@@ -58,6 +58,14 @@ const beregnere = [
     category: "Økonomi",
   },
   {
+    title: "Opsparingsberegner",
+    description: "Beregn renters rente og se din opsparing vokse",
+    href: "/opsparing",
+    icon: "📈",
+    popular: false,
+    category: "Økonomi",
+  },
+  {
     title: "Procentberegner",
     description: "Beregn procent af et tal, stigning, fald og mere",
     href: "/procent",
