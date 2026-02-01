@@ -9,6 +9,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: "/loen-efter-skat", priority: 0.9, changeFrequency: "monthly" as const },
     { url: "/renteberegner", priority: 0.9, changeFrequency: "monthly" as const },
     { url: "/procent", priority: 0.9, changeFrequency: "monthly" as const },
+    { url: "/opsparing", priority: 0.9, changeFrequency: "monthly" as const },
     { url: "/elberegner", priority: 0.9, changeFrequency: "monthly" as const },
     { url: "/feriepenge", priority: 0.8, changeFrequency: "monthly" as const },
     { url: "/boernepenge", priority: 0.8, changeFrequency: "yearly" as const },
