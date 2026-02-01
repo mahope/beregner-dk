@@ -23,6 +23,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: "/alder", priority: 0.8, changeFrequency: "monthly" as const },
     { url: "/timepris", priority: 0.8, changeFrequency: "monthly" as const },
     { url: "/kvadratmeter", priority: 0.8, changeFrequency: "monthly" as const },
+    { url: "/husleje", priority: 0.8, changeFrequency: "monthly" as const },
+    { url: "/tidszone", priority: 0.8, changeFrequency: "monthly" as const },
     { url: "/om", priority: 0.5, changeFrequency: "yearly" as const },
     { url: "/privatlivspolitik", priority: 0.3, changeFrequency: "yearly" as const },
   ];

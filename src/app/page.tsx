@@ -178,6 +178,22 @@ const beregnere = [
     popular: false,
     category: "Praktisk",
   },
+  {
+    title: "Husleje Budget",
+    description: "Find ud af hvad du har råd til i husleje",
+    href: "/husleje",
+    icon: "🏠",
+    popular: false,
+    category: "Bolig",
+  },
+  {
+    title: "Tidszoneberegner",
+    description: "Se hvad klokken er i andre lande",
+    href: "/tidszone",
+    icon: "🌍",
+    popular: false,
+    category: "Hverdag",
+  },
 ];
 
 const homeFaqItems = [
