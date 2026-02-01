@@ -1,19 +1,88 @@
-import type { Metadata } from "next";
-import Script from "next/script";
+import type { Metadata, Viewport } from "next";
+import Link from "next/link";
 import "./globals.css";
+import { OrganizationSchema, WebSiteSchema } from "@/components/StructuredData";
+import Header from "@/components/Header";
+
+const baseUrl = "https://minberegner.dk";
 
 export const metadata: Metadata = {
-  title: "Beregner.dk - Gratis online beregnere",
-  description: "Danmarks samling af gratis online beregnere. Elberegner, lønberegner, BMI og meget mere.",
-  keywords: "beregner, online beregner, gratis beregner, bmi beregner, lønberegner, boliglånsberegner, pensionsberegner, elberegner",
-  openGraph: {
-    title: "Beregner.dk - Gratis online beregnere",
-    description: "Danmarks samling af gratis online beregnere.",
-    url: "https://beregner.dk",
-    siteName: "Beregner.dk",
-    locale: "da_DK",
-    type: "website",
+  metadataBase: new URL(baseUrl),
+  title: {
+    default: "MinBeregner.dk - Gratis online beregnere",
+    template: "%s | MinBeregner.dk",
   },
+  description:
+    "Danmarks samling af gratis online beregnere. BMI, løn efter skat, elberegner, feriepenge, børnepenge, SU og meget mere. Helt gratis og uden login.",
+  keywords: [
+    "beregner",
+    "online beregner",
+    "gratis beregner",
+    "bmi beregner",
+    "løn efter skat",
+    "lønberegner",
+    "elberegner",
+    "feriepenge beregner",
+    "børnepenge 2026",
+    "su beregner",
+    "dansk beregner",
+  ],
+  authors: [{ name: "MinBeregner.dk" }],
+  creator: "MinBeregner.dk",
+  publisher: "MinBeregner.dk",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  openGraph: {
+    type: "website",
+    locale: "da_DK",
+    url: baseUrl,
+    siteName: "MinBeregner.dk",
+    title: "MinBeregner.dk - Gratis online beregnere",
+    description:
+      "Danmarks samling af gratis online beregnere til økonomi, sundhed og hverdag.",
+    images: [
+      {
+        url: `${baseUrl}/og-image.png`,
+        width: 1200,
+        height: 630,
+        alt: "MinBeregner.dk - Gratis online beregnere",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "MinBeregner.dk - Gratis online beregnere",
+    description:
+      "Danmarks samling af gratis online beregnere til økonomi, sundhed og hverdag.",
+    images: [`${baseUrl}/og-image.png`],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  alternates: {
+    canonical: baseUrl,
+  },
+  verification: {
+    // google: 'your-google-verification-code',
+  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  themeColor: "#2563eb",
 };
 
 export default function RootLayout({
@@ -24,64 +93,85 @@ export default function RootLayout({
   return (
     <html lang="da">
       <head>
-        {/* Plausible Analytics */}
-        <Script
-          defer
-          data-domain="beregner.dk"
-          src="https://analytics.holstjensen.eu/js/script.js"
+        <OrganizationSchema />
+        <WebSiteSchema
+          name="MinBeregner.dk"
+          url={baseUrl}
+          description="Danmarks samling af gratis online beregnere"
         />
       </head>
-      <body className="min-h-screen bg-gray-50">
-        <header className="bg-white shadow-sm">
-          <div className="max-w-6xl mx-auto px-4 py-4">
-            <a href="/" className="text-2xl font-bold text-blue-600">
-              Beregner.dk
-            </a>
-          </div>
-        </header>
-        <main className="max-w-6xl mx-auto px-4 py-8">
+      <body className="min-h-screen bg-gray-50 flex flex-col">
+        <Header />
+
+        <main className="flex-1 max-w-6xl mx-auto px-4 py-8 w-full">
           {children}
         </main>
-        <footer className="bg-gray-100 mt-16 py-8">
-          <div className="max-w-6xl mx-auto px-4">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+
+        <footer className="bg-gray-900 text-gray-300 mt-auto">
+          <div className="max-w-6xl mx-auto px-4 py-12">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div>
-                <h3 className="font-semibold mb-3">Økonomi</h3>
-                <ul className="space-y-2 text-sm text-gray-600">
-                  <li><a href="/boliglaan" className="hover:text-blue-600">Boliglånsberegner</a></li>
-                  <li><a href="/loen-efter-skat" className="hover:text-blue-600">Løn efter skat</a></li>
-                  <li><a href="/feriepenge" className="hover:text-blue-600">Feriepenge</a></li>
-                  <li><a href="/pension" className="hover:text-blue-600">Pension</a></li>
+                <h3 className="text-white font-bold text-lg mb-4">
+                  MinBeregner.dk
+                </h3>
+                <p className="text-sm">
+                  Gratis online beregnere til danskere. Alle beregninger sker
+                  lokalt i din browser — vi gemmer ingen data.
+                </p>
+              </div>
+              <div>
+                <h4 className="text-white font-semibold mb-4">Beregnere</h4>
+                <ul className="space-y-2 text-sm">
+                  <li>
+                    <Link href="/bmi" className="hover:text-white transition-colors">
+                      BMI Beregner
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/loen-efter-skat" className="hover:text-white transition-colors">
+                      Løn efter skat
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/renteberegner" className="hover:text-white transition-colors">
+                      Renteberegner
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/elberegner" className="hover:text-white transition-colors">
+                      Elberegner
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/feriepenge" className="hover:text-white transition-colors">
+                      Feriepenge
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/su" className="hover:text-white transition-colors">
+                      SU Beregner
+                    </Link>
+                  </li>
                 </ul>
               </div>
               <div>
-                <h3 className="font-semibold mb-3">Familie</h3>
-                <ul className="space-y-2 text-sm text-gray-600">
-                  <li><a href="/boernepenge" className="hover:text-blue-600">Børnepenge</a></li>
-                  <li><a href="/su" className="hover:text-blue-600">SU beregner</a></li>
-                </ul>
-              </div>
-              <div>
-                <h3 className="font-semibold mb-3">Forbrug</h3>
-                <ul className="space-y-2 text-sm text-gray-600">
-                  <li><a href="/elberegner" className="hover:text-blue-600">Elberegner</a></li>
-                  <li><a href="/bil" className="hover:text-blue-600">Bilomkostninger</a></li>
-                </ul>
-              </div>
-              <div>
-                <h3 className="font-semibold mb-3">Sundhed</h3>
-                <ul className="space-y-2 text-sm text-gray-600">
-                  <li><a href="/bmi" className="hover:text-blue-600">BMI beregner</a></li>
-                  <li><a href="/kalorier" className="hover:text-blue-600">Kalorieberegner</a></li>
-                  <li><a href="https://levetidsberegner.dk" className="hover:text-blue-600">Levetidsberegner ↗</a></li>
+                <h4 className="text-white font-semibold mb-4">Information</h4>
+                <ul className="space-y-2 text-sm">
+                  <li>
+                    <Link href="/om" className="hover:text-white transition-colors">
+                      Om MinBeregner.dk
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/privatlivspolitik" className="hover:text-white transition-colors">
+                      Privatlivspolitik
+                    </Link>
+                  </li>
                 </ul>
               </div>
             </div>
-            <div className="text-center text-gray-500 text-sm border-t pt-6">
-              <p>© 2026 Beregner.dk - Gratis online beregnere</p>
-              <p className="mt-2">
-                Et <a href="https://mahope.dk" className="hover:text-blue-600">Mahope</a> projekt
-              </p>
+            <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm">
+              <p>© {new Date().getFullYear()} MinBeregner.dk — Gratis online beregnere</p>
             </div>
           </div>
         </footer>
