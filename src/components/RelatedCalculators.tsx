@@ -44,6 +44,12 @@ const allCalculators: Calculator[] = [
     icon: "📈",
   },
   {
+    title: "Kalorieberegner",
+    description: "Beregn kaloriebehov",
+    href: "/kalorier",
+    icon: "🍎",
+  },
+  {
     title: "Elberegner",
     description: "Beregn dit elforbrug",
     href: "/elberegner",
@@ -71,7 +77,7 @@ const allCalculators: Calculator[] = [
 
 // Map related calculators by topic
 const relatedMap: Record<string, string[]> = {
-  "/bmi": ["/loen-efter-skat", "/procent"],
+  "/bmi": ["/kalorier", "/loen-efter-skat"],
   "/loen-efter-skat": ["/feriepenge", "/renteberegner", "/opsparing"],
   "/elberegner": ["/loen-efter-skat", "/procent"],
   "/feriepenge": ["/loen-efter-skat", "/opsparing", "/su"],
@@ -80,6 +86,7 @@ const relatedMap: Record<string, string[]> = {
   "/renteberegner": ["/opsparing", "/loen-efter-skat", "/procent"],
   "/procent": ["/renteberegner", "/loen-efter-skat", "/elberegner"],
   "/opsparing": ["/renteberegner", "/loen-efter-skat", "/procent"],
+  "/kalorier": ["/bmi", "/loen-efter-skat", "/procent"],
 };
 
 export default function RelatedCalculators({

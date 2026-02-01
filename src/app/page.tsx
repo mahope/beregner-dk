@@ -105,6 +105,14 @@ const beregnere = [
     popular: false,
     category: "Uddannelse",
   },
+  {
+    title: "Kalorieberegner",
+    description: "Beregn dit daglige kaloriebehov og makroer",
+    href: "/kalorier",
+    icon: "🍎",
+    popular: false,
+    category: "Sundhed",
+  },
 ];
 
 const homeFaqItems = [

@@ -1,19 +1,114 @@
 import type { Metadata } from "next";
 import KalorieBeregner from "@/components/KalorieBeregner";
+import FAQ from "@/components/FAQ";
+import RelatedCalculators from "@/components/RelatedCalculators";
+import {
+  CalculatorSchema,
+  FAQSchema,
+  BreadcrumbSchema,
+} from "@/components/StructuredData";
+
+const baseUrl = "https://minberegner.dk";
 
 export const metadata: Metadata = {
-  title: "Kalorieberegner - Beregn dit daglige kaloriebehov | Beregner.dk",
+  title: "Kalorieberegner - Beregn dit daglige kaloriebehov gratis",
   description:
-    "Gratis kalorieberegner. Beregn dit daglige kaloriebehov baseret på alder, køn, vægt og aktivitetsniveau. Få forslag til makrofordeling for vægttab eller muskelopbygning.",
-  keywords: "kalorier, kalorieberegner, BMR, TDEE, vægttab, makroer, protein, dagligt kaloriebehov",
+    "Gratis kalorieberegner. Beregn dit daglige kaloriebehov (TDEE og BMR) baseret på alder, køn, vægt og aktivitetsniveau. Få makrofordeling for vægttab eller muskelopbygning.",
+  keywords: [
+    "kalorieberegner",
+    "dagligt kaloriebehov",
+    "TDEE beregner",
+    "BMR beregner",
+    "vægttab kalorier",
+    "makroer beregner",
+    "protein beregner",
+    "kalorieunderskud",
+  ],
+  openGraph: {
+    title: "Kalorieberegner - Beregn dit kaloriebehov",
+    description:
+      "Beregn dit daglige kaloriebehov og få makrofordeling. Gratis kalorieberegner.",
+    url: `${baseUrl}/kalorier`,
+    type: "website",
+  },
+  alternates: {
+    canonical: `${baseUrl}/kalorier`,
+  },
 };
+
+const faqItems = [
+  {
+    question: "Hvad er forskellen på BMR og TDEE?",
+    answer:
+      "BMR (Basal Metabolic Rate) er de kalorier din krop brænder i hvile - bare for at holde dig i live. TDEE (Total Daily Energy Expenditure) er dit totale daglige forbrug inkl. al aktivitet. TDEE = BMR × aktivitetsfaktor.",
+  },
+  {
+    question: "Hvor mange kalorier skal jeg spise for at tabe mig?",
+    answer:
+      "For at tabe ca. 0,5 kg om ugen, spis 500 kalorier under din TDEE. For 1 kg/uge, spis 1000 under (ikke anbefalet i længere perioder). Start med 500 kcal underskud for bæredygtigt vægttab.",
+  },
+  {
+    question: "Hvor meget protein har jeg brug for?",
+    answer:
+      "Det afhænger af dit mål: Vedligehold: 0,8-1,2g per kg kropsvægt. Vægttab: 1,2-1,6g per kg (bevarer muskler). Muskelopbygning: 1,6-2,2g per kg. Protein mætter godt og bevarer muskelmasse.",
+  },
+  {
+    question: "Er denne beregner præcis?",
+    answer:
+      "Beregneren bruger Mifflin-St Jeor formlen, som er den mest præcise formel for de fleste mennesker. Dog kan individuelle variationer være på 10-15%. Brug resultatet som udgangspunkt og justér baseret på dine resultater.",
+  },
+  {
+    question: "Hvorfor taber jeg ikke vægt selvom jeg spiser under min TDEE?",
+    answer:
+      "Mulige årsager: 1) Du spiser mere end du tror (prøv at veje maden). 2) Din TDEE er lavere end beregnet. 3) Du har ikke givet det tid nok - vægten svinger naturligt. Prøv at reducere yderligere 200 kcal.",
+  },
+  {
+    question: "Skal jeg spise mine trænede kalorier tilbage?",
+    answer:
+      "Det afhænger af dit mål. Ved vægttab: Spis ikke alle tilbage, men tilføj evt. 50% ved hård træning. Ved vedligehold/muskelopbygning: Ja, spis ekstra for at dække træningen. Din aktivitetsfaktor dækker allerede let-moderat træning.",
+  },
+  {
+    question: "Hvor hurtigt kan jeg tabe mig sikkert?",
+    answer:
+      "En sikker og bæredygtig vægttabsrate er 0,5-1 kg per uge. Hurtigere vægttab kan føre til muskeltab, næringsmangel og metabolisk tilpasning. Tålmodighed giver bedre resultater på lang sigt.",
+  },
+  {
+    question: "Hvad er en god makrofordeling?",
+    answer:
+      "En typisk fordeling er: Protein 25-30%, Fedt 25-30%, Kulhydrater 40-50%. Ved vægttab øges protein ofte til 30-35%. Fedt bør aldrig være under 20% af kalorierne pga. hormonbalance.",
+  },
+];
 
 export default function KalorierPage() {
   return (
     <div>
+      <CalculatorSchema
+        name="Kalorieberegner"
+        description="Gratis kalorieberegner. Beregn dit daglige kaloriebehov og få makrofordeling."
+        url={`${baseUrl}/kalorier`}
+        category="HealthApplication"
+      />
+      <FAQSchema items={faqItems} />
+      <BreadcrumbSchema
+        items={[
+          { name: "Forside", url: baseUrl },
+          { name: "Kalorieberegner", url: `${baseUrl}/kalorier` },
+        ]}
+      />
+
+      <nav className="text-sm text-gray-500 mb-4">
+        <a href="/" className="hover:text-blue-600">
+          Forside
+        </a>
+        <span className="mx-2">/</span>
+        <span className="text-gray-900">Kalorieberegner</span>
+      </nav>
+
       <h1 className="text-3xl font-bold mb-2">Kalorieberegner</h1>
       <p className="text-gray-600 mb-8">
-        Beregn dit daglige kaloriebehov baseret på din krop og aktivitetsniveau. Få personlige anbefalinger til vægttab, vedligehold eller muskelopbygning.
+        Beregn dit daglige kaloriebehov baseret på din krop og aktivitetsniveau.
+        Få personlige anbefalinger til vægttab, vedligehold eller
+        muskelopbygning.
       </p>
 
       <KalorieBeregner />
@@ -21,127 +116,92 @@ export default function KalorierPage() {
       <div className="mt-12 prose max-w-none">
         <h2>Forstå dit kaloriebehov</h2>
         <p>
-          Dit kaloriebehov afhænger af flere faktorer: alder, køn, vægt, højde og hvor aktiv du er.
-          Denne beregner bruger <strong>Mifflin-St Jeor formlen</strong>, som er den mest præcise metode
-          til at estimere dit basalstofskifte.
+          Dit kaloriebehov afhænger af flere faktorer: alder, køn, vægt, højde
+          og hvor aktiv du er. Denne beregner bruger{" "}
+          <strong>Mifflin-St Jeor formlen</strong>, som er den mest præcise
+          metode til at estimere dit basalstofskifte.
         </p>
 
         <h2>BMR vs. TDEE</h2>
-        
+
         <h3>BMR (Basal Metabolic Rate)</h3>
         <p>
-          Dit basalstofskifte er antallet af kalorier din krop brænder bare for at holde dig i live
-          - hjertet pumper, lungerne trækker vejret, cellerne fornyer sig. Selv hvis du lå stille
-          i sengen hele dagen, ville du brænde disse kalorier.
+          Dit basalstofskifte er antallet af kalorier din krop brænder bare for
+          at holde dig i live - hjertet pumper, lungerne trækker vejret,
+          cellerne fornyer sig. Selv hvis du lå stille i sengen hele dagen,
+          ville du brænde disse kalorier.
         </p>
 
         <h3>TDEE (Total Daily Energy Expenditure)</h3>
         <p>
-          TDEE er dit totale daglige kalorieforbrug - BMR plus alle de kalorier du brænder gennem
-          aktivitet: gåture, træning, arbejde, selv at tænke bruger kalorier.
+          TDEE er dit totale daglige kalorieforbrug - BMR plus alle de kalorier
+          du brænder gennem aktivitet: gåture, træning, arbejde, selv at tænke
+          bruger kalorier.
         </p>
-
-        <h2>Aktivitetsniveauer forklaret</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>Niveau</th>
-              <th>Beskrivelse</th>
-              <th>Eksempel</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Stillesiddende</td>
-              <td>Meget lidt bevægelse</td>
-              <td>Kontorarbejde, ingen motion</td>
-            </tr>
-            <tr>
-              <td>Let aktivitet</td>
-              <td>Let motion 1-3 dage/uge</td>
-              <td>Gåture, let yoga</td>
-            </tr>
-            <tr>
-              <td>Moderat</td>
-              <td>Moderat motion 3-5 dage/uge</td>
-              <td>Fitness, løb, cykling</td>
-            </tr>
-            <tr>
-              <td>Aktiv</td>
-              <td>Hård træning 6-7 dage/uge</td>
-              <td>Daglig sport, fysisk arbejde</td>
-            </tr>
-            <tr>
-              <td>Meget aktiv</td>
-              <td>Atletisk træning</td>
-              <td>Professionel sport, 2x daglig træning</td>
-            </tr>
-          </tbody>
-        </table>
 
         <h2>Vægttab og kalorieunderskud</h2>
         <p>
-          For at tabe vægt skal du spise færre kalorier end du forbrænder. En god tommelfingerregel:
+          For at tabe vægt skal du spise færre kalorier end du forbrænder. En
+          god tommelfingerregel:
         </p>
         <ul>
-          <li><strong>500 kcal underskud/dag</strong> = ca. 0.5 kg tab/uge</li>
-          <li><strong>1000 kcal underskud/dag</strong> = ca. 1 kg tab/uge (ikke anbefalet længe)</li>
+          <li>
+            <strong>500 kcal underskud/dag</strong> = ca. 0.5 kg tab/uge
+          </li>
+          <li>
+            <strong>1000 kcal underskud/dag</strong> = ca. 1 kg tab/uge (ikke
+            anbefalet længe)
+          </li>
         </ul>
-        <p>
-          Et moderat underskud på 500 kcal er mere bæredygtigt og hjælper dig med at bevare muskelmasse.
-        </p>
-
-        <h2>Muskelopbygning og kalorieoverskud</h2>
-        <p>
-          For at opbygge muskler har du brug for et lille kalorieoverskud (typisk 200-500 kcal)
-          kombineret med styrketræning og tilstrækkeligt protein.
-        </p>
 
         <h2>Makronæringsstoffer</h2>
-        
+
         <h3>Protein</h3>
         <p>
-          Protein er essentielt for muskler, hår, hud og hundredvis af kropsprocesser.
+          Protein er essentielt for muskler, hår, hud og hundredvis af
+          kropsprocesser.
         </p>
         <ul>
-          <li><strong>Vedligehold:</strong> 0.8-1.2g per kg kropsvægt</li>
-          <li><strong>Vægttab:</strong> 1.2-1.6g per kg (bevarer muskler)</li>
-          <li><strong>Muskelopbygning:</strong> 1.6-2.2g per kg</li>
+          <li>
+            <strong>Vedligehold:</strong> 0.8-1.2g per kg kropsvægt
+          </li>
+          <li>
+            <strong>Vægttab:</strong> 1.2-1.6g per kg (bevarer muskler)
+          </li>
+          <li>
+            <strong>Muskelopbygning:</strong> 1.6-2.2g per kg
+          </li>
         </ul>
         <p>1g protein = 4 kalorier</p>
 
         <h3>Fedt</h3>
         <p>
-          Fedt er vigtigt for hormoner, vitaminoptagelse og cellestruktur. Minimum 20-25% af kalorier
-          bør komme fra fedt.
+          Fedt er vigtigt for hormoner, vitaminoptagelse og cellestruktur.
+          Minimum 20-25% af kalorier bør komme fra fedt.
         </p>
         <p>1g fedt = 9 kalorier</p>
 
         <h3>Kulhydrater</h3>
         <p>
-          Kulhydrater er kroppens foretrukne energikilde, især under træning. Mængden kan variere
-          meget baseret på dine mål og præferencer.
+          Kulhydrater er kroppens foretrukne energikilde, især under træning.
+          Mængden kan variere meget baseret på dine mål og præferencer.
         </p>
         <p>1g kulhydrat = 4 kalorier</p>
 
-        <h2>Tips til at nå dine mål</h2>
-        <ul>
-          <li><strong>Følg med:</strong> Brug en app til at tracke mad de første uger</li>
-          <li><strong>Vej dig konsistent:</strong> Samme tidspunkt, samme forhold</li>
-          <li><strong>Vær tålmodig:</strong> Bæredygtig forandring tager tid</li>
-          <li><strong>Justér løbende:</strong> Din krop tilpasser sig - justér kalorierne efter behov</li>
-          <li><strong>Prioritér protein:</strong> Holder dig mæt og bevarer muskler</li>
-        </ul>
-
-        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 my-6">
+        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 my-6 not-prose">
           <p className="font-medium text-yellow-800">Vigtigt</p>
           <p className="text-yellow-700">
-            Denne beregner giver et estimat baseret på gennemsnitsværdier. Individuelle 
-            variationer kan være betydelige. Ved større vægtændringer eller helbredsproblemer, 
-            konsulter altid en læge eller diætist.
+            Denne beregner giver et estimat baseret på gennemsnitsværdier.
+            Individuelle variationer kan være betydelige. Ved større
+            vægtændringer eller helbredsproblemer, konsulter altid en læge eller
+            diætist.
           </p>
         </div>
       </div>
+
+      <FAQ items={faqItems} />
+
+      <RelatedCalculators current="/kalorier" />
     </div>
   );
 }
