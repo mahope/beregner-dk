@@ -59,6 +59,13 @@ const beregnere = [
     ready: true,
   },
   {
+    title: "Bilomkostningsberegner",
+    description: "Se hvad din bil reelt koster pr. måned og pr. kilometer",
+    href: "/bil",
+    icon: "🚗",
+    ready: true,
+  },
+  {
     title: "Levetidsberegner",
     description: "Beregn din forventede levetid baseret på statistik",
     href: "https://levetidsberegner.dk",
