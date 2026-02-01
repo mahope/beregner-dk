@@ -66,6 +66,13 @@ const beregnere = [
     ready: true,
   },
   {
+    title: "Kalorieberegner",
+    description: "Beregn dit daglige kaloriebehov og få makroforslag",
+    href: "/kalorier",
+    icon: "🔥",
+    ready: true,
+  },
+  {
     title: "Levetidsberegner",
     description: "Beregn din forventede levetid baseret på statistik",
     href: "https://levetidsberegner.dk",

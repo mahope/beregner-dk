@@ -72,6 +72,7 @@ export default function RootLayout({
                 <h3 className="font-semibold mb-3">Sundhed</h3>
                 <ul className="space-y-2 text-sm text-gray-600">
                   <li><a href="/bmi" className="hover:text-blue-600">BMI beregner</a></li>
+                  <li><a href="/kalorier" className="hover:text-blue-600">Kalorieberegner</a></li>
                   <li><a href="https://levetidsberegner.dk" className="hover:text-blue-600">Levetidsberegner ↗</a></li>
                 </ul>
               </div>
