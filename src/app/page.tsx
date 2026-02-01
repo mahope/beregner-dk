@@ -113,6 +113,14 @@ const beregnere = [
     popular: false,
     category: "Sundhed",
   },
+  {
+    title: "Datoberegner",
+    description: "Beregn dage mellem datoer, arbejdsdage og alder",
+    href: "/dato",
+    icon: "📅",
+    popular: false,
+    category: "Praktisk",
+  },
 ];
 
 const homeFaqItems = [

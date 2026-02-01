@@ -50,6 +50,12 @@ const allCalculators: Calculator[] = [
     icon: "🍎",
   },
   {
+    title: "Datoberegner",
+    description: "Dage mellem datoer",
+    href: "/dato",
+    icon: "📅",
+  },
+  {
     title: "Elberegner",
     description: "Beregn dit elforbrug",
     href: "/elberegner",
@@ -86,7 +92,8 @@ const relatedMap: Record<string, string[]> = {
   "/renteberegner": ["/opsparing", "/loen-efter-skat", "/procent"],
   "/procent": ["/renteberegner", "/loen-efter-skat", "/elberegner"],
   "/opsparing": ["/renteberegner", "/loen-efter-skat", "/procent"],
-  "/kalorier": ["/bmi", "/loen-efter-skat", "/procent"],
+  "/kalorier": ["/bmi", "/dato", "/procent"],
+  "/dato": ["/procent", "/loen-efter-skat", "/feriepenge"],
 };
 
 export default function RelatedCalculators({
