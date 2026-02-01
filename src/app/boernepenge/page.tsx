@@ -41,7 +41,7 @@ export default function BoernepengePage() {
 
         <h2>Aftrapning for høje indkomster</h2>
         <p>
-          Hvis husstandens samlede indkomst overstiger ca. 828.100 kr. (2026), 
+          Hvis husstandens samlede indkomst overstiger 961.100 kr. (2026), 
           aftrappes ydelsen med 2% for hver 2.500 kr. over grænsen.
         </p>
         <p>
@@ -83,12 +83,11 @@ export default function BoernepengePage() {
           </p>
         </div>
 
-        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 my-6">
-          <p className="font-medium text-yellow-800">Bemærk</p>
-          <p className="text-yellow-700">
-            Satserne i denne beregner er estimater for 2026 baseret på 2025-satser 
-            med forventet regulering. De officielle satser offentliggøres af 
-            Udbetaling Danmark.
+        <div className="bg-green-50 border-l-4 border-green-400 p-4 my-6">
+          <p className="font-medium text-green-800">Opdateret</p>
+          <p className="text-green-700">
+            Satserne i denne beregner er de officielle 2026-satser fra 
+            Skatteministeriet og borger.dk.
           </p>
         </div>
       </div>

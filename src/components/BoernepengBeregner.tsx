@@ -2,13 +2,14 @@
 
 import { useState, useMemo } from "react";
 
-// 2026 satser for børne- og ungeydelse (estimat baseret på 2025 + regulering)
+// 2026 satser for børne- og ungeydelse (officielle satser)
+// Kilde: borger.dk, skm.dk
 const SATSER_2026 = {
-  barn_0_2: 19476, // 0-2 år, pr. kvartal
-  barn_3_6: 15420, // 3-6 år, pr. kvartal  
-  barn_7_14: 12132, // 7-14 år, pr. kvartal
-  unge_15_17: 12132, // 15-17 år, pr. kvartal (udbetales månedligt)
-  indkomstgraense: 828100, // Årlig indkomstgrænse for aftrapning
+  barn_0_2: 5370, // 0-2 år, pr. kvartal (21.480 kr/år)
+  barn_3_6: 4251, // 3-6 år, pr. kvartal (17.004 kr/år)
+  barn_7_14: 3345, // 7-14 år, pr. kvartal (13.380 kr/år)
+  unge_15_17: 3345, // 15-17 år, pr. kvartal (13.380 kr/år, udbetales månedligt)
+  indkomstgraense: 961100, // Årlig indkomstgrænse for aftrapning (2026)
   aftrapningPct: 0.02, // 2% aftrapning per 2.500 kr over grænsen
 };
 
