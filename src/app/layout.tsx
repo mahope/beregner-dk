@@ -88,9 +88,9 @@ const navigation = [
   { name: "Forside", href: "/" },
   { name: "BMI", href: "/bmi" },
   { name: "Løn", href: "/loen-efter-skat" },
+  { name: "Rente", href: "/renteberegner" },
   { name: "El", href: "/elberegner" },
   { name: "Feriepenge", href: "/feriepenge" },
-  { name: "Børnepenge", href: "/boernepenge" },
   { name: "SU", href: "/su" },
 ];
 
@@ -183,6 +183,11 @@ export default function RootLayout({
                     </Link>
                   </li>
                   <li>
+                    <Link href="/renteberegner" className="hover:text-white transition-colors">
+                      Renteberegner
+                    </Link>
+                  </li>
+                  <li>
                     <Link href="/elberegner" className="hover:text-white transition-colors">
                       Elberegner
                     </Link>
@@ -190,11 +195,6 @@ export default function RootLayout({
                   <li>
                     <Link href="/feriepenge" className="hover:text-white transition-colors">
                       Feriepenge
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/boernepenge" className="hover:text-white transition-colors">
-                      Børnepenge
                     </Link>
                   </li>
                   <li>

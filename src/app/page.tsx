@@ -50,11 +50,19 @@ const beregnere = [
     category: "Sundhed",
   },
   {
+    title: "Renteberegner",
+    description: "Beregn ydelse, rente og tilbagebetaling på lån",
+    href: "/renteberegner",
+    icon: "🏦",
+    popular: true,
+    category: "Økonomi",
+  },
+  {
     title: "Elberegner",
     description: "Beregn dit elforbrug og se hvad dine apparater koster",
     href: "/elberegner",
     icon: "⚡",
-    popular: true,
+    popular: false,
     category: "Hverdag",
   },
   {
