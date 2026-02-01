@@ -7,18 +7,19 @@ const baseUrl = "https://minberegner.dk";
 export const metadata: Metadata = {
   title: "MinBeregner.dk - Gratis online beregnere til danskere",
   description:
-    "Danmarks samling af gratis online beregnere. BMI beregner, løn efter skat, elberegner, feriepenge, børnepenge og SU. Helt gratis og uden login.",
+    "Danmarks samling af gratis online beregnere. Lån, moms, valuta, løn, BMI, el og meget mere. 20+ beregnere - helt gratis og uden login.",
   keywords: [
     "beregner",
     "online beregner",
     "gratis beregner",
     "dansk beregner",
-    "bmi beregner",
+    "momsberegner",
+    "låneberegner",
+    "valutaberegner",
     "lønberegner",
+    "bmi beregner",
     "elberegner",
-    "feriepenge beregner",
-    "børnepenge beregner",
-    "su beregner",
+    "timeprisberegner",
   ],
   openGraph: {
     title: "MinBeregner.dk - Gratis online beregnere",
@@ -50,11 +51,35 @@ const beregnere = [
     category: "Sundhed",
   },
   {
+    title: "Låneberegner",
+    description: "Beregn ydelse, sammenlign lån og se afdragsplan",
+    href: "/laaneberegner",
+    icon: "🏦",
+    popular: true,
+    category: "Økonomi",
+  },
+  {
+    title: "Momsberegner",
+    description: "Tillæg eller fratræk 25% moms nemt og hurtigt",
+    href: "/moms",
+    icon: "🧾",
+    popular: true,
+    category: "Økonomi",
+  },
+  {
+    title: "Valutaberegner",
+    description: "Omregn mellem DKK, EUR, USD og andre valutaer",
+    href: "/valuta",
+    icon: "💱",
+    popular: true,
+    category: "Økonomi",
+  },
+  {
     title: "Renteberegner",
     description: "Beregn ydelse, rente og tilbagebetaling på lån",
     href: "/renteberegner",
-    icon: "🏦",
-    popular: true,
+    icon: "📊",
+    popular: false,
     category: "Økonomi",
   },
   {
@@ -72,6 +97,38 @@ const beregnere = [
     icon: "➗",
     popular: false,
     category: "Matematik",
+  },
+  {
+    title: "Kvadratmeterberegner",
+    description: "Beregn areal af rum, haver og grunde",
+    href: "/kvadratmeter",
+    icon: "📐",
+    popular: false,
+    category: "Matematik",
+  },
+  {
+    title: "Aldersberegner",
+    description: "Beregn din præcise alder i år, måneder og dage",
+    href: "/alder",
+    icon: "🎂",
+    popular: false,
+    category: "Hverdag",
+  },
+  {
+    title: "Timeprisberegner",
+    description: "Find din timepris som freelancer eller selvstændig",
+    href: "/timepris",
+    icon: "⏱️",
+    popular: false,
+    category: "Erhverv",
+  },
+  {
+    title: "Brændstofberegner",
+    description: "Beregn pris for benzin, diesel eller el-bil",
+    href: "/braendstof",
+    icon: "⛽",
+    popular: false,
+    category: "Hverdag",
   },
   {
     title: "Elberegner",
@@ -142,7 +199,7 @@ const homeFaqItems = [
   {
     question: "Hvilke beregnere har I?",
     answer:
-      "Vi har beregnere til BMI, løn efter skat, elforbrug, feriepenge, børnepenge og SU. Vi tilføjer løbende nye beregnere baseret på efterspørgsel.",
+      "Vi har 20+ beregnere til økonomi (lån, moms, valuta, løn, feriepenge), sundhed (BMI, kalorier), matematik (procent, kvadratmeter) og hverdag (alder, el, brændstof). Vi tilføjer løbende nye beregnere.",
   },
 ];
 

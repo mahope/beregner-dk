@@ -8,7 +8,7 @@ interface Calculator {
 }
 
 interface RelatedCalculatorsProps {
-  current: string; // Current page href to exclude
+  current?: string; // Current page href to exclude (optional)
   calculators?: Calculator[];
 }
 
@@ -100,13 +100,16 @@ export default function RelatedCalculators({
   current,
   calculators,
 }: RelatedCalculatorsProps) {
+  // If calculators are provided directly, use them
+  if (calculators && calculators.length > 0) {
+    return <RelatedGrid calculators={calculators} />;
+  }
+
   // Use provided calculators or get related ones based on current page
-  const relatedHrefs = relatedMap[current] || [];
-  const related =
-    calculators ||
-    allCalculators
-      .filter((calc) => relatedHrefs.includes(calc.href))
-      .slice(0, 3);
+  const relatedHrefs = current ? relatedMap[current] || [] : [];
+  const related = allCalculators
+    .filter((calc) => relatedHrefs.includes(calc.href))
+    .slice(0, 3);
 
   if (related.length === 0) {
     // Fallback: show 3 random calculators (not current)
