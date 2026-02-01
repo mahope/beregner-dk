@@ -27,7 +27,7 @@ const beregnere = [
     description: "Beregn hvor meget du har til gode i feriepenge",
     href: "/feriepenge",
     icon: "🏖️",
-    ready: false,
+    ready: true,
   },
   {
     title: "Børnepenge",
