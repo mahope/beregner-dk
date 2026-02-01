@@ -2,6 +2,14 @@ import Link from "next/link";
 
 const beregnere = [
   {
+    title: "Boliglånsberegner",
+    description: "Beregn månedlig ydelse og se hvad dit boliglån koster",
+    href: "/boliglaan",
+    icon: "🏠",
+    ready: true,
+    featured: true,
+  },
+  {
     title: "Elberegner",
     description: "Beregn dit elforbrug og se hvad dine apparater koster i strøm",
     href: "/elberegner",
@@ -42,6 +50,21 @@ const beregnere = [
     href: "/su",
     icon: "🎓",
     ready: true,
+  },
+  {
+    title: "Pensionsberegner",
+    description: "Beregn din fremtidige pension og månedlige udbetaling",
+    href: "/pension",
+    icon: "🧓",
+    ready: true,
+  },
+  {
+    title: "Levetidsberegner",
+    description: "Beregn din forventede levetid baseret på statistik",
+    href: "https://levetidsberegner.dk",
+    icon: "⏳",
+    ready: true,
+    external: true,
   },
 ];
 
