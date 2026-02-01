@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import Link from "next/link";
 import "./globals.css";
 import { OrganizationSchema, WebSiteSchema } from "@/components/StructuredData";
+import Header from "@/components/Header";
 
 const baseUrl = "https://minberegner.dk";
 
@@ -84,16 +85,6 @@ export const viewport: Viewport = {
   themeColor: "#2563eb",
 };
 
-const navigation = [
-  { name: "Forside", href: "/" },
-  { name: "BMI", href: "/bmi" },
-  { name: "Løn", href: "/loen-efter-skat" },
-  { name: "Rente", href: "/renteberegner" },
-  { name: "El", href: "/elberegner" },
-  { name: "Feriepenge", href: "/feriepenge" },
-  { name: "SU", href: "/su" },
-];
-
 export default function RootLayout({
   children,
 }: {
@@ -110,48 +101,7 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-screen bg-gray-50 flex flex-col">
-        <header className="bg-white shadow-sm sticky top-0 z-50">
-          <div className="max-w-6xl mx-auto px-4">
-            <div className="flex items-center justify-between py-4">
-              <Link
-                href="/"
-                className="text-2xl font-bold text-blue-600 hover:text-blue-700 transition-colors"
-              >
-                MinBeregner.dk
-              </Link>
-              <nav className="hidden md:flex items-center gap-1">
-                {navigation.slice(1).map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className="px-3 py-2 text-sm text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                  >
-                    {item.name}
-                  </Link>
-                ))}
-              </nav>
-              {/* Mobile menu button - could be expanded */}
-              <button
-                className="md:hidden p-2 text-gray-600"
-                aria-label="Menu"
-              >
-                <svg
-                  className="w-6 h-6"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
-                </svg>
-              </button>
-            </div>
-          </div>
-        </header>
+        <Header />
 
         <main className="flex-1 max-w-6xl mx-auto px-4 py-8 w-full">
           {children}

@@ -32,6 +32,12 @@ const allCalculators: Calculator[] = [
     icon: "🏦",
   },
   {
+    title: "Procentberegner",
+    description: "Beregn procent nemt",
+    href: "/procent",
+    icon: "➗",
+  },
+  {
     title: "Elberegner",
     description: "Beregn dit elforbrug",
     href: "/elberegner",
@@ -59,13 +65,14 @@ const allCalculators: Calculator[] = [
 
 // Map related calculators by topic
 const relatedMap: Record<string, string[]> = {
-  "/bmi": ["/loen-efter-skat", "/elberegner"],
-  "/loen-efter-skat": ["/feriepenge", "/renteberegner", "/su"],
-  "/elberegner": ["/loen-efter-skat", "/renteberegner"],
-  "/feriepenge": ["/loen-efter-skat", "/su"],
+  "/bmi": ["/loen-efter-skat", "/procent"],
+  "/loen-efter-skat": ["/feriepenge", "/renteberegner", "/procent"],
+  "/elberegner": ["/loen-efter-skat", "/procent"],
+  "/feriepenge": ["/loen-efter-skat", "/procent", "/su"],
   "/boernepenge": ["/su", "/feriepenge", "/loen-efter-skat"],
   "/su": ["/loen-efter-skat", "/boernepenge", "/feriepenge"],
-  "/renteberegner": ["/loen-efter-skat", "/elberegner", "/feriepenge"],
+  "/renteberegner": ["/loen-efter-skat", "/procent", "/feriepenge"],
+  "/procent": ["/renteberegner", "/loen-efter-skat", "/elberegner"],
 };
 
 export default function RelatedCalculators({

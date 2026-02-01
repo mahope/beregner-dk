@@ -58,6 +58,14 @@ const beregnere = [
     category: "Økonomi",
   },
   {
+    title: "Procentberegner",
+    description: "Beregn procent af et tal, stigning, fald og mere",
+    href: "/procent",
+    icon: "➗",
+    popular: false,
+    category: "Matematik",
+  },
+  {
     title: "Elberegner",
     description: "Beregn dit elforbrug og se hvad dine apparater koster",
     href: "/elberegner",
