@@ -34,7 +34,7 @@ const beregnere = [
     description: "Se hvad du kan få i børne- og ungeydelse",
     href: "/boernepenge",
     icon: "👶",
-    ready: false,
+    ready: true,
   },
   {
     title: "SU Beregner",
