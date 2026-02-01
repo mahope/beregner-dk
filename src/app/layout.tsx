@@ -1,8 +1,15 @@
 import type { Metadata, Viewport } from "next";
 import Link from "next/link";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import { OrganizationSchema, WebSiteSchema } from "@/components/StructuredData";
 import Header from "@/components/Header";
+
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-inter",
+});
 
 const baseUrl = "https://minberegner.dk";
 
@@ -100,7 +107,7 @@ export default function RootLayout({
           description="Danmarks samling af gratis online beregnere"
         />
       </head>
-      <body className="min-h-screen bg-gray-50 flex flex-col">
+      <body className={`${inter.variable} font-sans min-h-screen bg-gray-50 flex flex-col antialiased`}>
         <Header />
 
         <main className="flex-1 max-w-6xl mx-auto px-4 py-8 w-full">
@@ -138,18 +145,18 @@ export default function RootLayout({
                     </Link>
                   </li>
                   <li>
+                    <Link href="/opsparing" className="hover:text-white transition-colors">
+                      Opsparingsberegner
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/procent" className="hover:text-white transition-colors">
+                      Procentberegner
+                    </Link>
+                  </li>
+                  <li>
                     <Link href="/elberegner" className="hover:text-white transition-colors">
                       Elberegner
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/feriepenge" className="hover:text-white transition-colors">
-                      Feriepenge
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/su" className="hover:text-white transition-colors">
-                      SU Beregner
                     </Link>
                   </li>
                 </ul>
