@@ -20,7 +20,7 @@ const beregnere = [
     description: "Se hvad du får udbetalt efter skat og AM-bidrag",
     href: "/loen-efter-skat",
     icon: "💰",
-    ready: false,
+    ready: true,
   },
   {
     title: "Feriepenge",
