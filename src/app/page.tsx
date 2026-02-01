@@ -163,6 +163,14 @@ const beregnere = [
     category: "Uddannelse",
   },
   {
+    title: "Dagpengeberegner",
+    description: "Beregn hvad du kan få i dagpenge ved ledighed",
+    href: "/dagpenge",
+    icon: "📋",
+    popular: false,
+    category: "Økonomi",
+  },
+  {
     title: "Kalorieberegner",
     description: "Beregn dit daglige kaloriebehov og makroer",
     href: "/kalorier",

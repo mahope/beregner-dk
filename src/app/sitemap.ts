@@ -20,6 +20,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: "/feriepenge", priority: 0.8, changeFrequency: "monthly" as const },
     { url: "/boernepenge", priority: 0.8, changeFrequency: "yearly" as const },
     { url: "/su", priority: 0.8, changeFrequency: "yearly" as const },
+    { url: "/dagpenge", priority: 0.9, changeFrequency: "yearly" as const },
     { url: "/alder", priority: 0.8, changeFrequency: "monthly" as const },
     { url: "/timepris", priority: 0.8, changeFrequency: "monthly" as const },
     { url: "/kvadratmeter", priority: 0.8, changeFrequency: "monthly" as const },
