@@ -171,6 +171,14 @@ const beregnere = [
     category: "Økonomi",
   },
   {
+    title: "Boligstøtte",
+    description: "Beregn din boligstøtte til husleje",
+    href: "/boligstoette",
+    icon: "🏘️",
+    popular: false,
+    category: "Bolig",
+  },
+  {
     title: "Kalorieberegner",
     description: "Beregn dit daglige kaloriebehov og makroer",
     href: "/kalorier",
