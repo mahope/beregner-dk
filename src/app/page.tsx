@@ -41,7 +41,7 @@ const beregnere = [
     description: "Beregn din SU baseret på din situation",
     href: "/su",
     icon: "🎓",
-    ready: false,
+    ready: true,
   },
 ];
 
