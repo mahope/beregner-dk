@@ -13,7 +13,7 @@ const beregnere = [
     description: "Beregn dit Body Mass Index og se om din vægt er sund",
     href: "/bmi",
     icon: "⚖️",
-    ready: false,
+    ready: true,
   },
   {
     title: "Løn efter skat",
