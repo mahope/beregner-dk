@@ -25,6 +25,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: "/kvadratmeter", priority: 0.8, changeFrequency: "monthly" as const },
     { url: "/husleje", priority: 0.8, changeFrequency: "monthly" as const },
     { url: "/tidszone", priority: 0.8, changeFrequency: "monthly" as const },
+    { url: "/blog", priority: 0.7, changeFrequency: "weekly" as const },
+    { url: "/blog/hvordan-beregner-man-moms", priority: 0.6, changeFrequency: "monthly" as const },
+    { url: "/blog/30-procent-reglen-husleje", priority: 0.6, changeFrequency: "monthly" as const },
+    { url: "/blog/saadan-finder-du-din-timepris-som-freelancer", priority: 0.6, changeFrequency: "monthly" as const },
     { url: "/om", priority: 0.5, changeFrequency: "yearly" as const },
     { url: "/privatlivspolitik", priority: 0.3, changeFrequency: "yearly" as const },
   ];
