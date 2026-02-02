@@ -210,6 +210,14 @@ const beregnere = [
     popular: false,
     category: "Hverdag",
   },
+  {
+    title: "Tidsberegner",
+    description: "Beregn timer og minutter mellem tidspunkter",
+    href: "/tidsberegner",
+    icon: "⏱️",
+    popular: false,
+    category: "Praktisk",
+  },
 ];
 
 const homeFaqItems = [
