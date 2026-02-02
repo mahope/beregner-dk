@@ -130,6 +130,24 @@ export default function RootLayout({
 
         <footer className="bg-gray-900 text-gray-300 mt-auto">
           <div className="max-w-6xl mx-auto px-4 py-12">
+            {/* Cross-linking sektion */}
+            <div className="mb-8 pb-8 border-b border-gray-800">
+              <h3 className="text-white font-semibold mb-4">🛠️ Andre gratis værktøjer</h3>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 text-sm">
+                <a href="https://gratisfaktura.dk" className="hover:text-white">📄 Faktura Generator</a>
+                <a href="https://kodeord.dk" className="hover:text-white">🔐 Kodeord Generator</a>
+                <a href="https://countdowntimer.dk" className="hover:text-white">⏰ Countdown Timer</a>
+                <a href="https://loenberegner.dk" className="hover:text-white">💰 Lønberegner</a>
+                <a href="https://ai-tools.dk" className="hover:text-white">🤖 AI Værktøjer</a>
+                <a href="https://whitenoise.dk" className="hover:text-white">🔊 White Noise</a>
+                <a href="https://rejsermedborn.dk" className="hover:text-white">✈️ Rejser m. Børn</a>
+                <a href="https://notiondk.dk" className="hover:text-white">📋 Notion Templates</a>
+                <a href="https://valuta.holstjensen.eu" className="hover:text-white">💱 Valuta Omregner</a>
+                <a href="https://enheder.holstjensen.eu" className="hover:text-white">📏 Enheder Omregner</a>
+                <a href="https://citater.holstjensen.eu" className="hover:text-white">💬 Citater</a>
+                <a href="https://lorem.holstjensen.eu" className="hover:text-white">📜 Lorem Ipsum</a>
+              </div>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div>
                 <h3 className="text-white font-bold text-lg mb-4">
