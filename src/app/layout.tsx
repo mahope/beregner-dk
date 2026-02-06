@@ -4,6 +4,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { OrganizationSchema, WebSiteSchema } from "@/components/StructuredData";
 import Header from "@/components/Header";
+import CookieConsent from "@/components/CookieConsent";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -128,6 +129,8 @@ export default function RootLayout({
           {children}
         </main>
 
+        <CookieConsent />
+
         <footer className="bg-gray-900 text-gray-300 mt-auto">
           <div className="max-w-6xl mx-auto px-4 py-12">
             {/* Cross-linking sektion */}
@@ -204,6 +207,11 @@ export default function RootLayout({
                   <li>
                     <Link href="/privatlivspolitik" className="hover:text-white transition-colors">
                       Privatlivspolitik
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/cookiepolitik" className="hover:text-white transition-colors">
+                      Cookiepolitik
                     </Link>
                   </li>
                 </ul>
