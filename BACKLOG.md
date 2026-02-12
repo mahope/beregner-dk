@@ -1,35 +1,53 @@
-# Beregner.dk — Backlog (v1)
+# Minberegner.dk — Backlog
 
-- [x] - [ ] Sitemap: kortlæg 20 værktøjer (løn, skat, BMI, promille, feriepenge, dagpenge, etc.) — completed 2026-02-12 14:15
-- [x] Komponentbibliotek: UI-kit for beregnere (Next/TS) m. input validators + i18n (done: 2026-02-12 14:32)
-- [x] SEO skabelon — completed 2026-02-12 14:45: Title/Desc/Schema for hver beregner + interne linkmoduler
-- [x] (2026-02-12 15:22 CET) 1-Click deploy: Dokploy pipeline + preview builds
-- [x] Performance: lighthouse 95+ (SSR, code-splitting) — completed 2026-02-12 15:40 CET: next.config perf flags + docs + lighthouse script
-- [x] 2026-02-12T15:19:14Z Tracking: event goals pr. beregner (beregn, kopier resultat, deling)
-- [x] Content: 10 how-to guides pr. cluster (fx “Sådan beregner du løn efter skat”) — completed 2026-02-12 16:37 CET
-- [x] Monetisering: AdSense + affiliate på relevante outputs — completed 2026-02-12 16:46
-- [x] Lokaliseringsplan: .dk først, udvid .no/.se hvis traction — completed 2026-02-12 17:07 CET
-- [x] Backlinks: 20 outreach targets (offentlige/uddannelsessider med ressource-lister) — done: 2026-02-12 17:30
+## Completed
+- [x] 25+ beregnere implementeret og live
+- [x] Blog med how-to guides
+- [x] SEO skabelon (src/lib/seo.ts)
+- [x] InternalLinks component
+- [x] Cookie consent
+- [x] Responsive design
+- [x] Sitemap
 
-## New Features (2026-02-12)
-- [x] Nye beregnere: Boligstoette, Barselsdagpenge, SU, Efterloen, Rentefradrag — completed 2026-02-12 19:30 CET (Barselsdagpenge, Efterløn, Rentefradrag added; Boligstøtte+SU existed)
-- [x] Gem og del beregning (URL state + shortlink) — completed 2026-02-12 19:45 CET
-- [ ] Sammenligningsvaerktoj (scenarier side-om-side)
-- [ ] PDF/print-eksport af beregningsresultater
-- [ ] Indlejringswidget (iframe) til blogs/partnere + simpel partnerparam
-- [ ] API v1 (read-only) for udvalgte beregninger (rate limited)
-- [ ] PWA/offline til de mest brugte beregnere
-- [ ] Enheds-/valutaomregner integreret i relevante beregnere
-- [ ] "Naeste skridt"-CTAer baseret paa output (fx kontakt bank/raadgiver)
-- [ ] Forbedret breadcrumb/IA + relaterede vaerktoejer pr. side
-- [ ] Skatte-/ydelsesvisualisering (grafer pr. scenarie)
-- [ ] Gem scenarie-historik + "sammenlign 2"
-- [ ] Embed-generator UI (stoerrelser/tema)
-- [ ] CSV-eksport af beregninger
-- [ ] A11y-forbedringer (tastatur, ARIA, kontrast)
-- [ ] Dark mode + auto baseret paa systemtema
-- [ ] Kategorinavigation + soeg i beregnere
-- [ ] Cache/rate-limit for tunge beregninger
-- [ ] Automatisk sitemap + schema for hver beregner
-- [ ] FAQ/How-to structured data pr. side
-- [ ] Implementer Plausible analytics (self-hosted: analytics.holstjensen.eu)
+## Eksisterende Beregnere
+Løn efter skat, Dagpenge, Moms, BMI, Procent, Boliglån, Husleje, Boligstøtte, 
+Rente, Pension, SU, Efterløn, Barselsdagpenge, Børnepenge, Rentefradrag, 
+Feriepenge, Valuta, Tidszone, Alder, Opsparing, Bil/brændstof, Kalorier, 
+Kvadratmeter, Timepris, Dato/tid
+
+## In Progress / To Do
+
+### Fix Build Issues (Prioritet 1)
+- [ ] Fix FAQ og RelatedCalculators exports (navngivne exports)
+- [ ] Verificer alle imports matcher eksisterende komponenter
+- [ ] Kør fuld build og fix eventuelle fejl
+- [ ] Deploy og verificer alle sider virker
+
+### SEO & Content (Prioritet 2)
+- [ ] Tilføj JSON-LD schema til hver beregner (Calculator type)
+- [ ] Skriv 3 flere how-to blog posts
+- [ ] Forbedre meta descriptions på alle sider
+- [ ] Tilføj FAQ sektion til populære beregnere
+
+### Gem & Del (Prioritet 3)
+- [ ] Implementer URL state for beregninger (src/lib/calculation-state.ts exists)
+- [ ] Tilføj "Kopier link" knap
+- [ ] Social share buttons (FB, Twitter, LinkedIn)
+- [ ] QR kode generator for deling
+
+### UX Forbedringer
+- [ ] Dark mode toggle (system preference default)
+- [ ] Keyboard navigation forbedringer
+- [ ] Print-venligt layout for resultater
+- [ ] Loading states på tunge beregninger
+
+### Analytics
+- [ ] Implementer Plausible (analytics.holstjensen.eu)
+- [ ] Event tracking: beregning_udført, resultat_kopieret, delt
+- [ ] A/B test forskellige CTA placeringer
+
+### Nye Beregnere (Lower Priority)
+- [ ] Elafgift beregner (allerede delvist: Elberegner.tsx)
+- [ ] Arveafgift beregner
+- [ ] Aktieskat beregner
+- [ ] Crypto skat beregner
