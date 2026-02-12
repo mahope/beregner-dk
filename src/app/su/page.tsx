@@ -13,7 +13,7 @@ const baseUrl = "https://minberegner.dk";
 export const metadata: Metadata = {
   title: "SU Beregner 2026 - Beregn din SU og fribeløb",
   description:
-    "Gratis SU beregner. Beregn din SU (Statens Uddannelsesstøtte) og fribeløb for 2026. Se hvad du får som udeboende, hjemmeboende eller forsørger.",
+    "Hvad får du i SU? 2026 satser: Udeboende 6.888 kr/md, hjemmeboende 3.046 kr/md. Fribeløb: 14.943 kr/md. Beregn din SU og tjek om du holder dig under fribeløbet. Gratis beregner.",
   keywords: [
     "su beregner",
     "su 2026",

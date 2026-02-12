@@ -13,7 +13,7 @@ const baseUrl = "https://minberegner.dk";
 export const metadata: Metadata = {
   title: "Opsparingsberegner - Renters rente beregner",
   description:
-    "Gratis opsparingsberegner. Beregn hvad din opsparing vokser til med renters rente. Se udviklingen år for år og forstå effekten af løbende indbetalinger.",
+    "Se hvad din opsparing vokser til. Eksempel: 1.000 kr/md i 30 år med 5% rente = 830.000 kr. Beregn renters rente-effekten og se udviklingen år for år. Gratis beregner.",
   keywords: [
     "opsparingsberegner",
     "renters rente",

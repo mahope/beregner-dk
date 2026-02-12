@@ -9,7 +9,7 @@ const baseUrl = "https://minberegner.dk";
 export const metadata: Metadata = {
   title: "Boligstøtte beregner 2026 - Beregn din boligstøtte",
   description:
-    "Beregn hvor meget du kan få i boligstøtte i 2026. Gratis beregner til lejere - se din månedlige støtte baseret på husleje og indkomst.",
+    "Beregn boligstøtte 2026. Eksempel: Husleje 6.000 kr, indkomst 18.000 kr → ca. 1.500-2.500 kr/md i støtte. Se hvad du kan få baseret på husleje, indkomst og husstand. Gratis beregner.",
   keywords: [
     "boligstøtte beregner",
     "boligstøtte 2026",

@@ -56,7 +56,7 @@ const faqItems = [
 export const metadata: Metadata = {
   title: "Boliglånsberegner - Beregn din månedlige ydelse | Beregner.dk",
   description:
-    "Gratis boliglånsberegner. Beregn månedlig ydelse, samlet pris og skattefradrag på dit boliglån. Sammenlign fastforrentet, variabel og afdragsfrit.",
+    "Beregn dit boliglån 2026. Eksempel: 2 mio. kr lån med 4% rente = ca. 10.500 kr/md. Se månedlig ydelse, skattefradrag (25,6%) og sammenlign fast vs. variabel rente.",
   keywords: "boliglån, beregner, månedlig ydelse, realkreditlån, huslån, boligkøb, rente, skattefradrag",
 };
 

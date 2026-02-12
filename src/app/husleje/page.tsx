@@ -13,7 +13,7 @@ const baseUrl = "https://minberegner.dk";
 export const metadata: Metadata = {
   title: "Husleje Budget Beregner - Hvad har du råd til? | MinBeregner.dk",
   description:
-    "Gratis husleje beregner. Find ud af hvor meget du kan bruge på husleje baseret på din indkomst og udgifter. Brug 30% reglen.",
+    "Hvad har du råd til i husleje? Tjener du 25.000 kr netto → max ca. 7.500 kr/md (30% reglen). Beregn dit huslejebudget ud fra din indkomst og udgifter. Gratis beregner.",
   keywords: [
     "husleje beregner",
     "hvad har jeg råd til i husleje",

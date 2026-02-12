@@ -13,7 +13,7 @@ const baseUrl = "https://minberegner.dk";
 export const metadata: Metadata = {
   title: "Pensionsberegner - Beregn din fremtidige pension | Beregner.dk",
   description:
-    "Gratis pensionsberegner. Beregn hvad du kan få udbetalt som pensionist baseret på din opsparing, afkast og folkepension.",
+    "Beregn din pension 2026. Folkepension: ca. 13.000-15.000 kr/md. Se hvad du får med arbejdsmarkedspension (12-17% af løn), ATP og egen opsparing. Gratis pensionsberegner.",
   keywords: "pension, beregner, pensionsopsparing, folkepension, ATP, alderspension, ratepension",
 };
 

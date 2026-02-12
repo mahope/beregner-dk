@@ -13,7 +13,7 @@ const baseUrl = "https://minberegner.dk";
 export const metadata: Metadata = {
   title: "Timeprisberegner for freelancere | MinBeregner.dk",
   description:
-    "Gratis timeprisberegner for freelancere og selvstændige. Beregn din timepris ud fra ønsket løn, eller se hvad du tjener med din nuværende timepris.",
+    "Find din freelance timepris. Ønsker du 35.000 kr netto/md? Du skal fakturere ca. 700-900 kr/time. Beregn timepris inkl. skat, ferie og driftsomkostninger. Gratis beregner.",
   keywords: [
     "timeprisberegner",
     "freelance timepris",

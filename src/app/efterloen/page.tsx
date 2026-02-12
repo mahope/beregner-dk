@@ -13,7 +13,7 @@ const baseUrl = "https://minberegner.dk";
 export const metadata: Metadata = {
   title: "Efterløn beregner 2026 - Se hvad du kan få udbetalt",
   description:
-    "Beregn din efterløn for 2026. Se satser, betingelser og hvad du kan forvente at få udbetalt. Gratis beregner med aktuelle satser.",
+    "Beregn efterløn 2026. Max sats: ca. 19.866 kr/md (91% af dagpenge). Se hvornår du kan gå på efterløn, betingelser og præcis sats ud fra din indkomst. Gratis beregner.",
   keywords: [
     "efterløn",
     "efterløn beregner",

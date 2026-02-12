@@ -13,7 +13,7 @@ const baseUrl = "https://minberegner.dk";
 export const metadata: Metadata = {
   title: "Børnepenge Beregner 2026 - Børne- og ungeydelse",
   description:
-    "Gratis børnepenge beregner. Beregn din børne- og ungeydelse (børnecheck) for 2026. Se hvad du får udbetalt baseret på dine børns alder og din indkomst.",
+    "Beregn børnepenge 2026. Satser: 0-2 år: 4.824 kr/kvartal, 3-6 år: 3.819 kr/kvartal, 7-14 år: 3.003 kr/kvartal. Se hvad du får ud fra antal børn og indkomst. Gratis beregner.",
   keywords: [
     "børnepenge",
     "børnepenge beregner",

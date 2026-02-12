@@ -13,7 +13,7 @@ const baseUrl = "https://minberegner.dk";
 export const metadata: Metadata = {
   title: "Rentefradrag beregner 2026 - Se din skattebesparelse",
   description:
-    "Beregn dit rentefradrag for 2026. Se hvor meget du sparer i skat på dine renteudgifter fra boliglån, billån og andre lån.",
+    "Hvad sparer du i skat? Fradragsværdi 2026: ca. 25,6-33,6%. Eksempel: 50.000 kr renter = ca. 13.000-17.000 kr i skattebesparelse. Beregn dit rentefradrag på boliglån og andre lån.",
   keywords: [
     "rentefradrag",
     "rentefradrag beregner",

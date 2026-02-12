@@ -13,7 +13,7 @@ const baseUrl = "https://minberegner.dk";
 export const metadata: Metadata = {
   title: "Procentberegner - Beregn procent nemt og gratis",
   description:
-    "Gratis procentberegner. Beregn procent af et tal, find procentvis stigning/fald, eller regn baglæns fra procent. Nem og hurtig.",
+    "Beregn procent hurtigt. Eksempel: 15% af 2.500 kr = 375 kr. Find procent af et tal, beregn stigning/fald, eller regn baglæns. Gratis procentberegner.",
   keywords: [
     "procentberegner",
     "beregn procent",

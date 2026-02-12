@@ -13,7 +13,7 @@ const baseUrl = "https://minberegner.dk";
 export const metadata: Metadata = {
   title: "Renteberegner - Beregn lån og ydelse gratis",
   description:
-    "Gratis renteberegner. Beregn din månedlige ydelse, samlet rente og tilbagebetaling på lån. Sammenlign annuitetslån og serielån.",
+    "Beregn dit lån hurtigt. Eksempel: 100.000 kr med 5% rente i 5 år = ca. 1.887 kr/md. Se månedlig ydelse, samlet rente og sammenlign annuitets- vs. serielån.",
   keywords: [
     "renteberegner",
     "lånberegner",

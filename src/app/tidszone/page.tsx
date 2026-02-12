@@ -13,7 +13,7 @@ const baseUrl = "https://minberegner.dk";
 export const metadata: Metadata = {
   title: "Tidszoneberegner - Omregn tid mellem lande | MinBeregner.dk",
   description:
-    "Gratis tidszoneberegner. Se hvad klokken er i andre lande og omregn tidspunkter mellem tidszoner. New York, Tokyo, Sydney og mange flere.",
+    "Hvad er klokken i New York, Tokyo eller Sydney? Danmark til New York: -6 timer. Omregn tid mellem tidszoner og planlæg internationale møder. Gratis tidszoneberegner.",
   keywords: [
     "tidszoneberegner",
     "tidszone omregner",

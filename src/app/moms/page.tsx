@@ -13,7 +13,7 @@ const baseUrl = "https://minberegner.dk";
 export const metadata: Metadata = {
   title: "Momsberegner - Beregn moms online | MinBeregner.dk",
   description:
-    "Gratis momsberegner. Beregn moms (25%) nemt og hurtigt. Tillæg moms, fratræk moms eller find momsandelen i et beløb. Opdateret til 2026.",
+    "Beregn dansk moms (25%) hurtigt. Eksempel: 1.000 kr × 1,25 = 1.250 kr inkl. moms. Tillæg moms, fratræk moms eller find momsandelen. Gratis momsberegner 2026.",
   keywords: [
     "momsberegner",
     "beregn moms",

@@ -13,7 +13,7 @@ const baseUrl = "https://minberegner.dk";
 export const metadata: Metadata = {
   title: "Tidsberegner - Beregn timer og minutter mellem tidspunkter",
   description:
-    "Gratis tidsberegner. Beregn antal timer og minutter mellem to tidspunkter. Perfekt til arbejdstid, møder og timeregistrering.",
+    "Beregn tid hurtigt. Eksempel: 08:30 til 16:45 = 8 timer 15 min (8,25 decimal). Perfekt til arbejdstid, timeregistrering og møder. Gratis tidsberegner.",
   keywords: [
     "tidsberegner",
     "timer mellem tidspunkter",

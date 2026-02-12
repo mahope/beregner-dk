@@ -13,7 +13,7 @@ const baseUrl = "https://minberegner.dk";
 export const metadata: Metadata = {
   title: "Aldersberegner - Beregn din præcise alder | MinBeregner.dk",
   description:
-    "Gratis aldersberegner. Beregn din præcise alder i år, måneder, uger, dage og timer. Se dit stjernetegn og dage til næste fødselsdag.",
+    "Hvor gammel er du præcist? Beregn din alder i år, måneder og dage. Eksempel: Født 15/3/1990 = 35 år, 10 måneder og 28 dage. Se også dit stjernetegn og dage til fødselsdag.",
   keywords: [
     "aldersberegner",
     "beregn alder",

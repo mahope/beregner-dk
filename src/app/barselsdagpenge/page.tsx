@@ -13,7 +13,7 @@ const baseUrl = "https://minberegner.dk";
 export const metadata: Metadata = {
   title: "Barselsdagpenge beregner 2026 - Se hvad du får udbetalt",
   description:
-    "Beregn dine barselsdagpenge for 2026. Se hvad du får udbetalt under barsel baseret på din løn og situation. Gratis beregner med aktuelle satser.",
+    "Hvad får du under barsel? Max sats 2026: ca. 4.695 kr/uge (≈ 20.000 kr/md før skat). Beregn dine barselsdagpenge ud fra din løn og situation. Gratis beregner.",
   keywords: [
     "barselsdagpenge",
     "barsel beregner",

@@ -13,7 +13,7 @@ const baseUrl = "https://minberegner.dk";
 export const metadata: Metadata = {
   title: "BMI Beregner - Beregn dit Body Mass Index gratis",
   description:
-    "Gratis BMI beregner. Beregn dit Body Mass Index og se om din vægt er sund. Få din idealvægt og personlige anbefalinger baseret på din højde og vægt.",
+    "Beregn dit BMI på 5 sekunder. Eksempel: 75 kg / 1,75m = BMI 24,5 (normal). Se om du er undervægtig (under 18,5), normal (18,5-24,9) eller overvægtig. Gratis BMI beregner.",
   keywords: [
     "bmi beregner",
     "bmi",

@@ -9,7 +9,7 @@ const baseUrl = "https://minberegner.dk";
 export const metadata: Metadata = {
   title: "Dagpengeberegner 2026 - Beregn dine dagpenge",
   description:
-    "Beregn hvad du kan få i dagpenge i 2026. Se din månedlige, ugentlige og daglige sats baseret på din tidligere løn. Gratis dagpengeberegner.",
+    "Hvad får du i dagpenge? Max sats 2026: 20.359 kr/md (90% af løn). Beregn din dagpengesats ud fra din tidligere løn. Se månedlig, ugentlig og daglig sats. Gratis beregner.",
   keywords: [
     "dagpenge beregner",
     "dagpenge 2026",

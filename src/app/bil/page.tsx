@@ -10,7 +10,7 @@ const baseUrl = "https://minberegner.dk";
 export const metadata: Metadata = {
   title: "Bilomkostningsberegner - Se hvad din bil koster | Beregner.dk",
   description:
-    "Gratis bilberegner. Beregn de reelle omkostninger ved at eje bil: brændstof, forsikring, værditab, afgifter og service. Sammenlign benzin, diesel og elbil.",
+    "Se hvad din bil reelt koster. Typisk: 2,50-4,50 kr/km inkl. værditab, brændstof, forsikring og afgifter. Sammenlign benzin, diesel og elbil. Gratis beregner 2026.",
   keywords: "bil beregner, bilomkostninger, biludgifter, elbil vs benzin, bil pris pr km, værditab bil",
 };
 

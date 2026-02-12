@@ -13,7 +13,7 @@ const baseUrl = "https://minberegner.dk";
 export const metadata: Metadata = {
   title: "Løn efter skat 2026 - Beregn din nettoløn gratis",
   description:
-    "Gratis lønberegner 2026. Se hvad du får udbetalt efter skat, AM-bidrag og pension. Beregn din nettoløn med aktuelle danske skattesatser.",
+    "Beregn din nettoløn 2026. Eksempel: 35.000 kr brutto ≈ 23.500 kr netto. Se hvad du får udbetalt efter skat (37-52%), AM-bidrag (8%) og pension. Gratis lønberegner.",
   keywords: [
     "løn efter skat",
     "lønberegner",
