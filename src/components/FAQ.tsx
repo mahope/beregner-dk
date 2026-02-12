@@ -12,7 +12,7 @@ interface FAQProps {
   title?: string;
 }
 
-export default function FAQ({ items, title = "Ofte stillede spørgsmål" }: FAQProps) {
+export function FAQ({ items, title = "Ofte stillede spørgsmål" }: FAQProps) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   return (
@@ -52,3 +52,4 @@ export default function FAQ({ items, title = "Ofte stillede spørgsmål" }: FAQP
 
 // Export for use in data files
 export type { FAQItem };
+export default FAQ;

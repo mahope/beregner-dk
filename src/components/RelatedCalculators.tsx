@@ -1,10 +1,10 @@
 import Link from "next/link";
 
-interface Calculator {
+export interface Calculator {
   title: string;
   description: string;
   href: string;
-  icon: string;
+  icon?: string;
 }
 
 interface RelatedCalculatorsProps {
@@ -96,7 +96,7 @@ const relatedMap: Record<string, string[]> = {
   "/dato": ["/procent", "/loen-efter-skat", "/feriepenge"],
 };
 
-export default function RelatedCalculators({
+export function RelatedCalculators({
   current,
   calculators,
 }: RelatedCalculatorsProps) {
@@ -133,7 +133,7 @@ function RelatedGrid({ calculators }: { calculators: Calculator[] }) {
             href={calc.href}
             className="p-4 bg-white rounded-lg border hover:shadow-md transition-shadow flex items-center gap-3"
           >
-            <span className="text-2xl">{calc.icon}</span>
+            {calc.icon && <span className="text-2xl">{calc.icon}</span>}
             <div>
               <p className="font-medium">{calc.title}</p>
               <p className="text-sm text-gray-500">{calc.description}</p>
@@ -144,3 +144,5 @@ function RelatedGrid({ calculators }: { calculators: Calculator[] }) {
     </section>
   );
 }
+
+export default RelatedCalculators;
