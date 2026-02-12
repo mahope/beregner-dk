@@ -10,3 +10,26 @@
 - [x] Monetisering: AdSense + affiliate på relevante outputs — completed 2026-02-12 16:46
 - [x] Lokaliseringsplan: .dk først, udvid .no/.se hvis traction — completed 2026-02-12 17:07 CET
 - [x] Backlinks: 20 outreach targets (offentlige/uddannelsessider med ressource-lister) — done: 2026-02-12 17:30
+
+## New Features (2026-02-12)
+- [ ] Nye beregnere: Boligstoette, Barselsdagpenge, SU, Efterloen, Rentefradrag
+- [ ] Gem og del beregning (URL state + shortlink)
+- [ ] Sammenligningsvaerktoj (scenarier side-om-side)
+- [ ] PDF/print-eksport af beregningsresultater
+- [ ] Indlejringswidget (iframe) til blogs/partnere + simpel partnerparam
+- [ ] API v1 (read-only) for udvalgte beregninger (rate limited)
+- [ ] PWA/offline til de mest brugte beregnere
+- [ ] Enheds-/valutaomregner integreret i relevante beregnere
+- [ ] "Naeste skridt"-CTAer baseret paa output (fx kontakt bank/raadgiver)
+- [ ] Forbedret breadcrumb/IA + relaterede vaerktoejer pr. side
+- [ ] Skatte-/ydelsesvisualisering (grafer pr. scenarie)
+- [ ] Gem scenarie-historik + "sammenlign 2"
+- [ ] Embed-generator UI (stoerrelser/tema)
+- [ ] CSV-eksport af beregninger
+- [ ] A11y-forbedringer (tastatur, ARIA, kontrast)
+- [ ] Dark mode + auto baseret paa systemtema
+- [ ] Kategorinavigation + soeg i beregnere
+- [ ] Cache/rate-limit for tunge beregninger
+- [ ] Automatisk sitemap + schema for hver beregner
+- [ ] FAQ/How-to structured data pr. side
+- [ ] Implementer Plausible analytics (self-hosted: analytics.holstjensen.eu)
