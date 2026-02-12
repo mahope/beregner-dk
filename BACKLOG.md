@@ -162,3 +162,8 @@ Kvadratmeter, Timepris, Dato/tid
 **Hosting:** Dokploy
 **Mål:** 50.000 månedlige besøgende inden Q4 2026
 **AdSense krav:** God UX, unik content, policy compliance
+
+<!-- auto-45m 2026-02-13 00:45 -->
+- [ ] [auto-45m] Implementer SEO schema (JSON-LD) for 2 beregnere med test
+- [ ] [auto-45m] Tilfoej relaterede beregnere paa 3 sider (InternalLinks)
+- [ ] [auto-45m] Skriv 1 how-to stub (200 ord) til prioriteret emne
