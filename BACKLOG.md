@@ -29,7 +29,7 @@ Kvadratmeter, Timepris, Dato/tid
 ## 🚀 Phase 1: SEO & Ads Revenue (Prioritet 1)
 
 ### Build & Deploy
-- [ ] Kør fuld production build og fix alle fejl
+- [x] Kør fuld production build og fix alle fejl
 - [ ] Deploy til Dokploy og verificer alle sider
 - [ ] SSL og performance check
 - [ ] Submit til Google Search Console
