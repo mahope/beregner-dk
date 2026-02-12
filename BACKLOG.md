@@ -9,4 +9,4 @@
 - [x] Content: 10 how-to guides pr. cluster (fx “Sådan beregner du løn efter skat”) — completed 2026-02-12 16:37 CET
 - [x] Monetisering: AdSense + affiliate på relevante outputs — completed 2026-02-12 16:46
 - [x] Lokaliseringsplan: .dk først, udvid .no/.se hvis traction — completed 2026-02-12 17:07 CET
-- [ ] Backlinks: 20 outreach targets (offentlige/uddannelsessider med ressource-lister)
+- [x] Backlinks: 20 outreach targets (offentlige/uddannelsessider med ressource-lister) — done: 2026-02-12 17:30
