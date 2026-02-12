@@ -6,6 +6,13 @@
 
 ---
 
+## 🎯 UI/UX Princip
+**Alle features SKAL være synlige og tilgængelige for brugeren!**
+- Backend-funktionalitet → tilføj også UI (knap, menu, side)
+- Ingen "skjulte" features — brugeren skal kunne finde og bruge det
+- Test at UI er responsiv og intuitiv
+
+
 ## ✅ Completed
 
 ### Core Site
@@ -25,6 +32,13 @@ Feriepenge, Valuta, Tidszone, Alder, Opsparing, Bil/brændstof, Kalorier,
 Kvadratmeter, Timepris, Dato/tid
 
 ---
+
+## 🎯 UI/UX Princip
+**Alle features SKAL være synlige og tilgængelige for brugeren!**
+- Backend-funktionalitet → tilføj også UI (knap, menu, side)
+- Ingen "skjulte" features — brugeren skal kunne finde og bruge det
+- Test at UI er responsiv og intuitiv
+
 
 ## 🚀 Phase 1: SEO & Ads Revenue (Prioritet 1)
 
@@ -58,6 +72,13 @@ Kvadratmeter, Timepris, Dato/tid
 
 ---
 
+## 🎯 UI/UX Princip
+**Alle features SKAL være synlige og tilgængelige for brugeren!**
+- Backend-funktionalitet → tilføj også UI (knap, menu, side)
+- Ingen "skjulte" features — brugeren skal kunne finde og bruge det
+- Test at UI er responsiv og intuitiv
+
+
 ## 📈 Phase 2: Engagement & Affiliate (Prioritet 2)
 
 ### Gem & Del Feature
@@ -90,6 +111,13 @@ Kvadratmeter, Timepris, Dato/tid
 
 ---
 
+## 🎯 UI/UX Princip
+**Alle features SKAL være synlige og tilgængelige for brugeren!**
+- Backend-funktionalitet → tilføj også UI (knap, menu, side)
+- Ingen "skjulte" features — brugeren skal kunne finde og bruge det
+- Test at UI er responsiv og intuitiv
+
+
 ## 🔧 Phase 3: Nye Beregnere & Scale (Prioritet 3)
 
 ### Høj-værdi Beregnere (affiliate potential)
@@ -117,6 +145,13 @@ Kvadratmeter, Timepris, Dato/tid
 - [ ] Lokaliser skatteregler per land
 
 ---
+
+## 🎯 UI/UX Princip
+**Alle features SKAL være synlige og tilgængelige for brugeren!**
+- Backend-funktionalitet → tilføj også UI (knap, menu, side)
+- Ingen "skjulte" features — brugeren skal kunne finde og bruge det
+- Test at UI er responsiv og intuitiv
+
 
 ## 📝 Notes
 
