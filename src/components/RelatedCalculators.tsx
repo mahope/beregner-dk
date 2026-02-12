@@ -13,53 +13,18 @@ interface RelatedCalculatorsProps {
 }
 
 const allCalculators: Calculator[] = [
-  {
-    title: "BMI Beregner",
-    description: "Beregn dit Body Mass Index",
-    href: "/bmi",
-    icon: "⚖️",
-  },
+  // Økonomi & Løn
   {
     title: "Løn efter skat",
-    description: "Se din nettoløn efter skat",
+    description: "Beregn din nettoløn efter skat",
     href: "/loen-efter-skat",
     icon: "💰",
   },
   {
-    title: "Renteberegner",
-    description: "Beregn ydelse på lån",
-    href: "/renteberegner",
-    icon: "🏦",
-  },
-  {
-    title: "Procentberegner",
-    description: "Beregn procent nemt",
-    href: "/procent",
-    icon: "➗",
-  },
-  {
-    title: "Opsparingsberegner",
-    description: "Renters rente beregner",
-    href: "/opsparing",
-    icon: "📈",
-  },
-  {
-    title: "Kalorieberegner",
-    description: "Beregn kaloriebehov",
-    href: "/kalorier",
-    icon: "🍎",
-  },
-  {
-    title: "Datoberegner",
-    description: "Dage mellem datoer",
-    href: "/dato",
-    icon: "📅",
-  },
-  {
-    title: "Elberegner",
-    description: "Beregn dit elforbrug",
-    href: "/elberegner",
-    icon: "⚡",
+    title: "Dagpenge",
+    description: "Beregn dine dagpenge",
+    href: "/dagpenge",
+    icon: "📋",
   },
   {
     title: "Feriepenge",
@@ -68,32 +33,213 @@ const allCalculators: Calculator[] = [
     icon: "🏖️",
   },
   {
-    title: "Børnepenge",
-    description: "Se børne- og ungeydelse",
-    href: "/boernepenge",
-    icon: "👶",
-  },
-  {
     title: "SU Beregner",
     description: "Beregn din SU",
     href: "/su",
     icon: "🎓",
   },
+  {
+    title: "Pension",
+    description: "Beregn din pension",
+    href: "/pension",
+    icon: "👴",
+  },
+  {
+    title: "Efterløn",
+    description: "Beregn din efterløn",
+    href: "/efterloen",
+    icon: "🏡",
+  },
+  {
+    title: "Barselsdagpenge",
+    description: "Beregn barselsdagpenge",
+    href: "/barselsdagpenge",
+    icon: "👶",
+  },
+  {
+    title: "Børnepenge",
+    description: "Se børne- og ungeydelse",
+    href: "/boernepenge",
+    icon: "👧",
+  },
+  {
+    title: "Timepris",
+    description: "Beregn din timepris",
+    href: "/timepris",
+    icon: "⏰",
+  },
+  // Lån & Bolig
+  {
+    title: "Boliglån",
+    description: "Beregn dit boliglån",
+    href: "/boliglaan",
+    icon: "🏠",
+  },
+  {
+    title: "Renteberegner",
+    description: "Beregn renter på lån",
+    href: "/renteberegner",
+    icon: "🏦",
+  },
+  {
+    title: "Husleje",
+    description: "Beregn rimelig husleje",
+    href: "/husleje",
+    icon: "🔑",
+  },
+  {
+    title: "Boligstøtte",
+    description: "Beregn din boligstøtte",
+    href: "/boligstoette",
+    icon: "🏘️",
+  },
+  {
+    title: "Låneberegner",
+    description: "Beregn dit lån",
+    href: "/laaneberegner",
+    icon: "💳",
+  },
+  {
+    title: "Opsparing",
+    description: "Renters rente beregner",
+    href: "/opsparing",
+    icon: "📈",
+  },
+  {
+    title: "Rentefradrag",
+    description: "Beregn dit rentefradrag",
+    href: "/rentefradrag",
+    icon: "📉",
+  },
+  // Moms & Procent
+  {
+    title: "Moms",
+    description: "Beregn moms til/fra",
+    href: "/moms",
+    icon: "🧾",
+  },
+  {
+    title: "Procent",
+    description: "Beregn procent nemt",
+    href: "/procent",
+    icon: "➗",
+  },
+  // Sundhed
+  {
+    title: "BMI Beregner",
+    description: "Beregn dit Body Mass Index",
+    href: "/bmi",
+    icon: "⚖️",
+  },
+  {
+    title: "Kalorieberegner",
+    description: "Beregn kaloriebehov",
+    href: "/kalorier",
+    icon: "🍎",
+  },
+  // Tid
+  {
+    title: "Datoberegner",
+    description: "Dage mellem datoer",
+    href: "/dato",
+    icon: "📅",
+  },
+  {
+    title: "Tidsberegner",
+    description: "Beregn tid og varighed",
+    href: "/tidsberegner",
+    icon: "⏱️",
+  },
+  {
+    title: "Tidszone",
+    description: "Omregn tidszoner",
+    href: "/tidszone",
+    icon: "🌍",
+  },
+  {
+    title: "Alder",
+    description: "Beregn din præcise alder",
+    href: "/alder",
+    icon: "🎂",
+  },
+  // Bil & Energi
+  {
+    title: "Bil",
+    description: "Beregn biludgifter",
+    href: "/bil",
+    icon: "🚗",
+  },
+  {
+    title: "Brændstof",
+    description: "Beregn brændstofforbrug",
+    href: "/braendstof",
+    icon: "⛽",
+  },
+  {
+    title: "Elberegner",
+    description: "Beregn dit elforbrug",
+    href: "/elberegner",
+    icon: "⚡",
+  },
+  // Andet
+  {
+    title: "Kvadratmeter",
+    description: "Beregn areal",
+    href: "/kvadratmeter",
+    icon: "📐",
+  },
+  {
+    title: "Valuta",
+    description: "Omregn valutaer",
+    href: "/valuta",
+    icon: "💱",
+  },
 ];
 
-// Map related calculators by topic
+// Map related calculators by topic - each has 5 related
 const relatedMap: Record<string, string[]> = {
-  "/bmi": ["/kalorier", "/loen-efter-skat"],
-  "/loen-efter-skat": ["/feriepenge", "/renteberegner", "/opsparing"],
-  "/elberegner": ["/loen-efter-skat", "/procent"],
-  "/feriepenge": ["/loen-efter-skat", "/opsparing", "/su"],
-  "/boernepenge": ["/su", "/feriepenge", "/loen-efter-skat"],
-  "/su": ["/loen-efter-skat", "/boernepenge", "/feriepenge"],
-  "/renteberegner": ["/opsparing", "/loen-efter-skat", "/procent"],
-  "/procent": ["/renteberegner", "/loen-efter-skat", "/elberegner"],
-  "/opsparing": ["/renteberegner", "/loen-efter-skat", "/procent"],
-  "/kalorier": ["/bmi", "/dato", "/procent"],
-  "/dato": ["/procent", "/loen-efter-skat", "/feriepenge"],
+  // Økonomi & Løn
+  "/loen-efter-skat": ["/feriepenge", "/dagpenge", "/pension", "/timepris", "/rentefradrag"],
+  "/dagpenge": ["/loen-efter-skat", "/efterloen", "/barselsdagpenge", "/su", "/feriepenge"],
+  "/feriepenge": ["/loen-efter-skat", "/dagpenge", "/barselsdagpenge", "/pension", "/timepris"],
+  "/su": ["/loen-efter-skat", "/boernepenge", "/boligstoette", "/dagpenge", "/feriepenge"],
+  "/pension": ["/loen-efter-skat", "/efterloen", "/opsparing", "/renteberegner", "/feriepenge"],
+  "/efterloen": ["/pension", "/dagpenge", "/loen-efter-skat", "/opsparing", "/feriepenge"],
+  "/barselsdagpenge": ["/boernepenge", "/dagpenge", "/loen-efter-skat", "/feriepenge", "/boligstoette"],
+  "/boernepenge": ["/barselsdagpenge", "/su", "/boligstoette", "/loen-efter-skat", "/dagpenge"],
+  "/timepris": ["/loen-efter-skat", "/moms", "/procent", "/feriepenge", "/dagpenge"],
+  
+  // Lån & Bolig
+  "/boliglaan": ["/renteberegner", "/laaneberegner", "/husleje", "/boligstoette", "/rentefradrag"],
+  "/renteberegner": ["/boliglaan", "/laaneberegner", "/opsparing", "/procent", "/rentefradrag"],
+  "/husleje": ["/boligstoette", "/boliglaan", "/loen-efter-skat", "/kvadratmeter", "/procent"],
+  "/boligstoette": ["/husleje", "/boernepenge", "/loen-efter-skat", "/su", "/dagpenge"],
+  "/laaneberegner": ["/boliglaan", "/renteberegner", "/opsparing", "/rentefradrag", "/procent"],
+  "/opsparing": ["/renteberegner", "/pension", "/laaneberegner", "/procent", "/loen-efter-skat"],
+  "/rentefradrag": ["/boliglaan", "/renteberegner", "/laaneberegner", "/loen-efter-skat", "/opsparing"],
+  
+  // Moms & Procent
+  "/moms": ["/procent", "/timepris", "/loen-efter-skat", "/valuta", "/renteberegner"],
+  "/procent": ["/moms", "/renteberegner", "/opsparing", "/bmi", "/kalorier"],
+  
+  // Sundhed
+  "/bmi": ["/kalorier", "/alder", "/procent", "/dato", "/tidsberegner"],
+  "/kalorier": ["/bmi", "/procent", "/alder", "/dato", "/tidsberegner"],
+  
+  // Tid
+  "/dato": ["/tidsberegner", "/alder", "/tidszone", "/feriepenge", "/pension"],
+  "/tidsberegner": ["/dato", "/tidszone", "/alder", "/timepris", "/kalorier"],
+  "/tidszone": ["/dato", "/tidsberegner", "/valuta", "/alder", "/timepris"],
+  "/alder": ["/dato", "/pension", "/bmi", "/tidsberegner", "/efterloen"],
+  
+  // Bil & Energi
+  "/bil": ["/braendstof", "/elberegner", "/loen-efter-skat", "/procent", "/valuta"],
+  "/braendstof": ["/bil", "/elberegner", "/procent", "/valuta", "/kvadratmeter"],
+  "/elberegner": ["/braendstof", "/bil", "/procent", "/husleje", "/boligstoette"],
+  
+  // Andet
+  "/kvadratmeter": ["/husleje", "/boliglaan", "/procent", "/braendstof", "/elberegner"],
+  "/valuta": ["/moms", "/procent", "/tidszone", "/loen-efter-skat", "/bil"],
 };
 
 export function RelatedCalculators({
@@ -109,13 +255,13 @@ export function RelatedCalculators({
   const relatedHrefs = current ? relatedMap[current] || [] : [];
   const related = allCalculators
     .filter((calc) => relatedHrefs.includes(calc.href))
-    .slice(0, 3);
+    .slice(0, 5);
 
   if (related.length === 0) {
-    // Fallback: show 3 random calculators (not current)
+    // Fallback: show 5 random calculators (not current)
     const fallback = allCalculators
       .filter((calc) => calc.href !== current)
-      .slice(0, 3);
+      .slice(0, 5);
     return <RelatedGrid calculators={fallback} />;
   }
 
@@ -126,7 +272,7 @@ function RelatedGrid({ calculators }: { calculators: Calculator[] }) {
   return (
     <section className="mt-12 pt-8 border-t">
       <h2 className="text-xl font-bold mb-4">Relaterede beregnere</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {calculators.map((calc) => (
           <Link
             key={calc.href}
