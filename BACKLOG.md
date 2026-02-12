@@ -7,6 +7,6 @@
 - [x] Performance: lighthouse 95+ (SSR, code-splitting) — completed 2026-02-12 15:40 CET: next.config perf flags + docs + lighthouse script
 - [x] 2026-02-12T15:19:14Z Tracking: event goals pr. beregner (beregn, kopier resultat, deling)
 - [x] Content: 10 how-to guides pr. cluster (fx “Sådan beregner du løn efter skat”) — completed 2026-02-12 16:37 CET
-- [ ] Monetisering: AdSense + affiliate på relevante outputs
+- [x] Monetisering: AdSense + affiliate på relevante outputs — completed 2026-02-12 16:46
 - [ ] Lokaliseringsplan: .dk først, udvid .no/.se hvis traction
 - [ ] Backlinks: 20 outreach targets (offentlige/uddannelsessider med ressource-lister)
