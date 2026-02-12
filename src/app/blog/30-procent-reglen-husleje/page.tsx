@@ -76,7 +76,8 @@ export default function HuslejeGuidePage() {
         <p>
           30% reglen er en simpel tommelfingerregel: <strong>Din husleje bør max udgøre 
           30% af din nettoindkomst</strong>. Hvis du tjener 25.000 kr efter skat, bør din 
-          husleje altså ikke overstige 7.500 kr.
+          husleje altså ikke overstige 7.500 kr. Kender du ikke din nettoløn? Brug vores{" "}
+          <Link href="/loen-efter-skat" className="text-blue-600 hover:underline">løn efter skat beregner</Link>.
         </p>
 
         <div className="bg-blue-50 p-4 rounded-lg not-prose my-6">
@@ -137,7 +138,8 @@ export default function HuslejeGuidePage() {
         <ul>
           <li>Du har høj gæld der skal afdrages</li>
           <li>Din indkomst er usikker (freelance, provision)</li>
-          <li>Du sparer op til noget stort (bolig, uddannelse)</li>
+          <li>Du sparer op til noget stort (bolig, uddannelse) - se vores{" "}
+            <Link href="/opsparing" className="text-blue-600 hover:underline">opsparingsberegner</Link></li>
           <li>Du har høje andre faste udgifter (bil, børn)</li>
         </ul>
 
@@ -148,7 +150,16 @@ export default function HuslejeGuidePage() {
           <li><strong>Almene boliger</strong> - Skriv dig op i boligforeninger</li>
           <li><strong>Mindre kvadratmeter</strong> - Har du virkelig brug for 70m²?</li>
           <li><strong>Forhandl</strong> - Nogen huslejer kan forhandles</li>
+          <li><strong>Boligstøtte</strong> - Tjek om du er{" "}
+            <Link href="/boligstoette" className="text-blue-600 hover:underline">berettiget til boligstøtte</Link></li>
         </ol>
+
+        <h2>Overvejer du at købe?</h2>
+        <p>
+          Hvis du overvejer at købe bolig i stedet for at leje, kan du bruge vores{" "}
+          <Link href="/boliglaan" className="text-blue-600 hover:underline">boliglånsberegner</Link>{" "}
+          til at se, hvad dine månedlige ydelser ville være.
+        </p>
 
         <h2>Brug vores husleje-beregner</h2>
         <p>

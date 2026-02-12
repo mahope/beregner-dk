@@ -78,8 +78,10 @@ export default function TimeprisGuidePage() {
           <strong>Det er en stor fejl.</strong> Som freelancer har du mange ekstra omkostninger:
         </p>
         <ul>
-          <li><strong>Ingen betalt ferie</strong> - 5-6 uger = 10-12% af din tid</li>
-          <li><strong>Ingen pension</strong> fra arbejdsgiver</li>
+          <li><strong>Ingen betalt ferie</strong> - 5-6 uger = 10-12% af din tid. Se vores{" "}
+            <Link href="/feriepenge" className="text-blue-600 hover:underline">feriepenge-beregner</Link> for sammenligning</li>
+          <li><strong>Ingen pension</strong> fra arbejdsgiver - brug vores{" "}
+            <Link href="/pension" className="text-blue-600 hover:underline">pensionsberegner</Link> til at planlægge</li>
           <li><strong>Ingen løn under sygdom</strong></li>
           <li><strong>Software og udstyr</strong> - du betaler selv</li>
           <li><strong>Forsikringer</strong> - ansvar, erhverv, sundhed</li>
@@ -102,7 +104,9 @@ export default function TimeprisGuidePage() {
         <h3>Trin 2: Beregn bruttoløn</h3>
         <p>
           Som selvstændig betaler du ca. 45% i skat (AM-bidrag + indkomstskat). 
-          Divider din ønskede nettoløn med 0,55:
+          Divider din ønskede nettoløn med 0,55. Du kan bruge vores{" "}
+          <Link href="/loen-efter-skat" className="text-blue-600 hover:underline">løn efter skat beregner</Link>{" "}
+          til at se sammenhængen mellem brutto og netto:
         </p>
         <div className="bg-gray-50 p-4 rounded-lg not-prose mb-4">
           <p className="font-mono">30.000 ÷ 0,55 = 54.545 kr bruttoløn</p>
@@ -151,7 +155,9 @@ export default function TimeprisGuidePage() {
           <p className="font-medium text-yellow-800">💡 Rund op!</p>
           <p className="text-yellow-700 text-sm mt-1">
             I praksis ville du runde op til 550 eller 600 kr for at have buffer. 
-            Husk at dette er ekskl. moms - for virksomhedskunder tillægges 25%.
+            Husk at dette er ekskl. moms - for virksomhedskunder tillægges 25%. 
+            Brug vores <Link href="/moms" className="text-blue-600 hover:underline">momsberegner</Link>{" "}
+            til at beregne priser inkl. moms.
           </p>
         </div>
 
@@ -194,6 +200,13 @@ export default function TimeprisGuidePage() {
             </tbody>
           </table>
         </div>
+
+        <h2>Hvad hvis du mister opgaver?</h2>
+        <p>
+          Som selvstændig kan du have perioder uden indkomst. Det er vigtigt at have opsparing 
+          og evt. A-kasse. Tjek hvad du kan få i{" "}
+          <Link href="/dagpenge" className="text-blue-600 hover:underline">dagpenge</Link> hvis du står uden arbejde.
+        </p>
 
         <h2>Tips til at hæve din timepris</h2>
         <ol>

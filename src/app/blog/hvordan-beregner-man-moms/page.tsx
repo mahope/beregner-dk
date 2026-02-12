@@ -125,20 +125,31 @@ export default function MomsGuidePage() {
           <p className="text-yellow-700 text-sm mt-1">
             Momsandelen i en pris inkl. moms er <strong>20%</strong> (ikke 25%). 
             Det skyldes at 200 kr af 1.000 kr er 20%. Momsen beregnes af prisen 
-            <em>uden</em> moms, ikke af totalen.
+            <em>uden</em> moms, ikke af totalen. Forvirret over procenter? Brug vores{" "}
+            <Link href="/procent" className="text-blue-600 hover:underline">procentberegner</Link>.
           </p>
         </div>
 
         <h2>Momsregistrering for virksomheder</h2>
         <p>
           Virksomheder med en årlig omsætning over <strong>50.000 kr</strong> skal 
-          momsregistreres hos SKAT. Som momsregistreret virksomhed:
+          momsregistreres hos SKAT. Er du freelancer? Læs vores{" "}
+          <Link href="/blog/saadan-finder-du-din-timepris-som-freelancer" className="text-blue-600 hover:underline">guide til timepris</Link>{" "}
+          og brug <Link href="/timepris" className="text-blue-600 hover:underline">timepris-beregneren</Link>.
+          Som momsregistreret virksomhed:
         </p>
         <ul>
           <li>Opkræver du moms af dit salg (salgsmoms)</li>
           <li>Kan du trække moms fra på erhvervsmæssige indkøb (købsmoms)</li>
           <li>Afregner du forskellen med SKAT (typisk kvartalsvis)</li>
         </ul>
+
+        <h2>Moms vs. indkomstskat</h2>
+        <p>
+          Moms er ikke det samme som indkomstskat. Moms betales af forbrugeren på varer/ydelser, 
+          mens indkomstskat trækkes af din løn. Vil du se hvor meget du får udbetalt efter skat? 
+          Brug vores <Link href="/loen-efter-skat" className="text-blue-600 hover:underline">løn efter skat beregner</Link>.
+        </p>
 
         <h2>Hvad er momsfrit?</h2>
         <p>
