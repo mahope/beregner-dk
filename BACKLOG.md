@@ -48,7 +48,10 @@ Kvadratmeter, Timepris, Dato/tid
   - ✅ **LØST (2026-02-12):** App kører på Dokploy med status "done"
   - Domæne konfigureret: minberegner.dk (HTTPS + Let's Encrypt)
   - Site verificeret tilgængeligt: HTTP 200
-- [ ] SSL og performance check
+- [x] SSL og performance check
+  - ✅ **LØST (2026-02-13):** SSL verificeret (gyldig til maj 2026)
+  - Security headers tilføjet (HSTS, X-Frame-Options, X-Content-Type-Options, etc.)
+  - Performance OK: TTFB ~200ms, Next.js caching aktivt
 - [ ] Submit til Google Search Console
 
 ### AdSense Setup
