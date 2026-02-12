@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import DagpengeBeregner from "@/components/DagpengeBeregner";
-import { CalculatorSchema } from "@/components/StructuredData";
+import { CalculatorSchema, FAQSchema, BreadcrumbSchema } from "@/components/StructuredData";
 import { FAQ } from "@/components/FAQ";
 import { RelatedCalculators } from "@/components/RelatedCalculators";
+
+const baseUrl = "https://minberegner.dk";
 
 export const metadata: Metadata = {
   title: "Dagpengeberegner 2026 - Beregn dine dagpenge",
@@ -71,7 +73,15 @@ export default function DagpengePage() {
       <CalculatorSchema
         name="Dagpengeberegner 2026"
         description="Beregn hvad du kan få i dagpenge baseret på din tidligere løn"
-        url="https://minberegner.dk/dagpenge"
+        url={`${baseUrl}/dagpenge`}
+        category="FinanceApplication"
+      />
+      <FAQSchema items={faqItems} />
+      <BreadcrumbSchema
+        items={[
+          { name: "Forside", url: baseUrl },
+          { name: "Dagpengeberegner", url: `${baseUrl}/dagpenge` },
+        ]}
       />
 
       {/* Header */}

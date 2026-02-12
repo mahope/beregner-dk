@@ -1,11 +1,57 @@
 import type { Metadata } from "next";
 import BoliglaanBeregner from "@/components/BoliglaanBeregner";
+import FAQ from "@/components/FAQ";
+import RelatedCalculators from "@/components/RelatedCalculators";
 import {
   CalculatorSchema,
+  FAQSchema,
   BreadcrumbSchema,
 } from "@/components/StructuredData";
 
 const baseUrl = "https://minberegner.dk";
+
+const faqItems = [
+  {
+    question: "Hvor meget kan jeg låne til bolig?",
+    answer:
+      "Som hovedregel kan du låne op til 80% af boligens værdi i realkreditlån. Dertil kan du typisk låne 15% i banklån og skal selv have 5% i udbetaling. Din indkomst og gæld påvirker også, hvor meget banken vil låne dig.",
+  },
+  {
+    question: "Hvad er forskellen på fast og variabel rente?",
+    answer:
+      "Med fast rente kender du din ydelse i hele lånets løbetid - typisk 30 år. Med variabel rente (F-kort, F1, F3, F5) justeres renten løbende, ofte hver 1-5 år. Variabel rente er ofte lavere, men kan stige.",
+  },
+  {
+    question: "Hvad er bidragssatsen?",
+    answer:
+      "Bidragssatsen er det realkreditinstituttet tager for at administrere dit lån. Den varierer fra ca. 0,45% til 1,55% afhængigt af belåningsgrad, boligtype og om du har afdrag. Jo højere belåning, jo højere bidrag.",
+  },
+  {
+    question: "Kan jeg få fradrag for renter på boliglån?",
+    answer:
+      "Ja, renteudgifter er fradragsberettigede. I 2026 er fradragsværdien ca. 25,6% for de fleste. Det betyder, at for hver 100 kr du betaler i rente, får du ca. 25,6 kr tilbage via lavere skat.",
+  },
+  {
+    question: "Hvad er afdragsfrihed?",
+    answer:
+      "Med afdragsfrihed betaler du kun renter - ikke afdrag på selve lånet. Det giver lavere ydelse, men du skylder stadig det samme. Afdragsfrihed kan typisk bevilges i op til 10 år ad gangen.",
+  },
+  {
+    question: "Hvor lang løbetid skal jeg vælge?",
+    answer:
+      "De fleste vælger 30 år. Kortere løbetid betyder højere ydelse, men du betaler mindre i renter totalt. Med 20 år i stedet for 30 kan du spare 20-30% på de samlede renteomkostninger.",
+  },
+  {
+    question: "Hvad koster det at købe bolig udover lånet?",
+    answer:
+      "Udover selve boliglånet skal du betale tinglysningsafgift (ca. 1,45% + 1.850 kr), kursskæring på realkreditlån, advokat/mægler, og evt. stiftelsesomkostninger. Regn med ca. 3-5% af købesummen i omkostninger.",
+  },
+  {
+    question: "Skal jeg vælge realkredit eller banklån?",
+    answer:
+      "Realkreditlån har normalt lavere rente og er at foretrække. Banklån bruges typisk kun til de 15% over realkreditgrænsen (80%) og op til udbetalingen (95%). Banklån har højere rente men er mere fleksible.",
+  },
+];
 
 export const metadata: Metadata = {
   title: "Boliglånsberegner - Beregn din månedlige ydelse | Beregner.dk",
@@ -23,6 +69,7 @@ export default function BoliglaanPage() {
         url={`${baseUrl}/boliglaan`}
         category="FinanceApplication"
       />
+      <FAQSchema items={faqItems} />
       <BreadcrumbSchema
         items={[
           { name: "Forside", url: baseUrl },
@@ -154,6 +201,10 @@ export default function BoliglaanPage() {
           </p>
         </div>
       </div>
+
+      <FAQ items={faqItems} />
+
+      <RelatedCalculators current="/boliglaan" />
     </div>
   );
 }

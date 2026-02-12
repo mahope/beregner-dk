@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import BoligstoetteBeregner from "@/components/BoligstoetteBeregner";
-import { CalculatorSchema } from "@/components/StructuredData";
+import { CalculatorSchema, FAQSchema, BreadcrumbSchema } from "@/components/StructuredData";
 import { FAQ } from "@/components/FAQ";
 import { RelatedCalculators } from "@/components/RelatedCalculators";
+
+const baseUrl = "https://minberegner.dk";
 
 export const metadata: Metadata = {
   title: "Boligstøtte beregner 2026 - Beregn din boligstøtte",
@@ -71,7 +73,15 @@ export default function BoligstoettePage() {
       <CalculatorSchema
         name="Boligstøtte beregner 2026"
         description="Beregn hvor meget du kan få i boligstøtte baseret på husleje og indkomst"
-        url="https://minberegner.dk/boligstoette"
+        url={`${baseUrl}/boligstoette`}
+        category="FinanceApplication"
+      />
+      <FAQSchema items={faqItems} />
+      <BreadcrumbSchema
+        items={[
+          { name: "Forside", url: baseUrl },
+          { name: "Boligstøtte beregner", url: `${baseUrl}/boligstoette` },
+        ]}
       />
 
       {/* Header */}
