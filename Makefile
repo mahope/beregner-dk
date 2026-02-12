@@ -10,3 +10,6 @@ seo:
 	[ -x scripts/seo-check.sh ] && scripts/seo-check.sh || echo "No SEO script"
 links:
 	[ -x scripts/affiliate-validate.sh ] && scripts/affiliate-validate.sh || echo "No affiliate validator"
+
+lighthouse:
+	[ -x scripts/lighthouse.sh ] && scripts/lighthouse.sh || echo "No lighthouse script"
