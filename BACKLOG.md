@@ -18,8 +18,8 @@ Kvadratmeter, Timepris, Dato/tid
 ## In Progress / To Do
 
 ### Fix Build Issues (Prioritet 1)
-- [ ] Fix FAQ og RelatedCalculators exports (navngivne exports)
-- [ ] Verificer alle imports matcher eksisterende komponenter
+- [x] Fix FAQ og RelatedCalculators exports (navngivne exports) ✓ Already correct
+- [x] Verificer alle imports matcher eksisterende komponenter ✓ TypeScript passes
 - [ ] Kør fuld build og fix eventuelle fejl
 - [ ] Deploy og verificer alle sider virker
 
