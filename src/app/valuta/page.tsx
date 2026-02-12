@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import ValutaBeregner from "@/components/ValutaBeregner";
 import FAQ from "@/components/FAQ";
-import { FAQSchema } from "@/components/StructuredData";
+import {
+  CalculatorSchema,
+  FAQSchema,
+  BreadcrumbSchema,
+} from "@/components/StructuredData";
 import RelatedCalculators from "@/components/RelatedCalculators";
 
 const baseUrl = "https://minberegner.dk";
@@ -89,7 +93,19 @@ const relatedCalculators = [
 export default function ValutaPage() {
   return (
     <div className="max-w-4xl mx-auto">
+      <CalculatorSchema
+        name="Valutaberegner - Omregn valuta"
+        description="Gratis valutaberegner. Omregn mellem DKK, EUR, USD, GBP, SEK, NOK og mange flere valutaer."
+        url={`${baseUrl}/valuta`}
+        category="FinanceApplication"
+      />
       <FAQSchema items={faqItems} />
+      <BreadcrumbSchema
+        items={[
+          { name: "Forside", url: baseUrl },
+          { name: "Valutaberegner", url: `${baseUrl}/valuta` },
+        ]}
+      />
       
       {/* Header */}
       <div className="mb-8">

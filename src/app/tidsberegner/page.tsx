@@ -2,8 +2,13 @@ import type { Metadata } from "next";
 import TidsBeregner from "@/components/TidsBeregner";
 import { RelatedCalculators } from "@/components/RelatedCalculators";
 import FAQ from "@/components/FAQ";
+import {
+  CalculatorSchema,
+  FAQSchema,
+  BreadcrumbSchema,
+} from "@/components/StructuredData";
 
-const baseUrl = "https://minberegner.dk/tidsberegner";
+const baseUrl = "https://minberegner.dk";
 
 export const metadata: Metadata = {
   title: "Tidsberegner - Beregn timer og minutter mellem tidspunkter",
@@ -20,11 +25,11 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Tidsberegner - Timer og minutter mellem tidspunkter",
     description: "Beregn tid mellem to tidspunkter. Gratis og let at bruge.",
-    url: baseUrl,
+    url: `${baseUrl}/tidsberegner`,
     type: "website",
   },
   alternates: {
-    canonical: baseUrl,
+    canonical: `${baseUrl}/tidsberegner`,
   },
 };
 
@@ -72,6 +77,19 @@ const relatedCalculators = [
 export default function TidsberegnerPage() {
   return (
     <div className="max-w-4xl mx-auto">
+      <CalculatorSchema
+        name="Tidsberegner - Timer og minutter"
+        description="Gratis tidsberegner. Beregn antal timer og minutter mellem to tidspunkter."
+        url={`${baseUrl}/tidsberegner`}
+        category="UtilityApplication"
+      />
+      <FAQSchema items={faqItems} />
+      <BreadcrumbSchema
+        items={[
+          { name: "Forside", url: baseUrl },
+          { name: "Tidsberegner", url: `${baseUrl}/tidsberegner` },
+        ]}
+      />
       <h1 className="text-3xl md:text-4xl font-bold mb-4">
         ⏱️ Tidsberegner
       </h1>

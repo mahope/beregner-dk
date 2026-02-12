@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import MomsBeregner from "@/components/MomsBeregner";
 import FAQ from "@/components/FAQ";
-import { FAQSchema } from "@/components/StructuredData";
+import {
+  CalculatorSchema,
+  FAQSchema,
+  BreadcrumbSchema,
+} from "@/components/StructuredData";
 import RelatedCalculators from "@/components/RelatedCalculators";
 
 const baseUrl = "https://minberegner.dk";
@@ -89,7 +93,19 @@ const relatedCalculators = [
 export default function MomsPage() {
   return (
     <div className="max-w-4xl mx-auto">
+      <CalculatorSchema
+        name="Momsberegner - Beregn dansk moms"
+        description="Gratis momsberegner. Tillæg moms, fratræk moms eller find momsandelen i et beløb. Dansk moms 25%."
+        url={`${baseUrl}/moms`}
+        category="FinanceApplication"
+      />
       <FAQSchema items={faqItems} />
+      <BreadcrumbSchema
+        items={[
+          { name: "Forside", url: baseUrl },
+          { name: "Momsberegner", url: `${baseUrl}/moms` },
+        ]}
+      />
       
       {/* Header */}
       <div className="mb-8">

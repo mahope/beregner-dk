@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import BraendstofBeregner from "@/components/BraendstofBeregner";
 import FAQ from "@/components/FAQ";
-import { FAQSchema } from "@/components/StructuredData";
+import {
+  CalculatorSchema,
+  FAQSchema,
+  BreadcrumbSchema,
+} from "@/components/StructuredData";
 import RelatedCalculators from "@/components/RelatedCalculators";
 
 const baseUrl = "https://minberegner.dk";
@@ -88,7 +92,19 @@ const relatedCalculators = [
 export default function BraendstofPage() {
   return (
     <div className="max-w-4xl mx-auto">
+      <CalculatorSchema
+        name="Brændstofberegner - Benzin, diesel og el"
+        description="Gratis brændstofberegner. Beregn pris for benzin, diesel eller el-bil. Se hvad en tur koster og pris pr. km."
+        url={`${baseUrl}/braendstof`}
+        category="FinanceApplication"
+      />
       <FAQSchema items={faqItems} />
+      <BreadcrumbSchema
+        items={[
+          { name: "Forside", url: baseUrl },
+          { name: "Brændstofberegner", url: `${baseUrl}/braendstof` },
+        ]}
+      />
       
       {/* Header */}
       <div className="mb-8">

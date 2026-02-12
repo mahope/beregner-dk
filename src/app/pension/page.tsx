@@ -1,5 +1,14 @@
 import type { Metadata } from "next";
 import PensionBeregner from "@/components/PensionBeregner";
+import FAQ from "@/components/FAQ";
+import {
+  CalculatorSchema,
+  FAQSchema,
+  BreadcrumbSchema,
+} from "@/components/StructuredData";
+import RelatedCalculators from "@/components/RelatedCalculators";
+
+const baseUrl = "https://minberegner.dk";
 
 export const metadata: Metadata = {
   title: "Pensionsberegner - Beregn din fremtidige pension | Beregner.dk",
@@ -11,6 +20,18 @@ export const metadata: Metadata = {
 export default function PensionPage() {
   return (
     <div>
+      <CalculatorSchema
+        name="Pensionsberegner - Beregn din pension"
+        description="Gratis pensionsberegner. Beregn hvad du kan få udbetalt som pensionist baseret på din opsparing, afkast og folkepension."
+        url={`${baseUrl}/pension`}
+        category="FinanceApplication"
+      />
+      <BreadcrumbSchema
+        items={[
+          { name: "Forside", url: baseUrl },
+          { name: "Pensionsberegner", url: `${baseUrl}/pension` },
+        ]}
+      />
       <h1 className="text-3xl font-bold mb-2">Pensionsberegner</h1>
       <p className="text-gray-600 mb-8">
         Beregn hvad du kan forvente at få udbetalt som pensionist baseret på din opsparing og de forventede afkast.

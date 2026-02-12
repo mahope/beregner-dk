@@ -1,5 +1,11 @@
 import type { Metadata } from "next";
 import BoliglaanBeregner from "@/components/BoliglaanBeregner";
+import {
+  CalculatorSchema,
+  BreadcrumbSchema,
+} from "@/components/StructuredData";
+
+const baseUrl = "https://minberegner.dk";
 
 export const metadata: Metadata = {
   title: "Boliglånsberegner - Beregn din månedlige ydelse | Beregner.dk",
@@ -11,6 +17,18 @@ export const metadata: Metadata = {
 export default function BoliglaanPage() {
   return (
     <div>
+      <CalculatorSchema
+        name="Boliglånsberegner - Beregn din månedlige ydelse"
+        description="Gratis boliglånsberegner. Beregn månedlig ydelse, samlet pris og skattefradrag på dit boliglån."
+        url={`${baseUrl}/boliglaan`}
+        category="FinanceApplication"
+      />
+      <BreadcrumbSchema
+        items={[
+          { name: "Forside", url: baseUrl },
+          { name: "Boliglånsberegner", url: `${baseUrl}/boliglaan` },
+        ]}
+      />
       <h1 className="text-3xl font-bold mb-2">Boliglånsberegner</h1>
       <p className="text-gray-600 mb-8">
         Beregn hvad dit boliglån vil koste om måneden, og se hvor meget du betaler i alt over lånets løbetid.

@@ -1,5 +1,11 @@
 import type { Metadata } from "next";
 import BilBeregner from "@/components/BilBeregner";
+import {
+  CalculatorSchema,
+  BreadcrumbSchema,
+} from "@/components/StructuredData";
+
+const baseUrl = "https://minberegner.dk";
 
 export const metadata: Metadata = {
   title: "Bilomkostningsberegner - Se hvad din bil koster | Beregner.dk",
@@ -11,6 +17,18 @@ export const metadata: Metadata = {
 export default function BilPage() {
   return (
     <div>
+      <CalculatorSchema
+        name="Bilomkostningsberegner - Se hvad din bil koster"
+        description="Gratis bilberegner. Beregn de reelle omkostninger ved at eje bil: brændstof, forsikring, værditab, afgifter og service."
+        url={`${baseUrl}/bil`}
+        category="FinanceApplication"
+      />
+      <BreadcrumbSchema
+        items={[
+          { name: "Forside", url: baseUrl },
+          { name: "Bilomkostningsberegner", url: `${baseUrl}/bil` },
+        ]}
+      />
       <h1 className="text-3xl font-bold mb-2">Bilomkostningsberegner</h1>
       <p className="text-gray-600 mb-8">
         Beregn hvad det reelt koster at eje og køre bil. Inkluderer brændstof, forsikring, værditab, afgifter og service.

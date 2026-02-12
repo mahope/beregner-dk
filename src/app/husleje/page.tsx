@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import HuslejeBudgetBeregner from "@/components/HuslejeBudgetBeregner";
 import FAQ from "@/components/FAQ";
-import { FAQSchema } from "@/components/StructuredData";
+import {
+  CalculatorSchema,
+  FAQSchema,
+  BreadcrumbSchema,
+} from "@/components/StructuredData";
 import RelatedCalculators from "@/components/RelatedCalculators";
 
 const baseUrl = "https://minberegner.dk";
@@ -87,7 +91,19 @@ const relatedCalculators = [
 export default function HuslejePage() {
   return (
     <div className="max-w-4xl mx-auto">
+      <CalculatorSchema
+        name="Husleje Budget Beregner - Hvad har du råd til?"
+        description="Gratis husleje beregner. Find ud af hvor meget du kan bruge på husleje baseret på din indkomst og udgifter."
+        url={`${baseUrl}/husleje`}
+        category="FinanceApplication"
+      />
       <FAQSchema items={faqItems} />
+      <BreadcrumbSchema
+        items={[
+          { name: "Forside", url: baseUrl },
+          { name: "Husleje Budget", url: `${baseUrl}/husleje` },
+        ]}
+      />
       
       {/* Header */}
       <div className="mb-8">

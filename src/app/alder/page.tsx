@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import AlderBeregner from "@/components/AlderBeregner";
 import FAQ from "@/components/FAQ";
-import { FAQSchema } from "@/components/StructuredData";
+import {
+  CalculatorSchema,
+  FAQSchema,
+  BreadcrumbSchema,
+} from "@/components/StructuredData";
 import RelatedCalculators from "@/components/RelatedCalculators";
 
 const baseUrl = "https://minberegner.dk";
@@ -88,7 +92,19 @@ const relatedCalculators = [
 export default function AlderPage() {
   return (
     <div className="max-w-4xl mx-auto">
+      <CalculatorSchema
+        name="Aldersberegner - Beregn din præcise alder"
+        description="Gratis aldersberegner. Beregn din præcise alder i år, måneder, uger, dage og timer."
+        url={`${baseUrl}/alder`}
+        category="UtilityApplication"
+      />
       <FAQSchema items={faqItems} />
+      <BreadcrumbSchema
+        items={[
+          { name: "Forside", url: baseUrl },
+          { name: "Aldersberegner", url: `${baseUrl}/alder` },
+        ]}
+      />
       
       {/* Header */}
       <div className="mb-8">

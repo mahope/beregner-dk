@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import TidszoneBeregner from "@/components/TidszoneBeregner";
 import FAQ from "@/components/FAQ";
-import { FAQSchema } from "@/components/StructuredData";
+import {
+  CalculatorSchema,
+  FAQSchema,
+  BreadcrumbSchema,
+} from "@/components/StructuredData";
 import RelatedCalculators from "@/components/RelatedCalculators";
 
 const baseUrl = "https://minberegner.dk";
@@ -87,7 +91,19 @@ const relatedCalculators = [
 export default function TidszonePage() {
   return (
     <div className="max-w-4xl mx-auto">
+      <CalculatorSchema
+        name="Tidszoneberegner - Omregn tid"
+        description="Gratis tidszoneberegner. Se hvad klokken er i andre lande og omregn tidspunkter mellem tidszoner."
+        url={`${baseUrl}/tidszone`}
+        category="UtilityApplication"
+      />
       <FAQSchema items={faqItems} />
+      <BreadcrumbSchema
+        items={[
+          { name: "Forside", url: baseUrl },
+          { name: "Tidszoneberegner", url: `${baseUrl}/tidszone` },
+        ]}
+      />
       
       {/* Header */}
       <div className="mb-8">

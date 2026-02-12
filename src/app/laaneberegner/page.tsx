@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import LaaneBeregner from "@/components/LaaneBeregner";
 import FAQ from "@/components/FAQ";
-import { FAQSchema } from "@/components/StructuredData";
+import {
+  CalculatorSchema,
+  FAQSchema,
+  BreadcrumbSchema,
+} from "@/components/StructuredData";
 import RelatedCalculators from "@/components/RelatedCalculators";
 
 const baseUrl = "https://minberegner.dk";
@@ -88,7 +92,19 @@ const relatedCalculators = [
 export default function LaaneberegnerPage() {
   return (
     <div className="max-w-4xl mx-auto">
+      <CalculatorSchema
+        name="Låneberegner - Beregn lån og ydelse"
+        description="Gratis låneberegner. Beregn månedlig ydelse, samlede renter og sammenlign forskellige lån."
+        url={`${baseUrl}/laaneberegner`}
+        category="FinanceApplication"
+      />
       <FAQSchema items={faqItems} />
+      <BreadcrumbSchema
+        items={[
+          { name: "Forside", url: baseUrl },
+          { name: "Låneberegner", url: `${baseUrl}/laaneberegner` },
+        ]}
+      />
       
       {/* Header */}
       <div className="mb-8">
