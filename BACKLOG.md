@@ -61,7 +61,7 @@ Kvadratmeter, Timepris, Dato/tid
 - [x] JSON-LD Calculator schema på alle beregnere
 - [x] FAQ schema på populære sider (løn, dagpenge, moms, bmi, boliglån, boligstøtte m.fl.)
 - [x] Forbedre meta descriptions (inkluder tal/eksempler)
-- [ ] Internal linking: hver beregner → 5 relaterede
+- [x] Internal linking: hver beregner → 5 relaterede
 - [ ] Blog posts linker til relevante beregnere
 
 ### Analytics
