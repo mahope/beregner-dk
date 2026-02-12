@@ -58,7 +58,7 @@ Kvadratmeter, Timepris, Dato/tid
 - [ ] Respekter UX: max 3 ads per side
 
 ### SEO Improvements
-- [ ] JSON-LD Calculator schema på alle beregnere
+- [x] JSON-LD Calculator schema på alle beregnere
 - [ ] FAQ schema på populære sider
 - [ ] Forbedre meta descriptions (inkluder tal/eksempler)
 - [ ] Internal linking: hver beregner → 5 relaterede
