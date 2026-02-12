@@ -12,7 +12,7 @@
 - [x] Backlinks: 20 outreach targets (offentlige/uddannelsessider med ressource-lister) — done: 2026-02-12 17:30
 
 ## New Features (2026-02-12)
-- [ ] Nye beregnere: Boligstoette, Barselsdagpenge, SU, Efterloen, Rentefradrag
+- [x] Nye beregnere: Boligstoette, Barselsdagpenge, SU, Efterloen, Rentefradrag — completed 2026-02-12 19:30 CET (Barselsdagpenge, Efterløn, Rentefradrag added; Boligstøtte+SU existed)
 - [ ] Gem og del beregning (URL state + shortlink)
 - [ ] Sammenligningsvaerktoj (scenarier side-om-side)
 - [ ] PDF/print-eksport af beregningsresultater
