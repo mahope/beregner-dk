@@ -31,6 +31,9 @@ Kvadratmeter, Timepris, Dato/tid
 ### Build & Deploy
 - [x] Kør fuld production build og fix alle fejl
 - [ ] Deploy til Dokploy og verificer alle sider
+  - ⚠️ **BLOCKER:** Alle deploys fejler på ~2 sek. Tjek GitHub-integration i Dokploy UI
+  - App: app_beregner_001, status: error, ingen domæne konfigureret
+  - Logs: `/etc/dokploy/logs/beregner-dk-web/`
 - [ ] SSL og performance check
 - [ ] Submit til Google Search Console
 
