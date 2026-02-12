@@ -1,0 +1,13 @@
+# Lychee configuration
+max_redirects = 5
+# Ignore localhost/dev servers
+exclude = [
+  "http://localhost:*",
+  "https://localhost:*",
+  "http://127.0.0.1:*",
+  "https://127.0.0.1:*"
+]
+# Accept some flaky hosts without failing CI
+accept = [200, 206, 429]
+# Don't fail the build (report-only mode); set to true later
+fail = false

@@ -1,0 +1,30 @@
+name: Link Check
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+  schedule:
+    - cron: '30 3 * * 1' # Weekly Monday 03:30 UTC
+jobs:
+  lychee:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Link check (Markdown + MDX)
+        uses: lycheeverse/lychee-action@v1.11.0
+        with:
+          args: >-
+            --config .lychee.toml
+            --accept 200,206,429
+            --max-redirects 5
+            --verbose
+            --no-progress
+            "**/*.md" "**/*.mdx"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload lychee report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lychee-report
+          path: .lychee/**
