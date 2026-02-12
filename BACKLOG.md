@@ -1,6 +1,6 @@
 # Beregner.dk — Backlog (v1)
 
-- [ ] Sitemap: kortlæg 20 værktøjer (løn, skat, BMI, promille, feriepenge, dagpenge, etc.)
+- [x] - [ ] Sitemap: kortlæg 20 værktøjer (løn, skat, BMI, promille, feriepenge, dagpenge, etc.) — completed 2026-02-12 14:15
 - [ ] Komponentbibliotek: UI-kit for beregnere (Next/TS) m. input validators + i18n
 - [ ] SEO skabelon: Title/Desc/Schema for hver beregner + interne linkmoduler
 - [ ] 1-Click deploy: Dokploy pipeline + preview builds
