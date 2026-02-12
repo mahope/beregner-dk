@@ -2,7 +2,7 @@
 
 - [x] - [ ] Sitemap: kortlæg 20 værktøjer (løn, skat, BMI, promille, feriepenge, dagpenge, etc.) — completed 2026-02-12 14:15
 - [x] Komponentbibliotek: UI-kit for beregnere (Next/TS) m. input validators + i18n (done: 2026-02-12 14:32)
-- [ ] SEO skabelon: Title/Desc/Schema for hver beregner + interne linkmoduler
+- [x] SEO skabelon — completed 2026-02-12 14:45: Title/Desc/Schema for hver beregner + interne linkmoduler
 - [ ] 1-Click deploy: Dokploy pipeline + preview builds
 - [ ] Performance: lighthouse 95+ (SSR, code-splitting)
 - [ ] Tracking: event goals pr. beregner (beregn, kopier resultat, deling)
