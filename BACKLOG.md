@@ -5,7 +5,7 @@
 - [x] SEO skabelon — completed 2026-02-12 14:45: Title/Desc/Schema for hver beregner + interne linkmoduler
 - [x] (2026-02-12 15:22 CET) 1-Click deploy: Dokploy pipeline + preview builds
 - [x] Performance: lighthouse 95+ (SSR, code-splitting) — completed 2026-02-12 15:40 CET: next.config perf flags + docs + lighthouse script
-- [ ] Tracking: event goals pr. beregner (beregn, kopier resultat, deling)
+- [x] 2026-02-12T15:19:14Z Tracking: event goals pr. beregner (beregn, kopier resultat, deling)
 - [ ] Content: 10 how-to guides pr. cluster (fx “Sådan beregner du løn efter skat”)
 - [ ] Monetisering: AdSense + affiliate på relevante outputs
 - [ ] Lokaliseringsplan: .dk først, udvid .no/.se hvis traction
