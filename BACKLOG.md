@@ -44,10 +44,10 @@ Kvadratmeter, Timepris, Dato/tid
 
 ### Build & Deploy
 - [x] Kør fuld production build og fix alle fejl
-- [ ] Deploy til Dokploy og verificer alle sider
-  - ⚠️ **BLOCKER:** Alle deploys fejler på ~2 sek. Tjek GitHub-integration i Dokploy UI
-  - App: app_beregner_001, status: error, ingen domæne konfigureret
-  - Logs: `/etc/dokploy/logs/beregner-dk-web/`
+- [x] Deploy til Dokploy og verificer alle sider
+  - ✅ **LØST (2026-02-12):** App kører på Dokploy med status "done"
+  - Domæne konfigureret: minberegner.dk (HTTPS + Let's Encrypt)
+  - Site verificeret tilgængeligt: HTTP 200
 - [ ] SSL og performance check
 - [ ] Submit til Google Search Console
 
