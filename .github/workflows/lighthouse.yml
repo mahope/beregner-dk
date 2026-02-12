@@ -1,0 +1,31 @@
+name: Lighthouse (PR)
+on:
+  pull_request:
+    branches: [ master, main ]
+jobs:
+  lhci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install deps
+        run: npm ci
+      - name: Build
+        run: npm run build --if-present
+      - name: Start server
+        run: next start & echo $! > .lhci.pid
+      - name: Wait for server
+        run: |
+          for i in {1..60}; do curl -fsS http://localhost:3000 && exit 0 || sleep 2; done; exit 1
+      - name: Run Lighthouse
+        uses: treosh/lighthouse-ci-action@v12
+        with:
+          urls: |
+            http://localhost:3000/
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+      - name: Stop server
+        if: always()
+        run: kill $(cat .lhci.pid) || true
