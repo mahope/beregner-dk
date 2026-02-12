@@ -1,53 +1,123 @@
-# Minberegner.dk — Backlog
+# Minberegner.dk (Beregner.dk brand) — Backlog
 
-## Completed
+> **Produkt:** Gratis online beregnere til danskere
+> **Revenue model:** Ads (AdSense), Affiliate (finans, forsikring)
+> **Target:** Danskere der søger på "beregn X", "X beregner"
+
+---
+
+## ✅ Completed
+
+### Core Site
 - [x] 25+ beregnere implementeret og live
 - [x] Blog med how-to guides
 - [x] SEO skabelon (src/lib/seo.ts)
 - [x] InternalLinks component
-- [x] Cookie consent
+- [x] Cookie consent + GDPR
 - [x] Responsive design
-- [x] Sitemap
+- [x] Sitemap generering
+- [x] FAQ og RelatedCalculators exports fixed
 
-## Eksisterende Beregnere
+### Eksisterende Beregnere
 Løn efter skat, Dagpenge, Moms, BMI, Procent, Boliglån, Husleje, Boligstøtte, 
 Rente, Pension, SU, Efterløn, Barselsdagpenge, Børnepenge, Rentefradrag, 
 Feriepenge, Valuta, Tidszone, Alder, Opsparing, Bil/brændstof, Kalorier, 
 Kvadratmeter, Timepris, Dato/tid
 
-## In Progress / To Do
+---
 
-### Fix Build Issues (Prioritet 1)
-- [x] Fix FAQ og RelatedCalculators exports (navngivne exports) ✓ Already correct
-- [x] Verificer alle imports matcher eksisterende komponenter ✓ TypeScript passes
-- [ ] Kør fuld build og fix eventuelle fejl
-- [ ] Deploy og verificer alle sider virker
+## 🚀 Phase 1: SEO & Ads Revenue (Prioritet 1)
 
-### SEO & Content (Prioritet 2)
-- [ ] Tilføj JSON-LD schema til hver beregner (Calculator type)
-- [ ] Skriv 3 flere how-to blog posts
-- [ ] Forbedre meta descriptions på alle sider
-- [ ] Tilføj FAQ sektion til populære beregnere
+### Build & Deploy
+- [ ] Kør fuld production build og fix alle fejl
+- [ ] Deploy til Dokploy og verificer alle sider
+- [ ] SSL og performance check
+- [ ] Submit til Google Search Console
 
-### Gem & Del (Prioritet 3)
-- [ ] Implementer URL state for beregninger (src/lib/calculation-state.ts exists)
-- [ ] Tilføj "Kopier link" knap
-- [ ] Social share buttons (FB, Twitter, LinkedIn)
-- [ ] QR kode generator for deling
+### AdSense Setup
+- [ ] Ansøg om AdSense godkendelse
+- [ ] Placer ads: sidebar, mellem sektioner, footer
+- [ ] A/B test ad placering (over vs under beregner)
+- [ ] Respekter UX: max 3 ads per side
 
-### UX Forbedringer
-- [ ] Dark mode toggle (system preference default)
-- [ ] Keyboard navigation forbedringer
-- [ ] Print-venligt layout for resultater
-- [ ] Loading states på tunge beregninger
+### SEO Improvements
+- [ ] JSON-LD Calculator schema på alle beregnere
+- [ ] FAQ schema på populære sider
+- [ ] Forbedre meta descriptions (inkluder tal/eksempler)
+- [ ] Internal linking: hver beregner → 5 relaterede
+- [ ] Blog posts linker til relevante beregnere
 
 ### Analytics
 - [ ] Implementer Plausible (analytics.holstjensen.eu)
-- [ ] Event tracking: beregning_udført, resultat_kopieret, delt
-- [ ] A/B test forskellige CTA placeringer
+- [ ] Events: beregning_udført, resultat_kopieret, ad_clicked
+- [ ] Goal: beregninger per bruger
+- [ ] Search Console: track keyword rankings
 
-### Nye Beregnere (Lower Priority)
-- [ ] Elafgift beregner (allerede delvist: Elberegner.tsx)
+---
+
+## 📈 Phase 2: Engagement & Affiliate (Prioritet 2)
+
+### Gem & Del Feature
+- [ ] URL state encoding for beregninger (share link)
+- [ ] "Kopier link" knap på alle beregnere
+- [ ] Social share buttons (Facebook, LinkedIn)
+- [ ] QR kode for print/deling
+
+### Affiliate Integration
+- [ ] Boliglån beregner → boliglån affiliate (Mybanker, etc.)
+- [ ] Forsikring relaterede → forsikring sammenligning
+- [ ] Opsparing beregner → investeringsplatforme
+- [ ] Implementer disclosure ("annonce" labels)
+
+### Content Expansion
+- [ ] 5 nye blog posts:
+  - "Sådan beregner du din reelle timeløn"
+  - "Guide: Feriepenge - hvornår og hvor meget"
+  - "BMI for børn - sådan tjekker du"
+  - "Boligstøtte 2026 - nye regler"
+  - "Pension: Hvor meget skal du spare op?"
+- [ ] Hver post: 1000+ ord, FAQ sektion, relaterede beregnere
+
+### UX Forbedringer
+- [ ] Dark mode (system preference default)
+- [ ] Keyboard navigation (tab through inputs)
+- [ ] Print-venligt resultat layout
+- [ ] Loading states på tunge beregninger
+- [ ] Input validation med venlige fejlbeskeder
+
+---
+
+## 🔧 Phase 3: Nye Beregnere & Scale (Prioritet 3)
+
+### Høj-værdi Beregnere (affiliate potential)
+- [ ] Billån beregner (→ billån affiliate)
+- [ ] Forbrugslån beregner (→ lån sammenligning)
+- [ ] Ejendomsværdiskat beregner
 - [ ] Arveafgift beregner
-- [ ] Aktieskat beregner
-- [ ] Crypto skat beregner
+- [ ] Aktieskat / crypto skat beregner
+
+### Niche Beregnere
+- [ ] Elafgift beregner (udvid eksisterende)
+- [ ] Varmecheck beregner
+- [ ] CO2 udledning beregner
+- [ ] Madbudget beregner
+- [ ] Bryllup budget beregner
+
+### Technical
+- [ ] API for beregnere (monetize B2B)
+- [ ] Widget embed kode (gratis, med backlink)
+- [ ] Mobile app (React Native wrapper)
+
+### Internationalisering
+- [ ] Norsk version (minberegner.no)
+- [ ] Svensk version (minberegner.se)
+- [ ] Lokaliser skatteregler per land
+
+---
+
+## 📝 Notes
+
+**Tech stack:** Next.js 15, TypeScript, Tailwind
+**Hosting:** Dokploy
+**Mål:** 50.000 månedlige besøgende inden Q4 2026
+**AdSense krav:** God UX, unik content, policy compliance
