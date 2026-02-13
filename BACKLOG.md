@@ -168,7 +168,12 @@ Kvadratmeter, Timepris, Dato/tid
   - Tre modes: System (auto), Lys, Mørk — cykler via knap i header
   - Persisterer i localStorage, respekterer system preference
   - Alle core komponenter opdateret (layout, forside, header, mobile menu, cookie consent, BMI beregner)
-- [ ] Keyboard navigation (tab through inputs)
+- [x] Keyboard navigation (tab through inputs)
+  - ✅ **LØST (2026-02-13):** SkipLink, ModeSelector, fokus-trapping implementeret
+  - Skip-link: Keyboard-brugere kan springe direkte til hovedindhold
+  - ModeSelector: Arrow keys til at navigere mellem modes (radiogroup pattern)
+  - ShareCalculation: Escape lukker modal, fokus fanges i modal
+  - ARIA labels på input-felter
 - [ ] Print-venligt resultat layout
 - [ ] Loading states på tunge beregninger
 - [ ] Input validation med venlige fejlbeskeder
