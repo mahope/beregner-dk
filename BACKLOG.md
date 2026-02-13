@@ -116,9 +116,16 @@ Kvadratmeter, Timepris, Dato/tid
   - Tydelig "Annonce" label per dansk markedsføringslov
   - Vises efter beregningsresultat for højest konvertering
   - Dark mode support + proper disclosure footer
-- [ ] Forsikring relaterede → forsikring sammenligning
-- [ ] Opsparing beregner → investeringsplatforme
-- [ ] Implementer disclosure ("annonce" labels)
+- [x] Forsikring relaterede → forsikring sammenligning
+  - ✅ **LØST (2026-02-13):** BilforsikringAffiliate komponent i BilBeregner
+  - 4 partnere: Samlino, Alm. Brand, Topdanmark, Tryg
+  - Synlig under tips-sektionen på /bilberegner
+- [x] Opsparing beregner → investeringsplatforme
+  - ✅ **LØST (2026-02-13):** OpsparingAffiliate komponent i OpsparingsBeregner
+  - 3 partnere: Nordnet, Saxo Bank, Lunar
+  - Synlig efter beregningsresultat på /opsparing
+- [x] Implementer disclosure ("annonce" labels)
+  - ✅ **LØST (2026-02-13):** Alle affiliate boxes har "Annonce" label + disclosure footer
 
 ### Content Expansion
 - [ ] 5 nye blog posts:
