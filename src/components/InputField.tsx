@@ -14,6 +14,9 @@ interface InputFieldProps {
   unit?: string;
   className?: string;
   inline?: boolean;
+  placeholder?: string;
+  helpText?: string;
+  customValidation?: (value: number, rawValue: string) => string | null;
 }
 
 function getErrorMessage(
@@ -21,7 +24,8 @@ function getErrorMessage(
   rawValue: string,
   required?: boolean,
   min?: number,
-  max?: number
+  max?: number,
+  customValidation?: (value: number, rawValue: string) => string | null
 ): string | null {
   if (required && rawValue.trim() === "") {
     return "Indtast venligst en værdi";
@@ -29,12 +33,16 @@ function getErrorMessage(
 
   if (rawValue.trim() === "") return null;
 
+  if (rawValue.trim() !== "" && isNaN(Number(rawValue))) {
+    return "Indtast venligst et gyldigt tal";
+  }
+
   if (min !== undefined && min >= 0 && value < 0) {
     return "Værdien kan ikke være negativ";
   }
 
   if (min !== undefined && max !== undefined && value < min) {
-    return `Indtast en værdi mellem ${min} og ${max}`;
+    return `Indtast et tal mellem ${min} og ${max}`;
   }
 
   if (min !== undefined && max === undefined && value < min) {
@@ -46,7 +54,11 @@ function getErrorMessage(
   }
 
   if (max !== undefined && min !== undefined && value > max) {
-    return `Indtast en værdi mellem ${min} og ${max}`;
+    return `Indtast et tal mellem ${min} og ${max}`;
+  }
+
+  if (customValidation) {
+    return customValidation(value, rawValue);
   }
 
   return null;
@@ -64,11 +76,16 @@ export function InputField({
   unit,
   className,
   inline,
+  placeholder,
+  helpText,
+  customValidation,
 }: InputFieldProps) {
   const [touched, setTouched] = useState(false);
   const [rawValue, setRawValue] = useState(String(value));
   const [isFocused, setIsFocused] = useState(false);
   const id = useId();
+  const errorId = `${id}-error`;
+  const helpId = `${id}-help`;
 
   // Sync rawValue with external value changes (e.g. URL state loading)
   useEffect(() => {
@@ -77,7 +94,8 @@ export function InputField({
     }
   }, [value, isFocused]);
 
-  const error = touched ? getErrorMessage(value, rawValue, required, min, max) : null;
+  const error = touched ? getErrorMessage(value, rawValue, required, min, max, customValidation) : null;
+  const isValid = touched && !error && rawValue.trim() !== "";
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -98,6 +116,17 @@ export function InputField({
     setTouched(true);
   }, []);
 
+  const borderClass = error
+    ? "border-red-400 dark:border-red-500 focus:ring-red-300 dark:focus:ring-red-600"
+    : isValid
+      ? "border-green-400 dark:border-green-500 focus:ring-green-300 dark:focus:ring-green-600"
+      : "border-gray-300 dark:border-gray-600 focus:ring-blue-300 dark:focus:ring-blue-600";
+
+  const describedBy = [
+    error ? errorId : null,
+    helpText ? helpId : null,
+  ].filter(Boolean).join(" ") || undefined;
+
   if (inline) {
     return (
       <div className="inline-flex flex-col">
@@ -111,16 +140,14 @@ export function InputField({
           min={min}
           max={max}
           step={step}
+          placeholder={placeholder}
           aria-label={ariaLabel || label}
           aria-invalid={!!error}
-          className={`px-4 py-3 border rounded-lg text-center text-xl bg-white dark:bg-gray-700 dark:text-gray-100 ${
-            error
-              ? "border-red-400 dark:border-red-500"
-              : "dark:border-gray-600"
-          } ${className || "w-28"}`}
+          aria-describedby={describedBy}
+          className={`px-4 py-3 border rounded-lg text-center text-xl bg-white dark:bg-gray-700 dark:text-gray-100 focus:outline-none focus:ring-2 transition-colors ${borderClass} ${className || "w-28"}`}
         />
         {error && (
-          <span className="text-red-500 dark:text-red-400 text-xs mt-1 max-w-28">
+          <span id={errorId} role="alert" className="text-red-500 dark:text-red-400 text-xs mt-1 max-w-28">
             {error}
           </span>
         )}
@@ -146,13 +173,11 @@ export function InputField({
           min={min}
           max={max}
           step={step}
+          placeholder={placeholder}
           aria-label={ariaLabel || label}
           aria-invalid={!!error}
-          className={`w-full px-4 py-3 border rounded-lg text-lg bg-white dark:bg-gray-800 dark:text-white ${
-            error
-              ? "border-red-400 dark:border-red-500"
-              : "dark:border-gray-600"
-          } ${unit ? "pr-12" : ""} ${className || ""}`}
+          aria-describedby={describedBy}
+          className={`w-full px-4 py-3 border rounded-lg text-lg bg-white dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-2 transition-colors ${borderClass} ${unit ? "pr-12" : ""} ${className || ""}`}
         />
         {unit && (
           <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">
@@ -161,7 +186,10 @@ export function InputField({
         )}
       </div>
       {error && (
-        <p className="text-red-500 dark:text-red-400 text-xs mt-1">{error}</p>
+        <p id={errorId} role="alert" className="text-red-500 dark:text-red-400 text-xs mt-1">{error}</p>
+      )}
+      {helpText && !error && (
+        <p id={helpId} className="text-xs text-gray-500 dark:text-gray-400 mt-1">{helpText}</p>
       )}
     </div>
   );

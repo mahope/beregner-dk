@@ -185,7 +185,14 @@ Kvadratmeter, Timepris, Dato/tid
   - useCalculationLoading hook med 150ms debounce
   - Implementeret i 4 beregnere: Boliglån, Pension, Opsparing, Dagpenge
   - Dark mode support inkluderet
-- [ ] Input validation med venlige fejlbeskeder
+- [x] Input validation med venlige fejlbeskeder
+  - ✅ **LØST (2026-02-13):** InputField komponent udvidet med validering
+  - Min/max validering, required, custom validation funktion
+  - Venlige danske fejlbeskeder (fx 'Indtast et tal mellem 0 og 100')
+  - Visuel feedback: rød border ved fejl, grøn ved valid, focus ring
+  - ARIA: aria-invalid, aria-describedby, role="alert" på fejlbeskeder
+  - Implementeret i BMIBeregner, LoenBeregner, ProcentBeregner
+  - Dark mode support + helpText prop til kontekstuelle hints
 
 ---
 

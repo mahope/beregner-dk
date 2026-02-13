@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { trackCalculation } from "@/lib/analytics";
 import { ShareCalculation } from "@/components/ShareCalculation";
 import { PrintResult } from "@/components/PrintResult";
+import { InputField } from "@/components/InputField";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { ModeSelector, ModeOption } from "@/components/ModeSelector";
 
@@ -18,19 +19,19 @@ const MODES: ModeOption<BeregningsMode>[] = [
 
 export default function ProcentBeregner() {
   const [mode, setMode] = useState<BeregningsMode>("find-procent");
-  
+
   // Find procent mode
   const [deltal, setDeltal] = useState<number>(25);
   const [heltal, setHeltal] = useState<number>(100);
-  
+
   // Find resultat mode
   const [procent, setProcent] = useState<number>(25);
   const [baseVal, setBaseVal] = useState<number>(200);
-  
+
   // Stigning mode
   const [fra, setFra] = useState<number>(100);
   const [til, setTil] = useState<number>(125);
-  
+
   const hasTracked = useRef(false);
   const hasLoadedUrl = useRef(false);
 
@@ -38,7 +39,7 @@ export default function ProcentBeregner() {
   useEffect(() => {
     if (hasLoadedUrl.current) return;
     hasLoadedUrl.current = true;
-    
+
     const urlState = getStateFromUrl();
     if (urlState && urlState.type === 'procent') {
       const inputs = urlState.inputs;
@@ -62,6 +63,11 @@ export default function ProcentBeregner() {
     return generateShareableLink(state);
   }, [mode, deltal, heltal, procent, baseVal, fra, til]);
 
+  const validateNotZero = useCallback((value: number) => {
+    if (value === 0) return "Værdien kan ikke være nul";
+    return null;
+  }, []);
+
   const resultat = useMemo(() => {
     switch (mode) {
       case "find-procent":
@@ -72,7 +78,7 @@ export default function ProcentBeregner() {
           resultat: procentAfHeltal,
           forklaring: `${deltal} er ${procentAfHeltal.toFixed(2)}% af ${heltal}`,
         };
-      
+
       case "find-resultat":
         const resultatVaerdi = (procent / 100) * baseVal;
         return {
@@ -80,7 +86,7 @@ export default function ProcentBeregner() {
           resultat: resultatVaerdi,
           forklaring: `${procent}% af ${baseVal} er ${resultatVaerdi.toFixed(2)}`,
         };
-      
+
       case "find-heltal":
         if (procent === 0) return null;
         const heltalVaerdi = (deltal / procent) * 100;
@@ -89,7 +95,7 @@ export default function ProcentBeregner() {
           resultat: heltalVaerdi,
           forklaring: `Hvis ${deltal} er ${procent}%, så er 100% = ${heltalVaerdi.toFixed(2)}`,
         };
-      
+
       case "stigning":
         if (fra === 0) return null;
         const aendring = til - fra;
@@ -102,7 +108,7 @@ export default function ProcentBeregner() {
           erStigning,
           forklaring: `${erStigning ? "Stigning" : "Fald"} fra ${fra} til ${til} er ${Math.abs(procentAendring).toFixed(2)}%`,
         };
-      
+
       default:
         return null;
     }
@@ -134,42 +140,41 @@ export default function ProcentBeregner() {
       <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-6">
         {mode === "find-procent" && (
           <div className="flex flex-wrap items-center gap-4 text-lg">
-            <input
-              type="number"
+            <InputField
               value={deltal}
-              onChange={(e) => setDeltal(parseFloat(e.target.value) || 0)}
-              aria-label="Del-tal (tælleren)"
-              className="w-28 px-4 py-3 border dark:border-gray-600 rounded-lg text-center text-xl bg-white dark:bg-gray-700 dark:text-gray-100"
+              onChange={setDeltal}
+              ariaLabel="Del-tal (tælleren)"
+              inline
             />
             <span className="text-gray-600 dark:text-gray-400">er</span>
             <span className="text-2xl font-bold text-blue-600 dark:text-blue-400" aria-label="Resultat procent">?%</span>
             <span className="text-gray-600 dark:text-gray-400">af</span>
-            <input
-              type="number"
+            <InputField
               value={heltal}
-              onChange={(e) => setHeltal(parseFloat(e.target.value) || 0)}
-              aria-label="Heltal (nævneren)"
-              className="w-28 px-4 py-3 border dark:border-gray-600 rounded-lg text-center text-xl bg-white dark:bg-gray-700 dark:text-gray-100"
+              onChange={setHeltal}
+              ariaLabel="Heltal (nævneren)"
+              inline
+              customValidation={validateNotZero}
             />
           </div>
         )}
 
         {mode === "find-resultat" && (
           <div className="flex flex-wrap items-center gap-4 text-lg">
-            <input
-              type="number"
+            <InputField
               value={procent}
-              onChange={(e) => setProcent(parseFloat(e.target.value) || 0)}
-              aria-label="Procent"
-              className="w-28 px-4 py-3 border dark:border-gray-600 rounded-lg text-center text-xl bg-white dark:bg-gray-700 dark:text-gray-100"
+              onChange={setProcent}
+              ariaLabel="Procent"
+              min={0}
+              max={1000}
+              inline
             />
             <span className="text-gray-600 dark:text-gray-400">% af</span>
-            <input
-              type="number"
+            <InputField
               value={baseVal}
-              onChange={(e) => setBaseVal(parseFloat(e.target.value) || 0)}
-              aria-label="Grundværdi"
-              className="w-28 px-4 py-3 border dark:border-gray-600 rounded-lg text-center text-xl bg-white dark:bg-gray-700 dark:text-gray-100"
+              onChange={setBaseVal}
+              ariaLabel="Grundværdi"
+              inline
             />
             <span className="text-gray-600 dark:text-gray-400">=</span>
             <span className="text-2xl font-bold text-blue-600 dark:text-blue-400" aria-label="Resultat">?</span>
@@ -178,20 +183,19 @@ export default function ProcentBeregner() {
 
         {mode === "find-heltal" && (
           <div className="flex flex-wrap items-center gap-4 text-lg">
-            <input
-              type="number"
+            <InputField
               value={deltal}
-              onChange={(e) => setDeltal(parseFloat(e.target.value) || 0)}
-              aria-label="Del-værdi"
-              className="w-28 px-4 py-3 border dark:border-gray-600 rounded-lg text-center text-xl bg-white dark:bg-gray-700 dark:text-gray-100"
+              onChange={setDeltal}
+              ariaLabel="Del-værdi"
+              inline
             />
             <span className="text-gray-600 dark:text-gray-400">er</span>
-            <input
-              type="number"
+            <InputField
               value={procent}
-              onChange={(e) => setProcent(parseFloat(e.target.value) || 0)}
-              aria-label="Procent"
-              className="w-28 px-4 py-3 border dark:border-gray-600 rounded-lg text-center text-xl bg-white dark:bg-gray-700 dark:text-gray-100"
+              onChange={setProcent}
+              ariaLabel="Procent"
+              inline
+              customValidation={validateNotZero}
             />
             <span className="text-gray-600 dark:text-gray-400">% af</span>
             <span className="text-2xl font-bold text-blue-600 dark:text-blue-400" aria-label="Resultat heltal">?</span>
@@ -201,20 +205,19 @@ export default function ProcentBeregner() {
         {mode === "stigning" && (
           <div className="flex flex-wrap items-center gap-4 text-lg">
             <span className="text-gray-600 dark:text-gray-400">Fra</span>
-            <input
-              type="number"
+            <InputField
               value={fra}
-              onChange={(e) => setFra(parseFloat(e.target.value) || 0)}
-              aria-label="Startværdi"
-              className="w-28 px-4 py-3 border dark:border-gray-600 rounded-lg text-center text-xl bg-white dark:bg-gray-700 dark:text-gray-100"
+              onChange={setFra}
+              ariaLabel="Startværdi"
+              inline
+              customValidation={validateNotZero}
             />
             <span className="text-gray-600 dark:text-gray-400">til</span>
-            <input
-              type="number"
+            <InputField
               value={til}
-              onChange={(e) => setTil(parseFloat(e.target.value) || 0)}
-              aria-label="Slutværdi"
-              className="w-28 px-4 py-3 border dark:border-gray-600 rounded-lg text-center text-xl bg-white dark:bg-gray-700 dark:text-gray-100"
+              onChange={setTil}
+              ariaLabel="Slutværdi"
+              inline
             />
             <span className="text-gray-600 dark:text-gray-400">=</span>
             <span className="text-2xl font-bold text-blue-600 dark:text-blue-400" aria-label="Procentvis ændring">?%</span>
@@ -225,22 +228,22 @@ export default function ProcentBeregner() {
       {/* Result */}
       {resultat && (
         <div className={`p-6 rounded-xl text-center ${
-          resultat.type === "stigning" && !resultat.erStigning 
-            ? "bg-red-50" 
-            : "bg-green-50"
+          resultat.type === "stigning" && !resultat.erStigning
+            ? "bg-red-50 dark:bg-red-900/20"
+            : "bg-green-50 dark:bg-green-900/20"
         }`}>
-          <p className="text-sm text-gray-600 mb-2">Resultat</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Resultat</p>
           <p className={`text-5xl font-bold ${
             resultat.type === "stigning" && !resultat.erStigning
-              ? "text-red-600"
-              : "text-green-600"
+              ? "text-red-600 dark:text-red-400"
+              : "text-green-600 dark:text-green-400"
           }`}>
             {resultat.type === "find-procent" || resultat.type === "stigning"
               ? `${resultat.resultat.toFixed(2)}%`
               : resultat.resultat.toFixed(2)}
           </p>
-          <p className="text-gray-600 mt-2">{resultat.forklaring}</p>
-          
+          <p className="text-gray-600 dark:text-gray-400 mt-2">{resultat.forklaring}</p>
+
           {/* Share and Print buttons */}
           <div className="mt-4 flex justify-center gap-3">
             <ShareCalculation
