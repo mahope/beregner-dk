@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
+import { trackCalculation } from "@/lib/analytics";
 
 type BeregningsMode = "find-procent" | "find-resultat" | "find-heltal" | "stigning";
 
@@ -18,6 +19,8 @@ export default function ProcentBeregner() {
   // Stigning mode
   const [fra, setFra] = useState<number>(100);
   const [til, setTil] = useState<number>(125);
+  
+  const hasTracked = useRef(false);
 
   const resultat = useMemo(() => {
     switch (mode) {
@@ -64,6 +67,17 @@ export default function ProcentBeregner() {
         return null;
     }
   }, [mode, deltal, heltal, procent, baseVal, fra, til]);
+
+  // Track calculation once per session
+  useEffect(() => {
+    if (resultat && !hasTracked.current) {
+      const timer = setTimeout(() => {
+        trackCalculation("procent");
+        hasTracked.current = true;
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [resultat]);
 
   const modes = [
     { id: "find-procent" as BeregningsMode, label: "Find procent", desc: "X er ? % af Y" },

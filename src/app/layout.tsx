@@ -101,11 +101,11 @@ export default function RootLayout({
   return (
     <html lang="da">
       <head>
-        {/* Plausible Analytics */}
+        {/* Plausible Analytics - Self-hosted */}
         <script
           defer
           data-domain="minberegner.dk"
-          src="https://plausible.io/js/script.js"
+          src="https://analytics.holstjensen.eu/js/script.js"
         />
         
         {/* Google AdSense - Tilføj Publisher ID når godkendt */}

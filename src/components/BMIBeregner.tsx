@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
+import { trackCalculation } from "@/lib/analytics";
 
 type Koen = "mand" | "kvinde";
 
@@ -9,6 +10,7 @@ export default function BMIBeregner() {
   const [hoejde, setHoejde] = useState<number>(175);
   const [koen, setKoen] = useState<Koen>("mand");
   const [alder, setAlder] = useState<number>(30);
+  const hasTracked = useRef(false);
 
   const resultat = useMemo(() => {
     if (!vaegt || !hoejde || hoejde === 0) {
@@ -69,6 +71,17 @@ export default function BMIBeregner() {
       idealVaegtMax: idealVaegtMax.toFixed(0),
     };
   }, [vaegt, hoejde, koen, alder]);
+
+  // Track calculation once per session when user changes values
+  useEffect(() => {
+    if (resultat && !hasTracked.current) {
+      const timer = setTimeout(() => {
+        trackCalculation("bmi");
+        hasTracked.current = true;
+      }, 2000); // Track after 2 seconds of having a result
+      return () => clearTimeout(timer);
+    }
+  }, [resultat]);
 
   return (
     <div className="space-y-8">

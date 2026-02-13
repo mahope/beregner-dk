@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
+import { trackCalculation } from "@/lib/analytics";
 
 // Dansk momssats
 const MOMS_SATS = 0.25; // 25%
@@ -8,6 +9,7 @@ const MOMS_SATS = 0.25; // 25%
 export default function MomsBeregner() {
   const [beloeb, setBeloeb] = useState<number>(1000);
   const [beregningsType, setBeregningsType] = useState<"tillaegMoms" | "fratraekMoms" | "findMoms">("tillaegMoms");
+  const hasTracked = useRef(false);
 
   const beregning = useMemo(() => {
     switch (beregningsType) {
@@ -53,6 +55,17 @@ export default function MomsBeregner() {
         };
     }
   }, [beloeb, beregningsType]);
+
+  // Track calculation once per session
+  useEffect(() => {
+    if (beregning && !hasTracked.current) {
+      const timer = setTimeout(() => {
+        trackCalculation("moms");
+        hasTracked.current = true;
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [beregning]);
 
   const formatKr = (amount: number) => {
     return new Intl.NumberFormat("da-DK", {
