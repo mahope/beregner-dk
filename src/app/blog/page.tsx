@@ -28,6 +28,14 @@ export const metadata: Metadata = {
 
 const blogPosts = [
   {
+    slug: "pension-hvor-meget-skal-du-spare-op",
+    title: "Pension: Hvor Meget Skal Du Spare Op?",
+    description: "Komplet guide til pensionsopsparing i 2026: Tommelfingerregler, de tre pensionssøjler, og hvor meget du faktisk har brug for.",
+    category: "Pension & Opsparing",
+    date: "2026-02-13",
+    readTime: "10 min",
+  },
+  {
     slug: "boligstoette-2026-nye-regler",
     title: "Boligstøtte 2026 - Nye Regler og Satser",
     description: "Komplet guide til boligstøtte i 2026: Nye satser, ændrede regler, hvem kan få støtte og hvor meget. Se de opdaterede grænser.",
