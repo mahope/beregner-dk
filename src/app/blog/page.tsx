@@ -28,6 +28,14 @@ export const metadata: Metadata = {
 
 const blogPosts = [
   {
+    slug: "guide-feriepenge-hvornaar-og-hvor-meget",
+    title: "Guide: Feriepenge - Hvornår og Hvor Meget?",
+    description: "Komplet guide til feriepenge i 2026: Hvornår får du dem udbetalt? Hvor meget får du? Lær om ferieåret og samtidighedsferie.",
+    category: "Løn & Ferie",
+    date: "2026-02-13",
+    readTime: "8 min",
+  },
+  {
     slug: "saadan-beregner-du-din-reelle-timeloen",
     title: "Sådan beregner du din reelle timeløn",
     description: "Lær at beregne din faktiske timeløn inkl. pension, frokost, ferie og andre goder. Se hvad du virkelig tjener per time.",
@@ -81,8 +89,8 @@ export default function BlogPage() {
   return (
     <div className="max-w-4xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-3xl md:text-4xl font-bold mb-4">Blog</h1>
-        <p className="text-lg text-gray-600">
+        <h1 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900 dark:text-white">Blog</h1>
+        <p className="text-lg text-gray-600 dark:text-gray-300">
           Guides, tips og artikler om økonomi, beregninger og privatøkonomi.
         </p>
       </div>
@@ -91,18 +99,18 @@ export default function BlogPage() {
         {blogPosts.map((post) => (
           <article 
             key={post.slug}
-            className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow"
+            className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow"
           >
             <Link href={`/blog/${post.slug}`}>
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div>
-                  <span className="text-sm text-blue-600 font-medium">{post.category}</span>
-                  <h2 className="text-xl font-semibold mt-1 hover:text-blue-600 transition-colors">
+                  <span className="text-sm text-blue-600 dark:text-blue-400 font-medium">{post.category}</span>
+                  <h2 className="text-xl font-semibold mt-1 text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                     {post.title}
                   </h2>
-                  <p className="text-gray-600 mt-2">{post.description}</p>
+                  <p className="text-gray-600 dark:text-gray-300 mt-2">{post.description}</p>
                 </div>
-                <div className="flex items-center gap-4 text-sm text-gray-500 whitespace-nowrap">
+                <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">
                   <span>{post.date}</span>
                   <span>•</span>
                   <span>{post.readTime} læsetid</span>
@@ -113,9 +121,9 @@ export default function BlogPage() {
         ))}
       </div>
 
-      <div className="mt-12 p-6 bg-blue-50 rounded-xl text-center">
-        <h2 className="text-xl font-bold mb-2">Brug vores beregnere</h2>
-        <p className="text-gray-600 mb-4">
+      <div className="mt-12 p-6 bg-blue-50 dark:bg-blue-900/30 rounded-xl text-center">
+        <h2 className="text-xl font-bold mb-2 text-gray-900 dark:text-white">Brug vores beregnere</h2>
+        <p className="text-gray-600 dark:text-gray-300 mb-4">
           Vi har 20+ gratis beregnere til økonomi, sundhed og hverdag.
         </p>
         <Link 
