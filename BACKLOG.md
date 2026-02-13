@@ -224,7 +224,11 @@ Kvadratmeter, Timepris, Dato/tid
   - Beregner grundskyld (kommuneprocent × grundværdi)
   - Viser samlet ejendomsskat og månedligt beløb
   - 50+ kommuner med korrekte kommuneprocenter
-- [ ] Arveafgift beregner
+- [x] Arveafgift beregner
+  - ✅ **LØST (2026-02-13):** Implementeret på /arveafgift
+  - Beregner boafgift baseret på relation (ægtefælle, barn, søskende, andre)
+  - Bundfradrag på 321.700 kr, 15% boafgift + 25% tillægsafgift
+  - Detaljeret info om arveafgift regler i Danmark
 - [ ] Aktieskat / crypto skat beregner
 
 ### Niche Beregnere
