@@ -4,8 +4,16 @@ import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { trackCalculation } from "@/lib/analytics";
 import { ShareCalculation } from "@/components/ShareCalculation";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
+import { ModeSelector, ModeOption } from "@/components/ModeSelector";
 
 type BeregningsMode = "find-procent" | "find-resultat" | "find-heltal" | "stigning";
+
+const MODES: ModeOption<BeregningsMode>[] = [
+  { id: "find-procent", label: "Find procent", desc: "X er ? % af Y" },
+  { id: "find-resultat", label: "Find resultat", desc: "X % af Y = ?" },
+  { id: "find-heltal", label: "Find heltal", desc: "X er Y% af ?" },
+  { id: "stigning", label: "Procentvis ændring", desc: "Fra X til Y = ?%" },
+];
 
 export default function ProcentBeregner() {
   const [mode, setMode] = useState<BeregningsMode>("find-procent");
@@ -110,51 +118,37 @@ export default function ProcentBeregner() {
     }
   }, [resultat]);
 
-  const modes = [
-    { id: "find-procent" as BeregningsMode, label: "Find procent", desc: "X er ? % af Y" },
-    { id: "find-resultat" as BeregningsMode, label: "Find resultat", desc: "X % af Y = ?" },
-    { id: "find-heltal" as BeregningsMode, label: "Find heltal", desc: "X er Y% af ?" },
-    { id: "stigning" as BeregningsMode, label: "Procentvis ændring", desc: "Fra X til Y = ?%" },
-  ];
-
   return (
     <div className="space-y-8">
-      {/* Mode selection */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-        {modes.map((m) => (
-          <button
-            key={m.id}
-            onClick={() => setMode(m.id)}
-            className={`p-3 rounded-lg border-2 text-left transition-colors ${
-              mode === m.id
-                ? "border-blue-500 bg-blue-50"
-                : "border-gray-200 hover:border-gray-300"
-            }`}
-          >
-            <span className="font-medium block">{m.label}</span>
-            <span className="text-xs text-gray-500">{m.desc}</span>
-          </button>
-        ))}
-      </div>
+      {/* Mode selection with keyboard navigation */}
+      <ModeSelector
+        modes={MODES}
+        currentMode={mode}
+        onChange={setMode}
+        name="Beregningstype"
+        columns={4}
+      />
 
       {/* Input fields based on mode */}
-      <div className="bg-gray-50 rounded-xl p-6">
+      <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-6">
         {mode === "find-procent" && (
           <div className="flex flex-wrap items-center gap-4 text-lg">
             <input
               type="number"
               value={deltal}
               onChange={(e) => setDeltal(parseFloat(e.target.value) || 0)}
-              className="w-28 px-4 py-3 border rounded-lg text-center text-xl"
+              aria-label="Del-tal (tælleren)"
+              className="w-28 px-4 py-3 border dark:border-gray-600 rounded-lg text-center text-xl bg-white dark:bg-gray-700 dark:text-gray-100"
             />
-            <span className="text-gray-600">er</span>
-            <span className="text-2xl font-bold text-blue-600">?%</span>
-            <span className="text-gray-600">af</span>
+            <span className="text-gray-600 dark:text-gray-400">er</span>
+            <span className="text-2xl font-bold text-blue-600 dark:text-blue-400" aria-label="Resultat procent">?%</span>
+            <span className="text-gray-600 dark:text-gray-400">af</span>
             <input
               type="number"
               value={heltal}
               onChange={(e) => setHeltal(parseFloat(e.target.value) || 0)}
-              className="w-28 px-4 py-3 border rounded-lg text-center text-xl"
+              aria-label="Heltal (nævneren)"
+              className="w-28 px-4 py-3 border dark:border-gray-600 rounded-lg text-center text-xl bg-white dark:bg-gray-700 dark:text-gray-100"
             />
           </div>
         )}
@@ -165,17 +159,19 @@ export default function ProcentBeregner() {
               type="number"
               value={procent}
               onChange={(e) => setProcent(parseFloat(e.target.value) || 0)}
-              className="w-28 px-4 py-3 border rounded-lg text-center text-xl"
+              aria-label="Procent"
+              className="w-28 px-4 py-3 border dark:border-gray-600 rounded-lg text-center text-xl bg-white dark:bg-gray-700 dark:text-gray-100"
             />
-            <span className="text-gray-600">% af</span>
+            <span className="text-gray-600 dark:text-gray-400">% af</span>
             <input
               type="number"
               value={baseVal}
               onChange={(e) => setBaseVal(parseFloat(e.target.value) || 0)}
-              className="w-28 px-4 py-3 border rounded-lg text-center text-xl"
+              aria-label="Grundværdi"
+              className="w-28 px-4 py-3 border dark:border-gray-600 rounded-lg text-center text-xl bg-white dark:bg-gray-700 dark:text-gray-100"
             />
-            <span className="text-gray-600">=</span>
-            <span className="text-2xl font-bold text-blue-600">?</span>
+            <span className="text-gray-600 dark:text-gray-400">=</span>
+            <span className="text-2xl font-bold text-blue-600 dark:text-blue-400" aria-label="Resultat">?</span>
           </div>
         )}
 
@@ -185,38 +181,42 @@ export default function ProcentBeregner() {
               type="number"
               value={deltal}
               onChange={(e) => setDeltal(parseFloat(e.target.value) || 0)}
-              className="w-28 px-4 py-3 border rounded-lg text-center text-xl"
+              aria-label="Del-værdi"
+              className="w-28 px-4 py-3 border dark:border-gray-600 rounded-lg text-center text-xl bg-white dark:bg-gray-700 dark:text-gray-100"
             />
-            <span className="text-gray-600">er</span>
+            <span className="text-gray-600 dark:text-gray-400">er</span>
             <input
               type="number"
               value={procent}
               onChange={(e) => setProcent(parseFloat(e.target.value) || 0)}
-              className="w-28 px-4 py-3 border rounded-lg text-center text-xl"
+              aria-label="Procent"
+              className="w-28 px-4 py-3 border dark:border-gray-600 rounded-lg text-center text-xl bg-white dark:bg-gray-700 dark:text-gray-100"
             />
-            <span className="text-gray-600">% af</span>
-            <span className="text-2xl font-bold text-blue-600">?</span>
+            <span className="text-gray-600 dark:text-gray-400">% af</span>
+            <span className="text-2xl font-bold text-blue-600 dark:text-blue-400" aria-label="Resultat heltal">?</span>
           </div>
         )}
 
         {mode === "stigning" && (
           <div className="flex flex-wrap items-center gap-4 text-lg">
-            <span className="text-gray-600">Fra</span>
+            <span className="text-gray-600 dark:text-gray-400">Fra</span>
             <input
               type="number"
               value={fra}
               onChange={(e) => setFra(parseFloat(e.target.value) || 0)}
-              className="w-28 px-4 py-3 border rounded-lg text-center text-xl"
+              aria-label="Startværdi"
+              className="w-28 px-4 py-3 border dark:border-gray-600 rounded-lg text-center text-xl bg-white dark:bg-gray-700 dark:text-gray-100"
             />
-            <span className="text-gray-600">til</span>
+            <span className="text-gray-600 dark:text-gray-400">til</span>
             <input
               type="number"
               value={til}
               onChange={(e) => setTil(parseFloat(e.target.value) || 0)}
-              className="w-28 px-4 py-3 border rounded-lg text-center text-xl"
+              aria-label="Slutværdi"
+              className="w-28 px-4 py-3 border dark:border-gray-600 rounded-lg text-center text-xl bg-white dark:bg-gray-700 dark:text-gray-100"
             />
-            <span className="text-gray-600">=</span>
-            <span className="text-2xl font-bold text-blue-600">?%</span>
+            <span className="text-gray-600 dark:text-gray-400">=</span>
+            <span className="text-2xl font-bold text-blue-600 dark:text-blue-400" aria-label="Procentvis ændring">?%</span>
           </div>
         )}
       </div>
@@ -253,9 +253,9 @@ export default function ProcentBeregner() {
 
       {/* Quick reference */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="bg-gray-50 p-4 rounded-lg">
-          <h3 className="font-medium mb-2">Hurtig reference</h3>
-          <ul className="text-sm text-gray-600 space-y-1">
+        <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+          <h3 className="font-medium mb-2 dark:text-gray-100">Hurtig reference</h3>
+          <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
             <li>10% = 1/10</li>
             <li>25% = 1/4</li>
             <li>33% ≈ 1/3</li>
@@ -263,9 +263,9 @@ export default function ProcentBeregner() {
             <li>75% = 3/4</li>
           </ul>
         </div>
-        <div className="bg-gray-50 p-4 rounded-lg">
-          <h3 className="font-medium mb-2">Formler</h3>
-          <ul className="text-sm text-gray-600 space-y-1">
+        <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+          <h3 className="font-medium mb-2 dark:text-gray-100">Formler</h3>
+          <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
             <li>Procent = (Del / Heltal) × 100</li>
             <li>Del = (Procent / 100) × Heltal</li>
             <li>Heltal = Del × (100 / Procent)</li>

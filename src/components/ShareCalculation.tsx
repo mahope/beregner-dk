@@ -9,8 +9,8 @@
  * @since 1.1.0
  */
 
-import { useState, useCallback } from 'react';
-import { Share2, Copy, Check, Link2, Twitter, Facebook, Mail, QrCode } from 'lucide-react';
+import { useState, useCallback, useEffect, useRef } from 'react';
+import { Share2, Copy, Check, Link2, Twitter, Facebook, Mail, QrCode, X } from 'lucide-react';
 import { 
   ShareableLink, 
   copyToClipboard, 
@@ -33,13 +33,66 @@ export function ShareCalculation({
   const [isCopied, setIsCopied] = useState(false);
   const [isCreatingShortlink, setIsCreatingShortlink] = useState(false);
   const [showQr, setShowQr] = useState(false);
+  
+  const modalRef = useRef<HTMLDivElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const previousActiveElement = useRef<HTMLElement | null>(null);
 
   const handleOpen = useCallback(() => {
+    previousActiveElement.current = document.activeElement as HTMLElement;
     const link = getShareableLink();
     setShareableLink(link);
     setIsOpen(true);
     setIsCopied(false);
   }, [getShareableLink]);
+
+  const handleClose = useCallback(() => {
+    setIsOpen(false);
+    // Restore focus to the button that opened the modal
+    previousActiveElement.current?.focus();
+  }, []);
+
+  // Handle Escape key and focus trapping
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        handleClose();
+        return;
+      }
+
+      // Focus trapping
+      if (e.key === 'Tab' && modalRef.current) {
+        const focusableElements = modalRef.current.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        const firstElement = focusableElements[0];
+        const lastElement = focusableElements[focusableElements.length - 1];
+
+        if (e.shiftKey && document.activeElement === firstElement) {
+          e.preventDefault();
+          lastElement.focus();
+        } else if (!e.shiftKey && document.activeElement === lastElement) {
+          e.preventDefault();
+          firstElement.focus();
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    // Focus the close button when modal opens
+    setTimeout(() => closeButtonRef.current?.focus(), 0);
+
+    // Prevent scrolling when modal is open
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = '';
+    };
+  }, [isOpen, handleClose]);
 
   const handleCopy = async () => {
     if (!shareableLink) return;
@@ -86,23 +139,42 @@ export function ShareCalculation({
 
       {/* Modal */}
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full overflow-hidden">
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="share-modal-title"
+          onClick={(e) => e.target === e.currentTarget && handleClose()}
+        >
+          <div 
+            ref={modalRef}
+            className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-md w-full overflow-hidden"
+          >
             {/* Header */}
-            <div className="px-6 py-4 border-b border-gray-100">
-              <h2 className="text-lg font-semibold text-gray-900">
-                Del din beregning
-              </h2>
-              <p className="text-sm text-gray-500 mt-1">
-                Andre kan se og genbruge dine indtastninger
-              </p>
+            <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex items-start justify-between">
+              <div>
+                <h2 id="share-modal-title" className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                  Del din beregning
+                </h2>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  Andre kan se og genbruge dine indtastninger
+                </p>
+              </div>
+              <button
+                ref={closeButtonRef}
+                onClick={handleClose}
+                className="p-1 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                aria-label="Luk dialog"
+              >
+                <X className="w-5 h-5" />
+              </button>
             </div>
 
             {/* Content */}
             <div className="p-6 space-y-6">
               {/* URL Copy Section */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Link til beregning
                 </label>
                 <div className="flex gap-2">
@@ -111,22 +183,24 @@ export function ShareCalculation({
                       type="text"
                       value={shareUrl}
                       readOnly
-                      className="w-full px-3 py-2 pr-10 text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-600 truncate"
+                      aria-label="Delbart link"
+                      className="w-full px-3 py-2 pr-10 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-300 truncate"
                     />
-                    <Link2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <Link2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" aria-hidden="true" />
                   </div>
                   <button
                     onClick={handleCopy}
+                    aria-label={isCopied ? "Kopieret!" : "Kopier link"}
                     className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
                       isCopied
-                        ? 'bg-green-100 text-green-700'
+                        ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300'
                         : 'bg-blue-600 text-white hover:bg-blue-700'
                     }`}
                   >
                     {isCopied ? (
-                      <Check className="w-4 h-4" />
+                      <Check className="w-4 h-4" aria-hidden="true" />
                     ) : (
-                      <Copy className="w-4 h-4" />
+                      <Copy className="w-4 h-4" aria-hidden="true" />
                     )}
                   </button>
                 </div>
@@ -136,7 +210,7 @@ export function ShareCalculation({
                   <button
                     onClick={handleCreateShortlink}
                     disabled={isCreatingShortlink}
-                    className="mt-2 text-sm text-blue-600 hover:text-blue-700 disabled:text-gray-400"
+                    className="mt-2 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 disabled:text-gray-400"
                   >
                     {isCreatingShortlink ? 'Opretter kort link...' : 'Opret kort link'}
                   </button>
@@ -145,7 +219,7 @@ export function ShareCalculation({
 
               {/* Social Share */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Del på sociale medier
                 </label>
                 <div className="flex gap-3">
@@ -179,27 +253,27 @@ export function ShareCalculation({
                     className={`flex items-center justify-center w-12 h-12 rounded-full transition-colors ${
                       showQr
                         ? 'bg-blue-600 text-white'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                     }`}
-                    aria-label="Vis QR-kode"
+                    aria-label={showQr ? "Skjul QR-kode" : "Vis QR-kode"}
+                    aria-pressed={showQr}
                   >
-                    <QrCode className="w-5 h-5" />
+                    <QrCode className="w-5 h-5" aria-hidden="true" />
                   </button>
                 </div>
               </div>
 
               {/* QR Code */}
               {showQr && (
-                <div className="text-center p-4 bg-gray-50 rounded-lg">
+                <div className="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                   <div className="inline-block p-4 bg-white rounded-lg">
-                    {/* QR code would be generated here - using placeholder */}
                     <img
                       src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(shareUrl)}`}
-                      alt="QR kode"
+                      alt="QR kode til beregning"
                       className="w-32 h-32"
                     />
                   </div>
-                  <p className="text-xs text-gray-500 mt-2">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
                     Scan for at åbne beregningen
                   </p>
                 </div>
@@ -207,8 +281,8 @@ export function ShareCalculation({
 
               {/* Result preview */}
               {resultSummary && (
-                <div className="p-4 bg-blue-50 rounded-lg">
-                  <p className="text-sm font-medium text-blue-900">
+                <div className="p-4 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
+                  <p className="text-sm font-medium text-blue-900 dark:text-blue-200">
                     Resultat: {resultSummary}
                   </p>
                 </div>
@@ -216,10 +290,10 @@ export function ShareCalculation({
             </div>
 
             {/* Footer */}
-            <div className="px-6 py-4 bg-gray-50 border-t border-gray-100">
+            <div className="px-6 py-4 bg-gray-50 dark:bg-gray-900 border-t border-gray-100 dark:border-gray-700">
               <button
-                onClick={() => setIsOpen(false)}
-                className="w-full py-2 text-gray-600 font-medium hover:text-gray-800 transition-colors"
+                onClick={handleClose}
+                className="w-full py-2 text-gray-600 dark:text-gray-400 font-medium hover:text-gray-800 dark:hover:text-gray-200 transition-colors"
               >
                 Luk
               </button>

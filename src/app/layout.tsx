@@ -6,6 +6,7 @@ import { OrganizationSchema, WebSiteSchema } from "@/components/StructuredData";
 import Header from "@/components/Header";
 import CookieConsent from "@/components/CookieConsent";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { SkipLink } from "@/components/SkipLink";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -125,9 +126,10 @@ export default function RootLayout({
       </head>
       <body className={`${inter.variable} font-sans min-h-screen bg-gray-50 dark:bg-gray-950 flex flex-col antialiased transition-colors`}>
         <ThemeProvider>
+          <SkipLink />
           <Header />
 
-          <main className="flex-1 max-w-6xl mx-auto px-4 py-8 w-full">
+          <main id="main-content" tabIndex={-1} className="flex-1 max-w-6xl mx-auto px-4 py-8 w-full outline-none">
             {children}
           </main>
 
