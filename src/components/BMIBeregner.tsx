@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { trackCalculation } from "@/lib/analytics";
 import { ShareCalculation } from "@/components/ShareCalculation";
 import { PrintResult } from "@/components/PrintResult";
+import { InputField } from "@/components/InputField";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 
 type Koen = "mand" | "kvinde";
@@ -117,29 +118,23 @@ export default function BMIBeregner() {
       {/* Input */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium mb-2 dark:text-gray-200">Vægt (kg)</label>
-            <input
-              type="number"
-              min="30"
-              max="300"
-              value={vaegt}
-              onChange={(e) => setVaegt(parseFloat(e.target.value) || 0)}
-              className="w-full px-4 py-3 border dark:border-gray-600 rounded-lg text-lg bg-white dark:bg-gray-800 dark:text-white"
-            />
-          </div>
+          <InputField
+            label="Vægt (kg)"
+            value={vaegt}
+            onChange={setVaegt}
+            min={30}
+            max={300}
+            required
+          />
 
-          <div>
-            <label className="block text-sm font-medium mb-2 dark:text-gray-200">Højde (cm)</label>
-            <input
-              type="number"
-              min="100"
-              max="250"
-              value={hoejde}
-              onChange={(e) => setHoejde(parseFloat(e.target.value) || 0)}
-              className="w-full px-4 py-3 border dark:border-gray-600 rounded-lg text-lg bg-white dark:bg-gray-800 dark:text-white"
-            />
-          </div>
+          <InputField
+            label="Højde (cm)"
+            value={hoejde}
+            onChange={setHoejde}
+            min={100}
+            max={250}
+            required
+          />
         </div>
 
         <div className="space-y-4">
@@ -169,17 +164,14 @@ export default function BMIBeregner() {
             </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-2 dark:text-gray-200">Alder</label>
-            <input
-              type="number"
-              min="18"
-              max="120"
-              value={alder}
-              onChange={(e) => setAlder(parseInt(e.target.value) || 0)}
-              className="w-full px-4 py-3 border dark:border-gray-600 rounded-lg text-lg bg-white dark:bg-gray-800 dark:text-white"
-            />
-          </div>
+          <InputField
+            label="Alder"
+            value={alder}
+            onChange={setAlder}
+            min={18}
+            max={120}
+            required
+          />
         </div>
       </div>
 
