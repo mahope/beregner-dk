@@ -53,10 +53,10 @@ Kvadratmeter, Timepris, Dato/tid
   - Security headers tilføjet (HSTS, X-Frame-Options, X-Content-Type-Options, etc.)
   - Performance OK: TTFB ~200ms, Next.js caching aktivt
 - [ ] Submit til Google Search Console
-  - ⚠️ **BLOCKER:** sitemap.xml giver 404 på Dokploy (Next.js standalone mode issue)
-  - Statisk sitemap.xml i public/ virker ikke med Dokploy
-  - Kræver enten: route handler, ekstern sitemap hosting, eller nginx config
-  - Se commit 707a10c for forsøg på fix
+  - ✅ **LØST (2026-02-13):** sitemap.xml virker nu via API route handler
+  - Rewrite regel: /sitemap.xml → /api/sitemap (dynamisk XML)
+  - 30+ sider inkluderet med korrekte priorities
+  - ⏳ **BRUGER-OPGAVE:** Gå til search.google.com/search-console, tilføj minberegner.dk, submit sitemap
 
 ### AdSense Setup
 - [ ] Ansøg om AdSense godkendelse
