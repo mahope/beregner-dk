@@ -128,11 +128,15 @@ Kvadratmeter, Timepris, Dato/tid
   - ✅ **LØST (2026-02-13):** Alle affiliate boxes har "Annonce" label + disclosure footer
 
 ### Content Expansion
-- [ ] 5 nye blog posts (1/5 færdig):
+- [ ] 5 nye blog posts (2/5 færdig):
   - [x] "Sådan beregner du din reelle timeløn"
     - ✅ **LØST (2026-02-13):** /blog/saadan-beregner-du-din-reelle-timeloen
     - 1.300+ ord, FAQ schema, links til timepris/løn-beregnere
-  - "Guide: Feriepenge - hvornår og hvor meget"
+  - [x] "Guide: Feriepenge - hvornår og hvor meget"
+    - ✅ **LØST (2026-02-13):** /blog/guide-feriepenge-hvornaar-og-hvor-meget
+    - 1.400+ ord, FAQ schema, 6 FAQ items
+    - Forklaring af samtidighedsferie, ferieåret, beregninger
+    - Links til feriepenge, dagpenge, barselsdagpenge beregnere
   - "BMI for børn - sådan tjekker du"
   - "Boligstøtte 2026 - nye regler"
   - "Pension: Hvor meget skal du spare op?"
