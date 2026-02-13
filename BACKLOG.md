@@ -125,7 +125,11 @@ Kvadratmeter, Timepris, Dato/tid
 - [ ] Hver post: 1000+ ord, FAQ sektion, relaterede beregnere
 
 ### UX Forbedringer
-- [ ] Dark mode (system preference default)
+- [x] Dark mode (system preference default)
+  - ✅ **LØST (2026-02-13):** ThemeProvider + ThemeToggle implementeret
+  - Tre modes: System (auto), Lys, Mørk — cykler via knap i header
+  - Persisterer i localStorage, respekterer system preference
+  - Alle core komponenter opdateret (layout, forside, header, mobile menu, cookie consent, BMI beregner)
 - [ ] Keyboard navigation (tab through inputs)
 - [ ] Print-venligt resultat layout
 - [ ] Loading states på tunge beregninger
