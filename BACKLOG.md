@@ -53,6 +53,10 @@ Kvadratmeter, Timepris, Dato/tid
   - Security headers tilføjet (HSTS, X-Frame-Options, X-Content-Type-Options, etc.)
   - Performance OK: TTFB ~200ms, Next.js caching aktivt
 - [ ] Submit til Google Search Console
+  - ⚠️ **BLOCKER:** sitemap.xml giver 404 på Dokploy (Next.js standalone mode issue)
+  - Statisk sitemap.xml i public/ virker ikke med Dokploy
+  - Kræver enten: route handler, ekstern sitemap hosting, eller nginx config
+  - Se commit 707a10c for forsøg på fix
 
 ### AdSense Setup
 - [ ] Ansøg om AdSense godkendelse
