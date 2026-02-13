@@ -211,7 +211,12 @@ Kvadratmeter, Timepris, Dato/tid
   - Input: bilpris, udbetaling, løbetid, rente
   - Beregner månedlig ydelse, samlet rente og totalpris
   - 4 affiliate partnere: Samlino, Bank Norwegian, Basisbank, Santander
-- [ ] Forbrugslån beregner (→ lån sammenligning)
+- [x] Forbrugslån beregner (→ lån sammenligning)
+  - ✅ **LØST (2026-02-13):** Implementeret på /forbrugslaan med affiliate links
+  - Input: lånebeløb, løbetid, rentesats
+  - Beregner månedlig ydelse, samlet rente og totalpris
+  - 5 affiliate partnere: Samlino, Bank Norwegian, Basisbank, Lunar, AK Nordic
+  - Inkluderer FAQ, tips og ydelsestabel
 - [ ] Ejendomsværdiskat beregner
 - [ ] Arveafgift beregner
 - [ ] Aktieskat / crypto skat beregner
