@@ -79,7 +79,10 @@ Kvadratmeter, Timepris, Dato/tid
   - Integreret i BMI, Procent, Moms beregnere
 - [x] Events: beregning_udført, resultat_kopieret, ad_clicked
   - ✅ **LØST (2026-02-13):** Event tracking implementeret med 2s delay
-- [ ] Goal: beregninger per bruger
+- [x] Goal: beregninger per bruger
+  - ✅ **LØST (2026-02-13):** Event tracking implementeret via analytics.ts
+  - `beregning_udført` event sendes med calculator prop
+  - Goals skal sættes op manuelt i Plausible UI (analytics.holstjensen.eu)
 - [ ] Search Console: track keyword rankings
 
 ---
