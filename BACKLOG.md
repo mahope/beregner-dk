@@ -97,10 +97,17 @@ Kvadratmeter, Timepris, Dato/tid
 ## 📈 Phase 2: Engagement & Affiliate (Prioritet 2)
 
 ### Gem & Del Feature
-- [ ] URL state encoding for beregninger (share link)
-- [ ] "Kopier link" knap på alle beregnere
-- [ ] Social share buttons (Facebook, LinkedIn)
-- [ ] QR kode for print/deling
+- [x] URL state encoding for beregninger (share link)
+  - ✅ **LØST (2026-02-13):** Implementeret i ProcentBeregner, BMIBeregner, MomsBeregner, LoenBeregner
+  - URL parameter ?s= gemmer input-værdier i base64-kodet state
+  - Modtagere får præ-udfyldte beregnere når de åbner linket
+- [x] "Kopier link" knap på alle beregnere
+  - ✅ **LØST (2026-02-13):** "Del beregning" knap synlig under alle 4 beregnere
+  - Åbner modal med kopiérbart link
+- [x] Social share buttons (Facebook, LinkedIn)
+  - ✅ **LØST (2026-02-13):** Twitter, Facebook, Email knapper i share modal
+- [x] QR kode for print/deling
+  - ✅ **LØST (2026-02-13):** QR-kode generator integreret i share modal
 
 ### Affiliate Integration
 - [ ] Boliglån beregner → boliglån affiliate (Mybanker, etc.)
