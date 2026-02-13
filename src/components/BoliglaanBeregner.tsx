@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import { BoliglaanAffiliate } from "./AffiliateBox";
 import { PrintResult } from "./PrintResult";
+import { CalculationLoading, useCalculationLoading } from "./LoadingSpinner";
 
 type LaanType = "fastforrentet" | "variabel" | "afdragsfrit";
 
@@ -13,6 +14,9 @@ export default function BoliglaanBeregner() {
   const [loebetid, setLoebetid] = useState<number>(30);
   const [laanType, setLaanType] = useState<LaanType>("fastforrentet");
   const [bidragssats, setBidragssats] = useState<number>(0.75);
+
+  // Loading state for beregning
+  const isLoading = useCalculationLoading([boligpris, udbetaling, rente, loebetid, laanType, bidragssats]);
 
   const resultat = useMemo(() => {
     const laanBeloeb = boligpris - udbetaling;
@@ -220,8 +224,13 @@ export default function BoliglaanBeregner() {
       </div>
 
       {/* Resultat */}
+      <CalculationLoading 
+        isLoading={isLoading} 
+        loadingText="Beregner din boligydelse..."
+        minHeight="300px"
+      >
       {resultat && (
-        <div className="p-6 bg-white rounded-xl shadow-sm border">
+        <div className="p-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm border dark:border-gray-700">
           <div className="text-center mb-6">
             <p className="text-sm text-gray-500 mb-1">Månedlig ydelse</p>
             <p className="text-5xl font-bold text-blue-600">
@@ -274,8 +283,10 @@ export default function BoliglaanBeregner() {
         </div>
       )}
 
+      </CalculationLoading>
+
       {/* Affiliate box - vises når brugeren har beregnet */}
-      {resultat && (
+      {resultat && !isLoading && (
         <BoliglaanAffiliate className="mt-6" />
       )}
 

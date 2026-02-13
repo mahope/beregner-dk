@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { CalculationLoading, useCalculationLoading } from "./LoadingSpinner";
 
 export default function PensionBeregner() {
   const [alder, setAlder] = useState<number>(30);
@@ -10,6 +11,12 @@ export default function PensionBeregner() {
   const [forventetAfkast, setForventetAfkast] = useState<number>(5);
   const [inflation, setInflation] = useState<number>(2);
   const [udbetalingsperiode, setUdbetalingsperiode] = useState<number>(20);
+
+  // Loading state for beregning
+  const isLoading = useCalculationLoading([
+    alder, pensionsalder, maanedligIndbetaling, nuværendeOpsparing, 
+    forventetAfkast, inflation, udbetalingsperiode
+  ]);
 
   const resultat = useMemo(() => {
     const aarTilPension = pensionsalder - alder;
@@ -192,10 +199,15 @@ export default function PensionBeregner() {
       </div>
 
       {/* Resultat */}
+      <CalculationLoading 
+        isLoading={isLoading} 
+        loadingText="Beregner din pension..."
+        minHeight="300px"
+      >
       {resultat && (
-        <div className="p-6 bg-white rounded-xl shadow-sm border">
+        <div className="p-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm border dark:border-gray-700">
           <div className="text-center mb-6">
-            <p className="text-sm text-gray-500 mb-1">Forventet månedlig pension</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Forventet månedlig pension</p>
             <p className="text-5xl font-bold text-green-600">
               {formatKr(resultat.samletMaanedlig)}
             </p>
@@ -236,8 +248,10 @@ export default function PensionBeregner() {
         </div>
       )}
 
+      </CalculationLoading>
+
       {/* Ekstra info */}
-      {resultat && (
+      {resultat && !isLoading && (
         <div className="p-4 bg-green-50 rounded-lg">
           <h3 className="font-medium mb-2 text-green-800">💡 Vidste du?</h3>
           <p className="text-green-700">

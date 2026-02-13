@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { OpsparingAffiliate } from "./AffiliateBox";
+import { CalculationLoading, useCalculationLoading } from "./LoadingSpinner";
 
 type Frekvens = "maanedlig" | "kvartal" | "aarlig";
 
@@ -11,6 +12,9 @@ export default function OpsparingsBeregner() {
   const [aarligRente, setAarligRente] = useState<number>(5);
   const [periode, setPeriode] = useState<number>(10);
   const [renteFrekvens, setRenteFrekvens] = useState<Frekvens>("aarlig");
+
+  // Loading state for beregning
+  const isLoading = useCalculationLoading([startBeloeb, maanedligIndbetaling, aarligRente, periode, renteFrekvens]);
 
   const beregning = useMemo(() => {
     if (periode <= 0) return null;
@@ -184,9 +188,14 @@ export default function OpsparingsBeregner() {
       </div>
 
       {/* Resultat */}
+      <CalculationLoading 
+        isLoading={isLoading} 
+        loadingText="Beregner din opsparing..."
+        minHeight="250px"
+      >
       {beregning && (
         <>
-          <div className="p-6 bg-green-100 rounded-xl text-center">
+          <div className="p-6 bg-green-100 dark:bg-green-900/30 rounded-xl text-center">
             <p className="text-sm text-gray-600 mb-1">
               Din opsparing efter {periode} år
             </p>
@@ -258,9 +267,13 @@ export default function OpsparingsBeregner() {
             </p>
           </div>
 
-          {/* Affiliate box - investeringsplatforme */}
-          <OpsparingAffiliate className="mt-6" />
         </>
+      )}
+      </CalculationLoading>
+
+      {/* Affiliate box - investeringsplatforme */}
+      {beregning && !isLoading && (
+        <OpsparingAffiliate className="mt-6" />
       )}
     </div>
   );

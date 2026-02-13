@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { CalculationLoading, useCalculationLoading } from "./LoadingSpinner";
 
 // 2026 satser
 const MAX_DAGPENGE_SATS = 20359; // kr/måned (2026)
@@ -18,6 +19,9 @@ interface DagpengeResultat {
 export default function DagpengeBeregner() {
   const [maanedsloen, setMaanedsloen] = useState<string>("");
   const [arbejdstimer, setArbejdstimer] = useState<string>("37");
+
+  // Loading state for beregning
+  const isLoading = useCalculationLoading([maanedsloen, arbejdstimer]);
 
   const resultat = useMemo<DagpengeResultat | null>(() => {
     const loen = parseFloat(maanedsloen);
@@ -93,8 +97,13 @@ export default function DagpengeBeregner() {
         </div>
 
         {/* Resultat */}
+        <CalculationLoading 
+          isLoading={isLoading} 
+          loadingText="Beregner dagpenge..."
+          minHeight="200px"
+        >
         {resultat && (
-          <div className="mt-8 p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl">
+          <div className="mt-8 p-6 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-xl">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
               Dine estimerede dagpenge
             </h3>
@@ -130,13 +139,14 @@ export default function DagpengeBeregner() {
               </div>
             )}
 
-            <div className="mt-4 text-sm text-gray-600">
+            <div className="mt-4 text-sm text-gray-600 dark:text-gray-400">
               <p>
                 Dagpengene svarer til <strong>{resultat.procentAfLoen}%</strong> af din løn
               </p>
             </div>
           </div>
         )}
+        </CalculationLoading>
 
         {/* Info boks */}
         <div className="mt-6 p-4 bg-gray-50 rounded-lg text-sm text-gray-600">
