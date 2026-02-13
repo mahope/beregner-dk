@@ -253,3 +253,23 @@ Kvadratmeter, Timepris, Dato/tid
 **Hosting:** Dokploy
 **Mål:** 50.000 månedlige besøgende inden Q4 2026
 **AdSense krav:** God UX, unik content, policy compliance
+
+## February 2026 — Nye muligheder
+
+### Fra codebase analyse og research
+
+
+- [ ] Låneberegner (boliglån)
+- [ ] Pensionsberegner
+- [ ] Investeringsberegner
+- [ ] Valutaomregner
+- [ ] BMI beregner (allerede eksisterer)
+- [ ] Kalorieberegner
+- [ ] Momsberegner
+- [ ] leasingberegner
+- [ ] Afstands beregner (transport)
+- [ ] Elpris beregner
+
+
+> 💡 Disse er forslag — evaluer og prioriter baseret på værdi/indsats.
+
