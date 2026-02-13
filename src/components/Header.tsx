@@ -43,6 +43,7 @@ const navigation: NavItem[] = [
     children: [
       { name: "📈 Renteberegner", href: "/renteberegner" },
       { name: "💳 Låneberegner", href: "/laaneberegner" },
+      { name: "💵 Forbrugslån", href: "/forbrugslaan" },
       { name: "🚗 Billån", href: "/billaan" },
       { name: "🐷 Opsparing", href: "/opsparing" },
     ],
