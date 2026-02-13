@@ -180,7 +180,11 @@ Kvadratmeter, Timepris, Dato/tid
   - Print header med logo, beregner-navn og dato
   - Print-styles skjuler navigation, ads, affiliates, dark mode
   - Kort/results undgår page breaks
-- [ ] Loading states på tunge beregninger
+- [x] Loading states på tunge beregninger
+  - ✅ **LØST (2026-02-13):** LoadingSpinner + CalculationLoading komponenter
+  - useCalculationLoading hook med 150ms debounce
+  - Implementeret i 4 beregnere: Boliglån, Pension, Opsparing, Dagpenge
+  - Dark mode support inkluderet
 - [ ] Input validation med venlige fejlbeskeder
 
 ---
