@@ -1,5 +1,8 @@
 FROM node:22-alpine AS base
 
+# Cache bust arg - change this to force full rebuild
+ARG CACHE_BUST=2026-02-13-v2
+
 # Install dependencies only when needed
 FROM base AS deps
 RUN apk add --no-cache libc6-compat
