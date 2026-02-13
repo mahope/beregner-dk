@@ -110,7 +110,12 @@ Kvadratmeter, Timepris, Dato/tid
   - ✅ **LØST (2026-02-13):** QR-kode generator integreret i share modal
 
 ### Affiliate Integration
-- [ ] Boliglån beregner → boliglån affiliate (Mybanker, etc.)
+- [x] Boliglån beregner → boliglån affiliate (Mybanker, etc.)
+  - ✅ **LØST (2026-02-13):** AffiliateBox komponent med 4 boliglån-partnere
+  - Mybanker (sammenligning), Nordea, Totalkredit, Realkredit Danmark
+  - Tydelig "Annonce" label per dansk markedsføringslov
+  - Vises efter beregningsresultat for højest konvertering
+  - Dark mode support + proper disclosure footer
 - [ ] Forsikring relaterede → forsikring sammenligning
 - [ ] Opsparing beregner → investeringsplatforme
 - [ ] Implementer disclosure ("annonce" labels)
