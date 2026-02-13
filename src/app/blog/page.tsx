@@ -28,6 +28,14 @@ export const metadata: Metadata = {
 
 const blogPosts = [
   {
+    slug: "bmi-for-boern-saadan-tjekker-du",
+    title: "BMI for Børn - Sådan Tjekker Du",
+    description: "BMI for børn beregnes anderledes end voksne. Lær om percentiler, ISO BMI, og hvordan du tjekker dit barns vægt sundt. Inkl. tabeller.",
+    category: "Sundhed & Børn",
+    date: "2026-02-13",
+    readTime: "9 min",
+  },
+  {
     slug: "guide-feriepenge-hvornaar-og-hvor-meget",
     title: "Guide: Feriepenge - Hvornår og Hvor Meget?",
     description: "Komplet guide til feriepenge i 2026: Hvornår får du dem udbetalt? Hvor meget får du? Lær om ferieåret og samtidighedsferie.",
