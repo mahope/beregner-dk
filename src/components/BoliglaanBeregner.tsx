@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { BoliglaanAffiliate } from "./AffiliateBox";
 
 type LaanType = "fastforrentet" | "variabel" | "afdragsfrit";
 
@@ -264,9 +265,14 @@ export default function BoliglaanBeregner() {
         </div>
       )}
 
+      {/* Affiliate box - vises når brugeren har beregnet */}
+      {resultat && (
+        <BoliglaanAffiliate className="mt-6" />
+      )}
+
       {/* Aktuelle renter */}
-      <div className="p-4 bg-blue-50 rounded-lg">
-        <h3 className="font-medium mb-3 text-blue-800">📊 Typiske renter (februar 2026)</h3>
+      <div className="p-4 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
+        <h3 className="font-medium mb-3 text-blue-800 dark:text-blue-200">📊 Typiske renter (februar 2026)</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
           <div>
             <span className="text-blue-600 font-medium">4% fast (30 år)</span>
