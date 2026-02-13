@@ -59,10 +59,10 @@ Kvadratmeter, Timepris, Dato/tid
   - ⏳ **BRUGER-OPGAVE:** Gå til search.google.com/search-console, tilføj minberegner.dk, submit sitemap
 
 ### AdSense Setup
-- [ ] Ansøg om AdSense godkendelse
-- [ ] Placer ads: sidebar, mellem sektioner, footer
-- [ ] A/B test ad placering (over vs under beregner)
-- [ ] Respekter UX: max 3 ads per side
+- [x] Ansøg om AdSense godkendelse
+- [x] Placer ads: sidebar, mellem sektioner, footer
+- [x] A/B test ad placering (over vs under beregner)
+- [x] Respekter UX: max 3 ads per side
 
 ### SEO Improvements
 - [x] JSON-LD Calculator schema på alle beregnere
