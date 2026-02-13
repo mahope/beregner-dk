@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { trackCalculation } from "@/lib/analytics";
+import { ShareCalculation } from "@/components/ShareCalculation";
+import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 
 type BeregningsMode = "find-procent" | "find-resultat" | "find-heltal" | "stigning";
 
@@ -21,6 +23,35 @@ export default function ProcentBeregner() {
   const [til, setTil] = useState<number>(125);
   
   const hasTracked = useRef(false);
+  const hasLoadedUrl = useRef(false);
+
+  // Load state from URL on mount
+  useEffect(() => {
+    if (hasLoadedUrl.current) return;
+    hasLoadedUrl.current = true;
+    
+    const urlState = getStateFromUrl();
+    if (urlState && urlState.type === 'procent') {
+      const inputs = urlState.inputs;
+      if (inputs.mode) setMode(inputs.mode);
+      if (inputs.deltal !== undefined) setDeltal(inputs.deltal);
+      if (inputs.heltal !== undefined) setHeltal(inputs.heltal);
+      if (inputs.procent !== undefined) setProcent(inputs.procent);
+      if (inputs.baseVal !== undefined) setBaseVal(inputs.baseVal);
+      if (inputs.fra !== undefined) setFra(inputs.fra);
+      if (inputs.til !== undefined) setTil(inputs.til);
+    }
+  }, []);
+
+  // Get shareable link for current calculation
+  const getShareableLink = useCallback(() => {
+    const state: CalculationState = {
+      type: 'procent',
+      inputs: { mode, deltal, heltal, procent, baseVal, fra, til },
+      timestamp: Date.now(),
+    };
+    return generateShareableLink(state);
+  }, [mode, deltal, heltal, procent, baseVal, fra, til]);
 
   const resultat = useMemo(() => {
     switch (mode) {
@@ -208,6 +239,15 @@ export default function ProcentBeregner() {
               : resultat.resultat.toFixed(2)}
           </p>
           <p className="text-gray-600 mt-2">{resultat.forklaring}</p>
+          
+          {/* Share button */}
+          <div className="mt-4 flex justify-center">
+            <ShareCalculation
+              getShareableLink={getShareableLink}
+              calculatorName="Procentberegner"
+              resultSummary={resultat.forklaring}
+            />
+          </div>
         </div>
       )}
 

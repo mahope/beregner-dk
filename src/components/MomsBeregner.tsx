@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { trackCalculation } from "@/lib/analytics";
+import { ShareCalculation } from "@/components/ShareCalculation";
+import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 
 // Dansk momssats
 const MOMS_SATS = 0.25; // 25%
@@ -10,6 +12,30 @@ export default function MomsBeregner() {
   const [beloeb, setBeloeb] = useState<number>(1000);
   const [beregningsType, setBeregningsType] = useState<"tillaegMoms" | "fratraekMoms" | "findMoms">("tillaegMoms");
   const hasTracked = useRef(false);
+  const hasLoadedUrl = useRef(false);
+
+  // Load state from URL on mount
+  useEffect(() => {
+    if (hasLoadedUrl.current) return;
+    hasLoadedUrl.current = true;
+    
+    const urlState = getStateFromUrl();
+    if (urlState && urlState.type === 'moms') {
+      const inputs = urlState.inputs;
+      if (inputs.beloeb !== undefined) setBeloeb(inputs.beloeb);
+      if (inputs.beregningsType) setBeregningsType(inputs.beregningsType);
+    }
+  }, []);
+
+  // Get shareable link for current calculation
+  const getShareableLink = useCallback(() => {
+    const state: CalculationState = {
+      type: 'moms',
+      inputs: { beloeb, beregningsType },
+      timestamp: Date.now(),
+    };
+    return generateShareableLink(state);
+  }, [beloeb, beregningsType]);
 
   const beregning = useMemo(() => {
     switch (beregningsType) {
@@ -164,6 +190,15 @@ export default function MomsBeregner() {
             {formatKr(beregning.prisInklMoms)}
           </p>
         </div>
+      </div>
+
+      {/* Share button */}
+      <div className="flex justify-center">
+        <ShareCalculation
+          getShareableLink={getShareableLink}
+          calculatorName="Momsberegner"
+          resultSummary={`${formatKr(beregning.prisUdenMoms)} + moms = ${formatKr(beregning.prisInklMoms)}`}
+        />
       </div>
 
       {/* Hurtig reference tabel */}

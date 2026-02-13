@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { trackCalculation } from "@/lib/analytics";
+import { ShareCalculation } from "@/components/ShareCalculation";
+import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 
 type Koen = "mand" | "kvinde";
 
@@ -11,6 +13,32 @@ export default function BMIBeregner() {
   const [koen, setKoen] = useState<Koen>("mand");
   const [alder, setAlder] = useState<number>(30);
   const hasTracked = useRef(false);
+  const hasLoadedUrl = useRef(false);
+
+  // Load state from URL on mount
+  useEffect(() => {
+    if (hasLoadedUrl.current) return;
+    hasLoadedUrl.current = true;
+    
+    const urlState = getStateFromUrl();
+    if (urlState && urlState.type === 'bmi') {
+      const inputs = urlState.inputs;
+      if (inputs.vaegt !== undefined) setVaegt(inputs.vaegt);
+      if (inputs.hoejde !== undefined) setHoejde(inputs.hoejde);
+      if (inputs.koen) setKoen(inputs.koen);
+      if (inputs.alder !== undefined) setAlder(inputs.alder);
+    }
+  }, []);
+
+  // Get shareable link for current calculation
+  const getShareableLink = useCallback(() => {
+    const state: CalculationState = {
+      type: 'bmi',
+      inputs: { vaegt, hoejde, koen, alder },
+      timestamp: Date.now(),
+    };
+    return generateShareableLink(state);
+  }, [vaegt, hoejde, koen, alder]);
 
   const resultat = useMemo(() => {
     if (!vaegt || !hoejde || hoejde === 0) {
@@ -173,6 +201,15 @@ export default function BMIBeregner() {
             <p className="text-sm text-gray-600 text-center">
               Idealvægt for din højde: <strong>{resultat.idealVaegtMin} - {resultat.idealVaegtMax} kg</strong>
             </p>
+          </div>
+
+          {/* Share button */}
+          <div className="mt-4 flex justify-center">
+            <ShareCalculation
+              getShareableLink={getShareableLink}
+              calculatorName="BMI Beregner"
+              resultSummary={`BMI ${resultat.bmi} - ${resultat.kategori}`}
+            />
           </div>
         </div>
       )}

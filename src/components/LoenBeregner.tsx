@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import { ShareCalculation } from "@/components/ShareCalculation";
+import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 
 // 2026 danske skattesatser (tilnærmede)
 const SKATTESATSER = {
@@ -21,6 +23,33 @@ export default function LoenBeregner() {
   const [medKirkeskat, setMedKirkeskat] = useState(true);
   const [kommuneSkat, setKommuneSkat] = useState(24.94);
   const [pension, setPension] = useState(0);
+  const hasLoadedUrl = useRef(false);
+
+  // Load state from URL on mount
+  useEffect(() => {
+    if (hasLoadedUrl.current) return;
+    hasLoadedUrl.current = true;
+    
+    const urlState = getStateFromUrl();
+    if (urlState && urlState.type === 'loen') {
+      const inputs = urlState.inputs;
+      if (inputs.bruttoLoen !== undefined) setBruttoLoen(inputs.bruttoLoen);
+      if (inputs.periode) setPeriode(inputs.periode);
+      if (inputs.medKirkeskat !== undefined) setMedKirkeskat(inputs.medKirkeskat);
+      if (inputs.kommuneSkat !== undefined) setKommuneSkat(inputs.kommuneSkat);
+      if (inputs.pension !== undefined) setPension(inputs.pension);
+    }
+  }, []);
+
+  // Get shareable link for current calculation
+  const getShareableLink = useCallback(() => {
+    const state: CalculationState = {
+      type: 'loen',
+      inputs: { bruttoLoen, periode, medKirkeskat, kommuneSkat, pension },
+      timestamp: Date.now(),
+    };
+    return generateShareableLink(state);
+  }, [bruttoLoen, periode, medKirkeskat, kommuneSkat, pension]);
 
   const beregning = useMemo(() => {
     // Konverter til årlig
@@ -214,6 +243,15 @@ export default function LoenBeregner() {
         <p className="text-sm text-gray-600">
           Effektiv skatteprocent: <strong>{beregning.effektivSkat.toFixed(1)}%</strong>
         </p>
+      </div>
+
+      {/* Share button */}
+      <div className="flex justify-center">
+        <ShareCalculation
+          getShareableLink={getShareableLink}
+          calculatorName="Lønberegner"
+          resultSummary={`${formatKr(beregning.maanedligBrutto)} brutto → ${formatKr(beregning.maanedligNetto)} netto`}
+        />
       </div>
 
       {/* Detaljeret breakdown */}
