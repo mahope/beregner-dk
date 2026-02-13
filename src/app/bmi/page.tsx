@@ -7,6 +7,7 @@ import {
   FAQSchema,
   BreadcrumbSchema,
 } from "@/components/StructuredData";
+import { SidebarAd, InlineAd } from "@/components/ads/AdBanner";
 
 const baseUrl = "https://minberegner.dk";
 
@@ -72,7 +73,9 @@ const faqItems = [
 
 export default function BMIPage() {
   return (
-    <div>
+    <div className="flex flex-col lg:flex-row gap-8">
+      {/* Main Content - Left Column */}
+      <div className="flex-1 min-w-0">
       <CalculatorSchema
         name="BMI Beregner"
         description="Gratis BMI beregner. Beregn dit Body Mass Index og se om din vægt er sund."
@@ -103,6 +106,9 @@ export default function BMIPage() {
       </p>
 
       <BMIBeregner />
+      
+      {/* Inline Ad - Between calculator and content */}
+      <InlineAd slotId="bmi-after-calculator" />
 
       <div className="mt-12 prose max-w-none">
         <h2>Hvad er BMI?</h2>
@@ -193,9 +199,17 @@ export default function BMIPage() {
         </div>
       </div>
 
+      <InlineAd slotId="bmi-before-faq" />
+
       <FAQ items={faqItems} />
 
       <RelatedCalculators current="/bmi" />
+      </div>
+
+      {/* Sidebar - Right Column (Desktop only) */}
+      <aside className="hidden lg:block lg:w-[300px] flex-shrink-0">
+        <SidebarAd slotId="bmi-sidebar" />
+      </aside>
     </div>
   );
 }

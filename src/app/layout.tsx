@@ -7,6 +7,7 @@ import Header from "@/components/Header";
 import CookieConsent from "@/components/CookieConsent";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { SkipLink } from "@/components/SkipLink";
+import { FooterAd } from "@/components/ads/AdBanner";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -224,6 +225,9 @@ export default function RootLayout({
             <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm">
               <p>© {new Date().getFullYear()} MinBeregner.dk — Gratis online beregnere</p>
             </div>
+            
+            {/* Footer Ad - Maximum 3 ads per page policy */}
+            <FooterAd />
           </div>
         </footer>
         </ThemeProvider>

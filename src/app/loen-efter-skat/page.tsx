@@ -7,6 +7,7 @@ import {
   FAQSchema,
   BreadcrumbSchema,
 } from "@/components/StructuredData";
+import { SidebarAd, InlineAd } from "@/components/ads/AdBanner";
 
 const baseUrl = "https://minberegner.dk";
 
@@ -83,7 +84,9 @@ const faqItems = [
 
 export default function LoenPage() {
   return (
-    <div>
+    <div className="flex flex-col lg:flex-row gap-8">
+      {/* Main Content - Left Column */}
+      <div className="flex-1 min-w-0">
       <CalculatorSchema
         name="Lønberegner - Løn efter skat"
         description="Gratis lønberegner. Se hvad du får udbetalt efter skat, AM-bidrag og pension."
@@ -113,6 +116,9 @@ export default function LoenPage() {
       </p>
 
       <LoenBeregner />
+      
+      {/* Inline Ad - After calculator */}
+      <InlineAd slotId="loen-after-calculator" />
 
       <div className="mt-12 prose max-w-none">
         <h2>Sådan beregnes din skat i Danmark</h2>
@@ -240,6 +246,12 @@ export default function LoenPage() {
       <FAQ items={faqItems} />
 
       <RelatedCalculators current="/loen-efter-skat" />
+      </div>
+
+      {/* Sidebar - Right Column (Desktop only) */}
+      <aside className="hidden lg:block lg:w-[300px] flex-shrink-0">
+        <SidebarAd slotId="loen-sidebar" />
+      </aside>
     </div>
   );
 }

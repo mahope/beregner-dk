@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
+import { InlineAd } from "@/components/ads/AdBanner";
 
 const baseUrl = "https://minberegner.dk";
 
@@ -88,6 +89,9 @@ export default function PensionGuidePage() {
           selv på et tidspunkt. I denne guide giver vi dig konkrete tal, tommelfingerregler og 
           en forståelse af det danske pensionssystem, så du kan planlægge din økonomiske fremtid.
         </p>
+
+        {/* Inline Ad - After introduction */}
+        <InlineAd slotId="pension-after-intro" />
 
         <h2>Den korte version: Hvor meget skal du spare?</h2>
         <p>
@@ -453,6 +457,10 @@ export default function PensionGuidePage() {
         </div>
 
         <h2>Ofte stillede spørgsmål</h2>
+        
+        {/* Inline Ad - Before FAQ */}
+        <InlineAd slotId="pension-before-faq" />
+        
         {faqItems.map((item, index) => (
           <div key={index} className="mb-4">
             <h3 className="text-lg">{item.question}</h3>
