@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { BoliglaanAffiliate } from "./AffiliateBox";
+import { PrintResult } from "./PrintResult";
 
 type LaanType = "fastforrentet" | "variabel" | "afdragsfrit";
 
@@ -102,7 +103,7 @@ export default function BoliglaanBeregner() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 print-area">
       {/* Input */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-4">
@@ -261,6 +262,14 @@ export default function BoliglaanBeregner() {
               <p className="text-sm text-gray-500">Samlet rente</p>
               <p className="font-bold text-lg">{rente + bidragssats}% p.a.</p>
             </div>
+          </div>
+
+          {/* Print button */}
+          <div className="mt-6 flex justify-center">
+            <PrintResult
+              calculatorName="Boliglån Beregner"
+              resultSummary={`Lån: ${formatKr(resultat.laanBeloeb)} • Ydelse: ${formatKr(resultat.maanedligYdelse)}/md`}
+            />
           </div>
         </div>
       )}

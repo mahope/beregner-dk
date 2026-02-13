@@ -68,14 +68,156 @@ html {
 
 /* Print styles */
 @media print {
+  /* Hide non-essential elements */
   header,
   footer,
-  nav {
+  nav,
+  .print\\:hidden,
+  [data-cookie-consent],
+  .cookie-consent,
+  #cookie-consent,
+  .share-calculation,
+  .related-calculators,
+  .ad-banner,
+  .affiliate-box,
+  .skip-link,
+  .theme-toggle,
+  button[title="Skift tema"],
+  .mobile-menu-toggle {
     display: none !important;
   }
 
+  /* Reset background colors for print */
+  html,
+  body {
+    background: white !important;
+    color: black !important;
+    font-size: 12pt !important;
+  }
+
+  /* Main content full width */
   main {
     max-width: none !important;
+    padding: 1cm !important;
+    margin: 0 !important;
+  }
+
+  /* Container resets */
+  .container,
+  .max-w-4xl,
+  .max-w-3xl,
+  .max-w-2xl {
+    max-width: none !important;
     padding: 0 !important;
+  }
+
+  /* Print area styling */
+  .print-area {
+    page-break-inside: avoid;
+  }
+
+  /* Print header styling */
+  #print-meta {
+    display: block !important;
+    margin-bottom: 1cm;
+    padding-bottom: 0.5cm;
+    border-bottom: 2px solid #333;
+  }
+
+  #print-meta .print-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  #print-meta .print-logo {
+    font-weight: bold;
+    font-size: 14pt;
+  }
+
+  #print-meta .print-title {
+    font-size: 16pt;
+    font-weight: 600;
+  }
+
+  #print-meta .print-date {
+    font-size: 10pt;
+    color: #666;
+  }
+
+  /* Result cards styling for print */
+  .bg-white,
+  .bg-gray-50 {
+    background: white !important;
+    box-shadow: none !important;
+    border: 1px solid #ddd !important;
+  }
+
+  /* Dark mode elements reset for print */
+  .dark\\:bg-gray-800,
+  .dark\\:bg-gray-700,
+  .dark\\:bg-gray-900 {
+    background: white !important;
+  }
+
+  .dark\\:text-white,
+  .dark\\:text-gray-200,
+  .dark\\:text-gray-300 {
+    color: black !important;
+  }
+
+  /* Ensure colored text prints visibly */
+  .text-blue-600,
+  .text-green-600,
+  .text-yellow-600,
+  .text-orange-600,
+  .text-red-500,
+  .text-red-700 {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Input fields in print */
+  input,
+  select {
+    border: 1px solid #999 !important;
+    background: #f9f9f9 !important;
+    padding: 0.5em !important;
+  }
+
+  /* Links styling for print */
+  a {
+    color: #000 !important;
+    text-decoration: underline !important;
+  }
+
+  a[href]::after {
+    content: " (" attr(href) ")";
+    font-size: 9pt;
+    color: #666;
+  }
+
+  /* Don't show URL for internal links */
+  a[href^="/"]::after,
+  a[href^="#"]::after {
+    content: "";
+  }
+
+  /* Print footer */
+  @page {
+    margin: 1.5cm;
+    @bottom-center {
+      content: "minberegner.dk";
+      font-size: 10pt;
+      color: #666;
+    }
+  }
+
+  /* Avoid page breaks in cards */
+  .rounded-xl,
+  .rounded-lg {
+    page-break-inside: avoid;
   }
 }

@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { trackCalculation } from "@/lib/analytics";
 import { ShareCalculation } from "@/components/ShareCalculation";
+import { PrintResult } from "@/components/PrintResult";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { ModeSelector, ModeOption } from "@/components/ModeSelector";
 
@@ -119,7 +120,7 @@ export default function ProcentBeregner() {
   }, [resultat]);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 print-area">
       {/* Mode selection with keyboard navigation */}
       <ModeSelector
         modes={MODES}
@@ -240,10 +241,14 @@ export default function ProcentBeregner() {
           </p>
           <p className="text-gray-600 mt-2">{resultat.forklaring}</p>
           
-          {/* Share button */}
-          <div className="mt-4 flex justify-center">
+          {/* Share and Print buttons */}
+          <div className="mt-4 flex justify-center gap-3">
             <ShareCalculation
               getShareableLink={getShareableLink}
+              calculatorName="Procentberegner"
+              resultSummary={resultat.forklaring}
+            />
+            <PrintResult
               calculatorName="Procentberegner"
               resultSummary={resultat.forklaring}
             />

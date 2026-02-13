@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { trackCalculation } from "@/lib/analytics";
 import { ShareCalculation } from "@/components/ShareCalculation";
+import { PrintResult } from "@/components/PrintResult";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 
 type Koen = "mand" | "kvinde";
@@ -112,7 +113,7 @@ export default function BMIBeregner() {
   }, [resultat]);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 print-area">
       {/* Input */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-4">
@@ -203,10 +204,14 @@ export default function BMIBeregner() {
             </p>
           </div>
 
-          {/* Share button */}
-          <div className="mt-4 flex justify-center">
+          {/* Share and Print buttons */}
+          <div className="mt-4 flex justify-center gap-3">
             <ShareCalculation
               getShareableLink={getShareableLink}
+              calculatorName="BMI Beregner"
+              resultSummary={`BMI ${resultat.bmi} - ${resultat.kategori}`}
+            />
+            <PrintResult
               calculatorName="BMI Beregner"
               resultSummary={`BMI ${resultat.bmi} - ${resultat.kategori}`}
             />

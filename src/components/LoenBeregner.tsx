@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { ShareCalculation } from "@/components/ShareCalculation";
+import { PrintResult } from "@/components/PrintResult";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 
 // 2026 danske skattesatser (tilnærmede)
@@ -129,7 +130,7 @@ export default function LoenBeregner() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 print-area">
       {/* Input */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-4">
@@ -245,10 +246,14 @@ export default function LoenBeregner() {
         </p>
       </div>
 
-      {/* Share button */}
-      <div className="flex justify-center">
+      {/* Share and Print buttons */}
+      <div className="flex justify-center gap-3">
         <ShareCalculation
           getShareableLink={getShareableLink}
+          calculatorName="Lønberegner"
+          resultSummary={`${formatKr(beregning.maanedligBrutto)} brutto → ${formatKr(beregning.maanedligNetto)} netto`}
+        />
+        <PrintResult
           calculatorName="Lønberegner"
           resultSummary={`${formatKr(beregning.maanedligBrutto)} brutto → ${formatKr(beregning.maanedligNetto)} netto`}
         />

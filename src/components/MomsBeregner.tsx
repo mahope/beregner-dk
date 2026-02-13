@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { trackCalculation } from "@/lib/analytics";
 import { ShareCalculation } from "@/components/ShareCalculation";
+import { PrintResult } from "@/components/PrintResult";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 
 // Dansk momssats
@@ -113,7 +114,7 @@ export default function MomsBeregner() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 print-area">
       {/* Beregningstype valg */}
       <div>
         <label className="block text-sm font-medium mb-3">Hvad vil du beregne?</label>
@@ -192,10 +193,14 @@ export default function MomsBeregner() {
         </div>
       </div>
 
-      {/* Share button */}
-      <div className="flex justify-center">
+      {/* Share and Print buttons */}
+      <div className="flex justify-center gap-3">
         <ShareCalculation
           getShareableLink={getShareableLink}
+          calculatorName="Momsberegner"
+          resultSummary={`${formatKr(beregning.prisUdenMoms)} + moms = ${formatKr(beregning.prisInklMoms)}`}
+        />
+        <PrintResult
           calculatorName="Momsberegner"
           resultSummary={`${formatKr(beregning.prisUdenMoms)} + moms = ${formatKr(beregning.prisInklMoms)}`}
         />
