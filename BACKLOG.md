@@ -206,7 +206,11 @@ Kvadratmeter, Timepris, Dato/tid
 ## 🔧 Phase 3: Nye Beregnere & Scale (Prioritet 3)
 
 ### Høj-værdi Beregnere (affiliate potential)
-- [ ] Billån beregner (→ billån affiliate)
+- [x] Billån beregner (→ billån affiliate)
+  - ✅ **LØST (2026-02-13):** Implementeret på /billaan med affiliate links
+  - Input: bilpris, udbetaling, løbetid, rente
+  - Beregner månedlig ydelse, samlet rente og totalpris
+  - 4 affiliate partnere: Samlino, Bank Norwegian, Basisbank, Santander
 - [ ] Forbrugslån beregner (→ lån sammenligning)
 - [ ] Ejendomsværdiskat beregner
 - [ ] Arveafgift beregner
