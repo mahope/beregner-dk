@@ -128,7 +128,7 @@ Kvadratmeter, Timepris, Dato/tid
   - ✅ **LØST (2026-02-13):** Alle affiliate boxes har "Annonce" label + disclosure footer
 
 ### Content Expansion
-- [ ] 5 nye blog posts (4/5 færdig):
+- [x] 5 nye blog posts (5/5 færdig):
   - [x] "Sådan beregner du din reelle timeløn"
     - ✅ **LØST (2026-02-13):** /blog/saadan-beregner-du-din-reelle-timeloen
     - 1.300+ ord, FAQ schema, links til timepris/løn-beregnere
@@ -151,8 +151,16 @@ Kvadratmeter, Timepris, Dato/tid
     - Tabeller for indkomstgrænser og max boligstørrelse
     - Eksempler: enlig + familie med beregninger
     - Links til boligstoette, husleje, loen-efter-skat, boernepenge beregnere
-  - "Pension: Hvor meget skal du spare op?"
-- [ ] Hver post: 1000+ ord, FAQ sektion, relaterede beregnere
+  - [x] "Pension: Hvor meget skal du spare op?"
+    - ✅ **LØST (2026-02-13):** /blog/pension-hvor-meget-skal-du-spare-op
+    - 1.500+ ord, 6 FAQ items med schema markup
+    - De tre pensionssøjler forklaret (folkepension, arbejdsmarked, privat)
+    - Tommelfingerregler: 12-17% af løn, 100-alder aktieandel
+    - Renters rente eksempler med tabeller
+    - Folkepensionsalder-tabel
+    - Links til pension, opsparing, efterløn, løn-efter-skat beregnere
+- [x] Hver post: 1000+ ord, FAQ sektion, relaterede beregnere
+  - ✅ **LØST (2026-02-13):** Alle 5 posts opfylder kravene
 
 ### UX Forbedringer
 - [x] Dark mode (system preference default)
