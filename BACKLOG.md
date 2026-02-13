@@ -69,8 +69,12 @@ Kvadratmeter, Timepris, Dato/tid
   - ✅ **LØST (2026-02-13):** 13+ nye beregner-links tilføjet i 3 blog posts
 
 ### Analytics
-- [ ] Implementer Plausible (analytics.holstjensen.eu)
-- [ ] Events: beregning_udført, resultat_kopieret, ad_clicked
+- [x] Implementer Plausible (analytics.holstjensen.eu)
+  - ✅ **LØST (2026-02-13):** Self-hosted Plausible script tilføjet
+  - analytics.ts utility med tracking funktioner
+  - Integreret i BMI, Procent, Moms beregnere
+- [x] Events: beregning_udført, resultat_kopieret, ad_clicked
+  - ✅ **LØST (2026-02-13):** Event tracking implementeret med 2s delay
 - [ ] Goal: beregninger per bruger
 - [ ] Search Console: track keyword rankings
 
