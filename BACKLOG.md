@@ -174,7 +174,12 @@ Kvadratmeter, Timepris, Dato/tid
   - ModeSelector: Arrow keys til at navigere mellem modes (radiogroup pattern)
   - ShareCalculation: Escape lukker modal, fokus fanges i modal
   - ARIA labels på input-felter
-- [ ] Print-venligt resultat layout
+- [x] Print-venligt resultat layout
+  - ✅ **LØST (2026-02-13):** PrintResult komponent implementeret
+  - Udskriv-knap på 5 nøgle-beregnere: BMI, Løn, Moms, Procent, Boliglån
+  - Print header med logo, beregner-navn og dato
+  - Print-styles skjuler navigation, ads, affiliates, dark mode
+  - Kort/results undgår page breaks
 - [ ] Loading states på tunge beregninger
 - [ ] Input validation med venlige fejlbeskeder
 
