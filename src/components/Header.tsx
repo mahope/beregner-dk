@@ -36,6 +36,7 @@ const navigation: NavItem[] = [
       { name: "💸 Rentefradrag", href: "/rentefradrag" },
       { name: "⚡ Elberegner", href: "/elberegner" },
       { name: "📐 Kvadratmeter", href: "/kvadratmeter" },
+      { name: "🏛️ Ejendomsskat", href: "/ejendomsvaerdiskat" },
     ],
   },
   {

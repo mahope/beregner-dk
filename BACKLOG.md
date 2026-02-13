@@ -217,7 +217,13 @@ Kvadratmeter, Timepris, Dato/tid
   - Beregner månedlig ydelse, samlet rente og totalpris
   - 5 affiliate partnere: Samlino, Bank Norwegian, Basisbank, Lunar, AK Nordic
   - Inkluderer FAQ, tips og ydelsestabel
-- [ ] Ejendomsværdiskat beregner
+- [x] Ejendomsværdiskat beregner
+  - ✅ **LØST (2026-02-13):** Implementeret på /ejendomsvaerdiskat
+  - Input: ejendomsværdi, grundværdi, kommunekode
+  - Beregner ejendomsværdiskat (0,92% op til 3%, 3% over bundfradrag)
+  - Beregner grundskyld (kommuneprocent × grundværdi)
+  - Viser samlet ejendomsskat og månedligt beløb
+  - 50+ kommuner med korrekte kommuneprocenter
 - [ ] Arveafgift beregner
 - [ ] Aktieskat / crypto skat beregner
 
