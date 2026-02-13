@@ -28,6 +28,14 @@ export const metadata: Metadata = {
 
 const blogPosts = [
   {
+    slug: "saadan-beregner-du-din-reelle-timeloen",
+    title: "Sådan beregner du din reelle timeløn",
+    description: "Lær at beregne din faktiske timeløn inkl. pension, frokost, ferie og andre goder. Se hvad du virkelig tjener per time.",
+    category: "Løn & Økonomi",
+    date: "2026-02-13",
+    readTime: "7 min",
+  },
+  {
     slug: "hvordan-beregner-man-moms",
     title: "Hvordan beregner man moms? En komplet guide",
     description: "Lær alt om dansk moms: Hvordan du tillægger og fratrækker 25% moms, og hvornår du skal gøre hvad.",
