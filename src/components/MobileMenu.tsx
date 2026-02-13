@@ -39,7 +39,7 @@ export default function MobileMenu({ items }: MobileMenuProps) {
       {/* Menu button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="md:hidden p-2 text-gray-600 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg"
+        className="md:hidden p-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg"
         aria-label={isOpen ? "Luk menu" : "Åbn menu"}
         aria-expanded={isOpen}
       >
@@ -85,17 +85,17 @@ export default function MobileMenu({ items }: MobileMenuProps) {
 
       {/* Menu panel */}
       <div
-        className={`fixed top-0 right-0 h-full w-72 bg-white shadow-xl z-50 transform transition-transform duration-300 ease-in-out md:hidden ${
+        className={`fixed top-0 right-0 h-full w-72 bg-white dark:bg-gray-900 shadow-xl z-50 transform transition-transform duration-300 ease-in-out md:hidden ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b">
-            <span className="text-lg font-bold text-blue-600">Menu</span>
+          <div className="flex items-center justify-between p-4 border-b dark:border-gray-700">
+            <span className="text-lg font-bold text-blue-600 dark:text-blue-400">Menu</span>
             <button
               onClick={() => setIsOpen(false)}
-              className="p-2 text-gray-600 hover:text-gray-900 rounded-lg"
+              className="p-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white rounded-lg"
               aria-label="Luk menu"
             >
               <svg
@@ -125,8 +125,8 @@ export default function MobileMenu({ items }: MobileMenuProps) {
                       href={item.href}
                       className={`block px-4 py-3 rounded-lg transition-colors ${
                         isActive
-                          ? "bg-blue-50 text-blue-700 font-medium"
-                          : "text-gray-700 hover:bg-gray-50"
+                          ? "bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-medium"
+                          : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
                       }`}
                     >
                       {item.name}
@@ -138,7 +138,7 @@ export default function MobileMenu({ items }: MobileMenuProps) {
           </nav>
 
           {/* Footer */}
-          <div className="p-4 border-t text-center text-sm text-gray-500">
+          <div className="p-4 border-t dark:border-gray-700 text-center text-sm text-gray-500 dark:text-gray-400">
             <p>MinBeregner.dk</p>
             <p>Gratis beregnere</p>
           </div>

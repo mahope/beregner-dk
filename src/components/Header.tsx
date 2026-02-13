@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import MobileMenu from "./MobileMenu";
+import ThemeToggle from "./ThemeToggle";
 
 const navigation = [
   { name: "Forside", href: "/" },
@@ -15,12 +16,12 @@ const navigation = [
 
 export default function Header() {
   return (
-    <header className="bg-white shadow-sm sticky top-0 z-50">
+    <header className="bg-white dark:bg-gray-900 shadow-sm dark:shadow-gray-800/50 sticky top-0 z-50 transition-colors">
       <div className="max-w-6xl mx-auto px-4">
         <div className="flex items-center justify-between py-4">
           <Link
             href="/"
-            className="text-2xl font-bold text-blue-600 hover:text-blue-700 transition-colors"
+            className="text-2xl font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
           >
             MinBeregner.dk
           </Link>
@@ -29,13 +30,17 @@ export default function Header() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="px-3 py-2 text-sm text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                className="px-3 py-2 text-sm text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
               >
                 {item.name}
               </Link>
             ))}
+            <ThemeToggle />
           </nav>
-          <MobileMenu items={navigation} />
+          <div className="flex items-center gap-2 md:hidden">
+            <ThemeToggle />
+            <MobileMenu items={navigation} />
+          </div>
         </div>
       </div>
     </header>

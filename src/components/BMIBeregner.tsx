@@ -117,40 +117,40 @@ export default function BMIBeregner() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-2">Vægt (kg)</label>
+            <label className="block text-sm font-medium mb-2 dark:text-gray-200">Vægt (kg)</label>
             <input
               type="number"
               min="30"
               max="300"
               value={vaegt}
               onChange={(e) => setVaegt(parseFloat(e.target.value) || 0)}
-              className="w-full px-4 py-3 border rounded-lg text-lg"
+              className="w-full px-4 py-3 border dark:border-gray-600 rounded-lg text-lg bg-white dark:bg-gray-800 dark:text-white"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">Højde (cm)</label>
+            <label className="block text-sm font-medium mb-2 dark:text-gray-200">Højde (cm)</label>
             <input
               type="number"
               min="100"
               max="250"
               value={hoejde}
               onChange={(e) => setHoejde(parseFloat(e.target.value) || 0)}
-              className="w-full px-4 py-3 border rounded-lg text-lg"
+              className="w-full px-4 py-3 border dark:border-gray-600 rounded-lg text-lg bg-white dark:bg-gray-800 dark:text-white"
             />
           </div>
         </div>
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-2">Køn</label>
+            <label className="block text-sm font-medium mb-2 dark:text-gray-200">Køn</label>
             <div className="flex gap-4">
               <button
                 onClick={() => setKoen("mand")}
                 className={`flex-1 py-3 rounded-lg border-2 transition-colors ${
                   koen === "mand"
-                    ? "border-blue-500 bg-blue-50 text-blue-700"
-                    : "border-gray-200 hover:border-gray-300"
+                    ? "border-blue-500 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300"
+                    : "border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 dark:text-gray-300"
                 }`}
               >
                 👨 Mand
@@ -159,8 +159,8 @@ export default function BMIBeregner() {
                 onClick={() => setKoen("kvinde")}
                 className={`flex-1 py-3 rounded-lg border-2 transition-colors ${
                   koen === "kvinde"
-                    ? "border-pink-500 bg-pink-50 text-pink-700"
-                    : "border-gray-200 hover:border-gray-300"
+                    ? "border-pink-500 bg-pink-50 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300"
+                    : "border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 dark:text-gray-300"
                 }`}
               >
                 👩 Kvinde
@@ -169,14 +169,14 @@ export default function BMIBeregner() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">Alder</label>
+            <label className="block text-sm font-medium mb-2 dark:text-gray-200">Alder</label>
             <input
               type="number"
               min="18"
               max="120"
               value={alder}
               onChange={(e) => setAlder(parseInt(e.target.value) || 0)}
-              className="w-full px-4 py-3 border rounded-lg text-lg"
+              className="w-full px-4 py-3 border dark:border-gray-600 rounded-lg text-lg bg-white dark:bg-gray-800 dark:text-white"
             />
           </div>
         </div>
@@ -184,9 +184,9 @@ export default function BMIBeregner() {
 
       {/* Resultat */}
       {resultat && (
-        <div className="p-6 bg-white rounded-xl shadow-sm border">
+        <div className="p-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm border dark:border-gray-700">
           <div className="text-center mb-6">
-            <p className="text-sm text-gray-500 mb-1">Dit BMI</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Dit BMI</p>
             <p className={`text-5xl font-bold ${resultat.farve}`}>
               {resultat.bmi}
             </p>
@@ -195,11 +195,11 @@ export default function BMIBeregner() {
             </p>
           </div>
 
-          <p className="text-gray-600 text-center mb-6">{resultat.beskrivelse}</p>
+          <p className="text-gray-600 dark:text-gray-300 text-center mb-6">{resultat.beskrivelse}</p>
 
-          <div className="bg-gray-50 rounded-lg p-4">
-            <p className="text-sm text-gray-600 text-center">
-              Idealvægt for din højde: <strong>{resultat.idealVaegtMin} - {resultat.idealVaegtMax} kg</strong>
+          <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+            <p className="text-sm text-gray-600 dark:text-gray-300 text-center">
+              Idealvægt for din højde: <strong className="dark:text-white">{resultat.idealVaegtMin} - {resultat.idealVaegtMax} kg</strong>
             </p>
           </div>
 
@@ -215,31 +215,31 @@ export default function BMIBeregner() {
       )}
 
       {/* BMI skala */}
-      <div className="p-4 bg-gray-50 rounded-lg">
-        <h3 className="font-medium mb-3">BMI kategorier (voksne)</h3>
-        <div className="space-y-2 text-sm">
+      <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+        <h3 className="font-medium mb-3 dark:text-white">BMI kategorier (voksne)</h3>
+        <div className="space-y-2 text-sm dark:text-gray-300">
           <div className="flex justify-between">
-            <span className="text-blue-600">Under 18,5</span>
+            <span className="text-blue-600 dark:text-blue-400">Under 18,5</span>
             <span>Undervægtig</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-green-600">18,5 - 24,9</span>
+            <span className="text-green-600 dark:text-green-400">18,5 - 24,9</span>
             <span>Normalvægtig</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-yellow-600">25,0 - 29,9</span>
+            <span className="text-yellow-600 dark:text-yellow-400">25,0 - 29,9</span>
             <span>Overvægtig</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-orange-600">30,0 - 34,9</span>
+            <span className="text-orange-600 dark:text-orange-400">30,0 - 34,9</span>
             <span>Fedme (klasse 1)</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-red-500">35,0 - 39,9</span>
+            <span className="text-red-500 dark:text-red-400">35,0 - 39,9</span>
             <span>Fedme (klasse 2)</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-red-700">40+</span>
+            <span className="text-red-700 dark:text-red-500">40+</span>
             <span>Fedme (klasse 3)</span>
           </div>
         </div>

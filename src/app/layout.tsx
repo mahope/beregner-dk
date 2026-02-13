@@ -5,6 +5,7 @@ import "./globals.css";
 import { OrganizationSchema, WebSiteSchema } from "@/components/StructuredData";
 import Header from "@/components/Header";
 import CookieConsent from "@/components/CookieConsent";
+import { ThemeProvider } from "@/components/ThemeProvider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -122,16 +123,17 @@ export default function RootLayout({
           description="Danmarks samling af gratis online beregnere"
         />
       </head>
-      <body className={`${inter.variable} font-sans min-h-screen bg-gray-50 flex flex-col antialiased`}>
-        <Header />
+      <body className={`${inter.variable} font-sans min-h-screen bg-gray-50 dark:bg-gray-950 flex flex-col antialiased transition-colors`}>
+        <ThemeProvider>
+          <Header />
 
-        <main className="flex-1 max-w-6xl mx-auto px-4 py-8 w-full">
-          {children}
-        </main>
+          <main className="flex-1 max-w-6xl mx-auto px-4 py-8 w-full">
+            {children}
+          </main>
 
-        <CookieConsent />
+          <CookieConsent />
 
-        <footer className="bg-gray-900 text-gray-300 mt-auto">
+          <footer className="bg-gray-900 dark:bg-gray-950 text-gray-300 dark:text-gray-400 mt-auto border-t border-transparent dark:border-gray-800">
           <div className="max-w-6xl mx-auto px-4 py-12">
             {/* Cross-linking sektion */}
             <div className="mb-8 pb-8 border-b border-gray-800">
@@ -222,6 +224,7 @@ export default function RootLayout({
             </div>
           </div>
         </footer>
+        </ThemeProvider>
       </body>
     </html>
   );

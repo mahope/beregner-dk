@@ -253,10 +253,10 @@ export default function Home() {
 
       {/* Hero */}
       <section className="text-center mb-12">
-        <h1 className="text-4xl md:text-5xl font-bold mb-4">
+        <h1 className="text-4xl md:text-5xl font-bold mb-4 dark:text-white">
           Gratis Online Beregnere
         </h1>
-        <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+        <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
           Danmarks samling af nyttige beregnere til økonomi, sundhed og hverdag.
           Helt gratis og uden login — dine data gemmes ikke.
         </p>
@@ -264,24 +264,24 @@ export default function Home() {
 
       {/* Popular calculators */}
       <section className="mb-12">
-        <h2 className="text-2xl font-bold mb-6">Populære beregnere</h2>
+        <h2 className="text-2xl font-bold mb-6 dark:text-white">Populære beregnere</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {popularBeregnere.map((beregner) => (
             <Link
               key={beregner.href}
               href={beregner.href}
-              className="group block p-6 bg-white rounded-xl shadow-sm border-2 border-transparent hover:border-blue-500 hover:shadow-lg transition-all"
+              className="group block p-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm border-2 border-transparent hover:border-blue-500 dark:hover:border-blue-400 hover:shadow-lg transition-all"
             >
               <div className="flex items-start gap-4">
                 <span className="text-4xl">{beregner.icon}</span>
                 <div>
-                  <span className="text-xs text-blue-600 font-medium uppercase tracking-wide">
+                  <span className="text-xs text-blue-600 dark:text-blue-400 font-medium uppercase tracking-wide">
                     {beregner.category}
                   </span>
-                  <h3 className="text-xl font-semibold mt-1 group-hover:text-blue-600 transition-colors">
+                  <h3 className="text-xl font-semibold mt-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 dark:text-white transition-colors">
                     {beregner.title}
                   </h3>
-                  <p className="text-gray-600 mt-2">{beregner.description}</p>
+                  <p className="text-gray-600 dark:text-gray-300 mt-2">{beregner.description}</p>
                 </div>
               </div>
             </Link>
@@ -291,24 +291,24 @@ export default function Home() {
 
       {/* Other calculators */}
       <section className="mb-16">
-        <h2 className="text-2xl font-bold mb-6">Flere beregnere</h2>
+        <h2 className="text-2xl font-bold mb-6 dark:text-white">Flere beregnere</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {oevrigeBeregnere.map((beregner) => (
             <Link
               key={beregner.href}
               href={beregner.href}
-              className="group block p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow"
+              className="group block p-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-shadow"
             >
               <div className="flex items-start gap-4">
                 <span className="text-3xl">{beregner.icon}</span>
                 <div>
-                  <span className="text-xs text-gray-500 font-medium uppercase tracking-wide">
+                  <span className="text-xs text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wide">
                     {beregner.category}
                   </span>
-                  <h3 className="text-lg font-semibold mt-1 group-hover:text-blue-600 transition-colors">
+                  <h3 className="text-lg font-semibold mt-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 dark:text-white transition-colors">
                     {beregner.title}
                   </h3>
-                  <p className="text-gray-600 text-sm mt-1">
+                  <p className="text-gray-600 dark:text-gray-300 text-sm mt-1">
                     {beregner.description}
                   </p>
                 </div>
@@ -319,30 +319,30 @@ export default function Home() {
       </section>
 
       {/* Features */}
-      <section className="bg-white rounded-2xl p-8 mb-16">
-        <h2 className="text-2xl font-bold mb-8 text-center">
+      <section className="bg-white dark:bg-gray-800 rounded-2xl p-8 mb-16">
+        <h2 className="text-2xl font-bold mb-8 text-center dark:text-white">
           Hvorfor bruge MinBeregner.dk?
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="text-center">
             <div className="text-4xl mb-4">🆓</div>
-            <h3 className="font-semibold text-lg mb-2">100% Gratis</h3>
-            <p className="text-gray-600">
+            <h3 className="font-semibold text-lg mb-2 dark:text-white">100% Gratis</h3>
+            <p className="text-gray-600 dark:text-gray-300">
               Alle beregnere er gratis at bruge. Ingen skjulte gebyrer eller
               premium-funktioner.
             </p>
           </div>
           <div className="text-center">
             <div className="text-4xl mb-4">🔒</div>
-            <h3 className="font-semibold text-lg mb-2">Privat & Sikkert</h3>
-            <p className="text-gray-600">
+            <h3 className="font-semibold text-lg mb-2 dark:text-white">Privat & Sikkert</h3>
+            <p className="text-gray-600 dark:text-gray-300">
               Dine data gemmes ikke. Alle beregninger sker lokalt i din browser.
             </p>
           </div>
           <div className="text-center">
             <div className="text-4xl mb-4">🇩🇰</div>
-            <h3 className="font-semibold text-lg mb-2">Danske Satser</h3>
-            <p className="text-gray-600">
+            <h3 className="font-semibold text-lg mb-2 dark:text-white">Danske Satser</h3>
+            <p className="text-gray-600 dark:text-gray-300">
               Opdateret med de nyeste danske satser og regler for 2026.
             </p>
           </div>
@@ -350,7 +350,7 @@ export default function Home() {
       </section>
 
       {/* SEO content */}
-      <section className="prose max-w-none mb-16">
+      <section className="prose dark:prose-invert max-w-none mb-16">
         <h2>Om MinBeregner.dk</h2>
         <p>
           MinBeregner.dk er din go-to ressource for gratis online beregnere. Vi
