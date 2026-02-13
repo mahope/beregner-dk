@@ -145,6 +145,40 @@ export const forsikringAffiliates: AffiliateLink[] = [
     url: "https://www.forsikringsguiden.dk/?ref=minberegner",
     cta: "Tjek priser",
   },
+  {
+    name: "Topdanmark",
+    description: "En af Danmarks største forsikringsselskaber",
+    url: "https://www.topdanmark.dk/?ref=minberegner",
+    cta: "Få tilbud",
+  },
+];
+
+export const bilforsikringAffiliates: AffiliateLink[] = [
+  {
+    name: "Samlino Bilforsikring",
+    description: "Sammenlign bilforsikringer fra 15+ selskaber - spar op til 3.000 kr/år",
+    url: "https://www.samlino.dk/bilforsikring/?ref=minberegner",
+    cta: "Sammenlign",
+    highlight: true,
+  },
+  {
+    name: "Alm. Brand",
+    description: "Bilforsikring med vejhjælp og fri autoreparatør",
+    url: "https://www.almbrand.dk/forsikringer/bilforsikring/?ref=minberegner",
+    cta: "Beregn pris",
+  },
+  {
+    name: "Topdanmark Bil",
+    description: "Få tilbud på 2 min - inkl. bonus fra andre selskaber",
+    url: "https://www.topdanmark.dk/forsikring/bilforsikring/?ref=minberegner",
+    cta: "Få tilbud",
+  },
+  {
+    name: "Tryg Bilforsikring",
+    description: "Danmarks mest valgte bilforsikring - hurtig skadebehandling",
+    url: "https://www.tryg.dk/privat/forsikringer/bilforsikring/?ref=minberegner",
+    cta: "Se priser",
+  },
 ];
 
 // Convenience komponenter
@@ -177,6 +211,17 @@ export function ForsikringAffiliate({ className = "" }: { className?: string }) 
       title="🛡️ Sammenlign forsikringer"
       subtitle="Spar penge på dine forsikringer"
       links={forsikringAffiliates}
+      className={className}
+    />
+  );
+}
+
+export function BilforsikringAffiliate({ className = "" }: { className?: string }) {
+  return (
+    <AffiliateBox
+      title="🚗 Sammenlign bilforsikringer"
+      subtitle="Spar op til 50% på din bilforsikring"
+      links={bilforsikringAffiliates}
       className={className}
     />
   );

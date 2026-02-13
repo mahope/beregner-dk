@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { OpsparingAffiliate } from "./AffiliateBox";
 
 type Frekvens = "maanedlig" | "kvartal" | "aarlig";
 
@@ -247,15 +248,18 @@ export default function OpsparingsBeregner() {
           </details>
 
           {/* Info box */}
-          <div className="p-4 bg-blue-50 rounded-lg">
-            <h3 className="font-medium mb-2">💡 Renters rente-effekten</h3>
-            <p className="text-sm text-gray-600">
+          <div className="p-4 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
+            <h3 className="font-medium mb-2 dark:text-blue-200">💡 Renters rente-effekten</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-300">
               Med renters rente tjener du ikke kun rente på dit indskud, men også
               på den rente du allerede har tjent. Over {periode} år giver dette
               en ekstra gevinst på {formatKr(beregning.samletRente)} i rente
               oveni dine indbetalinger på {formatKr(beregning.samletIndskud)}.
             </p>
           </div>
+
+          {/* Affiliate box - investeringsplatforme */}
+          <OpsparingAffiliate className="mt-6" />
         </>
       )}
     </div>

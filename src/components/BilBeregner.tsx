@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { BilforsikringAffiliate } from "./AffiliateBox";
 
 type Braendstoftype = "benzin" | "diesel" | "el" | "hybrid";
 
@@ -280,9 +281,9 @@ export default function BilBeregner() {
       </div>
 
       {/* Tips */}
-      <div className="p-4 bg-green-50 rounded-lg">
-        <h3 className="font-medium mb-3 text-green-800">💡 Sådan sparer du på bilomkostninger</h3>
-        <ul className="text-sm text-green-700 space-y-2">
+      <div className="p-4 bg-green-50 dark:bg-green-900/30 rounded-lg">
+        <h3 className="font-medium mb-3 text-green-800 dark:text-green-200">💡 Sådan sparer du på bilomkostninger</h3>
+        <ul className="text-sm text-green-700 dark:text-green-300 space-y-2">
           <li>• <strong>Sammenlign forsikringer</strong> - priser varierer op til 50%</li>
           <li>• <strong>Kør jævnt</strong> - op til 20% bedre brændstoføkonomi</li>
           <li>• <strong>Tjek dæktryk</strong> - korrekt tryk sparer brændstof</li>
@@ -290,6 +291,9 @@ export default function BilBeregner() {
           <li>• <strong>Køb brugt</strong> - undgå det største værditab (år 1-3)</li>
         </ul>
       </div>
+
+      {/* Affiliate box - sammenlign bilforsikringer */}
+      <BilforsikringAffiliate className="mt-6" />
     </div>
   );
 }
