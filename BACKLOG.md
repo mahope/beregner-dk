@@ -128,7 +128,7 @@ Kvadratmeter, Timepris, Dato/tid
   - ✅ **LØST (2026-02-13):** Alle affiliate boxes har "Annonce" label + disclosure footer
 
 ### Content Expansion
-- [ ] 5 nye blog posts (3/5 færdig):
+- [ ] 5 nye blog posts (4/5 færdig):
   - [x] "Sådan beregner du din reelle timeløn"
     - ✅ **LØST (2026-02-13):** /blog/saadan-beregner-du-din-reelle-timeloen
     - 1.300+ ord, FAQ schema, links til timepris/løn-beregnere
@@ -144,7 +144,13 @@ Kvadratmeter, Timepris, Dato/tid
     - Aldersbaserede BMI-tabeller for drenge og piger (2-16 år)
     - ISO BMI forklaring og eksempler
     - Links til BMI, kalorier, alder, børnepenge beregnere
-  - "Boligstøtte 2026 - nye regler"
+  - [x] "Boligstøtte 2026 - nye regler"
+    - ✅ **LØST (2026-02-13):** /blog/boligstoette-2026-nye-regler
+    - 1.500+ ord, 6 FAQ items med schema markup
+    - 2026 satser, indkomstgrænser, arealkrav, formueregler
+    - Tabeller for indkomstgrænser og max boligstørrelse
+    - Eksempler: enlig + familie med beregninger
+    - Links til boligstoette, husleje, loen-efter-skat, boernepenge beregnere
   - "Pension: Hvor meget skal du spare op?"
 - [ ] Hver post: 1000+ ord, FAQ sektion, relaterede beregnere
 
