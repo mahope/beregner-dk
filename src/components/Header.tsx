@@ -25,6 +25,7 @@ const navigation: NavItem[] = [
       { name: "📋 Dagpenge", href: "/dagpenge" },
       { name: "👴 Pension", href: "/pension" },
       { name: "🧓 Efterløn", href: "/efterloen" },
+      { name: "💀 Arveafgift", href: "/arveafgift" },
     ],
   },
   {
