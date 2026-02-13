@@ -28,6 +28,14 @@ export const metadata: Metadata = {
 
 const blogPosts = [
   {
+    slug: "boligstoette-2026-nye-regler",
+    title: "Boligstøtte 2026 - Nye Regler og Satser",
+    description: "Komplet guide til boligstøtte i 2026: Nye satser, ændrede regler, hvem kan få støtte og hvor meget. Se de opdaterede grænser.",
+    category: "Bolig & Økonomi",
+    date: "2026-02-13",
+    readTime: "9 min",
+  },
+  {
     slug: "bmi-for-boern-saadan-tjekker-du",
     title: "BMI for Børn - Sådan Tjekker Du",
     description: "BMI for børn beregnes anderledes end voksne. Lær om percentiler, ISO BMI, og hvordan du tjekker dit barns vægt sundt. Inkl. tabeller.",
