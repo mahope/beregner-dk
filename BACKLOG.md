@@ -408,11 +408,12 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 - [x] Dark mode og InputField migration
 
 ### D5. Pensionsberegner forbedring
-- [ ] Tilfoej de tre pensionsoejler visuelt (folkepension + arbejdsmarked + privat)
-- Vis estimeret maanedlig pension baseret paa nuvaerende opsparing
-- Tilfoej folkepension automatisk baseret paa alder
-- Vis "pension gap" — forskellen mellem oensket og estimeret pension
-- Tilfoej graf: pensionsformue over tid
+- [x] Tre pensionssøjler visualiseret (folkepension + arbejdsmarked + privat)
+- [x] Estimeret månedlig pension fra opsparing
+- [x] Folkepension automatisk beregnet (2026-satser)
+- [x] Pension gap med "ønsket månedlig pension" input
+- [x] Pensionsformue graf over tid
+- [x] Dark mode og InputField migration
 
 ### D6. Valuta beregner forbedring
 - [ ] Tilfoej live valutakurser via API (fx exchangerate-api.com eller ECB)
