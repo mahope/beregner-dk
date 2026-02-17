@@ -3,14 +3,14 @@
 import { useState, useMemo } from "react";
 
 // 2026 satser for børne- og ungeydelse (officielle satser)
-// Kilde: borger.dk, skm.dk
+// Kilde: borger.dk/familie-og-boern/Familieydelser-oversigt/Boerne-ungeydelse
 const SATSER_2026 = {
   barn_0_2: 5370, // 0-2 år, pr. kvartal (21.480 kr/år)
   barn_3_6: 4251, // 3-6 år, pr. kvartal (17.004 kr/år)
   barn_7_14: 3345, // 7-14 år, pr. kvartal (13.380 kr/år)
-  unge_15_17: 3345, // 15-17 år, pr. kvartal (13.380 kr/år, udbetales månedligt)
+  unge_15_17_maaned: 1115, // 15-17 år, pr. måned (13.380 kr/år)
   indkomstgraense: 961100, // Årlig indkomstgrænse for aftrapning (2026)
-  aftrapningPct: 0.02, // 2% aftrapning per 2.500 kr over grænsen
+  aftrapningPct: 0.02, // 2% aftrapning af beløb over grænsen
 };
 
 interface Barn {
@@ -24,6 +24,7 @@ export default function BoernepengBeregner() {
   ]);
   const [husstandsIndkomst, setHusstandsIndkomst] = useState<number>(600000);
   const [enlig, setEnlig] = useState(false);
+  const [deltForaeldremyndighed, setDeltForaeldremyndighed] = useState(true);
 
   const tilfoejBarn = () => {
     setBoern([...boern, { id: crypto.randomUUID(), alder: 0 }]);
@@ -42,32 +43,39 @@ export default function BoernepengBeregner() {
   const beregning = useMemo(() => {
     // Beregn ydelse per barn
     const ydelsePrBarn = boern.map((barn) => {
-      let kvartalYdelse: number;
+      let aarligYdelse: number;
       let kategori: string;
+      let udbetalingstype: string;
 
       if (barn.alder <= 2) {
-        kvartalYdelse = SATSER_2026.barn_0_2;
+        aarligYdelse = SATSER_2026.barn_0_2 * 4;
         kategori = "0-2 år";
+        udbetalingstype = "kvartal";
       } else if (barn.alder <= 6) {
-        kvartalYdelse = SATSER_2026.barn_3_6;
+        aarligYdelse = SATSER_2026.barn_3_6 * 4;
         kategori = "3-6 år";
+        udbetalingstype = "kvartal";
       } else if (barn.alder <= 14) {
-        kvartalYdelse = SATSER_2026.barn_7_14;
+        aarligYdelse = SATSER_2026.barn_7_14 * 4;
         kategori = "7-14 år";
+        udbetalingstype = "kvartal";
       } else if (barn.alder <= 17) {
-        kvartalYdelse = SATSER_2026.unge_15_17;
+        aarligYdelse = SATSER_2026.unge_15_17_maaned * 12;
         kategori = "15-17 år";
+        udbetalingstype = "maaned";
       } else {
-        kvartalYdelse = 0;
+        aarligYdelse = 0;
         kategori = "Over 18";
+        udbetalingstype = "ingen";
       }
 
       return {
         alder: barn.alder,
         kategori,
-        kvartal: kvartalYdelse,
-        aarlig: kvartalYdelse * 4,
-        maanedlig: (kvartalYdelse * 4) / 12,
+        udbetalingstype,
+        aarlig: aarligYdelse,
+        kvartal: aarligYdelse / 4,
+        maanedlig: aarligYdelse / 12,
       };
     });
 
@@ -75,29 +83,30 @@ export default function BoernepengBeregner() {
     const samletAarlig = ydelsePrBarn.reduce((sum, y) => sum + y.aarlig, 0);
 
     // Beregn evt. aftrapning (kun for høje indkomster)
+    // Aftrapning: 2% af beløbet over indkomstgrænsen
     let aftrapning = 0;
-    const graense = enlig 
-      ? SATSER_2026.indkomstgraense 
-      : SATSER_2026.indkomstgraense; // Samme grænse, men evt. fordelt på 2
-
-    if (husstandsIndkomst > graense) {
-      const overGraense = husstandsIndkomst - graense;
-      const antalTrin = Math.floor(overGraense / 2500);
-      aftrapning = samletAarlig * SATSER_2026.aftrapningPct * antalTrin;
-      aftrapning = Math.min(aftrapning, samletAarlig); // Kan ikke blive negativ
+    if (husstandsIndkomst > SATSER_2026.indkomstgraense) {
+      const overGraense = husstandsIndkomst - SATSER_2026.indkomstgraense;
+      aftrapning = overGraense * SATSER_2026.aftrapningPct;
+      aftrapning = Math.min(aftrapning, samletAarlig);
     }
 
     const samletEfterAftrapning = Math.max(0, samletAarlig - aftrapning);
+
+    // Siden 2022 deles ydelsen som standard mellem forældre med fælles forældremyndighed
+    const dinAndel = deltForaeldremyndighed ? samletEfterAftrapning / 2 : samletEfterAftrapning;
 
     return {
       boern: ydelsePrBarn,
       samletAarlig,
       aftrapning,
       samletEfterAftrapning,
-      maanedlig: samletEfterAftrapning / 12,
-      kvartal: samletEfterAftrapning / 4,
+      dinAndel,
+      maanedlig: dinAndel / 12,
+      kvartal: dinAndel / 4,
+      deltMellemForaeldre: deltForaeldremyndighed,
     };
-  }, [boern, husstandsIndkomst, enlig]);
+  }, [boern, husstandsIndkomst, enlig, deltForaeldremyndighed]);
 
   const formatKr = (beloeb: number) => {
     return new Intl.NumberFormat("da-DK", {
@@ -111,11 +120,11 @@ export default function BoernepengBeregner() {
     <div className="space-y-8">
       {/* Børn input */}
       <div>
-        <h2 className="text-lg font-semibold mb-4">Dine børn</h2>
+        <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Dine børn</h2>
         <div className="space-y-3">
           {boern.map((barn, index) => (
-            <div key={barn.id} className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
-              <span className="text-gray-600">Barn {index + 1}:</span>
+            <div key={barn.id} className="flex items-center gap-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <span className="text-gray-600 dark:text-gray-300">Barn {index + 1}:</span>
               <div className="flex items-center gap-2">
                 <input
                   type="number"
@@ -123,17 +132,19 @@ export default function BoernepengBeregner() {
                   max="18"
                   value={barn.alder}
                   onChange={(e) => opdaterAlder(barn.id, parseInt(e.target.value) || 0)}
-                  className="w-20 px-3 py-2 border rounded-md"
+                  className="w-20 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  aria-label={`Alder for barn ${index + 1}`}
                 />
-                <span className="text-gray-600">år</span>
+                <span className="text-gray-600 dark:text-gray-300">år</span>
               </div>
-              <span className="text-sm text-gray-500">
+              <span className="text-sm text-gray-500 dark:text-gray-400">
                 ({beregning.boern[index]?.kategori})
               </span>
               {boern.length > 1 && (
                 <button
                   onClick={() => fjernBarn(barn.id)}
-                  className="ml-auto text-red-500 hover:text-red-700"
+                  className="ml-auto text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                  aria-label={`Fjern barn ${index + 1}`}
                 >
                   ✕
                 </button>
@@ -143,16 +154,16 @@ export default function BoernepengBeregner() {
         </div>
         <button
           onClick={tilfoejBarn}
-          className="mt-3 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+          className="mt-3 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
         >
           + Tilføj barn
         </button>
       </div>
 
-      {/* Indkomst */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* Indkomst og indstillinger */}
+      <div className="space-y-6">
         <div>
-          <label className="block text-sm font-medium mb-2">
+          <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
             Husstandens samlede indkomst (årlig)
           </label>
           <input
@@ -161,78 +172,124 @@ export default function BoernepengBeregner() {
             step="10000"
             value={husstandsIndkomst}
             onChange={(e) => setHusstandsIndkomst(parseFloat(e.target.value) || 0)}
-            className="w-full px-4 py-3 border rounded-lg"
+            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+            aria-label="Husstandens samlede årlige indkomst"
           />
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
             Bruges til at beregne evt. aftrapning (over {formatKr(SATSER_2026.indkomstgraense)})
           </p>
         </div>
-        <div className="flex items-center gap-2 pt-8">
-          <input
-            type="checkbox"
-            id="enlig"
-            checked={enlig}
-            onChange={(e) => setEnlig(e.target.checked)}
-            className="w-4 h-4"
-          />
-          <label htmlFor="enlig" className="text-sm">
-            Enlig forsørger
-          </label>
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="enlig"
+              checked={enlig}
+              onChange={(e) => setEnlig(e.target.checked)}
+              className="w-4 h-4"
+            />
+            <label htmlFor="enlig" className="text-sm text-gray-700 dark:text-gray-300">
+              Enlig forsørger
+            </label>
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="deltForaeldremyndighed"
+              checked={deltForaeldremyndighed}
+              onChange={(e) => setDeltForaeldremyndighed(e.target.checked)}
+              className="w-4 h-4"
+            />
+            <label htmlFor="deltForaeldremyndighed" className="text-sm text-gray-700 dark:text-gray-300">
+              Fælles forældremyndighed (ydelsen deles)
+            </label>
+          </div>
         </div>
       </div>
 
       {/* Resultat */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="p-6 bg-green-100 rounded-xl text-center">
-          <p className="text-sm text-gray-600 mb-1">Månedlig udbetaling</p>
-          <p className="text-3xl font-bold text-green-700">
+        <div className="p-6 bg-green-100 dark:bg-green-900/30 rounded-xl text-center">
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+            {beregning.deltMellemForaeldre ? "Din månedlige andel" : "Månedlig udbetaling"}
+          </p>
+          <p className="text-3xl font-bold text-green-700 dark:text-green-400">
             {formatKr(beregning.maanedlig)}
           </p>
         </div>
-        <div className="p-6 bg-green-50 rounded-xl text-center">
-          <p className="text-sm text-gray-600 mb-1">Kvartalsvis</p>
-          <p className="text-3xl font-bold text-green-600">
+        <div className="p-6 bg-green-50 dark:bg-green-900/20 rounded-xl text-center">
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+            {beregning.deltMellemForaeldre ? "Din kvartalsvise andel" : "Kvartalsvis"}
+          </p>
+          <p className="text-3xl font-bold text-green-600 dark:text-green-400">
             {formatKr(beregning.kvartal)}
           </p>
         </div>
-        <div className="p-6 bg-blue-50 rounded-xl text-center">
-          <p className="text-sm text-gray-600 mb-1">Årlig total</p>
-          <p className="text-3xl font-bold text-blue-600">
-            {formatKr(beregning.samletEfterAftrapning)}
+        <div className="p-6 bg-blue-50 dark:bg-blue-900/20 rounded-xl text-center">
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+            {beregning.deltMellemForaeldre ? "Din årlige andel" : "Årlig total"}
+          </p>
+          <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">
+            {formatKr(beregning.dinAndel)}
           </p>
         </div>
       </div>
 
-      {beregning.aftrapning > 0 && (
-        <div className="p-4 bg-yellow-50 rounded-lg">
-          <p className="text-sm text-yellow-800">
-            <strong>Bemærk:</strong> Din indkomst er over grænsen, så ydelsen 
-            aftrappes med {formatKr(beregning.aftrapning)} årligt.
+      {beregning.deltMellemForaeldre && (
+        <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+          <p className="text-sm text-blue-800 dark:text-blue-300">
+            <strong>Delt ydelse:</strong> Siden 2022 deles ydelsen som standard mellem forældre med fælles forældremyndighed. Den samlede årlige ydelse er {formatKr(beregning.samletEfterAftrapning)} — du modtager halvdelen.
           </p>
         </div>
       )}
 
+      {beregning.aftrapning > 0 && (
+        <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+          <p className="text-sm text-yellow-800 dark:text-yellow-300">
+            <strong>Bemærk:</strong> Din indkomst er over grænsen på {formatKr(SATSER_2026.indkomstgraense)}, så ydelsen aftrappes med {formatKr(beregning.aftrapning)} årligt.
+          </p>
+        </div>
+      )}
+
+      {/* Detaljer per barn */}
+      {beregning.boern.length > 1 && (
+        <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+          <h3 className="font-medium mb-3 text-gray-900 dark:text-white">Ydelse per barn (før evt. deling)</h3>
+          <div className="space-y-2 text-sm">
+            {beregning.boern.map((barn, index) => (
+              <div key={index} className="flex justify-between text-gray-700 dark:text-gray-300">
+                <span>Barn {index + 1} ({barn.kategori})</span>
+                <span>{formatKr(barn.aarlig)} årligt</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Satser tabel */}
-      <div className="bg-gray-50 rounded-lg p-4">
-        <h3 className="font-medium mb-3">Satser 2026 (estimat)</h3>
+      <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+        <h3 className="font-medium mb-3 text-gray-900 dark:text-white">Officielle satser 2026</h3>
         <div className="space-y-2 text-sm">
-          <div className="flex justify-between">
+          <div className="flex justify-between text-gray-700 dark:text-gray-300">
             <span>0-2 år</span>
             <span>{formatKr(SATSER_2026.barn_0_2)} pr. kvartal ({formatKr(SATSER_2026.barn_0_2 * 4)} årligt)</span>
           </div>
-          <div className="flex justify-between">
+          <div className="flex justify-between text-gray-700 dark:text-gray-300">
             <span>3-6 år</span>
             <span>{formatKr(SATSER_2026.barn_3_6)} pr. kvartal ({formatKr(SATSER_2026.barn_3_6 * 4)} årligt)</span>
           </div>
-          <div className="flex justify-between">
+          <div className="flex justify-between text-gray-700 dark:text-gray-300">
             <span>7-14 år</span>
             <span>{formatKr(SATSER_2026.barn_7_14)} pr. kvartal ({formatKr(SATSER_2026.barn_7_14 * 4)} årligt)</span>
           </div>
-          <div className="flex justify-between">
-            <span>15-17 år</span>
-            <span>{formatKr(SATSER_2026.unge_15_17)} pr. kvartal ({formatKr(SATSER_2026.unge_15_17 * 4)} årligt)</span>
+          <div className="flex justify-between text-gray-700 dark:text-gray-300">
+            <span>15-17 år (ungeydelse)</span>
+            <span>{formatKr(SATSER_2026.unge_15_17_maaned)} pr. måned ({formatKr(SATSER_2026.unge_15_17_maaned * 12)} årligt)</span>
           </div>
         </div>
+        <p className="text-xs text-gray-500 dark:text-gray-400 mt-3">
+          Kilde: borger.dk — Aftrapningsgrænse: {formatKr(SATSER_2026.indkomstgraense)}
+        </p>
       </div>
     </div>
   );

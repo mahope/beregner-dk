@@ -13,7 +13,7 @@ const baseUrl = "https://minberegner.dk";
 export const metadata: Metadata = {
   title: "Børnepenge Beregner 2026 - Børne- og ungeydelse",
   description:
-    "Beregn børnepenge 2026. Satser: 0-2 år: 4.824 kr/kvartal, 3-6 år: 3.819 kr/kvartal, 7-14 år: 3.003 kr/kvartal. Se hvad du får ud fra antal børn og indkomst. Gratis beregner.",
+    "Beregn børnepenge 2026. Officielle satser: 0-2 år: 5.370 kr/kvartal, 3-6 år: 4.251 kr/kvartal, 7-14 år: 3.345 kr/kvartal, 15-17 år: 1.115 kr/md. Beregn ud fra antal børn og indkomst.",
   keywords: [
     "børnepenge",
     "børnepenge beregner",
@@ -24,11 +24,13 @@ export const metadata: Metadata = {
     "hvad får jeg i børnepenge",
     "børneydelse beregner",
     "børnepenge satser",
+    "børnepenge satser 2026",
+    "ungeydelse 2026",
   ],
   openGraph: {
     title: "Børnepenge Beregner 2026 - Børne- og ungeydelse",
     description:
-      "Beregn din børne- og ungeydelse med de nyeste 2026 satser. Gratis børnepenge beregner.",
+      "Beregn din børne- og ungeydelse med officielle 2026-satser. Se hvad du får udbetalt med ny deling mellem forældre.",
     url: `${baseUrl}/boernepenge`,
     type: "website",
   },
@@ -41,42 +43,42 @@ const faqItems = [
   {
     question: "Hvem kan få børne- og ungeydelse?",
     answer:
-      "Forældre med børn under 18 år, hvor barnet bor i Danmark, og mindst én forælder er dansk statsborger eller har haft bopæl i DK i min. 2 år. Ydelsen udbetales til den forælder barnet bor hos.",
+      "Forældre med børn under 18 år, hvor barnet bor i Danmark, og mindst én forælder er dansk statsborger eller har haft bopæl i DK i min. 2 år. Siden 2022 deles ydelsen som standard mellem forældre med fælles forældremyndighed.",
   },
   {
     question: "Hvor meget får jeg i børnepenge 2026?",
     answer:
-      "I 2026 er satserne ca.: 0-2 år: 19.296 kr/år (4.824 kr/kvartal), 3-6 år: 15.276 kr/år (3.819 kr/kvartal), 7-14 år: 12.012 kr/år (3.003 kr/kvartal), 15-17 år: ca. 1.001 kr/måned.",
+      "I 2026 er de officielle satser: 0-2 år: 21.480 kr/år (5.370 kr/kvartal), 3-6 år: 17.004 kr/år (4.251 kr/kvartal), 7-14 år: 13.380 kr/år (3.345 kr/kvartal), 15-17 år: 1.115 kr/måned (13.380 kr/år). Ved fælles forældremyndighed modtager hver forælder halvdelen.",
   },
   {
     question: "Hvornår udbetales børnepenge?",
     answer:
-      "For børn 0-14 år udbetales kvartalsvis (januar, april, juli, oktober). For unge 15-17 år udbetales månedligt direkte til den unge selv.",
+      "Børneydelsen (0-14 år) udbetales kvartalsvis forud den 20. i januar, april, juli og oktober. Ungeydelsen (15-17 år) udbetales månedligt den 20. i hver måned direkte til den unge.",
   },
   {
     question: "Bliver børnepenge modregnet ved høj indkomst?",
     answer:
-      "Ja, hvis husstandens samlede indkomst overstiger ca. 961.100 kr. (2026), aftrappes ydelsen med 2% for hver 2.500 kr. over grænsen. Ved meget høje indkomster kan ydelsen blive 0 kr.",
+      "Ja, hvis din indkomst overstiger 961.100 kr. i 2026, nedsættes ydelsen med 2% af beløbet over grænsen. Eksempel: tjener du 1.000.000 kr., reduceres ydelsen med 2% af 38.900 kr. = 778 kr. årligt.",
   },
   {
-    question: "Hvordan deles børnepenge ved delt bopæl?",
+    question: "Hvordan deles børnepenge mellem forældre?",
     answer:
-      "Ved delt bopæl (7/7-ordning) kan ydelsen deles mellem forældrene, så hver får halvdelen. Begge forældre skal søge om deling via Digital Post til Udbetaling Danmark.",
+      "Siden januar 2022 deles børne- og ungeydelsen som standard ligeligt mellem forældre med fælles forældremyndighed. Hver forælder modtager halvdelen af ydelsen. Bor barnet kun hos den ene forælder, kan man søge om at få hele ydelsen.",
   },
   {
     question: "Hvad får enlige forsørgere ekstra?",
     answer:
-      "Enlige forsørgere kan få ordinært børnetilskud (ca. 6.300 kr/kvartal), ekstra børnetilskud (ca. 6.600 kr/kvartal, kun én gang uanset antal børn), og evt. særligt børnetilskud hvis anden forælder er død/ukendt.",
+      "Enlige forsørgere kan udover børne- og ungeydelsen få: ordinært børnetilskud (ca. 6.300 kr/kvartal per barn), ekstra børnetilskud (ca. 6.600 kr/kvartal, kun én gang uanset antal børn), og evt. særligt børnetilskud hvis den anden forælder er død eller ukendt.",
   },
   {
     question: "Er børnepenge skattefrie?",
     answer:
-      "Ja, børne- og ungeydelsen er skattefri. Du skal ikke betale skat af beløbet, og det påvirker ikke din skattepligtige indkomst.",
+      "Ja, børne- og ungeydelsen er skattefri. Du skal ikke betale skat af beløbet, og det påvirker ikke din skattepligtige indkomst eller offentlige ydelser som boligstøtte.",
   },
   {
     question: "Hvordan søger jeg om børnepenge?",
     answer:
-      "Børneydelsen udbetales automatisk når dit barn får et CPR-nummer. Ved særlige forhold (delt bopæl, høj indkomst, enlig forsørger) kan du administrere ydelsen på borger.dk.",
+      "Børneydelsen udbetales automatisk når dit barn får et CPR-nummer. Du behøver ikke søge. Ved særlige forhold som eneforældremyndighed, delt bopæl eller høj indkomst kan du administrere ydelsen via borger.dk eller Digital Post til Udbetaling Danmark.",
   },
 ];
 
@@ -113,90 +115,101 @@ export default function BoernepengePage() {
 
       <BoernepengBeregner />
 
-      <div className="mt-12 prose max-w-none">
+      <div className="mt-12 prose max-w-none dark:prose-invert">
         <h2>Om børne- og ungeydelse</h2>
         <p>
           Børne- og ungeydelsen (ofte kaldet &quot;børnepenge&quot; eller
           &quot;børnecheck&quot;) er en skattefri ydelse, som{" "}
           <strong>Udbetaling Danmark</strong> udbetaler til forældre med børn
-          under 18 år.
+          under 18 år. Ydelsen udbetales automatisk og kræver ingen ansøgning.
+        </p>
+        <p>
+          Siden januar 2022 deles ydelsen som standard ligeligt mellem forældre
+          med fælles forældremyndighed — hver forælder modtager halvdelen.
         </p>
 
-        <h3>Børnepenge satser 2026</h3>
+        <h3>Børnepenge satser 2026 (officielle)</h3>
         <div className="overflow-x-auto">
           <table>
             <thead>
               <tr>
                 <th>Alder</th>
                 <th>Årligt</th>
-                <th>Kvartalsvis/Månedlig</th>
+                <th>Udbetaling</th>
               </tr>
             </thead>
             <tbody>
               <tr>
                 <td>0-2 år</td>
-                <td>19.296 kr</td>
-                <td>4.824 kr/kvartal</td>
+                <td>21.480 kr</td>
+                <td>5.370 kr/kvartal</td>
               </tr>
               <tr>
                 <td>3-6 år</td>
-                <td>15.276 kr</td>
-                <td>3.819 kr/kvartal</td>
+                <td>17.004 kr</td>
+                <td>4.251 kr/kvartal</td>
               </tr>
               <tr>
                 <td>7-14 år</td>
-                <td>12.012 kr</td>
-                <td>3.003 kr/kvartal</td>
+                <td>13.380 kr</td>
+                <td>3.345 kr/kvartal</td>
               </tr>
               <tr>
-                <td>15-17 år</td>
-                <td>12.012 kr</td>
-                <td>1.001 kr/måned</td>
+                <td>15-17 år (ungeydelse)</td>
+                <td>13.380 kr</td>
+                <td>1.115 kr/måned</td>
               </tr>
             </tbody>
           </table>
         </div>
+        <p className="text-sm">
+          Børneydelsen (0-14 år) udbetales kvartalsvis forud den 20. i januar, april, juli og oktober.
+          Ungeydelsen (15-17 år) udbetales månedligt den 20. direkte til den unge.
+        </p>
 
         <h2>Aftrapning for høje indkomster</h2>
         <p>
-          Hvis husstandens samlede indkomst overstiger 961.100 kr. (2026),
-          aftrappes ydelsen med 2% for hver 2.500 kr. over grænsen.
+          Hvis din indkomst overstiger <strong>961.100 kr.</strong> i 2026,
+          nedsættes ydelsen med 2% af beløbet over grænsen.
         </p>
-        <p>Ved meget høje indkomster kan ydelsen blive fuldt aftrappet (0 kr.).</p>
-
-        <h2>Delt bopæl</h2>
         <p>
-          Hvis barnet har delt bopæl (7/7-ordning), deles ydelsen mellem
-          forældrene:
+          <strong>Eksempel:</strong> Tjener du 1.100.000 kr., er du 138.900 kr. over grænsen.
+          Aftrapningen bliver 2% × 138.900 kr. = 2.778 kr. årligt.
+        </p>
+
+        <h2>Deling mellem forældre</h2>
+        <p>
+          Siden januar 2022 deles ydelsen automatisk mellem forældre med fælles
+          forældremyndighed. Det betyder:
         </p>
         <ul>
-          <li>Hver forælder får halvdelen af ydelsen</li>
-          <li>Kræver at begge forældre søger om deling</li>
-          <li>Kan aftales via Digital Post til Udbetaling Danmark</li>
+          <li>Hver forælder modtager halvdelen af ydelsen</li>
+          <li>Gælder uanset barnets bopæl</li>
+          <li>Bor barnet kun hos én forælder, kan man søge om fuld ydelse via borger.dk</li>
         </ul>
 
         <h2>Ekstra ydelser til enlige forsørgere</h2>
         <p>Enlige forsørgere kan derudover være berettiget til:</p>
         <ul>
           <li>
-            <strong>Ordinært børnetilskud:</strong> Ca. 6.300 kr. pr. kvartal
+            <strong>Ordinært børnetilskud:</strong> Ca. 6.300 kr. pr. kvartal per barn
           </li>
           <li>
             <strong>Ekstra børnetilskud:</strong> Ca. 6.600 kr. pr. kvartal (kun
-            én gang)
+            én gang uanset antal børn)
           </li>
           <li>
             <strong>Særligt børnetilskud:</strong> Hvis den anden forælder er
-            død/ukendt
+            død eller ukendt
           </li>
         </ul>
 
-        <div className="bg-blue-50 border-l-4 border-blue-400 p-4 my-6 not-prose">
-          <p className="font-medium text-blue-800">Ansøg og administrer</p>
-          <p className="text-blue-700">
-            Du kan ansøge om og administrere din børneydelse på{" "}
+        <div className="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-400 dark:border-blue-500 p-4 my-6 not-prose">
+          <p className="font-medium text-blue-800 dark:text-blue-300">Ansøg og administrer</p>
+          <p className="text-blue-700 dark:text-blue-400">
+            Du kan administrere din børneydelse på{" "}
             <a
-              href="https://www.borger.dk"
+              href="https://www.borger.dk/familie-og-boern/Familieydelser-oversigt/Boerne-ungeydelse"
               target="_blank"
               rel="noopener noreferrer"
               className="underline"
@@ -206,11 +219,11 @@ export default function BoernepengePage() {
           </p>
         </div>
 
-        <div className="bg-green-50 border-l-4 border-green-400 p-4 my-6 not-prose">
-          <p className="font-medium text-green-800">Opdateret med 2026-satser</p>
-          <p className="text-green-700">
+        <div className="bg-green-50 dark:bg-green-900/20 border-l-4 border-green-400 dark:border-green-500 p-4 my-6 not-prose">
+          <p className="font-medium text-green-800 dark:text-green-300">Opdateret med 2026-satser</p>
+          <p className="text-green-700 dark:text-green-400">
             Satserne i denne beregner er de officielle 2026-satser fra
-            Skatteministeriet og borger.dk.
+            borger.dk. Sidst verificeret februar 2026.
           </p>
         </div>
       </div>
