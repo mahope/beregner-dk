@@ -2,9 +2,9 @@
 
 import { useState, useMemo } from "react";
 
-// 2026 satser (estimater baseret på regulering)
-const MAX_BOLIGUDGIFT = 97_000; // Max årlig boligudgift der indgår i beregning
-const GRADDAGE_TILLÆG = 0; // Kan variere efter kommune
+// 2026 satser (kilde: bm.dk, borger.dk)
+const MAX_BOLIGUDGIFT = 113_000; // Max årlig boligudgift der indgår i beregning (2026)
+const MINDSTE_EGENBETALING = 28_900; // Min egenbetaling for boligsikring (2026)
 const MINDSTE_EGENBETALING_PROCENT = 18; // % af indkomst over grænsen
 
 interface BoligstoetteResultat {
@@ -34,8 +34,8 @@ export default function BoligstoetteBeregner() {
     const aarligHusleje = husleje * 12;
     const maksHusleje = Math.min(aarligHusleje, MAX_BOLIGUDGIFT);
     
-    // Indkomstgrænse varierer efter antal personer
-    const indkomstGraense = 135_000 + (personer - 1) * 46_000;
+    // Indkomstgrænse varierer efter antal personer (2026)
+    const indkomstGraense = 171_500 + (personer - 1) * 53_100;
     
     // Beregn egenbetaling
     let egenbetalingProcent = 18;
@@ -57,14 +57,14 @@ export default function BoligstoetteBeregner() {
 
     const endeligStoette = aarligStoette * arealReduktion;
     
-    // Mindste boligstøtte
-    if (endeligStoette < 3_408) {
+    // Mindste boligstøtte (2026)
+    if (endeligStoette < 3_648) {
       return {
         aarligBoligstoette: 0,
         maanedligBoligstoette: 0,
         egenbetaling: aarligHusleje,
         procentAfHusleje: 0,
-        note: "Beregnet støtte er under minimumsgrænsen (284 kr/md).",
+        note: "Beregnet støtte er under minimumsgrænsen (304 kr/md).",
       };
     }
 
