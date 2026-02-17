@@ -416,11 +416,12 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 - [x] Dark mode og InputField migration
 
 ### D6. Valuta beregner forbedring
-- [ ] Tilfoej live valutakurser via API (fx exchangerate-api.com eller ECB)
-- Vis historisk kursudvikling (7 dage, 30 dage, 1 aar)
-- Tilfoej de 10 mest brugte valutapar for danskere (EUR, USD, GBP, SEK, NOK, CHF, etc.)
-- Tilfoej "favorit valutaer" som brugeren kan gemme
-- Vis kurs-opdateringstidspunkt
+- [x] Live valutakurser via Frankfurter API (ECB data, gratis)
+- [x] Fallback til statiske kurser ved fejl
+- [x] Populære valutapar hurtigknapper (DKK/EUR, USD, GBP, SEK, NOK)
+- [x] Klikbar kursliste der skifter valutapar
+- [x] Opdateringstidspunkt og live/vejledende indikator
+- [x] Dark mode
 
 ### D7. Elberegner forbedring
 - [ ] Tilfoej aktuelle elpriser (evt. via Energi Data Service API)
