@@ -6,17 +6,23 @@ import { PrintResult } from "@/components/PrintResult";
 import { InputField } from "@/components/InputField";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 
-// 2026 danske skattesatser (tilnærmede)
+// 2026 danske skattesatser (ny skattereform med mellemskat/topskat/top-topskat)
+// Kilde: skm.dk, skat.dk, martinsen.dk
 const SKATTESATSER = {
   amBidrag: 0.08, // 8% AM-bidrag
-  bundSkat: 0.1222, // 12,22% bundskat
-  kommuneSkatSnit: 0.2494, // Gennemsnitlig kommuneskat
+  bundSkat: 0.1201, // 12,01% bundskat (ned fra 12,22%)
+  kommuneSkatSnit: 0.2507, // Gennemsnitlig kommuneskat 2026
   kirkeSkat: 0.0068, // Gennemsnitlig kirkeskat (valgfri)
-  topSkatGraense: 588900, // Topskattegrænse 2026
-  topSkat: 0.15, // 15% topskat
-  personfradrag: 49700, // Personfradrag 2026
-  beskaeftigelsesfradragMax: 45100, // Max beskæftigelsesfradrag
-  beskaeftigelsesfradragPct: 0.1065, // 10,65% af lønindkomst
+  // NY 2026: Mellemskat, topskat og top-topskat erstatter gammel topskat
+  mellemSkatGraense: 641200, // Mellemskattegrænse (efter AM-bidrag)
+  mellemSkat: 0.075, // 7,5% mellemskat
+  topSkatGraense: 777900, // Topskattegrænse (efter AM-bidrag)
+  topSkat: 0.075, // 7,5% topskat
+  topTopSkatGraense: 2592700, // Top-topskattegrænse (efter AM-bidrag)
+  topTopSkat: 0.05, // 5,0% top-topskat
+  personfradrag: 54100, // Personfradrag 2026 (op fra 49.700)
+  beskaeftigelsesfradragMax: 63300, // Max beskæftigelsesfradrag (op fra 45.100)
+  beskaeftigelsesfradragPct: 0.1275, // 12,75% af lønindkomst (op fra 10,65%)
 };
 
 export default function LoenBeregner() {
@@ -86,12 +92,20 @@ export default function LoenBeregner() {
       ? skattepligtigIndkomst * SKATTESATSER.kirkeSkat
       : 0;
 
-    // Topskat
+    // NY 2026: Mellemskat (7,5% af indkomst over 641.200 kr)
+    const mellemSkatGrundlag = Math.max(0, loenEfterAM - SKATTESATSER.mellemSkatGraense);
+    const mellemSkat = mellemSkatGrundlag * SKATTESATSER.mellemSkat;
+
+    // NY 2026: Topskat (7,5% af indkomst over 777.900 kr)
     const topSkatGrundlag = Math.max(0, loenEfterAM - SKATTESATSER.topSkatGraense);
     const topSkat = topSkatGrundlag * SKATTESATSER.topSkat;
 
+    // NY 2026: Top-topskat (5% af indkomst over 2.592.700 kr)
+    const topTopSkatGrundlag = Math.max(0, loenEfterAM - SKATTESATSER.topTopSkatGraense);
+    const topTopSkat = topTopSkatGrundlag * SKATTESATSER.topTopSkat;
+
     // Samlet skat
-    const samletSkat = bundSkat + kommuneSkatBeloeb + kirkeSkatBeloeb + topSkat;
+    const samletSkat = bundSkat + kommuneSkatBeloeb + kirkeSkatBeloeb + mellemSkat + topSkat + topTopSkat;
 
     // Nettoløn
     const aarligNetto = loenEfterAM - samletSkat;
@@ -114,7 +128,9 @@ export default function LoenBeregner() {
       bundSkat,
       kommuneSkatBeloeb,
       kirkeSkatBeloeb,
+      mellemSkat,
       topSkat,
+      topTopSkat,
       samletSkat,
       aarligNetto,
       maanedligNetto,
@@ -283,7 +299,7 @@ export default function LoenBeregner() {
             <span>{formatKr(beregning.skattepligtigIndkomst)}</span>
           </div>
           <div className="flex justify-between text-red-600 dark:text-red-400">
-            <span>Bundskat (12,22%)</span>
+            <span>Bundskat (12,01%)</span>
             <span>{formatKr(beregning.bundSkat)}</span>
           </div>
           <div className="flex justify-between text-red-600 dark:text-red-400">
@@ -296,10 +312,22 @@ export default function LoenBeregner() {
               <span>{formatKr(beregning.kirkeSkatBeloeb)}</span>
             </div>
           )}
+          {beregning.mellemSkat > 0 && (
+            <div className="flex justify-between text-red-600 dark:text-red-400">
+              <span>Mellemskat (7,5%)</span>
+              <span>{formatKr(beregning.mellemSkat)}</span>
+            </div>
+          )}
           {beregning.topSkat > 0 && (
             <div className="flex justify-between text-red-600 dark:text-red-400">
-              <span>Topskat (15%)</span>
+              <span>Topskat (7,5%)</span>
               <span>{formatKr(beregning.topSkat)}</span>
+            </div>
+          )}
+          {beregning.topTopSkat > 0 && (
+            <div className="flex justify-between text-red-600 dark:text-red-400">
+              <span>Top-topskat (5%)</span>
+              <span>{formatKr(beregning.topTopSkat)}</span>
             </div>
           )}
           <div className="flex justify-between font-medium border-t dark:border-gray-600 pt-2 text-red-700 dark:text-red-400">

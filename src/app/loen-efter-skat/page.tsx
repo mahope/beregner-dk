@@ -14,7 +14,7 @@ const baseUrl = "https://minberegner.dk";
 export const metadata: Metadata = {
   title: "Løn efter skat 2026 - Beregn din nettoløn gratis",
   description:
-    "Beregn din nettoløn 2026. Eksempel: 35.000 kr brutto ≈ 23.500 kr netto. Se hvad du får udbetalt efter skat (37-52%), AM-bidrag (8%) og pension. Gratis lønberegner.",
+    "Beregn din nettoløn 2026. Nyt skattesystem med mellemskat og topskat. Personfradrag 54.100 kr. Se hvad du får udbetalt efter skat, AM-bidrag (8%) og pension. Gratis lønberegner.",
   keywords: [
     "løn efter skat",
     "lønberegner",
@@ -51,14 +51,14 @@ const faqItems = [
       "AM-bidrag (arbejdsmarkedsbidrag) er 8% af din bruttoløn før andre fradrag. Bidraget går til at finansiere dagpenge, efterløn og andre arbejdsmarkedsordninger. AM-bidrag trækkes før skat beregnes.",
   },
   {
-    question: "Hvornår skal jeg betale topskat?",
+    question: "Hvornår skal jeg betale mellemskat eller topskat i 2026?",
     answer:
-      "I 2026 skal du betale topskat på 15%, hvis din indkomst efter AM-bidrag overstiger ca. 588.900 kr årligt. Det svarer til en månedsløn på omkring 53.000 kr før skat.",
+      "I 2026 er der indført et nyt skattesystem: Mellemskat på 7,5% af indkomst over 641.200 kr, topskat på 7,5% over 777.900 kr, og top-topskat på 5% over 2.592.700 kr (alle efter AM-bidrag). Den gamle topskat på 15% er afskaffet.",
   },
   {
     question: "Hvad er personfradraget i 2026?",
     answer:
-      "Personfradraget i 2026 er 49.700 kr. Det betyder, at du ikke betaler skat af de første 49.700 kr af din årlige indkomst (efter AM-bidrag). Alle skatteydere får automatisk dette fradrag.",
+      "Personfradraget i 2026 er 54.100 kr (op fra 49.700 kr). Det betyder, at du ikke betaler skat af de første 54.100 kr af din årlige indkomst (efter AM-bidrag). Alle skatteydere får automatisk dette fradrag.",
   },
   {
     question: "Hvorfor varierer kommuneskatten?",
@@ -120,7 +120,7 @@ export default function LoenPage() {
       {/* Inline Ad - After calculator */}
       <InlineAd slotId="loen-after-calculator" />
 
-      <div className="mt-12 prose max-w-none">
+      <div className="mt-12 prose max-w-none dark:prose-invert">
         <h2>Sådan beregnes din skat i Danmark</h2>
         <p>
           I Danmark betaler vi skat af vores indkomst i flere lag. Her er en
@@ -134,28 +134,28 @@ export default function LoenPage() {
           arbejdsmarkedsordninger.
         </p>
 
-        <h3>2. Personfradrag (49.700 kr)</h3>
+        <h3>2. Personfradrag (54.100 kr)</h3>
         <p>
-          Alle har ret til et <strong>personfradrag</strong> på 49.700 kr i
-          2026. Du betaler ikke skat af dette beløb.
+          Alle har ret til et <strong>personfradrag</strong> på 54.100 kr i
+          2026 (op fra 49.700 kr). Du betaler ikke skat af dette beløb.
         </p>
 
-        <h3>3. Beskæftigelsesfradrag</h3>
+        <h3>3. Beskæftigelsesfradrag (12,75%)</h3>
         <p>
-          Som lønmodtager får du et ekstra fradrag på 10,65% af din lønindkomst
-          (efter AM-bidrag), dog maks. ca. 45.100 kr i 2026.
+          Som lønmodtager får du et ekstra fradrag på 12,75% af din lønindkomst
+          (efter AM-bidrag), dog maks. 63.300 kr i 2026 (op fra 45.100 kr).
         </p>
 
-        <h3>4. Bundskat (12,22%)</h3>
+        <h3>4. Bundskat (12,01%)</h3>
         <p>
           Alle betaler <strong>bundskat</strong> af den skattepligtige indkomst
-          (efter fradrag).
+          (efter fradrag). Satsen er sat ned fra 12,22% til 12,01% i 2026.
         </p>
 
         <h3>5. Kommuneskat (varierer)</h3>
         <p>
           <strong>Kommuneskatten</strong> varierer fra kommune til kommune.
-          Landsgennemsnittet er ca. 24,94% i 2026. De billigste kommuner ligger
+          Landsgennemsnittet er ca. 25,07% i 2026. De billigste kommuner ligger
           omkring 22%, mens de dyreste er over 27%.
         </p>
 
@@ -165,10 +165,24 @@ export default function LoenPage() {
           0,6-1% (gennemsnit 0,68%).
         </p>
 
-        <h3>7. Topskat (15%)</h3>
+        <h3>7. Nyt: Mellemskat, topskat og top-topskat (2026)</h3>
         <p>
-          Tjener du over ca. 588.900 kr årligt (efter AM-bidrag), betaler du
-          <strong> topskat</strong> på 15% af beløbet over grænsen.
+          Fra 2026 er den gamle topskat på 15% erstattet af tre nye skattebrackets:
+        </p>
+        <ul>
+          <li>
+            <strong>Mellemskat (7,5%):</strong> Indkomst over 641.200 kr/år (efter AM-bidrag)
+          </li>
+          <li>
+            <strong>Topskat (7,5%):</strong> Indkomst over 777.900 kr/år (efter AM-bidrag)
+          </li>
+          <li>
+            <strong>Top-topskat (5%):</strong> Indkomst over 2.592.700 kr/år (efter AM-bidrag)
+          </li>
+        </ul>
+        <p>
+          For de fleste danskere betyder reformen en skattelettelse, da
+          mellemskattegrænsen er højere end den gamle topskattegrænse.
         </p>
 
         <h2>Kommuner med lavest og højest skat (2026)</h2>
@@ -217,9 +231,9 @@ export default function LoenPage() {
           </li>
         </ul>
 
-        <div className="bg-blue-50 border-l-4 border-blue-400 p-4 my-6 not-prose">
-          <p className="font-medium text-blue-800">Tip</p>
-          <p className="text-blue-700">
+        <div className="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-400 dark:border-blue-500 p-4 my-6 not-prose">
+          <p className="font-medium text-blue-800 dark:text-blue-300">Tip</p>
+          <p className="text-blue-700 dark:text-blue-400">
             Tjek din forskudsopgørelse på{" "}
             <a
               href="https://skat.dk"
@@ -233,12 +247,11 @@ export default function LoenPage() {
           </p>
         </div>
 
-        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 my-6 not-prose">
-          <p className="font-medium text-yellow-800">Bemærk</p>
-          <p className="text-yellow-700">
-            Denne beregner giver et estimat baseret på gennemsnitlige satser.
-            Din faktiske skat afhænger af din specifikke situation, fradrag og
-            kommune. For præcis beregning, brug SKAT's officielle værktøjer.
+        <div className="bg-green-50 dark:bg-green-900/20 border-l-4 border-green-400 dark:border-green-500 p-4 my-6 not-prose">
+          <p className="font-medium text-green-800 dark:text-green-300">Opdateret med 2026-skattereform</p>
+          <p className="text-green-700 dark:text-green-400">
+            Denne beregner er opdateret med det nye skattesystem fra 2026 med mellemskat,
+            topskat og top-topskat. Kilde: skm.dk, skat.dk. Sidst verificeret februar 2026.
           </p>
         </div>
       </div>

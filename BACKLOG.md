@@ -311,7 +311,7 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 - Kilde: su.dk/satser
 
 ### C3. Dagpenge-satser 2026
-- [ ] Verificer og opdater dagpenge-satser til 2026-niveau
+- [x] Verificer og opdater dagpenge-satser til 2026-niveau
 - Tjek max dagpengesats (timesat og maanedlig)
 - Opdater beregningsgrundlag (90% af tidl. loen, max XX kr)
 - Tjek dimittendsats og unge-sats
