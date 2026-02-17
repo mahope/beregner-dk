@@ -431,9 +431,10 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 - [x] Dark mode
 
 ### D8. Kalorieberegner forbedring
-- [ ] Tilfoej beregning af makronaeringstoffer (protein, kulhydrat, fedt)
-- Tilfoej aktivitetsniveau-vaelger med flere niveauer
-- Vis dagligt kaloriebehov for vaegttab, vedligeholdelse og vaegtoegning
+- [x] Makronæringsstoffer med visuel bar (protein, kulhydrat, fedt)
+- [x] 5 aktivitetsniveauer allerede implementeret
+- [x] Alle tre mål side om side (vægttab, vedligehold, opbygning)
+- [x] Dark mode og InputField migration
 - Tilfoej BMR (Basal Metabolic Rate) separat
 - Link til BMI-beregner med forudfyldte data
 
