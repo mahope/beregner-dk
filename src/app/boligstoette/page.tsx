@@ -102,33 +102,53 @@ export default function BoligstoettePage() {
       <section className="mt-12 prose prose-blue max-w-none">
         <h2>Hvad er boligstøtte?</h2>
         <p>
-          Boligstøtte er et skattefrit tilskud fra staten til din husleje. 
-          Formålet er at hjælpe lejere med lave og mellemstore indkomster 
-          med at kunne betale deres bolig.
+          Boligstøtte er et skattefrit tilskud fra staten til din husleje.
+          Formålet er at hjælpe lejere med lave og mellemstore indkomster
+          med at kunne betale deres bolig. Boligstøtte administreres af
+          Udbetaling Danmark og udbetales månedligt.
         </p>
+
+        <h2>Boligstøtte-satser 2026</h2>
+        <p>
+          I 2026 gælder følgende nøgletal for boligstøtte (boligsikring):
+        </p>
+        <ul>
+          <li><strong>Max boligudgift:</strong> 113.000 kr/år (ca. 9.417 kr/md) — den del af huslejen der overstiger dette, indgår ikke i beregningen</li>
+          <li><strong>Indkomstgrænse:</strong> 171.500 kr/år for 1 person, plus 53.100 kr for hver yderligere person i husstanden</li>
+          <li><strong>Minimumsbeløb:</strong> 304 kr/md — støtte under dette beløb udbetales ikke</li>
+          <li><strong>Formuegrænse:</strong> Ca. 800.000 kr for enlige, 1.600.000 kr for par</li>
+        </ul>
 
         <h3>Hvad tæller med i beregningen?</h3>
         <ul>
           <li><strong>Husstandens indkomst:</strong> Al indkomst for alle over 18 år tæller med</li>
-          <li><strong>Huslejens størrelse:</strong> Der er et loft over, hvor meget husleje der indgår</li>
-          <li><strong>Boligens størrelse:</strong> Store boliger kan give reduceret støtte</li>
-          <li><strong>Antal personer:</strong> Flere personer giver højere indkomstgrænse</li>
+          <li><strong>Huslejens størrelse:</strong> Der er et loft over, hvor meget husleje der indgår (113.000 kr/år i 2026)</li>
+          <li><strong>Boligens størrelse:</strong> Max 65 m² for 1 person, plus 20 m² per ekstra person. Overskydende areal reducerer støtten</li>
+          <li><strong>Antal personer:</strong> Flere personer giver højere indkomstgrænse og arealgrænse</li>
           <li><strong>Formue:</strong> Høj formue reducerer eller fjerner støtten</li>
         </ul>
 
         <h3>Boligstøtte vs. boligydelse</h3>
         <p>
-          Boligstøtte er for almindelige lejere. Boligydelse er en særlig ordning 
-          for folkepensionister og førtidspensionister, som typisk giver et 
-          højere beløb.
+          Boligstøtte (boligsikring) er for almindelige lejere under folkepensionsalderen.
+          Boligydelse er en særlig ordning for folkepensionister og førtidspensionister,
+          som typisk giver et højere beløb og har mere favorable indkomstgrænser.
         </p>
 
-        <h3>Sådan maksimerer du din boligstøtte</h3>
+        <h3>Sådan søger du boligstøtte</h3>
+        <ol>
+          <li>Log ind på <a href="https://www.borger.dk" target="_blank" rel="noopener">borger.dk</a> med MitID</li>
+          <li>Find &quot;Boligstøtte&quot; under Bolig og flytning</li>
+          <li>Udfyld oplysninger om husleje, indkomst og husstand</li>
+          <li>Udbetaling Danmark beregner beløbet og udbetaler til din NemKonto</li>
+        </ol>
+
+        <h3>Tips til at maksimere din boligstøtte</h3>
         <ul>
-          <li>Søg tidligt - du kan kun få støtte fra ansøgningsdatoen</li>
+          <li>Søg tidligt — du kan kun få støtte fra ansøgningsdatoen</li>
           <li>Opdater dine oplysninger løbende for at undgå efterregulering</li>
           <li>Tjek om din varmeudgift kan medregnes i huslejen</li>
-          <li>Ved flytning: Søg igen - beløbet kan ændre sig</li>
+          <li>Ved flytning: Søg igen — beløbet kan ændre sig med ny husleje</li>
         </ul>
       </section>
 

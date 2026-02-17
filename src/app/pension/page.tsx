@@ -17,6 +17,49 @@ export const metadata: Metadata = {
   keywords: "pension, beregner, pensionsopsparing, folkepension, ATP, alderspension, ratepension",
 };
 
+const pensionFaqItems = [
+  {
+    question: "Hvad er folkepensionen i 2026?",
+    answer:
+      "I 2026 er folkepensionens grundbeløb ca. 7.544 kr/md. Dertil kommer pensionstillæg på 8.729 kr/md for enlige eller 4.367 kr/md for samboende. Pensionstillægget modregnes i anden indkomst.",
+  },
+  {
+    question: "Hvornår kan jeg gå på folkepension?",
+    answer:
+      "Folkepensionsalderen afhænger af dit fødselsår. For personer født 1963-1966 er den 68 år, for 1967-1970 er den 69 år, og for personer født efter 1970 forventes den at stige til 70+ år.",
+  },
+  {
+    question: "Hvor meget skal jeg spare op til pension?",
+    answer:
+      "En tommelfingerregel er at spare 12-17% af din bruttoløn til pension. De fleste har brug for 60-80% af deres arbejdsindkomst som pensionist for at bevare deres levestandard.",
+  },
+  {
+    question: "Hvad er forskellen på ratepension og aldersopsparing?",
+    answer:
+      "Ratepension giver fradrag ved indbetaling (op til 63.100 kr/år i 2026) men beskattes ved udbetaling. Aldersopsparing giver ikke fradrag, men udbetales skattefrit. Max indbetaling til aldersopsparing er 5.900 kr/år i 2026.",
+  },
+  {
+    question: "Hvad er ATP pension?",
+    answer:
+      "ATP er en obligatorisk pension for alle lønmodtagere i Danmark. Den livslange udbetaling ligger typisk på 2.000-3.000 kr/md afhængig af dine indbetalinger gennem arbejdslivet.",
+  },
+  {
+    question: "Kan jeg se alle mine pensioner ét sted?",
+    answer:
+      "Ja, på PensionsInfo.dk kan du logge ind med MitID og se et samlet overblik over alle dine pensionsordninger, herunder folkepension, ATP, arbejdsmarkedspension og private opsparinger.",
+  },
+  {
+    question: "Beskattes pension ved udbetaling?",
+    answer:
+      "Det afhænger af pensionstypen. Ratepension og livrente beskattes som personlig indkomst. Aldersopsparing udbetales skattefrit. Folkepension beskattes som personlig indkomst.",
+  },
+  {
+    question: "Hvad er en livrente?",
+    answer:
+      "En livrente er en pensionsordning der udbetales livslangt. Den beskytter mod at du 'løber tør' for penge. Til gengæld kan du ikke arve den resterende opsparing, som du kan med ratepension.",
+  },
+];
+
 export default function PensionPage() {
   return (
     <div>
@@ -26,6 +69,7 @@ export default function PensionPage() {
         url={`${baseUrl}/pension`}
         category="FinanceApplication"
       />
+      <FAQSchema items={pensionFaqItems} />
       <BreadcrumbSchema
         items={[
           { name: "Forside", url: baseUrl },
@@ -186,6 +230,17 @@ export default function PensionPage() {
           <li><a href="https://www.atp.dk" target="_blank" rel="noopener">ATP.dk</a> - Din ATP-pension</li>
         </ul>
       </div>
+
+      <section className="mt-12">
+        <h2 className="text-2xl font-bold text-gray-900 mb-6">
+          Ofte stillede spørgsmål om pension
+        </h2>
+        <FAQ items={pensionFaqItems} />
+      </section>
+
+      <section className="mt-12">
+        <RelatedCalculators current="/pension" />
+      </section>
     </div>
   );
 }
