@@ -401,11 +401,11 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 - [x] Dark mode og InputField migration
 
 ### D4. Opsparingsberegner forbedring
-- [ ] Tilfoej interaktiv graf der viser opsparingens vaekst over tid
-- Vis effekten af renters rente visuelt
-- Tilfoej sammenligning af scenarier (fx 5% vs 7% vs 10% afkast)
-- Tilfoej inflations-justering saa brugeren ser reelt afkast
-- Tilfoej "Hvor laenge skal jeg spare for at naa X kr?"
+- [x] Vækstgraf med indskud/rente-fordeling
+- [x] Scenarie-sammenligning (aktuelt + 2 højere rentesatser)
+- [x] Inflations-justering med toggle og realt afkast
+- [x] "Nå et mål" omvendt beregner
+- [x] Dark mode og InputField migration
 
 ### D5. Pensionsberegner forbedring
 - [ ] Tilfoej de tre pensionsoejler visuelt (folkepension + arbejdsmarked + privat)
