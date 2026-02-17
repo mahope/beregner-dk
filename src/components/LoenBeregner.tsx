@@ -5,6 +5,7 @@ import { ShareCalculation } from "@/components/ShareCalculation";
 import { PrintResult } from "@/components/PrintResult";
 import { InputField } from "@/components/InputField";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
+import { KOMMUNER } from "@/lib/kommuner";
 
 // 2026 danske skattesatser (ny skattereform med mellemskat/topskat/top-topskat)
 // Kilde: skm.dk, skat.dk, martinsen.dk
@@ -30,6 +31,7 @@ export default function LoenBeregner() {
   const [periode, setPeriode] = useState<"maaned" | "aar">("maaned");
   const [medKirkeskat, setMedKirkeskat] = useState(true);
   const [kommuneSkat, setKommuneSkat] = useState(24.94);
+  const [valgtKommune, setValgtKommune] = useState("");
   const [pension, setPension] = useState(0);
   const hasLoadedUrl = useRef(false);
 
@@ -87,9 +89,12 @@ export default function LoenBeregner() {
     // Kommuneskat
     const kommuneSkatBeloeb = skattepligtigIndkomst * (kommuneSkat / 100);
 
-    // Kirkeskat (valgfri)
+    // Kirkeskat (valgfri) — brug kommune-specifik sats hvis valgt
+    const kirkeSkatPct = valgtKommune
+      ? (KOMMUNER.find(k => k.navn === valgtKommune)?.kirkeskat ?? SKATTESATSER.kirkeSkat * 100) / 100
+      : SKATTESATSER.kirkeSkat;
     const kirkeSkatBeloeb = medKirkeskat
-      ? skattepligtigIndkomst * SKATTESATSER.kirkeSkat
+      ? skattepligtigIndkomst * kirkeSkatPct
       : 0;
 
     // NY 2026: Mellemskat (7,5% af indkomst over 641.200 kr)
@@ -135,8 +140,37 @@ export default function LoenBeregner() {
       aarligNetto,
       maanedligNetto,
       effektivSkat,
+      kirkeSkatPct,
     };
-  }, [bruttoLoen, periode, medKirkeskat, kommuneSkat, pension]);
+  }, [bruttoLoen, periode, medKirkeskat, kommuneSkat, valgtKommune, pension]);
+
+  // Beregn gevinst ved 1.000 kr mere i månedsløn
+  const ekstraBeregning = useMemo(() => {
+    if (periode !== "maaned") return null;
+    const ekstraBrutto = 1000;
+    const nyBrutto = (bruttoLoen + ekstraBrutto) * 12;
+    const pensionBidrag = nyBrutto * (pension / 100);
+    const loenEfterPension = nyBrutto - pensionBidrag;
+    const amBidrag = loenEfterPension * SKATTESATSER.amBidrag;
+    const loenEfterAM = loenEfterPension - amBidrag;
+    const beskaeftigelsesfradrag = Math.min(
+      loenEfterAM * SKATTESATSER.beskaeftigelsesfradragPct,
+      SKATTESATSER.beskaeftigelsesfradragMax
+    );
+    const skattepligtigIndkomst = Math.max(0, loenEfterAM - SKATTESATSER.personfradrag - beskaeftigelsesfradrag);
+    const kirkeSkatPct = valgtKommune
+      ? (KOMMUNER.find(k => k.navn === valgtKommune)?.kirkeskat ?? SKATTESATSER.kirkeSkat * 100) / 100
+      : SKATTESATSER.kirkeSkat;
+    const bundSkat = skattepligtigIndkomst * SKATTESATSER.bundSkat;
+    const kommuneSkatBeloeb = skattepligtigIndkomst * (kommuneSkat / 100);
+    const kirkeSkatBeloeb = medKirkeskat ? skattepligtigIndkomst * kirkeSkatPct : 0;
+    const mellemSkat = Math.max(0, loenEfterAM - SKATTESATSER.mellemSkatGraense) * SKATTESATSER.mellemSkat;
+    const topSkat = Math.max(0, loenEfterAM - SKATTESATSER.topSkatGraense) * SKATTESATSER.topSkat;
+    const topTopSkat = Math.max(0, loenEfterAM - SKATTESATSER.topTopSkatGraense) * SKATTESATSER.topTopSkat;
+    const samletSkat = bundSkat + kommuneSkatBeloeb + kirkeSkatBeloeb + mellemSkat + topSkat + topTopSkat;
+    const nyNetto = (loenEfterAM - samletSkat) / 12;
+    return Math.round(nyNetto - beregning.maanedligNetto);
+  }, [bruttoLoen, periode, medKirkeskat, kommuneSkat, valgtKommune, pension, beregning.maanedligNetto]);
 
   const formatKr = (beloeb: number) => {
     return new Intl.NumberFormat("da-DK", {
@@ -191,16 +225,56 @@ export default function LoenBeregner() {
         </div>
 
         <div className="space-y-4">
-          <InputField
-            label="Kommuneskat (%)"
-            value={kommuneSkat}
-            onChange={setKommuneSkat}
-            min={20}
-            max={30}
-            step={0.01}
-            unit="%"
-            helpText="Landsgennemsnit: 24,94%. Tjek din kommunes sats."
-          />
+          <div>
+            <label className="block text-sm font-medium mb-2 dark:text-gray-200">
+              Kommune
+            </label>
+            <select
+              value={valgtKommune}
+              onChange={(e) => {
+                const kommuneNavn = e.target.value;
+                setValgtKommune(kommuneNavn);
+                if (kommuneNavn) {
+                  const kommune = KOMMUNER.find(k => k.navn === kommuneNavn);
+                  if (kommune) {
+                    setKommuneSkat(kommune.kommuneskat);
+                    setMedKirkeskat(true);
+                  }
+                }
+              }}
+              className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+            >
+              <option value="">Manuel indtastning (gennemsnit)</option>
+              {KOMMUNER.map(k => (
+                <option key={k.navn} value={k.navn}>
+                  {k.navn} ({k.kommuneskat}%)
+                </option>
+              ))}
+            </select>
+            {valgtKommune && (
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Kirkeskat: {KOMMUNER.find(k => k.navn === valgtKommune)?.kirkeskat}%
+              </p>
+            )}
+            {!valgtKommune && (
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Vælg kommune for præcis beregning
+              </p>
+            )}
+          </div>
+
+          {!valgtKommune && (
+            <InputField
+              label="Kommuneskat (%)"
+              value={kommuneSkat}
+              onChange={setKommuneSkat}
+              min={20}
+              max={30}
+              step={0.01}
+              unit="%"
+              helpText="Landsgennemsnit: 24,94%"
+            />
+          )}
 
           <InputField
             label="Arbejdsgiver pension (%)"
@@ -243,10 +317,19 @@ export default function LoenBeregner() {
         </div>
       </div>
 
-      <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-center">
-        <p className="text-sm text-gray-600 dark:text-gray-400">
-          Effektiv skatteprocent: <strong className="dark:text-white">{beregning.effektivSkat.toFixed(1)}%</strong>
-        </p>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-center">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            Effektiv skatteprocent: <strong className="dark:text-white">{beregning.effektivSkat.toFixed(1)}%</strong>
+          </p>
+        </div>
+        {ekstraBeregning !== null && (
+          <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg text-center">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              1.000 kr mere i bruttoløn = <strong className="text-green-700 dark:text-green-400">+{ekstraBeregning} kr</strong> netto/md
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Share and Print buttons */}
@@ -308,7 +391,7 @@ export default function LoenBeregner() {
           </div>
           {medKirkeskat && (
             <div className="flex justify-between text-red-600 dark:text-red-400">
-              <span>Kirkeskat (0,68%)</span>
+              <span>Kirkeskat ({(beregning.kirkeSkatPct * 100).toFixed(2).replace('.', ',')}%)</span>
               <span>{formatKr(beregning.kirkeSkatBeloeb)}</span>
             </div>
           )}

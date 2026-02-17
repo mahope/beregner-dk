@@ -380,7 +380,7 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 ## D. Gennemgang & Forbedring af Alle Beregnere (11 opgaver)
 
 ### D1. Loen-efter-skat beregner forbedring
-- [ ] Udvid med kommune-vaelger (alle 98 kommuner med korrekt kommuneskat)
+- [x] Udvid med kommune-vaelger (alle 98 kommuner med korrekt kommuneskat)
 - Tilfoej kirkeskat-toggle
 - Vis detaljeret beregning: AM-bidrag → Bundskat → Kommuneskat → Topskat → Nettoloen
 - Tilfoej beregning for forskellige ansaettelsestyper (maanedsloen, timeloen, freelance)
