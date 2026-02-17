@@ -148,7 +148,7 @@ export default function BlogPage() {
       <div className="mt-12 p-6 bg-blue-50 dark:bg-blue-900/30 rounded-xl text-center">
         <h2 className="text-xl font-bold mb-2 text-gray-900 dark:text-white">Brug vores beregnere</h2>
         <p className="text-gray-600 dark:text-gray-300 mb-4">
-          Vi har 20+ gratis beregnere til økonomi, sundhed og hverdag.
+          Vi har 33+ gratis beregnere til økonomi, sundhed og hverdag.
         </p>
         <Link 
           href="/"
