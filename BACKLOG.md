@@ -439,7 +439,7 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 - Link til BMI-beregner med forudfyldte data
 
 ### D9. Timepris beregner forbedring
-- [ ] Tilfoej beregning for freelancere (inkl. moms, skat, ferie, sygedage)
+- [x] Tilfoej beregning for freelancere (inkl. moms, skat, ferie, sygedage)
 - Vis breakdown: bruttotimepris → skat → nettotimepris
 - Tilfoej branche-sammenligning (hvad tjener andre i din branche?)
 - Tilfoej beregning af effektiv timepris inkl. transport og forberedelse
