@@ -2,8 +2,8 @@
 
 import { useState, useMemo } from 'react';
 
-// 2026 rates (approximate)
-const MAX_WEEKLY_RATE = 4695; // Max barselsdagpenge per week
+// 2026 satser (kilde: bm.dk, borger.dk)
+const MAX_WEEKLY_RATE = 5085; // Max barselsdagpenge per uge 2026
 const WORK_HOURS_FULL = 37;   // Full time hours
 
 type Employment = 'fulltime' | 'parttime' | 'selfemployed' | 'unemployed';

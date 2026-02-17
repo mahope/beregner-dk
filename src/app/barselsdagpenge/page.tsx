@@ -13,7 +13,7 @@ const baseUrl = "https://minberegner.dk";
 export const metadata: Metadata = {
   title: "Barselsdagpenge beregner 2026 - Se hvad du får udbetalt",
   description:
-    "Hvad får du under barsel? Max sats 2026: ca. 4.695 kr/uge (≈ 20.000 kr/md før skat). Beregn dine barselsdagpenge ud fra din løn og situation. Gratis beregner.",
+    "Hvad får du under barsel? Max sats 2026: ca. 5.085 kr/uge (≈ 22.000 kr/md før skat). Beregn dine barselsdagpenge ud fra din løn og situation. Gratis beregner.",
   keywords: [
     "barselsdagpenge",
     "barsel beregner",
@@ -47,7 +47,7 @@ const faqItems = [
   {
     question: "Hvad er satsen for barselsdagpenge i 2026?",
     answer:
-      "I 2026 er den maksimale barselsdagpengesats ca. 4.695 kr. om ugen (før skat) for fuldtidsansatte. Det svarer til ca. 20.000-21.000 kr. om måneden. Satsen reguleres årligt.",
+      "I 2026 er den maksimale barselsdagpengesats ca. 5.085 kr. om ugen (før skat) for fuldtidsansatte. Det svarer til ca. 22.000 kr. om måneden. Satsen reguleres årligt.",
   },
   {
     question: "Hvor længe kan jeg få barselsdagpenge?",
