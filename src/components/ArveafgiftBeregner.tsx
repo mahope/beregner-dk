@@ -18,7 +18,7 @@ interface RelationOption {
   icon: string;
 }
 
-const BUNDFRADRAG = 321700;
+const BUNDFRADRAG = 392300;
 const BOAFGIFT_PROCENT = 0.15;
 const TILLAEG_PROCENT = 0.25;
 
@@ -50,13 +50,13 @@ const relationOptions: RelationOption[] = [
   {
     value: "soeskende",
     label: "Søskende",
-    description: "15% boafgift + 25% tillægsafgift",
+    description: "15% boafgift + 25% tillægsafgift (op til 36,25%)",
     icon: "👫",
   },
   {
     value: "andre",
     label: "Andre (ven, fjern familie mv.)",
-    description: "15% boafgift + 25% tillægsafgift",
+    description: "15% boafgift + 25% tillægsafgift (op til 36,25%)",
     icon: "👥",
   },
 ];
@@ -101,7 +101,7 @@ export default function ArveafgiftBeregner() {
     const afgiftsgrundlag = Math.max(0, beloeb - BUNDFRADRAG);
     const boafgift = afgiftsgrundlag * BOAFGIFT_PROCENT;
     const tillaegAfgift = harTillaeg(relation)
-      ? boafgift * TILLAEG_PROCENT
+      ? (beloeb - boafgift) * TILLAEG_PROCENT
       : 0;
     const samletAfgift = boafgift + tillaegAfgift;
     const arvEfterAfgift = beloeb - samletAfgift;
@@ -270,7 +270,7 @@ export default function ArveafgiftBeregner() {
               {harTillaeg(relation) && (
                 <div className="flex justify-between py-2 border-b border-gray-100 dark:border-gray-700">
                   <span className="text-gray-600 dark:text-gray-300">
-                    Tillægsafgift (25% af boafgift)
+                    Tillægsafgift (25% af arv efter boafgift)
                   </span>
                   <span className="font-medium text-red-600 dark:text-red-400">
                     {formatKr(resultat.tillaegAfgift)}
@@ -314,8 +314,9 @@ export default function ArveafgiftBeregner() {
                   <strong>Bemærk:</strong> Som{" "}
                   {relation === "soeskende" ? "søskende" : "fjernere arving"}{" "}
                   betales der både 15% boafgift og yderligere 25%
-                  tillægsafgift. Tillægsafgiften beregnes af boafgiften, ikke af
-                  arvebeløbet.
+                  tillægsafgift. Tillægsafgiften beregnes af arven efter fradrag
+                  af boafgiften (ikke af selve boafgiften). Der er intet
+                  bundfradrag for tillægsafgiften.
                 </p>
               </div>
             )}

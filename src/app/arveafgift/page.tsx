@@ -64,19 +64,19 @@ export default function ArveafgiftPage() {
               <td>Børn, børnebørn, forældre</td>
               <td>15%</td>
               <td>0%</td>
-              <td>321.700 kr</td>
+              <td>392.300 kr</td>
             </tr>
             <tr>
               <td>Søskende</td>
               <td>15%</td>
-              <td>25% af boafgiften</td>
-              <td>321.700 kr</td>
+              <td>25% af arv efter boafgift</td>
+              <td>392.300 kr</td>
             </tr>
             <tr>
               <td>Andre (venner, fjern familie)</td>
               <td>15%</td>
-              <td>25% af boafgiften</td>
-              <td>321.700 kr</td>
+              <td>25% af arv efter boafgift</td>
+              <td>392.300 kr</td>
             </tr>
           </tbody>
         </table>
@@ -93,7 +93,7 @@ export default function ArveafgiftPage() {
         <h3>Børn, børnebørn og forældre</h3>
         <p>
           Nærmeste familie betaler 15% i boafgift af beløbet over bundfradraget 
-          på 321.700 kr. Der er ingen tillægsafgift for denne gruppe.
+          på 392.300 kr. Der er ingen tillægsafgift for denne gruppe.
         </p>
         <ul>
           <li><strong>Børn:</strong> Arv fra forældre</li>
@@ -103,25 +103,28 @@ export default function ArveafgiftPage() {
 
         <h3>Søskende</h3>
         <p>
-          Søskende betaler 15% boafgift plus 25% tillægsafgift af boafgiften. 
-          Det giver en effektiv sats på 18,75% af det overskydende beløb.
+          Søskende betaler 15% boafgift plus 25% tillægsafgift af arven efter
+          boafgift. Den effektive marginale sats nærmer sig 36,25% for store arvebeløb.
+          <strong>Bemærk:</strong> Fra 1. januar 2027 afskaffes tillægsafgiften for
+          søskende, så de fremover kun betaler 15% boafgift.
         </p>
 
         <h3>Andre arvinger</h3>
         <p>
-          Venner, fjern familie og andre uden direkte familiemæssig tilknytning 
-          betaler samme sats som søskende: 15% boafgift + 25% tillægsafgift.
+          Venner, fjern familie og andre uden direkte familiemæssig tilknytning
+          betaler 15% boafgift + 25% tillægsafgift af arven efter boafgift.
+          Der er intet bundfradrag for tillægsafgiften.
         </p>
 
         <h2>Bundfradraget</h2>
         <p>
-          Bundfradraget på 321.700 kr (2026) gælder for alle arvinger undtagen 
-          ægtefæller. Det betyder, at de første 321.700 kr af arven er 
+          Bundfradraget på 392.300 kr (2026) gælder for alle arvinger undtagen 
+          ægtefæller. Det betyder, at de første 392.300 kr af arven er 
           afgiftsfri — uanset hvem der arver.
         </p>
         <p>
-          <strong>Eksempel:</strong> Et barn arver 1.000.000 kr. Arveafgiften 
-          beregnes således: (1.000.000 - 321.700) × 15% = 101.745 kr i afgift.
+          <strong>Eksempel:</strong> Et barn arver 1.000.000 kr. Arveafgiften
+          beregnes således: (1.000.000 − 392.300) × 15% = 91.155 kr i afgift.
         </p>
 
         <h2>Hvornår skal arveafgift betales?</h2>
@@ -141,9 +144,10 @@ export default function ArveafgiftPage() {
 
         <h3>Hvad er tillægsafgift?</h3>
         <p>
-          Tillægsafgift er en ekstra afgift på 25% af boafgiften (ikke af 
-          arvebeløbet). Den gælder for søskende og andre arvinger, der ikke 
-          er i direkte op- eller nedstigende linje.
+          Tillægsafgift er en ekstra afgift på 25% af arven efter fradrag af
+          boafgiften. Der er intet bundfradrag for tillægsafgiften. Den gælder
+          for søskende (indtil 2027) og andre arvinger, der ikke er i direkte
+          op- eller nedstigende linje.
         </p>
 
         <h3>Har børnebarn samme rettigheder som børn?</h3>
