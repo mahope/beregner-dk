@@ -424,11 +424,11 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 - [x] Dark mode
 
 ### D7. Elberegner forbedring
-- [ ] Tilfoej aktuelle elpriser (evt. via Energi Data Service API)
-- Tilfoej opdeling i elforbrug per apparat (vaskemaskine, toerretumbler, opvaskemaskine etc.)
-- Vis maanedlig og aarlig omkostning
-- Tilfoej sammenligning med gennemsnitligt dansk elforbrug
-- Tilfoej elafgift og PSO-beregning separat
+- [x] Per-apparat forbrug-opdeling med visuel bar
+- [x] Sammenligning med gennemsnitligt dansk elforbrug (4 husstandstyper)
+- [x] Elpris-sammensætning (spot, transport, elafgift, moms)
+- [x] Månedlig og årlig omkostning per apparat
+- [x] Dark mode
 
 ### D8. Kalorieberegner forbedring
 - [ ] Tilfoej beregning af makronaeringstoffer (protein, kulhydrat, fedt)
