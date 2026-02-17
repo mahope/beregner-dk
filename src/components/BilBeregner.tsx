@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { BilforsikringAffiliate } from "./AffiliateBox";
+import { ShareCalculation } from "@/components/ShareCalculation";
+import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 
 type Braendstoftype = "benzin" | "diesel" | "el" | "hybrid";
 
@@ -17,6 +19,38 @@ export default function BilBeregner() {
   // El-bil specifikt
   const [kwh100km, setKwh100km] = useState<number>(17);
   const [elpris, setElpris] = useState<number>(2.5);
+
+  const hasLoadedUrl = useRef(false);
+
+  // Load state from URL on mount
+  useEffect(() => {
+    if (hasLoadedUrl.current) return;
+    hasLoadedUrl.current = true;
+
+    const urlState = getStateFromUrl();
+    if (urlState && urlState.type === 'bil') {
+      const inputs = urlState.inputs;
+      if (inputs.bilpris !== undefined) setBilpris(inputs.bilpris);
+      if (inputs.braendstof) setBraendstof(inputs.braendstof);
+      if (inputs.kmPrLiter !== undefined) setKmPrLiter(inputs.kmPrLiter);
+      if (inputs.kmPrAar !== undefined) setKmPrAar(inputs.kmPrAar);
+      if (inputs.braendstofpris !== undefined) setBraendstofpris(inputs.braendstofpris);
+      if (inputs.forsikring !== undefined) setForsikring(inputs.forsikring);
+      if (inputs.vaerditab !== undefined) setVaerditab(inputs.vaerditab);
+      if (inputs.kwh100km !== undefined) setKwh100km(inputs.kwh100km);
+      if (inputs.elpris !== undefined) setElpris(inputs.elpris);
+    }
+  }, []);
+
+  // Get shareable link for current calculation
+  const getShareableLink = useCallback(() => {
+    const state: CalculationState = {
+      type: 'bil',
+      inputs: { bilpris, braendstof, kmPrLiter, kmPrAar, braendstofpris, forsikring, vaerditab, kwh100km, elpris },
+      timestamp: Date.now(),
+    };
+    return generateShareableLink(state);
+  }, [bilpris, braendstof, kmPrLiter, kmPrAar, braendstofpris, forsikring, vaerditab, kwh100km, elpris]);
 
   const resultat = useMemo(() => {
     // Brændstof/strøm omkostninger
@@ -278,6 +312,15 @@ export default function BilBeregner() {
             Samlet årlig omkostning: {formatKr(resultat.aarligt)}
           </p>
         </div>
+      </div>
+
+      {/* Share button */}
+      <div className="flex justify-center">
+        <ShareCalculation
+          getShareableLink={getShareableLink}
+          calculatorName="Bilberegner"
+          resultSummary={`${formatKr(resultat.maanedligt)}/md - ${resultat.prKm} kr/km (${formatKr(resultat.aarligt)}/år)`}
+        />
       </div>
 
       {/* Tips */}

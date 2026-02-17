@@ -446,7 +446,7 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 - Tilfoej "Hvad skal jeg tage i timepris for at tjene X om maaneden?"
 
 ### D10. Share/Del feature paa alle beregnere
-- [ ] URL state encoding mangler paa 29 beregnere (kun implementeret paa 4)
+- [x] URL state encoding mangler paa 29 beregnere (kun implementeret paa 4)
 - Implementer useCalculationState hook paa alle 33 beregnere
 - Tilfoej "Del beregning" knap paa alle beregnere
 - Test at delte links preudfylder korrekt paa alle beregnere

@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import { ShareCalculation } from "@/components/ShareCalculation";
+import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 
 // SU-satser 2026 (officielle satser fra su.dk)
 // Kilde: su.dk/satser
@@ -40,6 +42,34 @@ export default function SUBeregner() {
   const [antalMaaneder, setAntalMaaneder] = useState<number>(12);
   const [harHandicap, setHarHandicap] = useState(false);
   const [erEnligForsorger, setErEnligForsorger] = useState(false);
+  const hasLoadedUrl = useRef(false);
+
+  // Load state from URL on mount
+  useEffect(() => {
+    if (hasLoadedUrl.current) return;
+    hasLoadedUrl.current = true;
+
+    const urlState = getStateFromUrl();
+    if (urlState && urlState.type === 'su') {
+      const inputs = urlState.inputs;
+      if (inputs.uddannelse) setUddannelse(inputs.uddannelse);
+      if (inputs.boligstatus) setBoligstatus(inputs.boligstatus);
+      if (inputs.arbejdsindkomst !== undefined) setArbejdsindkomst(inputs.arbejdsindkomst);
+      if (inputs.antalMaaneder !== undefined) setAntalMaaneder(inputs.antalMaaneder);
+      if (inputs.harHandicap !== undefined) setHarHandicap(inputs.harHandicap);
+      if (inputs.erEnligForsorger !== undefined) setErEnligForsorger(inputs.erEnligForsorger);
+    }
+  }, []);
+
+  // Get shareable link for current calculation
+  const getShareableLink = useCallback(() => {
+    const state: CalculationState = {
+      type: 'su',
+      inputs: { uddannelse, boligstatus, arbejdsindkomst, antalMaaneder, harHandicap, erEnligForsorger },
+      timestamp: Date.now(),
+    };
+    return generateShareableLink(state);
+  }, [uddannelse, boligstatus, arbejdsindkomst, antalMaaneder, harHandicap, erEnligForsorger]);
 
   const beregning = useMemo(() => {
     // Basis SU-sats afhængig af uddannelse og boligstatus
@@ -287,6 +317,14 @@ export default function SUBeregner() {
           </p>
         </div>
       )}
+
+      <div className="flex justify-center">
+        <ShareCalculation
+          getShareableLink={getShareableLink}
+          calculatorName="SU-beregner"
+          resultSummary={`${formatKr(beregning.samletNetto)}/md efter skat`}
+        />
+      </div>
 
       {/* Info boks */}
       <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">

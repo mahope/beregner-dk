@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import { ShareCalculation } from "@/components/ShareCalculation";
+import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 
 interface Tidszone {
   id: string;
@@ -33,6 +35,33 @@ export default function TidszoneBeregner() {
   const [timer, setTimer] = useState<number>(12);
   const [minutter, setMinutter] = useState<number>(0);
   const [aktuelTid, setAktuelTid] = useState<Date>(new Date());
+
+  const hasLoadedUrl = useRef(false);
+
+  // Load state from URL on mount
+  useEffect(() => {
+    if (hasLoadedUrl.current) return;
+    hasLoadedUrl.current = true;
+
+    const urlState = getStateFromUrl();
+    if (urlState && urlState.type === 'tidszone') {
+      const inputs = urlState.inputs;
+      if (inputs.fraTidszone) setFraTidszone(inputs.fraTidszone);
+      if (inputs.tilTidszone) setTilTidszone(inputs.tilTidszone);
+      if (inputs.timer !== undefined) setTimer(inputs.timer);
+      if (inputs.minutter !== undefined) setMinutter(inputs.minutter);
+    }
+  }, []);
+
+  // Get shareable link for current calculation
+  const getShareableLink = useCallback(() => {
+    const state: CalculationState = {
+      type: 'tidszone',
+      inputs: { fraTidszone, tilTidszone, timer, minutter },
+      timestamp: Date.now(),
+    };
+    return generateShareableLink(state);
+  }, [fraTidszone, tilTidszone, timer, minutter]);
 
   // Opdater aktuel tid hvert sekund
   useEffect(() => {
@@ -211,6 +240,15 @@ export default function TidszoneBeregner() {
             <p className="text-sm opacity-75">{getDagTekst()}</p>
           </div>
         </div>
+      </div>
+
+      {/* Share button */}
+      <div className="flex justify-center">
+        <ShareCalculation
+          getShareableLink={getShareableLink}
+          calculatorName="Tidszoneberegner"
+          resultSummary={`${formatTid(timer, minutter)} i ${beregning.fraTz.by} = ${formatTid(beregning.tilTimer, beregning.tilMinutter)} i ${beregning.tilTz.by} ${getDagTekst()}`}
+        />
       </div>
 
       {/* Populære tidszoner fra Danmark */}

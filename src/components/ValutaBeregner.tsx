@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import { ShareCalculation } from "@/components/ShareCalculation";
+import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 
 // Statiske fallback-kurser (DKK pr. 1 enhed)
 const FALLBACK_KURSER: Record<string, { kurs: number; navn: string; symbol: string }> = {
@@ -52,6 +54,32 @@ export default function ValutaBeregner() {
   const [liveKurser, setLiveKurser] = useState<Record<string, number> | null>(null);
   const [sidstOpdateret, setSidstOpdateret] = useState<string | null>(null);
   const [isLive, setIsLive] = useState(false);
+
+  const hasLoadedUrl = useRef(false);
+
+  // Load state from URL on mount
+  useEffect(() => {
+    if (hasLoadedUrl.current) return;
+    hasLoadedUrl.current = true;
+
+    const urlState = getStateFromUrl();
+    if (urlState && urlState.type === 'valuta') {
+      const inputs = urlState.inputs;
+      if (inputs.beloeb !== undefined) setBeloeb(inputs.beloeb);
+      if (inputs.fraValuta) setFraValuta(inputs.fraValuta);
+      if (inputs.tilValuta) setTilValuta(inputs.tilValuta);
+    }
+  }, []);
+
+  // Get shareable link for current calculation
+  const getShareableLink = useCallback(() => {
+    const state: CalculationState = {
+      type: 'valuta',
+      inputs: { beloeb, fraValuta, tilValuta },
+      timestamp: Date.now(),
+    };
+    return generateShareableLink(state);
+  }, [beloeb, fraValuta, tilValuta]);
 
   // Hent live kurser fra Frankfurter API (ECB data, gratis, ingen API-nøgle)
   useEffect(() => {
@@ -223,6 +251,15 @@ export default function ValutaBeregner() {
         <p className="text-sm text-gray-500 dark:text-gray-400 mt-3">
           Kurs: 1 {fraValuta} = {formatNumber(beregning.kurs, 4)} {tilValuta}
         </p>
+      </div>
+
+      {/* Del beregning */}
+      <div className="flex justify-center">
+        <ShareCalculation
+          getShareableLink={getShareableLink}
+          calculatorName="Valutaberegner"
+          resultSummary={`${formatNumber(beloeb)} ${fraValuta} = ${formatNumber(beregning.resultat)} ${tilValuta}`}
+        />
       </div>
 
       {/* Populære omregninger */}

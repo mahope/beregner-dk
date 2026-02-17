@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import { ShareCalculation } from "@/components/ShareCalculation";
+import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 
 export default function TidsBeregner() {
   const [startTid, setStartTid] = useState<string>("09:00");
@@ -8,6 +10,34 @@ export default function TidsBeregner() {
   const [startDato, setStartDato] = useState<string>("");
   const [slutDato, setSlutDato] = useState<string>("");
   const [fratraekPause, setFratraekPause] = useState<number>(0);
+
+  const hasLoadedUrl = useRef(false);
+
+  // Load state from URL on mount
+  useEffect(() => {
+    if (hasLoadedUrl.current) return;
+    hasLoadedUrl.current = true;
+
+    const urlState = getStateFromUrl();
+    if (urlState && urlState.type === 'tidsberegner') {
+      const inputs = urlState.inputs;
+      if (inputs.startTid) setStartTid(inputs.startTid);
+      if (inputs.slutTid) setSlutTid(inputs.slutTid);
+      if (inputs.startDato) setStartDato(inputs.startDato);
+      if (inputs.slutDato) setSlutDato(inputs.slutDato);
+      if (inputs.fratraekPause !== undefined) setFratraekPause(inputs.fratraekPause);
+    }
+  }, []);
+
+  // Get shareable link for current calculation
+  const getShareableLink = useCallback(() => {
+    const state: CalculationState = {
+      type: 'tidsberegner',
+      inputs: { startTid, slutTid, startDato, slutDato, fratraekPause },
+      timestamp: Date.now(),
+    };
+    return generateShareableLink(state);
+  }, [startTid, slutTid, startDato, slutDato, fratraekPause]);
 
   const beregning = useMemo(() => {
     const [startTime, startMin] = startTid.split(":").map(Number);
@@ -188,6 +218,15 @@ export default function TidsBeregner() {
                 <p className="text-sm text-gray-500">dage</p>
               </div>
             </div>
+          </div>
+
+          {/* Share button */}
+          <div className="flex justify-center">
+            <ShareCalculation
+              getShareableLink={getShareableLink}
+              calculatorName="Tidsberegner"
+              resultSummary={`${beregning.timer}t ${beregning.minutter}m (${beregning.decimalTimer} timer)`}
+            />
           </div>
 
           {/* Quick presets */}

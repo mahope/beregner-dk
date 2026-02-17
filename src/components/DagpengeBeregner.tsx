@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { CalculationLoading, useCalculationLoading } from "./LoadingSpinner";
+import { ShareCalculation } from "@/components/ShareCalculation";
+import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 
 // Officielle 2026 dagpenge-satser
 // Kilde: bm.dk/satser/satser-for-2026, a-kasser.dk
@@ -27,6 +29,30 @@ interface DagpengeResultat {
 export default function DagpengeBeregner() {
   const [maanedsloen, setMaanedsloen] = useState<string>("");
   const [arbejdstimer, setArbejdstimer] = useState<string>("37");
+  const hasLoadedUrl = useRef(false);
+
+  // Load state from URL on mount
+  useEffect(() => {
+    if (hasLoadedUrl.current) return;
+    hasLoadedUrl.current = true;
+
+    const urlState = getStateFromUrl();
+    if (urlState && urlState.type === 'dagpenge') {
+      const inputs = urlState.inputs;
+      if (inputs.maanedsloen !== undefined) setMaanedsloen(String(inputs.maanedsloen));
+      if (inputs.arbejdstimer !== undefined) setArbejdstimer(String(inputs.arbejdstimer));
+    }
+  }, []);
+
+  // Get shareable link for current calculation
+  const getShareableLink = useCallback(() => {
+    const state: CalculationState = {
+      type: 'dagpenge',
+      inputs: { maanedsloen, arbejdstimer },
+      timestamp: Date.now(),
+    };
+    return generateShareableLink(state);
+  }, [maanedsloen, arbejdstimer]);
 
   // Loading state for beregning
   const isLoading = useCalculationLoading([maanedsloen, arbejdstimer]);
@@ -174,6 +200,16 @@ export default function DagpengeBeregner() {
           </div>
         )}
         </CalculationLoading>
+
+        {resultat && (
+          <div className="flex justify-center mt-6">
+            <ShareCalculation
+              getShareableLink={getShareableLink}
+              calculatorName="Dagpengeberegner"
+              resultSummary={`${resultat.maanedligDagpenge.toLocaleString("da-DK")} kr/md`}
+            />
+          </div>
+        )}
 
         {/* Info boks */}
         <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg text-sm text-gray-600 dark:text-gray-300">

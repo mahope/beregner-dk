@@ -1,9 +1,11 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { OpsparingAffiliate } from "./AffiliateBox";
 import { CalculationLoading, useCalculationLoading } from "./LoadingSpinner";
 import { InputField } from "./InputField";
+import { ShareCalculation } from "@/components/ShareCalculation";
+import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 
 type Frekvens = "maanedlig" | "kvartal" | "aarlig";
 type Visning = "beregner" | "maal";
@@ -138,6 +140,43 @@ export default function OpsparingsBeregner() {
   const [maalRente, setMaalRente] = useState<number>(5);
 
   const isLoading = useCalculationLoading([startBeloeb, maanedligIndbetaling, aarligRente, periode, renteFrekvens]);
+
+  const hasLoadedUrl = useRef(false);
+
+  // Load state from URL on mount
+  useEffect(() => {
+    if (hasLoadedUrl.current) return;
+    hasLoadedUrl.current = true;
+
+    const urlState = getStateFromUrl();
+    if (urlState && urlState.type === 'opsparing') {
+      const inputs = urlState.inputs;
+      if (inputs.visning) setVisning(inputs.visning);
+      if (inputs.startBeloeb !== undefined) setStartBeloeb(inputs.startBeloeb);
+      if (inputs.maanedligIndbetaling !== undefined) setMaanedligIndbetaling(inputs.maanedligIndbetaling);
+      if (inputs.aarligRente !== undefined) setAarligRente(inputs.aarligRente);
+      if (inputs.periode !== undefined) setPeriode(inputs.periode);
+      if (inputs.renteFrekvens) setRenteFrekvens(inputs.renteFrekvens);
+      if (inputs.maalBeloeb !== undefined) setMaalBeloeb(inputs.maalBeloeb);
+      if (inputs.maalStart !== undefined) setMaalStart(inputs.maalStart);
+      if (inputs.maalMaanedlig !== undefined) setMaalMaanedlig(inputs.maalMaanedlig);
+      if (inputs.maalRente !== undefined) setMaalRente(inputs.maalRente);
+    }
+  }, []);
+
+  // Get shareable link for current calculation
+  const getShareableLink = useCallback(() => {
+    const state: CalculationState = {
+      type: 'opsparing',
+      inputs: {
+        visning, startBeloeb, maanedligIndbetaling, aarligRente, periode, renteFrekvens,
+        maalBeloeb, maalStart, maalMaanedlig, maalRente,
+      },
+      timestamp: Date.now(),
+    };
+    return generateShareableLink(state);
+  }, [visning, startBeloeb, maanedligIndbetaling, aarligRente, periode, renteFrekvens,
+      maalBeloeb, maalStart, maalMaanedlig, maalRente]);
 
   const beregning = useMemo(() => {
     if (periode <= 0) return null;
@@ -439,6 +478,16 @@ export default function OpsparingsBeregner() {
           </CalculationLoading>
 
           {beregning && !isLoading && (
+            <div className="flex justify-center">
+              <ShareCalculation
+                getShareableLink={getShareableLink}
+                calculatorName="Opsparingsberegner"
+                resultSummary={`${formatKr(beregning.slutSaldo)} efter ${periode} år`}
+              />
+            </div>
+          )}
+
+          {beregning && !isLoading && (
             <OpsparingAffiliate className="mt-6" />
           )}
         </>
@@ -486,29 +535,39 @@ export default function OpsparingsBeregner() {
 
           {/* Mål resultat */}
           {maalResultat ? (
-            <div className="p-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm border dark:border-gray-700">
-              <div className="text-center mb-6">
-                <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">
-                  Du når {formatKr(maalBeloeb)} på
-                </p>
-                <p className="text-5xl font-bold text-green-700 dark:text-green-400">
-                  {maalResultat.aar > 0 && `${maalResultat.aar} år`}
-                  {maalResultat.aar > 0 && maalResultat.maaneder > 0 && " og "}
-                  {maalResultat.maaneder > 0 && `${maalResultat.maaneder} md.`}
-                </p>
+            <>
+              <div className="p-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm border dark:border-gray-700">
+                <div className="text-center mb-6">
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">
+                    Du når {formatKr(maalBeloeb)} på
+                  </p>
+                  <p className="text-5xl font-bold text-green-700 dark:text-green-400">
+                    {maalResultat.aar > 0 && `${maalResultat.aar} år`}
+                    {maalResultat.aar > 0 && maalResultat.maaneder > 0 && " og "}
+                    {maalResultat.maaneder > 0 && `${maalResultat.maaneder} md.`}
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 text-center">
+                  <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Samlet indskud</p>
+                    <p className="font-bold text-lg dark:text-white">{formatKr(maalResultat.samletIndskud)}</p>
+                  </div>
+                  <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Tjent i rente</p>
+                    <p className="font-bold text-lg text-green-600 dark:text-green-400">{formatKr(maalResultat.samletRente)}</p>
+                  </div>
+                </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 text-center">
-                <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Samlet indskud</p>
-                  <p className="font-bold text-lg dark:text-white">{formatKr(maalResultat.samletIndskud)}</p>
-                </div>
-                <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Tjent i rente</p>
-                  <p className="font-bold text-lg text-green-600 dark:text-green-400">{formatKr(maalResultat.samletRente)}</p>
-                </div>
+              <div className="flex justify-center">
+                <ShareCalculation
+                  getShareableLink={getShareableLink}
+                  calculatorName="Opsparingsberegner"
+                  resultSummary={`Når ${formatKr(maalBeloeb)} på ${maalResultat.aar} år og ${maalResultat.maaneder} md.`}
+                />
               </div>
-            </div>
+            </>
           ) : maalBeloeb > 0 && maalMaanedlig > 0 ? (
             <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg text-center">
               <p className="text-yellow-700 dark:text-yellow-400">

@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { Home, Percent, Calculator } from "lucide-react";
+import { ShareCalculation } from "@/components/ShareCalculation";
+import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 
 // Nyt ejendomsskattesystem fra 2024 (boligskattereformen)
 // Kilde: skm.dk, info.skat.dk, vurderingsportalen.dk
@@ -61,6 +63,32 @@ export default function EjendomsvaerdiskatBeregner() {
   const [grundvaerdi, setGrundvaerdi] = useState<number>(1000000);
   const [valgtKommune, setValgtKommune] = useState<string>("koebenhavn");
   const [customPromille, setCustomPromille] = useState<number>(6.0);
+  const hasLoadedUrl = useRef(false);
+
+  // Load state from URL on mount
+  useEffect(() => {
+    if (hasLoadedUrl.current) return;
+    hasLoadedUrl.current = true;
+
+    const urlState = getStateFromUrl();
+    if (urlState && urlState.type === 'ejendomsvaerdiskat') {
+      const inputs = urlState.inputs;
+      if (inputs.ejendomsvaerdi !== undefined) setEjendomsvaerdi(inputs.ejendomsvaerdi);
+      if (inputs.grundvaerdi !== undefined) setGrundvaerdi(inputs.grundvaerdi);
+      if (inputs.valgtKommune) setValgtKommune(inputs.valgtKommune);
+      if (inputs.customPromille !== undefined) setCustomPromille(inputs.customPromille);
+    }
+  }, []);
+
+  // Get shareable link for current calculation
+  const getShareableLink = useCallback(() => {
+    const state: CalculationState = {
+      type: 'ejendomsvaerdiskat',
+      inputs: { ejendomsvaerdi, grundvaerdi, valgtKommune, customPromille },
+      timestamp: Date.now(),
+    };
+    return generateShareableLink(state);
+  }, [ejendomsvaerdi, grundvaerdi, valgtKommune, customPromille]);
 
   const grundskyldPromille =
     valgtKommune === "custom"
@@ -309,6 +337,14 @@ export default function EjendomsvaerdiskatBeregner() {
           </div>
         </div>
       </details>
+
+      <div className="flex justify-center">
+        <ShareCalculation
+          getShareableLink={getShareableLink}
+          calculatorName="Ejendomsværdiskat-beregner"
+          resultSummary={`${formatKr(resultat.samlet)}/år (${formatKr(resultat.maanedligt)}/md)`}
+        />
+      </div>
 
       {/* Info */}
       <div className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg">

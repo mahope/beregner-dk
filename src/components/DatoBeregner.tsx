@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import { ShareCalculation } from "@/components/ShareCalculation";
+import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 
 type BeregningsMode = "dage-mellem" | "tilfoej-dage" | "arbejdsdage" | "alder";
 
@@ -40,6 +42,31 @@ export default function DatoBeregner() {
 
   // Alder mode
   const [foedselsdato, setFoedselsdato] = useState<string>("1990-01-01");
+  const hasLoadedUrl = useRef(false);
+
+  useEffect(() => {
+    if (hasLoadedUrl.current) return;
+    hasLoadedUrl.current = true;
+    const urlState = getStateFromUrl();
+    if (urlState && urlState.type === 'dato') {
+      const inputs = urlState.inputs;
+      if (inputs.mode) setMode(inputs.mode);
+      if (inputs.startDato) setStartDato(inputs.startDato);
+      if (inputs.slutDato) setSlutDato(inputs.slutDato);
+      if (inputs.baseDato) setBaseDato(inputs.baseDato);
+      if (inputs.antalDage !== undefined) setAntalDage(inputs.antalDage);
+      if (inputs.foedselsdato) setFoedselsdato(inputs.foedselsdato);
+    }
+  }, []);
+
+  const getShareableLink = useCallback(() => {
+    const state: CalculationState = {
+      type: 'dato',
+      inputs: { mode, startDato, slutDato, baseDato, antalDage, foedselsdato },
+      timestamp: Date.now(),
+    };
+    return generateShareableLink(state);
+  }, [mode, startDato, slutDato, baseDato, antalDage, foedselsdato]);
 
   const resultat = useMemo(() => {
     switch (mode) {
@@ -384,6 +411,20 @@ export default function DatoBeregner() {
           )}
         </>
       )}
+
+      <div className="flex justify-center">
+        <ShareCalculation
+          getShareableLink={getShareableLink}
+          calculatorName="Datoberegner"
+          resultSummary={
+            resultat?.type === "dage-mellem" ? `${resultat.dage} dage mellem datoer` :
+            resultat?.type === "tilfoej-dage" ? `${antalDage} dage tilføjet` :
+            resultat?.type === "arbejdsdage" ? `${antalDage} arbejdsdage` :
+            resultat?.type === "alder" ? `${resultat.aar} år, ${resultat.maaneder} mdr, ${resultat.dage} dage` :
+            undefined
+          }
+        />
+      </div>
     </div>
   );
 }

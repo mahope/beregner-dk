@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { BoliglaanAffiliate } from "./AffiliateBox";
 import { PrintResult } from "./PrintResult";
 import { CalculationLoading, useCalculationLoading } from "./LoadingSpinner";
 import { InputField } from "./InputField";
+import { ShareCalculation } from "@/components/ShareCalculation";
+import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 
 type LaanType = "fastforrentet" | "variabel" | "afdragsfrit";
 type Visning = "beregner" | "raadtil";
@@ -90,6 +92,50 @@ export default function BoliglaanBeregner() {
 
   // Loading state
   const isLoading = useCalculationLoading([boligpris, udbetaling, rente, loebetid, laanType, bidragssats, ejendomsskat, forsikring, ejerforening]);
+
+  const hasLoadedUrl = useRef(false);
+
+  // Load state from URL on mount
+  useEffect(() => {
+    if (hasLoadedUrl.current) return;
+    hasLoadedUrl.current = true;
+
+    const urlState = getStateFromUrl();
+    if (urlState && urlState.type === 'boliglaan') {
+      const inputs = urlState.inputs;
+      if (inputs.visning) setVisning(inputs.visning);
+      if (inputs.boligpris !== undefined) setBoligpris(inputs.boligpris);
+      if (inputs.udbetaling !== undefined) setUdbetaling(inputs.udbetaling);
+      if (inputs.rente !== undefined) setRente(inputs.rente);
+      if (inputs.loebetid !== undefined) setLoebetid(inputs.loebetid);
+      if (inputs.laanType) setLaanType(inputs.laanType);
+      if (inputs.bidragssats !== undefined) setBidragssats(inputs.bidragssats);
+      if (inputs.ejendomsskat !== undefined) setEjendomsskat(inputs.ejendomsskat);
+      if (inputs.forsikring !== undefined) setForsikring(inputs.forsikring);
+      if (inputs.ejerforening !== undefined) setEjerforening(inputs.ejerforening);
+      if (inputs.maanedligtBudget !== undefined) setMaanedligtBudget(inputs.maanedligtBudget);
+      if (inputs.raadRente !== undefined) setRaadRente(inputs.raadRente);
+      if (inputs.raadLoebetid !== undefined) setRaadLoebetid(inputs.raadLoebetid);
+      if (inputs.raadBidrag !== undefined) setRaadBidrag(inputs.raadBidrag);
+      if (inputs.raadUdbetaling !== undefined) setRaadUdbetaling(inputs.raadUdbetaling);
+    }
+  }, []);
+
+  // Get shareable link for current calculation
+  const getShareableLink = useCallback(() => {
+    const state: CalculationState = {
+      type: 'boliglaan',
+      inputs: {
+        visning, boligpris, udbetaling, rente, loebetid, laanType, bidragssats,
+        ejendomsskat, forsikring, ejerforening,
+        maanedligtBudget, raadRente, raadLoebetid, raadBidrag, raadUdbetaling,
+      },
+      timestamp: Date.now(),
+    };
+    return generateShareableLink(state);
+  }, [visning, boligpris, udbetaling, rente, loebetid, laanType, bidragssats,
+      ejendomsskat, forsikring, ejerforening,
+      maanedligtBudget, raadRente, raadLoebetid, raadBidrag, raadUdbetaling]);
 
   const resultat = useMemo(() => {
     const laanBeloeb = boligpris - udbetaling;
@@ -497,8 +543,13 @@ export default function BoliglaanBeregner() {
                   )}
                 </div>
 
-                {/* Print button */}
-                <div className="mt-6 flex justify-center">
+                {/* Share and Print buttons */}
+                <div className="mt-6 flex justify-center gap-3">
+                  <ShareCalculation
+                    getShareableLink={getShareableLink}
+                    calculatorName="Boliglån Beregner"
+                    resultSummary={`Lån: ${formatKr(resultat.laanBeloeb)} • Ydelse: ${formatKr(resultat.maanedligYdelse)}/md`}
+                  />
                   <PrintResult
                     calculatorName="Boliglån Beregner"
                     resultSummary={`Lån: ${formatKr(resultat.laanBeloeb)} • Ydelse: ${formatKr(resultat.maanedligYdelse)}/md`}
@@ -610,6 +661,16 @@ export default function BoliglaanBeregner() {
               <p className="text-xs text-gray-500 dark:text-gray-400 text-center mt-4">
                 Beregningen er vejledende. Kontakt din bank for en præcis vurdering af din lånekapacitet.
               </p>
+            </div>
+          )}
+
+          {raadTilResultat && (
+            <div className="flex justify-center">
+              <ShareCalculation
+                getShareableLink={getShareableLink}
+                calculatorName="Boliglån Beregner"
+                resultSummary={`Råd til bolig op til ${formatKr(raadTilResultat.maxBoligpris)}`}
+              />
             </div>
           )}
         </>

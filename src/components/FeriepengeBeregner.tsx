@@ -1,12 +1,37 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import { ShareCalculation } from "@/components/ShareCalculation";
+import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 
 export default function FeriepengeBeregner() {
   const [bruttoLoen, setBruttoLoen] = useState<number>(40000);
   const [periode, setPeriode] = useState<"maaned" | "aar">("maaned");
   const [feriedage, setFeriedage] = useState<number>(25);
   const [samletFerie, setSamletFerie] = useState(true);
+  const hasLoadedUrl = useRef(false);
+
+  useEffect(() => {
+    if (hasLoadedUrl.current) return;
+    hasLoadedUrl.current = true;
+    const urlState = getStateFromUrl();
+    if (urlState && urlState.type === 'feriepenge') {
+      const inputs = urlState.inputs;
+      if (inputs.bruttoLoen !== undefined) setBruttoLoen(inputs.bruttoLoen);
+      if (inputs.periode) setPeriode(inputs.periode);
+      if (inputs.feriedage !== undefined) setFeriedage(inputs.feriedage);
+      if (inputs.samletFerie !== undefined) setSamletFerie(inputs.samletFerie);
+    }
+  }, []);
+
+  const getShareableLink = useCallback(() => {
+    const state: CalculationState = {
+      type: 'feriepenge',
+      inputs: { bruttoLoen, periode, feriedage, samletFerie },
+      timestamp: Date.now(),
+    };
+    return generateShareableLink(state);
+  }, [bruttoLoen, periode, feriedage, samletFerie]);
 
   const beregning = useMemo(() => {
     // Konverter til årlig løn
@@ -168,6 +193,14 @@ export default function FeriepengeBeregner() {
           <strong>Per feriedag:</strong> {formatKr(beregning.perDagNetto)} netto 
           ({formatKr(beregning.perDagBrutto)} før skat)
         </p>
+      </div>
+
+      <div className="flex justify-center">
+        <ShareCalculation
+          getShareableLink={getShareableLink}
+          calculatorName="Feriepengeberegner"
+          resultSummary={`${formatKr(beregning.udbetalingNetto)} netto for ${feriedage} feriedage`}
+        />
       </div>
 
       {/* Detaljeret breakdown */}

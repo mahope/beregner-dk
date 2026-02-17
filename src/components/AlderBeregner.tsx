@@ -1,12 +1,35 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import { ShareCalculation } from "@/components/ShareCalculation";
+import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 
 export default function AlderBeregner() {
   const [foedselsdato, setFoedselsdato] = useState<string>("");
   const [beregningsDato, setBeregningsDato] = useState<string>(
     new Date().toISOString().split("T")[0]
   );
+  const hasLoadedUrl = useRef(false);
+
+  useEffect(() => {
+    if (hasLoadedUrl.current) return;
+    hasLoadedUrl.current = true;
+    const urlState = getStateFromUrl();
+    if (urlState && urlState.type === 'alder') {
+      const inputs = urlState.inputs;
+      if (inputs.foedselsdato) setFoedselsdato(inputs.foedselsdato);
+      if (inputs.beregningsDato) setBeregningsDato(inputs.beregningsDato);
+    }
+  }, []);
+
+  const getShareableLink = useCallback(() => {
+    const state: CalculationState = {
+      type: 'alder',
+      inputs: { foedselsdato, beregningsDato },
+      timestamp: Date.now(),
+    };
+    return generateShareableLink(state);
+  }, [foedselsdato, beregningsDato]);
 
   const beregning = useMemo(() => {
     if (!foedselsdato) {
@@ -256,6 +279,14 @@ export default function AlderBeregner() {
                 </tbody>
               </table>
             </div>
+          </div>
+
+          <div className="flex justify-center">
+            <ShareCalculation
+              getShareableLink={getShareableLink}
+              calculatorName="Aldersberegner"
+              resultSummary={beregning ? `${beregning.aar} år, ${beregning.maaneder} mdr, ${beregning.dage} dage` : undefined}
+            />
           </div>
         </>
       )}

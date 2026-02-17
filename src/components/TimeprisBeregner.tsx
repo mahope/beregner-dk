@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { InputField } from "./InputField";
+import { ShareCalculation } from "@/components/ShareCalculation";
+import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 
 export default function TimeprisBeregner() {
   const [beregningsType, setBeregningsType] = useState<"fraLoen" | "fraTimepris">("fraLoen");
@@ -18,6 +20,45 @@ export default function TimeprisBeregner() {
   // Fra timepris
   const [timepris, setTimepris] = useState<number>(600);
   const [fakturerbareTimer, setFakturerbareTimer] = useState<number>(120);
+
+  const hasLoadedUrl = useRef(false);
+
+  // Load state from URL on mount
+  useEffect(() => {
+    if (hasLoadedUrl.current) return;
+    hasLoadedUrl.current = true;
+
+    const urlState = getStateFromUrl();
+    if (urlState && urlState.type === 'timepris') {
+      const inputs = urlState.inputs;
+      if (inputs.beregningsType) setBeregningsType(inputs.beregningsType);
+      if (inputs.oensketNettoLoen !== undefined) setOensketNettoLoen(inputs.oensketNettoLoen);
+      if (inputs.arbejdstimerUge !== undefined) setArbejdstimerUge(inputs.arbejdstimerUge);
+      if (inputs.ferieUger !== undefined) setFerieUger(inputs.ferieUger);
+      if (inputs.sygdomsBuffer !== undefined) setSygdomsBuffer(inputs.sygdomsBuffer);
+      if (inputs.administrativTid !== undefined) setAdministrativTid(inputs.administrativTid);
+      if (inputs.transportTid !== undefined) setTransportTid(inputs.transportTid);
+      if (inputs.driftsomkostninger !== undefined) setDriftsomkostninger(inputs.driftsomkostninger);
+      if (inputs.timepris !== undefined) setTimepris(inputs.timepris);
+      if (inputs.fakturerbareTimer !== undefined) setFakturerbareTimer(inputs.fakturerbareTimer);
+    }
+  }, []);
+
+  // Get shareable link for current calculation
+  const getShareableLink = useCallback(() => {
+    const state: CalculationState = {
+      type: 'timepris',
+      inputs: {
+        beregningsType, oensketNettoLoen, arbejdstimerUge, ferieUger,
+        sygdomsBuffer, administrativTid, transportTid, driftsomkostninger,
+        timepris, fakturerbareTimer,
+      },
+      timestamp: Date.now(),
+    };
+    return generateShareableLink(state);
+  }, [beregningsType, oensketNettoLoen, arbejdstimerUge, ferieUger,
+      sygdomsBuffer, administrativTid, transportTid, driftsomkostninger,
+      timepris, fakturerbareTimer]);
 
   const beregningFraLoen = useMemo(() => {
     const skatProcent = 0.45;
@@ -212,6 +253,14 @@ export default function TimeprisBeregner() {
               <p className="text-sm text-gray-500 dark:text-gray-400">Bruttoløn/måned</p>
             </div>
           </div>
+
+          <div className="flex justify-center">
+            <ShareCalculation
+              getShareableLink={getShareableLink}
+              calculatorName="Timeprisberegner"
+              resultSummary={`Anbefalet timepris: ${formatKr(beregningFraLoen.beregnetTimepris)} ekskl. moms`}
+            />
+          </div>
         </>
       ) : (
         <>
@@ -296,6 +345,14 @@ export default function TimeprisBeregner() {
               </p>
               <p className="text-sm text-gray-500 dark:text-gray-400">Omsætning/år</p>
             </div>
+          </div>
+
+          <div className="flex justify-center">
+            <ShareCalculation
+              getShareableLink={getShareableLink}
+              calculatorName="Timeprisberegner"
+              resultSummary={`Nettoløn: ${formatKr(beregningFraTimepris.nettoLoenMaaned)}/md ved ${formatKr(timepris)}/time`}
+            />
           </div>
         </>
       )}

@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import { ShareCalculation } from "@/components/ShareCalculation";
+import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 
 // 2026 satser (kilde: bm.dk, borger.dk)
 const MAX_BOLIGUDGIFT = 113_000; // Max årlig boligudgift der indgår i beregning (2026)
@@ -21,6 +23,34 @@ export default function BoligstoetteBeregner() {
   const [antalPersoner, setAntalPersoner] = useState<string>("1");
   const [boligType, setBoligType] = useState<string>("leje");
   const [areal, setAreal] = useState<string>("65");
+
+  const hasLoadedUrl = useRef(false);
+
+  // Load state from URL on mount
+  useEffect(() => {
+    if (hasLoadedUrl.current) return;
+    hasLoadedUrl.current = true;
+
+    const urlState = getStateFromUrl();
+    if (urlState && urlState.type === 'boligstoette') {
+      const inputs = urlState.inputs;
+      if (inputs.maanedligHusleje !== undefined) setMaanedligHusleje(String(inputs.maanedligHusleje));
+      if (inputs.husstandsindkomst !== undefined) setHusstandsindkomst(String(inputs.husstandsindkomst));
+      if (inputs.antalPersoner !== undefined) setAntalPersoner(String(inputs.antalPersoner));
+      if (inputs.boligType) setBoligType(inputs.boligType);
+      if (inputs.areal !== undefined) setAreal(String(inputs.areal));
+    }
+  }, []);
+
+  // Get shareable link for current calculation
+  const getShareableLink = useCallback(() => {
+    const state: CalculationState = {
+      type: 'boligstoette',
+      inputs: { maanedligHusleje, husstandsindkomst, antalPersoner, boligType, areal },
+      timestamp: Date.now(),
+    };
+    return generateShareableLink(state);
+  }, [maanedligHusleje, husstandsindkomst, antalPersoner, boligType, areal]);
 
   const resultat = useMemo<BoligstoetteResultat | null>(() => {
     const husleje = parseFloat(maanedligHusleje);
@@ -210,6 +240,17 @@ export default function BoligstoetteBeregner() {
                 <p className="text-yellow-800">{resultat.note}</p>
               </div>
             )}
+          </div>
+        )}
+
+        {/* Del beregning */}
+        {resultat && resultat.maanedligBoligstoette > 0 && (
+          <div className="flex justify-center">
+            <ShareCalculation
+              getShareableLink={getShareableLink}
+              calculatorName="Boligstøtteberegner"
+              resultSummary={`Estimeret støtte: ${resultat.maanedligBoligstoette.toLocaleString("da-DK")} kr/md`}
+            />
           </div>
         )}
 

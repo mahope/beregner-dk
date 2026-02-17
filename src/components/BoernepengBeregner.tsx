@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import { ShareCalculation } from "@/components/ShareCalculation";
+import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 
 // 2026 satser for børne- og ungeydelse (officielle satser)
 // Kilde: borger.dk/familie-og-boern/Familieydelser-oversigt/Boerne-ungeydelse
@@ -25,6 +27,32 @@ export default function BoernepengBeregner() {
   const [husstandsIndkomst, setHusstandsIndkomst] = useState<number>(600000);
   const [enlig, setEnlig] = useState(false);
   const [deltForaeldremyndighed, setDeltForaeldremyndighed] = useState(true);
+  const hasLoadedUrl = useRef(false);
+
+  // Load state from URL on mount
+  useEffect(() => {
+    if (hasLoadedUrl.current) return;
+    hasLoadedUrl.current = true;
+
+    const urlState = getStateFromUrl();
+    if (urlState && urlState.type === 'boernepenge') {
+      const inputs = urlState.inputs;
+      if (inputs.boern !== undefined) setBoern(inputs.boern);
+      if (inputs.husstandsIndkomst !== undefined) setHusstandsIndkomst(inputs.husstandsIndkomst);
+      if (inputs.enlig !== undefined) setEnlig(inputs.enlig);
+      if (inputs.deltForaeldremyndighed !== undefined) setDeltForaeldremyndighed(inputs.deltForaeldremyndighed);
+    }
+  }, []);
+
+  // Get shareable link for current calculation
+  const getShareableLink = useCallback(() => {
+    const state: CalculationState = {
+      type: 'boernepenge',
+      inputs: { boern, husstandsIndkomst, enlig, deltForaeldremyndighed },
+      timestamp: Date.now(),
+    };
+    return generateShareableLink(state);
+  }, [boern, husstandsIndkomst, enlig, deltForaeldremyndighed]);
 
   const tilfoejBarn = () => {
     setBoern([...boern, { id: crypto.randomUUID(), alder: 0 }]);
@@ -250,6 +278,14 @@ export default function BoernepengBeregner() {
           </p>
         </div>
       )}
+
+      <div className="flex justify-center">
+        <ShareCalculation
+          getShareableLink={getShareableLink}
+          calculatorName="Børnepengeberegner"
+          resultSummary={`${formatKr(beregning.maanedlig)}/md (${formatKr(beregning.dinAndel)}/år)`}
+        />
+      </div>
 
       {/* Detaljer per barn */}
       {beregning.boern.length > 1 && (

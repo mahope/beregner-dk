@@ -1,6 +1,8 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
+import { ShareCalculation } from '@/components/ShareCalculation';
+import { generateShareableLink, getStateFromUrl, CalculationState } from '@/lib/calculation-state';
 
 // 2026 satser (kilde: bm.dk, borger.dk)
 const MAX_WEEKLY_RATE = 5085; // Max barselsdagpenge per uge 2026
@@ -15,6 +17,33 @@ export default function BarselBeregner() {
   const [weeklyHours, setWeeklyHours] = useState<string>('37');
   const [parent, setParent] = useState<Parent>('mor');
   const [weeksPlanned, setWeeksPlanned] = useState<string>('24');
+  const hasLoadedUrl = useRef(false);
+
+  // Load state from URL on mount
+  useEffect(() => {
+    if (hasLoadedUrl.current) return;
+    hasLoadedUrl.current = true;
+
+    const urlState = getStateFromUrl();
+    if (urlState && urlState.type === 'barsel') {
+      const inputs = urlState.inputs;
+      if (inputs.monthlyIncome !== undefined) setMonthlyIncome(String(inputs.monthlyIncome));
+      if (inputs.employment) setEmployment(inputs.employment);
+      if (inputs.weeklyHours !== undefined) setWeeklyHours(String(inputs.weeklyHours));
+      if (inputs.parent) setParent(inputs.parent);
+      if (inputs.weeksPlanned !== undefined) setWeeksPlanned(String(inputs.weeksPlanned));
+    }
+  }, []);
+
+  // Get shareable link for current calculation
+  const getShareableLink = useCallback(() => {
+    const state: CalculationState = {
+      type: 'barsel',
+      inputs: { monthlyIncome, employment, weeklyHours, parent, weeksPlanned },
+      timestamp: Date.now(),
+    };
+    return generateShareableLink(state);
+  }, [monthlyIncome, employment, weeklyHours, parent, weeksPlanned]);
 
   const result = useMemo(() => {
     const income = parseFloat(monthlyIncome) || 0;
@@ -222,6 +251,16 @@ export default function BarselBeregner() {
           )}
         </div>
       </div>
+
+      {result && (
+        <div className="flex justify-center mt-6">
+          <ShareCalculation
+            getShareableLink={getShareableLink}
+            calculatorName="Barselsberegner"
+            resultSummary={`${result.weeklyRate.toLocaleString('da-DK')} kr/uge (${weeksPlanned} uger)`}
+          />
+        </div>
+      )}
 
       {/* Info boxes */}
       <div className="grid md:grid-cols-2 gap-4 mt-6">

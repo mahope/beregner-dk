@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import { ShareCalculation } from "@/components/ShareCalculation";
+import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 
 type FormType = "rektangel" | "cirkel" | "trekant" | "trapez";
 
@@ -25,6 +27,35 @@ export default function KvadratmeterBeregner() {
   
   // Ekstra beregninger
   const [prisPerKvm, setPrisPerKvm] = useState<number>(0);
+  const hasLoadedUrl = useRef(false);
+
+  useEffect(() => {
+    if (hasLoadedUrl.current) return;
+    hasLoadedUrl.current = true;
+    const urlState = getStateFromUrl();
+    if (urlState && urlState.type === 'kvadratmeter') {
+      const inputs = urlState.inputs;
+      if (inputs.formType) setFormType(inputs.formType);
+      if (inputs.laengde !== undefined) setLaengde(inputs.laengde);
+      if (inputs.bredde !== undefined) setBredde(inputs.bredde);
+      if (inputs.radius !== undefined) setRadius(inputs.radius);
+      if (inputs.grundlinje !== undefined) setGrundlinje(inputs.grundlinje);
+      if (inputs.hoejde !== undefined) setHoejde(inputs.hoejde);
+      if (inputs.side1 !== undefined) setSide1(inputs.side1);
+      if (inputs.side2 !== undefined) setSide2(inputs.side2);
+      if (inputs.trapezHoejde !== undefined) setTrapezHoejde(inputs.trapezHoejde);
+      if (inputs.prisPerKvm !== undefined) setPrisPerKvm(inputs.prisPerKvm);
+    }
+  }, []);
+
+  const getShareableLink = useCallback(() => {
+    const state: CalculationState = {
+      type: 'kvadratmeter',
+      inputs: { formType, laengde, bredde, radius, grundlinje, hoejde, side1, side2, trapezHoejde, prisPerKvm },
+      timestamp: Date.now(),
+    };
+    return generateShareableLink(state);
+  }, [formType, laengde, bredde, radius, grundlinje, hoejde, side1, side2, trapezHoejde, prisPerKvm]);
 
   const beregning = useMemo(() => {
     let areal = 0;
@@ -306,6 +337,14 @@ export default function KvadratmeterBeregner() {
             </div>
           </div>
         </div>
+      </div>
+
+      <div className="flex justify-center">
+        <ShareCalculation
+          getShareableLink={getShareableLink}
+          calculatorName="Kvadratmeterberegner"
+          resultSummary={`${formatNumber(beregning.areal)} m² (${formType})`}
+        />
       </div>
 
       {/* Formler */}

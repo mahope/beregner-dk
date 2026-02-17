@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import { ShareCalculation } from "@/components/ShareCalculation";
+import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 
 export default function BraendstofBeregner() {
   const [beregningsType, setBeregningsType] = useState<"turPris" | "kmPris" | "forbrug">("turPris");
@@ -20,6 +22,34 @@ export default function BraendstofBeregner() {
   // Forbrugsberegning
   const [literBrugt, setLiterBrugt] = useState<number>(50);
   const [kmKoert, setKmKoert] = useState<number>(750);
+  const hasLoadedUrl = useRef(false);
+
+  useEffect(() => {
+    if (hasLoadedUrl.current) return;
+    hasLoadedUrl.current = true;
+    const urlState = getStateFromUrl();
+    if (urlState && urlState.type === 'braendstof') {
+      const inputs = urlState.inputs;
+      if (inputs.beregningsType) setBeregningsType(inputs.beregningsType);
+      if (inputs.braendstofType) setBraendstofType(inputs.braendstofType);
+      if (inputs.literPris !== undefined) setLiterPris(inputs.literPris);
+      if (inputs.kmPerLiter !== undefined) setKmPerLiter(inputs.kmPerLiter);
+      if (inputs.kwhPris !== undefined) setKwhPris(inputs.kwhPris);
+      if (inputs.kwhPer100km !== undefined) setKwhPer100km(inputs.kwhPer100km);
+      if (inputs.distance !== undefined) setDistance(inputs.distance);
+      if (inputs.literBrugt !== undefined) setLiterBrugt(inputs.literBrugt);
+      if (inputs.kmKoert !== undefined) setKmKoert(inputs.kmKoert);
+    }
+  }, []);
+
+  const getShareableLink = useCallback(() => {
+    const state: CalculationState = {
+      type: 'braendstof',
+      inputs: { beregningsType, braendstofType, literPris, kmPerLiter, kwhPris, kwhPer100km, distance, literBrugt, kmKoert },
+      timestamp: Date.now(),
+    };
+    return generateShareableLink(state);
+  }, [beregningsType, braendstofType, literPris, kmPerLiter, kwhPris, kwhPer100km, distance, literBrugt, kmKoert]);
 
   const beregning = useMemo(() => {
     if (braendstofType === "el") {
@@ -350,6 +380,14 @@ export default function BraendstofBeregner() {
           </p>
           <p className="text-sm text-gray-500">Pr. måned</p>
         </div>
+      </div>
+
+      <div className="flex justify-center">
+        <ShareCalculation
+          getShareableLink={getShareableLink}
+          calculatorName="Brændstofberegner"
+          resultSummary={`${formatKr(beregning.prisPrKm)}/km – ${formatNumber(beregning.forbrugPr100km, 1)} ${beregning.enhed}/100km`}
+        />
       </div>
 
       {/* Sammenligningstabel */}

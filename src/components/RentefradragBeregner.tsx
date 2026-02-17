@@ -1,6 +1,8 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
+import { ShareCalculation } from '@/components/ShareCalculation';
+import { generateShareableLink, getStateFromUrl, CalculationState } from '@/lib/calculation-state';
 
 // 2026 rates (approximate)
 const LOW_THRESHOLD_SINGLE = 50000;
@@ -22,6 +24,32 @@ export default function RentefradragBeregner() {
     { id: 1, name: 'Boliglån', annualInterest: '' },
   ]);
   const [interestIncome, setInterestIncome] = useState<string>('');
+
+  const hasLoadedUrl = useRef(false);
+
+  // Load state from URL on mount
+  useEffect(() => {
+    if (hasLoadedUrl.current) return;
+    hasLoadedUrl.current = true;
+
+    const urlState = getStateFromUrl();
+    if (urlState && urlState.type === 'rentefradrag') {
+      const inputs = urlState.inputs;
+      if (inputs.civilStatus) setCivilStatus(inputs.civilStatus);
+      if (inputs.loans) setLoans(inputs.loans);
+      if (inputs.interestIncome !== undefined) setInterestIncome(inputs.interestIncome);
+    }
+  }, []);
+
+  // Get shareable link for current calculation
+  const getShareableLink = useCallback(() => {
+    const state: CalculationState = {
+      type: 'rentefradrag',
+      inputs: { civilStatus, loans, interestIncome },
+      timestamp: Date.now(),
+    };
+    return generateShareableLink(state);
+  }, [civilStatus, loans, interestIncome]);
 
   const addLoan = () => {
     const newId = Math.max(...loans.map(l => l.id), 0) + 1;
@@ -265,6 +293,15 @@ export default function RentefradragBeregner() {
             </div>
           )}
         </div>
+      </div>
+
+      {/* Share button */}
+      <div className="flex justify-center mt-6">
+        <ShareCalculation
+          getShareableLink={getShareableLink}
+          calculatorName="Rentefradragberegner"
+          resultSummary={result.hasDeduction ? `Fradrag: ${result.totalDeduction.toLocaleString('da-DK')} kr./år (${result.monthlyBenefit.toLocaleString('da-DK')} kr./md)` : `Renteudgifter: ${result.totalInterestExpense.toLocaleString('da-DK')} kr./år`}
+        />
       </div>
 
       {/* Info boxes */}

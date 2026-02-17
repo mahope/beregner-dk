@@ -1,8 +1,10 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { CalculationLoading, useCalculationLoading } from "./LoadingSpinner";
 import { InputField } from "./InputField";
+import { ShareCalculation } from "@/components/ShareCalculation";
+import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 
 interface AarData {
   aar: number;
@@ -26,6 +28,41 @@ export default function PensionBeregner() {
     alder, pensionsalder, maanedligIndbetaling, nuværendeOpsparing,
     forventetAfkast, inflation, udbetalingsperiode, oensketMaanedlig,
   ]);
+
+  const hasLoadedUrl = useRef(false);
+
+  // Load state from URL on mount
+  useEffect(() => {
+    if (hasLoadedUrl.current) return;
+    hasLoadedUrl.current = true;
+
+    const urlState = getStateFromUrl();
+    if (urlState && urlState.type === 'pension') {
+      const inputs = urlState.inputs;
+      if (inputs.alder !== undefined) setAlder(inputs.alder);
+      if (inputs.pensionsalder !== undefined) setPensionsalder(inputs.pensionsalder);
+      if (inputs.maanedligIndbetaling !== undefined) setMaanedligIndbetaling(inputs.maanedligIndbetaling);
+      if (inputs.nuværendeOpsparing !== undefined) setNuværendeOpsparing(inputs.nuværendeOpsparing);
+      if (inputs.forventetAfkast !== undefined) setForventetAfkast(inputs.forventetAfkast);
+      if (inputs.inflation !== undefined) setInflation(inputs.inflation);
+      if (inputs.udbetalingsperiode !== undefined) setUdbetalingsperiode(inputs.udbetalingsperiode);
+      if (inputs.oensketMaanedlig !== undefined) setOensketMaanedlig(inputs.oensketMaanedlig);
+    }
+  }, []);
+
+  // Get shareable link for current calculation
+  const getShareableLink = useCallback(() => {
+    const state: CalculationState = {
+      type: 'pension',
+      inputs: {
+        alder, pensionsalder, maanedligIndbetaling, nuværendeOpsparing,
+        forventetAfkast, inflation, udbetalingsperiode, oensketMaanedlig,
+      },
+      timestamp: Date.now(),
+    };
+    return generateShareableLink(state);
+  }, [alder, pensionsalder, maanedligIndbetaling, nuværendeOpsparing,
+      forventetAfkast, inflation, udbetalingsperiode, oensketMaanedlig]);
 
   const resultat = useMemo(() => {
     const aarTilPension = pensionsalder - alder;
@@ -345,6 +382,17 @@ export default function PensionBeregner() {
           </div>
         )}
       </CalculationLoading>
+
+      {/* Del beregning */}
+      {resultat && !isLoading && (
+        <div className="flex justify-center">
+          <ShareCalculation
+            getShareableLink={getShareableLink}
+            calculatorName="Pensionsberegner"
+            resultSummary={`Forventet pension: ${formatKr(resultat.samletMaanedlig)}/md`}
+          />
+        </div>
+      )}
 
       {/* Ekstra info */}
       {resultat && !isLoading && (

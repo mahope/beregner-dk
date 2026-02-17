@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { Users, Calculator, Percent, Heart } from "lucide-react";
+import { ShareCalculation } from "@/components/ShareCalculation";
+import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 
 type Relation =
   | "aegtefaelle"
@@ -80,6 +82,30 @@ function formatKr(amount: number): string {
 export default function ArveafgiftBeregner() {
   const [arvebeloeb, setArvebeloeb] = useState<string>("");
   const [relation, setRelation] = useState<Relation>("barn");
+  const hasLoadedUrl = useRef(false);
+
+  // Load state from URL on mount
+  useEffect(() => {
+    if (hasLoadedUrl.current) return;
+    hasLoadedUrl.current = true;
+
+    const urlState = getStateFromUrl();
+    if (urlState && urlState.type === 'arveafgift') {
+      const inputs = urlState.inputs;
+      if (inputs.arvebeloeb !== undefined) setArvebeloeb(String(inputs.arvebeloeb));
+      if (inputs.relation) setRelation(inputs.relation);
+    }
+  }, []);
+
+  // Get shareable link for current calculation
+  const getShareableLink = useCallback(() => {
+    const state: CalculationState = {
+      type: 'arveafgift',
+      inputs: { arvebeloeb, relation },
+      timestamp: Date.now(),
+    };
+    return generateShareableLink(state);
+  }, [arvebeloeb, relation]);
 
   const resultat = useMemo(() => {
     const beloeb = parseFloat(arvebeloeb.replace(/\./g, "").replace(",", "."));
@@ -120,6 +146,7 @@ export default function ArveafgiftBeregner() {
   }, [arvebeloeb, relation]);
 
   return (
+    <div className="space-y-8">
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
       {/* Input */}
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
@@ -323,6 +350,19 @@ export default function ArveafgiftBeregner() {
           </div>
         )}
       </div>
+    </div>
+
+      {resultat && (
+        <div className="flex justify-center">
+          <ShareCalculation
+            getShareableLink={getShareableLink}
+            calculatorName="Arveafgiftberegner"
+            resultSummary={relation === "aegtefaelle"
+              ? `Ingen afgift - ${formatKr(resultat.arvebeloeb)} arves afgiftsfrit`
+              : `Afgift: ${formatKr(resultat.samletAfgift)} (${resultat.effektivSats.toFixed(1)}%) - Arv efter afgift: ${formatKr(resultat.arvEfterAfgift)}`}
+          />
+        </div>
+      )}
     </div>
   );
 }

@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import { ShareCalculation } from "@/components/ShareCalculation";
+import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 
 type BeregningsType = "annuitet" | "serielaan";
 
@@ -9,6 +11,33 @@ export default function RenteBeregner() {
   const [rente, setRente] = useState<number>(5);
   const [loebetid, setLoebetid] = useState<number>(30);
   const [type, setType] = useState<BeregningsType>("annuitet");
+
+  const hasLoadedUrl = useRef(false);
+
+  // Load state from URL on mount
+  useEffect(() => {
+    if (hasLoadedUrl.current) return;
+    hasLoadedUrl.current = true;
+
+    const urlState = getStateFromUrl();
+    if (urlState && urlState.type === 'rente') {
+      const inputs = urlState.inputs;
+      if (inputs.hovedstol !== undefined) setHovedstol(inputs.hovedstol);
+      if (inputs.rente !== undefined) setRente(inputs.rente);
+      if (inputs.loebetid !== undefined) setLoebetid(inputs.loebetid);
+      if (inputs.type) setType(inputs.type);
+    }
+  }, []);
+
+  // Get shareable link for current calculation
+  const getShareableLink = useCallback(() => {
+    const state: CalculationState = {
+      type: 'rente',
+      inputs: { hovedstol, rente, loebetid, type },
+      timestamp: Date.now(),
+    };
+    return generateShareableLink(state);
+  }, [hovedstol, rente, loebetid, type]);
 
   const beregning = useMemo(() => {
     if (!hovedstol || !rente || !loebetid) {
@@ -269,6 +298,15 @@ export default function RenteBeregner() {
               </div>
             </div>
           </details>
+
+          {/* Share button */}
+          <div className="flex justify-center">
+            <ShareCalculation
+              getShareableLink={getShareableLink}
+              calculatorName="Renteberegner"
+              resultSummary={`${formatKr(hovedstol)} til ${rente}% i ${loebetid} år - samlet rente ${formatKr(beregning.samletRente)}`}
+            />
+          </div>
 
           {/* Låntype forklaring */}
           <div className="p-4 bg-blue-50 rounded-lg">

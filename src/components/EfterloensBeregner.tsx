@@ -1,6 +1,8 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
+import { ShareCalculation } from '@/components/ShareCalculation';
+import { generateShareableLink, getStateFromUrl, CalculationState } from '@/lib/calculation-state';
 
 // 2026 satser (kilde: bm.dk, borger.dk)
 const MAX_EFTERLOEN_91 = 20057;  // 91% af max dagpenge (22.041 × 0,91)
@@ -14,6 +16,34 @@ export default function EfterloensBeregner() {
   const [postpone2Years, setPostpone2Years] = useState(false);
   const [workWhileOnEfterloen, setWorkWhileOnEfterloen] = useState(false);
   const [hoursPerYear, setHoursPerYear] = useState<string>('962');
+  const hasLoadedUrl = useRef(false);
+
+  // Load state from URL on mount
+  useEffect(() => {
+    if (hasLoadedUrl.current) return;
+    hasLoadedUrl.current = true;
+
+    const urlState = getStateFromUrl();
+    if (urlState && urlState.type === 'efterloen') {
+      const inputs = urlState.inputs;
+      if (inputs.birthYear !== undefined) setBirthYear(String(inputs.birthYear));
+      if (inputs.insurance) setInsurance(inputs.insurance);
+      if (inputs.yearsContributed !== undefined) setYearsContributed(String(inputs.yearsContributed));
+      if (inputs.postpone2Years !== undefined) setPostpone2Years(inputs.postpone2Years);
+      if (inputs.workWhileOnEfterloen !== undefined) setWorkWhileOnEfterloen(inputs.workWhileOnEfterloen);
+      if (inputs.hoursPerYear !== undefined) setHoursPerYear(String(inputs.hoursPerYear));
+    }
+  }, []);
+
+  // Get shareable link for current calculation
+  const getShareableLink = useCallback(() => {
+    const state: CalculationState = {
+      type: 'efterloen',
+      inputs: { birthYear, insurance, yearsContributed, postpone2Years, workWhileOnEfterloen, hoursPerYear },
+      timestamp: Date.now(),
+    };
+    return generateShareableLink(state);
+  }, [birthYear, insurance, yearsContributed, postpone2Years, workWhileOnEfterloen, hoursPerYear]);
 
   const result = useMemo(() => {
     const year = parseInt(birthYear) || 1963;
@@ -266,6 +296,16 @@ export default function EfterloensBeregner() {
           )}
         </div>
       </div>
+
+      {result.eligible && (
+        <div className="flex justify-center mt-6">
+          <ShareCalculation
+            getShareableLink={getShareableLink}
+            calculatorName="Efterlønsberegner"
+            resultSummary={`${result.monthlyAmount?.toLocaleString('da-DK')} kr/md (alder ${result.efterloenAge})`}
+          />
+        </div>
+      )}
 
       {/* Info boxes */}
       <div className="grid md:grid-cols-2 gap-4 mt-6">

@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import { ShareCalculation } from "@/components/ShareCalculation";
+import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 
 interface Apparat {
   id: string;
@@ -49,6 +51,43 @@ export default function Elberegner() {
   ]);
   const [elpris, setElpris] = useState(2.5);
   const [husstandType, setHusstandType] = useState<keyof typeof GENNNEMSNIT_KWH>("hus2");
+
+  const hasLoadedUrl = useRef(false);
+
+  // Load state from URL on mount
+  useEffect(() => {
+    if (hasLoadedUrl.current) return;
+    hasLoadedUrl.current = true;
+
+    const urlState = getStateFromUrl();
+    if (urlState && urlState.type === 'elberegner') {
+      const inputs = urlState.inputs;
+      if (inputs.elpris !== undefined) setElpris(inputs.elpris);
+      if (inputs.husstandType) setHusstandType(inputs.husstandType);
+      if (inputs.apparater && Array.isArray(inputs.apparater)) {
+        setApparater(inputs.apparater.map((a: { navn: string; watt: number; timerPerDag: number }) => ({
+          id: crypto.randomUUID(),
+          navn: a.navn,
+          watt: a.watt,
+          timerPerDag: a.timerPerDag,
+        })));
+      }
+    }
+  }, []);
+
+  // Get shareable link for current calculation
+  const getShareableLink = useCallback(() => {
+    const state: CalculationState = {
+      type: 'elberegner',
+      inputs: {
+        elpris,
+        husstandType,
+        apparater: apparater.map((a) => ({ navn: a.navn, watt: a.watt, timerPerDag: a.timerPerDag })),
+      },
+      timestamp: Date.now(),
+    };
+    return generateShareableLink(state);
+  }, [elpris, husstandType, apparater]);
 
   const tilfoejApparat = () => {
     setApparater([
@@ -255,6 +294,15 @@ export default function Elberegner() {
           <p className="text-3xl font-bold text-gray-800 dark:text-white">{beregninger.aarligtKwh} kWh</p>
           <p className="text-2xl text-green-800 dark:text-green-300 font-bold">{beregninger.aarligPris} kr</p>
         </div>
+      </div>
+
+      {/* Del beregning */}
+      <div className="flex justify-center">
+        <ShareCalculation
+          getShareableLink={getShareableLink}
+          calculatorName="Elberegner"
+          resultSummary={`${beregninger.aarligtKwh} kWh/år = ${beregninger.aarligPris} kr/år`}
+        />
       </div>
 
       {/* Per-apparat opdeling */}

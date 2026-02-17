@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { InputField } from "./InputField";
+import { ShareCalculation } from "@/components/ShareCalculation";
+import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 
 type Koen = "mand" | "kvinde";
 type AktivitetsNiveau = "stillesiddende" | "let" | "moderat" | "aktiv" | "meget_aktiv";
@@ -21,6 +23,35 @@ export default function KalorieBeregner() {
   const [hoejde, setHoejde] = useState<number>(175);
   const [aktivitet, setAktivitet] = useState<AktivitetsNiveau>("moderat");
   const [maal, setMaal] = useState<"vedligehold" | "tab" | "opbyg">("vedligehold");
+
+  const hasLoadedUrl = useRef(false);
+
+  // Load state from URL on mount
+  useEffect(() => {
+    if (hasLoadedUrl.current) return;
+    hasLoadedUrl.current = true;
+
+    const urlState = getStateFromUrl();
+    if (urlState && urlState.type === 'kalorier') {
+      const inputs = urlState.inputs;
+      if (inputs.alder !== undefined) setAlder(inputs.alder);
+      if (inputs.koen) setKoen(inputs.koen);
+      if (inputs.vaegt !== undefined) setVaegt(inputs.vaegt);
+      if (inputs.hoejde !== undefined) setHoejde(inputs.hoejde);
+      if (inputs.aktivitet) setAktivitet(inputs.aktivitet);
+      if (inputs.maal) setMaal(inputs.maal);
+    }
+  }, []);
+
+  // Get shareable link for current calculation
+  const getShareableLink = useCallback(() => {
+    const state: CalculationState = {
+      type: 'kalorier',
+      inputs: { alder, koen, vaegt, hoejde, aktivitet, maal },
+      timestamp: Date.now(),
+    };
+    return generateShareableLink(state);
+  }, [alder, koen, vaegt, hoejde, aktivitet, maal]);
 
   const resultat = useMemo(() => {
     // Mifflin-St Jeor formel
@@ -233,6 +264,15 @@ export default function KalorieBeregner() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Del beregning */}
+      <div className="flex justify-center">
+        <ShareCalculation
+          getShareableLink={getShareableLink}
+          calculatorName="Kalorieberegner"
+          resultSummary={`${resultat.anbefalet} kcal/dag (${resultat.maalBeskrivelse.toLowerCase()})`}
+        />
       </div>
 
       {/* Info */}

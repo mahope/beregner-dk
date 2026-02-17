@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import { ShareCalculation } from "@/components/ShareCalculation";
+import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 
 export default function HuslejeBudgetBeregner() {
   // Indkomst
@@ -18,6 +20,35 @@ export default function HuslejeBudgetBeregner() {
   
   // Opsparing
   const [opsparingProcent, setOpsparingProcent] = useState<number>(10);
+  const hasLoadedUrl = useRef(false);
+
+  useEffect(() => {
+    if (hasLoadedUrl.current) return;
+    hasLoadedUrl.current = true;
+    const urlState = getStateFromUrl();
+    if (urlState && urlState.type === 'husleje-budget') {
+      const inputs = urlState.inputs;
+      if (inputs.maanedligNettoLoen !== undefined) setMaanedligNettoLoen(inputs.maanedligNettoLoen);
+      if (inputs.partnerLoen !== undefined) setPartnerLoen(inputs.partnerLoen);
+      if (inputs.andreIndkomster !== undefined) setAndreIndkomster(inputs.andreIndkomster);
+      if (inputs.madOgDagligvarer !== undefined) setMadOgDagligvarer(inputs.madOgDagligvarer);
+      if (inputs.transport !== undefined) setTransport(inputs.transport);
+      if (inputs.forsikringer !== undefined) setForsikringer(inputs.forsikringer);
+      if (inputs.mobilOgInternet !== undefined) setMobilOgInternet(inputs.mobilOgInternet);
+      if (inputs.abonnementer !== undefined) setAbonnementer(inputs.abonnementer);
+      if (inputs.andreUdgifter !== undefined) setAndreUdgifter(inputs.andreUdgifter);
+      if (inputs.opsparingProcent !== undefined) setOpsparingProcent(inputs.opsparingProcent);
+    }
+  }, []);
+
+  const getShareableLink = useCallback(() => {
+    const state: CalculationState = {
+      type: 'husleje-budget',
+      inputs: { maanedligNettoLoen, partnerLoen, andreIndkomster, madOgDagligvarer, transport, forsikringer, mobilOgInternet, abonnementer, andreUdgifter, opsparingProcent },
+      timestamp: Date.now(),
+    };
+    return generateShareableLink(state);
+  }, [maanedligNettoLoen, partnerLoen, andreIndkomster, madOgDagligvarer, transport, forsikringer, mobilOgInternet, abonnementer, andreUdgifter, opsparingProcent]);
 
   const beregning = useMemo(() => {
     // Samlet indkomst
@@ -311,6 +342,14 @@ export default function HuslejeBudgetBeregner() {
             </div>
           </div>
         </div>
+      </div>
+
+      <div className="flex justify-center">
+        <ShareCalculation
+          getShareableLink={getShareableLink}
+          calculatorName="Huslejebudget-beregner"
+          resultSummary={`Max husleje: ${formatKr(Math.max(0, beregning.anbefalet))}/måned`}
+        />
       </div>
 
       {/* Tips */}

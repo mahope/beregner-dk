@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import { ShareCalculation } from "@/components/ShareCalculation";
+import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 
 type LaaneType = "annuitet" | "serie" | "sammenlign";
 
@@ -10,10 +12,40 @@ export default function LaaneBeregner() {
   const [loebetidAar, setLoebetidAar] = useState<number>(5);
   const [renteSats, setRenteSats] = useState<number>(8);
   const [stiftelsesgebyr, setStiftelsesgebyr] = useState<number>(0);
-  
+
   // Til sammenligning
   const [rente2, setRente2] = useState<number>(12);
   const [loebetid2, setLoebetid2] = useState<number>(3);
+
+  const hasLoadedUrl = useRef(false);
+
+  // Load state from URL on mount
+  useEffect(() => {
+    if (hasLoadedUrl.current) return;
+    hasLoadedUrl.current = true;
+
+    const urlState = getStateFromUrl();
+    if (urlState && urlState.type === 'laaneberegner') {
+      const inputs = urlState.inputs;
+      if (inputs.laaneType) setLaaneType(inputs.laaneType);
+      if (inputs.hovedstol !== undefined) setHovedstol(inputs.hovedstol);
+      if (inputs.loebetidAar !== undefined) setLoebetidAar(inputs.loebetidAar);
+      if (inputs.renteSats !== undefined) setRenteSats(inputs.renteSats);
+      if (inputs.stiftelsesgebyr !== undefined) setStiftelsesgebyr(inputs.stiftelsesgebyr);
+      if (inputs.rente2 !== undefined) setRente2(inputs.rente2);
+      if (inputs.loebetid2 !== undefined) setLoebetid2(inputs.loebetid2);
+    }
+  }, []);
+
+  // Get shareable link for current calculation
+  const getShareableLink = useCallback(() => {
+    const state: CalculationState = {
+      type: 'laaneberegner',
+      inputs: { laaneType, hovedstol, loebetidAar, renteSats, stiftelsesgebyr, rente2, loebetid2 },
+      timestamp: Date.now(),
+    };
+    return generateShareableLink(state);
+  }, [laaneType, hovedstol, loebetidAar, renteSats, stiftelsesgebyr, rente2, loebetid2]);
 
   const beregning = useMemo(() => {
     const r = renteSats / 100 / 12; // Månedlig rente
@@ -376,6 +408,15 @@ export default function LaaneBeregner() {
           </div>
         </div>
       )}
+
+      {/* Share button */}
+      <div className="flex justify-center">
+        <ShareCalculation
+          getShareableLink={getShareableLink}
+          calculatorName="Låneberegner"
+          resultSummary={`Lån ${formatKr(hovedstol)} i ${loebetidAar} år til ${renteSats}% - ydelse ${formatKr(beregning.annuitetYdelse)}/md`}
+        />
+      </div>
 
       {/* Info */}
       <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
