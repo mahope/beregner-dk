@@ -223,7 +223,7 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 - Tilfoej descriptions paa sider der mangler det (kategorisider, Om-siden)
 
 ### B5. Blog-udvidelse med 10 nye artikler
-- [ ] Skriv 10 nye, soege-optimerede blog posts (1000-1500 ord hver)
+- [x] Skriv 10 nye, soege-optimerede blog posts (1000-1500 ord hver)
 - Aemner med hoejt soegevolumen:
   1. "Skat 2026: Alt du skal vide om skatteaendringer"
   2. "SU 2026: Nye satser og regler for studerende"

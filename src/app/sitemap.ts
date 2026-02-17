@@ -58,6 +58,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: "/blog/saadan-finder-du-din-timepris-som-freelancer", priority: 0.6, changeFrequency: "monthly" as const },
     { url: "/blog/guide-til-laan-og-renter", priority: 0.6, changeFrequency: "monthly" as const },
     { url: "/blog/spar-penge-paa-braendstof", priority: 0.6, changeFrequency: "monthly" as const },
+    { url: "/blog/skat-2026-alt-du-skal-vide", priority: 0.6, changeFrequency: "monthly" as const },
+    { url: "/blog/su-2026-satser-og-regler", priority: 0.6, changeFrequency: "monthly" as const },
+    { url: "/blog/dagpenge-saadan-finder-du-din-sats", priority: 0.6, changeFrequency: "monthly" as const },
+    { url: "/blog/boliglaan-2026-renter-og-afdrag", priority: 0.6, changeFrequency: "monthly" as const },
+    { url: "/blog/fradrag-2026-komplet-guide", priority: 0.6, changeFrequency: "monthly" as const },
+    { url: "/blog/barsel-2026-regler-og-satser", priority: 0.6, changeFrequency: "monthly" as const },
+    { url: "/blog/arveafgift-regler-og-satser", priority: 0.6, changeFrequency: "monthly" as const },
+    { url: "/blog/elpriser-2026-beregn-dit-forbrug", priority: 0.6, changeFrequency: "monthly" as const },
+    { url: "/blog/privatoekonomi-for-unge", priority: 0.6, changeFrequency: "monthly" as const },
+    { url: "/blog/koeb-af-bolig-2026-omkostninger", priority: 0.6, changeFrequency: "monthly" as const },
 
     // Info-sider
     { url: "/om", priority: 0.5, changeFrequency: "yearly" as const },
