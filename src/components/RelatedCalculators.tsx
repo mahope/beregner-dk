@@ -111,6 +111,30 @@ const allCalculators: Calculator[] = [
     href: "/rentefradrag",
     icon: "📉",
   },
+  {
+    title: "Billån",
+    description: "Beregn dit billån",
+    href: "/billaan",
+    icon: "🚙",
+  },
+  {
+    title: "Forbrugslån",
+    description: "Beregn dit forbrugslån",
+    href: "/forbrugslaan",
+    icon: "💸",
+  },
+  {
+    title: "Ejendomsværdiskat",
+    description: "Beregn din boligskat",
+    href: "/ejendomsvaerdiskat",
+    icon: "🏡",
+  },
+  {
+    title: "Arveafgift",
+    description: "Beregn boafgift",
+    href: "/arveafgift",
+    icon: "📜",
+  },
   // Moms & Procent
   {
     title: "Moms",
@@ -203,21 +227,25 @@ const relatedMap: Record<string, string[]> = {
   "/dagpenge": ["/loen-efter-skat", "/efterloen", "/barselsdagpenge", "/su", "/feriepenge"],
   "/feriepenge": ["/loen-efter-skat", "/dagpenge", "/barselsdagpenge", "/pension", "/timepris"],
   "/su": ["/loen-efter-skat", "/boernepenge", "/boligstoette", "/dagpenge", "/feriepenge"],
-  "/pension": ["/loen-efter-skat", "/efterloen", "/opsparing", "/renteberegner", "/feriepenge"],
-  "/efterloen": ["/pension", "/dagpenge", "/loen-efter-skat", "/opsparing", "/feriepenge"],
+  "/pension": ["/loen-efter-skat", "/efterloen", "/opsparing", "/arveafgift", "/feriepenge"],
+  "/efterloen": ["/pension", "/dagpenge", "/loen-efter-skat", "/arveafgift", "/opsparing"],
   "/barselsdagpenge": ["/boernepenge", "/dagpenge", "/loen-efter-skat", "/feriepenge", "/boligstoette"],
   "/boernepenge": ["/barselsdagpenge", "/su", "/boligstoette", "/loen-efter-skat", "/dagpenge"],
   "/timepris": ["/loen-efter-skat", "/moms", "/procent", "/feriepenge", "/dagpenge"],
   
   // Lån & Bolig
-  "/boliglaan": ["/renteberegner", "/laaneberegner", "/husleje", "/boligstoette", "/rentefradrag"],
+  "/boliglaan": ["/renteberegner", "/laaneberegner", "/husleje", "/ejendomsvaerdiskat", "/rentefradrag"],
   "/renteberegner": ["/boliglaan", "/laaneberegner", "/opsparing", "/procent", "/rentefradrag"],
-  "/husleje": ["/boligstoette", "/boliglaan", "/loen-efter-skat", "/kvadratmeter", "/procent"],
+  "/husleje": ["/boligstoette", "/boliglaan", "/ejendomsvaerdiskat", "/loen-efter-skat", "/kvadratmeter"],
   "/boligstoette": ["/husleje", "/boernepenge", "/loen-efter-skat", "/su", "/dagpenge"],
-  "/laaneberegner": ["/boliglaan", "/renteberegner", "/opsparing", "/rentefradrag", "/procent"],
+  "/laaneberegner": ["/boliglaan", "/renteberegner", "/billaan", "/forbrugslaan", "/rentefradrag"],
   "/opsparing": ["/renteberegner", "/pension", "/laaneberegner", "/procent", "/loen-efter-skat"],
   "/rentefradrag": ["/boliglaan", "/renteberegner", "/laaneberegner", "/loen-efter-skat", "/opsparing"],
-  
+  "/billaan": ["/bil", "/laaneberegner", "/renteberegner", "/forbrugslaan", "/braendstof"],
+  "/forbrugslaan": ["/laaneberegner", "/renteberegner", "/billaan", "/boliglaan", "/rentefradrag"],
+  "/ejendomsvaerdiskat": ["/boliglaan", "/boligstoette", "/husleje", "/rentefradrag", "/loen-efter-skat"],
+  "/arveafgift": ["/pension", "/efterloen", "/loen-efter-skat", "/opsparing", "/rentefradrag"],
+
   // Moms & Procent
   "/moms": ["/procent", "/timepris", "/loen-efter-skat", "/valuta", "/renteberegner"],
   "/procent": ["/moms", "/renteberegner", "/opsparing", "/bmi", "/kalorier"],
@@ -233,7 +261,7 @@ const relatedMap: Record<string, string[]> = {
   "/alder": ["/dato", "/pension", "/bmi", "/tidsberegner", "/efterloen"],
   
   // Bil & Energi
-  "/bil": ["/braendstof", "/elberegner", "/loen-efter-skat", "/procent", "/valuta"],
+  "/bil": ["/braendstof", "/billaan", "/elberegner", "/forbrugslaan", "/loen-efter-skat"],
   "/braendstof": ["/bil", "/elberegner", "/procent", "/valuta", "/kvadratmeter"],
   "/elberegner": ["/braendstof", "/bil", "/procent", "/husleje", "/boligstoette"],
   

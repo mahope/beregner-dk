@@ -266,7 +266,7 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 - Tilfoej info om localStorage-brug (theme, cookie consent)
 
 ### B10. Struktureret indhold med tabeller
-- [ ] Tilfoej informative tabeller paa relevante beregnersider
+- [x] Tilfoej informative tabeller paa relevante beregnersider
 - /boernepenge: Tabel med satser per aldersgruppe og kvartal
 - /su: Tabel med SU-satser (hjemmeboende, udeboende, med/uden fribeloeb)
 - /dagpenge: Tabel med dagpengesatser og krav
@@ -275,7 +275,7 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 - Tabellerne skal vaere responsive og se godt ud paa mobil
 
 ### B11. Interne links-strategi
-- [ ] Styrk den interne linking paa tvaers af hele sitet
+- [x] Styrk den interne linking paa tvaers af hele sitet
 - Hver beregner skal linke til 5-8 relaterede beregnere (ikke kun 3-4)
 - Blog posts skal linke til beregnere med kontekstuelle anchor-tekster
 - Tilfoej "Se ogsaa" sektioner i SEO-teksten paa hver side
