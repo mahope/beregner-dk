@@ -245,7 +245,7 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 - Blog-indekset viser 10 posts men kun 8 har pages — fix mismatch
 
 ### B7. MDX-indhold aktivering
-- [ ] Der ligger 10 ubrugte .mdx-filer i /content/how-to/ — aktiver dem
+- [x] Der ligger 10 ubrugte .mdx-filer i /content/how-to/ — aktiver dem
 - Opret en dynamisk route der renderer MDX-filer (fx /guide/[slug])
 - Tilfoej MDX-renderer med support for Tailwind prose styling
 - Link til guiderne fra relevante beregnere
