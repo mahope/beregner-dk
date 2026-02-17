@@ -303,7 +303,7 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 - Kilde: borger.dk/familie-og-boern/boernefamilieydelse
 
 ### C2. SU-satser 2026
-- [ ] Verificer og opdater SU-satser til 2026-niveau
+- [x] Verificer og opdater SU-satser til 2026-niveau
 - Tjek grundsats for hjemmeboende og udeboende
 - Opdater fribeloeb (lavt og hoejt fribeloeb)
 - Tjek SU-laan satser og rentesats
