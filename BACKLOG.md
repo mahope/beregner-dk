@@ -295,7 +295,7 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 ## C. Opdatering af Tal & Satser 2026 (10 opgaver)
 
 ### C1. Boernepenge-satser 2026
-- [ ] Verificer og opdater boernepenge-satser til 2026-niveau
+- [x] Verificer og opdater boernepenge-satser til 2026-niveau
 - Tjek satser paa borger.dk for 0-2 aar, 3-6 aar, 7-14 aar, 15-17 aar
 - Opdater kvartalsvise og maanedlige beloeb
 - Tjek indkomstafhaengig reduktion og graenser

@@ -13,7 +13,7 @@ const baseUrl = "https://minberegner.dk";
 export const metadata: Metadata = {
   title: "SU Beregner 2026 - Beregn din SU og fribeløb",
   description:
-    "Hvad får du i SU? 2026 satser: Udeboende 6.888 kr/md, hjemmeboende 3.046 kr/md. Fribeløb: 14.943 kr/md. Beregn din SU og tjek om du holder dig under fribeløbet. Gratis beregner.",
+    "Beregn din SU 2026. Officielle satser: Udeboende 7.426 kr/md, hjemmeboende 3.692 kr/md. Fribeløb: 20.749 kr/md (videregående). Tjek om du holder dig under fribeløbet.",
   keywords: [
     "su beregner",
     "su 2026",
@@ -42,12 +42,12 @@ const faqItems = [
   {
     question: "Hvor meget kan jeg få i SU 2026?",
     answer:
-      "I 2026 er SU-satserne ca.: Udeboende på videregående: 6.888 kr/md, hjemmeboende: 3.046 kr/md. Udeboende forsørgere får ca. 8.594 kr/md. Alle beløb er før skat.",
+      "I 2026 er de officielle SU-satser: Udeboende på videregående: 7.426 kr/md, hjemmeboende: 3.692 kr/md (gammel ordning) eller 1.154 kr + tillæg (ny ordning). Forsørgere får ca. 8.575 kr/md. Alle beløb er før skat.",
   },
   {
     question: "Hvad er fribeløbet i 2026?",
     answer:
-      "Fribeløbet i 2026 er ca. 14.943 kr/md (før AM-bidrag) i måneder med SU. I måneder uden SU eller ved uddannelsens start/slut er det forhøjede fribeløb ca. 20.810 kr/md.",
+      "Fribeløbet i 2026 afhænger af din uddannelse: Videregående uddannelse: 20.749 kr/md, ungdomsuddannelse: 15.297 kr/md (begge før AM-bidrag). Fribeløbet gælder årligt, så du kan tjene mere nogle måneder og mindre andre.",
   },
   {
     question: "Hvem kan få SU?",
@@ -62,22 +62,22 @@ const faqItems = [
   {
     question: "Hvad sker der hvis jeg tjener over fribeløbet?",
     answer:
-      "Hvis din årsindkomst overstiger det samlede fribeløb, skal du tilbagebetale for meget udbetalt SU. Tilbagebetalingen sker året efter via SKAT.",
+      "Hvis din årsindkomst overstiger det samlede fribeløb, skal du tilbagebetale for meget udbetalt SU. Tilbagebetalingen sker året efter via SKAT. Du kan tjekke dit fribeløb løbende på su.dk.",
   },
   {
     question: "Kan jeg få SU-lån?",
     answer:
-      "Ja, du kan optage studielån (op til ca. 3.594 kr/md under hele uddannelsen) og slutlån (op til ca. 8.782 kr/md de sidste 12 måneder). Lånet tilbagebetales efter endt uddannelse.",
+      "Ja, du kan optage studielån på op til 3.799 kr/md i 2026 under hele uddannelsen. De sidste 12 måneder kan du desuden søge slutlån. Lånet tilbagebetales efter endt uddannelse med renter.",
   },
   {
     question: "Hvad er forskellen på udeboende og hjemmeboende SU?",
     answer:
-      "Udeboende får højere SU (ca. 6.888 kr/md) fordi de skal betale husleje. For at få udeboende-sats skal du dokumentere at du ikke bor hos dine forældre.",
+      "Udeboende på videregående får 7.426 kr/md i 2026, mens hjemmeboende får 3.692 kr/md (gammel ordning) eller 1.154 kr + indkomstafhængigt tillæg (ny ordning). For at få udeboende-sats skal du dokumentere at du ikke bor hos dine forældre.",
   },
   {
     question: "Kan jeg få ekstra SU som forælder?",
     answer:
-      "Ja, forsørgere kan få højere SU-sats. Enlige forsørgere får mest (ca. 8.594 kr/md). Derudover kan du søge om børnetilskud som supplement.",
+      "Ja, forsørgere kan få højere SU-sats (ca. 8.575 kr/md i 2026). Enlige forsørgere kan få yderligere tillæg. Derudover kan du søge om børnetilskud som supplement via borger.dk.",
   },
 ];
 
@@ -114,7 +114,7 @@ export default function SUPage() {
 
       <SUBeregner />
 
-      <div className="mt-12 prose max-w-none">
+      <div className="mt-12 prose max-w-none dark:prose-invert">
         <h2>Om SU (Statens Uddannelsesstøtte)</h2>
         <p>
           SU er en støtte fra staten til studerende på videregående uddannelser,
@@ -122,7 +122,7 @@ export default function SUPage() {
           du er 18 år.
         </p>
 
-        <h3>SU-satser 2026</h3>
+        <h3>SU-satser 2026 (officielle)</h3>
         <div className="overflow-x-auto">
           <table>
             <thead>
@@ -134,40 +134,45 @@ export default function SUPage() {
             <tbody>
               <tr>
                 <td>Udeboende, videregående</td>
-                <td>ca. 6.888 kr</td>
+                <td>7.426 kr</td>
               </tr>
               <tr>
-                <td>Hjemmeboende</td>
-                <td>ca. 3.046 kr</td>
+                <td>Hjemmeboende (før 1/7-2014)</td>
+                <td>3.692 kr</td>
               </tr>
               <tr>
-                <td>Udeboende forsørger</td>
-                <td>ca. 8.594 kr</td>
+                <td>Hjemmeboende (ny ordning)</td>
+                <td>1.154 kr + indkomstafhængigt tillæg</td>
               </tr>
               <tr>
-                <td>Enlig forsørger</td>
-                <td>ca. 8.594 kr + tillæg</td>
+                <td>Ungdomsudd. udeboende (18-19 år)</td>
+                <td>4.764 kr</td>
+              </tr>
+              <tr>
+                <td>Ungdomsudd. udeboende (20+ år)</td>
+                <td>7.426 kr</td>
+              </tr>
+              <tr>
+                <td>Forsørger</td>
+                <td>ca. 8.575 kr</td>
               </tr>
             </tbody>
           </table>
         </div>
 
-        <h2>Fribeløb</h2>
+        <h2>Fribeløb 2026</h2>
         <p>
           Fribeløbet er det beløb, du må tjene ved siden af din SU uden at
-          skulle tilbagebetale. I 2026 er det ca.{" "}
-          <strong>14.943 kr/md</strong> (før AM-bidrag).
+          skulle tilbagebetale. Fribeløbet afhænger af din uddannelsestype:
         </p>
+        <ul>
+          <li><strong>Videregående uddannelse:</strong> 20.749 kr/md (før AM-bidrag)</li>
+          <li><strong>Ungdomsuddannelse:</strong> 15.297 kr/md (før AM-bidrag)</li>
+        </ul>
         <p>
           Vigtigt: Fribeløbet gælder <strong>årligt</strong>. Så du kan tjene
           mere nogle måneder og mindre andre, så længe din samlede årsindkomst
           ikke overstiger det samlede fribeløb.
-        </p>
-
-        <h3>Forhøjet fribeløb</h3>
-        <p>
-          I måneder hvor du starter eller slutter din uddannelse, samt i måneder
-          uden SU, får du et forhøjet fribeløb (ca. 20.810 kr/md i 2026).
         </p>
 
         <h2>SU-klip</h2>
@@ -194,18 +199,19 @@ export default function SUPage() {
         <p>Du kan optage SU-lån som supplement til din SU:</p>
         <ul>
           <li>
-            <strong>Studielån:</strong> Op til 3.594 kr/md under hele
-            uddannelsen
+            <strong>Studielån:</strong> Op til 3.799 kr/md under hele
+            uddannelsen (2026)
           </li>
           <li>
-            <strong>Slutlån:</strong> Op til 8.782 kr/md de sidste 12 måneder
+            <strong>Slutlån:</strong> Tilgængeligt de sidste 12 måneder
+            af uddannelsen
           </li>
         </ul>
         <p>Lånet skal tilbagebetales efter afsluttet uddannelse med renter.</p>
 
-        <div className="bg-blue-50 border-l-4 border-blue-400 p-4 my-6 not-prose">
-          <p className="font-medium text-blue-800">Administrer din SU</p>
-          <p className="text-blue-700">
+        <div className="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-400 dark:border-blue-500 p-4 my-6 not-prose">
+          <p className="font-medium text-blue-800 dark:text-blue-300">Administrer din SU</p>
+          <p className="text-blue-700 dark:text-blue-400">
             Du kan søge SU, se din klipsaldo og tjekke dit fribeløb på{" "}
             <a
               href="https://www.su.dk"
@@ -218,11 +224,10 @@ export default function SUPage() {
           </p>
         </div>
 
-        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 my-6 not-prose">
-          <p className="font-medium text-yellow-800">Bemærk</p>
-          <p className="text-yellow-700">
-            Satserne er estimater for 2026 og kan afvige fra de officielle
-            satser. Tjek altid su.dk for de aktuelle satser.
+        <div className="bg-green-50 dark:bg-green-900/20 border-l-4 border-green-400 dark:border-green-500 p-4 my-6 not-prose">
+          <p className="font-medium text-green-800 dark:text-green-300">Opdateret med 2026-satser</p>
+          <p className="text-green-700 dark:text-green-400">
+            Satserne er de officielle 2026-satser fra su.dk. Sidst verificeret februar 2026.
           </p>
         </div>
       </div>
