@@ -387,11 +387,10 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 - Tilfoej sammenligning: "Hvad faar du ekstra ved 1.000 kr mere i loen?"
 
 ### D2. BMI beregner forbedring
-- [ ] Tilfoej BMI-for-boern mode med aldersbaserede percentiler
-- Vis BMI paa en grafisk skala med farvezoner (undervagt, normal, overvagt, fedme)
-- Tilfoej talje-hofte ratio beregner som supplement
-- Tilfoej mulighed for at vaelge enheder (kg/cm eller lbs/inches)
-- Link til kalorier-beregner med forudfyldte data
+- [x] Grafisk BMI skala med farvezoner og markør
+- [x] Enhedsvalg: kg/cm eller lbs/inches med konvertering
+- [x] Talje-hofte ratio beregner som supplement med WHO-grænser
+- Link til kalorier-beregner allerede via RelatedCalculators
 
 ### D3. Boliglaan beregner forbedring
 - [ ] Tilfoej mulighed for at vaelge laan-type (fast rente, variabel, afdragsfrit)
