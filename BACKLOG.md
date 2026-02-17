@@ -183,7 +183,7 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 ## B. SEO-Tekster & Indhold (12 opgaver)
 
 ### B1. SEO-tekst paa forsiden
-- [ ] Skriv en grundig SEO-tekst paa forsiden (500-800 ord)
+- [x] Skriv en grundig SEO-tekst paa forsiden (500-800 ord)
 - Forklar hvad MinBeregner.dk er, og hvilke beregnere der findes
 - Inkluder keywords: "gratis beregner", "online beregner Danmark", "beregn loen", "beregn moms" osv.
 - Strukturer med h2-overskrifter for hver kategori
@@ -191,7 +191,7 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 - Skriv naturligt og informativt — ikke keyword-stuffing
 
 ### B2. Unik SEO-tekst paa alle 33 beregner-sider
-- [ ] Skriv eller forbedr SEO-teksten paa hver enkelt beregner-side (minimum 300-500 ord per side)
+- [x] Skriv eller forbedr SEO-teksten paa hver enkelt beregner-side (minimum 300-500 ord per side)
 - Hver side skal forklare: hvad beregneren goer, hvordan den virker, hvilke tal der bruges, og hvornaar man har brug for den
 - Inkluder aktuelle 2026-tal og satser i teksten (fx "I 2026 er boernepenge-satsen X kr per kvartal")
 - Teksten skal vaere informativ og hjaelpe brugeren — ikke bare vaere der for SEO
@@ -208,7 +208,7 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
   10. /efterloen — Efterloenssatser, efterloensalder, krav
 
 ### B3. FAQ-sektioner paa alle beregnere
-- [ ] Tilfoej eller forbedr FAQ-sektioner paa alle 33 beregnere
+- [x] Tilfoej eller forbedr FAQ-sektioner paa alle 33 beregnere
 - Hver FAQ skal have 5-8 relevante spoergsmaal med grundige svar
 - Brug FAQSchema markup saa spoergsmaalene kan vises i Google
 - Spoergsmaalene skal matche reelle soegninger (brug Google autocomplete for inspiration)
@@ -216,7 +216,7 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 - Svarene skal vaere praecise med aktuelle tal, ikke generiske
 
 ### B4. Meta descriptions paa alle sider
-- [ ] Gennemgaa og optimere meta descriptions paa alle 33 beregnere + blog + indholdssider
+- [x] Gennemgaa og optimere meta descriptions paa alle 33 beregnere + blog + indholdssider
 - Hver description skal vaere 150-160 tegn og indeholde et call-to-action
 - Inkluder aktuelle tal/satser for at oege CTR (fx "Beregn din loen efter skat med 2026-satser. Indtast din bruttolon og se hvad du faar udbetalt.")
 - Test at descriptions ikke bliver afskaret i Google-resultater
@@ -239,7 +239,7 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 - Tilfoej FAQ-schema paa alle nye artikler
 
 ### B6. Fix manglende blog posts (404-links)
-- [ ] To blog posts linker til sider der ikke eksisterer:
+- [x] To blog posts linker til sider der ikke eksisterer:
   - /blog/guide-til-laan-og-renter → lav denne side eller fjern linket
   - /blog/spar-penge-paa-braendstof → lav denne side eller fjern linket
 - Blog-indekset viser 10 posts men kun 8 har pages — fix mismatch
@@ -252,7 +252,7 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 - Tilfoej siderne til sitemap og navigation
 
 ### B8. Om-siden opdatering
-- [ ] Opdater /om-siden som kun naevner 6 beregnere men der er 33+
+- [x] Opdater /om-siden som kun naevner 6 beregnere men der er 33+
 - Opdater beregnertaeller og liste over alle beregnere
 - Tilfoej information om opdateringsfrekvens og kildeangivelser
 - Tilfoej kontaktinformation eller kontaktformular
@@ -283,7 +283,7 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 - Opret et link-map og sikr at ingen sider er "orphans" (uden indgaaende links)
 
 ### B12. Sitemap og teknisk SEO fix
-- [ ] Fix sitemap-problemer og teknisk SEO
+- [x] Fix sitemap-problemer og teknisk SEO
 - Synkroniser src/app/sitemap.ts med /api/sitemap route (de er ude af sync)
 - Tilfoej blog posts til sitemap (mangler: /blog/pension-..., /blog/boligstoette-... osv.)
 - Tilfoej lastmod dato paa alle sitemap-entries
