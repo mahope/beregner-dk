@@ -147,15 +147,15 @@ export default function PensionGuidePage() {
             <tbody className="text-gray-700 dark:text-gray-300">
               <tr className="border-b border-green-200 dark:border-green-700">
                 <td className="py-2">Grundbeløb</td>
-                <td className="text-right">~6.900 kr/md</td>
+                <td className="text-right">~7.544 kr/md</td>
               </tr>
               <tr className="border-b border-green-200 dark:border-green-700">
                 <td className="py-2">Pensionstillæg (enlig)</td>
-                <td className="text-right">~8.200 kr/md</td>
+                <td className="text-right">~8.729 kr/md</td>
               </tr>
               <tr className="border-b border-green-200 dark:border-green-700">
                 <td className="py-2">Pensionstillæg (par)</td>
-                <td className="text-right">~4.100 kr/md</td>
+                <td className="text-right">~4.367 kr/md</td>
               </tr>
               <tr className="border-b border-green-200 dark:border-green-700">
                 <td className="py-2">ATP (typisk)</td>

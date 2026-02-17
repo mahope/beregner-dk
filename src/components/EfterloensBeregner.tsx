@@ -2,9 +2,9 @@
 
 import { useState, useMemo } from 'react';
 
-// 2026 rates (approximate)
-const MAX_EFTERLOEN_91 = 19866;  // 91% of max dagpenge
-const MAX_EFTERLOEN_100 = 21830; // 100% for 2-year postponers
+// 2026 satser (kilde: bm.dk, borger.dk)
+const MAX_EFTERLOEN_91 = 20057;  // 91% af max dagpenge (22.041 × 0,91)
+const MAX_EFTERLOEN_100 = 22041; // 100% for 2 års udskydelse
 const PRAEMIE_PER_PORTION = 15500;
 
 export default function EfterloensBeregner() {

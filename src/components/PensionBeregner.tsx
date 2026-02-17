@@ -60,9 +60,9 @@ export default function PensionBeregner() {
     const ekstraPr500 = 500 * 
       ((Math.pow(1 + maanedligRealAfkast, antalMaaneder) - 1) / maanedligRealAfkast);
     
-    // Folkepension (2026 satser, ca.)
-    const folkepensionGrundbeloeb = 6900; // månedlig
-    const folkepensionTillaeg = 8200; // månedlig for enlige, ca. 4100 for samboende
+    // Folkepension (2026 satser, kilde: borger.dk)
+    const folkepensionGrundbeloeb = 7544; // månedlig grundbeløb
+    const folkepensionTillaeg = 8729; // månedlig pensionstillæg for enlige, ca. 4400 for samboende
     const anslaaetFolkepension = folkepensionGrundbeloeb + (folkepensionTillaeg * 0.7); // modregning antaget
 
     return {

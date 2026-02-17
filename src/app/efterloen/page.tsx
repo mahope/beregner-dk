@@ -13,7 +13,7 @@ const baseUrl = "https://minberegner.dk";
 export const metadata: Metadata = {
   title: "Efterløn beregner 2026 - Se hvad du kan få udbetalt",
   description:
-    "Beregn efterløn 2026. Max sats: ca. 19.866 kr/md (91% af dagpenge). Se hvornår du kan gå på efterløn, betingelser og præcis sats ud fra din indkomst. Gratis beregner.",
+    "Beregn efterløn 2026. Max sats: ca. 20.057 kr/md (91% af dagpenge). Se hvornår du kan gå på efterløn, betingelser og præcis sats ud fra din indkomst. Gratis beregner.",
   keywords: [
     "efterløn",
     "efterløn beregner",
@@ -46,7 +46,7 @@ const faqItems = [
   {
     question: "Hvad er efterlønssatsen i 2026?",
     answer:
-      "I 2026 er den maksimale efterlønssats ca. 19.866 kr. om måneden (91% af dagpengesatsen) ved fuldtidsforsikring. Satsen afhænger af din tidligere indkomst og forsikringsstatus.",
+      "I 2026 er den maksimale efterlønssats ca. 20.057 kr. om måneden (91% af dagpengesatsen) ved fuldtidsforsikring. Satsen afhænger af din tidligere indkomst og forsikringsstatus.",
   },
   {
     question: "Hvornår kan jeg gå på efterløn?",

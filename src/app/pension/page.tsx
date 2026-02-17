@@ -65,17 +65,17 @@ export default function PensionPage() {
           <tbody>
             <tr>
               <td>Grundbeløb</td>
-              <td>6.900 kr</td>
+              <td>7.544 kr</td>
               <td>Afhænger af ophold i DK</td>
             </tr>
             <tr>
               <td>Pensionstillæg (enlig)</td>
-              <td>8.200 kr</td>
+              <td>8.729 kr</td>
               <td>Modregnes i anden indkomst</td>
             </tr>
             <tr>
               <td>Pensionstillæg (samboende)</td>
-              <td>4.100 kr</td>
+              <td>4.367 kr</td>
               <td>Modregnes i anden indkomst</td>
             </tr>
             <tr>
