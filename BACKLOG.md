@@ -259,7 +259,7 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 - Goer siden mere trovaerdig med "Saadan sikrer vi korrekte tal"-sektion
 
 ### B9. Privatlivspolitik-opdatering
-- [ ] Opdater privatlivspolitikken — den siger "ingen cookies" og "ingen analytics" men sitet bruger Plausible analytics og cookie consent
+- [x] Opdater privatlivspolitikken — den siger "ingen cookies" og "ingen analytics" men sitet bruger Plausible analytics og cookie consent
 - Tilfoej sektion om Plausible analytics (privacy-fokuseret, ingen persondata)
 - Opdater cookie-sektionen til at afspejle faktisk brug
 - Tilfoej info om AdSense cookies (naar det aktiveres)
@@ -319,7 +319,7 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 - Kilde: borger.dk/arbejde-dagpenge-ferie/dagpenge
 
 ### C4. Loen-efter-skat 2026 skattesatser
-- [ ] Verificer og opdater alle skattesatser til 2026
+- [x] Verificer og opdater alle skattesatser til 2026
 - Personfradrag (bundfradrag)
 - AM-bidrag (8%)
 - Kommuneskat (gennemsnit og mulighed for at vaelge kommune)
