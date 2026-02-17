@@ -328,7 +328,7 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 - Kilde: skm.dk, skat.dk/satser-og-beloeb
 
 ### C5. Boligstoette-satser 2026
-- [ ] Verificer og opdater boligstoette-satser til 2026-niveau
+- [x] Verificer og opdater boligstoette-satser til 2026-niveau
 - Indkomstgraenser for enlige og par
 - Max boligudgift der gives stoette til
 - Formuegrundlag og fradrag
@@ -336,7 +336,7 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 - Kilde: borger.dk/bolig-og-flytning/boligstoette
 
 ### C6. Pension og efterloen 2026
-- [ ] Verificer og opdater pension og efterloen-satser
+- [x] Verificer og opdater pension og efterloen-satser
 - Folkepensionsalder (nuvaerende og kommende)
 - Folkepension grundbeloeb og pensionstillaeg
 - Efterloenssats (91% af max dagpenge)
@@ -344,7 +344,7 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 - Kilde: borger.dk/pension-og-efterloen
 
 ### C7. Barselsdagpenge 2026
-- [ ] Verificer og opdater barsels-satser
+- [x] Verificer og opdater barsels-satser
 - Max barselsdagpengesats
 - Barselsorlov-perioder (mor, far/medmor, faelles)
 - Nye regler om oeremaerket barsel (11 uger til hver)
@@ -352,7 +352,7 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 - Kilde: borger.dk/familie-og-boern/barsel-og-orlov
 
 ### C8. Feriepenge-satser 2026
-- [ ] Verificer og opdater feriepenge-regler
+- [x] Verificer og opdater feriepenge-regler
 - Feriepengesats (12,5% af ferieberettiget loen)
 - Ferieaar og optjeningsperiode
 - Samtidighedsferie-regler
@@ -360,7 +360,7 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 - Kilde: borger.dk/arbejde-dagpenge-ferie/ferie
 
 ### C9. Ejendomsvaerdiskat og grundskyld 2026
-- [ ] Verificer og opdater ejendomsskat-satser
+- [x] Verificer og opdater ejendomsskat-satser
 - Ejendomsvaerdiskattesatser (0,92% / 3%)
 - Bundfradragsgraense
 - Opdater kommunale grundskyldspromiller (alle 98 kommuner)
@@ -368,7 +368,7 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 - Kilde: skm.dk/ejendomsskat
 
 ### C10. Arveafgift-satser 2026
-- [ ] Verificer og opdater arveafgift-satser
+- [x] Verificer og opdater arveafgift-satser
 - Bundfradrag (322.000 kr eller opdateret?)
 - Boafgift-sats (15%)
 - Tillaegafgift (25% for fjerne slaegtninge)
