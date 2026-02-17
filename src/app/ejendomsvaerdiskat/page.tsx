@@ -8,131 +8,135 @@ import {
 const baseUrl = "https://minberegner.dk";
 
 export const metadata: Metadata = {
-  title: "Ejendomsværdiskat beregner - Beregn din ejendomsskat 2024/2025 | MinBeregner.dk",
+  title: "Ejendomsværdiskat beregner 2026 - Beregn din ejendomsskat | MinBeregner.dk",
   description:
-    "Beregn nemt din ejendomsværdiskat og grundskyld. Se hvor meget du skal betale i ejendomsskat baseret på ejendomsværdi, grundværdi og kommune. Gratis beregner med 2024/2025 satser.",
-  keywords: "ejendomsværdiskat beregner, ejendomsskat, grundskyld, boligskat, kommuneskat",
+    "Beregn ejendomsværdiskat og grundskyld med det nye boligskattesystem fra 2024. 5,1‰ / 14‰ satser, 80% forsigtighedsfradrag, kommunale grundskyldspromiller. Gratis beregner med 2026 satser.",
+  keywords: "ejendomsværdiskat beregner, ejendomsskat 2026, grundskyld, boligskat, grundskyldspromille, boligskattereform",
 };
 
 export default function EjendomsvaerdiskatPage() {
   return (
     <div>
       <CalculatorSchema
-        name="Ejendomsværdiskat beregner"
-        description="Beregn din ejendomsværdiskat og grundskyld baseret på ejendomsværdi, grundværdi og kommune. Opdateret med 2024/2025 satser."
+        name="Ejendomsværdiskat beregner 2026"
+        description="Beregn din ejendomsværdiskat og grundskyld med det nye boligskattesystem. 5,1‰ / 14‰ satser og kommunale grundskyldspromiller."
         url={`${baseUrl}/ejendomsvaerdiskat`}
         category="FinanceApplication"
       />
       <BreadcrumbSchema
         items={[
           { name: "Forside", url: baseUrl },
-          { name: "Bolig", url: `${baseUrl}/bolig` },
           { name: "Ejendomsværdiskat beregner", url: `${baseUrl}/ejendomsvaerdiskat` },
         ]}
       />
-      <h1 className="text-3xl font-bold mb-2">Ejendomsværdiskat beregner</h1>
-      <p className="text-gray-600 mb-8">
-        Beregn hvor meget du skal betale i ejendomsværdiskat og grundskyld. 
-        Beregneren bruger de officielle 2024/2025 satser og kommuneprocenter.
+      <h1 className="text-3xl font-bold mb-2">Ejendomsværdiskat beregner 2026</h1>
+      <p className="text-gray-600 dark:text-gray-400 mb-8">
+        Beregn hvor meget du skal betale i ejendomsværdiskat og grundskyld med det
+        nye boligskattesystem. Opdateret med 2026-satser og kommunale grundskyldspromiller.
       </p>
 
       <EjendomsvaerdiskatBeregner />
 
-      <div className="mt-12 prose max-w-none">
-        <h2>Sådan beregnes ejendomsskat</h2>
+      <div className="mt-12 prose max-w-none dark:prose-invert">
+        <h2>Det nye boligskattesystem (fra 2024)</h2>
         <p>
-          Ejendomsskatten i Danmark består af to dele: ejendomsværdiskat og grundskyld. 
-          Begge dele beregnes på baggrund af vurderinger fra ejendomsvurderingssystemet.
+          Fra 1. januar 2024 trådte et nyt boligskattesystem i kraft i Danmark.
+          Ejendomsskatten består fortsat af to dele — ejendomsværdiskat og grundskyld —
+          men begge beregnes nu på nye måder med nye satser.
         </p>
 
         <h3>Ejendomsværdiskat</h3>
         <p>
-          Ejendomsværdiskatten beregnes som en procentdel af ejendomsværdien med følgende satser:
+          Ejendomsværdiskatten beregnes af <strong>80% af ejendomsværdien</strong>
+          {" "}(et såkaldt forsigtighedsfradrag på 20%). Satserne er:
         </p>
         <ul>
-          <li><strong>0,92%</strong> af ejendomsværdien op til bundfradraget på {formatKr(3040000)}</li>
-          <li><strong>3%</strong> af ejendomsværdien over bundfradraget</li>
+          <li><strong>5,1‰ (0,51%)</strong> af beskatningsgrundlaget op til progressionsgrænsen</li>
+          <li><strong>14‰ (1,4%)</strong> af beskatningsgrundlaget over progressionsgrænsen</li>
         </ul>
         <p>
-          <strong>Bundfradrag:</strong> Der er et bundfradrag på {formatKr(3040000)} for 2024/2025. 
-          Det betyder, at ejendomme under denne værdi kun betaler 0,92% af den fulde værdi.
+          <strong>Progressionsgrænsen</strong> er 9.007.000 kr for 2026-2027 (beskatningsgrundlag).
+          Det svarer til en ejendomsværdi på ca. 11,3 mio. kr før forsigtighedsfradraget.
         </p>
 
         <h3>Grundskyld</h3>
         <p>
-          Grundskylden beregnes som en procentdel af grundværdien. Procentsatsen (kommuneprocenten) 
-          varierer fra kommune til kommune og fastsættes årligt af de enkelte kommunalbestyrelser.
+          Grundskylden beregnes som kommunens grundskyldspromille ganget med <strong>80%
+          af grundværdien</strong> (samme forsigtighedsfradrag som ejendomsværdiskatten).
+          Grundskyldspromillen varierer fra kommune til kommune:
         </p>
         <table>
           <thead>
             <tr>
               <th>Kommune</th>
-              <th>Kommuneprocent (ca.)</th>
+              <th>Grundskyldspromille (‰)</th>
             </tr>
           </thead>
           <tbody>
             <tr>
+              <td>Frederiksberg (lavest)</td>
+              <td>3,1‰</td>
+            </tr>
+            <tr>
               <td>København</td>
-              <td>23,0%</td>
-            </tr>
-            <tr>
-              <td>Aarhus</td>
-              <td>24,9%</td>
-            </tr>
-            <tr>
-              <td>Aalborg</td>
-              <td>23,4%</td>
+              <td>5,1‰</td>
             </tr>
             <tr>
               <td>Odense</td>
-              <td>24,6%</td>
+              <td>5,7‰</td>
             </tr>
             <tr>
-              <td>Frederiksberg</td>
-              <td>25,5%</td>
+              <td>Aarhus</td>
+              <td>6,0‰</td>
+            </tr>
+            <tr>
+              <td>Aalborg</td>
+              <td>7,4‰</td>
+            </tr>
+            <tr>
+              <td>Varde (højest)</td>
+              <td>17,7‰</td>
             </tr>
           </tbody>
         </table>
 
+        <h2>Eksempel: Beregning af ejendomsskat</h2>
+        <p>
+          En bolig i København med ejendomsværdi 3.000.000 kr og grundværdi 1.000.000 kr:
+        </p>
+        <ul>
+          <li><strong>Ejendomsværdiskat:</strong> 3.000.000 × 80% × 5,1‰ = 12.240 kr/år</li>
+          <li><strong>Grundskyld:</strong> 1.000.000 × 80% × 5,1‰ = 4.080 kr/år</li>
+          <li><strong>Samlet:</strong> 16.320 kr/år (1.360 kr/måned)</li>
+        </ul>
+
+        <h2>Forsigtighedsfradraget (20%)</h2>
+        <p>
+          De nye ejendomsvurderinger er forbundet med en vis usikkerhed. Derfor er der
+          indført et forsigtighedsfradrag på 20%, så du kun betaler skat af 80% af den
+          vurderede værdi. Fradraget gælder for både ejendomsværdiskat og grundskyld.
+        </p>
+
+        <h2>Overgangsordning</h2>
+        <p>
+          For at beskytte boligejere mod pludselige skattestigninger er der indført en
+          overgangsordning (skatterabat). Hvis din skat stiger med det nye system,
+          indfases stigningen gradvist. Beregneren viser den fulde skat uden
+          overgangsrabat.
+        </p>
+
         <h2>Hvornår betales ejendomsskat?</h2>
         <p>
-          Ejendomsskatten betales via din ejendomsskattebillet, som du modtager fra din kommune. 
-          Betalingen sker typisk i to rater:
-        </p>
-        <ul>
-          <li><strong>1. rate:</strong> 1. marts - forfaldsdato typisk 1. april</li>
-          <li><strong>2. rate:</strong> 1. september - forfaldsdato typisk 1. oktober</li>
-        </ul>
-
-        <h2>Ejendomsvurdering</h2>
-        <p>
-          Din ejendomsværdi og grundværdi fastsættes af Vurderingsstyrelsen. Vurderingen 
-          sker typisk hvert andet år, men der kan anmodes om en ny vurdering ved visse ændringer 
-          af ejendommen (f.eks. større ombygninger, tilbygninger eller nedrivning).
+          Ejendomsskatten betales via din ejendomsskattebillet, som du modtager fra
+          din kommune. Betalingen sker typisk i to rater i marts og september.
         </p>
 
-        <h2>Ændringer til ejendomsskatten</h2>
-        <p>
-          Der har været politisk debat om ændringer til ejendomsbeskatningen. Nogle af de 
-          foreslåede eller implementerede ændringer inkluderer:
-        </p>
-        <ul>
-          <li>Midlertidige indefrysningsordninger for stigninger i ejendomsværdi</li>
-          <li>Nye vurderingssystemer med hyppigere vurderinger</li>
-          <li>Justering af bundfradrag og procentnatsatser</li>
-        </ul>
-        <p>
-          <strong>Tip:</strong> Hold dig opdateret med din kommunes hjemmeside for de 
-          gældende satser for dit område.
-        </p>
-
-        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 my-6">
-          <p className="font-medium text-yellow-800">Bemærk</p>
-          <p className="text-yellow-700">
-            Denne beregner giver et estimat baseret på de officielle 2024/2025 satser. 
-            Den faktiske ejendomsskat kan afvige, hvis din ejendomsvurdering er anderledes, 
-            eller hvis der er sket ændringer i kommuneprocenten. Brug altid din officielle 
-            ejendomsskattebillet som grundlag for den endelige betaling.
+        <div className="bg-green-50 dark:bg-green-900/20 border-l-4 border-green-400 dark:border-green-500 p-4 my-6 not-prose">
+          <p className="font-medium text-green-800 dark:text-green-300">Opdateret med nyt boligskattesystem</p>
+          <p className="text-green-700 dark:text-green-400">
+            Denne beregner bruger det nye ejendomsskattesystem fra 2024 med
+            5,1‰ / 14‰ satser og 80% forsigtighedsfradrag. Progressionsgrænse
+            for 2026-2027: 9.007.000 kr. Kilde: skm.dk, info.skat.dk.
           </p>
         </div>
 
@@ -146,12 +150,4 @@ export default function EjendomsvaerdiskatPage() {
       </div>
     </div>
   );
-}
-
-function formatKr(amount: number): string {
-  return new Intl.NumberFormat("da-DK", {
-    style: "currency",
-    currency: "DKK",
-    maximumFractionDigits: 0,
-  }).format(amount);
 }
