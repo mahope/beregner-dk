@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import ArveafgiftBeregner from "@/components/ArveafgiftBeregner";
+import FAQ from "@/components/FAQ";
+import RelatedCalculators from "@/components/RelatedCalculators";
 import {
   CalculatorSchema,
+  FAQSchema,
   BreadcrumbSchema,
 } from "@/components/StructuredData";
 
@@ -14,6 +17,49 @@ export const metadata: Metadata = {
   keywords: "arveafgift beregner, boafgift, arveskat, dansk arveafgift",
 };
 
+const arveafgiftFaqItems = [
+  {
+    question: "Hvad er arveafgiften i Danmark i 2026?",
+    answer:
+      "I 2026 betaler nærmeste familie (børn, børnebørn, forældre) 15% boafgift af arv over bundfradraget på 392.300 kr. Ægtefæller er helt fritaget. Søskende og andre betaler 15% boafgift plus 25% tillægsafgift af arven efter boafgiften.",
+  },
+  {
+    question: "Kan ægtefæller undgå arveafgift?",
+    answer:
+      "Ja, ægtefæller er fuldstændig fritaget for arveafgift i Danmark uanset beløbets størrelse. Det anbefales ofte at oprette ægtepagt, så den længstlevende ægtefælle sikres bedst muligt.",
+  },
+  {
+    question: "Hvad er tillægsafgift på arv?",
+    answer:
+      "Tillægsafgift er en ekstra afgift på 25% af arven efter fradrag af boafgiften. Der er intet bundfradrag for tillægsafgiften. Den gælder for søskende (indtil 2027) og andre arvinger, der ikke er i direkte op- eller nedstigende linje.",
+  },
+  {
+    question: "Hvad er bundfradraget for arveafgift i 2026?",
+    answer:
+      "Bundfradraget er 392.300 kr i 2026. Det betyder, at de første 392.300 kr af arven er afgiftsfri for alle arvinger undtagen ægtefæller (som er helt fritaget).",
+  },
+  {
+    question: "Betaler børnebørn samme arveafgift som børn?",
+    answer:
+      "Ja, børnebørn betaler samme sats som biologiske børn: 15% boafgift uden tillægsafgift. Der er dog en undtagelse, hvis barnets forældre stadig lever — i så fald arver bedsteforældrenes formue typisk gennem forældrene først.",
+  },
+  {
+    question: "Hvornår skal arveafgift betales?",
+    answer:
+      "Arveafgiften skal betales til Skattestyrelsen inden 1 år efter dødsfaldet. Boet afvikles typisk gennem en bobestyrer eller advokat, som sørger for at beregne og afregne afgifterne.",
+  },
+  {
+    question: "Ændres reglerne for søskende i 2027?",
+    answer:
+      "Ja, fra 1. januar 2027 afskaffes tillægsafgiften for søskende. Det betyder at søskende fremover kun betaler 15% boafgift i stedet for den nuværende effektive sats på op til 36,25%.",
+  },
+  {
+    question: "Skal man betale arveafgift af forsikringer?",
+    answer:
+      "Forsikringsudbetalinger der tilfalder en navngiven begunstiget (fx livsforsikring) indgår som udgangspunkt ikke i boet og er dermed ikke underlagt boafgift. Men beløbet kan i stedet være omfattet af afgiftspligt efter forsikringsaftalelovens regler.",
+  },
+];
+
 export default function ArveafgiftPage() {
   return (
     <div>
@@ -23,6 +69,7 @@ export default function ArveafgiftPage() {
         url={`${baseUrl}/arveafgift`}
         category="FinanceApplication"
       />
+      <FAQSchema items={arveafgiftFaqItems} />
       <BreadcrumbSchema
         items={[
           { name: "Forside", url: baseUrl },
@@ -134,40 +181,27 @@ export default function ArveafgiftPage() {
           for at beregne og afregne afgifterne.
         </p>
 
-        <h2>Ofte stillede spørgsmål</h2>
-        <h3>Kan ægtefæller undgå arveafgift?</h3>
-        <p>
-          Ja, ægtefæller er fuldstændig fritaget for arveafgift. Det anbefales 
-          ofte at oprette ægtepagt, så den længstlevende ægtefælle sikres bedst 
-          muligt.
-        </p>
-
-        <h3>Hvad er tillægsafgift?</h3>
-        <p>
-          Tillægsafgift er en ekstra afgift på 25% af arven efter fradrag af
-          boafgiften. Der er intet bundfradrag for tillægsafgiften. Den gælder
-          for søskende (indtil 2027) og andre arvinger, der ikke er i direkte
-          op- eller nedstigende linje.
-        </p>
-
-        <h3>Har børnebarn samme rettigheder som børn?</h3>
-        <p>
-          Ja, børnebarn betaler samme sats som biologiske børn: 15% boafgift 
-          uden tillægsafgift. Der er dog en undtagelse, hvis barnets forældre 
-          stadig lever — i så fald arver bedsteforældrenes formue typisk gennem 
-          forældrene først.
-        </p>
-
-        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 my-6">
+        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 my-6 not-prose">
           <p className="font-medium text-yellow-800">Vigtigt</p>
           <p className="text-yellow-700">
-            Denne beregner giver et estimat baseret på gældende 2026-satser. 
-            De faktiske afgifter kan variere afhængigt af boets specifikke 
-            forhold. Vi anbefaler at kontakte en bobestyrer eller advokat 
+            Denne beregner giver et estimat baseret på gældende 2026-satser.
+            De faktiske afgifter kan variere afhængigt af boets specifikke
+            forhold. Vi anbefaler at kontakte en bobestyrer eller advokat
             for præcis beregning.
           </p>
         </div>
       </div>
+
+      <section className="mt-12">
+        <h2 className="text-2xl font-bold text-gray-900 mb-6">
+          Ofte stillede spørgsmål om arveafgift
+        </h2>
+        <FAQ items={arveafgiftFaqItems} />
+      </section>
+
+      <section className="mt-12">
+        <RelatedCalculators current="/arveafgift" />
+      </section>
     </div>
   );
 }

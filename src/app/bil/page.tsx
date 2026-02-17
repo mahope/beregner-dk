@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import BilBeregner from "@/components/BilBeregner";
+import FAQ from "@/components/FAQ";
+import RelatedCalculators from "@/components/RelatedCalculators";
 import {
   CalculatorSchema,
+  FAQSchema,
   BreadcrumbSchema,
 } from "@/components/StructuredData";
 
@@ -14,9 +17,43 @@ export const metadata: Metadata = {
   keywords: "bil beregner, bilomkostninger, biludgifter, elbil vs benzin, bil pris pr km, værditab bil",
 };
 
+const bilFaqItems = [
+  {
+    question: "Hvad koster det at eje bil i Danmark?",
+    answer:
+      "De samlede omkostninger ved at eje bil ligger typisk på 2,50-4,50 kr/km inkl. værditab, brændstof, forsikring, afgifter og service. For en gennemsnitlig bil der kører 15.000 km/år svarer det til ca. 4.000-6.000 kr/md.",
+  },
+  {
+    question: "Hvad er den største udgift ved at eje bil?",
+    answer:
+      "Værditab er ofte den største enkeltudgift — en ny bil mister 20-25% af sin værdi det første år. Køb af en 2-3 år gammel bil kan spare dig for det største værditab.",
+  },
+  {
+    question: "Er elbil billigere end benzinbil?",
+    answer:
+      "Elbiler har lavere driftsomkostninger (billigere 'brændstof', minimal service, lav afgift), men højere købspris. Over tid er elbiler ofte billigere totalt set, især ved mange kørte kilometer.",
+  },
+  {
+    question: "Hvad koster benzin i 2026?",
+    answer:
+      "Benzin koster ca. 13-14 kr/liter i 2026. Diesel koster ca. 12-13 kr/liter. Elpriser for opladning ligger på 2-3 kr/kWh derhjemme og 3-5 kr/kWh ved offentlige ladere.",
+  },
+  {
+    question: "Hvad er grøn ejerafgift?",
+    answer:
+      "Grøn ejerafgift (tidligere vægtafgift) er en halvårlig afgift baseret på bilens brændstofforbrug. Benzinbiler betaler ca. 3.000-5.000 kr/år, dieselbiler 4.000-7.000 kr/år, mens elbiler har lav eller ingen afgift.",
+  },
+  {
+    question: "Hvordan beregner jeg pris per kilometer?",
+    answer:
+      "Saml alle årlige udgifter (brændstof, forsikring, afgifter, service, værditab) og divider med antal kørte kilometer. Typisk ligger det på 2,50-4,50 kr/km for en gennemsnitlig bil.",
+  },
+];
+
 export default function BilPage() {
   return (
     <div>
+      <FAQSchema items={bilFaqItems} />
       <CalculatorSchema
         name="Bilomkostningsberegner - Se hvad din bil koster"
         description="Gratis bilberegner. Beregn de reelle omkostninger ved at eje bil: brændstof, forsikring, værditab, afgifter og service."
@@ -213,15 +250,26 @@ export default function BilPage() {
           </tbody>
         </table>
 
-        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 my-6">
+        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 my-6 not-prose">
           <p className="font-medium text-yellow-800">Vigtigt</p>
           <p className="text-yellow-700">
-            Denne beregner giver et estimat baseret på typiske værdier. De faktiske omkostninger 
-            afhænger af din specifikke bil, kørselsmønster og lokale priser. Brug den som udgangspunkt 
+            Denne beregner giver et estimat baseret på typiske værdier. De faktiske omkostninger
+            afhænger af din specifikke bil, kørselsmønster og lokale priser. Brug den som udgangspunkt
             for at sammenligne forskellige biler.
           </p>
         </div>
       </div>
+
+      <section className="mt-12">
+        <h2 className="text-2xl font-bold text-gray-900 mb-6">
+          Ofte stillede spørgsmål om bilomkostninger
+        </h2>
+        <FAQ items={bilFaqItems} />
+      </section>
+
+      <section className="mt-12">
+        <RelatedCalculators current="/bil" />
+      </section>
     </div>
   );
 }

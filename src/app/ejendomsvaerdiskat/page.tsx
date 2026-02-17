@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import EjendomsvaerdiskatBeregner from "@/components/EjendomsvaerdiskatBeregner";
+import FAQ from "@/components/FAQ";
+import RelatedCalculators from "@/components/RelatedCalculators";
 import {
   CalculatorSchema,
+  FAQSchema,
   BreadcrumbSchema,
 } from "@/components/StructuredData";
 
@@ -14,9 +17,53 @@ export const metadata: Metadata = {
   keywords: "ejendomsværdiskat beregner, ejendomsskat 2026, grundskyld, boligskat, grundskyldspromille, boligskattereform",
 };
 
+const ejendomsFaqItems = [
+  {
+    question: "Hvad er ejendomsværdiskatten i 2026?",
+    answer:
+      "Ejendomsværdiskatten beregnes som 5,1‰ (0,51%) af 80% af ejendomsværdien op til progressionsgrænsen på 9.007.000 kr, og 14‰ (1,4%) af beløbet derover. De 80% skyldes forsigtighedsfradraget på 20%.",
+  },
+  {
+    question: "Hvad er forsigtighedsfradraget?",
+    answer:
+      "Forsigtighedsfradraget er 20% af den offentlige vurdering. Du betaler kun skat af 80% af den vurderede ejendomsværdi og grundværdi. Fradraget kompenserer for usikkerheden i de nye vurderinger.",
+  },
+  {
+    question: "Hvad er grundskyld?",
+    answer:
+      "Grundskyld er en skat på din grunds værdi (ikke bygningen). Den beregnes som kommunens grundskyldspromille ganget med 80% af grundværdien. Promillen varierer fra 3,1‰ (Frederiksberg) til 17,7‰ (Varde).",
+  },
+  {
+    question: "Hvad er progressionsgrænsen for ejendomsværdiskat?",
+    answer:
+      "Progressionsgrænsen er 9.007.000 kr for 2026-2027 (beskatningsgrundlag efter forsigtighedsfradrag). Det svarer til en ejendomsværdi på ca. 11,3 mio. kr. Beløbet over grænsen beskattes med 14‰ i stedet for 5,1‰.",
+  },
+  {
+    question: "Hvornår betaler man ejendomsskat?",
+    answer:
+      "Ejendomsskatten betales via din ejendomsskattebillet fra kommunen. Betalingen sker typisk i to rater — marts og september. Ejendomsværdiskatten opkræves via årsopgørelsen.",
+  },
+  {
+    question: "Hvad er overgangsordningen?",
+    answer:
+      "For at beskytte boligejere mod pludselige skattestigninger er der en overgangsordning. Hvis din skat stiger med det nye system, indfases stigningen gradvist over flere år via en skatterabat.",
+  },
+  {
+    question: "Gælder de nye regler for sommerhuse?",
+    answer:
+      "Ja, de nye ejendomsværdiskattesatser (5,1‰ / 14‰) og forsigtighedsfradraget gælder også for sommerhuse. Grundskyldspromillen afhænger af den kommune, sommerhuset ligger i.",
+  },
+  {
+    question: "Hvor finder jeg min ejendomsvurdering?",
+    answer:
+      "Du kan se din ejendomsvurdering på vurderingsportalen.dk. Her finder du både ejendomsværdi og grundværdi, som bruges til at beregne din ejendomsskat.",
+  },
+];
+
 export default function EjendomsvaerdiskatPage() {
   return (
     <div>
+      <FAQSchema items={ejendomsFaqItems} />
       <CalculatorSchema
         name="Ejendomsværdiskat beregner 2026"
         description="Beregn din ejendomsværdiskat og grundskyld med det nye boligskattesystem. 5,1‰ / 14‰ satser og kommunale grundskyldspromiller."
@@ -140,14 +187,18 @@ export default function EjendomsvaerdiskatPage() {
           </p>
         </div>
 
-        <h2>Relaterede beregnere</h2>
-        <ul>
-          <li><a href="/boliglaan">Boliglån beregner</a> - Beregn din boliggæld og ydelser</li>
-          <li><a href="/husleje">Husleje beregner</a> - Beregn huslejeudgifter</li>
-          <li><a href="/boligstoette">Boligstøtte beregner</a> - Tjek din ret til boligstøtte</li>
-          <li><a href="/rentefradrag">Rentefradrag beregner</a> - Beregn dit rentefradrag</li>
-        </ul>
       </div>
+
+      <section className="mt-12">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+          Ofte stillede spørgsmål om ejendomsskat
+        </h2>
+        <FAQ items={ejendomsFaqItems} />
+      </section>
+
+      <section className="mt-12">
+        <RelatedCalculators current="/ejendomsvaerdiskat" />
+      </section>
     </div>
   );
 }
