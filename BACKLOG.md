@@ -393,11 +393,12 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 - Link til kalorier-beregner allerede via RelatedCalculators
 
 ### D3. Boliglaan beregner forbedring
-- [ ] Tilfoej mulighed for at vaelge laan-type (fast rente, variabel, afdragsfrit)
-- Vis detaljeret amortiseringsplan (maaned for maaned)
-- Tilfoej beregning af samlede boligomkostninger (ydelse + ejendomsskat + forsikring)
-- Tilfoej graf der viser afdrag vs rente over tid
-- Tilfoej "Hvad har jeg raad til?" omvendt beregning (ud fra maanedlig ydelse)
+- [x] Låntype allerede implementeret (fast, variabel, afdragsfrit)
+- [x] Amortiseringsplan (år for år) med toggle
+- [x] Samlede boligomkostninger (ydelse + ejendomsskat + forsikring + ejerforening)
+- [x] Afdrag vs. rente visualisering over tid
+- [x] "Hvad har jeg råd til?" omvendt beregning
+- [x] Dark mode og InputField migration
 
 ### D4. Opsparingsberegner forbedring
 - [ ] Tilfoej interaktiv graf der viser opsparingens vaekst over tid
