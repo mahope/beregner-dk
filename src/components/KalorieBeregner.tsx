@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { InputField } from "./InputField";
 import { ShareCalculation } from "@/components/ShareCalculation";
+import { CopyResultButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 
@@ -280,6 +281,7 @@ export default function KalorieBeregner() {
 
       {/* Del beregning */}
       <div className="flex justify-center">
+        <CopyResultButton text={`${resultat.anbefalet} kcal/dag (${resultat.maalBeskrivelse.toLowerCase()})`} />
         <ShareCalculation
           getShareableLink={getShareableLink}
           calculatorName="Kalorieberegner"

@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { CalculationLoading, useCalculationLoading } from "./LoadingSpinner";
 import { ShareCalculation } from "@/components/ShareCalculation";
+import { CopyResultButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 
@@ -215,6 +216,7 @@ export default function DagpengeBeregner() {
 
         {resultat && (
           <div className="flex justify-center mt-6">
+            <CopyResultButton text={`${resultat.maanedligDagpenge.toLocaleString("da-DK")} kr/md`} />
             <ShareCalculation
               getShareableLink={getShareableLink}
               calculatorName="Dagpengeberegner"

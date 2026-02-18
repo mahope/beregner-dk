@@ -7,6 +7,7 @@ import { InputField } from "@/components/InputField";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { KOMMUNER } from "@/lib/kommuner";
+import { AnimatedNumber, CopyResultButton } from "@/components/ui";
 
 // 2026 danske skattesatser (ny skattereform med mellemskat/topskat/top-topskat)
 // Kilde: skm.dk, skat.dk, martinsen.dk
@@ -318,13 +319,13 @@ export default function LoenBeregner() {
         <div className="p-6 bg-green-100 dark:bg-green-900/30 rounded-xl text-center">
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Du får udbetalt (måned)</p>
           <p className="text-4xl font-bold text-green-700 dark:text-green-400">
-            {formatKr(beregning.maanedligNetto)}
+            <AnimatedNumber value={beregning.maanedligNetto} formatFn={formatKr} />
           </p>
         </div>
         <div className="p-6 bg-green-50 dark:bg-green-900/20 rounded-xl text-center">
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Du får udbetalt (år)</p>
           <p className="text-4xl font-bold text-green-600 dark:text-green-400">
-            {formatKr(beregning.aarligNetto)}
+            <AnimatedNumber value={beregning.aarligNetto} formatFn={formatKr} />
           </p>
         </div>
       </div>
@@ -344,8 +345,9 @@ export default function LoenBeregner() {
         )}
       </div>
 
-      {/* Share and Print buttons */}
+      {/* Share, Copy and Print buttons */}
       <div className="flex justify-center gap-3">
+        <CopyResultButton text={`${formatKr(beregning.maanedligBrutto)} brutto → ${formatKr(beregning.maanedligNetto)} netto`} />
         <ShareCalculation
           getShareableLink={getShareableLink}
           calculatorName="Lønberegner"

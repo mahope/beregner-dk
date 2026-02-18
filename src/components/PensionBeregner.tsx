@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { CalculationLoading, useCalculationLoading } from "./LoadingSpinner";
 import { InputField } from "./InputField";
 import { ShareCalculation } from "@/components/ShareCalculation";
+import { CopyResultButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 
@@ -397,7 +398,8 @@ export default function PensionBeregner() {
 
       {/* Del beregning */}
       {resultat && !isLoading && (
-        <div className="flex justify-center">
+        <div className="flex justify-center gap-3">
+          <CopyResultButton text={`Forventet pension: ${formatKr(resultat.samletMaanedlig)}/md`} />
           <ShareCalculation
             getShareableLink={getShareableLink}
             calculatorName="Pensionsberegner"

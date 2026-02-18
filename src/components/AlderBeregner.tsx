@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { ShareCalculation } from "@/components/ShareCalculation";
+import { CopyResultButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 
@@ -294,6 +295,7 @@ export default function AlderBeregner() {
           </div>
 
           <div className="flex justify-center">
+            <CopyResultButton text={`${beregning.aar} år, ${beregning.maaneder} mdr, ${beregning.dage} dage`} />
             <ShareCalculation
               getShareableLink={getShareableLink}
               calculatorName="Aldersberegner"

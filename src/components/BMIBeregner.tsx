@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { ShareCalculation } from "@/components/ShareCalculation";
 import { PrintResult } from "@/components/PrintResult";
+import { CopyResultButton } from "@/components/ui";
 import { InputField } from "@/components/InputField";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 
@@ -372,6 +373,7 @@ export default function BMIBeregner() {
 
           {/* Share and Print buttons */}
           <div className="mt-4 flex justify-center gap-3">
+            <CopyResultButton text={`BMI ${resultat.bmiFormatted} - ${resultat.kategori}`} />
             <ShareCalculation
               getShareableLink={getShareableLink}
               calculatorName="BMI Beregner"

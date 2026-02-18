@@ -5,6 +5,7 @@ import { InputField } from "./InputField";
 import { AffiliateBox } from "./AffiliateBox";
 import { ShareCalculation } from "./ShareCalculation";
 import { PrintResult } from "./PrintResult";
+import { CopyResultButton } from "@/components/ui";
 import { useCalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 
@@ -222,6 +223,7 @@ export default function ForbrugslaanBeregner() {
 
       {/* Del og udskriv */}
       <div className="flex flex-wrap gap-4 justify-center">
+        <CopyResultButton text={`Månedlig ydelse: ${maanedligYdelseFormatted}`} />
         <ShareCalculation
           getShareableLink={getShareableLink}
           calculatorName="Forbrugslånsberegner"

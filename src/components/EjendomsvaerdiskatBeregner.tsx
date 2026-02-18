@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { Home, Percent, Calculator } from "lucide-react";
 import { ShareCalculation } from "@/components/ShareCalculation";
+import { CopyResultButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 
@@ -350,7 +351,8 @@ export default function EjendomsvaerdiskatBeregner() {
         </div>
       </details>
 
-      <div className="flex justify-center">
+      <div className="flex justify-center gap-3">
+        <CopyResultButton text={`${formatKr(resultat.samlet)}/år (${formatKr(resultat.maanedligt)}/md)`} />
         <ShareCalculation
           getShareableLink={getShareableLink}
           calculatorName="Ejendomsværdiskat-beregner"

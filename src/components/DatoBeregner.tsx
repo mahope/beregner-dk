@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { ShareCalculation } from "@/components/ShareCalculation";
+import { CopyResultButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 
@@ -425,6 +426,13 @@ export default function DatoBeregner() {
       )}
 
       <div className="flex justify-center">
+        <CopyResultButton text={
+          resultat?.type === "dage-mellem" ? `${resultat.dage} dage mellem datoer` :
+          resultat?.type === "tilfoej-dage" ? `${antalDage} dage tilføjet` :
+          resultat?.type === "arbejdsdage" ? `${antalDage} arbejdsdage` :
+          resultat?.type === "alder" ? `${resultat.aar} år, ${resultat.maaneder} mdr, ${resultat.dage} dage` :
+          ""
+        } />
         <ShareCalculation
           getShareableLink={getShareableLink}
           calculatorName="Datoberegner"

@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { ShareCalculation } from "@/components/ShareCalculation";
+import { CopyResultButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 
@@ -351,7 +352,8 @@ export default function KvadratmeterBeregner() {
         </div>
       </div>
 
-      <div className="flex justify-center">
+      <div className="flex justify-center gap-3">
+        <CopyResultButton text={`${formatNumber(beregning.areal)} m² (${formType})`} />
         <ShareCalculation
           getShareableLink={getShareableLink}
           calculatorName="Kvadratmeterberegner"

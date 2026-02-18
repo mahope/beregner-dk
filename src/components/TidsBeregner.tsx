@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { ShareCalculation } from "@/components/ShareCalculation";
+import { CopyResultButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 
@@ -233,7 +234,8 @@ export default function TidsBeregner() {
           </div>
 
           {/* Share button */}
-          <div className="flex justify-center">
+          <div className="flex justify-center gap-3">
+            <CopyResultButton text={`${beregning.timer}t ${beregning.minutter}m (${beregning.decimalTimer} timer)`} />
             <ShareCalculation
               getShareableLink={getShareableLink}
               calculatorName="Tidsberegner"

@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { InputField } from "./InputField";
 import { ShareCalculation } from "@/components/ShareCalculation";
+import { CopyResultButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 
@@ -267,6 +268,7 @@ export default function TimeprisBeregner() {
           </div>
 
           <div className="flex justify-center">
+            <CopyResultButton text={`Anbefalet timepris: ${formatKr(beregningFraLoen.beregnetTimepris)} ekskl. moms`} />
             <ShareCalculation
               getShareableLink={getShareableLink}
               calculatorName="Timeprisberegner"
@@ -360,6 +362,7 @@ export default function TimeprisBeregner() {
           </div>
 
           <div className="flex justify-center">
+            <CopyResultButton text={`Nettoløn: ${formatKr(beregningFraTimepris.nettoLoenMaaned)}/md ved ${formatKr(timepris)}/time`} />
             <ShareCalculation
               getShareableLink={getShareableLink}
               calculatorName="Timeprisberegner"

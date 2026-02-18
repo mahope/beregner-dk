@@ -63,7 +63,7 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 ## A. Design & Visuelt Loefte (15 opgaver)
 
 ### A1. Nyt hero-design paa forsiden
-- [ ] Redesign forsiden med et stoerre, mere indbydende hero-sektion
+- [x] Redesign forsiden med et stoerre, mere indbydende hero-sektion
 - Tilfoej en soegebar med autocomplete der soeger paa tvaers af alle beregnere
 - Vis de 6 mest populaere beregnere som store, klikbare kort med ikoner
 - Tilfoej "trending" badge paa saesonrelevante beregnere (fx feriepenge om sommeren)
@@ -71,7 +71,7 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 - **Inspiration:** Finansielle portaler som Nordea.dk, Mybanker.dk
 
 ### A2. Konsistent komponent-designsystem
-- [ ] Opret et samlet designsystem med genanvendelige UI-komponenter
+- [x] Opret et samlet designsystem med genanvendelige UI-komponenter
 - Standardiser alle knapper (primaer, sekundaer, ghost) med ens stoerrelse og padding
 - Lav et konsistent kort-design (shadow, border-radius, padding) til alle beregnere
 - Definer farvepalette som CSS custom properties i stedet for spredte Tailwind-klasser

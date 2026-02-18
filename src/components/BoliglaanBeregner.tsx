@@ -6,6 +6,7 @@ import { PrintResult } from "./PrintResult";
 import { CalculationLoading, useCalculationLoading } from "./LoadingSpinner";
 import { InputField } from "./InputField";
 import { ShareCalculation } from "@/components/ShareCalculation";
+import { CopyResultButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 
@@ -557,6 +558,7 @@ export default function BoliglaanBeregner() {
 
                 {/* Share and Print buttons */}
                 <div className="mt-6 flex justify-center gap-3">
+                  <CopyResultButton text={`Lån: ${formatKr(resultat.laanBeloeb)} • Ydelse: ${formatKr(resultat.maanedligYdelse)}/md`} />
                   <ShareCalculation
                     getShareableLink={getShareableLink}
                     calculatorName="Boliglån Beregner"
@@ -677,7 +679,8 @@ export default function BoliglaanBeregner() {
           )}
 
           {raadTilResultat && (
-            <div className="flex justify-center">
+            <div className="flex justify-center gap-3">
+              <CopyResultButton text={`Råd til bolig op til ${formatKr(raadTilResultat.maxBoligpris)}`} />
               <ShareCalculation
                 getShareableLink={getShareableLink}
                 calculatorName="Boliglån Beregner"

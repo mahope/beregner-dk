@@ -5,6 +5,7 @@ import { OpsparingAffiliate } from "./AffiliateBox";
 import { CalculationLoading, useCalculationLoading } from "./LoadingSpinner";
 import { InputField } from "./InputField";
 import { ShareCalculation } from "@/components/ShareCalculation";
+import { CopyResultButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 
@@ -490,7 +491,8 @@ export default function OpsparingsBeregner() {
           </CalculationLoading>
 
           {beregning && !isLoading && (
-            <div className="flex justify-center">
+            <div className="flex justify-center gap-3">
+              <CopyResultButton text={`${formatKr(beregning.slutSaldo)} efter ${periode} år`} />
               <ShareCalculation
                 getShareableLink={getShareableLink}
                 calculatorName="Opsparingsberegner"
@@ -572,7 +574,8 @@ export default function OpsparingsBeregner() {
                 </div>
               </div>
 
-              <div className="flex justify-center">
+              <div className="flex justify-center gap-3">
+                <CopyResultButton text={`Når ${formatKr(maalBeloeb)} på ${maalResultat.aar} år og ${maalResultat.maaneder} md.`} />
                 <ShareCalculation
                   getShareableLink={getShareableLink}
                   calculatorName="Opsparingsberegner"

@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { ShareCalculation } from '@/components/ShareCalculation';
+import { CopyResultButton } from '@/components/ui';
 import { generateShareableLink, getStateFromUrl, CalculationState } from '@/lib/calculation-state';
 import { trackCalculation, initScrollDepthTracking } from '@/lib/analytics';
 
@@ -265,7 +266,8 @@ export default function BarselBeregner() {
       </div>
 
       {result && (
-        <div className="flex justify-center mt-6">
+        <div className="flex justify-center gap-3 mt-6">
+          <CopyResultButton text={`${result.weeklyRate.toLocaleString('da-DK')} kr/uge (${weeksPlanned} uger)`} />
           <ShareCalculation
             getShareableLink={getShareableLink}
             calculatorName="Barselsberegner"

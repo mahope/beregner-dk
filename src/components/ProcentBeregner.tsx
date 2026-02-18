@@ -7,6 +7,7 @@ import { PrintResult } from "@/components/PrintResult";
 import { InputField } from "@/components/InputField";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { ModeSelector, ModeOption } from "@/components/ModeSelector";
+import { AnimatedNumber, CopyResultButton } from "@/components/ui";
 
 type BeregningsMode = "find-procent" | "find-resultat" | "find-heltal" | "stigning";
 
@@ -239,14 +240,20 @@ export default function ProcentBeregner() {
               ? "text-red-600 dark:text-red-400"
               : "text-green-600 dark:text-green-400"
           }`}>
-            {resultat.type === "find-procent" || resultat.type === "stigning"
-              ? `${resultat.resultat.toFixed(2)}%`
-              : resultat.resultat.toFixed(2)}
+            <AnimatedNumber
+              value={resultat.resultat}
+              formatFn={(n) =>
+                resultat.type === "find-procent" || resultat.type === "stigning"
+                  ? `${n.toFixed(2)}%`
+                  : n.toFixed(2)
+              }
+            />
           </p>
           <p className="text-gray-600 dark:text-gray-400 mt-2">{resultat.forklaring}</p>
 
-          {/* Share and Print buttons */}
+          {/* Share, Copy and Print buttons */}
           <div className="mt-4 flex justify-center gap-3">
+            <CopyResultButton text={resultat.forklaring} />
             <ShareCalculation
               getShareableLink={getShareableLink}
               calculatorName="Procentberegner"

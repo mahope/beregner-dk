@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { ShareCalculation } from '@/components/ShareCalculation';
+import { CopyResultButton } from '@/components/ui';
 import { generateShareableLink, getStateFromUrl, CalculationState } from '@/lib/calculation-state';
 import { trackCalculation, initScrollDepthTracking } from '@/lib/analytics';
 
@@ -308,7 +309,8 @@ export default function RentefradragBeregner() {
       </div>
 
       {/* Share button */}
-      <div className="flex justify-center mt-6">
+      <div className="flex justify-center mt-6 gap-3">
+        <CopyResultButton text={result.hasDeduction ? `Fradrag: ${result.totalDeduction.toLocaleString('da-DK')} kr./år (${result.monthlyBenefit.toLocaleString('da-DK')} kr./md)` : `Renteudgifter: ${result.totalInterestExpense.toLocaleString('da-DK')} kr./år`} />
         <ShareCalculation
           getShareableLink={getShareableLink}
           calculatorName="Rentefradragberegner"

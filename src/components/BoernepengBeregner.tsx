@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { ShareCalculation } from "@/components/ShareCalculation";
+import { CopyResultButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 
@@ -292,6 +293,7 @@ export default function BoernepengBeregner() {
       )}
 
       <div className="flex justify-center">
+        <CopyResultButton text={`${formatKr(beregning.maanedlig)}/md (${formatKr(beregning.dinAndel)}/år)`} />
         <ShareCalculation
           getShareableLink={getShareableLink}
           calculatorName="Børnepengeberegner"

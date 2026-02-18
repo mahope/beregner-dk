@@ -5,6 +5,7 @@ import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { ShareCalculation } from "@/components/ShareCalculation";
 import { PrintResult } from "@/components/PrintResult";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
+import { AnimatedNumber, CopyResultButton } from "@/components/ui";
 
 // Dansk momssats
 const MOMS_SATS = 0.25; // 25%
@@ -174,28 +175,29 @@ export default function MomsBeregner() {
 
       {/* Resultat */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="p-6 bg-gray-50 rounded-xl text-center">
-          <p className="text-sm text-gray-600 mb-1">Pris uden moms</p>
-          <p className="text-2xl font-bold text-gray-700">
-            {formatKr(beregning.prisUdenMoms)}
+        <div className="p-6 bg-gray-50 dark:bg-gray-800 rounded-xl text-center">
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Pris uden moms</p>
+          <p className="text-2xl font-bold text-gray-700 dark:text-gray-200">
+            <AnimatedNumber value={beregning.prisUdenMoms} formatFn={formatKr} />
           </p>
         </div>
-        <div className="p-6 bg-blue-50 rounded-xl text-center">
-          <p className="text-sm text-gray-600 mb-1">Moms (25%)</p>
-          <p className="text-2xl font-bold text-blue-600">
-            {formatKr(beregning.momsBeloeb)}
+        <div className="p-6 bg-blue-50 dark:bg-blue-900/20 rounded-xl text-center">
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Moms (25%)</p>
+          <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+            <AnimatedNumber value={beregning.momsBeloeb} formatFn={formatKr} />
           </p>
         </div>
-        <div className="p-6 bg-green-100 rounded-xl text-center">
-          <p className="text-sm text-gray-600 mb-1">Pris inkl. moms</p>
-          <p className="text-2xl font-bold text-green-700">
-            {formatKr(beregning.prisInklMoms)}
+        <div className="p-6 bg-green-100 dark:bg-green-900/20 rounded-xl text-center">
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Pris inkl. moms</p>
+          <p className="text-2xl font-bold text-green-700 dark:text-green-400">
+            <AnimatedNumber value={beregning.prisInklMoms} formatFn={formatKr} />
           </p>
         </div>
       </div>
 
-      {/* Share and Print buttons */}
+      {/* Share, Copy and Print buttons */}
       <div className="flex justify-center gap-3">
+        <CopyResultButton text={`${formatKr(beregning.prisUdenMoms)} + moms = ${formatKr(beregning.prisInklMoms)}`} />
         <ShareCalculation
           getShareableLink={getShareableLink}
           calculatorName="Momsberegner"

@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { ShareCalculation } from "@/components/ShareCalculation";
+import { CopyResultButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 
@@ -310,6 +311,7 @@ export default function Elberegner() {
 
       {/* Del beregning */}
       <div className="flex justify-center">
+        <CopyResultButton text={`${beregninger.aarligtKwh} kWh/år = ${beregninger.aarligPris} kr/år`} />
         <ShareCalculation
           getShareableLink={getShareableLink}
           calculatorName="Elberegner"

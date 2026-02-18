@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { ShareCalculation } from "@/components/ShareCalculation";
+import { CopyResultButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 
@@ -258,6 +259,7 @@ export default function BoligstoetteBeregner() {
         {/* Del beregning */}
         {resultat && resultat.maanedligBoligstoette > 0 && (
           <div className="flex justify-center">
+            <CopyResultButton text={`Estimeret støtte: ${resultat.maanedligBoligstoette.toLocaleString("da-DK")} kr/md`} />
             <ShareCalculation
               getShareableLink={getShareableLink}
               calculatorName="Boligstøtteberegner"
