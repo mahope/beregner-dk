@@ -79,7 +79,7 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 - Dokumenter komponenterne i en /design-system side (intern reference)
 
 ### A3. Forbedret resultat-visning paa alle beregnere
-- [ ] Redesign resultat-sektionen saa den er mere visuel og engagerende
+- [x] Redesign resultat-sektionen saa den er mere visuel og engagerende
 - Tilfoej farvekodede resultat-kort (groen = godt, gul = ok, roed = advarsel) hvor relevant
 - Vis noegletal i store, fremhaevede tal med labels (fx "Din maanedlige ydelse: **4.250 kr**")
 - Tilfoej grafiske elementer: progress bars for BMI, donut charts for budget-beregnere
@@ -87,7 +87,7 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 - Alle resultater skal have en "Kopier resultat" knap
 
 ### A4. Mobil-optimeret navigation og layout
-- [ ] Gennemgaa og forbedre mobiloplevelsen paa alle 33 beregnere
+- [x] Gennemgaa og forbedre mobiloplevelsen paa alle 33 beregnere
 - Test og fix touch-targets (minimum 44x44px paa alle klikbare elementer)
 - Forbedre mobile dropdown-menuer (kategorier skal vaere nemmere at navigere)
 - Tilfoej en sticky "Beregn" knap i bunden paa mobil naar formularen er udfyldt
@@ -95,7 +95,7 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 - Test paa iPhone SE (375px), iPhone 14 (390px) og Samsung Galaxy (360px)
 
 ### A5. Typografi og laesbarhed
-- [ ] Forbedre typografi paa tvaers af hele sitet
+- [x] Forbedre typografi paa tvaers af hele sitet
 - Oeg body font-size fra 16px til 17-18px for bedre laesekomfort
 - Tilfoej ordentlig linjehojde (1.6-1.75) paa alle tekst-sektioner
 - Brug heading-hierarki konsekvent (h1 → h2 → h3, aldrig spring niveauer over)
