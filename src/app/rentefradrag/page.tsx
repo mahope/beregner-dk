@@ -5,8 +5,8 @@ import RelatedCalculators from "@/components/RelatedCalculators";
 import {
   CalculatorSchema,
   FAQSchema,
-  BreadcrumbSchema,
 } from "@/components/StructuredData";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const baseUrl = "https://minberegner.dk";
 
@@ -97,19 +97,9 @@ export default function RentefradragPage() {
         category="FinanceApplication"
       />
       <FAQSchema items={faqItems} />
-      <BreadcrumbSchema
-        items={[
-          { name: "Forside", url: baseUrl },
-          { name: "Rentefradrag", url: `${baseUrl}/rentefradrag` },
-        ]}
-      />
+      <Breadcrumbs items={[{ name: "Økonomi", href: "/kategori/oekonomi" }, { name: "Rentefradrag", href: "/rentefradrag" }]} />
 
       <main className="container mx-auto px-4 py-8 max-w-4xl">
-        <nav className="text-sm text-gray-500 mb-6">
-          <a href="/" className="hover:text-blue-600">Forside</a>
-          <span className="mx-2">/</span>
-          <span>Rentefradrag</span>
-        </nav>
 
         <article>
           <header className="mb-8">

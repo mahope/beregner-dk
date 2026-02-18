@@ -5,8 +5,8 @@ import RelatedCalculators from "@/components/RelatedCalculators";
 import {
   CalculatorSchema,
   FAQSchema,
-  BreadcrumbSchema,
 } from "@/components/StructuredData";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const baseUrl = "https://minberegner.dk";
 
@@ -70,12 +70,7 @@ export default function ArveafgiftPage() {
         category="FinanceApplication"
       />
       <FAQSchema items={arveafgiftFaqItems} />
-      <BreadcrumbSchema
-        items={[
-          { name: "Forside", url: baseUrl },
-          { name: "Arveafgift beregner", url: `${baseUrl}/arveafgift` },
-        ]}
-      />
+      <Breadcrumbs items={[{ name: "Økonomi", href: "/kategori/oekonomi" }, { name: "Arveafgift beregner", href: "/arveafgift" }]} />
       <h1 className="text-3xl font-bold mb-2">Arveafgift beregner</h1>
       <p className="text-gray-600 mb-8">
         Beregn arveafgift i Danmark baseret på din relation til afdøde og størrelsen af arven.

@@ -2,11 +2,8 @@ import type { Metadata } from "next";
 import TidsBeregner from "@/components/TidsBeregner";
 import { RelatedCalculators } from "@/components/RelatedCalculators";
 import FAQ from "@/components/FAQ";
-import {
-  CalculatorSchema,
-  FAQSchema,
-  BreadcrumbSchema,
-} from "@/components/StructuredData";
+import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const baseUrl = "https://minberegner.dk";
 
@@ -84,12 +81,8 @@ export default function TidsberegnerPage() {
         category="UtilityApplication"
       />
       <FAQSchema items={faqItems} />
-      <BreadcrumbSchema
-        items={[
-          { name: "Forside", url: baseUrl },
-          { name: "Tidsberegner", url: `${baseUrl}/tidsberegner` },
-        ]}
-      />
+      <Breadcrumbs items={[{ name: "Praktisk", href: "/kategori/praktisk" }, { name: "Tidsberegner", href: "/tidsberegner" }]} />
+
       <h1 className="text-3xl md:text-4xl font-bold mb-4">
         ⏱️ Tidsberegner
       </h1>

@@ -4,8 +4,8 @@ import FAQ from "@/components/FAQ";
 import {
   CalculatorSchema,
   FAQSchema,
-  BreadcrumbSchema,
 } from "@/components/StructuredData";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import RelatedCalculators from "@/components/RelatedCalculators";
 
 const baseUrl = "https://minberegner.dk";
@@ -100,12 +100,7 @@ export default function MomsPage() {
         category="FinanceApplication"
       />
       <FAQSchema items={faqItems} />
-      <BreadcrumbSchema
-        items={[
-          { name: "Forside", url: baseUrl },
-          { name: "Momsberegner", url: `${baseUrl}/moms` },
-        ]}
-      />
+      <Breadcrumbs items={[{ name: "Økonomi", href: "/kategori/oekonomi" }, { name: "Momsberegner", href: "/moms" }]} />
       
       {/* Header */}
       <div className="mb-8">

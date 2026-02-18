@@ -110,7 +110,7 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 - Tilfoej manifest.json for PWA-klar branding (navn, farver, ikoner)
 
 ### A7. Footer redesign
-- [ ] Redesign footer med bedre struktur og flere links
+- [x] Redesign footer med bedre struktur og flere links
 - Vis alle 33 beregnere organiseret i kategorier (Oekonomi, Bolig, Laan, Sundhed, Vaerktoej)
 - Tilfoej "Seneste blog posts" sektion med de 3 nyeste artikler
 - Tilfoej trust-signaler (antal beregnere, "Opdateret 2026", "Gratis og uden login")

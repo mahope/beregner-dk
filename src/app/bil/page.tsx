@@ -2,11 +2,8 @@ import type { Metadata } from "next";
 import BilBeregner from "@/components/BilBeregner";
 import FAQ from "@/components/FAQ";
 import RelatedCalculators from "@/components/RelatedCalculators";
-import {
-  CalculatorSchema,
-  FAQSchema,
-  BreadcrumbSchema,
-} from "@/components/StructuredData";
+import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const baseUrl = "https://minberegner.dk";
 
@@ -60,12 +57,8 @@ export default function BilPage() {
         url={`${baseUrl}/bil`}
         category="FinanceApplication"
       />
-      <BreadcrumbSchema
-        items={[
-          { name: "Forside", url: baseUrl },
-          { name: "Bilomkostningsberegner", url: `${baseUrl}/bil` },
-        ]}
-      />
+      <Breadcrumbs items={[{ name: "Hverdag", href: "/kategori/hverdag" }, { name: "Bilomkostningsberegner", href: "/bil" }]} />
+
       <h1 className="text-3xl font-bold mb-2">Bilomkostningsberegner</h1>
       <p className="text-gray-600 mb-8">
         Beregn hvad det reelt koster at eje og køre bil. Inkluderer brændstof, forsikring, værditab, afgifter og service.

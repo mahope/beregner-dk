@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import DagpengeBeregner from "@/components/DagpengeBeregner";
-import { CalculatorSchema, FAQSchema, BreadcrumbSchema } from "@/components/StructuredData";
+import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import { FAQ } from "@/components/FAQ";
 import { RelatedCalculators } from "@/components/RelatedCalculators";
 
@@ -82,12 +83,7 @@ export default function DagpengePage() {
         category="FinanceApplication"
       />
       <FAQSchema items={faqItems} />
-      <BreadcrumbSchema
-        items={[
-          { name: "Forside", url: baseUrl },
-          { name: "Dagpengeberegner", url: `${baseUrl}/dagpenge` },
-        ]}
-      />
+      <Breadcrumbs items={[{ name: "Økonomi", href: "/kategori/oekonomi" }, { name: "Dagpengeberegner", href: "/dagpenge" }]} />
 
       {/* Header */}
       <div className="text-center mb-8">

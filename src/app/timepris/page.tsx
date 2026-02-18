@@ -1,12 +1,9 @@
 import type { Metadata } from "next";
 import TimeprisBeregner from "@/components/TimeprisBeregner";
 import FAQ from "@/components/FAQ";
-import {
-  CalculatorSchema,
-  FAQSchema,
-  BreadcrumbSchema,
-} from "@/components/StructuredData";
+import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import RelatedCalculators from "@/components/RelatedCalculators";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const baseUrl = "https://minberegner.dk";
 
@@ -99,13 +96,8 @@ export default function TimeprisPage() {
         category="FinanceApplication"
       />
       <FAQSchema items={faqItems} />
-      <BreadcrumbSchema
-        items={[
-          { name: "Forside", url: baseUrl },
-          { name: "Timeprisberegner", url: `${baseUrl}/timepris` },
-        ]}
-      />
-      
+      <Breadcrumbs items={[{ name: "Erhverv", href: "/kategori/erhverv" }, { name: "Timeprisberegner", href: "/timepris" }]} />
+
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl md:text-4xl font-bold mb-4">

@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { BreadcrumbSchema } from "@/components/StructuredData";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const baseUrl = "https://minberegner.dk";
 
@@ -22,20 +21,7 @@ export const metadata: Metadata = {
 export default function PrivatlivspolitikPage() {
   return (
     <div className="max-w-3xl mx-auto">
-      <BreadcrumbSchema
-        items={[
-          { name: "Forside", url: baseUrl },
-          { name: "Privatlivspolitik", url: `${baseUrl}/privatlivspolitik` },
-        ]}
-      />
-
-      <nav className="text-sm text-gray-500 mb-4">
-        <Link href="/" className="hover:text-blue-600">
-          Forside
-        </Link>
-        <span className="mx-2">/</span>
-        <span className="text-gray-900">Privatlivspolitik</span>
-      </nav>
+      <Breadcrumbs items={[{ name: "Privatlivspolitik", href: "/privatlivspolitik" }]} />
 
       <h1 className="text-3xl font-bold mb-6">Privatlivspolitik</h1>
 

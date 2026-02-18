@@ -1,11 +1,8 @@
 import type { Metadata } from "next";
 import BraendstofBeregner from "@/components/BraendstofBeregner";
 import FAQ from "@/components/FAQ";
-import {
-  CalculatorSchema,
-  FAQSchema,
-  BreadcrumbSchema,
-} from "@/components/StructuredData";
+import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import RelatedCalculators from "@/components/RelatedCalculators";
 
 const baseUrl = "https://minberegner.dk";
@@ -99,13 +96,8 @@ export default function BraendstofPage() {
         category="FinanceApplication"
       />
       <FAQSchema items={faqItems} />
-      <BreadcrumbSchema
-        items={[
-          { name: "Forside", url: baseUrl },
-          { name: "Brændstofberegner", url: `${baseUrl}/braendstof` },
-        ]}
-      />
-      
+      <Breadcrumbs items={[{ name: "Hverdag", href: "/kategori/hverdag" }, { name: "Brændstofberegner", href: "/braendstof" }]} />
+
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl md:text-4xl font-bold mb-4">

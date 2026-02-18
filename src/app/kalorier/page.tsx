@@ -2,11 +2,8 @@ import type { Metadata } from "next";
 import KalorieBeregner from "@/components/KalorieBeregner";
 import FAQ from "@/components/FAQ";
 import RelatedCalculators from "@/components/RelatedCalculators";
-import {
-  CalculatorSchema,
-  FAQSchema,
-  BreadcrumbSchema,
-} from "@/components/StructuredData";
+import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const baseUrl = "https://minberegner.dk";
 
@@ -89,20 +86,7 @@ export default function KalorierPage() {
         category="HealthApplication"
       />
       <FAQSchema items={faqItems} />
-      <BreadcrumbSchema
-        items={[
-          { name: "Forside", url: baseUrl },
-          { name: "Kalorieberegner", url: `${baseUrl}/kalorier` },
-        ]}
-      />
-
-      <nav className="text-sm text-gray-500 mb-4">
-        <a href="/" className="hover:text-blue-600">
-          Forside
-        </a>
-        <span className="mx-2">/</span>
-        <span className="text-gray-900">Kalorieberegner</span>
-      </nav>
+      <Breadcrumbs items={[{ name: "Sundhed", href: "/kategori/sundhed" }, { name: "Kalorieberegner", href: "/kalorier" }]} />
 
       <h1 className="text-3xl font-bold mb-2">Kalorieberegner</h1>
       <p className="text-gray-600 mb-8">

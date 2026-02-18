@@ -4,8 +4,8 @@ import FAQ from "@/components/FAQ";
 import {
   CalculatorSchema,
   FAQSchema,
-  BreadcrumbSchema,
 } from "@/components/StructuredData";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import RelatedCalculators from "@/components/RelatedCalculators";
 
 const baseUrl = "https://minberegner.dk";
@@ -70,12 +70,7 @@ export default function PensionPage() {
         category="FinanceApplication"
       />
       <FAQSchema items={pensionFaqItems} />
-      <BreadcrumbSchema
-        items={[
-          { name: "Forside", url: baseUrl },
-          { name: "Pensionsberegner", url: `${baseUrl}/pension` },
-        ]}
-      />
+      <Breadcrumbs items={[{ name: "Økonomi", href: "/kategori/oekonomi" }, { name: "Pensionsberegner", href: "/pension" }]} />
       <h1 className="text-3xl font-bold mb-2">Pensionsberegner</h1>
       <p className="text-gray-600 mb-8">
         Beregn hvad du kan forvente at få udbetalt som pensionist baseret på din opsparing og de forventede afkast.

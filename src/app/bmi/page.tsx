@@ -5,8 +5,8 @@ import RelatedCalculators from "@/components/RelatedCalculators";
 import {
   CalculatorSchema,
   FAQSchema,
-  BreadcrumbSchema,
 } from "@/components/StructuredData";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import { SidebarAd, InlineAd } from "@/components/ads/AdBanner";
 
 const baseUrl = "https://minberegner.dk";
@@ -83,20 +83,7 @@ export default function BMIPage() {
         category="HealthApplication"
       />
       <FAQSchema items={faqItems} />
-      <BreadcrumbSchema
-        items={[
-          { name: "Forside", url: baseUrl },
-          { name: "BMI Beregner", url: `${baseUrl}/bmi` },
-        ]}
-      />
-
-      <nav className="text-sm text-gray-500 mb-4">
-        <a href="/" className="hover:text-blue-600">
-          Forside
-        </a>
-        <span className="mx-2">/</span>
-        <span className="text-gray-900">BMI Beregner</span>
-      </nav>
+      <Breadcrumbs items={[{ name: "Sundhed", href: "/kategori/sundhed" }, { name: "BMI Beregner", href: "/bmi" }]} />
 
       <h1 className="text-3xl font-bold mb-2">BMI Beregner</h1>
       <p className="text-gray-600 mb-8">

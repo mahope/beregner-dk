@@ -5,8 +5,8 @@ import RelatedCalculators from "@/components/RelatedCalculators";
 import {
   CalculatorSchema,
   FAQSchema,
-  BreadcrumbSchema,
 } from "@/components/StructuredData";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const baseUrl = "https://minberegner.dk";
 
@@ -90,20 +90,7 @@ export default function OpsparingPage() {
         category="FinanceApplication"
       />
       <FAQSchema items={faqItems} />
-      <BreadcrumbSchema
-        items={[
-          { name: "Forside", url: baseUrl },
-          { name: "Opsparingsberegner", url: `${baseUrl}/opsparing` },
-        ]}
-      />
-
-      <nav className="text-sm text-gray-500 mb-4">
-        <a href="/" className="hover:text-blue-600">
-          Forside
-        </a>
-        <span className="mx-2">/</span>
-        <span className="text-gray-900">Opsparingsberegner</span>
-      </nav>
+      <Breadcrumbs items={[{ name: "Økonomi", href: "/kategori/oekonomi" }, { name: "Opsparingsberegner", href: "/opsparing" }]} />
 
       <h1 className="text-3xl font-bold mb-2">Opsparingsberegner</h1>
       <p className="text-gray-600 mb-8">

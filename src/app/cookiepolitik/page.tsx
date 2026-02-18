@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 export const metadata: Metadata = {
   title: "Cookiepolitik | MinBeregner.dk",
@@ -10,6 +11,8 @@ export const metadata: Metadata = {
 export default function CookiePolitikPage() {
   return (
     <div className="prose max-w-3xl">
+      <Breadcrumbs items={[{ name: "Cookiepolitik", href: "/cookiepolitik" }]} />
+
       <h1>Cookiepolitik</h1>
       <p>
         Denne side forklarer, hvordan MinBeregner.dk forholder sig til cookies

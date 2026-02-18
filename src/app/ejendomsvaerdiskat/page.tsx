@@ -5,8 +5,8 @@ import RelatedCalculators from "@/components/RelatedCalculators";
 import {
   CalculatorSchema,
   FAQSchema,
-  BreadcrumbSchema,
 } from "@/components/StructuredData";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const baseUrl = "https://minberegner.dk";
 
@@ -70,12 +70,7 @@ export default function EjendomsvaerdiskatPage() {
         url={`${baseUrl}/ejendomsvaerdiskat`}
         category="FinanceApplication"
       />
-      <BreadcrumbSchema
-        items={[
-          { name: "Forside", url: baseUrl },
-          { name: "Ejendomsværdiskat beregner", url: `${baseUrl}/ejendomsvaerdiskat` },
-        ]}
-      />
+      <Breadcrumbs items={[{ name: "Bolig", href: "/kategori/bolig" }, { name: "Ejendomsværdiskat beregner", href: "/ejendomsvaerdiskat" }]} />
       <h1 className="text-3xl font-bold mb-2">Ejendomsværdiskat beregner 2026</h1>
       <p className="text-gray-600 dark:text-gray-400 mb-8">
         Beregn hvor meget du skal betale i ejendomsværdiskat og grundskyld med det

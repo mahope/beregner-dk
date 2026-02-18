@@ -1,11 +1,8 @@
 import type { Metadata } from "next";
 import TidszoneBeregner from "@/components/TidszoneBeregner";
 import FAQ from "@/components/FAQ";
-import {
-  CalculatorSchema,
-  FAQSchema,
-  BreadcrumbSchema,
-} from "@/components/StructuredData";
+import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import RelatedCalculators from "@/components/RelatedCalculators";
 
 const baseUrl = "https://minberegner.dk";
@@ -98,13 +95,8 @@ export default function TidszonePage() {
         category="UtilityApplication"
       />
       <FAQSchema items={faqItems} />
-      <BreadcrumbSchema
-        items={[
-          { name: "Forside", url: baseUrl },
-          { name: "Tidszoneberegner", url: `${baseUrl}/tidszone` },
-        ]}
-      />
-      
+      <Breadcrumbs items={[{ name: "Hverdag", href: "/kategori/hverdag" }, { name: "Tidszoneberegner", href: "/tidszone" }]} />
+
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl md:text-4xl font-bold mb-4">

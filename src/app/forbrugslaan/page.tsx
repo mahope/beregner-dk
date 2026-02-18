@@ -1,12 +1,9 @@
 import type { Metadata } from "next";
 import ForbrugslaanBeregner from "@/components/ForbrugslaanBeregner";
 import FAQ from "@/components/FAQ";
-import {
-  CalculatorSchema,
-  FAQSchema,
-  BreadcrumbSchema,
-} from "@/components/StructuredData";
+import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import RelatedCalculators from "@/components/RelatedCalculators";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const baseUrl = "https://minberegner.dk";
 
@@ -98,13 +95,8 @@ export default function ForbrugslaanPage() {
         category="FinanceApplication"
       />
       <FAQSchema items={faqItems} />
-      <BreadcrumbSchema
-        items={[
-          { name: "Forside", url: baseUrl },
-          { name: "Forbrugslån", url: `${baseUrl}/forbrugslaan` },
-        ]}
-      />
-      
+      <Breadcrumbs items={[{ name: "Lån", href: "/kategori/laan" }, { name: "Forbrugslån", href: "/forbrugslaan" }]} />
+
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl md:text-4xl font-bold mb-4">

@@ -2,11 +2,8 @@ import type { Metadata } from "next";
 import SUBeregner from "@/components/SUBeregner";
 import FAQ from "@/components/FAQ";
 import RelatedCalculators from "@/components/RelatedCalculators";
-import {
-  CalculatorSchema,
-  FAQSchema,
-  BreadcrumbSchema,
-} from "@/components/StructuredData";
+import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const baseUrl = "https://minberegner.dk";
 
@@ -91,20 +88,7 @@ export default function SUPage() {
         category="FinanceApplication"
       />
       <FAQSchema items={faqItems} />
-      <BreadcrumbSchema
-        items={[
-          { name: "Forside", url: baseUrl },
-          { name: "SU Beregner", url: `${baseUrl}/su` },
-        ]}
-      />
-
-      <nav className="text-sm text-gray-500 mb-4">
-        <a href="/" className="hover:text-blue-600">
-          Forside
-        </a>
-        <span className="mx-2">/</span>
-        <span className="text-gray-900">SU Beregner</span>
-      </nav>
+      <Breadcrumbs items={[{ name: "Uddannelse", href: "/kategori/uddannelse" }, { name: "SU Beregner", href: "/su" }]} />
 
       <h1 className="text-3xl font-bold mb-2">SU Beregner 2026</h1>
       <p className="text-gray-600 mb-8">

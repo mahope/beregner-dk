@@ -2,11 +2,8 @@ import type { Metadata } from "next";
 import BarselBeregner from "@/components/BarselBeregner";
 import FAQ from "@/components/FAQ";
 import RelatedCalculators from "@/components/RelatedCalculators";
-import {
-  CalculatorSchema,
-  FAQSchema,
-  BreadcrumbSchema,
-} from "@/components/StructuredData";
+import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const baseUrl = "https://minberegner.dk";
 
@@ -98,19 +95,9 @@ export default function BarselPage() {
         category="FinanceApplication"
       />
       <FAQSchema items={faqItems} />
-      <BreadcrumbSchema
-        items={[
-          { name: "Forside", url: baseUrl },
-          { name: "Barselsdagpenge", url: `${baseUrl}/barselsdagpenge` },
-        ]}
-      />
+      <Breadcrumbs items={[{ name: "Familie", href: "/kategori/familie" }, { name: "Barselsdagpenge", href: "/barselsdagpenge" }]} />
 
       <main className="container mx-auto px-4 py-8 max-w-4xl">
-        <nav className="text-sm text-gray-500 mb-6">
-          <a href="/" className="hover:text-blue-600">Forside</a>
-          <span className="mx-2">/</span>
-          <span>Barselsdagpenge</span>
-        </nav>
 
         <article>
           <header className="mb-8">

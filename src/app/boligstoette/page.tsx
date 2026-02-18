@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import BoligstoetteBeregner from "@/components/BoligstoetteBeregner";
-import { CalculatorSchema, FAQSchema, BreadcrumbSchema } from "@/components/StructuredData";
+import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import { FAQ } from "@/components/FAQ";
 import { RelatedCalculators } from "@/components/RelatedCalculators";
 
@@ -77,12 +78,7 @@ export default function BoligstoettePage() {
         category="FinanceApplication"
       />
       <FAQSchema items={faqItems} />
-      <BreadcrumbSchema
-        items={[
-          { name: "Forside", url: baseUrl },
-          { name: "Boligstøtte beregner", url: `${baseUrl}/boligstoette` },
-        ]}
-      />
+      <Breadcrumbs items={[{ name: "Bolig", href: "/kategori/bolig" }, { name: "Boligstøtte beregner", href: "/boligstoette" }]} />
 
       {/* Header */}
       <div className="text-center mb-8">

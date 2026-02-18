@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { BreadcrumbSchema } from "@/components/StructuredData";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const baseUrl = "https://minberegner.dk";
 
@@ -22,20 +22,7 @@ export const metadata: Metadata = {
 export default function OmPage() {
   return (
     <div className="max-w-3xl mx-auto">
-      <BreadcrumbSchema
-        items={[
-          { name: "Forside", url: baseUrl },
-          { name: "Om MinBeregner.dk", url: `${baseUrl}/om` },
-        ]}
-      />
-
-      <nav className="text-sm text-gray-500 mb-4">
-        <Link href="/" className="hover:text-blue-600">
-          Forside
-        </Link>
-        <span className="mx-2">/</span>
-        <span className="text-gray-900">Om os</span>
-      </nav>
+      <Breadcrumbs items={[{ name: "Om MinBeregner.dk", href: "/om" }]} />
 
       <h1 className="text-3xl font-bold mb-6">Om MinBeregner.dk</h1>
 

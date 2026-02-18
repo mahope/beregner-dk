@@ -5,8 +5,8 @@ import RelatedCalculators from "@/components/RelatedCalculators";
 import {
   CalculatorSchema,
   FAQSchema,
-  BreadcrumbSchema,
 } from "@/components/StructuredData";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const baseUrl = "https://minberegner.dk";
 
@@ -70,12 +70,7 @@ export default function BoliglaanPage() {
         category="FinanceApplication"
       />
       <FAQSchema items={faqItems} />
-      <BreadcrumbSchema
-        items={[
-          { name: "Forside", url: baseUrl },
-          { name: "Boliglånsberegner", url: `${baseUrl}/boliglaan` },
-        ]}
-      />
+      <Breadcrumbs items={[{ name: "Bolig", href: "/kategori/bolig" }, { name: "Boliglånsberegner", href: "/boliglaan" }]} />
       <h1 className="text-3xl font-bold mb-2">Boliglånsberegner</h1>
       <p className="text-gray-600 mb-8">
         Beregn hvad dit boliglån vil koste om måneden, og se hvor meget du betaler i alt over lånets løbetid.
