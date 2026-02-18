@@ -1,6 +1,8 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { FAQSchema } from "@/components/StructuredData";
+import SearchBar from "@/components/SearchBar";
+import { getTrendingHrefs } from "@/lib/trending";
 
 const baseUrl = "https://minberegner.dk";
 
@@ -75,6 +77,14 @@ const beregnere = [
     category: "Økonomi",
   },
   {
+    title: "Procentberegner",
+    description: "Beregn procent af et tal, stigning, fald og mere",
+    href: "/procent",
+    icon: "➗",
+    popular: true,
+    category: "Matematik",
+  },
+  {
     title: "Renteberegner",
     description: "Beregn ydelse, rente og tilbagebetaling på lån",
     href: "/renteberegner",
@@ -89,14 +99,6 @@ const beregnere = [
     icon: "📈",
     popular: false,
     category: "Økonomi",
-  },
-  {
-    title: "Procentberegner",
-    description: "Beregn procent af et tal, stigning, fald og mere",
-    href: "/procent",
-    icon: "➗",
-    popular: false,
-    category: "Matematik",
   },
   {
     title: "Kvadratmeterberegner",
@@ -323,80 +325,133 @@ const homeFaqItems = [
   },
 ];
 
+const categoryOrder = [
+  { key: "Økonomi", emoji: "💰" },
+  { key: "Bolig", emoji: "🏠" },
+  { key: "Lån", emoji: "🏦" },
+  { key: "Sundhed", emoji: "❤️" },
+  { key: "Familie", emoji: "👨‍👩‍👧" },
+  { key: "Uddannelse", emoji: "🎓" },
+  { key: "Erhverv", emoji: "💼" },
+  { key: "Hverdag", emoji: "☀️" },
+  { key: "Praktisk", emoji: "🔧" },
+  { key: "Matematik", emoji: "📐" },
+];
+
 export default function Home() {
+  const trendingHrefs = getTrendingHrefs();
   const popularBeregnere = beregnere.filter((b) => b.popular);
   const oevrigeBeregnere = beregnere.filter((b) => !b.popular);
+
+  // Group non-popular by category
+  const grouped = new Map<string, typeof beregnere>();
+  for (const b of oevrigeBeregnere) {
+    const list = grouped.get(b.category) || [];
+    list.push(b);
+    grouped.set(b.category, list);
+  }
+
+  // Search bar needs flat list
+  const searchData = beregnere.map(({ title, description, href, icon, category }) => ({
+    title,
+    description,
+    href,
+    icon,
+    category,
+  }));
 
   return (
     <div>
       <FAQSchema items={homeFaqItems} />
 
       {/* Hero */}
-      <section className="text-center mb-12">
-        <h1 className="text-4xl md:text-5xl font-bold mb-4 dark:text-white">
-          Gratis Online Beregnere
-        </h1>
-        <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-          33+ gratis beregnere til økonomi, bolig, skat, sundhed og hverdag.
-          Opdateret med 2026-satser — helt gratis og uden login.
-        </p>
+      <section className="-mx-4 px-4 pt-4 pb-12 mb-12 bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-gray-900 dark:via-gray-950 dark:to-blue-950">
+        <div className="max-w-3xl mx-auto text-center">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-4 bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent">
+            Gratis Online Beregnere
+          </h1>
+          <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto mb-8">
+            33+ gratis beregnere til økonomi, bolig, skat, sundhed og hverdag.
+            Opdateret med 2026-satser — helt gratis og uden login.
+          </p>
+          <SearchBar beregnere={searchData} />
+        </div>
       </section>
 
       {/* Popular calculators */}
-      <section className="mb-12">
-        <h2 className="text-2xl font-bold mb-6 dark:text-white">Populære beregnere</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {popularBeregnere.map((beregner) => (
-            <Link
-              key={beregner.href}
-              href={beregner.href}
-              className="group block p-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm border-2 border-transparent hover:border-blue-500 dark:hover:border-blue-400 hover:shadow-lg transition-all"
-            >
-              <div className="flex items-start gap-4">
-                <span className="text-4xl">{beregner.icon}</span>
-                <div>
-                  <span className="text-xs text-blue-600 dark:text-blue-400 font-medium uppercase tracking-wide">
-                    {beregner.category}
-                  </span>
-                  <h3 className="text-xl font-semibold mt-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 dark:text-white transition-colors">
-                    {beregner.title}
-                  </h3>
-                  <p className="text-gray-600 dark:text-gray-300 mt-2">{beregner.description}</p>
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      {/* Other calculators */}
       <section className="mb-16">
-        <h2 className="text-2xl font-bold mb-6 dark:text-white">Flere beregnere</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {oevrigeBeregnere.map((beregner) => (
-            <Link
-              key={beregner.href}
-              href={beregner.href}
-              className="group block p-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-shadow"
-            >
-              <div className="flex items-start gap-4">
-                <span className="text-3xl">{beregner.icon}</span>
-                <div>
-                  <span className="text-xs text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wide">
+        <h2 className="text-2xl font-bold mb-6 dark:text-white">Populære beregnere</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {popularBeregnere.map((beregner) => {
+            const isTrending = trendingHrefs.includes(beregner.href);
+            return (
+              <Link
+                key={beregner.href}
+                href={beregner.href}
+                className="group relative block p-6 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border-2 border-transparent hover:border-blue-500 dark:hover:border-blue-400 hover:shadow-lg transition-all"
+              >
+                {isTrending && (
+                  <span className="absolute -top-2 -right-2 bg-orange-500 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full shadow">
+                    Trending
+                  </span>
+                )}
+                <div className="text-center">
+                  <span className="text-5xl block mb-3">{beregner.icon}</span>
+                  <span className="inline-block text-xs text-blue-600 dark:text-blue-400 font-medium uppercase tracking-wide bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-full mb-2">
                     {beregner.category}
                   </span>
-                  <h3 className="text-lg font-semibold mt-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 dark:text-white transition-colors">
+                  <h3 className="text-xl font-semibold group-hover:text-blue-600 dark:group-hover:text-blue-400 dark:text-white transition-colors">
                     {beregner.title}
                   </h3>
-                  <p className="text-gray-600 dark:text-gray-300 text-sm mt-1">
+                  <p className="text-gray-600 dark:text-gray-300 mt-2 text-sm">
                     {beregner.description}
                   </p>
                 </div>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            );
+          })}
         </div>
       </section>
+
+      {/* Categorized sections */}
+      {categoryOrder.map(({ key, emoji }) => {
+        const items = grouped.get(key);
+        if (!items || items.length === 0) return null;
+        return (
+          <section key={key} className="mb-12">
+            <h2 className="text-xl font-bold mb-4 dark:text-white">
+              {emoji} {key}
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {items.map((beregner) => {
+                const isTrending = trendingHrefs.includes(beregner.href);
+                return (
+                  <Link
+                    key={beregner.href}
+                    href={beregner.href}
+                    className="group relative flex items-center gap-4 p-4 bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md border border-transparent hover:border-blue-500 dark:hover:border-blue-400 transition-all"
+                  >
+                    <span className="text-3xl flex-shrink-0">{beregner.icon}</span>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="font-semibold group-hover:text-blue-600 dark:group-hover:text-blue-400 dark:text-white transition-colors truncate">
+                        {beregner.title}
+                      </h3>
+                      <p className="text-gray-600 dark:text-gray-300 text-sm truncate">
+                        {beregner.description}
+                      </p>
+                    </div>
+                    {isTrending && (
+                      <span className="flex-shrink-0 bg-orange-500 text-white text-xs font-semibold px-2 py-0.5 rounded-full">
+                        Trending
+                      </span>
+                    )}
+                  </Link>
+                );
+              })}
+            </div>
+          </section>
+        );
+      })}
 
       {/* Features */}
       <section className="bg-white dark:bg-gray-800 rounded-2xl p-8 mb-16">
