@@ -6,3 +6,4 @@ export type { CardProps, CardVariant } from "./Card";
 
 export { AnimatedNumber } from "./AnimatedNumber";
 export { CopyResultButton } from "./CopyResultButton";
+export { ScrollToResult } from "./ScrollToResult";

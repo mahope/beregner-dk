@@ -113,12 +113,12 @@ function DropdownMenu({ item }: { item: NavItem }) {
         />
       </button>
       {isOpen && (
-        <div className="absolute top-full left-0 mt-1 w-56 bg-white dark:bg-gray-800 rounded-xl shadow-lg dark:shadow-gray-900/50 border border-gray-200 dark:border-gray-700 py-2 z-50">
+        <div className="absolute top-full left-0 mt-1 w-56 bg-white dark:bg-gray-800 rounded-xl shadow-lg dark:shadow-gray-900/50 border border-gray-200 dark:border-gray-700 py-1 z-50">
           {item.children.map((child) => (
             <Link
               key={child.href}
               href={child.href}
-              className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors"
+              className="block px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors"
               onClick={() => setIsOpen(false)}
             >
               {child.name}
@@ -173,12 +173,12 @@ function MobileNav() {
                     />
                   </button>
                   {openCategory === item.name && (
-                    <div className="ml-4 mt-1 space-y-1 border-l-2 border-blue-200 dark:border-blue-800 pl-4">
+                    <div className="ml-4 mt-1 space-y-0.5 border-l-2 border-blue-200 dark:border-blue-800 pl-4">
                       {item.children.map((child) => (
                         <Link
                           key={child.href}
                           href={child.href}
-                          className="block px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400"
+                          className="block px-4 py-3 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
                           onClick={() => setIsOpen(false)}
                         >
                           {child.name}
