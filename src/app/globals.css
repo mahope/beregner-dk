@@ -61,7 +61,7 @@
 
   --color-text: #f9fafb;
   --color-text-secondary: #d1d5db;
-  --color-text-muted: #6b7280;
+  --color-text-muted: #9ca3af; /* Upgraded from #6b7280 for better contrast */
 
   --color-border: #374151;
   --color-border-hover: #4b5563;
@@ -83,9 +83,24 @@
   --color-info-text: #93c5fd;
 }
 
-/* Smooth scrolling */
+/* Typography — better readability */
 html {
+  font-size: 17px;
   scroll-behavior: smooth;
+}
+
+body {
+  line-height: 1.65;
+}
+
+/* Optimal reading width for prose text */
+p, li, dd, blockquote {
+  max-width: 70ch;
+}
+
+/* Headings tighter line-height */
+h1, h2, h3, h4, h5, h6 {
+  line-height: 1.25;
 }
 
 /* Mobile touch target minimum — 44×44px per WCAG 2.5.5 */
