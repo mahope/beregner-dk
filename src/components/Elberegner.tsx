@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { ShareCalculation } from "@/components/ShareCalculation";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
+import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 
 interface Apparat {
   id: string;
@@ -53,6 +54,7 @@ export default function Elberegner() {
   const [husstandType, setHusstandType] = useState<keyof typeof GENNNEMSNIT_KWH>("hus2");
 
   const hasLoadedUrl = useRef(false);
+  const hasTracked = useRef(false);
 
   // Load state from URL on mount
   useEffect(() => {
@@ -76,6 +78,16 @@ export default function Elberegner() {
   }, []);
 
   // Get shareable link for current calculation
+  useEffect(() => {
+    if (hasTracked.current) return;
+    const cleanupScroll = initScrollDepthTracking("elberegner");
+    const timer = setTimeout(() => {
+      trackCalculation("elberegner");
+      hasTracked.current = true;
+    }, 2000);
+    return () => { clearTimeout(timer); cleanupScroll(); };
+  }, []);
+
   const getShareableLink = useCallback(() => {
     const state: CalculationState = {
       type: 'elberegner',

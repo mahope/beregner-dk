@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { ShareCalculation } from "@/components/ShareCalculation";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
+import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 
 export default function FeriepengeBeregner() {
   const [bruttoLoen, setBruttoLoen] = useState<number>(40000);
@@ -10,6 +11,7 @@ export default function FeriepengeBeregner() {
   const [feriedage, setFeriedage] = useState<number>(25);
   const [samletFerie, setSamletFerie] = useState(true);
   const hasLoadedUrl = useRef(false);
+  const hasTracked = useRef(false);
 
   useEffect(() => {
     if (hasLoadedUrl.current) return;
@@ -22,6 +24,16 @@ export default function FeriepengeBeregner() {
       if (inputs.feriedage !== undefined) setFeriedage(inputs.feriedage);
       if (inputs.samletFerie !== undefined) setSamletFerie(inputs.samletFerie);
     }
+  }, []);
+
+  useEffect(() => {
+    if (hasTracked.current) return;
+    const cleanupScroll = initScrollDepthTracking("feriepenge");
+    const timer = setTimeout(() => {
+      trackCalculation("feriepenge");
+      hasTracked.current = true;
+    }, 2000);
+    return () => { clearTimeout(timer); cleanupScroll(); };
   }, []);
 
   const getShareableLink = useCallback(() => {

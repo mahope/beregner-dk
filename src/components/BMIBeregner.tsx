@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
-import { trackCalculation } from "@/lib/analytics";
+import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { ShareCalculation } from "@/components/ShareCalculation";
 import { PrintResult } from "@/components/PrintResult";
 import { InputField } from "@/components/InputField";
@@ -225,11 +225,12 @@ export default function BMIBeregner() {
   // Track calculation once per session when user changes values
   useEffect(() => {
     if (resultat && !hasTracked.current) {
-      const timer = setTimeout(() => {
+      const cleanupScroll = initScrollDepthTracking("bmi");
+    const timer = setTimeout(() => {
         trackCalculation("bmi");
         hasTracked.current = true;
       }, 2000);
-      return () => clearTimeout(timer);
+      return () => { clearTimeout(timer); cleanupScroll(); };
     }
   }, [resultat]);
 

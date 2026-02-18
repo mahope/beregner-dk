@@ -1,11 +1,12 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useEffect, useRef } from "react";
 import { InputField } from "./InputField";
 import { AffiliateBox } from "./AffiliateBox";
 import { ShareCalculation } from "./ShareCalculation";
 import { PrintResult } from "./PrintResult";
 import { useCalculationState } from "@/lib/calculation-state";
+import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 
 interface AffiliateLink {
   name: string;
@@ -51,6 +52,18 @@ const defaultInputs = {
 };
 
 export default function BillaanBeregner() {
+  const hasTracked = useRef(false);
+
+  useEffect(() => {
+    if (hasTracked.current) return;
+    const cleanupScroll = initScrollDepthTracking("billaan");
+    const timer = setTimeout(() => {
+      trackCalculation("billaan");
+      hasTracked.current = true;
+    }, 2000);
+    return () => { clearTimeout(timer); cleanupScroll(); };
+  }, []);
+
   const { inputs, updateInput, getShareableLink } = useCalculationState("billaan", defaultInputs);
   const bilpris = inputs.bilpris as number;
   const udbetaling = inputs.udbetaling as number;

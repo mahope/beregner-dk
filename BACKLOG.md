@@ -453,7 +453,7 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 - Sorg for at URL-state er bagudkompatibel
 
 ### D11. Analytics tracking paa alle beregnere
-- [ ] Plausible event tracking er kun paa 4 beregnere — udvid til alle 33
+- [x] Plausible event tracking er kun paa 4 beregnere — udvid til alle 33
 - Track "beregning_udfoert" med calculator-navn paa alle beregnere
 - Track "resultat_kopieret" paa alle beregnere med kopier-knap
 - Tilfoej scroll-depth tracking paa beregner-sider

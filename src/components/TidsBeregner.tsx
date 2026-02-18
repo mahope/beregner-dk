@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { ShareCalculation } from "@/components/ShareCalculation";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
+import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 
 export default function TidsBeregner() {
   const [startTid, setStartTid] = useState<string>("09:00");
@@ -12,6 +13,7 @@ export default function TidsBeregner() {
   const [fratraekPause, setFratraekPause] = useState<number>(0);
 
   const hasLoadedUrl = useRef(false);
+  const hasTracked = useRef(false);
 
   // Load state from URL on mount
   useEffect(() => {
@@ -30,6 +32,16 @@ export default function TidsBeregner() {
   }, []);
 
   // Get shareable link for current calculation
+  useEffect(() => {
+    if (hasTracked.current) return;
+    const cleanupScroll = initScrollDepthTracking("tidsberegner");
+    const timer = setTimeout(() => {
+      trackCalculation("tidsberegner");
+      hasTracked.current = true;
+    }, 2000);
+    return () => { clearTimeout(timer); cleanupScroll(); };
+  }, []);
+
   const getShareableLink = useCallback(() => {
     const state: CalculationState = {
       type: 'tidsberegner',

@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { ShareCalculation } from "@/components/ShareCalculation";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
+import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 
 type BeregningsType = "annuitet" | "serielaan";
 
@@ -13,6 +14,7 @@ export default function RenteBeregner() {
   const [type, setType] = useState<BeregningsType>("annuitet");
 
   const hasLoadedUrl = useRef(false);
+  const hasTracked = useRef(false);
 
   // Load state from URL on mount
   useEffect(() => {
@@ -30,6 +32,16 @@ export default function RenteBeregner() {
   }, []);
 
   // Get shareable link for current calculation
+  useEffect(() => {
+    if (hasTracked.current) return;
+    const cleanupScroll = initScrollDepthTracking("renteberegner");
+    const timer = setTimeout(() => {
+      trackCalculation("renteberegner");
+      hasTracked.current = true;
+    }, 2000);
+    return () => { clearTimeout(timer); cleanupScroll(); };
+  }, []);
+
   const getShareableLink = useCallback(() => {
     const state: CalculationState = {
       type: 'rente',

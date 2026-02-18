@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { ShareCalculation } from '@/components/ShareCalculation';
 import { generateShareableLink, getStateFromUrl, CalculationState } from '@/lib/calculation-state';
+import { trackCalculation, initScrollDepthTracking } from '@/lib/analytics';
 
 // 2026 rates (approximate)
 const LOW_THRESHOLD_SINGLE = 50000;
@@ -26,6 +27,7 @@ export default function RentefradragBeregner() {
   const [interestIncome, setInterestIncome] = useState<string>('');
 
   const hasLoadedUrl = useRef(false);
+  const hasTracked = useRef(false);
 
   // Load state from URL on mount
   useEffect(() => {
@@ -42,6 +44,16 @@ export default function RentefradragBeregner() {
   }, []);
 
   // Get shareable link for current calculation
+  useEffect(() => {
+    if (hasTracked.current) return;
+    const cleanupScroll = initScrollDepthTracking("rentefradrag");
+    const timer = setTimeout(() => {
+      trackCalculation("rentefradrag");
+      hasTracked.current = true;
+    }, 2000);
+    return () => { clearTimeout(timer); cleanupScroll(); };
+  }, []);
+
   const getShareableLink = useCallback(() => {
     const state: CalculationState = {
       type: 'rentefradrag',

@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { ShareCalculation } from "@/components/ShareCalculation";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
+import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 
 type FormType = "rektangel" | "cirkel" | "trekant" | "trapez";
 
@@ -28,6 +29,7 @@ export default function KvadratmeterBeregner() {
   // Ekstra beregninger
   const [prisPerKvm, setPrisPerKvm] = useState<number>(0);
   const hasLoadedUrl = useRef(false);
+  const hasTracked = useRef(false);
 
   useEffect(() => {
     if (hasLoadedUrl.current) return;
@@ -46,6 +48,16 @@ export default function KvadratmeterBeregner() {
       if (inputs.trapezHoejde !== undefined) setTrapezHoejde(inputs.trapezHoejde);
       if (inputs.prisPerKvm !== undefined) setPrisPerKvm(inputs.prisPerKvm);
     }
+  }, []);
+
+  useEffect(() => {
+    if (hasTracked.current) return;
+    const cleanupScroll = initScrollDepthTracking("kvadratmeter");
+    const timer = setTimeout(() => {
+      trackCalculation("kvadratmeter");
+      hasTracked.current = true;
+    }, 2000);
+    return () => { clearTimeout(timer); cleanupScroll(); };
   }, []);
 
   const getShareableLink = useCallback(() => {

@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { ShareCalculation } from '@/components/ShareCalculation';
 import { generateShareableLink, getStateFromUrl, CalculationState } from '@/lib/calculation-state';
+import { trackCalculation, initScrollDepthTracking } from '@/lib/analytics';
 
 // 2026 satser (kilde: bm.dk, borger.dk)
 const MAX_EFTERLOEN_91 = 20057;  // 91% af max dagpenge (22.041 × 0,91)
@@ -17,6 +18,7 @@ export default function EfterloensBeregner() {
   const [workWhileOnEfterloen, setWorkWhileOnEfterloen] = useState(false);
   const [hoursPerYear, setHoursPerYear] = useState<string>('962');
   const hasLoadedUrl = useRef(false);
+  const hasTracked = useRef(false);
 
   // Load state from URL on mount
   useEffect(() => {
@@ -36,6 +38,16 @@ export default function EfterloensBeregner() {
   }, []);
 
   // Get shareable link for current calculation
+  useEffect(() => {
+    if (hasTracked.current) return;
+    const cleanupScroll = initScrollDepthTracking("efterloen");
+    const timer = setTimeout(() => {
+      trackCalculation("efterloen");
+      hasTracked.current = true;
+    }, 2000);
+    return () => { clearTimeout(timer); cleanupScroll(); };
+  }, []);
+
   const getShareableLink = useCallback(() => {
     const state: CalculationState = {
       type: 'efterloen',

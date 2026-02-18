@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { ShareCalculation } from "@/components/ShareCalculation";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
+import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 
 export default function AlderBeregner() {
   const [foedselsdato, setFoedselsdato] = useState<string>("");
@@ -10,6 +11,7 @@ export default function AlderBeregner() {
     new Date().toISOString().split("T")[0]
   );
   const hasLoadedUrl = useRef(false);
+  const hasTracked = useRef(false);
 
   useEffect(() => {
     if (hasLoadedUrl.current) return;
@@ -20,6 +22,16 @@ export default function AlderBeregner() {
       if (inputs.foedselsdato) setFoedselsdato(inputs.foedselsdato);
       if (inputs.beregningsDato) setBeregningsDato(inputs.beregningsDato);
     }
+  }, []);
+
+  useEffect(() => {
+    if (hasTracked.current) return;
+    const cleanupScroll = initScrollDepthTracking("alder");
+    const timer = setTimeout(() => {
+      trackCalculation("alder");
+      hasTracked.current = true;
+    }, 2000);
+    return () => { clearTimeout(timer); cleanupScroll(); };
   }, []);
 
   const getShareableLink = useCallback(() => {

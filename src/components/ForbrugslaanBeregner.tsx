@@ -1,11 +1,12 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useEffect, useRef } from "react";
 import { InputField } from "./InputField";
 import { AffiliateBox } from "./AffiliateBox";
 import { ShareCalculation } from "./ShareCalculation";
 import { PrintResult } from "./PrintResult";
 import { useCalculationState } from "@/lib/calculation-state";
+import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 
 interface AffiliateLink {
   name: string;
@@ -56,6 +57,18 @@ const defaultInputs = {
 };
 
 export default function ForbrugslaanBeregner() {
+  const hasTracked = useRef(false);
+
+  useEffect(() => {
+    if (hasTracked.current) return;
+    const cleanupScroll = initScrollDepthTracking("forbrugslaan");
+    const timer = setTimeout(() => {
+      trackCalculation("forbrugslaan");
+      hasTracked.current = true;
+    }, 2000);
+    return () => { clearTimeout(timer); cleanupScroll(); };
+  }, []);
+
   const { inputs, updateInput, getShareableLink } = useCalculationState("forbrugslaan", defaultInputs);
   const laanebelob = inputs.laanebelob as number;
   const loebetid = inputs.loebetid as number;

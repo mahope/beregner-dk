@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { ShareCalculation } from "@/components/ShareCalculation";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
+import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 
 export default function BraendstofBeregner() {
   const [beregningsType, setBeregningsType] = useState<"turPris" | "kmPris" | "forbrug">("turPris");
@@ -23,6 +24,7 @@ export default function BraendstofBeregner() {
   const [literBrugt, setLiterBrugt] = useState<number>(50);
   const [kmKoert, setKmKoert] = useState<number>(750);
   const hasLoadedUrl = useRef(false);
+  const hasTracked = useRef(false);
 
   useEffect(() => {
     if (hasLoadedUrl.current) return;
@@ -40,6 +42,16 @@ export default function BraendstofBeregner() {
       if (inputs.literBrugt !== undefined) setLiterBrugt(inputs.literBrugt);
       if (inputs.kmKoert !== undefined) setKmKoert(inputs.kmKoert);
     }
+  }, []);
+
+  useEffect(() => {
+    if (hasTracked.current) return;
+    const cleanupScroll = initScrollDepthTracking("braendstof");
+    const timer = setTimeout(() => {
+      trackCalculation("braendstof");
+      hasTracked.current = true;
+    }, 2000);
+    return () => { clearTimeout(timer); cleanupScroll(); };
   }, []);
 
   const getShareableLink = useCallback(() => {

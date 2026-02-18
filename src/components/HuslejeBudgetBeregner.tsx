@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { ShareCalculation } from "@/components/ShareCalculation";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
+import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 
 export default function HuslejeBudgetBeregner() {
   // Indkomst
@@ -21,6 +22,7 @@ export default function HuslejeBudgetBeregner() {
   // Opsparing
   const [opsparingProcent, setOpsparingProcent] = useState<number>(10);
   const hasLoadedUrl = useRef(false);
+  const hasTracked = useRef(false);
 
   useEffect(() => {
     if (hasLoadedUrl.current) return;
@@ -39,6 +41,16 @@ export default function HuslejeBudgetBeregner() {
       if (inputs.andreUdgifter !== undefined) setAndreUdgifter(inputs.andreUdgifter);
       if (inputs.opsparingProcent !== undefined) setOpsparingProcent(inputs.opsparingProcent);
     }
+  }, []);
+
+  useEffect(() => {
+    if (hasTracked.current) return;
+    const cleanupScroll = initScrollDepthTracking("husleje");
+    const timer = setTimeout(() => {
+      trackCalculation("husleje");
+      hasTracked.current = true;
+    }, 2000);
+    return () => { clearTimeout(timer); cleanupScroll(); };
   }, []);
 
   const getShareableLink = useCallback(() => {

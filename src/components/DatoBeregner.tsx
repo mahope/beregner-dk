@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { ShareCalculation } from "@/components/ShareCalculation";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
+import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 
 type BeregningsMode = "dage-mellem" | "tilfoej-dage" | "arbejdsdage" | "alder";
 
@@ -43,6 +44,7 @@ export default function DatoBeregner() {
   // Alder mode
   const [foedselsdato, setFoedselsdato] = useState<string>("1990-01-01");
   const hasLoadedUrl = useRef(false);
+  const hasTracked = useRef(false);
 
   useEffect(() => {
     if (hasLoadedUrl.current) return;
@@ -57,6 +59,16 @@ export default function DatoBeregner() {
       if (inputs.antalDage !== undefined) setAntalDage(inputs.antalDage);
       if (inputs.foedselsdato) setFoedselsdato(inputs.foedselsdato);
     }
+  }, []);
+
+  useEffect(() => {
+    if (hasTracked.current) return;
+    const cleanupScroll = initScrollDepthTracking("dato");
+    const timer = setTimeout(() => {
+      trackCalculation("dato");
+      hasTracked.current = true;
+    }, 2000);
+    return () => { clearTimeout(timer); cleanupScroll(); };
   }, []);
 
   const getShareableLink = useCallback(() => {

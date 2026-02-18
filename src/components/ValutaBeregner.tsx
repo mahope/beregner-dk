@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { ShareCalculation } from "@/components/ShareCalculation";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
+import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 
 // Statiske fallback-kurser (DKK pr. 1 enhed)
 const FALLBACK_KURSER: Record<string, { kurs: number; navn: string; symbol: string }> = {
@@ -56,6 +57,7 @@ export default function ValutaBeregner() {
   const [isLive, setIsLive] = useState(false);
 
   const hasLoadedUrl = useRef(false);
+  const hasTracked = useRef(false);
 
   // Load state from URL on mount
   useEffect(() => {
@@ -72,6 +74,16 @@ export default function ValutaBeregner() {
   }, []);
 
   // Get shareable link for current calculation
+  useEffect(() => {
+    if (hasTracked.current) return;
+    const cleanupScroll = initScrollDepthTracking("valuta");
+    const timer = setTimeout(() => {
+      trackCalculation("valuta");
+      hasTracked.current = true;
+    }, 2000);
+    return () => { clearTimeout(timer); cleanupScroll(); };
+  }, []);
+
   const getShareableLink = useCallback(() => {
     const state: CalculationState = {
       type: 'valuta',

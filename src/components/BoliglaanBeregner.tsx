@@ -7,6 +7,7 @@ import { CalculationLoading, useCalculationLoading } from "./LoadingSpinner";
 import { InputField } from "./InputField";
 import { ShareCalculation } from "@/components/ShareCalculation";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
+import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 
 type LaanType = "fastforrentet" | "variabel" | "afdragsfrit";
 type Visning = "beregner" | "raadtil";
@@ -94,6 +95,7 @@ export default function BoliglaanBeregner() {
   const isLoading = useCalculationLoading([boligpris, udbetaling, rente, loebetid, laanType, bidragssats, ejendomsskat, forsikring, ejerforening]);
 
   const hasLoadedUrl = useRef(false);
+  const hasTracked = useRef(false);
 
   // Load state from URL on mount
   useEffect(() => {
@@ -122,6 +124,16 @@ export default function BoliglaanBeregner() {
   }, []);
 
   // Get shareable link for current calculation
+  useEffect(() => {
+    if (hasTracked.current) return;
+    const cleanupScroll = initScrollDepthTracking("boliglaan");
+    const timer = setTimeout(() => {
+      trackCalculation("boliglaan");
+      hasTracked.current = true;
+    }, 2000);
+    return () => { clearTimeout(timer); cleanupScroll(); };
+  }, []);
+
   const getShareableLink = useCallback(() => {
     const state: CalculationState = {
       type: 'boliglaan',

@@ -6,6 +6,7 @@ import { CalculationLoading, useCalculationLoading } from "./LoadingSpinner";
 import { InputField } from "./InputField";
 import { ShareCalculation } from "@/components/ShareCalculation";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
+import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 
 type Frekvens = "maanedlig" | "kvartal" | "aarlig";
 type Visning = "beregner" | "maal";
@@ -142,6 +143,7 @@ export default function OpsparingsBeregner() {
   const isLoading = useCalculationLoading([startBeloeb, maanedligIndbetaling, aarligRente, periode, renteFrekvens]);
 
   const hasLoadedUrl = useRef(false);
+  const hasTracked = useRef(false);
 
   // Load state from URL on mount
   useEffect(() => {
@@ -165,6 +167,16 @@ export default function OpsparingsBeregner() {
   }, []);
 
   // Get shareable link for current calculation
+  useEffect(() => {
+    if (hasTracked.current) return;
+    const cleanupScroll = initScrollDepthTracking("opsparing");
+    const timer = setTimeout(() => {
+      trackCalculation("opsparing");
+      hasTracked.current = true;
+    }, 2000);
+    return () => { clearTimeout(timer); cleanupScroll(); };
+  }, []);
+
   const getShareableLink = useCallback(() => {
     const state: CalculationState = {
       type: 'opsparing',

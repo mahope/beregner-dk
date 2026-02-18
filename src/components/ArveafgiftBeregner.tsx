@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { Users, Calculator, Percent, Heart } from "lucide-react";
 import { ShareCalculation } from "@/components/ShareCalculation";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
+import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 
 type Relation =
   | "aegtefaelle"
@@ -83,6 +84,7 @@ export default function ArveafgiftBeregner() {
   const [arvebeloeb, setArvebeloeb] = useState<string>("");
   const [relation, setRelation] = useState<Relation>("barn");
   const hasLoadedUrl = useRef(false);
+  const hasTracked = useRef(false);
 
   // Load state from URL on mount
   useEffect(() => {
@@ -98,6 +100,16 @@ export default function ArveafgiftBeregner() {
   }, []);
 
   // Get shareable link for current calculation
+  useEffect(() => {
+    if (hasTracked.current) return;
+    const cleanupScroll = initScrollDepthTracking("arveafgift");
+    const timer = setTimeout(() => {
+      trackCalculation("arveafgift");
+      hasTracked.current = true;
+    }, 2000);
+    return () => { clearTimeout(timer); cleanupScroll(); };
+  }, []);
+
   const getShareableLink = useCallback(() => {
     const state: CalculationState = {
       type: 'arveafgift',

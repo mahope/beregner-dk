@@ -1,5 +1,7 @@
 "use client";
 
+import { trackAffiliateClick } from "@/lib/analytics";
+
 interface AffiliateLink {
   name: string;
   description: string;
@@ -45,6 +47,7 @@ export function AffiliateBox({ title, subtitle, links, className = "" }: Affilia
             href={link.url}
             target="_blank"
             rel="noopener sponsored"
+            onClick={() => trackAffiliateClick(title, link.url)}
             className={`block p-4 transition-colors ${
               link.highlight 
                 ? "bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 hover:from-green-100 hover:to-blue-100 dark:hover:from-green-900/30 dark:hover:to-blue-900/30" 

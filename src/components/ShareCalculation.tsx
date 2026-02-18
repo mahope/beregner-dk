@@ -11,11 +11,12 @@
 
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { Share2, Copy, Check, Link2, Twitter, Facebook, Mail, QrCode, X } from 'lucide-react';
-import { 
-  ShareableLink, 
-  copyToClipboard, 
-  createShortlink 
+import {
+  ShareableLink,
+  copyToClipboard,
+  createShortlink
 } from '@/lib/calculation-state';
+import { trackShare, trackResultCopied } from '@/lib/analytics';
 
 interface ShareCalculationProps {
   getShareableLink: () => ShareableLink;
@@ -44,7 +45,8 @@ export function ShareCalculation({
     setShareableLink(link);
     setIsOpen(true);
     setIsCopied(false);
-  }, [getShareableLink]);
+    trackShare(calculatorName, 'open');
+  }, [getShareableLink, calculatorName]);
 
   const handleClose = useCallback(() => {
     setIsOpen(false);
@@ -102,6 +104,7 @@ export function ShareCalculation({
     
     if (success) {
       setIsCopied(true);
+      trackResultCopied(calculatorName);
       setTimeout(() => setIsCopied(false), 2000);
     }
   };
@@ -227,6 +230,7 @@ export function ShareCalculation({
                     href={socialLinks.twitter}
                     target="_blank"
                     rel="noopener noreferrer"
+                    onClick={() => trackShare(calculatorName, 'twitter')}
                     className="flex items-center justify-center w-12 h-12 rounded-full bg-[#1DA1F2] text-white hover:opacity-90 transition-opacity"
                     aria-label="Del på Twitter"
                   >
@@ -236,6 +240,7 @@ export function ShareCalculation({
                     href={socialLinks.facebook}
                     target="_blank"
                     rel="noopener noreferrer"
+                    onClick={() => trackShare(calculatorName, 'facebook')}
                     className="flex items-center justify-center w-12 h-12 rounded-full bg-[#1877F2] text-white hover:opacity-90 transition-opacity"
                     aria-label="Del på Facebook"
                   >
@@ -243,6 +248,7 @@ export function ShareCalculation({
                   </a>
                   <a
                     href={socialLinks.email}
+                    onClick={() => trackShare(calculatorName, 'email')}
                     className="flex items-center justify-center w-12 h-12 rounded-full bg-gray-600 text-white hover:opacity-90 transition-opacity"
                     aria-label="Del via email"
                   >

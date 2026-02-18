@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
-import { trackCalculation } from "@/lib/analytics";
+import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { ShareCalculation } from "@/components/ShareCalculation";
 import { PrintResult } from "@/components/PrintResult";
 import { InputField } from "@/components/InputField";
@@ -117,11 +117,12 @@ export default function ProcentBeregner() {
   // Track calculation once per session
   useEffect(() => {
     if (resultat && !hasTracked.current) {
-      const timer = setTimeout(() => {
+      const cleanupScroll = initScrollDepthTracking("procent");
+    const timer = setTimeout(() => {
         trackCalculation("procent");
         hasTracked.current = true;
       }, 2000);
-      return () => clearTimeout(timer);
+      return () => { clearTimeout(timer); cleanupScroll(); };
     }
   }, [resultat]);
 

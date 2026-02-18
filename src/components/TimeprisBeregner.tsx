@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { InputField } from "./InputField";
 import { ShareCalculation } from "@/components/ShareCalculation";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
+import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 
 export default function TimeprisBeregner() {
   const [beregningsType, setBeregningsType] = useState<"fraLoen" | "fraTimepris">("fraLoen");
@@ -22,6 +23,7 @@ export default function TimeprisBeregner() {
   const [fakturerbareTimer, setFakturerbareTimer] = useState<number>(120);
 
   const hasLoadedUrl = useRef(false);
+  const hasTracked = useRef(false);
 
   // Load state from URL on mount
   useEffect(() => {
@@ -45,6 +47,16 @@ export default function TimeprisBeregner() {
   }, []);
 
   // Get shareable link for current calculation
+  useEffect(() => {
+    if (hasTracked.current) return;
+    const cleanupScroll = initScrollDepthTracking("timepris");
+    const timer = setTimeout(() => {
+      trackCalculation("timepris");
+      hasTracked.current = true;
+    }, 2000);
+    return () => { clearTimeout(timer); cleanupScroll(); };
+  }, []);
+
   const getShareableLink = useCallback(() => {
     const state: CalculationState = {
       type: 'timepris',

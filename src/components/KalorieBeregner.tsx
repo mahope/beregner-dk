@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { InputField } from "./InputField";
 import { ShareCalculation } from "@/components/ShareCalculation";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
+import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 
 type Koen = "mand" | "kvinde";
 type AktivitetsNiveau = "stillesiddende" | "let" | "moderat" | "aktiv" | "meget_aktiv";
@@ -25,6 +26,7 @@ export default function KalorieBeregner() {
   const [maal, setMaal] = useState<"vedligehold" | "tab" | "opbyg">("vedligehold");
 
   const hasLoadedUrl = useRef(false);
+  const hasTracked = useRef(false);
 
   // Load state from URL on mount
   useEffect(() => {
@@ -44,6 +46,16 @@ export default function KalorieBeregner() {
   }, []);
 
   // Get shareable link for current calculation
+  useEffect(() => {
+    if (hasTracked.current) return;
+    const cleanupScroll = initScrollDepthTracking("kalorier");
+    const timer = setTimeout(() => {
+      trackCalculation("kalorier");
+      hasTracked.current = true;
+    }, 2000);
+    return () => { clearTimeout(timer); cleanupScroll(); };
+  }, []);
+
   const getShareableLink = useCallback(() => {
     const state: CalculationState = {
       type: 'kalorier',

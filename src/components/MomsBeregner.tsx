@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
-import { trackCalculation } from "@/lib/analytics";
+import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { ShareCalculation } from "@/components/ShareCalculation";
 import { PrintResult } from "@/components/PrintResult";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
@@ -86,11 +86,12 @@ export default function MomsBeregner() {
   // Track calculation once per session
   useEffect(() => {
     if (beregning && !hasTracked.current) {
-      const timer = setTimeout(() => {
+      const cleanupScroll = initScrollDepthTracking("moms");
+    const timer = setTimeout(() => {
         trackCalculation("moms");
         hasTracked.current = true;
       }, 2000);
-      return () => clearTimeout(timer);
+      return () => { clearTimeout(timer); cleanupScroll(); };
     }
   }, [beregning]);
 

@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { ShareCalculation } from '@/components/ShareCalculation';
 import { generateShareableLink, getStateFromUrl, CalculationState } from '@/lib/calculation-state';
+import { trackCalculation, initScrollDepthTracking } from '@/lib/analytics';
 
 // 2026 satser (kilde: bm.dk, borger.dk)
 const MAX_WEEKLY_RATE = 5085; // Max barselsdagpenge per uge 2026
@@ -18,6 +19,7 @@ export default function BarselBeregner() {
   const [parent, setParent] = useState<Parent>('mor');
   const [weeksPlanned, setWeeksPlanned] = useState<string>('24');
   const hasLoadedUrl = useRef(false);
+  const hasTracked = useRef(false);
 
   // Load state from URL on mount
   useEffect(() => {
@@ -36,6 +38,16 @@ export default function BarselBeregner() {
   }, []);
 
   // Get shareable link for current calculation
+  useEffect(() => {
+    if (hasTracked.current) return;
+    const cleanupScroll = initScrollDepthTracking("barselsdagpenge");
+    const timer = setTimeout(() => {
+      trackCalculation("barselsdagpenge");
+      hasTracked.current = true;
+    }, 2000);
+    return () => { clearTimeout(timer); cleanupScroll(); };
+  }, []);
+
   const getShareableLink = useCallback(() => {
     const state: CalculationState = {
       type: 'barsel',

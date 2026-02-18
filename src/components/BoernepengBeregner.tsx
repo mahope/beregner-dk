@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { ShareCalculation } from "@/components/ShareCalculation";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
+import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 
 // 2026 satser for børne- og ungeydelse (officielle satser)
 // Kilde: borger.dk/familie-og-boern/Familieydelser-oversigt/Boerne-ungeydelse
@@ -28,6 +29,7 @@ export default function BoernepengBeregner() {
   const [enlig, setEnlig] = useState(false);
   const [deltForaeldremyndighed, setDeltForaeldremyndighed] = useState(true);
   const hasLoadedUrl = useRef(false);
+  const hasTracked = useRef(false);
 
   // Load state from URL on mount
   useEffect(() => {
@@ -45,6 +47,16 @@ export default function BoernepengBeregner() {
   }, []);
 
   // Get shareable link for current calculation
+  useEffect(() => {
+    if (hasTracked.current) return;
+    const cleanupScroll = initScrollDepthTracking("boernepenge");
+    const timer = setTimeout(() => {
+      trackCalculation("boernepenge");
+      hasTracked.current = true;
+    }, 2000);
+    return () => { clearTimeout(timer); cleanupScroll(); };
+  }, []);
+
   const getShareableLink = useCallback(() => {
     const state: CalculationState = {
       type: 'boernepenge',

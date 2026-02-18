@@ -5,6 +5,7 @@ import { ShareCalculation } from "@/components/ShareCalculation";
 import { PrintResult } from "@/components/PrintResult";
 import { InputField } from "@/components/InputField";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
+import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { KOMMUNER } from "@/lib/kommuner";
 
 // 2026 danske skattesatser (ny skattereform med mellemskat/topskat/top-topskat)
@@ -34,6 +35,7 @@ export default function LoenBeregner() {
   const [valgtKommune, setValgtKommune] = useState("");
   const [pension, setPension] = useState(0);
   const hasLoadedUrl = useRef(false);
+  const hasTracked = useRef(false);
 
   // Load state from URL on mount
   useEffect(() => {
@@ -52,6 +54,16 @@ export default function LoenBeregner() {
   }, []);
 
   // Get shareable link for current calculation
+  useEffect(() => {
+    if (hasTracked.current) return;
+    const cleanupScroll = initScrollDepthTracking("loen-efter-skat");
+    const timer = setTimeout(() => {
+      trackCalculation("loen-efter-skat");
+      hasTracked.current = true;
+    }, 2000);
+    return () => { clearTimeout(timer); cleanupScroll(); };
+  }, []);
+
   const getShareableLink = useCallback(() => {
     const state: CalculationState = {
       type: 'loen',

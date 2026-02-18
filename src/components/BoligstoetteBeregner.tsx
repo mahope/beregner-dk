@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { ShareCalculation } from "@/components/ShareCalculation";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
+import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 
 // 2026 satser (kilde: bm.dk, borger.dk)
 const MAX_BOLIGUDGIFT = 113_000; // Max årlig boligudgift der indgår i beregning (2026)
@@ -25,6 +26,7 @@ export default function BoligstoetteBeregner() {
   const [areal, setAreal] = useState<string>("65");
 
   const hasLoadedUrl = useRef(false);
+  const hasTracked = useRef(false);
 
   // Load state from URL on mount
   useEffect(() => {
@@ -43,6 +45,16 @@ export default function BoligstoetteBeregner() {
   }, []);
 
   // Get shareable link for current calculation
+  useEffect(() => {
+    if (hasTracked.current) return;
+    const cleanupScroll = initScrollDepthTracking("boligstoette");
+    const timer = setTimeout(() => {
+      trackCalculation("boligstoette");
+      hasTracked.current = true;
+    }, 2000);
+    return () => { clearTimeout(timer); cleanupScroll(); };
+  }, []);
+
   const getShareableLink = useCallback(() => {
     const state: CalculationState = {
       type: 'boligstoette',
