@@ -103,7 +103,7 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 - Forbedre kontrast paa sekundaer tekst i dark mode (gray-400 er for lav kontrast)
 
 ### A6. Favicon og branding
-- [ ] Design et professionelt favicon-set og OG-image
+- [x] Design et professionelt favicon-set og OG-image
 - Lav favicon i alle stoerrelse (16x16, 32x32, 180x180 apple-touch-icon, 512x512)
 - Design et unikt OG-image (1200x630) med logo og tagline
 - Lav side-specifikke OG-images for de 10 mest populaere beregnere
