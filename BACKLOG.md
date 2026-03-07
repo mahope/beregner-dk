@@ -566,8 +566,8 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 - Hoej interest med stigende elpriser
 - **Route:** /solceller
 
-### E14. Bryllupsbudget beregner
-- [ ] Beregn komplet bryllupsbudget
+### E14. Bryllupsbudget beregner ✅
+- [x] Beregn komplet bryllupsbudget
 - Input: antal gaester, lokation-type, madniveau
 - Vis breakdown: venue, catering, fotograf, musik, kjole/jakkesaet, ringe, dekoration
 - Tilfoej gennemsnitlige danske bryllupspriser

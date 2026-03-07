@@ -341,6 +341,14 @@ const beregnere = [
     category: "Bolig",
   },
   {
+    title: "Bryllupsbudget",
+    description: "Beregn komplet bryllupsbudget",
+    href: "/bryllup",
+    icon: "💒",
+    popular: false,
+    category: "Familie",
+  },
+  {
     title: "Forbrugslån",
     description: "Beregn ydelse og ÅOP på forbrugslån",
     href: "/forbrugslaan",
