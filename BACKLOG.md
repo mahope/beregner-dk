@@ -488,7 +488,7 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 - **Route:** /topskat
 
 ### E4. Graviditetsberegner / terminsdato
-- [ ] Beregn terminsdato ud fra sidste menstruations foerste dag
+- [x] Beregn terminsdato ud fra sidste menstruations foerste dag
 - Vis uge-for-uge kalender med milepale
 - Tilfoej info om barselsorlov-perioder
 - Link til barselsdagpenge-beregner

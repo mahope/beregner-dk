@@ -245,6 +245,14 @@ const beregnere = [
     category: "Familie",
   },
   {
+    title: "Terminsdato Beregner",
+    description: "Beregn terminsdato og se graviditetsuge",
+    href: "/termin",
+    icon: "🤰",
+    popular: false,
+    category: "Familie",
+  },
+  {
     title: "Boliglån",
     description: "Beregn ydelse og omkostninger på dit boliglån",
     href: "/boliglaan",
