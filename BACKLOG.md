@@ -716,13 +716,13 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 - Push notifikationer ved satsaendringer
 
 ### H4. Internationalisering
-- [ ] Norsk version (minberegner.no) med norske satser og regler
+- [x] Norsk version (minberegner.no) med norske satser og regler
 - Svensk version (minberegner.se) med svenske satser og regler
 - Brug eksisterende locales/ JSON-filer som fundament
 - Lokaliser skatteregler, satser og sprog per land
 
 ### H5. AI-assistent
-- [ ] Tilfoej en AI chatbot der kan besvare spoergsmaal om beregnere
+- [x] Tilfoej en AI chatbot der kan besvare spoergsmaal om beregnere
 - "Sporg mig om din oekonomi" — router til den rette beregner
 - Kan besvare simple spoergsmaal direkte (fx "Hvad er momsen paa 500 kr?")
 - Brug OpenAI/Anthropic API med context om alle beregnere
