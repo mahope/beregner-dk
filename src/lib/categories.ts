@@ -25,6 +25,7 @@ export const beregnere: BeregnerItem[] = [
   { title: "Opsparingsberegner", description: "Beregn renters rente og se din opsparing vokse", href: "/opsparing", icon: "📈", category: "Økonomi" },
   { title: "Feriepenge", description: "Beregn hvor meget du har til gode i feriepenge", href: "/feriepenge", icon: "🏖️", category: "Økonomi" },
   { title: "Dagpengeberegner", description: "Beregn hvad du kan få i dagpenge ved ledighed", href: "/dagpenge", icon: "📋", category: "Økonomi" },
+  { title: "Sygedagpenge", description: "Beregn sygedagpenge og se arbejdsgiverperiode", href: "/sygedagpenge", icon: "🏥", category: "Økonomi" },
   { title: "Pensionsberegner", description: "Beregn din fremtidige pension og folkepension", href: "/pension", icon: "🧓", category: "Økonomi" },
   { title: "Efterløn", description: "Beregn din efterløn og se hvornår du kan gå", href: "/efterloen", icon: "🏖️", category: "Økonomi" },
   { title: "Rentefradrag", description: "Beregn din skattebesparelse på rentefradrag", href: "/rentefradrag", icon: "🏦", category: "Økonomi" },

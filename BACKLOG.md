@@ -511,8 +511,8 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 - Tilfoej mulighed for ekstra indbetalinger
 - **Route:** /gaeldsfri
 
-### E7. Sygdom / sygedagpenge beregner
-- [ ] Beregn sygedagpenge for loenmodtagere og selvstaendige
+### E7. Sygdom / sygedagpenge beregner ✅
+- [x] Beregn sygedagpenge for loenmodtagere og selvstaendige
 - Max sygedagpengesats, beregningsgrundlag
 - Vis arbejdsgiverperiode (30 dage) vs kommunal udbetaling
 - Tilfoej info om mulighedserklearing og varighedsbegraensning

@@ -285,6 +285,14 @@ const beregnere = [
     category: "Lån",
   },
   {
+    title: "Sygedagpenge",
+    description: "Beregn sygedagpenge og se arbejdsgiverperiode",
+    href: "/sygedagpenge",
+    icon: "🏥",
+    popular: false,
+    category: "Økonomi",
+  },
+  {
     title: "Forbrugslån",
     description: "Beregn ydelse og ÅOP på forbrugslån",
     href: "/forbrugslaan",
