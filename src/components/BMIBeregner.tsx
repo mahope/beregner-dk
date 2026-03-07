@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { ShareCalculation } from "@/components/ShareCalculation";
 import { PrintResult } from "@/components/PrintResult";
-import { CopyResultButton } from "@/components/ui";
+import { CopyResultButton, ResetButton } from "@/components/ui";
 import { InputField } from "@/components/InputField";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 
@@ -112,6 +112,16 @@ export default function BMIBeregner() {
       if (inputs.koen) setKoen(inputs.koen);
       if (inputs.alder !== undefined) setAlder(inputs.alder);
     }
+  }, []);
+
+  const handleReset = useCallback(() => {
+    setVaegt(75);
+    setHoejde(175);
+    setKoen("mand");
+    setAlder(30);
+    setEnhed("metrisk");
+    setTaljemaal(0);
+    setHoftemaal(0);
   }, []);
 
   // Get shareable link for current calculation
@@ -295,6 +305,7 @@ export default function BMIBeregner() {
             min={enhed === "metrisk" ? 30 : 66}
             max={enhed === "metrisk" ? 300 : 660}
             step={0.1}
+            unit={enhed === "metrisk" ? "kg" : "lbs"}
             required
           />
 
@@ -305,6 +316,7 @@ export default function BMIBeregner() {
             min={enhed === "metrisk" ? 100 : 39}
             max={enhed === "metrisk" ? 250 : 98}
             step={0.1}
+            unit={enhed === "metrisk" ? "cm" : "in"}
             required
           />
         </div>
@@ -342,9 +354,14 @@ export default function BMIBeregner() {
             onChange={setAlder}
             min={18}
             max={120}
+            unit="år"
             required
           />
         </div>
+      </div>
+
+      <div className="flex justify-end">
+        <ResetButton onReset={handleReset} />
       </div>
 
       {/* Resultat */}
@@ -401,6 +418,7 @@ export default function BMIBeregner() {
             min={0}
             max={enhed === "metrisk" ? 200 : 79}
             step={0.1}
+            unit={maalEnhed}
             helpText="Mål ved navlen"
           />
           <InputField
@@ -410,6 +428,7 @@ export default function BMIBeregner() {
             min={0}
             max={enhed === "metrisk" ? 200 : 79}
             step={0.1}
+            unit={maalEnhed}
             helpText="Mål ved det bredeste punkt"
           />
         </div>

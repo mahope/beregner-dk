@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { ShareCalculation } from "@/components/ShareCalculation";
-import { CopyResultButton } from "@/components/ui";
+import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 
@@ -83,6 +83,12 @@ export default function ValutaBeregner() {
       hasTracked.current = true;
     }, 2000);
     return () => { clearTimeout(timer); cleanupScroll(); };
+  }, []);
+
+  const handleReset = useCallback(() => {
+    setBeloeb(1000);
+    setFraValuta("DKK");
+    setTilValuta("EUR");
   }, []);
 
   const getShareableLink = useCallback(() => {
@@ -251,6 +257,10 @@ export default function ValutaBeregner() {
             {getValutaSymbol(fraValuta)}
           </span>
         </div>
+      </div>
+
+      <div className="flex justify-end">
+        <ResetButton onReset={handleReset} />
       </div>
 
       {/* Resultat */}

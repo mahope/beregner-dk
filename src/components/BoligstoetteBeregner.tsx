@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { ShareCalculation } from "@/components/ShareCalculation";
-import { CopyResultButton } from "@/components/ui";
+import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 
@@ -64,6 +64,14 @@ export default function BoligstoetteBeregner() {
     };
     return generateShareableLink(state);
   }, [maanedligHusleje, husstandsindkomst, antalPersoner, boligType, areal]);
+
+  const handleReset = useCallback(() => {
+    setMaanedligHusleje("");
+    setHusstandsindkomst("");
+    setAntalPersoner("1");
+    setBoligType("leje");
+    setAreal("65");
+  }, []);
 
   const resultat = useMemo<BoligstoetteResultat | null>(() => {
     const husleje = parseFloat(maanedligHusleje);
@@ -212,6 +220,10 @@ export default function BoligstoetteBeregner() {
               m²
             </span>
           </div>
+        </div>
+
+        <div className="flex justify-end">
+          <ResetButton onReset={handleReset} />
         </div>
 
         {/* Resultat */}

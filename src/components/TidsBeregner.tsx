@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { ShareCalculation } from "@/components/ShareCalculation";
-import { CopyResultButton } from "@/components/ui";
+import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 
@@ -51,6 +51,14 @@ export default function TidsBeregner() {
     };
     return generateShareableLink(state);
   }, [startTid, slutTid, startDato, slutDato, fratraekPause]);
+
+  const handleReset = useCallback(() => {
+    setStartTid("09:00");
+    setSlutTid("17:00");
+    setStartDato("");
+    setSlutDato("");
+    setFratraekPause(0);
+  }, []);
 
   const beregning = useMemo(() => {
     const [startTime, startMin] = startTid.split(":").map(Number);
@@ -167,16 +175,23 @@ export default function TidsBeregner() {
         <label className="block text-sm font-medium mb-2">
           Fratræk pause (minutter)
         </label>
-        <input
-          type="number"
-          min="0"
-          max="480"
-          step="5"
-          value={fratraekPause}
-          onChange={(e) => setFratraekPause(parseInt(e.target.value) || 0)}
-          className="w-full px-4 py-3 border rounded-lg"
-          placeholder="F.eks. 30 min frokostpause"
-        />
+        <div className="relative">
+          <input
+            type="number"
+            min="0"
+            max="480"
+            step="5"
+            value={fratraekPause}
+            onChange={(e) => setFratraekPause(parseInt(e.target.value) || 0)}
+            className="w-full px-4 py-3 pr-12 border rounded-lg"
+            placeholder="F.eks. 30 min frokostpause"
+          />
+          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">min</span>
+        </div>
+      </div>
+
+      <div className="flex justify-end">
+        <ResetButton onReset={handleReset} />
       </div>
 
       {/* Resultater */}

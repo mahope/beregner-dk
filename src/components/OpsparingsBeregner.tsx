@@ -5,7 +5,7 @@ import { OpsparingAffiliate } from "./AffiliateBox";
 import { CalculationLoading, useCalculationLoading } from "./LoadingSpinner";
 import { InputField } from "./InputField";
 import { ShareCalculation } from "@/components/ShareCalculation";
-import { CopyResultButton } from "@/components/ui";
+import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 
@@ -191,6 +191,21 @@ export default function OpsparingsBeregner() {
   }, [visning, startBeloeb, maanedligIndbetaling, aarligRente, periode, renteFrekvens,
       maalBeloeb, maalStart, maalMaanedlig, maalRente]);
 
+  const handleReset = useCallback(() => {
+    setVisning("beregner");
+    setStartBeloeb(10000);
+    setMaanedligIndbetaling(1000);
+    setAarligRente(5);
+    setPeriode(10);
+    setRenteFrekvens("aarlig");
+    setVisInflation(false);
+    setInflation(2);
+    setMaalBeloeb(500000);
+    setMaalStart(10000);
+    setMaalMaanedlig(1000);
+    setMaalRente(5);
+  }, []);
+
   const beregning = useMemo(() => {
     if (periode <= 0) return null;
     return simulerOpsparing(startBeloeb, maanedligIndbetaling, aarligRente, periode, renteFrekvens);
@@ -364,6 +379,10 @@ export default function OpsparingsBeregner() {
               </div>
             )}
             {visInflation && <span className="text-sm text-gray-500 dark:text-gray-400">% inflation</span>}
+          </div>
+
+          <div className="flex justify-end">
+            <ResetButton onReset={handleReset} />
           </div>
 
           {/* Resultat */}
@@ -545,6 +564,10 @@ export default function OpsparingsBeregner() {
                 step={0.1}
               />
             </div>
+          </div>
+
+          <div className="flex justify-end">
+            <ResetButton onReset={handleReset} />
           </div>
 
           {/* Mål resultat */}

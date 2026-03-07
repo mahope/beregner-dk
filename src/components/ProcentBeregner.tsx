@@ -7,7 +7,7 @@ import { PrintResult } from "@/components/PrintResult";
 import { InputField } from "@/components/InputField";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { ModeSelector, ModeOption } from "@/components/ModeSelector";
-import { AnimatedNumber, CopyResultButton } from "@/components/ui";
+import { AnimatedNumber, CopyResultButton, ResetButton } from "@/components/ui";
 
 type BeregningsMode = "find-procent" | "find-resultat" | "find-heltal" | "stigning";
 
@@ -52,6 +52,16 @@ export default function ProcentBeregner() {
       if (inputs.fra !== undefined) setFra(inputs.fra);
       if (inputs.til !== undefined) setTil(inputs.til);
     }
+  }, []);
+
+  const handleReset = useCallback(() => {
+    setMode("find-procent");
+    setDeltal(25);
+    setHeltal(100);
+    setProcent(25);
+    setBaseVal(200);
+    setFra(100);
+    setTil(125);
   }, []);
 
   // Get shareable link for current calculation
@@ -225,6 +235,10 @@ export default function ProcentBeregner() {
             <span className="text-2xl font-bold text-blue-600 dark:text-blue-400" aria-label="Procentvis ændring">?%</span>
           </div>
         )}
+      </div>
+
+      <div className="flex justify-end">
+        <ResetButton onReset={handleReset} />
       </div>
 
       {/* Result */}

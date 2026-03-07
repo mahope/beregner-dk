@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { ShareCalculation } from "@/components/ShareCalculation";
-import { CopyResultButton } from "@/components/ui";
+import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 
@@ -66,6 +66,13 @@ export default function BoernepengBeregner() {
     };
     return generateShareableLink(state);
   }, [boern, husstandsIndkomst, enlig, deltForaeldremyndighed]);
+
+  const handleReset = useCallback(() => {
+    setBoern([{ id: "1", alder: 5 }]);
+    setHusstandsIndkomst(600000);
+    setEnlig(false);
+    setDeltForaeldremyndighed(true);
+  }, []);
 
   const tilfoejBarn = () => {
     setBoern([...boern, { id: crypto.randomUUID(), alder: 0 }]);
@@ -207,15 +214,18 @@ export default function BoernepengBeregner() {
           <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
             Husstandens samlede indkomst (årlig)
           </label>
-          <input
-            type="number"
-            min="0"
-            step="10000"
-            value={husstandsIndkomst}
-            onChange={(e) => setHusstandsIndkomst(parseFloat(e.target.value) || 0)}
-            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-            aria-label="Husstandens samlede årlige indkomst"
-          />
+          <div className="relative">
+            <input
+              type="number"
+              min="0"
+              step="10000"
+              value={husstandsIndkomst}
+              onChange={(e) => setHusstandsIndkomst(parseFloat(e.target.value) || 0)}
+              className="w-full px-4 py-3 pr-14 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              aria-label="Husstandens samlede årlige indkomst"
+            />
+            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">kr/år</span>
+          </div>
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
             Bruges til at beregne evt. aftrapning (over {formatKr(SATSER_2026.indkomstgraense)})
           </p>
@@ -246,6 +256,10 @@ export default function BoernepengBeregner() {
             </label>
           </div>
         </div>
+      </div>
+
+      <div className="flex justify-end">
+        <ResetButton onReset={handleReset} />
       </div>
 
       {/* Resultat */}

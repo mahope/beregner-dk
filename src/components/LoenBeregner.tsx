@@ -7,7 +7,7 @@ import { InputField } from "@/components/InputField";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { KOMMUNER } from "@/lib/kommuner";
-import { AnimatedNumber, CopyResultButton } from "@/components/ui";
+import { AnimatedNumber, CopyResultButton, ResetButton } from "@/components/ui";
 
 // 2026 danske skattesatser (ny skattereform med mellemskat/topskat/top-topskat)
 // Kilde: skm.dk, skat.dk, martinsen.dk
@@ -63,6 +63,15 @@ export default function LoenBeregner() {
       hasTracked.current = true;
     }, 2000);
     return () => { clearTimeout(timer); cleanupScroll(); };
+  }, []);
+
+  const handleReset = useCallback(() => {
+    setBruttoLoen(40000);
+    setPeriode("maaned");
+    setMedKirkeskat(true);
+    setKommuneSkat(24.94);
+    setValgtKommune("");
+    setPension(0);
   }, []);
 
   const getShareableLink = useCallback(() => {
@@ -312,6 +321,10 @@ export default function LoenBeregner() {
             </label>
           </div>
         </div>
+      </div>
+
+      <div className="flex justify-end">
+        <ResetButton onReset={handleReset} />
       </div>
 
       {/* Resultat */}

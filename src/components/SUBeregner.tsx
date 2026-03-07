@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { ShareCalculation } from "@/components/ShareCalculation";
-import { CopyResultButton } from "@/components/ui";
+import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 
@@ -83,6 +83,15 @@ export default function SUBeregner() {
     };
     return generateShareableLink(state);
   }, [uddannelse, boligstatus, arbejdsindkomst, antalMaaneder, harHandicap, erEnligForsorger]);
+
+  const handleReset = useCallback(() => {
+    setUddannelse("videregaaende");
+    setBoligstatus("udeboende");
+    setArbejdsindkomst(5000);
+    setAntalMaaneder(12);
+    setHarHandicap(false);
+    setErEnligForsorger(false);
+  }, []);
 
   const beregning = useMemo(() => {
     // Basis SU-sats afhængig af uddannelse og boligstatus
@@ -228,29 +237,35 @@ export default function SUBeregner() {
           <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
             Forventet arbejdsindkomst (pr. måned, før skat)
           </label>
-          <input
-            type="number"
-            min="0"
-            step="500"
-            value={arbejdsindkomst}
-            onChange={(e) => setArbejdsindkomst(parseFloat(e.target.value) || 0)}
-            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-            aria-label="Månedlig arbejdsindkomst før skat"
-          />
+          <div className="relative">
+            <input
+              type="number"
+              min="0"
+              step="500"
+              value={arbejdsindkomst}
+              onChange={(e) => setArbejdsindkomst(parseFloat(e.target.value) || 0)}
+              className="w-full px-4 py-3 pr-12 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              aria-label="Månedlig arbejdsindkomst før skat"
+            />
+            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">kr</span>
+          </div>
         </div>
         <div>
           <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
             Antal SU-måneder i år
           </label>
-          <input
-            type="number"
-            min="1"
-            max="12"
-            value={antalMaaneder}
-            onChange={(e) => setAntalMaaneder(parseInt(e.target.value) || 12)}
-            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-            aria-label="Antal måneder med SU i år"
-          />
+          <div className="relative">
+            <input
+              type="number"
+              min="1"
+              max="12"
+              value={antalMaaneder}
+              onChange={(e) => setAntalMaaneder(parseInt(e.target.value) || 12)}
+              className="w-full px-4 py-3 pr-14 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              aria-label="Antal måneder med SU i år"
+            />
+            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">mdr</span>
+          </div>
         </div>
       </div>
 
@@ -281,6 +296,10 @@ export default function SUBeregner() {
             </label>
           </div>
         )}
+      </div>
+
+      <div className="flex justify-end">
+        <ResetButton onReset={handleReset} />
       </div>
 
       {/* Resultat */}

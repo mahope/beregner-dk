@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { ShareCalculation } from '@/components/ShareCalculation';
-import { CopyResultButton } from '@/components/ui';
+import { CopyResultButton, ResetButton } from '@/components/ui';
 import { generateShareableLink, getStateFromUrl, CalculationState } from '@/lib/calculation-state';
 import { trackCalculation, initScrollDepthTracking } from '@/lib/analytics';
 
@@ -58,6 +58,14 @@ export default function BarselBeregner() {
     return generateShareableLink(state);
   }, [monthlyIncome, employment, weeklyHours, parent, weeksPlanned]);
 
+  const handleReset = useCallback(() => {
+    setMonthlyIncome('');
+    setEmployment('fulltime');
+    setWeeklyHours('37');
+    setParent('mor');
+    setWeeksPlanned('24');
+  }, []);
+
   const result = useMemo(() => {
     const income = parseFloat(monthlyIncome) || 0;
     const hours = parseFloat(weeklyHours) || 37;
@@ -109,13 +117,16 @@ export default function BarselBeregner() {
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Månedlig bruttoløn (kr.)
             </label>
-            <input
-              type="number"
-              value={monthlyIncome}
-              onChange={(e) => setMonthlyIncome(e.target.value)}
-              placeholder="F.eks. 35000"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            />
+            <div className="relative">
+              <input
+                type="number"
+                value={monthlyIncome}
+                onChange={(e) => setMonthlyIncome(e.target.value)}
+                placeholder="F.eks. 35000"
+                className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">kr</span>
+            </div>
           </div>
 
           <div>
@@ -139,14 +150,17 @@ export default function BarselBeregner() {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Ugentlige timer
               </label>
-              <input
-                type="number"
-                value={weeklyHours}
-                onChange={(e) => setWeeklyHours(e.target.value)}
-                min="1"
-                max="37"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
+              <div className="relative">
+                <input
+                  type="number"
+                  value={weeklyHours}
+                  onChange={(e) => setWeeklyHours(e.target.value)}
+                  min="1"
+                  max="37"
+                  className="w-full px-4 py-3 pr-14 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">timer</span>
+              </div>
             </div>
           )}
 
@@ -263,6 +277,10 @@ export default function BarselBeregner() {
             </div>
           )}
         </div>
+      </div>
+
+      <div className="flex justify-end">
+        <ResetButton onReset={handleReset} />
       </div>
 
       {result && (

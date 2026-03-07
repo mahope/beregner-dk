@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { ShareCalculation } from "@/components/ShareCalculation";
-import { CopyResultButton } from "@/components/ui";
+import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 
@@ -102,6 +102,14 @@ export default function Elberegner() {
     return generateShareableLink(state);
   }, [elpris, husstandType, apparater]);
 
+  const handleReset = useCallback(() => {
+    setApparater([
+      { id: crypto.randomUUID(), navn: "", watt: 0, timerPerDag: 0 },
+    ]);
+    setElpris(2.5);
+    setHusstandType("hus2");
+  }, []);
+
   const tilfoejApparat = () => {
     setApparater([
       ...apparater,
@@ -193,14 +201,17 @@ export default function Elberegner() {
         <label className="block text-sm font-medium mb-2 dark:text-gray-200">
           Din elpris (kr/kWh inkl. afgifter)
         </label>
-        <input
-          type="number"
-          step="0.1"
-          min="0"
-          value={elpris}
-          onChange={(e) => setElpris(parseFloat(e.target.value) || 0)}
-          className="w-32 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 dark:text-white"
-        />
+        <div className="relative w-32">
+          <input
+            type="number"
+            step="0.1"
+            min="0"
+            value={elpris}
+            onChange={(e) => setElpris(parseFloat(e.target.value) || 0)}
+            className="w-full px-3 py-2 pr-20 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 dark:text-white"
+          />
+          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-gray-400">kr/kWh</span>
+        </div>
         <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
           Gennemsnitlig dansk elpris er ca. 2-3 kr/kWh inkl. alle afgifter (2026)
         </p>
@@ -245,28 +256,34 @@ export default function Elberegner() {
 
               <div className="w-28">
                 <label className="block text-sm font-medium mb-1 dark:text-gray-200">Watt</label>
-                <input
-                  type="number"
-                  min="0"
-                  value={apparat.watt || ""}
-                  onChange={(e) => opdaterApparat(apparat.id, "watt", parseInt(e.target.value) || 0)}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 dark:text-white"
-                  placeholder="0"
-                />
+                <div className="relative">
+                  <input
+                    type="number"
+                    min="0"
+                    value={apparat.watt || ""}
+                    onChange={(e) => opdaterApparat(apparat.id, "watt", parseInt(e.target.value) || 0)}
+                    className="w-full px-3 py-2 pr-12 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 dark:text-white"
+                    placeholder="0"
+                  />
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">W</span>
+                </div>
               </div>
 
               <div className="w-28">
                 <label className="block text-sm font-medium mb-1 dark:text-gray-200">Timer/dag</label>
-                <input
-                  type="number"
-                  step="0.5"
-                  min="0"
-                  max="24"
-                  value={apparat.timerPerDag || ""}
-                  onChange={(e) => opdaterApparat(apparat.id, "timerPerDag", parseFloat(e.target.value) || 0)}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 dark:text-white"
-                  placeholder="0"
-                />
+                <div className="relative">
+                  <input
+                    type="number"
+                    step="0.5"
+                    min="0"
+                    max="24"
+                    value={apparat.timerPerDag || ""}
+                    onChange={(e) => opdaterApparat(apparat.id, "timerPerDag", parseFloat(e.target.value) || 0)}
+                    className="w-full px-3 py-2 pr-16 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 dark:text-white"
+                    placeholder="0"
+                  />
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-gray-400">timer</span>
+                </div>
               </div>
 
               <button
@@ -286,6 +303,10 @@ export default function Elberegner() {
         >
           + Tilføj apparat
         </button>
+      </div>
+
+      <div className="flex justify-end">
+        <ResetButton onReset={handleReset} />
       </div>
 
       {/* Resultater */}

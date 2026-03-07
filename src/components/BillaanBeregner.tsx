@@ -1,11 +1,11 @@
 "use client";
 
-import { useMemo, useEffect, useRef } from "react";
+import { useMemo, useEffect, useRef, useCallback } from "react";
 import { InputField } from "./InputField";
 import { AffiliateBox } from "./AffiliateBox";
 import { ShareCalculation } from "./ShareCalculation";
 import { PrintResult } from "./PrintResult";
-import { CopyResultButton } from "@/components/ui";
+import { CopyResultButton, ResetButton } from "@/components/ui";
 import { useCalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 
@@ -65,11 +65,15 @@ export default function BillaanBeregner() {
     return () => { clearTimeout(timer); cleanupScroll(); };
   }, []);
 
-  const { inputs, updateInput, getShareableLink } = useCalculationState("billaan", defaultInputs);
+  const { inputs, updateInput, getShareableLink, reset } = useCalculationState("billaan", defaultInputs);
   const bilpris = inputs.bilpris as number;
   const udbetaling = inputs.udbetaling as number;
   const loebetid = inputs.loebetid as number;
   const rentesats = inputs.rentesats as number;
+
+  const handleReset = useCallback(() => {
+    reset();
+  }, [reset]);
 
   // Beregningsresultater
   const result = useMemo(() => {
@@ -233,6 +237,10 @@ export default function BillaanBeregner() {
             </p>
           </div>
         </div>
+      </div>
+
+      <div className="flex justify-end">
+        <ResetButton onReset={handleReset} />
       </div>
 
       {/* Del og udskriv */}

@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { ShareCalculation } from "@/components/ShareCalculation";
-import { CopyResultButton } from "@/components/ui";
+import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 
@@ -43,6 +43,11 @@ export default function AlderBeregner() {
     };
     return generateShareableLink(state);
   }, [foedselsdato, beregningsDato]);
+
+  const handleReset = useCallback(() => {
+    setFoedselsdato("");
+    setBeregningsDato(new Date().toISOString().split("T")[0]);
+  }, []);
 
   const beregning = useMemo(() => {
     if (!foedselsdato) {
@@ -186,6 +191,10 @@ export default function AlderBeregner() {
             Brug i dag
           </button>
         </div>
+      </div>
+
+      <div className="flex justify-end">
+        <ResetButton onReset={handleReset} />
       </div>
 
       {beregning && (

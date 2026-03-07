@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { BilforsikringAffiliate } from "./AffiliateBox";
 import { ShareCalculation } from "@/components/ShareCalculation";
-import { CopyResultButton } from "@/components/ui";
+import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 
@@ -64,6 +64,18 @@ export default function BilBeregner() {
     };
     return generateShareableLink(state);
   }, [bilpris, braendstof, kmPrLiter, kmPrAar, braendstofpris, forsikring, vaerditab, kwh100km, elpris]);
+
+  const handleReset = useCallback(() => {
+    setBilpris(250000);
+    setBraendstof("benzin");
+    setKmPrLiter(15);
+    setKmPrAar(15000);
+    setBraendstofpris(13.5);
+    setForsikring(8000);
+    setVaerditab(15);
+    setKwh100km(17);
+    setElpris(2.5);
+  }, []);
 
   const resultat = useMemo(() => {
     // Brændstof/strøm omkostninger
@@ -135,15 +147,18 @@ export default function BilBeregner() {
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium mb-2">Bilens pris</label>
-            <input
-              type="number"
-              min="10000"
-              max="5000000"
-              step="10000"
-              value={bilpris}
-              onChange={(e) => setBilpris(parseFloat(e.target.value) || 0)}
-              className="w-full px-4 py-3 border rounded-lg text-lg"
-            />
+            <div className="relative">
+              <input
+                type="number"
+                min="10000"
+                max="5000000"
+                step="10000"
+                value={bilpris}
+                onChange={(e) => setBilpris(parseFloat(e.target.value) || 0)}
+                className="w-full px-4 py-3 pr-12 border rounded-lg text-lg"
+              />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">kr</span>
+            </div>
             <p className="text-sm text-gray-500 mt-1">{formatKr(bilpris)}</p>
           </div>
 
@@ -173,29 +188,35 @@ export default function BilBeregner() {
 
           <div>
             <label className="block text-sm font-medium mb-2">Kørsel pr. år (km)</label>
-            <input
-              type="number"
-              min="1000"
-              max="100000"
-              step="1000"
-              value={kmPrAar}
-              onChange={(e) => setKmPrAar(parseFloat(e.target.value) || 0)}
-              className="w-full px-4 py-3 border rounded-lg text-lg"
-            />
+            <div className="relative">
+              <input
+                type="number"
+                min="1000"
+                max="100000"
+                step="1000"
+                value={kmPrAar}
+                onChange={(e) => setKmPrAar(parseFloat(e.target.value) || 0)}
+                className="w-full px-4 py-3 pr-12 border rounded-lg text-lg"
+              />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">km</span>
+            </div>
             <p className="text-sm text-gray-500 mt-1">Gennemsnitligt: 15.000 km/år</p>
           </div>
 
           <div>
             <label className="block text-sm font-medium mb-2">Forsikring (kr/år)</label>
-            <input
-              type="number"
-              min="0"
-              max="50000"
-              step="500"
-              value={forsikring}
-              onChange={(e) => setForsikring(parseFloat(e.target.value) || 0)}
-              className="w-full px-4 py-3 border rounded-lg text-lg"
-            />
+            <div className="relative">
+              <input
+                type="number"
+                min="0"
+                max="50000"
+                step="500"
+                value={forsikring}
+                onChange={(e) => setForsikring(parseFloat(e.target.value) || 0)}
+                className="w-full px-4 py-3 pr-16 border rounded-lg text-lg"
+              />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">kr/år</span>
+            </div>
           </div>
         </div>
 
@@ -204,29 +225,35 @@ export default function BilBeregner() {
             <>
               <div>
                 <label className="block text-sm font-medium mb-2">Forbrug (kWh/100 km)</label>
-                <input
-                  type="number"
-                  min="10"
-                  max="40"
-                  step="0.5"
-                  value={kwh100km}
-                  onChange={(e) => setKwh100km(parseFloat(e.target.value) || 0)}
-                  className="w-full px-4 py-3 border rounded-lg text-lg"
-                />
+                <div className="relative">
+                  <input
+                    type="number"
+                    min="10"
+                    max="40"
+                    step="0.5"
+                    value={kwh100km}
+                    onChange={(e) => setKwh100km(parseFloat(e.target.value) || 0)}
+                    className="w-full px-4 py-3 pr-16 border rounded-lg text-lg"
+                  />
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">kWh/100km</span>
+                </div>
                 <p className="text-sm text-gray-500 mt-1">Typisk: 15-20 kWh/100 km</p>
               </div>
 
               <div>
                 <label className="block text-sm font-medium mb-2">Elpris (kr/kWh)</label>
-                <input
-                  type="number"
-                  min="0.5"
-                  max="10"
-                  step="0.1"
-                  value={elpris}
-                  onChange={(e) => setElpris(parseFloat(e.target.value) || 0)}
-                  className="w-full px-4 py-3 border rounded-lg text-lg"
-                />
+                <div className="relative">
+                  <input
+                    type="number"
+                    min="0.5"
+                    max="10"
+                    step="0.1"
+                    value={elpris}
+                    onChange={(e) => setElpris(parseFloat(e.target.value) || 0)}
+                    className="w-full px-4 py-3 pr-16 border rounded-lg text-lg"
+                  />
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">kr/kWh</span>
+                </div>
                 <p className="text-sm text-gray-500 mt-1">Hjemme: 2-3 kr, Offentlig: 3-5 kr</p>
               </div>
             </>
@@ -234,15 +261,18 @@ export default function BilBeregner() {
             <>
               <div>
                 <label className="block text-sm font-medium mb-2">Forbrug (km/liter)</label>
-                <input
-                  type="number"
-                  min="5"
-                  max="40"
-                  step="0.5"
-                  value={kmPrLiter}
-                  onChange={(e) => setKmPrLiter(parseFloat(e.target.value) || 0)}
-                  className="w-full px-4 py-3 border rounded-lg text-lg"
-                />
+                <div className="relative">
+                  <input
+                    type="number"
+                    min="5"
+                    max="40"
+                    step="0.5"
+                    value={kmPrLiter}
+                    onChange={(e) => setKmPrLiter(parseFloat(e.target.value) || 0)}
+                    className="w-full px-4 py-3 pr-16 border rounded-lg text-lg"
+                  />
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">km/l</span>
+                </div>
                 <p className="text-sm text-gray-500 mt-1">
                   {braendstof === "diesel" ? "Typisk diesel: 18-25 km/l" : "Typisk benzin: 12-18 km/l"}
                 </p>
@@ -250,35 +280,45 @@ export default function BilBeregner() {
 
               <div>
                 <label className="block text-sm font-medium mb-2">Brændstofpris (kr/liter)</label>
-                <input
-                  type="number"
-                  min="5"
-                  max="25"
-                  step="0.1"
-                  value={braendstofpris}
-                  onChange={(e) => setBraendstofpris(parseFloat(e.target.value) || 0)}
-                  className="w-full px-4 py-3 border rounded-lg text-lg"
-                />
+                <div className="relative">
+                  <input
+                    type="number"
+                    min="5"
+                    max="25"
+                    step="0.1"
+                    value={braendstofpris}
+                    onChange={(e) => setBraendstofpris(parseFloat(e.target.value) || 0)}
+                    className="w-full px-4 py-3 pr-12 border rounded-lg text-lg"
+                  />
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">kr/l</span>
+                </div>
               </div>
             </>
           )}
 
           <div>
             <label className="block text-sm font-medium mb-2">Årligt værditab (%)</label>
-            <input
-              type="number"
-              min="5"
-              max="30"
-              step="1"
-              value={vaerditab}
-              onChange={(e) => setVaerditab(parseFloat(e.target.value) || 0)}
-              className="w-full px-4 py-3 border rounded-lg text-lg"
-            />
+            <div className="relative">
+              <input
+                type="number"
+                min="5"
+                max="30"
+                step="1"
+                value={vaerditab}
+                onChange={(e) => setVaerditab(parseFloat(e.target.value) || 0)}
+                className="w-full px-4 py-3 pr-12 border rounded-lg text-lg"
+              />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">%</span>
+            </div>
             <p className="text-sm text-gray-500 mt-1">
               Nye biler: 15-20%, ældre: 8-12%
             </p>
           </div>
         </div>
+      </div>
+
+      <div className="flex justify-end">
+        <ResetButton onReset={handleReset} />
       </div>
 
       {/* Resultat */}

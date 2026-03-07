@@ -1,11 +1,11 @@
 "use client";
 
-import { useMemo, useEffect, useRef } from "react";
+import { useMemo, useEffect, useRef, useCallback } from "react";
 import { InputField } from "./InputField";
 import { AffiliateBox } from "./AffiliateBox";
 import { ShareCalculation } from "./ShareCalculation";
 import { PrintResult } from "./PrintResult";
-import { CopyResultButton } from "@/components/ui";
+import { CopyResultButton, ResetButton } from "@/components/ui";
 import { useCalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 
@@ -70,7 +70,11 @@ export default function ForbrugslaanBeregner() {
     return () => { clearTimeout(timer); cleanupScroll(); };
   }, []);
 
-  const { inputs, updateInput, getShareableLink } = useCalculationState("forbrugslaan", defaultInputs);
+  const { inputs, updateInput, getShareableLink, reset } = useCalculationState("forbrugslaan", defaultInputs);
+
+  const handleReset = useCallback(() => {
+    reset();
+  }, [reset]);
   const laanebelob = inputs.laanebelob as number;
   const loebetid = inputs.loebetid as number;
   const rentesats = inputs.rentesats as number;
@@ -219,6 +223,10 @@ export default function ForbrugslaanBeregner() {
             </p>
           </div>
         </div>
+      </div>
+
+      <div className="flex justify-end">
+        <ResetButton onReset={handleReset} />
       </div>
 
       {/* Del og udskriv */}

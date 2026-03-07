@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { CalculationLoading, useCalculationLoading } from "./LoadingSpinner";
 import { InputField } from "./InputField";
 import { ShareCalculation } from "@/components/ShareCalculation";
-import { CopyResultButton } from "@/components/ui";
+import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 
@@ -76,6 +76,17 @@ export default function PensionBeregner() {
     return generateShareableLink(state);
   }, [alder, pensionsalder, maanedligIndbetaling, nuværendeOpsparing,
       forventetAfkast, inflation, udbetalingsperiode, oensketMaanedlig]);
+
+  const handleReset = useCallback(() => {
+    setAlder(30);
+    setPensionsalder(68);
+    setMaanedligIndbetaling(3000);
+    setNuværendeOpsparing(200000);
+    setForventetAfkast(5);
+    setInflation(2);
+    setUdbetalingsperiode(20);
+    setOensketMaanedlig(25000);
+  }, []);
 
   const resultat = useMemo(() => {
     const aarTilPension = pensionsalder - alder;
@@ -262,6 +273,10 @@ export default function PensionBeregner() {
             helpText="Til beregning af pension gap"
           />
         </div>
+      </div>
+
+      <div className="flex justify-end">
+        <ResetButton onReset={handleReset} />
       </div>
 
       {/* Resultat */}

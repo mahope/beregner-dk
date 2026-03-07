@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { ShareCalculation } from '@/components/ShareCalculation';
-import { CopyResultButton } from '@/components/ui';
+import { CopyResultButton, ResetButton } from '@/components/ui';
 import { generateShareableLink, getStateFromUrl, CalculationState } from '@/lib/calculation-state';
 import { trackCalculation, initScrollDepthTracking } from '@/lib/analytics';
 
@@ -57,6 +57,15 @@ export default function EfterloensBeregner() {
     };
     return generateShareableLink(state);
   }, [birthYear, insurance, yearsContributed, postpone2Years, workWhileOnEfterloen, hoursPerYear]);
+
+  const handleReset = useCallback(() => {
+    setBirthYear('1963');
+    setInsurance('full');
+    setYearsContributed('30');
+    setPostpone2Years(false);
+    setWorkWhileOnEfterloen(false);
+    setHoursPerYear('962');
+  }, []);
 
   const result = useMemo(() => {
     const year = parseInt(birthYear) || 1963;
@@ -179,14 +188,17 @@ export default function EfterloensBeregner() {
             <label className="block text-sm font-medium text-gray-700 mb-2">
               År med efterlønsbidrag
             </label>
-            <input
-              type="number"
-              value={yearsContributed}
-              onChange={(e) => setYearsContributed(e.target.value)}
-              min="0"
-              max="40"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            />
+            <div className="relative">
+              <input
+                type="number"
+                value={yearsContributed}
+                onChange={(e) => setYearsContributed(e.target.value)}
+                min="0"
+                max="40"
+                className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">år</span>
+            </div>
           </div>
 
           <div className="space-y-3">
@@ -220,19 +232,26 @@ export default function EfterloensBeregner() {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Forventede arbejdstimer pr. år
               </label>
-              <input
-                type="number"
-                value={hoursPerYear}
-                onChange={(e) => setHoursPerYear(e.target.value)}
-                min="0"
-                max="1924"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
+              <div className="relative">
+                <input
+                  type="number"
+                  value={hoursPerYear}
+                  onChange={(e) => setHoursPerYear(e.target.value)}
+                  min="0"
+                  max="1924"
+                  className="w-full px-4 py-3 pr-14 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">timer</span>
+              </div>
               <p className="text-xs text-gray-500 mt-1">
                 Ved mindst 962 timer/år kan du optjene skattefri præmie
               </p>
             </div>
           )}
+
+          <div className="flex justify-end">
+            <ResetButton onReset={handleReset} />
+          </div>
         </div>
 
         {/* Result Section */}

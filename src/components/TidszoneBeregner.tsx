@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { ShareCalculation } from "@/components/ShareCalculation";
-import { CopyResultButton } from "@/components/ui";
+import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 
@@ -82,6 +82,13 @@ export default function TidszoneBeregner() {
       setAktuelTid(new Date());
     }, 1000);
     return () => clearInterval(interval);
+  }, []);
+
+  const handleReset = useCallback(() => {
+    setFraTidszone("dk");
+    setTilTidszone("us_east");
+    setTimer(12);
+    setMinutter(0);
   }, []);
 
   const beregning = useMemo(() => {
@@ -235,6 +242,10 @@ export default function TidszoneBeregner() {
             </select>
           </div>
         </div>
+      </div>
+
+      <div className="flex justify-end">
+        <ResetButton onReset={handleReset} />
       </div>
 
       {/* Konverteringsresultat */}

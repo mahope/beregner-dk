@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { CalculationLoading, useCalculationLoading } from "./LoadingSpinner";
 import { ShareCalculation } from "@/components/ShareCalculation";
-import { CopyResultButton } from "@/components/ui";
+import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 
@@ -66,6 +66,11 @@ export default function DagpengeBeregner() {
     };
     return generateShareableLink(state);
   }, [maanedsloen, arbejdstimer]);
+
+  const handleReset = useCallback(() => {
+    setMaanedsloen("");
+    setArbejdstimer("37");
+  }, []);
 
   // Loading state for beregning
   const isLoading = useCalculationLoading([maanedsloen, arbejdstimer]);
@@ -151,6 +156,10 @@ export default function DagpengeBeregner() {
             <option value="20">20 timer</option>
             <option value="15">15 timer</option>
           </select>
+        </div>
+
+        <div className="flex justify-end">
+          <ResetButton onReset={handleReset} />
         </div>
 
         {/* Resultat */}

@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { ShareCalculation } from "@/components/ShareCalculation";
-import { CopyResultButton } from "@/components/ui";
+import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 
@@ -49,6 +49,16 @@ export default function LaaneBeregner() {
       hasTracked.current = true;
     }, 2000);
     return () => { clearTimeout(timer); cleanupScroll(); };
+  }, []);
+
+  const handleReset = useCallback(() => {
+    setLaaneType("annuitet");
+    setHovedstol(100000);
+    setLoebetidAar(5);
+    setRenteSats(8);
+    setStiftelsesgebyr(0);
+    setRente2(12);
+    setLoebetid2(3);
   }, []);
 
   const getShareableLink = useCallback(() => {
@@ -195,49 +205,61 @@ export default function LaaneBeregner() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium mb-2">Lånebeløb</label>
-            <input
-              type="number"
-              min="1000"
-              step="1000"
-              value={hovedstol}
-              onChange={(e) => setHovedstol(parseFloat(e.target.value) || 0)}
-              className="w-full px-4 py-3 border rounded-lg"
-            />
+            <div className="relative">
+              <input
+                type="number"
+                min="1000"
+                step="1000"
+                value={hovedstol}
+                onChange={(e) => setHovedstol(parseFloat(e.target.value) || 0)}
+                className="w-full px-4 py-3 pr-12 border rounded-lg"
+              />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">kr</span>
+            </div>
           </div>
           <div>
             <label className="block text-sm font-medium mb-2">Årlig rente (%)</label>
-            <input
-              type="number"
-              min="0"
-              max="50"
-              step="0.1"
-              value={renteSats}
-              onChange={(e) => setRenteSats(parseFloat(e.target.value) || 0)}
-              className="w-full px-4 py-3 border rounded-lg"
-            />
+            <div className="relative">
+              <input
+                type="number"
+                min="0"
+                max="50"
+                step="0.1"
+                value={renteSats}
+                onChange={(e) => setRenteSats(parseFloat(e.target.value) || 0)}
+                className="w-full px-4 py-3 pr-12 border rounded-lg"
+              />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">%</span>
+            </div>
           </div>
           <div>
             <label className="block text-sm font-medium mb-2">Løbetid (år)</label>
-            <input
-              type="number"
-              min="1"
-              max="30"
-              step="1"
-              value={loebetidAar}
-              onChange={(e) => setLoebetidAar(parseFloat(e.target.value) || 1)}
-              className="w-full px-4 py-3 border rounded-lg"
-            />
+            <div className="relative">
+              <input
+                type="number"
+                min="1"
+                max="30"
+                step="1"
+                value={loebetidAar}
+                onChange={(e) => setLoebetidAar(parseFloat(e.target.value) || 1)}
+                className="w-full px-4 py-3 pr-12 border rounded-lg"
+              />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">år</span>
+            </div>
           </div>
           <div>
             <label className="block text-sm font-medium mb-2">Stiftelsesgebyr</label>
-            <input
-              type="number"
-              min="0"
-              step="100"
-              value={stiftelsesgebyr}
-              onChange={(e) => setStiftelsesgebyr(parseFloat(e.target.value) || 0)}
-              className="w-full px-4 py-3 border rounded-lg"
-            />
+            <div className="relative">
+              <input
+                type="number"
+                min="0"
+                step="100"
+                value={stiftelsesgebyr}
+                onChange={(e) => setStiftelsesgebyr(parseFloat(e.target.value) || 0)}
+                className="w-full px-4 py-3 pr-12 border rounded-lg"
+              />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">kr</span>
+            </div>
           </div>
         </div>
 
@@ -247,31 +269,41 @@ export default function LaaneBeregner() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium mb-2">Årlig rente (%)</label>
-                <input
-                  type="number"
-                  min="0"
-                  max="50"
-                  step="0.1"
-                  value={rente2}
-                  onChange={(e) => setRente2(parseFloat(e.target.value) || 0)}
-                  className="w-full px-4 py-3 border rounded-lg"
-                />
+                <div className="relative">
+                  <input
+                    type="number"
+                    min="0"
+                    max="50"
+                    step="0.1"
+                    value={rente2}
+                    onChange={(e) => setRente2(parseFloat(e.target.value) || 0)}
+                    className="w-full px-4 py-3 pr-12 border rounded-lg"
+                  />
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">%</span>
+                </div>
               </div>
               <div>
                 <label className="block text-sm font-medium mb-2">Løbetid (år)</label>
-                <input
-                  type="number"
-                  min="1"
-                  max="30"
-                  step="1"
-                  value={loebetid2}
-                  onChange={(e) => setLoebetid2(parseFloat(e.target.value) || 1)}
-                  className="w-full px-4 py-3 border rounded-lg"
-                />
+                <div className="relative">
+                  <input
+                    type="number"
+                    min="1"
+                    max="30"
+                    step="1"
+                    value={loebetid2}
+                    onChange={(e) => setLoebetid2(parseFloat(e.target.value) || 1)}
+                    className="w-full px-4 py-3 pr-12 border rounded-lg"
+                  />
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">år</span>
+                </div>
               </div>
             </div>
           </div>
         )}
+      </div>
+
+      <div className="flex justify-end">
+        <ResetButton onReset={handleReset} />
       </div>
 
       {/* Resultater */}

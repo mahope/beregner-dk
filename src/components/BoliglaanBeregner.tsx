@@ -6,7 +6,7 @@ import { PrintResult } from "./PrintResult";
 import { CalculationLoading, useCalculationLoading } from "./LoadingSpinner";
 import { InputField } from "./InputField";
 import { ShareCalculation } from "@/components/ShareCalculation";
-import { CopyResultButton } from "@/components/ui";
+import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 
@@ -150,6 +150,25 @@ export default function BoliglaanBeregner() {
       ejendomsskat, forsikring, ejerforening,
       maanedligtBudget, raadRente, raadLoebetid, raadBidrag, raadUdbetaling]);
 
+  const handleReset = useCallback(() => {
+    setVisning("beregner");
+    setBoligpris(3000000);
+    setUdbetaling(150000);
+    setRente(4.5);
+    setLoebetid(30);
+    setLaanType("fastforrentet");
+    setBidragssats(0.75);
+    setEjendomsskat(1500);
+    setForsikring(500);
+    setEjerforening(0);
+    setVisAmortisering(false);
+    setMaanedligtBudget(12000);
+    setRaadRente(4.5);
+    setRaadLoebetid(30);
+    setRaadBidrag(0.75);
+    setRaadUdbetaling(200000);
+  }, []);
+
   const resultat = useMemo(() => {
     const laanBeloeb = boligpris - udbetaling;
 
@@ -284,6 +303,10 @@ export default function BoliglaanBeregner() {
         >
           Hvad har jeg råd til?
         </button>
+      </div>
+
+      <div className="flex justify-end">
+        <ResetButton onReset={handleReset} />
       </div>
 
       {visning === "beregner" ? (

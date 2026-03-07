@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { ShareCalculation } from "@/components/ShareCalculation";
-import { CopyResultButton } from "@/components/ui";
+import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 
@@ -63,6 +63,18 @@ export default function BraendstofBeregner() {
     };
     return generateShareableLink(state);
   }, [beregningsType, braendstofType, literPris, kmPerLiter, kwhPris, kwhPer100km, distance, literBrugt, kmKoert]);
+
+  const handleReset = useCallback(() => {
+    setBeregningsType("turPris");
+    setBraendstofType("benzin");
+    setLiterPris(13.5);
+    setKmPerLiter(15);
+    setKwhPris(2.5);
+    setKwhPer100km(17);
+    setDistance(100);
+    setLiterBrugt(50);
+    setKmKoert(750);
+  }, []);
 
   const beregning = useMemo(() => {
     if (braendstofType === "el") {
@@ -236,114 +248,145 @@ export default function BraendstofBeregner() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium mb-2">El-pris (kr/kWh)</label>
-              <input
-                type="number"
-                min="0"
-                step="0.1"
-                value={kwhPris}
-                onChange={(e) => setKwhPris(parseFloat(e.target.value) || 0)}
-                className="w-full px-4 py-3 border rounded-lg"
-              />
+              <div className="relative">
+                <input
+                  type="number"
+                  min="0"
+                  step="0.1"
+                  value={kwhPris}
+                  onChange={(e) => setKwhPris(parseFloat(e.target.value) || 0)}
+                  className="w-full px-4 py-3 pr-16 border rounded-lg"
+                />
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">kr/kWh</span>
+              </div>
               <p className="text-xs text-gray-500 mt-1">Typisk 2-4 kr/kWh hjemme, 3-6 kr på ladestander</p>
             </div>
             <div>
               <label className="block text-sm font-medium mb-2">Forbrug (kWh/100 km)</label>
-              <input
-                type="number"
-                min="0"
-                step="1"
-                value={kwhPer100km}
-                onChange={(e) => setKwhPer100km(parseFloat(e.target.value) || 0)}
-                className="w-full px-4 py-3 border rounded-lg"
-              />
+              <div className="relative">
+                <input
+                  type="number"
+                  min="0"
+                  step="1"
+                  value={kwhPer100km}
+                  onChange={(e) => setKwhPer100km(parseFloat(e.target.value) || 0)}
+                  className="w-full px-4 py-3 pr-16 border rounded-lg"
+                />
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">kWh/100km</span>
+              </div>
               <p className="text-xs text-gray-500 mt-1">Typisk 15-20 kWh/100km</p>
             </div>
             <div>
               <label className="block text-sm font-medium mb-2">Distance (km)</label>
-              <input
-                type="number"
-                min="0"
-                step="10"
-                value={distance}
-                onChange={(e) => setDistance(parseFloat(e.target.value) || 0)}
-                className="w-full px-4 py-3 border rounded-lg"
-              />
+              <div className="relative">
+                <input
+                  type="number"
+                  min="0"
+                  step="10"
+                  value={distance}
+                  onChange={(e) => setDistance(parseFloat(e.target.value) || 0)}
+                  className="w-full px-4 py-3 pr-12 border rounded-lg"
+                />
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">km</span>
+              </div>
             </div>
           </div>
         ) : beregningsType === "forbrug" ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium mb-2">{braendstofType === "benzin" ? "Benzin" : "Diesel"} tanket (liter)</label>
-              <input
-                type="number"
-                min="0"
-                step="1"
-                value={literBrugt}
-                onChange={(e) => setLiterBrugt(parseFloat(e.target.value) || 0)}
-                className="w-full px-4 py-3 border rounded-lg"
-              />
+              <div className="relative">
+                <input
+                  type="number"
+                  min="0"
+                  step="1"
+                  value={literBrugt}
+                  onChange={(e) => setLiterBrugt(parseFloat(e.target.value) || 0)}
+                  className="w-full px-4 py-3 pr-12 border rounded-lg"
+                />
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">l</span>
+              </div>
             </div>
             <div>
               <label className="block text-sm font-medium mb-2">Kilometer kørt</label>
-              <input
-                type="number"
-                min="0"
-                step="10"
-                value={kmKoert}
-                onChange={(e) => setKmKoert(parseFloat(e.target.value) || 0)}
-                className="w-full px-4 py-3 border rounded-lg"
-              />
+              <div className="relative">
+                <input
+                  type="number"
+                  min="0"
+                  step="10"
+                  value={kmKoert}
+                  onChange={(e) => setKmKoert(parseFloat(e.target.value) || 0)}
+                  className="w-full px-4 py-3 pr-12 border rounded-lg"
+                />
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">km</span>
+              </div>
             </div>
             <div>
               <label className="block text-sm font-medium mb-2">{braendstofType === "benzin" ? "Benzin" : "Diesel"}pris (kr/liter)</label>
-              <input
-                type="number"
-                min="0"
-                step="0.1"
-                value={literPris}
-                onChange={(e) => setLiterPris(parseFloat(e.target.value) || 0)}
-                className="w-full px-4 py-3 border rounded-lg"
-              />
+              <div className="relative">
+                <input
+                  type="number"
+                  min="0"
+                  step="0.1"
+                  value={literPris}
+                  onChange={(e) => setLiterPris(parseFloat(e.target.value) || 0)}
+                  className="w-full px-4 py-3 pr-12 border rounded-lg"
+                />
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">kr/l</span>
+              </div>
             </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium mb-2">{braendstofType === "benzin" ? "Benzin" : "Diesel"}pris (kr/liter)</label>
-              <input
-                type="number"
-                min="0"
-                step="0.1"
-                value={literPris}
-                onChange={(e) => setLiterPris(parseFloat(e.target.value) || 0)}
-                className="w-full px-4 py-3 border rounded-lg"
-              />
+              <div className="relative">
+                <input
+                  type="number"
+                  min="0"
+                  step="0.1"
+                  value={literPris}
+                  onChange={(e) => setLiterPris(parseFloat(e.target.value) || 0)}
+                  className="w-full px-4 py-3 pr-12 border rounded-lg"
+                />
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">kr/l</span>
+              </div>
             </div>
             <div>
               <label className="block text-sm font-medium mb-2">Bilens km/liter</label>
-              <input
-                type="number"
-                min="1"
-                step="0.5"
-                value={kmPerLiter}
-                onChange={(e) => setKmPerLiter(parseFloat(e.target.value) || 1)}
-                className="w-full px-4 py-3 border rounded-lg"
-              />
+              <div className="relative">
+                <input
+                  type="number"
+                  min="1"
+                  step="0.5"
+                  value={kmPerLiter}
+                  onChange={(e) => setKmPerLiter(parseFloat(e.target.value) || 1)}
+                  className="w-full px-4 py-3 pr-12 border rounded-lg"
+                />
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">km/l</span>
+              </div>
               <p className="text-xs text-gray-500 mt-1">Typisk 10-20 km/l afhængig af bil</p>
             </div>
             <div>
               <label className="block text-sm font-medium mb-2">Distance (km)</label>
-              <input
-                type="number"
-                min="0"
-                step="10"
-                value={distance}
-                onChange={(e) => setDistance(parseFloat(e.target.value) || 0)}
-                className="w-full px-4 py-3 border rounded-lg"
-              />
+              <div className="relative">
+                <input
+                  type="number"
+                  min="0"
+                  step="10"
+                  value={distance}
+                  onChange={(e) => setDistance(parseFloat(e.target.value) || 0)}
+                  className="w-full px-4 py-3 pr-12 border rounded-lg"
+                />
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">km</span>
+              </div>
             </div>
           </div>
         )}
+      </div>
+
+      <div className="flex justify-end">
+        <ResetButton onReset={handleReset} />
       </div>
 
       {/* Resultater */}

@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { ShareCalculation } from "@/components/ShareCalculation";
-import { CopyResultButton } from "@/components/ui";
+import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 
@@ -80,6 +80,18 @@ export default function DatoBeregner() {
     };
     return generateShareableLink(state);
   }, [mode, startDato, slutDato, baseDato, antalDage, foedselsdato]);
+
+  const handleReset = useCallback(() => {
+    const today = new Date().toISOString().split("T")[0];
+    const nextMonth = new Date();
+    nextMonth.setMonth(nextMonth.getMonth() + 1);
+    setMode("dage-mellem");
+    setStartDato(today);
+    setSlutDato(nextMonth.toISOString().split("T")[0]);
+    setBaseDato(today);
+    setAntalDage(30);
+    setFoedselsdato("1990-01-01");
+  }, []);
 
   const resultat = useMemo(() => {
     switch (mode) {
@@ -285,12 +297,15 @@ export default function DatoBeregner() {
               <label className="block text-sm font-medium mb-2">
                 Antal {mode === "arbejdsdage" ? "arbejdsdage" : "dage"}
               </label>
-              <input
-                type="number"
-                value={antalDage}
-                onChange={(e) => setAntalDage(parseInt(e.target.value) || 0)}
-                className="w-full px-4 py-3 border rounded-lg"
-              />
+              <div className="relative">
+                <input
+                  type="number"
+                  value={antalDage}
+                  onChange={(e) => setAntalDage(parseInt(e.target.value) || 0)}
+                  className="w-full px-4 py-3 pr-16 border rounded-lg"
+                />
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-gray-400">dage</span>
+              </div>
               <p className="text-xs text-gray-500 mt-1">
                 Brug negativ værdi for at trække fra
               </p>
@@ -311,6 +326,10 @@ export default function DatoBeregner() {
             />
           </div>
         )}
+      </div>
+
+      <div className="flex justify-end">
+        <ResetButton onReset={handleReset} />
       </div>
 
       {/* Resultat */}

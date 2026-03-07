@@ -118,14 +118,14 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 - Tilfoej nyhedsbrev-signup formular (email capture til remarketing)
 
 ### A8. Breadcrumbs paa alle sider
-- [ ] Implementer synlige breadcrumbs paa alle undersider
+- [x] Implementer synlige breadcrumbs paa alle undersider
 - Forside → Kategori → Beregner (fx "Forside > Bolig > Boliglaan Beregner")
 - Brug eksisterende BreadcrumbSchema men tilfoej ogsaa synlig UI-komponent
 - Style breadcrumbs konsistent med resten af designet
 - Test at breadcrumbs virker korrekt i dark mode
 
 ### A9. Forbedrede input-formularer
-- [ ] Opgrader alle beregner-formularer med bedre UX
+- [x] Opgrader alle beregner-formularer med bedre UX
 - Tilfoej enheds-labels inde i input-felter (fx "kr", "%", "aar", "kg")
 - Implementer slider/range inputs som alternativ til talfelter paa relevante beregnere
 - Tilfoej tooltip/info-ikoner med forklaringer ved komplekse felter

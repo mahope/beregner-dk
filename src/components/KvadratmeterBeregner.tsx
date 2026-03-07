@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { ShareCalculation } from "@/components/ShareCalculation";
-import { CopyResultButton } from "@/components/ui";
+import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 
@@ -69,6 +69,19 @@ export default function KvadratmeterBeregner() {
     };
     return generateShareableLink(state);
   }, [formType, laengde, bredde, radius, grundlinje, hoejde, side1, side2, trapezHoejde, prisPerKvm]);
+
+  const handleReset = useCallback(() => {
+    setFormType("rektangel");
+    setLaengde(10);
+    setBredde(8);
+    setRadius(5);
+    setGrundlinje(10);
+    setHoejde(6);
+    setSide1(8);
+    setSide2(12);
+    setTrapezHoejde(5);
+    setPrisPerKvm(0);
+  }, []);
 
   const beregning = useMemo(() => {
     let areal = 0;
@@ -178,25 +191,31 @@ export default function KvadratmeterBeregner() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium mb-2">Længde (meter)</label>
-              <input
-                type="number"
-                min="0"
-                step="0.1"
-                value={laengde}
-                onChange={(e) => setLaengde(parseFloat(e.target.value) || 0)}
-                className="w-full px-4 py-3 border rounded-lg"
-              />
+              <div className="relative">
+                <input
+                  type="number"
+                  min="0"
+                  step="0.1"
+                  value={laengde}
+                  onChange={(e) => setLaengde(parseFloat(e.target.value) || 0)}
+                  className="w-full px-4 py-3 pr-12 border rounded-lg"
+                />
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">m</span>
+              </div>
             </div>
             <div>
               <label className="block text-sm font-medium mb-2">Bredde (meter)</label>
-              <input
-                type="number"
-                min="0"
-                step="0.1"
-                value={bredde}
-                onChange={(e) => setBredde(parseFloat(e.target.value) || 0)}
-                className="w-full px-4 py-3 border rounded-lg"
-              />
+              <div className="relative">
+                <input
+                  type="number"
+                  min="0"
+                  step="0.1"
+                  value={bredde}
+                  onChange={(e) => setBredde(parseFloat(e.target.value) || 0)}
+                  className="w-full px-4 py-3 pr-12 border rounded-lg"
+                />
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">m</span>
+              </div>
             </div>
           </div>
         )}
@@ -204,14 +223,17 @@ export default function KvadratmeterBeregner() {
         {formType === "cirkel" && (
           <div className="max-w-xs">
             <label className="block text-sm font-medium mb-2">Radius (meter)</label>
-            <input
-              type="number"
-              min="0"
-              step="0.1"
-              value={radius}
-              onChange={(e) => setRadius(parseFloat(e.target.value) || 0)}
-              className="w-full px-4 py-3 border rounded-lg"
-            />
+            <div className="relative">
+              <input
+                type="number"
+                min="0"
+                step="0.1"
+                value={radius}
+                onChange={(e) => setRadius(parseFloat(e.target.value) || 0)}
+                className="w-full px-4 py-3 pr-12 border rounded-lg"
+              />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">m</span>
+            </div>
             <p className="text-xs text-gray-500 mt-1">Radius = halvdelen af diameteren</p>
           </div>
         )}
@@ -220,25 +242,31 @@ export default function KvadratmeterBeregner() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium mb-2">Grundlinje (meter)</label>
-              <input
-                type="number"
-                min="0"
-                step="0.1"
-                value={grundlinje}
-                onChange={(e) => setGrundlinje(parseFloat(e.target.value) || 0)}
-                className="w-full px-4 py-3 border rounded-lg"
-              />
+              <div className="relative">
+                <input
+                  type="number"
+                  min="0"
+                  step="0.1"
+                  value={grundlinje}
+                  onChange={(e) => setGrundlinje(parseFloat(e.target.value) || 0)}
+                  className="w-full px-4 py-3 pr-12 border rounded-lg"
+                />
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">m</span>
+              </div>
             </div>
             <div>
               <label className="block text-sm font-medium mb-2">Højde (meter)</label>
-              <input
-                type="number"
-                min="0"
-                step="0.1"
-                value={hoejde}
-                onChange={(e) => setHoejde(parseFloat(e.target.value) || 0)}
-                className="w-full px-4 py-3 border rounded-lg"
-              />
+              <div className="relative">
+                <input
+                  type="number"
+                  min="0"
+                  step="0.1"
+                  value={hoejde}
+                  onChange={(e) => setHoejde(parseFloat(e.target.value) || 0)}
+                  className="w-full px-4 py-3 pr-12 border rounded-lg"
+                />
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">m</span>
+              </div>
               <p className="text-xs text-gray-500 mt-1">Vinkelret afstand til grundlinjen</p>
             </div>
           </div>
@@ -248,39 +276,52 @@ export default function KvadratmeterBeregner() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium mb-2">Øverste side (meter)</label>
-              <input
-                type="number"
-                min="0"
-                step="0.1"
-                value={side1}
-                onChange={(e) => setSide1(parseFloat(e.target.value) || 0)}
-                className="w-full px-4 py-3 border rounded-lg"
-              />
+              <div className="relative">
+                <input
+                  type="number"
+                  min="0"
+                  step="0.1"
+                  value={side1}
+                  onChange={(e) => setSide1(parseFloat(e.target.value) || 0)}
+                  className="w-full px-4 py-3 pr-12 border rounded-lg"
+                />
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">m</span>
+              </div>
             </div>
             <div>
               <label className="block text-sm font-medium mb-2">Nederste side (meter)</label>
-              <input
-                type="number"
-                min="0"
-                step="0.1"
-                value={side2}
-                onChange={(e) => setSide2(parseFloat(e.target.value) || 0)}
-                className="w-full px-4 py-3 border rounded-lg"
-              />
+              <div className="relative">
+                <input
+                  type="number"
+                  min="0"
+                  step="0.1"
+                  value={side2}
+                  onChange={(e) => setSide2(parseFloat(e.target.value) || 0)}
+                  className="w-full px-4 py-3 pr-12 border rounded-lg"
+                />
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">m</span>
+              </div>
             </div>
             <div>
               <label className="block text-sm font-medium mb-2">Højde (meter)</label>
-              <input
-                type="number"
-                min="0"
-                step="0.1"
-                value={trapezHoejde}
-                onChange={(e) => setTrapezHoejde(parseFloat(e.target.value) || 0)}
-                className="w-full px-4 py-3 border rounded-lg"
-              />
+              <div className="relative">
+                <input
+                  type="number"
+                  min="0"
+                  step="0.1"
+                  value={trapezHoejde}
+                  onChange={(e) => setTrapezHoejde(parseFloat(e.target.value) || 0)}
+                  className="w-full px-4 py-3 pr-12 border rounded-lg"
+                />
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">m</span>
+              </div>
             </div>
           </div>
         )}
+      </div>
+
+      <div className="flex justify-end">
+        <ResetButton onReset={handleReset} />
       </div>
 
       {/* Resultat */}
@@ -306,15 +347,18 @@ export default function KvadratmeterBeregner() {
         <div className="flex flex-col md:flex-row gap-4 items-end">
           <div className="flex-1">
             <label className="block text-sm font-medium mb-2">Pris pr. m² (valgfrit)</label>
-            <input
-              type="number"
-              min="0"
-              step="10"
-              value={prisPerKvm || ""}
-              placeholder="0"
-              onChange={(e) => setPrisPerKvm(parseFloat(e.target.value) || 0)}
-              className="w-full px-4 py-3 border rounded-lg"
-            />
+            <div className="relative">
+              <input
+                type="number"
+                min="0"
+                step="10"
+                value={prisPerKvm || ""}
+                placeholder="0"
+                onChange={(e) => setPrisPerKvm(parseFloat(e.target.value) || 0)}
+                className="w-full px-4 py-3 pr-16 border rounded-lg"
+              />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-gray-400">kr/m²</span>
+            </div>
           </div>
           {beregning.totalPris > 0 && (
             <div className="flex-1 p-4 bg-green-100 rounded-lg text-center">

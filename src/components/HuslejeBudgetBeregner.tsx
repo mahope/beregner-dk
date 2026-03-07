@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { ShareCalculation } from "@/components/ShareCalculation";
-import { CopyResultButton } from "@/components/ui";
+import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 
@@ -62,6 +62,19 @@ export default function HuslejeBudgetBeregner() {
     };
     return generateShareableLink(state);
   }, [maanedligNettoLoen, partnerLoen, andreIndkomster, madOgDagligvarer, transport, forsikringer, mobilOgInternet, abonnementer, andreUdgifter, opsparingProcent]);
+
+  const handleReset = useCallback(() => {
+    setMaanedligNettoLoen(28000);
+    setPartnerLoen(0);
+    setAndreIndkomster(0);
+    setMadOgDagligvarer(4000);
+    setTransport(2000);
+    setForsikringer(1000);
+    setMobilOgInternet(500);
+    setAbonnementer(500);
+    setAndreUdgifter(1000);
+    setOpsparingProcent(10);
+  }, []);
 
   const beregning = useMemo(() => {
     // Samlet indkomst
@@ -138,36 +151,45 @@ export default function HuslejeBudgetBeregner() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium mb-2">Din nettoløn pr. måned</label>
-            <input
-              type="number"
-              min="0"
-              step="500"
-              value={maanedligNettoLoen}
-              onChange={(e) => setMaanedligNettoLoen(parseFloat(e.target.value) || 0)}
-              className="w-full px-4 py-3 border rounded-lg"
-            />
+            <div className="relative">
+              <input
+                type="number"
+                min="0"
+                step="500"
+                value={maanedligNettoLoen}
+                onChange={(e) => setMaanedligNettoLoen(parseFloat(e.target.value) || 0)}
+                className="w-full px-4 py-3 pr-12 border rounded-lg"
+              />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">kr</span>
+            </div>
           </div>
           <div>
             <label className="block text-sm font-medium mb-2">Partner/roommate (valgfrit)</label>
-            <input
-              type="number"
-              min="0"
-              step="500"
-              value={partnerLoen}
-              onChange={(e) => setPartnerLoen(parseFloat(e.target.value) || 0)}
-              className="w-full px-4 py-3 border rounded-lg"
-            />
+            <div className="relative">
+              <input
+                type="number"
+                min="0"
+                step="500"
+                value={partnerLoen}
+                onChange={(e) => setPartnerLoen(parseFloat(e.target.value) || 0)}
+                className="w-full px-4 py-3 pr-12 border rounded-lg"
+              />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">kr</span>
+            </div>
           </div>
           <div>
             <label className="block text-sm font-medium mb-2">Andre indkomster</label>
-            <input
-              type="number"
-              min="0"
-              step="100"
-              value={andreIndkomster}
-              onChange={(e) => setAndreIndkomster(parseFloat(e.target.value) || 0)}
-              className="w-full px-4 py-3 border rounded-lg"
-            />
+            <div className="relative">
+              <input
+                type="number"
+                min="0"
+                step="100"
+                value={andreIndkomster}
+                onChange={(e) => setAndreIndkomster(parseFloat(e.target.value) || 0)}
+                className="w-full px-4 py-3 pr-12 border rounded-lg"
+              />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">kr</span>
+            </div>
             <p className="text-xs text-gray-500 mt-1">SU, børnepenge, etc.</p>
           </div>
         </div>
@@ -179,71 +201,47 @@ export default function HuslejeBudgetBeregner() {
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium mb-2">Mad & dagligvarer</label>
-            <input
-              type="number"
-              min="0"
-              step="100"
-              value={madOgDagligvarer}
-              onChange={(e) => setMadOgDagligvarer(parseFloat(e.target.value) || 0)}
-              className="w-full px-4 py-3 border rounded-lg"
-            />
+            <div className="relative">
+              <input type="number" min="0" step="100" value={madOgDagligvarer} onChange={(e) => setMadOgDagligvarer(parseFloat(e.target.value) || 0)} className="w-full px-4 py-3 pr-12 border rounded-lg" />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">kr</span>
+            </div>
           </div>
           <div>
             <label className="block text-sm font-medium mb-2">Transport</label>
-            <input
-              type="number"
-              min="0"
-              step="100"
-              value={transport}
-              onChange={(e) => setTransport(parseFloat(e.target.value) || 0)}
-              className="w-full px-4 py-3 border rounded-lg"
-            />
+            <div className="relative">
+              <input type="number" min="0" step="100" value={transport} onChange={(e) => setTransport(parseFloat(e.target.value) || 0)} className="w-full px-4 py-3 pr-12 border rounded-lg" />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">kr</span>
+            </div>
             <p className="text-xs text-gray-500 mt-1">Bil, bus, tog</p>
           </div>
           <div>
             <label className="block text-sm font-medium mb-2">Forsikringer</label>
-            <input
-              type="number"
-              min="0"
-              step="100"
-              value={forsikringer}
-              onChange={(e) => setForsikringer(parseFloat(e.target.value) || 0)}
-              className="w-full px-4 py-3 border rounded-lg"
-            />
+            <div className="relative">
+              <input type="number" min="0" step="100" value={forsikringer} onChange={(e) => setForsikringer(parseFloat(e.target.value) || 0)} className="w-full px-4 py-3 pr-12 border rounded-lg" />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">kr</span>
+            </div>
           </div>
           <div>
             <label className="block text-sm font-medium mb-2">Mobil & internet</label>
-            <input
-              type="number"
-              min="0"
-              step="50"
-              value={mobilOgInternet}
-              onChange={(e) => setMobilOgInternet(parseFloat(e.target.value) || 0)}
-              className="w-full px-4 py-3 border rounded-lg"
-            />
+            <div className="relative">
+              <input type="number" min="0" step="50" value={mobilOgInternet} onChange={(e) => setMobilOgInternet(parseFloat(e.target.value) || 0)} className="w-full px-4 py-3 pr-12 border rounded-lg" />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">kr</span>
+            </div>
           </div>
           <div>
             <label className="block text-sm font-medium mb-2">Abonnementer</label>
-            <input
-              type="number"
-              min="0"
-              step="50"
-              value={abonnementer}
-              onChange={(e) => setAbonnementer(parseFloat(e.target.value) || 0)}
-              className="w-full px-4 py-3 border rounded-lg"
-            />
+            <div className="relative">
+              <input type="number" min="0" step="50" value={abonnementer} onChange={(e) => setAbonnementer(parseFloat(e.target.value) || 0)} className="w-full px-4 py-3 pr-12 border rounded-lg" />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">kr</span>
+            </div>
             <p className="text-xs text-gray-500 mt-1">Streaming, fitness, etc.</p>
           </div>
           <div>
             <label className="block text-sm font-medium mb-2">Andre udgifter</label>
-            <input
-              type="number"
-              min="0"
-              step="100"
-              value={andreUdgifter}
-              onChange={(e) => setAndreUdgifter(parseFloat(e.target.value) || 0)}
-              className="w-full px-4 py-3 border rounded-lg"
-            />
+            <div className="relative">
+              <input type="number" min="0" step="100" value={andreUdgifter} onChange={(e) => setAndreUdgifter(parseFloat(e.target.value) || 0)} className="w-full px-4 py-3 pr-12 border rounded-lg" />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">kr</span>
+            </div>
             <p className="text-xs text-gray-500 mt-1">Tøj, hobby, etc.</p>
           </div>
         </div>
@@ -267,6 +265,10 @@ export default function HuslejeBudgetBeregner() {
           <span>10% (anbefalet min.)</span>
           <span>30%</span>
         </div>
+      </div>
+
+      <div className="flex justify-end">
+        <ResetButton onReset={handleReset} />
       </div>
 
       {/* Resultat */}

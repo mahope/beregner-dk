@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { Users, Calculator, Percent, Heart } from "lucide-react";
 import { ShareCalculation } from "@/components/ShareCalculation";
-import { CopyResultButton } from "@/components/ui";
+import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 
@@ -120,6 +120,11 @@ export default function ArveafgiftBeregner() {
     return generateShareableLink(state);
   }, [arvebeloeb, relation]);
 
+  const handleReset = useCallback(() => {
+    setArvebeloeb("");
+    setRelation("barn");
+  }, []);
+
   const resultat = useMemo(() => {
     const beloeb = parseFloat(arvebeloeb.replace(/\./g, "").replace(",", "."));
     if (!beloeb || beloeb <= 0) return null;
@@ -235,6 +240,10 @@ export default function ArveafgiftBeregner() {
                 </label>
               ))}
             </div>
+          </div>
+
+          <div className="flex justify-end">
+            <ResetButton onReset={handleReset} />
           </div>
         </div>
       </div>

@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { InputField } from "./InputField";
 import { ShareCalculation } from "@/components/ShareCalculation";
-import { CopyResultButton } from "@/components/ui";
+import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 
@@ -65,6 +65,15 @@ export default function KalorieBeregner() {
     };
     return generateShareableLink(state);
   }, [alder, koen, vaegt, hoejde, aktivitet, maal]);
+
+  const handleReset = useCallback(() => {
+    setAlder(30);
+    setKoen("mand");
+    setVaegt(75);
+    setHoejde(175);
+    setAktivitet("moderat");
+    setMaal("vedligehold");
+  }, []);
 
   const resultat = useMemo(() => {
     // Mifflin-St Jeor formel
@@ -157,9 +166,9 @@ export default function KalorieBeregner() {
             </div>
           </div>
 
-          <InputField label="Alder" value={alder} onChange={setAlder} min={15} max={100} />
-          <InputField label="Vægt (kg)" value={vaegt} onChange={setVaegt} min={30} max={300} />
-          <InputField label="Højde (cm)" value={hoejde} onChange={setHoejde} min={100} max={250} />
+          <InputField label="Alder" value={alder} onChange={setAlder} min={15} max={100} unit="år" />
+          <InputField label="Vægt" value={vaegt} onChange={setVaegt} min={30} max={300} unit="kg" />
+          <InputField label="Højde" value={hoejde} onChange={setHoejde} min={100} max={250} unit="cm" />
         </div>
 
         <div className="space-y-4">
@@ -206,6 +215,10 @@ export default function KalorieBeregner() {
             </div>
           </div>
         </div>
+      </div>
+
+      <div className="flex justify-end">
+        <ResetButton onReset={handleReset} />
       </div>
 
       {/* Resultat */}

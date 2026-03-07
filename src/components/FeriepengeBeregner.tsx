@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { ShareCalculation } from "@/components/ShareCalculation";
-import { CopyResultButton } from "@/components/ui";
+import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 
@@ -45,6 +45,13 @@ export default function FeriepengeBeregner() {
     };
     return generateShareableLink(state);
   }, [bruttoLoen, periode, feriedage, samletFerie]);
+
+  const handleReset = useCallback(() => {
+    setBruttoLoen(40000);
+    setPeriode("maaned");
+    setFeriedage(25);
+    setSamletFerie(true);
+  }, []);
 
   const beregning = useMemo(() => {
     // Konverter til årlig løn
@@ -104,14 +111,17 @@ export default function FeriepengeBeregner() {
             <label className="block text-sm font-medium mb-2">
               Bruttoløn ({periode === "maaned" ? "pr. måned" : "pr. år"})
             </label>
-            <input
-              type="number"
-              min="0"
-              step="1000"
-              value={bruttoLoen}
-              onChange={(e) => setBruttoLoen(parseFloat(e.target.value) || 0)}
-              className="w-full px-4 py-3 border rounded-lg text-lg"
-            />
+            <div className="relative">
+              <input
+                type="number"
+                min="0"
+                step="1000"
+                value={bruttoLoen}
+                onChange={(e) => setBruttoLoen(parseFloat(e.target.value) || 0)}
+                className="w-full px-4 py-3 pr-12 border rounded-lg text-lg"
+              />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">kr</span>
+            </div>
           </div>
 
           <div>
@@ -146,14 +156,17 @@ export default function FeriepengeBeregner() {
             <label className="block text-sm font-medium mb-2">
               Antal feriedage at udbetale
             </label>
-            <input
-              type="number"
-              min="1"
-              max="25"
-              value={feriedage}
-              onChange={(e) => setFeriedage(parseInt(e.target.value) || 25)}
-              className="w-full px-4 py-3 border rounded-lg text-lg"
-            />
+            <div className="relative">
+              <input
+                type="number"
+                min="1"
+                max="25"
+                value={feriedage}
+                onChange={(e) => setFeriedage(parseInt(e.target.value) || 25)}
+                className="w-full px-4 py-3 pr-14 border rounded-lg text-lg"
+              />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">dage</span>
+            </div>
             <p className="text-xs text-gray-500 mt-1">
               Fuld ferie = 25 dage (5 uger)
             </p>
@@ -172,6 +185,10 @@ export default function FeriepengeBeregner() {
             </label>
           </div>
         </div>
+      </div>
+
+      <div className="flex justify-end">
+        <ResetButton onReset={handleReset} />
       </div>
 
       {/* Resultat */}

@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { InputField } from "./InputField";
 import { ShareCalculation } from "@/components/ShareCalculation";
-import { CopyResultButton } from "@/components/ui";
+import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 
@@ -72,6 +72,19 @@ export default function TimeprisBeregner() {
   }, [beregningsType, oensketNettoLoen, arbejdstimerUge, ferieUger,
       sygdomsBuffer, administrativTid, transportTid, driftsomkostninger,
       timepris, fakturerbareTimer]);
+
+  const handleReset = useCallback(() => {
+    setBeregningsType("fraLoen");
+    setOensketNettoLoen(35000);
+    setArbejdstimerUge(37);
+    setFerieUger(5);
+    setSygdomsBuffer(5);
+    setAdministrativTid(20);
+    setTransportTid(0);
+    setDriftsomkostninger(3000);
+    setTimepris(600);
+    setFakturerbareTimer(120);
+  }, []);
 
   const beregningFraLoen = useMemo(() => {
     const skatProcent = 0.45;
@@ -162,6 +175,10 @@ export default function TimeprisBeregner() {
         >
           Se din indtjening
         </button>
+      </div>
+
+      <div className="flex justify-end">
+        <ResetButton onReset={handleReset} />
       </div>
 
       {beregningsType === "fraLoen" ? (

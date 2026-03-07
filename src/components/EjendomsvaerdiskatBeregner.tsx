@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { Home, Percent, Calculator } from "lucide-react";
 import { ShareCalculation } from "@/components/ShareCalculation";
-import { CopyResultButton } from "@/components/ui";
+import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 
@@ -103,6 +103,13 @@ export default function EjendomsvaerdiskatBeregner() {
     return generateShareableLink(state);
   }, [ejendomsvaerdi, grundvaerdi, valgtKommune, customPromille]);
 
+  const handleReset = useCallback(() => {
+    setEjendomsvaerdi(3000000);
+    setGrundvaerdi(1000000);
+    setValgtKommune("koebenhavn");
+    setCustomPromille(6.0);
+  }, []);
+
   const grundskyldPromille =
     valgtKommune === "custom"
       ? customPromille
@@ -162,17 +169,20 @@ export default function EjendomsvaerdiskatBeregner() {
               <Home className="inline w-4 h-4 mr-1" />
               Ejendomsværdi (kr)
             </label>
-            <input
-              type="number"
-              min="0"
-              max="50000000"
-              step="50000"
-              value={ejendomsvaerdi}
-              onChange={(e) =>
-                setEjendomsvaerdi(parseFloat(e.target.value) || 0)
-              }
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg text-lg dark:bg-gray-700 dark:text-white"
-            />
+            <div className="relative">
+              <input
+                type="number"
+                min="0"
+                max="50000000"
+                step="50000"
+                value={ejendomsvaerdi}
+                onChange={(e) =>
+                  setEjendomsvaerdi(parseFloat(e.target.value) || 0)
+                }
+                className="w-full px-4 py-3 pr-12 border border-gray-300 dark:border-gray-600 rounded-lg text-lg dark:bg-gray-700 dark:text-white"
+              />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">kr</span>
+            </div>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
               Vurdering fra Vurderingsstyrelsen ({formatKr(ejendomsvaerdi)})
             </p>
@@ -183,17 +193,20 @@ export default function EjendomsvaerdiskatBeregner() {
               <Percent className="inline w-4 h-4 mr-1" />
               Grundværdi (kr)
             </label>
-            <input
-              type="number"
-              min="0"
-              max="20000000"
-              step="25000"
-              value={grundvaerdi}
-              onChange={(e) =>
-                setGrundvaerdi(parseFloat(e.target.value) || 0)
-              }
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg text-lg dark:bg-gray-700 dark:text-white"
-            />
+            <div className="relative">
+              <input
+                type="number"
+                min="0"
+                max="20000000"
+                step="25000"
+                value={grundvaerdi}
+                onChange={(e) =>
+                  setGrundvaerdi(parseFloat(e.target.value) || 0)
+                }
+                className="w-full px-4 py-3 pr-12 border border-gray-300 dark:border-gray-600 rounded-lg text-lg dark:bg-gray-700 dark:text-white"
+              />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">kr</span>
+            </div>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
               Grundens vurdering ({formatKr(grundvaerdi)})
             </p>
@@ -223,17 +236,20 @@ export default function EjendomsvaerdiskatBeregner() {
                 <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">
                   Grundskyldspromille (‰)
                 </label>
-                <input
-                  type="number"
-                  min="1"
-                  max="35"
-                  step="0.1"
-                  value={customPromille}
-                  onChange={(e) =>
-                    setCustomPromille(parseFloat(e.target.value) || 6)
-                  }
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
-                />
+                <div className="relative">
+                  <input
+                    type="number"
+                    min="1"
+                    max="35"
+                    step="0.1"
+                    value={customPromille}
+                    onChange={(e) =>
+                      setCustomPromille(parseFloat(e.target.value) || 6)
+                    }
+                    className="w-full px-4 py-2 pr-12 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
+                  />
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">‰</span>
+                </div>
               </div>
             )}
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
@@ -252,6 +268,10 @@ export default function EjendomsvaerdiskatBeregner() {
             </p>
           </div>
         </div>
+      </div>
+
+      <div className="flex justify-end">
+        <ResetButton onReset={handleReset} />
       </div>
 
       {/* Resultat */}

@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { ShareCalculation } from "@/components/ShareCalculation";
-import { CopyResultButton } from "@/components/ui";
+import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 
@@ -41,6 +41,13 @@ export default function RenteBeregner() {
       hasTracked.current = true;
     }, 2000);
     return () => { clearTimeout(timer); cleanupScroll(); };
+  }, []);
+
+  const handleReset = useCallback(() => {
+    setHovedstol(1000000);
+    setRente(5);
+    setLoebetid(30);
+    setType("annuitet");
   }, []);
 
   const getShareableLink = useCallback(() => {
@@ -148,29 +155,35 @@ export default function RenteBeregner() {
             <label className="block text-sm font-medium mb-2">
               Lånebeløb (hovedstol)
             </label>
-            <input
-              type="number"
-              min="0"
-              step="10000"
-              value={hovedstol}
-              onChange={(e) => setHovedstol(parseFloat(e.target.value) || 0)}
-              className="w-full px-4 py-3 border rounded-lg text-lg"
-            />
+            <div className="relative">
+              <input
+                type="number"
+                min="0"
+                step="10000"
+                value={hovedstol}
+                onChange={(e) => setHovedstol(parseFloat(e.target.value) || 0)}
+                className="w-full px-4 py-3 pr-12 border rounded-lg text-lg"
+              />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">kr</span>
+            </div>
           </div>
 
           <div>
             <label className="block text-sm font-medium mb-2">
               Årlig rente (%)
             </label>
-            <input
-              type="number"
-              min="0"
-              max="30"
-              step="0.1"
-              value={rente}
-              onChange={(e) => setRente(parseFloat(e.target.value) || 0)}
-              className="w-full px-4 py-3 border rounded-lg text-lg"
-            />
+            <div className="relative">
+              <input
+                type="number"
+                min="0"
+                max="30"
+                step="0.1"
+                value={rente}
+                onChange={(e) => setRente(parseFloat(e.target.value) || 0)}
+                className="w-full px-4 py-3 pr-12 border rounded-lg text-lg"
+              />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">%</span>
+            </div>
           </div>
         </div>
 
@@ -179,14 +192,17 @@ export default function RenteBeregner() {
             <label className="block text-sm font-medium mb-2">
               Løbetid (år)
             </label>
-            <input
-              type="number"
-              min="1"
-              max="50"
-              value={loebetid}
-              onChange={(e) => setLoebetid(parseInt(e.target.value) || 0)}
-              className="w-full px-4 py-3 border rounded-lg text-lg"
-            />
+            <div className="relative">
+              <input
+                type="number"
+                min="1"
+                max="50"
+                value={loebetid}
+                onChange={(e) => setLoebetid(parseInt(e.target.value) || 0)}
+                className="w-full px-4 py-3 pr-12 border rounded-lg text-lg"
+              />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">år</span>
+            </div>
           </div>
 
           <div>
@@ -215,6 +231,10 @@ export default function RenteBeregner() {
             </div>
           </div>
         </div>
+      </div>
+
+      <div className="flex justify-end">
+        <ResetButton onReset={handleReset} />
       </div>
 
       {/* Resultater */}

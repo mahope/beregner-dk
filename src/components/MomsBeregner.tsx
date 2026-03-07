@@ -5,7 +5,7 @@ import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { ShareCalculation } from "@/components/ShareCalculation";
 import { PrintResult } from "@/components/PrintResult";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
-import { AnimatedNumber, CopyResultButton } from "@/components/ui";
+import { AnimatedNumber, CopyResultButton, ResetButton } from "@/components/ui";
 
 // Dansk momssats
 const MOMS_SATS = 0.25; // 25%
@@ -27,6 +27,11 @@ export default function MomsBeregner() {
       if (inputs.beloeb !== undefined) setBeloeb(inputs.beloeb);
       if (inputs.beregningsType) setBeregningsType(inputs.beregningsType);
     }
+  }, []);
+
+  const handleReset = useCallback(() => {
+    setBeloeb(1000);
+    setBeregningsType("tillaegMoms");
   }, []);
 
   // Get shareable link for current calculation
@@ -171,6 +176,10 @@ export default function MomsBeregner() {
           />
           <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">kr</span>
         </div>
+      </div>
+
+      <div className="flex justify-end">
+        <ResetButton onReset={handleReset} />
       </div>
 
       {/* Resultat */}
