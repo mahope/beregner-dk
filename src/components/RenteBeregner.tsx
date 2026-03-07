@@ -152,7 +152,7 @@ export default function RenteBeregner() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-2">
+            <label className="block text-sm font-medium mb-2 dark:text-gray-200">
               Lånebeløb (hovedstol)
             </label>
             <div className="relative">
@@ -162,14 +162,14 @@ export default function RenteBeregner() {
                 step="10000"
                 value={hovedstol}
                 onChange={(e) => setHovedstol(parseFloat(e.target.value) || 0)}
-                className="w-full px-4 py-3 pr-12 border rounded-lg text-lg"
+                className="w-full px-4 py-3 pr-12 border rounded-lg text-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">kr</span>
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-400">kr</span>
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">
+            <label className="block text-sm font-medium mb-2 dark:text-gray-200">
               Årlig rente (%)
             </label>
             <div className="relative">
@@ -180,16 +180,16 @@ export default function RenteBeregner() {
                 step="0.1"
                 value={rente}
                 onChange={(e) => setRente(parseFloat(e.target.value) || 0)}
-                className="w-full px-4 py-3 pr-12 border rounded-lg text-lg"
+                className="w-full px-4 py-3 pr-12 border rounded-lg text-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">%</span>
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-400">%</span>
             </div>
           </div>
         </div>
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-2">
+            <label className="block text-sm font-medium mb-2 dark:text-gray-200">
               Løbetid (år)
             </label>
             <div className="relative">
@@ -199,21 +199,21 @@ export default function RenteBeregner() {
                 max="50"
                 value={loebetid}
                 onChange={(e) => setLoebetid(parseInt(e.target.value) || 0)}
-                className="w-full px-4 py-3 pr-12 border rounded-lg text-lg"
+                className="w-full px-4 py-3 pr-12 border rounded-lg text-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">år</span>
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-400">år</span>
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">Låntype</label>
+            <label className="block text-sm font-medium mb-2 dark:text-gray-200">Låntype</label>
             <div className="flex gap-4">
               <button
                 onClick={() => setType("annuitet")}
                 className={`flex-1 py-3 rounded-lg border-2 transition-colors ${
                   type === "annuitet"
-                    ? "border-blue-500 bg-blue-50 text-blue-700"
-                    : "border-gray-200 hover:border-gray-300"
+                    ? "border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
+                    : "border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500 dark:text-gray-200"
                 }`}
               >
                 Annuitetslån
@@ -222,8 +222,8 @@ export default function RenteBeregner() {
                 onClick={() => setType("serielaan")}
                 className={`flex-1 py-3 rounded-lg border-2 transition-colors ${
                   type === "serielaan"
-                    ? "border-blue-500 bg-blue-50 text-blue-700"
-                    : "border-gray-200 hover:border-gray-300"
+                    ? "border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
+                    : "border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500 dark:text-gray-200"
                 }`}
               >
                 Serielån
@@ -243,34 +243,34 @@ export default function RenteBeregner() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {beregning.type === "annuitet" ? (
               <>
-                <div className="p-6 bg-blue-100 rounded-xl text-center">
-                  <p className="text-sm text-gray-600 mb-1">Månedlig ydelse</p>
-                  <p className="text-3xl font-bold text-blue-700">
+                <div className="p-6 bg-blue-100 rounded-xl text-center dark:bg-blue-900/20">
+                  <p className="text-sm text-gray-600 mb-1 dark:text-gray-400">Månedlig ydelse</p>
+                  <p className="text-3xl font-bold text-blue-700 dark:text-blue-300">
                     {formatKr(beregning.maanedligYdelse)}
                   </p>
                 </div>
-                <div className="p-6 bg-blue-50 rounded-xl text-center">
-                  <p className="text-sm text-gray-600 mb-1">Årlig ydelse</p>
-                  <p className="text-3xl font-bold text-blue-600">
+                <div className="p-6 bg-blue-50 rounded-xl text-center dark:bg-blue-900/20">
+                  <p className="text-sm text-gray-600 mb-1 dark:text-gray-400">Årlig ydelse</p>
+                  <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">
                     {formatKr(beregning.aarligYdelse)}
                   </p>
                 </div>
               </>
             ) : (
               <>
-                <div className="p-6 bg-blue-100 rounded-xl text-center">
-                  <p className="text-sm text-gray-600 mb-1">
+                <div className="p-6 bg-blue-100 rounded-xl text-center dark:bg-blue-900/20">
+                  <p className="text-sm text-gray-600 mb-1 dark:text-gray-400">
                     Første måneds ydelse
                   </p>
-                  <p className="text-3xl font-bold text-blue-700">
+                  <p className="text-3xl font-bold text-blue-700 dark:text-blue-300">
                     {formatKr(beregning.foersteMaanedsYdelse)}
                   </p>
                 </div>
-                <div className="p-6 bg-green-100 rounded-xl text-center">
-                  <p className="text-sm text-gray-600 mb-1">
+                <div className="p-6 bg-green-100 rounded-xl text-center dark:bg-green-900/20">
+                  <p className="text-sm text-gray-600 mb-1 dark:text-gray-400">
                     Sidste måneds ydelse
                   </p>
-                  <p className="text-3xl font-bold text-green-700">
+                  <p className="text-3xl font-bold text-green-700 dark:text-green-400">
                     {formatKr(beregning.sidsteMaanedsYdelse)}
                   </p>
                 </div>
@@ -279,45 +279,45 @@ export default function RenteBeregner() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="p-4 bg-gray-100 rounded-lg text-center">
-              <p className="text-sm text-gray-600 mb-1">Lånebeløb</p>
-              <p className="text-xl font-bold">{formatKr(hovedstol)}</p>
+            <div className="p-4 bg-gray-100 rounded-lg text-center dark:bg-gray-800">
+              <p className="text-sm text-gray-600 mb-1 dark:text-gray-400">Lånebeløb</p>
+              <p className="text-xl font-bold dark:text-white">{formatKr(hovedstol)}</p>
             </div>
-            <div className="p-4 bg-red-50 rounded-lg text-center">
-              <p className="text-sm text-gray-600 mb-1">Samlet rente</p>
-              <p className="text-xl font-bold text-red-600">
+            <div className="p-4 bg-red-50 rounded-lg text-center dark:bg-red-900/20">
+              <p className="text-sm text-gray-600 mb-1 dark:text-gray-400">Samlet rente</p>
+              <p className="text-xl font-bold text-red-600 dark:text-red-400">
                 {formatKr(beregning.samletRente)}
               </p>
             </div>
-            <div className="p-4 bg-yellow-50 rounded-lg text-center">
-              <p className="text-sm text-gray-600 mb-1">
+            <div className="p-4 bg-yellow-50 rounded-lg text-center dark:bg-yellow-900/20">
+              <p className="text-sm text-gray-600 mb-1 dark:text-gray-400">
                 Samlet tilbagebetaling
               </p>
-              <p className="text-xl font-bold text-yellow-700">
+              <p className="text-xl font-bold text-yellow-700 dark:text-yellow-400">
                 {formatKr(beregning.samletBetaling)}
               </p>
             </div>
           </div>
 
           {/* Første år breakdown */}
-          <details className="bg-gray-50 rounded-lg">
-            <summary className="p-4 cursor-pointer font-medium">
+          <details className="bg-gray-50 rounded-lg dark:bg-gray-800 dark:border dark:border-gray-700">
+            <summary className="p-4 cursor-pointer font-medium dark:text-gray-200">
               Se første års beregning
             </summary>
-            <div className="p-4 pt-0 space-y-2 text-sm">
+            <div className="p-4 pt-0 space-y-2 text-sm dark:text-gray-300">
               <div className="flex justify-between">
                 <span>Rente første år</span>
-                <span className="text-red-600">
+                <span className="text-red-600 dark:text-red-400">
                   {formatKr(beregning.foersteAarRente)}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span>Afdrag første år</span>
-                <span className="text-green-600">
+                <span className="text-green-600 dark:text-green-400">
                   {formatKr(beregning.foersteAarAfdrag)}
                 </span>
               </div>
-              <div className="flex justify-between font-medium border-t pt-2">
+              <div className="flex justify-between font-medium border-t pt-2 dark:border-gray-700">
                 <span>Samlet ydelse første år</span>
                 <span>
                   {formatKr(
@@ -325,7 +325,7 @@ export default function RenteBeregner() {
                   )}
                 </span>
               </div>
-              <div className="flex justify-between text-gray-600 border-t pt-2">
+              <div className="flex justify-between text-gray-600 border-t pt-2 dark:text-gray-400 dark:border-gray-700">
                 <span>Restgæld efter 1 år</span>
                 <span>{formatKr(hovedstol - beregning.foersteAarAfdrag)}</span>
               </div>
@@ -343,11 +343,11 @@ export default function RenteBeregner() {
           </div>
 
           {/* Låntype forklaring */}
-          <div className="p-4 bg-blue-50 rounded-lg">
-            <h3 className="font-medium mb-2">
+          <div className="p-4 bg-blue-50 rounded-lg dark:bg-blue-900/20">
+            <h3 className="font-medium mb-2 dark:text-white">
               {type === "annuitet" ? "Om annuitetslån" : "Om serielån"}
             </h3>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
               {type === "annuitet"
                 ? "Ved annuitetslån er din månedlige ydelse fast gennem hele lånets løbetid. I starten betaler du mest i rente og mindst i afdrag. Over tid skifter forholdet, så du betaler mere i afdrag og mindre i rente."
                 : "Ved serielån er dit månedlige afdrag fast, men den samlede ydelse falder over tid, fordi renten beregnes af en stadig mindre restgæld. Du betaler mindre i samlet rente, men starter med højere ydelser."}

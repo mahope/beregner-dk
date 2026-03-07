@@ -138,12 +138,12 @@ export default function EfterloensBeregner() {
   }, [birthYear, insurance, yearsContributed, postpone2Years, workWhileOnEfterloen, hoursPerYear]);
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 md:p-8">
       <div className="grid md:grid-cols-2 gap-6">
         {/* Input Section */}
         <div className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
               Fødselsår
             </label>
             <input
@@ -152,12 +152,12 @@ export default function EfterloensBeregner() {
               onChange={(e) => setBirthYear(e.target.value)}
               min="1955"
               max="1990"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:ring-blue-400"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
               Forsikringsstatus
             </label>
             <div className="flex gap-4">
@@ -165,8 +165,8 @@ export default function EfterloensBeregner() {
                 onClick={() => setInsurance('full')}
                 className={`flex-1 py-3 px-4 rounded-lg border-2 transition-all ${
                   insurance === 'full'
-                    ? 'border-blue-500 bg-blue-50'
-                    : 'border-gray-200 hover:border-gray-300'
+                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-300'
+                    : 'border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500 dark:text-gray-200'
                 }`}
               >
                 Fuldtid
@@ -175,8 +175,8 @@ export default function EfterloensBeregner() {
                 onClick={() => setInsurance('part')}
                 className={`flex-1 py-3 px-4 rounded-lg border-2 transition-all ${
                   insurance === 'part'
-                    ? 'border-blue-500 bg-blue-50'
-                    : 'border-gray-200 hover:border-gray-300'
+                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-300'
+                    : 'border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500 dark:text-gray-200'
                 }`}
               >
                 Deltid
@@ -185,7 +185,7 @@ export default function EfterloensBeregner() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
               År med efterlønsbidrag
             </label>
             <div className="relative">
@@ -195,9 +195,9 @@ export default function EfterloensBeregner() {
                 onChange={(e) => setYearsContributed(e.target.value)}
                 min="0"
                 max="40"
-                className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:ring-blue-400"
               />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">år</span>
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">år</span>
             </div>
           </div>
 
@@ -207,9 +207,9 @@ export default function EfterloensBeregner() {
                 type="checkbox"
                 checked={postpone2Years}
                 onChange={(e) => setPostpone2Years(e.target.checked)}
-                className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
+                className="w-5 h-5 text-blue-600 dark:text-blue-500 rounded focus:ring-blue-500 dark:focus:ring-blue-400"
               />
-              <span className="text-sm text-gray-700">
+              <span className="text-sm text-gray-700 dark:text-gray-200">
                 Jeg udskyder efterløn 2 år (højere sats)
               </span>
             </label>
@@ -219,9 +219,9 @@ export default function EfterloensBeregner() {
                 type="checkbox"
                 checked={workWhileOnEfterloen}
                 onChange={(e) => setWorkWhileOnEfterloen(e.target.checked)}
-                className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
+                className="w-5 h-5 text-blue-600 dark:text-blue-500 rounded focus:ring-blue-500 dark:focus:ring-blue-400"
               />
-              <span className="text-sm text-gray-700">
+              <span className="text-sm text-gray-700 dark:text-gray-200">
                 Jeg vil arbejde ved siden af
               </span>
             </label>
@@ -229,7 +229,7 @@ export default function EfterloensBeregner() {
 
           {workWhileOnEfterloen && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
                 Forventede arbejdstimer pr. år
               </label>
               <div className="relative">
@@ -239,11 +239,11 @@ export default function EfterloensBeregner() {
                   onChange={(e) => setHoursPerYear(e.target.value)}
                   min="0"
                   max="1924"
-                  className="w-full px-4 py-3 pr-14 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-4 py-3 pr-14 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:ring-blue-400"
                 />
-                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">timer</span>
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 text-sm">timer</span>
               </div>
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                 Ved mindst 962 timer/år kan du optjene skattefri præmie
               </p>
             </div>
@@ -255,68 +255,68 @@ export default function EfterloensBeregner() {
         </div>
 
         {/* Result Section */}
-        <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6">
+        <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-xl p-6">
           {result.eligible ? (
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                 Din efterløn
               </h3>
 
-              <div className="bg-white rounded-lg p-4 shadow-sm">
-                <div className="text-sm text-gray-500">Efterlønsalder</div>
-                <div className="text-2xl font-bold text-gray-900">
+              <div className="bg-white dark:bg-gray-700 rounded-lg p-4 shadow-sm">
+                <div className="text-sm text-gray-500 dark:text-gray-400">Efterlønsalder</div>
+                <div className="text-2xl font-bold text-gray-900 dark:text-white">
                   {result.efterloenAge} år
                 </div>
-                <div className="text-xs text-gray-500 mt-1">
+                <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                   Folkepension: {result.folkepensionAge} år
                 </div>
               </div>
 
-              <div className="bg-white rounded-lg p-4 shadow-sm">
-                <div className="text-sm text-gray-500">Månedlig efterløn</div>
-                <div className="text-2xl font-bold text-gray-900">
+              <div className="bg-white dark:bg-gray-700 rounded-lg p-4 shadow-sm">
+                <div className="text-sm text-gray-500 dark:text-gray-400">Månedlig efterløn</div>
+                <div className="text-2xl font-bold text-gray-900 dark:text-white">
                   {result.monthlyAmount?.toLocaleString('da-DK')} kr.
                 </div>
-                <div className="text-sm text-green-600">
+                <div className="text-sm text-green-600 dark:text-green-400">
                   ~{result.monthlyAfterTax?.toLocaleString('da-DK')} kr. efter skat
                 </div>
                 {result.postponeBonus && (
-                  <div className="text-xs text-blue-600 mt-1">
+                  <div className="text-xs text-blue-600 dark:text-blue-400 mt-1">
                     ✨ Forhøjet sats (100%) pga. 2 års udskydelse
                   </div>
                 )}
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <div className="bg-white rounded-lg p-3 shadow-sm">
-                  <div className="text-xs text-gray-500">Efterlønsperiode</div>
-                  <div className="text-lg font-semibold text-gray-900">
+                <div className="bg-white dark:bg-gray-700 rounded-lg p-3 shadow-sm">
+                  <div className="text-xs text-gray-500 dark:text-gray-400">Efterlønsperiode</div>
+                  <div className="text-lg font-semibold text-gray-900 dark:text-white">
                     {result.efterloenYears} år
                   </div>
                 </div>
-                <div className="bg-white rounded-lg p-3 shadow-sm">
-                  <div className="text-xs text-gray-500">Samlet efterløn</div>
-                  <div className="text-lg font-semibold text-gray-900">
+                <div className="bg-white dark:bg-gray-700 rounded-lg p-3 shadow-sm">
+                  <div className="text-xs text-gray-500 dark:text-gray-400">Samlet efterløn</div>
+                  <div className="text-lg font-semibold text-gray-900 dark:text-white">
                     {((result.totalAmount || 0) / 1000).toFixed(0)}k kr.
                   </div>
                 </div>
               </div>
 
               {workWhileOnEfterloen && result.praemiePortioner && result.praemiePortioner > 0 && (
-                <div className="bg-yellow-50 rounded-lg p-4">
-                  <div className="text-sm text-yellow-800">
+                <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-4">
+                  <div className="text-sm text-yellow-800 dark:text-yellow-300">
                     <strong>🏆 Skattefri præmie</strong>
                   </div>
-                  <div className="text-lg font-semibold text-yellow-700 mt-1">
+                  <div className="text-lg font-semibold text-yellow-700 dark:text-yellow-400 mt-1">
                     {result.praemiePortioner} portioner = {result.totalPraemie?.toLocaleString('da-DK')} kr.
                   </div>
-                  <p className="text-xs text-yellow-600 mt-1">
+                  <p className="text-xs text-yellow-600 dark:text-yellow-500 mt-1">
                     Udbetales skattefrit ved folkepensionsalderen
                   </p>
                 </div>
               )}
 
-              <div className="text-xs text-gray-500 mt-4">
+              <div className="text-xs text-gray-500 dark:text-gray-400 mt-4">
                 * Beregningen er vejledende. Kontakt din a-kasse for præcise tal.
               </div>
             </div>
@@ -342,16 +342,16 @@ export default function EfterloensBeregner() {
 
       {/* Info boxes */}
       <div className="grid md:grid-cols-2 gap-4 mt-6">
-        <div className="bg-blue-50 rounded-lg p-4">
-          <h4 className="font-semibold text-blue-800 mb-2">💡 2-års reglen</h4>
-          <p className="text-sm text-blue-700">
+        <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
+          <h4 className="font-semibold text-blue-800 dark:text-blue-300 mb-2">💡 2-års reglen</h4>
+          <p className="text-sm text-blue-700 dark:text-blue-400">
             Udskyder du efterlønnen i mindst 2 år efter efterlønsalderen, 
             får du fuld dagpengesats (100%) i stedet for 91%.
           </p>
         </div>
-        <div className="bg-green-50 rounded-lg p-4">
-          <h4 className="font-semibold text-green-800 mb-2">🏆 Præmieordningen</h4>
-          <p className="text-sm text-green-700">
+        <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
+          <h4 className="font-semibold text-green-800 dark:text-green-300 mb-2">🏆 Præmieordningen</h4>
+          <p className="text-sm text-green-700 dark:text-green-400">
             Arbejder du mindst 962 timer/år mens du er på efterløn, 
             kan du optjene skattefri præmieportioner på ca. 15.500 kr. hver.
           </p>

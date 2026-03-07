@@ -167,26 +167,26 @@ export default function AlderBeregner() {
       {/* Input */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label className="block text-sm font-medium mb-2">Fødselsdato</label>
+          <label className="block text-sm font-medium mb-2 dark:text-gray-200">Fødselsdato</label>
           <input
             type="date"
             value={foedselsdato}
             onChange={(e) => setFoedselsdato(e.target.value)}
             max={beregningsDato}
-            className="w-full px-4 py-3 border rounded-lg text-lg"
+            className="w-full px-4 py-3 border rounded-lg text-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-2">Beregn alder pr. dato</label>
+          <label className="block text-sm font-medium mb-2 dark:text-gray-200">Beregn alder pr. dato</label>
           <input
             type="date"
             value={beregningsDato}
             onChange={(e) => setBeregningsDato(e.target.value)}
-            className="w-full px-4 py-3 border rounded-lg text-lg"
+            className="w-full px-4 py-3 border rounded-lg text-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white"
           />
           <button
             onClick={() => setBeregningsDato(new Date().toISOString().split("T")[0])}
-            className="text-sm text-blue-600 hover:text-blue-800 mt-1"
+            className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 mt-1"
           >
             Brug i dag
           </button>
@@ -211,8 +211,8 @@ export default function AlderBeregner() {
           </div>
 
           {/* Næste fødselsdag */}
-          <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-center">
-            <p className="text-yellow-800">
+          <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg text-center">
+            <p className="text-yellow-800 dark:text-yellow-300">
               🎂 Der er <strong>{beregning.dageTilFoedselsdag} dage</strong> til din næste fødselsdag
               (du fylder {beregning.naesteFoedselsdagAlder} år)
             </p>
@@ -220,45 +220,45 @@ export default function AlderBeregner() {
 
           {/* Statistikker */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="p-4 bg-white border rounded-lg text-center">
-              <p className="text-2xl font-bold text-blue-600">{formatNumber(beregning.totalDage)}</p>
-              <p className="text-sm text-gray-500">Dage levet</p>
+            <div className="p-4 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg text-center">
+              <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{formatNumber(beregning.totalDage)}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Dage levet</p>
             </div>
-            <div className="p-4 bg-white border rounded-lg text-center">
-              <p className="text-2xl font-bold text-blue-600">{formatNumber(beregning.totalUger)}</p>
-              <p className="text-sm text-gray-500">Uger levet</p>
+            <div className="p-4 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg text-center">
+              <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{formatNumber(beregning.totalUger)}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Uger levet</p>
             </div>
-            <div className="p-4 bg-white border rounded-lg text-center">
-              <p className="text-2xl font-bold text-blue-600">{formatNumber(beregning.totalMaaneder)}</p>
-              <p className="text-sm text-gray-500">Måneder levet</p>
+            <div className="p-4 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg text-center">
+              <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{formatNumber(beregning.totalMaaneder)}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Måneder levet</p>
             </div>
-            <div className="p-4 bg-white border rounded-lg text-center">
-              <p className="text-2xl font-bold text-blue-600">{formatNumber(beregning.totalTimer)}</p>
-              <p className="text-sm text-gray-500">Timer levet</p>
+            <div className="p-4 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg text-center">
+              <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{formatNumber(beregning.totalTimer)}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Timer levet</p>
             </div>
           </div>
 
           {/* Fun facts */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="p-4 bg-purple-50 rounded-lg">
+            <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
               <div className="flex items-center gap-3">
                 <span className="text-4xl">{beregning.stjernetegn.symbol}</span>
                 <div>
-                  <p className="font-medium">Stjernetegn: {beregning.stjernetegn.navn}</p>
-                  <p className="text-sm text-gray-500">{beregning.stjernetegn.periode}</p>
+                  <p className="font-medium dark:text-gray-200">Stjernetegn: {beregning.stjernetegn.navn}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{beregning.stjernetegn.periode}</p>
                 </div>
               </div>
             </div>
-            <div className="p-4 bg-green-50 rounded-lg">
+            <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
               <div className="flex items-center gap-3">
                 <span className="text-4xl">📅</span>
                 <div>
-                  <p className="font-medium">Født på en {beregning.ugedagFoedt}</p>
-                  <p className="text-sm text-gray-500">
-                    {new Date(foedselsdato).toLocaleDateString("da-DK", { 
-                      day: "numeric", 
-                      month: "long", 
-                      year: "numeric" 
+                  <p className="font-medium dark:text-gray-200">Født på en {beregning.ugedagFoedt}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    {new Date(foedselsdato).toLocaleDateString("da-DK", {
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric"
                     })}
                   </p>
                 </div>
@@ -267,30 +267,30 @@ export default function AlderBeregner() {
           </div>
 
           {/* Detaljeret tabel */}
-          <div className="bg-white border rounded-lg overflow-hidden">
-            <div className="p-4 bg-gray-50 border-b">
-              <h3 className="font-medium">Detaljeret aldersberegning</h3>
+          <div className="bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg overflow-hidden">
+            <div className="p-4 bg-gray-50 dark:bg-gray-900/50 border-b dark:border-gray-700">
+              <h3 className="font-medium dark:text-white">Detaljeret aldersberegning</h3>
             </div>
             <div className="p-4">
-              <table className="w-full text-sm">
+              <table className="w-full text-sm dark:text-gray-200">
                 <tbody>
-                  <tr className="border-b">
+                  <tr className="border-b dark:border-gray-700">
                     <td className="py-2">Alder i år</td>
                     <td className="py-2 text-right font-mono">{beregning.aar}</td>
                   </tr>
-                  <tr className="border-b">
+                  <tr className="border-b dark:border-gray-700">
                     <td className="py-2">Alder i måneder</td>
                     <td className="py-2 text-right font-mono">{formatNumber(beregning.totalMaaneder)}</td>
                   </tr>
-                  <tr className="border-b">
+                  <tr className="border-b dark:border-gray-700">
                     <td className="py-2">Alder i uger</td>
                     <td className="py-2 text-right font-mono">{formatNumber(beregning.totalUger)}</td>
                   </tr>
-                  <tr className="border-b">
+                  <tr className="border-b dark:border-gray-700">
                     <td className="py-2">Alder i dage</td>
                     <td className="py-2 text-right font-mono">{formatNumber(beregning.totalDage)}</td>
                   </tr>
-                  <tr className="border-b">
+                  <tr className="border-b dark:border-gray-700">
                     <td className="py-2">Alder i timer</td>
                     <td className="py-2 text-right font-mono">{formatNumber(beregning.totalTimer)}</td>
                   </tr>
@@ -315,13 +315,13 @@ export default function AlderBeregner() {
       )}
 
       {!beregning && foedselsdato && (
-        <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-center text-red-700">
+        <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg text-center text-red-700 dark:text-red-400">
           Fødselsdatoen kan ikke være efter beregningsdatoen.
         </div>
       )}
 
       {!foedselsdato && (
-        <div className="p-8 bg-gray-50 rounded-xl text-center text-gray-500">
+        <div className="p-8 bg-gray-50 dark:bg-gray-800 rounded-xl text-center text-gray-500 dark:text-gray-400">
           Indtast din fødselsdato for at se din præcise alder
         </div>
       )}

@@ -137,9 +137,9 @@ export default function HuslejeBudgetBeregner() {
 
   const getVurderingFarve = () => {
     switch (beregning.vurdering) {
-      case "god": return "bg-green-100 text-green-800 border-green-300";
-      case "ok": return "bg-yellow-100 text-yellow-800 border-yellow-300";
-      case "risikabel": return "bg-red-100 text-red-800 border-red-300";
+      case "god": return "bg-green-100 text-green-800 border-green-300 dark:bg-green-900/20 dark:text-green-300 dark:border-green-700";
+      case "ok": return "bg-yellow-100 text-yellow-800 border-yellow-300 dark:bg-yellow-900/20 dark:text-yellow-300 dark:border-yellow-700";
+      case "risikabel": return "bg-red-100 text-red-800 border-red-300 dark:bg-red-900/20 dark:text-red-300 dark:border-red-700";
     }
   };
 
@@ -147,10 +147,10 @@ export default function HuslejeBudgetBeregner() {
     <div className="space-y-8">
       {/* Indkomst */}
       <div>
-        <h3 className="text-lg font-medium mb-4">💰 Din indkomst</h3>
+        <h3 className="text-lg font-medium mb-4 dark:text-white">💰 Din indkomst</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label className="block text-sm font-medium mb-2">Din nettoløn pr. måned</label>
+            <label className="block text-sm font-medium mb-2 dark:text-gray-200">Din nettoløn pr. måned</label>
             <div className="relative">
               <input
                 type="number"
@@ -158,13 +158,13 @@ export default function HuslejeBudgetBeregner() {
                 step="500"
                 value={maanedligNettoLoen}
                 onChange={(e) => setMaanedligNettoLoen(parseFloat(e.target.value) || 0)}
-                className="w-full px-4 py-3 pr-12 border rounded-lg"
+                className="w-full px-4 py-3 pr-12 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">kr</span>
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">kr</span>
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2">Partner/roommate (valgfrit)</label>
+            <label className="block text-sm font-medium mb-2 dark:text-gray-200">Partner/roommate (valgfrit)</label>
             <div className="relative">
               <input
                 type="number"
@@ -172,13 +172,13 @@ export default function HuslejeBudgetBeregner() {
                 step="500"
                 value={partnerLoen}
                 onChange={(e) => setPartnerLoen(parseFloat(e.target.value) || 0)}
-                className="w-full px-4 py-3 pr-12 border rounded-lg"
+                className="w-full px-4 py-3 pr-12 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">kr</span>
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">kr</span>
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2">Andre indkomster</label>
+            <label className="block text-sm font-medium mb-2 dark:text-gray-200">Andre indkomster</label>
             <div className="relative">
               <input
                 type="number"
@@ -186,70 +186,70 @@ export default function HuslejeBudgetBeregner() {
                 step="100"
                 value={andreIndkomster}
                 onChange={(e) => setAndreIndkomster(parseFloat(e.target.value) || 0)}
-                className="w-full px-4 py-3 pr-12 border rounded-lg"
+                className="w-full px-4 py-3 pr-12 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">kr</span>
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">kr</span>
             </div>
-            <p className="text-xs text-gray-500 mt-1">SU, børnepenge, etc.</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">SU, børnepenge, etc.</p>
           </div>
         </div>
       </div>
 
       {/* Faste udgifter */}
       <div>
-        <h3 className="text-lg font-medium mb-4">📋 Dine faste udgifter (ekskl. husleje)</h3>
+        <h3 className="text-lg font-medium mb-4 dark:text-white">📋 Dine faste udgifter (ekskl. husleje)</h3>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           <div>
-            <label className="block text-sm font-medium mb-2">Mad & dagligvarer</label>
+            <label className="block text-sm font-medium mb-2 dark:text-gray-200">Mad & dagligvarer</label>
             <div className="relative">
-              <input type="number" min="0" step="100" value={madOgDagligvarer} onChange={(e) => setMadOgDagligvarer(parseFloat(e.target.value) || 0)} className="w-full px-4 py-3 pr-12 border rounded-lg" />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">kr</span>
+              <input type="number" min="0" step="100" value={madOgDagligvarer} onChange={(e) => setMadOgDagligvarer(parseFloat(e.target.value) || 0)} className="w-full px-4 py-3 pr-12 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">kr</span>
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2">Transport</label>
+            <label className="block text-sm font-medium mb-2 dark:text-gray-200">Transport</label>
             <div className="relative">
-              <input type="number" min="0" step="100" value={transport} onChange={(e) => setTransport(parseFloat(e.target.value) || 0)} className="w-full px-4 py-3 pr-12 border rounded-lg" />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">kr</span>
+              <input type="number" min="0" step="100" value={transport} onChange={(e) => setTransport(parseFloat(e.target.value) || 0)} className="w-full px-4 py-3 pr-12 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">kr</span>
             </div>
-            <p className="text-xs text-gray-500 mt-1">Bil, bus, tog</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Bil, bus, tog</p>
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2">Forsikringer</label>
+            <label className="block text-sm font-medium mb-2 dark:text-gray-200">Forsikringer</label>
             <div className="relative">
-              <input type="number" min="0" step="100" value={forsikringer} onChange={(e) => setForsikringer(parseFloat(e.target.value) || 0)} className="w-full px-4 py-3 pr-12 border rounded-lg" />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">kr</span>
-            </div>
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-2">Mobil & internet</label>
-            <div className="relative">
-              <input type="number" min="0" step="50" value={mobilOgInternet} onChange={(e) => setMobilOgInternet(parseFloat(e.target.value) || 0)} className="w-full px-4 py-3 pr-12 border rounded-lg" />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">kr</span>
+              <input type="number" min="0" step="100" value={forsikringer} onChange={(e) => setForsikringer(parseFloat(e.target.value) || 0)} className="w-full px-4 py-3 pr-12 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">kr</span>
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2">Abonnementer</label>
+            <label className="block text-sm font-medium mb-2 dark:text-gray-200">Mobil & internet</label>
             <div className="relative">
-              <input type="number" min="0" step="50" value={abonnementer} onChange={(e) => setAbonnementer(parseFloat(e.target.value) || 0)} className="w-full px-4 py-3 pr-12 border rounded-lg" />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">kr</span>
+              <input type="number" min="0" step="50" value={mobilOgInternet} onChange={(e) => setMobilOgInternet(parseFloat(e.target.value) || 0)} className="w-full px-4 py-3 pr-12 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">kr</span>
             </div>
-            <p className="text-xs text-gray-500 mt-1">Streaming, fitness, etc.</p>
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2">Andre udgifter</label>
+            <label className="block text-sm font-medium mb-2 dark:text-gray-200">Abonnementer</label>
             <div className="relative">
-              <input type="number" min="0" step="100" value={andreUdgifter} onChange={(e) => setAndreUdgifter(parseFloat(e.target.value) || 0)} className="w-full px-4 py-3 pr-12 border rounded-lg" />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">kr</span>
+              <input type="number" min="0" step="50" value={abonnementer} onChange={(e) => setAbonnementer(parseFloat(e.target.value) || 0)} className="w-full px-4 py-3 pr-12 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">kr</span>
             </div>
-            <p className="text-xs text-gray-500 mt-1">Tøj, hobby, etc.</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Streaming, fitness, etc.</p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-2 dark:text-gray-200">Andre udgifter</label>
+            <div className="relative">
+              <input type="number" min="0" step="100" value={andreUdgifter} onChange={(e) => setAndreUdgifter(parseFloat(e.target.value) || 0)} className="w-full px-4 py-3 pr-12 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">kr</span>
+            </div>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Tøj, hobby, etc.</p>
           </div>
         </div>
       </div>
 
       {/* Opsparing */}
       <div>
-        <label className="block text-sm font-medium mb-2">
+        <label className="block text-sm font-medium mb-2 dark:text-gray-200">
           Ønsket opsparing: {opsparingProcent}% ({formatKr(beregning.opsparingBeloeb)}/måned)
         </label>
         <input
@@ -260,7 +260,7 @@ export default function HuslejeBudgetBeregner() {
           onChange={(e) => setOpsparingProcent(parseFloat(e.target.value))}
           className="w-full"
         />
-        <div className="flex justify-between text-xs text-gray-500">
+        <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
           <span>0%</span>
           <span>10% (anbefalet min.)</span>
           <span>30%</span>
@@ -292,66 +292,66 @@ export default function HuslejeBudgetBeregner() {
 
       {/* Detaljeret oversigt */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="p-4 bg-white border rounded-lg text-center">
-          <p className="text-xl font-bold text-gray-700">{formatKr(beregning.samletIndkomst)}</p>
-          <p className="text-sm text-gray-500">Samlet indkomst</p>
+        <div className="p-4 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg text-center">
+          <p className="text-xl font-bold text-gray-700 dark:text-gray-200">{formatKr(beregning.samletIndkomst)}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Samlet indkomst</p>
         </div>
-        <div className="p-4 bg-white border rounded-lg text-center">
-          <p className="text-xl font-bold text-red-600">{formatKr(beregning.fasteUdgifter)}</p>
-          <p className="text-sm text-gray-500">Faste udgifter</p>
+        <div className="p-4 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg text-center">
+          <p className="text-xl font-bold text-red-600 dark:text-red-400">{formatKr(beregning.fasteUdgifter)}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Faste udgifter</p>
         </div>
-        <div className="p-4 bg-white border rounded-lg text-center">
-          <p className="text-xl font-bold text-blue-600">{formatKr(beregning.opsparingBeloeb)}</p>
-          <p className="text-sm text-gray-500">Opsparing</p>
+        <div className="p-4 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg text-center">
+          <p className="text-xl font-bold text-blue-600 dark:text-blue-400">{formatKr(beregning.opsparingBeloeb)}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Opsparing</p>
         </div>
-        <div className="p-4 bg-white border rounded-lg text-center">
-          <p className="text-xl font-bold text-green-600">{formatKr(beregning.maxHusleje30Pct)}</p>
-          <p className="text-sm text-gray-500">30% reglen</p>
+        <div className="p-4 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg text-center">
+          <p className="text-xl font-bold text-green-600 dark:text-green-400">{formatKr(beregning.maxHusleje30Pct)}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">30% reglen</p>
         </div>
       </div>
 
       {/* Budget oversigt */}
-      <div className="bg-white border rounded-lg overflow-hidden">
-        <div className="p-4 bg-gray-50 border-b">
-          <h3 className="font-medium">Dit budget</h3>
+      <div className="bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg overflow-hidden">
+        <div className="p-4 bg-gray-50 dark:bg-gray-900/50 border-b dark:border-gray-700">
+          <h3 className="font-medium dark:text-white">Dit budget</h3>
         </div>
         <div className="p-4">
           <div className="space-y-3">
-            <div className="flex justify-between">
+            <div className="flex justify-between dark:text-gray-200">
               <span>Samlet månedlig indkomst</span>
-              <span className="font-bold text-green-600">+{formatKr(beregning.samletIndkomst)}</span>
+              <span className="font-bold text-green-600 dark:text-green-400">+{formatKr(beregning.samletIndkomst)}</span>
             </div>
-            <div className="flex justify-between text-gray-600">
+            <div className="flex justify-between text-gray-600 dark:text-gray-400">
               <span>Mad & dagligvarer</span>
               <span>-{formatKr(madOgDagligvarer)}</span>
             </div>
-            <div className="flex justify-between text-gray-600">
+            <div className="flex justify-between text-gray-600 dark:text-gray-400">
               <span>Transport</span>
               <span>-{formatKr(transport)}</span>
             </div>
-            <div className="flex justify-between text-gray-600">
+            <div className="flex justify-between text-gray-600 dark:text-gray-400">
               <span>Forsikringer</span>
               <span>-{formatKr(forsikringer)}</span>
             </div>
-            <div className="flex justify-between text-gray-600">
+            <div className="flex justify-between text-gray-600 dark:text-gray-400">
               <span>Mobil & internet</span>
               <span>-{formatKr(mobilOgInternet)}</span>
             </div>
-            <div className="flex justify-between text-gray-600">
+            <div className="flex justify-between text-gray-600 dark:text-gray-400">
               <span>Abonnementer</span>
               <span>-{formatKr(abonnementer)}</span>
             </div>
-            <div className="flex justify-between text-gray-600">
+            <div className="flex justify-between text-gray-600 dark:text-gray-400">
               <span>Andre udgifter</span>
               <span>-{formatKr(andreUdgifter)}</span>
             </div>
-            <div className="flex justify-between text-blue-600">
+            <div className="flex justify-between text-blue-600 dark:text-blue-400">
               <span>Opsparing ({opsparingProcent}%)</span>
               <span>-{formatKr(beregning.opsparingBeloeb)}</span>
             </div>
-            <div className="flex justify-between font-bold text-lg border-t pt-3">
+            <div className="flex justify-between font-bold text-lg border-t dark:border-gray-700 pt-3 dark:text-gray-200">
               <span>Tilgængeligt til husleje</span>
-              <span className={beregning.tilHusleje >= 0 ? "text-green-600" : "text-red-600"}>
+              <span className={beregning.tilHusleje >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}>
                 {formatKr(beregning.tilHusleje)}
               </span>
             </div>
@@ -369,9 +369,9 @@ export default function HuslejeBudgetBeregner() {
       </div>
 
       {/* Tips */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <h3 className="font-medium text-blue-800 mb-2">💡 Tommelfingerregler for husleje</h3>
-        <ul className="text-sm text-blue-700 space-y-1">
+      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+        <h3 className="font-medium text-blue-800 dark:text-blue-300 mb-2">💡 Tommelfingerregler for husleje</h3>
+        <ul className="text-sm text-blue-700 dark:text-blue-400 space-y-1">
           <li>• <strong>30% reglen:</strong> Husleje bør max være 30% af din nettoindkomst</li>
           <li>• <strong>Inkluder alt:</strong> Husleje + el + vand + varme + evt. internet</li>
           <li>• <strong>Buffer:</strong> Hav altid 3-6 måneders udgifter i opsparing</li>

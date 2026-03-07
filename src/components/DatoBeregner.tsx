@@ -245,36 +245,36 @@ export default function DatoBeregner() {
             onClick={() => setMode(m.id)}
             className={`p-3 rounded-lg border-2 text-left transition-colors ${
               mode === m.id
-                ? "border-blue-500 bg-blue-50"
-                : "border-gray-200 hover:border-gray-300"
+                ? "border-blue-500 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-300"
+                : "border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500"
             }`}
           >
-            <span className="font-medium block">{m.label}</span>
-            <span className="text-xs text-gray-500">{m.desc}</span>
+            <span className="font-medium block dark:text-gray-200">{m.label}</span>
+            <span className="text-xs text-gray-500 dark:text-gray-400">{m.desc}</span>
           </button>
         ))}
       </div>
 
       {/* Input */}
-      <div className="bg-gray-50 rounded-xl p-6">
+      <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-6">
         {mode === "dage-mellem" && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-2">Fra dato</label>
+              <label className="block text-sm font-medium mb-2 dark:text-gray-200">Fra dato</label>
               <input
                 type="date"
                 value={startDato}
                 onChange={(e) => setStartDato(e.target.value)}
-                className="w-full px-4 py-3 border rounded-lg"
+                className="w-full px-4 py-3 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2">Til dato</label>
+              <label className="block text-sm font-medium mb-2 dark:text-gray-200">Til dato</label>
               <input
                 type="date"
                 value={slutDato}
                 onChange={(e) => setSlutDato(e.target.value)}
-                className="w-full px-4 py-3 border rounded-lg"
+                className="w-full px-4 py-3 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               />
             </div>
           </div>
@@ -283,18 +283,18 @@ export default function DatoBeregner() {
         {(mode === "tilfoej-dage" || mode === "arbejdsdage") && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-2">
+              <label className="block text-sm font-medium mb-2 dark:text-gray-200">
                 Udgangsdato
               </label>
               <input
                 type="date"
                 value={baseDato}
                 onChange={(e) => setBaseDato(e.target.value)}
-                className="w-full px-4 py-3 border rounded-lg"
+                className="w-full px-4 py-3 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2">
+              <label className="block text-sm font-medium mb-2 dark:text-gray-200">
                 Antal {mode === "arbejdsdage" ? "arbejdsdage" : "dage"}
               </label>
               <div className="relative">
@@ -302,11 +302,11 @@ export default function DatoBeregner() {
                   type="number"
                   value={antalDage}
                   onChange={(e) => setAntalDage(parseInt(e.target.value) || 0)}
-                  className="w-full px-4 py-3 pr-16 border rounded-lg"
+                  className="w-full px-4 py-3 pr-16 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                 />
                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-gray-400">dage</span>
               </div>
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                 Brug negativ værdi for at trække fra
               </p>
             </div>
@@ -315,14 +315,14 @@ export default function DatoBeregner() {
 
         {mode === "alder" && (
           <div>
-            <label className="block text-sm font-medium mb-2">
+            <label className="block text-sm font-medium mb-2 dark:text-gray-200">
               Fødselsdato
             </label>
             <input
               type="date"
               value={foedselsdato}
               onChange={(e) => setFoedselsdato(e.target.value)}
-              className="w-full md:w-1/2 px-4 py-3 border rounded-lg"
+              className="w-full md:w-1/2 px-4 py-3 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             />
           </div>
         )}
@@ -337,33 +337,33 @@ export default function DatoBeregner() {
         <>
           {resultat.type === "dage-mellem" && (
             <div className="space-y-4">
-              <div className="p-6 bg-blue-100 rounded-xl text-center">
-                <p className="text-sm text-gray-600 mb-1">Antal dage</p>
-                <p className="text-5xl font-bold text-blue-700">
+              <div className="p-6 bg-blue-100 dark:bg-blue-900/20 rounded-xl text-center">
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Antal dage</p>
+                <p className="text-5xl font-bold text-blue-700 dark:text-blue-300">
                   {resultat.dage}
                 </p>
-                <p className="text-gray-600 mt-2">
+                <p className="text-gray-600 dark:text-gray-400 mt-2">
                   {resultat.uger} uger og {Math.abs(resultat.dage) % 7} dage
                 </p>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="p-4 bg-gray-50 rounded-lg text-center">
-                  <p className="text-sm text-gray-600">Uger</p>
-                  <p className="text-2xl font-bold">{resultat.uger}</p>
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Uger</p>
+                  <p className="text-2xl font-bold dark:text-gray-200">{resultat.uger}</p>
                 </div>
-                <div className="p-4 bg-gray-50 rounded-lg text-center">
-                  <p className="text-sm text-gray-600">Ca. måneder</p>
-                  <p className="text-2xl font-bold">{resultat.maaneder}</p>
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Ca. måneder</p>
+                  <p className="text-2xl font-bold dark:text-gray-200">{resultat.maaneder}</p>
                 </div>
-                <div className="p-4 bg-green-50 rounded-lg text-center">
-                  <p className="text-sm text-gray-600">Arbejdsdage</p>
-                  <p className="text-2xl font-bold text-green-600">
+                <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Arbejdsdage</p>
+                  <p className="text-2xl font-bold text-green-600 dark:text-green-400">
                     {resultat.arbejdsdage}
                   </p>
                 </div>
-                <div className="p-4 bg-yellow-50 rounded-lg text-center">
-                  <p className="text-sm text-gray-600">Weekenddage</p>
-                  <p className="text-2xl font-bold text-yellow-600">
+                <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg text-center">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Weekenddage</p>
+                  <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
                     {resultat.weekenddage}
                   </p>
                 </div>
@@ -372,9 +372,9 @@ export default function DatoBeregner() {
           )}
 
           {resultat.type === "tilfoej-dage" && (
-            <div className="p-6 bg-blue-100 rounded-xl text-center">
-              <p className="text-sm text-gray-600 mb-1">Resultat</p>
-              <p className="text-2xl font-bold text-blue-700 capitalize">
+            <div className="p-6 bg-blue-100 dark:bg-blue-900/20 rounded-xl text-center">
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Resultat</p>
+              <p className="text-2xl font-bold text-blue-700 dark:text-blue-300 capitalize">
                 {resultat.formatteret}
               </p>
             </div>
@@ -382,22 +382,22 @@ export default function DatoBeregner() {
 
           {resultat.type === "arbejdsdage" && (
             <div className="space-y-4">
-              <div className="p-6 bg-green-100 rounded-xl text-center">
-                <p className="text-sm text-gray-600 mb-1">
+              <div className="p-6 bg-green-100 dark:bg-green-900/20 rounded-xl text-center">
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
                   {antalDage} arbejdsdage fra nu
                 </p>
-                <p className="text-2xl font-bold text-green-700 capitalize">
+                <p className="text-2xl font-bold text-green-700 dark:text-green-300 capitalize">
                   {resultat.formatteret}
                 </p>
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <div className="p-4 bg-gray-50 rounded-lg text-center">
-                  <p className="text-sm text-gray-600">Kalenderdage i alt</p>
-                  <p className="text-2xl font-bold">{resultat.samledeDage}</p>
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Kalenderdage i alt</p>
+                  <p className="text-2xl font-bold dark:text-gray-200">{resultat.samledeDage}</p>
                 </div>
-                <div className="p-4 bg-yellow-50 rounded-lg text-center">
-                  <p className="text-sm text-gray-600">Weekenddage sprunget</p>
-                  <p className="text-2xl font-bold text-yellow-600">
+                <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg text-center">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Weekenddage sprunget</p>
+                  <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
                     {resultat.weekenddage}
                   </p>
                 </div>
@@ -407,34 +407,34 @@ export default function DatoBeregner() {
 
           {resultat.type === "alder" && (
             <div className="space-y-4">
-              <div className="p-6 bg-blue-100 rounded-xl text-center">
-                <p className="text-sm text-gray-600 mb-1">Din alder</p>
-                <p className="text-5xl font-bold text-blue-700">
+              <div className="p-6 bg-blue-100 dark:bg-blue-900/20 rounded-xl text-center">
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Din alder</p>
+                <p className="text-5xl font-bold text-blue-700 dark:text-blue-300">
                   {resultat.aar} år
                 </p>
-                <p className="text-lg text-gray-600 mt-2">
+                <p className="text-lg text-gray-600 dark:text-gray-400 mt-2">
                   {resultat.maaneder} måneder og {resultat.dage} dage
                 </p>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="p-4 bg-gray-50 rounded-lg text-center">
-                  <p className="text-sm text-gray-600">Total dage</p>
-                  <p className="text-xl font-bold">
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Total dage</p>
+                  <p className="text-xl font-bold dark:text-gray-200">
                     {resultat.totalDage.toLocaleString("da-DK")}
                   </p>
                 </div>
-                <div className="p-4 bg-gray-50 rounded-lg text-center">
-                  <p className="text-sm text-gray-600">Total uger</p>
-                  <p className="text-xl font-bold">
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Total uger</p>
+                  <p className="text-xl font-bold dark:text-gray-200">
                     {resultat.totalUger.toLocaleString("da-DK")}
                   </p>
                 </div>
-                <div className="p-4 bg-green-50 rounded-lg text-center col-span-2">
-                  <p className="text-sm text-gray-600">Næste fødselsdag</p>
-                  <p className="text-lg font-bold text-green-600">
+                <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center col-span-2">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Næste fødselsdag</p>
+                  <p className="text-lg font-bold text-green-600 dark:text-green-400">
                     Om {resultat.dageTilFoedselsdag} dage
                   </p>
-                  <p className="text-xs text-gray-500 capitalize">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">
                     {resultat.naesteFoedselsdag}
                   </p>
                 </div>

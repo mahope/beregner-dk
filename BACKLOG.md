@@ -141,7 +141,7 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 - Brug Framer Motion eller CSS transitions (vaelg en tilgang og vaer konsistent)
 
 ### A11. Dark mode gennemgang
-- [ ] Gennemgaa dark mode paa ALLE 33 beregnere og fix inkonsistenser
+- [x] Gennemgaa dark mode paa ALLE 33 beregnere og fix inkonsistenser
 - Mange beregnere har ikke faaet dark mode styling (kun BMI, Loen, Moms, Procent er testet)
 - Fix kontrast-problemer paa sekundaer tekst, borders og baggrunde
 - Sorg for at alle grafer/charts ogsaa virker i dark mode

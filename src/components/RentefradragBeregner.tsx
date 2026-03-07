@@ -146,12 +146,12 @@ export default function RentefradragBeregner() {
   }, [loans, interestIncome, civilStatus]);
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 md:p-8">
       <div className="grid md:grid-cols-2 gap-6">
         {/* Input Section */}
         <div className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
               Civil status
             </label>
             <div className="flex gap-4">
@@ -159,8 +159,8 @@ export default function RentefradragBeregner() {
                 onClick={() => setCivilStatus('single')}
                 className={`flex-1 py-3 px-4 rounded-lg border-2 transition-all ${
                   civilStatus === 'single'
-                    ? 'border-blue-500 bg-blue-50'
-                    : 'border-gray-200 hover:border-gray-300'
+                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-300'
+                    : 'border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500 dark:text-gray-200'
                 }`}
               >
                 👤 Enlig
@@ -169,8 +169,8 @@ export default function RentefradragBeregner() {
                 onClick={() => setCivilStatus('couple')}
                 className={`flex-1 py-3 px-4 rounded-lg border-2 transition-all ${
                   civilStatus === 'couple'
-                    ? 'border-blue-500 bg-blue-50'
-                    : 'border-gray-200 hover:border-gray-300'
+                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-300'
+                    : 'border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500 dark:text-gray-200'
                 }`}
               >
                 👫 Par
@@ -179,7 +179,7 @@ export default function RentefradragBeregner() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
               Dine lån og årlige renteudgifter
             </label>
             <div className="space-y-3">
@@ -190,7 +190,7 @@ export default function RentefradragBeregner() {
                     value={loan.name}
                     onChange={(e) => updateLoan(loan.id, 'name', e.target.value)}
                     placeholder={`Lån ${index + 1} (navn)`}
-                    className="w-1/3 px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                    className="w-1/3 px-3 py-2 border border-gray-300 rounded-lg text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                   />
                   <div className="relative flex-1">
                     <input
@@ -198,14 +198,14 @@ export default function RentefradragBeregner() {
                       value={loan.annualInterest}
                       onChange={(e) => updateLoan(loan.id, 'annualInterest', e.target.value)}
                       placeholder="Årlig rente (kr.)"
-                      className="w-full px-3 py-2 pr-12 border border-gray-300 rounded-lg"
+                      className="w-full px-3 py-2 pr-12 border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                     />
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">kr</span>
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 text-sm">kr</span>
                   </div>
                   {loans.length > 1 && (
                     <button
                       onClick={() => removeLoan(loan.id)}
-                      className="px-3 py-2 text-red-500 hover:bg-red-50 rounded-lg"
+                      className="px-3 py-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg"
                     >
                       ✕
                     </button>
@@ -214,7 +214,7 @@ export default function RentefradragBeregner() {
               ))}
               <button
                 onClick={addLoan}
-                className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 flex items-center gap-1"
               >
                 + Tilføj lån
               </button>
@@ -222,7 +222,7 @@ export default function RentefradragBeregner() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
               Årlige renteindtægter (hvis nogen)
             </label>
             <div className="relative">
@@ -231,11 +231,11 @@ export default function RentefradragBeregner() {
                 value={interestIncome}
                 onChange={(e) => setInterestIncome(e.target.value)}
                 placeholder="F.eks. renter fra opsparing"
-                className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:ring-blue-400"
               />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">kr</span>
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">kr</span>
             </div>
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
               Renter fra bankkonti, obligationer osv.
             </p>
           </div>
@@ -246,77 +246,77 @@ export default function RentefradragBeregner() {
         </div>
 
         {/* Result Section */}
-        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6">
+        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-6">
           {result.totalInterestExpense > 0 ? (
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                 Dit rentefradrag
               </h3>
 
-              <div className="bg-white rounded-lg p-4 shadow-sm">
-                <div className="text-sm text-gray-500">Samlede renteudgifter</div>
-                <div className="text-2xl font-bold text-gray-900">
+              <div className="bg-white dark:bg-gray-700 rounded-lg p-4 shadow-sm">
+                <div className="text-sm text-gray-500 dark:text-gray-400">Samlede renteudgifter</div>
+                <div className="text-2xl font-bold text-gray-900 dark:text-white">
                   {result.totalInterestExpense.toLocaleString('da-DK')} kr./år
                 </div>
               </div>
 
               {result.hasDeduction ? (
                 <>
-                  <div className="bg-white rounded-lg p-4 shadow-sm">
-                    <div className="text-sm text-gray-500">Årlig skattebesparelse</div>
-                    <div className="text-3xl font-bold text-green-600">
+                  <div className="bg-white dark:bg-gray-700 rounded-lg p-4 shadow-sm">
+                    <div className="text-sm text-gray-500 dark:text-gray-400">Årlig skattebesparelse</div>
+                    <div className="text-3xl font-bold text-green-600 dark:text-green-400">
                       {result.totalDeduction.toLocaleString('da-DK')} kr.
                     </div>
-                    <div className="text-sm text-gray-500 mt-1">
+                    <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                       = {result.monthlyBenefit.toLocaleString('da-DK')} kr./måned
                     </div>
                   </div>
 
-                  <div className="bg-white rounded-lg p-4 shadow-sm text-sm">
+                  <div className="bg-white dark:bg-gray-700 rounded-lg p-4 shadow-sm text-sm">
                     <div className="space-y-2">
                       {result.lowRateAmount > 0 && (
                         <div className="flex justify-between">
-                          <span className="text-gray-600">
+                          <span className="text-gray-600 dark:text-gray-400">
                             Fradrag {FRADRAG_LOW * 100}% af {result.lowRateAmount.toLocaleString('da-DK')} kr.
                           </span>
-                          <span className="font-medium">{result.lowRateDeduction.toLocaleString('da-DK')} kr.</span>
+                          <span className="font-medium dark:text-gray-200">{result.lowRateDeduction.toLocaleString('da-DK')} kr.</span>
                         </div>
                       )}
                       {result.highRateAmount > 0 && (
                         <div className="flex justify-between">
-                          <span className="text-gray-600">
+                          <span className="text-gray-600 dark:text-gray-400">
                             Fradrag {FRADRAG_HIGH * 100}% af {result.highRateAmount.toLocaleString('da-DK')} kr.
                           </span>
-                          <span className="font-medium">{result.highRateDeduction.toLocaleString('da-DK')} kr.</span>
+                          <span className="font-medium dark:text-gray-200">{result.highRateDeduction.toLocaleString('da-DK')} kr.</span>
                         </div>
                       )}
                     </div>
                   </div>
 
-                  <div className="bg-blue-100 rounded-lg p-4">
-                    <div className="text-sm text-blue-800">
+                  <div className="bg-blue-100 dark:bg-blue-900/30 rounded-lg p-4">
+                    <div className="text-sm text-blue-800 dark:text-blue-300">
                       <strong>Effektiv fradragssats:</strong> {result.effectiveRate}%
                     </div>
-                    <p className="text-xs text-blue-600 mt-1">
+                    <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
                       Staten betaler reelt {result.effectiveRate}% af dine renteudgifter
                     </p>
                   </div>
                 </>
               ) : (
-                <div className="bg-yellow-50 rounded-lg p-4">
-                  <p className="text-sm text-yellow-700">
+                <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-4">
+                  <p className="text-sm text-yellow-700 dark:text-yellow-400">
                     Du har positiv kapitalindkomst (renteindtægter {'>'}  renteudgifter), 
                     så du får ikke rentefradrag.
                   </p>
                 </div>
               )}
 
-              <div className="text-xs text-gray-500 mt-4">
+              <div className="text-xs text-gray-500 dark:text-gray-400 mt-4">
                 * Beregningen er vejledende og baseret på gennemsnitlige 2026-satser.
               </div>
             </div>
           ) : (
-            <div className="text-center text-gray-500 py-8">
+            <div className="text-center text-gray-500 dark:text-gray-400 py-8">
               <div className="text-4xl mb-3">💰</div>
               <p>Indtast dine renteudgifter for at se besparelsen</p>
             </div>
@@ -336,16 +336,16 @@ export default function RentefradragBeregner() {
 
       {/* Info boxes */}
       <div className="grid md:grid-cols-2 gap-4 mt-6">
-        <div className="bg-blue-50 rounded-lg p-4">
-          <h4 className="font-semibold text-blue-800 mb-2">💡 Bundfradrag 2026</h4>
-          <p className="text-sm text-blue-700">
+        <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
+          <h4 className="font-semibold text-blue-800 dark:text-blue-300 mb-2">💡 Bundfradrag 2026</h4>
+          <p className="text-sm text-blue-700 dark:text-blue-400">
             De første {civilStatus === 'single' ? '50.000' : '100.000'} kr. i renteudgifter 
             giver højere fradragsværdi (33,6%) end beløb derover (25,6%).
           </p>
         </div>
-        <div className="bg-green-50 rounded-lg p-4">
-          <h4 className="font-semibold text-green-800 mb-2">✅ Automatisk indberetning</h4>
-          <p className="text-sm text-green-700">
+        <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
+          <h4 className="font-semibold text-green-800 dark:text-green-300 mb-2">✅ Automatisk indberetning</h4>
+          <p className="text-sm text-green-700 dark:text-green-400">
             Din bank indberetter automatisk dine renteudgifter til SKAT. 
             Tjek at tallene stemmer i din forskudsopgørelse.
           </p>

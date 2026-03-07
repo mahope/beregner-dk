@@ -162,49 +162,49 @@ export default function LaaneBeregner() {
     <div className="space-y-8">
       {/* Lånetype valg */}
       <div>
-        <label className="block text-sm font-medium mb-3">Beregningstype</label>
+        <label className="block text-sm font-medium mb-3 dark:text-gray-200">Beregningstype</label>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <button
             onClick={() => setLaaneType("annuitet")}
             className={`p-4 rounded-lg border-2 text-left ${
               laaneType === "annuitet"
-                ? "border-blue-500 bg-blue-50"
-                : "border-gray-200 hover:border-gray-300"
+                ? "border-blue-500 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-300"
+                : "border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500 dark:text-gray-200"
             }`}
           >
-            <div className="font-medium">Annuitetslån</div>
-            <div className="text-sm text-gray-500">Fast månedlig ydelse</div>
+            <div className="font-medium dark:text-inherit">Annuitetslån</div>
+            <div className="text-sm text-gray-500 dark:text-gray-400">Fast månedlig ydelse</div>
           </button>
           <button
             onClick={() => setLaaneType("serie")}
             className={`p-4 rounded-lg border-2 text-left ${
               laaneType === "serie"
-                ? "border-blue-500 bg-blue-50"
-                : "border-gray-200 hover:border-gray-300"
+                ? "border-blue-500 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-300"
+                : "border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500 dark:text-gray-200"
             }`}
           >
-            <div className="font-medium">Serielån</div>
-            <div className="text-sm text-gray-500">Faldende ydelse</div>
+            <div className="font-medium dark:text-inherit">Serielån</div>
+            <div className="text-sm text-gray-500 dark:text-gray-400">Faldende ydelse</div>
           </button>
           <button
             onClick={() => setLaaneType("sammenlign")}
             className={`p-4 rounded-lg border-2 text-left ${
               laaneType === "sammenlign"
-                ? "border-blue-500 bg-blue-50"
-                : "border-gray-200 hover:border-gray-300"
+                ? "border-blue-500 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-300"
+                : "border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500 dark:text-gray-200"
             }`}
           >
-            <div className="font-medium">Sammenlign lån</div>
-            <div className="text-sm text-gray-500">To lån side om side</div>
+            <div className="font-medium dark:text-inherit">Sammenlign lån</div>
+            <div className="text-sm text-gray-500 dark:text-gray-400">To lån side om side</div>
           </button>
         </div>
       </div>
 
       {/* Input */}
-      <div className="bg-gray-50 rounded-lg p-6">
+      <div className="bg-gray-50 rounded-lg p-6 dark:bg-gray-800 dark:border dark:border-gray-700">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium mb-2">Lånebeløb</label>
+            <label className="block text-sm font-medium mb-2 dark:text-gray-200">Lånebeløb</label>
             <div className="relative">
               <input
                 type="number"
@@ -212,13 +212,13 @@ export default function LaaneBeregner() {
                 step="1000"
                 value={hovedstol}
                 onChange={(e) => setHovedstol(parseFloat(e.target.value) || 0)}
-                className="w-full px-4 py-3 pr-12 border rounded-lg"
+                className="w-full px-4 py-3 pr-12 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">kr</span>
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-400">kr</span>
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2">Årlig rente (%)</label>
+            <label className="block text-sm font-medium mb-2 dark:text-gray-200">Årlig rente (%)</label>
             <div className="relative">
               <input
                 type="number"
@@ -227,13 +227,13 @@ export default function LaaneBeregner() {
                 step="0.1"
                 value={renteSats}
                 onChange={(e) => setRenteSats(parseFloat(e.target.value) || 0)}
-                className="w-full px-4 py-3 pr-12 border rounded-lg"
+                className="w-full px-4 py-3 pr-12 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">%</span>
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-400">%</span>
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2">Løbetid (år)</label>
+            <label className="block text-sm font-medium mb-2 dark:text-gray-200">Løbetid (år)</label>
             <div className="relative">
               <input
                 type="number"
@@ -242,13 +242,13 @@ export default function LaaneBeregner() {
                 step="1"
                 value={loebetidAar}
                 onChange={(e) => setLoebetidAar(parseFloat(e.target.value) || 1)}
-                className="w-full px-4 py-3 pr-12 border rounded-lg"
+                className="w-full px-4 py-3 pr-12 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">år</span>
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-400">år</span>
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2">Stiftelsesgebyr</label>
+            <label className="block text-sm font-medium mb-2 dark:text-gray-200">Stiftelsesgebyr</label>
             <div className="relative">
               <input
                 type="number"
@@ -256,19 +256,19 @@ export default function LaaneBeregner() {
                 step="100"
                 value={stiftelsesgebyr}
                 onChange={(e) => setStiftelsesgebyr(parseFloat(e.target.value) || 0)}
-                className="w-full px-4 py-3 pr-12 border rounded-lg"
+                className="w-full px-4 py-3 pr-12 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">kr</span>
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-400">kr</span>
             </div>
           </div>
         </div>
 
         {laaneType === "sammenlign" && (
-          <div className="mt-4 pt-4 border-t">
-            <h4 className="font-medium mb-3">Lån 2 (til sammenligning)</h4>
+          <div className="mt-4 pt-4 border-t dark:border-gray-700">
+            <h4 className="font-medium mb-3 dark:text-white">Lån 2 (til sammenligning)</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-2">Årlig rente (%)</label>
+                <label className="block text-sm font-medium mb-2 dark:text-gray-200">Årlig rente (%)</label>
                 <div className="relative">
                   <input
                     type="number"
@@ -277,13 +277,13 @@ export default function LaaneBeregner() {
                     step="0.1"
                     value={rente2}
                     onChange={(e) => setRente2(parseFloat(e.target.value) || 0)}
-                    className="w-full px-4 py-3 pr-12 border rounded-lg"
+                    className="w-full px-4 py-3 pr-12 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                   />
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">%</span>
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-400">%</span>
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">Løbetid (år)</label>
+                <label className="block text-sm font-medium mb-2 dark:text-gray-200">Løbetid (år)</label>
                 <div className="relative">
                   <input
                     type="number"
@@ -292,9 +292,9 @@ export default function LaaneBeregner() {
                     step="1"
                     value={loebetid2}
                     onChange={(e) => setLoebetid2(parseFloat(e.target.value) || 1)}
-                    className="w-full px-4 py-3 pr-12 border rounded-lg"
+                    className="w-full px-4 py-3 pr-12 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                   />
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">år</span>
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-400">år</span>
                 </div>
               </div>
             </div>
@@ -317,21 +317,21 @@ export default function LaaneBeregner() {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="p-4 bg-white border rounded-lg text-center">
-              <p className="text-xl font-bold text-gray-700">{formatKr(hovedstol)}</p>
-              <p className="text-sm text-gray-500">Lånebeløb</p>
+            <div className="p-4 bg-white border rounded-lg text-center dark:bg-gray-800 dark:border-gray-700">
+              <p className="text-xl font-bold text-gray-700 dark:text-gray-200">{formatKr(hovedstol)}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Lånebeløb</p>
             </div>
-            <div className="p-4 bg-white border rounded-lg text-center">
-              <p className="text-xl font-bold text-red-600">{formatKr(beregning.annuitetRenter)}</p>
-              <p className="text-sm text-gray-500">Samlede renter</p>
+            <div className="p-4 bg-white border rounded-lg text-center dark:bg-gray-800 dark:border-gray-700">
+              <p className="text-xl font-bold text-red-600 dark:text-red-400">{formatKr(beregning.annuitetRenter)}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Samlede renter</p>
             </div>
-            <div className="p-4 bg-white border rounded-lg text-center">
-              <p className="text-xl font-bold text-gray-700">{formatKr(beregning.annuitetTotal)}</p>
-              <p className="text-sm text-gray-500">Samlet tilbagebetaling</p>
+            <div className="p-4 bg-white border rounded-lg text-center dark:bg-gray-800 dark:border-gray-700">
+              <p className="text-xl font-bold text-gray-700 dark:text-gray-200">{formatKr(beregning.annuitetTotal)}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Samlet tilbagebetaling</p>
             </div>
-            <div className="p-4 bg-white border rounded-lg text-center">
-              <p className="text-xl font-bold text-gray-700">{beregning.aopAnnuitet.toFixed(1)}%</p>
-              <p className="text-sm text-gray-500">ÅOP (ca.)</p>
+            <div className="p-4 bg-white border rounded-lg text-center dark:bg-gray-800 dark:border-gray-700">
+              <p className="text-xl font-bold text-gray-700 dark:text-gray-200">{beregning.aopAnnuitet.toFixed(1)}%</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">ÅOP (ca.)</p>
             </div>
           </div>
         </>
@@ -351,21 +351,21 @@ export default function LaaneBeregner() {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="p-4 bg-white border rounded-lg text-center">
-              <p className="text-xl font-bold text-gray-700">{formatKr(beregning.serieAfdrag)}</p>
-              <p className="text-sm text-gray-500">Fast afdrag/md</p>
+            <div className="p-4 bg-white border rounded-lg text-center dark:bg-gray-800 dark:border-gray-700">
+              <p className="text-xl font-bold text-gray-700 dark:text-gray-200">{formatKr(beregning.serieAfdrag)}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Fast afdrag/md</p>
             </div>
-            <div className="p-4 bg-white border rounded-lg text-center">
-              <p className="text-xl font-bold text-gray-700">{formatKr(beregning.serieGennemsnitYdelse)}</p>
-              <p className="text-sm text-gray-500">Gennemsnit ydelse</p>
+            <div className="p-4 bg-white border rounded-lg text-center dark:bg-gray-800 dark:border-gray-700">
+              <p className="text-xl font-bold text-gray-700 dark:text-gray-200">{formatKr(beregning.serieGennemsnitYdelse)}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Gennemsnit ydelse</p>
             </div>
-            <div className="p-4 bg-white border rounded-lg text-center">
-              <p className="text-xl font-bold text-red-600">{formatKr(beregning.serieRenter)}</p>
-              <p className="text-sm text-gray-500">Samlede renter</p>
+            <div className="p-4 bg-white border rounded-lg text-center dark:bg-gray-800 dark:border-gray-700">
+              <p className="text-xl font-bold text-red-600 dark:text-red-400">{formatKr(beregning.serieRenter)}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Samlede renter</p>
             </div>
-            <div className="p-4 bg-white border rounded-lg text-center">
-              <p className="text-xl font-bold text-gray-700">{formatKr(beregning.serieTotal)}</p>
-              <p className="text-sm text-gray-500">Samlet tilbagebetaling</p>
+            <div className="p-4 bg-white border rounded-lg text-center dark:bg-gray-800 dark:border-gray-700">
+              <p className="text-xl font-bold text-gray-700 dark:text-gray-200">{formatKr(beregning.serieTotal)}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Samlet tilbagebetaling</p>
             </div>
           </div>
         </>
@@ -374,35 +374,35 @@ export default function LaaneBeregner() {
       {laaneType === "sammenlign" && (
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="p-6 bg-white border-2 border-blue-500 rounded-xl">
-              <h4 className="font-medium text-blue-600 mb-4">Lån 1: {renteSats}% i {loebetidAar} år</h4>
-              <div className="space-y-2">
+            <div className="p-6 bg-white border-2 border-blue-500 rounded-xl dark:bg-gray-800">
+              <h4 className="font-medium text-blue-600 mb-4 dark:text-blue-400">Lån 1: {renteSats}% i {loebetidAar} år</h4>
+              <div className="space-y-2 dark:text-gray-300">
                 <div className="flex justify-between">
                   <span>Månedlig ydelse</span>
                   <span className="font-bold">{formatKr(beregning.annuitetYdelse)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Samlede renter</span>
-                  <span className="text-red-600">{formatKr(beregning.annuitetRenter)}</span>
+                  <span className="text-red-600 dark:text-red-400">{formatKr(beregning.annuitetRenter)}</span>
                 </div>
-                <div className="flex justify-between border-t pt-2">
+                <div className="flex justify-between border-t pt-2 dark:border-gray-700">
                   <span>Total</span>
                   <span className="font-bold">{formatKr(beregning.annuitetTotal)}</span>
                 </div>
               </div>
             </div>
-            <div className="p-6 bg-white border-2 border-green-500 rounded-xl">
-              <h4 className="font-medium text-green-600 mb-4">Lån 2: {rente2}% i {loebetid2} år</h4>
-              <div className="space-y-2">
+            <div className="p-6 bg-white border-2 border-green-500 rounded-xl dark:bg-gray-800">
+              <h4 className="font-medium text-green-600 mb-4 dark:text-green-400">Lån 2: {rente2}% i {loebetid2} år</h4>
+              <div className="space-y-2 dark:text-gray-300">
                 <div className="flex justify-between">
                   <span>Månedlig ydelse</span>
                   <span className="font-bold">{formatKr(beregning.laan2Ydelse)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Samlede renter</span>
-                  <span className="text-red-600">{formatKr(beregning.laan2Renter)}</span>
+                  <span className="text-red-600 dark:text-red-400">{formatKr(beregning.laan2Renter)}</span>
                 </div>
-                <div className="flex justify-between border-t pt-2">
+                <div className="flex justify-between border-t pt-2 dark:border-gray-700">
                   <span>Total</span>
                   <span className="font-bold">{formatKr(beregning.laan2Total)}</span>
                 </div>
@@ -410,8 +410,8 @@ export default function LaaneBeregner() {
             </div>
           </div>
 
-          <div className={`p-4 rounded-lg text-center ${beregning.forskelTotal > 0 ? 'bg-green-100' : 'bg-red-100'}`}>
-            <p className={beregning.forskelTotal > 0 ? 'text-green-700' : 'text-red-700'}>
+          <div className={`p-4 rounded-lg text-center ${beregning.forskelTotal > 0 ? 'bg-green-100 dark:bg-green-900/20' : 'bg-red-100 dark:bg-red-900/20'}`}>
+            <p className={beregning.forskelTotal > 0 ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'}>
               {beregning.forskelTotal > 0 
                 ? `Lån 2 er ${formatKr(Math.abs(beregning.forskelTotal))} billigere totalt`
                 : `Lån 1 er ${formatKr(Math.abs(beregning.forskelTotal))} billigere totalt`
@@ -423,29 +423,29 @@ export default function LaaneBeregner() {
 
       {/* Afdragsplan */}
       {laaneType === "annuitet" && (
-        <div className="bg-white border rounded-lg overflow-hidden">
-          <div className="p-4 bg-gray-50 border-b">
-            <h3 className="font-medium">Afdragsplan (første 12 måneder)</h3>
+        <div className="bg-white border rounded-lg overflow-hidden dark:bg-gray-800 dark:border-gray-700">
+          <div className="p-4 bg-gray-50 border-b dark:bg-gray-900/50 dark:border-gray-700">
+            <h3 className="font-medium dark:text-white">Afdragsplan (første 12 måneder)</h3>
           </div>
           <div className="p-4 overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full text-sm dark:text-gray-300">
               <thead>
-                <tr className="border-b">
-                  <th className="text-left py-2">Md.</th>
-                  <th className="text-right py-2">Ydelse</th>
-                  <th className="text-right py-2">Rente</th>
-                  <th className="text-right py-2">Afdrag</th>
-                  <th className="text-right py-2">Restgæld</th>
+                <tr className="border-b dark:border-gray-700">
+                  <th className="text-left py-2 dark:text-gray-300">Md.</th>
+                  <th className="text-right py-2 dark:text-gray-300">Ydelse</th>
+                  <th className="text-right py-2 dark:text-gray-300">Rente</th>
+                  <th className="text-right py-2 dark:text-gray-300">Afdrag</th>
+                  <th className="text-right py-2 dark:text-gray-300">Restgæld</th>
                 </tr>
               </thead>
               <tbody>
                 {beregning.afdragsplan.map((row) => (
-                  <tr key={row.maaned} className="border-b last:border-b-0">
-                    <td className="py-2">{row.maaned}</td>
-                    <td className="py-2 text-right">{formatKr(row.ydelse)}</td>
-                    <td className="py-2 text-right text-red-600">{formatKr(row.rente)}</td>
-                    <td className="py-2 text-right text-green-600">{formatKr(row.afdrag)}</td>
-                    <td className="py-2 text-right font-mono">{formatKr(row.restgaeld)}</td>
+                  <tr key={row.maaned} className="border-b last:border-b-0 dark:border-gray-700">
+                    <td className="py-2 dark:text-gray-300">{row.maaned}</td>
+                    <td className="py-2 text-right dark:text-gray-300">{formatKr(row.ydelse)}</td>
+                    <td className="py-2 text-right text-red-600 dark:text-red-400">{formatKr(row.rente)}</td>
+                    <td className="py-2 text-right text-green-600 dark:text-green-400">{formatKr(row.afdrag)}</td>
+                    <td className="py-2 text-right font-mono dark:text-gray-300">{formatKr(row.restgaeld)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -465,9 +465,9 @@ export default function LaaneBeregner() {
       </div>
 
       {/* Info */}
-      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-        <h3 className="font-medium text-yellow-800 mb-2">⚠️ Vigtigt om lån</h3>
-        <ul className="text-sm text-yellow-700 space-y-1">
+      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 dark:bg-yellow-900/20 dark:border-yellow-700">
+        <h3 className="font-medium text-yellow-800 mb-2 dark:text-yellow-300">⚠️ Vigtigt om lån</h3>
+        <ul className="text-sm text-yellow-700 space-y-1 dark:text-yellow-400">
           <li>• Sammenlign altid ÅOP (årlig omkostning i procent), ikke kun renten</li>
           <li>• Tjek alle gebyrer: stiftelse, administration, indfrielse</li>
           <li>• Kortere løbetid = højere ydelse, men færre renteudgifter</li>

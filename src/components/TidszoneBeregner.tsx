@@ -158,24 +158,24 @@ export default function TidszoneBeregner() {
     <div className="space-y-8">
       {/* Aktuelle tider */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="p-4 bg-blue-50 rounded-lg text-center">
-          <p className="text-sm text-gray-600">Klokken nu i {beregning.fraTz.by}</p>
-          <p className="text-3xl font-bold text-blue-600">{formatDato(beregning.fraLokalTid)}</p>
+        <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-center">
+          <p className="text-sm text-gray-600 dark:text-gray-400">Klokken nu i {beregning.fraTz.by}</p>
+          <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">{formatDato(beregning.fraLokalTid)}</p>
         </div>
-        <div className="p-4 bg-green-50 rounded-lg text-center">
-          <p className="text-sm text-gray-600">Klokken nu i {beregning.tilTz.by}</p>
-          <p className="text-3xl font-bold text-green-600">{formatDato(beregning.tilLokalTid)}</p>
+        <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
+          <p className="text-sm text-gray-600 dark:text-gray-400">Klokken nu i {beregning.tilTz.by}</p>
+          <p className="text-3xl font-bold text-green-600 dark:text-green-400">{formatDato(beregning.tilLokalTid)}</p>
         </div>
       </div>
 
       {/* Valg af tidszoner */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium mb-2">Fra tidszone</label>
+          <label className="block text-sm font-medium mb-2 dark:text-gray-200">Fra tidszone</label>
           <select
             value={fraTidszone}
             onChange={(e) => setFraTidszone(e.target.value)}
-            className="w-full px-4 py-3 border rounded-lg"
+            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
           >
             {tidszoner.map((tz) => (
               <option key={tz.id} value={tz.id}>
@@ -185,11 +185,11 @@ export default function TidszoneBeregner() {
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium mb-2">Til tidszone</label>
+          <label className="block text-sm font-medium mb-2 dark:text-gray-200">Til tidszone</label>
           <select
             value={tilTidszone}
             onChange={(e) => setTilTidszone(e.target.value)}
-            className="w-full px-4 py-3 border rounded-lg"
+            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
           >
             {tidszoner.map((tz) => (
               <option key={tz.id} value={tz.id}>
@@ -201,28 +201,28 @@ export default function TidszoneBeregner() {
       </div>
 
       {/* Tidsforskel info */}
-      <div className="p-4 bg-gray-100 rounded-lg text-center">
-        <p className="text-gray-600">
-          Tidsforskel: <strong>
+      <div className="p-4 bg-gray-100 dark:bg-gray-800 rounded-lg text-center">
+        <p className="text-gray-600 dark:text-gray-400">
+          Tidsforskel: <strong className="dark:text-white">
             {beregning.forskelTimer >= 0 ? '+' : ''}{beregning.forskelTimer} timer
           </strong>
         </p>
-        <p className="text-sm text-gray-500">
-          {beregning.tilTz.by} er {Math.abs(beregning.forskelTimer)} timer 
+        <p className="text-sm text-gray-500 dark:text-gray-400">
+          {beregning.tilTz.by} er {Math.abs(beregning.forskelTimer)} timer
           {beregning.forskelTimer >= 0 ? ' foran' : ' bagud'} {beregning.fraTz.by}
         </p>
       </div>
 
       {/* Manuel tid konvertering */}
-      <div className="bg-gray-50 rounded-lg p-6">
-        <h3 className="font-medium mb-4">Konverter et specifikt tidspunkt</h3>
+      <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6">
+        <h3 className="font-medium mb-4 dark:text-white">Konverter et specifikt tidspunkt</h3>
         <div className="grid grid-cols-2 gap-4 max-w-xs">
           <div>
-            <label className="block text-sm font-medium mb-2">Time</label>
+            <label className="block text-sm font-medium mb-2 dark:text-gray-200">Time</label>
             <select
               value={timer}
               onChange={(e) => setTimer(parseInt(e.target.value))}
-              className="w-full px-4 py-3 border rounded-lg"
+              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
             >
               {Array.from({ length: 24 }, (_, i) => (
                 <option key={i} value={i}>{i.toString().padStart(2, '0')}</option>
@@ -230,11 +230,11 @@ export default function TidszoneBeregner() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2">Minut</label>
+            <label className="block text-sm font-medium mb-2 dark:text-gray-200">Minut</label>
             <select
               value={minutter}
               onChange={(e) => setMinutter(parseInt(e.target.value))}
-              className="w-full px-4 py-3 border rounded-lg"
+              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
             >
               {[0, 15, 30, 45].map((m) => (
                 <option key={m} value={m}>{m.toString().padStart(2, '0')}</option>
@@ -277,9 +277,9 @@ export default function TidszoneBeregner() {
       </div>
 
       {/* Populære tidszoner fra Danmark */}
-      <div className="bg-white border rounded-lg overflow-hidden">
-        <div className="p-4 bg-gray-50 border-b">
-          <h3 className="font-medium">Tidsforskel fra Danmark</h3>
+      <div className="bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg overflow-hidden">
+        <div className="p-4 bg-gray-50 dark:bg-gray-700 border-b dark:border-gray-600">
+          <h3 className="font-medium dark:text-white">Tidsforskel fra Danmark</h3>
         </div>
         <div className="p-4">
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
@@ -288,9 +288,9 @@ export default function TidszoneBeregner() {
               .map((tz) => {
                 const forskel = (tz.offset - 60) / 60;
                 return (
-                  <div key={tz.id} className="flex justify-between p-2 hover:bg-gray-50 rounded">
-                    <span>{tz.by}</span>
-                    <span className="font-mono">
+                  <div key={tz.id} className="flex justify-between p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded">
+                    <span className="dark:text-gray-300">{tz.by}</span>
+                    <span className="font-mono dark:text-white">
                       {forskel >= 0 ? '+' : ''}{forskel}t
                     </span>
                   </div>
@@ -301,11 +301,11 @@ export default function TidszoneBeregner() {
       </div>
 
       {/* Info */}
-      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-        <h3 className="font-medium text-yellow-800 mb-2">⚠️ Om sommertid</h3>
-        <p className="text-sm text-yellow-700">
-          Denne beregner bruger standard tidsforskelle. Husk at sommertid (DST) kan påvirke 
-          den faktiske tidsforskel. Danmark skifter til sommertid sidste søndag i marts og 
+      <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg p-4">
+        <h3 className="font-medium text-yellow-800 dark:text-yellow-300 mb-2">⚠️ Om sommertid</h3>
+        <p className="text-sm text-yellow-700 dark:text-yellow-400">
+          Denne beregner bruger standard tidsforskelle. Husk at sommertid (DST) kan påvirke
+          den faktiske tidsforskel. Danmark skifter til sommertid sidste søndag i marts og
           tilbage sidste søndag i oktober.
         </p>
       </div>

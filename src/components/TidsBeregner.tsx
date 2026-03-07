@@ -125,46 +125,46 @@ export default function TidsBeregner() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-2">Starttidspunkt</label>
+            <label className="block text-sm font-medium mb-2 dark:text-gray-200">Starttidspunkt</label>
             <input
               type="time"
               value={startTid}
               onChange={(e) => setStartTid(e.target.value)}
-              className="w-full px-4 py-3 border rounded-lg text-lg"
+              className="w-full px-4 py-3 border rounded-lg text-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2">
-              Startdato <span className="text-gray-400">(valgfri)</span>
+            <label className="block text-sm font-medium mb-2 dark:text-gray-200">
+              Startdato <span className="text-gray-400 dark:text-gray-500">(valgfri)</span>
             </label>
             <input
               type="date"
               value={startDato}
               onChange={(e) => setStartDato(e.target.value)}
-              className="w-full px-4 py-3 border rounded-lg text-lg"
+              className="w-full px-4 py-3 border rounded-lg text-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             />
           </div>
         </div>
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-2">Sluttidspunkt</label>
+            <label className="block text-sm font-medium mb-2 dark:text-gray-200">Sluttidspunkt</label>
             <input
               type="time"
               value={slutTid}
               onChange={(e) => setSlutTid(e.target.value)}
-              className="w-full px-4 py-3 border rounded-lg text-lg"
+              className="w-full px-4 py-3 border rounded-lg text-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2">
-              Slutdato <span className="text-gray-400">(valgfri)</span>
+            <label className="block text-sm font-medium mb-2 dark:text-gray-200">
+              Slutdato <span className="text-gray-400 dark:text-gray-500">(valgfri)</span>
             </label>
             <input
               type="date"
               value={slutDato}
               onChange={(e) => setSlutDato(e.target.value)}
-              className="w-full px-4 py-3 border rounded-lg text-lg"
+              className="w-full px-4 py-3 border rounded-lg text-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             />
           </div>
         </div>
@@ -172,7 +172,7 @@ export default function TidsBeregner() {
 
       {/* Pause fratræk */}
       <div className="max-w-md">
-        <label className="block text-sm font-medium mb-2">
+        <label className="block text-sm font-medium mb-2 dark:text-gray-200">
           Fratræk pause (minutter)
         </label>
         <div className="relative">
@@ -183,10 +183,10 @@ export default function TidsBeregner() {
             step="5"
             value={fratraekPause}
             onChange={(e) => setFratraekPause(parseInt(e.target.value) || 0)}
-            className="w-full px-4 py-3 pr-12 border rounded-lg"
+            className="w-full px-4 py-3 pr-12 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             placeholder="F.eks. 30 min frokostpause"
           />
-          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">min</span>
+          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-400">min</span>
         </div>
       </div>
 
@@ -198,52 +198,52 @@ export default function TidsBeregner() {
       {beregning && (
         <>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="p-6 bg-blue-100 rounded-xl text-center">
-              <p className="text-sm text-gray-600 mb-1">Tid i alt</p>
-              <p className="text-4xl font-bold text-blue-700">
+            <div className="p-6 bg-blue-100 rounded-xl text-center dark:bg-blue-900/20">
+              <p className="text-sm text-gray-600 mb-1 dark:text-gray-400">Tid i alt</p>
+              <p className="text-4xl font-bold text-blue-700 dark:text-blue-300">
                 {beregning.timer}t {beregning.minutter}m
               </p>
               {beregning.overMidnat && (
-                <p className="text-xs text-blue-500 mt-1">🌙 Over midnat</p>
+                <p className="text-xs text-blue-500 mt-1 dark:text-blue-400">🌙 Over midnat</p>
               )}
             </div>
-            <div className="p-6 bg-green-100 rounded-xl text-center">
-              <p className="text-sm text-gray-600 mb-1">Decimal timer</p>
-              <p className="text-4xl font-bold text-green-700">
+            <div className="p-6 bg-green-100 rounded-xl text-center dark:bg-green-900/20">
+              <p className="text-sm text-gray-600 mb-1 dark:text-gray-400">Decimal timer</p>
+              <p className="text-4xl font-bold text-green-700 dark:text-green-400">
                 {beregning.decimalTimer}
               </p>
-              <p className="text-xs text-gray-500">timer</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">timer</p>
             </div>
-            <div className="p-6 bg-purple-100 rounded-xl text-center">
-              <p className="text-sm text-gray-600 mb-1">Arbejdsdage (8t)</p>
-              <p className="text-4xl font-bold text-purple-700">
+            <div className="p-6 bg-purple-100 rounded-xl text-center dark:bg-purple-900/20">
+              <p className="text-sm text-gray-600 mb-1 dark:text-gray-400">Arbejdsdage (8t)</p>
+              <p className="text-4xl font-bold text-purple-700 dark:text-purple-300">
                 {beregning.arbejdsdage}
               </p>
-              <p className="text-xs text-gray-500">dage</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">dage</p>
             </div>
           </div>
 
           {/* Detaljeret breakdown */}
-          <div className="bg-gray-50 rounded-lg p-6">
-            <h3 className="font-semibold mb-4">📊 Detaljeret visning</h3>
+          <div className="bg-gray-50 rounded-lg p-6 dark:bg-gray-800 dark:border dark:border-gray-700">
+            <h3 className="font-semibold mb-4 dark:text-white">📊 Detaljeret visning</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
               <div>
-                <p className="text-3xl font-bold text-gray-700">{beregning.totalMinutter}</p>
-                <p className="text-sm text-gray-500">minutter</p>
+                <p className="text-3xl font-bold text-gray-700 dark:text-gray-200">{beregning.totalMinutter}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">minutter</p>
               </div>
               <div>
-                <p className="text-3xl font-bold text-gray-700">{beregning.sekunder.toLocaleString()}</p>
-                <p className="text-sm text-gray-500">sekunder</p>
+                <p className="text-3xl font-bold text-gray-700 dark:text-gray-200">{beregning.sekunder.toLocaleString()}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">sekunder</p>
               </div>
               <div>
-                <p className="text-3xl font-bold text-gray-700">{beregning.totalTimer}</p>
-                <p className="text-sm text-gray-500">timer (decimal)</p>
+                <p className="text-3xl font-bold text-gray-700 dark:text-gray-200">{beregning.totalTimer}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">timer (decimal)</p>
               </div>
               <div>
-                <p className="text-3xl font-bold text-gray-700">
+                <p className="text-3xl font-bold text-gray-700 dark:text-gray-200">
                   {(parseFloat(beregning.totalTimer) / 24).toFixed(2)}
                 </p>
-                <p className="text-sm text-gray-500">dage</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">dage</p>
               </div>
             </div>
           </div>
@@ -259,24 +259,24 @@ export default function TidsBeregner() {
           </div>
 
           {/* Quick presets */}
-          <div className="p-4 bg-blue-50 rounded-lg">
-            <h3 className="font-medium mb-3">⚡ Hurtige eksempler</h3>
+          <div className="p-4 bg-blue-50 rounded-lg dark:bg-blue-900/20">
+            <h3 className="font-medium mb-3 dark:text-white">⚡ Hurtige eksempler</h3>
             <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => { setStartTid("08:00"); setSlutTid("16:00"); setFratraekPause(30); }}
-                className="px-3 py-1 bg-white border rounded hover:bg-gray-50 text-sm"
+                className="px-3 py-1 bg-white border rounded hover:bg-gray-50 text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-600"
               >
                 Normal arbejdsdag (8-16)
               </button>
               <button
                 onClick={() => { setStartTid("09:00"); setSlutTid("17:00"); setFratraekPause(60); }}
-                className="px-3 py-1 bg-white border rounded hover:bg-gray-50 text-sm"
+                className="px-3 py-1 bg-white border rounded hover:bg-gray-50 text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-600"
               >
                 Kontor (9-17, 1t pause)
               </button>
               <button
                 onClick={() => { setStartTid("22:00"); setSlutTid("06:00"); setFratraekPause(30); }}
-                className="px-3 py-1 bg-white border rounded hover:bg-gray-50 text-sm"
+                className="px-3 py-1 bg-white border rounded hover:bg-gray-50 text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-600"
               >
                 Nattevagt (22-06)
               </button>

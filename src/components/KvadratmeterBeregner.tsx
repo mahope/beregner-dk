@@ -136,61 +136,61 @@ export default function KvadratmeterBeregner() {
     <div className="space-y-8">
       {/* Form valg */}
       <div>
-        <label className="block text-sm font-medium mb-3">Vælg form</label>
+        <label className="block text-sm font-medium mb-3 dark:text-gray-200">Vælg form</label>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <button
             onClick={() => setFormType("rektangel")}
             className={`p-4 rounded-lg border-2 transition-all ${
               formType === "rektangel"
-                ? "border-blue-500 bg-blue-50"
-                : "border-gray-200 hover:border-gray-300"
+                ? "border-blue-500 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-300"
+                : "border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500"
             }`}
           >
             <div className="text-3xl mb-2">▭</div>
-            <div className="font-medium text-sm">Rektangel</div>
+            <div className="font-medium text-sm dark:text-gray-200">Rektangel</div>
           </button>
           <button
             onClick={() => setFormType("cirkel")}
             className={`p-4 rounded-lg border-2 transition-all ${
               formType === "cirkel"
-                ? "border-blue-500 bg-blue-50"
-                : "border-gray-200 hover:border-gray-300"
+                ? "border-blue-500 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-300"
+                : "border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500"
             }`}
           >
             <div className="text-3xl mb-2">◯</div>
-            <div className="font-medium text-sm">Cirkel</div>
+            <div className="font-medium text-sm dark:text-gray-200">Cirkel</div>
           </button>
           <button
             onClick={() => setFormType("trekant")}
             className={`p-4 rounded-lg border-2 transition-all ${
               formType === "trekant"
-                ? "border-blue-500 bg-blue-50"
-                : "border-gray-200 hover:border-gray-300"
+                ? "border-blue-500 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-300"
+                : "border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500"
             }`}
           >
             <div className="text-3xl mb-2">△</div>
-            <div className="font-medium text-sm">Trekant</div>
+            <div className="font-medium text-sm dark:text-gray-200">Trekant</div>
           </button>
           <button
             onClick={() => setFormType("trapez")}
             className={`p-4 rounded-lg border-2 transition-all ${
               formType === "trapez"
-                ? "border-blue-500 bg-blue-50"
-                : "border-gray-200 hover:border-gray-300"
+                ? "border-blue-500 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-300"
+                : "border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500"
             }`}
           >
             <div className="text-3xl mb-2">⏢</div>
-            <div className="font-medium text-sm">Trapez</div>
+            <div className="font-medium text-sm dark:text-gray-200">Trapez</div>
           </button>
         </div>
       </div>
 
       {/* Input baseret på form */}
-      <div className="bg-gray-50 rounded-lg p-6">
+      <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6">
         {formType === "rektangel" && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-2">Længde (meter)</label>
+              <label className="block text-sm font-medium mb-2 dark:text-gray-200">Længde (meter)</label>
               <div className="relative">
                 <input
                   type="number"
@@ -198,13 +198,13 @@ export default function KvadratmeterBeregner() {
                   step="0.1"
                   value={laengde}
                   onChange={(e) => setLaengde(parseFloat(e.target.value) || 0)}
-                  className="w-full px-4 py-3 pr-12 border rounded-lg"
+                  className="w-full px-4 py-3 pr-12 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                 />
                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">m</span>
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2">Bredde (meter)</label>
+              <label className="block text-sm font-medium mb-2 dark:text-gray-200">Bredde (meter)</label>
               <div className="relative">
                 <input
                   type="number"
@@ -212,7 +212,7 @@ export default function KvadratmeterBeregner() {
                   step="0.1"
                   value={bredde}
                   onChange={(e) => setBredde(parseFloat(e.target.value) || 0)}
-                  className="w-full px-4 py-3 pr-12 border rounded-lg"
+                  className="w-full px-4 py-3 pr-12 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                 />
                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">m</span>
               </div>
@@ -222,7 +222,7 @@ export default function KvadratmeterBeregner() {
 
         {formType === "cirkel" && (
           <div className="max-w-xs">
-            <label className="block text-sm font-medium mb-2">Radius (meter)</label>
+            <label className="block text-sm font-medium mb-2 dark:text-gray-200">Radius (meter)</label>
             <div className="relative">
               <input
                 type="number"
@@ -230,18 +230,18 @@ export default function KvadratmeterBeregner() {
                 step="0.1"
                 value={radius}
                 onChange={(e) => setRadius(parseFloat(e.target.value) || 0)}
-                className="w-full px-4 py-3 pr-12 border rounded-lg"
+                className="w-full px-4 py-3 pr-12 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               />
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">m</span>
             </div>
-            <p className="text-xs text-gray-500 mt-1">Radius = halvdelen af diameteren</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Radius = halvdelen af diameteren</p>
           </div>
         )}
 
         {formType === "trekant" && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-2">Grundlinje (meter)</label>
+              <label className="block text-sm font-medium mb-2 dark:text-gray-200">Grundlinje (meter)</label>
               <div className="relative">
                 <input
                   type="number"
@@ -249,13 +249,13 @@ export default function KvadratmeterBeregner() {
                   step="0.1"
                   value={grundlinje}
                   onChange={(e) => setGrundlinje(parseFloat(e.target.value) || 0)}
-                  className="w-full px-4 py-3 pr-12 border rounded-lg"
+                  className="w-full px-4 py-3 pr-12 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                 />
                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">m</span>
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2">Højde (meter)</label>
+              <label className="block text-sm font-medium mb-2 dark:text-gray-200">Højde (meter)</label>
               <div className="relative">
                 <input
                   type="number"
@@ -263,11 +263,11 @@ export default function KvadratmeterBeregner() {
                   step="0.1"
                   value={hoejde}
                   onChange={(e) => setHoejde(parseFloat(e.target.value) || 0)}
-                  className="w-full px-4 py-3 pr-12 border rounded-lg"
+                  className="w-full px-4 py-3 pr-12 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                 />
                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">m</span>
               </div>
-              <p className="text-xs text-gray-500 mt-1">Vinkelret afstand til grundlinjen</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Vinkelret afstand til grundlinjen</p>
             </div>
           </div>
         )}
@@ -275,7 +275,7 @@ export default function KvadratmeterBeregner() {
         {formType === "trapez" && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-2">Øverste side (meter)</label>
+              <label className="block text-sm font-medium mb-2 dark:text-gray-200">Øverste side (meter)</label>
               <div className="relative">
                 <input
                   type="number"
@@ -283,13 +283,13 @@ export default function KvadratmeterBeregner() {
                   step="0.1"
                   value={side1}
                   onChange={(e) => setSide1(parseFloat(e.target.value) || 0)}
-                  className="w-full px-4 py-3 pr-12 border rounded-lg"
+                  className="w-full px-4 py-3 pr-12 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                 />
                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">m</span>
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2">Nederste side (meter)</label>
+              <label className="block text-sm font-medium mb-2 dark:text-gray-200">Nederste side (meter)</label>
               <div className="relative">
                 <input
                   type="number"
@@ -297,13 +297,13 @@ export default function KvadratmeterBeregner() {
                   step="0.1"
                   value={side2}
                   onChange={(e) => setSide2(parseFloat(e.target.value) || 0)}
-                  className="w-full px-4 py-3 pr-12 border rounded-lg"
+                  className="w-full px-4 py-3 pr-12 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                 />
                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">m</span>
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2">Højde (meter)</label>
+              <label className="block text-sm font-medium mb-2 dark:text-gray-200">Højde (meter)</label>
               <div className="relative">
                 <input
                   type="number"
@@ -311,7 +311,7 @@ export default function KvadratmeterBeregner() {
                   step="0.1"
                   value={trapezHoejde}
                   onChange={(e) => setTrapezHoejde(parseFloat(e.target.value) || 0)}
-                  className="w-full px-4 py-3 pr-12 border rounded-lg"
+                  className="w-full px-4 py-3 pr-12 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                 />
                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">m</span>
               </div>
@@ -334,19 +334,19 @@ export default function KvadratmeterBeregner() {
       </div>
 
       {beregning.omkreds > 0 && (
-        <div className="p-4 bg-gray-100 rounded-lg text-center">
-          <p className="text-gray-600">
-            Omkreds: <strong>{formatNumber(beregning.omkreds)} meter</strong>
+        <div className="p-4 bg-gray-100 dark:bg-gray-800 rounded-lg text-center">
+          <p className="text-gray-600 dark:text-gray-400">
+            Omkreds: <strong className="dark:text-gray-200">{formatNumber(beregning.omkreds)} meter</strong>
           </p>
         </div>
       )}
 
       {/* Prisberegning */}
-      <div className="bg-white border rounded-lg p-6">
-        <h3 className="font-medium mb-4">Beregn pris</h3>
+      <div className="bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg p-6">
+        <h3 className="font-medium mb-4 dark:text-white">Beregn pris</h3>
         <div className="flex flex-col md:flex-row gap-4 items-end">
           <div className="flex-1">
-            <label className="block text-sm font-medium mb-2">Pris pr. m² (valgfrit)</label>
+            <label className="block text-sm font-medium mb-2 dark:text-gray-200">Pris pr. m² (valgfrit)</label>
             <div className="relative">
               <input
                 type="number"
@@ -355,42 +355,42 @@ export default function KvadratmeterBeregner() {
                 value={prisPerKvm || ""}
                 placeholder="0"
                 onChange={(e) => setPrisPerKvm(parseFloat(e.target.value) || 0)}
-                className="w-full px-4 py-3 pr-16 border rounded-lg"
+                className="w-full px-4 py-3 pr-16 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               />
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-gray-400">kr/m²</span>
             </div>
           </div>
           {beregning.totalPris > 0 && (
-            <div className="flex-1 p-4 bg-green-100 rounded-lg text-center">
-              <p className="text-sm text-gray-600">Samlet pris</p>
-              <p className="text-2xl font-bold text-green-700">{formatKr(beregning.totalPris)}</p>
+            <div className="flex-1 p-4 bg-green-100 dark:bg-green-900/20 rounded-lg text-center">
+              <p className="text-sm text-gray-600 dark:text-gray-400">Samlet pris</p>
+              <p className="text-2xl font-bold text-green-700 dark:text-green-400">{formatKr(beregning.totalPris)}</p>
             </div>
           )}
         </div>
       </div>
 
       {/* Omregningsliste */}
-      <div className="bg-white border rounded-lg overflow-hidden">
-        <div className="p-4 bg-gray-50 border-b">
-          <h3 className="font-medium">Omregn dit areal</h3>
+      <div className="bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg overflow-hidden">
+        <div className="p-4 bg-gray-50 dark:bg-gray-900/50 border-b dark:border-gray-700">
+          <h3 className="font-medium dark:text-white">Omregn dit areal</h3>
         </div>
         <div className="p-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-            <div className="text-center p-3 bg-gray-50 rounded-lg">
-              <div className="text-lg font-semibold">{formatNumber(beregning.areal)} m²</div>
-              <div className="text-gray-500">Kvadratmeter</div>
+            <div className="text-center p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
+              <div className="text-lg font-semibold dark:text-gray-200">{formatNumber(beregning.areal)} m²</div>
+              <div className="text-gray-500 dark:text-gray-400">Kvadratmeter</div>
             </div>
-            <div className="text-center p-3 bg-gray-50 rounded-lg">
-              <div className="text-lg font-semibold">{formatNumber(beregning.areal * 10000)} cm²</div>
-              <div className="text-gray-500">Kvadratcentimeter</div>
+            <div className="text-center p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
+              <div className="text-lg font-semibold dark:text-gray-200">{formatNumber(beregning.areal * 10000)} cm²</div>
+              <div className="text-gray-500 dark:text-gray-400">Kvadratcentimeter</div>
             </div>
-            <div className="text-center p-3 bg-gray-50 rounded-lg">
-              <div className="text-lg font-semibold">{formatNumber(beregning.areal / 10000, 6)} ha</div>
-              <div className="text-gray-500">Hektar</div>
+            <div className="text-center p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
+              <div className="text-lg font-semibold dark:text-gray-200">{formatNumber(beregning.areal / 10000, 6)} ha</div>
+              <div className="text-gray-500 dark:text-gray-400">Hektar</div>
             </div>
-            <div className="text-center p-3 bg-gray-50 rounded-lg">
-              <div className="text-lg font-semibold">{formatNumber(beregning.areal * 10.764)} sq ft</div>
-              <div className="text-gray-500">Kvadratfod</div>
+            <div className="text-center p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
+              <div className="text-lg font-semibold dark:text-gray-200">{formatNumber(beregning.areal * 10.764)} sq ft</div>
+              <div className="text-gray-500 dark:text-gray-400">Kvadratfod</div>
             </div>
           </div>
         </div>
@@ -406,26 +406,26 @@ export default function KvadratmeterBeregner() {
       </div>
 
       {/* Formler */}
-      <details className="bg-gray-50 rounded-lg">
-        <summary className="p-4 cursor-pointer font-medium">
+      <details className="bg-gray-50 dark:bg-gray-800 rounded-lg">
+        <summary className="p-4 cursor-pointer font-medium dark:text-gray-200">
           Se formler for arealberegning
         </summary>
-        <div className="p-4 pt-0 space-y-4 text-sm">
+        <div className="p-4 pt-0 space-y-4 text-sm dark:text-gray-300">
           <div>
-            <h4 className="font-medium mb-1">Rektangel:</h4>
-            <code className="block bg-white p-2 rounded border">Areal = Længde × Bredde</code>
+            <h4 className="font-medium mb-1 dark:text-white">Rektangel:</h4>
+            <code className="block bg-white dark:bg-gray-700 p-2 rounded border dark:border-gray-600 dark:text-gray-200">Areal = Længde × Bredde</code>
           </div>
           <div>
-            <h4 className="font-medium mb-1">Cirkel:</h4>
-            <code className="block bg-white p-2 rounded border">Areal = π × r² (hvor r = radius)</code>
+            <h4 className="font-medium mb-1 dark:text-white">Cirkel:</h4>
+            <code className="block bg-white dark:bg-gray-700 p-2 rounded border dark:border-gray-600 dark:text-gray-200">Areal = π × r² (hvor r = radius)</code>
           </div>
           <div>
-            <h4 className="font-medium mb-1">Trekant:</h4>
-            <code className="block bg-white p-2 rounded border">Areal = (Grundlinje × Højde) / 2</code>
+            <h4 className="font-medium mb-1 dark:text-white">Trekant:</h4>
+            <code className="block bg-white dark:bg-gray-700 p-2 rounded border dark:border-gray-600 dark:text-gray-200">Areal = (Grundlinje × Højde) / 2</code>
           </div>
           <div>
-            <h4 className="font-medium mb-1">Trapez:</h4>
-            <code className="block bg-white p-2 rounded border">Areal = ((Side 1 + Side 2) / 2) × Højde</code>
+            <h4 className="font-medium mb-1 dark:text-white">Trapez:</h4>
+            <code className="block bg-white dark:bg-gray-700 p-2 rounded border dark:border-gray-600 dark:text-gray-200">Areal = ((Side 1 + Side 2) / 2) × Højde</code>
           </div>
         </div>
       </details>
