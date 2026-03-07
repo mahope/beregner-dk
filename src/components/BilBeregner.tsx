@@ -146,9 +146,10 @@ export default function BilBeregner() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-2">Bilens pris</label>
+            <label htmlFor="bilPris" className="block text-sm font-medium mb-2">Bilens pris</label>
             <div className="relative">
               <input
+                id="bilPris"
                 type="number"
                 min="10000"
                 max="5000000"
@@ -187,9 +188,10 @@ export default function BilBeregner() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">Kørsel pr. år (km)</label>
+            <label htmlFor="koerselPrAar" className="block text-sm font-medium mb-2">Kørsel pr. år (km)</label>
             <div className="relative">
               <input
+                id="koerselPrAar"
                 type="number"
                 min="1000"
                 max="100000"
@@ -204,9 +206,10 @@ export default function BilBeregner() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">Forsikring (kr/år)</label>
+            <label htmlFor="forsikring" className="block text-sm font-medium mb-2">Forsikring (kr/år)</label>
             <div className="relative">
               <input
+                id="forsikring"
                 type="number"
                 min="0"
                 max="50000"
@@ -224,9 +227,10 @@ export default function BilBeregner() {
           {braendstof === "el" ? (
             <>
               <div>
-                <label className="block text-sm font-medium mb-2">Forbrug (kWh/100 km)</label>
+                <label htmlFor="forbrugKwh" className="block text-sm font-medium mb-2">Forbrug (kWh/100 km)</label>
                 <div className="relative">
                   <input
+                    id="forbrugKwh"
                     type="number"
                     min="10"
                     max="40"
@@ -241,9 +245,10 @@ export default function BilBeregner() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Elpris (kr/kWh)</label>
+                <label htmlFor="elpris" className="block text-sm font-medium mb-2">Elpris (kr/kWh)</label>
                 <div className="relative">
                   <input
+                    id="elpris"
                     type="number"
                     min="0.5"
                     max="10"
@@ -260,9 +265,10 @@ export default function BilBeregner() {
           ) : (
             <>
               <div>
-                <label className="block text-sm font-medium mb-2">Forbrug (km/liter)</label>
+                <label htmlFor="forbrugKmLiter" className="block text-sm font-medium mb-2">Forbrug (km/liter)</label>
                 <div className="relative">
                   <input
+                    id="forbrugKmLiter"
                     type="number"
                     min="5"
                     max="40"
@@ -279,9 +285,10 @@ export default function BilBeregner() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Brændstofpris (kr/liter)</label>
+                <label htmlFor="braendstofpris" className="block text-sm font-medium mb-2">Brændstofpris (kr/liter)</label>
                 <div className="relative">
                   <input
+                    id="braendstofpris"
                     type="number"
                     min="5"
                     max="25"
@@ -297,9 +304,10 @@ export default function BilBeregner() {
           )}
 
           <div>
-            <label className="block text-sm font-medium mb-2">Årligt værditab (%)</label>
+            <label htmlFor="vaerditab" className="block text-sm font-medium mb-2">Årligt værditab (%)</label>
             <div className="relative">
               <input
+                id="vaerditab"
                 type="number"
                 min="5"
                 max="30"

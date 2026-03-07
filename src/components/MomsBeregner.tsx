@@ -164,9 +164,10 @@ export default function MomsBeregner() {
 
       {/* Input */}
       <div className="max-w-md">
-        <label className="block text-sm font-medium mb-2">{getInputLabel()}</label>
+        <label htmlFor="momsBeloeb" className="block text-sm font-medium mb-2">{getInputLabel()}</label>
         <div className="relative">
           <input
+            id="momsBeloeb"
             type="number"
             min="0"
             step="0.01"

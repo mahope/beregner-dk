@@ -152,11 +152,12 @@ export default function RenteBeregner() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-2 dark:text-gray-200">
+            <label htmlFor="laaneBeloeb" className="block text-sm font-medium mb-2 dark:text-gray-200">
               Lånebeløb (hovedstol)
             </label>
             <div className="relative">
               <input
+                id="laaneBeloeb"
                 type="number"
                 min="0"
                 step="10000"
@@ -169,11 +170,12 @@ export default function RenteBeregner() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2 dark:text-gray-200">
+            <label htmlFor="aarligRente" className="block text-sm font-medium mb-2 dark:text-gray-200">
               Årlig rente (%)
             </label>
             <div className="relative">
               <input
+                id="aarligRente"
                 type="number"
                 min="0"
                 max="30"
@@ -189,11 +191,12 @@ export default function RenteBeregner() {
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-2 dark:text-gray-200">
+            <label htmlFor="loebetid" className="block text-sm font-medium mb-2 dark:text-gray-200">
               Løbetid (år)
             </label>
             <div className="relative">
               <input
+                id="loebetid"
                 type="number"
                 min="1"
                 max="50"
