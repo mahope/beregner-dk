@@ -349,6 +349,14 @@ const beregnere = [
     category: "Familie",
   },
   {
+    title: "Skattefradrag",
+    description: "Beregn alle skattefradrag samlet",
+    href: "/skattefradrag",
+    icon: "📋",
+    popular: false,
+    category: "Økonomi",
+  },
+  {
     title: "Forbrugslån",
     description: "Beregn ydelse og ÅOP på forbrugslån",
     href: "/forbrugslaan",

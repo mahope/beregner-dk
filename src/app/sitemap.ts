@@ -37,6 +37,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: "/andelsbolig", priority: 0.8, changeFrequency: "monthly" as const },
     { url: "/solceller", priority: 0.8, changeFrequency: "monthly" as const },
     { url: "/bryllup", priority: 0.8, changeFrequency: "yearly" as const },
+    { url: "/skattefradrag", priority: 0.9, changeFrequency: "yearly" as const },
     { url: "/rejsebudget", priority: 0.8, changeFrequency: "monthly" as const },
     { url: "/studielaan", priority: 0.8, changeFrequency: "yearly" as const },
 
