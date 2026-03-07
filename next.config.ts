@@ -46,6 +46,12 @@ const nextConfig: NextConfig = {
         headers: securityHeaders,
       },
       {
+        source: '/embed/:path*',
+        headers: [
+          ...securityHeaders.filter((h) => h.key !== 'X-Frame-Options'),
+        ],
+      },
+      {
         source: '/_next/static/:path*',
         headers: [
           {
