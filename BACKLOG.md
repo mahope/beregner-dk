@@ -575,7 +575,7 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 - **Route:** /bryllup
 
 ### E15. Skattefradrag beregner (samlet)
-- [ ] Samlet beregner for alle skattefradrag
+- [x] Samlet beregner for alle skattefradrag
 - Haandvaerkerfradrag, koerselsfradrag, rentefradrag, fagforening, a-kasse
 - Vis samlet fradrag og skattebesparelse
 - Tilfoej info om hvad der kan fradrages og graenser
@@ -587,7 +587,7 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 ## F. Teknisk Gaeld & Bugfixes (8 opgaver)
 
 ### F1. Test-setup og test-daekning
-- [ ] Konfigurer Vitest som test-runner (der er en test-fil men ingen konfiguration)
+- [x] Konfigurer Vitest som test-runner (der er en test-fil men ingen konfiguration)
 - Tilfoej unit tests paa beregningslogik for alle 33 beregnere
 - Sorg for at hvert beregnerens matematiske logik er testet isoleret
 - Tilfoej integration tests for de mest populaere beregnere
@@ -595,14 +595,14 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 - Maal: 80% test-daekning paa beregningslogik
 
 ### F2. Fjern duplikeret og ubrugt kode
-- [ ] Fjern gammel AdBanner.tsx i rod (erstattet af ads/AdBanner.tsx)
+- [x] Fjern gammel AdBanner.tsx i rod (erstattet af ads/AdBanner.tsx)
 - Fjern ubrugt src/lib/seo.ts (refererer til "beregner.dk", erstattet af StructuredData.tsx)
 - Fjern eller opdater SharedFooter.tsx (erstattet af inline footer i layout.tsx)
 - Fjern duplikerede UI/UX Princip-sektioner i BACKLOG.md (var 5 kopier)
 - Ryd op i "February 2026" sektionen i bunden af backlog (duplikerer eksisterende beregnere)
 
 ### F3. Performance optimering
-- [ ] Implementer dynamisk import / lazy loading paa beregner-komponenter
+- [x] Implementer dynamisk import / lazy loading paa beregner-komponenter
 - Tilfoej Image optimering (next/image) paa alle billeder
 - Implementer route-baseret code splitting
 - Reducer bundle size ved at analysere med next-bundle-analyzer
@@ -610,7 +610,7 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 - Maal: Lighthouse performance score > 95
 
 ### F4. Tilgaengelighed (a11y) audit
-- [ ] Koer fuld tilgaengelighedsaudit med axe-core eller Lighthouse
+- [x] Koer fuld tilgaengelighedsaudit med axe-core eller Lighthouse
 - Fix alle ARIA-problemer og manglende labels
 - Test med skraemlaeser (VoiceOver/NVDA)
 - Sorg for at alle formularer har tilknyttede labels
@@ -618,21 +618,21 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 - Test tab-raekkefoelge paa alle sider
 
 ### F5. Error handling og edge cases
-- [ ] Gennemgaa alle beregnere for edge cases
+- [x] Gennemgaa alle beregnere for edge cases
 - Hvad sker der ved 0-input, negative tal, ekstremt store tal?
 - Tilfoej venlige fejlbeskeder paa alle beregnere (kun 3 har InputField validering)
 - Tilfoej error boundaries saa en fejl i en beregner ikke crasher hele siden
 - Test alle beregnere med ugyldig URL state (?s= parameter med ugyldige data)
 
 ### F6. Cookiepolitik og GDPR compliance
-- [ ] Opdater cookiepolitik-siden med faktisk brug
+- [x] Opdater cookiepolitik-siden med faktisk brug
 - Cookie consent gemmer i localStorage — er det tilstraekkeligt eller skal det vaere en cookie?
 - Tilfoej granuleret samtykke (nødvendige, analytics, marketing) naar AdSense aktiveres
 - Sorg for at Plausible foerst loades efter samtykke (eller dokumenter at det er cookiefrit)
 - Test at cookie consent virker korrekt paa alle sider
 
 ### F7. Sitemap og robots.txt sync
-- [ ] Der er to sitemap-implementeringer der er ude af sync:
+- [x] Der er to sitemap-implementeringer der er ude af sync:
   - src/app/sitemap.ts (statisk, mangler nye beregnere)
   - src/app/api/sitemap/route.ts (dynamisk, mere komplet)
 - Vaelg een implementering og fjern den anden
@@ -641,7 +641,7 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 - Tilfoej changefreq og priority korrekt
 
 ### F8. Linting og kode-kvalitet
-- [ ] Koer fuld Biome lint og fix alle warnings
+- [x] Koer fuld Biome lint og fix alle warnings
 - Standardiser imports (absolut @/ prefix overalt)
 - Sorg for konsistent navngivning (nogle filer bruger PascalCase, andre camelCase)
 - Tilfoej stricter TypeScript (no-any, strict null checks)
@@ -657,15 +657,6 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 - Test ad performance med Plausible events (ad_clicked, ad_impression)
 - Implementer ad-free oplevelse paa foerste visit (vis ads foerst ved genbrug)
 - Respekter max 3 ads per side for UX
-
-### G2. Affiliate-links udvidelse
-- [ ] Tilfoej affiliate-links paa flere beregnere:
-  - /aktieskat → Nordnet, Saxo Bank, Lunar Invest
-  - /leasing → LeasePlan, ALD Automotive
-  - /solceller → Viasol, GreenMatch
-  - /studielaan → banker med gode studielaansbetingelser
-  - /forsikring (ny) → Samlino, TopDanmark, Tryg
-- Alle affiliate boxes skal have "Annonce" label (dansk markedsfoeringslov)
 
 ### G3. Email-capture og nyhedsbrev
 - [ ] Implementer email-signup paa forsiden og beregner-sider
@@ -755,4 +746,4 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 
 ---
 
-> Sidst opdateret: 2026-02-17
+> Sidst opdateret: 2026-03-07
