@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import DatoBeregner from "@/components/DatoBeregner";
+import dynamic from "next/dynamic";
+const DatoBeregner = dynamic(() => import("@/components/DatoBeregner"));
 import FAQ from "@/components/FAQ";
 import RelatedCalculators from "@/components/RelatedCalculators";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";

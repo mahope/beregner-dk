@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import BoliglaanBeregner from "@/components/BoliglaanBeregner";
+import dynamic from "next/dynamic";
+const BoliglaanBeregner = dynamic(() => import("@/components/BoliglaanBeregner"));
 import FAQ from "@/components/FAQ";
 import RelatedCalculators from "@/components/RelatedCalculators";
 import {

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import BraendstofBeregner from "@/components/BraendstofBeregner";
+import dynamic from "next/dynamic";
+const BraendstofBeregner = dynamic(() => import("@/components/BraendstofBeregner"));
 import FAQ from "@/components/FAQ";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";

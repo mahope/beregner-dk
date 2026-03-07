@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import BMIBeregner from "@/components/BMIBeregner";
+import dynamic from "next/dynamic";
+const BMIBeregner = dynamic(() => import("@/components/BMIBeregner"));
 import FAQ from "@/components/FAQ";
 import RelatedCalculators from "@/components/RelatedCalculators";
 import {
