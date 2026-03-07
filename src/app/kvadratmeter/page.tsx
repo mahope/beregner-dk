@@ -121,9 +121,9 @@ export default function KvadratmeterPage() {
       <div className="prose max-w-none mb-8">
         <h2>Om arealberegning</h2>
         <p>
-          Areal måles i kvadratmeter (m²) og angiver størrelsen af en flade. 
-          Det er vigtigt at kunne beregne areal ved mange lejligheder - fra gulvlægning 
-          og maling til køb af bolig.
+          Areal måles i <strong>kvadratmeter (m²)</strong> og angiver størrelsen af en flade.
+          Det er vigtigt at kunne beregne areal ved mange lejligheder — fra <strong>gulvlægning</strong>
+          og <strong>maling</strong> til køb af bolig.
         </p>
         
         <h3>Almindelige anvendelser</h3>
@@ -136,7 +136,7 @@ export default function KvadratmeterPage() {
 
         <h3>BBR-areal vs. boligareal</h3>
         <p>
-          Ved boligkøb skelner man mellem:
+          Ved <strong>boligkøb</strong> skelner man mellem:
         </p>
         <ul>
           <li><strong>Boligareal:</strong> De faktiske beboelige rum</li>
@@ -147,7 +147,7 @@ export default function KvadratmeterPage() {
 
         <h3>Materialeberegning</h3>
         <p>
-          Når du skal købe materialer, læg altid 5-10% til for spild:
+          Når du skal købe materialer, læg altid <strong>5-10% til for spild</strong>:
         </p>
         <ul>
           <li>Gulvbrædder: +10% for tilskæring</li>

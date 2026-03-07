@@ -118,9 +118,9 @@ export default function AlderPage() {
       <div className="prose max-w-none mb-8">
         <h2>Om aldersberegning</h2>
         <p>
-          At kende sin præcise alder kan være nyttigt i mange sammenhænge - fra juridiske dokumenter 
-          til sundhedsberegninger. Vores aldersberegner giver dig et detaljeret overblik over din alder 
-          i forskellige tidsenheder.
+          At kende sin <strong>præcise alder</strong> kan være nyttigt i mange sammenhænge - fra <strong>juridiske dokumenter</strong>
+          til <strong>sundhedsberegninger</strong>. Vores aldersberegner giver dig et detaljeret overblik over din alder
+          i forskellige <strong>tidsenheder</strong>.
         </p>
         
         <h3>Alder i forskellige enheder</h3>
@@ -148,8 +148,8 @@ export default function AlderPage() {
 
         <h3>Stjernetegn</h3>
         <p>
-          Stjernetegnene er baseret på den vestlige astrologi og følger solens position 
-          i zodiakken på fødselstidspunktet. Der er 12 tegn, hver med unikke karaktertræk 
+          <strong>Stjernetegnene</strong> er baseret på den <strong>vestlige astrologi</strong> og følger <strong>solens position</strong>
+          i zodiakken på fødselstidspunktet. Der er <strong>12 tegn</strong>, hver med unikke karaktertræk
           ifølge astrologisk tradition.
         </p>
       </div>

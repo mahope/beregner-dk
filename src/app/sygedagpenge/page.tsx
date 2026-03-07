@@ -90,7 +90,7 @@ export default function SygedagpengePage() {
         <div className="mt-12 prose dark:prose-invert max-w-none">
           <h2>Sådan fungerer sygedagpenge</h2>
           <p>
-            Når du bliver syg og ikke kan arbejde, har du ret til sygedagpenge. De første 30 kalenderdage betaler din arbejdsgiver (arbejdsgiverperioden). Herefter overtager kommunen udbetalingen via Udbetaling Danmark.
+            Når du bliver syg og ikke kan arbejde, har du ret til <strong>sygedagpenge</strong>. De første <strong>30 kalenderdage</strong> betaler din arbejdsgiver (<strong>arbejdsgiverperioden</strong>). Herefter overtager <strong>kommunen</strong> udbetalingen via <strong>Udbetaling Danmark</strong>.
           </p>
 
           <h2>Hvem har ret til sygedagpenge?</h2>
@@ -102,12 +102,12 @@ export default function SygedagpengePage() {
 
           <h2>Arbejdsgiverens pligter</h2>
           <p>
-            Din arbejdsgiver skal anmelde dit fravær til kommunen senest 5 uger efter din første sygedag. Arbejdsgiveren kan fra dag 1 anmode om en <strong>mulighedserklæring</strong>, der beskriver, hvad du evt. kan arbejde med under din sygdom.
+            Din arbejdsgiver skal anmelde dit fravær til kommunen senest <strong>5 uger</strong> efter din første sygedag. Arbejdsgiveren kan fra <strong>dag 1</strong> anmode om en <strong>mulighedserklæring</strong>, der beskriver, hvad du evt. kan arbejde med under din sygdom.
           </p>
 
           <h2>Revurdering efter 22 uger</h2>
           <p>
-            Kommunen skal senest ved uge 22 tage stilling til, om dine sygedagpenge kan forlænges. Forlængelse sker typisk ved afventning af behandling, revalidering, afklaring til fleksjob eller ressourceforløb.
+            Kommunen skal senest ved <strong>uge 22</strong> tage stilling til, om dine sygedagpenge kan <strong>forlænges</strong>. Forlængelse sker typisk ved afventning af <strong>behandling</strong>, <strong>revalidering</strong>, afklaring til <strong>fleksjob</strong> eller <strong>ressourceforløb</strong>.
           </p>
         </div>
 

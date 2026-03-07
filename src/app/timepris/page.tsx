@@ -119,9 +119,9 @@ export default function TimeprisPage() {
       <div className="prose max-w-none mb-8">
         <h2>Sådan finder du den rigtige timepris</h2>
         <p>
-          At fastsætte sin timepris er en af de vigtigste beslutninger som freelancer. 
-          Sætter du den for lavt, ender du med at arbejde for meget for for lidt. 
-          Sætter du den for højt, risikerer du at miste kunder.
+          At <strong>fastsætte sin timepris</strong> er en af de vigtigste beslutninger som <strong>freelancer</strong>.
+          Sætter du den <strong>for lavt</strong>, ender du med at arbejde for meget for for lidt.
+          Sætter du den <strong>for højt</strong>, risikerer du at miste kunder.
         </p>
         
         <h3>Faktorer der påvirker din timepris</h3>
@@ -135,7 +135,7 @@ export default function TimeprisPage() {
 
         <h3>Skjulte omkostninger som freelancer</h3>
         <p>
-          Mange nye freelancere undervurderer deres omkostninger:
+          Mange nye freelancere <strong>undervurderer deres omkostninger</strong>:
         </p>
         <ul>
           <li>Ingen betalt ferie (5-6 uger = 10-12% af din tid)</li>
@@ -149,8 +149,8 @@ export default function TimeprisPage() {
 
         <h3>Timepris vs. fastpris</h3>
         <p>
-          Overvej også at tilbyde fastpriser på projekter. Det kan give dig bedre indtjening 
-          når du bliver mere effektiv, og kunder foretrækker ofte at kende den samlede pris på forhånd.
+          Overvej også at tilbyde <strong>fastpriser på projekter</strong>. Det kan give dig <strong>bedre indtjening</strong>
+          når du bliver mere effektiv, og kunder foretrækker ofte at kende den <strong>samlede pris</strong> på forhånd.
         </p>
       </div>
 

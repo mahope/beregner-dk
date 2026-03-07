@@ -634,78 +634,96 @@ export default function Home() {
       <section className="prose dark:prose-invert max-w-none mb-16">
         <h2>Om MinBeregner.dk — Danmarks gratis beregnerportal</h2>
         <p>
-          MinBeregner.dk samler over 33 gratis online beregnere til danskere. Alle beregnere er
-          opdateret med de nyeste satser og regler for 2026, og beregningerne sker lokalt i din
-          browser — vi gemmer ingen persondata. Uanset om du skal beregne løn efter skat, finde ud
-          af hvad du kan få i pension, eller regne moms ud, finder du det hele her.
+          MinBeregner.dk samler over <strong>44 gratis online beregnere</strong> til danskere.
+          Alle beregnere er opdateret med de nyeste satser og regler for 2026, og beregningerne
+          sker lokalt i din browser — vi gemmer ingen persondata.
         </p>
 
         <h2>Økonomi og skat</h2>
         <p>
-          Vores mest brugte beregner er <Link href="/loen-efter-skat">løn efter skat</Link>, hvor du
-          kan se hvad du får udbetalt efter AM-bidrag, kommuneskat, bundskat og eventuelt topskat.
-          Beregneren er opdateret med 2026-skattesatserne, herunder det nye mellemskat-trin.
-          Du kan også bruge vores <Link href="/moms">momsberegner</Link> til hurtigt at tillægge
-          eller fratrække 25% moms, og <Link href="/procent">procentberegneren</Link> til
-          at beregne procent af et tal, procentvis stigning og fald.
+          Vores mest brugte beregner er <Link href="/loen-efter-skat">løn efter skat</Link>, hvor
+          du kan se hvad du får udbetalt efter AM-bidrag, kommuneskat, bundskat og eventuelt topskat.
+          Beregneren er opdateret med <strong>2026-skattesatserne</strong>, herunder det nye mellemskat-trin.
         </p>
-        <p>
-          Til skatteoptimering har vi en <Link href="/rentefradrag">rentefradrag-beregner</Link> der
-          viser din skattebesparelse, og en <Link href="/arveafgift">arveafgift-beregner</Link> med
-          de korrekte satser for boafgift (15%) og tillægsafgift (25%).
-        </p>
+        <h3>Populære økonomi-beregnere</h3>
+        <ul>
+          <li><Link href="/moms"><strong>Momsberegner</strong></Link> — tillæg eller fratræk 25% moms</li>
+          <li><Link href="/procent"><strong>Procentberegner</strong></Link> — beregn procent af et tal, stigning og fald</li>
+          <li><Link href="/rentefradrag"><strong>Rentefradrag</strong></Link> — se din skattebesparelse på renteudgifter</li>
+          <li><Link href="/arveafgift"><strong>Arveafgift</strong></Link> — beregn boafgift (15%) og tillægsafgift (25%)</li>
+          <li><Link href="/aktieskat"><strong>Aktieskat</strong></Link> — beregn skat på aktiegevinst</li>
+          <li><Link href="/topskat"><strong>Topskat</strong></Link> — tjek om du betaler mellemskat eller topskat</li>
+        </ul>
 
         <h2>Pension, dagpenge og offentlige ydelser</h2>
         <p>
-          Planlæg din fremtid med vores <Link href="/pension">pensionsberegner</Link>. Se hvad du
-          kan forvente i folkepension, arbejdsmarkedspension og privat opsparing. Overvejer du at
-          trække dig tidligt tilbage? Vores <Link href="/efterloen">efterlønsberegner</Link> viser
-          din sats baseret på 2026-reglerne.
+          Planlæg din fremtid med vores <Link href="/pension">pensionsberegner</Link> — se hvad du
+          kan forvente i folkepension, arbejdsmarkedspension og privat opsparing.
         </p>
-        <p>
-          Er du ledig, kan du bruge <Link href="/dagpenge">dagpengeberegneren</Link> til at se din
-          dagpengesats. Forældre finder <Link href="/barselsdagpenge">barselsdagpenge-beregneren</Link> nyttig
-          til at planlægge økonomi under barsel, og <Link href="/boernepenge">børnepenge-beregneren</Link> viser
-          de aktuelle satser for børne- og ungeydelse. Studerende kan bruge vores{" "}
-          <Link href="/su">SU beregner</Link> til at tjekke satser og fribeløb, og{" "}
-          <Link href="/feriepenge">feriepenge-beregneren</Link> viser hvad du får udbetalt i ferie.
-        </p>
+        <h3>Ydelser og offentlig støtte</h3>
+        <ul>
+          <li><Link href="/efterloen"><strong>Efterløn</strong></Link> — beregn din efterlønssats baseret på 2026-reglerne</li>
+          <li><Link href="/dagpenge"><strong>Dagpenge</strong></Link> — se din dagpengesats ved ledighed</li>
+          <li><Link href="/barselsdagpenge"><strong>Barselsdagpenge</strong></Link> — planlæg økonomi under barsel</li>
+          <li><Link href="/boernepenge"><strong>Børnepenge</strong></Link> — aktuelle satser for børne- og ungeydelse</li>
+          <li><Link href="/su"><strong>SU beregner</strong></Link> — tjek satser og fribeløb</li>
+          <li><Link href="/sygedagpenge"><strong>Sygedagpenge</strong></Link> — beregn sygedagpengesats</li>
+          <li><Link href="/feriepenge"><strong>Feriepenge</strong></Link> — se hvad du får udbetalt i ferie</li>
+        </ul>
 
         <h2>Bolig og lån</h2>
         <p>
-          Skal du købe bolig? Start med vores <Link href="/boliglaan">boliglåns-beregner</Link> for
-          at se ydelsen på dit lån, og brug <Link href="/ejendomsvaerdiskat">ejendomsværdiskat-beregneren</Link> til
-          at beregne din årlige boligskat med det nye 2024-system (5,1‰ / 14‰ af vurderingen).
-          Lejer du, kan du tjekke om du har ret til <Link href="/boligstoette">boligstøtte</Link> med
-          vores beregner, eller bruge <Link href="/husleje">huslejebudget-beregneren</Link> til at
-          finde ud af hvad du har råd til.
+          Skal du <strong>købe bolig</strong>? Start med vores <Link href="/boliglaan">boliglåns-beregner</Link> for
+          at se ydelsen på dit lån. <strong>Lejer du</strong>, kan du tjekke om du har ret
+          til <Link href="/boligstoette">boligstøtte</Link> eller bruge <Link href="/husleje">huslejebudget-beregneren</Link>.
         </p>
-        <p>
-          Vi har også specialiserede låneberegnere: <Link href="/laaneberegner">generel låneberegner</Link>,{" "}
-          <Link href="/billaan">billån</Link>, <Link href="/forbrugslaan">forbrugslån</Link> og{" "}
-          <Link href="/renteberegner">renteberegner</Link> med afdragsplaner. Med{" "}
-          <Link href="/opsparing">opsparingsberegneren</Link> kan du se hvordan renters rente får
-          din opsparing til at vokse over tid.
-        </p>
+        <h3>Boligberegnere</h3>
+        <ul>
+          <li><Link href="/boliglaan"><strong>Boliglån</strong></Link> — beregn ydelse og omkostninger</li>
+          <li><Link href="/ejendomsvaerdiskat"><strong>Ejendomsværdiskat</strong></Link> — beregn boligskat (5,1‰ / 14‰ af vurdering)</li>
+          <li><Link href="/andelsbolig"><strong>Andelsbolig</strong></Link> — beregn omkostninger ved køb af andelsbolig</li>
+          <li><Link href="/solceller"><strong>Solceller</strong></Link> — beregn besparelse og tilbagebetalingstid</li>
+        </ul>
+        <h3>Låneberegnere</h3>
+        <ul>
+          <li><Link href="/laaneberegner"><strong>Generel låneberegner</strong></Link> — beregn ydelse og sammenlign lån</li>
+          <li><Link href="/billaan"><strong>Billån</strong></Link> — beregn månedlig ydelse og rente</li>
+          <li><Link href="/forbrugslaan"><strong>Forbrugslån</strong></Link> — beregn ydelse og ÅOP</li>
+          <li><Link href="/renteberegner"><strong>Renteberegner</strong></Link> — detaljeret rente med afdragsplan</li>
+          <li><Link href="/opsparing"><strong>Opsparingsberegner</strong></Link> — se hvordan renters rente får din opsparing til at vokse</li>
+          <li><Link href="/gaeldsfri"><strong>Gældsfri beregner</strong></Link> — beregn din vej ud af gæld</li>
+        </ul>
 
         <h2>Sundhed og krop</h2>
-        <p>
-          Vores <Link href="/bmi">BMI beregner</Link> giver dig indblik i dit Body Mass Index og
-          om din vægt er sund. Kombiner den med <Link href="/kalorier">kalorieberegneren</Link> for
-          at se dit daglige kaloriebehov baseret på alder, køn og aktivitetsniveau.
-        </p>
+        <ul>
+          <li><Link href="/bmi"><strong>BMI beregner</strong></Link> — beregn dit Body Mass Index og se om din vægt er sund</li>
+          <li><Link href="/kalorier"><strong>Kalorieberegner</strong></Link> — se dit daglige kaloriebehov baseret på alder, køn og aktivitetsniveau</li>
+          <li><Link href="/vaegttab"><strong>Vægttab</strong></Link> — beregn kalorieunderskud for vægttab</li>
+        </ul>
 
         <h2>Hverdag og praktisk</h2>
-        <p>
-          Med <Link href="/elberegner">elberegneren</Link> kan du se hvad dine apparater koster i
-          strøm, og <Link href="/braendstof">brændstofberegneren</Link> hjælper dig med at beregne
-          transportomkostninger. <Link href="/bil">Bil værdtab-beregneren</Link> viser hvad din bil
-          koster at eje over tid. Til planlægning har vi en <Link href="/dato">datoberegner</Link>,{" "}
-          <Link href="/alder">aldersberegner</Link>, <Link href="/tidsberegner">tidsberegner</Link>,{" "}
-          <Link href="/tidszone">tidszoneberegner</Link> og <Link href="/valuta">valutaberegner</Link>.
-          Selvstændige og freelancere finder vores <Link href="/timepris">timeprisberegner</Link> nyttig
-          til at fastsætte den rette pris.
-        </p>
+        <h3>Bil og transport</h3>
+        <ul>
+          <li><Link href="/elberegner"><strong>Elberegner</strong></Link> — se hvad dine apparater koster i strøm</li>
+          <li><Link href="/braendstof"><strong>Brændstofberegner</strong></Link> — beregn transportomkostninger</li>
+          <li><Link href="/bil"><strong>Bil værdtab</strong></Link> — se hvad din bil koster at eje over tid</li>
+          <li><Link href="/leasing"><strong>Leasing</strong></Link> — beregn leasingydelse og sammenlign med billån</li>
+        </ul>
+        <h3>Tid, dato og valuta</h3>
+        <ul>
+          <li><Link href="/dato"><strong>Datoberegner</strong></Link> — beregn dage mellem datoer og arbejdsdage</li>
+          <li><Link href="/alder"><strong>Aldersberegner</strong></Link> — beregn din præcise alder</li>
+          <li><Link href="/tidsberegner"><strong>Tidsberegner</strong></Link> — beregn timer og minutter mellem tidspunkter</li>
+          <li><Link href="/tidszone"><strong>Tidszoneberegner</strong></Link> — se klokken i andre lande</li>
+          <li><Link href="/valuta"><strong>Valutaberegner</strong></Link> — omregn mellem DKK, EUR, USD og andre valutaer</li>
+        </ul>
+        <h3>Erhverv og planlægning</h3>
+        <ul>
+          <li><Link href="/timepris"><strong>Timeprisberegner</strong></Link> — find din timepris som freelancer eller selvstændig</li>
+          <li><Link href="/rejsebudget"><strong>Rejsebudget</strong></Link> — beregn rejsebudget til populære destinationer</li>
+          <li><Link href="/bryllup"><strong>Bryllupsbudget</strong></Link> — beregn komplet bryllupsbudget</li>
+          <li><Link href="/konfirmation"><strong>Konfirmationsbudget</strong></Link> — beregn budget for konfirmation</li>
+        </ul>
 
         <h2>Ofte stillede spørgsmål</h2>
         {homeFaqItems.map((item, index) => (

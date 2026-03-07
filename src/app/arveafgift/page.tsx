@@ -81,8 +81,8 @@ export default function ArveafgiftPage() {
       <div className="mt-12 prose max-w-none">
         <h2>Arveafgift i Danmark</h2>
         <p>
-          Arveafgift (også kaldet boafgift) er en skat, der betales af arvinger 
-          efter en persons død. Reglerne varierer afhængigt af din relation til afdøde.
+          <strong>Arveafgift</strong> (også kaldet <strong>boafgift</strong>) er en skat, der betales af arvinger
+          efter en persons død. Reglerne varierer afhængigt af din <strong>relation til afdøde</strong>.
         </p>
 
         <h2>Bundfradrag og satser (2026)</h2>
@@ -134,8 +134,8 @@ export default function ArveafgiftPage() {
 
         <h3>Børn, børnebørn og forældre</h3>
         <p>
-          Nærmeste familie betaler 15% i boafgift af beløbet over bundfradraget 
-          på 392.300 kr. Der er ingen tillægsafgift for denne gruppe.
+          Nærmeste familie betaler <strong>15% i boafgift</strong> af beløbet over bundfradraget
+          på <strong>392.300 kr</strong>. Der er ingen <strong>tillægsafgift</strong> for denne gruppe.
         </p>
         <ul>
           <li><strong>Børn:</strong> Arv fra forældre</li>
@@ -145,8 +145,8 @@ export default function ArveafgiftPage() {
 
         <h3>Søskende</h3>
         <p>
-          Søskende betaler 15% boafgift plus 25% tillægsafgift af arven efter
-          boafgift. Den effektive marginale sats nærmer sig 36,25% for store arvebeløb.
+          Søskende betaler <strong>15% boafgift</strong> plus <strong>25% tillægsafgift</strong> af arven efter
+          boafgift. Den <strong>effektive marginale sats</strong> nærmer sig <strong>36,25%</strong> for store arvebeløb.
           <strong>Bemærk:</strong> Fra 1. januar 2027 afskaffes tillægsafgiften for
           søskende, så de fremover kun betaler 15% boafgift.
         </p>
@@ -154,15 +154,15 @@ export default function ArveafgiftPage() {
         <h3>Andre arvinger</h3>
         <p>
           Venner, fjern familie og andre uden direkte familiemæssig tilknytning
-          betaler 15% boafgift + 25% tillægsafgift af arven efter boafgift.
-          Der er intet bundfradrag for tillægsafgiften.
+          betaler <strong>15% boafgift + 25% tillægsafgift</strong> af arven efter boafgift.
+          Der er <strong>intet bundfradrag</strong> for tillægsafgiften.
         </p>
 
         <h2>Bundfradraget</h2>
         <p>
-          Bundfradraget på 392.300 kr (2026) gælder for alle arvinger undtagen 
-          ægtefæller. Det betyder, at de første 392.300 kr af arven er 
-          afgiftsfri — uanset hvem der arver.
+          <strong>Bundfradraget</strong> på <strong>392.300 kr</strong> (2026) gælder for alle arvinger undtagen
+          ægtefæller. Det betyder, at de første 392.300 kr af arven er
+          <strong>afgiftsfri</strong> — uanset hvem der arver.
         </p>
         <p>
           <strong>Eksempel:</strong> Et barn arver 1.000.000 kr. Arveafgiften
@@ -171,8 +171,8 @@ export default function ArveafgiftPage() {
 
         <h2>Hvornår skal arveafgift betales?</h2>
         <p>
-          Arveafgiften skal betales til Skattestyrelsen inden 1 år efter dødsfaldet. 
-          Boet afvikles typisk gennem en bobestyrer eller advokat, som sørger 
+          Arveafgiften skal betales til <strong>Skattestyrelsen</strong> inden <strong>1 år efter dødsfaldet</strong>.
+          Boet afvikles typisk gennem en <strong>bobestyrer</strong> eller <strong>advokat</strong>, som sørger
           for at beregne og afregne afgifterne.
         </p>
 

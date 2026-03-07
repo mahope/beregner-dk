@@ -82,7 +82,7 @@ export default function PensionPage() {
       <div className="mt-12 prose max-w-none">
         <h2>Pension i Danmark - et overblik</h2>
         <p>
-          Det danske pensionssystem består af tre søjler:
+          Det danske <strong>pensionssystem</strong> består af <strong>tre søjler</strong>:
         </p>
         <ol>
           <li><strong>Folkepension + ATP:</strong> Staten betaler til alle (ca. 13.000-15.000 kr/måned)</li>
@@ -92,7 +92,7 @@ export default function PensionPage() {
 
         <h2>Folkepension (2026)</h2>
         <p>
-          Alle danske statsborgere med bopæl i Danmark har ret til folkepension fra folkepensionsalderen (pt. 68 år).
+          Alle danske statsborgere med bopæl i Danmark har ret til <strong>folkepension</strong> fra <strong>folkepensionsalderen</strong> (pt. 68 år).
         </p>
         <table>
           <thead>
@@ -128,7 +128,7 @@ export default function PensionPage() {
 
         <h2>Arbejdsmarkedspension</h2>
         <p>
-          De fleste danskere har arbejdsmarkedspension via deres ansættelse. Typiske satser:
+          De fleste danskere har <strong>arbejdsmarkedspension</strong> via deres ansættelse. Typiske satser:
         </p>
         <ul>
           <li><strong>Arbejdsgiver:</strong> 8-12% af din løn</li>
@@ -136,7 +136,7 @@ export default function PensionPage() {
           <li><strong>Total:</strong> 12-17% af din bruttoløn</li>
         </ul>
         <p>
-          Eksempel: Med 40.000 kr/måned i løn og 15% pension indbetales 6.000 kr/måned.
+          <strong>Eksempel:</strong> Med <strong>40.000 kr/måned</strong> i løn og <strong>15% pension</strong> indbetales <strong>6.000 kr/måned</strong>.
         </p>
 
         <h2>Pensionstyper</h2>
@@ -190,8 +190,8 @@ export default function PensionPage() {
           </tbody>
         </table>
         <p>
-          Du kan typisk gå på <strong>tidlig pension</strong> (opsparingsbaseret) fra 5 år før folkepensionsalderen,
-          men folkepensionen starter først ved den officielle alder.
+          Du kan typisk gå på <strong>tidlig pension</strong> (opsparingsbaseret) fra <strong>5 år før folkepensionsalderen</strong>,
+          men <strong>folkepensionen</strong> starter først ved den officielle alder.
         </p>
 
         <h2>Tips til pensionsplanlægning</h2>

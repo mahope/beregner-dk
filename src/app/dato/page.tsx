@@ -99,11 +99,11 @@ export default function DatoPage() {
 
       <div className="mt-12 prose max-w-none">
         <h2>Sådan bruger du datoberegneren</h2>
-        <p>Datoberegneren har fire forskellige funktioner:</p>
+        <p>Datoberegneren har <strong>fire forskellige funktioner</strong>:</p>
 
         <h3>1. Dage mellem datoer</h3>
         <p>
-          Beregn hvor mange dage der er mellem to datoer. Du får også antal
+          Beregn hvor mange <strong>dage der er mellem to datoer</strong>. Du får også antal
           uger, ca. måneder, arbejdsdage og weekenddage.
         </p>
         <ul>
@@ -116,7 +116,7 @@ export default function DatoPage() {
 
         <h3>2. Tilføj dage</h3>
         <p>
-          Find ud af hvilken dato det bliver om X dage, eller hvilken dato det
+          Find ud af hvilken dato det bliver om <strong>X dage</strong>, eller hvilken dato det
           var for X dage siden.
         </p>
         <ul>
@@ -127,8 +127,8 @@ export default function DatoPage() {
 
         <h3>3. Arbejdsdage</h3>
         <p>
-          Beregn en dato baseret på antal arbejdsdage. Perfekt til
-          projektplanlægning og deadline-beregning.
+          Beregn en dato baseret på antal <strong>arbejdsdage</strong>. Perfekt til
+          <strong>projektplanlægning</strong> og deadline-beregning.
         </p>
         <ul>
           <li>Vælg startdato</li>
@@ -138,7 +138,7 @@ export default function DatoPage() {
 
         <h3>4. Alder</h3>
         <p>
-          Beregn din præcise alder i år, måneder og dage. Se også hvor mange
+          Beregn din <strong>præcise alder</strong> i år, måneder og dage. Se også hvor mange
           dage du har levet, og hvornår du fylder år.
         </p>
 
@@ -153,7 +153,7 @@ export default function DatoPage() {
         </ul>
 
         <h2>Skudår</h2>
-        <p>Et år er et skudår hvis:</p>
+        <p>Et år er et <strong>skudår</strong> hvis:</p>
         <ul>
           <li>Året er deleligt med 4, OG</li>
           <li>Året er IKKE deleligt med 100, MED MINDRE</li>

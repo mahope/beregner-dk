@@ -105,13 +105,13 @@ export default function FeriepengePage() {
         <p>
           I Danmark optjener du{" "}
           <strong>12,5% af din ferieberettigede løn</strong> i feriepenge. Denne sats er
-          fastsat i ferieloven og gælder uændret i 2026. Det svarer til 2,08 feriedag
-          per måned eller 25 dage om året (5 ugers ferie).
+          fastsat i <strong>ferieloven</strong> og gælder uændret i 2026. Det svarer til <strong>2,08 feriedag
+          per måned</strong> eller <strong>25 dage om året</strong> (5 ugers ferie).
         </p>
         <p>
-          Ved udbetaling trækkes først AM-bidrag (8%), derefter A-skat efter dit skattekort.
-          Eksempel: Med en månedsløn på 35.000 kr optjener du 52.500 kr i feriepenge om året
-          (35.000 &times; 12 &times; 12,5%). Det svarer til ca. 2.100 kr brutto per feriedag.
+          Ved udbetaling trækkes først <strong>AM-bidrag (8%)</strong>, derefter <strong>A-skat</strong> efter dit skattekort.
+          Eksempel: Med en månedsløn på <strong>35.000 kr</strong> optjener du <strong>52.500 kr</strong> i feriepenge om året
+          (35.000 &times; 12 &times; 12,5%). Det svarer til ca. <strong>2.100 kr brutto per feriedag</strong>.
         </p>
 
         <h3>Ferieåret 2025/2026</h3>

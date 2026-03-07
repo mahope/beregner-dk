@@ -85,12 +85,12 @@ export default function StudielaanPage() {
         <div className="mt-12 prose dark:prose-invert max-w-none">
           <h2>Tilbagebetaling af SU-lån</h2>
           <p>
-            SU-lån er et af de billigste lån, du kan have. Tilbagebetalingen starter 1 år efter endt uddannelse, og du har typisk 7 år til at betale lånet ud — med mulighed for forlængelse til 15 år.
+            SU-lån er et af de <strong>billigste lån</strong>, du kan have. Tilbagebetalingen starter <strong>1 år efter endt uddannelse</strong>, og du har typisk 7 år til at betale lånet ud — med mulighed for forlængelse til 15 år.
           </p>
 
           <h2>Fordele ved ekstra afdrag</h2>
           <p>
-            Selvom renten på SU-lån er lav, kan ekstra afdrag stadig spare dig penge. Jo hurtigere du betaler ned, jo mindre rente betaler du samlet. Brug beregneren til at se den præcise effekt.
+            Selvom renten på SU-lån er lav, kan <strong>ekstra afdrag</strong> stadig spare dig penge. Jo hurtigere du betaler ned, jo mindre <strong>rente</strong> betaler du samlet. Brug beregneren til at se den præcise effekt.
           </p>
 
           <h2>Tips til studielån</h2>

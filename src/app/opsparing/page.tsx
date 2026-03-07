@@ -104,8 +104,8 @@ export default function OpsparingPage() {
       <div className="mt-12 prose max-w-none">
         <h2>Sådan bruger du opsparingsberegneren</h2>
         <p>
-          Med vores opsparingsberegner kan du se, hvordan din opsparing vokser
-          over tid med renters rente:
+          Med vores <strong>opsparingsberegner</strong> kan du se, hvordan din opsparing vokser
+          over tid med <strong>renters rente</strong>:
         </p>
         <ol>
           <li>
@@ -125,9 +125,9 @@ export default function OpsparingPage() {
 
         <h2>Kraften i renters rente</h2>
         <p>
-          Renters rente er en af de mest kraftfulde kræfter inden for økonomi.
-          Albert Einstein sagde angiveligt, at &quot;renters rente er verdens
-          ottende vidunder&quot;.
+          <strong>Renters rente</strong> er en af de mest kraftfulde kræfter inden for økonomi.
+          Albert Einstein sagde angiveligt, at &quot;<strong>renters rente er verdens
+          ottende vidunder</strong>&quot;.
         </p>
         <p>Her er et eksempel på forskellen:</p>
         <ul>

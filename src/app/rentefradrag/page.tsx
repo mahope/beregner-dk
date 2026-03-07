@@ -122,9 +122,9 @@ export default function RentefradragPage() {
             </h2>
             <div className="prose max-w-none text-gray-700">
               <p>
-                Rentefradrag er en af de mest værdifulde skattefordele for boligejere i Danmark. 
-                Når du betaler renter på dit lån, får du lov til at trække en del fra i skat. 
-                Det betyder, at staten reelt betaler en del af dine renteudgifter.
+                <strong>Rentefradrag</strong> er en af de mest værdifulde <strong>skattefordele</strong> for boligejere i Danmark.
+                Når du betaler renter på dit lån, får du lov til at <strong>trække en del fra i skat</strong>.
+                Det betyder, at staten reelt betaler en del af dine <strong>renteudgifter</strong>.
               </p>
               
               <h3 className="text-xl font-semibold mt-6 mb-3">Fradragssatser 2026</h3>
@@ -152,7 +152,7 @@ export default function RentefradragPage() {
 
               <h3 className="text-xl font-semibold mt-6 mb-3">Eksempel</h3>
               <p>
-                Hvis du har 80.000 kr. i årlige renteudgifter som enlig:
+                Hvis du har <strong>80.000 kr. i årlige renteudgifter</strong> som enlig:
               </p>
               <ul className="list-disc pl-6 space-y-1">
                 <li>De første 50.000 kr. giver fradrag: 50.000 × 33,6% = 16.800 kr.</li>

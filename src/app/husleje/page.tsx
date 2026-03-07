@@ -120,16 +120,16 @@ export default function HuslejePage() {
       <div className="prose max-w-none mb-8">
         <h2>Hvor meget bør du bruge på husleje?</h2>
         <p>
-          At finde den rigtige balance mellem husleje og andre udgifter er afgørende for 
-          en sund økonomi. Bruger du for meget på bolig, kan det gå ud over din livskvalitet 
-          og mulighed for opsparing.
+          At finde den <strong>rigtige balance mellem husleje og andre udgifter</strong> er afgørende for
+          en sund økonomi. Bruger du for meget på bolig, kan det gå ud over din <strong>livskvalitet</strong>
+          og mulighed for <strong>opsparing</strong>.
         </p>
         
         <h3>30% reglen forklaret</h3>
         <p>
-          Den mest udbredte tommelfingerregel siger, at din husleje (inkl. forbrugsudgifter) 
-          ikke bør overstige 30% af din nettoindkomst. Nogle kilder siger 33%, men 30% 
-          giver mere buffer til uforudsete udgifter.
+          Den mest udbredte tommelfingerregel siger, at din husleje (inkl. forbrugsudgifter)
+          ikke bør overstige <strong>30% af din nettoindkomst</strong>. Nogle kilder siger 33%, men 30%
+          giver mere <strong>buffer til uforudsete udgifter</strong>.
         </p>
         <p>
           <strong>Eksempel:</strong> Med en nettoløn på 25.000 kr bør din husleje max være 
@@ -138,7 +138,7 @@ export default function HuslejePage() {
 
         <h3>Hvad inkluderer "husleje"?</h3>
         <p>
-          Når du beregner dit boligbudget, skal du huske alle boligrelaterede udgifter:
+          Når du beregner dit <strong>boligbudget</strong>, skal du huske alle <strong>boligrelaterede udgifter</strong>:
         </p>
         <ul>
           <li>Grundleje/husleje</li>

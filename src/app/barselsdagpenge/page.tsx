@@ -105,8 +105,8 @@ export default function BarselPage() {
               Barselsdagpenge beregner 2026
             </h1>
             <p className="text-lg text-gray-600 leading-relaxed">
-              Se hvad du kan forvente at få udbetalt i barselsdagpenge under din barselsorlov. 
-              Beregneren bruger de aktuelle satser for 2026.
+              Se hvad du kan forvente at få udbetalt i <strong>barselsdagpenge</strong> under din <strong>barselsorlov</strong>.
+              Beregneren bruger de <strong>aktuelle satser for 2026</strong>.
             </p>
           </header>
 
@@ -120,8 +120,8 @@ export default function BarselPage() {
             </h2>
             <div className="prose max-w-none text-gray-700">
               <p>
-                Barselsdagpenge er en offentlig ydelse, der hjælper forældre økonomisk under barselsorlov. 
-                Ydelsen administreres af Udbetaling Danmark og erstatter din indkomst, når du holder pause 
+                <strong>Barselsdagpenge</strong> er en offentlig ydelse, der hjælper forældre økonomisk under <strong>barselsorlov</strong>.
+                Ydelsen administreres af <strong>Udbetaling Danmark</strong> og erstatter din indkomst, når du holder pause
                 fra arbejdet for at passe dit barn.
               </p>
               <h3 className="text-xl font-semibold mt-6 mb-3">Hvem kan få barselsdagpenge?</h3>

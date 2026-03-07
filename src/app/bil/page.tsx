@@ -69,15 +69,15 @@ export default function BilPage() {
       <div className="mt-12 prose max-w-none">
         <h2>De reelle omkostninger ved at eje bil</h2>
         <p>
-          Mange bilister fokuserer kun på benzinprisen, men de samlede omkostninger ved at eje bil 
-          er meget højere. Denne beregner hjælper dig med at se det fulde billede.
+          Mange bilister fokuserer kun på benzinprisen, men de <strong>samlede omkostninger</strong> ved at eje bil
+          er meget højere. Denne beregner hjælper dig med at se det <strong>fulde billede</strong>.
         </p>
 
         <h2>Hvad koster en bil at eje?</h2>
         
         <h3>1. Brændstof/strøm</h3>
         <p>
-          Den mest synlige udgift. Afhænger af kørselsomfang, bilens forbrug og brændstofpriser.
+          Den mest synlige udgift. Afhænger af <strong>kørselsomfang</strong>, bilens forbrug og <strong>brændstofpriser</strong>.
         </p>
         <ul>
           <li><strong>Benzin:</strong> Ca. 13-14 kr/liter (2026)</li>
@@ -122,7 +122,7 @@ export default function BilPage() {
 
         <h3>3. Forsikring</h3>
         <p>
-          Forsikringsprisen varierer meget baseret på:
+          <strong>Forsikringsprisen</strong> varierer meget baseret på:
         </p>
         <ul>
           <li>Din alder og erfaring</li>
@@ -137,7 +137,7 @@ export default function BilPage() {
 
         <h3>4. Vægtafgift / grøn ejerafgift</h3>
         <p>
-          Afgiften afhænger af bilens brændstofforbrug og udledning:
+          Afgiften afhænger af bilens <strong>brændstofforbrug</strong> og <strong>udledning</strong>:
         </p>
         <table>
           <thead>
@@ -168,7 +168,7 @@ export default function BilPage() {
 
         <h3>5. Service og reparationer</h3>
         <p>
-          Regn med ca. 3% af bilens værdi årligt til service, olie, bremser osv.
+          Regn med ca. <strong>3% af bilens værdi</strong> årligt til service, olie, bremser osv.
         </p>
         <ul>
           <li><strong>Serviceeftersyn:</strong> 1.500-4.000 kr</li>
@@ -181,7 +181,7 @@ export default function BilPage() {
 
         <h3>6. Dæk</h3>
         <p>
-          Dæk holder typisk 30.000-50.000 km. Regn med ca. 3.000 kr/år inkl. skift.
+          Dæk holder typisk <strong>30.000-50.000 km</strong>. Regn med ca. <strong>3.000 kr/år</strong> inkl. skift.
         </p>
 
         <h2>Benzin vs. Diesel vs. Elbil</h2>

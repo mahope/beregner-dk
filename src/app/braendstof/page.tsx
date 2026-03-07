@@ -119,9 +119,9 @@ export default function BraendstofPage() {
       <div className="prose max-w-none mb-8">
         <h2>Om brændstofforbrug</h2>
         <p>
-          At forstå dit brændstofforbrug hjælper dig med at budgettere bilkørsel 
-          og vælge den rigtige bil. Forbruget varierer betydeligt mellem biltyper, 
-          kørestil og kørselsforhold.
+          At forstå dit <strong>brændstofforbrug</strong> hjælper dig med at <strong>budgettere bilkørsel</strong>
+          og vælge den rigtige bil. Forbruget varierer betydeligt mellem <strong>biltyper</strong>,
+          <strong>kørestil</strong> og <strong>kørselsforhold</strong>.
         </p>
         
         <h3>Typiske forbrug</h3>
@@ -144,7 +144,7 @@ export default function BraendstofPage() {
 
         <h3>Benzin vs. Diesel vs. El</h3>
         <p>
-          Ved valg af brændstoftype bør du overveje:
+          Ved valg af <strong>brændstoftype</strong> bør du overveje:
         </p>
         <ul>
           <li><strong>Benzin:</strong> Lavere indkøbspris, højere km-pris</li>

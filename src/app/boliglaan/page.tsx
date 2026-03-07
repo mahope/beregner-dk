@@ -96,8 +96,8 @@ export default function BoliglaanPage() {
         
         <h3>Fastforrentet lån</h3>
         <p>
-          Med et fastforrentet lån kender du din ydelse i hele lånets løbetid. Det giver tryghed og 
-          budgetsikkerhed, men typisk til en lidt højere rente end variabel.
+          Med et <strong>fastforrentet lån</strong> kender du din ydelse i hele lånets løbetid. Det giver <strong>tryghed</strong> og
+          <strong>budgetsikkerhed</strong>, men typisk til en lidt højere rente end variabel.
         </p>
         <ul>
           <li>✅ Fast ydelse hele perioden</li>
@@ -109,7 +109,7 @@ export default function BoliglaanPage() {
 
         <h3>Variabel rente (F-kort, F1, F3, F5)</h3>
         <p>
-          Med variabel rente justeres din rente løbende. Du kan ofte få lavere rente, men med risiko for stigninger.
+          Med <strong>variabel rente</strong> justeres din rente løbende. Du kan ofte få <strong>lavere rente</strong>, men med <strong>risiko for stigninger</strong>.
         </p>
         <ul>
           <li>✅ Ofte lavere rente</li>
@@ -120,7 +120,7 @@ export default function BoliglaanPage() {
 
         <h2>Hvad er bidragssatsen?</h2>
         <p>
-          Bidragssatsen er det realkreditinstituttet tager for at administrere dit lån. 
+          <strong>Bidragssatsen</strong> er det realkreditinstituttet tager for at administrere dit lån.
           Den afhænger af:
         </p>
         <ul>
@@ -160,14 +160,14 @@ export default function BoliglaanPage() {
 
         <h2>Skattefradrag på renteudgifter</h2>
         <p>
-          I Danmark kan du trække renteudgifter fra i skat. I 2024-2026 er fradragsværdien:
+          I Danmark kan du <strong>trække renteudgifter fra i skat</strong>. I 2024-2026 er <strong>fradragsværdien</strong>:
         </p>
         <ul>
           <li><strong>Op til ca. 50.000 kr:</strong> ca. 33% fradrag</li>
           <li><strong>Over 50.000 kr:</strong> ca. 25.6% fradrag</li>
         </ul>
         <p>
-          Vores beregner bruger en gennemsnitlig fradragsværdi på 25.6% som et konservativt estimat.
+          Vores beregner bruger en gennemsnitlig <strong>fradragsværdi på 25.6%</strong> som et konservativt estimat.
         </p>
 
         <h2>Tips til boligkøb</h2>

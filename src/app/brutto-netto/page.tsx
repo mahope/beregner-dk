@@ -86,7 +86,7 @@ export default function BruttoNettoPage() {
 
           <h2>Perfekt til lønforhandling</h2>
           <p>
-            Når du forhandler løn, er det nyttigt at vide præcis hvad en lønforhøjelse betyder for din udbetaling — og omvendt. Hvis du fx ønsker 2.000 kr. mere udbetalt om måneden, skal du typisk forhandle dig til 3.500-4.000 kr. mere i bruttoløn (afhængig af din skatteprocent).
+            Når du forhandler løn, er det nyttigt at vide præcis hvad en <strong>lønforhøjelse</strong> betyder for din udbetaling — og omvendt. Hvis du fx ønsker 2.000 kr. mere udbetalt om måneden, skal du typisk forhandle dig til <strong>3.500-4.000 kr. mere i bruttoløn</strong> (afhængig af din skatteprocent).
           </p>
 
           <h2>Hvad trækkes fra din løn?</h2>

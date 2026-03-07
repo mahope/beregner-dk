@@ -91,7 +91,16 @@ export default function AndelsboligPage() {
 
           <h2>Boligafgift forklaret</h2>
           <p>
-            Boligafgiften dækker foreningens driftsudgifter: ejendomsskat, forsikring, vedligeholdelse, vand, renovation og afdrag på fælleslån. En høj boligafgift kan betyde stor fællesgæld — men også at du betaler en lavere andelpris.
+            <strong>Boligafgiften</strong> dækker foreningens driftsudgifter og omfatter typisk:
+          </p>
+          <ul>
+            <li><strong>Ejendomsskat</strong> og forsikring</li>
+            <li><strong>Vedligeholdelse</strong> af ejendommen</li>
+            <li>Vand og renovation</li>
+            <li>Afdrag på <strong>fælleslån</strong></li>
+          </ul>
+          <p>
+            En høj boligafgift kan betyde stor <strong>fællesgæld</strong> — men også at du betaler en lavere <strong>andelpris</strong>.
           </p>
 
           <h2>Tjekliste før du køber andelsbolig</h2>

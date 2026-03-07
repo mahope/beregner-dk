@@ -108,15 +108,12 @@ export default function OmPage() {
 
         <h2>Præcision og ansvarsfraskrivelse</h2>
         <p>
-          Vores beregnere giver gode estimater baseret på officielle satser og
-          formler. Dog kan dine faktiske beløb variere afhængigt af din
-          specifikke situation.
+          Vores beregnere giver <strong>gode estimater</strong> baseret på officielle satser og
+          formler. Dine faktiske beløb kan variere afhængigt af din specifikke situation.
         </p>
         <p>
-          <strong>Vigtigt:</strong> Beregnerne er kun til informationsformål og
-          erstatter ikke professionel rådgivning fra revisorer, læger eller
-          andre eksperter. Ved tvivl bør du altid konsultere de officielle
-          kilder:
+          Beregnerne er kun til <strong>informationsformål</strong> og erstatter ikke
+          professionel rådgivning. Ved tvivl bør du altid konsultere de officielle kilder:
         </p>
         <ul>
           <li>
@@ -159,15 +156,22 @@ export default function OmPage() {
 
         <h2>Sådan sikrer vi korrekte tal</h2>
         <p>
-          Alle beregnere opdateres løbende med de nyeste satser og regler fra
-          officielle kilder som skat.dk, borger.dk, su.dk og skm.dk. Vi
-          verificerer satserne ved hvert årsskifte og når lovændringer træder i
-          kraft. Seneste opdatering: februar 2026.
+          Alle beregnere opdateres løbende med de nyeste satser og regler fra officielle kilder:
+        </p>
+        <ul>
+          <li><strong>Skatteministeriet</strong> (skm.dk) — skattesatser og fradrag</li>
+          <li><strong>Skattestyrelsen</strong> (skat.dk) — personfradrag, AM-bidrag, kommuneskat</li>
+          <li><strong>Borger.dk</strong> — offentlige ydelser og satser</li>
+          <li><strong>SU-styrelsen</strong> (su.dk) — SU-satser og fribeløb</li>
+        </ul>
+        <p>
+          Vi verificerer satserne ved hvert årsskifte og når lovændringer træder i kraft.
+          <strong>Seneste opdatering:</strong> februar 2026.
         </p>
 
         <h2>Teknisk information</h2>
         <p>
-          MinBeregner.dk er bygget med moderne teknologier for at sikre hurtig
+          MinBeregner.dk er bygget med <strong>moderne teknologier</strong> for at sikre hurtig
           indlæsning og god brugeroplevelse:
         </p>
         <ul>

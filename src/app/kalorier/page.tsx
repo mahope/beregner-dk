@@ -100,7 +100,7 @@ export default function KalorierPage() {
       <div className="mt-12 prose max-w-none">
         <h2>Forstå dit kaloriebehov</h2>
         <p>
-          Dit kaloriebehov afhænger af flere faktorer: alder, køn, vægt, højde
+          Dit <strong>kaloriebehov</strong> afhænger af flere faktorer: alder, køn, vægt, højde
           og hvor aktiv du er. Denne beregner bruger{" "}
           <strong>Mifflin-St Jeor formlen</strong>, som er den mest præcise
           metode til at estimere dit basalstofskifte.
@@ -110,22 +110,22 @@ export default function KalorierPage() {
 
         <h3>BMR (Basal Metabolic Rate)</h3>
         <p>
-          Dit basalstofskifte er antallet af kalorier din krop brænder bare for
-          at holde dig i live - hjertet pumper, lungerne trækker vejret,
+          Dit <strong>basalstofskifte</strong> er antallet af kalorier din krop brænder bare for
+          at holde dig i live — hjertet pumper, lungerne trækker vejret,
           cellerne fornyer sig. Selv hvis du lå stille i sengen hele dagen,
           ville du brænde disse kalorier.
         </p>
 
         <h3>TDEE (Total Daily Energy Expenditure)</h3>
         <p>
-          TDEE er dit totale daglige kalorieforbrug - BMR plus alle de kalorier
+          <strong>TDEE</strong> er dit <strong>totale daglige kalorieforbrug</strong> — BMR plus alle de kalorier
           du brænder gennem aktivitet: gåture, træning, arbejde, selv at tænke
           bruger kalorier.
         </p>
 
         <h2>Vægttab og kalorieunderskud</h2>
         <p>
-          For at tabe vægt skal du spise færre kalorier end du forbrænder. En
+          For at tabe vægt skal du spise <strong>færre kalorier end du forbrænder</strong>. En
           god tommelfingerregel:
         </p>
         <ul>
@@ -142,7 +142,7 @@ export default function KalorierPage() {
 
         <h3>Protein</h3>
         <p>
-          Protein er essentielt for muskler, hår, hud og hundredvis af
+          <strong>Protein</strong> er essentielt for muskler, hår, hud og hundredvis af
           kropsprocesser.
         </p>
         <ul>
@@ -160,14 +160,14 @@ export default function KalorierPage() {
 
         <h3>Fedt</h3>
         <p>
-          Fedt er vigtigt for hormoner, vitaminoptagelse og cellestruktur.
-          Minimum 20-25% af kalorier bør komme fra fedt.
+          <strong>Fedt</strong> er vigtigt for hormoner, vitaminoptagelse og cellestruktur.
+          Minimum <strong>20-25% af kalorier</strong> bør komme fra fedt.
         </p>
         <p>1g fedt = 9 kalorier</p>
 
         <h3>Kulhydrater</h3>
         <p>
-          Kulhydrater er kroppens foretrukne energikilde, især under træning.
+          <strong>Kulhydrater</strong> er kroppens <strong>foretrukne energikilde</strong>, især under træning.
           Mængden kan variere meget baseret på dine mål og præferencer.
         </p>
         <p>1g kulhydrat = 4 kalorier</p>

@@ -86,7 +86,7 @@ export default function RejsebudgetPage() {
         <div className="mt-12 prose dark:prose-invert max-w-none">
           <h2>Planlæg dit rejsebudget</h2>
           <p>
-            Et godt rejsebudget giver dig overblik over de samlede udgifter, så du kan spare op og undgå ubehagelige overraskelser. Beregneren giver dig et realistisk estimat baseret på gennemsnitspriser for populære destinationer.
+            Et godt <strong>rejsebudget</strong> giver dig overblik over de <strong>samlede udgifter</strong>, så du kan spare op og undgå ubehagelige overraskelser. Beregneren giver dig et <strong>realistisk estimat</strong> baseret på gennemsnitspriser for populære destinationer.
           </p>
 
           <h2>De største udgiftsposter</h2>

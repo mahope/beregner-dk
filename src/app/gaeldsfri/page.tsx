@@ -86,7 +86,7 @@ export default function GaeldsfriPage() {
         <div className="mt-12 prose dark:prose-invert max-w-none">
           <h2>Sådan bliver du gældsfri hurtigere</h2>
           <p>
-            At blive gældsfri kræver en plan. Det vigtigste skridt er at betale mere end minimumsafdraget — selv små ekstra beløb gør en enorm forskel over tid takket være renters rente-effekten.
+            At blive <strong>gældsfri</strong> kræver en plan. Det vigtigste skridt er at betale mere end <strong>minimumsafdraget</strong> — selv små ekstra beløb gør en enorm forskel over tid takket være <strong>renters rente-effekten</strong>.
           </p>
 
           <h2>Lavine vs. snebold — hvilken metode er bedst?</h2>

@@ -104,7 +104,7 @@ export default function BMIPage() {
         <p>
           BMI står for <strong>Body Mass Index</strong> og er et tal, der bruges
           til at vurdere, om din vægt er passende i forhold til din højde. BMI
-          beregnes ved at dividere din vægt i kilogram med din højde i meter i
+          beregnes ved at dividere din <strong>vægt i kilogram</strong> med din <strong>højde i meter</strong> i
           anden potens.
         </p>
         <p>
@@ -159,7 +159,7 @@ export default function BMIPage() {
 
         <h2>Andre vigtige sundhedsmål</h2>
         <p>
-          Ud over BMI kan disse målinger give et bedre billede af din sundhed:
+          Ud over BMI kan disse målinger give et <strong>bedre billede af din sundhed</strong>:
         </p>
         <ul>
           <li>

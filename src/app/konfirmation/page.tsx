@@ -85,7 +85,7 @@ export default function KonfirmationPage() {
         <div className="mt-12 prose dark:prose-invert max-w-none">
           <h2>Sådan planlægger du konfirmationsbudgettet</h2>
           <p>
-            En konfirmation er en stor dag — både for konfirmanden og familien. Ved at planlægge budgettet tidligt undgår du ubehagelige overraskelser og kan fokusere på det vigtigste: at fejre dagen.
+            En konfirmation er en stor dag — både for konfirmanden og familien. Ved at <strong>planlægge budgettet tidligt</strong> undgår du ubehagelige overraskelser og kan fokusere på det vigtigste: at fejre dagen.
           </p>
 
           <h2>De største udgiftsposter</h2>
@@ -95,7 +95,7 @@ export default function KonfirmationPage() {
 
           <h2>Gennemsnitlige konfirmationsgaver 2026</h2>
           <p>
-            Gavebeløbet afhænger af relationen til konfirmanden. Forældre giver typisk mest, efterfulgt af bedsteforældre. Mange konfirmander modtager samlet set mellem 10.000 og 25.000 kr. i gaver.
+            Gavebeløbet afhænger af <strong>relationen til konfirmanden</strong>. Forældre giver typisk mest, efterfulgt af bedsteforældre. Mange konfirmander modtager samlet set mellem <strong>10.000 og 25.000 kr.</strong> i gaver.
           </p>
 
           <h2>Sparetips til konfirmationen</h2>

@@ -118,9 +118,9 @@ export default function ForbrugslaanPage() {
       <div className="prose max-w-none mb-8">
         <h2>Om forbrugslån</h2>
         <p>
-          Forbrugslån er en populær finansieringsløsning for danskere, der ønsker 
-          fleksibilitet i deres økonomi. I modsætning til boliglån eller billån er 
-          forbrugslån ikke knyttet til en specifik aktiv, hvilket giver frihed til at 
+          <strong>Forbrugslån</strong> er en populær finansieringsløsning for danskere, der ønsker
+          fleksibilitet i deres økonomi. I modsætning til <strong>boliglån</strong> eller <strong>billån</strong> er
+          forbrugslån ikke knyttet til en specifik aktiv, hvilket giver frihed til at
           bruge pengene efter eget ønske.
         </p>
         
@@ -143,13 +143,13 @@ export default function ForbrugslaanPage() {
 
         <h3>Hvornår giver forbrugslån mening?</h3>
         <p>
-          Forbrugslån kan være fornuftige til større investeringer som renovation af bolig, 
-          køb af bil, uddannelse eller andre formål hvor opsparing ikke er mulig. Det er 
-          vigtigt at låne ansvarligt og kun det beløb, du har råd til at betale tilbage.
+          Forbrugslån kan være fornuftige til større investeringer som <strong>renovation af bolig</strong>,
+          køb af bil, uddannelse eller andre formål hvor opsparing ikke er mulig. Det er
+          vigtigt at <strong>låne ansvarligt</strong> og kun det beløb, du har råd til at betale tilbage.
         </p>
         <p>
-          Undgå at låne til forbrug der hurtigt mister værdi, som rejser, elektronik eller 
-          tøj. I disse tilfælde kan det være bedre at spare op først.
+          Undgå at låne til forbrug der hurtigt <strong>mister værdi</strong>, som rejser, elektronik eller
+          tøj. I disse tilfælde kan det være bedre at <strong>spare op først</strong>.
         </p>
       </div>
 

@@ -101,9 +101,9 @@ export default function SUPage() {
       <div className="mt-12 prose max-w-none dark:prose-invert">
         <h2>Om SU (Statens Uddannelsesstøtte)</h2>
         <p>
-          SU er en støtte fra staten til studerende på videregående uddannelser,
-          ungdomsuddannelser og visse andre uddannelser. Du kan modtage SU fra
-          du er 18 år.
+          <strong>SU</strong> er en støtte fra staten til studerende på <strong>videregående uddannelser</strong>,
+          <strong>ungdomsuddannelser</strong> og visse andre uddannelser. Du kan modtage SU fra
+          du er <strong>18 år</strong>.
         </p>
 
         <h3>SU-satser 2026 (officielle)</h3>
@@ -146,8 +146,8 @@ export default function SUPage() {
 
         <h2>Fribeløb 2026</h2>
         <p>
-          Fribeløbet er det beløb, du må tjene ved siden af din SU uden at
-          skulle tilbagebetale. Fribeløbet afhænger af din uddannelsestype:
+          <strong>Fribeløbet</strong> er det beløb, du må tjene ved siden af din SU uden at
+          skulle <strong>tilbagebetale</strong>. Fribeløbet afhænger af din <strong>uddannelsestype</strong>:
         </p>
         <ul>
           <li><strong>Videregående uddannelse:</strong> 20.749 kr/md (før AM-bidrag)</li>
@@ -161,8 +161,8 @@ export default function SUPage() {
 
         <h2>SU-klip</h2>
         <p>
-          Du får tildelt et antal SU-klip (måneder med SU) baseret på din
-          uddannelses normerede varighed:
+          Du får tildelt et antal <strong>SU-klip</strong> (måneder med SU) baseret på din
+          uddannelses <strong>normerede varighed</strong>:
         </p>
         <ul>
           <li>

@@ -105,8 +105,8 @@ export default function ElberegnerPage() {
       <div className="mt-12 prose max-w-none">
         <h2>Sådan bruger du elberegneren</h2>
         <p>
-          Med vores elberegner kan du nemt beregne, hvad dine elektriske
-          apparater koster i strøm. Sådan gør du:
+          Med vores <strong>elberegner</strong> kan du nemt beregne, hvad dine elektriske
+          apparater <strong>koster i strøm</strong>. Sådan gør du:
         </p>
         <ol>
           <li>
@@ -210,8 +210,8 @@ export default function ElberegnerPage() {
 
         <h2>Om elpriser i Danmark</h2>
         <p>
-          Elpriser i Danmark varierer afhængigt af tidspunkt, årstid og din
-          elaftale. Den samlede pris du betaler inkluderer:
+          <strong>Elpriser i Danmark</strong> varierer afhængigt af tidspunkt, årstid og din
+          elaftale. Den <strong>samlede pris</strong> du betaler inkluderer:
         </p>
         <ul>
           <li>

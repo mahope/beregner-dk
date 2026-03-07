@@ -86,7 +86,7 @@ export default function LeasingPage() {
         <div className="mt-12 prose dark:prose-invert max-w-none">
           <h2>Leasing af bil i Danmark</h2>
           <p>
-            Leasing er blevet en populær måde at få bil på i Danmark. I stedet for at købe bilen betaler du en fast månedlig ydelse for at bruge den i en aftalt periode — typisk 12-48 måneder. Ved periodens udløb afleverer du bilen.
+            Leasing er blevet en <strong>populær måde at få bil på</strong> i Danmark. I stedet for at købe bilen betaler du en <strong>fast månedlig ydelse</strong> for at bruge den i en aftalt periode — typisk <strong>12-48 måneder</strong>. Ved periodens udløb afleverer du bilen.
           </p>
 
           <h2>Privat leasing vs. erhvervsleasing</h2>
@@ -99,7 +99,7 @@ export default function LeasingPage() {
 
           <h2>Leasing vs. billån vs. kontantkøb</h2>
           <p>
-            Hver finansieringsform har fordele:
+            Hver <strong>finansieringsform</strong> har fordele:
           </p>
           <ul>
             <li><strong>Leasing:</strong> Lav månedlig ydelse, men du ejer ikke bilen</li>

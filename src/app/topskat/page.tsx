@@ -99,7 +99,7 @@ export default function TopskatPage() {
             Omregnet til bruttoindkomst (før AM-bidrag) betaler du mellemskat fra ca. <strong>697.000 kr./år</strong> (ca. 58.100 kr./md) og topskat fra ca. <strong>845.500 kr./år</strong> (ca. 70.500 kr./md).
           </p>
           <p>
-            Ca. 10-15% af alle danske lønmodtagere betaler topskat. Det inkluderer typisk ledere, specialister, læger og andre med høj indkomst.
+            Ca. <strong>10-15% af alle danske lønmodtagere</strong> betaler topskat. Det inkluderer typisk ledere, specialister, læger og andre med <strong>høj indkomst</strong>.
           </p>
 
           <h2>Effektiv skat vs. marginalskat</h2>

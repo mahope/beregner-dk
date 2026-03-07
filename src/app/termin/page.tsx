@@ -88,7 +88,7 @@ export default function TerminPage() {
             Terminsdatoen beregnes ved at lægge <strong>280 dage (40 uger)</strong> til første dag i din sidste menstruation (Naegeles regel). Denne metode bruges af læger og jordmødre verden over og er den mest udbredte beregningsmetode.
           </p>
           <p>
-            Bemærk at beregningen antager en cyklus på 28 dage og at ægløsningen sker på dag 14. Hvis din cyklus er kortere eller længere, kan terminsdatoen justeres af din læge ved scanningen i uge 12.
+            Bemærk at beregningen antager en <strong>cyklus på 28 dage</strong> og at ægløsningen sker på dag 14. Hvis din cyklus er kortere eller længere, kan terminsdatoen justeres af din læge ved <strong>scanningen i uge 12</strong>.
           </p>
 
           <h2>Graviditetens tre trimestre</h2>

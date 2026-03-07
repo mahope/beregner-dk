@@ -104,7 +104,7 @@ export default function RenteberegnerPage() {
       <div className="mt-12 prose max-w-none">
         <h2>Sådan bruger du renteberegneren</h2>
         <p>
-          Med vores renteberegner kan du hurtigt beregne, hvad et lån vil koste
+          Med vores <strong>renteberegner</strong> kan du hurtigt beregne, hvad et lån vil koste
           dig:
         </p>
         <ol>
@@ -194,10 +194,10 @@ export default function RenteberegnerPage() {
 
         <h2>Skattefradrag for renter</h2>
         <p>
-          I Danmark kan du få fradrag for renteudgifter på private lån.
-          Fradraget er ca. 33% af renteudgiften, hvilket reducerer din
+          I Danmark kan du få <strong>fradrag for renteudgifter</strong> på private lån.
+          Fradraget er ca. <strong>33% af renteudgiften</strong>, hvilket reducerer din
           skattebetaling. Det betyder, at et lån med 5% rente reelt kun koster
-          dig ca. 3,35% efter skat.
+          dig ca. <strong>3,35% efter skat</strong>.
         </p>
 
         <div className="bg-blue-50 border-l-4 border-blue-400 p-4 my-6 not-prose">

@@ -82,17 +82,17 @@ export default function BillaanPage() {
       <div className="mt-12 prose max-w-none">
         <h2>Sådan fungerer billån i Danmark</h2>
         <p>
-          Når du køber bil i Danmark, kan du finansiere købet på flere måder. Et billån er ofte
-          den mest fordelagtige løsning, da du kan bruge bilen som sikkerhed og derved få en
-          lavere rente end ved et usikret forbrugslån.
+          Når du køber bil i Danmark, kan du finansiere købet på flere måder. Et <strong>billån</strong> er ofte
+          den mest fordelagtige løsning, da du kan bruge bilen som <strong>sikkerhed</strong> og derved få en
+          <strong>lavere rente</strong> end ved et usikret forbrugslån.
         </p>
 
         <h2>Typer af billån</h2>
 
         <h3>Billån med pant i bilen</h3>
         <p>
-          Det traditionelle billån hvor banken har pant i bilen som sikkerhed. Dette giver
-          typisk den laveste rente (5-8%), men banken kan i værste fald tage bilen tilbage
+          Det traditionelle billån hvor banken har <strong>pant i bilen</strong> som sikkerhed. Dette giver
+          typisk den <strong>laveste rente (5-8%)</strong>, men banken kan i værste fald tage bilen tilbage
           ved betalingsproblemer.
         </p>
         <ul>
@@ -105,8 +105,8 @@ export default function BillaanPage() {
 
         <h3>FlexBillån / Variabelt billån</h3>
         <p>
-          Et billån med variabel rente, der løbende tilpasses markedet. Renten kan både stige
-          og falde i lånets løbetid.
+          Et billån med <strong>variabel rente</strong>, der løbende tilpasses markedet. Renten kan både <strong>stige
+          og falde</strong> i lånets løbetid.
         </p>
         <ul>
           <li>✅ Lavere startrente end fastforrentet</li>
@@ -117,7 +117,7 @@ export default function BillaanPage() {
 
         <h3>Forbrugslån til bil</h3>
         <p>
-          Et usikret lån uden pant i bilen. Kan bruges til enhver bil, men har højere rente
+          Et <strong>usikret lån</strong> uden pant i bilen. Kan bruges til enhver bil, men har <strong>højere rente</strong>
           end traditionelt billån.
         </p>
         <ul>
@@ -130,7 +130,7 @@ export default function BillaanPage() {
 
         <h2>Hvad påvirker din rente?</h2>
         <p>
-          Den rente du tilbydes afhænger af flere faktorer:
+          Den <strong>rente</strong> du tilbydes afhænger af flere faktorer:
         </p>
         <ul>
           <li><strong>Din økonomi:</strong> Indkomst, gældsfrihed og betalingshistorik</li>

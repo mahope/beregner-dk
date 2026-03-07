@@ -124,9 +124,9 @@ export default function LaaneberegnerPage() {
       <div className="prose max-w-none mb-8">
         <h2>Om låneberegning</h2>
         <p>
-          Før du optager et lån, er det vigtigt at forstå de samlede omkostninger. 
-          Vores låneberegner hjælper dig med at se, hvad lånet reelt koster - ikke 
-          bare den månedlige ydelse, men også de samlede renter over lånets løbetid.
+          Før du optager et lån, er det vigtigt at forstå de <strong>samlede omkostninger</strong>.
+          Vores <strong>låneberegner</strong> hjælper dig med at se, hvad lånet reelt koster - ikke
+          bare den <strong>månedlige ydelse</strong>, men også de <strong>samlede renter</strong> over lånets løbetid.
         </p>
         
         <h3>Typer af lån</h3>
@@ -148,8 +148,8 @@ export default function LaaneberegnerPage() {
 
         <h3>Hvornår giver det mening at låne?</h3>
         <p>
-          Lån kan give mening til investeringer der øger din værdi (uddannelse, bolig) 
-          eller nødvendige køb du ikke kan spare op til. Undgå at låne til forbrug 
+          Lån kan give mening til <strong>investeringer</strong> der øger din værdi (<strong>uddannelse</strong>, <strong>bolig</strong>)
+          eller nødvendige køb du ikke kan spare op til. Undgå at låne til <strong>forbrug</strong>
           der hurtigt mister værdi (rejser, elektronik, tøj).
         </p>
       </div>

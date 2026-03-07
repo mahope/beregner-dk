@@ -98,15 +98,15 @@ export default function BoligstoettePage() {
       <section className="mt-12 prose prose-blue max-w-none">
         <h2>Hvad er boligstøtte?</h2>
         <p>
-          Boligstøtte er et skattefrit tilskud fra staten til din husleje.
+          <strong>Boligstøtte</strong> er et <strong>skattefrit tilskud</strong> fra staten til din husleje.
           Formålet er at hjælpe lejere med lave og mellemstore indkomster
           med at kunne betale deres bolig. Boligstøtte administreres af
-          Udbetaling Danmark og udbetales månedligt.
+          <strong>Udbetaling Danmark</strong> og udbetales månedligt.
         </p>
 
         <h2>Boligstøtte-satser 2026</h2>
         <p>
-          I 2026 gælder følgende nøgletal for boligstøtte (boligsikring):
+          I 2026 gælder følgende <strong>nøgletal for boligstøtte</strong> (boligsikring):
         </p>
         <ul>
           <li><strong>Max boligudgift:</strong> 113.000 kr/år (ca. 9.417 kr/md) — den del af huslejen der overstiger dette, indgår ikke i beregningen</li>
@@ -126,9 +126,9 @@ export default function BoligstoettePage() {
 
         <h3>Boligstøtte vs. boligydelse</h3>
         <p>
-          Boligstøtte (boligsikring) er for almindelige lejere under folkepensionsalderen.
-          Boligydelse er en særlig ordning for folkepensionister og førtidspensionister,
-          som typisk giver et højere beløb og har mere favorable indkomstgrænser.
+          <strong>Boligstøtte</strong> (boligsikring) er for almindelige lejere under folkepensionsalderen.
+          <strong>Boligydelse</strong> er en særlig ordning for folkepensionister og førtidspensionister,
+          som typisk giver et højere beløb og har mere <strong>favorable indkomstgrænser</strong>.
         </p>
 
         <h3>Sådan søger du boligstøtte</h3>

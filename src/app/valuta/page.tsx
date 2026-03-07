@@ -123,16 +123,16 @@ export default function ValutaPage() {
       <div className="prose max-w-none mb-8">
         <h2>Om valutaomregning</h2>
         <p>
-          Valutakurser angiver, hvor meget én valuta er værd i forhold til en anden. 
-          Den danske krone (DKK) er bundet til euroen gennem ERM2-samarbejdet, 
-          hvilket betyder at kursen mellem DKK og EUR er relativt stabil.
+          <strong>Valutakurser</strong> angiver, hvor meget én valuta er værd i forhold til en anden.
+          Den <strong>danske krone (DKK)</strong> er bundet til euroen gennem <strong>ERM2-samarbejdet</strong>,
+          hvilket betyder at kursen mellem DKK og EUR er relativt <strong>stabil</strong>.
         </p>
         
         <h3>Danmarks fastkurspolitik</h3>
         <p>
-          Danmark fører fastkurspolitik over for euroen. Det betyder, at Nationalbanken 
-          holder kronens kurs inden for et snævert bånd omkring centralkursen på 7,46038 DKK pr. EUR. 
-          Dette giver stabilitet i handlen med eurolandene.
+          Danmark fører <strong>fastkurspolitik</strong> over for euroen. Det betyder, at <strong>Nationalbanken</strong>
+          holder kronens kurs inden for et snævert bånd omkring <strong>centralkursen på 7,46038 DKK pr. EUR</strong>.
+          Dette giver <strong>stabilitet</strong> i handlen med eurolandene.
         </p>
 
         <h3>Populære valutaer</h3>

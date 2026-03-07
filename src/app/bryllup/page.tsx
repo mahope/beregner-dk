@@ -85,7 +85,7 @@ export default function BryllupPage() {
         <div className="mt-12 prose dark:prose-invert max-w-none">
           <h2>Planlæg dit bryllupsbudget</h2>
           <p>
-            Et bryllup er en af livets største fester — og en af de dyreste. Ved at planlægge budgettet tidligt kan du prioritere det, der betyder mest for jer, og undgå ubehagelige overraskelser.
+            Et bryllup er en af livets største fester — og en af de <strong>dyreste</strong>. Ved at <strong>planlægge budgettet tidligt</strong> kan du prioritere det, der betyder mest for jer, og undgå ubehagelige overraskelser.
           </p>
 
           <h2>Typiske udgiftsposter</h2>

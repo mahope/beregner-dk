@@ -108,8 +108,8 @@ export default function BoernepengePage() {
           under 18 år. Ydelsen udbetales automatisk og kræver ingen ansøgning.
         </p>
         <p>
-          Siden januar 2022 deles ydelsen som standard ligeligt mellem forældre
-          med fælles forældremyndighed — hver forælder modtager halvdelen.
+          Siden <strong>januar 2022</strong> deles ydelsen som standard <strong>ligeligt mellem forældre</strong>
+          med <strong>fælles forældremyndighed</strong> — hver forælder modtager halvdelen.
         </p>
 
         <h3>Børnepenge satser 2026 (officielle)</h3>
@@ -147,8 +147,8 @@ export default function BoernepengePage() {
           </table>
         </div>
         <p className="text-sm">
-          Børneydelsen (0-14 år) udbetales kvartalsvis forud den 20. i januar, april, juli og oktober.
-          Ungeydelsen (15-17 år) udbetales månedligt den 20. direkte til den unge.
+          <strong>Børneydelsen</strong> (0-14 år) udbetales <strong>kvartalsvis</strong> forud den 20. i januar, april, juli og oktober.
+          <strong>Ungeydelsen</strong> (15-17 år) udbetales <strong>månedligt</strong> den 20. direkte til den unge.
         </p>
 
         <h2>Aftrapning for høje indkomster</h2>
@@ -163,8 +163,8 @@ export default function BoernepengePage() {
 
         <h2>Deling mellem forældre</h2>
         <p>
-          Siden januar 2022 deles ydelsen automatisk mellem forældre med fælles
-          forældremyndighed. Det betyder:
+          Siden <strong>januar 2022</strong> deles ydelsen automatisk mellem forældre med <strong>fælles
+          forældremyndighed</strong>. Det betyder:
         </p>
         <ul>
           <li>Hver forælder modtager halvdelen af ydelsen</li>

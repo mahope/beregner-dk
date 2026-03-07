@@ -86,7 +86,7 @@ export default function VaegttabPage() {
         <div className="mt-12 prose dark:prose-invert max-w-none">
           <h2>Sådan taber du dig sundt</h2>
           <p>
-            Vægttab handler grundlæggende om at spise færre kalorier, end din krop forbrænder. Men tempoet er afgørende — for hurtigt vægttab fører ofte til muskeltab, nedsat stofskifte og jo-jo-effekt.
+            Vægttab handler grundlæggende om at spise færre kalorier, end din krop forbrænder. Men <strong>tempoet er afgørende</strong> — for hurtigt vægttab fører ofte til <strong>muskeltab</strong>, nedsat stofskifte og <strong>jo-jo-effekt</strong>.
           </p>
 
           <h2>Den gyldne regel: 0,5-1 kg pr. uge</h2>

@@ -86,12 +86,12 @@ export default function SolcellerPage() {
         <div className="mt-12 prose dark:prose-invert max-w-none">
           <h2>Er solceller en god investering?</h2>
           <p>
-            Med stigende elpriser er solceller en attraktiv investering for de fleste husejere. Tilbagebetalingstiden er typisk 7-12 år, og herefter producerer anlægget gratis strøm i yderligere 15-20 år.
+            Med <strong>stigende elpriser</strong> er solceller en <strong>attraktiv investering</strong> for de fleste husejere. Tilbagebetalingstiden er typisk <strong>7-12 år</strong>, og herefter producerer anlægget gratis strøm i yderligere 15-20 år.
           </p>
 
           <h2>Sådan virker solceller</h2>
           <p>
-            Solceller omdanner sollys til elektricitet. Den producerede strøm bruges først i dit eget hjem (egetforbrug). Overskuddet sælges til elnettet via nettoafregning. Om aftenen og natten køber du el fra nettet som normalt.
+            Solceller omdanner <strong>sollys til elektricitet</strong>. Den producerede strøm bruges først i dit eget hjem (<strong>egetforbrug</strong>). Overskuddet sælges til elnettet via <strong>nettoafregning</strong>. Om aftenen og natten køber du el fra nettet som normalt.
           </p>
 
           <h2>Hvad påvirker produktionen?</h2>

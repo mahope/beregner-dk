@@ -117,15 +117,15 @@ export default function TidszonePage() {
       <div className="prose max-w-none mb-8">
         <h2>Om tidszoner</h2>
         <p>
-          Verden er opdelt i 24 tidszoner, der hver svarer til 15 graders længde på jordkloden. 
-          Tidszoner gør det muligt at have en praktisk lokal tid, der nogenlunde følger solens gang.
+          Verden er opdelt i <strong>24 tidszoner</strong>, der hver svarer til <strong>15 graders længde</strong> på jordkloden.
+          Tidszoner gør det muligt at have en praktisk <strong>lokal tid</strong>, der nogenlunde følger solens gang.
         </p>
         
         <h3>Danmarks tidszone</h3>
         <p>
-          Danmark bruger Central European Time (CET), som er UTC+1. Om sommeren bruger vi 
-          Central European Summer Time (CEST), som er UTC+2. Sommertid blev indført for 
-          at spare energi ved at udnytte dagslyset bedre.
+          Danmark bruger <strong>Central European Time (CET)</strong>, som er <strong>UTC+1</strong>. Om sommeren bruger vi
+          <strong>Central European Summer Time (CEST)</strong>, som er <strong>UTC+2</strong>. Sommertid blev indført for
+          at <strong>spare energi</strong> ved at udnytte dagslyset bedre.
         </p>
 
         <h3>Populære tidsforskelle fra Danmark</h3>

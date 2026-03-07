@@ -122,9 +122,9 @@ export default function EfterloenPage() {
             </h2>
             <div className="prose max-w-none text-gray-700">
               <p>
-                Efterløn er en ordning, der giver dig mulighed for at trække dig tilbage fra 
-                arbejdsmarkedet før folkepensionsalderen. Ordningen er frivillig og kræver, 
-                at du har indbetalt til efterlønsordningen gennem din a-kasse.
+                <strong>Efterløn</strong> er en ordning, der giver dig mulighed for at <strong>trække dig tilbage fra
+                arbejdsmarkedet</strong> før folkepensionsalderen. Ordningen er frivillig og kræver,
+                at du har indbetalt til <strong>efterlønsordningen</strong> gennem din a-kasse.
               </p>
               
               <h3 className="text-xl font-semibold mt-6 mb-3">Efterlønsalder (2026)</h3>

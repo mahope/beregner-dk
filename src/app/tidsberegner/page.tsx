@@ -99,7 +99,7 @@ export default function TidsberegnerPage() {
       <div className="prose max-w-none mb-8">
         <h2>Sådan bruger du tidsberegneren</h2>
         <p>
-          Vores tidsberegner hjælper dig med at beregne den præcise tid mellem
+          Vores <strong>tidsberegner</strong> hjælper dig med at beregne den <strong>præcise tid</strong> mellem
           to tidspunkter. Den er ideel til:
         </p>
         <ul>
@@ -131,10 +131,11 @@ export default function TidsberegnerPage() {
         </ul>
 
         <h2>Tips til præcis timeregistrering</h2>
-        <p>
-          Husk altid at fratrække pauser fra din arbejdstid. De fleste har 30
-          minutters frokostpause, som ikke tælles med i den betalte arbejdstid.
-        </p>
+        <ul>
+          <li>Husk altid at <strong>fratrække pauser</strong> fra din arbejdstid</li>
+          <li>De fleste har <strong>30 minutters frokostpause</strong>, som ikke tælles med i den betalte arbejdstid</li>
+          <li>Brug <strong>decimal timer</strong> når din virksomhed kræver det til timeregistrering</li>
+        </ul>
       </div>
 
       <FAQ items={faqItems} />

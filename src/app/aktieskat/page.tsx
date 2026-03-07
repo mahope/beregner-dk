@@ -100,19 +100,19 @@ export default function AktieskatPage() {
 
           <h2>Frit depot — realisationsbeskatning</h2>
           <p>
-            I et frit depot beskattes du kun når du realiserer en gevinst (sælger aktier med overskud). Skattesatsen i 2026 er:
+            I et <strong>frit depot</strong> beskattes du kun når du <strong>realiserer en gevinst</strong> (sælger aktier med overskud). Skattesatsen i 2026 er:
           </p>
           <ul>
             <li><strong>27%</strong> af de første 61.000 kr. i aktieindkomst</li>
             <li><strong>42%</strong> af aktieindkomst over 61.000 kr.</li>
           </ul>
           <p>
-            For ægtepar er progressionsgrænsen det dobbelte: 122.000 kr. samlet. Uudnyttet progressionsgrænse kan overføres mellem ægtefæller.
+            For <strong>ægtepar</strong> er progressionsgrænsen det dobbelte: <strong>122.000 kr.</strong> samlet. Uudnyttet progressionsgrænse kan <strong>overføres mellem ægtefæller</strong>.
           </p>
 
           <h2>Aktiesparekonto (ASK) — lagerbeskatning</h2>
           <p>
-            En aktiesparekonto beskattes med kun <strong>17%</strong>, men der er lagerbeskatning. Det betyder at du betaler skat af årets værdistigning — også selvom du ikke har solgt. Til gengæld er satsen markant lavere.
+            En <strong>aktiesparekonto</strong> beskattes med kun <strong>17%</strong>, men der er <strong>lagerbeskatning</strong>. Det betyder at du betaler skat af årets værdistigning — også selvom du ikke har solgt. Til gengæld er satsen markant lavere.
           </p>
           <p>
             I 2026 er det maksimale indskud på en ASK <strong>135.300 kr.</strong> Gevinster ud over indskuddet kan forblive på kontoen, men du kan ikke indsætte mere end loftet.
@@ -128,12 +128,12 @@ export default function AktieskatPage() {
             <li>Du kan leve med lagerbeskatning (skat årligt, ikke kun ved salg)</li>
           </ul>
           <p>
-            For store porteføljer kan forskellen mellem 42% skat (frit depot over grænsen) og 17% (ASK) betyde tusindvis af kroner i besparelse årligt.
+            For store porteføljer kan forskellen mellem <strong>42% skat</strong> (frit depot over grænsen) og <strong>17%</strong> (ASK) betyde <strong>tusindvis af kroner i besparelse</strong> årligt.
           </p>
 
           <h2>Tabsmodregning</h2>
           <p>
-            Tab på aktier kan modregnes i gevinster inden for samme depot-type. Har du et nettotab i et år, kan det fremføres til modregning i fremtidige gevinster. Vær opmærksom på at tab i frit depot ikke kan modregnes i ASK-gevinster og omvendt.
+            <strong>Tab på aktier</strong> kan modregnes i gevinster inden for samme depot-type. Har du et <strong>nettotab</strong> i et år, kan det <strong>fremføres til modregning</strong> i fremtidige gevinster. Vær opmærksom på at tab i frit depot <strong>ikke kan modregnes</strong> i ASK-gevinster og omvendt.
           </p>
         </div>
 

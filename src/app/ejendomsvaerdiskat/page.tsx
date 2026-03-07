@@ -82,9 +82,9 @@ export default function EjendomsvaerdiskatPage() {
       <div className="mt-12 prose max-w-none dark:prose-invert">
         <h2>Det nye boligskattesystem (fra 2024)</h2>
         <p>
-          Fra 1. januar 2024 trådte et nyt boligskattesystem i kraft i Danmark.
-          Ejendomsskatten består fortsat af to dele — ejendomsværdiskat og grundskyld —
-          men begge beregnes nu på nye måder med nye satser.
+          Fra <strong>1. januar 2024</strong> trådte et <strong>nyt boligskattesystem</strong> i kraft i Danmark.
+          Ejendomsskatten består fortsat af to dele — <strong>ejendomsværdiskat</strong> og <strong>grundskyld</strong> —
+          men begge beregnes nu på nye måder med <strong>nye satser</strong>.
         </p>
 
         <h3>Ejendomsværdiskat</h3>
@@ -154,23 +154,23 @@ export default function EjendomsvaerdiskatPage() {
 
         <h2>Forsigtighedsfradraget (20%)</h2>
         <p>
-          De nye ejendomsvurderinger er forbundet med en vis usikkerhed. Derfor er der
-          indført et forsigtighedsfradrag på 20%, så du kun betaler skat af 80% af den
-          vurderede værdi. Fradraget gælder for både ejendomsværdiskat og grundskyld.
+          De nye ejendomsvurderinger er forbundet med en vis <strong>usikkerhed</strong>. Derfor er der
+          indført et <strong>forsigtighedsfradrag på 20%</strong>, så du kun betaler skat af <strong>80% af den
+          vurderede værdi</strong>. Fradraget gælder for både <strong>ejendomsværdiskat</strong> og <strong>grundskyld</strong>.
         </p>
 
         <h2>Overgangsordning</h2>
         <p>
-          For at beskytte boligejere mod pludselige skattestigninger er der indført en
-          overgangsordning (skatterabat). Hvis din skat stiger med det nye system,
-          indfases stigningen gradvist. Beregneren viser den fulde skat uden
+          For at beskytte boligejere mod <strong>pludselige skattestigninger</strong> er der indført en
+          <strong>overgangsordning</strong> (skatterabat). Hvis din skat stiger med det nye system,
+          indfases stigningen <strong>gradvist</strong>. Beregneren viser den fulde skat uden
           overgangsrabat.
         </p>
 
         <h2>Hvornår betales ejendomsskat?</h2>
         <p>
-          Ejendomsskatten betales via din ejendomsskattebillet, som du modtager fra
-          din kommune. Betalingen sker typisk i to rater i marts og september.
+          Ejendomsskatten betales via din <strong>ejendomsskattebillet</strong>, som du modtager fra
+          din kommune. Betalingen sker typisk i <strong>to rater</strong> i <strong>marts og september</strong>.
         </p>
 
         <div className="bg-green-50 dark:bg-green-900/20 border-l-4 border-green-400 dark:border-green-500 p-4 my-6 not-prose">

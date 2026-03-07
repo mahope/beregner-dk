@@ -105,9 +105,9 @@ export default function DagpengePage() {
       <section className="mt-12 prose prose-blue max-w-none dark:prose-invert">
         <h2>Sådan fungerer dagpenge i 2026</h2>
         <p>
-          Dagpenge er en økonomisk sikkerhed for dig, der er medlem af en A-kasse og
+          <strong>Dagpenge</strong> er en økonomisk sikkerhed for dig, der er medlem af en <strong>A-kasse</strong> og
           bliver ledig. Dagpengene giver dig mulighed for at fokusere på at finde et
-          nyt job uden at bekymre dig for meget om økonomien.
+          nyt job uden at bekymre dig for meget om <strong>økonomien</strong>.
         </p>
 
         <h3>Dagpenge-satser 2026</h3>
@@ -147,15 +147,15 @@ export default function DagpengePage() {
 
         <h3>Indkomstkravet</h3>
         <p>
-          For at få ret til dagpenge skal du opfylde et indkomstkrav. I 2026 skal du
-          have haft en samlet indkomst på mindst 263.232 kr inden for de seneste 3 år,
-          eller have haft fuldtidsarbejde i mindst 1.924 timer inden for de seneste 3 år.
+          For at få ret til dagpenge skal du opfylde et <strong>indkomstkrav</strong>. I 2026 skal du
+          have haft en samlet indkomst på mindst <strong>263.232 kr</strong> inden for de seneste 3 år,
+          eller have haft <strong>fuldtidsarbejde</strong> i mindst <strong>1.924 timer</strong> inden for de seneste 3 år.
         </p>
 
         <h3>Supplerende dagpenge</h3>
         <p>
-          Hvis du arbejder på nedsat tid (under 37 timer), kan du få supplerende dagpenge.
-          Dog er der et loft på 30 ugers supplerende dagpenge inden for 104 uger.
+          Hvis du arbejder på <strong>nedsat tid</strong> (under 37 timer), kan du få <strong>supplerende dagpenge</strong>.
+          Dog er der et loft på <strong>30 ugers</strong> supplerende dagpenge inden for <strong>104 uger</strong>.
         </p>
 
         <div className="bg-green-50 dark:bg-green-900/20 border-l-4 border-green-400 dark:border-green-500 p-4 my-6 not-prose">
