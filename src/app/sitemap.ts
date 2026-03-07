@@ -69,6 +69,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: "/blog/privatoekonomi-for-unge", priority: 0.6, changeFrequency: "monthly" as const },
     { url: "/blog/koeb-af-bolig-2026-omkostninger", priority: 0.6, changeFrequency: "monthly" as const },
 
+    // Kategorisider
+    { url: "/kategori/oekonomi", priority: 0.7, changeFrequency: "monthly" as const },
+    { url: "/kategori/bolig", priority: 0.7, changeFrequency: "monthly" as const },
+    { url: "/kategori/laan", priority: 0.7, changeFrequency: "monthly" as const },
+    { url: "/kategori/sundhed", priority: 0.7, changeFrequency: "monthly" as const },
+    { url: "/kategori/familie", priority: 0.7, changeFrequency: "monthly" as const },
+    { url: "/kategori/uddannelse", priority: 0.7, changeFrequency: "monthly" as const },
+    { url: "/kategori/erhverv", priority: 0.7, changeFrequency: "monthly" as const },
+    { url: "/kategori/hverdag", priority: 0.7, changeFrequency: "monthly" as const },
+    { url: "/kategori/praktisk", priority: 0.7, changeFrequency: "monthly" as const },
+    { url: "/kategori/matematik", priority: 0.7, changeFrequency: "monthly" as const },
+
     // Info-sider
     { url: "/om", priority: 0.5, changeFrequency: "yearly" as const },
     { url: "/privatlivspolitik", priority: 0.3, changeFrequency: "yearly" as const },

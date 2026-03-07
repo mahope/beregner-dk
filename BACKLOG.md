@@ -149,7 +149,7 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 - Verificer at print stadig virker korrekt fra dark mode
 
 ### A12. Kategorisider
-- [ ] Opret dedikerede kategorisider for hver beregner-kategori
+- [x] Opret dedikerede kategorisider for hver beregner-kategori
 - /kategori/oekonomi — alle oekonomiske beregnere med beskrivelse
 - /kategori/bolig — alle bolig-beregnere med beskrivelse
 - /kategori/laan — alle laan-beregnere med beskrivelse
