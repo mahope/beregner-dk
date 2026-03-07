@@ -165,7 +165,7 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 - Log 404-hits til analytics saa vi kan finde broken links
 
 ### A14. Forside-testimonials og trust-sektion
-- [ ] Tilfoej social proof og trust-elementer paa forsiden
+- [x] Tilfoej social proof og trust-elementer paa forsiden
 - "Brugt af X danskere" taeller (kan vaere estimat baseret paa Plausible data)
 - Vis antal beregnere: "33+ gratis beregnere"
 - "Opdateret med 2026-satser" badge

@@ -378,6 +378,26 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Trust signals */}
+      <section className="flex flex-wrap justify-center gap-6 md:gap-10 mb-12 text-center">
+        <div>
+          <div className="text-2xl md:text-3xl font-bold text-blue-600 dark:text-blue-400">33+</div>
+          <div className="text-sm text-gray-600 dark:text-gray-400">Gratis beregnere</div>
+        </div>
+        <div>
+          <div className="text-2xl md:text-3xl font-bold text-blue-600 dark:text-blue-400">2026</div>
+          <div className="text-sm text-gray-600 dark:text-gray-400">Opdaterede satser</div>
+        </div>
+        <div>
+          <div className="text-2xl md:text-3xl font-bold text-blue-600 dark:text-blue-400">0 kr.</div>
+          <div className="text-sm text-gray-600 dark:text-gray-400">Ingen login eller betaling</div>
+        </div>
+        <div>
+          <div className="text-2xl md:text-3xl font-bold text-blue-600 dark:text-blue-400">100%</div>
+          <div className="text-sm text-gray-600 dark:text-gray-400">Privat — data gemmes ikke</div>
+        </div>
+      </section>
+
       {/* Popular calculators */}
       <section className="mb-16">
         <h2 className="text-2xl font-bold mb-6 dark:text-white">Populære beregnere</h2>
