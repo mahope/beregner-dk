@@ -496,7 +496,7 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 - **Route:** /termin
 
 ### E5. Brutto/netto loen beregner
-- [ ] Omvendt beregning: fra oensket nettoloen til noedvendig bruttoloen
+- [x] Omvendt beregning: fra oensket nettoloen til noedvendig bruttoloen
 - Input: oensket maanedlig udbetaling, kommune, kirkeskat
 - Nyttigt til loenforhandling
 - Vis detaljeret skatteberegning

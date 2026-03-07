@@ -325,6 +325,14 @@ const beregnere = [
     category: "Økonomi",
   },
   {
+    title: "Brutto/Netto Beregner",
+    description: "Find bruttoløn ud fra ønsket udbetaling",
+    href: "/brutto-netto",
+    icon: "💸",
+    popular: false,
+    category: "Økonomi",
+  },
+  {
     title: "Bil Værdtab",
     description: "Beregn værdtab og omkostninger for din bil",
     href: "/bil",
