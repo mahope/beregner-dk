@@ -50,6 +50,7 @@ export const beregnere: BeregnerItem[] = [
   { title: "Barselsdagpenge", description: "Beregn barselsdagpenge og se orlovsperioder", href: "/barselsdagpenge", icon: "👶", category: "Familie" },
   { title: "Terminsdato Beregner", description: "Beregn terminsdato og se graviditetsuge", href: "/termin", icon: "🤰", category: "Familie" },
   { title: "Konfirmationsbudget", description: "Beregn budget for konfirmation med udgifter og gaver", href: "/konfirmation", icon: "⛪", category: "Familie" },
+  { title: "Rejsebudget Beregner", description: "Beregn rejsebudget til populære destinationer", href: "/rejsebudget", icon: "✈️", category: "Hverdag" },
   { title: "SU Beregner", description: "Beregn din SU og fribeløb baseret på din situation", href: "/su", icon: "🎓", category: "Uddannelse" },
   { title: "Timeprisberegner", description: "Find din timepris som freelancer eller selvstændig", href: "/timepris", icon: "⏱️", category: "Erhverv" },
   { title: "Aldersberegner", description: "Beregn din præcise alder i år, måneder og dage", href: "/alder", icon: "🎂", category: "Hverdag" },

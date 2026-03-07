@@ -317,6 +317,14 @@ const beregnere = [
     category: "Bolig",
   },
   {
+    title: "Rejsebudget",
+    description: "Beregn rejsebudget til populære destinationer",
+    href: "/rejsebudget",
+    icon: "✈️",
+    popular: false,
+    category: "Hverdag",
+  },
+  {
     title: "Forbrugslån",
     description: "Beregn ydelse og ÅOP på forbrugslån",
     href: "/forbrugslaan",

@@ -542,8 +542,8 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 - Info om haefte for faelleslaen
 - **Route:** /andelsbolig
 
-### E11. Rejsebudget beregner
-- [ ] Beregn rejsebudget baseret paa destination
+### E11. Rejsebudget beregner ✅
+- [x] Beregn rejsebudget baseret paa destination
 - Input: destination, antal dage, antal personer, rejsetype
 - Vis estimeret budget: fly, hotel, mad, transport, oplevelser
 - Tilfoej valutaomregning til destination
