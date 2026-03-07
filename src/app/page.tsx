@@ -381,7 +381,7 @@ export default function Home() {
       {/* Popular calculators */}
       <section className="mb-16">
         <h2 className="text-2xl font-bold mb-6 dark:text-white">Populære beregnere</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 animate-stagger">
           {popularBeregnere.map((beregner) => {
             const isTrending = trendingHrefs.includes(beregner.href);
             return (

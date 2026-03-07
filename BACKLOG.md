@@ -133,7 +133,7 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 - Tilfoej "Nulstil" knap paa alle formularer
 
 ### A10. Animations og micro-interactions
-- [ ] Tilfoej subtile animationer for bedre brugeroplevelse
+- [x] Tilfoej subtile animationer for bedre brugeroplevelse
 - Fade-in animation paa resultat-sektionen naar beregning er faerdig
 - Smooth scroll til resultater efter "Beregn" klik paa mobil
 - Hover-effekter paa alle kort og klikbare elementer

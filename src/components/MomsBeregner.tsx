@@ -183,7 +183,7 @@ export default function MomsBeregner() {
       </div>
 
       {/* Resultat */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 animate-stagger">
         <div className="p-6 bg-gray-50 dark:bg-gray-800 rounded-xl text-center">
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Pris uden moms</p>
           <p className="text-2xl font-bold text-gray-700 dark:text-gray-200">

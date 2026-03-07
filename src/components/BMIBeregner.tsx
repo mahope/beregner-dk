@@ -366,7 +366,7 @@ export default function BMIBeregner() {
 
       {/* Resultat */}
       {resultat && (
-        <div className="p-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm border dark:border-gray-700">
+        <div className="p-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm border dark:border-gray-700 animate-fade-in">
           <div className="text-center mb-4">
             <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Dit BMI</p>
             <p className={`text-5xl font-bold ${resultat.farve}`}>
