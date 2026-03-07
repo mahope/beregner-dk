@@ -518,8 +518,8 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 - Tilfoej info om mulighedserklearing og varighedsbegraensning
 - **Route:** /sygedagpenge
 
-### E8. Konfirmationsbudget beregner
-- [ ] Beregn budget for konfirmation (populaert saesonemne)
+### E8. Konfirmationsbudget beregner ✅
+- [x] Beregn budget for konfirmation (populaert saesonemne)
 - Input: antal gaester, fest-type, gaver
 - Vis breakdown: lokale, mad, gaver, toej, kirke
 - Tilfoej gennemsnitlige konfirmationsgave-beloeb

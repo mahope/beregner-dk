@@ -293,6 +293,14 @@ const beregnere = [
     category: "Økonomi",
   },
   {
+    title: "Konfirmationsbudget",
+    description: "Beregn budget for konfirmation med udgifter og gaver",
+    href: "/konfirmation",
+    icon: "⛪",
+    popular: false,
+    category: "Familie",
+  },
+  {
     title: "Forbrugslån",
     description: "Beregn ydelse og ÅOP på forbrugslån",
     href: "/forbrugslaan",

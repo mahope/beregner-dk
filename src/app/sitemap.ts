@@ -32,6 +32,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: "/husleje", priority: 0.8, changeFrequency: "monthly" as const },
     { url: "/gaeldsfri", priority: 0.8, changeFrequency: "monthly" as const },
     { url: "/sygedagpenge", priority: 0.8, changeFrequency: "yearly" as const },
+    { url: "/konfirmation", priority: 0.8, changeFrequency: "yearly" as const },
 
     // Sundhed
     { url: "/bmi", priority: 0.9, changeFrequency: "monthly" as const },
