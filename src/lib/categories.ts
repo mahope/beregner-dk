@@ -37,6 +37,7 @@ export const beregnere: BeregnerItem[] = [
   { title: "Låneberegner", description: "Beregn ydelse, sammenlign lån og se afdragsplan", href: "/laaneberegner", icon: "🏦", category: "Lån" },
   { title: "Billån", description: "Beregn månedlig ydelse og rente på billån", href: "/billaan", icon: "🚗", category: "Lån" },
   { title: "Forbrugslån", description: "Beregn ydelse og ÅOP på forbrugslån", href: "/forbrugslaan", icon: "💳", category: "Lån" },
+  { title: "Leasing Beregner", description: "Beregn leasingydelse og sammenlign med billån", href: "/leasing", icon: "🚗", category: "Lån" },
   { title: "BMI Beregner", description: "Beregn dit Body Mass Index og se om din vægt er sund", href: "/bmi", icon: "⚖️", category: "Sundhed" },
   { title: "Kalorieberegner", description: "Beregn dit daglige kaloriebehov og makroer", href: "/kalorier", icon: "🍎", category: "Sundhed" },
   { title: "Børnepenge", description: "Se hvad du kan få i børne- og ungeydelse 2026", href: "/boernepenge", icon: "👶", category: "Familie" },

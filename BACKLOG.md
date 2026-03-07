@@ -472,7 +472,7 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 - **Route:** /aktieskat
 
 ### E2. Leasing beregner
-- [ ] Beregn maanedlig leasingydelse for bil
+- [x] Beregn maanedlig leasingydelse for bil
 - Input: bilpris, restvaerdi, loebetid, rente, udbetaling
 - Vis total leasingomkostning vs koeb
 - Tilfoej sammenligning: leasing vs laan vs kontantkob

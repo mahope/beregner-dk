@@ -261,6 +261,14 @@ const beregnere = [
     category: "Lån",
   },
   {
+    title: "Leasing Beregner",
+    description: "Beregn leasingydelse og sammenlign med billån",
+    href: "/leasing",
+    icon: "🚗",
+    popular: false,
+    category: "Lån",
+  },
+  {
     title: "Forbrugslån",
     description: "Beregn ydelse og ÅOP på forbrugslån",
     href: "/forbrugslaan",
