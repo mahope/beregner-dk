@@ -7,6 +7,7 @@ import {
 } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import RelatedCalculators from "@/components/RelatedCalculators";
+import Sidebar from "@/components/Sidebar";
 
 const baseUrl = "https://minberegner.dk";
 
@@ -92,7 +93,8 @@ const relatedCalculators = [
 
 export default function ValutaPage() {
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="flex flex-col lg:flex-row gap-8">
+      <div className="flex-1 min-w-0">
       <CalculatorSchema
         name="Valutaberegner - Omregn valuta"
         description="Gratis valutaberegner. Omregn mellem DKK, EUR, USD, GBP, SEK, NOK og mange flere valutaer."
@@ -159,6 +161,8 @@ export default function ValutaPage() {
 
       {/* Related Calculators */}
       <RelatedCalculators calculators={relatedCalculators} />
+      </div>
+      <Sidebar currentHref="/valuta" adSlotId="valuta-sidebar" />
     </div>
   );
 }

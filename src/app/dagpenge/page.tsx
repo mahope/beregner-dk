@@ -4,6 +4,7 @@ import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { FAQ } from "@/components/FAQ";
 import { RelatedCalculators } from "@/components/RelatedCalculators";
+import Sidebar from "@/components/Sidebar";
 
 const baseUrl = "https://minberegner.dk";
 
@@ -75,7 +76,8 @@ const relatedCalcs = [
 
 export default function DagpengePage() {
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="flex flex-col lg:flex-row gap-8">
+      <div className="flex-1 min-w-0">
       <CalculatorSchema
         name="Dagpengeberegner 2026"
         description="Beregn hvad du kan få i dagpenge baseret på din tidligere løn"
@@ -176,6 +178,8 @@ export default function DagpengePage() {
       <section className="mt-12">
         <RelatedCalculators calculators={relatedCalcs} />
       </section>
+      </div>
+      <Sidebar currentHref="/dagpenge" adSlotId="dagpenge-sidebar" />
     </div>
   );
 }

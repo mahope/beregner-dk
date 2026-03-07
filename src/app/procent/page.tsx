@@ -7,6 +7,7 @@ import {
   FAQSchema,
 } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import Sidebar from "@/components/Sidebar";
 
 const baseUrl = "https://minberegner.dk";
 
@@ -82,7 +83,8 @@ const faqItems = [
 
 export default function ProcentPage() {
   return (
-    <div>
+    <div className="flex flex-col lg:flex-row gap-8">
+      <div className="flex-1 min-w-0">
       <CalculatorSchema
         name="Procentberegner"
         description="Gratis procentberegner. Beregn procent af et tal, find procentvis stigning/fald, eller regn baglæns."
@@ -213,6 +215,8 @@ export default function ProcentPage() {
       <FAQ items={faqItems} />
 
       <RelatedCalculators current="/procent" />
+      </div>
+      <Sidebar currentHref="/procent" adSlotId="procent-sidebar" />
     </div>
   );
 }

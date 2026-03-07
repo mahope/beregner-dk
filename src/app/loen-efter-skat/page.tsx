@@ -7,7 +7,8 @@ import {
   FAQSchema,
 } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
-import { SidebarAd, InlineAd } from "@/components/ads/AdBanner";
+import { InlineAd } from "@/components/ads/AdBanner";
+import Sidebar from "@/components/Sidebar";
 
 const baseUrl = "https://minberegner.dk";
 
@@ -248,10 +249,7 @@ export default function LoenPage() {
       <RelatedCalculators current="/loen-efter-skat" />
       </div>
 
-      {/* Sidebar - Right Column (Desktop only) */}
-      <aside className="hidden lg:block lg:w-[300px] flex-shrink-0">
-        <SidebarAd slotId="loen-sidebar" />
-      </aside>
+      <Sidebar currentHref="/loen-efter-skat" adSlotId="loen-sidebar" />
     </div>
   );
 }

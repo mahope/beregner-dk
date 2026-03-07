@@ -172,7 +172,7 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 - Eventuelt: bruger-testimonials eller ratings (kan implementeres senere)
 
 ### A15. Forbedret sidebar-design
-- [ ] Redesign sidebar-sektionen paa beregner-sider
+- [x] Redesign sidebar-sektionen paa beregner-sider
 - Giv sidebar et konsistent layout: relaterede beregnere, tips, affiliate
 - Tilfoej "Populaere beregnere" widget i sidebar
 - Giv sidebar sticky scroll paa desktop (foelger med ned paa siden)

@@ -7,6 +7,7 @@ import {
 } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import RelatedCalculators from "@/components/RelatedCalculators";
+import Sidebar from "@/components/Sidebar";
 
 const baseUrl = "https://minberegner.dk";
 
@@ -92,7 +93,8 @@ const relatedCalculators = [
 
 export default function MomsPage() {
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="flex flex-col lg:flex-row gap-8">
+      <div className="flex-1 min-w-0">
       <CalculatorSchema
         name="Momsberegner - Beregn dansk moms"
         description="Gratis momsberegner. Tillæg moms, fratræk moms eller find momsandelen i et beløb. Dansk moms 25%."
@@ -195,6 +197,8 @@ export default function MomsPage() {
 
       {/* Related Calculators */}
       <RelatedCalculators calculators={relatedCalculators} />
+      </div>
+      <Sidebar currentHref="/moms" adSlotId="moms-sidebar" />
     </div>
   );
 }

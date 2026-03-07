@@ -7,6 +7,7 @@ import {
   FAQSchema,
 } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import Sidebar from "@/components/Sidebar";
 
 const baseUrl = "https://minberegner.dk";
 
@@ -62,7 +63,8 @@ export const metadata: Metadata = {
 
 export default function BoliglaanPage() {
   return (
-    <div>
+    <div className="flex flex-col lg:flex-row gap-8">
+      <div className="flex-1 min-w-0">
       <CalculatorSchema
         name="Boliglånsberegner - Beregn din månedlige ydelse"
         description="Gratis boliglånsberegner. Beregn månedlig ydelse, samlet pris og skattefradrag på dit boliglån."
@@ -200,6 +202,8 @@ export default function BoliglaanPage() {
       <FAQ items={faqItems} />
 
       <RelatedCalculators current="/boliglaan" />
+      </div>
+      <Sidebar currentHref="/boliglaan" adSlotId="boliglaan-sidebar" />
     </div>
   );
 }

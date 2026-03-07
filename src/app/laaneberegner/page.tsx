@@ -7,6 +7,7 @@ import {
 } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import RelatedCalculators from "@/components/RelatedCalculators";
+import Sidebar from "@/components/Sidebar";
 
 const baseUrl = "https://minberegner.dk";
 
@@ -91,7 +92,8 @@ const relatedCalculators = [
 
 export default function LaaneberegnerPage() {
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="flex flex-col lg:flex-row gap-8">
+      <div className="flex-1 min-w-0">
       <CalculatorSchema
         name="Låneberegner - Beregn lån og ydelse"
         description="Gratis låneberegner. Beregn månedlig ydelse, samlede renter og sammenlign forskellige lån."
@@ -158,6 +160,8 @@ export default function LaaneberegnerPage() {
 
       {/* Related Calculators */}
       <RelatedCalculators calculators={relatedCalculators} />
+      </div>
+      <Sidebar currentHref="/laaneberegner" adSlotId="laaneberegner-sidebar" />
     </div>
   );
 }
