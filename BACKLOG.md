@@ -534,8 +534,8 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 - Link til kalorier og BMI beregnere
 - **Route:** /vaegttab
 
-### E10. Huslaan / andelsbolig beregner
-- [ ] Beregn oekonomien ved koeb af andelsbolig
+### E10. Huslaan / andelsbolig beregner ✅
+- [x] Beregn oekonomien ved koeb af andelsbolig
 - Input: andelpris, boligafgift, forbedringer, laan
 - Vis maanedlige omkostninger vs leje
 - Tilfoej beregning af andelskrone

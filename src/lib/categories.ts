@@ -37,6 +37,7 @@ export const beregnere: BeregnerItem[] = [
   { title: "Husleje Budget", description: "Find ud af hvad du har råd til i husleje", href: "/husleje", icon: "🏠", category: "Bolig" },
   { title: "Boliglån", description: "Beregn ydelse og omkostninger på dit boliglån", href: "/boliglaan", icon: "🏡", category: "Bolig" },
   { title: "Ejendomsværdiskat", description: "Beregn ejendomsværdiskat og grundskyld 2026", href: "/ejendomsvaerdiskat", icon: "🏠", category: "Bolig" },
+  { title: "Andelsbolig Beregner", description: "Beregn omkostninger ved køb af andelsbolig", href: "/andelsbolig", icon: "🏢", category: "Bolig" },
   { title: "Låneberegner", description: "Beregn ydelse, sammenlign lån og se afdragsplan", href: "/laaneberegner", icon: "🏦", category: "Lån" },
   { title: "Billån", description: "Beregn månedlig ydelse og rente på billån", href: "/billaan", icon: "🚗", category: "Lån" },
   { title: "Forbrugslån", description: "Beregn ydelse og ÅOP på forbrugslån", href: "/forbrugslaan", icon: "💳", category: "Lån" },

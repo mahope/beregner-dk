@@ -309,6 +309,14 @@ const beregnere = [
     category: "Sundhed",
   },
   {
+    title: "Andelsbolig Beregner",
+    description: "Beregn omkostninger ved køb af andelsbolig",
+    href: "/andelsbolig",
+    icon: "🏢",
+    popular: false,
+    category: "Bolig",
+  },
+  {
     title: "Forbrugslån",
     description: "Beregn ydelse og ÅOP på forbrugslån",
     href: "/forbrugslaan",
