@@ -293,6 +293,14 @@ const beregnere = [
     category: "Økonomi",
   },
   {
+    title: "Aktieskat",
+    description: "Beregn skat på aktiegevinst — frit depot vs. ASK",
+    href: "/aktieskat",
+    icon: "📈",
+    popular: false,
+    category: "Økonomi",
+  },
+  {
     title: "Bil Værdtab",
     description: "Beregn værdtab og omkostninger for din bil",
     href: "/bil",

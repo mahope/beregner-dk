@@ -29,6 +29,7 @@ export const beregnere: BeregnerItem[] = [
   { title: "Efterløn", description: "Beregn din efterløn og se hvornår du kan gå", href: "/efterloen", icon: "🏖️", category: "Økonomi" },
   { title: "Rentefradrag", description: "Beregn din skattebesparelse på rentefradrag", href: "/rentefradrag", icon: "🏦", category: "Økonomi" },
   { title: "Arveafgift", description: "Beregn bo- og tillægsafgift ved arv", href: "/arveafgift", icon: "📜", category: "Økonomi" },
+  { title: "Aktieskat", description: "Beregn skat på aktiegevinst — frit depot vs. ASK", href: "/aktieskat", icon: "📈", category: "Økonomi" },
   { title: "Boligstøtte", description: "Beregn din boligstøtte til husleje", href: "/boligstoette", icon: "🏘️", category: "Bolig" },
   { title: "Husleje Budget", description: "Find ud af hvad du har råd til i husleje", href: "/husleje", icon: "🏠", category: "Bolig" },
   { title: "Boliglån", description: "Beregn ydelse og omkostninger på dit boliglån", href: "/boliglaan", icon: "🏡", category: "Bolig" },

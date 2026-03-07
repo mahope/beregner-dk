@@ -69,6 +69,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: "/blog/privatoekonomi-for-unge", priority: 0.6, changeFrequency: "monthly" as const },
     { url: "/blog/koeb-af-bolig-2026-omkostninger", priority: 0.6, changeFrequency: "monthly" as const },
 
+    { url: "/aktieskat", priority: 0.8, changeFrequency: "yearly" as const },
+
     // Kategorisider
     { url: "/kategori/oekonomi", priority: 0.7, changeFrequency: "monthly" as const },
     { url: "/kategori/bolig", priority: 0.7, changeFrequency: "monthly" as const },

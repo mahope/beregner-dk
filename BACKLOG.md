@@ -464,7 +464,7 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 ## E. Nye Beregnere (15 opgaver)
 
 ### E1. Aktieskat beregner
-- [ ] Beregn skat paa aktieindkomst (27% under progressionsgraensen, 42% over)
+- [x] Beregn skat paa aktieindkomst (27% under progressionsgraensen, 42% over)
 - Input: realiseret gevinst, tab til modregning, aktiesparekonto vs frit depot
 - Vis forskel paa beskatning i aktiesparekonto vs frit depot
 - Tilfoej info om lagerbeskatning vs realisationsbeskatning
