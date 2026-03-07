@@ -698,19 +698,19 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 ## H. Fremtidige Muligheder (laengere sigt)
 
 ### H1. API for beregnere (B2B monetisering)
-- [ ] Byg et REST API der eksponerer beregnerlogik
+- [x] Byg et REST API der eksponerer beregnerlogik
 - Freemium model: 100 gratis kald/dag, derefter betaling
 - API dokumentation med OpenAPI/Swagger
 - Interessant for banker, raadgivere, fintech startups
 
 ### H2. Widget embed kode
-- [ ] Tilbyd embeddable beregner-widgets til andre websites
+- [x] Tilbyd embeddable beregner-widgets til andre websites
 - Gratis med "Powered by MinBeregner.dk" backlink
 - Betalt version uden branding
 - Tilpasselig farver og stoerrelse
 
 ### H3. PWA (Progressive Web App)
-- [ ] Goer sitet til en fuld PWA
+- [x] Goer sitet til en fuld PWA
 - Offline support for beregninger (service worker)
 - "Tilfoej til startskraerm" prompt
 - Push notifikationer ved satsaendringer
