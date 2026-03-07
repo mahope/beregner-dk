@@ -44,6 +44,7 @@ export const beregnere: BeregnerItem[] = [
   { title: "Gældsfri Beregner", description: "Beregn din vej ud af gæld med lavine/snebold", href: "/gaeldsfri", icon: "🎯", category: "Lån" },
   { title: "BMI Beregner", description: "Beregn dit Body Mass Index og se om din vægt er sund", href: "/bmi", icon: "⚖️", category: "Sundhed" },
   { title: "Kalorieberegner", description: "Beregn dit daglige kaloriebehov og makroer", href: "/kalorier", icon: "🍎", category: "Sundhed" },
+  { title: "Vægttab Beregner", description: "Beregn kalorieunderskud for vægttab", href: "/vaegttab", icon: "📉", category: "Sundhed" },
   { title: "Børnepenge", description: "Se hvad du kan få i børne- og ungeydelse 2026", href: "/boernepenge", icon: "👶", category: "Familie" },
   { title: "Barselsdagpenge", description: "Beregn barselsdagpenge og se orlovsperioder", href: "/barselsdagpenge", icon: "👶", category: "Familie" },
   { title: "Terminsdato Beregner", description: "Beregn terminsdato og se graviditetsuge", href: "/termin", icon: "🤰", category: "Familie" },

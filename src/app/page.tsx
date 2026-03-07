@@ -301,6 +301,14 @@ const beregnere = [
     category: "Familie",
   },
   {
+    title: "Vægttab Beregner",
+    description: "Beregn kalorieunderskud for vægttab",
+    href: "/vaegttab",
+    icon: "📉",
+    popular: false,
+    category: "Sundhed",
+  },
+  {
     title: "Forbrugslån",
     description: "Beregn ydelse og ÅOP på forbrugslån",
     href: "/forbrugslaan",

@@ -526,8 +526,8 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 - Hoejt soegevolumen i foraar/sommer
 - **Route:** /konfirmation
 
-### E9. Vaegttabs beregner
-- [ ] Beregn kalorieunderskud nødvendigt for oensket vaegttab
+### E9. Vaegttabs beregner ✅
+- [x] Beregn kalorieunderskud nødvendigt for oensket vaegttab
 - Input: nuvaerende vaegt, maalvaegt, tidsramme, aktivitetsniveau
 - Vis dagligt kaloriemaal og ugenligt vaegttab
 - Tilfoej advarsel ved for hurtigt vaegttab (< 0,5 kg/uge)
