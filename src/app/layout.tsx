@@ -144,7 +144,7 @@ export default function RootLayout({
           <div className="max-w-6xl mx-auto px-4 py-12">
             {/* Trust signals */}
             <div className="flex flex-wrap justify-center gap-6 mb-10 pb-10 border-b border-gray-800 text-sm">
-              <span className="flex items-center gap-2">🧮 <strong className="text-white">33+</strong> gratis beregnere</span>
+              <span className="flex items-center gap-2">🧮 <strong className="text-white">44</strong> gratis beregnere</span>
               <span className="flex items-center gap-2">📅 Opdateret med <strong className="text-white">2026-satser</strong></span>
               <span className="flex items-center gap-2">🔒 <strong className="text-white">Ingen login</strong> påkrævet</span>
               <span className="flex items-center gap-2">🇩🇰 Lavet til <strong className="text-white">danskere</strong></span>
@@ -158,15 +158,21 @@ export default function RootLayout({
                   <h4 className="text-white font-medium mb-2">💰 Økonomi</h4>
                   <ul className="space-y-1.5">
                     <li><Link href="/loen-efter-skat" className="hover:text-white transition-colors">Løn efter skat</Link></li>
+                    <li><Link href="/brutto-netto" className="hover:text-white transition-colors">Brutto/Netto</Link></li>
                     <li><Link href="/moms" className="hover:text-white transition-colors">Momsberegner</Link></li>
                     <li><Link href="/feriepenge" className="hover:text-white transition-colors">Feriepenge</Link></li>
                     <li><Link href="/dagpenge" className="hover:text-white transition-colors">Dagpenge</Link></li>
+                    <li><Link href="/sygedagpenge" className="hover:text-white transition-colors">Sygedagpenge</Link></li>
                     <li><Link href="/pension" className="hover:text-white transition-colors">Pension</Link></li>
                     <li><Link href="/efterloen" className="hover:text-white transition-colors">Efterløn</Link></li>
+                    <li><Link href="/topskat" className="hover:text-white transition-colors">Topskat</Link></li>
+                    <li><Link href="/skattefradrag" className="hover:text-white transition-colors">Skattefradrag</Link></li>
+                    <li><Link href="/aktieskat" className="hover:text-white transition-colors">Aktieskat</Link></li>
                     <li><Link href="/arveafgift" className="hover:text-white transition-colors">Arveafgift</Link></li>
                     <li><Link href="/rentefradrag" className="hover:text-white transition-colors">Rentefradrag</Link></li>
                     <li><Link href="/procent" className="hover:text-white transition-colors">Procent</Link></li>
                     <li><Link href="/valuta" className="hover:text-white transition-colors">Valuta</Link></li>
+                    <li><Link href="/timepris" className="hover:text-white transition-colors">Timepris</Link></li>
                   </ul>
                 </div>
                 <div>
@@ -175,9 +181,11 @@ export default function RootLayout({
                     <li><Link href="/boliglaan" className="hover:text-white transition-colors">Boliglån</Link></li>
                     <li><Link href="/boligstoette" className="hover:text-white transition-colors">Boligstøtte</Link></li>
                     <li><Link href="/husleje" className="hover:text-white transition-colors">Husleje Budget</Link></li>
+                    <li><Link href="/andelsbolig" className="hover:text-white transition-colors">Andelsbolig</Link></li>
                     <li><Link href="/ejendomsvaerdiskat" className="hover:text-white transition-colors">Ejendomsskat</Link></li>
                     <li><Link href="/kvadratmeter" className="hover:text-white transition-colors">Kvadratmeter</Link></li>
                     <li><Link href="/elberegner" className="hover:text-white transition-colors">Elberegner</Link></li>
+                    <li><Link href="/solceller" className="hover:text-white transition-colors">Solceller</Link></li>
                   </ul>
                 </div>
                 <div>
@@ -187,21 +195,25 @@ export default function RootLayout({
                     <li><Link href="/renteberegner" className="hover:text-white transition-colors">Renteberegner</Link></li>
                     <li><Link href="/opsparing" className="hover:text-white transition-colors">Opsparing</Link></li>
                     <li><Link href="/billaan" className="hover:text-white transition-colors">Billån</Link></li>
+                    <li><Link href="/leasing" className="hover:text-white transition-colors">Leasing</Link></li>
                     <li><Link href="/forbrugslaan" className="hover:text-white transition-colors">Forbrugslån</Link></li>
+                    <li><Link href="/gaeldsfri" className="hover:text-white transition-colors">Gældsfri</Link></li>
+                    <li><Link href="/studielaan" className="hover:text-white transition-colors">Studielån</Link></li>
                   </ul>
                 </div>
                 <div>
-                  <h4 className="text-white font-medium mb-2">❤️ Sundhed</h4>
-                  <ul className="space-y-1.5">
-                    <li><Link href="/bmi" className="hover:text-white transition-colors">BMI Beregner</Link></li>
-                    <li><Link href="/kalorier" className="hover:text-white transition-colors">Kalorieberegner</Link></li>
-                    <li><Link href="/alder" className="hover:text-white transition-colors">Aldersberegner</Link></li>
-                  </ul>
-                  <h4 className="text-white font-medium mb-2 mt-4">👨‍👩‍👧 Familie</h4>
+                  <h4 className="text-white font-medium mb-2">👨‍👩‍👧 Familie & Sundhed</h4>
                   <ul className="space-y-1.5">
                     <li><Link href="/boernepenge" className="hover:text-white transition-colors">Børnepenge</Link></li>
                     <li><Link href="/barselsdagpenge" className="hover:text-white transition-colors">Barselsdagpenge</Link></li>
+                    <li><Link href="/termin" className="hover:text-white transition-colors">Terminsdato</Link></li>
                     <li><Link href="/su" className="hover:text-white transition-colors">SU Beregner</Link></li>
+                    <li><Link href="/konfirmation" className="hover:text-white transition-colors">Konfirmation</Link></li>
+                    <li><Link href="/bryllup" className="hover:text-white transition-colors">Bryllup</Link></li>
+                    <li><Link href="/bmi" className="hover:text-white transition-colors">BMI Beregner</Link></li>
+                    <li><Link href="/kalorier" className="hover:text-white transition-colors">Kalorieberegner</Link></li>
+                    <li><Link href="/vaegttab" className="hover:text-white transition-colors">Vægttab</Link></li>
+                    <li><Link href="/alder" className="hover:text-white transition-colors">Aldersberegner</Link></li>
                   </ul>
                 </div>
                 <div>
@@ -209,7 +221,7 @@ export default function RootLayout({
                   <ul className="space-y-1.5">
                     <li><Link href="/braendstof" className="hover:text-white transition-colors">Brændstof</Link></li>
                     <li><Link href="/bil" className="hover:text-white transition-colors">Bil Værdtab</Link></li>
-                    <li><Link href="/timepris" className="hover:text-white transition-colors">Timepris</Link></li>
+                    <li><Link href="/rejsebudget" className="hover:text-white transition-colors">Rejsebudget</Link></li>
                     <li><Link href="/dato" className="hover:text-white transition-colors">Datoberegner</Link></li>
                     <li><Link href="/tidsberegner" className="hover:text-white transition-colors">Tidsberegner</Link></li>
                     <li><Link href="/tidszone" className="hover:text-white transition-colors">Tidszoner</Link></li>

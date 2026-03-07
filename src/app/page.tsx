@@ -10,7 +10,7 @@ const baseUrl = "https://minberegner.dk";
 export const metadata: Metadata = {
   title: "MinBeregner.dk - Gratis online beregnere til danskere",
   description:
-    "Danmarks samling af gratis online beregnere. Beregn løn efter skat, moms, lån, pension, feriepenge, BMI og meget mere. 33+ beregnere med 2026-satser — helt gratis og uden login.",
+    "Danmarks samling af gratis online beregnere. Beregn løn efter skat, moms, lån, pension, feriepenge, BMI og meget mere. 44 beregnere med 2026-satser — helt gratis og uden login.",
   keywords: [
     "beregner",
     "online beregner",
@@ -442,7 +442,7 @@ const homeFaqItems = [
   {
     question: "Hvilke beregnere har I?",
     answer:
-      "Vi har 33+ beregnere til økonomi (løn, skat, pension, dagpenge, feriepenge, moms), bolig (boliglån, ejendomsværdiskat, boligstøtte), lån (billån, forbrugslån, renteberegner), sundhed (BMI, kalorier) og hverdag (el, brændstof, dato). Vi tilføjer løbende nye beregnere.",
+      "Vi har 44 beregnere til økonomi (løn, skat, pension, dagpenge, feriepenge, moms), bolig (boliglån, ejendomsværdiskat, boligstøtte), lån (billån, forbrugslån, renteberegner), sundhed (BMI, kalorier) og hverdag (el, brændstof, dato). Vi tilføjer løbende nye beregnere.",
   },
 ];
 
@@ -492,7 +492,7 @@ export default function Home() {
             Gratis Online Beregnere
           </h1>
           <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto mb-8">
-            33+ gratis beregnere til økonomi, bolig, skat, sundhed og hverdag.
+            44+ gratis beregnere til økonomi, bolig, skat, sundhed og hverdag.
             Opdateret med 2026-satser — helt gratis og uden login.
           </p>
           <SearchBar beregnere={searchData} />
@@ -502,7 +502,7 @@ export default function Home() {
       {/* Trust signals */}
       <section className="flex flex-wrap justify-center gap-6 md:gap-10 mb-12 text-center">
         <div>
-          <div className="text-2xl md:text-3xl font-bold text-blue-600 dark:text-blue-400">33+</div>
+          <div className="text-2xl md:text-3xl font-bold text-blue-600 dark:text-blue-400">44+</div>
           <div className="text-sm text-gray-600 dark:text-gray-400">Gratis beregnere</div>
         </div>
         <div>
