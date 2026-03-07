@@ -550,8 +550,8 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 - Populaer soegning: "hvad koster en ferie til X"
 - **Route:** /rejsebudget
 
-### E12. Studielaan tilbagebetaling beregner
-- [ ] Beregn maanedlig tilbagebetaling af SU-laan
+### E12. Studielaan tilbagebetaling beregner ✅
+- [x] Beregn maanedlig tilbagebetaling af SU-laan
 - Input: samlet SU-gaeld, rente (1% under uddannelse, 4% efter)
 - Vis tilbagebetalingsplan over 7-15 aar
 - Tilfoej indkomstafhaengig tilbagebetaling

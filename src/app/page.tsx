@@ -325,6 +325,14 @@ const beregnere = [
     category: "Hverdag",
   },
   {
+    title: "Studielån",
+    description: "Beregn tilbagebetaling af SU-lån",
+    href: "/studielaan",
+    icon: "🎓",
+    popular: false,
+    category: "Uddannelse",
+  },
+  {
     title: "Forbrugslån",
     description: "Beregn ydelse og ÅOP på forbrugslån",
     href: "/forbrugslaan",
