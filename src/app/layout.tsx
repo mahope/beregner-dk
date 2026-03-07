@@ -111,12 +111,12 @@ export default function RootLayout({
           src="https://analytics.holstjensen.eu/js/script.js"
         />
         
-        {/* Google AdSense - Tilføj Publisher ID når godkendt */}
-        {/* <script
+        {/* Google AdSense */}
+        <script
           async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX"
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1902871361369866"
           crossOrigin="anonymous"
-        /> */}
+        />
         
         <OrganizationSchema />
         <WebSiteSchema
