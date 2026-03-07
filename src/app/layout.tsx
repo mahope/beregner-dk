@@ -9,6 +9,7 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { SkipLink } from "@/components/SkipLink";
 import { FooterAd } from "@/components/ads/AdBanner";
 import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
+import BeregnerAssistent from "@/components/BeregnerAssistent";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -137,6 +138,7 @@ export default function RootLayout({
 
           <CookieConsent />
           <ServiceWorkerRegistration />
+          <BeregnerAssistent />
 
           <footer className="bg-gray-900 dark:bg-gray-950 text-gray-300 dark:text-gray-400 mt-auto border-t border-transparent dark:border-gray-800">
           <div className="max-w-6xl mx-auto px-4 py-12">
