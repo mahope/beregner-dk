@@ -309,6 +309,14 @@ const beregnere = [
     category: "Økonomi",
   },
   {
+    title: "Topskat Beregner",
+    description: "Beregn om du betaler mellemskat eller topskat",
+    href: "/topskat",
+    icon: "📊",
+    popular: false,
+    category: "Økonomi",
+  },
+  {
     title: "Bil Værdtab",
     description: "Beregn værdtab og omkostninger for din bil",
     href: "/bil",

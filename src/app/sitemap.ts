@@ -71,6 +71,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
     { url: "/aktieskat", priority: 0.8, changeFrequency: "yearly" as const },
     { url: "/leasing", priority: 0.8, changeFrequency: "monthly" as const },
+    { url: "/topskat", priority: 0.8, changeFrequency: "yearly" as const },
 
     // Kategorisider
     { url: "/kategori/oekonomi", priority: 0.7, changeFrequency: "monthly" as const },

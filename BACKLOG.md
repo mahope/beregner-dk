@@ -480,7 +480,7 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 - **Route:** /leasing
 
 ### E3. Topskat beregner
-- [ ] Beregn om man betaler topskat og hvor meget
+- [x] Beregn om man betaler topskat og hvor meget
 - Input: aarsindkomst, kommune, kirkeskat
 - Vis topskat-graense og hvor meget der betales over
 - Vis effektiv skatteprocent (marginal vs gennemsnit)
