@@ -35,6 +35,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: "/konfirmation", priority: 0.8, changeFrequency: "yearly" as const },
     { url: "/vaegttab", priority: 0.8, changeFrequency: "monthly" as const },
     { url: "/andelsbolig", priority: 0.8, changeFrequency: "monthly" as const },
+    { url: "/solceller", priority: 0.8, changeFrequency: "monthly" as const },
     { url: "/rejsebudget", priority: 0.8, changeFrequency: "monthly" as const },
     { url: "/studielaan", priority: 0.8, changeFrequency: "yearly" as const },
 

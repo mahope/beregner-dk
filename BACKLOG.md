@@ -558,8 +558,8 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 - Link til SU-beregner
 - **Route:** /studielaan
 
-### E13. Solcelle beregner
-- [ ] Beregn besparelse og tilbagebetalingstid for solceller
+### E13. Solcelle beregner ✅
+- [x] Beregn besparelse og tilbagebetalingstid for solceller
 - Input: tagfladeretning, stoerrelse, elforbrug, elpris
 - Vis aarlig produktion, besparelse og tilbagebetalingstid
 - Tilfoej info om nettomaalerordning og afgifter

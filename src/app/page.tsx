@@ -333,6 +333,14 @@ const beregnere = [
     category: "Uddannelse",
   },
   {
+    title: "Solcelle Beregner",
+    description: "Beregn besparelse og tilbagebetalingstid for solceller",
+    href: "/solceller",
+    icon: "☀️",
+    popular: false,
+    category: "Bolig",
+  },
+  {
     title: "Forbrugslån",
     description: "Beregn ydelse og ÅOP på forbrugslån",
     href: "/forbrugslaan",
