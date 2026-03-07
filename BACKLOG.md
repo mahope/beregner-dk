@@ -158,7 +158,7 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 - Hver kategoriside faar eget SEO content, FAQ og schema markup
 
 ### A13. 404-side med soegefunktion
-- [ ] Design en custom 404-side der hjaelper brugeren videre
+- [x] Design en custom 404-side der hjaelper brugeren videre
 - Tilfoej soegefelt til at finde beregnere
 - Vis de mest populaere beregnere som forslag
 - Tilfoej "Mente du...?" med fuzzy matching paa URL'en
