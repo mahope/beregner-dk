@@ -659,7 +659,7 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 - Respekter max 3 ads per side for UX
 
 ### G3. Email-capture og nyhedsbrev
-- [ ] Implementer email-signup paa forsiden og beregner-sider
+- [x] Implementer email-signup paa forsiden og beregner-sider
 - "Faa besked naar satser aendres" — vaerdifuldt value proposition
 - Tilfoej popup/slide-in efter 30 sekunder paa siden
 - Integrer med simpel email-service (fx Buttondown, Mailchimp)
