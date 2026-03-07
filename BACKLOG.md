@@ -666,7 +666,7 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 - Send maanedligt nyhedsbrev med opdaterede satser og nye beregnere
 
 ### G4. Social media tilstedevaerelse
-- [ ] Opret og link til social media profiler
+- [x] Opret og link til social media profiler
 - Facebook-side med beregner-tips og satsaendringer
 - LinkedIn-profil for B2B synlighed
 - Tilfoej social media links i footer
