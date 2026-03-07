@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { FAQSchema } from "@/components/StructuredData";
 import SearchBar from "@/components/SearchBar";
 import { getTrendingHrefs } from "@/lib/trending";
+import NewsletterSignup from "@/components/NewsletterSignup";
 
 const baseUrl = "https://minberegner.dk";
 
@@ -622,6 +623,11 @@ export default function Home() {
             </p>
           </div>
         </div>
+      </section>
+
+      {/* Newsletter signup */}
+      <section className="mb-16 max-w-xl mx-auto">
+        <NewsletterSignup />
       </section>
 
       {/* SEO content */}

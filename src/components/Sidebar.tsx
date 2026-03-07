@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { SidebarAd } from "@/components/ads/AdBanner";
+import NewsletterSignup from "@/components/NewsletterSignup";
 
 interface SidebarProps {
   currentHref?: string;
@@ -43,14 +44,7 @@ export default function Sidebar({ currentHref, adSlotId }: SidebarProps) {
           </nav>
         </div>
 
-        <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4">
-          <p className="text-sm text-blue-800 dark:text-blue-300 font-medium mb-1">
-            Vidste du?
-          </p>
-          <p className="text-xs text-blue-700 dark:text-blue-400">
-            Alle beregninger sker lokalt i din browser. Vi gemmer ingen personlige data.
-          </p>
-        </div>
+        <NewsletterSignup />
       </div>
     </aside>
   );
