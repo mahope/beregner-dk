@@ -503,8 +503,8 @@ Billaan, Forbrugslaan, Ejendomsvaerdiskat, Arveafgift
 - Link til loen-efter-skat beregner
 - **Route:** /brutto-netto
 
-### E6. Gaeldsfri beregner (gaeldsafvikling)
-- [ ] Beregn hvor lang tid det tager at blive gaeldsfri
+### E6. Gaeldsfri beregner (gaeldsafvikling) ✅
+- [x] Beregn hvor lang tid det tager at blive gaeldsfri
 - Input: samlet gaeld, rente, maanedlig afdrag
 - Vis amortiseringsplan og total renteomkostning
 - Tilfoej "snebold" vs "lavine" metode sammenligning

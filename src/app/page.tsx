@@ -277,6 +277,14 @@ const beregnere = [
     category: "Lån",
   },
   {
+    title: "Gældsfri Beregner",
+    description: "Beregn din vej ud af gæld med lavine/snebold",
+    href: "/gaeldsfri",
+    icon: "🎯",
+    popular: false,
+    category: "Lån",
+  },
+  {
     title: "Forbrugslån",
     description: "Beregn ydelse og ÅOP på forbrugslån",
     href: "/forbrugslaan",
