@@ -1,5 +1,56 @@
 {
-  "common": {
-    "title": "Beregner"
+  "site": {
+    "name": "MinBeregner.dk",
+    "tagline": "Gratis Online Beregnere",
+    "description": "33+ gratis beregnere til økonomi, bolig, skat, sundhed og hverdag."
+  },
+  "nav": {
+    "home": "Forside",
+    "calculators": "Beregnere",
+    "blog": "Blog",
+    "about": "Om os"
+  },
+  "ui": {
+    "calculate": "Beregn",
+    "reset": "Nulstil",
+    "copy": "Kopiér resultat",
+    "share": "Del beregning",
+    "perMonth": "pr. måned",
+    "perYear": "pr. år",
+    "result": "Resultat",
+    "currency": "kr.",
+    "loading": "Beregner...",
+    "error": "Noget gik galt",
+    "tryAgain": "Prøv igen",
+    "readMore": "Læs mere",
+    "seeAll": "Se alle",
+    "faq": "Ofte stillede spørgsmål",
+    "relatedCalculators": "Relaterede beregnere",
+    "popularCalculators": "Populære beregnere",
+    "newsletter": "Få besked når satser ændres",
+    "newsletterCta": "Tilmeld",
+    "newsletterSuccess": "Tak for din tilmelding!",
+    "ad": "Annonce",
+    "poweredBy": "Powered by MinBeregner.dk",
+    "privacyNote": "Alle beregninger sker lokalt i din browser."
+  },
+  "categories": {
+    "economy": "Økonomi",
+    "housing": "Bolig",
+    "loans": "Lån",
+    "health": "Sundhed",
+    "family": "Familie",
+    "education": "Uddannelse",
+    "business": "Erhverv",
+    "everyday": "Hverdag",
+    "practical": "Praktisk",
+    "math": "Matematik"
+  },
+  "footer": {
+    "copyright": "© {year} MinBeregner.dk — Gratis online beregnere",
+    "freeCalculators": "gratis beregnere",
+    "updatedRates": "Opdateret med {year}-satser",
+    "noLogin": "Ingen login påkrævet",
+    "madeForDanes": "Lavet til danskere"
   }
 }

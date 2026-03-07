@@ -1,1 +1,56 @@
-{ "common": { "title": "Kalkulator" } }
+{
+  "site": {
+    "name": "MinKalkulator.no",
+    "tagline": "Gratis Kalkulatorer på Nett",
+    "description": "33+ gratis kalkulatorer for økonomi, bolig, skatt, helse og hverdag."
+  },
+  "nav": {
+    "home": "Forside",
+    "calculators": "Kalkulatorer",
+    "blog": "Blogg",
+    "about": "Om oss"
+  },
+  "ui": {
+    "calculate": "Beregn",
+    "reset": "Nullstill",
+    "copy": "Kopier resultat",
+    "share": "Del beregning",
+    "perMonth": "pr. måned",
+    "perYear": "pr. år",
+    "result": "Resultat",
+    "currency": "kr",
+    "loading": "Beregner...",
+    "error": "Noe gikk galt",
+    "tryAgain": "Prøv igjen",
+    "readMore": "Les mer",
+    "seeAll": "Se alle",
+    "faq": "Ofte stilte spørsmål",
+    "relatedCalculators": "Relaterte kalkulatorer",
+    "popularCalculators": "Populære kalkulatorer",
+    "newsletter": "Få beskjed når satser endres",
+    "newsletterCta": "Meld deg på",
+    "newsletterSuccess": "Takk for påmeldingen!",
+    "ad": "Annonse",
+    "poweredBy": "Drevet av MinKalkulator.no",
+    "privacyNote": "Alle beregninger skjer lokalt i nettleseren din."
+  },
+  "categories": {
+    "economy": "Økonomi",
+    "housing": "Bolig",
+    "loans": "Lån",
+    "health": "Helse",
+    "family": "Familie",
+    "education": "Utdanning",
+    "business": "Næring",
+    "everyday": "Hverdag",
+    "practical": "Praktisk",
+    "math": "Matematikk"
+  },
+  "footer": {
+    "copyright": "© {year} MinKalkulator.no — Gratis kalkulatorer",
+    "freeCalculators": "gratis kalkulatorer",
+    "updatedRates": "Oppdatert med {year}-satser",
+    "noLogin": "Ingen innlogging nødvendig",
+    "madeForNorwegians": "Laget for nordmenn"
+  }
+}

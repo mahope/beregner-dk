@@ -1,1 +1,56 @@
-{ "common": { "title": "Kalkylator" } }
+{
+  "site": {
+    "name": "MinKalkylator.se",
+    "tagline": "Gratis Kalkylatorer Online",
+    "description": "33+ gratis kalkylatorer för ekonomi, bostad, skatt, hälsa och vardag."
+  },
+  "nav": {
+    "home": "Startsida",
+    "calculators": "Kalkylatorer",
+    "blog": "Blogg",
+    "about": "Om oss"
+  },
+  "ui": {
+    "calculate": "Beräkna",
+    "reset": "Återställ",
+    "copy": "Kopiera resultat",
+    "share": "Dela beräkning",
+    "perMonth": "per månad",
+    "perYear": "per år",
+    "result": "Resultat",
+    "currency": "kr",
+    "loading": "Beräknar...",
+    "error": "Något gick fel",
+    "tryAgain": "Försök igen",
+    "readMore": "Läs mer",
+    "seeAll": "Se alla",
+    "faq": "Vanliga frågor",
+    "relatedCalculators": "Relaterade kalkylatorer",
+    "popularCalculators": "Populära kalkylatorer",
+    "newsletter": "Få besked när satser ändras",
+    "newsletterCta": "Prenumerera",
+    "newsletterSuccess": "Tack för din anmälan!",
+    "ad": "Annons",
+    "poweredBy": "Drivs av MinKalkylator.se",
+    "privacyNote": "Alla beräkningar sker lokalt i din webbläsare."
+  },
+  "categories": {
+    "economy": "Ekonomi",
+    "housing": "Bostad",
+    "loans": "Lån",
+    "health": "Hälsa",
+    "family": "Familj",
+    "education": "Utbildning",
+    "business": "Företag",
+    "everyday": "Vardag",
+    "practical": "Praktiskt",
+    "math": "Matematik"
+  },
+  "footer": {
+    "copyright": "© {year} MinKalkylator.se — Gratis kalkylatorer",
+    "freeCalculators": "gratis kalkylatorer",
+    "updatedRates": "Uppdaterad med {year}-satser",
+    "noLogin": "Ingen inloggning krävs",
+    "madeForSwedes": "Gjord för svenskar"
+  }
+}
