@@ -6,10 +6,138 @@ import { ShareCalculation } from "@/components/ShareCalculation";
 import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
+import { useLocale } from "@/components/LocaleProvider";
+import { formatCurrency, getCurrencySuffix } from "@/lib/format";
 
 type Braendstoftype = "benzin" | "diesel" | "el" | "hybrid";
 
 export default function BilBeregner() {
+  const { locale } = useLocale();
+
+  const labels = {
+    da: {
+      bilensPris: "Bilens pris",
+      braendstoftype: "Br\u00e6ndstoftype",
+      benzin: "\u26fd Benzin",
+      diesel: "\ud83d\udee2\ufe0f Diesel",
+      elbil: "\u26a1 Elbil",
+      hybrid: "\ud83d\udd0b Hybrid",
+      koerselPrAar: "K\u00f8rsel pr. \u00e5r (km)",
+      koerselGennemsnit: "Gennemsnitligt: 15.000 km/\u00e5r",
+      forsikringLabel: "Forsikring (kr/\u00e5r)",
+      forbrugKwh: "Forbrug (kWh/100 km)",
+      typiskKwh: "Typisk: 15-20 kWh/100 km",
+      elprisLabel: "Elpris (kr/kWh)",
+      elprisHint: "Hjemme: 2-3 kr, Offentlig: 3-5 kr",
+      forbrugKmL: "Forbrug (km/liter)",
+      typiskDiesel: "Typisk diesel: 18-25 km/l",
+      typiskBenzin: "Typisk benzin: 12-18 km/l",
+      braendstofprisLabel: "Br\u00e6ndstofpris (kr/liter)",
+      aarligtVaerditab: "\u00c5rligt v\u00e6rditab (%)",
+      vaerditabHint: "Nye biler: 15-20%, \u00e6ldre: 8-12%",
+      samletMaanedlig: "Samlet m\u00e5nedlig omkostning",
+      braendstofStroem: "Br\u00e6ndstof/str\u00f8m",
+      vaerditabLabel: "V\u00e6rditab",
+      forsikringResultat: "Forsikring",
+      vaegtafgift: "V\u00e6gtafgift",
+      service: "Service",
+      daek: "D\u00e6k",
+      samletAarlig: "Samlet \u00e5rlig omkostning:",
+      tipsTitle: "\ud83d\udca1 S\u00e5dan sparer du p\u00e5 bilomkostninger",
+      tipForsikring: "Sammenlign forsikringer",
+      tipForsikringText: " - priser varierer op til 50%",
+      tipKoer: "K\u00f8r j\u00e6vnt",
+      tipKoerText: " - op til 20% bedre br\u00e6ndstof\u00f8konomi",
+      tipDaek: "Tjek d\u00e6ktryk",
+      tipDaekText: " - korrekt tryk sparer br\u00e6ndstof",
+      tipElbil: "Overvej elbil",
+      tipElbilText: " - lavere driftsomkostninger trods h\u00f8jere pris",
+      tipBrugt: "K\u00f8b brugt",
+      tipBrugtText: " - undg\u00e5 det st\u00f8rste v\u00e6rditab (\u00e5r 1-3)",
+    },
+    se: {
+      bilensPris: "Bilens pris",
+      braendstoftype: "Br\u00e4nsletyp",
+      benzin: "\u26fd Bensin",
+      diesel: "\ud83d\udee2\ufe0f Diesel",
+      elbil: "\u26a1 Elbil",
+      hybrid: "\ud83d\udd0b Hybrid",
+      koerselPrAar: "K\u00f6rning per \u00e5r (km)",
+      koerselGennemsnit: "Genomsnitt: 15 000 km/\u00e5r",
+      forsikringLabel: "F\u00f6rs\u00e4kring (kr/\u00e5r)",
+      forbrugKwh: "F\u00f6rbrukning (kWh/100 km)",
+      typiskKwh: "Typiskt: 15\u201320 kWh/100 km",
+      elprisLabel: "Elpris (kr/kWh)",
+      elprisHint: "Hemma: 1\u20132 kr, Offentlig: 3\u20135 kr",
+      forbrugKmL: "F\u00f6rbrukning (km/liter)",
+      typiskDiesel: "Typisk diesel: 18\u201325 km/l",
+      typiskBenzin: "Typisk bensin: 12\u201318 km/l",
+      braendstofprisLabel: "Br\u00e4nslepris (kr/liter)",
+      aarligtVaerditab: "\u00c5rligt v\u00e4rdefall (%)",
+      vaerditabHint: "Nya bilar: 15\u201320 %, \u00e4ldre: 8\u201312 %",
+      samletMaanedlig: "Total m\u00e5nadskostnad",
+      braendstofStroem: "Br\u00e4nsle/el",
+      vaerditabLabel: "V\u00e4rdefall",
+      forsikringResultat: "F\u00f6rs\u00e4kring",
+      vaegtafgift: "Fordonsskatt",
+      service: "Service",
+      daek: "D\u00e4ck",
+      samletAarlig: "Total \u00e5rlig kostnad:",
+      tipsTitle: "\ud83d\udca1 S\u00e5 sparar du p\u00e5 bilkostnader",
+      tipForsikring: "J\u00e4mf\u00f6r f\u00f6rs\u00e4kringar",
+      tipForsikringText: " \u2013 priserna varierar upp till 50 %",
+      tipKoer: "K\u00f6r j\u00e4mnt",
+      tipKoerText: " \u2013 upp till 20 % b\u00e4ttre br\u00e4nsleekonomi",
+      tipDaek: "Kontrollera d\u00e4cktrycket",
+      tipDaekText: " \u2013 r\u00e4tt tryck sparar br\u00e4nsle",
+      tipElbil: "\u00d6verv\u00e4g elbil",
+      tipElbilText: " \u2013 l\u00e4gre driftskostnader trots h\u00f6gre pris",
+      tipBrugt: "K\u00f6p begagnat",
+      tipBrugtText: " \u2013 undvik det st\u00f6rsta v\u00e4rdefallet (\u00e5r 1\u20133)",
+    },
+    no: {
+      bilensPris: "Bilens pris",
+      braendstoftype: "Drivstofftype",
+      benzin: "\u26fd Bensin",
+      diesel: "\ud83d\udee2\ufe0f Diesel",
+      elbil: "\u26a1 Elbil",
+      hybrid: "\ud83d\udd0b Hybrid",
+      koerselPrAar: "Kj\u00f8ring per \u00e5r (km)",
+      koerselGennemsnit: "Gjennomsnittlig: 15 000 km/\u00e5r",
+      forsikringLabel: "Forsikring (kr/\u00e5r)",
+      forbrugKwh: "Forbruk (kWh/100 km)",
+      typiskKwh: "Typisk: 15\u201320 kWh/100 km",
+      elprisLabel: "Str\u00f8mpris (kr/kWh)",
+      elprisHint: "Hjemme: 1\u20132 kr, Offentlig: 3\u20135 kr",
+      forbrugKmL: "Forbruk (km/liter)",
+      typiskDiesel: "Typisk diesel: 18\u201325 km/l",
+      typiskBenzin: "Typisk bensin: 12\u201318 km/l",
+      braendstofprisLabel: "Drivstoffpris (kr/liter)",
+      aarligtVaerditab: "\u00c5rlig verditap (%)",
+      vaerditabHint: "Nye biler: 15\u201320 %, eldre: 8\u201312 %",
+      samletMaanedlig: "Total m\u00e5nedlig kostnad",
+      braendstofStroem: "Drivstoff/str\u00f8m",
+      vaerditabLabel: "Verditap",
+      forsikringResultat: "Forsikring",
+      vaegtafgift: "Veiavgift",
+      service: "Service",
+      daek: "Dekk",
+      samletAarlig: "Total \u00e5rlig kostnad:",
+      tipsTitle: "\ud83d\udca1 Slik sparer du p\u00e5 bilkostnader",
+      tipForsikring: "Sammenlign forsikringer",
+      tipForsikringText: " \u2013 prisene varierer opptil 50 %",
+      tipKoer: "Kj\u00f8r jevnt",
+      tipKoerText: " \u2013 opptil 20 % bedre drivstoff\u00f8konomi",
+      tipDaek: "Sjekk dekktrykket",
+      tipDaekText: " \u2013 riktig trykk sparer drivstoff",
+      tipElbil: "Vurder elbil",
+      tipElbilText: " \u2013 lavere driftskostnader tross h\u00f8yere pris",
+      tipBrugt: "Kj\u00f8p brukt",
+      tipBrugtText: " \u2013 unng\u00e5 det st\u00f8rste verditapet (\u00e5r 1\u20133)",
+    },
+  };
+  const l = labels[locale as keyof typeof labels] || labels.da;
+
   const [bilpris, setBilpris] = useState<number>(250000);
   const [braendstof, setBraendstof] = useState<Braendstoftype>("benzin");
   const [kmPrLiter, setKmPrLiter] = useState<number>(15);
@@ -78,47 +206,32 @@ export default function BilBeregner() {
   }, []);
 
   const resultat = useMemo(() => {
-    // Brændstof/strøm omkostninger
     let braendstofOmkostning: number;
-    
+
     if (braendstof === "el") {
-      // kWh pr. 100km * (km/100) * pris pr. kWh
       braendstofOmkostning = (kwh100km / 100) * kmPrAar * elpris;
     } else {
-      // (km/år) / (km/l) * pris/l
       braendstofOmkostning = (kmPrAar / kmPrLiter) * braendstofpris;
     }
-    
-    // Vægtafgift (forenklet - 2026 satser)
+
     let vaegt: number;
     if (braendstof === "el") {
-      vaegt = 0; // El-biler har 0 kr i afgift til 2026
+      vaegt = 0;
     } else if (braendstof === "benzin") {
-      vaegt = 4000; // Ca. gennemsnit for benzinbil
+      vaegt = 4000;
     } else if (braendstof === "diesel") {
-      vaegt = 5500; // Diesel er dyrere
+      vaegt = 5500;
     } else {
-      vaegt = 3000; // Hybrid
+      vaegt = 3000;
     }
-    
-    // Værditab
+
     const aarligtVaerditab = bilpris * (vaerditab / 100);
-    
-    // Service og reparationer (ca. 3% af bilpris)
     const service = bilpris * 0.03;
-    
-    // Dæk (ca. 3000 kr/år ved normalt forbrug)
     const daek = 3000;
-    
-    // Samlet pr. år
     const aarligtTotal = braendstofOmkostning + forsikring + vaegt + aarligtVaerditab + service + daek;
-    
-    // Pr. måned
     const maanedligtTotal = aarligtTotal / 12;
-    
-    // Pr. km
     const prKm = aarligtTotal / kmPrAar;
-    
+
     return {
       braendstof: Math.round(braendstofOmkostning),
       forsikring: Math.round(forsikring),
@@ -132,13 +245,7 @@ export default function BilBeregner() {
     };
   }, [bilpris, braendstof, kmPrLiter, kmPrAar, braendstofpris, forsikring, vaerditab, kwh100km, elpris]);
 
-  const formatKr = (amount: number) => {
-    return new Intl.NumberFormat("da-DK", {
-      style: "currency",
-      currency: "DKK",
-      maximumFractionDigits: 0,
-    }).format(amount);
-  };
+  const formatKr = (amount: number) => formatCurrency(amount, locale, { maximumFractionDigits: 0, minimumFractionDigits: 0 });
 
   return (
     <div className="space-y-8">
@@ -146,7 +253,7 @@ export default function BilBeregner() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-4">
           <div>
-            <label htmlFor="bilPris" className="block text-sm font-medium mb-2">Bilens pris</label>
+            <label htmlFor="bilPris" className="block text-sm font-medium mb-2">{l.bilensPris}</label>
             <div className="relative">
               <input
                 id="bilPris"
@@ -158,19 +265,19 @@ export default function BilBeregner() {
                 onChange={(e) => setBilpris(parseFloat(e.target.value) || 0)}
                 className="w-full px-4 py-3 pr-12 border rounded-lg text-lg"
               />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">kr</span>
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">{getCurrencySuffix(locale)}</span>
             </div>
             <p className="text-sm text-gray-500 mt-1">{formatKr(bilpris)}</p>
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">Brændstoftype</label>
+            <label className="block text-sm font-medium mb-2">{l.braendstoftype}</label>
             <div className="grid grid-cols-2 gap-2">
               {[
-                { key: "benzin", label: "⛽ Benzin" },
-                { key: "diesel", label: "🛢️ Diesel" },
-                { key: "el", label: "⚡ Elbil" },
-                { key: "hybrid", label: "🔋 Hybrid" },
+                { key: "benzin", label: l.benzin },
+                { key: "diesel", label: l.diesel },
+                { key: "el", label: l.elbil },
+                { key: "hybrid", label: l.hybrid },
               ].map((type) => (
                 <button
                   key={type.key}
@@ -188,7 +295,7 @@ export default function BilBeregner() {
           </div>
 
           <div>
-            <label htmlFor="koerselPrAar" className="block text-sm font-medium mb-2">Kørsel pr. år (km)</label>
+            <label htmlFor="koerselPrAar" className="block text-sm font-medium mb-2">{l.koerselPrAar}</label>
             <div className="relative">
               <input
                 id="koerselPrAar"
@@ -202,11 +309,11 @@ export default function BilBeregner() {
               />
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">km</span>
             </div>
-            <p className="text-sm text-gray-500 mt-1">Gennemsnitligt: 15.000 km/år</p>
+            <p className="text-sm text-gray-500 mt-1">{l.koerselGennemsnit}</p>
           </div>
 
           <div>
-            <label htmlFor="forsikring" className="block text-sm font-medium mb-2">Forsikring (kr/år)</label>
+            <label htmlFor="forsikring" className="block text-sm font-medium mb-2">{l.forsikringLabel}</label>
             <div className="relative">
               <input
                 id="forsikring"
@@ -218,7 +325,7 @@ export default function BilBeregner() {
                 onChange={(e) => setForsikring(parseFloat(e.target.value) || 0)}
                 className="w-full px-4 py-3 pr-16 border rounded-lg text-lg"
               />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">kr/år</span>
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">{getCurrencySuffix(locale)}/&#229;r</span>
             </div>
           </div>
         </div>
@@ -227,7 +334,7 @@ export default function BilBeregner() {
           {braendstof === "el" ? (
             <>
               <div>
-                <label htmlFor="forbrugKwh" className="block text-sm font-medium mb-2">Forbrug (kWh/100 km)</label>
+                <label htmlFor="forbrugKwh" className="block text-sm font-medium mb-2">{l.forbrugKwh}</label>
                 <div className="relative">
                   <input
                     id="forbrugKwh"
@@ -241,11 +348,11 @@ export default function BilBeregner() {
                   />
                   <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">kWh/100km</span>
                 </div>
-                <p className="text-sm text-gray-500 mt-1">Typisk: 15-20 kWh/100 km</p>
+                <p className="text-sm text-gray-500 mt-1">{l.typiskKwh}</p>
               </div>
 
               <div>
-                <label htmlFor="elpris" className="block text-sm font-medium mb-2">Elpris (kr/kWh)</label>
+                <label htmlFor="elpris" className="block text-sm font-medium mb-2">{l.elprisLabel}</label>
                 <div className="relative">
                   <input
                     id="elpris"
@@ -257,15 +364,15 @@ export default function BilBeregner() {
                     onChange={(e) => setElpris(parseFloat(e.target.value) || 0)}
                     className="w-full px-4 py-3 pr-16 border rounded-lg text-lg"
                   />
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">kr/kWh</span>
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">{getCurrencySuffix(locale)}/kWh</span>
                 </div>
-                <p className="text-sm text-gray-500 mt-1">Hjemme: 2-3 kr, Offentlig: 3-5 kr</p>
+                <p className="text-sm text-gray-500 mt-1">{l.elprisHint}</p>
               </div>
             </>
           ) : (
             <>
               <div>
-                <label htmlFor="forbrugKmLiter" className="block text-sm font-medium mb-2">Forbrug (km/liter)</label>
+                <label htmlFor="forbrugKmLiter" className="block text-sm font-medium mb-2">{l.forbrugKmL}</label>
                 <div className="relative">
                   <input
                     id="forbrugKmLiter"
@@ -280,12 +387,12 @@ export default function BilBeregner() {
                   <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">km/l</span>
                 </div>
                 <p className="text-sm text-gray-500 mt-1">
-                  {braendstof === "diesel" ? "Typisk diesel: 18-25 km/l" : "Typisk benzin: 12-18 km/l"}
+                  {braendstof === "diesel" ? l.typiskDiesel : l.typiskBenzin}
                 </p>
               </div>
 
               <div>
-                <label htmlFor="braendstofpris" className="block text-sm font-medium mb-2">Brændstofpris (kr/liter)</label>
+                <label htmlFor="braendstofpris" className="block text-sm font-medium mb-2">{l.braendstofprisLabel}</label>
                 <div className="relative">
                   <input
                     id="braendstofpris"
@@ -297,14 +404,14 @@ export default function BilBeregner() {
                     onChange={(e) => setBraendstofpris(parseFloat(e.target.value) || 0)}
                     className="w-full px-4 py-3 pr-12 border rounded-lg text-lg"
                   />
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">kr/l</span>
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">{getCurrencySuffix(locale)}/l</span>
                 </div>
               </div>
             </>
           )}
 
           <div>
-            <label htmlFor="vaerditab" className="block text-sm font-medium mb-2">Årligt værditab (%)</label>
+            <label htmlFor="vaerditab" className="block text-sm font-medium mb-2">{l.aarligtVaerditab}</label>
             <div className="relative">
               <input
                 id="vaerditab"
@@ -319,7 +426,7 @@ export default function BilBeregner() {
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">%</span>
             </div>
             <p className="text-sm text-gray-500 mt-1">
-              Nye biler: 15-20%, ældre: 8-12%
+              {l.vaerditabHint}
             </p>
           </div>
         </div>
@@ -332,7 +439,7 @@ export default function BilBeregner() {
       {/* Resultat */}
       <div className="p-6 bg-white rounded-xl shadow-sm border">
         <div className="text-center mb-6">
-          <p className="text-sm text-gray-500 mb-1">Samlet månedlig omkostning</p>
+          <p className="text-sm text-gray-500 mb-1">{l.samletMaanedlig}</p>
           <p className="text-5xl font-bold text-blue-600">
             {formatKr(resultat.maanedligt)}
           </p>
@@ -343,57 +450,57 @@ export default function BilBeregner() {
 
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           <div className="p-4 bg-red-50 rounded-lg text-center">
-            <p className="text-sm text-red-600">Brændstof/strøm</p>
-            <p className="font-bold text-lg">{formatKr(resultat.braendstof)}/år</p>
+            <p className="text-sm text-red-600">{l.braendstofStroem}</p>
+            <p className="font-bold text-lg">{formatKr(resultat.braendstof)}/&#229;r</p>
           </div>
           <div className="p-4 bg-orange-50 rounded-lg text-center">
-            <p className="text-sm text-orange-600">Værditab</p>
-            <p className="font-bold text-lg">{formatKr(resultat.vaerditab)}/år</p>
+            <p className="text-sm text-orange-600">{l.vaerditabLabel}</p>
+            <p className="font-bold text-lg">{formatKr(resultat.vaerditab)}/&#229;r</p>
           </div>
           <div className="p-4 bg-blue-50 rounded-lg text-center">
-            <p className="text-sm text-blue-600">Forsikring</p>
-            <p className="font-bold text-lg">{formatKr(resultat.forsikring)}/år</p>
+            <p className="text-sm text-blue-600">{l.forsikringResultat}</p>
+            <p className="font-bold text-lg">{formatKr(resultat.forsikring)}/&#229;r</p>
           </div>
           <div className="p-4 bg-purple-50 rounded-lg text-center">
-            <p className="text-sm text-purple-600">Vægtafgift</p>
-            <p className="font-bold text-lg">{formatKr(resultat.vaegt)}/år</p>
+            <p className="text-sm text-purple-600">{l.vaegtafgift}</p>
+            <p className="font-bold text-lg">{formatKr(resultat.vaegt)}/&#229;r</p>
           </div>
           <div className="p-4 bg-green-50 rounded-lg text-center">
-            <p className="text-sm text-green-600">Service</p>
-            <p className="font-bold text-lg">{formatKr(resultat.service)}/år</p>
+            <p className="text-sm text-green-600">{l.service}</p>
+            <p className="font-bold text-lg">{formatKr(resultat.service)}/&#229;r</p>
           </div>
           <div className="p-4 bg-gray-50 rounded-lg text-center">
-            <p className="text-sm text-gray-600">Dæk</p>
-            <p className="font-bold text-lg">{formatKr(resultat.daek)}/år</p>
+            <p className="text-sm text-gray-600">{l.daek}</p>
+            <p className="font-bold text-lg">{formatKr(resultat.daek)}/&#229;r</p>
           </div>
         </div>
 
         <div className="mt-6 p-4 bg-blue-50 rounded-lg">
           <p className="text-lg font-semibold text-blue-800 text-center">
-            Samlet årlig omkostning: {formatKr(resultat.aarligt)}
+            {l.samletAarlig} {formatKr(resultat.aarligt)}
           </p>
         </div>
       </div>
 
       {/* Share button */}
       <div className="flex justify-center gap-3">
-        <CopyResultButton text={`${formatKr(resultat.maanedligt)}/md - ${resultat.prKm} kr/km (${formatKr(resultat.aarligt)}/år)`} />
+        <CopyResultButton text={`${formatKr(resultat.maanedligt)}/md - ${resultat.prKm} kr/km (${formatKr(resultat.aarligt)}/\u00e5r)`} />
         <ShareCalculation
           getShareableLink={getShareableLink}
           calculatorName="Bilberegner"
-          resultSummary={`${formatKr(resultat.maanedligt)}/md - ${resultat.prKm} kr/km (${formatKr(resultat.aarligt)}/år)`}
+          resultSummary={`${formatKr(resultat.maanedligt)}/md - ${resultat.prKm} kr/km (${formatKr(resultat.aarligt)}/\u00e5r)`}
         />
       </div>
 
       {/* Tips */}
       <div className="p-4 bg-green-50 dark:bg-green-900/30 rounded-lg">
-        <h3 className="font-medium mb-3 text-green-800 dark:text-green-200">💡 Sådan sparer du på bilomkostninger</h3>
+        <h3 className="font-medium mb-3 text-green-800 dark:text-green-200">{l.tipsTitle}</h3>
         <ul className="text-sm text-green-700 dark:text-green-300 space-y-2">
-          <li>• <strong>Sammenlign forsikringer</strong> - priser varierer op til 50%</li>
-          <li>• <strong>Kør jævnt</strong> - op til 20% bedre brændstoføkonomi</li>
-          <li>• <strong>Tjek dæktryk</strong> - korrekt tryk sparer brændstof</li>
-          <li>• <strong>Overvej elbil</strong> - lavere driftsomkostninger trods højere pris</li>
-          <li>• <strong>Køb brugt</strong> - undgå det største værditab (år 1-3)</li>
+          <li>&#8226; <strong>{l.tipForsikring}</strong>{l.tipForsikringText}</li>
+          <li>&#8226; <strong>{l.tipKoer}</strong>{l.tipKoerText}</li>
+          <li>&#8226; <strong>{l.tipDaek}</strong>{l.tipDaekText}</li>
+          <li>&#8226; <strong>{l.tipElbil}</strong>{l.tipElbilText}</li>
+          <li>&#8226; <strong>{l.tipBrugt}</strong>{l.tipBrugtText}</li>
         </ul>
       </div>
 

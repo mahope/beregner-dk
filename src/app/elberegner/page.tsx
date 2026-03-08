@@ -7,77 +7,37 @@ import {
   FAQSchema,
 } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
-
-const baseUrl = "https://minberegner.dk";
+import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
+import { getPageData } from "@/lib/page-data";
 
 export async function generateMetadata() {
   return generatePageMetadata("elberegner");
 }
 
-const faqItems = [
-  {
-    question: "Hvordan beregner jeg mit elforbrug?",
-    answer:
-      "Dit elforbrug beregnes ved at gange apparatets watt med antal timer det bruges, og dividere med 1000 for at få kWh. For eksempel bruger en 100W lampe tændt i 10 timer: 100W × 10t / 1000 = 1 kWh.",
-  },
-  {
-    question: "Hvor finder jeg watt-tallet på mine apparater?",
-    answer:
-      "Watt-tallet findes typisk på mærkepladen bag på eller under apparatet, i brugsanvisningen under tekniske specifikationer, eller ved at søge efter modelnummeret online.",
-  },
-  {
-    question: "Hvad koster 1 kWh i Danmark?",
-    answer:
-      "I 2026 ligger den gennemsnitlige elpris typisk mellem 2-3 kr/kWh inkl. alle afgifter (spotpris, nettarif, elafgift, moms). Tjek din seneste elregning for din præcise pris.",
-  },
-  {
-    question: "Hvilke apparater bruger mest strøm?",
-    answer:
-      "De største strømslugere er typisk varmelegemer som tørretumblere (3000W), ovne (2500W), og elkedler (2000W). Men apparater der kører konstant som køleskabe og frysere bidrager også væsentligt til den årlige regning.",
-  },
-  {
-    question: "Hvordan kan jeg spare på strømmen?",
-    answer:
-      "Du kan spare strøm ved at slukke for standby, vælge A+++-mærkede apparater, bruge LED-pærer, vaske ved 30°, og kun køre vaskemaskine og opvaskemaskine når de er fulde.",
-  },
-  {
-    question: "Hvad bruger en computer i strøm?",
-    answer:
-      "En almindelig bærbar computer bruger ca. 50-100W, en stationær computer 150-300W, og en gaming PC kan bruge 400-700W under belastning. Standby-forbrug er typisk 1-5W.",
-  },
-  {
-    question: "Hvad er forskellen på watt og kWh?",
-    answer:
-      "Watt (W) er en måleenhed for effekt - hvor meget energi et apparat bruger i øjeblikket. kWh (kilowatt-timer) er energi over tid - det du betaler for. 1 kWh = 1000W brugt i 1 time.",
-  },
-  {
-    question: "Hvor meget strøm bruger et køleskab?",
-    answer:
-      "Et moderne A+++-køleskab bruger ca. 30-50W og kører ca. 8-10 timer aktivt per dag. Det giver et årligt forbrug på ca. 100-150 kWh, svarende til 250-375 kr ved 2,5 kr/kWh.",
-  },
-];
+export default async function ElberegnerPage() {
+  const locale = await getLocale();
+  const domainConfig = await getCurrentDomainConfig();
+  const pageData = getPageData("elberegner", locale) || getPageData("elberegner", "da")!;
 
-export default function ElberegnerPage() {
   return (
     <div>
       <CalculatorSchema
-        name="Elberegner - Beregn elforbrug"
-        description="Gratis elberegner. Beregn dit elforbrug og se hvad dine apparater koster i strøm."
-        url={`${baseUrl}/elberegner`}
-        category="UtilitiesApplication"
+        name={pageData.schemaName}
+        description={pageData.schemaDescription}
+        url={`${domainConfig.baseUrl}/elberegner`}
+        category={pageData.schemaCategory}
       />
-      <FAQSchema items={faqItems} />
-      <Breadcrumbs items={[{ name: "Bolig", href: "/kategori/bolig" }, { name: "Elberegner", href: "/elberegner" }]} />
+      <FAQSchema items={pageData.faqItems} />
+      <Breadcrumbs items={[{ name: pageData.breadcrumbCategory, href: pageData.breadcrumbCategoryHref }, { name: pageData.title, href: "/elberegner" }]} />
 
-      <h1 className="text-3xl font-bold mb-2">Elberegner</h1>
+      <h1 className="text-3xl font-bold mb-2">{pageData.title}</h1>
       <p className="text-gray-600 mb-8">
-        Beregn dit elforbrug og se hvad dine elektriske apparater koster i strøm
-        per dag, måned og år. Tilføj dine apparater og få overblik over din
-        elregning.
+        {pageData.description}
       </p>
 
       <Elberegner />
 
+      {locale === "da" && (
       <div className="mt-12 prose max-w-none">
         <h2>Sådan bruger du elberegneren</h2>
         <p>
@@ -132,7 +92,7 @@ export default function ElberegnerPage() {
               <tr>
                 <td>Tørretumbler</td>
                 <td>3000W</td>
-                <td>~1095 kr (1t/dag)</td>
+                <td>~1095 kr (4t/dag)</td>
               </tr>
               <tr>
                 <td>Gaming PC</td>
@@ -217,8 +177,9 @@ export default function ElberegnerPage() {
           </p>
         </div>
       </div>
+      )}
 
-      <FAQ items={faqItems} />
+      <FAQ items={pageData.faqItems} />
 
       <RelatedCalculators current="/elberegner" />
     </div>

@@ -6,6 +6,8 @@ import { ShareCalculation } from "@/components/ShareCalculation";
 import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
+import { useLocale } from '@/components/LocaleProvider';
+import { formatCurrency, getCurrencySuffix } from '@/lib/format';
 
 // Nyt ejendomsskattesystem fra 2024 (boligskattereformen)
 // Kilde: skm.dk, info.skat.dk, vurderingsportalen.dk
@@ -61,6 +63,7 @@ const sortedKommuner = Object.entries(KOMMUNER).sort((a, b) =>
 );
 
 export default function EjendomsvaerdiskatBeregner() {
+  const { locale } = useLocale();
   const [ejendomsvaerdi, setEjendomsvaerdi] = useState<number>(3000000);
   const [grundvaerdi, setGrundvaerdi] = useState<number>(1000000);
   const [valgtKommune, setValgtKommune] = useState<string>("koebenhavn");
@@ -151,13 +154,7 @@ export default function EjendomsvaerdiskatBeregner() {
     };
   }, [ejendomsvaerdi, grundvaerdi, grundskyldPromille]);
 
-  const formatKr = (amount: number) => {
-    return new Intl.NumberFormat("da-DK", {
-      style: "currency",
-      currency: "DKK",
-      maximumFractionDigits: 0,
-    }).format(amount);
-  };
+  const formatKr = (amount: number) => formatCurrency(amount, locale, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 
   return (
     <div className="space-y-8">
@@ -181,7 +178,7 @@ export default function EjendomsvaerdiskatBeregner() {
                 }
                 className="w-full px-4 py-3 pr-12 border border-gray-300 dark:border-gray-600 rounded-lg text-lg dark:bg-gray-700 dark:text-white"
               />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">kr</span>
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">{getCurrencySuffix(locale)}</span>
             </div>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
               Vurdering fra Vurderingsstyrelsen ({formatKr(ejendomsvaerdi)})
@@ -205,7 +202,7 @@ export default function EjendomsvaerdiskatBeregner() {
                 }
                 className="w-full px-4 py-3 pr-12 border border-gray-300 dark:border-gray-600 rounded-lg text-lg dark:bg-gray-700 dark:text-white"
               />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">kr</span>
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">{getCurrencySuffix(locale)}</span>
             </div>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
               Grundens vurdering ({formatKr(grundvaerdi)})

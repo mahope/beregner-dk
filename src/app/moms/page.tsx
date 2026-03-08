@@ -1,4 +1,6 @@
 import { generatePageMetadata } from "@/lib/page-helpers";
+import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
+import { getPageData } from "@/lib/page-data";
 import MomsBeregner from "@/components/MomsBeregner";
 import FAQ from "@/components/FAQ";
 import {
@@ -9,87 +11,34 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import RelatedCalculators from "@/components/RelatedCalculators";
 import Sidebar from "@/components/Sidebar";
 
-const baseUrl = "https://minberegner.dk";
-
 export async function generateMetadata() {
   return generatePageMetadata("moms");
 }
 
-const faqItems = [
-  {
-    question: "Hvad er den danske momssats?",
-    answer:
-      "Den danske momssats (moms/VAT) er 25%. Det betyder, at når du køber varer eller ydelser i Danmark, betaler du 25% i moms oveni prisen uden moms.",
-  },
-  {
-    question: "Hvordan beregner man moms?",
-    answer:
-      "For at tillægge moms: Gange prisen uden moms med 1,25. For at fratrække moms: Dividér prisen inkl. moms med 1,25. Eksempel: 100 kr uden moms = 125 kr inkl. moms.",
-  },
-  {
-    question: "Hvad er momsandelen i en pris inkl. moms?",
-    answer:
-      "Momsandelen i en pris inkl. moms er 20% (ikke 25%). Det skyldes at momsen beregnes af prisen uden moms. Regnestykket: 25/125 = 0,20 = 20%.",
-  },
-  {
-    question: "Skal alle betale moms i Danmark?",
-    answer:
-      "De fleste varer og ydelser er momspligtige i Danmark. Dog er visse ydelser momsfritaget, fx sundhedsydelser, undervisning, og finansielle tjenesteydelser.",
-  },
-  {
-    question: "Hvad er forskellen på moms og afgift?",
-    answer:
-      "Moms er en generel omsætningsafgift på 25% af de fleste varer og ydelser. Afgifter er specifikke skatter på bestemte produkter som fx biler, cigaretter og alkohol, og kommer oveni momsen.",
-  },
-  {
-    question: "Hvornår kan virksomheder trække moms fra?",
-    answer:
-      "Momsregistrerede virksomheder kan trække moms fra på deres erhvervsmæssige indkøb (købsmoms). De opkræver moms fra kunder (salgsmoms) og afregner forskellen med SKAT.",
-  },
-];
+export default async function MomsPage() {
+  const locale = await getLocale();
+  const domainConfig = await getCurrentDomainConfig();
+  const pageData = getPageData("moms", locale) || getPageData("moms", "da")!;
 
-const relatedCalculators = [
-  {
-    title: "Løn efter skat",
-    href: "/loen-efter-skat",
-    description: "Beregn din nettoløn",
-    icon: "💰",
-  },
-  {
-    title: "Procentberegner",
-    href: "/procent",
-    description: "Beregn procenter nemt",
-    icon: "➗",
-  },
-  {
-    title: "Renteberegner",
-    href: "/renteberegner",
-    description: "Beregn renter på lån",
-    icon: "📊",
-  },
-];
-
-export default function MomsPage() {
   return (
     <div className="flex flex-col lg:flex-row gap-8">
       <div className="flex-1 min-w-0">
       <CalculatorSchema
-        name="Momsberegner - Beregn dansk moms"
-        description="Gratis momsberegner. Tillæg moms, fratræk moms eller find momsandelen i et beløb. Dansk moms 25%."
-        url={`${baseUrl}/moms`}
-        category="FinanceApplication"
+        name={pageData.schemaName}
+        description={pageData.schemaDescription}
+        url={`${domainConfig.baseUrl}/moms`}
+        category={pageData.schemaCategory}
       />
-      <FAQSchema items={faqItems} />
-      <Breadcrumbs items={[{ name: "Økonomi", href: "/kategori/oekonomi" }, { name: "Momsberegner", href: "/moms" }]} />
-      
+      <FAQSchema items={pageData.faqItems} />
+      <Breadcrumbs items={[{ name: pageData.breadcrumbCategory, href: pageData.breadcrumbCategoryHref }, { name: pageData.title, href: "/moms" }]} />
+
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl md:text-4xl font-bold mb-4">
-          Momsberegner
+          {pageData.title}
         </h1>
         <p className="text-lg text-gray-600">
-          Beregn dansk moms nemt og hurtigt. Tillæg moms, fratræk moms, eller find momsandelen i et beløb.
-          Den danske momssats er 25%.
+          {pageData.description}
         </p>
       </div>
 
@@ -99,6 +48,7 @@ export default function MomsPage() {
       </div>
 
       {/* Informativ tekst - SEO */}
+      {locale === "da" && (
       <div className="prose max-w-none mb-8">
         <h2>Om moms i Danmark (2026)</h2>
         <p>
@@ -167,14 +117,15 @@ export default function MomsPage() {
           Du betaler altså allerede dansk moms når du køber fra fx Netflix, Spotify eller Apple.
         </p>
       </div>
+      )}
 
       {/* FAQ */}
       <div className="mb-8">
-        <FAQ items={faqItems} />
+        <FAQ items={pageData.faqItems} />
       </div>
 
       {/* Related Calculators */}
-      <RelatedCalculators calculators={relatedCalculators} />
+      <RelatedCalculators current="/moms" />
       </div>
       <Sidebar currentHref="/moms" adSlotId="moms-sidebar" />
     </div>

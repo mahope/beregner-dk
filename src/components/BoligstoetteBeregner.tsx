@@ -5,6 +5,8 @@ import { ShareCalculation } from "@/components/ShareCalculation";
 import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
+import { useLocale } from '@/components/LocaleProvider';
+import { formatNumber } from '@/lib/format';
 
 // 2026 satser (kilde: bm.dk, borger.dk)
 const MAX_BOLIGUDGIFT = 113_000; // Max årlig boligudgift der indgår i beregning (2026)
@@ -20,6 +22,7 @@ interface BoligstoetteResultat {
 }
 
 export default function BoligstoetteBeregner() {
+  const { locale } = useLocale();
   const [maanedligHusleje, setMaanedligHusleje] = useState<string>("");
   const [husstandsindkomst, setHusstandsindkomst] = useState<string>("");
   const [antalPersoner, setAntalPersoner] = useState<string>("1");
@@ -239,21 +242,21 @@ export default function BoligstoetteBeregner() {
                   <div className="bg-white p-4 rounded-lg shadow-sm">
                     <p className="text-sm text-gray-600">Månedlig støtte</p>
                     <p className="text-3xl font-bold text-green-600">
-                      {resultat.maanedligBoligstoette.toLocaleString("da-DK")} kr
+                      {formatNumber(resultat.maanedligBoligstoette, locale)} kr
                     </p>
                   </div>
-                  
+
                   <div className="bg-white p-4 rounded-lg shadow-sm">
                     <p className="text-sm text-gray-600">Årlig støtte</p>
                     <p className="text-2xl font-bold text-green-600">
-                      {resultat.aarligBoligstoette.toLocaleString("da-DK")} kr
+                      {formatNumber(resultat.aarligBoligstoette, locale)} kr
                     </p>
                   </div>
                 </div>
 
                 <div className="mt-4 text-sm text-gray-600">
                   <p>
-                    Din egenbetaling: {Math.round(resultat.egenbetaling / 12).toLocaleString("da-DK")} kr/md
+                    Din egenbetaling: {formatNumber(Math.round(resultat.egenbetaling / 12), locale)} kr/md
                   </p>
                   <p>
                     Støtten dækker ca. <strong>{resultat.procentAfHusleje}%</strong> af din husleje
@@ -271,11 +274,11 @@ export default function BoligstoetteBeregner() {
         {/* Del beregning */}
         {resultat && resultat.maanedligBoligstoette > 0 && (
           <div className="flex justify-center">
-            <CopyResultButton text={`Estimeret støtte: ${resultat.maanedligBoligstoette.toLocaleString("da-DK")} kr/md`} />
+            <CopyResultButton text={`Estimeret støtte: ${formatNumber(resultat.maanedligBoligstoette, locale)} kr/md`} />
             <ShareCalculation
               getShareableLink={getShareableLink}
               calculatorName="Boligstøtteberegner"
-              resultSummary={`Estimeret støtte: ${resultat.maanedligBoligstoette.toLocaleString("da-DK")} kr/md`}
+              resultSummary={`Estimeret støtte: ${formatNumber(resultat.maanedligBoligstoette, locale)} kr/md`}
             />
           </div>
         )}

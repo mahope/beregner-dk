@@ -4,65 +4,37 @@ import FAQ from "@/components/FAQ";
 import RelatedCalculators from "@/components/RelatedCalculators";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
-
-const baseUrl = "https://minberegner.dk";
+import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
+import { getPageData } from "@/lib/page-data";
 
 export async function generateMetadata() {
   return generatePageMetadata("bil");
 }
 
-const bilFaqItems = [
-  {
-    question: "Hvad koster det at eje bil i Danmark?",
-    answer:
-      "De samlede omkostninger ved at eje bil ligger typisk på 2,50-4,50 kr/km inkl. værditab, brændstof, forsikring, afgifter og service. For en gennemsnitlig bil der kører 15.000 km/år svarer det til ca. 4.000-6.000 kr/md.",
-  },
-  {
-    question: "Hvad er den største udgift ved at eje bil?",
-    answer:
-      "Værditab er ofte den største enkeltudgift — en ny bil mister 20-25% af sin værdi det første år. Køb af en 2-3 år gammel bil kan spare dig for det største værditab.",
-  },
-  {
-    question: "Er elbil billigere end benzinbil?",
-    answer:
-      "Elbiler har lavere driftsomkostninger (billigere 'brændstof', minimal service, lav afgift), men højere købspris. Over tid er elbiler ofte billigere totalt set, især ved mange kørte kilometer.",
-  },
-  {
-    question: "Hvad koster benzin i 2026?",
-    answer:
-      "Benzin koster ca. 13-14 kr/liter i 2026. Diesel koster ca. 12-13 kr/liter. Elpriser for opladning ligger på 2-3 kr/kWh derhjemme og 3-5 kr/kWh ved offentlige ladere.",
-  },
-  {
-    question: "Hvad er grøn ejerafgift?",
-    answer:
-      "Grøn ejerafgift (tidligere vægtafgift) er en halvårlig afgift baseret på bilens brændstofforbrug. Benzinbiler betaler ca. 3.000-5.000 kr/år, dieselbiler 4.000-7.000 kr/år, mens elbiler har lav eller ingen afgift.",
-  },
-  {
-    question: "Hvordan beregner jeg pris per kilometer?",
-    answer:
-      "Saml alle årlige udgifter (brændstof, forsikring, afgifter, service, værditab) og divider med antal kørte kilometer. Typisk ligger det på 2,50-4,50 kr/km for en gennemsnitlig bil.",
-  },
-];
+export default async function BilPage() {
+  const locale = await getLocale();
+  const domainConfig = await getCurrentDomainConfig();
+  const pageData = getPageData("bil", locale) || getPageData("bil", "da")!;
 
-export default function BilPage() {
   return (
     <div>
-      <FAQSchema items={bilFaqItems} />
+      <FAQSchema items={pageData.faqItems} />
       <CalculatorSchema
-        name="Bilomkostningsberegner - Se hvad din bil koster"
-        description="Gratis bilberegner. Beregn de reelle omkostninger ved at eje bil: brændstof, forsikring, værditab, afgifter og service."
-        url={`${baseUrl}/bil`}
-        category="FinanceApplication"
+        name={pageData.schemaName}
+        description={pageData.schemaDescription}
+        url={`${domainConfig.baseUrl}/bil`}
+        category={pageData.schemaCategory}
       />
-      <Breadcrumbs items={[{ name: "Hverdag", href: "/kategori/hverdag" }, { name: "Bilomkostningsberegner", href: "/bil" }]} />
+      <Breadcrumbs items={[{ name: pageData.breadcrumbCategory, href: pageData.breadcrumbCategoryHref }, { name: pageData.title, href: "/bil" }]} />
 
-      <h1 className="text-3xl font-bold mb-2">Bilomkostningsberegner</h1>
+      <h1 className="text-3xl font-bold mb-2">{pageData.title}</h1>
       <p className="text-gray-600 mb-8">
-        Beregn hvad det reelt koster at eje og køre bil. Inkluderer brændstof, forsikring, værditab, afgifter og service.
+        {pageData.description}
       </p>
 
       <BilBeregner />
 
+      {locale === "da" && (
       <div className="mt-12 prose max-w-none">
         <h2>De reelle omkostninger ved at eje bil</h2>
         <p>
@@ -71,7 +43,7 @@ export default function BilPage() {
         </p>
 
         <h2>Hvad koster en bil at eje?</h2>
-        
+
         <h3>1. Brændstof/strøm</h3>
         <p>
           Den mest synlige udgift. Afhænger af <strong>kørselsomfang</strong>, bilens forbrug og <strong>brændstofpriser</strong>.
@@ -182,31 +154,31 @@ export default function BilPage() {
         </p>
 
         <h2>Benzin vs. Diesel vs. Elbil</h2>
-        
+
         <h3>Benzin</h3>
         <ul>
-          <li>✅ Billigst at købe</li>
-          <li>✅ Lav vægtafgift</li>
-          <li>❌ Højere brændstofforbrug</li>
-          <li>❌ Højere CO2-udledning</li>
+          <li>Billigst at købe</li>
+          <li>Lav vægtafgift</li>
+          <li>Højere brændstofforbrug</li>
+          <li>Højere CO2-udledning</li>
         </ul>
 
         <h3>Diesel</h3>
         <ul>
-          <li>✅ Lavere forbrug (km/l)</li>
-          <li>✅ God til lange ture</li>
-          <li>❌ Højere afgifter</li>
-          <li>❌ Dyrere service (partikelfilter mm.)</li>
+          <li>Lavere forbrug (km/l)</li>
+          <li>God til lange ture</li>
+          <li>Højere afgifter</li>
+          <li>Dyrere service (partikelfilter mm.)</li>
         </ul>
 
         <h3>Elbil</h3>
         <ul>
-          <li>✅ Laveste driftsomkostninger</li>
-          <li>✅ Ingen afgift (endnu)</li>
-          <li>✅ Minimal service</li>
-          <li>❌ Højere købspris</li>
-          <li>❌ Rækkevidde-begrænsning</li>
-          <li>❌ Afgifter kommer (2026+)</li>
+          <li>Laveste driftsomkostninger</li>
+          <li>Ingen afgift (endnu)</li>
+          <li>Minimal service</li>
+          <li>Højere købspris</li>
+          <li>Rækkevidde-begrænsning</li>
+          <li>Afgifter kommer (2026+)</li>
         </ul>
 
         <h2>Pris pr. kilometer</h2>
@@ -249,12 +221,10 @@ export default function BilPage() {
           </p>
         </div>
       </div>
+      )}
 
       <section className="mt-12">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">
-          Ofte stillede spørgsmål om bilomkostninger
-        </h2>
-        <FAQ items={bilFaqItems} />
+        <FAQ items={pageData.faqItems} />
       </section>
 
       <section className="mt-12">

@@ -5,6 +5,7 @@ import { ShareCalculation } from '@/components/ShareCalculation';
 import { CopyResultButton, ResetButton } from '@/components/ui';
 import { generateShareableLink, getStateFromUrl, CalculationState } from '@/lib/calculation-state';
 import { trackCalculation, initScrollDepthTracking } from '@/lib/analytics';
+import { useLocale } from "@/components/LocaleProvider";
 
 interface GaeldsPost {
   id: number;
@@ -17,8 +18,116 @@ interface GaeldsPost {
 type Metode = 'lavine' | 'snebold';
 
 export default function GaeldsfriBeregner() {
+  const { locale } = useLocale();
+
+  const labels = {
+    da: {
+      dineGaeldsposter: "Dine g\u00e6ldsposter",
+      navn: "Navn",
+      gaeld: "G\u00e6ld (kr.)",
+      rente: "Rente",
+      minAfdragMd: "Min. afdrag/md",
+      placeholder: "F.eks. Forbrugsl\u00e5n",
+      tilfoejGaeldspost: "+ Tilf\u00f8j g\u00e6ldspost",
+      ekstraAfdragLabel: "Ekstra afdrag pr. m\u00e5ned",
+      ekstraAfdragHint: "Bel\u00f8b ud over minimum der g\u00e5r til g\u00e6ldsafvikling",
+      afviklingsmetode: "Afviklingsmetode",
+      lavine: "Lavine",
+      snebold: "Snebold",
+      dinGaeldsafvikling: "Din g\u00e6ldsafvikling",
+      samletGaeld: "Samlet g\u00e6ld",
+      gaeldsfriOm: "G\u00e6ldsfri om",
+      samletRente: "Samlet rente",
+      totalBetalt: "Total betalt",
+      effektEkstra: "Effekt af ekstra afdrag",
+      duSparer: "Du sparer",
+      iRenterOgBliver: "i renter og bliver g\u00e6ldsfri",
+      maanederTidligere: "m\u00e5neder tidligere.",
+      lavineVsSnebold: "Lavine vs. Snebold",
+      lavineHoejeste: "Lavine (h\u00f8jeste rente f\u00f8rst)",
+      sneboldLaveste: "Snebold (laveste saldo f\u00f8rst)",
+      renteLabel: "Rente:",
+      indtastGaeld: "Indtast din g\u00e6ld for at se afviklingsplanen",
+      lavineMetoden: "Lavine-metoden",
+      lavineDesc: "Betal ekstra afdrag p\u00e5 g\u00e6lden med den h\u00f8jeste rente f\u00f8rst. Matematisk den billigste metode \u2014 du sparer mest i renter.",
+      sneboldMetoden: "Snebold-metoden",
+      sneboldDesc: "Betal ekstra afdrag p\u00e5 den mindste g\u00e6ld f\u00f8rst. Giver hurtigere \"sejre\" og kan motivere dig til at holde fast i planen.",
+      aar: "\u00e5r",
+      mdr: "mdr",
+    },
+    se: {
+      dineGaeldsposter: "Dina skuldposter",
+      navn: "Namn",
+      gaeld: "Skuld (kr)",
+      rente: "R\u00e4nta",
+      minAfdragMd: "Min. avbetalning/m\u00e5n",
+      placeholder: "T.ex. Konsumtionsl\u00e5n",
+      tilfoejGaeldspost: "+ L\u00e4gg till skuldpost",
+      ekstraAfdragLabel: "Extra avbetalning per m\u00e5nad",
+      ekstraAfdragHint: "Belopp ut\u00f6ver minimum som g\u00e5r till skuldavveckling",
+      afviklingsmetode: "Avvecklingsmetod",
+      lavine: "Lavin",
+      snebold: "Sn\u00f6boll",
+      dinGaeldsafvikling: "Din skuldavveckling",
+      samletGaeld: "Total skuld",
+      gaeldsfriOm: "Skuldfri om",
+      samletRente: "Total r\u00e4nta",
+      totalBetalt: "Totalt betalt",
+      effektEkstra: "Effekt av extra avbetalning",
+      duSparer: "Du sparar",
+      iRenterOgBliver: "i r\u00e4nta och blir skuldfri",
+      maanederTidligere: "m\u00e5nader tidigare.",
+      lavineVsSnebold: "Lavin vs. Sn\u00f6boll",
+      lavineHoejeste: "Lavin (h\u00f6gsta r\u00e4nta f\u00f6rst)",
+      sneboldLaveste: "Sn\u00f6boll (l\u00e4gsta saldo f\u00f6rst)",
+      renteLabel: "R\u00e4nta:",
+      indtastGaeld: "Ange din skuld f\u00f6r att se avvecklingsplanen",
+      lavineMetoden: "Lavinmetoden",
+      lavineDesc: "Betala extra avbetalningar p\u00e5 skulden med h\u00f6gst r\u00e4nta f\u00f6rst. Matematiskt billigaste metoden \u2014 du sparar mest i r\u00e4nta.",
+      sneboldMetoden: "Sn\u00f6bollsmetoden",
+      sneboldDesc: "Betala extra avbetalningar p\u00e5 den minsta skulden f\u00f6rst. Ger snabbare \"vinster\" och kan motivera dig att h\u00e5lla fast vid planen.",
+      aar: "\u00e5r",
+      mdr: "m\u00e5n",
+    },
+    no: {
+      dineGaeldsposter: "Dine gjeldsposter",
+      navn: "Navn",
+      gaeld: "Gjeld (kr)",
+      rente: "Rente",
+      minAfdragMd: "Min. avdrag/mnd",
+      placeholder: "F.eks. Forbruksl\u00e5n",
+      tilfoejGaeldspost: "+ Legg til gjeldspost",
+      ekstraAfdragLabel: "Ekstra avdrag per m\u00e5ned",
+      ekstraAfdragHint: "Bel\u00f8p utover minimum som g\u00e5r til gjeldsavvikling",
+      afviklingsmetode: "Avviklingsmetode",
+      lavine: "Lavine",
+      snebold: "Sn\u00f8ball",
+      dinGaeldsafvikling: "Din gjeldsavvikling",
+      samletGaeld: "Samlet gjeld",
+      gaeldsfriOm: "Gjeldfri om",
+      samletRente: "Samlet rente",
+      totalBetalt: "Totalt betalt",
+      effektEkstra: "Effekt av ekstra avdrag",
+      duSparer: "Du sparer",
+      iRenterOgBliver: "i renter og blir gjeldfri",
+      maanederTidligere: "m\u00e5neder tidligere.",
+      lavineVsSnebold: "Lavine vs. Sn\u00f8ball",
+      lavineHoejeste: "Lavine (h\u00f8yeste rente f\u00f8rst)",
+      sneboldLaveste: "Sn\u00f8ball (laveste saldo f\u00f8rst)",
+      renteLabel: "Rente:",
+      indtastGaeld: "Oppgi gjelden din for \u00e5 se avviklingsplanen",
+      lavineMetoden: "Lavinemetoden",
+      lavineDesc: "Betal ekstra avdrag p\u00e5 gjelden med h\u00f8yest rente f\u00f8rst. Matematisk den billigste metoden \u2014 du sparer mest i renter.",
+      sneboldMetoden: "Sn\u00f8ballmetoden",
+      sneboldDesc: "Betal ekstra avdrag p\u00e5 den minste gjelden f\u00f8rst. Gir raskere \"seire\" og kan motivere deg til \u00e5 holde fast i planen.",
+      aar: "\u00e5r",
+      mdr: "mnd",
+    },
+  };
+  const l = labels[locale as keyof typeof labels] || labels.da;
+
   const [poster, setPoster] = useState<GaeldsPost[]>([
-    { id: 1, navn: 'Forbrugslån', gaeld: '', rente: '', minAfdrag: '' },
+    { id: 1, navn: 'Forbrugsl\u00e5n', gaeld: '', rente: '', minAfdrag: '' },
   ]);
   const [ekstraAfdrag, setEkstraAfdrag] = useState<string>('');
   const [metode, setMetode] = useState<Metode>('lavine');
@@ -58,7 +167,7 @@ export default function GaeldsfriBeregner() {
   }, [poster, ekstraAfdrag, metode]);
 
   const handleReset = useCallback(() => {
-    setPoster([{ id: 1, navn: 'Forbrugslån', gaeld: '', rente: '', minAfdrag: '' }]);
+    setPoster([{ id: 1, navn: 'Forbrugsl\u00e5n', gaeld: '', rente: '', minAfdrag: '' }]);
     setEkstraAfdrag('');
     setMetode('lavine');
   }, []);
@@ -79,7 +188,7 @@ export default function GaeldsfriBeregner() {
   const result = useMemo(() => {
     const aktive = poster
       .map(p => ({
-        navn: p.navn || `Gæld ${p.id}`,
+        navn: p.navn || `G\u00e6ld ${p.id}`,
         gaeld: parseFloat(p.gaeld) || 0,
         rente: (parseFloat(p.rente) || 0) / 100 / 12,
         minAfdrag: parseFloat(p.minAfdrag) || 0,
@@ -92,17 +201,15 @@ export default function GaeldsfriBeregner() {
     const samletMinAfdrag = aktive.reduce((s, p) => s + p.minAfdrag, 0);
     const ekstra = parseFloat(ekstraAfdrag) || 0;
 
-    // Simuler afbetaling
     function simuler(sortFn: (a: typeof aktive[0], b: typeof aktive[0]) => number) {
       const balancer = aktive.map(p => ({ ...p, balance: p.gaeld }));
       let totalRente = 0;
       let maaneder = 0;
-      const maxMaaneder = 600; // 50 år safety
+      const maxMaaneder = 600;
 
       while (balancer.some(b => b.balance > 0) && maaneder < maxMaaneder) {
         maaneder++;
 
-        // Tilskriv renter
         for (const b of balancer) {
           if (b.balance > 0) {
             const renteBeloeb = b.balance * b.rente;
@@ -111,7 +218,6 @@ export default function GaeldsfriBeregner() {
           }
         }
 
-        // Betal minimum på alle
         for (const b of balancer) {
           if (b.balance > 0) {
             const betaling = Math.min(b.balance, b.minAfdrag);
@@ -119,7 +225,6 @@ export default function GaeldsfriBeregner() {
           }
         }
 
-        // Fordel ekstra afdrag efter valgt metode
         let restEkstra = ekstra;
         const sorteret = [...balancer].filter(b => b.balance > 0).sort(sortFn);
         for (const b of sorteret) {
@@ -133,20 +238,19 @@ export default function GaeldsfriBeregner() {
       return { maaneder, totalRente: Math.round(totalRente), samletBetalt: Math.round(samletGaeld + totalRente) };
     }
 
-    // Lavine: højeste rente først
     const lavine = simuler((a, b) => b.rente - a.rente);
-    // Snebold: laveste saldo først
     const snebold = simuler((a, b) => a.gaeld - b.gaeld);
 
     const valgt = metode === 'lavine' ? lavine : snebold;
     const aar = Math.floor(valgt.maaneder / 12);
     const mdr = valgt.maaneder % 12;
 
-    // Uden ekstra afdrag
     const udenEkstra = ekstra > 0 ? simuler(() => 0) : null;
-    // Med ekstra beregnet separat for at vise forskel
     const besparelseRente = udenEkstra ? udenEkstra.totalRente - valgt.totalRente : 0;
     const besparelseMdr = udenEkstra ? udenEkstra.maaneder - valgt.maaneder : 0;
+
+    // suppress unused var
+    void samletMinAfdrag;
 
     return {
       samletGaeld,
@@ -162,44 +266,44 @@ export default function GaeldsfriBeregner() {
     };
   }, [poster, ekstraAfdrag, metode]);
 
-  const formatKr = (n: number) => n.toLocaleString('da-DK');
+  const formatKr = (n: number) => n.toLocaleString(locale === "se" ? "sv-SE" : locale === "no" ? "nb-NO" : "da-DK");
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 md:p-8">
       {/* Input */}
       <div className="space-y-4 mb-6">
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">
-          Dine gældsposter
+          {l.dineGaeldsposter}
         </label>
         <div className="space-y-3">
           {poster.map((post, idx) => (
             <div key={post.id} className="flex flex-wrap gap-2 items-end">
               <div className="w-full sm:w-auto sm:flex-1">
-                {idx === 0 && <span className="text-xs text-gray-500 dark:text-gray-400">Navn</span>}
+                {idx === 0 && <span className="text-xs text-gray-500 dark:text-gray-400">{l.navn}</span>}
                 <input
                   type="text"
                   value={post.navn}
                   onChange={(e) => updatePost(post.id, 'navn', e.target.value)}
-                  placeholder="F.eks. Forbrugslån"
+                  placeholder={l.placeholder}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                 />
               </div>
               <div className="flex-1 min-w-[100px]">
-                {idx === 0 && <span className="text-xs text-gray-500 dark:text-gray-400">Gæld (kr.)</span>}
+                {idx === 0 && <span className="text-xs text-gray-500 dark:text-gray-400">{l.gaeld}</span>}
                 <div className="relative">
                   <input type="number" value={post.gaeld} onChange={(e) => updatePost(post.id, 'gaeld', e.target.value)} placeholder="50.000" className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
                   <span className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 text-xs">kr</span>
                 </div>
               </div>
               <div className="w-20">
-                {idx === 0 && <span className="text-xs text-gray-500 dark:text-gray-400">Rente</span>}
+                {idx === 0 && <span className="text-xs text-gray-500 dark:text-gray-400">{l.rente}</span>}
                 <div className="relative">
                   <input type="number" step="0.1" value={post.rente} onChange={(e) => updatePost(post.id, 'rente', e.target.value)} placeholder="8" className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-lg text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
                   <span className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 text-xs">%</span>
                 </div>
               </div>
               <div className="flex-1 min-w-[100px]">
-                {idx === 0 && <span className="text-xs text-gray-500 dark:text-gray-400">Min. afdrag/md</span>}
+                {idx === 0 && <span className="text-xs text-gray-500 dark:text-gray-400">{l.minAfdragMd}</span>}
                 <div className="relative">
                   <input type="number" value={post.minAfdrag} onChange={(e) => updatePost(post.id, 'minAfdrag', e.target.value)} placeholder="1.500" className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
                   <span className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 text-xs">kr</span>
@@ -207,33 +311,33 @@ export default function GaeldsfriBeregner() {
               </div>
               {poster.length > 1 && (
                 <button onClick={() => removePost(post.id)} className="px-2 py-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg text-sm">
-                  ✕
+                  &#10005;
                 </button>
               )}
             </div>
           ))}
           <button onClick={addPost} className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400">
-            + Tilføj gældspost
+            {l.tilfoejGaeldspost}
           </button>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Ekstra afdrag pr. måned</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">{l.ekstraAfdragLabel}</label>
             <div className="relative">
               <input type="number" value={ekstraAfdrag} onChange={(e) => setEkstraAfdrag(e.target.value)} placeholder="0" className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">kr</span>
             </div>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Beløb ud over minimum der går til gældsafvikling</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{l.ekstraAfdragHint}</p>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Afviklingsmetode</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">{l.afviklingsmetode}</label>
             <div className="flex gap-3">
               <button onClick={() => setMetode('lavine')} className={`flex-1 py-3 rounded-lg border-2 text-sm font-medium transition-all ${metode === 'lavine' ? 'border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' : 'border-gray-200 dark:border-gray-600 dark:text-gray-200'}`}>
-                Lavine
+                {l.lavine}
               </button>
               <button onClick={() => setMetode('snebold')} className={`flex-1 py-3 rounded-lg border-2 text-sm font-medium transition-all ${metode === 'snebold' ? 'border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' : 'border-gray-200 dark:border-gray-600 dark:text-gray-200'}`}>
-                Snebold
+                {l.snebold}
               </button>
             </div>
           </div>
@@ -247,26 +351,26 @@ export default function GaeldsfriBeregner() {
       {/* Results */}
       {result ? (
         <div className="bg-gradient-to-br from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 rounded-xl p-6 animate-fade-in space-y-4">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Din gældsafvikling</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{l.dinGaeldsafvikling}</h3>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <div className="bg-white dark:bg-gray-700 rounded-lg p-3 shadow-sm text-center">
-              <div className="text-xs text-gray-500 dark:text-gray-400">Samlet gæld</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400">{l.samletGaeld}</div>
               <div className="text-lg font-bold text-gray-900 dark:text-white">{formatKr(result.samletGaeld)} kr.</div>
             </div>
             <div className="bg-white dark:bg-gray-700 rounded-lg p-3 shadow-sm text-center">
-              <div className="text-xs text-gray-500 dark:text-gray-400">Gældsfri om</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400">{l.gaeldsfriOm}</div>
               <div className="text-lg font-bold text-green-600 dark:text-green-400">
-                {result.aar > 0 ? `${result.aar} år` : ''}{result.aar > 0 && result.mdr > 0 ? ' ' : ''}{result.mdr > 0 ? `${result.mdr} mdr` : ''}
-                {result.aar === 0 && result.mdr === 0 ? '0 mdr' : ''}
+                {result.aar > 0 ? `${result.aar} ${l.aar}` : ''}{result.aar > 0 && result.mdr > 0 ? ' ' : ''}{result.mdr > 0 ? `${result.mdr} ${l.mdr}` : ''}
+                {result.aar === 0 && result.mdr === 0 ? `0 ${l.mdr}` : ''}
               </div>
             </div>
             <div className="bg-white dark:bg-gray-700 rounded-lg p-3 shadow-sm text-center">
-              <div className="text-xs text-gray-500 dark:text-gray-400">Samlet rente</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400">{l.samletRente}</div>
               <div className="text-lg font-bold text-red-600 dark:text-red-400">{formatKr(result.valgt.totalRente)} kr.</div>
             </div>
             <div className="bg-white dark:bg-gray-700 rounded-lg p-3 shadow-sm text-center">
-              <div className="text-xs text-gray-500 dark:text-gray-400">Total betalt</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400">{l.totalBetalt}</div>
               <div className="text-lg font-bold text-gray-900 dark:text-white">{formatKr(result.valgt.samletBetalt)} kr.</div>
             </div>
           </div>
@@ -274,60 +378,60 @@ export default function GaeldsfriBeregner() {
           {result.ekstra > 0 && result.besparelseMdr > 0 && (
             <div className="bg-green-100 dark:bg-green-900/30 rounded-lg p-4">
               <div className="text-sm text-green-800 dark:text-green-300">
-                <strong>Effekt af ekstra afdrag ({formatKr(result.ekstra)} kr./md):</strong>
+                <strong>{l.effektEkstra} ({formatKr(result.ekstra)} kr./md):</strong>
               </div>
               <div className="text-sm text-green-700 dark:text-green-400 mt-1">
-                Du sparer {formatKr(result.besparelseRente)} kr. i renter og bliver gældsfri {result.besparelseMdr} måneder tidligere.
+                {l.duSparer} {formatKr(result.besparelseRente)} kr. {l.iRenterOgBliver} {result.besparelseMdr} {l.maanederTidligere}
               </div>
             </div>
           )}
 
           {/* Metode sammenligning */}
           <div className="bg-white dark:bg-gray-700 rounded-lg p-4 shadow-sm text-sm">
-            <div className="font-medium mb-2 dark:text-gray-200">Lavine vs. Snebold</div>
+            <div className="font-medium mb-2 dark:text-gray-200">{l.lavineVsSnebold}</div>
             <div className="grid grid-cols-2 gap-4">
               <div className={metode === 'lavine' ? 'font-medium' : 'text-gray-500 dark:text-gray-400'}>
-                <div className="text-blue-600 dark:text-blue-400">Lavine (højeste rente først)</div>
-                <div className="dark:text-gray-200">{Math.floor(result.lavine.maaneder / 12)} år {result.lavine.maaneder % 12} mdr</div>
-                <div className="text-red-500">Rente: {formatKr(result.lavine.totalRente)} kr.</div>
+                <div className="text-blue-600 dark:text-blue-400">{l.lavineHoejeste}</div>
+                <div className="dark:text-gray-200">{Math.floor(result.lavine.maaneder / 12)} {l.aar} {result.lavine.maaneder % 12} {l.mdr}</div>
+                <div className="text-red-500">{l.renteLabel} {formatKr(result.lavine.totalRente)} kr.</div>
               </div>
               <div className={metode === 'snebold' ? 'font-medium' : 'text-gray-500 dark:text-gray-400'}>
-                <div className="text-purple-600 dark:text-purple-400">Snebold (laveste saldo først)</div>
-                <div className="dark:text-gray-200">{Math.floor(result.snebold.maaneder / 12)} år {result.snebold.maaneder % 12} mdr</div>
-                <div className="text-red-500">Rente: {formatKr(result.snebold.totalRente)} kr.</div>
+                <div className="text-purple-600 dark:text-purple-400">{l.sneboldLaveste}</div>
+                <div className="dark:text-gray-200">{Math.floor(result.snebold.maaneder / 12)} {l.aar} {result.snebold.maaneder % 12} {l.mdr}</div>
+                <div className="text-red-500">{l.renteLabel} {formatKr(result.snebold.totalRente)} kr.</div>
               </div>
             </div>
           </div>
         </div>
       ) : (
         <div className="text-center text-gray-500 dark:text-gray-400 py-8 bg-gray-50 dark:bg-gray-700/30 rounded-xl">
-          <div className="text-4xl mb-3">🎯</div>
-          <p>Indtast din gæld for at se afviklingsplanen</p>
+          <div className="text-4xl mb-3">&#127919;</div>
+          <p>{l.indtastGaeld}</p>
         </div>
       )}
 
       {/* Share */}
       <div className="flex justify-center mt-6 gap-3">
-        <CopyResultButton text={result ? `Gældsfri om ${result.aar} år ${result.mdr} mdr — samlet rente: ${formatKr(result.valgt.totalRente)} kr.` : ''} />
+        <CopyResultButton text={result ? `${l.gaeldsfriOm} ${result.aar} ${l.aar} ${result.mdr} ${l.mdr} \u2014 ${l.samletRente}: ${formatKr(result.valgt.totalRente)} kr.` : ''} />
         <ShareCalculation
           getShareableLink={getShareableLink}
-          calculatorName="Gældsfri Beregner"
-          resultSummary={result ? `Gældsfri om ${result.aar} år ${result.mdr} mdr` : ''}
+          calculatorName="G\u00e6ldsfri Beregner"
+          resultSummary={result ? `${l.gaeldsfriOm} ${result.aar} ${l.aar} ${result.mdr} ${l.mdr}` : ''}
         />
       </div>
 
       {/* Info */}
       <div className="grid md:grid-cols-2 gap-4 mt-6">
         <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
-          <h4 className="font-semibold text-blue-800 dark:text-blue-300 mb-2">Lavine-metoden</h4>
+          <h4 className="font-semibold text-blue-800 dark:text-blue-300 mb-2">{l.lavineMetoden}</h4>
           <p className="text-sm text-blue-700 dark:text-blue-400">
-            Betal ekstra afdrag på gælden med den højeste rente først. Matematisk den billigste metode — du sparer mest i renter.
+            {l.lavineDesc}
           </p>
         </div>
         <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4">
-          <h4 className="font-semibold text-purple-800 dark:text-purple-300 mb-2">Snebold-metoden</h4>
+          <h4 className="font-semibold text-purple-800 dark:text-purple-300 mb-2">{l.sneboldMetoden}</h4>
           <p className="text-sm text-purple-700 dark:text-purple-400">
-            Betal ekstra afdrag på den mindste gæld først. Giver hurtigere &quot;sejre&quot; og kan motivere dig til at holde fast i planen.
+            {l.sneboldDesc}
           </p>
         </div>
       </div>

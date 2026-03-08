@@ -1,67 +1,42 @@
 import VaegttabBeregner from "@/components/VaegttabBeregner";
 import { generatePageMetadata } from "@/lib/page-helpers";
+import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
+import { getPageData } from "@/lib/page-data";
 import FAQ from "@/components/FAQ";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import RelatedCalculators from "@/components/RelatedCalculators";
 import Sidebar from "@/components/Sidebar";
 
-const baseUrl = "https://minberegner.dk";
-
 export async function generateMetadata() {
   return generatePageMetadata("vaegttab");
 }
 
-const faqItems = [
-  {
-    question: "Hvor hurtigt kan man tabe sig sundt?",
-    answer: "Et sundt vægttab er 0,5-1 kg pr. uge. Det svarer til et kalorieunderskud på ca. 500-1.000 kcal pr. dag. Langsommere vægttab er nemmere at fastholde og reducerer risikoen for muskeltab.",
-  },
-  {
-    question: "Hvad er kalorieunderskud?",
-    answer: "Kalorieunderskud betyder, at du spiser færre kalorier, end din krop forbrænder. Dit daglige energiforbrug (TDEE) minus dit kalorieindtag giver dit underskud. 7.700 kcal underskud svarer til ca. 1 kg vægttab.",
-  },
-  {
-    question: "Hvor mange kalorier skal jeg mindst spise?",
-    answer: "Mænd bør ikke gå under 1.500 kcal/dag og kvinder ikke under 1.200 kcal/dag uden lægelig vejledning. For lavt kalorieindtag kan føre til næringsmangel, muskeltab og nedsat stofskifte.",
-  },
-  {
-    question: "Hvorfor taber jeg mig ikke selvom jeg er i underskud?",
-    answer: "Vægten kan svinge 1-2 kg dag-til-dag pga. væskebalance, salt, kost og hormoner. Mål din vægt på samme tidspunkt og brug et ugentligt gennemsnit. Plateu kan også skyldes tilpasning — prøv at justere aktivitetsniveauet.",
-  },
-  {
-    question: "Er det bedst at spise mindre eller motionere mere?",
-    answer: "En kombination er mest effektiv. Kost er vigtigst for selve vægttabet, mens motion bevarer muskelmasse, forbedrer sundhed og øger dit energiforbrug. Styrketræning er særligt gavnligt under vægttab.",
-  },
-];
+export default async function VaegttabPage() {
+  const locale = await getLocale();
+  const domainConfig = await getCurrentDomainConfig();
+  const pageData = getPageData("vaegttab", locale) || getPageData("vaegttab", "da")!;
 
-const relatedCalculators = [
-  { title: "Kalorieberegner", description: "Beregn dagligt kaloriebehov", href: "/kalorier", icon: "🍎" },
-  { title: "BMI Beregner", description: "Beregn dit BMI", href: "/bmi", icon: "⚖️" },
-  { title: "Tidsberegner", description: "Beregn tid mellem datoer", href: "/tidsberegner", icon: "⏱️" },
-  { title: "Procentberegner", description: "Beregn procenter", href: "/procent", icon: "📊" },
-];
-
-export default function VaegttabPage() {
   return (
     <div className="flex flex-col lg:flex-row gap-8">
       <div className="flex-1 min-w-0">
         <CalculatorSchema
-          name="Vægttab Beregner"
-          description="Beregn dit daglige kaloriemål for vægttab baseret på din vægt, højde, alder og aktivitetsniveau."
-          url={`${baseUrl}/vaegttab`}
-          category="HealthApplication"
+          name={pageData.schemaName}
+          description={pageData.schemaDescription}
+          url={`${domainConfig.baseUrl}/vaegttab`}
+          category={pageData.schemaCategory}
         />
-        <FAQSchema items={faqItems} />
-        <Breadcrumbs items={[{ name: "Sundhed", href: "/kategori/sundhed" }, { name: "Vægttab Beregner", href: "/vaegttab" }]} />
+        <FAQSchema items={pageData.faqItems} />
+        <Breadcrumbs items={[{ name: pageData.breadcrumbCategory, href: pageData.breadcrumbCategoryHref }, { name: pageData.title, href: "/vaegttab" }]} />
 
-        <h1 className="text-3xl font-bold mb-2 dark:text-white">Vægttab Beregner</h1>
+        <h1 className="text-3xl font-bold mb-2 dark:text-white">{pageData.title}</h1>
         <p className="text-gray-600 dark:text-gray-300 mb-8">
-          Beregn dit daglige kaloriemål for at nå din målvægt. Se kalorieunderskud, vægttab pr. uge og få advarsel ved for hurtigt tempo.
+          {pageData.description}
         </p>
 
         <VaegttabBeregner />
 
+        {locale === "da" && (
         <div className="mt-12 prose dark:prose-invert max-w-none">
           <h2>Sådan taber du dig sundt</h2>
           <p>
@@ -87,9 +62,10 @@ export default function VaegttabPage() {
             <li><strong>Vær tålmodig:</strong> Varige resultater kræver varige ændringer</li>
           </ul>
         </div>
+        )}
 
-        <FAQ items={faqItems} />
-        <RelatedCalculators calculators={relatedCalculators} />
+        <FAQ items={pageData.faqItems} />
+        <RelatedCalculators current="/vaegttab" />
       </div>
 
       <Sidebar currentHref="/vaegttab" adSlotId="vaegttab-sidebar" />

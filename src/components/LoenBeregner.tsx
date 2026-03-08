@@ -8,6 +8,8 @@ import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { KOMMUNER } from "@/lib/kommuner";
 import { AnimatedNumber, CopyResultButton, ResetButton } from "@/components/ui";
+import { useLocale } from '@/components/LocaleProvider';
+import { formatCurrency } from '@/lib/format';
 
 // 2026 danske skattesatser (ny skattereform med mellemskat/topskat/top-topskat)
 // Kilde: skm.dk, skat.dk, martinsen.dk
@@ -29,6 +31,7 @@ const SKATTESATSER = {
 };
 
 export default function LoenBeregner() {
+  const { locale } = useLocale();
   const [bruttoLoen, setBruttoLoen] = useState<number>(40000);
   const [periode, setPeriode] = useState<"maaned" | "aar">("maaned");
   const [medKirkeskat, setMedKirkeskat] = useState(true);
@@ -194,13 +197,7 @@ export default function LoenBeregner() {
     return Math.round(nyNetto - beregning.maanedligNetto);
   }, [bruttoLoen, periode, medKirkeskat, kommuneSkat, valgtKommune, pension, beregning.maanedligNetto]);
 
-  const formatKr = (beloeb: number) => {
-    return new Intl.NumberFormat("da-DK", {
-      style: "currency",
-      currency: "DKK",
-      maximumFractionDigits: 0,
-    }).format(beloeb);
-  };
+  const formatKr = (beloeb: number) => formatCurrency(beloeb, locale, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 
   return (
     <div className="space-y-8 print-area">

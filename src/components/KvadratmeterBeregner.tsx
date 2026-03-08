@@ -5,28 +5,141 @@ import { ShareCalculation } from "@/components/ShareCalculation";
 import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
+import { useLocale } from "@/components/LocaleProvider";
+import { formatCurrency, getCurrencySuffix } from "@/lib/format";
 
 type FormType = "rektangel" | "cirkel" | "trekant" | "trapez";
 
 export default function KvadratmeterBeregner() {
+  const { locale } = useLocale();
+
+  const labels = {
+    da: {
+      vaelgForm: "V\u00e6lg form",
+      rektangel: "Rektangel",
+      cirkel: "Cirkel",
+      trekant: "Trekant",
+      trapez: "Trapez",
+      laengde: "L\u00e6ngde (meter)",
+      bredde: "Bredde (meter)",
+      radius: "Radius (meter)",
+      radiusHint: "Radius = halvdelen af diameteren",
+      grundlinje: "Grundlinje (meter)",
+      hoejde: "H\u00f8jde (meter)",
+      hoejdeHint: "Vinkelret afstand til grundlinjen",
+      oeversteSide: "\u00d8verste side (meter)",
+      nedersteSide: "Nederste side (meter)",
+      areal: "Areal",
+      omkreds: "Omkreds:",
+      beregnPris: "Beregn pris",
+      prisPrM2: "Pris pr. m\u00b2 (valgfrit)",
+      samletPris: "Samlet pris",
+      omregnAreal: "Omregn dit areal",
+      kvadratmeter: "Kvadratmeter",
+      kvadratcentimeter: "Kvadratcentimeter",
+      hektar: "Hektar",
+      kvadratfod: "Kvadratfod",
+      seFormler: "Se formler for arealberegning",
+      rektangelFormel: "Rektangel:",
+      rektangelFormula: "Areal = L\u00e6ngde \u00d7 Bredde",
+      cirkelFormel: "Cirkel:",
+      cirkelFormula: "Areal = \u03c0 \u00d7 r\u00b2 (hvor r = radius)",
+      trekantFormel: "Trekant:",
+      trekantFormula: "Areal = (Grundlinje \u00d7 H\u00f8jde) / 2",
+      trapezFormel: "Trapez:",
+      trapezFormula: "Areal = ((Side 1 + Side 2) / 2) \u00d7 H\u00f8jde",
+    },
+    se: {
+      vaelgForm: "V\u00e4lj form",
+      rektangel: "Rektangel",
+      cirkel: "Cirkel",
+      trekant: "Triangel",
+      trapez: "Trapets",
+      laengde: "L\u00e4ngd (meter)",
+      bredde: "Bredd (meter)",
+      radius: "Radie (meter)",
+      radiusHint: "Radie = halva diametern",
+      grundlinje: "Baslinje (meter)",
+      hoejde: "H\u00f6jd (meter)",
+      hoejdeHint: "Vinkelr\u00e4tt avst\u00e5nd till baslinjen",
+      oeversteSide: "\u00d6vre sida (meter)",
+      nedersteSide: "Undre sida (meter)",
+      areal: "Area",
+      omkreds: "Omkrets:",
+      beregnPris: "Ber\u00e4kna pris",
+      prisPrM2: "Pris per m\u00b2 (valfritt)",
+      samletPris: "Totalpris",
+      omregnAreal: "Omvandla din area",
+      kvadratmeter: "Kvadratmeter",
+      kvadratcentimeter: "Kvadratcentimeter",
+      hektar: "Hektar",
+      kvadratfod: "Kvadratfot",
+      seFormler: "Visa formler f\u00f6r areaber\u00e4kning",
+      rektangelFormel: "Rektangel:",
+      rektangelFormula: "Area = L\u00e4ngd \u00d7 Bredd",
+      cirkelFormel: "Cirkel:",
+      cirkelFormula: "Area = \u03c0 \u00d7 r\u00b2 (d\u00e4r r = radie)",
+      trekantFormel: "Triangel:",
+      trekantFormula: "Area = (Baslinje \u00d7 H\u00f6jd) / 2",
+      trapezFormel: "Trapets:",
+      trapezFormula: "Area = ((Sida 1 + Sida 2) / 2) \u00d7 H\u00f6jd",
+    },
+    no: {
+      vaelgForm: "Velg form",
+      rektangel: "Rektangel",
+      cirkel: "Sirkel",
+      trekant: "Trekant",
+      trapez: "Trapes",
+      laengde: "Lengde (meter)",
+      bredde: "Bredde (meter)",
+      radius: "Radius (meter)",
+      radiusHint: "Radius = halvparten av diameteren",
+      grundlinje: "Grunnlinje (meter)",
+      hoejde: "H\u00f8yde (meter)",
+      hoejdeHint: "Vinkelrett avstand til grunnlinjen",
+      oeversteSide: "\u00d8verste side (meter)",
+      nedersteSide: "Nederste side (meter)",
+      areal: "Areal",
+      omkreds: "Omkrets:",
+      beregnPris: "Beregn pris",
+      prisPrM2: "Pris per m\u00b2 (valgfritt)",
+      samletPris: "Totalpris",
+      omregnAreal: "Omregn arealet ditt",
+      kvadratmeter: "Kvadratmeter",
+      kvadratcentimeter: "Kvadratcentimeter",
+      hektar: "Hektar",
+      kvadratfod: "Kvadratfot",
+      seFormler: "Se formler for arealberegning",
+      rektangelFormel: "Rektangel:",
+      rektangelFormula: "Areal = Lengde \u00d7 Bredde",
+      cirkelFormel: "Sirkel:",
+      cirkelFormula: "Areal = \u03c0 \u00d7 r\u00b2 (der r = radius)",
+      trekantFormel: "Trekant:",
+      trekantFormula: "Areal = (Grunnlinje \u00d7 H\u00f8yde) / 2",
+      trapezFormel: "Trapes:",
+      trapezFormula: "Areal = ((Side 1 + Side 2) / 2) \u00d7 H\u00f8yde",
+    },
+  };
+  const l = labels[locale as keyof typeof labels] || labels.da;
+
   const [formType, setFormType] = useState<FormType>("rektangel");
-  
+
   // Rektangel
   const [laengde, setLaengde] = useState<number>(10);
   const [bredde, setBredde] = useState<number>(8);
-  
+
   // Cirkel
   const [radius, setRadius] = useState<number>(5);
-  
+
   // Trekant
   const [grundlinje, setGrundlinje] = useState<number>(10);
   const [hoejde, setHoejde] = useState<number>(6);
-  
+
   // Trapez
   const [side1, setSide1] = useState<number>(8);
   const [side2, setSide2] = useState<number>(12);
   const [trapezHoejde, setTrapezHoejde] = useState<number>(5);
-  
+
   // Ekstra beregninger
   const [prisPerKvm, setPrisPerKvm] = useState<number>(0);
   const hasLoadedUrl = useRef(false);
@@ -87,56 +200,49 @@ export default function KvadratmeterBeregner() {
     let areal = 0;
     let omkreds = 0;
     let formel = "";
-    
+
     switch (formType) {
       case "rektangel":
         areal = laengde * bredde;
         omkreds = 2 * (laengde + bredde);
-        formel = `${laengde} × ${bredde} = ${areal} m²`;
+        formel = `${laengde} \u00d7 ${bredde} = ${areal} m\u00b2`;
         break;
       case "cirkel":
         areal = Math.PI * radius * radius;
         omkreds = 2 * Math.PI * radius;
-        formel = `π × ${radius}² = ${areal.toFixed(2)} m²`;
+        formel = `\u03c0 \u00d7 ${radius}\u00b2 = ${areal.toFixed(2)} m\u00b2`;
         break;
       case "trekant":
         areal = (grundlinje * hoejde) / 2;
-        // Omkreds kan ikke beregnes uden alle sider
         omkreds = 0;
-        formel = `(${grundlinje} × ${hoejde}) / 2 = ${areal} m²`;
+        formel = `(${grundlinje} \u00d7 ${hoejde}) / 2 = ${areal} m\u00b2`;
         break;
       case "trapez":
         areal = ((side1 + side2) / 2) * trapezHoejde;
-        omkreds = 0; // Kan ikke beregnes uden alle sider
-        formel = `((${side1} + ${side2}) / 2) × ${trapezHoejde} = ${areal} m²`;
+        omkreds = 0;
+        formel = `((${side1} + ${side2}) / 2) \u00d7 ${trapezHoejde} = ${areal} m\u00b2`;
         break;
     }
-    
+
     const totalPris = prisPerKvm > 0 ? areal * prisPerKvm : 0;
-    
+
     return { areal, omkreds, formel, totalPris };
   }, [formType, laengde, bredde, radius, grundlinje, hoejde, side1, side2, trapezHoejde, prisPerKvm]);
 
   const formatNumber = (num: number, decimals: number = 2) => {
-    return new Intl.NumberFormat("da-DK", {
+    return new Intl.NumberFormat(locale === "se" ? "sv-SE" : locale === "no" ? "nb-NO" : "da-DK", {
       minimumFractionDigits: 0,
       maximumFractionDigits: decimals,
     }).format(num);
   };
 
-  const formatKr = (amount: number) => {
-    return new Intl.NumberFormat("da-DK", {
-      style: "currency",
-      currency: "DKK",
-      maximumFractionDigits: 0,
-    }).format(amount);
-  };
+  const formatKr = (amount: number) => formatCurrency(amount, locale, { maximumFractionDigits: 0, minimumFractionDigits: 0 });
 
   return (
     <div className="space-y-8">
       {/* Form valg */}
       <div>
-        <label className="block text-sm font-medium mb-3 dark:text-gray-200">Vælg form</label>
+        <label className="block text-sm font-medium mb-3 dark:text-gray-200">{l.vaelgForm}</label>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <button
             onClick={() => setFormType("rektangel")}
@@ -146,8 +252,8 @@ export default function KvadratmeterBeregner() {
                 : "border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500"
             }`}
           >
-            <div className="text-3xl mb-2">▭</div>
-            <div className="font-medium text-sm dark:text-gray-200">Rektangel</div>
+            <div className="text-3xl mb-2">&#9645;</div>
+            <div className="font-medium text-sm dark:text-gray-200">{l.rektangel}</div>
           </button>
           <button
             onClick={() => setFormType("cirkel")}
@@ -157,8 +263,8 @@ export default function KvadratmeterBeregner() {
                 : "border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500"
             }`}
           >
-            <div className="text-3xl mb-2">◯</div>
-            <div className="font-medium text-sm dark:text-gray-200">Cirkel</div>
+            <div className="text-3xl mb-2">&#9711;</div>
+            <div className="font-medium text-sm dark:text-gray-200">{l.cirkel}</div>
           </button>
           <button
             onClick={() => setFormType("trekant")}
@@ -168,8 +274,8 @@ export default function KvadratmeterBeregner() {
                 : "border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500"
             }`}
           >
-            <div className="text-3xl mb-2">△</div>
-            <div className="font-medium text-sm dark:text-gray-200">Trekant</div>
+            <div className="text-3xl mb-2">&#9651;</div>
+            <div className="font-medium text-sm dark:text-gray-200">{l.trekant}</div>
           </button>
           <button
             onClick={() => setFormType("trapez")}
@@ -179,18 +285,18 @@ export default function KvadratmeterBeregner() {
                 : "border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500"
             }`}
           >
-            <div className="text-3xl mb-2">⏢</div>
-            <div className="font-medium text-sm dark:text-gray-200">Trapez</div>
+            <div className="text-3xl mb-2">&#9186;</div>
+            <div className="font-medium text-sm dark:text-gray-200">{l.trapez}</div>
           </button>
         </div>
       </div>
 
-      {/* Input baseret på form */}
+      {/* Input baseret p\u00e5 form */}
       <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6">
         {formType === "rektangel" && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-2 dark:text-gray-200">Længde (meter)</label>
+              <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.laengde}</label>
               <div className="relative">
                 <input
                   type="number"
@@ -204,7 +310,7 @@ export default function KvadratmeterBeregner() {
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2 dark:text-gray-200">Bredde (meter)</label>
+              <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.bredde}</label>
               <div className="relative">
                 <input
                   type="number"
@@ -222,7 +328,7 @@ export default function KvadratmeterBeregner() {
 
         {formType === "cirkel" && (
           <div className="max-w-xs">
-            <label className="block text-sm font-medium mb-2 dark:text-gray-200">Radius (meter)</label>
+            <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.radius}</label>
             <div className="relative">
               <input
                 type="number"
@@ -234,14 +340,14 @@ export default function KvadratmeterBeregner() {
               />
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">m</span>
             </div>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Radius = halvdelen af diameteren</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{l.radiusHint}</p>
           </div>
         )}
 
         {formType === "trekant" && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-2 dark:text-gray-200">Grundlinje (meter)</label>
+              <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.grundlinje}</label>
               <div className="relative">
                 <input
                   type="number"
@@ -255,7 +361,7 @@ export default function KvadratmeterBeregner() {
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2 dark:text-gray-200">Højde (meter)</label>
+              <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.hoejde}</label>
               <div className="relative">
                 <input
                   type="number"
@@ -267,7 +373,7 @@ export default function KvadratmeterBeregner() {
                 />
                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">m</span>
               </div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Vinkelret afstand til grundlinjen</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{l.hoejdeHint}</p>
             </div>
           </div>
         )}
@@ -275,7 +381,7 @@ export default function KvadratmeterBeregner() {
         {formType === "trapez" && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-2 dark:text-gray-200">Øverste side (meter)</label>
+              <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.oeversteSide}</label>
               <div className="relative">
                 <input
                   type="number"
@@ -289,7 +395,7 @@ export default function KvadratmeterBeregner() {
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2 dark:text-gray-200">Nederste side (meter)</label>
+              <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.nedersteSide}</label>
               <div className="relative">
                 <input
                   type="number"
@@ -303,7 +409,7 @@ export default function KvadratmeterBeregner() {
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2 dark:text-gray-200">Højde (meter)</label>
+              <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.hoejde}</label>
               <div className="relative">
                 <input
                   type="number"
@@ -326,9 +432,9 @@ export default function KvadratmeterBeregner() {
 
       {/* Resultat */}
       <div className="p-8 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-2xl text-center text-white">
-        <p className="text-lg opacity-90 mb-2">Areal</p>
+        <p className="text-lg opacity-90 mb-2">{l.areal}</p>
         <p className="text-5xl md:text-6xl font-bold">
-          {formatNumber(beregning.areal)} m²
+          {formatNumber(beregning.areal)} m&#178;
         </p>
         <p className="text-sm opacity-75 mt-2">{beregning.formel}</p>
       </div>
@@ -336,17 +442,17 @@ export default function KvadratmeterBeregner() {
       {beregning.omkreds > 0 && (
         <div className="p-4 bg-gray-100 dark:bg-gray-800 rounded-lg text-center">
           <p className="text-gray-600 dark:text-gray-400">
-            Omkreds: <strong className="dark:text-gray-200">{formatNumber(beregning.omkreds)} meter</strong>
+            {l.omkreds} <strong className="dark:text-gray-200">{formatNumber(beregning.omkreds)} meter</strong>
           </p>
         </div>
       )}
 
       {/* Prisberegning */}
       <div className="bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg p-6">
-        <h3 className="font-medium mb-4 dark:text-white">Beregn pris</h3>
+        <h3 className="font-medium mb-4 dark:text-white">{l.beregnPris}</h3>
         <div className="flex flex-col md:flex-row gap-4 items-end">
           <div className="flex-1">
-            <label className="block text-sm font-medium mb-2 dark:text-gray-200">Pris pr. m² (valgfrit)</label>
+            <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.prisPrM2}</label>
             <div className="relative">
               <input
                 type="number"
@@ -357,12 +463,12 @@ export default function KvadratmeterBeregner() {
                 onChange={(e) => setPrisPerKvm(parseFloat(e.target.value) || 0)}
                 className="w-full px-4 py-3 pr-16 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-gray-400">kr/m²</span>
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-gray-400">{getCurrencySuffix(locale)}/m&#178;</span>
             </div>
           </div>
           {beregning.totalPris > 0 && (
             <div className="flex-1 p-4 bg-green-100 dark:bg-green-900/20 rounded-lg text-center">
-              <p className="text-sm text-gray-600 dark:text-gray-400">Samlet pris</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">{l.samletPris}</p>
               <p className="text-2xl font-bold text-green-700 dark:text-green-400">{formatKr(beregning.totalPris)}</p>
             </div>
           )}
@@ -372,60 +478,60 @@ export default function KvadratmeterBeregner() {
       {/* Omregningsliste */}
       <div className="bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg overflow-hidden">
         <div className="p-4 bg-gray-50 dark:bg-gray-900/50 border-b dark:border-gray-700">
-          <h3 className="font-medium dark:text-white">Omregn dit areal</h3>
+          <h3 className="font-medium dark:text-white">{l.omregnAreal}</h3>
         </div>
         <div className="p-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
             <div className="text-center p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
-              <div className="text-lg font-semibold dark:text-gray-200">{formatNumber(beregning.areal)} m²</div>
-              <div className="text-gray-500 dark:text-gray-400">Kvadratmeter</div>
+              <div className="text-lg font-semibold dark:text-gray-200">{formatNumber(beregning.areal)} m&#178;</div>
+              <div className="text-gray-500 dark:text-gray-400">{l.kvadratmeter}</div>
             </div>
             <div className="text-center p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
-              <div className="text-lg font-semibold dark:text-gray-200">{formatNumber(beregning.areal * 10000)} cm²</div>
-              <div className="text-gray-500 dark:text-gray-400">Kvadratcentimeter</div>
+              <div className="text-lg font-semibold dark:text-gray-200">{formatNumber(beregning.areal * 10000)} cm&#178;</div>
+              <div className="text-gray-500 dark:text-gray-400">{l.kvadratcentimeter}</div>
             </div>
             <div className="text-center p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
               <div className="text-lg font-semibold dark:text-gray-200">{formatNumber(beregning.areal / 10000, 6)} ha</div>
-              <div className="text-gray-500 dark:text-gray-400">Hektar</div>
+              <div className="text-gray-500 dark:text-gray-400">{l.hektar}</div>
             </div>
             <div className="text-center p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
               <div className="text-lg font-semibold dark:text-gray-200">{formatNumber(beregning.areal * 10.764)} sq ft</div>
-              <div className="text-gray-500 dark:text-gray-400">Kvadratfod</div>
+              <div className="text-gray-500 dark:text-gray-400">{l.kvadratfod}</div>
             </div>
           </div>
         </div>
       </div>
 
       <div className="flex justify-center gap-3">
-        <CopyResultButton text={`${formatNumber(beregning.areal)} m² (${formType})`} />
+        <CopyResultButton text={`${formatNumber(beregning.areal)} m\u00b2 (${formType})`} />
         <ShareCalculation
           getShareableLink={getShareableLink}
           calculatorName="Kvadratmeterberegner"
-          resultSummary={`${formatNumber(beregning.areal)} m² (${formType})`}
+          resultSummary={`${formatNumber(beregning.areal)} m\u00b2 (${formType})`}
         />
       </div>
 
       {/* Formler */}
       <details className="bg-gray-50 dark:bg-gray-800 rounded-lg">
         <summary className="p-4 cursor-pointer font-medium dark:text-gray-200">
-          Se formler for arealberegning
+          {l.seFormler}
         </summary>
         <div className="p-4 pt-0 space-y-4 text-sm dark:text-gray-300">
           <div>
-            <h4 className="font-medium mb-1 dark:text-white">Rektangel:</h4>
-            <code className="block bg-white dark:bg-gray-700 p-2 rounded border dark:border-gray-600 dark:text-gray-200">Areal = Længde × Bredde</code>
+            <h4 className="font-medium mb-1 dark:text-white">{l.rektangelFormel}</h4>
+            <code className="block bg-white dark:bg-gray-700 p-2 rounded border dark:border-gray-600 dark:text-gray-200">{l.rektangelFormula}</code>
           </div>
           <div>
-            <h4 className="font-medium mb-1 dark:text-white">Cirkel:</h4>
-            <code className="block bg-white dark:bg-gray-700 p-2 rounded border dark:border-gray-600 dark:text-gray-200">Areal = π × r² (hvor r = radius)</code>
+            <h4 className="font-medium mb-1 dark:text-white">{l.cirkelFormel}</h4>
+            <code className="block bg-white dark:bg-gray-700 p-2 rounded border dark:border-gray-600 dark:text-gray-200">{l.cirkelFormula}</code>
           </div>
           <div>
-            <h4 className="font-medium mb-1 dark:text-white">Trekant:</h4>
-            <code className="block bg-white dark:bg-gray-700 p-2 rounded border dark:border-gray-600 dark:text-gray-200">Areal = (Grundlinje × Højde) / 2</code>
+            <h4 className="font-medium mb-1 dark:text-white">{l.trekantFormel}</h4>
+            <code className="block bg-white dark:bg-gray-700 p-2 rounded border dark:border-gray-600 dark:text-gray-200">{l.trekantFormula}</code>
           </div>
           <div>
-            <h4 className="font-medium mb-1 dark:text-white">Trapez:</h4>
-            <code className="block bg-white dark:bg-gray-700 p-2 rounded border dark:border-gray-600 dark:text-gray-200">Areal = ((Side 1 + Side 2) / 2) × Højde</code>
+            <h4 className="font-medium mb-1 dark:text-white">{l.trapezFormel}</h4>
+            <code className="block bg-white dark:bg-gray-700 p-2 rounded border dark:border-gray-600 dark:text-gray-200">{l.trapezFormula}</code>
           </div>
         </div>
       </details>

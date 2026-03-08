@@ -5,8 +5,11 @@ import { ShareCalculation } from "@/components/ShareCalculation";
 import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState, ShareableLink } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
+import { useLocale } from '@/components/LocaleProvider';
+import { formatNumber as formatNum, getCurrencySuffix } from '@/lib/format';
 
 export default function AndelsboligBeregner() {
+  const { locale } = useLocale();
   const [andelPris, setAndelPris] = useState<string>("");
   const [boligafgift, setBoligafgift] = useState<string>("");
   const [forbedringer, setForbedringer] = useState<string>("0");
@@ -119,7 +122,7 @@ export default function AndelsboligBeregner() {
     hasTracked.current = false;
   }, []);
 
-  const formatKr = (n: number) => n.toLocaleString("da-DK") + " kr.";
+  const formatKr = (n: number) => formatNum(n, locale) + " " + getCurrencySuffix(locale);
 
   return (
     <div className="space-y-6">
@@ -138,7 +141,7 @@ export default function AndelsboligBeregner() {
               <input id="andelPris" type="number" value={andelPris} onChange={(e) => setAndelPris(e.target.value)}
                 placeholder="F.eks. 500000" min="0"
                 className="w-full border border-gray-300 dark:border-gray-600 rounded-lg py-3 px-4 pr-12 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">kr.</span>
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">{getCurrencySuffix(locale)}</span>
             </div>
           </div>
           <div>
@@ -149,7 +152,7 @@ export default function AndelsboligBeregner() {
               <input id="boligafgift" type="number" value={boligafgift} onChange={(e) => setBoligafgift(e.target.value)}
                 placeholder="F.eks. 5000" min="0"
                 className="w-full border border-gray-300 dark:border-gray-600 rounded-lg py-3 px-4 pr-16 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">kr./md</span>
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">{getCurrencySuffix(locale)}/md</span>
             </div>
           </div>
           <div>
@@ -160,7 +163,7 @@ export default function AndelsboligBeregner() {
               <input id="forbedringer" type="number" value={forbedringer} onChange={(e) => setForbedringer(e.target.value)}
                 placeholder="0" min="0"
                 className="w-full border border-gray-300 dark:border-gray-600 rounded-lg py-3 px-4 pr-12 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">kr.</span>
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">{getCurrencySuffix(locale)}</span>
             </div>
           </div>
           <div>
@@ -228,7 +231,7 @@ export default function AndelsboligBeregner() {
             <input id="maanedligHusleje" type="number" value={maanedligHusleje} onChange={(e) => setMaanedligHusleje(e.target.value)}
               placeholder="F.eks. 8000" min="0"
               className="w-full border border-gray-300 dark:border-gray-600 rounded-lg py-3 px-4 pr-16 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">kr./md</span>
+            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">{getCurrencySuffix(locale)}/md</span>
           </div>
         </div>
       </div>

@@ -1,90 +1,39 @@
 import TidszoneBeregner from "@/components/TidszoneBeregner";
 import { generatePageMetadata } from "@/lib/page-helpers";
+import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
+import { getPageData } from "@/lib/page-data";
 import FAQ from "@/components/FAQ";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import RelatedCalculators from "@/components/RelatedCalculators";
 
-const baseUrl = "https://minberegner.dk";
-
 export async function generateMetadata() {
   return generatePageMetadata("tidszone");
 }
 
-const faqItems = [
-  {
-    question: "Hvad er tidsforskellen mellem Danmark og USA?",
-    answer:
-      "Det afhænger af hvilken del af USA. New York (østkyst) er typisk 6 timer bagud, mens Los Angeles (vestkyst) er 9 timer bagud. Dette kan variere under sommertid.",
-  },
-  {
-    question: "Hvornår har Danmark sommertid?",
-    answer:
-      "Danmark skifter til sommertid (CEST, UTC+2) den sidste søndag i marts kl. 02:00. Vi skifter tilbage til normaltid (CET, UTC+1) den sidste søndag i oktober kl. 03:00.",
-  },
-  {
-    question: "Hvad er UTC?",
-    answer:
-      "UTC (Coordinated Universal Time) er den internationale tidsstandard. Alle tidszoner defineres som et offset fra UTC. Danmark er UTC+1 (vinter) eller UTC+2 (sommer).",
-  },
-  {
-    question: "Hvordan planlægger jeg internationale møder?",
-    answer:
-      "Find et tidspunkt der passer i alle tidszoner. Brug denne beregner til at se, hvad klokken vil være for alle deltagere. Undgå møder uden for normal arbejdstid (9-17).",
-  },
-  {
-    question: "Hvorfor har nogle lande halve timer i tidszonen?",
-    answer:
-      "Nogle lande som Indien (UTC+5:30) og Nepal (UTC+5:45) har valgt tidszoner der ikke er hele timer fra UTC for at matche solen bedre geografisk.",
-  },
-  {
-    question: "Hvad er jetlag og hvordan undgår jeg det?",
-    answer:
-      "Jetlag opstår når din biologiske ur er ude af sync med lokal tid. Tilpas dig gradvist ved at justere søvn før rejsen, drik vand, undgå alkohol, og kom ud i sollys på destinationen.",
-  },
-];
+export default async function TidszonePage() {
+  const locale = await getLocale();
+  const domainConfig = await getCurrentDomainConfig();
+  const pageData = getPageData("tidszone", locale) || getPageData("tidszone", "da")!;
 
-const relatedCalculators = [
-  {
-    title: "Aldersberegner",
-    href: "/alder",
-    description: "Beregn din præcise alder",
-    icon: "🎂",
-  },
-  {
-    title: "Procentberegner",
-    href: "/procent",
-    description: "Beregn procenter",
-    icon: "➗",
-  },
-  {
-    title: "Valutaberegner",
-    href: "/valuta",
-    description: "Omregn valutaer",
-    icon: "💱",
-  },
-];
-
-export default function TidszonePage() {
   return (
     <div className="max-w-4xl mx-auto">
       <CalculatorSchema
-        name="Tidszoneberegner - Omregn tid"
-        description="Gratis tidszoneberegner. Se hvad klokken er i andre lande og omregn tidspunkter mellem tidszoner."
-        url={`${baseUrl}/tidszone`}
-        category="UtilityApplication"
+        name={pageData.schemaName}
+        description={pageData.schemaDescription}
+        url={`${domainConfig.baseUrl}/tidszone`}
+        category={pageData.schemaCategory}
       />
-      <FAQSchema items={faqItems} />
-      <Breadcrumbs items={[{ name: "Hverdag", href: "/kategori/hverdag" }, { name: "Tidszoneberegner", href: "/tidszone" }]} />
+      <FAQSchema items={pageData.faqItems} />
+      <Breadcrumbs items={[{ name: pageData.breadcrumbCategory, href: pageData.breadcrumbCategoryHref }, { name: pageData.title, href: "/tidszone" }]} />
 
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl md:text-4xl font-bold mb-4">
-          Tidszoneberegner
+          {pageData.title}
         </h1>
         <p className="text-lg text-gray-600">
-          Se hvad klokken er i andre lande og omregn tidspunkter mellem tidszoner. 
-          Perfekt til internationale møder, rejser og opkald til familie i udlandet.
+          {pageData.description}
         </p>
       </div>
 
@@ -94,21 +43,22 @@ export default function TidszonePage() {
       </div>
 
       {/* Informativ tekst - SEO */}
+      {locale === "da" && (
       <div className="prose max-w-none mb-8">
         <h2>Om tidszoner</h2>
         <p>
-          Verden er opdelt i <strong>24 tidszoner</strong>, der hver svarer til <strong>15 graders længde</strong> på jordkloden.
-          Tidszoner gør det muligt at have en praktisk <strong>lokal tid</strong>, der nogenlunde følger solens gang.
+          Verden er opdelt i <strong>24 tidszoner</strong>, der hver svarer til <strong>15 graders l&aelig;ngde</strong> p&aring; jordkloden.
+          Tidszoner g&oslash;r det muligt at have en praktisk <strong>lokal tid</strong>, der nogenlunde f&oslash;lger solens gang.
         </p>
-        
+
         <h3>Danmarks tidszone</h3>
         <p>
           Danmark bruger <strong>Central European Time (CET)</strong>, som er <strong>UTC+1</strong>. Om sommeren bruger vi
-          <strong>Central European Summer Time (CEST)</strong>, som er <strong>UTC+2</strong>. Sommertid blev indført for
+          {" "}<strong>Central European Summer Time (CEST)</strong>, som er <strong>UTC+2</strong>. Sommertid blev indf&oslash;rt for
           at <strong>spare energi</strong> ved at udnytte dagslyset bedre.
         </p>
 
-        <h3>Populære tidsforskelle fra Danmark</h3>
+        <h3>Popul&aelig;re tidsforskelle fra Danmark</h3>
         <ul>
           <li><strong>London:</strong> 1 time bagud</li>
           <li><strong>New York:</strong> 6 timer bagud</li>
@@ -117,22 +67,23 @@ export default function TidszonePage() {
           <li><strong>Sydney:</strong> 9-10 timer foran</li>
         </ul>
 
-        <h3>Tips til internationale møder</h3>
+        <h3>Tips til internationale m&oslash;der</h3>
         <ul>
-          <li>Brug et mødetidspunkt der er acceptabelt for alle tidszoner</li>
-          <li>Angiv altid tidszonen tydeligt (fx "14:00 CET")</li>
-          <li>Overvej at rotere mødetider så byrden deles</li>
+          <li>Brug et m&oslash;detidspunkt der er acceptabelt for alle tidszoner</li>
+          <li>Angiv altid tidszonen tydeligt (fx &quot;14:00 CET&quot;)</li>
+          <li>Overvej at rotere m&oslash;detider s&aring; byrden deles</li>
           <li>Brug kalenderinvitation med automatisk tidszone-konvertering</li>
         </ul>
       </div>
+      )}
 
       {/* FAQ */}
       <div className="mb-8">
-        <FAQ items={faqItems} />
+        <FAQ items={pageData.faqItems} />
       </div>
 
       {/* Related Calculators */}
-      <RelatedCalculators calculators={relatedCalculators} />
+      <RelatedCalculators current="/tidszone" />
     </div>
   );
 }

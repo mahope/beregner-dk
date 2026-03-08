@@ -1,6 +1,8 @@
 import dynamic from "next/dynamic";
 const BMIBeregner = dynamic(() => import("@/components/BMIBeregner"));
 import { generatePageMetadata } from "@/lib/page-helpers";
+import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
+import { getPageData } from "@/lib/page-data";
 import FAQ from "@/components/FAQ";
 import RelatedCalculators from "@/components/RelatedCalculators";
 import {
@@ -11,71 +13,39 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import { InlineAd } from "@/components/ads/AdBanner";
 import Sidebar from "@/components/Sidebar";
 
-const baseUrl = "https://minberegner.dk";
-
 export async function generateMetadata() {
   return generatePageMetadata("bmi");
 }
 
-const faqItems = [
-  {
-    question: "Hvad er en normal BMI?",
-    answer:
-      "En normal BMI ligger mellem 18,5 og 24,9. Under 18,5 regnes som undervægt, 25-29,9 som overvægt, og over 30 som fedme. Husk at BMI ikke tager højde for muskelmasse.",
-  },
-  {
-    question: "Er BMI pålidelig for alle?",
-    answer:
-      "BMI er et godt screeningsværktøj, men har begrænsninger. Meget muskuløse personer kan have høj BMI uden at være overvægtige. Ældre og gravide bør også tage resultaterne med forbehold.",
-  },
-  {
-    question: "Hvordan beregnes BMI?",
-    answer:
-      "BMI beregnes ved at dividere din vægt i kg med din højde i meter i anden. Formlen er: BMI = vægt (kg) / højde² (m). En person på 75 kg og 175 cm har BMI = 75 / 1,75² = 24,5.",
-  },
-  {
-    question: "Hvad er min idealvægt?",
-    answer:
-      "Din idealvægt er det vægtinterval hvor din BMI ligger mellem 18,5 og 24,9. For en person på 175 cm er idealvægten cirka 57-76 kg. Brug beregneren ovenfor for at se dit interval.",
-  },
-  {
-    question: "Gælder BMI for børn?",
-    answer:
-      "Denne beregner er for voksne (18+). For børn og unge bruges alders- og kønsspecifikke BMI-percentiler, da kroppen ændrer sig under vækst. Tal med en læge om børns vægt.",
-  },
-  {
-    question: "Hvad kan jeg gøre for at forbedre min BMI?",
-    answer:
-      "Ved overvægt: Fokuser på varige livsstilsændringer som mere bevægelse og sundere kost. Ved undervægt: Spis hyppige, næringsrige måltider og overvej styrketræning. Konsulter altid en læge ved bekymringer.",
-  },
-];
+export default async function BMIPage() {
+  const locale = await getLocale();
+  const domainConfig = await getCurrentDomainConfig();
+  const pageData = getPageData("bmi", locale) || getPageData("bmi", "da")!;
 
-export default function BMIPage() {
   return (
     <div className="flex flex-col lg:flex-row gap-8">
       {/* Main Content - Left Column */}
       <div className="flex-1 min-w-0">
       <CalculatorSchema
-        name="BMI Beregner"
-        description="Gratis BMI beregner. Beregn dit Body Mass Index og se om din vægt er sund."
-        url={`${baseUrl}/bmi`}
-        category="HealthApplication"
+        name={pageData.schemaName}
+        description={pageData.schemaDescription}
+        url={`${domainConfig.baseUrl}/bmi`}
+        category={pageData.schemaCategory}
       />
-      <FAQSchema items={faqItems} />
-      <Breadcrumbs items={[{ name: "Sundhed", href: "/kategori/sundhed" }, { name: "BMI Beregner", href: "/bmi" }]} />
+      <FAQSchema items={pageData.faqItems} />
+      <Breadcrumbs items={[{ name: pageData.breadcrumbCategory, href: pageData.breadcrumbCategoryHref }, { name: pageData.title, href: "/bmi" }]} />
 
-      <h1 className="text-3xl font-bold mb-2">BMI Beregner</h1>
+      <h1 className="text-3xl font-bold mb-2">{pageData.title}</h1>
       <p className="text-gray-600 mb-8">
-        Beregn dit Body Mass Index (BMI) og se om din vægt er inden for det
-        sunde område. BMI er et nyttigt værktøj til at vurdere din vægt i
-        forhold til din højde.
+        {pageData.description}
       </p>
 
       <BMIBeregner />
-      
+
       {/* Inline Ad - Between calculator and content */}
       <InlineAd slotId="bmi-after-calculator" />
 
+      {locale === "da" && (
       <div className="mt-12 prose max-w-none">
         <h2>Hvad er BMI?</h2>
         <p>
@@ -164,10 +134,11 @@ export default function BMIPage() {
           </p>
         </div>
       </div>
+      )}
 
       <InlineAd slotId="bmi-before-faq" />
 
-      <FAQ items={faqItems} />
+      <FAQ items={pageData.faqItems} />
 
       <RelatedCalculators current="/bmi" />
       </div>

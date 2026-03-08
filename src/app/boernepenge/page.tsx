@@ -1,79 +1,40 @@
 import { generatePageMetadata } from "@/lib/page-helpers";
+import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
+import { getPageData } from "@/lib/page-data";
 import BoernepengBeregner from "@/components/BoernepengBeregner";
 import FAQ from "@/components/FAQ";
 import RelatedCalculators from "@/components/RelatedCalculators";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
 
-const baseUrl = "https://minberegner.dk";
-
 export async function generateMetadata() {
   return generatePageMetadata("boernepenge");
 }
 
-const faqItems = [
-  {
-    question: "Hvem kan få børne- og ungeydelse?",
-    answer:
-      "Forældre med børn under 18 år, hvor barnet bor i Danmark, og mindst én forælder er dansk statsborger eller har haft bopæl i DK i min. 2 år. Siden 2022 deles ydelsen som standard mellem forældre med fælles forældremyndighed.",
-  },
-  {
-    question: "Hvor meget får jeg i børnepenge 2026?",
-    answer:
-      "I 2026 er de officielle satser: 0-2 år: 21.480 kr/år (5.370 kr/kvartal), 3-6 år: 17.004 kr/år (4.251 kr/kvartal), 7-14 år: 13.380 kr/år (3.345 kr/kvartal), 15-17 år: 1.115 kr/måned (13.380 kr/år). Ved fælles forældremyndighed modtager hver forælder halvdelen.",
-  },
-  {
-    question: "Hvornår udbetales børnepenge?",
-    answer:
-      "Børneydelsen (0-14 år) udbetales kvartalsvis forud den 20. i januar, april, juli og oktober. Ungeydelsen (15-17 år) udbetales månedligt den 20. i hver måned direkte til den unge.",
-  },
-  {
-    question: "Bliver børnepenge modregnet ved høj indkomst?",
-    answer:
-      "Ja, hvis din indkomst overstiger 961.100 kr. i 2026, nedsættes ydelsen med 2% af beløbet over grænsen. Eksempel: tjener du 1.000.000 kr., reduceres ydelsen med 2% af 38.900 kr. = 778 kr. årligt.",
-  },
-  {
-    question: "Hvordan deles børnepenge mellem forældre?",
-    answer:
-      "Siden januar 2022 deles børne- og ungeydelsen som standard ligeligt mellem forældre med fælles forældremyndighed. Hver forælder modtager halvdelen af ydelsen. Bor barnet kun hos den ene forælder, kan man søge om at få hele ydelsen.",
-  },
-  {
-    question: "Hvad får enlige forsørgere ekstra?",
-    answer:
-      "Enlige forsørgere kan udover børne- og ungeydelsen få: ordinært børnetilskud (ca. 6.300 kr/kvartal per barn), ekstra børnetilskud (ca. 6.600 kr/kvartal, kun én gang uanset antal børn), og evt. særligt børnetilskud hvis den anden forælder er død eller ukendt.",
-  },
-  {
-    question: "Er børnepenge skattefrie?",
-    answer:
-      "Ja, børne- og ungeydelsen er skattefri. Du skal ikke betale skat af beløbet, og det påvirker ikke din skattepligtige indkomst eller offentlige ydelser som boligstøtte.",
-  },
-  {
-    question: "Hvordan søger jeg om børnepenge?",
-    answer:
-      "Børneydelsen udbetales automatisk når dit barn får et CPR-nummer. Du behøver ikke søge. Ved særlige forhold som eneforældremyndighed, delt bopæl eller høj indkomst kan du administrere ydelsen via borger.dk eller Digital Post til Udbetaling Danmark.",
-  },
-];
+export default async function BoernepengePage() {
+  const locale = await getLocale();
+  const domainConfig = await getCurrentDomainConfig();
+  const pageData = getPageData("boernepenge", locale) || getPageData("boernepenge", "da")!;
 
-export default function BoernepengePage() {
   return (
     <div>
       <CalculatorSchema
-        name="Børnepenge Beregner - Børne- og ungeydelse"
-        description="Gratis børnepenge beregner. Beregn din børne- og ungeydelse for 2026."
-        url={`${baseUrl}/boernepenge`}
-        category="FinanceApplication"
+        name={pageData.schemaName}
+        description={pageData.schemaDescription}
+        url={`${domainConfig.baseUrl}/boernepenge`}
+        category={pageData.schemaCategory}
       />
-      <FAQSchema items={faqItems} />
-      <Breadcrumbs items={[{ name: "Familie", href: "/kategori/familie" }, { name: "Børnepenge Beregner", href: "/boernepenge" }]} />
+      <FAQSchema items={pageData.faqItems} />
+      <Breadcrumbs items={[{ name: pageData.breadcrumbCategory, href: pageData.breadcrumbCategoryHref }, { name: pageData.title, href: "/boernepenge" }]} />
 
-      <h1 className="text-3xl font-bold mb-2">Børnepenge Beregner 2026</h1>
+      <h1 className="text-3xl font-bold mb-2">{pageData.title}</h1>
       <p className="text-gray-600 mb-8">
-        Beregn din børne- og ungeydelse baseret på dine børns alder og din
-        husstandsindkomst. Opdateret med de officielle 2026-satser.
+        {pageData.description}
       </p>
 
       <BoernepengBeregner />
 
+      {locale === "da" && (
       <div className="mt-12 prose max-w-none dark:prose-invert">
         <h2>Om børne- og ungeydelse</h2>
         <p>
@@ -186,8 +147,9 @@ export default function BoernepengePage() {
           </p>
         </div>
       </div>
+      )}
 
-      <FAQ items={faqItems} />
+      <FAQ items={pageData.faqItems} />
 
       <RelatedCalculators current="/boernepenge" />
     </div>

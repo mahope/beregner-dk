@@ -5,87 +5,36 @@ import FAQ from "@/components/FAQ";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import RelatedCalculators from "@/components/RelatedCalculators";
 import Breadcrumbs from "@/components/Breadcrumbs";
-
-const baseUrl = "https://minberegner.dk";
+import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
+import { getPageData } from "@/lib/page-data";
 
 export async function generateMetadata() {
   return generatePageMetadata("timepris");
 }
 
-const faqItems = [
-  {
-    question: "Hvordan beregner jeg min timepris som freelancer?",
-    answer:
-      "Start med din ønskede nettoløn, tillæg skat (ca. 45%), driftsomkostninger, ferie, sygdom og administrativ tid. Divider med dine fakturerbare timer. Vores beregner hjælper dig med dette.",
-  },
-  {
-    question: "Hvad er en normal timepris for en konsulent?",
-    answer:
-      "Timepriser varierer meget efter branche og erfaring. IT-konsulenter tager typisk 800-1.500 kr/time, mens håndværkere ligger på 400-600 kr/time. Specialister kan tage betydeligt mere.",
-  },
-  {
-    question: "Skal jeg lægge moms på min timepris?",
-    answer:
-      "Ja, hvis du er momsregistreret (omsætning over 50.000 kr/år), skal du lægge 25% moms oven i din timepris. Prisen du kommunikerer bør være ekskl. moms ved B2B-salg.",
-  },
-  {
-    question: "Hvor mange timer kan jeg fakturere om måneden?",
-    answer:
-      "Realistisk set kan de fleste freelancere fakturere 100-130 timer/måned. Resten går til salg, administration, uddannelse og perioder uden opgaver. Start konservativt i dine beregninger.",
-  },
-  {
-    question: "Hvorfor er min timepris højere end en fastansat?",
-    answer:
-      "Som freelancer har du ingen betalt ferie, pension, forsikringer eller garanteret arbejde. Du betaler selv for udstyr og software. Din timepris skal dække alle disse omkostninger.",
-  },
-  {
-    question: "Kan jeg hæve min timepris over tid?",
-    answer:
-      "Ja, det er normalt at hæve timeprisen årligt (fx 3-5%) eller når du får mere erfaring. Det er lettere at starte med en fair pris end at hæve den drastisk senere.",
-  },
-];
+export default async function TimeprisPage() {
+  const locale = await getLocale();
+  const domainConfig = await getCurrentDomainConfig();
+  const pageData = getPageData("timepris", locale) || getPageData("timepris", "da")!;
 
-const relatedCalculators = [
-  {
-    title: "Løn efter skat",
-    href: "/loen-efter-skat",
-    description: "Beregn din nettoløn",
-    icon: "💰",
-  },
-  {
-    title: "Momsberegner",
-    href: "/moms",
-    description: "Beregn moms på din timepris",
-    icon: "🧾",
-  },
-  {
-    title: "Feriepenge",
-    href: "/feriepenge",
-    description: "Beregn dine feriepenge",
-    icon: "🏖️",
-  },
-];
-
-export default function TimeprisPage() {
   return (
     <div className="max-w-4xl mx-auto">
       <CalculatorSchema
-        name="Timeprisberegner for Freelancere"
-        description="Gratis timeprisberegner for freelancere og selvstændige. Beregn din timepris ud fra ønsket løn."
-        url={`${baseUrl}/timepris`}
-        category="FinanceApplication"
+        name={pageData.schemaName}
+        description={pageData.schemaDescription}
+        url={`${domainConfig.baseUrl}/timepris`}
+        category={pageData.schemaCategory}
       />
-      <FAQSchema items={faqItems} />
-      <Breadcrumbs items={[{ name: "Erhverv", href: "/kategori/erhverv" }, { name: "Timeprisberegner", href: "/timepris" }]} />
+      <FAQSchema items={pageData.faqItems} />
+      <Breadcrumbs items={[{ name: pageData.breadcrumbCategory, href: pageData.breadcrumbCategoryHref }, { name: pageData.title, href: "/timepris" }]} />
 
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl md:text-4xl font-bold mb-4">
-          Timeprisberegner for Freelancere
+          {pageData.title}
         </h1>
         <p className="text-lg text-gray-600">
-          Find den rigtige timepris som freelancer eller selvstændig. Beregn ud fra din ønskede løn, 
-          eller se hvad du reelt tjener med din nuværende timepris.
+          {pageData.description}
         </p>
       </div>
 
@@ -95,6 +44,7 @@ export default function TimeprisPage() {
       </div>
 
       {/* Informativ tekst - SEO */}
+      {locale === "da" && (
       <div className="prose max-w-none mb-8">
         <h2>Sådan finder du den rigtige timepris</h2>
         <p>
@@ -102,7 +52,7 @@ export default function TimeprisPage() {
           Sætter du den <strong>for lavt</strong>, ender du med at arbejde for meget for for lidt.
           Sætter du den <strong>for højt</strong>, risikerer du at miste kunder.
         </p>
-        
+
         <h3>Faktorer der påvirker din timepris</h3>
         <ul>
           <li><strong>Erfaring og kompetencer</strong> - Jo mere specialist du er, jo højere pris</li>
@@ -132,14 +82,15 @@ export default function TimeprisPage() {
           når du bliver mere effektiv, og kunder foretrækker ofte at kende den <strong>samlede pris</strong> på forhånd.
         </p>
       </div>
+      )}
 
       {/* FAQ */}
       <div className="mb-8">
-        <FAQ items={faqItems} />
+        <FAQ items={pageData.faqItems} />
       </div>
 
       {/* Related Calculators */}
-      <RelatedCalculators calculators={relatedCalculators} />
+      <RelatedCalculators current="/timepris" />
     </div>
   );
 }

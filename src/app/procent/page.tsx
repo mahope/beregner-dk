@@ -1,5 +1,7 @@
 import ProcentBeregner from "@/components/ProcentBeregner";
 import { generatePageMetadata } from "@/lib/page-helpers";
+import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
+import { getPageData } from "@/lib/page-data";
 import FAQ from "@/components/FAQ";
 import RelatedCalculators from "@/components/RelatedCalculators";
 import {
@@ -9,76 +11,35 @@ import {
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Sidebar from "@/components/Sidebar";
 
-const baseUrl = "https://minberegner.dk";
-
 export async function generateMetadata() {
   return generatePageMetadata("procent");
 }
 
-const faqItems = [
-  {
-    question: "Hvordan beregner jeg procent af et tal?",
-    answer:
-      "For at beregne X% af et tal, gang tallet med X og divider med 100. Eksempel: 25% af 200 = 200 × 25 / 100 = 50.",
-  },
-  {
-    question: "Hvordan finder jeg hvor mange procent noget er af noget andet?",
-    answer:
-      "Divider den del du vil finde procent af med heltallet, og gang med 100. Eksempel: 25 er hvor mange procent af 200? 25 / 200 × 100 = 12,5%.",
-  },
-  {
-    question: "Hvordan beregner jeg procentvis stigning?",
-    answer:
-      "Procentvis stigning = ((Ny værdi - Gammel værdi) / Gammel værdi) × 100. Eksempel: Fra 100 til 125 = ((125-100) / 100) × 100 = 25% stigning.",
-  },
-  {
-    question: "Hvordan beregner jeg procentvis fald?",
-    answer:
-      "Samme formel som stigning, men resultatet bliver negativt. Fra 100 til 80 = ((80-100) / 100) × 100 = -20% (altså 20% fald).",
-  },
-  {
-    question: "Hvad er forskellen på procentpoint og procent?",
-    answer:
-      "Procentpoint er en absolut ændring i procent, mens procent er en relativ ændring. Hvis renten stiger fra 2% til 3%, er det en stigning på 1 procentpoint, men en relativ stigning på 50%.",
-  },
-  {
-    question: "Hvordan regner jeg baglæns fra procent?",
-    answer:
-      "Hvis du ved at X er Y% af noget, så er heltallet = X × (100 / Y). Eksempel: Hvis 30 er 25% af noget, så er heltallet = 30 × (100/25) = 120.",
-  },
-  {
-    question: "Hvordan lægger jeg procent til et tal?",
-    answer:
-      "Gang tallet med (1 + procent/100). Eksempel: Læg 20% til 150: 150 × 1,20 = 180. Eller beregn 20% af 150 (= 30) og læg til.",
-  },
-  {
-    question: "Hvordan trækker jeg procent fra et tal?",
-    answer:
-      "Gang tallet med (1 - procent/100). Eksempel: Træk 25% fra 200: 200 × 0,75 = 150. Eller beregn 25% af 200 (= 50) og træk fra.",
-  },
-];
+export default async function ProcentPage() {
+  const locale = await getLocale();
+  const domainConfig = await getCurrentDomainConfig();
+  const pageData = getPageData("procent", locale) || getPageData("procent", "da")!;
 
-export default function ProcentPage() {
   return (
     <div className="flex flex-col lg:flex-row gap-8">
       <div className="flex-1 min-w-0">
       <CalculatorSchema
-        name="Procentberegner"
-        description="Gratis procentberegner. Beregn procent af et tal, find procentvis stigning/fald, eller regn baglæns."
-        url={`${baseUrl}/procent`}
-        category="UtilitiesApplication"
+        name={pageData.schemaName}
+        description={pageData.schemaDescription}
+        url={`${domainConfig.baseUrl}/procent`}
+        category={pageData.schemaCategory}
       />
-      <FAQSchema items={faqItems} />
-      <Breadcrumbs items={[{ name: "Matematik", href: "/kategori/matematik" }, { name: "Procentberegner", href: "/procent" }]} />
+      <FAQSchema items={pageData.faqItems} />
+      <Breadcrumbs items={[{ name: pageData.breadcrumbCategory, href: pageData.breadcrumbCategoryHref }, { name: pageData.title, href: "/procent" }]} />
 
-      <h1 className="text-3xl font-bold mb-2">Procentberegner</h1>
+      <h1 className="text-3xl font-bold mb-2">{pageData.title}</h1>
       <p className="text-gray-600 mb-8">
-        Beregn procent af et tal, find procentvis stigning eller fald, eller
-        regn baglæns fra procent. Vælg den beregning du har brug for.
+        {pageData.description}
       </p>
 
       <ProcentBeregner />
 
+      {locale === "da" && (
       <div className="mt-12 prose max-w-none">
         <h2>Sådan bruger du procentberegneren</h2>
         <p>
@@ -188,8 +149,9 @@ export default function ProcentPage() {
           </p>
         </div>
       </div>
+      )}
 
-      <FAQ items={faqItems} />
+      <FAQ items={pageData.faqItems} />
 
       <RelatedCalculators current="/procent" />
       </div>

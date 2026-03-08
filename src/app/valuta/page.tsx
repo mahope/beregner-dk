@@ -8,87 +8,37 @@ import {
 import Breadcrumbs from "@/components/Breadcrumbs";
 import RelatedCalculators from "@/components/RelatedCalculators";
 import Sidebar from "@/components/Sidebar";
-
-const baseUrl = "https://minberegner.dk";
+import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
+import { getPageData } from "@/lib/page-data";
 
 export async function generateMetadata() {
   return generatePageMetadata("valuta");
 }
 
-const faqItems = [
-  {
-    question: "Hvad er kursen mellem DKK og EUR?",
-    answer:
-      "Den danske krone er bundet til euroen via ERM2-samarbejdet. Kursen ligger typisk omkring 7,44-7,47 DKK pr. EUR. Danmark fører fastkurspolitik over for euroen.",
-  },
-  {
-    question: "Hvorfor svinger valutakurser?",
-    answer:
-      "Valutakurser påvirkes af mange faktorer: renteniveauer, inflation, handelsbalancer, politisk stabilitet og markedets forventninger. DKK er dog relativt stabil pga. fastkurspolitikken over for EUR.",
-  },
-  {
-    question: "Hvor kan jeg veksle penge?",
-    answer:
-      "Du kan veksle penge i banker, vekselkontorer og lufthavne. Online banker og Wise tilbyder ofte bedre kurser. Sammenlign altid kurser og gebyrer inden du veksler.",
-  },
-  {
-    question: "Hvad er forskellen på købs- og salgskurs?",
-    answer:
-      "Banker og vekselkontorer køber valuta billigere (købskurs) end de sælger (salgskurs). Forskellen kaldes spread og er vekslerens fortjeneste.",
-  },
-  {
-    question: "Er kurserne på denne side aktuelle?",
-    answer:
-      "Kurserne er vejledende og opdateres ikke i realtid. Ved faktisk veksling bør du altid tjekke den aktuelle kurs hos din bank eller vekselkontor.",
-  },
-  {
-    question: "Hvad er Forex/valutahandel?",
-    answer:
-      "Forex er det internationale valutamarked, hvor valutaer handles 24/7. Det er verdens største finansielle marked med daglige omsætninger på over 6 billioner dollars.",
-  },
-];
+export default async function ValutaPage() {
+  const locale = await getLocale();
+  const domainConfig = await getCurrentDomainConfig();
+  const pageData = getPageData("valuta", locale) || getPageData("valuta", "da")!;
 
-const relatedCalculators = [
-  {
-    title: "Momsberegner",
-    href: "/moms",
-    description: "Beregn dansk moms",
-    icon: "🧾",
-  },
-  {
-    title: "Procentberegner",
-    href: "/procent",
-    description: "Beregn procenter nemt",
-    icon: "➗",
-  },
-  {
-    title: "Løn efter skat",
-    href: "/loen-efter-skat",
-    description: "Se din nettoløn",
-    icon: "💰",
-  },
-];
-
-export default function ValutaPage() {
   return (
     <div className="flex flex-col lg:flex-row gap-8">
       <div className="flex-1 min-w-0">
       <CalculatorSchema
-        name="Valutaberegner - Omregn valuta"
-        description="Gratis valutaberegner. Omregn mellem DKK, EUR, USD, GBP, SEK, NOK og mange flere valutaer."
-        url={`${baseUrl}/valuta`}
-        category="FinanceApplication"
+        name={pageData.schemaName}
+        description={pageData.schemaDescription}
+        url={`${domainConfig.baseUrl}/valuta`}
+        category={pageData.schemaCategory}
       />
-      <FAQSchema items={faqItems} />
-      <Breadcrumbs items={[{ name: "Økonomi", href: "/kategori/oekonomi" }, { name: "Valutaberegner", href: "/valuta" }]} />
-      
+      <FAQSchema items={pageData.faqItems} />
+      <Breadcrumbs items={[{ name: pageData.breadcrumbCategory, href: pageData.breadcrumbCategoryHref }, { name: pageData.title, href: "/valuta" }]} />
+
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl md:text-4xl font-bold mb-4">
-          Valutaberegner
+          {pageData.title}
         </h1>
         <p className="text-lg text-gray-600">
-          Omregn nemt mellem danske kroner og andre valutaer. Se vejledende kurser for EUR, USD, GBP, SEK, NOK og mange flere.
+          {pageData.description}
         </p>
       </div>
 
@@ -98,6 +48,7 @@ export default function ValutaPage() {
       </div>
 
       {/* Informativ tekst - SEO */}
+      {locale === "da" && (
       <div className="prose max-w-none mb-8">
         <h2>Om valutaomregning</h2>
         <p>
@@ -105,7 +56,7 @@ export default function ValutaPage() {
           Den <strong>danske krone (DKK)</strong> er bundet til euroen gennem <strong>ERM2-samarbejdet</strong>,
           hvilket betyder at kursen mellem DKK og EUR er relativt <strong>stabil</strong>.
         </p>
-        
+
         <h3>Danmarks fastkurspolitik</h3>
         <p>
           Danmark fører <strong>fastkurspolitik</strong> over for euroen. Det betyder, at <strong>Nationalbanken</strong>
@@ -131,14 +82,15 @@ export default function ValutaPage() {
           <li>Veksle aldrig mere end nødvendigt - du taber på begge veje</li>
         </ul>
       </div>
+      )}
 
       {/* FAQ */}
       <div className="mb-8">
-        <FAQ items={faqItems} />
+        <FAQ items={pageData.faqItems} />
       </div>
 
       {/* Related Calculators */}
-      <RelatedCalculators calculators={relatedCalculators} />
+      <RelatedCalculators current="/valuta" />
       </div>
       <Sidebar currentHref="/valuta" adSlotId="valuta-sidebar" />
     </div>

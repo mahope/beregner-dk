@@ -1,4 +1,6 @@
 import { generatePageMetadata } from "@/lib/page-helpers";
+import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
+import { getPageData } from "@/lib/page-data";
 import FeriepengeBeregner from "@/components/FeriepengeBeregner";
 import FAQ from "@/components/FAQ";
 import RelatedCalculators from "@/components/RelatedCalculators";
@@ -8,75 +10,34 @@ import {
 } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
 
-const baseUrl = "https://minberegner.dk";
-
 export async function generateMetadata() {
   return generatePageMetadata("feriepenge");
 }
 
-const faqItems = [
-  {
-    question: "Hvordan beregnes mine feriepenge?",
-    answer:
-      "Du optjener 12,5% af din ferieberettigede løn i feriepenge. Det svarer til 2,08 feriedag per måned eller 25 dage om året (5 ugers ferie). Ved udbetaling trækkes AM-bidrag (8%) og A-skat.",
-  },
-  {
-    question: "Hvornår kan jeg få mine feriepenge udbetalt?",
-    answer:
-      "Du kan anmode om udbetaling fra feriekonto.dk tidligst 1 måned før feriens start. Ved jobskifte kan ikke-afholdt ferie overføres eller udbetales. 5. ferieuge kan udbetales uden at afholde ferie efter ferieåret.",
-  },
-  {
-    question: "Hvad er forskellen på feriepenge og ferie med løn?",
-    answer:
-      "Timelønnede får feriepenge (12,5% af lønnen opspares i FerieKonto). Månedslønnede funktionærer får ferie med løn - altså normal løn under ferie plus et ferietillæg på typisk 1%.",
-  },
-  {
-    question: "Hvornår er ferieåret?",
-    answer:
-      "Med den nye ferielov (fra 2020) er optjeningsperioden 1. september til 31. august, og ferieåret løber fra 1. september til 31. december året efter. Du kan afholde ferie løbende.",
-  },
-  {
-    question: "Hvad sker der med mine feriepenge hvis jeg skifter job?",
-    answer:
-      "Ved jobskifte indbetaler din arbejdsgiver dine optjente feriepenge til FerieKonto. Du kan vælge at få dem udbetalt eller overføre dem til brug ved din nye arbejdsgiver.",
-  },
-  {
-    question: "Bliver feriepenge beskattet?",
-    answer:
-      "Ja, feriepenge beskattes som almindelig A-indkomst. Først trækkes AM-bidrag (8%), derefter A-skat efter dit skattekort. Pengene indberettes automatisk til SKAT.",
-  },
-  {
-    question: "Hvad er ferieberettiget løn?",
-    answer:
-      "Ferieberettiget løn inkluderer fast løn, bonus, provision, overtid og tillæg. Det inkluderer IKKE arbejdsgiverbetalt pension, skattefrie godtgørelser (kørsel, rejse) og lignende.",
-  },
-  {
-    question: "Kan jeg få feriepenge udbetalt uden at holde ferie?",
-    answer:
-      "Din 5. ferieuge kan udbetales uden at du holder ferie, men først efter ferieårets udløb. De første 4 ugers ferie skal som udgangspunkt afholdes som faktisk ferie.",
-  },
-];
+export default async function FeriepengePage() {
+  const locale = await getLocale();
+  const domainConfig = await getCurrentDomainConfig();
+  const pageData = getPageData("feriepenge", locale) || getPageData("feriepenge", "da")!;
 
-export default function FeriepengePage() {
   return (
     <div>
       <CalculatorSchema
-        name="Feriepenge Beregner"
-        description="Gratis feriepenge beregner. Beregn hvor meget du får udbetalt i feriepenge."
-        url={`${baseUrl}/feriepenge`}
-        category="FinanceApplication"
+        name={pageData.schemaName}
+        description={pageData.schemaDescription}
+        url={`${domainConfig.baseUrl}/feriepenge`}
+        category={pageData.schemaCategory}
       />
-      <FAQSchema items={faqItems} />
-      <Breadcrumbs items={[{ name: "Økonomi", href: "/kategori/oekonomi" }, { name: "Feriepenge Beregner", href: "/feriepenge" }]} />
+      <FAQSchema items={pageData.faqItems} />
+      <Breadcrumbs items={[{ name: pageData.breadcrumbCategory, href: pageData.breadcrumbCategoryHref }, { name: pageData.title, href: "/feriepenge" }]} />
 
-      <h1 className="text-3xl font-bold mb-2">Feriepenge Beregner 2026</h1>
+      <h1 className="text-3xl font-bold mb-2">{pageData.title}</h1>
       <p className="text-gray-600 mb-8">
-        Beregn hvor meget du får udbetalt i feriepenge baseret på din løn.
-        Opdateret med aktuelle skattesatser for 2026.
+        {pageData.description}
       </p>
 
       <FeriepengeBeregner />
 
+      {locale === "da" && (
       <div className="mt-12 prose max-w-none">
         <h2>Sådan beregnes feriepenge i 2026</h2>
         <p>
@@ -179,8 +140,9 @@ export default function FeriepengePage() {
           </p>
         </div>
       </div>
+      )}
 
-      <FAQ items={faqItems} />
+      <FAQ items={pageData.faqItems} />
 
       <RelatedCalculators current="/feriepenge" />
     </div>

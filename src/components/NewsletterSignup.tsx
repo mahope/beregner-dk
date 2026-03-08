@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { useLocale } from "@/components/LocaleProvider";
+import { t } from "@/lib/i18n";
 
 interface NewsletterSignupProps {
   variant?: "inline" | "card";
@@ -11,6 +13,8 @@ export default function NewsletterSignup({
   variant = "card",
   className = "",
 }: NewsletterSignupProps) {
+  const { locale } = useLocale();
+  const l = locale as "da" | "no" | "se";
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const formRef = useRef<HTMLFormElement>(null);
@@ -21,7 +25,6 @@ export default function NewsletterSignup({
 
     setStatus("loading");
 
-    // Buttondown API integration
     try {
       const res = await fetch("https://api.buttondown.com/v1/subscribers", {
         method: "POST",
@@ -33,13 +36,11 @@ export default function NewsletterSignup({
         setStatus("success");
         setEmail("");
       } else {
-        // Fallback: open Buttondown subscribe page
         window.open(`https://buttondown.com/minberegner?email=${encodeURIComponent(email)}`, "_blank");
         setStatus("success");
         setEmail("");
       }
     } catch {
-      // Fallback: open Buttondown subscribe page
       window.open(`https://buttondown.com/minberegner?email=${encodeURIComponent(email)}`, "_blank");
       setStatus("success");
       setEmail("");
@@ -50,10 +51,10 @@ export default function NewsletterSignup({
     return (
       <div className={`rounded-2xl p-6 bg-green-50 dark:bg-green-900/20 text-center ${className}`}>
         <p className="text-green-700 dark:text-green-300 font-medium">
-          Tak for din tilmelding!
+          {t(l, "ui.newsletterConfirmation")}
         </p>
         <p className="text-sm text-green-600 dark:text-green-400 mt-1">
-          Du modtager en bekræftelse på email.
+          {t(l, "ui.newsletterConfirmationSub")}
         </p>
       </div>
     );
@@ -68,7 +69,7 @@ export default function NewsletterSignup({
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="Din email"
+          placeholder={t(l, "ui.newsletterPlaceholder")}
           required
           className="flex-1 px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         />
@@ -77,7 +78,7 @@ export default function NewsletterSignup({
           disabled={status === "loading"}
           className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50"
         >
-          {status === "loading" ? "..." : "Tilmeld"}
+          {status === "loading" ? t(l, "ui.newsletterSending") : t(l, "ui.newsletterHeading")}
         </button>
       </form>
     );
@@ -86,10 +87,10 @@ export default function NewsletterSignup({
   return (
     <div className={`rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-100 dark:border-blue-800 p-6 ${className}`}>
       <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
-        Få besked når satser ændres
+        {t(l, "ui.newsletterHeading")}
       </h3>
       <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-        Modtag opdateringer om nye 2026-satser og beregnere direkte i din indbakke. Gratis og ingen spam.
+        {t(l, "ui.newsletterBody")}
       </p>
       <form onSubmit={handleSubmit} ref={formRef} className="flex gap-2">
         <label htmlFor="newsletter-email" className="sr-only">Email</label>
@@ -98,7 +99,7 @@ export default function NewsletterSignup({
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="din@email.dk"
+          placeholder={t(l, "ui.newsletterPlaceholder")}
           required
           className="flex-1 px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         />
@@ -107,16 +108,16 @@ export default function NewsletterSignup({
           disabled={status === "loading"}
           className="px-5 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 whitespace-nowrap"
         >
-          {status === "loading" ? "Sender..." : "Tilmeld"}
+          {status === "loading" ? t(l, "ui.newsletterSending") : t(l, "ui.newsletterHeading")}
         </button>
       </form>
       {status === "error" && (
         <p className="text-sm text-red-600 dark:text-red-400 mt-2">
-          Noget gik galt. Prøv igen.
+          {t(l, "ui.newsletterError")}
         </p>
       )}
       <p className="text-xs text-gray-400 dark:text-gray-500 mt-3">
-        Vi deler aldrig din email. Afmeld når som helst.
+        {t(l, "ui.newsletterPrivacy")}
       </p>
     </div>
   );

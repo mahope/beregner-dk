@@ -6,11 +6,14 @@ import { ShareCalculation } from "@/components/ShareCalculation";
 import { PrintResult } from "@/components/PrintResult";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { AnimatedNumber, CopyResultButton, ResetButton } from "@/components/ui";
+import { useLocale } from '@/components/LocaleProvider';
+import { formatCurrency, getCurrencySuffix } from '@/lib/format';
 
 // Dansk momssats
 const MOMS_SATS = 0.25; // 25%
 
 export default function MomsBeregner() {
+  const { locale } = useLocale();
   const [beloeb, setBeloeb] = useState<number>(1000);
   const [beregningsType, setBeregningsType] = useState<"tillaegMoms" | "fratraekMoms" | "findMoms">("tillaegMoms");
   const hasTracked = useRef(false);
@@ -101,14 +104,7 @@ export default function MomsBeregner() {
     }
   }, [beregning]);
 
-  const formatKr = (amount: number) => {
-    return new Intl.NumberFormat("da-DK", {
-      style: "currency",
-      currency: "DKK",
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(amount);
-  };
+  const formatKr = (amount: number) => formatCurrency(amount, locale);
 
   const getInputLabel = () => {
     switch (beregningsType) {
@@ -175,7 +171,7 @@ export default function MomsBeregner() {
             onChange={(e) => setBeloeb(parseFloat(e.target.value) || 0)}
             className="w-full px-4 py-3 border rounded-lg text-lg pr-12"
           />
-          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">kr</span>
+          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">{getCurrencySuffix(locale)}</span>
         </div>
       </div>
 

@@ -7,6 +7,8 @@ import { ShareCalculation } from "@/components/ShareCalculation";
 import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
+import { useLocale } from '@/components/LocaleProvider';
+import { formatCurrency } from '@/lib/format';
 
 interface AarData {
   aar: number;
@@ -17,6 +19,7 @@ interface AarData {
 }
 
 export default function PensionBeregner() {
+  const { locale } = useLocale();
   const [alder, setAlder] = useState<number>(30);
   const [pensionsalder, setPensionsalder] = useState<number>(68);
   const [maanedligIndbetaling, setMaanedligIndbetaling] = useState<number>(3000);
@@ -180,13 +183,7 @@ export default function PensionBeregner() {
     };
   }, [alder, pensionsalder, maanedligIndbetaling, nuværendeOpsparing, forventetAfkast, inflation, udbetalingsperiode, oensketMaanedlig]);
 
-  const formatKr = (amount: number) => {
-    return new Intl.NumberFormat("da-DK", {
-      style: "currency",
-      currency: "DKK",
-      maximumFractionDigits: 0,
-    }).format(amount);
-  };
+  const formatKr = (amount: number) => formatCurrency(amount, locale, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 
   return (
     <div className="space-y-8">

@@ -1,4 +1,6 @@
 import { generatePageMetadata } from "@/lib/page-helpers";
+import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
+import { getPageData } from "@/lib/page-data";
 import AktieskatBeregner from "@/components/AktieskatBeregner";
 import FAQ from "@/components/FAQ";
 import {
@@ -9,66 +11,35 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import RelatedCalculators from "@/components/RelatedCalculators";
 import Sidebar from "@/components/Sidebar";
 
-const baseUrl = "https://minberegner.dk";
-
 export async function generateMetadata() {
   return generatePageMetadata("aktieskat");
 }
 
-const faqItems = [
-  {
-    question: "Hvor meget skat betaler jeg af aktiegevinst i 2026?",
-    answer: "I 2026 beskattes aktieindkomst i frit depot med 27% af de første 61.000 kr. (122.000 kr. for ægtepar) og 42% af beløb derover. I en aktiesparekonto (ASK) er satsen kun 17%.",
-  },
-  {
-    question: "Hvad er forskellen på frit depot og aktiesparekonto?",
-    answer: "I frit depot beskattes du ved realisationsbeskatning (27/42% når du sælger). I en aktiesparekonto (ASK) beskattes du med 17% lagerbeskatning (skat af urealiserede gevinster årligt). ASK har max indskud på 135.300 kr. i 2026.",
-  },
-  {
-    question: "Hvad er progressionsgrænsen for aktieskat i 2026?",
-    answer: "Progressionsgrænsen er 61.000 kr. i 2026. Aktieindkomst under denne grænse beskattes med 27%, og beløb over grænsen beskattes med 42%. For ægtepar er grænsen 122.000 kr. samlet.",
-  },
-  {
-    question: "Kan jeg modregne tab i aktiegevinster?",
-    answer: "Ja, tab på aktier kan modregnes i gevinster. Har du et nettotab, kan det fremføres til modregning i fremtidige aktiegevinster. Tab i frit depot kan kun modregnes i gevinster fra frit depot.",
-  },
-  {
-    question: "Hvad er lagerbeskatning?",
-    answer: "Lagerbeskatning betyder at du betaler skat af årets urealiserede gevinst — altså stigningen i værdi, selv om du ikke har solgt. Aktiesparekontoen bruger lagerbeskatning med en sats på 17%.",
-  },
-  {
-    question: "Hvornår skal jeg betale aktieskat?",
-    answer: "For frit depot betaler du skat i det år du sælger aktierne (realisationsbeskatning). For ASK betaler du skat årligt af årets værdistigning (lagerbeskatning). Skatten indberettes automatisk af din bank.",
-  },
-];
+export default async function AktieskatPage() {
+  const locale = await getLocale();
+  const domainConfig = await getCurrentDomainConfig();
+  const pageData = getPageData("aktieskat", locale) || getPageData("aktieskat", "da")!;
 
-const relatedCalculators = [
-  { title: "Opsparingsberegner", description: "Beregn renters rente på din opsparing", href: "/opsparing", icon: "📈" },
-  { title: "Rentefradrag", description: "Beregn din skattebesparelse på renter", href: "/rentefradrag", icon: "🏦" },
-  { title: "Løn efter skat", description: "Se hvad du får udbetalt", href: "/loen-efter-skat", icon: "💰" },
-  { title: "Pensionsberegner", description: "Beregn din fremtidige pension", href: "/pension", icon: "🧓" },
-];
-
-export default function AktieskatPage() {
   return (
     <div className="flex flex-col lg:flex-row gap-8">
       <div className="flex-1 min-w-0">
         <CalculatorSchema
-          name="Aktieskat Beregner 2026"
-          description="Beregn skat på aktieindkomst i 2026. Sammenlign frit depot (27/42%) med aktiesparekonto (17%)."
-          url={`${baseUrl}/aktieskat`}
-          category="FinanceApplication"
+          name={pageData.schemaName}
+          description={pageData.schemaDescription}
+          url={`${domainConfig.baseUrl}/aktieskat`}
+          category={pageData.schemaCategory}
         />
-        <FAQSchema items={faqItems} />
-        <Breadcrumbs items={[{ name: "Økonomi", href: "/kategori/oekonomi" }, { name: "Aktieskat Beregner", href: "/aktieskat" }]} />
+        <FAQSchema items={pageData.faqItems} />
+        <Breadcrumbs items={[{ name: pageData.breadcrumbCategory, href: pageData.breadcrumbCategoryHref }, { name: pageData.title, href: "/aktieskat" }]} />
 
-        <h1 className="text-3xl font-bold mb-2 dark:text-white">Aktieskat Beregner 2026</h1>
+        <h1 className="text-3xl font-bold mb-2 dark:text-white">{pageData.title}</h1>
         <p className="text-gray-600 dark:text-gray-300 mb-8">
-          Beregn hvor meget du skal betale i skat af dine aktiegevinster. Sammenlign beskatning i frit depot (27/42%) med aktiesparekonto (17%).
+          {pageData.description}
         </p>
 
         <AktieskatBeregner />
 
+        {locale === "da" && (
         <div className="mt-12 prose dark:prose-invert max-w-none">
           <h2>Aktieskat i Danmark 2026</h2>
           <p>
@@ -113,9 +84,10 @@ export default function AktieskatPage() {
             <strong>Tab på aktier</strong> kan modregnes i gevinster inden for samme depot-type. Har du et <strong>nettotab</strong> i et år, kan det <strong>fremføres til modregning</strong> i fremtidige gevinster. Vær opmærksom på at tab i frit depot <strong>ikke kan modregnes</strong> i ASK-gevinster og omvendt.
           </p>
         </div>
+        )}
 
-        <FAQ items={faqItems} />
-        <RelatedCalculators calculators={relatedCalculators} />
+        <FAQ items={pageData.faqItems} />
+        <RelatedCalculators current="/aktieskat" />
       </div>
 
       <Sidebar currentHref="/aktieskat" adSlotId="aktieskat-sidebar" />

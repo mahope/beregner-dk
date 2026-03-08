@@ -1,4 +1,6 @@
 import { generatePageMetadata } from "@/lib/page-helpers";
+import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
+import { getPageData } from "@/lib/page-data";
 import DagpengeBeregner from "@/components/DagpengeBeregner";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
@@ -6,73 +8,34 @@ import { FAQ } from "@/components/FAQ";
 import { RelatedCalculators } from "@/components/RelatedCalculators";
 import Sidebar from "@/components/Sidebar";
 
-const baseUrl = "https://minberegner.dk";
-
 export async function generateMetadata() {
   return generatePageMetadata("dagpenge");
 }
 
-const faqItems = [
-  {
-    question: "Hvordan beregnes dagpenge?",
-    answer:
-      "Dagpenge beregnes som 90% af din løn efter fradrag af 8% AM-bidrag, dog højst maxsatsen på 22.041 kr/md i 2026. Din A-kasse ser på din gennemsnitlige indtægt de seneste 12 måneder.",
-  },
-  {
-    question: "Hvad er maxsatsen for dagpenge i 2026?",
-    answer:
-      "I 2026 er den maksimale dagpengesats 22.041 kr/md før skat for fuldtidsforsikrede. Med beskæftigelsestillæg kan satsen de første 3 måneder være op til 26.198 kr/md.",
-  },
-  {
-    question: "Hvad er beskæftigelsestillægget?",
-    answer:
-      "Beskæftigelsestillægget er et ekstra tillæg de første 3 måneders ledighed, som kan give op til 26.198 kr/md i 2026. Tillægget kræver at du opfylder visse beskæftigelseskrav.",
-  },
-  {
-    question: "Hvor længe kan jeg få dagpenge?",
-    answer:
-      "Dagpengeperioden er normalt 2 år (3.848 timer) inden for 3 år. Perioden kan forlænges ved arbejde eller uddannelse.",
-  },
-  {
-    question: "Skal jeg betale skat af dagpenge?",
-    answer:
-      "Ja, dagpenge er skattepligtig indkomst. Der trækkes A-skat efter dit skattekort. Du kan bruge vores løn efter skat beregner til at estimere nettobeløbet.",
-  },
-  {
-    question: "Hvornår har jeg ret til dagpenge?",
-    answer:
-      "Du skal have været medlem af en A-kasse i mindst 1 år, have haft en vis indkomst (indkomstkravet på ca. 263.232 kr over 3 år), og være aktivt jobsøgende og tilmeldt jobcentret.",
-  },
-];
+export default async function DagpengePage() {
+  const locale = await getLocale();
+  const domainConfig = await getCurrentDomainConfig();
+  const pageData = getPageData("dagpenge", locale) || getPageData("dagpenge", "da")!;
 
-const relatedCalcs = [
-  { href: "/loen-efter-skat", title: "Løn efter skat", description: "Beregn din nettoløn" },
-  { href: "/feriepenge", title: "Feriepenge", description: "Beregn dine feriepenge" },
-  { href: "/su", title: "SU-beregner", description: "Beregn din SU" },
-  { href: "/boernepenge", title: "Børnepenge", description: "Se børne- og ungeydelse" },
-];
-
-export default function DagpengePage() {
   return (
     <div className="flex flex-col lg:flex-row gap-8">
       <div className="flex-1 min-w-0">
       <CalculatorSchema
-        name="Dagpengeberegner 2026"
-        description="Beregn hvad du kan få i dagpenge baseret på din tidligere løn"
-        url={`${baseUrl}/dagpenge`}
-        category="FinanceApplication"
+        name={pageData.schemaName}
+        description={pageData.schemaDescription}
+        url={`${domainConfig.baseUrl}/dagpenge`}
+        category={pageData.schemaCategory}
       />
-      <FAQSchema items={faqItems} />
-      <Breadcrumbs items={[{ name: "Økonomi", href: "/kategori/oekonomi" }, { name: "Dagpengeberegner", href: "/dagpenge" }]} />
+      <FAQSchema items={pageData.faqItems} />
+      <Breadcrumbs items={[{ name: pageData.breadcrumbCategory, href: pageData.breadcrumbCategoryHref }, { name: pageData.title, href: "/dagpenge" }]} />
 
       {/* Header */}
       <div className="text-center mb-8">
         <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-          Dagpengeberegner 2026
+          {pageData.title}
         </h1>
         <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-          Find ud af hvad du kan få i dagpenge hvis du bliver ledig. Beregneren bruger 
-          de aktuelle satser for 2026.
+          {pageData.description}
         </p>
       </div>
 
@@ -80,6 +43,7 @@ export default function DagpengePage() {
       <DagpengeBeregner />
 
       {/* Info sektion */}
+      {locale === "da" && (
       <section className="mt-12 prose prose-blue max-w-none dark:prose-invert">
         <h2>Sådan fungerer dagpenge i 2026</h2>
         <p>
@@ -143,18 +107,19 @@ export default function DagpengePage() {
           </p>
         </div>
       </section>
+      )}
 
       {/* FAQ */}
       <section className="mt-12">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">
           Ofte stillede spørgsmål om dagpenge
         </h2>
-        <FAQ items={faqItems} />
+        <FAQ items={pageData.faqItems} />
       </section>
 
       {/* Related */}
       <section className="mt-12">
-        <RelatedCalculators calculators={relatedCalcs} />
+        <RelatedCalculators current="/dagpenge" />
       </section>
       </div>
       <Sidebar currentHref="/dagpenge" adSlotId="dagpenge-sidebar" />

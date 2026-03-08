@@ -5,6 +5,8 @@ import { ShareCalculation } from "@/components/ShareCalculation";
 import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState, ShareableLink } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
+import { useLocale } from '@/components/LocaleProvider';
+import { formatNumber as formatNum, getCurrencySuffix } from '@/lib/format';
 
 // 2026 fradragssatser og grænser
 const SATSER_2026 = {
@@ -32,6 +34,7 @@ const SATSER_2026 = {
 };
 
 export default function SkattefradragBeregner() {
+  const { locale } = useLocale();
   // Kørselsfradrag
   const [afstandKm, setAfstandKm] = useState<string>("");
   const [arbejdsdage, setArbejdsdage] = useState<string>("216");
@@ -164,7 +167,7 @@ export default function SkattefradragBeregner() {
     hasTracked.current = false;
   }, []);
 
-  const formatKr = (n: number) => n.toLocaleString("da-DK") + " kr.";
+  const formatKr = (n: number) => formatNum(n, locale) + " " + getCurrencySuffix(locale);
 
   return (
     <div className="space-y-6">
@@ -211,7 +214,7 @@ export default function SkattefradragBeregner() {
             <input id="aarligRente" type="number" value={aarligRente} onChange={(e) => setAarligRente(e.target.value)}
               placeholder="F.eks. 40000" min="0"
               className="w-full border border-gray-300 dark:border-gray-600 rounded-lg py-3 px-4 pr-12 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">kr.</span>
+            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">{getCurrencySuffix(locale)}</span>
           </div>
         </div>
         <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -231,7 +234,7 @@ export default function SkattefradragBeregner() {
               <input id="fagforening" type="number" value={fagforening} onChange={(e) => setFagforening(e.target.value)}
                 placeholder="F.eks. 5000" min="0"
                 className="w-full border border-gray-300 dark:border-gray-600 rounded-lg py-3 px-4 pr-12 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">kr.</span>
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">{getCurrencySuffix(locale)}</span>
             </div>
           </div>
           <div>
@@ -242,7 +245,7 @@ export default function SkattefradragBeregner() {
               <input id="aKasse" type="number" value={aKasse} onChange={(e) => setAKasse(e.target.value)}
                 placeholder="F.eks. 4000" min="0"
                 className="w-full border border-gray-300 dark:border-gray-600 rounded-lg py-3 px-4 pr-12 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">kr.</span>
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">{getCurrencySuffix(locale)}</span>
             </div>
           </div>
         </div>
@@ -260,7 +263,7 @@ export default function SkattefradragBeregner() {
               <input id="haandvaerker" type="number" value={haandvaerker} onChange={(e) => setHaandvaerker(e.target.value)}
                 placeholder="F.eks. 10000" min="0"
                 className="w-full border border-gray-300 dark:border-gray-600 rounded-lg py-3 px-4 pr-12 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">kr.</span>
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">{getCurrencySuffix(locale)}</span>
             </div>
           </div>
           <div>
@@ -271,7 +274,7 @@ export default function SkattefradragBeregner() {
               <input id="serviceydelser" type="number" value={serviceydelser} onChange={(e) => setServiceydelser(e.target.value)}
                 placeholder="F.eks. 5000" min="0"
                 className="w-full border border-gray-300 dark:border-gray-600 rounded-lg py-3 px-4 pr-12 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">kr.</span>
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">{getCurrencySuffix(locale)}</span>
             </div>
           </div>
         </div>
@@ -292,7 +295,7 @@ export default function SkattefradragBeregner() {
               <input id="donationer" type="number" value={donationer} onChange={(e) => setDonationer(e.target.value)}
                 placeholder="0" min="0"
                 className="w-full border border-gray-300 dark:border-gray-600 rounded-lg py-3 px-4 pr-12 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">kr.</span>
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">{getCurrencySuffix(locale)}</span>
             </div>
           </div>
           <div>
@@ -303,7 +306,7 @@ export default function SkattefradragBeregner() {
               <input id="oevrigeFradrag" type="number" value={oevrigeFradrag} onChange={(e) => setOevrigeFradrag(e.target.value)}
                 placeholder="0" min="0"
                 className="w-full border border-gray-300 dark:border-gray-600 rounded-lg py-3 px-4 pr-12 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">kr.</span>
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">{getCurrencySuffix(locale)}</span>
             </div>
           </div>
         </div>

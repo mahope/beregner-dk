@@ -1,6 +1,8 @@
 "use client";
 
 import { Printer } from "lucide-react";
+import { useLocale } from "@/components/LocaleProvider";
+import { getIntlLocale } from "@/lib/format";
 
 interface PrintResultProps {
   /** Beregner navn til print header */
@@ -16,15 +18,17 @@ export function PrintResult({
   resultSummary,
   printAreaSelector,
 }: PrintResultProps) {
+  const { locale, domainConfig } = useLocale();
+  const intlLocale = getIntlLocale(locale);
   const handlePrint = () => {
     // Tilføj print-meta data til document for styling
     const printMeta = document.createElement("div");
     printMeta.id = "print-meta";
     printMeta.innerHTML = `
       <div class="print-header">
-        <div class="print-logo">📊 Minberegner.dk</div>
+        <div class="print-logo">📊 ${domainConfig.siteName}</div>
         <div class="print-title">${calculatorName}</div>
-        <div class="print-date">Udskrevet: ${new Date().toLocaleDateString("da-DK", {
+        <div class="print-date">${locale === "se" ? "Utskrivet" : "Udskrevet"}: ${new Date().toLocaleDateString(intlLocale, {
           year: "numeric",
           month: "long",
           day: "numeric",

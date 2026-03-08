@@ -1,4 +1,6 @@
 import { generatePageMetadata } from "@/lib/page-helpers";
+import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
+import { getPageData } from "@/lib/page-data";
 import EjendomsvaerdiskatBeregner from "@/components/EjendomsvaerdiskatBeregner";
 import FAQ from "@/components/FAQ";
 import RelatedCalculators from "@/components/RelatedCalculators";
@@ -8,74 +10,33 @@ import {
 } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
 
-const baseUrl = "https://minberegner.dk";
-
 export async function generateMetadata() {
   return generatePageMetadata("ejendomsvaerdiskat");
 }
 
-const ejendomsFaqItems = [
-  {
-    question: "Hvad er ejendomsværdiskatten i 2026?",
-    answer:
-      "Ejendomsværdiskatten beregnes som 5,1‰ (0,51%) af 80% af ejendomsværdien op til progressionsgrænsen på 9.007.000 kr, og 14‰ (1,4%) af beløbet derover. De 80% skyldes forsigtighedsfradraget på 20%.",
-  },
-  {
-    question: "Hvad er forsigtighedsfradraget?",
-    answer:
-      "Forsigtighedsfradraget er 20% af den offentlige vurdering. Du betaler kun skat af 80% af den vurderede ejendomsværdi og grundværdi. Fradraget kompenserer for usikkerheden i de nye vurderinger.",
-  },
-  {
-    question: "Hvad er grundskyld?",
-    answer:
-      "Grundskyld er en skat på din grunds værdi (ikke bygningen). Den beregnes som kommunens grundskyldspromille ganget med 80% af grundværdien. Promillen varierer fra 3,1‰ (Frederiksberg) til 17,7‰ (Varde).",
-  },
-  {
-    question: "Hvad er progressionsgrænsen for ejendomsværdiskat?",
-    answer:
-      "Progressionsgrænsen er 9.007.000 kr for 2026-2027 (beskatningsgrundlag efter forsigtighedsfradrag). Det svarer til en ejendomsværdi på ca. 11,3 mio. kr. Beløbet over grænsen beskattes med 14‰ i stedet for 5,1‰.",
-  },
-  {
-    question: "Hvornår betaler man ejendomsskat?",
-    answer:
-      "Ejendomsskatten betales via din ejendomsskattebillet fra kommunen. Betalingen sker typisk i to rater — marts og september. Ejendomsværdiskatten opkræves via årsopgørelsen.",
-  },
-  {
-    question: "Hvad er overgangsordningen?",
-    answer:
-      "For at beskytte boligejere mod pludselige skattestigninger er der en overgangsordning. Hvis din skat stiger med det nye system, indfases stigningen gradvist over flere år via en skatterabat.",
-  },
-  {
-    question: "Gælder de nye regler for sommerhuse?",
-    answer:
-      "Ja, de nye ejendomsværdiskattesatser (5,1‰ / 14‰) og forsigtighedsfradraget gælder også for sommerhuse. Grundskyldspromillen afhænger af den kommune, sommerhuset ligger i.",
-  },
-  {
-    question: "Hvor finder jeg min ejendomsvurdering?",
-    answer:
-      "Du kan se din ejendomsvurdering på vurderingsportalen.dk. Her finder du både ejendomsværdi og grundværdi, som bruges til at beregne din ejendomsskat.",
-  },
-];
+export default async function EjendomsvaerdiskatPage() {
+  const locale = await getLocale();
+  const domainConfig = await getCurrentDomainConfig();
+  const pageData = getPageData("ejendomsvaerdiskat", locale) || getPageData("ejendomsvaerdiskat", "da")!;
 
-export default function EjendomsvaerdiskatPage() {
   return (
     <div>
-      <FAQSchema items={ejendomsFaqItems} />
+      <FAQSchema items={pageData.faqItems} />
       <CalculatorSchema
-        name="Ejendomsværdiskat beregner 2026"
-        description="Beregn din ejendomsværdiskat og grundskyld med det nye boligskattesystem. 5,1‰ / 14‰ satser og kommunale grundskyldspromiller."
-        url={`${baseUrl}/ejendomsvaerdiskat`}
-        category="FinanceApplication"
+        name={pageData.schemaName}
+        description={pageData.schemaDescription}
+        url={`${domainConfig.baseUrl}/ejendomsvaerdiskat`}
+        category={pageData.schemaCategory}
       />
-      <Breadcrumbs items={[{ name: "Bolig", href: "/kategori/bolig" }, { name: "Ejendomsværdiskat beregner", href: "/ejendomsvaerdiskat" }]} />
-      <h1 className="text-3xl font-bold mb-2">Ejendomsværdiskat beregner 2026</h1>
+      <Breadcrumbs items={[{ name: pageData.breadcrumbCategory, href: pageData.breadcrumbCategoryHref }, { name: pageData.title, href: "/ejendomsvaerdiskat" }]} />
+      <h1 className="text-3xl font-bold mb-2">{pageData.title}</h1>
       <p className="text-gray-600 dark:text-gray-400 mb-8">
-        Beregn hvor meget du skal betale i ejendomsværdiskat og grundskyld med det
-        nye boligskattesystem. Opdateret med 2026-satser og kommunale grundskyldspromiller.
+        {pageData.description}
       </p>
 
       <EjendomsvaerdiskatBeregner />
 
+      {locale === "da" && (
       <div className="mt-12 prose max-w-none dark:prose-invert">
         <h2>Det nye boligskattesystem (fra 2024)</h2>
         <p>
@@ -90,8 +51,8 @@ export default function EjendomsvaerdiskatPage() {
           {" "}(et såkaldt forsigtighedsfradrag på 20%). Satserne er:
         </p>
         <ul>
-          <li><strong>5,1‰ (0,51%)</strong> af beskatningsgrundlaget op til progressionsgrænsen</li>
-          <li><strong>14‰ (1,4%)</strong> af beskatningsgrundlaget over progressionsgrænsen</li>
+          <li><strong>5,1&permil; (0,51%)</strong> af beskatningsgrundlaget op til progressionsgrænsen</li>
+          <li><strong>14&permil; (1,4%)</strong> af beskatningsgrundlaget over progressionsgrænsen</li>
         </ul>
         <p>
           <strong>Progressionsgrænsen</strong> er 9.007.000 kr for 2026-2027 (beskatningsgrundlag).
@@ -108,33 +69,33 @@ export default function EjendomsvaerdiskatPage() {
           <thead>
             <tr>
               <th>Kommune</th>
-              <th>Grundskyldspromille (‰)</th>
+              <th>Grundskyldspromille (&permil;)</th>
             </tr>
           </thead>
           <tbody>
             <tr>
               <td>Frederiksberg (lavest)</td>
-              <td>3,1‰</td>
+              <td>3,1&permil;</td>
             </tr>
             <tr>
               <td>København</td>
-              <td>5,1‰</td>
+              <td>5,1&permil;</td>
             </tr>
             <tr>
               <td>Odense</td>
-              <td>5,7‰</td>
+              <td>5,7&permil;</td>
             </tr>
             <tr>
               <td>Aarhus</td>
-              <td>6,0‰</td>
+              <td>6,0&permil;</td>
             </tr>
             <tr>
               <td>Aalborg</td>
-              <td>7,4‰</td>
+              <td>7,4&permil;</td>
             </tr>
             <tr>
               <td>Varde (højest)</td>
-              <td>17,7‰</td>
+              <td>17,7&permil;</td>
             </tr>
           </tbody>
         </table>
@@ -144,8 +105,8 @@ export default function EjendomsvaerdiskatPage() {
           En bolig i København med ejendomsværdi 3.000.000 kr og grundværdi 1.000.000 kr:
         </p>
         <ul>
-          <li><strong>Ejendomsværdiskat:</strong> 3.000.000 × 80% × 5,1‰ = 12.240 kr/år</li>
-          <li><strong>Grundskyld:</strong> 1.000.000 × 80% × 5,1‰ = 4.080 kr/år</li>
+          <li><strong>Ejendomsværdiskat:</strong> 3.000.000 × 80% × 5,1&permil; = 12.240 kr/år</li>
+          <li><strong>Grundskyld:</strong> 1.000.000 × 80% × 5,1&permil; = 4.080 kr/år</li>
           <li><strong>Samlet:</strong> 16.320 kr/år (1.360 kr/måned)</li>
         </ul>
 
@@ -174,18 +135,19 @@ export default function EjendomsvaerdiskatPage() {
           <p className="font-medium text-green-800 dark:text-green-300">Opdateret med nyt boligskattesystem</p>
           <p className="text-green-700 dark:text-green-400">
             Denne beregner bruger det nye ejendomsskattesystem fra 2024 med
-            5,1‰ / 14‰ satser og 80% forsigtighedsfradrag. Progressionsgrænse
+            5,1&permil; / 14&permil; satser og 80% forsigtighedsfradrag. Progressionsgrænse
             for 2026-2027: 9.007.000 kr. Kilde: skm.dk, info.skat.dk.
           </p>
         </div>
 
       </div>
+      )}
 
       <section className="mt-12">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
           Ofte stillede spørgsmål om ejendomsskat
         </h2>
-        <FAQ items={ejendomsFaqItems} />
+        <FAQ items={pageData.faqItems} />
       </section>
 
       <section className="mt-12">

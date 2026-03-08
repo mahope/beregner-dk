@@ -1,4 +1,6 @@
 import { generatePageMetadata } from "@/lib/page-helpers";
+import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
+import { getPageData } from "@/lib/page-data";
 import SygedagpengeBeregner from "@/components/SygedagpengeBeregner";
 import FAQ from "@/components/FAQ";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
@@ -6,66 +8,35 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import RelatedCalculators from "@/components/RelatedCalculators";
 import Sidebar from "@/components/Sidebar";
 
-const baseUrl = "https://minberegner.dk";
-
 export async function generateMetadata() {
   return generatePageMetadata("sygedagpenge");
 }
 
-const faqItems = [
-  {
-    question: "Hvad er sygedagpenge?",
-    answer: "Sygedagpenge er en ydelse, der erstatter din løn, når du er syg og ikke kan arbejde. Lønmodtagere, selvstændige og ledige kan modtage sygedagpenge, hvis de opfylder beskæftigelseskravet.",
-  },
-  {
-    question: "Hvor meget får jeg i sygedagpenge?",
-    answer: "Sygedagpenge beregnes som 90% af din timeløn gange dit ugentlige timetal, dog højst 4.750 kr. pr. uge i 2026. Mange arbejdsgivere supplerer op til fuld løn ifølge overenskomst.",
-  },
-  {
-    question: "Hvad er arbejdsgiverperioden?",
-    answer: "Arbejdsgiverperioden er de første 30 kalenderdage af sygefraværet, hvor din arbejdsgiver betaler sygedagpengene. Herefter overtager kommunen udbetalingen.",
-  },
-  {
-    question: "Hvad er en mulighedserklæring?",
-    answer: "En mulighedserklæring er et dokument, som din arbejdsgiver kan bede om fra dag 1 af dit sygefravær. Den beskriver dine muligheder for at arbejde helt eller delvist under sygdommen og udfyldes af dig, din arbejdsgiver og din læge.",
-  },
-  {
-    question: "Hvor længe kan jeg få sygedagpenge?",
-    answer: "Kommunen revurderer din sag efter 22 uger inden for de seneste 9 måneder. Sygedagpengene kan forlænges, f.eks. hvis du afventer behandling, er under revalidering, eller der afventes afklaring til fleksjob eller førtidspension.",
-  },
-  {
-    question: "Kan selvstændige få sygedagpenge?",
-    answer: "Ja, selvstændige kan få sygedagpenge efter 2 ugers sygdom (med mindre de har tegnet en sygedagpengeforsikring, der giver ret fra 1. eller 3. fraværsdag). Satsen beregnes ud fra den seneste årsopgørelse.",
-  },
-];
+export default async function SygedagpengePage() {
+  const locale = await getLocale();
+  const domainConfig = await getCurrentDomainConfig();
+  const pageData = getPageData("sygedagpenge", locale) || getPageData("sygedagpenge", "da")!;
 
-const relatedCalculators = [
-  { title: "Dagpenge", description: "Beregn dagpengesats", href: "/dagpenge", icon: "💼" },
-  { title: "Løn efter skat", description: "Beregn nettoløn", href: "/loen-efter-skat", icon: "💰" },
-  { title: "Barselsdagpenge", description: "Beregn barselsdagpenge", href: "/barselsdagpenge", icon: "👶" },
-  { title: "Feriepenge", description: "Beregn feriepenge", href: "/feriepenge", icon: "🌴" },
-];
-
-export default function SygedagpengePage() {
   return (
     <div className="flex flex-col lg:flex-row gap-8">
       <div className="flex-1 min-w-0">
         <CalculatorSchema
-          name="Sygedagpenge Beregner"
-          description="Beregn dine sygedagpenge for 2026. Se ugentlig sats, arbejdsgiverperiode og løntab."
-          url={`${baseUrl}/sygedagpenge`}
-          category="FinanceApplication"
+          name={pageData.schemaName}
+          description={pageData.schemaDescription}
+          url={`${domainConfig.baseUrl}/sygedagpenge`}
+          category={pageData.schemaCategory}
         />
-        <FAQSchema items={faqItems} />
-        <Breadcrumbs items={[{ name: "Økonomi", href: "/kategori/oekonomi" }, { name: "Sygedagpenge Beregner", href: "/sygedagpenge" }]} />
+        <FAQSchema items={pageData.faqItems} />
+        <Breadcrumbs items={[{ name: pageData.breadcrumbCategory, href: pageData.breadcrumbCategoryHref }, { name: pageData.title, href: "/sygedagpenge" }]} />
 
-        <h1 className="text-3xl font-bold mb-2 dark:text-white">Sygedagpenge Beregner</h1>
+        <h1 className="text-3xl font-bold mb-2 dark:text-white">{pageData.title}</h1>
         <p className="text-gray-600 dark:text-gray-300 mb-8">
-          Beregn dine sygedagpenge for 2026. Se din ugentlige og månedlige sats, periodefordeling mellem arbejdsgiver og kommune, og dit samlede løntab.
+          {pageData.description}
         </p>
 
         <SygedagpengeBeregner />
 
+        {locale === "da" && (
         <div className="mt-12 prose dark:prose-invert max-w-none">
           <h2>Sådan fungerer sygedagpenge</h2>
           <p>
@@ -89,9 +60,10 @@ export default function SygedagpengePage() {
             Kommunen skal senest ved <strong>uge 22</strong> tage stilling til, om dine sygedagpenge kan <strong>forlænges</strong>. Forlængelse sker typisk ved afventning af <strong>behandling</strong>, <strong>revalidering</strong>, afklaring til <strong>fleksjob</strong> eller <strong>ressourceforløb</strong>.
           </p>
         </div>
+        )}
 
-        <FAQ items={faqItems} />
-        <RelatedCalculators calculators={relatedCalculators} />
+        <FAQ items={pageData.faqItems} />
+        <RelatedCalculators current="/sygedagpenge" />
       </div>
 
       <Sidebar currentHref="/sygedagpenge" adSlotId="sygedagpenge-sidebar" />

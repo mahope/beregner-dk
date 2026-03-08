@@ -8,6 +8,8 @@ import { PrintResult } from "./PrintResult";
 import { CopyResultButton, ResetButton } from "@/components/ui";
 import { useCalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
+import { useLocale } from "@/components/LocaleProvider";
+import { formatCurrency, getCurrencySuffix } from "@/lib/format";
 
 interface AffiliateLink {
   name: string;
@@ -53,6 +55,151 @@ const defaultInputs = {
 };
 
 export default function BillaanBeregner() {
+  const { locale } = useLocale();
+
+  const labels = {
+    da: {
+      carPrice: "Bilens pris",
+      carPriceHelp: "Den samlede pris på bilen inkl. moms",
+      downPayment: "Udbetaling",
+      downPaymentHelp: "Typisk 10-20% af bilens pris anbefales",
+      term: "Løbetid",
+      termUnit: "mdr.",
+      termHelp: "Typisk 24-84 måneder (2-7 år)",
+      interestRate: "Rentesats",
+      interestRateHelp: "Aktuelle billån renter: 5-8% (2026)",
+      negativeRate: "Renten kan ikke være negativ",
+      highRate: "Indtast en realistisk rentesats",
+      monthlyPayment: "Månedlig ydelse",
+      loanAmount: "Lånebeløb",
+      termLabel: "Løbetid",
+      months: "måneder",
+      years: "år",
+      totalInterest: "Samlet rente",
+      totalAmount: "Samlet beløb",
+      aprLabel: "ÅOP (Årlig Omkostning i Procent)",
+      costPerKm: (cost: string) => `${cost}/km i gennemsnitlig omkostning`,
+      costPerKmBasis: "Baseret på 15.000 km/år over lånets løbetid",
+      calcName: "Billånsberegner",
+      monthlyPaymentSummary: (amount: string) => `Månedlig ydelse: ${amount}`,
+      fullSummary: (payment: string, total: string) => `Månedlig ydelse: ${payment} | Samlet beløb: ${total}`,
+      tipsTitle: "Sådan får du det bedste billån",
+      tip1Title: "Sammenlign flere banker",
+      tip1: "renter varierer op til 3% mellem udbydere",
+      tip2Title: "Overvej udbetalingens størrelse",
+      tip2: "større udbetaling = lavere månedlig ydelse",
+      tip3Title: "Kort løbetid = mindre rente",
+      tip3: "vælg kortest mulig løbetid du har råd til",
+      tip4Title: "Tjek ÅOP",
+      tip4: "den årlige omkostning i procent inkluderer alle gebyrer",
+      tip5Title: "Forhandl med din bank",
+      tip5: "ofte kan du få bedre vilkår hvis du har andre produkter der",
+      affiliateTitle: "Sammenlign billån",
+      affiliateSubtitle: "Find den bedste rente til din næste bil",
+      tableTitle: "Ydelsestabel",
+      monthCol: "Måned",
+      paymentCol: "Ydelse",
+      interestCol: "Rente",
+      amortCol: "Afdrag",
+      remainingCol: "Restgæld",
+      moreMonths: (count: number) => `... ${count} flere måneder ...`,
+    },
+    se: {
+      carPrice: "Bilens pris",
+      carPriceHelp: "Det totala priset på bilen inkl. moms",
+      downPayment: "Kontantinsats",
+      downPaymentHelp: "Typiskt 10–20 % av bilens pris rekommenderas",
+      term: "Löptid",
+      termUnit: "mån",
+      termHelp: "Typiskt 24–84 månader (2–7 år)",
+      interestRate: "Räntesats",
+      interestRateHelp: "Aktuella billåneräntor: 5–8 % (2026)",
+      negativeRate: "Räntan kan inte vara negativ",
+      highRate: "Ange en realistisk räntesats",
+      monthlyPayment: "Månatlig betalning",
+      loanAmount: "Lånebelopp",
+      termLabel: "Löptid",
+      months: "månader",
+      years: "år",
+      totalInterest: "Total ränta",
+      totalAmount: "Totalt belopp",
+      aprLabel: "Effektiv ränta",
+      costPerKm: (cost: string) => `${cost}/km i genomsnittlig kostnad`,
+      costPerKmBasis: "Baserat på 15 000 km/år under lånets löptid",
+      calcName: "Billånekalkylator",
+      monthlyPaymentSummary: (amount: string) => `Månatlig betalning: ${amount}`,
+      fullSummary: (payment: string, total: string) => `Månatlig betalning: ${payment} | Totalt belopp: ${total}`,
+      tipsTitle: "Så får du det bästa billånet",
+      tip1Title: "Jämför flera banker",
+      tip1: "räntor varierar upp till 3 % mellan långivare",
+      tip2Title: "Överväg kontantinsatsens storlek",
+      tip2: "större kontantinsats = lägre månatlig betalning",
+      tip3Title: "Kort löptid = mindre ränta",
+      tip3: "välj kortast möjliga löptid du har råd med",
+      tip4Title: "Kontrollera effektiv ränta",
+      tip4: "den effektiva räntan inkluderar alla avgifter",
+      tip5Title: "Förhandla med din bank",
+      tip5: "ofta kan du få bättre villkor om du har andra produkter där",
+      affiliateTitle: "Jämför billån",
+      affiliateSubtitle: "Hitta den bästa räntan för din nästa bil",
+      tableTitle: "Betalningsplan",
+      monthCol: "Månad",
+      paymentCol: "Betalning",
+      interestCol: "Ränta",
+      amortCol: "Amortering",
+      remainingCol: "Återstående skuld",
+      moreMonths: (count: number) => `... ${count} fler månader ...`,
+    },
+    no: {
+      carPrice: "Bilens pris",
+      carPriceHelp: "Den totale prisen på bilen inkl. mva",
+      downPayment: "Egenkapital",
+      downPaymentHelp: "Typisk 10–20 % av bilens pris anbefales",
+      term: "Løpetid",
+      termUnit: "mnd.",
+      termHelp: "Typisk 24–84 måneder (2–7 år)",
+      interestRate: "Rentesats",
+      interestRateHelp: "Aktuelle billånrenter: 5–8 % (2026)",
+      negativeRate: "Renten kan ikke være negativ",
+      highRate: "Angi en realistisk rentesats",
+      monthlyPayment: "Månedlig betaling",
+      loanAmount: "Lånebeløp",
+      termLabel: "Løpetid",
+      months: "måneder",
+      years: "år",
+      totalInterest: "Total rente",
+      totalAmount: "Totalt beløp",
+      aprLabel: "Effektiv rente",
+      costPerKm: (cost: string) => `${cost}/km i gjennomsnittlig kostnad`,
+      costPerKmBasis: "Basert på 15 000 km/år over lånets løpetid",
+      calcName: "Billånskalkulator",
+      monthlyPaymentSummary: (amount: string) => `Månedlig betaling: ${amount}`,
+      fullSummary: (payment: string, total: string) => `Månedlig betaling: ${payment} | Totalt beløp: ${total}`,
+      tipsTitle: "Slik får du det beste billånet",
+      tip1Title: "Sammenlign flere banker",
+      tip1: "renter varierer opp til 3 % mellom tilbydere",
+      tip2Title: "Vurder egenkapitalens størrelse",
+      tip2: "større egenkapital = lavere månedlig betaling",
+      tip3Title: "Kort løpetid = mindre rente",
+      tip3: "velg kortest mulig løpetid du har råd til",
+      tip4Title: "Sjekk effektiv rente",
+      tip4: "den effektive renten inkluderer alle gebyrer",
+      tip5Title: "Forhandle med banken din",
+      tip5: "ofte kan du få bedre vilkår hvis du har andre produkter der",
+      affiliateTitle: "Sammenlign billån",
+      affiliateSubtitle: "Finn den beste renten for din neste bil",
+      tableTitle: "Betalingsplan",
+      monthCol: "Måned",
+      paymentCol: "Betaling",
+      interestCol: "Rente",
+      amortCol: "Avdrag",
+      remainingCol: "Restgjeld",
+      moreMonths: (count: number) => `... ${count} flere måneder ...`,
+    },
+  };
+
+  const l = labels[locale as keyof typeof labels] || labels.da;
+
   const hasTracked = useRef(false);
 
   useEffect(() => {
@@ -75,39 +222,45 @@ export default function BillaanBeregner() {
     reset();
   }, [reset]);
 
+  const formatKr = useCallback((amount: number) => {
+    return formatCurrency(amount, locale as "da" | "no" | "se", { maximumFractionDigits: 0, minimumFractionDigits: 0 });
+  }, [locale]);
+
+  const currSuffix = getCurrencySuffix(locale as "da" | "no" | "se");
+
   // Beregningsresultater
   const result = useMemo(() => {
     const laanebelob = bilpris - udbetaling;
-    
+
     // Månedlig rente
     const maanedligRente = rentesats / 100 / 12;
-    
+
     // Antal betalinger
     const antalBetalinger = loebetid;
-    
+
     // Månedlig ydelse (annuitetsformlen)
     let maanedligYdelse: number;
-    
+
     if (maanedligRente === 0) {
       maanedligYdelse = laanebelob / antalBetalinger;
     } else {
-      maanedligYdelse = 
+      maanedligYdelse =
         (laanebelob * maanedligRente * Math.pow(1 + maanedligRente, antalBetalinger)) /
         (Math.pow(1 + maanedligRente, antalBetalinger) - 1);
     }
-    
+
     // Samlet beløb betalt
     const samletBelob = maanedligYdelse * antalBetalinger;
-    
+
     // Samlet rente
     const samletRente = samletBelob - laanebelob;
-    
+
     // APR (Approximate Annual Percentage Rate)
     const antalTerminerPrAar = 12;
     const samletGebyr = 0;
     const aprApprox = ((antalTerminerPrAar * samletRente) / (laanebelob * (antalBetalinger + 1))) * 100;
     const apr = aprApprox + (samletGebyr / (laanebelob / 2) * 100);
-    
+
     // Omkostninger pr. km
     const kmPrAar = 15000;
     const samletKm = (antalBetalinger / 12) * kmPrAar;
@@ -123,14 +276,6 @@ export default function BillaanBeregner() {
     };
   }, [bilpris, udbetaling, loebetid, rentesats]);
 
-  const formatKr = (amount: number) => {
-    return new Intl.NumberFormat("da-DK", {
-      style: "currency",
-      currency: "DKK",
-      maximumFractionDigits: 0,
-    }).format(amount);
-  };
-
   const maanedligYdelseFormatted = formatKr(result.maanedligYdelse);
   const samletBelobFormatted = formatKr(result.samletBelob);
 
@@ -142,48 +287,48 @@ export default function BillaanBeregner() {
           <InputField
             value={bilpris}
             onChange={(v) => updateInput("bilpris", v)}
-            label="Bilens pris"
+            label={l.carPrice}
             min={50000}
             max={2000000}
             step={10000}
-            unit="kr"
-            helpText="Den samlede pris på bilen inkl. moms"
+            unit={currSuffix}
+            helpText={l.carPriceHelp}
           />
 
           <InputField
             value={udbetaling}
             onChange={(v) => updateInput("udbetaling", v)}
-            label="Udbetaling"
+            label={l.downPayment}
             min={0}
             max={bilpris * 0.5}
             step={5000}
-            unit="kr"
-            helpText="Typisk 10-20% af bilens pris anbefales"
+            unit={currSuffix}
+            helpText={l.downPaymentHelp}
           />
 
           <InputField
             value={loebetid}
             onChange={(v) => updateInput("loebetid", v)}
-            label="Løbetid"
+            label={l.term}
             min={12}
             max={120}
             step={12}
-            unit="mdr."
-            helpText="Typisk 24-84 måneder (2-7 år)"
+            unit={l.termUnit}
+            helpText={l.termHelp}
           />
 
           <InputField
             value={rentesats}
             onChange={(v) => updateInput("rentesats", v)}
-            label="Rentesats"
+            label={l.interestRate}
             min={0}
             max={20}
             step={0.1}
             unit="%"
-            helpText="Aktuelle billån renter: 5-8% (2026)"
+            helpText={l.interestRateHelp}
             customValidation={(value) => {
-              if (value < 0) return "Renten kan ikke være negativ";
-              if (value > 20) return "Indtast en realistisk rentesats";
+              if (value < 0) return l.negativeRate;
+              if (value > 20) return l.highRate;
               return null;
             }}
           />
@@ -194,7 +339,7 @@ export default function BillaanBeregner() {
           <div className="p-6 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-xl border border-blue-200 dark:border-blue-700">
             <div className="text-center mb-4">
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
-                Månedlig ydelse
+                {l.monthlyPayment}
               </p>
               <p className="text-4xl font-bold text-blue-600 dark:text-blue-400">
                 {maanedligYdelseFormatted}
@@ -203,25 +348,25 @@ export default function BillaanBeregner() {
 
             <div className="space-y-3 text-sm">
               <div className="flex justify-between py-2 border-b border-blue-200 dark:border-blue-700">
-                <span className="text-gray-600 dark:text-gray-400">Lånebeløb</span>
+                <span className="text-gray-600 dark:text-gray-400">{l.loanAmount}</span>
                 <span className="font-medium">{formatKr(result.laanebelob)}</span>
               </div>
               <div className="flex justify-between py-2 border-b border-blue-200 dark:border-blue-700">
-                <span className="text-gray-600 dark:text-gray-400">Løbetid</span>
-                <span className="font-medium">{loebetid} måneder ({Math.round(loebetid / 12)} år)</span>
+                <span className="text-gray-600 dark:text-gray-400">{l.termLabel}</span>
+                <span className="font-medium">{loebetid} {l.months} ({Math.round(loebetid / 12)} {l.years})</span>
               </div>
               <div className="flex justify-between py-2 border-b border-blue-200 dark:border-blue-700">
-                <span className="text-gray-600 dark:text-gray-400">Samlet rente</span>
+                <span className="text-gray-600 dark:text-gray-400">{l.totalInterest}</span>
                 <span className="font-medium text-red-600 dark:text-red-400">
                   {formatKr(result.samletRente)}
                 </span>
               </div>
               <div className="flex justify-between py-2 border-b border-blue-200 dark:border-blue-700">
-                <span className="text-gray-600 dark:text-gray-400">Samlet beløb</span>
+                <span className="text-gray-600 dark:text-gray-400">{l.totalAmount}</span>
                 <span className="font-bold">{samletBelobFormatted}</span>
               </div>
               <div className="flex justify-between py-2">
-                <span className="text-gray-600 dark:text-gray-400">ÅOP (Årlig Omkostning i Procent)</span>
+                <span className="text-gray-600 dark:text-gray-400">{l.aprLabel}</span>
                 <span className="font-bold text-blue-600 dark:text-blue-400">{result.apr}%</span>
               </div>
             </div>
@@ -230,10 +375,10 @@ export default function BillaanBeregner() {
           {/* Ekstra info */}
           <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
             <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
-              💰 <strong>{result.prisPrKm} kr/km</strong> i gennemsnitlig omkostning
+              <strong>{l.costPerKm(`${result.prisPrKm} ${currSuffix}`)}</strong>
             </p>
             <p className="text-xs text-gray-500 dark:text-gray-500 text-center mt-2">
-              Baseret på 15.000 km/år over lånets løbetid
+              {l.costPerKmBasis}
             </p>
           </div>
         </div>
@@ -245,51 +390,46 @@ export default function BillaanBeregner() {
 
       {/* Del og udskriv */}
       <div className="flex flex-wrap gap-4 justify-center">
-        <CopyResultButton text={`Månedlig ydelse: ${maanedligYdelseFormatted}`} />
+        <CopyResultButton text={l.monthlyPaymentSummary(maanedligYdelseFormatted)} />
         <ShareCalculation
           getShareableLink={getShareableLink}
-          calculatorName="Billånsberegner"
-          resultSummary={`Månedlig ydelse: ${maanedligYdelseFormatted}`}
+          calculatorName={l.calcName}
+          resultSummary={l.monthlyPaymentSummary(maanedligYdelseFormatted)}
         />
         <PrintResult
-          calculatorName="Billånsberegner"
-          resultSummary={`Månedlig ydelse: ${maanedligYdelseFormatted} | Samlet beløb: ${samletBelobFormatted}`}
+          calculatorName={l.calcName}
+          resultSummary={l.fullSummary(maanedligYdelseFormatted, samletBelobFormatted)}
         />
       </div>
 
       {/* Tips sektion */}
       <div className="p-4 bg-green-50 dark:bg-green-900/30 rounded-lg">
         <h3 className="font-medium mb-3 text-green-800 dark:text-green-200">
-          💡 Sådan får du det bedste billån
+          {l.tipsTitle}
         </h3>
         <ul className="text-sm text-green-700 dark:text-green-300 space-y-2">
           <li>
-            • <strong>Sammenlign flere banker</strong> - renter varierer op til 3% mellem
-            udbydere
+            • <strong>{l.tip1Title}</strong> - {l.tip1}
           </li>
           <li>
-            • <strong>Overvej udbetalingens størrelse</strong> - større udbetaling = lavere
-            månedlig ydelse
+            • <strong>{l.tip2Title}</strong> - {l.tip2}
           </li>
           <li>
-            • <strong>Kort løbetid = mindre rente</strong> - vælg kortest mulig løbetid du
-            har råd til
+            • <strong>{l.tip3Title}</strong> - {l.tip3}
           </li>
           <li>
-            • <strong>Tjek ÅOP</strong> - den årlige omkostning i procent inkluderer alle
-            gebyrer
+            • <strong>{l.tip4Title}</strong> - {l.tip4}
           </li>
           <li>
-            • <strong>Forhandl med din bank</strong> - ofte kan du få bedre vilkår hvis du
-            har andre produkter der
+            • <strong>{l.tip5Title}</strong> - {l.tip5}
           </li>
         </ul>
       </div>
 
       {/* Affiliate box */}
       <AffiliateBox
-        title="🚗 Sammenlign billån"
-        subtitle="Find den bedste rente til din næste bil"
+        title={`${l.affiliateTitle}`}
+        subtitle={l.affiliateSubtitle}
         links={billaanAffiliates}
         className="mt-6"
       />
@@ -297,16 +437,16 @@ export default function BillaanBeregner() {
       {/* Ydelsestabel */}
       <div className="overflow-x-auto">
         <h3 className="font-medium mb-3 text-gray-900 dark:text-gray-100">
-          Ydelsestabel
+          {l.tableTitle}
         </h3>
         <table className="w-full text-sm">
           <thead>
             <tr className="bg-gray-100 dark:bg-gray-800">
-              <th className="px-4 py-2 text-left">Måned</th>
-              <th className="px-4 py-2 text-right">Ydelse</th>
-              <th className="px-4 py-2 text-right">Rente</th>
-              <th className="px-4 py-2 text-right">Afdrag</th>
-              <th className="px-4 py-2 text-right">Restgæld</th>
+              <th className="px-4 py-2 text-left">{l.monthCol}</th>
+              <th className="px-4 py-2 text-right">{l.paymentCol}</th>
+              <th className="px-4 py-2 text-right">{l.interestCol}</th>
+              <th className="px-4 py-2 text-right">{l.amortCol}</th>
+              <th className="px-4 py-2 text-right">{l.remainingCol}</th>
             </tr>
           </thead>
           <tbody>
@@ -314,28 +454,28 @@ export default function BillaanBeregner() {
               let restgaeld = result.laanebelob;
               const maanedligRente = rentesats / 100 / 12;
               const rows = [];
-              
+
               // Vis kun første 12 måneder og sidste måned
               const showAll = loebetid <= 24;
-              
+
               for (let i = 1; i <= loebetid; i++) {
                 if (!showAll && i > 12 && i < loebetid) {
                   if (i === 13) {
                     rows.push(
                       <tr key="ellipsis" className="bg-gray-50 dark:bg-gray-800/50">
                         <td colSpan={5} className="px-4 py-2 text-center text-gray-500">
-                          ... {loebetid - 24} flere måneder ...
+                          {l.moreMonths(loebetid - 24)}
                         </td>
                       </tr>
                     );
                   }
                   continue;
                 }
-                
+
                 const renteDel = restgaeld * maanedligRente;
                 const afdragsDel = result.maanedligYdelse - renteDel;
                 restgaeld = Math.max(0, restgaeld - afdragsDel);
-                
+
                 rows.push(
                   <tr
                     key={i}

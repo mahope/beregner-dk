@@ -1,79 +1,40 @@
 import { generatePageMetadata } from "@/lib/page-helpers";
+import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
+import { getPageData } from "@/lib/page-data";
 import SUBeregner from "@/components/SUBeregner";
 import FAQ from "@/components/FAQ";
 import RelatedCalculators from "@/components/RelatedCalculators";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
 
-const baseUrl = "https://minberegner.dk";
-
 export async function generateMetadata() {
   return generatePageMetadata("su");
 }
 
-const faqItems = [
-  {
-    question: "Hvor meget kan jeg få i SU 2026?",
-    answer:
-      "I 2026 er de officielle SU-satser: Udeboende på videregående: 7.426 kr/md, hjemmeboende: 3.692 kr/md (gammel ordning) eller 1.154 kr + tillæg (ny ordning). Forsørgere får ca. 8.575 kr/md. Alle beløb er før skat.",
-  },
-  {
-    question: "Hvad er fribeløbet i 2026?",
-    answer:
-      "Fribeløbet i 2026 afhænger af din uddannelse: Videregående uddannelse: 20.749 kr/md, ungdomsuddannelse: 15.297 kr/md (begge før AM-bidrag). Fribeløbet gælder årligt, så du kan tjene mere nogle måneder og mindre andre.",
-  },
-  {
-    question: "Hvem kan få SU?",
-    answer:
-      "Du kan få SU hvis du er dansk statsborger eller EU-borger, er indskrevet på en SU-berettigende uddannelse, er studieaktiv, og er fyldt 18 år. Du må ikke have opbrugt dine SU-klip.",
-  },
-  {
-    question: "Hvor mange SU-klip får jeg?",
-    answer:
-      "På videregående uddannelser får du 70 SU-klip total, som kan bruges til flere uddannelser. På ungdomsuddannelser får du klip svarende til uddannelsens normerede længde.",
-  },
-  {
-    question: "Hvad sker der hvis jeg tjener over fribeløbet?",
-    answer:
-      "Hvis din årsindkomst overstiger det samlede fribeløb, skal du tilbagebetale for meget udbetalt SU. Tilbagebetalingen sker året efter via SKAT. Du kan tjekke dit fribeløb løbende på su.dk.",
-  },
-  {
-    question: "Kan jeg få SU-lån?",
-    answer:
-      "Ja, du kan optage studielån på op til 3.799 kr/md i 2026 under hele uddannelsen. De sidste 12 måneder kan du desuden søge slutlån. Lånet tilbagebetales efter endt uddannelse med renter.",
-  },
-  {
-    question: "Hvad er forskellen på udeboende og hjemmeboende SU?",
-    answer:
-      "Udeboende på videregående får 7.426 kr/md i 2026, mens hjemmeboende får 3.692 kr/md (gammel ordning) eller 1.154 kr + indkomstafhængigt tillæg (ny ordning). For at få udeboende-sats skal du dokumentere at du ikke bor hos dine forældre.",
-  },
-  {
-    question: "Kan jeg få ekstra SU som forælder?",
-    answer:
-      "Ja, forsørgere kan få højere SU-sats (ca. 8.575 kr/md i 2026). Enlige forsørgere kan få yderligere tillæg. Derudover kan du søge om børnetilskud som supplement via borger.dk.",
-  },
-];
+export default async function SUPage() {
+  const locale = await getLocale();
+  const domainConfig = await getCurrentDomainConfig();
+  const pageData = getPageData("su", locale) || getPageData("su", "da")!;
 
-export default function SUPage() {
   return (
     <div>
       <CalculatorSchema
-        name="SU Beregner - Statens Uddannelsesstøtte"
-        description="Gratis SU beregner. Beregn din SU og fribeløb for 2026."
-        url={`${baseUrl}/su`}
-        category="FinanceApplication"
+        name={pageData.schemaName}
+        description={pageData.schemaDescription}
+        url={`${domainConfig.baseUrl}/su`}
+        category={pageData.schemaCategory}
       />
-      <FAQSchema items={faqItems} />
-      <Breadcrumbs items={[{ name: "Uddannelse", href: "/kategori/uddannelse" }, { name: "SU Beregner", href: "/su" }]} />
+      <FAQSchema items={pageData.faqItems} />
+      <Breadcrumbs items={[{ name: pageData.breadcrumbCategory, href: pageData.breadcrumbCategoryHref }, { name: pageData.title, href: "/su" }]} />
 
-      <h1 className="text-3xl font-bold mb-2">SU Beregner 2026</h1>
+      <h1 className="text-3xl font-bold mb-2">{pageData.title}</h1>
       <p className="text-gray-600 mb-8">
-        Beregn din SU og se om du holder dig under fribeløbet. Opdateret med de
-        nyeste 2026-satser.
+        {pageData.description}
       </p>
 
       <SUBeregner />
 
+      {locale === "da" && (
       <div className="mt-12 prose max-w-none dark:prose-invert">
         <h2>Om SU (Statens Uddannelsesstøtte)</h2>
         <p>
@@ -191,8 +152,9 @@ export default function SUPage() {
           </p>
         </div>
       </div>
+      )}
 
-      <FAQ items={faqItems} />
+      <FAQ items={pageData.faqItems} />
 
       <RelatedCalculators current="/su" />
     </div>

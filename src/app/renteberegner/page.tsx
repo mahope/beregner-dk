@@ -1,4 +1,6 @@
 import { generatePageMetadata } from "@/lib/page-helpers";
+import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
+import { getPageData } from "@/lib/page-data";
 import RenteBeregner from "@/components/RenteBeregner";
 import FAQ from "@/components/FAQ";
 import RelatedCalculators from "@/components/RelatedCalculators";
@@ -8,75 +10,34 @@ import {
 } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
 
-const baseUrl = "https://minberegner.dk";
-
 export async function generateMetadata() {
   return generatePageMetadata("renteberegner");
 }
 
-const faqItems = [
-  {
-    question: "Hvad er forskellen på annuitetslån og serielån?",
-    answer:
-      "Ved annuitetslån er din månedlige ydelse fast, men fordelingen mellem rente og afdrag ændrer sig. Ved serielån er afdraget fast, så ydelsen falder over tid. Serielån giver lavere samlet rente, men højere startydelser.",
-  },
-  {
-    question: "Hvordan beregnes den månedlige ydelse på et annuitetslån?",
-    answer:
-      "Ydelsen beregnes med annuitetsformlen: Y = H × r × (1+r)^n / ((1+r)^n - 1), hvor H er hovedstolen, r er den månedlige rente, og n er antal terminer. Formlen sikrer at ydelsen er konstant.",
-  },
-  {
-    question: "Hvad påvirker hvor meget rente jeg betaler?",
-    answer:
-      "Den samlede rente afhænger af lånebeløbet, rentesatsen, løbetiden og låntypen. Længere løbetid giver lavere månedlig ydelse, men højere samlet rente. Serielån giver lavere samlet rente end annuitetslån.",
-  },
-  {
-    question: "Hvad er en typisk boliglånsrente i 2026?",
-    answer:
-      "Renten på boliglån varierer afhængigt af lånetypen. Fastforrentede lån ligger typisk på 3-5%, mens variabelt forrentede lån (F-lån) kan være lavere. Banklån har ofte højere rente end realkreditlån.",
-  },
-  {
-    question: "Kan jeg få fradrag for renteudgifter?",
-    answer:
-      "Ja, du kan få fradrag for renteudgifter på lån. Fradraget er ca. 33% af renteudgiften (negativ kapitalindkomst). Ved højere kapitalindkomst kan fradraget være op til 42%.",
-  },
-  {
-    question: "Hvad er ÅOP, og hvorfor er den vigtig?",
-    answer:
-      "ÅOP (Årlige Omkostninger i Procent) inkluderer alle låneomkostninger - ikke kun renten, men også gebyrer og bidrag. ÅOP gør det nemmere at sammenligne lån fra forskellige udbydere.",
-  },
-  {
-    question: "Bør jeg vælge kort eller lang løbetid?",
-    answer:
-      "Kort løbetid giver højere månedlig ydelse, men lavere samlet rente. Lang løbetid giver lavere ydelse, men du betaler mere i rente samlet. Vælg ud fra din økonomi og risikovillighed.",
-  },
-  {
-    question: "Hvornår kan det betale sig at omlægge et lån?",
-    answer:
-      "Det kan betale sig at omlægge hvis renten er faldet væsentligt (typisk 0,5-1%), eller hvis du vil ændre fra variabel til fast rente. Husk at medregne omkostninger til omlægning.",
-  },
-];
+export default async function RenteberegnerPage() {
+  const locale = await getLocale();
+  const domainConfig = await getCurrentDomainConfig();
+  const pageData = getPageData("renteberegner", locale) || getPageData("renteberegner", "da")!;
 
-export default function RenteberegnerPage() {
   return (
     <div>
       <CalculatorSchema
-        name="Renteberegner - Lån og ydelse"
-        description="Gratis renteberegner. Beregn din månedlige ydelse og samlet rente på lån."
-        url={`${baseUrl}/renteberegner`}
-        category="FinanceApplication"
+        name={pageData.schemaName}
+        description={pageData.schemaDescription}
+        url={`${domainConfig.baseUrl}/renteberegner`}
+        category={pageData.schemaCategory}
       />
-      <FAQSchema items={faqItems} />
-      <Breadcrumbs items={[{ name: "Økonomi", href: "/kategori/oekonomi" }, { name: "Renteberegner", href: "/renteberegner" }]} />
+      <FAQSchema items={pageData.faqItems} />
+      <Breadcrumbs items={[{ name: pageData.breadcrumbCategory, href: pageData.breadcrumbCategoryHref }, { name: pageData.title, href: "/renteberegner" }]} />
 
-      <h1 className="text-3xl font-bold mb-2">Renteberegner</h1>
+      <h1 className="text-3xl font-bold mb-2">{pageData.title}</h1>
       <p className="text-gray-600 mb-8">
-        Beregn din månedlige ydelse, samlet rente og tilbagebetaling på lån.
-        Sammenlign annuitetslån og serielån for at finde den bedste løsning.
+        {pageData.description}
       </p>
 
       <RenteBeregner />
 
+      {locale === "da" && (
       <div className="mt-12 prose max-w-none">
         <h2>Sådan bruger du renteberegneren</h2>
         <p>
@@ -193,8 +154,9 @@ export default function RenteberegnerPage() {
           </p>
         </div>
       </div>
+      )}
 
-      <FAQ items={faqItems} />
+      <FAQ items={pageData.faqItems} />
 
       <RelatedCalculators current="/renteberegner" />
     </div>

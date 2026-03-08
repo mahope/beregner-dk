@@ -1,4 +1,6 @@
 import { generatePageMetadata } from "@/lib/page-helpers";
+import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
+import { getPageData } from "@/lib/page-data";
 import BillaanBeregner from "@/components/BillaanBeregner";
 import FAQ from "@/components/FAQ";
 import RelatedCalculators from "@/components/RelatedCalculators";
@@ -8,73 +10,33 @@ import {
 } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
 
-const baseUrl = "https://minberegner.dk";
-
-const faqItems = [
-  {
-    question: "Hvor meget kan jeg låne til bil?",
-    answer:
-      "Som hovedregel kan du låne op til bilens fulde værdi. De fleste banker tilbyder billån op til 500.000 kr uden sikkerhedsstillelse. Typisk anbefales en udbetaling på 10-20% af bilens pris.",
-  },
-  {
-    question: "Hvad er forskellen på billån og forbrugslån?",
-    answer:
-      "Billån er ofte billigere end forbrugslån, da bilen kan bruges som sikkerhed. Billån har typisk 2-4% lavere rente end usikrede forbrugslån. Til gengæld kan banken tage bilen tilbage, hvis du ikke kan betale.",
-  },
-  {
-    question: "Kan jeg finansiere en brugt bil med billån?",
-    answer:
-      "Ja, de fleste banker tilbyder billån til både nye og brugte biler. For brugte biler kan der være krav om bilens alder og stand. Typisk skal bilen være max 10-12 år gammel ved lånets udløb.",
-  },
-  {
-    question: "Hvad betyder ÅOP (Årlig Omkostning i Procent)?",
-    answer:
-      "ÅOP viser den samlede pris for lånet som årlig procent. Den inkluderer rente, gebyrer og andre omkostninger. Brug ÅOP til at sammenligne lån - jo lavere ÅOP, jo billigere er lånet.",
-  },
-  {
-    question: "Skal jeg vælge fast eller variabel rente på billån?",
-    answer:
-      "De fleste billån har fast rente i hele løbetiden. Nogle banker tilbyder FlexBillån med variabel rente. Variabel rente kan være billigere, men giver usikkerhed om fremtidige ydelser.",
-  },
-  {
-    question: "Kan jeg indfri billånet før tid?",
-    answer:
-      "Ja, de fleste billån kan indfries når som helst. Der kan være et mindre indfrielsesgebyr (ofte 1-2 måneders rente). Tjek låneaftalens vilkår for de specifikke regler.",
-  },
-  {
-    question: "Hvad koster det at låne 200.000 kr til bil?",
-    answer:
-      "Ved et billån på 200.000 kr over 7 år med 6% rente: Månedlig ydelse ca. 3.000 kr, samlet rente ca. 52.000 kr, samlet tilbagebetaling ca. 252.000 kr. Det præcise beløb afhænger af din kreditvurdering og bankens rente.",
-  },
-  {
-    question: "Hvad påvirker min rentesats på billån?",
-    answer:
-      "Din rente afhænger af: din økonomi (indkomst, gæld, betalingsanmærkninger), udbetalingens størrelse, bilens alder og stand, din relation til banken, og markedets renteniveau.",
-  },
-];
-
 export async function generateMetadata() {
   return generatePageMetadata("billaan");
 }
 
-export default function BillaanPage() {
+export default async function BillaanPage() {
+  const locale = await getLocale();
+  const domainConfig = await getCurrentDomainConfig();
+  const pageData = getPageData("billaan", locale) || getPageData("billaan", "da")!;
+
   return (
     <div>
       <CalculatorSchema
-        name="Billånsberegner - Beregn din månedlige ydelse"
-        description="Gratis billånsberegner. Beregn månedlig ydelse, samlet rente og ÅOP på dit billån."
-        url={`${baseUrl}/billaan`}
-        category="FinanceApplication"
+        name={pageData.schemaName}
+        description={pageData.schemaDescription}
+        url={`${domainConfig.baseUrl}/billaan`}
+        category={pageData.schemaCategory}
       />
-      <FAQSchema items={faqItems} />
-      <Breadcrumbs items={[{ name: "Lån", href: "/kategori/laan" }, { name: "Billånsberegner", href: "/billaan" }]} />
-      <h1 className="text-3xl font-bold mb-2">Billånsberegner</h1>
+      <FAQSchema items={pageData.faqItems} />
+      <Breadcrumbs items={[{ name: pageData.breadcrumbCategory, href: pageData.breadcrumbCategoryHref }, { name: pageData.title, href: "/billaan" }]} />
+      <h1 className="text-3xl font-bold mb-2">{pageData.title}</h1>
       <p className="text-gray-600 mb-8">
-        Beregn hvad dit billån vil koste om måneden, og se hvor meget du betaler i alt over lånets løbetid.
+        {pageData.description}
       </p>
 
       <BillaanBeregner />
 
+      {locale === "da" && (
       <div className="mt-12 prose max-w-none">
         <h2>Sådan fungerer billån i Danmark</h2>
         <p>
@@ -249,8 +211,9 @@ export default function BillaanPage() {
           </p>
         </div>
       </div>
+      )}
 
-      <FAQ items={faqItems} />
+      <FAQ items={pageData.faqItems} />
 
       <RelatedCalculators current="/billaan" />
     </div>

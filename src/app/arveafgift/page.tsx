@@ -1,4 +1,6 @@
 import { generatePageMetadata } from "@/lib/page-helpers";
+import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
+import { getPageData } from "@/lib/page-data";
 import ArveafgiftBeregner from "@/components/ArveafgiftBeregner";
 import FAQ from "@/components/FAQ";
 import RelatedCalculators from "@/components/RelatedCalculators";
@@ -8,73 +10,33 @@ import {
 } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
 
-const baseUrl = "https://minberegner.dk";
-
 export async function generateMetadata() {
   return generatePageMetadata("arveafgift");
 }
 
-const arveafgiftFaqItems = [
-  {
-    question: "Hvad er arveafgiften i Danmark i 2026?",
-    answer:
-      "I 2026 betaler nærmeste familie (børn, børnebørn, forældre) 15% boafgift af arv over bundfradraget på 392.300 kr. Ægtefæller er helt fritaget. Søskende og andre betaler 15% boafgift plus 25% tillægsafgift af arven efter boafgiften.",
-  },
-  {
-    question: "Kan ægtefæller undgå arveafgift?",
-    answer:
-      "Ja, ægtefæller er fuldstændig fritaget for arveafgift i Danmark uanset beløbets størrelse. Det anbefales ofte at oprette ægtepagt, så den længstlevende ægtefælle sikres bedst muligt.",
-  },
-  {
-    question: "Hvad er tillægsafgift på arv?",
-    answer:
-      "Tillægsafgift er en ekstra afgift på 25% af arven efter fradrag af boafgiften. Der er intet bundfradrag for tillægsafgiften. Den gælder for søskende (indtil 2027) og andre arvinger, der ikke er i direkte op- eller nedstigende linje.",
-  },
-  {
-    question: "Hvad er bundfradraget for arveafgift i 2026?",
-    answer:
-      "Bundfradraget er 392.300 kr i 2026. Det betyder, at de første 392.300 kr af arven er afgiftsfri for alle arvinger undtagen ægtefæller (som er helt fritaget).",
-  },
-  {
-    question: "Betaler børnebørn samme arveafgift som børn?",
-    answer:
-      "Ja, børnebørn betaler samme sats som biologiske børn: 15% boafgift uden tillægsafgift. Der er dog en undtagelse, hvis barnets forældre stadig lever — i så fald arver bedsteforældrenes formue typisk gennem forældrene først.",
-  },
-  {
-    question: "Hvornår skal arveafgift betales?",
-    answer:
-      "Arveafgiften skal betales til Skattestyrelsen inden 1 år efter dødsfaldet. Boet afvikles typisk gennem en bobestyrer eller advokat, som sørger for at beregne og afregne afgifterne.",
-  },
-  {
-    question: "Ændres reglerne for søskende i 2027?",
-    answer:
-      "Ja, fra 1. januar 2027 afskaffes tillægsafgiften for søskende. Det betyder at søskende fremover kun betaler 15% boafgift i stedet for den nuværende effektive sats på op til 36,25%.",
-  },
-  {
-    question: "Skal man betale arveafgift af forsikringer?",
-    answer:
-      "Forsikringsudbetalinger der tilfalder en navngiven begunstiget (fx livsforsikring) indgår som udgangspunkt ikke i boet og er dermed ikke underlagt boafgift. Men beløbet kan i stedet være omfattet af afgiftspligt efter forsikringsaftalelovens regler.",
-  },
-];
+export default async function ArveafgiftPage() {
+  const locale = await getLocale();
+  const domainConfig = await getCurrentDomainConfig();
+  const pageData = getPageData("arveafgift", locale) || getPageData("arveafgift", "da")!;
 
-export default function ArveafgiftPage() {
   return (
     <div>
       <CalculatorSchema
-        name="Arveafgift beregner - Beregn arveafgift i Danmark"
-        description="Gratis arveafgift beregner. Beregn boafgift baseret på din relation: ægtefælle (fritaget), børn (15%), søskende (15% + 25% tillægsafgift)."
-        url={`${baseUrl}/arveafgift`}
-        category="FinanceApplication"
+        name={pageData.schemaName}
+        description={pageData.schemaDescription}
+        url={`${domainConfig.baseUrl}/arveafgift`}
+        category={pageData.schemaCategory}
       />
-      <FAQSchema items={arveafgiftFaqItems} />
-      <Breadcrumbs items={[{ name: "Økonomi", href: "/kategori/oekonomi" }, { name: "Arveafgift beregner", href: "/arveafgift" }]} />
-      <h1 className="text-3xl font-bold mb-2">Arveafgift beregner</h1>
+      <FAQSchema items={pageData.faqItems} />
+      <Breadcrumbs items={[{ name: pageData.breadcrumbCategory, href: pageData.breadcrumbCategoryHref }, { name: pageData.title, href: "/arveafgift" }]} />
+      <h1 className="text-3xl font-bold mb-2">{pageData.title}</h1>
       <p className="text-gray-600 mb-8">
-        Beregn arveafgift i Danmark baseret på din relation til afdøde og størrelsen af arven.
+        {pageData.description}
       </p>
 
       <ArveafgiftBeregner />
 
+      {locale === "da" && (
       <div className="mt-12 prose max-w-none">
         <h2>Arveafgift i Danmark</h2>
         <p>
@@ -121,11 +83,11 @@ export default function ArveafgiftPage() {
         </table>
 
         <h2>Hvem betaler arveafgift?</h2>
-        
+
         <h3>Ægtefælle</h3>
         <p>
-          Ægtefæller er <strong>helt fritaget</strong> for arveafgift i Danmark. 
-          Dette gælder uanset størrelsen af arven. Ægtefællen arver alt boet 
+          Ægtefæller er <strong>helt fritaget</strong> for arveafgift i Danmark.
+          Dette gælder uanset størrelsen af arven. Ægtefællen arver alt boet
           afgiftsfrit.
         </p>
 
@@ -183,12 +145,13 @@ export default function ArveafgiftPage() {
           </p>
         </div>
       </div>
+      )}
 
       <section className="mt-12">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">
           Ofte stillede spørgsmål om arveafgift
         </h2>
-        <FAQ items={arveafgiftFaqItems} />
+        <FAQ items={pageData.faqItems} />
       </section>
 
       <section className="mt-12">

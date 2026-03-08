@@ -5,8 +5,12 @@ import { ShareCalculation } from "@/components/ShareCalculation";
 import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
+import { useLocale } from '@/components/LocaleProvider';
+import { getIntlLocale } from '@/lib/format';
 
 export default function AlderBeregner() {
+  const { locale } = useLocale();
+  const intlLocale = getIntlLocale(locale);
   const [foedselsdato, setFoedselsdato] = useState<string>("");
   const [beregningsDato, setBeregningsDato] = useState<string>(
     new Date().toISOString().split("T")[0]
@@ -159,7 +163,7 @@ export default function AlderBeregner() {
   }
 
   const formatNumber = (num: number) => {
-    return new Intl.NumberFormat("da-DK").format(num);
+    return new Intl.NumberFormat(intlLocale).format(num);
   };
 
   return (
@@ -255,7 +259,7 @@ export default function AlderBeregner() {
                 <div>
                   <p className="font-medium dark:text-gray-200">Født på en {beregning.ugedagFoedt}</p>
                   <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {new Date(foedselsdato).toLocaleDateString("da-DK", {
+                    {new Date(foedselsdato).toLocaleDateString(intlLocale, {
                       day: "numeric",
                       month: "long",
                       year: "numeric"

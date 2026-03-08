@@ -5,63 +5,38 @@ import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import RelatedCalculators from "@/components/RelatedCalculators";
 import Sidebar from "@/components/Sidebar";
-
-const baseUrl = "https://minberegner.dk";
+import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
+import { getPageData } from "@/lib/page-data";
 
 export async function generateMetadata() {
   return generatePageMetadata("rejsebudget");
 }
 
-const faqItems = [
-  {
-    question: "Hvad koster en uges ferie i Sydeuropa?",
-    answer: "En uges ferie i Sydeuropa koster typisk 5.000-8.000 kr. pr. person for en standardrejse inkl. fly, hotel, mad og oplevelser. Budget-rejser kan klares for 3.500-5.000 kr., mens luksus koster 10.000-15.000 kr. pr. person.",
-  },
-  {
-    question: "Hvornår er det billigst at rejse?",
-    answer: "Lavest priser finder du typisk i lavsæsonen: januar-marts og november for Sydeuropa, september-november for Asien. Book fly 6-8 uger i forvejen og undgå skoleferier for de bedste priser.",
-  },
-  {
-    question: "Hvor meget skal man budgettere til mad?",
-    answer: "Madbudgettet varierer meget: I Sydøstasien kan du spise godt for 100-200 kr./dag, i Centraleuropa 200-400 kr./dag, og i Skandinavien/USA 300-600 kr./dag. Morgenmad på hotellet sparer penge.",
-  },
-  {
-    question: "Skal jeg have rejseforsikring?",
-    answer: "Ja, altid. Det blå EU-sygesikringskort dækker kun offentlig behandling i EU. En rejseforsikring dækker afbestilling, bagageforsinkelse, hjemtransport og privat behandling. Mange kreditkort inkluderer en.",
-  },
-  {
-    question: "Hvordan sparer jeg på rejsebudgettet?",
-    answer: "Book i god tid, vær fleksibel med datoer, brug prissammenligningssider, bo centralt (spar transport), spis lokalt (undgå turistfælder), og overvej lejlighed i stedet for hotel til længere ophold.",
-  },
-];
+export default async function RejsebudgetPage() {
+  const locale = await getLocale();
+  const domainConfig = await getCurrentDomainConfig();
+  const pageData = getPageData("rejsebudget", locale) || getPageData("rejsebudget", "da")!;
 
-const relatedCalculators = [
-  { title: "Valutaberegner", description: "Omregn valuta", href: "/valuta", icon: "💱" },
-  { title: "Opsparingsberegner", description: "Spar op til rejsen", href: "/opsparing", icon: "📈" },
-  { title: "Procentberegner", description: "Beregn rabatter", href: "/procent", icon: "📊" },
-  { title: "Tidszone", description: "Se tidsforskel", href: "/tidszone", icon: "🌍" },
-];
-
-export default function RejsebudgetPage() {
   return (
     <div className="flex flex-col lg:flex-row gap-8">
       <div className="flex-1 min-w-0">
         <CalculatorSchema
-          name="Rejsebudget Beregner"
-          description="Beregn dit rejsebudget til populære destinationer med fly, hotel, mad og oplevelser."
-          url={`${baseUrl}/rejsebudget`}
-          category="FinanceApplication"
+          name={pageData.schemaName}
+          description={pageData.schemaDescription}
+          url={`${domainConfig.baseUrl}/rejsebudget`}
+          category={pageData.schemaCategory}
         />
-        <FAQSchema items={faqItems} />
-        <Breadcrumbs items={[{ name: "Hverdag", href: "/kategori/hverdag" }, { name: "Rejsebudget Beregner", href: "/rejsebudget" }]} />
+        <FAQSchema items={pageData.faqItems} />
+        <Breadcrumbs items={[{ name: pageData.breadcrumbCategory, href: pageData.breadcrumbCategoryHref }, { name: pageData.title, href: "/rejsebudget" }]} />
 
-        <h1 className="text-3xl font-bold mb-2 dark:text-white">Rejsebudget Beregner</h1>
+        <h1 className="text-3xl font-bold mb-2 dark:text-white">{pageData.title}</h1>
         <p className="text-gray-600 dark:text-gray-300 mb-8">
-          Beregn dit samlede rejsebudget baseret på destination, rejsetype og antal dage. Se estimerede udgifter til fly, hotel, mad, transport og oplevelser.
+          {pageData.description}
         </p>
 
         <RejsebudgetBeregner />
 
+        {locale === "da" && (
         <div className="mt-12 prose dark:prose-invert max-w-none">
           <h2>Planlæg dit rejsebudget</h2>
           <p>
@@ -82,9 +57,10 @@ export default function RejsebudgetPage() {
             <li><strong>Rejsekort:</strong> Brug lokale dagskort til offentlig transport</li>
           </ul>
         </div>
+        )}
 
-        <FAQ items={faqItems} />
-        <RelatedCalculators calculators={relatedCalculators} />
+        <FAQ items={pageData.faqItems} />
+        <RelatedCalculators current="/rejsebudget" />
       </div>
 
       <Sidebar currentHref="/rejsebudget" adSlotId="rejsebudget-sidebar" />

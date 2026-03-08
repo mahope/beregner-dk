@@ -1,4 +1,6 @@
 import { generatePageMetadata } from "@/lib/page-helpers";
+import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
+import { getPageData } from "@/lib/page-data";
 import StudielaanBeregner from "@/components/StudielaanBeregner";
 import FAQ from "@/components/FAQ";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
@@ -6,62 +8,35 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import RelatedCalculators from "@/components/RelatedCalculators";
 import Sidebar from "@/components/Sidebar";
 
-const baseUrl = "https://minberegner.dk";
-
 export async function generateMetadata() {
   return generatePageMetadata("studielaan");
 }
 
-const faqItems = [
-  {
-    question: "Hvornår skal jeg begynde at betale SU-lån tilbage?",
-    answer: "Tilbagebetalingen starter 1 år efter, at du afslutter eller afbryder din uddannelse. Du modtager en tilbagebetalingsplan fra Udbetaling Danmark ca. 6 måneder før tilbagebetaling starter.",
-  },
-  {
-    question: "Hvad er renten på SU-lån?",
-    answer: "Renten på SU-lån er variabel og fastsættes årligt. Under uddannelsen er renten typisk lavere (diskontoen + 1%). Efter uddannelsen stiger renten (diskontoen + tillæg). Se aktuelle satser på su.dk.",
-  },
-  {
-    question: "Kan jeg betale SU-lån hurtigere tilbage?",
-    answer: "Ja, du kan til enhver tid betale ekstra af på dit SU-lån uden gebyr. Ekstra afdrag reducerer din restgæld og dermed din samlede renteomkostning. Selv små ekstra beløb gør en forskel.",
-  },
-  {
-    question: "Hvad sker der, hvis jeg ikke kan betale?",
-    answer: "Kontakt Udbetaling Danmark hurtigst muligt. Du kan søge om nedsat ydelse eller midlertidigt betalingsstop, hvis du har lav indkomst. Ignorer ikke problemet — gælden vokser med renter.",
-  },
-  {
-    question: "Hvor lang tid har jeg til at betale SU-lån?",
-    answer: "Standard løbetiden er 7 år, men den kan forlænges til op til 15 år, hvis du har behov for lavere månedlige ydelser. Husk at en længere løbetid betyder flere renteomkostninger.",
-  },
-];
+export default async function StudielaanPage() {
+  const locale = await getLocale();
+  const domainConfig = await getCurrentDomainConfig();
+  const pageData = getPageData("studielaan", locale) || getPageData("studielaan", "da")!;
 
-const relatedCalculators = [
-  { title: "SU Beregner", description: "Beregn din SU-sats", href: "/su", icon: "🎓" },
-  { title: "Løn efter skat", description: "Beregn nettoløn", href: "/loen-efter-skat", icon: "💰" },
-  { title: "Gældsfri Beregner", description: "Beregn gældsafvikling", href: "/gaeldsfri", icon: "🎯" },
-  { title: "Opsparingsberegner", description: "Beregn renters rente", href: "/opsparing", icon: "📈" },
-];
-
-export default function StudielaanPage() {
   return (
     <div className="flex flex-col lg:flex-row gap-8">
       <div className="flex-1 min-w-0">
         <CalculatorSchema
-          name="Studielån Beregner"
-          description="Beregn månedlig ydelse og tilbagebetalingstid for SU-lån."
-          url={`${baseUrl}/studielaan`}
-          category="FinanceApplication"
+          name={pageData.schemaName}
+          description={pageData.schemaDescription}
+          url={`${domainConfig.baseUrl}/studielaan`}
+          category={pageData.schemaCategory}
         />
-        <FAQSchema items={faqItems} />
-        <Breadcrumbs items={[{ name: "Uddannelse", href: "/kategori/uddannelse" }, { name: "Studielån Beregner", href: "/studielaan" }]} />
+        <FAQSchema items={pageData.faqItems} />
+        <Breadcrumbs items={[{ name: pageData.breadcrumbCategory, href: pageData.breadcrumbCategoryHref }, { name: pageData.title, href: "/studielaan" }]} />
 
-        <h1 className="text-3xl font-bold mb-2 dark:text-white">Studielån Beregner</h1>
+        <h1 className="text-3xl font-bold mb-2 dark:text-white">{pageData.title}</h1>
         <p className="text-gray-600 dark:text-gray-300 mb-8">
-          Beregn din månedlige ydelse på SU-lån, se den samlede tilbagebetaling og effekten af ekstra afdrag. Få overblik over din afdragsplan.
+          {pageData.description}
         </p>
 
         <StudielaanBeregner />
 
+        {locale === "da" && (
         <div className="mt-12 prose dark:prose-invert max-w-none">
           <h2>Tilbagebetaling af SU-lån</h2>
           <p>
@@ -82,9 +57,10 @@ export default function StudielaanPage() {
             <li><strong>Søg nedsat ydelse:</strong> Ved lav indkomst kan du få reduceret din ydelse</li>
           </ul>
         </div>
+        )}
 
-        <FAQ items={faqItems} />
-        <RelatedCalculators calculators={relatedCalculators} />
+        <FAQ items={pageData.faqItems} />
+        <RelatedCalculators current="/studielaan" />
       </div>
 
       <Sidebar currentHref="/studielaan" adSlotId="studielaan-sidebar" />

@@ -1,91 +1,39 @@
 import { generatePageMetadata } from "@/lib/page-helpers";
+import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
+import { getPageData } from "@/lib/page-data";
 import ForbrugslaanBeregner from "@/components/ForbrugslaanBeregner";
 import FAQ from "@/components/FAQ";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import RelatedCalculators from "@/components/RelatedCalculators";
 import Breadcrumbs from "@/components/Breadcrumbs";
 
-const baseUrl = "https://minberegner.dk";
-
 export async function generateMetadata() {
   return generatePageMetadata("forbrugslaan");
 }
 
-const faqItems = [
-  {
-    question: "Hvad er et forbrugslån?",
-    answer:
-      "Et forbrugslån er et lån uden sikkerhed i bolig eller bil. Du kan bruge pengene til hvad du vil - rejser, elektronik, renovation eller andre formål. Renten er typisk højere end boliglån, men lavere end kviklån.",
-  },
-  {
-    question: "Hvad er ÅOP og hvorfor er det vigtigt?",
-    answer:
-      "ÅOP (Årlige Omkostninger i Procent) inkluderer alle låneomkostninger - rente, stiftelsesgebyr og alle andre gebyrer. Det giver dig det reelle billede af lånets pris og gør det nemt at sammenligne forskellige lån.",
-  },
-  {
-    question: "Hvor meget kan jeg låne som forbrugslån?",
-    answer:
-      "Typisk kan du låne mellem 10.000 og 350.000 kr som forbrugslån. Det præcise beløb afhænger af din indkomst, kreditvurdering og gæld. Som tommelfingerregel bør ydelsen ikke overstige 30-40% af din rådighedsbeløb.",
-  },
-  {
-    question: "Hvad er typisk rente på forbrugslån?",
-    answer:
-      "Renter på forbrugslån varierer typisk mellem 7% og 20% afhængigt af lånebeløb, løbetid og din kreditvurdering. Bank Norwegian og andre网上银行 tilbyder ofte de laveste renter, mens traditionelle banker kan kræve højere rente.",
-  },
-  {
-    question: "Kan jeg indfri forbrugslån før tid?",
-    answer:
-      "Ja, de fleste forbrugslån kan indfries før tid. Tjek om der er et indfrielsesgebyr. Ved at betale ekstra afdrag sparer du renter. Nogle udbydere tilbyder også mulighed for afdragsfrihed i perioder.",
-  },
-  {
-    question: "Er forbrugslån det samme som kviklån?",
-    answer:
-      "Nej, der er forskel. Forbrugslån har typisk lavere rente (7-20%), længere løbetid og mere seriøse vilkår. Kviklån har ofte meget høj rente (100%+) og kortere løbetid. Forbrugslån er reguleret af forbrugerombudsmanden, mens kviklån ikke er det.",
-  },
-];
+export default async function ForbrugslaanPage() {
+  const locale = await getLocale();
+  const domainConfig = await getCurrentDomainConfig();
+  const pageData = getPageData("forbrugslaan", locale) || getPageData("forbrugslaan", "da")!;
 
-const relatedCalculators = [
-  {
-    title: "Låneberegner",
-    href: "/laaneberegner",
-    description: "Generel låneberegner",
-    icon: "💰",
-  },
-  {
-    title: "Billån",
-    href: "/billaan",
-    description: "Beregn dit billån",
-    icon: "🚗",
-  },
-  {
-    title: "Boliglån",
-    href: "/boliglaan",
-    description: "Beregn dit boliglån",
-    icon: "🏠",
-  },
-];
-
-export default function ForbrugslaanPage() {
   return (
     <div className="max-w-4xl mx-auto">
       <CalculatorSchema
-        name="Forbrugslån beregner - Beregn lån og ydelse"
-        description="Gratis forbrugslån beregner. Beregn månedlig ydelse, samlede renter og find det bedste forbrugslån."
-        url={`${baseUrl}/forbrugslaan`}
-        category="FinanceApplication"
+        name={pageData.schemaName}
+        description={pageData.schemaDescription}
+        url={`${domainConfig.baseUrl}/forbrugslaan`}
+        category={pageData.schemaCategory}
       />
-      <FAQSchema items={faqItems} />
-      <Breadcrumbs items={[{ name: "Lån", href: "/kategori/laan" }, { name: "Forbrugslån", href: "/forbrugslaan" }]} />
+      <FAQSchema items={pageData.faqItems} />
+      <Breadcrumbs items={[{ name: pageData.breadcrumbCategory, href: pageData.breadcrumbCategoryHref }, { name: pageData.title, href: "/forbrugslaan" }]} />
 
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl md:text-4xl font-bold mb-4">
-          Forbrugslån beregner
+          {pageData.title}
         </h1>
         <p className="text-lg text-gray-600">
-          Beregn din månedlige ydelse på et forbrugslån, se samlede renteudgifter og 
-          find det bedste lån. Forbrugslån er lån uden sikkerhed, som du kan bruge 
-          til hvad du vil - fra rejser til større køb.
+          {pageData.description}
         </p>
       </div>
 
@@ -95,6 +43,7 @@ export default function ForbrugslaanPage() {
       </div>
 
       {/* Informativ tekst - SEO */}
+      {locale === "da" && (
       <div className="prose max-w-none mb-8">
         <h2>Om forbrugslån</h2>
         <p>
@@ -103,7 +52,7 @@ export default function ForbrugslaanPage() {
           forbrugslån ikke knyttet til en specifik aktiv, hvilket giver frihed til at
           bruge pengene efter eget ønske.
         </p>
-        
+
         <h3>Typer af forbrugslån</h3>
         <ul>
           <li><strong>Banklån:</strong> Traditionelle banker tilbyder ofte de bedste vilkår for kunder med god økonomi</li>
@@ -132,14 +81,15 @@ export default function ForbrugslaanPage() {
           tøj. I disse tilfælde kan det være bedre at <strong>spare op først</strong>.
         </p>
       </div>
+      )}
 
       {/* FAQ */}
       <div className="mb-8">
-        <FAQ items={faqItems} />
+        <FAQ items={pageData.faqItems} />
       </div>
 
       {/* Related Calculators */}
-      <RelatedCalculators calculators={relatedCalculators} />
+      <RelatedCalculators current="/forbrugslaan" />
     </div>
   );
 }

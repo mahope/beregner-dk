@@ -1,71 +1,39 @@
 import { generatePageMetadata } from "@/lib/page-helpers";
+import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
+import { getPageData } from "@/lib/page-data";
 import BoligstoetteBeregner from "@/components/BoligstoetteBeregner";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
-import { FAQ } from "@/components/FAQ";
-import { RelatedCalculators } from "@/components/RelatedCalculators";
-
-const baseUrl = "https://minberegner.dk";
+import FAQ from "@/components/FAQ";
+import RelatedCalculators from "@/components/RelatedCalculators";
 
 export async function generateMetadata() {
   return generatePageMetadata("boligstoette");
 }
 
-const faqItems = [
-  {
-    question: "Hvem kan få boligstøtte?",
-    answer:
-      "Du kan søge boligstøtte hvis du bor til leje i en helårsbolig, er fyldt 18 år, og har en indkomst under visse grænser. Både danske og udenlandske statsborgere kan søge, hvis de har lovligt ophold.",
-  },
-  {
-    question: "Hvordan søger jeg boligstøtte?",
-    answer:
-      "Du søger boligstøtte på borger.dk med MitID. Udbetaling Danmark behandler ansøgningen og beregner det præcise beløb. Støtten udbetales direkte til din NemKonto.",
-  },
-  {
-    question: "Hvornår får jeg boligstøtte udbetalt?",
-    answer:
-      "Boligstøtte udbetales månedsvist forud, typisk omkring den 1. i måneden. Fra ansøgningsdatoen kan du få støtte med tilbagevirkende kraft op til 2 måneder.",
-  },
-  {
-    question: "Påvirker min formue boligstøtten?",
-    answer:
-      "Ja, hvis din formue overstiger fribeløbet (ca. 800.000 kr for enlige, 1.600.000 kr for par), nedsættes boligstøtten. Visse formuetyper som pensionsopsparinger tæller ikke med.",
-  },
-  {
-    question: "Hvad sker der hvis min indkomst ændrer sig?",
-    answer:
-      "Du skal give Udbetaling Danmark besked om ændringer i indkomst, husstandens størrelse eller husleje. De beregner så et nyt beløb. Ved årets slutning foretages en efterregulering.",
-  },
-];
+export default async function BoligstoettePage() {
+  const locale = await getLocale();
+  const domainConfig = await getCurrentDomainConfig();
+  const pageData = getPageData("boligstoette", locale) || getPageData("boligstoette", "da")!;
 
-const relatedCalcs = [
-  { href: "/husleje", title: "Husleje budget", description: "Hvad har du råd til?" },
-  { href: "/loen-efter-skat", title: "Løn efter skat", description: "Beregn din nettoløn" },
-  { href: "/dagpenge", title: "Dagpenge", description: "Beregn dagpenge ved ledighed" },
-  { href: "/boernepenge", title: "Børnepenge", description: "Børne- og ungeydelse" },
-];
-
-export default function BoligstoettePage() {
   return (
     <div className="max-w-4xl mx-auto">
       <CalculatorSchema
-        name="Boligstøtte beregner 2026"
-        description="Beregn hvor meget du kan få i boligstøtte baseret på husleje og indkomst"
-        url={`${baseUrl}/boligstoette`}
-        category="FinanceApplication"
+        name={pageData.schemaName}
+        description={pageData.schemaDescription}
+        url={`${domainConfig.baseUrl}/boligstoette`}
+        category={pageData.schemaCategory}
       />
-      <FAQSchema items={faqItems} />
-      <Breadcrumbs items={[{ name: "Bolig", href: "/kategori/bolig" }, { name: "Boligstøtte beregner", href: "/boligstoette" }]} />
+      <FAQSchema items={pageData.faqItems} />
+      <Breadcrumbs items={[{ name: pageData.breadcrumbCategory, href: pageData.breadcrumbCategoryHref }, { name: pageData.title, href: "/boligstoette" }]} />
 
       {/* Header */}
       <div className="text-center mb-8">
         <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-          Boligstøtte beregner 2026
+          {pageData.title}
         </h1>
         <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-          Find ud af hvor meget boligstøtte du kan få til din husleje. 
-          Beregneren giver et estimat baseret på de aktuelle regler.
+          {pageData.description}
         </p>
       </div>
 
@@ -73,6 +41,7 @@ export default function BoligstoettePage() {
       <BoligstoetteBeregner />
 
       {/* Info sektion */}
+      {locale === "da" && (
       <section className="mt-12 prose prose-blue max-w-none">
         <h2>Hvad er boligstøtte?</h2>
         <p>
@@ -125,18 +94,19 @@ export default function BoligstoettePage() {
           <li>Ved flytning: Søg igen — beløbet kan ændre sig med ny husleje</li>
         </ul>
       </section>
+      )}
 
       {/* FAQ */}
       <section className="mt-12">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">
           Ofte stillede spørgsmål om boligstøtte
         </h2>
-        <FAQ items={faqItems} />
+        <FAQ items={pageData.faqItems} />
       </section>
 
       {/* Related */}
       <section className="mt-12">
-        <RelatedCalculators calculators={relatedCalcs} />
+        <RelatedCalculators current="/boligstoette" />
       </section>
     </div>
   );

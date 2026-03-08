@@ -5,6 +5,8 @@ import { ShareCalculation } from "@/components/ShareCalculation";
 import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
+import { useLocale } from '@/components/LocaleProvider';
+import { getIntlLocale, formatNumber } from '@/lib/format';
 
 type BeregningsMode = "dage-mellem" | "tilfoej-dage" | "arbejdsdage" | "alder";
 
@@ -17,8 +19,8 @@ function isWeekend(date: Date): boolean {
   return day === 0 || day === 6;
 }
 
-function formatDate(date: Date): string {
-  return date.toLocaleDateString("da-DK", {
+function formatDate(date: Date, intlLocale: string): string {
+  return date.toLocaleDateString(intlLocale, {
     weekday: "long",
     year: "numeric",
     month: "long",
@@ -27,6 +29,8 @@ function formatDate(date: Date): string {
 }
 
 export default function DatoBeregner() {
+  const { locale } = useLocale();
+  const intlLocale = getIntlLocale(locale);
   const [mode, setMode] = useState<BeregningsMode>("dage-mellem");
 
   // Dage mellem mode
@@ -131,7 +135,7 @@ export default function DatoBeregner() {
         return {
           type: "tilfoej-dage" as const,
           resultatDato,
-          formatteret: formatDate(resultatDato),
+          formatteret: formatDate(resultatDato, intlLocale),
         };
       }
 
@@ -154,7 +158,7 @@ export default function DatoBeregner() {
         return {
           type: "arbejdsdage" as const,
           resultatDato,
-          formatteret: formatDate(resultatDato),
+          formatteret: formatDate(resultatDato, intlLocale),
           samledeDage,
           weekenddage: samledeDage - antalDage,
         };
@@ -203,7 +207,7 @@ export default function DatoBeregner() {
           totalDage,
           totalUger,
           dageTilFoedselsdag,
-          naesteFoedselsdag: formatDate(naesteFoedselsdag),
+          naesteFoedselsdag: formatDate(naesteFoedselsdag, intlLocale),
         };
       }
 
@@ -420,13 +424,13 @@ export default function DatoBeregner() {
                 <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
                   <p className="text-sm text-gray-600 dark:text-gray-400">Total dage</p>
                   <p className="text-xl font-bold dark:text-gray-200">
-                    {resultat.totalDage.toLocaleString("da-DK")}
+                    {resultat.totalDage.toLocaleString(intlLocale)}
                   </p>
                 </div>
                 <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
                   <p className="text-sm text-gray-600 dark:text-gray-400">Total uger</p>
                   <p className="text-xl font-bold dark:text-gray-200">
-                    {resultat.totalUger.toLocaleString("da-DK")}
+                    {resultat.totalUger.toLocaleString(intlLocale)}
                   </p>
                 </div>
                 <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center col-span-2">

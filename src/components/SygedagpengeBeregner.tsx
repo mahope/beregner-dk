@@ -5,6 +5,8 @@ import { ShareCalculation } from "@/components/ShareCalculation";
 import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState, ShareableLink } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
+import { useLocale } from '@/components/LocaleProvider';
+import { formatNumber as formatNum, getCurrencySuffix } from '@/lib/format';
 
 // Sygedagpenge 2026 satser
 // Kilde: borger.dk, star.dk, retsinformation.dk
@@ -19,6 +21,7 @@ const SATSER_2026 = {
 type Ansaettelse = "loenmodtager" | "selvstaendig";
 
 export default function SygedagpengeBeregner() {
+  const { locale } = useLocale();
   const [ansaettelse, setAnsaettelse] = useState<Ansaettelse>("loenmodtager");
   const [maanedsloen, setMaanedsloen] = useState<string>("");
   const [arbejdstimer, setArbejdstimer] = useState<string>("37");
@@ -129,7 +132,7 @@ export default function SygedagpengeBeregner() {
     hasTracked.current = false;
   }, []);
 
-  const formatKr = (n: number) => n.toLocaleString("da-DK") + " kr.";
+  const formatKr = (n: number) => formatNum(n, locale) + " " + getCurrencySuffix(locale);
 
   return (
     <div className="space-y-6">
@@ -177,7 +180,7 @@ export default function SygedagpengeBeregner() {
               className="w-full border border-gray-300 dark:border-gray-600 rounded-lg py-3 px-4 pr-12 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               min="0"
             />
-            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">kr.</span>
+            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">{getCurrencySuffix(locale)}</span>
           </div>
         </div>
 

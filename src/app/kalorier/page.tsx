@@ -1,80 +1,40 @@
 import KalorieBeregner from "@/components/KalorieBeregner";
 import { generatePageMetadata } from "@/lib/page-helpers";
+import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
+import { getPageData } from "@/lib/page-data";
 import FAQ from "@/components/FAQ";
 import RelatedCalculators from "@/components/RelatedCalculators";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
 
-const baseUrl = "https://minberegner.dk";
-
 export async function generateMetadata() {
   return generatePageMetadata("kalorier");
 }
 
-const faqItems = [
-  {
-    question: "Hvad er forskellen på BMR og TDEE?",
-    answer:
-      "BMR (Basal Metabolic Rate) er de kalorier din krop brænder i hvile - bare for at holde dig i live. TDEE (Total Daily Energy Expenditure) er dit totale daglige forbrug inkl. al aktivitet. TDEE = BMR × aktivitetsfaktor.",
-  },
-  {
-    question: "Hvor mange kalorier skal jeg spise for at tabe mig?",
-    answer:
-      "For at tabe ca. 0,5 kg om ugen, spis 500 kalorier under din TDEE. For 1 kg/uge, spis 1000 under (ikke anbefalet i længere perioder). Start med 500 kcal underskud for bæredygtigt vægttab.",
-  },
-  {
-    question: "Hvor meget protein har jeg brug for?",
-    answer:
-      "Det afhænger af dit mål: Vedligehold: 0,8-1,2g per kg kropsvægt. Vægttab: 1,2-1,6g per kg (bevarer muskler). Muskelopbygning: 1,6-2,2g per kg. Protein mætter godt og bevarer muskelmasse.",
-  },
-  {
-    question: "Er denne beregner præcis?",
-    answer:
-      "Beregneren bruger Mifflin-St Jeor formlen, som er den mest præcise formel for de fleste mennesker. Dog kan individuelle variationer være på 10-15%. Brug resultatet som udgangspunkt og justér baseret på dine resultater.",
-  },
-  {
-    question: "Hvorfor taber jeg ikke vægt selvom jeg spiser under min TDEE?",
-    answer:
-      "Mulige årsager: 1) Du spiser mere end du tror (prøv at veje maden). 2) Din TDEE er lavere end beregnet. 3) Du har ikke givet det tid nok - vægten svinger naturligt. Prøv at reducere yderligere 200 kcal.",
-  },
-  {
-    question: "Skal jeg spise mine trænede kalorier tilbage?",
-    answer:
-      "Det afhænger af dit mål. Ved vægttab: Spis ikke alle tilbage, men tilføj evt. 50% ved hård træning. Ved vedligehold/muskelopbygning: Ja, spis ekstra for at dække træningen. Din aktivitetsfaktor dækker allerede let-moderat træning.",
-  },
-  {
-    question: "Hvor hurtigt kan jeg tabe mig sikkert?",
-    answer:
-      "En sikker og bæredygtig vægttabsrate er 0,5-1 kg per uge. Hurtigere vægttab kan føre til muskeltab, næringsmangel og metabolisk tilpasning. Tålmodighed giver bedre resultater på lang sigt.",
-  },
-  {
-    question: "Hvad er en god makrofordeling?",
-    answer:
-      "En typisk fordeling er: Protein 25-30%, Fedt 25-30%, Kulhydrater 40-50%. Ved vægttab øges protein ofte til 30-35%. Fedt bør aldrig være under 20% af kalorierne pga. hormonbalance.",
-  },
-];
+export default async function KalorierPage() {
+  const locale = await getLocale();
+  const domainConfig = await getCurrentDomainConfig();
+  const pageData = getPageData("kalorier", locale) || getPageData("kalorier", "da")!;
 
-export default function KalorierPage() {
   return (
     <div>
       <CalculatorSchema
-        name="Kalorieberegner"
-        description="Gratis kalorieberegner. Beregn dit daglige kaloriebehov og få makrofordeling."
-        url={`${baseUrl}/kalorier`}
-        category="HealthApplication"
+        name={pageData.schemaName}
+        description={pageData.schemaDescription}
+        url={`${domainConfig.baseUrl}/kalorier`}
+        category={pageData.schemaCategory}
       />
-      <FAQSchema items={faqItems} />
-      <Breadcrumbs items={[{ name: "Sundhed", href: "/kategori/sundhed" }, { name: "Kalorieberegner", href: "/kalorier" }]} />
+      <FAQSchema items={pageData.faqItems} />
+      <Breadcrumbs items={[{ name: pageData.breadcrumbCategory, href: pageData.breadcrumbCategoryHref }, { name: pageData.title, href: "/kalorier" }]} />
 
-      <h1 className="text-3xl font-bold mb-2">Kalorieberegner</h1>
+      <h1 className="text-3xl font-bold mb-2">{pageData.title}</h1>
       <p className="text-gray-600 mb-8">
-        Beregn dit daglige kaloriebehov baseret på din krop og aktivitetsniveau.
-        Få personlige anbefalinger til vægttab, vedligehold eller
-        muskelopbygning.
+        {pageData.description}
       </p>
 
       <KalorieBeregner />
 
+      {locale === "da" && (
       <div className="mt-12 prose max-w-none">
         <h2>Forstå dit kaloriebehov</h2>
         <p>
@@ -160,8 +120,9 @@ export default function KalorierPage() {
           </p>
         </div>
       </div>
+      )}
 
-      <FAQ items={faqItems} />
+      <FAQ items={pageData.faqItems} />
 
       <RelatedCalculators current="/kalorier" />
     </div>

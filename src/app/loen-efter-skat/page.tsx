@@ -1,4 +1,6 @@
 import { generatePageMetadata } from "@/lib/page-helpers";
+import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
+import { getPageData } from "@/lib/page-data";
 import dynamic from "next/dynamic";
 const LoenBeregner = dynamic(() => import("@/components/LoenBeregner"));
 import FAQ from "@/components/FAQ";
@@ -11,80 +13,39 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import { InlineAd } from "@/components/ads/AdBanner";
 import Sidebar from "@/components/Sidebar";
 
-const baseUrl = "https://minberegner.dk";
-
 export async function generateMetadata() {
   return generatePageMetadata("loen-efter-skat");
 }
 
-const faqItems = [
-  {
-    question: "Hvordan beregnes min løn efter skat?",
-    answer:
-      "Din nettoløn beregnes ved først at trække AM-bidrag (8%) fra bruttolønnen. Derefter trækkes bundskat, kommuneskat og eventuel kirkeskat fra den skattepligtige indkomst efter fradrag. Tjener du over topskattegrænsen, betales også 15% topskat.",
-  },
-  {
-    question: "Hvad er AM-bidrag?",
-    answer:
-      "AM-bidrag (arbejdsmarkedsbidrag) er 8% af din bruttoløn før andre fradrag. Bidraget går til at finansiere dagpenge, efterløn og andre arbejdsmarkedsordninger. AM-bidrag trækkes før skat beregnes.",
-  },
-  {
-    question: "Hvornår skal jeg betale mellemskat eller topskat i 2026?",
-    answer:
-      "I 2026 er der indført et nyt skattesystem: Mellemskat på 7,5% af indkomst over 641.200 kr, topskat på 7,5% over 777.900 kr, og top-topskat på 5% over 2.592.700 kr (alle efter AM-bidrag). Den gamle topskat på 15% er afskaffet.",
-  },
-  {
-    question: "Hvad er personfradraget i 2026?",
-    answer:
-      "Personfradraget i 2026 er 54.100 kr (op fra 49.700 kr). Det betyder, at du ikke betaler skat af de første 54.100 kr af din årlige indkomst (efter AM-bidrag). Alle skatteydere får automatisk dette fradrag.",
-  },
-  {
-    question: "Hvorfor varierer kommuneskatten?",
-    answer:
-      "Hver kommune fastsætter sin egen skatteprocent baseret på kommunens økonomi og serviceniveau. I 2026 varierer kommuneskatten fra ca. 22,5% (Rudersdal) til 27,8% (Langeland). Landsgennemsnittet er omkring 24,94%.",
-  },
-  {
-    question: "Hvad er forskellen på brutto og netto?",
-    answer:
-      "Bruttoløn er din løn før skat og bidrag. Nettoløn er det beløb, du faktisk får udbetalt på kontoen efter alle fradrag. Forskellen udgøres af AM-bidrag, skat, pension og eventuelle andre fradrag.",
-  },
-  {
-    question: "Hvordan påvirker pension min skat?",
-    answer:
-      "Arbejdsgiverbetalt pension trækkes fra bruttolønnen før AM-bidrag beregnes, hvilket reducerer din skattepligtige indkomst. Det betyder, at du betaler mindre i skat nu, men skal betale skat når du hæver pensionen.",
-  },
-  {
-    question: "Er denne beregner præcis?",
-    answer:
-      "Beregneren giver et godt estimat baseret på gennemsnitlige satser. Din faktiske nettoløn kan variere afhængigt af dine specifikke fradrag, kommune og situation. For præcis beregning, brug SKAT's officielle værktøjer.",
-  },
-];
+export default async function LoenPage() {
+  const locale = await getLocale();
+  const domainConfig = await getCurrentDomainConfig();
+  const pageData = getPageData("loen-efter-skat", locale) || getPageData("loen-efter-skat", "da")!;
 
-export default function LoenPage() {
   return (
     <div className="flex flex-col lg:flex-row gap-8">
       {/* Main Content - Left Column */}
       <div className="flex-1 min-w-0">
       <CalculatorSchema
-        name="Lønberegner - Løn efter skat"
-        description="Gratis lønberegner. Se hvad du får udbetalt efter skat, AM-bidrag og pension."
-        url={`${baseUrl}/loen-efter-skat`}
-        category="FinanceApplication"
+        name={pageData.schemaName}
+        description={pageData.schemaDescription}
+        url={`${domainConfig.baseUrl}/loen-efter-skat`}
+        category={pageData.schemaCategory}
       />
-      <FAQSchema items={faqItems} />
-      <Breadcrumbs items={[{ name: "Økonomi", href: "/kategori/oekonomi" }, { name: "Løn efter skat", href: "/loen-efter-skat" }]} />
+      <FAQSchema items={pageData.faqItems} />
+      <Breadcrumbs items={[{ name: pageData.breadcrumbCategory, href: pageData.breadcrumbCategoryHref }, { name: pageData.title, href: "/loen-efter-skat" }]} />
 
-      <h1 className="text-3xl font-bold mb-2">Løn efter skat 2026</h1>
+      <h1 className="text-3xl font-bold mb-2">{pageData.title}</h1>
       <p className="text-gray-600 mb-8">
-        Beregn din nettoløn og se hvad du får udbetalt efter skat, AM-bidrag og
-        pension. Opdateret med de nyeste danske skattesatser for 2026.
+        {pageData.description}
       </p>
 
       <LoenBeregner />
-      
+
       {/* Inline Ad - After calculator */}
       <InlineAd slotId="loen-after-calculator" />
 
+      {locale === "da" && (
       <div className="mt-12 prose max-w-none dark:prose-invert">
         <h2>Sådan beregnes din skat i Danmark</h2>
         <p>
@@ -220,8 +181,9 @@ export default function LoenPage() {
           </p>
         </div>
       </div>
+      )}
 
-      <FAQ items={faqItems} />
+      <FAQ items={pageData.faqItems} />
 
       <RelatedCalculators current="/loen-efter-skat" />
       </div>

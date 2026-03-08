@@ -5,22 +5,24 @@ import { ShareCalculation } from "@/components/ShareCalculation";
 import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState, ShareableLink } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
+import { useLocale } from "@/components/LocaleProvider";
+import { formatCurrency, getCurrencySuffix } from "@/lib/format";
 
 type Venue = "have" | "forsamlingshus" | "slot_herregaard" | "restaurant" | "hotel";
 type MadNiveau = "budget" | "standard" | "luksus";
 
-const VENUES: Record<Venue, { label: string; pris: number }> = {
-  have: { label: "Privat have", pris: 0 },
-  forsamlingshus: { label: "Forsamlingshus", pris: 8000 },
-  slot_herregaard: { label: "Slot/herregård", pris: 35000 },
-  restaurant: { label: "Restaurant", pris: 15000 },
-  hotel: { label: "Hotel", pris: 25000 },
+const VENUES_DATA: Record<Venue, { pris: number }> = {
+  have: { pris: 0 },
+  forsamlingshus: { pris: 8000 },
+  slot_herregaard: { pris: 35000 },
+  restaurant: { pris: 15000 },
+  hotel: { pris: 25000 },
 };
 
-const MAD: Record<MadNiveau, { label: string; prisPrPerson: number }> = {
-  budget: { label: "Budget", prisPrPerson: 350 },
-  standard: { label: "Standard", prisPrPerson: 650 },
-  luksus: { label: "Luksus", prisPrPerson: 1100 },
+const MAD_DATA: Record<MadNiveau, { prisPrPerson: number }> = {
+  budget: { prisPrPerson: 350 },
+  standard: { prisPrPerson: 650 },
+  luksus: { prisPrPerson: 1100 },
 };
 
 const POSTER = {
@@ -36,6 +38,134 @@ const POSTER = {
 };
 
 export default function BryllupBeregner() {
+  const { locale } = useLocale();
+
+  const labels = {
+    da: {
+      basics: "Grundlæggende",
+      numGuests: "Antal gæster",
+      venue: "Venue",
+      venueHave: "Privat have",
+      venueForsamlingshus: "Forsamlingshus",
+      venueSlot: "Slot/herregård",
+      venueRestaurant: "Restaurant",
+      venueHotel: "Hotel",
+      free: "Gratis",
+      foodAndDrink: "Mad og drikke",
+      budget: "Budget",
+      standard: "Standard",
+      luxury: "Luksus",
+      perPerson: "/pers.",
+      expensePosts: "Udgiftsposter",
+      photographer: "Fotograf",
+      musicDJ: "Musik/DJ/band",
+      weddingDress: "Brudekjole",
+      suit: "Jakkesæt",
+      rings: "Vielsesringe",
+      flowersDecor: "Blomster/dekoration",
+      otherExpenses: "Øvrige udgifter (transport, overnatning mv.)",
+      totalBudget: "Samlet bryllupsbudget",
+      totalBudgetLabel: "Samlet budget",
+      perGuest: "Pr. gæst",
+      expenseBreakdown: "Udgiftsfordeling",
+      disclaimer: "Priserne er estimater baseret på gennemsnitlige danske bryllupspriser 2026. Faktiske priser varierer efter sted, sæson og ønsker.",
+      foodAndDrinkPost: "Mad og drikke",
+      venuePost: "Venue/lokale",
+      musicDJPost: "Musik/DJ",
+      invitations: "Invitationer",
+      weddingCake: "Bryllupskage",
+      ringsPost: "Ringe",
+      otherExpensesPost: "Øvrige udgifter",
+    },
+    se: {
+      basics: "Grundläggande",
+      numGuests: "Antal gäster",
+      venue: "Lokal",
+      venueHave: "Privat trädgård",
+      venueForsamlingshus: "Samlingslokal",
+      venueSlot: "Slott/herrgård",
+      venueRestaurant: "Restaurang",
+      venueHotel: "Hotell",
+      free: "Gratis",
+      foodAndDrink: "Mat och dryck",
+      budget: "Budget",
+      standard: "Standard",
+      luxury: "Lyx",
+      perPerson: "/pers.",
+      expensePosts: "Utgiftsposter",
+      photographer: "Fotograf",
+      musicDJ: "Musik/DJ/band",
+      weddingDress: "Brudklänning",
+      suit: "Kostym",
+      rings: "Vigselringar",
+      flowersDecor: "Blommor/dekoration",
+      otherExpenses: "Övriga utgifter (transport, övernattning m.m.)",
+      totalBudget: "Total brölloppsbudget",
+      totalBudgetLabel: "Total budget",
+      perGuest: "Per gäst",
+      expenseBreakdown: "Utgiftsfördelning",
+      disclaimer: "Priserna är uppskattningar baserade på genomsnittliga svenska bröllopspriser 2026. Faktiska priser varierar beroende på plats, säsong och önskemål.",
+      foodAndDrinkPost: "Mat och dryck",
+      venuePost: "Lokal/venue",
+      musicDJPost: "Musik/DJ",
+      invitations: "Inbjudningar",
+      weddingCake: "Bröllopstårta",
+      ringsPost: "Ringar",
+      otherExpensesPost: "Övriga utgifter",
+    },
+    no: {
+      basics: "Grunnleggende",
+      numGuests: "Antall gjester",
+      venue: "Lokale",
+      venueHave: "Privat hage",
+      venueForsamlingshus: "Forsamlingshus",
+      venueSlot: "Slott/herregård",
+      venueRestaurant: "Restaurant",
+      venueHotel: "Hotell",
+      free: "Gratis",
+      foodAndDrink: "Mat og drikke",
+      budget: "Budsjett",
+      standard: "Standard",
+      luxury: "Luksus",
+      perPerson: "/pers.",
+      expensePosts: "Utgiftsposter",
+      photographer: "Fotograf",
+      musicDJ: "Musikk/DJ/band",
+      weddingDress: "Brudekjole",
+      suit: "Dress",
+      rings: "Gifteringer",
+      flowersDecor: "Blomster/dekorasjon",
+      otherExpenses: "Øvrige utgifter (transport, overnatting mv.)",
+      totalBudget: "Samlet bryllupsbudsjett",
+      totalBudgetLabel: "Samlet budsjett",
+      perGuest: "Per gjest",
+      expenseBreakdown: "Utgiftsfordeling",
+      disclaimer: "Prisene er estimater basert på gjennomsnittlige norske bryllupspriser 2026. Faktiske priser varierer etter sted, sesong og ønsker.",
+      foodAndDrinkPost: "Mat og drikke",
+      venuePost: "Lokale/venue",
+      musicDJPost: "Musikk/DJ",
+      invitations: "Invitasjoner",
+      weddingCake: "Bryllupskake",
+      ringsPost: "Ringer",
+      otherExpensesPost: "Øvrige utgifter",
+    },
+  };
+  const l = labels[locale as keyof typeof labels] || labels.da;
+
+  const venueLabels: Record<Venue, string> = {
+    have: l.venueHave,
+    forsamlingshus: l.venueForsamlingshus,
+    slot_herregaard: l.venueSlot,
+    restaurant: l.venueRestaurant,
+    hotel: l.venueHotel,
+  };
+
+  const madLabels: Record<MadNiveau, string> = {
+    budget: l.budget,
+    standard: l.standard,
+    luksus: l.luxury,
+  };
+
   const [antalGaester, setAntalGaester] = useState<string>("80");
   const [venue, setVenue] = useState<Venue>("forsamlingshus");
   const [madNiveau, setMadNiveau] = useState<MadNiveau>("standard");
@@ -82,8 +212,8 @@ export default function BryllupBeregner() {
     const gaester = Number(antalGaester);
     if (!gaester || gaester <= 0) return null;
 
-    const venuePris = VENUES[venue].pris;
-    const madPris = gaester * MAD[madNiveau].prisPrPerson;
+    const venuePris = VENUES_DATA[venue].pris;
+    const madPris = gaester * MAD_DATA[madNiveau].prisPrPerson;
     const fotografPris = Number(fotograf) || 0;
     const musikPris = Number(musik) || 0;
     const kjolePris = Number(kjole) || 0;
@@ -98,17 +228,17 @@ export default function BryllupBeregner() {
     const prGaest = Math.round(total / gaester);
 
     const poster = [
-      { navn: "Mad og drikke", beloeb: madPris },
-      ...(venuePris > 0 ? [{ navn: "Venue/lokale", beloeb: venuePris }] : []),
-      { navn: "Fotograf", beloeb: fotografPris },
-      { navn: "Musik/DJ", beloeb: musikPris },
-      { navn: "Brudekjole", beloeb: kjolePris },
-      { navn: "Jakkesæt", beloeb: jakkesaetPris },
-      { navn: "Ringe", beloeb: ringePris },
-      { navn: "Blomster/dekoration", beloeb: blomsterPris },
-      { navn: "Invitationer", beloeb: invitationPris },
-      { navn: "Bryllupskage", beloeb: kagePris },
-      ...(ekstraPris > 0 ? [{ navn: "Øvrige udgifter", beloeb: ekstraPris }] : []),
+      { navn: l.foodAndDrinkPost, beloeb: madPris },
+      ...(venuePris > 0 ? [{ navn: l.venuePost, beloeb: venuePris }] : []),
+      { navn: l.photographer, beloeb: fotografPris },
+      { navn: l.musicDJPost, beloeb: musikPris },
+      { navn: l.weddingDress, beloeb: kjolePris },
+      { navn: l.suit, beloeb: jakkesaetPris },
+      { navn: l.ringsPost, beloeb: ringePris },
+      { navn: l.flowersDecor, beloeb: blomsterPris },
+      { navn: l.invitations, beloeb: invitationPris },
+      { navn: l.weddingCake, beloeb: kagePris },
+      ...(ekstraPris > 0 ? [{ navn: l.otherExpensesPost, beloeb: ekstraPris }] : []),
     ].filter(p => p.beloeb > 0).sort((a, b) => b.beloeb - a.beloeb);
 
     if (!hasTracked.current) {
@@ -117,7 +247,7 @@ export default function BryllupBeregner() {
     }
 
     return { total, prGaest, poster };
-  }, [antalGaester, venue, madNiveau, fotograf, musik, kjole, jakkesaet, ringe, blomster, ekstra]);
+  }, [antalGaester, venue, madNiveau, fotograf, musik, kjole, jakkesaet, ringe, blomster, ekstra, l]);
 
   const handleReset = useCallback(() => {
     setAntalGaester("80");
@@ -133,35 +263,35 @@ export default function BryllupBeregner() {
     hasTracked.current = false;
   }, []);
 
-  const formatKr = (n: number) => n.toLocaleString("da-DK") + " kr.";
+  const formatKr = (n: number) => formatCurrency(n, locale, { maximumFractionDigits: 0, minimumFractionDigits: 0 });
   const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899", "#06b6d4", "#6b7280", "#f97316", "#84cc16", "#14b8a6"];
 
   return (
     <div className="space-y-6">
       <div className="bg-white dark:bg-gray-800 rounded-2xl shadow p-6 space-y-5">
         <div className="flex justify-between items-center">
-          <h2 className="text-lg font-semibold dark:text-white">Grundlæggende</h2>
+          <h2 className="text-lg font-semibold dark:text-white">{l.basics}</h2>
           <ResetButton onReset={handleReset} />
         </div>
 
         <div>
-          <label htmlFor="antalGaester" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Antal gæster</label>
+          <label htmlFor="antalGaester" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{l.numGuests}</label>
           <input id="antalGaester" type="number" value={antalGaester} onChange={(e) => setAntalGaester(e.target.value)}
             min="1" max="500"
             className="w-full border border-gray-300 dark:border-gray-600 rounded-lg py-3 px-4 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Venue</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{l.venue}</label>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-            {(Object.entries(VENUES) as [Venue, typeof VENUES.have][]).map(([key, val]) => (
+            {(Object.keys(VENUES_DATA) as Venue[]).map((key) => (
               <button key={key} onClick={() => setVenue(key)}
                 className={`py-2.5 px-3 rounded-lg text-sm font-medium transition-colors ${
                   venue === key ? "bg-blue-600 text-white" : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
                 }`}>
-                {val.label}
+                {venueLabels[key]}
                 <span className={`block text-xs mt-0.5 ${venue === key ? "text-blue-200" : "text-gray-400"}`}>
-                  {val.pris === 0 ? "Gratis" : formatKr(val.pris)}
+                  {VENUES_DATA[key].pris === 0 ? l.free : formatKr(VENUES_DATA[key].pris)}
                 </span>
               </button>
             ))}
@@ -169,16 +299,16 @@ export default function BryllupBeregner() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Mad og drikke</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{l.foodAndDrink}</label>
           <div className="grid grid-cols-3 gap-2">
-            {(Object.entries(MAD) as [MadNiveau, typeof MAD.budget][]).map(([key, val]) => (
+            {(Object.keys(MAD_DATA) as MadNiveau[]).map((key) => (
               <button key={key} onClick={() => setMadNiveau(key)}
                 className={`py-2.5 px-3 rounded-lg text-sm font-medium transition-colors ${
                   madNiveau === key ? "bg-blue-600 text-white" : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
                 }`}>
-                {val.label}
+                {madLabels[key]}
                 <span className={`block text-xs mt-0.5 ${madNiveau === key ? "text-blue-200" : "text-gray-400"}`}>
-                  {formatKr(val.prisPrPerson)}/pers.
+                  {formatKr(MAD_DATA[key].prisPrPerson)}{l.perPerson}
                 </span>
               </button>
             ))}
@@ -188,15 +318,15 @@ export default function BryllupBeregner() {
 
       {/* Detaljerede poster */}
       <div className="bg-white dark:bg-gray-800 rounded-2xl shadow p-6 space-y-4">
-        <h2 className="text-lg font-semibold dark:text-white">Udgiftsposter</h2>
+        <h2 className="text-lg font-semibold dark:text-white">{l.expensePosts}</h2>
         <div className="grid grid-cols-2 gap-4">
           {[
-            { id: "fotograf", label: "Fotograf", value: fotograf, set: setFotograf },
-            { id: "musik", label: "Musik/DJ/band", value: musik, set: setMusik },
-            { id: "kjole", label: "Brudekjole", value: kjole, set: setKjole },
-            { id: "jakkesaet", label: "Jakkesæt", value: jakkesaet, set: setJakkesaet },
-            { id: "ringe", label: "Vielsesringe", value: ringe, set: setRinge },
-            { id: "blomster", label: "Blomster/dekoration", value: blomster, set: setBlomster },
+            { id: "fotograf", label: l.photographer, value: fotograf, set: setFotograf },
+            { id: "musik", label: l.musicDJ, value: musik, set: setMusik },
+            { id: "kjole", label: l.weddingDress, value: kjole, set: setKjole },
+            { id: "jakkesaet", label: l.suit, value: jakkesaet, set: setJakkesaet },
+            { id: "ringe", label: l.rings, value: ringe, set: setRinge },
+            { id: "blomster", label: l.flowersDecor, value: blomster, set: setBlomster },
           ].map((post) => (
             <div key={post.id}>
               <label htmlFor={post.id} className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{post.label}</label>
@@ -204,18 +334,18 @@ export default function BryllupBeregner() {
                 <input id={post.id} type="number" value={post.value} onChange={(e) => post.set(e.target.value)}
                   min="0"
                   className="w-full border border-gray-300 dark:border-gray-600 rounded-lg py-2.5 px-4 pr-12 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm" />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">kr.</span>
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">{getCurrencySuffix(locale)}</span>
               </div>
             </div>
           ))}
         </div>
         <div>
-          <label htmlFor="ekstra" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Øvrige udgifter (transport, overnatning mv.)</label>
+          <label htmlFor="ekstra" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{l.otherExpenses}</label>
           <div className="relative">
             <input id="ekstra" type="number" value={ekstra} onChange={(e) => setEkstra(e.target.value)}
               min="0"
               className="w-full border border-gray-300 dark:border-gray-600 rounded-lg py-2.5 px-4 pr-12 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm" />
-            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">kr.</span>
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">{getCurrencySuffix(locale)}</span>
           </div>
         </div>
       </div>
@@ -225,26 +355,26 @@ export default function BryllupBeregner() {
         <div className="animate-fade-in space-y-4">
           <div className="bg-gradient-to-br from-pink-50 to-rose-100 dark:from-pink-900/30 dark:to-rose-800/30 rounded-2xl p-6">
             <div className="flex justify-between items-start mb-4">
-              <h3 className="text-lg font-semibold text-rose-900 dark:text-rose-200">Samlet bryllupsbudget</h3>
+              <h3 className="text-lg font-semibold text-rose-900 dark:text-rose-200">{l.totalBudget}</h3>
               <div className="flex gap-2">
-                <CopyResultButton text={`Bryllupsbudget: ${formatKr(resultat.total)} (${formatKr(resultat.prGaest)}/gæst, ${antalGaester} gæster).`} />
+                <CopyResultButton text={`${l.totalBudget}: ${formatKr(resultat.total)} (${formatKr(resultat.prGaest)}/${l.perGuest}, ${antalGaester} ${l.numGuests}).`} />
                 <ShareCalculation getShareableLink={getShareableLink} calculatorName="Bryllup" />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-sm text-rose-700 dark:text-rose-300">Samlet budget</p>
+                <p className="text-sm text-rose-700 dark:text-rose-300">{l.totalBudgetLabel}</p>
                 <p className="text-3xl font-bold text-rose-900 dark:text-rose-100">{formatKr(resultat.total)}</p>
               </div>
               <div>
-                <p className="text-sm text-rose-700 dark:text-rose-300">Pr. gæst</p>
+                <p className="text-sm text-rose-700 dark:text-rose-300">{l.perGuest}</p>
                 <p className="text-3xl font-bold text-rose-900 dark:text-rose-100">{formatKr(resultat.prGaest)}</p>
               </div>
             </div>
           </div>
 
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow p-6">
-            <h3 className="text-lg font-semibold dark:text-white mb-4">Udgiftsfordeling</h3>
+            <h3 className="text-lg font-semibold dark:text-white mb-4">{l.expenseBreakdown}</h3>
             <div className="space-y-3">
               {resultat.poster.map((post, i) => (
                 <div key={post.navn}>
@@ -262,7 +392,7 @@ export default function BryllupBeregner() {
           </div>
 
           <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
-            Priserne er estimater baseret på gennemsnitlige danske bryllupspriser 2026. Faktiske priser varierer efter sted, sæson og ønsker.
+            {l.disclaimer}
           </p>
         </div>
       )}

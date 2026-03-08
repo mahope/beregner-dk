@@ -6,6 +6,8 @@ import { ShareCalculation } from "@/components/ShareCalculation";
 import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
+import { useLocale } from '@/components/LocaleProvider';
+import { formatCurrency, getCurrencySuffix } from '@/lib/format';
 
 type Relation =
   | "aegtefaelle"
@@ -73,15 +75,9 @@ function harTillaeg(relation: Relation): boolean {
   return ["soeskende", "andre"].includes(relation);
 }
 
-function formatKr(amount: number): string {
-  return new Intl.NumberFormat("da-DK", {
-    style: "currency",
-    currency: "DKK",
-    maximumFractionDigits: 0,
-  }).format(amount);
-}
-
 export default function ArveafgiftBeregner() {
+  const { locale } = useLocale();
+  const formatKr = (amount: number) => formatCurrency(amount, locale, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
   const [arvebeloeb, setArvebeloeb] = useState<string>("");
   const [relation, setRelation] = useState<Relation>("barn");
   const hasLoadedUrl = useRef(false);
@@ -196,7 +192,7 @@ export default function ArveafgiftBeregner() {
                 className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white text-lg"
               />
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">
-                kr.
+                {getCurrencySuffix(locale)}
               </span>
             </div>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">

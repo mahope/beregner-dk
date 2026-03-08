@@ -7,87 +7,36 @@ import {
 } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import RelatedCalculators from "@/components/RelatedCalculators";
-
-const baseUrl = "https://minberegner.dk";
+import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
+import { getPageData } from "@/lib/page-data";
 
 export async function generateMetadata() {
   return generatePageMetadata("kvadratmeter");
 }
 
-const faqItems = [
-  {
-    question: "Hvordan beregner jeg kvadratmeter?",
-    answer:
-      "For et rektangulært rum: Gange længde med bredde. Et rum på 5m x 4m = 20 m². For andre former bruges specifikke formler (cirkel: π×r², trekant: grundlinje×højde/2).",
-  },
-  {
-    question: "Hvad er forskellen på m² og m?",
-    answer:
-      "Meter (m) måler længde/afstand. Kvadratmeter (m²) måler areal/flade. 1 m² er arealet af en firkant med sider på 1 meter.",
-  },
-  {
-    question: "Hvordan omregner jeg m² til andre enheder?",
-    answer:
-      "1 m² = 10.000 cm². 10.000 m² = 1 hektar. 1 m² ≈ 10,76 kvadratfod. Vores beregner viser automatisk omregninger.",
-  },
-  {
-    question: "Hvordan beregner jeg areal af et L-formet rum?",
-    answer:
-      "Del rummet op i to rektangler, beregn arealet af hver del, og læg dem sammen. Eksempel: Del L'et i to dele, beregn begge, og summer.",
-  },
-  {
-    question: "Hvad koster gulv pr. m²?",
-    answer:
-      "Priser varierer meget: Laminat 80-200 kr/m², trægulv 300-800 kr/m², fliser 200-500 kr/m². Læg arbejdsløn oveni (typisk 150-300 kr/m²).",
-  },
-  {
-    question: "Hvor mange m² er en typisk dansk bolig?",
-    answer:
-      "En gennemsnitlig dansk bolig er ca. 110-120 m². Lejligheder typisk 60-90 m², parcelhuse 120-180 m².",
-  },
-];
+export default async function KvadratmeterPage() {
+  const locale = await getLocale();
+  const domainConfig = await getCurrentDomainConfig();
+  const pageData = getPageData("kvadratmeter", locale) || getPageData("kvadratmeter", "da")!;
 
-const relatedCalculators = [
-  {
-    title: "Elberegner",
-    href: "/elberegner",
-    description: "Beregn dit elforbrug",
-    icon: "⚡",
-  },
-  {
-    title: "Boliglån",
-    href: "/boliglaan",
-    description: "Beregn dit boliglån",
-    icon: "🏠",
-  },
-  {
-    title: "Procentberegner",
-    href: "/procent",
-    description: "Beregn procenter",
-    icon: "➗",
-  },
-];
-
-export default function KvadratmeterPage() {
   return (
     <div className="max-w-4xl mx-auto">
       <CalculatorSchema
-        name="Kvadratmeterberegner - Beregn areal"
-        description="Gratis kvadratmeterberegner. Beregn areal af rektangler, cirkler, trekanter og trapez."
-        url={`${baseUrl}/kvadratmeter`}
-        category="UtilityApplication"
+        name={pageData.schemaName}
+        description={pageData.schemaDescription}
+        url={`${domainConfig.baseUrl}/kvadratmeter`}
+        category={pageData.schemaCategory}
       />
-      <FAQSchema items={faqItems} />
-      <Breadcrumbs items={[{ name: "Bolig", href: "/kategori/bolig" }, { name: "Kvadratmeterberegner", href: "/kvadratmeter" }]} />
+      <FAQSchema items={pageData.faqItems} />
+      <Breadcrumbs items={[{ name: pageData.breadcrumbCategory, href: pageData.breadcrumbCategoryHref }, { name: pageData.title, href: "/kvadratmeter" }]} />
 
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl md:text-4xl font-bold mb-4">
-          Kvadratmeterberegner
+          {pageData.title}
         </h1>
         <p className="text-lg text-gray-600">
-          Beregn areal af rum, haver, grunde og andre flader. Vælg mellem forskellige former 
-          og få arealet i kvadratmeter samt andre enheder.
+          {pageData.description}
         </p>
       </div>
 
@@ -97,6 +46,7 @@ export default function KvadratmeterPage() {
       </div>
 
       {/* Informativ tekst - SEO */}
+      {locale === "da" && (
       <div className="prose max-w-none mb-8">
         <h2>Om arealberegning</h2>
         <p>
@@ -104,7 +54,7 @@ export default function KvadratmeterPage() {
           Det er vigtigt at kunne beregne areal ved mange lejligheder — fra <strong>gulvlægning</strong>
           og <strong>maling</strong> til køb af bolig.
         </p>
-        
+
         <h3>Almindelige anvendelser</h3>
         <ul>
           <li><strong>Bolig:</strong> Beregn boligareal, værelsesstørrelser</li>
@@ -134,14 +84,15 @@ export default function KvadratmeterPage() {
           <li>Fliser: +5-10% for tilskæring og knækkede</li>
         </ul>
       </div>
+      )}
 
       {/* FAQ */}
       <div className="mb-8">
-        <FAQ items={faqItems} />
+        <FAQ items={pageData.faqItems} />
       </div>
 
       {/* Related Calculators */}
-      <RelatedCalculators calculators={relatedCalculators} />
+      <RelatedCalculators current="/kvadratmeter" />
     </div>
   );
 }

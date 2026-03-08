@@ -5,6 +5,8 @@ import { ShareCalculation } from '@/components/ShareCalculation';
 import { CopyResultButton, ResetButton } from '@/components/ui';
 import { generateShareableLink, getStateFromUrl, CalculationState } from '@/lib/calculation-state';
 import { trackCalculation, initScrollDepthTracking } from '@/lib/analytics';
+import { useLocale } from "@/components/LocaleProvider";
+import { getCurrencySuffix } from "@/lib/format";
 
 // 2026-satser
 const AM = 0.08;
@@ -33,7 +35,6 @@ function beregnNetto(bruttoAar: number, komPct: number, kirPct: number): number 
 }
 
 function findBruttoFraNetto(oensketNettoAar: number, komPct: number, kirPct: number): number {
-  // Binary search for brutto that gives the desired netto
   let low = oensketNettoAar;
   let high = oensketNettoAar * 3;
 
@@ -48,6 +49,90 @@ function findBruttoFraNetto(oensketNettoAar: number, komPct: number, kirPct: num
 }
 
 export default function BruttoNettoBeregner() {
+  const { locale } = useLocale();
+
+  const labels = {
+    da: {
+      desiredPayout: "Ønsket udbetaling (netto)",
+      perMonth: "Pr. måned",
+      perYear: "Pr. år",
+      municipalTax: "Kommuneskat (%)",
+      paysChurchTax: "Betaler kirkeskat",
+      youNeedToEarn: "Du skal tjene",
+      requiredGross: "Nødvendig bruttoløn",
+      desiredPayoutResult: "Ønsket udbetaling",
+      amContribution: "AM-bidrag (8%)",
+      baseTax: "Bundskat",
+      municipalTaxLabel: "Kommuneskat",
+      churchTax: "Kirkeskat",
+      middleTax: "Mellemskat",
+      topTax: "Topskat",
+      totalTax: "Samlet skat",
+      effectiveTax: "Effektiv skat",
+      effectiveTaxDesc: "For hver 100 kr. du tjener, betaler du",
+      enterDesiredPayout: "Indtast din ønskede udbetaling",
+      forNegotiation: "Til lønforhandling",
+      forNegotiationDesc: "Brug beregneren til at finde ud af hvilken bruttoløn du skal forhandle dig til for at nå din ønskede udbetaling. Husk at pension og fradrag også påvirker resultatet.",
+      reverseCalc: "Den omvendte beregning",
+      reverseCalcDesc: "Kender du din bruttoløn og vil vide hvad du får udbetalt? Brug vores",
+      reverseCalcLink: "løn efter skat beregner",
+      reverseCalcSuffix: "i stedet.",
+    },
+    se: {
+      desiredPayout: "Önskad utbetalning (netto)",
+      perMonth: "Per månad",
+      perYear: "Per år",
+      municipalTax: "Kommunalskatt (%)",
+      paysChurchTax: "Betalar kyrkoskatt",
+      youNeedToEarn: "Du behöver tjäna",
+      requiredGross: "Nödvändig bruttolön",
+      desiredPayoutResult: "Önskad utbetalning",
+      amContribution: "AM-bidrag (8%)",
+      baseTax: "Grundskatt",
+      municipalTaxLabel: "Kommunalskatt",
+      churchTax: "Kyrkoskatt",
+      middleTax: "Mellanskatt",
+      topTax: "Toppskatt",
+      totalTax: "Total skatt",
+      effectiveTax: "Effektiv skatt",
+      effectiveTaxDesc: "För varje 100 kr du tjänar, betalar du",
+      enterDesiredPayout: "Ange din önskade utbetalning",
+      forNegotiation: "För löneförhandling",
+      forNegotiationDesc: "Använd kalkylatorn för att ta reda på vilken bruttolön du behöver förhandla dig till för att nå din önskade utbetalning. Kom ihåg att pension och avdrag också påverkar resultatet.",
+      reverseCalc: "Den omvända beräkningen",
+      reverseCalcDesc: "Vet du din bruttolön och vill veta vad du får utbetalt? Använd vår",
+      reverseCalcLink: "lön efter skatt-kalkylator",
+      reverseCalcSuffix: "istället.",
+    },
+    no: {
+      desiredPayout: "Ønsket utbetaling (netto)",
+      perMonth: "Per måned",
+      perYear: "Per år",
+      municipalTax: "Kommuneskatt (%)",
+      paysChurchTax: "Betaler kirkeskatt",
+      youNeedToEarn: "Du må tjene",
+      requiredGross: "Nødvendig bruttolønn",
+      desiredPayoutResult: "Ønsket utbetaling",
+      amContribution: "AM-bidrag (8%)",
+      baseTax: "Bunnsskatt",
+      municipalTaxLabel: "Kommuneskatt",
+      churchTax: "Kirkeskatt",
+      middleTax: "Mellomskatt",
+      topTax: "Toppskatt",
+      totalTax: "Samlet skatt",
+      effectiveTax: "Effektiv skatt",
+      effectiveTaxDesc: "For hver 100 kr du tjener, betaler du",
+      enterDesiredPayout: "Skriv inn ønsket utbetaling",
+      forNegotiation: "Til lønnsforhandling",
+      forNegotiationDesc: "Bruk kalkulatoren til å finne ut hvilken bruttolønn du må forhandle deg til for å nå ønsket utbetaling. Husk at pensjon og fradrag også påvirker resultatet.",
+      reverseCalc: "Den omvendte beregningen",
+      reverseCalcDesc: "Vet du bruttolønnen din og vil vite hva du får utbetalt? Bruk vår",
+      reverseCalcLink: "lønn etter skatt-kalkulator",
+      reverseCalcSuffix: "i stedet.",
+    },
+  };
+  const l = labels[locale as keyof typeof labels] || labels.da;
+
   const [oensketNetto, setOensketNetto] = useState<string>('25000');
   const [periode, setPeriode] = useState<'maaned' | 'aar'>('maaned');
   const [kommuneSkat, setKommuneSkat] = useState<string>('25.07');
@@ -134,7 +219,7 @@ export default function BruttoNettoBeregner() {
     };
   }, [oensketNetto, periode, kommuneSkat, medKirkeskat]);
 
-  const formatKr = (n: number) => n.toLocaleString('da-DK');
+  const formatKr = (n: number) => n.toLocaleString(locale === "se" ? "sv-SE" : locale === "no" ? "nb-NO" : "da-DK");
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 md:p-8">
@@ -143,25 +228,25 @@ export default function BruttoNettoBeregner() {
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-              Ønsket udbetaling (netto)
+              {l.desiredPayout}
             </label>
             <div className="relative">
               <input type="number" value={oensketNetto} onChange={(e) => setOensketNetto(e.target.value)} className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">kr</span>
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">{getCurrencySuffix(locale)}</span>
             </div>
           </div>
 
           <div className="flex gap-4">
             <button onClick={() => setPeriode('maaned')} className={`flex-1 py-2.5 rounded-lg border-2 text-sm font-medium transition-all ${periode === 'maaned' ? 'border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' : 'border-gray-200 dark:border-gray-600 dark:text-gray-200'}`}>
-              Pr. måned
+              {l.perMonth}
             </button>
             <button onClick={() => setPeriode('aar')} className={`flex-1 py-2.5 rounded-lg border-2 text-sm font-medium transition-all ${periode === 'aar' ? 'border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' : 'border-gray-200 dark:border-gray-600 dark:text-gray-200'}`}>
-              Pr. år
+              {l.perYear}
             </button>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Kommuneskat (%)</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">{l.municipalTax}</label>
             <div className="relative">
               <input type="number" step="0.01" value={kommuneSkat} onChange={(e) => setKommuneSkat(e.target.value)} className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">%</span>
@@ -170,7 +255,7 @@ export default function BruttoNettoBeregner() {
 
           <div className="flex items-center gap-3">
             <input type="checkbox" id="kirke-bn" checked={medKirkeskat} onChange={(e) => setMedKirkeskat(e.target.checked)} className="w-4 h-4 text-blue-600 rounded" />
-            <label htmlFor="kirke-bn" className="text-sm text-gray-700 dark:text-gray-200">Betaler kirkeskat</label>
+            <label htmlFor="kirke-bn" className="text-sm text-gray-700 dark:text-gray-200">{l.paysChurchTax}</label>
           </div>
 
           <div className="flex justify-end">
@@ -182,10 +267,10 @@ export default function BruttoNettoBeregner() {
         <div className="bg-gradient-to-br from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 rounded-xl p-6">
           {result ? (
             <div className="space-y-4 animate-fade-in">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Du skal tjene</h3>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{l.youNeedToEarn}</h3>
 
               <div className="bg-white dark:bg-gray-700 rounded-lg p-4 shadow-sm text-center">
-                <div className="text-sm text-gray-500 dark:text-gray-400">Nødvendig bruttoløn</div>
+                <div className="text-sm text-gray-500 dark:text-gray-400">{l.requiredGross}</div>
                 <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">
                   {formatKr(result.bruttoMd)} kr./md
                 </div>
@@ -195,39 +280,39 @@ export default function BruttoNettoBeregner() {
               </div>
 
               <div className="bg-white dark:bg-gray-700 rounded-lg p-4 shadow-sm text-center">
-                <div className="text-sm text-gray-500 dark:text-gray-400">Ønsket udbetaling</div>
+                <div className="text-sm text-gray-500 dark:text-gray-400">{l.desiredPayoutResult}</div>
                 <div className="text-2xl font-bold text-green-600 dark:text-green-400">
                   {formatKr(result.nettoMd)} kr./md
                 </div>
               </div>
 
               <div className="bg-white dark:bg-gray-700 rounded-lg p-4 shadow-sm text-sm space-y-1.5">
-                <div className="flex justify-between"><span className="text-gray-600 dark:text-gray-400">AM-bidrag (8%)</span><span className="dark:text-gray-200">{formatKr(Math.round(result.amBidrag / 12))} kr./md</span></div>
-                <div className="flex justify-between"><span className="text-gray-600 dark:text-gray-400">Bundskat</span><span className="dark:text-gray-200">{formatKr(Math.round(result.bundSkat / 12))} kr./md</span></div>
-                <div className="flex justify-between"><span className="text-gray-600 dark:text-gray-400">Kommuneskat</span><span className="dark:text-gray-200">{formatKr(Math.round(result.kommuneSkatBeloeb / 12))} kr./md</span></div>
+                <div className="flex justify-between"><span className="text-gray-600 dark:text-gray-400">{l.amContribution}</span><span className="dark:text-gray-200">{formatKr(Math.round(result.amBidrag / 12))} kr./md</span></div>
+                <div className="flex justify-between"><span className="text-gray-600 dark:text-gray-400">{l.baseTax}</span><span className="dark:text-gray-200">{formatKr(Math.round(result.bundSkat / 12))} kr./md</span></div>
+                <div className="flex justify-between"><span className="text-gray-600 dark:text-gray-400">{l.municipalTaxLabel}</span><span className="dark:text-gray-200">{formatKr(Math.round(result.kommuneSkatBeloeb / 12))} kr./md</span></div>
                 {result.kirkeSkatBeloeb > 0 && (
-                  <div className="flex justify-between"><span className="text-gray-600 dark:text-gray-400">Kirkeskat</span><span className="dark:text-gray-200">{formatKr(Math.round(result.kirkeSkatBeloeb / 12))} kr./md</span></div>
+                  <div className="flex justify-between"><span className="text-gray-600 dark:text-gray-400">{l.churchTax}</span><span className="dark:text-gray-200">{formatKr(Math.round(result.kirkeSkatBeloeb / 12))} kr./md</span></div>
                 )}
                 {result.betalerMellemskat && (
-                  <div className="flex justify-between text-yellow-600 dark:text-yellow-400"><span>Mellemskat</span><span>{formatKr(Math.round(result.mellemSkat / 12))} kr./md</span></div>
+                  <div className="flex justify-between text-yellow-600 dark:text-yellow-400"><span>{l.middleTax}</span><span>{formatKr(Math.round(result.mellemSkat / 12))} kr./md</span></div>
                 )}
                 {result.betalerTopskat && (
-                  <div className="flex justify-between text-red-600 dark:text-red-400"><span>Topskat</span><span>{formatKr(Math.round(result.topSkat / 12))} kr./md</span></div>
+                  <div className="flex justify-between text-red-600 dark:text-red-400"><span>{l.topTax}</span><span>{formatKr(Math.round(result.topSkat / 12))} kr./md</span></div>
                 )}
                 <div className="flex justify-between font-medium border-t pt-2 dark:border-gray-600">
-                  <span className="dark:text-gray-200">Samlet skat</span>
+                  <span className="dark:text-gray-200">{l.totalTax}</span>
                   <span className="dark:text-gray-200">{formatKr(Math.round(result.samletSkat / 12))} kr./md</span>
                 </div>
               </div>
 
               <div className="bg-blue-100 dark:bg-blue-900/30 rounded-lg p-3 text-xs text-blue-700 dark:text-blue-400">
-                <strong>Effektiv skat:</strong> {result.effektivSkat}% — For hver 100 kr. du tjener, betaler du {result.effektivSkat} kr. i skat.
+                <strong>{l.effectiveTax}:</strong> {result.effektivSkat}% — {l.effectiveTaxDesc} {result.effektivSkat} kr.
               </div>
             </div>
           ) : (
             <div className="text-center text-gray-500 dark:text-gray-400 py-8">
               <div className="text-4xl mb-3">💸</div>
-              <p>Indtast din ønskede udbetaling</p>
+              <p>{l.enterDesiredPayout}</p>
             </div>
           )}
         </div>
@@ -246,15 +331,15 @@ export default function BruttoNettoBeregner() {
       {/* Info */}
       <div className="grid md:grid-cols-2 gap-4 mt-6">
         <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
-          <h4 className="font-semibold text-blue-800 dark:text-blue-300 mb-2">Til lønforhandling</h4>
+          <h4 className="font-semibold text-blue-800 dark:text-blue-300 mb-2">{l.forNegotiation}</h4>
           <p className="text-sm text-blue-700 dark:text-blue-400">
-            Brug beregneren til at finde ud af hvilken bruttoløn du skal forhandle dig til for at nå din ønskede udbetaling. Husk at pension og fradrag også påvirker resultatet.
+            {l.forNegotiationDesc}
           </p>
         </div>
         <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
-          <h4 className="font-semibold text-green-800 dark:text-green-300 mb-2">Den omvendte beregning</h4>
+          <h4 className="font-semibold text-green-800 dark:text-green-300 mb-2">{l.reverseCalc}</h4>
           <p className="text-sm text-green-700 dark:text-green-400">
-            Kender du din bruttoløn og vil vide hvad du får udbetalt? Brug vores <a href="/loen-efter-skat" className="underline">løn efter skat beregner</a> i stedet.
+            {l.reverseCalcDesc} <a href="/loen-efter-skat" className="underline">{l.reverseCalcLink}</a> {l.reverseCalcSuffix}
           </p>
         </div>
       </div>

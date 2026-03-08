@@ -5,6 +5,8 @@ import { ShareCalculation } from "@/components/ShareCalculation";
 import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
+import { useLocale } from '@/components/LocaleProvider';
+import { formatCurrency } from '@/lib/format';
 
 // 2026 satser for børne- og ungeydelse (officielle satser)
 // Kilde: borger.dk/familie-og-boern/Familieydelser-oversigt/Boerne-ungeydelse
@@ -23,6 +25,7 @@ interface Barn {
 }
 
 export default function BoernepengBeregner() {
+  const { locale } = useLocale();
   const [boern, setBoern] = useState<Barn[]>([
     { id: "1", alder: 5 },
   ]);
@@ -156,13 +159,7 @@ export default function BoernepengBeregner() {
     };
   }, [boern, husstandsIndkomst, enlig, deltForaeldremyndighed]);
 
-  const formatKr = (beloeb: number) => {
-    return new Intl.NumberFormat("da-DK", {
-      style: "currency",
-      currency: "DKK",
-      maximumFractionDigits: 0,
-    }).format(beloeb);
-  };
+  const formatKr = (beloeb: number) => formatCurrency(beloeb, locale, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 
   return (
     <div className="space-y-8">

@@ -5,10 +5,13 @@ import { ShareCalculation } from "@/components/ShareCalculation";
 import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
+import { useLocale } from '@/components/LocaleProvider';
+import { formatCurrency, getCurrencySuffix } from '@/lib/format';
 
 type BeregningsType = "annuitet" | "serielaan";
 
 export default function RenteBeregner() {
+  const { locale } = useLocale();
   const [hovedstol, setHovedstol] = useState<number>(1000000);
   const [rente, setRente] = useState<number>(5);
   const [loebetid, setLoebetid] = useState<number>(30);
@@ -138,13 +141,7 @@ export default function RenteBeregner() {
     }
   }, [hovedstol, rente, loebetid, type]);
 
-  const formatKr = (beloeb: number) => {
-    return new Intl.NumberFormat("da-DK", {
-      style: "currency",
-      currency: "DKK",
-      maximumFractionDigits: 0,
-    }).format(beloeb);
-  };
+  const formatKr = (beloeb: number) => formatCurrency(beloeb, locale, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 
   return (
     <div className="space-y-8">
@@ -165,7 +162,7 @@ export default function RenteBeregner() {
                 onChange={(e) => setHovedstol(parseFloat(e.target.value) || 0)}
                 className="w-full px-4 py-3 pr-12 border rounded-lg text-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-400">kr</span>
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-400">{getCurrencySuffix(locale)}</span>
             </div>
           </div>
 

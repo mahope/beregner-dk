@@ -5,8 +5,11 @@ import { ShareCalculation } from "@/components/ShareCalculation";
 import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
+import { useLocale } from '@/components/LocaleProvider';
+import { formatCurrency, formatNumber as formatNum } from '@/lib/format';
 
 export default function BraendstofBeregner() {
+  const { locale } = useLocale();
   const [beregningsType, setBeregningsType] = useState<"turPris" | "kmPris" | "forbrug">("turPris");
   
   // Fælles
@@ -146,21 +149,9 @@ export default function BraendstofBeregner() {
     }
   }, [beregningsType, braendstofType, literPris, kmPerLiter, distance, kwhPris, kwhPer100km, literBrugt, kmKoert]);
 
-  const formatKr = (amount: number) => {
-    return new Intl.NumberFormat("da-DK", {
-      style: "currency",
-      currency: "DKK",
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(amount);
-  };
+  const formatKr = (amount: number) => formatCurrency(amount, locale);
 
-  const formatNumber = (num: number, decimals: number = 2) => {
-    return new Intl.NumberFormat("da-DK", {
-      minimumFractionDigits: decimals,
-      maximumFractionDigits: decimals,
-    }).format(num);
-  };
+  const formatNumber = (num: number, decimals: number = 2) => formatNum(num, locale, { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
 
   return (
     <div className="space-y-8">

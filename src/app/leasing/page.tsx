@@ -1,4 +1,6 @@
 import { generatePageMetadata } from "@/lib/page-helpers";
+import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
+import { getPageData } from "@/lib/page-data";
 import LeasingBeregner from "@/components/LeasingBeregner";
 import FAQ from "@/components/FAQ";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
@@ -6,62 +8,35 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import RelatedCalculators from "@/components/RelatedCalculators";
 import Sidebar from "@/components/Sidebar";
 
-const baseUrl = "https://minberegner.dk";
-
 export async function generateMetadata() {
   return generatePageMetadata("leasing");
 }
 
-const faqItems = [
-  {
-    question: "Hvordan beregnes en leasingydelse?",
-    answer: "Leasingydelsen dækker bilens værditab (pris minus restværdi fordelt over perioden) plus renter af den gennemsnitlige gæld. Derudover kan der komme gebyrer og forsikring.",
-  },
-  {
-    question: "Hvad er forskellen på leasing og billån?",
-    answer: "Ved leasing lejer du bilen og afleverer den efter perioden. Ved billån ejer du bilen og kan sælge den. Leasing har ofte lavere månedlig ydelse, men du opbygger ingen egenkapital.",
-  },
-  {
-    question: "Hvad er restværdi?",
-    answer: "Restværdien er bilens forventede værdi ved leasingperiodens udløb. Jo højere restværdi, jo lavere månedlig ydelse — men du bærer risikoen hvis bilen er mindre værd ved aflevering.",
-  },
-  {
-    question: "Er privat leasing billigere end billån?",
-    answer: "Privat leasing giver typisk lavere månedlig ydelse end billån, men du ejer ikke bilen og opbygger ingen egenkapital. Over flere biler kan billån eller kontantkøb være billigere samlet set.",
-  },
-  {
-    question: "Kan jeg trække leasing fra i skat?",
-    answer: "Privatpersoner kan ikke trække leasing fra. Virksomheder kan fratrække leasingydelsen som driftsudgift og få momsfradrag, hvilket gør erhvervsleasing skattemæssigt fordelagtigt.",
-  },
-];
+export default async function LeasingPage() {
+  const locale = await getLocale();
+  const domainConfig = await getCurrentDomainConfig();
+  const pageData = getPageData("leasing", locale) || getPageData("leasing", "da")!;
 
-const relatedCalculators = [
-  { title: "Billån", description: "Beregn ydelse på billån", href: "/billaan", icon: "🚗" },
-  { title: "Bil Værdtab", description: "Beregn din bils værditab", href: "/bil", icon: "🚙" },
-  { title: "Brændstofberegner", description: "Beregn dine køreomkostninger", href: "/braendstof", icon: "⛽" },
-  { title: "Låneberegner", description: "Sammenlign lån og se afdragsplan", href: "/laaneberegner", icon: "🏦" },
-];
-
-export default function LeasingPage() {
   return (
     <div className="flex flex-col lg:flex-row gap-8">
       <div className="flex-1 min-w-0">
         <CalculatorSchema
-          name="Leasing Beregner"
-          description="Beregn månedlig leasingydelse for bil. Sammenlign leasing vs. billån vs. kontantkøb."
-          url={`${baseUrl}/leasing`}
-          category="FinanceApplication"
+          name={pageData.schemaName}
+          description={pageData.schemaDescription}
+          url={`${domainConfig.baseUrl}/leasing`}
+          category={pageData.schemaCategory}
         />
-        <FAQSchema items={faqItems} />
-        <Breadcrumbs items={[{ name: "Lån", href: "/kategori/laan" }, { name: "Leasing Beregner", href: "/leasing" }]} />
+        <FAQSchema items={pageData.faqItems} />
+        <Breadcrumbs items={[{ name: pageData.breadcrumbCategory, href: pageData.breadcrumbCategoryHref }, { name: pageData.title, href: "/leasing" }]} />
 
-        <h1 className="text-3xl font-bold mb-2 dark:text-white">Leasing Beregner</h1>
+        <h1 className="text-3xl font-bold mb-2 dark:text-white">{pageData.title}</h1>
         <p className="text-gray-600 dark:text-gray-300 mb-8">
-          Beregn din månedlige leasingydelse for bil og sammenlign med billån og kontantkøb. Se hvad det reelt koster at lease en bil.
+          {pageData.description}
         </p>
 
         <LeasingBeregner />
 
+        {locale === "da" && (
         <div className="mt-12 prose dark:prose-invert max-w-none">
           <h2>Leasing af bil i Danmark</h2>
           <p>
@@ -95,9 +70,10 @@ export default function LeasingPage() {
             <li><strong>Udbetaling:</strong> Større udbetaling sænker den månedlige ydelse</li>
           </ul>
         </div>
+        )}
 
-        <FAQ items={faqItems} />
-        <RelatedCalculators calculators={relatedCalculators} />
+        <FAQ items={pageData.faqItems} />
+        <RelatedCalculators current="/leasing" />
       </div>
 
       <Sidebar currentHref="/leasing" adSlotId="leasing-sidebar" />

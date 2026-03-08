@@ -5,6 +5,8 @@ import { ShareCalculation } from "@/components/ShareCalculation";
 import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState, ShareableLink } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
+import { useLocale } from '@/components/LocaleProvider';
+import { formatNumber } from '@/lib/format';
 
 type Koen = "mand" | "kvinde";
 type Aktivitet = "stillesiddende" | "let" | "moderat" | "aktiv" | "meget_aktiv";
@@ -29,6 +31,7 @@ function beregnBMR(vaegt: number, hoejde: number, alder: number, koen: Koen): nu
 }
 
 export default function VaegttabBeregner() {
+  const { locale } = useLocale();
   const [vaegt, setVaegt] = useState<string>("");
   const [maalVaegt, setMaalVaegt] = useState<string>("");
   const [hoejde, setHoejde] = useState<string>("");
@@ -278,11 +281,11 @@ export default function VaegttabBeregner() {
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
               <div>
                 <p className="text-sm text-green-700 dark:text-green-300">Dagligt kaloriemål</p>
-                <p className="text-2xl font-bold text-green-900 dark:text-green-100">{resultat.dagligtMaal.toLocaleString("da-DK")} kcal</p>
+                <p className="text-2xl font-bold text-green-900 dark:text-green-100">{formatNumber(resultat.dagligtMaal, locale)} kcal</p>
               </div>
               <div>
                 <p className="text-sm text-green-700 dark:text-green-300">Dagligt underskud</p>
-                <p className="text-2xl font-bold text-green-900 dark:text-green-100">{resultat.dagligtDeficit.toLocaleString("da-DK")} kcal</p>
+                <p className="text-2xl font-bold text-green-900 dark:text-green-100">{formatNumber(resultat.dagligtDeficit, locale)} kcal</p>
               </div>
               <div>
                 <p className="text-sm text-green-700 dark:text-green-300">Vægttab pr. uge</p>
@@ -307,11 +310,11 @@ export default function VaegttabBeregner() {
               </div>
               <div className="flex justify-between items-center py-2 border-b dark:border-gray-700">
                 <span className="text-gray-600 dark:text-gray-400">Basalstofskifte (BMR)</span>
-                <span className="font-medium dark:text-white">{resultat.bmr.toLocaleString("da-DK")} kcal/dag</span>
+                <span className="font-medium dark:text-white">{formatNumber(resultat.bmr, locale)} kcal/dag</span>
               </div>
               <div className="flex justify-between items-center py-2 border-b dark:border-gray-700">
                 <span className="text-gray-600 dark:text-gray-400">Dagligt energiforbrug (TDEE)</span>
-                <span className="font-medium dark:text-white">{resultat.tdee.toLocaleString("da-DK")} kcal/dag</span>
+                <span className="font-medium dark:text-white">{formatNumber(resultat.tdee, locale)} kcal/dag</span>
               </div>
               <div className="flex justify-between items-center py-2 border-b dark:border-gray-700">
                 <span className="text-gray-600 dark:text-gray-400">BMI start</span>
@@ -330,7 +333,7 @@ export default function VaegttabBeregner() {
               <h3 className="font-semibold text-blue-800 dark:text-blue-300 mb-2">Anbefalet plan</h3>
               <p className="text-sm text-blue-700 dark:text-blue-400">
                 Med et sundt tempo (0,5 kg/uge) vil det tage ca. <strong>{resultat.anbefaletUger} uger</strong>,
-                og du kan spise <strong>{resultat.anbefaletKalorier.toLocaleString("da-DK")} kcal/dag</strong> — en meget mere overkommelig plan.
+                og du kan spise <strong>{formatNumber(resultat.anbefaletKalorier, locale)} kcal/dag</strong> — en meget mere overkommelig plan.
               </p>
             </div>
           )}

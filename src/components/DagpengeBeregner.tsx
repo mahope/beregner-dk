@@ -6,6 +6,8 @@ import { ShareCalculation } from "@/components/ShareCalculation";
 import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
+import { useLocale } from "@/components/LocaleProvider";
+import { getCurrencySuffix } from "@/lib/format";
 
 // Officielle 2026 dagpenge-satser
 // Kilde: bm.dk/satser/satser-for-2026, a-kasser.dk
@@ -29,12 +31,119 @@ interface DagpengeResultat {
 }
 
 export default function DagpengeBeregner() {
+  const { locale } = useLocale();
+
+  const labels = {
+    da: {
+      monthlyPreTax: "Månedlig løn før skat",
+      placeholder: "F.eks. 35000",
+      perMonth: "/md",
+      avgLast12: "Din gennemsnitlige månedsløn de seneste 12 måneder",
+      weeklyHours: "Ugentlige arbejdstimer",
+      fulltime: "37 timer (fuldtid)",
+      hours30: "30 timer",
+      hours25: "25 timer",
+      hours20: "20 timer",
+      hours15: "15 timer",
+      calculating: "Beregner dagpenge...",
+      estimatedBenefits: "Dine estimerede dagpenge",
+      monthly: "Månedligt",
+      weekly: "Ugentligt",
+      daily: "Dagligt (ca.)",
+      employmentSupplement: "Beskæftigelsestillæg:",
+      employmentSupplementDesc: "De første 3 måneder kan du få op til",
+      employmentSupplementSuffix: "kr/md hvis du opfylder kravene.",
+      maxRateHit: "Du rammer maxsatsen på",
+      calcBasis: "Din løn giver et beregningsgrundlag på",
+      afterAM: "(efter 8% AM-bidrag).",
+      benefitsEqual: "Dagpengene svarer til",
+      ofGross: "af din bruttoløn.",
+      calcExplain: "Beregning:",
+      salaryAfterAM: "(løn efter AM-bidrag) × 90% =",
+      infoTitle: "Officielle dagpenge-satser 2026",
+      info1: "Dagpenge = 90% af løn efter AM-bidrag (8%)",
+      info2: "Max dagpengesats:",
+      info3: "Med beskæftigelsestillæg (første 3 mdr): op til",
+      info4: "Dagpengeperioden er normalt 2 år (3.848 timer)",
+      info5: "Du skal være medlem af en A-kasse og opfylde indkomstkravet",
+      source: "Kilde: bm.dk/satser/satser-for-2026 — Kontakt din A-kasse for præcis beregning.",
+    },
+    se: {
+      monthlyPreTax: "Månadslön före skatt",
+      placeholder: "T.ex. 35000",
+      perMonth: "/mån",
+      avgLast12: "Din genomsnittliga månadslön de senaste 12 månaderna",
+      weeklyHours: "Veckoarbetstimmar",
+      fulltime: "37 timmar (heltid)",
+      hours30: "30 timmar",
+      hours25: "25 timmar",
+      hours20: "20 timmar",
+      hours15: "15 timmar",
+      calculating: "Beräknar dagpenning...",
+      estimatedBenefits: "Din uppskattade dagpenning",
+      monthly: "Månadsvis",
+      weekly: "Veckovis",
+      daily: "Dagligen (ca.)",
+      employmentSupplement: "Sysselsättningstillägg:",
+      employmentSupplementDesc: "De första 3 månaderna kan du få upp till",
+      employmentSupplementSuffix: "kr/mån om du uppfyller kraven.",
+      maxRateHit: "Du når maxbeloppet på",
+      calcBasis: "Din lön ger ett beräkningsunderlag på",
+      afterAM: "(efter 8% AM-bidrag).",
+      benefitsEqual: "Dagpenningen motsvarar",
+      ofGross: "av din bruttolön.",
+      calcExplain: "Beräkning:",
+      salaryAfterAM: "(lön efter AM-bidrag) × 90% =",
+      infoTitle: "Officiella dagpenningsatser 2026",
+      info1: "Dagpenning = 90% av lön efter AM-bidrag (8%)",
+      info2: "Max dagpenningsats:",
+      info3: "Med sysselsättningstillägg (första 3 mån): upp till",
+      info4: "Dagpenningperioden är normalt 2 år (3 848 timmar)",
+      info5: "Du måste vara medlem i en A-kassa och uppfylla inkomstkravet",
+      source: "Källa: bm.dk/satser/satser-for-2026 — Kontakta din A-kassa för exakt beräkning.",
+    },
+    no: {
+      monthlyPreTax: "Månedlig lønn før skatt",
+      placeholder: "F.eks. 35000",
+      perMonth: "/md",
+      avgLast12: "Din gjennomsnittlige månedslønn de siste 12 månedene",
+      weeklyHours: "Ukentlige arbeidstimer",
+      fulltime: "37 timer (fulltid)",
+      hours30: "30 timer",
+      hours25: "25 timer",
+      hours20: "20 timer",
+      hours15: "15 timer",
+      calculating: "Beregner dagpenger...",
+      estimatedBenefits: "Dine estimerte dagpenger",
+      monthly: "Månedlig",
+      weekly: "Ukentlig",
+      daily: "Daglig (ca.)",
+      employmentSupplement: "Sysselsettingstillegg:",
+      employmentSupplementDesc: "De første 3 månedene kan du få opptil",
+      employmentSupplementSuffix: "kr/md hvis du oppfyller kravene.",
+      maxRateHit: "Du treffer makssatsen på",
+      calcBasis: "Lønnen din gir et beregningsgrunnlag på",
+      afterAM: "(etter 8% AM-bidrag).",
+      benefitsEqual: "Dagpengene tilsvarer",
+      ofGross: "av bruttolønnen din.",
+      calcExplain: "Beregning:",
+      salaryAfterAM: "(lønn etter AM-bidrag) × 90% =",
+      infoTitle: "Offisielle dagpengesatser 2026",
+      info1: "Dagpenger = 90% av lønn etter AM-bidrag (8%)",
+      info2: "Maks dagpengesats:",
+      info3: "Med sysselsettingstillegg (første 3 mnd): opptil",
+      info4: "Dagpengeperioden er normalt 2 år (3 848 timer)",
+      info5: "Du må være medlem av en A-kasse og oppfylle inntektskravet",
+      source: "Kilde: bm.dk/satser/satser-for-2026 — Kontakt A-kassen din for nøyaktig beregning.",
+    },
+  };
+  const l = labels[locale as keyof typeof labels] || labels.da;
+
   const [maanedsloen, setMaanedsloen] = useState<string>("");
   const [arbejdstimer, setArbejdstimer] = useState<string>("37");
   const hasLoadedUrl = useRef(false);
   const hasTracked = useRef(false);
 
-  // Load state from URL on mount
   useEffect(() => {
     if (hasLoadedUrl.current) return;
     hasLoadedUrl.current = true;
@@ -47,7 +156,6 @@ export default function DagpengeBeregner() {
     }
   }, []);
 
-  // Get shareable link for current calculation
   useEffect(() => {
     if (hasTracked.current) return;
     const cleanupScroll = initScrollDepthTracking("dagpenge");
@@ -72,7 +180,6 @@ export default function DagpengeBeregner() {
     setArbejdstimer("37");
   }, []);
 
-  // Loading state for beregning
   const isLoading = useCalculationLoading([maanedsloen, arbejdstimer]);
 
   const resultat = useMemo<DagpengeResultat | null>(() => {
@@ -81,17 +188,11 @@ export default function DagpengeBeregner() {
 
     if (!loen || loen <= 0 || !timer || timer <= 0) return null;
 
-    // Beregningsgrundlag: løn EFTER AM-bidrag (8%)
     const beregningsgrundlag = loen * (1 - SATSER_2026.amBidragProcent / 100);
-
-    // Dagpenge = 90% af beregningsgrundlag
     const beregnetDagpenge = beregningsgrundlag * (SATSER_2026.dagpengeProcent / 100);
-
-    // Juster for deltid
     const deltidsFaktor = timer / 37;
     const maxDagpengeJusteret = SATSER_2026.maxDagpenge * deltidsFaktor;
     const maxMedTillaeg = SATSER_2026.beskaeftigelsesTillaeg * deltidsFaktor;
-
     const erMaxSats = beregnetDagpenge >= maxDagpengeJusteret;
     const maanedligDagpenge = erMaxSats ? maxDagpengeJusteret : beregnetDagpenge;
     const medBeskaeftigelsesTillaeg = erMaxSats ? maxMedTillaeg : beregnetDagpenge;
@@ -107,6 +208,8 @@ export default function DagpengeBeregner() {
     };
   }, [maanedsloen, arbejdstimer]);
 
+  const fmtNum = (n: number) => n.toLocaleString(locale === "se" ? "sv-SE" : locale === "no" ? "nb-NO" : "da-DK");
+
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 md:p-8">
       <div className="space-y-6">
@@ -116,7 +219,7 @@ export default function DagpengeBeregner() {
             htmlFor="maanedsloen"
             className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
           >
-            Månedlig løn før skat
+            {l.monthlyPreTax}
           </label>
           <div className="relative">
             <input
@@ -124,15 +227,15 @@ export default function DagpengeBeregner() {
               id="maanedsloen"
               value={maanedsloen}
               onChange={(e) => setMaanedsloen(e.target.value)}
-              placeholder="F.eks. 35000"
+              placeholder={l.placeholder}
               className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             />
             <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400">
-              kr/md
+              {getCurrencySuffix(locale)}{l.perMonth}
             </span>
           </div>
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-            Din gennemsnitlige månedsløn de seneste 12 måneder
+            {l.avgLast12}
           </p>
         </div>
 
@@ -142,7 +245,7 @@ export default function DagpengeBeregner() {
             htmlFor="arbejdstimer"
             className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
           >
-            Ugentlige arbejdstimer
+            {l.weeklyHours}
           </label>
           <select
             id="arbejdstimer"
@@ -150,11 +253,11 @@ export default function DagpengeBeregner() {
             onChange={(e) => setArbejdstimer(e.target.value)}
             className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
           >
-            <option value="37">37 timer (fuldtid)</option>
-            <option value="30">30 timer</option>
-            <option value="25">25 timer</option>
-            <option value="20">20 timer</option>
-            <option value="15">15 timer</option>
+            <option value="37">{l.fulltime}</option>
+            <option value="30">{l.hours30}</option>
+            <option value="25">{l.hours25}</option>
+            <option value="20">{l.hours20}</option>
+            <option value="15">{l.hours15}</option>
           </select>
         </div>
 
@@ -165,34 +268,34 @@ export default function DagpengeBeregner() {
         {/* Resultat */}
         <CalculationLoading
           isLoading={isLoading}
-          loadingText="Beregner dagpenge..."
+          loadingText={l.calculating}
           minHeight="200px"
         >
         {resultat && (
           <div className="mt-8 p-6 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-xl">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-              Dine estimerede dagpenge
+              {l.estimatedBenefits}
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="bg-white dark:bg-gray-700 p-4 rounded-lg shadow-sm">
-                <p className="text-sm text-gray-600 dark:text-gray-400">Månedligt</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">{l.monthly}</p>
                 <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                  {resultat.maanedligDagpenge.toLocaleString("da-DK")} kr
+                  {fmtNum(resultat.maanedligDagpenge)} kr
                 </p>
               </div>
 
               <div className="bg-white dark:bg-gray-700 p-4 rounded-lg shadow-sm">
-                <p className="text-sm text-gray-600 dark:text-gray-400">Ugentligt</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">{l.weekly}</p>
                 <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                  {resultat.ugentligDagpenge.toLocaleString("da-DK")} kr
+                  {fmtNum(resultat.ugentligDagpenge)} kr
                 </p>
               </div>
 
               <div className="bg-white dark:bg-gray-700 p-4 rounded-lg shadow-sm">
-                <p className="text-sm text-gray-600 dark:text-gray-400">Dagligt (ca.)</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">{l.daily}</p>
                 <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                  {resultat.dagligSats.toLocaleString("da-DK")} kr
+                  {fmtNum(resultat.dagligSats)} kr
                 </p>
               </div>
             </div>
@@ -200,7 +303,7 @@ export default function DagpengeBeregner() {
             {resultat.erMaxSats && resultat.medBeskaeftigelsesTillaeg > resultat.maanedligDagpenge && (
               <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
                 <p className="text-sm text-green-800 dark:text-green-300">
-                  <strong>Beskæftigelsestillæg:</strong> De første 3 måneder kan du få op til {resultat.medBeskaeftigelsesTillaeg.toLocaleString("da-DK")} kr/md hvis du opfylder kravene.
+                  <strong>{l.employmentSupplement}</strong> {l.employmentSupplementDesc} {fmtNum(resultat.medBeskaeftigelsesTillaeg)} {l.employmentSupplementSuffix}
                 </p>
               </div>
             )}
@@ -208,15 +311,15 @@ export default function DagpengeBeregner() {
             {resultat.erMaxSats && (
               <div className="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
                 <p className="text-sm text-yellow-800 dark:text-yellow-300">
-                  Du rammer maxsatsen på {SATSER_2026.maxDagpenge.toLocaleString("da-DK")} kr/md. Din løn giver et beregningsgrundlag på {resultat.beregningsgrundlag.toLocaleString("da-DK")} kr (efter 8% AM-bidrag).
+                  {l.maxRateHit} {fmtNum(SATSER_2026.maxDagpenge)} kr/md. {l.calcBasis} {fmtNum(resultat.beregningsgrundlag)} kr {l.afterAM}
                 </p>
               </div>
             )}
 
             <div className="mt-4 text-sm text-gray-600 dark:text-gray-400">
               <p>
-                Dagpengene svarer til <strong>{resultat.procentAfLoen}%</strong> af din bruttoløn.
-                Beregning: {resultat.beregningsgrundlag.toLocaleString("da-DK")} kr (løn efter AM-bidrag) × 90% = {Math.round(resultat.beregningsgrundlag * 0.9).toLocaleString("da-DK")} kr
+                {l.benefitsEqual} <strong>{resultat.procentAfLoen}%</strong> {l.ofGross}{" "}
+                {l.calcExplain} {fmtNum(resultat.beregningsgrundlag)} kr {l.salaryAfterAM} {fmtNum(Math.round(resultat.beregningsgrundlag * 0.9))} kr
               </p>
             </div>
           </div>
@@ -225,27 +328,27 @@ export default function DagpengeBeregner() {
 
         {resultat && (
           <div className="flex justify-center mt-6">
-            <CopyResultButton text={`${resultat.maanedligDagpenge.toLocaleString("da-DK")} kr/md`} />
+            <CopyResultButton text={`${fmtNum(resultat.maanedligDagpenge)} kr/md`} />
             <ShareCalculation
               getShareableLink={getShareableLink}
               calculatorName="Dagpengeberegner"
-              resultSummary={`${resultat.maanedligDagpenge.toLocaleString("da-DK")} kr/md`}
+              resultSummary={`${fmtNum(resultat.maanedligDagpenge)} kr/md`}
             />
           </div>
         )}
 
         {/* Info boks */}
         <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg text-sm text-gray-600 dark:text-gray-300">
-          <h4 className="font-semibold text-gray-800 dark:text-white mb-2">Officielle dagpenge-satser 2026</h4>
+          <h4 className="font-semibold text-gray-800 dark:text-white mb-2">{l.infoTitle}</h4>
           <ul className="space-y-1 list-disc list-inside">
-            <li>Dagpenge = 90% af løn efter AM-bidrag (8%)</li>
-            <li>Max dagpengesats: {SATSER_2026.maxDagpenge.toLocaleString("da-DK")} kr/md</li>
-            <li>Med beskæftigelsestillæg (første 3 mdr): op til {SATSER_2026.beskaeftigelsesTillaeg.toLocaleString("da-DK")} kr/md</li>
-            <li>Dagpengeperioden er normalt 2 år (3.848 timer)</li>
-            <li>Du skal være medlem af en A-kasse og opfylde indkomstkravet</li>
+            <li>{l.info1}</li>
+            <li>{l.info2} {fmtNum(SATSER_2026.maxDagpenge)} kr/md</li>
+            <li>{l.info3} {fmtNum(SATSER_2026.beskaeftigelsesTillaeg)} kr/md</li>
+            <li>{l.info4}</li>
+            <li>{l.info5}</li>
           </ul>
           <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-            Kilde: bm.dk/satser/satser-for-2026 — Kontakt din A-kasse for præcis beregning.
+            {l.source}
           </p>
         </div>
       </div>
