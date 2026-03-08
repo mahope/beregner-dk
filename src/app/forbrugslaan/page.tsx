@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import { generatePageMetadata } from "@/lib/page-helpers";
 import ForbrugslaanBeregner from "@/components/ForbrugslaanBeregner";
 import FAQ from "@/components/FAQ";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
@@ -7,29 +7,9 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 
 const baseUrl = "https://minberegner.dk";
 
-export const metadata: Metadata = {
-  title: "Forbrugslån beregner - Beregn forbrugslån og ydelse | MinBeregner.dk",
-  description:
-    "Gratis forbrugslån beregner. Beregn månedlig ydelse, samlede renter og find det bedste forbrugslån. Sammenlign renter og ÅOP fra flere udbydere.",
-  keywords: [
-    "forbrugslån beregner",
-    "beregn forbrugslån",
-    "forbrugslån ydelse",
-    "lån uden sikkerhed",
-    "sammenlign forbrugslån",
-    "billigt forbrugslån",
-    "forbrugslån rente",
-  ],
-  openGraph: {
-    title: "Forbrugslån beregner - Beregn din låneydelse",
-    description: "Beregn månedlig ydelse, renter og sammenlign forbrugslån. Gratis online beregner.",
-    url: `${baseUrl}/forbrugslaan`,
-    type: "website",
-  },
-  alternates: {
-    canonical: `${baseUrl}/forbrugslaan`,
-  },
-};
+export async function generateMetadata() {
+  return generatePageMetadata("forbrugslaan");
+}
 
 const faqItems = [
   {

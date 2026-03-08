@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import { generatePageMetadata } from "@/lib/page-helpers";
 import BillaanBeregner from "@/components/BillaanBeregner";
 import FAQ from "@/components/FAQ";
 import RelatedCalculators from "@/components/RelatedCalculators";
@@ -53,13 +53,9 @@ const faqItems = [
   },
 ];
 
-export const metadata: Metadata = {
-  title: "Billånsberegner - Beregn månedlig ydelse på billån | Beregner.dk",
-  description:
-    "Beregn dit billån nemt og hurtigt. Indtast bilpris, udbetaling, løbetid og rente - se månedlig ydelse, samlet rente og ÅOP. Gratis online billånsberegner.",
-  keywords:
-    "billån, billånsberegner, billån rente, månedlig ydelse bil, finansiering bil, billån beregner",
-};
+export async function generateMetadata() {
+  return generatePageMetadata("billaan");
+}
 
 export default function BillaanPage() {
   return (

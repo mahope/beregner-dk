@@ -1,32 +1,36 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
+import { getCurrentDomainConfig } from "@/lib/get-locale";
 
-const baseUrl = "https://minberegner.dk";
+export async function generateMetadata(): Promise<Metadata> {
+  const dc = await getCurrentDomainConfig();
+  const baseUrl = dc.baseUrl;
 
-export const metadata: Metadata = {
-  title: "Hvordan beregner man moms? En komplet guide | MinBeregner.dk",
-  description:
-    "Lær alt om dansk moms: Hvordan du tillægger og fratrækker 25% moms, hvornår du skal momsregistreres, og hvad der er momsfrit.",
-  keywords: [
-    "beregn moms",
-    "hvordan beregner man moms",
-    "tillæg moms",
-    "fratræk moms",
-    "25% moms",
-    "moms guide",
-    "momsberegning",
-  ],
-  openGraph: {
-    title: "Hvordan beregner man moms? En komplet guide",
-    description: "Lær alt om dansk moms: Tillæg, fratræk og beregn 25% moms korrekt.",
-    url: `${baseUrl}/blog/hvordan-beregner-man-moms`,
-    type: "article",
-  },
-  alternates: {
-    canonical: `${baseUrl}/blog/hvordan-beregner-man-moms`,
-  },
-};
+  return {
+    title: "Hvordan beregner man moms? En komplet guide | MinBeregner.dk",
+    description:
+      "Lær alt om dansk moms: Hvordan du tillægger og fratrækker 25% moms, hvornår du skal momsregistreres, og hvad der er momsfrit.",
+    keywords: [
+      "beregn moms",
+      "hvordan beregner man moms",
+      "tillæg moms",
+      "fratræk moms",
+      "25% moms",
+      "moms guide",
+      "momsberegning",
+    ],
+    openGraph: {
+      title: "Hvordan beregner man moms? En komplet guide",
+      description: "Lær alt om dansk moms: Tillæg, fratræk og beregn 25% moms korrekt.",
+      url: `${baseUrl}/blog/hvordan-beregner-man-moms`,
+      type: "article",
+    },
+    alternates: {
+      canonical: `${baseUrl}/blog/hvordan-beregner-man-moms`,
+    },
+  };
+}
 
 const faqItems = [
   {

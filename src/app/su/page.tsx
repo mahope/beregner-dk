@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import { generatePageMetadata } from "@/lib/page-helpers";
 import SUBeregner from "@/components/SUBeregner";
 import FAQ from "@/components/FAQ";
 import RelatedCalculators from "@/components/RelatedCalculators";
@@ -7,33 +7,9 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 
 const baseUrl = "https://minberegner.dk";
 
-export const metadata: Metadata = {
-  title: "SU Beregner 2026 - Beregn din SU og fribeløb",
-  description:
-    "Beregn din SU 2026. Officielle satser: Udeboende 7.426 kr/md, hjemmeboende 3.692 kr/md. Fribeløb: 20.749 kr/md (videregående). Tjek om du holder dig under fribeløbet.",
-  keywords: [
-    "su beregner",
-    "su 2026",
-    "beregn su",
-    "fribeløb",
-    "su satser",
-    "hvad får jeg i su",
-    "su udeboende",
-    "su hjemmeboende",
-    "statens uddannelsesstøtte",
-    "su-klip",
-  ],
-  openGraph: {
-    title: "SU Beregner 2026 - Beregn din SU og fribeløb",
-    description:
-      "Beregn din SU og tjek dit fribeløb med de nyeste 2026 satser. Gratis SU beregner.",
-    url: `${baseUrl}/su`,
-    type: "website",
-  },
-  alternates: {
-    canonical: `${baseUrl}/su`,
-  },
-};
+export async function generateMetadata() {
+  return generatePageMetadata("su");
+}
 
 const faqItems = [
   {

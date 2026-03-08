@@ -1,31 +1,35 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
+import { getCurrentDomainConfig } from "@/lib/get-locale";
 
-const baseUrl = "https://minberegner.dk";
+export async function generateMetadata(): Promise<Metadata> {
+  const dc = await getCurrentDomainConfig();
+  const baseUrl = dc.baseUrl;
 
-export const metadata: Metadata = {
-  title: "Sådan finder du din timepris som freelancer | MinBeregner.dk",
-  description:
-    "Lær at beregne den rigtige timepris som freelancer. Trin-for-trin guide til at sætte en fair pris der dækker alle dine omkostninger.",
-  keywords: [
-    "freelancer timepris",
-    "beregn timepris",
-    "konsulent timepris",
-    "hvad skal jeg tage i timen",
-    "selvstændig timepris",
-    "timepris guide",
-  ],
-  openGraph: {
-    title: "Sådan finder du din timepris som freelancer",
-    description: "Trin-for-trin guide til at sætte den rigtige timepris som freelancer.",
-    url: `${baseUrl}/blog/saadan-finder-du-din-timepris-som-freelancer`,
-    type: "article",
-  },
-  alternates: {
-    canonical: `${baseUrl}/blog/saadan-finder-du-din-timepris-som-freelancer`,
-  },
-};
+  return {
+    title: "Sådan finder du din timepris som freelancer | MinBeregner.dk",
+    description:
+      "Lær at beregne den rigtige timepris som freelancer. Trin-for-trin guide til at sætte en fair pris der dækker alle dine omkostninger.",
+    keywords: [
+      "freelancer timepris",
+      "beregn timepris",
+      "konsulent timepris",
+      "hvad skal jeg tage i timen",
+      "selvstændig timepris",
+      "timepris guide",
+    ],
+    openGraph: {
+      title: "Sådan finder du din timepris som freelancer",
+      description: "Trin-for-trin guide til at sætte den rigtige timepris som freelancer.",
+      url: `${baseUrl}/blog/saadan-finder-du-din-timepris-som-freelancer`,
+      type: "article",
+    },
+    alternates: {
+      canonical: `${baseUrl}/blog/saadan-finder-du-din-timepris-som-freelancer`,
+    },
+  };
+}
 
 const faqItems = [
   {

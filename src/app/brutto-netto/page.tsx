@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import { generatePageMetadata } from "@/lib/page-helpers";
 import BruttoNettoBeregner from "@/components/BruttoNettoBeregner";
 import FAQ from "@/components/FAQ";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
@@ -8,29 +8,9 @@ import Sidebar from "@/components/Sidebar";
 
 const baseUrl = "https://minberegner.dk";
 
-export const metadata: Metadata = {
-  title: "Brutto/Netto Beregner 2026 - Fra netto til brutto | MinBeregner.dk",
-  description:
-    "Beregn hvilken bruttoløn du skal have for at få en bestemt udbetaling. Perfekt til lønforhandling. Opdateret med 2026-skattesatser.",
-  keywords: [
-    "brutto netto beregner",
-    "netto til brutto",
-    "løn beregner",
-    "hvad skal jeg tjene",
-    "lønforhandling beregner",
-    "bruttoløn beregner",
-    "omvendt skatteberegning",
-  ],
-  openGraph: {
-    title: "Brutto/Netto Beregner 2026",
-    description: "Beregn hvilken bruttoløn du behøver for din ønskede udbetaling.",
-    url: `${baseUrl}/brutto-netto`,
-    type: "website",
-  },
-  alternates: {
-    canonical: `${baseUrl}/brutto-netto`,
-  },
-};
+export async function generateMetadata() {
+  return generatePageMetadata("brutto-netto");
+}
 
 const faqItems = [
   {

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import { generatePageMetadata } from "@/lib/page-helpers";
 import BarselBeregner from "@/components/BarselBeregner";
 import FAQ from "@/components/FAQ";
 import RelatedCalculators from "@/components/RelatedCalculators";
@@ -7,33 +7,9 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 
 const baseUrl = "https://minberegner.dk";
 
-export const metadata: Metadata = {
-  title: "Barselsdagpenge beregner 2026 - Se hvad du får udbetalt",
-  description:
-    "Hvad får du under barsel? Max sats 2026: ca. 5.085 kr/uge (≈ 22.000 kr/md før skat). Beregn dine barselsdagpenge ud fra din løn og situation. Gratis beregner.",
-  keywords: [
-    "barselsdagpenge",
-    "barsel beregner",
-    "barselsdagpenge 2026",
-    "beregn barselsdagpenge",
-    "hvad får jeg i barselsdagpenge",
-    "dagpenge under barsel",
-    "barselsorlov",
-    "barsel sats",
-    "mors barsel",
-    "fars barsel",
-  ],
-  openGraph: {
-    title: "Barselsdagpenge beregner 2026",
-    description:
-      "Beregn hvad du får udbetalt under barsel. Gratis beregner med 2026 satser.",
-    url: `${baseUrl}/barselsdagpenge`,
-    type: "website",
-  },
-  alternates: {
-    canonical: `${baseUrl}/barselsdagpenge`,
-  },
-};
+export async function generateMetadata() {
+  return generatePageMetadata("barselsdagpenge");
+}
 
 const faqItems = [
   {

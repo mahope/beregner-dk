@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
 import BilBeregner from "@/components/BilBeregner";
+import { generatePageMetadata } from "@/lib/page-helpers";
 import FAQ from "@/components/FAQ";
 import RelatedCalculators from "@/components/RelatedCalculators";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
@@ -7,12 +7,9 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 
 const baseUrl = "https://minberegner.dk";
 
-export const metadata: Metadata = {
-  title: "Bilomkostningsberegner - Se hvad din bil koster | Beregner.dk",
-  description:
-    "Se hvad din bil reelt koster. Typisk: 2,50-4,50 kr/km inkl. værditab, brændstof, forsikring og afgifter. Sammenlign benzin, diesel og elbil. Gratis beregner 2026.",
-  keywords: "bil beregner, bilomkostninger, biludgifter, elbil vs benzin, bil pris pr km, værditab bil",
-};
+export async function generateMetadata() {
+  return generatePageMetadata("bil");
+}
 
 const bilFaqItems = [
   {

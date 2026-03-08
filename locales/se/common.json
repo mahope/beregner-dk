@@ -1,14 +1,22 @@
 {
   "site": {
-    "name": "MinKalkylator.se",
+    "name": "Beräknare.se",
     "tagline": "Gratis Kalkylatorer Online",
     "description": "33+ gratis kalkylatorer för ekonomi, bostad, skatt, hälsa och vardag."
   },
   "nav": {
     "home": "Startsida",
     "calculators": "Kalkylatorer",
+    "allCalculators": "Alla kalkylatorer",
     "blog": "Blogg",
-    "about": "Om oss"
+    "about": "Om oss",
+    "categories": {
+      "economy": "Ekonomi",
+      "housing": "Bostad",
+      "loans": "Lån & Ränta",
+      "family": "Familj & Hälsa",
+      "tools": "Verktyg"
+    }
   },
   "ui": {
     "calculate": "Beräkna",
@@ -31,7 +39,7 @@
     "newsletterCta": "Prenumerera",
     "newsletterSuccess": "Tack för din anmälan!",
     "ad": "Annons",
-    "poweredBy": "Drivs av MinKalkylator.se",
+    "poweredBy": "Drivs av Beräknare.se",
     "privacyNote": "Alla beräkningar sker lokalt i din webbläsare."
   },
   "categories": {
@@ -47,10 +55,18 @@
     "math": "Matematik"
   },
   "footer": {
-    "copyright": "© {year} MinKalkylator.se — Gratis kalkylatorer",
+    "copyright": "© {year} Beräknare.se — Gratis kalkylatorer",
     "freeCalculators": "gratis kalkylatorer",
     "updatedRates": "Uppdaterad med {year}-satser",
     "noLogin": "Ingen inloggning krävs",
-    "madeForSwedes": "Gjord för svenskar"
+    "madeFor": "Gjord för svenskar",
+    "allCalculators": "Alla kalkylatorer",
+    "aboutSite": "Gratis kalkylatorer för svenskar. Alla beräkningar sker lokalt i din webbläsare — vi sparar ingen data.",
+    "aboutLink": "Om Beräknare.se",
+    "privacyLink": "Integritetspolicy",
+    "cookieLink": "Cookiepolicy",
+    "latestArticles": "Senaste artiklar",
+    "seeAllArticles": "Se alla artiklar",
+    "otherTools": "Andra gratis verktyg"
   }
 }

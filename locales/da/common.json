@@ -7,8 +7,16 @@
   "nav": {
     "home": "Forside",
     "calculators": "Beregnere",
+    "allCalculators": "Alle beregnere",
     "blog": "Blog",
-    "about": "Om os"
+    "about": "Om os",
+    "categories": {
+      "economy": "Økonomi",
+      "housing": "Bolig",
+      "loans": "Lån & Rente",
+      "family": "Familie & Sundhed",
+      "tools": "Værktøjer"
+    }
   },
   "ui": {
     "calculate": "Beregn",
@@ -51,6 +59,14 @@
     "freeCalculators": "gratis beregnere",
     "updatedRates": "Opdateret med {year}-satser",
     "noLogin": "Ingen login påkrævet",
-    "madeForDanes": "Lavet til danskere"
+    "madeFor": "Lavet til danskere",
+    "allCalculators": "Alle beregnere",
+    "aboutSite": "Gratis online beregnere til danskere. Alle beregninger sker lokalt i din browser — vi gemmer ingen data.",
+    "aboutLink": "Om MinBeregner.dk",
+    "privacyLink": "Privatlivspolitik",
+    "cookieLink": "Cookiepolitik",
+    "latestArticles": "Seneste artikler",
+    "seeAllArticles": "Se alle artikler",
+    "otherTools": "Andre gratis værktøjer"
   }
 }

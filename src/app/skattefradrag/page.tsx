@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import { generatePageMetadata } from "@/lib/page-helpers";
 import dynamic from "next/dynamic";
 const SkattefradragBeregner = dynamic(() => import("@/components/SkattefradragBeregner"));
 import FAQ from "@/components/FAQ";
@@ -9,31 +9,9 @@ import Sidebar from "@/components/Sidebar";
 
 const baseUrl = "https://minberegner.dk";
 
-export const metadata: Metadata = {
-  title: "Skattefradrag Beregner - Beregn alle fradrag 2026 | MinBeregner.dk",
-  description:
-    "Beregn din samlede skattebesparelse fra kørselsfradrag, rentefradrag, håndværkerfradrag, fagforening og a-kasse. Se 2026-satser og grænser.",
-  keywords: [
-    "skattefradrag beregner",
-    "fradrag 2026",
-    "kørselsfradrag",
-    "rentefradrag",
-    "håndværkerfradrag",
-    "fagforening fradrag",
-    "a-kasse fradrag",
-    "skattebesparelse",
-    "boligjobordning",
-  ],
-  openGraph: {
-    title: "Skattefradrag Beregner - Beregn alle fradrag 2026",
-    description: "Beregn din samlede skattebesparelse fra kørsel, renter, håndværker, fagforening og a-kasse.",
-    url: `${baseUrl}/skattefradrag`,
-    type: "website",
-  },
-  alternates: {
-    canonical: `${baseUrl}/skattefradrag`,
-  },
-};
+export async function generateMetadata() {
+  return generatePageMetadata("skattefradrag");
+}
 
 const faqItems = [
   {

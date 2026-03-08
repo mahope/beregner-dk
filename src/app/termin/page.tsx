@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import { generatePageMetadata } from "@/lib/page-helpers";
 import TerminBeregner from "@/components/TerminBeregner";
 import FAQ from "@/components/FAQ";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
@@ -8,29 +8,9 @@ import Sidebar from "@/components/Sidebar";
 
 const baseUrl = "https://minberegner.dk";
 
-export const metadata: Metadata = {
-  title: "Terminsdato Beregner - Beregn din terminsdato gratis | MinBeregner.dk",
-  description:
-    "Beregn din terminsdato gratis. Indtast første dag i sidste menstruation og se forventet fødselsdato, uge-for-uge milepæle og barselstart.",
-  keywords: [
-    "terminsdato beregner",
-    "graviditetsberegner",
-    "beregn terminsdato",
-    "hvornår er jeg i termin",
-    "graviditetsuge beregner",
-    "fødselsdato beregner",
-    "termin beregner",
-  ],
-  openGraph: {
-    title: "Terminsdato Beregner - Beregn din terminsdato",
-    description: "Gratis terminsdato beregner. Se forventet fødselsdato og graviditetsuge.",
-    url: `${baseUrl}/termin`,
-    type: "website",
-  },
-  alternates: {
-    canonical: `${baseUrl}/termin`,
-  },
-};
+export async function generateMetadata() {
+  return generatePageMetadata("termin");
+}
 
 const faqItems = [
   {

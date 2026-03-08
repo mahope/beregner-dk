@@ -10,6 +10,8 @@ interface CalculatorSchemaProps {
   description: string;
   url: string;
   category?: string;
+  siteName?: string;
+  currency?: string;
 }
 
 interface FAQSchemaProps {
@@ -36,7 +38,10 @@ export function CalculatorSchema({
   description,
   url,
   category = "Calculator",
+  siteName = "MinBeregner.dk",
+  currency = "DKK",
 }: CalculatorSchemaProps) {
+  const siteUrl = url.split("/").slice(0, 3).join("/"); // extract origin from url
   const schema = {
     "@context": "https://schema.org",
     "@type": "WebApplication",
@@ -49,12 +54,12 @@ export function CalculatorSchema({
     offers: {
       "@type": "Offer",
       price: "0",
-      priceCurrency: "DKK",
+      priceCurrency: currency,
     },
     provider: {
       "@type": "Organization",
-      name: "MinBeregner.dk",
-      url: "https://minberegner.dk",
+      name: siteName,
+      url: siteUrl,
     },
   };
 
@@ -97,7 +102,7 @@ export function WebSiteSchema({ name, url, description }: WebSiteSchemaProps) {
     description,
     publisher: {
       "@type": "Organization",
-      name: "MinBeregner.dk",
+      name,
       logo: {
         "@type": "ImageObject",
         url: `${url}/logo.png`,
@@ -141,20 +146,26 @@ export function BreadcrumbSchema({ items }: BreadcrumbSchemaProps) {
   );
 }
 
-export function OrganizationSchema() {
+export function OrganizationSchema({
+  name = "MinBeregner.dk",
+  url = "https://minberegner.dk",
+  description = "Gratis online beregnere til økonomi, sundhed og hverdag.",
+}: {
+  name?: string;
+  url?: string;
+  description?: string;
+} = {}) {
   const schema = {
     "@context": "https://schema.org",
     "@type": "Organization",
-    name: "MinBeregner.dk",
-    url: "https://minberegner.dk",
-    logo: "https://minberegner.dk/logo.png",
-    description:
-      "Danmarks samling af gratis online beregnere til økonomi, sundhed og hverdag.",
+    name,
+    url,
+    logo: `${url}/logo.png`,
+    description,
     sameAs: [],
     contactPoint: {
       "@type": "ContactPoint",
       contactType: "customer support",
-      availableLanguage: "Danish",
     },
   };
 

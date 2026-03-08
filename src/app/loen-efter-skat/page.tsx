@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import { generatePageMetadata } from "@/lib/page-helpers";
 import dynamic from "next/dynamic";
 const LoenBeregner = dynamic(() => import("@/components/LoenBeregner"));
 import FAQ from "@/components/FAQ";
@@ -13,33 +13,9 @@ import Sidebar from "@/components/Sidebar";
 
 const baseUrl = "https://minberegner.dk";
 
-export const metadata: Metadata = {
-  title: "Løn efter skat 2026 - Beregn din nettoløn gratis",
-  description:
-    "Beregn din nettoløn 2026. Nyt skattesystem med mellemskat og topskat. Personfradrag 54.100 kr. Se hvad du får udbetalt efter skat, AM-bidrag (8%) og pension. Gratis lønberegner.",
-  keywords: [
-    "løn efter skat",
-    "lønberegner",
-    "nettoløn",
-    "beregn løn efter skat",
-    "hvad får jeg udbetalt",
-    "skat beregner",
-    "bruttoløn til nettoløn",
-    "løn 2026",
-    "skatteberegner",
-    "am-bidrag",
-  ],
-  openGraph: {
-    title: "Løn efter skat 2026 - Beregn din nettoløn",
-    description:
-      "Se hvad du får udbetalt efter skat. Gratis lønberegner med 2026 satser.",
-    url: `${baseUrl}/loen-efter-skat`,
-    type: "website",
-  },
-  alternates: {
-    canonical: `${baseUrl}/loen-efter-skat`,
-  },
-};
+export async function generateMetadata() {
+  return generatePageMetadata("loen-efter-skat");
+}
 
 const faqItems = [
   {

@@ -1,34 +1,38 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
+import { getCurrentDomainConfig } from "@/lib/get-locale";
 
-const baseUrl = "https://minberegner.dk";
+export async function generateMetadata(): Promise<Metadata> {
+  const dc = await getCurrentDomainConfig();
+  const baseUrl = dc.baseUrl;
 
-export const metadata: Metadata = {
-  title: "Spar penge på brændstof: Tips til billigere kørsel | MinBeregner.dk",
-  description:
-    "Praktiske tips til at spare på benzin, diesel og el. Kør 10-20% billigere med køreteknik, ruteplanlægning og vedligeholdelse. Priser 2026.",
-  keywords: [
-    "spar brændstof",
-    "billigere benzin",
-    "brændstofbesparelse",
-    "køreteknik",
-    "spare benzin",
-    "elbil opladning",
-    "brændstof priser 2026",
-    "km/l forbedring",
-  ],
-  openGraph: {
-    title: "Spar penge på brændstof: Tips til billigere kørsel",
+  return {
+    title: "Spar penge på brændstof: Tips til billigere kørsel | MinBeregner.dk",
     description:
-      "Praktiske tips til at reducere dit brændstofforbrug og spare penge på benzin, diesel eller el.",
-    url: `${baseUrl}/blog/spar-penge-paa-braendstof`,
-    type: "article",
-  },
-  alternates: {
-    canonical: `${baseUrl}/blog/spar-penge-paa-braendstof`,
-  },
-};
+      "Praktiske tips til at spare på benzin, diesel og el. Kør 10-20% billigere med køreteknik, ruteplanlægning og vedligeholdelse. Priser 2026.",
+    keywords: [
+      "spar brændstof",
+      "billigere benzin",
+      "brændstofbesparelse",
+      "køreteknik",
+      "spare benzin",
+      "elbil opladning",
+      "brændstof priser 2026",
+      "km/l forbedring",
+    ],
+    openGraph: {
+      title: "Spar penge på brændstof: Tips til billigere kørsel",
+      description:
+        "Praktiske tips til at reducere dit brændstofforbrug og spare penge på benzin, diesel eller el.",
+      url: `${baseUrl}/blog/spar-penge-paa-braendstof`,
+      type: "article",
+    },
+    alternates: {
+      canonical: `${baseUrl}/blog/spar-penge-paa-braendstof`,
+    },
+  };
+}
 
 const faqItems = [
   {

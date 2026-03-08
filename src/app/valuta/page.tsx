@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
 import ValutaBeregner from "@/components/ValutaBeregner";
+import { generatePageMetadata } from "@/lib/page-helpers";
 import FAQ from "@/components/FAQ";
 import {
   CalculatorSchema,
@@ -11,31 +11,9 @@ import Sidebar from "@/components/Sidebar";
 
 const baseUrl = "https://minberegner.dk";
 
-export const metadata: Metadata = {
-  title: "Valutaberegner - Omregn valuta online | MinBeregner.dk",
-  description:
-    "Gratis valutaberegner. Omregn mellem DKK, EUR, USD, GBP, SEK, NOK og mange flere valutaer. Se aktuelle vejledende kurser.",
-  keywords: [
-    "valutaberegner",
-    "valuta omregner",
-    "omregn valuta",
-    "dkk til euro",
-    "dollar til kroner",
-    "valutakurs",
-    "veksle penge",
-    "currency converter",
-    "kroner til euro",
-  ],
-  openGraph: {
-    title: "Valutaberegner - Omregn valuta nemt",
-    description: "Omregn mellem danske kroner og andre valutaer. EUR, USD, GBP, SEK, NOK og mange flere.",
-    url: `${baseUrl}/valuta`,
-    type: "website",
-  },
-  alternates: {
-    canonical: `${baseUrl}/valuta`,
-  },
-};
+export async function generateMetadata() {
+  return generatePageMetadata("valuta");
+}
 
 const faqItems = [
   {

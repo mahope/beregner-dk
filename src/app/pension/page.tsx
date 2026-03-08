@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import { generatePageMetadata } from "@/lib/page-helpers";
 import dynamic from "next/dynamic";
 const PensionBeregner = dynamic(() => import("@/components/PensionBeregner"));
 import FAQ from "@/components/FAQ";
@@ -11,12 +11,9 @@ import RelatedCalculators from "@/components/RelatedCalculators";
 
 const baseUrl = "https://minberegner.dk";
 
-export const metadata: Metadata = {
-  title: "Pensionsberegner - Beregn din fremtidige pension | Beregner.dk",
-  description:
-    "Beregn din pension 2026. Folkepension: ca. 13.000-15.000 kr/md. Se hvad du får med arbejdsmarkedspension (12-17% af løn), ATP og egen opsparing. Gratis pensionsberegner.",
-  keywords: "pension, beregner, pensionsopsparing, folkepension, ATP, alderspension, ratepension",
-};
+export async function generateMetadata() {
+  return generatePageMetadata("pension");
+}
 
 const pensionFaqItems = [
   {

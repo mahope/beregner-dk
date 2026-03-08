@@ -1,34 +1,38 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
+import { getCurrentDomainConfig } from "@/lib/get-locale";
 
-const baseUrl = "https://minberegner.dk";
+export async function generateMetadata(): Promise<Metadata> {
+  const dc = await getCurrentDomainConfig();
+  const baseUrl = dc.baseUrl;
 
-export const metadata: Metadata = {
-  title: "Boligstøtte 2026 - Nye Regler og Satser | MinBeregner.dk",
-  description:
-    "Komplet guide til boligstøtte i 2026: Nye satser, ændrede regler, hvem kan få støtte og hvor meget. Se de opdaterede grænser og beregn din boligstøtte.",
-  keywords: [
-    "boligstøtte 2026",
-    "boligstøtte nye regler",
-    "boligstøtte satser 2026",
-    "boligsikring 2026",
-    "boligydelse 2026",
-    "udbetaling danmark boligstøtte",
-    "husleje tilskud 2026",
-    "boligstøtte beregning",
-    "boligstøtte indkomstgrænse",
-  ],
-  openGraph: {
-    title: "Boligstøtte 2026 - Nye Regler og Satser",
-    description: "Alt du skal vide om boligstøtte i 2026: satser, regler og hvad du kan få.",
-    url: `${baseUrl}/blog/boligstoette-2026-nye-regler`,
-    type: "article",
-  },
-  alternates: {
-    canonical: `${baseUrl}/blog/boligstoette-2026-nye-regler`,
-  },
-};
+  return {
+    title: "Boligstøtte 2026 - Nye Regler og Satser | MinBeregner.dk",
+    description:
+      "Komplet guide til boligstøtte i 2026: Nye satser, ændrede regler, hvem kan få støtte og hvor meget. Se de opdaterede grænser og beregn din boligstøtte.",
+    keywords: [
+      "boligstøtte 2026",
+      "boligstøtte nye regler",
+      "boligstøtte satser 2026",
+      "boligsikring 2026",
+      "boligydelse 2026",
+      "udbetaling danmark boligstøtte",
+      "husleje tilskud 2026",
+      "boligstøtte beregning",
+      "boligstøtte indkomstgrænse",
+    ],
+    openGraph: {
+      title: "Boligstøtte 2026 - Nye Regler og Satser",
+      description: "Alt du skal vide om boligstøtte i 2026: satser, regler og hvad du kan få.",
+      url: `${baseUrl}/blog/boligstoette-2026-nye-regler`,
+      type: "article",
+    },
+    alternates: {
+      canonical: `${baseUrl}/blog/boligstoette-2026-nye-regler`,
+    },
+  };
+}
 
 const faqItems = [
   {

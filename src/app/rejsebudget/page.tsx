@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
 import RejsebudgetBeregner from "@/components/RejsebudgetBeregner";
+import { generatePageMetadata } from "@/lib/page-helpers";
 import FAQ from "@/components/FAQ";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
@@ -8,30 +8,9 @@ import Sidebar from "@/components/Sidebar";
 
 const baseUrl = "https://minberegner.dk";
 
-export const metadata: Metadata = {
-  title: "Rejsebudget Beregner - Hvad koster en ferie? | MinBeregner.dk",
-  description:
-    "Beregn dit rejsebudget til populære destinationer. Se estimerede udgifter til fly, hotel, mad og oplevelser for budget-, standard- og luksusrejser.",
-  keywords: [
-    "rejsebudget beregner",
-    "hvad koster en ferie",
-    "ferie budget",
-    "rejse pris",
-    "ferie beregner",
-    "rejseudgifter",
-    "feriebudget",
-    "hvad koster en tur til",
-  ],
-  openGraph: {
-    title: "Rejsebudget Beregner - Hvad koster en ferie?",
-    description: "Beregn dit samlede rejsebudget med fly, hotel, mad og oplevelser.",
-    url: `${baseUrl}/rejsebudget`,
-    type: "website",
-  },
-  alternates: {
-    canonical: `${baseUrl}/rejsebudget`,
-  },
-};
+export async function generateMetadata() {
+  return generatePageMetadata("rejsebudget");
+}
 
 const faqItems = [
   {

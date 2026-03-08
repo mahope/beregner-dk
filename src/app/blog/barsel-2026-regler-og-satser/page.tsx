@@ -1,32 +1,36 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
+import { getCurrentDomainConfig } from "@/lib/get-locale";
 
-const baseUrl = "https://minberegner.dk";
+export async function generateMetadata(): Promise<Metadata> {
+  const dc = await getCurrentDomainConfig();
+  const baseUrl = dc.baseUrl;
 
-export const metadata: Metadata = {
-  title: "Barsel 2026: Nye regler for barselsdagpenge og orlov | MinBeregner.dk",
-  description:
-    "Komplet guide til barsel i 2026: Øremærket barsel, barselsdagpenge-satser, orlovsperioder for mor og far, og nye regler. Se hvad du har ret til.",
-  keywords: [
-    "barsel 2026",
-    "barselsdagpenge 2026",
-    "barselsorlov 2026",
-    "øremærket barsel",
-    "barsel far 2026",
-    "barsel mor 2026",
-    "barselsdagpenge sats",
-  ],
-  openGraph: {
-    title: "Barsel 2026: Nye regler for barselsdagpenge og orlov",
-    description: "Alt om barsel i 2026 — satser, orlovsperioder og nye regler.",
-    url: `${baseUrl}/blog/barsel-2026-regler-og-satser`,
-    type: "article",
-  },
-  alternates: {
-    canonical: `${baseUrl}/blog/barsel-2026-regler-og-satser`,
-  },
-};
+  return {
+    title: "Barsel 2026: Nye regler for barselsdagpenge og orlov | MinBeregner.dk",
+    description:
+      "Komplet guide til barsel i 2026: Øremærket barsel, barselsdagpenge-satser, orlovsperioder for mor og far, og nye regler. Se hvad du har ret til.",
+    keywords: [
+      "barsel 2026",
+      "barselsdagpenge 2026",
+      "barselsorlov 2026",
+      "øremærket barsel",
+      "barsel far 2026",
+      "barsel mor 2026",
+      "barselsdagpenge sats",
+    ],
+    openGraph: {
+      title: "Barsel 2026: Nye regler for barselsdagpenge og orlov",
+      description: "Alt om barsel i 2026 — satser, orlovsperioder og nye regler.",
+      url: `${baseUrl}/blog/barsel-2026-regler-og-satser`,
+      type: "article",
+    },
+    alternates: {
+      canonical: `${baseUrl}/blog/barsel-2026-regler-og-satser`,
+    },
+  };
+}
 
 const faqItems = [
   {

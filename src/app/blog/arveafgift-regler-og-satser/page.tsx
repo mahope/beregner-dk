@@ -1,33 +1,37 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
+import { getCurrentDomainConfig } from "@/lib/get-locale";
 
-const baseUrl = "https://minberegner.dk";
+export async function generateMetadata(): Promise<Metadata> {
+  const dc = await getCurrentDomainConfig();
+  const baseUrl = dc.baseUrl;
 
-export const metadata: Metadata = {
-  title: "Arveafgift i Danmark: Regler, satser og eksempler | MinBeregner.dk",
-  description:
-    "Komplet guide til arveafgift (boafgift) i 2026: Bundfradrag, satser for nære og fjerne arvinger, tillægsafgift og beregningseksempler.",
-  keywords: [
-    "arveafgift 2026",
-    "boafgift 2026",
-    "arveafgift satser",
-    "bundfradrag arv",
-    "tillægsafgift",
-    "arv skat",
-    "arveafgift beregner",
-    "boafgift beregning",
-  ],
-  openGraph: {
-    title: "Arveafgift i Danmark: Regler, satser og eksempler",
-    description: "Alt om arveafgift i 2026 — satser, bundfradrag og beregning.",
-    url: `${baseUrl}/blog/arveafgift-regler-og-satser`,
-    type: "article",
-  },
-  alternates: {
-    canonical: `${baseUrl}/blog/arveafgift-regler-og-satser`,
-  },
-};
+  return {
+    title: "Arveafgift i Danmark: Regler, satser og eksempler | MinBeregner.dk",
+    description:
+      "Komplet guide til arveafgift (boafgift) i 2026: Bundfradrag, satser for nære og fjerne arvinger, tillægsafgift og beregningseksempler.",
+    keywords: [
+      "arveafgift 2026",
+      "boafgift 2026",
+      "arveafgift satser",
+      "bundfradrag arv",
+      "tillægsafgift",
+      "arv skat",
+      "arveafgift beregner",
+      "boafgift beregning",
+    ],
+    openGraph: {
+      title: "Arveafgift i Danmark: Regler, satser og eksempler",
+      description: "Alt om arveafgift i 2026 — satser, bundfradrag og beregning.",
+      url: `${baseUrl}/blog/arveafgift-regler-og-satser`,
+      type: "article",
+    },
+    alternates: {
+      canonical: `${baseUrl}/blog/arveafgift-regler-og-satser`,
+    },
+  };
+}
 
 const faqItems = [
   {

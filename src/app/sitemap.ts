@@ -1,106 +1,70 @@
 import { MetadataRoute } from "next";
+import { headers } from "next/headers";
+import { getDomainConfig } from "@/lib/domain-config";
+import { getAvailableSlugs } from "@/lib/page-data";
+import { getFooterBlogLinks } from "@/lib/footer-data";
+import type { Locale } from "@/lib/i18n";
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = "https://minberegner.dk";
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const headersList = await headers();
+  const hostname = headersList.get("x-hostname") || "localhost";
+  const domainConfig = getDomainConfig(hostname);
+  const locale = domainConfig.locale;
+  const baseUrl = domainConfig.baseUrl;
   const lastModified = new Date();
 
-  const beregnere = [
-    // Økonomi og skat (højest prioritet)
-    { url: "/loen-efter-skat", priority: 0.9, changeFrequency: "monthly" as const },
-    { url: "/moms", priority: 0.9, changeFrequency: "monthly" as const },
-    { url: "/dagpenge", priority: 0.9, changeFrequency: "yearly" as const },
-    { url: "/pension", priority: 0.9, changeFrequency: "yearly" as const },
-    { url: "/feriepenge", priority: 0.8, changeFrequency: "monthly" as const },
-    { url: "/boernepenge", priority: 0.8, changeFrequency: "yearly" as const },
-    { url: "/su", priority: 0.8, changeFrequency: "yearly" as const },
-    { url: "/efterloen", priority: 0.8, changeFrequency: "yearly" as const },
-    { url: "/barselsdagpenge", priority: 0.8, changeFrequency: "yearly" as const },
-    { url: "/arveafgift", priority: 0.8, changeFrequency: "yearly" as const },
-    { url: "/rentefradrag", priority: 0.8, changeFrequency: "yearly" as const },
-    { url: "/procent", priority: 0.9, changeFrequency: "monthly" as const },
-    { url: "/valuta", priority: 0.9, changeFrequency: "daily" as const },
+  // Calculator pages available for this locale
+  const availableSlugs = getAvailableSlugs(locale);
 
-    // Bolig og lån
-    { url: "/boliglaan", priority: 0.9, changeFrequency: "monthly" as const },
-    { url: "/laaneberegner", priority: 0.9, changeFrequency: "monthly" as const },
-    { url: "/renteberegner", priority: 0.9, changeFrequency: "monthly" as const },
-    { url: "/billaan", priority: 0.8, changeFrequency: "monthly" as const },
-    { url: "/forbrugslaan", priority: 0.8, changeFrequency: "monthly" as const },
-    { url: "/opsparing", priority: 0.9, changeFrequency: "monthly" as const },
-    { url: "/ejendomsvaerdiskat", priority: 0.8, changeFrequency: "yearly" as const },
-    { url: "/boligstoette", priority: 0.9, changeFrequency: "yearly" as const },
-    { url: "/husleje", priority: 0.8, changeFrequency: "monthly" as const },
-    { url: "/gaeldsfri", priority: 0.8, changeFrequency: "monthly" as const },
-    { url: "/sygedagpenge", priority: 0.8, changeFrequency: "yearly" as const },
-    { url: "/konfirmation", priority: 0.8, changeFrequency: "yearly" as const },
-    { url: "/vaegttab", priority: 0.8, changeFrequency: "monthly" as const },
-    { url: "/andelsbolig", priority: 0.8, changeFrequency: "monthly" as const },
-    { url: "/solceller", priority: 0.8, changeFrequency: "monthly" as const },
-    { url: "/bryllup", priority: 0.8, changeFrequency: "yearly" as const },
-    { url: "/skattefradrag", priority: 0.9, changeFrequency: "yearly" as const },
-    { url: "/rejsebudget", priority: 0.8, changeFrequency: "monthly" as const },
-    { url: "/studielaan", priority: 0.8, changeFrequency: "yearly" as const },
+  // Priority map for important pages
+  const highPriority = new Set([
+    "bmi", "moms", "procent", "valuta", "boliglaan", "laaneberegner",
+    "renteberegner", "kalorier", "elberegner", "braendstof", "dato",
+    "tidsberegner", "opsparing", "loen-efter-skat", "dagpenge",
+    "pension", "boligstoette", "skattefradrag",
+  ]);
 
-    // Sundhed
-    { url: "/bmi", priority: 0.9, changeFrequency: "monthly" as const },
-    { url: "/kalorier", priority: 0.9, changeFrequency: "monthly" as const },
+  const dailyUpdates = new Set(["valuta"]);
 
-    // Hverdag og praktisk
-    { url: "/elberegner", priority: 0.9, changeFrequency: "monthly" as const },
-    { url: "/braendstof", priority: 0.9, changeFrequency: "monthly" as const },
-    { url: "/bil", priority: 0.8, changeFrequency: "monthly" as const },
-    { url: "/timepris", priority: 0.8, changeFrequency: "monthly" as const },
-    { url: "/kvadratmeter", priority: 0.8, changeFrequency: "monthly" as const },
-    { url: "/dato", priority: 0.9, changeFrequency: "monthly" as const },
-    { url: "/alder", priority: 0.8, changeFrequency: "monthly" as const },
-    { url: "/tidsberegner", priority: 0.9, changeFrequency: "monthly" as const },
-    { url: "/tidszone", priority: 0.8, changeFrequency: "monthly" as const },
+  const calculatorEntries: MetadataRoute.Sitemap = availableSlugs.map((slug) => ({
+    url: `${baseUrl}/${slug}`,
+    lastModified,
+    changeFrequency: dailyUpdates.has(slug) ? "daily" : "monthly",
+    priority: highPriority.has(slug) ? 0.9 : 0.8,
+  }));
 
-    // Blog
-    { url: "/blog", priority: 0.7, changeFrequency: "weekly" as const },
-    { url: "/blog/pension-hvor-meget-skal-du-spare-op", priority: 0.6, changeFrequency: "monthly" as const },
-    { url: "/blog/boligstoette-2026-nye-regler", priority: 0.6, changeFrequency: "monthly" as const },
-    { url: "/blog/bmi-for-boern-saadan-tjekker-du", priority: 0.6, changeFrequency: "monthly" as const },
-    { url: "/blog/guide-feriepenge-hvornaar-og-hvor-meget", priority: 0.6, changeFrequency: "monthly" as const },
-    { url: "/blog/saadan-beregner-du-din-reelle-timeloen", priority: 0.6, changeFrequency: "monthly" as const },
-    { url: "/blog/hvordan-beregner-man-moms", priority: 0.6, changeFrequency: "monthly" as const },
-    { url: "/blog/30-procent-reglen-husleje", priority: 0.6, changeFrequency: "monthly" as const },
-    { url: "/blog/saadan-finder-du-din-timepris-som-freelancer", priority: 0.6, changeFrequency: "monthly" as const },
-    { url: "/blog/guide-til-laan-og-renter", priority: 0.6, changeFrequency: "monthly" as const },
-    { url: "/blog/spar-penge-paa-braendstof", priority: 0.6, changeFrequency: "monthly" as const },
-    { url: "/blog/skat-2026-alt-du-skal-vide", priority: 0.6, changeFrequency: "monthly" as const },
-    { url: "/blog/su-2026-satser-og-regler", priority: 0.6, changeFrequency: "monthly" as const },
-    { url: "/blog/dagpenge-saadan-finder-du-din-sats", priority: 0.6, changeFrequency: "monthly" as const },
-    { url: "/blog/boliglaan-2026-renter-og-afdrag", priority: 0.6, changeFrequency: "monthly" as const },
-    { url: "/blog/fradrag-2026-komplet-guide", priority: 0.6, changeFrequency: "monthly" as const },
-    { url: "/blog/barsel-2026-regler-og-satser", priority: 0.6, changeFrequency: "monthly" as const },
-    { url: "/blog/arveafgift-regler-og-satser", priority: 0.6, changeFrequency: "monthly" as const },
-    { url: "/blog/elpriser-2026-beregn-dit-forbrug", priority: 0.6, changeFrequency: "monthly" as const },
-    { url: "/blog/privatoekonomi-for-unge", priority: 0.6, changeFrequency: "monthly" as const },
-    { url: "/blog/koeb-af-bolig-2026-omkostninger", priority: 0.6, changeFrequency: "monthly" as const },
+  // Category pages (only for DA which has all categories)
+  const categoryEntries: MetadataRoute.Sitemap = locale === "da"
+    ? [
+        "oekonomi", "bolig", "laan", "sundhed", "familie",
+        "uddannelse", "erhverv", "hverdag", "praktisk", "matematik",
+      ].map((slug) => ({
+        url: `${baseUrl}/kategori/${slug}`,
+        lastModified,
+        changeFrequency: "monthly" as const,
+        priority: 0.7,
+      }))
+    : [];
 
-    { url: "/aktieskat", priority: 0.8, changeFrequency: "yearly" as const },
-    { url: "/leasing", priority: 0.8, changeFrequency: "monthly" as const },
-    { url: "/topskat", priority: 0.8, changeFrequency: "yearly" as const },
-    { url: "/termin", priority: 0.8, changeFrequency: "monthly" as const },
-    { url: "/brutto-netto", priority: 0.8, changeFrequency: "yearly" as const },
+  // Blog entries (only for DA which has blog content)
+  const blogLinks = getFooterBlogLinks(locale);
+  const blogEntries: MetadataRoute.Sitemap = blogLinks.length > 0
+    ? [
+        { url: `${baseUrl}/blog`, lastModified, changeFrequency: "weekly" as const, priority: 0.7 },
+        ...getBlogSlugs(locale).map((slug) => ({
+          url: `${baseUrl}/blog/${slug}`,
+          lastModified,
+          changeFrequency: "monthly" as const,
+          priority: 0.6,
+        })),
+      ]
+    : [];
 
-    // Kategorisider
-    { url: "/kategori/oekonomi", priority: 0.7, changeFrequency: "monthly" as const },
-    { url: "/kategori/bolig", priority: 0.7, changeFrequency: "monthly" as const },
-    { url: "/kategori/laan", priority: 0.7, changeFrequency: "monthly" as const },
-    { url: "/kategori/sundhed", priority: 0.7, changeFrequency: "monthly" as const },
-    { url: "/kategori/familie", priority: 0.7, changeFrequency: "monthly" as const },
-    { url: "/kategori/uddannelse", priority: 0.7, changeFrequency: "monthly" as const },
-    { url: "/kategori/erhverv", priority: 0.7, changeFrequency: "monthly" as const },
-    { url: "/kategori/hverdag", priority: 0.7, changeFrequency: "monthly" as const },
-    { url: "/kategori/praktisk", priority: 0.7, changeFrequency: "monthly" as const },
-    { url: "/kategori/matematik", priority: 0.7, changeFrequency: "monthly" as const },
-
-    // Info-sider
-    { url: "/om", priority: 0.5, changeFrequency: "yearly" as const },
-    { url: "/privatlivspolitik", priority: 0.3, changeFrequency: "yearly" as const },
-    { url: "/cookiepolitik", priority: 0.3, changeFrequency: "yearly" as const },
+  // Info pages
+  const infoEntries: MetadataRoute.Sitemap = [
+    { url: `${baseUrl}/om`, lastModified, changeFrequency: "yearly" as const, priority: 0.5 },
+    { url: `${baseUrl}/privatlivspolitik`, lastModified, changeFrequency: "yearly" as const, priority: 0.3 },
+    { url: `${baseUrl}/cookiepolitik`, lastModified, changeFrequency: "yearly" as const, priority: 0.3 },
   ];
 
   return [
@@ -110,11 +74,35 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "weekly",
       priority: 1,
     },
-    ...beregnere.map((beregner) => ({
-      url: `${baseUrl}${beregner.url}`,
-      lastModified,
-      changeFrequency: beregner.changeFrequency,
-      priority: beregner.priority,
-    })),
+    ...calculatorEntries,
+    ...categoryEntries,
+    ...blogEntries,
+    ...infoEntries,
+  ];
+}
+
+function getBlogSlugs(locale: Locale): string[] {
+  if (locale !== "da") return [];
+  return [
+    "pension-hvor-meget-skal-du-spare-op",
+    "boligstoette-2026-nye-regler",
+    "bmi-for-boern-saadan-tjekker-du",
+    "guide-feriepenge-hvornaar-og-hvor-meget",
+    "saadan-beregner-du-din-reelle-timeloen",
+    "hvordan-beregner-man-moms",
+    "30-procent-reglen-husleje",
+    "saadan-finder-du-din-timepris-som-freelancer",
+    "guide-til-laan-og-renter",
+    "spar-penge-paa-braendstof",
+    "skat-2026-alt-du-skal-vide",
+    "su-2026-satser-og-regler",
+    "dagpenge-saadan-finder-du-din-sats",
+    "boliglaan-2026-renter-og-afdrag",
+    "fradrag-2026-komplet-guide",
+    "barsel-2026-regler-og-satser",
+    "arveafgift-regler-og-satser",
+    "elpriser-2026-beregn-dit-forbrug",
+    "privatoekonomi-for-unge",
+    "koeb-af-bolig-2026-omkostninger",
   ];
 }

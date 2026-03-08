@@ -1,14 +1,22 @@
 {
   "site": {
-    "name": "MinKalkulator.no",
+    "name": "Beregner.no",
     "tagline": "Gratis Kalkulatorer på Nett",
     "description": "33+ gratis kalkulatorer for økonomi, bolig, skatt, helse og hverdag."
   },
   "nav": {
     "home": "Forside",
     "calculators": "Kalkulatorer",
+    "allCalculators": "Alle kalkulatorer",
     "blog": "Blogg",
-    "about": "Om oss"
+    "about": "Om oss",
+    "categories": {
+      "economy": "Økonomi",
+      "housing": "Bolig",
+      "loans": "Lån & Rente",
+      "family": "Familie & Helse",
+      "tools": "Verktøy"
+    }
   },
   "ui": {
     "calculate": "Beregn",
@@ -31,7 +39,7 @@
     "newsletterCta": "Meld deg på",
     "newsletterSuccess": "Takk for påmeldingen!",
     "ad": "Annonse",
-    "poweredBy": "Drevet av MinKalkulator.no",
+    "poweredBy": "Drevet av Beregner.no",
     "privacyNote": "Alle beregninger skjer lokalt i nettleseren din."
   },
   "categories": {
@@ -47,10 +55,18 @@
     "math": "Matematikk"
   },
   "footer": {
-    "copyright": "© {year} MinKalkulator.no — Gratis kalkulatorer",
+    "copyright": "© {year} Beregner.no — Gratis kalkulatorer",
     "freeCalculators": "gratis kalkulatorer",
     "updatedRates": "Oppdatert med {year}-satser",
     "noLogin": "Ingen innlogging nødvendig",
-    "madeForNorwegians": "Laget for nordmenn"
+    "madeFor": "Laget for nordmenn",
+    "allCalculators": "Alle kalkulatorer",
+    "aboutSite": "Gratis kalkulatorer for nordmenn. Alle beregninger skjer lokalt i nettleseren din — vi lagrer ingen data.",
+    "aboutLink": "Om Beregner.no",
+    "privacyLink": "Personvern",
+    "cookieLink": "Informasjonskapsler",
+    "latestArticles": "Nyeste artikler",
+    "seeAllArticles": "Se alle artikler",
+    "otherTools": "Andre gratis verktøy"
   }
 }

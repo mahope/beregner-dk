@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import { generatePageMetadata } from "@/lib/page-helpers";
 import Elberegner from "@/components/Elberegner";
 import FAQ from "@/components/FAQ";
 import RelatedCalculators from "@/components/RelatedCalculators";
@@ -10,33 +10,9 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 
 const baseUrl = "https://minberegner.dk";
 
-export const metadata: Metadata = {
-  title: "Elberegner - Beregn dit elforbrug og strømudgifter",
-  description:
-    "Gratis elberegner. Beregn dit elforbrug og se hvad dine apparater koster i strøm per dag, måned og år. Inkluderer watt-værdier for typiske apparater.",
-  keywords: [
-    "elberegner",
-    "elforbrug",
-    "beregn strøm",
-    "strømforbrug",
-    "kwh beregner",
-    "elpris beregner",
-    "hvad koster strøm",
-    "elforbrug apparat",
-    "watt til kr",
-    "energiberegner",
-  ],
-  openGraph: {
-    title: "Elberegner - Beregn dit elforbrug",
-    description:
-      "Se hvad dine apparater koster i strøm. Gratis elberegner med danske elpriser.",
-    url: `${baseUrl}/elberegner`,
-    type: "website",
-  },
-  alternates: {
-    canonical: `${baseUrl}/elberegner`,
-  },
-};
+export async function generateMetadata() {
+  return generatePageMetadata("elberegner");
+}
 
 const faqItems = [
   {

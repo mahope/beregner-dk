@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import { generatePageMetadata } from "@/lib/page-helpers";
 import DagpengeBeregner from "@/components/DagpengeBeregner";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
@@ -8,31 +8,9 @@ import Sidebar from "@/components/Sidebar";
 
 const baseUrl = "https://minberegner.dk";
 
-export const metadata: Metadata = {
-  title: "Dagpengeberegner 2026 - Beregn dine dagpenge",
-  description:
-    "Beregn dagpenge 2026. Max sats: 22.041 kr/md (90% af løn efter AM-bidrag). Med beskæftigelsestillæg op til 26.198 kr/md. Beregn din dagpengesats ud fra din løn.",
-  keywords: [
-    "dagpenge beregner",
-    "dagpenge 2026",
-    "beregn dagpenge",
-    "dagpenge sats",
-    "a-kasse beregner",
-    "arbejdsløshedsdagpenge",
-    "dagpenge efter skat",
-    "max dagpenge 2026",
-  ],
-  alternates: {
-    canonical: "https://minberegner.dk/dagpenge",
-  },
-  openGraph: {
-    title: "Dagpengeberegner 2026 - Beregn dine dagpenge",
-    description:
-      "Beregn hvad du kan få i dagpenge i 2026. Gratis og nem dagpengeberegner.",
-    url: "https://minberegner.dk/dagpenge",
-    type: "website",
-  },
-};
+export async function generateMetadata() {
+  return generatePageMetadata("dagpenge");
+}
 
 const faqItems = [
   {

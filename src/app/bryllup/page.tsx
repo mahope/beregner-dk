@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
 import BryllupBeregner from "@/components/BryllupBeregner";
+import { generatePageMetadata } from "@/lib/page-helpers";
 import FAQ from "@/components/FAQ";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
@@ -8,29 +8,9 @@ import Sidebar from "@/components/Sidebar";
 
 const baseUrl = "https://minberegner.dk";
 
-export const metadata: Metadata = {
-  title: "Bryllupsbudget Beregner - Hvad koster et bryllup? | MinBeregner.dk",
-  description:
-    "Beregn dit bryllupsbudget. Se udgifter til venue, mad, fotograf, musik, kjole og ringe. Gennemsnitlige danske bryllupspriser 2026.",
-  keywords: [
-    "bryllupsbudget",
-    "hvad koster et bryllup",
-    "bryllup pris",
-    "bryllup beregner",
-    "bryllupsbudget beregner",
-    "bryllup udgifter",
-    "gennemsnit bryllup Danmark",
-  ],
-  openGraph: {
-    title: "Bryllupsbudget Beregner - Hvad koster et bryllup?",
-    description: "Beregn dit samlede bryllupsbudget med venue, catering, fotograf og alle udgiftsposter.",
-    url: `${baseUrl}/bryllup`,
-    type: "website",
-  },
-  alternates: {
-    canonical: `${baseUrl}/bryllup`,
-  },
-};
+export async function generateMetadata() {
+  return generatePageMetadata("bryllup");
+}
 
 const faqItems = [
   {

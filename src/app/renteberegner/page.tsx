@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import { generatePageMetadata } from "@/lib/page-helpers";
 import RenteBeregner from "@/components/RenteBeregner";
 import FAQ from "@/components/FAQ";
 import RelatedCalculators from "@/components/RelatedCalculators";
@@ -10,33 +10,9 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 
 const baseUrl = "https://minberegner.dk";
 
-export const metadata: Metadata = {
-  title: "Renteberegner - Beregn lån og ydelse gratis",
-  description:
-    "Beregn dit lån hurtigt. Eksempel: 100.000 kr med 5% rente i 5 år = ca. 1.887 kr/md. Se månedlig ydelse, samlet rente og sammenlign annuitets- vs. serielån.",
-  keywords: [
-    "renteberegner",
-    "lånberegner",
-    "beregn lån",
-    "månedlig ydelse",
-    "annuitetslån",
-    "serielån",
-    "boliglån beregner",
-    "billån beregner",
-    "rente beregning",
-    "afdrag beregner",
-  ],
-  openGraph: {
-    title: "Renteberegner - Beregn lån og ydelse",
-    description:
-      "Beregn din månedlige ydelse og se hvad dit lån koster i alt. Gratis renteberegner.",
-    url: `${baseUrl}/renteberegner`,
-    type: "website",
-  },
-  alternates: {
-    canonical: `${baseUrl}/renteberegner`,
-  },
-};
+export async function generateMetadata() {
+  return generatePageMetadata("renteberegner");
+}
 
 const faqItems = [
   {

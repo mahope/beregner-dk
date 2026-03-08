@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import { generatePageMetadata } from "@/lib/page-helpers";
 import BoernepengBeregner from "@/components/BoernepengBeregner";
 import FAQ from "@/components/FAQ";
 import RelatedCalculators from "@/components/RelatedCalculators";
@@ -7,34 +7,9 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 
 const baseUrl = "https://minberegner.dk";
 
-export const metadata: Metadata = {
-  title: "Børnepenge Beregner 2026 - Børne- og ungeydelse",
-  description:
-    "Beregn børnepenge 2026. Officielle satser: 0-2 år: 5.370 kr/kvartal, 3-6 år: 4.251 kr/kvartal, 7-14 år: 3.345 kr/kvartal, 15-17 år: 1.115 kr/md. Beregn ud fra antal børn og indkomst.",
-  keywords: [
-    "børnepenge",
-    "børnepenge beregner",
-    "børne- og ungeydelse",
-    "børnecheck",
-    "børnepenge 2026",
-    "børnetilskud",
-    "hvad får jeg i børnepenge",
-    "børneydelse beregner",
-    "børnepenge satser",
-    "børnepenge satser 2026",
-    "ungeydelse 2026",
-  ],
-  openGraph: {
-    title: "Børnepenge Beregner 2026 - Børne- og ungeydelse",
-    description:
-      "Beregn din børne- og ungeydelse med officielle 2026-satser. Se hvad du får udbetalt med ny deling mellem forældre.",
-    url: `${baseUrl}/boernepenge`,
-    type: "website",
-  },
-  alternates: {
-    canonical: `${baseUrl}/boernepenge`,
-  },
-};
+export async function generateMetadata() {
+  return generatePageMetadata("boernepenge");
+}
 
 const faqItems = [
   {

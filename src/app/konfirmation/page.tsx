@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
 import KonfirmationBeregner from "@/components/KonfirmationBeregner";
+import { generatePageMetadata } from "@/lib/page-helpers";
 import FAQ from "@/components/FAQ";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
@@ -8,29 +8,9 @@ import Sidebar from "@/components/Sidebar";
 
 const baseUrl = "https://minberegner.dk";
 
-export const metadata: Metadata = {
-  title: "Konfirmationsbudget Beregner - Hvad koster en konfirmation? | MinBeregner.dk",
-  description:
-    "Beregn dit budget til konfirmation. Se udgifter til mad, lokale, tøj og fotograf. Beregn forventede gavebeløb fra familie og venner.",
-  keywords: [
-    "konfirmation budget",
-    "konfirmation pris",
-    "hvad koster en konfirmation",
-    "konfirmationsgave beløb",
-    "konfirmation beregner",
-    "konfirmationsfest budget",
-    "gennemsnitlig konfirmationsgave",
-  ],
-  openGraph: {
-    title: "Konfirmationsbudget Beregner - Hvad koster en konfirmation?",
-    description: "Beregn dit samlede budget for konfirmation med mad, lokale, tøj og forventede gaver.",
-    url: `${baseUrl}/konfirmation`,
-    type: "website",
-  },
-  alternates: {
-    canonical: `${baseUrl}/konfirmation`,
-  },
-};
+export async function generateMetadata() {
+  return generatePageMetadata("konfirmation");
+}
 
 const faqItems = [
   {

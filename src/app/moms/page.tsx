@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import { generatePageMetadata } from "@/lib/page-helpers";
 import MomsBeregner from "@/components/MomsBeregner";
 import FAQ from "@/components/FAQ";
 import {
@@ -11,31 +11,9 @@ import Sidebar from "@/components/Sidebar";
 
 const baseUrl = "https://minberegner.dk";
 
-export const metadata: Metadata = {
-  title: "Momsberegner - Beregn moms online | MinBeregner.dk",
-  description:
-    "Beregn dansk moms (25%) hurtigt. Eksempel: 1.000 kr × 1,25 = 1.250 kr inkl. moms. Tillæg moms, fratræk moms eller find momsandelen. Gratis momsberegner 2026.",
-  keywords: [
-    "momsberegner",
-    "beregn moms",
-    "moms beregner",
-    "tillæg moms",
-    "fratræk moms",
-    "moms 25%",
-    "dansk moms",
-    "mva beregner",
-    "moms kalkulator",
-  ],
-  openGraph: {
-    title: "Momsberegner - Beregn dansk moms",
-    description: "Beregn moms nemt. Tillæg eller fratræk 25% moms med vores gratis beregner.",
-    url: `${baseUrl}/moms`,
-    type: "website",
-  },
-  alternates: {
-    canonical: `${baseUrl}/moms`,
-  },
-};
+export async function generateMetadata() {
+  return generatePageMetadata("moms");
+}
 
 const faqItems = [
   {

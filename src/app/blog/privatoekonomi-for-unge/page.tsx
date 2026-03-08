@@ -1,32 +1,36 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
+import { getCurrentDomainConfig } from "@/lib/get-locale";
 
-const baseUrl = "https://minberegner.dk";
+export async function generateMetadata(): Promise<Metadata> {
+  const dc = await getCurrentDomainConfig();
+  const baseUrl = dc.baseUrl;
 
-export const metadata: Metadata = {
-  title: "Privatøkonomi for unge: 5 beregnere du skal kende | MinBeregner.dk",
-  description:
-    "Guide til privatøkonomi for unge: SU-beregning, budget, husleje, opsparing og skat. 5 gratis beregnere der hjælper dig med at få styr på økonomien.",
-  keywords: [
-    "privatøkonomi unge",
-    "økonomi studerende",
-    "budget unge",
-    "SU budget",
-    "opsparing unge",
-    "husleje unge",
-    "skat studerende",
-  ],
-  openGraph: {
-    title: "Privatøkonomi for unge: 5 beregnere du skal kende",
-    description: "5 gratis beregnere der hjælper unge med privatøkonomien.",
-    url: `${baseUrl}/blog/privatoekonomi-for-unge`,
-    type: "article",
-  },
-  alternates: {
-    canonical: `${baseUrl}/blog/privatoekonomi-for-unge`,
-  },
-};
+  return {
+    title: "Privatøkonomi for unge: 5 beregnere du skal kende | MinBeregner.dk",
+    description:
+      "Guide til privatøkonomi for unge: SU-beregning, budget, husleje, opsparing og skat. 5 gratis beregnere der hjælper dig med at få styr på økonomien.",
+    keywords: [
+      "privatøkonomi unge",
+      "økonomi studerende",
+      "budget unge",
+      "SU budget",
+      "opsparing unge",
+      "husleje unge",
+      "skat studerende",
+    ],
+    openGraph: {
+      title: "Privatøkonomi for unge: 5 beregnere du skal kende",
+      description: "5 gratis beregnere der hjælper unge med privatøkonomien.",
+      url: `${baseUrl}/blog/privatoekonomi-for-unge`,
+      type: "article",
+    },
+    alternates: {
+      canonical: `${baseUrl}/blog/privatoekonomi-for-unge`,
+    },
+  };
+}
 
 const faqItems = [
   {

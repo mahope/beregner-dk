@@ -10,8 +10,7 @@ import {
   getBeregnereByCategoryName,
   getAllCategorySlugs,
 } from "@/lib/categories";
-
-const baseUrl = "https://minberegner.dk";
+import { getCurrentDomainConfig } from "@/lib/get-locale";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -25,9 +24,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { slug } = await params;
   const category = getCategoryBySlug(slug);
   if (!category) return {};
+  const domainConfig = await getCurrentDomainConfig();
+  const baseUrl = domainConfig.baseUrl;
 
   return {
-    title: `${category.title} | MinBeregner.dk`,
+    title: `${category.title} | ${domainConfig.siteName}`,
     description: category.metaDescription,
     keywords: category.keywords,
     openGraph: {
@@ -45,6 +46,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function KategoriPage({ params }: PageProps) {
   const { slug } = await params;
   const category = getCategoryBySlug(slug);
+  const domainConfig = await getCurrentDomainConfig();
+  const baseUrl = domainConfig.baseUrl;
 
   if (!category) {
     notFound();

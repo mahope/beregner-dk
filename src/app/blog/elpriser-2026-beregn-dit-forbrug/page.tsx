@@ -1,33 +1,37 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
+import { getCurrentDomainConfig } from "@/lib/get-locale";
 
-const baseUrl = "https://minberegner.dk";
+export async function generateMetadata(): Promise<Metadata> {
+  const dc = await getCurrentDomainConfig();
+  const baseUrl = dc.baseUrl;
 
-export const metadata: Metadata = {
-  title: "Elpriser 2026: Sådan beregner du dit elforbrug | MinBeregner.dk",
-  description:
-    "Guide til elpriser i 2026: Hvad koster strøm, hvordan læser du din elregning, og hvordan sparer du penge? Se gennemsnitligt forbrug og beregn dine udgifter.",
-  keywords: [
-    "elpriser 2026",
-    "strømpris 2026",
-    "elforbrug beregner",
-    "hvad koster strøm",
-    "elregning forstå",
-    "spare på strøm",
-    "gennemsnitligt elforbrug",
-    "kWh pris 2026",
-  ],
-  openGraph: {
-    title: "Elpriser 2026: Sådan beregner du dit elforbrug",
-    description: "Alt om elpriser i 2026 — priser, forbrug og sparetips.",
-    url: `${baseUrl}/blog/elpriser-2026-beregn-dit-forbrug`,
-    type: "article",
-  },
-  alternates: {
-    canonical: `${baseUrl}/blog/elpriser-2026-beregn-dit-forbrug`,
-  },
-};
+  return {
+    title: "Elpriser 2026: Sådan beregner du dit elforbrug | MinBeregner.dk",
+    description:
+      "Guide til elpriser i 2026: Hvad koster strøm, hvordan læser du din elregning, og hvordan sparer du penge? Se gennemsnitligt forbrug og beregn dine udgifter.",
+    keywords: [
+      "elpriser 2026",
+      "strømpris 2026",
+      "elforbrug beregner",
+      "hvad koster strøm",
+      "elregning forstå",
+      "spare på strøm",
+      "gennemsnitligt elforbrug",
+      "kWh pris 2026",
+    ],
+    openGraph: {
+      title: "Elpriser 2026: Sådan beregner du dit elforbrug",
+      description: "Alt om elpriser i 2026 — priser, forbrug og sparetips.",
+      url: `${baseUrl}/blog/elpriser-2026-beregn-dit-forbrug`,
+      type: "article",
+    },
+    alternates: {
+      canonical: `${baseUrl}/blog/elpriser-2026-beregn-dit-forbrug`,
+    },
+  };
+}
 
 const faqItems = [
   {

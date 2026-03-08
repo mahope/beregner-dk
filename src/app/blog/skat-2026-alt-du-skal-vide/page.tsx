@@ -1,34 +1,38 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
+import { getCurrentDomainConfig } from "@/lib/get-locale";
 
-const baseUrl = "https://minberegner.dk";
+export async function generateMetadata(): Promise<Metadata> {
+  const dc = await getCurrentDomainConfig();
+  const baseUrl = dc.baseUrl;
 
-export const metadata: Metadata = {
-  title: "Skat 2026: Alt du skal vide om skatteændringer | MinBeregner.dk",
-  description:
-    "Komplet overblik over skat i 2026: Nye satser for personfradrag, topskat, AM-bidrag, kommuneskat og beskæftigelsesfradrag. Se hvad det betyder for din løn.",
-  keywords: [
-    "skat 2026",
-    "skatteændringer 2026",
-    "personfradrag 2026",
-    "topskat 2026",
-    "kommuneskat 2026",
-    "skattesatser 2026",
-    "AM-bidrag 2026",
-    "beskæftigelsesfradrag 2026",
-  ],
-  openGraph: {
-    title: "Skat 2026: Alt du skal vide om skatteændringer",
+  return {
+    title: "Skat 2026: Alt du skal vide om skatteændringer | MinBeregner.dk",
     description:
-      "Komplet overblik over skat i 2026 — personfradrag, topskat, kommuneskat og mere.",
-    url: `${baseUrl}/blog/skat-2026-alt-du-skal-vide`,
-    type: "article",
-  },
-  alternates: {
-    canonical: `${baseUrl}/blog/skat-2026-alt-du-skal-vide`,
-  },
-};
+      "Komplet overblik over skat i 2026: Nye satser for personfradrag, topskat, AM-bidrag, kommuneskat og beskæftigelsesfradrag. Se hvad det betyder for din løn.",
+    keywords: [
+      "skat 2026",
+      "skatteændringer 2026",
+      "personfradrag 2026",
+      "topskat 2026",
+      "kommuneskat 2026",
+      "skattesatser 2026",
+      "AM-bidrag 2026",
+      "beskæftigelsesfradrag 2026",
+    ],
+    openGraph: {
+      title: "Skat 2026: Alt du skal vide om skatteændringer",
+      description:
+        "Komplet overblik over skat i 2026 — personfradrag, topskat, kommuneskat og mere.",
+      url: `${baseUrl}/blog/skat-2026-alt-du-skal-vide`,
+      type: "article",
+    },
+    alternates: {
+      canonical: `${baseUrl}/blog/skat-2026-alt-du-skal-vide`,
+    },
+  };
+}
 
 const faqItems = [
   {

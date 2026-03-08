@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
 import AlderBeregner from "@/components/AlderBeregner";
+import { generatePageMetadata } from "@/lib/page-helpers";
 import FAQ from "@/components/FAQ";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import RelatedCalculators from "@/components/RelatedCalculators";
@@ -7,30 +7,9 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 
 const baseUrl = "https://minberegner.dk";
 
-export const metadata: Metadata = {
-  title: "Aldersberegner - Beregn din præcise alder | MinBeregner.dk",
-  description:
-    "Hvor gammel er du præcist? Beregn din alder i år, måneder og dage. Eksempel: Født 15/3/1990 = 35 år, 10 måneder og 28 dage. Se også dit stjernetegn og dage til fødselsdag.",
-  keywords: [
-    "aldersberegner",
-    "beregn alder",
-    "hvor gammel er jeg",
-    "præcis alder",
-    "alder i dage",
-    "alder kalkulator",
-    "fødselsdag beregner",
-    "stjernetegn",
-  ],
-  openGraph: {
-    title: "Aldersberegner - Hvor gammel er du?",
-    description: "Beregn din præcise alder i år, måneder, dage og timer. Find også dit stjernetegn.",
-    url: `${baseUrl}/alder`,
-    type: "website",
-  },
-  alternates: {
-    canonical: `${baseUrl}/alder`,
-  },
-};
+export async function generateMetadata() {
+  return generatePageMetadata("alder");
+}
 
 const faqItems = [
   {

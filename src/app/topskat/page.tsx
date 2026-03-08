@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import { generatePageMetadata } from "@/lib/page-helpers";
 import TopskatBeregner from "@/components/TopskatBeregner";
 import FAQ from "@/components/FAQ";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
@@ -8,30 +8,9 @@ import Sidebar from "@/components/Sidebar";
 
 const baseUrl = "https://minberegner.dk";
 
-export const metadata: Metadata = {
-  title: "Topskat Beregner 2026 - Betaler du topskat? | MinBeregner.dk",
-  description:
-    "Beregn om du betaler topskat i 2026. Ny skattemodel: mellemskat fra 641.200 kr., topskat fra 777.900 kr. Se din effektive og marginale skatteprocent gratis.",
-  keywords: [
-    "topskat beregner",
-    "betaler jeg topskat",
-    "topskat 2026",
-    "topskattegrænse",
-    "mellemskat 2026",
-    "effektiv skat",
-    "marginalskat",
-    "skatteberegner",
-  ],
-  openGraph: {
-    title: "Topskat Beregner 2026",
-    description: "Beregn om du betaler mellemskat eller topskat med 2026-satser.",
-    url: `${baseUrl}/topskat`,
-    type: "website",
-  },
-  alternates: {
-    canonical: `${baseUrl}/topskat`,
-  },
-};
+export async function generateMetadata() {
+  return generatePageMetadata("topskat");
+}
 
 const faqItems = [
   {

@@ -32,6 +32,7 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   compress: true,
+  allowedDevOrigins: ['beregner.no', 'beraknare.se', 'minberegner.dk'],
   images: {
     formats: ['image/avif', 'image/webp'],
     minimumCacheTTL: 86400,
@@ -68,14 +69,6 @@ const nextConfig: NextConfig = {
             value: 'public, max-age=86400',
           },
         ],
-      },
-    ];
-  },
-  async rewrites() {
-    return [
-      {
-        source: '/sitemap.xml',
-        destination: '/api/sitemap',
       },
     ];
   },

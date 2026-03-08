@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import { generatePageMetadata } from "@/lib/page-helpers";
 import StudielaanBeregner from "@/components/StudielaanBeregner";
 import FAQ from "@/components/FAQ";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
@@ -8,29 +8,9 @@ import Sidebar from "@/components/Sidebar";
 
 const baseUrl = "https://minberegner.dk";
 
-export const metadata: Metadata = {
-  title: "Studielån Beregner - Beregn tilbagebetaling af SU-lån | MinBeregner.dk",
-  description:
-    "Beregn din månedlige ydelse og tilbagebetalingstid for SU-lån. Se effekten af ekstra afdrag og total renteomkostning.",
-  keywords: [
-    "studielån beregner",
-    "SU-lån tilbagebetaling",
-    "SU-lån rente",
-    "studiegæld",
-    "SU-lån afbetaling",
-    "studielån ydelse",
-    "tilbagebetal SU-lån",
-  ],
-  openGraph: {
-    title: "Studielån Beregner - Beregn tilbagebetaling af SU-lån",
-    description: "Beregn månedlig ydelse og se afdragsplan for dit SU-lån.",
-    url: `${baseUrl}/studielaan`,
-    type: "website",
-  },
-  alternates: {
-    canonical: `${baseUrl}/studielaan`,
-  },
-};
+export async function generateMetadata() {
+  return generatePageMetadata("studielaan");
+}
 
 const faqItems = [
   {

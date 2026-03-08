@@ -1,35 +1,39 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
+import { getCurrentDomainConfig } from "@/lib/get-locale";
 
-const baseUrl = "https://minberegner.dk";
+export async function generateMetadata(): Promise<Metadata> {
+  const dc = await getCurrentDomainConfig();
+  const baseUrl = dc.baseUrl;
 
-export const metadata: Metadata = {
-  title: "Guide til lån og renter: Forstå hvad du betaler | MinBeregner.dk",
-  description:
-    "Alt om lån i Danmark 2026: Annuitetslån vs. serielån, fast vs. variabel rente, ÅOP forklaret. Lær at sammenligne lån og find det billigste.",
-  keywords: [
-    "lån guide",
-    "rente forklaring",
-    "annuitetslån",
-    "serielån",
-    "ÅOP",
-    "fast rente",
-    "variabel rente",
-    "sammenlign lån",
-    "låneberegner",
-  ],
-  openGraph: {
-    title: "Guide til lån og renter: Forstå hvad du betaler",
+  return {
+    title: "Guide til lån og renter: Forstå hvad du betaler | MinBeregner.dk",
     description:
-      "Lær alt om lån, renter og ÅOP. Forstå forskellen på lånetyper og find det billigste lån.",
-    url: `${baseUrl}/blog/guide-til-laan-og-renter`,
-    type: "article",
-  },
-  alternates: {
-    canonical: `${baseUrl}/blog/guide-til-laan-og-renter`,
-  },
-};
+      "Alt om lån i Danmark 2026: Annuitetslån vs. serielån, fast vs. variabel rente, ÅOP forklaret. Lær at sammenligne lån og find det billigste.",
+    keywords: [
+      "lån guide",
+      "rente forklaring",
+      "annuitetslån",
+      "serielån",
+      "ÅOP",
+      "fast rente",
+      "variabel rente",
+      "sammenlign lån",
+      "låneberegner",
+    ],
+    openGraph: {
+      title: "Guide til lån og renter: Forstå hvad du betaler",
+      description:
+        "Lær alt om lån, renter og ÅOP. Forstå forskellen på lånetyper og find det billigste lån.",
+      url: `${baseUrl}/blog/guide-til-laan-og-renter`,
+      type: "article",
+    },
+    alternates: {
+      canonical: `${baseUrl}/blog/guide-til-laan-og-renter`,
+    },
+  };
+}
 
 const faqItems = [
   {

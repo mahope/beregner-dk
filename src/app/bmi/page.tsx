@@ -1,6 +1,6 @@
-import type { Metadata } from "next";
 import dynamic from "next/dynamic";
 const BMIBeregner = dynamic(() => import("@/components/BMIBeregner"));
+import { generatePageMetadata } from "@/lib/page-helpers";
 import FAQ from "@/components/FAQ";
 import RelatedCalculators from "@/components/RelatedCalculators";
 import {
@@ -13,32 +13,9 @@ import Sidebar from "@/components/Sidebar";
 
 const baseUrl = "https://minberegner.dk";
 
-export const metadata: Metadata = {
-  title: "BMI Beregner - Beregn dit Body Mass Index gratis",
-  description:
-    "Beregn dit BMI på 5 sekunder. Eksempel: 75 kg / 1,75m = BMI 24,5 (normal). Se om du er undervægtig (under 18,5), normal (18,5-24,9) eller overvægtig. Gratis BMI beregner.",
-  keywords: [
-    "bmi beregner",
-    "bmi",
-    "body mass index",
-    "beregn bmi",
-    "idealvægt",
-    "vægtberegner",
-    "sundhed beregner",
-    "overvægt",
-    "undervægt",
-  ],
-  openGraph: {
-    title: "BMI Beregner - Beregn dit Body Mass Index",
-    description:
-      "Gratis BMI beregner. Se om din vægt er sund og få din idealvægt.",
-    url: `${baseUrl}/bmi`,
-    type: "website",
-  },
-  alternates: {
-    canonical: `${baseUrl}/bmi`,
-  },
-};
+export async function generateMetadata() {
+  return generatePageMetadata("bmi");
+}
 
 const faqItems = [
   {

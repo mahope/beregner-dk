@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import { generatePageMetadata } from "@/lib/page-helpers";
 import GaeldsfriBeregner from "@/components/GaeldsfriBeregner";
 import FAQ from "@/components/FAQ";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
@@ -8,30 +8,9 @@ import Sidebar from "@/components/Sidebar";
 
 const baseUrl = "https://minberegner.dk";
 
-export const metadata: Metadata = {
-  title: "Gældsfri Beregner - Beregn din vej ud af gæld | MinBeregner.dk",
-  description:
-    "Beregn hvor lang tid det tager at blive gældsfri. Sammenlign lavine- og snebold-metoden. Se effekten af ekstra afdrag på din gæld.",
-  keywords: [
-    "gældsfri beregner",
-    "gældsafvikling",
-    "gæld beregner",
-    "blive gældsfri",
-    "lavine metode",
-    "snebold metode",
-    "afbetal gæld",
-    "gældsplan",
-  ],
-  openGraph: {
-    title: "Gældsfri Beregner - Beregn din vej ud af gæld",
-    description: "Beregn afviklingstid og sammenlign lavine vs. snebold metoden.",
-    url: `${baseUrl}/gaeldsfri`,
-    type: "website",
-  },
-  alternates: {
-    canonical: `${baseUrl}/gaeldsfri`,
-  },
-};
+export async function generateMetadata() {
+  return generatePageMetadata("gaeldsfri");
+}
 
 const faqItems = [
   {

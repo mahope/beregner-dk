@@ -1,33 +1,37 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
+import { getCurrentDomainConfig } from "@/lib/get-locale";
 
-const baseUrl = "https://minberegner.dk";
+export async function generateMetadata(): Promise<Metadata> {
+  const dc = await getCurrentDomainConfig();
+  const baseUrl = dc.baseUrl;
 
-export const metadata: Metadata = {
-  title: "Boliglån 2026: Renter, afdrag og hvad du har råd til | MinBeregner.dk",
-  description:
-    "Komplet guide til boliglån i 2026: Aktuelle renter, realkreditlån vs. banklån, fast vs. variabel rente og hvad du har råd til. Beregn din boliglånsydelse.",
-  keywords: [
-    "boliglån 2026",
-    "realkreditlån rente 2026",
-    "boliglån rente",
-    "fast rente 2026",
-    "variabel rente",
-    "boliglån beregner",
-    "hvad har jeg råd til bolig",
-    "boliglån afdrag",
-  ],
-  openGraph: {
-    title: "Boliglån 2026: Renter, afdrag og hvad du har råd til",
-    description: "Alt om boliglån i 2026 — renter, låntyper og beregning.",
-    url: `${baseUrl}/blog/boliglaan-2026-renter-og-afdrag`,
-    type: "article",
-  },
-  alternates: {
-    canonical: `${baseUrl}/blog/boliglaan-2026-renter-og-afdrag`,
-  },
-};
+  return {
+    title: "Boliglån 2026: Renter, afdrag og hvad du har råd til | MinBeregner.dk",
+    description:
+      "Komplet guide til boliglån i 2026: Aktuelle renter, realkreditlån vs. banklån, fast vs. variabel rente og hvad du har råd til. Beregn din boliglånsydelse.",
+    keywords: [
+      "boliglån 2026",
+      "realkreditlån rente 2026",
+      "boliglån rente",
+      "fast rente 2026",
+      "variabel rente",
+      "boliglån beregner",
+      "hvad har jeg råd til bolig",
+      "boliglån afdrag",
+    ],
+    openGraph: {
+      title: "Boliglån 2026: Renter, afdrag og hvad du har råd til",
+      description: "Alt om boliglån i 2026 — renter, låntyper og beregning.",
+      url: `${baseUrl}/blog/boliglaan-2026-renter-og-afdrag`,
+      type: "article",
+    },
+    alternates: {
+      canonical: `${baseUrl}/blog/boliglaan-2026-renter-og-afdrag`,
+    },
+  };
+}
 
 const faqItems = [
   {

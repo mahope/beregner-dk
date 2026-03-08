@@ -1,6 +1,6 @@
-import type { Metadata } from "next";
 import dynamic from "next/dynamic";
 const DatoBeregner = dynamic(() => import("@/components/DatoBeregner"));
+import { generatePageMetadata } from "@/lib/page-helpers";
 import FAQ from "@/components/FAQ";
 import RelatedCalculators from "@/components/RelatedCalculators";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
@@ -8,31 +8,9 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 
 const baseUrl = "https://minberegner.dk";
 
-export const metadata: Metadata = {
-  title: "Datoberegner - Beregn dage mellem datoer gratis",
-  description:
-    "Gratis datoberegner. Beregn antal dage mellem to datoer, tilføj dage til en dato, beregn arbejdsdage, eller find din præcise alder.",
-  keywords: [
-    "datoberegner",
-    "dage mellem datoer",
-    "beregn dage",
-    "arbejdsdage beregner",
-    "tilføj dage til dato",
-    "alder beregner",
-    "hvor mange dage",
-    "dato kalkulator",
-  ],
-  openGraph: {
-    title: "Datoberegner - Beregn dage mellem datoer",
-    description:
-      "Beregn dage mellem datoer, arbejdsdage, eller din præcise alder. Gratis datoberegner.",
-    url: `${baseUrl}/dato`,
-    type: "website",
-  },
-  alternates: {
-    canonical: `${baseUrl}/dato`,
-  },
-};
+export async function generateMetadata() {
+  return generatePageMetadata("dato");
+}
 
 const faqItems = [
   {

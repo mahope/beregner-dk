@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { BreadcrumbSchema } from "@/components/StructuredData";
-
-const baseUrl = "https://minberegner.dk";
+import { getCurrentDomainConfig } from "@/lib/get-locale";
+import { getTranslations } from "@/lib/i18n";
 
 interface BreadcrumbItem {
   name: string;
@@ -20,13 +20,18 @@ interface BreadcrumbsProps {
  *   <Breadcrumbs items={[{ name: "Sundhed", href: "/kategori/sundhed" }, { name: "BMI Beregner", href: "/bmi" }]} />
  *   → Forside / Sundhed / BMI Beregner
  */
-export default function Breadcrumbs({ items }: BreadcrumbsProps) {
+export default async function Breadcrumbs({ items }: BreadcrumbsProps) {
+  const domainConfig = await getCurrentDomainConfig();
+  const t = getTranslations(domainConfig.locale);
+  const baseUrl = domainConfig.baseUrl;
+  const homeName = t.nav.home;
+
   const schemaItems = [
-    { name: "Forside", url: baseUrl },
+    { name: homeName, url: baseUrl },
     ...items.map((item) => ({ name: item.name, url: `${baseUrl}${item.href}` })),
   ];
 
-  const allItems = [{ name: "Forside", href: "/" }, ...items];
+  const allItems = [{ name: homeName, href: "/" }, ...items];
   const lastIndex = allItems.length - 1;
 
   return (

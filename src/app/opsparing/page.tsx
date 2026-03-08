@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import { generatePageMetadata } from "@/lib/page-helpers";
 import dynamic from "next/dynamic";
 const OpsparingsBeregner = dynamic(() => import("@/components/OpsparingsBeregner"));
 import FAQ from "@/components/FAQ";
@@ -11,32 +11,9 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 
 const baseUrl = "https://minberegner.dk";
 
-export const metadata: Metadata = {
-  title: "Opsparingsberegner - Renters rente beregner",
-  description:
-    "Se hvad din opsparing vokser til. Eksempel: 1.000 kr/md i 30 år med 5% rente = 830.000 kr. Beregn renters rente-effekten og se udviklingen år for år. Gratis beregner.",
-  keywords: [
-    "opsparingsberegner",
-    "renters rente",
-    "beregn opsparing",
-    "renteberegner opsparing",
-    "compound interest",
-    "investering beregner",
-    "opsparing med rente",
-    "fremtidig værdi",
-    "pensionsopsparing beregner",
-  ],
-  openGraph: {
-    title: "Opsparingsberegner - Renters rente",
-    description:
-      "Beregn hvad din opsparing vokser til med renters rente. Gratis opsparingsberegner.",
-    url: `${baseUrl}/opsparing`,
-    type: "website",
-  },
-  alternates: {
-    canonical: `${baseUrl}/opsparing`,
-  },
-};
+export async function generateMetadata() {
+  return generatePageMetadata("opsparing");
+}
 
 const faqItems = [
   {

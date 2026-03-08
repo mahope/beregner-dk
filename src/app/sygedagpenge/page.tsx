@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import { generatePageMetadata } from "@/lib/page-helpers";
 import SygedagpengeBeregner from "@/components/SygedagpengeBeregner";
 import FAQ from "@/components/FAQ";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
@@ -8,30 +8,9 @@ import Sidebar from "@/components/Sidebar";
 
 const baseUrl = "https://minberegner.dk";
 
-export const metadata: Metadata = {
-  title: "Sygedagpenge Beregner - Beregn din sats 2026 | MinBeregner.dk",
-  description:
-    "Beregn dine sygedagpenge for 2026. Se din ugentlige sats, arbejdsgiverperiode, kommunal udbetaling og løntab ved sygdom.",
-  keywords: [
-    "sygedagpenge beregner",
-    "sygedagpenge 2026",
-    "sygedagpenge sats",
-    "sygdom løn",
-    "sygemelding",
-    "arbejdsgiverperiode",
-    "mulighedserklæring",
-    "sygedagpenge selvstændig",
-  ],
-  openGraph: {
-    title: "Sygedagpenge Beregner - Beregn din sats 2026",
-    description: "Beregn sygedagpenge, se arbejdsgiverperiode og løntab ved sygdom.",
-    url: `${baseUrl}/sygedagpenge`,
-    type: "website",
-  },
-  alternates: {
-    canonical: `${baseUrl}/sygedagpenge`,
-  },
-};
+export async function generateMetadata() {
+  return generatePageMetadata("sygedagpenge");
+}
 
 const faqItems = [
   {

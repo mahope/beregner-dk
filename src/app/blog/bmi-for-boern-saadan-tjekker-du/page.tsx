@@ -1,35 +1,39 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
+import { getCurrentDomainConfig } from "@/lib/get-locale";
 
-const baseUrl = "https://minberegner.dk";
+export async function generateMetadata(): Promise<Metadata> {
+  const dc = await getCurrentDomainConfig();
+  const baseUrl = dc.baseUrl;
 
-export const metadata: Metadata = {
-  title: "BMI for Børn - Sådan Tjekker Du (Komplet Guide 2026) | MinBeregner.dk",
-  description:
-    "BMI for børn beregnes anderledes end voksne. Lær om percentiler, ISO BMI, og hvordan du tjekker dit barns vægt sundt. Inkluderer aldersbaserede tabeller og eksempler.",
-  keywords: [
-    "bmi børn",
-    "bmi for børn",
-    "bmi beregner børn",
-    "børn overvægt",
-    "børn undervægt",
-    "iso bmi",
-    "bmi percentil",
-    "barnets vægt",
-    "sund vægt børn",
-    "vækstkurve",
-  ],
-  openGraph: {
-    title: "BMI for Børn - Sådan Tjekker Du (Komplet Guide)",
-    description: "BMI for børn beregnes med percentiler, ikke faste grænser. Se hvordan du tjekker dit barns vægt korrekt.",
-    url: `${baseUrl}/blog/bmi-for-boern-saadan-tjekker-du`,
-    type: "article",
-  },
-  alternates: {
-    canonical: `${baseUrl}/blog/bmi-for-boern-saadan-tjekker-du`,
-  },
-};
+  return {
+    title: "BMI for Børn - Sådan Tjekker Du (Komplet Guide 2026) | MinBeregner.dk",
+    description:
+      "BMI for børn beregnes anderledes end voksne. Lær om percentiler, ISO BMI, og hvordan du tjekker dit barns vægt sundt. Inkluderer aldersbaserede tabeller og eksempler.",
+    keywords: [
+      "bmi børn",
+      "bmi for børn",
+      "bmi beregner børn",
+      "børn overvægt",
+      "børn undervægt",
+      "iso bmi",
+      "bmi percentil",
+      "barnets vægt",
+      "sund vægt børn",
+      "vækstkurve",
+    ],
+    openGraph: {
+      title: "BMI for Børn - Sådan Tjekker Du (Komplet Guide)",
+      description: "BMI for børn beregnes med percentiler, ikke faste grænser. Se hvordan du tjekker dit barns vægt korrekt.",
+      url: `${baseUrl}/blog/bmi-for-boern-saadan-tjekker-du`,
+      type: "article",
+    },
+    alternates: {
+      canonical: `${baseUrl}/blog/bmi-for-boern-saadan-tjekker-du`,
+    },
+  };
+}
 
 const faqItems = [
   {

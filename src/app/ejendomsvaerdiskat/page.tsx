@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import { generatePageMetadata } from "@/lib/page-helpers";
 import EjendomsvaerdiskatBeregner from "@/components/EjendomsvaerdiskatBeregner";
 import FAQ from "@/components/FAQ";
 import RelatedCalculators from "@/components/RelatedCalculators";
@@ -10,12 +10,9 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 
 const baseUrl = "https://minberegner.dk";
 
-export const metadata: Metadata = {
-  title: "Ejendomsværdiskat beregner 2026 - Beregn din ejendomsskat | MinBeregner.dk",
-  description:
-    "Beregn ejendomsværdiskat og grundskyld med det nye boligskattesystem fra 2024. 5,1‰ / 14‰ satser, 80% forsigtighedsfradrag, kommunale grundskyldspromiller. Gratis beregner med 2026 satser.",
-  keywords: "ejendomsværdiskat beregner, ejendomsskat 2026, grundskyld, boligskat, grundskyldspromille, boligskattereform",
-};
+export async function generateMetadata() {
+  return generatePageMetadata("ejendomsvaerdiskat");
+}
 
 const ejendomsFaqItems = [
   {

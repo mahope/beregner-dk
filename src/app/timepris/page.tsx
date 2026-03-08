@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import { generatePageMetadata } from "@/lib/page-helpers";
 import dynamic from "next/dynamic";
 const TimeprisBeregner = dynamic(() => import("@/components/TimeprisBeregner"));
 import FAQ from "@/components/FAQ";
@@ -8,30 +8,9 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 
 const baseUrl = "https://minberegner.dk";
 
-export const metadata: Metadata = {
-  title: "Timeprisberegner for freelancere | MinBeregner.dk",
-  description:
-    "Find din freelance timepris. Ønsker du 35.000 kr netto/md? Du skal fakturere ca. 700-900 kr/time. Beregn timepris inkl. skat, ferie og driftsomkostninger. Gratis beregner.",
-  keywords: [
-    "timeprisberegner",
-    "freelance timepris",
-    "beregn timepris",
-    "konsulent timepris",
-    "selvstændig timepris",
-    "hvad skal jeg tage i timen",
-    "timepris kalkulator",
-    "freelancer løn",
-  ],
-  openGraph: {
-    title: "Timeprisberegner - Find din freelance timepris",
-    description: "Beregn den rigtige timepris som freelancer eller selvstændig. Gratis beregner.",
-    url: `${baseUrl}/timepris`,
-    type: "website",
-  },
-  alternates: {
-    canonical: `${baseUrl}/timepris`,
-  },
-};
+export async function generateMetadata() {
+  return generatePageMetadata("timepris");
+}
 
 const faqItems = [
   {

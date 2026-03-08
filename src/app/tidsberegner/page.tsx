@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
 import TidsBeregner from "@/components/TidsBeregner";
+import { generatePageMetadata } from "@/lib/page-helpers";
 import { RelatedCalculators } from "@/components/RelatedCalculators";
 import FAQ from "@/components/FAQ";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
@@ -7,28 +7,9 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 
 const baseUrl = "https://minberegner.dk";
 
-export const metadata: Metadata = {
-  title: "Tidsberegner - Beregn timer og minutter mellem tidspunkter",
-  description:
-    "Beregn tid hurtigt. Eksempel: 08:30 til 16:45 = 8 timer 15 min (8,25 decimal). Perfekt til arbejdstid, timeregistrering og møder. Gratis tidsberegner.",
-  keywords: [
-    "tidsberegner",
-    "timer mellem tidspunkter",
-    "arbejdstid beregner",
-    "tid beregner",
-    "timer og minutter",
-    "timeregistrering",
-  ],
-  openGraph: {
-    title: "Tidsberegner - Timer og minutter mellem tidspunkter",
-    description: "Beregn tid mellem to tidspunkter. Gratis og let at bruge.",
-    url: `${baseUrl}/tidsberegner`,
-    type: "website",
-  },
-  alternates: {
-    canonical: `${baseUrl}/tidsberegner`,
-  },
-};
+export async function generateMetadata() {
+  return generatePageMetadata("tidsberegner");
+}
 
 const faqItems = [
   {

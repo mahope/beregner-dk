@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
 import VaegttabBeregner from "@/components/VaegttabBeregner";
+import { generatePageMetadata } from "@/lib/page-helpers";
 import FAQ from "@/components/FAQ";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
@@ -8,30 +8,9 @@ import Sidebar from "@/components/Sidebar";
 
 const baseUrl = "https://minberegner.dk";
 
-export const metadata: Metadata = {
-  title: "Vægttab Beregner - Beregn dit kalorieunderskud | MinBeregner.dk",
-  description:
-    "Beregn dit daglige kaloriemål for vægttab. Se hvor mange kalorier du skal spise for at tabe dig sundt og realistisk.",
-  keywords: [
-    "vægttab beregner",
-    "kalorieunderskud",
-    "tab dig",
-    "kalorier vægttab",
-    "vægttab plan",
-    "kalorieberegner vægttab",
-    "sundt vægttab",
-    "kg pr uge",
-  ],
-  openGraph: {
-    title: "Vægttab Beregner - Beregn dit kalorieunderskud",
-    description: "Beregn dagligt kaloriemål for vægttab baseret på din vægt, højde og aktivitetsniveau.",
-    url: `${baseUrl}/vaegttab`,
-    type: "website",
-  },
-  alternates: {
-    canonical: `${baseUrl}/vaegttab`,
-  },
-};
+export async function generateMetadata() {
+  return generatePageMetadata("vaegttab");
+}
 
 const faqItems = [
   {

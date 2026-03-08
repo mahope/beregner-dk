@@ -1,30 +1,34 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { getCurrentDomainConfig } from "@/lib/get-locale";
 
-const baseUrl = "https://minberegner.dk";
+export async function generateMetadata(): Promise<Metadata> {
+  const dc = await getCurrentDomainConfig();
+  const baseUrl = dc.baseUrl;
 
-export const metadata: Metadata = {
-  title: "Blog - Guides og tips | MinBeregner.dk",
-  description:
-    "Læs vores guides om økonomi, beregninger og privatøkonomi. Lær hvordan du beregner moms, finder den rigtige husleje, og meget mere.",
-  keywords: [
-    "økonomi guide",
-    "privatøkonomi tips",
-    "beregning guide",
-    "moms guide",
-    "husleje tips",
-    "lån guide",
-  ],
-  openGraph: {
+  return {
     title: "Blog - Guides og tips | MinBeregner.dk",
-    description: "Guides og tips om økonomi og beregninger.",
-    url: `${baseUrl}/blog`,
-    type: "website",
-  },
-  alternates: {
-    canonical: `${baseUrl}/blog`,
-  },
-};
+    description:
+      "Læs vores guides om økonomi, beregninger og privatøkonomi. Lær hvordan du beregner moms, finder den rigtige husleje, og meget mere.",
+    keywords: [
+      "økonomi guide",
+      "privatøkonomi tips",
+      "beregning guide",
+      "moms guide",
+      "husleje tips",
+      "lån guide",
+    ],
+    openGraph: {
+      title: "Blog - Guides og tips | MinBeregner.dk",
+      description: "Guides og tips om økonomi og beregninger.",
+      url: `${baseUrl}/blog`,
+      type: "website",
+    },
+    alternates: {
+      canonical: `${baseUrl}/blog`,
+    },
+  };
+}
 
 const blogPosts = [
   {

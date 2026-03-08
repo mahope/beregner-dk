@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import { generatePageMetadata } from "@/lib/page-helpers";
 import RentefradragBeregner from "@/components/RentefradragBeregner";
 import FAQ from "@/components/FAQ";
 import RelatedCalculators from "@/components/RelatedCalculators";
@@ -10,32 +10,9 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 
 const baseUrl = "https://minberegner.dk";
 
-export const metadata: Metadata = {
-  title: "Rentefradrag beregner 2026 - Se din skattebesparelse",
-  description:
-    "Hvad sparer du i skat? Fradragsværdi 2026: ca. 25,6-33,6%. Eksempel: 50.000 kr renter = ca. 13.000-17.000 kr i skattebesparelse. Beregn dit rentefradrag på boliglån og andre lån.",
-  keywords: [
-    "rentefradrag",
-    "rentefradrag beregner",
-    "rentefradrag 2026",
-    "beregn rentefradrag",
-    "skattefradrag renter",
-    "boliglån fradrag",
-    "renteudgifter fradrag",
-    "negativ kapitalindkomst",
-    "fradragsværdi",
-  ],
-  openGraph: {
-    title: "Rentefradrag beregner 2026",
-    description:
-      "Beregn hvor meget du sparer i skat på dine renteudgifter.",
-    url: `${baseUrl}/rentefradrag`,
-    type: "website",
-  },
-  alternates: {
-    canonical: `${baseUrl}/rentefradrag`,
-  },
-};
+export async function generateMetadata() {
+  return generatePageMetadata("rentefradrag");
+}
 
 const faqItems = [
   {

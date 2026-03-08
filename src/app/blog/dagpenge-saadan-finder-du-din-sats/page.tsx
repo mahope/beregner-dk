@@ -1,32 +1,36 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
+import { getCurrentDomainConfig } from "@/lib/get-locale";
 
-const baseUrl = "https://minberegner.dk";
+export async function generateMetadata(): Promise<Metadata> {
+  const dc = await getCurrentDomainConfig();
+  const baseUrl = dc.baseUrl;
 
-export const metadata: Metadata = {
-  title: "Dagpenge 2026: Sådan finder du din dagpengesats | MinBeregner.dk",
-  description:
-    "Komplet guide til dagpenge i 2026: Max dagpengesats, beregningsgrundlag, krav til optjening og dimittendsats. Se hvad du har ret til.",
-  keywords: [
-    "dagpenge 2026",
-    "dagpengesats 2026",
-    "max dagpenge 2026",
-    "dagpenge beregner",
-    "dagpenge krav",
-    "dimittendsats 2026",
-    "a-kasse dagpenge",
-  ],
-  openGraph: {
-    title: "Dagpenge 2026: Sådan finder du din dagpengesats",
-    description: "Alt om dagpenge i 2026 — satser, krav og beregning.",
-    url: `${baseUrl}/blog/dagpenge-saadan-finder-du-din-sats`,
-    type: "article",
-  },
-  alternates: {
-    canonical: `${baseUrl}/blog/dagpenge-saadan-finder-du-din-sats`,
-  },
-};
+  return {
+    title: "Dagpenge 2026: Sådan finder du din dagpengesats | MinBeregner.dk",
+    description:
+      "Komplet guide til dagpenge i 2026: Max dagpengesats, beregningsgrundlag, krav til optjening og dimittendsats. Se hvad du har ret til.",
+    keywords: [
+      "dagpenge 2026",
+      "dagpengesats 2026",
+      "max dagpenge 2026",
+      "dagpenge beregner",
+      "dagpenge krav",
+      "dimittendsats 2026",
+      "a-kasse dagpenge",
+    ],
+    openGraph: {
+      title: "Dagpenge 2026: Sådan finder du din dagpengesats",
+      description: "Alt om dagpenge i 2026 — satser, krav og beregning.",
+      url: `${baseUrl}/blog/dagpenge-saadan-finder-du-din-sats`,
+      type: "article",
+    },
+    alternates: {
+      canonical: `${baseUrl}/blog/dagpenge-saadan-finder-du-din-sats`,
+    },
+  };
+}
 
 const faqItems = [
   {

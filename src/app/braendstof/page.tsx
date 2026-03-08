@@ -1,6 +1,6 @@
-import type { Metadata } from "next";
 import dynamic from "next/dynamic";
 const BraendstofBeregner = dynamic(() => import("@/components/BraendstofBeregner"));
+import { generatePageMetadata } from "@/lib/page-helpers";
 import FAQ from "@/components/FAQ";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
@@ -8,30 +8,9 @@ import RelatedCalculators from "@/components/RelatedCalculators";
 
 const baseUrl = "https://minberegner.dk";
 
-export const metadata: Metadata = {
-  title: "Brændstofberegner - Beregn benzin, diesel og el | MinBeregner.dk",
-  description:
-    "Gratis brændstofberegner. Beregn pris for benzin, diesel eller el-bil. Se hvad en tur koster, pris pr. km og dit årlige brændstofforbrug.",
-  keywords: [
-    "brændstofberegner",
-    "benzin beregner",
-    "diesel beregner",
-    "el bil beregner",
-    "pris pr km",
-    "brændstofforbrug",
-    "tur pris beregner",
-    "km pris bil",
-  ],
-  openGraph: {
-    title: "Brændstofberegner - Benzin, diesel og el",
-    description: "Beregn hvad det koster at køre bil. Sammenlign benzin, diesel og el.",
-    url: `${baseUrl}/braendstof`,
-    type: "website",
-  },
-  alternates: {
-    canonical: `${baseUrl}/braendstof`,
-  },
-};
+export async function generateMetadata() {
+  return generatePageMetadata("braendstof");
+}
 
 const faqItems = [
   {

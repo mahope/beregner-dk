@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
 import KalorieBeregner from "@/components/KalorieBeregner";
+import { generatePageMetadata } from "@/lib/page-helpers";
 import FAQ from "@/components/FAQ";
 import RelatedCalculators from "@/components/RelatedCalculators";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
@@ -7,31 +7,9 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 
 const baseUrl = "https://minberegner.dk";
 
-export const metadata: Metadata = {
-  title: "Kalorieberegner - Beregn dit daglige kaloriebehov gratis",
-  description:
-    "Gratis kalorieberegner. Beregn dit daglige kaloriebehov (TDEE og BMR) baseret på alder, køn, vægt og aktivitetsniveau. Få makrofordeling for vægttab eller muskelopbygning.",
-  keywords: [
-    "kalorieberegner",
-    "dagligt kaloriebehov",
-    "TDEE beregner",
-    "BMR beregner",
-    "vægttab kalorier",
-    "makroer beregner",
-    "protein beregner",
-    "kalorieunderskud",
-  ],
-  openGraph: {
-    title: "Kalorieberegner - Beregn dit kaloriebehov",
-    description:
-      "Beregn dit daglige kaloriebehov og få makrofordeling. Gratis kalorieberegner.",
-    url: `${baseUrl}/kalorier`,
-    type: "website",
-  },
-  alternates: {
-    canonical: `${baseUrl}/kalorier`,
-  },
-};
+export async function generateMetadata() {
+  return generatePageMetadata("kalorier");
+}
 
 const faqItems = [
   {

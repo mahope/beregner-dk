@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import { generatePageMetadata } from "@/lib/page-helpers";
 import EfterloensBeregner from "@/components/EfterloensBeregner";
 import FAQ from "@/components/FAQ";
 import RelatedCalculators from "@/components/RelatedCalculators";
@@ -10,32 +10,9 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 
 const baseUrl = "https://minberegner.dk";
 
-export const metadata: Metadata = {
-  title: "Efterløn beregner 2026 - Se hvad du kan få udbetalt",
-  description:
-    "Beregn efterløn 2026. Max sats: ca. 20.057 kr/md (91% af dagpenge). Se hvornår du kan gå på efterløn, betingelser og præcis sats ud fra din indkomst. Gratis beregner.",
-  keywords: [
-    "efterløn",
-    "efterløn beregner",
-    "efterlønssats 2026",
-    "beregn efterløn",
-    "hvornår kan jeg gå på efterløn",
-    "efterløn alder",
-    "efterløn sats",
-    "efterlønsbidrag",
-    "tidlig pension",
-  ],
-  openGraph: {
-    title: "Efterløn beregner 2026",
-    description:
-      "Beregn hvad du kan få i efterløn. Gratis beregner med 2026 satser.",
-    url: `${baseUrl}/efterloen`,
-    type: "website",
-  },
-  alternates: {
-    canonical: `${baseUrl}/efterloen`,
-  },
-};
+export async function generateMetadata() {
+  return generatePageMetadata("efterloen");
+}
 
 const faqItems = [
   {

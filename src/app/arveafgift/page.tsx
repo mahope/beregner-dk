@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import { generatePageMetadata } from "@/lib/page-helpers";
 import ArveafgiftBeregner from "@/components/ArveafgiftBeregner";
 import FAQ from "@/components/FAQ";
 import RelatedCalculators from "@/components/RelatedCalculators";
@@ -10,12 +10,9 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 
 const baseUrl = "https://minberegner.dk";
 
-export const metadata: Metadata = {
-  title: "Arveafgift beregner - Beregn arveafgift i Danmark | Beregner.dk",
-  description:
-    "Beregn arveafgift i Danmark. Se hvor meget du skal betale i boafgift baseret på din relation til afdøde. Gratis beregner med 2026 satser og regler.",
-  keywords: "arveafgift beregner, boafgift, arveskat, dansk arveafgift",
-};
+export async function generateMetadata() {
+  return generatePageMetadata("arveafgift");
+}
 
 const arveafgiftFaqItems = [
   {

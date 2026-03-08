@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
 import TidszoneBeregner from "@/components/TidszoneBeregner";
+import { generatePageMetadata } from "@/lib/page-helpers";
 import FAQ from "@/components/FAQ";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
@@ -7,29 +7,9 @@ import RelatedCalculators from "@/components/RelatedCalculators";
 
 const baseUrl = "https://minberegner.dk";
 
-export const metadata: Metadata = {
-  title: "Tidszoneberegner - Omregn tid mellem lande | MinBeregner.dk",
-  description:
-    "Hvad er klokken i New York, Tokyo eller Sydney? Danmark til New York: -6 timer. Omregn tid mellem tidszoner og planlæg internationale møder. Gratis tidszoneberegner.",
-  keywords: [
-    "tidszoneberegner",
-    "tidszone omregner",
-    "hvad er klokken i",
-    "tidsforskel",
-    "konverter tid",
-    "world clock",
-    "mødetid international",
-  ],
-  openGraph: {
-    title: "Tidszoneberegner - Hvad er klokken?",
-    description: "Se hvad klokken er i andre lande og omregn mellem tidszoner.",
-    url: `${baseUrl}/tidszone`,
-    type: "website",
-  },
-  alternates: {
-    canonical: `${baseUrl}/tidszone`,
-  },
-};
+export async function generateMetadata() {
+  return generatePageMetadata("tidszone");
+}
 
 const faqItems = [
   {

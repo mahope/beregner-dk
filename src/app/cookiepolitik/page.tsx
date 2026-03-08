@@ -1,12 +1,15 @@
 import type { Metadata } from "next";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import { getCurrentDomainConfig } from "@/lib/get-locale";
 
-export const metadata: Metadata = {
-  title: "Cookiepolitik | MinBeregner.dk",
-  description:
-    "Læs om vores brug af cookies og localStorage på MinBeregner.dk. Vi bruger Plausible Analytics (cookiefrit) og Google AdSense (annoncecookies efter samtykke).",
-  robots: { index: true, follow: true },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const dc = await getCurrentDomainConfig();
+  return {
+    title: `Cookiepolitik | ${dc.siteName}`,
+    description: `Læs om vores brug af cookies og localStorage på ${dc.siteName}. Vi bruger Plausible Analytics (cookiefrit) og Google AdSense (annoncecookies efter samtykke).`,
+    robots: { index: true, follow: true },
+  };
+}
 
 export default function CookiePolitikPage() {
   return (

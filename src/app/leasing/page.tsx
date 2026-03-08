@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import { generatePageMetadata } from "@/lib/page-helpers";
 import LeasingBeregner from "@/components/LeasingBeregner";
 import FAQ from "@/components/FAQ";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
@@ -8,30 +8,9 @@ import Sidebar from "@/components/Sidebar";
 
 const baseUrl = "https://minberegner.dk";
 
-export const metadata: Metadata = {
-  title: "Leasing Beregner 2026 - Beregn leasingydelse for bil | MinBeregner.dk",
-  description:
-    "Beregn din månedlige leasingydelse gratis. Sammenlign leasing vs. billån vs. kontantkøb. Indtast bilpris, restværdi og løbetid — se hvad det koster.",
-  keywords: [
-    "leasing beregner",
-    "bil leasing",
-    "leasingydelse beregner",
-    "privat leasing",
-    "erhvervsleasing",
-    "leasing vs køb",
-    "bil leasing pris",
-    "leasing bil beregner",
-  ],
-  openGraph: {
-    title: "Leasing Beregner - Beregn leasingydelse for bil",
-    description: "Beregn leasingydelse og sammenlign leasing vs. lån vs. kontantkøb.",
-    url: `${baseUrl}/leasing`,
-    type: "website",
-  },
-  alternates: {
-    canonical: `${baseUrl}/leasing`,
-  },
-};
+export async function generateMetadata() {
+  return generatePageMetadata("leasing");
+}
 
 const faqItems = [
   {

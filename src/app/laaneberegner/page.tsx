@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import { generatePageMetadata } from "@/lib/page-helpers";
 import dynamic from "next/dynamic";
 const LaaneBeregner = dynamic(() => import("@/components/LaaneBeregner"));
 import FAQ from "@/components/FAQ";
@@ -12,30 +12,9 @@ import Sidebar from "@/components/Sidebar";
 
 const baseUrl = "https://minberegner.dk";
 
-export const metadata: Metadata = {
-  title: "Låneberegner - Beregn lån og ydelse | MinBeregner.dk",
-  description:
-    "Gratis låneberegner. Beregn månedlig ydelse, samlede renter og sammenlign forskellige lån. Se afdragsplan og find det bedste lån.",
-  keywords: [
-    "låneberegner",
-    "beregn lån",
-    "lån ydelse beregner",
-    "annuitetslån beregner",
-    "sammenlign lån",
-    "lån rente beregner",
-    "afdragsplan",
-    "ÅOP beregner",
-  ],
-  openGraph: {
-    title: "Låneberegner - Beregn din låneydelse",
-    description: "Beregn månedlig ydelse, renter og sammenlign lån. Gratis online beregner.",
-    url: `${baseUrl}/laaneberegner`,
-    type: "website",
-  },
-  alternates: {
-    canonical: `${baseUrl}/laaneberegner`,
-  },
-};
+export async function generateMetadata() {
+  return generatePageMetadata("laaneberegner");
+}
 
 const faqItems = [
   {

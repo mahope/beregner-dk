@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
 import ProcentBeregner from "@/components/ProcentBeregner";
+import { generatePageMetadata } from "@/lib/page-helpers";
 import FAQ from "@/components/FAQ";
 import RelatedCalculators from "@/components/RelatedCalculators";
 import {
@@ -11,32 +11,9 @@ import Sidebar from "@/components/Sidebar";
 
 const baseUrl = "https://minberegner.dk";
 
-export const metadata: Metadata = {
-  title: "Procentberegner - Beregn procent nemt og gratis",
-  description:
-    "Beregn procent hurtigt. Eksempel: 15% af 2.500 kr = 375 kr. Find procent af et tal, beregn stigning/fald, eller regn baglæns. Gratis procentberegner.",
-  keywords: [
-    "procentberegner",
-    "beregn procent",
-    "procent af",
-    "procentvis stigning",
-    "procentvis ændring",
-    "procent regner",
-    "find procent",
-    "hvor mange procent",
-    "procentregning",
-  ],
-  openGraph: {
-    title: "Procentberegner - Beregn procent nemt",
-    description:
-      "Beregn procent af et tal, find stigning/fald, eller regn baglæns. Gratis procentberegner.",
-    url: `${baseUrl}/procent`,
-    type: "website",
-  },
-  alternates: {
-    canonical: `${baseUrl}/procent`,
-  },
-};
+export async function generateMetadata() {
+  return generatePageMetadata("procent");
+}
 
 const faqItems = [
   {

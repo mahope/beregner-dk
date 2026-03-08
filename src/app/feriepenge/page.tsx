@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import { generatePageMetadata } from "@/lib/page-helpers";
 import FeriepengeBeregner from "@/components/FeriepengeBeregner";
 import FAQ from "@/components/FAQ";
 import RelatedCalculators from "@/components/RelatedCalculators";
@@ -10,32 +10,9 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 
 const baseUrl = "https://minberegner.dk";
 
-export const metadata: Metadata = {
-  title: "Feriepenge Beregner 2026 - Se hvad du får udbetalt",
-  description:
-    "Gratis feriepenge beregner. Beregn hvor meget du får udbetalt i feriepenge baseret på din løn. Se både brutto og netto feriepenge med aktuelle skattesatser.",
-  keywords: [
-    "feriepenge beregner",
-    "beregn feriepenge",
-    "feriepenge 2026",
-    "ferieberegner",
-    "feriepenge udbetaling",
-    "hvor meget i feriepenge",
-    "feriekonto",
-    "ferie med løn",
-    "ferietillæg",
-  ],
-  openGraph: {
-    title: "Feriepenge Beregner 2026",
-    description:
-      "Beregn dine feriepenge og se hvad du får udbetalt. Gratis ferieberegner.",
-    url: `${baseUrl}/feriepenge`,
-    type: "website",
-  },
-  alternates: {
-    canonical: `${baseUrl}/feriepenge`,
-  },
-};
+export async function generateMetadata() {
+  return generatePageMetadata("feriepenge");
+}
 
 const faqItems = [
   {

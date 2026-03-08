@@ -1,31 +1,35 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
+import { getCurrentDomainConfig } from "@/lib/get-locale";
 
-const baseUrl = "https://minberegner.dk";
+export async function generateMetadata(): Promise<Metadata> {
+  const dc = await getCurrentDomainConfig();
+  const baseUrl = dc.baseUrl;
 
-export const metadata: Metadata = {
-  title: "30% reglen: Hvor meget bør du bruge på husleje? | MinBeregner.dk",
-  description:
-    "Forstå 30% reglen for husleje. Lær hvordan du budgetterer din bolig korrekt baseret på din nettoindkomst.",
-  keywords: [
-    "30 procent reglen",
-    "husleje budget",
-    "hvor meget husleje",
-    "hvad har jeg råd til i husleje",
-    "boligbudget",
-    "husleje nettoløn",
-  ],
-  openGraph: {
-    title: "30% reglen: Hvor meget bør du bruge på husleje?",
-    description: "Forstå 30% reglen og lær at budgettere din bolig korrekt.",
-    url: `${baseUrl}/blog/30-procent-reglen-husleje`,
-    type: "article",
-  },
-  alternates: {
-    canonical: `${baseUrl}/blog/30-procent-reglen-husleje`,
-  },
-};
+  return {
+    title: "30% reglen: Hvor meget bør du bruge på husleje? | MinBeregner.dk",
+    description:
+      "Forstå 30% reglen for husleje. Lær hvordan du budgetterer din bolig korrekt baseret på din nettoindkomst.",
+    keywords: [
+      "30 procent reglen",
+      "husleje budget",
+      "hvor meget husleje",
+      "hvad har jeg råd til i husleje",
+      "boligbudget",
+      "husleje nettoløn",
+    ],
+    openGraph: {
+      title: "30% reglen: Hvor meget bør du bruge på husleje?",
+      description: "Forstå 30% reglen og lær at budgettere din bolig korrekt.",
+      url: `${baseUrl}/blog/30-procent-reglen-husleje`,
+      type: "article",
+    },
+    alternates: {
+      canonical: `${baseUrl}/blog/30-procent-reglen-husleje`,
+    },
+  };
+}
 
 const faqItems = [
   {

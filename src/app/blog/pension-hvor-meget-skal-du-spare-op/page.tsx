@@ -2,36 +2,40 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
 import { InlineAd } from "@/components/ads/AdBanner";
+import { getCurrentDomainConfig } from "@/lib/get-locale";
 
-const baseUrl = "https://minberegner.dk";
+export async function generateMetadata(): Promise<Metadata> {
+  const dc = await getCurrentDomainConfig();
+  const baseUrl = dc.baseUrl;
 
-export const metadata: Metadata = {
-  title: "Pension: Hvor Meget Skal Du Spare Op? Komplet Guide 2026 | MinBeregner.dk",
-  description:
-    "Hvor meget skal du spare op til pension? Lær om tommelfingerregler, beregn dit behov, og forstå de tre pensionssøjler. Gratis pensionsberegner inkluderet.",
-  keywords: [
-    "pension opsparing",
-    "hvor meget pension",
-    "pensionsopsparing",
-    "hvor meget skal jeg spare op",
-    "pension guide",
-    "pension 2026",
-    "pensionsplanlægning",
-    "folkepension",
-    "arbejdsmarkedspension",
-    "ratepension",
-    "aldersopsparing",
-  ],
-  openGraph: {
-    title: "Pension: Hvor Meget Skal Du Spare Op?",
-    description: "Komplet guide til pensionsopsparing i 2026: Tommelfingerregler, beregninger og de tre pensionssøjler.",
-    url: `${baseUrl}/blog/pension-hvor-meget-skal-du-spare-op`,
-    type: "article",
-  },
-  alternates: {
-    canonical: `${baseUrl}/blog/pension-hvor-meget-skal-du-spare-op`,
-  },
-};
+  return {
+    title: "Pension: Hvor Meget Skal Du Spare Op? Komplet Guide 2026 | MinBeregner.dk",
+    description:
+      "Hvor meget skal du spare op til pension? Lær om tommelfingerregler, beregn dit behov, og forstå de tre pensionssøjler. Gratis pensionsberegner inkluderet.",
+    keywords: [
+      "pension opsparing",
+      "hvor meget pension",
+      "pensionsopsparing",
+      "hvor meget skal jeg spare op",
+      "pension guide",
+      "pension 2026",
+      "pensionsplanlægning",
+      "folkepension",
+      "arbejdsmarkedspension",
+      "ratepension",
+      "aldersopsparing",
+    ],
+    openGraph: {
+      title: "Pension: Hvor Meget Skal Du Spare Op?",
+      description: "Komplet guide til pensionsopsparing i 2026: Tommelfingerregler, beregninger og de tre pensionssøjler.",
+      url: `${baseUrl}/blog/pension-hvor-meget-skal-du-spare-op`,
+      type: "article",
+    },
+    alternates: {
+      canonical: `${baseUrl}/blog/pension-hvor-meget-skal-du-spare-op`,
+    },
+  };
+}
 
 const faqItems = [
   {

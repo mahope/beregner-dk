@@ -1,32 +1,36 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
+import { getCurrentDomainConfig } from "@/lib/get-locale";
 
-const baseUrl = "https://minberegner.dk";
+export async function generateMetadata(): Promise<Metadata> {
+  const dc = await getCurrentDomainConfig();
+  const baseUrl = dc.baseUrl;
 
-export const metadata: Metadata = {
-  title: "Køb af bolig 2026: Alle omkostninger du skal kende | MinBeregner.dk",
-  description:
-    "Komplet guide til boligkøb i 2026: Tinglysningsafgift, advokat, udbetaling, ejendomsværdiskat og alle skjulte omkostninger. Se det fulde billede.",
-  keywords: [
-    "køb af bolig 2026",
-    "boligkøb omkostninger",
-    "tinglysningsafgift",
-    "udbetaling bolig",
-    "ejendomsværdiskat 2026",
-    "advokat boligkøb",
-    "købers omkostninger",
-  ],
-  openGraph: {
-    title: "Køb af bolig 2026: Alle omkostninger du skal kende",
-    description: "Alle omkostninger ved boligkøb i 2026 — fra udbetaling til tinglysning.",
-    url: `${baseUrl}/blog/koeb-af-bolig-2026-omkostninger`,
-    type: "article",
-  },
-  alternates: {
-    canonical: `${baseUrl}/blog/koeb-af-bolig-2026-omkostninger`,
-  },
-};
+  return {
+    title: "Køb af bolig 2026: Alle omkostninger du skal kende | MinBeregner.dk",
+    description:
+      "Komplet guide til boligkøb i 2026: Tinglysningsafgift, advokat, udbetaling, ejendomsværdiskat og alle skjulte omkostninger. Se det fulde billede.",
+    keywords: [
+      "køb af bolig 2026",
+      "boligkøb omkostninger",
+      "tinglysningsafgift",
+      "udbetaling bolig",
+      "ejendomsværdiskat 2026",
+      "advokat boligkøb",
+      "købers omkostninger",
+    ],
+    openGraph: {
+      title: "Køb af bolig 2026: Alle omkostninger du skal kende",
+      description: "Alle omkostninger ved boligkøb i 2026 — fra udbetaling til tinglysning.",
+      url: `${baseUrl}/blog/koeb-af-bolig-2026-omkostninger`,
+      type: "article",
+    },
+    alternates: {
+      canonical: `${baseUrl}/blog/koeb-af-bolig-2026-omkostninger`,
+    },
+  };
+}
 
 const faqItems = [
   {

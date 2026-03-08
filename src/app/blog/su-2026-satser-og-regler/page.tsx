@@ -1,32 +1,36 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
+import { getCurrentDomainConfig } from "@/lib/get-locale";
 
-const baseUrl = "https://minberegner.dk";
+export async function generateMetadata(): Promise<Metadata> {
+  const dc = await getCurrentDomainConfig();
+  const baseUrl = dc.baseUrl;
 
-export const metadata: Metadata = {
-  title: "SU 2026: Nye satser og regler for studerende | MinBeregner.dk",
-  description:
-    "Komplet guide til SU i 2026: Satser for hjemmeboende og udeboende, fribeløb, SU-lån og nye regler. Se hvor meget du kan få.",
-  keywords: [
-    "SU 2026",
-    "SU satser 2026",
-    "SU udeboende 2026",
-    "SU hjemmeboende 2026",
-    "fribeløb 2026",
-    "SU-lån 2026",
-    "studerende økonomi",
-  ],
-  openGraph: {
-    title: "SU 2026: Nye satser og regler for studerende",
-    description: "Alt om SU i 2026 — satser, fribeløb, SU-lån og regler.",
-    url: `${baseUrl}/blog/su-2026-satser-og-regler`,
-    type: "article",
-  },
-  alternates: {
-    canonical: `${baseUrl}/blog/su-2026-satser-og-regler`,
-  },
-};
+  return {
+    title: "SU 2026: Nye satser og regler for studerende | MinBeregner.dk",
+    description:
+      "Komplet guide til SU i 2026: Satser for hjemmeboende og udeboende, fribeløb, SU-lån og nye regler. Se hvor meget du kan få.",
+    keywords: [
+      "SU 2026",
+      "SU satser 2026",
+      "SU udeboende 2026",
+      "SU hjemmeboende 2026",
+      "fribeløb 2026",
+      "SU-lån 2026",
+      "studerende økonomi",
+    ],
+    openGraph: {
+      title: "SU 2026: Nye satser og regler for studerende",
+      description: "Alt om SU i 2026 — satser, fribeløb, SU-lån og regler.",
+      url: `${baseUrl}/blog/su-2026-satser-og-regler`,
+      type: "article",
+    },
+    alternates: {
+      canonical: `${baseUrl}/blog/su-2026-satser-og-regler`,
+    },
+  };
+}
 
 const faqItems = [
   {

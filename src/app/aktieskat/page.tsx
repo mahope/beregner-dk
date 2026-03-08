@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import { generatePageMetadata } from "@/lib/page-helpers";
 import AktieskatBeregner from "@/components/AktieskatBeregner";
 import FAQ from "@/components/FAQ";
 import {
@@ -11,32 +11,9 @@ import Sidebar from "@/components/Sidebar";
 
 const baseUrl = "https://minberegner.dk";
 
-export const metadata: Metadata = {
-  title: "Aktieskat Beregner 2026 - Beregn skat på aktier | MinBeregner.dk",
-  description:
-    "Beregn aktieskat 2026: 27% under 61.000 kr., 42% over. Sammenlign frit depot vs. aktiesparekonto (ASK, 17%). Se din skat og besparelse gratis.",
-  keywords: [
-    "aktieskat beregner",
-    "skat på aktier",
-    "aktieindkomst skat",
-    "aktiesparekonto",
-    "ASK skat",
-    "27 procent aktieskat",
-    "42 procent aktieskat",
-    "progressionsgrænse aktier",
-    "lagerbeskatning",
-    "realisationsbeskatning",
-  ],
-  openGraph: {
-    title: "Aktieskat Beregner 2026 - Frit depot vs. ASK",
-    description: "Beregn din aktieskat gratis. Sammenlign frit depot (27/42%) med aktiesparekonto (17%).",
-    url: `${baseUrl}/aktieskat`,
-    type: "website",
-  },
-  alternates: {
-    canonical: `${baseUrl}/aktieskat`,
-  },
-};
+export async function generateMetadata() {
+  return generatePageMetadata("aktieskat");
+}
 
 const faqItems = [
   {

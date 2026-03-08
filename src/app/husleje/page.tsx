@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import { generatePageMetadata } from "@/lib/page-helpers";
 import HuslejeBudgetBeregner from "@/components/HuslejeBudgetBeregner";
 import FAQ from "@/components/FAQ";
 import {
@@ -10,29 +10,9 @@ import RelatedCalculators from "@/components/RelatedCalculators";
 
 const baseUrl = "https://minberegner.dk";
 
-export const metadata: Metadata = {
-  title: "Husleje Budget Beregner - Hvad har du råd til? | MinBeregner.dk",
-  description:
-    "Hvad har du råd til i husleje? Tjener du 25.000 kr netto → max ca. 7.500 kr/md (30% reglen). Beregn dit huslejebudget ud fra din indkomst og udgifter. Gratis beregner.",
-  keywords: [
-    "husleje beregner",
-    "hvad har jeg råd til i husleje",
-    "husleje budget",
-    "30% reglen husleje",
-    "bolig budget",
-    "lejlighed budget",
-    "hvad må husleje koste",
-  ],
-  openGraph: {
-    title: "Husleje Budget Beregner - Find din max husleje",
-    description: "Beregn hvor meget du kan bruge på husleje. Baseret på din indkomst og udgifter.",
-    url: `${baseUrl}/husleje`,
-    type: "website",
-  },
-  alternates: {
-    canonical: `${baseUrl}/husleje`,
-  },
-};
+export async function generateMetadata() {
+  return generatePageMetadata("husleje");
+}
 
 const faqItems = [
   {

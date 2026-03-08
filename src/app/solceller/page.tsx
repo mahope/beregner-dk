@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import { generatePageMetadata } from "@/lib/page-helpers";
 import SolcelleBeregner from "@/components/SolcelleBeregner";
 import FAQ from "@/components/FAQ";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
@@ -8,30 +8,9 @@ import Sidebar from "@/components/Sidebar";
 
 const baseUrl = "https://minberegner.dk";
 
-export const metadata: Metadata = {
-  title: "Solcelle Beregner - Beregn besparelse og tilbagebetalingstid | MinBeregner.dk",
-  description:
-    "Beregn besparelse og tilbagebetalingstid for solceller. Se årlig produktion, selvforsyningsgrad og CO₂-reduktion.",
-  keywords: [
-    "solcelle beregner",
-    "solceller besparelse",
-    "solceller tilbagebetalingstid",
-    "solceller pris",
-    "solcelleanlæg",
-    "kWp beregner",
-    "solceller Danmark",
-    "nettoafregning",
-  ],
-  openGraph: {
-    title: "Solcelle Beregner - Beregn besparelse og tilbagebetalingstid",
-    description: "Beregn hvad solceller sparer dig i elregning og hvor hurtigt de er tjent hjem.",
-    url: `${baseUrl}/solceller`,
-    type: "website",
-  },
-  alternates: {
-    canonical: `${baseUrl}/solceller`,
-  },
-};
+export async function generateMetadata() {
+  return generatePageMetadata("solceller");
+}
 
 const faqItems = [
   {

@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
 import KvadratmeterBeregner from "@/components/KvadratmeterBeregner";
+import { generatePageMetadata } from "@/lib/page-helpers";
 import FAQ from "@/components/FAQ";
 import {
   CalculatorSchema,
@@ -10,30 +10,9 @@ import RelatedCalculators from "@/components/RelatedCalculators";
 
 const baseUrl = "https://minberegner.dk";
 
-export const metadata: Metadata = {
-  title: "Kvadratmeterberegner - Beregn areal online | MinBeregner.dk",
-  description:
-    "Gratis kvadratmeterberegner. Beregn areal af rektangler, cirkler, trekanter og trapez. Omregn til andre enheder og beregn pris pr. m².",
-  keywords: [
-    "kvadratmeterberegner",
-    "beregn kvadratmeter",
-    "areal beregner",
-    "m2 beregner",
-    "beregn areal",
-    "cirkel areal",
-    "trekant areal",
-    "rum størrelse",
-  ],
-  openGraph: {
-    title: "Kvadratmeterberegner - Beregn areal nemt",
-    description: "Beregn areal af rum, haver og andre flader. Gratis online værktøj.",
-    url: `${baseUrl}/kvadratmeter`,
-    type: "website",
-  },
-  alternates: {
-    canonical: `${baseUrl}/kvadratmeter`,
-  },
-};
+export async function generateMetadata() {
+  return generatePageMetadata("kvadratmeter");
+}
 
 const faqItems = [
   {

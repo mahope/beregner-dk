@@ -1,23 +1,25 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import { getCurrentDomainConfig } from "@/lib/get-locale";
 
-const baseUrl = "https://minberegner.dk";
-
-export const metadata: Metadata = {
-  title: "Om MinBeregner.dk - Gratis danske beregnere",
-  description:
-    "Læs om MinBeregner.dk - Danmarks samling af gratis online beregnere til økonomi, sundhed og hverdag. 100% gratis, ingen login, ingen data gemmes.",
-  openGraph: {
-    title: "Om MinBeregner.dk",
-    description: "Danmarks samling af gratis online beregnere.",
-    url: `${baseUrl}/om`,
-    type: "website",
-  },
-  alternates: {
-    canonical: `${baseUrl}/om`,
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const domainConfig = await getCurrentDomainConfig();
+  const baseUrl = domainConfig.baseUrl;
+  return {
+    title: `Om ${domainConfig.siteName}`,
+    description: `Læs om ${domainConfig.siteName} - gratis online beregnere til økonomi, sundhed og hverdag. 100% gratis, ingen login, ingen data gemmes.`,
+    openGraph: {
+      title: `Om ${domainConfig.siteName}`,
+      description: `Gratis online beregnere fra ${domainConfig.siteName}.`,
+      url: `${baseUrl}/om`,
+      type: "website",
+    },
+    alternates: {
+      canonical: `${baseUrl}/om`,
+    },
+  };
+}
 
 export default function OmPage() {
   return (

@@ -1,32 +1,36 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
+import { getCurrentDomainConfig } from "@/lib/get-locale";
 
-const baseUrl = "https://minberegner.dk";
+export async function generateMetadata(): Promise<Metadata> {
+  const dc = await getCurrentDomainConfig();
+  const baseUrl = dc.baseUrl;
 
-export const metadata: Metadata = {
-  title: "Sådan beregner du din reelle timeløn | MinBeregner.dk",
-  description:
-    "Lær at beregne din faktiske timeløn inkl. alle skjulte goder som pension, frokost og ferie. Se hvad du virkelig tjener per time.",
-  keywords: [
-    "reel timeløn",
-    "beregn timeløn",
-    "faktisk timeløn",
-    "timeløn efter skat",
-    "hvad tjener jeg i timen",
-    "løn per time",
-    "samlet timeløn",
-  ],
-  openGraph: {
-    title: "Sådan beregner du din reelle timeløn",
-    description: "Beregn din faktiske timeløn inkl. pension, frokost, ferie og andre goder.",
-    url: `${baseUrl}/blog/saadan-beregner-du-din-reelle-timeloen`,
-    type: "article",
-  },
-  alternates: {
-    canonical: `${baseUrl}/blog/saadan-beregner-du-din-reelle-timeloen`,
-  },
-};
+  return {
+    title: "Sådan beregner du din reelle timeløn | MinBeregner.dk",
+    description:
+      "Lær at beregne din faktiske timeløn inkl. alle skjulte goder som pension, frokost og ferie. Se hvad du virkelig tjener per time.",
+    keywords: [
+      "reel timeløn",
+      "beregn timeløn",
+      "faktisk timeløn",
+      "timeløn efter skat",
+      "hvad tjener jeg i timen",
+      "løn per time",
+      "samlet timeløn",
+    ],
+    openGraph: {
+      title: "Sådan beregner du din reelle timeløn",
+      description: "Beregn din faktiske timeløn inkl. pension, frokost, ferie og andre goder.",
+      url: `${baseUrl}/blog/saadan-beregner-du-din-reelle-timeloen`,
+      type: "article",
+    },
+    alternates: {
+      canonical: `${baseUrl}/blog/saadan-beregner-du-din-reelle-timeloen`,
+    },
+  };
+}
 
 const faqItems = [
   {

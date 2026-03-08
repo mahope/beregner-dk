@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import { generatePageMetadata } from "@/lib/page-helpers";
 import AndelsboligBeregner from "@/components/AndelsboligBeregner";
 import FAQ from "@/components/FAQ";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
@@ -8,30 +8,9 @@ import Sidebar from "@/components/Sidebar";
 
 const baseUrl = "https://minberegner.dk";
 
-export const metadata: Metadata = {
-  title: "Andelsbolig Beregner - Beregn månedlige omkostninger | MinBeregner.dk",
-  description:
-    "Beregn månedlige omkostninger ved køb af andelsbolig. Se boligafgift, lånydelse og sammenlign med lejebolig.",
-  keywords: [
-    "andelsbolig beregner",
-    "andelsbolig pris",
-    "køb andelsbolig",
-    "andelsbolig omkostninger",
-    "boligafgift",
-    "andelskrone",
-    "andel vs leje",
-    "andelsbolig lån",
-  ],
-  openGraph: {
-    title: "Andelsbolig Beregner - Beregn månedlige omkostninger",
-    description: "Beregn hvad det koster at købe andelsbolig og sammenlign med leje.",
-    url: `${baseUrl}/andelsbolig`,
-    type: "website",
-  },
-  alternates: {
-    canonical: `${baseUrl}/andelsbolig`,
-  },
-};
+export async function generateMetadata() {
+  return generatePageMetadata("andelsbolig");
+}
 
 const faqItems = [
   {

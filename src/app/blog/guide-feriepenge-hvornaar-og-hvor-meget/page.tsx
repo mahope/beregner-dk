@@ -1,35 +1,39 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
+import { getCurrentDomainConfig } from "@/lib/get-locale";
 
-const baseUrl = "https://minberegner.dk";
+export async function generateMetadata(): Promise<Metadata> {
+  const dc = await getCurrentDomainConfig();
+  const baseUrl = dc.baseUrl;
 
-export const metadata: Metadata = {
-  title: "Guide: Feriepenge - Hvornår og Hvor Meget? | MinBeregner.dk",
-  description:
-    "Komplet guide til feriepenge i 2026: Hvornår får du dem udbetalt? Hvor meget får du? Lær om ferieåret, samtidighedsferie, og beregn dine egne feriepenge.",
-  keywords: [
-    "feriepenge",
-    "hvornår får man feriepenge",
-    "hvor meget feriepenge",
-    "feriepenge udbetaling",
-    "ferieår",
-    "samtidighedsferie",
-    "12,5 procent feriepenge",
-    "feriepenge beregning",
-    "ferieloven",
-    "feriefridage",
-  ],
-  openGraph: {
-    title: "Guide: Feriepenge - Hvornår og Hvor Meget?",
-    description: "Alt du skal vide om feriepenge i 2026: beregning, udbetaling og dine rettigheder.",
-    url: `${baseUrl}/blog/guide-feriepenge-hvornaar-og-hvor-meget`,
-    type: "article",
-  },
-  alternates: {
-    canonical: `${baseUrl}/blog/guide-feriepenge-hvornaar-og-hvor-meget`,
-  },
-};
+  return {
+    title: "Guide: Feriepenge - Hvornår og Hvor Meget? | MinBeregner.dk",
+    description:
+      "Komplet guide til feriepenge i 2026: Hvornår får du dem udbetalt? Hvor meget får du? Lær om ferieåret, samtidighedsferie, og beregn dine egne feriepenge.",
+    keywords: [
+      "feriepenge",
+      "hvornår får man feriepenge",
+      "hvor meget feriepenge",
+      "feriepenge udbetaling",
+      "ferieår",
+      "samtidighedsferie",
+      "12,5 procent feriepenge",
+      "feriepenge beregning",
+      "ferieloven",
+      "feriefridage",
+    ],
+    openGraph: {
+      title: "Guide: Feriepenge - Hvornår og Hvor Meget?",
+      description: "Alt du skal vide om feriepenge i 2026: beregning, udbetaling og dine rettigheder.",
+      url: `${baseUrl}/blog/guide-feriepenge-hvornaar-og-hvor-meget`,
+      type: "article",
+    },
+    alternates: {
+      canonical: `${baseUrl}/blog/guide-feriepenge-hvornaar-og-hvor-meget`,
+    },
+  };
+}
 
 const faqItems = [
   {

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import { generatePageMetadata } from "@/lib/page-helpers";
 import BoligstoetteBeregner from "@/components/BoligstoetteBeregner";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
@@ -7,31 +7,9 @@ import { RelatedCalculators } from "@/components/RelatedCalculators";
 
 const baseUrl = "https://minberegner.dk";
 
-export const metadata: Metadata = {
-  title: "Boligstøtte beregner 2026 - Beregn din boligstøtte",
-  description:
-    "Beregn boligstøtte 2026. Eksempel: Husleje 6.000 kr, indkomst 18.000 kr → ca. 1.500-2.500 kr/md i støtte. Se hvad du kan få baseret på husleje, indkomst og husstand. Gratis beregner.",
-  keywords: [
-    "boligstøtte beregner",
-    "boligstøtte 2026",
-    "beregn boligstøtte",
-    "boligsikring",
-    "huslejetilskud",
-    "boligydelse",
-    "boligstøtte satser",
-    "udbetaling danmark boligstøtte",
-  ],
-  alternates: {
-    canonical: "https://minberegner.dk/boligstoette",
-  },
-  openGraph: {
-    title: "Boligstøtte beregner 2026 - Beregn din boligstøtte",
-    description:
-      "Find ud af hvor meget boligstøtte du kan få. Gratis online beregner med 2026-satser.",
-    url: "https://minberegner.dk/boligstoette",
-    type: "website",
-  },
-};
+export async function generateMetadata() {
+  return generatePageMetadata("boligstoette");
+}
 
 const faqItems = [
   {

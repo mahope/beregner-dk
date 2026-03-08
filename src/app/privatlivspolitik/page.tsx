@@ -1,22 +1,23 @@
 import type { Metadata } from "next";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import { getCurrentDomainConfig } from "@/lib/get-locale";
 
-const baseUrl = "https://minberegner.dk";
-
-export const metadata: Metadata = {
-  title: "Privatlivspolitik - MinBeregner.dk",
-  description:
-    "Læs om hvordan MinBeregner.dk håndterer dine data. Vi bruger privacy-fokuseret analytics uden cookies. Alle beregninger sker lokalt i din browser.",
-  openGraph: {
-    title: "Privatlivspolitik - MinBeregner.dk",
-    description: "Sådan håndterer vi dine data på MinBeregner.dk.",
-    url: `${baseUrl}/privatlivspolitik`,
-    type: "website",
-  },
-  alternates: {
-    canonical: `${baseUrl}/privatlivspolitik`,
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const dc = await getCurrentDomainConfig();
+  return {
+    title: `Privatlivspolitik - ${dc.siteName}`,
+    description: `Læs om hvordan ${dc.siteName} håndterer dine data. Vi bruger privacy-fokuseret analytics uden cookies. Alle beregninger sker lokalt i din browser.`,
+    openGraph: {
+      title: `Privatlivspolitik - ${dc.siteName}`,
+      description: `Sådan håndterer vi dine data på ${dc.siteName}.`,
+      url: `${dc.baseUrl}/privatlivspolitik`,
+      type: "website",
+    },
+    alternates: {
+      canonical: `${dc.baseUrl}/privatlivspolitik`,
+    },
+  };
+}
 
 export default function PrivatlivspolitikPage() {
   return (

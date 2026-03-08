@@ -1,92 +1,12 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import Link from "next/link";
 import { ChevronDown, Menu, X, Calculator } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
-
-type NavItem = {
-  name: string;
-  href?: string;
-  children?: { name: string; href: string; icon?: string }[];
-};
-
-const navigation: NavItem[] = [
-  {
-    name: "Økonomi",
-    children: [
-      { name: "💰 Løn efter skat", href: "/loen-efter-skat" },
-      { name: "💸 Brutto/Netto", href: "/brutto-netto" },
-      { name: "🏖️ Feriepenge", href: "/feriepenge" },
-      { name: "💼 Timepris", href: "/timepris" },
-      { name: "📊 Moms", href: "/moms" },
-      { name: "📋 Dagpenge", href: "/dagpenge" },
-      { name: "🏥 Sygedagpenge", href: "/sygedagpenge" },
-      { name: "👴 Pension", href: "/pension" },
-      { name: "🧓 Efterløn", href: "/efterloen" },
-      { name: "📈 Topskat", href: "/topskat" },
-      { name: "📋 Skattefradrag", href: "/skattefradrag" },
-      { name: "📈 Aktieskat", href: "/aktieskat" },
-      { name: "💀 Arveafgift", href: "/arveafgift" },
-    ],
-  },
-  {
-    name: "Bolig",
-    children: [
-      { name: "🏠 Boliglån", href: "/boliglaan" },
-      { name: "🏡 Boligstøtte", href: "/boligstoette" },
-      { name: "🏢 Husleje", href: "/husleje" },
-      { name: "🏢 Andelsbolig", href: "/andelsbolig" },
-      { name: "💸 Rentefradrag", href: "/rentefradrag" },
-      { name: "⚡ Elberegner", href: "/elberegner" },
-      { name: "☀️ Solceller", href: "/solceller" },
-      { name: "📐 Kvadratmeter", href: "/kvadratmeter" },
-      { name: "🏛️ Ejendomsskat", href: "/ejendomsvaerdiskat" },
-    ],
-  },
-  {
-    name: "Lån & Rente",
-    children: [
-      { name: "📈 Renteberegner", href: "/renteberegner" },
-      { name: "💳 Låneberegner", href: "/laaneberegner" },
-      { name: "💵 Forbrugslån", href: "/forbrugslaan" },
-      { name: "🚗 Billån", href: "/billaan" },
-      { name: "🚗 Leasing", href: "/leasing" },
-      { name: "🎯 Gældsfri", href: "/gaeldsfri" },
-      { name: "🎓 Studielån", href: "/studielaan" },
-      { name: "🐷 Opsparing", href: "/opsparing" },
-    ],
-  },
-  {
-    name: "Familie & Sundhed",
-    children: [
-      { name: "👶 Børnepenge", href: "/boernepenge" },
-      { name: "🤰 Barselsdagpenge", href: "/barselsdagpenge" },
-      { name: "🤰 Terminsdato", href: "/termin" },
-      { name: "🎓 SU", href: "/su" },
-      { name: "⛪ Konfirmation", href: "/konfirmation" },
-      { name: "💒 Bryllup", href: "/bryllup" },
-      { name: "⚖️ BMI", href: "/bmi" },
-      { name: "🔥 Kalorier", href: "/kalorier" },
-      { name: "📉 Vægttab", href: "/vaegttab" },
-      { name: "🎂 Alder", href: "/alder" },
-    ],
-  },
-  {
-    name: "Værktøjer",
-    children: [
-      { name: "➗ Procent", href: "/procent" },
-      { name: "🚗 Bil (værdtab)", href: "/bil" },
-      { name: "⛽ Brændstof", href: "/braendstof" },
-      { name: "💱 Valuta", href: "/valuta" },
-      { name: "✈️ Rejsebudget", href: "/rejsebudget" },
-      { name: "⏰ Tidsberegner", href: "/tidsberegner" },
-      { name: "📅 Dato", href: "/dato" },
-      { name: "🌍 Tidszone", href: "/tidszone" },
-    ],
-  },
-  { name: "Blog", href: "/blog" },
-];
+import { useLocale } from "./LocaleProvider";
+import { getNavigation, type NavItem } from "@/lib/navigation";
+import { getTranslations } from "@/lib/i18n";
 
 function DropdownMenu({ item }: { item: NavItem }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -145,7 +65,13 @@ function DropdownMenu({ item }: { item: NavItem }) {
   );
 }
 
-function MobileNav() {
+function MobileNav({
+  navigation,
+  allCalculatorsLabel,
+}: {
+  navigation: NavItem[];
+  allCalculatorsLabel: string;
+}) {
   const [isOpen, setIsOpen] = useState(false);
   const [openCategory, setOpenCategory] = useState<string | null>(null);
 
@@ -168,15 +94,17 @@ function MobileNav() {
               onClick={() => setIsOpen(false)}
             >
               <Calculator className="w-5 h-5" />
-              Alle beregnere
+              {allCalculatorsLabel}
             </Link>
-            
+
             {navigation.map((item) =>
               item.children ? (
                 <div key={item.name}>
                   <button
                     onClick={() =>
-                      setOpenCategory(openCategory === item.name ? null : item.name)
+                      setOpenCategory(
+                        openCategory === item.name ? null : item.name
+                      )
                     }
                     className="flex items-center justify-between w-full px-4 py-3 text-gray-900 dark:text-white font-medium hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
                   >
@@ -221,6 +149,10 @@ function MobileNav() {
 }
 
 export default function Header() {
+  const { locale, domainConfig } = useLocale();
+  const navigation = getNavigation(locale);
+  const t = getTranslations(locale);
+
   return (
     <header className="bg-white dark:bg-gray-900 shadow-sm dark:shadow-gray-800/50 sticky top-0 z-50 transition-colors border-b border-gray-100 dark:border-gray-800">
       <div className="max-w-6xl mx-auto px-4">
@@ -231,8 +163,8 @@ export default function Header() {
             className="flex items-center gap-2 text-xl font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
           >
             <Calculator className="w-6 h-6" />
-            <span className="hidden sm:inline">MinBeregner.dk</span>
-            <span className="sm:hidden">MinBeregner</span>
+            <span className="hidden sm:inline">{domainConfig.siteName}</span>
+            <span className="sm:hidden">{domainConfig.siteName.split(".")[0]}</span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -248,7 +180,10 @@ export default function Header() {
           {/* Mobile Navigation */}
           <div className="flex items-center gap-2 lg:hidden">
             <ThemeToggle />
-            <MobileNav />
+            <MobileNav
+              navigation={navigation}
+              allCalculatorsLabel={t.nav.allCalculators}
+            />
           </div>
         </div>
       </div>

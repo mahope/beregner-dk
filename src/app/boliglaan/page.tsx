@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import { generatePageMetadata } from "@/lib/page-helpers";
 import dynamic from "next/dynamic";
 const BoliglaanBeregner = dynamic(() => import("@/components/BoliglaanBeregner"));
 import FAQ from "@/components/FAQ";
@@ -55,12 +55,9 @@ const faqItems = [
   },
 ];
 
-export const metadata: Metadata = {
-  title: "Boliglånsberegner - Beregn din månedlige ydelse | Beregner.dk",
-  description:
-    "Beregn dit boliglån 2026. Eksempel: 2 mio. kr lån med 4% rente = ca. 10.500 kr/md. Se månedlig ydelse, skattefradrag (25,6%) og sammenlign fast vs. variabel rente.",
-  keywords: "boliglån, beregner, månedlig ydelse, realkreditlån, huslån, boligkøb, rente, skattefradrag",
-};
+export async function generateMetadata() {
+  return generatePageMetadata("boliglaan");
+}
 
 export default function BoliglaanPage() {
   return (

@@ -1,32 +1,36 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
+import { getCurrentDomainConfig } from "@/lib/get-locale";
 
-const baseUrl = "https://minberegner.dk";
+export async function generateMetadata(): Promise<Metadata> {
+  const dc = await getCurrentDomainConfig();
+  const baseUrl = dc.baseUrl;
 
-export const metadata: Metadata = {
-  title: "Fradrag 2026: Komplet guide til skattefradrag i Danmark | MinBeregner.dk",
-  description:
-    "Overblik over alle skattefradrag i 2026: Rentefradrag, kørselsfradrag, håndværkerfradrag, fagforening og mere. Se hvad du kan trække fra.",
-  keywords: [
-    "skattefradrag 2026",
-    "fradrag 2026",
-    "rentefradrag 2026",
-    "kørselsfradrag 2026",
-    "håndværkerfradrag 2026",
-    "befordringsfradrag",
-    "fagforening fradrag",
-  ],
-  openGraph: {
-    title: "Fradrag 2026: Komplet guide til skattefradrag i Danmark",
-    description: "Alle skattefradrag i 2026 — rentefradrag, kørsel, håndværker og mere.",
-    url: `${baseUrl}/blog/fradrag-2026-komplet-guide`,
-    type: "article",
-  },
-  alternates: {
-    canonical: `${baseUrl}/blog/fradrag-2026-komplet-guide`,
-  },
-};
+  return {
+    title: "Fradrag 2026: Komplet guide til skattefradrag i Danmark | MinBeregner.dk",
+    description:
+      "Overblik over alle skattefradrag i 2026: Rentefradrag, kørselsfradrag, håndværkerfradrag, fagforening og mere. Se hvad du kan trække fra.",
+    keywords: [
+      "skattefradrag 2026",
+      "fradrag 2026",
+      "rentefradrag 2026",
+      "kørselsfradrag 2026",
+      "håndværkerfradrag 2026",
+      "befordringsfradrag",
+      "fagforening fradrag",
+    ],
+    openGraph: {
+      title: "Fradrag 2026: Komplet guide til skattefradrag i Danmark",
+      description: "Alle skattefradrag i 2026 — rentefradrag, kørsel, håndværker og mere.",
+      url: `${baseUrl}/blog/fradrag-2026-komplet-guide`,
+      type: "article",
+    },
+    alternates: {
+      canonical: `${baseUrl}/blog/fradrag-2026-komplet-guide`,
+    },
+  };
+}
 
 const faqItems = [
   {
