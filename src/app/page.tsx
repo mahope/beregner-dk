@@ -3,10 +3,10 @@ import type { Metadata } from "next";
 import { FAQSchema } from "@/components/StructuredData";
 import SearchBar from "@/components/SearchBar";
 import { getTrendingHrefs } from "@/lib/trending";
-import NewsletterSignup from "@/components/NewsletterSignup";
 import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
 import { getHomePageData, getHomeCalculators } from "@/lib/home-data";
 import { HomeContent } from "@/components/HomeContent";
+import CountryFlag from "@/components/CountryFlag";
 
 export async function generateMetadata(): Promise<Metadata> {
   const domainConfig = await getCurrentDomainConfig();
@@ -195,16 +195,11 @@ export default async function Home() {
             <p className="text-gray-600 dark:text-gray-300">{data.sections.features.private.description}</p>
           </div>
           <div className="text-center">
-            <div className="text-4xl mb-4">{domainConfig.countryFlag}</div>
+            <div className="text-4xl mb-4"><CountryFlag locale={domainConfig.locale} className="w-10 h-7 inline-block" /></div>
             <h3 className="font-semibold text-lg mb-2 dark:text-white">{data.sections.features.local.title}</h3>
             <p className="text-gray-600 dark:text-gray-300">{data.sections.features.local.description}</p>
           </div>
         </div>
-      </section>
-
-      {/* Newsletter signup */}
-      <section className="mb-16 max-w-xl mx-auto">
-        <NewsletterSignup />
       </section>
 
       {/* SEO content - locale-specific */}

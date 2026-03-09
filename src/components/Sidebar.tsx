@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { SidebarAd } from "@/components/ads/AdBanner";
-import NewsletterSignup from "@/components/NewsletterSignup";
 import { useLocale } from "@/components/LocaleProvider";
 import { t } from "@/lib/i18n";
 import { getPopularCalculators } from "@/lib/calculator-list";
@@ -40,8 +39,6 @@ export default function Sidebar({ currentHref, adSlotId }: SidebarProps) {
             ))}
           </nav>
         </div>
-
-        <NewsletterSignup />
       </div>
     </aside>
   );

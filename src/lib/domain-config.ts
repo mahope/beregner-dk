@@ -72,12 +72,14 @@ export function getDomainConfig(hostname: string): DomainConfig {
 }
 
 /**
- * Get all domain configs (for hreflang generation).
- * Excludes localhost.
+ * Get all LIVE domain configs (for hreflang and footer cross-links).
+ * Excludes localhost and domains not yet launched.
  */
+const hiddenDomains = new Set(["localhost", "beregner.no"]);
+
 export function getAllDomainConfigs(): DomainConfig[] {
   return Object.entries(domainConfigs)
-    .filter(([key]) => key !== "localhost")
+    .filter(([key]) => !hiddenDomains.has(key))
     .map(([, config]) => config);
 }
 
