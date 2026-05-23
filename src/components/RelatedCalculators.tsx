@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { getLocale } from "@/lib/get-locale";
+import { getTranslations } from "@/lib/i18n";
 
 export interface Calculator {
   title: string;
@@ -296,10 +298,13 @@ export function RelatedCalculators({
   return <RelatedGrid calculators={related} />;
 }
 
-function RelatedGrid({ calculators }: { calculators: Calculator[] }) {
+async function RelatedGrid({ calculators }: { calculators: Calculator[] }) {
+  const locale = await getLocale();
+  const t = getTranslations(locale);
+
   return (
     <section className="mt-12 pt-8 border-t dark:border-gray-700">
-      <h2 className="text-xl font-bold mb-4 dark:text-white">Relaterede beregnere</h2>
+      <h2 className="text-xl font-bold mb-4 dark:text-white">{t.ui.relatedCalculators}</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {calculators.map((calc) => (
           <Link
