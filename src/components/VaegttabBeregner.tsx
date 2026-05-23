@@ -73,7 +73,7 @@ export default function VaegttabBeregner() {
   }, [vaegt, maalVaegt, hoejde, alder, koen, aktivitet, uger]);
 
   useEffect(() => {
-    initScrollDepthTracking("vaegttab");
+    return initScrollDepthTracking("vaegttab");
   }, []);
 
   const resultat = useMemo(() => {

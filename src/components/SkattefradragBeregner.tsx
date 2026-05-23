@@ -82,7 +82,7 @@ export default function SkattefradragBeregner() {
     });
   }, [afstandKm, arbejdsdage, aarligRente, fagforening, aKasse, haandvaerker, serviceydelser, donationer, oevrigeFradrag]);
 
-  useEffect(() => { initScrollDepthTracking("skattefradrag"); }, []);
+  useEffect(() => initScrollDepthTracking("skattefradrag"), []);
 
   const resultat = useMemo(() => {
     // Kørselsfradrag

@@ -56,7 +56,7 @@ export default function AndelsboligBeregner() {
   }, [andelPris, boligafgift, forbedringer, udbetalingProcent, laanRente, laanAar, andelskrone, maanedligHusleje]);
 
   useEffect(() => {
-    initScrollDepthTracking("andelsbolig");
+    return initScrollDepthTracking("andelsbolig");
   }, []);
 
   const resultat = useMemo(() => {

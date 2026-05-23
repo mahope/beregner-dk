@@ -58,7 +58,7 @@ export default function SygedagpengeBeregner() {
   }, [ansaettelse, maanedsloen, arbejdstimer, sygedage]);
 
   useEffect(() => {
-    initScrollDepthTracking("sygedagpenge");
+    return initScrollDepthTracking("sygedagpenge");
   }, []);
 
   const resultat = useMemo(() => {
