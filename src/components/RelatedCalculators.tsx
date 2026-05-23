@@ -298,19 +298,19 @@ export function RelatedCalculators({
 
 function RelatedGrid({ calculators }: { calculators: Calculator[] }) {
   return (
-    <section className="mt-12 pt-8 border-t">
-      <h2 className="text-xl font-bold mb-4">Relaterede beregnere</h2>
+    <section className="mt-12 pt-8 border-t dark:border-gray-700">
+      <h2 className="text-xl font-bold mb-4 dark:text-white">Relaterede beregnere</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {calculators.map((calc) => (
           <Link
             key={calc.href}
             href={calc.href}
-            className="p-4 bg-white rounded-lg border hover:shadow-md transition-shadow flex items-center gap-3"
+            className="p-4 bg-white dark:bg-gray-800 rounded-lg border dark:border-gray-700 hover:shadow-md dark:hover:bg-gray-700 transition-shadow flex items-center gap-3"
           >
             {calc.icon && <span className="text-2xl">{calc.icon}</span>}
             <div>
-              <p className="font-medium">{calc.title}</p>
-              <p className="text-sm text-gray-500">{calc.description}</p>
+              <p className="font-medium dark:text-white">{calc.title}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{calc.description}</p>
             </div>
           </Link>
         ))}
