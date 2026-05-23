@@ -20,6 +20,3 @@ export function t(locale: Locale, path: string): string {
   }
   return typeof result === "string" ? result : path;
 }
-
-export const supportedLocales: Locale[] = ["da", "no", "se"];
-export const defaultLocale: Locale = "da";
