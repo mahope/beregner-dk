@@ -19,14 +19,14 @@ export default function CookieConsent() {
 
   const accept = () => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ date: Date.now(), ads: false }));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ date: Date.now(), accepted: true }));
     } catch (_) {}
     setVisible(false);
   };
 
   const decline = () => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ date: Date.now(), ads: false }));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ date: Date.now(), accepted: false }));
     } catch (_) {}
     setVisible(false);
   };
