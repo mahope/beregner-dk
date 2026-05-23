@@ -14,7 +14,6 @@ import { Share2, Copy, Check, Link2, Twitter, Facebook, Mail, QrCode, X } from '
 import {
   ShareableLink,
   copyToClipboard,
-  createShortlink
 } from '@/lib/calculation-state';
 import { trackShare, trackResultCopied } from '@/lib/analytics';
 
@@ -32,7 +31,6 @@ export function ShareCalculation({
   const [isOpen, setIsOpen] = useState(false);
   const [shareableLink, setShareableLink] = useState<ShareableLink | null>(null);
   const [isCopied, setIsCopied] = useState(false);
-  const [isCreatingShortlink, setIsCreatingShortlink] = useState(false);
   const [showQr, setShowQr] = useState(false);
   
   const modalRef = useRef<HTMLDivElement>(null);
@@ -99,7 +97,7 @@ export function ShareCalculation({
   const handleCopy = async () => {
     if (!shareableLink) return;
     
-    const url = shareableLink.shortUrl || shareableLink.fullUrl;
+    const url = shareableLink.fullUrl;
     const success = await copyToClipboard(url);
     
     if (success) {
@@ -109,16 +107,7 @@ export function ShareCalculation({
     }
   };
 
-  const handleCreateShortlink = async () => {
-    if (!shareableLink || shareableLink.shortUrl) return;
-    
-    setIsCreatingShortlink(true);
-    const result = await createShortlink(shareableLink.fullUrl);
-    setShareableLink(result);
-    setIsCreatingShortlink(false);
-  };
-
-  const shareUrl = shareableLink?.shortUrl || shareableLink?.fullUrl || '';
+  const shareUrl = shareableLink?.fullUrl || '';
   const shareText = resultSummary 
     ? `${calculatorName}: ${resultSummary}` 
     : `Se min beregning på ${calculatorName}`;
@@ -208,16 +197,6 @@ export function ShareCalculation({
                   </button>
                 </div>
 
-                {/* Shortlink button */}
-                {!shareableLink?.shortUrl && (
-                  <button
-                    onClick={handleCreateShortlink}
-                    disabled={isCreatingShortlink}
-                    className="mt-2 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 disabled:text-gray-400"
-                  >
-                    {isCreatingShortlink ? 'Opretter kort link...' : 'Opret kort link'}
-                  </button>
-                )}
               </div>
 
               {/* Social Share */}
