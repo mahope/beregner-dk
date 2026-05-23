@@ -16,6 +16,71 @@ import {
   copyToClipboard,
 } from '@/lib/calculation-state';
 import { trackShare, trackResultCopied } from '@/lib/analytics';
+import { useLocale } from '@/components/LocaleProvider';
+import type { Locale } from '@/lib/i18n';
+
+const shareLabels = {
+  da: {
+    shareButton: "Del beregning",
+    title: "Del din beregning",
+    subtitle: "Andre kan se og genbruge dine indtastninger",
+    close: "Luk dialog",
+    linkLabel: "Link til beregning",
+    linkAria: "Delbart link",
+    copied: "Kopieret!",
+    copyLink: "Kopier link",
+    socialLabel: "Del på sociale medier",
+    twitter: "Del på Twitter",
+    facebook: "Del på Facebook",
+    email: "Del via email",
+    showQr: "Vis QR-kode",
+    hideQr: "Skjul QR-kode",
+    scanQr: "Scan for at åbne beregningen",
+    result: "Resultat",
+    closeButton: "Luk",
+    shareText: "Se min beregning på",
+  },
+  no: {
+    shareButton: "Del beregning",
+    title: "Del din beregning",
+    subtitle: "Andre kan se og gjenbruke dine innstillinger",
+    close: "Lukk dialog",
+    linkLabel: "Lenke til beregning",
+    linkAria: "Delbar lenke",
+    copied: "Kopiert!",
+    copyLink: "Kopier lenke",
+    socialLabel: "Del på sosiale medier",
+    twitter: "Del på Twitter",
+    facebook: "Del på Facebook",
+    email: "Del via e-post",
+    showQr: "Vis QR-kode",
+    hideQr: "Skjul QR-kode",
+    scanQr: "Skann for å åpne beregningen",
+    result: "Resultat",
+    closeButton: "Lukk",
+    shareText: "Se min beregning på",
+  },
+  se: {
+    shareButton: "Dela beräkning",
+    title: "Dela din beräkning",
+    subtitle: "Andra kan se och återanvända dina inmatningar",
+    close: "Stäng dialog",
+    linkLabel: "Länk till beräkning",
+    linkAria: "Delbar länk",
+    copied: "Kopierat!",
+    copyLink: "Kopiera länk",
+    socialLabel: "Dela på sociala medier",
+    twitter: "Dela på Twitter",
+    facebook: "Dela på Facebook",
+    email: "Dela via e-post",
+    showQr: "Visa QR-kod",
+    hideQr: "Dölj QR-kod",
+    scanQr: "Skanna för att öppna beräkningen",
+    result: "Resultat",
+    closeButton: "Stäng",
+    shareText: "Se min beräkning på",
+  },
+} as const;
 
 interface ShareCalculationProps {
   getShareableLink: () => ShareableLink;
@@ -28,6 +93,8 @@ export function ShareCalculation({
   calculatorName,
   resultSummary,
 }: ShareCalculationProps) {
+  const { locale } = useLocale();
+  const l = shareLabels[locale as Locale] || shareLabels.da;
   const [isOpen, setIsOpen] = useState(false);
   const [shareableLink, setShareableLink] = useState<ShareableLink | null>(null);
   const [isCopied, setIsCopied] = useState(false);
@@ -108,9 +175,9 @@ export function ShareCalculation({
   };
 
   const shareUrl = shareableLink?.fullUrl || '';
-  const shareText = resultSummary 
-    ? `${calculatorName}: ${resultSummary}` 
-    : `Se min beregning på ${calculatorName}`;
+  const shareText = resultSummary
+    ? `${calculatorName}: ${resultSummary}`
+    : `${l.shareText} ${calculatorName}`;
 
   const socialLinks = {
     twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`,
@@ -123,10 +190,10 @@ export function ShareCalculation({
       <button
         onClick={handleOpen}
         className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
-        aria-label="Del beregning"
+        aria-label={l.shareButton}
       >
         <Share2 className="w-4 h-4" />
-        <span>Del beregning</span>
+        <span>{l.shareButton}</span>
       </button>
 
       {/* Modal */}
@@ -146,17 +213,17 @@ export function ShareCalculation({
             <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex items-start justify-between">
               <div>
                 <h2 id="share-modal-title" className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                  Del din beregning
+                  {l.title}
                 </h2>
                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                  Andre kan se og genbruge dine indtastninger
+                  {l.subtitle}
                 </p>
               </div>
               <button
                 ref={closeButtonRef}
                 onClick={handleClose}
                 className="p-1 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                aria-label="Luk dialog"
+                aria-label={l.close}
               >
                 <X className="w-5 h-5" />
               </button>
@@ -167,7 +234,7 @@ export function ShareCalculation({
               {/* URL Copy Section */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Link til beregning
+                  {l.linkLabel}
                 </label>
                 <div className="flex gap-2">
                   <div className="flex-1 relative">
@@ -175,14 +242,14 @@ export function ShareCalculation({
                       type="text"
                       value={shareUrl}
                       readOnly
-                      aria-label="Delbart link"
+                      aria-label={l.linkAria}
                       className="w-full px-3 py-2 pr-10 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-300 truncate"
                     />
                     <Link2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" aria-hidden="true" />
                   </div>
                   <button
                     onClick={handleCopy}
-                    aria-label={isCopied ? "Kopieret!" : "Kopier link"}
+                    aria-label={isCopied ? l.copied : l.copyLink}
                     className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
                       isCopied
                         ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300'
@@ -202,7 +269,7 @@ export function ShareCalculation({
               {/* Social Share */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Del på sociale medier
+                  {l.socialLabel}
                 </label>
                 <div className="flex gap-3">
                   <a
@@ -211,7 +278,7 @@ export function ShareCalculation({
                     rel="noopener noreferrer"
                     onClick={() => trackShare(calculatorName, 'twitter')}
                     className="flex items-center justify-center w-12 h-12 rounded-full bg-[#1DA1F2] text-white hover:opacity-90 transition-opacity"
-                    aria-label="Del på Twitter"
+                    aria-label={l.twitter}
                   >
                     <Twitter className="w-5 h-5" />
                   </a>
@@ -221,7 +288,7 @@ export function ShareCalculation({
                     rel="noopener noreferrer"
                     onClick={() => trackShare(calculatorName, 'facebook')}
                     className="flex items-center justify-center w-12 h-12 rounded-full bg-[#1877F2] text-white hover:opacity-90 transition-opacity"
-                    aria-label="Del på Facebook"
+                    aria-label={l.facebook}
                   >
                     <Facebook className="w-5 h-5" />
                   </a>
@@ -229,7 +296,7 @@ export function ShareCalculation({
                     href={socialLinks.email}
                     onClick={() => trackShare(calculatorName, 'email')}
                     className="flex items-center justify-center w-12 h-12 rounded-full bg-gray-600 text-white hover:opacity-90 transition-opacity"
-                    aria-label="Del via email"
+                    aria-label={l.email}
                   >
                     <Mail className="w-5 h-5" />
                   </a>
@@ -240,7 +307,7 @@ export function ShareCalculation({
                         ? 'bg-blue-600 text-white'
                         : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                     }`}
-                    aria-label={showQr ? "Skjul QR-kode" : "Vis QR-kode"}
+                    aria-label={showQr ? l.hideQr : l.showQr}
                     aria-pressed={showQr}
                   >
                     <QrCode className="w-5 h-5" aria-hidden="true" />
@@ -259,7 +326,7 @@ export function ShareCalculation({
                     />
                   </div>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                    Scan for at åbne beregningen
+                    {l.scanQr}
                   </p>
                 </div>
               )}
@@ -268,7 +335,7 @@ export function ShareCalculation({
               {resultSummary && (
                 <div className="p-4 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
                   <p className="text-sm font-medium text-blue-900 dark:text-blue-200">
-                    Resultat: {resultSummary}
+                    {l.result}: {resultSummary}
                   </p>
                 </div>
               )}
@@ -280,7 +347,7 @@ export function ShareCalculation({
                 onClick={handleClose}
                 className="w-full py-2 text-gray-600 dark:text-gray-400 font-medium hover:text-gray-800 dark:hover:text-gray-200 transition-colors"
               >
-                Luk
+                {l.closeButton}
               </button>
             </div>
           </div>
