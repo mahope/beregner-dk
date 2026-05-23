@@ -105,16 +105,8 @@ export function WebSiteSchema({ name, url, description }: WebSiteSchemaProps) {
       name,
       logo: {
         "@type": "ImageObject",
-        url: `${url}/logo.png`,
+        url: `${url}/icon.svg`,
       },
-    },
-    potentialAction: {
-      "@type": "SearchAction",
-      target: {
-        "@type": "EntryPoint",
-        urlTemplate: `${url}/?q={search_term_string}`,
-      },
-      "query-input": "required name=search_term_string",
     },
   };
 
@@ -160,13 +152,8 @@ export function OrganizationSchema({
     "@type": "Organization",
     name,
     url,
-    logo: `${url}/logo.png`,
+    logo: `${url}/icon.svg`,
     description,
-    sameAs: [],
-    contactPoint: {
-      "@type": "ContactPoint",
-      contactType: "customer support",
-    },
   };
 
   return (
