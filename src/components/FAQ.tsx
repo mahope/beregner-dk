@@ -1,6 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { useLocale } from "@/components/LocaleProvider";
+import { t } from "@/lib/i18n";
+import type { Locale } from "@/lib/i18n";
 
 interface FAQItem {
   question: string;
@@ -12,12 +15,14 @@ interface FAQProps {
   title?: string;
 }
 
-export function FAQ({ items, title = "Ofte stillede spørgsmål" }: FAQProps) {
+export function FAQ({ items, title }: FAQProps) {
+  const { locale } = useLocale();
+  const faqTitle = title || t(locale as Locale, "ui.faq");
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   return (
     <section className="mt-12">
-      <h2 className="text-2xl font-bold mb-6 dark:text-white">{title}</h2>
+      <h2 className="text-2xl font-bold mb-6 dark:text-white">{faqTitle}</h2>
       <div className="space-y-3">
         {items.map((item, index) => (
           <div
