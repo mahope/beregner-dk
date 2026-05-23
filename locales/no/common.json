@@ -30,6 +30,7 @@
     "loading": "Beregner...",
     "error": "Noe gikk galt",
     "tryAgain": "Prøv igjen",
+    "errorDescription": "Det oppsto en uventet feil. Prøv å laste inn siden på nytt.",
     "readMore": "Les mer",
     "seeAll": "Se alle",
     "faq": "Ofte stilte spørsmål",

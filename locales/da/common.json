@@ -30,6 +30,7 @@
     "loading": "Beregner...",
     "error": "Noget gik galt",
     "tryAgain": "Prøv igen",
+    "errorDescription": "Der opstod en uventet fejl. Prøv at genindlæse siden.",
     "readMore": "Læs mere",
     "seeAll": "Se alle",
     "faq": "Ofte stillede spørgsmål",

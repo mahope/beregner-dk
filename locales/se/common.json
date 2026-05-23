@@ -30,6 +30,7 @@
     "loading": "Beräknar...",
     "error": "Något gick fel",
     "tryAgain": "Försök igen",
+    "errorDescription": "Ett oväntat fel uppstod. Försök att ladda om sidan.",
     "readMore": "Läs mer",
     "seeAll": "Se alla",
     "faq": "Vanliga frågor",
