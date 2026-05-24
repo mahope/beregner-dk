@@ -239,22 +239,22 @@ export default function BoligstoetteBeregner() {
             {resultat.maanedligBoligstoette > 0 ? (
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="bg-white p-4 rounded-lg shadow-sm">
-                    <p className="text-sm text-gray-600">Månedlig støtte</p>
-                    <p className="text-3xl font-bold text-green-600">
+                  <div className="bg-white dark:bg-gray-700 p-4 rounded-lg shadow-sm">
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Månedlig støtte</p>
+                    <p className="text-3xl font-bold text-green-600 dark:text-green-400">
                       {formatNumber(resultat.maanedligBoligstoette, locale)} kr
                     </p>
                   </div>
 
-                  <div className="bg-white p-4 rounded-lg shadow-sm">
-                    <p className="text-sm text-gray-600">Årlig støtte</p>
-                    <p className="text-2xl font-bold text-green-600">
+                  <div className="bg-white dark:bg-gray-700 p-4 rounded-lg shadow-sm">
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Årlig støtte</p>
+                    <p className="text-2xl font-bold text-green-600 dark:text-green-400">
                       {formatNumber(resultat.aarligBoligstoette, locale)} kr
                     </p>
                   </div>
                 </div>
 
-                <div className="mt-4 text-sm text-gray-600">
+                <div className="mt-4 text-sm text-gray-600 dark:text-gray-400">
                   <p>
                     Din egenbetaling: {formatNumber(Math.round(resultat.egenbetaling / 12), locale)} kr/md
                   </p>
@@ -284,8 +284,8 @@ export default function BoligstoetteBeregner() {
         )}
 
         {/* Info boks */}
-        <div className="mt-6 p-4 bg-gray-50 rounded-lg text-sm text-gray-600">
-          <h4 className="font-semibold text-gray-800 mb-2">Om boligstøtte</h4>
+        <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-sm text-gray-600 dark:text-gray-400">
+          <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-2">Om boligstøtte</h4>
           <ul className="space-y-1 list-disc list-inside">
             <li>Boligstøtte er et skattefrit tilskud til din husleje</li>
             <li>Du skal bo til leje i en helårsbolig</li>

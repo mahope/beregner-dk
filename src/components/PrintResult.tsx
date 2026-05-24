@@ -21,22 +21,32 @@ export function PrintResult({
   const { locale, domainConfig } = useLocale();
   const intlLocale = getIntlLocale(locale);
   const handlePrint = () => {
-    // Tilføj print-meta data til document for styling
     const printMeta = document.createElement("div");
     printMeta.id = "print-meta";
-    printMeta.innerHTML = `
-      <div class="print-header">
-        <div class="print-logo">📊 ${domainConfig.siteName}</div>
-        <div class="print-title">${calculatorName}</div>
-        <div class="print-date">${locale === "se" ? "Utskrivet" : "Udskrevet"}: ${new Date().toLocaleDateString(intlLocale, {
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-        })}</div>
-      </div>
-    `;
+
+    const header = document.createElement("div");
+    header.className = "print-header";
+
+    const logo = document.createElement("div");
+    logo.className = "print-logo";
+    logo.textContent = `📊 ${domainConfig.siteName}`;
+
+    const title = document.createElement("div");
+    title.className = "print-title";
+    title.textContent = calculatorName;
+
+    const date = document.createElement("div");
+    date.className = "print-date";
+    date.textContent = `${locale === "se" ? "Utskrivet" : "Udskrevet"}: ${new Date().toLocaleDateString(intlLocale, {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    })}`;
+
+    header.append(logo, title, date);
+    printMeta.appendChild(header);
 
     // Find print area
     const printArea = printAreaSelector

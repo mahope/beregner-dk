@@ -37,7 +37,7 @@ export async function GET() {
         example: "/api/v1/loen?brutto=500000&kommuneskat=25.07",
       },
     },
-    rate_limit: "100 kald/dag (gratis)",
+    rate_limit: "Ingen begrænsning (fair use)",
     attribution: "Powered by MinBeregner.dk",
   });
 }

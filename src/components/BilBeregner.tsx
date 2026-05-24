@@ -437,46 +437,46 @@ export default function BilBeregner() {
       </div>
 
       {/* Resultat */}
-      <div className="p-6 bg-white rounded-xl shadow-sm border">
+      <div className="p-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm border dark:border-gray-700">
         <div className="text-center mb-6">
-          <p className="text-sm text-gray-500 mb-1">{l.samletMaanedlig}</p>
-          <p className="text-5xl font-bold text-blue-600">
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">{l.samletMaanedlig}</p>
+          <p className="text-5xl font-bold text-blue-600 dark:text-blue-400">
             {formatKr(resultat.maanedligt)}
           </p>
-          <p className="text-xl text-gray-500 mt-2">
+          <p className="text-xl text-gray-500 dark:text-gray-400 mt-2">
             {resultat.prKm} kr/km
           </p>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          <div className="p-4 bg-red-50 rounded-lg text-center">
-            <p className="text-sm text-red-600">{l.braendstofStroem}</p>
-            <p className="font-bold text-lg">{formatKr(resultat.braendstof)}/&#229;r</p>
+          <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg text-center">
+            <p className="text-sm text-red-600 dark:text-red-400">{l.braendstofStroem}</p>
+            <p className="font-bold text-lg dark:text-white">{formatKr(resultat.braendstof)}/&#229;r</p>
           </div>
-          <div className="p-4 bg-orange-50 rounded-lg text-center">
-            <p className="text-sm text-orange-600">{l.vaerditabLabel}</p>
-            <p className="font-bold text-lg">{formatKr(resultat.vaerditab)}/&#229;r</p>
+          <div className="p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg text-center">
+            <p className="text-sm text-orange-600 dark:text-orange-400">{l.vaerditabLabel}</p>
+            <p className="font-bold text-lg dark:text-white">{formatKr(resultat.vaerditab)}/&#229;r</p>
           </div>
-          <div className="p-4 bg-blue-50 rounded-lg text-center">
-            <p className="text-sm text-blue-600">{l.forsikringResultat}</p>
-            <p className="font-bold text-lg">{formatKr(resultat.forsikring)}/&#229;r</p>
+          <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-center">
+            <p className="text-sm text-blue-600 dark:text-blue-400">{l.forsikringResultat}</p>
+            <p className="font-bold text-lg dark:text-white">{formatKr(resultat.forsikring)}/&#229;r</p>
           </div>
-          <div className="p-4 bg-purple-50 rounded-lg text-center">
-            <p className="text-sm text-purple-600">{l.vaegtafgift}</p>
-            <p className="font-bold text-lg">{formatKr(resultat.vaegt)}/&#229;r</p>
+          <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg text-center">
+            <p className="text-sm text-purple-600 dark:text-purple-400">{l.vaegtafgift}</p>
+            <p className="font-bold text-lg dark:text-white">{formatKr(resultat.vaegt)}/&#229;r</p>
           </div>
-          <div className="p-4 bg-green-50 rounded-lg text-center">
-            <p className="text-sm text-green-600">{l.service}</p>
-            <p className="font-bold text-lg">{formatKr(resultat.service)}/&#229;r</p>
+          <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
+            <p className="text-sm text-green-600 dark:text-green-400">{l.service}</p>
+            <p className="font-bold text-lg dark:text-white">{formatKr(resultat.service)}/&#229;r</p>
           </div>
-          <div className="p-4 bg-gray-50 rounded-lg text-center">
-            <p className="text-sm text-gray-600">{l.daek}</p>
-            <p className="font-bold text-lg">{formatKr(resultat.daek)}/&#229;r</p>
+          <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg text-center">
+            <p className="text-sm text-gray-600 dark:text-gray-400">{l.daek}</p>
+            <p className="font-bold text-lg dark:text-white">{formatKr(resultat.daek)}/&#229;r</p>
           </div>
         </div>
 
-        <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-          <p className="text-lg font-semibold text-blue-800 text-center">
+        <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+          <p className="text-lg font-semibold text-blue-800 dark:text-blue-200 text-center">
             {l.samletAarlig} {formatKr(resultat.aarligt)}
           </p>
         </div>

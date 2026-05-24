@@ -4,6 +4,7 @@ import { FAQSchema } from "@/components/StructuredData";
 import SearchBar from "@/components/SearchBar";
 import { getTrendingHrefs } from "@/lib/trending";
 import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
+import { getAllDomainConfigs } from "@/lib/domain-config";
 import { getHomePageData, getHomeCalculators } from "@/lib/home-data";
 import { HomeContent } from "@/components/HomeContent";
 import CountryFlag from "@/components/CountryFlag";
@@ -12,6 +13,12 @@ export async function generateMetadata(): Promise<Metadata> {
   const domainConfig = await getCurrentDomainConfig();
   const data = getHomePageData(domainConfig.locale);
   const baseUrl = domainConfig.baseUrl;
+  const allDomains = getAllDomainConfigs();
+
+  const languages: Record<string, string> = {};
+  for (const dc of allDomains) {
+    languages[dc.hreflangCode] = dc.baseUrl;
+  }
 
   return {
     title: data.meta.title,
@@ -25,6 +32,7 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     alternates: {
       canonical: baseUrl,
+      languages,
     },
   };
 }

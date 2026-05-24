@@ -19,8 +19,6 @@ export interface CalculationState {
 
 export interface ShareableLink {
   fullUrl: string;
-  shortUrl?: string;
-  shortCode?: string;
 }
 
 // Constants
@@ -119,10 +117,7 @@ export function generateShareableLink(state: CalculationState): ShareableLink {
   
   const fullUrl = `${baseUrl}?${STATE_PARAM}=${encoded}`;
   
-  return {
-    fullUrl,
-    shortCode: undefined, // Will be set by API if shortlink is generated
-  };
+  return { fullUrl };
 }
 
 /**
@@ -148,53 +143,6 @@ export async function copyToClipboard(text: string): Promise<boolean> {
   } catch (e) {
     console.error('Failed to copy to clipboard:', e);
     return false;
-  }
-}
-
-/**
- * Create shortlink via API
- */
-export async function createShortlink(fullUrl: string): Promise<ShareableLink> {
-  try {
-    const response = await fetch('/api/shortlink', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url: fullUrl }),
-    });
-    
-    if (!response.ok) {
-      throw new Error('Failed to create shortlink');
-    }
-    
-    const data = await response.json();
-    
-    return {
-      fullUrl,
-      shortUrl: data.shortUrl,
-      shortCode: data.code,
-    };
-  } catch (e) {
-    console.error('Failed to create shortlink:', e);
-    return { fullUrl };
-  }
-}
-
-/**
- * Resolve shortlink to full URL
- */
-export async function resolveShortlink(code: string): Promise<string | null> {
-  try {
-    const response = await fetch(`/api/shortlink/${code}`);
-    
-    if (!response.ok) {
-      return null;
-    }
-    
-    const data = await response.json();
-    return data.url;
-  } catch (e) {
-    console.error('Failed to resolve shortlink:', e);
-    return null;
   }
 }
 

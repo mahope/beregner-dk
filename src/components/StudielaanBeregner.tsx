@@ -49,7 +49,7 @@ export default function StudielaanBeregner() {
     });
   }, [samletGaeld, rente, loebetid, ekstraAfdrag, maanedligIndkomst]);
 
-  useEffect(() => { initScrollDepthTracking("studielaan"); }, []);
+  useEffect(() => initScrollDepthTracking("studielaan"), []);
 
   const resultat = useMemo(() => {
     const gaeld = Number(samletGaeld);

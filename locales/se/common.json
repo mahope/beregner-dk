@@ -30,6 +30,7 @@
     "loading": "Beräknar...",
     "error": "Något gick fel",
     "tryAgain": "Försök igen",
+    "errorDescription": "Ett oväntat fel uppstod. Försök att ladda om sidan.",
     "readMore": "Läs mer",
     "seeAll": "Se alla",
     "faq": "Vanliga frågor",
@@ -63,7 +64,13 @@
     "assistantAllCalc": "alla kalkylatorer",
     "assistantTryLabel": "Prova t.ex.:",
     "assistantBestMatch": "Bästa träff:",
-    "assistantRelevant": "relevanta kalkylatorer:"
+    "assistantRelevant": "relevanta kalkylatorer:",
+    "validationRequired": "Vänligen ange ett värde",
+    "validationInvalidNumber": "Vänligen ange ett giltigt tal",
+    "validationNegative": "Värdet kan inte vara negativt",
+    "validationRange": "Ange ett tal mellan {min} och {max}",
+    "validationMin": "Ange ett värde på minst {min}",
+    "validationMax": "Ange ett värde på högst {max}"
   },
   "categories": {
     "economy": "Ekonomi",

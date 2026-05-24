@@ -423,3 +423,98 @@ describe("Skattefradrag besparelse", () => {
     expect(beregnBesparelse(0)).toBe(0);
   });
 });
+
+// --- Opsparing (renters rente) ---
+describe("Opsparing beregning", () => {
+  function simulerOpsparing(
+    startBeloeb: number,
+    maanedligIndbetaling: number,
+    aarligRentePct: number,
+    periodeAar: number
+  ) {
+    const maanedligRente = aarligRentePct / 100 / 12;
+    const antalMaaneder = periodeAar * 12;
+    let saldo = startBeloeb;
+    let samletIndskud = startBeloeb;
+    let samletRente = 0;
+
+    for (let m = 1; m <= antalMaaneder; m++) {
+      saldo += maanedligIndbetaling;
+      samletIndskud += maanedligIndbetaling;
+      const renteBeloeb = saldo * maanedligRente;
+      saldo += renteBeloeb;
+      samletRente += renteBeloeb;
+    }
+
+    return { slutSaldo: Math.round(saldo), samletIndskud, samletRente: Math.round(samletRente) };
+  }
+
+  test("0% rente giver kun indskud tilbage", () => {
+    const r = simulerOpsparing(10000, 1000, 0, 5);
+    expect(r.slutSaldo).toBe(70000);
+    expect(r.samletIndskud).toBe(70000);
+    expect(r.samletRente).toBe(0);
+  });
+
+  test("renters rente med startbeloeb", () => {
+    const r = simulerOpsparing(100000, 0, 5, 10);
+    expect(r.slutSaldo).toBeGreaterThan(160000);
+    expect(r.slutSaldo).toBeLessThan(170000);
+    expect(r.samletIndskud).toBe(100000);
+    expect(r.samletRente).toBeGreaterThan(60000);
+  });
+
+  test("maanedlige indbetalinger uden startbeloeb", () => {
+    const r = simulerOpsparing(0, 1000, 5, 10);
+    expect(r.samletIndskud).toBe(120000);
+    expect(r.slutSaldo).toBeGreaterThan(r.samletIndskud);
+  });
+
+  test("1 aars opsparing ved 3%", () => {
+    const r = simulerOpsparing(0, 1000, 3, 1);
+    expect(r.samletIndskud).toBe(12000);
+    expect(r.slutSaldo).toBeGreaterThan(12000);
+    expect(r.slutSaldo).toBeLessThan(12300);
+  });
+});
+
+// --- Termin beregning ---
+describe("Termin beregning", () => {
+  function beregnTermin(sidsteMenstruation: Date): Date {
+    const termin = new Date(sidsteMenstruation);
+    termin.setDate(termin.getDate() + 280);
+    return termin;
+  }
+
+  function beregnUge(sidsteMenstruation: Date, dato: Date): number {
+    const diffMs = dato.getTime() - sidsteMenstruation.getTime();
+    const diffDage = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    return Math.floor(diffDage / 7);
+  }
+
+  test("termin er 280 dage efter sidste menstruation", () => {
+    const sm = new Date(2026, 0, 1);
+    const termin = beregnTermin(sm);
+    const diffDage = Math.round((termin.getTime() - sm.getTime()) / (1000 * 60 * 60 * 24));
+    expect(diffDage).toBe(280);
+  });
+
+  test("termin er ca. 40 uger", () => {
+    const sm = new Date(2026, 0, 1);
+    const termin = beregnTermin(sm);
+    const uger = beregnUge(sm, termin);
+    expect(uger).toBeGreaterThanOrEqual(39);
+    expect(uger).toBeLessThanOrEqual(40);
+  });
+
+  test("uge 0 paa starddato", () => {
+    const sm = new Date(2026, 0, 1);
+    expect(beregnUge(sm, sm)).toBe(0);
+  });
+
+  test("7 dage er uge 1", () => {
+    const sm = new Date(2026, 0, 1);
+    const enUge = new Date(2026, 0, 8);
+    expect(beregnUge(sm, enUge)).toBe(1);
+  });
+});

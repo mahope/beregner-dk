@@ -1,9 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { Search } from "lucide-react";
-import { beregnere } from "@/lib/categories";
+import { useLocale } from "@/components/LocaleProvider";
+import { getCalculatorsByLocale } from "@/lib/calculator-list";
+import type { Locale } from "@/lib/i18n";
 
 function fuzzyMatch(query: string, text: string): boolean {
   const q = query.toLowerCase();
@@ -24,7 +26,17 @@ function getUrlSuggestion(): string | null {
   return path.length > 1 ? path : null;
 }
 
+const searchText = {
+  da: { placeholder: "Søg efter en beregner...", hint: "Mente du en af disse?", noMatch: "Ingen beregnere matchede din søgning. Prøv et andet søgeord." },
+  no: { placeholder: "Søk etter en kalkulator...", hint: "Mente du en av disse?", noMatch: "Ingen kalkulatorer matchet søket ditt. Prøv et annet søkeord." },
+  se: { placeholder: "Sök efter en kalkylator...", hint: "Menade du en av dessa?", noMatch: "Inga kalkylatorer matchade din sökning. Prova ett annat sökord." },
+} as const;
+
 export default function NotFoundSearch() {
+  const { locale } = useLocale();
+  const l = locale as Locale;
+  const texts = searchText[l] || searchText.da;
+  const allCalcs = useMemo(() => getCalculatorsByLocale(l), [l]);
   const [query, setQuery] = useState("");
   const [urlHint, setUrlHint] = useState<string | null>(null);
 
@@ -34,19 +46,17 @@ export default function NotFoundSearch() {
       setUrlHint(hint);
       setQuery(hint);
     }
-    // Log 404 to Plausible
     if (typeof window !== "undefined" && window.plausible) {
       window.plausible("404", { props: { path: window.location.pathname } });
     }
   }, []);
 
   const results = query.length > 1
-    ? beregnere
+    ? allCalcs
         .filter(
           (b) =>
             fuzzyMatch(query, b.title) ||
-            fuzzyMatch(query, b.description) ||
-            fuzzyMatch(query, b.category)
+            fuzzyMatch(query, b.description)
         )
         .slice(0, 6)
     : [];
@@ -59,7 +69,7 @@ export default function NotFoundSearch() {
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Søg efter en beregner..."
+          placeholder={texts.placeholder}
           className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400"
           autoFocus
         />
@@ -67,7 +77,7 @@ export default function NotFoundSearch() {
 
       {urlHint && results.length > 0 && (
         <p className="text-sm text-gray-500 dark:text-gray-400">
-          Mente du en af disse?
+          {texts.hint}
         </p>
       )}
 
@@ -95,7 +105,7 @@ export default function NotFoundSearch() {
 
       {query.length > 1 && results.length === 0 && (
         <p className="text-sm text-gray-500 dark:text-gray-400">
-          Ingen beregnere matchede din søgning. Prøv et andet søgeord.
+          {texts.noMatch}
         </p>
       )}
     </div>

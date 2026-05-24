@@ -254,26 +254,26 @@ export default function MomsBeregner() {
       </div>
 
       {/* Formler */}
-      <details className="bg-gray-50 rounded-lg">
-        <summary className="p-4 cursor-pointer font-medium">
+      <details className="bg-gray-50 dark:bg-gray-800 rounded-lg">
+        <summary className="p-4 cursor-pointer font-medium dark:text-gray-200">
           Se formler og beregningsmetoder
         </summary>
-        <div className="p-4 pt-0 space-y-4 text-sm">
+        <div className="p-4 pt-0 space-y-4 text-sm dark:text-gray-300">
           <div>
-            <h4 className="font-medium mb-1">Tillæg moms (25%):</h4>
-            <code className="block bg-white p-2 rounded border">
+            <h4 className="font-medium mb-1 dark:text-gray-200">Tillæg moms (25%):</h4>
+            <code className="block bg-white dark:bg-gray-700 p-2 rounded border dark:border-gray-600 dark:text-gray-200">
               Pris inkl. moms = Pris uden moms × 1,25
             </code>
           </div>
           <div>
-            <h4 className="font-medium mb-1">Fratræk moms:</h4>
-            <code className="block bg-white p-2 rounded border">
+            <h4 className="font-medium mb-1 dark:text-gray-200">Fratræk moms:</h4>
+            <code className="block bg-white dark:bg-gray-700 p-2 rounded border dark:border-gray-600 dark:text-gray-200">
               Pris uden moms = Pris inkl. moms ÷ 1,25
             </code>
           </div>
           <div>
-            <h4 className="font-medium mb-1">Find momsbeløbet:</h4>
-            <code className="block bg-white p-2 rounded border">
+            <h4 className="font-medium mb-1 dark:text-gray-200">Find momsbeløbet:</h4>
+            <code className="block bg-white dark:bg-gray-700 p-2 rounded border dark:border-gray-600 dark:text-gray-200">
               Moms = Pris inkl. moms - (Pris inkl. moms ÷ 1,25)
             </code>
           </div>

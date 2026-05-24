@@ -1,6 +1,9 @@
 "use client";
 
 import { useState, useCallback, useEffect, useId } from "react";
+import { useLocale } from "@/components/LocaleProvider";
+import { t } from "@/lib/i18n";
+import type { Locale } from "@/lib/i18n";
 
 interface InputFieldProps {
   value: number;
@@ -20,6 +23,7 @@ interface InputFieldProps {
 }
 
 function getErrorMessage(
+  locale: Locale,
   value: number,
   rawValue: string,
   required?: boolean,
@@ -28,33 +32,33 @@ function getErrorMessage(
   customValidation?: (value: number, rawValue: string) => string | null
 ): string | null {
   if (required && rawValue.trim() === "") {
-    return "Indtast venligst en værdi";
+    return t(locale, "ui.validationRequired");
   }
 
   if (rawValue.trim() === "") return null;
 
   if (rawValue.trim() !== "" && isNaN(Number(rawValue))) {
-    return "Indtast venligst et gyldigt tal";
+    return t(locale, "ui.validationInvalidNumber");
   }
 
   if (min !== undefined && min >= 0 && value < 0) {
-    return "Værdien kan ikke være negativ";
+    return t(locale, "ui.validationNegative");
   }
 
   if (min !== undefined && max !== undefined && value < min) {
-    return `Indtast et tal mellem ${min} og ${max}`;
+    return t(locale, "ui.validationRange").replace("{min}", String(min)).replace("{max}", String(max));
   }
 
   if (min !== undefined && max === undefined && value < min) {
-    return `Indtast en værdi på mindst ${min}`;
+    return t(locale, "ui.validationMin").replace("{min}", String(min));
   }
 
   if (max !== undefined && min === undefined && value > max) {
-    return `Indtast en værdi på højst ${max}`;
+    return t(locale, "ui.validationMax").replace("{max}", String(max));
   }
 
   if (max !== undefined && min !== undefined && value > max) {
-    return `Indtast et tal mellem ${min} og ${max}`;
+    return t(locale, "ui.validationRange").replace("{min}", String(min)).replace("{max}", String(max));
   }
 
   if (customValidation) {
@@ -80,6 +84,7 @@ export function InputField({
   helpText,
   customValidation,
 }: InputFieldProps) {
+  const { locale } = useLocale();
   const [touched, setTouched] = useState(false);
   const [rawValue, setRawValue] = useState(String(value));
   const [isFocused, setIsFocused] = useState(false);
@@ -94,7 +99,7 @@ export function InputField({
     }
   }, [value, isFocused]);
 
-  const error = touched ? getErrorMessage(value, rawValue, required, min, max, customValidation) : null;
+  const error = touched ? getErrorMessage(locale as Locale, value, rawValue, required, min, max, customValidation) : null;
   const isValid = touched && !error && rawValue.trim() !== "";
 
   const handleChange = useCallback(

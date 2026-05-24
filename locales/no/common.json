@@ -30,6 +30,7 @@
     "loading": "Beregner...",
     "error": "Noe gikk galt",
     "tryAgain": "Prøv igjen",
+    "errorDescription": "Det oppsto en uventet feil. Prøv å laste inn siden på nytt.",
     "readMore": "Les mer",
     "seeAll": "Se alle",
     "faq": "Ofte stilte spørsmål",
@@ -63,7 +64,13 @@
     "assistantAllCalc": "alle kalkulatorer",
     "assistantTryLabel": "Prøv f.eks.:",
     "assistantBestMatch": "Beste treff:",
-    "assistantRelevant": "relevante kalkulatorer:"
+    "assistantRelevant": "relevante kalkulatorer:",
+    "validationRequired": "Vennligst skriv inn en verdi",
+    "validationInvalidNumber": "Vennligst skriv inn et gyldig tall",
+    "validationNegative": "Verdien kan ikke være negativ",
+    "validationRange": "Skriv inn et tall mellom {min} og {max}",
+    "validationMin": "Skriv inn en verdi på minst {min}",
+    "validationMax": "Skriv inn en verdi på høyst {max}"
   },
   "categories": {
     "economy": "Økonomi",

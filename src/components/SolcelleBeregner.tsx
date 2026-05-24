@@ -138,7 +138,7 @@ export default function SolcelleBeregner() {
     });
   }, [anlaegStr, retning, aarligtForbrug, elPris, anlaegPris, prisPrKwp]);
 
-  useEffect(() => { initScrollDepthTracking("solceller"); }, []);
+  useEffect(() => initScrollDepthTracking("solceller"), []);
 
   const effektivAnlaegPris = useMemo(() => {
     const manuel = Number(anlaegPris);

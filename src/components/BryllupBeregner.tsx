@@ -206,7 +206,7 @@ export default function BryllupBeregner() {
     });
   }, [antalGaester, venue, madNiveau, fotograf, musik, kjole, jakkesaet, ringe, blomster, ekstra]);
 
-  useEffect(() => { initScrollDepthTracking("bryllup"); }, []);
+  useEffect(() => initScrollDepthTracking("bryllup"), []);
 
   const resultat = useMemo(() => {
     const gaester = Number(antalGaester);

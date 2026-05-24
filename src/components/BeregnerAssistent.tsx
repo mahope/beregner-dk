@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { useLocale } from "@/components/LocaleProvider";
 import { t } from "@/lib/i18n";
@@ -91,7 +91,7 @@ function AssistentInner({ locale }: { locale: string }) {
   const [matches, setMatches] = useState<Match[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const allCalcs = getCalculatorsByLocale(locale as "da" | "no" | "se");
+  const allCalcs = useMemo(() => getCalculatorsByLocale(locale as "da" | "no" | "se"), [locale]);
   const keywords = keywordsMap[locale] || keywordsMap.da;
   const quickSuggestions = quickSuggestionsMap[locale as keyof typeof quickSuggestionsMap] || quickSuggestionsMap.da;
 

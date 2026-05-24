@@ -182,7 +182,7 @@ export default function RejsebudgetBeregner() {
     });
   }, [destination, rejsetype, antalDage, antalPersoner, ekstraUdgifter]);
 
-  useEffect(() => { initScrollDepthTracking("rejsebudget"); }, []);
+  useEffect(() => initScrollDepthTracking("rejsebudget"), []);
 
   const resultat = useMemo(() => {
     const dage = Number(antalDage);

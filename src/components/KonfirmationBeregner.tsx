@@ -221,7 +221,7 @@ export default function KonfirmationBeregner() {
   }, [antalGaester, festType, inkluderFotograf, konfirmandToej, ekstraUdgifter, antalForaeldre, antalBedsteforaeldre, antalFamilie, antalVenner]);
 
   useEffect(() => {
-    initScrollDepthTracking("konfirmation");
+    return initScrollDepthTracking("konfirmation");
   }, []);
 
   const resultat = useMemo(() => {

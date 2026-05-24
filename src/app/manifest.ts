@@ -1,11 +1,18 @@
 import type { MetadataRoute } from "next";
+import { headers } from "next/headers";
+import { getDomainConfig } from "@/lib/domain-config";
+import { getTranslations } from "@/lib/i18n";
 
-export default function manifest(): MetadataRoute.Manifest {
+export default async function manifest(): Promise<MetadataRoute.Manifest> {
+  const headersList = await headers();
+  const hostname = headersList.get("x-hostname") || "localhost";
+  const domainConfig = getDomainConfig(hostname);
+  const t = getTranslations(domainConfig.locale);
+
   return {
-    name: "MinBeregner.dk - Gratis online beregnere",
-    short_name: "MinBeregner",
-    description:
-      "33+ gratis online beregnere til danskere. Løn, skat, moms, BMI, lån og meget mere.",
+    name: `${domainConfig.siteName} - ${t.site.tagline}`,
+    short_name: domainConfig.siteName,
+    description: t.site.description,
     start_url: "/",
     display: "standalone",
     background_color: "#f9fafb",

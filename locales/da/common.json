@@ -30,6 +30,7 @@
     "loading": "Beregner...",
     "error": "Noget gik galt",
     "tryAgain": "Prøv igen",
+    "errorDescription": "Der opstod en uventet fejl. Prøv at genindlæse siden.",
     "readMore": "Læs mere",
     "seeAll": "Se alle",
     "faq": "Ofte stillede spørgsmål",
@@ -63,7 +64,13 @@
     "assistantAllCalc": "alle beregnere",
     "assistantTryLabel": "Prøv fx:",
     "assistantBestMatch": "Bedste match:",
-    "assistantRelevant": "relevante beregnere:"
+    "assistantRelevant": "relevante beregnere:",
+    "validationRequired": "Indtast venligst en værdi",
+    "validationInvalidNumber": "Indtast venligst et gyldigt tal",
+    "validationNegative": "Værdien kan ikke være negativ",
+    "validationRange": "Indtast et tal mellem {min} og {max}",
+    "validationMin": "Indtast en værdi på mindst {min}",
+    "validationMax": "Indtast en værdi på højst {max}"
   },
   "categories": {
     "economy": "Økonomi",

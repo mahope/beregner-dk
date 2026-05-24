@@ -12,8 +12,6 @@ import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
 import BeregnerAssistent from "@/components/BeregnerAssistent";
 import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
 import { getTranslations } from "@/lib/i18n";
-import { getAllDomainConfigs } from "@/lib/domain-config";
-import { HreflangTags } from "@/components/HreflangTags";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -95,8 +93,6 @@ export default async function RootLayout({
   const locale = await getLocale();
   const domainConfig = await getCurrentDomainConfig();
   const htmlLang = domainConfig.hreflangCode;
-  const allDomains = getAllDomainConfigs();
-
   return (
     <html lang={htmlLang}>
       <head>
@@ -113,9 +109,6 @@ export default async function RootLayout({
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1902871361369866"
           crossOrigin="anonymous"
         />
-
-        {/* hreflang tags for multi-domain SEO */}
-        <HreflangTags domains={allDomains} />
 
         <OrganizationSchema
           name={domainConfig.siteName}
