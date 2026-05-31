@@ -6,7 +6,7 @@ This file is a contract for Claude Code working in this repository. Follow it ex
 
 beregner-dk is a Danish calculator website (MinBeregner.dk) — a large collection of free financial, tax, loan, health and date calculators rendered as Next.js App Router pages, plus a public read-only JSON API under `/api/v1`.
 
-- Production URL: `<PRODUCTION_URL>` ⚠️ TODO: confirm deploy target (no matching Dokploy application found; repo config and code reference `minberegner.dk`).
+- Production URL: `minberegner.dk` (also serves the Swedish domain `beraknare.se`).
 - Stack: Next.js 15 (App Router, `output: "standalone"`), React 19, TypeScript, Tailwind CSS v4, npm.
 
 ## Commands
@@ -31,15 +31,13 @@ beregner-dk is a Danish calculator website (MinBeregner.dk) — a large collecti
 
 ## Deploy
 
-⚠️ TODO: confirm deploy target. No Dokploy application matched this repository at rollout time, so the deploy details below are unverified.
-
-The repo is configured for Dokploy (`.dokploy/preview.template.json`, `Dockerfile` with `next build` → standalone) and the default branch is `master`. Expected flow once the target is confirmed:
+The app is deployed via Dokploy (`.dokploy/preview.template.json`, `Dockerfile` with `next build` → standalone) to production host `minberegner.dk`. The default branch is `master` and Dokploy has autoDeploy enabled. Flow:
 
 1. Stage only the specific files you changed (never `git add .`).
 2. Commit with an English imperative message; push to `master`.
-3. Dokploy auto-deploys from `master` (confirm autoDeploy on the live app).
+3. Dokploy auto-deploys from `master` (autoDeploy is on).
 4. Watch the Dokploy deploy log until it finishes.
-5. Verify on production: `curl -fsI https://<PRODUCTION_URL>/api/health` must return `200`.
+5. Verify on production: `curl -fsI https://minberegner.dk/api/health` must return `200`.
 
 A deploy is not done until it is verified on production.
 
