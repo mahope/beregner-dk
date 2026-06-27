@@ -10,6 +10,7 @@ import { useCalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { useLocale } from "@/components/LocaleProvider";
 import { formatCurrency, getCurrencySuffix } from "@/lib/format";
+import { adtractionLink } from "@/lib/adtraction";
 
 interface AffiliateLink {
   name: string;
@@ -19,31 +20,33 @@ interface AffiliateLink {
   highlight?: boolean;
 }
 
+// Real Adtraction tracking links (channel "Min Beregner" 2056156501).
+// Programs applied for 2026-06-27 — go live the moment each is approved.
 const billaanAffiliates: AffiliateLink[] = [
   {
-    name: "Samlino Billån",
-    description: "Sammenlign billån fra 20+ banker - find den laveste rente",
-    url: "https://www.samlino.dk/billaan/?ref=minberegner",
-    cta: "Sammenlign",
+    name: "Lendo",
+    description: "Sammenlign billån fra 20+ banker med én ansøgning - find den laveste rente",
+    url: adtractionLink("1562731450", "https://www.lendo.dk/billaan"),
+    cta: "Sammenlign billån",
     highlight: true,
+  },
+  {
+    name: "Mybanker",
+    description: "Uvildig sammenligning af billån - se hvad du kan spare",
+    url: adtractionLink("1740042344", "https://www.mybanker.dk"),
+    cta: "Sammenlign",
   },
   {
     name: "Bank Norwegian",
     description: "Billån uden udbetaling - nem ansøgning på 2 minutter",
-    url: "https://www.banknorwegian.dk/privat/finansiering/billaan/?ref=minberegner",
+    url: adtractionLink("1888483286", "https://www.banknorwegian.dk"),
     cta: "Søg nu",
   },
   {
-    name: "Basisbank",
-    description: "Fleksibelt billån med konkurrencedygtige renter",
-    url: "https://www.basisbank.dk/privat/laan/billaan/?ref=minberegner",
+    name: "Facit Bank",
+    description: "Billån med konkurrencedygtig rente og hurtigt svar",
+    url: adtractionLink("1820677672", "https://facitbank.dk"),
     cta: "Få tilbud",
-  },
-  {
-    name: "Santander Consumer Bank",
-    description: "Billån med eller uden udbetaling - hurtig udbetaling",
-    url: "https://www.santanderconsumer.dk/billaan/?ref=minberegner",
-    cta: "Læs mere",
   },
 ];
 

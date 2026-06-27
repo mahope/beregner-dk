@@ -10,6 +10,7 @@ import { useCalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { useLocale } from "@/components/LocaleProvider";
 import { formatCurrency, getCurrencySuffix } from "@/lib/format";
+import { adtractionLink } from "@/lib/adtraction";
 
 interface AffiliateLink {
   name: string;
@@ -19,37 +20,39 @@ interface AffiliateLink {
   highlight?: boolean;
 }
 
+// Real Adtraction tracking links (channel "Min Beregner" 2056156501).
+// Programs applied for 2026-06-27 — go live the moment each is approved.
 const forbrugslaanAffiliates: AffiliateLink[] = [
   {
-    name: "Samlino Forbrugslån",
-    description: "Sammenlign forbrugslån fra 20+ banker - find den laveste rente",
-    url: "https://www.samlino.dk/forbrugslaan/?ref=minberegner",
-    cta: "Sammenlign",
+    name: "Lendo",
+    description: "Sammenlign forbrugslån fra 20+ banker med én ansøgning - find den laveste rente",
+    url: adtractionLink("1562731450", "https://www.lendo.dk"),
+    cta: "Sammenlign lån",
     highlight: true,
+  },
+  {
+    name: "Mybanker",
+    description: "Uvildig sammenligning af forbrugslån - se hvad du kan spare",
+    url: adtractionLink("1740042344", "https://www.mybanker.dk"),
+    cta: "Sammenlign",
   },
   {
     name: "Bank Norwegian",
     description: "Forbrugslån uden gebyrer - nem ansøgning på 2 minutter",
-    url: "https://www.banknorwegian.dk/privat/finansiering/forbrugslaan/?ref=minberegner",
+    url: adtractionLink("1888483286", "https://www.banknorwegian.dk"),
     cta: "Søg nu",
   },
   {
-    name: "Basisbank",
-    description: "Fleksibelt forbrugslån med lav rente fra 7,5%",
-    url: "https://www.basisbank.dk/privat/laan/forbrugslaan/?ref=minberegner",
+    name: "Facit Bank",
+    description: "Forbrugslån med konkurrencedygtig rente og hurtigt svar",
+    url: adtractionLink("1820677672", "https://facitbank.dk"),
     cta: "Få tilbud",
   },
   {
-    name: "Lunar",
-    description: "Forbrugslån med hurtig udbetaling - ansøg online",
-    url: "https://www.lunar.app/dk/privat/loan/?ref=minberegner",
+    name: "CapitalBox",
+    description: "Fleksibelt lån med hurtig udbetaling",
+    url: adtractionLink("1808759797", "https://www.capitalbox.dk"),
     cta: "Læs mere",
-  },
-  {
-    name: "AK Nordic",
-    description: "Tryghedslån med rimelige vilkår - til alle formål",
-    url: "https://www.aknordic.dk/?ref=minberegner",
-    cta: "Beregn rente",
   },
 ];
 
