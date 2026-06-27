@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { ShareCalculation } from "@/components/ShareCalculation";
 import { CopyResultButton, ResetButton } from "@/components/ui";
+import { AffiliateBox } from "./AffiliateBox";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { useLocale } from '@/components/LocaleProvider';
@@ -296,6 +297,13 @@ export default function BoligstoetteBeregner() {
             Dette er et estimat. Den præcise beregning laves af Udbetaling Danmark.
           </p>
         </div>
+
+        <AffiliateBox
+          title="Forsikring til din bolig"
+          subtitle="Sammenlign og find den billigste indbo- og husforsikring"
+          links={[{ name: "Findforsikring.dk", description: "Danmarks største forsikringsportal — sammenlign indbo-, hus- og familieforsikring og spar penge på din police.", url: "https://www.partner-ads.com/dk/klikbanner.php?partnerid=42553&bannerid=60068&uid=minberegner", cta: "Sammenlign forsikringer", highlight: true }]}
+          className="mt-6"
+        />
       </div>
     </div>
   );
