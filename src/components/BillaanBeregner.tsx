@@ -437,6 +437,16 @@ export default function BillaanBeregner() {
         className="mt-6"
       />
 
+      <AffiliateBox
+        title="Forsikring & lån til din bil"
+        subtitle="Spar på bilforsikringen og se dine lånemuligheder"
+        links={[
+          { name: "Cover Forsikring", description: "Skift bilforsikring på 2 minutter og se din pris — ofte markant billigere end din nuværende.", url: "https://www.partner-ads.com/dk/klikbanner.php?partnerid=42553&bannerid=110013&uid=minberegner", cta: "Beregn din bilforsikring", highlight: true },
+          { name: "Pantsat.dk", description: "Lån med pant i værdigenstande — hurtigt svar uden kreditvurdering.", url: "https://www.partner-ads.com/dk/klikbanner.php?partnerid=42553&bannerid=78126&uid=minberegner", cta: "Se pantelån" },
+        ]}
+        className="mt-6"
+      />
+
       {/* Ydelsestabel */}
       <div className="overflow-x-auto">
         <h3 className="font-medium mb-3 text-gray-900 dark:text-gray-100">

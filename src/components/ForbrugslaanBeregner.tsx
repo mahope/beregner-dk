@@ -414,6 +414,16 @@ export default function ForbrugslaanBeregner() {
         className="mt-6"
       />
 
+      <AffiliateBox
+        title="Forsikring & økonomi"
+        subtitle="Sammenlign forsikringer og se flere lånemuligheder"
+        links={[
+          { name: "Findforsikring.dk", description: "Danmarks største forsikringsportal — sammenlign og find den billigste forsikring.", url: "https://www.partner-ads.com/dk/klikbanner.php?partnerid=42553&bannerid=60068&uid=minberegner", cta: "Sammenlign forsikringer", highlight: true },
+          { name: "Pantsat.dk", description: "Lån med pant i værdigenstande — hurtigt svar uden kreditvurdering.", url: "https://www.partner-ads.com/dk/klikbanner.php?partnerid=42553&bannerid=78126&uid=minberegner", cta: "Se pantelån" },
+        ]}
+        className="mt-6"
+      />
+
       {/* Ydelsestabel */}
       <div className="overflow-x-auto">
         <h3 className="font-medium mb-3 text-gray-900 dark:text-gray-100">
