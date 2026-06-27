@@ -500,6 +500,12 @@ export default function BMIBeregner() {
         links={[{ name: "Med24", description: "Danmarks apotek på nettet — vitaminer, kosttilskud og produkter til vægttab.", url: "https://www.partner-ads.com/dk/klikbanner.php?partnerid=42553&bannerid=42807&uid=minberegner", cta: "Se produkter hos Med24", highlight: true }]}
         className="mt-6"
       />
+      <AffiliateBox
+        title="Sundhedsforsikring"
+        subtitle="Hurtig behandling uden ventetid"
+        links={[{ name: "Findforsikring.dk", description: "Sammenlign sundhedsforsikringer og få hurtig adgang til behandling, fysioterapi og speciallæge uden lange ventelister.", url: "https://www.partner-ads.com/dk/klikbanner.php?partnerid=42553&bannerid=60068&uid=minberegner", cta: "Sammenlign sundhedsforsikring", highlight: true }]}
+        className="mt-6"
+      />
     </div>
   );
 }

@@ -447,6 +447,13 @@ export default function BarselBeregner() {
         links={[{ name: "Babysam", description: "Danmarks store babyudstyrsbutik — barnevogne, autostole, tøj og legetøj.", url: "https://www.partner-ads.com/dk/klikbanner.php?partnerid=42553&bannerid=66806&uid=minberegner", cta: "Se udstyr hos Babysam", highlight: true }]}
         className="mt-6"
       />
+
+      <AffiliateBox
+        title="Forsikring til den nye familie"
+        subtitle="Sammenlign børne-, familie- og ulykkesforsikring"
+        links={[{ name: "Findforsikring.dk", description: "Danmarks største forsikringsportal — sammenlign børne-, familie- og ulykkesforsikring og sikr den nye familie bedst muligt.", url: "https://www.partner-ads.com/dk/klikbanner.php?partnerid=42553&bannerid=60068&uid=minberegner", cta: "Sammenlign forsikringer", highlight: true }]}
+        className="mt-6"
+      />
     </div>
   );
 }
