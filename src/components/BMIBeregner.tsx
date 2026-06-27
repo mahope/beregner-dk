@@ -7,6 +7,7 @@ import { PrintResult } from "@/components/PrintResult";
 import { CopyResultButton, ResetButton } from "@/components/ui";
 import { InputField } from "@/components/InputField";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
+import { AffiliateBox } from "./AffiliateBox";
 
 type Koen = "mand" | "kvinde";
 type Enhed = "metrisk" | "imperial";
@@ -493,6 +494,12 @@ export default function BMIBeregner() {
           WHO anbefaler en ratio under 0,90 for mænd og under 0,85 for kvinder.
         </p>
       </div>
+      <AffiliateBox
+        title="Sundhed & velvære"
+        subtitle="Vitaminer, kosttilskud og vægttab"
+        links={[{ name: "Med24", description: "Danmarks apotek på nettet — vitaminer, kosttilskud og produkter til vægttab.", url: "https://www.partner-ads.com/dk/klikbanner.php?partnerid=42553&bannerid=42807&uid=minberegner", cta: "Se produkter hos Med24", highlight: true }]}
+        className="mt-6"
+      />
     </div>
   );
 }

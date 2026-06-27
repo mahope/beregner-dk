@@ -7,6 +7,7 @@ import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { useLocale } from '@/components/LocaleProvider';
 import { formatCurrency, getCurrencySuffix } from '@/lib/format';
+import { AffiliateBox } from "./AffiliateBox";
 
 // SU-satser 2026 (officielle satser fra su.dk)
 // Kilde: su.dk/satser
@@ -403,6 +404,12 @@ export default function SUBeregner() {
           Kilde: su.dk/satser — Alle beløb er før skat
         </p>
       </div>
+      <AffiliateBox
+        title="Spar på studiebøgerne"
+        subtitle="Køb dit pensum billigere"
+        links={[{ name: "Plusbog", description: "Stort udvalg af fag- og studiebøger til skarpe priser og hurtig levering.", url: "https://www.partner-ads.com/dk/klikbanner.php?partnerid=42553&bannerid=100622&uid=minberegner", cta: "Se studiebøger hos Plusbog", highlight: true }]}
+        className="mt-6"
+      />
     </div>
   );
 }

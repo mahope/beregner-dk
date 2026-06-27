@@ -7,6 +7,7 @@ import { generateShareableLink, getStateFromUrl, CalculationState } from '@/lib/
 import { trackCalculation, initScrollDepthTracking } from '@/lib/analytics';
 import { useLocale } from "@/components/LocaleProvider";
 import { getCurrencySuffix } from "@/lib/format";
+import { AffiliateBox } from "./AffiliateBox";
 
 // 2026 satser (kilde: bm.dk, borger.dk)
 const MAX_WEEKLY_RATE = 5085; // Max barselsdagpenge per uge 2026
@@ -440,6 +441,12 @@ export default function BarselBeregner() {
           </p>
         </div>
       </div>
+      <AffiliateBox
+        title="Forbered babyen"
+        subtitle="Alt til den lille — barnevogn, autostol, tøj og udstyr"
+        links={[{ name: "Babysam", description: "Danmarks store babyudstyrsbutik — barnevogne, autostole, tøj og legetøj.", url: "https://www.partner-ads.com/dk/klikbanner.php?partnerid=42553&bannerid=66806&uid=minberegner", cta: "Se udstyr hos Babysam", highlight: true }]}
+        className="mt-6"
+      />
     </div>
   );
 }
