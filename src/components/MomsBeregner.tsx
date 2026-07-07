@@ -12,8 +12,78 @@ import { formatCurrency, getCurrencySuffix } from '@/lib/format';
 // Dansk momssats
 const MOMS_SATS = 0.25; // 25%
 
+const labels = {
+  da: {
+    hvadBeregne: "Hvad vil du beregne?",
+    tillaegTitle: "Tillæg moms",
+    tillaegDesc: "Beløb uden moms → inkl. moms",
+    fratraekTitle: "Fratræk moms",
+    fratraekDesc: "Beløb inkl. moms → uden moms",
+    findTitle: "Find moms",
+    findDesc: "Se momsandelen i et beløb",
+    beloebUdenMoms: "Beløb uden moms",
+    beloebInklMoms: "Beløb inkl. moms",
+    prisUdenMoms: "Pris uden moms",
+    momsProcent: "Moms (25%)",
+    prisInklMoms: "Pris inkl. moms",
+    momsSeparator: " + moms = ",
+    calculatorName: "Momsberegner",
+    hurtigReference: "Hurtig reference",
+    tblUdenMoms: "Uden moms",
+    tblMoms: "Moms",
+    tblInklMoms: "Inkl. moms",
+    infoTitle: "💡 Om dansk moms",
+    info1a: "Den danske momssats er ",
+    info1b: "25%",
+    info2: "For at beregne moms: Beløb × 0,25",
+    info3: "For at finde pris uden moms: Beløb ÷ 1,25",
+    info4: "Momsandelen af en pris inkl. moms er 20% (25/125)",
+    seFormler: "Se formler og beregningsmetoder",
+    formTillaegTitle: "Tillæg moms (25%):",
+    formTillaeg: "Pris inkl. moms = Pris uden moms × 1,25",
+    formFratraekTitle: "Fratræk moms:",
+    formFratraek: "Pris uden moms = Pris inkl. moms ÷ 1,25",
+    formFindTitle: "Find momsbeløbet:",
+    formFind: "Moms = Pris inkl. moms - (Pris inkl. moms ÷ 1,25)",
+  },
+  se: {
+    hvadBeregne: "Vad vill du beräkna?",
+    tillaegTitle: "Lägg till moms",
+    tillaegDesc: "Belopp utan moms → inkl. moms",
+    fratraekTitle: "Dra av moms",
+    fratraekDesc: "Belopp inkl. moms → utan moms",
+    findTitle: "Hitta moms",
+    findDesc: "Se momsandelen i ett belopp",
+    beloebUdenMoms: "Belopp utan moms",
+    beloebInklMoms: "Belopp inkl. moms",
+    prisUdenMoms: "Pris utan moms",
+    momsProcent: "Moms (25%)",
+    prisInklMoms: "Pris inkl. moms",
+    momsSeparator: " + moms = ",
+    calculatorName: "Momsräknare",
+    hurtigReference: "Snabbreferens",
+    tblUdenMoms: "Utan moms",
+    tblMoms: "Moms",
+    tblInklMoms: "Inkl. moms",
+    infoTitle: "💡 Om svensk moms",
+    info1a: "Den svenska momssatsen är ",
+    info1b: "25%",
+    info2: "För att beräkna moms: Belopp × 0,25",
+    info3: "För att hitta pris utan moms: Belopp ÷ 1,25",
+    info4: "Momsandelen av ett pris inkl. moms är 20% (25/125)",
+    seFormler: "Se formler och beräkningsmetoder",
+    formTillaegTitle: "Lägg till moms (25%):",
+    formTillaeg: "Pris inkl. moms = Pris utan moms × 1,25",
+    formFratraekTitle: "Dra av moms:",
+    formFratraek: "Pris utan moms = Pris inkl. moms ÷ 1,25",
+    formFindTitle: "Hitta momsbeloppet:",
+    formFind: "Moms = Pris inkl. moms - (Pris inkl. moms ÷ 1,25)",
+  },
+} as const;
+
 export default function MomsBeregner() {
   const { locale } = useLocale();
+  const l = labels[locale as keyof typeof labels] || labels.da;
   const [beloeb, setBeloeb] = useState<number>(1000);
   const [beregningsType, setBeregningsType] = useState<"tillaegMoms" | "fratraekMoms" | "findMoms">("tillaegMoms");
   const hasTracked = useRef(false);
@@ -109,10 +179,10 @@ export default function MomsBeregner() {
   const getInputLabel = () => {
     switch (beregningsType) {
       case "tillaegMoms":
-        return "Beløb uden moms";
+        return l.beloebUdenMoms;
       case "fratraekMoms":
       case "findMoms":
-        return "Beløb inkl. moms";
+        return l.beloebInklMoms;
     }
   };
 
@@ -120,7 +190,7 @@ export default function MomsBeregner() {
     <div className="space-y-8 print-area">
       {/* Beregningstype valg */}
       <div>
-        <label className="block text-sm font-medium mb-3">Hvad vil du beregne?</label>
+        <label className="block text-sm font-medium mb-3">{l.hvadBeregne}</label>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <button type="button"
             onClick={() => setBeregningsType("tillaegMoms")}
@@ -130,8 +200,8 @@ export default function MomsBeregner() {
                 : "border-gray-200 hover:border-gray-300"
             }`}
           >
-            <div className="font-medium">Tillæg moms</div>
-            <div className="text-sm text-gray-500">Beløb uden moms → inkl. moms</div>
+            <div className="font-medium">{l.tillaegTitle}</div>
+            <div className="text-sm text-gray-500">{l.tillaegDesc}</div>
           </button>
           <button type="button"
             onClick={() => setBeregningsType("fratraekMoms")}
@@ -141,8 +211,8 @@ export default function MomsBeregner() {
                 : "border-gray-200 hover:border-gray-300"
             }`}
           >
-            <div className="font-medium">Fratræk moms</div>
-            <div className="text-sm text-gray-500">Beløb inkl. moms → uden moms</div>
+            <div className="font-medium">{l.fratraekTitle}</div>
+            <div className="text-sm text-gray-500">{l.fratraekDesc}</div>
           </button>
           <button type="button"
             onClick={() => setBeregningsType("findMoms")}
@@ -152,8 +222,8 @@ export default function MomsBeregner() {
                 : "border-gray-200 hover:border-gray-300"
             }`}
           >
-            <div className="font-medium">Find moms</div>
-            <div className="text-sm text-gray-500">Se momsandelen i et beløb</div>
+            <div className="font-medium">{l.findTitle}</div>
+            <div className="text-sm text-gray-500">{l.findDesc}</div>
           </button>
         </div>
       </div>
@@ -182,19 +252,19 @@ export default function MomsBeregner() {
       {/* Resultat */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 animate-stagger">
         <div className="p-6 bg-gray-50 dark:bg-gray-800 rounded-xl text-center">
-          <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Pris uden moms</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">{l.prisUdenMoms}</p>
           <p className="text-2xl font-bold text-gray-700 dark:text-gray-200">
             <AnimatedNumber value={beregning.prisUdenMoms} formatFn={formatKr} />
           </p>
         </div>
         <div className="p-6 bg-blue-50 dark:bg-blue-900/20 rounded-xl text-center">
-          <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Moms (25%)</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">{l.momsProcent}</p>
           <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
             <AnimatedNumber value={beregning.momsBeloeb} formatFn={formatKr} />
           </p>
         </div>
         <div className="p-6 bg-green-100 dark:bg-green-900/20 rounded-xl text-center">
-          <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Pris inkl. moms</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">{l.prisInklMoms}</p>
           <p className="text-2xl font-bold text-green-700 dark:text-green-400">
             <AnimatedNumber value={beregning.prisInklMoms} formatFn={formatKr} />
           </p>
@@ -203,30 +273,30 @@ export default function MomsBeregner() {
 
       {/* Share, Copy and Print buttons */}
       <div className="flex justify-center gap-3">
-        <CopyResultButton text={`${formatKr(beregning.prisUdenMoms)} + moms = ${formatKr(beregning.prisInklMoms)}`} />
+        <CopyResultButton text={`${formatKr(beregning.prisUdenMoms)}${l.momsSeparator}${formatKr(beregning.prisInklMoms)}`} />
         <ShareCalculation
           getShareableLink={getShareableLink}
-          calculatorName="Momsberegner"
-          resultSummary={`${formatKr(beregning.prisUdenMoms)} + moms = ${formatKr(beregning.prisInklMoms)}`}
+          calculatorName={l.calculatorName}
+          resultSummary={`${formatKr(beregning.prisUdenMoms)}${l.momsSeparator}${formatKr(beregning.prisInklMoms)}`}
         />
         <PrintResult
-          calculatorName="Momsberegner"
-          resultSummary={`${formatKr(beregning.prisUdenMoms)} + moms = ${formatKr(beregning.prisInklMoms)}`}
+          calculatorName={l.calculatorName}
+          resultSummary={`${formatKr(beregning.prisUdenMoms)}${l.momsSeparator}${formatKr(beregning.prisInklMoms)}`}
         />
       </div>
 
       {/* Hurtig reference tabel */}
       <div className="bg-white border rounded-lg overflow-hidden">
         <div className="p-4 bg-gray-50 border-b">
-          <h3 className="font-medium">Hurtig reference</h3>
+          <h3 className="font-medium">{l.hurtigReference}</h3>
         </div>
         <div className="p-4">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b">
-                <th className="text-left py-2">Uden moms</th>
-                <th className="text-left py-2">Moms</th>
-                <th className="text-left py-2">Inkl. moms</th>
+                <th className="text-left py-2">{l.tblUdenMoms}</th>
+                <th className="text-left py-2">{l.tblMoms}</th>
+                <th className="text-left py-2">{l.tblInklMoms}</th>
               </tr>
             </thead>
             <tbody>
@@ -244,37 +314,37 @@ export default function MomsBeregner() {
 
       {/* Info boks */}
       <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-        <h3 className="font-medium text-blue-800 dark:text-blue-200 mb-2">💡 Om dansk moms</h3>
+        <h3 className="font-medium text-blue-800 dark:text-blue-200 mb-2">{l.infoTitle}</h3>
         <ul className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
-          <li>• Den danske momssats er <strong>25%</strong></li>
-          <li>• For at beregne moms: Beløb × 0,25</li>
-          <li>• For at finde pris uden moms: Beløb ÷ 1,25</li>
-          <li>• Momsandelen af en pris inkl. moms er 20% (25/125)</li>
+          <li>• {l.info1a}<strong>{l.info1b}</strong></li>
+          <li>• {l.info2}</li>
+          <li>• {l.info3}</li>
+          <li>• {l.info4}</li>
         </ul>
       </div>
 
       {/* Formler */}
       <details className="bg-gray-50 dark:bg-gray-800 rounded-lg">
         <summary className="p-4 cursor-pointer font-medium dark:text-gray-200">
-          Se formler og beregningsmetoder
+          {l.seFormler}
         </summary>
         <div className="p-4 pt-0 space-y-4 text-sm dark:text-gray-300">
           <div>
-            <h4 className="font-medium mb-1 dark:text-gray-200">Tillæg moms (25%):</h4>
+            <h4 className="font-medium mb-1 dark:text-gray-200">{l.formTillaegTitle}</h4>
             <code className="block bg-white dark:bg-gray-700 p-2 rounded border dark:border-gray-600 dark:text-gray-200">
-              Pris inkl. moms = Pris uden moms × 1,25
+              {l.formTillaeg}
             </code>
           </div>
           <div>
-            <h4 className="font-medium mb-1 dark:text-gray-200">Fratræk moms:</h4>
+            <h4 className="font-medium mb-1 dark:text-gray-200">{l.formFratraekTitle}</h4>
             <code className="block bg-white dark:bg-gray-700 p-2 rounded border dark:border-gray-600 dark:text-gray-200">
-              Pris uden moms = Pris inkl. moms ÷ 1,25
+              {l.formFratraek}
             </code>
           </div>
           <div>
-            <h4 className="font-medium mb-1 dark:text-gray-200">Find momsbeløbet:</h4>
+            <h4 className="font-medium mb-1 dark:text-gray-200">{l.formFindTitle}</h4>
             <code className="block bg-white dark:bg-gray-700 p-2 rounded border dark:border-gray-600 dark:text-gray-200">
-              Moms = Pris inkl. moms - (Pris inkl. moms ÷ 1,25)
+              {l.formFind}
             </code>
           </div>
         </div>

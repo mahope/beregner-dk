@@ -5,6 +5,7 @@ import { ShareCalculation } from "@/components/ShareCalculation";
 import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
+import { useLocale } from "@/components/LocaleProvider";
 
 interface Tidszone {
   id: string;
@@ -32,6 +33,104 @@ const tidszoner: Tidszone[] = [
 ];
 
 export default function TidszoneBeregner() {
+  const { locale } = useLocale();
+
+  const labels = {
+    da: {
+      navn: {
+        dk: "Danmark (CET/CEST)",
+        uk: "Storbritannien (GMT/BST)",
+        us_east: "USA Østkyst (EST/EDT)",
+        us_west: "USA Vestkyst (PST/PDT)",
+        japan: "Japan (JST)",
+        china: "Kina (CST)",
+        australia: "Australien (AEST)",
+        india: "Indien (IST)",
+        dubai: "Dubai (GST)",
+        brazil: "Brasilien (BRT)",
+        germany: "Tyskland (CET/CEST)",
+        france: "Frankrig (CET/CEST)",
+        thailand: "Thailand (ICT)",
+        singapore: "Singapore (SGT)",
+        south_africa: "Sydafrika (SAST)",
+      } as Record<string, string>,
+      by: {
+        dk: "København", uk: "London", us_east: "New York", us_west: "Los Angeles",
+        japan: "Tokyo", china: "Beijing", australia: "Sydney", india: "Mumbai",
+        dubai: "Dubai", brazil: "São Paulo", germany: "Berlin", france: "Paris",
+        thailand: "Bangkok", singapore: "Singapore", south_africa: "Johannesburg",
+      } as Record<string, string>,
+      nowIn: (by: string) => `Klokken nu i ${by}`,
+      fromZone: "Fra tidszone",
+      toZone: "Til tidszone",
+      timeDiff: "Tidsforskel",
+      hoursWord: "timer",
+      diffSentence: (tilBy: string, abs: number, ahead: boolean, fraBy: string) =>
+        `${tilBy} er ${abs} timer${ahead ? " foran" : " bagud"} ${fraBy}`,
+      convertTitle: "Konverter et specifikt tidspunkt",
+      hourLabel: "Time",
+      minuteLabel: "Minut",
+      dayBefore: "(dagen før)",
+      nextDay: "(næste dag)",
+      summary: (fraTid: string, fraBy: string, tilTid: string, tilBy: string, dagTekst: string) =>
+        `${fraTid} i ${fraBy} = ${tilTid} i ${tilBy} ${dagTekst}`,
+      calcName: "Tidszoneberegner",
+      diffFromDenmark: "Tidsforskel fra Danmark",
+      hourSuffix: "t",
+      dstTitle: "⚠️ Om sommertid",
+      dstBody:
+        "Denne beregner bruger standard tidsforskelle. Husk at sommertid (DST) kan påvirke den faktiske tidsforskel. Danmark skifter til sommertid sidste søndag i marts og tilbage sidste søndag i oktober.",
+      dateLocale: "da-DK",
+    },
+    se: {
+      navn: {
+        dk: "Danmark (CET/CEST)",
+        uk: "Storbritannien (GMT/BST)",
+        us_east: "USA Östkusten (EST/EDT)",
+        us_west: "USA Västkusten (PST/PDT)",
+        japan: "Japan (JST)",
+        china: "Kina (CST)",
+        australia: "Australien (AEST)",
+        india: "Indien (IST)",
+        dubai: "Dubai (GST)",
+        brazil: "Brasilien (BRT)",
+        germany: "Tyskland (CET/CEST)",
+        france: "Frankrike (CET/CEST)",
+        thailand: "Thailand (ICT)",
+        singapore: "Singapore (SGT)",
+        south_africa: "Sydafrika (SAST)",
+      } as Record<string, string>,
+      by: {
+        dk: "Köpenhamn", uk: "London", us_east: "New York", us_west: "Los Angeles",
+        japan: "Tokyo", china: "Beijing", australia: "Sydney", india: "Mumbai",
+        dubai: "Dubai", brazil: "São Paulo", germany: "Berlin", france: "Paris",
+        thailand: "Bangkok", singapore: "Singapore", south_africa: "Johannesburg",
+      } as Record<string, string>,
+      nowIn: (by: string) => `Klockan nu i ${by}`,
+      fromZone: "Från tidszon",
+      toZone: "Till tidszon",
+      timeDiff: "Tidsskillnad",
+      hoursWord: "timmar",
+      diffSentence: (tilBy: string, abs: number, ahead: boolean, fraBy: string) =>
+        `${tilBy} är ${abs} timmar${ahead ? " före" : " efter"} ${fraBy}`,
+      convertTitle: "Konvertera en specifik tidpunkt",
+      hourLabel: "Timme",
+      minuteLabel: "Minut",
+      dayBefore: "(dagen innan)",
+      nextDay: "(nästa dag)",
+      summary: (fraTid: string, fraBy: string, tilTid: string, tilBy: string, dagTekst: string) =>
+        `${fraTid} i ${fraBy} = ${tilTid} i ${tilBy} ${dagTekst}`,
+      calcName: "Tidszonsberäknare",
+      diffFromDenmark: "Tidsskillnad från Danmark",
+      hourSuffix: "h",
+      dstTitle: "⚠️ Om sommartid",
+      dstBody:
+        "Den här beräknaren använder standardtidsskillnader. Kom ihåg att sommartid (DST) kan påverka den faktiska tidsskillnaden. Danmark byter till sommartid sista söndagen i mars och tillbaka sista söndagen i oktober.",
+      dateLocale: "sv-SE",
+    },
+  } as const;
+  const l = labels[locale as keyof typeof labels] || labels.da;
+
   const [fraTidszone, setFraTidszone] = useState<string>("dk");
   const [tilTidszone, setTilTidszone] = useState<string>("us_east");
   const [timer, setTimer] = useState<number>(12);
@@ -141,7 +240,7 @@ export default function TidszoneBeregner() {
   };
 
   const formatDato = (dato: Date) => {
-    return dato.toLocaleTimeString('da-DK', {
+    return dato.toLocaleTimeString(l.dateLocale, {
       hour: '2-digit',
       minute: '2-digit',
       second: '2-digit',
@@ -149,8 +248,8 @@ export default function TidszoneBeregner() {
   };
 
   const getDagTekst = () => {
-    if (beregning.dagForskel === -1) return "(dagen før)";
-    if (beregning.dagForskel === 1) return "(næste dag)";
+    if (beregning.dagForskel === -1) return l.dayBefore;
+    if (beregning.dagForskel === 1) return l.nextDay;
     return "";
   };
 
@@ -159,11 +258,11 @@ export default function TidszoneBeregner() {
       {/* Aktuelle tider */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-center">
-          <p className="text-sm text-gray-600 dark:text-gray-400">Klokken nu i {beregning.fraTz.by}</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400">{l.nowIn(l.by[beregning.fraTz.id])}</p>
           <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">{formatDato(beregning.fraLokalTid)}</p>
         </div>
         <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
-          <p className="text-sm text-gray-600 dark:text-gray-400">Klokken nu i {beregning.tilTz.by}</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400">{l.nowIn(l.by[beregning.tilTz.id])}</p>
           <p className="text-3xl font-bold text-green-600 dark:text-green-400">{formatDato(beregning.tilLokalTid)}</p>
         </div>
       </div>
@@ -171,7 +270,7 @@ export default function TidszoneBeregner() {
       {/* Valg af tidszoner */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium mb-2 dark:text-gray-200">Fra tidszone</label>
+          <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.fromZone}</label>
           <select
             value={fraTidszone}
             onChange={(e) => setFraTidszone(e.target.value)}
@@ -179,13 +278,13 @@ export default function TidszoneBeregner() {
           >
             {tidszoner.map((tz) => (
               <option key={tz.id} value={tz.id}>
-                {tz.by} - {tz.navn}
+                {l.by[tz.id]} - {l.navn[tz.id]}
               </option>
             ))}
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium mb-2 dark:text-gray-200">Til tidszone</label>
+          <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.toZone}</label>
           <select
             value={tilTidszone}
             onChange={(e) => setTilTidszone(e.target.value)}
@@ -193,7 +292,7 @@ export default function TidszoneBeregner() {
           >
             {tidszoner.map((tz) => (
               <option key={tz.id} value={tz.id}>
-                {tz.by} - {tz.navn}
+                {l.by[tz.id]} - {l.navn[tz.id]}
               </option>
             ))}
           </select>
@@ -203,22 +302,21 @@ export default function TidszoneBeregner() {
       {/* Tidsforskel info */}
       <div className="p-4 bg-gray-100 dark:bg-gray-800 rounded-lg text-center">
         <p className="text-gray-600 dark:text-gray-400">
-          Tidsforskel: <strong className="dark:text-white">
-            {beregning.forskelTimer >= 0 ? '+' : ''}{beregning.forskelTimer} timer
+          {l.timeDiff}: <strong className="dark:text-white">
+            {beregning.forskelTimer >= 0 ? '+' : ''}{beregning.forskelTimer} {l.hoursWord}
           </strong>
         </p>
         <p className="text-sm text-gray-500 dark:text-gray-400">
-          {beregning.tilTz.by} er {Math.abs(beregning.forskelTimer)} timer
-          {beregning.forskelTimer >= 0 ? ' foran' : ' bagud'} {beregning.fraTz.by}
+          {l.diffSentence(l.by[beregning.tilTz.id], Math.abs(beregning.forskelTimer), beregning.forskelTimer >= 0, l.by[beregning.fraTz.id])}
         </p>
       </div>
 
       {/* Manuel tid konvertering */}
       <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6">
-        <h3 className="font-medium mb-4 dark:text-white">Konverter et specifikt tidspunkt</h3>
+        <h3 className="font-medium mb-4 dark:text-white">{l.convertTitle}</h3>
         <div className="grid grid-cols-2 gap-4 max-w-xs">
           <div>
-            <label className="block text-sm font-medium mb-2 dark:text-gray-200">Time</label>
+            <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.hourLabel}</label>
             <select
               value={timer}
               onChange={(e) => setTimer(parseInt(e.target.value))}
@@ -230,7 +328,7 @@ export default function TidszoneBeregner() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2 dark:text-gray-200">Minut</label>
+            <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.minuteLabel}</label>
             <select
               value={minutter}
               onChange={(e) => setMinutter(parseInt(e.target.value))}
@@ -252,12 +350,12 @@ export default function TidszoneBeregner() {
       <div className="p-8 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-2xl text-white">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
           <div className="text-center">
-            <p className="text-sm opacity-75">{beregning.fraTz.by}</p>
+            <p className="text-sm opacity-75">{l.by[beregning.fraTz.id]}</p>
             <p className="text-4xl font-bold">{formatTid(timer, minutter)}</p>
           </div>
           <div className="text-center text-4xl">→</div>
           <div className="text-center">
-            <p className="text-sm opacity-75">{beregning.tilTz.by}</p>
+            <p className="text-sm opacity-75">{l.by[beregning.tilTz.id]}</p>
             <p className="text-4xl font-bold">
               {formatTid(beregning.tilTimer, beregning.tilMinutter)}
             </p>
@@ -268,18 +366,18 @@ export default function TidszoneBeregner() {
 
       {/* Share button */}
       <div className="flex justify-center gap-3">
-        <CopyResultButton text={`${formatTid(timer, minutter)} i ${beregning.fraTz.by} = ${formatTid(beregning.tilTimer, beregning.tilMinutter)} i ${beregning.tilTz.by} ${getDagTekst()}`} />
+        <CopyResultButton text={l.summary(formatTid(timer, minutter), l.by[beregning.fraTz.id], formatTid(beregning.tilTimer, beregning.tilMinutter), l.by[beregning.tilTz.id], getDagTekst())} />
         <ShareCalculation
           getShareableLink={getShareableLink}
-          calculatorName="Tidszoneberegner"
-          resultSummary={`${formatTid(timer, minutter)} i ${beregning.fraTz.by} = ${formatTid(beregning.tilTimer, beregning.tilMinutter)} i ${beregning.tilTz.by} ${getDagTekst()}`}
+          calculatorName={l.calcName}
+          resultSummary={l.summary(formatTid(timer, minutter), l.by[beregning.fraTz.id], formatTid(beregning.tilTimer, beregning.tilMinutter), l.by[beregning.tilTz.id], getDagTekst())}
         />
       </div>
 
       {/* Populære tidszoner fra Danmark */}
       <div className="bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg overflow-hidden">
         <div className="p-4 bg-gray-50 dark:bg-gray-700 border-b dark:border-gray-600">
-          <h3 className="font-medium dark:text-white">Tidsforskel fra Danmark</h3>
+          <h3 className="font-medium dark:text-white">{l.diffFromDenmark}</h3>
         </div>
         <div className="p-4">
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
@@ -289,9 +387,9 @@ export default function TidszoneBeregner() {
                 const forskel = (tz.offset - 60) / 60;
                 return (
                   <div key={tz.id} className="flex justify-between p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded">
-                    <span className="dark:text-gray-300">{tz.by}</span>
+                    <span className="dark:text-gray-300">{l.by[tz.id]}</span>
                     <span className="font-mono dark:text-white">
-                      {forskel >= 0 ? '+' : ''}{forskel}t
+                      {forskel >= 0 ? '+' : ''}{forskel}{l.hourSuffix}
                     </span>
                   </div>
                 );
@@ -302,11 +400,9 @@ export default function TidszoneBeregner() {
 
       {/* Info */}
       <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg p-4">
-        <h3 className="font-medium text-yellow-800 dark:text-yellow-300 mb-2">⚠️ Om sommertid</h3>
+        <h3 className="font-medium text-yellow-800 dark:text-yellow-300 mb-2">{l.dstTitle}</h3>
         <p className="text-sm text-yellow-700 dark:text-yellow-400">
-          Denne beregner bruger standard tidsforskelle. Husk at sommertid (DST) kan påvirke
-          den faktiske tidsforskel. Danmark skifter til sommertid sidste søndag i marts og
-          tilbage sidste søndag i oktober.
+          {l.dstBody}
         </p>
       </div>
     </div>

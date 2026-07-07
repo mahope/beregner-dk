@@ -8,9 +8,101 @@ import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { useLocale } from '@/components/LocaleProvider';
 import { getIntlLocale } from '@/lib/format';
 
+const zodiacSymbols = ["♈", "♉", "♊", "♋", "♌", "♍", "♎", "♏", "♐", "♑", "♒", "♓"];
+
 export default function AlderBeregner() {
   const { locale } = useLocale();
   const intlLocale = getIntlLocale(locale);
+
+  const labels = {
+    da: {
+      birthDate: "Fødselsdato",
+      calcAgePerDate: "Beregn alder pr. dato",
+      useToday: "Brug i dag",
+      yourExactAge: "Din præcise alder",
+      yearUnit: "år",
+      monthsAndDays: (m: number, d: number) => `${m} måneder og ${d} dage`,
+      nextBirthday: (days: number, age: number) => (
+        <>🎂 Der er <strong>{days} dage</strong> til din næste fødselsdag (du fylder {age} år)</>
+      ),
+      daysLived: "Dage levet",
+      weeksLived: "Uger levet",
+      monthsLived: "Måneder levet",
+      hoursLived: "Timer levet",
+      zodiacLabel: "Stjernetegn",
+      bornOnA: "Født på en",
+      detailedTitle: "Detaljeret aldersberegning",
+      ageInYears: "Alder i år",
+      ageInMonths: "Alder i måneder",
+      ageInWeeks: "Alder i uger",
+      ageInDays: "Alder i dage",
+      ageInHours: "Alder i timer",
+      ageInMinutes: "Alder i minutter",
+      copySummary: (aar: number, mdr: number, dage: number) => `${aar} år, ${mdr} mdr, ${dage} dage`,
+      calcName: "Aldersberegner",
+      errorFutureBirth: "Fødselsdatoen kan ikke være efter beregningsdatoen.",
+      emptyPrompt: "Indtast din fødselsdato for at se din præcise alder",
+      weekdays: ["Søndag", "Mandag", "Tirsdag", "Onsdag", "Torsdag", "Fredag", "Lørdag"],
+      zodiac: [
+        { navn: "Vædder", periode: "21. mar - 19. apr" },
+        { navn: "Tyr", periode: "20. apr - 20. maj" },
+        { navn: "Tvilling", periode: "21. maj - 20. jun" },
+        { navn: "Krebs", periode: "21. jun - 22. jul" },
+        { navn: "Løve", periode: "23. jul - 22. aug" },
+        { navn: "Jomfru", periode: "23. aug - 22. sep" },
+        { navn: "Vægt", periode: "23. sep - 22. okt" },
+        { navn: "Skorpion", periode: "23. okt - 21. nov" },
+        { navn: "Skytte", periode: "22. nov - 21. dec" },
+        { navn: "Stenbuk", periode: "22. dec - 19. jan" },
+        { navn: "Vandmand", periode: "20. jan - 18. feb" },
+        { navn: "Fisk", periode: "19. feb - 20. mar" },
+      ],
+    },
+    se: {
+      birthDate: "Födelsedatum",
+      calcAgePerDate: "Beräkna ålder per datum",
+      useToday: "Använd idag",
+      yourExactAge: "Din exakta ålder",
+      yearUnit: "år",
+      monthsAndDays: (m: number, d: number) => `${m} månader och ${d} dagar`,
+      nextBirthday: (days: number, age: number) => (
+        <>🎂 Det är <strong>{days} dagar</strong> till din nästa födelsedag (du fyller {age} år)</>
+      ),
+      daysLived: "Dagar levda",
+      weeksLived: "Veckor levda",
+      monthsLived: "Månader levda",
+      hoursLived: "Timmar levda",
+      zodiacLabel: "Stjärntecken",
+      bornOnA: "Född på en",
+      detailedTitle: "Detaljerad åldersberäkning",
+      ageInYears: "Ålder i år",
+      ageInMonths: "Ålder i månader",
+      ageInWeeks: "Ålder i veckor",
+      ageInDays: "Ålder i dagar",
+      ageInHours: "Ålder i timmar",
+      ageInMinutes: "Ålder i minuter",
+      copySummary: (aar: number, mdr: number, dage: number) => `${aar} år, ${mdr} mån, ${dage} dagar`,
+      calcName: "Ålderskalkylator",
+      errorFutureBirth: "Födelsedatumet kan inte vara efter beräkningsdatumet.",
+      emptyPrompt: "Ange ditt födelsedatum för att se din exakta ålder",
+      weekdays: ["Söndag", "Måndag", "Tisdag", "Onsdag", "Torsdag", "Fredag", "Lördag"],
+      zodiac: [
+        { navn: "Väduren", periode: "21. mar - 19. apr" },
+        { navn: "Oxen", periode: "20. apr - 20. maj" },
+        { navn: "Tvillingarna", periode: "21. maj - 20. jun" },
+        { navn: "Kräftan", periode: "21. jun - 22. jul" },
+        { navn: "Lejonet", periode: "23. jul - 22. aug" },
+        { navn: "Jungfrun", periode: "23. aug - 22. sep" },
+        { navn: "Vågen", periode: "23. sep - 22. okt" },
+        { navn: "Skorpionen", periode: "23. okt - 21. nov" },
+        { navn: "Skytten", periode: "22. nov - 21. dec" },
+        { navn: "Stenbocken", periode: "22. dec - 19. jan" },
+        { navn: "Vattumannen", periode: "20. jan - 18. feb" },
+        { navn: "Fiskarna", periode: "19. feb - 20. mar" },
+      ],
+    },
+  };
+  const l = labels[locale as keyof typeof labels] || labels.da;
   const [foedselsdato, setFoedselsdato] = useState<string>("");
   const [beregningsDato, setBeregningsDato] = useState<string>(
     new Date().toISOString().split("T")[0]
@@ -109,11 +201,15 @@ export default function AlderBeregner() {
     );
 
     // Stjernetegn
-    const stjernetegn = getStjernetegn(foedselsDate);
+    const stjernetegnIndex = getStjernetegnIndex(foedselsDate);
+    const stjernetegn = {
+      navn: l.zodiac[stjernetegnIndex].navn,
+      symbol: zodiacSymbols[stjernetegnIndex],
+      periode: l.zodiac[stjernetegnIndex].periode,
+    };
 
     // Ugedag født
-    const ugedage = ["Søndag", "Mandag", "Tirsdag", "Onsdag", "Torsdag", "Fredag", "Lørdag"];
-    const ugedagFoedt = ugedage[foedselsDate.getDay()];
+    const ugedagFoedt = l.weekdays[foedselsDate.getDay()];
 
     return {
       aar,
@@ -131,34 +227,34 @@ export default function AlderBeregner() {
     };
   }, [foedselsdato, beregningsDato]);
 
-  function getStjernetegn(dato: Date): { navn: string; symbol: string; periode: string } {
+  function getStjernetegnIndex(dato: Date): number {
     const dag = dato.getDate();
     const maaned = dato.getMonth() + 1;
 
     if ((maaned === 3 && dag >= 21) || (maaned === 4 && dag <= 19)) {
-      return { navn: "Vædder", symbol: "♈", periode: "21. mar - 19. apr" };
+      return 0;
     } else if ((maaned === 4 && dag >= 20) || (maaned === 5 && dag <= 20)) {
-      return { navn: "Tyr", symbol: "♉", periode: "20. apr - 20. maj" };
+      return 1;
     } else if ((maaned === 5 && dag >= 21) || (maaned === 6 && dag <= 20)) {
-      return { navn: "Tvilling", symbol: "♊", periode: "21. maj - 20. jun" };
+      return 2;
     } else if ((maaned === 6 && dag >= 21) || (maaned === 7 && dag <= 22)) {
-      return { navn: "Krebs", symbol: "♋", periode: "21. jun - 22. jul" };
+      return 3;
     } else if ((maaned === 7 && dag >= 23) || (maaned === 8 && dag <= 22)) {
-      return { navn: "Løve", symbol: "♌", periode: "23. jul - 22. aug" };
+      return 4;
     } else if ((maaned === 8 && dag >= 23) || (maaned === 9 && dag <= 22)) {
-      return { navn: "Jomfru", symbol: "♍", periode: "23. aug - 22. sep" };
+      return 5;
     } else if ((maaned === 9 && dag >= 23) || (maaned === 10 && dag <= 22)) {
-      return { navn: "Vægt", symbol: "♎", periode: "23. sep - 22. okt" };
+      return 6;
     } else if ((maaned === 10 && dag >= 23) || (maaned === 11 && dag <= 21)) {
-      return { navn: "Skorpion", symbol: "♏", periode: "23. okt - 21. nov" };
+      return 7;
     } else if ((maaned === 11 && dag >= 22) || (maaned === 12 && dag <= 21)) {
-      return { navn: "Skytte", symbol: "♐", periode: "22. nov - 21. dec" };
+      return 8;
     } else if ((maaned === 12 && dag >= 22) || (maaned === 1 && dag <= 19)) {
-      return { navn: "Stenbuk", symbol: "♑", periode: "22. dec - 19. jan" };
+      return 9;
     } else if ((maaned === 1 && dag >= 20) || (maaned === 2 && dag <= 18)) {
-      return { navn: "Vandmand", symbol: "♒", periode: "20. jan - 18. feb" };
+      return 10;
     } else {
-      return { navn: "Fisk", symbol: "♓", periode: "19. feb - 20. mar" };
+      return 11;
     }
   }
 
@@ -171,7 +267,7 @@ export default function AlderBeregner() {
       {/* Input */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label className="block text-sm font-medium mb-2 dark:text-gray-200">Fødselsdato</label>
+          <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.birthDate}</label>
           <input
             type="date"
             value={foedselsdato}
@@ -181,7 +277,7 @@ export default function AlderBeregner() {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-2 dark:text-gray-200">Beregn alder pr. dato</label>
+          <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.calcAgePerDate}</label>
           <input
             type="date"
             value={beregningsDato}
@@ -192,7 +288,7 @@ export default function AlderBeregner() {
             onClick={() => setBeregningsDato(new Date().toISOString().split("T")[0])}
             className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 mt-1"
           >
-            Brug i dag
+            {l.useToday}
           </button>
         </div>
       </div>
@@ -205,20 +301,19 @@ export default function AlderBeregner() {
         <>
           {/* Hovedresultat */}
           <div className="p-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl text-center text-white">
-            <p className="text-lg opacity-90 mb-2">Din præcise alder</p>
+            <p className="text-lg opacity-90 mb-2">{l.yourExactAge}</p>
             <p className="text-5xl md:text-6xl font-bold mb-2">
-              {beregning.aar} år
+              {beregning.aar} {l.yearUnit}
             </p>
             <p className="text-xl opacity-90">
-              {beregning.maaneder} måneder og {beregning.dage} dage
+              {l.monthsAndDays(beregning.maaneder, beregning.dage)}
             </p>
           </div>
 
           {/* Næste fødselsdag */}
           <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg text-center">
             <p className="text-yellow-800 dark:text-yellow-300">
-              🎂 Der er <strong>{beregning.dageTilFoedselsdag} dage</strong> til din næste fødselsdag
-              (du fylder {beregning.naesteFoedselsdagAlder} år)
+              {l.nextBirthday(beregning.dageTilFoedselsdag, beregning.naesteFoedselsdagAlder)}
             </p>
           </div>
 
@@ -226,19 +321,19 @@ export default function AlderBeregner() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="p-4 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg text-center">
               <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{formatNumber(beregning.totalDage)}</p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Dage levet</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{l.daysLived}</p>
             </div>
             <div className="p-4 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg text-center">
               <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{formatNumber(beregning.totalUger)}</p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Uger levet</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{l.weeksLived}</p>
             </div>
             <div className="p-4 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg text-center">
               <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{formatNumber(beregning.totalMaaneder)}</p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Måneder levet</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{l.monthsLived}</p>
             </div>
             <div className="p-4 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg text-center">
               <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{formatNumber(beregning.totalTimer)}</p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Timer levet</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{l.hoursLived}</p>
             </div>
           </div>
 
@@ -248,7 +343,7 @@ export default function AlderBeregner() {
               <div className="flex items-center gap-3">
                 <span className="text-4xl">{beregning.stjernetegn.symbol}</span>
                 <div>
-                  <p className="font-medium dark:text-gray-200">Stjernetegn: {beregning.stjernetegn.navn}</p>
+                  <p className="font-medium dark:text-gray-200">{l.zodiacLabel}: {beregning.stjernetegn.navn}</p>
                   <p className="text-sm text-gray-500 dark:text-gray-400">{beregning.stjernetegn.periode}</p>
                 </div>
               </div>
@@ -257,7 +352,7 @@ export default function AlderBeregner() {
               <div className="flex items-center gap-3">
                 <span className="text-4xl">📅</span>
                 <div>
-                  <p className="font-medium dark:text-gray-200">Født på en {beregning.ugedagFoedt}</p>
+                  <p className="font-medium dark:text-gray-200">{l.bornOnA} {beregning.ugedagFoedt}</p>
                   <p className="text-sm text-gray-500 dark:text-gray-400">
                     {new Date(foedselsdato).toLocaleDateString(intlLocale, {
                       day: "numeric",
@@ -273,33 +368,33 @@ export default function AlderBeregner() {
           {/* Detaljeret tabel */}
           <div className="bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg overflow-hidden">
             <div className="p-4 bg-gray-50 dark:bg-gray-900/50 border-b dark:border-gray-700">
-              <h3 className="font-medium dark:text-white">Detaljeret aldersberegning</h3>
+              <h3 className="font-medium dark:text-white">{l.detailedTitle}</h3>
             </div>
             <div className="p-4">
               <table className="w-full text-sm dark:text-gray-200">
                 <tbody>
                   <tr className="border-b dark:border-gray-700">
-                    <td className="py-2">Alder i år</td>
+                    <td className="py-2">{l.ageInYears}</td>
                     <td className="py-2 text-right font-mono">{beregning.aar}</td>
                   </tr>
                   <tr className="border-b dark:border-gray-700">
-                    <td className="py-2">Alder i måneder</td>
+                    <td className="py-2">{l.ageInMonths}</td>
                     <td className="py-2 text-right font-mono">{formatNumber(beregning.totalMaaneder)}</td>
                   </tr>
                   <tr className="border-b dark:border-gray-700">
-                    <td className="py-2">Alder i uger</td>
+                    <td className="py-2">{l.ageInWeeks}</td>
                     <td className="py-2 text-right font-mono">{formatNumber(beregning.totalUger)}</td>
                   </tr>
                   <tr className="border-b dark:border-gray-700">
-                    <td className="py-2">Alder i dage</td>
+                    <td className="py-2">{l.ageInDays}</td>
                     <td className="py-2 text-right font-mono">{formatNumber(beregning.totalDage)}</td>
                   </tr>
                   <tr className="border-b dark:border-gray-700">
-                    <td className="py-2">Alder i timer</td>
+                    <td className="py-2">{l.ageInHours}</td>
                     <td className="py-2 text-right font-mono">{formatNumber(beregning.totalTimer)}</td>
                   </tr>
                   <tr>
-                    <td className="py-2">Alder i minutter</td>
+                    <td className="py-2">{l.ageInMinutes}</td>
                     <td className="py-2 text-right font-mono">{formatNumber(beregning.totalMinutter)}</td>
                   </tr>
                 </tbody>
@@ -308,11 +403,11 @@ export default function AlderBeregner() {
           </div>
 
           <div className="flex justify-center">
-            <CopyResultButton text={`${beregning.aar} år, ${beregning.maaneder} mdr, ${beregning.dage} dage`} />
+            <CopyResultButton text={l.copySummary(beregning.aar, beregning.maaneder, beregning.dage)} />
             <ShareCalculation
               getShareableLink={getShareableLink}
-              calculatorName="Aldersberegner"
-              resultSummary={beregning ? `${beregning.aar} år, ${beregning.maaneder} mdr, ${beregning.dage} dage` : undefined}
+              calculatorName={l.calcName}
+              resultSummary={beregning ? l.copySummary(beregning.aar, beregning.maaneder, beregning.dage) : undefined}
             />
           </div>
         </>
@@ -320,13 +415,13 @@ export default function AlderBeregner() {
 
       {!beregning && foedselsdato && (
         <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg text-center text-red-700 dark:text-red-400">
-          Fødselsdatoen kan ikke være efter beregningsdatoen.
+          {l.errorFutureBirth}
         </div>
       )}
 
       {!foedselsdato && (
         <div className="p-8 bg-gray-50 dark:bg-gray-800 rounded-xl text-center text-gray-500 dark:text-gray-400">
-          Indtast din fødselsdato for at se din præcise alder
+          {l.emptyPrompt}
         </div>
       )}
     </div>
