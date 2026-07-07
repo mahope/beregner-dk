@@ -38,12 +38,12 @@ const faqItems = [
   {
     question: "Hvad er personfradraget i 2026?",
     answer:
-      "Personfradraget (bundfradraget) er 49.700 kr i 2026. Det betyder, at du ikke betaler skat af de første 49.700 kr af din indkomst.",
+      "Personfradraget (bundfradraget) er 54.100 kr i 2026. Det betyder, at du ikke betaler skat af de første 54.100 kr af din indkomst.",
   },
   {
     question: "Hvornår betaler man topskat i 2026?",
     answer:
-      "Du betaler topskat i 2026, når din personlige indkomst efter AM-bidrag overstiger 588.900 kr. Topskattesatsen er 15%.",
+      "Du betaler topskat i 2026, når din personlige indkomst efter AM-bidrag overstiger 777.900 kr (7,5% topskat). Ved indkomst over 641.200 kr betaler du desuden 7,5% mellemskat, og over 2.592.700 kr yderligere 5% top-topskat.",
   },
   {
     question: "Hvor meget er AM-bidraget i 2026?",
@@ -104,15 +104,23 @@ export default function Skat2026GuidePage() {
               </tr>
               <tr>
                 <td>Personfradrag</td>
-                <td>49.700 kr</td>
+                <td>54.100 kr</td>
               </tr>
               <tr>
                 <td>Bundskat</td>
-                <td>12,09%</td>
+                <td>12,01%</td>
+              </tr>
+              <tr>
+                <td>Mellemskat</td>
+                <td>7,5% (over 641.200 kr)</td>
               </tr>
               <tr>
                 <td>Topskat</td>
-                <td>15% (over 588.900 kr)</td>
+                <td>7,5% (over 777.900 kr)</td>
+              </tr>
+              <tr>
+                <td>Top-topskat</td>
+                <td>5% (over 2.592.700 kr)</td>
               </tr>
               <tr>
                 <td>Gennemsnitlig kommuneskat</td>
@@ -120,7 +128,7 @@ export default function Skat2026GuidePage() {
               </tr>
               <tr>
                 <td>Beskæftigelsesfradrag (max)</td>
-                <td>45.100 kr</td>
+                <td>63.300 kr</td>
               </tr>
               <tr>
                 <td>Kirkeskat (gennemsnit)</td>
@@ -142,12 +150,12 @@ export default function Skat2026GuidePage() {
 
         <h2>Personfradraget: Din skattefri bundgrænse</h2>
         <p>
-          Personfradraget er det beløb, du kan tjene skattefrit. I 2026 er personfradraget <strong>49.700 kr
+          Personfradraget er det beløb, du kan tjene skattefrit. I 2026 er personfradraget <strong>54.100 kr
           om året</strong> for voksne over 18 år. For unge under 18 er fradraget lavere (39.300 kr).
         </p>
         <p>
           Personfradraget modregnes i din skat — ikke i din indkomst. Det svarer til en skattebesparelse
-          på ca. 18.500 kr årligt (afhængigt af din kommune).
+          på ca. 20.000 kr årligt (afhængigt af din kommune).
         </p>
 
         <h2>Kommuneskat: Stor forskel på din adresse</h2>
@@ -169,19 +177,20 @@ export default function Skat2026GuidePage() {
 
         <h2>Bundskat og topskat</h2>
         <p>
-          <strong>Bundskattesatsen</strong> er 12,09% i 2026 og beregnes af din personlige indkomst efter
+          <strong>Bundskattesatsen</strong> er 12,01% i 2026 og beregnes af din personlige indkomst efter
           AM-bidrag, minus personfradraget.
         </p>
         <p>
-          <strong>Topskattegrænsen</strong> er 588.900 kr i 2026. Tjener du mere end dette beløb (efter
-          AM-bidrag), betaler du 15% i topskat af det overskydende beløb. Det giver en effektiv
-          marginalskat på ca. 52-56% for topskatte-ydere, afhængigt af kommune og kirkeskat.
+          Med skattereformen er den gamle topskat i 2026 delt op i tre trin: <strong>mellemskat</strong> (7,5%
+          over 641.200 kr efter AM-bidrag), <strong>topskat</strong> (7,5% over 777.900 kr) og
+          <strong>top-topskat</strong> (5% over 2.592.700 kr). Det giver en effektiv
+          marginalskat på op til ca. 55% for de højeste indkomster, afhængigt af kommune og kirkeskat.
         </p>
 
         <h2>Beskæftigelsesfradrag</h2>
         <p>
-          Beskæftigelsesfradraget gives automatisk til alle, der arbejder. I 2026 er det <strong>10,65%</strong> af
-          din arbejdsindkomst, dog med et loft på <strong>45.100 kr</strong>. Det svarer til en skattebesparelse
+          Beskæftigelsesfradraget gives automatisk til alle, der arbejder. I 2026 er det <strong>12,75%</strong> af
+          din arbejdsindkomst, dog med et loft på <strong>63.300 kr</strong>. Det svarer til en skattebesparelse
           på ca. 11.000-17.000 kr årligt afhængigt af indkomst og kommune.
         </p>
         <p>
@@ -209,13 +218,13 @@ export default function Skat2026GuidePage() {
         <ol>
           <li><strong>AM-bidrag:</strong> 40.000 × 8% = 3.200 kr</li>
           <li><strong>Personlig indkomst:</strong> 40.000 - 3.200 = 36.800 kr</li>
-          <li><strong>Bundskat:</strong> (36.800 - 4.142*) × 12,09% ≈ 3.946 kr</li>
-          <li><strong>Kommuneskat:</strong> (36.800 - 4.142*) × 25,1% ≈ 8.197 kr</li>
+          <li><strong>Bundskat:</strong> (36.800 - 4.508*) × 12,01% ≈ 3.878 kr</li>
+          <li><strong>Kommuneskat:</strong> (36.800 - 4.508*) × 25,1% ≈ 8.105 kr</li>
           <li><strong>Beskæftigelsesfradrag:</strong> Reducerer skatten med ca. 1.100 kr/md</li>
           <li><strong>Nettoudbetaling:</strong> ca. 26.000-27.000 kr</li>
         </ol>
         <p className="text-sm text-gray-600 dark:text-gray-400">
-          * Personfradrag 49.700 kr / 12 måneder = 4.142 kr/md
+          * Personfradrag 54.100 kr / 12 måneder = 4.508 kr/md
         </p>
         <p>
           Er du i tvivl om din konkrete skat?{" "}
@@ -231,11 +240,11 @@ export default function Skat2026GuidePage() {
           de vigtigste ændringer:
         </p>
         <ul>
-          <li>Personfradraget er steget fra ca. 48.000 kr til 49.700 kr</li>
-          <li>Topskattegrænsen er steget fra ca. 568.900 kr til 588.900 kr</li>
-          <li>Beskæftigelsesfradragets loft er steget fra ca. 43.500 kr til 45.100 kr</li>
+          <li>Personfradraget er steget fra ca. 51.600 kr til 54.100 kr</li>
+          <li>Den gamle topskat er delt op i mellemskat (7,5%), topskat (7,5%) og top-topskat (5%)</li>
+          <li>Beskæftigelsesfradragets loft er hævet markant til 63.300 kr</li>
           <li>AM-bidraget er uændret 8%</li>
-          <li>Bundskattesatsen er uændret 12,09%</li>
+          <li>Bundskatten er sænket til 12,01%</li>
         </ul>
         <p>
           Samlet set betyder det en lille skattelettelse for de fleste lønmodtagere — typisk 200-500 kr

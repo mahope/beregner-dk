@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "biome lint ./src",
+    "lint:fix": "biome lint --write ./src",
     "test": "vitest run",
     "test:watch": "vitest"
   },
@@ -17,6 +18,7 @@
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
     "@tailwindcss/postcss": "^4.0.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
@@ -33,11 +35,7 @@
   },
   "lint-staged": {
     "*.{ts,tsx}": [
-      "eslint --fix",
-      "prettier --write"
-    ],
-    "*.{json,css}": [
-      "prettier --write"
+      "biome lint --write --no-errors-on-unmatched"
     ]
   }
 }

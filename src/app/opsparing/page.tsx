@@ -144,7 +144,7 @@ export default async function OpsparingPage() {
           </li>
         </ul>
 
-        <div className="bg-green-50 border-l-4 border-green-400 p-4 my-6 not-prose">
+        <div className="bg-green-50 dark:bg-green-900/20 border-l-4 border-green-400 dark:border-green-500 p-4 my-6 not-prose">
           <p className="font-medium text-green-800">Eksempel: Tid vs. beløb</p>
           <p className="text-green-700">
             Person A starter med 25 år og sparer 1.000 kr/md i 40 år (5% rente) = <strong>1,5 mio kr</strong><br />
@@ -153,7 +153,7 @@ export default async function OpsparingPage() {
           </p>
         </div>
 
-        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 my-6 not-prose">
+        <div className="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 dark:border-yellow-500 p-4 my-6 not-prose">
           <p className="font-medium text-yellow-800">Bemærk</p>
           <p className="text-yellow-700">
             Denne beregner viser beløb før skat og inflation. Faktisk afkast

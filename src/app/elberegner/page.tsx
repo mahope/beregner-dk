@@ -92,7 +92,7 @@ export default async function ElberegnerPage() {
               <tr>
                 <td>Tørretumbler</td>
                 <td>3000W</td>
-                <td>~1095 kr (4t/dag)</td>
+                <td>~10.950 kr (4t/dag)</td>
               </tr>
               <tr>
                 <td>Gaming PC</td>
@@ -123,8 +123,8 @@ export default async function ElberegnerPage() {
             stadig strøm (typisk 5-15W)
           </li>
           <li>
-            <strong>Vælg energieffektive apparater</strong> - kig efter A+++
-            mærkning
+            <strong>Vælg energieffektive apparater</strong> - kig efter en god
+            energiklasse på EU&apos;s A-G-mærkning
           </li>
           <li>
             <strong>LED-pærer</strong> - bruger op til 80% mindre strøm end
@@ -168,7 +168,7 @@ export default async function ElberegnerPage() {
           </li>
         </ul>
 
-        <div className="bg-green-50 border-l-4 border-green-400 p-4 my-6 not-prose">
+        <div className="bg-green-50 dark:bg-green-900/20 border-l-4 border-green-400 dark:border-green-500 p-4 my-6 not-prose">
           <p className="font-medium text-green-800">Tip til lavere elregning</p>
           <p className="text-green-700">
             Overvej en variabel elaftale og brug strøm når spotprisen er lav.

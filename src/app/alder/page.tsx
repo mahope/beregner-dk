@@ -47,39 +47,39 @@ export default async function AlderPage() {
       <div className="prose max-w-none mb-8">
         <h2>Om aldersberegning</h2>
         <p>
-          At kende sin <strong>pr&aelig;cise alder</strong> kan v&aelig;re nyttigt i mange sammenh&aelig;nge - fra <strong>juridiske dokumenter</strong>
+          At kende sin <strong>præcise alder</strong> kan være nyttigt i mange sammenhænge - fra <strong>juridiske dokumenter</strong>
           {" "}til <strong>sundhedsberegninger</strong>. Vores aldersberegner giver dig et detaljeret overblik over din alder
           i forskellige <strong>tidsenheder</strong>.
         </p>
 
         <h3>Alder i forskellige enheder</h3>
         <p>
-          Din alder kan m&aring;les i mange enheder:
+          Din alder kan måles i mange enheder:
         </p>
         <ul>
-          <li><strong>&Aring;r</strong> - Den mest almindelige m&aring;de at angive alder</li>
-          <li><strong>M&aring;neder</strong> - Bruges ofte for sm&aring;b&oslash;rn</li>
-          <li><strong>Uger</strong> - Bruges ved graviditet og for nyf&oslash;dte</li>
-          <li><strong>Dage</strong> - For pr&aelig;cise beregninger</li>
+          <li><strong>År</strong> - Den mest almindelige måde at angive alder</li>
+          <li><strong>Måneder</strong> - Bruges ofte for småbørn</li>
+          <li><strong>Uger</strong> - Bruges ved graviditet og for nyfødte</li>
+          <li><strong>Dage</strong> - For præcise beregninger</li>
           <li><strong>Timer/Minutter</strong> - For sjov og kuriositet</li>
         </ul>
 
         <h3>Juridisk alder i Danmark</h3>
         <p>
-          I Danmark har alder juridisk betydning ved flere milep&aelig;le:
+          I Danmark har alder juridisk betydning ved flere milepæle:
         </p>
         <ul>
-          <li>15 &aring;r - Seksuel lavalder</li>
-          <li>18 &aring;r - Myndighedsalder, stemmeret, k&oslash;rekort til bil</li>
-          <li>21 &aring;r - Kan adoptere (med undtagelser)</li>
-          <li>Pensionsalder - Afh&aelig;nger af f&oslash;dsels&aring;r (ca. 67-68 &aring;r)</li>
+          <li>15 år - Seksuel lavalder</li>
+          <li>18 år - Myndighedsalder, stemmeret, kørekort til bil</li>
+          <li>21 år - Kan adoptere (med undtagelser)</li>
+          <li>Pensionsalder - Afhænger af fødselsår (ca. 67-68 år)</li>
         </ul>
 
         <h3>Stjernetegn</h3>
         <p>
-          <strong>Stjernetegnene</strong> er baseret p&aring; den <strong>vestlige astrologi</strong> og f&oslash;lger <strong>solens position</strong>
-          {" "}i zodiakken p&aring; f&oslash;dselstidspunktet. Der er <strong>12 tegn</strong>, hver med unikke karaktertr&aelig;k
-          if&oslash;lge astrologisk tradition.
+          <strong>Stjernetegnene</strong> er baseret på den <strong>vestlige astrologi</strong> og følger <strong>solens position</strong>
+          {" "}i zodiakken på fødselstidspunktet. Der er <strong>12 tegn</strong>, hver med unikke karaktertræk
+          ifølge astrologisk tradition.
         </p>
       </div>
       )}

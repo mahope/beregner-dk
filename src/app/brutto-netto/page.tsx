@@ -45,14 +45,14 @@ export default async function BruttoNettoPage() {
 
           <h2>Perfekt til lønforhandling</h2>
           <p>
-            Når du forhandler løn, er det nyttigt at vide præcis hvad en <strong>lønforhøjelse</strong> betyder for din udbetaling — og omvendt. Hvis du fx ønsker 2.000 kr. mere udbetalt om måneden, skal du typisk forhandle dig til <strong>3.500-4.000 kr. mere i bruttoløn</strong> (afhængig af din skatteprocent).
+            Når du forhandler løn, er det nyttigt at vide præcis hvad en <strong>lønforhøjelse</strong> betyder for din udbetaling — og omvendt. Hvis du fx ønsker 2.000 kr. mere udbetalt om måneden, skal du typisk forhandle dig til <strong>3.500-4.000 kr. mere i bruttoløn</strong> (afhængigt af din skatteprocent).
           </p>
 
           <h2>Hvad trækkes fra din løn?</h2>
           <ul>
             <li><strong>AM-bidrag (8%):</strong> Trækkes af bruttolønnen før skat</li>
             <li><strong>Bundskat (12,01%):</strong> Betales af alle lønindkomster</li>
-            <li><strong>Kommuneskat (ca. 25%):</strong> Varierer fra 22,8% til 27,8% afhængig af kommune</li>
+            <li><strong>Kommuneskat (ca. 25%):</strong> Varierer fra 22,8% til 27,8% afhængigt af kommune</li>
             <li><strong>Kirkeskat (ca. 0,7%):</strong> Valgfri — kun for medlemmer af folkekirken</li>
             <li><strong>Mellemskat (7,5%):</strong> Over 641.200 kr./år efter AM-bidrag</li>
             <li><strong>Topskat (7,5%):</strong> Over 777.900 kr./år efter AM-bidrag</li>

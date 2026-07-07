@@ -38,27 +38,27 @@ export default async function KonfirmationPage() {
 
         {locale === "da" && (
         <div className="mt-12 prose dark:prose-invert max-w-none">
-          <h2>S&aring;dan planl&aelig;gger du konfirmationsbudgettet</h2>
+          <h2>Sådan planlægger du konfirmationsbudgettet</h2>
           <p>
-            En konfirmation er en stor dag — b&aring;de for konfirmanden og familien. Ved at <strong>planl&aelig;gge budgettet tidligt</strong> undg&aring;r du ubehagelige overraskelser og kan fokusere p&aring; det vigtigste: at fejre dagen.
+            En konfirmation er en stor dag — både for konfirmanden og familien. Ved at <strong>planlægge budgettet tidligt</strong> undgår du ubehagelige overraskelser og kan fokusere på det vigtigste: at fejre dagen.
           </p>
 
-          <h2>De st&oslash;rste udgiftsposter</h2>
+          <h2>De største udgiftsposter</h2>
           <p>
-            <strong>Mad og drikke</strong> er typisk den st&oslash;rste post og kan variere fra 150-200 kr./person hjemme til 400-700 kr./person p&aring; restaurant. <strong>Konfirmandt&oslash;j</strong> koster typisk 1.500-4.000 kr., og en <strong>fotograf</strong> ligger omkring 1.000-3.000 kr.
+            <strong>Mad og drikke</strong> er typisk den største post og kan variere fra 150-200 kr./person hjemme til 400-700 kr./person på restaurant. <strong>Konfirmandtøj</strong> koster typisk 1.500-4.000 kr., og en <strong>fotograf</strong> ligger omkring 1.000-3.000 kr.
           </p>
 
           <h2>Gennemsnitlige konfirmationsgaver 2026</h2>
           <p>
-            Gavebel&oslash;bet afh&aelig;nger af <strong>relationen til konfirmanden</strong>. For&aelig;ldre giver typisk mest, efterfulgt af bedstefor&aelig;ldre. Mange konfirmander modtager samlet set mellem <strong>10.000 og 25.000 kr.</strong> i gaver.
+            Gavebeløbet afhænger af <strong>relationen til konfirmanden</strong>. Forældre giver typisk mest, efterfulgt af bedsteforældre. Mange konfirmander modtager samlet set mellem <strong>10.000 og 25.000 kr.</strong> i gaver.
           </p>
 
           <h2>Sparetips til konfirmationen</h2>
           <ul>
-            <li><strong>Hold festen hjemme:</strong> Spar tusindvis af kroner p&aring; lokaleleje</li>
+            <li><strong>Hold festen hjemme:</strong> Spar tusindvis af kroner på lokaleleje</li>
             <li><strong>Lav maden selv:</strong> En buffet er billigere og nemmere end servering</li>
-            <li><strong>K&oslash;b t&oslash;j i god tid:</strong> Undg&aring; s&aelig;sontill&aelig;g ved at k&oslash;be tidligt</li>
-            <li><strong>Del fotograf:</strong> G&aring; sammen med en anden konfirmandfamilie</li>
+            <li><strong>Køb tøj i god tid:</strong> Undgå sæsontillæg ved at købe tidligt</li>
+            <li><strong>Del fotograf:</strong> Gå sammen med en anden konfirmandfamilie</li>
             <li><strong>Brug naturen:</strong> Blomster og grene fra haven er flot og gratis pynt</li>
           </ul>
         </div>

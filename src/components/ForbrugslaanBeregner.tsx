@@ -251,11 +251,9 @@ export default function ForbrugslaanBeregner() {
     // Samlet rente
     const samletRente = samletBelob - laanebelob;
 
-    // ÅOP (Approximate Annual Percentage Rate) - forenklet
-    const antalTerminerPrAar = 12;
-    const samletGebyr = 0;
-    const aprApprox = ((antalTerminerPrAar * samletRente) / (laanebelob * (antalBetalinger + 1))) * 100;
-    const apr = aprApprox + (samletGebyr / (laanebelob / 2) * 100);
+    // ÅOP: effektiv årlig rente. Renten tilskrives månedligt og der er ingen
+    // gebyrer, så den effektive årlige omkostning er (1 + i)^12 − 1.
+    const apr = (Math.pow(1 + maanedligRente, 12) - 1) * 100;
 
     // Samlet kredittid
     const samletAar = loebetid / 12;

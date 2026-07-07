@@ -78,30 +78,32 @@ export default function TopskatBeregner() {
     const amBidrag = brutto * AM_BIDRAG;
     const indkomstEfterAm = brutto - amBidrag;
 
-    // Beskæftigelsesfradrag
-    const beskFradrag = Math.min(brutto * BESKAEFTIGELSESFRADRAG_PCT, BESKAEFTIGELSESFRADRAG_MAX);
+    // Beskæftigelsesfradrag (af arbejdsindkomst efter AM-bidrag)
+    const beskFradrag = Math.min(indkomstEfterAm * BESKAEFTIGELSESFRADRAG_PCT, BESKAEFTIGELSESFRADRAG_MAX);
 
-    // Skattepligtig indkomst
-    const skattepligtig = indkomstEfterAm;
+    // Grundlag for bund-, kommune- og kirkeskat: personlig indkomst efter
+    // AM-bidrag minus person- og beskæftigelsesfradrag (jf. LoenBeregner).
+    const skattepligtig = Math.max(0, indkomstEfterAm - PERSONFRADRAG - beskFradrag);
 
-    // Bundskat (af skattepligtig indkomst minus personfradrag)
-    const bundSkatBeloeb = Math.max(0, skattepligtig - PERSONFRADRAG) * BUNDSKAT;
+    // Bundskat
+    const bundSkatBeloeb = skattepligtig * BUNDSKAT;
 
-    // Kommuneskat + kirkeskat (af skattepligtig indkomst minus personfradrag)
-    const kommuneSkatBeloeb = Math.max(0, skattepligtig - PERSONFRADRAG) * komPct;
-    const kirkeSkatBeloeb = Math.max(0, skattepligtig - PERSONFRADRAG) * kirPct;
+    // Kommuneskat + kirkeskat
+    const kommuneSkatBeloeb = skattepligtig * komPct;
+    const kirkeSkatBeloeb = skattepligtig * kirPct;
 
-    // Mellemskat
-    const mellemSkatBeloeb = Math.max(0, skattepligtig - MELLEMSKAT_GRAENSE) * MELLEMSKAT;
-    const betalerMellemskat = skattepligtig > MELLEMSKAT_GRAENSE;
+    // Mellem-, top- og top-topskat beregnes af personlig indkomst efter
+    // AM-bidrag (ligningsmæssige fradrag reducerer ikke disse grundlag).
+    const mellemSkatBeloeb = Math.max(0, indkomstEfterAm - MELLEMSKAT_GRAENSE) * MELLEMSKAT;
+    const betalerMellemskat = indkomstEfterAm > MELLEMSKAT_GRAENSE;
 
     // Topskat
-    const topSkatBeloeb = Math.max(0, skattepligtig - TOPSKAT_GRAENSE) * TOPSKAT;
-    const betalerTopskat = skattepligtig > TOPSKAT_GRAENSE;
+    const topSkatBeloeb = Math.max(0, indkomstEfterAm - TOPSKAT_GRAENSE) * TOPSKAT;
+    const betalerTopskat = indkomstEfterAm > TOPSKAT_GRAENSE;
 
     // Top-topskat
-    const topTopSkatBeloeb = Math.max(0, skattepligtig - TOP_TOPSKAT_GRAENSE) * TOP_TOPSKAT;
-    const betalerTopTopskat = skattepligtig > TOP_TOPSKAT_GRAENSE;
+    const topTopSkatBeloeb = Math.max(0, indkomstEfterAm - TOP_TOPSKAT_GRAENSE) * TOP_TOPSKAT;
+    const betalerTopTopskat = indkomstEfterAm > TOP_TOPSKAT_GRAENSE;
 
     // Samlet skat
     const samletSkat = amBidrag + bundSkatBeloeb + kommuneSkatBeloeb + kirkeSkatBeloeb + mellemSkatBeloeb + topSkatBeloeb + topTopSkatBeloeb;
@@ -110,12 +112,14 @@ export default function TopskatBeregner() {
     // Effektiv skatteprocent
     const effektivSkat = brutto > 0 ? (samletSkat / brutto) * 100 : 0;
 
-    // Marginal skatteprocent (skat af den sidst tjente krone)
-    let marginalSkat = AM_BIDRAG + BUNDSKAT + komPct + kirPct;
-    if (betalerMellemskat) marginalSkat += MELLEMSKAT;
-    if (betalerTopskat) marginalSkat += TOPSKAT;
-    if (betalerTopTopskat) marginalSkat += TOP_TOPSKAT;
-    // Skatteloft: ca. 52,07%
+    // Marginal skatteprocent (skat af den sidst tjente krone). AM-bidraget
+    // tages først, og resten af kronen beskattes med indkomstskatterne.
+    let indkomstSkat = BUNDSKAT + komPct + kirPct;
+    if (betalerMellemskat) indkomstSkat += MELLEMSKAT;
+    if (betalerTopskat) indkomstSkat += TOPSKAT;
+    if (betalerTopTopskat) indkomstSkat += TOP_TOPSKAT;
+    const marginalSkat = AM_BIDRAG + (1 - AM_BIDRAG) * indkomstSkat;
+    // Skatteloft på indkomstskatterne (ekskl. AM og kirkeskat): ca. 52,07%
     const marginalPct = Math.min(marginalSkat * 100, 52.07 + AM_BIDRAG * 100);
 
     // Hvad skal du tjene før topskat?

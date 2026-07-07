@@ -137,7 +137,7 @@ export default async function RenteberegnerPage() {
           dig ca. <strong>3,35% efter skat</strong>.
         </p>
 
-        <div className="bg-blue-50 border-l-4 border-blue-400 p-4 my-6 not-prose">
+        <div className="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-400 dark:border-blue-500 p-4 my-6 not-prose">
           <p className="font-medium text-blue-800">Tip: Brug beregneren til at sammenligne</p>
           <p className="text-blue-700">
             Prøv at indtaste det samme lån med forskellig løbetid eller låntype
@@ -145,7 +145,7 @@ export default async function RenteberegnerPage() {
           </p>
         </div>
 
-        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 my-6 not-prose">
+        <div className="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 dark:border-yellow-500 p-4 my-6 not-prose">
           <p className="font-medium text-yellow-800">Bemærk</p>
           <p className="text-yellow-700">
             Denne beregner giver et estimat. Faktiske lånetilbud kan afvige på

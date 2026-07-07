@@ -16,8 +16,8 @@ const SATSER_2026 = {
 
   // Kørselsfradrag
   koerselBundgraense: 24, // km enkelt vej (12 km = 24 km dagligt)
-  koerselSatsLav: 2.23, // kr./km for 25-120 km
-  koerselSatsHoej: 1.12, // kr./km over 120 km
+  koerselSatsLav: 2.28, // kr./km for 25-120 km
+  koerselSatsHoej: 1.14, // kr./km over 120 km
   koerselDageMax: 216, // max arbejdsdage
 
   // Rentefradrag
@@ -93,7 +93,7 @@ export default function SkattefradragBeregner() {
       const dagligKm = km * 2; // tur-retur
       const fradragsKm = dagligKm - SATSER_2026.koerselBundgraense;
       if (fradragsKm > 0) {
-        const lavKm = Math.min(fradragsKm, 120 * 2 - SATSER_2026.koerselBundgraense);
+        const lavKm = Math.min(fradragsKm, 120 - SATSER_2026.koerselBundgraense);
         const hoejKm = Math.max(0, fradragsKm - lavKm);
         koerselsFradrag = Math.round((lavKm * SATSER_2026.koerselSatsLav + hoejKm * SATSER_2026.koerselSatsHoej) * dage);
       }
@@ -149,8 +149,10 @@ export default function SkattefradragBeregner() {
 
     return {
       samletFradrag: samletFradrag + boligfradrag,
-      totalBesparelse: Math.round(besparelseAlmindelig + besparelseBoligfradrag),
-      besparelsePrMd: Math.round((besparelseAlmindelig + besparelseBoligfradrag) / 12),
+      // Brug den rentekorrigerede besparelse (rentefradrag værdisættes til
+      // rentefradragsværdien, ikke den fulde skattesats).
+      totalBesparelse: Math.round(totalBesparelse),
+      besparelsePrMd: Math.round(totalBesparelse / 12),
       poster,
       koerselsFradrag,
       renteFradrag,

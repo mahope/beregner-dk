@@ -7,11 +7,11 @@ import { generateShareableLink, getStateFromUrl, CalculationState } from '@/lib/
 import { trackCalculation, initScrollDepthTracking } from '@/lib/analytics';
 
 // 2026-satser
-const PROGRESSION_LIMIT = 61000; // Progressionsgrænse for aktieindkomst 2026
+const PROGRESSION_LIMIT = 79400; // Progressionsgrænse for aktieindkomst 2026
 const LOW_TAX_RATE = 0.27;       // 27% under grænsen
 const HIGH_TAX_RATE = 0.42;      // 42% over grænsen
 const ASK_TAX_RATE = 0.17;       // 17% i aktiesparekonto (lagerbeskatning)
-const ASK_MAX_DEPOSIT = 135300;  // Max indskud i ASK 2026
+const ASK_MAX_DEPOSIT = 174200;  // Max indskud i ASK 2026
 
 type DepotType = 'frit' | 'ask' | 'begge';
 

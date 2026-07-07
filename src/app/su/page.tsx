@@ -40,7 +40,7 @@ export default async function SUPage() {
         <p>
           <strong>SU</strong> er en støtte fra staten til studerende på <strong>videregående uddannelser</strong>,
           <strong>ungdomsuddannelser</strong> og visse andre uddannelser. Du kan modtage SU fra
-          du er <strong>18 år</strong>.
+          du fylder <strong>18 år</strong>.
         </p>
 
         <h3>SU-satser 2026 (officielle)</h3>

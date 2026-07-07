@@ -106,7 +106,7 @@ export default function KalorieBeregner() {
     // Makronæringsstoffer
     const protein = vaegt * 1.8;
     const fedt = (anbefaletKalorier * 0.25) / 9;
-    const kulhydrater = (anbefaletKalorier - (protein * 4) - (fedt * 9)) / 4;
+    const kulhydrater = Math.max(0, (anbefaletKalorier - (protein * 4) - (fedt * 9)) / 4);
 
     // Alle tre mål til sammenligning
     const tabKcal = Math.round(tdee - 500);

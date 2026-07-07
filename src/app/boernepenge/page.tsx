@@ -112,7 +112,7 @@ export default async function BoernepengePage() {
         <p>Enlige forsørgere kan derudover være berettiget til:</p>
         <ul>
           <li>
-            <strong>Ordinært børnetilskud:</strong> Ca. 6.300 kr. pr. kvartal per barn
+            <strong>Ordinært børnetilskud:</strong> Ca. 6.300 kr. pr. kvartal pr. barn
           </li>
           <li>
             <strong>Ekstra børnetilskud:</strong> Ca. 6.600 kr. pr. kvartal (kun

@@ -52,7 +52,7 @@ const faqItems = [
   },
   {
     question: "Hvad er forskellen på ratepension og aldersopsparing?",
-    answer: "Ratepension giver fradrag nu og beskattes ved udbetaling. Aldersopsparing giver ingen fradrag, men udbetales skattefrit. Max aldersopsparing er 5.900 kr/år (2026), mens ratepension kan være op til 63.100 kr/år.",
+    answer: "Ratepension giver fradrag nu og beskattes ved udbetaling. Aldersopsparing giver ingen fradrag, men udbetales skattefrit. Max aldersopsparing er 9.900 kr/år (2026), mens ratepension kan være op til 68.700 kr/år.",
   },
   {
     question: "Hvad sker der med min pension hvis jeg dør før pensionsalderen?",
@@ -194,7 +194,7 @@ export default function PensionGuidePage() {
         </p>
         <ul>
           <li><strong>Ratepension:</strong> Fradrag nu, skat ved udbetaling (max ~63.000 kr/år)</li>
-          <li><strong>Aldersopsparing:</strong> Ingen fradrag, skattefri udbetaling (max 5.900 kr/år)</li>
+          <li><strong>Aldersopsparing:</strong> Ingen fradrag, skattefri udbetaling (max 9.900 kr/år)</li>
           <li><strong>Frie midler:</strong> Aktier, obligationer, ejendom (lagerbeskatning)</li>
         </ul>
 
@@ -432,7 +432,7 @@ export default function PensionGuidePage() {
               <strong>3. Max ratepension først</strong> - Få skattefradrag nu (op til ~63.000 kr/år)
             </li>
             <li>
-              <strong>4. Tilføj aldersopsparing</strong> - 5.900 kr/år skattefrit ved udbetaling
+              <strong>4. Tilføj aldersopsparing</strong> - 9.900 kr/år skattefrit ved udbetaling
             </li>
             <li>
               <strong>5. Tjek omkostninger</strong> - Høje administrationsgebyrer spiser dit afkast

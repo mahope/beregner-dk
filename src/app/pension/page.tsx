@@ -51,7 +51,7 @@ export default async function PensionPage() {
 
         <h2>Folkepension (2026)</h2>
         <p>
-          Alle danske statsborgere med bopæl i Danmark har ret til <strong>folkepension</strong> fra <strong>folkepensionsalderen</strong> (pt. 68 år).
+          Alle danske statsborgere med bopæl i Danmark har ret til <strong>folkepension</strong> fra <strong>folkepensionsalderen</strong> (pt. 67 år).
         </p>
         <table>
           <thead>
@@ -104,14 +104,14 @@ export default async function PensionPage() {
         <ul>
           <li>Udbetales over 10-30 år</li>
           <li>Beskattes som almindelig indkomst ved udbetaling</li>
-          <li>Fradrag for indbetalinger (op til 63.100 kr/år i 2026)</li>
+          <li>Fradrag for indbetalinger (op til 68.700 kr/år i 2026)</li>
         </ul>
 
         <h3>Aldersopsparing</h3>
         <ul>
           <li>Udbetales skattefrit</li>
           <li>Ingen fradrag for indbetalinger</li>
-          <li>Max 5.900 kr/år (2026)</li>
+          <li>Max 9.900 kr/år (2026)</li>
         </ul>
 
         <h3>Livrente</h3>
@@ -169,7 +169,7 @@ export default async function PensionPage() {
           <li><strong>Aktieandel:</strong> 100 minus din alder (30-årig = 70% aktier)</li>
         </ul>
 
-        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 my-6">
+        <div className="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 dark:border-yellow-500 p-4 my-6">
           <p className="font-medium text-yellow-800">Vigtigt</p>
           <p className="text-yellow-700">
             Denne beregner giver et estimat til orientering. Pensionsregler ændres løbende, og

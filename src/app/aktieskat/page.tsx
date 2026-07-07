@@ -51,11 +51,11 @@ export default async function AktieskatPage() {
             I et <strong>frit depot</strong> beskattes du kun når du <strong>realiserer en gevinst</strong> (sælger aktier med overskud). Skattesatsen i 2026 er:
           </p>
           <ul>
-            <li><strong>27%</strong> af de første 61.000 kr. i aktieindkomst</li>
-            <li><strong>42%</strong> af aktieindkomst over 61.000 kr.</li>
+            <li><strong>27%</strong> af de første 79.400 kr. i aktieindkomst</li>
+            <li><strong>42%</strong> af aktieindkomst over 79.400 kr.</li>
           </ul>
           <p>
-            For <strong>ægtepar</strong> er progressionsgrænsen det dobbelte: <strong>122.000 kr.</strong> samlet. Uudnyttet progressionsgrænse kan <strong>overføres mellem ægtefæller</strong>.
+            For <strong>ægtepar</strong> er progressionsgrænsen det dobbelte: <strong>158.800 kr.</strong> samlet. Uudnyttet progressionsgrænse kan <strong>overføres mellem ægtefæller</strong>.
           </p>
 
           <h2>Aktiesparekonto (ASK) — lagerbeskatning</h2>
@@ -63,7 +63,7 @@ export default async function AktieskatPage() {
             En <strong>aktiesparekonto</strong> beskattes med kun <strong>17%</strong>, men der er <strong>lagerbeskatning</strong>. Det betyder at du betaler skat af årets værdistigning — også selvom du ikke har solgt. Til gengæld er satsen markant lavere.
           </p>
           <p>
-            I 2026 er det maksimale indskud på en ASK <strong>135.300 kr.</strong> Gevinster ud over indskuddet kan forblive på kontoen, men du kan ikke indsætte mere end loftet.
+            I 2026 er det maksimale indskud på en ASK <strong>174.200 kr.</strong> Gevinster ud over indskuddet kan forblive på kontoen, men du kan ikke indsætte mere end loftet.
           </p>
 
           <h2>Hvornår er ASK bedst?</h2>
@@ -72,7 +72,7 @@ export default async function AktieskatPage() {
           </p>
           <ul>
             <li>Du investerer langsigtet og forventer gevinst</li>
-            <li>Din aktieindkomst overstiger progressionsgrænsen (61.000 kr.)</li>
+            <li>Din aktieindkomst overstiger progressionsgrænsen (79.400 kr.)</li>
             <li>Du kan leve med lagerbeskatning (skat årligt, ikke kun ved salg)</li>
           </ul>
           <p>
