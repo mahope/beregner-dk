@@ -56,6 +56,8 @@ const calculatorDefs: CalculatorDef[] = [
   { href: "/bmi", icon: "⚖️", titles: { da: "BMI Beregner", no: "BMI Kalkulator", se: "BMI Kalkylator" }, descriptions: { da: "Beregn dit Body Mass Index", no: "Beregn din BMI", se: "Beräkna ditt BMI" } },
   { href: "/kalorier", icon: "🍎", titles: { da: "Kalorieberegner", no: "Kaloriekalkulator", se: "Kalorikalkylator" }, descriptions: { da: "Beregn kaloriebehov", no: "Beregn kaloribehovet ditt", se: "Beräkna ditt kaloribehov" } },
   { href: "/promille", icon: "🍺", titles: { da: "Promilleberegner", no: "Promillekalkulator", se: "Promillekalkylator" }, descriptions: { da: "Anslå din alkoholpromille", no: "Anslå alkoholpromillen din", se: "Uppskatta din alkoholpromille" } },
+  { href: "/kropsfedt", icon: "💪", titles: { da: "Kropsfedtprocent", no: "Kroppsfettprosent", se: "Kroppsfettprocent" }, descriptions: { da: "Beregn fedtprocent (Navy-metoden)", no: "Beregn fettprosent (Navy-metoden)", se: "Beräkna fettprocent (Navy-metoden)" } },
+  { href: "/1rm", icon: "🏋️", titles: { da: "1RM beregner", no: "1RM kalkulator", se: "1RM kalkylator" }, descriptions: { da: "Anslå dit maksimale løft", no: "Anslå ditt maksimale løft", se: "Uppskatta ditt maxlyft" } },
   // Tid
   { href: "/dato", icon: "📅", titles: { da: "Datoberegner", no: "Datokalkulator", se: "Datumkalkylator" }, descriptions: { da: "Dage mellem datoer", no: "Dager mellom datoer", se: "Dagar mellan datum" } },
   { href: "/tidsberegner", icon: "⏱️", titles: { da: "Tidsberegner", no: "Tidskalkulator", se: "Tidskalkylator" }, descriptions: { da: "Beregn tid og varighed", no: "Beregn tid og varighet", se: "Beräkna tid och varaktighet" } },
@@ -143,6 +145,8 @@ const relatedMap: Record<string, string[]> = {
   "/bmi": ["/kalorier", "/alder", "/procent", "/dato", "/tidsberegner"],
   "/kalorier": ["/bmi", "/procent", "/alder", "/dato", "/tidsberegner"],
   "/promille": ["/bmi", "/kalorier", "/alder", "/tidsberegner", "/procent"],
+  "/kropsfedt": ["/bmi", "/kalorier", "/vaegttab", "/promille", "/procent"],
+  "/1rm": ["/kalorier", "/kropsfedt", "/bmi", "/vaegttab", "/procent"],
   "/dato": ["/tidsberegner", "/alder", "/tidszone", "/feriepenge", "/pension"],
   "/tidsberegner": ["/dato", "/tidszone", "/alder", "/timepris", "/kalorier"],
   "/tidszone": ["/dato", "/tidsberegner", "/valuta", "/alder", "/timepris"],
