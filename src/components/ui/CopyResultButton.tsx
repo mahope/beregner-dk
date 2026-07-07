@@ -2,16 +2,25 @@
 
 import { useState, useCallback } from "react";
 import { Copy, Check } from "lucide-react";
+import { useLocale } from "@/components/LocaleProvider";
 
 interface CopyResultButtonProps {
   text: string;
   className?: string;
 }
 
+const COPY_LABELS: Record<string, { copy: string; copied: string; aria: string }> = {
+  da: { copy: "Kopiér", copied: "Kopieret!", aria: "Kopiér resultat" },
+  se: { copy: "Kopiera", copied: "Kopierat!", aria: "Kopiera resultat" },
+  no: { copy: "Kopier", copied: "Kopiert!", aria: "Kopier resultat" },
+};
+
 /**
- * Inline "Kopiér resultat" button that copies formatted result text.
+ * Inline copy-result button. Copies formatted result text to the clipboard.
  */
 export function CopyResultButton({ text, className = "" }: CopyResultButtonProps) {
+  const { locale } = useLocale();
+  const t = COPY_LABELS[locale] ?? COPY_LABELS.da;
   const [copied, setCopied] = useState(false);
 
   const handleCopy = useCallback(async () => {
@@ -43,17 +52,17 @@ export function CopyResultButton({ text, className = "" }: CopyResultButtonProps
           ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300"
           : "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
       } ${className}`}
-      aria-label={copied ? "Kopieret" : "Kopiér resultat"}
+      aria-label={copied ? t.copied : t.aria}
     >
       {copied ? (
         <>
           <Check className="w-3.5 h-3.5" />
-          Kopieret!
+          {t.copied}
         </>
       ) : (
         <>
           <Copy className="w-3.5 h-3.5" />
-          Kopiér
+          {t.copy}
         </>
       )}
     </button>

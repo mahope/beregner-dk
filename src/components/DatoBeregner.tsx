@@ -28,9 +28,101 @@ function formatDate(date: Date, intlLocale: string): string {
   });
 }
 
+const labels = {
+  da: {
+    modeDageMellemLabel: "Dage mellem",
+    modeDageMellemDesc: "Beregn dage mellem to datoer",
+    modeTilfoejLabel: "Tilføj dage",
+    modeTilfoejDesc: "Tilføj/træk dage fra en dato",
+    modeArbejdsdageLabel: "Arbejdsdage",
+    modeArbejdsdageDesc: "Beregn arbejdsdage fremad",
+    modeAlderLabel: "Alder",
+    modeAlderDesc: "Beregn præcis alder",
+    fraDato: "Fra dato",
+    tilDato: "Til dato",
+    udgangsdato: "Udgangsdato",
+    antal: "Antal",
+    arbejdsdageWord: "arbejdsdage",
+    dageWord: "dage",
+    dageSuffix: "dage",
+    negativHint: "Brug negativ værdi for at trække fra",
+    foedselsdato: "Fødselsdato",
+    antalDage: "Antal dage",
+    ugerWord: "uger",
+    ogWord: "og",
+    uger: "Uger",
+    caMaaneder: "Ca. måneder",
+    arbejdsdage: "Arbejdsdage",
+    weekenddage: "Weekenddage",
+    resultat: "Resultat",
+    arbejdsdageFraNu: "arbejdsdage fra nu",
+    kalenderdageIAlt: "Kalenderdage i alt",
+    weekenddageSprunget: "Weekenddage sprunget",
+    dinAlder: "Din alder",
+    aarWord: "år",
+    maanederWord: "måneder",
+    totalDage: "Total dage",
+    totalUger: "Total uger",
+    naesteFoedselsdag: "Næste fødselsdag",
+    om: "Om",
+    dageMellemDatoer: "dage mellem datoer",
+    dageTilfoejet: "dage tilføjet",
+    arbejdsdageSummary: "arbejdsdage",
+    aarSummary: "år",
+    mdrSummary: "mdr",
+    dageSummary: "dage",
+    calculatorName: "Datoberegner",
+  },
+  se: {
+    modeDageMellemLabel: "Dagar mellan",
+    modeDageMellemDesc: "Beräkna dagar mellan två datum",
+    modeTilfoejLabel: "Lägg till dagar",
+    modeTilfoejDesc: "Lägg till/dra av dagar från ett datum",
+    modeArbejdsdageLabel: "Arbetsdagar",
+    modeArbejdsdageDesc: "Beräkna arbetsdagar framåt",
+    modeAlderLabel: "Ålder",
+    modeAlderDesc: "Beräkna exakt ålder",
+    fraDato: "Från datum",
+    tilDato: "Till datum",
+    udgangsdato: "Utgångsdatum",
+    antal: "Antal",
+    arbejdsdageWord: "arbetsdagar",
+    dageWord: "dagar",
+    dageSuffix: "dagar",
+    negativHint: "Använd negativt värde för att dra av",
+    foedselsdato: "Födelsedatum",
+    antalDage: "Antal dagar",
+    ugerWord: "veckor",
+    ogWord: "och",
+    uger: "Veckor",
+    caMaaneder: "Ca. månader",
+    arbejdsdage: "Arbetsdagar",
+    weekenddage: "Helgdagar",
+    resultat: "Resultat",
+    arbejdsdageFraNu: "arbetsdagar från nu",
+    kalenderdageIAlt: "Kalenderdagar totalt",
+    weekenddageSprunget: "Överhoppade helgdagar",
+    dinAlder: "Din ålder",
+    aarWord: "år",
+    maanederWord: "månader",
+    totalDage: "Totalt dagar",
+    totalUger: "Totalt veckor",
+    naesteFoedselsdag: "Nästa födelsedag",
+    om: "Om",
+    dageMellemDatoer: "dagar mellan datum",
+    dageTilfoejet: "dagar tillagda",
+    arbejdsdageSummary: "arbetsdagar",
+    aarSummary: "år",
+    mdrSummary: "mån",
+    dageSummary: "dagar",
+    calculatorName: "Datumberäknare",
+  },
+} as const;
+
 export default function DatoBeregner() {
   const { locale } = useLocale();
   const intlLocale = getIntlLocale(locale);
+  const l = labels[locale as keyof typeof labels] || labels.da;
   const [mode, setMode] = useState<BeregningsMode>("dage-mellem");
 
   // Dage mellem mode
@@ -219,23 +311,23 @@ export default function DatoBeregner() {
   const modes = [
     {
       id: "dage-mellem" as BeregningsMode,
-      label: "Dage mellem",
-      desc: "Beregn dage mellem to datoer",
+      label: l.modeDageMellemLabel,
+      desc: l.modeDageMellemDesc,
     },
     {
       id: "tilfoej-dage" as BeregningsMode,
-      label: "Tilføj dage",
-      desc: "Tilføj/træk dage fra en dato",
+      label: l.modeTilfoejLabel,
+      desc: l.modeTilfoejDesc,
     },
     {
       id: "arbejdsdage" as BeregningsMode,
-      label: "Arbejdsdage",
-      desc: "Beregn arbejdsdage fremad",
+      label: l.modeArbejdsdageLabel,
+      desc: l.modeArbejdsdageDesc,
     },
     {
       id: "alder" as BeregningsMode,
-      label: "Alder",
-      desc: "Beregn præcis alder",
+      label: l.modeAlderLabel,
+      desc: l.modeAlderDesc,
     },
   ];
 
@@ -264,7 +356,7 @@ export default function DatoBeregner() {
         {mode === "dage-mellem" && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-2 dark:text-gray-200">Fra dato</label>
+              <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.fraDato}</label>
               <input
                 type="date"
                 value={startDato}
@@ -273,7 +365,7 @@ export default function DatoBeregner() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2 dark:text-gray-200">Til dato</label>
+              <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.tilDato}</label>
               <input
                 type="date"
                 value={slutDato}
@@ -288,7 +380,7 @@ export default function DatoBeregner() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium mb-2 dark:text-gray-200">
-                Udgangsdato
+                {l.udgangsdato}
               </label>
               <input
                 type="date"
@@ -299,7 +391,7 @@ export default function DatoBeregner() {
             </div>
             <div>
               <label className="block text-sm font-medium mb-2 dark:text-gray-200">
-                Antal {mode === "arbejdsdage" ? "arbejdsdage" : "dage"}
+                {l.antal} {mode === "arbejdsdage" ? l.arbejdsdageWord : l.dageWord}
               </label>
               <div className="relative">
                 <input
@@ -308,10 +400,10 @@ export default function DatoBeregner() {
                   onChange={(e) => setAntalDage(parseInt(e.target.value) || 0)}
                   className="w-full px-4 py-3 pr-16 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                 />
-                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-gray-400">dage</span>
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-gray-400">{l.dageSuffix}</span>
               </div>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Brug negativ værdi for at trække fra
+                {l.negativHint}
               </p>
             </div>
           </div>
@@ -320,7 +412,7 @@ export default function DatoBeregner() {
         {mode === "alder" && (
           <div>
             <label className="block text-sm font-medium mb-2 dark:text-gray-200">
-              Fødselsdato
+              {l.foedselsdato}
             </label>
             <input
               type="date"
@@ -342,31 +434,31 @@ export default function DatoBeregner() {
           {resultat.type === "dage-mellem" && (
             <div className="space-y-4">
               <div className="p-6 bg-blue-100 dark:bg-blue-900/20 rounded-xl text-center">
-                <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Antal dage</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">{l.antalDage}</p>
                 <p className="text-5xl font-bold text-blue-700 dark:text-blue-300">
                   {resultat.dage}
                 </p>
                 <p className="text-gray-600 dark:text-gray-400 mt-2">
-                  {resultat.uger} uger og {Math.abs(resultat.dage) % 7} dage
+                  {resultat.uger} {l.ugerWord} {l.ogWord} {Math.abs(resultat.dage) % 7} {l.dageWord}
                 </p>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Uger</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{l.uger}</p>
                   <p className="text-2xl font-bold dark:text-gray-200">{resultat.uger}</p>
                 </div>
                 <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Ca. måneder</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{l.caMaaneder}</p>
                   <p className="text-2xl font-bold dark:text-gray-200">{resultat.maaneder}</p>
                 </div>
                 <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Arbejdsdage</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{l.arbejdsdage}</p>
                   <p className="text-2xl font-bold text-green-600 dark:text-green-400">
                     {resultat.arbejdsdage}
                   </p>
                 </div>
                 <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg text-center">
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Weekenddage</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{l.weekenddage}</p>
                   <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
                     {resultat.weekenddage}
                   </p>
@@ -377,7 +469,7 @@ export default function DatoBeregner() {
 
           {resultat.type === "tilfoej-dage" && (
             <div className="p-6 bg-blue-100 dark:bg-blue-900/20 rounded-xl text-center">
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Resultat</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">{l.resultat}</p>
               <p className="text-2xl font-bold text-blue-700 dark:text-blue-300 capitalize">
                 {resultat.formatteret}
               </p>
@@ -388,7 +480,7 @@ export default function DatoBeregner() {
             <div className="space-y-4">
               <div className="p-6 bg-green-100 dark:bg-green-900/20 rounded-xl text-center">
                 <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
-                  {antalDage} arbejdsdage fra nu
+                  {antalDage} {l.arbejdsdageFraNu}
                 </p>
                 <p className="text-2xl font-bold text-green-700 dark:text-green-300 capitalize">
                   {resultat.formatteret}
@@ -396,11 +488,11 @@ export default function DatoBeregner() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Kalenderdage i alt</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{l.kalenderdageIAlt}</p>
                   <p className="text-2xl font-bold dark:text-gray-200">{resultat.samledeDage}</p>
                 </div>
                 <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg text-center">
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Weekenddage sprunget</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{l.weekenddageSprunget}</p>
                   <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
                     {resultat.weekenddage}
                   </p>
@@ -412,31 +504,31 @@ export default function DatoBeregner() {
           {resultat.type === "alder" && (
             <div className="space-y-4">
               <div className="p-6 bg-blue-100 dark:bg-blue-900/20 rounded-xl text-center">
-                <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Din alder</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">{l.dinAlder}</p>
                 <p className="text-5xl font-bold text-blue-700 dark:text-blue-300">
-                  {resultat.aar} år
+                  {resultat.aar} {l.aarWord}
                 </p>
                 <p className="text-lg text-gray-600 dark:text-gray-400 mt-2">
-                  {resultat.maaneder} måneder og {resultat.dage} dage
+                  {resultat.maaneder} {l.maanederWord} {l.ogWord} {resultat.dage} {l.dageWord}
                 </p>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Total dage</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{l.totalDage}</p>
                   <p className="text-xl font-bold dark:text-gray-200">
                     {resultat.totalDage.toLocaleString(intlLocale)}
                   </p>
                 </div>
                 <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Total uger</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{l.totalUger}</p>
                   <p className="text-xl font-bold dark:text-gray-200">
                     {resultat.totalUger.toLocaleString(intlLocale)}
                   </p>
                 </div>
                 <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center col-span-2">
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Næste fødselsdag</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{l.naesteFoedselsdag}</p>
                   <p className="text-lg font-bold text-green-600 dark:text-green-400">
-                    Om {resultat.dageTilFoedselsdag} dage
+                    {l.om} {resultat.dageTilFoedselsdag} {l.dageWord}
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">
                     {resultat.naesteFoedselsdag}
@@ -450,20 +542,20 @@ export default function DatoBeregner() {
 
       <div className="flex justify-center">
         <CopyResultButton text={
-          resultat?.type === "dage-mellem" ? `${resultat.dage} dage mellem datoer` :
-          resultat?.type === "tilfoej-dage" ? `${antalDage} dage tilføjet` :
-          resultat?.type === "arbejdsdage" ? `${antalDage} arbejdsdage` :
-          resultat?.type === "alder" ? `${resultat.aar} år, ${resultat.maaneder} mdr, ${resultat.dage} dage` :
+          resultat?.type === "dage-mellem" ? `${resultat.dage} ${l.dageMellemDatoer}` :
+          resultat?.type === "tilfoej-dage" ? `${antalDage} ${l.dageTilfoejet}` :
+          resultat?.type === "arbejdsdage" ? `${antalDage} ${l.arbejdsdageSummary}` :
+          resultat?.type === "alder" ? `${resultat.aar} ${l.aarSummary}, ${resultat.maaneder} ${l.mdrSummary}, ${resultat.dage} ${l.dageSummary}` :
           ""
         } />
         <ShareCalculation
           getShareableLink={getShareableLink}
-          calculatorName="Datoberegner"
+          calculatorName={l.calculatorName}
           resultSummary={
-            resultat?.type === "dage-mellem" ? `${resultat.dage} dage mellem datoer` :
-            resultat?.type === "tilfoej-dage" ? `${antalDage} dage tilføjet` :
-            resultat?.type === "arbejdsdage" ? `${antalDage} arbejdsdage` :
-            resultat?.type === "alder" ? `${resultat.aar} år, ${resultat.maaneder} mdr, ${resultat.dage} dage` :
+            resultat?.type === "dage-mellem" ? `${resultat.dage} ${l.dageMellemDatoer}` :
+            resultat?.type === "tilfoej-dage" ? `${antalDage} ${l.dageTilfoejet}` :
+            resultat?.type === "arbejdsdage" ? `${antalDage} ${l.arbejdsdageSummary}` :
+            resultat?.type === "alder" ? `${resultat.aar} ${l.aarSummary}, ${resultat.maaneder} ${l.mdrSummary}, ${resultat.dage} ${l.dageSummary}` :
             undefined
           }
         />

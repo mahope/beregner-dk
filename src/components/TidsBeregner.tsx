@@ -5,8 +5,68 @@ import { ShareCalculation } from "@/components/ShareCalculation";
 import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
+import { useLocale } from "@/components/LocaleProvider";
+
+const labels = {
+  da: {
+    starttidspunkt: "Starttidspunkt",
+    sluttidspunkt: "Sluttidspunkt",
+    startdato: "Startdato",
+    slutdato: "Slutdato",
+    valgfri: "(valgfri)",
+    fratraekPause: "Fratræk pause (minutter)",
+    pausePlaceholder: "F.eks. 30 min frokostpause",
+    minSuffix: "min",
+    tidIAlt: "Tid i alt",
+    overMidnat: "🌙 Over midnat",
+    decimalTimer: "Decimal timer",
+    timerWord: "timer",
+    arbejdsdage8t: "Arbejdsdage (8t)",
+    dageWord: "dage",
+    detaljeretVisning: "📊 Detaljeret visning",
+    minutterWord: "minutter",
+    sekunderWord: "sekunder",
+    timerDecimal: "timer (decimal)",
+    timerAbbr: "t",
+    minAbbr: "m",
+    hurtigeEksempler: "⚡ Hurtige eksempler",
+    presetNormal: "Normal arbejdsdag (8-16)",
+    presetKontor: "Kontor (9-17, 1t pause)",
+    presetNat: "Nattevagt (22-06)",
+    calculatorName: "Tidsberegner",
+  },
+  se: {
+    starttidspunkt: "Starttid",
+    sluttidspunkt: "Sluttid",
+    startdato: "Startdatum",
+    slutdato: "Slutdatum",
+    valgfri: "(valfri)",
+    fratraekPause: "Dra av rast (minuter)",
+    pausePlaceholder: "T.ex. 30 min lunchrast",
+    minSuffix: "min",
+    tidIAlt: "Total tid",
+    overMidnat: "🌙 Över midnatt",
+    decimalTimer: "Decimaltimmar",
+    timerWord: "timmar",
+    arbejdsdage8t: "Arbetsdagar (8h)",
+    dageWord: "dagar",
+    detaljeretVisning: "📊 Detaljerad vy",
+    minutterWord: "minuter",
+    sekunderWord: "sekunder",
+    timerDecimal: "timmar (decimal)",
+    timerAbbr: "h",
+    minAbbr: "m",
+    hurtigeEksempler: "⚡ Snabbexempel",
+    presetNormal: "Normal arbetsdag (8-16)",
+    presetKontor: "Kontor (9-17, 1h rast)",
+    presetNat: "Nattskift (22-06)",
+    calculatorName: "Tidsberäknare",
+  },
+} as const;
 
 export default function TidsBeregner() {
+  const { locale } = useLocale();
+  const l = labels[locale as keyof typeof labels] || labels.da;
   const [startTid, setStartTid] = useState<string>("09:00");
   const [slutTid, setSlutTid] = useState<string>("17:00");
   const [startDato, setStartDato] = useState<string>("");
@@ -125,7 +185,7 @@ export default function TidsBeregner() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-2 dark:text-gray-200">Starttidspunkt</label>
+            <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.starttidspunkt}</label>
             <input
               type="time"
               value={startTid}
@@ -135,7 +195,7 @@ export default function TidsBeregner() {
           </div>
           <div>
             <label className="block text-sm font-medium mb-2 dark:text-gray-200">
-              Startdato <span className="text-gray-400 dark:text-gray-500">(valgfri)</span>
+              {l.startdato} <span className="text-gray-400 dark:text-gray-500">{l.valgfri}</span>
             </label>
             <input
               type="date"
@@ -148,7 +208,7 @@ export default function TidsBeregner() {
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-2 dark:text-gray-200">Sluttidspunkt</label>
+            <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.sluttidspunkt}</label>
             <input
               type="time"
               value={slutTid}
@@ -158,7 +218,7 @@ export default function TidsBeregner() {
           </div>
           <div>
             <label className="block text-sm font-medium mb-2 dark:text-gray-200">
-              Slutdato <span className="text-gray-400 dark:text-gray-500">(valgfri)</span>
+              {l.slutdato} <span className="text-gray-400 dark:text-gray-500">{l.valgfri}</span>
             </label>
             <input
               type="date"
@@ -173,7 +233,7 @@ export default function TidsBeregner() {
       {/* Pause fratræk */}
       <div className="max-w-md">
         <label className="block text-sm font-medium mb-2 dark:text-gray-200">
-          Fratræk pause (minutter)
+          {l.fratraekPause}
         </label>
         <div className="relative">
           <input
@@ -184,9 +244,9 @@ export default function TidsBeregner() {
             value={fratraekPause}
             onChange={(e) => setFratraekPause(parseInt(e.target.value) || 0)}
             className="w-full px-4 py-3 pr-12 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-            placeholder="F.eks. 30 min frokostpause"
+            placeholder={l.pausePlaceholder}
           />
-          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-400">min</span>
+          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-400">{l.minSuffix}</span>
         </div>
       </div>
 
@@ -199,86 +259,86 @@ export default function TidsBeregner() {
         <>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="p-6 bg-blue-100 rounded-xl text-center dark:bg-blue-900/20">
-              <p className="text-sm text-gray-600 mb-1 dark:text-gray-400">Tid i alt</p>
+              <p className="text-sm text-gray-600 mb-1 dark:text-gray-400">{l.tidIAlt}</p>
               <p className="text-4xl font-bold text-blue-700 dark:text-blue-300">
-                {beregning.timer}t {beregning.minutter}m
+                {beregning.timer}{l.timerAbbr} {beregning.minutter}{l.minAbbr}
               </p>
               {beregning.overMidnat && (
-                <p className="text-xs text-blue-500 mt-1 dark:text-blue-400">🌙 Over midnat</p>
+                <p className="text-xs text-blue-500 mt-1 dark:text-blue-400">{l.overMidnat}</p>
               )}
             </div>
             <div className="p-6 bg-green-100 rounded-xl text-center dark:bg-green-900/20">
-              <p className="text-sm text-gray-600 mb-1 dark:text-gray-400">Decimal timer</p>
+              <p className="text-sm text-gray-600 mb-1 dark:text-gray-400">{l.decimalTimer}</p>
               <p className="text-4xl font-bold text-green-700 dark:text-green-400">
                 {beregning.decimalTimer}
               </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">timer</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">{l.timerWord}</p>
             </div>
             <div className="p-6 bg-purple-100 rounded-xl text-center dark:bg-purple-900/20">
-              <p className="text-sm text-gray-600 mb-1 dark:text-gray-400">Arbejdsdage (8t)</p>
+              <p className="text-sm text-gray-600 mb-1 dark:text-gray-400">{l.arbejdsdage8t}</p>
               <p className="text-4xl font-bold text-purple-700 dark:text-purple-300">
                 {beregning.arbejdsdage}
               </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">dage</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">{l.dageWord}</p>
             </div>
           </div>
 
           {/* Detaljeret breakdown */}
           <div className="bg-gray-50 rounded-lg p-6 dark:bg-gray-800 dark:border dark:border-gray-700">
-            <h3 className="font-semibold mb-4 dark:text-white">📊 Detaljeret visning</h3>
+            <h3 className="font-semibold mb-4 dark:text-white">{l.detaljeretVisning}</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
               <div>
                 <p className="text-3xl font-bold text-gray-700 dark:text-gray-200">{beregning.totalMinutter}</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">minutter</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{l.minutterWord}</p>
               </div>
               <div>
                 <p className="text-3xl font-bold text-gray-700 dark:text-gray-200">{beregning.sekunder.toLocaleString()}</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">sekunder</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{l.sekunderWord}</p>
               </div>
               <div>
                 <p className="text-3xl font-bold text-gray-700 dark:text-gray-200">{beregning.totalTimer}</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">timer (decimal)</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{l.timerDecimal}</p>
               </div>
               <div>
                 <p className="text-3xl font-bold text-gray-700 dark:text-gray-200">
                   {(parseFloat(beregning.totalTimer) / 24).toFixed(2)}
                 </p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">dage</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{l.dageWord}</p>
               </div>
             </div>
           </div>
 
           {/* Share button */}
           <div className="flex justify-center gap-3">
-            <CopyResultButton text={`${beregning.timer}t ${beregning.minutter}m (${beregning.decimalTimer} timer)`} />
+            <CopyResultButton text={`${beregning.timer}${l.timerAbbr} ${beregning.minutter}${l.minAbbr} (${beregning.decimalTimer} ${l.timerWord})`} />
             <ShareCalculation
               getShareableLink={getShareableLink}
-              calculatorName="Tidsberegner"
-              resultSummary={`${beregning.timer}t ${beregning.minutter}m (${beregning.decimalTimer} timer)`}
+              calculatorName={l.calculatorName}
+              resultSummary={`${beregning.timer}${l.timerAbbr} ${beregning.minutter}${l.minAbbr} (${beregning.decimalTimer} ${l.timerWord})`}
             />
           </div>
 
           {/* Quick presets */}
           <div className="p-4 bg-blue-50 rounded-lg dark:bg-blue-900/20">
-            <h3 className="font-medium mb-3 dark:text-white">⚡ Hurtige eksempler</h3>
+            <h3 className="font-medium mb-3 dark:text-white">{l.hurtigeEksempler}</h3>
             <div className="flex flex-wrap gap-2">
               <button type="button"
                 onClick={() => { setStartTid("08:00"); setSlutTid("16:00"); setFratraekPause(30); }}
                 className="px-3 py-1 bg-white border rounded hover:bg-gray-50 text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-600"
               >
-                Normal arbejdsdag (8-16)
+                {l.presetNormal}
               </button>
               <button type="button"
                 onClick={() => { setStartTid("09:00"); setSlutTid("17:00"); setFratraekPause(60); }}
                 className="px-3 py-1 bg-white border rounded hover:bg-gray-50 text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-600"
               >
-                Kontor (9-17, 1t pause)
+                {l.presetKontor}
               </button>
               <button type="button"
                 onClick={() => { setStartTid("22:00"); setSlutTid("06:00"); setFratraekPause(30); }}
                 className="px-3 py-1 bg-white border rounded hover:bg-gray-50 text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-600"
               >
-                Nattevagt (22-06)
+                {l.presetNat}
               </button>
             </div>
           </div>

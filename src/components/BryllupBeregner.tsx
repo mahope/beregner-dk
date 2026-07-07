@@ -100,7 +100,7 @@ export default function BryllupBeregner() {
       rings: "Vigselringar",
       flowersDecor: "Blommor/dekoration",
       otherExpenses: "Övriga utgifter (transport, övernattning m.m.)",
-      totalBudget: "Total brölloppsbudget",
+      totalBudget: "Total bröllopsbudget",
       totalBudgetLabel: "Total budget",
       perGuest: "Per gäst",
       expenseBreakdown: "Utgiftsfördelning",

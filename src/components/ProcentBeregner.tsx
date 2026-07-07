@@ -8,17 +8,106 @@ import { InputField } from "@/components/InputField";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { ModeSelector, ModeOption } from "@/components/ModeSelector";
 import { AnimatedNumber, CopyResultButton, ResetButton } from "@/components/ui";
+import { useLocale } from "@/components/LocaleProvider";
 
 type BeregningsMode = "find-procent" | "find-resultat" | "find-heltal" | "stigning";
 
-const MODES: ModeOption<BeregningsMode>[] = [
-  { id: "find-procent", label: "Find procent", desc: "X er ? % af Y" },
-  { id: "find-resultat", label: "Find resultat", desc: "X % af Y = ?" },
-  { id: "find-heltal", label: "Find heltal", desc: "X er Y% af ?" },
-  { id: "stigning", label: "Procentvis ændring", desc: "Fra X til Y = ?%" },
-];
+const labels = {
+  da: {
+    modeFindProcentLabel: "Find procent",
+    modeFindProcentDesc: "X er ? % af Y",
+    modeFindResultatLabel: "Find resultat",
+    modeFindResultatDesc: "X % af Y = ?",
+    modeFindHeltalLabel: "Find heltal",
+    modeFindHeltalDesc: "X er Y% af ?",
+    modeStigningLabel: "Procentvis ændring",
+    modeStigningDesc: "Fra X til Y = ?%",
+    modeSelectorName: "Beregningstype",
+    ariaDeltalTael: "Del-tal (tælleren)",
+    ariaHeltalNaev: "Heltal (nævneren)",
+    ariaProcent: "Procent",
+    ariaGrundvaerdi: "Grundværdi",
+    ariaDelVaerdi: "Del-værdi",
+    ariaStartvaerdi: "Startværdi",
+    ariaSlutvaerdi: "Slutværdi",
+    ariaResultProcent: "Resultat procent",
+    ariaResult: "Resultat",
+    ariaResultHeltal: "Resultat heltal",
+    ariaProcentvis: "Procentvis ændring",
+    wordEr: "er",
+    wordAf: "af",
+    wordPctAf: "% af",
+    wordFra: "Fra",
+    wordTil: "til",
+    valueNotZero: "Værdien kan ikke være nul",
+    resultHeading: "Resultat",
+    quickReference: "Hurtig reference",
+    formulas: "Formler",
+    formulaProcent: "Procent = (Del / Heltal) × 100",
+    formulaDel: "Del = (Procent / 100) × Heltal",
+    formulaHeltal: "Heltal = Del × (100 / Procent)",
+    formulaAendring: "Ændring = ((Ny - Gammel) / Gammel) × 100",
+    calcName: "Procentberegner",
+    explainFindProcent: (deltal: number, pct: string, heltal: number) => `${deltal} er ${pct}% af ${heltal}`,
+    explainFindResultat: (procent: number, baseVal: number, val: string) => `${procent}% af ${baseVal} er ${val}`,
+    explainFindHeltal: (deltal: number, procent: number, val: string) => `Hvis ${deltal} er ${procent}%, så er 100% = ${val}`,
+    explainStigning: (erStigning: boolean, fra: number, til: number, pct: string) =>
+      `${erStigning ? "Stigning" : "Fald"} fra ${fra} til ${til} er ${pct}%`,
+  },
+  se: {
+    modeFindProcentLabel: "Hitta procent",
+    modeFindProcentDesc: "X är ? % av Y",
+    modeFindResultatLabel: "Hitta resultat",
+    modeFindResultatDesc: "X % av Y = ?",
+    modeFindHeltalLabel: "Hitta heltal",
+    modeFindHeltalDesc: "X är Y% av ?",
+    modeStigningLabel: "Procentuell förändring",
+    modeStigningDesc: "Från X till Y = ?%",
+    modeSelectorName: "Beräkningstyp",
+    ariaDeltalTael: "Deltal (täljaren)",
+    ariaHeltalNaev: "Heltal (nämnaren)",
+    ariaProcent: "Procent",
+    ariaGrundvaerdi: "Grundvärde",
+    ariaDelVaerdi: "Delvärde",
+    ariaStartvaerdi: "Startvärde",
+    ariaSlutvaerdi: "Slutvärde",
+    ariaResultProcent: "Resultat procent",
+    ariaResult: "Resultat",
+    ariaResultHeltal: "Resultat heltal",
+    ariaProcentvis: "Procentuell förändring",
+    wordEr: "är",
+    wordAf: "av",
+    wordPctAf: "% av",
+    wordFra: "Från",
+    wordTil: "till",
+    valueNotZero: "Värdet kan inte vara noll",
+    resultHeading: "Resultat",
+    quickReference: "Snabbreferens",
+    formulas: "Formler",
+    formulaProcent: "Procent = (Del / Heltal) × 100",
+    formulaDel: "Del = (Procent / 100) × Heltal",
+    formulaHeltal: "Heltal = Del × (100 / Procent)",
+    formulaAendring: "Förändring = ((Ny - Gammal) / Gammal) × 100",
+    calcName: "Procentkalkylator",
+    explainFindProcent: (deltal: number, pct: string, heltal: number) => `${deltal} är ${pct}% av ${heltal}`,
+    explainFindResultat: (procent: number, baseVal: number, val: string) => `${procent}% av ${baseVal} är ${val}`,
+    explainFindHeltal: (deltal: number, procent: number, val: string) => `Om ${deltal} är ${procent}%, så är 100% = ${val}`,
+    explainStigning: (erStigning: boolean, fra: number, til: number, pct: string) =>
+      `${erStigning ? "Ökning" : "Minskning"} från ${fra} till ${til} är ${pct}%`,
+  },
+} as const;
 
 export default function ProcentBeregner() {
+  const { locale } = useLocale();
+  const l = labels[locale as keyof typeof labels] || labels.da;
+
+  const MODES: ModeOption<BeregningsMode>[] = [
+    { id: "find-procent", label: l.modeFindProcentLabel, desc: l.modeFindProcentDesc },
+    { id: "find-resultat", label: l.modeFindResultatLabel, desc: l.modeFindResultatDesc },
+    { id: "find-heltal", label: l.modeFindHeltalLabel, desc: l.modeFindHeltalDesc },
+    { id: "stigning", label: l.modeStigningLabel, desc: l.modeStigningDesc },
+  ];
+
   const [mode, setMode] = useState<BeregningsMode>("find-procent");
 
   // Find procent mode
@@ -75,9 +164,9 @@ export default function ProcentBeregner() {
   }, [mode, deltal, heltal, procent, baseVal, fra, til]);
 
   const validateNotZero = useCallback((value: number) => {
-    if (value === 0) return "Værdien kan ikke være nul";
+    if (value === 0) return l.valueNotZero;
     return null;
-  }, []);
+  }, [l]);
 
   const resultat = useMemo(() => {
     switch (mode) {
@@ -87,7 +176,7 @@ export default function ProcentBeregner() {
         return {
           type: "find-procent" as const,
           resultat: procentAfHeltal,
-          forklaring: `${deltal} er ${procentAfHeltal.toFixed(2)}% af ${heltal}`,
+          forklaring: l.explainFindProcent(deltal, procentAfHeltal.toFixed(2), heltal),
         };
 
       case "find-resultat":
@@ -95,7 +184,7 @@ export default function ProcentBeregner() {
         return {
           type: "find-resultat" as const,
           resultat: resultatVaerdi,
-          forklaring: `${procent}% af ${baseVal} er ${resultatVaerdi.toFixed(2)}`,
+          forklaring: l.explainFindResultat(procent, baseVal, resultatVaerdi.toFixed(2)),
         };
 
       case "find-heltal":
@@ -104,7 +193,7 @@ export default function ProcentBeregner() {
         return {
           type: "find-heltal" as const,
           resultat: heltalVaerdi,
-          forklaring: `Hvis ${deltal} er ${procent}%, så er 100% = ${heltalVaerdi.toFixed(2)}`,
+          forklaring: l.explainFindHeltal(deltal, procent, heltalVaerdi.toFixed(2)),
         };
 
       case "stigning":
@@ -117,13 +206,13 @@ export default function ProcentBeregner() {
           resultat: procentAendring,
           aendring,
           erStigning,
-          forklaring: `${erStigning ? "Stigning" : "Fald"} fra ${fra} til ${til} er ${Math.abs(procentAendring).toFixed(2)}%`,
+          forklaring: l.explainStigning(erStigning, fra, til, Math.abs(procentAendring).toFixed(2)),
         };
 
       default:
         return null;
     }
-  }, [mode, deltal, heltal, procent, baseVal, fra, til]);
+  }, [mode, deltal, heltal, procent, baseVal, fra, til, l]);
 
   // Track calculation once per session
   useEffect(() => {
@@ -144,7 +233,7 @@ export default function ProcentBeregner() {
         modes={MODES}
         currentMode={mode}
         onChange={setMode}
-        name="Beregningstype"
+        name={l.modeSelectorName}
         columns={4}
       />
 
@@ -155,16 +244,16 @@ export default function ProcentBeregner() {
             <InputField
               value={deltal}
               onChange={setDeltal}
-              ariaLabel="Del-tal (tælleren)"
+              ariaLabel={l.ariaDeltalTael}
               inline
             />
-            <span className="text-gray-600 dark:text-gray-400">er</span>
-            <span className="text-2xl font-bold text-blue-600 dark:text-blue-400" aria-label="Resultat procent">?%</span>
-            <span className="text-gray-600 dark:text-gray-400">af</span>
+            <span className="text-gray-600 dark:text-gray-400">{l.wordEr}</span>
+            <span className="text-2xl font-bold text-blue-600 dark:text-blue-400" aria-label={l.ariaResultProcent}>?%</span>
+            <span className="text-gray-600 dark:text-gray-400">{l.wordAf}</span>
             <InputField
               value={heltal}
               onChange={setHeltal}
-              ariaLabel="Heltal (nævneren)"
+              ariaLabel={l.ariaHeltalNaev}
               inline
               customValidation={validateNotZero}
             />
@@ -176,20 +265,20 @@ export default function ProcentBeregner() {
             <InputField
               value={procent}
               onChange={setProcent}
-              ariaLabel="Procent"
+              ariaLabel={l.ariaProcent}
               min={0}
               max={1000}
               inline
             />
-            <span className="text-gray-600 dark:text-gray-400">% af</span>
+            <span className="text-gray-600 dark:text-gray-400">{l.wordPctAf}</span>
             <InputField
               value={baseVal}
               onChange={setBaseVal}
-              ariaLabel="Grundværdi"
+              ariaLabel={l.ariaGrundvaerdi}
               inline
             />
             <span className="text-gray-600 dark:text-gray-400">=</span>
-            <span className="text-2xl font-bold text-blue-600 dark:text-blue-400" aria-label="Resultat">?</span>
+            <span className="text-2xl font-bold text-blue-600 dark:text-blue-400" aria-label={l.ariaResult}>?</span>
           </div>
         )}
 
@@ -198,41 +287,41 @@ export default function ProcentBeregner() {
             <InputField
               value={deltal}
               onChange={setDeltal}
-              ariaLabel="Del-værdi"
+              ariaLabel={l.ariaDelVaerdi}
               inline
             />
-            <span className="text-gray-600 dark:text-gray-400">er</span>
+            <span className="text-gray-600 dark:text-gray-400">{l.wordEr}</span>
             <InputField
               value={procent}
               onChange={setProcent}
-              ariaLabel="Procent"
+              ariaLabel={l.ariaProcent}
               inline
               customValidation={validateNotZero}
             />
-            <span className="text-gray-600 dark:text-gray-400">% af</span>
-            <span className="text-2xl font-bold text-blue-600 dark:text-blue-400" aria-label="Resultat heltal">?</span>
+            <span className="text-gray-600 dark:text-gray-400">{l.wordPctAf}</span>
+            <span className="text-2xl font-bold text-blue-600 dark:text-blue-400" aria-label={l.ariaResultHeltal}>?</span>
           </div>
         )}
 
         {mode === "stigning" && (
           <div className="flex flex-wrap items-center gap-4 text-lg">
-            <span className="text-gray-600 dark:text-gray-400">Fra</span>
+            <span className="text-gray-600 dark:text-gray-400">{l.wordFra}</span>
             <InputField
               value={fra}
               onChange={setFra}
-              ariaLabel="Startværdi"
+              ariaLabel={l.ariaStartvaerdi}
               inline
               customValidation={validateNotZero}
             />
-            <span className="text-gray-600 dark:text-gray-400">til</span>
+            <span className="text-gray-600 dark:text-gray-400">{l.wordTil}</span>
             <InputField
               value={til}
               onChange={setTil}
-              ariaLabel="Slutværdi"
+              ariaLabel={l.ariaSlutvaerdi}
               inline
             />
             <span className="text-gray-600 dark:text-gray-400">=</span>
-            <span className="text-2xl font-bold text-blue-600 dark:text-blue-400" aria-label="Procentvis ændring">?%</span>
+            <span className="text-2xl font-bold text-blue-600 dark:text-blue-400" aria-label={l.ariaProcentvis}>?%</span>
           </div>
         )}
       </div>
@@ -248,7 +337,7 @@ export default function ProcentBeregner() {
             ? "bg-red-50 dark:bg-red-900/20"
             : "bg-green-50 dark:bg-green-900/20"
         }`}>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Resultat</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">{l.resultHeading}</p>
           <p className={`text-5xl font-bold ${
             resultat.type === "stigning" && !resultat.erStigning
               ? "text-red-600 dark:text-red-400"
@@ -270,11 +359,11 @@ export default function ProcentBeregner() {
             <CopyResultButton text={resultat.forklaring} />
             <ShareCalculation
               getShareableLink={getShareableLink}
-              calculatorName="Procentberegner"
+              calculatorName={l.calcName}
               resultSummary={resultat.forklaring}
             />
             <PrintResult
-              calculatorName="Procentberegner"
+              calculatorName={l.calcName}
               resultSummary={resultat.forklaring}
             />
           </div>
@@ -284,7 +373,7 @@ export default function ProcentBeregner() {
       {/* Quick reference */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
-          <h3 className="font-medium mb-2 dark:text-gray-100">Hurtig reference</h3>
+          <h3 className="font-medium mb-2 dark:text-gray-100">{l.quickReference}</h3>
           <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
             <li>10% = 1/10</li>
             <li>25% = 1/4</li>
@@ -294,12 +383,12 @@ export default function ProcentBeregner() {
           </ul>
         </div>
         <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
-          <h3 className="font-medium mb-2 dark:text-gray-100">Formler</h3>
+          <h3 className="font-medium mb-2 dark:text-gray-100">{l.formulas}</h3>
           <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
-            <li>Procent = (Del / Heltal) × 100</li>
-            <li>Del = (Procent / 100) × Heltal</li>
-            <li>Heltal = Del × (100 / Procent)</li>
-            <li>Ændring = ((Ny - Gammel) / Gammel) × 100</li>
+            <li>{l.formulaProcent}</li>
+            <li>{l.formulaDel}</li>
+            <li>{l.formulaHeltal}</li>
+            <li>{l.formulaAendring}</li>
           </ul>
         </div>
       </div>

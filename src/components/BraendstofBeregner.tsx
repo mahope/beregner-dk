@@ -10,6 +10,77 @@ import { formatCurrency, formatNumber as formatNum } from '@/lib/format';
 
 export default function BraendstofBeregner() {
   const { locale } = useLocale();
+
+  const labels = {
+    da: {
+      fuelType: "Brændstoftype",
+      benzin: "Benzin",
+      diesel: "Diesel",
+      el: "El",
+      whatCalc: "Hvad vil du beregne?",
+      tripPrice: "🚗 Pris for en tur",
+      kmPrice: "📊 Pris pr. km",
+      calcConsumption: "📈 Beregn forbrug",
+      elPrice: "El-pris (kr/kWh)",
+      elPriceHint: "Typisk 2-4 kr/kWh hjemme, 3-6 kr på ladestander",
+      elConsumption: "Forbrug (kWh/100 km)",
+      elConsumptionHint: "Typisk 15-20 kWh/100km",
+      distance: "Distance (km)",
+      fuelTanked: (fuel: string) => `${fuel} tanket (liter)`,
+      kmDriven: "Kilometer kørt",
+      fuelPrice: (fuel: string) => `${fuel}pris (kr/liter)`,
+      carKmPerLiter: "Bilens km/liter",
+      carKmPerLiterHint: "Typisk 10-20 km/l afhængig af bil",
+      yourConsumption: "Dit forbrug",
+      priceForKm: (km: number) => `Pris for ${km} km`,
+      perKilometer: "Pr. kilometer",
+      per100km: "Pr. 100 km",
+      perYear: "Pr. år (15.000 km)",
+      perMonth: "Pr. måned",
+      compareTitle: "Sammenlign brændstofpriser",
+      colDistance: "Distance",
+      colBenzin: "Benzin (15 km/l)",
+      colDiesel: "Diesel (18 km/l)",
+      colEl: "El (17 kWh/100km)",
+      compareNote: "Baseret på benzin 13,50 kr/l, diesel 12,80 kr/l, el 2,50 kr/kWh",
+      calcName: "Brændstofberegner",
+    },
+    se: {
+      fuelType: "Bränsletyp",
+      benzin: "Bensin",
+      diesel: "Diesel",
+      el: "El",
+      whatCalc: "Vad vill du beräkna?",
+      tripPrice: "🚗 Pris för en resa",
+      kmPrice: "📊 Pris per km",
+      calcConsumption: "📈 Beräkna förbrukning",
+      elPrice: "Elpris (kr/kWh)",
+      elPriceHint: "Vanligtvis 2-4 kr/kWh hemma, 3-6 kr vid laddstation",
+      elConsumption: "Förbrukning (kWh/100 km)",
+      elConsumptionHint: "Vanligtvis 15-20 kWh/100km",
+      distance: "Sträcka (km)",
+      fuelTanked: (fuel: string) => `${fuel} tankat (liter)`,
+      kmDriven: "Kilometer körda",
+      fuelPrice: (fuel: string) => `${fuel}pris (kr/liter)`,
+      carKmPerLiter: "Bilens km/liter",
+      carKmPerLiterHint: "Vanligtvis 10-20 km/l beroende på bil",
+      yourConsumption: "Din förbrukning",
+      priceForKm: (km: number) => `Pris för ${km} km`,
+      perKilometer: "Per kilometer",
+      per100km: "Per 100 km",
+      perYear: "Per år (15 000 km)",
+      perMonth: "Per månad",
+      compareTitle: "Jämför bränslepriser",
+      colDistance: "Sträcka",
+      colBenzin: "Bensin (15 km/l)",
+      colDiesel: "Diesel (18 km/l)",
+      colEl: "El (17 kWh/100km)",
+      compareNote: "Baserat på bensin 13,50 kr/l, diesel 12,80 kr/l, el 2,50 kr/kWh",
+      calcName: "Bränslekalkylator",
+    },
+  } as const;
+  const l = labels[locale as keyof typeof labels] || labels.da;
+
   const [beregningsType, setBeregningsType] = useState<"turPris" | "kmPris" | "forbrug">("turPris");
   
   // Fælles
@@ -157,7 +228,7 @@ export default function BraendstofBeregner() {
     <div className="space-y-8">
       {/* Brændstoftype */}
       <div>
-        <label className="block text-sm font-medium mb-3 dark:text-gray-200">Brændstoftype</label>
+        <label className="block text-sm font-medium mb-3 dark:text-gray-200">{l.fuelType}</label>
         <div className="grid grid-cols-3 gap-3">
           <button type="button"
             onClick={() => setBraendstofType("benzin")}
@@ -168,7 +239,7 @@ export default function BraendstofBeregner() {
             }`}
           >
             <div className="text-2xl mb-1">⛽</div>
-            <div className="font-medium dark:text-gray-200">Benzin</div>
+            <div className="font-medium dark:text-gray-200">{l.benzin}</div>
           </button>
           <button type="button"
             onClick={() => setBraendstofType("diesel")}
@@ -179,7 +250,7 @@ export default function BraendstofBeregner() {
             }`}
           >
             <div className="text-2xl mb-1">🛢️</div>
-            <div className="font-medium dark:text-gray-200">Diesel</div>
+            <div className="font-medium dark:text-gray-200">{l.diesel}</div>
           </button>
           <button type="button"
             onClick={() => setBraendstofType("el")}
@@ -190,14 +261,14 @@ export default function BraendstofBeregner() {
             }`}
           >
             <div className="text-2xl mb-1">🔌</div>
-            <div className="font-medium dark:text-gray-200">El</div>
+            <div className="font-medium dark:text-gray-200">{l.el}</div>
           </button>
         </div>
       </div>
 
       {braendstofType !== "el" && (
         <div>
-          <label className="block text-sm font-medium mb-3 dark:text-gray-200">Hvad vil du beregne?</label>
+          <label className="block text-sm font-medium mb-3 dark:text-gray-200">{l.whatCalc}</label>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <button type="button"
               onClick={() => setBeregningsType("turPris")}
@@ -207,7 +278,7 @@ export default function BraendstofBeregner() {
                   : "border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500"
               }`}
             >
-              <div className="font-medium dark:text-gray-200">🚗 Pris for en tur</div>
+              <div className="font-medium dark:text-gray-200">{l.tripPrice}</div>
             </button>
             <button type="button"
               onClick={() => setBeregningsType("kmPris")}
@@ -217,7 +288,7 @@ export default function BraendstofBeregner() {
                   : "border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500"
               }`}
             >
-              <div className="font-medium dark:text-gray-200">📊 Pris pr. km</div>
+              <div className="font-medium dark:text-gray-200">{l.kmPrice}</div>
             </button>
             <button type="button"
               onClick={() => setBeregningsType("forbrug")}
@@ -227,7 +298,7 @@ export default function BraendstofBeregner() {
                   : "border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500"
               }`}
             >
-              <div className="font-medium dark:text-gray-200">📈 Beregn forbrug</div>
+              <div className="font-medium dark:text-gray-200">{l.calcConsumption}</div>
             </button>
           </div>
         </div>
@@ -238,7 +309,7 @@ export default function BraendstofBeregner() {
         {braendstofType === "el" ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-2 dark:text-gray-200">El-pris (kr/kWh)</label>
+              <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.elPrice}</label>
               <div className="relative">
                 <input
                   type="number"
@@ -250,10 +321,10 @@ export default function BraendstofBeregner() {
                 />
                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-400 text-sm">kr/kWh</span>
               </div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Typisk 2-4 kr/kWh hjemme, 3-6 kr på ladestander</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{l.elPriceHint}</p>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2 dark:text-gray-200">Forbrug (kWh/100 km)</label>
+              <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.elConsumption}</label>
               <div className="relative">
                 <input
                   type="number"
@@ -265,10 +336,10 @@ export default function BraendstofBeregner() {
                 />
                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-400 text-sm">kWh/100km</span>
               </div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Typisk 15-20 kWh/100km</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{l.elConsumptionHint}</p>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2 dark:text-gray-200">Distance (km)</label>
+              <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.distance}</label>
               <div className="relative">
                 <input
                   type="number"
@@ -285,7 +356,7 @@ export default function BraendstofBeregner() {
         ) : beregningsType === "forbrug" ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-2 dark:text-gray-200">{braendstofType === "benzin" ? "Benzin" : "Diesel"} tanket (liter)</label>
+              <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.fuelTanked(braendstofType === "benzin" ? l.benzin : l.diesel)}</label>
               <div className="relative">
                 <input
                   type="number"
@@ -299,7 +370,7 @@ export default function BraendstofBeregner() {
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2 dark:text-gray-200">Kilometer kørt</label>
+              <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.kmDriven}</label>
               <div className="relative">
                 <input
                   type="number"
@@ -313,7 +384,7 @@ export default function BraendstofBeregner() {
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2 dark:text-gray-200">{braendstofType === "benzin" ? "Benzin" : "Diesel"}pris (kr/liter)</label>
+              <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.fuelPrice(braendstofType === "benzin" ? l.benzin : l.diesel)}</label>
               <div className="relative">
                 <input
                   type="number"
@@ -330,7 +401,7 @@ export default function BraendstofBeregner() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-2 dark:text-gray-200">{braendstofType === "benzin" ? "Benzin" : "Diesel"}pris (kr/liter)</label>
+              <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.fuelPrice(braendstofType === "benzin" ? l.benzin : l.diesel)}</label>
               <div className="relative">
                 <input
                   type="number"
@@ -344,7 +415,7 @@ export default function BraendstofBeregner() {
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2 dark:text-gray-200">Bilens km/liter</label>
+              <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.carKmPerLiter}</label>
               <div className="relative">
                 <input
                   type="number"
@@ -356,10 +427,10 @@ export default function BraendstofBeregner() {
                 />
                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">km/l</span>
               </div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Typisk 10-20 km/l afhængig af bil</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{l.carKmPerLiterHint}</p>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2 dark:text-gray-200">Distance (km)</label>
+              <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.distance}</label>
               <div className="relative">
                 <input
                   type="number"
@@ -383,7 +454,7 @@ export default function BraendstofBeregner() {
       {/* Resultater */}
       {beregningsType === "forbrug" && braendstofType !== "el" ? (
         <div className="p-8 bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl text-center text-white">
-          <p className="text-lg opacity-90 mb-2">Dit forbrug</p>
+          <p className="text-lg opacity-90 mb-2">{l.yourConsumption}</p>
           <p className="text-5xl md:text-6xl font-bold">
             {formatNumber(beregning.forbrugPr100km, 1)} l/100km
           </p>
@@ -393,7 +464,7 @@ export default function BraendstofBeregner() {
         </div>
       ) : (
         <div className="p-8 bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl text-center text-white">
-          <p className="text-lg opacity-90 mb-2">Pris for {distance} km</p>
+          <p className="text-lg opacity-90 mb-2">{l.priceForKm(distance)}</p>
           <p className="text-5xl md:text-6xl font-bold">
             {formatKr(beregning.turPris)}
           </p>
@@ -407,25 +478,25 @@ export default function BraendstofBeregner() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="p-4 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg text-center">
           <p className="text-xl font-bold text-gray-700 dark:text-gray-200">{formatKr(beregning.prisPrKm)}</p>
-          <p className="text-sm text-gray-500 dark:text-gray-400">Pr. kilometer</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{l.perKilometer}</p>
         </div>
         <div className="p-4 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg text-center">
           <p className="text-xl font-bold text-gray-700 dark:text-gray-200">
             {formatNumber(beregning.forbrugPr100km, 1)} {beregning.enhed}
           </p>
-          <p className="text-sm text-gray-500 dark:text-gray-400">Pr. 100 km</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{l.per100km}</p>
         </div>
         <div className="p-4 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg text-center">
           <p className="text-xl font-bold text-gray-700 dark:text-gray-200">
             {formatKr(beregning.prisPrKm * 15000)}
           </p>
-          <p className="text-sm text-gray-500 dark:text-gray-400">Pr. år (15.000 km)</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{l.perYear}</p>
         </div>
         <div className="p-4 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg text-center">
           <p className="text-xl font-bold text-gray-700 dark:text-gray-200">
             {formatKr(beregning.prisPrKm * 15000 / 12)}
           </p>
-          <p className="text-sm text-gray-500 dark:text-gray-400">Pr. måned</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{l.perMonth}</p>
         </div>
       </div>
 
@@ -433,7 +504,7 @@ export default function BraendstofBeregner() {
         <CopyResultButton text={`${formatKr(beregning.prisPrKm)}/km – ${formatNumber(beregning.forbrugPr100km, 1)} ${beregning.enhed}/100km`} />
         <ShareCalculation
           getShareableLink={getShareableLink}
-          calculatorName="Brændstofberegner"
+          calculatorName={l.calcName}
           resultSummary={`${formatKr(beregning.prisPrKm)}/km – ${formatNumber(beregning.forbrugPr100km, 1)} ${beregning.enhed}/100km`}
         />
       </div>
@@ -441,16 +512,16 @@ export default function BraendstofBeregner() {
       {/* Sammenligningstabel */}
       <div className="bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg overflow-hidden">
         <div className="p-4 bg-gray-50 dark:bg-gray-900/50 border-b dark:border-gray-700">
-          <h3 className="font-medium dark:text-white">Sammenlign brændstofpriser</h3>
+          <h3 className="font-medium dark:text-white">{l.compareTitle}</h3>
         </div>
         <div className="p-4 overflow-x-auto">
           <table className="w-full text-sm dark:text-gray-200">
             <thead>
               <tr className="border-b dark:border-gray-700">
-                <th className="text-left py-2">Distance</th>
-                <th className="text-right py-2">Benzin (15 km/l)</th>
-                <th className="text-right py-2">Diesel (18 km/l)</th>
-                <th className="text-right py-2">El (17 kWh/100km)</th>
+                <th className="text-left py-2">{l.colDistance}</th>
+                <th className="text-right py-2">{l.colBenzin}</th>
+                <th className="text-right py-2">{l.colDiesel}</th>
+                <th className="text-right py-2">{l.colEl}</th>
               </tr>
             </thead>
             <tbody>
@@ -470,7 +541,7 @@ export default function BraendstofBeregner() {
             </tbody>
           </table>
           <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">
-            Baseret på benzin 13,50 kr/l, diesel 12,80 kr/l, el 2,50 kr/kWh
+            {l.compareNote}
           </p>
         </div>
       </div>

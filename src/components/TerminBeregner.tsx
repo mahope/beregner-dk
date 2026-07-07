@@ -5,30 +5,95 @@ import { ShareCalculation } from '@/components/ShareCalculation';
 import { CopyResultButton, ResetButton } from '@/components/ui';
 import { generateShareableLink, getStateFromUrl, CalculationState } from '@/lib/calculation-state';
 import { trackCalculation, initScrollDepthTracking } from '@/lib/analytics';
+import { useLocale } from '@/components/LocaleProvider';
 
 const GRAVIDITET_DAGE = 280; // 40 uger
 
-const ugerMilepale: { uge: number; tekst: string }[] = [
-  { uge: 4, tekst: "Positiv graviditetstest mulig" },
-  { uge: 8, tekst: "Første lægebesøg anbefales" },
-  { uge: 12, tekst: "Nakkefoldscanning" },
-  { uge: 13, tekst: "2. trimester begynder" },
-  { uge: 18, tekst: "Du kan mærke bevægelser" },
-  { uge: 20, tekst: "Misdannelsesscanning" },
-  { uge: 24, tekst: "Barnet kan overleve uden for livmoderen" },
-  { uge: 27, tekst: "3. trimester begynder" },
-  { uge: 32, tekst: "Forbered barselstaske" },
-  { uge: 34, tekst: "Barsel kan begynde (4 uger før termin)" },
-  { uge: 37, tekst: "Barnet er fuldbårent" },
-  { uge: 40, tekst: "Terminsdato" },
-];
+const ugerMilepale: number[] = [4, 8, 12, 13, 18, 20, 24, 27, 32, 34, 37, 40];
 
-function formatDato(d: Date): string {
-  return d.toLocaleDateString('da-DK', { day: 'numeric', month: 'long', year: 'numeric' });
+const labels = {
+  da: {
+    lastPeriodLabel: "Første dag i sidste menstruation",
+    hint: "Terminsdatoen beregnes som 280 dage (40 uger) fra denne dato",
+    expectedDueDate: "Forventet terminsdato",
+    youAreInWeek: "Du er i uge",
+    trimester: "Trimester",
+    daysToTermin: (n: number) => `${n} dage til termin`,
+    pctPregnancy: (n: number) => `${n}% af graviditeten`,
+    conception: "Undfangelse (ca.)",
+    maternityStart: "Barselstart (4 uger før)",
+    emptyState: "Vælg første dag i din sidste menstruation",
+    milestonesTitle: "Milepæle i graviditeten",
+    nowBadge: "Nu",
+    copySummary: (date: string, w: number, r: number) => `Terminsdato: ${date} (uge ${w}+${r})`,
+    shareSummary: (date: string) => `Termin: ${date}`,
+    calcName: "Terminsdato Beregner",
+    info1Title: "Sådan beregnes terminen",
+    info1Desc:
+      "Terminsdatoen beregnes som 280 dage (40 uger) fra første dag i din sidste menstruation. Kun 5% af børn fødes på den præcise terminsdato — de fleste fødes inden for 2 uger.",
+    info2Title: "Barsel i Danmark",
+    info2Desc:
+      "Mor har ret til barsel fra 4 uger før termin. Samlet har forældre ret til 52 ugers barsel, hvoraf 11 uger er øremærket til hver forælder. Brug vores barselsdagpenge-beregner for beløb.",
+    milestones: {
+      4: "Positiv graviditetstest mulig",
+      8: "Første lægebesøg anbefales",
+      12: "Nakkefoldscanning",
+      13: "2. trimester begynder",
+      18: "Du kan mærke bevægelser",
+      20: "Misdannelsesscanning",
+      24: "Barnet kan overleve uden for livmoderen",
+      27: "3. trimester begynder",
+      32: "Forbered barselstaske",
+      34: "Barsel kan begynde (4 uger før termin)",
+      37: "Barnet er fuldbårent",
+      40: "Terminsdato",
+    } as Record<number, string>,
+  },
+  se: {
+    lastPeriodLabel: "Första dagen i din senaste menstruation",
+    hint: "Beräknat förlossningsdatum räknas som 280 dagar (40 veckor) från detta datum",
+    expectedDueDate: "Beräknat förlossningsdatum",
+    youAreInWeek: "Du är i vecka",
+    trimester: "Trimester",
+    daysToTermin: (n: number) => `${n} dagar till förlossning`,
+    pctPregnancy: (n: number) => `${n}% av graviditeten`,
+    conception: "Befruktning (ca.)",
+    maternityStart: "Föräldraledighet (4 veckor före)",
+    emptyState: "Välj första dagen i din senaste menstruation",
+    milestonesTitle: "Milstolpar i graviditeten",
+    nowBadge: "Nu",
+    copySummary: (date: string, w: number, r: number) => `Beräknat förlossningsdatum: ${date} (vecka ${w}+${r})`,
+    shareSummary: (date: string) => `BF: ${date}`,
+    calcName: "Förlossningsdatum-kalkylator",
+    info1Title: "Så beräknas förlossningsdatumet",
+    info1Desc:
+      "Beräknat förlossningsdatum räknas som 280 dagar (40 veckor) från första dagen i din senaste menstruation. Endast 5 % av barnen föds på det exakta datumet — de flesta föds inom 2 veckor.",
+    info2Title: "Föräldraledighet i Sverige",
+    info2Desc:
+      "I Sverige har föräldrar tillsammans rätt till 480 dagars föräldrapenning, varav 90 dagar är reserverade för vardera föräldern. Mamman kan börja ta ut föräldrapenning upp till 60 dagar före beräknad förlossning.",
+    milestones: {
+      4: "Positivt graviditetstest möjligt",
+      8: "Första läkarbesöket rekommenderas",
+      12: "Nackuppklarhetsmätning (KUB)",
+      13: "Andra trimestern börjar",
+      18: "Du kan känna rörelser",
+      20: "Rutinultraljud",
+      24: "Barnet kan överleva utanför livmodern",
+      27: "Tredje trimestern börjar",
+      32: "Packa förlossningsväskan",
+      34: "Föräldraledighet kan börja (4 veckor före förlossning)",
+      37: "Barnet är fullgånget",
+      40: "Beräknat förlossningsdatum",
+    } as Record<number, string>,
+  },
+} as const;
+
+function formatDato(d: Date, dateLocale: string): string {
+  return d.toLocaleDateString(dateLocale, { day: 'numeric', month: 'long', year: 'numeric' });
 }
 
-function ugedagNavn(d: Date): string {
-  return d.toLocaleDateString('da-DK', { weekday: 'long' });
+function ugedagNavn(d: Date, dateLocale: string): string {
+  return d.toLocaleDateString(dateLocale, { weekday: 'long' });
 }
 
 function dageMellem(a: Date, b: Date): number {
@@ -36,6 +101,9 @@ function dageMellem(a: Date, b: Date): number {
 }
 
 export default function TerminBeregner() {
+  const { locale } = useLocale();
+  const l = labels[locale as keyof typeof labels] || labels.da;
+  const dateLocale = locale === "se" ? "sv-SE" : "da-DK";
   const [sidsteMens, setSidsteMens] = useState<string>('');
 
   const hasLoadedUrl = useRef(false);
@@ -118,7 +186,7 @@ export default function TerminBeregner() {
         <div className="space-y-5">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-              Første dag i sidste menstruation
+              {l.lastPeriodLabel}
             </label>
             <input
               type="date"
@@ -127,7 +195,7 @@ export default function TerminBeregner() {
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             />
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              Terminsdatoen beregnes som 280 dage (40 uger) fra denne dato
+              {l.hint}
             </p>
           </div>
 
@@ -141,24 +209,24 @@ export default function TerminBeregner() {
           {result ? (
             <div className="space-y-4 animate-fade-in">
               <div className="bg-white dark:bg-gray-700 rounded-lg p-4 shadow-sm text-center">
-                <div className="text-sm text-gray-500 dark:text-gray-400">Forventet terminsdato</div>
+                <div className="text-sm text-gray-500 dark:text-gray-400">{l.expectedDueDate}</div>
                 <div className="text-2xl font-bold text-pink-600 dark:text-pink-400">
-                  {formatDato(result.termin)}
+                  {formatDato(result.termin, dateLocale)}
                 </div>
                 <div className="text-sm text-gray-500 dark:text-gray-400">
-                  {ugedagNavn(result.termin)}
+                  {ugedagNavn(result.termin, dateLocale)}
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-white dark:bg-gray-700 rounded-lg p-3 shadow-sm text-center">
-                  <div className="text-xs text-gray-500 dark:text-gray-400">Du er i uge</div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">{l.youAreInWeek}</div>
                   <div className="text-xl font-bold text-gray-900 dark:text-white">
                     {result.ugerGaaet}+{result.restDage}
                   </div>
                 </div>
                 <div className="bg-white dark:bg-gray-700 rounded-lg p-3 shadow-sm text-center">
-                  <div className="text-xs text-gray-500 dark:text-gray-400">Trimester</div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">{l.trimester}</div>
                   <div className="text-xl font-bold text-gray-900 dark:text-white">{result.trimester}.</div>
                 </div>
               </div>
@@ -166,7 +234,7 @@ export default function TerminBeregner() {
               {result.dageTilTermin > 0 && (
                 <div className="bg-white dark:bg-gray-700 rounded-lg p-3 shadow-sm text-center">
                   <div className="text-sm text-gray-500 dark:text-gray-400">
-                    {result.dageTilTermin} dage til termin
+                    {l.daysToTermin(result.dageTilTermin)}
                   </div>
                   <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-3 mt-2">
                     <div
@@ -175,26 +243,26 @@ export default function TerminBeregner() {
                     />
                   </div>
                   <div className="text-xs text-gray-400 mt-1">
-                    {Math.round((result.dageGaaet / GRAVIDITET_DAGE) * 100)}% af graviditeten
+                    {l.pctPregnancy(Math.round((result.dageGaaet / GRAVIDITET_DAGE) * 100))}
                   </div>
                 </div>
               )}
 
               <div className="bg-white dark:bg-gray-700 rounded-lg p-3 shadow-sm text-sm space-y-1">
                 <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Undfangelse (ca.)</span>
-                  <span className="dark:text-gray-200">{formatDato(result.undfangelse)}</span>
+                  <span className="text-gray-600 dark:text-gray-400">{l.conception}</span>
+                  <span className="dark:text-gray-200">{formatDato(result.undfangelse, dateLocale)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Barselstart (4 uger før)</span>
-                  <span className="dark:text-gray-200">{formatDato(result.barselStart)}</span>
+                  <span className="text-gray-600 dark:text-gray-400">{l.maternityStart}</span>
+                  <span className="dark:text-gray-200">{formatDato(result.barselStart, dateLocale)}</span>
                 </div>
               </div>
             </div>
           ) : (
             <div className="text-center text-gray-500 dark:text-gray-400 py-8">
               <div className="text-4xl mb-3">🤰</div>
-              <p>Vælg første dag i din sidste menstruation</p>
+              <p>{l.emptyState}</p>
             </div>
           )}
         </div>
@@ -203,14 +271,14 @@ export default function TerminBeregner() {
       {/* Uge-for-uge milepæle */}
       {result && (
         <div className="mt-8">
-          <h3 className="text-lg font-semibold mb-4 dark:text-white">Milepæle i graviditeten</h3>
+          <h3 className="text-lg font-semibold mb-4 dark:text-white">{l.milestonesTitle}</h3>
           <div className="space-y-2">
-            {ugerMilepale.map((m) => {
-              const erPasseret = result.ugerGaaet >= m.uge;
-              const erNu = result.ugerGaaet === m.uge;
+            {ugerMilepale.map((uge) => {
+              const erPasseret = result.ugerGaaet >= uge;
+              const erNu = result.ugerGaaet === uge;
               return (
                 <div
-                  key={m.uge}
+                  key={uge}
                   className={`flex items-center gap-3 p-3 rounded-lg text-sm ${
                     erNu
                       ? 'bg-pink-100 dark:bg-pink-900/30 border-2 border-pink-400'
@@ -222,12 +290,12 @@ export default function TerminBeregner() {
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${
                     erPasseret ? 'bg-green-500 text-white' : 'bg-gray-300 dark:bg-gray-600 text-gray-600 dark:text-gray-300'
                   }`}>
-                    {m.uge}
+                    {uge}
                   </div>
                   <span className={erPasseret ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400'}>
-                    {m.tekst}
+                    {l.milestones[uge]}
                   </span>
-                  {erNu && <span className="text-pink-600 dark:text-pink-400 font-medium ml-auto">Nu</span>}
+                  {erNu && <span className="text-pink-600 dark:text-pink-400 font-medium ml-auto">{l.nowBadge}</span>}
                 </div>
               );
             })}
@@ -237,26 +305,26 @@ export default function TerminBeregner() {
 
       {/* Share */}
       <div className="flex justify-center mt-6 gap-3">
-        <CopyResultButton text={result ? `Terminsdato: ${formatDato(result.termin)} (uge ${result.ugerGaaet}+${result.restDage})` : ''} />
+        <CopyResultButton text={result ? l.copySummary(formatDato(result.termin, dateLocale), result.ugerGaaet, result.restDage) : ''} />
         <ShareCalculation
           getShareableLink={getShareableLink}
-          calculatorName="Terminsdato Beregner"
-          resultSummary={result ? `Termin: ${formatDato(result.termin)}` : ''}
+          calculatorName={l.calcName}
+          resultSummary={result ? l.shareSummary(formatDato(result.termin, dateLocale)) : ''}
         />
       </div>
 
       {/* Info */}
       <div className="grid md:grid-cols-2 gap-4 mt-6">
         <div className="bg-pink-50 dark:bg-pink-900/20 rounded-lg p-4">
-          <h4 className="font-semibold text-pink-800 dark:text-pink-300 mb-2">Sådan beregnes terminen</h4>
+          <h4 className="font-semibold text-pink-800 dark:text-pink-300 mb-2">{l.info1Title}</h4>
           <p className="text-sm text-pink-700 dark:text-pink-400">
-            Terminsdatoen beregnes som 280 dage (40 uger) fra første dag i din sidste menstruation. Kun 5% af børn fødes på den præcise terminsdato — de fleste fødes inden for 2 uger.
+            {l.info1Desc}
           </p>
         </div>
         <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4">
-          <h4 className="font-semibold text-purple-800 dark:text-purple-300 mb-2">Barsel i Danmark</h4>
+          <h4 className="font-semibold text-purple-800 dark:text-purple-300 mb-2">{l.info2Title}</h4>
           <p className="text-sm text-purple-700 dark:text-purple-400">
-            Mor har ret til barsel fra 4 uger før termin. Samlet har forældre ret til 52 ugers barsel, hvoraf 11 uger er øremærket til hver forælder. Brug vores barselsdagpenge-beregner for beløb.
+            {l.info2Desc}
           </p>
         </div>
       </div>
