@@ -215,8 +215,10 @@ export default function LaaneBeregner() {
     let annuitetTotal = 0;
     let annuitetRenter = 0;
 
-    if (r > 0 && n > 0) {
-      annuitetYdelse = hovedstol * (r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+    if (n > 0) {
+      annuitetYdelse = r > 0
+        ? hovedstol * (r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1)
+        : hovedstol / n;
       annuitetTotal = annuitetYdelse * n + stiftelsesgebyr;
       annuitetRenter = annuitetTotal - hovedstol - stiftelsesgebyr;
     }
@@ -238,8 +240,10 @@ export default function LaaneBeregner() {
     let laan2Total = 0;
     let laan2Renter = 0;
 
-    if (r2 > 0 && n2 > 0) {
-      laan2Ydelse = hovedstol * (r2 * Math.pow(1 + r2, n2)) / (Math.pow(1 + r2, n2) - 1);
+    if (n2 > 0) {
+      laan2Ydelse = r2 > 0
+        ? hovedstol * (r2 * Math.pow(1 + r2, n2)) / (Math.pow(1 + r2, n2) - 1)
+        : hovedstol / n2;
       laan2Total = laan2Ydelse * n2;
       laan2Renter = laan2Total - hovedstol;
     }

@@ -502,7 +502,7 @@ export default function OpsparingsBeregner() {
                   <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
                     <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">{l.gain}</p>
                     <p className="text-xl font-bold text-green-600 dark:text-green-400">
-                      +{((beregning.samletRente / beregning.samletIndskud) * 100).toFixed(1)}%
+                      +{beregning.samletIndskud > 0 ? ((beregning.samletRente / beregning.samletIndskud) * 100).toFixed(1) : "0.0"}%
                     </p>
                   </div>
                 </div>
