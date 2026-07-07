@@ -69,6 +69,8 @@ export const beregnere: BeregnerItem[] = [
   { title: "Brændstofberegner", description: "Beregn pris for benzin, diesel eller el-bil", href: "/braendstof", icon: "⛽", category: "Hverdag" },
   { title: "Elbil vs. benzinbil", description: "Sammenlign driftsomkostninger for elbil og benzinbil", href: "/elbil", icon: "🔌", category: "Hverdag" },
   { title: "Enhedspris", description: "Find den billigste vare pr. kilo, liter eller stk", href: "/enhedspris", icon: "🏷️", category: "Hverdag" },
+  { title: "Fartberegner", description: "Beregn fart, distance og tid — plus tempo i min/km", href: "/fart", icon: "🏃", category: "Hverdag" },
+  { title: "Del regningen", description: "Fordel regningen ligeligt mellem flere personer", href: "/del-regning", icon: "🧾", category: "Hverdag" },
   { title: "Elberegner", description: "Beregn dit elforbrug og se hvad dine apparater koster", href: "/elberegner", icon: "⚡", category: "Hverdag" },
   { title: "Tidszoneberegner", description: "Se hvad klokken er i andre lande", href: "/tidszone", icon: "🌍", category: "Hverdag" },
   { title: "Bil Værdtab", description: "Beregn værdtab og omkostninger for din bil", href: "/bil", icon: "🚙", category: "Hverdag" },
@@ -76,6 +78,7 @@ export const beregnere: BeregnerItem[] = [
   { title: "Kvadratmeterberegner", description: "Beregn areal af rum, haver og grunde", href: "/kvadratmeter", icon: "📐", category: "Matematik" },
   { title: "Temperaturberegner", description: "Omregn mellem Celsius, Fahrenheit og Kelvin", href: "/temperatur", icon: "🌡️", category: "Matematik" },
   { title: "Gennemsnitsberegner", description: "Beregn gennemsnit, sum og median af tal", href: "/gennemsnit", icon: "📊", category: "Matematik" },
+  { title: "Enhedsberegner", description: "Omregn længde, vægt og volumen mellem enheder", href: "/enheder", icon: "📏", category: "Matematik" },
   { title: "Datoberegner", description: "Beregn dage mellem datoer, arbejdsdage og alder", href: "/dato", icon: "📅", category: "Praktisk" },
   { title: "Tidsberegner", description: "Beregn timer og minutter mellem tidspunkter", href: "/tidsberegner", icon: "⏱️", category: "Praktisk" },
 ];
