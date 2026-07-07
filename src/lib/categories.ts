@@ -27,6 +27,7 @@ export const beregnere: BeregnerItem[] = [
   { title: "Renteberegner", description: "Beregn ydelse, rente og tilbagebetaling på lån", href: "/renteberegner", icon: "📊", category: "Økonomi" },
   { title: "Opsparingsberegner", description: "Beregn renters rente og se din opsparing vokse", href: "/opsparing", icon: "📈", category: "Økonomi" },
   { title: "Rådighedsbeløb", description: "Beregn dit månedlige rådighedsbeløb", href: "/budget", icon: "📊", category: "Økonomi" },
+  { title: "Lön efter skatt", description: "Beräkna din nettolön efter skatt", href: "/lon-efter-skatt", icon: "💰", category: "Økonomi" },
   { title: "Feriepenge", description: "Beregn hvor meget du har til gode i feriepenge", href: "/feriepenge", icon: "🏖️", category: "Økonomi" },
   { title: "Dagpengeberegner", description: "Beregn hvad du kan få i dagpenge ved ledighed", href: "/dagpenge", icon: "📋", category: "Økonomi" },
   { title: "Sygedagpenge", description: "Beregn sygedagpenge og se arbejdsgiverperiode", href: "/sygedagpenge", icon: "🏥", category: "Økonomi" },
@@ -38,6 +39,7 @@ export const beregnere: BeregnerItem[] = [
   { title: "Topskat Beregner", description: "Beregn om du betaler mellemskat eller topskat", href: "/topskat", icon: "📊", category: "Økonomi" },
   { title: "Brutto/Netto Beregner", description: "Find bruttoløn ud fra ønsket udbetaling", href: "/brutto-netto", icon: "💸", category: "Økonomi" },
   { title: "Boligstøtte", description: "Beregn din boligstøtte til husleje", href: "/boligstoette", icon: "🏘️", category: "Bolig" },
+  { title: "Bolån", description: "Beräkna månadskostnad för bolån", href: "/bolan", icon: "🏠", category: "Bolig" },
   { title: "Husleje Budget", description: "Find ud af hvad du har råd til i husleje", href: "/husleje", icon: "🏠", category: "Bolig" },
   { title: "Boliglån", description: "Beregn ydelse og omkostninger på dit boliglån", href: "/boliglaan", icon: "🏡", category: "Bolig" },
   { title: "Ejendomsværdiskat", description: "Beregn ejendomsværdiskat og grundskyld 2026", href: "/ejendomsvaerdiskat", icon: "🏠", category: "Bolig" },
@@ -278,8 +280,12 @@ export function getBeregnereByCategoryName(
   locale: Locale = "da"
 ): BeregnerItem[] {
   const inCategory = beregnere.filter((b) => b.category === categoryName);
-  // Danish keeps the curated titles/descriptions as-is.
-  if (locale === "da") return inCategory;
+  // Danish keeps the curated titles/descriptions but still drops any
+  // calculator not available on the Danish site (e.g. seOnly ones).
+  if (locale === "da") {
+    const daAvail = new Set(getCalculatorsByLocale("da").map((c) => c.href));
+    return inCategory.filter((b) => daAvail.has(b.href));
+  }
   // For other locales, use the localized names from the calculator list and
   // drop calculators that are not available in this locale (e.g. daOnly ones).
   const byHref = new Map(getCalculatorsByLocale(locale).map((c) => [c.href, c]));
