@@ -62,6 +62,7 @@ const calculatorDefs: CalculatorDef[] = [
   // Bil & Energi
   { href: "/bil", icon: "🚗", titles: { da: "Bil", no: "Bil", se: "Bil" }, descriptions: { da: "Beregn biludgifter", no: "Beregn bilutgifter", se: "Beräkna bilkostnader" } },
   { href: "/braendstof", icon: "⛽", titles: { da: "Brændstof", no: "Drivstoff", se: "Bränsle" }, descriptions: { da: "Beregn brændstofforbrug", no: "Beregn drivstofforbruk", se: "Beräkna bränsleförbrukning" } },
+  { href: "/elbil", icon: "🔌", titles: { da: "Elbil vs. benzin", no: "Elbil vs. bensin", se: "Elbil vs. bensin" }, descriptions: { da: "Sammenlign elbil og benzinbil", no: "Sammenlign elbil og bensinbil", se: "Jämför elbil och bensinbil" } },
   { href: "/elberegner", icon: "⚡", titles: { da: "Elberegner", no: "Strømkalkulator", se: "Elkalkylator" }, descriptions: { da: "Beregn dit elforbrug", no: "Beregn strømforbruket ditt", se: "Beräkna din elförbrukning" } },
   // Andet
   { href: "/kvadratmeter", icon: "📐", titles: { da: "Kvadratmeter", no: "Kvadratmeter", se: "Kvadratmeter" }, descriptions: { da: "Beregn areal", no: "Beregn areal", se: "Beräkna yta" } },
@@ -132,6 +133,7 @@ const relatedMap: Record<string, string[]> = {
   "/alder": ["/dato", "/pension", "/bmi", "/tidsberegner", "/efterloen"],
   "/bil": ["/braendstof", "/billaan", "/elberegner", "/forbrugslaan", "/loen-efter-skat"],
   "/braendstof": ["/bil", "/elberegner", "/procent", "/valuta", "/kvadratmeter"],
+  "/elbil": ["/braendstof", "/bil", "/elberegner", "/leasing", "/billaan"],
   "/elberegner": ["/braendstof", "/bil", "/procent", "/husleje", "/boligstoette"],
   "/kvadratmeter": ["/husleje", "/boliglaan", "/procent", "/braendstof", "/elberegner"],
   "/valuta": ["/moms", "/procent", "/tidszone", "/loen-efter-skat", "/bil"],
