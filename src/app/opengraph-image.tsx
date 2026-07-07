@@ -50,7 +50,7 @@ export default function OGImage() {
 
         {/* Tagline */}
         <p style={{ fontSize: 28, color: "#4b5563", margin: 0, marginBottom: 40 }}>
-          33+ gratis online beregnere til danskere
+          48+ gratis online beregnere til danskere
         </p>
 
         {/* Calculator icons row */}

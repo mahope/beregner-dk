@@ -43,7 +43,7 @@ export default async function FeriepengePage() {
         <p>
           I Danmark optjener du{" "}
           <strong>12,5% af din ferieberettigede løn</strong> i feriepenge. Denne sats er
-          fastsat i <strong>ferieloven</strong> og gælder uændret i 2026. Det svarer til <strong>2,08 feriedag
+          fastsat i <strong>ferieloven</strong> og gælder uændret i 2026. Det svarer til <strong>2,08 feriedage
           per måned</strong> eller <strong>25 dage om året</strong> (5 ugers ferie).
         </p>
         <p>

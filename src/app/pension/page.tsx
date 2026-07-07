@@ -51,7 +51,7 @@ export default async function PensionPage() {
 
         <h2>Folkepension (2026)</h2>
         <p>
-          Alle danske statsborgere med bopæl i Danmark har ret til <strong>folkepension</strong> fra <strong>folkepensionsalderen</strong> (pt. 68 år).
+          Alle danske statsborgere med bopæl i Danmark har ret til <strong>folkepension</strong> fra <strong>folkepensionsalderen</strong> (pt. 67 år).
         </p>
         <table>
           <thead>

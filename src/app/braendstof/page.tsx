@@ -57,7 +57,7 @@ export default async function BraendstofPage() {
         <ul>
           <li><strong>Benzin:</strong> 12-18 km/l (5,5-8,3 l/100km)</li>
           <li><strong>Diesel:</strong> 15-22 km/l (4,5-6,7 l/100km)</li>
-          <li><strong>El:</strong> 15-20 kWh/100km (svarer til 60-80 km/kWh)</li>
+          <li><strong>El:</strong> 15-20 kWh/100km (svarer til ca. 5-7 km/kWh)</li>
           <li><strong>Hybrid:</strong> 18-25 km/l (benzin-ækvivalent)</li>
         </ul>
 

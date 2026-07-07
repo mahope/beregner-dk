@@ -75,7 +75,7 @@ export default async function BoligstoettePage() {
         <p>
           <strong>Boligstøtte</strong> (boligsikring) er for almindelige lejere under folkepensionsalderen.
           <strong>Boligydelse</strong> er en særlig ordning for folkepensionister og førtidspensionister,
-          som typisk giver et højere beløb og har mere <strong>favorable indkomstgrænser</strong>.
+          som typisk giver et højere beløb og har mere <strong>gunstige indkomstgrænser</strong>.
         </p>
 
         <h3>Sådan søger du boligstøtte</h3>

@@ -40,7 +40,7 @@ export default async function AndelsboligPage() {
         <div className="mt-12 prose dark:prose-invert max-w-none">
           <h2>Hvad koster det at købe andelsbolig?</h2>
           <p>
-            Prisen på en andelsbolig består af <strong>andelprisen</strong> (din andel af foreningens formue) plus evt. <strong>forbedringer</strong> (køkken, bad mv.) foretaget af den tidligere ejer. Derudover betaler du en <strong>månedlig boligafgift</strong>.
+            Prisen på en andelsbolig består af <strong>andelsprisen</strong> (din andel af foreningens formue) plus evt. <strong>forbedringer</strong> (køkken, bad mv.) foretaget af den tidligere ejer. Derudover betaler du en <strong>månedlig boligafgift</strong>.
           </p>
 
           <h2>Boligafgift forklaret</h2>
@@ -54,7 +54,7 @@ export default async function AndelsboligPage() {
             <li>Afdrag på <strong>fælleslån</strong></li>
           </ul>
           <p>
-            En høj boligafgift kan betyde stor <strong>fællesgæld</strong> — men også at du betaler en lavere <strong>andelpris</strong>.
+            En høj boligafgift kan betyde stor <strong>fællesgæld</strong> — men også at du betaler en lavere <strong>andelspris</strong>.
           </p>
 
           <h2>Tjekliste før du køber andelsbolig</h2>

@@ -41,21 +41,21 @@ export default async function TidsberegnerPage() {
       {/* SEO Content */}
       {locale === "da" && (
       <div className="prose max-w-none mb-8">
-        <h2>S&aring;dan bruger du tidsberegneren</h2>
+        <h2>Sådan bruger du tidsberegneren</h2>
         <p>
-          Vores <strong>tidsberegner</strong> hj&aelig;lper dig med at beregne den <strong>pr&aelig;cise tid</strong> mellem
+          Vores <strong>tidsberegner</strong> hjælper dig med at beregne den <strong>præcise tid</strong> mellem
           to tidspunkter. Den er ideel til:
         </p>
         <ul>
           <li>
             <strong>Arbejdstidsregistrering</strong> - beregn dine timer til
-            l&oslash;nseddel
+            lønseddel
           </li>
           <li>
-            <strong>M&oslash;detid</strong> - se hvor lang tid et m&oslash;de varede
+            <strong>Mødetid</strong> - se hvor lang tid et møde varede
           </li>
           <li>
-            <strong>Projektplanl&aelig;gning</strong> - estimer tid til opgaver
+            <strong>Projektplanlægning</strong> - estimer tid til opgaver
           </li>
           <li>
             <strong>Nattevagter</strong> - beregn tid over midnat
@@ -74,11 +74,11 @@ export default async function TidsberegnerPage() {
           <li>1 time 15 min = 1,25 timer</li>
         </ul>
 
-        <h2>Tips til pr&aelig;cis timeregistrering</h2>
+        <h2>Tips til præcis timeregistrering</h2>
         <ul>
-          <li>Husk altid at <strong>fratr&aelig;kke pauser</strong> fra din arbejdstid</li>
-          <li>De fleste har <strong>30 minutters frokostpause</strong>, som ikke t&aelig;lles med i den betalte arbejdstid</li>
-          <li>Brug <strong>decimal timer</strong> n&aring;r din virksomhed kr&aelig;ver det til timeregistrering</li>
+          <li>Husk altid at <strong>fratrække pauser</strong> fra din arbejdstid</li>
+          <li>De fleste har <strong>30 minutters frokostpause</strong>, som ikke tælles med i den betalte arbejdstid</li>
+          <li>Brug <strong>decimal timer</strong> når din virksomhed kræver det til timeregistrering</li>
         </ul>
       </div>
       )}

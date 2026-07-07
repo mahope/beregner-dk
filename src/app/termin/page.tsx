@@ -38,34 +38,34 @@ export default async function TerminPage() {
 
         {locale === "da" && (
         <div className="mt-12 prose dark:prose-invert max-w-none">
-          <h2>S&aring;dan beregnes din terminsdato</h2>
+          <h2>Sådan beregnes din terminsdato</h2>
           <p>
-            Terminsdatoen beregnes ved at l&aelig;gge <strong>280 dage (40 uger)</strong> til f&oslash;rste dag i din sidste menstruation (Naegeles regel). Denne metode bruges af l&aelig;ger og jordm&oslash;dre verden over og er den mest udbredte beregningsmetode.
+            Terminsdatoen beregnes ved at lægge <strong>280 dage (40 uger)</strong> til første dag i din sidste menstruation (Naegeles regel). Denne metode bruges af læger og jordmødre verden over og er den mest udbredte beregningsmetode.
           </p>
           <p>
-            Bem&aelig;rk at beregningen antager en <strong>cyklus p&aring; 28 dage</strong> og at &aelig;gl&oslash;sningen sker p&aring; dag 14. Hvis din cyklus er kortere eller l&aelig;ngere, kan terminsdatoen justeres af din l&aelig;ge ved <strong>scanningen i uge 12</strong>.
+            Bemærk at beregningen antager en <strong>cyklus på 28 dage</strong> og at ægløsningen sker på dag 14. Hvis din cyklus er kortere eller længere, kan terminsdatoen justeres af din læge ved <strong>scanningen i uge 12</strong>.
           </p>
 
           <h2>Graviditetens tre trimestre</h2>
           <ul>
-            <li><strong>1. trimester (uge 1-12):</strong> Alle organer dannes. Risikoen for spontan abort er st&oslash;rst i denne periode. Nakkefoldscanning tilbydes i uge 11-14.</li>
-            <li><strong>2. trimester (uge 13-26):</strong> Barnet vokser hurtigt. De fleste oplever &oslash;get energi. Misdannelsesscanning tilbydes i uge 18-20.</li>
-            <li><strong>3. trimester (uge 27-40):</strong> Barnet modnes og g&oslash;r sig klar til f&oslash;dsel. Fra uge 37 regnes barnet som fuldb&aring;rent.</li>
+            <li><strong>1. trimester (uge 1-12):</strong> Alle organer dannes. Risikoen for spontan abort er størst i denne periode. Nakkefoldscanning tilbydes i uge 11-14.</li>
+            <li><strong>2. trimester (uge 13-26):</strong> Barnet vokser hurtigt. De fleste oplever øget energi. Misdannelsesscanning tilbydes i uge 18-20.</li>
+            <li><strong>3. trimester (uge 27-40):</strong> Barnet modnes og gør sig klar til fødsel. Fra uge 37 regnes barnet som fuldbårent.</li>
           </ul>
 
           <h2>Barsel i Danmark 2026</h2>
           <p>
-            Mor har ret til barsel fra <strong>4 uger f&oslash;r terminsdatoen</strong>. Samlet har for&aelig;ldrene ret til 52 ugers barselsorlov med barselsdagpenge. I 2026 er reglerne:
+            Mor har ret til barsel fra <strong>4 uger før terminsdatoen</strong>. Samlet har forældrene ret til 52 ugers barselsorlov med barselsdagpenge. I 2026 er reglerne:
           </p>
           <ul>
-            <li>2 uger &oslash;rem&aelig;rket til mor f&oslash;r f&oslash;dsel</li>
-            <li>2 uger &oslash;rem&aelig;rket til far/medmor ved f&oslash;dsel</li>
-            <li>8 uger &oslash;rem&aelig;rket til mor efter f&oslash;dsel</li>
-            <li>9 uger &oslash;rem&aelig;rket til far/medmor (kan ikke overdrages)</li>
-            <li>Resten kan deles frit mellem for&aelig;ldrene</li>
+            <li>2 uger øremærket til mor før fødsel</li>
+            <li>2 uger øremærket til far/medmor ved fødsel</li>
+            <li>8 uger øremærket til mor efter fødsel</li>
+            <li>9 uger øremærket til far/medmor (kan ikke overdrages)</li>
+            <li>Resten kan deles frit mellem forældrene</li>
           </ul>
           <p>
-            Brug vores <a href="/barselsdagpenge">barselsdagpenge-beregner</a> for at se hvad du kan f&aring; udbetalt under barsel.
+            Brug vores <a href="/barselsdagpenge">barselsdagpenge-beregner</a> for at se hvad du kan få udbetalt under barsel.
           </p>
         </div>
         )}

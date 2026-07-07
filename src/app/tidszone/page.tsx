@@ -47,18 +47,18 @@ export default async function TidszonePage() {
       <div className="prose max-w-none mb-8">
         <h2>Om tidszoner</h2>
         <p>
-          Verden er opdelt i <strong>24 tidszoner</strong>, der hver svarer til <strong>15 graders l&aelig;ngde</strong> p&aring; jordkloden.
-          Tidszoner g&oslash;r det muligt at have en praktisk <strong>lokal tid</strong>, der nogenlunde f&oslash;lger solens gang.
+          Verden er opdelt i <strong>24 tidszoner</strong>, der hver svarer til <strong>15 graders længde</strong> på jordkloden.
+          Tidszoner gør det muligt at have en praktisk <strong>lokal tid</strong>, der nogenlunde følger solens gang.
         </p>
 
         <h3>Danmarks tidszone</h3>
         <p>
           Danmark bruger <strong>Central European Time (CET)</strong>, som er <strong>UTC+1</strong>. Om sommeren bruger vi
-          {" "}<strong>Central European Summer Time (CEST)</strong>, som er <strong>UTC+2</strong>. Sommertid blev indf&oslash;rt for
+          {" "}<strong>Central European Summer Time (CEST)</strong>, som er <strong>UTC+2</strong>. Sommertid blev indført for
           at <strong>spare energi</strong> ved at udnytte dagslyset bedre.
         </p>
 
-        <h3>Popul&aelig;re tidsforskelle fra Danmark</h3>
+        <h3>Populære tidsforskelle fra Danmark</h3>
         <ul>
           <li><strong>London:</strong> 1 time bagud</li>
           <li><strong>New York:</strong> 6 timer bagud</li>
@@ -67,11 +67,11 @@ export default async function TidszonePage() {
           <li><strong>Sydney:</strong> 9-10 timer foran</li>
         </ul>
 
-        <h3>Tips til internationale m&oslash;der</h3>
+        <h3>Tips til internationale møder</h3>
         <ul>
-          <li>Brug et m&oslash;detidspunkt der er acceptabelt for alle tidszoner</li>
+          <li>Brug et mødetidspunkt der er acceptabelt for alle tidszoner</li>
           <li>Angiv altid tidszonen tydeligt (fx &quot;14:00 CET&quot;)</li>
-          <li>Overvej at rotere m&oslash;detider s&aring; byrden deles</li>
+          <li>Overvej at rotere mødetider så byrden deles</li>
           <li>Brug kalenderinvitation med automatisk tidszone-konvertering</li>
         </ul>
       </div>

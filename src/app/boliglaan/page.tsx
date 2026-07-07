@@ -101,18 +101,18 @@ export default async function BoliglaanPage() {
           <tbody>
             <tr>
               <td>0-40%</td>
-              <td>0.45-0.65%</td>
-              <td>0.55-0.85%</td>
+              <td>0,45-0,65%</td>
+              <td>0,55-0,85%</td>
             </tr>
             <tr>
               <td>40-60%</td>
-              <td>0.55-0.85%</td>
-              <td>0.75-1.15%</td>
+              <td>0,55-0,85%</td>
+              <td>0,75-1,15%</td>
             </tr>
             <tr>
               <td>60-80%</td>
-              <td>0.75-1.25%</td>
-              <td>1.05-1.55%</td>
+              <td>0,75-1,25%</td>
+              <td>1,05-1,55%</td>
             </tr>
           </tbody>
         </table>
@@ -123,10 +123,10 @@ export default async function BoliglaanPage() {
         </p>
         <ul>
           <li><strong>Op til ca. 50.000 kr:</strong> ca. 33% fradrag</li>
-          <li><strong>Over 50.000 kr:</strong> ca. 25.6% fradrag</li>
+          <li><strong>Over 50.000 kr:</strong> ca. 25,6% fradrag</li>
         </ul>
         <p>
-          Vores beregner bruger en gennemsnitlig <strong>fradragsværdi på 25.6%</strong> som et konservativt estimat.
+          Vores beregner bruger en gennemsnitlig <strong>fradragsværdi på 25,6%</strong> som et konservativt estimat.
         </p>
 
         <h2>Tips til boligkøb</h2>
