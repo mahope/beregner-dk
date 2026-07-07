@@ -95,7 +95,7 @@ export default function MomsGuidePage() {
         <p>
           Når du har en pris uden moms og vil finde prisen inkl. moms:
         </p>
-        <div className="bg-blue-50 p-4 rounded-lg not-prose mb-4">
+        <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg not-prose mb-4">
           <p className="font-mono text-lg">Pris inkl. moms = Pris uden moms × 1,25</p>
           <p className="text-sm text-gray-600 mt-2">
             Eksempel: 800 kr × 1,25 = 1.000 kr inkl. moms
@@ -106,7 +106,7 @@ export default function MomsGuidePage() {
         <p>
           Når du har en pris inkl. moms og vil finde prisen uden moms:
         </p>
-        <div className="bg-blue-50 p-4 rounded-lg not-prose mb-4">
+        <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg not-prose mb-4">
           <p className="font-mono text-lg">Pris uden moms = Pris inkl. moms ÷ 1,25</p>
           <p className="text-sm text-gray-600 mt-2">
             Eksempel: 1.000 kr ÷ 1,25 = 800 kr uden moms
@@ -117,16 +117,16 @@ export default function MomsGuidePage() {
         <p>
           Når du vil finde selve momsbeløbet i en pris inkl. moms:
         </p>
-        <div className="bg-blue-50 p-4 rounded-lg not-prose mb-4">
+        <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg not-prose mb-4">
           <p className="font-mono text-lg">Moms = Pris inkl. moms - (Pris inkl. moms ÷ 1,25)</p>
           <p className="text-sm text-gray-600 mt-2">
             Eksempel: 1.000 kr - 800 kr = 200 kr i moms
           </p>
         </div>
 
-        <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg not-prose my-6">
+        <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 p-4 rounded-lg not-prose my-6">
           <p className="font-medium text-yellow-800">💡 Vigtig pointe</p>
-          <p className="text-yellow-700 text-sm mt-1">
+          <p className="text-yellow-700 dark:text-yellow-300 text-sm mt-1">
             Momsandelen i en pris inkl. moms er <strong>20%</strong> (ikke 25%). 
             Det skyldes at 200 kr af 1.000 kr er 20%. Momsen beregnes af prisen 
             <em>uden</em> moms, ikke af totalen. Forvirret over procenter? Brug vores{" "}

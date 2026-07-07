@@ -84,7 +84,7 @@ export default function HuslejeGuidePage() {
           <Link href="/loen-efter-skat" className="text-blue-600 hover:underline">løn efter skat beregner</Link>.
         </p>
 
-        <div className="bg-blue-50 p-4 rounded-lg not-prose my-6">
+        <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg not-prose my-6">
           <p className="font-mono text-lg">Max husleje = Nettoløn × 0,30</p>
           <p className="text-sm text-gray-600 mt-2">
             Eksempel: 28.000 kr × 0,30 = 8.400 kr max husleje
@@ -115,9 +115,9 @@ export default function HuslejeGuidePage() {
           <li>Evt. parkering</li>
         </ul>
 
-        <div className="bg-green-50 border border-green-200 p-4 rounded-lg not-prose my-6">
+        <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 p-4 rounded-lg not-prose my-6">
           <p className="font-medium text-green-800">✅ Eksempel på boligbudget</p>
-          <div className="text-green-700 text-sm mt-2 space-y-1">
+          <div className="text-green-700 dark:text-green-300 text-sm mt-2 space-y-1">
             <p>Husleje: 6.500 kr</p>
             <p>A conto varme/vand: 500 kr</p>
             <p>El: 400 kr</p>

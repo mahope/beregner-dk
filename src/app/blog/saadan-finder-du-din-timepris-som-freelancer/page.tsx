@@ -148,16 +148,16 @@ export default function TimeprisGuidePage() {
         </div>
 
         <h3>Trin 5: Beregn timepris</h3>
-        <div className="bg-blue-50 p-4 rounded-lg not-prose my-6">
+        <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg not-prose my-6">
           <p className="font-mono text-lg">
             Timepris = Månedlig omsætning ÷ Fakturerbare timer<br/>
             = 56.945 ÷ 110 = <strong>518 kr/time</strong>
           </p>
         </div>
 
-        <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg not-prose my-6">
+        <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 p-4 rounded-lg not-prose my-6">
           <p className="font-medium text-yellow-800">💡 Rund op!</p>
-          <p className="text-yellow-700 text-sm mt-1">
+          <p className="text-yellow-700 dark:text-yellow-300 text-sm mt-1">
             I praksis ville du runde op til 550 eller 600 kr for at have buffer. 
             Husk at dette er ekskl. moms - for virksomhedskunder tillægges 25%. 
             Brug vores <Link href="/moms" className="text-blue-600 hover:underline">momsberegner</Link>{" "}
