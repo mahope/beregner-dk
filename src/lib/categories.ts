@@ -28,6 +28,7 @@ export const beregnere: BeregnerItem[] = [
   { title: "Opsparingsberegner", description: "Beregn renters rente og se din opsparing vokse", href: "/opsparing", icon: "📈", category: "Økonomi" },
   { title: "Rådighedsbeløb", description: "Beregn dit månedlige rådighedsbeløb", href: "/budget", icon: "📊", category: "Økonomi" },
   { title: "Lønberegner", description: "Omregn mellem timeløn, månedsløn og årsløn", href: "/loen-konverter", icon: "🔄", category: "Økonomi" },
+  { title: "Afkastberegner", description: "Beregn ROI og årligt afkast (CAGR)", href: "/afkast", icon: "📈", category: "Økonomi" },
   { title: "Lön efter skatt", description: "Beräkna din nettolön efter skatt", href: "/lon-efter-skatt", icon: "💰", category: "Økonomi" },
   { title: "Feriepenge", description: "Beregn hvor meget du har til gode i feriepenge", href: "/feriepenge", icon: "🏖️", category: "Økonomi" },
   { title: "Dagpengeberegner", description: "Beregn hvad du kan få i dagpenge ved ledighed", href: "/dagpenge", icon: "📋", category: "Økonomi" },
@@ -83,6 +84,8 @@ export const beregnere: BeregnerItem[] = [
   { title: "Temperaturberegner", description: "Omregn mellem Celsius, Fahrenheit og Kelvin", href: "/temperatur", icon: "🌡️", category: "Matematik" },
   { title: "Gennemsnitsberegner", description: "Beregn gennemsnit, sum og median af tal", href: "/gennemsnit", icon: "📊", category: "Matematik" },
   { title: "Enhedsberegner", description: "Omregn længde, vægt og volumen mellem enheder", href: "/enheder", icon: "📏", category: "Matematik" },
+  { title: "Brøkberegner", description: "Forkort brøk og omregn til decimal og procent", href: "/brok", icon: "➗", category: "Matematik" },
+  { title: "Nedtælling", description: "Tæl dage til en fødselsdag, ferie eller jul", href: "/nedtaelling", icon: "⏳", category: "Hverdag" },
   { title: "Datoberegner", description: "Beregn dage mellem datoer, arbejdsdage og alder", href: "/dato", icon: "📅", category: "Praktisk" },
   { title: "Tidsberegner", description: "Beregn timer og minutter mellem tidspunkter", href: "/tidsberegner", icon: "⏱️", category: "Praktisk" },
 ];
