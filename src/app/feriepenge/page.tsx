@@ -112,7 +112,7 @@ export default async function FeriepengePage() {
           <li>Feriepengene indberettes automatisk til SKAT</li>
         </ol>
 
-        <div className="bg-blue-50 border-l-4 border-blue-400 p-4 my-6 not-prose">
+        <div className="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-400 dark:border-blue-500 p-4 my-6 not-prose">
           <p className="font-medium text-blue-800">
             Tip: Tjek din ferieopsparing
           </p>
@@ -131,7 +131,7 @@ export default async function FeriepengePage() {
           </p>
         </div>
 
-        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 my-6 not-prose">
+        <div className="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 dark:border-yellow-500 p-4 my-6 not-prose">
           <p className="font-medium text-yellow-800">Bemærk</p>
           <p className="text-yellow-700">
             Denne beregner giver et estimat. Din faktiske udbetaling afhænger af

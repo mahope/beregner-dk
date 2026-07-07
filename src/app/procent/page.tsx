@@ -141,7 +141,7 @@ export default async function ProcentPage() {
           </li>
         </ul>
 
-        <div className="bg-blue-50 border-l-4 border-blue-400 p-4 my-6 not-prose">
+        <div className="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-400 dark:border-blue-500 p-4 my-6 not-prose">
           <p className="font-medium text-blue-800">Tip</p>
           <p className="text-blue-700">
             Husk at 50% af 40 er det samme som 40% af 50 - begge giver 20. Dette

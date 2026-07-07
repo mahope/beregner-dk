@@ -103,7 +103,7 @@ export default async function DatoPage() {
           (deleligt med 100). 2000 var skudår (deleligt med 400).
         </p>
 
-        <div className="bg-blue-50 border-l-4 border-blue-400 p-4 my-6 not-prose">
+        <div className="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-400 dark:border-blue-500 p-4 my-6 not-prose">
           <p className="font-medium text-blue-800">Tip</p>
           <p className="text-blue-700">
             Beregneren tager ikke højde for helligdage ved beregning af

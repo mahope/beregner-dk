@@ -169,7 +169,7 @@ export default async function PensionPage() {
           <li><strong>Aktieandel:</strong> 100 minus din alder (30-årig = 70% aktier)</li>
         </ul>
 
-        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 my-6">
+        <div className="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 dark:border-yellow-500 p-4 my-6">
           <p className="font-medium text-yellow-800">Vigtigt</p>
           <p className="text-yellow-700">
             Denne beregner giver et estimat til orientering. Pensionsregler ændres løbende, og
