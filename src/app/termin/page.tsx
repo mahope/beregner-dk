@@ -70,6 +70,40 @@ export default async function TerminPage() {
         </div>
         )}
 
+        {locale === "se" && (
+        <div className="mt-12 prose dark:prose-invert max-w-none">
+          <h2>Så beräknas ditt beräknade förlossningsdatum</h2>
+          <p>
+            Det beräknade förlossningsdatumet (BF) räknas ut genom att lägga <strong>280 dagar (40 veckor)</strong> till första dagen i din senaste menstruation (Naegeles regel). Metoden används av läkare och barnmorskor världen över och är den mest utbredda beräkningsmetoden.
+          </p>
+          <p>
+            Observera att beräkningen utgår från en <strong>cykel på 28 dagar</strong> och att ägglossningen sker på dag 14. Om din cykel är kortare eller längre kan datumet justeras av barnmorskan vid <strong>ultraljudet i vecka 12</strong>.
+          </p>
+
+          <h2>Graviditetens tre trimestrar</h2>
+          <ul>
+            <li><strong>1:a trimestern (vecka 1-12):</strong> Alla organ bildas. Risken för missfall är störst under denna period. Ett tidigt ultraljud kan erbjudas i vecka 11-14.</li>
+            <li><strong>2:a trimestern (vecka 13-26):</strong> Barnet växer snabbt. De flesta upplever ökad energi. Rutinultraljudet görs vanligtvis i vecka 18-20.</li>
+            <li><strong>3:e trimestern (vecka 27-40):</strong> Barnet mognar och gör sig redo för förlossningen. Från vecka 37 räknas barnet som fullgånget.</li>
+          </ul>
+
+          <h2>Föräldraledighet i Sverige 2026</h2>
+          <p>
+            I Sverige har föräldrarna tillsammans rätt till <strong>480 dagar med föräldrapenning</strong> per barn. Reglerna innebär bland annat:
+          </p>
+          <ul>
+            <li>390 dagar på sjukpenningnivå (baserat på din inkomst)</li>
+            <li>90 dagar på lägstanivå</li>
+            <li>90 dagar är reserverade för vardera föräldern och kan inte överlåtas</li>
+            <li>Gravid kan ta ut föräldrapenning från 60 dagar före beräknat datum</li>
+            <li>Resterande dagar kan fördelas fritt mellan föräldrarna</li>
+          </ul>
+          <p>
+            Använd vår <a href="/barselsdagpenge">räknare för föräldrapenning</a> för att se vad du kan få utbetalt under ledigheten.
+          </p>
+        </div>
+        )}
+
         <FAQ items={pageData.faqItems} />
         <RelatedCalculators current="/termin" />
       </div>

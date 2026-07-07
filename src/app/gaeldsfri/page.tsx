@@ -62,6 +62,32 @@ export default async function GaeldsfriPage() {
         </div>
         )}
 
+        {locale === "se" && (
+        <div className="mt-12 prose dark:prose-invert max-w-none">
+          <h2>Så blir du skuldfri snabbare</h2>
+          <p>
+            Att bli <strong>skuldfri</strong> kräver en plan. Det viktigaste steget är att betala mer än <strong>minimibeloppet</strong> — även små extra belopp gör enorm skillnad över tid tack vare <strong>ränta på ränta-effekten</strong>.
+          </p>
+
+          <h2>Lavin- vs. snöbollsmetoden — vilken är bäst?</h2>
+          <p>
+            <strong>Lavinmetoden</strong> är matematiskt optimal. Du riktar extra <strong>amortering</strong> mot den <strong>skuld</strong> med högst ränta, vilket minimerar dina totala räntekostnader — du betalar helt enkelt av den dyraste skulden först.
+          </p>
+          <p>
+            <strong>Snöbollsmetoden</strong> riktar extra amortering mot den minsta skulden. När den är avbetald går alla pengar vidare till den näst minsta. De täta &quot;segrarna&quot; kan motivera dig att hålla ut — och den bästa metoden är den du faktiskt följer.
+          </p>
+
+          <h2>Tips för att betala av skulder</h2>
+          <ul>
+            <li><strong>Gör en budget:</strong> Ta reda på hur mycket du kan avsätta extra till avbetalning</li>
+            <li><strong>Förhandla räntan:</strong> Kontakta din bank — du kan ofta få lägre ränta</li>
+            <li><strong>Undvik ny skuld:</strong> Använd kontanter eller betalkort i stället för kredit</li>
+            <li><strong>Automatisera:</strong> Ställ in automatiska överföringar till amortering</li>
+            <li><strong>Buffert först:</strong> Ha 1-2 månaders utgifter som buffert, så du inte tar ny skuld vid oväntade utgifter</li>
+          </ul>
+        </div>
+        )}
+
         <FAQ items={pageData.faqItems} />
         <RelatedCalculators current="/gaeldsfri" />
       </div>

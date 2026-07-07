@@ -64,6 +64,34 @@ export default async function KonfirmationPage() {
         </div>
         )}
 
+        {locale === "se" && (
+        <div className="mt-12 prose dark:prose-invert max-w-none">
+          <h2>Så planerar du konfirmationsbudgeten</h2>
+          <p>
+            En konfirmation är en stor dag — både för konfirmanden och familjen. Genom att <strong>planera budgeten tidigt</strong> slipper du obehagliga överraskningar och kan fokusera på det viktigaste: att fira dagen.
+          </p>
+
+          <h2>De största utgiftsposterna</h2>
+          <p>
+            <strong>Mat och dryck</strong> är oftast den största posten och kan variera från 150-250 kr/person hemma till 400-800 kr/person på restaurang. <strong>Konfirmationskläder</strong> kostar vanligtvis 1 500-4 000 kr, och en <strong>fotograf</strong> ligger kring 1 500-4 000 kr.
+          </p>
+
+          <h2>Genomsnittliga konfirmationspresenter 2026</h2>
+          <p>
+            Presentbeloppet beror på <strong>relationen till konfirmanden</strong>. Föräldrar ger vanligtvis mest, följt av mor- och farföräldrar. Många konfirmander tar sammanlagt emot mellan <strong>10 000 och 25 000 kr</strong> i presenter.
+          </p>
+
+          <h2>Spartips till konfirmationen</h2>
+          <ul>
+            <li><strong>Håll festen hemma:</strong> Spara tusentals kronor på lokalhyra</li>
+            <li><strong>Laga maten själv:</strong> En buffé är billigare och enklare än serverad middag</li>
+            <li><strong>Köp kläder i god tid:</strong> Undvik säsongstillägg genom att handla tidigt</li>
+            <li><strong>Dela fotograf:</strong> Gå ihop med en annan konfirmandfamilj</li>
+            <li><strong>Använd naturen:</strong> Blommor och grenar från trädgården är vackra och gratis dekorationer</li>
+          </ul>
+        </div>
+        )}
+
         <FAQ items={pageData.faqItems} />
         <RelatedCalculators current="/konfirmation" />
       </div>

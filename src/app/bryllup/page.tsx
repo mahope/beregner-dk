@@ -59,6 +59,29 @@ export default async function BryllupPage() {
         </div>
         )}
 
+        {locale === "se" && (
+        <div className="mt-12 prose dark:prose-invert max-w-none">
+          <h2>Planera din bröllopsbudget</h2>
+          <p>
+            Ett bröllop är en av livets största fester — och en av de <strong>dyraste</strong>. Genom att <strong>planera budgeten tidigt</strong> kan ni prioritera det som betyder mest för er och undvika obehagliga överraskningar.
+          </p>
+
+          <h2>Typiska utgiftsposter</h2>
+          <p>
+            <strong>Mat och dryck</strong> är den klart största posten. <strong>Lokalen</strong> varierar enormt — från gratis i en privat trädgård till 35 000+ kr för ett slott. <strong>Fotografen</strong> är en investering i minnen och bör inte sparas bort.
+          </p>
+
+          <h2>Spartips till bröllopet</h2>
+          <ul>
+            <li><strong>Välj lågsäsong:</strong> Vinter och vardagar är betydligt billigare</li>
+            <li><strong>Gör-det-själv-dekoration:</strong> Blommor från trädgården och hemmagjord pynt sparar tusentals</li>
+            <li><strong>Buffé:</strong> Billigare och mer avslappnad än serverad middag</li>
+            <li><strong>DJ framför band:</strong> En DJ kostar 5 000-10 000 kr mot 20 000+ för ett band</li>
+            <li><strong>Prioritera:</strong> Välj 2-3 saker som verkligen betyder något och spara på resten</li>
+          </ul>
+        </div>
+        )}
+
         <FAQ items={pageData.faqItems} />
         <RelatedCalculators current="/bryllup" />
       </div>

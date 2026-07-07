@@ -84,6 +84,41 @@ export default async function LaaneberegnerPage() {
       </div>
       )}
 
+      {locale === "se" && (
+      <div className="prose max-w-none mb-8">
+        <h2>Om lånekalkyl</h2>
+        <p>
+          Innan du tar ett <strong>lån</strong> är det viktigt att förstå den <strong>totala kostnaden</strong>.
+          Vår <strong>lånekalkyl</strong> hjälper dig att se vad lånet faktiskt kostar - inte
+          bara <strong>månadskostnaden</strong>, utan även den <strong>totala räntan</strong> under lånets löptid.
+        </p>
+
+        <h3>Olika typer av lån</h3>
+        <ul>
+          <li><strong>Privatlån:</strong> Till mindre köp, ofta 5-15% i ränta</li>
+          <li><strong>Billån:</strong> Till köp av bil, vanligen 3-8% i ränta</li>
+          <li><strong>Bolån:</strong> Till köp av bostad, lägst ränta (2-5%)</li>
+          <li><strong>Snabblån:</strong> Små snabba lån, mycket hög ränta</li>
+        </ul>
+
+        <h3>Så får du det bästa lånet</h3>
+        <ol>
+          <li>Jämför den effektiva räntan från flera långivare</li>
+          <li>Kontrollera alla avgifter (uppläggning, administration, lösen)</li>
+          <li>Bedöm om du klarar månadskostnaden om räntan stiger</li>
+          <li>Överväg om du kan spara ihop till beloppet i stället för att låna</li>
+          <li>Läs det finstilta - finns bindning eller avgifter vid extra amortering?</li>
+        </ol>
+
+        <h3>När är det klokt att låna?</h3>
+        <p>
+          Lån kan vara motiverat till <strong>investeringar</strong> som ökar ditt värde (<strong>utbildning</strong>, <strong>bostad</strong>)
+          eller nödvändiga köp du inte kan spara ihop till. Undvik att låna till <strong>konsumtion</strong>
+          som snabbt tappar värde (resor, elektronik, kläder).
+        </p>
+      </div>
+      )}
+
       {/* FAQ */}
       <div className="mb-8">
         <FAQ items={pageData.faqItems} />

@@ -83,6 +83,45 @@ export default async function BraendstofPage() {
       </div>
       )}
 
+      {locale === "se" && (
+      <div className="prose max-w-none mb-8">
+        <h2>Om bränsleförbrukning</h2>
+        <p>
+          Att förstå din <strong>bränsleförbrukning</strong> hjälper dig att <strong>budgetera för bilkörning</strong>
+          och välja rätt bil. Förbrukningen varierar betydligt mellan <strong>biltyper</strong>,
+          <strong>körstil</strong> och <strong>körförhållanden</strong>.
+        </p>
+
+        <h3>Typisk förbrukning</h3>
+        <ul>
+          <li><strong>Bensin:</strong> 0,55-0,83 l/mil (5,5-8,3 l/100 km)</li>
+          <li><strong>Diesel:</strong> 0,45-0,67 l/mil (4,5-6,7 l/100 km)</li>
+          <li><strong>El:</strong> 1,5-2,0 kWh/mil (15-20 kWh/100 km)</li>
+          <li><strong>Hybrid:</strong> lägre förbrukning än ren bensin, särskilt i stadstrafik</li>
+        </ul>
+
+        <h3>Så minskar du förbrukningen</h3>
+        <ul>
+          <li>Kör jämnt - undvik hård acceleration och inbromsning</li>
+          <li>Håll jämn hastighet på motorvägen (optimalt 80-100 km/tim)</li>
+          <li>Kontrollera däcktrycket regelbundet (för lågt tryck ökar förbrukningen)</li>
+          <li>Ta bort onödig vikt och takbox</li>
+          <li>Använd luftkonditioneringen med måtta</li>
+          <li>Planera rutter för att undvika köer</li>
+        </ul>
+
+        <h3>Bensin vs. diesel vs. el</h3>
+        <p>
+          När du väljer <strong>drivmedel</strong> bör du tänka på:
+        </p>
+        <ul>
+          <li><strong>Bensin:</strong> Lägre inköpspris, högre kostnad per mil</li>
+          <li><strong>Diesel:</strong> Bra för långa sträckor, ofta högre pris per liter</li>
+          <li><strong>El:</strong> Lägst kostnad per mil, men högre inköpspris och behov av laddinfrastruktur</li>
+        </ul>
+      </div>
+      )}
+
       {/* FAQ */}
       <div className="mb-8">
         <FAQ items={pageData.faqItems} />

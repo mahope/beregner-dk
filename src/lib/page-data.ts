@@ -1746,6 +1746,28 @@ const noPages: Record<string, PageData> = {
 // ─── SWEDISH (se) PAGE DATA ────────────────────────────────────────────────
 
 const sePages: Record<string, PageData> = {
+    "bolan": {
+      slug: "bolan",
+      title: "Bolånekalkylator",
+      description: "Beräkna månadskostnaden för ditt bolån 2026 – ränta, amorteringskrav och ränteavdrag. Se belåningsgrad och kontantinsats.",
+      metaTitle: "Bolånekalkylator 2026 – Beräkna månadskostnad | Beräknare.se",
+      metaDescription: "Beräkna ditt bolån 2026. Ange bostadens pris, lånebelopp och ränta och se månadskostnad, amorteringskrav, belåningsgrad och ränteavdrag. Gratis bolånekalkylator.",
+      keywords: ["bolån", "bolånekalkylator", "amorteringskrav", "belåningsgrad", "månadskostnad bolån", "ränteavdrag", "bolånetak"],
+      ogTitle: "Bolånekalkylator 2026 – Beräkna månadskostnad",
+      ogDescription: "Beräkna månadskostnaden för ditt bolån 2026 med amorteringskrav och ränteavdrag.",
+      category: "Bostad",
+      breadcrumbCategory: "Bostad",
+      breadcrumbCategoryHref: "/kategori/bolig",
+      schemaName: "Bolånekalkylator",
+      schemaDescription: "Gratis bolånekalkylator. Beräkna månadskostnad, amorteringskrav och ränteavdrag för ditt bolån 2026.",
+      schemaCategory: "FinanceApplication",
+      faqItems: [
+        { question: "Hur mycket måste jag amortera på mitt bolån 2026?", answer: "Sedan 1 april 2026 beror amorteringskravet enbart på belåningsgraden: minst 2% av lånet per år vid belåningsgrad över 70%, minst 1% vid 50–70%, och inget krav under 50%. Det tidigare skuldkvotskravet (extra 1% för lån över 4,5× inkomsten) är borttaget." },
+        { question: "Hur stor kontantinsats behöver jag?", answer: "Bolånetaket är 90% av bostadens värde från 2026, så du behöver minst 10% i kontantinsats. Tidigare var kravet 15%." },
+        { question: "Vad är ränteavdrag?", answer: "Du får dra av 30% av dina räntekostnader upp till 100 000 kr underskott av kapital per år, och 21% på beloppet däröver. Det sänker din effektiva räntekostnad." },
+        { question: "Vad är skillnaden på bunden och rörlig ränta?", answer: "Bunden ränta är låst en period (t.ex. 1–5 år) och ger en förutsägbar månadskostnad. Rörlig ränta (oftast 3 månader) är ofta lägre men kan ändras. Många väljer en kombination." },
+      ],
+    },
     "lon-efter-skatt": {
       slug: "lon-efter-skatt",
       title: "Lön efter skatt",

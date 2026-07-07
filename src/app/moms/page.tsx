@@ -119,6 +119,84 @@ export default async function MomsPage() {
       </div>
       )}
 
+      {locale === "se" && (
+      <div className="prose max-w-none mb-8">
+        <h2>Om moms i Sverige (2026)</h2>
+        <p>
+          Moms (mervärdesskatt, eng. VAT) är en generell konsumtionsskatt på varor och tjänster i Sverige.
+          Standardsatsen är <strong>25%</strong>, vilket är en av de högsta momssatserna i Europa.
+          Utöver standardsatsen finns två reducerade satser: <strong>12%</strong> och <strong>6%</strong>.
+        </p>
+
+        <h3>Sveriges tre momssatser</h3>
+        <ul>
+          <li><strong>25% (standardsats):</strong> gäller de flesta varor och tjänster</li>
+          <li><strong>12% (reducerad):</strong> livsmedel, restaurang- och cateringtjänster samt hotell och logi</li>
+          <li><strong>6% (starkt reducerad):</strong> böcker, tidningar, kollektivtrafik, konserter, idrott och kultur</li>
+        </ul>
+
+        <h3>Så här räknar du ut moms</h3>
+        <p>
+          Det finns tre typiska beräkningar när du arbetar med moms (exemplen utgår från 25%):
+        </p>
+        <ul>
+          <li><strong>Lägga på moms:</strong> Multiplicera beloppet med 1,25. Exempel: 1 000 kr &times; 1,25 = 1 250 kr inkl. moms</li>
+          <li><strong>Räkna bort moms:</strong> Dividera beloppet med 1,25. Exempel: 1 250 kr &divide; 1,25 = 1 000 kr exkl. moms</li>
+          <li><strong>Hitta momsandelen:</strong> Multiplicera beloppet inkl. moms med 0,20. Exempel: 1 250 kr &times; 0,20 = 250 kr i moms</li>
+        </ul>
+        <p>
+          Observera att momsandelen i ett pris <em>inklusive</em> 25% moms är 20% (inte 25%), eftersom
+          momsen beräknas på priset utan moms: 25 / 125 = 0,20. För 12% moms är andelen ca 10,71% och för
+          6% moms ca 5,66%.
+        </p>
+
+        <h3>Momsfria varor och tjänster</h3>
+        <p>
+          Alla varor och tjänster är inte momspliktiga i Sverige. Momsfritt är bland annat:
+        </p>
+        <ul>
+          <li>Sjukvård, tandvård och social omsorg</li>
+          <li>Utbildning inom det offentliga skolväsendet</li>
+          <li>Bank- och finansieringstjänster samt försäkringar</li>
+          <li>Uthyrning av bostad</li>
+        </ul>
+
+        <h3>Momsregistrering för företag (2026)</h3>
+        <p>
+          Företag registrerar sig för moms hos <strong>Skatteverket</strong>. Företag med en omsättning
+          på högst <strong>120 000 kr</strong> per år kan vara momsbefriade, men de flesta väljer eller
+          måste momsregistrera sig. Registrerade företag tar ut moms på sin försäljning (utgående moms)
+          och får dra av moms på inköp i verksamheten (ingående moms). Skillnaden redovisas till
+          Skatteverket i en <strong>momsdeklaration</strong>.
+        </p>
+        <p>
+          Redovisningsperioden beror på företagets omsättning:
+        </p>
+        <ul>
+          <li><strong>Upp till 1 miljon kr/år:</strong> redovisning en gång per år</li>
+          <li><strong>1–40 miljoner kr/år:</strong> redovisning varje kvartal</li>
+          <li><strong>Över 40 miljoner kr/år:</strong> redovisning varje månad</li>
+        </ul>
+
+        <h3>Moms i EU och vid handel med utlandet</h3>
+        <p>
+          Momssatserna i EU varierar från 17% (Luxemburg) till 27% (Ungern). Sveriges 25% ligger i den
+          höga delen. Vid köp av varor från utlandet gäller:
+        </p>
+        <ul>
+          <li><strong>Inom EU:</strong> Privatpersoner betalar normalt momsen i säljarlandet. Företag kan använda omvänd skattskyldighet</li>
+          <li><strong>Utanför EU:</strong> Du betalar svensk moms (25%) plus eventuell tull vid import</li>
+        </ul>
+
+        <h3>Moms på digitala tjänster</h3>
+        <p>
+          Köper du digitala tjänster som streaming, mjukvara eller e-böcker från utländska leverantörer
+          ska de ta ut svensk moms (25%) via EU:s One Stop Shop-ordning. Du betalar alltså redan svensk
+          moms när du köper från exempelvis Netflix, Spotify eller Apple.
+        </p>
+      </div>
+      )}
+
       {/* FAQ */}
       <div className="mb-8">
         <FAQ items={pageData.faqItems} />

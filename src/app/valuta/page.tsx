@@ -84,6 +84,42 @@ export default async function ValutaPage() {
       </div>
       )}
 
+      {locale === "se" && (
+      <div className="prose max-w-none mb-8">
+        <h2>Om valutaomvandling</h2>
+        <p>
+          <strong>Växelkurser</strong> anger hur mycket en <strong>valuta</strong> är värd i förhållande till en annan.
+          Kurserna ändras hela tiden beroende på utbud och efterfrågan, räntor och det ekonomiska läget
+          i respektive land.
+        </p>
+
+        <h3>Populära valutor</h3>
+        <ul>
+          <li><strong>EUR (Euro)</strong> - Används i 20 EU-länder</li>
+          <li><strong>USD (US-dollar)</strong> - Världens mest handlade valuta</li>
+          <li><strong>GBP (Brittiska pund)</strong> - Storbritanniens valuta</li>
+          <li><strong>SEK (Svenska kronor)</strong> - Sveriges valuta</li>
+          <li><strong>NOK (Norska kronor)</strong> - Vårt grannlands valuta</li>
+        </ul>
+
+        <h3>Tänk på avgifterna vid växling</h3>
+        <p>
+          Den <strong>växelkurs</strong> du ser är sällan den du faktiskt betalar. Banker och växelkontor
+          lägger på ett <strong>påslag</strong> och tar ofta ut en <strong>växlingsavgift</strong>. Även vid
+          kortbetalning utomlands kan det tillkomma avgifter, så jämför alltid den totala kostnaden.
+        </p>
+
+        <h3>Tips vid valutaväxling</h3>
+        <ul>
+          <li>Jämför kurser mellan banker och växelkontor</li>
+          <li>Undvik att växla på flygplatser - kurserna är ofta sämre</li>
+          <li>Överväg onlinetjänster som Wise för bättre kurser</li>
+          <li>Använd kort med bra villkor för utlandsbetalningar</li>
+          <li>Växla aldrig mer än nödvändigt - du förlorar på båda hållen</li>
+        </ul>
+      </div>
+      )}
+
       {/* FAQ */}
       <div className="mb-8">
         <FAQ items={pageData.faqItems} />

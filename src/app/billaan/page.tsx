@@ -213,6 +213,150 @@ export default async function BillaanPage() {
       </div>
       )}
 
+      {locale === "se" && (
+      <div className="mt-12 prose max-w-none">
+        <h2>Så fungerar billån i Sverige</h2>
+        <p>
+          När du köper bil i Sverige kan du finansiera köpet på flera sätt. Ett <strong>billån</strong> är
+          ofta det förmånligaste alternativet, eftersom bilen kan användas som <strong>säkerhet</strong> och
+          du därmed får en <strong>lägre ränta</strong> än vid ett blancolån utan säkerhet.
+        </p>
+
+        <h2>Typer av bilfinansiering</h2>
+
+        <h3>Billån med bilen som säkerhet</h3>
+        <p>
+          Det klassiska billånet där långivaren har <strong>säkerhet i bilen</strong>. Det ger vanligtvis
+          den <strong>lägsta räntan</strong>, men i värsta fall kan bilen återtas vid utebliven betalning.
+          Ett vanligt krav är en <strong>kontantinsats på minst 20%</strong> av bilens pris.
+        </p>
+        <ul>
+          <li>✅ Lägre ränta tack vare säkerheten</li>
+          <li>✅ Möjlighet till större lånebelopp</li>
+          <li>✅ Inbytesbilen kan användas som kontantinsats</li>
+          <li>❌ Bilen står som säkerhet</li>
+          <li>❌ Krav på kontantinsats (ofta 20%)</li>
+        </ul>
+
+        <h3>Billeasing (privatleasing)</h3>
+        <p>
+          Med <strong>privatleasing</strong> hyr du bilen under en bestämd period mot en fast månadsavgift.
+          Du äger inte bilen, utan lämnar tillbaka den när avtalet löper ut. Ett <strong>restvärde</strong> avgör
+          en stor del av kostnaden.
+        </p>
+        <ul>
+          <li>✅ Fast och förutsägbar månadskostnad</li>
+          <li>✅ Ingen stor kontantinsats krävs</li>
+          <li>❌ Du äger aldrig bilen</li>
+          <li>❌ Begränsat körsträcka enligt avtalet</li>
+        </ul>
+
+        <h3>Blancolån till bil</h3>
+        <p>
+          Ett <strong>lån utan säkerhet</strong> i bilen. Kan användas till vilken bil som helst, men har
+          en <strong>högre effektiv ränta</strong> än ett vanligt billån.
+        </p>
+        <ul>
+          <li>✅ Ingen säkerhet i bilen</li>
+          <li>✅ Fri användning av pengarna</li>
+          <li>✅ Inga krav på bilens ålder</li>
+          <li>❌ Högre effektiv ränta</li>
+          <li>❌ Ofta lägre lånebelopp</li>
+        </ul>
+
+        <h2>Vad påverkar din ränta?</h2>
+        <p>
+          Den <strong>ränta</strong> du erbjuds beror på flera faktorer:
+        </p>
+        <ul>
+          <li><strong>Din ekonomi:</strong> Inkomst, skuldsättning och betalningshistorik</li>
+          <li><strong>Kontantinsats:</strong> Större insats ger lägre ränta</li>
+          <li><strong>Löptid:</strong> Kortare löptid ger ofta lägre ränta</li>
+          <li><strong>Bilens värde:</strong> Nyare bilar ger bättre villkor</li>
+          <li><strong>Långivarens policy:</strong> Olika banker har olika räntor</li>
+        </ul>
+
+        <h2>Jämför alltid effektiv ränta</h2>
+        <p>
+          Den <strong>effektiva räntan</strong> inkluderar alla avgifter, som uppläggningsavgift och
+          aviavgift, och ger den verkliga kostnaden för lånet. Titta aldrig bara på den nominella räntan –
+          jämför alltid <strong>effektiv ränta</strong> mellan olika erbjudanden.
+        </p>
+
+        <h2>Så får du det bästa erbjudandet</h2>
+        <ol>
+          <li>
+            <strong>Jämför minst tre långivare</strong> – använd en jämförelsetjänst
+          </li>
+          <li>
+            <strong>Förhandla med din nuvarande bank</strong> – de kan ofta matcha konkurrenternas
+            erbjudande
+          </li>
+          <li>
+            <strong>Se till totalkostnaden</strong> – inte bara månadskostnaden, utan även effektiv
+            ränta och avgifter
+          </li>
+          <li>
+            <strong>Betala en större kontantinsats</strong> – ju mer, desto lägre ränta</li>
+          <li>
+            <strong>Undvik onödiga tilläggsprodukter</strong> – betala bara för det du verkligen behöver
+          </li>
+        </ol>
+
+        <h2>Vad kostar ett billån typiskt?</h2>
+        <p>
+          Exempel på billån (2026):
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Lånebelopp</th>
+              <th>Kontantinsats</th>
+              <th>Löptid</th>
+              <th>Ränta</th>
+              <th>Månadskostnad</th>
+              <th>Total kostnad</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>150 000 kr</td>
+              <td>30 000 kr</td>
+              <td>5 år</td>
+              <td>7%</td>
+              <td>2 376 kr</td>
+              <td>172 600 kr</td>
+            </tr>
+            <tr>
+              <td>250 000 kr</td>
+              <td>50 000 kr</td>
+              <td>7 år</td>
+              <td>7%</td>
+              <td>3 020 kr</td>
+              <td>303 700 kr</td>
+            </tr>
+            <tr>
+              <td>350 000 kr</td>
+              <td>70 000 kr</td>
+              <td>7 år</td>
+              <td>7%</td>
+              <td>4 228 kr</td>
+              <td>425 200 kr</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div className="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 dark:border-yellow-500 p-4 my-6">
+          <p className="font-medium text-yellow-800">Viktigt</p>
+          <p className="text-yellow-700">
+            Den här kalkylatorn ger en uppskattning som vägledning. Kontakta alltid din bank för ett
+            exakt låneerbjudande med din individuella ränta. Räntesatserna varierar beroende på din
+            ekonomi och kreditvärdighet.
+          </p>
+        </div>
+      </div>
+      )}
+
       <FAQ items={pageData.faqItems} />
 
       <RelatedCalculators current="/billaan" />
