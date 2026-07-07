@@ -1,3 +1,6 @@
+import { getCalculatorsByLocale } from "./calculator-list";
+import type { Locale } from "./i18n";
+
 export interface CategoryData {
   slug: string;
   name: string;
@@ -23,6 +26,7 @@ export const beregnere: BeregnerItem[] = [
   { title: "Valutaberegner", description: "Omregn mellem DKK, EUR, USD og andre valutaer", href: "/valuta", icon: "💱", category: "Økonomi" },
   { title: "Renteberegner", description: "Beregn ydelse, rente og tilbagebetaling på lån", href: "/renteberegner", icon: "📊", category: "Økonomi" },
   { title: "Opsparingsberegner", description: "Beregn renters rente og se din opsparing vokse", href: "/opsparing", icon: "📈", category: "Økonomi" },
+  { title: "Rådighedsbeløb", description: "Beregn dit månedlige rådighedsbeløb", href: "/budget", icon: "📊", category: "Økonomi" },
   { title: "Feriepenge", description: "Beregn hvor meget du har til gode i feriepenge", href: "/feriepenge", icon: "🏖️", category: "Økonomi" },
   { title: "Dagpengeberegner", description: "Beregn hvad du kan få i dagpenge ved ledighed", href: "/dagpenge", icon: "📋", category: "Økonomi" },
   { title: "Sygedagpenge", description: "Beregn sygedagpenge og se arbejdsgiverperiode", href: "/sygedagpenge", icon: "🏥", category: "Økonomi" },
@@ -269,8 +273,22 @@ export function getCategoryBySlug(slug: string): CategoryData | undefined {
   return categories.find((c) => c.slug === slug);
 }
 
-export function getBeregnereByCategoryName(categoryName: string): BeregnerItem[] {
-  return beregnere.filter((b) => b.category === categoryName);
+export function getBeregnereByCategoryName(
+  categoryName: string,
+  locale: Locale = "da"
+): BeregnerItem[] {
+  const inCategory = beregnere.filter((b) => b.category === categoryName);
+  // Danish keeps the curated titles/descriptions as-is.
+  if (locale === "da") return inCategory;
+  // For other locales, use the localized names from the calculator list and
+  // drop calculators that are not available in this locale (e.g. daOnly ones).
+  const byHref = new Map(getCalculatorsByLocale(locale).map((c) => [c.href, c]));
+  return inCategory
+    .filter((b) => byHref.has(b.href))
+    .map((b) => {
+      const c = byHref.get(b.href)!;
+      return { ...b, title: c.title, description: c.description };
+    });
 }
 
 export function getAllCategorySlugs(): string[] {

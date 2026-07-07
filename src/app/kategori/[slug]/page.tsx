@@ -53,7 +53,7 @@ export default async function KategoriPage({ params }: PageProps) {
     notFound();
   }
 
-  const categoryBeregnere = getBeregnereByCategoryName(category.name);
+  const categoryBeregnere = getBeregnereByCategoryName(category.name, domainConfig.locale);
 
   const jsonLd = {
     "@context": "https://schema.org",
