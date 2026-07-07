@@ -158,7 +158,7 @@ export default async function PensionPage() {
           <li><strong>Start tidligt:</strong> Renters rente virker bedst over mange år</li>
           <li><strong>Udnyt fradrag:</strong> Ratepension giver skattefradrag nu</li>
           <li><strong>Diversificer:</strong> Bland aktier og obligationer efter alder</li>
-          <li><strong>Tjek dine pensioner:</strong> <a href="https://www.pensionsinfo.dk" target="_blank" rel="noopener">PensionsInfo.dk</a></li>
+          <li><strong>Tjek dine pensioner:</strong> <a href="https://www.pensionsinfo.dk" target="_blank" rel="noreferrer noopener">PensionsInfo.dk</a></li>
           <li><strong>Overvej tidlig pension:</strong> Kræver ekstra opsparing</li>
         </ul>
 
@@ -180,9 +180,9 @@ export default async function PensionPage() {
 
         <h2>Nyttige links</h2>
         <ul>
-          <li><a href="https://www.pensionsinfo.dk" target="_blank" rel="noopener">PensionsInfo.dk</a> - Se alle dine pensioner samlet</li>
-          <li><a href="https://www.borger.dk/pension-og-efterloen" target="_blank" rel="noopener">Borger.dk</a> - Officiel info om pension</li>
-          <li><a href="https://www.atp.dk" target="_blank" rel="noopener">ATP.dk</a> - Din ATP-pension</li>
+          <li><a href="https://www.pensionsinfo.dk" target="_blank" rel="noreferrer noopener">PensionsInfo.dk</a> - Se alle dine pensioner samlet</li>
+          <li><a href="https://www.borger.dk/pension-og-efterloen" target="_blank" rel="noreferrer noopener">Borger.dk</a> - Officiel info om pension</li>
+          <li><a href="https://www.atp.dk" target="_blank" rel="noreferrer noopener">ATP.dk</a> - Din ATP-pension</li>
         </ul>
       </div>
       )}

@@ -219,7 +219,7 @@ export default function LoenBeregner() {
           <div>
             <label className="block text-sm font-medium mb-2 dark:text-gray-200">Periode</label>
             <div className="flex gap-4">
-              <button
+              <button type="button"
                 onClick={() => setPeriode("maaned")}
                 className={`flex-1 py-3 rounded-lg border-2 transition-colors ${
                   periode === "maaned"
@@ -229,7 +229,7 @@ export default function LoenBeregner() {
               >
                 Månedlig
               </button>
-              <button
+              <button type="button"
                 onClick={() => setPeriode("aar")}
                 className={`flex-1 py-3 rounded-lg border-2 transition-colors ${
                   periode === "aar"

@@ -130,7 +130,7 @@ function AssistentInner({ locale }: { locale: string }) {
 
   if (!isOpen) {
     return (
-      <button
+      <button type="button"
         onClick={() => { setIsOpen(true); setTimeout(() => inputRef.current?.focus(), 100); }}
         className="fixed bottom-6 right-6 z-50 bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-lg transition-all hover:scale-105"
         aria-label={t(locale as "da" | "no" | "se", "ui.assistantTitle")}
@@ -147,7 +147,7 @@ function AssistentInner({ locale }: { locale: string }) {
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 bg-blue-600 text-white">
         <span className="font-semibold text-sm">{t(locale as "da" | "no" | "se", "ui.assistantTitle")}</span>
-        <button onClick={() => setIsOpen(false)} className="hover:bg-blue-700 rounded p-1" aria-label="Luk">
+        <button type="button" onClick={() => setIsOpen(false)} className="hover:bg-blue-700 rounded p-1" aria-label="Luk">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
           </svg>
@@ -164,7 +164,7 @@ function AssistentInner({ locale }: { locale: string }) {
           <div className="space-y-2">
             <p className="text-xs text-gray-400 dark:text-gray-500 font-medium">{t(locale as "da" | "no" | "se", "ui.assistantTryLabel")}</p>
             {quickSuggestions.map((s) => (
-              <button
+              <button type="button"
                 key={s}
                 onClick={() => setQuery(s)}
                 className="block w-full text-left text-sm px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-600 transition-colors"

@@ -187,7 +187,7 @@ export function ShareCalculation({
 
   return (
     <>
-      <button
+      <button type="button"
         onClick={handleOpen}
         className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
         aria-label={l.shareButton}
@@ -219,7 +219,7 @@ export function ShareCalculation({
                   {l.subtitle}
                 </p>
               </div>
-              <button
+              <button type="button"
                 ref={closeButtonRef}
                 onClick={handleClose}
                 className="p-1 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
@@ -247,7 +247,7 @@ export function ShareCalculation({
                     />
                     <Link2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" aria-hidden="true" />
                   </div>
-                  <button
+                  <button type="button"
                     onClick={handleCopy}
                     aria-label={isCopied ? l.copied : l.copyLink}
                     className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
@@ -300,7 +300,7 @@ export function ShareCalculation({
                   >
                     <Mail className="w-5 h-5" />
                   </a>
-                  <button
+                  <button type="button"
                     onClick={() => setShowQr(!showQr)}
                     className={`flex items-center justify-center w-12 h-12 rounded-full transition-colors ${
                       showQr
@@ -343,7 +343,7 @@ export function ShareCalculation({
 
             {/* Footer */}
             <div className="px-6 py-4 bg-gray-50 dark:bg-gray-900 border-t border-gray-100 dark:border-gray-700">
-              <button
+              <button type="button"
                 onClick={handleClose}
                 className="w-full py-2 text-gray-600 dark:text-gray-400 font-medium hover:text-gray-800 dark:hover:text-gray-200 transition-colors"
               >

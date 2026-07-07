@@ -155,7 +155,7 @@ export default function RentefradragBeregner() {
               Civil status
             </label>
             <div className="flex gap-4">
-              <button
+              <button type="button"
                 onClick={() => setCivilStatus('single')}
                 className={`flex-1 py-3 px-4 rounded-lg border-2 transition-all ${
                   civilStatus === 'single'
@@ -165,7 +165,7 @@ export default function RentefradragBeregner() {
               >
                 👤 Enlig
               </button>
-              <button
+              <button type="button"
                 onClick={() => setCivilStatus('couple')}
                 className={`flex-1 py-3 px-4 rounded-lg border-2 transition-all ${
                   civilStatus === 'couple'
@@ -203,7 +203,7 @@ export default function RentefradragBeregner() {
                     <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 text-sm">kr</span>
                   </div>
                   {loans.length > 1 && (
-                    <button
+                    <button type="button"
                       onClick={() => removeLoan(loan.id)}
                       className="px-3 py-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg"
                     >
@@ -212,7 +212,7 @@ export default function RentefradragBeregner() {
                   )}
                 </div>
               ))}
-              <button
+              <button type="button"
                 onClick={addLoan}
                 className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 flex items-center gap-1"
               >

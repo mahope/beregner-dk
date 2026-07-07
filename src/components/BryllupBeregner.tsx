@@ -285,7 +285,7 @@ export default function BryllupBeregner() {
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{l.venue}</label>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
             {(Object.keys(VENUES_DATA) as Venue[]).map((key) => (
-              <button key={key} onClick={() => setVenue(key)}
+              <button type="button" key={key} onClick={() => setVenue(key)}
                 className={`py-2.5 px-3 rounded-lg text-sm font-medium transition-colors ${
                   venue === key ? "bg-blue-600 text-white" : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
                 }`}>
@@ -302,7 +302,7 @@ export default function BryllupBeregner() {
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{l.foodAndDrink}</label>
           <div className="grid grid-cols-3 gap-2">
             {(Object.keys(MAD_DATA) as MadNiveau[]).map((key) => (
-              <button key={key} onClick={() => setMadNiveau(key)}
+              <button type="button" key={key} onClick={() => setMadNiveau(key)}
                 className={`py-2.5 px-3 rounded-lg text-sm font-medium transition-colors ${
                   madNiveau === key ? "bg-blue-600 text-white" : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
                 }`}>

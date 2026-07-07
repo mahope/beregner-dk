@@ -244,10 +244,10 @@ export default function BruttoNettoBeregner() {
           </div>
 
           <div className="flex gap-4">
-            <button onClick={() => setPeriode('maaned')} className={`flex-1 py-2.5 rounded-lg border-2 text-sm font-medium transition-all ${periode === 'maaned' ? 'border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' : 'border-gray-200 dark:border-gray-600 dark:text-gray-200'}`}>
+            <button type="button" onClick={() => setPeriode('maaned')} className={`flex-1 py-2.5 rounded-lg border-2 text-sm font-medium transition-all ${periode === 'maaned' ? 'border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' : 'border-gray-200 dark:border-gray-600 dark:text-gray-200'}`}>
               {l.perMonth}
             </button>
-            <button onClick={() => setPeriode('aar')} className={`flex-1 py-2.5 rounded-lg border-2 text-sm font-medium transition-all ${periode === 'aar' ? 'border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' : 'border-gray-200 dark:border-gray-600 dark:text-gray-200'}`}>
+            <button type="button" onClick={() => setPeriode('aar')} className={`flex-1 py-2.5 rounded-lg border-2 text-sm font-medium transition-all ${periode === 'aar' ? 'border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' : 'border-gray-200 dark:border-gray-600 dark:text-gray-200'}`}>
               {l.perYear}
             </button>
           </div>

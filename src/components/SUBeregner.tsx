@@ -164,7 +164,7 @@ export default function SUBeregner() {
       <div>
         <label className="block text-sm font-medium mb-3 text-gray-700 dark:text-gray-300">Uddannelsestype</label>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <button
+          <button type="button"
             onClick={() => setUddannelse("videregaaende")}
             className={`p-4 rounded-lg border-2 text-left transition-colors ${
               uddannelse === "videregaaende"
@@ -175,7 +175,7 @@ export default function SUBeregner() {
             <div className="font-medium text-gray-900 dark:text-white">Videregående uddannelse</div>
             <div className="text-sm text-gray-500 dark:text-gray-400">Universitet, professionsbachelor, erhvervsakademi</div>
           </button>
-          <button
+          <button type="button"
             onClick={() => setUddannelse("ungdom")}
             className={`p-4 rounded-lg border-2 text-left transition-colors ${
               uddannelse === "ungdom"
@@ -193,7 +193,7 @@ export default function SUBeregner() {
       <div>
         <label className="block text-sm font-medium mb-3 text-gray-700 dark:text-gray-300">Din boligsituation</label>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <button
+          <button type="button"
             onClick={() => setBoligstatus("udeboende")}
             className={`p-4 rounded-lg border-2 text-left transition-colors ${
               boligstatus === "udeboende"
@@ -204,7 +204,7 @@ export default function SUBeregner() {
             <div className="font-medium text-gray-900 dark:text-white">Udeboende</div>
             <div className="text-sm text-gray-500 dark:text-gray-400">Bor ikke hos forældre</div>
           </button>
-          <button
+          <button type="button"
             onClick={() => setBoligstatus("hjemmeboende")}
             className={`p-4 rounded-lg border-2 text-left transition-colors ${
               boligstatus === "hjemmeboende"
@@ -215,7 +215,7 @@ export default function SUBeregner() {
             <div className="font-medium text-gray-900 dark:text-white">Hjemmeboende</div>
             <div className="text-sm text-gray-500 dark:text-gray-400">Bor hos forældre</div>
           </button>
-          <button
+          <button type="button"
             onClick={() => setBoligstatus("foraelder")}
             className={`p-4 rounded-lg border-2 text-left transition-colors ${
               boligstatus === "foraelder"

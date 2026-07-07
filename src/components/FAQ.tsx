@@ -29,7 +29,7 @@ export function FAQ({ items, title }: FAQProps) {
             key={index}
             className="border dark:border-gray-700 rounded-lg overflow-hidden bg-white dark:bg-gray-800"
           >
-            <button
+            <button type="button"
               onClick={() => setOpenIndex(openIndex === index ? null : index)}
               className="w-full px-6 py-4 text-left flex justify-between items-center hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors dark:text-white"
               aria-expanded={openIndex === index}

@@ -280,7 +280,7 @@ export default function LaaneBeregner() {
       <div>
         <label className="block text-sm font-medium mb-3 dark:text-gray-200">{l.calcType}</label>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <button
+          <button type="button"
             onClick={() => setLaaneType("annuitet")}
             className={`p-4 rounded-lg border-2 text-left ${
               laaneType === "annuitet"
@@ -291,7 +291,7 @@ export default function LaaneBeregner() {
             <div className="font-medium dark:text-inherit">{l.annuitet}</div>
             <div className="text-sm text-gray-500 dark:text-gray-400">{l.annuitetDesc}</div>
           </button>
-          <button
+          <button type="button"
             onClick={() => setLaaneType("serie")}
             className={`p-4 rounded-lg border-2 text-left ${
               laaneType === "serie"
@@ -302,7 +302,7 @@ export default function LaaneBeregner() {
             <div className="font-medium dark:text-inherit">{l.serie}</div>
             <div className="text-sm text-gray-500 dark:text-gray-400">{l.serieDesc}</div>
           </button>
-          <button
+          <button type="button"
             onClick={() => setLaaneType("sammenlign")}
             className={`p-4 rounded-lg border-2 text-left ${
               laaneType === "sammenlign"

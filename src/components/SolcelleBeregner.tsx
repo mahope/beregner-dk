@@ -248,7 +248,7 @@ export default function SolcelleBeregner() {
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{l.tagretning}</label>
           <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
             {(Object.keys(RETNINGSFAKTORER) as Retning[]).map((key) => (
-              <button key={key} onClick={() => setRetning(key)}
+              <button type="button" key={key} onClick={() => setRetning(key)}
                 className={`py-2 px-2 rounded-lg text-xs sm:text-sm font-medium transition-colors ${
                   retning === key ? "bg-blue-600 text-white" : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
                 }`}>

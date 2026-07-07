@@ -233,7 +233,7 @@ export default function ValutaBeregner() {
       {/* Popul\u00e6re valutapar hurtigknapper */}
       <div className="flex flex-wrap gap-2">
         {POPULAERE_PAR.map((par) => (
-          <button
+          <button type="button"
             key={`${par.fra}-${par.til}`}
             onClick={() => { setFraValuta(par.fra); setTilValuta(par.til); }}
             className={`px-3 py-1.5 rounded-full text-sm border transition-colors ${
@@ -265,7 +265,7 @@ export default function ValutaBeregner() {
         </div>
 
         <div className="flex justify-center">
-          <button
+          <button type="button"
             onClick={byttValutaer}
             className="p-3 rounded-full border-2 border-gray-200 dark:border-gray-600 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-all dark:text-gray-300"
             title={l.bytValutaer}
@@ -369,7 +369,7 @@ export default function ValutaBeregner() {
             {Object.keys(FALLBACK_KURSER).map((code) => {
               const kurs = getKurs(code);
               return (
-                <button
+                <button type="button"
                   key={code}
                   onClick={() => { setFraValuta("DKK"); setTilValuta(code); }}
                   className="flex justify-between p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded transition-colors text-left dark:text-gray-300"

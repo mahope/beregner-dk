@@ -262,19 +262,19 @@ export default function TidsBeregner() {
           <div className="p-4 bg-blue-50 rounded-lg dark:bg-blue-900/20">
             <h3 className="font-medium mb-3 dark:text-white">⚡ Hurtige eksempler</h3>
             <div className="flex flex-wrap gap-2">
-              <button
+              <button type="button"
                 onClick={() => { setStartTid("08:00"); setSlutTid("16:00"); setFratraekPause(30); }}
                 className="px-3 py-1 bg-white border rounded hover:bg-gray-50 text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-600"
               >
                 Normal arbejdsdag (8-16)
               </button>
-              <button
+              <button type="button"
                 onClick={() => { setStartTid("09:00"); setSlutTid("17:00"); setFratraekPause(60); }}
                 className="px-3 py-1 bg-white border rounded hover:bg-gray-50 text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-600"
               >
                 Kontor (9-17, 1t pause)
               </button>
-              <button
+              <button type="button"
                 onClick={() => { setStartTid("22:00"); setSlutTid("06:00"); setFratraekPause(30); }}
                 className="px-3 py-1 bg-white border rounded hover:bg-gray-50 text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-600"
               >

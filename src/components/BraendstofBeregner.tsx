@@ -159,7 +159,7 @@ export default function BraendstofBeregner() {
       <div>
         <label className="block text-sm font-medium mb-3 dark:text-gray-200">Brændstoftype</label>
         <div className="grid grid-cols-3 gap-3">
-          <button
+          <button type="button"
             onClick={() => setBraendstofType("benzin")}
             className={`p-4 rounded-lg border-2 transition-all ${
               braendstofType === "benzin"
@@ -170,7 +170,7 @@ export default function BraendstofBeregner() {
             <div className="text-2xl mb-1">⛽</div>
             <div className="font-medium dark:text-gray-200">Benzin</div>
           </button>
-          <button
+          <button type="button"
             onClick={() => setBraendstofType("diesel")}
             className={`p-4 rounded-lg border-2 transition-all ${
               braendstofType === "diesel"
@@ -181,7 +181,7 @@ export default function BraendstofBeregner() {
             <div className="text-2xl mb-1">🛢️</div>
             <div className="font-medium dark:text-gray-200">Diesel</div>
           </button>
-          <button
+          <button type="button"
             onClick={() => setBraendstofType("el")}
             className={`p-4 rounded-lg border-2 transition-all ${
               braendstofType === "el"
@@ -199,7 +199,7 @@ export default function BraendstofBeregner() {
         <div>
           <label className="block text-sm font-medium mb-3 dark:text-gray-200">Hvad vil du beregne?</label>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <button
+            <button type="button"
               onClick={() => setBeregningsType("turPris")}
               className={`p-3 rounded-lg border-2 text-left ${
                 beregningsType === "turPris"
@@ -209,7 +209,7 @@ export default function BraendstofBeregner() {
             >
               <div className="font-medium dark:text-gray-200">🚗 Pris for en tur</div>
             </button>
-            <button
+            <button type="button"
               onClick={() => setBeregningsType("kmPris")}
               className={`p-3 rounded-lg border-2 text-left ${
                 beregningsType === "kmPris"
@@ -219,7 +219,7 @@ export default function BraendstofBeregner() {
             >
               <div className="font-medium dark:text-gray-200">📊 Pris pr. km</div>
             </button>
-            <button
+            <button type="button"
               onClick={() => setBeregningsType("forbrug")}
               className={`p-3 rounded-lg border-2 text-left ${
                 beregningsType === "forbrug"

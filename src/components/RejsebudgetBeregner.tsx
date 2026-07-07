@@ -244,7 +244,7 @@ export default function RejsebudgetBeregner() {
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{l.destination}</label>
           <div className="space-y-2">
             {(Object.keys(DESTINATIONER) as Exclude<Destination, "custom">[]).map((key) => (
-              <button key={key} onClick={() => setDestination(key)}
+              <button type="button" key={key} onClick={() => setDestination(key)}
                 className={`w-full text-left py-2.5 px-4 rounded-lg text-sm transition-colors ${
                   destination === key ? "bg-blue-600 text-white" : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
                 }`}>
@@ -258,7 +258,7 @@ export default function RejsebudgetBeregner() {
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{l.travelType}</label>
           <div className="grid grid-cols-3 gap-2">
             {(Object.entries(REJSETYPER) as [Rejsetype, string][]).map(([key, label]) => (
-              <button key={key} onClick={() => setRejsetype(key)}
+              <button type="button" key={key} onClick={() => setRejsetype(key)}
                 className={`py-2.5 px-3 rounded-lg text-sm font-medium transition-colors ${
                   rejsetype === key ? "bg-blue-600 text-white" : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
                 }`}>

@@ -482,7 +482,7 @@ export default function BoliglaanBeregner() {
     <div className="space-y-8 print-area">
       {/* Visning toggle */}
       <div className="flex rounded-lg border border-gray-200 dark:border-gray-600 overflow-hidden">
-        <button
+        <button type="button"
           onClick={() => setVisning("beregner")}
           className={`flex-1 py-3 text-sm font-medium transition-colors ${
             visning === "beregner"
@@ -492,7 +492,7 @@ export default function BoliglaanBeregner() {
         >
           {l.calcPayment}
         </button>
-        <button
+        <button type="button"
           onClick={() => setVisning("raadtil")}
           className={`flex-1 py-3 text-sm font-medium transition-colors ${
             visning === "raadtil"
@@ -569,7 +569,7 @@ export default function BoliglaanBeregner() {
                     { type: "variabel" as LaanType, label: l.variableRate },
                     { type: "afdragsfrit" as LaanType, label: l.interestOnly },
                   ]).map(({ type, label }) => (
-                    <button
+                    <button type="button"
                       key={type}
                       onClick={() => setLaanType(type)}
                       className={`py-2 px-4 rounded-lg border-2 transition-colors text-left ${
@@ -743,7 +743,7 @@ export default function BoliglaanBeregner() {
 
                 {/* Amortiseringsplan */}
                 <div className="mt-6">
-                  <button
+                  <button type="button"
                     onClick={() => setVisAmortisering(!visAmortisering)}
                     className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
                   >

@@ -202,7 +202,7 @@ export default function VaegttabBeregner() {
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Køn</label>
           <div className="flex gap-3">
             {(["mand", "kvinde"] as const).map((k) => (
-              <button key={k} onClick={() => setKoen(k)}
+              <button type="button" key={k} onClick={() => setKoen(k)}
                 className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-medium transition-colors ${
                   koen === k ? "bg-blue-600 text-white" : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
                 }`}>
@@ -216,7 +216,7 @@ export default function VaegttabBeregner() {
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Aktivitetsniveau</label>
           <div className="space-y-2">
             {(Object.entries(AKTIVITETSFAKTORER) as [Aktivitet, typeof AKTIVITETSFAKTORER.stillesiddende][]).map(([key, val]) => (
-              <button key={key} onClick={() => setAktivitet(key)}
+              <button type="button" key={key} onClick={() => setAktivitet(key)}
                 className={`w-full text-left py-2.5 px-4 rounded-lg text-sm transition-colors ${
                   aktivitet === key
                     ? "bg-blue-600 text-white"

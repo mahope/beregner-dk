@@ -122,7 +122,7 @@ export default function MomsBeregner() {
       <div>
         <label className="block text-sm font-medium mb-3">Hvad vil du beregne?</label>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <button
+          <button type="button"
             onClick={() => setBeregningsType("tillaegMoms")}
             className={`p-4 rounded-lg border-2 text-left transition-all ${
               beregningsType === "tillaegMoms"
@@ -133,7 +133,7 @@ export default function MomsBeregner() {
             <div className="font-medium">Tillæg moms</div>
             <div className="text-sm text-gray-500">Beløb uden moms → inkl. moms</div>
           </button>
-          <button
+          <button type="button"
             onClick={() => setBeregningsType("fratraekMoms")}
             className={`p-4 rounded-lg border-2 text-left transition-all ${
               beregningsType === "fratraekMoms"
@@ -144,7 +144,7 @@ export default function MomsBeregner() {
             <div className="font-medium">Fratræk moms</div>
             <div className="text-sm text-gray-500">Beløb inkl. moms → uden moms</div>
           </button>
-          <button
+          <button type="button"
             onClick={() => setBeregningsType("findMoms")}
             className={`p-4 rounded-lg border-2 text-left transition-all ${
               beregningsType === "findMoms"

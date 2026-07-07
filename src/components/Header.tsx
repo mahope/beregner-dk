@@ -38,7 +38,7 @@ function DropdownMenu({ item }: { item: NavItem }) {
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <button
+      <button type="button"
         className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
         onClick={() => setIsOpen(!isOpen)}
       >
@@ -77,7 +77,7 @@ function MobileNav({
 
   return (
     <>
-      <button
+      <button type="button"
         onClick={() => setIsOpen(!isOpen)}
         className="p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
         aria-label="Toggle menu"
@@ -100,7 +100,7 @@ function MobileNav({
             {navigation.map((item) =>
               item.children ? (
                 <div key={item.name}>
-                  <button
+                  <button type="button"
                     onClick={() =>
                       setOpenCategory(
                         openCategory === item.name ? null : item.name

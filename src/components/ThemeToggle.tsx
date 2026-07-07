@@ -24,7 +24,7 @@ export default function ThemeToggle() {
   };
 
   return (
-    <button
+    <button type="button"
       onClick={cycleTheme}
       className="p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
       title={theme === "system" ? l.system : theme === "dark" ? l.dark : l.light}

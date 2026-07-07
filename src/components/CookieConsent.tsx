@@ -53,8 +53,8 @@ export default function CookieConsent() {
               </p>
             </div>
             <div className="shrink-0 flex gap-2 mt-3 md:mt-0">
-              <button onClick={decline} className="px-3 py-2 border dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">{t(l, "ui.cookieDecline")}</button>
-              <button onClick={accept} className="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">{t(l, "ui.cookieAccept")}</button>
+              <button type="button" onClick={decline} className="px-3 py-2 border dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">{t(l, "ui.cookieDecline")}</button>
+              <button type="button" onClick={accept} className="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">{t(l, "ui.cookieAccept")}</button>
             </div>
           </div>
         </div>

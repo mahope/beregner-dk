@@ -113,7 +113,7 @@ export default function AktieskatBeregner() {
             </label>
             <div className="flex gap-2">
               {([['begge', 'Sammenlign'], ['frit', 'Frit depot'], ['ask', 'ASK']] as const).map(([key, label]) => (
-                <button
+                <button type="button"
                   key={key}
                   onClick={() => setDepotType(key)}
                   className={`flex-1 py-2.5 px-3 rounded-lg border-2 text-sm font-medium transition-all ${

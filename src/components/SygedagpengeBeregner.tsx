@@ -152,7 +152,7 @@ export default function SygedagpengeBeregner() {
           </label>
           <div className="flex gap-3">
             {(["loenmodtager", "selvstaendig"] as const).map((type) => (
-              <button
+              <button type="button"
                 key={type}
                 onClick={() => setAnsaettelse(type)}
                 className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-medium transition-colors ${

@@ -46,7 +46,7 @@ export function AffiliateBox({ title, subtitle, links, className = "" }: Affilia
             key={index}
             href={link.url}
             target="_blank"
-            rel="noopener sponsored"
+            rel="noreferrer noopener sponsored"
             onClick={() => trackAffiliateClick(title, link.url)}
             className={`block p-4 transition-colors ${
               link.highlight 

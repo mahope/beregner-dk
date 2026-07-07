@@ -244,7 +244,7 @@ export default function KvadratmeterBeregner() {
       <div>
         <label className="block text-sm font-medium mb-3 dark:text-gray-200">{l.vaelgForm}</label>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <button
+          <button type="button"
             onClick={() => setFormType("rektangel")}
             className={`p-4 rounded-lg border-2 transition-all ${
               formType === "rektangel"
@@ -255,7 +255,7 @@ export default function KvadratmeterBeregner() {
             <div className="text-3xl mb-2">&#9645;</div>
             <div className="font-medium text-sm dark:text-gray-200">{l.rektangel}</div>
           </button>
-          <button
+          <button type="button"
             onClick={() => setFormType("cirkel")}
             className={`p-4 rounded-lg border-2 transition-all ${
               formType === "cirkel"
@@ -266,7 +266,7 @@ export default function KvadratmeterBeregner() {
             <div className="text-3xl mb-2">&#9711;</div>
             <div className="font-medium text-sm dark:text-gray-200">{l.cirkel}</div>
           </button>
-          <button
+          <button type="button"
             onClick={() => setFormType("trekant")}
             className={`p-4 rounded-lg border-2 transition-all ${
               formType === "trekant"
@@ -277,7 +277,7 @@ export default function KvadratmeterBeregner() {
             <div className="text-3xl mb-2">&#9651;</div>
             <div className="font-medium text-sm dark:text-gray-200">{l.trekant}</div>
           </button>
-          <button
+          <button type="button"
             onClick={() => setFormType("trapez")}
             className={`p-4 rounded-lg border-2 transition-all ${
               formType === "trapez"
