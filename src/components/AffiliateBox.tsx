@@ -1,6 +1,7 @@
 "use client";
 
 import { trackAffiliateClick } from "@/lib/analytics";
+import { useLocale } from "@/components/LocaleProvider";
 
 interface AffiliateLink {
   name: string;
@@ -24,6 +25,11 @@ interface AffiliateBoxProps {
  * Kræver "Annonce" label per dansk markedsføringslov.
  */
 export function AffiliateBox({ title, subtitle, links, className = "" }: AffiliateBoxProps) {
+  const { locale } = useLocale();
+  // Every affiliate partner is Danish (.dk links, "Annonce" disclosure per
+  // dansk markedsføringslov), so only show these on the Danish site.
+  if (locale !== "da") return null;
+
   return (
     <div className={`border-2 border-blue-200 dark:border-blue-800 rounded-xl overflow-hidden ${className}`}>
       {/* Header med disclosure */}
