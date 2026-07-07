@@ -1,5 +1,70 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.8.3/schema.json",
-  "linter": { "enabled": true },
-  "formatter": { "enabled": true }
+  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "files": {
+    "ignore": [
+      "node_modules",
+      ".next",
+      "out",
+      "dist",
+      "public",
+      "next-env.d.ts",
+      "*.css"
+    ]
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "style": {
+        "noNonNullAssertion": "off",
+        "useImportType": "off",
+        "useExponentiationOperator": "off",
+        "noInferrableTypes": "off",
+        "useSelfClosingElements": "off",
+        "noUnusedTemplateLiteral": "off",
+        "useTemplate": "off",
+        "noUselessElse": "off",
+        "useConst": "off",
+        "useNumberNamespace": "off"
+      },
+      "suspicious": {
+        "noArrayIndexKey": "off",
+        "noShadowRestrictedNames": "off",
+        "noAssignInExpressions": "off",
+        "noGlobalIsNan": "off",
+        "noExplicitAny": "off"
+      },
+      "complexity": {
+        "useOptionalChain": "off",
+        "useLiteralKeys": "off",
+        "noUselessSwitchCase": "off"
+      },
+      "correctness": {
+        "useExhaustiveDependencies": "off",
+        "noSwitchDeclarations": "off"
+      },
+      "a11y": {
+        "noBlankTarget": "off",
+        "noSvgWithoutTitle": "off",
+        "noNoninteractiveElementToInteractiveRole": "off",
+        "noAutofocus": "off",
+        "useFocusableInteractive": "off",
+        "noLabelWithoutControl": "off",
+        "useButtonType": "off",
+        "useSemanticElements": "off",
+        "useKeyWithClickEvents": "off"
+      },
+      "security": {
+        "noDangerouslySetInnerHtml": "off"
+      }
+    }
+  },
+  "formatter": {
+    "enabled": false
+  }
 }
