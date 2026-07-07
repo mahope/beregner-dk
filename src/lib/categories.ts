@@ -55,6 +55,8 @@ export const beregnere: BeregnerItem[] = [
   { title: "Kalorieberegner", description: "Beregn dit daglige kaloriebehov og makroer", href: "/kalorier", icon: "🍎", category: "Sundhed" },
   { title: "Vægttab Beregner", description: "Beregn kalorieunderskud for vægttab", href: "/vaegttab", icon: "📉", category: "Sundhed" },
   { title: "Promilleberegner", description: "Anslå din alkoholpromille med Widmark-formlen", href: "/promille", icon: "🍺", category: "Sundhed" },
+  { title: "Kropsfedtprocent", description: "Beregn din fedtprocent med U.S. Navy-metoden", href: "/kropsfedt", icon: "💪", category: "Sundhed" },
+  { title: "1RM beregner", description: "Anslå dit maksimale løft (one-rep max)", href: "/1rm", icon: "🏋️", category: "Sundhed" },
   { title: "Børnepenge", description: "Se hvad du kan få i børne- og ungeydelse 2026", href: "/boernepenge", icon: "👶", category: "Familie" },
   { title: "Barselsdagpenge", description: "Beregn barselsdagpenge og se orlovsperioder", href: "/barselsdagpenge", icon: "👶", category: "Familie" },
   { title: "Terminsdato Beregner", description: "Beregn terminsdato og se graviditetsuge", href: "/termin", icon: "🤰", category: "Familie" },
