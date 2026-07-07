@@ -64,10 +64,11 @@ describe("getAvailableSlugs", () => {
     expect(da.length).toBeGreaterThan(no.length);
   });
 
-  test("SE and NO have same number of slugs", () => {
+  test("SE has at least as many slugs as NO (SE-only calculators allowed)", () => {
     const se = getAvailableSlugs("se");
     const no = getAvailableSlugs("no");
-    expect(se.length).toBe(no.length);
+    // SE ships Swedish-only calculators (e.g. lön efter skatt) that NO lacks.
+    expect(se.length).toBeGreaterThanOrEqual(no.length);
   });
 
   test("all universal slugs exist on all locales", () => {

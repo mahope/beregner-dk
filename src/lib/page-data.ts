@@ -1746,6 +1746,29 @@ const noPages: Record<string, PageData> = {
 // ─── SWEDISH (se) PAGE DATA ────────────────────────────────────────────────
 
 const sePages: Record<string, PageData> = {
+    "lon-efter-skatt": {
+      slug: "lon-efter-skatt",
+      title: "Lön efter skatt",
+      description: "Beräkna din nettolön efter skatt 2026. Se kommunalskatt, statlig skatt, jobbskatteavdrag och grundavdrag – vad får du kvar efter skatt?",
+      metaTitle: "Lön efter skatt 2026 – Beräkna din nettolön | Beräknare.se",
+      metaDescription: "Beräkna lön efter skatt 2026. Ange bruttolön och kommunalskatt och se nettolön per månad, jobbskatteavdrag, statlig skatt och effektiv skatt. Gratis kalkylator.",
+      keywords: ["lön efter skatt", "nettolön", "lönekalkylator", "skatt 2026", "jobbskatteavdrag", "kommunalskatt", "statlig skatt"],
+      ogTitle: "Lön efter skatt 2026 – Beräkna din nettolön",
+      ogDescription: "Beräkna din nettolön efter skatt 2026 med jobbskatteavdrag och kommunalskatt.",
+      category: "Ekonomi",
+      breadcrumbCategory: "Ekonomi",
+      breadcrumbCategoryHref: "/kategori/oekonomi",
+      schemaName: "Lön efter skatt",
+      schemaDescription: "Gratis lönekalkylator. Beräkna din nettolön efter skatt 2026 med jobbskatteavdrag, kommunalskatt och statlig skatt.",
+      schemaCategory: "FinanceApplication",
+      faqItems: [
+        { question: "Hur mycket skatt betalar jag på min lön 2026?", answer: "Skatten består av kommunalskatt (i genomsnitt 32,38 % 2026) på din beskattningsbara inkomst, plus statlig inkomstskatt på 20 % för beskattningsbar inkomst över 643 000 kr. Jobbskatteavdraget sänker skatten med upp till cirka 4 400 kr per månad." },
+        { question: "Vad är jobbskatteavdrag?", answer: "Jobbskatteavdraget är en skattereduktion för arbetsinkomst som räknas av mot din kommunalskatt. Storleken beror på din inkomst och kommunalskattesats. För 2026 slopas avtrappningen vid höga inkomster." },
+        { question: "Vad är grundavdrag?", answer: "Grundavdraget är en del av inkomsten du inte betalar skatt på. Det varierar mellan cirka 17 400 och 45 600 kr per år 2026 beroende på din inkomst (prisbasbelopp 59 200 kr)." },
+        { question: "När betalar man statlig inkomstskatt?", answer: "Statlig inkomstskatt på 20 % tas ut på beskattningsbar förvärvsinkomst över skiktgränsen 643 000 kr 2026, vilket motsvarar en bruttolön (brytpunkt) på cirka 660 400 kr per år för den som är under 66 år." },
+        { question: "Ingår pensionsavgift och public service-avgift?", answer: "Allmän pensionsavgift (7 %) dras men krediteras fullt ut via skattereduktion, så den påverkar normalt inte din nettolön. Public service-avgiften är 1 % av inkomsten, högst 1 184 kr per år 2026." },
+      ],
+    },
     "bmi": {
       slug: "bmi",
       title: "BMI Kalkylator",
