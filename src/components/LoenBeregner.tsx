@@ -6,28 +6,27 @@ import { PrintResult } from "@/components/PrintResult";
 import { InputField } from "@/components/InputField";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
+import { SATSER_2026 } from "@/lib/satser-2026";
 import { KOMMUNER } from "@/lib/kommuner";
 import { AnimatedNumber, CopyResultButton, ResetButton } from "@/components/ui";
 import { useLocale } from '@/components/LocaleProvider';
 import { formatCurrency } from '@/lib/format';
 
-// 2026 danske skattesatser (ny skattereform med mellemskat/topskat/top-topskat)
-// Kilde: skm.dk, skat.dk, martinsen.dk
+// 2026 danske skattesatser fra den fælles kilde (src/lib/satser-2026.ts)
 const SKATTESATSER = {
-  amBidrag: 0.08, // 8% AM-bidrag
-  bundSkat: 0.1201, // 12,01% bundskat (ned fra 12,22%)
-  kommuneSkatSnit: 0.2507, // Gennemsnitlig kommuneskat 2026
-  kirkeSkat: 0.0068, // Gennemsnitlig kirkeskat (valgfri)
-  // NY 2026: Mellemskat, topskat og top-topskat erstatter gammel topskat
-  mellemSkatGraense: 641200, // Mellemskattegrænse (efter AM-bidrag)
-  mellemSkat: 0.075, // 7,5% mellemskat
-  topSkatGraense: 777900, // Topskattegrænse (efter AM-bidrag)
-  topSkat: 0.075, // 7,5% topskat
-  topTopSkatGraense: 2592700, // Top-topskattegrænse (efter AM-bidrag)
-  topTopSkat: 0.05, // 5,0% top-topskat
-  personfradrag: 54100, // Personfradrag 2026 (op fra 49.700)
-  beskaeftigelsesfradragMax: 63300, // Max beskæftigelsesfradrag (op fra 45.100)
-  beskaeftigelsesfradragPct: 0.1275, // 12,75% af lønindkomst (op fra 10,65%)
+  amBidrag: SATSER_2026.amBidrag,
+  bundSkat: SATSER_2026.bundskat,
+  kommuneSkatSnit: SATSER_2026.kommuneskatSnit,
+  kirkeSkat: SATSER_2026.kirkeskatSnit,
+  mellemSkatGraense: SATSER_2026.mellemskatGraense,
+  mellemSkat: SATSER_2026.mellemskat,
+  topSkatGraense: SATSER_2026.topskatGraense,
+  topSkat: SATSER_2026.topskat,
+  topTopSkatGraense: SATSER_2026.topTopskatGraense,
+  topTopSkat: SATSER_2026.topTopskat,
+  personfradrag: SATSER_2026.personfradrag,
+  beskaeftigelsesfradragMax: SATSER_2026.beskaeftigelsesfradragMax,
+  beskaeftigelsesfradragPct: SATSER_2026.beskaeftigelsesfradragPct,
 };
 
 export default function LoenBeregner() {

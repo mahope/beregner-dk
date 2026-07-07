@@ -5,19 +5,20 @@ import { ShareCalculation } from '@/components/ShareCalculation';
 import { CopyResultButton, ResetButton } from '@/components/ui';
 import { generateShareableLink, getStateFromUrl, CalculationState } from '@/lib/calculation-state';
 import { trackCalculation, initScrollDepthTracking } from '@/lib/analytics';
+import { SATSER_2026 } from "@/lib/satser-2026";
 
-// 2026-satser (kilde: skm.dk)
-const AM_BIDRAG = 0.08;
-const BUNDSKAT = 0.1201;
-const MELLEMSKAT_GRAENSE = 641200;
-const MELLEMSKAT = 0.075;
-const TOPSKAT_GRAENSE = 777900;
-const TOPSKAT = 0.075;
-const TOP_TOPSKAT_GRAENSE = 2592700;
-const TOP_TOPSKAT = 0.05;
-const PERSONFRADRAG = 54100;
-const BESKAEFTIGELSESFRADRAG_PCT = 0.1275;
-const BESKAEFTIGELSESFRADRAG_MAX = 63300;
+// 2026-satser fra den fælles kilde (src/lib/satser-2026.ts)
+const AM_BIDRAG = SATSER_2026.amBidrag;
+const BUNDSKAT = SATSER_2026.bundskat;
+const MELLEMSKAT_GRAENSE = SATSER_2026.mellemskatGraense;
+const MELLEMSKAT = SATSER_2026.mellemskat;
+const TOPSKAT_GRAENSE = SATSER_2026.topskatGraense;
+const TOPSKAT = SATSER_2026.topskat;
+const TOP_TOPSKAT_GRAENSE = SATSER_2026.topTopskatGraense;
+const TOP_TOPSKAT = SATSER_2026.topTopskat;
+const PERSONFRADRAG = SATSER_2026.personfradrag;
+const BESKAEFTIGELSESFRADRAG_PCT = SATSER_2026.beskaeftigelsesfradragPct;
+const BESKAEFTIGELSESFRADRAG_MAX = SATSER_2026.beskaeftigelsesfradragMax;
 
 export default function TopskatBeregner() {
   const [aarsindkomst, setAarsindkomst] = useState<string>('600000');

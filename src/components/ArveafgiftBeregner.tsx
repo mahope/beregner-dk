@@ -6,6 +6,7 @@ import { ShareCalculation } from "@/components/ShareCalculation";
 import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
+import { SATSER_2026 } from "@/lib/satser-2026";
 import { useLocale } from '@/components/LocaleProvider';
 import { formatCurrency, getCurrencySuffix } from '@/lib/format';
 
@@ -24,9 +25,9 @@ interface RelationOption {
   icon: string;
 }
 
-const BUNDFRADRAG = 392300;
-const BOAFGIFT_PROCENT = 0.15;
-const TILLAEG_PROCENT = 0.25;
+const BUNDFRADRAG = SATSER_2026.arveBundfradrag;
+const BOAFGIFT_PROCENT = SATSER_2026.boafgift;
+const TILLAEG_PROCENT = SATSER_2026.tillaegsboafgift;
 
 const relationOptions: RelationOption[] = [
   {
