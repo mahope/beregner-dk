@@ -64,6 +64,34 @@ export default async function VaegttabPage() {
         </div>
         )}
 
+        {locale === "se" && (
+        <div className="mt-12 prose dark:prose-invert max-w-none">
+          <h2>Så går du ner i vikt på ett hälsosamt sätt</h2>
+          <p>
+            Viktnedgång handlar i grunden om att äta färre kalorier än din kropp förbränner. Men <strong>takten är avgörande</strong> — för snabb viktnedgång leder ofta till <strong>muskelförlust</strong>, sänkt ämnesomsättning och <strong>jojo-effekt</strong>.
+          </p>
+
+          <h2>Den gyllene regeln: 0,5-1 kg per vecka</h2>
+          <p>
+            De flesta näringsexperter rekommenderar en viktnedgång på <strong>0,5-1 kg per vecka</strong>. Det motsvarar ett dagligt kaloriunderskott på 500-1 000 kcal och är en takt som de flesta kan hålla.
+          </p>
+
+          <h2>Beräkningen bakom</h2>
+          <p>
+            Kalkylatorn använder <strong>Mifflin-St Jeor-formeln</strong> för att beräkna din basalämnesomsättning (BMR), som multipliceras med en aktivitetsfaktor för att hitta din dagliga energiförbrukning (TDEE). Ditt kalorimål är TDEE minus det nödvändiga underskottet.
+          </p>
+
+          <h2>Tips för viktnedgång</h2>
+          <ul>
+            <li><strong>Ät proteinrikt:</strong> Protein mättar och bevarar muskelmassa under viktnedgång</li>
+            <li><strong>Styrketräna:</strong> Bevara och bygg muskler som håller uppe din ämnesomsättning</li>
+            <li><strong>Sov tillräckligt:</strong> Sömnbrist ökar hungern och gör viktnedgång svårare</li>
+            <li><strong>Väg dig veckovis:</strong> Använd genomsnittet, inte dagliga svängningar</li>
+            <li><strong>Var tålmodig:</strong> Varaktiga resultat kräver varaktiga förändringar</li>
+          </ul>
+        </div>
+        )}
+
         <FAQ items={pageData.faqItems} />
         <RelatedCalculators current="/vaegttab" />
       </div>

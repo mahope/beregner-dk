@@ -84,6 +84,47 @@ export default async function AlderPage() {
       </div>
       )}
 
+      {locale === "se" && (
+      <div className="prose max-w-none mb-8">
+        <h2>Om åldersberäkning</h2>
+        <p>
+          Att känna till sin <strong>exakta ålder</strong> kan vara användbart i många sammanhang - från <strong>juridiska dokument</strong>
+          {" "}till <strong>hälsoberäkningar</strong>. Vår åldersberäknare ger dig en detaljerad överblick över din ålder
+          i olika <strong>tidsenheter</strong>.
+        </p>
+
+        <h3>Ålder i olika enheter</h3>
+        <p>
+          Din ålder kan mätas i många enheter:
+        </p>
+        <ul>
+          <li><strong>År</strong> - Det vanligaste sättet att ange ålder</li>
+          <li><strong>Månader</strong> - Används ofta för små barn</li>
+          <li><strong>Veckor</strong> - Används vid graviditet och för nyfödda</li>
+          <li><strong>Dagar</strong> - För exakta beräkningar</li>
+          <li><strong>Timmar/Minuter</strong> - För skoj och nyfikenhet</li>
+        </ul>
+
+        <h3>Åldersgränser</h3>
+        <p>
+          Åldern har juridisk betydelse vid flera milstolpar:
+        </p>
+        <ul>
+          <li>15 år - Sexuell lågålder i många länder</li>
+          <li>18 år - Myndighetsålder, rösträtt, körkort för bil</li>
+          <li>21 år - Åldersgräns för vissa rättigheter (med undantag)</li>
+          <li>Pensionsålder - Beror på födelseår (ca 65-68 år)</li>
+        </ul>
+
+        <h3>Stjärntecken</h3>
+        <p>
+          <strong>Stjärntecknen</strong> baseras på den <strong>västerländska astrologin</strong> och följer <strong>solens position</strong>
+          {" "}i zodiaken vid födelsetillfället. Det finns <strong>12 tecken</strong>, vart och ett med unika karaktärsdrag
+          enligt astrologisk tradition.
+        </p>
+      </div>
+      )}
+
       {/* FAQ */}
       <div className="mb-8">
         <FAQ items={pageData.faqItems} />

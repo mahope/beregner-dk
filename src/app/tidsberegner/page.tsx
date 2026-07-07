@@ -83,6 +83,50 @@ export default async function TidsberegnerPage() {
       </div>
       )}
 
+      {locale === "se" && (
+      <div className="prose max-w-none mb-8">
+        <h2>Så här använder du tidsberäknaren</h2>
+        <p>
+          Vår <strong>tidsberäknare</strong> hjälper dig att beräkna den <strong>exakta tiden</strong> mellan
+          två tidpunkter. Den är idealisk för:
+        </p>
+        <ul>
+          <li>
+            <strong>Arbetstidsregistrering</strong> - beräkna dina timmar till
+            lönebesked
+          </li>
+          <li>
+            <strong>Mötestid</strong> - se hur länge ett möte varade
+          </li>
+          <li>
+            <strong>Projektplanering</strong> - uppskatta tid för uppgifter
+          </li>
+          <li>
+            <strong>Nattpass</strong> - beräkna tid över midnatt
+          </li>
+        </ul>
+
+        <h2>Decimaltimmar vs. timmar:minuter</h2>
+        <p>
+          Många företag använder decimaltimmar för tidsregistrering. Här är
+          en snabb referens:
+        </p>
+        <ul>
+          <li>15 min = 0,25 timmar</li>
+          <li>30 min = 0,50 timmar</li>
+          <li>45 min = 0,75 timmar</li>
+          <li>1 timme 15 min = 1,25 timmar</li>
+        </ul>
+
+        <h2>Tips för exakt tidsregistrering</h2>
+        <ul>
+          <li>Kom alltid ihåg att <strong>dra av raster</strong> från din arbetstid</li>
+          <li>De flesta har <strong>30 minuters lunchrast</strong>, som inte räknas med i den betalda arbetstiden</li>
+          <li>Använd <strong>decimaltimmar</strong> när ditt företag kräver det för tidsregistrering</li>
+        </ul>
+      </div>
+      )}
+
       <FAQ items={pageData.faqItems} />
 
       <RelatedCalculators current="/tidsberegner" />

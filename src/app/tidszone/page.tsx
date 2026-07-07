@@ -77,6 +77,40 @@ export default async function TidszonePage() {
       </div>
       )}
 
+      {locale === "se" && (
+      <div className="prose max-w-none mb-8">
+        <h2>Om tidszoner</h2>
+        <p>
+          Världen är indelad i <strong>24 tidszoner</strong>, som var och en motsvarar <strong>15 graders längd</strong> på jordklotet.
+          Tidszoner gör det möjligt att ha en praktisk <strong>lokal tid</strong> som ungefär följer solens gång.
+        </p>
+
+        <h3>Centraleuropeisk tid</h3>
+        <p>
+          Stora delar av Europa använder <strong>Central European Time (CET)</strong>, som är <strong>UTC+1</strong>. På sommaren används
+          {" "}<strong>Central European Summer Time (CEST)</strong>, som är <strong>UTC+2</strong>. Sommartid infördes för
+          att <strong>spara energi</strong> genom att utnyttja dagsljuset bättre.
+        </p>
+
+        <h3>Populära tidsskillnader från Centraleuropa</h3>
+        <ul>
+          <li><strong>London:</strong> 1 timme efter</li>
+          <li><strong>New York:</strong> 6 timmar efter</li>
+          <li><strong>Los Angeles:</strong> 9 timmar efter</li>
+          <li><strong>Tokyo:</strong> 8 timmar före</li>
+          <li><strong>Sydney:</strong> 9-10 timmar före</li>
+        </ul>
+
+        <h3>Tips för internationella möten</h3>
+        <ul>
+          <li>Använd en mötestid som är acceptabel för alla tidszoner</li>
+          <li>Ange alltid tidszonen tydligt (t.ex. &quot;14:00 CET&quot;)</li>
+          <li>Överväg att rotera mötestider så att bördan delas</li>
+          <li>Använd kalenderinbjudan med automatisk tidszonskonvertering</li>
+        </ul>
+      </div>
+      )}
+
       {/* FAQ */}
       <div className="mb-8">
         <FAQ items={pageData.faqItems} />

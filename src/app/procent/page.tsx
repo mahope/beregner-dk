@@ -151,6 +151,118 @@ export default async function ProcentPage() {
       </div>
       )}
 
+      {locale === "se" && (
+      <div className="mt-12 prose max-w-none">
+        <h2>Så här använder du procenträknaren</h2>
+        <p>
+          Vår procenträknare kan hjälpa dig med fyra olika typer av
+          beräkningar:
+        </p>
+        <ol>
+          <li>
+            <strong>Hitta procent:</strong> Hur många procent är X av Y?
+          </li>
+          <li>
+            <strong>Hitta resultat:</strong> Vad är X% av Y?
+          </li>
+          <li>
+            <strong>Hitta heltal:</strong> Om X är Y%, vad är då 100%?
+          </li>
+          <li>
+            <strong>Procentuell förändring:</strong> Hur många procent är
+            ökningen/minskningen från X till Y?
+          </li>
+        </ol>
+
+        <h2>Procenträkning i vardagen</h2>
+        <p>Procent används överallt i vardagen:</p>
+        <ul>
+          <li>
+            <strong>Rabatter:</strong> 25% rabatt på en vara för 400 kr = du
+            sparar 100 kr
+          </li>
+          <li>
+            <strong>Moms:</strong> 25% moms på 1000 kr = 250 kr i moms (1250 kr
+            totalt)
+          </li>
+          <li>
+            <strong>Ränta:</strong> 5% ränta på 10 000 kr = 500 kr i ränta
+          </li>
+          <li>
+            <strong>Löneökningar:</strong> 3% ökning på 30 000 kr = 900 kr
+            mer
+          </li>
+          <li>
+            <strong>Skatt:</strong> 37% skatt på 40 000 kr = 14 800 kr i skatt
+          </li>
+        </ul>
+
+        <h2>Snabba procent-knep</h2>
+        <div className="overflow-x-auto">
+          <table>
+            <thead>
+              <tr>
+                <th>För att hitta...</th>
+                <th>Gör så här</th>
+                <th>Exempel</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>10%</td>
+                <td>Flytta kommat ett steg åt vänster</td>
+                <td>10% av 250 = 25</td>
+              </tr>
+              <tr>
+                <td>5%</td>
+                <td>Hitta 10% och halvera</td>
+                <td>5% av 250 = 12,5</td>
+              </tr>
+              <tr>
+                <td>25%</td>
+                <td>Dividera med 4</td>
+                <td>25% av 200 = 50</td>
+              </tr>
+              <tr>
+                <td>50%</td>
+                <td>Halvera talet</td>
+                <td>50% av 180 = 90</td>
+              </tr>
+              <tr>
+                <td>1%</td>
+                <td>Dividera med 100</td>
+                <td>1% av 350 = 3,5</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Procenträkningens formler</h2>
+        <ul>
+          <li>
+            <strong>Hitta procent:</strong> Procent = (Del / Heltal) × 100
+          </li>
+          <li>
+            <strong>Hitta del:</strong> Del = (Procent / 100) × Heltal
+          </li>
+          <li>
+            <strong>Hitta heltal:</strong> Heltal = Del × (100 / Procent)
+          </li>
+          <li>
+            <strong>Procentuell förändring:</strong> ((Ny - Gammal) / Gammal) × 100
+          </li>
+        </ul>
+
+        <div className="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-400 dark:border-blue-500 p-4 my-6 not-prose">
+          <p className="font-medium text-blue-800">Tips</p>
+          <p className="text-blue-700">
+            Kom ihåg att 50% av 40 är samma sak som 40% av 50 - båda ger 20. Det
+            här knepet kan göra huvudräkning enklare!
+          </p>
+        </div>
+      </div>
+      )}
+
       <FAQ items={pageData.faqItems} />
 
       <RelatedCalculators current="/procent" />

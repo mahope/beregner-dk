@@ -114,6 +114,85 @@ export default async function DatoPage() {
       </div>
       )}
 
+      {locale === "se" && (
+      <div className="mt-12 prose max-w-none">
+        <h2>Så här använder du datumräknaren</h2>
+        <p>Datumräknaren har <strong>fyra olika funktioner</strong>:</p>
+
+        <h3>1. Dagar mellan datum</h3>
+        <p>
+          Beräkna hur många <strong>dagar det är mellan två datum</strong>. Du får också antal
+          veckor, ungefär antal månader, arbetsdagar och helgdagar.
+        </p>
+        <ul>
+          <li>Välj startdatum och slutdatum</li>
+          <li>Resultatet visas automatiskt</li>
+          <li>
+            Negativt tal betyder att slutdatumet är före startdatumet
+          </li>
+        </ul>
+
+        <h3>2. Lägg till dagar</h3>
+        <p>
+          Ta reda på vilket datum det blir om <strong>X dagar</strong>, eller vilket datum det
+          var för X dagar sedan.
+        </p>
+        <ul>
+          <li>Välj ett utgångsdatum</li>
+          <li>Ange antal dagar (använd minus för att gå bakåt)</li>
+          <li>Se resultatet med veckodag och datum</li>
+        </ul>
+
+        <h3>3. Arbetsdagar</h3>
+        <p>
+          Beräkna ett datum baserat på antal <strong>arbetsdagar</strong>. Perfekt för
+          {" "}<strong>projektplanering</strong> och deadline-beräkning.
+        </p>
+        <ul>
+          <li>Välj startdatum</li>
+          <li>Ange antal arbetsdagar</li>
+          <li>Helger hoppas automatiskt över</li>
+        </ul>
+
+        <h3>4. Ålder</h3>
+        <p>
+          Beräkna din <strong>exakta ålder</strong> i år, månader och dagar. Se också hur många
+          dagar du har levt, och när du fyller år.
+        </p>
+
+        <h2>Nyttiga datumfakta</h2>
+        <ul>
+          <li>1 år = 365 dagar (366 under skottår)</li>
+          <li>1 månad = ca 30,44 dagar i genomsnitt</li>
+          <li>1 vecka = 7 dagar</li>
+          <li>1 arbetsvecka = vanligtvis 5 dagar</li>
+          <li>1 år &asymp; 52 veckor</li>
+          <li>1 år &asymp; 260 arbetsdagar (utan helgdagar)</li>
+        </ul>
+
+        <h2>Skottår</h2>
+        <p>Ett år är ett <strong>skottår</strong> om:</p>
+        <ul>
+          <li>Året är delbart med 4, OCH</li>
+          <li>Året är INTE delbart med 100, OM INTE</li>
+          <li>Året är delbart med 400</li>
+        </ul>
+        <p>
+          Exempel: 2024 är skottår (delbart med 4). 2100 är inte skottår
+          (delbart med 100). 2000 var skottår (delbart med 400).
+        </p>
+
+        <div className="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-400 dark:border-blue-500 p-4 my-6 not-prose">
+          <p className="font-medium text-blue-800">Tips</p>
+          <p className="text-blue-700">
+            Räknaren tar inte hänsyn till helgdagar vid beräkning av
+            arbetsdagar, eftersom dessa varierar från år till år. Lägg själv till extra
+            dagar för helgdagar under din period.
+          </p>
+        </div>
+      </div>
+      )}
+
       <FAQ items={pageData.faqItems} />
 
       <RelatedCalculators current="/dato" />

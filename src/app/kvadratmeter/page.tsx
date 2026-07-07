@@ -86,6 +86,46 @@ export default async function KvadratmeterPage() {
       </div>
       )}
 
+      {locale === "se" && (
+      <div className="prose max-w-none mb-8">
+        <h2>Om ytberäkning</h2>
+        <p>
+          Yta mäts i <strong>kvadratmeter (m²)</strong> och anger storleken på en yta.
+          Det är viktigt att kunna beräkna yta vid många tillfällen — från <strong>golvläggning</strong>
+          och <strong>målning</strong> till bostadsköp.
+        </p>
+
+        <h3>Vanliga användningsområden</h3>
+        <ul>
+          <li><strong>Bostad:</strong> Beräkna boyta, rumsstorlekar</li>
+          <li><strong>Trädgård:</strong> Planera gräsmatta, terrass, rabatter</li>
+          <li><strong>Renovering:</strong> Beräkna material till golv, vägg, tak</li>
+          <li><strong>Fastighetsaffär:</strong> Förstå tomtstorlek och boyta</li>
+        </ul>
+
+        <h3>Olika ytbegrepp</h3>
+        <p>
+          Vid <strong>bostadsköp</strong> skiljer man mellan:
+        </p>
+        <ul>
+          <li><strong>Boyta:</strong> De faktiskt beboeliga rummen</li>
+          <li><strong>Biyta:</strong> Utrymmen som inte räknas som boyta</li>
+          <li><strong>Tomtyta:</strong> Hela tomtens storlek</li>
+          <li><strong>Byggnadsyta:</strong> Byggnadens fotavtryck</li>
+        </ul>
+
+        <h3>Materialberäkning</h3>
+        <p>
+          När du ska köpa material, lägg alltid <strong>5-10% till för spill</strong>:
+        </p>
+        <ul>
+          <li>Golvbrädor: +10% för kapning</li>
+          <li>Färg: Ca 8-10 m² per liter (kontrollera produkten)</li>
+          <li>Kakel: +5-10% för kapning och trasiga plattor</li>
+        </ul>
+      </div>
+      )}
+
       {/* FAQ */}
       <div className="mb-8">
         <FAQ items={pageData.faqItems} />
