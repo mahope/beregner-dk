@@ -65,6 +65,7 @@ export const beregnere: BeregnerItem[] = [
   { title: "Timeprisberegner", description: "Find din timepris som freelancer eller selvstændig", href: "/timepris", icon: "⏱️", category: "Erhverv" },
   { title: "Aldersberegner", description: "Beregn din præcise alder i år, måneder og dage", href: "/alder", icon: "🎂", category: "Hverdag" },
   { title: "Brændstofberegner", description: "Beregn pris for benzin, diesel eller el-bil", href: "/braendstof", icon: "⛽", category: "Hverdag" },
+  { title: "Elbil vs. benzinbil", description: "Sammenlign driftsomkostninger for elbil og benzinbil", href: "/elbil", icon: "🔌", category: "Hverdag" },
   { title: "Elberegner", description: "Beregn dit elforbrug og se hvad dine apparater koster", href: "/elberegner", icon: "⚡", category: "Hverdag" },
   { title: "Tidszoneberegner", description: "Se hvad klokken er i andre lande", href: "/tidszone", icon: "🌍", category: "Hverdag" },
   { title: "Bil Værdtab", description: "Beregn værdtab og omkostninger for din bil", href: "/bil", icon: "🚙", category: "Hverdag" },

@@ -25,6 +25,27 @@ const allLocalesSlugs = ["bmi", "kalorier", "vaegttab", "procent", "kvadratmeter
 // ─── DANISH (da) PAGE DATA ─────────────────────────────────────────────────
 
 const daPages: Record<string, PageData> = {
+    "elbil": {
+      slug: "elbil",
+      title: "Elbil vs. benzinbil",
+      description: "Sammenlign driftsomkostningerne for en elbil og en benzinbil. Se den årlige besparelse på energi og hvornår en dyrere elbil har tjent sig hjem.",
+      metaTitle: "Elbil vs. benzinbil - Hvad kan bedst betale sig? | MinBeregner.dk",
+      metaDescription: "Sammenlign elbil og benzinbil. Indtast kørsel, elpris og benzinpris og se den årlige energibesparelse samt tilbagebetalingstid på en dyrere elbil. Gratis beregner.",
+      keywords: ["elbil vs benzinbil", "elbil eller benzinbil", "elbil besparelse", "elbil beregner", "elbil økonomi"],
+      ogTitle: "Elbil vs. benzinbil - Se hvad der bedst kan betale sig",
+      ogDescription: "Sammenlign driftsomkostningerne for elbil og benzinbil.",
+      category: "Hverdag",
+      breadcrumbCategory: "Hverdag",
+      breadcrumbCategoryHref: "/kategori/hverdag",
+      schemaName: "Elbil vs. benzinbil beregner",
+      schemaDescription: "Sammenlign den årlige energiudgift for elbil og benzinbil og se tilbagebetalingstid på en dyrere elbil.",
+      schemaCategory: "FinanceApplication",
+      faqItems: [
+        { question: "Er en elbil billigere end en benzinbil?", answer: "På energi er en elbil næsten altid billigere: en elbil bruger typisk 15-20 kWh pr. 100 km, mens en benzinbil bruger 5-7 liter. Ved normale priser koster el ofte under halvdelen af benzin pr. km. Til gengæld er elbiler ofte dyrere at købe — brug beregneren til at se, hvornår merprisen er tjent hjem." },
+        { question: "Hvor meget sparer man på en elbil om året?", answer: "Med 15.000 km om året sparer de fleste 5.000-10.000 kr om året på energi ved at køre el frem for benzin, afhængigt af el- og benzinpris. Beregneren viser din konkrete besparelse." },
+        { question: "Hvad indgår ikke i beregningen?", answer: "Beregneren sammenligner energiudgiften (el vs. benzin). Forsikring, service, dæk, grøn ejerafgift og værditab varierer meget fra bil til bil og indgår ikke — men energiudgiften er den største løbende forskel." },
+      ],
+    },
     "budget": {
       slug: "budget",
       title: "Rådighedsbeløb",
@@ -1767,6 +1788,27 @@ const noPages: Record<string, PageData> = {
 // ─── SWEDISH (se) PAGE DATA ────────────────────────────────────────────────
 
 const sePages: Record<string, PageData> = {
+    "elbil": {
+      slug: "elbil",
+      title: "Elbil vs. bensinbil",
+      description: "Jämför driftskostnaden för en elbil och en bensinbil. Se den årliga besparingen på energi och när en dyrare elbil har tjänat in sig.",
+      metaTitle: "Elbil vs. bensinbil - Vad lönar sig bäst? | Beräknare.se",
+      metaDescription: "Jämför elbil och bensinbil. Ange körsträcka, elpris och bensinpris och se den årliga energibesparingen samt återbetalningstid på en dyrare elbil. Gratis kalkylator.",
+      keywords: ["elbil vs bensinbil", "elbil eller bensinbil", "elbil besparing", "elbilskalkylator", "elbil ekonomi"],
+      ogTitle: "Elbil vs. bensinbil - Se vad som lönar sig bäst",
+      ogDescription: "Jämför driftskostnaden för elbil och bensinbil.",
+      category: "Vardag",
+      breadcrumbCategory: "Vardag",
+      breadcrumbCategoryHref: "/kategori/hverdag",
+      schemaName: "Elbil vs. bensinbil",
+      schemaDescription: "Jämför den årliga energikostnaden för elbil och bensinbil och se återbetalningstid på en dyrare elbil.",
+      schemaCategory: "FinanceApplication",
+      faqItems: [
+        { question: "Är en elbil billigare än en bensinbil?", answer: "På energi är en elbil nästan alltid billigare: en elbil drar cirka 15-20 kWh per 100 km, en bensinbil 5-7 liter. Vid normala priser kostar el ofta under hälften av bensin per km. Elbilar är dock ofta dyrare att köpa — kalkylatorn visar när merpriset är intjänat." },
+        { question: "Hur mycket sparar man på en elbil per år?", answer: "Med 1 500 mil (15 000 km) per år sparar de flesta 5 000-12 000 kr per år på energi genom att köra el i stället för bensin, beroende på el- och bensinpris." },
+        { question: "Vad ingår inte i beräkningen?", answer: "Kalkylatorn jämför energikostnaden (el vs. bensin). Försäkring, service, däck, fordonsskatt och värdeminskning varierar mycket och ingår inte — men energikostnaden är den största löpande skillnaden." },
+      ],
+    },
     "budget": {
       slug: "budget",
       title: "Hushållsbudget",
