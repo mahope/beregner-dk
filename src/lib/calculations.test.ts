@@ -275,9 +275,9 @@ describe("Feriepenge beregning", () => {
 
 // --- Kørselsfradrag ---
 describe("Koerselsfradrag beregning", () => {
-  const BUNDGRAENSE = 24; // km dagligt
-  const SATS_LAV = 2.23; // kr/km 25-120 km
-  const SATS_HOEJ = 1.12; // kr/km over 120 km
+  const BUNDGRAENSE = 24; // km dagligt (tur-retur)
+  const SATS_LAV = 2.28; // kr/km 25-120 km (2026)
+  const SATS_HOEJ = 1.14; // kr/km over 120 km (2026)
   const MAX_DAGE = 216;
 
   function beregnKoerselsfradrag(enkeltVejKm: number, arbejdsdage: number = MAX_DAGE) {
@@ -286,7 +286,8 @@ describe("Koerselsfradrag beregning", () => {
     const fradragsKm = dagligKm - BUNDGRAENSE;
     if (fradragsKm <= 0) return 0;
 
-    const lavKm = Math.min(fradragsKm, 120 * 2 - BUNDGRAENSE);
+    // De daglige grænser er 24 km og 120 km (tur-retur), ikke enkelt vej.
+    const lavKm = Math.min(fradragsKm, 120 - BUNDGRAENSE);
     const hoejKm = Math.max(0, fradragsKm - lavKm);
     return Math.round((lavKm * SATS_LAV + hoejKm * SATS_HOEJ) * dage);
   }
@@ -300,10 +301,20 @@ describe("Koerselsfradrag beregning", () => {
   });
 
   test("30 km enkelt vej giver fradrag", () => {
-    // 60 km dagligt - 24 km = 36 km fradrag
-    // 36 km * 2.23 kr * 216 dage
+    // 60 km dagligt - 24 km = 36 km fradrag, alt i den lave sats-zone
     const forventet = Math.round(36 * SATS_LAV * MAX_DAGE);
     expect(beregnKoerselsfradrag(30)).toBe(forventet);
+  });
+
+  test("lang pendling rammer den lave sats over 120 km dagligt", () => {
+    // 70 km enkelt = 140 km dagligt. Fradragsberettiget: 140 - 24 = 116 km.
+    // 25-120 km (96 km) til høj sats, resten (20 km) til lav sats.
+    const hoejBandKm = 120 - BUNDGRAENSE; // 96
+    const overBandKm = 140 - 24 - hoejBandKm; // 20
+    const forventet = Math.round(
+      (hoejBandKm * SATS_LAV + overBandKm * SATS_HOEJ) * MAX_DAGE
+    );
+    expect(beregnKoerselsfradrag(70)).toBe(forventet);
   });
 
   test("0 km giver 0 fradrag", () => {

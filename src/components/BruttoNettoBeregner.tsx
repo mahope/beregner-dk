@@ -17,6 +17,8 @@ const MELLEMSKAT_GRAENSE = 641200;
 const MELLEMSKAT = 0.075;
 const TOPSKAT_GRAENSE = 777900;
 const TOPSKAT_SATS = 0.075;
+const TOP_TOPSKAT_GRAENSE = 2592700;
+const TOP_TOPSKAT = 0.05;
 const PERSONFRADRAG = 54100;
 const BESK_FRADRAG_PCT = 0.1275;
 const BESK_FRADRAG_MAX = 63300;
@@ -24,13 +26,15 @@ const BESK_FRADRAG_MAX = 63300;
 function beregnNetto(bruttoAar: number, komPct: number, kirPct: number): number {
   const amBidrag = bruttoAar * AM;
   const indkomstEfterAm = bruttoAar - amBidrag;
-  const skattepligtig = indkomstEfterAm;
-  const bundSkat = Math.max(0, skattepligtig - PERSONFRADRAG) * BUNDSKAT;
-  const kommuneSkat = Math.max(0, skattepligtig - PERSONFRADRAG) * komPct;
-  const kirkeSkat = Math.max(0, skattepligtig - PERSONFRADRAG) * kirPct;
-  const mellemSkat = Math.max(0, skattepligtig - MELLEMSKAT_GRAENSE) * MELLEMSKAT;
-  const topSkat = Math.max(0, skattepligtig - TOPSKAT_GRAENSE) * TOPSKAT_SATS;
-  const samletSkat = amBidrag + bundSkat + kommuneSkat + kirkeSkat + mellemSkat + topSkat;
+  const beskFradrag = Math.min(indkomstEfterAm * BESK_FRADRAG_PCT, BESK_FRADRAG_MAX);
+  const skattepligtig = Math.max(0, indkomstEfterAm - PERSONFRADRAG - beskFradrag);
+  const bundSkat = skattepligtig * BUNDSKAT;
+  const kommuneSkat = skattepligtig * komPct;
+  const kirkeSkat = skattepligtig * kirPct;
+  const mellemSkat = Math.max(0, indkomstEfterAm - MELLEMSKAT_GRAENSE) * MELLEMSKAT;
+  const topSkat = Math.max(0, indkomstEfterAm - TOPSKAT_GRAENSE) * TOPSKAT_SATS;
+  const topTopSkat = Math.max(0, indkomstEfterAm - TOP_TOPSKAT_GRAENSE) * TOP_TOPSKAT;
+  const samletSkat = amBidrag + bundSkat + kommuneSkat + kirkeSkat + mellemSkat + topSkat + topTopSkat;
   return bruttoAar - samletSkat;
 }
 
@@ -193,12 +197,15 @@ export default function BruttoNettoBeregner() {
 
     const amBidrag = bruttoAar * AM;
     const indkomstEfterAm = bruttoAar - amBidrag;
-    const bundSkat = Math.max(0, indkomstEfterAm - PERSONFRADRAG) * BUNDSKAT;
-    const kommuneSkatBeloeb = Math.max(0, indkomstEfterAm - PERSONFRADRAG) * komPct;
-    const kirkeSkatBeloeb = Math.max(0, indkomstEfterAm - PERSONFRADRAG) * kirPct;
+    const beskFradrag = Math.min(indkomstEfterAm * BESK_FRADRAG_PCT, BESK_FRADRAG_MAX);
+    const skattepligtig = Math.max(0, indkomstEfterAm - PERSONFRADRAG - beskFradrag);
+    const bundSkat = skattepligtig * BUNDSKAT;
+    const kommuneSkatBeloeb = skattepligtig * komPct;
+    const kirkeSkatBeloeb = skattepligtig * kirPct;
     const mellemSkat = Math.max(0, indkomstEfterAm - MELLEMSKAT_GRAENSE) * MELLEMSKAT;
     const topSkat = Math.max(0, indkomstEfterAm - TOPSKAT_GRAENSE) * TOPSKAT_SATS;
-    const samletSkat = amBidrag + bundSkat + kommuneSkatBeloeb + kirkeSkatBeloeb + mellemSkat + topSkat;
+    const topTopSkat = Math.max(0, indkomstEfterAm - TOP_TOPSKAT_GRAENSE) * TOP_TOPSKAT;
+    const samletSkat = amBidrag + bundSkat + kommuneSkatBeloeb + kirkeSkatBeloeb + mellemSkat + topSkat + topTopSkat;
     const effektivSkat = bruttoAar > 0 ? (samletSkat / bruttoAar) * 100 : 0;
 
     return {
