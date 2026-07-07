@@ -25,6 +25,27 @@ const allLocalesSlugs = ["bmi", "kalorier", "vaegttab", "procent", "kvadratmeter
 // ─── DANISH (da) PAGE DATA ─────────────────────────────────────────────────
 
 const daPages: Record<string, PageData> = {
+    "budget": {
+      slug: "budget",
+      title: "Rådighedsbeløb",
+      description: "Beregn dit månedlige rådighedsbeløb. Træk dine faste udgifter fra din indkomst efter skat og se hvor meget du har tilbage at leve for.",
+      metaTitle: "Rådighedsbeløb beregner - Hvad har du tilbage? | MinBeregner.dk",
+      metaDescription: "Beregn dit rådighedsbeløb. Indtast indkomst og faste udgifter (bolig, transport, mad, lån) og se hvad du har tilbage hver måned. Gratis budgetberegner.",
+      keywords: ["rådighedsbeløb", "budget beregner", "månedligt budget", "rådighedsbeløb beregner", "privatøkonomi", "faste udgifter"],
+      ogTitle: "Rådighedsbeløb beregner - Se hvad du har tilbage",
+      ogDescription: "Beregn dit månedlige rådighedsbeløb. Indkomst minus faste udgifter.",
+      category: "Økonomi",
+      breadcrumbCategory: "Økonomi",
+      breadcrumbCategoryHref: "/kategori/oekonomi",
+      schemaName: "Rådighedsbeløb beregner",
+      schemaDescription: "Gratis budgetberegner. Beregn dit månedlige rådighedsbeløb ud fra indkomst og faste udgifter.",
+      schemaCategory: "FinanceApplication",
+      faqItems: [
+        { question: "Hvad er et rådighedsbeløb?", answer: "Rådighedsbeløbet er det beløb du har tilbage hver måned, når alle faste udgifter er betalt. Det beregnes som din indkomst efter skat minus faste udgifter som bolig, transport, mad, forsikringer og afdrag på lån." },
+        { question: "Hvor stort bør mit rådighedsbeløb være?", answer: "Banker regner ofte med et minimum rådighedsbeløb ved låneansøgninger — typisk omkring 5.000-6.000 kr for en enlig og 8.500-10.000 kr for et par, plus tillæg pr. barn. Jo større rådighedsbeløb, jo bedre buffer til uforudsete udgifter og opsparing." },
+        { question: "Hvad tæller med som faste udgifter?", answer: "Faste udgifter er tilbagevendende poster som husleje/boliglån, forsikringer, abonnementer (mobil, streaming, internet), transport, dagligvarer og afdrag på lån. Variable udgifter som ferie og gaver hører ikke med i det faste budget." },
+      ],
+    },
     "bmi": {
       slug: "bmi",
       title: "BMI Beregner",
@@ -1746,6 +1767,27 @@ const noPages: Record<string, PageData> = {
 // ─── SWEDISH (se) PAGE DATA ────────────────────────────────────────────────
 
 const sePages: Record<string, PageData> = {
+    "budget": {
+      slug: "budget",
+      title: "Hushållsbudget",
+      description: "Beräkna hur mycket du har kvar att leva på varje månad. Dra dina fasta utgifter från din inkomst efter skatt.",
+      metaTitle: "Hushållsbudget – Kvar att leva på | Beräknare.se",
+      metaDescription: "Räkna ut hur mycket du har kvar att leva på. Ange inkomst och fasta utgifter (boende, transport, mat, lån) och se ditt månadsöverskott. Gratis budgetkalkylator.",
+      keywords: ["hushållsbudget", "kvar att leva på", "budgetkalkylator", "månadsbudget", "privatekonomi", "fasta utgifter"],
+      ogTitle: "Hushållsbudget – Kvar att leva på",
+      ogDescription: "Beräkna hur mycket du har kvar att leva på varje månad.",
+      category: "Ekonomi",
+      breadcrumbCategory: "Ekonomi",
+      breadcrumbCategoryHref: "/kategori/oekonomi",
+      schemaName: "Hushållsbudget",
+      schemaDescription: "Gratis budgetkalkylator. Räkna ut hur mycket du har kvar att leva på varje månad.",
+      schemaCategory: "FinanceApplication",
+      faqItems: [
+        { question: "Vad betyder kvar att leva på?", answer: "Kvar att leva på är det belopp du har över varje månad när alla fasta utgifter är betalda – din inkomst efter skatt minus boende, transport, mat, försäkringar och amorteringar." },
+        { question: "Hur mycket bör jag ha kvar att leva på?", answer: "Kronofogden använder ett normalbelopp (förbehållsbelopp) som riktmärke – 2026 cirka 6 400 kr per månad för en ensamstående vuxen, utöver boendekostnaden. Ett större överskott ger buffert och möjlighet att spara." },
+        { question: "Vilka räknas som fasta utgifter?", answer: "Fasta utgifter är återkommande poster som hyra/bolån, försäkringar, abonnemang (mobil, streaming, internet), transport, mat och amortering på lån." },
+      ],
+    },
     "bolan": {
       slug: "bolan",
       title: "Bolånekalkylator",
