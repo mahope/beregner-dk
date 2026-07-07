@@ -13,3 +13,6 @@ build/
 .DS_Store
 *.log
 .env*
+
+# TypeScript incremental build cache
+tsconfig.tsbuildinfo
