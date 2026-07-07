@@ -10,7 +10,7 @@ import { useLocale } from '@/components/LocaleProvider';
 import { formatCurrency, getCurrencySuffix } from '@/lib/format';
 
 // Dansk momssats
-const MOMS_SATS = 0.25; // 25%
+const sats = 0.25; // 25%
 
 const labels = {
   da: {
@@ -86,6 +86,7 @@ export default function MomsBeregner() {
   const l = labels[locale as keyof typeof labels] || labels.da;
   const [beloeb, setBeloeb] = useState<number>(1000);
   const [beregningsType, setBeregningsType] = useState<"tillaegMoms" | "fratraekMoms" | "findMoms">("tillaegMoms");
+  const [momssats, setMomssats] = useState<number>(25);
   const hasTracked = useRef(false);
   const hasLoadedUrl = useRef(false);
 
@@ -99,57 +100,60 @@ export default function MomsBeregner() {
       const inputs = urlState.inputs;
       if (inputs.beloeb !== undefined) setBeloeb(inputs.beloeb);
       if (inputs.beregningsType) setBeregningsType(inputs.beregningsType);
+      if (inputs.momssats !== undefined) setMomssats(Number(inputs.momssats));
     }
   }, []);
 
   const handleReset = useCallback(() => {
     setBeloeb(1000);
     setBeregningsType("tillaegMoms");
+    setMomssats(25);
   }, []);
 
   // Get shareable link for current calculation
   const getShareableLink = useCallback(() => {
     const state: CalculationState = {
       type: 'moms',
-      inputs: { beloeb, beregningsType },
+      inputs: { beloeb, beregningsType, momssats },
       timestamp: Date.now(),
     };
     return generateShareableLink(state);
-  }, [beloeb, beregningsType]);
+  }, [beloeb, beregningsType, momssats]);
 
   const beregning = useMemo(() => {
+    const sats = momssats / 100;
     switch (beregningsType) {
       case "tillaegMoms": {
         // Beløb uden moms → tilføj moms
-        const momsBeloeb = beloeb * MOMS_SATS;
+        const momsBeloeb = beloeb * sats;
         const prisInklMoms = beloeb + momsBeloeb;
         return {
           prisUdenMoms: beloeb,
           momsBeloeb,
           prisInklMoms,
-          momsProcent: 25,
+          momsProcent: momssats,
         };
       }
       case "fratraekMoms": {
         // Beløb inkl. moms → find pris uden moms
-        const prisUdenMoms = beloeb / (1 + MOMS_SATS);
+        const prisUdenMoms = beloeb / (1 + sats);
         const momsBeloeb = beloeb - prisUdenMoms;
         return {
           prisUdenMoms,
           momsBeloeb,
           prisInklMoms: beloeb,
-          momsProcent: 25,
+          momsProcent: momssats,
         };
       }
       case "findMoms": {
         // Find momsandelen i et beløb inkl. moms
-        const prisUdenMoms = beloeb / (1 + MOMS_SATS);
+        const prisUdenMoms = beloeb / (1 + sats);
         const momsBeloeb = beloeb - prisUdenMoms;
         return {
           prisUdenMoms,
           momsBeloeb,
           prisInklMoms: beloeb,
-          momsProcent: 25,
+          momsProcent: momssats,
         };
       }
       default:
@@ -157,10 +161,10 @@ export default function MomsBeregner() {
           prisUdenMoms: 0,
           momsBeloeb: 0,
           prisInklMoms: 0,
-          momsProcent: 25,
+          momsProcent: momssats,
         };
     }
-  }, [beloeb, beregningsType]);
+  }, [beloeb, beregningsType, momssats]);
 
   // Track calculation once per session
   useEffect(() => {
@@ -228,6 +232,30 @@ export default function MomsBeregner() {
         </div>
       </div>
 
+      {/* Momssats (svenska reducerade satser) */}
+      {locale === "se" && (
+        <div className="max-w-md">
+          <label className="block text-sm font-medium mb-2">Momssats</label>
+          <div className="grid grid-cols-3 gap-2">
+            {[{ v: 25, d: "Standard" }, { v: 12, d: "Mat, hotell" }, { v: 6, d: "Böcker, kultur" }].map((o) => (
+              <button
+                key={o.v}
+                type="button"
+                onClick={() => setMomssats(o.v)}
+                className={`p-3 rounded-lg border-2 text-center transition-all ${
+                  momssats === o.v
+                    ? "border-blue-500 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300"
+                    : "border-gray-200 dark:border-gray-600 dark:text-gray-300"
+                }`}
+              >
+                <div className="font-semibold">{o.v}%</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">{o.d}</div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Input */}
       <div className="max-w-md">
         <label htmlFor="momsBeloeb" className="block text-sm font-medium mb-2">{getInputLabel()}</label>
@@ -258,7 +286,7 @@ export default function MomsBeregner() {
           </p>
         </div>
         <div className="p-6 bg-blue-50 dark:bg-blue-900/20 rounded-xl text-center">
-          <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">{l.momsProcent}</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">{`${l.tblMoms} (${momssats}%)`}</p>
           <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
             <AnimatedNumber value={beregning.momsBeloeb} formatFn={formatKr} />
           </p>
@@ -303,8 +331,8 @@ export default function MomsBeregner() {
               {[100, 500, 1000, 5000, 10000].map((amount) => (
                 <tr key={amount} className="border-b last:border-b-0">
                   <td className="py-2">{formatKr(amount)}</td>
-                  <td className="py-2">{formatKr(amount * MOMS_SATS)}</td>
-                  <td className="py-2 font-medium">{formatKr(amount * (1 + MOMS_SATS))}</td>
+                  <td className="py-2">{formatKr(amount * sats)}</td>
+                  <td className="py-2 font-medium">{formatKr(amount * (1 + sats))}</td>
                 </tr>
               ))}
             </tbody>
