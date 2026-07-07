@@ -377,7 +377,7 @@ export default function Elberegner() {
                 </div>
               </div>
 
-              <button
+              <button type="button"
                 onClick={() => fjernApparat(apparat.id)}
                 className="px-3 py-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md"
                 disabled={apparater.length === 1}
@@ -388,7 +388,7 @@ export default function Elberegner() {
           ))}
         </div>
 
-        <button
+        <button type="button"
           onClick={tilfoejApparat}
           className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
         >
@@ -467,7 +467,7 @@ export default function Elberegner() {
         <h3 className="font-medium mb-3 dark:text-white">{l.sammenlignGennemsnit}</h3>
         <div className="flex flex-wrap gap-2 mb-4">
           {Object.entries(husstandLabels).map(([key, label]) => (
-            <button
+            <button type="button"
               key={key}
               onClick={() => setHusstandType(key as keyof typeof GENNNEMSNIT_KWH)}
               className={`px-3 py-1.5 rounded-full text-sm border transition-colors ${

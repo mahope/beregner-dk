@@ -49,13 +49,11 @@
         "noSwitchDeclarations": "off"
       },
       "a11y": {
-        "noBlankTarget": "off",
         "noSvgWithoutTitle": "off",
         "noNoninteractiveElementToInteractiveRole": "off",
         "noAutofocus": "off",
         "useFocusableInteractive": "off",
         "noLabelWithoutControl": "off",
-        "useButtonType": "off",
         "useSemanticElements": "off",
         "useKeyWithClickEvents": "off"
       },

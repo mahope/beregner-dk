@@ -209,6 +209,7 @@ export default function RenteBeregner() {
             <label className="block text-sm font-medium mb-2 dark:text-gray-200">Låntype</label>
             <div className="flex gap-4">
               <button
+                type="button"
                 onClick={() => setType("annuitet")}
                 className={`flex-1 py-3 rounded-lg border-2 transition-colors ${
                   type === "annuitet"
@@ -219,6 +220,7 @@ export default function RenteBeregner() {
                 Annuitetslån
               </button>
               <button
+                type="button"
                 onClick={() => setType("serielaan")}
                 className={`flex-1 py-3 rounded-lg border-2 transition-colors ${
                   type === "serielaan"

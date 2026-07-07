@@ -163,7 +163,7 @@ export default function EfterloensBeregner() {
               Forsikringsstatus
             </label>
             <div className="flex gap-4">
-              <button
+              <button type="button"
                 onClick={() => setInsurance('full')}
                 className={`flex-1 py-3 px-4 rounded-lg border-2 transition-all ${
                   insurance === 'full'
@@ -173,7 +173,7 @@ export default function EfterloensBeregner() {
               >
                 Fuldtid
               </button>
-              <button
+              <button type="button"
                 onClick={() => setInsurance('part')}
                 className={`flex-1 py-3 px-4 rounded-lg border-2 transition-all ${
                   insurance === 'part'

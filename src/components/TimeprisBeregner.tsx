@@ -328,7 +328,7 @@ export default function TimeprisBeregner() {
     <div className="space-y-8">
       {/* Valg af beregningstype */}
       <div className="flex rounded-lg border border-gray-200 dark:border-gray-600 overflow-hidden">
-        <button
+        <button type="button"
           onClick={() => setBeregningsType("fraLoen")}
           className={`flex-1 py-3 text-sm font-medium transition-colors ${
             beregningsType === "fraLoen"
@@ -338,7 +338,7 @@ export default function TimeprisBeregner() {
         >
           {l.findTimepris}
         </button>
-        <button
+        <button type="button"
           onClick={() => setBeregningsType("fraTimepris")}
           className={`flex-1 py-3 text-sm font-medium transition-colors ${
             beregningsType === "fraTimepris"

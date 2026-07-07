@@ -397,7 +397,7 @@ export default function OpsparingsBeregner() {
   return (
     <div className="space-y-8">
       <div className="flex rounded-lg border border-gray-200 dark:border-gray-600 overflow-hidden">
-        <button
+        <button type="button"
           onClick={() => setVisning("beregner")}
           className={`flex-1 py-3 text-sm font-medium transition-colors ${
             visning === "beregner"
@@ -407,7 +407,7 @@ export default function OpsparingsBeregner() {
         >
           {l.calcSavings}
         </button>
-        <button
+        <button type="button"
           onClick={() => setVisning("maal")}
           className={`flex-1 py-3 text-sm font-medium transition-colors ${
             visning === "maal"
@@ -440,7 +440,7 @@ export default function OpsparingsBeregner() {
                 { id: "kvartal" as Frekvens, label: l.quarterly },
                 { id: "aarlig" as Frekvens, label: l.yearly },
               ]).map((f) => (
-                <button
+                <button type="button"
                   key={f.id}
                   onClick={() => setRenteFrekvens(f.id)}
                   className={`flex-1 py-2 rounded-lg border-2 transition-colors ${

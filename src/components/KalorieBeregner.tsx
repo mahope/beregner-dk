@@ -143,7 +143,7 @@ export default function KalorieBeregner() {
           <div>
             <label className="block text-sm font-medium mb-2 dark:text-gray-200">Køn</label>
             <div className="flex gap-4">
-              <button
+              <button type="button"
                 onClick={() => setKoen("mand")}
                 className={`flex-1 py-3 rounded-lg border-2 transition-colors ${
                   koen === "mand"
@@ -153,7 +153,7 @@ export default function KalorieBeregner() {
               >
                 Mand
               </button>
-              <button
+              <button type="button"
                 onClick={() => setKoen("kvinde")}
                 className={`flex-1 py-3 rounded-lg border-2 transition-colors ${
                   koen === "kvinde"
@@ -176,7 +176,7 @@ export default function KalorieBeregner() {
             <label className="block text-sm font-medium mb-2 dark:text-gray-200">Aktivitetsniveau</label>
             <div className="space-y-2">
               {Object.entries(AKTIVITETS_FAKTORER).map(([key, value]) => (
-                <button
+                <button type="button"
                   key={key}
                   onClick={() => setAktivitet(key as AktivitetsNiveau)}
                   className={`w-full py-2 px-4 rounded-lg border-2 transition-colors text-left ${
@@ -200,7 +200,7 @@ export default function KalorieBeregner() {
                 { id: "vedligehold" as const, label: "Vedligehold", border: "border-blue-500 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300" },
                 { id: "opbyg" as const, label: "Opbyg", border: "border-orange-500 bg-orange-50 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300" },
               ]).map((m) => (
-                <button
+                <button type="button"
                   key={m.id}
                   onClick={() => setMaal(m.id)}
                   className={`flex-1 py-2 px-3 rounded-lg border-2 transition-colors text-sm ${

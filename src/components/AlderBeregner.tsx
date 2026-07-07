@@ -188,7 +188,7 @@ export default function AlderBeregner() {
             onChange={(e) => setBeregningsDato(e.target.value)}
             className="w-full px-4 py-3 border rounded-lg text-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white"
           />
-          <button
+          <button type="button"
             onClick={() => setBeregningsDato(new Date().toISOString().split("T")[0])}
             className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 mt-1"
           >

@@ -5,23 +5,24 @@ import { ShareCalculation } from '@/components/ShareCalculation';
 import { CopyResultButton, ResetButton } from '@/components/ui';
 import { generateShareableLink, getStateFromUrl, CalculationState } from '@/lib/calculation-state';
 import { trackCalculation, initScrollDepthTracking } from '@/lib/analytics';
+import { SATSER_2026 } from "@/lib/satser-2026";
 import { useLocale } from "@/components/LocaleProvider";
 import { getCurrencySuffix } from "@/lib/format";
 
-// 2026-satser
-const AM = 0.08;
-const BUNDSKAT = 0.1201;
-const KOMMUNE_SNIT = 0.2507;
-const KIRKESKAT_SNIT = 0.0068;
-const MELLEMSKAT_GRAENSE = 641200;
-const MELLEMSKAT = 0.075;
-const TOPSKAT_GRAENSE = 777900;
-const TOPSKAT_SATS = 0.075;
-const TOP_TOPSKAT_GRAENSE = 2592700;
-const TOP_TOPSKAT = 0.05;
-const PERSONFRADRAG = 54100;
-const BESK_FRADRAG_PCT = 0.1275;
-const BESK_FRADRAG_MAX = 63300;
+// 2026-satser fra den fælles kilde (src/lib/satser-2026.ts)
+const AM = SATSER_2026.amBidrag;
+const BUNDSKAT = SATSER_2026.bundskat;
+const KOMMUNE_SNIT = SATSER_2026.kommuneskatSnit;
+const KIRKESKAT_SNIT = SATSER_2026.kirkeskatSnit;
+const MELLEMSKAT_GRAENSE = SATSER_2026.mellemskatGraense;
+const MELLEMSKAT = SATSER_2026.mellemskat;
+const TOPSKAT_GRAENSE = SATSER_2026.topskatGraense;
+const TOPSKAT_SATS = SATSER_2026.topskat;
+const TOP_TOPSKAT_GRAENSE = SATSER_2026.topTopskatGraense;
+const TOP_TOPSKAT = SATSER_2026.topTopskat;
+const PERSONFRADRAG = SATSER_2026.personfradrag;
+const BESK_FRADRAG_PCT = SATSER_2026.beskaeftigelsesfradragPct;
+const BESK_FRADRAG_MAX = SATSER_2026.beskaeftigelsesfradragMax;
 
 function beregnNetto(bruttoAar: number, komPct: number, kirPct: number): number {
   const amBidrag = bruttoAar * AM;
@@ -244,10 +245,10 @@ export default function BruttoNettoBeregner() {
           </div>
 
           <div className="flex gap-4">
-            <button onClick={() => setPeriode('maaned')} className={`flex-1 py-2.5 rounded-lg border-2 text-sm font-medium transition-all ${periode === 'maaned' ? 'border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' : 'border-gray-200 dark:border-gray-600 dark:text-gray-200'}`}>
+            <button type="button" onClick={() => setPeriode('maaned')} className={`flex-1 py-2.5 rounded-lg border-2 text-sm font-medium transition-all ${periode === 'maaned' ? 'border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' : 'border-gray-200 dark:border-gray-600 dark:text-gray-200'}`}>
               {l.perMonth}
             </button>
-            <button onClick={() => setPeriode('aar')} className={`flex-1 py-2.5 rounded-lg border-2 text-sm font-medium transition-all ${periode === 'aar' ? 'border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' : 'border-gray-200 dark:border-gray-600 dark:text-gray-200'}`}>
+            <button type="button" onClick={() => setPeriode('aar')} className={`flex-1 py-2.5 rounded-lg border-2 text-sm font-medium transition-all ${periode === 'aar' ? 'border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' : 'border-gray-200 dark:border-gray-600 dark:text-gray-200'}`}>
               {l.perYear}
             </button>
           </div>

@@ -5,13 +5,14 @@ import { ShareCalculation } from '@/components/ShareCalculation';
 import { CopyResultButton, ResetButton } from '@/components/ui';
 import { generateShareableLink, getStateFromUrl, CalculationState } from '@/lib/calculation-state';
 import { trackCalculation, initScrollDepthTracking } from '@/lib/analytics';
+import { SATSER_2026 } from "@/lib/satser-2026";
 
 // 2026-satser
-const PROGRESSION_LIMIT = 79400; // Progressionsgrænse for aktieindkomst 2026
-const LOW_TAX_RATE = 0.27;       // 27% under grænsen
-const HIGH_TAX_RATE = 0.42;      // 42% over grænsen
-const ASK_TAX_RATE = 0.17;       // 17% i aktiesparekonto (lagerbeskatning)
-const ASK_MAX_DEPOSIT = 174200;  // Max indskud i ASK 2026
+const PROGRESSION_LIMIT = SATSER_2026.aktieProgressionsgraense;
+const LOW_TAX_RATE = SATSER_2026.aktieSatsLav;
+const HIGH_TAX_RATE = SATSER_2026.aktieSatsHoej;
+const ASK_TAX_RATE = SATSER_2026.askSats;
+const ASK_MAX_DEPOSIT = SATSER_2026.askLoft;
 
 type DepotType = 'frit' | 'ask' | 'begge';
 
@@ -113,7 +114,7 @@ export default function AktieskatBeregner() {
             </label>
             <div className="flex gap-2">
               {([['begge', 'Sammenlign'], ['frit', 'Frit depot'], ['ask', 'ASK']] as const).map(([key, label]) => (
-                <button
+                <button type="button"
                   key={key}
                   onClick={() => setDepotType(key)}
                   className={`flex-1 py-2.5 px-3 rounded-lg border-2 text-sm font-medium transition-all ${

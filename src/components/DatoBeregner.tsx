@@ -244,7 +244,7 @@ export default function DatoBeregner() {
       {/* Mode selection */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
         {modes.map((m) => (
-          <button
+          <button type="button"
             key={m.id}
             onClick={() => setMode(m.id)}
             className={`p-3 rounded-lg border-2 text-left transition-colors ${

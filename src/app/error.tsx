@@ -21,7 +21,7 @@ export default function Error({
       <p className="text-gray-600 dark:text-gray-300 mb-6">
         {t(l, "ui.errorDescription")}
       </p>
-      <button
+      <button type="button"
         onClick={reset}
         className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
       >

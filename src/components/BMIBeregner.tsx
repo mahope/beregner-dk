@@ -273,7 +273,7 @@ export default function BMIBeregner() {
       {/* Enhedsvalg */}
       <div className="flex justify-end">
         <div className="inline-flex rounded-lg border border-gray-200 dark:border-gray-600 overflow-hidden">
-          <button
+          <button type="button"
             onClick={() => handleEnhedSkift("metrisk")}
             className={`px-4 py-2 text-sm font-medium transition-colors ${
               enhed === "metrisk"
@@ -283,7 +283,7 @@ export default function BMIBeregner() {
           >
             kg / cm
           </button>
-          <button
+          <button type="button"
             onClick={() => handleEnhedSkift("imperial")}
             className={`px-4 py-2 text-sm font-medium transition-colors ${
               enhed === "imperial"
@@ -326,7 +326,7 @@ export default function BMIBeregner() {
           <div>
             <label className="block text-sm font-medium mb-2 dark:text-gray-200">Køn</label>
             <div className="flex gap-4">
-              <button
+              <button type="button"
                 onClick={() => setKoen("mand")}
                 className={`flex-1 py-3 rounded-lg border-2 transition-colors ${
                   koen === "mand"
@@ -336,7 +336,7 @@ export default function BMIBeregner() {
               >
                 Mand
               </button>
-              <button
+              <button type="button"
                 onClick={() => setKoen("kvinde")}
                 className={`flex-1 py-3 rounded-lg border-2 transition-colors ${
                   koen === "kvinde"

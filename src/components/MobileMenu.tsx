@@ -37,7 +37,7 @@ export default function MobileMenu({ items }: MobileMenuProps) {
   return (
     <>
       {/* Menu button */}
-      <button
+      <button type="button"
         onClick={() => setIsOpen(!isOpen)}
         className="md:hidden p-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg"
         aria-label={isOpen ? "Luk menu" : "Åbn menu"}
@@ -93,7 +93,7 @@ export default function MobileMenu({ items }: MobileMenuProps) {
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b dark:border-gray-700">
             <span className="text-lg font-bold text-blue-600 dark:text-blue-400">Menu</span>
-            <button
+            <button type="button"
               onClick={() => setIsOpen(false)}
               className="p-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white rounded-lg"
               aria-label="Luk menu"

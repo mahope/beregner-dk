@@ -248,10 +248,10 @@ export default function LeasingBeregner() {
 
           <div>
             <div className="flex gap-4">
-              <button onClick={() => setVisning('leasing')} className={`flex-1 py-2.5 rounded-lg border-2 text-sm font-medium transition-all ${visning === 'leasing' ? 'border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' : 'border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:text-gray-200'}`}>
+              <button type="button" onClick={() => setVisning('leasing')} className={`flex-1 py-2.5 rounded-lg border-2 text-sm font-medium transition-all ${visning === 'leasing' ? 'border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' : 'border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:text-gray-200'}`}>
                 {l.leasingberegning}
               </button>
-              <button onClick={() => setVisning('sammenlign')} className={`flex-1 py-2.5 rounded-lg border-2 text-sm font-medium transition-all ${visning === 'sammenlign' ? 'border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' : 'border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:text-gray-200'}`}>
+              <button type="button" onClick={() => setVisning('sammenlign')} className={`flex-1 py-2.5 rounded-lg border-2 text-sm font-medium transition-all ${visning === 'sammenlign' ? 'border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' : 'border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:text-gray-200'}`}>
                 {l.sammenlign}
               </button>
             </div>

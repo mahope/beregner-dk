@@ -310,13 +310,13 @@ export default function GaeldsfriBeregner() {
                 </div>
               </div>
               {poster.length > 1 && (
-                <button onClick={() => removePost(post.id)} className="px-2 py-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg text-sm">
+                <button type="button" onClick={() => removePost(post.id)} className="px-2 py-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg text-sm">
                   &#10005;
                 </button>
               )}
             </div>
           ))}
-          <button onClick={addPost} className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400">
+          <button type="button" onClick={addPost} className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400">
             {l.tilfoejGaeldspost}
           </button>
         </div>
@@ -333,10 +333,10 @@ export default function GaeldsfriBeregner() {
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">{l.afviklingsmetode}</label>
             <div className="flex gap-3">
-              <button onClick={() => setMetode('lavine')} className={`flex-1 py-3 rounded-lg border-2 text-sm font-medium transition-all ${metode === 'lavine' ? 'border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' : 'border-gray-200 dark:border-gray-600 dark:text-gray-200'}`}>
+              <button type="button" onClick={() => setMetode('lavine')} className={`flex-1 py-3 rounded-lg border-2 text-sm font-medium transition-all ${metode === 'lavine' ? 'border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' : 'border-gray-200 dark:border-gray-600 dark:text-gray-200'}`}>
                 {l.lavine}
               </button>
-              <button onClick={() => setMetode('snebold')} className={`flex-1 py-3 rounded-lg border-2 text-sm font-medium transition-all ${metode === 'snebold' ? 'border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' : 'border-gray-200 dark:border-gray-600 dark:text-gray-200'}`}>
+              <button type="button" onClick={() => setMetode('snebold')} className={`flex-1 py-3 rounded-lg border-2 text-sm font-medium transition-all ${metode === 'snebold' ? 'border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' : 'border-gray-200 dark:border-gray-600 dark:text-gray-200'}`}>
                 {l.snebold}
               </button>
             </div>

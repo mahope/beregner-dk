@@ -279,7 +279,7 @@ export default function BilBeregner() {
                 { key: "el", label: l.elbil },
                 { key: "hybrid", label: l.hybrid },
               ].map((type) => (
-                <button
+                <button type="button"
                   key={type.key}
                   onClick={() => setBraendstof(type.key as Braendstoftype)}
                   className={`py-2 px-4 rounded-lg border-2 transition-colors text-sm ${

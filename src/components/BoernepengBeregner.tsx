@@ -186,7 +186,7 @@ export default function BoernepengBeregner() {
                 ({beregning.boern[index]?.kategori})
               </span>
               {boern.length > 1 && (
-                <button
+                <button type="button"
                   onClick={() => fjernBarn(barn.id)}
                   className="ml-auto text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
                   aria-label={`Fjern barn ${index + 1}`}
@@ -197,7 +197,7 @@ export default function BoernepengBeregner() {
             </div>
           ))}
         </div>
-        <button
+        <button type="button"
           onClick={tilfoejBarn}
           className="mt-3 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
         >

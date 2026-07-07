@@ -80,7 +80,7 @@ export default async function BoligstoettePage() {
 
         <h3>Sådan søger du boligstøtte</h3>
         <ol>
-          <li>Log ind på <a href="https://www.borger.dk" target="_blank" rel="noopener">borger.dk</a> med MitID</li>
+          <li>Log ind på <a href="https://www.borger.dk" target="_blank" rel="noreferrer noopener">borger.dk</a> med MitID</li>
           <li>Find &quot;Boligstøtte&quot; under Bolig og flytning</li>
           <li>Udfyld oplysninger om husleje, indkomst og husstand</li>
           <li>Udbetaling Danmark beregner beløbet og udbetaler til din NemKonto</li>

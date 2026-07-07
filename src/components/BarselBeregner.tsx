@@ -287,7 +287,7 @@ export default function BarselBeregner() {
               {l.youAre}
             </label>
             <div className="flex gap-4">
-              <button
+              <button type="button"
                 onClick={() => setParent('mor')}
                 className={`flex-1 py-3 px-4 rounded-lg border-2 transition-all ${
                   parent === 'mor'
@@ -297,7 +297,7 @@ export default function BarselBeregner() {
               >
                 👩 {l.mother}
               </button>
-              <button
+              <button type="button"
                 onClick={() => setParent('far')}
                 className={`flex-1 py-3 px-4 rounded-lg border-2 transition-all ${
                   parent === 'far'

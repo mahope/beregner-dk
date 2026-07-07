@@ -325,7 +325,7 @@ export default function KonfirmationBeregner() {
           </label>
           <div className="grid grid-cols-3 gap-2">
             {(Object.entries(PRISER) as [FestType, typeof PRISER.hjemme][]).map(([key]) => (
-              <button
+              <button type="button"
                 key={key}
                 onClick={() => setFestType(key)}
                 className={`py-2.5 px-3 rounded-lg text-sm font-medium transition-colors ${
