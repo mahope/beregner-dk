@@ -30,6 +30,7 @@ const calculatorDefs: CalculatorDef[] = [
   { href: "/barselsdagpenge", icon: "👶", daOnly: true, titles: { da: "Barselsdagpenge", no: "Foreldrepenger", se: "Föräldrapenning" }, descriptions: { da: "Beregn barselsdagpenge", no: "Beregn foreldrepenger", se: "Beräkna föräldrapenning" } },
   { href: "/boernepenge", icon: "👧", daOnly: true, titles: { da: "Børnepenge", no: "Barnetrygd", se: "Barnbidrag" }, descriptions: { da: "Se børne- og ungeydelse", no: "Se barnetrygden din", se: "Se ditt barnbidrag" } },
   { href: "/timepris", icon: "⏰", titles: { da: "Timepris", no: "Timepris", se: "Timpris" }, descriptions: { da: "Beregn din timepris", no: "Beregn timeprisen din", se: "Beräkna ditt timpris" } },
+  { href: "/loen-konverter", icon: "🔄", titles: { da: "Lønberegner", no: "Lønnkalkulator", se: "Lönekalkylator" }, descriptions: { da: "Omregn timeløn, månedsløn og årsløn", no: "Omregn timelønn, månedslønn og årslønn", se: "Omvandla timlön, månadslön och årslön" } },
   // Lån & Bolig
   { href: "/boliglaan", icon: "🏠", titles: { da: "Boliglån", no: "Boliglån", se: "Bolån" }, descriptions: { da: "Beregn dit boliglån", no: "Beregn boliglånet ditt", se: "Beräkna ditt bolån" } },
   { href: "/renteberegner", icon: "🏦", titles: { da: "Renteberegner", no: "Rentekalkulator", se: "Räntekalkylator" }, descriptions: { da: "Beregn renter på lån", no: "Beregn renter på lån", se: "Beräkna ränta på lån" } },
@@ -54,6 +55,7 @@ const calculatorDefs: CalculatorDef[] = [
   // Sundhed
   { href: "/bmi", icon: "⚖️", titles: { da: "BMI Beregner", no: "BMI Kalkulator", se: "BMI Kalkylator" }, descriptions: { da: "Beregn dit Body Mass Index", no: "Beregn din BMI", se: "Beräkna ditt BMI" } },
   { href: "/kalorier", icon: "🍎", titles: { da: "Kalorieberegner", no: "Kaloriekalkulator", se: "Kalorikalkylator" }, descriptions: { da: "Beregn kaloriebehov", no: "Beregn kaloribehovet ditt", se: "Beräkna ditt kaloribehov" } },
+  { href: "/promille", icon: "🍺", titles: { da: "Promilleberegner", no: "Promillekalkulator", se: "Promillekalkylator" }, descriptions: { da: "Anslå din alkoholpromille", no: "Anslå alkoholpromillen din", se: "Uppskatta din alkoholpromille" } },
   // Tid
   { href: "/dato", icon: "📅", titles: { da: "Datoberegner", no: "Datokalkulator", se: "Datumkalkylator" }, descriptions: { da: "Dage mellem datoer", no: "Dager mellom datoer", se: "Dagar mellan datum" } },
   { href: "/tidsberegner", icon: "⏱️", titles: { da: "Tidsberegner", no: "Tidskalkulator", se: "Tidskalkylator" }, descriptions: { da: "Beregn tid og varighed", no: "Beregn tid og varighet", se: "Beräkna tid och varaktighet" } },
@@ -66,6 +68,9 @@ const calculatorDefs: CalculatorDef[] = [
   { href: "/elberegner", icon: "⚡", titles: { da: "Elberegner", no: "Strømkalkulator", se: "Elkalkylator" }, descriptions: { da: "Beregn dit elforbrug", no: "Beregn strømforbruket ditt", se: "Beräkna din elförbrukning" } },
   // Andet
   { href: "/kvadratmeter", icon: "📐", titles: { da: "Kvadratmeter", no: "Kvadratmeter", se: "Kvadratmeter" }, descriptions: { da: "Beregn areal", no: "Beregn areal", se: "Beräkna yta" } },
+  { href: "/temperatur", icon: "🌡️", titles: { da: "Temperatur", no: "Temperatur", se: "Temperatur" }, descriptions: { da: "Omregn °C, °F og Kelvin", no: "Omregn °C, °F og Kelvin", se: "Omvandla °C, °F och Kelvin" } },
+  { href: "/gennemsnit", icon: "📊", titles: { da: "Gennemsnit", no: "Gjennomsnitt", se: "Medelvärde" }, descriptions: { da: "Beregn gennemsnit og median", no: "Beregn gjennomsnitt og median", se: "Beräkna medelvärde och median" } },
+  { href: "/enhedspris", icon: "🏷️", titles: { da: "Enhedspris", no: "Enhetspris", se: "Jämförpris" }, descriptions: { da: "Find den billigste vare pr. enhed", no: "Finn den billigste varen per enhet", se: "Hitta den billigaste varan per enhet" } },
   { href: "/valuta", icon: "💱", titles: { da: "Valuta", no: "Valuta", se: "Valuta" }, descriptions: { da: "Omregn valutaer", no: "Omregn valutaer", se: "Omvandla valutor" } },
   // Yderligere
   { href: "/solceller", icon: "☀️", titles: { da: "Solceller", no: "Solceller", se: "Solceller" }, descriptions: { da: "Beregn solcelleøkonomi", no: "Beregn solcelleøkonomi", se: "Beräkna solcellsekonomi" } },
@@ -111,6 +116,10 @@ const relatedMap: Record<string, string[]> = {
   "/barselsdagpenge": ["/boernepenge", "/dagpenge", "/loen-efter-skat", "/feriepenge", "/boligstoette"],
   "/boernepenge": ["/barselsdagpenge", "/su", "/boligstoette", "/loen-efter-skat", "/dagpenge"],
   "/timepris": ["/loen-efter-skat", "/moms", "/procent", "/feriepenge", "/dagpenge"],
+  "/loen-konverter": ["/loen-efter-skat", "/timepris", "/brutto-netto", "/feriepenge", "/procent"],
+  "/enhedspris": ["/procent", "/moms", "/valuta", "/budget", "/rabat"],
+  "/temperatur": ["/procent", "/kvadratmeter", "/gennemsnit", "/valuta", "/tidszone"],
+  "/gennemsnit": ["/procent", "/temperatur", "/kvadratmeter", "/moms", "/dato"],
   "/boliglaan": ["/renteberegner", "/laaneberegner", "/andelsbolig", "/ejendomsvaerdiskat", "/rentefradrag"],
   "/renteberegner": ["/boliglaan", "/laaneberegner", "/opsparing", "/procent", "/rentefradrag"],
   "/husleje": ["/boligstoette", "/boliglaan", "/ejendomsvaerdiskat", "/loen-efter-skat", "/kvadratmeter"],
@@ -127,6 +136,7 @@ const relatedMap: Record<string, string[]> = {
   "/procent": ["/moms", "/renteberegner", "/opsparing", "/bmi", "/kalorier"],
   "/bmi": ["/kalorier", "/alder", "/procent", "/dato", "/tidsberegner"],
   "/kalorier": ["/bmi", "/procent", "/alder", "/dato", "/tidsberegner"],
+  "/promille": ["/bmi", "/kalorier", "/alder", "/tidsberegner", "/procent"],
   "/dato": ["/tidsberegner", "/alder", "/tidszone", "/feriepenge", "/pension"],
   "/tidsberegner": ["/dato", "/tidszone", "/alder", "/timepris", "/kalorier"],
   "/tidszone": ["/dato", "/tidsberegner", "/valuta", "/alder", "/timepris"],
