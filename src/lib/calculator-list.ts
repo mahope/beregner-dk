@@ -20,6 +20,7 @@ const calculatorDefs: CalculatorDef[] = [
   // Økonomi & Løn
   { href: "/loen-efter-skat", icon: "💰", daOnly: true, titles: { da: "Løn efter skat", no: "Lønn etter skatt", se: "Lön efter skatt" }, descriptions: { da: "Beregn din nettoløn efter skat", no: "Beregn din nettolønn etter skatt", se: "Beräkna din nettolön efter skatt" } },
   { href: "/lon-efter-skatt", icon: "💰", seOnly: true, titles: { da: "Lön efter skatt", no: "Lön efter skatt", se: "Lön efter skatt" }, descriptions: { da: "Beräkna nettolön", no: "Beräkna nettolön", se: "Beräkna din nettolön efter skatt" } },
+  { href: "/bolan", icon: "🏠", seOnly: true, titles: { da: "Bolån", no: "Bolån", se: "Bolånekalkylator" }, descriptions: { da: "Beräkna bolån", no: "Beräkna bolån", se: "Beräkna månadskostnad för bolån" } },
   { href: "/dagpenge", icon: "📋", daOnly: true, titles: { da: "Dagpenge", no: "Dagpenger", se: "Dagpenning" }, descriptions: { da: "Beregn dine dagpenge", no: "Beregn dagpengene dine", se: "Beräkna din dagpenning" } },
   { href: "/feriepenge", icon: "🏖️", daOnly: true, titles: { da: "Feriepenge", no: "Feriepenger", se: "Semesterpengar" }, descriptions: { da: "Beregn dine feriepenge", no: "Beregn feriepengene dine", se: "Beräkna dina semesterpengar" } },
   { href: "/su", icon: "🎓", daOnly: true, titles: { da: "SU Beregner", no: "Studiestøtte", se: "Studiestöd" }, descriptions: { da: "Beregn din SU", no: "Beregn studiestøtten din", se: "Beräkna ditt studiestöd" } },
@@ -99,6 +100,7 @@ export function getCalculatorsByLocale(locale: Locale): Calculator[] {
 const relatedMap: Record<string, string[]> = {
   "/loen-efter-skat": ["/feriepenge", "/dagpenge", "/pension", "/topskat", "/rentefradrag"],
   "/lon-efter-skatt": ["/moms", "/procent", "/laaneberegner", "/opsparing", "/timepris"],
+  "/bolan": ["/laaneberegner", "/renteberegner", "/opsparing", "/lon-efter-skatt", "/valuta"],
   "/dagpenge": ["/loen-efter-skat", "/sygedagpenge", "/efterloen", "/barselsdagpenge", "/feriepenge"],
   "/feriepenge": ["/loen-efter-skat", "/dagpenge", "/barselsdagpenge", "/pension", "/timepris"],
   "/su": ["/loen-efter-skat", "/studielaan", "/boernepenge", "/boligstoette", "/dagpenge"],
