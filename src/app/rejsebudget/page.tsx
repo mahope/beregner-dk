@@ -59,6 +59,29 @@ export default async function RejsebudgetPage() {
         </div>
         )}
 
+        {locale === "se" && (
+        <div className="mt-12 prose dark:prose-invert max-w-none">
+          <h2>Planera din resebudget</h2>
+          <p>
+            En bra <strong>resebudget</strong> ger dig överblick över de <strong>samlade kostnaderna</strong>, så att du kan spara ihop och undvika obehagliga överraskningar. Räknaren ger dig ett <strong>realistiskt estimat</strong> baserat på genomsnittspriser för populära destinationer.
+          </p>
+
+          <h2>De största utgiftsposterna</h2>
+          <p>
+            <strong>Flyg</strong> är ofta den största enskilda utgiften vid resor utanför Europa. <strong>Boende</strong> är den största posten vid resor inom Europa, och här kan du spara mest genom att välja budgetalternativ som vandrarhem eller Airbnb.
+          </p>
+
+          <h2>Spartips till resan</h2>
+          <ul>
+            <li><strong>Boka tidigt:</strong> Flyg och hotell är billigast 6-10 veckor före avresa</li>
+            <li><strong>Var flexibel:</strong> Avresa tisdag-torsdag är oftast billigast</li>
+            <li><strong>Ät lokalt:</strong> Restauranger på sidogatorna är billigare och ofta bättre</li>
+            <li><strong>Gratis upplevelser:</strong> Många städer har gratis museer, parker och guidade promenader</li>
+            <li><strong>Resekort:</strong> Använd lokala dagskort för kollektivtrafiken</li>
+          </ul>
+        </div>
+        )}
+
         <FAQ items={pageData.faqItems} />
         <RelatedCalculators current="/rejsebudget" />
       </div>

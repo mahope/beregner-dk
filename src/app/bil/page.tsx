@@ -223,6 +223,199 @@ export default async function BilPage() {
       </div>
       )}
 
+      {locale === "se" && (
+      <div className="mt-12 prose max-w-none">
+        <h2>De verkliga kostnaderna för att äga bil</h2>
+        <p>
+          Många bilister fokuserar bara på bränslepriset, men de <strong>totala kostnaderna</strong> för att äga bil
+          är mycket högre. Den här räknaren hjälper dig att se <strong>hela bilden</strong>.
+        </p>
+
+        <h2>Vad kostar en bil att äga?</h2>
+
+        <h3>1. Bränsle/el</h3>
+        <p>
+          Den mest synliga utgiften. Beror på <strong>körsträcka</strong>, bilens förbrukning och <strong>bränslepriser</strong>.
+        </p>
+        <ul>
+          <li><strong>Bensin:</strong> Ca 18-20 kr/liter (2026)</li>
+          <li><strong>Diesel:</strong> Ca 19-21 kr/liter</li>
+          <li><strong>El (hemma):</strong> Ca 1,5-3 kr/kWh</li>
+          <li><strong>El (publik laddning):</strong> Ca 4-7 kr/kWh</li>
+        </ul>
+
+        <h3>2. Värdeminskning (den dolda jätten)</h3>
+        <p>
+          Värdeminskning är ofta den <strong>största enskilda utgiften</strong> för att äga bil - och den mest förbisedda.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Bilens ålder</th>
+              <th>Årlig värdeminskning</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Ny bil (år 1)</td>
+              <td>20-25%</td>
+            </tr>
+            <tr>
+              <td>1-3 år</td>
+              <td>15-20%</td>
+            </tr>
+            <tr>
+              <td>3-5 år</td>
+              <td>10-15%</td>
+            </tr>
+            <tr>
+              <td>5+ år</td>
+              <td>8-12%</td>
+            </tr>
+          </tbody>
+        </table>
+        <p>
+          <strong>Tips:</strong> Köp 2-3 år gamla bilar för att undvika den största värdeminskningen.
+        </p>
+
+        <h3>3. Försäkring</h3>
+        <p>
+          <strong>Försäkringspriset</strong> varierar mycket beroende på:
+        </p>
+        <ul>
+          <li>Din ålder och erfarenhet</li>
+          <li>Bostadsort (stad vs. landsbygd)</li>
+          <li>Bilens modell och värde</li>
+          <li>Körbehov</li>
+          <li>Självrisk</li>
+        </ul>
+        <p>
+          <strong>Tips:</strong> Jämför alltid försäkringar. Prisskillnaden kan vara flera tusen kronor. Kom ihåg att bilen även behöver minst trafikförsäkring enligt lag.
+        </p>
+
+        <h3>4. Fordonsskatt</h3>
+        <p>
+          <strong>Fordonsskatten</strong> i Sverige är i huvudsak <strong>CO2-baserad</strong> - ju högre koldioxidutsläpp, desto högre skatt.
+          För nya bilar med höga utsläpp tillkommer en förhöjd skatt, <strong>malus</strong>, under de tre första åren.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Typ</th>
+              <th>Årlig fordonsskatt (ca.)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Elbil</td>
+              <td>360 kr (lägsta nivå)</td>
+            </tr>
+            <tr>
+              <td>Laddhybrid</td>
+              <td>Ca 400-3 000 kr</td>
+            </tr>
+            <tr>
+              <td>Bensin (genomsnitt)</td>
+              <td>Ca 1 500-5 000 kr</td>
+            </tr>
+            <tr>
+              <td>Ny bil med höga utsläpp (malus, år 1-3)</td>
+              <td>Upp till 15 000+ kr</td>
+            </tr>
+          </tbody>
+        </table>
+        <p>
+          Kör du <strong>tjänstebil</strong> beskattas du dessutom för <strong>förmånsvärdet</strong>, som beror på bilens nybilspris, utrustning och utsläpp.
+        </p>
+
+        <h3>5. Service och reparationer</h3>
+        <p>
+          Räkna med ca <strong>3% av bilens värde</strong> per år för service, olja, bromsar osv.
+        </p>
+        <ul>
+          <li><strong>Serviceöversyn:</strong> 2 000-5 000 kr</li>
+          <li><strong>Bromsar:</strong> 2 500-6 000 kr per axel</li>
+          <li><strong>Kamrem:</strong> 5 000-10 000 kr</li>
+        </ul>
+        <p>
+          <strong>Elbilar</strong> har markant lägre servicekostnader (färre slitdelar).
+        </p>
+
+        <h3>6. Däck</h3>
+        <p>
+          Däck håller vanligtvis <strong>30 000-50 000 km</strong>. Räkna med ca <strong>3 000-4 000 kr/år</strong> inkl. skifte. Kom ihåg att vinterdäck är lagkrav i Sverige under vinterväglag.
+        </p>
+
+        <h2>Bensin vs. Diesel vs. Elbil</h2>
+
+        <h3>Bensin</h3>
+        <ul>
+          <li>Billigast att köpa</li>
+          <li>Lägre fordonsskatt vid låga utsläpp</li>
+          <li>Högre bränsleförbrukning</li>
+          <li>Högre CO2-utsläpp (risk för malus på nya bilar)</li>
+        </ul>
+
+        <h3>Diesel</h3>
+        <ul>
+          <li>Lägre förbrukning (mil/liter)</li>
+          <li>Bra för långkörning</li>
+          <li>Högre fordonsskatt</li>
+          <li>Dyrare service (partikelfilter m.m.)</li>
+        </ul>
+
+        <h3>Elbil</h3>
+        <ul>
+          <li>Lägsta driftskostnaderna</li>
+          <li>Lägsta fordonsskatt</li>
+          <li>Minimal service</li>
+          <li>Högre inköpspris</li>
+          <li>Räckviddsbegränsning</li>
+          <li>Lägre förmånsvärde för tjänstebil</li>
+        </ul>
+
+        <h2>Pris per kilometer</h2>
+        <p>
+          En typisk svensk bil kostar <strong>3,00-5,00 kr/km</strong> i totala kostnader:
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Biltyp</th>
+              <th>Pris/km (ca.)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Liten bensinbil, begagnad</td>
+              <td>2,50-3,00 kr</td>
+            </tr>
+            <tr>
+              <td>Mellanstor bensin, begagnad</td>
+              <td>3,00-4,00 kr</td>
+            </tr>
+            <tr>
+              <td>Ny familjebil</td>
+              <td>4,00-5,50 kr</td>
+            </tr>
+            <tr>
+              <td>Elbil (efter inköp)</td>
+              <td>2,00-3,00 kr</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div className="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 dark:border-yellow-500 p-4 my-6 not-prose">
+          <p className="font-medium text-yellow-800">Viktigt</p>
+          <p className="text-yellow-700">
+            Den här räknaren ger en uppskattning baserad på typiska värden. De faktiska kostnaderna
+            beror på din specifika bil, ditt körmönster och lokala priser. Använd den som utgångspunkt
+            för att jämföra olika bilar.
+          </p>
+        </div>
+      </div>
+      )}
+
       <section className="mt-12">
         <FAQ items={pageData.faqItems} />
       </section>

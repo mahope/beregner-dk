@@ -179,6 +179,154 @@ export default async function ElberegnerPage() {
       </div>
       )}
 
+      {locale === "se" && (
+      <div className="mt-12 prose max-w-none">
+        <h2>Så här använder du elberäknaren</h2>
+        <p>
+          Med vår <strong>elberäknare</strong> kan du enkelt räkna ut vad dina elektriska
+          apparater <strong>kostar i el</strong>. Så här gör du:
+        </p>
+        <ol>
+          <li>
+            <strong>Välj en apparat</strong> från listan, eller skriv namnet
+            själv
+          </li>
+          <li>
+            <strong>Ange watt</strong> - du hittar det på apparatens
+            märkskylt
+          </li>
+          <li>
+            <strong>Ange timmar per dag</strong> - hur länge använder du
+            apparaten?
+          </li>
+          <li>
+            <strong>Lägg till fler apparater</strong> för att se din totala
+            förbrukning
+          </li>
+        </ol>
+
+        <h2>Vanliga apparaters elförbrukning</h2>
+        <div className="overflow-x-auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Apparat</th>
+                <th>Typisk watt</th>
+                <th>Årlig kostnad*</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Kylskåp</td>
+                <td>40W (går 24/7)</td>
+                <td>~875 kr</td>
+              </tr>
+              <tr>
+                <td>Dator</td>
+                <td>150W</td>
+                <td>~550 kr (4h/dag)</td>
+              </tr>
+              <tr>
+                <td>TV</td>
+                <td>100W</td>
+                <td>~365 kr (4h/dag)</td>
+              </tr>
+              <tr>
+                <td>Torktumlare</td>
+                <td>3000W</td>
+                <td>~10 950 kr (4h/dag)</td>
+              </tr>
+              <tr>
+                <td>Gaming-dator</td>
+                <td>500W</td>
+                <td>~1825 kr (4h/dag)</td>
+              </tr>
+              <tr>
+                <td>LED-lampa</td>
+                <td>10W</td>
+                <td>~45 kr (5h/dag)</td>
+              </tr>
+              <tr>
+                <td>Glödlampa</td>
+                <td>60W</td>
+                <td>~275 kr (5h/dag)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p className="text-sm text-gray-500">
+          *Beräknat med ett elpris på 2,5 kr/kWh
+        </p>
+
+        <h2>Tips för att spara på elen</h2>
+        <ul>
+          <li>
+            <strong>Stäng av standby</strong> - apparater i standby-läge drar
+            fortfarande el (typiskt 5-15W)
+          </li>
+          <li>
+            <strong>Välj energieffektiva apparater</strong> - titta efter en bra
+            energiklass på EU:s A-G-märkning
+          </li>
+          <li>
+            <strong>LED-lampor</strong> - drar upp till 80% mindre el än
+            glödlampor
+          </li>
+          <li>
+            <strong>Tvätta på 30°</strong> - de flesta tvättar blir rena vid
+            lägre temperaturer
+          </li>
+          <li>
+            <strong>Fyll maskinen</strong> - kör disk- och tvättmaskin
+            bara när de är fulla
+          </li>
+          <li>
+            <strong>Använd timer</strong> - kör apparater när elen är billigast
+            (ofta på natten)
+          </li>
+        </ul>
+
+        <h2>Om elpriser i Sverige</h2>
+        <p>
+          <strong>Elpriser i Sverige</strong> varierar beroende på tidpunkt, årstid, elområde och ditt
+          elavtal. Det <strong>totala priset</strong> du betalar består av:
+        </p>
+        <ul>
+          <li>
+            <strong>Elpris (spotpris)</strong> - varierar timme för timme på
+            Nord Pool utifrån utbud och efterfrågan
+          </li>
+          <li>
+            <strong>Elnätsavgift</strong> - betalning till nätbolaget för
+            transport av elen
+          </li>
+          <li>
+            <strong>Energiskatt på el</strong> - statlig skatt på elektricitet
+          </li>
+          <li>
+            <strong>Moms</strong> - 25% på hela summan
+          </li>
+          <li>
+            <strong>Elhandlarens påslag</strong> - varierar mellan bolag
+          </li>
+        </ul>
+        <p>
+          Sverige är indelat i fyra <strong>elområden</strong>, SE1–SE4, där priset ofta är lägre i
+          norr (SE1–SE2) och högre i söder (SE3–SE4). Inklusive alla avgifter och moms landar priset
+          ofta på ca <strong>1,5–3 kr/kWh</strong>.
+        </p>
+
+        <div className="bg-green-50 dark:bg-green-900/20 border-l-4 border-green-400 dark:border-green-500 p-4 my-6 not-prose">
+          <p className="font-medium text-green-800">Tips för lägre elräkning</p>
+          <p className="text-green-700">
+            Överväg ett rörligt elavtal och använd el när spotpriset är lågt.
+            Appar som Tibber och Greppa visar priser i realtid och kan hjälpa
+            dig att spara.
+          </p>
+        </div>
+      </div>
+      )}
+
       <FAQ items={pageData.faqItems} />
 
       <RelatedCalculators current="/elberegner" />

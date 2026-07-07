@@ -164,6 +164,134 @@ export default async function OpsparingPage() {
       </div>
       )}
 
+      {locale === "se" && (
+      <div className="mt-12 prose max-w-none">
+        <h2>Så använder du sparkalkylatorn</h2>
+        <p>
+          Med vår <strong>sparkalkylator</strong> ser du hur ditt <strong>sparande</strong> växer
+          över tid tack vare <strong>ränta-på-ränta</strong>:
+        </p>
+        <ol>
+          <li>
+            <strong>Startbelopp:</strong> hur mycket har du att börja med?
+          </li>
+          <li>
+            <strong>Månadssparande:</strong> hur mycket vill du spara varje
+            månad?
+          </li>
+          <li>
+            <strong>Årlig avkastning:</strong> vilken ränta eller avkastning
+            räknar du med?
+          </li>
+          <li>
+            <strong>Sparhorisont:</strong> hur många år vill du spara?
+          </li>
+        </ol>
+
+        <h2>Kraften i ränta-på-ränta</h2>
+        <p>
+          <strong>Ränta-på-ränta</strong> är en av de mest kraftfulla krafterna inom ekonomi.
+          Albert Einstein ska ha sagt att &quot;<strong>ränta-på-ränta är världens
+          åttonde underverk</strong>&quot;.
+        </p>
+        <p>Här är ett exempel på skillnaden:</p>
+        <ul>
+          <li>
+            <strong>Utan ränta-på-ränta:</strong> 100 000 kr med 5 % enkel ränta i
+            30 år = 250 000 kr
+          </li>
+          <li>
+            <strong>Med ränta-på-ränta:</strong> 100 000 kr med 5 % ränta-på-ränta i
+            30 år = 432 194 kr
+          </li>
+        </ul>
+        <p>Nästan dubbelt så mycket!</p>
+
+        <h2>Typisk avkastning på olika sparformer</h2>
+        <div className="overflow-x-auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Typ</th>
+                <th>Typisk årlig avkastning</th>
+                <th>Risk</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Sparkonto</td>
+                <td>0-3 %</td>
+                <td>Ingen</td>
+              </tr>
+              <tr>
+                <td>Obligationer</td>
+                <td>2-4 %</td>
+                <td>Låg</td>
+              </tr>
+              <tr>
+                <td>Blandfonder</td>
+                <td>4-6 %</td>
+                <td>Medel</td>
+              </tr>
+              <tr>
+                <td>Aktiefonder</td>
+                <td>6-8 %</td>
+                <td>Hög</td>
+              </tr>
+              <tr>
+                <td>Enskilda aktier</td>
+                <td>Varierande</td>
+                <td>Mycket hög</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Tips för ett effektivt sparande</h2>
+        <ul>
+          <li>
+            <strong>Börja tidigt:</strong> tiden är viktigare än beloppet. Även
+            små belopp växer enormt över 30-40 år.
+          </li>
+          <li>
+            <strong>Automatisera:</strong> lägg upp en fast överföring så att du
+            sparar automatiskt varje månad.
+          </li>
+          <li>
+            <strong>Öka gradvis:</strong> höj sparandet varje gång du får en
+            löneökning.
+          </li>
+          <li>
+            <strong>Diversifiera:</strong> sprid ditt sparande över flera typer
+            av tillgångar.
+          </li>
+          <li>
+            <strong>Håll avgifterna låga:</strong> välj fonder med låga årliga
+            avgifter.
+          </li>
+        </ul>
+
+        <div className="bg-green-50 dark:bg-green-900/20 border-l-4 border-green-400 dark:border-green-500 p-4 my-6 not-prose">
+          <p className="font-medium text-green-800">Exempel: tid kontra belopp</p>
+          <p className="text-green-700">
+            Person A börjar vid 25 års ålder och sparar 1 000 kr/mån i 40 år (5 % ränta) = <strong>1,5 mkr</strong><br />
+            Person B börjar vid 35 års ålder och sparar 2 000 kr/mån i 30 år (5 % ränta) = <strong>1,7 mkr</strong><br />
+            Person A sätter bara in 480 000 kr, Person B sätter in 720 000 kr - men skillnaden är liten!
+          </p>
+        </div>
+
+        <div className="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 dark:border-yellow-500 p-4 my-6 not-prose">
+          <p className="font-medium text-yellow-800">Observera</p>
+          <p className="text-yellow-700">
+            Kalkylatorn visar belopp före skatt och inflation. Sparar du i ett
+            ISK eller på ett sparkonto påverkas nettoresultatet av skatt och
+            avgifter. Faktisk avkastning kan variera betydligt, och historisk
+            avkastning är ingen garanti för framtida avkastning.
+          </p>
+        </div>
+      </div>
+      )}
+
       <FAQ items={pageData.faqItems} />
 
       <RelatedCalculators current="/opsparing" />

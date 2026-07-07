@@ -84,6 +84,54 @@ export default async function TimeprisPage() {
       </div>
       )}
 
+      {locale === "se" && (
+      <div className="prose max-w-none mb-8">
+        <h2>Så räknar du ut rätt timpris</h2>
+        <p>
+          Att <strong>sätta sin timpris</strong> är ett av de viktigaste besluten som <strong>frilansare</strong> eller <strong>egenföretagare</strong>.
+          Sätter du den <strong>för lågt</strong> jobbar du för mycket för för lite.
+          Sätter du den <strong>för högt</strong> riskerar du att tappa kunder.
+        </p>
+
+        <h3>Faktorer som påverkar din timpris</h3>
+        <ul>
+          <li><strong>Erfarenhet och kompetens</strong> - ju mer specialiserad du är, desto högre pris</li>
+          <li><strong>Bransch</strong> - vissa branscher har högre marknadspriser</li>
+          <li><strong>Geografi</strong> - storstadsregioner som Stockholm har ofta högre priser än övriga landet</li>
+          <li><strong>Kundtyp</strong> - stora företag betalar ofta mer</li>
+          <li><strong>Uppdragstyp</strong> - brådskande uppdrag och specialprojekt kan kräva mer</li>
+        </ul>
+
+        <h3>Dolda kostnader som egenföretagare</h3>
+        <p>
+          Många nya frilansare <strong>underskattar sina kostnader</strong>. Kom ihåg att din timpris ska täcka mer än bara din lön:
+        </p>
+        <ul>
+          <li>Ingen betald semester (5-6 veckor = 10-12 % av din tid)</li>
+          <li>Ingen tjänstepension från arbetsgivare - du sparar själv</li>
+          <li><strong>Egenavgifter</strong> och skatt om du har enskild firma, eller sociala avgifter i eget aktiebolag</li>
+          <li>Ingen lön vid sjukdom utöver karensdagar</li>
+          <li>Programvara, utrustning och kontorskostnader</li>
+          <li>Företagsförsäkringar</li>
+          <li>Bokföring och revisor</li>
+          <li>Tid för försäljning, nätverkande och administration</li>
+        </ul>
+
+        <h3>Moms och F-skatt</h3>
+        <p>
+          Som företagare med <strong>F-skatt</strong> lägger du normalt på <strong>25 % moms</strong> på din timpris till andra företag.
+          Momsen är inte din intäkt - den redovisar du vidare till Skatteverket. Tänk därför alltid i termer av
+          <strong> timpris exklusive moms</strong> när du räknar på din lön och lönsamhet.
+        </p>
+
+        <h3>Timpris kontra fast pris</h3>
+        <p>
+          Överväg också att erbjuda <strong>fast pris på projekt</strong>. Det kan ge dig <strong>bättre lönsamhet</strong>
+          när du blir mer effektiv, och kunder föredrar ofta att veta det <strong>totala priset</strong> i förväg.
+        </p>
+      </div>
+      )}
+
       {/* FAQ */}
       <div className="mb-8">
         <FAQ items={pageData.faqItems} />

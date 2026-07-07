@@ -83,6 +83,54 @@ export default async function ForbrugslaanPage() {
       </div>
       )}
 
+      {locale === "se" && (
+      <div className="prose max-w-none mb-8">
+        <h2>Om konsumtionslån</h2>
+        <p>
+          <strong>Konsumtionslån</strong> (även kallat privatlån eller blancolån) är en populär
+          finansieringslösning för svenskar som vill ha flexibilitet i sin ekonomi. Till skillnad
+          från <strong>bolån</strong> eller <strong>billån</strong> är konsumtionslånet inte kopplat till
+          någon säkerhet, vilket ger frihet att använda pengarna precis som du vill – men också en
+          högre ränta.
+        </p>
+
+        <h3>Typer av konsumtionslån</h3>
+        <ul>
+          <li><strong>Banklån:</strong> Traditionella banker erbjuder ofta de bästa villkoren för kunder med god ekonomi</li>
+          <li><strong>Nischbanker online:</strong> Enkel ansökan helt digitalt, ofta med snabbt besked</li>
+          <li><strong>Jämförelsetjänster:</strong> Hjälper dig att hitta den lägsta effektiva räntan</li>
+          <li><strong>Låneförmedlare:</strong> Skickar en ansökan till flera långivare samtidigt</li>
+        </ul>
+
+        <h3>Så får du det bästa konsumtionslånet</h3>
+        <ol>
+          <li><strong>Jämför flera långivare:</strong> Använd vår kalkylator och jämför den effektiva räntan mellan flera banker</li>
+          <li><strong>Kontrollera alla avgifter:</strong> Uppläggningsavgift och aviavgift kan göra stor skillnad</li>
+          <li><strong>Se över löptiden:</strong> Kortare löptid ger lägre total räntekostnad men högre månadskostnad</li>
+          <li><strong>Räkna på ditt utrymme:</strong> Se till att månadskostnaden ryms i din ekonomi</li>
+          <li><strong>Läs det finstilta:</strong> Kolla villkoren för lösen i förtid och extra amorteringar</li>
+        </ol>
+
+        <h3>Jämför alltid effektiv ränta</h3>
+        <p>
+          Eftersom ett konsumtionslån saknar säkerhet är räntan högre än för bolån och billån. Den
+          <strong>effektiva räntan</strong> visar den verkliga kostnaden inklusive alla avgifter och är
+          det viktigaste måttet när du jämför olika erbjudanden. Titta aldrig bara på den nominella räntan.
+        </p>
+
+        <h3>När är ett konsumtionslån rimligt?</h3>
+        <p>
+          Konsumtionslån kan vara vettiga för större behov som <strong>renovering av bostaden</strong>,
+          köp av bil, tandvård eller andra ändamål där sparande inte är möjligt. Det är viktigt att
+          <strong>låna ansvarsfullt</strong> och bara det belopp du har råd att betala tillbaka.
+        </p>
+        <p>
+          Undvik att låna till konsumtion som snabbt <strong>tappar i värde</strong>, som resor, elektronik
+          eller kläder. I sådana fall är det ofta bättre att <strong>spara ihop först</strong>.
+        </p>
+      </div>
+      )}
+
       {/* FAQ */}
       <div className="mb-8">
         <FAQ items={pageData.faqItems} />
