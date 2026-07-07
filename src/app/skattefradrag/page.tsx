@@ -46,7 +46,7 @@ export default async function SkattefradragPage() {
 
           <h2>Kørselsfradrag (befordringsfradrag)</h2>
           <p>
-            Du kan få fradrag for <strong>transport mellem hjem og arbejde</strong>, uanset om du kører bil, tager bus eller cykler. Fradraget gælder for den del af afstanden, der overstiger <strong>24 km dagligt</strong> (12 km hver vej). Satsen er <strong>2,23 kr./km</strong> for 25-120 km og 1,12 kr./km over 120 km.
+            Du kan få fradrag for <strong>transport mellem hjem og arbejde</strong>, uanset om du kører bil, tager bus eller cykler. Fradraget gælder for den del af afstanden, der overstiger <strong>24 km dagligt</strong> (12 km hver vej). Satsen er <strong>2,28 kr./km</strong> for 25-120 km og 1,14 kr./km over 120 km.
           </p>
 
           <h2>Boligjobordningen (håndværkerfradrag)</h2>

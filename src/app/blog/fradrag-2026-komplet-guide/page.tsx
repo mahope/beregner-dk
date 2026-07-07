@@ -95,12 +95,12 @@ export default function FradragGuidePage() {
             <tbody>
               <tr>
                 <td>Beskæftigelsesfradrag</td>
-                <td>45.100 kr</td>
+                <td>63.300 kr</td>
                 <td>Automatisk</td>
               </tr>
               <tr>
                 <td>Personfradrag</td>
-                <td>49.700 kr</td>
+                <td>54.100 kr</td>
                 <td>Automatisk</td>
               </tr>
               <tr>
@@ -130,7 +130,7 @@ export default function FradragGuidePage() {
               </tr>
               <tr>
                 <td>Ratepension</td>
-                <td>63.100 kr</td>
+                <td>68.700 kr</td>
                 <td>Automatisk</td>
               </tr>
             </tbody>
@@ -193,7 +193,7 @@ export default function FradragGuidePage() {
 
         <h2>5. Pension</h2>
         <p>
-          Indbetalinger til ratepension er fradragsberettigede med op til <strong>63.100 kr</strong> i 2026.
+          Indbetalinger til ratepension er fradragsberettigede med op til <strong>68.700 kr</strong> i 2026.
           Indbetalinger til livrente har ingen loft. Bemærk at aldersopsparing ikke giver fradrag
           (til gengæld er udbetalingen skattefri).
         </p>

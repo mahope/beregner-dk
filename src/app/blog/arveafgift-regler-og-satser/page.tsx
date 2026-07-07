@@ -42,7 +42,7 @@ const faqItems = [
   {
     question: "Hvad er bundfradraget for arveafgift i 2026?",
     answer:
-      "Bundfradraget (det afgiftsfri beløb) er 321.700 kr i 2026. Det gælder per bo, ikke per arving. Boafgift beregnes kun af beløbet over bundfradraget.",
+      "Bundfradraget (det afgiftsfri beløb) er 392.300 kr i 2026. Det gælder per bo, ikke per arving. Boafgift beregnes kun af beløbet over bundfradraget.",
   },
   {
     question: "Betaler ægtefæller arveafgift?",
@@ -131,8 +131,8 @@ export default function ArveafgiftGuidePage() {
 
         <h2>Bundfradraget</h2>
         <p>
-          I 2026 er bundfradraget <strong>321.700 kr per bo</strong>. Det betyder, at der først skal
-          betales boafgift af den del af arven, der overstiger 321.700 kr. Bundfradraget gælder
+          I 2026 er bundfradraget <strong>392.300 kr per bo</strong>. Det betyder, at der først skal
+          betales boafgift af den del af arven, der overstiger 392.300 kr. Bundfradraget gælder
           for hele boet — ikke per arving.
         </p>
 
@@ -143,10 +143,10 @@ export default function ArveafgiftGuidePage() {
         </p>
         <ol>
           <li>Bobeholdning: 1.500.000 kr</li>
-          <li>Bundfradrag: -321.700 kr</li>
-          <li>Afgiftspligtigt beløb: 1.178.300 kr</li>
-          <li>Boafgift (15%): 176.745 kr</li>
-          <li>Til fordeling mellem børn: 1.323.255 kr (661.628 kr hver)</li>
+          <li>Bundfradrag: -392.300 kr</li>
+          <li>Afgiftspligtigt beløb: 1.107.700 kr</li>
+          <li>Boafgift (15%): 166.155 kr</li>
+          <li>Til fordeling mellem børn: 1.333.845 kr (666.923 kr hver)</li>
         </ol>
 
         <h3>Eksempel 2: Arv til søskende</h3>
@@ -155,13 +155,13 @@ export default function ArveafgiftGuidePage() {
         </p>
         <ol>
           <li>Bobeholdning: 800.000 kr</li>
-          <li>Bundfradrag: -321.700 kr</li>
-          <li>Afgiftspligtigt beløb: 478.300 kr</li>
-          <li>Boafgift (15%): 71.745 kr</li>
-          <li>Rest efter boafgift: 406.555 kr</li>
-          <li>Tillægsafgift (25% af rest): 101.639 kr</li>
-          <li>Samlet afgift: 173.384 kr</li>
-          <li>Arving modtager: 626.616 kr</li>
+          <li>Bundfradrag: -392.300 kr</li>
+          <li>Afgiftspligtigt beløb: 407.700 kr</li>
+          <li>Boafgift (15%): 61.155 kr</li>
+          <li>Rest efter boafgift: 346.545 kr</li>
+          <li>Tillægsafgift (25% af rest): 86.636 kr</li>
+          <li>Samlet afgift: 147.791 kr</li>
+          <li>Arving modtager: 652.209 kr</li>
         </ol>
 
         <h2>Ægtefæller: Ingen arveafgift</h2>

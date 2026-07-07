@@ -46,7 +46,7 @@ const faqItems = [
   {
     question: "Skal man betale skat af SU?",
     answer:
-      "Ja, SU er skattepligtig. Men med personfradraget på 49.700 kr/år betaler de fleste studerende uden studiejob kun lidt eller ingen skat.",
+      "Ja, SU er skattepligtig. Men med personfradraget på 54.100 kr/år betaler de fleste studerende uden studiejob kun lidt eller ingen skat.",
   },
 ];
 
@@ -127,7 +127,7 @@ export default function PrivatoekonomieGuidePage() {
           du se præcist, hvad du får udbetalt.
         </p>
         <p>
-          Som studerende har du et personfradrag på 49.700 kr/år. Hvis din samlede indkomst
+          Som studerende har du et personfradrag på 54.100 kr/år. Hvis din samlede indkomst
           (SU + job) er under dette beløb, betaler du ingen skat. Men de fleste studerende
           med studiejob kommer over grænsen.
         </p>

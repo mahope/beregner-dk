@@ -104,14 +104,14 @@ export default async function PensionPage() {
         <ul>
           <li>Udbetales over 10-30 år</li>
           <li>Beskattes som almindelig indkomst ved udbetaling</li>
-          <li>Fradrag for indbetalinger (op til 63.100 kr/år i 2026)</li>
+          <li>Fradrag for indbetalinger (op til 68.700 kr/år i 2026)</li>
         </ul>
 
         <h3>Aldersopsparing</h3>
         <ul>
           <li>Udbetales skattefrit</li>
           <li>Ingen fradrag for indbetalinger</li>
-          <li>Max 5.900 kr/år (2026)</li>
+          <li>Max 9.900 kr/år (2026)</li>
         </ul>
 
         <h3>Livrente</h3>

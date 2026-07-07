@@ -198,7 +198,7 @@ export default function SU2026GuidePage() {
         <h2>SU og skat</h2>
         <p>
           SU er skattepligtig indkomst. Det betyder, at du betaler skat af din SU ligesom af anden
-          indkomst. Som studerende har du dog personfradrag (49.700 kr/år i 2026), der dækker en
+          indkomst. Som studerende har du dog personfradrag (54.100 kr/år i 2026), der dækker en
           stor del af din SU, hvis du ikke har anden indkomst.
         </p>
         <p>
