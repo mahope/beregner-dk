@@ -37,7 +37,9 @@ export async function generatePageMetadata(slug: string): Promise<Metadata> {
   }
 
   return {
-    title: pageData.metaTitle,
+    // metaTitle already includes the site name, so opt out of the root
+    // layout's "%s | {siteName}" template to avoid doubling the brand.
+    title: { absolute: pageData.metaTitle },
     description: pageData.metaDescription,
     keywords: pageData.keywords,
     openGraph: {
