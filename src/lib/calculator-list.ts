@@ -40,6 +40,8 @@ const calculatorDefs: CalculatorDef[] = [
   { href: "/opsparing", icon: "📈", titles: { da: "Opsparing", no: "Sparing", se: "Sparande" }, descriptions: { da: "Renters rente beregner", no: "Rentes rente kalkulator", se: "Ränta-på-ränta kalkylator" } },
   { href: "/budget", icon: "📊", titles: { da: "Rådighedsbeløb", no: "Rådighetsbeløp", se: "Hushållsbudget" }, descriptions: { da: "Beregn dit rådighedsbeløb", no: "Beregn disponibelt beløp", se: "Räkna ut kvar att leva på" } },
   { href: "/afkast", icon: "📈", titles: { da: "Afkastberegner", no: "Avkastningskalkulator", se: "Avkastningskalkylator" }, descriptions: { da: "Beregn ROI og årligt afkast", no: "Beregn ROI og årlig avkastning", se: "Beräkna ROI och årlig avkastning" } },
+  { href: "/sparemaal", icon: "🎯", titles: { da: "Sparemål", no: "Sparemål", se: "Sparmål" }, descriptions: { da: "Hvor meget skal du spare op om måneden?", no: "Hvor mye bør du spare per måned?", se: "Hur mycket ska du spara per månad?" } },
+  { href: "/loenstigning", icon: "💹", titles: { da: "Lønstigning", no: "Lønnsøkning", se: "Löneökning" }, descriptions: { da: "Beregn lønstigning i procent", no: "Beregn lønnsøkning i prosent", se: "Beräkna löneökning i procent" } },
   { href: "/rentefradrag", icon: "📉", daOnly: true, titles: { da: "Rentefradrag", no: "Rentefradrag", se: "Ränteavdrag" }, descriptions: { da: "Beregn dit rentefradrag", no: "Beregn rentefradraget ditt", se: "Beräkna ditt ränteavdrag" } },
   { href: "/billaan", icon: "🚙", titles: { da: "Billån", no: "Billån", se: "Billån" }, descriptions: { da: "Beregn dit billån", no: "Beregn billånet ditt", se: "Beräkna ditt billån" } },
   { href: "/forbrugslaan", icon: "💸", titles: { da: "Forbrugslån", no: "Forbrukslån", se: "Konsumtionslån" }, descriptions: { da: "Beregn dit forbrugslån", no: "Beregn forbrukslånet ditt", se: "Beräkna ditt konsumtionslån" } },
@@ -77,6 +79,8 @@ const calculatorDefs: CalculatorDef[] = [
   { href: "/gennemsnit", icon: "📊", titles: { da: "Gennemsnit", no: "Gjennomsnitt", se: "Medelvärde" }, descriptions: { da: "Beregn gennemsnit og median", no: "Beregn gjennomsnitt og median", se: "Beräkna medelvärde och median" } },
   { href: "/brok", icon: "➗", titles: { da: "Brøkberegner", no: "Brøkkalkulator", se: "Bråkkalkylator" }, descriptions: { da: "Forkort brøk til decimal og procent", no: "Forkort brøk til desimal og prosent", se: "Förkorta bråk till decimal och procent" } },
   { href: "/nedtaelling", icon: "⏳", titles: { da: "Nedtælling", no: "Nedtelling", se: "Nedräkning" }, descriptions: { da: "Hvor mange dage til en dato?", no: "Hvor mange dager til en dato?", se: "Hur många dagar till ett datum?" } },
+  { href: "/ohm", icon: "⚡", titles: { da: "Ohms lov", no: "Ohms lov", se: "Ohms lag" }, descriptions: { da: "Beregn spænding, strøm og modstand", no: "Beregn spenning, strøm og motstand", se: "Beräkna spänning, ström och resistans" } },
+  { href: "/planetvaegt", icon: "🪐", titles: { da: "Vægt på planeterne", no: "Vekt på planetene", se: "Vikt på planeterna" }, descriptions: { da: "Hvor meget vejer du på Mars?", no: "Hvor mye veier du på Mars?", se: "Hur mycket väger du på Mars?" } },
   { href: "/fart", icon: "🏃", titles: { da: "Fartberegner", no: "Fartkalkulator", se: "Hastighetskalkylator" }, descriptions: { da: "Beregn fart, distance og tid", no: "Beregn fart, distanse og tid", se: "Beräkna hastighet, sträcka och tid" } },
   { href: "/enheder", icon: "📏", titles: { da: "Enhedsberegner", no: "Enhetskalkulator", se: "Enhetskalkylator" }, descriptions: { da: "Omregn længde, vægt og volumen", no: "Omregn lengde, vekt og volum", se: "Omvandla längd, vikt och volym" } },
   { href: "/del-regning", icon: "🧾", titles: { da: "Del regningen", no: "Del regningen", se: "Dela notan" }, descriptions: { da: "Fordel regningen mellem flere", no: "Fordel regningen mellom flere", se: "Fördela notan mellan flera" } },
@@ -92,6 +96,7 @@ const calculatorDefs: CalculatorDef[] = [
   { href: "/rejsebudget", icon: "✈️", titles: { da: "Rejsebudget", no: "Reisebudsjett", se: "Resebudget" }, descriptions: { da: "Beregn dit rejsebudget", no: "Beregn reisebudsjettet ditt", se: "Beräkna din resebudget" } },
   { href: "/vaegttab", icon: "📉", titles: { da: "Vægttab", no: "Vekttap", se: "Viktminskning" }, descriptions: { da: "Beregn vægttab", no: "Beregn vekttap", se: "Beräkna viktminskning" } },
   { href: "/termin", icon: "🤰", titles: { da: "Terminsdato", no: "Termindato", se: "Beräknat datum" }, descriptions: { da: "Beregn terminsdato", no: "Beregn termindato", se: "Beräkna förlossningsdatum" } },
+  { href: "/aegloesning", icon: "🌸", titles: { da: "Ægløsning", no: "Eggløsning", se: "Ägglossning" }, descriptions: { da: "Find dine frugtbare dage", no: "Finn dine fruktbare dager", se: "Hitta dina fertila dagar" } },
 ];
 
 // DA-only slugs (not available on NO/SE)
@@ -141,6 +146,11 @@ const relatedMap: Record<string, string[]> = {
   "/opsparing": ["/renteberegner", "/pension", "/aktieskat", "/laaneberegner", "/loen-efter-skat"],
   "/budget": ["/loen-efter-skat", "/opsparing", "/gaeldsfri", "/boliglaan", "/laaneberegner"],
   "/afkast": ["/opsparing", "/renteberegner", "/aktieskat", "/procent", "/pension"],
+  "/sparemaal": ["/opsparing", "/afkast", "/renteberegner", "/budget", "/pension"],
+  "/loenstigning": ["/loen-efter-skat", "/loen-konverter", "/procent", "/timepris", "/brutto-netto"],
+  "/ohm": ["/procent", "/enheder", "/elberegner", "/temperatur", "/kvadratmeter"],
+  "/planetvaegt": ["/enheder", "/procent", "/temperatur", "/gennemsnit", "/kvadratmeter"],
+  "/aegloesning": ["/termin", "/nedtaelling", "/dato", "/alder", "/bmi"],
   "/brok": ["/procent", "/gennemsnit", "/kvadratmeter", "/temperatur", "/enheder"],
   "/nedtaelling": ["/dato", "/alder", "/tidsberegner", "/termin", "/tidszone"],
   "/rentefradrag": ["/boliglaan", "/renteberegner", "/laaneberegner", "/skattefradrag", "/loen-efter-skat"],
