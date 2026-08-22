@@ -3,12 +3,12 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Search } from "lucide-react";
 import Link from "next/link";
+import { CalcIcon } from "@/components/ui/icons";
 
 interface Beregner {
   title: string;
   description: string;
   href: string;
-  icon: string;
   category: string;
 }
 
@@ -114,7 +114,7 @@ export default function SearchBar({ beregnere }: SearchBarProps) {
                     : "hover:bg-gray-50 dark:hover:bg-gray-700/50"
                 }`}
               >
-                <span className="text-2xl flex-shrink-0">{b.icon}</span>
+                <CalcIcon href={b.href} className="h-5 w-5 flex-shrink-0 text-gray-400 dark:text-gray-500" />
                 <div className="min-w-0">
                   <div className="font-medium text-gray-900 dark:text-white truncate">{b.title}</div>
                   <div className="text-sm text-gray-500 dark:text-gray-400 truncate">{b.category}</div>

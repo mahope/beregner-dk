@@ -1,6 +1,11 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: AKTIV (iteration 1 = research-iteration, backlog oprettet)
+STATUS: AKTIV
+
+## Prioriteter (opdateret pr. missions-brev 2026-08-22)
+1. **Emojis ud → lucide-react ikoner ind** (ca. 666 forekomster i 45 filer) — i etaper, grøn gate mellem hver
+2. Flere blogindlæg (20 findes; ét ad gangen med ægte substans + kilder + interne links)
+3. Flere beregnere (backlog nedenfor) + løbende korrekthed (2026-satser), UX, CWV
 
 ## Kvalitetsgate (repoets egne scripts fra package.json)
 
@@ -41,6 +46,41 @@ Fundet under research: `relatedMap["/enhedspris"]` refererer til `/rabat`, som I
 findes (filtreres væk i runtime). Bygges Rabatberegner (#1) løses referencen naturligt.
 
 ## Backlog (prioriteret — byg ÉN ad gangen, helt færdig)
+
+### Emoji-udskiftning (Prio 1) — i etaper
+
+**Beslutning (iteration 3):** ét centralt ikonsystem i `src/lib/icons.ts`:
+- `calculatorIcons: Record<href, LucideIcon>` — én definition pr. beregner (fjerner duplikering
+  på tværs af home-data/categories/calculator-list/footer, som i dag gentager samme emoji pr. locale)
+- `getCategoryVisual(name)` → `{ icon, color }` pr. kategori (da/no/se-navnevarianter mappet til
+  samme visuel; farve = fulde Tailwind-literal-strenge m. dark-variant, så v4-purge ikke rammer)
+- Wrapper-komponenter `src/components/ui/icons.tsx` (`CalcIcon`, `CategoryIcon`): ensartet
+  strokeWidth 1,75, dekorativ `aria-hidden`, størrelse via className pr. kontekst
+- Data-filernes `emoji: string`/`icon: string`-felter FJERNES (ikke omdøbt) — forbrugere slår op
+  centralt. Betydningsbærende ikoner får label (ingen kendte i denne etape; alle er dekorative)
+
+Etaper:
+1. [x] FÆRDIG (iteration 3): `icons.ts` + `ui/icons.tsx`; data: `categories.ts`,
+   `home-data.ts`; forbrugere: `app/page.tsx`, `kategori/[slug]/page.tsx`, `SearchBar.tsx`.
+   Features-sektion 🆓/🔒 → Gift/ShieldCheck.
+   Gate grøn: lint ok, 279/279 tests, build ok. Verificeret lokalt mod build-output:
+   0 emojis fra home-data/categories på forsiden+kategori (75/44 inline-SVG'er);
+   resterende 🧮 i Footer tælles i etape 4.
+2. [ ] `navigation.ts` + `Header.tsx` (+ evt. mobilmenu)
+3. [ ] `calculator-list.ts` + forbrugere: `Sidebar`, `RelatedCalculators`, `NotFoundSearch`,
+   `not-found.tsx`, `BeregnerAssistent`
+4. [ ] `footer-data.ts` + `Footer.tsx`
+5. [ ] Komponent-emojis: `AlderBeregner`, `PlanetVaegtBeregner`, `BraendstofBeregner`,
+   `TidsBeregner`, `RentefradragBeregner`, `HuslejeBudgetBeregner`, `BarselBeregner`,
+   `ArveafgiftBeregner`, `EfterloensBeregner`, `ElbilBenzinBeregner`, + småforekomster
+6. [ ] `app/billaan/page.tsx` (28 forekomster)
+7. [ ] Blog-prose-emojis (lav prio; kun hvis de ligner UI, ellers ok i løbende tekst? VURDÉR)
+8. [ ] `opengraph-image.tsx` (9 emojis — vurder om lucide kan rendres i OG-image eller drop)
+
+Ikon-valg pr. href er dokumenteret i `src/lib/icons.ts` (meningsfulde valg: hus=bolig,
+landmark=lån, piggybank=opsparing osv.).
+
+### Beregnere (Prio 3 — efter blog iflg. missions-brev, men beholdes her som klar backlog)
 
 ### 1. [ ] Rabatberegner (`/rabat`) — Hverdag
    - Logik: pris efter rabat %, "X for Y"-pris pr. stk., spar-beloeb; tests incl. 0%/100%/negative
@@ -98,3 +138,6 @@ findes (filtreres væk i runtime). Bygges Rabatberegner (#1) løses referencen n
 
 ## VERIFICÉR DEPLOY-log
 - VERIFICÉR DEPLOY: implementationsplan tilføjet f7633f6 16:20 (2026-08-22)
+  → kun repo-filer (IMPLEMENTATION_PLAN.md), intet site-indhold at verificere; health ok.
+- DEPLOY OK 2026-08-22: PR #19 (titel-fix, f9dd358/9329b79) verificeret live —
+  https://minberegner.dk/moms viser `<title>Momsberegner | MinBeregner.dk</title>` (ikke dobbelt).

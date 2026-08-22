@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { FAQSchema } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import FAQ from "@/components/FAQ";
+import { CalcIcon, CategoryIcon, getCategoryColor } from "@/components/ui/icons";
 import {
   categories,
   getCategoryBySlug,
@@ -85,7 +86,7 @@ export default async function KategoriPage({ params }: PageProps) {
 
       <div className="mb-8">
         <h1 className="text-3xl md:text-4xl font-bold mb-3">
-          <span className="mr-2">{category.emoji}</span>
+          <CategoryIcon name={category.name} className="mr-2 inline-block h-8 w-8 align-[-6px]" />
           {category.title}
         </h1>
         <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl">
@@ -100,7 +101,7 @@ export default async function KategoriPage({ params }: PageProps) {
             href={beregner.href}
             className="group block p-5 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-md transition-all hover-lift"
           >
-            <div className="text-3xl mb-3">{beregner.icon}</div>
+            <CalcIcon href={beregner.href} className={`mb-3 h-8 w-8 ${getCategoryColor(category.name)}`} />
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
               {beregner.title}
             </h2>
@@ -125,7 +126,7 @@ export default async function KategoriPage({ params }: PageProps) {
                 href={`/kategori/${c.slug}`}
                 className="inline-flex items-center gap-1.5 px-4 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-blue-900/20 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium transition-colors"
               >
-                <span>{c.emoji}</span>
+                <CategoryIcon name={c.name} className="h-4 w-4" />
                 {c.name}
               </Link>
             ))}
