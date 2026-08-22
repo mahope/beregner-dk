@@ -9,3 +9,5 @@ export { CopyResultButton } from "./CopyResultButton";
 export { ScrollToResult } from "./ScrollToResult";
 export { InfoTooltip } from "./InfoTooltip";
 export { ResetButton } from "./ResetButton";
+
+export { CalcIcon, CategoryIcon, getCategoryColor } from "./icons";

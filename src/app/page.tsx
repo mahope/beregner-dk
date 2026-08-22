@@ -1,7 +1,9 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { Gift, ShieldCheck } from "lucide-react";
 import { FAQSchema } from "@/components/StructuredData";
 import SearchBar from "@/components/SearchBar";
+import { CalcIcon, CategoryIcon, getCategoryColor } from "@/components/ui/icons";
 import { getTrendingHrefs } from "@/lib/trending";
 import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
 import { getAllDomainConfigs } from "@/lib/domain-config";
@@ -54,11 +56,10 @@ export default async function Home() {
     grouped.set(b.category, list);
   }
 
-  const searchData = beregnere.map(({ title, description, href, icon, category }) => ({
+  const searchData = beregnere.map(({ title, description, href, category }) => ({
     title,
     description,
     href,
-    icon,
     category,
   }));
 
@@ -129,7 +130,10 @@ export default async function Home() {
                   </span>
                 )}
                 <div className="text-center">
-                  <span className="text-5xl block mb-3">{beregner.icon}</span>
+                  <CalcIcon
+                    href={beregner.href}
+                    className={`mx-auto block h-12 w-12 mb-3 ${getCategoryColor(beregner.category)}`}
+                  />
                   <span className="inline-block text-xs text-blue-600 dark:text-blue-400 font-medium uppercase tracking-wide bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-full mb-2">
                     {beregner.category}
                   </span>
@@ -147,13 +151,14 @@ export default async function Home() {
       </section>
 
       {/* Categorized sections */}
-      {data.categoryOrder.map(({ key, emoji }) => {
+      {data.categoryOrder.map(({ key }) => {
         const items = grouped.get(key);
         if (!items || items.length === 0) return null;
         return (
           <section key={key} className="mb-12">
-            <h2 className="text-xl font-bold mb-4 dark:text-white">
-              {emoji} {key}
+            <h2 className="text-xl font-bold mb-4 dark:text-white flex items-center gap-2">
+              <CategoryIcon name={key} className="h-6 w-6" />
+              {key}
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {items.map((beregner) => {
@@ -164,7 +169,10 @@ export default async function Home() {
                     href={beregner.href}
                     className="group relative flex items-center gap-4 p-4 bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md border border-transparent hover:border-blue-500 dark:hover:border-blue-400 transition-all"
                   >
-                    <span className="text-3xl flex-shrink-0">{beregner.icon}</span>
+                    <CalcIcon
+                      href={beregner.href}
+                      className={`h-6 w-6 flex-shrink-0 ${getCategoryColor(beregner.category)}`}
+                    />
                     <div className="min-w-0 flex-1">
                       <h3 className="font-semibold group-hover:text-blue-600 dark:group-hover:text-blue-400 dark:text-white transition-colors truncate">
                         {beregner.title}
@@ -193,12 +201,12 @@ export default async function Home() {
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="text-center">
-            <div className="text-4xl mb-4">🆓</div>
+            <Gift className="mx-auto h-10 w-10 mb-4 text-blue-600 dark:text-blue-400" strokeWidth={1.75} aria-hidden="true" />
             <h3 className="font-semibold text-lg mb-2 dark:text-white">{data.sections.features.free.title}</h3>
             <p className="text-gray-600 dark:text-gray-300">{data.sections.features.free.description}</p>
           </div>
           <div className="text-center">
-            <div className="text-4xl mb-4">🔒</div>
+            <ShieldCheck className="mx-auto h-10 w-10 mb-4 text-emerald-600 dark:text-emerald-400" strokeWidth={1.75} aria-hidden="true" />
             <h3 className="font-semibold text-lg mb-2 dark:text-white">{data.sections.features.private.title}</h3>
             <p className="text-gray-600 dark:text-gray-300">{data.sections.features.private.description}</p>
           </div>
