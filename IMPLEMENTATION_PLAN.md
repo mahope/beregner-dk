@@ -141,3 +141,4 @@ landmark=lån, piggybank=opsparing osv.).
   → kun repo-filer (IMPLEMENTATION_PLAN.md), intet site-indhold at verificere; health ok.
 - DEPLOY OK 2026-08-22: PR #19 (titel-fix, f9dd358/9329b79) verificeret live —
   https://minberegner.dk/moms viser `<title>Momsberegner | MinBeregner.dk</title>` (ikke dobbelt).
+- VERIFICÉR DEPLOY: lucide-ikoner på forside/kategori/søgning (etape 1) eed982b 20:35 (2026-08-22)
