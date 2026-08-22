@@ -97,4 +97,4 @@ findes (filtreres væk i runtime). Bygges Rabatberegner (#1) løses referencen n
 - Deploy: batch-deployer ~07:30/12:30/17:30. Efter hvert merge: VERIFICÉR-note herunder.
 
 ## VERIFICÉR DEPLOY-log
-- VERIFICÉR DEPLOY: implementationsplan tilføjet <sha> <tidspunkt>
+- VERIFICÉR DEPLOY: implementationsplan tilføjet f7633f6 16:20 (2026-08-22)
