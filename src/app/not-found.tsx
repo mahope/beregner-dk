@@ -2,6 +2,7 @@ import Link from "next/link";
 import NotFoundSearch from "@/components/NotFoundSearch";
 import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPopularCalculators } from "@/lib/calculator-list";
+import { CalcIcon } from "@/components/ui/icons";
 
 const notFoundText = {
   da: {
@@ -53,7 +54,7 @@ export default async function NotFound() {
               href={b.href}
               className="flex items-center gap-2 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-sm transition-all text-sm font-medium text-gray-900 dark:text-white"
             >
-              {b.icon && <span className="text-xl">{b.icon}</span>}
+              <CalcIcon href={b.href} className="h-5 w-5 text-gray-500 dark:text-gray-400 shrink-0" aria-hidden="true" />
               {b.title}
             </Link>
           ))}

@@ -6,6 +6,7 @@ import { Search } from "lucide-react";
 import { useLocale } from "@/components/LocaleProvider";
 import { getCalculatorsByLocale } from "@/lib/calculator-list";
 import type { Locale } from "@/lib/i18n";
+import { CalcIcon } from "@/components/ui/icons";
 
 function fuzzyMatch(query: string, text: string): boolean {
   const q = query.toLowerCase();
@@ -89,7 +90,7 @@ export default function NotFoundSearch() {
               href={b.href}
               className="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-sm transition-all text-left"
             >
-              <span className="text-2xl flex-shrink-0">{b.icon}</span>
+              <CalcIcon href={b.href} className="h-7 w-7 text-gray-500 dark:text-gray-400 shrink-0" aria-hidden="true" />
               <div>
                 <div className="font-medium text-gray-900 dark:text-white">
                   {b.title}

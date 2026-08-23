@@ -5,11 +5,11 @@ import Link from "next/link";
 import { useLocale } from "@/components/LocaleProvider";
 import { t } from "@/lib/i18n";
 import { getCalculatorsByLocale } from "@/lib/calculator-list";
+import { CalcIcon } from "@/components/ui/icons";
 
 interface Match {
   title: string;
   href: string;
-  icon?: string;
   description: string;
   score: number;
 }
@@ -119,7 +119,7 @@ function AssistentInner({ locale }: { locale: string }) {
           }
         }
 
-        return { title: calc.title, href: calc.href, icon: calc.icon, description: calc.description, score };
+        return { title: calc.title, href: calc.href, description: calc.description, score };
       })
       .filter((m) => m.score > 0)
       .sort((a, b) => b.score - a.score)
@@ -187,7 +187,7 @@ function AssistentInner({ locale }: { locale: string }) {
                 onClick={() => setIsOpen(false)}
                 className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-gray-50 dark:bg-gray-700 hover:bg-blue-50 dark:hover:bg-gray-600 transition-colors"
               >
-                {m.icon && <span className="text-2xl">{m.icon}</span>}
+                <CalcIcon href={m.href} className="h-7 w-7 text-gray-500 dark:text-gray-400 shrink-0" aria-hidden="true" />
                 <div>
                   <span className="font-medium text-sm text-gray-900 dark:text-white">{m.title}</span>
                   <span className="block text-xs text-gray-500 dark:text-gray-400">{m.description}</span>

@@ -3,6 +3,7 @@ import { getLocale } from "@/lib/get-locale";
 import { getTranslations } from "@/lib/i18n";
 import { getRelatedCalculators, getCalculatorsByLocale } from "@/lib/calculator-list";
 import type { Calculator } from "@/lib/calculator-list";
+import { CalcIcon } from "@/components/ui/icons";
 
 interface RelatedCalculatorsProps {
   current?: string;
@@ -38,7 +39,7 @@ export async function RelatedCalculators({
             href={calc.href}
             className="p-4 bg-white dark:bg-gray-800 rounded-lg border dark:border-gray-700 hover:shadow-md dark:hover:bg-gray-700 transition-shadow flex items-center gap-3"
           >
-            {calc.icon && <span className="text-2xl">{calc.icon}</span>}
+            <CalcIcon href={calc.href} className="h-8 w-8 text-gray-500 dark:text-gray-400 shrink-0" aria-hidden="true" />
             <div>
               <p className="font-medium dark:text-white">{calc.title}</p>
               <p className="text-sm text-gray-500 dark:text-gray-400">{calc.description}</p>

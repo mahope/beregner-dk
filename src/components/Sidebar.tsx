@@ -5,6 +5,7 @@ import { SidebarAd } from "@/components/ads/AdBanner";
 import { useLocale } from "@/components/LocaleProvider";
 import { t } from "@/lib/i18n";
 import { getPopularCalculators } from "@/lib/calculator-list";
+import { CalcIcon } from "@/components/ui/icons";
 
 interface SidebarProps {
   currentHref?: string;
@@ -33,7 +34,7 @@ export default function Sidebar({ currentHref, adSlotId }: SidebarProps) {
                 href={b.href}
                 className="flex items-center gap-2 px-2 py-1.5 rounded-lg text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
               >
-                {b.icon && <span className="text-base">{b.icon}</span>}
+                <CalcIcon href={b.href} className="h-5 w-5 text-gray-500 dark:text-gray-400 shrink-0" aria-hidden="true" />
                 {b.title}
               </Link>
             ))}
