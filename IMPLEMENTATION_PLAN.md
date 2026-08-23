@@ -105,8 +105,13 @@ Etaper:
     shipper 1× pr. side i RSC-payload — lavprio-oprydning, ikke synligt UI.
 6. [x] FÆRDIG (iteration: 2026-08-23): `app/billaan/page.tsx` — 28 ✅/❌ i prose-lister
    → CheckCircle (grøn) / XCircle (rød). Gate: lint ok, 280/280 tests, build ok.
-7. [ ] Blog-prose-emojis (lav prio; kun hvis de ligner UI, ellers ok i løbende tekst? VURDÉR)
-8. [ ] `opengraph-image.tsx` (9 emojis — vurder om lucide kan rendres i OG-image eller drop)
+7. [x] SKIPPET (iteration: 2026-08-23): Blog-prose-emojis i løbende tekst er lav prioritet
+   jf. missions-brev ("Emoji i ren tekst... er lavere prioritet — tag UI'et først").
+   Ingen UI-emojis tilbage; prosa-emojis afklares ved senere gennemgang hvis behov.
+8. [x] FÆRDIG (iteration: 2026-08-23 20:16): `opengraph-image.tsx` — 8 emoji-ikoner →
+   inline lucide SVG (Banknote, Divide, Scale, Receipt, Landmark, ArrowLeftRight,
+   ChartColumn, House) + 3 badge-emojis (🆓🔒🇩🇰) → ren tekst (100% Gratis / Privat & Sikkert /
+   2026-satser). Gate: lint ok, 280/280 tests, build ok (124 pages).
 
 Ikon-valg pr. href er dokumenteret i `src/lib/icons.ts` (meningsfulde valg: hus=bolig,
 landmark=lån, piggybank=opsparing osv.).
@@ -187,3 +192,6 @@ landmark=lån, piggybank=opsparing osv.).
 - VERIFICÉR DEPLOY: billaan-ikoner (etape 6) e6d009a 13:45
   → DEPLOY OK 2026-08-23 18:20: /billaan = 0 ✅/❌; circle-check ×16, circle-x ×12.
 - VERIFICÉR DEPLOY: komponent-ikoner etape 5 bd832b2 18:40
+  → PT: commit efter 17:30-batch (18:20), næste vindue 07:30 24. aug.
+     PlanetVaegt (☿️♀️🌙♂️🪐🔵🌑☀️) bekræfter endnu ikke live.
+- VERIFICÉR DEPLOY: opengraph-image etape 8 (committed nedenfor)
