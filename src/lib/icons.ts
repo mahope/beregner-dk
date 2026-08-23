@@ -173,6 +173,7 @@ const calculatorIcons: Record<string, LucideIcon> = {
   "/opsparing": PiggyBank,
   "/pension": Hourglass,
   "/planetvaegt": Orbit,
+  "/rabat": Tag,
   "/procent": Percent,
   "/promille": Beer,
   "/rejsebudget": Plane,

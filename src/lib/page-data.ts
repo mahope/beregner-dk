@@ -18,7 +18,7 @@ export type PageData = {
   schemaCategory: string;
 };
 
-const daOnlySlugs = ["loen-efter-skat", "brutto-netto", "feriepenge", "dagpenge", "sygedagpenge", "pension", "efterloen", "topskat", "skattefradrag", "aktieskat", "arveafgift", "rentefradrag", "boligstoette", "husleje", "andelsbolig", "ejendomsvaerdiskat", "boernepenge", "barselsdagpenge", "su", "studielaan"];
+const daOnlySlugs = ["loen-efter-skat", "brutto-netto", "feriepenge", "dagpenge", "sygedagpenge", "pension", "efterloen", "topskat", "skattefradrag", "aktieskat", "arveafgift", "rentefradrag", "boligstoette", "husleje", "andelsbolig", "ejendomsvaerdiskat", "boernepenge", "barselsdagpenge", "su", "studielaan", "rabat"];
 
 const allLocalesSlugs = ["bmi", "kalorier", "vaegttab", "procent", "kvadratmeter", "alder", "dato", "tidsberegner", "tidszone", "rejsebudget", "bryllup", "konfirmation", "braendstof", "bil", "valuta", "renteberegner", "opsparing", "laaneberegner", "billaan", "leasing", "forbrugslaan", "gaeldsfri", "boliglaan", "elberegner", "solceller", "timepris", "termin", "moms"];
 
@@ -1588,6 +1588,28 @@ const daPages: Record<string, PageData> = {
       { question: "Kan jeg betale SU-lån hurtigere tilbage?", answer: "Ja, du kan til enhver tid betale ekstra af på dit SU-lån uden gebyr. Ekstra afdrag reducerer din restgæld og dermed din samlede renteomkostning. Selv små ekstra beløb gør en forskel." },
       { question: "Hvad sker der, hvis jeg ikke kan betale?", answer: "Kontakt Udbetaling Danmark hurtigst muligt. Du kan søge om nedsat ydelse eller midlertidigt betalingsstop, hvis du har lav indkomst. Ignorer ikke problemet — gælden vokser med renter." },
       { question: "Hvor lang tid har jeg til at betale SU-lån?", answer: "Standard løbetiden er 7 år, men den kan forlænges til op til 15 år, hvis du har behov for lavere månedlige ydelser. Husk at en længere løbetid betyder flere renteomkostninger." },
+      ],
+    },
+    "rabat": {
+      slug: "rabat",
+      title: "Rabatberegner - beregn pris efter rabat",
+      description: "Beregn prisen efter rabat og se, hvor mange procent du sparer. Indtast originalpris og rabatprocent, eller find rabatprocent ud fra tilbudspris.",
+      metaTitle: "Rabatberegner - Beregn pris efter rabat & besparelse | MinBeregner.dk",
+      metaDescription: "Gratis rabatberegner. Beregn pris efter rabat, find rabatprocent og se hvor meget du sparer. Perfekt til tilbud, udsalg og danske prissammenligninger.",
+      keywords: ["rabatberegner", "beregn rabat", "pris efter rabat", "rabatprocent", "besparelse beregner", "tilbudspris beregner"],
+      ogTitle: "Rabatberegner - Beregn pris efter rabat",
+      ogDescription: "Beregn pris efter rabat og se, hvor mange procent du sparer. Indtast originalpris og rabatprocent.",
+      category: "Hverdag",
+      breadcrumbCategory: "Hverdag",
+      breadcrumbCategoryHref: "/kategori/hverdag",
+      schemaName: "Rabatberegner",
+      schemaDescription: "Beregn pris efter rabat eller find rabatprocent mellem original- og tilbudspris.",
+      schemaCategory: "FinanceApplication",
+      faqItems: [
+        { question: "Hvordan beregner man rabat?", answer: "Rabat i kroner = originalpris × rabatprocent / 100. Hvis en vare koster 400 kr og der er 25% rabat, sparer du 100 kr og betaler 300 kr. Beregneren gør det automatisk for dig." },
+        { question: "Hvordan finder man rabatprocenten?", answer: "Rabatprocent = (originalpris − tilbudspris) / originalpris × 100. Hvis en vare er sat ned fra 400 kr til 300 kr, er rabatprocenten 25%. Beregneren regner det ud med det samme." },
+        { question: "Hvad er forskellen på rabat og procent?", answer: "Rabat er et afslag i prisen, typisk angivet i procent. Det er det samme som procentregning: 'x% rabat' betyder, at du betaler (100 − x)% af originalprisen. Vores procentberegner kan også hjælpe med andre procentberegninger." },
+        { question: "Kan beregneren håndtere decimaltal?", answer: "Ja, du kan indtaste priser og procenter med decimaler. Beregneren viser resultatet med to decimaler, så du får et præcist billede af, hvad du sparer." },
       ],
     },
 };

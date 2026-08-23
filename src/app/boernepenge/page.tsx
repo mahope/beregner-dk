@@ -6,6 +6,7 @@ import FAQ from "@/components/FAQ";
 import RelatedCalculators from "@/components/RelatedCalculators";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import Link from "next/link";
 
 export async function generateMetadata() {
   return generatePageMetadata("boernepenge");
