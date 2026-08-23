@@ -215,6 +215,14 @@ const blogPosts = [
     date: "2026-08-24",
     readTime: "10 min",
   },
+  {
+    slug: "boernepenge-2026-satser-og-regler",
+    title: "Børnepenge 2026: Satser, regler og udbetaling",
+    description: "Komplet guide til børnepenge (børne- og ungeydelse) i 2026: Satser for 0-2, 3-6, 7-14 og 15-17 år, aftrapning, deling mellem forældre og ekstra tilskud til enlige.",
+    category: "Familie & Økonomi",
+    date: "2026-08-24",
+    readTime: "8 min",
+  },
 ];
 
 export default function BlogPage() {

@@ -195,12 +195,21 @@ landmark=lån, piggybank=opsparing osv.).
    - Gate grøn: lint ok, 280/280 tests, build ok (125 pages). Commitsha: 4966fab
 
 ### 2. [x] FÆRDIG (iteration: 2026-08-23 23:37): Leasing af bil 2026 (`/blog/leasing-af-bil-2026-pris-og-guide`)
-   - Topic: "Leasing af bil 2026: Pris, fordele, ulemper og guide" — komplet guide til privatleasing vs. erhvervsleasing, typiske priser pr. bilklasse, leasing vs. billån, elbil-leasing, faldgruber; danske 2026-tal
-   - Calculators linked: /leasing, /billaan, /bil, /braendstof, /elbil, /laaneberegner
-   - Cross-links til: biloekonomi-2026, spar-penge-paa-braendstof, elpriser-2026, guide-til-laan-og-renter
-   - Registreret i blog/page.tsx, sitemap.ts
-   - Research: FDM blokeret (404); brugt generelle danske leasingpriser noteret "vejledende"
-   - Gate grøn: lint ok, 280/280 tests, build ok (126 pages). Commitsha: 1c8a9a6
+    - Topic: "Leasing af bil 2026: Pris, fordele, ulemper og guide" — komplet guide til privatleasing vs. erhvervsleasing, typiske priser pr. bilklasse, leasing vs. billån, elbil-leasing, faldgruber; danske 2026-tal
+    - Calculators linked: /leasing, /billaan, /bil, /braendstof, /elbil, /laaneberegner
+    - Cross-links til: biloekonomi-2026, spar-penge-paa-braendstof, elpriser-2026, guide-til-laan-og-renter
+    - Registreret i blog/page.tsx, sitemap.ts
+    - Research: FDM blokeret (404); brugt generelle danske leasingpriser noteret "vejledende"
+    - Gate grøn: lint ok, 280/280 tests, build ok (126 pages). Commitsha: 1c8a9a6
+
+### 4. [x] FÆRDIG (iteration: 2026-08-24): Børnepenge 2026 — Satser, regler og udbetaling (`/blog/boernepenge-2026-satser-og-regler`)
+    - Topic: komplet guide til børne- og ungeydelse 2026 — satser 0-2/3-6/7-14/15-17 år, aftrapning ved høj indkomst, deling mellem forældre, ekstra tilskud til enlige forsørgere; officielle borger.dk-satser
+    - Calculators linked: /boernepenge, /barselsdagpenge, /boligstoette, /budget, /su, /loen-efter-skat
+    - Cross-links til: barsel-2026, boligstoette-2026, fradrag-2026, skat-2026
+    - Registreret i blog/page.tsx, sitemap.ts
+    - Backlink added: /boernepenge page linker til blog
+    - Cleanup: 3 tidligere blog-indlæg og dette nye tilføjet til footer-data.ts "Seneste artikler"
+    - Gate grøn: lint ok, 280/280 tests, build ok (128 pages).
 
 ## VERIFICÉR DEPLOY-log
 - VERIFICÉR DEPLOY: implementationsplan tilføjet f7633f6 16:20 (2026-08-22)
@@ -232,3 +241,5 @@ landmark=lån, piggybank=opsparing osv.).
   → PT: commit efter 17:30-batch, næste vindue 07:30 24. aug.
 - VERIFICÉR DEPLOY: månedsbudget blog post a2ca835 23:58
   → PT: commit efter 17:30-batch, næste vindue 07:30 24. aug.
+- VERIFICÉR DEPLOY: børnepenge blog post + footer-data cleanup (3 tidl. blog-posts tilføjet)
+  → PT: commit før 07:30-batch 24. aug.

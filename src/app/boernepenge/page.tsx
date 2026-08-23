@@ -86,6 +86,9 @@ export default async function BoernepengePage() {
           <strong>Børneydelsen</strong> (0-14 år) udbetales <strong>kvartalsvis</strong> forud den 20. i januar, april, juli og oktober.
           <strong>Ungeydelsen</strong> (15-17 år) udbetales <strong>månedligt</strong> den 20. direkte til den unge.
         </p>
+        <p>
+          Læs vores <Link href="/blog/boernepenge-2026-satser-og-regler" className="text-blue-600 hover:underline">komplette guide til børnepenge 2026</Link> for en dybdegående gennemgang af satser, delingsregler og ekstra tilskud til enlige forsørgere.
+        </p>
 
         <h2>Aftrapning for høje indkomster</h2>
         <p>

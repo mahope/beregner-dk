@@ -107,5 +107,6 @@ function getBlogSlugs(locale: Locale): string[] {
     "biloekonomi-2026-hvad-koster-det-at-eje-bil",
     "leasing-af-bil-2026-pris-og-guide",
     "maanedsbudget-2026-komplet-guide",
+    "boernepenge-2026-satser-og-regler",
   ];
 }
