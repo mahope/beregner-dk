@@ -118,10 +118,14 @@ landmark=lån, piggybank=opsparing osv.).
 
 ### Beregnere (Prio 3 — efter blog iflg. missions-brev, men beholdes her som klar backlog)
 
-### 1. [ ] Rabatberegner (`/rabat`) — Hverdag
-   - Logik: pris efter rabat %, "X for Y"-pris pr. stk., spar-beloeb; tests incl. 0%/100%/negative
+### 1. [x] FÆRDIG (iteration: 2026-08-24 01:50): Rabatberegner (`/rabat`) — Hverdag
+   - Logik: pris efter rabat %, rabatprocent mellem original- og tilbudspris; tests incl. 0%/100%/negative/null
    - SEO: "rabat beregner", "procent rabat udregning"; fixer dangling `/rabat`-ref i relatedMap
    - Links: procent, enhedspris, del-regning, moms
+   - Ikon: Tag (lucide)
+   - Fix: src/app/boernepenge/page.tsx manglede `import Link from "next/link"` — build brød på master
+   - Gate grøn: lint ok, 295/295 tests (+15 nye rabat-tests, 36 test-filer), build ok (129 pages)
+   - Commitsha: e5b21ae
 
 ### 2. [ ] Befordringsfradrag-beregner (`/befordringsfradrag`) — Økonomi, daOnly
    - Logik: bruger eksisterende `SATSER_2026.koersel*` (24 km bundgrænse, 2,28/1,14 kr/km);
@@ -174,6 +178,8 @@ landmark=lån, piggybank=opsparing osv.).
 - Emoji-udskiftning: ALLE 8 etaper færdige. Alle UI-emojis fjernet (650+ forekomster i 45 filer
   skiftet til lucide-react SVG-ikoner). Kun prosa-emojis (lav prioritet) og dødt data
   (countryFlag i domain-config) resterer.
+- Fix: src/app/boernepenge/page.tsx manglede `import Link from "next/link"` — byggefejl opdaget
+  under kvalitetsgate for rabatberegner (pre-existing bug, rettet sammen med rabat-iterationen).
 
 ## Blog — næste indlæg
 
@@ -243,3 +249,5 @@ landmark=lån, piggybank=opsparing osv.).
   → PT: commit efter 17:30-batch, næste vindue 07:30 24. aug.
 - VERIFICÉR DEPLOY: børnepenge blog post + footer-data cleanup (3 tidl. blog-posts tilføjet)
   → PT: commit før 07:30-batch 24. aug.
+- VERIFICÉR DEPLOY: rabatberegner + boernepenge Link-fix e5b21ae 01:50
+  → PT: commit efter 07:30-batch, næste vindue 12:30 24. aug.
