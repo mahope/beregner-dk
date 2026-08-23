@@ -177,6 +177,14 @@ landmark=lån, piggybank=opsparing osv.).
 
 ## Blog — næste indlæg
 
+### 3. [x] FÆRDIG (iteration: 2026-08-23 23:58): Månedsbudget 2026 — Komplet guide til privatøkonomi (`/blog/maanedsbudget-2026-komplet-guide`)
+   - Topic: komplet guide til at lave et månedsbudget — faste/variable udgifter, 50/30/20-reglen,
+     tommelfingerregler for bolig/transport/opsparing, gældsafbetaling, danske 2026-tal
+   - Calculators linked: /budget, /sparemaal, /huslejeberegner, /loen-efter-skat, /opsparing, /pension
+   - Backlinks added: /budget, /husleje, /opsparing pages
+   - Registreret i blog/page.tsx, sitemap.ts
+   - Gate grøn: lint ok, 280/280 tests, build ok (127 pages). Commitsha: a2ca835
+
 ### 1. [x] FÆRDIG: Biløkonomi 2026 — Hvad koster det at eje bil? (`/blog/biloekonomi-2026`)
    - Topic: samlet guide til biløkonomi (ejeromkostninger: afgifter, forsikring, brændstof/el,
      værditab, finansiering) med danske 2026-tal
@@ -221,4 +229,6 @@ landmark=lån, piggybank=opsparing osv.).
 - VERIFICÉR DEPLOY: biloekonomi blog post 4966fab 23:00
   → PT: commit efter 17:30-batch, næste vindue 07:30 24. aug.
 - VERIFICÉR DEPLOY: leasing blog post 1c8a9a6 23:37
+  → PT: commit efter 17:30-batch, næste vindue 07:30 24. aug.
+- VERIFICÉR DEPLOY: månedsbudget blog post a2ca835 23:58
   → PT: commit efter 17:30-batch, næste vindue 07:30 24. aug.
