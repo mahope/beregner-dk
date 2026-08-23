@@ -87,7 +87,8 @@ Etaper:
 5. [ ] Komponent-emojis: `AlderBeregner`, `PlanetVaegtBeregner`, `BraendstofBeregner`,
    `TidsBeregner`, `RentefradragBeregner`, `HuslejeBudgetBeregner`, `BarselBeregner`,
    `ArveafgiftBeregner`, `EfterloensBeregner`, `ElbilBenzinBeregner`, + småforekomster
-6. [ ] `app/billaan/page.tsx` (28 forekomster)
+6. [x] FÆRDIG (iteration: 2026-08-23): `app/billaan/page.tsx` — 28 ✅/❌ i prose-lister
+   → CheckCircle (grøn) / XCircle (rød). Gate: lint ok, 280/280 tests, build ok.
 7. [ ] Blog-prose-emojis (lav prio; kun hvis de ligner UI, ellers ok i løbende tekst? VURDÉR)
 8. [ ] `opengraph-image.tsx` (9 emojis — vurder om lucide kan rendres i OG-image eller drop)
 
@@ -163,3 +164,4 @@ landmark=lån, piggybank=opsparing osv.).
   i desktop-dropdown på /kategori/oekonomi.
 - VERIFICÉR DEPLOY: calculator-list-ikoner (etape 3) a932b07 13:22
 - VERIFICÉR DEPLOY: footer-ikoner (etape 4) 9e50974 13:32
+- VERIFICÉR DEPLOY: billaan-ikoner (etape 6) e6d009a 13:45
