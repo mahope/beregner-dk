@@ -46,4 +46,16 @@ describe("getNavigation", () => {
     expect(daTotal).toBeGreaterThan(seTotal);
     expect(daTotal).toBeGreaterThan(noTotal);
   });
+
+  test("nav names contain no emojis and no stray whitespace", () => {
+    for (const locale of ["da", "no", "se"] as const) {
+      for (const item of getNavigation(locale)) {
+        const names = [item.name, ...(item.children?.map((c) => c.name) ?? [])];
+        for (const name of names) {
+          expect(name).not.toMatch(/\p{Extended_Pictographic}/u);
+          expect(name).toBe(name.trim());
+        }
+      }
+    }
+  });
 });

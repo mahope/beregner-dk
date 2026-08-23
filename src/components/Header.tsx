@@ -6,6 +6,7 @@ import { ChevronDown, Menu, X, Calculator } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
 import { useLocale } from "./LocaleProvider";
 import { getNavigation, type NavItem } from "@/lib/navigation";
+import { CalcIcon } from "@/components/ui/icons";
 import { getTranslations } from "@/lib/i18n";
 
 function DropdownMenu({ item }: { item: NavItem }) {
@@ -53,9 +54,13 @@ function DropdownMenu({ item }: { item: NavItem }) {
             <Link
               key={child.href}
               href={child.href}
-              className="block px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors"
+              className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors"
               onClick={() => setIsOpen(false)}
             >
+              <CalcIcon
+                href={child.href}
+                className="h-4 w-4 flex-shrink-0 text-gray-400 dark:text-gray-500"
+              />
               {child.name}
             </Link>
           ))}
@@ -121,9 +126,13 @@ function MobileNav({
                         <Link
                           key={child.href}
                           href={child.href}
-                          className="block px-4 py-3 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                          className="flex items-center gap-2.5 px-4 py-3 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
                           onClick={() => setIsOpen(false)}
                         >
+                          <CalcIcon
+                            href={child.href}
+                            className="h-4 w-4 flex-shrink-0 text-gray-400 dark:text-gray-500"
+                          />
                           {child.name}
                         </Link>
                       ))}
