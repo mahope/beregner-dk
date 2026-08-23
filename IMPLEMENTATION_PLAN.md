@@ -177,13 +177,14 @@ landmark=lån, piggybank=opsparing osv.).
 
 ## Blog — næste indlæg
 
-### 1. [x] I GANG: Biløkonomi 2026 — Hvad koster det at eje bil? (`/blog/biloekonomi-2026`)
+### 1. [x] FÆRDIG: Biløkonomi 2026 — Hvad koster det at eje bil? (`/blog/biloekonomi-2026`)
    - Topic: samlet guide til biløkonomi (ejeromkostninger: afgifter, forsikring, brændstof/el,
      værditab, finansiering) med danske 2026-tal
-   - Calculators to link: /bil, /braendstof, /billaan, /leasing, /elbil, /laaneberegner, /budget
-   - Cross-link to: spar-penge-paa-braendstof, elpriser-2026, boliglaan-2026
-   - Registrer i blog/page.tsx, sitemap.ts
-   - Research først: webfetch skat.dk (registreringsafgift, grøn ejerafgift), FDM (ejeromk.)
+   - Calculators linked: /bil, /braendstof, /billaan, /leasing, /elbil, /laaneberegner, /budget, /loen-efter-skat
+   - Cross-links til: spar-penge-paa-braendstof, elpriser-2026, boliglaan-2026
+   - Registreret i blog/page.tsx, sitemap.ts
+   - Research: FDM/skat.dk-sider blokerede (404), brugt generelle danske 2026-estimater noteret "vejledende"
+   - Gate grøn: lint ok, 280/280 tests, build ok (125 pages). Commitsha: 4966fab
 
 ## VERIFICÉR DEPLOY-log
 - VERIFICÉR DEPLOY: implementationsplan tilføjet f7633f6 16:20 (2026-08-22)
@@ -208,4 +209,6 @@ landmark=lån, piggybank=opsparing osv.).
   → PT: commit efter 17:30-batch (18:20), næste vindue 07:30 24. aug.
      PlanetVaegt (☿️♀️🌙♂️🪐🔵🌑☀️) bekræfter endnu ikke live.
 - VERIFICÉR DEPLOY: opengraph-image etape 8 6429336 18:45
+  → PT: commit efter 17:30-batch, næste vindue 07:30 24. aug.
+- VERIFICÉR DEPLOY: biloekonomi blog post 4966fab 23:00
   → PT: commit efter 17:30-batch, næste vindue 07:30 24. aug.
