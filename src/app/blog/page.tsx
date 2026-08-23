@@ -199,6 +199,14 @@ const blogPosts = [
     date: "2026-08-23",
     readTime: "10 min",
   },
+  {
+    slug: "leasing-af-bil-2026-pris-og-guide",
+    title: "Leasing af bil 2026: Pris, fordele, ulemper og guide",
+    description: "Komplet guide til leasing af bil i 2026: Privat leasing vs. billån, typiske priser, fordele og ulemper, km-grænser og hvordan du finder det bedste tilbud.",
+    category: "Transport & Økonomi",
+    date: "2026-08-23",
+    readTime: "9 min",
+  },
 ];
 
 export default function BlogPage() {
