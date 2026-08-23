@@ -72,9 +72,18 @@ Etaper:
    nav-navne må ikke indeholde emojis eller whitespace (`navigation.test.ts`, 280 tests).
    Gate grøn: lint ok, 280/280 tests, build ok. SSR-verificeret: 0 emojis i header-region,
    ikoner via samme centrale href-opslag som SearchBar.
-3. [ ] `calculator-list.ts` + forbrugere: `Sidebar`, `RelatedCalculators`, `NotFoundSearch`,
-   `not-found.tsx`, `BeregnerAssistent`
-4. [ ] `footer-data.ts` + `Footer.tsx`
+3. [x] FÆRDIG (iteration: 2026-08-23): `calculator-list.ts` — fjernet `icon`-felt
+    fra interface + alle 78 entries. Forbrugere: `Sidebar`, `RelatedCalculators`,
+    `NotFoundSearch`, `not-found.tsx`, `BeregnerAssistent` — alle skiftet til
+    `<CalcIcon href={b.href}>` med konsistent `h-5 w-5`/`h-7 w-7`/`h-8 w-8`,
+    grå farve, aria-hidden. Gate: lint ok, 280/280 tests, build ok (124 pages).
+    Ikon-valg centralt i icons.ts (fallback Calculator-icon).
+4. [x] FÆRDIG (iteration: 2026-08-23): `footer-data.ts` — fjernet `emoji`-felt
+    fra FooterCategory + alle entries (da/no/se). `Footer.tsx` — trust-signaler
+    🧮📅🔒 → Calculator/CalendarDays/ShieldCheck; kategori-headere → CategoryIcon
+    (h-4 w-4, colored). Forbrugere: 1 test grøn. Lokal build: 0 footer-emojis.
+    Nye kategorivisualer tilføjet i icons.ts: "Lån & Rente", "Lån & Ränta",
+    "Familie & Sundhed", "Familie & Helse", "Familj & Hälsa", "Verktøy", "Verktyg".
 5. [ ] Komponent-emojis: `AlderBeregner`, `PlanetVaegtBeregner`, `BraendstofBeregner`,
    `TidsBeregner`, `RentefradragBeregner`, `HuslejeBudgetBeregner`, `BarselBeregner`,
    `ArveafgiftBeregner`, `EfterloensBeregner`, `ElbilBenzinBeregner`, + småforekomster
@@ -149,4 +158,8 @@ landmark=lån, piggybank=opsparing osv.).
 - DEPLOY OK 2026-08-23 (iteration 4): etape 1-ikoner (eed982b) verificeret live —
   forside viser 75 lucide-SVG'er og 0 emojis fra home-data/categories; /kategori/bolig
   viser 29 SVG'er og kun Footer-emojis (🧮, tæller i etape 4); /api/health = status ok.
-- VERIFICÉR DEPLOY: navigation-ikoner i header (etape 2) b6b10a3 08:25 (2026-08-23)
+- DEPLOY OK 2026-08-23: navigation-ikoner i header (etape 2) b6b10a3 08:25 —
+  verificeret live 13:22: 9 lucide-SVG'er (h-4 w-4, stroke-width=1.75, categoria-ikoner)
+  i desktop-dropdown på /kategori/oekonomi.
+- VERIFICÉR DEPLOY: calculator-list-ikoner (etape 3) a932b07 13:22
+- VERIFICÉR DEPLOY: footer-ikoner (etape 4) 9e50974 13:32
