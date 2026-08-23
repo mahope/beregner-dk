@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { generatePageMetadata } from "@/lib/page-helpers";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
@@ -68,6 +69,9 @@ export default async function BudgetPage() {
               <li><strong>Læg et madbudget:</strong> Dagligvarer er ofte den nemmeste post at sænke</li>
               <li><strong>Betal dig selv først:</strong> Overfør til opsparing samme dag, du får løn</li>
             </ul>
+            <p>
+              Læs vores <Link href="/blog/maanedsbudget-2026-komplet-guide" className="text-blue-600 hover:underline">komplette guide til månedsbudget 2026</Link> for en trin-for-trin metode til at strukturere din økonomi.
+            </p>
           </div>
         )}
 

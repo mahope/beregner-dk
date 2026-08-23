@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { generatePageMetadata } from "@/lib/page-helpers";
 import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
@@ -84,8 +85,11 @@ export default async function HuslejePage() {
           <li>Kig udenfor de dyreste områder</li>
           <li>Vær fleksibel med størrelse og stand</li>
           <li>Tjek almene boliger (boligforeninger)</li>
-          <li>Brug flere boligportaler og sociale medier</li>
-        </ul>
+<li>Brug flere boligportaler og sociale medier</li>
+    </ul>
+    <p>
+      Læs vores <Link href="/blog/maanedsbudget-2026-komplet-guide" className="text-blue-600 hover:underline">komplette guide til månedsbudget 2026</Link> for at se hvordan husleje passer ind i det samlede budget.
+    </p>
       </div>
       )}
 

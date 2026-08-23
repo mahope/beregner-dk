@@ -207,6 +207,14 @@ const blogPosts = [
     date: "2026-08-23",
     readTime: "9 min",
   },
+  {
+    slug: "maanedsbudget-2026-komplet-guide",
+    title: "Månedsbudget 2026: Komplet guide til privatøkonomi",
+    description: "Komplet guide til at lave et månedsbudget i 2026: Faste og variable udgifter, 50/30/20-reglen, tommelfingerregler og gratis budgetberegner.",
+    category: "Privatøkonomi",
+    date: "2026-08-24",
+    readTime: "10 min",
+  },
 ];
 
 export default function BlogPage() {

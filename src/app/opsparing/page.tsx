@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { generatePageMetadata } from "@/lib/page-helpers";
 import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
@@ -143,6 +144,10 @@ export default async function OpsparingPage() {
             årlige omkostninger (ÅOP).
           </li>
         </ul>
+
+        <p>
+          Et budget er første skridt til at finde penge til opsparing. Se vores <Link href="/blog/maanedsbudget-2026-komplet-guide" className="text-blue-600 hover:underline">komplette guide til månedsbudget 2026</Link>.
+        </p>
 
         <div className="bg-green-50 dark:bg-green-900/20 border-l-4 border-green-400 dark:border-green-500 p-4 my-6 not-prose">
           <p className="font-medium text-green-800">Eksempel: Tid vs. beløb</p>
