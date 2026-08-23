@@ -9,6 +9,7 @@ import {
   FAQSchema,
 } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import { CheckCircle, XCircle } from "lucide-react";
 
 export async function generateMetadata() {
   return generatePageMetadata("billaan");
@@ -54,11 +55,11 @@ export default async function BillaanPage() {
           ved betalingsproblemer.
         </p>
         <ul>
-          <li>✅ Lav rente (5-8%)</li>
-          <li>✅ Mulighed for større lånebeløb</li>
-          <li>✅ Bilen kan bruges som udbetaling ved ny bil</li>
-          <li>❌ Pant i bilen</li>
-          <li>❌ Kort løbetid (typisk max 7 år)</li>
+          <li><CheckCircle className="h-5 w-5 text-green-600 inline mr-1" aria-hidden="true" /> Lav rente (5-8%)</li>
+          <li><CheckCircle className="h-5 w-5 text-green-600 inline mr-1" aria-hidden="true" /> Mulighed for større lånebeløb</li>
+          <li><CheckCircle className="h-5 w-5 text-green-600 inline mr-1" aria-hidden="true" /> Bilen kan bruges som udbetaling ved ny bil</li>
+          <li><XCircle className="h-5 w-5 text-red-600 inline mr-1" aria-hidden="true" /> Pant i bilen</li>
+          <li><XCircle className="h-5 w-5 text-red-600 inline mr-1" aria-hidden="true" /> Kort løbetid (typisk max 7 år)</li>
         </ul>
 
         <h3>FlexBillån / Variabelt billån</h3>
@@ -67,10 +68,10 @@ export default async function BillaanPage() {
           og falde</strong> i lånets løbetid.
         </p>
         <ul>
-          <li>✅ Lavere startrente end fastforrentet</li>
-          <li>✅ Mulighed for at konvertere til fast rente</li>
-          <li>❌ Usikkerhed om fremtidige ydelser</li>
-          <li>❌ Kan blive dyrere ved rentestigninger</li>
+          <li><CheckCircle className="h-5 w-5 text-green-600 inline mr-1" aria-hidden="true" /> Lavere startrente end fastforrentet</li>
+          <li><CheckCircle className="h-5 w-5 text-green-600 inline mr-1" aria-hidden="true" /> Mulighed for at konvertere til fast rente</li>
+          <li><XCircle className="h-5 w-5 text-red-600 inline mr-1" aria-hidden="true" /> Usikkerhed om fremtidige ydelser</li>
+          <li><XCircle className="h-5 w-5 text-red-600 inline mr-1" aria-hidden="true" /> Kan blive dyrere ved rentestigninger</li>
         </ul>
 
         <h3>Forbrugslån til bil</h3>
@@ -79,11 +80,11 @@ export default async function BillaanPage() {
           end traditionelt billån.
         </p>
         <ul>
-          <li>✅ Ingen pant i bilen</li>
-          <li>✅ Fleksibel brug af pengene</li>
-          <li>✅ Ingen krav til bilens alder</li>
-          <li>❌ Højere rente (8-15%)</li>
-          <li>❌ Typisk lavere lånebeløb</li>
+          <li><CheckCircle className="h-5 w-5 text-green-600 inline mr-1" aria-hidden="true" /> Ingen pant i bilen</li>
+          <li><CheckCircle className="h-5 w-5 text-green-600 inline mr-1" aria-hidden="true" /> Fleksibel brug af pengene</li>
+          <li><CheckCircle className="h-5 w-5 text-green-600 inline mr-1" aria-hidden="true" /> Ingen krav til bilens alder</li>
+          <li><XCircle className="h-5 w-5 text-red-600 inline mr-1" aria-hidden="true" /> Højere rente (8-15%)</li>
+          <li><XCircle className="h-5 w-5 text-red-600 inline mr-1" aria-hidden="true" /> Typisk lavere lånebeløb</li>
         </ul>
 
         <h2>Hvad påvirker din rente?</h2>
@@ -231,11 +232,11 @@ export default async function BillaanPage() {
           Ett vanligt krav är en <strong>kontantinsats på minst 20%</strong> av bilens pris.
         </p>
         <ul>
-          <li>✅ Lägre ränta tack vare säkerheten</li>
-          <li>✅ Möjlighet till större lånebelopp</li>
-          <li>✅ Inbytesbilen kan användas som kontantinsats</li>
-          <li>❌ Bilen står som säkerhet</li>
-          <li>❌ Krav på kontantinsats (ofta 20%)</li>
+          <li><CheckCircle className="h-5 w-5 text-green-600 inline mr-1" aria-hidden="true" /> Lägre ränta tack vare säkerheten</li>
+          <li><CheckCircle className="h-5 w-5 text-green-600 inline mr-1" aria-hidden="true" /> Möjlighet till större lånebelopp</li>
+          <li><CheckCircle className="h-5 w-5 text-green-600 inline mr-1" aria-hidden="true" /> Inbytesbilen kan användas som kontantinsats</li>
+          <li><XCircle className="h-5 w-5 text-red-600 inline mr-1" aria-hidden="true" /> Bilen står som säkerhet</li>
+          <li><XCircle className="h-5 w-5 text-red-600 inline mr-1" aria-hidden="true" /> Krav på kontantinsats (ofta 20%)</li>
         </ul>
 
         <h3>Billeasing (privatleasing)</h3>
@@ -245,10 +246,10 @@ export default async function BillaanPage() {
           en stor del av kostnaden.
         </p>
         <ul>
-          <li>✅ Fast och förutsägbar månadskostnad</li>
-          <li>✅ Ingen stor kontantinsats krävs</li>
-          <li>❌ Du äger aldrig bilen</li>
-          <li>❌ Begränsat körsträcka enligt avtalet</li>
+          <li><CheckCircle className="h-5 w-5 text-green-600 inline mr-1" aria-hidden="true" /> Fast och förutsägbar månadskostnad</li>
+          <li><CheckCircle className="h-5 w-5 text-green-600 inline mr-1" aria-hidden="true" /> Ingen stor kontantinsats krävs</li>
+          <li><XCircle className="h-5 w-5 text-red-600 inline mr-1" aria-hidden="true" /> Du äger aldrig bilen</li>
+          <li><XCircle className="h-5 w-5 text-red-600 inline mr-1" aria-hidden="true" /> Begränsat körsträcka enligt avtalet</li>
         </ul>
 
         <h3>Blancolån till bil</h3>
@@ -257,11 +258,11 @@ export default async function BillaanPage() {
           en <strong>högre effektiv ränta</strong> än ett vanligt billån.
         </p>
         <ul>
-          <li>✅ Ingen säkerhet i bilen</li>
-          <li>✅ Fri användning av pengarna</li>
-          <li>✅ Inga krav på bilens ålder</li>
-          <li>❌ Högre effektiv ränta</li>
-          <li>❌ Ofta lägre lånebelopp</li>
+          <li><CheckCircle className="h-5 w-5 text-green-600 inline mr-1" aria-hidden="true" /> Ingen säkerhet i bilen</li>
+          <li><CheckCircle className="h-5 w-5 text-green-600 inline mr-1" aria-hidden="true" /> Fri användning av pengarna</li>
+          <li><CheckCircle className="h-5 w-5 text-green-600 inline mr-1" aria-hidden="true" /> Inga krav på bilens ålder</li>
+          <li><XCircle className="h-5 w-5 text-red-600 inline mr-1" aria-hidden="true" /> Högre effektiv ränta</li>
+          <li><XCircle className="h-5 w-5 text-red-600 inline mr-1" aria-hidden="true" /> Ofta lägre lånebelopp</li>
         </ul>
 
         <h2>Vad påverkar din ränta?</h2>
