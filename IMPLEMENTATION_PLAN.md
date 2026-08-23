@@ -66,7 +66,12 @@ Etaper:
    Gate grøn: lint ok, 279/279 tests, build ok. Verificeret lokalt mod build-output:
    0 emojis fra home-data/categories på forsiden+kategori (75/44 inline-SVG'er);
    resterende 🧮 i Footer tælles i etape 4.
-2. [ ] `navigation.ts` + `Header.tsx` (+ evt. mobilmenu)
+2. [x] FÆRDIG (iteration 4): `navigation.ts` (alle 120 navne da/no/se strippet for
+   emojis, ingen strukturendring) + `Header.tsx`: `CalcIcon` (h-4 w-4, grå, dekorativ)
+   renderes foran child-links i både desktop-dropdown og mobilmenu. Ny regressionstest:
+   nav-navne må ikke indeholde emojis eller whitespace (`navigation.test.ts`, 280 tests).
+   Gate grøn: lint ok, 280/280 tests, build ok. SSR-verificeret: 0 emojis i header-region,
+   ikoner via samme centrale href-opslag som SearchBar.
 3. [ ] `calculator-list.ts` + forbrugere: `Sidebar`, `RelatedCalculators`, `NotFoundSearch`,
    `not-found.tsx`, `BeregnerAssistent`
 4. [ ] `footer-data.ts` + `Footer.tsx`
@@ -141,4 +146,7 @@ landmark=lån, piggybank=opsparing osv.).
   → kun repo-filer (IMPLEMENTATION_PLAN.md), intet site-indhold at verificere; health ok.
 - DEPLOY OK 2026-08-22: PR #19 (titel-fix, f9dd358/9329b79) verificeret live —
   https://minberegner.dk/moms viser `<title>Momsberegner | MinBeregner.dk</title>` (ikke dobbelt).
-- VERIFICÉR DEPLOY: lucide-ikoner på forside/kategori/søgning (etape 1) eed982b 20:35 (2026-08-22)
+- DEPLOY OK 2026-08-23 (iteration 4): etape 1-ikoner (eed982b) verificeret live —
+  forside viser 75 lucide-SVG'er og 0 emojis fra home-data/categories; /kategori/bolig
+  viser 29 SVG'er og kun Footer-emojis (🧮, tæller i etape 4); /api/health = status ok.
+- VERIFICÉR DEPLOY: navigation-ikoner i header (etape 2) b6b10a3 08:25 (2026-08-23)
