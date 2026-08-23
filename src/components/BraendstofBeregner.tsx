@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import { Car, ChartColumn, Droplets, Fuel, PlugZap, TrendingUp } from "lucide-react";
 import { ShareCalculation } from "@/components/ShareCalculation";
 import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
@@ -18,9 +19,9 @@ export default function BraendstofBeregner() {
       diesel: "Diesel",
       el: "El",
       whatCalc: "Hvad vil du beregne?",
-      tripPrice: "🚗 Pris for en tur",
-      kmPrice: "📊 Pris pr. km",
-      calcConsumption: "📈 Beregn forbrug",
+      tripPrice: "Pris for en tur",
+      kmPrice: "Pris pr. km",
+      calcConsumption: "Beregn forbrug",
       elPrice: "El-pris (kr/kWh)",
       elPriceHint: "Typisk 2-4 kr/kWh hjemme, 3-6 kr på ladestander",
       elConsumption: "Forbrug (kWh/100 km)",
@@ -51,9 +52,9 @@ export default function BraendstofBeregner() {
       diesel: "Diesel",
       el: "El",
       whatCalc: "Vad vill du beräkna?",
-      tripPrice: "🚗 Pris för en resa",
-      kmPrice: "📊 Pris per km",
-      calcConsumption: "📈 Beräkna förbrukning",
+      tripPrice: "Pris för en resa",
+      kmPrice: "Pris per km",
+      calcConsumption: "Beräkna förbrukning",
       elPrice: "Elpris (kr/kWh)",
       elPriceHint: "Vanligtvis 2-4 kr/kWh hemma, 3-6 kr vid laddstation",
       elConsumption: "Förbrukning (kWh/100 km)",
@@ -238,7 +239,7 @@ export default function BraendstofBeregner() {
                 : "border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500"
             }`}
           >
-            <div className="text-2xl mb-1">⛽</div>
+            <Fuel className="h-6 w-6 mx-auto mb-1" strokeWidth={1.75} aria-hidden="true" focusable="false" />
             <div className="font-medium dark:text-gray-200">{l.benzin}</div>
           </button>
           <button type="button"
@@ -249,7 +250,7 @@ export default function BraendstofBeregner() {
                 : "border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500"
             }`}
           >
-            <div className="text-2xl mb-1">🛢️</div>
+            <Droplets className="h-6 w-6 mx-auto mb-1" strokeWidth={1.75} aria-hidden="true" focusable="false" />
             <div className="font-medium dark:text-gray-200">{l.diesel}</div>
           </button>
           <button type="button"
@@ -260,7 +261,7 @@ export default function BraendstofBeregner() {
                 : "border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500"
             }`}
           >
-            <div className="text-2xl mb-1">🔌</div>
+            <PlugZap className="h-6 w-6 mx-auto mb-1" strokeWidth={1.75} aria-hidden="true" focusable="false" />
             <div className="font-medium dark:text-gray-200">{l.el}</div>
           </button>
         </div>
@@ -278,7 +279,7 @@ export default function BraendstofBeregner() {
                   : "border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500"
               }`}
             >
-              <div className="font-medium dark:text-gray-200">{l.tripPrice}</div>
+              <div className="font-medium dark:text-gray-200 flex items-center gap-1.5"><Car className="h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden="true" focusable="false" />{l.tripPrice}</div>
             </button>
             <button type="button"
               onClick={() => setBeregningsType("kmPris")}
@@ -288,7 +289,7 @@ export default function BraendstofBeregner() {
                   : "border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500"
               }`}
             >
-              <div className="font-medium dark:text-gray-200">{l.kmPrice}</div>
+              <div className="font-medium dark:text-gray-200 flex items-center gap-1.5"><ChartColumn className="h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden="true" focusable="false" />{l.kmPrice}</div>
             </button>
             <button type="button"
               onClick={() => setBeregningsType("forbrug")}
@@ -298,7 +299,7 @@ export default function BraendstofBeregner() {
                   : "border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500"
               }`}
             >
-              <div className="font-medium dark:text-gray-200">{l.calcConsumption}</div>
+              <div className="font-medium dark:text-gray-200 flex items-center gap-1.5"><TrendingUp className="h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden="true" focusable="false" />{l.calcConsumption}</div>
             </button>
           </div>
         </div>

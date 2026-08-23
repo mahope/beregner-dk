@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import { PartyPopper } from "lucide-react";
 import { ShareCalculation } from "@/components/ShareCalculation";
 import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
@@ -121,7 +122,7 @@ export default function NedtaellingBeregner() {
           <div className="space-y-4 animate-fade-in">
             <div className="rounded-lg p-6 text-center bg-blue-100 dark:bg-blue-900/30">
               {r && r.dage === 0 ? (
-                <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">🎉 {l.today}</div>
+                <div className="text-2xl font-bold text-blue-600 dark:text-blue-400 inline-flex items-center justify-center gap-2"><PartyPopper className="h-6 w-6" strokeWidth={1.75} aria-hidden="true" focusable="false" />{l.today}</div>
               ) : (
                 <>
                   <div className="text-5xl font-bold text-blue-600 dark:text-blue-400">{r ? fmt(r.dage) : "—"}</div>

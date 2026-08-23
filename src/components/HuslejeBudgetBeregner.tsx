@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import { CircleCheck, ClipboardList, Lightbulb, Siren, TriangleAlert, Wallet } from "lucide-react";
 import { ShareCalculation } from "@/components/ShareCalculation";
 import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
@@ -257,7 +258,7 @@ export default function HuslejeBudgetBeregner() {
     <div className="space-y-8">
       {/* Indkomst */}
       <div>
-        <h3 className="text-lg font-medium mb-4 dark:text-white">💰 {l.dinIndkomst}</h3>
+        <h3 className="text-lg font-medium mb-4 dark:text-white flex items-center gap-2"><Wallet className="h-5 w-5 shrink-0" strokeWidth={1.75} aria-hidden="true" focusable="false" />{l.dinIndkomst}</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.dinNettoLoen}</label>
@@ -307,7 +308,7 @@ export default function HuslejeBudgetBeregner() {
 
       {/* Faste udgifter */}
       <div>
-        <h3 className="text-lg font-medium mb-4 dark:text-white">📋 {l.fasteUdgifter}</h3>
+        <h3 className="text-lg font-medium mb-4 dark:text-white flex items-center gap-2"><ClipboardList className="h-5 w-5 shrink-0" strokeWidth={1.75} aria-hidden="true" focusable="false" />{l.fasteUdgifter}</h3>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.madDagligvarer}</label>
@@ -393,9 +394,15 @@ export default function HuslejeBudgetBeregner() {
       {/* Vurdering */}
       <div className={`p-4 rounded-lg border ${getVurderingFarve()}`}>
         <p className="font-medium mb-1">
-          {beregning.vurdering === "god" && `✅ ${l.godOekonomi}`}
-          {beregning.vurdering === "ok" && `⚠️ ${l.acceptabelOekonomi}`}
-          {beregning.vurdering === "risikabel" && `🚨 ${l.stramOekonomi}`}
+          {beregning.vurdering === "god" && (
+            <span className="inline-flex items-center gap-1.5"><CircleCheck className="h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden="true" focusable="false" />{l.godOekonomi}</span>
+          )}
+          {beregning.vurdering === "ok" && (
+            <span className="inline-flex items-center gap-1.5"><TriangleAlert className="h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden="true" focusable="false" />{l.acceptabelOekonomi}</span>
+          )}
+          {beregning.vurdering === "risikabel" && (
+            <span className="inline-flex items-center gap-1.5"><Siren className="h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden="true" focusable="false" />{l.stramOekonomi}</span>
+          )}
         </p>
         <p className="text-sm">{beregning.vurderingTekst}</p>
       </div>
@@ -480,7 +487,7 @@ export default function HuslejeBudgetBeregner() {
 
       {/* Tips */}
       <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-        <h3 className="font-medium text-blue-800 dark:text-blue-300 mb-2">💡 {l.tipsTitle}</h3>
+        <h3 className="font-medium text-blue-800 dark:text-blue-300 mb-2 flex items-center gap-2"><Lightbulb className="h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden="true" focusable="false" />{l.tipsTitle}</h3>
         <ul className="text-sm text-blue-700 dark:text-blue-400 space-y-1">
           <li>• <strong>{l.regel30}:</strong> {l.tip30}</li>
           <li>• <strong>{locale === "se" ? "Inkludera allt" : locale === "no" ? "Inkluder alt" : "Inkluder alt"}:</strong> {l.tipInkluder}</li>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import { ChartColumn, MoonStar, Zap } from "lucide-react";
 import { ShareCalculation } from "@/components/ShareCalculation";
 import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
@@ -18,18 +19,18 @@ const labels = {
     pausePlaceholder: "F.eks. 30 min frokostpause",
     minSuffix: "min",
     tidIAlt: "Tid i alt",
-    overMidnat: "🌙 Over midnat",
+    overMidnat: "Over midnat",
     decimalTimer: "Decimal timer",
     timerWord: "timer",
     arbejdsdage8t: "Arbejdsdage (8t)",
     dageWord: "dage",
-    detaljeretVisning: "📊 Detaljeret visning",
+    detaljeretVisning: "Detaljeret visning",
     minutterWord: "minutter",
     sekunderWord: "sekunder",
     timerDecimal: "timer (decimal)",
     timerAbbr: "t",
     minAbbr: "m",
-    hurtigeEksempler: "⚡ Hurtige eksempler",
+    hurtigeEksempler: "Hurtige eksempler",
     presetNormal: "Normal arbejdsdag (8-16)",
     presetKontor: "Kontor (9-17, 1t pause)",
     presetNat: "Nattevagt (22-06)",
@@ -45,18 +46,18 @@ const labels = {
     pausePlaceholder: "T.ex. 30 min lunchrast",
     minSuffix: "min",
     tidIAlt: "Total tid",
-    overMidnat: "🌙 Över midnatt",
+    overMidnat: "Över midnatt",
     decimalTimer: "Decimaltimmar",
     timerWord: "timmar",
     arbejdsdage8t: "Arbetsdagar (8h)",
     dageWord: "dagar",
-    detaljeretVisning: "📊 Detaljerad vy",
+    detaljeretVisning: "Detaljerad vy",
     minutterWord: "minuter",
     sekunderWord: "sekunder",
     timerDecimal: "timmar (decimal)",
     timerAbbr: "h",
     minAbbr: "m",
-    hurtigeEksempler: "⚡ Snabbexempel",
+    hurtigeEksempler: "Snabbexempel",
     presetNormal: "Normal arbetsdag (8-16)",
     presetKontor: "Kontor (9-17, 1h rast)",
     presetNat: "Nattskift (22-06)",
@@ -264,7 +265,7 @@ export default function TidsBeregner() {
                 {beregning.timer}{l.timerAbbr} {beregning.minutter}{l.minAbbr}
               </p>
               {beregning.overMidnat && (
-                <p className="text-xs text-blue-500 mt-1 dark:text-blue-400">{l.overMidnat}</p>
+                <p className="text-xs text-blue-500 mt-1 dark:text-blue-400 inline-flex items-center gap-1"><MoonStar className="h-3 w-3" strokeWidth={1.75} aria-hidden="true" focusable="false" />{l.overMidnat}</p>
               )}
             </div>
             <div className="p-6 bg-green-100 rounded-xl text-center dark:bg-green-900/20">
@@ -285,7 +286,7 @@ export default function TidsBeregner() {
 
           {/* Detaljeret breakdown */}
           <div className="bg-gray-50 rounded-lg p-6 dark:bg-gray-800 dark:border dark:border-gray-700">
-            <h3 className="font-semibold mb-4 dark:text-white">{l.detaljeretVisning}</h3>
+            <h3 className="font-semibold mb-4 dark:text-white flex items-center gap-2"><ChartColumn className="h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden="true" focusable="false" />{l.detaljeretVisning}</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
               <div>
                 <p className="text-3xl font-bold text-gray-700 dark:text-gray-200">{beregning.totalMinutter}</p>
@@ -320,7 +321,7 @@ export default function TidsBeregner() {
 
           {/* Quick presets */}
           <div className="p-4 bg-blue-50 rounded-lg dark:bg-blue-900/20">
-            <h3 className="font-medium mb-3 dark:text-white">{l.hurtigeEksempler}</h3>
+            <h3 className="font-medium mb-3 dark:text-white flex items-center gap-2"><Zap className="h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden="true" focusable="false" />{l.hurtigeEksempler}</h3>
             <div className="flex flex-wrap gap-2">
               <button type="button"
                 onClick={() => { setStartTid("08:00"); setSlutTid("16:00"); setFratraekPause(30); }}

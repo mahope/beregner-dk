@@ -2,6 +2,8 @@
 
 import { trackAffiliateClick } from "@/lib/analytics";
 import { useLocale } from "@/components/LocaleProvider";
+import type { LucideIcon } from "lucide-react";
+import { Car, Landmark, ShieldCheck, TrendingUp } from "lucide-react";
 
 interface AffiliateLink {
   name: string;
@@ -15,6 +17,7 @@ interface AffiliateLink {
 interface AffiliateBoxProps {
   title: string;
   subtitle?: string;
+  icon?: LucideIcon;
   links: AffiliateLink[];
   className?: string;
 }
@@ -24,7 +27,7 @@ interface AffiliateBoxProps {
  * 
  * Kræver "Annonce" label per dansk markedsføringslov.
  */
-export function AffiliateBox({ title, subtitle, links, className = "" }: AffiliateBoxProps) {
+export function AffiliateBox({ title, subtitle, icon: Icon, links, className = "" }: AffiliateBoxProps) {
   const { locale } = useLocale();
   // Every affiliate partner is Danish (.dk links, "Annonce" disclosure per
   // dansk markedsføringslov), so only show these on the Danish site.
@@ -36,7 +39,12 @@ export function AffiliateBox({ title, subtitle, links, className = "" }: Affilia
       <div className="bg-blue-50 dark:bg-blue-900/30 px-4 py-3 border-b border-blue-200 dark:border-blue-800">
         <div className="flex items-center justify-between gap-2">
           <div>
-            <h3 className="font-bold text-blue-800 dark:text-blue-200">{title}</h3>
+            <h3 className="font-bold text-blue-800 dark:text-blue-200">
+              {Icon && (
+                <Icon className="mr-1.5 inline h-4 w-4 align-text-bottom" strokeWidth={1.75} aria-hidden="true" focusable="false" />
+              )}
+              {title}
+            </h3>
             {subtitle && <p className="text-sm text-blue-600 dark:text-blue-400">{subtitle}</p>}
           </div>
           <span className="text-xs bg-blue-100 dark:bg-blue-800 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded font-medium">
@@ -195,7 +203,8 @@ export const bilforsikringAffiliates: AffiliateLink[] = [
 export function BoliglaanAffiliate({ className = "" }: { className?: string }) {
   return (
     <AffiliateBox
-      title="💰 Sammenlign boliglån"
+      title="Sammenlign boliglån"
+      icon={Landmark}
       subtitle="Find det bedste lån til din bolig"
       links={boliglaanAffiliates}
       className={className}
@@ -206,7 +215,8 @@ export function BoliglaanAffiliate({ className = "" }: { className?: string }) {
 export function OpsparingAffiliate({ className = "" }: { className?: string }) {
   return (
     <AffiliateBox
-      title="📈 Start din opsparing"
+      title="Start din opsparing"
+      icon={TrendingUp}
       subtitle="Investeringsplatforme til danskere"
       links={opsparingAffiliates}
       className={className}
@@ -217,7 +227,8 @@ export function OpsparingAffiliate({ className = "" }: { className?: string }) {
 export function ForsikringAffiliate({ className = "" }: { className?: string }) {
   return (
     <AffiliateBox
-      title="🛡️ Sammenlign forsikringer"
+      title="Sammenlign forsikringer"
+      icon={ShieldCheck}
       subtitle="Spar penge på dine forsikringer"
       links={forsikringAffiliates}
       className={className}
@@ -228,7 +239,8 @@ export function ForsikringAffiliate({ className = "" }: { className?: string }) 
 export function BilforsikringAffiliate({ className = "" }: { className?: string }) {
   return (
     <AffiliateBox
-      title="🚗 Sammenlign bilforsikringer"
+      title="Sammenlign bilforsikringer"
+      icon={Car}
       subtitle="Spar op til 50% på din bilforsikring"
       links={bilforsikringAffiliates}
       className={className}

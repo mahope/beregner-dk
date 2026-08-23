@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
-import { Users, Calculator, Percent, Heart } from "lucide-react";
+import { Baby, Calculator, Contact, Heart, Percent, UserRound, Users, UsersRound, type LucideIcon } from "lucide-react";
 import { ShareCalculation } from "@/components/ShareCalculation";
 import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
@@ -22,7 +22,7 @@ interface RelationOption {
   value: Relation;
   label: string;
   description: string;
-  icon: string;
+  icon: LucideIcon;
 }
 
 const BUNDFRADRAG = SATSER_2026.arveBundfradrag;
@@ -34,37 +34,37 @@ const relationOptions: RelationOption[] = [
     value: "aegtefaelle",
     label: "Ægtefælle",
     description: "Fritaget for arveafgift",
-    icon: "💍",
+    icon: Heart,
   },
   {
     value: "barn",
     label: "Barn",
     description: "15% boafgift",
-    icon: "👶",
+    icon: Baby,
   },
   {
     value: "barnebarn",
     label: "Barnebarn",
     description: "15% boafgift",
-    icon: "👦",
+    icon: UserRound,
   },
   {
     value: "foraeldre",
     label: "Forældre",
     description: "15% boafgift",
-    icon: "👨‍👩‍👧",
+    icon: Users,
   },
   {
     value: "soeskende",
     label: "Søskende",
     description: "15% boafgift + 25% tillægsafgift (op til 36,25%)",
-    icon: "👫",
+    icon: UsersRound,
   },
   {
     value: "andre",
     label: "Andre (ven, fjern familie mv.)",
     description: "15% boafgift + 25% tillægsafgift (op til 36,25%)",
-    icon: "👥",
+    icon: Contact,
   },
 ];
 
@@ -225,7 +225,7 @@ export default function ArveafgiftBeregner() {
                     onChange={() => setRelation(opt.value)}
                     className="sr-only"
                   />
-                  <span className="text-xl">{opt.icon}</span>
+                  <span className="text-gray-500 dark:text-gray-400 shrink-0"><opt.icon className="h-6 w-6" strokeWidth={1.75} aria-hidden="true" focusable="false" /></span>
                   <div>
                     <div className="font-medium dark:text-white">
                       {opt.label}

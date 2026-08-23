@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
+import { Baby, Lightbulb, TriangleAlert, User, UserRound } from 'lucide-react';
 import { ShareCalculation } from '@/components/ShareCalculation';
 import { CopyResultButton, ResetButton } from '@/components/ui';
 import { generateShareableLink, getStateFromUrl, CalculationState } from '@/lib/calculation-state';
@@ -295,7 +296,7 @@ export default function BarselBeregner() {
                     : 'border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500'
                 }`}
               >
-                👩 {l.mother}
+                <span className="inline-flex items-center justify-center gap-2"><User className="h-4 w-4" strokeWidth={1.75} aria-hidden="true" focusable="false" />{l.mother}</span>
               </button>
               <button type="button"
                 onClick={() => setParent('far')}
@@ -305,7 +306,7 @@ export default function BarselBeregner() {
                     : 'border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500'
                 }`}
               >
-                👨 {l.fatherCoMother}
+                <span className="inline-flex items-center justify-center gap-2"><UserRound className="h-4 w-4" strokeWidth={1.75} aria-hidden="true" focusable="false" />{l.fatherCoMother}</span>
               </button>
             </div>
           </div>
@@ -345,7 +346,7 @@ export default function BarselBeregner() {
                 </div>
                 {result.isMaxed && (
                   <div className="text-xs text-amber-600 dark:text-amber-400 mt-1">
-                    ⚠️ {l.maxRateReached}
+                    <span className="inline-flex items-center gap-1"><TriangleAlert className="h-3.5 w-3.5 shrink-0" strokeWidth={1.75} aria-hidden="true" focusable="false" />{l.maxRateReached}</span>
                   </div>
                 )}
               </div>
@@ -389,7 +390,9 @@ export default function BarselBeregner() {
             </div>
           ) : (
             <div className="text-center text-gray-500 dark:text-gray-400 py-8">
-              <div className="text-4xl mb-3">👶</div>
+              <div className="mb-3 flex justify-center">
+                <Baby className="h-10 w-10 text-gray-300 dark:text-gray-600" strokeWidth={1.75} aria-hidden="true" focusable="false" />
+              </div>
               <p>{l.enterSalary}</p>
             </div>
           )}
@@ -415,7 +418,11 @@ export default function BarselBeregner() {
       <div className="grid md:grid-cols-2 gap-4 mt-6">
         <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
           <h4 className="font-semibold text-blue-800 dark:text-blue-300 mb-2">
-            {parent === 'mor' ? `👩 ${l.motherLeave}` : `👨 ${l.fatherLeave}`}
+            {parent === 'mor' ? (
+              <span className="inline-flex items-center gap-2"><User className="h-4 w-4" strokeWidth={1.75} aria-hidden="true" focusable="false" />{l.motherLeave}</span>
+            ) : (
+              <span className="inline-flex items-center gap-2"><UserRound className="h-4 w-4" strokeWidth={1.75} aria-hidden="true" focusable="false" />{l.fatherLeave}</span>
+            )}
           </h4>
           <ul className="text-sm text-blue-700 dark:text-blue-400 space-y-1">
             {parent === 'mor' ? (
@@ -435,7 +442,7 @@ export default function BarselBeregner() {
           </ul>
         </div>
         <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
-          <h4 className="font-semibold text-green-800 dark:text-green-300 mb-2">💡 {l.tip}</h4>
+          <h4 className="font-semibold text-green-800 dark:text-green-300 mb-2 flex items-center gap-2"><Lightbulb className="h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden="true" focusable="false" />{l.tip}</h4>
           <p className="text-sm text-green-700 dark:text-green-400">
             {l.tipText}
           </p>

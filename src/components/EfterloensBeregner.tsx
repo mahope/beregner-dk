@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
+import { Lightbulb, Sparkles, TriangleAlert, Trophy } from 'lucide-react';
 import { ShareCalculation } from '@/components/ShareCalculation';
 import { CopyResultButton, ResetButton } from '@/components/ui';
 import { generateShareableLink, getStateFromUrl, CalculationState } from '@/lib/calculation-state';
@@ -284,7 +285,7 @@ export default function EfterloensBeregner() {
                 </div>
                 {result.postponeBonus && (
                   <div className="text-xs text-blue-600 dark:text-blue-400 mt-1">
-                    ✨ Forhøjet sats (100%) pga. 2 års udskydelse
+                    <span className="inline-flex items-center gap-1"><Sparkles className="h-3.5 w-3.5 shrink-0" strokeWidth={1.75} aria-hidden="true" focusable="false" />Forhøjet sats (100%) pga. 2 års udskydelse</span>
                   </div>
                 )}
               </div>
@@ -307,7 +308,7 @@ export default function EfterloensBeregner() {
               {workWhileOnEfterloen && result.praemiePortioner && result.praemiePortioner > 0 && (
                 <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-4">
                   <div className="text-sm text-yellow-800 dark:text-yellow-300">
-                    <strong>🏆 Skattefri præmie</strong>
+                    <strong className="inline-flex items-center gap-1.5"><Trophy className="h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden="true" focusable="false" />Skattefri præmie</strong>
                   </div>
                   <div className="text-lg font-semibold text-yellow-700 dark:text-yellow-400 mt-1">
                     {result.praemiePortioner} portioner = {result.totalPraemie?.toLocaleString('da-DK')} kr.
@@ -324,7 +325,9 @@ export default function EfterloensBeregner() {
             </div>
           ) : (
             <div className="text-center py-8">
-              <div className="text-4xl mb-3">⚠️</div>
+              <div className="mb-3 flex justify-center">
+                <TriangleAlert className="h-10 w-10 text-red-500" strokeWidth={1.75} aria-hidden="true" focusable="false" />
+              </div>
               <p className="text-red-600 font-medium">{result.reason}</p>
             </div>
           )}
@@ -345,14 +348,14 @@ export default function EfterloensBeregner() {
       {/* Info boxes */}
       <div className="grid md:grid-cols-2 gap-4 mt-6">
         <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
-          <h4 className="font-semibold text-blue-800 dark:text-blue-300 mb-2">💡 2-års reglen</h4>
+          <h4 className="font-semibold text-blue-800 dark:text-blue-300 mb-2 flex items-center gap-2"><Lightbulb className="h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden="true" focusable="false" />2-års reglen</h4>
           <p className="text-sm text-blue-700 dark:text-blue-400">
             Udskyder du efterlønnen i mindst 2 år efter efterlønsalderen, 
             får du fuld dagpengesats (100%) i stedet for 91%.
           </p>
         </div>
         <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
-          <h4 className="font-semibold text-green-800 dark:text-green-300 mb-2">🏆 Præmieordningen</h4>
+          <h4 className="font-semibold text-green-800 dark:text-green-300 mb-2 flex items-center gap-2"><Trophy className="h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden="true" focusable="false" />Præmieordningen</h4>
           <p className="text-sm text-green-700 dark:text-green-400">
             Arbejder du mindst 962 timer/år mens du er på efterløn, 
             kan du optjene skattefri præmieportioner på ca. 15.500 kr. hver.

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import { SunMedium } from "lucide-react";
 import { ShareCalculation } from "@/components/ShareCalculation";
 import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
@@ -77,7 +78,7 @@ export default function TidszoneBeregner() {
       calcName: "Tidszoneberegner",
       diffFromDenmark: "Tidsforskel fra Danmark",
       hourSuffix: "t",
-      dstTitle: "⚠️ Om sommertid",
+      dstTitle: "Om sommertid",
       dstBody:
         "Denne beregner bruger standard tidsforskelle. Husk at sommertid (DST) kan påvirke den faktiske tidsforskel. Danmark skifter til sommertid sidste søndag i marts og tilbage sidste søndag i oktober.",
       dateLocale: "da-DK",
@@ -123,7 +124,7 @@ export default function TidszoneBeregner() {
       calcName: "Tidszonsberäknare",
       diffFromDenmark: "Tidsskillnad från Danmark",
       hourSuffix: "h",
-      dstTitle: "⚠️ Om sommartid",
+      dstTitle: "Om sommartid",
       dstBody:
         "Den här beräknaren använder standardtidsskillnader. Kom ihåg att sommartid (DST) kan påverka den faktiska tidsskillnaden. Danmark byter till sommartid sista söndagen i mars och tillbaka sista söndagen i oktober.",
       dateLocale: "sv-SE",
@@ -400,7 +401,7 @@ export default function TidszoneBeregner() {
 
       {/* Info */}
       <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg p-4">
-        <h3 className="font-medium text-yellow-800 dark:text-yellow-300 mb-2">{l.dstTitle}</h3>
+        <h3 className="font-medium text-yellow-800 dark:text-yellow-300 mb-2 flex items-center gap-2"><SunMedium className="h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden="true" focusable="false" />{l.dstTitle}</h3>
         <p className="text-sm text-yellow-700 dark:text-yellow-400">
           {l.dstBody}
         </p>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
+import { CircleCheck, Landmark, Lightbulb, User, Users, X } from 'lucide-react';
 import { ShareCalculation } from '@/components/ShareCalculation';
 import { CopyResultButton, ResetButton } from '@/components/ui';
 import { generateShareableLink, getStateFromUrl, CalculationState } from '@/lib/calculation-state';
@@ -163,7 +164,7 @@ export default function RentefradragBeregner() {
                     : 'border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500 dark:text-gray-200'
                 }`}
               >
-                👤 Enlig
+                <span className="inline-flex items-center justify-center gap-2"><User className="h-4 w-4" strokeWidth={1.75} aria-hidden="true" focusable="false" />Enlig</span>
               </button>
               <button type="button"
                 onClick={() => setCivilStatus('couple')}
@@ -173,7 +174,7 @@ export default function RentefradragBeregner() {
                     : 'border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500 dark:text-gray-200'
                 }`}
               >
-                👫 Par
+                <span className="inline-flex items-center justify-center gap-2"><Users className="h-4 w-4" strokeWidth={1.75} aria-hidden="true" focusable="false" />Par</span>
               </button>
             </div>
           </div>
@@ -207,7 +208,7 @@ export default function RentefradragBeregner() {
                       onClick={() => removeLoan(loan.id)}
                       className="px-3 py-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg"
                     >
-                      ✕
+                      <X className="h-4 w-4" strokeWidth={1.75} aria-hidden="true" focusable="false" />
                     </button>
                   )}
                 </div>
@@ -317,7 +318,9 @@ export default function RentefradragBeregner() {
             </div>
           ) : (
             <div className="text-center text-gray-500 dark:text-gray-400 py-8">
-              <div className="text-4xl mb-3">💰</div>
+              <div className="mb-3 flex justify-center">
+                <Landmark className="h-10 w-10 text-gray-300 dark:text-gray-600" strokeWidth={1.75} aria-hidden="true" focusable="false" />
+              </div>
               <p>Indtast dine renteudgifter for at se besparelsen</p>
             </div>
           )}
@@ -337,14 +340,14 @@ export default function RentefradragBeregner() {
       {/* Info boxes */}
       <div className="grid md:grid-cols-2 gap-4 mt-6">
         <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
-          <h4 className="font-semibold text-blue-800 dark:text-blue-300 mb-2">💡 Bundfradrag 2026</h4>
+          <h4 className="font-semibold text-blue-800 dark:text-blue-300 mb-2 flex items-center gap-2"><Lightbulb className="h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden="true" focusable="false" />Bundfradrag 2026</h4>
           <p className="text-sm text-blue-700 dark:text-blue-400">
             De første {civilStatus === 'single' ? '50.000' : '100.000'} kr. i renteudgifter 
             giver højere fradragsværdi (33,6%) end beløb derover (25,6%).
           </p>
         </div>
         <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
-          <h4 className="font-semibold text-green-800 dark:text-green-300 mb-2">✅ Automatisk indberetning</h4>
+          <h4 className="font-semibold text-green-800 dark:text-green-300 mb-2 flex items-center gap-2"><CircleCheck className="h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden="true" focusable="false" />Automatisk indberetning</h4>
           <p className="text-sm text-green-700 dark:text-green-400">
             Din bank indberetter automatisk dine renteudgifter til SKAT. 
             Tjek at tallene stemmer i din forskudsopgørelse.

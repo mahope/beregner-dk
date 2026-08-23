@@ -7,8 +7,7 @@ import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { useLocale } from '@/components/LocaleProvider';
 import { getIntlLocale } from '@/lib/format';
-
-const zodiacSymbols = ["♈", "♉", "♊", "♋", "♌", "♍", "♎", "♏", "♐", "♑", "♒", "♓"];
+import { Cake, CalendarDays, Sparkles } from "lucide-react";
 
 export default function AlderBeregner() {
   const { locale } = useLocale();
@@ -23,7 +22,7 @@ export default function AlderBeregner() {
       yearUnit: "år",
       monthsAndDays: (m: number, d: number) => `${m} måneder og ${d} dage`,
       nextBirthday: (days: number, age: number) => (
-        <>🎂 Der er <strong>{days} dage</strong> til din næste fødselsdag (du fylder {age} år)</>
+        <><Cake className="mr-1.5 inline h-4 w-4 align-text-bottom text-pink-500" strokeWidth={1.75} aria-hidden="true" focusable="false" />Der er <strong>{days} dage</strong> til din næste fødselsdag (du fylder {age} år)</>
       ),
       daysLived: "Dage levet",
       weeksLived: "Uger levet",
@@ -66,7 +65,7 @@ export default function AlderBeregner() {
       yearUnit: "år",
       monthsAndDays: (m: number, d: number) => `${m} månader och ${d} dagar`,
       nextBirthday: (days: number, age: number) => (
-        <>🎂 Det är <strong>{days} dagar</strong> till din nästa födelsedag (du fyller {age} år)</>
+        <><Cake className="mr-1.5 inline h-4 w-4 align-text-bottom text-pink-500" strokeWidth={1.75} aria-hidden="true" focusable="false" />Det är <strong>{days} dagar</strong> till din nästa födelsedag (du fyller {age} år)</>
       ),
       daysLived: "Dagar levda",
       weeksLived: "Veckor levda",
@@ -204,7 +203,6 @@ export default function AlderBeregner() {
     const stjernetegnIndex = getStjernetegnIndex(foedselsDate);
     const stjernetegn = {
       navn: l.zodiac[stjernetegnIndex].navn,
-      symbol: zodiacSymbols[stjernetegnIndex],
       periode: l.zodiac[stjernetegnIndex].periode,
     };
 
@@ -341,7 +339,7 @@ export default function AlderBeregner() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
               <div className="flex items-center gap-3">
-                <span className="text-4xl">{beregning.stjernetegn.symbol}</span>
+                <Sparkles className="h-10 w-10 text-purple-500 dark:text-purple-400 shrink-0" strokeWidth={1.75} aria-hidden="true" focusable="false" />
                 <div>
                   <p className="font-medium dark:text-gray-200">{l.zodiacLabel}: {beregning.stjernetegn.navn}</p>
                   <p className="text-sm text-gray-500 dark:text-gray-400">{beregning.stjernetegn.periode}</p>
@@ -350,7 +348,7 @@ export default function AlderBeregner() {
             </div>
             <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
               <div className="flex items-center gap-3">
-                <span className="text-4xl">📅</span>
+                <CalendarDays className="h-10 w-10 text-green-600 dark:text-green-400 shrink-0" strokeWidth={1.75} aria-hidden="true" focusable="false" />
                 <div>
                   <p className="font-medium dark:text-gray-200">{l.bornOnA} {beregning.ugedagFoedt}</p>
                   <p className="text-sm text-gray-500 dark:text-gray-400">

@@ -29,7 +29,7 @@ export function PrintResult({
 
     const logo = document.createElement("div");
     logo.className = "print-logo";
-    logo.textContent = `📊 ${domainConfig.siteName}`;
+    logo.textContent = domainConfig.siteName;
 
     const title = document.createElement("div");
     title.className = "print-title";

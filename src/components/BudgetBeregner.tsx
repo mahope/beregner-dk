@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import { ChartColumn } from "lucide-react";
 import { ShareCalculation } from "@/components/ShareCalculation";
 import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
@@ -181,7 +182,9 @@ export default function BudgetBeregner() {
             </div>
           ) : (
             <div className="text-center text-gray-500 dark:text-gray-400 py-8">
-              <div className="text-4xl mb-3">📊</div>
+              <div className="mb-3 flex justify-center">
+                <ChartColumn className="h-10 w-10 text-gray-300 dark:text-gray-600" strokeWidth={1.75} aria-hidden="true" focusable="false" />
+              </div>
               <p>{l.empty}</p>
             </div>
           )}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import { Fuel, Zap } from "lucide-react";
 import { ShareCalculation } from "@/components/ShareCalculation";
 import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
@@ -151,11 +152,11 @@ export default function ElbilBenzinBeregner() {
           {field(l.kmPerYear, kmPerYear, setKmPerYear, "100", "km")}
           {field(l.years, years, setYears, "1", l.yearsUnit)}
 
-          <p className="text-sm font-medium text-blue-700 dark:text-blue-300 pt-2">⚡ {l.ev}</p>
+          <p className="text-sm font-medium text-blue-700 dark:text-blue-300 pt-2 inline-flex items-center gap-1.5"><Zap className="h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden="true" focusable="false" />{l.ev}</p>
           {field(l.evUse, evUse, setEvUse, "0.1", "kWh")}
           {field(l.elPrice, elPrice, setElPrice, "0.1", "kr")}
 
-          <p className="text-sm font-medium text-orange-700 dark:text-orange-300 pt-2">⛽ {l.petrol}</p>
+          <p className="text-sm font-medium text-orange-700 dark:text-orange-300 pt-2 inline-flex items-center gap-1.5"><Fuel className="h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden="true" focusable="false" />{l.petrol}</p>
           {field(l.petrolUse, petrolUse, setPetrolUse, "0.1", "km/l")}
           {field(l.petrolPrice, petrolPrice, setPetrolPrice, "0.1", "kr")}
 
@@ -182,12 +183,12 @@ export default function ElbilBenzinBeregner() {
 
             <div className="grid grid-cols-2 gap-3">
               <div className="bg-white dark:bg-gray-700 rounded-lg p-3 text-center shadow-sm">
-                <div className="text-xs text-gray-500 dark:text-gray-400">⚡ {l.ev}</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400 inline-flex items-center gap-1 justify-center"><Zap className="h-3.5 w-3.5 shrink-0" strokeWidth={1.75} aria-hidden="true" focusable="false" />{l.ev}</div>
                 <div className="text-lg font-bold text-gray-900 dark:text-white">{fmt(r.evYearly)} kr</div>
                 <div className="text-xs text-gray-400">{l.perYear}</div>
               </div>
               <div className="bg-white dark:bg-gray-700 rounded-lg p-3 text-center shadow-sm">
-                <div className="text-xs text-gray-500 dark:text-gray-400">⛽ {l.petrol}</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400 inline-flex items-center gap-1 justify-center"><Fuel className="h-3.5 w-3.5 shrink-0" strokeWidth={1.75} aria-hidden="true" focusable="false" />{l.petrol}</div>
                 <div className="text-lg font-bold text-gray-900 dark:text-white">{fmt(r.petrolYearly)} kr</div>
                 <div className="text-xs text-gray-400">{l.perYear}</div>
               </div>

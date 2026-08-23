@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import { Circle, CircleDot, Droplets, Eclipse, Globe, Mars, Moon, Orbit, Sun, Venus, type LucideIcon } from "lucide-react";
 import { ShareCalculation } from "@/components/ShareCalculation";
 import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
@@ -8,18 +9,30 @@ import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { useLocale } from "@/components/LocaleProvider";
 import { alleVaegte } from "@/lib/planetvaegt";
 
-const NAVN: Record<string, { da: string; se: string; icon: string }> = {
-  merkur: { da: "Merkur", se: "Merkurius", icon: "☿️" },
-  venus: { da: "Venus", se: "Venus", icon: "♀️" },
-  maane: { da: "Månen", se: "Månen", icon: "🌙" },
-  mars: { da: "Mars", se: "Mars", icon: "♂️" },
-  jupiter: { da: "Jupiter", se: "Jupiter", icon: "🪐" },
-  saturn: { da: "Saturn", se: "Saturnus", icon: "🪐" },
-  uranus: { da: "Uranus", se: "Uranus", icon: "🔵" },
-  neptun: { da: "Neptun", se: "Neptunus", icon: "🔵" },
-  pluto: { da: "Pluto", se: "Pluto", icon: "🌑" },
-  sol: { da: "Solen", se: "Solen", icon: "☀️" },
+const NAVN: Record<string, { da: string; se: string; icon: LucideIcon }> = {
+  merkur: { da: "Merkur", se: "Merkurius", icon: CircleDot },
+  venus: { da: "Venus", se: "Venus", icon: Venus },
+  maane: { da: "Månen", se: "Månen", icon: Moon },
+  mars: { da: "Mars", se: "Mars", icon: Mars },
+  jupiter: { da: "Jupiter", se: "Jupiter", icon: Orbit },
+  saturn: { da: "Saturn", se: "Saturnus", icon: Eclipse },
+  uranus: { da: "Uranus", se: "Uranus", icon: Globe },
+  neptun: { da: "Neptun", se: "Neptunus", icon: Droplets },
+  pluto: { da: "Pluto", se: "Pluto", icon: Circle },
+  sol: { da: "Solen", se: "Solen", icon: Sun },
 };
+
+function PlanetIcon({ id }: { id: string }) {
+  const Icon = NAVN[id].icon;
+  return (
+    <Icon
+      className="mr-1.5 inline h-4 w-4 align-text-bottom text-indigo-500 dark:text-indigo-400"
+      strokeWidth={1.75}
+      aria-hidden="true"
+      focusable="false"
+    />
+  );
+}
 
 const labels = {
   da: {
@@ -100,7 +113,7 @@ export default function PlanetVaegtBeregner() {
             {r?.map((item) => (
               <div key={item.id} className="flex justify-between items-center bg-white dark:bg-gray-700 rounded-lg px-3 py-2 shadow-sm">
                 <span className="text-sm text-gray-700 dark:text-gray-200">
-                  <span className="mr-1.5">{NAVN[item.id].icon}</span>{NAVN[item.id][lang]}
+                  <PlanetIcon id={item.id} />{NAVN[item.id][lang]}
                 </span>
                 <span className="font-bold text-gray-900 dark:text-white">{fmt(item.vaegt)} kg</span>
               </div>

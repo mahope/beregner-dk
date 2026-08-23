@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import { Lightbulb } from "lucide-react";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { ShareCalculation } from "@/components/ShareCalculation";
 import { PrintResult } from "@/components/PrintResult";
@@ -32,7 +33,7 @@ const labels = {
     tblUdenMoms: "Uden moms",
     tblMoms: "Moms",
     tblInklMoms: "Inkl. moms",
-    infoTitle: "💡 Om dansk moms",
+    infoTitle: "Om dansk moms",
     info1a: "Den danske momssats er ",
     info1b: "25%",
     info2: "For at beregne moms: Beløb × 0,25",
@@ -65,7 +66,7 @@ const labels = {
     tblUdenMoms: "Utan moms",
     tblMoms: "Moms",
     tblInklMoms: "Inkl. moms",
-    infoTitle: "💡 Om svensk moms",
+    infoTitle: "Om svensk moms",
     info1a: "Den svenska momssatsen är ",
     info1b: "25%",
     info2: "För att beräkna moms: Belopp × 0,25",
@@ -342,7 +343,7 @@ export default function MomsBeregner() {
 
       {/* Info boks */}
       <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-        <h3 className="font-medium text-blue-800 dark:text-blue-200 mb-2">{l.infoTitle}</h3>
+        <h3 className="font-medium text-blue-800 dark:text-blue-200 mb-2 flex items-center gap-2"><Lightbulb className="h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden="true" focusable="false" />{l.infoTitle}</h3>
         <ul className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
           <li>• {l.info1a}<strong>{l.info1b}</strong></li>
           <li>• {l.info2}</li>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import { X } from "lucide-react";
 import { ShareCalculation } from "@/components/ShareCalculation";
 import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
@@ -191,7 +192,7 @@ export default function BoernepengBeregner() {
                   className="ml-auto text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
                   aria-label={`Fjern barn ${index + 1}`}
                 >
-                  ✕
+                  <X className="h-4 w-4" strokeWidth={1.75} aria-hidden="true" focusable="false" />
                 </button>
               )}
             </div>
