@@ -171,6 +171,19 @@ landmark=lån, piggybank=opsparing osv.).
   279/279 tests grønne, lint ok, build ok.
 - Gate-definition noteret øverst (lint + test + build).
 - Deploy: batch-deployer ~07:30/12:30/17:30. Efter hvert merge: VERIFICÉR-note herunder.
+- Emoji-udskiftning: ALLE 8 etaper færdige. Alle UI-emojis fjernet (650+ forekomster i 45 filer
+  skiftet til lucide-react SVG-ikoner). Kun prosa-emojis (lav prioritet) og dødt data
+  (countryFlag i domain-config) resterer.
+
+## Blog — næste indlæg
+
+### 1. [x] I GANG: Biløkonomi 2026 — Hvad koster det at eje bil? (`/blog/biloekonomi-2026`)
+   - Topic: samlet guide til biløkonomi (ejeromkostninger: afgifter, forsikring, brændstof/el,
+     værditab, finansiering) med danske 2026-tal
+   - Calculators to link: /bil, /braendstof, /billaan, /leasing, /elbil, /laaneberegner, /budget
+   - Cross-link to: spar-penge-paa-braendstof, elpriser-2026, boliglaan-2026
+   - Registrer i blog/page.tsx, sitemap.ts
+   - Research først: webfetch skat.dk (registreringsafgift, grøn ejerafgift), FDM (ejeromk.)
 
 ## VERIFICÉR DEPLOY-log
 - VERIFICÉR DEPLOY: implementationsplan tilføjet f7633f6 16:20 (2026-08-22)
@@ -194,4 +207,5 @@ landmark=lån, piggybank=opsparing osv.).
 - VERIFICÉR DEPLOY: komponent-ikoner etape 5 bd832b2 18:40
   → PT: commit efter 17:30-batch (18:20), næste vindue 07:30 24. aug.
      PlanetVaegt (☿️♀️🌙♂️🪐🔵🌑☀️) bekræfter endnu ikke live.
-- VERIFICÉR DEPLOY: opengraph-image etape 8 (committed nedenfor)
+- VERIFICÉR DEPLOY: opengraph-image etape 8 6429336 18:45
+  → PT: commit efter 17:30-batch, næste vindue 07:30 24. aug.

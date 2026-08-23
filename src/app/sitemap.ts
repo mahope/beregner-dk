@@ -104,5 +104,6 @@ function getBlogSlugs(locale: Locale): string[] {
     "elpriser-2026-beregn-dit-forbrug",
     "privatoekonomi-for-unge",
     "koeb-af-bolig-2026-omkostninger",
+    "biloekonomi-2026-hvad-koster-det-at-eje-bil",
   ];
 }

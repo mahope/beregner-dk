@@ -191,6 +191,14 @@ const blogPosts = [
     date: "2026-02-07",
     readTime: "5 min",
   },
+  {
+    slug: "biloekonomi-2026-hvad-koster-det-at-eje-bil",
+    title: "Biløkonomi 2026: Hvad koster det at eje bil?",
+    description: "Komplet guide til biløkonomi: Registreringsafgift, grøn ejerafgift, forsikring, brændstof, værditab og finansiering. Få det fulde overblik.",
+    category: "Transport & Økonomi",
+    date: "2026-08-23",
+    readTime: "10 min",
+  },
 ];
 
 export default function BlogPage() {
