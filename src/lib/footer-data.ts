@@ -2,7 +2,6 @@ import type { Locale } from "./i18n";
 
 export interface FooterCategory {
   name: string;
-  emoji: string;
   links: { name: string; href: string }[];
 }
 
@@ -19,7 +18,7 @@ const footerData: Record<Locale, FooterCategory[]> = {
   da: [
     {
       name: "Økonomi",
-      emoji: "💰",
+
       links: [
         { name: "Løn efter skat", href: "/loen-efter-skat" },
         { name: "Brutto/Netto", href: "/brutto-netto" },
@@ -41,7 +40,7 @@ const footerData: Record<Locale, FooterCategory[]> = {
     },
     {
       name: "Bolig",
-      emoji: "🏠",
+
       links: [
         { name: "Boliglån", href: "/boliglaan" },
         { name: "Boligstøtte", href: "/boligstoette" },
@@ -55,7 +54,7 @@ const footerData: Record<Locale, FooterCategory[]> = {
     },
     {
       name: "Lån & Rente",
-      emoji: "🏦",
+
       links: [
         { name: "Låneberegner", href: "/laaneberegner" },
         { name: "Renteberegner", href: "/renteberegner" },
@@ -69,7 +68,7 @@ const footerData: Record<Locale, FooterCategory[]> = {
     },
     {
       name: "Familie & Sundhed",
-      emoji: "👨‍👩‍👧",
+
       links: [
         { name: "Børnepenge", href: "/boernepenge" },
         { name: "Barselsdagpenge", href: "/barselsdagpenge" },
@@ -85,7 +84,7 @@ const footerData: Record<Locale, FooterCategory[]> = {
     },
     {
       name: "Hverdag",
-      emoji: "🔧",
+
       links: [
         { name: "Brændstof", href: "/braendstof" },
         { name: "Bil Værdtab", href: "/bil" },
@@ -99,7 +98,7 @@ const footerData: Record<Locale, FooterCategory[]> = {
   no: [
     {
       name: "Økonomi",
-      emoji: "💰",
+
       links: [
         { name: "Moms (MVA)", href: "/moms" },
         { name: "Valuta", href: "/valuta" },
@@ -111,7 +110,7 @@ const footerData: Record<Locale, FooterCategory[]> = {
     },
     {
       name: "Bolig",
-      emoji: "🏠",
+
       links: [
         { name: "Boliglån", href: "/boliglaan" },
         { name: "Strømberegner", href: "/elberegner" },
@@ -121,7 +120,7 @@ const footerData: Record<Locale, FooterCategory[]> = {
     },
     {
       name: "Lån & Rente",
-      emoji: "🏦",
+
       links: [
         { name: "Låneberegner", href: "/laaneberegner" },
         { name: "Billån", href: "/billaan" },
@@ -132,7 +131,7 @@ const footerData: Record<Locale, FooterCategory[]> = {
     },
     {
       name: "Familie & Helse",
-      emoji: "👨‍👩‍👧",
+
       links: [
         { name: "Termin", href: "/termin" },
         { name: "Konfirmasjon", href: "/konfirmation" },
@@ -145,7 +144,7 @@ const footerData: Record<Locale, FooterCategory[]> = {
     },
     {
       name: "Verktøy",
-      emoji: "🔧",
+
       links: [
         { name: "Drivstoff", href: "/braendstof" },
         { name: "Bil (verditap)", href: "/bil" },
@@ -159,7 +158,7 @@ const footerData: Record<Locale, FooterCategory[]> = {
   se: [
     {
       name: "Ekonomi",
-      emoji: "💰",
+
       links: [
         { name: "Moms", href: "/moms" },
         { name: "Valuta", href: "/valuta" },
@@ -171,7 +170,7 @@ const footerData: Record<Locale, FooterCategory[]> = {
     },
     {
       name: "Bostad",
-      emoji: "🏠",
+
       links: [
         { name: "Bolån", href: "/boliglaan" },
         { name: "Elberäknare", href: "/elberegner" },
@@ -181,7 +180,7 @@ const footerData: Record<Locale, FooterCategory[]> = {
     },
     {
       name: "Lån & Ränta",
-      emoji: "🏦",
+
       links: [
         { name: "Låneberäknare", href: "/laaneberegner" },
         { name: "Billån", href: "/billaan" },
@@ -192,7 +191,7 @@ const footerData: Record<Locale, FooterCategory[]> = {
     },
     {
       name: "Familj & Hälsa",
-      emoji: "👨‍👩‍👧",
+
       links: [
         { name: "Beräknad förlossning", href: "/termin" },
         { name: "Konfirmation", href: "/konfirmation" },
@@ -205,7 +204,7 @@ const footerData: Record<Locale, FooterCategory[]> = {
     },
     {
       name: "Verktyg",
-      emoji: "🔧",
+
       links: [
         { name: "Bränsle", href: "/braendstof" },
         { name: "Bil (värdeminskning)", href: "/bil" },

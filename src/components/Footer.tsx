@@ -5,6 +5,8 @@ import { getFooterCategories, getFooterBlogLinks } from "@/lib/footer-data";
 import { getAllDomainConfigs } from "@/lib/domain-config";
 import { FooterAd } from "./ads/AdBanner";
 import CountryFlag from "./CountryFlag";
+import { CalcIcon, CategoryIcon } from "@/components/ui/icons";
+import { Calculator, CalendarDays, ShieldCheck } from "lucide-react";
 
 export default async function Footer() {
   const locale = await getLocale();
@@ -23,13 +25,13 @@ export default async function Footer() {
         {/* Trust signals */}
         <div className="flex flex-wrap justify-center gap-6 mb-10 pb-10 border-b border-gray-800 text-sm">
           <span className="flex items-center gap-2">
-            🧮 <strong className="text-white">{totalCalcs}</strong> {t.footer.freeCalculators}
+            <Calculator className="h-5 w-5 text-gray-400" aria-hidden="true" /> <strong className="text-white">{totalCalcs}</strong> {t.footer.freeCalculators}
           </span>
           <span className="flex items-center gap-2">
-            📅 {t.footer.updatedRates.replace("{year}", String(year))}
+            <CalendarDays className="h-5 w-5 text-gray-400" aria-hidden="true" /> {t.footer.updatedRates.replace("{year}", String(year))}
           </span>
           <span className="flex items-center gap-2">
-            🔒 <strong className="text-white">{t.footer.noLogin}</strong>
+            <ShieldCheck className="h-5 w-5 text-gray-400" aria-hidden="true" /> <strong className="text-white">{t.footer.noLogin}</strong>
           </span>
           <span className="flex items-center gap-2">
             <CountryFlag locale={domainConfig.locale} /> {t.footer.madeFor}
@@ -43,7 +45,7 @@ export default async function Footer() {
             {categories.map((cat) => (
               <div key={cat.name}>
                 <h4 className="text-white font-medium mb-2">
-                  {cat.emoji} {cat.name}
+                  <CategoryIcon name={cat.name} className="h-4 w-4 shrink-0" /> {cat.name}
                 </h4>
                 <ul className="space-y-1.5">
                   {cat.links.map((link) => (
