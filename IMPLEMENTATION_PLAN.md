@@ -186,6 +186,14 @@ landmark=lån, piggybank=opsparing osv.).
    - Research: FDM/skat.dk-sider blokerede (404), brugt generelle danske 2026-estimater noteret "vejledende"
    - Gate grøn: lint ok, 280/280 tests, build ok (125 pages). Commitsha: 4966fab
 
+### 2. [x] FÆRDIG (iteration: 2026-08-23 23:37): Leasing af bil 2026 (`/blog/leasing-af-bil-2026-pris-og-guide`)
+   - Topic: "Leasing af bil 2026: Pris, fordele, ulemper og guide" — komplet guide til privatleasing vs. erhvervsleasing, typiske priser pr. bilklasse, leasing vs. billån, elbil-leasing, faldgruber; danske 2026-tal
+   - Calculators linked: /leasing, /billaan, /bil, /braendstof, /elbil, /laaneberegner
+   - Cross-links til: biloekonomi-2026, spar-penge-paa-braendstof, elpriser-2026, guide-til-laan-og-renter
+   - Registreret i blog/page.tsx, sitemap.ts
+   - Research: FDM blokeret (404); brugt generelle danske leasingpriser noteret "vejledende"
+   - Gate grøn: lint ok, 280/280 tests, build ok (126 pages). Commitsha: 1c8a9a6
+
 ## VERIFICÉR DEPLOY-log
 - VERIFICÉR DEPLOY: implementationsplan tilføjet f7633f6 16:20 (2026-08-22)
   → kun repo-filer (IMPLEMENTATION_PLAN.md), intet site-indhold at verificere; health ok.
@@ -211,4 +219,6 @@ landmark=lån, piggybank=opsparing osv.).
 - VERIFICÉR DEPLOY: opengraph-image etape 8 6429336 18:45
   → PT: commit efter 17:30-batch, næste vindue 07:30 24. aug.
 - VERIFICÉR DEPLOY: biloekonomi blog post 4966fab 23:00
+  → PT: commit efter 17:30-batch, næste vindue 07:30 24. aug.
+- VERIFICÉR DEPLOY: leasing blog post 1c8a9a6 23:37
   → PT: commit efter 17:30-batch, næste vindue 07:30 24. aug.
