@@ -84,9 +84,25 @@ Etaper:
     (h-4 w-4, colored). Forbrugere: 1 test grøn. Lokal build: 0 footer-emojis.
     Nye kategorivisualer tilføjet i icons.ts: "Lån & Rente", "Lån & Ränta",
     "Familie & Sundhed", "Familie & Helse", "Familj & Hälsa", "Verktøy", "Verktyg".
-5. [ ] Komponent-emojis: `AlderBeregner`, `PlanetVaegtBeregner`, `BraendstofBeregner`,
-   `TidsBeregner`, `RentefradragBeregner`, `HuslejeBudgetBeregner`, `BarselBeregner`,
-   `ArveafgiftBeregner`, `EfterloensBeregner`, `ElbilBenzinBeregner`, + småforekomster
+5. [x] FÆRDIG (iteration: 2026-08-23): ALLE komponenter emoji-fri — 24 filer.
+    Tom-tilstande (11 stk): TrendingUp/House/Banknote/Wallet/Landmark/Baby/Car/
+    ChartColumn/TriangleAlert m. h-10 w-10 grå, aria-hidden. Datamaps typet om til
+    `LucideIcon`: PlanetVaegt-NAVN (Venus/Mars/Eclipse=Saturn-ring/Droplets=Neptun,
+    PlanetIcon-hjælper), Arveafgift-relationer (Heart/Baby/UserRound/Users/UsersRound/
+    Contact), AffiliateBox får valgfrit `icon?: LucideIcon`-prop (Landmark/TrendingUp/
+    ShieldCheck/Car på 4 kaldssteder — emoji fjernet fra title/analytics-label).
+    Labels strippet + ikon ved render-site: Moms (Lightbulb), Tidszone (SunMedium),
+    TidsBeregner (MoonStar/ChartColumn/Zap), Braendstof (Car/ChartColumn/TrendingUp +
+    Fuel/Droplets/PlugZap i type-knapper). Vurderings-/status-tekster: CircleCheck/
+    TriangleAlert/Siren (HuslejeBudget), Barsel User/UserRound-toggle. Zodiac-symboler
+    (♈♉…) fjernet fra AlderBeregner — Sparkles i stedet (ingen lucide-zodiac findes);
+    navn+periode bærer betydningen. ✕-fjern-knapper → X-icon (Rentefradrag, Boernepeng).
+    PrintResult-logo uden 📊. Gate: lint ok, 280/280 tests, build ok. Lokal SSR-
+    verificering: /alder /planetvaegt /braendstof /rentefradrag /barselsdagpenge
+    /tidsberegner /tidszone /efterloen /arveafgift /elbil /husleje /billaan = 0 synlige
+    emojis, 20-33 unikke lucide-SVG'er pr. side.
+    FUND: `countryFlag` (🇩🇰🇳🇴🇸🇪) i domain-config er dødt data uden forbrugere men
+    shipper 1× pr. side i RSC-payload — lavprio-oprydning, ikke synligt UI.
 6. [x] FÆRDIG (iteration: 2026-08-23): `app/billaan/page.tsx` — 28 ✅/❌ i prose-lister
    → CheckCircle (grøn) / XCircle (rød). Gate: lint ok, 280/280 tests, build ok.
 7. [ ] Blog-prose-emojis (lav prio; kun hvis de ligner UI, ellers ok i løbende tekst? VURDÉR)
@@ -163,5 +179,11 @@ landmark=lån, piggybank=opsparing osv.).
   verificeret live 13:22: 9 lucide-SVG'er (h-4 w-4, stroke-width=1.75, categoria-ikoner)
   i desktop-dropdown på /kategori/oekonomi.
 - VERIFICÉR DEPLOY: calculator-list-ikoner (etape 3) a932b07 13:22
+  → DEPLOY OK 2026-08-23 18:20: /moms viser CalcIcon-lucide-SVG'er i sidebar/related
+  (percent/landmark/banknote m.fl.), ingen emoji-ikoner.
 - VERIFICÉR DEPLOY: footer-ikoner (etape 4) 9e50974 13:32
+  → DEPLOY OK 2026-08-23 18:20: /kategori/oekonomi footer = 0 🧮📅🔒;
+  lucide-calculator ×3, calendar-days ×2, shield-check ×2 til stede.
 - VERIFICÉR DEPLOY: billaan-ikoner (etape 6) e6d009a 13:45
+  → DEPLOY OK 2026-08-23 18:20: /billaan = 0 ✅/❌; circle-check ×16, circle-x ×12.
+- VERIFICÉR DEPLOY: komponent-ikoner etape 5 bd832b2 18:40
