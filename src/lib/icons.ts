@@ -23,6 +23,7 @@ import {
   CarFront,
   ChartLine,
   Church,
+  CigaretteOff,
   CircuitBoard,
   ClipboardList,
   Clock,
@@ -197,6 +198,7 @@ const calculatorIcons: Record<string, LucideIcon> = {
   "/vandbehov": Droplets,
   "/proteinbehov": Egg,
   "/befordringsfradrag": Car,
+  "/rygestop": CigaretteOff,
 };
 
 export function getCalculatorIcon(href: string): LucideIcon {
