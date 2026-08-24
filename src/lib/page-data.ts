@@ -18,7 +18,7 @@ export type PageData = {
   schemaCategory: string;
 };
 
-const daOnlySlugs = ["loen-efter-skat", "brutto-netto", "feriepenge", "dagpenge", "sygedagpenge", "pension", "efterloen", "topskat", "skattefradrag", "aktieskat", "arveafgift", "rentefradrag", "boligstoette", "husleje", "andelsbolig", "ejendomsvaerdiskat", "boernepenge", "barselsdagpenge", "su", "studielaan", "rabat", "befordringsfradrag"];
+const daOnlySlugs = ["loen-efter-skat", "brutto-netto", "feriepenge", "dagpenge", "sygedagpenge", "pension", "efterloen", "topskat", "skattefradrag", "aktieskat", "arveafgift", "rentefradrag", "boligstoette", "husleje", "andelsbolig", "ejendomsvaerdiskat", "boernepenge", "barselsdagpenge", "su", "studielaan", "rabat", "befordringsfradrag", "rygestop"];
 
 const allLocalesSlugs = ["bmi", "kalorier", "vaegttab", "procent", "kvadratmeter", "alder", "dato", "tidsberegner", "tidszone", "rejsebudget", "bryllup", "konfirmation", "braendstof", "bil", "valuta", "renteberegner", "opsparing", "laaneberegner", "billaan", "leasing", "forbrugslaan", "gaeldsfri", "boliglaan", "elberegner", "solceller", "timepris", "termin", "moms", "proteinbehov"];
 
@@ -87,6 +87,28 @@ const daPages: Record<string, PageData> = {
         { question: "Hvad er de bedste proteinkilder?", answer: "Animalske kilder (kød, fisk, æg, mejeriprodukter) indeholder alle essentielle aminosyrer. Plantebaserede kilder (bønner, linser, tofu, quinoa, nødder) kan også dække behovet ved varieret sammensætning." },
         { question: "Kan man få for meget protein?", answer: "Meget højt proteinindtag (over 2,5-3 g/kg i længere tid) kan belaste nyrerne hos sårbare personer. For raske personer er 1,5-2,0 g/kg sikkert, men følg de officielle anbefalinger og kontakt en læge ved usikkerhed." },
         { question: "Skal man tage proteinpulver?", answer: "Nej, de fleste kan dække deres proteinbehov gennem almindelig kost. Proteinpulver kan være praktisk efter træning eller ved højt behov, men er ikke nødvendigt." },
+      ],
+    },
+    "rygestop": {
+      slug: "rygestop",
+      title: "Rygestop-besparelse - hvad sparer du på at holde op?",
+      description: "Beregn hvor mange kroner du sparer ved at holde op med at ryge. Se besparelsen pr. dag, måned, år og over fem år.",
+      metaTitle: "Rygestop beregner - Se hvad du sparer på at holde op | MinBeregner.dk",
+      metaDescription: "Gratis rygestop beregner. Indtast cigaretter pr. dag og pakkepris, og se din besparelse pr. dag, måned, år og over 5 år.",
+      keywords: ["rygestop beregner", "hvad sparer jeg på at holde op med at ryge", "cigaretter pris om året", "rygebesparelse", "holde op med at ryge penge"],
+      ogTitle: "Rygestop-besparelse - Hvad sparer du på at holde op?",
+      ogDescription: "Beregn hvor mange kroner du sparer ved at holde op med at ryge.",
+      category: "Sundhed",
+      breadcrumbCategory: "Sundhed",
+      breadcrumbCategoryHref: "/kategori/sundhed",
+      schemaName: "Rygestop-besparelse beregner",
+      schemaDescription: "Beregn økonomisk besparelse ved rygestop ud fra cigaretforbrug og pakkepris.",
+      schemaCategory: "HealthApplication",
+      faqItems: [
+        { question: "Hvad koster det at ryge om året?", answer: "Det afhænger af forbrug og pris. Ryger du 15 cigaretter om dagen til en pakkepris på 60 kr for 20 stk, koster det cirka 16.400 kr om året — over fem år mere end 80.000 kr. Beregneren viser dit eget tal." },
+        { question: "Hvordan beregnes besparelsen?", answer: "Beregneren finder prisen pr. cigaret (pakkepris divideret med antal cigarette i pakken) og ganger op med dit daglige forbrug. Årsbesparelsen er daglig besparelse × 365 dage, og månedsbesparelsen er årsbesparelsen divideret med 12." },
+        { question: "Er cigaretpakker blevet dyrere?", answer: "Ja, tobaksafgifterne er forhøjet flere gange i de seneste år, og regeringens tobaksaftale betyder yderligere stigninger frem mod 2028. Din besparelse ved at holde op bliver derfor typisk større hvert år." },
+        { question: "Hvor kan jeg få hjælp til at holde op?", answer: "Tal med din egen læge eller se sundhed.dk for gratis rygestop-forløb. Mange kommuner tilbyder gratis rygestop-kurser, og nogle arbejdspladser har egne tilbud." },
       ],
     },
     "motion-kalorier": {
