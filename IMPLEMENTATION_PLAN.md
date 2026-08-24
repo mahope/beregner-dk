@@ -198,9 +198,10 @@ landmark=lån, piggybank=opsparing osv.).
    - Gate grøn: lint ok, 358/358 tests (+10 nye, 41 test-filer), build ok (134 pages)
    - Commitsha: 1bcbc1d
 
-### 7. [ ] Flyttebudget (`/flyttebudget`) — Hverdag
-   - Følger bryllup/rejsebudget-skabelonen; checklist-budget (mægler, flyttemand, depositum osv.)
-   - Links: husleje, budget, boliglaan
+### 7. [x] I GANG: Flyttebudget (`/flyttebudget`) — Hverdag
+   - Checklist-budget flytteudgifter (flyttemand, transport, rengøring, istandsættelse,
+     depositum, mægler, tinglysning, advokat, møbler, opbevaring, forsikring)
+   - Links: husleje, budget, boliglaan, boligstoette, kvadratmeter
 
 ### 8. [ ] Boligsalgsberegner (`/boligssalg`) — Bolig, daOnly
    - Logik: salgspris − (mæglerhonorar % + fast gebyr + tinglysningsafgift ved ny bolig);

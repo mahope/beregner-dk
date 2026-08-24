@@ -97,6 +97,7 @@ export const beregnere: BeregnerItem[] = [
   { title: "Datoberegner", description: "Beregn dage mellem datoer, arbejdsdage og alder", href: "/dato", category: "Praktisk" },
   { title: "Tidsberegner", description: "Beregn timer og minutter mellem tidspunkter", href: "/tidsberegner", category: "Praktisk" },
   { title: "Ugenummer", description: "Se ISO-ugenummer for enhver dato", href: "/ugenummer", category: "Praktisk" },
+  { title: "Flyttebudget Beregner", description: "Beregn dit samlede flyttebudget", href: "/flyttebudget", category: "Hverdag" },
 ];
 
 export const categories: CategoryData[] = [

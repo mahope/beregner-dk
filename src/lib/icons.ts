@@ -74,6 +74,7 @@ import {
   Thermometer,
   TrendingDown,
   TrendingUp,
+  Truck,
   Users,
   Utensils,
   Wallet,
@@ -201,6 +202,7 @@ const calculatorIcons: Record<string, LucideIcon> = {
   "/rygestop": CigaretteOff,
   "/alkoholenheder": Beer,
   "/ugenummer": CalendarDays,
+  "/flyttebudget": Truck,
 };
 
 export function getCalculatorIcon(href: string): LucideIcon {

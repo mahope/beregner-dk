@@ -20,7 +20,7 @@ export type PageData = {
 
 const daOnlySlugs = ["loen-efter-skat", "brutto-netto", "feriepenge", "dagpenge", "sygedagpenge", "pension", "efterloen", "topskat", "skattefradrag", "aktieskat", "arveafgift", "rentefradrag", "boligstoette", "husleje", "andelsbolig", "ejendomsvaerdiskat", "boernepenge", "barselsdagpenge", "su", "studielaan", "rabat", "befordringsfradrag", "rygestop", "alkoholenheder"];
 
-const allLocalesSlugs = ["bmi", "kalorier", "vaegttab", "procent", "kvadratmeter", "alder", "dato", "tidsberegner", "tidszone", "rejsebudget", "bryllup", "konfirmation", "braendstof", "bil", "valuta", "renteberegner", "opsparing", "laaneberegner", "billaan", "leasing", "forbrugslaan", "gaeldsfri", "boliglaan", "elberegner", "solceller", "timepris", "termin", "moms", "proteinbehov", "ugenummer"];
+const allLocalesSlugs = ["bmi", "kalorier", "vaegttab", "procent", "kvadratmeter", "alder", "dato", "tidsberegner", "tidszone", "rejsebudget", "bryllup", "konfirmation", "braendstof", "bil", "valuta", "renteberegner", "opsparing", "laaneberegner", "billaan", "leasing", "forbrugslaan", "gaeldsfri", "boliglaan", "elberegner", "solceller", "timepris", "termin", "moms", "proteinbehov", "ugenummer", "flyttebudget"];
 
 // ─── DANISH (da) PAGE DATA ─────────────────────────────────────────────────
 
@@ -1722,6 +1722,28 @@ const daPages: Record<string, PageData> = {
         { question: "Hvordan beregnes ISO-ugenummeret?", answer: "ISO 8601-reglen: uger starter på mandag, og uge 1 er den uge, der indeholder årets første torsdag. Det betyder, at dage omkring nytår kan tilhøre uge 52 eller 53 af det foregående år." },
         { question: "Hvor mange uger er der i 2026?", answer: "2026 har 53 uger, fordi 1. januar er en torsdag. Cirka hvert femte eller sjette år har 53 uger." },
         { question: "Hvorfor har nogle år 53 uger?", answer: "Et år har 53 uger, når året starter på en torsdag (almindelig år) eller på en onsdag (skudår). Det sker cirka hvert 5-6 år." },
+      ],
+    },
+    "flyttebudget": {
+      slug: "flyttebudget",
+      title: "Flyttebudget Beregner",
+      description: "Beregn dit samlede flyttebudget — flyttemand, depositum, mægler, transport og mere.",
+      metaTitle: "Flyttebudget Beregner - Hvad koster en flytning? | MinBeregner.dk",
+      metaDescription: "Beregn dit flyttebudget med udgifter til flyttemand, depositum, mægler, istandsættelse og transport. Få overblik over alle flytteomkostninger. Gratis beregner.",
+      keywords: ["flyttebudget beregner", "hvad koster en flytning", "flytteomkostninger", "flytning pris", "flytteudgifter", "beregn flytteomkostninger"],
+      ogTitle: "Flyttebudget Beregner",
+      ogDescription: "Beregn dit samlede flyttebudget med flyttemand, depositum, mægler og transport.",
+      category: "Hverdag",
+      breadcrumbCategory: "Hverdag",
+      breadcrumbCategoryHref: "/kategori/hverdag",
+      schemaName: "Flyttebudget Beregner",
+      schemaDescription: "Gratis flyttebudget beregner. Beregn flytteomkostninger.",
+      schemaCategory: "FinanceApplication",
+      faqItems: [
+        { question: "Hvad koster en gennemsnitlig flytning i Danmark?", answer: "En flytning koster typisk 15.000-50.000 kr afhængig af om du både sælger/privatkøber, depositum på ny bolig og mængde af istandsættelse." },
+        { question: "Hvad er den største udgift ved flytning?", answer: "Ejendomsmægler er ofte størst (25.000-50.000 kr), efterfulgt af depositum på ny lejebolig (3-6 mdrs. husleje) og istandsættelse." },
+        { question: "Hvor meget koster en flyttemand?", answer: "En flyttemand koster typisk 5.000-15.000 kr for en standard 3-4 værelses lejlighed. Prisen afhænger af afstand, mængde og sæson." },
+        { question: "Hvordan sparer jeg på flytningen?", answer: "Lej en flyttebil selv, rengør selv den gamle bolig, få flere tilbud på håndværkere, og sælg overskydende møbler inden flytning." },
       ],
     },
 };
