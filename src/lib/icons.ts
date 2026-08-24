@@ -31,6 +31,7 @@ import {
   Divide,
   Droplets,
   Dumbbell,
+  Egg,
   Flag,
   Flame,
   Flower2,
@@ -194,6 +195,7 @@ const calculatorIcons: Record<string, LucideIcon> = {
   "/vaegttab": TrendingDown,
   "/valuta": ArrowLeftRight,
   "/vandbehov": Droplets,
+  "/proteinbehov": Egg,
   "/befordringsfradrag": Car,
 };
 

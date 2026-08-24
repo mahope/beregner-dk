@@ -20,7 +20,7 @@ export type PageData = {
 
 const daOnlySlugs = ["loen-efter-skat", "brutto-netto", "feriepenge", "dagpenge", "sygedagpenge", "pension", "efterloen", "topskat", "skattefradrag", "aktieskat", "arveafgift", "rentefradrag", "boligstoette", "husleje", "andelsbolig", "ejendomsvaerdiskat", "boernepenge", "barselsdagpenge", "su", "studielaan", "rabat", "befordringsfradrag"];
 
-const allLocalesSlugs = ["bmi", "kalorier", "vaegttab", "procent", "kvadratmeter", "alder", "dato", "tidsberegner", "tidszone", "rejsebudget", "bryllup", "konfirmation", "braendstof", "bil", "valuta", "renteberegner", "opsparing", "laaneberegner", "billaan", "leasing", "forbrugslaan", "gaeldsfri", "boliglaan", "elberegner", "solceller", "timepris", "termin", "moms"];
+const allLocalesSlugs = ["bmi", "kalorier", "vaegttab", "procent", "kvadratmeter", "alder", "dato", "tidsberegner", "tidszone", "rejsebudget", "bryllup", "konfirmation", "braendstof", "bil", "valuta", "renteberegner", "opsparing", "laaneberegner", "billaan", "leasing", "forbrugslaan", "gaeldsfri", "boliglaan", "elberegner", "solceller", "timepris", "termin", "moms", "proteinbehov"];
 
 // ─── DANISH (da) PAGE DATA ─────────────────────────────────────────────────
 
@@ -65,6 +65,28 @@ const daPages: Record<string, PageData> = {
         { question: "Hvor meget vand skal man drikke om dagen?", answer: "En udbredt tommelfingerregel er cirka 35 ml pr. kilo kropsvægt. En person på 75 kg har altså brug for omkring 2,6 liter væske om dagen, mere ved motion, varme og feber." },
         { question: "Tæller kaffe og te med?", answer: "Ja, langt de fleste drikke tæller med i væskeregnskabet, og en stor del af væsken får du også fra mad — især frugt, grønt og supper. Beregneren viser det samlede væskebehov." },
         { question: "Hvordan påvirker motion vandbehovet?", answer: "Når du sveder, taber du væske, der skal erstattes. Beregneren lægger cirka en halv liter til pr. 30 minutters motion. Ved hård eller lang træning kan behovet være endnu højere." },
+      ],
+    },
+    "proteinbehov": {
+      slug: "proteinbehov",
+      title: "Proteinbehov - beregn dit daglige proteinindtag",
+      description: "Beregn dit daglige proteinbehov ud fra kropsvægt og aktivitetsniveau. Vejledende estimat for stillesiddende til eliteatlet.",
+      metaTitle: "Proteinbehov beregner - Beregn dit daglige proteinindtag | MinBeregner.dk",
+      metaDescription: "Gratis proteinbehov beregner. Find dit daglige proteinbehov ud fra vægt og aktivitetsniveau. 0,8-2,0 g/kg. Vejledende — ikke medicinsk rådgivning.",
+      keywords: ["proteinbehov beregner", "proteinindtag", "protein pr kg", "hvor meget protein", "protein kosttilskud", "protein dagligt"],
+      ogTitle: "Proteinbehov - Beregn dit daglige proteinindtag",
+      ogDescription: "Beregn dit daglige proteinbehov ud fra vægt og aktivitetsniveau.",
+      category: "Sundhed",
+      breadcrumbCategory: "Sundhed",
+      breadcrumbCategoryHref: "/kategori/sundhed",
+      schemaName: "Proteinbehov beregner",
+      schemaDescription: "Beregn dagligt proteinbehov ud fra kropsvægt og aktivitetsniveau.",
+      schemaCategory: "HealthApplication",
+      faqItems: [
+        { question: "Hvor meget protein har jeg brug for om dagen?", answer: "Det anbefalede daglige proteinindtag er 0,8 g pr. kg kropsvægt for stillesiddende voksne. Ved motion stiger behovet til 1,2-2,0 g/kg afhængigt af træningsmængde og -intensitet." },
+        { question: "Hvad er de bedste proteinkilder?", answer: "Animalske kilder (kød, fisk, æg, mejeriprodukter) indeholder alle essentielle aminosyrer. Plantebaserede kilder (bønner, linser, tofu, quinoa, nødder) kan også dække behovet ved varieret sammensætning." },
+        { question: "Kan man få for meget protein?", answer: "Meget højt proteinindtag (over 2,5-3 g/kg i længere tid) kan belaste nyrerne hos sårbare personer. For raske personer er 1,5-2,0 g/kg sikkert, men følg de officielle anbefalinger og kontakt en læge ved usikkerhed." },
+        { question: "Skal man tage proteinpulver?", answer: "Nej, de fleste kan dække deres proteinbehov gennem almindelig kost. Proteinpulver kan være praktisk efter træning eller ved højt behov, men er ikke nødvendigt." },
       ],
     },
     "motion-kalorier": {
@@ -2316,6 +2338,27 @@ const sePages: Record<string, PageData> = {
         { question: "Hur många kalorier förbränner man vid löpning?", answer: "Löpning har ett högt MET-värde (ca 9,8). En person på 75 kg bränner runt 370 kalorier på 30 minuters löpning. Förbrukningen ökar med vikt, tempo och längd." },
         { question: "Hur beräknas kaloriförbränningen?", answer: "Kalkylatorn använder formeln kalorier = MET × vikt i kg × timmar. MET (metabolic equivalent of task) anger hur energikrävande en aktivitet är jämfört med vila." },
         { question: "Hur exakta är siffrorna?", answer: "Det är uppskattningar. Din verkliga förbränning beror på intensitet, kondition och ämnesomsättning, men MET-baserade siffror ger en bra överblick för att jämföra aktiviteter." },
+      ],
+    },
+    "proteinbehov": {
+      slug: "proteinbehov",
+      title: "Proteinbehov kalkylator - beräkna ditt dagliga proteinintag",
+      description: "Beräkna ditt dagliga proteinbehov utifrån kroppsvikt och aktivitetsnivå. Vägledande uppskattning för stillasittande till elitidrottare.",
+      metaTitle: "Proteinbehov kalkylator - Beräkna ditt dagliga proteinintag | Beräknare.se",
+      metaDescription: "Gratis proteinbehov kalkylator. Hitta ditt dagliga proteinbehov utifrån vikt och aktivitetsnivå. 0,8-2,0 g/kg. Vägledande — inte medicinsk rådgivning.",
+      keywords: ["proteinbehov kalkylator", "proteinintag", "protein per kg", "hur mycket protein", "protein dagligen"],
+      ogTitle: "Proteinbehov kalkylator - Beräkna ditt dagliga proteinintag",
+      ogDescription: "Beräkna ditt dagliga proteinbehov utifrån vikt och aktivitetsnivå.",
+      category: "Hälsa",
+      breadcrumbCategory: "Hälsa",
+      breadcrumbCategoryHref: "/kategori/sundhed",
+      schemaName: "Proteinbehov kalkylator",
+      schemaDescription: "Beräkna dagligt proteinbehov utifrån kroppsvikt och aktivitetsnivå.",
+      schemaCategory: "HealthApplication",
+      faqItems: [
+        { question: "Hur mycket protein behöver jag per dag?", answer: "Det rekommenderade dagliga proteinintaget är 0,8 g per kg kroppsvikt för stillasittande vuxna. Vid motion ökar behovet till 1,2-2,0 g/kg beroende på träningsmängd och -intensitet." },
+        { question: "Vilka är de bästa proteinkällorna?", answer: "Animaliska källor (kött, fisk, ägg, mejeriprodukter) innehåller alla essentiella aminosyror. Växtbaserade källor (bönor, linser, tofu, quinoa, nötter) kan också täcka behovet vid varierad sammansättning." },
+        { question: "Kan man få för mycket protein?", answer: "Mycket högt proteinintag (över 2,5-3 g/kg under längre tid) kan belasta njurarna hos sårbara personer. För friska personer är 1,5-2,0 g/kg säkert." },
       ],
     },
     "1rm": {

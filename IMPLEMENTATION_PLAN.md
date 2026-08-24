@@ -139,7 +139,7 @@ landmark=lån, piggybank=opsparing osv.).
    - Gate grøn: lint ok, 314/314 tests (+15 nye, 37 test-filer), build ok (130 pages)
    - Commitsha: c57af43 (merge: bdaf555)
 
-### 3. [ ] Proteinbehov-beregner (`/proteinbehov`) — Sundhed
+### 3. [I GANG] Proteinbehov-beregner (`/proteinbehov`) — Sundhed
    - Logik: g/kg efter aktivitetsniveau (0,8 hvile – 1,2–2,0 sport, vejledende);
      tests på kanttilfælde
    - UI/prose markér VEJLEDENDE (ikke medicinsk rådgivning)
@@ -184,6 +184,9 @@ landmark=lån, piggybank=opsparing osv.).
   (countryFlag i domain-config) resterer.
 - Fix: src/app/boernepenge/page.tsx manglede `import Link from "next/link"` — byggefejl opdaget
   under kvalitetsgate for rabatberegner (pre-existing bug, rettet sammen med rabat-iterationen).
+- Sikkerhed (2026-08-24 02:46): npm audit fix kørt — 7 non-breaking patches (esbuild, nanoid,
+  picomatch, undici, vite, vitest, yaml). 3 høj-alvorlige vuln kræver Next.js 16.3.2 (major) —
+  håndteres separat. Commit 57ec92f.
 
 ## Blog — næste indlæg
 
