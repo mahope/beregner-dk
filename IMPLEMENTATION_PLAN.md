@@ -11,7 +11,7 @@ STATUS: AKTIV
 
 ```
 npm run lint    # biome lint ./src
-npm run test    # vitest run (baseline: 314 tests / 37 filer — SKAL alle bestå)
+npm run test    # vitest run (baseline: 372 tests / 42 filer — SKAL alle bestå)
 npm run build   # next build (inkluderer TypeScript-typecheck)
 ```
 
@@ -211,10 +211,16 @@ landmark=lån, piggybank=opsparing osv.).
    - Gate grøn: lint ok, 358/358 tests, build ok (135 pages)
    - Commitsha: c0d44b4
 
-### 8. [ ] Boligsalgsberegner (`/boligssalg`) — Bolig, daOnly
-   - Logik: salgspris − (mæglerhonorar % + fast gebyr + tinglysningsafgift ved ny bolig);
-     research kræves: aktuelle satser (tinglysning.dk/skat.dk) — markér usikkerhed hvis tvivl
-   - Links: boliglaan, ejendomsvaerdiskat, andelsbolig, kvadratmeter
+### 8. [x] FÆRDIG (iteration: 2026-08-24 06:27): Boligsalgsberegner (`/boligsalg`) — Bolig, daOnly
+   - Logik: salgspris − mæglerhonorar (% eller fast) − markedsføring − energimærke − tilstandsrapport − el-rapport − ejerskifteforsikring − istandsættelse − flytning − advokat − indfrielsesgebyrer − evt. tinglysning af ny bolig = nettoprovenu
+   - Research: Boligejer.dk (Erhvervsstyrelsen) for tinglysning/energimærke; markedsbaserede estimater for mægler/istandsættelse/flytning markeret som vejledende
+   - Tests: 14 tests — null/negativ/NaN, 4% mægler, fast fee, tinglysning, "andre", fordeling, høj/lav salgspris
+   - UI: gradient resultat (emerald/green), radio-knapper for mægler procent/fast, checkbox for tinglysning, progress bars
+   - Ikon: DollarSign (lucide)
+   - Registreret: calculator-list (daOnly + relatedMap: boliglaan/ejendomsvaerdiskat/andelsbolig/kvadratmeter/flyttebudget + backlinks fra 4 bolig-sider), categories (Bolig), page-data (daOnly), icons.ts
+   - SEO: "boligsalg beregner", "salgsprovenu beregner", "omkostninger ved salg af bolig"; FAQ 4 items; CalculatorSchema + FAQSchema, Breadcrumbs, RelatedCalculators, Sidebar
+   - Gate grøn: lint ok, 372/372 tests (42 filer), build ok (136 pages)
+   - Commitsha: 00dbf4b
 
 ### 9. [ ] Vedligehold: verificér SATSER_2026 mod officielle kilder
    - Webfetch skat.dk/skm.dk (personskattereform 2026): bund/mellem/topskat-grænser,
@@ -287,3 +293,5 @@ landmark=lån, piggybank=opsparing osv.).
   → DEPLOY-MISSING anyway hvis 12:30-batch stadig viser 404.
 - VERIFICÉR DEPLOY: flyttebudget c0d44b4 06:05
   → Forventes i 07:30-batch 24. aug. Verificér: /flyttebudget på live-site.
+- VERIFICÉR DEPLOY: boligsalg 00dbf4b 06:27
+  → Forventes i 07:30-batch 24. aug. Verificér: /boligsalg på live-site.
