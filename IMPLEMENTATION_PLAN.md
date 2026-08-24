@@ -139,11 +139,18 @@ landmark=lån, piggybank=opsparing osv.).
    - Gate grøn: lint ok, 314/314 tests (+15 nye, 37 test-filer), build ok (130 pages)
    - Commitsha: c57af43 (merge: bdaf555)
 
-### 3. [I GANG] Proteinbehov-beregner (`/proteinbehov`) — Sundhed
-   - Logik: g/kg efter aktivitetsniveau (0,8 hvile – 1,2–2,0 sport, vejledende);
-     tests på kanttilfælde
-   - UI/prose markér VEJLEDENDE (ikke medicinsk rådgivning)
-   - Links: kalorier, bmi, vaegttab, motion-kalorier
+### 3. [x] FÆRDIG (iteration: 2026-08-24 02:56): Proteinbehov-beregner (`/proteinbehov`) — Sundhed
+   - Logik: g/kg efter aktivitetsniveau (0,8 stillesiddende – 1,0/1,3/1,6/2,0); min/max range
+   - Tests: 6 kanttilfælde (null/negative/500+), alle aktivitetsniveauer, range
+   - UI: select-dropdown med 5 niveauer, vægt-input, gradient-resultatboks (rose/orange),
+     g/kg-visning, range-visning, vejledende-markering i prose
+   - SEO-side: da + se locale, FAQ (4 items), CalculatorSchema + FAQSchema,
+     Breadcrumbs, RelatedCalculators, Sidebar, 5 interne links
+   - Ikon: Egg (lucide)
+   - Registreret: calculator-list (Sundhed + relatedMap 5 veje), categories,
+     page-data (da + se, allLocalesSlugs), icons.ts
+   - Gate grøn: lint ok, 321/321 tests (+7, 38 filer), build ok
+   - Commitsha: 4bc9f44 (merge: 2ba658c)
 
 ### 4. [ ] Rygestop-besparelse (`/rygestop`) — Sundhed/Hverdag
    - Logik: cig/day × pakkepris ÷ 19 × dage → besparelse dag/maaned/aar/5-aar; trivielt men evergreen
@@ -260,3 +267,5 @@ landmark=lån, piggybank=opsparing osv.).
   → PT: commit efter 07:30-batch, næste vindue 12:30 24. aug.
 - VERIFICÉR DEPLOY: befordringsfradrag-beregner + satser-opdatering + FAQ-fix c57af43/bdaf555 02:13
   → PT: commit efter 12:30-batch, næste vindue 17:30 24. aug.
+- VERIFICÉR DEPLOY: proteinbehov-beregner + npm-audit-fix 4bc9f44 02:56
+  → PT: commit efter 07:30-batch, næste vindue 12:30 24. aug.
