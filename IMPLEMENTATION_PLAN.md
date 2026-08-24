@@ -170,10 +170,17 @@ landmark=lån, piggybank=opsparing osv.).
    - Lokal SSR-verificeret: /rygestop = HTTP 200, resultat + interne links renderer, 156 SVG'er
    - Commitsha: 56401f0 (merge: 06a3239)
 
-### 5. [ ] Ugenummer-beregner (`/ugenummer`) — Praktisk
-   - Logik: ISO-8601 ugenummer for vilkårlig dato + "nuværende uge"; kant: årsskifte (53 uger)
-   - SEO: "hvad uge er det", "ugenummer 2026"
-   - Links: dato, alder, nedtaelling, tidsberegner
+### 5. [x] FÆRDIG (iteration: 2026-08-24 05:22): Ugenummer-beregner (`/ugenummer`) — Praktisk
+   - Logik: ISO-8601 ugenummer, ISO-år, ugedag; antal uger i året (52/53); årsskifte-kanttilfælde
+   - Tests: 30 tests (113 linjer) — årsskifte, 53-ugers år, ugedag 1-7, Date-objekt, ugyldige input
+   - UI: date-input, gradient-resultatboks, ugedag-navn i locale, årsskifte-advarsel, kort/53-ugers info
+   - SEO-side: "Hvilken uge er det?" da + no + se (allLocalesSlugs), FAQ (4 items), CalculatorSchema + FAQSchema, Breadcrumbs, RelatedCalculators, Sidebar; dansk prose-sektion om ISO 8601, 53-ugers år, årsskifte
+   - Ikon: CalendarDays (lucide) i icons.ts — matcher dato-relaterede beregnere
+   - Registreret: calculator-list (Praktisk + relatedMap til dato/alder/nedtaelling/tidsberegner/termin), categories, page-data (da + allLocales), icons.ts
+   - Backlinks tilføjet: /dato /alder /tidsberegner /nedtaelling får ugenummer i relatedMap
+   - Fix: TypeScript `as 52 | 53` cast i antalUgerIIsoAar — .uge er number, ikke union (build-fejl opdaget ved gate)
+   - Gate grøn: lint ok, 348/348 tests (40 filer), build ok (133 pages)
+   - Commitsha: 5a37dda (merge: 5a37dda)
 
 ### 6. [ ] Alkoholenheder-beregner (`/alkoholenheder`) — Sundhed
    - Logik: enheder = cl × pct/100 × 0,789 / 12 (dansk enhed = 12 g); VEJLEDENDE-markering
@@ -283,6 +290,6 @@ landmark=lån, piggybank=opsparing osv.).
   → PT: commit efter 12:30-batch, næste vindue 17:30 24. aug.
 - VERIFICÉR DEPLOY: proteinbehov-beregner + npm-audit-fix 4bc9f44 02:56
   → PT: commit efter 07:30-batch, næste vindue 12:30 24. aug.
-- VERIFICÉR DEPLOY: rygestop-beregner 56401f0/06a3239 03:15
-  → PT: commit før 07:30-batch 24. aug. (samme batch som proteinbehov hvis deployer
-     henter seneste master; ellers næste vindue 12:30). Verificér /rygestop på URL.
+- VERIFICÉR DEPLOY: ugenummer-beregner 5a37dda 05:22
+   → PT: commit efter 07:30-batch 24. aug. (næste: 12:30). Samme batch som proteinbehov+rygestop
+     hvis de venter; ellers næste vindue. Verificér /ugenummer på URL.
