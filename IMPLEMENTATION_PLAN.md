@@ -11,7 +11,7 @@ STATUS: AKTIV
 
 ```
 npm run lint    # biome lint ./src
-npm run test    # vitest run (baseline: 279 tests / 35 filer — SKAL alle bestå)
+npm run test    # vitest run (baseline: 314 tests / 37 filer — SKAL alle bestå)
 npm run build   # next build (inkluderer TypeScript-typecheck)
 ```
 
@@ -127,13 +127,17 @@ landmark=lån, piggybank=opsparing osv.).
    - Gate grøn: lint ok, 295/295 tests (+15 nye rabat-tests, 36 test-filer), build ok (129 pages)
    - Commitsha: e5b21ae
 
-### 2. [ ] Befordringsfradrag-beregner (`/befordringsfradrag`) — Økonomi, daOnly
-   - Logik: bruger eksisterende `SATSER_2026.koersel*` (24 km bundgrænse, 2,28/1,14 kr/km);
-     årlig skattebesparelse; markér satsene med kilde (skat.dk)
-   - Research først: verificér 2026-sats + kilometergodtgørelse-sats via webfetch (skat.dk);
-     notér fund her
+### 2. [x] FÆRDIG (iteration: 2026-08-24 02:13): Befordringsfradrag-beregner (`/befordringsfradrag`) — Økonomi, daOnly
+   - Logik: bruger opdaterede `SATSER_2026.koersel*` (24 km bundgrænse, 3,17/1,59 kr/km standard,
+     3,51 kr/km yderkommune); brofradrag (Storebælt 110 kr, Øresund 50 kr); ekstra fradrag op til
+     30.800 kr ved indkomst under 391.500 kr; årlig skattebesparelse
+   - Research: 2026-satser fra skat.dk (3,17/1,59 vs tidligere 2,23/1,12) — markant stigning ~42%
    - SEO: "befordringsfradrag 2026 beregner" — højt sæsonvolumen; links: skattefradrag,
-     topskat, loen-efter-skat, rentefradrag
+     topskat, loen-efter-skat, rentefradrag, boliglaan
+   - SATSER_2026 opdateret: kørselsfradragssatser + nye felter (yderkommune, ekstra, bro)
+   - Skattefradrag FAQ opdateret: gamle 2,23/1,12 → 3,17/1,59 kr/km
+   - Gate grøn: lint ok, 314/314 tests (+15 nye, 37 test-filer), build ok (130 pages)
+   - Commitsha: c57af43 (merge: bdaf555)
 
 ### 3. [ ] Proteinbehov-beregner (`/proteinbehov`) — Sundhed
    - Logik: g/kg efter aktivitetsniveau (0,8 hvile – 1,2–2,0 sport, vejledende);
@@ -251,3 +255,5 @@ landmark=lån, piggybank=opsparing osv.).
   → PT: commit før 07:30-batch 24. aug.
 - VERIFICÉR DEPLOY: rabatberegner + boernepenge Link-fix e5b21ae 01:50
   → PT: commit efter 07:30-batch, næste vindue 12:30 24. aug.
+- VERIFICÉR DEPLOY: befordringsfradrag-beregner + satser-opdatering + FAQ-fix c57af43/bdaf555 02:13
+  → PT: commit efter 12:30-batch, næste vindue 17:30 24. aug.
