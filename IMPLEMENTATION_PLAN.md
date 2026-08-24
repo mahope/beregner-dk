@@ -1,6 +1,12 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: AKTIV
+STATUS: KOE-TOM — alle kendte opgaver færdige. Afventer Mads' beslutning om næste prioritet.
+
+## Morgenrapport 2026-08-24 06:45
+- ✅ Boligsalgsberegner (`/boligsalg`): logik+tests+UI+SEO-side+registrering — commit 00dbf4b
+- ✅ SATSER_2026 verifikation: kommuneskat 25,07→25,049%, kirkeskat 0,68→0,639% (svmn.dk) — commit 8f34a8a
+- ✅ Blog: Boligsalg 2026 guide til omkostninger og provenu — commit bdb0d7c
+- 🔒 Deploy: ~17 commits afventer 07:30-batch (se VERIFICÉR DEPLOY-log). Verificér efter batch.
 
 ## Prioriteter (opdateret pr. missions-brev 2026-08-22)
 1. **Emojis ud → lucide-react ikoner ind** (ca. 666 forekomster i 45 filer) — i etaper, grøn gate mellem hver
