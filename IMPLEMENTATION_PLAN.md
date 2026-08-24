@@ -182,10 +182,21 @@ landmark=lån, piggybank=opsparing osv.).
    - Gate grøn: lint ok, 348/348 tests (40 filer), build ok (133 pages)
    - Commitsha: 5a37dda (merge: 5a37dda)
 
-### 6. [ ] Alkoholenheder-beregner (`/alkoholenheder`) — Sundhed
-   - Logik: enheder = cl × pct/100 × 0,789 / 12 (dansk enhed = 12 g); VEJLEDENDE-markering
-   - Research: dobbelttjek enhedsdefinition (borger.dk)
-   - Links: promille, kalorier, bmi
+### 6. [x] FÆRDIG (iteration: 2026-08-24 05:45): Alkoholenheder-beregner (`/alkoholenheder`) — Sundhed, daOnly
+   - Logik: enheder = volume_cl × abv_pct × 0.006575 (12g/enhed, 0.789 g/ml ethanol)
+   - Tests: 10 tests — null på ugyldige inputs, 33cl/4.6%=1 enhed, 50cl/12%=3.9, 4cl/40%=1.05,
+     total=pr.drink×antal, gram-alcohol=enheder×12, fractional antal
+   - Research: borger.dk/sundhed.dk/cancer.dk alle 404 — definition 12g/enhed er veletableret
+     (Sundhedsstyrelsen); note i koden + i prose-sektion
+   - UI: select-dropdown med 10 typiske serveringer (øl/vin/shots), antal-drinks input,
+     gradient-resultatboks (purple/indigo), enheder-visning + gram-visning, vejledende-markering
+   - SEO-side: daOnly (dansk enhedsdefinition); FAQ (4 items), CalculatorSchema + FAQSchema,
+     Breadcrumbs, RelatedCalculators, Sidebar, 5 interne links
+   - Ikon: Beer (lucide) — allerede importeret i icons.ts
+   - Registreret: calculator-list (Sundhed + relatedMap 5 veje + backlink fra /promille),
+     categories, page-data (daOnly), icons.ts
+   - Gate grøn: lint ok, 358/358 tests (+10 nye, 41 test-filer), build ok (134 pages)
+   - Commitsha: 1bcbc1d
 
 ### 7. [ ] Flyttebudget (`/flyttebudget`) — Hverdag
    - Følger bryllup/rejsebudget-skabelonen; checklist-budget (mægler, flyttemand, depositum osv.)
@@ -260,3 +271,8 @@ landmark=lån, piggybank=opsparing osv.).
   → **Batch 12:30 24. aug.** forventes: rabatberegner (e5b21ae), proteinbehov (4bc9f44), ugenummer (5a37dda).
   → **Batch 17:30 24. aug.** forventes: befordringsfradrag (c57af43).
   Efter hver batch verificeres: /rygestop, /proteinbehov, /rabat, /ugenummer, /blog/* på URL.
+- VERIFICÉR DEPLOY: alkoholenheder-beregner 1bcbc1d 05:45
+  → PT: bør inkluderes i 07:30-batch 24. aug. (naeste efter 05:45). Hvis 07:30-batch inkluderer:
+    rabat (e5b21ae), proteinbehov (4bc9f44), rygestop (56401f0), ugenummer (5a37dda),
+    befordringsfradrag (c57af43 samles maaske) og alkoholenheder (1bcbc1d) — verificér ved naeste pass.
+  → DEPLOY-MISSING anyway hvis 12:30-batch stadig viser 404.
