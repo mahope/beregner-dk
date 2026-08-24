@@ -70,5 +70,5 @@ export function isoUge(dato: Date | string): IsoUgeResultat | null {
 export function antalUgerIIsoAar(aar: number): 52 | 53 | null {
   if (!Number.isInteger(aar) || aar < 1 || aar > 9999) return null;
   const resultat = isoUge(new Date(aar, 11, 28));
-  return resultat ? resultat.uge : null;
+  return resultat ? (resultat.uge as 52 | 53) : null;
 }

@@ -99,6 +99,7 @@ const calculatorDefs: CalculatorDef[] = [
   { href: "/vaegttab", titles: { da: "Vægttab", no: "Vekttap", se: "Viktminskning" }, descriptions: { da: "Beregn vægttab", no: "Beregn vekttap", se: "Beräkna viktminskning" } },
   { href: "/termin", titles: { da: "Terminsdato", no: "Termindato", se: "Beräknat datum" }, descriptions: { da: "Beregn terminsdato", no: "Beregn termindato", se: "Beräkna förlossningsdatum" } },
   { href: "/aegloesning", titles: { da: "Ægløsning", no: "Eggløsning", se: "Ägglossning" }, descriptions: { da: "Find dine frugtbare dage", no: "Finn dine fruktbare dager", se: "Hitta dina fertila dagar" } },
+  { href: "/ugenummer", titles: { da: "Ugenummer", no: "Ukenummer", se: "Veckonummer" }, descriptions: { da: "Hvilken uge er det?", no: "Hvilken uke er det?", se: "Vilken vecka är det?" } },
 ];
 
 // DA-only slugs (not available on NO/SE)
@@ -154,7 +155,7 @@ const relatedMap: Record<string, string[]> = {
   "/planetvaegt": ["/enheder", "/procent", "/temperatur", "/gennemsnit", "/kvadratmeter"],
   "/aegloesning": ["/termin", "/nedtaelling", "/dato", "/alder", "/bmi"],
   "/brok": ["/procent", "/gennemsnit", "/kvadratmeter", "/temperatur", "/enheder"],
-  "/nedtaelling": ["/dato", "/alder", "/tidsberegner", "/termin", "/tidszone"],
+  "/nedtaelling": ["/dato", "/alder", "/tidsberegner", "/termin", "/tidszone", "/ugenummer"],
   "/rentefradrag": ["/boliglaan", "/renteberegner", "/laaneberegner", "/skattefradrag", "/loen-efter-skat"],
   "/billaan": ["/bil", "/laaneberegner", "/renteberegner", "/forbrugslaan", "/braendstof"],
   "/forbrugslaan": ["/laaneberegner", "/renteberegner", "/billaan", "/boliglaan", "/rentefradrag"],
@@ -171,10 +172,10 @@ const relatedMap: Record<string, string[]> = {
   "/vandbehov": ["/kalorier", "/bmi", "/kropsfedt", "/motion-kalorier", "/proteinbehov"],
   "/motion-kalorier": ["/kalorier", "/vaegttab", "/bmi", "/vandbehov", "/proteinbehov"],
   "/proteinbehov": ["/kalorier", "/bmi", "/motion-kalorier", "/vandbehov", "/vaegttab"],
-  "/dato": ["/tidsberegner", "/alder", "/tidszone", "/feriepenge", "/pension"],
-  "/tidsberegner": ["/dato", "/tidszone", "/alder", "/timepris", "/kalorier"],
+  "/dato": ["/tidsberegner", "/alder", "/tidszone", "/feriepenge", "/pension", "/ugenummer"],
+  "/tidsberegner": ["/dato", "/tidszone", "/alder", "/timepris", "/kalorier", "/ugenummer"],
   "/tidszone": ["/dato", "/tidsberegner", "/valuta", "/alder", "/timepris"],
-  "/alder": ["/dato", "/pension", "/bmi", "/tidsberegner", "/efterloen"],
+  "/alder": ["/dato", "/pension", "/bmi", "/tidsberegner", "/efterloen", "/ugenummer"],
   "/bil": ["/braendstof", "/billaan", "/elberegner", "/forbrugslaan", "/loen-efter-skat"],
   "/braendstof": ["/bil", "/elberegner", "/procent", "/valuta", "/kvadratmeter"],
   "/elbil": ["/braendstof", "/bil", "/elberegner", "/leasing", "/billaan"],
@@ -197,6 +198,7 @@ const relatedMap: Record<string, string[]> = {
   "/aktieskat": ["/opsparing", "/loen-efter-skat", "/pension", "/renteberegner", "/procent"],
   "/andelsbolig": ["/boliglaan", "/husleje", "/laaneberegner", "/rentefradrag", "/ejendomsvaerdiskat"],
   "/studielaan": ["/su", "/laaneberegner", "/forbrugslaan", "/renteberegner", "/opsparing"],
+  "/ugenummer": ["/dato", "/alder", "/nedtaelling", "/tidsberegner", "/termin"],
 };
 
 /**

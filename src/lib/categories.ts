@@ -95,6 +95,7 @@ export const beregnere: BeregnerItem[] = [
   { title: "Nedtælling", description: "Tæl dage til en fødselsdag, ferie eller jul", href: "/nedtaelling", category: "Hverdag" },
   { title: "Datoberegner", description: "Beregn dage mellem datoer, arbejdsdage og alder", href: "/dato", category: "Praktisk" },
   { title: "Tidsberegner", description: "Beregn timer og minutter mellem tidspunkter", href: "/tidsberegner", category: "Praktisk" },
+  { title: "Ugenummer", description: "Se ISO-ugenummer for enhver dato", href: "/ugenummer", category: "Praktisk" },
 ];
 
 export const categories: CategoryData[] = [

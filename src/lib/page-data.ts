@@ -20,7 +20,7 @@ export type PageData = {
 
 const daOnlySlugs = ["loen-efter-skat", "brutto-netto", "feriepenge", "dagpenge", "sygedagpenge", "pension", "efterloen", "topskat", "skattefradrag", "aktieskat", "arveafgift", "rentefradrag", "boligstoette", "husleje", "andelsbolig", "ejendomsvaerdiskat", "boernepenge", "barselsdagpenge", "su", "studielaan", "rabat", "befordringsfradrag", "rygestop"];
 
-const allLocalesSlugs = ["bmi", "kalorier", "vaegttab", "procent", "kvadratmeter", "alder", "dato", "tidsberegner", "tidszone", "rejsebudget", "bryllup", "konfirmation", "braendstof", "bil", "valuta", "renteberegner", "opsparing", "laaneberegner", "billaan", "leasing", "forbrugslaan", "gaeldsfri", "boliglaan", "elberegner", "solceller", "timepris", "termin", "moms", "proteinbehov"];
+const allLocalesSlugs = ["bmi", "kalorier", "vaegttab", "procent", "kvadratmeter", "alder", "dato", "tidsberegner", "tidszone", "rejsebudget", "bryllup", "konfirmation", "braendstof", "bil", "valuta", "renteberegner", "opsparing", "laaneberegner", "billaan", "leasing", "forbrugslaan", "gaeldsfri", "boliglaan", "elberegner", "solceller", "timepris", "termin", "moms", "proteinbehov", "ugenummer"];
 
 // ─── DANISH (da) PAGE DATA ─────────────────────────────────────────────────
 
@@ -1678,6 +1678,28 @@ const daPages: Record<string, PageData> = {
         { question: "Hvad er ekstra befordringsfradrag?", answer: "Hvis din årlige indkomst før AM-bidrag er under 391.500 kr. (2026), kan du få et ekstra fradrag på op til 30.800 kr. Fradraget nedtrappes gradvist med stigende indkomst og er et supplement til det almindelige kørselsfradrag." },
         { question: "Hvordan får jeg befordringsfradraget?", answer: "Befordringsfradraget indberetter du i SKATs forskudsopgørelse, så det bliver trukket fra din skat løbende hen over året. Du kan også rette det på årsopgørelsen året efter. Brug beregneren til at finde dit præcise fradrag, og indtast beløbet i din forskudsopgørelse." },
         { question: "Kan jeg få brofradrag?", answer: "Ja, hvis du krydser Storebæltsbroen eller Øresundsbroen på vej til arbejde, kan du få et ekstra fradrag pr. passage. I 2026 er det 110 kr. pr. Storebæltspassage i bil og 50 kr. pr. Øresundspassage i bil. Bruger du offentlig transport, er satserne lavere (hhv. 15 kr. og 8 kr.)." },
+      ],
+    },
+    "ugenummer": {
+      slug: "ugenummer",
+      title: "Ugenummer - hvilken uge er det?",
+      description: "Se hvilket ISO-ugenummer en dato har, ugens dag og hvor mange uger året har. Virker for enhver dato også omkring årsskiftet.",
+      metaTitle: "Ugenummer beregner - Hvilken uge er det? | MinBeregner.dk",
+      metaDescription: "Gratis ugenummer beregner. Se ISO-ugenummeret for enhver dato — også ved årsskifte, hvor uge 1 kan ligge i december. Inkl. ugedag og uger i året.",
+      keywords: ["ugenummer", "hvilken uge er det", "uge beregner", "iso ugenummer", "uge i dag", "uge 2026"],
+      ogTitle: "Ugenummer - Hvilken uge er det?",
+      ogDescription: "Se ISO-ugenummeret for enhver dato, ugens dag og uger i året.",
+      category: "Praktisk",
+      breadcrumbCategory: "Praktisk",
+      breadcrumbCategoryHref: "/kategori/praktisk",
+      schemaName: "Ugenummer beregner",
+      schemaDescription: "Beregn ISO-ugenummer for en dato, se ugens dag og antal uger i året.",
+      schemaCategory: "UtilitiesApplication",
+      faqItems: [
+        { question: "Hvilken uge er det?", answer: "Beregneren viser automatisk ugenummeret for dags dato. Du kan også vælge en anden dato for at se dens ugenummer." },
+        { question: "Hvordan beregnes ISO-ugenummeret?", answer: "ISO 8601-reglen: uger starter på mandag, og uge 1 er den uge, der indeholder årets første torsdag. Det betyder, at dage omkring nytår kan tilhøre uge 52 eller 53 af det foregående år." },
+        { question: "Hvor mange uger er der i 2026?", answer: "2026 har 53 uger, fordi 1. januar er en torsdag. Cirka hvert femte eller sjette år har 53 uger." },
+        { question: "Hvorfor har nogle år 53 uger?", answer: "Et år har 53 uger, når året starter på en torsdag (almindelig år) eller på en onsdag (skudår). Det sker cirka hvert 5-6 år." },
       ],
     },
 };
