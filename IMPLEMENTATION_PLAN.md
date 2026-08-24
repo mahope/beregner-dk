@@ -152,9 +152,23 @@ landmark=lån, piggybank=opsparing osv.).
    - Gate grøn: lint ok, 321/321 tests (+7, 38 filer), build ok
    - Commitsha: 4bc9f44 (merge: 2ba658c)
 
-### 4. [ ] Rygestop-besparelse (`/rygestop`) — Sundhed/Hverdag
-   - Logik: cig/day × pakkepris ÷ 19 × dage → besparelse dag/maaned/aar/5-aar; trivielt men evergreen
-   - Links: budget, sparemaal, opsparing
+### 4. [x] FÆRDIG (iteration: 2026-08-24 03:15): Rygestop-besparelse (`/rygestop`) — Sundhed, daOnly
+   - Logik: `src/lib/rygestop.ts` — cigaretter/dag × pakkepris ÷ pakkestørrelse; besparelse
+     dag/måned/år/5 år; måned = 365/12 dage så 12×måned = år præcist; validering incl.
+     null/0/negative/ekstreme inputs (10 tests)
+   - PAKKESTØRRELSE: backlog sagde "÷19", men standardpakkken i DK er 20 stk — gjort konfigurerbart
+     med default 20 og hint i UI (19-pakker findes hos nogle budgetmærker)
+   - Research: skat.dk/cancer.dk/Bing-fetches fejlede (404/irrelevante resultater) — beregneren
+     afhænger IKKE af officielle satser (pris = brugerinput), default 60 kr/pakke markeret vejledende;
+     tobaksaftalen (afgiftsstigninger frem mod 2028) nævnt generisk i prose uden konkrete satser
+   - SEO: "rygestop beregner", "hvad sparer jeg på at holde op"; FAQ 4 items; CalculatorSchema +
+     FAQSchema + Breadcrumbs + RelatedCalculators + Sidebar; daOnly (svarende til rabat/befordring)
+   - Links: side linker ud til /opsparing /sparemaal /budget i prose; relatedMap: /rygestop →
+     opsparing/sparemaal/budget/promille/vaegttab; backlinks tilføjet i /promille og /budget maps
+   - Ikon: CigaretteOff (lucide) i icons.ts — verificeret renderet på /kategori/sundhed
+   - Gate grøn: lint ok, 331/331 tests (+10 nye, 39 filer), build ok (132 pages)
+   - Lokal SSR-verificeret: /rygestop = HTTP 200, resultat + interne links renderer, 156 SVG'er
+   - Commitsha: 56401f0 (merge: 06a3239)
 
 ### 5. [ ] Ugenummer-beregner (`/ugenummer`) — Praktisk
    - Logik: ISO-8601 ugenummer for vilkårlig dato + "nuværende uge"; kant: årsskifte (53 uger)
@@ -269,3 +283,6 @@ landmark=lån, piggybank=opsparing osv.).
   → PT: commit efter 12:30-batch, næste vindue 17:30 24. aug.
 - VERIFICÉR DEPLOY: proteinbehov-beregner + npm-audit-fix 4bc9f44 02:56
   → PT: commit efter 07:30-batch, næste vindue 12:30 24. aug.
+- VERIFICÉR DEPLOY: rygestop-beregner 56401f0/06a3239 03:15
+  → PT: commit før 07:30-batch 24. aug. (samme batch som proteinbehov hvis deployer
+     henter seneste master; ellers næste vindue 12:30). Verificér /rygestop på URL.
