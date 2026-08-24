@@ -29,9 +29,9 @@ export const SATSER_2026 = {
   beskaeftigelsesfradragPct: 0.1275, // 12,75 % af arbejdsindkomst efter AM
   beskaeftigelsesfradragMax: 63300,
 
-  // Gennemsnitlige kommunale satser
-  kommuneskatSnit: 0.2507, // 25,07 %
-  kirkeskatSnit: 0.0068, // 0,68 %
+  // Gennemsnitlige kommunale satser (kilde: svmn.dk, 2026-gennemsnit)
+  kommuneskatSnit: 0.25049, // 25,049 %
+  kirkeskatSnit: 0.00639, // 0,639 %
 
   // Aktieindkomst (kilde: skm.dk / skat.dk)
   aktieProgressionsgraense: 79400,

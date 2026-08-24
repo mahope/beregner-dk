@@ -1,5 +1,6 @@
 import { describe, test, expect } from "vitest";
 import { beregnBefordringsfradrag } from "./befordringsfradrag";
+import { SATSER_2026 } from "./satser-2026";
 
 const base = () => ({
   kmPerDag: 60,
@@ -103,7 +104,7 @@ describe("beregnBefordringsfradrag", () => {
 
   test("skattevaerdi is computed as fradrag × kommuneskat", () => {
     const r = beregnBefordringsfradrag(base())!;
-    const expected = r.fradraegPerAar * 0.2507;
+    const expected = r.fradraegPerAar * SATSER_2026.kommuneskatSnit;
     expect(r.skattevaerdi).toBeCloseTo(expected, 0);
   });
 
