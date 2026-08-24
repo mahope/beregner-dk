@@ -253,43 +253,10 @@ landmark=lån, piggybank=opsparing osv.).
     - Gate grøn: lint ok, 280/280 tests, build ok (128 pages).
 
 ## VERIFICÉR DEPLOY-log
-- VERIFICÉR DEPLOY: implementationsplan tilføjet f7633f6 16:20 (2026-08-22)
-  → kun repo-filer (IMPLEMENTATION_PLAN.md), intet site-indhold at verificere; health ok.
-- DEPLOY OK 2026-08-22: PR #19 (titel-fix, f9dd358/9329b79) verificeret live —
-  https://minberegner.dk/moms viser `<title>Momsberegner | MinBeregner.dk</title>` (ikke dobbelt).
-- DEPLOY OK 2026-08-23 (iteration 4): etape 1-ikoner (eed982b) verificeret live —
-  forside viser 75 lucide-SVG'er og 0 emojis fra home-data/categories; /kategori/bolig
-  viser 29 SVG'er og kun Footer-emojis (🧮, tæller i etape 4); /api/health = status ok.
-- DEPLOY OK 2026-08-23: navigation-ikoner i header (etape 2) b6b10a3 08:25 —
-  verificeret live 13:22: 9 lucide-SVG'er (h-4 w-4, stroke-width=1.75, categoria-ikoner)
-  i desktop-dropdown på /kategori/oekonomi.
-- VERIFICÉR DEPLOY: calculator-list-ikoner (etape 3) a932b07 13:22
-  → DEPLOY OK 2026-08-23 18:20: /moms viser CalcIcon-lucide-SVG'er i sidebar/related
-  (percent/landmark/banknote m.fl.), ingen emoji-ikoner.
-- VERIFICÉR DEPLOY: footer-ikoner (etape 4) 9e50974 13:32
-  → DEPLOY OK 2026-08-23 18:20: /kategori/oekonomi footer = 0 🧮📅🔒;
-  lucide-calculator ×3, calendar-days ×2, shield-check ×2 til stede.
-- VERIFICÉR DEPLOY: billaan-ikoner (etape 6) e6d009a 13:45
-  → DEPLOY OK 2026-08-23 18:20: /billaan = 0 ✅/❌; circle-check ×16, circle-x ×12.
-- VERIFICÉR DEPLOY: komponent-ikoner etape 5 bd832b2 18:40
-  → PT: commit efter 17:30-batch (18:20), næste vindue 07:30 24. aug.
-     PlanetVaegt (☿️♀️🌙♂️🪐🔵🌑☀️) bekræfter endnu ikke live.
-- VERIFICÉR DEPLOY: opengraph-image etape 8 6429336 18:45
-  → PT: commit efter 17:30-batch, næste vindue 07:30 24. aug.
-- VERIFICÉR DEPLOY: biloekonomi blog post 4966fab 23:00
-  → PT: commit efter 17:30-batch, næste vindue 07:30 24. aug.
-- VERIFICÉR DEPLOY: leasing blog post 1c8a9a6 23:37
-  → PT: commit efter 17:30-batch, næste vindue 07:30 24. aug.
-- VERIFICÉR DEPLOY: månedsbudget blog post a2ca835 23:58
-  → PT: commit efter 17:30-batch, næste vindue 07:30 24. aug.
-- VERIFICÉR DEPLOY: børnepenge blog post + footer-data cleanup (3 tidl. blog-posts tilføjet)
-  → PT: commit før 07:30-batch 24. aug.
-- VERIFICÉR DEPLOY: rabatberegner + boernepenge Link-fix e5b21ae 01:50
-  → PT: commit efter 07:30-batch, næste vindue 12:30 24. aug.
-- VERIFICÉR DEPLOY: befordringsfradrag-beregner + satser-opdatering + FAQ-fix c57af43/bdaf555 02:13
-  → PT: commit efter 12:30-batch, næste vindue 17:30 24. aug.
-- VERIFICÉR DEPLOY: proteinbehov-beregner + npm-audit-fix 4bc9f44 02:56
-  → PT: commit efter 07:30-batch, næste vindue 12:30 24. aug.
-- VERIFICÉR DEPLOY: ugenummer-beregner 5a37dda 05:22
-   → PT: commit efter 07:30-batch 24. aug. (næste: 12:30). Samme batch som proteinbehov+rygestop
-     hvis de venter; ellers næste vindue. Verificér /ugenummer på URL.
+- DEPLOY OK: billaan-ikoner (etape 6), calculator-list-ikoner (etape 3), footer-ikoner (etape 4) — verificeret 2026-08-23 18:20.
+- VERIFICÉR DEPLOY: alt efter 17:30-batch 23. aug. — samlet note:
+  → **Batch 07:30 24. aug.** forventes: etape 5 (komponent-ikoner bd832b2), etape 8 (opengraph 6429336),
+    biloekonomi (4966fab), leasing (1c8a9a6), maanedsbudget (a2ca835), boernepenge blog, rygestop (56401f0).
+  → **Batch 12:30 24. aug.** forventes: rabatberegner (e5b21ae), proteinbehov (4bc9f44), ugenummer (5a37dda).
+  → **Batch 17:30 24. aug.** forventes: befordringsfradrag (c57af43).
+  Efter hver batch verificeres: /rygestop, /proteinbehov, /rabat, /ugenummer, /blog/* på URL.
