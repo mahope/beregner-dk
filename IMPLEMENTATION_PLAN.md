@@ -245,11 +245,13 @@ landmark=lån, piggybank=opsparing osv.).
   picomatch, undici, vite, vitest, yaml). 3 høj-alvorlige vuln kræver Next.js 16.3.2 (major) —
   håndteres separat. Commit 57ec92f.
 
-### 10. [ ] Boligsalg 2026 — guide til omkostninger og salgsprovenu (`/blog/boligsalg-2026-guide-til-omkostninger-og-provenu`)
-    - Topic: komplet guide til omkostninger ved boligsalg — mæglerhonorar, energimærke, tilstandsrapport, ejerskifteforsikring, istandsættelse, tinglysning; gennemsnitlige priser; hvordan man optimerer sit provenu
-    - Calculators linked: /boligsalg (primær), /boliglaan, /ejendomsvaerdiskat, /andelsbolig, /kvadratmeter, /flyttebudget
-    - Research: Boligejer.dk, svmn.dk, ejendomsmægleres gennemsnitssalær (vejledende)
-    - Registreret i blog/page.tsx, sitemap.ts. Backlinks i /boligsalg page.
+### 10. [x] FÆRDIG (iteration: 2026-08-24 06:43): Boligsalg 2026 — guide til omkostninger og salgsprovenu (`/blog/boligsalg-2026-guide-til-omkostninger-og-provenu`)
+    - Topic: komplet guide til omkostninger ved boligsalg — mæglerhonorar, energimærke, tilstandsrapport, el-rapport, ejerskifteforsikring, istandsættelse, tinglysning, flytning; konkret eksempel (3 mio. kr → 2,79 mio. kr nettoprovenu); optimeringsråd
+    - Calculators linked: /boligsalg (primær, 2× CTA), /boliglaan, /ejendomsvaerdiskat, /andelsbolig, /kvadratmeter, /flyttebudget
+    - Research: Boligejer.dk (Erhvervsstyrelsen), markedsestimater
+    - Registreret: blog/page.tsx, sitemap.ts, footer-data.ts ("Seneste artikler"), backlink i /boligsalg page
+    - Gate grøn: lint ok, 372/372 tests, build ok (137 pages)
+    - Commitsha: bdb0d7c
 
 ## Blog — næste indlæg
 
@@ -289,5 +291,5 @@ landmark=lån, piggybank=opsparing osv.).
 
 ## VERIFICÉR DEPLOY-log
 - DEPLOY OK: billaan-ikoner (etape 6), calculator-list-ikoner (etape 3), footer-ikoner (etape 4) — verificeret 2026-08-23 18:20.
-- **Batch 07:30 24. aug.** forventes at inkludere: etape 5 (komponent-ikoner), etape 8 (opengraph), biloekonomi, leasing, maanedsbudget, boernepenge blog, rygestop, rabat, proteinbehov, ugenummer, befordringsfradrag, alkoholenheder, flyttebudget, boligsalg, satser-opdatering.
-  → Verificér efter 07:30-batch: /alkoholenheder, /flyttebudget, /boligsalg, /rygestop, /ugenummer
+- **Batch 07:30 24. aug.** forventes at inkludere: etape 5 (komponent-ikoner), etape 8 (opengraph), biloekonomi, leasing, maanedsbudget, boernepenge blog, rygestop, rabat, proteinbehov, ugenummer, befordringsfradrag, alkoholenheder, flyttebudget, boligsalg, satser-opdatering, boligsalg blog.
+  → Verificér efter 07:30-batch: /alkoholenheder, /flyttebudget, /boligsalg, /blog/boligsalg-2026-guide-til-omkostninger-og-provenu
