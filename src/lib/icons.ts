@@ -199,6 +199,7 @@ const calculatorIcons: Record<string, LucideIcon> = {
   "/proteinbehov": Egg,
   "/befordringsfradrag": Car,
   "/rygestop": CigaretteOff,
+  "/alkoholenheder": Beer,
   "/ugenummer": CalendarDays,
 };
 

@@ -63,6 +63,7 @@ const calculatorDefs: CalculatorDef[] = [
   { href: "/motion-kalorier", titles: { da: "Kalorieforbrænding", no: "Kaloriforbrenning", se: "Kaloriförbränning" }, descriptions: { da: "Forbrændte kalorier ved motion", no: "Forbrente kalorier ved trening", se: "Förbrända kalorier vid motion" } },
   { href: "/proteinbehov", titles: { da: "Proteinbehov", no: "Proteinbehov", se: "Proteinbehov" }, descriptions: { da: "Beregn dit daglige proteinbehov", no: "Beregn ditt daglige proteinbehov", se: "Beräkna ditt dagliga proteinbehov" } },
   { href: "/rygestop", daOnly: true, titles: { da: "Rygestop", no: "Røykeslutt", se: "Sluta röka" }, descriptions: { da: "Se hvad du sparer på at holde op med at ryge", no: "Se hvor mye du sparer på å slutte å røyke", se: "Se vad du sparar på att sluta röka" } },
+  { href: "/alkoholenheder", daOnly: true, titles: { da: "Alkoholenheder", no: "Alkoholenheter", se: "Alkoholenheter" }, descriptions: { da: "Beregn antal genstande ud fra mængde og alkoholprocent", no: "Beregn alkoholenheter ut fra mengde og alkoholprosent", se: "Beräkna alkoholenheter utifrån mängd och alkoholprocent" } },
   // Tid
   { href: "/dato", titles: { da: "Datoberegner", no: "Datokalkulator", se: "Datumkalkylator" }, descriptions: { da: "Dage mellem datoer", no: "Dager mellom datoer", se: "Dagar mellan datum" } },
   { href: "/tidsberegner", titles: { da: "Tidsberegner", no: "Tidskalkulator", se: "Tidskalkylator" }, descriptions: { da: "Beregn tid og varighed", no: "Beregn tid og varighet", se: "Beräkna tid och varaktighet" } },
@@ -165,8 +166,9 @@ const relatedMap: Record<string, string[]> = {
   "/procent": ["/moms", "/rabat", "/renteberegner", "/opsparing", "/bmi"],
   "/bmi": ["/kalorier", "/alder", "/procent", "/dato", "/tidsberegner"],
   "/kalorier": ["/bmi", "/procent", "/alder", "/dato", "/tidsberegner"],
-  "/promille": ["/bmi", "/kalorier", "/rygestop", "/alder", "/procent"],
+  "/promille": ["/bmi", "/kalorier", "/rygestop", "/alkoholenheder", "/alder", "/procent"],
   "/rygestop": ["/opsparing", "/sparemaal", "/budget", "/promille", "/vaegttab"],
+  "/alkoholenheder": ["/promille", "/kalorier", "/rygestop", "/bmi", "/vaegttab"],
   "/kropsfedt": ["/bmi", "/kalorier", "/vaegttab", "/promille", "/procent"],
   "/1rm": ["/kalorier", "/kropsfedt", "/bmi", "/vaegttab", "/procent"],
   "/vandbehov": ["/kalorier", "/bmi", "/kropsfedt", "/motion-kalorier", "/proteinbehov"],

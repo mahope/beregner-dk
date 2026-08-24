@@ -18,7 +18,7 @@ export type PageData = {
   schemaCategory: string;
 };
 
-const daOnlySlugs = ["loen-efter-skat", "brutto-netto", "feriepenge", "dagpenge", "sygedagpenge", "pension", "efterloen", "topskat", "skattefradrag", "aktieskat", "arveafgift", "rentefradrag", "boligstoette", "husleje", "andelsbolig", "ejendomsvaerdiskat", "boernepenge", "barselsdagpenge", "su", "studielaan", "rabat", "befordringsfradrag", "rygestop"];
+const daOnlySlugs = ["loen-efter-skat", "brutto-netto", "feriepenge", "dagpenge", "sygedagpenge", "pension", "efterloen", "topskat", "skattefradrag", "aktieskat", "arveafgift", "rentefradrag", "boligstoette", "husleje", "andelsbolig", "ejendomsvaerdiskat", "boernepenge", "barselsdagpenge", "su", "studielaan", "rabat", "befordringsfradrag", "rygestop", "alkoholenheder"];
 
 const allLocalesSlugs = ["bmi", "kalorier", "vaegttab", "procent", "kvadratmeter", "alder", "dato", "tidsberegner", "tidszone", "rejsebudget", "bryllup", "konfirmation", "braendstof", "bil", "valuta", "renteberegner", "opsparing", "laaneberegner", "billaan", "leasing", "forbrugslaan", "gaeldsfri", "boliglaan", "elberegner", "solceller", "timepris", "termin", "moms", "proteinbehov", "ugenummer"];
 
@@ -109,6 +109,28 @@ const daPages: Record<string, PageData> = {
         { question: "Hvordan beregnes besparelsen?", answer: "Beregneren finder prisen pr. cigaret (pakkepris divideret med antal cigarette i pakken) og ganger op med dit daglige forbrug. Årsbesparelsen er daglig besparelse × 365 dage, og månedsbesparelsen er årsbesparelsen divideret med 12." },
         { question: "Er cigaretpakker blevet dyrere?", answer: "Ja, tobaksafgifterne er forhøjet flere gange i de seneste år, og regeringens tobaksaftale betyder yderligere stigninger frem mod 2028. Din besparelse ved at holde op bliver derfor typisk større hvert år." },
         { question: "Hvor kan jeg få hjælp til at holde op?", answer: "Tal med din egen læge eller se sundhed.dk for gratis rygestop-forløb. Mange kommuner tilbyder gratis rygestop-kurser, og nogle arbejdspladser har egne tilbud." },
+      ],
+    },
+    "alkoholenheder": {
+      slug: "alkoholenheder",
+      title: "Alkoholenheder - Beregn genstande og gram alkohol",
+      description: "Beregn antal alkoholenheder (genstande) ud fra mængde og alkoholprocent. Se gram ren alkohol og få overblik over dit alkoholindtag.",
+      metaTitle: "Alkoholenheder beregner - Beregn genstande | MinBeregner.dk",
+      metaDescription: "Gratis alkoholenheder beregner. Indtast mængde og alkoholprocent, og se antal genstande og gram ren alkohol. Inkluderer typiske serveringsstørrelser.",
+      keywords: ["alkoholenheder", "genstande beregner", "beregn genstande", "alkohol genstande", "hvor mange genstande", "alkohol udregning"],
+      ogTitle: "Alkoholenheder - Beregn genstande og gram alkohol",
+      ogDescription: "Beregn antal genstande ud fra mængde og alkoholprocent.",
+      category: "Sundhed",
+      breadcrumbCategory: "Sundhed",
+      breadcrumbCategoryHref: "/kategori/sundhed",
+      schemaName: "Alkoholenheder beregner",
+      schemaDescription: "Beregn antal alkoholenheder (genstande) ud fra drikkevaremængde og alkoholprocent.",
+      schemaCategory: "HealthApplication",
+      faqItems: [
+        { question: "Hvad er en alkoholenhed (genstand)?", answer: "En dansk genstand indeholder 12 g ren alkohol (Sundhedsstyrelsen). Det svarer til cirka én almindelig øl (33 cl, 4,6 %), ét glas vin (12 cl, 12 %) eller én shot (4 cl, 40 %)." },
+        { question: "Hvor mange genstande må man drikke?", answer: "Sundhedsstyrelsen anbefaler maksimalt 10 genstande om ugen og højst 4 genstande på samme dag. Anbefalingen er den samme for mænd og kvinder. Gravide og ammende bør helt undgå alkohol." },
+        { question: "Hvordan beregnes antal genstande?", answer: "Antal genstande beregnes som: (mængde i cl × 10 × alkoholprocent / 100 × 0,789) / 12. 0,789 er massefylden for ren alkohol (g/ml), og 12 er gram alkohol pr. genstand." },
+        { question: "Hvor mange kalorier er der i alkohol?", answer: "Ren alkohol indeholder cirka 7 kalorier pr. gram. En almindelig øl (33 cl, 4,6 %) indeholder omkring 120-150 kalorier, og et glas vin (12 cl, 12 %) omkring 80-100 kalorier. Brug vores kalorieberegner for et præcist tal." },
       ],
     },
     "motion-kalorier": {
