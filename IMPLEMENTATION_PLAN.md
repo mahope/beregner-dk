@@ -198,10 +198,18 @@ landmark=lån, piggybank=opsparing osv.).
    - Gate grøn: lint ok, 358/358 tests (+10 nye, 41 test-filer), build ok (134 pages)
    - Commitsha: 1bcbc1d
 
-### 7. [x] I GANG: Flyttebudget (`/flyttebudget`) — Hverdag
-   - Checklist-budget flytteudgifter (flyttemand, transport, rengøring, istandsættelse,
-     depositum, mægler, tinglysning, advokat, møbler, opbevaring, forsikring)
-   - Links: husleje, budget, boliglaan, boligstoette, kvadratmeter
+### 7. [x] FÆRDIG (iteration: 2026-08-24 06:05): Flyttebudget (`/flyttebudget`) — Hverdag
+   - Checklist-budget flytteudgifter (flyttemand 8.000, transport 1.500, kasser 500,
+     rengøring 2.500, istandsættelse 10.000, mægler 25.000, tinglysning 3.000,
+     advokat 10.000, depositum 30.000, opbevaring 2.000, møbler 15.000, forsikring 1.000,
+     andre 0 kr); gradient resultat (yellow/amber); udgiftsfordeling progress bars
+   - Registreret: calculator-list (Hverdag, allLocales), categories, page-data (allLocales),
+     icons.ts (Truck), backlinks via relatedMap: husleje/budget/boliglaan/boligstoette/kvadratmeter
+   - SEO: "flyttebudget beregner", "hvad koster en flytning"; FAQ 4 items;
+     CalculatorSchema + FAQSchema, Breadcrumbs, RelatedCalculators, Sidebar
+   - Ikon: Truck (lucide)
+   - Gate grøn: lint ok, 358/358 tests, build ok (135 pages)
+   - Commitsha: c0d44b4
 
 ### 8. [ ] Boligsalgsberegner (`/boligssalg`) — Bolig, daOnly
    - Logik: salgspris − (mæglerhonorar % + fast gebyr + tinglysningsafgift ved ny bolig);
@@ -277,3 +285,5 @@ landmark=lån, piggybank=opsparing osv.).
     rabat (e5b21ae), proteinbehov (4bc9f44), rygestop (56401f0), ugenummer (5a37dda),
     befordringsfradrag (c57af43 samles maaske) og alkoholenheder (1bcbc1d) — verificér ved naeste pass.
   → DEPLOY-MISSING anyway hvis 12:30-batch stadig viser 404.
+- VERIFICÉR DEPLOY: flyttebudget c0d44b4 06:05
+  → Forventes i 07:30-batch 24. aug. Verificér: /flyttebudget på live-site.
