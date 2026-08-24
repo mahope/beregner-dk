@@ -85,6 +85,7 @@ const calculatorDefs: CalculatorDef[] = [
   { href: "/enhedspris", titles: { da: "Enhedspris", no: "Enhetspris", se: "Jämförpris" }, descriptions: { da: "Find den billigste vare pr. enhed", no: "Finn den billigste varen per enhet", se: "Hitta den billigaste varan per enhet" } },
   { href: "/rabat", daOnly: true, titles: { da: "Rabatberegner", no: "Rabattkalkulator", se: "Rabattkalkylator" }, descriptions: { da: "Beregn pris efter rabat", no: "Beregn pris etter rabatt", se: "Beräkna pris efter rabatt" } },
   { href: "/valuta", titles: { da: "Valuta", no: "Valuta", se: "Valuta" }, descriptions: { da: "Omregn valutaer", no: "Omregn valutaer", se: "Omvandla valutor" } },
+  { href: "/befordringsfradrag", daOnly: true, titles: { da: "Befordringsfradrag", no: "Befordringsfradrag", se: "Befordringsavdrag" }, descriptions: { da: "Beregn befordringsfradrag 2026", no: "Beregn befordringsfradrag", se: "Beräkna befordringsavdrag" } },
   // Yderligere
   { href: "/solceller", titles: { da: "Solceller", no: "Solceller", se: "Solceller" }, descriptions: { da: "Beregn solcelleøkonomi", no: "Beregn solcelleøkonomi", se: "Beräkna solcellsekonomi" } },
   { href: "/leasing", titles: { da: "Leasing", no: "Leasing", se: "Leasing" }, descriptions: { da: "Beregn leasingydelse", no: "Beregn leasingytelse", se: "Beräkna leasingavgift" } },
@@ -187,7 +188,8 @@ const relatedMap: Record<string, string[]> = {
   "/termin": ["/barselsdagpenge", "/boernepenge", "/alder", "/dato", "/kalorier"],
   "/sygedagpenge": ["/dagpenge", "/barselsdagpenge", "/loen-efter-skat", "/feriepenge", "/boligstoette"],
   "/topskat": ["/loen-efter-skat", "/brutto-netto", "/skattefradrag", "/pension", "/rentefradrag"],
-  "/skattefradrag": ["/rentefradrag", "/loen-efter-skat", "/topskat", "/pension", "/boliglaan"],
+  "/skattefradrag": ["/rentefradrag", "/loen-efter-skat", "/topskat", "/befordringsfradrag", "/boliglaan"],
+  "/befordringsfradrag": ["/skattefradrag", "/topskat", "/loen-efter-skat", "/rentefradrag", "/boliglaan"],
   "/aktieskat": ["/opsparing", "/loen-efter-skat", "/pension", "/renteberegner", "/procent"],
   "/andelsbolig": ["/boliglaan", "/husleje", "/laaneberegner", "/rentefradrag", "/ejendomsvaerdiskat"],
   "/studielaan": ["/su", "/laaneberegner", "/forbrugslaan", "/renteberegner", "/opsparing"],

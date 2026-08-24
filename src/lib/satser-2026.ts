@@ -48,8 +48,15 @@ export const SATSER_2026 = {
   // Kørselsfradrag / befordringsfradrag (daglige tur-retur-km, kilde: skat.dk)
   koerselBundgraense: 24, // ingen fradrag for de første 24 km/dag
   koerselHoejGraense: 120, // høj sats op til 120 km/dag
-  koerselSatsLav: 2.28, // kr./km for 25-120 km
-  koerselSatsHoej: 1.14, // kr./km over 120 km
+  koerselSatsLav: 3.17, // kr./km for 25-120 km (2026: 3,17 kr/km, kilde: skat.dk)
+  koerselSatsHoej: 1.59, // kr./km over 120 km (2026: 1,59 kr/km, kilde: skat.dk)
+  koerselYderkommuneSats: 3.51, // forhøjet sats for yderkommuner og visse småøer (2026)
+  koerselEkstraFradragMax: 30800, // maks. ekstra befordringsfradrag (2026)
+  koerselEkstraIndkomstGraense: 391500, // indkomstgrænse for ekstra fradrag, før AM-bidrag (2026)
+  koerselBroStorebaelt: 110, // Storebæltsbroen, bil/motorcykel, pr. tur (2026)
+  koerselBroStorebaeltOff: 15, // Storebæltsbroen, tog/offentlig, pr. tur (2026)
+  koerselBroOeresund: 50, // Øresundsbroen, bil/motorcykel, pr. tur (2026)
+  koerselBroOeresundOff: 8, // Øresundsbroen, tog/offentlig, pr. tur (2026)
 
   // Rentefradrag (skattemæssig fradragsværdi)
   rentefradragVaerdi: 0.256, // 25,6 % under grænsen

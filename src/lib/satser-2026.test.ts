@@ -35,8 +35,13 @@ describe("SATSER_2026 single source of truth", () => {
   test("kørselsfradrag og pension", () => {
     expect(S.koerselBundgraense).toBe(24);
     expect(S.koerselHoejGraense).toBe(120);
-    expect(S.koerselSatsLav).toBe(2.28);
-    expect(S.koerselSatsHoej).toBe(1.14);
+    expect(S.koerselSatsLav).toBe(3.17);
+    expect(S.koerselSatsHoej).toBe(1.59);
+    expect(S.koerselYderkommuneSats).toBe(3.51);
+    expect(S.koerselEkstraFradragMax).toBe(30800);
+    expect(S.koerselEkstraIndkomstGraense).toBe(391500);
+    expect(S.koerselBroStorebaelt).toBe(110);
+    expect(S.koerselBroOeresund).toBe(50);
     expect(S.ratepensionMax).toBe(68700);
     expect(S.aldersopsparingMax).toBe(9900);
   });
