@@ -18,7 +18,7 @@ export type PageData = {
   schemaCategory: string;
 };
 
-const daOnlySlugs = ["loen-efter-skat", "brutto-netto", "feriepenge", "dagpenge", "sygedagpenge", "pension", "efterloen", "topskat", "skattefradrag", "aktieskat", "arveafgift", "rentefradrag", "boligstoette", "husleje", "andelsbolig", "ejendomsvaerdiskat", "boernepenge", "barselsdagpenge", "su", "studielaan", "rabat", "befordringsfradrag", "rygestop", "alkoholenheder"];
+const daOnlySlugs = ["loen-efter-skat", "brutto-netto", "feriepenge", "dagpenge", "sygedagpenge", "pension", "efterloen", "topskat", "skattefradrag", "aktieskat", "arveafgift", "rentefradrag", "boligstoette", "husleje", "andelsbolig", "ejendomsvaerdiskat", "boernepenge", "barselsdagpenge", "su", "studielaan", "rabat", "befordringsfradrag", "rygestop", "alkoholenheder", "boligsalg"];
 
 const allLocalesSlugs = ["bmi", "kalorier", "vaegttab", "procent", "kvadratmeter", "alder", "dato", "tidsberegner", "tidszone", "rejsebudget", "bryllup", "konfirmation", "braendstof", "bil", "valuta", "renteberegner", "opsparing", "laaneberegner", "billaan", "leasing", "forbrugslaan", "gaeldsfri", "boliglaan", "elberegner", "solceller", "timepris", "termin", "moms", "proteinbehov", "ugenummer", "flyttebudget"];
 
@@ -1744,6 +1744,28 @@ const daPages: Record<string, PageData> = {
         { question: "Hvad er den største udgift ved flytning?", answer: "Ejendomsmægler er ofte størst (25.000-50.000 kr), efterfulgt af depositum på ny lejebolig (3-6 mdrs. husleje) og istandsættelse." },
         { question: "Hvor meget koster en flyttemand?", answer: "En flyttemand koster typisk 5.000-15.000 kr for en standard 3-4 værelses lejlighed. Prisen afhænger af afstand, mængde og sæson." },
         { question: "Hvordan sparer jeg på flytningen?", answer: "Lej en flyttebil selv, rengør selv den gamle bolig, få flere tilbud på håndværkere, og sælg overskydende møbler inden flytning." },
+      ],
+    },
+    "boligsalg": {
+      slug: "boligsalg",
+      title: "Boligsalg Beregner - Beregn salgsprovenu ved boligsalg",
+      description: "Beregn dit nettoprovenu ved salg af bolig — mæglerhonorar, energimærke, tilstandsrapport, istandsættelse og alle andre omkostninger.",
+      metaTitle: "Boligsalg Beregner - Beregn salgsprovenu ved boligsalg | MinBeregner.dk",
+      metaDescription: "Beregn nettoprovenu ved boligsalg. Indtast salgspris og få alle salgsomkostninger — mægler, energimærke, tilstandsrapport, ejerskifteforsikring, istandsættelse og flytning. Gratis beregner.",
+      keywords: ["boligsalg beregner", "salgsprovenu beregner", "beregn boligsalg", "omkostninger ved salg af bolig", "nettoprovenu bolig", "hvad koster det at sælge sin bolig"],
+      ogTitle: "Boligsalg Beregner - Beregn dit nettoprovenu",
+      ogDescription: "Beregn dit nettoprovenu ved salg af bolig. Få overblik over alle salgsomkostninger.",
+      category: "Bolig",
+      breadcrumbCategory: "Bolig",
+      breadcrumbCategoryHref: "/kategori/bolig",
+      schemaName: "Boligsalg Beregner",
+      schemaDescription: "Gratis boligsalg beregner. Beregn nettoprovenu ved salg af bolig med mæglerhonorar, rapporter, istandsættelse og flere omkostninger.",
+      schemaCategory: "FinanceApplication",
+      faqItems: [
+        { question: "Hvad koster det at sælge en bolig i Danmark?", answer: "Salgsomkostningerne for en bolig til 3 mio. kr er typisk 150.000-250.000 kr. De største poster er ejendomsmægler (3-6% af salgsprisen), istandsættelse og energimærke. Brug beregneren til at se dit konkrete nettoprovenu." },
+        { question: "Skal sælger betale tinglysning?", answer: "Sælger betaler normalt ikke tinglysning. Det er køber der betaler for nyt skøde og pantebrev. Øst for Storebælt deles tinglysningsafgiften dog ofte mellem køber og sælger. Beregneren kan medtage tinglysning af ny bolig hvis du også skal købe." },
+        { question: "Hvad er et typisk mæglersalær?", answer: "Ejendomsmæglere tager typisk 3-6% af salgsprisen for huse, eller et fast salær på 25.000-60.000 kr. Mange mæglere er villige til at forhandle salæret, især ved høje salgspriser." },
+        { question: "Hvordan får jeg det bedste salgsprovenu?", answer: "Få mindst 3 mæglervurderinger og forhandl salæret. Gør istandsættelse selv når muligt. Overvej home staging (5.000-15.000 kr) — det kan øge salgsprisen. Sælg overskydende møbler i stedet for at flytte dem." },
       ],
     },
 };

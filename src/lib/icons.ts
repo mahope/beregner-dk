@@ -30,6 +30,7 @@ import {
   Coins,
   CreditCard,
   Divide,
+  DollarSign,
   Droplets,
   Dumbbell,
   Egg,
@@ -203,6 +204,7 @@ const calculatorIcons: Record<string, LucideIcon> = {
   "/alkoholenheder": Beer,
   "/ugenummer": CalendarDays,
   "/flyttebudget": Truck,
+  "/boligsalg": DollarSign,
 };
 
 export function getCalculatorIcon(href: string): LucideIcon {

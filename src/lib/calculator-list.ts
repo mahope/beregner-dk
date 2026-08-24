@@ -102,6 +102,7 @@ const calculatorDefs: CalculatorDef[] = [
   { href: "/aegloesning", titles: { da: "Ægløsning", no: "Eggløsning", se: "Ägglossning" }, descriptions: { da: "Find dine frugtbare dage", no: "Finn dine fruktbare dager", se: "Hitta dina fertila dagar" } },
   { href: "/ugenummer", titles: { da: "Ugenummer", no: "Ukenummer", se: "Veckonummer" }, descriptions: { da: "Hvilken uge er det?", no: "Hvilken uke er det?", se: "Vilken vecka är det?" } },
   { href: "/flyttebudget", titles: { da: "Flyttebudget", no: "Flyttebudsjett", se: "Flyttbudget" }, descriptions: { da: "Beregn dit samlede flyttebudget", no: "Beregn flyttebudsjettet ditt", se: "Beräkna din flyttbudget" } },
+  { href: "/boligsalg", daOnly: true, titles: { da: "Boligsalg", no: "Boligsalg", se: "Bostadsförsäljning" }, descriptions: { da: "Beregn nettoprovenu ved salg af bolig", no: "Beregn nettoproveny ved boligsalg", se: "Beräkna netto vid bostadsförsäljning" } },
 ];
 
 // DA-only slugs (not available on NO/SE)
@@ -143,7 +144,7 @@ const relatedMap: Record<string, string[]> = {
   "/fart": ["/tidsberegner", "/braendstof", "/kalorier", "/temperatur", "/dato"],
   "/enheder": ["/temperatur", "/kvadratmeter", "/procent", "/gennemsnit", "/valuta"],
   "/del-regning": ["/procent", "/rabat", "/budget", "/rejsebudget", "/enhedspris"],
-  "/boliglaan": ["/renteberegner", "/laaneberegner", "/andelsbolig", "/ejendomsvaerdiskat", "/rentefradrag", "/flyttebudget"],
+  "/boliglaan": ["/renteberegner", "/laaneberegner", "/andelsbolig", "/ejendomsvaerdiskat", "/rentefradrag", "/flyttebudget", "/boligsalg"],
   "/renteberegner": ["/boliglaan", "/laaneberegner", "/opsparing", "/procent", "/rentefradrag"],
   "/husleje": ["/boligstoette", "/boliglaan", "/ejendomsvaerdiskat", "/loen-efter-skat", "/kvadratmeter", "/flyttebudget"],
   "/boligstoette": ["/husleje", "/boernepenge", "/loen-efter-skat", "/su", "/dagpenge", "/flyttebudget"],
@@ -161,7 +162,7 @@ const relatedMap: Record<string, string[]> = {
   "/rentefradrag": ["/boliglaan", "/renteberegner", "/laaneberegner", "/skattefradrag", "/loen-efter-skat"],
   "/billaan": ["/bil", "/laaneberegner", "/renteberegner", "/forbrugslaan", "/braendstof"],
   "/forbrugslaan": ["/laaneberegner", "/renteberegner", "/billaan", "/boliglaan", "/rentefradrag"],
-  "/ejendomsvaerdiskat": ["/boliglaan", "/boligstoette", "/husleje", "/rentefradrag", "/loen-efter-skat"],
+  "/ejendomsvaerdiskat": ["/boliglaan", "/boligstoette", "/husleje", "/rentefradrag", "/loen-efter-skat", "/boligsalg"],
   "/arveafgift": ["/pension", "/efterloen", "/loen-efter-skat", "/opsparing", "/rentefradrag"],
   "/moms": ["/procent", "/timepris", "/loen-efter-skat", "/valuta", "/renteberegner"],
   "/procent": ["/moms", "/rabat", "/renteberegner", "/opsparing", "/bmi"],
@@ -199,10 +200,11 @@ const relatedMap: Record<string, string[]> = {
   "/skattefradrag": ["/rentefradrag", "/loen-efter-skat", "/topskat", "/befordringsfradrag", "/boliglaan"],
   "/befordringsfradrag": ["/skattefradrag", "/topskat", "/loen-efter-skat", "/rentefradrag", "/boliglaan"],
   "/aktieskat": ["/opsparing", "/loen-efter-skat", "/pension", "/renteberegner", "/procent"],
-  "/andelsbolig": ["/boliglaan", "/husleje", "/laaneberegner", "/rentefradrag", "/ejendomsvaerdiskat"],
+  "/andelsbolig": ["/boliglaan", "/husleje", "/laaneberegner", "/rentefradrag", "/ejendomsvaerdiskat", "/boligsalg"],
   "/studielaan": ["/su", "/laaneberegner", "/forbrugslaan", "/renteberegner", "/opsparing"],
   "/ugenummer": ["/dato", "/alder", "/nedtaelling", "/tidsberegner", "/termin"],
   "/flyttebudget": ["/husleje", "/budget", "/boliglaan", "/boligstoette", "/kvadratmeter"],
+  "/boligsalg": ["/boliglaan", "/ejendomsvaerdiskat", "/andelsbolig", "/kvadratmeter", "/flyttebudget"],
 };
 
 /**
