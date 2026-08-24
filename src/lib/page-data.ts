@@ -18,7 +18,7 @@ export type PageData = {
   schemaCategory: string;
 };
 
-const daOnlySlugs = ["loen-efter-skat", "brutto-netto", "feriepenge", "dagpenge", "sygedagpenge", "pension", "efterloen", "topskat", "skattefradrag", "aktieskat", "arveafgift", "rentefradrag", "boligstoette", "husleje", "andelsbolig", "ejendomsvaerdiskat", "boernepenge", "barselsdagpenge", "su", "studielaan", "rabat"];
+const daOnlySlugs = ["loen-efter-skat", "brutto-netto", "feriepenge", "dagpenge", "sygedagpenge", "pension", "efterloen", "topskat", "skattefradrag", "aktieskat", "arveafgift", "rentefradrag", "boligstoette", "husleje", "andelsbolig", "ejendomsvaerdiskat", "boernepenge", "barselsdagpenge", "su", "studielaan", "rabat", "befordringsfradrag"];
 
 const allLocalesSlugs = ["bmi", "kalorier", "vaegttab", "procent", "kvadratmeter", "alder", "dato", "tidsberegner", "tidszone", "rejsebudget", "bryllup", "konfirmation", "braendstof", "bil", "valuta", "renteberegner", "opsparing", "laaneberegner", "billaan", "leasing", "forbrugslaan", "gaeldsfri", "boliglaan", "elberegner", "solceller", "timepris", "termin", "moms"];
 
@@ -1310,7 +1310,7 @@ const daPages: Record<string, PageData> = {
       schemaDescription: "Beregn din samlede skattebesparelse fra alle fradrag: kørsel, renter, håndværker, fagforening og a-kasse.",
       schemaCategory: "FinanceApplication",
       faqItems: [
-      { question: "Hvad er kørselsfradrag?", answer: "Kørselsfradrag (befordringsfradrag) er et fradrag for transport mellem hjem og arbejde. Du kan få fradrag for kørsel over 24 km dagligt (12 km hver vej), uanset om du kører bil, cykel eller bruger offentlig transport. Satsen er 2,23 kr./km for 25-120 km og 1,12 kr./km derover." },
+      { question: "Hvad er kørselsfradrag?", answer: "Kørselsfradrag (befordringsfradrag) er et fradrag for transport mellem hjem og arbejde. Du kan få fradrag for kørsel over 24 km dagligt (12 km hver vej), uanset om du kører bil, cykel eller bruger offentlig transport. Satsen er 3,17 kr./km for 25-120 km og 1,59 kr./km derover i 2026." },
       { question: "Hvad er rentefradrag?", answer: "Rentefradrag er et fradrag for renteudgifter på lån — fx boliglån, billån og SU-lån. Fradragsværdien er ca. 25,6% af renteudgifterne. Det betyder, at du sparer ca. 256 kr. i skat for hver 1.000 kr. du betaler i renter." },
       { question: "Hvad dækker håndværkerfradraget?", answer: "Boligjobordningen (håndværkerfradraget) dækker arbejdsløn til håndværkerydelser (maling, VVS, el mv.) op til 12.400 kr. og serviceydelser (rengøring, havearbejde mv.) op til 6.200 kr. pr. person i 2026. Kun arbejdsløn — ikke materialer — kan fradrages." },
       { question: "Kan jeg trække fagforening fra i skat?", answer: "Ja, du kan trække kontingent til fagforening fra op til 7.000 kr. årligt i 2026. A-kasse-kontingent kan trækkes fuldt fra uden loft. Begge fradrages som ligningsmæssige fradrag." },
@@ -1610,6 +1610,30 @@ const daPages: Record<string, PageData> = {
         { question: "Hvordan finder man rabatprocenten?", answer: "Rabatprocent = (originalpris − tilbudspris) / originalpris × 100. Hvis en vare er sat ned fra 400 kr til 300 kr, er rabatprocenten 25%. Beregneren regner det ud med det samme." },
         { question: "Hvad er forskellen på rabat og procent?", answer: "Rabat er et afslag i prisen, typisk angivet i procent. Det er det samme som procentregning: 'x% rabat' betyder, at du betaler (100 − x)% af originalprisen. Vores procentberegner kan også hjælpe med andre procentberegninger." },
         { question: "Kan beregneren håndtere decimaltal?", answer: "Ja, du kan indtaste priser og procenter med decimaler. Beregneren viser resultatet med to decimaler, så du får et præcist billede af, hvad du sparer." },
+      ],
+    },
+    "befordringsfradrag": {
+      slug: "befordringsfradrag",
+      title: "Befordringsfradrag 2026 - Beregn dit kørselsfradrag",
+      description: "Beregn dit befordringsfradrag for 2026. Se fradrag pr. dag, årlig skattebesparelse og ekstra fradrag. Opdateret med 2026-satser: 3,17 kr./km (25-120 km), 1,59 kr./km (over 120 km).",
+      metaTitle: "Befordringsfradrag 2026 - Beregn dit kørselsfradrag | MinBeregner.dk",
+      metaDescription: "Gratis befordringsfradrag beregner for 2026. Beregn dit kørselsfradrag mellem hjem og arbejde. 3,17 kr./km for 25-120 km, 1,59 kr./km over 120 km. Se skattebesparelse. Opdateret med skat.dk 2026-satser.",
+      keywords: ["befordringsfradrag", "kørselsfradrag", "befordringsfradrag 2026", "kørselsfradrag 2026", "skattefradrag kørsel", "beregn befordringsfradrag", "kørsel mellem hjem og arbejde", "km fradrag"],
+      ogTitle: "Befordringsfradrag 2026 - Beregn dit kørselsfradrag",
+      ogDescription: "Beregn dit befordringsfradrag for 2026. Se fradrag pr. dag, årlig skattebesparelse og ekstra fradrag.",
+      category: "Økonomi",
+      breadcrumbCategory: "Økonomi",
+      breadcrumbCategoryHref: "/kategori/oekonomi",
+      schemaName: "Befordringsfradrag beregner",
+      schemaDescription: "Beregn befordringsfradrag for kørsel mellem hjem og arbejde med 2026-satser. Se fradrag pr. dag, årlig skattebesparelse og ekstra fradrag.",
+      schemaCategory: "FinanceApplication",
+      faqItems: [
+        { question: "Hvad er befordringsfradrag?", answer: "Befordringsfradrag (også kaldet kørselsfradrag) er et skattefradrag for transport mellem hjem og arbejde. Du kan få fradrag for kørsel over 24 km dagligt (12 km hver vej), uanset om du kører bil, cykel eller bruger offentlig transport. Satsen i 2026 er 3,17 kr./km for 25-120 km og 1,59 kr./km over 120 km." },
+        { question: "Hvordan beregnes befordringsfradrag?", answer: "Fradraget beregnes som antal kørte km pr. dag over bundgrænsen på 24 km, ganget med satsen (3,17 kr. for 25-120 km, 1,59 kr. over 120 km) og ganget med antal arbejdsdage. Der kan også lægges brofradrag til (Storebælt: 110 kr/tur, Øresund: 50 kr/tur). Endelig gives et ekstra fradrag på op til 30.800 kr. ved indkomst under 391.500 kr." },
+        { question: "Hvad er satsen for befordringsfradrag i 2026?", answer: "I 2026 er satserne 3,17 kr./km for 25-120 km dagligt og 1,59 kr./km over 120 km. I yderkommuner og visse småøer er satsen 3,51 kr./km. Bundgrænsen er 24 km pr. dag (12 km hver vej). Satserne er opdateret pr. 24. august 2026 fra skat.dk." },
+        { question: "Hvad er ekstra befordringsfradrag?", answer: "Hvis din årlige indkomst før AM-bidrag er under 391.500 kr. (2026), kan du få et ekstra fradrag på op til 30.800 kr. Fradraget nedtrappes gradvist med stigende indkomst og er et supplement til det almindelige kørselsfradrag." },
+        { question: "Hvordan får jeg befordringsfradraget?", answer: "Befordringsfradraget indberetter du i SKATs forskudsopgørelse, så det bliver trukket fra din skat løbende hen over året. Du kan også rette det på årsopgørelsen året efter. Brug beregneren til at finde dit præcise fradrag, og indtast beløbet i din forskudsopgørelse." },
+        { question: "Kan jeg få brofradrag?", answer: "Ja, hvis du krydser Storebæltsbroen eller Øresundsbroen på vej til arbejde, kan du få et ekstra fradrag pr. passage. I 2026 er det 110 kr. pr. Storebæltspassage i bil og 50 kr. pr. Øresundspassage i bil. Bruger du offentlig transport, er satserne lavere (hhv. 15 kr. og 8 kr.)." },
       ],
     },
 };

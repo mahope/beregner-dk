@@ -194,6 +194,7 @@ const calculatorIcons: Record<string, LucideIcon> = {
   "/vaegttab": TrendingDown,
   "/valuta": ArrowLeftRight,
   "/vandbehov": Droplets,
+  "/befordringsfradrag": Car,
 };
 
 export function getCalculatorIcon(href: string): LucideIcon {
