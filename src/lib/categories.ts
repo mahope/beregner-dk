@@ -60,6 +60,7 @@ export const beregnere: BeregnerItem[] = [
   { title: "1RM beregner", description: "Anslå dit maksimale løft (one-rep max)", href: "/1rm", category: "Sundhed" },
   { title: "Vandbehov", description: "Beregn dit daglige væskebehov", href: "/vandbehov", category: "Sundhed" },
   { title: "Kalorieforbrænding", description: "Forbrændte kalorier ved løb, cykling m.m.", href: "/motion-kalorier", category: "Sundhed" },
+  { title: "Proteinbehov", description: "Beregn dit daglige proteinbehov efter aktivitetsniveau", href: "/proteinbehov", category: "Sundhed" },
   { title: "Børnepenge", description: "Se hvad du kan få i børne- og ungeydelse 2026", href: "/boernepenge", category: "Familie" },
   { title: "Barselsdagpenge", description: "Beregn barselsdagpenge og se orlovsperioder", href: "/barselsdagpenge", category: "Familie" },
   { title: "Terminsdato Beregner", description: "Beregn terminsdato og se graviditetsuge", href: "/termin", category: "Familie" },
