@@ -222,6 +222,7 @@ const blogLinks: Record<Locale, FooterBlogLink[]> = {
     { name: "Børnepenge 2026: Satser og regler", href: "/blog/boernepenge-2026-satser-og-regler" },
     { name: "Månedsbudget 2026: Komplet guide", href: "/blog/maanedsbudget-2026-komplet-guide" },
     { name: "Biløkonomi 2026: Guide til eje bil", href: "/blog/biloekonomi-2026-hvad-koster-det-at-eje-bil" },
+    { name: "Boligsalg 2026: Omkostninger og provenu", href: "/blog/boligsalg-2026-guide-til-omkostninger-og-provenu" },
   ],
   no: [],
   se: [],

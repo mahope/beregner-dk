@@ -7,6 +7,7 @@ import RelatedCalculators from "@/components/RelatedCalculators";
 import Sidebar from "@/components/Sidebar";
 import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
+import Link from "next/link";
 
 export async function generateMetadata() {
   return generatePageMetadata("boligsalg");
@@ -63,6 +64,13 @@ export default async function BoligsalgPage() {
               <li><strong>Sælg løsøre:</strong> Overskydende møbler og indbo kan sælges på DBA eller i genbrug — færre ting at flytte og ekstra penge</li>
               <li><strong>Home staging:</strong> Professionel styling koster 5.000-15.000 kr, men kan øge salgsprisen</li>
             </ul>
+
+            <p className="mt-8">
+              Læs vores komplette guide:{' '}
+              <Link href="/blog/boligsalg-2026-guide-til-omkostninger-og-provenu" className="text-blue-600 hover:underline font-medium">
+                Boligsalg 2026 — omkostninger og salgsprovenu →
+              </Link>
+            </p>
 
             <h2>Kilder</h2>
             <p className="text-sm text-gray-500">

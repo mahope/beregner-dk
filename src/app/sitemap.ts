@@ -108,5 +108,6 @@ function getBlogSlugs(locale: Locale): string[] {
     "leasing-af-bil-2026-pris-og-guide",
     "maanedsbudget-2026-komplet-guide",
     "boernepenge-2026-satser-og-regler",
+    "boligsalg-2026-guide-til-omkostninger-og-provenu",
   ];
 }

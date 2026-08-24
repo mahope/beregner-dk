@@ -245,6 +245,12 @@ landmark=lån, piggybank=opsparing osv.).
   picomatch, undici, vite, vitest, yaml). 3 høj-alvorlige vuln kræver Next.js 16.3.2 (major) —
   håndteres separat. Commit 57ec92f.
 
+### 10. [ ] Boligsalg 2026 — guide til omkostninger og salgsprovenu (`/blog/boligsalg-2026-guide-til-omkostninger-og-provenu`)
+    - Topic: komplet guide til omkostninger ved boligsalg — mæglerhonorar, energimærke, tilstandsrapport, ejerskifteforsikring, istandsættelse, tinglysning; gennemsnitlige priser; hvordan man optimerer sit provenu
+    - Calculators linked: /boligsalg (primær), /boliglaan, /ejendomsvaerdiskat, /andelsbolig, /kvadratmeter, /flyttebudget
+    - Research: Boligejer.dk, svmn.dk, ejendomsmægleres gennemsnitssalær (vejledende)
+    - Registreret i blog/page.tsx, sitemap.ts. Backlinks i /boligsalg page.
+
 ## Blog — næste indlæg
 
 ### 3. [x] FÆRDIG (iteration: 2026-08-23 23:58): Månedsbudget 2026 — Komplet guide til privatøkonomi (`/blog/maanedsbudget-2026-komplet-guide`)
