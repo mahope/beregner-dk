@@ -8,6 +8,55 @@
 
 ---
 
+## Kommerciel stopregel før udvikling
+
+Fastlagt 2026-09-16. Denne regel har forrang for nedenstående udviklingsønsker og de ældre prioriteter i `IMPLEMENTATION_PLAN.md`.
+
+- [x] [P1] [S] Sæt en stopregel før udvikling.
+
+**Status: Ny produktudvikling er sat på pause, indtil valideringen giver et dokumenteret fortsæt-signal.** Stopreglen er fastlagt; selve markedstesten er ikke gennemført i denne kørsel. Eksisterende kode til `/timepris` findes allerede (`src/lib/calculator-list.ts:30`), så testen kræver ikke en ny beregner. Kode, analytics-integration og historiske mål er ikke dokumentation for efterspørgsel.
+
+### Afgræns testen før start
+
+Mads er beslutningsejer. Testen må højst bruge én arbejdsdag (otte arbejdstimer) på eksisterende materiale og data. Registrér starttidspunkt og slutfrist i dansk lokal tid her, før testen starter; slutfristen skal være samme kalenderdag. Fristen må ikke forlænges for at vente på svar. Indtil testen starter, forbliver ny udvikling på pause.
+
+- Teststart: Ikke startet.
+- Slutfrist: Ikke fastlagt; udfyldes sammen med teststart.
+- Testniche: Nye danske freelancere og soloselvstændige, der skal fastsætte timepris.
+- Mulig køber: Bogholder eller rådgiver med selvstændige kunder.
+- Tilladt validering: Gennemgå eksisterende værktøj, aggregerede trafikdata og betalingsdokumentation. Kontakt kræver særskilt tilladelse og lovlige kanaler; denne regel giver ikke tilladelse til mails, publicering eller ændringer i produktion.
+
+### Fortsæt kun med mindst ét dokumenteret signal
+
+**A. Betalt pilot:** Mindst én bogholder eller rådgiver har accepteret et skriftligt afgrænset pilottilbud på 2.500 kr. ekskl. moms, og forudbetalingen på 50 % (1.250 kr. ekskl. moms) er modtaget. Et tilsagn eller en udsendt, ubetalt faktura tæller ikke. Bekræftelse kontrolleres i det eksisterende betalings-/regnskabssystem; gem kun kontroltidspunkt og anonymiseret bekræftelse her, ikke kundedata eller betalingsbilag.
+
+**B. Dokumenteret relevant trafik:** Mindst 100 organiske Google-søgeklik til `/timepris` på det danske domæne i de seneste 90 afsluttede kalenderdage før teststart, dokumenteret i Search Console. Kontrollér desuden, at synlige søgeforespørgsler viser intention om freelanceres/selvstændiges prissætning eller fakturerbare timer, ikke kun lønmodtageres timeløn. Registrér datakilde, datoperiode, sidefilter, samlet kliktal og aggregeret relevansvurdering. Tærsklen er en intern beslutningsgrænse, ikke en verificeret markedsstandard eller et løfte om indtjening.
+
+Manglende adgang eller utilstrækkelige data betyder **ikke dokumenteret**, ikke nul trafik. Det udløser ikke en undtagelse fra stopreglen. Likes, venlige svar, sidevisninger uden relevant intention, søgevisninger uden klik, egne testbesøg og trafik til andre beregnere tæller ikke som fortsæt-signal for denne niche.
+
+Et bestået signal åbner kun for én afgrænset opgave omkring den dokumenterede efterspørgsel. Trafik er ikke betalingsvilje; signal B giver ikke grundlag for at bygge en fuld licensplatform, flere nicher eller budgettere en bestemt indtægt. Betalt pilot begrænser arbejdet til det aftalte leveranceomfang. Begge spor kræver fortsat normal godkendelse før produktion berøres.
+
+### Stop og parkér i 90 dage
+
+Ved slutfristen: Hvis hverken A eller B er opfyldt, registrér beslutningen **PARKÉR** og en genvurderingsdato præcis 90 kalenderdage efter testens slutdato. Ingen nye beregnere, SEO-landingssider, affiliateforsøg eller licensfunktioner i perioden. Reglen lukker ikke det eksisterende site og udløser ingen driftsændringer; nødvendige sikkerheds- og korrekthedsrettelser håndteres særskilt med de gældende godkendelser.
+
+Efter 90 dage foretages kun en ny vurdering af dokumentation, ikke automatisk genstart af udvikling. En tidligere genåbning kræver et nyt dokumenteret A- eller B-signal og Mads' udtrykkelige beslutning; likes og løfter kan ikke ophæve parkeringen.
+
+### Beslutningslog
+
+- Signal A: Ikke undersøgt i denne kørsel.
+- Signal B: Ikke undersøgt i denne kørsel; ingen trafikmåling påstås.
+- Beslutning ved testslut: Afventer den afgrænsede test; udviklingspausen gælder allerede.
+- Beslutningsdato og beslutningsejer: Udfyldes ved testslut af Mads.
+- Parkering til: Udfyldes ved beslutningen PARKÉR (slutdato + 90 kalenderdage).
+- Dokumentation: Kun aggregerede tal og anonymiserede kontrolnotater; ingen økonomiske brugerinput, persondata eller hemmeligheder i repoet.
+
+### Kontrol af denne dokumentationsændring
+
+Kun `BACKLOG.md` er ændret; ingen programkode eller konfiguration. Før redigeringen bestod `npm run lint` (336 filer), mens `npm run build` ramte timeout efter henholdsvis 120 og 600 sekunder (sidste forsøg viste `ETIMEDOUT`). `npm run test` og `tsc --noEmit --incremental false` ramte begge timeout efter 120 sekunder uden slutresultat. Build, tests og typecheck er derfor ikke verificeret som bestået; blokeringen blev observeret før dokumentationsændringen. Ingen push, deploy eller kontakt til kunder er udført.
+
+---
+
 ## UI/UX Princip
 
 **Alle features SKAL vaere synlige og tilgaengelige for brugeren!**
