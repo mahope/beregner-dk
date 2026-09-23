@@ -1,4 +1,5 @@
 import { getCalculatorsByLocale } from "./calculator-list";
+import { BARSEL_2026 } from "./satser-2026";
 import type { Locale } from "./i18n";
 
 export interface CategoryData {
@@ -200,7 +201,7 @@ export const categories: CategoryData[] = [
       },
       {
         question: "Hvordan beregnes barselsdagpenge?",
-        answer: "Barselsdagpenge beregnes ud fra din gennemsnitlige indkomst, dog maksimalt 4.695 kr. per uge (2026-sats). Både mor og far har ret til barselsdagpenge i forskellige perioder.",
+        answer: `Barselsdagpenge beregnes ud fra din gennemsnitlige indkomst og arbejdstid, dog maksimalt ${BARSEL_2026.maxHourlyRate.toLocaleString("da-DK", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} kr. pr. time (${BARSEL_2026.maxWeeklyRate.toLocaleString("da-DK")} kr. pr. uge ved ${BARSEL_2026.fullTimeHours} timer). Reglerne varierer for lønmodtagere, selvstændige og ledige.`,
       },
     ],
   },

@@ -5,17 +5,18 @@ import { Baby, Lightbulb, TriangleAlert, User, UserRound } from 'lucide-react';
 import { ShareCalculation } from '@/components/ShareCalculation';
 import { CopyResultButton, ResetButton } from '@/components/ui';
 import { generateShareableLink, getStateFromUrl, CalculationState } from '@/lib/calculation-state';
+import {
+  beregnBarselsdagpenge,
+  isBarselEmployment,
+  isBarselParent,
+  type BarselEmployment,
+  type BarselParent,
+} from '@/lib/barselsdagpenge';
+import { BARSEL_2026 } from '@/lib/satser-2026';
 import { trackCalculation, initScrollDepthTracking } from '@/lib/analytics';
 import { useLocale } from "@/components/LocaleProvider";
 import { getCurrencySuffix } from "@/lib/format";
 import { AffiliateBox } from "./AffiliateBox";
-
-// 2026 satser (kilde: bm.dk, borger.dk)
-const MAX_WEEKLY_RATE = 5085; // Max barselsdagpenge per uge 2026
-const WORK_HOURS_FULL = 37;   // Full time hours
-
-type Employment = 'fulltime' | 'parttime' | 'selfemployed' | 'unemployed';
-type Parent = 'mor' | 'far';
 
 export default function BarselBeregner() {
   const { locale } = useLocale();
@@ -24,11 +25,13 @@ export default function BarselBeregner() {
     da: {
       monthlyGross: "Månedlig bruttoløn (kr.)",
       placeholder: "F.eks. 35000",
-      employmentType: "Ansættelsestype",
-      fulltime: "Fuldtid (37 timer)",
+      employmentType: "Beregningsgrundlag",
+      employeeOnlyNote: "Beregningen gælder lønmodtagere. Selvstændige og ledige skal bruge Min barsel.",
+      fulltime: `Fuldtid (${BARSEL_2026.fullTimeHours} timer)`,
       parttime: "Deltid",
-      selfemployed: "Selvstændig",
-      unemployed: "Ledig",
+      selfemployed: "Selvstændig – se Min barsel",
+      unemployed: "Ledig – se Min barsel",
+      otherRules: "Selvstændige og ledige har andre regler. Brug Min barsel til den officielle ansøgning og beregning.",
       weeklyHours: "Ugentlige timer",
       hoursUnit: "timer",
       youAre: "Du er",
@@ -39,7 +42,7 @@ export default function BarselBeregner() {
       weekUnit: "uge",
       estimatedBenefits: "Estimeret barselsdagpenge",
       weeklyRateBeforeTax: "Ugentlig sats (før skat)",
-      maxRateReached: "Maksimumssats nået",
+      hourlyRateCapReached: "Maksimum timeløn nået",
       monthlyBeforeTax: "Månedligt (før skat)",
       monthlyAfterTax: "Månedligt (efter skat)",
       totalForWeeks: "I alt for",
@@ -47,28 +50,30 @@ export default function BarselBeregner() {
       incomeDrop: "Indkomstnedgang:",
       benefitsCover: "Dagpenge dækker ca.",
       ofYourSalary: "af din løn",
-      disclaimer: "* Beregningen er vejledende og baseret på 2026-satser. Den faktiske udbetaling kan variere baseret på din situation.",
+      disclaimer: "* Beregningen er vejledende for lønmodtagere og baseret på 2026-satser. Selvstændige og ledige har separate regler; den faktiske udbetaling kan variere.",
       enterSalary: "Indtast din månedsløn for at se beregningen",
       motherLeave: "Mors orlov",
       fatherLeave: "Fars/medmors orlov",
-      motherWeek1: "4 uger før termin",
-      motherWeek2: "10 uger efter fødsel (øremærket)",
-      motherWeek3: "9 uger yderligere (øremærket)",
-      motherWeek4: "Op til 13 uger til deling",
-      fatherWeek1: "2 uger lige efter fødsel",
-      fatherWeek2: "9 uger yderligere (øremærket)",
-      fatherWeek3: "Op til 13 uger til deling",
+      motherWeek1: `${BARSEL_2026.motherBeforeBirthWeeks} uger før termin`,
+      motherWeek2: `${BARSEL_2026.motherAtBirthWeeks} + ${BARSEL_2026.motherEarlyAfterBirthWeeks} uger efter fødsel (${BARSEL_2026.motherEarlyAfterBirthWeeks} kan overdrages under særlige betingelser)`,
+      motherWeek3: `${BARSEL_2026.earmarkedWeeks} uger yderligere (øremærket)`,
+      motherWeek4: `${BARSEL_2026.motherLateTransferableWeeks} uger efter de første ${BARSEL_2026.firstTenWeeksAfterBirth} uger (kan overdrages)`,
+      fatherWeek1: `${BARSEL_2026.fatherAtBirthWeeks} uger i de første ${BARSEL_2026.firstTenWeeksAfterBirth} uger (kan fordeles fleksibelt efter aftale med arbejdsgiveren)`,
+      fatherWeek2: `${BARSEL_2026.earmarkedWeeks} uger yderligere (øremærket)`,
+      fatherWeek3: `Op til ${BARSEL_2026.maxTransferableWeeks} uger til overdragelse (som udgangspunkt inden for barnets første år)`,
       tip: "Tip",
       tipText: "Tjek din overenskomst eller ansættelseskontrakt. Mange arbejdsgivere supplerer barselsdagpenge med løn, så du får fuld eller delvis løn under barslen.",
     },
     se: {
       monthlyGross: "Månatlig bruttolön (kr)",
       placeholder: "T.ex. 35000",
-      employmentType: "Anställningstyp",
-      fulltime: "Heltid (37 timmar)",
+      employmentType: "Beräkningsunderlag",
+      employeeOnlyNote: "Beräkningen gäller löntagare. Egenföretagare och arbetslösa ska använda Min barsel.",
+      fulltime: `Heltid (${BARSEL_2026.fullTimeHours} timmar)`,
       parttime: "Deltid",
-      selfemployed: "Egenföretagare",
-      unemployed: "Arbetslös",
+      selfemployed: "Egenföretagare – se Min barsel",
+      unemployed: "Arbetslös – se Min barsel",
+      otherRules: "Egenföretagare och arbetslösa har andra regler. Använd Min barsel för den officiella ansökan och beräkningen.",
       weeklyHours: "Veckoarbetstimmar",
       hoursUnit: "timmar",
       youAre: "Du är",
@@ -79,7 +84,7 @@ export default function BarselBeregner() {
       weekUnit: "vecka",
       estimatedBenefits: "Uppskattad föräldrapenning",
       weeklyRateBeforeTax: "Veckobelopp (före skatt)",
-      maxRateReached: "Maxbelopp uppnått",
+      hourlyRateCapReached: "Maximal timlön nådd",
       monthlyBeforeTax: "Månadsbelopp (före skatt)",
       monthlyAfterTax: "Månadsbelopp (efter skatt)",
       totalForWeeks: "Totalt för",
@@ -104,11 +109,13 @@ export default function BarselBeregner() {
     no: {
       monthlyGross: "Månedlig bruttolønn (kr)",
       placeholder: "F.eks. 35000",
-      employmentType: "Ansettelsestype",
-      fulltime: "Fulltid (37 timer)",
+      employmentType: "Beregningsgrunnlag",
+      employeeOnlyNote: "Beregningen gjelder lønnsøkere. Selvstendige og arbeidsledige skal bruke Min barsel.",
+      fulltime: `Fulltid (${BARSEL_2026.fullTimeHours} timer)`,
       parttime: "Deltid",
-      selfemployed: "Selvstendig",
-      unemployed: "Arbeidsledig",
+      selfemployed: "Selvstendig – se Min barsel",
+      unemployed: "Arbeidsledig – se Min barsel",
+      otherRules: "Selvstendige og arbeidsledige har andre regler. Bruk Min barsel til den offisielle søknaden og beregningen.",
       weeklyHours: "Ukentlige arbeidstimer",
       hoursUnit: "timer",
       youAre: "Du er",
@@ -119,7 +126,7 @@ export default function BarselBeregner() {
       weekUnit: "uke",
       estimatedBenefits: "Estimert foreldrepenger",
       weeklyRateBeforeTax: "Ukentlig sats (før skatt)",
-      maxRateReached: "Maksimumssats nådd",
+      hourlyRateCapReached: "Maksimum timlønn nådd",
       monthlyBeforeTax: "Månedlig (før skatt)",
       monthlyAfterTax: "Månedlig (etter skatt)",
       totalForWeeks: "Totalt for",
@@ -145,10 +152,10 @@ export default function BarselBeregner() {
   const l = labels[locale as keyof typeof labels] || labels.da;
 
   const [monthlyIncome, setMonthlyIncome] = useState<string>('');
-  const [employment, setEmployment] = useState<Employment>('fulltime');
-  const [weeklyHours, setWeeklyHours] = useState<string>('37');
-  const [parent, setParent] = useState<Parent>('mor');
-  const [weeksPlanned, setWeeksPlanned] = useState<string>('24');
+  const [employment, setEmployment] = useState<BarselEmployment>('fulltime');
+  const [weeklyHours, setWeeklyHours] = useState<string>(`${BARSEL_2026.fullTimeHours}`);
+  const [parent, setParent] = useState<BarselParent>('mor');
+  const [weeksPlanned, setWeeksPlanned] = useState<string>(`${BARSEL_2026.defaultWeeks}`);
   const hasLoadedUrl = useRef(false);
   const hasTracked = useRef(false);
 
@@ -160,9 +167,9 @@ export default function BarselBeregner() {
     if (urlState && urlState.type === 'barsel') {
       const inputs = urlState.inputs;
       if (inputs.monthlyIncome !== undefined) setMonthlyIncome(String(inputs.monthlyIncome));
-      if (inputs.employment) setEmployment(inputs.employment);
+      if (isBarselEmployment(inputs.employment)) setEmployment(inputs.employment);
       if (inputs.weeklyHours !== undefined) setWeeklyHours(String(inputs.weeklyHours));
-      if (inputs.parent) setParent(inputs.parent);
+      if (isBarselParent(inputs.parent)) setParent(inputs.parent);
       if (inputs.weeksPlanned !== undefined) setWeeksPlanned(String(inputs.weeksPlanned));
     }
   }, []);
@@ -189,41 +196,41 @@ export default function BarselBeregner() {
   const handleReset = useCallback(() => {
     setMonthlyIncome('');
     setEmployment('fulltime');
-    setWeeklyHours('37');
+    setWeeklyHours(`${BARSEL_2026.fullTimeHours}`);
     setParent('mor');
-    setWeeksPlanned('24');
+    setWeeksPlanned(`${BARSEL_2026.defaultWeeks}`);
   }, []);
 
   const result = useMemo(() => {
-    const income = parseFloat(monthlyIncome) || 0;
-    const hours = parseFloat(weeklyHours) || 37;
-    const weeks = parseInt(weeksPlanned) || 24;
+    const income = Number.parseFloat(monthlyIncome);
+    const parsedHours = Number.parseFloat(weeklyHours);
+    const hours =
+      employment === 'parttime' && Number.isFinite(parsedHours)
+        ? parsedHours
+        : BARSEL_2026.fullTimeHours;
+    const weeks = Number.parseInt(weeksPlanned, 10);
 
+    if (employment !== 'fulltime' && employment !== 'parttime') return null;
     if (income <= 0) return null;
 
-    const monthlyHours = hours * 4.33;
-    const hourlyRate = income / monthlyHours;
-    const calculatedWeeklyRate = hourlyRate * hours;
-    const weeklyRate = Math.min(calculatedWeeklyRate, MAX_WEEKLY_RATE);
-    const coveragePercent = Math.min(100, (weeklyRate / calculatedWeeklyRate) * 100);
-    const monthlyAmount = weeklyRate * 4.33;
-    const totalAmount = weeklyRate * weeks;
-    const taxRate = 0.38;
-    const monthlyAfterTax = monthlyAmount * (1 - taxRate);
-    const totalAfterTax = totalAmount * (1 - taxRate);
-    const monthlyLoss = income - monthlyAfterTax;
+    const calculated = beregnBarselsdagpenge({
+      monthlyIncome: income,
+      weeklyHours: hours,
+      weeks,
+    });
+    if (!calculated) return null;
 
     return {
-      weeklyRate: Math.round(weeklyRate),
-      monthlyAmount: Math.round(monthlyAmount),
-      monthlyAfterTax: Math.round(monthlyAfterTax),
-      totalAmount: Math.round(totalAmount),
-      totalAfterTax: Math.round(totalAfterTax),
-      coveragePercent: Math.round(coveragePercent),
-      monthlyLoss: Math.round(monthlyLoss),
-      isMaxed: weeklyRate >= MAX_WEEKLY_RATE,
+      ...calculated,
+      weeklyRate: Math.round(calculated.weeklyRate),
+      monthlyAmount: Math.round(calculated.monthlyAmount),
+      monthlyAfterTax: Math.round(calculated.monthlyAfterTax),
+      totalAmount: Math.round(calculated.totalAmount),
+      totalAfterTax: Math.round(calculated.totalAfterTax),
+      coveragePercent: Math.round(calculated.coveragePercent),
+      monthlyLoss: Math.round(calculated.monthlyLoss),
     };
-  }, [monthlyIncome, weeklyHours, weeksPlanned]);
+  }, [monthlyIncome, weeklyHours, weeksPlanned, employment]);
 
   const fmtNum = (n: number) => n.toLocaleString(locale === "se" ? "sv-SE" : locale === "no" ? "nb-NO" : "da-DK");
 
@@ -233,11 +240,12 @@ export default function BarselBeregner() {
         {/* Input Section */}
         <div className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+            <label htmlFor="barsel-monthly-income" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
               {l.monthlyGross}
             </label>
             <div className="relative">
               <input
+                id="barsel-monthly-income"
                 type="number"
                 value={monthlyIncome}
                 onChange={(e) => setMonthlyIncome(e.target.value)}
@@ -249,12 +257,13 @@ export default function BarselBeregner() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+            <label htmlFor="barsel-employment" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
               {l.employmentType}
             </label>
             <select
+              id="barsel-employment"
               value={employment}
-              onChange={(e) => setEmployment(e.target.value as Employment)}
+              onChange={(e) => setEmployment(e.target.value as BarselEmployment)}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:ring-blue-400"
             >
               <option value="fulltime">{l.fulltime}</option>
@@ -262,20 +271,22 @@ export default function BarselBeregner() {
               <option value="selfemployed">{l.selfemployed}</option>
               <option value="unemployed">{l.unemployed}</option>
             </select>
+            <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">{l.employeeOnlyNote}</p>
           </div>
 
           {employment === 'parttime' && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+              <label htmlFor="barsel-weekly-hours" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
                 {l.weeklyHours}
               </label>
               <div className="relative">
                 <input
+                  id="barsel-weekly-hours"
                   type="number"
                   value={weeklyHours}
                   onChange={(e) => setWeeklyHours(e.target.value)}
                   min="1"
-                  max="37"
+                  max={BARSEL_2026.maxHoursForEstimate}
                   className="w-full px-4 py-3 pr-14 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:ring-blue-400"
                 />
                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 text-sm">{l.hoursUnit}</span>
@@ -289,6 +300,7 @@ export default function BarselBeregner() {
             </label>
             <div className="flex gap-4">
               <button type="button"
+                aria-pressed={parent === 'mor'}
                 onClick={() => setParent('mor')}
                 className={`flex-1 py-3 px-4 rounded-lg border-2 transition-all ${
                   parent === 'mor'
@@ -299,6 +311,7 @@ export default function BarselBeregner() {
                 <span className="inline-flex items-center justify-center gap-2"><User className="h-4 w-4" strokeWidth={1.75} aria-hidden="true" focusable="false" />{l.mother}</span>
               </button>
               <button type="button"
+                aria-pressed={parent === 'far'}
                 onClick={() => setParent('far')}
                 className={`flex-1 py-3 px-4 rounded-lg border-2 transition-all ${
                   parent === 'far'
@@ -312,13 +325,14 @@ export default function BarselBeregner() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+            <label htmlFor="barsel-planned-weeks" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
               {l.plannedWeeks} <span className="font-bold">{weeksPlanned} {l.weeksUnit}</span>
             </label>
             <input
+              id="barsel-planned-weeks"
               type="range"
               min="1"
-              max="52"
+              max={BARSEL_2026.maxWeeks}
               value={weeksPlanned}
               onChange={(e) => setWeeksPlanned(e.target.value)}
               className="w-full h-2 bg-gray-200 dark:bg-gray-600 rounded-lg appearance-none cursor-pointer"
@@ -332,7 +346,7 @@ export default function BarselBeregner() {
         </div>
 
         {/* Result Section */}
-        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-6">
+        <div role="status" aria-live="polite" aria-atomic="true" className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-6">
           {result ? (
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
@@ -344,9 +358,9 @@ export default function BarselBeregner() {
                 <div className="text-2xl font-bold text-gray-900 dark:text-white">
                   {fmtNum(result.weeklyRate)} kr.
                 </div>
-                {result.isMaxed && (
+                {result.isHourlyRateCapped && (
                   <div className="text-xs text-amber-600 dark:text-amber-400 mt-1">
-                    <span className="inline-flex items-center gap-1"><TriangleAlert className="h-3.5 w-3.5 shrink-0" strokeWidth={1.75} aria-hidden="true" focusable="false" />{l.maxRateReached}</span>
+                    <span className="inline-flex items-center gap-1"><TriangleAlert className="h-3.5 w-3.5 shrink-0" strokeWidth={1.75} aria-hidden="true" focusable="false" />{l.hourlyRateCapReached}</span>
                   </div>
                 )}
               </div>
@@ -387,6 +401,11 @@ export default function BarselBeregner() {
               <div className="text-xs text-gray-500 dark:text-gray-400 mt-4">
                 {l.disclaimer}
               </div>
+            </div>
+          ) : employment === 'selfemployed' || employment === 'unemployed' ? (
+            <div className="text-center text-gray-600 dark:text-gray-300 py-8">
+              <p>{l.otherRules}</p>
+              <a href="https://barselsdagpenge.dk" className="mt-3 inline-block font-medium text-blue-600 underline dark:text-blue-400">Min barsel</a>
             </div>
           ) : (
             <div className="text-center text-gray-500 dark:text-gray-400 py-8">

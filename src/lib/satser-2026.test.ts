@@ -1,5 +1,5 @@
 import { describe, test, expect } from "vitest";
-import { SATSER_2026 as S } from "./satser-2026";
+import { BARSEL_2026, SATSER_2026 as S } from "./satser-2026";
 
 // These lock in the officially-verified 2026 figures (skm.dk / skat.dk).
 // If SKAT changes a rate, update satser-2026.ts AND this test together.
@@ -44,6 +44,31 @@ describe("SATSER_2026 single source of truth", () => {
     expect(S.koerselBroOeresund).toBe(50);
     expect(S.ratepensionMax).toBe(68700);
     expect(S.aldersopsparingMax).toBe(9900);
+  });
+
+  test("barsel 2026", () => {
+    expect(BARSEL_2026.maxWeeklyRate).toBe(5085);
+    expect(BARSEL_2026.maxHourlyRate).toBe(137.43);
+    expect(BARSEL_2026.fullTimeHours).toBe(37);
+    expect(BARSEL_2026.earmarkedWeeks).toBe(9);
+    expect(BARSEL_2026.firstTenWeeksAfterBirth).toBe(10);
+    expect(BARSEL_2026.maxTransferableWeeks).toBe(13);
+    expect(BARSEL_2026.maxHoursForEstimate).toBe(40);
+    expect(BARSEL_2026.defaultWeeks).toBe(24);
+    expect(BARSEL_2026.maxWeeks).toBe(52);
+    expect(BARSEL_2026.afterBirthWeeks).toBe(24);
+    expect(BARSEL_2026.applicationDeadlineWeeks).toBe(8);
+    expect(BARSEL_2026.applicationProcessingDays).toBe(11);
+    expect(BARSEL_2026.earmarkedModelStart).toBe("2. august 2022");
+    expect(Math.round(BARSEL_2026.maxHourlyRate * BARSEL_2026.fullTimeHours)).toBe(
+      BARSEL_2026.maxWeeklyRate
+    );
+    expect(
+      BARSEL_2026.motherAtBirthWeeks +
+        BARSEL_2026.motherEarlyAfterBirthWeeks +
+        BARSEL_2026.earmarkedWeeks +
+        BARSEL_2026.motherLateTransferableWeeks
+    ).toBe(BARSEL_2026.afterBirthWeeks);
   });
 
   test("rates are internally consistent", () => {

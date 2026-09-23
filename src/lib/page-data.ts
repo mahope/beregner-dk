@@ -1,4 +1,5 @@
 import type { Locale } from "./i18n";
+import { BARSEL_2026 } from "./satser-2026";
 
 export type PageData = {
   slug: string;
@@ -1137,7 +1138,7 @@ const daPages: Record<string, PageData> = {
       faqItems: [
       { question: "Hvordan beregnes terminsdatoen?", answer: "280 dage (40 uger) fra første dag i sidste menstruation." },
       { question: "Hvor præcis?", answer: "Ca. 5% fødes på terminsdatoen. De fleste mellem uge 38 og 42." },
-      { question: "Barsel i Danmark?", answer: "Mor: barsel fra 4 uger før termin. Samlet 52 ugers orlov for forældrene." },
+      { question: "Barsel i Danmark?", answer: `Mor har ret til ${BARSEL_2026.motherBeforeBirthWeeks} uger før termin. Når forældrene bor sammen ved fødslen, har hver ${BARSEL_2026.afterBirthWeeks} uger efter fødslen, hvoraf ${BARSEL_2026.earmarkedWeeks} uger er øremærkede. Op til ${BARSEL_2026.maxTransferableWeeks} uger kan overdrages under særlige betingelser.` },
       { question: "Tre trimestre?", answer: "1. trimester: uge 1-12. 2. trimester: uge 13-26. 3. trimester: uge 27-40." },
       ],
     },
@@ -1584,9 +1585,9 @@ const daPages: Record<string, PageData> = {
     "barselsdagpenge": {
       slug: "barselsdagpenge",
       title: "Barselsdagpenge beregner 2026 - Se hvad du får udbetalt",
-      description: "Hvad får du under barsel? Max sats 2026: ca. 5.085 kr/uge (≈ 22.000 kr/md før skat). Beregn dine barselsdagpenge ud fra din løn og situation. Gratis beregner.",
+      description: `Hvad får du under barsel? Maks. sats 2026: ${BARSEL_2026.maxWeeklyRate.toLocaleString("da-DK")} kr./uge før skat og ${BARSEL_2026.maxHourlyRate.toLocaleString("da-DK", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} kr./time ved ${BARSEL_2026.fullTimeHours} timer. Beregn din barselsdagpenge ud fra din løn og situation. Gratis beregner.`,
       metaTitle: "Barselsdagpenge beregner 2026 - Se hvad du får udbetalt",
-      metaDescription: "Hvad får du under barsel? Max sats 2026: ca. 5.085 kr/uge (≈ 22.000 kr/md før skat). Beregn dine barselsdagpenge ud fra din løn og situation. Gratis beregner.",
+      metaDescription: `Hvad får du under barsel? Maks. sats 2026: ${BARSEL_2026.maxWeeklyRate.toLocaleString("da-DK")} kr./uge før skat og ${BARSEL_2026.maxHourlyRate.toLocaleString("da-DK", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} kr./time ved ${BARSEL_2026.fullTimeHours} timer. Beregn din barselsdagpenge ud fra din løn og situation. Gratis beregner.`,
       keywords: ["barselsdagpenge", "barsel beregner", "barselsdagpenge 2026", "beregn barselsdagpenge", "hvad får jeg i barselsdagpenge", "dagpenge under barsel", "barselsorlov", "barsel sats", "mors barsel", "fars barsel"],
       ogTitle: "Barselsdagpenge beregner 2026",
       ogDescription: "Beregn hvad du får udbetalt under barsel. Gratis beregner med 2026 satser.",
@@ -1597,14 +1598,14 @@ const daPages: Record<string, PageData> = {
       schemaDescription: "Beregn hvad du får udbetalt i barselsdagpenge under barselsorlov.",
       schemaCategory: "FinanceApplication",
       faqItems: [
-      { question: "Hvad er barselsdagpenge?", answer: "Barselsdagpenge er en ydelse, du kan få fra Udbetaling Danmark, når du holder barselsorlov. Ydelsen erstatter din løn under barsel, hvis din arbejdsgiver ikke betaler fuld løn i perioden." },
-      { question: "Hvad er satsen for barselsdagpenge i 2026?", answer: "I 2026 er den maksimale barselsdagpengesats ca. 5.085 kr. om ugen (før skat) for fuldtidsansatte. Det svarer til ca. 22.000 kr. om måneden. Satsen reguleres årligt." },
-      { question: "Hvor længe kan jeg få barselsdagpenge?", answer: "Mor har ret til 4 ugers barsel før termin og 14 uger efter fødslen. Far/medmor har 2 ugers orlov efter fødslen. Derudover er der 32 uger til deling mellem forældrene. I alt op til 52 uger." },
-      { question: "Skal jeg betale skat af barselsdagpenge?", answer: "Ja, barselsdagpenge er skattepligtig indkomst. Der trækkes automatisk A-skat af udbetalingen. Du kan justere dit fradrag via Skattestyrelsen." },
-      { question: "Hvad er forskellen på barselsdagpenge og løn under barsel?", answer: "Mange overenskomster giver ret til fuld løn under barsel. I så fald modtager din arbejdsgiver barselsdagpengene som refusion. Har du ikke ret til løn, får du dagpengene direkte fra Udbetaling Danmark." },
-      { question: "Kan selvstændige få barselsdagpenge?", answer: "Ja, selvstændige kan få barselsdagpenge, hvis de har tegnet en frivillig forsikring hos A-kassen eller har haft et vist overskud i virksomheden. Kontakt Udbetaling Danmark for præcise betingelser." },
-      { question: "Hvordan ansøger jeg om barselsdagpenge?", answer: "Du ansøger via borger.dk. Din arbejdsgiver skal først indberette din orlov. Derefter modtager du besked om at udfylde din del af ansøgningen. Ansøg senest 8 uger efter orlovens start." },
-      { question: "Kan jeg arbejde deltid og stadig få barselsdagpenge?", answer: "Ja, du kan genoptage arbejdet delvist og få nedsatte barselsdagpenge for de timer, du ikke arbejder. Det kaldes fleksibel barsel og skal aftales med din arbejdsgiver." },
+      { question: "Hvad er barselsdagpenge?", answer: "Barselsdagpenge er en ydelse fra Udbetaling Danmark, du kan få under barselsorlov, hvis du opfylder betingelserne for din situation." },
+      { question: "Hvad er satsen for barselsdagpenge i 2026?", answer: `Den maksimale sats er ${BARSEL_2026.maxWeeklyRate.toLocaleString("da-DK")} kr. om ugen før skat ved ${BARSEL_2026.fullTimeHours} timer, svarende til ${BARSEL_2026.maxHourlyRate.toLocaleString("da-DK", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} kr. pr. time før skat. Hvis din timeløn er lavere, udbetales denne timeløn.` },
+      { question: "Hvor længe kan jeg få barselsdagpenge?", answer: `Når forældrene bor sammen ved fødslen, har hver forælder som udgangspunkt ${BARSEL_2026.afterBirthWeeks} uger efter fødslen. Det er ${BARSEL_2026.earmarkedWeeks} øremærkede uger pr. forælder, og op til ${BARSEL_2026.maxTransferableWeeks} uger fra hver lønmodtager kan overdrages under særlige betingelser og som udgangspunkt inden for barnets første år. Far/medmor kan efter aftale med arbejdsgiveren fordele de ${BARSEL_2026.fatherAtBirthWeeks} uger ved fødslen fleksibelt inden for de første ${BARSEL_2026.firstTenWeeksAfterBirth} uger. Mor kan også holde ${BARSEL_2026.motherBeforeBirthWeeks} uger før fødslen.` },
+      { question: "Skal jeg betale skat af barselsdagpenge?", answer: "Ja, barselsdagpenge er skattepligtig indkomst. Den konkrete skat afhænger af din skattekorttype, ATP og andre forhold." },
+      { question: "Hvad er forskellen på barselsdagpenge og løn under barsel?", answer: "Mange overenskomster giver ret til løn under barsel. Hvis din arbejdsgiver betaler løn, kan arbejdsgiveren modtage barselsdagpenge som refusion. Ellers udbetales den direkte til dig." },
+      { question: "Kan selvstændige få barselsdagpenge?", answer: "Selvstændige og ledige har andre regler end lønmodtagere. Se Min barsel eller spørg Udbetaling Danmark, hvilke betingelser der gælder for din situation." },
+      { question: "Hvordan ansøger jeg om barselsdagpenge?", answer: `Får du løn under barsel, skal du som udgangspunkt søge senest ${BARSEL_2026.applicationDeadlineWeeks} uger efter, at lønnen stopper. Hvis mor ikke får løn og holder mindst ${BARSEL_2026.motherBeforeBirthWeeks} uger før fødslen, er fristen ${BARSEL_2026.applicationDeadlineWeeks} uger efter fødslen. Far/medmor skal søge senest ${BARSEL_2026.applicationDeadlineWeeks} uger efter første orlovsdag. En for sen ansøgning giver som udgangspunkt først ydelse fra den dag, Udbetaling Danmark modtager ansøgningen.` },
+      { question: "Kan jeg arbejde deltid og stadig få barselsdagpenge?", answer: "Ja, du kan genoptage arbejdet delvist og få nedsat barselsdagpenge for de timer, du ikke arbejder. Det skal aftales med din arbejdsgiver." },
       ],
     },
     "su": {

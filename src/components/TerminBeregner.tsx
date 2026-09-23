@@ -6,11 +6,19 @@ import { ShareCalculation } from '@/components/ShareCalculation';
 import { CopyResultButton, ResetButton } from '@/components/ui';
 import { generateShareableLink, getStateFromUrl, CalculationState } from '@/lib/calculation-state';
 import { trackCalculation, initScrollDepthTracking } from '@/lib/analytics';
+import { BARSEL_2026 } from '@/lib/satser-2026';
 import { useLocale } from '@/components/LocaleProvider';
 
 const GRAVIDITET_DAGE = 280; // 40 uger
+const barselStartDays = {
+  da: BARSEL_2026.motherBeforeBirthWeeks * 7,
+  se: 60,
+} as const;
 
-const ugerMilepale: number[] = [4, 8, 12, 13, 18, 20, 24, 27, 32, 34, 37, 40];
+const ugerMilepale = {
+  da: [4, 8, 12, 13, 18, 20, 24, 27, 32, 36, 37, 40],
+  se: [4, 8, 12, 13, 18, 20, 24, 27, 31, 32, 37, 40],
+} as const;
 
 const labels = {
   da: {
@@ -22,7 +30,7 @@ const labels = {
     daysToTermin: (n: number) => `${n} dage til termin`,
     pctPregnancy: (n: number) => `${n}% af graviditeten`,
     conception: "Undfangelse (ca.)",
-    maternityStart: "Barselstart (4 uger før)",
+     maternityStart: `Barselstart (${BARSEL_2026.motherBeforeBirthWeeks} uger før)`,
     emptyState: "Vælg første dag i din sidste menstruation",
     milestonesTitle: "Milepæle i graviditeten",
     nowBadge: "Nu",
@@ -34,7 +42,7 @@ const labels = {
       "Terminsdatoen beregnes som 280 dage (40 uger) fra første dag i din sidste menstruation. Kun 5% af børn fødes på den præcise terminsdato — de fleste fødes inden for 2 uger.",
     info2Title: "Barsel i Danmark",
     info2Desc:
-      "Mor har ret til barsel fra 4 uger før termin. Samlet har forældre ret til 52 ugers barsel, hvoraf 11 uger er øremærket til hver forælder. Brug vores barselsdagpenge-beregner for beløb.",
+      `Mor har ret til ${BARSEL_2026.motherBeforeBirthWeeks} uger før terminen. Efter fødslen har hver forælder ${BARSEL_2026.afterBirthWeeks} uger med barselsdagpenge, hvoraf ${BARSEL_2026.earmarkedWeeks} uger er øremærkede. Far/medmor kan fordele ${BARSEL_2026.fatherAtBirthWeeks} uger fleksibelt i de første ${BARSEL_2026.firstTenWeeksAfterBirth} uger efter aftale med arbejdsgiveren, og op til ${BARSEL_2026.maxTransferableWeeks} uger kan overdrages under særlige betingelser og som udgangspunkt inden for barnets første år. Brug vores barselsdagpenge-beregner for beløb.`,
     milestones: {
       4: "Positiv graviditetstest mulig",
       8: "Første lægebesøg anbefales",
@@ -45,7 +53,7 @@ const labels = {
       24: "Barnet kan overleve uden for livmoderen",
       27: "3. trimester begynder",
       32: "Forbered barselstaske",
-      34: "Barsel kan begynde (4 uger før termin)",
+      36: `Barsel kan begynde (${BARSEL_2026.motherBeforeBirthWeeks} uger før termin)`,
       37: "Barnet er fuldbårent",
       40: "Terminsdato",
     } as Record<number, string>,
@@ -59,7 +67,7 @@ const labels = {
     daysToTermin: (n: number) => `${n} dagar till förlossning`,
     pctPregnancy: (n: number) => `${n}% av graviditeten`,
     conception: "Befruktning (ca.)",
-    maternityStart: "Föräldraledighet (4 veckor före)",
+    maternityStart: "Föräldrapenning (60 dagar före)",
     emptyState: "Välj första dagen i din senaste menstruation",
     milestonesTitle: "Milstolpar i graviditeten",
     nowBadge: "Nu",
@@ -81,8 +89,8 @@ const labels = {
       20: "Rutinultraljud",
       24: "Barnet kan överleva utanför livmodern",
       27: "Tredje trimestern börjar",
+      31: "Föräldrapenning kan börja 60 dagar före beräknad förlossning",
       32: "Packa förlossningsväskan",
-      34: "Föräldraledighet kan börja (4 veckor före förlossning)",
       37: "Barnet är fullgånget",
       40: "Beräknat förlossningsdatum",
     } as Record<number, string>,
@@ -104,6 +112,8 @@ function dageMellem(a: Date, b: Date): number {
 export default function TerminBeregner() {
   const { locale } = useLocale();
   const l = labels[locale as keyof typeof labels] || labels.da;
+  const ugerMilepaleForLocale = locale === "se" ? ugerMilepale.se : ugerMilepale.da;
+  const barselStartDayCount = locale === "se" ? barselStartDays.se : barselStartDays.da;
   const dateLocale = locale === "se" ? "sv-SE" : "da-DK";
   const [sidsteMens, setSidsteMens] = useState<string>('');
 
@@ -160,9 +170,8 @@ export default function TerminBeregner() {
 
     const trimester = ugerGaaet < 13 ? 1 : ugerGaaet < 27 ? 2 : 3;
 
-    // Barsel start (4 uger før termin)
     const barselStart = new Date(termin);
-    barselStart.setDate(barselStart.getDate() - 28);
+    barselStart.setDate(barselStart.getDate() - barselStartDayCount);
 
     // Undfangelse (ca. uge 2)
     const undfangelse = new Date(smp);
@@ -178,7 +187,7 @@ export default function TerminBeregner() {
       undfangelse,
       dageGaaet,
     };
-  }, [sidsteMens]);
+  }, [sidsteMens, barselStartDayCount]);
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 md:p-8">
@@ -186,10 +195,11 @@ export default function TerminBeregner() {
         {/* Input */}
         <div className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+            <label htmlFor="termin-last-period" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
               {l.lastPeriodLabel}
             </label>
             <input
+              id="termin-last-period"
               type="date"
               value={sidsteMens}
               onChange={(e) => setSidsteMens(e.target.value)}
@@ -276,7 +286,7 @@ export default function TerminBeregner() {
         <div className="mt-8">
           <h3 className="text-lg font-semibold mb-4 dark:text-white">{l.milestonesTitle}</h3>
           <div className="space-y-2">
-            {ugerMilepale.map((uge) => {
+            {ugerMilepaleForLocale.map((uge) => {
               const erPasseret = result.ugerGaaet >= uge;
               const erNu = result.ugerGaaet === uge;
               return (

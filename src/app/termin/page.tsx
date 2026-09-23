@@ -1,6 +1,8 @@
+import Link from "next/link";
 import { generatePageMetadata } from "@/lib/page-helpers";
 import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
+import { BARSEL_2026 } from "@/lib/satser-2026";
 import TerminBeregner from "@/components/TerminBeregner";
 import FAQ from "@/components/FAQ";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
@@ -55,17 +57,18 @@ export default async function TerminPage() {
 
           <h2>Barsel i Danmark 2026</h2>
           <p>
-            Mor har ret til barsel fra <strong>4 uger før terminsdatoen</strong>. Samlet har forældrene ret til 52 ugers barselsorlov med barselsdagpenge. I 2026 er reglerne:
+            Mor har ret til {BARSEL_2026.motherBeforeBirthWeeks} uger før terminsdatoen. Når forældrene bor sammen ved fødslen, har hver forælder som udgangspunkt {BARSEL_2026.afterBirthWeeks} uger med barselsdagpenge efter fødslen:
           </p>
           <ul>
-            <li>2 uger øremærket til mor før fødsel</li>
-            <li>2 uger øremærket til far/medmor ved fødsel</li>
-            <li>8 uger øremærket til mor efter fødsel</li>
-            <li>9 uger øremærket til far/medmor (kan ikke overdrages)</li>
-            <li>Resten kan deles frit mellem forældrene</li>
+            <li>{BARSEL_2026.motherAtBirthWeeks} uger ved fødsel til mor</li>
+            <li>{BARSEL_2026.motherEarlyAfterBirthWeeks} uger efter fødsel til mor inden for de første {BARSEL_2026.firstTenWeeksAfterBirth} uger</li>
+            <li>{BARSEL_2026.motherLateTransferableWeeks} uger efter de første {BARSEL_2026.firstTenWeeksAfterBirth} uger til mor</li>
+            <li>{BARSEL_2026.fatherAtBirthWeeks} uger til far/medmor i de første {BARSEL_2026.firstTenWeeksAfterBirth} uger, som kan fordeles fleksibelt efter aftale med arbejdsgiveren</li>
+            <li>{BARSEL_2026.earmarkedWeeks} øremærkede uger til hver forælder</li>
+            <li>Op til {BARSEL_2026.maxTransferableWeeks} uger kan overdrages under særlige betingelser og som udgangspunkt inden for barnets første år</li>
           </ul>
           <p>
-            Brug vores <a href="/barselsdagpenge">barselsdagpenge-beregner</a> for at se hvad du kan få udbetalt under barsel.
+            Brug vores <Link href="/barselsdagpenge">barselsdagpenge-beregner</Link> for at se, hvad du kan få udbetalt under barsel.
           </p>
         </div>
         )}
@@ -99,7 +102,7 @@ export default async function TerminPage() {
             <li>Resterande dagar kan fördelas fritt mellan föräldrarna</li>
           </ul>
           <p>
-            Använd vår <a href="/barselsdagpenge">räknare för föräldrapenning</a> för att se vad du kan få utbetalt under ledigheten.
+            Använd vår <Link href="/barselsdagpenge">räknare för föräldrapenning</Link> för att se vad du kan få utbetalt under ledigheten.
           </p>
         </div>
         )}

@@ -67,4 +67,33 @@ export const SATSER_2026 = {
   aldersopsparingMax: 9900, // > 7 år til folkepensionsalder
 } as const;
 
+export const BARSEL_2026 = {
+  source:
+    "https://www.borger.dk/familie-og-boern/barsel-oversigt/barsel-loenmodtagere-ny-orlovsmodel",
+  verifiedAt: "2026-09-23",
+  maxWeeklyRate: 5085,
+  maxHourlyRate: 137.43,
+  fullTimeHours: 37,
+  maxHoursForEstimate: 40,
+  defaultWeeks: 24,
+  maxWeeks: 52,
+  afterBirthWeeks: 24,
+  motherBeforeBirthWeeks: 4,
+  motherAtBirthWeeks: 2,
+  motherEarlyAfterBirthWeeks: 8,
+  motherLateTransferableWeeks: 5,
+  fatherAtBirthWeeks: 2,
+  firstTenWeeksAfterBirth: 10,
+  earmarkedWeeks: 9,
+  maxTransferableWeeks: 13,
+  applicationDeadlineWeeks: 8,
+  applicationProcessingDays: 11,
+  earmarkedModelStart: "2. august 2022",
+  employmentHours: 160,
+  employmentMonths: 4,
+  monthlyHoursThreshold: 40,
+  monthsWithMonthlyHours: 3,
+} as const;
+
+export type Barsel2026 = typeof BARSEL_2026;
 export type Satser2026 = typeof SATSER_2026;
