@@ -1,6 +1,6 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: I GANG — O1 retter barsel-2026 og tilføjer konverteringsvejen fra artikel til beregner.
+STATUS: NÆSTE ITERATION — O1 er landet; næste opgave i køen er O2 (BMI).
 
 ## Fase 3 — trafik-drevet
 
@@ -93,7 +93,7 @@ STATUS: I GANG — O1 retter barsel-2026 og tilføjer konverteringsvejen fra art
 
 ### Prioriterede opgaver — kø uden sideløb
 
-#### 1. [~] O1 — Ret barsel-2026 og skab en tydelig næste handling fra blog til beregner — I GANG
+#### 1. [x] O1 — Ret barsel-2026 og skab en tydelig næste handling fra blog til beregner — FÆRDIG 2026-09-23
 
 - **Iteration start:** 2026-09-23. Borger.dk er læst og bekræfter 5.085 kr./uge,
   137,43 kr./time ved 37 timer, 9 øremærkede uger og op til 13 overdragelige uger.
@@ -109,6 +109,7 @@ STATUS: I GANG — O1 retter barsel-2026 og tilføjer konverteringsvejen fra art
   timepris-cap'en 5.085/37, så deltid følger Borger.dk's timeeksempel; artiklen,
   kategorien, siden, `BarselBeregner` og termin-teksten bruger samme data. Artiklen
   har nu tidlig CTA og `/barselsdagpenge` har backlink.
+- **Landet:** commit `98ebc2c`, merge `792d0c0`, PR #20 den 2026-09-23 23:52 CEST.
 - **Verifikation 2026-09-23:** `npm run build` grøn (137 sider; 7 kendte CSS-advarsler),
   `npm run test` grøn (381/381, 43 filer), `npm run lint` grøn (338 filer),
   `npm audit --json` 0 sårbarheder. Lokal standalone SSR-check af health, artiklen,
@@ -116,6 +117,9 @@ STATUS: I GANG — O1 retter barsel-2026 og tilføjer konverteringsvejen fra art
   duplikeret-JSX-advarsel i `termin/page.tsx`. Frisk review førte til locale-specifik
   60-dages svensk terminstart, validering af legacy URL-state og bevarelse af den
   eksisterende `/barselsdagpenge`-adgang; ingen åbne P1/P2-fund.
+- **PR-CI:** Build og GitGuardian grønne. Lighthouse-CI fejlede før serverstart med
+  `next: command not found`, fordi workflowen kalder bare `next start`; de fire seneste
+  tidligere Lighthouse-runs har samme infrastructurefejl. Se M1.
 - **Forventet effekt:** Mindre bounce, højere tillid og flere kvalificerede besøg på
   `/barselsdagpenge`; faglig korrekthed prioriteres over en optimistisk trafikprognose.
 - **Acceptkriterier:**
@@ -234,6 +238,23 @@ STATUS: I GANG — O1 retter barsel-2026 og tilføjer konverteringsvejen fra art
   `/blog/boligstoette-2026-nye-regler` baseline ukendt i snapshot — udfyld fra næste
   trafikdata før bloggen ændres.
 - **Kilde:** https://www.boligstoette.dk/bos-selvbetjening/beregner/basisoplysninger
+
+#### 6. [ ] M1 — Ret Lighthouse-CI's serverstart
+
+- **Datagrund:** PR #20 og fire seneste tidligere Lighthouse-runs fejlede, før audit
+  startede, med `next: command not found`. Den separate build-job er grøn.
+- **Scope:** Kør den eksisterende standalone-produktionsserver via et script, der
+  får `node_modules/.bin` på PATH (fx `npm run start` eller `npm exec -- next start`),
+  og bekræft at workflowen tester den faktiske Next.js-production-build.
+- **Forventet effekt:** Gør PR-gate troværdig igen; påvirker ikke brugerindhold eller
+  trafik direkte, men fjerner en gentaget CI-fejl.
+- **Acceptkriterier:**
+  1. Serveren starter efter `npm ci` + build, og LHCI kører faktisk Lighthouse.
+  2. Ét grønt PR-run med fejlende Lighthouse-tærskel må kun fejle på den konkrete
+     Lighthouse-regel, aldrig `next: command not found` eller manglende production-output.
+  3. Repoets lokale build/tests/lint forbliver grønne.
+- **Placering:** Lav trafikprioritet; udfør efter O2-O5 medmindre LHCI begynder at
+  blokere flere PR'er.
 
 ### Dokumenterede kandidatere efter top-5
 
@@ -575,3 +596,4 @@ landmark=lån, piggybank=opsparing osv.).
 - DEPLOY OK: billaan-ikoner (etape 6), calculator-list-ikoner (etape 3), footer-ikoner (etape 4) — verificeret 2026-08-23 18:20.
 - **Batch 07:30 24. aug.** inkluderede: etape 5 (komponent-ikoner), etape 8 (opengraph), biloekonomi, leasing, maanedsbudget, boernepenge blog, rygestop, rabat, proteinbehov, ugenummer, befordringsfradrag, alkoholenheder, flyttebudget, boligsalg, satser-opdatering, boligsalg blog.
   - DEPLOY OK 2026-09-23: `/alkoholenheder`, `/flyttebudget`, `/boligsalg` og `/blog/boligsalg-2026-guide-til-omkostninger-og-provenu` serverede det forventede live-indhold; `/api/health` svarede `status: ok`.
+- **VERIFICÉR DEPLOY:** barsel-2026-artikel → beregner, fælles 2026-konfiguration og backlink `792d0c0` 2026-09-23 23:52 CEST.
