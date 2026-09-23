@@ -1,6 +1,6 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — Fase 3-research er færdig; næste iteration er O1.
+STATUS: I GANG — O1 retter barsel-2026 og tilføjer konverteringsvejen fra artikel til beregner.
 
 ## Fase 3 — trafik-drevet
 
@@ -93,8 +93,10 @@ STATUS: KØ — Fase 3-research er færdig; næste iteration er O1.
 
 ### Prioriterede opgaver — kø uden sideløb
 
-#### 1. [ ] O1 — Ret barsel-2026 og skab en tydelig næste handling fra blog til beregner
+#### 1. [~] O1 — Ret barsel-2026 og skab en tydelig næste handling fra blog til beregner — I GANG
 
+- **Iteration start:** 2026-09-23. Borger.dk er læst og bekræfter 5.085 kr./uge,
+  137,43 kr./time ved 37 timer, 9 øremærkede uger og op til 13 overdragelige uger.
 - **Datagrund:** 177 besøgende/28d (+77 %), 85 % bounce;
   verificerede modstridende/offentlige 2026-satser.
 - **Scope:** Ret sats, fordeling, overdragelse, frister og roller mod Borger.dk. Gør
@@ -102,6 +104,18 @@ STATUS: KØ — Fase 3-research er færdig; næste iteration er O1.
   `/barselsdagpenge` efter den korte opsummering og tilføj et tilbage-link fra siden. Flyt
   barselgrunddata til den fælles konfigurerede satsfil, så blog, side og beregner ikke
   kan glide fra hinanden. Fjern kun konkrete påstande, der ikke kan dokumenteres.
+- **Beslutning/implementering:** `BARSEL_2026` i `src/lib/satser-2026.ts` er nu
+  single source for sats, perioder, frister og kilde. `beregnBarselsdagpenge` bruger
+  timepris-cap'en 5.085/37, så deltid følger Borger.dk's timeeksempel; artiklen,
+  kategorien, siden, `BarselBeregner` og termin-teksten bruger samme data. Artiklen
+  har nu tidlig CTA og `/barselsdagpenge` har backlink.
+- **Verifikation 2026-09-23:** `npm run build` grøn (137 sider; 7 kendte CSS-advarsler),
+  `npm run test` grøn (381/381, 43 filer), `npm run lint` grøn (338 filer),
+  `npm audit --json` 0 sårbarheder. Lokal standalone SSR-check af health, artiklen,
+  siden og termin-siden grøn. React Doctor: 84/100; kun én pre-existing
+  duplikeret-JSX-advarsel i `termin/page.tsx`. Frisk review førte til locale-specifik
+  60-dages svensk terminstart, validering af legacy URL-state og bevarelse af den
+  eksisterende `/barselsdagpenge`-adgang; ingen åbne P1/P2-fund.
 - **Forventet effekt:** Mindre bounce, højere tillid og flere kvalificerede besøg på
   `/barselsdagpenge`; faglig korrekthed prioriteres over en optimistisk trafikprognose.
 - **Acceptkriterier:**
