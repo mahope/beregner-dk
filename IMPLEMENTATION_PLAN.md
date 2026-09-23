@@ -1,14 +1,276 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KOE-TOM — alle kendte opgaver færdige. Afventer Mads' beslutning om næste prioritet.
+STATUS: KØ — Fase 3-research er færdig; næste iteration er O1.
+
+## Fase 3 — trafik-drevet
+
+### Research-iterationens gate — 2026-09-23
+
+- Første build brugte en stale `node_modules` med Next.js 15.5.23, selvom lockfile og
+  `package.json` krævede 15.5.25. Resultatet blev kasseret; `npm ci` genskabte præcis
+  lockfilen og rapporterede 0 sårbarheder.
+- Endelig gate på Next.js 15.5.25: `npm run build` grøn (137 sider + typecheck),
+  `npm run test` grøn (372/372 tests, 42 filer), `npm run lint` grøn (336 filer).
+- Builden viser 7 kendte, pre-existing CSS-optimeringsadvarsler om `print:hidden` og
+  `dark:`-varianter. Denne iteration ændrer ingen kode/CSS; advarslerne er ikke nye.
+
+### Baseline — Plausible 2026-09-23 21:06 (28 dage)
+
+- **minberegner.dk:** 6.956 besøgende (+48 %), 8.804 sidevisninger, bounce 11 %, besøgstid 77 s.
+  Google 3.784, Bing 1.316, Direct 949, DuckDuckGo 369, Yahoo 286. Trafikken er
+  altså overvejende søgemaskinetrafik.
+- **beraknare.se:** 457 besøgende (+161 %), 579 sidevisninger, bounce 8 %, besøgstid 84 s.
+  Google 345. `/tidsberegner` (139) + `/dato` (106) + `/leasing` (41) + `/nedtaelling`
+  (15) = 301 besøgende eller ca. 66 % af domænets baseline.
+- **Voksende danske søgelandingssider:** `/dato` 1.008 (+92 %), `/boligstoette` 469
+  (+72 %), `/kvadratmeter` 370 (+131 %), `/rentefradrag` 289 (+160 %).
+- **Fald:** `/bmi` 1.216 → 979 (-19 %), `/su` 252 → 117 (-54 %), `/bil` 50 → 25,
+  `/arveafgift` 40 → 24.
+- **Højeste bounce uden for forsiden:** `/blog/barsel-2026-regler-og-satser` 85 %
+  på 177 besøgende (+77 %). Forsiden har 44 % bounce på 214 besøgende; beregnerne
+  ligger typisk på 2-7 %.
+
+### Verificerede researchfund
+
+1. **Barsel-2026 har en verificeret fagfejl og intern modstridelse.** Bloggen viser
+   4.695 kr./uge, 11 øremærkede uger og 22 fælles uger
+   (`src/app/blog/barsel-2026-regler-og-satser/page.tsx:35-50,85-150`), mens vores egen
+   beregner og side bruger 5.085 kr. og 9/13-modellen
+   (`src/components/BarselBeregner.tsx:13-15,54-58`;
+   `src/app/barselsdagpenge/page.tsx:64-92`). Borger.dk oplyser 5.085 kr./uge før skat,
+   137,43 kr./time ved 37 timer og 9 øremærkede + 13 overdragelige uger. Det er en reel
+   tillidsfejl, ikke kun en SEO-mulighed.
+2. **BMI har en dokumenteret modsætning mellem søgeintention og UI.** Værktøjet spørger om alder
+   (`src/components/BMIBeregner.tsx:209-220`), men alderen indgår ikke i BMI-formlen
+   (`src/components/BMIBeregner.tsx:261-312`); køn indgår kun i WHR. Børneartiklen
+   sender dog læseren til voksenværktøjet og kalder det beregner for "voksne og børn"
+   (`src/app/blog/bmi-for-boern-saadan-tjekker-du/page.tsx:184,430-468`). Dette kan
+   forklare utilfredsstillende brug, men det er ikke alene en dokumenteret årsag til
+   trafikfaldet.
+3. **SU har modstridende 2026-tal mellem blog, side og beregner.** Bloggen bruger
+   6.397/2.968 kr. og SU-lån 3.234 kr. (`src/app/blog/su-2026-satser-og-regler/page.tsx:35-50,85-115`),
+   mens siden og komponenten bruger 7.426/3.692 kr. og 3.799 kr.
+   (`src/app/su/page.tsx:46-80,119-130`; `src/components/SUBeregner.tsx:12-38`).
+   `/su` svarer 200 og er teknisk tilgængelig, så et tilgængelighedsbrud er ikke
+   dokumenteret. Den præcise ranking-årsag må derfor måles, ikke gættes.
+4. **Den svenska domeneopsætning har reelle locale-leaks.** Live er
+   `beraknare.se/loen-efter-skat` dansk, selvom `/lon-efter-skatt` er den svenska side;
+   `/ugenummer`, `/flyttebudget` og `/boligsalg` serverer dansk H1/tekst med svensk canonical.
+   `src/lib/page-helpers.ts:21-24` falder generelt tilbage til dansk data, og
+   `CalculatorSchema` har dansk siteName/DKK som standard
+   (`src/components/StructuredData.tsx:36-64`). De fire trafikstærke svenska sider
+   `/tidsberegner`, `/dato`, `/nedtaelling` og `/leasing` har derimod svensk indhold og
+   bør bevares som canonicale; det er ikke dokumenteret, at en slug-migrering vil hjælpe.
+5. **Tre danske vækstsider har konkrete substansmuligheder.** `/kvadratmeter` nævner
+   5-10 % spild i teksten (`src/app/kvadratmeter/page.tsx:77-85`), men værktøjet kan
+   kun prissætte råt areal (`src/components/KvadratmeterBeregner.tsx:199-230,450-476`).
+   `/rentefradrag` bruger upræcise 33,6/25,6 % uden primære kilder
+   (`src/components/RentefradragBeregner.tsx:10-14`;
+   `src/app/rentefradrag/page.tsx:61-92`). `/boligstoette` er en hjemmelavet,
+   lineær model (`src/components/BoligstoetteBeregner.tsx:80-133`), mens bloggen og
+   siden har modstridende grænser på 73.000/113.000 kr. og
+   850.000/800.000 kr. henholdsvis 1.700.000/1.600.000 kr.
+6. **Teknisk basis er delvis sund.** `/dato` og `/bmi` har self-canonical; trailing-slash-
+   varianter `/dato/` og `/bmi/` svarer korrekt 308 til slashless canonical. Robots og
+   sitemap peger på det aktive domæne. Sitemap bruger dog `new Date()` som `lastModified`
+   for alle sider (`src/app/sitemap.ts:8-17`). To reelle 404-links findes i blogindhold:
+   `/bilberegner` og `/huslejeberegner`. Forsiden hævder 44/44+ beregnere, mens det
+   filtrerede danske katalog har 78.
+7. **Dependency-sikkerhed er aktuelt grøn.** `npm audit --json` 2026-09-23: 0 critical,
+   0 high, 0 moderate, 0 low. `master` har Next.js 15.5.25 og postcss-override fra
+   commit 99f1e99. Docker bruger Node 22, mens `package.json` stadig mangler `engines`
+   og repoet mangler `.nvmrc`; det er ikke en Fase 3-blokering, men skal med ved næste
+   framework-opgradering.
+8. **Autocomplete og konkurrenter peger på konkrete huller.** Forespørgselsforslag den
+   23. september 2026 inkluderede bl.a. barsel far/tvillinger/dagpengesats, BMI med
+   alder/køn/børn, boligstøtte pensionist/studerende/formue, kvadratmeter til gulv,
+   rentefradragsbegrænsning/loft samt svenska tids-/datum-/leasingudtryk. Synlige
+   konkurrenter omfatter HK/IDA/Min barsel for barsel, Sundhed.dk/I FORM/Med24 for BMI,
+   Udbetaling Danmark/Online Beregner/Bolius for boligstøtte, Hjemmeland/BeregnLortet
+   for materialereal og Skat/Finansberegner for rentefradrag. svenska
+   kalkylator.nu/kalkylatoronline.se bruger flere svenska intent-slugs. Dette er
+   søgeintents- og indholdssignaler, ikke dokumenterede Google-top-5-placeringer.
+
+### Prioriterede opgaver — kø uden sideløb
+
+#### 1. [ ] O1 — Ret barsel-2026 og skab en tydelig næste handling fra blog til beregner
+
+- **Datagrund:** 177 besøgende/28d (+77 %), 85 % bounce;
+  verificerede modstridende/offentlige 2026-satser.
+- **Scope:** Ret sats, fordeling, overdragelse, frister og roller mod Borger.dk. Gør
+  artiklen svar-først med en kort, kildeført 2026-tabel. Vis CTA til
+  `/barselsdagpenge` efter den korte opsummering og tilføj et tilbage-link fra siden. Flyt
+  barselgrunddata til den fælles konfigurerede satsfil, så blog, side og beregner ikke
+  kan glide fra hinanden. Fjern kun konkrete påstande, der ikke kan dokumenteres.
+- **Forventet effekt:** Mindre bounce, højere tillid og flere kvalificerede besøg på
+  `/barselsdagpenge`; faglig korrekthed prioriteres over en optimistisk trafikprognose.
+- **Acceptkriterier:**
+  1. Artiklen viser 5.085 kr./uge før skat, 137,43 kr./time ved 37 timer og den
+     officielle 9 + 13-fordeling med kilde + verificeringsdato.
+  2. `4.695`, "11 uger øremærket" og "22 uger til fri fordeling" findes ikke som
+     gældende 2026-fakta.
+  3. CTA'en til `/barselsdagpenge` ligger før artiklens tredje hovedsektion, og
+     `/barselsdagpenge` linker tilbage til guiden.
+  4. Fælles satser bruges af beregner, side og artikel; berørte beregningstests er grønne.
+  5. `npm run lint`, `npm run test` og `npm run build` er grønne.
+- **MÅL:** `/blog/barsel-2026-regler-og-satser` baseline 177 besøgende/28d 2026-09-23;
+  `/barselsdagpenge` baseline 191 besøgende/28d 2026-09-23.
+- **Kilde:** https://www.borger.dk/familie-og-boern/barsel-oversigt/barsel-loenmodtagere-ny-orlovsmodel
+
+#### 2. [ ] O2 — Ret BMI-søgeintentionen og adskil voksenværktøjet fra børneindhold
+
+- **Datagrund:** 979 besøgende/28d (-19 %), 849 indgangssider, bounce 3 %; alder
+  indgår ikke i voksnes BMI-formel, men børneartiklen sender brugeren til samme værktøj.
+- **Scope:** Fjern alder som voksentinput (men ødelæg ikke gamle delte URL'er), gør
+  "BMI for voksne" eksplicit, forklar at køn kun påvirker WHR, og ret børneartiklens
+  CTA/relaterede-kort, så de ikke lover en børnepercentilberegner. Tilføj en tydelig
+  kontekstuel CTA fra `/bmi` til børneartiklen. Byg ikke et børneværktøj uden
+  dokumenterede alders-/percentilgrænser.
+- **Forventet effekt:** Bedre søgeintention, færre misvisende resultater og mulig
+  stabilisering af den faldende trafik; ranking-årsagen er ikke dokumenteret endnu.
+- **Acceptkriterier:**
+  1. Samme vægt/højde giver samme BMI uanset køn; alder vises ikke som beregningsinput.
+  2. Voksenværktøjet siger eksplicit, at BMI-formlen ikke aldersjusteres; WHR-forklaring
+     er korrekt og afgrænset.
+  3. Børneartiklen kalder værktøjet voksentiltag og bruger linket til den faktiske
+     BMI-beregning, mens percentiltabellerne står som artiklens egen kildebaserede substans.
+  4. Gamle BMI-dele-URL'er indlæses stadig uden fejl.
+  5. Relevante tests og fuld gate er grønne.
+- **MÅL:** `/bmi` baseline 979 besøgende/28d 2026-09-23;
+  `/blog/bmi-for-boern-saadan-tjekker-du` baseline ukendt i snapshot — udfyld fra næste
+  trafikdata før bloggen ændres.
+
+#### 3. [ ] O3 — Diagnosticér og ret SU-faldet samt konsolidér 2026-kilder
+
+- **Datagrund:** 117 besøgende/28d mod 252 tidligere (-54 %). Live er 200, men blog,
+  side og beregner har tre forskellige sæt satser. Det er dokumenterede modstridende
+  oplysninger, men ikke en dokumenteret ranking-årsag.
+- **Scope:** Først verificér hver officiel 2026-sats, aldersgruppe, fribeløb og
+  SU-lån på su.dk. Sammenlign canonical, title og live-indhold, og dokumentér
+  tilgængelig Search Console-querydata pr. side. Centralisér de officielle konstanter,
+  ret den faste 38 % skatteantagelse eller mærk den klart som vejledende, og gør
+  blog/side/beregner ens. Bevar URL og eksisterende deletilstand.
+- **Forventet effekt:** Bedre tillid og bedre søgeintention; muligvis genopretning af trafik efter
+  konsistens og kildeopdatering. Ingen konkrete ranking- eller volumenhæftelser.
+- **Acceptkriterier:**
+  1. Hvert viste 2026-tal har en primær su.dk-kilde og verificeringsdato.
+  2. Ingen modstridende 6.397/7.426-, 2.968/3.692- eller 3.234/3.799-tal findes.
+  3. Beregningsregler: tests dækker enkelt/par, uddannelse, fribeløb og gammel URL-state.
+  4. Hvis Search Console ikke kan læses, står ranking-årsagen eksplicit som
+     "uafklaret"; den opfindes ikke.
+  5. Fuld gate er grøn.
+- **MÅL:** `/su` baseline 117 besøgende/28d 2026-09-23;
+  `/blog/su-2026-satser-og-regler` baseline ukendt i snapshot — udfyld fra næste
+  trafikdata før bloggen ændres.
+- **Kilde:** https://www.su.dk
+
+#### 4. [ ] O4 — Lås beraknare.se's locale, canonicale og svensk opdagelse
+
+- **Datagrund:** 457 besøgende/28d (+161 %), 345 besøgende fra Google, 301 besøgende på fire
+  nye/eksisterende top-sider. Live viser danske duplikerede/fallback-sider på det
+  svenska domæne og dansk JSON-LD-standardværdier.
+- **Scope:** Behold eksisterende `/tidsberegner`, `/dato`, `/nedtaelling`, `/leasing`,
+  `/lon-efter-skatt` og `/bolan` som canonicale; lav ingen dansk-slug-migrering. Indfør
+  én testet locale-/availability-matrix, så DA-only-ruter ikke self-canonicaliserer på
+  beraknare.se. Giv `CalculatorSchema`/OG/SearchBar domæne- og valutadata. Etablér
+  301-aliaser kun for semantisk identiske kandidater efter kontrol af eksisterende
+  ruter/links: `/loen-efter-skat` → `/lon-efter-skatt` er verificeret dublet;
+  `/tidskalkylator` → `/tidsberegner`, `/datumkalkylator` → `/dato`,
+  `/nedrakning` → `/nedtaelling` og `/leasingkalkylator` → `/leasing` er research-
+  kandidater fra svenske søgeintentioner, ikke eksisterende trafik-URL'er. Tilføj manglende
+  interne svenska links. `beregner.no` må ikke få hreflang før domænet er live.
+- **Forventet effekt:** Beskytter den dokumenterede +161 % vækst, fjerner dansk self-
+  canonical på svensk domæne og forbedrer svensk opdagelse/CTR uden at migrere de
+  fire stærkeste URL'er.
+- **Acceptkriterier:**
+  1. `/tidsberegner`, `/dato`, `/nedtaelling` og `/leasing` har 200, self-canonical,
+     `lang="sv"` og ingen redirect fra sig selv.
+  2. DA-only-sider på beraknare.se og SE-only-sider på minberegner.dk har én testet
+     404/410/redirect-politik og ingen dansk fallback-tekst.
+  3. Godkendte aliases er ét 308/301-hop, bevarer forespørgselsparametre og danner ingen kæder.
+  4. Svensk JSON-LD bruger Beräknare.se + SEK; svensk OG/søgetekst er svensk.
+  5. Host/locale/canonical/hreflang/robots/sitemap har en automatisk matrix-test.
+  6. Fuld gate er grøn, og eksisterende canonicale live-sider er indholdskontrolleret efter deploy.
+- **MÅL:** `beraknare.se` baseline 457 besøgende/28d 2026-09-23; `/tidsberegner` 139;
+  `/dato` 106; `/leasing` 41; `/` 17; `/nedtaelling` 15 — alle 2026-09-23.
+  Før en yderligere konkret svensk side ændres, skal dens `MÅL`-baseline fra
+  trafiksnapshotet skrives her; ukendt baseline må ikke erstattes med 0.
+
+#### 5. [ ] O5 — Gør boligstøtte til et troværdigt screeningestimat
+
+- **Datagrund:** 469 besøgende/28d (+72 %), bounce 2 %, 424 indgangssider. Den
+  eksisterende model er stærkt forenklet, og side/blog har modstridende 2026-grænser.
+- **Scope:** Verificér boligudgift, indkomst, formue, husstands-/arealgrænser og
+  minimum mod officielle oplysninger fra Udbetaling Danmark. Udtræk logikken til ren,
+  testet funktion. Enten implementér kun dokumenterede regler med 3-5 officielle
+  testeksempler, eller mærk værktøjet tydeligt som groft screeningestimat. Fjern ubrugte
+  konstanter/input, tilføj tydelig CTA til den officielle beregner uden login, og gør
+  blog/side samlet.
+- **Forventet effekt:** Beskytter en stærk vækstside mod fejltillid, øger tillid og
+  flytter useren til den officielle næste handling; ikke dokumenteret bounce-reduktion.
+- **Acceptkriterier:**
+  1. 3-5 officielle testeksempler består, eller den endelige tekst erklærer eksplicit,
+     at modellen ikke er en officiel ansøgningsberegning.
+  2. Alle viste beløb har primær kilde + verificeringsdato; ingen 73.000/113.000- eller
+     800.000/850.000-konflikt.
+  3. Ingen deklarerede UI-felter/konstanter er ubrugte; kanttilfælde har tests.
+  4. Den officielle beregner er en synlig næste handling på både side og blog.
+  5. Fuld gate er grøn.
+- **MÅL:** `/boligstoette` baseline 469 besøgende/28d 2026-09-23;
+  `/blog/boligstoette-2026-nye-regler` baseline ukendt i snapshot — udfyld fra næste
+  trafikdata før bloggen ændres.
+- **Kilde:** https://www.boligstoette.dk/bos-selvbetjening/beregner/basisoplysninger
+
+### Dokumenterede kandidatere efter top-5
+
+- `/kvadratmeter` 370 besøgende/28d (+131 %): autocomplete og konkurrenter peger på
+  gulv, cm/mm, antal ens felter og spild; prose nævner allerede 5-10 %, men koden gør
+  det ikke. MÅL ved eventuel opgave: baseline 370 2026-09-23.
+- `/rentefradrag` 289 besøgende/28d (+160 %): høj vækst, men 33,6/25,6 % er
+  upræcise og mangler primær kilde. MÅL ved eventuel opgave: baseline 289 2026-09-23.
+- `/dato` 1.008 besøgende/28d (+92 %): stærkeste side og allerede bred funktionstil;
+  konkurrenten iKalender tilbyder arbejdsdage uden helligdager, mens vores side
+  springer helligdage over. Ingen ændring før et konkret søgeintentionsgap kan dokumenteres.
+  MÅL: baseline 1.008 2026-09-23.
+- Forsiden 214 besøgende/28d, bounce 44 %: linket til alle prioriterede beregnere,
+  men researchen gav endnu et forsvarbart specifikt ændringsforslag. Udskyd til nye
+  trafik-/adfærdsdata; MÅL: baseline 214 2026-09-23.
+
+### Måleprotokol
+
+- Baseline er snapshotdatoen ovenfor; tallene er 28-dages rullende besøgende pr. side.
+- Efter hvert sideændringsforløb skal resultatet først skrives i planen, når der er
+  gået mindst 14 dage; sammenlign da et nyt 28-dages snapshot med baseline og den
+  foregående 28 dage. Manglende data skrives som ukendt, ikke som nul.
+- Plausible-opsætning, metrikker og events ændres ikke. Eksisterende sidevisninger/bounce
+  og interne links måles via de normale trafik- og indgangssider; nye events kræver en
+  separat beslutning.
+- Google autocomplete/PAA bruges kun som kvalitative søgeintents-signaler, ikke som
+  volumen. Denne research fik SERP/PAA via webfetch, men Google viste JS-videresendelser;
+  der påstås derfor ingen aktuelle Google-placeringer uden dokumenteret resultat.
+
+### Kilder brugt i første research
+
+- Borger.dk, barsel lønmodtagere: https://www.borger.dk/familie-og-boern/barsel-oversigt/barsel-loenmodtagere-ny-orlovsmodel
+- Udbetaling Danmark, boligstøtte uden login: https://www.boligstoette.dk/bos-selvbetjening/beregner/basisoplysninger
+- Skat, fradrag for renter: https://skat.dk/borger/fradrag/fradrag-for-renter
+- SU: https://www.su.dk
+- Sundhed.dk BMI: https://www.sundhed.dk/borger/patienthaandbogen/hormoner-og-stofskifte/undersoegelser/bmi-kropsmasseindeks/
+- I FORM, voksne BMI og køn/alder: https://iform.dk/vaegttab/bmi-beregner
+- Hjemmeland, kvadratmeter til materialer: https://hjemmeland.dk/beregner/kvadratmeter-m2-beregner/
+- Live-indhold stikprøver: minberegner.dk `/bmi`, `/su`, `/kvadratmeter`,
+  `/rentefradrag`, barsel-guiden; beraknare.se `/tidsberegner`, `/dato`,
+  `/loen-efter-skat`, `/lon-efter-skatt`, `/ugenummer`, `/flyttebudget`, `/boligsalg`.
+
+---
 
 ## Morgenrapport 2026-08-24 06:45
 - ✅ Boligsalgsberegner (`/boligsalg`): logik+tests+UI+SEO-side+registrering — commit 00dbf4b
 - ✅ SATSER_2026 verifikation: kommuneskat 25,07→25,049%, kirkeskat 0,68→0,639% (svmn.dk) — commit 8f34a8a
 - ✅ Blog: Boligsalg 2026 guide til omkostninger og provenu — commit bdb0d7c
-- 🔒 Deploy: ~17 commits afventer 07:30-batch (se VERIFICÉR DEPLOY-log). Verificér efter batch.
+- ✅ Deploy: Batchens beregnere/artikler er indholdskontrolleret live 2026-09-23 (se VERIFICÉR DEPLOY-log).
 
-## Prioriteter (opdateret pr. missions-brev 2026-08-22)
+## Historisk: Prioriteter før Fase 3 (opdateret pr. missions-brev 2026-08-22)
 1. **Emojis ud → lucide-react ikoner ind** (ca. 666 forekomster i 45 filer) — i etaper, grøn gate mellem hver
 2. Flere blogindlæg (20 findes; ét ad gangen med ægte substans + kilder + interne links)
 3. Flere beregnere (backlog nedenfor) + løbende korrekthed (2026-satser), UX, CWV
@@ -51,7 +313,7 @@ Satser: `src/lib/satser-2026.ts` er single source of truth for danske 2026-satse
 Fundet under research: `relatedMap["/enhedspris"]` refererer til `/rabat`, som IKKE
 findes (filtreres væk i runtime). Bygges Rabatberegner (#1) løses referencen naturligt.
 
-## Backlog (prioriteret — byg ÉN ad gangen, helt færdig)
+## Historisk backlog før Fase 3 (alt markeret med [x] er færdigt)
 
 ### Emoji-udskiftning (Prio 1) — i etaper
 
@@ -297,5 +559,5 @@ landmark=lån, piggybank=opsparing osv.).
 
 ## VERIFICÉR DEPLOY-log
 - DEPLOY OK: billaan-ikoner (etape 6), calculator-list-ikoner (etape 3), footer-ikoner (etape 4) — verificeret 2026-08-23 18:20.
-- **Batch 07:30 24. aug.** forventes at inkludere: etape 5 (komponent-ikoner), etape 8 (opengraph), biloekonomi, leasing, maanedsbudget, boernepenge blog, rygestop, rabat, proteinbehov, ugenummer, befordringsfradrag, alkoholenheder, flyttebudget, boligsalg, satser-opdatering, boligsalg blog.
-  → Verificér efter 07:30-batch: /alkoholenheder, /flyttebudget, /boligsalg, /blog/boligsalg-2026-guide-til-omkostninger-og-provenu
+- **Batch 07:30 24. aug.** inkluderede: etape 5 (komponent-ikoner), etape 8 (opengraph), biloekonomi, leasing, maanedsbudget, boernepenge blog, rygestop, rabat, proteinbehov, ugenummer, befordringsfradrag, alkoholenheder, flyttebudget, boligsalg, satser-opdatering, boligsalg blog.
+  - DEPLOY OK 2026-09-23: `/alkoholenheder`, `/flyttebudget`, `/boligsalg` og `/blog/boligsalg-2026-guide-til-omkostninger-og-provenu` serverede det forventede live-indhold; `/api/health` svarede `status: ok`.
