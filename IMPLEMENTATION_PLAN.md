@@ -1,6 +1,6 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — C1 FÆRDIG; C2 (CTR på /dato) er næste opgave.
+STATUS: KØ — C2 (CTR på /dato) I GANG.
 
 ## Fase 3 — trafik-drevet
 
@@ -504,7 +504,7 @@ STATUS: KØ — C1 FÆRDIG; C2 (CTR på /dato) er næste opgave.
   https://hjemmeland.dk/beregnere/procentregning/;
   https://www.proberegner.dk/beregnere/procentberegner/.
 
-#### 7. [ ] C2 — Løft `/dato` CTR og svar direkte på dage-spørgsmål
+#### 7. [ ] I GANG 2026-09-25 — C2 — Løft `/dato` CTR og svar direkte på dage-spørgsmål
 
 - **Datagrund:** Search Console: 128.065 visninger, 784 klik, CTR 0,6 %, position 5,8.
   “dage mellem datoer” (448, position 5), “antal dage mellem to datoer” (257, position 5),
@@ -513,6 +513,29 @@ STATUS: KØ — C1 FÆRDIG; C2 (CTR på /dato) er næste opgave.
 - **Scope:** Ret title/description og svar-først indhold til de eksisterende
   dage-mellem-formål. Researchér først, om konkrete `/dage-til/[dato]`-landingsider har
   dokumenteret efterspørgsel; byg ingen mange variationer, og undgå slugs/date-konflikter.
+- **Research 2026-09-25 01:26 CEST:** Fem læsbare danske konkurrenter bruger
+  opgaven “dage mellem to datoer” tidligt i title og beskriver konkrete resultater;
+  flere forklarer tællereglen, og stærke sider skelner mellem kalenderdage,
+  arbejdsdage og inkluderede endepunkter. Google/Brave/DuckDuckGo viste blokering, så
+  ingen Google-placering eller PAA-rangering er udledt. Autocomplete dokumenterer
+  både generiske to-datoers- og “dage til [begivenhed]”-intents, men ikke volumen.
+  Search Console har ingen dokumenteret cluster til en bestemt dato; `/nedtaelling`
+  dækker allerede dato-til-intent. Beslutning: **ingen `/dage-til/[dato]`-route i C2**.
+  Den eksisterende `/dato` får DA/SE title, description, H1/intro, OG og schema-copy
+  centreret om “antal dage mellem to datoer”; URL, canonical, hreflang, sitemap og
+  beregnerlogik er uændrede. `npm audit --json` viser 0 sårbarheder.
+- **Implementering 2026-09-25:** DA/SE side-data, H1/intro, title, description, keywords,
+  OG, schema og FAQ er nu samlet om “antal dage mellem to datoer”. Månedsresultatet er
+  korrekt kvalificeret som cirkulært/ungefärligt i metadata, schema og forklaring. En ny
+  DA/SE route-rendertest låser H1, synligt svar og bevaret beregner.
+- **Review 2026-09-25:** To friske reviews fandt og fik rettet svensk grammatik,
+  manglende kvalificering af den approximative månedsberegning og et testhul, hvor den
+  dynamiske beregner ikke blev krævet. Slutreview fandt ingen åbne P0-P2-fund.
+- **Kvalitetsgate 2026-09-25 01:50 CEST:** `npm run build` grøn (137 sider + typecheck;
+  7 kendte CSS-optimeringsadvarsler), `npm run test` grøn (572/572 tests, 60 filer),
+  `npm run lint` grøn (361 filer) og `npm audit --json` 0 sårbarheder. Lokal
+  production-HTTP-kontrol passede DA/SE title, H1, canonical, schema-copy og
+  `/api/health` med `status: ok`.
 - **Forventet effekt:** Stærk CTR på eksisterende høj placering og bedre overførsel fra
   spørgsmål til selve dato-værktøjet.
 - **Acceptkriterier:** Baselines skrives før ændring; title/description svarer på
