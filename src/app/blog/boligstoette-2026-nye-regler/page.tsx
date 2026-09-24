@@ -1,16 +1,25 @@
+import { FAQSchema } from "@/components/StructuredData";
+import { formatNumber } from "@/lib/format";
+import { getCurrentDomainConfig } from "@/lib/get-locale";
+import { BOLIGSTOETTE_2026 } from "@/lib/satser-2026";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { FAQSchema } from "@/components/StructuredData";
-import { getCurrentDomainConfig } from "@/lib/get-locale";
+
+const kr = (value: number) => value.toLocaleString("da-DK");
+const tenPercent = formatNumber(BOLIGSTOETTE_2026.wealth.considerationRates.tenPercent * 100, "da");
+const twentyPercent = formatNumber(
+  BOLIGSTOETTE_2026.wealth.considerationRates.twentyPercent * 100,
+  "da",
+);
 
 export async function generateMetadata(): Promise<Metadata> {
   const dc = await getCurrentDomainConfig();
   const baseUrl = dc.baseUrl;
 
   return {
-    title: "Boligstøtte 2026 - Nye Regler og Satser | MinBeregner.dk",
+    title: "Boligstøtte 2026: Maksima, formue og beregning",
     description:
-      "Komplet guide til boligstøtte i 2026: Nye satser, ændrede regler, hvem kan få støtte og hvor meget. Se de opdaterede grænser og beregn din boligstøtte.",
+       "Se boligstøtte-standardmaksima for 2026, formuegrænser og hvilke oplysninger Udbetaling Danmark bruger. Beregn et screeningestimat og fortsæt hos myndigheden.",
     keywords: [
       "boligstøtte 2026",
       "boligstøtte nye regler",
@@ -20,11 +29,11 @@ export async function generateMetadata(): Promise<Metadata> {
       "udbetaling danmark boligstøtte",
       "husleje tilskud 2026",
       "boligstøtte beregning",
-      "boligstøtte indkomstgrænse",
+      "boligstøtte formue",
     ],
     openGraph: {
-      title: "Boligstøtte 2026 - Nye Regler og Satser",
-      description: "Alt du skal vide om boligstøtte i 2026: satser, regler og hvad du kan få.",
+      title: "Boligstøtte 2026: Maksima, formue og beregning",
+      description: "Officielle nøgletal og en tydelig næste handling, når du vil screen din boligstøtte.",
       url: `${baseUrl}/blog/boligstoette-2026-nye-regler`,
       type: "article",
       siteName: dc.siteName,
@@ -38,446 +47,309 @@ export async function generateMetadata(): Promise<Metadata> {
 
 const faqItems = [
   {
-    question: "Hvad er de nye boligstøtte-satser i 2026?",
-    answer: "I 2026 er satserne reguleret med ca. 3,5% på grund af inflationen. Det maksimale huslejeloft er steget til ca. 73.000 kr/år, og indkomstgrænserne er hævet tilsvarende. Minstebeløbet for udbetaling er fortsat ca. 300 kr/måned.",
+     question: "Hvad er boligstøtte-standardmaksima i 2026?",
+     answer: `For lejere uden pension er standardmaksimum ${kr(BOLIGSTOETTE_2026.maximumMonthly.nonPensioner.noChildren)} kr. pr. måned uden børn, ${kr(BOLIGSTOETTE_2026.maximumMonthly.nonPensioner.oneToThreeChildren)} kr. med 1-3 børn og ${kr(BOLIGSTOETTE_2026.maximumMonthly.nonPensioner.fourPlusChildren)} kr. med 4 eller flere børn. Det er standardbeløb, ikke automatiske ydelser; særlige ordninger og enkelte boligforhold kan give højere satser.`,
   },
   {
-    question: "Hvem kan få boligstøtte i 2026?",
-    answer: "Du kan få boligstøtte hvis du er 18+ år, bor til leje i en helårsbolig, og har en husstandsindkomst under ca. 250.000-350.000 kr/år (afhængig af husstandens størrelse). Både enlige, par og familier med børn kan søge.",
+    question: "Hvem kan få boligstøtte?",
+    answer:
+      "Boligstøtte gælder som udgangspunkt lejere i en egnet bolig med eget køkken, der bor fast i boligen. Udbetaling Danmark vurderer også indkomst, formue, antal børn og voksne, husleje og areal. Særlige situationer kan give andre ordninger.",
   },
   {
-    question: "Hvor meget kan jeg få i boligstøtte 2026?",
-    answer: "Det afhænger af din husleje, indkomst og husstandens størrelse. Typisk 15-30% af huslejen. Ved husleje på 6.000 kr/md og indkomst på 18.000 kr/md kan du forvente 1.500-2.500 kr/md. Pensionister (boligydelse) kan få mere.",
+    question: "Er MinBeregners resultat en officiel beregning?",
+    answer:
+       "Nej. Værktøjet er et screeningestimat, der viser et interval ud fra standardmaksimum og formuegrænserne. Det beregner ikke din endelige ret, fordi Udbetaling Danmarks regler tager flere oplysninger og særlige tilfælde med.",
   },
   {
-    question: "Er der ændringer i formuegrænsen for boligstøtte 2026?",
-    answer: "Ja, formuegrænserne er også reguleret. For enlige er fribeløbet ca. 850.000 kr, og for par ca. 1.700.000 kr. Formue derover reducerer støtten. Pensionsopsparinger i pensionsselskaber tæller ikke med.",
+    question: "Hvordan påvirker formue boligstøtten?",
+    answer: `Der er ingen øvre grænse for retten til boligstøtte. For ikke-pensionister og førtidspensionister efter nye regler regnes ${tenPercent} procent af formuen fra ${kr(BOLIGSTOETTE_2026.wealth.nonPensioner.noEffect)} kr. og derover med i vurderingen, og ${twentyPercent} procent regnes med fra ${kr(BOLIGSTOETTE_2026.wealth.nonPensioner.tenPercent)} kr. For folkepensionister og førtidspensionister før 2003 gælder tilsvarende grænser på ${kr(BOLIGSTOETTE_2026.wealth.pensioner.noEffect)} og ${kr(BOLIGSTOETTE_2026.wealth.pensioner.tenPercent)} kr.`,
   },
   {
-    question: "Hvordan påvirker husstandens størrelse boligstøtten?",
-    answer: "Flere personer giver højere indkomstgrænse. Et ekstra barn betyder typisk at du kan tjene ca. 45.000 kr mere årligt og stadig få boligstøtte. Samtidig stiger arealkravet - 1-2 personer: max 65 m², 3+ personer: +20 m² per person.",
+    question: "Hvilke udgifter skal trækkes fra huslejen?",
+    answer:
+      "Udbetaling Danmark oplyser, at el, varme, varmt vand, fællesantenne, telefon, internet eller bredbånd, garage eller carport, indskud og afdrag på indskud, forudbetalt leje, møbler i en møbleret bolig og vaskeri normalt ikke tæller med i huslejen til beregningen.",
   },
   {
-    question: "Hvad er forskellen på boligstøtte og boligydelse i 2026?",
-    answer: "Boligstøtte er for almindelige lejere. Boligydelse er for folkepensionister og førtidspensionister og giver typisk 20-40% mere. Pensionister skal søge boligydelse i stedet for boligstøtte.",
+    question: "Hvad er forskellen på boligstøtte og boligydelse?",
+    answer:
+      "Boligstøtte er den almindelige ordning for lejere. Folkepensionister og nogle førtidspensionister kan være berettiget til boligydelse, som er en særlig ordning med andre regler. Den officielle beregner viser, hvilken ordning der skal bruges.",
   },
 ];
 
 export default function Boligstoette2026Page() {
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className="mx-auto max-w-3xl">
       <FAQSchema items={faqItems} />
 
-      <nav className="text-sm mb-6">
-        <Link href="/blog" className="text-blue-600 dark:text-blue-400 hover:underline">Blog</Link>
+      <nav className="mb-6 text-sm">
+        <Link href="/blog" className="text-blue-600 hover:underline dark:text-blue-400">
+          Blog
+        </Link>
         <span className="mx-2 text-gray-400">/</span>
         <span className="text-gray-600 dark:text-gray-400">Boligstøtte 2026</span>
       </nav>
 
-      <article className="prose prose-lg dark:prose-invert max-w-none">
-        <header className="mb-8 not-prose">
-          <span className="text-sm text-blue-600 dark:text-blue-400 font-medium">Bolig & Økonomi</span>
-          <h1 className="text-3xl md:text-4xl font-bold mt-2 mb-4 text-gray-900 dark:text-white">
-            Boligstøtte 2026 - Nye Regler og Satser
+      <article className="prose prose-lg max-w-none dark:prose-invert">
+        <header className="not-prose mb-8">
+          <span className="text-sm font-medium text-blue-600 dark:text-blue-400">Bolig & Økonomi</span>
+          <h1 className="mt-2 mb-4 text-3xl font-bold text-gray-900 md:text-4xl dark:text-white">
+             Boligstøtte 2026: standardmaksima, formue og beregning
           </h1>
-          <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
-            <span>13. februar 2026</span>
+          <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+            <time dateTime="2026-09-24">Opdateret 24. september 2026</time>
             <span>•</span>
-            <span>9 min læsetid</span>
+            <span>8 min læsetid</span>
           </div>
         </header>
 
         <p className="lead">
-          Boligstøtte hjælper tusindvis af danskere med at få huslejen til at hænge sammen. 
-          I 2026 er satserne reguleret, og der er enkelte justeringer i reglerne. Her får 
-          du det fulde overblik over hvad der gælder - og hvad du kan få.
+          Boligstøtte kan lette huslejen for lejere med en lavere husstandsindkomst, men det
+          præcise beløb afhænger af flere oplysninger end huslejen alene. Her er de
+          dokumenterede 2026-nøgletal, og hvad du skal bruge den officielle beregner til.
         </p>
 
-        <h2>Hvad er nyt i 2026?</h2>
-        <p>
-          De vigtigste ændringer i boligstøttereglerne for 2026 handler primært om 
-          <strong> satsregulering</strong>. Alle beløbsgrænser er justeret med ca. 3,5% 
-          for at følge med prisudviklingen.
-        </p>
-
-        <div className="bg-blue-50 dark:bg-blue-900/30 p-6 rounded-lg not-prose my-6">
-          <h3 className="font-bold text-lg mb-3 text-gray-900 dark:text-white">Nøgletal boligstøtte 2026</h3>
-          <ul className="space-y-2 text-gray-700 dark:text-gray-300">
-            <li>📊 <strong>Satsregulering:</strong> +3,5% ift. 2025</li>
-            <li>🏠 <strong>Max huslejeloft:</strong> Ca. 73.000 kr/år (6.083 kr/md)</li>
-            <li>💰 <strong>Min. udbetaling:</strong> Ca. 300 kr/md</li>
-            <li>🏦 <strong>Formuefribeløb (enlig):</strong> Ca. 850.000 kr</li>
-            <li>👫 <strong>Formuefribeløb (par):</strong> Ca. 1.700.000 kr</li>
-          </ul>
-        </div>
-
-        <h3>Satsregulering</h3>
-        <p>
-          Hvert år reguleres boligstøttesatserne efter den såkaldte satsreguleringsprocent. 
-          I 2026 er reguleringen på ca. 3,5%, hvilket betyder at du kan få lidt mere i støtte 
-          - og at indkomstgrænserne er hævet tilsvarende.
-        </p>
-
-        <h3>Huslejeloft</h3>
-        <p>
-          Der er et loft over, hvor meget husleje der indgår i beregningen. I 2026 er dette 
-          loft ca. <strong>73.000 kr/år</strong> (godt 6.000 kr/md). Betaler du mere i husleje, 
-          indgår kun beløbet op til loftet.
-        </p>
-
-        <h2>Hvem kan få boligstøtte?</h2>
-        <p>
-          For at få boligstøtte skal du opfylde disse grundlæggende krav:
-        </p>
-
-        <ul>
-          <li><strong>Alder:</strong> Du skal være fyldt 18 år</li>
-          <li><strong>Boligtype:</strong> Du skal bo til leje i en helårsbolig</li>
-          <li><strong>Indkomst:</strong> Din husstandsindkomst skal være under visse grænser</li>
-          <li><strong>Ophold:</strong> Du skal have lovligt ophold i Danmark</li>
-        </ul>
-
-        <div className="bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800 p-4 rounded-lg not-prose my-6">
-          <p className="font-medium text-gray-900 dark:text-white">💡 Tip: Boligydelse for pensionister</p>
-          <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">
-            Er du folkepensionist eller førtidspensionist? Så skal du søge <strong>boligydelse</strong> 
-            i stedet for boligstøtte. Boligydelse giver typisk et højere beløb.
+        <div className="not-prose my-6 rounded-lg border border-blue-200 bg-blue-50 p-5">
+          <p className="font-semibold text-blue-900">Vil du se en konkret beregning?</p>
+          <p className="mt-1 text-blue-800">
+            Udbetaling Danmarks officielle beregner kan fortsættes uden login. Den bruger
+            blandt andet husleje, indkomst, formue, beboere og areal.
           </p>
+          <div className="mt-3 flex flex-wrap gap-3">
+            <a
+              href={BOLIGSTOETTE_2026.sources.officialCalculator}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700"
+            >
+              Åbn officiel beregning
+            </a>
+            <Link
+              href="/boligstoette"
+              className="rounded-lg bg-white px-4 py-2 font-medium text-blue-800 ring-1 ring-blue-300 hover:bg-blue-100"
+            >
+              Lav lokalt screeningestimat
+            </Link>
+          </div>
         </div>
 
-        <h2>Hvor meget kan du få i 2026?</h2>
+        <h2>Standardmaksimumsbeløb i 2026</h2>
         <p>
-          Boligstøtten beregnes ud fra en formel der tager højde for din husleje, indkomst 
-          og husstandens størrelse. Som tommelfingerregel kan du forvente at få dækket 
-          <strong> 15-30% af huslejen</strong> - men det varierer meget.
+          Borger.dk oplyser følgende standardsatser pr. måned for 2026. Særlige ordninger og
+          enkelte boligforhold kan give højere beløb, og beløbet er ikke automatisk til enhver.
         </p>
 
-        <h3>Eksempel: Enlig med lav indkomst</h3>
-        <div className="bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 p-4 rounded-lg not-prose my-6">
+        <a
+          href="#boligstoette-standardmaksima"
+          className="sr-only focus:not-sr-only focus:my-2 focus:inline-block focus:underline"
+        >
+          Spring til standardmaksimum
+        </a>
+        <div
+          id="boligstoette-standardmaksima"
+          className="not-prose my-6 overflow-x-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+          role="region"
+          aria-label="Standardmaksimum for boligstøtte i 2026"
+          tabIndex={-1}
+        >
           <table className="w-full text-sm">
-            <tbody>
-              <tr className="border-b border-green-200 dark:border-green-700">
-                <td className="py-2">Husleje</td>
-                <td className="text-right">5.500 kr/md</td>
-              </tr>
-              <tr className="border-b border-green-200 dark:border-green-700">
-                <td className="py-2">Indkomst før skat</td>
-                <td className="text-right">16.000 kr/md</td>
-              </tr>
-              <tr className="border-b border-green-200 dark:border-green-700">
-                <td className="py-2">Husstandsstørrelse</td>
-                <td className="text-right">1 person</td>
-              </tr>
-              <tr className="font-bold">
-                <td className="py-2">Estimeret boligstøtte</td>
-                <td className="text-right text-green-700 dark:text-green-400">ca. 2.100 kr/md</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <h3>Eksempel: Familie med børn</h3>
-        <div className="bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 p-4 rounded-lg not-prose my-6">
-          <table className="w-full text-sm">
-            <tbody>
-              <tr className="border-b border-green-200 dark:border-green-700">
-                <td className="py-2">Husleje</td>
-                <td className="text-right">8.000 kr/md</td>
-              </tr>
-              <tr className="border-b border-green-200 dark:border-green-700">
-                <td className="py-2">Samlet husstandsindkomst</td>
-                <td className="text-right">32.000 kr/md</td>
-              </tr>
-              <tr className="border-b border-green-200 dark:border-green-700">
-                <td className="py-2">Husstandsstørrelse</td>
-                <td className="text-right">2 voksne + 2 børn</td>
-              </tr>
-              <tr className="font-bold">
-                <td className="py-2">Estimeret boligstøtte</td>
-                <td className="text-right text-green-700 dark:text-green-400">ca. 1.800 kr/md</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <p>
-          Vil du have et præcist estimat? Brug vores{" "}
-          <Link href="/boligstoette">boligstøtte-beregner</Link> - den tager højde for 
-          de aktuelle 2026-satser.
-        </p>
-
-        <h2>Indkomstgrænserne i 2026</h2>
-        <p>
-          Der er ingen fast indkomstgrænse - boligstøtten aftrappes gradvist når indkomsten 
-          stiger. Men som udgangspunkt kan du forvente disse tommelfingerregler:
-        </p>
-
-        <div className="not-prose my-6 overflow-x-auto">
-          <table className="w-full text-sm">
+            <caption className="sr-only">
+              Standardmaksimum pr. måned i 2026 efter pensionstatus og antal børn
+            </caption>
             <thead>
               <tr className="border-b dark:border-gray-700">
-                <th className="text-left py-2">Husstand</th>
-                <th className="text-left py-2">Typisk indkomstgrænse</th>
+                <th scope="col" className="py-2 text-left">Situation</th>
+                <th scope="col" className="py-2 text-left">0 børn</th>
+                <th scope="col" className="py-2 text-left">1-3 børn</th>
+                <th scope="col" className="py-2 text-left">4+ børn</th>
               </tr>
             </thead>
             <tbody>
               <tr className="border-b dark:border-gray-700">
-                <td className="py-2">1 voksen, ingen børn</td>
-                <td>Ca. 170.000 - 220.000 kr/år</td>
+                <th scope="row" className="py-2 text-left font-normal">Lejer, ikke-pensionist</th>
+                <td>{kr(BOLIGSTOETTE_2026.maximumMonthly.nonPensioner.noChildren)} kr.</td>
+                <td>{kr(BOLIGSTOETTE_2026.maximumMonthly.nonPensioner.oneToThreeChildren)} kr.</td>
+                <td>{kr(BOLIGSTOETTE_2026.maximumMonthly.nonPensioner.fourPlusChildren)} kr.</td>
               </tr>
               <tr className="border-b dark:border-gray-700">
-                <td className="py-2">1 voksen + 1 barn</td>
-                <td>Ca. 215.000 - 265.000 kr/år</td>
+                <th scope="row" className="py-2 text-left font-normal">Førtidspension efter nye regler</th>
+                <td>{kr(BOLIGSTOETTE_2026.maximumMonthly.newDisabilityPension.noChildren)} kr.</td>
+                <td>{kr(BOLIGSTOETTE_2026.maximumMonthly.newDisabilityPension.oneToThreeChildren)} kr.</td>
+                <td>{kr(BOLIGSTOETTE_2026.maximumMonthly.newDisabilityPension.fourPlusChildren)} kr.</td>
               </tr>
-              <tr className="border-b dark:border-gray-700">
-                <td className="py-2">1 voksen + 2 børn</td>
-                <td>Ca. 260.000 - 310.000 kr/år</td>
-              </tr>
-              <tr className="border-b dark:border-gray-700">
-                <td className="py-2">2 voksne, ingen børn</td>
-                <td>Ca. 250.000 - 300.000 kr/år</td>
-              </tr>
-              <tr className="border-b dark:border-gray-700">
-                <td className="py-2">2 voksne + 2 børn</td>
-                <td>Ca. 340.000 - 400.000 kr/år</td>
+              <tr>
+                <th scope="row" className="py-2 text-left font-normal">Folkepension eller førtidspension før 2003</th>
+                <td>{kr(BOLIGSTOETTE_2026.maximumMonthly.oldPension.noChildren)} kr.</td>
+                <td>{kr(BOLIGSTOETTE_2026.maximumMonthly.oldPension.oneToThreeChildren)} kr.</td>
+                <td>{kr(BOLIGSTOETTE_2026.maximumMonthly.oldPension.fourPlusChildren)} kr.</td>
               </tr>
             </tbody>
           </table>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-            *Grænserne er vejledende og afhænger af huslejen og andre faktorer.
-          </p>
         </div>
 
-        <h2>Arealkrav og boligstørrelse</h2>
         <p>
-          Der er også krav til boligens størrelse i forhold til antal beboere. Bor du i 
-          en bolig der er "for stor" til din husstand, kan støtten reduceres.
+          Kilde:{" "}
+          <a
+            href={BOLIGSTOETTE_2026.sources.officialRules}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline"
+          >
+            Udbetaling Danmarks søgning på boligstøtte
+          </a>
+          , verificeret {BOLIGSTOETTE_2026.verifiedAt}.
+        </p>
+        <p>
+          Pensionsrækkerne er en ordningsafklaring, ikke et krav på boligstøtte. Nogle
+          pensionister kan være berettiget til boligydelse, som følger andre regler; den
+          officielle beregner afgør, hvilken ordning der gælder.
         </p>
 
-        <div className="not-prose my-6 overflow-x-auto">
+        <h2>Formue påvirker beregningen</h2>
+        <p>
+          Der er ingen øvre grænse for, hvor stor formue du kan have og fortsætte få
+          boligstøtte. Formuen påvirker dog, hvor meget der regnes med som indkomst:
+        </p>
+        <a
+          href="#boligstoette-formuegraenser"
+          className="sr-only focus:not-sr-only focus:my-2 focus:inline-block focus:underline"
+        >
+          Spring til formuegrænser
+        </a>
+        <div
+          id="boligstoette-formuegraenser"
+          className="not-prose my-6 overflow-x-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+          role="region"
+          aria-label="Formuegrænser for boligstøtte i 2026"
+          tabIndex={-1}
+        >
           <table className="w-full text-sm">
+            <caption className="sr-only">
+              Hvordan formue påvirker vurderingen af boligstøtte i 2026
+            </caption>
             <thead>
               <tr className="border-b dark:border-gray-700">
-                <th className="text-left py-2">Antal personer</th>
-                <th className="text-left py-2">Max areal (uden reduktion)</th>
+                <th scope="col" className="py-2 text-left">Gruppe</th>
+                <th scope="col" className="py-2 text-left">Under fribeløb</th>
+                <th scope="col" className="py-2 text-left">{tenPercent} % med</th>
+                <th scope="col" className="py-2 text-left">{twentyPercent} % med</th>
               </tr>
             </thead>
             <tbody>
               <tr className="border-b dark:border-gray-700">
-                <td className="py-2">1-2 personer</td>
-                <td>65 m²</td>
+                <th scope="row" className="py-2 text-left font-normal">Ikke-pensionister og førtidspensionister efter nye regler</th>
+                <td>Under {kr(BOLIGSTOETTE_2026.wealth.nonPensioner.noEffect)} kr.</td>
+                <td>Fra {kr(BOLIGSTOETTE_2026.wealth.nonPensioner.noEffect)} kr.</td>
+                <td>Fra {kr(BOLIGSTOETTE_2026.wealth.nonPensioner.tenPercent)} kr.</td>
               </tr>
-              <tr className="border-b dark:border-gray-700">
-                <td className="py-2">3 personer</td>
-                <td>85 m²</td>
-              </tr>
-              <tr className="border-b dark:border-gray-700">
-                <td className="py-2">4 personer</td>
-                <td>105 m²</td>
-              </tr>
-              <tr className="border-b dark:border-gray-700">
-                <td className="py-2">5+ personer</td>
-                <td>+20 m² per ekstra person</td>
+              <tr>
+                <th scope="row" className="py-2 text-left font-normal">Folkepensionister og førtidspensionister før 2003</th>
+                <td>Under {kr(BOLIGSTOETTE_2026.wealth.pensioner.noEffect)} kr.</td>
+                <td>Fra {kr(BOLIGSTOETTE_2026.wealth.pensioner.noEffect)} kr.</td>
+                <td>Fra {kr(BOLIGSTOETTE_2026.wealth.pensioner.tenPercent)} kr.</td>
               </tr>
             </tbody>
           </table>
         </div>
-
-        <h2>Formue og boligstøtte</h2>
         <p>
-          Din formue kan påvirke boligstøtten. Overstiger formuen fribeløbet, reduceres 
-          støtten. I 2026 er fribeløbene:
+          Vurderingen kan også regne med andre forhold. Læs derfor ikke formuegrænserne som
+          en selvstændig beregning, men som et signal om, hvornår du bør bruge den officielle
+          beregner.
         </p>
 
+        <h2>Hvilke oplysninger skal du bruge?</h2>
         <ul>
-          <li><strong>Enlig:</strong> Ca. 850.000 kr</li>
-          <li><strong>Par:</strong> Ca. 1.700.000 kr</li>
+          <li>Husstands samlede indkomst.</li>
+          <li>Formue, som Udbetaling Danmark kan regne med i vurderingen.</li>
+          <li>Antal børn og voksne i boligen.</li>
+          <li>Boligens areal og om den er lejet.</li>
+          <li>Pensionstatus og eventuelle særlige forhold.</li>
         </ul>
+        <p>Træk følgende udgifter fra huslejen, når du bruger den officielle beregner:</p>
+        <ul>
+          {BOLIGSTOETTE_2026.rentExcludes.map((item) => <li key={item}>{item}</li>)}
+        </ul>
+        <p>
+          Betaler du særskilt for forbedringer som et nyt køkken eller bad, skal beløbet
+          lægges til huslejen.
+        </p>
 
-        <h3>Hvad tæller som formue?</h3>
-        <ul>
-          <li>Bankindestående og kontanter</li>
-          <li>Aktier, obligationer, investeringsforeninger</li>
-          <li>Ejendom (udover din lejebolig)</li>
-          <li>Bil (over en vis værdi)</li>
-        </ul>
+        <h2>Sådan bruger du screeningen</h2>
+        <p>
+           Vores <Link href="/boligstoette">boligstøtte-screening</Link> viser et interval fra
+           0 kr. til standardmaksimum for det valgte antal børn, men aldrig højere end
+            den angivne husleje. Den bruger også de
+            dokumenterede formuegrænser til at markere, når {tenPercent} eller {twentyPercent} procent af formuen kan
+            regnes med. Areal og husstandens øvrige sammensætning indgår i den officielle
+            beregning, men ikke i det lokale interval. Den er bevidst ikke en efterligning af
+            Udbetaling Danmarks fulde ansøgningsberegning.
+        </p>
+        <p>
+          Brug resultatet til at se, om det kan være relevant at søge. Gå videre med den
+          officielle beregning, når du vil have en vurdering af din konkrete situation.
+        </p>
 
-        <h3>Hvad tæller IKKE med?</h3>
-        <ul>
-          <li>Pensionsopsparinger i pensionsselskaber</li>
-          <li>Indestående i ratepension og livrente</li>
-          <li>Aldersopsparing (den nye ordning)</li>
-        </ul>
+        <h2>Boligstøtte og boligydelse</h2>
+        <p>
+          Boligstøtte er den almindelige ordning for lejere. Folkepensionister og visse
+          førtidspensionister kan være berettiget til boligydelse, som er en særlig ordning
+          med andre regler og ofte andre dokumentationskrav. Den officielle beregner er det
+          rette sted at få den konkrete vurdering.
+        </p>
 
         <h2>Sådan søger du boligstøtte</h2>
         <p>
-          Du søger boligstøtte digitalt på <a href="https://www.borger.dk" target="_blank" rel="noopener noreferrer">borger.dk</a> 
-          med MitID. Processen er:
+          Når du har brugt den officielle beregning, kan du fortsætte ansøgningen derfra.
+          Udbetaling Danmark behandler ansøgningen og sender besked om det endelige beløb.
+          Husk at oplyse ændringer i indkomst, husstand eller husleje.
         </p>
 
-        <ol>
-          <li><strong>Log ind</strong> på borger.dk med MitID</li>
-          <li><strong>Find ansøgningen</strong> under "Boligstøtte"</li>
-          <li><strong>Udfyld oplysninger</strong> om bolig, indkomst og husstand</li>
-          <li><strong>Send ansøgningen</strong> - du får svar inden for få uger</li>
-        </ol>
-
-        <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg not-prose mb-4">
-          <p className="text-sm text-gray-600 dark:text-gray-300">
-            <strong>Vigtigt:</strong> Du kan få boligstøtte fra ansøgningsdatoen - med op til 
-            2 måneders tilbagevirkende kraft. Søg derfor så hurtigt som muligt!
+        <div className="not-prose my-6 rounded-lg border-l-4 border-blue-400 bg-blue-50 p-4">
+          <p className="font-medium text-blue-900">Anden næste handling</p>
+          <p className="mt-1 text-blue-800">
+            Vil du se, hvad du har råd til i husleje? Brug{" "}
+            <Link href="/husleje" className="underline">
+              huslejeberegneren
+            </Link>{" "}
+            eller læs vores guide til{" "}
+            <Link href="/blog/30-procent-reglen-husleje" className="underline">
+              30-procent-reglen
+            </Link>
+            .
           </p>
-        </div>
-
-        <h2>Udbetaling og efterregulering</h2>
-        <p>
-          Boligstøtte udbetales månedsvist <strong>forud</strong> - typisk omkring den 1. i måneden. 
-          Pengene går direkte til din NemKonto.
-        </p>
-
-        <h3>Efterregulering</h3>
-        <p>
-          Efter hvert kalenderår sammenligner Udbetaling Danmark din faktiske indkomst med 
-          den forventede indkomst der lå til grund for beregningen:
-        </p>
-
-        <ul>
-          <li><strong>Tjent for lidt:</strong> Du får penge tilbage (efterbetaling)</li>
-          <li><strong>Tjent for meget:</strong> Du skal betale penge tilbage (tilbagebetaling)</li>
-        </ul>
-
-        <div className="bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800 p-4 rounded-lg not-prose my-6">
-          <p className="font-medium text-gray-900 dark:text-white">💡 Undgå tilbagebetaling</p>
-          <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">
-            Giv besked til Udbetaling Danmark hvis din indkomst ændrer sig markant i løbet 
-            af året. Så justeres støtten løbende, og du undgår store tilbagebetalingskrav.
-          </p>
-        </div>
-
-        <h2>Boligstøtte vs. boligydelse</h2>
-        <p>
-          Der er to ordninger - og forskellen er vigtig:
-        </p>
-
-        <h3>Boligstøtte</h3>
-        <p>
-          For alle lejere under pensionsalderen. Beregnes efter husleje, indkomst og 
-          husstandsstørrelse.
-        </p>
-
-        <h3>Boligydelse</h3>
-        <p>
-          Kun for folkepensionister og førtidspensionister. Giver typisk <strong>20-40% mere</strong> 
-          end almindelig boligstøtte, fordi der er andre beregningsregler.
-        </p>
-
-        <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg not-prose mb-4">
-          <p className="text-sm text-gray-600 dark:text-gray-300">
-            <strong>Eksempel:</strong> En folkepensionist med samme husleje og indkomst som 
-            en ikke-pensionist kan typisk få 1.500-2.000 kr/md mere via boligydelse end via boligstøtte.
-          </p>
-        </div>
-
-        <h2>Hvad påvirker beløbet?</h2>
-        <p>
-          Disse faktorer har størst indflydelse på din boligstøtte:
-        </p>
-
-        <ol>
-          <li>
-            <strong>Husleje:</strong> Højere husleje = højere støtte (op til loftet)
-          </li>
-          <li>
-            <strong>Indkomst:</strong> Lavere indkomst = højere støtte
-          </li>
-          <li>
-            <strong>Børn:</strong> Flere børn = højere indkomstgrænse
-          </li>
-          <li>
-            <strong>Formue:</strong> Høj formue = lavere eller ingen støtte
-          </li>
-          <li>
-            <strong>Boligstørrelse:</strong> For stor bolig kan reducere støtten
-          </li>
-        </ol>
-
-        <h2>Beregn din boligstøtte</h2>
-        <p>
-          Vil du vide præcis hvad du kan få i 2026? Brug vores gratis beregner:
-        </p>
-
-        <div className="not-prose my-8 flex flex-col sm:flex-row gap-4">
-          <Link 
-            href="/boligstoette"
-            className="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-center"
-          >
-            Beregn boligstøtte →
-          </Link>
-          <Link 
-            href="/husleje"
-            className="inline-block px-6 py-3 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-center"
-          >
-            Husleje budget →
-          </Link>
         </div>
 
         <h2>Ofte stillede spørgsmål</h2>
-        {faqItems.map((item, index) => (
-          <div key={index} className="mb-4">
-            <h3 className="text-lg">{item.question}</h3>
+        {faqItems.map((item) => (
+          <div key={item.question}>
+            <h3>{item.question}</h3>
             <p>{item.answer}</p>
           </div>
         ))}
       </article>
 
-      <div className="mt-12 pt-8 border-t dark:border-gray-700">
-        <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Relaterede beregnere</h2>
+      <div className="mt-12 border-t pt-8 dark:border-gray-700">
+        <h2 className="mb-4 text-xl font-bold text-gray-900 dark:text-white">Relaterede beregnere</h2>
         <div className="grid gap-4 md:grid-cols-2">
-          <Link 
+          <Link
             href="/boligstoette"
-            className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            className="rounded-lg bg-gray-50 p-4 text-gray-900 hover:bg-gray-100 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700"
           >
-            <span className="font-medium text-gray-900 dark:text-white">Boligstøtte-beregner →</span>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Beregn din boligstøtte med 2026-satser</p>
+            <span className="font-medium">Boligstøtte-screening →</span>
+             <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Se standardmaksimum 2026 for din profil.</p>
           </Link>
-          <Link 
+          <Link
             href="/husleje"
-            className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            className="rounded-lg bg-gray-50 p-4 text-gray-900 hover:bg-gray-100 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700"
           >
-            <span className="font-medium text-gray-900 dark:text-white">Husleje budget →</span>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Find ud af hvad du har råd til i husleje</p>
+            <span className="font-medium">Husleje budget →</span>
+            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Se, hvad du har råd til efter huslejen.</p>
           </Link>
-          <Link 
+          <Link
             href="/loen-efter-skat"
-            className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            className="rounded-lg bg-gray-50 p-4 text-gray-900 hover:bg-gray-100 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700"
           >
-            <span className="font-medium text-gray-900 dark:text-white">Løn efter skat →</span>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Se hvad du får udbetalt af din løn</p>
-          </Link>
-          <Link 
-            href="/boernepenge"
-            className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-          >
-            <span className="font-medium text-gray-900 dark:text-white">Børnepenge →</span>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Beregn børne- og ungeydelse</p>
-          </Link>
-        </div>
-      </div>
-
-      <div className="mt-8 pt-8 border-t dark:border-gray-700">
-        <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Relaterede artikler</h2>
-        <div className="grid gap-4">
-          <Link 
-            href="/blog/30-procent-reglen-husleje"
-            className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-          >
-            <span className="font-medium text-gray-900 dark:text-white">30% reglen for husleje - hvad er realistisk? →</span>
-          </Link>
-          <Link 
-            href="/blog/guide-feriepenge-hvornaar-og-hvor-meget"
-            className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-          >
-            <span className="font-medium text-gray-900 dark:text-white">Guide: Feriepenge - hvornår og hvor meget? →</span>
+            <span className="font-medium">Løn efter skat →</span>
+            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Se, hvad der er tilbage af løn og andre indkomster efter skat.</p>
           </Link>
         </div>
       </div>

@@ -1,6 +1,14 @@
-import { describe, test, expect } from "vitest";
-import { encodeCalculationState, decodeCalculationState } from "./calculation-state";
+import { afterEach, describe, expect, test } from "vitest";
+import {
+  clearStateFromUrl,
+  decodeCalculationState,
+  encodeCalculationState,
+  generateShareableLink,
+  getStateFromUrl,
+  updateUrlWithState,
+} from "./calculation-state";
 import type { CalculationState } from "./calculation-state";
+import { calculationStatePrivacyScript } from "./calculation-state-privacy";
 
 describe("encodeCalculationState / decodeCalculationState", () => {
   const state: CalculationState = {
@@ -63,5 +71,109 @@ describe("encodeCalculationState / decodeCalculationState", () => {
   test("returns empty string for invalid state", () => {
     const result = encodeCalculationState(undefined as unknown as CalculationState);
     expect(result).toBe("");
+  });
+});
+
+describe("URL state location", () => {
+  afterEach(() => {
+    window.history.replaceState({}, "", "/");
+  });
+
+  test("kan generere et fragment-link uden at ændre standardlinks", () => {
+    const state: CalculationState = {
+      type: "boligstoette",
+      inputs: { husstandsindkomst: 216000 },
+      timestamp: 1700000000000,
+    };
+    const fragmentLink = generateShareableLink(state, { useFragment: true });
+    const fragmentUrl = new URL(fragmentLink.fullUrl);
+
+    expect(fragmentUrl.searchParams.has("s")).toBe(false);
+    expect(fragmentUrl.hash).toMatch(/^#s=.+/);
+
+    const legacyLink = generateShareableLink(state);
+    expect(new URL(legacyLink.fullUrl).searchParams.has("s")).toBe(true);
+  });
+
+  test("understøtter fragment-state og fortsat gamle query-links", () => {
+    const encoded = encodeCalculationState({
+      type: "boligstoette",
+      inputs: { husstandsindkomst: 216000 },
+      timestamp: 1700000000000,
+    });
+
+    window.history.replaceState({}, "", `/boligstoette#s=${encoded}`);
+    expect(getStateFromUrl()?.inputs.husstandsindkomst).toBe(216000);
+
+    window.history.replaceState({}, "", `/boligstoette?s=${encoded}`);
+    expect(getStateFromUrl()?.inputs.husstandsindkomst).toBe(216000);
+  });
+
+  test("fjerner fragment-state før tredjepartsscripts og bruger lokal history-buffer", () => {
+    const encoded = encodeCalculationState({
+      type: "boligstoette",
+      inputs: { husstandsindkomst: 216000 },
+      timestamp: 1700000000000,
+    });
+    window.history.replaceState({ existing: true }, "", `/boligstoette#s=${encoded}&guide`);
+
+    new Function(calculationStatePrivacyScript)();
+
+    expect(window.location.hash).toBe("#guide");
+    expect(window.location.search).toBe("");
+    expect(window.history.state).toMatchObject({ existing: true });
+    expect(getStateFromUrl()?.inputs.husstandsindkomst).toBe(216000);
+    expect(window.history.state).toEqual({ existing: true });
+  });
+
+  test("rydder state uden at fjerne andre fragment-ankere", () => {
+    const encoded = encodeCalculationState({
+      type: "boligstoette",
+      inputs: { husstandsindkomst: 216000 },
+      timestamp: 1700000000000,
+    });
+    window.history.replaceState({}, "", `/boligstoette?s=${encoded}#guide`);
+
+    clearStateFromUrl();
+
+    expect(new URL(window.location.href).searchParams.has("s")).toBe(false);
+    expect(new URL(window.location.href).hash).toBe("#guide");
+  });
+
+  test("opdaterer query-state uden at efterlade gammel fragment-state", () => {
+    const oldState = encodeCalculationState({
+      type: "boligstoette",
+      inputs: { husstandsindkomst: 100000 },
+      timestamp: 1700000000000,
+    });
+    window.history.replaceState({}, "", `/boligstoette?s=legacy#s=${oldState}&guide`);
+
+    updateUrlWithState({
+      type: "boligstoette",
+      inputs: { husstandsindkomst: 216000 },
+      timestamp: 1700000000000,
+    });
+
+    const url = new URL(window.location.href);
+    expect(url.searchParams.get("s")).toBeTruthy();
+    expect(url.hash).toBe("#guide");
+  });
+
+  test("opdaterer og rydder både fragment- og legacy query-state", () => {
+    window.history.replaceState({}, "", "/boligstoette?behold=ja");
+
+    updateUrlWithState({
+      type: "boligstoette",
+      inputs: { husstandsindkomst: 216000 },
+      timestamp: 1700000000000,
+    });
+
+    expect(new URL(window.location.href).searchParams.get("behold")).toBe("ja");
+    expect(new URL(window.location.href).searchParams.has("s")).toBe(true);
+    expect(new URL(window.location.href).hash).toBe("");
+
+    clearStateFromUrl();
+    expect(new URL(window.location.href).hash).toBe("");
+    expect(new URL(window.location.href).searchParams.get("behold")).toBe("ja");
   });
 });

@@ -1,6 +1,6 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: NÆSTE ITERATION — O5 (boligstøtte).
+STATUS: I GANG — O5 (boligstøtte).
 
 ## Fase 3 — trafik-drevet
 
@@ -367,7 +367,7 @@ STATUS: NÆSTE ITERATION — O5 (boligstøtte).
   Før en yderligere konkret svensk side ændres, skal dens `MÅL`-baseline fra
   trafiksnapshotet skrives her; ukendt baseline må ikke erstattes med 0.
 
-#### 5. [ ] O5 — Gør boligstøtte til et troværdigt screeningestimat
+#### 5. [ ] I GANG — O5 — Gør boligstøtte til et troværdigt screeningestimat
 
 - **Datagrund:** 469 besøgende/28d (+72 %), bounce 2 %, 424 indgangssider. Den
   eksisterende model er stærkt forenklet, og side/blog har modstridende 2026-grænser.
@@ -377,6 +377,48 @@ STATUS: NÆSTE ITERATION — O5 (boligstøtte).
   testeksempler, eller mærk værktøjet tydeligt som groft screeningestimat. Fjern ubrugte
   konstanter/input, tilføj tydelig CTA til den officielle beregner uden login, og gør
   blog/side samlet.
+- **Research 2026-09-24 10:20:** Borger.dk/Udbetaling Danmarks officielle søgning og
+  selvbetjeningssider bekræfter, at resultatet er vejledende, at særlige tilfælde ikke
+  indgår, og at husstandsindkomst, formue, antal børn/voksne, husleje og areal påvirker
+  resultatet. Officielle 2026-maksima pr. måned er for lejere uden pension 1.194 kr.
+  (0 børn), 4.201 kr. (1-3 børn) og 5.251 kr. (4+); nye førtidspensionister har
+  4.201 kr. (0-3 børn) og 5.251 kr. (4+), mens folkepensionister og gamle
+  førtidspensionister har 4.969 kr. (0-3 børn) og 6.211 kr. (4+). Formuen har ingen
+  øvre ret til at få støtte, men 10 % regnes med fra 896.400 kr. hhv. 1.060.300 kr. og
+  20 % fra 1.793.000 kr. hhv. 2.120.800 kr.; de viste nedre grænser er inklusive.
+  Huslejen skal oplyses uden el, varme, varmt vand, telefon/internet, garage, depositum
+  m.fl. Den officielle beregner kan fortsættes uden login. Kilder: Borger.dk
+  `soeg-boligstoette` og boligstoette.dk `basisoplysninger`, læst 2026-09-24.
+- **Beslutning:** Brug dokumenteret screening, ikke en ny officiel formel. Den lokale
+  beregner viser 0 til det officielle 2026-maksimum, men aldrig højere end den faktiske
+  husleje, bruger de inklusive formuegrænser til at vise konsekvensen, og siger eksplicit
+  at indkomst, areal, særlige ordninger og den endelige ret kræver Udbetaling Danmarks
+  beregner. 73.000/113.000 kr., 800.000/1.600.000/850.000/1.700.000 kr. og det gamle
+  304 kr-mindstebeløb fjernes fra alle O5-flader, indtil de kan dokumenteres.
+- **Implementeringsretning:** Central `BOLIGSTOETTE_2026`-konfiguration, ren
+  `beregnBoligstoette`-funktion, URL-normalisering med legacy-stater, komponent- og
+  indholdstests samt synlig official-CTA på side og blog. Ingen public API-ændring.
+- **Implementeringsstatus 2026-09-24 14:25:** Konfigurationen, den rene funktion og
+  normalisering er implementeret. UI'en bruger husleje, indkomst, husstandsstørrelse,
+  antal børn, pensionstatus, formue og areal; den døde `boligType` og de gamle lokale
+  2026-konstanter er fjernet. Resultatet vises som 0–min(husleje, officielt maksimum),
+  og formuejusteringen vises udtrykkeligt som et forenklet screening-signal. Side,
+  metadata, kategori-, home- og blogdata er aligning til screening-sproget; official-CTA
+  er synlig på begge hovedflader.
+- **Review-rettelser 2026-09-24:** To uafhængige reviews fandt og fik rettet manglende
+  enheder i accessible names, `min=1` versus positive decimaler, uoplyst formue som
+  eksplicit nul i delelink, manglende fuldt aktuel state-roundtrip, uvedkommende CTA-copy
+  og manglende advarsel om økonomiske data i delelinket. Boligstøtte har kun lokal
+  link-deling; QR/social/email er skjult for den følsomme state. Privatlivspolitikken
+  beskriver nu eksplicit base64-link og tredjepartstransmission ved frivillig deling.
+  Primærkilden bekræfter pensionernes 0-3-børnsgrænse og inklusive formuegrænser, så
+  de to reviewfund om manglende pensionbeløb og strenge `>`-grænser var false positives.
+- **Mellemgate 2026-09-24 14:25:** `npm run build` grøn (137 sider; 7 kendte CSS-
+  advarsler), `npm run test` grøn (515/515, 57 filer), `npm run lint` grøn (357 filer),
+  `npm audit --audit-level=high` 0 sårbarheder. React Doctor 70/100 med fem
+  maintainability-advarsler (tre eksisterende dupliker-JSX-fund samt komponentens
+  kompleksitet/størrelse); ingen rapporterede correctness/security-fejl. Endelig frisk
+  review og indholdskontrolleret SSR skal ske før merge.
 - **Forventet effekt:** Beskytter en stærk vækstside mod fejltillid, øger tillid og
   flytter useren til den officielle næste handling; ikke dokumenteret bounce-reduktion.
 - **Acceptkriterier:**

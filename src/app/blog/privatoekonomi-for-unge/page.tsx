@@ -128,8 +128,8 @@ export default function PrivatoekonomieGuidePage() {
         <p>
           <strong>Eksempel:</strong> Med {kr(SU_2026.udeboende)} kr. i SU før skat + 5.000 kr. i
           studiejob = {kr(SU_2026.udeboende + 5000)} kr. pr. måned. 30 % er ca. 3.700 kr — men husk at tjekke{" "}
-          <Link href="/boligstoette" className="text-blue-600 hover:underline">boligstøtte</Link>,
-          som beregnes efter din enkelte situation.
+          <Link href="/boligstoette" className="text-blue-600 hover:underline">boligstøtte</Link>
+          . Vores screening giver et groft interval, mens Udbetaling Danmark beregner din konkrete ret.
         </p>
 
         <h2>3. Løn efter skat: Hvad får du udbetalt?</h2>
@@ -264,7 +264,7 @@ export default function PrivatoekonomieGuidePage() {
           <p className="text-blue-700 dark:text-blue-400">
             Start med at beregne din <Link href="/su" className="underline font-medium">SU</Link> og
             se hvad du har råd til i <Link href="/husleje" className="underline font-medium">husleje</Link>.
-            Tjek også om du kan få <Link href="/boligstoette" className="underline font-medium">boligstøtte</Link>.
+            Lav også et <Link href="/boligstoette" className="underline font-medium">screeningestimat af boligstøtte</Link>.
           </p>
         </div>
 

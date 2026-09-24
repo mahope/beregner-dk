@@ -1,5 +1,5 @@
-import type { Locale } from "./i18n";
 import { isCalculatorAvailable } from "./calculator-list";
+import type { Locale } from "./i18n";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -93,7 +93,7 @@ const daPageData: HomePageData = {
       private: {
         title: "Privat & Sikkert",
         description:
-          "Dine data gemmes ikke. Alle beregninger sker lokalt i din browser.",
+          "Dine input gemmes ikke i nogen database. Beregningen sker lokalt i din browser, medmindre du selv bruger en delefunktion.",
       },
       local: {
         title: "Danske Satser",
@@ -111,12 +111,12 @@ const daPageData: HomePageData = {
     {
       question: "Gemmer I mine data?",
       answer:
-        "Nej, alle beregninger sker lokalt i din browser. Vi gemmer ingen personlige data, og dine oplysninger forlader aldrig din computer.",
+        "Nej, selve beregningen sker lokalt i din browser. Vi gemmer ikke dine personlige input i nogen database. De forlader først din computer, når du selv bruger en delefunktion eller åbner et delelink.",
     },
     {
       question: "Er beregningerne pålidelige?",
       answer:
-        "Vores beregnere giver gode estimater baseret på officielle satser og formler. For præcise beløb anbefaler vi altid at tjekke de officielle kilder (SKAT, borger.dk, etc.).",
+        "Vores beregnere og screeninger giver estimater baseret på officielle satser, formler og dokumenterede signaler. Se altid de officielle kilder, når et præcist beløb eller en endelig ydelse er vigtigt.",
     },
     {
       question: "Hvilke beregnere har I?",
@@ -156,7 +156,7 @@ const daCalculators: HomeCalculator[] = [
   { title: "Børnepenge", description: "Se hvad du kan få i børne- og ungeydelse 2026", href: "/boernepenge", popular: false, category: "Familie" },
   { title: "SU Beregner", description: "Beregn din SU og fribeløb baseret på din situation", href: "/su", popular: false, category: "Uddannelse" },
   { title: "Dagpengeberegner", description: "Beregn hvad du kan få i dagpenge ved ledighed", href: "/dagpenge", popular: false, category: "Økonomi" },
-  { title: "Boligstøtte", description: "Beregn din boligstøtte til husleje", href: "/boligstoette", popular: false, category: "Bolig" },
+  { title: "Boligstøtte", description: "Lav et screeningestimat af boligstøtte til husleje", href: "/boligstoette", popular: false, category: "Bolig" },
   { title: "Kalorieberegner", description: "Beregn dit daglige kaloriebehov og makroer", href: "/kalorier", popular: false, category: "Sundhed" },
   { title: "Datoberegner", description: "Beregn dage mellem datoer, arbejdsdage og alder", href: "/dato", popular: false, category: "Praktisk" },
   { title: "Husleje Budget", description: "Find ud af hvad du har råd til i husleje", href: "/husleje", popular: false, category: "Bolig" },
@@ -255,7 +255,7 @@ const noPageData: HomePageData = {
     {
       question: "Lagrer dere mine data?",
       answer:
-        "Nei, alle beregninger skjer lokalt i nettleseren din. Vi lagrer ingen personlige data, og opplysningene dine forlater aldri datamaskinen din.",
+        "Nei, selve beregningen skjer lokalt i nettleseren din. Vi lagrer ikke inndataene dine i noen database. De forlater datamaskinen først når du selv deler dem eller åpner en delelenke.",
     },
     {
       question: "Er beregningene pålitelige?",
@@ -379,7 +379,7 @@ const sePageData: HomePageData = {
     {
       question: "Sparar ni mina uppgifter?",
       answer:
-        "Nej, alla beräkningar sker lokalt i din webbläsare. Vi sparar inga personuppgifter, och dina uppgifter lämnar aldrig din dator.",
+        "Nej, själva beräkningen sker lokalt i din webbläsare. Vi sparar inte dina uppgifter i någon databas. De lämnar datorn först när du själv delar dem eller öppnar en delelänk.",
     },
     {
       question: "Är beräkningarna tillförlitliga?",

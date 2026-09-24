@@ -11,6 +11,7 @@ import { SkipLink } from "@/components/SkipLink";
 import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
 import BeregnerAssistent from "@/components/BeregnerAssistent";
 import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
+import { calculationStatePrivacyScript } from "@/lib/calculation-state-privacy";
 import { getTranslations } from "@/lib/i18n";
 
 const inter = Inter({
@@ -88,6 +89,8 @@ export default async function RootLayout({
   return (
     <html lang={htmlLang}>
       <head>
+        <script dangerouslySetInnerHTML={{ __html: calculationStatePrivacyScript }} />
+
         {/* Plausible Analytics - Self-hosted */}
         <script
           defer

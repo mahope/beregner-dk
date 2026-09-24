@@ -1,6 +1,6 @@
 import { getCalculatorsByLocale } from "./calculator-list";
-import { BARSEL_2026, SU_2026 } from "./satser-2026";
 import type { Locale } from "./i18n";
+import { BARSEL_2026, SU_2026 } from "./satser-2026";
 
 export interface CategoryData {
   slug: string;
@@ -43,7 +43,7 @@ export const beregnere: BeregnerItem[] = [
   { title: "Aktieskat", description: "Beregn skat på aktiegevinst — frit depot vs. ASK", href: "/aktieskat", category: "Økonomi" },
   { title: "Topskat Beregner", description: "Beregn om du betaler mellemskat eller topskat", href: "/topskat", category: "Økonomi" },
   { title: "Brutto/Netto Beregner", description: "Find bruttoløn ud fra ønsket udbetaling", href: "/brutto-netto", category: "Økonomi" },
-  { title: "Boligstøtte", description: "Beregn din boligstøtte til husleje", href: "/boligstoette", category: "Bolig" },
+  { title: "Boligstøtte", description: "Lav et screeningestimat af boligstøtte til husleje", href: "/boligstoette", category: "Bolig" },
   { title: "Bolån", description: "Beräkna månadskostnad för bolån", href: "/bolan", category: "Bolig" },
   { title: "Husleje Budget", description: "Find ud af hvad du har råd til i husleje", href: "/husleje", category: "Bolig" },
   { title: "Boliglån", description: "Beregn ydelse og omkostninger på dit boliglån", href: "/boliglaan", category: "Bolig" },
@@ -131,8 +131,8 @@ export const categories: CategoryData[] = [
     slug: "bolig",
     name: "Bolig",
     title: "Boligberegnere — Boliglån, Husleje & Ejendomsskat",
-    metaDescription: "Gratis boligberegnere til boliglån, husleje-budget, boligstøtte og ejendomsværdiskat. Beregn hvad din bolig koster dig.",
-    description: "Find ud af hvad din bolig koster dig med vores gratis boligberegnere. Beregn boliglån, husleje-budget, boligstøtte og ejendomsværdiskat — alt opdateret med 2026-regler.",
+     metaDescription: "Gratis boligberegnere til boliglån, husleje-budget, boligstøtte-screening og ejendomsværdiskat. Beregn hvad din bolig koster dig.",
+     description: "Find ud af hvad din bolig koster dig med vores gratis boligberegnere. Beregn boliglån, husleje-budget, lav en screening af boligstøtte og ejendomsværdiskat — alt opdateret med 2026-regler.",
     keywords: ["boligberegner", "boliglån beregner", "husleje beregner", "boligstøtte beregner", "ejendomsværdiskat beregner", "boligudgifter"],
     faqItems: [
       {
@@ -140,8 +140,8 @@ export const categories: CategoryData[] = [
         answer: "Brug vores husleje-budgetberegner til at se hvad du har råd til, boliglån-beregneren til at se månedlig ydelse, og ejendomsværdiskat-beregneren til at beregne årlig skat på din bolig.",
       },
       {
-        question: "Kan jeg få boligstøtte?",
-        answer: "Brug vores boligstøtteberegner til at se om du er berettiget. Boligstøtte afhænger af din husleje, indkomst, formue og boligens størrelse. Beregneren bruger 2026-satserne.",
+         question: "Hvordan kan jeg screen boligstøtte?",
+         answer: "Brug vores boligstøtte-screening til at se standardmaksimum for 2026 og formuegrænser. Værktøjet er vejledende; Udbetaling Danmark afgør den endelige ret.",
       },
       {
         question: "Hvad koster et boliglån?",

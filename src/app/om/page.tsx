@@ -1,7 +1,7 @@
-import type { Metadata } from "next";
-import Link from "next/link";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { getCurrentDomainConfig, getLocale } from "@/lib/get-locale";
+import type { Metadata } from "next";
+import Link from "next/link";
 
 export async function generateMetadata(): Promise<Metadata> {
   const dc = await getCurrentDomainConfig();
@@ -51,7 +51,7 @@ function DaContent() {
         <ul>
           <li><strong>100% gratis</strong> - ingen premium-funktioner eller skjulte gebyrer</li>
           <li><strong>Uden login</strong> - du behøver ikke oprette en konto</li>
-          <li><strong>Privat</strong> - alle beregninger sker lokalt i din browser</li>
+          <li><strong>Privat</strong> - beregningerne sker lokalt; data sendes kun videre, når du selv deler dem eller åbner et delelink</li>
           <li><strong>Opdateret</strong> - med de nyeste danske satser og regler</li>
         </ul>
 
@@ -84,7 +84,7 @@ function DaContent() {
           <li><Link href="/renteberegner">Renteberegner</Link> - beregn renter og afdrag</li>
           <li><Link href="/opsparing">Opsparingsberegner</Link> - se renters rente-effekt</li>
           <li><Link href="/ejendomsvaerdiskat">Ejendomsværdiskat</Link> - beregn boligskat 2026</li>
-          <li><Link href="/boligstoette">Boligstøtte</Link> - beregn boligstøtte</li>
+          <li><Link href="/boligstoette">Boligstøtte</Link> - lav et screeningestimat</li>
           <li><Link href="/husleje">Huslejebudget</Link> - hvad har du råd til?</li>
         </ul>
 
@@ -109,8 +109,9 @@ function DaContent() {
 
         <h2>Præcision og ansvarsfraskrivelse</h2>
         <p>
-          Vores beregnere giver <strong>gode estimater</strong> baseret på officielle satser og
-          formler. Dine faktiske beløb kan variere afhængigt af din specifikke situation.
+          Vores værktøjer giver <strong>estimater eller screeninger</strong> baseret på
+          officielle satser, formler og dokumenterede signaler. Dine faktiske beløb og
+          ydelser kan variere afhængigt af din specifikke situation.
         </p>
         <p>
           Beregnerne er kun til <strong>informationsformål</strong> og erstatter ikke
@@ -184,7 +185,7 @@ function SeContent() {
         <ul>
           <li><strong>100% gratis</strong> - inga premiumfunktioner eller dolda avgifter</li>
           <li><strong>Utan inloggning</strong> - du behöver inte skapa ett konto</li>
-          <li><strong>Privat</strong> - alla beräkningar sker lokalt i din webbläsare</li>
+          <li><strong>Privat</strong> - beräkningarna sker lokalt; uppgifter skickas vidare endast när du själv delar dem eller öppnar en delelänk</li>
           <li><strong>Uppdaterade</strong> - med de senaste svenska satserna och reglerna</li>
         </ul>
 
@@ -261,7 +262,7 @@ function SeContent() {
           <li>TypeScript för bättre kodkvalitet</li>
           <li>Tailwind CSS för responsiv design</li>
           <li>Integritetsanpassad analys (Plausible — inga personuppgifter, inga cookies)</li>
-          <li>Alla beräkningar sker lokalt i din webbläsare</li>
+          <li>Beräkningar sker lokalt i din webbläsare; uppgifter skickas vidare endast när du väljer att dela dem</li>
         </ul>
       </div>
     </>

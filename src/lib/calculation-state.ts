@@ -8,6 +8,8 @@
  * @since 1.1.0
  */
 
+import { CALCULATION_STATE_HISTORY_KEY } from './calculation-state-privacy';
+
 // Types
 export interface CalculationState {
   type: string;           // Calculator type (e.g., 'loenberegner', 'bmi')
@@ -21,7 +23,10 @@ export interface ShareableLink {
   fullUrl: string;
 }
 
-// Constants
+export interface ShareableLinkOptions {
+  useFragment?: boolean;
+}
+
 const STATE_PARAM = 's';
 const VERSION = '1';
 
@@ -79,13 +84,44 @@ export function decodeCalculationState(encoded: string): CalculationState | null
  */
 export function getStateFromUrl(): CalculationState | null {
   if (typeof window === 'undefined') return null;
-  
-  const params = new URLSearchParams(window.location.search);
-  const encoded = params.get(STATE_PARAM);
-  
+
+  const historyState = window.history.state;
+  if (
+    historyState &&
+    typeof historyState === 'object' &&
+    !Array.isArray(historyState) &&
+    Object.prototype.hasOwnProperty.call(historyState, CALCULATION_STATE_HISTORY_KEY)
+  ) {
+    const storedState = historyState[CALCULATION_STATE_HISTORY_KEY];
+    if (typeof storedState === 'string') {
+      const nextHistoryState = { ...historyState };
+      delete nextHistoryState[CALCULATION_STATE_HISTORY_KEY];
+      window.history.replaceState(nextHistoryState, '', window.location.href);
+      return decodeCalculationState(storedState);
+    }
+  }
+
+  const fragmentParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+  const queryParams = new URLSearchParams(window.location.search);
+  const encoded = fragmentParams.get(STATE_PARAM) ?? queryParams.get(STATE_PARAM);
+
   if (!encoded) return null;
-  
+
   return decodeCalculationState(encoded);
+}
+
+function removeFragmentState(url: URL): void {
+  if (!url.hash) return;
+  const fragmentParams = new URLSearchParams(url.hash.slice(1));
+  if (!fragmentParams.has(STATE_PARAM)) return;
+  const remainingParts = url.hash.slice(1).split('&').filter((part) => {
+    try {
+      return decodeURIComponent(part.split('=', 1)[0]) !== STATE_PARAM;
+    } catch {
+      return true;
+    }
+  });
+  url.hash = remainingParts.length ? `#${remainingParts.join('&')}` : '';
 }
 
 /**
@@ -97,6 +133,7 @@ export function updateUrlWithState(state: CalculationState): string {
   
   const url = new URL(window.location.href);
   url.searchParams.set(STATE_PARAM, encoded);
+  removeFragmentState(url);
   
   // Update URL without reload
   window.history.replaceState({}, '', url.toString());
@@ -107,7 +144,10 @@ export function updateUrlWithState(state: CalculationState): string {
 /**
  * Generate shareable link with calculation state
  */
-export function generateShareableLink(state: CalculationState): ShareableLink {
+export function generateShareableLink(
+  state: CalculationState,
+  options: ShareableLinkOptions = {},
+): ShareableLink {
   const encoded = encodeCalculationState(state);
   
   // Build full URL
@@ -115,9 +155,20 @@ export function generateShareableLink(state: CalculationState): ShareableLink {
     ? `${window.location.origin}${window.location.pathname}`
     : '';
   
-  const fullUrl = `${baseUrl}?${STATE_PARAM}=${encoded}`;
+  const fullUrl = options.useFragment
+    ? `${baseUrl}#${STATE_PARAM}=${encoded}`
+    : `${baseUrl}?${STATE_PARAM}=${encoded}`;
   
   return { fullUrl };
+}
+
+export function clearStateFromUrl(): void {
+  if (typeof window === 'undefined') return;
+
+  const url = new URL(window.location.href);
+  url.searchParams.delete(STATE_PARAM);
+  removeFragmentState(url);
+  window.history.replaceState({}, '', url.toString());
 }
 
 /**
@@ -206,11 +257,7 @@ export function useCalculationState<T extends Record<string, any>>(
     setIsFromUrl(false);
     
     // Clear URL state
-    if (typeof window !== 'undefined') {
-      const url = new URL(window.location.href);
-      url.searchParams.delete(STATE_PARAM);
-      window.history.replaceState({}, '', url.toString());
-    }
+    clearStateFromUrl();
   }, [defaultInputs]);
   
   return {

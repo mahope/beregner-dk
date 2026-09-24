@@ -318,7 +318,7 @@ export default function SU2026GuidePage() {
         <ul>
           <li>Se din aktuelle SU, fribeløb og maksimale SU-lån med <Link href="/su">SU-beregneren</Link>.</li>
           <li>Planlæg afdrag på studiegæld med <Link href="/studielaan">studielånsberegneren</Link>.</li>
-          <li>Undersøg din boligudgift med <Link href="/boligstoette">boligstøtteberegneren</Link>.</li>
+          <li>Undersøg din boligudgift med <Link href="/boligstoette">boligstøtte-screeningen</Link>.</li>
           <li>Se børnetilskud og afhængige ydelser med <Link href="/boernepenge">børnepengeberegneren</Link>.</li>
         </ul>
 
@@ -347,7 +347,7 @@ export default function SU2026GuidePage() {
             <span className="font-medium">Skat 2026: Alt du skal vide →</span>
           </Link>
           <Link href="/blog/boligstoette-2026-nye-regler" className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-            <span className="font-medium">Boligstøtte 2026: Nye regler →</span>
+            <span className="font-medium">Boligstøtte 2026: Maksima, formue og beregning →</span>
           </Link>
         </div>
       </div>

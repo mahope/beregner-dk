@@ -33,7 +33,7 @@ const calculatorDefs: CalculatorDef[] = [
   { href: "/boliglaan", titles: { da: "Boliglån", no: "Boliglån", se: "Bolån" }, descriptions: { da: "Beregn dit boliglån", no: "Beregn boliglånet ditt", se: "Beräkna ditt bolån" } },
   { href: "/renteberegner", titles: { da: "Renteberegner", no: "Rentekalkulator", se: "Räntekalkylator" }, descriptions: { da: "Beregn renter på lån", no: "Beregn renter på lån", se: "Beräkna ränta på lån" } },
   { href: "/husleje", daOnly: true, titles: { da: "Husleje", no: "Husleie", se: "Hyra" }, descriptions: { da: "Beregn rimelig husleje", no: "Beregn rimelig husleie", se: "Beräkna rimlig hyra" } },
-  { href: "/boligstoette", daOnly: true, titles: { da: "Boligstøtte", no: "Bostøtte", se: "Bostadsbidrag" }, descriptions: { da: "Beregn din boligstøtte", no: "Beregn bostøtten din", se: "Beräkna ditt bostadsbidrag" } },
+  { href: "/boligstoette", daOnly: true, titles: { da: "Boligstøtte", no: "Bostøtte", se: "Bostadsbidrag" }, descriptions: { da: "Lav et screeningestimat af boligstøtte", no: "Beregn bostøtten din", se: "Beräkna ditt bostadsbidrag" } },
   { href: "/laaneberegner", titles: { da: "Låneberegner", no: "Lånekalkulator", se: "Lånekalkylator" }, descriptions: { da: "Beregn dit lån", no: "Beregn lånet ditt", se: "Beräkna ditt lån" } },
   { href: "/opsparing", titles: { da: "Opsparing", no: "Sparing", se: "Sparande" }, descriptions: { da: "Renters rente beregner", no: "Rentes rente kalkulator", se: "Ränta-på-ränta kalkylator" } },
   { href: "/budget", titles: { da: "Rådighedsbeløb", no: "Rådighetsbeløp", se: "Hushållsbudget" }, descriptions: { da: "Beregn dit rådighedsbeløb", no: "Beregn disponibelt beløp", se: "Räkna ut kvar att leva på" } },
