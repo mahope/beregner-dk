@@ -44,6 +44,32 @@ describe("getPageData", () => {
     }
   });
 
+  test.each([
+    {
+      locale: "da" as const,
+      title: "Procentberegner – beregn 10 procent af et tal",
+      intent: "10 procent af",
+      answer: "10 procent af 250 er 25",
+    },
+    {
+      locale: "se" as const,
+      title: "Procenträknare – beräkna 10 procent av ett tal",
+      intent: "10 procent av",
+      answer: "10 procent av 250 är 25",
+    },
+  ])("has answer-first percentage metadata for $locale", ({ locale, title, intent, answer }) => {
+    const data = getPageData("procent", locale)!;
+
+    expect(data.metaTitle).toBe(title);
+    expect(data.metaTitle.length).toBeLessThanOrEqual(60);
+    expect(data.description).toContain(answer);
+    expect(data.metaDescription).toContain(answer);
+    expect(data.metaDescription.length).toBeLessThanOrEqual(160);
+    expect(data.ogTitle).toBe(title);
+    expect(data.ogDescription).toContain(answer);
+    expect(data.schemaDescription).toContain(intent);
+  });
+
   test("returns undefined for DA-only slug on SE", () => {
     const data = getPageData("loen-efter-skat", "se");
     expect(data).toBeUndefined();
