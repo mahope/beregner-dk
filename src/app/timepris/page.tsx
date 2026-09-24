@@ -7,6 +7,7 @@ import RelatedCalculators from "@/components/RelatedCalculators";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
+import { SelvstaendigAffiliate } from "@/components/AffiliateBox";
 
 export async function generateMetadata() {
   return generatePageMetadata("timepris");
@@ -41,6 +42,7 @@ export default async function TimeprisPage() {
       {/* Calculator */}
       <div className="bg-white rounded-2xl shadow-sm p-6 md:p-8 mb-8">
         <TimeprisBeregner />
+        <SelvstaendigAffiliate className="mt-8" />
       </div>
 
       {/* Informativ tekst - SEO */}

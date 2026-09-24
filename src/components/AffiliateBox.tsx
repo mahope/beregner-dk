@@ -3,7 +3,7 @@
 import { trackAffiliateClick } from "@/lib/analytics";
 import { useLocale } from "@/components/LocaleProvider";
 import type { LucideIcon } from "lucide-react";
-import { Car, Landmark, ShieldCheck, TrendingUp } from "lucide-react";
+import { Briefcase, Car, Landmark, ScrollText, ShieldCheck } from "lucide-react";
 
 interface AffiliateLink {
   name: string;
@@ -97,103 +97,83 @@ export function AffiliateBox({ title, subtitle, icon: Icon, links, className = "
 }
 
 // Pre-konfigurerede affiliate data
+//
+// Kun programmer Mahope er godkendt til hos Partner-ads (partnerid 42553).
+// uid=minberegner gør klik og salg synlige pr. site i Partner-ads' statistik.
+// Tilføj ALDRIG links med en hjemmelavet ?ref= — de giver ingen kommission.
 
-export const boliglaanAffiliates: AffiliateLink[] = [
+const PARTNER_ADS_ID = "42553";
+
+/** Partner-ads tracking-link, evt. som deeplink til en underside hos annoncøren. */
+export function partnerAdsLink(bannerId: string, deeplink?: string): string {
+  const base = `https://www.partner-ads.com/dk/klikbanner.php?partnerid=${PARTNER_ADS_ID}&bannerid=${bannerId}&uid=minberegner`;
+  return deeplink ? `${base}&htmlurl=${encodeURIComponent(deeplink)}` : base;
+}
+
+const COVER_BILFORSIKRING = "110013"; // Cover Forsikring (11253), 275 kr./lead
+const FINDFORSIKRING = "60068"; // Findforsikring.dk (4935), 60 kr./lead
+const DINERO = "50128"; // Dinero Regnskab (5513), 50 kr./lead
+const JURA_DOCS = "99220"; // Jura-Docs (10074), 35 %
+const DOKUMENT_24 = "71629"; // Dokument 24 (7464), 25 %
+
+export const boligforsikringAffiliates: AffiliateLink[] = [
   {
-    name: "Mybanker",
-    description: "Sammenlign boliglån fra alle danske banker - find den laveste rente",
-    url: "https://www.mybanker.dk/boliglaan/?ref=minberegner",
-    cta: "Sammenlign",
-    highlight: true,
-  },
-  {
-    name: "Nordea",
-    description: "Få et uforpligtende lånetilbud på 2 minutter",
-    url: "https://www.nordea.dk/privat/lan/boliglan/?ref=minberegner",
+    name: "Findforsikring.dk",
+    description: "Få 3 gratis tilbud på hus- og indboforsikring, når du køber bolig",
+    url: partnerAdsLink(FINDFORSIKRING),
     cta: "Få tilbud",
-  },
-  {
-    name: "Totalkredit",
-    description: "Danmarks største realkreditinstitut - lav bidragssats",
-    url: "https://www.totalkredit.dk/?ref=minberegner",
-    cta: "Se renter",
-  },
-  {
-    name: "Realkredit Danmark",
-    description: "Fleksible låneløsninger med god rådgivning",
-    url: "https://www.rd.dk/?ref=minberegner",
-    cta: "Beregn lån",
-  },
-];
-
-export const opsparingAffiliates: AffiliateLink[] = [
-  {
-    name: "Nordnet",
-    description: "Investér i aktier og fonde fra 29 kr/måned",
-    url: "https://www.nordnet.dk/?ref=minberegner",
-    cta: "Opret konto",
     highlight: true,
-  },
-  {
-    name: "Saxo Bank",
-    description: "Danmarks billigste kurtage på aktiehandel",
-    url: "https://www.saxobank.dk/?ref=minberegner",
-    cta: "Kom i gang",
-  },
-  {
-    name: "Lunar",
-    description: "Mobilbank med højrentekonto - nem oprettelse",
-    url: "https://www.lunar.app/?ref=minberegner",
-    cta: "Åbn konto",
   },
 ];
 
 export const forsikringAffiliates: AffiliateLink[] = [
   {
-    name: "Samlino",
-    description: "Sammenlign forsikringer fra 20+ selskaber på 2 minutter",
-    url: "https://www.samlino.dk/?ref=minberegner",
-    cta: "Sammenlign",
-    highlight: true,
-  },
-  {
-    name: "Forsikringsguiden",
-    description: "Find den billigste forsikring til dine behov",
-    url: "https://www.forsikringsguiden.dk/?ref=minberegner",
-    cta: "Tjek priser",
-  },
-  {
-    name: "Topdanmark",
-    description: "En af Danmarks største forsikringsselskaber",
-    url: "https://www.topdanmark.dk/?ref=minberegner",
+    name: "Findforsikring.dk",
+    description: "Få 3 gratis tilbud på dine forsikringer og se, hvor meget du kan spare",
+    url: partnerAdsLink(FINDFORSIKRING),
     cta: "Få tilbud",
+    highlight: true,
   },
 ];
 
 export const bilforsikringAffiliates: AffiliateLink[] = [
   {
-    name: "Samlino Bilforsikring",
-    description: "Sammenlign bilforsikringer fra 15+ selskaber - spar op til 3.000 kr/år",
-    url: "https://www.samlino.dk/bilforsikring/?ref=minberegner",
-    cta: "Sammenlign",
+    name: "Cover Bilforsikring",
+    description: "Skift bilforsikring online på 2 minutter (i samarbejde med Aros Forsikring)",
+    url: partnerAdsLink(COVER_BILFORSIKRING),
+    cta: "Se pris",
     highlight: true,
   },
   {
-    name: "Alm. Brand",
-    description: "Bilforsikring med vejhjælp og fri autoreparatør",
-    url: "https://www.almbrand.dk/forsikringer/bilforsikring/?ref=minberegner",
-    cta: "Beregn pris",
-  },
-  {
-    name: "Topdanmark Bil",
-    description: "Få tilbud på 2 min - inkl. bonus fra andre selskaber",
-    url: "https://www.topdanmark.dk/forsikring/bilforsikring/?ref=minberegner",
+    name: "Findforsikring.dk",
+    description: "Få 3 gratis tilbud på din bilforsikring",
+    url: partnerAdsLink(FINDFORSIKRING),
     cta: "Få tilbud",
   },
+];
+
+export const selvstaendigAffiliates: AffiliateLink[] = [
   {
-    name: "Tryg Bilforsikring",
-    description: "Danmarks mest valgte bilforsikring - hurtig skadebehandling",
-    url: "https://www.tryg.dk/privat/forsikringer/bilforsikring/?ref=minberegner",
+    name: "Dinero Regnskab",
+    description: "Gratis regnskabsprogram til iværksættere og små virksomheder — moms, fakturaer og bilag",
+    url: partnerAdsLink(DINERO),
+    cta: "Prøv gratis",
+    highlight: true,
+  },
+];
+
+export const testamenteAffiliates: AffiliateLink[] = [
+  {
+    name: "Jura-Docs",
+    description: "Testamente, ægtepagt og fremtidsfuldmagt online — leveret på mail på få minutter",
+    url: partnerAdsLink(JURA_DOCS),
+    cta: "Se dokumenter",
+    highlight: true,
+  },
+  {
+    name: "Dokument 24",
+    description: "Lav testamente eller ægtepagt online med gratis juridisk vejledning",
+    url: partnerAdsLink(DOKUMENT_24),
     cta: "Se priser",
   },
 ];
@@ -203,22 +183,10 @@ export const bilforsikringAffiliates: AffiliateLink[] = [
 export function BoliglaanAffiliate({ className = "" }: { className?: string }) {
   return (
     <AffiliateBox
-      title="Sammenlign boliglån"
+      title="Køber du bolig?"
       icon={Landmark}
-      subtitle="Find det bedste lån til din bolig"
-      links={boliglaanAffiliates}
-      className={className}
-    />
-  );
-}
-
-export function OpsparingAffiliate({ className = "" }: { className?: string }) {
-  return (
-    <AffiliateBox
-      title="Start din opsparing"
-      icon={TrendingUp}
-      subtitle="Investeringsplatforme til danskere"
-      links={opsparingAffiliates}
+      subtitle="Husk forsikringen, når du overtager boligen"
+      links={boligforsikringAffiliates}
       className={className}
     />
   );
@@ -241,8 +209,32 @@ export function BilforsikringAffiliate({ className = "" }: { className?: string 
     <AffiliateBox
       title="Sammenlign bilforsikringer"
       icon={Car}
-      subtitle="Spar op til 50% på din bilforsikring"
+      subtitle="Bilforsikringen er ofte en af bilens største faste udgifter"
       links={bilforsikringAffiliates}
+      className={className}
+    />
+  );
+}
+
+export function SelvstaendigAffiliate({ className = "" }: { className?: string }) {
+  return (
+    <AffiliateBox
+      title="Selvstændig?"
+      icon={Briefcase}
+      subtitle="Hold styr på moms og fakturaer"
+      links={selvstaendigAffiliates}
+      className={className}
+    />
+  );
+}
+
+export function TestamenteAffiliate({ className = "" }: { className?: string }) {
+  return (
+    <AffiliateBox
+      title="Bestem selv, hvem der arver"
+      icon={ScrollText}
+      subtitle="Et testamente kan ændre fordelingen og dermed afgiften"
+      links={testamenteAffiliates}
       className={className}
     />
   );

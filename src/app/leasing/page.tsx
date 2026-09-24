@@ -7,6 +7,7 @@ import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import RelatedCalculators from "@/components/RelatedCalculators";
 import Sidebar from "@/components/Sidebar";
+import { BilforsikringAffiliate } from "@/components/AffiliateBox";
 
 export async function generateMetadata() {
   return generatePageMetadata("leasing");
@@ -35,6 +36,8 @@ export default async function LeasingPage() {
         </p>
 
         <LeasingBeregner />
+
+        <BilforsikringAffiliate className="mt-8" />
 
         {locale === "da" && (
         <div className="mt-12 prose dark:prose-invert max-w-none">

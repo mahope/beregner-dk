@@ -10,6 +10,7 @@ import {
 import Breadcrumbs from "@/components/Breadcrumbs";
 import RelatedCalculators from "@/components/RelatedCalculators";
 import Sidebar from "@/components/Sidebar";
+import { SelvstaendigAffiliate } from "@/components/AffiliateBox";
 
 export async function generateMetadata() {
   return generatePageMetadata("moms");
@@ -45,6 +46,7 @@ export default async function MomsPage() {
       {/* Calculator */}
       <div className="bg-white rounded-2xl shadow-sm p-6 md:p-8 mb-8">
         <MomsBeregner />
+        <SelvstaendigAffiliate className="mt-8" />
       </div>
 
       {/* Informativ tekst - SEO */}
