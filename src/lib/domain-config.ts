@@ -67,7 +67,7 @@ const domainConfigs: Record<string, DomainConfig> = {
  */
 export function getDomainConfig(hostname: string): DomainConfig {
   // Strip port number
-  const domain = hostname.split(":")[0];
+  const domain = hostname.split(":")[0].replace(/^www\./, "");
   return domainConfigs[domain] || domainConfigs["localhost"];
 }
 

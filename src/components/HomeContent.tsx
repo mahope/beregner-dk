@@ -74,7 +74,7 @@ function HomeContentDA() {
 
       <h2>Sundhed og krop</h2>
       <ul>
-        <li><Link href="/bmi"><strong>BMI beregner</strong></Link> — beregn dit Body Mass Index</li>
+        <li><Link href="/bmi"><strong>BMI beregner for voksne</strong></Link> — beregn BMI ud fra vægt og højde</li>
         <li><Link href="/kalorier"><strong>Kalorieberegner</strong></Link> — se dit daglige kaloriebehov</li>
         <li><Link href="/vaegttab"><strong>Vægttab</strong></Link> — beregn kalorieunderskud for vægttab</li>
       </ul>
@@ -139,7 +139,7 @@ function HomeContentNO({ siteName }: { siteName: string }) {
 
       <h2>Helse og kropp</h2>
       <ul>
-        <li><Link href="/bmi"><strong>BMI-kalkulator</strong></Link> — beregn din Body Mass Index</li>
+        <li><Link href="/bmi"><strong>BMI-kalkulator for voksne</strong></Link> — beregn BMI ut fra vekt og høyde</li>
         <li><Link href="/kalorier"><strong>Kalorikalkulator</strong></Link> — se ditt daglige kaloriforbruk</li>
         <li><Link href="/vaegttab"><strong>Vekttap</strong></Link> — beregn kaloriunderskudd</li>
       </ul>
@@ -190,7 +190,7 @@ function HomeContentSE({ siteName }: { siteName: string }) {
 
       <h2>Hälsa och kropp</h2>
       <ul>
-        <li><Link href="/bmi"><strong>BMI-beräknare</strong></Link> — beräkna ditt Body Mass Index</li>
+        <li><Link href="/bmi"><strong>BMI-kalkylator för vuxna</strong></Link> — beräkna BMI utifrån vikt och längd</li>
         <li><Link href="/kalorier"><strong>Kaloriberäknare</strong></Link> — se ditt dagliga kaloribehov</li>
         <li><Link href="/vaegttab"><strong>Viktnedgång</strong></Link> — beräkna kaloriunderskott</li>
       </ul>

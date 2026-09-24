@@ -18,21 +18,21 @@ const quickSuggestionsMap = {
   da: [
     "Hvad får jeg udbetalt i løn?",
     "Beregn moms af 5000 kr",
-    "Hvad er mit BMI?",
+    "Hvad er mit BMI for voksne?",
     "Hvad koster mit boliglån?",
     "Hvor meget kan jeg få i dagpenge?",
   ],
   se: [
     "Vad får jag i lön efter skatt?",
     "Beräkna moms på 5000 kr",
-    "Vad är mitt BMI?",
+    "Vad är mitt BMI för vuxna?",
     "Vad kostar mitt bolån?",
     "Hur mycket kan jag spara?",
   ],
   no: [
     "Hva får jeg utbetalt i lønn?",
     "Beregn moms av 5000 kr",
-    "Hva er min BMI?",
+    "Hva er min BMI for voksne?",
     "Hva koster boliglånet mitt?",
     "Hvor mye kan jeg spare?",
   ],
@@ -42,7 +42,7 @@ const keywordsMap: Record<string, Record<string, string[]>> = {
   da: {
     "/loen-efter-skat": ["løn", "skat", "netto", "brutto", "udbetalt", "indkomst", "skattetryk", "am-bidrag", "hvad får jeg udbetalt", "månedsløn"],
     "/moms": ["moms", "25%", "ex moms", "inkl moms", "momsfri", "moms af", "hvad er momsen"],
-    "/bmi": ["bmi", "vægt", "overvægt", "body mass", "højde", "normalvægt"],
+    "/bmi": ["bmi", "bmi for voksne", "voksne bmi", "vægt", "overvægt", "body mass", "højde", "normalvægt"],
     "/boliglaan": ["boliglån", "huslån", "ydelse", "rente", "afdrag", "bolig", "realkreditlån"],
     "/laaneberegner": ["lån", "låne", "afdrag", "ydelse", "tilbagebetaling"],
     "/dagpenge": ["dagpenge", "ledig", "arbejdsløs", "a-kasse"],
