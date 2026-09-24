@@ -1,6 +1,6 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: O2 I GANG — BMI-søgeintention og voksenværktøj.
+STATUS: NÆSTE ITERATION — O2 er landet; tag O3 (SU).
 
 ## Fase 3 — trafik-drevet
 
@@ -135,7 +135,7 @@ STATUS: O2 I GANG — BMI-søgeintention og voksenværktøj.
   `/barselsdagpenge` baseline 191 besøgende/28d 2026-09-23.
 - **Kilde:** https://www.borger.dk/familie-og-boern/barsel-oversigt/barsel-loenmodtagere-ny-orlovsmodel
 
-#### 2. [I GANG] O2 — Ret BMI-søgeintentionen og adskil voksenværktøjet fra børneindhold
+#### 2. [x] O2 — Ret BMI-søgeintentionen og adskil voksenværktøjet fra børneindhold — FÆRDIG 2026-09-24
 
 - **Datagrund:** 979 besøgende/28d (-19 %), 849 indgangssider, bounce 3 %; alder
   indgår ikke i voksnes BMI-formel, men børneartiklen sender brugeren til samme værktøj.
@@ -154,41 +154,45 @@ STATUS: O2 I GANG — BMI-søgeintention og voksenværktøj.
      BMI-beregning, mens percentiltabellerne står som artiklens egen kildebaserede substans.
   4. Gamle BMI-dele-URL'er indlæses stadig uden fejl.
   5. Relevante tests og fuld gate er grønne.
-  - **Research 2026-09-24:** Sundhed.dk bekræfter BMI = vægt (kg) / højde(m)² og
-    voksenkategorierne; WHO oplyser, at BMI for voksne er 18+ og at børns BMI skal
-    være alders- og kønsspecifikt. De kilder, jeg kunne verificere, dokumenterer
-    ikke WHR's tre risikobånd, så UI'en viser kun den rå ratio og en
-    kønsspecifik referencevejledning med tydelig ikke-diagnose-grænse. Se
-    https://www.sundhed.dk/borger/patienthaandbogen/hormoner-og-stofskifte/undersoegelser/bmi-kropsmasseindeks/
-    og https://www.who.int/news-room/fact-sheets/detail/obesity-and-overweight.
-  - **Beslutning/implementering:** Alder er fjernet fra BMI-input og ny delestate,
-    men gamle URL-states med `alder` indlæses fortsat. BMI er eksplicit for voksne
-    i komponent, metadata, navigation, hjemmeside, kategori, footer, embed og
-    assistent. Børneartiklen linker kun til det voksne værktøj og siger, at
-    percentiltabellerne er børnespecifikke; 30 kg/100 cm er reelt inputminimum,
-    ikke voksengrænser. WHR-bånd er fjernet, fordi de ikke kunne dokumenteres med en
-    verificeret primærkilde; værktøjet viser ratioen og forklarer, at køn kun
-    påvirker referencevisningen.
-  - **Verifikation 2026-09-24:** `npm run build` grøn (137 sider; 7 kendte
-    CSS-optimeringsadvarsler), `npm run test` grøn (394/394, 44 filer),
-    `npm run lint` grøn (339 filer), `npm audit --audit-level=high` 0
-    sårbarheder. Lokal standalone SSR-kontrol: health `status: ok`, voksenvarsel,
-    manglende alderslabel, barnes CTA, WHR uden ubekræftede bånd og
-    korrigeret artikelindhold PASS. React Doctor: 83/100 med én
-    kompleksitetsadvarsel i `BMIBeregner.tsx:255` (ingen ny reaktiv fejl; ikke
-    suppression).
-  - **Review-notat:** BMI-sideens egen `CalculatorSchema` får nu domænets
-    `siteName`/valuta, og `www.*`-varianter normaliseres i domain-config med
-    locale-, valuta- og base-URL-tests. Den bredere locale-/canonicale
-    JSON-LD-fejl på kategori- og DA-only-ruter er O4-gæld og udvides ikke i O2.
-    BMI-enhedsrundning er et eksisterende vedligeholdelsesemne, ikke en
-    O2-regression, og får en separat, testet opgave.
-  - **MÅL:** `/bmi` baseline 979 besøgende/28d 2026-09-23;
-    `/blog/bmi-for-boern-saadan-tjekker-du` baseline ukendt i snapshot — udfyld fra næste
-    trafikdata før bloggen ændres.
-  - **Baseline-undtagelse:** Bloggen mangler et baseline-tal i snapshot. Denne
-    ændring er en korrektions- og søgeintentionsreparation, ikke et trafik-
-    eksperiment; næste trafiksnapshot etablerer baseline, før effekten vurderes.
+- **Research 2026-09-24:** Sundhed.dk bekræfter BMI = vægt (kg) / højde(m)² og
+  voksenkategorierne; WHO oplyser, at BMI for voksne er 18+ og at børns BMI skal være
+  alders- og kønsspecifikt. WHO's BMI-for-age-spiller blev hentet direkte fra de to
+  officielle drenge-/pige-XLSX-filer; tabellen er derfor kun beholdt for 6-16 år og
+  afgerdet til én decimal. Se Sundhed.dk ovenfor, WHO's BMI-for-age-side og
+  https://www.who.int/news-room/fact-sheets/detail/obesity-and-overweight.
+- **Beslutning/implementering:** Alder er fjernet fra BMI-input og nye delestates,
+  men gamle URL-states indlæses. Et legacy `alder`-felt under 18 giver efter hydration
+  en eksplicit barnestate-advarsel og intet voksent BMI-resultat før eller efter hydration. BMI er eksplicit
+  for voksne i komponent, metadata, navigation, hjemmeside, kategori, footer, embed og
+  assistent. Nye delelinks gemmer enhed; gamle imperiale links kan infereres sikkert ud fra
+  værdierne. Enhedskonvertering er afgrænset til 30-300 kg/100-250 cm og testet i begge
+  retninger. WHR er blot et råt, kønsuafhængigt forholdtal; kønvalget og ubekræftede
+  risikobånd er fjernet. BMI/WHR formateres med locale-decimal.
+- **Børneartikel:** Den skelner nu eksplicit mellem voksenværktøjet og børns BMI-for-age.
+  ISO BMI er korrekt afgrænset fra BMI-for-age/percentil, metadata-formlen er rettet til
+  `75 / 1,75² = 24,5`, eksemplet matcher WHO-tabellen, og kilder/linket er flyttet til
+  familierelaterede værktøjer i stedet for kropsfedt/vægttab, der ikke er børnesikre.
+- **Review og rettelser 2026-09-24:** Fresh-context reviews fandt og fik rettet manglende
+  imperial enhed, barnestate, SSR-flash, WHO-tabelafvigelse, metadataformel, enhedsgrænser
+  og usikre børnelinks. Sidste grænsefund blev lukket med eksplicit imperial clamping og
+  blur-regression; der er ingen åbne P0-P2-fund fra O2-reviewene.
+- **Verifikation 2026-09-24:** `npm run build` grøn (137 sider; 7 kendte
+  CSS-optimeringsadvarsler), `npm run test` grøn (400/400, 44 filer), `npm run lint`
+  grøn (339 filer), `npm audit --audit-level=high` 0 sårbarheder. Lokal standalone
+  SSR-kontrol: health `status: ok`, voksenvarsel, intet BMI-resultat i SSR for voksne-
+  eller barnestate, WHO-tabel og korrigeret ISO-tekst PASS. React Doctor 84/100 med den
+  kendte kompleksitetsadvarsel og en tydelig `no-initialize-state`-advarsel; sidstnævnte
+  er bevidst valgt for at server-rendere intet barnesystemat voksentresultat før URL-state
+  er kontrolleret. Ingen suppressioner.
+- **Landet:** commits `cccb5e1` + `f941976`, merge `e3f3dcf` den 2026-09-24 04:03 CEST.
+- **Afgrænsning:** BMI-sideens egen `CalculatorSchema` får domænets `siteName`/valuta,
+  og `www.*` normaliseres i domain-config. Den bredere locale-/canonicale middleware-
+  fejl er O4-gæld; public `/api/v1` er bevidst uændret, fordi kontraten er frosset.
+- **MÅL:** `/bmi` baseline 979 besøgende/28d 2026-09-23;
+  `/blog/bmi-for-boern-saadan-tjekker-du` baseline ukendt i snapshot — udfyld fra næste
+  trafikdata før effekten vurderes.
+- **Baseline-undtagelse:** Bloggen manglede baseline i snapshot. Denne iteration er en
+  korrektions- og søgeintentionsreparation; næste trafiksnapshot etablerer baseline.
 
 #### 3. [ ] O3 — Diagnosticér og ret SU-faldet samt konsolidér 2026-kilder
 
@@ -288,15 +292,40 @@ STATUS: O2 I GANG — BMI-søgeintention og voksenværktøj.
 - **Placering:** Lav trafikprioritet; udfør efter O2-O5 medmindre LHCI begynder at
   blokere flere PR'er.
 
-#### 7. [ ] M2 — Bevar BMI ved skift mellem metrisk og imperial enhed
+#### 7. [ ] M2 — Bevar BMI ved gentaget skift mellem metrisk og imperial enhed
 
-- **Datagrund:** Eksisterende BMI-konvertering ruller visningsværdier til én decimal,
-  så et enhedsskift kan ændre BMI'en med 0,1. O2's BMI-grænse og locale-krav er
-  dækket; denne separate vedligeholdelsesopgave skal først testes, før den ændres.
-- **Acceptkriterier:** Måleenhedsskift bevarer BMI'en inden for dokumenteret
-  displaypræcision, og der findes en test for kg/cm → lbs/inches → kg/cm.
+- **Datagrund:** O2 gemmer nu enhed i delelinks, infererer gamle imperiale links og
+  afgrænser konverteringen til to decimaler. En fuld kg/cm → lbs/inches → kg/cm
+  roundtrip er endnu ikke målt, så gentagne skift kan stadig ændre BMI'en en smule.
+- **Acceptkriterier:**
+  1. En test måler BMI før og efter mindst tre skift og dokumenterer maksimal afvigelse.
+  2. Måleenhedsskift bevarer BMI'en inden for den dokumenterede displaypræcision.
+  3. Delelink, enhedsværdier og `InputField`-validering er grønne efter roundtrip.
 - **MÅL:** `/bmi` baseline 979 besøgende/28d 2026-09-23; effektmåling først efter
   14 dage hvis der laves en separat produktændring.
+
+#### 8. [ ] M3 — Route børne-BMI-søgninger til guiden
+
+- **Datagrund:** O2 har adskilt sider og metadata, men `SearchBar` og
+  `BeregnerAssistent` søger fortsat kun i beregnere. "BMI for mit barn" kan derfor matche
+  `/bmi`, selv om værktøjet kun er for voksne.
+- **Scope:** Tilføj den danske BMI-for-børn-guide som søgeindhold på forsiden, lad
+  børneudtryk vælge guide før voksenværktøjet, og behold voksenquick-suggestionen.
+  Tilføj komponenttests; ændr ikke Plausible-events eller -metrikker.
+- **Forventet effekt:** Forhindrer en forkert voksen-handling og giver den relevante
+  næste handling; effekt på organisk trafik måles ikke isoleret.
+- **Acceptkriterier:**
+  1. Søgning på "BMI for mit barn" viser guiden og ikke voksenværktøjet som bedste match.
+  2. Søgning på "BMI for voksne" viser fortsat `/bmi`.
+  3. Tastaturvalg, tomme resultater og eksisterende locale-adfærd er grønne.
+- **MÅL:** `/bmi` baseline 979 besøgende/28d 2026-09-23; bloggens baseline er ukendt
+  og skal udfyldes fra næste snapshot før en reel effektvurdering.
+
+### ❓ Til Mads
+
+- Public `/api/v1/bmi` er bevidst uændret, fordi `/api/v1` er en frosset ekstern
+  kontrakt. Den returner fortsat rå BMI med voksengrænser uden alder. En eventuel
+  dokumentations- eller adfærdsændring kræver en eksplicit beslutning.
 
 ### Dokumenterede kandidatere efter top-5
 
@@ -333,6 +362,7 @@ STATUS: O2 I GANG — BMI-søgeintention og voksenværktøj.
 - Skat, fradrag for renter: https://skat.dk/borger/fradrag/fradrag-for-renter
 - SU: https://www.su.dk
 - Sundhed.dk BMI: https://www.sundhed.dk/borger/patienthaandbogen/hormoner-og-stofskifte/undersoegelser/bmi-kropsmasseindeks/
+- WHO BMI-for-age 5-19 år: https://www.who.int/tools/growth-reference-data-for-5to19-years/indicators/bmi-for-age
 - I FORM, voksne BMI og køn/alder: https://iform.dk/vaegttab/bmi-beregner
 - Hjemmeland, kvadratmeter til materialer: https://hjemmeland.dk/beregner/kvadratmeter-m2-beregner/
 - Live-indhold stikprøver: minberegner.dk `/bmi`, `/su`, `/kvadratmeter`,
@@ -639,3 +669,4 @@ landmark=lån, piggybank=opsparing osv.).
 - **Batch 07:30 24. aug.** inkluderede: etape 5 (komponent-ikoner), etape 8 (opengraph), biloekonomi, leasing, maanedsbudget, boernepenge blog, rygestop, rabat, proteinbehov, ugenummer, befordringsfradrag, alkoholenheder, flyttebudget, boligsalg, satser-opdatering, boligsalg blog.
   - DEPLOY OK 2026-09-23: `/alkoholenheder`, `/flyttebudget`, `/boligsalg` og `/blog/boligsalg-2026-guide-til-omkostninger-og-provenu` serverede det forventede live-indhold; `/api/health` svarede `status: ok`.
 - **VERIFICÉR DEPLOY:** barsel-2026-artikel → beregner, fælles 2026-konfiguration og backlink `792d0c0` 2026-09-23 23:52 CEST.
+- **VERIFICÉR DEPLOY:** O2 BMI-voksenværktøj, legacy/ imperial delestates, WHO-børnetabel og BMI/artikel-links `e3f3dcf` 2026-09-24 04:03 CEST.
