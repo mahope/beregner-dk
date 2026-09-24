@@ -2,7 +2,11 @@
   "site": {
     "name": "MinBeregner.dk",
     "tagline": "Gratis Online Beregnere",
-    "description": "33+ gratis beregnere til økonomi, bolig, skat, sundhed og hverdag."
+    "description": "33+ gratis beregnere til økonomi, bolig, skat, sundhed og hverdag.",
+    "ogTagline": "Gratis online beregnere til danskere",
+    "ogFree": "100% gratis",
+    "ogPrivate": "Privat & sikkert",
+    "ogRates": "2026-satser"
   },
   "nav": {
     "home": "Forside",
@@ -65,6 +69,7 @@
     "assistantTryLabel": "Prøv fx:",
     "assistantBestMatch": "Bedste match:",
     "assistantRelevant": "relevante beregnere:",
+    "searchPlaceholder": "Søg blandt alle beregnere...",
     "validationRequired": "Indtast venligst en værdi",
     "validationInvalidNumber": "Indtast venligst et gyldigt tal",
     "validationNegative": "Værdien kan ikke være negativ",

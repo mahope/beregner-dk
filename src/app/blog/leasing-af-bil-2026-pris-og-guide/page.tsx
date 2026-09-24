@@ -26,6 +26,8 @@ export async function generateMetadata(): Promise<Metadata> {
       description: "Komplet guide til leasing i 2026: Sammenlign med billån, se typiske priser, og find ud af om leasing er billigst for dig.",
       url: `${baseUrl}/blog/leasing-af-bil-2026-pris-og-guide`,
       type: "article",
+      siteName: dc.siteName,
+      locale: dc.ogLocale,
     },
     alternates: {
       canonical: `${baseUrl}/blog/leasing-af-bil-2026-pris-og-guide`,

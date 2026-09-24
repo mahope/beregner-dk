@@ -18,6 +18,8 @@ export async function generateMetadata(): Promise<Metadata> {
       description: desc,
       url: `${dc.baseUrl}/privatlivspolitik`,
       type: "website",
+      siteName: dc.siteName,
+      locale: dc.ogLocale,
     },
     alternates: {
       canonical: `${dc.baseUrl}/privatlivspolitik`,

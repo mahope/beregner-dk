@@ -25,6 +25,8 @@ export async function generateMetadata(): Promise<Metadata> {
       description: "Beregn din faktiske timeløn inkl. pension, frokost, ferie og andre goder.",
       url: `${baseUrl}/blog/saadan-beregner-du-din-reelle-timeloen`,
       type: "article",
+      siteName: dc.siteName,
+      locale: dc.ogLocale,
     },
     alternates: {
       canonical: `${baseUrl}/blog/saadan-beregner-du-din-reelle-timeloen`,

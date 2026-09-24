@@ -1,5 +1,6 @@
 import { describe, test, expect } from "vitest";
 import { getPageData, getAvailableSlugs } from "./page-data";
+import { getCalculatorHrefs, isCalculatorAvailable } from "./calculator-list";
 
 describe("getPageData", () => {
   test("returns data for known DA slug", () => {
@@ -105,11 +106,23 @@ describe("getAvailableSlugs", () => {
   });
 
   test("DA-only slugs do not exist on SE/NO", () => {
-    const daOnlySlugs = ["loen-efter-skat", "dagpenge", "su"];
+    const daOnlySlugs = ["loen-efter-skat", "dagpenge", "su", "ugenummer", "flyttebudget"];
     for (const slug of daOnlySlugs) {
       expect(getAvailableSlugs("da")).toContain(slug);
       expect(getAvailableSlugs("se")).not.toContain(slug);
       expect(getAvailableSlugs("no")).not.toContain(slug);
+    }
+  });
+
+  test("live-domain availability matches localized page data", () => {
+    for (const locale of ["da", "se"] as const) {
+      for (const href of getCalculatorHrefs()) {
+        const slug = href.slice(1);
+        expect(
+          isCalculatorAvailable(href, locale),
+          `${locale}/${slug} availability mismatch`
+        ).toBe(Boolean(getPageData(slug, locale)));
+      }
     }
   });
 });

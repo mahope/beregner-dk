@@ -1,6 +1,6 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: NÆSTE ITERATION — O4 (beraknare.se).
+STATUS: NÆSTE ITERATION — O5 (boligstøtte).
 
 ## Fase 3 — trafik-drevet
 
@@ -281,8 +281,11 @@ STATUS: NÆSTE ITERATION — O4 (beraknare.se).
   trafikdata før effekten vurderes.
 - **Kilde:** https://www.su.dk
 
-#### 4. [ ] O4 — Lås beraknare.se's locale, canonicale og svensk opdagelse
+#### 4. [x] FÆRDIG 2026-09-24 — O4 — Lås beraknare.se's locale, canonicale og svensk opdagelse
 
+- **Iteration start:** 2026-09-24 07:45 CEST. Tre tidligere deploynoter er
+  indholdskontrolleret efter 07:30-vinduet; O4's locale-research, implementation og gate
+  fortsætter serielt uden sideløbende opgave.
 - **Datagrund:** 457 besøgende/28d (+161 %), 345 besøgende fra Google, 301 besøgende på fire
   nye/eksisterende top-sider. Live viser danske duplikerede/fallback-sider på det
   svenska domæne og dansk JSON-LD-standardværdier.
@@ -296,6 +299,55 @@ STATUS: NÆSTE ITERATION — O4 (beraknare.se).
   `/nedrakning` → `/nedtaelling` og `/leasingkalkylator` → `/leasing` er research-
   kandidater fra svenske søgeintentioner, ikke eksisterende trafik-URL'er. Tilføj manglende
   interne svenska links. `beregner.no` må ikke få hreflang før domænet er live.
+- **Research 2026-09-24 07:45-08:20:** `npm audit --audit-level=high` er grøn med
+  0 sårbarheder. Katalogen, page-data og den fysiske route-tree har tre forskellige
+  tilgængeligheder: 80 ruter findes, men side/beregner har 78 DA-, 53 SE- og 28 NO-sider.
+  `/ugenummer` og `/flyttebudget` er kun danske trods manglende flag; `/lon-efter-skatt` og
+  `/bolan` er kun svenske. Dansk blog/kategori er skjult fra svensk sitemap/footer, men
+  stadig 200 med dansk indhold. Før implementationen satte middleware de afledte headers
+  på response, ikke som request-header override. 77/80 `CalculatorSchema`-kald bruger
+  hardcoded MinBeregner.dk/DKK, og barnets OG/search-tekst mangler siteName/locale.
+- **Aliasresearch:** De fire svenske kandidater er 404 live, mens deres eksisterende
+  mål/matchende svenska peers allerede bruger samme H1/intent: tidskalkylator,
+  datumkalkylator, nedräkning og leasingkalkylator. De godkendes som domænespecifikke
+  301-aliaser. `/loen-efter-skat` → `/lon-efter-skatt` er **ikke** en global dansk→svensk
+  modelmigrering: på `beraknare.se` sender den danske slug til den svenske skattemodel,
+  mens `/minberegner.dk/loen-efter-skat` forbliver dansk canonical. Aliaset bevarer query.
+- **Beslutning:** En central request-time matrix i middleware bruger
+  `calculator-list.ts` som locale-kilde, markerer de to reelle DA-only-sider og returnerer
+  404 ved DA/SE-mismatch. `/blog` og `/kategori` er DA-only på svensk host. Den eksisterende
+  `getPageData(slug, locale) || ...da`-fallback bevares som interne forsvar, men kan ikke
+  længere nås gennem en live DA/SE-anmodning. Request headers sættes eksplicit; metadata
+  gør canonical/hreflang fail-closed og løn-parret får ægte DA/SE-alternater.
+  `CalculatorSchema` afleder siteName/currency fra URL-host, OG og search får samme
+  domæne-/locale-kontekst, og sitemap/robots får rene, testede byggefunktioner.
+  Next.js' indbyggede trailing-slash-redirect løb før middleware og skabte kæder ved
+  svenske aliaser. `skipTrailingSlashRedirect` og eksplicit 308-normalisering i
+  `getRouteDecision` bevarer slashless canonicale ruter, ét 301-hop for de fem
+  godkendte aliaser og 308-normalisering for API-ruter. 404-rewriten bruger
+  domænets HTTPS-base-URL og videresender request-heads, så svenske 404-sider ikke
+  falder tilbage til localhost eller dansk metadata. FQDN-trailing-dot normaliseres,
+  Domæneopslag bruger own-property lookup, så prototype-værdier ikke kan give 500.
+  Schema-provideren bruger samme normaliserede apex-URL som canonical/domæneconfig, så
+  `www` ikke kan lække en separat provider-URL.
+- **Implementering:** Availability-matrixen er nu centraliseret i
+  `src/lib/calculator-list.ts` + `src/lib/routing.ts`; `ugenummer` og `flyttebudget`
+  er DA-only, `lon-efter-skatt` og `bolan` SE-only, og blog/kategori er DA-only på
+  beraknare.se. Metadata, hreflang, JSON-LD, OG, search, robots og sitemap bruger
+  den aktive host; cookiepolitik, informationssider, kategori og blog- OG har egen
+  canonical/hostdata. `/api/v1`-responsformer er uændrede; mellembuilden har 0
+  kendte sårbarheder.
+- **Review og rettelser 2026-09-24:** To friske reviews fandt og fik rettet en
+  forudgående 308→301-kæde for trailing-slash-aliaser, localhost/fejlvært 404-rewrite,
+  manglende cookiecanonical/OG, child-OG-værdier og 404-header-dækning. Den anden
+  review fandt desuden FQDN-trailing-dot og prototype-hostfejl; begge er nu dækket af
+  tests. Slutreview fandt ingen åbne P1/P2-fund.
+- **Kvalitetsgate 2026-09-24 09:36 CEST:** `npm run build` grøn (137 sider; 7 kendte
+  CSS-optimeringsadvarsler), `npm run test` grøn (484/484 tests, 53 filer), `npm run lint`
+  grøn (352 filer), `npm audit --audit-level=high` 0 sårbarheder. Lokal production-HTTP-
+  matrix passede DA/SE 200/404, alias/trailing-slash, svensk canonical/lang/JSON-LD/OG/
+  search, info-canonicaler, sitemap, robots, API-trailing og edge-host cases. React Doctor
+  scannede 52 filer med 74/100 og ingen rapporterede issues.
 - **Forventet effekt:** Beskytter den dokumenterede +161 % vækst, fjerner dansk self-
   canonical på svensk domæne og forbedrer svensk opdagelse/CTR uden at migrere de
   fire stærkeste URL'er.
@@ -731,6 +783,11 @@ landmark=lån, piggybank=opsparing osv.).
 - DEPLOY OK: billaan-ikoner (etape 6), calculator-list-ikoner (etape 3), footer-ikoner (etape 4) — verificeret 2026-08-23 18:20.
 - **Batch 07:30 24. aug.** inkluderede: etape 5 (komponent-ikoner), etape 8 (opengraph), biloekonomi, leasing, maanedsbudget, boernepenge blog, rygestop, rabat, proteinbehov, ugenummer, befordringsfradrag, alkoholenheder, flyttebudget, boligsalg, satser-opdatering, boligsalg blog.
   - DEPLOY OK 2026-09-23: `/alkoholenheder`, `/flyttebudget`, `/boligsalg` og `/blog/boligsalg-2026-guide-til-omkostninger-og-provenu` serverede det forventede live-indhold; `/api/health` svarede `status: ok`.
-- **VERIFICÉR DEPLOY:** barsel-2026-artikel → beregner, fælles 2026-konfiguration og backlink `792d0c0` 2026-09-23 23:52 CEST.
-- **VERIFICÉR DEPLOY:** O2 BMI-voksenværktøj, legacy/ imperial delestates, WHO-børnetabel og BMI/artikel-links `e3f3dcf` 2026-09-24 04:03 CEST.
-- **VERIFICÉR DEPLOY:** O3 SU-2026-konsolidering, centrale satser/kilder, legacy-delestater, `/su`, SU-guide og `/studielaan` (commit `cc173c5`, merge `191a431`) 2026-09-24 07:11 CEST.
+- **DEPLOY OK 2026-09-24 07:46 CEST:** 07:30-batchen indeholder barsel-2026-artiklen,
+  `/barselsdagpenge`, BMI-voksenværktøjet, WHO-børnetabel/links, SU-konsolideringen,
+  `/su`, SU-guiden og `/studielaan`. Live-indholdet viser henholdsvis 5.085 kr./137,43 kr.
+  og 9+13-UGER, "BMI for voksne" + alders-/kønsspecifik børneguide, samt
+  7.426/1.154-3.202/3.692/3.799 kr. med fribeløb og hypotetisk studielånsscenario.
+  `/api/health` svarede samtidig `status: ok`; alle sider gav 200 via live-hentning.
+- Lukkede dermed deploynoterne for `792d0c0`, `e3f3dcf` og `191a431` (med O3-kode i
+  `cc173c5`); ingen ældre åbne VERIFICÉR-noter står tilbage.

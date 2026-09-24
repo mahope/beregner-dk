@@ -1,5 +1,6 @@
 import { describe, test, expect } from "vitest";
 import { getHomePageData, getHomeCalculators } from "./home-data";
+import { isCalculatorAvailable } from "./calculator-list";
 
 describe("getHomePageData", () => {
   test("returns data for all locales", () => {
@@ -52,6 +53,24 @@ describe("getHomeCalculators", () => {
       const bmi = getHomeCalculators(locale).find((calc) => calc.href === "/bmi");
       expect(bmi?.description.toLowerCase()).toMatch(/voksne|vuxna/);
     }
+  });
+
+  test("only exposes calculators available in the active locale", () => {
+    for (const locale of ["da", "no", "se"] as const) {
+      for (const calculator of getHomeCalculators(locale)) {
+        expect(
+          isCalculatorAvailable(calculator.href, locale),
+          `${locale}/${calculator.href}`
+        ).toBe(true);
+      }
+    }
+  });
+
+  test("Swedish home links the Swedish-only salary and mortgage calculators", () => {
+    const hrefs = getHomeCalculators("se").map((calculator) => calculator.href);
+    expect(hrefs).toContain("/lon-efter-skatt");
+    expect(hrefs).toContain("/bolan");
+    expect(hrefs).not.toContain("/loen-efter-skat");
   });
 
   test("some calculators are marked popular", () => {

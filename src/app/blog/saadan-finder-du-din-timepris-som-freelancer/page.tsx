@@ -24,6 +24,8 @@ export async function generateMetadata(): Promise<Metadata> {
       description: "Trin-for-trin guide til at sætte den rigtige timepris som freelancer.",
       url: `${baseUrl}/blog/saadan-finder-du-din-timepris-som-freelancer`,
       type: "article",
+      siteName: dc.siteName,
+      locale: dc.ogLocale,
     },
     alternates: {
       canonical: `${baseUrl}/blog/saadan-finder-du-din-timepris-som-freelancer`,

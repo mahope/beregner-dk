@@ -2,7 +2,11 @@
   "site": {
     "name": "Beregner.no",
     "tagline": "Gratis Kalkulatorer på Nett",
-    "description": "33+ gratis kalkulatorer for økonomi, bolig, skatt, helse og hverdag."
+    "description": "33+ gratis kalkulatorer for økonomi, bolig, skatt, helse og hverdag.",
+    "ogTagline": "Gratis online kalkulatorer for nordmenn",
+    "ogFree": "100% gratis",
+    "ogPrivate": "Privat & sikker",
+    "ogRates": "2026-satser"
   },
   "nav": {
     "home": "Forside",
@@ -65,6 +69,7 @@
     "assistantTryLabel": "Prøv f.eks.:",
     "assistantBestMatch": "Beste treff:",
     "assistantRelevant": "relevante kalkulatorer:",
+    "searchPlaceholder": "Søk blant alle kalkulatorer...",
     "validationRequired": "Vennligst skriv inn en verdi",
     "validationInvalidNumber": "Vennligst skriv inn et gyldig tall",
     "validationNegative": "Verdien kan ikke være negativ",

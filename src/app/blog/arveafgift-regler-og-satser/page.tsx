@@ -26,6 +26,8 @@ export async function generateMetadata(): Promise<Metadata> {
       description: "Alt om arveafgift i 2026 — satser, bundfradrag og beregning.",
       url: `${baseUrl}/blog/arveafgift-regler-og-satser`,
       type: "article",
+      siteName: dc.siteName,
+      locale: dc.ogLocale,
     },
     alternates: {
       canonical: `${baseUrl}/blog/arveafgift-regler-og-satser`,

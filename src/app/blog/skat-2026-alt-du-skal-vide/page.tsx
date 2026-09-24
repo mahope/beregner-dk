@@ -27,6 +27,8 @@ export async function generateMetadata(): Promise<Metadata> {
         "Komplet overblik over skat i 2026 — personfradrag, topskat, kommuneskat og mere.",
       url: `${baseUrl}/blog/skat-2026-alt-du-skal-vide`,
       type: "article",
+      siteName: dc.siteName,
+      locale: dc.ogLocale,
     },
     alternates: {
       canonical: `${baseUrl}/blog/skat-2026-alt-du-skal-vide`,

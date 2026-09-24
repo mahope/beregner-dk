@@ -31,6 +31,8 @@ export async function generateMetadata(): Promise<Metadata> {
       description: `Det korte svar: ${maxWeeklyRate} kr. pr. uge før skat ved ${BARSEL_2026.fullTimeHours} timer i 2026. Se også reglerne for orlov og overdragelse.`,
       url: `${baseUrl}/blog/barsel-2026-regler-og-satser`,
       type: "article",
+      siteName: dc.siteName,
+      locale: dc.ogLocale,
     },
     alternates: {
       canonical: `${baseUrl}/blog/barsel-2026-regler-og-satser`,

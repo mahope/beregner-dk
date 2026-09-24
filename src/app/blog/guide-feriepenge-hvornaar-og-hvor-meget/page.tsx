@@ -28,6 +28,8 @@ export async function generateMetadata(): Promise<Metadata> {
       description: "Alt du skal vide om feriepenge i 2026: beregning, udbetaling og dine rettigheder.",
       url: `${baseUrl}/blog/guide-feriepenge-hvornaar-og-hvor-meget`,
       type: "article",
+      siteName: dc.siteName,
+      locale: dc.ogLocale,
     },
     alternates: {
       canonical: `${baseUrl}/blog/guide-feriepenge-hvornaar-og-hvor-meget`,

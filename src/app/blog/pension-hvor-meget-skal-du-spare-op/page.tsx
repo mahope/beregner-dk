@@ -30,6 +30,8 @@ export async function generateMetadata(): Promise<Metadata> {
       description: "Komplet guide til pensionsopsparing i 2026: Tommelfingerregler, beregninger og de tre pensionssøjler.",
       url: `${baseUrl}/blog/pension-hvor-meget-skal-du-spare-op`,
       type: "article",
+      siteName: dc.siteName,
+      locale: dc.ogLocale,
     },
     alternates: {
       canonical: `${baseUrl}/blog/pension-hvor-meget-skal-du-spare-op`,

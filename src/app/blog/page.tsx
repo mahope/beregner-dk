@@ -23,6 +23,8 @@ export async function generateMetadata(): Promise<Metadata> {
       description: "Guides og tips om økonomi og beregninger.",
       url: `${baseUrl}/blog`,
       type: "website",
+      siteName: dc.siteName,
+      locale: dc.ogLocale,
     },
     alternates: {
       canonical: `${baseUrl}/blog`,

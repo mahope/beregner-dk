@@ -1,5 +1,6 @@
 import { describe, test, expect } from "vitest";
 import { getNavigation } from "./navigation";
+import { isCalculatorAvailable } from "./calculator-list";
 
 describe("getNavigation", () => {
   test("returns non-empty array for all locales", () => {
@@ -45,6 +46,28 @@ describe("getNavigation", () => {
     const noTotal = no.reduce((sum, item) => sum + (item.children?.length || 1), 0);
     expect(daTotal).toBeGreaterThan(seTotal);
     expect(daTotal).toBeGreaterThan(noTotal);
+  });
+
+  test("Swedish navigation links both Swedish-only calculators", () => {
+    const hrefs = getNavigation("se")
+      .flatMap((item) => item.children ?? [])
+      .map((child) => child.href);
+    expect(hrefs).toContain("/lon-efter-skatt");
+    expect(hrefs).toContain("/bolan");
+  });
+
+  test("navigation only links calculators available in its locale", () => {
+    for (const locale of ["da", "no", "se"] as const) {
+      for (const item of getNavigation(locale)) {
+        for (const child of item.children ?? []) {
+          if (child.href.startsWith("/kategori") || child.href === "/blog") continue;
+          expect(
+            isCalculatorAvailable(child.href, locale),
+            `${locale}:${child.href}`
+          ).toBe(true);
+        }
+      }
+    }
   });
 
   test("labels BMI navigation links for adults", () => {

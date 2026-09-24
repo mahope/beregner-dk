@@ -1,5 +1,5 @@
 import { describe, test, expect } from "vitest";
-import { getDomainConfig, getAllDomainConfigs, getDomainConfigByLocale } from "./domain-config";
+import { getDomainConfig, getDomainConfigForHost, getAllDomainConfigs, getDomainConfigByLocale } from "./domain-config";
 
 describe("getDomainConfig", () => {
   test("returns DA config for minberegner.dk", () => {
@@ -41,6 +41,22 @@ describe("getDomainConfig", () => {
   test("strips port from hostname", () => {
     const config = getDomainConfig("minberegner.dk:3000");
     expect(config.locale).toBe("da");
+  });
+
+  test("normalizes hostname case and a fully qualified trailing dot", () => {
+    const config = getDomainConfig("WWW.BERAKNARE.SE.:3000");
+    expect(config.siteName).toBe("Beräknare.se");
+  });
+
+  test("returns null for an unknown host when no fallback is allowed", () => {
+    expect(getDomainConfigForHost("unknown.example.com")).toBeNull();
+    expect(getDomainConfigForHost("www.beraknare.se")?.locale).toBe("se");
+  });
+
+  test("does not resolve inherited object properties as domain configs", () => {
+    expect(getDomainConfigForHost("__proto__")).toBeNull();
+    expect(getDomainConfigForHost("constructor")).toBeNull();
+    expect(getDomainConfig("__proto__").locale).toBe("da");
   });
 
   test("falls back to localhost config for unknown domains", () => {

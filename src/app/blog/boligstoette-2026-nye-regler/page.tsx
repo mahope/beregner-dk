@@ -27,6 +27,8 @@ export async function generateMetadata(): Promise<Metadata> {
       description: "Alt du skal vide om boligstøtte i 2026: satser, regler og hvad du kan få.",
       url: `${baseUrl}/blog/boligstoette-2026-nye-regler`,
       type: "article",
+      siteName: dc.siteName,
+      locale: dc.ogLocale,
     },
     alternates: {
       canonical: `${baseUrl}/blog/boligstoette-2026-nye-regler`,

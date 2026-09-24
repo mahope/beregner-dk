@@ -24,6 +24,8 @@ export async function generateMetadata(): Promise<Metadata> {
       description: "Forstå 30% reglen og lær at budgettere din bolig korrekt.",
       url: `${baseUrl}/blog/30-procent-reglen-husleje`,
       type: "article",
+      siteName: dc.siteName,
+      locale: dc.ogLocale,
     },
     alternates: {
       canonical: `${baseUrl}/blog/30-procent-reglen-husleje`,

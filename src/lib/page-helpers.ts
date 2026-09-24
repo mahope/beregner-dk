@@ -1,56 +1,58 @@
 import type { Metadata } from "next";
+import { getAllDomainConfigs, type DomainConfig } from "./domain-config";
 import { getCurrentDomainConfig } from "./get-locale";
+import type { Locale } from "./i18n";
 import { getPageData } from "./page-data";
-import { getAllDomainConfigs } from "./domain-config";
 
-/**
- * Generate locale-aware metadata for a calculator page.
- * Replaces the static `export const metadata` pattern.
- *
- * Usage in page.tsx:
- * ```ts
- * export async function generateMetadata() {
- *   return generatePageMetadata("bmi");
- * }
- * ```
- */
-export async function generatePageMetadata(slug: string): Promise<Metadata> {
-  const domainConfig = await getCurrentDomainConfig();
-  const data = getPageData(slug, domainConfig.locale);
+const alternateSlugs: Record<string, Partial<Record<Locale, string>>> = {
+  "loen-efter-skat": { se: "lon-efter-skatt" },
+  "lon-efter-skatt": { da: "loen-efter-skat" },
+};
 
-  // Fallback to DA if no data for this locale
-  const pageData = data || getPageData(slug, "da");
+function getAlternateSlug(slug: string, locale: Locale): string {
+  return alternateSlugs[slug]?.[locale] || slug;
+}
+
+export function buildPageMetadata(
+  slug: string,
+  domainConfig: DomainConfig
+): Metadata {
+  const pageData = getPageData(slug, domainConfig.locale);
   if (!pageData) {
-    return { title: slug };
+    return { robots: { index: false, follow: false } };
   }
 
-  const baseUrl = domainConfig.baseUrl;
-  const allDomains = getAllDomainConfigs();
-
-  // Build hreflang alternates
+  const canonicalUrl = `${domainConfig.baseUrl}/${slug}`;
   const languages: Record<string, string> = {};
-  for (const dc of allDomains) {
-    const pd = getPageData(slug, dc.locale);
-    if (pd) {
-      languages[dc.hreflangCode] = `${dc.baseUrl}/${slug}`;
+
+  for (const config of getAllDomainConfigs()) {
+    const alternateSlug = getAlternateSlug(slug, config.locale);
+    if (getPageData(alternateSlug, config.locale)) {
+      languages[config.hreflangCode] = `${config.baseUrl}/${alternateSlug}`;
     }
   }
 
+  if (languages.da) languages["x-default"] = languages.da;
+
   return {
-    // metaTitle already includes the site name, so opt out of the root
-    // layout's "%s | {siteName}" template to avoid doubling the brand.
     title: { absolute: pageData.metaTitle },
     description: pageData.metaDescription,
     keywords: pageData.keywords,
     openGraph: {
       title: pageData.ogTitle,
       description: pageData.ogDescription,
-      url: `${baseUrl}/${slug}`,
+      url: canonicalUrl,
       type: "website",
+      siteName: domainConfig.siteName,
+      locale: domainConfig.ogLocale,
     },
     alternates: {
-      canonical: `${baseUrl}/${slug}`,
+      canonical: canonicalUrl,
       languages,
     },
   };
+}
+
+export async function generatePageMetadata(slug: string): Promise<Metadata> {
+  return buildPageMetadata(slug, await getCurrentDomainConfig());
 }

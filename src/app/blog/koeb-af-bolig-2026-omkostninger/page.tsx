@@ -25,6 +25,8 @@ export async function generateMetadata(): Promise<Metadata> {
       description: "Alle omkostninger ved boligkøb i 2026 — fra udbetaling til tinglysning.",
       url: `${baseUrl}/blog/koeb-af-bolig-2026-omkostninger`,
       type: "article",
+      siteName: dc.siteName,
+      locale: dc.ogLocale,
     },
     alternates: {
       canonical: `${baseUrl}/blog/koeb-af-bolig-2026-omkostninger`,

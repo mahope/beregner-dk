@@ -21,10 +21,6 @@ export type PageData = {
 
 const kr = (value: number) => value.toLocaleString("da-DK");
 
-const daOnlySlugs = ["loen-efter-skat", "brutto-netto", "feriepenge", "dagpenge", "sygedagpenge", "pension", "efterloen", "topskat", "skattefradrag", "aktieskat", "arveafgift", "rentefradrag", "boligstoette", "husleje", "andelsbolig", "ejendomsvaerdiskat", "boernepenge", "barselsdagpenge", "su", "studielaan", "rabat", "befordringsfradrag", "rygestop", "alkoholenheder", "boligsalg"];
-
-const allLocalesSlugs = ["bmi", "kalorier", "vaegttab", "procent", "kvadratmeter", "alder", "dato", "tidsberegner", "tidszone", "rejsebudget", "bryllup", "konfirmation", "braendstof", "bil", "valuta", "renteberegner", "opsparing", "laaneberegner", "billaan", "leasing", "forbrugslaan", "gaeldsfri", "boliglaan", "elberegner", "solceller", "timepris", "termin", "moms", "proteinbehov", "ugenummer", "flyttebudget"];
-
 // ─── DANISH (da) PAGE DATA ─────────────────────────────────────────────────
 
 const daPages: Record<string, PageData> = {

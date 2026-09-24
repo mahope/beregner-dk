@@ -1,5 +1,5 @@
 import { describe, test, expect } from "vitest";
-import { getCalculatorsByLocale, getRelatedCalculators, getPopularCalculators } from "./calculator-list";
+import { getCalculatorsByLocale, getRelatedCalculators, getPopularCalculators, isCalculatorAvailable } from "./calculator-list";
 
 describe("getCalculatorsByLocale", () => {
   test("DA returns all calculators", () => {
@@ -36,6 +36,17 @@ describe("getCalculatorsByLocale", () => {
     for (const locale of ["da", "no", "se"] as const) {
       const bmi = getCalculatorsByLocale(locale).find((calc) => calc.href === "/bmi");
       expect(bmi?.description.toLowerCase()).toMatch(/voksne|vuxna/);
+    }
+  });
+
+  test("enforces the live DA/SE locale matrix", () => {
+    for (const href of ["/loen-efter-skat", "/ugenummer", "/flyttebudget"]) {
+      expect(isCalculatorAvailable(href, "da")).toBe(true);
+      expect(isCalculatorAvailable(href, "se")).toBe(false);
+    }
+    for (const href of ["/lon-efter-skatt", "/bolan"]) {
+      expect(isCalculatorAvailable(href, "da")).toBe(false);
+      expect(isCalculatorAvailable(href, "se")).toBe(true);
     }
   });
 });
@@ -83,5 +94,12 @@ describe("getPopularCalculators", () => {
         expect(allHrefs.has(calc.href), `${calc.href} not in ${locale}`).toBe(true);
       }
     }
+  });
+
+  test("Swedish popular calculators use Swedish-only canonicals", () => {
+    const hrefs = getPopularCalculators("se").map((calculator) => calculator.href);
+    expect(hrefs).toContain("/lon-efter-skatt");
+    expect(hrefs).toContain("/bolan");
+    expect(hrefs).not.toContain("/pension");
   });
 });

@@ -1,35 +1,51 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-
-/**
- * Domain → locale mapping for multi-domain setup.
- * Middleware sets x-locale and x-hostname headers so server components
- * can read the current locale without client-side JS.
- */
-const domainLocaleMap: Record<string, string> = {
-  "minberegner.dk": "da",
-  "www.minberegner.dk": "da",
-  "beregner.no": "no",
-  "www.beregner.no": "no",
-  "beraknare.se": "se",
-  "www.beraknare.se": "se",
-};
+import { getDomainConfigForHost } from "@/lib/domain-config";
+import { getRouteDecision } from "@/lib/routing";
 
 export function middleware(request: NextRequest) {
   const hostname = request.headers.get("host") || "localhost";
-  const domain = hostname.split(":")[0]; // strip port
-  const locale = domainLocaleMap[domain] || "da";
+  const domainConfig = getDomainConfigForHost(hostname);
+  const locale = domainConfig?.locale || "da";
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-locale", locale);
+  requestHeaders.set("x-hostname", hostname);
 
-  const response = NextResponse.next();
+  const decision = getRouteDecision(domainConfig, request.nextUrl.pathname);
 
-  // Set headers for server components to read
+  if (decision.type === "redirect") {
+    const requestUrl = new URL(request.nextUrl.toString());
+    const redirectBase =
+      domainConfig && !domainConfig.baseUrl.includes("localhost")
+        ? domainConfig.baseUrl
+        : request.nextUrl.origin;
+    const redirectUrl = new URL(decision.destination, redirectBase);
+    redirectUrl.search = requestUrl.search;
+    redirectUrl.hash = requestUrl.hash;
+    return NextResponse.redirect(redirectUrl, decision.status);
+  }
+
+  if (decision.type === "not-found") {
+    const notFoundUrl = new URL(
+      "/locale-unavailable",
+      domainConfig?.baseUrl || request.nextUrl.origin
+    );
+    notFoundUrl.search = request.nextUrl.search;
+    return NextResponse.rewrite(notFoundUrl, {
+      status: 404,
+      request: { headers: requestHeaders },
+    });
+  }
+
+  const response = NextResponse.next({ request: { headers: requestHeaders } });
   response.headers.set("x-locale", locale);
   response.headers.set("x-hostname", hostname);
-
   return response;
 }
 
 export const config = {
-  // Run on all routes except static files and api routes
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|api/).*)"],
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|api/).*)",
+    "/api/:path*",
+  ],
 };

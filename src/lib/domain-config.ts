@@ -61,14 +61,27 @@ const domainConfigs: Record<string, DomainConfig> = {
   },
 };
 
+export function normalizeHostname(hostname: string): string {
+  return hostname
+    .toLowerCase()
+    .split(":")[0]
+    .replace(/^www\./, "")
+    .replace(/\.+$/, "");
+}
+
+export function getDomainConfigForHost(hostname: string): DomainConfig | null {
+  const normalizedHostname = normalizeHostname(hostname);
+  return Object.prototype.hasOwnProperty.call(domainConfigs, normalizedHostname)
+    ? domainConfigs[normalizedHostname]
+    : null;
+}
+
 /**
  * Get domain config from hostname.
  * Falls back to Danish (minberegner.dk) if domain is unknown.
  */
 export function getDomainConfig(hostname: string): DomainConfig {
-  // Strip port number
-  const domain = hostname.split(":")[0].replace(/^www\./, "");
-  return domainConfigs[domain] || domainConfigs["localhost"];
+  return getDomainConfigForHost(hostname) || domainConfigs["localhost"];
 }
 
 /**

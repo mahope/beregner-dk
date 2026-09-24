@@ -2,7 +2,11 @@
   "site": {
     "name": "Beräknare.se",
     "tagline": "Gratis Kalkylatorer Online",
-    "description": "33+ gratis kalkylatorer för ekonomi, bostad, skatt, hälsa och vardag."
+    "description": "33+ gratis kalkylatorer för ekonomi, bostad, skatt, hälsa och vardag.",
+    "ogTagline": "Gratis online kalkylatorer för svenskar",
+    "ogFree": "100% gratis",
+    "ogPrivate": "Privat & säkert",
+    "ogRates": "2026-satser"
   },
   "nav": {
     "home": "Startsida",
@@ -65,6 +69,7 @@
     "assistantTryLabel": "Prova t.ex.:",
     "assistantBestMatch": "Bästa träff:",
     "assistantRelevant": "relevanta kalkylatorer:",
+    "searchPlaceholder": "Sök bland alla kalkylatorer...",
     "validationRequired": "Vänligen ange ett värde",
     "validationInvalidNumber": "Vänligen ange ett giltigt tal",
     "validationNegative": "Värdet kan inte vara negativt",
