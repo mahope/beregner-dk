@@ -122,7 +122,7 @@ export default async function DatoPage() {
         <h3>1. Dagar mellan datum</h3>
         <p>
           Beräkna hur många <strong>dagar det är mellan två datum</strong>. Du får också antal
-          veckor, ungefär antal månader, arbetsdagar och helgdagar.
+          hela veckor, ungefärligt antal månader, arbetsdagar och helgdagar.
         </p>
         <ul>
           <li>Välj startdatum och slutdatum</li>

@@ -70,6 +70,41 @@ describe("getPageData", () => {
     expect(data.schemaDescription).toContain(intent);
   });
 
+  test.each([
+    {
+      locale: "da" as const,
+      title: "Beregn antal dage mellem to datoer | MinBeregner.dk",
+      heading: "Beregn antal dage mellem to datoer",
+      intent: "antal dage mellem to datoer",
+      answer: "Vælg en startdato og en slutdato",
+      months: "ca. måneder",
+    },
+    {
+      locale: "se" as const,
+      title: "Beräkna antal dagar mellan två datum | Beräknare.se",
+      heading: "Beräkna antal dagar mellan två datum",
+      intent: "antal dagar mellan två datum",
+      answer: "Välj ett startdatum och ett slutdatum",
+      months: "ungefärligt antal månader",
+    },
+  ])("has answer-first date metadata for $locale", ({ locale, title, heading, intent, answer, months }) => {
+    const data = getPageData("dato", locale)!;
+
+    expect(data.title).toBe(heading);
+    expect(data.metaTitle).toBe(title);
+    expect(data.metaTitle.length).toBeLessThanOrEqual(60);
+    expect(data.description).toContain(answer);
+    expect(data.description).toContain(months);
+    expect(data.metaDescription).toContain(intent);
+    expect(data.metaDescription).toContain(months);
+    expect(data.metaDescription.length).toBeLessThanOrEqual(160);
+    expect(data.ogTitle).toBe(title);
+    expect(data.ogDescription).toContain(intent);
+    expect(data.ogDescription).toContain(months);
+    expect(data.schemaDescription).toContain(intent);
+    expect(data.schemaDescription).toContain(months);
+  });
+
   test("returns undefined for DA-only slug on SE", () => {
     const data = getPageData("loen-efter-skat", "se");
     expect(data).toBeUndefined();
