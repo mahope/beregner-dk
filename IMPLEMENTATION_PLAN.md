@@ -1,6 +1,6 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — C1 (CTR på /procent) er næste opgave.
+STATUS: KØ — C1 er grøn og afventer merge; C2 er næste opgave.
 
 ## Fase 3 — trafik-drevet
 
@@ -447,15 +447,43 @@ STATUS: KØ — C1 (CTR på /procent) er næste opgave.
   udfyld fra næste trafikdata før effekten vurderes.
 - **Kilde:** https://www.boligstoette.dk/bos-selvbetjening/beregner/basisoplysninger
 
-#### 6. [ ] C1 — Løft CTR på `/procent` med svar-først title og description
+#### 6. [x] FÆRDIG 2026-09-25 — C1 — Løft CTR på `/procent` med svar-først title og description
 
 - **Datagrund:** Search Console 2026-08-25–2026-09-22: 148.870 visninger,
   96 klik, CTR 0,1 %, gennemsnitlig position 7,5. Største søgninger er
   “procentberegner” (257 visninger, position 8) og “10 procent af” (47, position 6).
   Plausible-besøgsbaseline for `/procent` mangler i det seneste snapshot.
+- **Nuværende metadata før ændring (live 2026-09-25 00:41 CEST):** title
+  “Procentberegner - Beregn procent nemt og gratis | MinBeregner.dk”; description
+  “Beregn procent hurtigt. Eksempel: 15% af 2.500 kr = 375 kr. Find procent af et
+  tal, beregn stigning/fald, eller regn baglæns. Gratis procentberegner.” Den synlige
+  intro beskriver kun fire beregningstyper og giver ikke et konkret svar på “10 procent af”.
+- **Research 2026-09-25 00:42 CEST:** Google Autocomplete foreslår “procentberegner
+  stigning”, “procentberegner fald” og “procentberegner formel”; “10 procent af” får
+  konkrete efterfølgere som 100, 200, 75, 1.600 og 25.000. Google/DuckDuckGo viste
+  bot-/JS-blokering, så kvalitative SERP-signaler blev verificeret hos Brave Search.
+  synlige konkurrenter lovede “find procenten af et tal”, “find procent af et tal” og
+  konkrete formler/eksempler; bl.a. Procentregning-online, Procentregning.dk,
+  Hjemmeland og Proberegner.dk. Googles egen PAA kunne ikke hentes troværdigt, så ingen
+  aktuel Google-placering eller PAA-rangering påstås.
 - **Scope:** Research først SERP/snippets og autosuggest. Ret kun title, description og
   synligt svar, så siden direkte løser procentberegning og “10 procent af”-type spørgsmål;
   bevar matematik, URL og interne links. Ingen nye afsnit eller tynd SEO-tekst.
+- **Beslutning/implementering:** Den eksisterende synlige intro bliver selve det korte
+  svar: “10 procent af 250 er 25” efterfulgt af de allerede understøttede hensigter.
+  Metadata, OG og schema-description bruger samme konkrete svar. DA og SE får
+  lokaliserede varianter; URL, canonical, matematik, beregnerens starttilstand og
+  interne links er uændrede. En regressionstest sikrer title ≤60 tegn,
+  description ≤160 tegn og det synlige eksempel på begge live-domæner.
+- **Review og rettelser 2026-09-25:** Fresh-context review fandt en reel P2-testmangel:
+  page-data-testen alene bevægede ikke, at siden rent faktisk viste svaret, og dækkede
+  ikke ændret OG/schema-copy. Ny route-render-test for DA/SE plus metadata/OG/schema-
+  assertions lukkede fundet. Slutreview godkendte uden åbne P0-P2-fund.
+- **Kvalitetsgate 2026-09-25 00:50 CEST:** `npm run build` grøn (137 sider + typecheck;
+  7 kendte CSS-optimeringsadvarsler), `npm run test` grøn (568/568 tests, 59 filer),
+  `npm run lint` grøn (360 filer) og `npm audit --audit-level=high` 0 sårbarheder.
+  Lokal production-SSR-kontrol passede DA/SE title, description, synligt svar og
+  bevarede beregner; `/api/health` svarede `status: ok`.
 - **Forventet effekt:** Størst CTR-effekt i den voksende danske trafik: siden har allerede
   7-8 placeringer, men 0,1 % CTR efterlader mange kvalificerede visninger.
 - **Acceptkriterier:** Search Console-baseline og nuværende metadata står her; title og
@@ -464,6 +492,15 @@ STATUS: KØ — C1 (CTR på /procent) er næste opgave.
 - **MÅL:** `/procent` Search Console baseline 148.870 visninger/28d, 96 klik, CTR 0,1 %,
   position 7,5 pr. 2026-09-22; Plausal baseline **ukendt**, ikke 0. Effekt måles først
   efter mindst 14 dage.
+- **Researchkilder:** Google Autocomplete (`procentberegner`, `10 procent af`),
+  Brave Search SERP for samme to intentioner, samt de linkede konkurrenters
+  publicerede metadata/sideindhold læst 2026-09-25. Ingen ranking eller PAA
+  udledes af autocomplete.
+  Kilder: https://suggestqueries.google.com/complete/search?client=firefox&hl=da&q=procentberegner;
+  https://search.brave.com/search?q=procentberegner&source=web;
+  https://www.procentregning-online.dk/; https://procent-regning.dk/;
+  https://hjemmeland.dk/beregnere/procentregning/;
+  https://www.proberegner.dk/beregnere/procentberegner/.
 
 #### 7. [ ] C2 — Løft `/dato` CTR og svar direkte på dage-spørgsmål
 

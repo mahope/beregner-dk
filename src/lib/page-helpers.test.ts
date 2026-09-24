@@ -27,6 +27,27 @@ describe("buildPageMetadata", () => {
     }
   );
 
+  test.each([
+    {
+      locale: "da" as const,
+      title: "Procentberegner – beregn 10 procent af et tal",
+      description: "10 procent af et tal er tallet × 0,10. 10 procent af 250 er 25. Beregn også stigning, fald og andre procentopgaver.",
+    },
+    {
+      locale: "se" as const,
+      title: "Procenträknare – beräkna 10 procent av ett tal",
+      description: "10 procent av ett tal är talet × 0,10. 10 procent av 250 är 25. Beräkna också ökning, minskning och andra procentuppgifter.",
+    },
+  ])("builds answer-first percentage metadata for $locale", ({ locale, title, description }) => {
+    const metadata = buildPageMetadata("procent", getDomainConfigByLocale(locale));
+
+    expect(metadata).toMatchObject({
+      title: { absolute: title },
+      description,
+      openGraph: { title, description },
+    });
+  });
+
   test("links the Danish salary canonical to its Swedish slug", () => {
     const metadata = buildPageMetadata(
       "loen-efter-skat",
