@@ -1,6 +1,6 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — C1 er grøn og afventer merge; C2 er næste opgave.
+STATUS: KØ — C1 FÆRDIG; C2 (CTR på /dato) er næste opgave.
 
 ## Fase 3 — trafik-drevet
 
@@ -484,6 +484,8 @@ STATUS: KØ — C1 er grøn og afventer merge; C2 er næste opgave.
   `npm run lint` grøn (360 filer) og `npm audit --audit-level=high` 0 sårbarheder.
   Lokal production-SSR-kontrol passede DA/SE title, description, synligt svar og
   bevarede beregner; `/api/health` svarede `status: ok`.
+- **Landet:** C1-kode, tests og plan i commit `0be4841`; merge til `master` er
+  `98306a7` den 2026-09-25 00:52 CEST.
 - **Forventet effekt:** Størst CTR-effekt i den voksende danske trafik: siden har allerede
   7-8 placeringer, men 0,1 % CTR efterlader mange kvalificerede visninger.
 - **Acceptkriterier:** Search Console-baseline og nuværende metadata står her; title og
@@ -963,3 +965,6 @@ landmark=lån, piggybank=opsparing osv.).
   fragment-delestat, offline/query-cachebeskyttelse og copy-fejlfeedback `0ed3ec3`
   2026-09-25 00:37 CEST. Verificér efter næste batch-vindue med faktisk indhold på
   `/boligstoette` og `/blog/boligstoette-2026-nye-regler`; HTTP 200 alene er utilstrækkeligt.
+- **VERIFICÉR DEPLOY:** C1 `/procent` med svar-først DA/SE title, description, synligt
+  eksempel og uændret beregner `98306a7` 2026-09-25 00:52 CEST. Verificér efter
+  næste batch-vindue med faktisk markup på begge domæner; HTTP 200 alene utilstrækkeligt.
