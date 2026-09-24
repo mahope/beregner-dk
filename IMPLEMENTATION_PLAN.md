@@ -1,6 +1,6 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: I GANG — O3 (SU).
+STATUS: NÆSTE ITERATION — O4 (beraknare.se).
 
 ## Fase 3 — trafik-drevet
 
@@ -194,7 +194,7 @@ STATUS: I GANG — O3 (SU).
 - **Baseline-undtagelse:** Bloggen manglede baseline i snapshot. Denne iteration er en
   korrektions- og søgeintentionsreparation; næste trafiksnapshot etablerer baseline.
 
-#### 3. [ ] I GANG — O3 — Diagnosticér og ret SU-faldet samt konsolidér 2026-kilder
+#### 3. [x] FÆRDIG 2026-09-24 — O3 — Diagnosticér og ret SU-faldet samt konsolidér 2026-kilder
 
 - **Iteration start:** 2026-09-24 04:22 CEST. Research, kode, kilder og fuld gate udføres
   serielt; ingen sideløbende O4+ task.
@@ -256,6 +256,8 @@ STATUS: I GANG — O3 (SU).
   standalone-SSR-kontrol passede health, `/su`, SU-guiden og `/studielaan`; `/su/`
   gav 308. React Doctor: 82/100 med to kendte/intentionelle advarsler om høj
   kontrolflow-kompleksitet og URL-state initialisering.
+- **Landet:** O3-kode, tests og planens gate ligger i commit `cc173c5`; merge til
+  `master` og deploy-note følger efter denne planopdatering.
 
 - **Datagrund:** 116 besøgende/28d mod 252 tidligere (-54 %). Live er 200, men blog,
   side og beregner har tre forskellige sæt satser. Det er dokumenterede modstridende
