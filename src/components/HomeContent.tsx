@@ -14,7 +14,9 @@ function HomeContentDA() {
       <p>
         MinBeregner.dk samler over <strong>44 gratis online beregnere</strong> til danskere.
         Alle beregnere er opdateret med de nyeste satser og regler for 2026, og beregningerne
-        sker lokalt i din browser — vi gemmer ingen persondata.
+        sker lokalt i din browser — vi lagrer ikke dine input i nogen database. Når du vælger
+        en ekstern delingstjeneste, modtager den de kodede input. Nogle delelinks bruger
+        query-parametre, som kan sendes, når linket åbnes.
       </p>
 
       <h2>Økonomi og skat</h2>
@@ -52,8 +54,8 @@ function HomeContentDA() {
       <h2>Bolig og lån</h2>
       <p>
         Skal du <strong>købe bolig</strong>? Start med vores <Link href="/boliglaan">boliglåns-beregner</Link> for
-        at se ydelsen på dit lån. <strong>Lejer du</strong>, kan du tjekke om du har ret
-        til <Link href="/boligstoette">boligstøtte</Link> eller bruge <Link href="/husleje">huslejebudget-beregneren</Link>.
+        at se ydelsen på dit lån. <strong>Lejer du</strong>, kan du se standardmaksima
+        for <Link href="/boligstoette">boligstøtte</Link> eller bruge <Link href="/husleje">huslejebudget-beregneren</Link>.
       </p>
       <h3>Boligberegnere</h3>
       <ul>
@@ -112,7 +114,9 @@ function HomeContentNO({ siteName }: { siteName: string }) {
       <h2>Om {siteName} — Gratis kalkulatorer for nordmenn</h2>
       <p>
         {siteName} samler <strong>gratis kalkulatorer</strong> for nordmenn.
-        Alle beregninger skjer lokalt i nettleseren din — vi lagrer ingen persondata.
+         Alle beregninger skjer lokalt i nettleseren — inndataene lagres ikke i noen database.
+         Når du velger en ekstern delingstjeneste, mottar den de kodede inndataene.
+         Noen dellenker bruker query-parametere som kan sendes når lenken åpnes.
       </p>
 
       <h2>Økonomi og lån</h2>
@@ -163,7 +167,9 @@ function HomeContentSE({ siteName }: { siteName: string }) {
       <h2>Om {siteName} — Gratis kalkylatorer för svenskar</h2>
       <p>
         {siteName} samlar <strong>gratis kalkylatorer</strong> för svenskar.
-        Alla beräkningar sker lokalt i din webbläsare — vi sparar ingen persondata.
+         Alla beräkningar sker lokalt i din webbläsare — uppgifterna lagras inte i någon databas.
+         När du väljer en extern delningstjänst tar den emot de kodade uppgifterna.
+         Vissa dellänkar använder query-parametrar som kan skickas när länken öppnas.
       </p>
 
       <h2>Ekonomi och lån</h2>

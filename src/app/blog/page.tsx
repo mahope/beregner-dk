@@ -123,11 +123,11 @@ const blogPosts = [
   },
   {
     slug: "boligstoette-2026-nye-regler",
-    title: "Boligstøtte 2026 - Nye Regler og Satser",
-    description: "Komplet guide til boligstøtte i 2026: Nye satser, ændrede regler, hvem kan få støtte og hvor meget. Se de opdaterede grænser.",
+    title: "Boligstøtte 2026: Maksima, formue og beregning",
+     description: "Standardmaksima for boligstøtte, formuegrænser og en tydelig næste handling til Udbetaling Danmarks officielle beregning.",
     category: "Bolig & Økonomi",
-    date: "2026-02-13",
-    readTime: "9 min",
+    date: "2026-09-24",
+    readTime: "8 min",
   },
   {
     slug: "bmi-for-boern-saadan-tjekker-du",

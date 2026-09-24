@@ -1,7 +1,7 @@
-import type { Metadata } from "next";
-import Link from "next/link";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { getCurrentDomainConfig, getLocale } from "@/lib/get-locale";
+import type { Metadata } from "next";
+import Link from "next/link";
 
 export async function generateMetadata(): Promise<Metadata> {
   const dc = await getCurrentDomainConfig();
@@ -9,8 +9,8 @@ export async function generateMetadata(): Promise<Metadata> {
   const title = locale === "se" ? `Om ${dc.siteName}` : `Om ${dc.siteName}`;
   const desc =
     locale === "se"
-      ? `Läs om ${dc.siteName} - gratis beräkningsverktyg online för ekonomi, hälsa och vardag. 100% gratis, ingen inloggning, ingen data sparas.`
-      : `Læs om ${dc.siteName} - gratis online beregnere til økonomi, sundhed og hverdag. 100% gratis, ingen login, ingen data gemmes.`;
+      ? `Läs om ${dc.siteName} - gratis beräkningsverktyg online för ekonomi, hälsa och vardag. 100% gratis, ingen inloggning, inga inmatningar sparas i vår databas.`
+      : `Læs om ${dc.siteName} - gratis online beregnere til økonomi, sundhed og hverdag. 100% gratis, ingen login, og dine input gemmes ikke i vores database.`;
   return {
     title,
     description: desc,
@@ -51,7 +51,7 @@ function DaContent() {
         <ul>
           <li><strong>100% gratis</strong> - ingen premium-funktioner eller skjulte gebyrer</li>
           <li><strong>Uden login</strong> - du behøver ikke oprette en konto</li>
-          <li><strong>Privat</strong> - alle beregninger sker lokalt i din browser</li>
+          <li><strong>Privat</strong> - beregningerne sker lokalt, og input gemmes ikke i en database. Query-baserede delelinks kan sendes, når de åbnes; eksterne delingstjenester modtager linket, når du vælger dem</li>
           <li><strong>Opdateret</strong> - med de nyeste danske satser og regler</li>
         </ul>
 
@@ -84,7 +84,7 @@ function DaContent() {
           <li><Link href="/renteberegner">Renteberegner</Link> - beregn renter og afdrag</li>
           <li><Link href="/opsparing">Opsparingsberegner</Link> - se renters rente-effekt</li>
           <li><Link href="/ejendomsvaerdiskat">Ejendomsværdiskat</Link> - beregn boligskat 2026</li>
-          <li><Link href="/boligstoette">Boligstøtte</Link> - beregn boligstøtte</li>
+          <li><Link href="/boligstoette">Boligstøtte</Link> - se standardinterval og formuegrænser</li>
           <li><Link href="/husleje">Huslejebudget</Link> - hvad har du råd til?</li>
         </ul>
 
@@ -109,8 +109,9 @@ function DaContent() {
 
         <h2>Præcision og ansvarsfraskrivelse</h2>
         <p>
-          Vores beregnere giver <strong>gode estimater</strong> baseret på officielle satser og
-          formler. Dine faktiske beløb kan variere afhængigt af din specifikke situation.
+          Vores værktøjer giver <strong>estimater eller screeninger</strong> baseret på
+          officielle satser, formler og dokumenterede signaler. Dine faktiske beløb og
+          ydelser kan variere afhængigt af din specifikke situation.
         </p>
         <p>
           Beregnerne er kun til <strong>informationsformål</strong> og erstatter ikke
@@ -144,7 +145,7 @@ function DaContent() {
         </ul>
         <p>
           Vi verificerer satserne ved hvert årsskifte og når lovændringer træder i kraft.
-          <strong> Seneste opdatering:</strong> februar 2026.
+          <strong> Seneste danske satser kontrolleret:</strong> 24. september 2026.
         </p>
 
         <h2>Teknisk information</h2>
@@ -184,7 +185,7 @@ function SeContent() {
         <ul>
           <li><strong>100% gratis</strong> - inga premiumfunktioner eller dolda avgifter</li>
           <li><strong>Utan inloggning</strong> - du behöver inte skapa ett konto</li>
-          <li><strong>Privat</strong> - alla beräkningar sker lokalt i din webbläsare</li>
+          <li><strong>Privat</strong> - beräkningarna sker lokalt, och uppgifter sparas inte i vår databas. Query-baserade dellänkar kan skickas när de öppnas; externa delningstjänster mottar länken när du väljer dem</li>
           <li><strong>Uppdaterade</strong> - med de senaste svenska satserna och reglerna</li>
         </ul>
 
@@ -261,7 +262,7 @@ function SeContent() {
           <li>TypeScript för bättre kodkvalitet</li>
           <li>Tailwind CSS för responsiv design</li>
           <li>Integritetsanpassad analys (Plausible — inga personuppgifter, inga cookies)</li>
-          <li>Alla beräkningar sker lokalt i din webbläsare</li>
+          <li>Beräkningar sker lokalt i din webbläsare; uppgifter sparas inte i vår databas. Query-baserade dellänkar kan skickas när de öppnas och externa delningstjänster mottar länken när du väljer dem</li>
         </ul>
       </div>
     </>

@@ -44,6 +44,16 @@ describe("getTranslations", () => {
     expect(seKeys).toEqual(daKeys);
   });
 
+  test("footer copy does not promise that no data is stored", () => {
+    for (const locale of ["da", "no", "se"] as const) {
+      const aboutSite = getTranslations(locale).footer.aboutSite;
+      expect(aboutSite, locale).not.toMatch(
+        /gemmer ingen data|lagrer ingen data|sparar ingen data/i,
+      );
+      expect(aboutSite, locale).toMatch(/database|databas/i);
+    }
+  });
+
   test("all locales have localized search and OpenGraph copy", () => {
     expect(t("da", "ui.searchPlaceholder")).toBe("Søg blandt alle beregnere...");
     expect(t("no", "ui.searchPlaceholder")).toBe("Søk blant alle kalkulatorer...");

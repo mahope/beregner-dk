@@ -1,6 +1,6 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: NÆSTE ITERATION — O5 (boligstøtte).
+STATUS: KØ — C1 (CTR på /procent) er næste opgave.
 
 ## Fase 3 — trafik-drevet
 
@@ -367,16 +367,68 @@ STATUS: NÆSTE ITERATION — O5 (boligstøtte).
   Før en yderligere konkret svensk side ændres, skal dens `MÅL`-baseline fra
   trafiksnapshotet skrives her; ukendt baseline må ikke erstattes med 0.
 
-#### 5. [ ] O5 — Gør boligstøtte til et troværdigt screeningestimat
+#### 5. [x] FÆRDIG 2026-09-25 — O5 — Gør boligstøtte til et troværdigt screeningestimat
 
-- **Datagrund:** 469 besøgende/28d (+72 %), bounce 2 %, 424 indgangssider. Den
-  eksisterende model er stærkt forenklet, og side/blog har modstridende 2026-grænser.
+- **Iteration start:** 2026-09-24 10:20 CEST; genoptaget og sluttet 2026-09-25 00:34
+  CEST efter checkpoint af lokalt review-arbejde.
+- **Datagrund:** Seneste snapshot 2026-09-24 23:10: 493 besøgende/28d (+83 %),
+  bounce 2 %, 449 indgangssider. Den tidligere baseline var 469 besøgende/28d
+  2026-09-23. Den eksisterende model var stærkt forenklet, og side/blog havde
+  modstridende 2026-grænser.
 - **Scope:** Verificér boligudgift, indkomst, formue, husstands-/arealgrænser og
   minimum mod officielle oplysninger fra Udbetaling Danmark. Udtræk logikken til ren,
   testet funktion. Enten implementér kun dokumenterede regler med 3-5 officielle
   testeksempler, eller mærk værktøjet tydeligt som groft screeningestimat. Fjern ubrugte
   konstanter/input, tilføj tydelig CTA til den officielle beregner uden login, og gør
   blog/side samlet.
+- **Research 2026-09-24 10:20:** Borger.dk/Udbetaling Danmarks officielle søgning og
+  selvbetjeningssider bekræfter, at resultatet er vejledende, at særlige tilfælde ikke
+  indgår, og at husstandsindkomst, formue, antal børn/voksne, husleje og areal påvirker
+  resultatet. Officielle 2026-maksima pr. måned er for lejere uden pension 1.194 kr.
+  (0 børn), 4.201 kr. (1-3 børn) og 5.251 kr. (4+); nye førtidspensionister har
+  4.201 kr. (0-3 børn) og 5.251 kr. (4+), mens folkepensionister og gamle
+  førtidspensionister har 4.969 kr. (0-3 børn) og 6.211 kr. (4+). Formuen har ingen
+  øvre ret til at få støtte, men 10 % regnes med fra 896.400 kr. hhv. 1.060.300 kr. og
+  20 % fra 1.793.000 kr. hhv. 2.120.800 kr.; de viste nedre grænser er inklusive.
+  Huslejen skal oplyses uden el, varme, varmt vand, telefon/internet, garage, depositum
+  m.fl. Den officielle beregner kan fortsættes uden login. Kilder: Borger.dk
+  `soeg-boligstoette` og boligstoette.dk `basisoplysninger`, læst 2026-09-24.
+- **Beslutning:** Brug dokumenteret screening, ikke en ny officiel formel. Den lokale
+  beregner viser 0 til det officielle 2026-maksimum, men aldrig højere end den faktiske
+  husleje, bruger de inklusive formuegrænser til at vise konsekvensen, og siger eksplicit
+  at indkomst, areal, særlige ordninger og den endelige ret kræver Udbetaling Danmarks
+  beregner. 73.000/113.000 kr., 800.000/1.600.000/850.000/1.700.000 kr. og det gamle
+  304 kr-mindstebeløb fjernes fra alle O5-flader, indtil de kan dokumenteres.
+- **Implementeringsretning:** Central `BOLIGSTOETTE_2026`-konfiguration, ren
+  `beregnBoligstoette`-funktion, URL-normalisering med legacy-stater, komponent- og
+  indholdstests samt synlig official-CTA på side og blog. Ingen public API-ændring.
+- **Implementeringsstatus 2026-09-25:** Konfigurationen, den rene funktion og
+  normalisering er implementeret. UI'en bruger husleje, indkomst, husstandsstørrelse,
+  antal børn, pensionstatus, formue og areal; den døde `boligType` og de gamle lokale
+  2026-konstanter er fjernet. Resultatet vises som 0–min(husleje, officielt maksimum),
+  og formuejusteringen vises udtrykkeligt som et forenklet screening-signal. Side,
+  metadata, kategori-, home- og blogdata er aligning til screening-sproget; official-CTA
+  er synlig på begge hovedflader. Checkpoint `204043c` samlede de bevarede privacy-,
+  legacy-state- og review-ændringer; sluttelsen retter sidste reviewfund.
+- **Review og rettelser 2026-09-25:** Tidligere reviews fandt og fik rettet manglende
+  enheder, legacy-profile, fuldt state-roundtrip, uvedkommende CTA-copy og manglende
+  advarsel om økonomiske data. To uafhængige slutreviews fandt tre reelle P2-fejl:
+  formuetabellerne inkluderede trods logikken den lave grænse, et interval tæt på
+  100 % af huslejen blev vist som 99 %, og clipboard-fallback meldte succes ved fejl.
+  Alle tre har nu failing-test-først-rettelser: intervallet er “over” den lave grænse,
+  et capped interval vises som “under 100 %” uden at fordreje funktionen, og
+  copy-fejl får et lokaliseret `role="alert"`. Slutreview fandt ingen åbne P0-P2-fund.
+  History-state og samme rute-navigation blev bekræftet som tilsigtede, site-wide
+  scriptisolering som et separat trusselsmodel-projekt og offline-fallback for
+  query-delelinks som et bevidst privacy-tradeoff; norsk juridisk fallback er
+  pre-existing og uden for O5.
+- **Slutgate 2026-09-25 00:34 CEST:** `npm run build` grøn (137 sider; 7 kendte CSS-
+  advarsler), `npm run test` grøn (562/562 tests, 58 filer), `npm run lint` grøn
+  (359 filer), `npm audit --audit-level=high` 0 sårbarheder. React Doctor 77/100 med
+  otte maintainability-advarsler om duplikeret JSX og komponentstørrelse/-kompleksitet;
+  ingen rapporterede correctness- eller security-fejl. Lokal standalone-HTTP-kontrol
+  passerede health, `/boligstoette`, artiklen og `Referrer-Policy: no-referrer`.
+  Fersk domæne- og React/privacy-slutreview: godkendt, ingen åbne P0-P2-fund.
 - **Forventet effekt:** Beskytter en stærk vækstside mod fejltillid, øger tillid og
   flytter useren til den officielle næste handling; ikke dokumenteret bounce-reduktion.
 - **Acceptkriterier:**
@@ -387,12 +439,81 @@ STATUS: NÆSTE ITERATION — O5 (boligstøtte).
   3. Ingen deklarerede UI-felter/konstanter er ubrugte; kanttilfælde har tests.
   4. Den officielle beregner er en synlig næste handling på både side og blog.
   5. Fuld gate er grøn.
-- **MÅL:** `/boligstoette` baseline 469 besøgende/28d 2026-09-23;
-  `/blog/boligstoette-2026-nye-regler` baseline ukendt i snapshot — udfyld fra næste
-  trafikdata før bloggen ændres.
+- **MÅL:** `/boligstoette` baseline 493 besøgende/28d 2026-09-24 (snapshot
+  2026-09-24 23:10); `/blog/boligstoette-2026-nye-regler` baseline ukendt i snapshot —
+  udfyld fra næste trafikdata før effekten vurderes.
 - **Kilde:** https://www.boligstoette.dk/bos-selvbetjening/beregner/basisoplysninger
 
-#### 6. [ ] M1 — Ret Lighthouse-CI's serverstart
+#### 6. [ ] C1 — Løft CTR på `/procent` med svar-først title og description
+
+- **Datagrund:** Search Console 2026-08-25–2026-09-22: 148.870 visninger,
+  96 klik, CTR 0,1 %, gennemsnitlig position 7,5. Største søgninger er
+  “procentberegner” (257 visninger, position 8) og “10 procent af” (47, position 6).
+  Plausible-besøgsbaseline for `/procent` mangler i det seneste snapshot.
+- **Scope:** Research først SERP/snippets og autosuggest. Ret kun title, description og
+  synligt svar, så siden direkte løser procentberegning og “10 procent af”-type spørgsmål;
+  bevar matematik, URL og interne links. Ingen nye afsnit eller tynd SEO-tekst.
+- **Forventet effekt:** Størst CTR-effekt i den voksende danske trafik: siden har allerede
+  7-8 placeringer, men 0,1 % CTR efterlader mange kvalificerede visninger.
+- **Acceptkriterier:** Search Console-baseline og nuværende metadata står her; title og
+  description matcher søgeintentionerne; spørgsmålstyper besvares synligt uden at skjule
+  beregneren; eksisterende logiktests og fuld gate er grønne.
+- **MÅL:** `/procent` Search Console baseline 148.870 visninger/28d, 96 klik, CTR 0,1 %,
+  position 7,5 pr. 2026-09-22; Plausal baseline **ukendt**, ikke 0. Effekt måles først
+  efter mindst 14 dage.
+
+#### 7. [ ] C2 — Løft `/dato` CTR og svar direkte på dage-spørgsmål
+
+- **Datagrund:** Search Console: 128.065 visninger, 784 klik, CTR 0,6 %, position 5,8.
+  “dage mellem datoer” (448, position 5), “antal dage mellem to datoer” (257, position 5),
+  “hvor mange dage er der tilbage af 2026” (212, position 5). Plausible:
+  1.028 besøgende/28d, bounce 5 %, 949 indgangssider pr. 2026-09-24.
+- **Scope:** Ret title/description og svar-først indhold til de eksisterende
+  dage-mellem-formål. Researchér først, om konkrete `/dage-til/[dato]`-landingsider har
+  dokumenteret efterspørgsel; byg ingen mange variationer, og undgå slugs/date-konflikter.
+- **Forventet effekt:** Stærk CTR på eksisterende høj placering og bedre overførsel fra
+  spørgsmål til selve dato-værktøjet.
+- **Acceptkriterier:** Baselines skrives før ændring; title/description svarer på
+  “antal dage mellem to datoer”; et eventuelt datolink kun hvis forskning dokumenterer
+  reel efterspørgsel og dynamisk korrekt dato; fuld gate grøn.
+- **MÅL:** `/dato` baseline 1.028 besøgende/28d 2026-09-24; Search Console 128.065
+  visninger, 784 klik, CTR 0,6 %, position 5,8 pr. 2026-09-22.
+
+#### 8. [ ] C3 — Løft CTR på `/tidsberegner` og `/moms`
+
+- **Datagrund:** Search Console: `/tidsberegner` 71.966 visninger, 207 klik, CTR 0,3 %,
+  position 7,0; `/moms` 23.735 visninger, 39 klik, CTR 0,2 %, position 6,8. Plausible:
+  `/tidsberegner` 292 besøgende/28d og `/moms` findes ikke i top-siderlisten pr.
+  2026-09-24.
+- **Scope:** Research snippets/autosuggest og ret title, description og synligt
+  svar-first indhold på de to eksisterende sider. Behandles som én CTR-iteration kun
+  hvis diffen forbliver lille; ellers skilles i to opgaver. Ingen matematikændringer.
+- **Forventet effekt:** Laver CTR-hængning ved position 6-7 bliver til kvalificeret
+  trafik på to eksisterende værktøjer.
+- **Acceptkriterier:** Baselines for begge sider skrives før ændring; snippets svarer på
+  henholdsvis “beregn tid” og “momsberegner”; fuld gate grøn.
+- **MÅL:** `/tidsberegner` baseline 292 besøgende/28d 2026-09-24; `/moms`
+  Plausible-baseline **ukendt**. Search Console: 71.966/23.735 visninger,
+  207/39 klik, CTR 0,3/0,2 %, position 7,0/6,8 pr. 2026-09-22.
+
+#### 9. [ ] I1 — Integrer IndexNow uden at sende under iterationen
+
+- **Datagrund:** Bing, DuckDuckGo og Yahoo bidrager væsentligt til dansk trafik;
+  brugerprompten angiver 1.320 Bing-, 381 DuckDuckGo- og 291 Yahoo-besøgende i
+  snapshotperioden mod 3.855 Google-besøgende.
+- **Scope:** Implementér offentlig IndexNow-protokol med en nøglefil på `/<nøgle>.txt`
+  og en central submissions-funktion, der kan sende konkrete URL'er efter publicering
+  eller ændring. Læs nøglen fra runtime-miljøet; skriv den aldrig i kode, plan eller
+  commit. Kaldet må ikke udføres manuelt under selve iterationen.
+- **Forventet effekt:** Kortere opdagelsestid for nye og ændrede sider hos Bing,
+  DuckDuckGo og Yahoo uden manuel distribution.
+- **Acceptkriterier:** Nøglefil og løsning af hemmelighed er dokumenteret; submissions
+  dækker sitemap-URL og den konkrete ændrede URL, håndterer 200/202/429/fejl og
+  har mockede tests; ingen outbound-submit køres under iterationen; fuld gate grøn.
+- **MÅL:** Ingen isoleret trafikbaseline. Mål før/efter med Search Console-impressions
+  for nye URL'er efter mindst 14 dage; adskill samtidige site's changes i noten.
+
+#### 10. [ ] M1 — Ret Lighthouse-CI's serverstart
 
 - **Datagrund:** PR #20 og fire seneste tidligere Lighthouse-runs fejlede, før audit
   startede, med `next: command not found`. Den separate build-job er grøn.
@@ -406,10 +527,9 @@ STATUS: NÆSTE ITERATION — O5 (boligstøtte).
   2. Ét grønt PR-run med fejlende Lighthouse-tærskel må kun fejle på den konkrete
      Lighthouse-regel, aldrig `next: command not found` eller manglende production-output.
   3. Repoets lokale build/tests/lint forbliver grønne.
-- **Placering:** Lav trafikprioritet; udfør efter O2-O5 medmindre LHCI begynder at
-  blokere flere PR'er.
+- **Placering:** Efter C1-C3 og I1; kun hvis LHCI begynder at blokere flere PR'er.
 
-#### 7. [ ] M2 — Bevar BMI ved gentaget skift mellem metrisk og imperial enhed
+#### 11. [ ] M2 — Bevar BMI ved gentaget skift mellem metrisk og imperial enhed
 
 - **Datagrund:** O2 gemmer nu enhed i delelinks, infererer gamle imperiale links og
   afgrænser konverteringen til to decimaler. En fuld kg/cm → lbs/inches → kg/cm
@@ -421,7 +541,7 @@ STATUS: NÆSTE ITERATION — O5 (boligstøtte).
 - **MÅL:** `/bmi` baseline 979 besøgende/28d 2026-09-23; effektmåling først efter
   14 dage hvis der laves en separat produktændring.
 
-#### 8. [ ] M3 — Route børne-BMI-søgninger til guiden
+#### 12. [ ] M3 — Route børne-BMI-søgninger til guiden
 
 - **Datagrund:** O2 har adskilt sider og metadata, men `SearchBar` og
   `BeregnerAssistent` søger fortsat kun i beregnere. "BMI for mit barn" kan derfor matche
@@ -793,5 +913,9 @@ landmark=lån, piggybank=opsparing osv.).
   `/api/health` svarede samtidig `status: ok`; alle sider gav 200 via live-hentning.
 - Lukkede dermed deploynoterne for `792d0c0`, `e3f3dcf` og `191a431` (med O3-kode i
   `cc173c5`); ingen ældre åbne VERIFICÉR-noter står tilbage.
-- **VERIFICÉR DEPLOY:** O4 beraknare.se locale-, redirect-, canonical-, hreflang-, JSON-LD-,
-  OG-, search-, sitemap- og robots-rettelser `1dc1c86` 2026-09-24 09:40 CEST.
+- **DEPLOY OK 2026-09-25 00:29 CEST:** O4 `1dc1c86` er live. Live-kontrol fandt
+  `lang=sv`, self-canonical, `og:site_name=Beräknare.se` og JSON-LD med SEK på
+  `/tidsberegner`, `/dato` og `/lon-efter-skatt`; de fem svenske aliases var ét
+  redirect-hop og bevarede query-parametre. `/blog` og DA-only `/ugenummer` gav 404,
+  sitemap indeholdt de svenske kernesider men ikke blog, og `/api/health` svarede
+  `status: ok`. Hermed er O4-noten lukket; ingen ældre åbne deploynoter står tilbage.

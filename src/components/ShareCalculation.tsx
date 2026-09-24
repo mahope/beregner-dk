@@ -9,15 +9,15 @@
  * @since 1.1.0
  */
 
-import { useState, useCallback, useEffect, useRef } from 'react';
-import { Share2, Copy, Check, Link2, Twitter, Facebook, Mail, QrCode, X } from 'lucide-react';
+import { useLocale } from '@/components/LocaleProvider';
+import { trackResultCopied, trackShare } from '@/lib/analytics';
 import {
   ShareableLink,
   copyToClipboard,
 } from '@/lib/calculation-state';
-import { trackShare, trackResultCopied } from '@/lib/analytics';
-import { useLocale } from '@/components/LocaleProvider';
 import type { Locale } from '@/lib/i18n';
+import { Check, Copy, Facebook, Link2, Mail, QrCode, Share2, Twitter, X } from 'lucide-react';
+import { useCallback, useEffect, useId, useRef, useState } from 'react';
 
 const shareLabels = {
   da: {
@@ -26,8 +26,8 @@ const shareLabels = {
     subtitle: "Andre kan se og genbruge dine indtastninger",
     close: "Luk dialog",
     linkLabel: "Link til beregning",
-    linkAria: "Delbart link",
     copied: "Kopieret!",
+    copyError: "Linket kunne ikke kopieres. Marker og kopier det manuelt.",
     copyLink: "Kopier link",
     socialLabel: "Del på sociale medier",
     twitter: "Del på Twitter",
@@ -46,8 +46,8 @@ const shareLabels = {
     subtitle: "Andre kan se og gjenbruke dine innstillinger",
     close: "Lukk dialog",
     linkLabel: "Lenke til beregning",
-    linkAria: "Delbar lenke",
     copied: "Kopiert!",
+    copyError: "Lenken kunne ikke kopieres. Marker og kopier den manuelt.",
     copyLink: "Kopier lenke",
     socialLabel: "Del på sosiale medier",
     twitter: "Del på Twitter",
@@ -66,8 +66,8 @@ const shareLabels = {
     subtitle: "Andra kan se och återanvända dina inmatningar",
     close: "Stäng dialog",
     linkLabel: "Länk till beräkning",
-    linkAria: "Delbar länk",
     copied: "Kopierat!",
+    copyError: "Länken kunde inte kopieras. Markera och kopiera den manuellt.",
     copyLink: "Kopiera länk",
     socialLabel: "Dela på sociala medier",
     twitter: "Dela på Twitter",
@@ -86,23 +86,31 @@ interface ShareCalculationProps {
   getShareableLink: () => ShareableLink;
   calculatorName: string;
   resultSummary?: string;
+  privacyWarning?: string;
+  allowExternalSharing?: boolean;
 }
 
 export function ShareCalculation({
   getShareableLink,
   calculatorName,
   resultSummary,
+  privacyWarning,
+  allowExternalSharing = true,
 }: ShareCalculationProps) {
   const { locale } = useLocale();
   const l = shareLabels[locale as Locale] || shareLabels.da;
   const [isOpen, setIsOpen] = useState(false);
   const [shareableLink, setShareableLink] = useState<ShareableLink | null>(null);
   const [isCopied, setIsCopied] = useState(false);
+  const [hasCopyError, setHasCopyError] = useState(false);
   const [showQr, setShowQr] = useState(false);
   
   const modalRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const previousActiveElement = useRef<HTMLElement | null>(null);
+  const modalTitleId = useId();
+  const linkInputId = useId();
+  const privacyWarningId = useId();
 
   const handleOpen = useCallback(() => {
     previousActiveElement.current = document.activeElement as HTMLElement;
@@ -110,6 +118,7 @@ export function ShareCalculation({
     setShareableLink(link);
     setIsOpen(true);
     setIsCopied(false);
+    setHasCopyError(false);
     trackShare(calculatorName, 'open');
   }, [getShareableLink, calculatorName]);
 
@@ -150,25 +159,28 @@ export function ShareCalculation({
     document.addEventListener('keydown', handleKeyDown);
 
     // Focus the close button when modal opens
-    setTimeout(() => closeButtonRef.current?.focus(), 0);
+    const focusTimer = window.setTimeout(() => closeButtonRef.current?.focus(), 0);
 
     // Prevent scrolling when modal is open
+    const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
 
     return () => {
+      window.clearTimeout(focusTimer);
       document.removeEventListener('keydown', handleKeyDown);
-      document.body.style.overflow = '';
+      document.body.style.overflow = previousOverflow;
     };
   }, [isOpen, handleClose]);
 
   const handleCopy = async () => {
     if (!shareableLink) return;
-    
+
     const url = shareableLink.fullUrl;
     const success = await copyToClipboard(url);
-    
+
+    setIsCopied(success);
+    setHasCopyError(!success);
     if (success) {
-      setIsCopied(true);
       trackResultCopied(calculatorName);
       setTimeout(() => setIsCopied(false), 2000);
     }
@@ -199,25 +211,33 @@ export function ShareCalculation({
       {/* Modal */}
       {isOpen && (
         <div 
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+           className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4"
           role="dialog"
           aria-modal="true"
-          aria-labelledby="share-modal-title"
+          aria-labelledby={modalTitleId}
           onClick={(e) => e.target === e.currentTarget && handleClose()}
         >
           <div 
             ref={modalRef}
-            className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-md w-full overflow-hidden"
+             className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-md w-full max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain"
           >
             {/* Header */}
             <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex items-start justify-between">
               <div>
-                <h2 id="share-modal-title" className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                <h2 id={modalTitleId} className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                   {l.title}
                 </h2>
                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                   {l.subtitle}
                 </p>
+                {privacyWarning && (
+                  <p
+                    id={privacyWarningId}
+                    className="text-sm text-amber-800 dark:text-amber-300 mt-2"
+                  >
+                    {privacyWarning}
+                  </p>
+                )}
               </div>
               <button type="button"
                 ref={closeButtonRef}
@@ -233,16 +253,20 @@ export function ShareCalculation({
             <div className="p-6 space-y-6">
               {/* URL Copy Section */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label
+                  htmlFor={linkInputId}
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                >
                   {l.linkLabel}
                 </label>
                 <div className="flex gap-2">
                   <div className="flex-1 relative">
                     <input
+                      id={linkInputId}
                       type="text"
                       value={shareUrl}
-                      readOnly
-                      aria-label={l.linkAria}
+                       readOnly
+                       aria-describedby={privacyWarning ? privacyWarningId : undefined}
                       className="w-full px-3 py-2 pr-10 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-300 truncate"
                     />
                     <Link2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" aria-hidden="true" />
@@ -263,9 +287,16 @@ export function ShareCalculation({
                     )}
                   </button>
                 </div>
+                {hasCopyError && (
+                  <p role="alert" className="mt-2 text-sm text-red-600 dark:text-red-400">
+                    {l.copyError}
+                  </p>
+                )}
 
               </div>
 
+              {allowExternalSharing && (
+                <>
               {/* Social Share */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -329,6 +360,8 @@ export function ShareCalculation({
                     {l.scanQr}
                   </p>
                 </div>
+              )}
+                </>
               )}
 
               {/* Result preview */}

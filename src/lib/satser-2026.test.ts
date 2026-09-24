@@ -1,5 +1,5 @@
-import { describe, test, expect } from "vitest";
-import { BARSEL_2026, SATSER_2026 as S, SU_2026 } from "./satser-2026";
+import { describe, expect, test } from "vitest";
+import { BARSEL_2026, BOLIGSTOETTE_2026, SATSER_2026 as S, SU_2026 } from "./satser-2026";
 
 // These lock in the officially-verified 2026 figures (skm.dk / skat.dk).
 // If SKAT changes a rate, update satser-2026.ts AND this test together.
@@ -126,6 +126,61 @@ describe("SATSER_2026 single source of truth", () => {
     expect(SU_2026.homewardBase + SU_2026.homewardMaximumSupplement).toBe(
       SU_2026.homewardMaximum,
     );
+  });
+
+  test("boligstøtte 2026", () => {
+    expect(BOLIGSTOETTE_2026.verifiedAt).toBe("2026-09-24");
+    expect(BOLIGSTOETTE_2026.sources.officialCalculator).toBe(
+      "https://www.boligstoette.dk/bos-selvbetjening/beregner/basisoplysninger",
+    );
+    expect(BOLIGSTOETTE_2026.maximumMonthly.nonPensioner).toEqual({
+      noChildren: 1194,
+      oneToThreeChildren: 4201,
+      fourPlusChildren: 5251,
+    });
+    expect(BOLIGSTOETTE_2026.maximumMonthly.newDisabilityPension).toEqual({
+      noChildren: 4201,
+      oneToThreeChildren: 4201,
+      fourPlusChildren: 5251,
+    });
+    expect(BOLIGSTOETTE_2026.maximumMonthly.oldPension).toEqual({
+      noChildren: 4969,
+      oneToThreeChildren: 4969,
+      fourPlusChildren: 6211,
+    });
+    expect(BOLIGSTOETTE_2026.wealth.considerationRates).toEqual({
+      tenPercent: 0.1,
+      twentyPercent: 0.2,
+    });
+    expect(BOLIGSTOETTE_2026.wealth.nonPensioner).toEqual({
+      noEffect: 896400,
+      tenPercent: 1793000,
+    });
+    expect(BOLIGSTOETTE_2026.wealth.pensioner).toEqual({
+      noEffect: 1060300,
+      tenPercent: 2120800,
+    });
+     expect(BOLIGSTOETTE_2026.sources.officialRules).toBe(
+       "https://www.borger.dk/bolig-og-flytning/Boligstoette-oversigt/soeg-boligstoette",
+     );
+     expect(BOLIGSTOETTE_2026.sources.officialFormula).toBe(
+       "https://www.retsinformation.dk/eli/retsinfo/2026/9156",
+     );
+     expect(BOLIGSTOETTE_2026.sources.officialRates).toBe(
+       "https://www.retsinformation.dk/eli/retsinfo/2026/9336",
+     );
+    expect(BOLIGSTOETTE_2026.rentExcludes).toEqual([
+      "el",
+      "varme",
+      "varmt vand",
+      "fællesantenne",
+      "telefon, internet eller bredbånd",
+      "leje betalt forud",
+      "indskud og afdrag på indskud",
+      "garage eller carport",
+      "møbler i en møbleret bolig",
+      "vaskeri",
+    ]);
   });
 
   test("rates are internally consistent", () => {

@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import { OrganizationSchema, WebSiteSchema } from "@/components/StructuredData";
 import Header from "@/components/Header";
@@ -11,6 +12,7 @@ import { SkipLink } from "@/components/SkipLink";
 import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
 import BeregnerAssistent from "@/components/BeregnerAssistent";
 import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
+import { calculationStatePrivacyScript } from "@/lib/calculation-state-privacy";
 import { getTranslations } from "@/lib/i18n";
 
 const inter = Inter({
@@ -88,6 +90,8 @@ export default async function RootLayout({
   return (
     <html lang={htmlLang}>
       <head>
+        <script dangerouslySetInnerHTML={{ __html: calculationStatePrivacyScript }} />
+
         {/* Plausible Analytics - Self-hosted */}
         <script
           defer
@@ -96,9 +100,9 @@ export default async function RootLayout({
         />
 
         {/* Google AdSense */}
-        <script
-          async
+        <Script
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1902871361369866"
+          strategy="afterInteractive"
           crossOrigin="anonymous"
         />
 

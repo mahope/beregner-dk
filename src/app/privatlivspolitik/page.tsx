@@ -1,6 +1,6 @@
-import type { Metadata } from "next";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { getCurrentDomainConfig, getLocale } from "@/lib/get-locale";
+import type { Metadata } from "next";
 
 export async function generateMetadata(): Promise<Metadata> {
   const dc = await getCurrentDomainConfig();
@@ -33,7 +33,7 @@ function DaContent() {
       <h1 className="text-3xl font-bold mb-6">Privatlivspolitik</h1>
       <div className="prose max-w-none dark:prose-invert">
         <p className="text-lg text-gray-600 dark:text-gray-400 mb-8">
-          <strong>TL;DR:</strong> Vi indsamler ingen personlige data. Alle
+          <strong>TL;DR:</strong> Vi lagrer ikke dine personlige input i nogen database. Alle
           beregninger sker lokalt i din browser. Vi bruger privacy-fokuseret
           analytics uden cookies og uden persondata.
         </p>
@@ -45,14 +45,28 @@ function DaContent() {
         </p>
         <ul>
           <li>Behandles kun lokalt i din browser (JavaScript)</li>
-          <li>Sendes aldrig til vores servere</li>
+          <li>Sendes ikke i selve beregningsprocessen</li>
           <li>Gemmes ikke i nogen database</li>
-          <li>Forsvinder når du lukker fanen</li>
+          <li>Forsvinder fra formularen, når du lukker fanen</li>
         </ul>
         <p>
           Hvis du bruger &quot;Del beregning&quot;-funktionen, kodes dine input-værdier i
-          URL&apos;en (base64), så modtageren kan se den samme beregning. Dette sker
-          i din browser og involverer ikke vores servere.
+          URL&apos;en, så modtageren kan se den samme beregning. I
+           boligstøtte-siden ligger de nye data i URL&apos;ens fragment (efter #), som
+          browseren ikke sender med sideanmodningen. Værdierne kan stå i
+          browserhistorikken, og enhver, der modtager linket, kan dekode dem. Delelinks fra
+          andre beregnere ligger i URL-parametrene og kan sendes, når linket åbnes. Før
+          analytics registrerer en sidevisning, flyttes den kodede boligstøtte-state fra
+          URL-fragmentet til sidens lokale history-buffer og fjernes fra den synlige URL;
+          den bruges kun lokalt til at genskabe beregningen. Gamle boligstøtte-links kan
+          stadig bruge en query-parameter, som kan sendes med sideanmodningen.
+          Service workeren gemmer ikke gamle query-links med delestat i sin cache. Brug
+          derfor kun nye fragmentlinks til følsomme oplysninger.
+        </p>
+        <p>
+          Vælger du at dele via QR-kode, sociale medier eller e-mail, sender din browser
+          linket til den valgte tjeneste. QR-tjenesten modtager hele URL&apos;en. Del kun
+          beregninger med personer, du har tilladelse til at give oplysningerne til.
         </p>
 
         <h2>Cookies og lokal lagring</h2>
@@ -149,7 +163,7 @@ function DaContent() {
         </div>
 
         <p className="text-sm text-gray-500 dark:text-gray-400 mt-8">
-          Sidst opdateret: 17. februar 2026
+          Sidst opdateret: 24. september 2026
         </p>
       </div>
     </>
@@ -162,7 +176,7 @@ function SeContent() {
       <h1 className="text-3xl font-bold mb-6">Integritetspolicy</h1>
       <div className="prose max-w-none dark:prose-invert">
         <p className="text-lg text-gray-600 dark:text-gray-400 mb-8">
-          <strong>Sammanfattning:</strong> Vi samlar inte in några personuppgifter. Alla
+          <strong>Sammanfattning:</strong> Vi lagrar inte dina personliga inmatningar i någon databas. Alla
           beräkningar sker lokalt i din webbläsare. Vi använder integritetsanpassad
           analys utan cookies och utan persondata.
         </p>
@@ -174,14 +188,22 @@ function SeContent() {
         </p>
         <ul>
           <li>Behandlas enbart lokalt i din webbläsare (JavaScript)</li>
-          <li>Skickas aldrig till våra servrar</li>
+          <li>Skickas inte i själva beräkningsprocessen</li>
           <li>Lagras inte i någon databas</li>
-          <li>Försvinner när du stänger fliken</li>
+          <li>Försvinner från formuläret när du stänger fliken</li>
         </ul>
         <p>
           Om du använder funktionen &quot;Dela beräkning&quot; kodas dina inmatade värden i
-          URL:en (base64) så att mottagaren kan se samma beräkning. Detta sker
-          i din webbläsare och involverar inte våra servrar.
+          URL:en, så att mottagaren kan se samma beräkning. Beroende på kalkylator ligger
+          uppgifterna i URL:ens fragment, som webbläsaren inte skickar i sidans förfrågan,
+          eller i en query-parameter, som kan skickas när länken öppnas. Värdena kan
+          finnas i webbläsarens historik, och alla som får länken kan avkoda dem. Dela
+          endast beräkningar med personer som du har tillåtit att ta del av uppgifterna.
+        </p>
+        <p>
+          Väljer du att dela via QR-kod, sociala medier eller e-post skickar din webbläsare
+          länken till den valda tjänsten. Dela endast beräkningar med personer som du har
+          tillåtit att ta del av uppgifterna.
         </p>
 
         <h2>Cookies och lokal lagring</h2>
@@ -278,7 +300,7 @@ function SeContent() {
         </div>
 
         <p className="text-sm text-gray-500 dark:text-gray-400 mt-8">
-          Senast uppdaterad: mars 2026
+          Senast uppdaterad: 24 september 2026
         </p>
       </div>
     </>

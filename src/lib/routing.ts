@@ -32,11 +32,7 @@ export function getRouteDecision(
   const normalizedPath = normalizePathname(pathname);
   const hasTrailingSlash = pathname !== "/" && normalizedPath !== pathname;
 
-  if (
-    !domainConfig ||
-    domainConfig.baseUrl.includes("localhost") ||
-    domainConfig.locale === "no"
-  ) {
+  if (!domainConfig || domainConfig.baseUrl.includes("localhost")) {
     return hasTrailingSlash
       ? { type: "redirect", destination: normalizedPath, status: 308 }
       : { type: "allow" };
@@ -45,10 +41,13 @@ export function getRouteDecision(
   if (domainConfig.locale === "se") {
     const alias = swedishAliases[normalizedPath];
     if (alias) return { type: "redirect", destination: alias, status: 301 };
+  }
 
-    if (danishOnlySections.some((section) => isInSection(normalizedPath, section))) {
-      return { type: "not-found" };
-    }
+  if (
+    (domainConfig.locale === "se" || domainConfig.locale === "no") &&
+    danishOnlySections.some((section) => isInSection(normalizedPath, section))
+  ) {
+    return { type: "not-found" };
   }
 
   if (

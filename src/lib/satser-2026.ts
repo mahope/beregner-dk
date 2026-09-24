@@ -180,6 +180,63 @@ export const SU_2026 = {
   suKlipExtraSupportMonths: 12,
 } as const;
 
+export const BOLIGSTOETTE_2026 = {
+  verifiedAt: "2026-09-24",
+  sources: {
+    officialRules:
+      "https://www.borger.dk/bolig-og-flytning/Boligstoette-oversigt/soeg-boligstoette",
+    officialCalculator:
+      "https://www.boligstoette.dk/bos-selvbetjening/beregner/basisoplysninger",
+    officialFormula:
+      "https://www.retsinformation.dk/eli/retsinfo/2026/9156",
+    officialRates:
+      "https://www.retsinformation.dk/eli/retsinfo/2026/9336",
+  },
+  maximumMonthly: {
+    nonPensioner: {
+      noChildren: 1194,
+      oneToThreeChildren: 4201,
+      fourPlusChildren: 5251,
+    },
+    newDisabilityPension: {
+      noChildren: 4201,
+      oneToThreeChildren: 4201,
+      fourPlusChildren: 5251,
+    },
+    oldPension: {
+      noChildren: 4969,
+      oneToThreeChildren: 4969,
+      fourPlusChildren: 6211,
+    },
+  },
+  wealth: {
+    considerationRates: {
+      tenPercent: 0.1,
+      twentyPercent: 0.2,
+    },
+    nonPensioner: {
+      noEffect: 896400,
+      tenPercent: 1793000,
+    },
+    pensioner: {
+      noEffect: 1060300,
+      tenPercent: 2120800,
+    },
+  },
+  rentExcludes: [
+    "el",
+    "varme",
+    "varmt vand",
+    "fællesantenne",
+    "telefon, internet eller bredbånd",
+    "leje betalt forud",
+    "indskud og afdrag på indskud",
+    "garage eller carport",
+    "møbler i en møbleret bolig",
+    "vaskeri",
+  ],
+} as const;
+
 export type Barsel2026 = typeof BARSEL_2026;
 export type Su2026 = typeof SU_2026;
 export type Satser2026 = typeof SATSER_2026;

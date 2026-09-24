@@ -528,7 +528,7 @@ export default function PensionGuidePage() {
             href="/blog/boligstoette-2026-nye-regler"
             className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
           >
-            <span className="font-medium text-gray-900 dark:text-white">Boligstøtte 2026 - Nye Regler →</span>
+            <span className="font-medium text-gray-900 dark:text-white">Boligstøtte 2026: Maksima, formue og beregning →</span>
           </Link>
         </div>
       </div>

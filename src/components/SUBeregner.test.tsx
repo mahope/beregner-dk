@@ -188,7 +188,7 @@ describe("SUBeregner", () => {
     fireEvent.click(screen.getByLabelText("Jeg har ét barn under 18 år"));
     fireEvent.click(screen.getByLabelText("Jeg er fortsat indskrevet i de øvrige måneder"));
     fireEvent.click(screen.getByRole("button", { name: "Del beregning" }));
-    const shareUrl = screen.getByLabelText("Delbart link").getAttribute("value") ?? "";
+    const shareUrl = screen.getByLabelText("Link til beregning").getAttribute("value") ?? "";
     const encoded = new URL(shareUrl).searchParams.get("s") ?? "";
 
     expect(decodeCalculationState(encoded)?.inputs).toMatchObject({

@@ -39,7 +39,7 @@ function DaContent() {
         bestræber os på at indsamle så lidt data som muligt.
       </p>
       <p>
-        <strong>Sidst opdateret:</strong> marts 2026
+        <strong>Sidst opdateret:</strong> 24. september 2026
       </p>
 
       <h2>1. Nødvendige cookies og localStorage</h2>
@@ -103,9 +103,13 @@ function DaContent() {
 
       <h2>4. Beregninger og brugerdata</h2>
       <p>
-        Alle beregninger på MinBeregner.dk sker <strong>lokalt i din
-        browser</strong>. De tal du indtaster i vores beregnere sendes ikke til
-        vores servere og gemmes ikke af os.
+        Når du ikke bruger &quot;Del beregning&quot;, sker alle beregninger på
+        MinBeregner.dk lokalt i din browser, og de tal, du indtaster, sendes ikke i
+        selve beregningen. Delelinks er en undtagelse. Nye boligstøtte-links bruger
+        URL-fragmentet, som browseren ikke sender med sideanmodningen. Delelinks fra
+        andre beregnere og ældre boligstøtte-links bruger query-parametre, som kan sendes,
+        når linket åbnes. Linket kan indeholde oplysninger, som alle med linket kan afkode.
+        Vælg derfor kun at dele links med data, du har tilladelse til at videregive.
       </p>
 
       <h2>5. Sådan styrer du cookies</h2>
@@ -153,7 +157,7 @@ function SeContent() {
         strävar efter att samla in så lite data som möjligt.
       </p>
       <p>
-        <strong>Senast uppdaterad:</strong> mars 2026
+        <strong>Senast uppdaterad:</strong> 24 september 2026
       </p>
 
       <h2>1. Nödvändiga cookies och localStorage</h2>
@@ -217,9 +221,13 @@ function SeContent() {
 
       <h2>4. Beräkningar och användardata</h2>
       <p>
-        Alla beräkningar på Beräknare.se sker <strong>lokalt i din
-        webbläsare</strong>. De siffror du anger i våra beräkningsverktyg skickas inte till
-        våra servrar och sparas inte av oss.
+        När du inte använder &quot;Dela beräkning&quot; sker beräkningarna lokalt i din
+        webbläsare, och siffrorna du anger skickas inte i beräkningsprocessen. Delelänkar
+        är ett undantag. Beroende på kalkylator använder de antingen URL:ens fragment,
+        som webbläsaren inte skickar med sidans förfrågan, eller en query-parameter, som
+        kan skickas när länken öppnas. Länken kan alsoå innehålla uppgifter som alla som
+        får den kan avkoda. Dela därför bara länkar med data som du har tillåtit att
+        vidarebefordra.
       </p>
 
       <h2>5. Så hanterar du cookies</h2>

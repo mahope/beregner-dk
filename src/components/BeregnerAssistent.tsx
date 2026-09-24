@@ -55,7 +55,7 @@ const keywordsMap: Record<string, Record<string, string[]>> = {
     "/skattefradrag": ["skattefradrag", "fradrag", "kørselsfradrag", "håndværkerfradrag"],
     "/topskat": ["topskat", "mellemskat", "høj indkomst", "skatteprocent"],
     "/brutto-netto": ["brutto", "netto", "bruttoløn", "nettoløn", "lønforhandling"],
-    "/boligstoette": ["boligstøtte", "husleje", "tilskud"],
+    "/boligstoette": ["boligstøtte", "boligstøtte screening", "boligstøtte formue", "husleje", "tilskud"],
     "/ejendomsvaerdiskat": ["ejendomsskat", "grundskyld", "ejendomsværdiskat", "boligskat"],
     "/elberegner": ["el", "strøm", "elforbrug", "kwh", "elpris"],
     "/kalorier": ["kalorier", "kalorie", "kcal", "mad", "kost", "diæt"],

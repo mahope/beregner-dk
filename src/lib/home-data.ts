@@ -1,5 +1,5 @@
-import type { Locale } from "./i18n";
 import { isCalculatorAvailable } from "./calculator-list";
+import type { Locale } from "./i18n";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -79,7 +79,7 @@ const daPageData: HomePageData = {
     calculators: "44+|Gratis beregnere",
     rates: "2026|Opdaterede satser",
     price: "0 kr.|Ingen login eller betaling",
-    privacy: "100%|Privat — data gemmes ikke",
+    privacy: "Lokalt|Ingen input gemmes i database",
   },
   sections: {
     popular: "Populære beregnere",
@@ -93,7 +93,7 @@ const daPageData: HomePageData = {
       private: {
         title: "Privat & Sikkert",
         description:
-          "Dine data gemmes ikke. Alle beregninger sker lokalt i din browser.",
+          "Dine input gemmes ikke i nogen database, og beregningen sker lokalt i din browser. Hvis du vælger en ekstern delingstjeneste, modtager den de kodede input.",
       },
       local: {
         title: "Danske Satser",
@@ -111,12 +111,12 @@ const daPageData: HomePageData = {
     {
       question: "Gemmer I mine data?",
       answer:
-        "Nej, alle beregninger sker lokalt i din browser. Vi gemmer ingen personlige data, og dine oplysninger forlader aldrig din computer.",
+        "Nej, selve beregningen sker lokalt i din browser, og vi gemmer ikke dine personlige input i nogen database. Delelinks afhænger af beregneren: Nogle bruger URL-fragmenter, som browseren normalt ikke sender med sideanmodningen, mens andre bruger query-parametre, som kan sendes, når linket åbnes. Læs privatlivspolitikken for detaljer.",
     },
     {
       question: "Er beregningerne pålidelige?",
       answer:
-        "Vores beregnere giver gode estimater baseret på officielle satser og formler. For præcise beløb anbefaler vi altid at tjekke de officielle kilder (SKAT, borger.dk, etc.).",
+        "Vores beregnere og screeninger giver estimater baseret på officielle satser, formler og dokumenterede signaler. Se altid de officielle kilder, når et præcist beløb eller en endelig ydelse er vigtigt.",
     },
     {
       question: "Hvilke beregnere har I?",
@@ -156,7 +156,7 @@ const daCalculators: HomeCalculator[] = [
   { title: "Børnepenge", description: "Se hvad du kan få i børne- og ungeydelse 2026", href: "/boernepenge", popular: false, category: "Familie" },
   { title: "SU Beregner", description: "Beregn din SU og fribeløb baseret på din situation", href: "/su", popular: false, category: "Uddannelse" },
   { title: "Dagpengeberegner", description: "Beregn hvad du kan få i dagpenge ved ledighed", href: "/dagpenge", popular: false, category: "Økonomi" },
-  { title: "Boligstøtte", description: "Beregn din boligstøtte til husleje", href: "/boligstoette", popular: false, category: "Bolig" },
+  { title: "Boligstøtte", description: "Se standardmaksima og formuegrænser for boligstøtte", href: "/boligstoette", popular: false, category: "Bolig" },
   { title: "Kalorieberegner", description: "Beregn dit daglige kaloriebehov og makroer", href: "/kalorier", popular: false, category: "Sundhed" },
   { title: "Datoberegner", description: "Beregn dage mellem datoer, arbejdsdage og alder", href: "/dato", popular: false, category: "Praktisk" },
   { title: "Husleje Budget", description: "Find ud af hvad du har råd til i husleje", href: "/husleje", popular: false, category: "Bolig" },
@@ -223,7 +223,7 @@ const noPageData: HomePageData = {
     calculators: "20+|Gratis kalkulatorer",
     rates: "2026|Oppdaterte satser",
     price: "0 kr|Ingen innlogging eller betaling",
-    privacy: "100%|Privat — data lagres ikke",
+    privacy: "Lokalt|Ingen inndata lagres i database",
   },
   sections: {
     popular: "Populære kalkulatorer",
@@ -237,7 +237,7 @@ const noPageData: HomePageData = {
       private: {
         title: "Privat & Sikkert",
         description:
-          "Dine data lagres ikke. Alle beregninger skjer lokalt i nettleseren din.",
+          "Inndataene lagres ikke i noen database, og beregningen skjer lokalt i nettleseren. Når du velger en ekstern delingstjeneste, mottar den de kodede inndataene.",
       },
       local: {
         title: "Norske Satser",
@@ -255,7 +255,7 @@ const noPageData: HomePageData = {
     {
       question: "Lagrer dere mine data?",
       answer:
-        "Nei, alle beregninger skjer lokalt i nettleseren din. Vi lagrer ingen personlige data, og opplysningene dine forlater aldri datamaskinen din.",
+        "Nei, selve beregningen skjer lokalt i nettleseren, og vi lagrer ikke inndataene dine i noen database. Delelenker avhenger av kalkulatoren: Noen bruker URL-fragmenter som normalt ikke sendes med sideforespørselen, mens andre bruker query-parametere som kan sendes når lenken åpnes. Se personvernerklæringen for detaljer.",
     },
     {
       question: "Er beregningene pålitelige?",
@@ -347,7 +347,7 @@ const sePageData: HomePageData = {
     calculators: "20+|Gratis kalkylatorer",
     rates: "2026|Uppdaterade satser",
     price: "0 kr|Ingen inloggning eller betalning",
-    privacy: "100%|Privat — data sparas inte",
+    privacy: "Lokalt|Inga uppgifter sparas i databas",
   },
   sections: {
     popular: "Populära kalkylatorer",
@@ -361,7 +361,7 @@ const sePageData: HomePageData = {
       private: {
         title: "Privat & Säkert",
         description:
-          "Dina uppgifter sparas inte. Alla beräkningar sker lokalt i din webbläsare.",
+          "Dina uppgifter sparas inte i någon databas, och beräkningen sker lokalt i webbläsaren. När du väljer en extern delningstjänst tar den emot de kodade uppgifterna.",
       },
       local: {
         title: "Svenska Satser",
@@ -379,7 +379,7 @@ const sePageData: HomePageData = {
     {
       question: "Sparar ni mina uppgifter?",
       answer:
-        "Nej, alla beräkningar sker lokalt i din webbläsare. Vi sparar inga personuppgifter, och dina uppgifter lämnar aldrig din dator.",
+        "Nej, själva beräkningen sker lokalt i webbläsaren, och vi sparar inte dina uppgifter i någon databas. Dellänkar beror på kalkylatorn: Vissa använder URL-fragment som normalt inte skickas med sidans förfrågan, medan andra använder query-parametrar som kan skickas när länken öppnas. Läs integritetspolicyn för detaljer.",
     },
     {
       question: "Är beräkningarna tillförlitliga?",
