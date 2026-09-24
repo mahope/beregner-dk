@@ -464,6 +464,16 @@ export default function BoligstoetteBeregner() {
     : validationMessage
       ? "Ret de ugyldige oplysninger, før du kan se standardintervallet."
       : calculationError ?? missingStatus ?? "";
+  const maximumShareLabel =
+    resultat?.maximumShareOfRent === 0
+      ? "under 1 %"
+      : resultat &&
+          resultat.screeningHighMonthly < (parsedRent ?? 0) &&
+          resultat.maximumShareOfRent === 100
+        ? "under 100 %"
+        : resultat
+          ? `${resultat.maximumShareOfRent} %`
+          : "";
 
   return (
     <div className="rounded-xl bg-white p-6 shadow-lg md:p-8">
@@ -753,7 +763,7 @@ export default function BoligstoetteBeregner() {
                 </p>
               )}
               <p>
-                Det øvre interval svarer til {resultat.maximumShareOfRent === 0 ? "under 1 %" : `${resultat.maximumShareOfRent} %`} af huslejen, men er ikke et krav på støtte.
+                 Det øvre interval svarer til {maximumShareLabel} af huslejen, men er ikke et krav på støtte.
               </p>
               {isPensionProfile && (
                 <p>

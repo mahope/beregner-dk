@@ -199,7 +199,7 @@ describe("BoligstoetteBeregner", () => {
     fillRequiredProfile();
 
     expect(screen.getByText(/0 – 1\.193,99 kr\/md/)).toBeInTheDocument();
-    expect(screen.getByText(/99 % af huslejen/)).toBeInTheDocument();
+    expect(screen.getByText(/under 100 % af huslejen/)).toBeInTheDocument();
   });
 
   test("accepterer nul indkomst og bevarer uoplyst formue som uoplyst", () => {
@@ -531,6 +531,46 @@ describe("BoligstoetteBeregner", () => {
         pensionStatus: "folkepension",
       },
     });
+  });
+
+  test("meldter når delelinket ikke kan kopieres", async () => {
+    const clipboardDescriptor = Object.getOwnPropertyDescriptor(navigator, "clipboard");
+    const execCommandDescriptor = Object.getOwnPropertyDescriptor(document, "execCommand");
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: undefined,
+    });
+    Object.defineProperty(document, "execCommand", {
+      configurable: true,
+      value: vi.fn(() => false),
+    });
+
+    try {
+      renderBoligstoette();
+      fireEvent.change(screen.getByLabelText("Månedlig husleje (kr./md, uden forbrugsudgifter)"), {
+        target: { value: "6000" },
+      });
+      fireEvent.change(screen.getByLabelText("Årlig husstandsindkomst før skat (kr./år)"), {
+        target: { value: "216000" },
+      });
+      fillRequiredProfile();
+      fireEvent.click(screen.getByRole("button", { name: "Del beregning" }));
+      fireEvent.click(screen.getByRole("button", { name: "Kopier link" }));
+
+      await waitFor(() => {
+        expect(screen.getByRole("alert")).toHaveTextContent(
+          "Linket kunne ikke kopieres. Marker og kopier det manuelt.",
+        );
+      });
+      expect(screen.getByRole("button", { name: "Kopier link" })).toBeInTheDocument();
+    } finally {
+      if (clipboardDescriptor) Object.defineProperty(navigator, "clipboard", clipboardDescriptor);
+      if (execCommandDescriptor) {
+        Object.defineProperty(document, "execCommand", execCommandDescriptor);
+      } else {
+        Reflect.deleteProperty(document, "execCommand");
+      }
+    }
   });
 
   test("lader ikke delestat på andre ruter blive ryddet", () => {

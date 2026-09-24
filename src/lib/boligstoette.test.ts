@@ -185,7 +185,7 @@ describe("beregnBoligstoette", () => {
     ).toMatchObject({ screeningHighMonthly: 1194 });
     expect(
       beregnBoligstoette({ ...baseInput, monthlyRent: 1194.005 }),
-    ).toMatchObject({ maximumShareOfRent: 99 });
+    ).toMatchObject({ maximumShareOfRent: 100 });
     expect(
       beregnBoligstoette({ ...baseInput, monthlyRent: 1000000 }),
     ).toMatchObject({ maximumShareOfRent: 0 });

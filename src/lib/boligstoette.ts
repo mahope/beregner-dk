@@ -240,11 +240,7 @@ export function beregnBoligstoette(
   );
   const exactMaximumShareOfRent =
     (screeningHighMonthly / input.monthlyRent) * 100;
-  const roundedMaximumShareOfRent = Math.round(exactMaximumShareOfRent);
-  const maximumShareOfRent =
-    screeningHighMonthly < input.monthlyRent && roundedMaximumShareOfRent === 100
-      ? 99
-      : roundedMaximumShareOfRent;
+  const maximumShareOfRent = Math.round(exactMaximumShareOfRent);
 
   return {
     maximumMonthly,

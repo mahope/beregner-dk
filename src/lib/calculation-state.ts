@@ -204,10 +204,12 @@ export async function copyToClipboard(text: string): Promise<boolean> {
     textArea.style.position = 'fixed';
     textArea.style.left = '-9999px';
     document.body.appendChild(textArea);
-    textArea.select();
-    document.execCommand('copy');
-    document.body.removeChild(textArea);
-    return true;
+    try {
+      textArea.select();
+      return document.execCommand('copy');
+    } finally {
+      document.body.removeChild(textArea);
+    }
   } catch (e) {
     console.error('Failed to copy to clipboard:', e);
     return false;

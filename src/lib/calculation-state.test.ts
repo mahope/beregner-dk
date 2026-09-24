@@ -1,6 +1,7 @@
-import { afterEach, describe, expect, test } from "vitest";
+import { afterEach, describe, expect, test, vi } from "vitest";
 import {
   clearStateFromUrl,
+  copyToClipboard,
   decodeCalculationState,
   encodeCalculationState,
   generateShareableLink,
@@ -219,5 +220,31 @@ describe("URL state location", () => {
     clearStateFromUrl();
     expect(new URL(window.location.href).hash).toBe("");
     expect(new URL(window.location.href).searchParams.get("behold")).toBe("ja");
+  });
+});
+
+describe("copyToClipboard", () => {
+  test("rapporterer fejl når fallback-kopiering mislykkes", async () => {
+    const clipboardDescriptor = Object.getOwnPropertyDescriptor(navigator, "clipboard");
+    const execCommandDescriptor = Object.getOwnPropertyDescriptor(document, "execCommand");
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: undefined,
+    });
+    Object.defineProperty(document, "execCommand", {
+      configurable: true,
+      value: vi.fn(() => false),
+    });
+
+    try {
+      await expect(copyToClipboard("https://minberegner.dk/boligstoette#s=test")).resolves.toBe(false);
+    } finally {
+      if (clipboardDescriptor) Object.defineProperty(navigator, "clipboard", clipboardDescriptor);
+      if (execCommandDescriptor) {
+        Object.defineProperty(document, "execCommand", execCommandDescriptor);
+      } else {
+        Reflect.deleteProperty(document, "execCommand");
+      }
+    }
   });
 });

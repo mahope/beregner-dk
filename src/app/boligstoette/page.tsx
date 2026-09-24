@@ -191,7 +191,7 @@ export default async function BoligstoettePage() {
                    <th scope="row">Ikke-pensionister og førtidspensionister efter nye regler</th>
                    <td>0–{kr(BOLIGSTOETTE_2026.wealth.nonPensioner.noEffect)} kr.</td>
                    <td>
-                     {kr(BOLIGSTOETTE_2026.wealth.nonPensioner.noEffect)}–
+                     Over {kr(BOLIGSTOETTE_2026.wealth.nonPensioner.noEffect)} kr. til{" "}
                      {kr(BOLIGSTOETTE_2026.wealth.nonPensioner.tenPercent)} kr.
                    </td>
                    <td>{kr(BOLIGSTOETTE_2026.wealth.nonPensioner.tenPercent)} kr. og derover</td>
@@ -200,7 +200,7 @@ export default async function BoligstoettePage() {
                    <th scope="row">Folkepensionister og førtidspensionister før 2003</th>
                    <td>0–{kr(BOLIGSTOETTE_2026.wealth.pensioner.noEffect)} kr.</td>
                    <td>
-                     {kr(BOLIGSTOETTE_2026.wealth.pensioner.noEffect)}–
+                     Over {kr(BOLIGSTOETTE_2026.wealth.pensioner.noEffect)} kr. til{" "}
                      {kr(BOLIGSTOETTE_2026.wealth.pensioner.tenPercent)} kr.
                    </td>
                    <td>{kr(BOLIGSTOETTE_2026.wealth.pensioner.tenPercent)} kr. og derover</td>

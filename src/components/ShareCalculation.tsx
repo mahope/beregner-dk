@@ -27,6 +27,7 @@ const shareLabels = {
     close: "Luk dialog",
     linkLabel: "Link til beregning",
     copied: "Kopieret!",
+    copyError: "Linket kunne ikke kopieres. Marker og kopier det manuelt.",
     copyLink: "Kopier link",
     socialLabel: "Del på sociale medier",
     twitter: "Del på Twitter",
@@ -46,6 +47,7 @@ const shareLabels = {
     close: "Lukk dialog",
     linkLabel: "Lenke til beregning",
     copied: "Kopiert!",
+    copyError: "Lenken kunne ikke kopieres. Marker og kopier den manuelt.",
     copyLink: "Kopier lenke",
     socialLabel: "Del på sosiale medier",
     twitter: "Del på Twitter",
@@ -65,6 +67,7 @@ const shareLabels = {
     close: "Stäng dialog",
     linkLabel: "Länk till beräkning",
     copied: "Kopierat!",
+    copyError: "Länken kunde inte kopieras. Markera och kopiera den manuellt.",
     copyLink: "Kopiera länk",
     socialLabel: "Dela på sociala medier",
     twitter: "Dela på Twitter",
@@ -99,6 +102,7 @@ export function ShareCalculation({
   const [isOpen, setIsOpen] = useState(false);
   const [shareableLink, setShareableLink] = useState<ShareableLink | null>(null);
   const [isCopied, setIsCopied] = useState(false);
+  const [hasCopyError, setHasCopyError] = useState(false);
   const [showQr, setShowQr] = useState(false);
   
   const modalRef = useRef<HTMLDivElement>(null);
@@ -114,6 +118,7 @@ export function ShareCalculation({
     setShareableLink(link);
     setIsOpen(true);
     setIsCopied(false);
+    setHasCopyError(false);
     trackShare(calculatorName, 'open');
   }, [getShareableLink, calculatorName]);
 
@@ -169,12 +174,13 @@ export function ShareCalculation({
 
   const handleCopy = async () => {
     if (!shareableLink) return;
-    
+
     const url = shareableLink.fullUrl;
     const success = await copyToClipboard(url);
-    
+
+    setIsCopied(success);
+    setHasCopyError(!success);
     if (success) {
-      setIsCopied(true);
       trackResultCopied(calculatorName);
       setTimeout(() => setIsCopied(false), 2000);
     }
@@ -281,6 +287,11 @@ export function ShareCalculation({
                     )}
                   </button>
                 </div>
+                {hasCopyError && (
+                  <p role="alert" className="mt-2 text-sm text-red-600 dark:text-red-400">
+                    {l.copyError}
+                  </p>
+                )}
 
               </div>
 

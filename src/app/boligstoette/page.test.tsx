@@ -52,8 +52,9 @@ describe("boligstoette page", () => {
     expect(html).toContain("basisoplysninger");
     expect(html).toContain("1.194");
      expect(html).toContain("896.400");
-     expect(html).toContain("896.400–1.793.000");
+     expect(html).toContain("Over 896.400 kr. til 1.793.000 kr.");
      expect(html).toContain("1.793.000 kr. og derover");
+     expect(html).toContain("Over 1.060.300 kr. til 2.120.800 kr.");
     expect(html).toContain("Standardinterval");
      expect(html).toContain("Folkepensionister og førtidspensionister før 2003");
      expect(html).toContain("Pensionsrækkerne er en ordningsafklaring");
