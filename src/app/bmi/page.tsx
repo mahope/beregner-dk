@@ -120,8 +120,8 @@ export default async function BMIPage() {
             sidder (mavefedme er mere risikabelt)
           </li>
           <li>
-            <strong>Køn:</strong> Køn indgår ikke i BMI-formlen. Det bruges kun til at
-            vælge WHR-vejledningen
+            <strong>Køn:</strong> Køn indgår ikke i BMI-formlen. Værktøjet viser WHR som
+            et råt forholdstal uden kønsjustering
           </li>
         </ul>
 
@@ -135,9 +135,8 @@ export default async function BMIPage() {
             kvinder
           </li>
           <li>
-            <strong>Talje-hofte-ratio:</strong> Værktøjet viser forskellig
-            WHR-vejledning til mænd og kvinder. Vejledningen er ikke en diagnose
-            og erstatter ikke en samlet vurdering fra en læge
+            <strong>Talje-hofte-ratio:</strong> Værktøjet viser WHR som et råt forholdstal
+            uden kønsjustering. Værdien erstatter ikke en samlet vurdering fra en læge
           </li>
           <li>
             <strong>Fedtprocent:</strong> Måles med specialudstyr
@@ -213,8 +212,8 @@ export default async function BMIPage() {
             sitter (bukfetma är farligare)
           </li>
           <li>
-            <strong>Kön:</strong> Kön ingår inte i BMI-formeln. Det används bara för
-            att välja WHR-vägledningen
+            <strong>Kön:</strong> Kön ingår inte i BMI-formeln. Verktyget visar WHR som
+            ett rått förhållandetal utan könsjustering
           </li>
         </ul>
 
@@ -228,9 +227,8 @@ export default async function BMIPage() {
             kvinnor
           </li>
           <li>
-            <strong>Midja-höft-kvot:</strong> Verktyget visar olika
-            WHR-vägledning för män och kvinnor. Vägledningen är inte en diagnos
-            och ersätter inte en samlad bedömning från läkare
+            <strong>Midja-höft-kvot:</strong> Verktyget visar WHR som ett rått förhållandetal
+            utan könsjustering. Värdet ersätter inte en samlad bedömning från läkare
           </li>
           <li>
             <strong>Fettprocent:</strong> Mäts med specialutrustning

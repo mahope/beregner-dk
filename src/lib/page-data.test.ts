@@ -31,12 +31,15 @@ describe("getPageData", () => {
       expect(data.title.toLowerCase()).toContain(adultWord);
       expect(data.metaTitle.toLowerCase()).toContain(adultWord);
       expect(data.metaDescription.toLowerCase()).toContain(adultWord);
+      expect(data.metaDescription).toContain("1,75²");
+      expect(data.metaDescription).not.toContain("1,75m");
       expect(data.ogTitle.toLowerCase()).toContain(adultWord);
       expect(data.ogDescription.toLowerCase()).toContain(adultWord);
       expect(data.schemaName.toLowerCase()).toContain(adultWord);
       expect(data.schemaDescription.toLowerCase()).toContain(adultWord);
       const childFaq = data.faqItems.find((item) => /børn|barn|children/i.test(item.question));
-      expect(childFaq?.answer).toMatch(/percentil|persentil/i);
+      expect(childFaq?.answer).toMatch(/percentil/i);
+      expect(childFaq?.answer).not.toMatch(/persentil/i);
     }
   });
 

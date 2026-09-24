@@ -10,7 +10,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: "BMI for Børn - Sådan Tjekker Du (Komplet Guide 2026) | MinBeregner.dk",
     description:
-      "BMI for børn beregnes anderledes end voksne. Lær om percentiler, ISO BMI, og hvordan du tjekker dit barns vægt sundt. Inkluderer aldersbaserede tabeller og eksempler.",
+      "BMI for børn skal vurderes med alders- og kønsspecifikke percentiler. Se formlen, WHO's væksttabeller og eksempler på 5., 50., 85. og 95. percentil.",
     keywords: [
       "bmi børn",
       "bmi for børn",
@@ -38,7 +38,7 @@ export async function generateMetadata(): Promise<Metadata> {
 const faqItems = [
   {
     question: "Hvad er en normal BMI for børn?",
-    answer: "For børn bruges percentiler i stedet for faste BMI-grænser. En 'normal' vægt ligger typisk mellem 5. og 85. percentil for barnets alder og køn. Over 85. percentil indikerer overvægt, og over 95. percentil indikerer fedme. Sundhedsplejersken bruger vækstkurver til at følge dit barns udvikling.",
+    answer: "Børns BMI vurderes med alders- og kønsspecifikke vækstkurver. I en forenklet percentiloversigt ligger 5.-85. percentil i normalområdet, 85.-95. percentil giver grund til opfølgning, og over 95. percentil bør vurderes professionelt. WHO bruger mere præcise grænser på +1 og +2 standardafvigelser.",
   },
   {
     question: "Kan jeg bruge en almindelig BMI beregner til mit barn?",
@@ -46,7 +46,7 @@ const faqItems = [
   },
   {
     question: "Hvad er ISO BMI?",
-    answer: "ISO BMI (også kaldet 'BMI-for-age') er en metode, der omsætter et barns BMI til hvad det ville svare til som voksen. Fx kan et barn med ISO BMI 25 forventes at have BMI omkring 25 som voksen, hvis de følger samme vækstmønster. Det gør det lettere at sammenligne på tværs af aldre.",
+    answer: "ISO BMI er en alders- og kønsspecifik projektion af barnets nuværende BMI-udvikling til det forventede BMI ved 18 år. Den er ikke det samme som BMI-for-age eller percentilen i WHO's væksttabeller, og vi beregner den ikke i værktøjet.",
   },
   {
     question: "Hvornår skal jeg være bekymret for mit barns vægt?",
@@ -108,8 +108,8 @@ export default function BMIBoernGuidePage() {
         <div className="bg-blue-50 dark:bg-blue-900/30 p-6 rounded-lg not-prose my-6">
           <h3 className="font-bold text-lg mb-2 text-gray-900 dark:text-white">Eksempel: Samme BMI, forskellig betydning</h3>
           <ul className="space-y-2 text-gray-700 dark:text-gray-300">
-            <li>👧 <strong>8-årig pige med BMI 17:</strong> Helt normalt (50. percentil)</li>
-            <li>👩 <strong>30-årig kvinde med BMI 17:</strong> Undervægtig (under 18,5)</li>
+            <li><strong>8-årig pige med BMI 15,7:</strong> 50. percentil i tabellen nedenfor</li>
+            <li><strong>30-årig kvinde med BMI 15,7:</strong> Under 18,5 og dermed undervægt ifølge voksnegrænserne</li>
           </ul>
         </div>
 
@@ -143,20 +143,20 @@ export default function BMIBoernGuidePage() {
               <tr className="border-b dark:border-gray-700">
                 <td className="py-2 font-medium">85. - 95.</td>
                 <td>Højere end 85% af jævnaldrende</td>
-                <td className="text-orange-600 dark:text-orange-400">Overvægt</td>
+                <td className="text-orange-600 dark:text-orange-400">Grund til opfølgning</td>
               </tr>
               <tr className="border-b dark:border-gray-700">
                 <td className="py-2 font-medium">Over 95.</td>
                 <td>Højere end 95% af jævnaldrende</td>
-                <td className="text-red-600 dark:text-red-400">Fedme</td>
+                <td className="text-red-600 dark:text-red-400">Professionel vurdering</td>
               </tr>
             </tbody>
           </table>
         </div>
 
         <p>
-          Percentilerne er baseret på store undersøgelser af børns vækst - primært 
-          WHO&apos;s vækstkurver, som også bruges af danske sundhedsplejersker.
+          Percentiltabellerne er hentet fra WHO's reference- og standarddatasæt. Brug den
+          alders- og kønsspecifikke kurve til at finde barnets placering.
         </p>
 
         <h2>Sådan beregner du dit barns BMI</h2>
@@ -193,7 +193,7 @@ export default function BMIBoernGuidePage() {
 
         <h2>BMI-percentiler efter alder</h2>
         <p>
-          Her er typiske BMI-værdier for 50. percentil (gennemsnittet) for drenge og piger 
+          Her er BMI-værdier ved 5., 50., 85. og 95. percentil for drenge og piger
           i forskellige aldre:
         </p>
 
@@ -211,60 +211,46 @@ export default function BMIBoernGuidePage() {
             </thead>
             <tbody>
               <tr className="border-b dark:border-gray-700">
-                <td className="py-2">2 år</td>
-                <td className="text-right">14,7</td>
-                <td className="text-right">16,4</td>
-                <td className="text-right">17,7</td>
-                <td className="text-right">18,4</td>
-              </tr>
-              <tr className="border-b dark:border-gray-700">
-                <td className="py-2">4 år</td>
-                <td className="text-right">13,8</td>
-                <td className="text-right">15,3</td>
-                <td className="text-right">16,6</td>
-                <td className="text-right">17,5</td>
-              </tr>
-              <tr className="border-b dark:border-gray-700">
                 <td className="py-2">6 år</td>
-                <td className="text-right">13,5</td>
+                <td className="text-right">13,4</td>
                 <td className="text-right">15,3</td>
-                <td className="text-right">17,0</td>
-                <td className="text-right">18,2</td>
+                <td className="text-right">16,8</td>
+                <td className="text-right">17,9</td>
               </tr>
               <tr className="border-b dark:border-gray-700">
                 <td className="py-2">8 år</td>
                 <td className="text-right">13,7</td>
-                <td className="text-right">15,8</td>
-                <td className="text-right">18,0</td>
-                <td className="text-right">19,6</td>
+                <td className="text-right">15,7</td>
+                <td className="text-right">17,5</td>
+                <td className="text-right">18,8</td>
               </tr>
               <tr className="border-b dark:border-gray-700">
                 <td className="py-2">10 år</td>
-                <td className="text-right">14,2</td>
-                <td className="text-right">16,6</td>
-                <td className="text-right">19,4</td>
-                <td className="text-right">21,4</td>
+                <td className="text-right">14,1</td>
+                <td className="text-right">16,4</td>
+                <td className="text-right">18,6</td>
+                <td className="text-right">20,2</td>
               </tr>
               <tr className="border-b dark:border-gray-700">
                 <td className="py-2">12 år</td>
-                <td className="text-right">15,0</td>
-                <td className="text-right">17,8</td>
-                <td className="text-right">21,2</td>
-                <td className="text-right">23,6</td>
+                <td className="text-right">14,9</td>
+                <td className="text-right">17,5</td>
+                <td className="text-right">20,1</td>
+                <td className="text-right">22,1</td>
               </tr>
               <tr className="border-b dark:border-gray-700">
                 <td className="py-2">14 år</td>
                 <td className="text-right">16,0</td>
-                <td className="text-right">19,2</td>
-                <td className="text-right">23,0</td>
-                <td className="text-right">25,5</td>
+                <td className="text-right">19,0</td>
+                <td className="text-right">21,9</td>
+                <td className="text-right">24,2</td>
               </tr>
               <tr className="border-b dark:border-gray-700">
                 <td className="py-2">16 år</td>
                 <td className="text-right">17,1</td>
                 <td className="text-right">20,5</td>
-                <td className="text-right">24,2</td>
-                <td className="text-right">26,8</td>
+                <td className="text-right">23,7</td>
+                <td className="text-right">26,1</td>
               </tr>
             </tbody>
           </table>
@@ -284,60 +270,46 @@ export default function BMIBoernGuidePage() {
             </thead>
             <tbody>
               <tr className="border-b dark:border-gray-700">
-                <td className="py-2">2 år</td>
-                <td className="text-right">14,4</td>
-                <td className="text-right">16,0</td>
-                <td className="text-right">17,3</td>
-                <td className="text-right">18,0</td>
-              </tr>
-              <tr className="border-b dark:border-gray-700">
-                <td className="py-2">4 år</td>
-                <td className="text-right">13,5</td>
-                <td className="text-right">15,0</td>
-                <td className="text-right">16,3</td>
-                <td className="text-right">17,2</td>
-              </tr>
-              <tr className="border-b dark:border-gray-700">
                 <td className="py-2">6 år</td>
                 <td className="text-right">13,1</td>
-                <td className="text-right">15,0</td>
-                <td className="text-right">16,8</td>
-                <td className="text-right">18,0</td>
+                <td className="text-right">15,3</td>
+                <td className="text-right">17,1</td>
+                <td className="text-right">18,4</td>
               </tr>
               <tr className="border-b dark:border-gray-700">
                 <td className="py-2">8 år</td>
                 <td className="text-right">13,3</td>
-                <td className="text-right">15,6</td>
-                <td className="text-right">18,0</td>
-                <td className="text-right">19,7</td>
+                <td className="text-right">15,7</td>
+                <td className="text-right">17,8</td>
+                <td className="text-right">19,4</td>
               </tr>
               <tr className="border-b dark:border-gray-700">
                 <td className="py-2">10 år</td>
                 <td className="text-right">13,9</td>
                 <td className="text-right">16,6</td>
-                <td className="text-right">19,7</td>
-                <td className="text-right">21,8</td>
+                <td className="text-right">19,1</td>
+                <td className="text-right">21,1</td>
               </tr>
               <tr className="border-b dark:border-gray-700">
                 <td className="py-2">12 år</td>
-                <td className="text-right">14,8</td>
+                <td className="text-right">14,9</td>
                 <td className="text-right">18,0</td>
-                <td className="text-right">21,5</td>
-                <td className="text-right">24,0</td>
+                <td className="text-right">20,9</td>
+                <td className="text-right">23,3</td>
               </tr>
               <tr className="border-b dark:border-gray-700">
                 <td className="py-2">14 år</td>
-                <td className="text-right">15,8</td>
-                <td className="text-right">19,4</td>
-                <td className="text-right">23,3</td>
-                <td className="text-right">26,0</td>
+                <td className="text-right">16,0</td>
+                <td className="text-right">19,6</td>
+                <td className="text-right">22,9</td>
+                <td className="text-right">25,5</td>
               </tr>
               <tr className="border-b dark:border-gray-700">
                 <td className="py-2">16 år</td>
-                <td className="text-right">16,6</td>
-                <td className="text-right">20,4</td>
-                <td className="text-right">24,5</td>
-                <td className="text-right">27,2</td>
+                <td className="text-right">16,8</td>
+                <td className="text-right">20,7</td>
+                <td className="text-right">24,2</td>
+                <td className="text-right">27,0</td>
               </tr>
             </tbody>
           </table>
@@ -351,37 +323,29 @@ export default function BMIBoernGuidePage() {
             rel="noopener noreferrer"
           >
             WHO&apos;s vækstreference for BMI-for-age (5–19 år)
-          </a>{" "}
-          og{" "}
-          <a
-            href="https://www.who.int/tools/child-growth-standards"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            WHO&apos;s vækststandarder for børn under 5 år
           </a>
-          . Gennemgået 24. september 2026.
+          . Tabellen viser de officielle WHO-værdier for 6-, 8-, 10-, 12-, 14- og
+          16-årige, afgerdet til én decimal. Gennemgået 24. september 2026.
         </p>
 
         <h2>Hvad er ISO BMI?</h2>
         <p>
-          <strong>ISO BMI</strong> (International Obesity Task Force standard) er en smart 
-          måde at udtrykke et barns BMI på. I stedet for at sige &quot;dit barn er på 75. 
-          percentil&quot;, omsætter ISO BMI tallet til, hvad det ville svare til som voksen.
+          <strong>ISO BMI</strong> er en særskilt alders- og kønsspecifik projektion. Den
+          beregner det BMI, barnet forventes at have ved 18 år, hvis den nuværende vækstbane
+          fortsætter. Den er ikke det samme som BMI-for-age, som er barnets BMI sammenlignet
+          med jævnaldrende, og den er heller ikke det samme som percentilen i WHO's tabeller.
         </p>
-
-        <div className="bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 p-4 rounded-lg not-prose my-6">
-          <p className="font-medium text-gray-900 dark:text-white">💡 Eksempel på ISO BMI</p>
-          <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">
-            En 10-årig dreng med BMI 19 har ISO BMI ≈ 25. Det betyder, at hvis han fortsætter 
-            det samme vækstmønster, vil han sandsynligvis have BMI omkring 25 som voksen 
-            (grænsen til overvægt).
-          </p>
-        </div>
-
         <p>
-          ISO BMI gør det lettere for forældre at forstå, fordi vi kender de voksne BMI-grænser. 
-          Mange læger og sundhedsplejersker bruger denne metode i deres kommunikation.
+          <a
+            href="https://www.who.int/tools/growth-reference-data-for-5to19-years/indicators/bmi-for-age"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            WHO&apos;s BMI-for-age-side
+          </a>{" "}
+          beskriver vækstreferencen og linker desuden til en sammenligning af WHO og IOTF.
+          Brug derfor den konkrete WHO-vækstkurve, når du skal finde barnets percentil. ISO BMI
+          kræver en særskilt beregning og bør tolkes sammen med en sundhedsplejerske eller læge.
         </p>
 
         <h2>Hvornår skal du reagere?</h2>
@@ -460,12 +424,6 @@ export default function BMIBoernGuidePage() {
           >
             Se BMI-beregneren for voksne →
           </Link>
-          <Link 
-            href="/kalorier"
-            className="inline-block px-6 py-3 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-center"
-          >
-            Kalorie-beregner →
-          </Link>
         </div>
 
         <h2>Ofte stillede spørgsmål</h2>
@@ -478,35 +436,35 @@ export default function BMIBoernGuidePage() {
       </article>
 
       <div className="mt-12 pt-8 border-t dark:border-gray-700">
-        <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Relaterede beregnere</h2>
+        <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Værktøjer til voksne og familien</h2>
         <div className="grid gap-4 md:grid-cols-2">
-          <Link 
+          <Link
             href="/bmi"
             className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
           >
             <span className="font-medium text-gray-900 dark:text-white">BMI-beregner for voksne →</span>
             <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Beregn råt Body Mass Index for voksne</p>
           </Link>
-          <Link 
-            href="/kalorier"
-            className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-          >
-            <span className="font-medium text-gray-900 dark:text-white">Kalorie-beregner →</span>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Beregn dagligt kaloriebehov</p>
-          </Link>
-          <Link 
+          <Link
             href="/alder"
             className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
           >
             <span className="font-medium text-gray-900 dark:text-white">Aldersberegner →</span>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Beregn præcis alder i år, måneder og dage</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Find et barns præcise alder i år, måneder og dage</p>
           </Link>
-          <Link 
+          <Link
             href="/boernepenge"
             className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
           >
             <span className="font-medium text-gray-900 dark:text-white">Børnepenge-beregner →</span>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Se hvor meget du får i børne- og ungeydelse</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Se børne- og ungeydelse for familien</p>
+          </Link>
+          <Link
+            href="/barselsdagpenge"
+            className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+          >
+            <span className="font-medium text-gray-900 dark:text-white">Barselsdagpenge-beregner →</span>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">BeregnBarselsdagpenge efter de officielle 2026-satser</p>
           </Link>
         </div>
       </div>
@@ -514,17 +472,17 @@ export default function BMIBoernGuidePage() {
       <div className="mt-8 pt-8 border-t dark:border-gray-700">
         <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Relaterede artikler</h2>
         <div className="grid gap-4">
-          <Link 
-            href="/blog/saadan-beregner-du-din-reelle-timeloen"
+          <Link
+            href="/blog/barsel-2026-regler-og-satser"
             className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
           >
-            <span className="font-medium text-gray-900 dark:text-white">Sådan beregner du din reelle timeløn →</span>
+            <span className="font-medium text-gray-900 dark:text-white">Barsel 2026: regler og satser →</span>
           </Link>
-          <Link 
-            href="/blog/guide-feriepenge-hvornaar-og-hvor-meget"
+          <Link
+            href="/blog/boernepenge-2026-satser-og-regler"
             className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
           >
-            <span className="font-medium text-gray-900 dark:text-white">Guide: Feriepenge - hvornår og hvor meget? →</span>
+            <span className="font-medium text-gray-900 dark:text-white">Børnepenge 2026: satser og regler →</span>
           </Link>
         </div>
       </div>

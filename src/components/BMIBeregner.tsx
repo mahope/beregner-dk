@@ -7,10 +7,9 @@ import { PrintResult } from "@/components/PrintResult";
 import { CopyResultButton, ResetButton } from "@/components/ui";
 import { InputField } from "@/components/InputField";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
+import { formatNumber } from "@/lib/format";
 import { AffiliateBox } from "./AffiliateBox";
 import { useLocale } from "@/components/LocaleProvider";
-
-type Koen = "mand" | "kvinde";
 type Enhed = "metrisk" | "imperial";
 type ZoneKey = "under" | "normal" | "over" | "fedme1" | "fedme2" | "fedme3";
 
@@ -24,11 +23,10 @@ const labels = {
     heightInches: "Højde (inches)",
     measureMetric: "cm",
     measureImperial: "inches",
-    gender: "Køn (kun til WHR)",
-    male: "Mand",
-    female: "Kvinde",
-    genderNote: "Køn påvirker kun WHR-vejledningen, ikke BMI.",
+    unitLabel: "Vælg måleenhed",
     adultNotice: "BMI for voksne (18+). Formlen bruger kun vægt og højde — alder indgår ikke i beregningen.",
+    childInput: "Delelinken indeholder en alder under 18. Brug alders- og kønsspecifikke væksttabeller til børn.",
+    invalidInput: "Indtast vægt og højde for en voksen inden for værktøjets grænser.",
     bmiScale: "BMI skala",
     zones: {
       under: "Undervægtig",
@@ -53,18 +51,17 @@ const labels = {
     descFedme2: "Din BMI indikerer svær fedme. Det anbefales at søge professionel hjælp.",
     descFedme3: "Din BMI indikerer meget svær fedme. Søg professionel medicinsk hjælp.",
     whrTitle: "Talje-hofte ratio (valgfrit)",
-    whrDesc: "Supplerer BMI med en vurdering af fedtfordelingen.",
+    whrDesc: "Beregner et råt forholdstal mellem taljemål og hoftemål.",
     waistLabel: "Taljemål",
     hipLabel: "Hoftemål",
     helpNavle: "Mål ved navlen",
     helpBredest: "Mål ved det bredeste punkt",
     whrResultLabel: "Talje-hofte ratio",
-    whrGuideMen: "Mænd: køn bruges kun til WHR-referencevisningen; vejledningen er ikke en diagnose.",
-    whrGuideWomen: "Kvinder: køn bruges kun til WHR-referencevisningen; vejledningen er ikke en diagnose.",
+    whrGuide: "Råt forholdstal uden kønsjustering. Det erstatter ikke en samlet helbreds-vurdering.",
     catTableTitle: "BMI kategorier (voksne)",
     whoTitle: "Om talje-hofte ratio",
     whoDesc:
-      "Talje-hofte ratioen (WHR) supplerer BMI ved at vurdere, hvor fedtet sidder på kroppen. Køn bruges kun til at vælge den viste WHR-vejledning. Vejledningen er ikke en diagnose.",
+      "Talje-hofte ratioen (WHR) er et råt forholdstal mellem taljemål og hoftemål. Køn indgår hverken i BMI-formlen eller i værktøjets WHR. Værdien er ikke en diagnose.",
     calcName: "BMI Beregner for voksne",
   },
   se: {
@@ -76,11 +73,10 @@ const labels = {
     heightInches: "Längd (tum)",
     measureMetric: "cm",
     measureImperial: "tum",
-    gender: "Kön (endast WHR)",
-    male: "Man",
-    female: "Kvinna",
-    genderNote: "Kön påverkar endast WHR-vägledningen, inte BMI.",
+    unitLabel: "Välj måtenhet",
     adultNotice: "BMI för vuxna (18+). Formeln använder endast vikt och längd — ålder ingår inte i beräkningen.",
+    childInput: "Delningslänken innehåller en ålder under 18. Använd ålders- och könsspecifika tillväxttabeller för barn.",
+    invalidInput: "Ange vikt och längd för en vuxen inom verktygets gränser.",
     bmiScale: "BMI-skala",
     zones: {
       under: "Undervikt",
@@ -105,18 +101,17 @@ const labels = {
     descFedme2: "Ditt BMI indikerar svår fetma. Det rekommenderas att söka professionell hjälp.",
     descFedme3: "Ditt BMI indikerar mycket svår fetma. Sök professionell medicinsk hjälp.",
     whrTitle: "Midja-höft-kvot (valfritt)",
-    whrDesc: "Kompletterar BMI med en bedömning av fettfördelningen.",
+    whrDesc: "Beräknar ett rått förhållandetal mellan midja och höft.",
     waistLabel: "Midjemått",
     hipLabel: "Höftmått",
     helpNavle: "Mät vid naveln",
     helpBredest: "Mät vid den bredaste punkten",
     whrResultLabel: "Midja-höft-kvot",
-    whrGuideMen: "Män: kön används endast för WHR-referensvisningen; vägledningen är inte en diagnos.",
-    whrGuideWomen: "Kvinnor: kön används endast för WHR-referensvisningen; vägledningen är inte en diagnos.",
+    whrGuide: "Rått förhållandetal utan könsjustering. Det ersätter inte en samlad hälsobedömning.",
     catTableTitle: "BMI-kategorier (vuxna)",
     whoTitle: "Om midja-höft-kvot",
     whoDesc:
-      "Midja-höft-kvoten (WHR) kompletterar BMI genom att bedöma var fettet sitter på kroppen. Kön används endast för att välja den visade WHR-vägledningen. Vägledningen är inte en diagnos.",
+      "Midja-höft-kvoten (WHR) är ett rått förhållandetal mellan midja och höft. Kön ingår varken i BMI-formeln eller i verktygets WHR. Värdet är inte en diagnos.",
     calcName: "BMI-kalkylator för vuxna",
   },
   no: {
@@ -128,11 +123,10 @@ const labels = {
     heightInches: "Høyde (tommer)",
     measureMetric: "cm",
     measureImperial: "tommer",
-    gender: "Kjønn (kun for WHR)",
-    male: "Mann",
-    female: "Kvinne",
-    genderNote: "Kjønn påvirker bare WHR-veiledningen, ikke BMI.",
+    unitLabel: "Velg måleenhet",
     adultNotice: "BMI for voksne (18+). Formelen bruker bare vekt og høyde — alder inngår ikke i beregningen.",
+    childInput: "Delingslenken inneholder en alder under 18. Bruk alders- og kjønnsspesifikke veksttabeller for barn.",
+    invalidInput: "Oppgi vekt og høyde for en voksen innenfor verktøyets grenser.",
     bmiScale: "BMI-skala",
     zones: {
       under: "Undervekt",
@@ -157,18 +151,17 @@ const labels = {
     descFedme2: "BMI-en din tyder på alvorlig fedme. Det anbefales å søke profesjonell hjelp.",
     descFedme3: "BMI-en din tyder på svært alvorlig fedme. Søk profesjonell medisinsk hjelp.",
     whrTitle: "Midje-hofte-kvot (valgfritt)",
-    whrDesc: "Supplerer BMI med en vurdering av fettfordelingen.",
+    whrDesc: "Beregner et rått forholdstall mellom midjemål og hofte mål.",
     waistLabel: "Midjemål",
     hipLabel: "Hofte mål",
     helpNavle: "Mål ved navlen",
     helpBredest: "Mål ved det bredeste punktet",
     whrResultLabel: "Midje-hofte-kvot",
-    whrGuideMen: "Menn: kjønn brukes bare til WHR-referansevisningen; veiledningen er ikke en diagnose.",
-    whrGuideWomen: "Kvinner: kjønn brukes bare til WHR-referansevisningen; veiledningen er ikke en diagnose.",
+    whrGuide: "Rått forholdstall uten kjønnsjustering. Det erstatter ikke en samlet helsevurdering.",
     catTableTitle: "BMI-kategorier (voksne)",
     whoTitle: "Om midje-hofte-kvot",
     whoDesc:
-      "Midje-hofte-kvoten (WHR) supplerer BMI ved å vurdere hvor fettet sitter på kroppen. Kjønn brukes bare til å velge den viste WHR-veiledningen. Veiledningen er ikke en diagnose.",
+      "Midje-hofte-kvoten (WHR) er et rått forholdstall mellom midje og hofte. Kjønn inngår verken i BMI-formelen eller i verktøyets WHR. Verdien er ikke en diagnose.",
     calcName: "BMI-kalkulator for voksne",
   },
 } as const;
@@ -186,6 +179,9 @@ function kgToLbs(kg: number): number {
 function cmToInches(cm: number): number {
   return cm / 2.54;
 }
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, value));
+}
 
 // BMI skala konfiguration
 const BMI_ZONES: { min: number; max: number; labelKey: ZoneKey; color: string }[] = [
@@ -199,12 +195,17 @@ const BMI_ZONES: { min: number; max: number; labelKey: ZoneKey; color: string }[
 
 const SCALE_MIN = 10;
 const SCALE_MAX = 50;
+const ADULT_INPUT_LIMITS = {
+  metrisk: { weight: 30, maxWeight: 300, height: 100, maxHeight: 250 },
+  imperial: { weight: 66.14, maxWeight: 661.38, height: 39.37, maxHeight: 98.42 },
+} as const;
 
-function BMISkala({ bmi }: { bmi: number }) {
+function BMISkala({ bmi, formattedBmi }: { bmi: number; formattedBmi: string }) {
   const { locale } = useLocale();
   const l = labels[locale as keyof typeof labels] || labels.da;
   const clampedBmi = Math.max(SCALE_MIN, Math.min(SCALE_MAX, bmi));
   const position = ((clampedBmi - SCALE_MIN) / (SCALE_MAX - SCALE_MIN)) * 100;
+  const format = (value: number) => formatNumber(value, locale, { maximumFractionDigits: 1 });
 
   return (
     <div className="mt-6">
@@ -221,7 +222,7 @@ function BMISkala({ bmi }: { bmi: number }) {
                 key={zone.labelKey}
                 className={`${zone.color} relative`}
                 style={{ width: `${width}%` }}
-                title={`${l.zones[zone.labelKey]}: ${zone.min}–${zone.max}`}
+                title={`${l.zones[zone.labelKey]}: ${format(zone.min)}–${format(zone.max)}`}
               />
             );
           })}
@@ -234,18 +235,18 @@ function BMISkala({ bmi }: { bmi: number }) {
         >
           <div className="w-0.5 h-6 bg-gray-900 dark:bg-white" />
           <div className="w-0 h-0 border-l-[6px] border-r-[6px] border-t-[8px] border-l-transparent border-r-transparent border-t-gray-900 dark:border-t-white" />
-          <span className="text-xs font-bold mt-0.5 dark:text-white">{bmi.toFixed(1)}</span>
+          <span className="text-xs font-bold mt-0.5 dark:text-white">{formattedBmi}</span>
         </div>
 
         {/* Tallabels under skala */}
         <div className="flex justify-between mt-5 text-[10px] text-gray-500 dark:text-gray-400 px-0.5">
-          <span>10</span>
-          <span>18.5</span>
-          <span>25</span>
-          <span>30</span>
-          <span>35</span>
-          <span>40</span>
-          <span>50</span>
+          <span>{format(10)}</span>
+          <span>{format(18.5)}</span>
+          <span>{format(25)}</span>
+          <span>{format(30)}</span>
+          <span>{format(35)}</span>
+          <span>{format(40)}</span>
+          <span>{format(50)}</span>
         </div>
       </div>
     </div>
@@ -257,10 +258,11 @@ export default function BMIBeregner() {
   const l = labels[locale as keyof typeof labels] || labels.da;
   const [vaegt, setVaegt] = useState<number>(75);
   const [hoejde, setHoejde] = useState<number>(175);
-  const [koen, setKoen] = useState<Koen>("mand");
   const [enhed, setEnhed] = useState<Enhed>("metrisk");
   const [taljemaal, setTaljemaal] = useState<number>(0);
   const [hoftemaal, setHoftemaal] = useState<number>(0);
+  const [harBarnestate, setHarBarnestate] = useState(false);
+  const [urlStateKontrolleret, setUrlStateKontrolleret] = useState(false);
   const hasTracked = useRef(false);
   const hasLoadedUrl = useRef(false);
 
@@ -272,37 +274,63 @@ export default function BMIBeregner() {
     const urlState = getStateFromUrl();
     if (urlState && urlState.type === 'bmi') {
       const inputs = urlState.inputs;
-      if (inputs.vaegt !== undefined) setVaegt(inputs.vaegt);
-      if (inputs.hoejde !== undefined) setHoejde(inputs.hoejde);
-      if (inputs.koen) setKoen(inputs.koen);
+      const inputVægt = Number(inputs.vaegt);
+      const inputHoejde = Number(inputs.hoejde);
+      const erGyldigtIImperial = inputVægt >= 66 && inputVægt <= 662 && inputHoejde >= 39 && inputHoejde <= 99;
+      const erGyldigtIMetrisk = inputVægt >= 30 && inputVægt <= 300 && inputHoejde >= 100 && inputHoejde <= 250;
+      const indlaestEnhed = inputs.enhed === "imperial"
+        ? "imperial"
+        : inputs.enhed === "metrisk"
+          ? "metrisk"
+          : erGyldigtIImperial && !erGyldigtIMetrisk
+            ? "imperial"
+            : "metrisk";
+
+      if (inputs.vaegt !== undefined) setVaegt(inputVægt);
+      if (inputs.hoejde !== undefined) setHoejde(inputHoejde);
+      if (inputs.enhed !== undefined || erGyldigtIImperial) setEnhed(indlaestEnhed);
+      if (inputs.alder !== undefined && Number(inputs.alder) < 18) setHarBarnestate(true);
     }
+    setUrlStateKontrolleret(true);
   }, []);
 
   const handleReset = useCallback(() => {
     setVaegt(75);
     setHoejde(175);
-    setKoen("mand");
     setEnhed("metrisk");
     setTaljemaal(0);
     setHoftemaal(0);
+    setHarBarnestate(false);
   }, []);
 
   // Get shareable link for current calculation
   const getShareableLink = useCallback(() => {
     const state: CalculationState = {
       type: 'bmi',
-      inputs: { vaegt, hoejde, koen },
+      inputs: { vaegt, hoejde, enhed },
       timestamp: Date.now(),
     };
     return generateShareableLink(state);
-  }, [vaegt, hoejde, koen]);
+  }, [vaegt, hoejde, enhed]);
 
   // Konverter input til metriske værdier til beregning
   const metriskVaegt = enhed === "imperial" ? lbsToKg(vaegt) : vaegt;
   const metriskHoejde = enhed === "imperial" ? inchesToCm(hoejde) : hoejde;
+  const inputLimits = ADULT_INPUT_LIMITS[enhed];
+  const minWeight = inputLimits.weight;
+  const maxWeight = inputLimits.maxWeight;
+  const minHeight = inputLimits.height;
+  const maxHeight = inputLimits.maxHeight;
+  const normaliseretVaegt = Math.round(metriskVaegt * 100) / 100;
+  const normaliseretHoejde = Math.round(metriskHoejde * 100) / 100;
+  const inputUdenforGraenser = normaliseretVaegt < 30
+    || normaliseretVaegt > 300
+    || normaliseretHoejde < 100
+    || normaliseretHoejde > 250;
+  const inputErUgyldigt = harBarnestate || inputUdenforGraenser;
 
   const resultat = useMemo(() => {
-    if (!metriskVaegt || !metriskHoejde || metriskHoejde === 0) {
+    if (!urlStateKontrolleret || inputErUgyldigt || !metriskVaegt || !metriskHoejde || metriskHoejde === 0) {
       return null;
     }
 
@@ -345,14 +373,14 @@ export default function BMIBeregner() {
 
     return {
       bmi,
-      bmiFormatted: bmi.toFixed(1),
+      bmiFormatted: formatNumber(bmi, locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 }),
       kategori,
       farve,
       beskrivelse,
-      idealVaegtMin: idealVaegtMinKg.toFixed(0),
-      idealVaegtMax: idealVaegtMaxKg.toFixed(0),
+      idealVaegtMin: formatNumber(idealVaegtMinKg, locale, { maximumFractionDigits: 0 }),
+      idealVaegtMax: formatNumber(idealVaegtMaxKg, locale, { maximumFractionDigits: 0 }),
     };
-  }, [metriskVaegt, metriskHoejde, l]);
+  }, [metriskVaegt, metriskHoejde, l, locale, inputErUgyldigt, urlStateKontrolleret]);
 
   // Talje-hofte ratio
   const taljeHofteResultat = useMemo(() => {
@@ -363,9 +391,9 @@ export default function BMIBeregner() {
     const ratio = metriskTalje / metriskHofte;
 
     return {
-      ratio: ratio.toFixed(2),
+      ratio: formatNumber(ratio, locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
     };
-  }, [taljemaal, hoftemaal, enhed]);
+  }, [taljemaal, hoftemaal, enhed, locale]);
 
   // Track calculation once per session when user changes values
   useEffect(() => {
@@ -383,16 +411,18 @@ export default function BMIBeregner() {
   const handleEnhedSkift = (nyEnhed: Enhed) => {
     if (nyEnhed === enhed) return;
 
+    const nextLimits = ADULT_INPUT_LIMITS[nyEnhed];
+
     if (nyEnhed === "imperial") {
-      setVaegt(Math.round(kgToLbs(vaegt) * 10) / 10);
-      setHoejde(Math.round(cmToInches(hoejde) * 10) / 10);
-      if (taljemaal) setTaljemaal(Math.round(cmToInches(taljemaal) * 10) / 10);
-      if (hoftemaal) setHoftemaal(Math.round(cmToInches(hoftemaal) * 10) / 10);
+      setVaegt(clamp(Math.round(kgToLbs(vaegt) * 100) / 100, nextLimits.weight, nextLimits.maxWeight));
+      setHoejde(clamp(Math.round(cmToInches(hoejde) * 100) / 100, nextLimits.height, nextLimits.maxHeight));
+      if (taljemaal) setTaljemaal(Math.round(cmToInches(taljemaal) * 100) / 100);
+      if (hoftemaal) setHoftemaal(Math.round(cmToInches(hoftemaal) * 100) / 100);
     } else {
-      setVaegt(Math.round(lbsToKg(vaegt) * 10) / 10);
-      setHoejde(Math.round(inchesToCm(hoejde) * 10) / 10);
-      if (taljemaal) setTaljemaal(Math.round(inchesToCm(taljemaal) * 10) / 10);
-      if (hoftemaal) setHoftemaal(Math.round(inchesToCm(hoftemaal) * 10) / 10);
+      setVaegt(clamp(Math.round(lbsToKg(vaegt) * 100) / 100, nextLimits.weight, nextLimits.maxWeight));
+      setHoejde(clamp(Math.round(inchesToCm(hoejde) * 100) / 100, nextLimits.height, nextLimits.maxHeight));
+      if (taljemaal) setTaljemaal(Math.round(inchesToCm(taljemaal) * 100) / 100);
+      if (hoftemaal) setHoftemaal(Math.round(inchesToCm(hoftemaal) * 100) / 100);
     }
     setEnhed(nyEnhed);
   };
@@ -405,8 +435,13 @@ export default function BMIBeregner() {
     <div className="space-y-8 print-area">
       {/* Enhedsvalg */}
       <div className="flex justify-end">
-        <div className="inline-flex rounded-lg border border-gray-200 dark:border-gray-600 overflow-hidden">
+        <div
+          role="group"
+          aria-label={l.unitLabel}
+          className="inline-flex rounded-lg border border-gray-200 dark:border-gray-600 overflow-hidden"
+        >
           <button type="button"
+            aria-pressed={enhed === "metrisk"}
             onClick={() => handleEnhedSkift("metrisk")}
             className={`px-4 py-2 text-sm font-medium transition-colors ${
               enhed === "metrisk"
@@ -417,6 +452,7 @@ export default function BMIBeregner() {
             {l.unitMetric}
           </button>
           <button type="button"
+            aria-pressed={enhed === "imperial"}
             onClick={() => handleEnhedSkift("imperial")}
             className={`px-4 py-2 text-sm font-medium transition-colors ${
               enhed === "imperial"
@@ -435,59 +471,34 @@ export default function BMIBeregner() {
 
       {/* Input */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-4">
-          <InputField
-            label={vaegtLabel}
-            value={vaegt}
-            onChange={setVaegt}
-            min={enhed === "metrisk" ? 30 : 66}
-            max={enhed === "metrisk" ? 300 : 660}
-            step={0.1}
-            unit={enhed === "metrisk" ? "kg" : "lbs"}
-            required
-          />
+        <InputField
+          label={vaegtLabel}
+          value={vaegt}
+          onChange={setVaegt}
+          min={minWeight}
+          max={maxWeight}
+          step={0.1}
+          unit={enhed === "metrisk" ? "kg" : "lbs"}
+          required
+        />
 
-          <InputField
-            label={hoejdeLabel}
-            value={hoejde}
-            onChange={setHoejde}
-            min={enhed === "metrisk" ? 100 : 39}
-            max={enhed === "metrisk" ? 250 : 98}
-            step={0.1}
-            unit={enhed === "metrisk" ? "cm" : "in"}
-            required
-          />
-        </div>
-
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.gender}</label>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">{l.genderNote}</p>
-            <div className="flex gap-4">
-              <button type="button"
-                onClick={() => setKoen("mand")}
-                className={`flex-1 py-3 rounded-lg border-2 transition-colors ${
-                  koen === "mand"
-                    ? "border-blue-500 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300"
-                    : "border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 dark:text-gray-300"
-                }`}
-              >
-                {l.male}
-              </button>
-              <button type="button"
-                onClick={() => setKoen("kvinde")}
-                className={`flex-1 py-3 rounded-lg border-2 transition-colors ${
-                  koen === "kvinde"
-                    ? "border-pink-500 bg-pink-50 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300"
-                    : "border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 dark:text-gray-300"
-                }`}
-              >
-                {l.female}
-              </button>
-            </div>
-          </div>
-        </div>
+        <InputField
+          label={hoejdeLabel}
+          value={hoejde}
+          onChange={setHoejde}
+          min={minHeight}
+          max={maxHeight}
+          step={0.1}
+          unit={enhed === "metrisk" ? "cm" : "in"}
+          required
+        />
       </div>
+
+      {urlStateKontrolleret && inputErUgyldigt && (
+        <p role="alert" className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800 dark:border-red-800 dark:bg-red-900/20 dark:text-red-100">
+          {harBarnestate ? l.childInput : l.invalidInput}
+        </p>
+      )}
 
       <div className="flex justify-end">
         <ResetButton onReset={handleReset} />
@@ -507,7 +518,7 @@ export default function BMIBeregner() {
           </div>
 
           {/* Grafisk BMI skala */}
-          <BMISkala bmi={resultat.bmi} />
+          <BMISkala bmi={resultat.bmi} formattedBmi={resultat.bmiFormatted} />
 
           <p className="text-gray-600 dark:text-gray-300 text-center mt-6 mb-6">{resultat.beskrivelse}</p>
 
@@ -571,7 +582,7 @@ export default function BMIBeregner() {
               </div>
               <div className="text-right">
                 <p className="text-xs text-gray-500 dark:text-gray-400">
-                  {koen === "mand" ? l.whrGuideMen : l.whrGuideWomen}
+                  {l.whrGuide}
                 </p>
               </div>
             </div>
