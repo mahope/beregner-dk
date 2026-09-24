@@ -1,4 +1,5 @@
 import dynamic from "next/dynamic";
+import Link from "next/link";
 const BMIBeregner = dynamic(() => import("@/components/BMIBeregner"));
 import { generatePageMetadata } from "@/lib/page-helpers";
 import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
@@ -31,6 +32,8 @@ export default async function BMIPage() {
         description={pageData.schemaDescription}
         url={`${domainConfig.baseUrl}/bmi`}
         category={pageData.schemaCategory}
+        siteName={domainConfig.siteName}
+        currency={domainConfig.currency}
       />
       <FAQSchema items={pageData.faqItems} />
       <Breadcrumbs items={[{ name: pageData.breadcrumbCategory, href: pageData.breadcrumbCategoryHref }, { name: pageData.title, href: "/bmi" }]} />
@@ -42,23 +45,40 @@ export default async function BMIPage() {
 
       <BMIBeregner />
 
+      {locale === "da" && (
+        <div className="mt-8 rounded-lg border border-blue-200 bg-blue-50 p-5 dark:border-blue-800 dark:bg-blue-900/20">
+          <h2 className="text-lg font-semibold text-blue-950 dark:text-blue-100">BMI for børn?</h2>
+          <p className="mt-2 text-sm text-blue-900 dark:text-blue-100">
+            Dette værktøj er en BMI-beregner for voksne. Det bruger kun vægt og højde og
+            beregner ikke børns percentil. Til børn skal BMI vurderes med alders- og
+            kønsspecifikke percentiltabeller.
+          </p>
+          <Link
+            href="/blog/bmi-for-boern-saadan-tjekker-du"
+            className="mt-3 inline-block font-medium text-blue-700 underline hover:text-blue-900 dark:text-blue-200 dark:hover:text-white"
+          >
+            Læs BMI for børn og se percentiltabeller →
+          </Link>
+        </div>
+      )}
+
       {/* Inline Ad - Between calculator and content */}
       <InlineAd slotId="bmi-after-calculator" />
 
       {locale === "da" && (
       <div className="mt-12 prose max-w-none">
-        <h2>Hvad er BMI?</h2>
+        <h2>Hvad er BMI for voksne?</h2>
         <p>
           BMI står for <strong>Body Mass Index</strong> og er et tal, der bruges
           til at vurdere, om din vægt er passende i forhold til din højde. BMI
           beregnes ved at dividere din <strong>vægt i kilogram</strong> med din <strong>højde i meter</strong> i
-          anden potens.
+          anden potens. Formlen justeres ikke for alder.
         </p>
         <p>
           <strong>Formlen er:</strong> BMI = vægt (kg) / højde² (m)
         </p>
 
-        <h2>BMI kategorier ifølge WHO</h2>
+        <h2>BMI kategorier for voksne ifølge WHO</h2>
         <p>
           Verdenssundhedsorganisationen (WHO) har defineret følgende BMI
           kategorier for voksne:
@@ -92,15 +112,16 @@ export default async function BMIPage() {
             BMI uden at være overvægtige
           </li>
           <li>
-            <strong>Alder:</strong> Ældre voksne kan have lavere muskelmasse,
-            hvilket påvirker BMI
+            <strong>Alder:</strong> BMI-formlen justeres ikke for alder. Ældre voksne
+            kan have lavere muskelmasse, hvilket påvirker BMI
           </li>
           <li>
             <strong>Fedtfordeling:</strong> BMI fortæller ikke hvor fedtet
             sidder (mavefedme er mere risikabelt)
           </li>
           <li>
-            <strong>Køn:</strong> Kvinder har naturligt mere fedtvæv end mænd
+            <strong>Køn:</strong> Køn indgår ikke i BMI-formlen. Det bruges kun til at
+            vælge WHR-vejledningen
           </li>
         </ul>
 
@@ -114,8 +135,9 @@ export default async function BMIPage() {
             kvinder
           </li>
           <li>
-            <strong>Talje-hofte-ratio:</strong> Under 0,9 for mænd, under 0,85
-            for kvinder
+            <strong>Talje-hofte-ratio:</strong> Værktøjet viser forskellig
+            WHR-vejledning til mænd og kvinder. Vejledningen er ikke en diagnose
+            og erstatter ikke en samlet vurdering fra en læge
           </li>
           <li>
             <strong>Fedtprocent:</strong> Måles med specialudstyr
@@ -138,18 +160,18 @@ export default async function BMIPage() {
 
       {locale === "se" && (
       <div className="mt-12 prose max-w-none">
-        <h2>Vad är BMI?</h2>
+        <h2>Vad är BMI för vuxna?</h2>
         <p>
           BMI står för <strong>Body Mass Index</strong> och är ett tal som används
           för att bedöma om din vikt är rimlig i förhållande till din längd. BMI
           beräknas genom att dividera din <strong>vikt i kilogram</strong> med din <strong>längd i meter</strong> i
-          kvadrat.
+          kvadrat. Formeln justeras inte för ålder.
         </p>
         <p>
           <strong>Formeln är:</strong> BMI = vikt (kg) / längd² (m)
         </p>
 
-        <h2>BMI-kategorier enligt WHO</h2>
+        <h2>BMI-kategorier för vuxna enligt WHO</h2>
         <p>
           Världshälsoorganisationen (WHO) har definierat följande BMI-kategorier
           för vuxna:
@@ -183,15 +205,16 @@ export default async function BMIPage() {
             BMI utan att vara överviktiga
           </li>
           <li>
-            <strong>Ålder:</strong> Äldre vuxna kan ha lägre muskelmassa,
-            vilket påverkar BMI
+            <strong>Ålder:</strong> BMI-formeln justeras inte för ålder. Äldre vuxna
+            kan ha lägre muskelmassa, vilket påverkar BMI
           </li>
           <li>
             <strong>Fettfördelning:</strong> BMI säger inte var fettet
             sitter (bukfetma är farligare)
           </li>
           <li>
-            <strong>Kön:</strong> Kvinnor har naturligt mer fettvävnad än män
+            <strong>Kön:</strong> Kön ingår inte i BMI-formeln. Det används bara för
+            att välja WHR-vägledningen
           </li>
         </ul>
 
@@ -205,8 +228,9 @@ export default async function BMIPage() {
             kvinnor
           </li>
           <li>
-            <strong>Midja-höft-kvot:</strong> Under 0,9 för män, under 0,85
-            för kvinnor
+            <strong>Midja-höft-kvot:</strong> Verktyget visar olika
+            WHR-vägledning för män och kvinnor. Vägledningen är inte en diagnos
+            och ersätter inte en samlad bedömning från läkare
           </li>
           <li>
             <strong>Fettprocent:</strong> Mäts med specialutrustning

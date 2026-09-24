@@ -31,6 +31,13 @@ describe("getCalculatorsByLocale", () => {
       expect(new Set(hrefs).size, `${locale} has duplicate hrefs`).toBe(hrefs.length);
     }
   });
+
+  test("describes BMI as an adult calculator", () => {
+    for (const locale of ["da", "no", "se"] as const) {
+      const bmi = getCalculatorsByLocale(locale).find((calc) => calc.href === "/bmi");
+      expect(bmi?.description.toLowerCase()).toMatch(/voksne|vuxna/);
+    }
+  });
 });
 
 describe("getRelatedCalculators", () => {

@@ -9,9 +9,19 @@ describe("getDomainConfig", () => {
     expect(config.hreflangCode).toBe("da");
   });
 
-  test("returns DA config for www.minberegner.dk", () => {
-    const config = getDomainConfig("www.minberegner.dk");
-    expect(config.locale).toBe("da");
+  test("normalizes www hosts to the canonical domain config", () => {
+    const cases = [
+      { host: "www.minberegner.dk", siteName: "MinBeregner.dk", currency: "DKK", baseUrl: "https://minberegner.dk" },
+      { host: "www.beregner.no", siteName: "Beregner.no", currency: "NOK", baseUrl: "https://beregner.no" },
+      { host: "www.beraknare.se", siteName: "Beräknare.se", currency: "SEK", baseUrl: "https://beraknare.se" },
+    ];
+
+    for (const testCase of cases) {
+      const config = getDomainConfig(testCase.host);
+      expect(config.siteName).toBe(testCase.siteName);
+      expect(config.currency).toBe(testCase.currency);
+      expect(config.baseUrl).toBe(testCase.baseUrl);
+    }
   });
 
   test("returns NO config for beregner.no", () => {

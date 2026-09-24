@@ -42,6 +42,15 @@ describe("getBeregnereByCategoryName", () => {
       expect(b.category, `${b.title} missing category`).toBeTruthy();
     }
   });
+
+  test("keeps BMI category copy adult-oriented", () => {
+    const bmi = getBeregnereByCategoryName("Sundhed", "da").find((item) => item.href === "/bmi");
+    const health = getCategoryBySlug("sundhed");
+
+    expect(bmi?.description).toMatch(/voksne/);
+    expect(health?.description).toMatch(/BMI for voksne/);
+    expect(health?.faqItems[0].answer).toMatch(/percentil/);
+  });
 });
 
 describe("getAllCategorySlugs", () => {

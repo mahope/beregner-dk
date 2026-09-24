@@ -14,7 +14,7 @@ export async function generateMetadata(): Promise<Metadata> {
     keywords: [
       "bmi børn",
       "bmi for børn",
-      "bmi beregner børn",
+      "bmi formel for børn",
       "børn overvægt",
       "børn undervægt",
       "iso bmi",
@@ -42,7 +42,7 @@ const faqItems = [
   },
   {
     question: "Kan jeg bruge en almindelig BMI beregner til mit barn?",
-    answer: "Den almindelige BMI-beregning (vægt/højde²) giver et tal, men du kan ikke bruge voksen-grænserne (18,5-24,9) til børn. Børns BMI skal sammenlignes med percentilkurver for deres alder og køn. Et BMI på 18 kan være helt normalt for et barn, men undervægt for en voksen.",
+    answer: "Den almindelige BMI-beregning (vægt/højde²) giver et tal, men du kan ikke bruge voksen-grænserne (18,5-24,9) til børn. Vores linkede BMI-beregner er til voksne og giver det rå BMI-tal, men beregner ikke børns percentil. Sammenlign derfor tallet med percentilkurver for barnets alder og køn.",
   },
   {
     question: "Hvad er ISO BMI?",
@@ -181,8 +181,9 @@ export default function BMIBoernGuidePage() {
             mod væggen og blikket lige frem
           </li>
           <li>
-            <strong>Beregn BMI:</strong> Brug vores <Link href="/bmi">BMI-beregner</Link> eller 
-            regn selv: fx 25 kg ÷ 1,20² = BMI 17,4
+            <strong>Beregn BMI:</strong> Regn selv med formlen: fx 25 kg ÷ 1,20² = BMI 17,4.
+            Vores <Link href="/bmi">BMI-beregner for voksne</Link> bruger samme grundformel,
+            men har minimum inputgrænser på 30 kg og 100 cm
           </li>
           <li>
             <strong>Find percentilen:</strong> Slå op i vækstkurverne for barnets alder og 
@@ -343,7 +344,23 @@ export default function BMIBoernGuidePage() {
         </div>
 
         <p className="text-sm text-gray-600 dark:text-gray-400 italic">
-          Kilde: Baseret på WHO vækstkurver og CDC referencedata
+          Kilder:{" "}
+          <a
+            href="https://www.who.int/tools/growth-reference-data-for-5to19-years"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            WHO&apos;s vækstreference for BMI-for-age (5–19 år)
+          </a>{" "}
+          og{" "}
+          <a
+            href="https://www.who.int/tools/child-growth-standards"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            WHO&apos;s vækststandarder for børn under 5 år
+          </a>
+          . Gennemgået 24. september 2026.
         </p>
 
         <h2>Hvad er ISO BMI?</h2>
@@ -427,10 +444,13 @@ export default function BMIBoernGuidePage() {
           <li>Teenagere (13-18 år): 8-10 timer</li>
         </ul>
 
-        <h2>Brug vores BMI-beregner</h2>
+        <h2>Se voksenværktøjet, men brug tabellerne til børn</h2>
         <p>
-          Start med at beregne dit barns aktuelle BMI. Derefter kan du sammenligne med 
-          tabellerne ovenfor for at finde percentilen.
+          Vores <Link href="/bmi">BMI-beregner for voksne</Link> bruger den samme
+          grundformel, men har minimum inputgrænser på 30 kg og 100 cm. Den bruger voksne
+          BMI-kategorier og beregner ikke dit barns percentil. Til børn skal du
+          derfor bruge formlen ovenfor og tabellerne til at finde percentil ud fra
+          alder og køn.
         </p>
 
         <div className="not-prose my-8 flex flex-col sm:flex-row gap-4">
@@ -438,7 +458,7 @@ export default function BMIBoernGuidePage() {
             href="/bmi"
             className="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-center"
           >
-            Beregn BMI →
+            Se BMI-beregneren for voksne →
           </Link>
           <Link 
             href="/kalorier"
@@ -464,8 +484,8 @@ export default function BMIBoernGuidePage() {
             href="/bmi"
             className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
           >
-            <span className="font-medium text-gray-900 dark:text-white">BMI-beregner →</span>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Beregn Body Mass Index for voksne og børn</p>
+            <span className="font-medium text-gray-900 dark:text-white">BMI-beregner for voksne →</span>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Beregn råt Body Mass Index for voksne</p>
           </Link>
           <Link 
             href="/kalorier"

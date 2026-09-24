@@ -47,6 +47,15 @@ describe("getNavigation", () => {
     expect(daTotal).toBeGreaterThan(noTotal);
   });
 
+  test("labels BMI navigation links for adults", () => {
+    for (const locale of ["da", "no", "se"] as const) {
+      const bmi = getNavigation(locale)
+        .flatMap((item) => item.children ?? [])
+        .find((child) => child.href === "/bmi");
+      expect(bmi?.name).toMatch(/voksne|vuxna/);
+    }
+  });
+
   test("nav names contain no emojis and no stray whitespace", () => {
     for (const locale of ["da", "no", "se"] as const) {
       for (const item of getNavigation(locale)) {

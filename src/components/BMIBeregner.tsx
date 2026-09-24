@@ -24,11 +24,11 @@ const labels = {
     heightInches: "Højde (inches)",
     measureMetric: "cm",
     measureImperial: "inches",
-    gender: "Køn",
+    gender: "Køn (kun til WHR)",
     male: "Mand",
     female: "Kvinde",
-    age: "Alder",
-    ageUnit: "år",
+    genderNote: "Køn påvirker kun WHR-vejledningen, ikke BMI.",
+    adultNotice: "BMI for voksne (18+). Formlen bruger kun vægt og højde — alder indgår ikke i beregningen.",
     bmiScale: "BMI skala",
     zones: {
       under: "Undervægtig",
@@ -38,8 +38,8 @@ const labels = {
       fedme2: "Fedme II",
       fedme3: "Fedme III",
     } as Record<ZoneKey, string>,
-    yourBmi: "Dit BMI",
-    idealWeightLabel: "Idealvægt for din højde:",
+    yourBmi: "Dit BMI (voksentall)",
+    idealWeightLabel: "Vægtinterval for voksne (BMI 18,5-24,9):",
     catUnder: "Undervægtig",
     catNormal: "Normalvægtig",
     catOver: "Overvægtig",
@@ -52,9 +52,6 @@ const labels = {
     descFedme1: "Din BMI indikerer fedme. Overvej at tale med en læge om sunde vægttabsstrategier.",
     descFedme2: "Din BMI indikerer svær fedme. Det anbefales at søge professionel hjælp.",
     descFedme3: "Din BMI indikerer meget svær fedme. Søg professionel medicinsk hjælp.",
-    riskLow: "Lav risiko",
-    riskModerate: "Moderat risiko",
-    riskHigh: "Høj risiko",
     whrTitle: "Talje-hofte ratio (valgfrit)",
     whrDesc: "Supplerer BMI med en vurdering af fedtfordelingen.",
     waistLabel: "Taljemål",
@@ -62,13 +59,13 @@ const labels = {
     helpNavle: "Mål ved navlen",
     helpBredest: "Mål ved det bredeste punkt",
     whrResultLabel: "Talje-hofte ratio",
-    whrGuideMen: "Mænd: < 0,90 = lav",
-    whrGuideWomen: "Kvinder: < 0,80 = lav",
+    whrGuideMen: "Mænd: køn bruges kun til WHR-referencevisningen; vejledningen er ikke en diagnose.",
+    whrGuideWomen: "Kvinder: køn bruges kun til WHR-referencevisningen; vejledningen er ikke en diagnose.",
     catTableTitle: "BMI kategorier (voksne)",
     whoTitle: "Om talje-hofte ratio",
     whoDesc:
-      "Talje-hofte ratioen (WHR) supplerer BMI ved at vurdere, hvor fedtet sidder på kroppen. Fedt omkring maven (æbleform) giver højere sundhedsrisiko end fedt på hofter og lår (pæreform). WHO anbefaler en ratio under 0,90 for mænd og under 0,85 for kvinder.",
-    calcName: "BMI Beregner",
+      "Talje-hofte ratioen (WHR) supplerer BMI ved at vurdere, hvor fedtet sidder på kroppen. Køn bruges kun til at vælge den viste WHR-vejledning. Vejledningen er ikke en diagnose.",
+    calcName: "BMI Beregner for voksne",
   },
   se: {
     unitMetric: "kg / cm",
@@ -79,11 +76,11 @@ const labels = {
     heightInches: "Längd (tum)",
     measureMetric: "cm",
     measureImperial: "tum",
-    gender: "Kön",
+    gender: "Kön (endast WHR)",
     male: "Man",
     female: "Kvinna",
-    age: "Ålder",
-    ageUnit: "år",
+    genderNote: "Kön påverkar endast WHR-vägledningen, inte BMI.",
+    adultNotice: "BMI för vuxna (18+). Formeln använder endast vikt och längd — ålder ingår inte i beräkningen.",
     bmiScale: "BMI-skala",
     zones: {
       under: "Undervikt",
@@ -93,8 +90,8 @@ const labels = {
       fedme2: "Fetma II",
       fedme3: "Fetma III",
     } as Record<ZoneKey, string>,
-    yourBmi: "Ditt BMI",
-    idealWeightLabel: "Idealvikt för din längd:",
+    yourBmi: "Ditt BMI (vuxental)",
+    idealWeightLabel: "Viktintervall för vuxna (BMI 18,5-24,9):",
     catUnder: "Undervikt",
     catNormal: "Normalvikt",
     catOver: "Övervikt",
@@ -107,9 +104,6 @@ const labels = {
     descFedme1: "Ditt BMI indikerar fetma. Överväg att tala med en läkare om sunda strategier för viktnedgång.",
     descFedme2: "Ditt BMI indikerar svår fetma. Det rekommenderas att söka professionell hjälp.",
     descFedme3: "Ditt BMI indikerar mycket svår fetma. Sök professionell medicinsk hjälp.",
-    riskLow: "Låg risk",
-    riskModerate: "Måttlig risk",
-    riskHigh: "Hög risk",
     whrTitle: "Midja-höft-kvot (valfritt)",
     whrDesc: "Kompletterar BMI med en bedömning av fettfördelningen.",
     waistLabel: "Midjemått",
@@ -117,13 +111,65 @@ const labels = {
     helpNavle: "Mät vid naveln",
     helpBredest: "Mät vid den bredaste punkten",
     whrResultLabel: "Midja-höft-kvot",
-    whrGuideMen: "Män: < 0,90 = låg",
-    whrGuideWomen: "Kvinnor: < 0,80 = låg",
+    whrGuideMen: "Män: kön används endast för WHR-referensvisningen; vägledningen är inte en diagnos.",
+    whrGuideWomen: "Kvinnor: kön används endast för WHR-referensvisningen; vägledningen är inte en diagnos.",
     catTableTitle: "BMI-kategorier (vuxna)",
     whoTitle: "Om midja-höft-kvot",
     whoDesc:
-      "Midja-höft-kvoten (WHR) kompletterar BMI genom att bedöma var fettet sitter på kroppen. Fett runt magen (äppelform) ger högre hälsorisk än fett på höfter och lår (päronform). WHO rekommenderar en kvot under 0,90 för män och under 0,85 för kvinnor.",
-    calcName: "BMI-kalkylator",
+      "Midja-höft-kvoten (WHR) kompletterar BMI genom att bedöma var fettet sitter på kroppen. Kön används endast för att välja den visade WHR-vägledningen. Vägledningen är inte en diagnos.",
+    calcName: "BMI-kalkylator för vuxna",
+  },
+  no: {
+    unitMetric: "kg / cm",
+    unitImperial: "lbs / tommer",
+    weightKg: "Vekt (kg)",
+    weightLbs: "Vekt (lbs)",
+    heightCm: "Høyde (cm)",
+    heightInches: "Høyde (tommer)",
+    measureMetric: "cm",
+    measureImperial: "tommer",
+    gender: "Kjønn (kun for WHR)",
+    male: "Mann",
+    female: "Kvinne",
+    genderNote: "Kjønn påvirker bare WHR-veiledningen, ikke BMI.",
+    adultNotice: "BMI for voksne (18+). Formelen bruker bare vekt og høyde — alder inngår ikke i beregningen.",
+    bmiScale: "BMI-skala",
+    zones: {
+      under: "Undervekt",
+      normal: "Normal",
+      over: "Overvekt",
+      fedme1: "Fedme I",
+      fedme2: "Fedme II",
+      fedme3: "Fedme III",
+    } as Record<ZoneKey, string>,
+    yourBmi: "BMI-en din (voksentall)",
+    idealWeightLabel: "Vektintervall for voksne (BMI 18,5-24,9):",
+    catUnder: "Undervekt",
+    catNormal: "Normalvekt",
+    catOver: "Overvekt",
+    catFedme1: "Fedme (klasse 1)",
+    catFedme2: "Fedme (klasse 2)",
+    catFedme3: "Fedme (klasse 3)",
+    descUnder: "BMI-en din tyder på undervekt. Vurder å snakke med en lege.",
+    descNormal: "BMI-en din er innenfor normalområdet. Fortsett med den gode livsstilen!",
+    descOver: "BMI-en din tyder på overvekt. Små livsstilsendringer kan gjøre en forskjell.",
+    descFedme1: "BMI-en din tyder på fedme. Vurder å snakke med en lege om sunne vekttapsstrategier.",
+    descFedme2: "BMI-en din tyder på alvorlig fedme. Det anbefales å søke profesjonell hjelp.",
+    descFedme3: "BMI-en din tyder på svært alvorlig fedme. Søk profesjonell medisinsk hjelp.",
+    whrTitle: "Midje-hofte-kvot (valgfritt)",
+    whrDesc: "Supplerer BMI med en vurdering av fettfordelingen.",
+    waistLabel: "Midjemål",
+    hipLabel: "Hofte mål",
+    helpNavle: "Mål ved navlen",
+    helpBredest: "Mål ved det bredeste punktet",
+    whrResultLabel: "Midje-hofte-kvot",
+    whrGuideMen: "Menn: kjønn brukes bare til WHR-referansevisningen; veiledningen er ikke en diagnose.",
+    whrGuideWomen: "Kvinner: kjønn brukes bare til WHR-referansevisningen; veiledningen er ikke en diagnose.",
+    catTableTitle: "BMI-kategorier (voksne)",
+    whoTitle: "Om midje-hofte-kvot",
+    whoDesc:
+      "Midje-hofte-kvoten (WHR) supplerer BMI ved å vurdere hvor fettet sitter på kroppen. Kjønn brukes bare til å velge den viste WHR-veiledningen. Veiledningen er ikke en diagnose.",
+    calcName: "BMI-kalkulator for voksne",
   },
 } as const;
 
@@ -212,7 +258,6 @@ export default function BMIBeregner() {
   const [vaegt, setVaegt] = useState<number>(75);
   const [hoejde, setHoejde] = useState<number>(175);
   const [koen, setKoen] = useState<Koen>("mand");
-  const [alder, setAlder] = useState<number>(30);
   const [enhed, setEnhed] = useState<Enhed>("metrisk");
   const [taljemaal, setTaljemaal] = useState<number>(0);
   const [hoftemaal, setHoftemaal] = useState<number>(0);
@@ -230,7 +275,6 @@ export default function BMIBeregner() {
       if (inputs.vaegt !== undefined) setVaegt(inputs.vaegt);
       if (inputs.hoejde !== undefined) setHoejde(inputs.hoejde);
       if (inputs.koen) setKoen(inputs.koen);
-      if (inputs.alder !== undefined) setAlder(inputs.alder);
     }
   }, []);
 
@@ -238,7 +282,6 @@ export default function BMIBeregner() {
     setVaegt(75);
     setHoejde(175);
     setKoen("mand");
-    setAlder(30);
     setEnhed("metrisk");
     setTaljemaal(0);
     setHoftemaal(0);
@@ -248,11 +291,11 @@ export default function BMIBeregner() {
   const getShareableLink = useCallback(() => {
     const state: CalculationState = {
       type: 'bmi',
-      inputs: { vaegt, hoejde, koen, alder },
+      inputs: { vaegt, hoejde, koen },
       timestamp: Date.now(),
     };
     return generateShareableLink(state);
-  }, [vaegt, hoejde, koen, alder]);
+  }, [vaegt, hoejde, koen]);
 
   // Konverter input til metriske værdier til beregning
   const metriskVaegt = enhed === "imperial" ? lbsToKg(vaegt) : vaegt;
@@ -319,39 +362,10 @@ export default function BMIBeregner() {
     const metriskHofte = enhed === "imperial" ? inchesToCm(hoftemaal) : hoftemaal;
     const ratio = metriskTalje / metriskHofte;
 
-    let risikoNiveau: string;
-    let farve: string;
-
-    if (koen === "mand") {
-      if (ratio < 0.90) {
-        risikoNiveau = l.riskLow;
-        farve = "text-green-600";
-      } else if (ratio < 1.0) {
-        risikoNiveau = l.riskModerate;
-        farve = "text-yellow-600";
-      } else {
-        risikoNiveau = l.riskHigh;
-        farve = "text-red-600";
-      }
-    } else {
-      if (ratio < 0.80) {
-        risikoNiveau = l.riskLow;
-        farve = "text-green-600";
-      } else if (ratio < 0.85) {
-        risikoNiveau = l.riskModerate;
-        farve = "text-yellow-600";
-      } else {
-        risikoNiveau = l.riskHigh;
-        farve = "text-red-600";
-      }
-    }
-
     return {
       ratio: ratio.toFixed(2),
-      risikoNiveau,
-      farve,
     };
-  }, [taljemaal, hoftemaal, koen, enhed, l]);
+  }, [taljemaal, hoftemaal, enhed]);
 
   // Track calculation once per session when user changes values
   useEffect(() => {
@@ -415,6 +429,10 @@ export default function BMIBeregner() {
         </div>
       </div>
 
+      <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900 dark:border-blue-800 dark:bg-blue-900/20 dark:text-blue-100">
+        {l.adultNotice}
+      </div>
+
       {/* Input */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-4">
@@ -444,6 +462,7 @@ export default function BMIBeregner() {
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.gender}</label>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">{l.genderNote}</p>
             <div className="flex gap-4">
               <button type="button"
                 onClick={() => setKoen("mand")}
@@ -467,16 +486,6 @@ export default function BMIBeregner() {
               </button>
             </div>
           </div>
-
-          <InputField
-            label={l.age}
-            value={alder}
-            onChange={setAlder}
-            min={18}
-            max={120}
-            unit={l.ageUnit}
-            required
-          />
         </div>
       </div>
 
@@ -561,9 +570,6 @@ export default function BMIBeregner() {
                 <p className="text-2xl font-bold dark:text-white">{taljeHofteResultat.ratio}</p>
               </div>
               <div className="text-right">
-                <p className={`text-lg font-semibold ${taljeHofteResultat.farve}`}>
-                  {taljeHofteResultat.risikoNiveau}
-                </p>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
                   {koen === "mand" ? l.whrGuideMen : l.whrGuideWomen}
                 </p>

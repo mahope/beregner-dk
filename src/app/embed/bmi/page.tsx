@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 const BMIBeregner = dynamic(() => import("@/components/BMIBeregner"));
 
 export const metadata: Metadata = {
-  title: "BMI Beregner Widget",
+  title: "BMI Beregner Widget for voksne",
   robots: { index: false, follow: false },
 };
 

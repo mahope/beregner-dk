@@ -4,7 +4,7 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 export const metadata: Metadata = {
   title: "Embed Beregnere - Gratis Widgets | MinBeregner.dk",
   description:
-    "Integrer gratis beregner-widgets på din hjemmeside. Momsberegner, BMI beregner og mere. Kopier koden og indsæt.",
+    "Integrer gratis beregner-widgets på din hjemmeside. Momsberegner, BMI for voksne og mere. Kopier koden og indsæt.",
 };
 
 const widgets = [
@@ -16,9 +16,9 @@ const widgets = [
     height: 400,
   },
   {
-    title: "BMI Beregner",
+    title: "BMI Beregner for voksne",
     slug: "bmi",
-    description: "Beregn Body Mass Index",
+    description: "Beregn BMI for voksne ud fra vægt og højde",
     width: 500,
     height: 600,
   },

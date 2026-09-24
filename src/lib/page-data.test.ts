@@ -22,6 +22,24 @@ describe("getPageData", () => {
     expect(data!.slug).toBe("bmi");
   });
 
+  test("BMI metadata and child FAQ are adult-oriented", () => {
+    const expectedAdultWord = { da: "voksne", no: "voksne", se: "vuxna" } as const;
+
+    for (const locale of ["da", "no", "se"] as const) {
+      const data = getPageData("bmi", locale)!;
+      const adultWord = expectedAdultWord[locale];
+      expect(data.title.toLowerCase()).toContain(adultWord);
+      expect(data.metaTitle.toLowerCase()).toContain(adultWord);
+      expect(data.metaDescription.toLowerCase()).toContain(adultWord);
+      expect(data.ogTitle.toLowerCase()).toContain(adultWord);
+      expect(data.ogDescription.toLowerCase()).toContain(adultWord);
+      expect(data.schemaName.toLowerCase()).toContain(adultWord);
+      expect(data.schemaDescription.toLowerCase()).toContain(adultWord);
+      const childFaq = data.faqItems.find((item) => /børn|barn|children/i.test(item.question));
+      expect(childFaq?.answer).toMatch(/percentil|persentil/i);
+    }
+  });
+
   test("returns undefined for DA-only slug on SE", () => {
     const data = getPageData("loen-efter-skat", "se");
     expect(data).toBeUndefined();

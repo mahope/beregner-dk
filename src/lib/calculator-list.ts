@@ -54,7 +54,7 @@ const calculatorDefs: CalculatorDef[] = [
   { href: "/moms", titles: { da: "Moms", no: "Moms", se: "Moms" }, descriptions: { da: "Beregn moms til/fra", no: "Beregn moms til/fra", se: "Beräkna moms till/från" } },
   { href: "/procent", titles: { da: "Procent", no: "Prosent", se: "Procent" }, descriptions: { da: "Beregn procent nemt", no: "Beregn prosent enkelt", se: "Beräkna procent enkelt" } },
   // Sundhed
-  { href: "/bmi", titles: { da: "BMI Beregner", no: "BMI Kalkulator", se: "BMI Kalkylator" }, descriptions: { da: "Beregn dit Body Mass Index", no: "Beregn din BMI", se: "Beräkna ditt BMI" } },
+  { href: "/bmi", titles: { da: "BMI Beregner for voksne", no: "BMI Kalkulator for voksne", se: "BMI Kalkylator för vuxna" }, descriptions: { da: "Beregn BMI for voksne", no: "Beregn BMI for voksne", se: "Beräkna BMI för vuxna" } },
   { href: "/kalorier", titles: { da: "Kalorieberegner", no: "Kaloriekalkulator", se: "Kalorikalkylator" }, descriptions: { da: "Beregn kaloriebehov", no: "Beregn kaloribehovet ditt", se: "Beräkna ditt kaloribehov" } },
   { href: "/promille", titles: { da: "Promilleberegner", no: "Promillekalkulator", se: "Promillekalkylator" }, descriptions: { da: "Anslå din alkoholpromille", no: "Anslå alkoholpromillen din", se: "Uppskatta din alkoholpromille" } },
   { href: "/kropsfedt", titles: { da: "Kropsfedtprocent", no: "Kroppsfettprosent", se: "Kroppsfettprocent" }, descriptions: { da: "Beregn fedtprocent (Navy-metoden)", no: "Beregn fettprosent (Navy-metoden)", se: "Beräkna fettprocent (Navy-metoden)" } },

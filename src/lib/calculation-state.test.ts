@@ -22,6 +22,14 @@ describe("encodeCalculationState / decodeCalculationState", () => {
     expect(decoded!.timestamp).toBe(1700000000000);
   });
 
+  test("keeps legacy BMI age fields decodable", () => {
+    const legacy = "eyJ2IjoiMSIsInQiOiJibWkiLCJpIjp7InZhZWd0Ijo4MCwiaG9lamRlIjoxODAsImtvZW4iOiJrdmluZGUiLCJhbGRlciI6OH0sInRzIjoxNzAwMDAwMDAwMDAwfQ";
+
+    const decoded = decodeCalculationState(legacy);
+
+    expect(decoded?.inputs.alder).toBe(8);
+  });
+
   test("produces URL-safe output (no +, /, =)", () => {
     const encoded = encodeCalculationState(state);
     expect(encoded).not.toMatch(/[+/=]/);

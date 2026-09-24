@@ -47,6 +47,13 @@ describe("getHomeCalculators", () => {
     }
   });
 
+  test("BMI home cards describe an adult calculator", () => {
+    for (const locale of ["da", "no", "se"] as const) {
+      const bmi = getHomeCalculators(locale).find((calc) => calc.href === "/bmi");
+      expect(bmi?.description.toLowerCase()).toMatch(/voksne|vuxna/);
+    }
+  });
+
   test("some calculators are marked popular", () => {
     for (const locale of ["da", "no", "se"] as const) {
       const popular = getHomeCalculators(locale).filter((c) => c.popular);

@@ -51,7 +51,7 @@ const daPageData: HomePageData = {
   meta: {
     title: "MinBeregner.dk - Gratis online beregnere til danskere",
     description:
-      "Danmarks samling af gratis online beregnere. Beregn løn efter skat, moms, lån, pension, feriepenge, BMI og meget mere. 44 beregnere med 2026-satser — helt gratis og uden login.",
+      "Danmarks samling af gratis online beregnere. Beregn løn efter skat, moms, lån, pension, feriepenge, BMI for voksne og meget mere. 44 beregnere med 2026-satser — helt gratis og uden login.",
     keywords: [
       "beregner",
       "online beregner",
@@ -120,7 +120,7 @@ const daPageData: HomePageData = {
     {
       question: "Hvilke beregnere har I?",
       answer:
-        "Vi har 44 beregnere til økonomi (løn, skat, pension, dagpenge, feriepenge, moms), bolig (boliglån, ejendomsværdiskat, boligstøtte), lån (billån, forbrugslån, renteberegner), sundhed (BMI, kalorier) og hverdag (el, brændstof, dato). Vi tilføjer løbende nye beregnere.",
+        "Vi har 44 beregnere til økonomi (løn, skat, pension, dagpenge, feriepenge, moms), bolig (boliglån, ejendomsværdiskat, boligstøtte), lån (billån, forbrugslån, renteberegner), sundhed (BMI for voksne, kalorier) og hverdag (el, brændstof, dato). Vi tilføjer løbende nye beregnere.",
     },
   ],
   categoryOrder: [
@@ -139,7 +139,7 @@ const daPageData: HomePageData = {
 
 const daCalculators: HomeCalculator[] = [
   { title: "Løn efter skat", description: "Se hvad du får udbetalt efter skat, AM-bidrag og pension", href: "/loen-efter-skat", popular: true, category: "Økonomi" },
-  { title: "BMI Beregner", description: "Beregn dit Body Mass Index og se om din vægt er sund", href: "/bmi", popular: true, category: "Sundhed" },
+  { title: "BMI Beregner for voksne", description: "Beregn BMI for voksne ud fra vægt og højde", href: "/bmi", popular: true, category: "Sundhed" },
   { title: "Låneberegner", description: "Beregn ydelse, sammenlign lån og se afdragsplan", href: "/laaneberegner", popular: true, category: "Økonomi" },
   { title: "Momsberegner", description: "Tillæg eller fratræk 25% moms nemt og hurtigt", href: "/moms", popular: true, category: "Økonomi" },
   { title: "Valutaberegner", description: "Omregn mellem DKK, EUR, USD og andre valutaer", href: "/valuta", popular: true, category: "Økonomi" },
@@ -196,7 +196,7 @@ const noPageData: HomePageData = {
   meta: {
     title: "Beregner.no - Gratis online kalkulatorer for Norge",
     description:
-      "Norges samling av gratis online kalkulatorer. Beregn moms, lån, renter, BMI og mye mer. 20+ kalkulatorer med 2026-satser — helt gratis og uten innlogging.",
+      "Norges samling av gratis online kalkulatorer. Beregn moms, lån, renter, BMI for voksne og mye mer. 20+ kalkulatorer med 2026-satser — helt gratis og uten innlogging.",
     keywords: [
       "kalkulator",
       "online kalkulator",
@@ -264,7 +264,7 @@ const noPageData: HomePageData = {
     {
       question: "Hvilke kalkulatorer har dere?",
       answer:
-        "Vi har over 20 kalkulatorer for økonomi (moms, valuta, renter, opsparing), bolig (boliglån, strøm, solceller), lån (billån, leasing, forbrukslån), helse (BMI, kalorier) og hverdag (drivstoff, dato, tidssoner). Vi legger løpende til nye kalkulatorer.",
+        "Vi har over 20 kalkulatorer for økonomi (moms, valuta, renter, opsparing), bolig (boliglån, strøm, solceller), lån (billån, leasing, forbrukslån), helse (BMI for voksne, kalorier) og hverdag (drivstoff, dato, tidssoner). Vi legger løpende til nye kalkulatorer.",
     },
   ],
   categoryOrder: [
@@ -281,7 +281,7 @@ const noPageData: HomePageData = {
 
 const noCalculators: HomeCalculator[] = [
   // Popular
-  { title: "BMI Kalkulator", description: "Beregn din Body Mass Index og se om vekten din er sunn", href: "/bmi", popular: true, category: "Helse" },
+  { title: "BMI Kalkulator for voksne", description: "Beregn BMI for voksne ut fra vekt og høyde", href: "/bmi", popular: true, category: "Helse" },
   { title: "Momskalkulator (MVA)", description: "Legg til eller trekk fra 25% moms enkelt og raskt", href: "/moms", popular: true, category: "Økonomi" },
   { title: "Lånekalkulator", description: "Beregn månedlig betaling, sammenlign lån og se nedbetalingsplan", href: "/laaneberegner", popular: true, category: "Lån" },
   { title: "Valutakalkulator", description: "Regn om mellom NOK, EUR, USD og andre valutaer", href: "/valuta", popular: true, category: "Økonomi" },
@@ -320,7 +320,7 @@ const sePageData: HomePageData = {
   meta: {
     title: "Beräknare.se - Gratis online kalkylatorer för Sverige",
     description:
-      "Sveriges samling av gratis online kalkylatorer. Beräkna moms, lån, räntor, BMI och mycket mer. 20+ kalkylatorer med 2026-satser — helt gratis och utan inloggning.",
+      "Sveriges samling av gratis online kalkylatorer. Beräkna moms, lån, räntor, BMI för vuxna och mycket mer. 20+ kalkylatorer med 2026-satser — helt gratis och utan inloggning.",
     keywords: [
       "kalkylator",
       "online kalkylator",
@@ -388,7 +388,7 @@ const sePageData: HomePageData = {
     {
       question: "Vilka kalkylatorer har ni?",
       answer:
-        "Vi har över 20 kalkylatorer för ekonomi (moms, valuta, räntor, sparande), bostad (bolån, el, solceller), lån (billån, leasing, konsumtionslån), hälsa (BMI, kalorier) och vardag (bränsle, datum, tidszoner). Vi lägger löpande till nya kalkylatorer.",
+        "Vi har över 20 kalkylatorer för ekonomi (moms, valuta, räntor, sparande), bostad (bolån, el, solceller), lån (billån, leasing, konsumtionslån), hälsa (BMI för vuxna, kalorier) och vardag (bränsle, datum, tidszoner). Vi lägger löpande till nya kalkylatorer.",
     },
   ],
   categoryOrder: [
@@ -405,7 +405,7 @@ const sePageData: HomePageData = {
 
 const seCalculators: HomeCalculator[] = [
   // Popular
-  { title: "BMI Kalkylator", description: "Beräkna ditt Body Mass Index och se om din vikt är hälsosam", href: "/bmi", popular: true, category: "Hälsa" },
+  { title: "BMI Kalkylator för vuxna", description: "Beräkna BMI för vuxna utifrån vikt och längd", href: "/bmi", popular: true, category: "Hälsa" },
   { title: "Momskalkylator", description: "Lägg till eller dra av 25% moms enkelt och snabbt", href: "/moms", popular: true, category: "Ekonomi" },
   { title: "Lånekalkylator", description: "Beräkna månadskostnad, jämför lån och se amorteringsplan", href: "/laaneberegner", popular: true, category: "Lån" },
   { title: "Valutakalkylator", description: "Räkna om mellan SEK, EUR, USD och andra valutor", href: "/valuta", popular: true, category: "Ekonomi" },

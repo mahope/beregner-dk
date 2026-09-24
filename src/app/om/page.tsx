@@ -88,7 +88,7 @@ function DaContent() {
 
         <h3>Sundhed</h3>
         <ul>
-          <li><Link href="/bmi">BMI Beregner</Link> - tjek dit Body Mass Index</li>
+          <li><Link href="/bmi">BMI Beregner for voksne</Link> - tjek dit Body Mass Index</li>
           <li><Link href="/kalorier">Kalorieberegner</Link> - beregn dit daglige kaloriebehov</li>
         </ul>
 
@@ -208,7 +208,7 @@ function SeContent() {
 
         <h3>Hälsa</h3>
         <ul>
-          <li><Link href="/bmi">BMI-beräknare</Link> - kontrollera ditt Body Mass Index</li>
+          <li><Link href="/bmi">BMI-beräknare för vuxna</Link> - kontrollera ditt Body Mass Index</li>
           <li><Link href="/kalorier">Kaloriräknare</Link> - beräkna ditt dagliga kaloribehov</li>
         </ul>
 

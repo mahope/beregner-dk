@@ -53,7 +53,7 @@ export const beregnere: BeregnerItem[] = [
   { title: "Forbrugslån", description: "Beregn ydelse og ÅOP på forbrugslån", href: "/forbrugslaan", category: "Lån" },
   { title: "Leasing Beregner", description: "Beregn leasingydelse og sammenlign med billån", href: "/leasing", category: "Lån" },
   { title: "Gældsfri Beregner", description: "Beregn din vej ud af gæld med lavine/snebold", href: "/gaeldsfri", category: "Lån" },
-  { title: "BMI Beregner", description: "Beregn dit Body Mass Index og se om din vægt er sund", href: "/bmi", category: "Sundhed" },
+  { title: "BMI Beregner for voksne", description: "Beregn BMI for voksne ud fra vægt og højde", href: "/bmi", category: "Sundhed" },
   { title: "Kalorieberegner", description: "Beregn dit daglige kaloriebehov og makroer", href: "/kalorier", category: "Sundhed" },
   { title: "Vægttab Beregner", description: "Beregn kalorieunderskud for vægttab", href: "/vaegttab", category: "Sundhed" },
   { title: "Promilleberegner", description: "Anslå din alkoholpromille med Widmark-formlen", href: "/promille", category: "Sundhed" },
@@ -172,14 +172,14 @@ export const categories: CategoryData[] = [
   {
     slug: "sundhed",
     name: "Sundhed",
-    title: "Sundhedsberegnere — BMI & Kalorieberegner",
-    metaDescription: "Gratis sundhedsberegnere: BMI beregner og kalorieberegner. Beregn dit Body Mass Index og daglige kaloriebehov.",
-    description: "Hold styr på din sundhed med vores gratis beregnere. Beregn dit BMI og daglige kaloriebehov baseret på din alder, køn, højde og aktivitetsniveau.",
-    keywords: ["sundhed beregner", "bmi beregner", "kalorieberegner", "body mass index", "kaloriebehov", "idealvægt"],
+    title: "Sundhedsberegnere — BMI for voksne & Kalorieberegner",
+    metaDescription: "Gratis BMI-beregner for voksne og kalorieberegner. Beregn BMI ud fra vægt og højde og find dit daglige kaloriebehov.",
+    description: "Hold styr på din sundhed med vores gratis beregnere. Beregn BMI for voksne ud fra vægt og højde. Kaloriebehovet beregnes ud fra din alder, køn, højde og aktivitetsniveau.",
+    keywords: ["sundhed beregner", "bmi beregner", "kalorieberegner", "body mass index", "kaloriebehov", "vægtinterval"],
     faqItems: [
       {
-        question: "Hvad er en normal BMI?",
-        answer: "En normal BMI ligger mellem 18,5 og 24,9. Under 18,5 er undervægt, 25-29,9 er overvægt, og over 30 regnes som fedme. BMI tager dog ikke højde for muskelmasse.",
+        question: "Hvad er en normal BMI for voksne?",
+        answer: "For voksne ligger BMI normalt mellem 18,5 og 24,9. Under 18,5 er undervægt, 25-29,9 er overvægt, og over 30 regnes som fedme. BMI-beregneren beregner ikke børns percentil.",
       },
       {
         question: "Hvor mange kalorier har jeg brug for?",
