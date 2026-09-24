@@ -348,6 +348,8 @@ STATUS: NÆSTE ITERATION — O5 (boligstøtte).
   matrix passede DA/SE 200/404, alias/trailing-slash, svensk canonical/lang/JSON-LD/OG/
   search, info-canonicaler, sitemap, robots, API-trailing og edge-host cases. React Doctor
   scannede 52 filer med 74/100 og ingen rapporterede issues.
+- **Landet:** O4-kode, tests og plan ligger i commit `7ddfa8c`; merge til `master` er
+  `1dc1c86`, og begge refs blev pushet 2026-09-24 09:40 CEST.
 - **Forventet effekt:** Beskytter den dokumenterede +161 % vækst, fjerner dansk self-
   canonical på svensk domæne og forbedrer svensk opdagelse/CTR uden at migrere de
   fire stærkeste URL'er.
@@ -791,3 +793,5 @@ landmark=lån, piggybank=opsparing osv.).
   `/api/health` svarede samtidig `status: ok`; alle sider gav 200 via live-hentning.
 - Lukkede dermed deploynoterne for `792d0c0`, `e3f3dcf` og `191a431` (med O3-kode i
   `cc173c5`); ingen ældre åbne VERIFICÉR-noter står tilbage.
+- **VERIFICÉR DEPLOY:** O4 beraknare.se locale-, redirect-, canonical-, hreflang-, JSON-LD-,
+  OG-, search-, sitemap- og robots-rettelser `1dc1c86` 2026-09-24 09:40 CEST.
