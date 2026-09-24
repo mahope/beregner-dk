@@ -26,6 +26,8 @@ export async function generateMetadata(): Promise<Metadata> {
       description: "Officielle 2026-satser for SU, fribeløb, forsørgertillæg og SU-lån.",
       url: `${baseUrl}/blog/su-2026-satser-og-regler`,
       type: "article",
+      siteName: dc.siteName,
+      locale: dc.ogLocale,
     },
     alternates: {
       canonical: `${baseUrl}/blog/su-2026-satser-og-regler`,

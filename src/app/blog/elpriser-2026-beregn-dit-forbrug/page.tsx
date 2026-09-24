@@ -26,6 +26,8 @@ export async function generateMetadata(): Promise<Metadata> {
       description: "Alt om elpriser i 2026 — priser, forbrug og sparetips.",
       url: `${baseUrl}/blog/elpriser-2026-beregn-dit-forbrug`,
       type: "article",
+      siteName: dc.siteName,
+      locale: dc.ogLocale,
     },
     alternates: {
       canonical: `${baseUrl}/blog/elpriser-2026-beregn-dit-forbrug`,

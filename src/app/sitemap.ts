@@ -1,39 +1,32 @@
-import { MetadataRoute } from "next";
-import { headers } from "next/headers";
-import { getDomainConfig } from "@/lib/domain-config";
-import { getAvailableSlugs } from "@/lib/page-data";
+import type { MetadataRoute } from "next";
+import { getCurrentDomainConfig } from "@/lib/get-locale";
+import type { DomainConfig } from "@/lib/domain-config";
+import { isCalculatorAvailable } from "@/lib/calculator-list";
 import { getFooterBlogLinks } from "@/lib/footer-data";
 import type { Locale } from "@/lib/i18n";
+import { getAvailableSlugs } from "@/lib/page-data";
 
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const headersList = await headers();
-  const hostname = headersList.get("x-hostname") || "localhost";
-  const domainConfig = getDomainConfig(hostname);
-  const locale = domainConfig.locale;
-  const baseUrl = domainConfig.baseUrl;
-  const lastModified = new Date();
-
-  // Calculator pages available for this locale
-  const availableSlugs = getAvailableSlugs(locale);
-
-  // Priority map for important pages
+export function buildSitemap(
+  domainConfig: DomainConfig,
+  lastModified = new Date()
+): MetadataRoute.Sitemap {
+  const { locale, baseUrl } = domainConfig;
+  const availableSlugs = getAvailableSlugs(locale).filter((slug) =>
+    isCalculatorAvailable(`/${slug}`, locale)
+  );
   const highPriority = new Set([
     "bmi", "moms", "procent", "valuta", "boliglaan", "laaneberegner",
     "renteberegner", "kalorier", "elberegner", "braendstof", "dato",
-    "tidsberegner", "opsparing", "loen-efter-skat", "dagpenge",
-    "pension", "boligstoette", "skattefradrag",
+    "tidsberegner", "opsparing", "loen-efter-skat", "lon-efter-skatt",
+    "bolan", "dagpenge", "pension", "boligstoette", "skattefradrag",
   ]);
-
   const dailyUpdates = new Set(["valuta"]);
-
   const calculatorEntries: MetadataRoute.Sitemap = availableSlugs.map((slug) => ({
     url: `${baseUrl}/${slug}`,
     lastModified,
     changeFrequency: dailyUpdates.has(slug) ? "daily" : "monthly",
     priority: highPriority.has(slug) ? 0.9 : 0.8,
   }));
-
-  // Category pages (only for DA which has all categories)
   const categoryEntries: MetadataRoute.Sitemap = locale === "da"
     ? [
         "oekonomi", "bolig", "laan", "sundhed", "familie",
@@ -45,8 +38,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.7,
       }))
     : [];
-
-  // Blog entries (only for DA which has blog content)
   const blogLinks = getFooterBlogLinks(locale);
   const blogEntries: MetadataRoute.Sitemap = blogLinks.length > 0
     ? [
@@ -59,8 +50,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         })),
       ]
     : [];
-
-  // Info pages
   const infoEntries: MetadataRoute.Sitemap = [
     { url: `${baseUrl}/om`, lastModified, changeFrequency: "yearly" as const, priority: 0.5 },
     { url: `${baseUrl}/privatlivspolitik`, lastModified, changeFrequency: "yearly" as const, priority: 0.3 },
@@ -79,6 +68,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...blogEntries,
     ...infoEntries,
   ];
+}
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  return buildSitemap(await getCurrentDomainConfig());
 }
 
 function getBlogSlugs(locale: Locale): string[] {

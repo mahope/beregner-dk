@@ -157,12 +157,14 @@ const navigationData: Record<Locale, NavItem[]> = {
         { name: "Sparande", href: "/opsparing" },
         { name: "Procent", href: "/procent" },
         { name: "Timpris", href: "/timepris" },
+        { name: "Lön efter skatt", href: "/lon-efter-skatt" },
       ],
     },
     {
       name: "Bostad",
       children: [
         { name: "Bolån", href: "/boliglaan" },
+        { name: "Bolån 2026", href: "/bolan" },
         { name: "Elberäknare", href: "/elberegner" },
         { name: "Solceller", href: "/solceller" },
         { name: "Kvadratmeter", href: "/kvadratmeter" },

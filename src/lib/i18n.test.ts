@@ -43,6 +43,15 @@ describe("getTranslations", () => {
     expect(noKeys).toEqual(daKeys);
     expect(seKeys).toEqual(daKeys);
   });
+
+  test("all locales have localized search and OpenGraph copy", () => {
+    expect(t("da", "ui.searchPlaceholder")).toBe("Søg blandt alle beregnere...");
+    expect(t("no", "ui.searchPlaceholder")).toBe("Søk blant alle kalkulatorer...");
+    expect(t("se", "ui.searchPlaceholder")).toBe("Sök bland alla kalkylatorer...");
+    expect(t("da", "site.ogTagline")).toContain("danskere");
+    expect(t("no", "site.ogTagline")).toContain("nordmenn");
+    expect(t("se", "site.ogTagline")).toContain("svenskar");
+  });
 });
 
 describe("t", () => {

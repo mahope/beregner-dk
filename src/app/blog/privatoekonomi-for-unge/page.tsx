@@ -28,6 +28,8 @@ export async function generateMetadata(): Promise<Metadata> {
       description: "5 gratis beregnere der hjælper unge med privatøkonomien.",
       url: `${baseUrl}/blog/privatoekonomi-for-unge`,
       type: "article",
+      siteName: dc.siteName,
+      locale: dc.ogLocale,
     },
     alternates: {
       canonical: `${baseUrl}/blog/privatoekonomi-for-unge`,

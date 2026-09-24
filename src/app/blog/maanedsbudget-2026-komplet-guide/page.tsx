@@ -26,6 +26,8 @@ export async function generateMetadata(): Promise<Metadata> {
       description: "Lær at lave et budget der holder: Faste/variable udgifter, tommelfingerregler og gratis budgetberegner.",
       url: `${baseUrl}/blog/maanedsbudget-2026-komplet-guide`,
       type: "article",
+      siteName: dc.siteName,
+      locale: dc.ogLocale,
     },
     alternates: {
       canonical: `${baseUrl}/blog/maanedsbudget-2026-komplet-guide`,

@@ -37,6 +37,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       description: category.metaDescription,
       url: `${baseUrl}/kategori/${slug}`,
       type: "website",
+      siteName: domainConfig.siteName,
+      locale: domainConfig.ogLocale,
     },
     alternates: {
       canonical: `${baseUrl}/kategori/${slug}`,

@@ -1,6 +1,9 @@
 import { ImageResponse } from "next/og";
+import { getCurrentDomainConfig } from "@/lib/get-locale";
+import { getTranslations } from "@/lib/i18n";
 
-export const alt = "MinBeregner.dk - Gratis online beregnere";
+export const alt = "MinBeregner.dk / Beräknare.se";
+export const dynamic = "force-dynamic";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -21,7 +24,9 @@ function Icon({ size: s, color, children }: { size: number; color: string; child
   );
 }
 
-export default function OGImage() {
+export default async function OGImage() {
+  const domainConfig = await getCurrentDomainConfig();
+  const translations = getTranslations(domainConfig.locale);
   const gray = "#4b5563";
   return new ImageResponse(
     (
@@ -58,16 +63,18 @@ export default function OGImage() {
               borderRadius: 20,
             }}
           >
-            <span style={{ fontSize: 48, fontWeight: 800, color: "white" }}>M</span>
+            <span style={{ fontSize: 48, fontWeight: 800, color: "white" }}>
+              {domainConfig.siteName.charAt(0)}
+            </span>
           </div>
           <span style={{ fontSize: 48, fontWeight: 800, color: "#1e3a5f" }}>
-            MinBeregner.dk
+            {domainConfig.siteName}
           </span>
         </div>
 
         {/* Tagline */}
         <p style={{ fontSize: 28, color: "#4b5563", margin: 0, marginBottom: 40 }}>
-          48+ gratis online beregnere til danskere
+          {translations.site.ogTagline}
         </p>
 
         {/* Icon row — lucide icons */}
@@ -131,9 +138,9 @@ export default function OGImage() {
             color: "#6b7280",
           }}
         >
-          <span>100% Gratis</span>
-          <span>Privat &amp; Sikkert</span>
-          <span>2026-satser</span>
+          <span>{translations.site.ogFree}</span>
+          <span>{translations.site.ogPrivate}</span>
+          <span>{translations.site.ogRates}</span>
         </div>
       </div>
     ),

@@ -28,6 +28,8 @@ export async function generateMetadata(): Promise<Metadata> {
         "Lær alt om lån, renter og ÅOP. Forstå forskellen på lånetyper og find det billigste lån.",
       url: `${baseUrl}/blog/guide-til-laan-og-renter`,
       type: "article",
+      siteName: dc.siteName,
+      locale: dc.ogLocale,
     },
     alternates: {
       canonical: `${baseUrl}/blog/guide-til-laan-og-renter`,

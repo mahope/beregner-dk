@@ -25,6 +25,8 @@ export async function generateMetadata(): Promise<Metadata> {
       description: "Lær alt om dansk moms: Tillæg, fratræk og beregn 25% moms korrekt.",
       url: `${baseUrl}/blog/hvordan-beregner-man-moms`,
       type: "article",
+      siteName: dc.siteName,
+      locale: dc.ogLocale,
     },
     alternates: {
       canonical: `${baseUrl}/blog/hvordan-beregner-man-moms`,

@@ -26,6 +26,8 @@ export async function generateMetadata(): Promise<Metadata> {
       description: "Alt om boliglån i 2026 — renter, låntyper og beregning.",
       url: `${baseUrl}/blog/boliglaan-2026-renter-og-afdrag`,
       type: "article",
+      siteName: dc.siteName,
+      locale: dc.ogLocale,
     },
     alternates: {
       canonical: `${baseUrl}/blog/boliglaan-2026-renter-og-afdrag`,

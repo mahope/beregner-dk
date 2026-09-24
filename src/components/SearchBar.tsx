@@ -4,6 +4,8 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { Search } from "lucide-react";
 import Link from "next/link";
 import { CalcIcon } from "@/components/ui/icons";
+import { useLocale } from "@/components/LocaleProvider";
+import { getTranslations } from "@/lib/i18n";
 
 interface Beregner {
   title: string;
@@ -17,6 +19,8 @@ interface SearchBarProps {
 }
 
 export default function SearchBar({ beregnere }: SearchBarProps) {
+  const { locale } = useLocale();
+  const placeholder = getTranslations(locale).ui.searchPlaceholder;
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
@@ -75,9 +79,11 @@ export default function SearchBar({ beregnere }: SearchBarProps) {
 
   return (
     <div ref={containerRef} className="relative w-full max-w-xl mx-auto">
+      <label htmlFor="site-search" className="sr-only">{placeholder}</label>
       <div className="relative">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" />
+        <Search aria-hidden="true" className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" />
         <input
+          id="site-search"
           ref={inputRef}
           type="text"
           value={query}
@@ -87,7 +93,7 @@ export default function SearchBar({ beregnere }: SearchBarProps) {
           }}
           onFocus={() => setOpen(true)}
           onKeyDown={handleKeyDown}
-          placeholder="Søg blandt alle beregnere..."
+          placeholder={placeholder}
           className="w-full pl-12 pr-4 py-4 text-lg rounded-2xl shadow-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-shadow"
           role="combobox"
           aria-expanded={showDropdown}

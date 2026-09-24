@@ -27,6 +27,8 @@ export async function generateMetadata(): Promise<Metadata> {
       description: "Komplet guide til omkostninger ved boligsalg. Beregn dit nettoprovenu — få overblik over mæglerhonorar, rapporter, istandsættelse og alle salgsomkostninger.",
       url: `${baseUrl}/blog/boligsalg-2026-guide-til-omkostninger-og-provenu`,
       type: "article",
+      siteName: dc.siteName,
+      locale: dc.ogLocale,
     },
     alternates: {
       canonical: `${baseUrl}/blog/boligsalg-2026-guide-til-omkostninger-og-provenu`,

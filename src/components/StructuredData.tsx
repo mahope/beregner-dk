@@ -1,5 +1,7 @@
 // JSON-LD Structured Data Components for SEO
 
+import { getDomainConfig } from "@/lib/domain-config";
+
 interface FAQItem {
   question: string;
   answer: string;
@@ -38,10 +40,11 @@ export function CalculatorSchema({
   description,
   url,
   category = "Calculator",
-  siteName = "MinBeregner.dk",
-  currency = "DKK",
+  siteName,
+  currency,
 }: CalculatorSchemaProps) {
-  const siteUrl = url.split("/").slice(0, 3).join("/"); // extract origin from url
+  const pageUrl = new URL(url);
+  const domainConfig = getDomainConfig(pageUrl.hostname);
   const schema = {
     "@context": "https://schema.org",
     "@type": "WebApplication",
@@ -51,15 +54,16 @@ export function CalculatorSchema({
     applicationCategory: category,
     operatingSystem: "All",
     browserRequirements: "Requires JavaScript",
+    inLanguage: domainConfig.hreflangCode,
     offers: {
       "@type": "Offer",
       price: "0",
-      priceCurrency: currency,
+      priceCurrency: currency || domainConfig.currency,
     },
     provider: {
       "@type": "Organization",
-      name: siteName,
-      url: siteUrl,
+      name: siteName || domainConfig.siteName,
+      url: domainConfig.baseUrl,
     },
   };
 

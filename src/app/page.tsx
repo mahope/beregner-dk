@@ -31,6 +31,8 @@ export async function generateMetadata(): Promise<Metadata> {
       description: data.meta.ogDescription,
       url: baseUrl,
       type: "website",
+      siteName: domainConfig.siteName,
+      locale: domainConfig.ogLocale,
     },
     alternates: {
       canonical: baseUrl,

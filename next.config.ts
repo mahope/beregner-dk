@@ -31,6 +31,7 @@ const nextConfig: NextConfig = {
   output: 'standalone',
   reactStrictMode: true,
   poweredByHeader: false,
+  skipTrailingSlashRedirect: true,
   compress: true,
   allowedDevOrigins: ['beregner.no', 'beraknare.se', 'minberegner.dk'],
   images: {

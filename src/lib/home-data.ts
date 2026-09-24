@@ -1,4 +1,5 @@
 import type { Locale } from "./i18n";
+import { isCalculatorAvailable } from "./calculator-list";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -411,6 +412,7 @@ const seCalculators: HomeCalculator[] = [
   { title: "Valutakalkylator", description: "Räkna om mellan SEK, EUR, USD och andra valutor", href: "/valuta", popular: true, category: "Ekonomi" },
   { title: "Procentkalkylator", description: "Beräkna procent av ett tal, ökning, minskning och mer", href: "/procent", popular: true, category: "Matematik" },
   { title: "Räntekalkylator", description: "Beräkna räntor, amortering och total återbetalning på lån", href: "/renteberegner", popular: true, category: "Ekonomi" },
+  { title: "Lön efter skatt", description: "Beräkna din nettolön efter svensk skatt", href: "/lon-efter-skatt", popular: true, category: "Ekonomi" },
   // Non-popular
   { title: "Sparkalkylator", description: "Beräkna ränta på ränta och se ditt sparande växa", href: "/opsparing", popular: false, category: "Ekonomi" },
   { title: "Kvadratmeterkalkylator", description: "Beräkna yta av rum, trädgårdar och tomter", href: "/kvadratmeter", popular: false, category: "Matematik" },
@@ -423,6 +425,7 @@ const seCalculators: HomeCalculator[] = [
   { title: "Tidszonskalkylator", description: "Se vad klockan är i andra länder", href: "/tidszone", popular: false, category: "Vardag" },
   { title: "Tidskalkylator", description: "Beräkna timmar och minuter mellan tidpunkter", href: "/tidsberegner", popular: false, category: "Praktiskt" },
   { title: "Bolån", description: "Beräkna månadskostnad och kostnader för ditt bolån", href: "/boliglaan", popular: false, category: "Bostad" },
+  { title: "Bolån 2026", description: "Beräkna amortering och räntekostnad med svenska bolåneregler", href: "/bolan", popular: false, category: "Bostad" },
   { title: "Billån", description: "Beräkna månadskostnad och ränta på billån", href: "/billaan", popular: false, category: "Lån" },
   { title: "Leasing Kalkylator", description: "Beräkna leasingkostnad och jämför med billån", href: "/leasing", popular: false, category: "Lån" },
   { title: "Skuldfri Kalkylator", description: "Beräkna vägen ut ur skuld med lavin-/snöbollsmetoden", href: "/gaeldsfri", popular: false, category: "Lån" },
@@ -461,5 +464,7 @@ export function getHomePageData(locale: Locale): HomePageData {
 }
 
 export function getHomeCalculators(locale: Locale): HomeCalculator[] {
-  return calculatorMap[locale] ?? calculatorMap.da;
+  return (calculatorMap[locale] ?? calculatorMap.da).filter((calculator) =>
+    isCalculatorAvailable(calculator.href, locale)
+  );
 }

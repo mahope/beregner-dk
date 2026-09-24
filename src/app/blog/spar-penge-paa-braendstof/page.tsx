@@ -27,6 +27,8 @@ export async function generateMetadata(): Promise<Metadata> {
         "Praktiske tips til at reducere dit brændstofforbrug og spare penge på benzin, diesel eller el.",
       url: `${baseUrl}/blog/spar-penge-paa-braendstof`,
       type: "article",
+      siteName: dc.siteName,
+      locale: dc.ogLocale,
     },
     alternates: {
       canonical: `${baseUrl}/blog/spar-penge-paa-braendstof`,

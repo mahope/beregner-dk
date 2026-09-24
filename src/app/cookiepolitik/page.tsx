@@ -10,9 +10,21 @@ export async function generateMetadata(): Promise<Metadata> {
     locale === "se"
       ? `Läs om vår användning av cookies och localStorage på ${dc.siteName}. Vi använder Plausible Analytics (cookiefritt) och Google AdSense (annonscookies efter samtycke).`
       : `Læs om vores brug af cookies og localStorage på ${dc.siteName}. Vi bruger Plausible Analytics (cookiefrit) og Google AdSense (annoncecookies efter samtykke).`;
+  const canonicalUrl = `${dc.baseUrl}/cookiepolitik`;
   return {
     title: `${title} | ${dc.siteName}`,
     description: desc,
+    openGraph: {
+      title: `${title} | ${dc.siteName}`,
+      description: desc,
+      url: canonicalUrl,
+      type: "website",
+      siteName: dc.siteName,
+      locale: dc.ogLocale,
+    },
+    alternates: {
+      canonical: canonicalUrl,
+    },
     robots: { index: true, follow: true },
   };
 }

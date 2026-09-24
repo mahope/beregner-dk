@@ -26,6 +26,8 @@ export async function generateMetadata(): Promise<Metadata> {
       description: "Komplet guide til biløkonomi: Afgifter, brændstof, forsikring, værditab og finansiering. Se de samlede ejeromkostninger.",
       url: `${baseUrl}/blog/biloekonomi-2026-hvad-koster-det-at-eje-bil`,
       type: "article",
+      siteName: dc.siteName,
+      locale: dc.ogLocale,
     },
     alternates: {
       canonical: `${baseUrl}/blog/biloekonomi-2026-hvad-koster-det-at-eje-bil`,

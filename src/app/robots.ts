@@ -1,13 +1,8 @@
-import { MetadataRoute } from "next";
-import { headers } from "next/headers";
-import { getDomainConfig } from "@/lib/domain-config";
+import type { MetadataRoute } from "next";
+import type { DomainConfig } from "@/lib/domain-config";
+import { getCurrentDomainConfig } from "@/lib/get-locale";
 
-export default async function robots(): Promise<MetadataRoute.Robots> {
-  const headersList = await headers();
-  const hostname = headersList.get("x-hostname") || "localhost";
-  const domainConfig = getDomainConfig(hostname);
-  const baseUrl = domainConfig.baseUrl;
-
+export function buildRobots(domainConfig: DomainConfig): MetadataRoute.Robots {
   return {
     rules: [
       {
@@ -16,6 +11,10 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
         disallow: ["/api/", "/_next/", "/embed/", "/design-system"],
       },
     ],
-    sitemap: `${baseUrl}/sitemap.xml`,
+    sitemap: `${domainConfig.baseUrl}/sitemap.xml`,
   };
+}
+
+export default async function robots(): Promise<MetadataRoute.Robots> {
+  return buildRobots(await getCurrentDomainConfig());
 }

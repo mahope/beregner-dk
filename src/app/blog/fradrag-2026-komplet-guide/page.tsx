@@ -25,6 +25,8 @@ export async function generateMetadata(): Promise<Metadata> {
       description: "Alle skattefradrag i 2026 — rentefradrag, kørsel, håndværker og mere.",
       url: `${baseUrl}/blog/fradrag-2026-komplet-guide`,
       type: "article",
+      siteName: dc.siteName,
+      locale: dc.ogLocale,
     },
     alternates: {
       canonical: `${baseUrl}/blog/fradrag-2026-komplet-guide`,

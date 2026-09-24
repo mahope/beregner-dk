@@ -100,22 +100,37 @@ const calculatorDefs: CalculatorDef[] = [
   { href: "/vaegttab", titles: { da: "Vægttab", no: "Vekttap", se: "Viktminskning" }, descriptions: { da: "Beregn vægttab", no: "Beregn vekttap", se: "Beräkna viktminskning" } },
   { href: "/termin", titles: { da: "Terminsdato", no: "Termindato", se: "Beräknat datum" }, descriptions: { da: "Beregn terminsdato", no: "Beregn termindato", se: "Beräkna förlossningsdatum" } },
   { href: "/aegloesning", titles: { da: "Ægløsning", no: "Eggløsning", se: "Ägglossning" }, descriptions: { da: "Find dine frugtbare dage", no: "Finn dine fruktbare dager", se: "Hitta dina fertila dagar" } },
-  { href: "/ugenummer", titles: { da: "Ugenummer", no: "Ukenummer", se: "Veckonummer" }, descriptions: { da: "Hvilken uge er det?", no: "Hvilken uke er det?", se: "Vilken vecka är det?" } },
-  { href: "/flyttebudget", titles: { da: "Flyttebudget", no: "Flyttebudsjett", se: "Flyttbudget" }, descriptions: { da: "Beregn dit samlede flyttebudget", no: "Beregn flyttebudsjettet ditt", se: "Beräkna din flyttbudget" } },
+  { href: "/ugenummer", daOnly: true, titles: { da: "Ugenummer", no: "Ukenummer", se: "Veckonummer" }, descriptions: { da: "Hvilken uge er det?", no: "Hvilken uke er det?", se: "Vilken vecka är det?" } },
+  { href: "/flyttebudget", daOnly: true, titles: { da: "Flyttebudget", no: "Flyttebudsjett", se: "Flyttbudget" }, descriptions: { da: "Beregn dit samlede flyttebudget", no: "Beregn flyttebudsjettet ditt", se: "Beräkna din flyttbudget" } },
   { href: "/boligsalg", daOnly: true, titles: { da: "Boligsalg", no: "Boligsalg", se: "Bostadsförsäljning" }, descriptions: { da: "Beregn nettoprovenu ved salg af bolig", no: "Beregn nettoproveny ved boligsalg", se: "Beräkna netto vid bostadsförsäljning" } },
 ];
 
-// DA-only slugs (not available on NO/SE)
-const daOnlySlugs = new Set(
-  calculatorDefs.filter((d) => d.daOnly).map((d) => d.href)
+const calculatorDefsByHref = new Map(
+  calculatorDefs.map((definition) => [definition.href, definition])
 );
+
+export function getCalculatorHrefs(): string[] {
+  return calculatorDefs.map((definition) => definition.href);
+}
+
+export function isCalculatorPath(href: string): boolean {
+  return calculatorDefsByHref.has(href);
+}
+
+export function isCalculatorAvailable(href: string, locale: Locale): boolean {
+  const definition = calculatorDefsByHref.get(href);
+  if (!definition) return false;
+  if (definition.daOnly) return locale === "da";
+  if (definition.seOnly) return locale === "se";
+  return true;
+}
 
 /**
  * Get all calculators for a given locale (filtered to only available ones).
  */
 export function getCalculatorsByLocale(locale: Locale): Calculator[] {
   return calculatorDefs
-    .filter((d) => (d.daOnly ? locale === "da" : d.seOnly ? locale === "se" : true))
+    .filter((definition) => isCalculatorAvailable(definition.href, locale))
     .map((d) => ({
       title: d.titles[locale] || d.titles.da,
       description: d.descriptions[locale] || d.descriptions.da,
@@ -238,7 +253,9 @@ export function getRelatedCalculators(
 export function getPopularCalculators(locale: Locale): Calculator[] {
   const popularHrefs = locale === "da"
     ? ["/loen-efter-skat", "/moms", "/bmi", "/laaneberegner", "/procent", "/valuta", "/feriepenge", "/boliglaan"]
-    : ["/moms", "/bmi", "/laaneberegner", "/procent", "/valuta", "/boliglaan", "/pension", "/timepris"];
+    : locale === "se"
+      ? ["/lon-efter-skatt", "/moms", "/bmi", "/laaneberegner", "/procent", "/valuta", "/bolan", "/timepris"]
+      : ["/moms", "/bmi", "/laaneberegner", "/procent", "/valuta", "/boliglaan", "/timepris"];
 
   const allCalcs = getCalculatorsByLocale(locale);
   return popularHrefs

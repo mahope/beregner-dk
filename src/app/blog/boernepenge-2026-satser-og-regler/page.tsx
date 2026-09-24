@@ -26,6 +26,8 @@ export async function generateMetadata(): Promise<Metadata> {
       description: "Alt om børne- og ungeydelse i 2026: satser pr. alder, aftrapning, deling mellem forældre og ekstra tilskud.",
       url: `${baseUrl}/blog/boernepenge-2026-satser-og-regler`,
       type: "article",
+      siteName: dc.siteName,
+      locale: dc.ogLocale,
     },
     alternates: {
       canonical: `${baseUrl}/blog/boernepenge-2026-satser-og-regler`,

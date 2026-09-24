@@ -25,6 +25,8 @@ export async function generateMetadata(): Promise<Metadata> {
       description: "Alt om dagpenge i 2026 — satser, krav og beregning.",
       url: `${baseUrl}/blog/dagpenge-saadan-finder-du-din-sats`,
       type: "article",
+      siteName: dc.siteName,
+      locale: dc.ogLocale,
     },
     alternates: {
       canonical: `${baseUrl}/blog/dagpenge-saadan-finder-du-din-sats`,

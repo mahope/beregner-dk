@@ -1,5 +1,6 @@
 import { describe, test, expect } from "vitest";
 import { getFooterCategories, getFooterBlogLinks } from "./footer-data";
+import { isCalculatorAvailable } from "./calculator-list";
 
 describe("getFooterCategories", () => {
   test("returns categories for all locales", () => {
@@ -17,6 +18,27 @@ describe("getFooterCategories", () => {
         for (const link of cat.links) {
           expect(link.name).toBeTruthy();
           expect(link.href).toMatch(/^\//);
+        }
+      }
+    }
+  });
+
+  test("Swedish footer links both Swedish-only calculators", () => {
+    const hrefs = getFooterCategories("se").flatMap((category) =>
+      category.links.map((link) => link.href)
+    );
+    expect(hrefs).toContain("/lon-efter-skatt");
+    expect(hrefs).toContain("/bolan");
+  });
+
+  test("footer only links calculators available in its locale", () => {
+    for (const locale of ["da", "no", "se"] as const) {
+      for (const category of getFooterCategories(locale)) {
+        for (const link of category.links) {
+          expect(
+            isCalculatorAvailable(link.href, locale),
+            `${locale}:${link.href}`
+          ).toBe(true);
         }
       }
     }

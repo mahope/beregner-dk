@@ -22,6 +22,8 @@ export async function generateMetadata(): Promise<Metadata> {
           : `Gratis online beregnere fra ${dc.siteName}.`,
       url: `${dc.baseUrl}/om`,
       type: "website",
+      siteName: dc.siteName,
+      locale: dc.ogLocale,
     },
     alternates: {
       canonical: `${dc.baseUrl}/om`,

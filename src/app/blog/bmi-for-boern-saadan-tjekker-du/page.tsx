@@ -28,6 +28,8 @@ export async function generateMetadata(): Promise<Metadata> {
       description: "BMI for børn beregnes med percentiler, ikke faste grænser. Se hvordan du tjekker dit barns vægt korrekt.",
       url: `${baseUrl}/blog/bmi-for-boern-saadan-tjekker-du`,
       type: "article",
+      siteName: dc.siteName,
+      locale: dc.ogLocale,
     },
     alternates: {
       canonical: `${baseUrl}/blog/bmi-for-boern-saadan-tjekker-du`,
