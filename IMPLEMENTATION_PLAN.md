@@ -429,6 +429,9 @@ STATUS: KØ — C1 (CTR på /procent) er næste opgave.
   ingen rapporterede correctness- eller security-fejl. Lokal standalone-HTTP-kontrol
   passerede health, `/boligstoette`, artiklen og `Referrer-Policy: no-referrer`.
   Fersk domæne- og React/privacy-slutreview: godkendt, ingen åbne P0-P2-fund.
+- **Landet:** O5-kode og plan i commits `f8227f3`, `204043c` og `2ef8082`;
+  merge til `master` er `0ed3ec3` den 2026-09-25 00:37 CEST. Både
+  `ceo/boligstoette-screening` og `master` blev pushet.
 - **Forventet effekt:** Beskytter en stærk vækstside mod fejltillid, øger tillid og
   flytter useren til den officielle næste handling; ikke dokumenteret bounce-reduktion.
 - **Acceptkriterier:**
@@ -919,3 +922,7 @@ landmark=lån, piggybank=opsparing osv.).
   redirect-hop og bevarede query-parametre. `/blog` og DA-only `/ugenummer` gav 404,
   sitemap indeholdt de svenske kernesider men ikke blog, og `/api/health` svarede
   `status: ok`. Hermed er O4-noten lukket; ingen ældre åbne deploynoter står tilbage.
+- **VERIFICÉR DEPLOY:** O5 boligstøtte-screening, konsistent 2026-indhold, sikker
+  fragment-delestat, offline/query-cachebeskyttelse og copy-fejlfeedback `0ed3ec3`
+  2026-09-25 00:37 CEST. Verificér efter næste batch-vindue med faktisk indhold på
+  `/boligstoette` og `/blog/boligstoette-2026-nye-regler`; HTTP 200 alene er utilstrækkeligt.
