@@ -1,5 +1,5 @@
 import { getCalculatorsByLocale } from "./calculator-list";
-import { BARSEL_2026 } from "./satser-2026";
+import { BARSEL_2026, SU_2026 } from "./satser-2026";
 import type { Locale } from "./i18n";
 
 export interface CategoryData {
@@ -18,6 +18,8 @@ export interface BeregnerItem {
   href: string;
   category: string;
 }
+
+const kr = (value: number) => value.toLocaleString("da-DK");
 
 export const beregnere: BeregnerItem[] = [
   { title: "Løn efter skat", description: "Se hvad du får udbetalt efter skat, AM-bidrag og pension", href: "/loen-efter-skat", category: "Økonomi" },
@@ -208,18 +210,18 @@ export const categories: CategoryData[] = [
   {
     slug: "uddannelse",
     name: "Uddannelse",
-    title: "Uddannelsesberegnere — SU Beregner",
-    metaDescription: "Gratis SU beregner: Beregn din SU og fribeløb baseret på din situation. Opdateret med 2026-satser.",
-    description: "Beregn din SU og fribeløb med vores gratis SU-beregner. Se hvad du kan få i SU baseret på om du er hjemme- eller udeboende, og hvor meget du må tjene ved siden af.",
+    title: "Uddannelsesberegnere — SU & Studielån",
+    metaDescription: "Gratis SU- og studielånsberegnere med officielle 2026-satser, fribeløb, renter og afdrag.",
+    description: "Beregn din SU, fribeløb og tilbagebetaling af SU-lån med vores gratis uddannelsesberegnere og officielle 2026-satser.",
     keywords: ["su beregner", "su sats", "fribeløb", "su udeboende", "su hjemmeboende", "studiestøtte"],
     faqItems: [
       {
         question: "Hvor meget får jeg i SU?",
-        answer: "SU-satsen afhænger af om du er hjemme- eller udeboende. I 2026 er udeboende-satsen ca. 6.597 kr/md og hjemmeboende-satsen ca. 2.944 kr/md (før på forældreindkomst).",
+        answer: `Som udeboende får du ${kr(SU_2026.udeboende)} kr. pr. måned før skat. Hjemmeboende har i den aktuelle ordning en samlet sats på ${kr(SU_2026.homewardBase)}-${kr(SU_2026.homewardMaximum)} kr. Kilde: su.dk, verificeret ${SU_2026.verifiedAt}.`,
       },
       {
         question: "Hvad er fribeløb?",
-        answer: "Fribeløb er det beløb du må tjene ved siden af din SU uden at skulle betale SU tilbage. I 2026 er det årlige fribeløb ca. 15.500 kr/md i de måneder du modtager SU.",
+        answer: `Fribeløbet er din egen indkomstgrænse efter AM-bidrag. I 2026 er den ${kr(SU_2026.freeAllowance.youthWithSu)} kr. pr. måned på ungdomsuddannelse med SU og ${kr(SU_2026.freeAllowance.videregaaendeWithSu)} kr. på videregående uddannelse med SU, dobbelt SU eller slutlån. Kilde: su.dk, verificeret ${SU_2026.verifiedAt}.`,
       },
     ],
   },

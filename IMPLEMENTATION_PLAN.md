@@ -1,6 +1,6 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: NÆSTE ITERATION — O2 er landet; tag O3 (SU).
+STATUS: NÆSTE ITERATION — O4 (beraknare.se).
 
 ## Fase 3 — trafik-drevet
 
@@ -194,9 +194,72 @@ STATUS: NÆSTE ITERATION — O2 er landet; tag O3 (SU).
 - **Baseline-undtagelse:** Bloggen manglede baseline i snapshot. Denne iteration er en
   korrektions- og søgeintentionsreparation; næste trafiksnapshot etablerer baseline.
 
-#### 3. [ ] O3 — Diagnosticér og ret SU-faldet samt konsolidér 2026-kilder
+#### 3. [x] FÆRDIG 2026-09-24 — O3 — Diagnosticér og ret SU-faldet samt konsolidér 2026-kilder
 
-- **Datagrund:** 117 besøgende/28d mod 252 tidligere (-54 %). Live er 200, men blog,
+- **Iteration start:** 2026-09-24 04:22 CEST. Research, kode, kilder og fuld gate udføres
+  serielt; ingen sideløbende O4+ task.
+- **Aktuel baseline fra prompt-snapshot 2026-09-24 03:21:** `/su` 116 besøgende/28d mod
+  252 i forrige 28 dage (-54 %). Bloggens baseline er ikke oplyst og forbliver ukendt.
+- **Dependency-gate:** `npm audit --json` viser 0 sårbarheder i alle niveauer; den gamle
+  2026-08-23-status med 1 critical/7 high er derfor ikke længere aktuel.
+- **Live-diagnose:** `/su` og SU-guiden er 200 med korrekt self-canonical, `lang="da"`,
+  én sitemap-URL og 308 fra trailing slash. Live indeholder de samme modstridende
+  repository-beløb som O2-master, så dette er en kilde-/indholdsfejl og ikke en gammel
+  build. Search Console-querydata findes hverken i repoet eller i en tilgængelig
+  offentlig kilde; ranking-årsagen forbliver **uafklaret**, ikke en gæt.
+- **Officiel 2026-model:** Udeboende VU/ungdom 20+ = 7.426 kr.; aktuel
+  hjemmeboende ordning = 1.154 kr. grundsats plus indkomstafhængigt tillæg til højst
+  3.202 kr.; VU i særlige tilfælde omfattet af ordningen fra før 1. juli 2014 = 3.692 kr.; godkendt 18-19-årig udeboende på
+  ungdomsuddannelse = 4.764 kr. grundsats; forsørgertillæg = 7.426 kr.; VU-
+  handicaptillæg = 10.562 kr. og er skattepligtigt. SU-lån = 3.799 kr./md, slutlån =
+  9.801 kr./md, 4 % under studiet og 2,85 % fra 1. juli 2026 efter uddannelse. Almindelig
+  SU-gæld betales typisk hver 2. måned; den officielle løbetid følger oprindelig gæld fra
+  7 til 15 år. Værktøjet på /studielaan er derfor eksplicit et hypotetisk månedsscenario,
+  ikke Udbetaling Danmarks endelige plan.
+- **Fribeløb:** 15.297 kr./md på ungdomsuddannelse, 20.749 kr./md på VU og
+  23.598 kr./md i indskrevet studiemåned uden SU. Et hjemmeboende VU-scenarie med kun
+  grundsats er 20.749 + 2.048 = 22.797 kr./md efter su.dk's generelle
+  forhøjningsregel; det publicerede 17.345-eksempel gælder ungdomsuddannelse. Årsfribeløbet
+  er summen pr. måned;
+  ved overfribeløb kan SU/slutlån nedsættes eller tilbagebetales, men vores gamle 1:1-
+  tilbagebetalingsformel er ikke dokumenteret og fjernes.
+- **Beslutning:** Tilføj `SU_2026` som central, kildeført konfiguration. Extract
+  `beregnSu` + validering af de seks eksisterende delestatsfelter til ren logik. Beregneren
+  viser kun beløb før skat; den faste 38 %-nettoantagelse fjernes, fordi den modvirker
+  personfradraget og afhænger af den samlede indkomst. Hjemmeboende beregnes eksplicit som
+  et **grundsats-scenarie** med advarsel om det indkomstafhængige tillæg; der interpoleres
+  ikke uden dokumenteret officiel formel. Legacy `boligstatus=foraelder` indlæses som
+  udeboende + barn under 18, mens det eksisterende `erEnligForsorger`-flag bevares, så
+  delelink hverken taber barnets betydning eller opfinder forsørgertillæg. Gamle VU-links
+  uden `homewardScheme` bevarer den faste 3.692-ords ordning; gamle ungdomslinks bevarer
+  den aktuelle 1.154-grundsats. Kilderne er su.dk's dybe rate-, fribeløb-, forældre-,
+  handicaptillæg- og SU-lånsider verificeret 2026-09-24.
+- **Implementeringsstatus:** Central `SU_2026` og ren `beregnSu`-logik er implementeret.
+  Hjemmeboende er et dokumenteret grundbeløbsscenario, 18-19-åriges godkendte udeboende er
+  4.764 kr. + forældreafhængigt tillæg, og den særlige gamle ungdomsordning er skelnet fra
+  den faste ordning fra 20 år. Barn under 18, forsørgertillæg og forældrelån er modelleret
+  som tre uafhængige forhold. Handicaptillægets nedsatte fribeløb gælder kun valgte
+  SU-måneder. Resultater vises før skat; 38 %-nettoantagelsen og den u dokumenterede
+  1:1-tilbagebetalingsformel er fjernet. Gamle delelinks er normaliseret uden at opfinde
+  forsørgerstate, gamle VU-links bevarer 3.692 kr., og gamle ungdomslinks bevarer 1.154 kr.
+  SU-resultatet venter på URL-hydrering for at undgå et forkert resultat-flash. Alle
+  synlige 2026-beløb i `/su`, SU-guiden, metadata, kategori, ungdomsguide og Studielån er
+  afledt fra den centrale konfiguration; Studielån er mærket som et hypotetisk månedsscenario,
+  fordi den officielle plan betales hver 2. måned og afhænger af oprindelig gæld.
+- **Review 2026-09-24:** Fresh-context review fandt og fik rettet legacy VU/youth-migration,
+  legacy+barn, `foraelder`-state, handicaptillægs-måneder, forældrelån, dødt kilde-link,
+  tom rente, ikke-finitt input og manglende statusannoncering. Slutreview fandt ingen
+  åbne P0-P2-fund.
+- **Kvalitetsgate 2026-09-24 07:09:** `npm run lint` grøn (345 filer), `npm run test`
+  grøn (439/439 tests, 48 filer), `npm run build` grøn (137 sider; 7 kendte
+  CSS-optimeringsadvarsler) og `npm audit --audit-level=high` 0 sårbarheder. Lokal
+  standalone-SSR-kontrol passede health, `/su`, SU-guiden og `/studielaan`; `/su/`
+  gav 308. React Doctor: 82/100 med to kendte/intentionelle advarsler om høj
+  kontrolflow-kompleksitet og URL-state initialisering.
+- **Landet:** O3-kode, tests og planens gate ligger i commit `cc173c5`; merge til
+  `master` og deploy-note følger efter denne planopdatering.
+
+- **Datagrund:** 116 besøgende/28d mod 252 tidligere (-54 %). Live er 200, men blog,
   side og beregner har tre forskellige sæt satser. Det er dokumenterede modstridende
   oplysninger, men ikke en dokumenteret ranking-årsag.
 - **Scope:** Først verificér hver officiel 2026-sats, aldersgruppe, fribeløb og
@@ -213,9 +276,9 @@ STATUS: NÆSTE ITERATION — O2 er landet; tag O3 (SU).
   4. Hvis Search Console ikke kan læses, står ranking-årsagen eksplicit som
      "uafklaret"; den opfindes ikke.
   5. Fuld gate er grøn.
-- **MÅL:** `/su` baseline 117 besøgende/28d 2026-09-23;
+- **MÅL:** `/su` baseline 116 besøgende/28d 2026-09-24;
   `/blog/su-2026-satser-og-regler` baseline ukendt i snapshot — udfyld fra næste
-  trafikdata før bloggen ændres.
+  trafikdata før effekten vurderes.
 - **Kilde:** https://www.su.dk
 
 #### 4. [ ] O4 — Lås beraknare.se's locale, canonicale og svensk opdagelse

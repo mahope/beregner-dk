@@ -1,5 +1,5 @@
 import type { Locale } from "./i18n";
-import { BARSEL_2026 } from "./satser-2026";
+import { BARSEL_2026, SU_2026 } from "./satser-2026";
 
 export type PageData = {
   slug: string;
@@ -18,6 +18,8 @@ export type PageData = {
   schemaDescription: string;
   schemaCategory: string;
 };
+
+const kr = (value: number) => value.toLocaleString("da-DK");
 
 const daOnlySlugs = ["loen-efter-skat", "brutto-netto", "feriepenge", "dagpenge", "sygedagpenge", "pension", "efterloen", "topskat", "skattefradrag", "aktieskat", "arveafgift", "rentefradrag", "boligstoette", "husleje", "andelsbolig", "ejendomsvaerdiskat", "boernepenge", "barselsdagpenge", "su", "studielaan", "rabat", "befordringsfradrag", "rygestop", "alkoholenheder", "boligsalg"];
 
@@ -1611,27 +1613,28 @@ const daPages: Record<string, PageData> = {
     "su": {
       slug: "su",
       title: "SU Beregner 2026 - Beregn din SU og fribeløb",
-      description: "Beregn din SU 2026. Officielle satser: Udeboende 7.426 kr/md, hjemmeboende 3.692 kr/md. Fribeløb: 20.749 kr/md (videregående). Tjek om du holder dig under fribeløbet.",
+      description: `Beregn din SU 2026. Udeboende får ${kr(SU_2026.udeboende)} kr./md før skat, mens hjemmeboende har en samlet sats på ${kr(SU_2026.homewardBase)}-${kr(SU_2026.homewardMaximum)} kr. Se også fribeløb.`,
       metaTitle: "SU Beregner 2026 - Beregn din SU og fribeløb",
-      metaDescription: "Beregn din SU 2026. Officielle satser: Udeboende 7.426 kr/md, hjemmeboende 3.692 kr/md. Fribeløb: 20.749 kr/md (videregående). Tjek om du holder dig under fribeløbet.",
+      metaDescription: `Beregn din SU 2026 før skat. Udeboende får ${kr(SU_2026.udeboende)} kr./md, mens hjemmeboende har en samlet sats på ${kr(SU_2026.homewardBase)}-${kr(SU_2026.homewardMaximum)} kr. Se også fribeløb.`,
       keywords: ["su beregner", "su 2026", "beregn su", "fribeløb", "su satser", "hvad får jeg i su", "su udeboende", "su hjemmeboende", "statens uddannelsesstøtte", "su-klip"],
       ogTitle: "SU Beregner 2026 - Beregn din SU og fribeløb",
-      ogDescription: "Beregn din SU og tjek dit fribeløb med de nyeste 2026 satser. Gratis SU beregner.",
+      ogDescription: "Beregn din SU og tjek dit fribeløb med de officielle 2026-satser. Gratis SU-beregner.",
       category: "Uddannelse",
       breadcrumbCategory: "Uddannelse",
       breadcrumbCategoryHref: "/kategori/uddannelse",
       schemaName: "SU Beregner - Statens Uddannelsesstøtte",
-      schemaDescription: "Gratis SU beregner. Beregn din SU og fribeløb for 2026.",
+      schemaDescription: "Gratis SU-beregner. Beregn din SU og fribeløb for 2026.",
       schemaCategory: "FinanceApplication",
       faqItems: [
-      { question: "Hvor meget kan jeg få i SU 2026?", answer: "I 2026 er de officielle SU-satser: Udeboende på videregående: 7.426 kr/md, hjemmeboende: 3.692 kr/md (gammel ordning) eller 1.154 kr + tillæg (ny ordning). Forsørgere får ca. 8.575 kr/md. Alle beløb er før skat." },
-      { question: "Hvad er fribeløbet i 2026?", answer: "Fribeløbet i 2026 afhænger af din uddannelse: Videregående uddannelse: 20.749 kr/md, ungdomsuddannelse: 15.297 kr/md (begge før AM-bidrag). Fribeløbet gælder årligt, så du kan tjene mere nogle måneder og mindre andre." },
-      { question: "Hvem kan få SU?", answer: "Du kan få SU hvis du er dansk statsborger eller EU-borger, er indskrevet på en SU-berettigende uddannelse, er studieaktiv, og er fyldt 18 år. Du må ikke have opbrugt dine SU-klip." },
-      { question: "Hvor mange SU-klip får jeg?", answer: "På videregående uddannelser får du 70 SU-klip total, som kan bruges til flere uddannelser. På ungdomsuddannelser får du klip svarende til uddannelsens normerede længde." },
-      { question: "Hvad sker der hvis jeg tjener over fribeløbet?", answer: "Hvis din årsindkomst overstiger det samlede fribeløb, skal du tilbagebetale for meget udbetalt SU. Tilbagebetalingen sker året efter via SKAT. Du kan tjekke dit fribeløb løbende på su.dk." },
-      { question: "Kan jeg få SU-lån?", answer: "Ja, du kan optage studielån på op til 3.799 kr/md i 2026 under hele uddannelsen. De sidste 12 måneder kan du desuden søge slutlån. Lånet tilbagebetales efter endt uddannelse med renter." },
-      { question: "Hvad er forskellen på udeboende og hjemmeboende SU?", answer: "Udeboende på videregående får 7.426 kr/md i 2026, mens hjemmeboende får 3.692 kr/md (gammel ordning) eller 1.154 kr + indkomstafhængigt tillæg (ny ordning). For at få udeboende-sats skal du dokumentere at du ikke bor hos dine forældre." },
-      { question: "Kan jeg få ekstra SU som forælder?", answer: "Ja, forsørgere kan få højere SU-sats (ca. 8.575 kr/md i 2026). Enlige forsørgere kan få yderligere tillæg. Derudover kan du søge om børnetilskud som supplement via borger.dk." },
+      { question: "Hvor meget kan jeg få i SU 2026?", answer: `Som udeboende får du ${kr(SU_2026.udeboende)} kr. pr. måned før skat på videregående uddannelse og fra 20 år på ungdomsuddannelse. Aktuel hjemmeboende ordning er en samlet sats på ${kr(SU_2026.homewardBase)}-${kr(SU_2026.homewardMaximum)} kr., svarende til et tillæg på højst ${kr(SU_2026.homewardMaximumSupplement)} kr.` },
+      { question: "Hvad er fribeløbet i 2026?", answer: `Månedsgrænserne gælder indkomst efter AM-bidrag: ${kr(SU_2026.freeAllowance.youthWithSu)} kr. på ungdomsuddannelse med SU og ${kr(SU_2026.freeAllowance.videregaaendeWithSu)} kr. på videregående uddannelse med SU, dobbelt SU eller slutlån. En indskrevet studerende uden SU har ${kr(SU_2026.freeAllowance.enrolledWithoutSu)} kr. Hvert barn under 18 år lægger ${kr(SU_2026.freeAllowance.childUnder18Annual)} kr. til årsfribeløbet, og en måned med handicaptillæg har et fribeløb på ${kr(SU_2026.freeAllowance.disabilityMonth)} kr.` },
+      { question: "Hvem kan få SU?", answer: "SU kræver en godkendt uddannelse, dansk statsborgerskab eller ligestillet status og overholdelse af studieaktivitetsreglerne. På ungdomsuddannelse starter SU i kvartallet efter det 18. år. Der er ingen nedre aldersgrænse for SU på videregående uddannelse." },
+      { question: "Hvor mange SU-klip får jeg?", answer: `Videregående uddannelser har i 2026 normalt en samlet ramme på ${SU_2026.suKlip} SU-klip. På ungdomsuddannelser fastsættes antallet efter uddannelsens længde.` },
+      { question: "Hvad sker der, hvis jeg tjener over fribeløbet?", answer: "Når årsindkomsten overstiger årsfribeløbet, kan en del af udbetalt SU og slutlån blive nedsat eller tilbagebetalt. Det endelige beløb afhænger af den konkrete situation og beregnes af Udbetaling Danmark." },
+      { question: "Kan jeg få SU-lån?", answer: `Du kan optage op til ${kr(SU_2026.loan.ordinaryMonthly)} kr. i almindeligt SU-lån pr. måned. Slutlån er op til ${kr(SU_2026.loan.finalMonthly)} kr. pr. måned i de seneste ${SU_2026.rules.finalLoanStandardMonths} måneder, i nogle tilfælde ${SU_2026.rules.finalLoanExtendedMonths} måneder. Renten er ${kr(SU_2026.loan.duringStudyRate * 100)} % under studiet og ${kr(SU_2026.loan.afterGraduationRate * 100)} % fra 1. juli 2026 efter uddannelsen.` },
+      { question: "Hvad er forskellen på udeboende og hjemmeboende SU?", answer: `Udeboende på videregående uddannelse får ${kr(SU_2026.udeboende)} kr. pr. måned. Hjemmeboende får i den aktuelle ordning en samlet sats på ${kr(SU_2026.homewardBase)}-${kr(SU_2026.homewardMaximum)} kr. Den afhænger af forældrenes indkomstgrundlag to år tidligere.` },
+      { question: "Hvad er forsørgertillægget?", answer: `Forsørgertillægget er ${kr(SU_2026.singleParentSupplement)} kr. pr. måned før skat til berettigede enlige forsørgere. Det er et tillæg til den øvrige SU, ikke en samlet SU-sats.` },
+      { question: "Hvor er SU-satserne verificeret?", answer: `Se de linkede officielle kilder under SU-satserne, fribeløb og SU-lån. Alle tal er verificeret ${SU_2026.verifiedAt}.` },
       ],
     },
     "studielaan": {
@@ -1650,11 +1653,11 @@ const daPages: Record<string, PageData> = {
       schemaDescription: "Beregn månedlig ydelse og tilbagebetalingstid for SU-lån.",
       schemaCategory: "FinanceApplication",
       faqItems: [
-      { question: "Hvornår skal jeg begynde at betale SU-lån tilbage?", answer: "Tilbagebetalingen starter 1 år efter, at du afslutter eller afbryder din uddannelse. Du modtager en tilbagebetalingsplan fra Udbetaling Danmark ca. 6 måneder før tilbagebetaling starter." },
-      { question: "Hvad er renten på SU-lån?", answer: "Renten på SU-lån er variabel og fastsættes årligt. Under uddannelsen er renten typisk lavere (diskontoen + 1%). Efter uddannelsen stiger renten (diskontoen + tillæg). Se aktuelle satser på su.dk." },
+      { question: "Hvornår skal jeg begynde at betale SU-lån tilbage?", answer: `Tilbagebetalingen starter 1. januar året efter det år, hvor du afslutter eller afbryder din uddannelse. Almindelig SU-gæld betales typisk hver ${SU_2026.loan.repaymentFrequencyMonths}. måned, og løbetiden følger den oprindelige gæld.` },
+      { question: "Hvad er renten på SU-lån?", answer: `Pr. ${SU_2026.verifiedAt} er den ${kr(SU_2026.loan.duringStudyRate * 100)} % under studiet og ${kr(SU_2026.loan.afterGraduationRate * 100)} % fra 1. juli 2026 efter uddannelsen. Renten er variabel og kan ændre sig.` },
       { question: "Kan jeg betale SU-lån hurtigere tilbage?", answer: "Ja, du kan til enhver tid betale ekstra af på dit SU-lån uden gebyr. Ekstra afdrag reducerer din restgæld og dermed din samlede renteomkostning. Selv små ekstra beløb gør en forskel." },
       { question: "Hvad sker der, hvis jeg ikke kan betale?", answer: "Kontakt Udbetaling Danmark hurtigst muligt. Du kan søge om nedsat ydelse eller midlertidigt betalingsstop, hvis du har lav indkomst. Ignorer ikke problemet — gælden vokser med renter." },
-      { question: "Hvor lang tid har jeg til at betale SU-lån?", answer: "Standard løbetiden er 7 år, men den kan forlænges til op til 15 år, hvis du har behov for lavere månedlige ydelser. Husk at en længere løbetid betyder flere renteomkostninger." },
+      { question: "Hvor lang tid har jeg til at betale SU-lån?", answer: `Den officielle løbetid afhænger af den oprindelige gæld: ${SU_2026.loan.repaymentMinYears} år op til ${SU_2026.loan.repaymentFirstBandMaxDebt.toLocaleString("da-DK")} kr. og op til ${SU_2026.loan.repaymentMaxYears} år fra ${SU_2026.loan.repaymentLastBandMinDebt.toLocaleString("da-DK")} kr. Beregneren kan vise et hypotetisk månedsscenario på ${SU_2026.loan.repaymentMinYears}-${SU_2026.loan.repaymentMaxYears} år, men det er ikke Udbetaling Danmarks endelige plan.` },
       ],
     },
     "rabat": {

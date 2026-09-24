@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
+import { SU_2026 } from "@/lib/satser-2026";
+
+const kr = (value: number) => value.toLocaleString("da-DK");
 
 export async function generateMetadata(): Promise<Metadata> {
   const dc = await getCurrentDomainConfig();
@@ -41,12 +44,12 @@ const faqItems = [
   {
     question: "Hvor meget bør man bruge på husleje som studerende?",
     answer:
-      "Max 30-33% af din samlede indkomst (SU + job + evt. boligstøtte). Med SU på 6.397 kr og et studiejob bør huslejen ideelt ikke overstige 4.000-5.500 kr.",
+      `Som tommelfingerregel bør huslejen højst være omkring 30-33 % af din samlede indkomst. Med ${kr(SU_2026.udeboende)} kr. i fuld udeboende SU før skat og et studiejob på 5.000 kr. er 30 % cirka 3.700 kr. Det afhænger dog af skat, fradrag og din enkelte situation.`,
   },
   {
     question: "Skal man betale skat af SU?",
     answer:
-      "Ja, SU er skattepligtig. Men med personfradraget på 54.100 kr/år betaler de fleste studerende uden studiejob kun lidt eller ingen skat.",
+      "Ja, SU er skattepligtig. Personfradrag og andre fradrag kan reducende skatten, men den konkrete skat afhænger af din samlede indkomst, skattekort og kommune.",
   },
 ];
 
@@ -55,7 +58,7 @@ export default function PrivatoekonomieGuidePage() {
     <div className="max-w-3xl mx-auto">
       <FAQSchema items={faqItems} />
 
-      <nav className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+      <nav className="text-sm text-gray-500 dark:text-gray-400 mb-6" aria-label="Brødkrumme">
         <Link href="/" className="hover:text-blue-600">Forside</Link>
         <span className="mx-2">/</span>
         <Link href="/blog" className="hover:text-blue-600">Blog</Link>
@@ -69,9 +72,9 @@ export default function PrivatoekonomieGuidePage() {
           <h1 className="text-3xl md:text-4xl font-bold mt-2 text-gray-900 dark:text-white">
             Privatøkonomi for unge: 5 beregnere du skal kende
           </h1>
-          <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400 mt-4">
-            <time dateTime="2026-02-17">17. februar 2026</time>
-            <span>•</span>
+          <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 dark:text-gray-400 mt-4">
+            <time dateTime="2026-09-24">Opdateret 24. september 2026</time>
+            <span aria-hidden="true">•</span>
             <span>7 min læsetid</span>
           </div>
         </header>
@@ -84,9 +87,17 @@ export default function PrivatoekonomieGuidePage() {
 
         <h2>1. SU-beregneren: Ved hvad du får</h2>
         <p>
-          SU er rygraden i de fleste studerendes økonomi. I 2026 får du som udeboende
-          studerende <strong>6.397 kr/md</strong> før skat. Men hvad får du reelt udbetalt?
-          Det afhænger af din trækprocent.
+          SU er rygraden i de fleste studerendes økonomi. På videregående uddannelse og på
+          ungdomsuddannelse fra 20 år er den fulde udeboendesats i 2026{" "}
+          <strong>{kr(SU_2026.udeboende)} kr. pr. måned før skat</strong>. En 18-19-årig på
+          ungdomsuddannelse får normalt hjemmeboende SU; med godkendelse til udeboendesats er
+          grundsatsen {kr(SU_2026.youthAway18To19Base)} kr. Den konkrete skat afhænger af din
+          samlede indkomst og dit skattekort.
+        </p>
+        <p className="text-xs text-gray-500 dark:text-gray-400 not-prose">
+          Kilde:{" "}
+          <a href={SU_2026.sources.udeboendeVideregaaende} target="_blank" rel="noopener noreferrer" className="underline">su.dk</a>
+          . SU-satsen er verificeret {SU_2026.verifiedAt}.
         </p>
         <p>
           Med vores{" "}
@@ -113,10 +124,10 @@ export default function PrivatoekonomieGuidePage() {
           at se, hvad du har råd til baseret på din SU og eventuelle studiejobindkomst.
         </p>
         <p>
-          <strong>Eksempel:</strong> Med SU (6.397 kr) + studiejob (5.000 kr) = 11.397 kr/md brutto.
-          30% af dette er ca. 3.400 kr — men husk at tjekke{" "}
+          <strong>Eksempel:</strong> Med {kr(SU_2026.udeboende)} kr. i SU før skat + 5.000 kr. i
+          studiejob = {kr(SU_2026.udeboende + 5000)} kr. pr. måned. 30 % er ca. 3.700 kr — men husk at tjekke{" "}
           <Link href="/boligstoette" className="text-blue-600 hover:underline">boligstøtte</Link>,
-          som kan give dig op til 1.000-2.000 kr ekstra om måneden.
+          som beregnes efter din enkelte situation.
         </p>
 
         <h2>3. Løn efter skat: Hvad får du udbetalt?</h2>
@@ -127,9 +138,9 @@ export default function PrivatoekonomieGuidePage() {
           du se præcist, hvad du får udbetalt.
         </p>
         <p>
-          Som studerende har du et personfradrag på 54.100 kr/år. Hvis din samlede indkomst
-          (SU + job) er under dette beløb, betaler du ingen skat. Men de fleste studerende
-          med studiejob kommer over grænsen.
+          Personfradraget og beskæftigelsesfradraget kan reducere skatten, men det er ikke nok alene
+          at se på SU. Den samlede indkomst, kommunen, skattekortet og eventuelle andre fradrag
+          afgør det endelige beløb.
         </p>
 
         <h2>4. Opsparingsberegneren: Start tidligt</h2>
@@ -162,7 +173,7 @@ export default function PrivatoekonomieGuidePage() {
 
         <h2>Budget-skabelon for studerende</h2>
         <p>
-          Her er et realistisk månedsbudget for en udeboende studerende i 2026:
+          Her er et illustrativt månedsbudget før skat for en udeboende studerende i 2026:
         </p>
         <div className="overflow-x-auto">
           <table>
@@ -178,20 +189,20 @@ export default function PrivatoekonomieGuidePage() {
                 <td></td>
               </tr>
               <tr>
-                <td>SU (efter skat)</td>
-                <td>ca. 5.800 kr</td>
+                <td>SU (før skat)</td>
+                <td>{kr(SU_2026.udeboende)} kr</td>
               </tr>
               <tr>
-                <td>Studiejob (efter skat)</td>
-                <td>ca. 4.000 kr</td>
+                <td>Studiejob (før skat)</td>
+                <td>5.000 kr</td>
               </tr>
               <tr>
-                <td>Boligstøtte</td>
-                <td>ca. 1.000 kr</td>
+                <td>Boligstøtte (illustrativt beløb)</td>
+                <td>1.000 kr</td>
               </tr>
               <tr>
-                <td><strong>Total indkomst</strong></td>
-                <td><strong>ca. 10.800 kr</strong></td>
+                <td><strong>I alt før skat</strong></td>
+                <td><strong>{kr(SU_2026.udeboende + 5000 + 1000)} kr</strong></td>
               </tr>
               <tr>
                 <td><strong>Udgifter</strong></td>

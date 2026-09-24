@@ -44,8 +44,8 @@ const blogPosts = [
     title: "SU 2026: Nye satser og regler for studerende",
     description: "Komplet guide til SU i 2026: Satser for hjemmeboende og udeboende, fribeløb, SU-lån og nye regler.",
     category: "Uddannelse & Økonomi",
-    date: "2026-02-17",
-    readTime: "8 min",
+    date: "2026-09-24",
+    readTime: "9 min",
   },
   {
     slug: "dagpenge-saadan-finder-du-din-sats",
@@ -100,7 +100,7 @@ const blogPosts = [
     title: "Privatøkonomi for unge: 5 beregnere du skal kende",
     description: "Guide til privatøkonomi for unge: SU-beregning, budget, husleje, opsparing og skat med gratis beregnere.",
     category: "Privatøkonomi",
-    date: "2026-02-17",
+    date: "2026-09-24",
     readTime: "7 min",
   },
   {
