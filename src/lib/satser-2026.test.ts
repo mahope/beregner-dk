@@ -1,5 +1,5 @@
 import { describe, test, expect } from "vitest";
-import { BARSEL_2026, SATSER_2026 as S } from "./satser-2026";
+import { BARSEL_2026, SATSER_2026 as S, SU_2026 } from "./satser-2026";
 
 // These lock in the officially-verified 2026 figures (skm.dk / skat.dk).
 // If SKAT changes a rate, update satser-2026.ts AND this test together.
@@ -69,6 +69,63 @@ describe("SATSER_2026 single source of truth", () => {
         BARSEL_2026.earmarkedWeeks +
         BARSEL_2026.motherLateTransferableWeeks
     ).toBe(BARSEL_2026.afterBirthWeeks);
+  });
+
+  test("SU 2026", () => {
+    expect(SU_2026.verifiedAt).toBe("2026-09-24");
+    expect(SU_2026.parentalIncomeYear).toBe(2024);
+    expect(SU_2026.currentHomewardSchemeStart).toBe("1. juli 2014");
+    expect(SU_2026.rules.youthEducationAge).toBe(18);
+    expect(SU_2026.rules.youthAwayApprovalMaxAge).toBe(19);
+    expect(SU_2026.rules.youthAwayMinimumDistanceKm).toBe(20);
+    expect(SU_2026.rules.youthAwayMinimumTravelMinutes).toBe(75);
+    expect(SU_2026.rules.youthAwayRequiredPriorMonths).toBe(12);
+    expect(SU_2026.rules.minimumLoanAge).toBe(18);
+    expect(SU_2026.rules.finalLoanStandardMonths).toBe(12);
+    expect(SU_2026.rules.finalLoanExtendedMonths).toBe(24);
+    expect(SU_2026.udeboende).toBe(7426);
+    expect(SU_2026.homewardBase).toBe(1154);
+    expect(SU_2026.homewardMaximum).toBe(3202);
+    expect(SU_2026.homewardMaximumSupplement).toBe(2048);
+    expect(SU_2026.homewardLegacy).toBe(3692);
+    expect(SU_2026.youthLegacy18To19Base).toBe(1643);
+    expect(SU_2026.youthAway18To19Base).toBe(4764);
+    expect(SU_2026.singleParentSupplement).toBe(7426);
+    expect(SU_2026.disabilitySupplement.videregaaende).toBe(10562);
+    expect(SU_2026.disabilitySupplement.erhverv).toBe(6624);
+    expect(SU_2026.freeAllowance.youthWithSu).toBe(15297);
+    expect(SU_2026.freeAllowance.videregaaendeWithSu).toBe(20749);
+    expect(SU_2026.freeAllowance.enrolledWithoutSu).toBe(23598);
+    expect(SU_2026.freeAllowance.notStudying).toBe(45420);
+    expect(SU_2026.freeAllowance.disabilityMonth).toBe(3921);
+    expect(SU_2026.loan.ordinaryMonthly).toBe(3799);
+    expect(SU_2026.loan.parentMonthly).toBe(1900);
+    expect(SU_2026.loan.combinedMonthly).toBe(5699);
+    expect(SU_2026.loan.parentMonthly + SU_2026.loan.ordinaryMonthly).toBe(
+      SU_2026.loan.combinedMonthly,
+    );
+    expect(SU_2026.loan.finalMonthly).toBe(9801);
+    expect(SU_2026.loan.duringStudyRate).toBe(0.04);
+    expect(SU_2026.loan.afterGraduationRate).toBe(0.0285);
+    expect(SU_2026.loan.repaymentMinYears).toBe(7);
+    expect(SU_2026.loan.repaymentMaxYears).toBe(15);
+    expect(SU_2026.loan.repaymentFrequencyMonths).toBe(2);
+    expect(SU_2026.loan.repaymentFirstBandMaxDebt).toBe(39999);
+    expect(SU_2026.loan.repaymentLastBandMinDebt).toBe(180000);
+    expect(SU_2026.suKlip).toBe(70);
+    expect(SU_2026.suKlipExtraSupportMonths).toBe(12);
+    expect(SU_2026.sources.parentalIncome).toBe(
+      "https://www.su.dk/su/om-su-til-videregaaende-uddannelser/dine-foraeldres-indkomst-videregaaende-uddannelse/kun-en-foraelder",
+    );
+    expect(SU_2026.sources.loanRepayment).toBe(
+      "https://www.su.dk/su-laan/naar-du-skal-betale-laan-tilbage",
+    );
+    expect(SU_2026.sources.youthHousing).toBe(
+      "https://www.su.dk/su/om-su-til-ungdomsuddannelser/bopael-og-su-satser",
+    );
+    expect(SU_2026.homewardBase + SU_2026.homewardMaximumSupplement).toBe(
+      SU_2026.homewardMaximum,
+    );
   });
 
   test("rates are internally consistent", () => {

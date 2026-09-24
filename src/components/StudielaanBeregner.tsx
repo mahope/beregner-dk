@@ -7,14 +7,13 @@ import { generateShareableLink, getStateFromUrl, CalculationState, ShareableLink
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { useLocale } from '@/components/LocaleProvider';
 import { formatNumber as formatNum, getCurrencySuffix } from '@/lib/format';
+import { SU_2026 } from "@/lib/satser-2026";
+import { normaliserStudielaanInputs } from "@/lib/studielaan";
 
-// SU-lån satser 2026
 const SATSER = {
-  renteUnderUddannelse: 4, // % p.a. (variabel, baseret på diskontoen + tillæg)
-  renteEfterUddannelse: 4, // % p.a. (variabel)
-  standardLoebetid: 7, // år (kan forlænges til 15)
-  maxSULaanPrMd: 3234, // kr. pr. md. 2026
-  tilbagebetalingsStart: 1, // år efter uddannelse
+  renteUnderUddannelse: SU_2026.loan.duringStudyRate * 100,
+  renteEfterUddannelse: SU_2026.loan.afterGraduationRate * 100,
+  standardLoebetid: SU_2026.loan.repaymentMinYears,
 };
 
 export default function StudielaanBeregner() {
@@ -33,12 +32,12 @@ export default function StudielaanBeregner() {
     hasLoadedUrl.current = true;
     const urlState = getStateFromUrl();
     if (urlState && urlState.type === "studielaan") {
-      const i = urlState.inputs;
-      if (i.samletGaeld !== undefined) setSamletGaeld(String(i.samletGaeld));
-      if (i.rente !== undefined) setRente(String(i.rente));
-      if (i.loebetid !== undefined) setLoebetid(String(i.loebetid));
-      if (i.ekstraAfdrag !== undefined) setEkstraAfdrag(String(i.ekstraAfdrag));
-      if (i.maanedligIndkomst !== undefined) setMaanedligIndkomst(String(i.maanedligIndkomst));
+      const parsed = normaliserStudielaanInputs(urlState.inputs, true);
+      setSamletGaeld(String(parsed.totalDebt));
+      setRente(String(parsed.annualInterestRate));
+      setLoebetid(String(parsed.repaymentYears));
+      setEkstraAfdrag(String(parsed.extraMonthlyPayment));
+      setMaanedligIndkomst(String(parsed.monthlyIncome));
     }
   }, []);
 
@@ -56,8 +55,22 @@ export default function StudielaanBeregner() {
     const r = Number(rente) / 100 / 12;
     const aar = Number(loebetid);
     const ekstra = Number(ekstraAfdrag) || 0;
+    const indkomst = Number(maanedligIndkomst);
 
-    if (!gaeld || gaeld <= 0 || !aar || aar <= 0) return null;
+    if (
+      rente.trim() === "" ||
+      !Number.isFinite(gaeld) ||
+      gaeld <= 0 ||
+      !Number.isInteger(aar) ||
+      aar < 1 ||
+      aar > SU_2026.loan.repaymentMaxYears ||
+      !Number.isFinite(r) ||
+      r < 0 ||
+      !Number.isFinite(ekstra) ||
+      ekstra < 0 ||
+      !Number.isFinite(indkomst) ||
+      indkomst < 0
+    ) return null;
 
     const n = aar * 12;
 
@@ -99,8 +112,6 @@ export default function StudielaanBeregner() {
     const sparetRente = totalRente - totalRenteMedEkstra;
     const sparetMaaneder = n - faktiskMaaneder;
 
-    // Indkomstafhængig vurdering
-    const indkomst = Number(maanedligIndkomst);
     const procentAfIndkomst = indkomst > 0 ? (totalYdelse / indkomst) * 100 : 0;
 
     // Afdragsplan (første 12 måneder + hvert år)
@@ -140,6 +151,11 @@ export default function StudielaanBeregner() {
     };
   }, [samletGaeld, rente, loebetid, ekstraAfdrag, maanedligIndkomst]);
 
+  const harLegacyLoebetid =
+    Number.isInteger(Number(loebetid)) &&
+    Number(loebetid) >= 1 &&
+    Number(loebetid) < SU_2026.loan.repaymentMinYears;
+
   const handleReset = useCallback(() => {
     setSamletGaeld("");
     setRente(String(SATSER.renteEfterUddannelse));
@@ -147,6 +163,12 @@ export default function StudielaanBeregner() {
     setEkstraAfdrag("0");
     setMaanedligIndkomst("");
     hasTracked.current = false;
+
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.delete("s");
+      window.history.replaceState({}, "", url.toString());
+    }
   }, []);
 
   const formatKr = (n: number) => formatNum(n, locale) + " " + getCurrencySuffix(locale);
@@ -164,7 +186,7 @@ export default function StudielaanBeregner() {
             Samlet SU-gæld
           </label>
           <div className="relative">
-            <input id="samletGaeld" type="number" value={samletGaeld} onChange={(e) => setSamletGaeld(e.target.value)}
+              <input id="samletGaeld" type="number" value={samletGaeld} onChange={(e) => setSamletGaeld(e.target.value === "" ? "" : String(Math.max(0, Number(e.target.value))))}
               placeholder="F.eks. 100000" min="0"
               className="w-full border border-gray-300 dark:border-gray-600 rounded-lg py-3 px-4 pr-12 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
             <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">{getCurrencySuffix(locale)}</span>
@@ -180,7 +202,7 @@ export default function StudielaanBeregner() {
               Rente (p.a.)
             </label>
             <div className="relative">
-              <input id="rente" type="number" value={rente} onChange={(e) => setRente(e.target.value)}
+              <input id="rente" type="number" value={rente} onChange={(e) => setRente(e.target.value === "" ? "" : String(Math.min(15, Math.max(0, Number(e.target.value)))))}
                 step="0.1" min="0" max="15"
                 className="w-full border border-gray-300 dark:border-gray-600 rounded-lg py-3 px-4 pr-12 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">%</span>
@@ -191,11 +213,17 @@ export default function StudielaanBeregner() {
               Løbetid
             </label>
             <div className="relative">
-              <input id="loebetid" type="number" value={loebetid} onChange={(e) => setLoebetid(e.target.value)}
-                min="1" max="15"
+              <input id="loebetid" type="number" value={loebetid}
+                onChange={(e) => setLoebetid(String(Math.min(SU_2026.loan.repaymentMaxYears, Math.max(SU_2026.loan.repaymentMinYears, parseInt(e.target.value) || SU_2026.loan.repaymentMinYears))))}
+                min={SU_2026.loan.repaymentMinYears} max={SU_2026.loan.repaymentMaxYears}
                 className="w-full border border-gray-300 dark:border-gray-600 rounded-lg py-3 px-4 pr-12 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">år</span>
             </div>
+            {harLegacyLoebetid && (
+              <p className="mt-1 text-xs text-amber-700 dark:text-amber-300">
+                Det indlæste delelink bruger {loebetid} år. Beregnerens valgbare interval er {SU_2026.loan.repaymentMinYears}-{SU_2026.loan.repaymentMaxYears} år, men beregningen bevarer det ældre link.
+              </p>
+            )}
           </div>
         </div>
 
@@ -204,7 +232,7 @@ export default function StudielaanBeregner() {
             Ekstra månedligt afdrag (valgfrit)
           </label>
           <div className="relative">
-            <input id="ekstraAfdrag" type="number" value={ekstraAfdrag} onChange={(e) => setEkstraAfdrag(e.target.value)}
+              <input id="ekstraAfdrag" type="number" value={ekstraAfdrag} onChange={(e) => setEkstraAfdrag(e.target.value === "" ? "" : String(Math.max(0, Number(e.target.value))))}
               placeholder="0" min="0"
               className="w-full border border-gray-300 dark:border-gray-600 rounded-lg py-3 px-4 pr-12 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
             <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">{getCurrencySuffix(locale)}</span>
@@ -216,7 +244,7 @@ export default function StudielaanBeregner() {
             Månedlig indkomst efter skat (valgfrit)
           </label>
           <div className="relative">
-            <input id="maanedligIndkomst" type="number" value={maanedligIndkomst} onChange={(e) => setMaanedligIndkomst(e.target.value)}
+              <input id="maanedligIndkomst" type="number" value={maanedligIndkomst} onChange={(e) => setMaanedligIndkomst(e.target.value === "" ? "" : String(Math.max(0, Number(e.target.value))))}
               placeholder="F.eks. 25000" min="0"
               className="w-full border border-gray-300 dark:border-gray-600 rounded-lg py-3 px-4 pr-12 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
             <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">{getCurrencySuffix(locale)}</span>
@@ -224,12 +252,18 @@ export default function StudielaanBeregner() {
         </div>
       </div>
 
+      <p className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+        {resultat
+          ? `Hypotetisk månedsplan: ${formatKr(resultat.totalYdelse)} pr. måned, ${resultat.faktiskAar} år og ${resultat.faktiskMdr} måneder, samlet rente ${formatKr(resultat.totalRenteMedEkstra)}.`
+          : ""}
+      </p>
+
       {/* Resultat */}
       {resultat && (
         <div className="animate-fade-in space-y-4">
           <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 rounded-2xl p-6">
             <div className="flex justify-between items-start mb-4">
-              <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-200">Din tilbagebetalingsplan</h3>
+              <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-200">Hypotetisk månedsplan</h3>
               <div className="flex gap-2">
                 <CopyResultButton text={`SU-lån: ${formatKr(resultat.totalYdelse)}/md i ${resultat.faktiskAar} år${resultat.faktiskMdr > 0 ? ` og ${resultat.faktiskMdr} mdr.` : ""}. Total rente: ${formatKr(resultat.totalRenteMedEkstra)}.`} />
                 <ShareCalculation getShareableLink={getShareableLink} calculatorName="Studielån" />
@@ -335,7 +369,8 @@ export default function StudielaanBeregner() {
           </div>
 
           <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
-            Beregningen er vejledende. SU-lån renten er variabel og afhænger af diskontoen. Se aktuelle satser på su.dk.
+            Rentesatsen er variabel. Pr. {SU_2026.verifiedAt} er den {SATSER.renteUnderUddannelse} % under studiet og {SATSER.renteEfterUddannelse} % fra 1. juli 2026 efter uddannelsen. Se{" "}
+            <a href={SU_2026.sources.loanInterest} target="_blank" rel="noopener noreferrer" className="underline">de officielle satser på su.dk</a>.
           </p>
         </div>
       )}

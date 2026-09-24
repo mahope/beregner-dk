@@ -95,5 +95,91 @@ export const BARSEL_2026 = {
   monthsWithMonthlyHours: 3,
 } as const;
 
+export const SU_2026 = {
+  verifiedAt: "2026-09-24",
+  sources: {
+    homewardVideregaaende:
+      "https://www.su.dk/satser/videregaaende-uddannelser-satser-for-su-til-hjemmeboende",
+    homewardUngdomsuddannelse:
+      "https://www.su.dk/satser/ungdomsuddannelse-satser-for-su-til-hjemmeboende",
+    udeboendeVideregaaende:
+      "https://www.su.dk/satser/videregaaende-uddannelser-satser-for-su-til-udeboende",
+    udeboendeUngdomsuddannelse:
+      "https://www.su.dk/satser/ungdomsuddannelse-satser-for-su-til-udeboende",
+    freeAllowance:
+      "https://www.su.dk/su/naar-du-faar-su/saa-meget-maa-du-tjene/satser-for-maanedsfribeloeb",
+    enhancedFreeAllowance:
+      "https://www.su.dk/su/naar-du-faar-su/saa-meget-maa-du-tjene/om-aarsfribeloeb/forhoejet-aarsfribeloeb",
+    parents: "https://www.su.dk/satser/satser-for-stoette-til-foraeldre",
+    singleParentEligibility:
+      "https://www.su.dk/stoette-til-foraeldre/du-er-forsoerger/enlig-forsoerger",
+    parentalIncome:
+      "https://www.su.dk/su/om-su-til-videregaaende-uddannelser/dine-foraeldres-indkomst-videregaaende-uddannelse/kun-en-foraelder",
+    youthHousing:
+      "https://www.su.dk/su/om-su-til-ungdomsuddannelser/bopael-og-su-satser",
+    disability: "https://www.su.dk/satser/satser-for-handicaptillaeg",
+    disabilityFreeAllowance:
+      "https://www.su.dk/handicaptillaeg/dit-fribeloeb-er-nedsat-naar-du-modtager-handicaptillaeg",
+    loan: "https://www.su.dk/satser/satser-for-su-laan",
+    finalLoan: "https://www.su.dk/su-laan/slutlaan",
+    loanInterest:
+      "https://www.su.dk/su-laan/naar-du-skal-betale-laan-tilbage/renter-paa-dit-su-laan",
+    loanRepayment:
+      "https://www.su.dk/su-laan/naar-du-skal-betale-laan-tilbage",
+    suKlip:
+      "https://www.su.dk/su/om-su-til-videregaaende-uddannelser/su-klippekort-til-videregaaende-uddannelser",
+    freeAllowanceCalculator:
+      "https://www.su.dk/su/naar-du-faar-su/saa-meget-maa-du-tjene/beregn-fribeloeb",
+  },
+  parentalIncomeYear: 2024,
+  currentHomewardSchemeStart: "1. juli 2014",
+  rules: {
+    youthEducationAge: 18,
+    youthAwayApprovalMaxAge: 19,
+    youthAwayMinimumDistanceKm: 20,
+    youthAwayMinimumTravelMinutes: 75,
+    youthAwayRequiredPriorMonths: 12,
+    minimumLoanAge: 18,
+    finalLoanStandardMonths: 12,
+    finalLoanExtendedMonths: 24,
+  },
+  udeboende: 7426,
+  homewardBase: 1154,
+  homewardMaximum: 3202,
+  homewardMaximumSupplement: 2048,
+  homewardLegacy: 3692,
+  youthLegacy18To19Base: 1643,
+  youthAway18To19Base: 4764,
+  singleParentSupplement: 7426,
+  disabilitySupplement: {
+    videregaaende: 10562,
+    erhverv: 6624,
+  },
+  freeAllowance: {
+    youthWithSu: 15297,
+    videregaaendeWithSu: 20749,
+    enrolledWithoutSu: 23598,
+    notStudying: 45420,
+    disabilityMonth: 3921,
+    childUnder18Annual: 34129,
+  },
+  loan: {
+    ordinaryMonthly: 3799,
+    parentMonthly: 1900,
+    combinedMonthly: 5699,
+    finalMonthly: 9801,
+    duringStudyRate: 0.04,
+    afterGraduationRate: 0.0285,
+    repaymentMinYears: 7,
+    repaymentMaxYears: 15,
+    repaymentFrequencyMonths: 2,
+    repaymentFirstBandMaxDebt: 39999,
+    repaymentLastBandMinDebt: 180000,
+  },
+  suKlip: 70,
+  suKlipExtraSupportMonths: 12,
+} as const;
+
 export type Barsel2026 = typeof BARSEL_2026;
+export type Su2026 = typeof SU_2026;
 export type Satser2026 = typeof SATSER_2026;
