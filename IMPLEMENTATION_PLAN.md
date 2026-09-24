@@ -1,6 +1,6 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — C2 (CTR på /dato) I GANG.
+STATUS: KØ — C2 FÆRDIG; C3 (CTR på /tidsberegner og /moms) er næste opgave.
 
 ## Fase 3 — trafik-drevet
 
@@ -504,7 +504,7 @@ STATUS: KØ — C2 (CTR på /dato) I GANG.
   https://hjemmeland.dk/beregnere/procentregning/;
   https://www.proberegner.dk/beregnere/procentberegner/.
 
-#### 7. [ ] I GANG 2026-09-25 — C2 — Løft `/dato` CTR og svar direkte på dage-spørgsmål
+#### 7. [x] FÆRDIG 2026-09-25 — C2 — Løft `/dato` CTR og svar direkte på dage-spørgsmål
 
 - **Datagrund:** Search Console: 128.065 visninger, 784 klik, CTR 0,6 %, position 5,8.
   “dage mellem datoer” (448, position 5), “antal dage mellem to datoer” (257, position 5),
@@ -536,6 +536,8 @@ STATUS: KØ — C2 (CTR på /dato) I GANG.
   `npm run lint` grøn (361 filer) og `npm audit --json` 0 sårbarheder. Lokal
   production-HTTP-kontrol passede DA/SE title, H1, canonical, schema-copy og
   `/api/health` med `status: ok`.
+- **Landet:** C2-kode, tests og plan i commit `80d672c`; merge til `master` er
+  `be7d30e` den 2026-09-25 01:54 CEST. Både `ceo/dato-ctr` og `master` blev pushet.
 - **Forventet effekt:** Stærk CTR på eksisterende høj placering og bedre overførsel fra
   spørgsmål til selve dato-værktøjet.
 - **Acceptkriterier:** Baselines skrives før ændring; title/description svarer på
@@ -990,4 +992,7 @@ landmark=lån, piggybank=opsparing osv.).
   `/boligstoette` og `/blog/boligstoette-2026-nye-regler`; HTTP 200 alene er utilstrækkeligt.
 - **VERIFICÉR DEPLOY:** C1 `/procent` med svar-først DA/SE title, description, synligt
   eksempel og uændret beregner `98306a7` 2026-09-25 00:52 CEST. Verificér efter
+  næste batch-vindue med faktisk markup på begge domæner; HTTP 200 alene utilstrækkeligt.
+- **VERIFICÉR DEPLOY:** C2 `/dato` med svar-først DA/SE title, description, H1/intro,
+  OG/schema og bevaret beregner `be7d30e` 2026-09-25 01:54 CEST. Verificér efter
   næste batch-vindue med faktisk markup på begge domæner; HTTP 200 alene utilstrækkeligt.
