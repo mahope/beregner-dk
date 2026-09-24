@@ -9,6 +9,7 @@ import {
   type BoligstoettePensionStatus,
   beregnBoligstoette,
   isBoligstoettePensionStatus,
+  MINIMUM_BOLIGSTOETTE_RENT,
   normaliserBoligstoetteInputs,
   parseBoligstoetteNumber,
 } from "@/lib/boligstoette";
@@ -18,6 +19,7 @@ import {
   generateShareableLink,
   getStateFromUrl,
 } from "@/lib/calculation-state";
+import { CALCULATION_STATE_HISTORY_KEY } from "@/lib/calculation-state-privacy";
 import { formatNumber } from "@/lib/format";
 import { BOLIGSTOETTE_2026 } from "@/lib/satser-2026";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -56,6 +58,35 @@ function hasSharedInput(value: unknown, key: string): boolean {
   );
 }
 
+const sharedFieldIds: Record<string, string> = {
+  maanedligHusleje: "husleje",
+  husstandsindkomst: "indkomst",
+  antalPersoner: "personer",
+  antalBorn: "born",
+  formue: "formue",
+  areal: "areal",
+  pensionStatus: "pensionstatus",
+};
+
+function isBoligstoettePath(pathname = window.location.pathname): boolean {
+  return (pathname.replace(/\/+$/, "") || "/") === "/boligstoette";
+}
+
+function hasStateInLocation(): boolean {
+  const historyState = window.history.state;
+  return (
+    (historyState !== null &&
+      typeof historyState === "object" &&
+      !Array.isArray(historyState) &&
+      Object.prototype.hasOwnProperty.call(
+        historyState,
+        CALCULATION_STATE_HISTORY_KEY,
+      )) ||
+    new URLSearchParams(window.location.search).has("s") ||
+    new URLSearchParams(window.location.hash.replace(/^#/, "")).has("s")
+  );
+}
+
 export default function BoligstoetteBeregner() {
   const { locale } = useLocale();
   const tenPercentLabel = formatNumber(
@@ -68,22 +99,47 @@ export default function BoligstoetteBeregner() {
   );
   const [maanedligHusleje, setMaanedligHusleje] = useState("");
   const [husstandsindkomst, setHusstandsindkomst] = useState("");
-  const [antalPersoner, setAntalPersoner] = useState("1");
-  const [antalBorn, setAntalBorn] = useState("0");
+  const [antalPersoner, setAntalPersoner] = useState("");
+  const [antalBorn, setAntalBorn] = useState("");
   const [formue, setFormue] = useState("");
-  const [areal, setAreal] = useState("65");
+  const [areal, setAreal] = useState("");
   const [pensionStatus, setPensionStatus] =
-    useState<BoligstoettePensionStatus | "">("ingen");
+    useState<BoligstoettePensionStatus | "">("");
   const [invalidSharedFields, setInvalidSharedFields] = useState<string[]>([]);
   const hasInvalidSharedState = invalidSharedFields.length > 0;
-  const hasLoadedUrl = useRef(false);
   const hasTracked = useRef(false);
+  const isLoadingUrlState = useRef(false);
+  const shouldFocusInvalidSharedField = useRef(false);
+  const wealthThresholds =
+    pensionStatus === "folkepension"
+      ? BOLIGSTOETTE_2026.wealth.pensioner
+      : BOLIGSTOETTE_2026.wealth.nonPensioner;
+  const wealthLowerLabel = formatNumber(wealthThresholds.noEffect, locale);
+  const wealthUpperLabel = formatNumber(wealthThresholds.tenPercent, locale);
 
-  useEffect(() => {
-    if (hasLoadedUrl.current) return;
-    hasLoadedUrl.current = true;
+  const resetInputs = useCallback(() => {
+    setMaanedligHusleje("");
+    setHusstandsindkomst("");
+    setAntalPersoner("");
+    setAntalBorn("");
+    setFormue("");
+    setAreal("");
+    setPensionStatus("");
+    setInvalidSharedFields([]);
+  }, []);
 
-    const urlState = getStateFromUrl();
+  const loadUrlState = useCallback(
+    ({ resetIfNoState = false }: { resetIfNoState?: boolean } = {}) => {
+      if (isLoadingUrlState.current || !isBoligstoettePath()) return;
+      const hadState = hasStateInLocation();
+      let urlState: CalculationState | null = null;
+      isLoadingUrlState.current = true;
+      try {
+        urlState = getStateFromUrl();
+        if (hadState) clearStateFromUrl();
+      } finally {
+        isLoadingUrlState.current = false;
+      }
     if (urlState && urlState.type === "boligstoette") {
       const rawInputs = urlState.inputs;
       const hasValidInputObject =
@@ -97,7 +153,8 @@ export default function BoligstoetteBeregner() {
       const hasSharedChildren = hasSharedInput(rawInputs, "antalBorn");
       const hasSharedPensionStatus = hasSharedInput(rawInputs, "pensionStatus");
       const hasValidSharedRent =
-        !hasSharedRent || isValidSharedNumber(rawInputs?.maanedligHusleje, 0, false);
+        !hasSharedRent ||
+        isValidSharedNumber(rawInputs?.maanedligHusleje, MINIMUM_BOLIGSTOETTE_RENT, true);
       const hasValidSharedIncome =
         !hasSharedIncome || isValidSharedNumber(rawInputs?.husstandsindkomst, 0, true);
       const hasValidSharedWealth =
@@ -105,9 +162,9 @@ export default function BoligstoetteBeregner() {
         rawInputs?.formue === null ||
         isValidSharedNumber(rawInputs?.formue, 0, true);
       const hasValidSharedArea =
-        !hasSharedArea || isValidSharedNumber(rawInputs?.areal, 0, false);
+        hasSharedArea && isValidSharedNumber(rawInputs?.areal, 0, false);
       const hasValidSharedHousehold =
-        !hasSharedHousehold ||
+        hasSharedHousehold &&
         isValidSharedInteger(rawInputs?.antalPersoner, 1, Number.MAX_SAFE_INTEGER);
       const householdSizeForChildren = hasValidSharedHousehold
         ? parseBoligstoetteNumber(rawInputs?.antalPersoner) ?? inputs.householdSize
@@ -137,6 +194,7 @@ export default function BoligstoetteBeregner() {
             ...(!hasValidSharedChildren ? ["antalBorn"] : []),
             ...(!hasValidSharedPensionStatus ? ["pensionStatus"] : []),
           ];
+      shouldFocusInvalidSharedField.current = invalidSharedFields.length > 0;
       setInvalidSharedFields(invalidSharedFields);
       setMaanedligHusleje(
         hasValidInputObject && hasValidSharedRent && inputs.monthlyRent > 0
@@ -160,13 +218,45 @@ export default function BoligstoetteBeregner() {
           : "",
       );
       setAreal(
-        hasValidInputObject && (!hasSharedArea || hasValidSharedArea) ? String(inputs.area) : "",
+        hasValidInputObject && hasValidSharedArea ? String(inputs.area) : "",
       );
       setPensionStatus(
         hasValidInputObject && hasValidSharedPensionStatus ? inputs.pensionStatus : "",
       );
+    } else if (hadState || resetIfNoState) {
+      shouldFocusInvalidSharedField.current = false;
+      resetInputs();
     }
-  }, []);
+  }, [resetInputs]);
+
+  useEffect(() => {
+    loadUrlState();
+    const handleHashStateNavigation = () => loadUrlState();
+    const handlePopStateNavigation = () => loadUrlState({ resetIfNoState: true });
+    window.addEventListener("hashchange", handleHashStateNavigation);
+    window.addEventListener("popstate", handlePopStateNavigation);
+
+    const history = window.history;
+    const originalPushState = history.pushState.bind(history);
+    const originalReplaceState = history.replaceState.bind(history);
+    const patchedPushState: History["pushState"] = (state, unused, url) => {
+      originalPushState(state, unused, url);
+      if (isBoligstoettePath()) loadUrlState();
+    };
+    const patchedReplaceState: History["replaceState"] = (state, unused, url) => {
+      originalReplaceState(state, unused, url);
+      if (isBoligstoettePath()) loadUrlState();
+    };
+    history.pushState = patchedPushState;
+    history.replaceState = patchedReplaceState;
+
+    return () => {
+      window.removeEventListener("hashchange", handleHashStateNavigation);
+      window.removeEventListener("popstate", handlePopStateNavigation);
+      if (history.pushState === patchedPushState) history.pushState = originalPushState;
+      if (history.replaceState === patchedReplaceState) history.replaceState = originalReplaceState;
+    };
+  }, [loadUrlState]);
 
   useEffect(() => {
     if (hasTracked.current) return;
@@ -184,6 +274,14 @@ export default function BoligstoetteBeregner() {
   const clearInvalidSharedField = useCallback((field: string) => {
     setInvalidSharedFields((current) => current.filter((item) => item !== field));
   }, []);
+
+  useEffect(() => {
+    if (!shouldFocusInvalidSharedField.current || invalidSharedFields.length === 0) return;
+    const firstInvalidField = invalidSharedFields[0];
+    const inputId = sharedFieldIds[firstInvalidField];
+    if (inputId) document.getElementById(inputId)?.focus();
+    shouldFocusInvalidSharedField.current = false;
+  }, [invalidSharedFields]);
 
   const getShareableLink = useCallback(() => {
     const state: CalculationState = {
@@ -203,16 +301,9 @@ export default function BoligstoetteBeregner() {
   }, [antalBorn, antalPersoner, areal, formue, husstandsindkomst, maanedligHusleje, pensionStatus]);
 
   const handleReset = useCallback(() => {
-    setMaanedligHusleje("");
-    setHusstandsindkomst("");
-    setAntalPersoner("1");
-    setAntalBorn("0");
-    setFormue("");
-    setAreal("65");
-    setPensionStatus("ingen");
-    setInvalidSharedFields([]);
+    resetInputs();
     clearStateFromUrl();
-  }, []);
+  }, [resetInputs]);
 
   const householdSize = parseBoligstoetteNumber(antalPersoner);
   const children = parseBoligstoetteNumber(antalBorn);
@@ -227,31 +318,43 @@ export default function BoligstoetteBeregner() {
       ? 4
       : householdSize - 1
     : 0;
-  const householdError = !hasValidHousehold
-    ? "Vælg et gyldigt antal personer."
-    : null;
-  const childrenError =
-    children === null || !Number.isSafeInteger(children) || children < 0 || children > maxChildren
+  const householdError = invalidSharedFields.includes("antalPersoner")
+    ? "Husstandens størrelse mangler eller er ugyldig i delelinket. Vælg den igen."
+    : antalPersoner.trim() !== "" && !hasValidHousehold
+      ? "Vælg et gyldigt antal personer."
+      : null;
+  const childrenError = invalidSharedFields.includes("antalBorn")
+    ? "Antallet børn mangler eller er ugyldigt i delelinket. Vælg det igen."
+    : antalBorn.trim() !== "" &&
+        (children === null || !Number.isSafeInteger(children) || children < 0 || children > maxChildren)
       ? "Vælg et gyldigt antal børn for husstanden."
       : null;
-  const rentError =
-    maanedligHusleje.trim() !== "" && (parsedRent === null || parsedRent <= 0)
-      ? "Indtast en husleje større end 0 kr."
+  const rentError = invalidSharedFields.includes("maanedligHusleje")
+    ? "Huslejen i delelinket er ugyldig. Indtast den igen."
+    : maanedligHusleje.trim() !== "" &&
+        (parsedRent === null || parsedRent < MINIMUM_BOLIGSTOETTE_RENT)
+      ? "Indtast en husleje på mindst 0,01 kr."
       : null;
-  const incomeError =
-    husstandsindkomst.trim() !== "" && (parsedIncome === null || parsedIncome < 0)
-      ? "Indtast en indkomst på 0 kr. eller mere."
+  const incomeError = invalidSharedFields.includes("husstandsindkomst")
+    ? "Indkomsten i delelinket er ugyldig. Indtast den igen."
+    : husstandsindkomst.trim() !== "" && (parsedIncome === null || parsedIncome < 0)
+      ? "Indtast en husstandsindkomst på 0 kr. eller mere."
       : null;
-  const wealthError =
-    formue.trim() !== "" && (parsedWealth === null || parsedWealth < 0)
+  const wealthError = invalidSharedFields.includes("formue")
+    ? "Formuen i delelinket er ugyldig. Indtast den igen eller tøm feltet."
+    : formue.trim() !== "" && (parsedWealth === null || parsedWealth < 0)
       ? "Indtast en formue på 0 kr. eller mere."
       : null;
-  const areaError = parsedArea === null || parsedArea <= 0
-    ? "Indtast et areal større end 0 m²."
-    : null;
-  const pensionStatusError = isBoligstoettePensionStatus(pensionStatus)
-    ? null
-    : "Vælg en gyldig pensionstatus.";
+  const areaError = invalidSharedFields.includes("areal")
+    ? "Arealet i delelinket er ugyldig. Indtast det igen."
+    : areal.trim() !== "" && (parsedArea === null || parsedArea <= 0)
+      ? "Indtast et areal større end 0 m²."
+      : null;
+  const pensionStatusError = invalidSharedFields.includes("pensionStatus")
+    ? "Pensionstatus mangler eller er ugyldig i delelinket. Vælg den igen."
+    : pensionStatus !== "" && !isBoligstoettePensionStatus(pensionStatus)
+      ? "Vælg en gyldig pensionstatus."
+      : null;
   const validationMessage = [
     hasInvalidSharedState
       ? "Nogle oplysninger i delelinket er ugyldige. Indtast dem igen."
@@ -261,24 +364,24 @@ export default function BoligstoetteBeregner() {
     rentError,
     incomeError,
     wealthError,
-    areal.trim() === "" ? null : areaError,
+    areaError,
     pensionStatusError,
   ].find((message): message is string => Boolean(message));
   const missingStatus =
     maanedligHusleje.trim() === "" && husstandsindkomst.trim() === ""
-      ? "Udfyld husleje og husstandsindkomst for at se et screeningestimat."
+      ? "Udfyld husleje og husstandsindkomst for at se standardintervallet."
       : maanedligHusleje.trim() === ""
-        ? "Udfyld husleje for at se et screeningestimat."
+        ? "Udfyld husleje for at se standardintervallet."
         : husstandsindkomst.trim() === ""
-          ? "Udfyld husstandsindkomst for at se et screeningestimat."
+          ? "Udfyld husstandsindkomst for at se standardintervallet."
           : areal.trim() === ""
-            ? "Udfyld areal for at se et screeningestimat."
+            ? "Udfyld areal for at se standardintervallet."
             : antalPersoner.trim() === ""
-              ? "Vælg husstandens størrelse for at se et screeningestimat."
+              ? "Vælg husstandens størrelse for at se standardintervallet."
               : antalBorn.trim() === ""
-                ? "Vælg antal børn for at se et screeningestimat."
+                ? "Vælg antal børn for at se standardintervallet."
                 : !isBoligstoettePensionStatus(pensionStatus)
-                  ? "Vælg pensionstatus for at se et screeningestimat."
+                  ? "Vælg pensionstatus for at se standardintervallet."
                   : null;
 
   const handlePersonerChange = (value: string) => {
@@ -302,12 +405,7 @@ export default function BoligstoetteBeregner() {
   };
 
   const resultat = useMemo(() => {
-    if (
-      validationMessage ||
-      maanedligHusleje.trim() === "" ||
-      husstandsindkomst.trim() === "" ||
-      areal.trim() === ""
-    ) {
+    if (validationMessage || missingStatus) {
       return null;
     }
 
@@ -330,6 +428,7 @@ export default function BoligstoetteBeregner() {
     householdSize,
     husstandsindkomst,
     maanedligHusleje,
+    missingStatus,
     parsedArea,
     parsedIncome,
     parsedRent,
@@ -340,13 +439,13 @@ export default function BoligstoetteBeregner() {
 
   const calculationError =
     !validationMessage && !missingStatus && !resultat
-      ? "Indtast mindre ekstreme beløb for at se et screeningestimat."
+      ? "Indtast mindre ekstreme beløb for at se standardintervallet."
       : null;
   const wealthMessage =
     resultat?.wealthConsideration === "10-procent"
-      ? `${tenPercentLabel} % af formuen (${formatNumber(resultat.wealthIncomeEquivalent ?? 0, locale)} kr.) regnes som indkomst i den officielle vurdering.`
+      ? `${tenPercentLabel} % af formuen over ${wealthLowerLabel} kr. (${formatNumber(resultat.wealthIncomeEquivalent ?? 0, locale)} kr.) regnes i den forenklede formuevurdering.`
       : resultat?.wealthConsideration === "20-procent"
-        ? `${twentyPercentLabel} % af formuen (${formatNumber(resultat.wealthIncomeEquivalent ?? 0, locale)} kr.) regnes som indkomst i den officielle vurdering.`
+        ? `${tenPercentLabel} % af beløbet mellem ${wealthLowerLabel} og ${wealthUpperLabel} kr. samt ${twentyPercentLabel} % af formuen over ${wealthUpperLabel} kr. (samlet ${formatNumber(resultat.wealthIncomeEquivalent ?? 0, locale)} kr.) regnes i den forenklede formuevurdering.`
         : null;
   const isPensionProfile = isBoligstoettePensionStatus(pensionStatus) && pensionStatus !== "ingen";
   const resultHeading = isPensionProfile
@@ -355,10 +454,15 @@ export default function BoligstoetteBeregner() {
   const maximumLabel = isPensionProfile
     ? "Relevant standardmaksimum 2026"
     : "Standardmaksimum 2026";
+  const screeningHighLabel = resultat
+    ? formatNumber(resultat.screeningHighMonthly, locale, {
+        maximumFractionDigits: 2,
+      })
+    : "";
   const resultStatus = resultat
-    ? `Screeninginterval: 0 til ${formatNumber(resultat.screeningHighMonthly, locale)} kr. pr. måned.${wealthMessage ? ` ${wealthMessage}` : ""}`
+    ? `Standardinterval: 0 til ${screeningHighLabel} kr. pr. måned.${wealthMessage ? ` ${wealthMessage}` : ""}`
     : validationMessage
-      ? "Ret de ugyldige oplysninger, før du kan se et screeningestimat."
+      ? "Ret de ugyldige oplysninger, før du kan se standardintervallet."
       : calculationError ?? missingStatus ?? "";
 
   return (
@@ -379,6 +483,7 @@ export default function BoligstoetteBeregner() {
               type="number"
                id="husleje"
                required
+               min={MINIMUM_BOLIGSTOETTE_RENT}
                step="any"
               value={maanedligHusleje}
                onChange={(event) => {
@@ -404,9 +509,9 @@ export default function BoligstoetteBeregner() {
         </div>
 
         <div>
-          <label htmlFor="indkomst" className="mb-2 block text-sm font-medium text-gray-700">
-            Årlig husstandsindkomst før skat (kr./år)
-          </label>
+           <label htmlFor="indkomst" className="mb-2 block text-sm font-medium text-gray-700">
+             Årlig husstandsindkomst før skat (kr./år)
+           </label>
           <div className="relative">
             <input
               type="number"
@@ -421,7 +526,7 @@ export default function BoligstoetteBeregner() {
               }}
               placeholder="F.eks. 300.000"
               aria-invalid={Boolean(incomeError)}
-               aria-describedby={incomeError ? "indkomst-error boligstoette-paakravede" : "boligstoette-paakravede"}
+                aria-describedby={incomeError ? "indkomst-error indkomst-kontekst boligstoette-paakravede" : "indkomst-kontekst boligstoette-paakravede"}
               className="w-full rounded-lg border border-gray-300 px-4 py-3 text-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
             />
             <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500">kr/år</span>
@@ -431,6 +536,9 @@ export default function BoligstoetteBeregner() {
               {incomeError}
             </p>
           )}
+          <p id="indkomst-kontekst" className="mt-2 text-xs text-gray-500">
+            Brug kun et samlet beløb til den lokale vurdering. Udbetaling Danmarks husstandsindkomst beregnes efter særlige regler og kan derfor afvige fra dette felt.
+          </p>
         </div>
 
         <div className="grid gap-6 md:grid-cols-2">
@@ -491,7 +599,7 @@ export default function BoligstoetteBeregner() {
           </div>
         </div>
         <p id="boligstoette-kontekst" className="-mt-4 text-xs text-gray-500">
-          Husstandens størrelse og boligens areal indgår i den officielle beregning, men ændrer ikke det lokale screeninginterval alene.
+          Husstandens størrelse og boligens areal indgår i den officielle beregning, men ændrer ikke det lokale standardinterval alene.
         </p>
 
         <div>
@@ -618,13 +726,13 @@ export default function BoligstoetteBeregner() {
 
         {resultat && (
           <div className="mt-8 rounded-xl bg-gradient-to-br from-green-50 to-emerald-50 p-6">
-            <p className="mb-2 text-sm font-medium text-emerald-800">Screeningestimat — ikke en ansøgningsberegning</p>
+            <p className="mb-2 text-sm font-medium text-emerald-800">Vejledende standardinterval — ikke en ansøgningsberegning</p>
             <h2 className="mb-4 text-lg font-semibold text-gray-900">{resultHeading}</h2>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="rounded-lg bg-white p-4 shadow-sm">
-                <p className="text-sm text-gray-600">Screeninginterval</p>
+                <p className="text-sm text-gray-600">Standardinterval</p>
                 <p className="text-3xl font-bold text-green-600">
-                  0 – {formatNumber(resultat.screeningHighMonthly, locale)} kr/md
+                  0 – {screeningHighLabel} kr/md
                 </p>
               </div>
               <div className="rounded-lg bg-white p-4 shadow-sm">
@@ -637,7 +745,7 @@ export default function BoligstoetteBeregner() {
             <div className="mt-4 space-y-2 text-sm text-gray-700">
               {resultat.wealthAdjustedIncome !== null ? (
                 <p>
-                  Screeningens formuejusterede indkomstsignal: {formatNumber(resultat.wealthAdjustedIncome, locale)} kr./år. Det er en forenklet sum, ikke Udbetaling Danmarks fulde beregning.
+                  Forenklet formuejusteret indkomstsignal: {formatNumber(resultat.wealthAdjustedIncome, locale)} kr./år. Det er en forenklet sum, ikke Udbetaling Danmarks fulde beregning.
                 </p>
               ) : (
                 <p>
@@ -665,12 +773,12 @@ export default function BoligstoetteBeregner() {
         {resultat && resultat.screeningHighMonthly > 0 && (
           <div className="flex justify-center">
             <CopyResultButton
-              text={`Screeningestimat: 0–${formatNumber(resultat.screeningHighMonthly, locale)} kr/md — ikke en ansøgningsberegning`}
+              text={`Standardinterval: 0–${screeningHighLabel} kr/md — ikke en ansøgningsberegning`}
             />
             <ShareCalculation
               getShareableLink={getShareableLink}
-              calculatorName="Boligstøtte-screening"
-              resultSummary={`Screeningestimat: 0–${formatNumber(resultat.screeningHighMonthly, locale)} kr/md — ikke en ansøgningsberegning`}
+               calculatorName="Boligstøtte-standardinterval"
+              resultSummary={`Standardinterval: 0–${screeningHighLabel} kr/md — ikke en ansøgningsberegning`}
               privacyWarning="Linket kan indeholde husleje, årlig indkomst, formue, husstandsstørrelse, antal børn, pensionstatus og areal. Del det kun med personer, du har tilladelse til at give oplysningerne til."
               allowExternalSharing={false}
             />
@@ -680,7 +788,7 @@ export default function BoligstoetteBeregner() {
         <div className="mt-6 rounded-lg bg-gray-50 p-4 text-sm text-gray-700">
           <h3 className="mb-2 font-semibold text-gray-900">Sådan tolker du resultatet</h3>
           <ul className="list-inside list-disc space-y-1">
-            <li>Resultatet er et groft interval, ikke en beregning af din ret til boligstøtte.</li>
+            <li>Resultatet er et vejledende standardinterval, ikke en beregning af din ret til boligstøtte.</li>
             <li>Den officielle beregning bruger blandt andet husstandsindkomst, formue, husleje, beboere og areal.</li>
             <li>Der er ingen øvre formuegrænse for retten, men formue over de officielle grænser kan sænke støtten.</li>
           </ul>

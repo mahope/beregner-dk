@@ -96,7 +96,7 @@
     "noLogin": "Ingen login påkrævet",
     "madeFor": "Lavet til danskere",
     "allCalculators": "Alle beregnere",
-    "aboutSite": "Gratis online beregnere til danskere. Alle beregninger sker lokalt i din browser — vi gemmer ingen data.",
+    "aboutSite": "Gratis online beregnere til danskere. Beregninger sker lokalt i din browser — vi gemmer ikke dine input i en database. Delelinks kan indeholde data, som sendes, når linket åbnes eller en delingstjeneste vælges.",
     "aboutLink": "Om MinBeregner.dk",
     "privacyLink": "Privatlivspolitik",
     "cookieLink": "Cookiepolitik",

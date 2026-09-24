@@ -8,7 +8,10 @@
  * @since 1.1.0
  */
 
-import { CALCULATION_STATE_HISTORY_KEY } from './calculation-state-privacy';
+import {
+  CALCULATION_STATE_CLEAR_KEY,
+  CALCULATION_STATE_HISTORY_KEY,
+} from './calculation-state-privacy';
 
 // Types
 export interface CalculationState {
@@ -96,7 +99,11 @@ export function getStateFromUrl(): CalculationState | null {
     if (typeof storedState === 'string') {
       const nextHistoryState = { ...historyState };
       delete nextHistoryState[CALCULATION_STATE_HISTORY_KEY];
-      window.history.replaceState(nextHistoryState, '', window.location.href);
+      window.history.replaceState(
+        { ...nextHistoryState, [CALCULATION_STATE_CLEAR_KEY]: true },
+        '',
+        window.location.href,
+      );
       return decodeCalculationState(storedState);
     }
   }
@@ -138,7 +145,7 @@ export function updateUrlWithState(state: CalculationState): string {
   // Update URL without reload
   window.history.replaceState({}, '', url.toString());
   
-  return url.toString();
+  return window.location.href;
 }
 
 /**
@@ -168,7 +175,17 @@ export function clearStateFromUrl(): void {
   const url = new URL(window.location.href);
   url.searchParams.delete(STATE_PARAM);
   removeFragmentState(url);
-  window.history.replaceState({}, '', url.toString());
+  const currentHistoryState = window.history.state;
+  const nextHistoryState =
+    currentHistoryState && typeof currentHistoryState === 'object' && !Array.isArray(currentHistoryState)
+      ? { ...currentHistoryState }
+      : {};
+  delete nextHistoryState[CALCULATION_STATE_HISTORY_KEY];
+  window.history.replaceState(
+    { ...nextHistoryState, [CALCULATION_STATE_CLEAR_KEY]: true },
+    '',
+    url.toString(),
+  );
 }
 
 /**

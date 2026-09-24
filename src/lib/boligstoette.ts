@@ -47,6 +47,8 @@ export const DEFAULT_BOLIGSTOETTE_INPUT: BoligstoetteInput = {
   pensionStatus: "ingen",
 };
 
+export const MINIMUM_BOLIGSTOETTE_RENT = 0.01;
+
 export function parseBoligstoetteNumber(value: unknown): number | null {
   if (typeof value === "number") {
     return Number.isFinite(value) ? value : null;
@@ -61,7 +63,7 @@ export function parseBoligstoetteNumber(value: unknown): number | null {
     candidate = normalized.replace(/\./g, "").replace(",", ".");
   } else if (normalized.includes(",")) {
     candidate = normalized.replace(",", ".");
-  } else if (/^[+-]?\d{1,3}(?:\.\d{3})+$/.test(normalized)) {
+  } else if (/^[+-]?[1-9]\d*(?:\.\d{3})+$/.test(normalized)) {
     candidate = normalized.replace(/\./g, "");
   }
 
@@ -79,9 +81,27 @@ function optionalNonNegativeNumber(value: unknown): number | null {
   return parsed !== null && parsed >= 0 ? parsed : null;
 }
 
-function nonNegativeInteger(value: unknown, fallback: number, maximum: number): number {
+function truncateToCents(value: number): number {
+  const [mantissa, exponentText] = value.toString().toLowerCase().split("e");
+  const exponent = exponentText ? Number(exponentText) : 0;
+  const [whole, fraction = ""] = mantissa.split(".");
+  const digits = `${whole}${fraction}`;
+  const decimalIndex = whole.length + exponent;
+
+  if (decimalIndex <= 0) return 0;
+  const wholePart = digits.slice(0, decimalIndex);
+  const cents = digits.slice(decimalIndex, decimalIndex + 2).padEnd(2, "0");
+  return Number(`${wholePart}.${cents}`);
+}
+
+function boundedInteger(
+  value: unknown,
+  fallback: number,
+  minimum: number,
+  maximum: number,
+): number {
   const parsed = parseBoligstoetteNumber(value);
-  return parsed !== null && Number.isSafeInteger(parsed) && parsed >= 0
+  return parsed !== null && Number.isSafeInteger(parsed) && parsed >= minimum
     ? Math.min(parsed, maximum)
     : fallback;
 }
@@ -92,8 +112,8 @@ export function normaliserBoligstoetteInputs(value: unknown): BoligstoetteInput 
   }
 
   const inputs = value as Record<string, unknown>;
-  const householdSize = nonNegativeInteger(inputs.antalPersoner, 1, 7);
-  const requestedChildren = nonNegativeInteger(inputs.antalBorn, 0, 4);
+  const householdSize = boundedInteger(inputs.antalPersoner, 1, 1, 7);
+  const requestedChildren = boundedInteger(inputs.antalBorn, 0, 0, 4);
   const children = Math.min(
     requestedChildren,
     householdSize === 7 ? 4 : Math.max(0, householdSize - 1),
@@ -159,23 +179,26 @@ function wealthConsideration(
     pensionStatus === "folkepension"
       ? BOLIGSTOETTE_2026.wealth.pensioner
       : BOLIGSTOETTE_2026.wealth.nonPensioner;
-  const rate =
-    wealth < thresholds.tenPercent
-      ? wealth >= thresholds.noEffect
-        ? ("10-procent" as const)
-        : ("ingen" as const)
-      : ("20-procent" as const);
   const considerationRates = BOLIGSTOETTE_2026.wealth.considerationRates;
 
+  if (wealth <= thresholds.noEffect) {
+    return { rate: "ingen", equivalent: 0 };
+  }
+
+  if (wealth < thresholds.tenPercent) {
+    return {
+      rate: "10-procent",
+      equivalent:
+        (wealth - thresholds.noEffect) * considerationRates.tenPercent,
+    };
+  }
+
   return {
-    rate,
+    rate: "20-procent",
     equivalent:
-      wealth *
-      (rate === "20-procent"
-        ? considerationRates.twentyPercent
-        : rate === "10-procent"
-          ? considerationRates.tenPercent
-          : 0),
+      (thresholds.tenPercent - thresholds.noEffect) *
+        considerationRates.tenPercent +
+      (wealth - thresholds.tenPercent) * considerationRates.twentyPercent,
   };
 }
 
@@ -186,7 +209,7 @@ export function beregnBoligstoette(
     !input ||
     typeof input !== "object" ||
     !Number.isFinite(input.monthlyRent) ||
-    input.monthlyRent <= 0 ||
+    input.monthlyRent < MINIMUM_BOLIGSTOETTE_RENT ||
     !Number.isFinite(input.annualIncome) ||
     input.annualIncome < 0 ||
     !Number.isSafeInteger(input.householdSize) ||
@@ -212,11 +235,16 @@ export function beregnBoligstoette(
     return null;
   }
 
-  const screeningHighMonthly = Math.min(maximumMonthly, input.monthlyRent);
-  const maximumShareOfRent = Math.min(
-    100,
-    Math.round((screeningHighMonthly / input.monthlyRent) * 100),
+  const screeningHighMonthly = truncateToCents(
+    Math.min(maximumMonthly, input.monthlyRent),
   );
+  const exactMaximumShareOfRent =
+    (screeningHighMonthly / input.monthlyRent) * 100;
+  const roundedMaximumShareOfRent = Math.round(exactMaximumShareOfRent);
+  const maximumShareOfRent =
+    screeningHighMonthly < input.monthlyRent && roundedMaximumShareOfRent === 100
+      ? 99
+      : roundedMaximumShareOfRent;
 
   return {
     maximumMonthly,

@@ -1,10 +1,11 @@
 import { LocaleProvider } from "@/components/LocaleProvider";
+import nextConfig from "../../../next.config";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, test, vi } from "vitest";
 import BoligstoettePage, { generateMetadata } from "./page";
 
 vi.mock("@/components/BoligstoetteBeregner", () => ({
-  default: () => <div>Screeningestimat</div>,
+  default: () => <div>Standardinterval</div>,
 }));
 vi.mock("@/components/Breadcrumbs", () => ({ default: () => null }));
 vi.mock("@/components/RelatedCalculators", () => ({ default: () => null }));
@@ -46,14 +47,14 @@ describe("boligstoette page", () => {
       </LocaleProvider>,
     );
 
-    expect(html).toContain("Boligstøtte screening 2026");
+    expect(html).toContain("Boligstøtte 2026: Standardmaksima, formue og beregning");
     expect(html).toContain("Åbn den officielle beregner");
     expect(html).toContain("basisoplysninger");
     expect(html).toContain("1.194");
-    expect(html).toContain("896.400");
-    expect(html).toContain("Fra 896.400");
-    expect(html).toContain("Fra 1.793.000");
-    expect(html).toContain("Screeningestimat");
+     expect(html).toContain("896.400");
+     expect(html).toContain("896.400–1.793.000");
+     expect(html).toContain("1.793.000 kr. og derover");
+    expect(html).toContain("Standardinterval");
      expect(html).toContain("Folkepensionister og førtidspensionister før 2003");
      expect(html).toContain("Pensionsrækkerne er en ordningsafklaring");
      expect(html).toContain('scope="row"');
@@ -62,8 +63,8 @@ describe("boligstoette page", () => {
      expect(html).toContain("indskud og afdrag på indskud");
      expect(html).toContain("fællesantenne");
      expect(html).toContain("forbedringer som et nyt køkken eller bad");
-     expect(html).toContain("Under 896.400");
-     expect(html).toContain("Under 1.060.300");
+     expect(html).toContain("0–896.400");
+     expect(html).toContain("0–1.060.300");
      expect(html).not.toContain("Boligstøtteberegner");
      expect(html).not.toContain("113.000");
      expect(html).not.toContain("73.000");
@@ -76,6 +77,12 @@ describe("boligstoette page", () => {
 
   test("deaktiverer referrer på den følsomme delestatsside", async () => {
     const metadata = await generateMetadata();
+    const headerRules = await nextConfig.headers?.();
+
     expect(metadata.referrer).toBe("no-referrer");
+    expect(headerRules?.find((rule) => rule.source === "/boligstoette")?.headers).toContainEqual({
+      key: "Referrer-Policy",
+      value: "no-referrer",
+    });
   });
 });

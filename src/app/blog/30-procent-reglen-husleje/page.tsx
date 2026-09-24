@@ -156,8 +156,8 @@ export default function HuslejeGuidePage() {
           <li><strong>Almene boliger</strong> - Skriv dig op i boligforeninger</li>
           <li><strong>Mindre kvadratmeter</strong> - Har du virkelig brug for 70m²?</li>
           <li><strong>Forhandl</strong> - Nogen huslejer kan forhandles</li>
-          <li><strong>Boligstøtte</strong> - Lav et{" "}
-            <Link href="/boligstoette" className="text-blue-600 hover:underline">screeningestimat</Link></li>
+          <li><strong>Boligstøtte</strong> - Se standardmaksima og{" "}
+            <Link href="/boligstoette" className="text-blue-600 hover:underline">formuegrænser</Link></li>
         </ol>
 
         <h2>Overvejer du at købe?</h2>

@@ -106,10 +106,10 @@ function DaContent() {
         Når du ikke bruger &quot;Del beregning&quot;, sker alle beregninger på
         MinBeregner.dk lokalt i din browser, og de tal, du indtaster, sendes ikke i
         selve beregningen. Delelinks er en undtagelse. Nye boligstøtte-links bruger
-        URL-fragmentet, som browseren ikke sender med sideanmodningen, mens ældre links
-        kan bruge query-parametre, som kan sendes, når linket åbnes. Linket kan indeholde
-        oplysninger, som alle med linket kan afkode. Vælg derfor kun at dele links med
-        data, du har tilladelse til at videregive.
+        URL-fragmentet, som browseren ikke sender med sideanmodningen. Delelinks fra
+        andre beregnere og ældre boligstøtte-links bruger query-parametre, som kan sendes,
+        når linket åbnes. Linket kan indeholde oplysninger, som alle med linket kan afkode.
+        Vælg derfor kun at dele links med data, du har tilladelse til at videregive.
       </p>
 
       <h2>5. Sådan styrer du cookies</h2>

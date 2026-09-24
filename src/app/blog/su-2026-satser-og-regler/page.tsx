@@ -318,7 +318,7 @@ export default function SU2026GuidePage() {
         <ul>
           <li>Se din aktuelle SU, fribeløb og maksimale SU-lån med <Link href="/su">SU-beregneren</Link>.</li>
           <li>Planlæg afdrag på studiegæld med <Link href="/studielaan">studielånsberegneren</Link>.</li>
-          <li>Undersøg din boligudgift med <Link href="/boligstoette">boligstøtte-screeningen</Link>.</li>
+           <li>Undersøg din boligudgift med <Link href="/boligstoette">boligstøtte-standardintervallet</Link>.</li>
           <li>Se børnetilskud og afhængige ydelser med <Link href="/boernepenge">børnepengeberegneren</Link>.</li>
         </ul>
 

@@ -48,6 +48,15 @@ const nextConfig: NextConfig = {
         headers: securityHeaders,
       },
       {
+        source: '/boligstoette',
+        headers: [
+          {
+            key: 'Referrer-Policy',
+            value: 'no-referrer',
+          },
+        ],
+      },
+      {
         source: '/embed/:path*',
         headers: [
           ...securityHeaders.filter((h) => h.key !== 'X-Frame-Options'),

@@ -160,9 +160,15 @@ describe("SATSER_2026 single source of truth", () => {
       noEffect: 1060300,
       tenPercent: 2120800,
     });
-    expect(BOLIGSTOETTE_2026.sources.officialRules).toBe(
-      "https://www.borger.dk/bolig-og-flytning/Boligstoette-oversigt/soeg-boligstoette",
-    );
+     expect(BOLIGSTOETTE_2026.sources.officialRules).toBe(
+       "https://www.borger.dk/bolig-og-flytning/Boligstoette-oversigt/soeg-boligstoette",
+     );
+     expect(BOLIGSTOETTE_2026.sources.officialFormula).toBe(
+       "https://www.retsinformation.dk/eli/retsinfo/2026/9156",
+     );
+     expect(BOLIGSTOETTE_2026.sources.officialRates).toBe(
+       "https://www.retsinformation.dk/eli/retsinfo/2026/9336",
+     );
     expect(BOLIGSTOETTE_2026.rentExcludes).toEqual([
       "el",
       "varme",

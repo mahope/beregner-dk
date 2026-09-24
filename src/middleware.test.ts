@@ -39,6 +39,17 @@ describe("middleware locale routing", () => {
     }
   });
 
+  test("returns a 404 path for Danish-only routes and sections in Norway", () => {
+    for (const path of ["/boligstoette", "/blog/boligstoette-2026-nye-regler", "/kategori/bolig"]) {
+      const response = middleware(makeRequest("beregner.no", path));
+      expect(response.status, path).toBe(404);
+      expect(response.headers.get("x-middleware-rewrite"), path).toBe(
+        "https://beregner.no/locale-unavailable"
+      );
+      expect(response.headers.get("x-middleware-request-x-locale"), path).toBe("no");
+    }
+  });
+
   test("returns a 404 path for SE-only routes in Denmark", () => {
     for (const path of ["/lon-efter-skatt", "/bolan"]) {
       const response = middleware(makeRequest("minberegner.dk", path));

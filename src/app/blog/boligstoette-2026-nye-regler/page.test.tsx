@@ -19,9 +19,9 @@ describe("boligstøtte 2026 article", () => {
     expect(html).toContain("basisoplysninger");
     expect(html).toContain("1.194");
     expect(html).toContain("896.400");
-    expect(html).toContain("Fra 896.400");
-    expect(html).toContain("Fra 1.793.000");
-    expect(html).toContain("screeningestimat");
+    expect(html).toContain("896.400–1.793.000");
+    expect(html).toContain("1.793.000 kr. og derover");
+    expect(html).toContain("standardinterval");
      expect(html).toContain("Folkepensionister og førtidspensionister før 2003");
      expect(html).toContain("Pensionsrækkerne er en ordningsafklaring");
      expect(html).toContain('scope="row"');
@@ -33,8 +33,8 @@ describe("boligstøtte 2026 article", () => {
      expect(html).toContain("møbler i en møbleret bolig");
      expect(html).toContain("vaskeri");
      expect(html).toContain("forbedringer som et nyt køkken eller bad");
-     expect(html).toContain("Under 896.400");
-     expect(html).toContain("Under 1.060.300");
+    expect(html).toContain("0–896.400");
+    expect(html).toContain("0–1.060.300");
      expect(html).toContain("Areal og husstandens øvrige sammensætning");
      expect(html).toContain("Vil du se, hvad du har råd til i husleje?");
      expect(html).toContain("Se, hvad der er tilbage af løn og andre indkomster efter skat");

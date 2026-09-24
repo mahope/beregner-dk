@@ -248,7 +248,7 @@ export default function Boernepenge2026Page() {
             {' · '}
             <Link href="/barselsdagpenge" className="text-blue-600 hover:underline">Barselsdagpenge</Link>
             {' · '}
-            <Link href="/boligstoette" className="text-blue-600 hover:underline">Boligstøtte-screening</Link>
+             <Link href="/boligstoette" className="text-blue-600 hover:underline">Boligstøtte-standardinterval</Link>
             {' · '}
             <Link href="/budget" className="text-blue-600 hover:underline">Budgetberegner</Link>
             {' · '}
@@ -273,7 +273,7 @@ export default function Boernepenge2026Page() {
           </li>
           <li>
             <strong>Boligstøtte:</strong> Huslejetilskud til familier med lav indkomst.{' '}
-            <Link href="/boligstoette" className="text-blue-600 hover:underline">Se screeningen →</Link>
+             <Link href="/boligstoette" className="text-blue-600 hover:underline">Se standardintervallet →</Link>
           </li>
           <li>
             <strong>Barselsdagpenge:</strong> Ydelse under barselsorlov.{' '}
@@ -318,8 +318,8 @@ export default function Boernepenge2026Page() {
             <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Beregn dine barselsdagpenge med 2026-satser</p>
           </Link>
           <Link href="/boligstoette" className="block p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-            <span className="font-medium text-gray-900 dark:text-white">Boligstøtte-screening →</span>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Se et screeningestimat af boligstøtte i 2026</p>
+             <span className="font-medium text-gray-900 dark:text-white">Boligstøtte-standardinterval →</span>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Se standardmaksima og formuegrænser for boligstøtte i 2026</p>
           </Link>
           <Link href="/budget" className="block p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
             <span className="font-medium text-gray-900 dark:text-white">Budgetberegner →</span>

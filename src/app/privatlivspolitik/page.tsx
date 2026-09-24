@@ -52,15 +52,16 @@ function DaContent() {
         <p>
           Hvis du bruger &quot;Del beregning&quot;-funktionen, kodes dine input-værdier i
           URL&apos;en, så modtageren kan se den samme beregning. I
-          boligstøtte-screening ligger de nye data i URL&apos;ens fragment (efter #), som
+           boligstøtte-siden ligger de nye data i URL&apos;ens fragment (efter #), som
           browseren ikke sender med sideanmodningen. Værdierne kan stå i
           browserhistorikken, og enhver, der modtager linket, kan dekode dem. Delelinks fra
           andre beregnere ligger i URL-parametrene og kan sendes, når linket åbnes. Før
           analytics registrerer en sidevisning, flyttes den kodede boligstøtte-state fra
           URL-fragmentet til sidens lokale history-buffer og fjernes fra den synlige URL;
           den bruges kun lokalt til at genskabe beregningen. Gamle boligstøtte-links kan
-          stadig bruge en query-parameter, som kan sendes med sideanmodningen. Brug derfor
-          kun nye fragmentlinks til følsomme oplysninger.
+          stadig bruge en query-parameter, som kan sendes med sideanmodningen.
+          Service workeren gemmer ikke gamle query-links med delestat i sin cache. Brug
+          derfor kun nye fragmentlinks til følsomme oplysninger.
         </p>
         <p>
           Vælger du at dele via QR-kode, sociale medier eller e-mail, sender din browser

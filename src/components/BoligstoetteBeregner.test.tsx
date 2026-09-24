@@ -24,6 +24,24 @@ function renderBoligstoette() {
   );
 }
 
+function fillRequiredProfile(
+  area = "65",
+  householdSize = "1",
+  children = "0",
+  pensionStatus = "ingen",
+) {
+  fireEvent.change(screen.getByLabelText("Personer i husstanden"), {
+    target: { value: householdSize },
+  });
+  fireEvent.change(screen.getByLabelText("Børn under 18 år"), {
+    target: { value: children },
+  });
+  fireEvent.change(screen.getByLabelText("Boligens areal (m²)"), { target: { value: area } });
+  fireEvent.change(screen.getByLabelText("Søgerens pensionstatus"), {
+    target: { value: pensionStatus },
+  });
+}
+
 describe("BoligstoetteBeregner", () => {
   beforeEach(() => {
     window.history.replaceState({}, "", "/boligstoette");
@@ -34,7 +52,7 @@ describe("BoligstoetteBeregner", () => {
     cleanup();
   });
 
-  test("markerer husleje, indkomst og areal som påkrævede felter", () => {
+  test("markerer husleje, indkomst og profil som påkrævede felter", () => {
     renderBoligstoette();
 
     expect(screen.getByLabelText("Månedlig husleje (kr./md, uden forbrugsudgifter)")).toBeRequired();
@@ -43,6 +61,13 @@ describe("BoligstoetteBeregner", () => {
     expect(screen.getByLabelText("Personer i husstanden")).toBeRequired();
     expect(screen.getByLabelText("Børn under 18 år")).toBeRequired();
     expect(screen.getByLabelText("Søgerens pensionstatus")).toBeRequired();
+    expect(screen.getByLabelText("Månedlig husleje (kr./md, uden forbrugsudgifter)")).toHaveValue(null);
+    expect(screen.getByLabelText("Årlig husstandsindkomst før skat (kr./år)")).toHaveValue(null);
+    expect(screen.getByLabelText("Boligens areal (m²)")).toHaveValue(null);
+    expect(screen.getByLabelText("Personer i husstanden")).toHaveValue("");
+    expect(screen.getByLabelText("Børn under 18 år")).toHaveValue("");
+    expect(screen.getByLabelText("Søgerens pensionstatus")).toHaveValue("");
+    expect(screen.queryAllByRole("alert")).toHaveLength(0);
   });
 
   test("accepterer decimaler i beløb og areal", () => {
@@ -57,6 +82,7 @@ describe("BoligstoetteBeregner", () => {
     fireEvent.change(screen.getByLabelText("Boligens areal (m²)"), {
       target: { value: "65.5" },
     });
+    fillRequiredProfile("65.5");
 
     expect(screen.getByText(/0 – 1\.194 kr\/md/)).toBeInTheDocument();
   });
@@ -75,6 +101,35 @@ describe("BoligstoetteBeregner", () => {
     expect(area.checkValidity()).toBe(true);
   });
 
+  test("viser små huslejer med hele øre", () => {
+    renderBoligstoette();
+
+    fireEvent.change(screen.getByLabelText("Månedlig husleje (kr./md, uden forbrugsudgifter)"), {
+      target: { value: "0.29" },
+    });
+    fireEvent.change(screen.getByLabelText("Årlig husstandsindkomst før skat (kr./år)"), {
+      target: { value: "216000" },
+    });
+    fillRequiredProfile();
+
+    expect(screen.getByText(/0 – 0,29 kr\/md/)).toBeInTheDocument();
+    expect(screen.getByText(/100 % af huslejen/)).toBeInTheDocument();
+  });
+
+  test("afviser husleje under ét øre", () => {
+    renderBoligstoette();
+
+    const rent = screen.getByLabelText("Månedlig husleje (kr./md, uden forbrugsudgifter)") as HTMLInputElement;
+    fireEvent.change(rent, { target: { value: "0.009" } });
+    fireEvent.change(screen.getByLabelText("Årlig husstandsindkomst før skat (kr./år)"), {
+      target: { value: "216000" },
+    });
+
+    expect(rent.checkValidity()).toBe(false);
+    expect(screen.getByText("Indtast en husleje på mindst 0,01 kr.")).toBeInTheDocument();
+    expect(screen.queryByText(/Vejledende standardinterval/)).not.toBeInTheDocument();
+  });
+
   test("viser ikke et resultat før nødvendige oplysninger er indtastet", () => {
     const markup = renderToString(
       <LocaleProvider locale="da" domainConfig={domainConfig}>
@@ -83,7 +138,30 @@ describe("BoligstoetteBeregner", () => {
     );
 
     expect(markup).not.toContain("Vejledende månedsinterval");
-    expect(screen.queryByText(/Screeningestimat/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Vejledende standardinterval/)).not.toBeInTheDocument();
+  });
+
+  test("kræver antal børn før resultat og deling", () => {
+    renderBoligstoette();
+
+    fireEvent.change(screen.getByLabelText("Månedlig husleje (kr./md, uden forbrugsudgifter)"), {
+      target: { value: "6000" },
+    });
+    fireEvent.change(screen.getByLabelText("Årlig husstandsindkomst før skat (kr./år)"), {
+      target: { value: "216000" },
+    });
+    fireEvent.change(screen.getByLabelText("Boligens areal (m²)"), { target: { value: "65" } });
+    fireEvent.change(screen.getByLabelText("Personer i husstanden"), { target: { value: "1" } });
+    fireEvent.change(screen.getByLabelText("Søgerens pensionstatus"), { target: { value: "ingen" } });
+
+    expect(screen.getByRole("status")).toHaveTextContent("Vælg antal børn");
+    expect(screen.queryByText(/Vejledende standardinterval/)).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Del beregning" })).not.toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText("Børn under 18 år"), { target: { value: "0" } });
+
+    expect(screen.getByText(/Vejledende standardinterval/)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Del beregning" })).toBeInTheDocument();
   });
 
   test("viser et interval og den officielle næste handling", () => {
@@ -95,8 +173,10 @@ describe("BoligstoetteBeregner", () => {
     fireEvent.change(screen.getByLabelText("Årlig husstandsindkomst før skat (kr./år)"), {
       target: { value: "216000" },
     });
+    expect(screen.queryByText(/Vejledende standardinterval/)).not.toBeInTheDocument();
+    fillRequiredProfile();
 
-    expect(screen.getByText(/Screeningestimat/)).toBeInTheDocument();
+    expect(screen.getByText(/Vejledende standardinterval/)).toBeInTheDocument();
     expect(screen.getByText(/0 – 1\.194 kr\/md/)).toBeInTheDocument();
     expect(screen.getByText(/ikke et krav på støtte/)).toBeInTheDocument();
     expect(
@@ -107,6 +187,21 @@ describe("BoligstoetteBeregner", () => {
     );
   });
 
+  test("viser det øvre interval konservativt ved decimaler", () => {
+    renderBoligstoette();
+
+    fireEvent.change(screen.getByLabelText("Månedlig husleje (kr./md, uden forbrugsudgifter)"), {
+      target: { value: "1193.9999" },
+    });
+    fireEvent.change(screen.getByLabelText("Årlig husstandsindkomst før skat (kr./år)"), {
+      target: { value: "216000" },
+    });
+    fillRequiredProfile();
+
+    expect(screen.getByText(/0 – 1\.193,99 kr\/md/)).toBeInTheDocument();
+    expect(screen.getByText(/99 % af huslejen/)).toBeInTheDocument();
+  });
+
   test("accepterer nul indkomst og bevarer uoplyst formue som uoplyst", () => {
     renderBoligstoette();
 
@@ -115,20 +210,46 @@ describe("BoligstoetteBeregner", () => {
     });
     const income = screen.getByLabelText("Årlig husstandsindkomst før skat (kr./år)") as HTMLInputElement;
     fireEvent.change(income, { target: { value: "0" } });
+    fillRequiredProfile();
 
     expect(income.checkValidity()).toBe(true);
     expect(screen.getByText(/0 – 1\.194 kr\/md/)).toBeInTheDocument();
     expect(
       screen.getByText(/Formuen er ikke oplyst, så der vises ikke et formuejusteret indkomstsignal/),
     ).toBeInTheDocument();
-    expect(screen.queryByText(/Screeningens formuejusterede indkomstsignal/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Forenklet formuejusteret indkomstsignal/)).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Del beregning" }));
-    const shareUrl = (screen.getByLabelText("Delbart link") as HTMLInputElement).value;
+    const shareUrl = (screen.getByLabelText("Link til beregning") as HTMLInputElement).value;
     const encoded = new URL(shareUrl).hash.slice("#s=".length);
     const decoded = decodeCalculationState(encoded);
     expect(decoded?.inputs).toMatchObject({ husstandsindkomst: 0 });
     expect(decoded?.inputs).not.toHaveProperty("formue");
+  });
+
+  test("indlæser et delelink med præcis én øre", async () => {
+    const state = encodeCalculationState({
+      type: "boligstoette",
+      inputs: {
+        maanedligHusleje: 0.01,
+        husstandsindkomst: 0,
+        antalPersoner: 1,
+        antalBorn: 0,
+        formue: 0,
+        areal: 65,
+        pensionStatus: "ingen",
+      },
+      timestamp: 1700000000000,
+    });
+    window.history.replaceState({}, "", `/boligstoette#s=${state}`);
+
+    renderBoligstoette();
+
+    await waitFor(() => {
+      expect(screen.getByLabelText("Månedlig husleje (kr./md, uden forbrugsudgifter)")).toHaveValue(0.01);
+    });
+    expect(screen.getByText(/0 – 0,01 kr\/md/)).toBeInTheDocument();
+    expect(screen.queryByText("Nogle oplysninger i delelinket er ugyldige. Indtast dem igen.")).not.toBeInTheDocument();
   });
 
   test("indlæser gamle query-links uden at opfinde en ny husstandsprofil", async () => {
@@ -149,6 +270,7 @@ describe("BoligstoetteBeregner", () => {
     await waitFor(() => {
       expect(screen.getByLabelText("Månedlig husleje (kr./md, uden forbrugsudgifter)")).toHaveValue(6000);
     });
+    expect(new URL(window.location.href).searchParams.has("s")).toBe(false);
     expect(screen.queryByText(/Vejledende månedsinterval/)).not.toBeInTheDocument();
     expect(screen.getByText("Nogle oplysninger i delelinket er ugyldige. Indtast dem igen.")).toBeInTheDocument();
 
@@ -156,6 +278,62 @@ describe("BoligstoetteBeregner", () => {
     fireEvent.change(screen.getByLabelText("Børn under 18 år"), { target: { value: "0" } });
     fireEvent.change(screen.getByLabelText("Søgerens pensionstatus"), { target: { value: "ingen" } });
 
+    expect(screen.getByText(/0 – 1\.194 kr\/md/)).toBeInTheDocument();
+  });
+
+  test("kræver husstandsstørrelse i stedet for at gætte én person", async () => {
+    const state = encodeCalculationState({
+      type: "boligstoette",
+      inputs: {
+        maanedligHusleje: 6000,
+        husstandsindkomst: 216000,
+        antalBorn: 0,
+        areal: 65,
+        pensionStatus: "ingen",
+      },
+      timestamp: 1700000000000,
+    });
+    window.history.replaceState({}, "", `/boligstoette#s=${state}`);
+
+    renderBoligstoette();
+
+    const household = screen.getByLabelText("Personer i husstanden");
+    await waitFor(() => {
+      expect(household).toHaveFocus();
+    });
+    expect(household).toHaveValue("");
+    expect(household).toHaveAttribute("aria-invalid", "true");
+    expect(screen.getByText("Husstandens størrelse mangler eller er ugyldig i delelinket. Vælg den igen.")).toBeInTheDocument();
+    expect(screen.queryByText(/Vejledende standardinterval/)).not.toBeInTheDocument();
+
+    fireEvent.change(household, { target: { value: "1" } });
+    expect(screen.getByText(/0 – 1\.194 kr\/md/)).toBeInTheDocument();
+  });
+
+  test("kræver areal i et legacy delelink i stedet for at gætte 65 m²", async () => {
+    const state = encodeCalculationState({
+      type: "boligstoette",
+      inputs: {
+        maanedligHusleje: 6000,
+        husstandsindkomst: 216000,
+        antalPersoner: 1,
+        antalBorn: 0,
+        pensionStatus: "ingen",
+      },
+      timestamp: 1700000000000,
+    });
+    window.history.replaceState({}, "", `/boligstoette#s=${state}`);
+
+    renderBoligstoette();
+
+    await waitFor(() => {
+      expect(screen.getByLabelText("Månedlig husleje (kr./md, uden forbrugsudgifter)")).toHaveValue(6000);
+    });
+    expect(screen.getByLabelText("Boligens areal (m²)")).toHaveValue(null);
+    expect(screen.queryByText(/Vejledende månedsinterval/)).not.toBeInTheDocument();
+    expect(screen.getByText("Nogle oplysninger i delelinket er ugyldige. Indtast dem igen.")).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText("Boligens areal (m²)"), { target: { value: "65" } });
     expect(screen.getByText(/0 – 1\.194 kr\/md/)).toBeInTheDocument();
   });
 
@@ -168,11 +346,12 @@ describe("BoligstoetteBeregner", () => {
     fireEvent.change(screen.getByLabelText("Årlig husstandsindkomst før skat (kr./år)"), {
       target: { value: "216000" },
     });
+    fillRequiredProfile();
     const areal = screen.getByLabelText("Boligens areal (m²)");
     fireEvent.change(areal, { target: { value: "" } });
 
-    expect(areal).toHaveAttribute("aria-invalid", "true");
-    expect(screen.getByRole("alert")).toHaveTextContent("Indtast et areal større end 0 m².");
+    expect(areal).toHaveAttribute("aria-invalid", "false");
+    expect(screen.queryByText("Indtast et areal større end 0 m².")).not.toBeInTheDocument();
     expect(screen.getByRole("status")).toHaveTextContent("Udfyld areal");
     expect(screen.queryByText(/Vejledende månedsinterval/)).not.toBeInTheDocument();
   });
@@ -198,6 +377,7 @@ describe("BoligstoetteBeregner", () => {
     });
     fireEvent.change(screen.getByLabelText("Personer i husstanden"), { target: { value: "3" } });
     fireEvent.change(screen.getByLabelText("Børn under 18 år"), { target: { value: "2" } });
+    fillRequiredProfile("65", "3", "2");
 
     expect(screen.getByText(/0 – 4\.201 kr\/md/)).toBeInTheDocument();
 
@@ -215,10 +395,14 @@ describe("BoligstoetteBeregner", () => {
 
     const personer = screen.getByLabelText("Personer i husstanden") as HTMLSelectElement;
     const born = screen.getByLabelText("Børn under 18 år") as HTMLSelectElement;
-    expect(Array.from(born.options).map((option) => option.textContent)).toEqual(["0 børn"]);
+    expect(Array.from(born.options).map((option) => option.textContent)).toEqual([
+      "Vælg antal børn",
+      "0 børn",
+    ]);
 
     fireEvent.change(personer, { target: { value: "3" } });
     expect(Array.from(born.options).map((option) => option.textContent)).toEqual([
+      "Vælg antal børn",
       "0 børn",
       "1 barn",
       "2 børn",
@@ -239,7 +423,7 @@ describe("BoligstoetteBeregner", () => {
     });
 
     expect(husleje).toHaveAttribute("aria-invalid", "true");
-    expect(screen.getByRole("alert")).toHaveTextContent("Indtast en husleje større end 0 kr.");
+    expect(screen.getByText("Indtast en husleje på mindst 0,01 kr.")).toBeInTheDocument();
     expect(screen.getByRole("status")).toHaveTextContent("Ret de ugyldige oplysninger");
     expect(screen.queryByText(/Vejledende månedsinterval/)).not.toBeInTheDocument();
   });
@@ -254,13 +438,15 @@ describe("BoligstoetteBeregner", () => {
       target: { value: "216000" },
     });
     fireEvent.change(screen.getByLabelText("Husstandens formue, som Udbetaling Danmark regner med (valgfri)"), {
-      target: { value: "896400" },
+      target: { value: "1000000" },
     });
+    fillRequiredProfile();
 
-    expect(screen.getAllByText(/10 % af formuen/)).toHaveLength(2);
-    expect(screen.getByText(/Screeningens formuejusterede indkomstsignal/)).toBeInTheDocument();
-    expect(screen.getByRole("status")).toHaveTextContent(/10 % af formuen/);
-    expect(screen.getByText(/305\.640 kr\.\/år/)).toBeInTheDocument();
+    expect(screen.getAllByText(/10 % af formuen over/)).toHaveLength(2);
+    expect(screen.getByText(/Forenklet formuejusteret indkomstsignal/)).toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent(/10 % af formuen over/);
+    expect(screen.getAllByText(/10\.360 kr\./)).toHaveLength(2);
+    expect(screen.getByText(/226\.360 kr\.\/år/)).toBeInTheDocument();
   });
 
   test("indlæser gamle delestater uden det døde boligType-felt", async () => {
@@ -311,6 +497,7 @@ describe("BoligstoetteBeregner", () => {
     await waitFor(() => {
       expect(screen.getByText(/0 – 4\.969 kr\/md/)).toBeInTheDocument();
     });
+    expect(new URL(window.location.href).hash).toBe("");
     expect(screen.getByLabelText("Månedlig husleje (kr./md, uden forbrugsudgifter)")).toHaveValue(7200);
     expect(screen.getByLabelText("Årlig husstandsindkomst før skat (kr./år)")).toHaveValue(0);
     expect(screen.getByLabelText("Personer i husstanden")).toHaveValue("4");
@@ -321,7 +508,7 @@ describe("BoligstoetteBeregner", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Del beregning" }));
     const privacyWarning = screen.getByText(/Linket kan indeholde husleje, årlig indkomst, formue, husstandsstørrelse, antal børn, pensionstatus og areal/);
-    const shareInput = screen.getByLabelText("Delbart link");
+    const shareInput = screen.getByLabelText("Link til beregning");
     expect(privacyWarning).toHaveAttribute("id");
     expect(shareInput).toHaveAttribute("aria-describedby", privacyWarning.id);
     expect(screen.getByText("Link til beregning")).toHaveAttribute("for", shareInput.id);
@@ -330,7 +517,7 @@ describe("BoligstoetteBeregner", () => {
     expect(screen.queryByRole("link", { name: "Del på Facebook" })).not.toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "Del via email" })).not.toBeInTheDocument();
 
-    const shareUrl = (screen.getByLabelText("Delbart link") as HTMLInputElement).value;
+    const shareUrl = (screen.getByLabelText("Link til beregning") as HTMLInputElement).value;
     const encoded = new URL(shareUrl).hash.slice("#s=".length);
     expect(decodeCalculationState(encoded ?? "")).toMatchObject({
       type: "boligstoette",
@@ -344,6 +531,87 @@ describe("BoligstoetteBeregner", () => {
         pensionStatus: "folkepension",
       },
     });
+  });
+
+  test("lader ikke delestat på andre ruter blive ryddet", () => {
+    renderBoligstoette();
+    const state = encodeCalculationState({
+      type: "su",
+      inputs: { husstandsindkomst: 216000 },
+      timestamp: 1700000000000,
+    });
+
+    window.history.replaceState({}, "", `/su?s=${state}`);
+
+    expect(new URL(window.location.href).searchParams.get("s")).toBe(state);
+  });
+
+  test("rydder formen ved en delestat fra en anden beregner på samme rute", async () => {
+    renderBoligstoette();
+    fireEvent.change(screen.getByLabelText("Månedlig husleje (kr./md, uden forbrugsudgifter)"), {
+      target: { value: "6000" },
+    });
+    fireEvent.change(screen.getByLabelText("Årlig husstandsindkomst før skat (kr./år)"), {
+      target: { value: "216000" },
+    });
+    fillRequiredProfile();
+    expect(screen.getByText(/Vejledende standardinterval/)).toBeInTheDocument();
+
+    const state = encodeCalculationState({
+      type: "su",
+      inputs: { husstandsindkomst: 216000 },
+      timestamp: 1700000000000,
+    });
+    window.history.replaceState({}, "", `/boligstoette?s=${state}`);
+
+    await waitFor(() => {
+      expect(screen.getByLabelText("Månedlig husleje (kr./md, uden forbrugsudgifter)")).toHaveValue(null);
+    });
+    expect(new URL(window.location.href).searchParams.has("s")).toBe(false);
+    expect(screen.queryByText(/Vejledende standardinterval/)).not.toBeInTheDocument();
+  });
+
+  test("rydder formen ved popstate uden en ny delestat", async () => {
+    renderBoligstoette();
+    fireEvent.change(screen.getByLabelText("Månedlig husleje (kr./md, uden forbrugsudgifter)"), {
+      target: { value: "6000" },
+    });
+    fireEvent.change(screen.getByLabelText("Årlig husstandsindkomst før skat (kr./år)"), {
+      target: { value: "216000" },
+    });
+    fillRequiredProfile();
+    expect(screen.getByText(/Vejledende standardinterval/)).toBeInTheDocument();
+
+    window.history.replaceState({}, "", "/boligstoette");
+    window.dispatchEvent(new Event("popstate"));
+
+    await waitFor(() => {
+      expect(screen.getByLabelText("Månedlig husleje (kr./md, uden forbrugsudgifter)")).toHaveValue(null);
+    });
+    expect(screen.queryByText(/Vejledende standardinterval/)).not.toBeInTheDocument();
+  });
+
+  test("indlæser og scrubber en ny delestat ved navigation på samme rute", async () => {
+    renderBoligstoette();
+    const state = encodeCalculationState({
+      type: "boligstoette",
+      inputs: {
+        maanedligHusleje: 7200,
+        husstandsindkomst: 420000,
+        antalPersoner: 4,
+        antalBorn: 2,
+        formue: 500000,
+        areal: 92,
+        pensionStatus: "folkepension",
+      },
+      timestamp: 1700000000000,
+    });
+    window.history.pushState({}, "", `/boligstoette#s=${state}`);
+
+    await waitFor(() => {
+      expect(screen.getByLabelText("Månedlig husleje (kr./md, uden forbrugsudgifter)")).toHaveValue(7200);
+    });
+    expect(new URL(window.location.href).hash).toBe("");
   });
 
   test("indlæser ikke ugyldige deletal som gyldige resultater", async () => {
@@ -364,7 +632,7 @@ describe("BoligstoetteBeregner", () => {
       expect(screen.getByLabelText("Boligens areal (m²)")).toHaveValue(null);
     });
     expect(screen.queryByText(/Vejledende månedsinterval/)).not.toBeInTheDocument();
-    expect(screen.getByText("Indtast et areal større end 0 m².")).toBeInTheDocument();
+    expect(screen.getByText("Nogle oplysninger i delelinket er ugyldige. Indtast dem igen.")).toBeInTheDocument();
   });
 
   test("avviser boolean- og arrayværdier i husstandsfelter", async () => {
@@ -444,10 +712,14 @@ describe("BoligstoetteBeregner", () => {
     await waitFor(() => {
       expect(screen.getByText("Nogle oplysninger i delelinket er ugyldige. Indtast dem igen.")).toBeInTheDocument();
     });
+    const pension = screen.getByLabelText("Søgerens pensionstatus");
+    const pensionError = screen.getByText("Pensionstatus mangler eller er ugyldig i delelinket. Vælg den igen.");
+    expect(pension).toHaveAttribute("aria-invalid", "true");
+    expect(pension.getAttribute("aria-describedby")).toContain(pensionError.id);
     fireEvent.change(screen.getByLabelText("Boligens areal (m²)"), { target: { value: "70" } });
-    expect(screen.queryByText(/Vejledende månedsinterval/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Vejledende standardinterval/)).not.toBeInTheDocument();
 
-    fireEvent.change(screen.getByLabelText("Søgerens pensionstatus"), { target: { value: "ingen" } });
+    fireEvent.change(pension, { target: { value: "ingen" } });
     expect(screen.getByText(/0 – 1\.194 kr\/md/)).toBeInTheDocument();
   });
 

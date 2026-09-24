@@ -96,7 +96,7 @@
     "noLogin": "Ingen inloggning krävs",
     "madeFor": "Gjord för svenskar",
     "allCalculators": "Alla kalkylatorer",
-    "aboutSite": "Gratis kalkylatorer för svenskar. Alla beräkningar sker lokalt i din webbläsare — vi sparar ingen data.",
+    "aboutSite": "Gratis kalkylatorer för svenskar. Beräkningar sker lokalt i din webbläsare — vi sparar inte dina uppgifter i någon databas. Dellänkar kan innehålla uppgifter som skickas när länken öppnas eller en delningstjänst väljs.",
     "aboutLink": "Om Beräknare.se",
     "privacyLink": "Integritetspolicy",
     "cookieLink": "Cookiepolicy",

@@ -74,7 +74,7 @@ describe("beregnBoligstoette", () => {
     ).toMatchObject({ maximumMonthly: 6211, screeningHighMonthly: 6211 });
   });
 
-  test("anvender Udbetaling Danmarks formuegrænser som et øvre screening-signal", () => {
+  test("anvender de progressive formuegrænser som et øvre formuesignal", () => {
     expect(
       beregnBoligstoette({ ...baseInput, wealth: 896399 }),
     ).toMatchObject({
@@ -85,16 +85,30 @@ describe("beregnBoligstoette", () => {
     expect(
       beregnBoligstoette({ ...baseInput, wealth: 896400 }),
     ).toMatchObject({
+      wealthConsideration: "ingen",
+      wealthIncomeEquivalent: 0,
+      wealthAdjustedIncome: 216000,
+    });
+    expect(
+      beregnBoligstoette({ ...baseInput, wealth: 896401 }),
+    ).toMatchObject({
       wealthConsideration: "10-procent",
-      wealthIncomeEquivalent: 89640,
-      wealthAdjustedIncome: 305640,
+      wealthIncomeEquivalent: 0.1,
+      wealthAdjustedIncome: 216000.1,
     });
     expect(
       beregnBoligstoette({ ...baseInput, wealth: 1793000 }),
     ).toMatchObject({
       wealthConsideration: "20-procent",
-      wealthIncomeEquivalent: 358600,
-      wealthAdjustedIncome: 574600,
+      wealthIncomeEquivalent: 89660,
+      wealthAdjustedIncome: 305660,
+    });
+    expect(
+      beregnBoligstoette({ ...baseInput, wealth: 1793001 }),
+    ).toMatchObject({
+      wealthConsideration: "20-procent",
+      wealthIncomeEquivalent: 89660.2,
+      wealthAdjustedIncome: 305660.2,
     });
     expect(
       beregnBoligstoette({
@@ -102,41 +116,45 @@ describe("beregnBoligstoette", () => {
         wealth: 1060300,
         pensionStatus: "folkepension",
       }),
-    ).toMatchObject({ wealthConsideration: "10-procent" });
+    ).toMatchObject({ wealthConsideration: "ingen", wealthIncomeEquivalent: 0 });
     expect(
       beregnBoligstoette({
         ...baseInput,
         wealth: 2120800,
         pensionStatus: "folkepension",
       }),
-    ).toMatchObject({ wealthConsideration: "20-procent" });
+    ).toMatchObject({
+      wealthConsideration: "20-procent",
+      wealthIncomeEquivalent: 106050,
+      wealthAdjustedIncome: 322050,
+    });
   });
 
-  test("bruger ikke-pensionisternes formuegrænser for nye førtidspensionister", () => {
-    expect(
-      beregnBoligstoette({ ...baseInput, pensionStatus: "foertidspension", wealth: 896399 }),
-    ).toMatchObject({ wealthConsideration: "ingen" });
+  test("bruger ikke-pensionisternes progressive formuegrænser for nye førtidspensionister", () => {
     expect(
       beregnBoligstoette({ ...baseInput, pensionStatus: "foertidspension", wealth: 896400 }),
-    ).toMatchObject({ wealthConsideration: "10-procent" });
+    ).toMatchObject({ wealthConsideration: "ingen", wealthIncomeEquivalent: 0 });
     expect(
       beregnBoligstoette({ ...baseInput, pensionStatus: "foertidspension", wealth: 1793000 }),
-    ).toMatchObject({ wealthConsideration: "20-procent" });
+    ).toMatchObject({ wealthConsideration: "20-procent", wealthIncomeEquivalent: 89660 });
   });
 
-  test("begrænser formuegrænserne ved de inklusive tærskler", () => {
-    expect(
-      beregnBoligstoette({ ...baseInput, wealth: 1792999 }),
-    ).toMatchObject({ wealthConsideration: "10-procent" });
+  test("begrænser de progressive formuegrænser ved de inklusive tærskler", () => {
+    const belowUpperThreshold = beregnBoligstoette({
+      ...baseInput,
+      wealth: 1792999,
+    });
+    expect(belowUpperThreshold).toMatchObject({ wealthConsideration: "10-procent" });
+    expect(belowUpperThreshold?.wealthIncomeEquivalent).toBeCloseTo(89659.9, 8);
     expect(
       beregnBoligstoette({ ...baseInput, wealth: 1793000 }),
-    ).toMatchObject({ wealthConsideration: "20-procent" });
+    ).toMatchObject({ wealthConsideration: "20-procent", wealthIncomeEquivalent: 89660 });
     expect(
       beregnBoligstoette({ ...baseInput, pensionStatus: "folkepension", wealth: 1060299 }),
-    ).toMatchObject({ wealthConsideration: "ingen" });
+    ).toMatchObject({ wealthConsideration: "ingen", wealthIncomeEquivalent: 0 });
     expect(
       beregnBoligstoette({ ...baseInput, pensionStatus: "folkepension", wealth: 1060300 }),
-    ).toMatchObject({ wealthConsideration: "10-procent" });
+    ).toMatchObject({ wealthConsideration: "ingen", wealthIncomeEquivalent: 0 });
   });
 
   test("accepterer nul indkomst, men markerer uoplyst formue som ukendt", () => {
@@ -166,8 +184,42 @@ describe("beregnBoligstoette", () => {
       beregnBoligstoette({ ...baseInput, monthlyRent: 1194.01 }),
     ).toMatchObject({ screeningHighMonthly: 1194 });
     expect(
+      beregnBoligstoette({ ...baseInput, monthlyRent: 1194.005 }),
+    ).toMatchObject({ maximumShareOfRent: 99 });
+    expect(
       beregnBoligstoette({ ...baseInput, monthlyRent: 1000000 }),
     ).toMatchObject({ maximumShareOfRent: 0 });
+  });
+
+  test("bevarer hele øre i små huslejer", () => {
+    expect(
+      beregnBoligstoette({ ...baseInput, monthlyRent: 1.15 }),
+    ).toMatchObject({
+      screeningHighMonthly: 1.15,
+      maximumShareOfRent: 100,
+    });
+    expect(
+      beregnBoligstoette({ ...baseInput, monthlyRent: 1000.5 }),
+    ).toMatchObject({
+      screeningHighMonthly: 1000.5,
+      maximumShareOfRent: 100,
+    });
+    expect(
+      beregnBoligstoette({ ...baseInput, monthlyRent: 0.29 }),
+    ).toMatchObject({
+      screeningHighMonthly: 0.29,
+      maximumShareOfRent: 100,
+    });
+    expect(
+      beregnBoligstoette({ ...baseInput, monthlyRent: 1.9999999999999998 }),
+    ).toMatchObject({ screeningHighMonthly: 1.99 });
+    expect(
+      beregnBoligstoette({ ...baseInput, monthlyRent: 0.049999999999999996 }),
+    ).toMatchObject({ screeningHighMonthly: 0.04 });
+  });
+
+  test("afviser husleje under ét øre", () => {
+    expect(beregnBoligstoette({ ...baseInput, monthlyRent: 0.009 })).toBeNull();
   });
 
   test("ændrer ikke det lokale interval alene for indkomst, formue, areal eller husstand", () => {
@@ -256,8 +308,14 @@ describe("normaliserBoligstoetteInputs", () => {
       area: 65.5,
     });
     expect(
+      normaliserBoligstoetteInputs({ formue: "1000.000" }),
+    ).toMatchObject({ wealth: 1000000 });
+    expect(
       normaliserBoligstoetteInputs({ maanedligHusleje: "6000.5" }),
     ).toMatchObject({ monthlyRent: 6000.5 });
+    expect(
+      normaliserBoligstoetteInputs({ maanedligHusleje: "0.009" }),
+    ).toMatchObject({ monthlyRent: 0.009 });
   });
 
   test("bevarer gamle links uden at opfinde børn eller formue", () => {
@@ -287,6 +345,13 @@ describe("normaliserBoligstoetteInputs", () => {
         antalBorn: 6,
       }),
     ).toMatchObject({ householdSize: 7, children: 4 });
+  });
+
+  test("normaliserer en ugyldig husstandsstørrelse til én person", () => {
+    expect(normaliserBoligstoetteInputs({ antalPersoner: 0 })).toMatchObject({
+      householdSize: 1,
+      children: 0,
+    });
   });
 
   test("erstatter malformed state med sikre defaults", () => {

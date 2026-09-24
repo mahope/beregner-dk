@@ -187,6 +187,10 @@ export const BOLIGSTOETTE_2026 = {
       "https://www.borger.dk/bolig-og-flytning/Boligstoette-oversigt/soeg-boligstoette",
     officialCalculator:
       "https://www.boligstoette.dk/bos-selvbetjening/beregner/basisoplysninger",
+    officialFormula:
+      "https://www.retsinformation.dk/eli/retsinfo/2026/9156",
+    officialRates:
+      "https://www.retsinformation.dk/eli/retsinfo/2026/9336",
   },
   maximumMonthly: {
     nonPensioner: {

@@ -96,7 +96,7 @@
     "noLogin": "Ingen innlogging nødvendig",
     "madeFor": "Laget for nordmenn",
     "allCalculators": "Alle kalkulatorer",
-    "aboutSite": "Gratis kalkulatorer for nordmenn. Alle beregninger skjer lokalt i nettleseren din — vi lagrer ingen data.",
+    "aboutSite": "Gratis kalkulatorer for nordmenn. Beregninger skjer lokalt i nettleseren — vi lagrer ikke inndataene i en database. Dellenker kan inneholde data som sendes når lenken åpnes eller en delingstjeneste velges.",
     "aboutLink": "Om Beregner.no",
     "privacyLink": "Personvern",
     "cookieLink": "Informasjonskapsler",

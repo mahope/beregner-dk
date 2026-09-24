@@ -1,4 +1,4 @@
-const CACHE_NAME = "minberegner-v1";
+const CACHE_NAME = "minberegner-v2";
 const OFFLINE_URL = "/";
 
 // Pre-cache the offline page on install
@@ -22,6 +22,7 @@ self.addEventListener("activate", (event) => {
 // Network-first strategy for pages, cache-first for static assets
 self.addEventListener("fetch", (event) => {
   const { request } = event;
+  const requestUrl = new URL(request.url);
 
   // Skip non-GET and external requests
   if (request.method !== "GET" || !request.url.startsWith(self.location.origin)) {
@@ -42,6 +43,7 @@ self.addEventListener("fetch", (event) => {
 
   // Network-first for HTML pages
   if (request.headers.get("accept")?.includes("text/html")) {
+    if (requestUrl.searchParams.has("s")) return;
     event.respondWith(
       fetch(request)
         .then((res) => {

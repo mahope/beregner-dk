@@ -22,6 +22,27 @@ describe("getHomePageData", () => {
       }
     }
   });
+
+  test("privacy copy distinguishes fragment and query-based share links", () => {
+    for (const locale of ["da", "no", "se"] as const) {
+      const data = getHomePageData(locale);
+      const privacyCopy = [
+        data.sections.features.private.description,
+        data.faqItems.find((item) => item.question.toLowerCase().includes(locale === "se" ? "sparar" : locale === "no" ? "lagrer" : "gemmer"))?.answer ?? "",
+      ].join(" ");
+      expect(privacyCopy, `${locale} privacy copy`).not.toMatch(
+        /åbner et delelink|åpner et delelink|öppnar en delelänk/i,
+      );
+      expect(privacyCopy, `${locale} privacy copy`).not.toMatch(
+        /bruger en delefunktion|bruker en delingsfunksjon|använder en delningsfunktion/i,
+      );
+      expect(privacyCopy, `${locale} privacy copy`).toMatch(/query/i);
+      expect(data.trustSignals.privacy, `${locale} privacy badge`).toMatch(/database|databas/i);
+      expect(data.trustSignals.privacy, `${locale} privacy badge`).not.toMatch(
+        /^100%\|/,
+      );
+    }
+  });
 });
 
 describe("getHomeCalculators", () => {

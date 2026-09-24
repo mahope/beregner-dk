@@ -126,21 +126,64 @@ describe("URL state location", () => {
     expect(window.history.state).toEqual({ existing: true });
   });
 
+  test("scrubber fragment-state før analytics kan læse samme-rute navigation", () => {
+    const encoded = encodeCalculationState({
+      type: "boligstoette",
+      inputs: { husstandsindkomst: 216000 },
+      timestamp: 1700000000000,
+    });
+    new Function(calculationStatePrivacyScript)();
+
+    window.history.pushState(
+      { existing: true },
+      "",
+      `/boligstoette#s=${encoded}&guide`,
+    );
+
+    expect(window.location.href).not.toContain(encoded);
+    expect(window.location.hash).toBe("#guide");
+    expect(getStateFromUrl()?.inputs.husstandsindkomst).toBe(216000);
+  });
+
+  test("bevarer scrubbet state ved en ren replaceState på samme rute", () => {
+    const encoded = encodeCalculationState({
+      type: "boligstoette",
+      inputs: { husstandsindkomst: 216000 },
+      timestamp: 1700000000000,
+    });
+    new Function(calculationStatePrivacyScript)();
+
+    window.history.pushState(
+      { existing: true },
+      "",
+      `/boligstoette#s=${encoded}&guide`,
+    );
+    window.history.replaceState({ router: true }, "", "/boligstoette");
+
+    expect(getStateFromUrl()?.inputs.husstandsindkomst).toBe(216000);
+    expect(window.history.state).toEqual({ router: true });
+  });
+
   test("rydder state uden at fjerne andre fragment-ankere", () => {
     const encoded = encodeCalculationState({
       type: "boligstoette",
       inputs: { husstandsindkomst: 216000 },
       timestamp: 1700000000000,
     });
-    window.history.replaceState({}, "", `/boligstoette?s=${encoded}#guide`);
+    window.history.replaceState(
+      { existing: true, __NA: true },
+      "",
+      `/boligstoette?s=${encoded}#guide`,
+    );
 
     clearStateFromUrl();
 
     expect(new URL(window.location.href).searchParams.has("s")).toBe(false);
     expect(new URL(window.location.href).hash).toBe("#guide");
+    expect(window.history.state).toEqual({ existing: true, __NA: true });
   });
 
-  test("opdaterer query-state uden at efterlade gammel fragment-state", () => {
+  test("skjuler ny boligstøtte-query-state og bevarer fragmentanker", () => {
     const oldState = encodeCalculationState({
       type: "boligstoette",
       inputs: { husstandsindkomst: 100000 },
@@ -155,15 +198,16 @@ describe("URL state location", () => {
     });
 
     const url = new URL(window.location.href);
-    expect(url.searchParams.get("s")).toBeTruthy();
+    expect(url.searchParams.has("s")).toBe(false);
     expect(url.hash).toBe("#guide");
+    expect(getStateFromUrl()?.inputs.husstandsindkomst).toBe(216000);
   });
 
   test("opdaterer og rydder både fragment- og legacy query-state", () => {
-    window.history.replaceState({}, "", "/boligstoette?behold=ja");
+    window.history.replaceState({}, "", "/su?behold=ja");
 
     updateUrlWithState({
-      type: "boligstoette",
+      type: "su",
       inputs: { husstandsindkomst: 216000 },
       timestamp: 1700000000000,
     });

@@ -138,7 +138,7 @@ describe("BMIBeregner", () => {
     expect(screen.queryByLabelText("Alder")).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Del beregning" }));
-    const shareUrl = screen.getByLabelText("Delbart link").getAttribute("value") ?? "";
+    const shareUrl = screen.getByLabelText("Link til beregning").getAttribute("value") ?? "";
     const sharedEncoded = new URL(shareUrl).searchParams.get("s");
     const sharedState = decodeCalculationState(sharedEncoded ?? "");
 
@@ -155,7 +155,7 @@ describe("BMIBeregner", () => {
     expect(screen.getByLabelText("Højde (inches)")).toHaveValue(68.9);
 
     fireEvent.click(screen.getByRole("button", { name: "Del beregning" }));
-    const shareUrl = screen.getByLabelText("Delbart link").getAttribute("value") ?? "";
+    const shareUrl = screen.getByLabelText("Link til beregning").getAttribute("value") ?? "";
     const sharedEncoded = new URL(shareUrl).searchParams.get("s") ?? "";
     firstRender.unmount();
 

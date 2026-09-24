@@ -130,13 +130,21 @@ export default async function BoligstoettePage() {
               </tbody>
             </table>
           </div>
-           <p>
-             Kilde:{" "}
-             <a href={BOLIGSTOETTE_2026.sources.officialRules} target="_blank" rel="noopener noreferrer">
-               Udbetaling Danmark på Borger.dk
-             </a>
-             , verificeret {BOLIGSTOETTE_2026.verifiedAt}.
-           </p>
+            <p>
+              Kilder:{" "}
+              <a href={BOLIGSTOETTE_2026.sources.officialRules} target="_blank" rel="noopener noreferrer">
+                Udbetaling Danmark på Borger.dk
+              </a>
+              ,{" "}
+              <a href={BOLIGSTOETTE_2026.sources.officialFormula} target="_blank" rel="noopener noreferrer">
+                VEJ nr. 9156 om husstandsindkomst
+              </a>{" "}
+              og{" "}
+              <a href={BOLIGSTOETTE_2026.sources.officialRates} target="_blank" rel="noopener noreferrer">
+                VEJ nr. 9336 om 2026-satser
+              </a>
+              , verificeret {BOLIGSTOETTE_2026.verifiedAt}.
+            </p>
            <p>
              Pensionsrækkerne er en ordningsafklaring, ikke et krav på boligstøtte. Nogle
              pensionister kan være berettiget til boligydelse, som følger andre regler; den
@@ -144,10 +152,13 @@ export default async function BoligstoettePage() {
            </p>
 
           <h2>Formue påvirker boligstøtten</h2>
-          <p>
-            Der er ingen øvre grænse for, hvor stor formue du kan have og fortsætte få
-            boligstøtte. Formuen påvirker dog beregningen på disse niveauer:
-          </p>
+           <p>
+             Der er ingen øvre grænse for, hvor stor formue du kan have og fortsætte få
+             boligstøtte. I den forenklede vurdering regnes {tenPercent} % af formuen over den laveste
+             grænse i det første bånd og {twentyPercent} % af beløbet over den højeste grænse. Den {tenPercent} %-del
+             fortsætter også i det øverste interval. Udbetaling Danmarks fulde beregning
+              anvender flere oplysninger end dette forenklede standardinterval.
+           </p>
           <a
             href="#boligstoette-formuegraenser"
             className="sr-only focus:not-sr-only focus:mb-2 focus:inline-block focus:underline"
@@ -166,26 +177,34 @@ export default async function BoligstoettePage() {
                 Hvordan formue påvirker vurderingen af boligstøtte i 2026
               </caption>
               <thead>
-                <tr>
-                  <th scope="col">Gruppe</th>
-                  <th scope="col">Ingen betydning</th>
-                  <th scope="col">{tenPercent} % regnes med</th>
-                  <th scope="col">{twentyPercent} % regnes med</th>
-                </tr>
+                 <tr>
+                   <th scope="col">Gruppe</th>
+                   <th scope="col">Ingen betydning</th>
+                   <th scope="col">{tenPercent} % i første bånd</th>
+                   <th scope="col">
+                     {tenPercent} % i første bånd + {twentyPercent} % over øvre grænse
+                   </th>
+                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <th scope="row">Ikke-pensionister og førtidspensionister efter nye regler</th>
-                  <td>Under {kr(BOLIGSTOETTE_2026.wealth.nonPensioner.noEffect)} kr.</td>
-                  <td>Fra {kr(BOLIGSTOETTE_2026.wealth.nonPensioner.noEffect)} kr.</td>
-                  <td>Fra {kr(BOLIGSTOETTE_2026.wealth.nonPensioner.tenPercent)} kr.</td>
-                </tr>
-                <tr>
-                  <th scope="row">Folkepensionister og førtidspensionister før 2003</th>
-                  <td>Under {kr(BOLIGSTOETTE_2026.wealth.pensioner.noEffect)} kr.</td>
-                  <td>Fra {kr(BOLIGSTOETTE_2026.wealth.pensioner.noEffect)} kr.</td>
-                  <td>Fra {kr(BOLIGSTOETTE_2026.wealth.pensioner.tenPercent)} kr.</td>
-                </tr>
+                 <tr>
+                   <th scope="row">Ikke-pensionister og førtidspensionister efter nye regler</th>
+                   <td>0–{kr(BOLIGSTOETTE_2026.wealth.nonPensioner.noEffect)} kr.</td>
+                   <td>
+                     {kr(BOLIGSTOETTE_2026.wealth.nonPensioner.noEffect)}–
+                     {kr(BOLIGSTOETTE_2026.wealth.nonPensioner.tenPercent)} kr.
+                   </td>
+                   <td>{kr(BOLIGSTOETTE_2026.wealth.nonPensioner.tenPercent)} kr. og derover</td>
+                 </tr>
+                 <tr>
+                   <th scope="row">Folkepensionister og førtidspensionister før 2003</th>
+                   <td>0–{kr(BOLIGSTOETTE_2026.wealth.pensioner.noEffect)} kr.</td>
+                   <td>
+                     {kr(BOLIGSTOETTE_2026.wealth.pensioner.noEffect)}–
+                     {kr(BOLIGSTOETTE_2026.wealth.pensioner.tenPercent)} kr.
+                   </td>
+                   <td>{kr(BOLIGSTOETTE_2026.wealth.pensioner.tenPercent)} kr. og derover</td>
+                 </tr>
               </tbody>
             </table>
           </div>
@@ -193,7 +212,7 @@ export default async function BoligstoettePage() {
           <h2>Hvilke huslejeudgifter tæller med?</h2>
           <p>
             Udbetaling Danmark oplyser, at huslejen skal oplyses uden forbrugsudgifter.
-            Følgende skal derfor normalt trækkes fra, før du bruger beløbet i vores screening:
+             Følgende skal derfor normalt trækkes fra, før du bruger beløbet i vores standardinterval:
           </p>
           <ul>
             {BOLIGSTOETTE_2026.rentExcludes.map((item) => <li key={item}>{item}</li>)}
