@@ -733,3 +733,4 @@ landmark=lån, piggybank=opsparing osv.).
   - DEPLOY OK 2026-09-23: `/alkoholenheder`, `/flyttebudget`, `/boligsalg` og `/blog/boligsalg-2026-guide-til-omkostninger-og-provenu` serverede det forventede live-indhold; `/api/health` svarede `status: ok`.
 - **VERIFICÉR DEPLOY:** barsel-2026-artikel → beregner, fælles 2026-konfiguration og backlink `792d0c0` 2026-09-23 23:52 CEST.
 - **VERIFICÉR DEPLOY:** O2 BMI-voksenværktøj, legacy/ imperial delestates, WHO-børnetabel og BMI/artikel-links `e3f3dcf` 2026-09-24 04:03 CEST.
+- **VERIFICÉR DEPLOY:** O3 SU-2026-konsolidering, centrale satser/kilder, legacy-delestater, `/su`, SU-guide og `/studielaan` (commit `cc173c5`, merge `191a431`) 2026-09-24 07:11 CEST.
