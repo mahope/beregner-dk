@@ -7,6 +7,7 @@ import RelatedCalculators from "@/components/RelatedCalculators";
 import Sidebar from "@/components/Sidebar";
 import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
+import { ForsikringAffiliate } from "@/components/AffiliateBox";
 
 export async function generateMetadata() {
   return generatePageMetadata("flyttebudget");
@@ -35,6 +36,8 @@ export default async function FlyttebudgetPage() {
         </p>
 
         <FlyttebudgetBeregner />
+
+        <ForsikringAffiliate className="mt-8" />
 
         {locale === "da" && (
         <div className="mt-12 prose dark:prose-invert max-w-none">

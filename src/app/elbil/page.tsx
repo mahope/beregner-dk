@@ -7,6 +7,7 @@ import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import RelatedCalculators from "@/components/RelatedCalculators";
 import Sidebar from "@/components/Sidebar";
+import { BilforsikringAffiliate } from "@/components/AffiliateBox";
 
 export async function generateMetadata() {
   return generatePageMetadata("elbil");
@@ -41,6 +42,7 @@ export default async function ElbilPage() {
 
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 md:p-8 mb-8">
           <ElbilBenzinBeregner />
+          <BilforsikringAffiliate className="mt-8" />
         </div>
 
         {locale === "da" && (

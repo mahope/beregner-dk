@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
-import { OpsparingAffiliate } from "./AffiliateBox";
 import { CalculationLoading, useCalculationLoading } from "./LoadingSpinner";
 import { InputField } from "./InputField";
 import { ShareCalculation } from "@/components/ShareCalculation";
@@ -590,9 +589,6 @@ export default function OpsparingsBeregner() {
             </div>
           )}
 
-          {beregning && !isLoading && (
-            <OpsparingAffiliate className="mt-6" />
-          )}
         </>
       ) : (
         <>

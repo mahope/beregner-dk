@@ -10,6 +10,7 @@ import {
 } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import RelatedCalculators from "@/components/RelatedCalculators";
+import { ForsikringAffiliate } from "@/components/AffiliateBox";
 
 export async function generateMetadata() {
   return generatePageMetadata("husleje");
@@ -44,6 +45,7 @@ export default async function HuslejePage() {
       {/* Calculator */}
       <div className="bg-white rounded-2xl shadow-sm p-6 md:p-8 mb-8">
         <HuslejeBudgetBeregner />
+        <ForsikringAffiliate className="mt-8" />
       </div>
 
       {/* Informativ tekst - SEO */}

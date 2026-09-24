@@ -7,6 +7,7 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import RelatedCalculators from "@/components/RelatedCalculators";
 import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
+import { BilforsikringAffiliate } from "@/components/AffiliateBox";
 
 export async function generateMetadata() {
   return generatePageMetadata("braendstof");
@@ -41,6 +42,7 @@ export default async function BraendstofPage() {
       {/* Calculator */}
       <div className="bg-white rounded-2xl shadow-sm p-6 md:p-8 mb-8">
         <BraendstofBeregner />
+        <BilforsikringAffiliate className="mt-8" />
       </div>
 
       {/* Informativ tekst - SEO */}

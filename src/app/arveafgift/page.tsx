@@ -9,6 +9,7 @@ import {
   FAQSchema,
 } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import { TestamenteAffiliate } from "@/components/AffiliateBox";
 
 export async function generateMetadata() {
   return generatePageMetadata("arveafgift");
@@ -35,6 +36,8 @@ export default async function ArveafgiftPage() {
       </p>
 
       <ArveafgiftBeregner />
+
+      <TestamenteAffiliate className="mt-8" />
 
       {locale === "da" && (
       <div className="mt-12 prose max-w-none">
