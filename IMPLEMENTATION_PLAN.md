@@ -1,6 +1,6 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — C2 FÆRDIG; C3 (CTR på /tidsberegner og /moms) er næste opgave.
+STATUS: KØ — C3 FÆRDIG; T4 (TidsBeregnerens dobbelte midnatstælling) er næste opgave.
 
 ## Fase 3 — trafik-drevet
 
@@ -546,7 +546,7 @@ STATUS: KØ — C2 FÆRDIG; C3 (CTR på /tidsberegner og /moms) er næste opgave
 - **MÅL:** `/dato` baseline 1.028 besøgende/28d 2026-09-24; Search Console 128.065
   visninger, 784 klik, CTR 0,6 %, position 5,8 pr. 2026-09-22.
 
-#### 8. [ ] C3 — Løft CTR på `/tidsberegner` og `/moms`
+#### 8. [x] FÆRDIG 2026-09-25 — C3 — Løft CTR på `/tidsberegner` og `/moms`
 
 - **Datagrund:** Search Console: `/tidsberegner` 71.966 visninger, 207 klik, CTR 0,3 %,
   position 7,0; `/moms` 23.735 visninger, 39 klik, CTR 0,2 %, position 6,8. Plausible:
@@ -555,6 +555,47 @@ STATUS: KØ — C2 FÆRDIG; C3 (CTR på /tidsberegner og /moms) er næste opgave
 - **Scope:** Research snippets/autosuggest og ret title, description og synligt
   svar-first indhold på de to eksisterende sider. Behandles som én CTR-iteration kun
   hvis diffen forbliver lille; ellers skilles i to opgaver. Ingen matematikændringer.
+- **Dependency-gate:** `npm audit --json` 2026-09-25 viser 0 sårbarheder; den
+  eksterne afhængighedsrapport fra 2026-08-23 er stale for dette projekt.
+- **Nuværende copy:** Live DA/SE 2026-09-25 har de generiske intros “Beregn tid mellem
+  to tidspunkter” og “Beregn dansk moms (25%). Tillæg, fratræk eller find
+  momsandelen”. `/tidsberegner` har desuden et 75-tegns title; ingen af siderne
+  svarer synligt med et konkret 1.000-kr.-eksempel.
+- **Research 2026-09-25:** Google-autosuggest peger på “mellem klokkeslæt”, timer og
+  “beregn tid”; for moms på “moms inkl./ekskl.”, “læg moms til” og “træk moms fra”.
+  Læsbare konkurrenter (Tidsberegner.dk, Tid & Sted, MomsBeregner.dk,
+  MomsBeregning.dk og Momsudregner.dk) gør netop disse opgaver synlige. Google/Brave/
+  DuckDuckGo viste delvis bot-blokering, så ingen aktuel rangering eller PAA-
+  placering er udledt. Kilder: Google autocomplete, Ecosia/Yahoo/Bing-søgninger og de
+  fem offentlige konkurrenters sider læst 2026-09-25.
+- **Beslutning/implementering:** Central `PageData` for DA/SE får korte, intent-matchende
+  titles og konkrete answer-first intros. Tidssiden får 08:30–16:45-eksemplet; moms
+  får 1.000 → 1.250 kr. og inkl./ekskl.-retning. Moms-eksemplet er eksplicit bundet
+  til standard-satsen 25 %. URL, canonical, hreflang, beregnerlogik og public API er
+  uændrede.
+- **Reviewfund 2026-09-25 03:16:** To friske reviews fandt to reelle, men
+  pre-existing calculatorfejl: TidsBeregner lægger 24 timer på to gange over midnat
+  (`src/components/TidsBeregner.tsx:143-154`), og den svenske moms-UI har 25/12/6 %-
+  vælgere, men statiske 1,25-/20 %-formler (`src/components/MomsBeregner.tsx:69-81,344-376`).
+  Begge er verificeret i kode og uden for C3's eksplicitte copy-only scope. C3's nye
+  copy lover derfor hverken datoforlængelse eller 12/6 %-resultater. Fejlene er
+  prioriteret som T4/T5 nedenfor og bliver ikke blandet ind i CTR-committen.
+- **Implementering 2026-09-25:** DA/SE `description`, `metaTitle`, `metaDescription`,
+  `ogTitle`, `ogDescription` og `schemaDescription` er nu svar-først. Fire routetests
+  renderer DA/SE og verificerer H1, intro, rigtig JSON-LD og at beregneren stadig er
+  til stede; page-data- og metadata-helperne låser DA/SE title ≤60, description ≤160,
+  canonicale og konkret eksempel. Ingen calculator-, URL-, API- eller sitemap-diff.
+- **Review og rettelser 2026-09-25:** To friske reviews fandt de to pre-existing fejl i
+  T4/T5, upræcis pauseformulering, svensk 1.000 → 1.250-kvalificering og for løst
+  schema-sprog. C3-copy blev strammet til understøttede same-clock/pause-formål, og
+  moms-eksemplet bundet til 25 %; schema + route-wiring fik exact tests. Slutreview:
+  ingen åbne P0-P2-fund i C3.
+- **Kvalitetsgate 2026-09-25 03:18 CEST:** `npm run build` grøn (137 sider + typecheck;
+  7 kendte CSS-optimeringsadvarsler), `npm run test` grøn (585/585 tests, 62 filer),
+  `npm run lint` grøn (363 filer), `npm audit --json` 0 sårbarheder. Fjerne nye
+  route-tests fejlede først med 12 forventede copy-fund og var grønne efter fixen.
+  Lokal standalone-HTTP-kontrol passede DA/SE `/tidsberegner` og `/moms` med title,
+  synlig copy og JSON-LD; `/api/health` svarede 200.
 - **Forventet effekt:** Laver CTR-hængning ved position 6-7 bliver til kvalificeret
   trafik på to eksisterende værktøjer.
 - **Acceptkriterier:** Baselines for begge sider skrives før ændring; snippets svarer på
@@ -563,7 +604,43 @@ STATUS: KØ — C2 FÆRDIG; C3 (CTR på /tidsberegner og /moms) er næste opgave
   Plausible-baseline **ukendt**. Search Console: 71.966/23.735 visninger,
   207/39 klik, CTR 0,3/0,2 %, position 7,0/6,8 pr. 2026-09-22.
 
-#### 9. [ ] I1 — Integrer IndexNow uden at sende under iterationen
+#### 9. [ ] T4 — Ret TidsBeregnerens dobbelte midnatstælling
+
+- **Datagrund:** C3-review 2026-09-25 fandt P1: koden gør både `slutMinutter += 24h`
+  og `totalDage = 1`, hvorefter `totalDage` igen lægges til. 22:00–06:00 bliver derfor
+  32 timer, selvom FAQ, nattevagt-preset og beregnerens løfte forventer 8 timer.
+- **Scope:** Extract ren, testet tidslogik. Bevar URL-state og UI; understøt samme dag,
+  over midnat uden datoer og eksplicit næste dato uden dobbelt 24-timers addition.
+  Ret FAQ/preset, hvis den korrigerede logik ændrer den dokumenterede forventning.
+- **Acceptkriterier:**
+  1. 08:30–16:45 = 8:15 og 22:00–06:00 = 8:00, både med og uden næste dato.
+  2. 30 minutters pause trækkes fra i hver gyldige variant; negative/ugyldige intervaller
+     følger eksisterende UI-adfærd.
+  3. DA/SE dele-URL-state roundtripper og fuld gate er grøn.
+- **Forventet effekt:** Genopretter beregningernes troværdighed på en side med høj
+  søgetrafik; prioritet er korrekthed, ikke ny trafik.
+- **MÅL:** `/tidsberegner` baseline 292 besøgende/28d 2026-09-24; Search Console
+  71.966 visninger, 207 klik, CTR 0,3 %, position 7,0 pr. 2026-09-22.
+
+#### 10. [ ] T5 — Gør svensk moms-UI og FAQ satsafhængige
+
+- **Datagrund:** C3-review 2026-09-25 fandt, at SE kan vælge 25/12/6 % og beregner
+  korrekt, men info-/formelteksten altid viser 1,25 og 20 % moms
+  (`src/components/MomsBeregner.tsx:69-81,344-376`). Det modsiger sidecopy, FAQ og
+  reducerede satser.
+- **Scope:** Udtræk satsafhængig formel- og info-copy til den valgte 25/12/6 %-sats,
+  med korrekt multiplikator, divisor og momsandel. Bevar dansk 25 %-adfærd og URL-state.
+- **Acceptkriterier:**
+  1. 1.000 kr. bliver 1.250/1.120/1.060 kr. ved 25/12/6 % i beregning og copy.
+  2. Info/formler viser henholdsvis ×1,25/÷1,25/20 %, ×1,12/÷1,12/10,71 % og
+     ×1,06/÷1,06/5,66 % uden hardcoded 25 %-tekst.
+  3. DA forbliver fast 25 %; DA/SE URL-state og fuld gate er grønne.
+- **Forventet effekt:** Fjerner en konkret modsigelse på beraknare.se og beskytter
+  tilliden til momsresultater.
+- **MÅL:** `/moms` på beraknare.se: Search Console baseline 1.298 visninger, 1 klik,
+  CTR 0,1 %, position 26,7 pr. 2026-09-22; Plausible-baseline ukendt.
+
+#### 11. [ ] I1 — Integrer IndexNow uden at sende under iterationen
 
 - **Datagrund:** Bing, DuckDuckGo og Yahoo bidrager væsentligt til dansk trafik;
   brugerprompten angiver 1.320 Bing-, 381 DuckDuckGo- og 291 Yahoo-besøgende i
@@ -580,7 +657,7 @@ STATUS: KØ — C2 FÆRDIG; C3 (CTR på /tidsberegner og /moms) er næste opgave
 - **MÅL:** Ingen isoleret trafikbaseline. Mål før/efter med Search Console-impressions
   for nye URL'er efter mindst 14 dage; adskill samtidige site's changes i noten.
 
-#### 10. [ ] M1 — Ret Lighthouse-CI's serverstart
+#### 12. [ ] M1 — Ret Lighthouse-CI's serverstart
 
 - **Datagrund:** PR #20 og fire seneste tidligere Lighthouse-runs fejlede, før audit
   startede, med `next: command not found`. Den separate build-job er grøn.
@@ -596,7 +673,7 @@ STATUS: KØ — C2 FÆRDIG; C3 (CTR på /tidsberegner og /moms) er næste opgave
   3. Repoets lokale build/tests/lint forbliver grønne.
 - **Placering:** Efter C1-C3 og I1; kun hvis LHCI begynder at blokere flere PR'er.
 
-#### 11. [ ] M2 — Bevar BMI ved gentaget skift mellem metrisk og imperial enhed
+#### 13. [ ] M2 — Bevar BMI ved gentaget skift mellem metrisk og imperial enhed
 
 - **Datagrund:** O2 gemmer nu enhed i delelinks, infererer gamle imperiale links og
   afgrænser konverteringen til to decimaler. En fuld kg/cm → lbs/inches → kg/cm
@@ -608,7 +685,7 @@ STATUS: KØ — C2 FÆRDIG; C3 (CTR på /tidsberegner og /moms) er næste opgave
 - **MÅL:** `/bmi` baseline 979 besøgende/28d 2026-09-23; effektmåling først efter
   14 dage hvis der laves en separat produktændring.
 
-#### 12. [ ] M3 — Route børne-BMI-søgninger til guiden
+#### 14. [ ] M3 — Route børne-BMI-søgninger til guiden
 
 - **Datagrund:** O2 har adskilt sider og metadata, men `SearchBar` og
   `BeregnerAssistent` søger fortsat kun i beregnere. "BMI for mit barn" kan derfor matche

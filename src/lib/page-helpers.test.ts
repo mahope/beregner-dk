@@ -3,7 +3,7 @@ import { getDomainConfigByLocale } from "./domain-config";
 import { buildPageMetadata } from "./page-helpers";
 
 describe("buildPageMetadata", () => {
-  test.each(["tidsberegner", "dato", "nedtaelling", "leasing"])(
+  test.each(["tidsberegner", "moms", "dato", "nedtaelling", "leasing"])(
     "keeps %s self-canonical with DA/SE alternates",
     (slug) => {
       for (const locale of ["da", "se"] as const) {
@@ -40,6 +40,41 @@ describe("buildPageMetadata", () => {
     },
   ])("builds answer-first percentage metadata for $locale", ({ locale, title, description }) => {
     const metadata = buildPageMetadata("procent", getDomainConfigByLocale(locale));
+
+    expect(metadata).toMatchObject({
+      title: { absolute: title },
+      description,
+      openGraph: { title, description },
+    });
+  });
+
+  test.each([
+    {
+      slug: "tidsberegner" as const,
+      locale: "da" as const,
+      title: "Tidsberegner – timer mellem klokkeslæt | MinBeregner.dk",
+      description: "Beregn hvor lang tid der går mellem to klokkeslæt. Eksempel: 08:30 til 16:45 er 8 timer og 15 minutter. Se decimaltimer og træk en pause fra.",
+    },
+    {
+      slug: "tidsberegner" as const,
+      locale: "se" as const,
+      title: "Tidskalkylator – timmar mellan klockslag | Beräknare.se",
+      description: "Beräkna hur lång tid det går mellan två klockslag. Exempel: 08:30 till 16:45 är 8 timmar och 15 minuter. Se decimaltimmar och dra av en rast.",
+    },
+    {
+      slug: "moms" as const,
+      locale: "da" as const,
+      title: "Momsberegner 25 % – inkl. og ekskl. moms | MinBeregner.dk",
+      description: "Beregn dansk moms på 25 %. Læg moms til 1.000 kr. og få 1.250 kr. Træk også moms fra en pris inkl. moms, eller find momsandelen.",
+    },
+    {
+      slug: "moms" as const,
+      locale: "se" as const,
+      title: "Momskalkylator – inkl. och exkl. moms | Beräknare.se",
+      description: "Beräkna svensk moms på 25 %. Lägg till 1 000 kr. och få 1 250 kr. Dra av moms eller hitta momsandelen.",
+    },
+  ])("builds answer-first metadata for $slug in $locale", ({ slug, locale, title, description }) => {
+    const metadata = buildPageMetadata(slug, getDomainConfigByLocale(locale));
 
     expect(metadata).toMatchObject({
       title: { absolute: title },

@@ -105,6 +105,60 @@ describe("getPageData", () => {
     expect(data.schemaDescription).toContain(months);
   });
 
+  test.each([
+    {
+      locale: "da" as const,
+      title: "Tidsberegner – timer mellem klokkeslæt | MinBeregner.dk",
+      intent: "mellem to klokkeslæt",
+      example: "08:30 til 16:45 er 8 timer og 15 minutter",
+      schema: "Gratis tidsberegner. Beregn tidsrum mellem to klokkeslæt og se resultatet i timer, minutter og decimaltimer.",
+    },
+    {
+      locale: "se" as const,
+      title: "Tidskalkylator – timmar mellan klockslag | Beräknare.se",
+      intent: "mellan två klockslag",
+      example: "08:30 till 16:45 är 8 timmar och 15 minuter",
+      schema: "Gratis tidskalkylator. Beräkna tidsintervall mellan två klockslag och se resultatet i timmar, minuter och decimaltimmar.",
+    },
+  ])("has answer-first time metadata for $locale", ({ locale, title, intent, example, schema }) => {
+    const data = getPageData("tidsberegner", locale)!;
+
+    expect(data.metaTitle).toBe(title);
+    expect(data.metaTitle.length).toBeLessThanOrEqual(60);
+    expect(data.description).toContain(intent);
+    expect(data.metaDescription).toContain(example);
+    expect(data.metaDescription.length).toBeLessThanOrEqual(160);
+    expect(data.ogTitle).toBe(title);
+    expect(data.ogDescription).toContain(example);
+    expect(data.schemaDescription).toBe(schema);
+  });
+
+  test.each([
+    {
+      locale: "da" as const,
+      title: "Momsberegner 25 % – inkl. og ekskl. moms | MinBeregner.dk",
+      answer: "1.000 kr. og få 1.250 kr.",
+      schema: "Gratis momsberegner. Beregn dansk moms på 25 % med priser inkl. og ekskl. moms.",
+    },
+    {
+      locale: "se" as const,
+      title: "Momskalkylator – inkl. och exkl. moms | Beräknare.se",
+      answer: "1 000 kr. och få 1 250 kr.",
+      schema: "Gratis momskalkylator. Beräkna svensk moms på 25 % med priser inkl. och exkl. moms.",
+    },
+  ])("has answer-first VAT metadata for $locale", ({ locale, title, answer, schema }) => {
+    const data = getPageData("moms", locale)!;
+
+    expect(data.metaTitle).toBe(title);
+    expect(data.metaTitle.length).toBeLessThanOrEqual(60);
+    expect(data.description).toContain(answer);
+    expect(data.metaDescription).toContain(answer);
+    expect(data.metaDescription.length).toBeLessThanOrEqual(160);
+    expect(data.ogTitle).toBe(title);
+    expect(data.ogDescription).toContain(answer);
+    expect(data.schemaDescription).toBe(schema);
+  });
+
   test("returns undefined for DA-only slug on SE", () => {
     const data = getPageData("loen-efter-skat", "se");
     expect(data).toBeUndefined();
