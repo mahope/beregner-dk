@@ -61,15 +61,16 @@ export function beregnBefordringsfradrag(
 
   const almFradragPerAar = koerselFradragPerDag * arbejdsdagePerAar + broFradragPerAar;
 
+  // Forhøjet fradrag for lav indkomst (LL § 9 C, stk. 4): 64 % af det normale kørselsfradrag,
+  // højst 30.800 kr. Over 341.500 kr. nedsættes procenten med 1,28 point og maksimum med 2 %
+  // for hver fulde 1.000 kr., så tillægget er væk ved 391.500 kr. Brofradrag indgår ikke.
   let ekstraFradragPerAar = 0;
   if (indkomstFørAms < SATS.koerselEkstraIndkomstGraense) {
-    const maxEkstra = SATS.koerselEkstraFradragMax;
-    const nedtrappesFra = SATS.koerselEkstraIndkomstGraense - maxEkstra;
-    if (indkomstFørAms <= nedtrappesFra) {
-      ekstraFradragPerAar = maxEkstra;
-    } else {
-      ekstraFradragPerAar = Math.max(0, maxEkstra - (indkomstFørAms - nedtrappesFra));
-    }
+    const tusinder = Math.max(0, Math.floor((indkomstFørAms - SATS.koerselEkstraAftrapningFra) / 1000));
+    const pct = Math.max(0, SATS.koerselEkstraPct - tusinder * SATS.koerselEkstraAftrapningPct);
+    const maks = Math.max(0, SATS.koerselEkstraFradragMax * (1 - tusinder * SATS.koerselEkstraMaxAftrapning));
+    const normaltKoerselsfradrag = koerselFradragPerDag * arbejdsdagePerAar;
+    ekstraFradragPerAar = Math.round(Math.min(normaltKoerselsfradrag * pct, maks) * 100) / 100;
   }
 
   const fradragPerAar = almFradragPerAar + ekstraFradragPerAar;

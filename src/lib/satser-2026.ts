@@ -53,6 +53,10 @@ export const SATSER_2026 = {
   koerselYderkommuneSats: 3.51, // forhøjet sats for yderkommuner og visse småøer (2026)
   koerselEkstraFradragMax: 30800, // maks. ekstra befordringsfradrag (2026)
   koerselEkstraIndkomstGraense: 391500, // indkomstgrænse for ekstra fradrag, før AM-bidrag (2026)
+  koerselEkstraAftrapningFra: 341500, // ekstra fradrag aftrappes for indkomst herover (2026, JV C.A.4.3.3.1.3)
+  koerselEkstraPct: 0.64, // ekstra fradrag = 64 % af det normale kørselsfradrag (LL § 9 C, stk. 4)
+  koerselEkstraAftrapningPct: 0.0128, // procentsatsen nedsættes 1,28 pct.-point pr. 1.000 kr. over grænsen
+  koerselEkstraMaxAftrapning: 0.02, // maksimumbeløbet nedsættes 2 % pr. 1.000 kr. over grænsen
   koerselBroStorebaelt: 110, // Storebæltsbroen, bil/motorcykel, pr. tur (2026)
   koerselBroStorebaeltOff: 15, // Storebæltsbroen, tog/offentlig, pr. tur (2026)
   koerselBroOeresund: 50, // Øresundsbroen, bil/motorcykel, pr. tur (2026)
