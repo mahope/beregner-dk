@@ -1,8 +1,8 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — C6 FÆRDIG; deploynoter for C4, C5 og C6 er åbne og kan først verificeres
-efter 07:30-vinduet 2026-09-26. Næste iteration: `/dage-til`-landingssider eller
-diagnose af `/pension` (position 12,2).
+STATUS: KØ — C7 (dage-til) FÆRDIG og merged 2026-09-25 19:50 CEST. Deploynoter for
+C4, C5, C6 og C7 er åbne og kan først verificeres efter 07:30-vinduet 2026-09-26.
+Næste iteration: diagnose af `/pension` (position 12,2) — CTR er ikke problemet dér.
 
 ## Fase 3 — trafik-drevet
 
@@ -1019,6 +1019,80 @@ diagnose af `/pension` (position 12,2).
   visninger, 28 klik, CTR 0,6 %, position 5,3 pr. 2026-09-23; Plausible-baseline
   ukendt. Effekt måles først efter mindst 14 dage.
 
+#### 18. [x] FÆRDIG 2026-09-25 — C7 — Svar-først-sider for "hvor mange dage er der til X"
+
+- **Iteration start:** 2026-09-25 19:40 CEST. Fortsatte den øverste kandidat
+  efter C6 i stedet for at starde en diagnose af `/pension` ved siden af.
+- **Datagrund:** `/dato` har 129.188 visninger/28d, 789 klik, CTR 0,6 %, pos. 5,8
+  pr. 2026-09-23. Søgningerne er konkrete spørgsmål: "hvor mange dage er der til
+  1 december" 959v/2k **pos 5 med 1 klik**, "dage mellem datoer" 448v/10k pos 5,
+  "antal dage mellem to datoer" 247v/5k pos 5, "hvor mange dage er der tilbage af
+  2026" 212v/2k pos 5. På SE: "dagar till 31 dec" 322v/0k pos 9, "hur många dagar
+  är det kvar till 1 oktober" 50v/0k pos 7, "dagar till 11 juni" 30v/0k pos 8.
+  Plausible: `/dato` 1.029 besøgende/28d (+77 %, bounce 5 %) pr. 2026-09-25.
+  Position 5-10 med 0,1-1 klik er positionen, hvor et svar i titlen er billig vækst.
+- **Scope:** Én ægte side pr. spørgsmål, kun kuraterede datoer med fast eller
+  computérbar ankerdato, dansk **og** svensk, med intern linking mellem siderne og
+  videre til `/dato` og `/nedtaelling`. `/dato` må ikke skades — de nye sider er
+  additive og linkes ikke fra `/dato` endnu (se ❓ Til Mads).
+- **Beslutning om datasættet:** 7 events pr. sprog — `juledagen`/`juldagen`
+  (25/12), `nytaarsaften`/`nyarsafton` (31/12), `nytaarsdag`/`nyarsdagen` (1/1),
+  `1-december`/`1-december` (1/12), `paskedag`/`paskdagen` (påskedag),
+  `skaertorsdag`/`skartorsdagen` (påskedag − 3) og `grundlovsdag`/`nationaldagen`
+  (5/6 juni hhv. 6/6 juni). **Sommerferie og skolestart er bevidst udeladt**:
+  de har ingen national ankerdato, og en gæt ville være en tynd side. En
+  webfetch til Undervisningsstyrelsen om skolestart fejlede i denne iteration
+  (transportfejl), så der er ingen kilde til et "typisk"-datum at cite. De bør
+  først bygges som kommunespecifikke sider med dokumenteret grundskole-start.
+  Ankeret er **pr. locale**, fordi grundlovsdag (5/6) og Sveriges nationaldag
+  (6/6) er to forskellige spørgsmål, ikke oversættelser af hinanden.
+- **Faglig korrekthed:** påske beregnes med den anonyme gregorianske algoritme
+  (Meeus/Jones/Butcher) og er testet mod 7 kendte år plus "altid en søndag"
+  1990-2050. **To fejl blev fundet af testene undervejs og rettet, før commit:**
+  1) påskedag + 39 dage er *ikke* grundlovsdag (påskedagen varierer 22/3-25/4,
+     så 5/6 ligger 41-75 dage senere) — begge blev ændret til lovens faste dato;
+  2) "1. december er månedens længste måned" er forkert (december har 31 dage
+     sammen med 6 andre måneder) og en påstand om lønflytning ved nytårsdag blev
+     fjernet, da den ikke kunne dokumenteres. Der er ingen kildehenvisning på
+     siderne, fordi alle påstande er kalenderfakta eller den angivne algoritme.
+- **Canonical/duplikater:** DA og SE har hver sin slug; den anden sprogvariant
+  301'er via `getRouteDecision` til sit eget domænes slug, så svaret aldrig
+  ligger på to URL'er. Ukendte slug 404'er. `no`-domænet (skjult) får ingen sider,
+  hverken i routing eller sitemap.
+- **Ferskhed:** begge ruter bygges som `ƒ (Dynamic)` (verificeret i build-output),
+  fordi de læser request-headers. Tallet genberegnes derfor ved hvert request og
+  kan ikke blive forældet mellem de tre batch-deploys. Sitemap markerer siderne
+  `changeFrequency: "daily"`.
+- **Verifikation 2026-09-25:** `npm run build` grøn (137+2 sider; kun de 7 kendte
+  pre-existing CSS-optimeringsadvarsler), `npm run test` grøn (986/986, 94 filer),
+  `npm run lint` grøn (477 filer). 45 nye tests: 33 i `src/lib/dage-til.test.ts`
+  (påske mod kendte år, dage-tælling over skudår og DST, nul-dage-på-datoen,
+  slug-opløsning begge veje, sitemap, redirects og renderet HTML med frosset tid).
+- **Landet:** kode og tests i commit `70e75b9`; merge til `master` er `8950593`
+  2026-09-25 19:50 CEST.
+- **Forventet effekt:** 7 nye sider pr. domæne, der kan fange de konkrete
+  dage-spørgsmål direkte. De fire dokumenterede søgninger (959 + 212 + 322 + 50
+  visninger) lå på pos. 5-10 med 1-2 klik i alt; hver især er for lille til at
+  flytte `/dato`s samlede CTR, men de er additive trafik, og interne links
+  mellem de 7 sider + `/dato` + `/nedtaelling` fordeler linkjuice.
+- **MÅL:** nye sider har ingen baseline (de findes ikke endnu). Sammenlign efter
+  14 dage mod Search Console-indgangene for "hvor mange dage er der til …" /
+  "dagar till …", og hold øje med at `/dato` (baseline 1.029 besøgende/28d
+  2026-09-25, CTR 0,6 %, pos. 5,8) ikke taber visninger, fordi de nye sider
+  konverterer samme søgning. Hvis `/dato` falder, skal de nye sider linkes fra
+  `/dato` i stedet for at stå sideløbs.
+- **Acceptkriterier:**
+  1. Titel, description og synligt H1 indeholder alle det konkrete antal dage.
+  2. Samme spørgsmål findes på begge domæner med hvert sit sprog og sin egen slug.
+  3. Det anden sprogs slug 301'er, ukendte slug 404'er, og ingen URL findes i to
+     sitemap'er.
+  4. Tallet er 0 på selve datoen og tæller ikke dagen i dag med.
+  5. Sitemap, interne links til `/dato` og `/nedtaelling` er med.
+  6. `npm run lint`, `npm run test` og `npm run build` er grønne.
+- **Næste iteration:** diagnose af `/pension` (position 12,2, "pensionsberegner"
+  på pos. 22) og de øvrige kandidatere nedenfor — ikke flere copieskrevne sider
+  på række.
+
 ### ❓ Til Mads
 
 - **IndexNow runtime-konfiguration:** Sæt kun i Dokploys production-runtime
@@ -1044,12 +1118,7 @@ diagnose af `/pension` (position 12,2).
   på position 22. Her er indholdet/rankingen problemet, ikke titlen, så den kræver
   en diagnose før copy-ændring. MÅL: baseline 4.001 visninger, 45 klik, CTR 1,1 %,
   position 12,2 pr. 2026-09-23, Plausible 141 besøgende/28d pr. 2026-09-25.
-- `/dage-til/[dato]`: endnu ikke bygget. Datagrund: "hvor mange dage er der til
-  1 december" 959 visninger/2k pos 5 på `/dato` med 1 klik, og på SE
-  "dagar till 31 dec" 322v/0k pos 9 samt "hur många dagar är det kvar till
-  1 oktober" 50v/0k pos 7. Én ægte side pr. spørgsmål, kun datoer med reel
-  efterspørgsel, og ingen tusindvis af tynde varianter. Skal dække både DA og SE
-  og må ikke skade `/dato`, som er 1.029 besøgende/28d og stærkest voksende.
+- ~~`/dage-til/[dato]`~~ er færdig som C7 den 2026-09-25, se opgave 18.
 
 - `/kvadratmeter` 370 besøgende/28d (+131 %): autocomplete og konkurrenter peger på
   gulv, cm/mm, antal ens felter og spild; prose nævner allerede 5-10 %, men koden gør
@@ -1060,6 +1129,9 @@ diagnose af `/pension` (position 12,2).
   konkurrenten iKalender tilbyder arbejdsdage uden helligdager, mens vores side
   springer helligdage over. Ingen ændring før et konkret søgeintentionsgap kan dokumenteres.
   MÅL: baseline 1.008 2026-09-23.
+- **Interne links fra `/dato` til de nye dage-til-sider er bevidst ikke lavet i
+  C7.** De kan gives ved skolestart/jul, hvor spørgsmålet opstår, men bør først
+  måles: hvis de nye sider tager trafik fra `/dato`, skal de linkes *fra* `/dato`.
 - Forsiden 214 besøgende/28d, bounce 44 %: linket til alle prioriterede beregnere,
   men researchen gav endnu et forsvarbart specifikt ændringsforslag. Udskyd til nye
   trafik-/adfærdsdata; MÅL: baseline 214 2026-09-23.
@@ -1449,6 +1521,14 @@ landmark=lån, piggybank=opsparing osv.).
   "Samlet rente: 13.227 kr." + link til `/rentefradrag`, og title
   "Hvor mange kalorier om dagen? | Kalorieberegner" med synligt
   "TDEE 2.759 kcal ved moderat aktivitet". HTTP 200 alene utilstrækkeligt.
+  **Kan først verificeres fra 07:30-vinduet 2026-09-26.**
+- **VERIFICÉR DEPLOY:** C7 dage-til-sider `8950593` 2026-09-25 19:50 CEST.
+  Verificér efter næste batch-vindue: live DA `/dage-til/juledagen` (og de 6
+  øvrige DA-slugs) samt SE `beraknare.se/dagar-till/juldagen` (og de øvrige
+  SE-slugs) skal servere det korrekte antal dage i title og synligt i H1, og
+  `/dage-til/juledagen` på beraknare.se skal være ét 301-hop til
+  `/dagar-till/juldagen`. Tjek desuden at sitemap på begge domæner indeholder
+  de 7 sider. HTTP 200 alene utilstrækkeligt — tallet skal være dagens.
   **Kan først verificeres fra 07:30-vinduet 2026-09-26.**
 - **VERIFICÉR DEPLOY:** C6 svar-først `/alder` og `/brok` `aa2c32c` 2026-09-25
   19:20 CEST. Verificér efter næste batch-vindue på live DA `/alder` (title
