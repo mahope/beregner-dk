@@ -7,6 +7,11 @@ import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { useLocale } from "@/components/LocaleProvider";
 import { getCurrencySuffix } from "@/lib/format";
+import { gennemsnitsPris, type PriceArea } from "@/lib/energi/elpriser";
+import type { ElprisData } from "@/lib/energi/server";
+import ElprisGraf, { kr2 } from "@/components/energi/ElprisGraf";
+import EnergiKilde from "@/components/energi/EnergiKilde";
+import PrisomraadeVaelger, { OMRAADE_NAVN } from "@/components/energi/PrisomraadeVaelger";
 
 interface Apparat {
   id: string;
@@ -47,8 +52,24 @@ const ELPRIS_KOMPONENTER = {
   moms: 0,
 };
 
-export default function Elberegner() {
+type Props = {
+  /** Live Danish prices; only used on the Danish locale. Null keeps the static default. */
+  elprisData?: ElprisData | null;
+  nu?: { date: string; hour: number };
+};
+
+const round2 = (n: number) => Math.round(n * 100) / 100;
+
+export default function Elberegner({ elprisData = null, nu }: Props = {}) {
   const { locale } = useLocale();
+  const live = locale === "da" ? elprisData : null;
+  const [omraade, setOmraade] = useState<PriceArea>("DK2");
+  const dagensGns = (a: PriceArea) => {
+    const dag = live?.omraader[a].dage.find((d) => d.date === live.idag);
+    return dag ? gennemsnitsPris(dag.hours) : null;
+  };
+  const liveGns = dagensGns(omraade);
+  const standardElpris = liveGns ? round2(liveGns.total) : 2.5;
 
   const labels = {
     da: {
@@ -147,7 +168,7 @@ export default function Elberegner() {
   const [apparater, setApparater] = useState<Apparat[]>([
     { id: crypto.randomUUID(), navn: "", watt: 0, timerPerDag: 0 },
   ]);
-  const [elpris, setElpris] = useState(2.5);
+  const [elpris, setElpris] = useState(standardElpris);
   const [husstandType, setHusstandType] = useState<keyof typeof GENNNEMSNIT_KWH>("hus2");
 
   const hasLoadedUrl = useRef(false);
@@ -200,9 +221,15 @@ export default function Elberegner() {
     setApparater([
       { id: crypto.randomUUID(), navn: "", watt: 0, timerPerDag: 0 },
     ]);
-    setElpris(2.5);
+    setElpris(standardElpris);
     setHusstandType("hus2");
-  }, []);
+  }, [standardElpris]);
+
+  const skiftOmraade = (a: PriceArea) => {
+    setOmraade(a);
+    const gns = dagensGns(a);
+    if (gns) setElpris(round2(gns.total));
+  };
 
   const tilfoejApparat = () => {
     setApparater([
@@ -289,13 +316,20 @@ export default function Elberegner() {
     <div className="space-y-8">
       {/* Elpris input */}
       <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-        <label className="block text-sm font-medium mb-2 dark:text-gray-200">
+        {live && (
+          <div className="mb-4 max-w-md">
+            <p className="block text-sm font-medium mb-2 dark:text-gray-200">Prisområde</p>
+            <PrisomraadeVaelger value={omraade} onChange={skiftOmraade} />
+          </div>
+        )}
+        <label htmlFor="elberegner-elpris" className="block text-sm font-medium mb-2 dark:text-gray-200">
           {l.dinElpris}
         </label>
-        <div className="relative w-32">
+        <div className="relative w-40">
           <input
+            id="elberegner-elpris"
             type="number"
-            step="0.1"
+            step="0.01"
             min="0"
             value={elpris}
             onChange={(e) => setElpris(parseFloat(e.target.value) || 0)}
@@ -304,9 +338,18 @@ export default function Elberegner() {
           <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-gray-400">{getCurrencySuffix(locale)}/kWh</span>
         </div>
         <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-          {l.gennemsnitElpris}
+          {liveGns
+            ? `Standard er dagens gennemsnit i ${OMRAADE_NAVN[omraade]}: ${kr2(liveGns.total)} kr/kWh inkl. nettarif, afgifter og moms. Ret den til din egen elpris, hvis du kender den.`
+            : l.gennemsnitElpris}
         </p>
       </div>
+
+      {live && (
+        <div className="space-y-2">
+          <ElprisGraf dage={live.omraader[omraade].dage} idag={live.idag} nuTime={nu?.date === live.idag ? nu.hour : undefined} />
+          <EnergiKilde hentet={live.hentet} tariffer={live.omraader[omraade].tariffer} />
+        </div>
+      )}
 
       {/* Apparater */}
       <div>
@@ -322,9 +365,9 @@ export default function Elberegner() {
                 <label className="block text-sm font-medium mb-1 dark:text-gray-200">
                   {l.apparat} {index + 1}
                 </label>
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <select
-                    className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 dark:text-white"
+                    className="max-w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 dark:text-white"
                     onChange={(e) => vaelgStandardApparat(apparat.id, e.target.value)}
                     value=""
                   >
@@ -340,7 +383,7 @@ export default function Elberegner() {
                     placeholder={l.ellerSkrivNavn}
                     value={apparat.navn}
                     onChange={(e) => opdaterApparat(apparat.id, "navn", e.target.value)}
-                    className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 dark:text-white"
+                    className="flex-1 min-w-0 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 dark:text-white"
                   />
                 </div>
               </div>
@@ -508,6 +551,42 @@ export default function Elberegner() {
       </div>
 
       {/* Elpris sammensætning */}
+      {liveGns ? (
+        <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+          <h3 className="font-medium mb-3 dark:text-white">Dagens gennemsnitspris: hvad betaler du for?</h3>
+          <div className="flex h-6 rounded-full overflow-hidden mb-3">
+            <div className="bg-blue-500" style={{ width: `${(Math.max(liveGns.spot, 0) / liveGns.total) * 100}%` }} title="Spotpris" />
+            <div className="bg-yellow-500" style={{ width: `${(liveGns.nettarif / liveGns.total) * 100}%` }} title="Nettarif" />
+            <div className="bg-orange-400" style={{ width: `${(liveGns.energinet / liveGns.total) * 100}%` }} title="Energinet" />
+            <div className="bg-red-400" style={{ width: `${(liveGns.elafgift / liveGns.total) * 100}%` }} title="Elafgift" />
+            <div className="bg-purple-400" style={{ width: `${(liveGns.moms / liveGns.total) * 100}%` }} title="Moms" />
+          </div>
+          <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1 text-sm">
+            {[
+              ["bg-blue-500", "Spotpris (gns. i dag)", liveGns.spot],
+              ["bg-yellow-500", `Nettarif (${live!.omraader[omraade].tariffer.netselskab}, gns.)`, liveGns.nettarif],
+              ["bg-orange-400", "Energinet (transmission + system)", liveGns.energinet],
+              ["bg-red-400", "Elafgift", liveGns.elafgift],
+              ["bg-purple-400", "Moms (25%)", liveGns.moms],
+            ].map(([farve, navn, v]) => (
+              <div key={navn as string} className="flex items-center justify-between gap-2">
+                <dt className="flex items-center gap-1.5 dark:text-gray-300">
+                  <span className={`w-3 h-3 rounded-sm inline-block ${farve}`} />
+                  {navn}
+                </dt>
+                <dd className="font-medium tabular-nums dark:text-white">{kr2(v as number)} kr</dd>
+              </div>
+            ))}
+            <div className="flex items-center justify-between gap-2 border-t dark:border-gray-600 pt-1 sm:col-span-2">
+              <dt className="font-medium dark:text-white">I alt pr. kWh</dt>
+              <dd className="font-bold tabular-nums dark:text-white">{kr2(liveGns.total)} kr</dd>
+            </div>
+          </dl>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+            Gennemsnit over dagens timer. Dit elselskabs tillæg og abonnementer kommer oveni.
+          </p>
+        </div>
+      ) : (
       <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
         <h3 className="font-medium mb-3 dark:text-white">{l.elprisHvadBetaler}</h3>
         <div className="flex h-6 rounded-full overflow-hidden mb-3">
@@ -538,6 +617,7 @@ export default function Elberegner() {
           {l.andeleBeskrivelse}
         </p>
       </div>
+      )}
     </div>
   );
 }

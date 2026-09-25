@@ -43,6 +43,8 @@ const daPages: Record<string, PageData> = {
         { question: "Er en elbil billigere end en benzinbil?", answer: "På energi er en elbil næsten altid billigere: en elbil bruger typisk 15-20 kWh pr. 100 km, mens en benzinbil bruger 5-7 liter. Ved normale priser koster el ofte under halvdelen af benzin pr. km. Til gengæld er elbiler ofte dyrere at købe — brug beregneren til at se, hvornår merprisen er tjent hjem." },
         { question: "Hvor meget sparer man på en elbil om året?", answer: "Med 15.000 km om året sparer de fleste 5.000-10.000 kr om året på energi ved at køre el frem for benzin, afhængigt af el- og benzinpris. Beregneren viser din konkrete besparelse." },
         { question: "Hvad indgår ikke i beregningen?", answer: "Beregneren sammenligner energiudgiften (el vs. benzin). Forsikring, service, dæk, grøn ejerafgift og værditab varierer meget fra bil til bil og indgår ikke — men energiudgiften er den største løbende forskel." },
+        { question: "Hvornår er det billigst at lade elbilen?", answer: "Oftest om natten. Beregneren finder de fire billigste sammenhængende timer mellem kl. 18 og 08 ud fra dagens og morgendagens timepriser inkl. nettarif, afgifter og moms. Morgendagens priser kommer ca. kl. 13." },
+        { question: "Hvilken elpris bruger beregneren?", answer: "Standard er dagens gennemsnitlige elpris i dit prisområde (DK1 vest eller DK2 øst for Storebælt) fra Energi Data Service plus nettarif, Energinets tariffer, elafgift og moms. Du kan altid rette den til din egen pris." },
       ],
     },
     "vandbehov": {
@@ -1069,7 +1071,10 @@ const daPages: Record<string, PageData> = {
       schemaCategory: "UtilitiesApplication",
       faqItems: [
       { question: "Beregn elforbrug?", answer: "Watt × timer / 1000 = kWh. 100W × 10t / 1000 = 1 kWh." },
-      { question: "Pris pr kWh i Danmark?", answer: "Typisk 2-3 DKK/kWh inkl. alle afgifter i 2026." },
+      { question: "Hvad koster en kWh strøm i dag?", answer: "Beregneren henter dagens spotpriser fra Energinets Energi Data Service og lægger nettarif, Energinets tariffer, elafgift og 25 % moms oveni. Standardprisen er dagens gennemsnit for dit prisområde: Vestdanmark (DK1) er Jylland og Fyn, Østdanmark (DK2) er Sjælland, øerne og Bornholm. Dit elselskabs tillæg kommer oveni." },
+      { question: "Hvornår er strømmen billigst?", answer: "Som regel om natten og midt på dagen, når der er meget vind- og solstrøm. Nettariffen er højest kl. 17-21, så aftenen er næsten altid dyrest. Grafen markerer dagens fire billigste timer." },
+      { question: "Hvornår kommer morgendagens elpriser?", answer: "Spotpriserne for næste døgn fastsættes på elbørsen og offentliggøres normalt omkring kl. 13. Derefter kan du se morgendagens timer i grafen." },
+      { question: "Hvor stor er elafgiften i 2026?", answer: "Elafgiften er midlertidigt sat ned til EU's minimum på 0,8 øre pr. kWh ekskl. moms i 2026 og 2027 (Den juridiske vejledning E.A.4.3.6.1). Tidligere lå den på omkring 72 øre." },
       { question: "Største strømslugere?", answer: "Tørretumblere (3000W), ovne (2500W), elkedler (2000W)." },
       { question: "Spare strøm?", answer: "Sluk standby, vælg A+++-mærkede apparater, LED-pærer." },
       ],
@@ -1092,6 +1097,8 @@ const daPages: Record<string, PageData> = {
       faqItems: [
       { question: "Pris i Danmark?", answer: "60.000-100.000 DKK for 4-8 kWp inkl. montering." },
       { question: "Tilbagebetalingstid?", answer: "Typisk 7-12 år. Herefter gratis strøm i 25-30 år." },
+      { question: "Hvor kommer produktionstallet fra?", answer: "Når du indtaster postnummer, henter beregneren den forventede årsproduktion fra EU-Kommissionens PVGIS 5.3 ud fra placering, tagretning og hældning med 14 % systemtab. Uden postnummer bruges et estimat på 950 kWh pr. kWp." },
+      { question: "Hvad får jeg for overskudsstrøm?", answer: "Overskud sælges typisk til spotpris uden afgifter. Beregneren bruger som standard den gennemsnitlige spotpris de seneste 12 måneder i dit prisområde. Den strøm, du selv bruger, sparer dig for den fulde elpris inkl. nettarif, afgifter og moms." },
       { question: "Nettoafregning?", answer: "Du kan sælge overskudsstrøm til elnettet." },
       { question: "Batteri?", answer: "Øger selvforsyningsgrad fra 30% til 60-70%, men øger tilbagebetalingstiden." },
       ],
