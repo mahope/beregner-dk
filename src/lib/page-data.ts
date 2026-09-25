@@ -663,6 +663,7 @@ const daPages: Record<string, PageData> = {
       { question: "Hvad er forskellen på m² og m?", answer: "Meter måler længde. Kvadratmeter måler areal/flade." },
       { question: "Omregning?", answer: "1 m² = 10.000 cm². 10.000 m² = 1 hektar. 1 m² ≈ 10,76 sq ft." },
       { question: "Hvad koster gulv pr. m²?", answer: "Laminat 80-200 kr/m², trægulv 300-800 kr/m², fliser 200-500 kr/m²." },
+      { question: "Hvor kommer arealet fra?", answer: "Når du slår en adresse op, henter vi boligareal, antal værelser og byggeår fra BBR (Bygnings- og Boligregistret) og grundarealet fra matriklen via Datafordeleren. For lejligheder bruges den konkrete lejligheds areal. BBR-arealet er målt til ydersiden af ydervæggene, så det er typisk lidt større end dine indvendige mål. Vi gemmer ikke adressen." },
       ],
     },
     "alder": {
@@ -1479,6 +1480,7 @@ const daPages: Record<string, PageData> = {
       { question: "Hvornår får jeg boligstøtte udbetalt?", answer: "Når ansøgningen er godkendt, udbetales boligstøtte månedsvist forud. Udbetaling Danmarks beregning og besked om din ansøgning afgør den konkrete udbetaling." },
       { question: "Påvirker min formue boligstøtten?", answer: "Der er ingen øvre ret til at få boligstøtte alene på grund af formue. Formuen kan dog regnes med i vurderingen af indkomsten. Ikke-pensionister og førtidspensionister efter nye regler har én gruppe grænser, mens folkepensionister og førtidspensionister før 2003 har en anden." },
       { question: "Hvad sker der, hvis min indkomst ændrer sig?", answer: "Du skal give Udbetaling Danmark besked om ændringer i indkomst, husstandens størrelse eller husleje. Beregningen og eventuel efterregulering sker derefter ud fra de nye oplysninger." },
+      { question: "Hvor kommer arealet fra?", answer: "Hvis du slår din adresse op, henter vi boligens areal fra BBR (Bygnings- og Boligregistret) via Datafordeleren. For lejligheder bruges den konkrete lejligheds areal. Tjek, at tallet passer med din lejekontrakt, og ret det, hvis det ikke gør. Vi gemmer ikke adressen." },
       ],
     },
     "husleje": {
@@ -1503,6 +1505,7 @@ const daPages: Record<string, PageData> = {
       { question: "Skal jeg have opsparing ud over husleje?", answer: "Ja, eksperter anbefaler at have 3-6 måneders udgifter i en nødfond. Plus løbende opsparing på mindst 10% af din indkomst til fremtiden." },
       { question: "Er det bedre at leje eller købe?", answer: "Det afhænger af din situation. Leje giver fleksibilitet, køb opbygger formue. Som tommelfingerregel: Hvis du bliver 5+ år, kan køb ofte betale sig." },
       { question: "Hvad er typiske boligudgifter ud over husleje?", answer: "El (ca. 300-600 kr/md), internet (ca. 300 kr/md), indboforsikring (ca. 100-200 kr/md). Varme og vand er ofte a conto i huslejen." },
+      { question: "Hvor kommer arealet fra?", answer: "I beregningen af husleje pr. m² kan du slå din adresse op, så henter vi boligens areal fra BBR (Bygnings- og Boligregistret) via Datafordeleren. For lejligheder bruges den konkrete lejligheds areal. Arealet i lejekontrakten kan afvige, så du kan altid rette tallet. Vi gemmer ikke adressen." },
       ],
     },
     "andelsbolig": {
