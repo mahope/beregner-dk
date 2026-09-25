@@ -1854,9 +1854,12 @@ merges ikke til `master` mere før et menneske har kigget; (2) kørselsfradraget
 - **Interne links fra `/dato` til de nye dage-til-sider er bevidst ikke lavet i
   C7.** De kan gives ved skolestart/jul, hvor spørgsmålet opstår, men bør først
   måles: hvis de nye sider tager trafik fra `/dato`, skal de linkes *fra* `/dato`.
-- Forsiden 214 besøgende/28d, bounce 44 %: linket til alle prioriterede beregnere,
-  men researchen gav endnu et forsvarbart specifikt ændringsforslag. Udskyd til nye
-  trafik-/adfærdsdata; MÅL: baseline 214 2026-09-23.
+- ~~Forsiden~~ er rettet som F1 den 2026-09-26: populærrækken følger nu de otte mest
+  besøgte danske beregnere (ikke løn/låne-/valuta-/procentværktøjet), den svenske
+  forside har fået de fire mest besøgte svenske værktøjer + /nedtaelling, og
+  beregnerantallet er afledt (49/28/31) i stedet for det forældede 44. MÅL: `/` DA 219
+  besøgende/28d, bounce 41 % pr. 2026-09-25 — genmål 2026-10-09. Næste skridt på
+  forsiden kræver nye adfærdsdata; hvis bounce ikke falder, er rækken ikke problemet.
 
 ### Måleprotokol
 
@@ -2366,7 +2369,7 @@ landmark=lån, piggybank=opsparing osv.).
   `/bmi`, `/boligstoette`, `/kvadratmeter`, `/rentefradrag`, `/tidsberegner`,
   `/kalorier`, `/braendstof` + `/loen-efter-skat`; SE `/tidsberegner`, `/dato`,
   `/leasing`, `/nedtaelling`, `/tidszone` + `/lon-efter-skatt`) og det afledte
-  beregnerantal 49/28/31 i stedet for 44 — kode `<commit>`, ff-merge `<merge>` til
+  beregnerantal 49/28/31 i stedet for 44 — kode `0797b9c`, ff-merge til
   `master` 2026-09-26 00:05 CEST. Verificér efter 07:30-vinduet 2026-09-26 på live DA
   `/`: badge skal sige "49+" og "49 beregnere med 2026-satser" i description, og
   populærrækken skal begynde med "Datoberegner". Tjek også `beraknare.se/`: badge
