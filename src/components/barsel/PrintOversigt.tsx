@@ -24,7 +24,7 @@ export default function PrintOversigt({ plan, analyse, oekonomi, idag }: Props) 
 
   return (
     <div className="barsel-print hidden print:block">
-      <header className="mb-3 flex items-end justify-between border-b-2 border-gray-900 pb-2">
+      <div className="mb-3 flex items-end justify-between border-b-2 border-gray-900 pb-2">
         <div>
           <h2 className="text-2xl font-bold">Barselsplan</h2>
           <p className="text-sm">
@@ -39,14 +39,14 @@ export default function PrintOversigt({ plan, analyse, oekonomi, idag }: Props) 
           <br />
           Udskrevet {formatDato(idag)}
         </p>
-      </header>
+      </div>
 
       <section className="mb-3 break-inside-avoid">
         <h3 className="mb-1 text-sm font-bold">Uge for uge</h3>
-        <table className="w-full border-collapse text-[8px]">
+        <table className="w-full table-fixed border-collapse text-[8px]">
           <thead>
             <tr>
-              <th className="w-16 text-left font-normal">Uge</th>
+              <th className="w-14 text-left font-normal">Uge</th>
               {uger.map((w) => (
                 <th key={w} className={`p-0 text-center font-normal ${w === 0 ? "font-bold" : ""}`}>
                   {w % 4 === 0 || w === -4 ? ugeLabel(w) : ""}
@@ -61,7 +61,7 @@ export default function PrintOversigt({ plan, analyse, oekonomi, idag }: Props) 
                 {uger.map((w) => {
                   const k: Kategori = a.uger.get(w)?.kategori ?? "arbejde";
                   return (
-                    <td key={w} className={`h-4 border border-white p-0 ${KATEGORI_BG[k]} ${w === 0 ? "border-l-2 border-l-gray-900" : ""}`} />
+                    <td key={w} className={`h-4 p-0 ${KATEGORI_BG[k]} ${w === 0 ? "border-l-2 border-gray-900" : ""}`} />
                   );
                 })}
               </tr>

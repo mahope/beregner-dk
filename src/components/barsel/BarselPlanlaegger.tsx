@@ -165,18 +165,18 @@ export default function BarselPlanlaegger() {
 
         {/* Summary + toolbar */}
         <div className="rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 p-4 text-white shadow-lg sm:p-6">
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
             <div>
-              <p className="text-sm text-blue-100">Barnet har en forælder hjemme i</p>
-              <p className="text-3xl font-bold tabular-nums">{hjemme.size} uger</p>
+              <p className="text-sm text-blue-100">Forælder hjemme i</p>
+              <p className="text-2xl font-bold tabular-nums sm:text-3xl">{hjemme.size} uger</p>
             </div>
             <div>
-              <p className="text-sm text-blue-100">Indkomstnedgang efter skat (vejledende)</p>
-              <p className="text-3xl font-bold tabular-nums">{kr(Math.max(0, oekonomi.tabNetto))}</p>
+              <p className="text-sm text-blue-100">Indkomsttab efter skat*</p>
+              <p className="text-2xl font-bold tabular-nums sm:text-3xl">{kr(Math.max(0, oekonomi.tabNetto))}</p>
             </div>
-            <div>
+            <div className="col-span-2 sm:col-span-1">
               <p className="text-sm text-blue-100">Tjek af reglerne</p>
-              <p className="text-3xl font-bold">
+              <p className="text-2xl font-bold sm:text-3xl">
                 {fejl + advarsler === 0 ? "Alt ser fint ud" : `${fejl + advarsler} ${fejl + advarsler === 1 ? "punkt" : "punkter"}`}
               </p>
               {fejl + advarsler > 0 && (
@@ -189,11 +189,11 @@ export default function BarselPlanlaegger() {
           <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-white/20 pt-4">
             <button type="button" onClick={() => window.print()} className="inline-flex items-center gap-2 rounded-lg bg-white px-3 py-2 text-sm font-semibold text-blue-800 hover:bg-blue-50">
               <Printer className="h-4 w-4" aria-hidden="true" />
-              Print / gem som PDF
+              Print / gem PDF
             </button>
             <button type="button" onClick={delLink} className="inline-flex items-center gap-2 rounded-lg bg-white/15 px-3 py-2 text-sm font-semibold text-white hover:bg-white/25">
               <Link2 className="h-4 w-4" aria-hidden="true" />
-              Kopiér del-link
+              Del-link
             </button>
             <button
               type="button"
@@ -201,7 +201,7 @@ export default function BarselPlanlaegger() {
               className="inline-flex items-center gap-2 rounded-lg bg-white/15 px-3 py-2 text-sm font-semibold text-white hover:bg-white/25"
             >
               <CalendarPlus className="h-4 w-4" aria-hidden="true" />
-              Hele planen til kalender
+              Til kalender
             </button>
             {bekraeftNulstil ? (
               <span className="inline-flex flex-wrap items-center gap-2 rounded-lg bg-white/10 px-2 py-1 text-sm">
@@ -221,7 +221,7 @@ export default function BarselPlanlaegger() {
             )}
             <span className="ml-auto inline-flex items-center gap-1.5 text-xs text-blue-100" role="status" aria-live="polite">
               <Save className="h-3.5 w-3.5" aria-hidden="true" />
-              {gemt === "fejl" ? "Kunne ikke gemme i denne browser" : "Gemmes automatisk i din browser"}
+              {gemt === "fejl" ? "Kunne ikke gemme i denne browser" : "Gemmes automatisk i din browser"} · *vejledende
             </span>
           </div>
           {delStatus && (

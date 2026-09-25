@@ -221,17 +221,17 @@ export default function Kalender({ plan, analyse, opdater }: Props) {
             ))}
           </div>
 
-          <div className="grid gap-3 min-[520px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-3 xl:grid-cols-4">
             {grupper.map(([maaned, ugerIMaaned]) => (
               <section
                 key={maaned}
                 aria-label={monthLabel(maaned)}
-                className="rounded-lg border border-gray-200 bg-white p-2 dark:border-gray-700 dark:bg-gray-800"
+                className="rounded-lg border border-gray-200 bg-white p-1.5 dark:border-gray-700 dark:bg-gray-800 sm:p-2"
               >
-                <h4 className="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-300">
+                <h4 className="mb-1 text-[11px] sm:text-xs font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-300">
                   {monthLabel(maaned)}
                 </h4>
-                <div className="grid gap-1" style={{ gridTemplateColumns: `repeat(${ugerIMaaned.length}, minmax(0, 1fr))` }}>
+                <div className="grid gap-0.5 sm:gap-1" style={{ gridTemplateColumns: "repeat(5, minmax(0, 1fr))" }}>
                   {ugerIMaaned.map((w) => (
                     <div key={w} className="text-center">
                       <div
@@ -246,7 +246,7 @@ export default function Kalender({ plan, analyse, opdater }: Props) {
                       >
                         {ugeLabel(w)}
                       </div>
-                      <div className="text-[10px] leading-tight text-gray-500 dark:text-gray-400">
+                      <div className="text-[9px] leading-tight text-gray-500 dark:text-gray-400 sm:text-[10px]">
                         {kortDato(weekStart(plan.dato, w))}
                       </div>
                       <div className="mt-0.5 space-y-1">
@@ -269,7 +269,7 @@ export default function Kalender({ plan, analyse, opdater }: Props) {
                               onKeyDown={(e) => onKeyDown(e, pi, w)}
                               onFocus={() => setFokus(key)}
                               aria-label={`${a.navn}, uge ${ugeLabel(w)} (${formatDato(weekStart(plan.dato, w))} til ${formatDato(weekEnd(plan.dato, w))}): ${statusTekst(u)}`}
-                              className={`relative block h-8 w-full overflow-hidden rounded border-l-4 ${
+                              className={`relative block h-8 min-h-0 w-full overflow-hidden rounded border-l-[3px] ${
                                 pi === 0 ? "border-l-rose-500" : "border-l-blue-600"
                               } bg-gray-100 transition-transform hover:scale-105 focus-visible:z-10 dark:bg-gray-700 ${
                                 efterFrist ? "ring-2 ring-red-500" : ""

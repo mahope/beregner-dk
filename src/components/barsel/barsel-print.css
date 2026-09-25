@@ -30,6 +30,11 @@
     page-break-inside: avoid;
   }
 
+  /* Floating overlays (cookie banner, assistant button) never belong on paper. */
+  body:has(.barsel-print) .fixed {
+    display: none !important;
+  }
+
   /* Everything else on the page (intro, FAQ, links) is hidden when printing the plan. */
   .barsel-side-indhold {
     display: none !important;

@@ -51,7 +51,7 @@ export default async function BarselsplanlaeggerPage() {
         <header className="barsel-side-indhold mb-6 max-w-3xl print:hidden">
           <p className="mb-2 text-sm font-semibold uppercase tracking-wide text-blue-700 dark:text-blue-300">Gratis · opdateret med 2026-reglerne</p>
           <h1 className="mb-3 text-3xl font-bold text-gray-900 dark:text-white md:text-4xl">Barselsplanlægger 2026</h1>
-          <p className="text-lg leading-relaxed text-gray-700 dark:text-gray-300">
+          <p className="text-base leading-relaxed text-gray-700 dark:text-gray-300 sm:text-lg">
             Læg jeres barsel ind i en kalender uge for uge, og se med det samme, hvilke uger der er øremærkede, hvad I kan overføre til hinanden, og hvad
             det betyder for økonomien måned for måned. Når planen er klar, kan I printe den og sende en færdig besked med datoer til arbejdsgiveren.
           </p>
