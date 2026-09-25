@@ -1,7 +1,7 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — D2 (børnetilskudssatser 2026) FÆRDIG
-2026-09-25 23:10 CEST. Deploynoterne C4-C11, D1, R1, K1, S1 og D2 står åbne:
+STATUS: KØ — L1 (interne 404-links) FÆRDIG, klar til merge 2026-09-26 00:10 CEST
+2026-09-25 23:33-00:10 CEST. Deploynoterne C4-C11, R1, K1, S1, D2 og L1 står åbne:
 21:30-batchen 2026-09-25 indeholdt ikke dagens merges, og næste batch-vindue er
 07:30 2026-09-26. HTTP 200 er ikke bevis — C4's kontrol 22:20 fandt `/dage-til/juledagen`
 på **404**, `/pension` med den gamle "De tre pensionssøjler"-overskrift og
@@ -1663,6 +1663,63 @@ merges ikke til `master` mere før et menneske har kigget; (2) kørselsfradraget
 - **Forventet effekt:** Fjerner et hul i en ellers kildeført artikel, men lille
   trafikvirkning. Lav prioritet — kun hvis en iteration ellers står uden bedre arbejde.
 
+#### 27. [x] FÆRDIG 2026-09-26 — L1 — Ret de tre 404-interne links og vagt mod nye
+
+- **Iteration start:** 2026-09-25 23:33 CEST. Kørte køens næste reelle opgave,
+  mens deployverificeringen venter på 07:30-vinduet 2026-09-26.
+- **Datagrund:** researchfund 6 fra 2026-09-23 fandt to reelle 404-links i
+  blogindhold. Blogindlæg har desuden høj bounce (`/blog/barsel-2026-regler-og-satser`
+  85 %), fordi læseren ikke får sendt videre til en beregner — en død link i den
+  ende af rejsen er tabt trafik *og* tabt troværdighed.
+- **Scope:** find **alle** statiske interne links i `src/`, ret de døde, og tilføj en
+  test, så en død `href` ikke kan slippe gennem gaten igen.
+- **Fund:** kun tre døde links på hele sitet, alle i blogindhold —
+  `saadan-beregner-du-din-reelle-timeloen` linkede til `/bilberegner` (findes ikke)
+  og `maanedsbudget-2026-komplet-guide` linkede to gange til `/huslejeberegner`
+  (findes ikke). Korrekt rute er `/bil` ("Beregn biludgifter") og `/husleje`
+  ("Beregn rimelig husleje"). `calculator-list.ts`' `relatedMap` har 0 døde links.
+- **Beslutning/implementering:** `/bilberegner` → `/bil` med linkteksten
+  "biludgiftsberegner", fordi `/bil` er den beregner, der viser kørselsomkostninger.
+  De to `/huslejeberegner` → `/husleje`; linkteksten "Huslejeberegner" er stadig
+  korrekt, fordi siden hedder "Beregn rimelig husleje".
+- **Ny test `src/app/internal-links.test.ts` (3 tests):** (1) ingen statisk
+  `href`/`src` i `src/` peger på en sti uden page/route, public-fil eller
+  App Router-metadatafil; dynamiske segmenter (`[dato]`) tælles som vilde;
+  (2) hver beregner i `relatedMap` findes i katalogen for `da`; (3) hver relateret
+  beregner findes som rute. Skanner 494 filer på ~0,5 s.
+- **Verifikation 2026-09-26 00:10 CEST:** `npm run lint` grøn (494 filer),
+  `npm run test` grøn (1.110/1.110, 105 filer — de 3 nye er de eneste ændring),
+  `npm run build` grøn (139 statiske sider; kun de 7 kendte pre-existing
+  CSS-advarsler). Den nye test fangede de tre links, før de blev rettet.
+- **Landet:** kode `4e84395` på `ceo/koerselsfradrag-kilde`.
+- **Forventet effekt:** lille direkte trafikvirkning (to artikler linkede til 404),
+  men permanent beskyttelse: en død intern link i en konverterende tekst er en
+  dokumenteret skade på domænet, og vagten gør den umulig at genindføre.
+- **MÅL:** `/blog/maanedsbudget-2026-komplet-guide` og
+  `/blog/saadan-beregner-du-din-reelle-timeloen` har ingen Search Console- eller
+  Plausible-baseline i snapshotet, så effekten måles ikke på disse to alene;
+  den reelle måling er at 404-andelen på `/blog/*` ikke stiger.
+- **Acceptkriterier:**
+  1. `/bilberegner` og `/huslejeberegner` forekommer ikke længere i `src/`.
+  2. Den nye test er grøn og ville have fanget de tre links.
+  3. `relatedMap` har ingen døde links.
+  4. `npm run lint`, `npm run test` og `npm run build` er grønne.
+
+#### 28. Forsøgt og **ikke** gjort den 2026-09-25 — kørselsfradragets primærkilde
+
+- ❓ Til Mads' punkt om kørselsfradraget blev undersøgt igen 2026-09-25 23:33-23:50
+  i stedet for at gætte. Resultat: **ingen primærkilde fundet, intet tal ændret.**
+- Prøvede kilder: `skat.dk/borger/fradrag/koerselsfradrag` (JS-renderet, ingen
+  maskinel tekst), `info.skat.dk`' juridiske vejledning (kun en ASP.NET-side med
+  `__VIEWSTATE`-POST-søgning, og `oid`-sweep 1921030-1921125 gav ingen
+  kørselsfradrag-side), `retsinformation.dk` (Cloudflare-gate) og
+  Bing/DDG/Mojeek (bot-gates). `info.skat.dk`' **juridiske vejledning 2026-2**
+  findes og er maskinel læsbar — den skal bruges, når den kan søges i.
+- Konklusion: 3,17/1,59 kr./km står uændret, fordi de ikke kan dokumenteres
+  lige nu, og 2,28/1,14 forbliver ude. Markeret som "vejledende" i UI, som S1
+  allerede gjorde. Næste forsøg bør ramme `info.skat.dk`' søgning med en
+  rigtig browser-session eller JV' PDF-udgave, ikke robots-gatede søgemaskiner.
+
 ### ❓ Til Mads
 
 - **IndexNow runtime-konfiguration:** Sæt kun i Dokploys production-runtime
@@ -2247,3 +2304,9 @@ landmark=lån, piggybank=opsparing osv.).
   (den gamle, døde `/barnetilskud`-variant gav 404) og at live `/boernepenge` viser de
   samme beløb med pensionistlinjen 1.741 + 5.025 / 4.449 kr. HTTP 200 alene
   utilstrækkeligt — de gamle rækker gav også 200.
+- **VERIFICÉR DEPLOY:** L1 ret af tre 404-interne links + ny `internal-links.test.ts`
+  `4e84395` 2026-09-26 00:12 CEST. Verificér efter 07:30-vinduet 2026-09-26 på
+  live DA: `/blog/saadan-beregner-du-din-reelle-timeloen` skal linke til `/bil`
+  (ikke `/bilberegner`) og `/blog/maanedsbudget-2026-komplet-guide` skal linke
+  to gange til `/husleje` (ikke `/huslejeberegner`). HTTP 200 er ikke nok — de
+  gamle stier gav også 200-sider hos læseren; tjek linkets `href` i DOM.
