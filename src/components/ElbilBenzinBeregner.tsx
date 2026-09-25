@@ -7,6 +7,11 @@ import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { useLocale } from "@/components/LocaleProvider";
+import { billigsteNatVindue, gennemsnitsPris, type PriceArea } from "@/lib/energi/elpriser";
+import type { ElprisData } from "@/lib/energi/server";
+import { kr2 } from "@/components/energi/ElprisGraf";
+import EnergiKilde from "@/components/energi/EnergiKilde";
+import PrisomraadeVaelger, { OMRAADE_NAVN } from "@/components/energi/PrisomraadeVaelger";
 
 const labels = {
   da: {
@@ -55,15 +60,35 @@ const labels = {
   },
 } as const;
 
-export default function ElbilBenzinBeregner() {
+type Props = {
+  /** Live Danish prices; only used on the Danish locale. Null keeps the static default. */
+  elprisData?: ElprisData | null;
+  nu?: { date: string; hour: number };
+};
+
+const round2 = (n: number) => Math.round(n * 100) / 100;
+const hh = (h: number) => String(h % 24).padStart(2, "0");
+const dagNavn = (date: string) =>
+  new Date(`${date}T12:00:00Z`).toLocaleDateString("da-DK", { timeZone: "UTC", weekday: "long", day: "numeric", month: "short" });
+
+export default function ElbilBenzinBeregner({ elprisData = null, nu }: Props = {}) {
   const { locale } = useLocale();
   const l = labels[locale as keyof typeof labels] || labels.da;
+  const live = locale === "da" ? elprisData : null;
+  const [omraade, setOmraade] = useState<PriceArea>("DK2");
+  const dagensGns = (a: PriceArea) => {
+    const dag = live?.omraader[a].dage.find((d) => d.date === live.idag);
+    return dag ? gennemsnitsPris(dag.hours).total : null;
+  };
+  const liveGns = dagensGns(omraade);
+  const standardElPrice = liveGns !== null ? round2(liveGns) : locale === "se" ? 2 : 2.5;
+  const ladeVindue = live && nu ? billigsteNatVindue(live.omraader[omraade].dage, nu, 4) : null;
   const fmt = (n: number) => Math.round(n).toLocaleString(locale === "se" ? "sv-SE" : locale === "no" ? "nb-NO" : "da-DK");
 
   const [kmPerYear, setKmPerYear] = useState<number>(15000);
   const [years, setYears] = useState<number>(5);
   const [evUse, setEvUse] = useState<number>(18);
-  const [elPrice, setElPrice] = useState<number>(locale === "se" ? 2 : 2.5);
+  const [elPrice, setElPrice] = useState<number>(standardElPrice);
   const [petrolUse, setPetrolUse] = useState<number>(16);
   const [petrolPrice, setPetrolPrice] = useState<number>(locale === "se" ? 19 : 13.5);
   const [priceDiff, setPriceDiff] = useState<number>(0);
@@ -101,11 +126,17 @@ export default function ElbilBenzinBeregner() {
     setKmPerYear(15000);
     setYears(5);
     setEvUse(18);
-    setElPrice(locale === "se" ? 2 : 2.5);
+    setElPrice(standardElPrice);
     setPetrolUse(16);
     setPetrolPrice(locale === "se" ? 19 : 13.5);
     setPriceDiff(0);
-  }, [locale]);
+  }, [locale, standardElPrice]);
+
+  const skiftOmraade = (a: PriceArea) => {
+    setOmraade(a);
+    const gns = dagensGns(a);
+    if (gns !== null) setElPrice(round2(gns));
+  };
 
   const getShareableLink = useCallback(() => {
     const state: CalculationState = {
@@ -154,7 +185,13 @@ export default function ElbilBenzinBeregner() {
 
           <p className="text-sm font-medium text-blue-700 dark:text-blue-300 pt-2 inline-flex items-center gap-1.5"><Zap className="h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden="true" focusable="false" />{l.ev}</p>
           {field(l.evUse, evUse, setEvUse, "0.1", "kWh")}
-          {field(l.elPrice, elPrice, setElPrice, "0.1", "kr")}
+          {live && <PrisomraadeVaelger value={omraade} onChange={skiftOmraade} />}
+          {field(l.elPrice, elPrice, setElPrice, "0.01", "kr")}
+          {liveGns !== null && (
+            <p className="text-xs text-gray-500 dark:text-gray-400 -mt-2">
+              Standard er dagens gennemsnitlige elpris i {OMRAADE_NAVN[omraade]}: {kr2(liveGns)} kr/kWh inkl. nettarif, afgifter og moms.
+            </p>
+          )}
 
           <p className="text-sm font-medium text-orange-700 dark:text-orange-300 pt-2 inline-flex items-center gap-1.5"><Fuel className="h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden="true" focusable="false" />{l.petrol}</p>
           {field(l.petrolUse, petrolUse, setPetrolUse, "0.1", "km/l")}
@@ -211,6 +248,37 @@ export default function ElbilBenzinBeregner() {
           </div>
         </div>
       </div>
+
+      {live && (
+        <div className="mt-6 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-4 md:p-5">
+          <h3 className="font-semibold text-green-900 dark:text-green-200 mb-1">Billigste 4 sammenhængende timer at lade i nat</h3>
+          {ladeVindue ? (
+            <>
+              <p className="text-2xl font-bold text-green-800 dark:text-green-300">
+                kl. {hh(ladeVindue.startHour)}-{ladeVindue.slutHour === 0 ? "24" : hh(ladeVindue.slutHour)}
+              </p>
+              <p className="text-sm text-green-900 dark:text-green-200">
+                {dagNavn(ladeVindue.startDate)} · gennemsnit {kr2(ladeVindue.gennemsnit)} kr/kWh
+                {liveGns !== null && liveGns > ladeVindue.gennemsnit && (
+                  <> ({Math.round((1 - ladeVindue.gennemsnit / liveGns) * 100)}% under dagens gennemsnit)</>
+                )}
+                . Det svarer til ca. {kr2((evUse * ladeVindue.gennemsnit))} kr pr. 100 km.
+              </p>
+              {ladeVindue.kunIDag && (
+                <p className="text-xs text-green-800 dark:text-green-300 mt-1">
+                  Morgendagens priser offentliggøres ca. kl. 13. Indtil da regnes der kun på aftenens timer frem til midnat.
+                </p>
+              )}
+            </>
+          ) : (
+            <p className="text-sm text-green-900 dark:text-green-200">Der er ikke kendte priser for nok timer i nat endnu. Kig igen efter kl. 13.</p>
+          )}
+          <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">
+            Beregnet ud fra timeprisen inkl. nettarif, afgifter og moms mellem kl. 18 og 08. Nettariffen er højest kl. 17-21, så aftenen er sjældent billigst.
+          </p>
+          <EnergiKilde hentet={live.hentet} tariffer={live.omraader[omraade].tariffer} className="mt-2" />
+        </div>
+      )}
 
       <div className="flex justify-center mt-6 gap-3">
         <CopyResultButton text={`${l.saving}: ${fmt(r.saving)} kr ${l.perYear}`} />

@@ -7,6 +7,17 @@ import { generateShareableLink, getStateFromUrl, CalculationState, ShareableLink
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { useLocale } from "@/components/LocaleProvider";
 import { formatCurrency, getCurrencySuffix } from "@/lib/format";
+import {
+  formatKlokkeslaet,
+  KILDER,
+  MOMS_SATS,
+  type PriceArea,
+  prisomraadeForPostnummer,
+  STANDARD_TARIFFER,
+} from "@/lib/energi/elpriser";
+import { HAELDNINGER, solOekonomi } from "@/lib/energi/solceller";
+import type { SpotGennemsnit } from "@/lib/energi/server";
+import { OMRAADE_NAVN } from "@/components/energi/PrisomraadeVaelger";
 
 type Retning = "syd" | "sydvest" | "sydoest" | "vest" | "oest";
 
@@ -19,9 +30,42 @@ const RETNINGSFAKTORER: Record<Retning, { faktor: number; labelDa: string; label
 };
 
 const KWH_PR_KWP = 950;
+const STANDARD_EGETFORBRUG_PCT = 30;
+const STANDARD_SALGSPRIS = 0.8;
 
-export default function SolcelleBeregner() {
+type PvgisSvar = {
+  postnr: string;
+  navn: string;
+  prisomraade: PriceArea | null;
+  kwhPrKwp: number;
+  hentet: string;
+  retning: Retning;
+  haeldning: number;
+};
+
+type Props = {
+  /** 12-month average spot price; only used on the Danish locale. */
+  spotGennemsnit?: SpotGennemsnit | null;
+};
+
+const round2 = (n: number) => Math.round(n * 100) / 100;
+
+/** Default purchase and sale prices for a price area from the 12-month average spot price. */
+function standardPriser(spot: SpotGennemsnit | null, area: PriceArea) {
+  const s = spot?.omraader[area];
+  if (s === undefined) return null;
+  const t = STANDARD_TARIFFER;
+  return {
+    spot: s,
+    koeb: round2((s + t.nettarif + t.transmission + t.system + t.elafgift) * (1 + MOMS_SATS)),
+    salg: round2(s),
+  };
+}
+
+export default function SolcelleBeregner({ spotGennemsnit = null }: Props = {}) {
   const { locale } = useLocale();
+  const erDa = locale === "da";
+  const spot12 = erDa ? spotGennemsnit : null;
 
   const labels = {
     da: {
@@ -109,9 +153,60 @@ export default function SolcelleBeregner() {
   const [anlaegStr, setAnlaegStr] = useState<string>("6");
   const [retning, setRetning] = useState<Retning>("syd");
   const [aarligtForbrug, setAarligtForbrug] = useState<string>("4000");
-  const [elPris, setElPris] = useState<string>("2.5");
+  const startPriser = standardPriser(spot12, "DK2");
+  const [elPris, setElPris] = useState<string>(startPriser ? String(startPriser.koeb) : "2.5");
   const [anlaegPris, setAnlaegPris] = useState<string>("");
   const [prisPrKwp, setPrisPrKwp] = useState<string>("12000");
+  const [postnr, setPostnr] = useState<string>("");
+  const [haeldning, setHaeldning] = useState<number>(35);
+  const [egetforbrugPct, setEgetforbrugPct] = useState<string>(String(STANDARD_EGETFORBRUG_PCT));
+  const [salgspris, setSalgspris] = useState<string>(String(startPriser ? startPriser.salg : STANDARD_SALGSPRIS));
+  const [prisRettet, setPrisRettet] = useState(false);
+  const [pvgis, setPvgis] = useState<PvgisSvar | null>(null);
+  const [pvgisStatus, setPvgisStatus] = useState<"idle" | "henter" | "fejl" | "ukendt">("idle");
+
+  const omraade: PriceArea = prisomraadeForPostnummer(postnr) ?? "DK2";
+  const aktuellePriser = standardPriser(spot12, omraade);
+
+  // Follow the postcode's price area until the user edits a price.
+  useEffect(() => {
+    if (prisRettet || !aktuellePriser) return;
+    setElPris(String(aktuellePriser.koeb));
+    setSalgspris(String(aktuellePriser.salg));
+  }, [omraade]);
+
+  // Look up PVGIS production for the postcode (Danish locale only).
+  useEffect(() => {
+    if (!erDa || !/^\d{4}$/.test(postnr)) {
+      setPvgisStatus("idle");
+      return;
+    }
+    const ctrl = new AbortController();
+    const timer = setTimeout(async () => {
+      setPvgisStatus("henter");
+      try {
+        const q = new URLSearchParams({ postnr, retning, haeldning: String(haeldning) });
+        const res = await fetch(`/api/energi/solproduktion?${q}`, { signal: ctrl.signal });
+        if (res.status === 404) {
+          setPvgisStatus("ukendt");
+          return;
+        }
+        if (!res.ok) throw new Error(String(res.status));
+        const data = await res.json();
+        setPvgis({ ...data, retning, haeldning });
+        setPvgisStatus("idle");
+      } catch (err) {
+        if ((err as Error).name !== "AbortError") setPvgisStatus("fejl");
+      }
+    }, 350);
+    return () => {
+      clearTimeout(timer);
+      ctrl.abort();
+    };
+  }, [erDa, postnr, retning, haeldning]);
+
+  const pvgisAktiv =
+    erDa && pvgis && pvgis.postnr === postnr && pvgis.retning === retning && pvgis.haeldning === haeldning ? pvgis : null;
 
   const hasLoadedUrl = useRef(false);
   const hasTracked = useRef(false);
@@ -122,6 +217,11 @@ export default function SolcelleBeregner() {
     const urlState = getStateFromUrl();
     if (urlState && urlState.type === "solceller") {
       const i = urlState.inputs;
+      if (i.postnr !== undefined) setPostnr(String(i.postnr));
+      if (i.haeldning !== undefined && (HAELDNINGER as readonly number[]).includes(Number(i.haeldning))) setHaeldning(Number(i.haeldning));
+      if (i.egetforbrugPct !== undefined) setEgetforbrugPct(String(i.egetforbrugPct));
+      if (i.salgspris !== undefined) setSalgspris(String(i.salgspris));
+      if (i.elPris !== undefined || i.salgspris !== undefined) setPrisRettet(true);
       if (i.anlaegStr !== undefined) setAnlaegStr(String(i.anlaegStr));
       if (i.retning !== undefined) setRetning(i.retning as Retning);
       if (i.aarligtForbrug !== undefined) setAarligtForbrug(String(i.aarligtForbrug));
@@ -134,9 +234,12 @@ export default function SolcelleBeregner() {
   const getShareableLink = useCallback((): ShareableLink => {
     return generateShareableLink({
       type: "solceller", timestamp: Date.now(),
-      inputs: { anlaegStr: Number(anlaegStr), retning, aarligtForbrug: Number(aarligtForbrug), elPris: Number(elPris), anlaegPris: Number(anlaegPris), prisPrKwp: Number(prisPrKwp) },
+      inputs: {
+        anlaegStr: Number(anlaegStr), retning, aarligtForbrug: Number(aarligtForbrug), elPris: Number(elPris), anlaegPris: Number(anlaegPris), prisPrKwp: Number(prisPrKwp),
+        ...(erDa ? { postnr, haeldning, egetforbrugPct: Number(egetforbrugPct), salgspris: Number(salgspris) } : {}),
+      },
     });
-  }, [anlaegStr, retning, aarligtForbrug, elPris, anlaegPris, prisPrKwp]);
+  }, [anlaegStr, retning, aarligtForbrug, elPris, anlaegPris, prisPrKwp, erDa, postnr, haeldning, egetforbrugPct, salgspris]);
 
   useEffect(() => initScrollDepthTracking("solceller"), []);
 
@@ -154,18 +257,20 @@ export default function SolcelleBeregner() {
     if (!kwp || kwp <= 0 || !forbrug || forbrug <= 0 || !pris || pris <= 0 || effektivAnlaegPris <= 0) return null;
 
     const retningsFaktor = RETNINGSFAKTORER[retning].faktor;
-    const aarligProduktion = Math.round(kwp * KWH_PR_KWP * retningsFaktor);
+    const aarligProduktion = Math.round(pvgisAktiv ? kwp * pvgisAktiv.kwhPrKwp : kwp * KWH_PR_KWP * retningsFaktor);
 
-    const egetForbrugPct = 0.30;
-    const egetForbrug = Math.round(Math.min(aarligProduktion * egetForbrugPct, forbrug));
+    const andel = erDa ? Math.min(100, Math.max(0, Number(egetforbrugPct) || 0)) / 100 : STANDARD_EGETFORBRUG_PCT / 100;
+    const salg = erDa ? Math.max(0, Number(salgspris) || 0) : STANDARD_SALGSPRIS;
+    const egetForbrug = Math.round(
+      solOekonomi({ produktion: aarligProduktion, forbrug, egetforbrugAndel: andel, koebspris: pris, salgspris: salg, anlaegspris: effektivAnlaegPris }).egetforbrug,
+    );
     const overskud = aarligProduktion - egetForbrug;
 
-    const nettoPris = 0.80;
     const besparelseEget = egetForbrug * pris;
-    const besparelseOverskud = overskud * nettoPris;
+    const besparelseOverskud = overskud * salg;
     const aarligBesparelse = besparelseEget + besparelseOverskud;
 
-    const tilbagebetalingsAar = effektivAnlaegPris / aarligBesparelse;
+    const tilbagebetalingsAar = aarligBesparelse > 0 ? effektivAnlaegPris / aarligBesparelse : Number.POSITIVE_INFINITY;
 
     const levetid = 25;
     const totalBesparelse = aarligBesparelse * levetid;
@@ -188,24 +293,29 @@ export default function SolcelleBeregner() {
       besparelseEget: Math.round(besparelseEget),
       besparelseOverskud: Math.round(besparelseOverskud),
       aarligBesparelse: Math.round(aarligBesparelse),
-      tilbagebetalingsAar: Math.round(tilbagebetalingsAar * 10) / 10,
+      tilbagebetalingsAar: Number.isFinite(tilbagebetalingsAar) ? Math.round(tilbagebetalingsAar * 10) / 10 : null,
       totalBesparelse: Math.round(totalBesparelse),
       nettoGevinst: Math.round(nettoGevinst),
       aarligCO2,
       selvforsyning: Math.min(selvforsyning, 100),
       anlaegPrisEffektiv: effektivAnlaegPris,
     };
-  }, [anlaegStr, retning, aarligtForbrug, elPris, effektivAnlaegPris]);
+  }, [anlaegStr, retning, aarligtForbrug, elPris, effektivAnlaegPris, pvgisAktiv, erDa, egetforbrugPct, salgspris]);
 
   const handleReset = useCallback(() => {
     setAnlaegStr("6");
     setRetning("syd");
     setAarligtForbrug("4000");
-    setElPris("2.5");
+    setElPris(aktuellePriser ? String(aktuellePriser.koeb) : "2.5");
     setAnlaegPris("");
     setPrisPrKwp("12000");
+    setPostnr("");
+    setHaeldning(35);
+    setEgetforbrugPct(String(STANDARD_EGETFORBRUG_PCT));
+    setSalgspris(String(aktuellePriser ? aktuellePriser.salg : STANDARD_SALGSPRIS));
+    setPrisRettet(false);
     hasTracked.current = false;
-  }, []);
+  }, [aktuellePriser?.koeb, aktuellePriser?.salg]);
 
   const formatKr = (n: number) => formatCurrency(n, locale, { maximumFractionDigits: 0, minimumFractionDigits: 0 });
 
@@ -244,6 +354,45 @@ export default function SolcelleBeregner() {
           </div>
         </div>
 
+        {erDa && (
+          <div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="postnr" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Postnummer
+                </label>
+                <input id="postnr" type="text" inputMode="numeric" autoComplete="postal-code" maxLength={4} placeholder="fx 8000"
+                  value={postnr} onChange={(e) => setPostnr(e.target.value.replace(/\D/g, "").slice(0, 4))}
+                  className="w-full border border-gray-300 dark:border-gray-600 rounded-lg py-3 px-4 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+              </div>
+              <div>
+                <label htmlFor="haeldning" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Taghældning
+                </label>
+                <select id="haeldning" value={haeldning} onChange={(e) => setHaeldning(Number(e.target.value))}
+                  className="w-full border border-gray-300 dark:border-gray-600 rounded-lg py-3 px-4 bg-white dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                  {HAELDNINGER.map((h) => (
+                    <option key={h} value={h}>
+                      {h}°{h === 0 ? " (fladt)" : ""}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 min-h-[2rem]" aria-live="polite">
+              {pvgisAktiv
+                ? `PVGIS: ${formatLocaleNumber(Math.round(pvgisAktiv.kwhPrKwp))} kWh pr. kWp om året i ${pvgisAktiv.postnr} ${pvgisAktiv.navn}, prisområde ${omraade}.`
+                : pvgisStatus === "henter"
+                  ? "Henter soldata fra PVGIS …"
+                  : pvgisStatus === "ukendt"
+                    ? "Postnummeret findes ikke. Beregningen bruger et estimat på 950 kWh pr. kWp."
+                    : pvgisStatus === "fejl"
+                      ? "PVGIS svarer ikke lige nu. Beregningen bruger et estimat på 950 kWh pr. kWp."
+                      : "Indtast postnummer for at hente soldata fra PVGIS. Indtil da bruges et estimat på 950 kWh pr. kWp."}
+            </p>
+          </div>
+        )}
+
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{l.tagretning}</label>
           <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
@@ -264,8 +413,8 @@ export default function SolcelleBeregner() {
               {l.elprisInkl}
             </label>
             <div className="relative">
-              <input id="elPris" type="number" value={elPris} onChange={(e) => setElPris(e.target.value)}
-                step="0.1" min="0.5"
+              <input id="elPris" type="number" value={elPris} onChange={(e) => { setElPris(e.target.value); setPrisRettet(true); }}
+                step="0.01" min="0.5"
                 className="w-full border border-gray-300 dark:border-gray-600 rounded-lg py-3 px-4 pr-20 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">{getCurrencySuffix(locale)}/kWh</span>
             </div>
@@ -294,16 +443,52 @@ export default function SolcelleBeregner() {
             <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">{getCurrencySuffix(locale)}</span>
           </div>
         </div>
+
+        {erDa && (
+          <div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="egetforbrug" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Egetforbrug
+                </label>
+                <div className="relative">
+                  <input id="egetforbrug" type="number" value={egetforbrugPct} onChange={(e) => setEgetforbrugPct(e.target.value)}
+                    min="0" max="100" step="5"
+                    className="w-full border border-gray-300 dark:border-gray-600 rounded-lg py-3 px-4 pr-10 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">%</span>
+                </div>
+              </div>
+              <div>
+                <label htmlFor="salgspris" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Salgspris (kr/kWh)
+                </label>
+                <div className="relative">
+                  <input id="salgspris" type="number" value={salgspris} onChange={(e) => { setSalgspris(e.target.value); setPrisRettet(true); }}
+                    step="0.01" min="0"
+                    className="w-full border border-gray-300 dark:border-gray-600 rounded-lg py-3 px-4 pr-12 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">kr</span>
+                </div>
+              </div>
+            </div>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+              Egetforbrug er den del af produktionen, du selv bruger (typisk 25-40 % uden batteri). Den værdisættes til din elpris,
+              mens overskuddet sælges til spotpris.{" "}
+              {aktuellePriser
+                ? `Standardpriserne bygger på gennemsnitlig spotpris de seneste 12 måneder i ${OMRAADE_NAVN[omraade]}: ${aktuellePriser.spot.toLocaleString("da-DK", { maximumFractionDigits: 2 })} kr/kWh. Elprisen lægger nettarif (ca. ${STANDARD_TARIFFER.nettarif.toLocaleString("da-DK")} kr), Energinets tariffer, elafgift og moms oveni.`
+                : `Salgsprisen er en standardværdi på ${STANDARD_SALGSPRIS.toLocaleString("da-DK", { minimumFractionDigits: 2 })} kr/kWh, fordi spotpriserne ikke kunne hentes.`}
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Resultat */}
       {resultat && (
         <div className="animate-fade-in space-y-4">
           <div className="bg-gradient-to-br from-yellow-50 to-amber-100 dark:from-yellow-900/30 dark:to-amber-800/30 rounded-2xl p-6">
-            <div className="flex justify-between items-start mb-4">
+            <div className="flex flex-wrap justify-between items-start gap-2 mb-4">
               <h3 className="text-lg font-semibold text-amber-900 dark:text-amber-200">{l.dinSolcellebesparelse}</h3>
               <div className="flex gap-2">
-                <CopyResultButton text={`Solceller ${anlaegStr} kWp: ${formatLocaleNumber(resultat.aarligProduktion)} kWh/år, besparelse ${formatKr(resultat.aarligBesparelse)}/år, tilbagebetalt på ${resultat.tilbagebetalingsAar} år.`} />
+                <CopyResultButton text={`Solceller ${anlaegStr} kWp: ${formatLocaleNumber(resultat.aarligProduktion)} kWh/år, besparelse ${formatKr(resultat.aarligBesparelse)}/år, tilbagebetalt på ${resultat.tilbagebetalingsAar ?? "–"} år.`} />
                 <ShareCalculation getShareableLink={getShareableLink} calculatorName="Solceller" />
               </div>
             </div>
@@ -315,7 +500,9 @@ export default function SolcelleBeregner() {
               </div>
               <div>
                 <p className="text-sm text-amber-700 dark:text-amber-300">{l.tilbagebetalingstid}</p>
-                <p className="text-2xl font-bold text-amber-900 dark:text-amber-100">{resultat.tilbagebetalingsAar} {l.aar}</p>
+                <p className="text-2xl font-bold text-amber-900 dark:text-amber-100">
+                  {resultat.tilbagebetalingsAar === null ? "–" : `${resultat.tilbagebetalingsAar.toLocaleString(locale === "se" ? "sv-SE" : locale === "no" ? "nb-NO" : "da-DK")} ${l.aar}`}
+                </p>
               </div>
               <div>
                 <p className="text-sm text-amber-700 dark:text-amber-300">{l.aarligProduktion}</p>
@@ -368,6 +555,25 @@ export default function SolcelleBeregner() {
           <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
             {l.disclaimer}
           </p>
+          {erDa && (
+            <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
+              Kilder: produktion fra{" "}
+              <a href={KILDER.pvgis} className="underline hover:text-blue-700 dark:hover:text-blue-400" target="_blank" rel="noopener noreferrer">
+                PVGIS 5.3 (EU JRC)
+              </a>
+              {pvgisAktiv ? `, hentet kl. ${formatKlokkeslaet(pvgisAktiv.hentet)}` : " (når postnummer er angivet)"}
+              {spot12 && (
+                <>
+                  ; spotpriser fra{" "}
+                  <a href={KILDER.energidataservice} className="underline hover:text-blue-700 dark:hover:text-blue-400" target="_blank" rel="noopener noreferrer">
+                    Energi Data Service (Energinet)
+                  </a>
+                  , priser hentet kl. {formatKlokkeslaet(spot12.hentet)}
+                </>
+              )}
+              . Postnumrenes midtpunkter er fra GeoNames (CC BY 4.0).
+            </p>
+          )}
         </div>
       )}
     </div>

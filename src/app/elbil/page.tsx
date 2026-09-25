@@ -1,6 +1,8 @@
 import { generatePageMetadata } from "@/lib/page-helpers";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
+import { getElprisData } from "@/lib/energi/server";
+import { dkNu } from "@/lib/energi/elpriser";
 import ElbilBenzinBeregner from "@/components/ElbilBenzinBeregner";
 import FAQ from "@/components/FAQ";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
@@ -17,6 +19,8 @@ export default async function ElbilPage() {
   const domainConfig = await getCurrentDomainConfig();
   const locale = domainConfig.locale;
   const pageData = getPageData("elbil", locale) || getPageData("elbil", "da")!;
+  // Live Danish spot prices are only relevant on the Danish site.
+  const elprisData = locale === "da" ? await getElprisData() : null;
 
   return (
     <div className="flex flex-col lg:flex-row gap-8">
@@ -41,7 +45,7 @@ export default async function ElbilPage() {
         </div>
 
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 md:p-8 mb-8">
-          <ElbilBenzinBeregner />
+          <ElbilBenzinBeregner elprisData={elprisData} nu={dkNu()} />
           <BilforsikringAffiliate className="mt-8" />
         </div>
 

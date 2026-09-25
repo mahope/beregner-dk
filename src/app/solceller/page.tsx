@@ -7,6 +7,7 @@ import RelatedCalculators from "@/components/RelatedCalculators";
 import Sidebar from "@/components/Sidebar";
 import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
+import { getSpotGennemsnit12Mdr } from "@/lib/energi/server";
 
 export async function generateMetadata() {
   return generatePageMetadata("solceller");
@@ -16,6 +17,8 @@ export default async function SolcellerPage() {
   const locale = await getLocale();
   const domainConfig = await getCurrentDomainConfig();
   const pageData = getPageData("solceller", locale) || getPageData("solceller", "da")!;
+  // Live Danish spot prices are only relevant on the Danish site.
+  const spotGennemsnit = locale === "da" ? await getSpotGennemsnit12Mdr() : null;
 
   return (
     <div className="flex flex-col lg:flex-row gap-8">
@@ -34,7 +37,7 @@ export default async function SolcellerPage() {
           {pageData.description}
         </p>
 
-        <SolcelleBeregner />
+        <SolcelleBeregner spotGennemsnit={spotGennemsnit} />
 
         {locale === "da" && (
         <div className="mt-12 prose dark:prose-invert max-w-none">

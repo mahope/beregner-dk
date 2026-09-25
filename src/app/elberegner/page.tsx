@@ -9,6 +9,8 @@ import {
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
+import { getElprisData } from "@/lib/energi/server";
+import { dkNu } from "@/lib/energi/elpriser";
 
 export async function generateMetadata() {
   return generatePageMetadata("elberegner");
@@ -18,6 +20,8 @@ export default async function ElberegnerPage() {
   const locale = await getLocale();
   const domainConfig = await getCurrentDomainConfig();
   const pageData = getPageData("elberegner", locale) || getPageData("elberegner", "da")!;
+  // Live Danish spot prices are only relevant on the Danish site.
+  const elprisData = locale === "da" ? await getElprisData() : null;
 
   return (
     <div>
@@ -35,7 +39,7 @@ export default async function ElberegnerPage() {
         {pageData.description}
       </p>
 
-      <Elberegner />
+      <Elberegner elprisData={elprisData} nu={dkNu()} />
 
       {locale === "da" && (
       <div className="mt-12 prose max-w-none">
