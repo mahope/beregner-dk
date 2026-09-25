@@ -8,16 +8,17 @@ import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { useLocale } from '@/components/LocaleProvider';
 import { formatCurrency } from '@/lib/format';
+import { BOERNE_SATSER_2026, BOERNEUNGEYDELSE_2026, beregnAftrapning } from "@/lib/borneungeydelse";
 
-// 2026 satser for børne- og ungeydelse (officielle satser)
-// Kilde: borger.dk/familie-og-boern/Familieydelser-oversigt/Boerne-ungeydelse
+// 2026 satser for børne- og ungeydelse (officielle satser, single source i
+// src/lib/borneungeydelse.ts med kilde og verificeringsdato)
 const SATSER_2026 = {
-  barn_0_2: 5370, // 0-2 år, pr. kvartal (21.480 kr/år)
-  barn_3_6: 4251, // 3-6 år, pr. kvartal (17.004 kr/år)
-  barn_7_14: 3345, // 7-14 år, pr. kvartal (13.380 kr/år)
-  unge_15_17_maaned: 1115, // 15-17 år, pr. måned (13.380 kr/år)
-  indkomstgraense: 961100, // Årlig indkomstgrænse for aftrapning (2026)
-  aftrapningPct: 0.02, // 2% aftrapning af beløb over grænsen
+  barn_0_2: BOERNE_SATSER_2026[0].hel, // 0-2 år, pr. kvartal
+  barn_3_6: BOERNE_SATSER_2026[1].hel, // 3-6 år, pr. kvartal
+  barn_7_14: BOERNE_SATSER_2026[2].hel, // 7-14 år, pr. kvartal
+  unge_15_17_maaned: BOERNE_SATSER_2026[3].hel, // 15-17 år, pr. måned
+  indkomstgraense: BOERNEUNGEYDELSE_2026.aftrapning.graense,
+  aftrapningPct: BOERNEUNGEYDELSE_2026.aftrapning.pct,
 };
 
 interface Barn {
@@ -136,12 +137,9 @@ export default function BoernepengBeregner() {
 
     // Beregn evt. aftrapning (kun for høje indkomster)
     // Aftrapning: 2% af beløbet over indkomstgrænsen
-    let aftrapning = 0;
-    if (husstandsIndkomst > SATSER_2026.indkomstgraense) {
-      const overGraense = husstandsIndkomst - SATSER_2026.indkomstgraense;
-      aftrapning = overGraense * SATSER_2026.aftrapningPct;
-      aftrapning = Math.min(aftrapning, samletAarlig);
-    }
+    // Beregn evt. nedsættelse. Siden 1. januar 2022 er den udelukkende ud fra
+    // egen indkomst, også når forældrene bor sammen.
+    const aftrapning = Math.min(beregnAftrapning(husstandsIndkomst), samletAarlig);
 
     const samletEfterAftrapning = Math.max(0, samletAarlig - aftrapning);
 
