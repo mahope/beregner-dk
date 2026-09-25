@@ -88,9 +88,21 @@ export default async function KvadratmeterPage() {
         </p>
         <ul>
           <li>Gulvbrædder: +10% for tilskæring</li>
-          <li>Maling: Ca. 8-10 m² pr. liter (tjek produktet)</li>
+          <li>Maling: Ca. 8-12 m² pr. liter (tjek produktets egen rækkevidde)</li>
           <li>Fliser: +5-10% for tilskæring og knækkede</li>
         </ul>
+        <p>
+          <strong>Beregn materialer</strong> ovenfor lægger spild på, tæller antallet af
+          ens felter og regner hele købsarealet, liter eller ruller ud — og prisen,
+          hvis du indtaster den. Værktøjet bruger 10% spild som standard, fordi det er
+          det de danske gulvleverandører anbefaler. Kilde:{" "}
+          <a href="https://hjemmeland.dk/beregner/kvadratmeter-m2-beregner/" rel="noreferrer nofollow noopener" target="_blank">
+            hjemmeland.dk
+          </a>{" "}
+          (verificeret 25. september 2026). Malingens dækning står på produktets eget
+          datablad og afhænger af underlag og kvalitet, så den kan overskrives i
+          værktøjet.
+        </p>
       </div>
       )}
 
@@ -128,9 +140,19 @@ export default async function KvadratmeterPage() {
         </p>
         <ul>
           <li>Golvbrädor: +10% för kapning</li>
-          <li>Färg: Ca 8-10 m² per liter (kontrollera produkten)</li>
+          <li>Färg: Ca 8-12 m² per liter (kontrollera produktens egen täckning)</li>
           <li>Kakel: +5-10% för kapning och trasiga plattor</li>
         </ul>
+        <p>
+          <strong>Beräkna material</strong> ovan lägger på spill, räknar antalet
+          lika ytor och räknar ut hela köparean, litern eller rullarna — och
+          priset om du anger det. Verktyget använder 10% spill som standard,
+          vilket är det danska golvleverantörerna rekommenderar. Källa:{" "}
+          <a href="https://hjemmeland.dk/beregner/kvadratmeter-m2-beregner/" rel="noreferrer nofollow noopener" target="_blank">
+            hjemmeland.dk
+          </a>{" "}
+          (verifierad 25 september 2026).
+        </p>
       </div>
       )}
 
