@@ -1,6 +1,6 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — M1 FÆRDIG; M2 (BMI-enhedsroundtrip) er næste opgave.
+STATUS: KØ — M2 FÆRDIG; M3 (BMI-børneguide-søgning) er næste opgave.
 
 ## Fase 3 — trafik-drevet
 
@@ -767,17 +767,46 @@ STATUS: KØ — M1 FÆRDIG; M2 (BMI-enhedsroundtrip) er næste opgave.
   3. Repoets lokale build/tests/lint forbliver grønne. **PASS.**
 - **Placering:** Efter C1-C3 og I1; kun hvis LHCI begynder at blokere flere PR'er.
 
-#### 13. [ ] M2 — Bevar BMI ved gentaget skift mellem metrisk og imperial enhed
+#### 13. [x] FÆRDIG 2026-09-25 — M2 — Bevar BMI ved gentaget skift mellem metrisk og imperial enhed
 
+- **Iteration start:** 2026-09-25 12:22 CEST; sluttet 15:27 CEST. M2 fortsættes som
+  eneste opgave; de åbne T5/I1/M1-deploynoter er endnu ikke ældre end næste
+  batch-vindue.
+- **Dependency-gate:** `npm audit --json` viser 0 sårbarheder i alle niveauer; den
+  eksterne afhængighedsrapport fra 2026-08-23 er stale for dette projekt.
 - **Datagrund:** O2 gemmer nu enhed i delelinks, infererer gamle imperiale links og
   afgrænser konverteringen til to decimaler. En fuld kg/cm → lbs/inches → kg/cm
-  roundtrip er endnu ikke målt, så gentagne skift kan stadig ændre BMI'en en smule.
+  roundtrip var ikke målt før denne iteration.
+- **Beslutning/implementering:** BMI-beregningen bruger nu separate kanoniske
+  `vaegtKg`/`hoejdeCm`-værdier, som bevares gennem display-enhedsskift og gemmes i
+  nye delelinks. Værdier normaliseres til 0,01-præcision; legacy numeriske strenge
+  og gamle links indlæses, mens canonical/display-konflikter fail-closed. Et delvist
+  BMI-delelink bliver ikke blandet med defaults. `InputField` får en synkroniserings-
+  nøgle, så fokuserede felter og nulstilling følger programmatic state changes.
+  WHR-grænsen er gjort symmetrisk ved 79 inches = 200,66 cm, så gentaget skift ikke
+  ændrer forholdet.
+- **Måling:** BMI-testen registrerer tre skift (kg/cm → lbs/inches → kg/cm →
+  lbs/inches) og måler `maximumDeviation = 0` før/efter alle skift. Delelink med
+  40 kg/143,4 cm → 88,18 lbs/56,46 inches → 40 kg/143,4 cm er dækket, sammen med
+  canonical-state, legacy-state, grænseværdier og fokuseret felt-sync.
+- **Review og rettelser:** Fresh-context review fandt først WHR-drift ved 79 inches
+  og en manglende numerisk max-afvigelsestest; begge er rettet og dækket. Den
+  afsluttende review fandt desuden et fail-open delelink med kun én af vægt/højde;
+  state indlæses nu kun når begge felter findes, med regressionstest. Ingen åbne
+  P0-P2-fund.
 - **Acceptkriterier:**
-  1. En test måler BMI før og efter mindst tre skift og dokumenterer maksimal afvigelse.
-  2. Måleenhedsskift bevarer BMI'en inden for den dokumenterede displaypræcision.
-  3. Delelink, enhedsværdier og `InputField`-validering er grønne efter roundtrip.
+  1. Tre enhedsskift måler BMI'en med maksimal afvigelse 0. **PASS.**
+  2. BMI'en bevares inden for displaypræcisionen ved gentaget skift. **PASS.**
+  3. Delelink, enhedsværdier, legacy-state og `InputField`-validering er grønne. **PASS.**
+  4. Fuld gate er grøn. **PASS.**
+- **Kvalitetsgate 2026-09-25 15:27 CEST:** `npm run build` grøn (138 sider +
+  typecheck; 7 kendte CSS-optimeringsadvarsler), `npm run test` grøn (800/800 tests,
+  81 filer), `npm run lint` grøn (433 filer) og `npm audit --audit-level=high` 0
+  sårbarheder. `npx tsc --noEmit` har én pre-existing TS1501-fejl i
+  `src/components/StructuredData.test.tsx`; Next-buildens typecheck er grøn.
 - **MÅL:** `/bmi` baseline 979 besøgende/28d 2026-09-23; effektmåling først efter
-  14 dage hvis der laves en separat produktændring.
+  14 dage, da dette er en korrekthedsændring frem for en isoleret SEO-ændring.
+- **Landet:** M2-kode, tests og plan afventer commit/merge i denne iteration.
 
 #### 14. [ ] M3 — Route børne-BMI-søgninger til guiden
 
