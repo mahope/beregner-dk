@@ -1,6 +1,6 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — I1 (IndexNow) I GANG.
+STATUS: KØ — I1 FÆRDIG; M1 (Lighthouse-CI) er næste opgave.
 
 ## Fase 3 — trafik-drevet
 
@@ -682,7 +682,7 @@ STATUS: KØ — I1 (IndexNow) I GANG.
 - **Landet:** T5-kode, tests og plan ligger i commit `b685026`; merge til `master` er
   `a889f5e` den 2026-09-25 08:08 CEST.
 
-#### 11. [ ] I GANG — I1 — Integrer IndexNow uden at sende under iterationen
+#### 11. [x] FÆRDIG 2026-09-25 — I1 — Integrer IndexNow uden at sende under iterationen
 
 - **Iteration start:** 2026-09-25 08:31 CEST. `npm audit --audit-level=high` er grøn
   med 0 sårbarheder; den eksterne afhængighedsrapport fra 2026-08-23 er stale.
@@ -699,7 +699,7 @@ STATUS: KØ — I1 (IndexNow) I GANG.
   samme funktion til den konkrete ændrede eller slettede URL efter
   publicering/deploy. Den interne route kræver en uafhængig random
   `INDEXNOW_TRIGGER_TOKEN`, stream-capped body, canonical published-target check og
-  lokal cooldown/dedup. Ingen rigtig   submission køres under implementation, test, build
+  lokal cooldown/dedup. Ingen rigtig submission køres under implementation, test, build
   eller lokal verification.
 - **Review/rettelser 2026-09-25 10:03 CEST:** Frisk review fandt to P2-fund:
   Next.js instrumentation kunne sende fra både Node og Edge, og trigger-token kunne
@@ -725,6 +725,8 @@ STATUS: KØ — I1 (IndexNow) I GANG.
   har mockede tests; ingen outbound-submit køres under iterationen; fuld gate grøn.
 - **MÅL:** Ingen isoleret trafikbaseline. Mål før/efter med Search Console-impressions
   for nye URL'er efter mindst 14 dage; adskill samtidige site's changes i noten.
+- **Landet:** I1-kode, tests og plan ligger i commit `8e01ff2`; merge til `master` er
+  `dd5f4af` den 2026-09-25 10:10 CEST. Begge refs pushes i denne iteration.
 
 #### 12. [ ] M1 — Ret Lighthouse-CI's serverstart
 
@@ -1158,3 +1160,7 @@ landmark=lån, piggybank=opsparing osv.).
   FAQ og schema `a889f5e` 2026-09-25 08:08 CEST. Verificér efter næste batch-vindue med
   faktisk hydreret 12/6 %-interaktion på `beraknare.se/moms`; HTTP 200 alene
   utilstrækkeligt.
+- **VERIFICÉR DEPLOY:** I1 IndexNow-submission, offentlig nøglefil, Node-only
+  instrumentation og beskyttet intern trigger `dd5f4af` 2026-09-25 10:10 CEST.
+  Verificér efter næste batch-vindue med live health, `INDEXNOW`-keyfil og konfigureret
+  runtime; HTTP 200 på health alene utilstrækkeligt.
