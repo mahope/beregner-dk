@@ -644,8 +644,8 @@ STATUS: KØ — T4 FÆRDIG; T5 (satsafhængigt svensk moms-UI) er næste opgave.
   søgetrafik; prioritet er korrekthed, ikke ny trafik.
 - **MÅL:** `/tidsberegner` baseline 292 besøgende/28d 2026-09-24; Search Console
   71.966 visninger, 207 klik, CTR 0,3 %, position 7,0 pr. 2026-09-22.
-- **Landet:** T4-kode, tests og plan forventes landet i næste commit/merge; merge- og
-  deployreferencer følger når de findes.
+- **Landet:** T4-kode, tests og plan ligger i commit `b12d368`; merge til `master` er
+  `e339937` den 2026-09-25 05:57 CEST. Begge refs blev pushet 2026-09-25 05:59 CEST.
 
 #### 10. [ ] T5 — Gør svensk moms-UI og FAQ satsafhængige
 
@@ -1105,3 +1105,7 @@ landmark=lån, piggybank=opsparing osv.).
   description, H1/intro, OG/schema og bevarede beregnere `ef1079e` 2026-09-25
   03:23 CEST. Verificér efter næste batch-vindue med faktisk markup på begge domæner;
   HTTP 200 alene utilstrækkeligt.
+- **VERIFICÉR DEPLOY:** T4 `/tidsberegner` uden dobbelt 24-timers addition ved
+  over-midnat, med rene DA/SE URL-state tests `e339937` 2026-09-25 05:57 CEST.
+  Verificér efter næste batch-vindue med faktisk kørsel af 22:00–06:00 med og uden
+  næste dato; HTTP 200 alene utilstrækkeligt.
