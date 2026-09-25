@@ -1,15 +1,15 @@
-import { generatePageMetadata } from "@/lib/page-helpers";
-import Link from "next/link";
-import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
-import { getPageData } from "@/lib/page-data";
-import RenteBeregner from "@/components/RenteBeregner";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import FAQ from "@/components/FAQ";
 import RelatedCalculators from "@/components/RelatedCalculators";
+import RenteBeregner from "@/components/RenteBeregner";
 import {
   CalculatorSchema,
   FAQSchema,
 } from "@/components/StructuredData";
-import Breadcrumbs from "@/components/Breadcrumbs";
+import { getCurrentDomainConfig, getLocale } from "@/lib/get-locale";
+import { getPageData } from "@/lib/page-data";
+import { generatePageMetadata } from "@/lib/page-helpers";
+import Link from "next/link";
 
 export async function generateMetadata() {
   return generatePageMetadata("renteberegner");
@@ -133,13 +133,14 @@ export default async function RenteberegnerPage() {
         <h2>Skattefradrag for renter</h2>
         <p>
           I Danmark kan du få <strong>fradrag for renteudgifter</strong> på private lån.
-          Fradraget er ca. <strong>33% af renteudgiften</strong>, hvilket reducerer din
-          skattebetaling. Det betyder, at et lån med 5% rente reelt kun koster
-          dig ca. <strong>3,35% efter skat</strong>.
+          Fradraget svarer til <strong>33,6%</strong> af de første 50.000 kr. i renteudgifter
+          (100.000 kr. for par) og <strong>25,6%</strong> af beløbet over grænsen, hvilket
+          reducerer din skattebetaling. Så længe du er under grænsen koster et lån med 5%
+          rente dig reelt kun ca. <strong>3,3% efter skat</strong>.
         </p>
         <p>
-          Den præcise fradragsværdi afhænger af lånetypen og året. Se den
-          officielle 2026-sats og beregn effekten i{" "}
+          Fradragsværdien afhænger af beløbsgrænsen og året — ikke af din kommune. Se
+          2026-reglen med kilde og beregn effekten i{" "}
           <Link href="/rentefradrag">vores rentefradragsberegner</Link>.
         </p>
 

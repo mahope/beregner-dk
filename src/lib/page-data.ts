@@ -1060,7 +1060,7 @@ const daPages: Record<string, PageData> = {
       faqItems: [
       { question: "Hvor meget kan jeg låne?", answer: "Op til 80% i realkredit, 15% banklån, 5% udbetaling." },
       { question: "Fast vs variabel rente?", answer: "Fast: fast ydelse hele løbetiden. Variabel: justeres løbende, ofte lavere." },
-      { question: "Rentefradrag?", answer: "Ca. 25,6% fradragsværdi i 2026." },
+      { question: "Rentefradrag?", answer: "Fradragsværdien er 33,6% på de første 50.000 kr. renteudgifter (100.000 kr. for par) og 25,6% på beløbet derudover." },
       { question: "Afdragsfrihed?", answer: "Du betaler kun renter, ikke afdrag. Lavere ydelse men gælden forbliver." },
       ],
     },
@@ -1393,7 +1393,7 @@ const daPages: Record<string, PageData> = {
       schemaCategory: "FinanceApplication",
       faqItems: [
       { question: "Hvad er kørselsfradrag?", answer: "Kørselsfradrag (befordringsfradrag) er et fradrag for transport mellem hjem og arbejde. Du kan få fradrag for kørsel over 24 km dagligt (12 km hver vej), uanset om du kører bil, cykel eller bruger offentlig transport. Satsen er 3,17 kr./km for 25-120 km og 1,59 kr./km derover i 2026." },
-      { question: "Hvad er rentefradrag?", answer: "Rentefradrag er et fradrag for renteudgifter på lån — fx boliglån, billån og SU-lån. Fradragsværdien er ca. 25,6% af renteudgifterne. Det betyder, at du sparer ca. 256 kr. i skat for hver 1.000 kr. du betaler i renter." },
+      { question: "Hvad er rentefradrag?", answer: "Rentefradrag er et fradrag for renteudgifter på lån — fx boliglån, billån og SU-lån. Fradragsværdien er 33,6% op til 50.000 kr. renteudgifter og 25,6% oveni. Det betyder, at du sparer ca. 336 kr. i skat for hver 1.000 kr. du betaler i renter, indtil du når grænsen." },
       { question: "Hvad dækker håndværkerfradraget?", answer: "Boligjobordningen (håndværkerfradraget) dækker arbejdsløn til håndværkerydelser (maling, VVS, el mv.) op til 12.400 kr. og serviceydelser (rengøring, havearbejde mv.) op til 6.200 kr. pr. person i 2026. Kun arbejdsløn — ikke materialer — kan fradrages." },
       { question: "Kan jeg trække fagforening fra i skat?", answer: "Ja, du kan trække kontingent til fagforening fra op til 7.000 kr. årligt i 2026. A-kasse-kontingent kan trækkes fuldt fra uden loft. Begge fradrages som ligningsmæssige fradrag." },
       { question: "Hvornår skal jeg indberette fradrag?", answer: "De fleste fradrag indberettes automatisk af din arbejdsgiver, bank eller fagforening. Kørselsfradrag og håndværkerfradrag skal du selv indberette via skat.dk. Fristen er typisk 1. maj for årsopgørelsen." },
@@ -1452,9 +1452,9 @@ const daPages: Record<string, PageData> = {
     "rentefradrag": {
       slug: "rentefradrag",
       title: "Rentefradrag beregner 2026 - Se din skattebesparelse",
-      description: "Hvad sparer du i skat? Fradragsværdi 2026: ca. 25,6-33,6%. Eksempel: 50.000 kr renter = ca. 13.000-17.000 kr i skattebesparelse. Beregn dit rentefradrag på boliglån og andre lån.",
+      description: "Hvad sparer du i skat? Fradragsværdi 2026: 33,6% på de første 50.000 kr. renter. Eksempel: 50.000 kr renter = 16.800 kr i skattebesparelse. Beregn dit rentefradrag på boliglån og andre lån.",
       metaTitle: "Rentefradrag beregner 2026 - Se din skattebesparelse",
-      metaDescription: "Hvad sparer du i skat? Fradragsværdi 2026: ca. 25,6-33,6%. Eksempel: 50.000 kr renter = ca. 13.000-17.000 kr i skattebesparelse. Beregn dit rentefradrag på boliglån og andre lån.",
+      metaDescription: "Hvad sparer du i skat? Fradragsværdi 2026: 33,6% på de første 50.000 kr. renter. Eksempel: 50.000 kr renter = 16.800 kr i skattebesparelse. Beregn dit rentefradrag på boliglån og andre lån.",
       keywords: ["rentefradrag", "rentefradrag beregner", "rentefradrag 2026", "beregn rentefradrag", "skattefradrag renter", "boliglån fradrag", "renteudgifter fradrag", "negativ kapitalindkomst", "fradragsværdi"],
       ogTitle: "Rentefradrag beregner 2026",
       ogDescription: "Beregn hvor meget du sparer i skat på dine renteudgifter.",
@@ -1466,13 +1466,13 @@ const daPages: Record<string, PageData> = {
       schemaCategory: "FinanceApplication",
       faqItems: [
       { question: "Hvad er rentefradrag?", answer: "Rentefradrag er et skattefradrag, du får for dine renteudgifter. Det reducerer din skattepligtige indkomst, så du betaler mindre i skat. Fradraget gælder for renter på boliglån, billån, forbrugslån og andre lån." },
-      { question: "Hvad er fradragsværdien i 2026?", answer: "I 2026 er den maksimale fradragsværdi ca. 33,6% for renteudgifter under 50.000 kr. (100.000 kr. for par). For beløb over denne grænse er fradragsværdien ca. 25,6%. Kommuneskatten påvirker den præcise værdi." },
+      { question: "Hvad er fradragsværdien i 2026?", answer: "I 2026 er fradragsværdien 33,6% for de første 50.000 kr. renteudgifter (100.000 kr. for par) og 25,6% for beløbet derudover. Værdien afhænger altså af beløbsgrænsen — ikke af din kommune og ikke af om du betaler topskat." },
       { question: "Hvilke renter kan jeg få fradrag for?", answer: "Du kan få fradrag for renter på boliglån (realkreditlån og banklån), billån, studielån, forbrugslån, og kassekreditter. Renter på SU-lån giver også fradrag." },
       { question: "Hvornår får jeg rentefradraget?", answer: "Rentefradraget indregnes automatisk i din forskudsopgørelse, hvis du har indberettet dine lån. Du får dermed lavere skat hen over året. Alternativt får du overskydende skat tilbage ved årsopgørelsen." },
       { question: "Hvordan påvirker rentefradrag min boligøkonomi?", answer: "Rentefradraget gør det billigere at have lån, fordi staten betaler en del af dine renteudgifter via skatten. Det kan gøre det mere attraktivt at låne til bolig frem for at leje." },
       { question: "Skal jeg gøre noget for at få rentefradrag?", answer: "Nej, banker og realkreditinstitutter indberetter automatisk dine renteudgifter til SKAT. Du skal dog kontrollere, at beløbene er korrekte i din forskudsopgørelse." },
       { question: "Hvad er negativ kapitalindkomst?", answer: "Negativ kapitalindkomst opstår, når dine renteudgifter er større end dine kapitalindtægter (f.eks. renteindtægter fra opsparing). Det er den negative kapitalindkomst, du får fradrag for." },
-      { question: "Falder rentefradraget?", answer: "Ja, den høje fradragsværdi (over bundfradraget) er blevet reduceret over de seneste år og er nu ca. 25,6%. Den lave fradragsværdi (under bundfradraget) er relativt stabil omkring 33%." },
+      { question: "Falder rentefradraget?", answer: "Nej. I 2026 er den høje fradragsværdi 33,6% for de første 50.000 kr. (100.000 kr. for par), og beløbet over grænsen har den lave værdi på 25,6%. Grænsen har været uændret i en årrække." },
       ],
     },
     "boligstoette": {

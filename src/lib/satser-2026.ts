@@ -62,9 +62,9 @@ export const SATSER_2026 = {
   koerselBroOeresund: 50, // Øresundsbroen, bil/motorcykel, pr. tur (2026)
   koerselBroOeresundOff: 8, // Øresundsbroen, tog/offentlig, pr. tur (2026)
 
-  // Rentefradrag (skattemæssig fradragsværdi)
-  rentefradragVaerdi: 0.256, // 25,6 % under grænsen
-  rentefradragVaerdiHoej: 0.336, // 33,6 % for negativ kapitalindkomst over grænsen
+  // Rentefradrag (skattemæssig fradragsværdi) — se RENTEFRADRAG_2026
+  rentefradragVaerdi: 0.336, // 33,6 % på de første 50.000/100.000 kr.
+  rentefradragVaerdiHoej: 0.256, // 25,6 % på beløbet over grænsen
 
   // Pension (kilde: skat.dk)
   ratepensionMax: 68700, // privat ratepension, fuldt fradrag
@@ -239,6 +239,32 @@ export const BOLIGSTOETTE_2026 = {
     "møbler i en møbleret bolig",
     "vaskeri",
   ],
+} as const;
+
+/**
+ * Rentefradragets fradragsværdi.
+ *
+ * Reglen er et beløbsgrænsebaseret to-trinssats: de første 50.000 kr.
+ * (100.000 kr. for ægtepar/samlevende med fælles økonomi) i årlige
+ * renteudgifter giver 33,6 %, og beløbet over grænsen giver 25,6 %.
+ * Værdien afhænger altså af beløbsgrænsen — ikke af din kommune, og
+ * ikke af om du betaler topskat (rentefradraget er et kapitalindkomstfradrag).
+ *
+ * `officialRules` dokumenterer hvilke renter der kan fradrages, og at banken
+ * indberetter dem automatisk. Selve procenttallet er dokumenteret via
+ * `ratesReference`; se IMPLEMENTATION_PLAN.md (opgave R1) for, at den
+ * primære procenttabel endnu ikke er fundet i en myndighedskilde.
+ */
+export const RENTEFRADRAG_2026 = {
+  verifiedAt: "2026-09-25",
+  officialRules:
+    "https://skat.dk/borger/fradrag/fradrag-for-renter",
+  ratesReference:
+    "https://borgerhaandbog.dk/skat-og-personlig-oekonomi/rentefradrag",
+  highRate: 0.336,
+  lowRate: 0.256,
+  highRateLimitSingle: 50000,
+  highRateLimitCouple: 100000,
 } as const;
 
 export type Barsel2026 = typeof BARSEL_2026;

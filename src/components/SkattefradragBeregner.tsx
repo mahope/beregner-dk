@@ -1,12 +1,17 @@
 "use client";
 
-import { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import { useLocale } from '@/components/LocaleProvider';
 import { ShareCalculation } from "@/components/ShareCalculation";
 import { CopyResultButton, ResetButton } from "@/components/ui";
-import { generateShareableLink, getStateFromUrl, CalculationState, ShareableLink } from "@/lib/calculation-state";
-import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
-import { useLocale } from '@/components/LocaleProvider';
+import { initScrollDepthTracking, trackCalculation } from "@/lib/analytics";
+import { CalculationState, ShareableLink, generateShareableLink, getStateFromUrl } from "@/lib/calculation-state";
 import { formatNumber as formatNum, getCurrencySuffix } from '@/lib/format';
+import { beregnRentefradrag } from '@/lib/rentefradrag';
+import { RENTEFRADRAG_2026 } from '@/lib/satser-2026';
+
+const RENTEFRADRAG_HOEJ_PCT = (RENTEFRADRAG_2026.highRate * 100).toLocaleString('da-DK');
+const RENTEFRADRAG_LAV_PCT = (RENTEFRADRAG_2026.lowRate * 100).toLocaleString('da-DK');
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 // 2026 fradragssatser og grænser
 const SATSER_2026 = {
@@ -20,9 +25,6 @@ const SATSER_2026 = {
   koerselSatsHoej: 1.14, // kr./km over 120 km
   koerselDageMax: 216, // max arbejdsdage
 
-  // Rentefradrag
-  rentefradragVaerdi: 25.6, // % (skattemæssig fradragsværdi for kapitalindkomst under bundfradrag)
-  rentefradragVaerdiHoej: 33.6, // % for negative kapitalindkomst over grænsen i visse kommuner
 
   // Fagforening og a-kasse
   fagforeningMax: 7000, // max fradrag for fagforening (2026)
@@ -102,7 +104,8 @@ export default function SkattefradragBeregner() {
     // Rentefradrag
     const rente = Number(aarligRente) || 0;
     const renteFradrag = rente; // fuldt fradragsberettiget
-    const renteBesparelse = Math.round(rente * (SATSER_2026.rentefradragVaerdi / 100));
+    // Beløbsgrænsebaseret to-trinssats, 33,6 % op til 50.000 kr. (enlig), 25,6 % over
+    const renteBesparelse = Math.round(beregnRentefradrag(rente, "single").besparelse);
 
     // Fagforening + a-kasse
     const fagforeningBeloeb = Math.min(Number(fagforening) || 0, SATSER_2026.fagforeningMax);
@@ -220,7 +223,9 @@ export default function SkattefradragBeregner() {
           </div>
         </div>
         <p className="text-xs text-gray-500 dark:text-gray-400">
-          Rentefradrag har en skatteværdi på ca. {SATSER_2026.rentefradragVaerdi}% af renteudgifterne.
+          Rentefradrag har en skatteværdi på {RENTEFRADRAG_HOEJ_PCT}% af de første{" "}
+          {RENTEFRADRAG_2026.highRateLimitSingle.toLocaleString("da-DK")} kr. renteudgifter
+          (beregnet som enlig) og {RENTEFRADRAG_LAV_PCT}% af beløbet over.
         </p>
       </div>
 
@@ -367,7 +372,10 @@ export default function SkattefradragBeregner() {
             <div className="bg-blue-50 dark:bg-blue-900/20 rounded-2xl p-5">
               <h3 className="font-semibold text-blue-800 dark:text-blue-300 mb-1">Rentefradrag detalje</h3>
               <p className="text-sm text-blue-700 dark:text-blue-400">
-                Dine renteudgifter på {formatKr(resultat.renteFradrag)} giver en skattebesparelse på ca. {formatKr(resultat.renteBesparelse)} (fradragsværdi {SATSER_2026.rentefradragVaerdi}%).
+                Dine renteudgifter på {formatKr(resultat.renteFradrag)} giver en skattebesparelse
+                på {formatKr(resultat.renteBesparelse)} ({RENTEFRADRAG_HOEJ_PCT}% op til{" "}
+                {RENTEFRADRAG_2026.highRateLimitSingle.toLocaleString("da-DK")} kr., derefter{" "}
+                {RENTEFRADRAG_LAV_PCT}%).
               </p>
             </div>
           )}

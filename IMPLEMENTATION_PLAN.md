@@ -1,10 +1,11 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — C11 (indkomstfelt, så pensionstillægget regnes ned) FÆRDIG 2026-09-25
-21:32 CEST. Deploynoter for C4-C10, D1 og C11 er åbne og kan først verificeres efter
-07:30-vinduet 2026-09-26.
-Næste iteration: (1) `/rentefradrag`'s manglende primære kilde; (2) D2 (børnetilskudssatser,
-lav trafikvirkning); (3) `/kvadratmeter`'s åbne del (materialer til 5-10 % spild).
+STATUS: KØ — R1 (rentefradrag: ét ratested, kilde og rettede modstridende FAQ'er) FÆRDIG
+2026-09-25 22:15 CEST. Deploynoter for C4-C10, D1, C11 og R1 er åbne og kan først
+verificeres efter 07:30-vinduet 2026-09-26.
+Næste iteration: (1) `/kvadratmeter`'s åbne del (materialer til 5-10 % spild, ny logik med
+tests); (2) D2 (børnetilskudssatser, lav trafikvirkning); (3) `/rentefradrag`'s primære
+procenttabel, hvis Mads kan finde den (se ❓ Til Mads).
 
 ## Fase 3 — trafik-drevet
 
@@ -1401,6 +1402,67 @@ lav trafikvirkning); (3) `/kvadratmeter`'s åbne del (materialer til 5-10 % spil
   kan skade domænet mere end det hjælper. Instrumentet er nu i stedet en sektion på
   `/pension` med synlige tal.
 
+#### 23. [x] FÆRDIG 2026-09-25 — R1 — Rentefradrag: ét ratested, dokumenteret kilde og rettede modstridelser
+
+- **Iteration start:** 2026-09-25 21:59. Datagrund: `/rentefradrag` 299 besøgende/28d
+  (+149 %), Search Console 4.492 visninger, 219 klik, **CTR 4,9 %**, position 6,7 pr. 2026-09-23.
+  CTR'en er altså ikke problemet; det var korrekthed og manglende kilde, som planen havde
+  peget på.
+- **Research 2026-09-25 (skat.dk hentet direkte):** skat.dk/borger/fradrag/fradrag-for-renter
+  dokumenterer hvilke renter der kan fradrages, at banken indberetter dem automatisk, og
+  hvordan fradraget fordeles mellem meddebitorer — men **ikke** procenttabellen. Den
+  dokumenterede struktur (beløbsgrænsen på 50.000 kr. enlig / 100.000 kr. par, højere værdi
+  under grænsen) er bekræftet af Borgerhåndbogs rentefradrag-side, som samtidig slår fast,
+  at værdien **ikke** afhænger af kommunen og **ikke** stiger ved topskat, fordi
+  rentefradraget er et kapitalindkomstfradrag. Bing/DuckDuckGo var blokerede for
+  autocomplete, så procenttabellen er ikke fundet i en myndighedskilde (se ❓ Til Mads).
+- **Fundne fejl (alle rettet):**
+  1. `src/lib/satser-2026.ts` havde ratestedet **omvendt**: 25,6 % "under grænsen" og
+     33,6 % "over grænsen", imod beregneren og den dokumenterede regel. Værdierne var
+     desuden døde kode — ingen komponent importerede dem.
+  2. `SkattefradragBeregner.tsx` havde sin **egen** kopi af satserne med samme omvendte
+     betydning plus kommentaren "i visse kommuner", og regnede en flad 25,6 % — så
+     `/skattefradrag` og `/rentefradrag` gav to forskellige tal for samme renteudgift.
+  3. Prose på tre sider sagde, at fradragsværdien "afhænger af din kommune" (fejl) og
+     FAQ'en på `/rentefradrag` kaldte den lave sats på 25,6 % for "høj" og omvendt.
+  4. `/renteberegner` skrev "ca. 33 %" og "afhænger af lånetypen og året" og lovede
+     3,35 % efter skat.
+- **Beslutning/implementering:** Nyt `RENTEFRADRAG_2026` i `src/lib/satser-2026.ts` med
+  ratser, beløbsgrænser, `officialRules` (skat.dk), `ratesReference` og `verifiedAt`,
+  efter samme mønster som BARSEL_2026/BOLIGSTOETTE_2026. Nyt rent logik-modul
+  `src/lib/rentefradrag.ts` med `beregnRentefradrag()` + 6 tests; begge beregnere bruger
+  det nu, så de ikke kan glide fra hinanden igen. `SATSER_2026.rentefradragVaerdi*` er
+  rettet til samme værdier og låst i `satser-2026.test.ts`. Prose, FAQ'er, tabel og
+  metaDescription på `/rentefradrag`, `/renteberegner`, `/boliglaan`, `/skattefradrag` og
+  `fradrag-2026-komplet-guide` er rettet til den dokumenterede regel med kilde +
+  verificeringsdato. `/rentefradrag` linker nu tilbage til `/renteberegner`.
+- **Bruger-facinge tal er uændrede på `/rentefradrag`:** 50.000 kr × 33,6 % + 30.000 kr ×
+  25,6 % = 24.480 kr. Det var allerede korrekt; kun "ca."-hedge'en, kommune-påstanden og
+  de modstridende steder er væk. `SkattefradragBeregner` giver nu 33,6 % op til 50.000 kr.
+  (beregnet som enlig) i stedet for flad 25,6 % — det er en **ændret** besparelse dér.
+- **Verifikation 2026-09-25:** `npm run lint` grøn (487 filer), `npm run test` grøn
+  (1052/1052 tests, 101 filer), `npm run build` grøn (139 sider + typecheck). Lokal
+  standalone-SSR-kontrol af `/rentefradrag` og `/skattefradrag` viser "33,6 %"/"25,6 %"
+  med dansk decimalkomma, kilde-links til skat.dk og Borgerhåndbog (2 forekomster) og
+  `/api/health` svarer `status: ok`.
+- **Acceptkriterier:**
+  1. Ét ratested for alle rentefradragstal — ✅ `RENTEFRADRAG_2026` bruges af begge
+     beregnere, siden og bloggen; ingen lokale kopier findes (grep-verificeret).
+  2. `SATSER_2026.rentefradragVaerdi` er 33,6 % og `...Hoej` 25,6 % — ✅ låst i test.
+  3. Ingen "afhænger af din kommune"-påstand om fradragsværdien — ✅ fjernet på
+     `/rentefradrag`, `/renteberegner` og bloggen.
+  4. Kilde + verificeringsdato står på siden — ✅.
+  5. Fuld gate grøn — ✅.
+- **Forventet effekt:** Lille direkte trafikvirkning (CTR'en var allerede 4,9 %), men
+  fjerner fire dokumenterede modstridelser på tværs af fem sider — tillidsværdi og
+  lavere risiko for at nogen regeler efter de forkerte tal.
+- **MÅL:** `/rentefradrag` baseline 299 besøgende/28d pr. 2026-09-25; Search Console
+  4.492 visninger / 219 klik / CTR 4,9 % / pos. 6,7 pr. 2026-09-23 — genmål 2026-10-09.
+- **Kendte huller bevidst ikke lukket:** `SkattefradragBeregner` har stadig egne,
+  forældede lokale satser for kørselsfradrag (2,28/1,14 kr./km) og
+  `kommuneskatSnit: 25.1`, som afviger fra `satser-2026.ts` (3,17/1,59 kr./km). Ikke rørt
+  her, fordi det er en selvstændig matematikændring med tests — ny opgave.
+
 #### D2. Ny kandidat — børnetilskudssatserne er ikke verificeret nogen steder
 
 - **Datagrund:** C10 fjernede de uverificerede "ca. 6.300/6.600 kr." fra artikel og
@@ -1426,6 +1488,17 @@ lav trafikvirkning); (3) `/kvadratmeter`'s åbne del (materialer til 5-10 % spil
   `{"url":"https://canonical-host/path"}`; tilføj `"deleted":true` kun for en
   bevidst slettet/tidligere redirectet URL. Denne eksterne hook skal ikke køres manuelt
   i denne iteration.
+- **Rentefradragets primære procenttabel (R1):** skat.dk dokumenterer *hvilke* renter der
+  fradrages, men ikke værdien i procent. Vi bruger 33,6 % / 25,6 % på hver side af
+  50.000/100.000 kr., fordi det er de officielle 2026-marginalsatser, og en
+  dansk sekundærkilde (Borgerhåndbog) angiver "ca. 33,7 %" / "ca. 25 %" for samme
+  struktur. Er den rigtige myndighedstabel fundet, skal den ind i `RENTEFRADRAG_2026` —
+  det er én fil og de to beregnere følger med automatisk.
+- **Indhold, der mangler internt link (kandidat til næste iterationer):**
+  `SkattefradragBeregner` bruger stadig egne, forældede kørselssatser
+  (2,28/1,14 kr./km) og `kommuneskatSnit: 25.1` mod `satser-2026.ts`'s
+  3,17/1,59 kr./km — samme slags dobbeltdefinitionsfejl som R1 fandt. Skal konsolideres
+  i en egen opgave med tests.
 - Public `/api/v1/bmi` er bevidst uændret, fordi `/api/v1` er en frosset ekstern
   kontrakt. Den returner fortsat rå BMI med voksengrænser uden alder. En eventuel
   dokumentations- eller adfærdsændring kræver en eksplicit beslutning.
@@ -1461,10 +1534,13 @@ lav trafikvirkning); (3) `/kvadratmeter`'s åbne del (materialer til 5-10 % spil
   så både svar-først-titel og et synligt 2026-talburk burde give effekt. Samme mønster som
   C1-C6/C9, men på en blogartikel:kræver en ny routetest og kildeførte tal.
   MÅL ved eventuel opgave: baseline 5.145 visninger, CTR 0,5 % pr. 2026-09-23.
-- `/rentefradrag` 299 besøgende/28d (+149 %): høj vækst og CTR 4,9 % — positionen er
-  allerede stærk, så her er **ikke** CTR problemet. Reelt hull: 33,6/25,6 % er
-  upræcise og mangler primær kilde, og siden bruges stadig ikke af `/renteberegner` på
-  andre domæner. MÅL ved eventuel opgave: baseline 289 2026-09-23.
+- ~~`/rentefradrag`~~ er lukket som R1 den 2026-09-25, se opgave 23: ét ratested med
+  kilde, fire rettede modstridelser og ingen "afhænger af din kommune"-påstand. MÅL:
+  Search Console baseline 4.492 visninger, 219 klik, CTR 4,9 %, position 6,7 pr.
+  2026-09-23; Plausible 299 besøgende/28d pr. 2026-09-25 — genmål 2026-10-09.
+  Næste skridt er **ikke** flere felter: `/renteberegner` linkede allerede til siden på
+  begge domæner (linket er ikke locale-gated), så den interne forbindelse findes. Det
+  åbne er indhold og den primære procenttabel (❓ Til Mads).
 - `/dato` 1.008 besøgende/28d (+92 %): stærkeste side og allerede bred funktionstil;
   konkurrenten iKalender tilbyder arbejdsdage uden helligdager, mens vores side
   springer helligdage over. Ingen ændring før et konkret søgeintentionsgap kan dokumenteres.
@@ -1915,4 +1991,14 @@ landmark=lån, piggybank=opsparing osv.).
   8.729 kr. og I alt pr. måned før skat 16.273 kr. ved standardværdierne, og prosaen skal
   nævne at beregneren bruger grænserne fra tabellen. Tjek også at indledningens liste nu
   siger 12.011 kr. til 16.273 kr. i stedet for "ca. 13.000-15.000 kr/måned".
+  HTTP 200 alene utilstrækkeligt. **Kan først verificeres fra 07:30-vinduet 2026-09-26.**
+- **VERIFICÉR DEPLOY:** R1 rentefradrag — ét ratested (`RENTEFRADRAG_2026` +
+  `src/lib/rentefradrag.ts`), kilde med verificeringsdato på `/rentefradrag` og rettede
+  FAQ'er/tabel på `/rentefradrag`, `/renteberegner`, `/boliglaan`, `/skattefradrag` og
+  `fradrag-2026-komplet-guide` — commit endnu ikke sat (se `git log --oneline -1` på
+  `ceo/rentefradrag-kilde`), merge 2026-09-25 22:15 CEST. Verificér efter
+  07:30-vinduet 2026-09-26 på live DA `/rentefradrag`: tabellen skal vise 33,6 % /
+  25,6 % med **ét** decimalkomma, teksten skal sige at værdien afhænger af
+  beløbsgrænsen og ikke af kommunen, og kilde-links til skat.dk + borgerhaandbog skal
+  være i DOM. Live `/skattefradrag` skal vise "33,6 % af de første 50.000 kr.".
   HTTP 200 alene utilstrækkeligt. **Kan først verificeres fra 07:30-vinduet 2026-09-26.**

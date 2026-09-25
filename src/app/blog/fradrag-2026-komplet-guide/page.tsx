@@ -1,7 +1,7 @@
-import type { Metadata } from "next";
-import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
+import type { Metadata } from "next";
+import Link from "next/link";
 
 export async function generateMetadata(): Promise<Metadata> {
   const dc = await getCurrentDomainConfig();
@@ -48,7 +48,7 @@ const faqItems = [
   {
     question: "Hvor meget sparer jeg på rentefradraget?",
     answer:
-      "Rentefradraget giver en skattebesparelse på ca. 25-33% af dine renteudgifter, afhængigt af din kommune. Betaler du 50.000 kr i renter, sparer du ca. 12.500-16.500 kr i skat.",
+      "De første 50.000 kr. i renteudgifter (100.000 kr. for par) har en fradragsværdi på 33,6%, og beløbet over grænsen 25,6%. Værdien afhænger altså af beløbsgrænsen, ikke af din kommune. Betaler du 50.000 kr i renter, sparer du ca. 16.800 kr i skat.",
   },
 ];
 
@@ -148,11 +148,17 @@ export default function FradragGuidePage() {
           fra på alle lån — boliglån, billån, forbrugslån og SU-lån. Skattebesparelsen er:
         </p>
         <ul>
-          <li><strong>Negativ kapitalindkomst under 50.000 kr:</strong> Ca. 25-33% fradragsværdi</li>
-          <li><strong>Negativ kapitalindkomst over 50.000 kr:</strong> Ca. 25-33% fradragsværdi</li>
+          <li>
+            <strong>De første 50.000 kr. (100.000 kr. for par):</strong> 33,6% fradragsværdi
+          </li>
+          <li>
+            <strong>Beløbet over grænsen:</strong> 25,6% fradragsværdi
+          </li>
         </ul>
         <p>
-          Renterne indberettes automatisk af din bank. Beregn din besparelse med vores{" "}
+          Renterne indberettes automatisk af din bank. Fradragsværdien afhænger af beløbsgrænsen
+          — ikke af din kommune og ikke af om du betaler topskat, fordi rentefradraget er et
+          kapitalindkomstfradrag. Beregn din besparelse med vores{" "}
           <Link href="/rentefradrag" className="text-blue-600 hover:underline">rentefradrag-beregner</Link>.
         </p>
 

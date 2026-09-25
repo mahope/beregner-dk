@@ -1,14 +1,19 @@
-import { generatePageMetadata } from "@/lib/page-helpers";
-import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
-import { getPageData } from "@/lib/page-data";
-import RentefradragBeregner from "@/components/RentefradragBeregner";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import FAQ from "@/components/FAQ";
 import RelatedCalculators from "@/components/RelatedCalculators";
+import RentefradragBeregner from "@/components/RentefradragBeregner";
 import {
   CalculatorSchema,
   FAQSchema,
 } from "@/components/StructuredData";
-import Breadcrumbs from "@/components/Breadcrumbs";
+import { getCurrentDomainConfig, getLocale } from "@/lib/get-locale";
+import { getPageData } from "@/lib/page-data";
+import { generatePageMetadata } from "@/lib/page-helpers";
+import { RENTEFRADRAG_2026 } from "@/lib/satser-2026";
+
+const HOEJ_SATS_PCT = (RENTEFRADRAG_2026.highRate * 100).toLocaleString("da-DK");
+const LAV_SATS_PCT = (RENTEFRADRAG_2026.lowRate * 100).toLocaleString("da-DK");
+import Link from "next/link";
 
 export async function generateMetadata() {
   return generatePageMetadata("rentefradrag");
@@ -68,17 +73,46 @@ export default async function RentefradragPage() {
                 </thead>
                 <tbody>
                   <tr>
-                    <td className="border p-3">Under 50.000 kr. (enlig) / 100.000 kr. (par)</td>
-                    <td className="border p-3">Ca. 33,6%</td>
+                    <td className="border p-3">
+                      De første {RENTEFRADRAG_2026.highRateLimitSingle.toLocaleString("da-DK")} kr. (enlig) /{" "}
+                      {RENTEFRADRAG_2026.highRateLimitCouple.toLocaleString("da-DK")} kr. (par)
+                    </td>
+                    <td className="border p-3">{HOEJ_SATS_PCT}%</td>
                   </tr>
                   <tr>
-                    <td className="border p-3">Over 50.000 kr. (enlig) / 100.000 kr. (par)</td>
-                    <td className="border p-3">Ca. 25,6%</td>
+                    <td className="border p-3">Beløbet over grænsen</td>
+                    <td className="border p-3">{LAV_SATS_PCT}%</td>
                   </tr>
                 </tbody>
               </table>
+              <p className="text-sm text-gray-700 mt-2">
+                Fradragsværdien afhænger af beløbsgrænsen — <strong>ikke af din kommune</strong> og
+                ikke af om du betaler topskat. Rentefradraget er et kapitalindkomstfradrag, så
+                topskat på din øvrige indkomst hæver ikke værdien. Er der både renteudgifter og
+                renteindtægter, nettinges de først, så det er det samlede beløb, der tæller.
+              </p>
               <p className="text-sm text-gray-500 mt-2">
-                * Den præcise fradragsværdi afhænger af din kommune.
+                * Kilde:{" "}
+                <a
+                  href={RENTEFRADRAG_2026.officialRules}
+                  className="underline hover:text-gray-700"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  SKAT, fradrag for renteudgifter
+                </a>{" "}
+                (hvilke renter der kan fradrages, og at banken indberetter dem automatisk) og{" "}
+                <a
+                  href={RENTEFRADRAG_2026.ratesReference}
+                  className="underline hover:text-gray-700"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Borgerhåndbog, rentefradrag
+                </a>{" "}
+                for beløbsgrænsen på {RENTEFRADRAG_2026.highRateLimitSingle.toLocaleString("da-DK")} kr. /{" "}
+                {RENTEFRADRAG_2026.highRateLimitCouple.toLocaleString("da-DK")} kr. Verificeret{" "}
+                {RENTEFRADRAG_2026.verifiedAt}.
               </p>
 
               <h3 className="text-xl font-semibold mt-6 mb-3">Eksempel</h3>
@@ -89,7 +123,15 @@ export default async function RentefradragPage() {
                 <li>De første 50.000 kr. giver fradrag: 50.000 × 33,6% = 16.800 kr.</li>
                 <li>De næste 30.000 kr. giver fradrag: 30.000 × 25,6% = 7.680 kr.</li>
                 <li><strong>Samlet skattebesparelse: 24.480 kr.</strong></li>
+                <li>
+                  Er I gift eller samlevende med fælles økonomi, er grænsen 100.000 kr., så
+                  hele beløbet ville give 80.000 × 33,6% = 26.880 kr.
+                </li>
               </ul>
+              <p className="text-sm text-gray-700 mt-3">
+                Vil du se, hvad et lån koster dig i renter, før du regner på fradraget, kan du
+                bruge <Link href="/renteberegner" className="underline">renteberegneren</Link>.
+              </p>
             </div>
           </section>
           )}

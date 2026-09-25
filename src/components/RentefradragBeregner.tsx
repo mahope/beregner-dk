@@ -1,19 +1,16 @@
 'use client';
 
-import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
-import { CircleCheck, Landmark, Lightbulb, User, Users, X } from 'lucide-react';
 import { ShareCalculation } from '@/components/ShareCalculation';
 import { CopyResultButton, ResetButton } from '@/components/ui';
-import { generateShareableLink, getStateFromUrl, CalculationState } from '@/lib/calculation-state';
-import { trackCalculation, initScrollDepthTracking } from '@/lib/analytics';
+import { initScrollDepthTracking, trackCalculation } from '@/lib/analytics';
+import { CalculationState, generateShareableLink, getStateFromUrl } from '@/lib/calculation-state';
+import { type CivilStatus, beregnRentefradrag } from '@/lib/rentefradrag';
+import { RENTEFRADRAG_2026 } from '@/lib/satser-2026';
 
-// 2026 rates (approximate)
-const LOW_THRESHOLD_SINGLE = 50000;
-const LOW_THRESHOLD_COUPLE = 100000;
-const FRADRAG_LOW = 0.336;    // ~33.6% under threshold
-const FRADRAG_HIGH = 0.256;   // ~25.6% over threshold
-
-type CivilStatus = 'single' | 'couple';
+const HOEJ_SATS_PCT = (RENTEFRADRAG_2026.highRate * 100).toLocaleString('da-DK');
+const LAV_SATS_PCT = (RENTEFRADRAG_2026.lowRate * 100).toLocaleString('da-DK');
+import { CircleCheck, Landmark, Lightbulb, User, Users, X } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 interface LoanEntry {
   id: number;
@@ -113,22 +110,16 @@ export default function RentefradragBeregner() {
 
     // Negative capital income = deductible
     const deductibleAmount = Math.abs(netCapitalIncome);
-    const threshold = civilStatus === 'single' ? LOW_THRESHOLD_SINGLE : LOW_THRESHOLD_COUPLE;
+    const fradrag = beregnRentefradrag(deductibleAmount, civilStatus);
+    const threshold = fradrag.graense;
 
-    let lowRateAmount = 0;
-    let highRateAmount = 0;
+    const lowRateAmount = fradrag.hoejAndel;
+    const highRateAmount = fradrag.lavAndel;
 
-    if (deductibleAmount <= threshold) {
-      lowRateAmount = deductibleAmount;
-    } else {
-      lowRateAmount = threshold;
-      highRateAmount = deductibleAmount - threshold;
-    }
-
-    const lowRateDeduction = lowRateAmount * FRADRAG_LOW;
-    const highRateDeduction = highRateAmount * FRADRAG_HIGH;
-    const totalDeduction = lowRateDeduction + highRateDeduction;
-    const effectiveRate = deductibleAmount > 0 ? (totalDeduction / deductibleAmount) * 100 : 0;
+    const lowRateDeduction = lowRateAmount * RENTEFRADRAG_2026.highRate;
+    const highRateDeduction = highRateAmount * RENTEFRADRAG_2026.lowRate;
+    const totalDeduction = fradrag.besparelse;
+    const effectiveRate = fradrag.effektivSats;
     const monthlyBenefit = totalDeduction / 12;
 
     return {
@@ -278,7 +269,7 @@ export default function RentefradragBeregner() {
                       {result.lowRateAmount > 0 && (
                         <div className="flex justify-between">
                           <span className="text-gray-600 dark:text-gray-400">
-                            Fradrag {FRADRAG_LOW * 100}% af {result.lowRateAmount.toLocaleString('da-DK')} kr.
+                            Fradrag {HOEJ_SATS_PCT}% af {result.lowRateAmount.toLocaleString('da-DK')} kr.
                           </span>
                           <span className="font-medium dark:text-gray-200">{result.lowRateDeduction.toLocaleString('da-DK')} kr.</span>
                         </div>
@@ -286,7 +277,7 @@ export default function RentefradragBeregner() {
                       {result.highRateAmount > 0 && (
                         <div className="flex justify-between">
                           <span className="text-gray-600 dark:text-gray-400">
-                            Fradrag {FRADRAG_HIGH * 100}% af {result.highRateAmount.toLocaleString('da-DK')} kr.
+                            Fradrag {LAV_SATS_PCT}% af {result.highRateAmount.toLocaleString('da-DK')} kr.
                           </span>
                           <span className="font-medium dark:text-gray-200">{result.highRateDeduction.toLocaleString('da-DK')} kr.</span>
                         </div>
@@ -313,7 +304,8 @@ export default function RentefradragBeregner() {
               )}
 
               <div className="text-xs text-gray-500 dark:text-gray-400 mt-4">
-                * Beregningen er vejledende og baseret på gennemsnitlige 2026-satser.
+                * Beregningen er vejledende. Fradragsværdien er en beløbsgrænsebaseret
+                to-trinssats for 2026 — se kilden nederst på siden.
               </div>
             </div>
           ) : (
@@ -342,8 +334,11 @@ export default function RentefradragBeregner() {
         <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
           <h4 className="font-semibold text-blue-800 dark:text-blue-300 mb-2 flex items-center gap-2"><Lightbulb className="h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden="true" focusable="false" />Bundfradrag 2026</h4>
           <p className="text-sm text-blue-700 dark:text-blue-400">
-            De første {civilStatus === 'single' ? '50.000' : '100.000'} kr. i renteudgifter 
-            giver højere fradragsværdi (33,6%) end beløb derover (25,6%).
+            De første {RENTEFRADRAG_2026.highRateLimitSingle.toLocaleString('da-DK')} kr. i renteudgifter
+            (enlig) eller {RENTEFRADRAG_2026.highRateLimitCouple.toLocaleString('da-DK')} kr. (par) giver
+            {HOEJ_SATS_PCT}% i skatteværdi. Beløbet over grænsen giver
+            {LAV_SATS_PCT}%. Værdien afhænger af beløbsgrænsen — ikke af
+            din kommune.
           </p>
         </div>
         <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
