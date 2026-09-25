@@ -8,7 +8,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const baseUrl = dc.baseUrl;
 
   return {
-    title: "Leasing af bil 2026: Pris, fordele, ulemper og guide | MinBeregner.dk",
+    title: "Leasing af bil 2026: Pris, fordele, ulemper og guide",
     description:
       "Komplet guide til leasing af bil i 2026: Privat leasing vs. billån, typiske priser, fordele og ulemper, km-grænser og hvordan du finder det bedste tilbud.",
     keywords: [

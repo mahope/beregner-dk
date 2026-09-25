@@ -8,7 +8,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const baseUrl = dc.baseUrl;
 
   return {
-    title: "Biløkonomi 2026: Hvad koster det at eje bil? | MinBeregner.dk",
+    title: "Biløkonomi 2026: Hvad koster det at eje bil?",
     description:
       "Komplet guide til biløkonomi i 2026: Registreringsafgift, grøn ejerafgift, forsikring, brændstof, værditab og finansiering. Få det fulde overblik over, hvad din bil koster om året.",
     keywords: [

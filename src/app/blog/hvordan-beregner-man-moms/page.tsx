@@ -8,7 +8,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const baseUrl = dc.baseUrl;
 
   return {
-    title: "Hvordan beregner man moms? En komplet guide | MinBeregner.dk",
+    title: "Hvordan beregner man moms? En komplet guide",
     description:
       "Lær alt om dansk moms: Hvordan du tillægger og fratrækker 25% moms, hvornår du skal momsregistreres, og hvad der er momsfrit.",
     keywords: [

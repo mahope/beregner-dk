@@ -8,7 +8,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const baseUrl = dc.baseUrl;
 
   return {
-    title: "Dagpenge 2026: Sådan finder du din dagpengesats | MinBeregner.dk",
+    title: "Dagpenge 2026: Sådan finder du din dagpengesats",
     description:
       "Komplet guide til dagpenge i 2026: Max dagpengesats, beregningsgrundlag, krav til optjening og dimittendsats. Se hvad du har ret til.",
     keywords: [

@@ -8,7 +8,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const baseUrl = dc.baseUrl;
 
   return {
-    title: "30% reglen: Hvor meget bør du bruge på husleje? | MinBeregner.dk",
+    title: "30% reglen: Hvor meget bør du bruge på husleje?",
     description:
       "Forstå 30% reglen for husleje. Lær hvordan du budgetterer din bolig korrekt baseret på din nettoindkomst.",
     keywords: [

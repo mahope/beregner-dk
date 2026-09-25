@@ -8,7 +8,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const baseUrl = dc.baseUrl;
 
   return {
-    title: "Sådan finder du din timepris som freelancer | MinBeregner.dk",
+    title: "Sådan finder du din timepris som freelancer",
     description:
       "Lær at beregne den rigtige timepris som freelancer. Trin-for-trin guide til at sætte en fair pris der dækker alle dine omkostninger.",
     keywords: [

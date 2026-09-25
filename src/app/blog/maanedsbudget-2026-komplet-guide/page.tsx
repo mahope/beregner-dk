@@ -8,7 +8,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const baseUrl = dc.baseUrl;
 
   return {
-    title: "Månedsbudget 2026 - Komplet guide til privatøkonomi | MinBeregner.dk",
+    title: "Månedsbudget 2026 - Komplet guide til privatøkonomi",
     description:
       "Komplet guide til at lave et månedsbudget i 2026: Faste og variable udgifter, 50/30/20-reglen, tommelfingerregler for bolig og opsparing. Få styr på din økonomi.",
     keywords: [

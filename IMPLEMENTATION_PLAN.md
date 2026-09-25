@@ -1,11 +1,11 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — C10 (børnepenge-satser + svar-først-artikel) FÆRDIG og merged 2026-09-25
-20:47 CEST (`259da41`). Deploynoter for C4-C10 er åbne og kan først verificeres efter
-07:30-vinduet 2026-09-26.
-Næste iteration: (1) de 20+ blogartikler har en **dobbelt domæne-suffiks i `<title>`** —
-også `/blog/barsel-2026-regler-og-satser` (183 besøgende) — se D1; (2) åben del af C8
-(indkomstfelt til pensionstillægget); (3) `/rentefradrag`'s manglende primære kilde.
+STATUS: KØ — D1 (fjernet dobbelt domæne-suffiks i 26 sidetitler) FÆRDIG 2026-09-25
+21:20 CEST. Deploynoter for C4-C10 er åbne og kan først verificeres efter 07:30-vinduet
+2026-09-26.
+Næste iteration: (1) åben del af C8 (indkomstfelt til pensionstillægget — ville ramme
+"beregn pensionstillæg" og "beregn pension af løn"); (2) `/rentefradrag`'s manglende
+primære kilde; (3) D2 (børnetilskudssatser, lav trafikvirkning).
 
 ## Fase 3 — trafik-drevet
 
@@ -1309,21 +1309,39 @@ også `/blog/barsel-2026-regler-og-satser` (183 besøgende) — se D1; (2) åben
   CTR 0,5 %, position 8,5 pr. 2026-09-23; Plausible `/boernepenge` 134 besøgende/28d
   pr. 2026-09-25. Effekt måles først fra 2026-10-09.
 
-#### D1. Ny kandidat — dubbelt domæne-suffiks i blogartiklernes `<title>`
+#### D1. [x] FÆRDIG 2026-09-25 — dubbelt domæne-suffiks i blogartiklernes `<title>`
 
 - **Datagrund:** fundet ved C10's live-kontrol 2026-09-25. Layoutets titel-template
-  tilføjer `| MinBeregner.dk`, og `/blog/boernepenge-2026-satser-og-regler` havde
+  tilføjer `| MinBeregner.dk`, og `/blog/boernepenge-2026-satser-og-satser` havde
   suffikset i sin egen `title` — SERP'en fik
   "Børnepenge 2026: ... | MinBeregner.dk | MinBeregner.dk". Samme mønster findes i
   `/blog/barsel-2026-regler-og-satser` (183 besøgende/28d, 85 % bounce),
-  `/blog/boernepenge-2026-satser-og-regler` (før C10) og formodentlig de øvrige
+  `/blog/boernepenge-2026-satser-og-satser` (før C10) og formodentlig de øvrige
   blogartikler.
 - **Scope:** gennemgå alle `title`-felter under `src/app/blog/` og fjern det
   hårdkodede domænesuffiks; kun metadata røres. Ny test der tjekker at ingen
   artikeltitel indeholder domænenavnet.
+- **Beslutning/implementering:** 25 blogartikler + blogindekset (`src/app/blog/page.tsx`,
+  også i `openGraph.title`) + `/embed` havde suffikset i egen `title`; alle 27 er renset
+  for **kun** metadata — ingen brødtekst, beregningslogik eller links er rørt. Ny
+  kilde-scannende gate `src/app/metadata-titles.test.ts` fejler på det rensede
+  `master`-indhold, så fejlen kan ikke komme tilbage.
+- **Undersøgt og befundet korrekt:** de 62 `metaTitle`-værdier i `src/lib/page-data.ts`
+  med `| MinBeregner.dk` er **ikke** dobbelt-suffiks. `buildPageMetadata` bruger
+  `title: { absolute: … }` (`src/lib/page-helpers.ts:38`), som bevidst omgår layoutets
+  template, og `getPageData(slug, locale)` returnerer lokaliserede titler — live-kontrol
+  på `Host: beraknare.se` gav svensk titel med `| Beräknare.se` for `/vandbehov`,
+  `/proteinbehov`, `/nedtaelling`, `/promille`, `/del-regning` og `/loenstigning`.
+  De blev bevidst ikke rørt.
+- **Verifikation 2026-09-25:** `npm run build` grøn (139 sider), `npm run test` grøn
+  (1030/1030, 99 filer), `npm run lint` grøn (484 filer). Lokal standalone-SSR-kontrol
+  mod alle 25 blogartikler + `/blog` + `/embed`: alle 200 og **præcis ét**
+  domænesuffiks i `<title>`.
 - **Forventet effekt:** 5-10 tegn mindre titel pr. artikel. Lav CTR-effekt i sig selv,
   men det er en ren fejl der koster troværdighed, og den er gratis at rette.
-  MÅL: `/blog/barsel-2026-regler-og-satser` baseline 183 besøgende/28d pr. 2026-09-25.
+  MÅL: `/blog/barsel-2026-regler-og-satser` baseline 183 besøgende/28d pr. 2026-09-25;
+  `/blog/boernepenge-2026-satser-og-regler` Search Console baseline 5.145 visninger,
+  27 klik, CTR 0,5 %, position 8,5 pr. 2026-09-23. Genmål 2026-10-09.
 
 #### D2. Ny kandidat — børnetilskudssatserne er ikke verificeret nogen steder
 

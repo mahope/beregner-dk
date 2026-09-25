@@ -8,7 +8,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const baseUrl = dc.baseUrl;
 
   return {
-    title: "Skat 2026: Alt du skal vide om skatteændringer | MinBeregner.dk",
+    title: "Skat 2026: Alt du skal vide om skatteændringer",
     description:
       "Komplet overblik over skat i 2026: Nye satser for personfradrag, topskat, AM-bidrag, kommuneskat og beskæftigelsesfradrag. Se hvad det betyder for din løn.",
     keywords: [

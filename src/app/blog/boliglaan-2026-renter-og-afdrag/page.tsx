@@ -8,7 +8,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const baseUrl = dc.baseUrl;
 
   return {
-    title: "Boliglån 2026: Renter, afdrag og hvad du har råd til | MinBeregner.dk",
+    title: "Boliglån 2026: Renter, afdrag og hvad du har råd til",
     description:
       "Komplet guide til boliglån i 2026: Aktuelle renter, realkreditlån vs. banklån, fast vs. variabel rente og hvad du har råd til. Beregn din boliglånsydelse.",
     keywords: [
