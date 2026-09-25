@@ -1,5 +1,6 @@
 "use client";
 
+import { BbrKilde, HentFraBbr } from "@/components/HentFraBbr";
 import { useLocale } from "@/components/LocaleProvider";
 import { ShareCalculation } from "@/components/ShareCalculation";
 import { CopyResultButton, ResetButton } from "@/components/ui";
@@ -103,6 +104,7 @@ export default function BoligstoetteBeregner() {
   const [antalBorn, setAntalBorn] = useState("");
   const [formue, setFormue] = useState("");
   const [areal, setAreal] = useState("");
+  const [arealFraBbr, setArealFraBbr] = useState(false);
   const [pensionStatus, setPensionStatus] =
     useState<BoligstoettePensionStatus | "">("");
   const [invalidSharedFields, setInvalidSharedFields] = useState<string[]>([]);
@@ -124,6 +126,7 @@ export default function BoligstoetteBeregner() {
     setAntalBorn("");
     setFormue("");
     setAreal("");
+    setArealFraBbr(false);
     setPensionStatus("");
     setInvalidSharedFields([]);
   }, []);
@@ -220,6 +223,7 @@ export default function BoligstoetteBeregner() {
       setAreal(
         hasValidInputObject && hasValidSharedArea ? String(inputs.area) : "",
       );
+      setArealFraBbr(false);
       setPensionStatus(
         hasValidInputObject && hasValidSharedPensionStatus ? inputs.pensionStatus : "",
       );
@@ -679,9 +683,21 @@ export default function BoligstoetteBeregner() {
           )}
         </div>
 
+        <HentFraBbr
+          beregner="boligstoette"
+          beskrivelse="Skriv adressen, så udfylder vi boligens areal fra Bygnings- og Boligregistret. Du kan altid rette tallet."
+          onData={(data) => {
+            if (!data.boligareal) return;
+            clearInvalidSharedField("areal");
+            setAreal(String(Math.round(data.boligareal)));
+            setArealFraBbr(true);
+          }}
+        />
+
         <div>
           <label htmlFor="areal" className="mb-2 block text-sm font-medium text-gray-700">
             Boligens areal (m²)
+            {arealFraBbr && <BbrKilde />}
           </label>
           <div className="relative">
             <input
@@ -693,6 +709,7 @@ export default function BoligstoetteBeregner() {
                onChange={(event) => {
                  clearInvalidSharedField("areal");
                  setAreal(event.target.value);
+                 setArealFraBbr(false);
                }}
               placeholder="F.eks. 65"
               aria-invalid={Boolean(areaError)}

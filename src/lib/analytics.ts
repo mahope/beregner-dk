@@ -9,6 +9,7 @@ export const ANALYTICS_EVENTS = {
   RESULT_COPIED: 'resultat_kopieret',
   AD_CLICKED: 'ad_clicked',
   SHARE_CLICKED: 'del_klikket',
+  BBR_LOOKUP: 'bbr_opslag',
 } as const;
 
 type PlausibleArgs = {
@@ -68,6 +69,15 @@ export function trackShare(calculator: string, platform: string): void {
  */
 export function trackAffiliateClick(calculator: string, destination: string): void {
   trackEvent(ANALYTICS_EVENTS.AD_CLICKED, { calculator, destination });
+}
+
+/**
+ * Track a BBR address lookup (no address data, only the outcome)
+ * @param calculator - Name of the calculator
+ * @param result - "fundet", "ikke_fundet", "uden_areal" or "utilgaengelig"
+ */
+export function trackBbrLookup(calculator: string, result: string): void {
+  trackEvent(ANALYTICS_EVENTS.BBR_LOOKUP, { calculator, result });
 }
 
 /**

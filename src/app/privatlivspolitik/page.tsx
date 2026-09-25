@@ -63,6 +63,31 @@ function DaContent() {
           Service workeren gemmer ikke gamle query-links med delestat i sin cache. Brug
           derfor kun nye fragmentlinks til følsomme oplysninger.
         </p>
+
+        <h2>Adresseopslag og BBR</h2>
+        <p>
+          På enkelte boligberegnere (fx boligstøtte, husleje og kvadratmeter) kan du slå en
+          adresse op og få boligens areal udfyldt. Det er frivilligt, og du kan altid udfylde
+          felterne selv.
+        </p>
+        <ul>
+          <li>
+            <strong>Adressesøgning:</strong> Mens du skriver, sender din browser teksten direkte
+            til Adressevælger (adressevaelger.dk), Klimadatastyrelsens offentlige adresseservice.
+            Den går ikke via vores server.
+          </li>
+          <li>
+            <strong>BBR-opslag:</strong> Når du vælger en adresse, sender din browser adressens
+            id til vores server, som slår boligen op i BBR og matriklen hos Datafordeleren og
+            sender arealet, antal værelser og byggeår tilbage. Id&apos;et sendes i selve
+            anmodningen og ikke i URL&apos;en.
+          </li>
+          <li>
+            <strong>Intet gemmes:</strong> Vi gemmer hverken adressen eller svaret fra BBR, og
+            adressen står ikke i vores logfiler. Analytics registrerer kun, at et opslag er
+            foretaget, og om det lykkedes, aldrig selve adressen.
+          </li>
+        </ul>
         <p>
           Vælger du at dele via QR-kode, sociale medier eller e-mail, sender din browser
           linket til den valgte tjeneste. QR-tjenesten modtager hele URL&apos;en. Del kun
@@ -121,10 +146,11 @@ function DaContent() {
 
         <h2>Hosting og serverlogfiler</h2>
         <p>
-          Vores website hostes hos Dokploy. Som standard logger webservere
-          IP-adresser i serverlogfiler af sikkerhedsmæssige årsager. Disse
-          logs slettes automatisk efter kort tid og bruges ikke til analyse
-          eller tracking.
+          Vores website hostes på en server, der drives med Dokploy. Serveren
+          fører af sikkerhedsmæssige årsager en teknisk adgangslog med
+          tidspunkt, IP-adresse og hvilken side der blev hentet. Loggen slettes
+          automatisk hver nat og bruges ikke til analyse eller tracking.
+          Adresser, du slår op i BBR, står ikke i loggen.
         </p>
 
         <h2>Eksterne links</h2>
@@ -163,7 +189,7 @@ function DaContent() {
         </div>
 
         <p className="text-sm text-gray-500 dark:text-gray-400 mt-8">
-          Sidst opdateret: 24. september 2026
+          Sidst opdateret: 25. september 2026
         </p>
       </div>
     </>

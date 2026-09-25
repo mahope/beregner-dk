@@ -3,6 +3,7 @@ import { generatePageMetadata } from "@/lib/page-helpers";
 import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
 import HuslejeBudgetBeregner from "@/components/HuslejeBudgetBeregner";
+import HuslejePrKvm from "@/components/HuslejePrKvm";
 import FAQ from "@/components/FAQ";
 import {
   CalculatorSchema,
@@ -48,6 +49,8 @@ export default async function HuslejePage() {
         <ForsikringAffiliate className="mt-8" />
       </div>
 
+      {locale === "da" && <HuslejePrKvm />}
+
       {/* Informativ tekst - SEO */}
       {locale === "da" && (
       <div className="prose max-w-none mb-8">
@@ -80,6 +83,12 @@ export default async function HuslejePage() {
           <li>Internet og TV</li>
           <li>Indboforsikring</li>
         </ul>
+
+        <h3>Sammenlign husleje pr. m²</h3>
+        <p>
+          Husleje pr. kvadratmeter gør det lettere at sammenligne boliger af forskellig størrelse.
+          Regn den ud ovenfor, og hent arealet fra BBR, hvis du ikke kender det.
+        </p>
 
         <h3>Tips til at finde billigere bolig</h3>
         <ul>

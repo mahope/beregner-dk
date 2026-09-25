@@ -1,0 +1,63 @@
+{
+  "data": {
+    "BBR_Bygning": {
+      "nodes": [
+        {
+          "id_lokalId": "3cdbc799-dfb1-4d25-9fe1-28e0a09c9f4e",
+          "status": "9",
+          "byg021BygningensAnvendelse": "321",
+          "byg026Opfoerelsesaar": null,
+          "byg027OmTilbygningsaar": null,
+          "byg038SamletBygningsareal": null,
+          "byg039BygningensSamledeBoligAreal": null,
+          "virkningTil": null,
+          "registreringTil": null
+        },
+        {
+          "id_lokalId": "6a1f5d34-2f60-400e-9154-777121d16b7f",
+          "status": "9",
+          "byg021BygningensAnvendelse": "320",
+          "byg026Opfoerelsesaar": null,
+          "byg027OmTilbygningsaar": null,
+          "byg038SamletBygningsareal": null,
+          "byg039BygningensSamledeBoligAreal": null,
+          "virkningTil": null,
+          "registreringTil": null
+        },
+        {
+          "id_lokalId": "78fcbe68-49a7-4913-b3b4-4b041c588bda",
+          "status": "6",
+          "byg021BygningensAnvendelse": "321",
+          "byg026Opfoerelsesaar": 1898,
+          "byg027OmTilbygningsaar": null,
+          "byg038SamletBygningsareal": 35375,
+          "byg039BygningensSamledeBoligAreal": null,
+          "virkningTil": null,
+          "registreringTil": null
+        },
+        {
+          "id_lokalId": "b37300e1-d4b2-498e-acb9-3b9b9b1e1852",
+          "status": "12",
+          "byg021BygningensAnvendelse": "320",
+          "byg026Opfoerelsesaar": null,
+          "byg027OmTilbygningsaar": null,
+          "byg038SamletBygningsareal": null,
+          "byg039BygningensSamledeBoligAreal": null,
+          "virkningTil": null,
+          "registreringTil": null
+        },
+        {
+          "id_lokalId": "c69d750c-b7b7-49f3-b6ae-a12196248ea2",
+          "status": "3",
+          "byg021BygningensAnvendelse": "320",
+          "byg026Opfoerelsesaar": null,
+          "byg027OmTilbygningsaar": null,
+          "byg038SamletBygningsareal": null,
+          "byg039BygningensSamledeBoligAreal": null,
+          "virkningTil": null,
+          "registreringTil": null
+        }
+      ]
+    }
+  }
+}

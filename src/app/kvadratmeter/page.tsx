@@ -1,3 +1,4 @@
+import BoligOpslag from "@/components/BoligOpslag";
 import KvadratmeterBeregner from "@/components/KvadratmeterBeregner";
 import { generatePageMetadata } from "@/lib/page-helpers";
 import FAQ from "@/components/FAQ";
@@ -45,6 +46,9 @@ export default async function KvadratmeterPage() {
         <KvadratmeterBeregner />
       </div>
 
+      {/* BBR lookup: Danish register, Danish locale only */}
+      {locale === "da" && <BoligOpslag />}
+
       {/* Informativ tekst - SEO */}
       {locale === "da" && (
       <div className="prose max-w-none mb-8">
@@ -73,6 +77,10 @@ export default async function KvadratmeterPage() {
           <li><strong>Grundareal:</strong> Hele grundens størrelse</li>
           <li><strong>Bebygget areal:</strong> Bygningens fodaftryk</li>
         </ul>
+        <p>
+          Med <strong>Slå din bolig op</strong> ovenfor kan du se boligens areal, grundareal, antal
+          værelser og byggeår fra BBR og matriklen og sammenligne med dine egne mål.
+        </p>
 
         <h3>Materialeberegning</h3>
         <p>

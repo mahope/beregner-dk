@@ -76,6 +76,11 @@ export default async function BoligstoettePage() {
             Udbetaling Danmarks betingelser. Den endelige vurdering afhænger blandt andet af
             husstandsindkomst, formue, antal børn og voksne, husleje og boligens areal.
           </p>
+          <p>
+            Kender du ikke boligens areal, kan du slå adressen op i beregneren ovenfor. Så
+            henter vi arealet fra BBR, og du kan rette det, hvis det ikke passer med din
+            lejekontrakt.
+          </p>
 
            <h2>Standardmaksimumsbeløb i 2026</h2>
            <p>
