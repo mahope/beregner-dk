@@ -809,7 +809,7 @@ STATUS: KØ — M2 FÆRDIG; M3 (BMI-børneguide-søgning) er næste opgave.
 - **Landet:** M2-kode, tests og plan ligger i commit `69c5260`; merge til `master` er
   `1745519` den 2026-09-25 15:32 CEST.
 
-#### 14. [ ] I GANG — M3 — Route børne-BMI-søgninger til guiden
+#### 14. [x] FÆRDIG 2026-09-25 — M3 — Route børne-BMI-søgninger til guiden
 
 - **Iteration start:** 2026-09-25 15:27 CEST på `ceo/m3-bmi-child-search`.
 - **Datagrund:** O2 har adskilt sider og metadata, men `SearchBar` og
@@ -832,8 +832,8 @@ STATUS: KØ — M2 FÆRDIG; M3 (BMI-børneguide-søgning) er næste opgave.
   `npm run test` grøn (907/907 tests, 86 filer), `npm run build` grøn (139 sider +
   typecheck; 7 kendte CSS-optimeringsadvarsler), `npm audit --audit-level=high` 0
   sårbarheder. Målrettet gate før fuld gate: 14/14 tests grønne.
-- **Landet:** M3-kode, tests og plan ligger i commit på `ceo/m3-bmi-child-search`;
-  merge/push og deploy-note følger efter grøn gate.
+- **Landet:** M3-kode, tests og plan ligger i commit `5e9f081` på
+  `ceo/m3-bmi-child-search`; merge/push og deploy-note følger efter grøn gate.
 - **Forventet effekt:** Forhindrer en forkert voksen-handling og giver den relevante
   næste handling; effekt på organisk trafik måles ikke isoleret.
 - **MÅL:** `/bmi` baseline 979 besøgende/28d 2026-09-23; bloggens baseline er ukendt
