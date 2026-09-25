@@ -2172,3 +2172,12 @@ landmark=lån, piggybank=opsparing osv.).
   kilde-linket til hjemmeland.dk skal være i DOM. Tjek også
   `beraknare.se/kvadratmeter` for "Beräkna material", "inkl. spill" og
   "Materialet säljs per m²". HTTP 200 alene utilstrækkeligt.
+- **VERIFICÉR DEPLOY:** S1 skattefradrag — delt kørselsfradragssats, ét ratested og
+  ny logik i `src/lib/skattefradrag.ts` — kode `972c92f`, merge `f70cd69` 2026-09-25
+  22:52 CEST. Verificér efter 07:30-vinduet 2026-09-26 på live DA `/skattefradrag`:
+  kørselsfradragsafsnittet skal vise "Bundgrænse: 24 km dagligt (12 km én vej),
+  herefter 3,17 kr./km op til 120 km og 1,59 kr./km over", have et link til
+  `/befordringsfradrag`, og boligjobafsnittet skal sige at loftet ikke er
+  verificeret mod en myndighedskilde. Tjek desuden at de gamle tal `2,28`, `1,14`
+  og `25,1` ikke forekommer i den serverede HTML, og at live `/befordringsfradrag`
+  bruger de samme satser. HTTP 200 alene utilstrækkeligt.
