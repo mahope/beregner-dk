@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect, useId } from "react";
+import { useState, useCallback, useEffect, useId, useRef } from "react";
 import { useLocale } from "@/components/LocaleProvider";
 import { t } from "@/lib/i18n";
 import type { Locale } from "@/lib/i18n";
@@ -19,6 +19,7 @@ interface InputFieldProps {
   inline?: boolean;
   placeholder?: string;
   helpText?: string;
+  valueSyncKey?: number;
   customValidation?: (value: number, rawValue: string) => string | null;
 }
 
@@ -82,12 +83,14 @@ export function InputField({
   inline,
   placeholder,
   helpText,
+  valueSyncKey,
   customValidation,
 }: InputFieldProps) {
   const { locale } = useLocale();
   const [touched, setTouched] = useState(false);
   const [rawValue, setRawValue] = useState(String(value));
   const [isFocused, setIsFocused] = useState(false);
+  const previousValueSyncKey = useRef<number | undefined>(valueSyncKey);
   const id = useId();
   const errorId = `${id}-error`;
   const helpId = `${id}-help`;
@@ -98,6 +101,12 @@ export function InputField({
       setRawValue(String(value));
     }
   }, [value, isFocused]);
+
+  useEffect(() => {
+    if (valueSyncKey === undefined || previousValueSyncKey.current === valueSyncKey) return;
+    previousValueSyncKey.current = valueSyncKey;
+    setRawValue(String(value));
+  }, [value, valueSyncKey]);
 
   const error = touched ? getErrorMessage(locale as Locale, value, rawValue, required, min, max, customValidation) : null;
   const isValid = touched && !error && rawValue.trim() !== "";

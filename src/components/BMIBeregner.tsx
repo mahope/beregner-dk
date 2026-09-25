@@ -179,8 +179,19 @@ function kgToLbs(kg: number): number {
 function cmToInches(cm: number): number {
   return cm / 2.54;
 }
+function roundToTwoDecimals(value: number): number {
+  return Math.round(value * 100) / 100;
+}
 function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
+}
+function toFiniteNumber(value: unknown): number | null {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string" && value.trim() !== "") {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+  return null;
 }
 
 // BMI skala konfiguration
@@ -199,6 +210,36 @@ const ADULT_INPUT_LIMITS = {
   metrisk: { weight: 30, maxWeight: 300, height: 100, maxHeight: 250 },
   imperial: { weight: 66.14, maxWeight: 661.38, height: 39.37, maxHeight: 98.42 },
 } as const;
+
+const IMPERIAL_MEASUREMENT_MAX = 79;
+const ADULT_MEASUREMENT_LIMITS = {
+  metrisk: { max: roundToTwoDecimals(IMPERIAL_MEASUREMENT_MAX * 2.54) },
+  imperial: { max: IMPERIAL_MEASUREMENT_MAX },
+} as const;
+
+type MetricField = "weight" | "height";
+
+function getDisplayValue(metricValue: number, unit: Enhed, field: MetricField): number {
+  const limits = ADULT_INPUT_LIMITS[unit];
+  const value = field === "weight"
+    ? unit === "imperial" ? kgToLbs(metricValue) : metricValue
+    : unit === "imperial" ? cmToInches(metricValue) : metricValue;
+  const min = field === "weight" ? limits.weight : limits.height;
+  const max = field === "weight" ? limits.maxWeight : limits.maxHeight;
+  return clamp(roundToTwoDecimals(value), min, max);
+}
+
+function canonicalMatchesDisplay(
+  canonical: number | null,
+  display: number,
+  unit: Enhed,
+  field: MetricField,
+): canonical is number {
+  if (canonical === null || !Number.isFinite(display)) return false;
+  if (field === "weight" && (canonical < 30 || canonical > 300)) return false;
+  if (field === "height" && (canonical < 100 || canonical > 250)) return false;
+  return Math.abs(getDisplayValue(canonical, unit, field) - display) < 0.000001;
+}
 
 function BMISkala({ bmi, formattedBmi }: { bmi: number; formattedBmi: string }) {
   const { locale } = useLocale();
@@ -258,7 +299,10 @@ export default function BMIBeregner() {
   const l = labels[locale as keyof typeof labels] || labels.da;
   const [vaegt, setVaegt] = useState<number>(75);
   const [hoejde, setHoejde] = useState<number>(175);
+  const [vaegtKg, setVaegtKg] = useState<number>(75);
+  const [hoejdeCm, setHoejdeCm] = useState<number>(175);
   const [enhed, setEnhed] = useState<Enhed>("metrisk");
+  const [inputVersion, setInputVersion] = useState(0);
   const [taljemaal, setTaljemaal] = useState<number>(0);
   const [hoftemaal, setHoftemaal] = useState<number>(0);
   const [harBarnestate, setHarBarnestate] = useState(false);
@@ -272,24 +316,56 @@ export default function BMIBeregner() {
     hasLoadedUrl.current = true;
 
     const urlState = getStateFromUrl();
-    if (urlState && urlState.type === 'bmi') {
+    if (
+      urlState
+      && urlState.type === 'bmi'
+      && urlState.inputs
+      && typeof urlState.inputs === 'object'
+      && !Array.isArray(urlState.inputs)
+    ) {
       const inputs = urlState.inputs;
-      const inputVægt = Number(inputs.vaegt);
-      const inputHoejde = Number(inputs.hoejde);
-      const erGyldigtIImperial = inputVægt >= 66 && inputVægt <= 662 && inputHoejde >= 39 && inputHoejde <= 99;
-      const erGyldigtIMetrisk = inputVægt >= 30 && inputVægt <= 300 && inputHoejde >= 100 && inputHoejde <= 250;
-      const indlaestEnhed = inputs.enhed === "imperial"
-        ? "imperial"
-        : inputs.enhed === "metrisk"
-          ? "metrisk"
-          : erGyldigtIImperial && !erGyldigtIMetrisk
-            ? "imperial"
-            : "metrisk";
+      const alder = toFiniteNumber(inputs.alder);
+      if (inputs.vaegt !== undefined && inputs.hoejde !== undefined) {
+        const inputVægt = toFiniteNumber(inputs.vaegt);
+        const inputHoejde = toFiniteNumber(inputs.hoejde);
+        const normaliseretVægt = inputVægt === null ? Number.NaN : roundToTwoDecimals(inputVægt);
+        const normaliseretHoejde = inputHoejde === null ? Number.NaN : roundToTwoDecimals(inputHoejde);
+        const erGyldigtIImperial = normaliseretVægt >= 66 && normaliseretVægt <= 662 && normaliseretHoejde >= 39 && normaliseretHoejde <= 99;
+        const erGyldigtIMetrisk = normaliseretVægt >= 30 && normaliseretVægt <= 300 && normaliseretHoejde >= 100 && normaliseretHoejde <= 250;
+        const indlaestEnhed = inputs.enhed === "imperial"
+          ? "imperial"
+          : inputs.enhed === "metrisk"
+            ? "metrisk"
+            : erGyldigtIImperial && !erGyldigtIMetrisk
+              ? "imperial"
+              : "metrisk";
 
-      if (inputs.vaegt !== undefined) setVaegt(inputVægt);
-      if (inputs.hoejde !== undefined) setHoejde(inputHoejde);
-      if (inputs.enhed !== undefined || erGyldigtIImperial) setEnhed(indlaestEnhed);
-      if (inputs.alder !== undefined && Number(inputs.alder) < 18) setHarBarnestate(true);
+        const vaegtIMetriskeEnhed = roundToTwoDecimals(
+          indlaestEnhed === "imperial" ? lbsToKg(normaliseretVægt) : normaliseretVægt,
+        );
+        const hoejdeIMetriskeEnhed = roundToTwoDecimals(
+          indlaestEnhed === "imperial" ? inchesToCm(normaliseretHoejde) : normaliseretHoejde,
+        );
+        const canonicalVægt = toFiniteNumber(inputs.vaegtKg);
+        const canonicalHoejde = toFiniteNumber(inputs.hoejdeCm);
+        const normaliseretCanonicalVægt = canonicalVægt === null ? null : roundToTwoDecimals(canonicalVægt);
+        const normaliseretCanonicalHoejde = canonicalHoejde === null ? null : roundToTwoDecimals(canonicalHoejde);
+        const canonicalVægtErGyldigt = canonicalMatchesDisplay(normaliseretCanonicalVægt, normaliseretVægt, indlaestEnhed, "weight");
+        const canonicalHoejdeErGyldigt = canonicalMatchesDisplay(normaliseretCanonicalHoejde, normaliseretHoejde, indlaestEnhed, "height");
+
+        setVaegt(normaliseretVægt);
+        setVaegtKg(normaliseretCanonicalVægt !== null && canonicalVægtErGyldigt
+          ? normaliseretCanonicalVægt
+          : vaegtIMetriskeEnhed);
+        setHoejde(normaliseretHoejde);
+        setHoejdeCm(normaliseretCanonicalHoejde !== null && canonicalHoejdeErGyldigt
+          ? normaliseretCanonicalHoejde
+          : hoejdeIMetriskeEnhed);
+        if (inputs.enhed !== undefined || erGyldigtIImperial) setEnhed(indlaestEnhed);
+      }
+      if (alder !== null && alder < 18) {
+        setHarBarnestate(true);
+      }
     }
     setUrlStateKontrolleret(true);
   }, []);
@@ -297,7 +373,10 @@ export default function BMIBeregner() {
   const handleReset = useCallback(() => {
     setVaegt(75);
     setHoejde(175);
+    setVaegtKg(75);
+    setHoejdeCm(175);
     setEnhed("metrisk");
+    setInputVersion((version) => version + 1);
     setTaljemaal(0);
     setHoftemaal(0);
     setHarBarnestate(false);
@@ -307,35 +386,58 @@ export default function BMIBeregner() {
   const getShareableLink = useCallback(() => {
     const state: CalculationState = {
       type: 'bmi',
-      inputs: { vaegt, hoejde, enhed },
+      inputs: { vaegt, hoejde, enhed, vaegtKg, hoejdeCm },
       timestamp: Date.now(),
     };
     return generateShareableLink(state);
-  }, [vaegt, hoejde, enhed]);
+  }, [vaegt, hoejde, enhed, vaegtKg, hoejdeCm]);
 
-  // Konverter input til metriske værdier til beregning
-  const metriskVaegt = enhed === "imperial" ? lbsToKg(vaegt) : vaegt;
-  const metriskHoejde = enhed === "imperial" ? inchesToCm(hoejde) : hoejde;
   const inputLimits = ADULT_INPUT_LIMITS[enhed];
   const minWeight = inputLimits.weight;
   const maxWeight = inputLimits.maxWeight;
   const minHeight = inputLimits.height;
   const maxHeight = inputLimits.maxHeight;
-  const normaliseretVaegt = Math.round(metriskVaegt * 100) / 100;
-  const normaliseretHoejde = Math.round(metriskHoejde * 100) / 100;
-  const inputUdenforGraenser = normaliseretVaegt < 30
-    || normaliseretVaegt > 300
-    || normaliseretHoejde < 100
-    || normaliseretHoejde > 250;
+  const inputUdenforGraenser = !Number.isFinite(vaegtKg)
+    || vaegtKg < 30
+    || vaegtKg > 300
+    || !Number.isFinite(hoejdeCm)
+    || hoejdeCm < 100
+    || hoejdeCm > 250
+    || !Number.isFinite(vaegt)
+    || vaegt < minWeight
+    || vaegt > maxWeight
+    || !Number.isFinite(hoejde)
+    || hoejde < minHeight
+    || hoejde > maxHeight;
   const inputErUgyldigt = harBarnestate || inputUdenforGraenser;
 
+  const handleVaegtAendring = (value: number) => {
+    const normaliseretVaerdi = roundToTwoDecimals(value);
+    setVaegt(normaliseretVaerdi);
+    setVaegtKg(roundToTwoDecimals(enhed === "imperial" ? lbsToKg(normaliseretVaerdi) : normaliseretVaerdi));
+  };
+
+  const handleHoejdeAendring = (value: number) => {
+    const normaliseretVaerdi = roundToTwoDecimals(value);
+    setHoejde(normaliseretVaerdi);
+    setHoejdeCm(roundToTwoDecimals(enhed === "imperial" ? inchesToCm(normaliseretVaerdi) : normaliseretVaerdi));
+  };
+
+  const handleTaljeAendring = (value: number) => {
+    setTaljemaal(roundToTwoDecimals(value));
+  };
+
+  const handleHofteAendring = (value: number) => {
+    setHoftemaal(roundToTwoDecimals(value));
+  };
+
   const resultat = useMemo(() => {
-    if (!urlStateKontrolleret || inputErUgyldigt || !metriskVaegt || !metriskHoejde || metriskHoejde === 0) {
+    if (!urlStateKontrolleret || inputErUgyldigt || !vaegtKg || !hoejdeCm || hoejdeCm === 0) {
       return null;
     }
 
-    const hoejdeM = metriskHoejde / 100;
-    const bmi = metriskVaegt / (hoejdeM * hoejdeM);
+    const hoejdeM = hoejdeCm / 100;
+    const bmi = vaegtKg / (hoejdeM * hoejdeM);
 
     let kategori: string;
     let farve: string;
@@ -380,11 +482,19 @@ export default function BMIBeregner() {
       idealVaegtMin: formatNumber(idealVaegtMinKg, locale, { maximumFractionDigits: 0 }),
       idealVaegtMax: formatNumber(idealVaegtMaxKg, locale, { maximumFractionDigits: 0 }),
     };
-  }, [metriskVaegt, metriskHoejde, l, locale, inputErUgyldigt, urlStateKontrolleret]);
+  }, [vaegtKg, hoejdeCm, l, locale, inputErUgyldigt, urlStateKontrolleret]);
 
   // Talje-hofte ratio
   const taljeHofteResultat = useMemo(() => {
-    if (!taljemaal || !hoftemaal || hoftemaal === 0) return null;
+    const measurementMax = ADULT_MEASUREMENT_LIMITS[enhed].max;
+    if (
+      !Number.isFinite(taljemaal)
+      || !Number.isFinite(hoftemaal)
+      || taljemaal <= 0
+      || hoftemaal <= 0
+      || taljemaal > measurementMax
+      || hoftemaal > measurementMax
+    ) return null;
 
     const metriskTalje = enhed === "imperial" ? inchesToCm(taljemaal) : taljemaal;
     const metriskHofte = enhed === "imperial" ? inchesToCm(hoftemaal) : hoftemaal;
@@ -412,18 +522,25 @@ export default function BMIBeregner() {
     if (nyEnhed === enhed) return;
 
     const nextLimits = ADULT_INPUT_LIMITS[nyEnhed];
+    const nextMeasurementMax = ADULT_MEASUREMENT_LIMITS[nyEnhed].max;
+    const normaliseretVaegtKg = clamp(vaegtKg, 30, 300);
+    const normaliseretHoejdeCm = clamp(hoejdeCm, 100, 250);
+
+    setVaegtKg(normaliseretVaegtKg);
+    setHoejdeCm(normaliseretHoejdeCm);
 
     if (nyEnhed === "imperial") {
-      setVaegt(clamp(Math.round(kgToLbs(vaegt) * 100) / 100, nextLimits.weight, nextLimits.maxWeight));
-      setHoejde(clamp(Math.round(cmToInches(hoejde) * 100) / 100, nextLimits.height, nextLimits.maxHeight));
-      if (taljemaal) setTaljemaal(Math.round(cmToInches(taljemaal) * 100) / 100);
-      if (hoftemaal) setHoftemaal(Math.round(cmToInches(hoftemaal) * 100) / 100);
+      setVaegt(clamp(roundToTwoDecimals(kgToLbs(normaliseretVaegtKg)), nextLimits.weight, nextLimits.maxWeight));
+      setHoejde(clamp(roundToTwoDecimals(cmToInches(normaliseretHoejdeCm)), nextLimits.height, nextLimits.maxHeight));
+      if (taljemaal) setTaljemaal(clamp(roundToTwoDecimals(cmToInches(taljemaal)), 0, nextMeasurementMax));
+      if (hoftemaal) setHoftemaal(clamp(roundToTwoDecimals(cmToInches(hoftemaal)), 0, nextMeasurementMax));
     } else {
-      setVaegt(clamp(Math.round(lbsToKg(vaegt) * 100) / 100, nextLimits.weight, nextLimits.maxWeight));
-      setHoejde(clamp(Math.round(inchesToCm(hoejde) * 100) / 100, nextLimits.height, nextLimits.maxHeight));
-      if (taljemaal) setTaljemaal(Math.round(inchesToCm(taljemaal) * 100) / 100);
-      if (hoftemaal) setHoftemaal(Math.round(inchesToCm(hoftemaal) * 100) / 100);
+      setVaegt(roundToTwoDecimals(normaliseretVaegtKg));
+      setHoejde(roundToTwoDecimals(normaliseretHoejdeCm));
+      if (taljemaal) setTaljemaal(clamp(roundToTwoDecimals(inchesToCm(taljemaal)), 0, nextMeasurementMax));
+      if (hoftemaal) setHoftemaal(clamp(roundToTwoDecimals(inchesToCm(hoftemaal)), 0, nextMeasurementMax));
     }
+    setInputVersion((version) => version + 1);
     setEnhed(nyEnhed);
   };
 
@@ -474,10 +591,11 @@ export default function BMIBeregner() {
         <InputField
           label={vaegtLabel}
           value={vaegt}
-          onChange={setVaegt}
+          valueSyncKey={inputVersion}
+          onChange={handleVaegtAendring}
           min={minWeight}
           max={maxWeight}
-          step={0.1}
+          step={0.01}
           unit={enhed === "metrisk" ? "kg" : "lbs"}
           required
         />
@@ -485,10 +603,11 @@ export default function BMIBeregner() {
         <InputField
           label={hoejdeLabel}
           value={hoejde}
-          onChange={setHoejde}
+          valueSyncKey={inputVersion}
+          onChange={handleHoejdeAendring}
           min={minHeight}
           max={maxHeight}
-          step={0.1}
+          step={0.01}
           unit={enhed === "metrisk" ? "cm" : "in"}
           required
         />
@@ -554,20 +673,22 @@ export default function BMIBeregner() {
           <InputField
             label={`${l.waistLabel} (${maalEnhed})`}
             value={taljemaal}
-            onChange={setTaljemaal}
+            valueSyncKey={inputVersion}
+            onChange={handleTaljeAendring}
             min={0}
-            max={enhed === "metrisk" ? 200 : 79}
-            step={0.1}
+            max={ADULT_MEASUREMENT_LIMITS[enhed].max}
+            step={0.01}
             unit={maalEnhed}
             helpText={l.helpNavle}
           />
           <InputField
             label={`${l.hipLabel} (${maalEnhed})`}
             value={hoftemaal}
-            onChange={setHoftemaal}
+            valueSyncKey={inputVersion}
+            onChange={handleHofteAendring}
             min={0}
-            max={enhed === "metrisk" ? 200 : 79}
-            step={0.1}
+            max={ADULT_MEASUREMENT_LIMITS[enhed].max}
+            step={0.01}
             unit={maalEnhed}
             helpText={l.helpBredest}
           />
