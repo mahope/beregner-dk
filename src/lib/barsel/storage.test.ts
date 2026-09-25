@@ -220,4 +220,10 @@ describe("arbejdsgiver", () => {
     expect(text).toContain("[dit navn]");
     expect(text).not.toContain("flytter sig");
   });
+
+  test("solo parent and close relative get their own wording", () => {
+    const base = { navn: "A", datoType: "foedsel" as const, dato: "2027-01-04", adoption: false, udskudteUger: 0, perioder: [] };
+    expect(arbejdsgiverBesked({ ...base, solo: true })).toContain("Mit barn blev født");
+    expect(arbejdsgiverBesked({ ...base, naertstaaende: true })).toContain("nærtstående familiemedlem (barselsloven § 23 c)");
+  });
 });

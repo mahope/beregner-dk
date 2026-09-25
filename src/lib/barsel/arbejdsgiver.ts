@@ -19,17 +19,31 @@ export interface ArbejdsgiverInput {
   adoption: boolean;
   perioder: ArbejdsgiverPeriode[];
   udskudteUger: number;
+  /** A close relative holding leave transferred by a solo parent (§ 23 c). */
+  naertstaaende?: boolean;
+  /** Single parent: "mit barn" instead of "vores barn". */
+  solo?: boolean;
 }
 
 function datoSaetning(input: ArbejdsgiverInput): string {
+  if (input.naertstaaende) {
+    const barn =
+      input.datoType === "termin"
+        ? `Barnet har termin ${formatLang(input.dato)}.`
+        : `Barnet blev født ${formatLang(input.dato)}.`;
+    return `Barnets forælder er soloforælder og har overdraget en del af sin orlov til mig som nærtstående familiemedlem (barselsloven § 23 c). ${barn}`;
+  }
+  const vi = input.solo ? "Jeg" : "Vi";
+  const vores = input.solo ? "mit" : "vores";
   if (input.adoption) {
     return input.datoType === "termin"
-      ? `Vi forventer at modtage vores barn ${formatLang(input.dato)}.`
-      : `Vi modtog vores barn ${formatLang(input.dato)}.`;
+      ? `${vi} forventer at modtage ${vores} barn ${formatLang(input.dato)}.`
+      : `${vi} modtog ${vores} barn ${formatLang(input.dato)}.`;
   }
+  const Vores = input.solo ? "Mit" : "Vores";
   return input.datoType === "termin"
-    ? `Vores barn har termin ${formatLang(input.dato)}.`
-    : `Vores barn blev født ${formatLang(input.dato)}.`;
+    ? `${Vores} barn har termin ${formatLang(input.dato)}.`
+    : `${Vores} barn blev født ${formatLang(input.dato)}.`;
 }
 
 export function periodeLinje(p: ArbejdsgiverPeriode): string {
@@ -63,7 +77,7 @@ export function arbejdsgiverBesked(input: ArbejdsgiverInput): string {
     );
   }
 
-  if (input.datoType === "termin" && !input.adoption) {
+  if (input.datoType === "termin" && !input.adoption && !input.naertstaaende) {
     linjer.push(
       "",
       "Datoerne efter fødslen er beregnet ud fra terminsdatoen og flytter sig tilsvarende, hvis barnet kommer før eller efter termin. Jeg giver besked, så snart barnet er født."

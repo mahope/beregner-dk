@@ -165,6 +165,7 @@ const daCalculators: HomeCalculator[] = [
   { title: "Pensionsberegner", description: "Beregn din fremtidige pension og folkepension", href: "/pension", popular: false, category: "Økonomi" },
   { title: "Efterløn", description: "Beregn din efterløn og se hvornår du kan gå", href: "/efterloen", popular: false, category: "Økonomi" },
   { title: "Barselsdagpenge", description: "Beregn barselsdagpenge og se orlovsperioder", href: "/barselsdagpenge", popular: false, category: "Familie" },
+  { title: "Barselsplanlægger", description: "Planlæg barsel uge for uge med kalender og økonomi", href: "/barselsplanlaegger", popular: false, category: "Familie" },
   { title: "Terminsdato Beregner", description: "Beregn terminsdato og se graviditetsuge", href: "/termin", popular: false, category: "Familie" },
   { title: "Boliglån", description: "Beregn ydelse og omkostninger på dit boliglån", href: "/boliglaan", popular: false, category: "Bolig" },
   { title: "Billån", description: "Beregn månedlig ydelse og rente på billån", href: "/billaan", popular: false, category: "Lån" },

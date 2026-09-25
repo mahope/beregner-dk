@@ -68,6 +68,7 @@ export const beregnere: BeregnerItem[] = [
   { title: "Alkoholenheder", description: "Beregn antal genstande ud fra mængde og alkoholprocent", href: "/alkoholenheder", category: "Sundhed" },
   { title: "Børnepenge", description: "Se hvad du kan få i børne- og ungeydelse 2026", href: "/boernepenge", category: "Familie" },
   { title: "Barselsdagpenge", description: "Beregn barselsdagpenge og se orlovsperioder", href: "/barselsdagpenge", category: "Familie" },
+  { title: "Barselsplanlægger", description: "Planlæg barsel uge for uge med kalender og økonomi", href: "/barselsplanlaegger", category: "Familie" },
   { title: "Terminsdato Beregner", description: "Beregn terminsdato og se graviditetsuge", href: "/termin", category: "Familie" },
   { title: "Ægløsningsberegner", description: "Find dine frugtbare dage og din ægløsning", href: "/aegloesning", category: "Familie" },
   { title: "Konfirmationsbudget", description: "Beregn budget for konfirmation med udgifter og gaver", href: "/konfirmation", category: "Familie" },

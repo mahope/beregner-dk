@@ -1,0 +1,37 @@
+/* Print layout for the parental-leave planner: one tidy A4 overview. */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 12mm;
+  }
+
+  .barsel-planlaegger,
+  .barsel-planlaegger * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .barsel-print {
+    font-size: 10pt;
+    line-height: 1.35;
+    color: #000;
+  }
+
+  .barsel-print p,
+  .barsel-print li {
+    max-width: none;
+  }
+
+  .barsel-print table {
+    page-break-inside: auto;
+  }
+
+  .barsel-print tr {
+    page-break-inside: avoid;
+  }
+
+  /* Everything else on the page (intro, FAQ, links) is hidden when printing the plan. */
+  .barsel-side-indhold {
+    display: none !important;
+  }
+}
