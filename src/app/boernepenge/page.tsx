@@ -7,6 +7,8 @@ import RelatedCalculators from "@/components/RelatedCalculators";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Link from "next/link";
+import { formatNumber } from "@/lib/format";
+import { BOERNE_SATSER_2026, aarligBelob } from "@/lib/borneungeydelse";
 
 export async function generateMetadata() {
   return generatePageMetadata("boernepenge");
@@ -60,31 +62,20 @@ export default async function BoernepengePage() {
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>0-2 år</td>
-                <td>21.480 kr</td>
-                <td>5.370 kr/kvartal</td>
-              </tr>
-              <tr>
-                <td>3-6 år</td>
-                <td>17.004 kr</td>
-                <td>4.251 kr/kvartal</td>
-              </tr>
-              <tr>
-                <td>7-14 år</td>
-                <td>13.380 kr</td>
-                <td>3.345 kr/kvartal</td>
-              </tr>
-              <tr>
-                <td>15-17 år (ungeydelse)</td>
-                <td>13.380 kr</td>
-                <td>1.115 kr/måned</td>
-              </tr>
+              {BOERNE_SATSER_2026.map((sats) => (
+                <tr key={sats.alder}>
+                  <td>{sats.alder}</td>
+                  <td>{formatNumber(aarligBelob(sats), "da")} kr</td>
+                  <td>
+                    {formatNumber(sats.hel, "da")} kr/{sats.intervalNavn}
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
         <p className="text-sm">
-          <strong>Børneydelsen</strong> (0-14 år) udbetales <strong>kvartalsvis</strong> forud den 20. i januar, april, juli og oktober.
+          <strong>Børneydelsen</strong> (under 15 år) udbetales <strong>kvartalsvis</strong> forud den 20. i januar, april, juli og oktober.
           <strong>Ungeydelsen</strong> (15-17 år) udbetales <strong>månedligt</strong> den 20. direkte til den unge.
         </p>
         <p>
@@ -113,18 +104,22 @@ export default async function BoernepengePage() {
         </ul>
 
         <h2>Ekstra ydelser til enlige forsørgere</h2>
-        <p>Enlige forsørgere kan derudover være berettiget til:</p>
+        <p>
+          Enlige forsørgere kan derudover være berettiget til disse tilskud. Beløbene
+          fastsættes separat for børnetilskuddene og udbetales ikke som en del af
+          børne- og ungeydelsen — de står på borger.dk under Børnetilskud.
+        </p>
         <ul>
           <li>
-            <strong>Ordinært børnetilskud:</strong> Ca. 6.300 kr. pr. kvartal pr. barn
+            <strong>Ordinært børnetilskud:</strong> gives automatisk, pr. barn
           </li>
           <li>
-            <strong>Ekstra børnetilskud:</strong> Ca. 6.600 kr. pr. kvartal (kun
-            én gang uanset antal børn)
+            <strong>Ekstra børnetilskud:</strong> gives automatisk (kun én gang uanset
+            antal børn)
           </li>
           <li>
-            <strong>Særligt børnetilskud:</strong> Hvis den anden forælder er
-            død eller ukendt
+            <strong>Særligt børnetilskud:</strong> kræver ansøgning og vurderes
+            individuelt
           </li>
         </ul>
 
