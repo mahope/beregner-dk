@@ -1875,6 +1875,12 @@ landmark=lån, piggybank=opsparing osv.).
     - Gate grøn: lint ok, 280/280 tests, build ok (128 pages).
 
 ## VERIFICÉR DEPLOY-log
+- **Kontrol 2026-09-25 22:20 CEST (ingen note lukket endnu):** 21:30-batchen er ikke
+  synlig. Live `/tidszone` (C4), `/alder` (C6), `/pension` (C8), `/braendstof` + 
+  `/kvadratmeter` (C9) har stadig de gamle titler, og `/dage-til/juledagen` (C7) svarer
+  **404**. Det er ét deploy-vindue siden C4's merge 18:40, altså endnu ikke
+  `DEPLOY-MISSING` (kræver to), men alle noter C4-C11 + R1 kan først verificeres
+  realistisk efter 07:30-vinduet 2026-09-26. `/api/health` svarede `status: ok`.
 - **Åbne noter:** O5/C1/C2/C3/T4 fra før dette T5-checkpoint er indholdskontrolleret
   efter 07:30-vinduet og lukket nedenfor.
 - DEPLOY OK: billaan-ikoner (etape 6), calculator-list-ikoner (etape 3), footer-ikoner (etape 4) — verificeret 2026-08-23 18:20.
@@ -1991,14 +1997,15 @@ landmark=lån, piggybank=opsparing osv.).
   8.729 kr. og I alt pr. måned før skat 16.273 kr. ved standardværdierne, og prosaen skal
   nævne at beregneren bruger grænserne fra tabellen. Tjek også at indledningens liste nu
   siger 12.011 kr. til 16.273 kr. i stedet for "ca. 13.000-15.000 kr/måned".
-  HTTP 200 alene utilstrækkeligt. **Kan først verificeres fra 07:30-vinduet 2026-09-26.**
+  HTTP 200 alene utilstrækkeligt. **Kan først verificeres fra 07:30-vinduet 2026-09-26**;
+  21:30-batchen 2026-09-25 indeholdt den ikke (se kontrol 22:20 ovenfor).
 - **VERIFICÉR DEPLOY:** R1 rentefradrag — ét ratested (`RENTEFRADRAG_2026` +
   `src/lib/rentefradrag.ts`), kilde med verificeringsdato på `/rentefradrag` og rettede
   FAQ'er/tabel på `/rentefradrag`, `/renteberegner`, `/boliglaan`, `/skattefradrag` og
-  `fradrag-2026-komplet-guide` — commit endnu ikke sat (se `git log --oneline -1` på
-  `ceo/rentefradrag-kilde`), merge 2026-09-25 22:15 CEST. Verificér efter
+  `fradrag-2026-komplet-guide` — commit `4e22336`, merge `9560189` 2026-09-25 22:15 CEST. Verificér efter
   07:30-vinduet 2026-09-26 på live DA `/rentefradrag`: tabellen skal vise 33,6 % /
   25,6 % med **ét** decimalkomma, teksten skal sige at værdien afhænger af
   beløbsgrænsen og ikke af kommunen, og kilde-links til skat.dk + borgerhaandbog skal
   være i DOM. Live `/skattefradrag` skal vise "33,6 % af de første 50.000 kr.".
-  HTTP 200 alene utilstrækkeligt. **Kan først verificeres fra 07:30-vinduet 2026-09-26.**
+  HTTP 200 alene utilstrækkeligt. **Kan først verificeres fra 07:30-vinduet 2026-09-26**;
+  21:30-batchen 2026-09-25 indeholdt den ikke (se kontrol 22:20 ovenfor).
