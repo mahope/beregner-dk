@@ -878,7 +878,7 @@ STATUS: KØ — C4 FÆRDIG; deploynoten for C4 er åben. Næste iteration: flere
 - **Kvalitetsgate 2026-09-25 18:33 CEST:** `npm run lint` grøn (467 filer),
   `npm run test` grøn (916/916 tests, 88 filer), `npm run build` grøn (139 sider +
   typecheck). Målrettet gate først: 9/9 nye tests grønne.
-- **Landet:** kode og tests i commit `4b2fb1c`; merge til `master` er `MERGE_SHA_PLACEHOLDER`.
+- **Landet:** kode og tests i commit `4b2fb1c`; merge til `master` er `c78a7a6`.
 - **Forventet effekt:** 0,5 % CTR ved position 7,5 med 24.544 visninger er det
   næststørste uudnyttede CTR-udbud efter `/procent` og `/dato`.
 - **MÅL:** `/tidszone` Search Console baseline 24.544 visninger/28d, 116 klik,
@@ -1293,7 +1293,7 @@ landmark=lån, piggybank=opsparing osv.).
     sti er ikke et fejlfund.
   - `/api/health` svarede `status: ok` under alle kontroller.
 - **VERIFICÉR DEPLOY:** C4 svar-først `/tidszone`-tabel, spørgsmålstitel og
-  description `MERGE_SHA_PLACEHOLDER` 2026-09-25 18:40 CEST. Verificér efter næste batch-vindue
+  description `c78a7a6` 2026-09-25 18:40 CEST. Verificér efter næste batch-vindue
   med live DA `/tidszone` (synligt svar + tabel) og SE `beraknare.se/tidszone`;
   HTTP 200 alene utilstrækkeligt.
 
