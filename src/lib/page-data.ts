@@ -1710,6 +1710,7 @@ const daPages: Record<string, PageData> = {
         { question: "Hvad er ekstra befordringsfradrag?", answer: "Hvis din årlige indkomst før AM-bidrag er under 391.500 kr. (2026), får du et ekstra fradrag på 64 % af dit almindelige kørselsfradrag, dog højst 30.800 kr. Over 341.500 kr. nedtrappes det gradvist, og ved 391.500 kr. er det væk. Skat beregner det automatisk på årsopgørelsen." },
         { question: "Hvordan får jeg befordringsfradraget?", answer: "Befordringsfradraget indberetter du i SKATs forskudsopgørelse, så det bliver trukket fra din skat løbende hen over året. Du kan også rette det på årsopgørelsen året efter. Brug beregneren til at finde dit præcise fradrag, og indtast beløbet i din forskudsopgørelse." },
         { question: "Kan jeg få brofradrag?", answer: "Ja, hvis du krydser Storebæltsbroen eller Øresundsbroen på vej til arbejde, kan du få et ekstra fradrag pr. passage. I 2026 er det 110 kr. pr. Storebæltspassage i bil og 50 kr. pr. Øresundspassage i bil. Bruger du offentlig transport, er satserne lavere (hhv. 15 kr. og 8 kr.)." },
+        { question: "Kan beregneren finde afstanden mellem hjem og arbejde?", answer: "Ja. Skriv din hjemadresse og arbejdsadresse, så finder beregneren den korteste køretur via OpenStreetMap og udfylder km tur/retur. Skat bruger den normale transportvej, som typisk er den korteste, men kan vurdere ruten anderledes – du kan altid rette tallet. Adresser og koordinater gemmes ikke." },
       ],
     },
     "ugenummer": {

@@ -7,6 +7,7 @@ import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { useLocale } from "@/components/LocaleProvider";
 import { beregnBefordringsfradrag } from "@/lib/befordringsfradrag";
+import { RuteAfstand } from "@/components/RuteAfstand";
 
 const labels = {
   da: {
@@ -133,11 +134,16 @@ export default function BefordringsfradragBeregner() {
     });
   }, [kmPerDag, arbejdsdage, yderkommune, broStorebaelt, broOeresund, broOffentlig, indkomst]);
 
+  // Danish data sources (Adressevælger + routing) only on the Danish site.
+  const visRute = locale === "da";
+  const brugAfstand = useCallback((kmEnVej: number) => setKmPerDag(Math.round(kmEnVej * 2)), []);
+
   const inputCls = "w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white";
   const labelCls = "block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1";
 
   return (
     <div>
+      {visRute && <RuteAfstand onAfstand={brugAfstand} />}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className={labelCls}>{l.kmPerDag}</label>

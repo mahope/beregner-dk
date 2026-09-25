@@ -1,5 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
-import { parseSoegning, soegAdresser } from "./adresse";
+import { hentAdressePunkt, parseAdressePunkt, parseSoegning, soegAdresser } from "./adresse";
+import adresseKbh from "./__fixtures__/adressevaelger-adresse-kbh.json";
+import husnummerAarhus from "./__fixtures__/adressevaelger-husnummer-aarhus.json";
 // Recorded responses from adressevaelger.dk/adresser/soeg on 25 Sep 2026.
 import soegAdresse from "./__fixtures__/bbr/adressevaelger-soeg-adresse.json";
 import soegVejpostnr from "./__fixtures__/bbr/adressevaelger-soeg-vejpostnr.json";
@@ -72,5 +74,54 @@ describe("soegAdresser", () => {
   it("throws when Adressevælger fails, so the field can show a message", async () => {
     const fetchImpl = vi.fn(async () => new Response("", { status: 503 }));
     await expect(soegAdresser("Vejers", { fetchImpl: fetchImpl as unknown as typeof fetch })).rejects.toThrow("503");
+  });
+});
+
+describe("husnummer-id på opgange (til ruteafstand)", () => {
+  it("keeps the house number id on an entrance suggestion", () => {
+    const f = parseSoegning(soegHusnummer).find((x) => x.type === "fortsaet" && x.kilde === "husnummer");
+    expect(f).toMatchObject({ husnummerId: "0a3f507a-d058-32b8-e044-0003ba298018" });
+  });
+});
+
+describe("parseAdressePunkt", () => {
+  it("converts the access point of /husnumre/{id} from EPSG:25832 to WGS84", () => {
+    const p = parseAdressePunkt(husnummerAarhus);
+    expect(p?.betegnelse).toBe("Rådhuspladsen 2, 8000 Aarhus C");
+    expect(p?.lat).toBeCloseTo(56.15263, 5);
+    expect(p?.lon).toBeCloseTo(10.20321, 5);
+  });
+
+  it("reads adresse.husnummer from /adresser/{id}", () => {
+    const p = parseAdressePunkt(adresseKbh);
+    expect(p?.husnummerId).toBe("0a3f507a-ec01-32b8-e044-0003ba298018");
+    expect(p?.lat).toBeCloseTo(55.67563, 5);
+    expect(p?.lon).toBeCloseTo(12.56958, 5);
+  });
+
+  it("rejects missing or implausible coordinates", () => {
+    expect(parseAdressePunkt({ husnummer: { id_lokalid: "x", adgangsadressebetegnelse: "y" } })).toBeNull();
+    expect(
+      parseAdressePunkt({
+        husnummer: { id_lokalid: "x", adgangsadressebetegnelse: "y", adgangspunkt: { koordinater: { x: 12.5, y: 55.6 } } },
+      }),
+    ).toBeNull();
+    expect(parseAdressePunkt("nope")).toBeNull();
+  });
+});
+
+describe("hentAdressePunkt", () => {
+  it("uses /husnumre/{husnummerId} when known, otherwise /adresser/{id}", async () => {
+    const fetchImpl = vi.fn(async (url: string) =>
+      new Response(JSON.stringify(url.includes("/husnumre/") ? husnummerAarhus : adresseKbh)),
+    );
+    const f = fetchImpl as unknown as typeof fetch;
+    expect((await hentAdressePunkt({ id: "a", husnummerId: "h1" }, { fetchImpl: f }))?.betegnelse).toBe(
+      "Rådhuspladsen 2, 8000 Aarhus C",
+    );
+    expect(new URL(fetchImpl.mock.calls[0][0]).pathname).toBe("/husnumre/h1");
+    await hentAdressePunkt({ id: "a2", husnummerId: null }, { fetchImpl: f });
+    expect(new URL(fetchImpl.mock.calls[1][0]).pathname).toBe("/adresser/a2");
+    expect(fetchImpl.mock.calls.every(([u]) => !u.includes("dataforsyningen"))).toBe(true);
   });
 });

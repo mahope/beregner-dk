@@ -1,0 +1,40 @@
+{
+ "code": "Ok",
+ "routes": [
+  {
+   "legs": [
+    {
+     "steps": [],
+     "weight": 12140.5,
+     "summary": "",
+     "duration": 12140.5,
+     "distance": 301870.9
+    }
+   ],
+   "weight_name": "routability",
+   "weight": 12140.5,
+   "duration": 12140.5,
+   "distance": 301870.9
+  }
+ ],
+ "waypoints": [
+  {
+   "hint": "qUDIg8ddr41SAAAABQAAAAkAAAAAAAAAzDBdQvbNM0DLdL5AAAAAAFIAAAAFAAAACQAAAAAAAAB6JwEA4M2_AC2MUQPqy78A7IpRAwIAPwgAAAAA",
+   "location": [
+    12.57008,
+    55.675949
+   ],
+   "name": "Vester Voldgade",
+   "distance": 47.69466855
+  },
+  {
+   "hint": "nCeMgp8njIJGAAAAAAAAAEAAAAAAAAAAtE7qQQAAAACy19JBAAAAAEYAAAAAAAAAQAAAAAAAAAB6JwEAe6-bAPjSWANGsJsAN9JYAwoAjwYAAAAA",
+   "location": [
+    10.203003,
+    56.152824
+   ],
+   "name": "",
+   "distance": 24.9153582
+  }
+ ]
+}

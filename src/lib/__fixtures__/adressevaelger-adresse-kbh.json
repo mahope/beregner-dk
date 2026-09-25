@@ -1,0 +1,95 @@
+{
+ "status": "ok",
+ "adresse": {
+  "id_lokalid": "70865c44-d570-44e7-a6f5-6f7c90add725",
+  "adressebetegnelse": "Rådhuspladsen 1, 1550 København V",
+  "etagebetegnelse": null,
+  "doerbetegnelse": null,
+  "status": "3",
+  "virkningfra": "2021-03-01T12:17:48.807Z",
+  "virkningtil": null,
+  "registreringfra": "2021-03-01T12:17:48.807Z",
+  "registreringtil": null,
+  "husnummer": {
+   "id_lokalid": "0a3f507a-ec01-32b8-e044-0003ba298018",
+   "husnummertekst": "1",
+   "adgangsadressebetegnelse": "Rådhuspladsen 1, 1550 København V",
+   "vejnavn": "Rådhuspladsen",
+   "status": "3",
+   "virkningfra": "2025-08-21T18:07:58.913501+00:00",
+   "virkningtil": null,
+   "registreringfra": "2025-08-21T18:07:58.913501+00:00",
+   "registreringtil": null,
+   "adgangspunkt": {
+    "id_lokalid": "0a3f507a-ec01-32b8-e044-0003ba298018",
+    "status": "8",
+    "virkningfra": "2009-11-25T00:07:37+00:00",
+    "virkningtil": null,
+    "registreringfra": "2018-05-03T16:58:34+00:00",
+    "registreringtil": null,
+    "geometri": {
+     "type": "Point",
+     "crs": {
+      "type": "name",
+      "properties": {
+       "name": "EPSG:25832"
+      }
+     },
+     "coordinates": [
+      724434.93,
+      6175755.61
+     ]
+    },
+    "koordinater": {
+     "x": 724434.93,
+     "y": 6175755.61
+    }
+   },
+   "postnummer": {
+    "id_lokalid": "327f7d73-b996-44ab-8830-2227129e9f4c",
+    "navn": "København V",
+    "postnr": "1550",
+    "status": "3",
+    "virkningfra": "2023-03-24T17:51:17.223964+00:00",
+    "virkningtil": null,
+    "registreringfra": "2023-03-24T17:51:17.223964+00:00",
+    "registreringtil": null
+   },
+   "navngivenvej": {
+    "id_lokalid": "db18d58c-b16d-457b-aa1b-e92cbd8aace5",
+    "vejnavn": "Rådhuspladsen",
+    "virkningfra": "2021-03-15T16:19:58.843178+00:00",
+    "virkningtil": null,
+    "registreringfra": "2021-03-15T16:19:58.843178+00:00",
+    "registreringtil": null
+   },
+   "navngivenvejkommunedel": {
+    "id_lokalid": "5c994b98-4eae-11e8-93fd-066cff24d637",
+    "kommune": "0101",
+    "vejkode": "6152",
+    "navngivenvej": "db18d58c-b16d-457b-aa1b-e92cbd8aace5",
+    "virkningfra": "2021-03-15T16:19:58.843178+00:00",
+    "virkningtil": null,
+    "registreringfra": "2021-03-15T16:19:58.843178+00:00",
+    "registreringtil": null
+   },
+   "navngivenvejpostnummer": {
+    "id_lokalid": "83a1b9a3-185d-4596-ad9a-e7587dd14474",
+    "virkningfra": "2020-12-18T15:17:19.000774+00:00",
+    "virkningtil": null,
+    "registreringfra": "2020-12-18T15:17:19.000774+00:00",
+    "registreringtil": null
+   },
+   "supplerendebynavn": {
+    "id_lokalid": null,
+    "status": null,
+    "supplerendebynavn": null,
+    "navn": null,
+    "virkningfra": null,
+    "virkningtil": null,
+    "registreringfra": null,
+    "registreringtil": null
+   }
+  }
+ }
+}
