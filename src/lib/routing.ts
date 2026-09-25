@@ -1,5 +1,6 @@
 import type { DomainConfig } from "./domain-config";
 import { isCalculatorAvailable, isCalculatorPath } from "./calculator-list";
+import { getDageTilSlugFromPathname, isDageTilLocale, resolveDageTilSlug } from "./dage-til";
 
 export type RouteDecision =
   | { type: "allow" }
@@ -41,6 +42,26 @@ export function getRouteDecision(
   if (domainConfig.locale === "se") {
     const alias = swedishAliases[normalizedPath];
     if (alias) return { type: "redirect", destination: alias, status: 301 };
+  }
+
+  const dageTil = getDageTilSlugFromPathname(normalizedPath);
+  if (dageTil) {
+    // dage-til pages have one canonical slug per language. A slug in the other
+    // language is redirected so the same answer never lives at two URLs.
+    if (!isDageTilLocale(domainConfig.locale)) {
+      return { type: "not-found" };
+    }
+    const resolved = resolveDageTilSlug(dageTil.slug, domainConfig.locale);
+    if (!resolved) return { type: "not-found" };
+    if (!resolved.isOwnLocale) {
+      return {
+        type: "redirect",
+        destination: `/${domainConfig.locale === "da" ? "dage-til" : "dagar-till"}/${
+          resolved.localeSlug
+        }`,
+        status: 301,
+      };
+    }
   }
 
   if (

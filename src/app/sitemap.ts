@@ -5,6 +5,7 @@ import { isCalculatorAvailable } from "@/lib/calculator-list";
 import { getFooterBlogLinks } from "@/lib/footer-data";
 import type { Locale } from "@/lib/i18n";
 import { getAvailableSlugs } from "@/lib/page-data";
+import { getDageTilPrefix, getDageTilSlugs } from "@/lib/dage-til";
 
 export function buildSitemap(
   domainConfig: DomainConfig,
@@ -55,6 +56,17 @@ export function buildSitemap(
     { url: `${baseUrl}/privatlivspolitik`, lastModified, changeFrequency: "yearly" as const, priority: 0.3 },
     { url: `${baseUrl}/cookiepolitik`, lastModified, changeFrequency: "yearly" as const, priority: 0.3 },
   ];
+  // Curated "hvor mange dage er der til X" pages. The answer changes every
+  // day, so they are re-crawled daily.
+  const dageTilPrefix = getDageTilPrefix(locale);
+  const dageTilEntries: MetadataRoute.Sitemap = dageTilPrefix
+    ? getDageTilSlugs(locale).map((slug) => ({
+        url: `${baseUrl}${dageTilPrefix}${slug}`,
+        lastModified,
+        changeFrequency: "daily" as const,
+        priority: 0.7,
+      }))
+    : [];
 
   return [
     {
@@ -66,6 +78,7 @@ export function buildSitemap(
     ...calculatorEntries,
     ...categoryEntries,
     ...blogEntries,
+    ...dageTilEntries,
     ...infoEntries,
   ];
 }
