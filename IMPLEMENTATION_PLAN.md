@@ -1,6 +1,7 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — M3 FÆRDIG; næste iteration er trafikresearch og prioritering af nye løftestænger.
+STATUS: KØ — C4 FÆRDIG; deploynoten for C4 er åben. Næste iteration: flere CTR-opgaver
+(/renteberegner, /kalorier, /alder, /brok) eller `/dage-til`-landingssider.
 
 ## Fase 3 — trafik-drevet
 
@@ -839,6 +840,51 @@ STATUS: KØ — M3 FÆRDIG; næste iteration er trafikresearch og prioritering a
 - **MÅL:** `/bmi` baseline 979 besøgende/28d 2026-09-23; bloggens baseline er ukendt
   og skal udfyldes fra næste snapshot før en reel effektvurdering.
 
+#### 15. [x] FÆRDIG 2026-09-25 — C4 — Svar-først på `/tidszone` (0,5 % CTR på 24.544 visninger)
+
+- **Iteration start:** 2026-09-25 18:05 CEST på `ceo/c4-tidszone-ctr`. Først blev de
+  fem åbne deploynoter fra T5/I1/M1/M2/M3 indholdskontrolleret live (17:30-vinduet
+  var passeret), se VERIFICÉR DEPLOY-log.
+- **Datagrund:** Search Console 2026-08-26–2026-09-23: 24.544 visninger, 116 klik,
+  CTR 0,5 %, position 7,5. Søgninger: "tidszoner" 755v pos 10, "hvad er klokken i
+  usa når den er 12 i danmark" 183v pos 6, "tidszoner beregner" 111v pos 3,
+  "tidsforskel" 85v pos 10. Det er den fjerdestørste visningsside, og ingen CTR-opgave
+  havde rørt den.
+- **Problem før ændring:** title "Tidszoneberegner - Omregn tid mellem lande |
+  MinBeregner.dk" og description med "Danmark til New York: -6 timer" gav ikke svaret
+  på det konkrete spørgsmål, og siden viste kun en statisk forskelsliste uden klokkeslæt.
+- **Beslutning/implementering:** Ny `src/lib/tidszone-reference.ts` med 11 byers
+  UTC-forskelle (JSDoc-kilde: IANA-offset + dansk CET/CEST) og `tidszoneRækker()`,
+  der beregner klokkeslæt ved 12 i Danmark i både dansk vinter- og somertid. Siden
+  viser nu et synligt, kildeført svarførst-blok med tabel (By | vintertid kl. 12 CET |
+  somertid kl. 12 CEST) på DA og SE, pluss en note om at byer uden sommertid ligger
+  en time tidligere, og at skiftedagen ikke er identisk i USA/EU/Australien. Title og
+  description er spørgsmålsformuleret ("Hvad er klokken i USA, når den er 12 i
+  Danmark?"); OG følger samme spørgsmål. Beregnerlogik, URL, canonical, hreflang og
+  interne links er uændrede.
+- **Fagligt fund undervejs:** Den oprindelige tabel-antagelse "sommertid =
+  vintertid + 1 time" viste sig forkert for de fleste byer, fordi de skifter
+  sommertid sammen med Danmark: New York er 06:00 hele året, Sydney 21:00 hele
+  året, mens byer uden sommertid (Tokyo, Dubai, Shanghai, Mumbai, São Paulo) ligger
+  en time tidligere i dansk somertid. Testen dækker begge regler plus dgnskifte
+  (UTC+14).
+- **Acceptkriterier:**
+  1. DA og SE viser det synlige svar (12 i Danmark/Sverige = 06 i New York) og
+     tabellen med vinter- og sommertid. **PASS**
+  2. Title ≤ 60 tegn, description ≤ 160 tegn på begge domæner. **PASS**
+  3. Tidszoneberegneren, dens URL-state og de eksisterende logiktests er urørt. **PASS**
+  4. Rækkerne er beregnet fra UTC-forskelle og dækket af unit tests. **PASS**
+  5. `npm run lint`, `npm run test` og `npm run build` er grønne. **PASS**
+- **Kvalitetsgate 2026-09-25 18:33 CEST:** `npm run lint` grøn (467 filer),
+  `npm run test` grøn (916/916 tests, 88 filer), `npm run build` grøn (139 sider +
+  typecheck). Målrettet gate først: 9/9 nye tests grønne.
+- **Landet:** kode og tests i commit `4b2fb1c`; merge til `master` er `MERGE_SHA_PLACEHOLDER`.
+- **Forventet effekt:** 0,5 % CTR ved position 7,5 med 24.544 visninger er det
+  næststørste uudnyttede CTR-udbud efter `/procent` og `/dato`.
+- **MÅL:** `/tidszone` Search Console baseline 24.544 visninger/28d, 116 klik,
+  CTR 0,5 %, position 7,5 pr. 2026-09-23; Plausible-baseline **ukendt** (siden
+  står ikke i top-15), ikke 0. Effekt måles først efter mindst 14 dage.
+
 ### ❓ Til Mads
 
 - **IndexNow runtime-konfiguration:** Sæt kun i Dokploys production-runtime
@@ -1222,23 +1268,32 @@ landmark=lån, piggybank=opsparing osv.).
   og viste 8t 0 både med og uden næste dato, altså ingen 32 timer.
   `/api/health` svarede samtidig `status: ok`. Dermed er O5/C1/C2/C3/T4-noterne lukket;
   ingen ældre åbne deploynoter står tilbage.
-- **VERIFICÉR DEPLOY:** T5 satsafhængige svenske momsformler, reference, info, URL-state,
-  FAQ og schema `a889f5e` 2026-09-25 08:08 CEST. Verificér efter næste batch-vindue med
-  faktisk hydreret 12/6 %-interaktion på `beraknare.se/moms`; HTTP 200 alene
-  utilstrækkeligt.
-- **VERIFICÉR DEPLOY:** I1 IndexNow-submission, offentlig nøglefil, Node-only
-  instrumentation og beskyttet intern trigger `dd5f4af` 2026-09-25 10:10 CEST.
-  Verificér efter næste batch-vindue med live health, `INDEXNOW`-keyfil og konfigureret
-  runtime; HTTP 200 på health alene utilstrækkeligt.
-- **VERIFICÉR DEPLOY:** M1 Lighthouse-CI-serverstart via `npm run start` `0ba8f8f`
-  2026-09-25 10:42 CEST. Ændringen er CI-only og forventer ingen live-indholdsdelta;
-  efter næste batch-vindue kontrollérs master-definitionen og første naturlige PR-run,
-  ikke blot live health.
-- **VERIFICÉR DEPLOY:** M2 BMI-enhedsroundtrip, canonicale delelinks, fokuseret
-  felt-sync og WHR-grænse `1745519` 2026-09-25 15:32 CEST. Verificér efter næste
-  batch-vindue med faktisk enhedsskift og delelink på `/bmi`; HTTP 200 alene er
-  utilstrækkeligt.
-- **VERIFICÉR DEPLOY:** M3 DA-only BMI-søgning til børneguide, SearchBar/assistent-
-  keywords og tastaturrydning `89ba868` 2026-09-25 15:59 CEST. Verificér efter næste
-  batch-vindue med live DA `/`, hydreret søgning på "BMI for mit barn" og voksensuggestion
-  på `/bmi`; HTTP 200 alene er utilstrækkeligt.
+- **DEPLOY OK 2026-09-25 18:20 CEST:** 17:30-batchen lukker T5, M2 og M3 efter
+  indholdskontrol i headless Chromium mod de live domæner.
+  - **T5 `a889f5e`:** `beraknare.se/moms` viser `Momssats`-gruppen med
+    25/12/6 %, "Mat, hotell"/"Böcker, kultur" og reducerad-sats-copy. Hydreret
+    indtastning af 1 000 kr. gav 1 250 ved 25 %, **1 120 ved 12 %** og **1 060 ved
+    6 %**, og `aria-pressed` fulgte valget. Det er den faktiske 12/6 %-interaktion,
+    note lukket.
+  - **M2 `1745519`:** `/bmi` med 80 kg/180 cm gav BMI 24,7; skift til imperial
+    konverterede til 176,37 lbs/70,87 in med BMI 24,7 bevaret, og skift tilbage
+    gav 80 kg/180 cm og BMI 24,7. Roundtrip består, note lukket.
+  - **M3 `89ba868`:** Hydreret søgning på DA `/` med "BMI for mit barn" gav
+    `/blog/bmi-for-boern-saadan-tjekker-du` som eneste og første resultat, mens
+    "BMI for voksne" gav `/bmi`. Note lukket.
+  - **M1 `0ba8f8f`:** CI-only ændring. `origin/master:.github/workflows/lighthouse.yml`
+    bruger nu `npm run start` med et wait-loop på `localhost:3000` i stedet for
+    det bare `next start`, der fejlede med `next: command not found`. Første
+    naturlige PR-run er stadig ikke set; det noteres i stedet for at antages.
+  - **I1 `dd5f4af`:** Kode er live — `POST /api/internal/indexnow` svarer 503 i stedet
+    for 404, også med Bearer-token, fordi runtime-konfigurationen mangler. Nøglefilen
+    `/api/indexnow-key/<nøgle>` svarer 404, fordi `INDEXNOW_API_KEY` ikke er sat.
+    **Indsendelser er derfor ikke aktive endnu.** Runtime-konfigurationen er
+    uændret under ❓ Til Mads; `/indexnow-key.txt` er ikke ruten, så et 404 på den
+    sti er ikke et fejlfund.
+  - `/api/health` svarede `status: ok` under alle kontroller.
+- **VERIFICÉR DEPLOY:** C4 svar-først `/tidszone`-tabel, spørgsmålstitel og
+  description `MERGE_SHA_PLACEHOLDER` 2026-09-25 18:40 CEST. Verificér efter næste batch-vindue
+  med live DA `/tidszone` (synligt svar + tabel) og SE `beraknare.se/tidszone`;
+  HTTP 200 alene utilstrækkeligt.
+
