@@ -216,6 +216,7 @@ const daPages: Record<string, PageData> = {
         { question: "Hvordan beregner jeg en lønstigning i procent?", answer: "Træk den gamle løn fra den nye, og del med den gamle løn: (ny − gammel) / gammel × 100. Går lønnen fra 30.000 til 33.000 kr, er det en stigning på 10 %." },
         { question: "Kan jeg bruge den til timeløn?", answer: "Ja. Beregneren virker med timeløn, månedsløn og årsløn — bare brug samme enhed i begge felter." },
         { question: "Er beløbet før eller efter skat?", answer: "Beregningen bruger bruttoløn (før skat). Den procentvise stigning er den samme, uanset om du regner i brutto eller netto, men kronebeløbet er brutto." },
+        { question: "Hvad er en reallønsstigning?", answer: "Reallønsstigningen er din lønstigning fratrukket inflationen, altså hvor meget mere du reelt kan købe for lønnen. Beregneren bruger den seneste årlige inflation fra Danmarks Statistik som standard, og du kan selv rette satsen." },
       ],
     },
     "aegloesning": {
@@ -884,6 +885,7 @@ const daPages: Record<string, PageData> = {
       { question: "Hvorfor svinger kurser?", answer: "Renteniveauer, inflation, handelsbalancer og politisk stabilitet." },
       { question: "Hvor veksle?", answer: "Banker, vekselkontorer, lufthavne. Wise tilbyder ofte bedre kurser." },
       { question: "Købs- vs salgskurs?", answer: "Banken køber billigere og sælger dyrere. Forskellen = spread." },
+      { question: "Hvor kommer kurserne fra?", answer: "Vi bruger Danmarks Nationalbanks officielle valutakurser, som offentliggøres hver bankdag omkring kl. 16. Datoen for kurserne står over beregneren. Svarer Nationalbanken ikke, bruger vi Den Europæiske Centralbanks kurser (ECB) i stedet." },
       ],
     },
     "renteberegner": {
@@ -926,6 +928,7 @@ const daPages: Record<string, PageData> = {
       { question: "Hvad er renters rente?", answer: "Du tjener rente på renten. Over tid accelererer dette din opsparing." },
       { question: "Hvor meget spare?", answer: "10-20% af indkomsten. Selv små beløb vokser." },
       { question: "Realistisk rente?", answer: "Aktier: ~7%. Obligationer: 2-4%. Bank: under 1%." },
+      { question: "Hvad er realværdien af min opsparing?", answer: "Realværdien er opsparingen i nutidens købekraft, altså efter inflation. Slår du inflationsjustering til, er standardsatsen den seneste årlige inflation fra Danmarks Statistik (forbrugerprisindekset), men du kan selv rette den." },
       ],
     },
     "laaneberegner": {
@@ -1705,11 +1708,12 @@ const daPages: Record<string, PageData> = {
       schemaCategory: "FinanceApplication",
       faqItems: [
         { question: "Hvad er befordringsfradrag?", answer: "Befordringsfradrag (også kaldet kørselsfradrag) er et skattefradrag for transport mellem hjem og arbejde. Du kan få fradrag for kørsel over 24 km dagligt (12 km hver vej), uanset om du kører bil, cykel eller bruger offentlig transport. Satsen i 2026 er 3,17 kr./km for 25-120 km og 1,59 kr./km over 120 km." },
-        { question: "Hvordan beregnes befordringsfradrag?", answer: "Fradraget beregnes som antal kørte km pr. dag over bundgrænsen på 24 km, ganget med satsen (3,17 kr. for 25-120 km, 1,59 kr. over 120 km) og ganget med antal arbejdsdage. Der kan også lægges brofradrag til (Storebælt: 110 kr/tur, Øresund: 50 kr/tur). Endelig gives et ekstra fradrag på op til 30.800 kr. ved indkomst under 391.500 kr." },
+        { question: "Hvordan beregnes befordringsfradrag?", answer: "Fradraget beregnes som antal kørte km pr. dag over bundgrænsen på 24 km, ganget med satsen (3,17 kr. for 25-120 km, 1,59 kr. over 120 km) og ganget med antal arbejdsdage. Der kan også lægges brofradrag til (Storebælt: 110 kr/tur, Øresund: 50 kr/tur). Ved indkomst under 391.500 kr. gives desuden et ekstra fradrag på 64 % af kørselsfradraget, dog højst 30.800 kr." },
         { question: "Hvad er satsen for befordringsfradrag i 2026?", answer: "I 2026 er satserne 3,17 kr./km for 25-120 km dagligt og 1,59 kr./km over 120 km. I yderkommuner og visse småøer er satsen 3,51 kr./km. Bundgrænsen er 24 km pr. dag (12 km hver vej). Satserne er opdateret pr. 24. august 2026 fra skat.dk." },
-        { question: "Hvad er ekstra befordringsfradrag?", answer: "Hvis din årlige indkomst før AM-bidrag er under 391.500 kr. (2026), kan du få et ekstra fradrag på op til 30.800 kr. Fradraget nedtrappes gradvist med stigende indkomst og er et supplement til det almindelige kørselsfradrag." },
+        { question: "Hvad er ekstra befordringsfradrag?", answer: "Hvis din årlige indkomst før AM-bidrag er under 391.500 kr. (2026), får du et ekstra fradrag på 64 % af dit almindelige kørselsfradrag, dog højst 30.800 kr. Over 341.500 kr. nedtrappes det gradvist, og ved 391.500 kr. er det væk. Skat beregner det automatisk på årsopgørelsen." },
         { question: "Hvordan får jeg befordringsfradraget?", answer: "Befordringsfradraget indberetter du i SKATs forskudsopgørelse, så det bliver trukket fra din skat løbende hen over året. Du kan også rette det på årsopgørelsen året efter. Brug beregneren til at finde dit præcise fradrag, og indtast beløbet i din forskudsopgørelse." },
         { question: "Kan jeg få brofradrag?", answer: "Ja, hvis du krydser Storebæltsbroen eller Øresundsbroen på vej til arbejde, kan du få et ekstra fradrag pr. passage. I 2026 er det 110 kr. pr. Storebæltspassage i bil og 50 kr. pr. Øresundspassage i bil. Bruger du offentlig transport, er satserne lavere (hhv. 15 kr. og 8 kr.)." },
+        { question: "Kan beregneren finde afstanden mellem hjem og arbejde?", answer: "Ja. Skriv din hjemadresse og arbejdsadresse, så finder beregneren den korteste køretur via OpenStreetMap og udfylder km tur/retur. Skat bruger den normale transportvej, som typisk er den korteste, men kan vurdere ruten anderledes – du kan altid rette tallet. Adresser og koordinater gemmes ikke." },
       ],
     },
     "ugenummer": {

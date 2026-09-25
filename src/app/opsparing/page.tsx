@@ -2,6 +2,7 @@ import Link from "next/link";
 import { generatePageMetadata } from "@/lib/page-helpers";
 import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
+import { hentInflation } from "@/lib/statbank";
 import dynamic from "next/dynamic";
 const OpsparingsBeregner = dynamic(() => import("@/components/OpsparingsBeregner"));
 import FAQ from "@/components/FAQ";
@@ -20,6 +21,8 @@ export default async function OpsparingPage() {
   const locale = await getLocale();
   const domainConfig = await getCurrentDomainConfig();
   const pageData = getPageData("opsparing", locale) || getPageData("opsparing", "da")!;
+  // Danish site: latest annual inflation from Danmarks Statistik (null on failure -> static default).
+  const dstInflation = locale === "da" ? await hentInflation() : null;
 
   return (
     <div>
@@ -37,7 +40,7 @@ export default async function OpsparingPage() {
         {pageData.description}
       </p>
 
-      <OpsparingsBeregner />
+      <OpsparingsBeregner dstInflation={dstInflation} />
 
       {locale === "da" && (
       <div className="mt-12 prose max-w-none">

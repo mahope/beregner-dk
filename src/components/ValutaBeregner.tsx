@@ -6,6 +6,7 @@ import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { useLocale } from "@/components/LocaleProvider";
+import type { NationalbankKurser } from "@/lib/nationalbanken";
 
 // Statiske fallback-kurser (DKK pr. 1 enhed)
 const FALLBACK_KURSER: Record<string, { kurs: number; navn: string; symbol: string }> = {
@@ -49,12 +50,20 @@ const POPULAERE_PAR = [
   { fra: "DKK", til: "NOK" },
 ];
 
-export default function ValutaBeregner() {
+type Props = {
+  /** Official Danmarks Nationalbank rates, fetched server-side on the Danish site. */
+  officielleKurser?: NationalbankKurser | null;
+};
+
+export default function ValutaBeregner({ officielleKurser = null }: Props) {
   const { locale } = useLocale();
+  const brugNationalbanken = locale === "da" && officielleKurser !== null;
 
   const labels = {
     da: {
       liveKurser: "Live kurser (ECB)",
+      nbKurser: "Officielle kurser (Danmarks Nationalbank)",
+      nbInfo: "Kurserne er Danmarks Nationalbanks officielle valutakurser, som offentliggøres hver bankdag ca. kl. 16. ",
       vejledendeKurser: "Vejledende kurser",
       opdateret: "Opdateret:",
       fra: "Fra",
@@ -110,9 +119,9 @@ export default function ValutaBeregner() {
   const [beloeb, setBeloeb] = useState<number>(1000);
   const [fraValuta, setFraValuta] = useState<string>("DKK");
   const [tilValuta, setTilValuta] = useState<string>("EUR");
-  const [liveKurser, setLiveKurser] = useState<Record<string, number> | null>(null);
-  const [sidstOpdateret, setSidstOpdateret] = useState<string | null>(null);
-  const [isLive, setIsLive] = useState(false);
+  const [liveKurser, setLiveKurser] = useState<Record<string, number> | null>(brugNationalbanken ? officielleKurser.kurser : null);
+  const [sidstOpdateret, setSidstOpdateret] = useState<string | null>(brugNationalbanken ? officielleKurser.dato : null);
+  const [isLive, setIsLive] = useState(brugNationalbanken);
 
   const hasLoadedUrl = useRef(false);
   const hasTracked = useRef(false);
@@ -156,6 +165,8 @@ export default function ValutaBeregner() {
   }, [beloeb, fraValuta, tilValuta]);
 
   useEffect(() => {
+    // Danish site with Nationalbank rates from the server: no need for the ECB fallback.
+    if (brugNationalbanken) return;
     const hentKurser = async () => {
       try {
         const res = await fetch("https://api.frankfurter.dev/v1/latest?base=DKK");
@@ -173,7 +184,7 @@ export default function ValutaBeregner() {
       }
     };
     hentKurser();
-  }, []);
+  }, [brugNationalbanken]);
 
   const getKurs = useCallback((code: string): number => {
     if (code === "DKK") return 1;
@@ -220,7 +231,7 @@ export default function ValutaBeregner() {
         <div className="flex items-center gap-2">
           <span className={`w-2 h-2 rounded-full ${isLive ? "bg-green-500" : "bg-yellow-500"}`} />
           <span className="text-gray-500 dark:text-gray-400">
-            {isLive ? l.liveKurser : l.vejledendeKurser}
+            {isLive ? (brugNationalbanken && "nbKurser" in l ? l.nbKurser : l.liveKurser) : l.vejledendeKurser}
           </span>
         </div>
         {sidstOpdateret && (
@@ -387,7 +398,7 @@ export default function ValutaBeregner() {
       <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
         <h3 className="font-medium text-yellow-800 dark:text-yellow-300 mb-2">{l.bemaerkOmKurser}</h3>
         <p className="text-sm text-yellow-700 dark:text-yellow-400">
-          {isLive ? l.liveInfo : l.fallbackInfo}
+          {isLive ? (brugNationalbanken && "nbInfo" in l ? l.nbInfo : l.liveInfo) : l.fallbackInfo}
           {l.vekslingInfo}
         </p>
       </div>

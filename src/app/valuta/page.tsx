@@ -10,6 +10,7 @@ import RelatedCalculators from "@/components/RelatedCalculators";
 import Sidebar from "@/components/Sidebar";
 import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
+import { hentNationalbankKurser } from "@/lib/nationalbanken";
 
 export async function generateMetadata() {
   return generatePageMetadata("valuta");
@@ -19,6 +20,8 @@ export default async function ValutaPage() {
   const locale = await getLocale();
   const domainConfig = await getCurrentDomainConfig();
   const pageData = getPageData("valuta", locale) || getPageData("valuta", "da")!;
+  // Danish site: official Nationalbank rates (null on failure -> the component falls back to ECB).
+  const officielleKurser = locale === "da" ? await hentNationalbankKurser() : null;
 
   return (
     <div className="flex flex-col lg:flex-row gap-8">
@@ -44,7 +47,7 @@ export default async function ValutaPage() {
 
       {/* Calculator */}
       <div className="bg-white rounded-2xl shadow-sm p-6 md:p-8 mb-8">
-        <ValutaBeregner />
+        <ValutaBeregner officielleKurser={officielleKurser} />
       </div>
 
       {/* Informativ tekst - SEO */}

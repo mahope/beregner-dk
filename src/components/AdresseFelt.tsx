@@ -17,9 +17,27 @@ type Props = {
   describedBy?: string;
   /** Message from the caller (e.g. the BBR lookup), shown in the field's reserved status line. */
   besked?: React.ReactNode;
+  placeholder?: string;
+  /**
+   * Accept a house number with several addresses as the final choice instead of asking for the
+   * floor (for callers that only need the location, e.g. the route distance). The chosen value then
+   * has `id` = `husnummerId` = the house number id.
+   */
+  husnummerNok?: boolean;
+  /** Called when the user edits the text after a choice, i.e. the choice is no longer valid. */
+  onRyd?: () => void;
 };
 
-export function AdresseFelt({ onValg, onFejl, label = "Din adresse", describedBy, besked }: Props) {
+export function AdresseFelt({
+  onValg,
+  onFejl,
+  label = "Din adresse",
+  describedBy,
+  besked,
+  placeholder = "Fx Vejers Havvej 5, 6853",
+  husnummerNok = false,
+  onRyd,
+}: Props) {
   const id = useId();
   const inputRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -30,6 +48,7 @@ export function AdresseFelt({ onValg, onFejl, label = "Din adresse", describedBy
   const [aktiv, setAktiv] = useState(-1);
   const [status, setStatus] = useState("");
   const [sr, setSr] = useState("");
+  const valgtRef = useRef(false);
 
   const inputId = `${id}-input`;
   const listeId = `${id}-liste`;
@@ -79,7 +98,11 @@ export function AdresseFelt({ onValg, onFejl, label = "Din adresse", describedBy
     timerRef.current = setTimeout(() => void soeg(q), forsinkelse);
   };
 
-  const vaelg = (f: Forslag) => {
+  const vaelg = (valgt: Forslag) => {
+    const f: Forslag =
+      husnummerNok && valgt.type === "fortsaet" && valgt.kilde === "husnummer" && valgt.husnummerId
+        ? { type: "adresse", id: valgt.husnummerId, titel: valgt.titel, husnummerId: valgt.husnummerId }
+        : valgt;
     if (f.type === "fortsaet") {
       setTekst(f.naesteTekst);
       planlaegSoegning(f.naesteTekst, 0);
@@ -98,6 +121,7 @@ export function AdresseFelt({ onValg, onFejl, label = "Din adresse", describedBy
     setForslag([]);
     setStatus("");
     setSr("");
+    valgtRef.current = true;
     onValg(f);
   };
 
@@ -150,10 +174,14 @@ export function AdresseFelt({ onValg, onFejl, label = "Din adresse", describedBy
           autoCorrect="off"
           spellCheck={false}
           enterKeyHint="search"
-          placeholder="Fx Vejers Havvej 5, 6853"
+          placeholder={placeholder}
           value={tekst}
           onChange={(e) => {
             setTekst(e.target.value);
+            if (valgtRef.current) {
+              valgtRef.current = false;
+              onRyd?.();
+            }
             planlaegSoegning(e.target.value);
           }}
           onKeyDown={onKeyDown}
@@ -184,7 +212,7 @@ export function AdresseFelt({ onValg, onFejl, label = "Din adresse", describedBy
               }`}
             >
               <span className="min-w-0 break-words">{f.titel}</span>
-              {f.type === "fortsaet" && (
+              {f.type === "fortsaet" && !(husnummerNok && f.kilde === "husnummer" && f.husnummerId) && (
                 <span className="shrink-0 text-xs text-gray-500 dark:text-gray-400">
                   {f.kilde === "husnummer" ? "vælg etage" : "skriv husnummer"}
                 </span>

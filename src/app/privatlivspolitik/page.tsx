@@ -64,10 +64,11 @@ function DaContent() {
           derfor kun nye fragmentlinks til følsomme oplysninger.
         </p>
 
-        <h2>Adresseopslag og BBR</h2>
+        <h2>Adresseopslag, BBR og køreafstand</h2>
         <p>
           På enkelte boligberegnere (fx boligstøtte, husleje og kvadratmeter) kan du slå en
-          adresse op og få boligens areal udfyldt. Det er frivilligt, og du kan altid udfylde
+          adresse op og få boligens areal udfyldt. På befordringsfradrag kan du skrive hjem- og
+          arbejdsadresse og få køreafstanden udfyldt. Det er frivilligt, og du kan altid udfylde
           felterne selv.
         </p>
         <ul>
@@ -83,8 +84,18 @@ function DaContent() {
             anmodningen og ikke i URL&apos;en.
           </li>
           <li>
-            <strong>Intet gemmes:</strong> Vi gemmer hverken adressen eller svaret fra BBR, og
-            adressen står ikke i vores logfiler. Analytics registrerer kun, at et opslag er
+            <strong>Køreafstand:</strong> Når du har valgt begge adresser, henter din browser
+            deres koordinater hos Adressevælger og sender kun de to koordinatsæt – ikke
+            adresserne – til vores server i selve anmodningen. Serveren sender koordinaterne
+            videre til en ruteberegningstjeneste baseret på OpenStreetMap (FOSSGIS e.V.s
+            routing-servere i Tyskland), som returnerer køreafstanden. FOSSGIS ser vores
+            servers IP-adresse, ikke din, og kan logge forespørgslen efter sin egen
+            privatlivspolitik.
+          </li>
+          <li>
+            <strong>Intet gemmes:</strong> Vi gemmer hverken adresser, koordinater eller svaret
+            fra BBR, og de står ikke i vores logfiler. Køreafstanden holdes kun kortvarigt i
+            serverens hukommelse, så samme opslag ikke skal beregnes igen. Analytics registrerer kun, at et opslag er
             foretaget, og om det lykkedes, aldrig selve adressen.
           </li>
         </ul>
@@ -150,7 +161,8 @@ function DaContent() {
           fører af sikkerhedsmæssige årsager en teknisk adgangslog med
           tidspunkt, IP-adresse og hvilken side der blev hentet. Loggen slettes
           automatisk hver nat og bruges ikke til analyse eller tracking.
-          Adresser, du slår op i BBR, står ikke i loggen.
+          Adresser og koordinater fra adresseopslag, BBR og køreafstand står ikke i
+          loggen, fordi de sendes i selve anmodningen og ikke i URL&apos;en.
         </p>
 
         <h2>Eksterne links</h2>

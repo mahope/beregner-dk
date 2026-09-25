@@ -86,15 +86,31 @@ describe("beregnBefordringsfradrag", () => {
     expect(r.almFradragPerAar).toBeCloseTo(36 * 3.17 * 225 + 50 * 110 + 50 * 50, 0);
   });
 
-  test("ekstra fradrag max at low income", () => {
+  test("ekstra fradrag er 64 % af kørselsfradraget ved lav indkomst", () => {
     const r = beregnBefordringsfradrag({ ...base(), indkomstFørAms: 200000 })!;
+    expect(r.ekstraFradragPerAar).toBeCloseTo(36 * 3.17 * 225 * 0.64, 1);
+  });
+
+  test("ekstra fradrag loftes ved 30.800 kr", () => {
+    const r = beregnBefordringsfradrag({ ...base(), kmPerDag: 120, indkomstFørAms: 200000 })!;
+    // 96 km × 3,17 × 225 × 64 % = 43.822 kr > loft
     expect(r.ekstraFradragPerAar).toBe(30800);
   });
 
-  test("ekstra fradrag phases out at income near threshold", () => {
+  test("ekstra fradrag ignorerer brofradrag", () => {
+    const r = beregnBefordringsfradrag({ ...base(), broStorebaeltTureAar: 100 })!;
+    expect(r.ekstraFradragPerAar).toBeCloseTo(36 * 3.17 * 225 * 0.64, 1);
+  });
+
+  test("ekstra fradrag aftrappes over 341.500 kr", () => {
     const r = beregnBefordringsfradrag({ ...base(), indkomstFørAms: 370000 })!;
-    expect(r.ekstraFradragPerAar).toBeGreaterThan(0);
-    expect(r.ekstraFradragPerAar).toBeLessThan(30800);
+    // 28 fulde tusinder over grænsen: 64 - 28 × 1,28 = 28,16 %
+    expect(r.ekstraFradragPerAar).toBeCloseTo(36 * 3.17 * 225 * 0.2816, 1);
+  });
+
+  test("ekstra fradrag er fuldt ved præcis 341.500 kr", () => {
+    const r = beregnBefordringsfradrag({ ...base(), indkomstFørAms: 341500 })!;
+    expect(r.ekstraFradragPerAar).toBeCloseTo(36 * 3.17 * 225 * 0.64, 1);
   });
 
   test("no ekstra fradrag at or above income threshold", () => {

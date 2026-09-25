@@ -1,6 +1,7 @@
 import { generatePageMetadata } from "@/lib/page-helpers";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
+import { hentInflation } from "@/lib/statbank";
 import LoenstigningBeregner from "@/components/LoenstigningBeregner";
 import FAQ from "@/components/FAQ";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
@@ -16,6 +17,8 @@ export default async function LoenstigningPage() {
   const domainConfig = await getCurrentDomainConfig();
   const locale = domainConfig.locale;
   const pageData = getPageData("loenstigning", locale) || getPageData("loenstigning", "da")!;
+  // Danish site: latest annual inflation from Danmarks Statistik (null on failure -> static default).
+  const dstInflation = locale === "da" ? await hentInflation() : null;
 
   return (
     <div className="flex flex-col lg:flex-row gap-8">
@@ -40,7 +43,7 @@ export default async function LoenstigningPage() {
         </div>
 
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 md:p-8 mb-8">
-          <LoenstigningBeregner />
+          <LoenstigningBeregner dstInflation={dstInflation} />
         </div>
 
         {locale === "da" && (

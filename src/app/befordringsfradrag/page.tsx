@@ -71,8 +71,9 @@ export default async function BefordringsfradragPage() {
             <h2>Ekstra befordringsfradrag</h2>
             <p>
               Har du en årlig indkomst under{" "}
-              <strong>391.500 kr.</strong> før AM-bidrag, kan du få et ekstra fradrag på op til{" "}
-              <strong>30.800 kr.</strong> — nedtrappes gradvist med stigende indkomst.
+              <strong>391.500 kr.</strong> før AM-bidrag, får du et ekstra fradrag på{" "}
+              <strong>64 % af kørselsfradraget</strong>, dog højst <strong>30.800 kr.</strong> Over
+              341.500 kr. nedtrappes det gradvist.
             </p>
           </div>
         )}

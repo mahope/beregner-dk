@@ -40,6 +40,8 @@ describe("SATSER_2026 single source of truth", () => {
     expect(S.koerselYderkommuneSats).toBe(3.51);
     expect(S.koerselEkstraFradragMax).toBe(30800);
     expect(S.koerselEkstraIndkomstGraense).toBe(391500);
+    expect(S.koerselEkstraAftrapningFra).toBe(341500);
+    expect(S.koerselEkstraPct).toBe(0.64);
     expect(S.koerselBroStorebaelt).toBe(110);
     expect(S.koerselBroOeresund).toBe(50);
     expect(S.ratepensionMax).toBe(68700);
