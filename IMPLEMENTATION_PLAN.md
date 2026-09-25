@@ -1,10 +1,10 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — C12 (nedtælling svar-først + link til dage-til) FÆRDIG, klar til merge
-2026-09-26 00:58 CEST
-2026-09-26 00:18-00:58 CEST. Deployverificering kunne ikke køre: 07:30-vinduet er
-endnu ikke passeret. I stedet blev den sidste dokumenterede lav-CTR-side rettet.
-Deploynoterne C4-C11, R1, K1, S1, D2, L1, F1 og C12 står åbne:
+STATUS: KØ — C12 landet på `master` (kode 0bd5e7d, plan 4364af3) 2026-09-26 01:03 CEST
+2026-09-26 00:18-01:03 CEST. Deployverificering kunne ikke køre i denne iteration:
+07:30-vinduet var ikke passeret. I stedet blev den sidste dokumenterede lav-CTR-side
+rettet, så køen ikke stod tom. Næste iteration skal først og fremmest verificere
+deploy. Deploynoterne C4-C11, R1, K1, S1, D2, L1, F1 og C12 står åbne:
 21:30-batchen 2026-09-25 indeholdt ikke dagens merges, og næste batch-vindue er
 07:30 2026-09-26. HTTP 200 er ikke bevis — C4's kontrol 22:20 fandt `/dage-til/juledagen`
 på **404**, `/pension` med den gamle "De tre pensionssøjler"-overskrift og
