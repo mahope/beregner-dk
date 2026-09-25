@@ -1,6 +1,6 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — T5 FÆRDIG; I1 (IndexNow) er næste opgave.
+STATUS: KØ — I1 (IndexNow) I GANG.
 
 ## Fase 3 — trafik-drevet
 
@@ -682,8 +682,35 @@ STATUS: KØ — T5 FÆRDIG; I1 (IndexNow) er næste opgave.
 - **Landet:** T5-kode, tests og plan ligger i commit `b685026`; merge til `master` er
   `a889f5e` den 2026-09-25 08:08 CEST.
 
-#### 11. [ ] I1 — Integrer IndexNow uden at sende under iterationen
+#### 11. [ ] I GANG — I1 — Integrer IndexNow uden at sende under iterationen
 
+- **Iteration start:** 2026-09-25 08:31 CEST. `npm audit --audit-level=high` er grøn
+  med 0 sårbarheder; den eksterne afhængighedsrapport fra 2026-08-23 er stale.
+- **Research/beslutning:** Den officielle protokol bruger nøgle på 8-128 alfanumeriske
+  tegn eller bindestreger i roden, POST til `https://api.indexnow.org/indexnow`, og
+  accepterer 200/202; 429 skal håndteres uden retry-storm i startup. Nøglen læses kun
+  fra runtime via `INDEXNOW_API_KEY`, og aktivering kræver desuden
+  `INDEXNOW_ENABLED=true`, så lokale production-starts og previews ikke sender. En
+  central, injectable `submitIndexNow`-funktion bygger sitemap + valgfrit canonicalt
+  URL, deduplicerer og klassificerer 200/202/429/fejl. En dynamisk key-route med
+  `afterFiles`-rewrite giver den offentlige `/<nøgle>.txt`; Next-instrumentering sender
+  efter deploy begge live-domæners sitemap og alle canonicale sitemap-URL'er, så en
+  eksisterende ændret side altid følger med. En beskyttet intern POST-route bruger
+  samme funktion til den konkrete ændrede eller slettede URL efter
+  publicering/deploy. Den interne route kræver en uafhængig random
+  `INDEXNOW_TRIGGER_TOKEN`, stream-capped body, canonical published-target check og
+  lokal cooldown/dedup. Ingen rigtig   submission køres under implementation, test, build
+  eller lokal verification.
+- **Review/rettelser 2026-09-25 10:03 CEST:** Frisk review fandt to P2-fund:
+  Next.js instrumentation kunne sende fra både Node og Edge, og trigger-token kunne
+  være lig den offentlige IndexNow-nøgle. Edge-registration er nu fail-closed,
+  og intern trigger afviser identiske tokens. To P3-fund er også lukket: tomme
+  query/fragment-markører kan ikke sendes ved `deleted: true`, og 401 svarer med
+  `WWW-Authenticate: Bearer`. Målrettede og fulle tests dækker rettelserne.
+- **Kvalitetsgate 2026-09-25 10:02 CEST:** `npm run build` grøn (137 sider +
+  typecheck; 7 kendte CSS-optimeringsadvarsler), `npm run test` grøn (674/674 tests,
+  71 filer), `npm run lint` grøn (377 filer) og `npm audit --audit-level=high` 0
+  sårbarheder. Ingen IndexNow-submission blev kørt under gate eller verification.
 - **Datagrund:** Bing, DuckDuckGo og Yahoo bidrager væsentligt til dansk trafik;
   brugerprompten angiver 1.320 Bing-, 381 DuckDuckGo- og 291 Yahoo-besøgende i
   snapshotperioden mod 3.855 Google-besøgende.
@@ -746,6 +773,18 @@ STATUS: KØ — T5 FÆRDIG; I1 (IndexNow) er næste opgave.
 
 ### ❓ Til Mads
 
+- **IndexNow runtime-konfiguration:** Sæt kun i Dokploys production-runtime
+  `INDEXNOW_ENABLED=true`, en gyldig `INDEXNOW_API_KEY` på 8-128 tegn med
+  `[A-Za-z0-9-]`, og — hvis den eksterne batch-deployer skal kalde den konkrete
+  trigger — en separat kryptografisk random `INDEXNOW_TRIGGER_TOKEN` på mindst 32
+  tegn. Generér/rotér begge nøgler uden for repoet; sæt aldrig værdier i
+  `.dokploy`, commits eller denne plan. Startup sender de nuværende sitemap-URL'er,
+  så en publiceret/ændret eksisterende side dækkes. Efter batch-deploy og health skal
+  deployeren ved sletning eller en præcis enkelt-URL-trigger POST'e
+  `/api/internal/indexnow` med `Authorization: Bearer <token>` og
+  `{"url":"https://canonical-host/path"}`; tilføj `"deleted":true` kun for en
+  bevidst slettet/tidligere redirectet URL. Denne eksterne hook skal ikke køres manuelt
+  i denne iteration.
 - Public `/api/v1/bmi` er bevidst uændret, fordi `/api/v1` er en frosset ekstern
   kontrakt. Den returner fortsat rå BMI med voksengrænser uden alder. En eventuel
   dokumentations- eller adfærdsændring kræver en eksplicit beslutning.

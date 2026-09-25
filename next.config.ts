@@ -82,6 +82,14 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async rewrites() {
+    return [
+      {
+        source: '/:key.txt',
+        destination: '/api/indexnow-key/:key',
+      },
+    ];
+  },
 };
 
 export default nextConfig;
