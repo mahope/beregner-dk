@@ -9,7 +9,7 @@ import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { useLocale } from '@/components/LocaleProvider';
 import { formatCurrency } from '@/lib/format';
-import { beregnFolkepension2026 } from '@/lib/folkepension';
+import { beregnFolkepension2026, type FolkepensionSamliv } from '@/lib/folkepension';
 
 interface AarData {
   aar: number;
@@ -29,10 +29,15 @@ export default function PensionBeregner() {
   const [inflation, setInflation] = useState<number>(2);
   const [udbetalingsperiode, setUdbetalingsperiode] = useState<number>(20);
   const [oensketMaanedlig, setOensketMaanedlig] = useState<number>(25000);
+  const [samliv, setSamliv] = useState<FolkepensionSamliv>("enlig");
+  const [samleverErPensionist, setSamleverErPensionist] = useState<boolean>(false);
+  const [aarligIndkomst, setAarligIndkomst] = useState<number>(0);
+  const [aarligSamleverIndkomst, setAarligSamleverIndkomst] = useState<number>(0);
 
   const isLoading = useCalculationLoading([
     alder, pensionsalder, maanedligIndbetaling, nuværendeOpsparing,
     forventetAfkast, inflation, udbetalingsperiode, oensketMaanedlig,
+    samliv, samleverErPensionist, aarligIndkomst, aarligSamleverIndkomst,
   ]);
 
   const hasLoadedUrl = useRef(false);
@@ -54,6 +59,10 @@ export default function PensionBeregner() {
       if (inputs.inflation !== undefined) setInflation(inputs.inflation);
       if (inputs.udbetalingsperiode !== undefined) setUdbetalingsperiode(inputs.udbetalingsperiode);
       if (inputs.oensketMaanedlig !== undefined) setOensketMaanedlig(inputs.oensketMaanedlig);
+      if (inputs.samliv === "enlig" || inputs.samliv === "samlevende") setSamliv(inputs.samliv);
+      if (typeof inputs.samleverErPensionist === "boolean") setSamleverErPensionist(inputs.samleverErPensionist);
+      if (inputs.aarligIndkomst !== undefined) setAarligIndkomst(inputs.aarligIndkomst);
+      if (inputs.aarligSamleverIndkomst !== undefined) setAarligSamleverIndkomst(inputs.aarligSamleverIndkomst);
     }
   }, []);
 
@@ -74,12 +83,14 @@ export default function PensionBeregner() {
       inputs: {
         alder, pensionsalder, maanedligIndbetaling, nuværendeOpsparing,
         forventetAfkast, inflation, udbetalingsperiode, oensketMaanedlig,
+        samliv, samleverErPensionist, aarligIndkomst, aarligSamleverIndkomst,
       },
       timestamp: Date.now(),
     };
     return generateShareableLink(state);
   }, [alder, pensionsalder, maanedligIndbetaling, nuværendeOpsparing,
-      forventetAfkast, inflation, udbetalingsperiode, oensketMaanedlig]);
+      forventetAfkast, inflation, udbetalingsperiode, oensketMaanedlig,
+      samliv, samleverErPensionist, aarligIndkomst, aarligSamleverIndkomst]);
 
   const handleReset = useCallback(() => {
     setAlder(30);
@@ -90,6 +101,10 @@ export default function PensionBeregner() {
     setInflation(2);
     setUdbetalingsperiode(20);
     setOensketMaanedlig(25000);
+    setSamliv("enlig");
+    setSamleverErPensionist(false);
+    setAarligIndkomst(0);
+    setAarligSamleverIndkomst(0);
   }, []);
 
   const resultat = useMemo(() => {
@@ -131,12 +146,13 @@ export default function PensionBeregner() {
       ? 500 * antalMaaneder
       : 500 * ((Math.pow(1 + maanedligRealAfkast, antalMaaneder) - 1) / maanedligRealAfkast);
 
-    // Folkepension 2026: grundbeløb + fuldt pensionstillæg (enlig uden anden indkomst).
+    // Folkepension 2026: grundbeløb + pensionstillæg, nedsat af andre indkomster
     // Kilde: borger.dk, verificeret 2026-09-25 — se src/lib/folkepension.ts
     const folkepension = beregnFolkepension2026({
-      samliv: "enlig",
-      aarligIndkomst: 0,
-      samleverErPensionist: false,
+      samliv,
+      aarligIndkomst,
+      samleverErPensionist,
+      aarligSamleverIndkomst,
     });
 
     // Folkepension + udbetaling fra egen opsparing
@@ -177,12 +193,13 @@ export default function PensionBeregner() {
       samletAfkast: Math.round(samletAfkast),
       ekstraPr500: Math.round(ekstraPr500),
       folkepension: folkepension.iAlt,
+      folkepensionDetaljer: folkepension,
       opsparingUdbetaling: Math.round(maanedligUdbetaling),
       samletMaanedlig,
       gap,
       aarligData,
     };
-  }, [alder, pensionsalder, maanedligIndbetaling, nuværendeOpsparing, forventetAfkast, inflation, udbetalingsperiode, oensketMaanedlig]);
+  }, [alder, pensionsalder, maanedligIndbetaling, nuværendeOpsparing, forventetAfkast, inflation, udbetalingsperiode, oensketMaanedlig, samliv, aarligIndkomst, samleverErPensionist, aarligSamleverIndkomst]);
 
   const formatKr = (amount: number) => formatCurrency(amount, locale, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 
@@ -270,6 +287,60 @@ export default function PensionBeregner() {
             unit="kr"
             helpText="Til beregning af pension gap"
           />
+          <div>
+            <label htmlFor="pension-samliv" className="block text-sm font-medium mb-2 dark:text-gray-200">
+              Samlivsstatus
+            </label>
+            <select
+              id="pension-samliv"
+              value={samliv}
+              onChange={(e) => setSamliv(e.target.value as FolkepensionSamliv)}
+              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg text-lg bg-white dark:bg-gray-800 dark:text-white"
+            >
+              <option value="enlig">Enlig</option>
+              <option value="samlevende">Gift eller samlevende</option>
+            </select>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              Påvirker kun pensionstillægget — grundbeløbet er det samme
+            </p>
+          </div>
+          {samliv === "samlevende" && (
+            <label className="flex items-start gap-3 p-3 border border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer">
+              <input
+                type="checkbox"
+                checked={samleverErPensionist}
+                onChange={(e) => setSamleverErPensionist(e.target.checked)}
+                className="mt-1 w-4 h-4"
+              />
+              <span className="text-sm dark:text-gray-300">
+                Min ægtefælle/samlever er også folkepensionsmodtager
+                <span className="block text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  Uden pensionist tæller kun 46 % af samleverens indkomst med
+                </span>
+              </span>
+            </label>
+          )}
+          <InputField
+            label="Din årlige indkomst ud over arbejdsindkomst"
+            value={aarligIndkomst}
+            onChange={setAarligIndkomst}
+            min={0}
+            max={2000000}
+            step={5000}
+            unit="kr"
+            helpText="Fx ATP, arbejdsmarkedspension, rateudbetalinger, aktieindkomst og nettokapitalindkomst"
+          />
+          {samliv === "samlevende" && (
+            <InputField
+              label="Samleverens årlige indkomst ud over arbejdsindkomst"
+              value={aarligSamleverIndkomst}
+              onChange={setAarligSamleverIndkomst}
+              min={0}
+              max={2000000}
+              step={5000}
+              unit="kr"
+            />
+          )}
         </div>
       </div>
 
@@ -320,14 +391,54 @@ export default function PensionBeregner() {
                   <p className="text-sm font-bold text-green-600 dark:text-green-400">{formatKr(resultat.opsparingUdbetaling)}</p>
                 </div>
               </div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-3">
-                Folkepensionen er 2026-beløbet for enlige uden anden indkomst: 7.544 kr. i grundbeløb
-                og 8.729 kr. i pensionstillæg (borger.dk, verificeret 25. september 2026). Gifte og
-                samlevende får 12.011 kr., og pensionstillægget sættes ned af andre indkomster, fx
-                arbejdsmarkedspension og ATP. Din egen arbejdsmarkedspension er derfor ikke
-                medregnet her &mdash; den afhænger af din arbejdsgiver. Se hele din pension på
-                PensionsInfo.dk.
-              </p>
+              <div className="mt-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg text-xs dark:text-gray-300">
+                <p className="font-medium dark:text-gray-200 mb-1">Folkepension 2026 — sådan er den sat sammen</p>
+                <ul className="space-y-1">
+                  <li className="flex justify-between gap-4">
+                    <span>Grundbeløb</span>
+                    <span className="font-medium">{formatKr(resultat.folkepensionDetaljer.grundbeloeb)}</span>
+                  </li>
+                  <li className="flex justify-between gap-4">
+                    <span>
+                      Pensionstillæg, fuldt ({samliv === "enlig" ? "enlig" : "gift/samlevende"})
+                    </span>
+                    <span className="font-medium">{formatKr(resultat.folkepensionDetaljer.tillaegFuld)}</span>
+                  </li>
+                  {resultat.folkepensionDetaljer.nedsatMed > 0 && (
+                    <li className="flex justify-between gap-4 text-red-600 dark:text-red-400">
+                      <span>Nedsat på grund af andre indkomster</span>
+                      <span>&minus;{formatKr(resultat.folkepensionDetaljer.nedsatMed)}</span>
+                    </li>
+                  )}
+                  {resultat.folkepensionDetaljer.bortfaldet && (
+                    <li className="flex justify-between gap-4 text-red-600 dark:text-red-400">
+                      <span>Pensionstillæg</span>
+                      <span className="font-medium">0 kr. — bortfaldet</span>
+                    </li>
+                  )}
+                  <li className="flex justify-between gap-4 border-t border-gray-300 dark:border-gray-600 pt-1 font-medium dark:text-gray-200">
+                    <span>I alt pr. måned før skat</span>
+                    <span>{formatKr(resultat.folkepension)}</span>
+                  </li>
+                </ul>
+                <p className="mt-2">
+                  {resultat.folkepensionDetaljer.bortfaldet
+                    ? `Din indkomst på ${formatKr(resultat.folkepensionDetaljer.indkomstGrundlag)} over bortfaldsgrænsen på ${formatKr(resultat.folkepensionDetaljer.graense.bortfaldOver)} kr. fjerner pensionstillægget helt. Grundbeløbet betales stadig.`
+                    : resultat.folkepensionDetaljer.nedsatMed > 0
+                      ? `Tillægget sættes ned med ${(resultat.folkepensionDetaljer.graense.pct * 100).toLocaleString("da-DK")} % af indkomsten over ${formatKr(resultat.folkepensionDetaljer.graense.nedsaetningOver)} kr. Du har opgivet ${formatKr(resultat.folkepensionDetaljer.indkomstGrundlag)} i årlig indkomst ud over arbejdsindkomst.`
+                      : resultat.folkepensionDetaljer.indkomstGrundlag === 0
+                        ? `Du har ikke opgivet andre indkomster, så du får det fulde pensionstillæg på ${formatKr(resultat.folkepensionDetaljer.tillaegFuld)} kr.`
+                        : `Din indkomst på ${formatKr(resultat.folkepensionDetaljer.indkomstGrundlag)} er under grænsen på ${formatKr(resultat.folkepensionDetaljer.graense.nedsaetningOver)} kr., så du får det fulde pensionstillæg.`}
+                  {resultat.folkepensionDetaljer.samleverUdeladt > 0 &&
+                    ` Der er holdt ${formatKr(resultat.folkepensionDetaljer.samleverUdeladt)} ude, fordi kun 46 % af din samlevers indkomst tæller med, når samleveren ikke er pensionist.`}
+                </p>
+                <p className="mt-2 text-gray-500 dark:text-gray-400">
+                  Grundbeløbet påvirkes aldrig af andre indkomster, så du får det uanset hvad du
+                  tjener. Kilde: borger.dk, verificeret 25. september 2026. Din egen
+                  arbejdsmarkedspension er ikke medregnet, fordi den afhænger af din arbejdsgiver —
+                  se hele din pension på PensionsInfo.dk.
+                </p>
+              </div>
             </div>
 
             {/* Pension gap */}

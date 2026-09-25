@@ -51,10 +51,15 @@ export type FolkepensionSamliv = "enlig" | "samlevende";
 
 export interface FolkepensionInput {
   samliv: FolkepensionSamliv;
-  /** Årlig indkomst ud over arbejdsindkomst hos dig og din samlever, kr. */
+  /** Din egen årlige indkomst ud over arbejdsindkomst, kr. */
   aarligIndkomst: number;
   /** Kun relevant når samliv er "samlevende". */
   samleverErPensionist: boolean;
+  /**
+   * Samleverens årlige indkomst ud over arbejdsindkomst, kr.
+   * Når samleveren ikke er pensionist, tæller kun 46 % med i grundlaget.
+   */
+  aarligSamleverIndkomst?: number;
 }
 
 export interface FolkepensionResult {
@@ -67,6 +72,14 @@ export interface FolkepensionResult {
   bortfaldet: boolean;
   /** Hvilken indkomstgrænse der blev brugt. */
   graense: { nedsaetningOver: number; bortfaldOver: number; pct: number };
+  /** Den indkomst der blev lagt til grundlaget, efter 46 %-reglen for samlever uden pensionist. */
+  indkomstGrundlag: number;
+  /** Det beløb 46 %-reglen holdt ude af grundlaget, kr. */
+  samleverUdeladt: number;
+}
+
+function beligIndkomst(value: number | undefined): number {
+  return typeof value === "number" && Number.isFinite(value) ? Math.max(0, value) : 0;
 }
 
 /**
@@ -90,9 +103,16 @@ export function beregnFolkepension2026(input: FolkepensionInput): FolkepensionRe
         ? FOLKEPENSION_2026.indkomstgraenser.samlevendeMedPensionist
         : FOLKEPENSION_2026.indkomstgraenser.samlevendeUdenPensionist;
 
-  const indkomst = Number.isFinite(input.aarligIndkomst)
-    ? Math.max(0, input.aarligIndkomst)
-    : 0;
+  const egenIndkomst = beligIndkomst(input.aarligIndkomst);
+  const samleverIndkomst =
+    input.samliv === "samlevende" ? beligIndkomst(input.aarligSamleverIndkomst) : 0;
+  const kun46Procent =
+    input.samliv === "samlevende" && !input.samleverErPensionist;
+  const samleverMedtalt = kun46Procent
+    ? samleverIndkomst * FOLKEPENSION_2026.samleverAndelMedRegel
+    : samleverIndkomst;
+  const indkomst = egenIndkomst + samleverMedtalt;
+  const samleverUdeladt = samleverIndkomst - samleverMedtalt;
 
   if (indkomst > graense.bortfaldOver) {
     return {
@@ -103,6 +123,8 @@ export function beregnFolkepension2026(input: FolkepensionInput): FolkepensionRe
       nedsatMed: tillaegFuld,
       bortfaldet: true,
       graense,
+      indkomstGrundlag: indkomst,
+      samleverUdeladt,
     };
   }
 
@@ -120,6 +142,8 @@ export function beregnFolkepension2026(input: FolkepensionInput): FolkepensionRe
     nedsatMed,
     bortfaldet: false,
     graense,
+    indkomstGrundlag: indkomst,
+    samleverUdeladt,
   };
 }
 

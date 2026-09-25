@@ -47,7 +47,7 @@ export default async function PensionPage() {
           Det danske <strong>pensionssystem</strong> består af <strong>tre søjler</strong>:
         </p>
         <ol>
-          <li><strong>Folkepension + ATP:</strong> Staten betaler til alle (ca. 13.000-15.000 kr/måned)</li>
+          <li><strong>Folkepension + ATP:</strong> Staten betaler til alle ({folk.iAlt.samlevende.toLocaleString("da-DK")} kr til {folk.iAlt.enlig.toLocaleString("da-DK")} kr pr. måned før skat, før ATP)</li>
           <li><strong>Arbejdsmarkedspension:</strong> Indbetalt via din arbejdsgiver (typisk 12-17% af løn)</li>
           <li><strong>Privat pension:</strong> Din egen opsparing (ratepension, aldersopsparing, frie midler)</li>
         </ol>
@@ -123,7 +123,10 @@ export default async function PensionPage() {
         </table>
         <p>
           Er din samlever ikke pensionist, ser Udbetaling Danmark bort fra de første
-          54 % af samleverens indkomst — kun 46 % tæller med. Ligesom grundbeløbet betales
+          54 % af samleverens indkomst — kun 46 % tæller med. Beregneren ovenfor bruger
+          præcis disse grænser: vælg om du er enlig eller gift/samlevende, markér om din
+          samlever er pensionist, og opgiv indkomsten ud over arbejdsindkomsten — så regner
+          den pensionstillægget ned og viser, hvor meget du får. Ligesom grundbeløbet betales
           folkepensionen bagud og udbetales på NemKonto den sidste bankdag i måneden. Se
           grænserne og din egen beregning i
           {" "}<a href="https://www.borger.dk/pension-og-efterloen/folkepension/foer-du-gaar-paa-folkepension" target="_blank" rel="noreferrer noopener">Udbetaling Danmarks folkepensionsside</a>
