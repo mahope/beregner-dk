@@ -187,7 +187,85 @@ describe("getPageData", () => {
   );
 
   test.each([
-    { locale: "da" as const, title: "Brøkberegner: forkort 6/8 til 3/4 = 0,75 = 75 %", answer: "6/8 forkortet = 3/4 = 0,75 = 75 %" },
+    {
+      locale: "da" as const,
+      title: "Brændstofberegner: 500 km benzin koster 450 kr.",
+      fuel: "benzin",
+      cost: "450 kr.",
+      perKm: "0,90 kr. pr. km",
+    },
+    {
+      locale: "se" as const,
+      title: "Bränslekalkylator: 500 km bensin kostar 450 kr",
+      fuel: "bensin",
+      cost: "450 kr",
+      perKm: "0,90 kr. per km",
+    },
+    {
+      locale: "no" as const,
+      title: "Drivstoffkalkulator: 500 km bensin koster 450 kr.",
+      fuel: "bensin",
+      cost: "450 kr.",
+      perKm: "0,90 kr. per km",
+    },
+  ])("has answer-first fuel metadata for $locale", ({ locale, title, fuel, cost, perKm }) => {
+    const data = getPageData("braendstof", locale)!;
+
+    expect(data.metaTitle).toBe(title);
+    expect(data.metaTitle.length).toBeLessThanOrEqual(60);
+    expect(data.description).toContain(cost);
+    expect(data.description).toContain(perKm);
+    expect(data.metaDescription).toContain(cost);
+    expect(data.metaDescription.length).toBeLessThanOrEqual(160);
+    expect(data.ogTitle).toBe(title);
+    expect(data.ogDescription).toContain(cost);
+    expect(data.schemaDescription).toContain(fuel);
+    const exampleFaq = data.faqItems.find((item) => item.answer.includes(cost));
+    expect(exampleFaq).toBeDefined();
+  });
+
+  test.each([
+    {
+      locale: "da" as const,
+      title: "Kvadratmeterberegner: 5 x 4 m = 20 m²",
+      area: "20 m²",
+      heading: "Et rum på 5 x 4 m er 20 m²",
+      price: "3.000 kr.",
+    },
+    {
+      locale: "se" as const,
+      title: "Kvadratmeterkalkylator: 5 x 4 m = 20 m²",
+      area: "20 m²",
+      heading: "Ett rum på 5 x 4 m är 20 m²",
+      price: "3.000 kr",
+    },
+    {
+      locale: "no" as const,
+      title: "Kvadratmeterkalkylator: 5 x 4 m = 20 m²",
+      area: "20 m²",
+      heading: "Et rom på 5 x 4 m er 20 m²",
+      price: "3.000 kr",
+    },
+  ])("has answer-first area metadata for $locale", ({ locale, title, area, heading, price }) => {
+    const data = getPageData("kvadratmeter", locale)!;
+
+    expect(data.metaTitle).toBe(title);
+    expect(data.metaTitle.length).toBeLessThanOrEqual(60);
+    expect(data.description).toContain(heading);
+    expect(data.description).toContain(area);
+    expect(data.metaDescription).toContain(area);
+    expect(data.metaDescription.length).toBeLessThanOrEqual(160);
+    expect(data.ogTitle).toBe(title);
+    expect(data.ogDescription).toContain(area);
+    expect(data.schemaDescription).toContain(area);
+    const priceFaq = data.faqItems.find((item) => item.answer.includes(price));
+    expect(priceFaq).toBeDefined();
+  });
+
+  test.each([
+    {
+      locale: "da" as const,
+      title: "Brøkberegner: forkort 6/8 til 3/4 = 0,75 = 75 %", answer: "6/8 forkortet = 3/4 = 0,75 = 75 %" },
     { locale: "se" as const, title: "Bråkkalkylator: förkorta 6/8 till 3/4 = 0,75 = 75 %", answer: "6/8 förkortat = 3/4 = 0,75 = 75 %" },
   ])("has answer-first fraction metadata for $locale", ({ locale, title, answer }) => {
     const data = getPageData("brok", locale)!;
