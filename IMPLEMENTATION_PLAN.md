@@ -938,7 +938,8 @@ STATUS: KØ — C5 FÆRDIG; deploynoter for C4 og C5 er åbne. Næste iteration:
 - **Forventet effekt:** De to sider står tilsammen for ca. 25.800 visninger/28d på
   position 7-8. Løftes CTR fra ~1 % til 2,5 %, giver det ca. 390 ekstra klik pr.
   måned på værktøjer, der allerede har kvalificeret trafik.
-- **Landet:** se commit på `ceo/c5-rente-kalorier-ctr` og merge-ref nedenfor.
+- **Landet:** kode, tests og plan i commit `64d8062`; merge til `master` er
+  `200ce4c`. Begge refs pushet 2026-09-25 19:05 CEST.
 - **MÅL:** `/renteberegner` Search Console baseline 13.535 visninger, 126 klik,
   CTR 0,9 %, position 7,5 pr. 2026-09-23; Plausible 149 besøgende/28d pr.
   2026-09-25. `/kalorier` Search Console baseline 12.261 visninger, 123 klik,
@@ -1367,4 +1368,10 @@ landmark=lån, piggybank=opsparing osv.).
   description `c78a7a6` 2026-09-25 18:40 CEST. Verificér efter næste batch-vindue
   med live DA `/tidszone` (synligt svar + tabel) og SE `beraknare.se/tidszone`;
   HTTP 200 alene utilstrækkeligt.
+- **VERIFICÉR DEPLOY:** C5 svar-først `/renteberegner` og `/kalorier` `200ce4c`
+  2026-09-25 19:05 CEST. Verificér efter næste batch-vindue på live DA: title
+  "Renteberegner: 100.000 kr. i 5 år = 1.887 kr./md." med synligt
+  "Samlet rente: 13.227 kr." + link til `/rentefradrag`, og title
+  "Hvor mange kalorier om dagen? | Kalorieberegner" med synligt
+  "TDEE 2.759 kcal ved moderat aktivitet". HTTP 200 alene utilstrækkeligt.
 
