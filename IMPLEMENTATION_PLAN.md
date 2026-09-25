@@ -1,12 +1,15 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — K1 (kvadratmeter: materialebehov med spild, enheder og pris) FÆRDIG
-2026-09-25 22:20 CEST. Deploynoter for C4-C10, D1, C11, R1 og K1 er åbne og kan
-først verificeres efter 07:30-vinduet 2026-09-26.
-Næste iteration: (1) `/blog/boernepenge-2026-satser-og-regler` — 5.145 visninger,
-CTR 0,5 % på pos. 8,5, samme svar-først-mønster som C1-C6/C9 men på en artikel;
-(2) konsolidér `SkattefradragBeregner`'s kørselssatser i `satser-2026.ts` (❓ nedenfor);
-(3) D2 (børnetilskudssatser, lav trafikvirkning).
+STATUS: KØ — S1 (skattefradrag: ét ratested, delt kørselsfradragssats) FÆRDIG
+2026-09-25 22:55 CEST. **21:30-batchen 2026-09-25 indeholdt ikke dagens merges** —
+live `/alder`, `/pension`, `/braendstof`, `/kvadratmeter` har stadig de gamle titler,
+og børnepenge-artiklen har stadig dobbelt domænesuffiks. Noterne C4-C11, D1, R1 og
+K1 står derfor åbne. Næste iteration skal verificere dem indholdskontrolleret efter
+07:30-vinduet 2026-09-26; er de stadig ikke live derefter, skrives `DEPLOY-MISSING`
+og der merges ikke til `master` mere, før et menneske har kigget.
+Næste iteration: (1) live-verificér deploynoterne efter 07:30-vinduet;
+(2) D2 (børnetilskudssatser, lav trafikvirkning); (3) kørselsfradragets 2026-sats —
+se ❓ Til Mads, må ikke gættes.
 
 ## Fase 3 — trafik-drevet
 
@@ -1518,6 +1521,83 @@ CTR 0,5 % på pos. 8,5, samme svar-først-mønster som C1-C6/C9 men på en artik
   parketgulv sælges i pakker pr. 2-6 m² med produktvarierende indhold — pakken
   kræver derfor et produktspecifikt tal, som værktøjet ikke kan gætte.
 
+#### 25. [x] FÆRDIG 2026-09-25 — S1 — Skattefradrag: ét ratested og delt kørselsfradragssats
+
+- **Iteration start:** 2026-09-25 22:44 CEST på `ceo/skattefradrag-rater`. Køen efter
+  K1 var tom; næste punkt var ❓ Til Mads' dobbeltdefinition.
+- **Problemfund:** `SkattefradragBeregner.tsx` havde sin **egen** `SATSER_2026`-konstant
+  med kørselsfradrag på 2,28/1,14 kr./km og `kommuneskatSnit: 25,1` +
+  `bundskat: 12,01` som rå procenttal, mens den fælles `satser-2026.ts` (med kilde
+  skat.dk og låst test) siger 3,17/1,59 kr./km og 25,049 %/12,01 %. `/skattefradrag`
+  og `/befordringsfradrag` har altså serveret to forskellige kørselsfradrag-sigter
+  for den samme pendler, og ingen af delene lå i et testede logik-modul.
+- **Research 2026-09-25 23:00:** kilderne modsiger hinanden, og ingen primær kilde
+  kunne hentes: skat.dk's fradragssider er JS-renderede (webfetch får kun
+  navigationen), og DuckDuckGo blokerer automatiske forespørgsler. Den
+  sekundære kilde borgerhaandbog.dk angiver for 2026 netop **2,28 kr./km (25-120 km)
+  og 1,14 kr./km over 120 km** samt 2,53 kr./km i udkantskommuner — altså tallene fra
+  komponentens lokale konstant. Samme side er dog internt modstridende (den siger
+  satsen er hævet 89 øre i 2026, hvilket forudsætter 1,39 kr. året før) og er
+  desuden automatisk genereret (spansk "Ir al contenido" i navigationen), så den
+  kan ikke bruges som grundlag for at ændre en sats. **Derfor er ingen sats ændret
+  på baggrund af researchen** — kun dobbeltdefinitionen er fjernet.
+- **Beslutning/implementering:** Ny `SKATTEFRADRAG_2026` i `src/lib/satser-2026.ts`
+  med `verifiedAt`, kilder, lofterne og den 26 % boligfradragsværdi som navngiven
+  konstant — og med en JSDoc, der siger hvilke tal der mangler en primær kilde.
+  Nyt rent logik-modul `src/lib/skattefradrag.ts` (`beregnKoerselsfradragAar` +
+  `beregnSkattefradrag`) overtager hele komponentens `useMemo`, så kørselsfradraget
+  nu læser **samme** `koerselSatsLav/Hoej`, `koerselHoejGraense` og
+  `koerselBundgraense` som `/befordringsfradrag`. `kommuneskatSnit`/`bundskat` er
+  læst som decider (0,25049 + 0,1201) i stedet for som rå procenttal divideret med
+  100. UI'et viser nu satserne og 120-km-grænsen, linker til `/befordringsfradrag`,
+  og mærker håndværker-/servicefradragsfelterne som **vejledende**, fordi deres loft
+  ikke er verificeret mod en myndighedskilde.
+- **Bekræftet uændret adfærd:** 120-km-grænsen går ikke tabt mellem satserne
+  (en ekstra km koster præcis den lave sats), arbejdsdage skalerer lineært, loftet på
+  216 dage tænkes ikke over, `NaN`/negative/udokumenterede inputs giver 0 frem for
+  `NaN`, fagforening klemmes til 7.000, a-kasse har intet loft, rentefradraget
+  værdersættes efter sin egen to-trinssats (33,6 %/25,6 %) og ikke ved
+  marginalskatten, og boligjob/servicefradrag har egen 26 %-værdi.
+- **Resultatvirkning (dokumenteret, ikke skjult):** kørselsfradraget stiger for
+  pendlere, fordi den fælles sats er 3,17/1,59 mod de gamle 2,28/1,14. Det er
+  samme sats som `/befordringsfradrag` og samme sats som sidens øvrige copy, så
+  uoverensstemmelsen forsvinder — men hvis Borgerhåndbogs 2,28/1,14 viser sig at
+  være den officielle 2026-sats, er det **ét tal i én fil** (`SATSER_2026`), der
+  skal rettes, og alle sider følger automatisk med.
+- **Acceptkriterier:**
+  1. Ingen `2,28`, `1,14` eller `kommuneskatSnit: 25.1` i `src/` — **PASS** (grep).
+  2. `SkattefradragBeregner.tsx` indeholder ingen egne satser — **PASS**.
+  3. `/skattefradrag` og `/befordringsfradrag` læser samme kørselssatser fra
+     `SATSER_2026` — **PASS** (live-kontrol nedenfor).
+  4. 18 nye tests dækker bundgrænse, 120-km-grænsen, lineær skalering, dagsloft,
+     `NaN`/negative/udokumenterede input, lofter, fradragsværdier og poster — **PASS**.
+  5. Kilde + `verifiedAt` i koden, og de uverificerede tal er mærket vejledende i
+     UI og i JSDoc — **PASS**.
+  6. `npm run lint`, `npm run test` og `npm run build` er grønne — **PASS**.
+- **Kvalitetsgate 2026-09-25 22:53 CEST:** `npm run lint` grøn (491 filer),
+  `npm run test` grøn (**1090/1090, 103 filer**), `npm run build` grøn
+  ("Compiled successfully", 139 sider + typecheck; kun de 7 kendte CSS-advarsler).
+  Lokal `next start` på port 3231: `/skattefradrag` serverede 200 med den nye
+  note om manglende myndighedskilde og linket til `/befordringsfradrag` i DOM,
+  `/api/health` svarede `{"status":"ok"}`.
+- **Ærlighed om et afvigende resultat:** det første `npm run test`-kørsel efter
+  ændringen meldte 6 fejl i én fil, som ikke kunne reproduceres i de tre følgende
+  kørsler (1090/1090 hver gang), og filnavnet blev ikke fanget, fordi outputtet
+  var tail'et. Det er derfor **ikke** dokumenteret som grønt eksisterende output:
+  næste iteration bør køre `npm run test` med fuld output og se, om den samme fil
+  fejler igen. Min egen nye testfil fejlede kun på grund af to fejlsatte
+  forventninger (afrunding), som blev rettet — ikke på grund af kodelogikken.
+- **MÅL:** `/skattefradrag` baseline: ingen Search Console-tal for siden i
+  snapshotet; `/befordringsfradrag` og `/skattefradrag` skal begge give samme
+  kørselsfradrag for samme pendler (kan efterprøves uden trafikdata). Effekten af
+  den højere sats kan ikke måles isoleret fra CTR-arbejdet på `/skattefradrag`.
+- **Kendte huller bevidst ikke lukket:** de to beløbsloft (12.400/6.200 kr.) og
+  26 %-fradragsværdien er ikke verificeret mod en primær kilde; det står i ❓ Til
+  Mads. Den forhøjede yderkommunesats (3,51 kr./km) tilbydes ikke i dette
+  værktøj, fordi den kræver valg af kommune.
+
+
+
 #### D2. Ny kandidat — børnetilskudssatserne er ikke verificeret nogen steder
 
 - **Datagrund:** C10 fjernede de uverificerede "ca. 6.300/6.600 kr." fra artikel og
@@ -1549,11 +1629,20 @@ CTR 0,5 % på pos. 8,5, samme svar-først-mønster som C1-C6/C9 men på en artik
   dansk sekundærkilde (Borgerhåndbog) angiver "ca. 33,7 %" / "ca. 25 %" for samme
   struktur. Er den rigtige myndighedstabel fundet, skal den ind i `RENTEFRADRAG_2026` —
   det er én fil og de to beregnere følger med automatisk.
-- **Indhold, der mangler internt link (kandidat til næste iterationer):**
-  `SkattefradragBeregner` bruger stadig egne, forældede kørselssatser
-  (2,28/1,14 kr./km) og `kommuneskatSnit: 25.1` mod `satser-2026.ts`'s
-  3,17/1,59 kr./km — samme slags dobbeltdefinitionsfejl som R1 fandt. Skal konsolideres
-  i en egen opgave med tests.
+- **Kørselsfradragets 2026-sats og beløbsloft (S1) — må ikke gættes.** To kilder
+  modsiger hinanden om kørselsfradraget for 2026: den fælles `SATSER_2026` siger
+  3,17 kr./km (25-120 km) og 1,59 kr./km over 120 km med skat.dk som kilde, mens
+  borgerhaandbog.dk siger 2,28/1,14 — de tal, komponenten havde hardkodet.
+  skat.dk's fradragssider er JS-renderede og kan ikke hentes maskinelt, så
+  primærkilden mangler. Findes den: ret **ét** tal i `SATSER_2026`, så følger
+  `/skattefradrag` og `/befordringsfradrag` automatisk med. Det samme gælder
+  håndværkerfradragets og servicefradragets beløbsloft (nu 12.400/6.200 kr. i
+  `SKATTEFRADRAG_2026`), som ingen kilde dækker, og 26 %-fradragsværdien for
+  boligjobordningen — de er derfor mærket vejledende i UI.
+- ~~Indhold, der mangler internt link~~ **Løst 2026-09-25 som S1:** `SkattefradragBeregner`
+  havde egne, modstridende kørselssatser og kommuneskat; den læser nu
+  `SATSER_2026` + `SKATTEFRADRAG_2026` gennem det testede modul
+  `src/lib/skattefradrag.ts`.
 - Public `/api/v1/bmi` er bevidst uændret, fordi `/api/v1` er en frosset ekstern
   kontrakt. Den returner fortsat rå BMI med voksengrænser uden alder. En eventuel
   dokumentations- eller adfærdsændring kræver en eksplicit beslutning.
@@ -1580,13 +1669,14 @@ CTR 0,5 % på pos. 8,5, samme svar-først-mønster som C1-C6/C9 men på en artik
 - ~~`/braendstof`~~ er svar-først siden 2026-09-25 (C9, opgave 20).
   MÅL: Search Console baseline 16.371 visninger, 179 klik, CTR 1,1 %, position 6,1
   pr. 2026-09-23; Plausible 272 besøgende/28d pr. 2026-09-25 — genmål 2026-10-09.
-- **Næste CTR-kandidat:** `/blog/boernepenge-2026-satser-og-regler` — 5.145 visninger,
-  27 klik, **CTR 0,5 %**, position 8,5 pr. 2026-09-23. Søgningerne er konkrete
-  ("børnepenge 2026" 986v/3k pos 9, "børnepenge sats 2026" 339v pos 6,
-  "børnepenge 2026 udbetaling" 294v pos 10, "børne unge ydelse satser 2026" 136v pos 8),
-  så både svar-først-titel og et synligt 2026-talburk burde give effekt. Samme mønster som
-  C1-C6/C9, men på en blogartikel:kræver en ny routetest og kildeførte tal.
-  MÅL ved eventuel opgave: baseline 5.145 visninger, CTR 0,5 % pr. 2026-09-23.
+- ~~`/blog/boernepenge-2026-satser-og-regler`~~ er svar-først siden 2026-09-25
+  (C10, opgave 21) med rensede 2026-satser. MÅL: Search Console baseline 5.145
+  visninger, 27 klik, CTR 0,5 %, position 8,5 pr. 2026-09-23 — genmål 2026-10-09.
+- **Næste CTR-kandidat:** `/pension` og `/procent` er allerede svar-først, og de
+  fire øvrige top-CTR-sider er dækket. Den næste dokumenterede mulighed er
+  `/blog/skat-2026-alt-du-skal-vide` og de øvrige artikler med samme
+  sats-spørgsmålsmønster som børnepenge-artiklen — kræver en ny baseline fra
+  Search Console, fordi snapshotet kun viser artiklen for børnepenge.
 - ~~`/rentefradrag`~~ er lukket som R1 den 2026-09-25, se opgave 23: ét ratested med
   kilde, fire rettede modstridelser og ingen "afhænger af din kommune"-påstand. MÅL:
   Search Console baseline 4.492 visninger, 219 klik, CTR 4,9 %, position 6,7 pr.
@@ -1934,6 +2024,17 @@ landmark=lån, piggybank=opsparing osv.).
   **404**. Det er ét deploy-vindue siden C4's merge 18:40, altså endnu ikke
   `DEPLOY-MISSING` (kræver to), men alle noter C4-C11 + R1 kan først verificeres
   realistisk efter 07:30-vinduet 2026-09-26. `/api/health` svarede `status: ok`.
+- **Kontrol 2026-09-25 22:50 CEST (S1):** 21:30-batchen er stadig ikke synlig, så
+  den indeholdt ikke dagens merges. Live `/alder` har titlen "Aldersberegner - Beregn
+  din præcise alder" (ikke C6's svar-først-titel), `/pension` viser stadig "De tre
+  pensionssøjler" (ikke C8/C11's rettelse), `/braendstof` og `/kvadratmeter` har de
+  gamle titler, og børnepenge-artiklen har stadig **dobbelt** domænesuffiks. Alle fem
+  svar 200, `/api/health` svarede `status: ok`. Det er **ét** deploy-vindue siden
+  C4's merge 18:40, altså endnu ikke `DEPLOY-MISSING` (kræver to). Næste
+  iteration skal genkontrollere efter 07:30-vinduet 2026-09-26; er indholdet stadig
+  gammelt derefter, skrives `DEPLOY-MISSING` og der merges ikke til `master` før et
+  menneske har kigget. HTTP 200 er ikke bevis — hele listen er kontrolleret på
+  indhold.
 - **Åbne noter:** O5/C1/C2/C3/T4 fra før dette T5-checkpoint er indholdskontrolleret
   efter 07:30-vinduet og lukket nedenfor.
 - DEPLOY OK: billaan-ikoner (etape 6), calculator-list-ikoner (etape 3), footer-ikoner (etape 4) — verificeret 2026-08-23 18:20.
