@@ -9,6 +9,7 @@ import {
   FAQSchema,
 } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import { FOLKEPENSION_2026, folkepensionsalderRækker } from "@/lib/folkepension";
 import RelatedCalculators from "@/components/RelatedCalculators";
 
 export async function generateMetadata() {
@@ -19,6 +20,8 @@ export default async function PensionPage() {
   const locale = await getLocale();
   const domainConfig = await getCurrentDomainConfig();
   const pageData = getPageData("pension", locale) || getPageData("pension", "da")!;
+  const folk = FOLKEPENSION_2026;
+  const alderRaekker = folkepensionsalderRækker();
 
   return (
     <div>
@@ -49,39 +52,108 @@ export default async function PensionPage() {
           <li><strong>Privat pension:</strong> Din egen opsparing (ratepension, aldersopsparing, frie midler)</li>
         </ol>
 
-        <h2>Folkepension (2026)</h2>
+        <h2 id="folkepension-2026">Folkepension 2026</h2>
         <p>
-          Alle danske statsborgere med bopæl i Danmark har ret til <strong>folkepension</strong> fra <strong>folkepensionsalderen</strong> (pt. 67 år).
+          Alle danske statsborgere med fast bopæl i Danmark har ret til <strong>folkepension</strong> fra
+          folkepensionsalderen, hvis de har boet i Danmark i mindst tre år fra de fyldte 15 år.
+          Folkepensionen består for de fleste af et <strong>grundbeløb</strong> og et
+          <strong>pensionstillæg</strong>. Beløbene er pr. måned før skat:
         </p>
         <table>
           <thead>
             <tr>
               <th>Type</th>
-              <th>Beløb/måned (ca.)</th>
-              <th>Note</th>
+              <th>Enlige</th>
+              <th>Gifte/samlevende</th>
             </tr>
           </thead>
           <tbody>
             <tr>
               <td>Grundbeløb</td>
-              <td>7.544 kr</td>
-              <td>Afhænger af ophold i DK</td>
+              <td>{folk.grundbeloeb.toLocaleString("da-DK")} kr</td>
+              <td>{folk.grundbeloeb.toLocaleString("da-DK")} kr</td>
             </tr>
             <tr>
-              <td>Pensionstillæg (enlig)</td>
-              <td>8.729 kr</td>
-              <td>Modregnes i anden indkomst</td>
+              <td>Pensionstillæg</td>
+              <td>{folk.tillaeg.enlig.toLocaleString("da-DK")} kr</td>
+              <td>{folk.tillaeg.samlevende.toLocaleString("da-DK")} kr</td>
             </tr>
             <tr>
-              <td>Pensionstillæg (samboende)</td>
-              <td>4.367 kr</td>
-              <td>Modregnes i anden indkomst</td>
+              <td><strong>I alt</strong></td>
+              <td><strong>{folk.iAlt.enlig.toLocaleString("da-DK")} kr</strong></td>
+              <td><strong>{folk.iAlt.samlevende.toLocaleString("da-DK")} kr</strong></td>
+            </tr>
+          </tbody>
+        </table>
+        <p>
+          <strong>Grundbeløbet påvirkes ikke af andre indkomster</strong> — du kan arbejde så meget,
+          du vil, uden at det påvirker grundbeløbet. <strong>Pensionstillægget sættes derimod ned</strong>,
+          hvis du eller din samlever har indkomster ud over arbejdsindkomst, fx arbejdsmarkedspension,
+          ATP, rateudbetalinger, nettokapitalindkomst og aktieindkomst. Grænserne for 2026:
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Situation</th>
+              <th>Sættes ned over</th>
+              <th>Bortfalder over</th>
+              <th>Nedsættelse</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Enlig</td>
+              <td>{folk.indkomstgraenser.enlig.nedsaetningOver.toLocaleString("da-DK")} kr</td>
+              <td>{folk.indkomstgraenser.enlig.bortfaldOver.toLocaleString("da-DK")} kr</td>
+              <td>{folk.indkomstgraenser.enlig.pct * 100}%</td>
             </tr>
             <tr>
-              <td>ATP livslang</td>
-              <td>2.000-3.000 kr</td>
-              <td>Afhænger af indbetalinger</td>
+              <td>Samlevende med pensionist</td>
+              <td>{folk.indkomstgraenser.samlevendeMedPensionist.nedsaetningOver.toLocaleString("da-DK")} kr</td>
+              <td>{folk.indkomstgraenser.samlevendeMedPensionist.bortfaldOver.toLocaleString("da-DK")} kr</td>
+              <td>{folk.indkomstgraenser.samlevendeMedPensionist.pct * 100}%</td>
             </tr>
+            <tr>
+              <td>Samlevende uden pensionist</td>
+              <td>{folk.indkomstgraenser.samlevendeUdenPensionist.nedsaetningOver.toLocaleString("da-DK")} kr</td>
+              <td>{folk.indkomstgraenser.samlevendeUdenPensionist.bortfaldOver.toLocaleString("da-DK")} kr</td>
+              <td>{folk.indkomstgraenser.samlevendeUdenPensionist.pct * 100}%</td>
+            </tr>
+          </tbody>
+        </table>
+        <p>
+          Er din samlever ikke pensionist, ser Udbetaling Danmark bort fra de første
+          54 % af samleverens indkomst — kun 46 % tæller med. Ligesom grundbeløbet betales
+          folkepensionen bagud og udbetales på NemKonto den sidste bankdag i måneden. Se
+          grænserne og din egen beregning i
+          {" "}<a href="https://www.borger.dk/pension-og-efterloen/folkepension/foer-du-gaar-paa-folkepension" target="_blank" rel="noreferrer noopener">Udbetaling Danmarks folkepensionsside</a>
+          {" "}eller se alle dine ordninger samlet på
+          {" "}<a href="https://www.pensionsinfo.dk" target="_blank" rel="noreferrer noopener">PensionsInfo.dk</a>.
+        </p>
+        <p className="text-sm text-gray-500">
+          Kilde: borger.dk, verificeret 25. september 2026. Folkepensionsalderen kan hæves,
+          fordi den løbende tilpasses den gennemsnitlige levealder.
+        </p>
+
+        <h2 id="folkepensionsalder">Hvornår kan du gå på folkepension?</h2>
+        <p>
+          Folkepensionsalderen afhænger af dit fødselsår. Du kan søge om folkepension
+          6 måneder inden, du har ret til den, og du skal selv søge — den udbetales ikke automatisk.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Født</th>
+              <th>Folkepensionsalder</th>
+            </tr>
+          </thead>
+          <tbody>
+            {alderRaekker.map((raekke) => (
+              <tr key={raekke.foedselsdato}>
+                <td>{raekke.foedselsdato}</td>
+                <td>{raekke.alderTekst}</td>
+              </tr>
+            ))}
           </tbody>
         </table>
 
@@ -122,35 +194,11 @@ export default async function PensionPage() {
         </ul>
 
         <h2>Hvornår kan du gå på pension?</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>Født</th>
-              <th>Folkepensionsalder</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Før 1963</td>
-              <td>65-67 år</td>
-            </tr>
-            <tr>
-              <td>1963-1966</td>
-              <td>68 år</td>
-            </tr>
-            <tr>
-              <td>1967-1970</td>
-              <td>69 år</td>
-            </tr>
-            <tr>
-              <td>Efter 1970</td>
-              <td>70+ år (forventes)</td>
-            </tr>
-          </tbody>
-        </table>
         <p>
-          Du kan typisk gå på <strong>tidlig pension</strong> (opsparingsbaseret) fra <strong>5 år før folkepensionsalderen</strong>,
-          men <strong>folkepensionen</strong> starter først ved den officielle alder.
+          <strong>Tidlig pension</strong> (opsparingsbaseret) kan typisk købes fra
+          5 år før folkepensionsalderen, men <strong>folkepensionen</strong> starter først ved den
+          officielle alder. Se <a href="#folkepensionsalder">folkepensionsalderen ovenfor</a> og
+          vores <a href="/efterloen">efterlønberegner</a>.
         </p>
 
         <h2>Tips til pensionsplanlægning</h2>

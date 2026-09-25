@@ -50,7 +50,7 @@ const faqItems = [
   },
   {
     question: "Kan jeg leve af folkepension alene?",
-    answer: "Folkepension og pensionstillæg giver ca. 13.000-15.000 kr/måned før skat for enlige, og mindre for samboende. De fleste har svært ved at opretholde deres levestandard kun på folkepension, så supplerende opsparing er vigtig.",
+    answer: "Folkepensionen er 16.273 kr/måned før skat for enlige (grundbeløb 7.544 kr + pensionstillæg 8.729 kr) og 12.011 kr for gifte/samlevende i 2026. Pensionstillægget sættes ned af andre indkomster, fx arbejdsmarkedspension og ATP. De fleste har svært ved at opretholde deres levestandard kun på folkepension, så supplerende opsparing er vigtig.",
   },
   {
     question: "Hvad er forskellen på ratepension og aldersopsparing?",
@@ -161,7 +161,7 @@ export default function PensionGuidePage() {
               </tr>
               <tr className="border-b border-green-200 dark:border-green-700">
                 <td className="py-2">Pensionstillæg (par)</td>
-                <td className="text-right">~4.367 kr/md</td>
+                <td className="text-right">~4.467 kr/md</td>
               </tr>
               <tr className="border-b border-green-200 dark:border-green-700">
                 <td className="py-2">ATP (typisk)</td>

@@ -9,6 +9,7 @@ import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { useLocale } from '@/components/LocaleProvider';
 import { formatCurrency } from '@/lib/format';
+import { beregnFolkepension2026 } from '@/lib/folkepension';
 
 interface AarData {
   aar: number;
@@ -130,16 +131,16 @@ export default function PensionBeregner() {
       ? 500 * antalMaaneder
       : 500 * ((Math.pow(1 + maanedligRealAfkast, antalMaaneder) - 1) / maanedligRealAfkast);
 
-    // Folkepension (2026 satser)
-    const folkepensionGrundbeloeb = 7544;
-    const folkepensionTillaeg = 8729;
-    const anslaaetFolkepension = folkepensionGrundbeloeb + Math.round(folkepensionTillaeg * 0.7);
+    // Folkepension 2026: grundbeløb + fuldt pensionstillæg (enlig uden anden indkomst).
+    // Kilde: borger.dk, verificeret 2026-09-25 — se src/lib/folkepension.ts
+    const folkepension = beregnFolkepension2026({
+      samliv: "enlig",
+      aarligIndkomst: 0,
+      samleverErPensionist: false,
+    });
 
-    // Tre søjler
-    const soejle1 = anslaaetFolkepension; // folkepension
-    const soejle2 = Math.round(maanedligUdbetaling * 0.7); // arbejdsmarkedspension (estimeret ~70%)
-    const soejle3 = Math.round(maanedligUdbetaling * 0.3); // privat (estimeret ~30%)
-    const samletMaanedlig = soejle1 + soejle2 + soejle3;
+    // Folkepension + udbetaling fra egen opsparing
+    const samletMaanedlig = folkepension.iAlt + Math.round(maanedligUdbetaling);
 
     // Pension gap
     const gap = oensketMaanedlig - samletMaanedlig;
@@ -175,8 +176,8 @@ export default function PensionBeregner() {
       samletIndbetalt: Math.round(samletIndbetalt),
       samletAfkast: Math.round(samletAfkast),
       ekstraPr500: Math.round(ekstraPr500),
-      folkepension: anslaaetFolkepension,
-      soejle1, soejle2, soejle3,
+      folkepension: folkepension.iAlt,
+      opsparingUdbetaling: Math.round(maanedligUdbetaling),
       samletMaanedlig,
       gap,
       aarligData,
@@ -294,41 +295,39 @@ export default function PensionBeregner() {
               </p>
             </div>
 
-            {/* Tre søjler visualisering */}
+            {/* Folkepension + opsparing */}
             <div className="mb-6">
-              <h4 className="text-sm font-medium mb-3 dark:text-gray-200">De tre pensionssøjler</h4>
-              <div className="grid grid-cols-3 gap-3">
+              <h4 className="text-sm font-medium mb-3 dark:text-gray-200">Hvor kommer pensionen fra</h4>
+              <div className="grid grid-cols-2 gap-3">
                 <div className="text-center">
                   <div className="relative mx-auto w-16 bg-gray-100 dark:bg-gray-700 rounded-t-lg overflow-hidden" style={{ height: "120px" }}>
                     <div
                       className="absolute bottom-0 w-full bg-purple-500 dark:bg-purple-400 rounded-t-lg transition-all"
-                      style={{ height: `${resultat.samletMaanedlig > 0 ? (resultat.soejle1 / resultat.samletMaanedlig) * 100 : 0}%` }}
+                      style={{ height: `${resultat.samletMaanedlig > 0 ? (resultat.folkepension / resultat.samletMaanedlig) * 100 : 0}%` }}
                     />
                   </div>
                   <p className="text-xs font-medium mt-2 dark:text-gray-200">Folkepension</p>
-                  <p className="text-sm font-bold text-purple-600 dark:text-purple-400">{formatKr(resultat.soejle1)}</p>
+                  <p className="text-sm font-bold text-purple-600 dark:text-purple-400">{formatKr(resultat.folkepension)}</p>
                 </div>
                 <div className="text-center">
                   <div className="relative mx-auto w-16 bg-gray-100 dark:bg-gray-700 rounded-t-lg overflow-hidden" style={{ height: "120px" }}>
                     <div
-                      className="absolute bottom-0 w-full bg-blue-500 dark:bg-blue-400 rounded-t-lg transition-all"
-                      style={{ height: `${resultat.samletMaanedlig > 0 ? (resultat.soejle2 / resultat.samletMaanedlig) * 100 : 0}%` }}
+                      className="absolute bottom-0 w-full bg-green-500 dark:text-green-400 rounded-t-lg transition-all"
+                      style={{ height: `${resultat.samletMaanedlig > 0 ? (resultat.opsparingUdbetaling / resultat.samletMaanedlig) * 100 : 0}%` }}
                     />
                   </div>
-                  <p className="text-xs font-medium mt-2 dark:text-gray-200">Arbejdsmarked</p>
-                  <p className="text-sm font-bold text-blue-600 dark:text-blue-400">{formatKr(resultat.soejle2)}</p>
-                </div>
-                <div className="text-center">
-                  <div className="relative mx-auto w-16 bg-gray-100 dark:bg-gray-700 rounded-t-lg overflow-hidden" style={{ height: "120px" }}>
-                    <div
-                      className="absolute bottom-0 w-full bg-green-500 dark:bg-green-400 rounded-t-lg transition-all"
-                      style={{ height: `${resultat.samletMaanedlig > 0 ? (resultat.soejle3 / resultat.samletMaanedlig) * 100 : 0}%` }}
-                    />
-                  </div>
-                  <p className="text-xs font-medium mt-2 dark:text-gray-200">Privat</p>
-                  <p className="text-sm font-bold text-green-600 dark:text-green-400">{formatKr(resultat.soejle3)}</p>
+                  <p className="text-xs font-medium mt-2 dark:text-gray-200">Din opsparing</p>
+                  <p className="text-sm font-bold text-green-600 dark:text-green-400">{formatKr(resultat.opsparingUdbetaling)}</p>
                 </div>
               </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-3">
+                Folkepensionen er 2026-beløbet for enlige uden anden indkomst: 7.544 kr. i grundbeløb
+                og 8.729 kr. i pensionstillæg (borger.dk, verificeret 25. september 2026). Gifte og
+                samlevende får 12.011 kr., og pensionstillægget sættes ned af andre indkomster, fx
+                arbejdsmarkedspension og ATP. Din egen arbejdsmarkedspension er derfor ikke
+                medregnet her &mdash; den afhænger af din arbejdsgiver. Se hele din pension på
+                PensionsInfo.dk.
+              </p>
             </div>
 
             {/* Pension gap */}
