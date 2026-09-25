@@ -29,3 +29,23 @@ export function beregnLoenstigning(
     erStigning: forskel >= 0,
   };
 }
+
+/**
+ * Real (inflation-adjusted) salary change:
+ *
+ *   realPercent = (1 + percent/100) / (1 + inflation/100) − 1
+ *   realDifference = new / (1 + inflation/100) − old   (new salary in the old salary's prices)
+ */
+export function beregnRealLoenstigning(
+  gammelLoen: number,
+  nyLoen: number,
+  inflationPct: number
+): { realProcent: number; realForskel: number } | null {
+  const nominel = beregnLoenstigning(gammelLoen, nyLoen);
+  if (!nominel || !Number.isFinite(inflationPct) || inflationPct <= -100) return null;
+  const faktor = 1 + inflationPct / 100;
+  return {
+    realProcent: ((1 + nominel.procent / 100) / faktor - 1) * 100,
+    realForskel: nyLoen / faktor - gammelLoen,
+  };
+}

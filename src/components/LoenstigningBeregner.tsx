@@ -6,7 +6,9 @@ import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { useLocale } from "@/components/LocaleProvider";
-import { beregnLoenstigning } from "@/lib/loenstigning";
+import { beregnLoenstigning, beregnRealLoenstigning } from "@/lib/loenstigning";
+import type { Inflation } from "@/lib/statbank";
+import { InflationKilde } from "@/components/InflationKilde";
 
 const labels = {
   da: {
@@ -31,14 +33,17 @@ const labels = {
   },
 } as const;
 
-export default function LoenstigningBeregner() {
+export default function LoenstigningBeregner({ dstInflation = null }: { dstInflation?: Inflation | null }) {
   const { locale } = useLocale();
+  // Danish site only: real salary change with the latest DST inflation as editable default.
+  const kildeInflation = locale === "da" ? dstInflation : null;
   const l = labels[locale as keyof typeof labels] || labels.da;
   const fmtKr = (n: number) => Math.round(n).toLocaleString(locale === "se" ? "sv-SE" : locale === "no" ? "nb-NO" : "da-DK");
   const fmtPct = (n: number) => n.toLocaleString(locale === "se" ? "sv-SE" : locale === "no" ? "nb-NO" : "da-DK", { maximumFractionDigits: 2 });
 
   const [oldLoen, setOldLoen] = useState<number>(30000);
   const [newLoen, setNewLoen] = useState<number>(33000);
+  const [inflation, setInflation] = useState<number>(kildeInflation?.pct ?? 2);
 
   const hasLoadedUrl = useRef(false);
   const hasTracked = useRef(false);
@@ -67,7 +72,8 @@ export default function LoenstigningBeregner() {
   const handleReset = useCallback(() => {
     setOldLoen(30000);
     setNewLoen(33000);
-  }, []);
+    setInflation(kildeInflation?.pct ?? 2);
+  }, [kildeInflation]);
 
   const getShareableLink = useCallback(() => {
     const state: CalculationState = {
@@ -80,6 +86,10 @@ export default function LoenstigningBeregner() {
 
   const r = useMemo(() => beregnLoenstigning(oldLoen, newLoen), [oldLoen, newLoen]);
   const up = r ? r.erStigning : true;
+  const real = useMemo(
+    () => (kildeInflation ? beregnRealLoenstigning(oldLoen, newLoen, inflation) : null),
+    [kildeInflation, oldLoen, newLoen, inflation],
+  );
 
   const field = (label: string, value: number, onChange: (n: number) => void) => (
     <div>
@@ -119,6 +129,39 @@ export default function LoenstigningBeregner() {
                 <span className="font-medium dark:text-gray-200">{r ? `${r.forskel > 0 ? "+" : ""}${fmtKr(r.forskel)}` : "—"} kr</span>
               </div>
             </div>
+            {kildeInflation && (
+              <div className="bg-white dark:bg-gray-700 rounded-lg p-4 shadow-sm text-sm space-y-2">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <label htmlFor="loen-inflation" className="text-gray-600 dark:text-gray-400">Inflation pr. år</label>
+                  <div className="relative w-24">
+                    <input
+                      id="loen-inflation"
+                      type="number"
+                      min="-10"
+                      max="30"
+                      step="0.1"
+                      value={inflation}
+                      onChange={(e) => setInflation(Number(e.target.value))}
+                      className="w-full px-2 py-1 pr-7 border border-gray-300 rounded-md text-right dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+                    />
+                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 text-xs">%</span>
+                  </div>
+                </div>
+                <div className="flex justify-between gap-2">
+                  <span className="text-gray-600 dark:text-gray-400">Reallønsstigning</span>
+                  <span className="font-medium whitespace-nowrap dark:text-gray-200">
+                    {real ? `${real.realProcent > 0 ? "+" : ""}${fmtPct(real.realProcent)} %` : "—"}
+                  </span>
+                </div>
+                <div className="flex justify-between gap-2">
+                  <span className="text-gray-600 dark:text-gray-400">Real forskel (i nuværende priser)</span>
+                  <span className="font-medium whitespace-nowrap dark:text-gray-200">
+                    {real ? `${real.realForskel > 0 ? "+" : ""}${fmtKr(real.realForskel)} kr` : "—"}
+                  </span>
+                </div>
+                <InflationKilde inflation={kildeInflation} />
+              </div>
+            )}
             <p className="text-xs text-gray-500 dark:text-gray-400">{l.note}</p>
           </div>
         </div>

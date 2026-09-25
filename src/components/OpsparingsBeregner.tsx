@@ -9,6 +9,8 @@ import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { useLocale } from "@/components/LocaleProvider";
 import { formatCurrency, getCurrencySuffix } from "@/lib/format";
+import type { Inflation } from "@/lib/statbank";
+import { InflationKilde } from "@/components/InflationKilde";
 
 type Frekvens = "maanedlig" | "kvartal" | "aarlig";
 type Visning = "beregner" | "maal";
@@ -131,8 +133,11 @@ function VaekstGraf({ aarligData }: { aarligData: AarData[] }) {
   );
 }
 
-export default function OpsparingsBeregner() {
+export default function OpsparingsBeregner({ dstInflation = null }: { dstInflation?: Inflation | null }) {
   const { locale } = useLocale();
+  // Danish site: default to the latest annual inflation from Danmarks Statistik (editable).
+  const kildeInflation = locale === "da" ? dstInflation : null;
+  const standardInflation = kildeInflation ? kildeInflation.pct : 2;
 
   const labels = {
     da: {
@@ -281,7 +286,7 @@ export default function OpsparingsBeregner() {
   const [periode, setPeriode] = useState<number>(10);
   const [renteFrekvens, setRenteFrekvens] = useState<Frekvens>("aarlig");
   const [visInflation, setVisInflation] = useState(false);
-  const [inflation, setInflation] = useState<number>(2);
+  const [inflation, setInflation] = useState<number>(standardInflation);
 
   const [maalBeloeb, setMaalBeloeb] = useState<number>(500000);
   const [maalStart, setMaalStart] = useState<number>(10000);
@@ -344,12 +349,12 @@ export default function OpsparingsBeregner() {
     setPeriode(10);
     setRenteFrekvens("aarlig");
     setVisInflation(false);
-    setInflation(2);
+    setInflation(standardInflation);
     setMaalBeloeb(500000);
     setMaalStart(10000);
     setMaalMaanedlig(1000);
     setMaalRente(5);
-  }, []);
+  }, [standardInflation]);
 
   const beregning = useMemo(() => {
     if (periode <= 0) return null;
@@ -454,7 +459,7 @@ export default function OpsparingsBeregner() {
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
@@ -471,6 +476,7 @@ export default function OpsparingsBeregner() {
             )}
             {visInflation && <span className="text-sm text-gray-500 dark:text-gray-400">{l.inflationLabel}</span>}
           </div>
+          {visInflation && kildeInflation && <InflationKilde inflation={kildeInflation} />}
 
           <div className="flex justify-end">
             <ResetButton onReset={handleReset} />

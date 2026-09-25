@@ -216,6 +216,7 @@ const daPages: Record<string, PageData> = {
         { question: "Hvordan beregner jeg en lønstigning i procent?", answer: "Træk den gamle løn fra den nye, og del med den gamle løn: (ny − gammel) / gammel × 100. Går lønnen fra 30.000 til 33.000 kr, er det en stigning på 10 %." },
         { question: "Kan jeg bruge den til timeløn?", answer: "Ja. Beregneren virker med timeløn, månedsløn og årsløn — bare brug samme enhed i begge felter." },
         { question: "Er beløbet før eller efter skat?", answer: "Beregningen bruger bruttoløn (før skat). Den procentvise stigning er den samme, uanset om du regner i brutto eller netto, men kronebeløbet er brutto." },
+        { question: "Hvad er en reallønsstigning?", answer: "Reallønsstigningen er din lønstigning fratrukket inflationen, altså hvor meget mere du reelt kan købe for lønnen. Beregneren bruger den seneste årlige inflation fra Danmarks Statistik som standard, og du kan selv rette satsen." },
       ],
     },
     "aegloesning": {
@@ -884,8 +885,8 @@ const daPages: Record<string, PageData> = {
       { question: "Hvorfor svinger kurser?", answer: "Renteniveauer, inflation, handelsbalancer og politisk stabilitet." },
       { question: "Hvor veksle?", answer: "Banker, vekselkontorer, lufthavne. Wise tilbyder ofte bedre kurser." },
       { question: "Købs- vs salgskurs?", answer: "Banken køber billigere og sælger dyrere. Forskellen = spread." },
-      ],
       { question: "Hvor kommer kurserne fra?", answer: "Vi bruger Danmarks Nationalbanks officielle valutakurser, som offentliggøres hver bankdag omkring kl. 16. Datoen for kurserne står over beregneren. Svarer Nationalbanken ikke, bruger vi Den Europæiske Centralbanks kurser (ECB) i stedet." },
+      ],
     },
     "renteberegner": {
       slug: "renteberegner",
@@ -927,6 +928,7 @@ const daPages: Record<string, PageData> = {
       { question: "Hvad er renters rente?", answer: "Du tjener rente på renten. Over tid accelererer dette din opsparing." },
       { question: "Hvor meget spare?", answer: "10-20% af indkomsten. Selv små beløb vokser." },
       { question: "Realistisk rente?", answer: "Aktier: ~7%. Obligationer: 2-4%. Bank: under 1%." },
+      { question: "Hvad er realværdien af min opsparing?", answer: "Realværdien er opsparingen i nutidens købekraft, altså efter inflation. Slår du inflationsjustering til, er standardsatsen den seneste årlige inflation fra Danmarks Statistik (forbrugerprisindekset), men du kan selv rette den." },
       ],
     },
     "laaneberegner": {
