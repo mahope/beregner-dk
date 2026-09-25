@@ -133,6 +133,7 @@ const calculatorIcons: Record<string, LucideIcon> = {
   "/andelsbolig": Building,
   "/arveafgift": ScrollText,
   "/barselsdagpenge": Baby,
+  "/barselsplanlaegger": CalendarHeart,
   "/bil": Car,
   "/billaan": CarFront,
   "/bmi": Scale,

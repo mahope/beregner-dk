@@ -67,6 +67,7 @@ const navigationData: Record<Locale, NavItem[]> = {
       children: [
         { name: "Børnepenge", href: "/boernepenge" },
         { name: "Barselsdagpenge", href: "/barselsdagpenge" },
+        { name: "Barselsplanlægger", href: "/barselsplanlaegger" },
         { name: "Terminsdato", href: "/termin" },
         { name: "SU", href: "/su" },
         { name: "Konfirmation", href: "/konfirmation" },
