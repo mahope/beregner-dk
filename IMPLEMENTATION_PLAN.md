@@ -1342,6 +1342,7 @@ primære kilde; (3) D2 (børnetilskudssatser, lav trafikvirkning).
   MÅL: `/blog/barsel-2026-regler-og-satser` baseline 183 besøgende/28d pr. 2026-09-25;
   `/blog/boernepenge-2026-satser-og-regler` Search Console baseline 5.145 visninger,
   27 klik, CTR 0,5 %, position 8,5 pr. 2026-09-23. Genmål 2026-10-09.
+- **Landet:** kode `c982651`, merge `76d8ad8` 2026-09-25 21:22 CEST.
 
 #### D2. Ny kandidat — børnetilskudssatserne er ikke verificeret nogen steder
 
@@ -1841,3 +1842,12 @@ landmark=lån, piggybank=opsparing osv.).
   Ved live-kontrol: titlen skal være "Børnepenge 2026: 5.370 kr./kvartal (0-2 år) |
   MinBeregner.dk" (præcis ét domænesuffiks), og `4.251`, `17.004`, `3.345` og `1.115`
   må ikke forekomme på siden.
+- **VERIFICÉR DEPLOY:** D1 rens dobbelt domæne-suffiks i 27 sidetitler (25 blogartikler,
+  `/blog`, `/embed`) `76d8ad8` 2026-09-25 21:22 CEST. Verificér efter næste
+  batch-vindue på live: `<title>` på `/blog/barsel-2026-regler-og-satser` skal være
+  "Barsel 2026: Sats, orlov og overdragelse | MinBeregner.dk" — altså præcis ét
+  domænesuffiks — og det samme for `/blog/skat-2026-alt-du-skal-vide`, `/blog` og
+  `/embed`. Tjek desuden at `beraknare.se/blog` stadig 404'er (blog er DA-only) og at
+  `/blog/boernepenge-2026-satser-og-regler` fortsat har sin rensede titel fra C10.
+  HTTP 200 alene utilstrækkeligt. **Kan først verificeres fra 07:30-vinduet
+  2026-09-26.**
