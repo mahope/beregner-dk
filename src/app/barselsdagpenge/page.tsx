@@ -50,6 +50,9 @@ export default async function BarselPage() {
             <p className="mt-2 text-blue-800 dark:text-blue-300">
               Læs <Link href="/blog/barsel-2026-regler-og-satser" className="font-medium underline">barsel 2026-guiden</Link> med sats, perioder, overdragelse og ansøgningsfrister.
             </p>
+            <p className="mt-2 text-blue-800 dark:text-blue-300">
+              Skal I fordele ugerne? Brug <Link href="/barselsplanlaegger" className="font-medium underline">barselsplanlæggeren</Link> med kalender, økonomi og besked til arbejdsgiveren.
+            </p>
             <p className="mt-3 text-xs text-blue-700 dark:text-blue-400">
               Kilde: <a href={BARSEL_2026.source} className="underline">Borger.dk</a>, verificeret {BARSEL_2026.verifiedAt}.
             </p>
