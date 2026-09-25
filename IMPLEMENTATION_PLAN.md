@@ -2065,7 +2065,7 @@ landmark=lån, piggybank=opsparing osv.).
 - **VERIFICÉR DEPLOY:** K1 materialeberegning på `/kvadratmeter` — "Beregn
   materialer"-afsnit med spild/antal felter/enheder/pris i værktøjet plus
   kildeført materialafsnit på DA- og SE-siden — commit `792760c` 2026-09-25
-  22:20 CEST (merge-ref tilføjes ved merge). Verificér efter 07:30-vinduet
+  22:20 CEST, merge `47c78bf` 2026-09-25 22:24 CEST til `master`. Verificér efter 07:30-vinduet
   2026-09-26 på live DA `/kvadratmeter`: der skal stå "Beregn materialer" med
   "Du skal købe 88 m² inkl. spild (8 m² spild)" for standard 10 x 8 m, og
   kilde-linket til hjemmeland.dk skal være i DOM. Tjek også
