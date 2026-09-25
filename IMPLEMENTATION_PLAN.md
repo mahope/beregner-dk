@@ -1,11 +1,11 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — C9 (svar-først `/braendstof` og `/kvadratmeter`) FÆRDIG og merged 2026-09-25
-20:36 CEST (`d9aa21c`). Deploynoter for C4, C5, C6, C7, C8 og C9 er åbne og kan først
-verificeres efter 07:30-vinduet 2026-09-26.
-Næste iteration: `/blog/boernepenge-2026-satser-og-regler` (5.145 visninger, CTR 0,5 %,
-pos. 8,5) er den næste CTR-kandidat; derefter den åbne del af C8 (indkomstfelt til
-pensionstillægget) og `/rentefradrag`'s manglende primære kilde.
+STATUS: KØ — C10 (børnepenge-satser + svar-først-artikel) FÆRDIG og merged 2026-09-25
+20:47 CEST (`259da41`). Deploynoter for C4-C10 er åbne og kan først verificeres efter
+07:30-vinduet 2026-09-26.
+Næste iteration: (1) de 20+ blogartikler har en **dobbelt domæne-suffiks i `<title>`** —
+også `/blog/barsel-2026-regler-og-satser` (183 besøgende) — se D1; (2) åben del af C8
+(indkomstfelt til pensionstillægget); (3) `/rentefradrag`'s manglende primære kilde.
 
 ## Fase 3 — trafik-drevet
 
@@ -1234,6 +1234,108 @@ pensionstillægget) og `/rentefradrag`'s manglende primære kilde.
 - **Landet:** kode og tests i commit `351d881`; merge til `master` sker i denne
   iteration.
 
+#### 21. [x] FÆRDIG 2026-09-25 — C10 — Ret børnepenge-satserne og gør artiklen svar-først
+
+- **Iteration start:** 2026-09-25 20:33 CEST på `ceo/c10-boernepenge-ctr`. Køen efter C9
+  var tom; planens egen næste CTR-kandidat var denne artikel.
+- **Datagrund:** Search Console 2026-08-26–2026-09-23: `/blog/boernepenge-2026-satser-og-regler`
+  5.145 visninger, 27 klik, **CTR 0,5 %**, position 8,5. Søgningerne er konkrete
+  ("børnepenge 2026" 986v/3k pos 9, "børnepenge sats 2026" 339v pos 6, "børnepenge 2026
+  udbetaling" 294v pos 10, "børne unge ydelse satser 2026" 136v pos 8). Plausible
+  `/boernepenge` 134 besøgende/28d (+185 %, bounce 1 %) pr. 2026-09-25.
+- **Fund — tre af fire satser var forkerte.** Borger.dk er verificeret direkte den
+  2026-09-25. Vores tal vs. de officielle 2026-satser:
+  | Alder | Vores værdi | borger.dk | Konsekvens |
+  |---|---|---|---|
+  | 0-2 år | 5.370 kr./kvartal | 5.370 kr./kvartal | korrekt |
+  | 3-6 år | 4.251 kr./kvartal | **4.248 kr./kvartal** | 12 kr. for lav pr. år |
+  | 7-14 år | 3.345 kr./kvartal | **3.342 kr./kvartal** | 12 kr. for lav pr. år |
+  | 15-17 år | 1.115 kr./måned | **1.114 kr./måned** | 12 kr. for lav pr. år |
+  Afledte årstal var dermed 17.004 (skal 16.992) og 13.380 (skal 13.368).
+  Fejlen lå i `page.tsx`, `page-data.ts` **og** `BoernepengBeregner.tsx` — altså også i
+  beregnerens beregnede resultat, ikke kun i teksten. Artiklen henviste til
+  "Kilde: borger.dk — sidst verificeret februar 2026" uden at nogen sats var verificeret
+  mod kilden.
+- **Fund — en regel var forklaret baglæns.** Artiklen skrev at "Bor du sammen med barnets
+  anden forælder, vurderes jeres indkomster samlet". Borger.dk siger modsat: siden
+  1. januar 2022 nedsættes ydelsen **kun ud fra egen indkomst**, også når forældrene
+  bor sammen, og den anden forælders indkomst påvirker ikke din halvdel.
+- **Beslutning/implementering:** Mønsteret fra O1 (barsel) og C8 (folkepension):
+  `src/lib/borneungeydelse.ts` er nu single source med `source`, `nedsættelseSource`,
+  `verifiedAt`, de fire aldersgrupper med hel/halv beløb, aftrapningsgrænse og
+  udbetalingsdage. Rente afledes i kode (`aarligBelob`, `udbetalingerPrAar`) i stedet for
+  at stå som et tal, der kan glide. Beregnerens nedsættelse bruger den testede
+  `beregnAftrapning()`. Artiklen, `/boernepenge`-siden og `page-data.ts` (description,
+  metaDescription og FAQ) læser alle fra samme fil.
+- **CTR:** Svar-først-titel `"Børnepenge 2026: 5.370 kr./kvartal (0-2 år)"` (45 tegn;
+  layoutets titel-template tilføjer domænet → 58 tegn i SERP) og description med alle
+  fire satser. Ny tabelkolonne "Halvdelen", fordi halvdelen er det søgeren ofte vil
+  have. "Ændringer i 2026"-afsnittet skrev om "ca. 3,5 % satsregulering" og en påstand om
+  uændret 2025-grænse, som ingen kilde dækker; det er erstattet af den dokumenterede
+  2026-regel: Udbetaling Danmark kan fra 1. januar 2026 udbetale ydelsen helt eller
+  delvist til barnet/den unge, med følge for supplerende grøn check.
+- **Børnetilskud:** De "ca. 6.300/6.600 kr." i artiklen og på siden kunne ikke
+  verificeres i denne iteration (borger.dk ligger på en separat side, Børnetilskud), så
+  de tal er fjernet og erstattet af en kildehenvisning. Børnetilskud ligger uden for
+  børne- og ungeydelsen og hører ikke i denne fil — jf. D2.
+- **Acceptkriterier:**
+  1. `4.251`, `3.345`, `1.115`, `17.004` og `13.380` findes ikke længere i `src/`. **PASS**
+     (`grep` efter merge)
+  2. Artikel, `/boernepenge`, `page-data.ts` og `BoernepengBeregner` bruger samme
+     konstanter, og intet børnebeløb er hardkodet i komponenten. **PASS** (drik fra
+     `BOERNE_SATSER_2026`; 6 filer i diffen)
+  3. Ingen påstand om samlet indkomstvurdering for sammenkørende forældre. **PASS**
+  4. 13 nye tests i `src/lib/borneungeydelse.test.ts` dækker satser, halvdele,
+     aldersgrænser (0/2/3/6/7/14/15/17/18), afledte årstal, aftrapning ved/under/over
+     grænsen samt negative og `NaN`-indkomster. **PASS**
+  5. `npm run lint`, `npm run test` og `npm run build` er grønne. **PASS**
+- **Kvalitetsgate 2026-09-25 20:45 CEST:** `npm run lint` grøn (483 filer), `npm run test`
+  grøn (**1027/1027, 98 filer**), `npm run build` grøn (Compiled successfully; kun de 7
+  kendte CSS-advarsler), `tsc --noEmit` ingen nye fejl (den ene `es2018`-regex-advarsel i
+  `StructuredData.test.tsx` er pre-existing). Lokal `next start` på port 3222: artiklen
+  gav `<title>Børnepenge 2026: 5.370 kr./kvartal (0-2 år) | MinBeregner.dk</title>` med
+  korrekte 4.248/3.342/1.114 og 16.992/13.368 synlige, `/boernepenge` viste samme tal,
+  `/api/health` svarede `{"status":"ok"}`.
+- **To fejl fanget af live-kontrollen, ikke af gaten:** (1) `title` må ikke selv indeholde
+  `| MinBeregner.dk`, fordi layoutets titel-template tilfører domænet — første build
+  serverede derfor dobbelt suffiks. Rettet. (2) Nyt interval-felt skrev "maaned" i prosa;
+  `intervalNavn` er nu dansk læsbar tekst, `interval` er maskin-nøgle.
+- **Landet:** kode `31a1a48`, merge `259da41` 2026-09-25 20:47 CEST.
+- **Forventet effekt:** 5.145 visninger/28d på position 8,5 med CTR 0,5 %. Løftes CTR til
+  2 %, giver det ca. 76 ekstra klik pr. måned på den søgning, der ligger tættest på at
+  konvertere. Sekundært: tre forkerede satser i beregneren fjernet — det er et
+  tillidsproblem på en ydelse, folk søger på fordi de skal have den rigtige.
+- **MÅL:** `/blog/boernepenge-2026-satser-og-regler` baseline 5.145 visninger, 27 klik,
+  CTR 0,5 %, position 8,5 pr. 2026-09-23; Plausible `/boernepenge` 134 besøgende/28d
+  pr. 2026-09-25. Effekt måles først fra 2026-10-09.
+
+#### D1. Ny kandidat — dubbelt domæne-suffiks i blogartiklernes `<title>`
+
+- **Datagrund:** fundet ved C10's live-kontrol 2026-09-25. Layoutets titel-template
+  tilføjer `| MinBeregner.dk`, og `/blog/boernepenge-2026-satser-og-regler` havde
+  suffikset i sin egen `title` — SERP'en fik
+  "Børnepenge 2026: ... | MinBeregner.dk | MinBeregner.dk". Samme mønster findes i
+  `/blog/barsel-2026-regler-og-satser` (183 besøgende/28d, 85 % bounce),
+  `/blog/boernepenge-2026-satser-og-regler` (før C10) og formodentlig de øvrige
+  blogartikler.
+- **Scope:** gennemgå alle `title`-felter under `src/app/blog/` og fjern det
+  hårdkodede domænesuffiks; kun metadata røres. Ny test der tjekker at ingen
+  artikeltitel indeholder domænenavnet.
+- **Forventet effekt:** 5-10 tegn mindre titel pr. artikel. Lav CTR-effekt i sig selv,
+  men det er en ren fejl der koster troværdighed, og den er gratis at rette.
+  MÅL: `/blog/barsel-2026-regler-og-satser` baseline 183 besøgende/28d pr. 2026-09-25.
+
+#### D2. Ny kandidat — børnetilskudssatserne er ikke verificeret nogen steder
+
+- **Datagrund:** C10 fjernede de uverificerede "ca. 6.300/6.600 kr." fra artikel og
+  side, fordi de ikke kunne verificeres. Børnetilskud er en egen ydelse med egen side
+  på borger.dk og hører ikke i `borneungeydelse.ts`.
+- **Scope:** hent borger.dk's Børnetilskud-side, verificér ordinært/ekstra/særligt
+  børnetilskud for 2026, og læg dem i en egen `src/lib/barnetilskud.ts` med kilde og
+  `verifiedAt`. Skal derefter genindføres i artikel og side.
+- **Forventet effekt:** Fjerner et hul i en ellers kildeført artikel, men lille
+  trafikvirkning. Lav prioritet — kun hvis en iteration ellers står uden bedre arbejde.
+
 ### ❓ Til Mads
 
 - **IndexNow runtime-konfiguration:** Sæt kun i Dokploys production-runtime
@@ -1715,3 +1817,9 @@ landmark=lån, piggybank=opsparing osv.).
   "Kvadratmeterberegner: 5 x 4 m = 20 m²" og "Et rum på 5 x 4 m er 20 m²" synligt.
   Tjek også `beraknare.se/braendstof` og `beraknare.se/kvadratmeter` for de svenske
   titler. HTTP 200 alene utilstrækkeligt.
+- **VERIFICÉR DEPLOY:** C10 børnepenge-satser (4.248/3.342/1.114), svar-først-titel og
+  kildeført 2026-ændringsafsnit på `/blog/boernepenge-2026-satser-og-regler`, samme
+  satskilde i `/boernepenge` og `page-data.ts` `259da41` 2026-09-25 20:47 CEST.
+  Ved live-kontrol: titlen skal være "Børnepenge 2026: 5.370 kr./kvartal (0-2 år) |
+  MinBeregner.dk" (præcis ét domænesuffiks), og `4.251`, `17.004`, `3.345` og `1.115`
+  må ikke forekomme på siden.
