@@ -365,7 +365,7 @@ export default function MaanedsbudgetGuidePage() {
             {' · '}
             <Link href="/sparemaal" className="text-blue-600 hover:underline">Sparemålsberegner</Link>
             {' · '}
-            <Link href="/huslejeberegner" className="text-blue-600 hover:underline">Huslejeberegner</Link>
+            <Link href="/husleje" className="text-blue-600 hover:underline">Huslejeberegner</Link>
           </p>
         </div>
 
@@ -418,7 +418,7 @@ export default function MaanedsbudgetGuidePage() {
             <span className="font-medium text-gray-900 dark:text-white">Sparemålsberegner →</span>
             <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Find ud af hvor meget du skal spare op hver måned</p>
           </Link>
-          <Link href="/huslejeberegner" className="block p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+          <Link href="/husleje" className="block p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
             <span className="font-medium text-gray-900 dark:text-white">Huslejeberegner →</span>
             <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Tjek om din husleje er rimelig</p>
           </Link>

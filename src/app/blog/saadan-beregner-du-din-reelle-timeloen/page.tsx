@@ -216,7 +216,7 @@ export default function ReelTimeloenPage() {
         <p>
           Mange glemmer transport, men det er tid du "giver" til arbejdet. 
           Brug vores{" "}
-          <Link href="/bilberegner">bilberegner</Link> til at se kørselsomkostninger.
+          <Link href="/bil">biludgiftsberegner</Link> til at se kørselsomkostninger.
         </p>
         <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg not-prose mb-4">
           <p className="text-sm text-gray-600 dark:text-gray-300">
