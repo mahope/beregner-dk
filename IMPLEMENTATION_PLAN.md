@@ -711,6 +711,10 @@ STATUS: KØ — I1 FÆRDIG; M1 (Lighthouse-CI) er næste opgave.
   typecheck; 7 kendte CSS-optimeringsadvarsler), `npm run test` grøn (674/674 tests,
   71 filer), `npm run lint` grøn (377 filer) og `npm audit --audit-level=high` 0
   sårbarheder. Ingen IndexNow-submission blev kørt under gate eller verification.
+- **Lokal HTTP-verifikation 2026-09-25 10:12 CEST:** Lokal production-server med
+  `INDEXNOW_ENABLED=false` svarede `status: ok` på `/api/health`, serverede den
+  konfigurerede dummy-nøgle på `<nøgle>.txt` og gav 404 på en forkert nøgle. Ingen
+  outbound-submission blev foretaget.
 - **Datagrund:** Bing, DuckDuckGo og Yahoo bidrager væsentligt til dansk trafik;
   brugerprompten angiver 1.320 Bing-, 381 DuckDuckGo- og 291 Yahoo-besøgende i
   snapshotperioden mod 3.855 Google-besøgende.
