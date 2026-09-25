@@ -806,7 +806,8 @@ STATUS: KØ — M2 FÆRDIG; M3 (BMI-børneguide-søgning) er næste opgave.
   `src/components/StructuredData.test.tsx`; Next-buildens typecheck er grøn.
 - **MÅL:** `/bmi` baseline 979 besøgende/28d 2026-09-23; effektmåling først efter
   14 dage, da dette er en korrekthedsændring frem for en isoleret SEO-ændring.
-- **Landet:** M2-kode, tests og plan afventer commit/merge i denne iteration.
+- **Landet:** M2-kode, tests og plan ligger i commit `69c5260`; merge til `master` er
+  `1745519` den 2026-09-25 15:32 CEST.
 
 #### 14. [ ] M3 — Route børne-BMI-søgninger til guiden
 
@@ -1220,3 +1221,7 @@ landmark=lån, piggybank=opsparing osv.).
   2026-09-25 10:42 CEST. Ændringen er CI-only og forventer ingen live-indholdsdelta;
   efter næste batch-vindue kontrollérs master-definitionen og første naturlige PR-run,
   ikke blot live health.
+- **VERIFICÉR DEPLOY:** M2 BMI-enhedsroundtrip, canonicale delelinks, fokuseret
+  felt-sync og WHR-grænse `1745519` 2026-09-25 15:32 CEST. Verificér efter næste
+  batch-vindue med faktisk enhedsskift og delelink på `/bmi`; HTTP 200 alene er
+  utilstrækkeligt.
