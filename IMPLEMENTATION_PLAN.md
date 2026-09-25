@@ -1,15 +1,15 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — S1 (skattefradrag: ét ratested, delt kørselsfradragssats) FÆRDIG
-2026-09-25 22:55 CEST. **21:30-batchen 2026-09-25 indeholdt ikke dagens merges** —
-live `/alder`, `/pension`, `/braendstof`, `/kvadratmeter` har stadig de gamle titler,
-og børnepenge-artiklen har stadig dobbelt domænesuffiks. Noterne C4-C11, D1, R1 og
-K1 står derfor åbne. Næste iteration skal verificere dem indholdskontrolleret efter
-07:30-vinduet 2026-09-26; er de stadig ikke live derefter, skrives `DEPLOY-MISSING`
-og der merges ikke til `master` mere, før et menneske har kigget.
-Næste iteration: (1) live-verificér deploynoterne efter 07:30-vinduet;
-(2) D2 (børnetilskudssatser, lav trafikvirkning); (3) kørselsfradragets 2026-sats —
-se ❓ Til Mads, må ikke gættes.
+STATUS: KØ — D2 (børnetilskudssatser 2026) FÆRDIG
+2026-09-25 23:10 CEST. Deploynoterne C4-C11, D1, R1, K1, S1 og D2 står åbne:
+21:30-batchen 2026-09-25 indeholdt ikke dagens merges, og næste batch-vindue er
+07:30 2026-09-26. HTTP 200 er ikke bevis — C4's kontrol 22:20 fandt `/dage-til/juledagen`
+på **404**, `/pension` med den gamle "De tre pensionssøjler"-overskrift og
+børnepenge-artiklen med dobbelt domænesuffiks.
+Næste iteration: (1) live-verificér alle noter indholdskontrolleret efter
+07:30-vinduet 2026-09-26; er de stadig ikke live, skrives `DEPLOY-MISSING` og der
+merges ikke til `master` mere før et menneske har kigget; (2) kørselsfradragets
+2026-sats — se ❓ Til Mads, må ikke gættes.
 
 ## Fase 3 — trafik-drevet
 
@@ -1598,11 +1598,65 @@ se ❓ Til Mads, må ikke gættes.
 
 
 
+#### 26. [x] FÆRDIG 2026-09-25 — D2 — Børnetilskudssatserne for 2026 er verificeret og genindsat
+
+- **Iteration start:** 2026-09-25 23:00 CEST. Kørte den øverste åbne opgave i køen,
+  mens deployverificeringen venter på 07:30-vinduet 2026-09-26.
+- **Datagrund:** `/blog/boernepenge-2026-satser-og-regler` (Search Console 5.145
+  visninger, 27 klik, CTR 0,5 %, pos. 8,5 pr. 2026-09-23; Plausible 201→ dokumenteret
+  af C10) havde tre rækker med "Se borger.dk" og "Særlig vurdering" i stedet for
+  beløb. `/boernepenge` havde samme hul. Børnetilskud er en **egen ydelse** med egen
+  side hos borger.dk og hører ikke i `borneungeydelse.ts`.
+- **Kilde fundet:** https://www.borger.dk/familie-og-boern/Familieydelser-oversigt/boernetilskud
+  (bemærk: den URL, artiklen linkede til med `barnetilskud` i stedet for
+  `boernetilskud` under `Familieydelser-oversigt`, gav 404 — rettet). Læst
+  2026-09-25 23:05 CEST.
+- **Verificerede 2026-beløb (pr. kvartal):** ordinært 1.741 kr. pr. barn, ekstra
+  1.774 kr. uanset antal børn, særligt børnetilskud ved adoption 5.025 kr.,
+  flerlinger 2.874 kr. pr. barn ud over det første (tvillinger ét tilskud,
+  trillinger to = 5.748 kr.), pensionist begge 1.741 + 5.025 kr., pensionist én
+  4.449 kr. Dertil udbetalingsdatoer 20. jan./20. apr./20. juli/20. okt., fristerne
+  31.12./31.3./30.6./30.9., enkeltårende svar senest 5. november (stop fra jan. 2027)
+  og optjeningsprincip 6 år i 10.
+- **Faglig rettelse:** artiklen påstod, at særligt børnetilskud "kræver en ansøgning og
+  vurderes individuelt". Borger.dk siger, at det udbetales **automatisk**, når en enlig
+  adopterer et barn. Påstanden er fjernet og erstattet af kildeført tekst.
+- **Beslutning/implementering:** egen `src/lib/barnetilskud.ts` med
+  `BARNETILSKUD_2026` (beløb, interval, skattefrihed, ansøgningskrav, aldersgrænse),
+  `BARNETILSKUD_2026_KILDE` (kilde, `verifiedAt`, udbetalingsdatoer, frister, enkeltårende
+  svar, optjening) og funktionerne `barnetilskudSats`, `flerlingBelob`,
+  `enligtilskudPrKvartal`, `pensionistNedaettelse` (3 % over
+  pensionstillægsgrænsen). Både artiklen og `/boernepenge` læser nu samme fil, så
+  de ikke kan glide fra hinanden.
+- **Ikke dækket, bevidst:** børnetilskud til forældre i praktik. Beløbet står et andet
+  sted på borger.dk end den side, der er verificeret, så det er ikke med her.
+- **Verifikation 2026-09-25:** `npm run lint` grøn (493 filer), `npm run test` grøn
+  (1.107/1.107, 104 filer — heraf 17 nye i `src/lib/barnetilskud.test.ts`), `npm run build`
+  grøn (139 statiske sider; kun de 7 kendte pre-existing CSS-advarsler).
+- **Landet:** kode `b8c535e` på `ceo/barnetilskud-satser`, ff-merge til `master`
+  2026-09-25 23:09 CEST.
+- **Forventet effekt:** lille trafikvirkning (beløbbene er nye oplysninger på to
+  eksisterende sider, ikke nye URL'er). Værdien er tillid: en kildeført artikel må
+  ikke sende læseren videre med "Se borger.dk", og FAQ'en skal kunne besvare
+  spørgsmålet om børnetilskud 2026 direkte.
+- **MÅL:** `/blog/boernepenge-2026-satser-og-regler` Search Console baseline 5.145
+  visninger, 27 klik, CTR 0,5 %, pos. 8,5 pr. 2026-09-23 — genmål 2026-10-09
+  sammen med C10. `/boernepenge` har ingen Search Console-baseline i snapshottet.
+- **Acceptkriterier:**
+  1. Alle seks beløb står i `src/lib/barnetilskud.ts` med kilde og `verifiedAt`.
+  2. Artiklen og `/boernepenge` viser beløbene med ét decimalkomma og kilde-link.
+  3. Påstanden om at særligt børnetilskud kræver ansøgning er væk.
+  4. 17 nye tests dækker beløb, flerlinger, samlet enligtilskud og nedsættelse.
+  5. `npm run lint`, `npm run test` og `npm run build` er grønne.
+- **Næste iteration:** live-verificér deploynoterne efter 07:30-vinduet 2026-09-26.
+
 #### D2. Ny kandidat — børnetilskudssatserne er ikke verificeret nogen steder
 
 - **Datagrund:** C10 fjernede de uverificerede "ca. 6.300/6.600 kr." fra artikel og
   side, fordi de ikke kunne verificeres. Børnetilskud er en egen ydelse med egen side
   på borger.dk og hører ikke i `borneungeydelse.ts`.
+- **FÆRDIG 2026-09-25 som opgave 26** — børnetilskud 1.741/1.774/5.025/2.874/4.449 kr.
+  pr. kvartal er nu verificeret, kildeført og genindsat i `src/lib/barnetilskud.ts`.
 - **Scope:** hent borger.dk's Børnetilskud-side, verificér ordinært/ekstra/særligt
   børnetilskud for 2026, og læg dem i en egen `src/lib/barnetilskud.ts` med kilde og
   `verifiedAt`. Skal derefter genindføres i artikel og side.
@@ -2181,3 +2235,15 @@ landmark=lån, piggybank=opsparing osv.).
   verificeret mod en myndighedskilde. Tjek desuden at de gamle tal `2,28`, `1,14`
   og `25,1` ikke forekommer i den serverede HTML, og at live `/befordringsfradrag`
   bruger de samme satser. HTTP 200 alene utilstrækkeligt.
+- **VERIFICÉR DEPLOY:** D2 børnetilskudssatser — `src/lib/barnetilskud.ts` med de
+  verificerede 2026-beløb, kildeført børnetilskudstabel og -liste i
+  `/blog/boernepenge-2026-satser-og-regler` og `/boernepenge` — kode `b8c535e`,
+  ff-merge til `master` 2026-09-25 23:09 CEST. Verificér efter 07:30-vinduet
+  2026-09-26 på live DA `/blog/boernepenge-2026-satser-og-regler`: tabellen skal vise
+  1.741 kr., 1.774 kr., 5.025 kr. og 2.874 kr. pr. kvartal, og "Se borger.dk" samt
+  "Særlig vurdering" må **ikke** forekomme i den serverede HTML. Tjek desuden at
+  kilde-linket peger på
+  `https://www.borger.dk/familie-og-boern/Familieydelser-oversigt/boernetilskud`
+  (den gamle, døde `/barnetilskud`-variant gav 404) og at live `/boernepenge` viser de
+  samme beløb med pensionistlinjen 1.741 + 5.025 / 4.449 kr. HTTP 200 alene
+  utilstrækkeligt — de gamle rækker gav også 200.
