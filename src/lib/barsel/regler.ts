@@ -275,7 +275,8 @@ export function rettigheder(plan: BarselsPlan, foraelder: Foraelder, index: numb
   // Weeks beyond 52 in total may be used until 16 months after the birth (§ 21 d).
   const samletFrist =
     efterUger - indlagt > REGLER.fristUger ? REGLER.fristUgerOver52 + indlagt : frist;
-  for (const s of spande) if (s.til === frist) s.til = samletFrist;
+  // Earmarked weeks always keep the 1-year deadline (§ 21, stk. 3).
+  for (const s of spande) if (s.til === frist && !s.oeremaerket) s.til = samletFrist;
 
   return {
     id: foraelder.id,

@@ -92,6 +92,15 @@ describe("rettigheder pr. konstellation", () => {
     }
   });
 
+  test("earmarked weeks keep the 1-year deadline even when § 21 d allows 16 months", () => {
+    const p = plan("solo", { antalBoern: 2 });
+    const r = rettigheder(p, p.foraeldre[0], 0);
+    expect(r.efterUger).toBe(59);
+    expect(r.frist).toBe(69);
+    expect(r.spande.find((s) => s.id === "oeremaerket")?.til).toBe(52);
+    expect(r.spande.find((s) => s.id === "solo")?.til).toBe(69);
+  });
+
   test("hospitalisation extends the leave and the deadline", () => {
     const p = plan("mor-far", { indlaeggelsesUger: 6 });
     const r = rettigheder(p, p.foraeldre[0], 0);
