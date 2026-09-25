@@ -39,6 +39,14 @@ function Trin({ nr, titel, beskrivelse, children, id }: { nr: number; titel: str
   );
 }
 
+function fjernHash() {
+  try {
+    window.history.replaceState(window.history.state, "", window.location.pathname + window.location.search);
+  } catch {
+    // ignore
+  }
+}
+
 function Skelet() {
   return (
     <div aria-busy="true" aria-label="Indlæser barselsplanlæggeren" className="space-y-6">
@@ -73,17 +81,16 @@ export default function BarselPlanlaegger() {
     afkodPlan(hash).then((data) => {
       if (!aktiv) return;
       const fraLink = data ? migrer(data, standard) : null;
-      try {
-        window.history.replaceState(null, "", window.location.pathname + window.location.search);
-      } catch {
-        // ignore
-      }
       if (fraLink && lokal && JSON.stringify(lokal) !== JSON.stringify(fraLink)) {
+        // Keep the hash until the user decides: the page may remount before that.
         setPlan(lokal);
         setDelt(fraLink);
-      } else {
-        setPlan(fraLink ?? lokal ?? standard);
+        return;
       }
+      const valgt = fraLink ?? lokal ?? standard;
+      if (fraLink) gemPlan(fraLink);
+      fjernHash();
+      setPlan(valgt);
     });
     return () => {
       aktiv = false;
@@ -145,6 +152,8 @@ export default function BarselPlanlaegger() {
               <button
                 type="button"
                 onClick={() => {
+                  gemPlan(delt);
+                  fjernHash();
                   setPlan(delt);
                   setDelt(null);
                 }}
@@ -154,7 +163,10 @@ export default function BarselPlanlaegger() {
               </button>
               <button
                 type="button"
-                onClick={() => setDelt(null)}
+                onClick={() => {
+                  fjernHash();
+                  setDelt(null);
+                }}
                 className="rounded-lg border border-blue-300 px-4 py-2 text-sm font-semibold hover:bg-white dark:border-blue-700 dark:hover:bg-blue-900/50"
               >
                 Behold min egen plan

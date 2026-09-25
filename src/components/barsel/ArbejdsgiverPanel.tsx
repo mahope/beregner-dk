@@ -113,7 +113,7 @@ export default function ArbejdsgiverPanel({ plan, analyse, idag }: Props) {
               id={`besked-${f.id}`}
               readOnly
               value={tekst}
-              rows={10}
+              rows={14}
               className="w-full flex-1 resize-y rounded-lg border border-gray-200 bg-gray-50 p-3 font-mono text-xs leading-relaxed text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
             />
             <div className="mt-3 flex flex-wrap gap-2">
