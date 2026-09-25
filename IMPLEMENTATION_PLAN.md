@@ -1,6 +1,6 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — I1 FÆRDIG; M1 (Lighthouse-CI) er næste opgave.
+STATUS: KØ — M1 er implementeret og lokalt verificeret; afventer merge og CI-run på første naturlige PR.
 
 ## Fase 3 — trafik-drevet
 
@@ -732,20 +732,37 @@ STATUS: KØ — I1 FÆRDIG; M1 (Lighthouse-CI) er næste opgave.
 - **Landet:** I1-kode, tests og plan ligger i commit `8e01ff2`; merge til `master` er
   `dd5f4af` den 2026-09-25 10:10 CEST. Begge refs pushes i denne iteration.
 
-#### 12. [ ] M1 — Ret Lighthouse-CI's serverstart
+#### 12. [ ] I GANG 2026-09-25 10:37 CEST — M1 — Ret Lighthouse-CI's serverstart
 
-- **Datagrund:** PR #20 og fire seneste tidligere Lighthouse-runs fejlede, før audit
-  startede, med `next: command not found`. Den separate build-job er grøn.
-- **Scope:** Kør den eksisterende standalone-produktionsserver via et script, der
-  får `node_modules/.bin` på PATH (fx `npm run start` eller `npm exec -- next start`),
-  og bekræft at workflowen tester den faktiske Next.js-production-build.
-- **Forventet effekt:** Gør PR-gate troværdig igen; påvirker ikke brugerindhold eller
-  trafik direkte, men fjerner en gentaget CI-fejl.
+- **Iteration start:** 2026-09-25 10:37 CEST. `npm audit --audit-level=high` var grøn
+  med 0 sårbarheder; den eksterne afhængighedsrapport fra 2026-08-23 er stale.
+- **Datagrund:** PR #20 og ni tidligere Lighthouse-runs fejlede før audit startede.
+  Run `35924638613` loggér i `Start server`: `next: command not found`; den efterfølgende
+  wait-step fik derfor 60 connection refusals. Den separate build-job var grøn.
+- **Beslutning/implementering:** `.github/workflows/lighthouse.yml:18` bruger nu det
+  eksisterende `npm run start`-script, som løser `next` fra `node_modules/.bin`.
+  Selve Next.js-productionbuild, URL'en, LHCI-actionen, artifact-upload og øvrige
+  workflow-trin er uændrede.
+- **Lokal verifikation 2026-09-25 10:38 CEST:** Efter productionbuild startede den
+  præcis samme kommando med `INDEXNOW_ENABLED=false` på en midlertidig port. `/` gav
+  HTTP 200 med 260.264 bytes, og `/api/health` gav HTTP 200 med `status: ok`.
+  Processgruppen blev efterfølgende lukket; ingen IndexNow-submission blev sendt.
+- **Review 2026-09-25 10:42 CEST:** Fresh-context review fandt ingen P0-P3-fund.
+  Revieweren isolerede desuden PID-opførselen og bekræftede, at stop af npm-procesgruppen
+  ikke efterlod en lyttende Next.js-child.
+- **Kvalitetsgate 2026-09-25 10:40 CEST:** `npm run build` grøn (137 sider + typecheck;
+  7 kendte CSS-optimeringsadvarsler), `npm run test` grøn (674/674 tests, 71 filer),
+  `npm run lint` grøn (377 filer), `npm audit --audit-level=high` 0 sårbarheder.
 - **Acceptkriterier:**
   1. Serveren starter efter `npm ci` + build, og LHCI kører faktisk Lighthouse.
+     **LOKALT PASS:** samme `npm run start` + productionbuild gav 200 på forsiden;
+     GitHub-LHCI afventer første naturlige PR.
   2. Ét grønt PR-run med fejlende Lighthouse-tærskel må kun fejle på den konkrete
      Lighthouse-regel, aldrig `next: command not found` eller manglende production-output.
-  3. Repoets lokale build/tests/lint forbliver grønne.
+     **ÅBEN CI-BEKRÆFTELSE:** workflowen uploader Lighthouse-rapporter til GitHub
+     Artifacts og midlertidig offentlig lagring; den blev ikke manuelt trigget under
+     iterationen. Første naturlige PR skal bekræfte den endelige LHCI-kørsel.
+  3. Repoets lokale build/tests/lint forbliver grønne. **PASS.**
 - **Placering:** Efter C1-C3 og I1; kun hvis LHCI begynder at blokere flere PR'er.
 
 #### 13. [ ] M2 — Bevar BMI ved gentaget skift mellem metrisk og imperial enhed
