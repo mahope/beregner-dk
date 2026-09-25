@@ -1395,7 +1395,7 @@ lav trafikvirkning); (3) `/kvadratmeter`'s åbne del (materialer til 5-10 % spil
   pr. 2026-09-23; Plausible 141 besøgende/28d, bounce 2 % pr. 2026-09-25. Sammenlign igen
   2026-10-09: se om "pensionsberegner" (var pos. 22) og "beregn pension" (var pos. 28) rykker,
   og at CTR'en ikke falder.
-- **Landet:** kode og tests committes i denne iteration; merge til `master` følger.
+- **Landet:** kode og tests `b4f4dfc`, merge til `master` `a5a4c89` 2026-09-25 21:34 CEST.
 - **Ikke gjort (bevidst):** ingen ny `/pensionstillæg`-side. Autocomplete-signalet er
   kvalitativt, og en tynd side om et emne, der allerede er fuldt dækket på `/pension`,
   kan skade domænet mere end det hjælper. Instrumentet er nu i stedet en sektion på
@@ -1909,7 +1909,7 @@ landmark=lån, piggybank=opsparing osv.).
   2026-09-26.**
 - **VERIFICÉR DEPLOY:** C11 indkomstfelt i `/pension` — samlivsstatus, samlever uden
   pensionist (46 %-reglen), to indkomstfelter og den synlige opdeling
-  grundbeløb/tillæg/nedsættelse/i alt — committes 2026-09-25 21:32 CEST. Verificér efter
+  grundbeløb/tillæg/nedsættelse/i alt — `b4f4dfc`, merge `a5a4c89` 2026-09-25 21:34 CEST. Verificér efter
   næste batch-vindue på live DA `/pension`: der skal stå "Folkepension 2026 — sådan er
   den sat sammen" med rækkerne Grundbeløb 7.544 kr., Pensionstillæg, fuldt (enlig)
   8.729 kr. og I alt pr. måned før skat 16.273 kr. ved standardværdierne, og prosaen skal
