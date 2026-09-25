@@ -1,6 +1,6 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — C14 landet på `master` (kode+plan) 2026-09-26 01:15 CEST
+STATUS: KØ — C14 landet på `master` (kode `0d57e31`, merge `3dcadfe`) 2026-09-26 01:09 CEST
 2026-09-26 01:03-01:15 CEST. **Retter en fejl i forrige iterations statuslinje:**
 O1/O2/O3 er *live*, og C1 er også live. Live-kontrol 01:05 bekræfter 5.085 kr. og
 ingen 4.695 på `/blog/barsel-2026-regler-og-satser`, "BMI for voksne" på `/bmi` og
@@ -2642,7 +2642,8 @@ landmark=lån, piggybank=opsparing osv.).
   merge kl. 18:40 → stadig **ikke** `DEPLOY-MISSING`. Næste vindue 07:30.
 - **VERIFICÉR DEPLOY:** C14 sitemap-lastmod — kun `/valuta` og de 7 dage-til-sider
   må have `<lastmod>`; de øvrige ~118 entries skal have **intet** `<lastmod>`-felt.
-  Kørende kode på `ceo/sitemap-lastmod`. Verificér efter 07:30-vinduet 2026-09-26
+  Kode `0d57e31`, merge `3dcadfe` 2026-09-26 01:09 CEST. Verificér efter
+  07:30-vinduet 2026-09-26
   på live `https://minberegner.dk/sitemap.xml`: `<loc>`-antal skal være 126 (119
   + de 7 dage-til-sider) på DA og 64 på SE, og `grep -c '<lastmod>'` skal give
   **8** på begge — ikke 126. HTTP 200 er ikke nok, fordi den gamle sitemap også
