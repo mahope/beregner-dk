@@ -6,6 +6,7 @@ import FAQ from "@/components/FAQ";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import RelatedCalculators from "@/components/RelatedCalculators";
+import { tidszoneRækker } from "@/lib/tidszone-reference";
 
 export async function generateMetadata() {
   return generatePageMetadata("tidszone");
@@ -36,6 +37,85 @@ export default async function TidszonePage() {
           {pageData.description}
         </p>
       </div>
+
+      {/* Svar-foerst: besvarer "hvad er klokken i X naar den er 12 i Danmark" */}
+      {locale === "da" && (
+        <div className="mb-8 rounded-2xl border border-blue-100 bg-blue-50 p-6 dark:border-blue-900 dark:bg-blue-900/20">
+          <h2 className="text-xl font-bold mb-2">Når det er 12 i Danmark, er det 06 i New York</h2>
+          <p className="mb-4">
+            Klokken 12 i Danmark er <strong>06 i New York</strong>, 05 i Chicago og{" "}
+            <strong>03 i Los Angeles</strong>. Videre ud i verden er det 11 i London, 19 i
+            Shanghai, 20 i Tokyo og 21 i Sydney. Forklaringen er tidsforskellen: Danmark ligger på
+            CET (UTC+1) om vinteren og CEST (UTC+2) om sommeren.
+          </p>
+          <div className="overflow-x-auto">
+            <table>
+              <thead>
+                <tr>
+                  <th>By</th>
+                  <th>Vintertid (kl. 12 CET)</th>
+                  <th>Sommertid (kl. 12 CEST)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {tidszoneRækker().map((raekke) => (
+                  <tr key={raekke.by}>
+                    <td>{raekke.by}</td>
+                    <td>{raekke.vinter}</td>
+                    <td>{raekke.sommer}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="mt-4 text-sm text-gray-600 dark:text-gray-300">
+            Byer, der skifter sommertid sammen med Danmark, viser samme klokkeslæt i begge
+            kolonner. Byer uden sommertid — fx Tokyo, Dubai og Sao Paulo — ligger en time
+            tidligere, når Danmark har somertid. Skiftet sker ikke altid samme dag i USA, EU og
+            Australien, så i de korte overgangsperioder kan forskellen afvige en time. Brug
+            tidszoneberegneren til et præcist klokkeslæt for en vilkårlig by, tidspunkt og dato.
+          </p>
+        </div>
+      )}
+
+      {locale === "se" && (
+        <div className="mb-8 rounded-2xl border border-blue-100 bg-blue-50 p-6 dark:border-blue-900 dark:bg-blue-900/20">
+          <h2 className="text-xl font-bold mb-2">När det är 12 i Sverige är det 06 i New York</h2>
+          <p className="mb-4">
+            Klockan 12 i Sverige är <strong>06 i New York</strong>, 05 i Chicago och{" "}
+            <strong>03 i Los Angeles</strong>. Vidare ut i världen är det 11 i London, 19 i
+            Shanghai, 20 i Tokyo och 21 i Sydney. Förklaringen är tidsskillnaden: Sverige ligger på
+            CET (UTC+1) på vintern och CEST (UTC+2) på sommaren.
+          </p>
+          <div className="overflow-x-auto">
+            <table>
+              <thead>
+                <tr>
+                  <th>Stad</th>
+                  <th>Vintertid (kl. 12 CET)</th>
+                  <th>Sommartid (kl. 12 CEST)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {tidszoneRækker().map((raekke) => (
+                  <tr key={raekke.by}>
+                    <td>{raekke.by}</td>
+                    <td>{raekke.vinter}</td>
+                    <td>{raekke.sommer}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="mt-4 text-sm text-gray-600 dark:text-gray-300">
+            Städer som byter sommartid samtidigt med Sverige visar samma klockslag i båda
+            kolumnerna. Städer utan sommartid — till exempel Tokyo, Dubai och São Paulo — ligger en
+            timme tidigare när Sverige har sommartid. Byte sker inte alltid samma dag i USA, EU och
+            Australien, så under de korta övergångsperioderna kan skillnaden avvika en timme. Använd
+            tidszonskalkylatorn för ett exakt klockslag för valfri stad, tidpunkt och datum.
+          </p>
+        </div>
+      )}
 
       {/* Calculator */}
       <div className="bg-white rounded-2xl shadow-sm p-6 md:p-8 mb-8">
