@@ -56,4 +56,24 @@ describe("metadata-titler", () => {
       }
     }
   });
+
+  // Sidens egen `title` på metadata-niveau (fire mellemrum) bliver sat ind i
+  // layoutets `%s | <siteName>`-template. Hvis den selv interpolerer
+  // `siteName`, kommer domænenavnet to gange i `<title>` — det var den
+  // levende fejl på alle ti kategorisider. `openGraph.title` ligger på seks
+  // mellemrum og går ikke gennem templaten, derfor springes den over.
+  test("ingen sidetitels egen template-literal tilføjer domænenavnet", () => {
+    const offenders: string[] = [];
+
+    for (const file of pageFiles) {
+      for (const line of readFileSync(file, "utf8").split("\n")) {
+        if (!/^ {4}title:/.test(line)) continue;
+        if (!line.includes("siteName")) continue;
+        if (line.includes("absolute")) continue;
+        offenders.push(`${file.replace(appDir, "src/app")}: ${line.trim()}`);
+      }
+    }
+
+    expect(offenders).toEqual([]);
+  });
 });

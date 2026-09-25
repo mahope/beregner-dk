@@ -1,18 +1,15 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — C12 landet på `master` (kode 0bd5e7d, plan 4364af3) 2026-09-26 01:03 CEST
-2026-09-26 00:18-01:03 CEST. Deployverificering kunne ikke køre i denne iteration:
-07:30-vinduet var ikke passeret. I stedet blev den sidste dokumenterede lav-CTR-side
-rettet, så køen ikke stod tom. Næste iteration skal først og fremmest verificere
-deploy. Deploynoterne C4-C11, R1, K1, S1, D2, L1, F1 og C12 står åbne:
-21:30-batchen 2026-09-25 indeholdt ikke dagens merges, og næste batch-vindue er
-07:30 2026-09-26. HTTP 200 er ikke bevis — C4's kontrol 22:20 fandt `/dage-til/juledagen`
-på **404**, `/pension` med den gamle "De tre pensionssøjler"-overskrift og
-børnepenge-artiklen med dobbelt domænesuffiks.
-Næste iteration: (1) live-verificér alle noter indholdskontrolleret efter
-07:30-vinduet 2026-09-26; er de stadig ikke live, skrives `DEPLOY-MISSING` og der
-merges ikke til `master` mere før et menneske har kigget; (2) kørselsfradragets
-2026-sats — se ❓ Til Mads, må ikke gættes (andet forsøg, 2026-09-25).
+STATUS: KØ — C13 landet på `master` 2026-09-26 01:15 CEST
+2026-09-26 00:33-01:15 CEST. Deployverificering kunne stadig ikke køre: 07:30-vinduet er
+ikke passeret. Live-kontrol 00:33 bekræfter at 21:30-batchen 2026-09-25 heller ikke
+indeholdt dagens merges — `/dage-til/juledagen` er stadig **404**, `/nedtaelling` har
+stadig den gamle H1, `/procent` den gamle titel, `/api/health` svarer `status: ok`.
+Alle noter C4-C12 står åbne. Næste iteration skal først og fremmest verificere
+indholdskontrolleret efter 07:30-vinduet 2026-09-26.
+Denne iteration gik i stedet efter et konkret fejl fund ved en fuld live-crawl
+(176 URL'er), som ville være sendt live med næste batch: **dobbelt domænesuffiks i
+`<title>` på alle ti `/kategori/*`-sider plus de to juridiske sider** (se C13).
 
 ## Fase 3 — trafik-drevet
 
@@ -1807,6 +1804,84 @@ merges ikke til `master` mere før et menneske har kigget; (2) kørselsfradraget
   4. `/dato` backlink er til stede.
   5. 5 nye tests + fuld gate grøn.
 
+#### 32. [x] FÆRDIG 2026-09-26 — C13 — Dobbelt domænesuffiks i `<title>` på kategori- og juridiske sider
+
+- **Iteration start:** 2026-09-26 00:33 CEST. Deployverificering kunne ikke køre
+  (07:30-vinduet er ikke passeret), så iterationen startede med den anden mulighed
+  fra punkt 31: undersøge **placering og teknik** i stedet for klik.
+- **Metode:** fuld crawl af begge live-domæners `sitemap.xml` — 119 DA-URL'er og
+  57 SE-URL'er — med statuskode, titel, description-længde, H1-antal og canonical.
+- **Resultat af crawlen (00:33-00:41 CEST):** 176/176 svarer **200**; ingen
+  canonical afviger fra URL'en; ingen dubletter af titel; alle sider har præcis ét
+  H1 og en description. hreflang er korrekt på begge domæner
+  (`da`+`sv`+`x-default` med self-canonical), og `/dato/` → `/dato` gav 308 i
+  sidste iterations kontrol. Teknikken er altså sund, bortset fra ét fund.
+- **Fund:** `<title>` indeholdt **dobbelt domænesuffiks** på alle **ti**
+  `/kategori/*`-sider ("… | MinBeregner.dk | MinBeregner.dk", 81-90 tegn) samt på
+  `/privatlivspolitik` og `/cookiepolitik`. D1 (2026-09-25) rensede 27 sidetitler,
+  men kun blogindlæg, `/blog` og `/embed` — kategorierne blev overset.
+- **Årsag:** `src/app/layout.tsx:33` sætter `title.template = "%s | <siteName>"`,
+  og de tre sider skrev selv `| siteName` ind i titlen. Den dobbelte tilføjelse
+  lå i kilden, ikke i live-konfigurationen, så **fejlen ville være sendt live med
+  næste batch** sammen med D1's rettelser.
+- **Hvorfor ingen test fangede det:** `src/app/metadata-titles.test.ts` leder efter
+  domænenavne i *streng-literaler* (`"… MinBeregner.dk …"`). Kode skrevet som
+  `` `${category.title} | ${domainConfig.siteName}` `` er en interpolation og er
+  usynlig for det regex. D1's egen regressionstest gælder desuden kun blogfiler.
+- **Beslutning/implementering:** De tre sider sætter nu titlen uden domænenavnet, så
+  layoutets template tilføjer det præcis én gang. `openGraph.title` er bevaret med
+  domænenavnet, da OG-titler ikke gennemgår templaten. Kategorititlerne bliver
+  21-24 tegn kortere. Der er **kun** ændret de tre titeludtryk — ingen faglogik, ingen
+  sider, ingen URL'er.
+- **Regressionstest (ny):** `src/app/title-suffix.test.ts` kalder `generateMetadata()`
+  for alle ti kategorislugs og for begge juridiske sider på **alle tre domæner** og
+  kræver, at titlen ikke selv indeholder `siteName`. Plus en ny kilde-scan i
+  `metadata-titles.test.ts` der fejler på ethvert metadata-niveau-`title` (fire
+  mellemrum) der interpolerer `siteName` uden `absolute` — det generelle mønster,
+  også for fremtidige sider. **Begge vagter er verificeret til at fejle på den gamle
+  kode** (5 fejlende tests) og grønne på den nye.
+- **Kvalitetsgate 2026-09-26 01:05 CEST:** `npm run lint` grøn (496 filer),
+  `npm run test` grøn (**1.124/1.124 tests, 107 filer** — de 6 nye i de to
+  titel-filer er de eneste ændring), `npm run build` grøn (137 sider + typecheck;
+  de 7 kendte, pre-existing `print:hidden`/`dark:`-CSS-advarsler er uændrede).
+  Lokal production-server på :3111 bekræfter indholdskontrolleret output:
+  `/kategori/bolig` → "Boligberegnere — Boliglån, Husleje & Ejendomsskat |
+  MinBeregner.dk", `/kategori/sundhed` og `/kategori/matematik` samme mønster,
+  `/privatlivspolitik` → "Privatlivspolitik | MinBeregner.dk", `/cookiepolitik` →
+  "Cookiepolitik | MinBeregner.dk", `/procent` uændret. `/api/health` svarede
+  `status: ok`.
+- **Forventet effekt:** Kategorisiderne er landingssider i sitemap med prioritet 0,7.
+  At fjerne 21-24 tegn fra en allerede 90 tegn lang titel giver alle ti en
+  fuld title i snippet frem for en afkortet, og fjerner et tydeligt
+  uprofessionelt dobbeltmærke. Effekten på placeringen er lille og dokumenteres ikke som
+  trafikstigning — den er en kvalitets- og troværdighedsrettelse.
+- **MÅL:** Ingen CTR-baseline for `/kategori/*` i snapshottet (siderne er ikke i
+  GSC-top-15); ukendt, ikke 0. Kvalitetsmål: 0 sider med dobbelt domænesuffiks i
+  `<title>` — nået i kilde og verificeret i build-output. Genmål ved næste
+  live-kontrol 2026-09-26.
+- **Acceptkriterier:**
+  1. `<title>` på alle ti `/kategori/*` og begge juridiske sider indeholder
+     domænenavnet præcis én gang, verificeret i den serverede HTML.
+  2. `openGraph.title` og `siteName` er uændrede.
+  3. Ny kilde-scan + ny renderingsvagt fejler på den gamle kode.
+  4. `npm run lint`, `npm run test` og `npm run build` er grønne.
+- **Sideobservation, ikke rettet:** `/procent` har **intet** domænesuffiks, fordi C1
+  bevidst satte en svar-først-titel på 45 tegn. 62 af `page-data.ts`' øvrige
+  `metaTitle` har suffikset hardkodet og bruger `title: { absolute: … }`. Det er
+  inkonsistent, men ikke en fejl, og `/procent` er den vigtigste CTR-side, så
+  den lades urørt. Bør afklares samlet med en senere metadata-opgave.
+
+#### 33. Ny kandidat — `/pension` og `/arveafgift` serverer en forældet titel
+
+- **Fund under C13's live-kontrol:** live `/pension` har titlen "Pensionsberegner -
+  Beregn din fremtidige pension | **Beregner.dk**" og `/arveafgift` tilsvarende.
+  Kilden siger `| MinBeregner.dk` (`src/lib/page-data.ts:1309,1431`), og ingen
+  streng i koden indeholder `"Beregner.dk"` uden `Min`. `git log -S` peger på
+  `5910b24`, som for længe siden afløstes af `MinBeregner.dk`.
+- **Konklusion:** det er en **forældet build**, ikke en fejl i koden. Den forsvinder
+  af sig selv, når næste batch deployer. Ikke en opgave — blot noteret, så en
+  fremtidig iteration ikke fejlfinder den.
+
 #### 31. Ny kandidat — de tre sidste tynde sider i CTR-klassen
 
 - Efter C12 er **hele den dokumenterede lav-CTR-klasse dækket** på tværs af begge
@@ -2471,3 +2546,23 @@ landmark=lån, piggybank=opsparing osv.).
   `href="/dage-til/juledagen"`. Tjek også `beraknare.se/nedtaelling`: svensk H1,
   `href="/dagar-till/juldagen"` og **ingen** `/dage-til/`. HTTP 200 alene
   utilstrækkeligt. **Kan først verificeres fra 07:30-vinduet 2026-09-26**.
+- **Live-kontrol 2026-09-26 00:33 CEST (tredje datapunkt, ingen note lukket):**
+  21:30-batchen 2026-09-25 indeholdt **heller ikke** dagens merges. Live
+  `minberegner.dk/dage-til/juledagen` svarer stadig **404**, `/nedtaelling` har H1
+  "Nedtælling - hvor mange dage til?" (ikke C12's svar-først-H1), og `/procent`
+  har titlen "Procentberegner – beregn 10 procent af et tal" — altså den gamle
+  variant fra før C1. `/procent` og `/dato` svarer dog 200, og `/api/health`
+  svarede `status: ok`. C4 mergerede efter 17:30-vinduet 2026-09-25, så der er
+  kun ét deploy-vindue (21:30) siden da — **endnu ikke `DEPLOY-MISSING`**, som
+  kræver to. Næste vindue er 07:30 2026-09-26.
+- **VERIFICÉR DEPLOY:** C13 dobbelt domænesuffiks på de ti `/kategori/*`-sider,
+  `/privatlivspolitik` og `/cookiepolitik` — kode på `ceo/kategori-dobbelt-titelsuffix`.
+  Verificér efter 07:30-vinduet 2026-09-26 på live DA: `<title>` på
+  `/kategori/bolig` skal være "Boligberegnere — Boliglån, Husleje & Ejendomsskat |
+  MinBeregner.dk" — **præcis ét** domænesuffiks — og det samme for de ni øvrige
+  kategorier, `/privatlivspolitik` ("Privatlivspolitik | MinBeregner.dk") og
+  `/cookiepolitik` ("Cookiepolitik | MinBeregner.dk"). Tjek desuden at
+  `openGraph:title` stadig har domænenavnet, og at `og:site_name` er uændret.
+  HTTP 200 er ikke nok: de gamle sider svarer 200 med dobbeltmærke. Tjek på
+  `beraknare.se/cookiepolitik` og `beraknare.se/privatlivspolitik` for de svenske
+  titler "Integritetspolicy"/"Cookiepolicy" med ét suffiks.

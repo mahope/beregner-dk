@@ -12,7 +12,7 @@ export async function generateMetadata(): Promise<Metadata> {
       : `Læs om vores brug af cookies og localStorage på ${dc.siteName}. Vi bruger Plausible Analytics (cookiefrit) og Google AdSense (annoncecookies efter samtykke).`;
   const canonicalUrl = `${dc.baseUrl}/cookiepolitik`;
   return {
-    title: `${title} | ${dc.siteName}`,
+    title,
     description: desc,
     openGraph: {
       title: `${title} | ${dc.siteName}`,

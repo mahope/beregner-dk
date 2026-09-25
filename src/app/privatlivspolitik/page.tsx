@@ -11,7 +11,7 @@ export async function generateMetadata(): Promise<Metadata> {
       ? `Läs om hur ${dc.siteName} hanterar dina data. Vi använder integritetsanpassad analys utan cookies. Alla beräkningar sker lokalt i din webbläsare.`
       : `Læs om hvordan ${dc.siteName} håndterer dine data. Vi bruger privacy-fokuseret analytics uden cookies. Alle beregninger sker lokalt i din browser.`;
   return {
-    title: `${title} - ${dc.siteName}`,
+    title,
     description: desc,
     openGraph: {
       title: `${title} - ${dc.siteName}`,

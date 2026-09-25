@@ -29,7 +29,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const baseUrl = domainConfig.baseUrl;
 
   return {
-    title: `${category.title} | ${domainConfig.siteName}`,
+    title: category.title,
     description: category.metaDescription,
     keywords: category.keywords,
     openGraph: {
