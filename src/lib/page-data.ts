@@ -885,6 +885,7 @@ const daPages: Record<string, PageData> = {
       { question: "Hvor veksle?", answer: "Banker, vekselkontorer, lufthavne. Wise tilbyder ofte bedre kurser." },
       { question: "Købs- vs salgskurs?", answer: "Banken køber billigere og sælger dyrere. Forskellen = spread." },
       ],
+      { question: "Hvor kommer kurserne fra?", answer: "Vi bruger Danmarks Nationalbanks officielle valutakurser, som offentliggøres hver bankdag omkring kl. 16. Datoen for kurserne står over beregneren. Svarer Nationalbanken ikke, bruger vi Den Europæiske Centralbanks kurser (ECB) i stedet." },
     },
     "renteberegner": {
       slug: "renteberegner",
