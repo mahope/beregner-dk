@@ -71,7 +71,7 @@ describe("buildPageMetadata", () => {
       slug: "moms" as const,
       locale: "se" as const,
       title: "Momskalkylator – inkl. och exkl. moms | Beräknare.se",
-      description: "Beräkna svensk moms på 25 %. Lägg till 1 000 kr. och få 1 250 kr. Dra av moms eller hitta momsandelen.",
+      description: "Beräkna svensk moms på 25 %, 12 % eller 6 %. Lägg till 1 000 kr. och få 1 250 kr. Dra av moms eller hitta momsandelen.",
     },
   ])("builds answer-first metadata for $slug in $locale", ({ slug, locale, title, description }) => {
     const metadata = buildPageMetadata(slug, getDomainConfigByLocale(locale));

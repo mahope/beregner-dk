@@ -1,6 +1,6 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — T4 FÆRDIG; T5 (satsafhængigt svensk moms-UI) er næste opgave.
+STATUS: KØ — T5 FÆRDIG; I1 (IndexNow) er næste opgave.
 
 ## Fase 3 — trafik-drevet
 
@@ -647,7 +647,7 @@ STATUS: KØ — T4 FÆRDIG; T5 (satsafhængigt svensk moms-UI) er næste opgave.
 - **Landet:** T4-kode, tests og plan ligger i commit `b12d368`; merge til `master` er
   `e339937` den 2026-09-25 05:57 CEST. Begge refs blev pushet 2026-09-25 05:59 CEST.
 
-#### 10. [ ] T5 — Gør svensk moms-UI og FAQ satsafhængige
+#### 10. [x] FÆRDIG 2026-09-25 — T5 — Gør svensk moms-UI og FAQ satsafhængige
 
 - **Datagrund:** C3-review 2026-09-25 fandt, at SE kan vælge 25/12/6 % og beregner
   korrekt, men info-/formelteksten altid viser 1,25 og 20 % moms
@@ -655,11 +655,26 @@ STATUS: KØ — T4 FÆRDIG; T5 (satsafhængigt svensk moms-UI) er næste opgave.
   reducerede satser.
 - **Scope:** Udtræk satsafhængig formel- og info-copy til den valgte 25/12/6 %-sats,
   med korrekt multiplikator, divisor og momsandel. Bevar dansk 25 %-adfærd og URL-state.
+- **Beslutning/implementering:** DA/NO normaliserer alle URL-states til 25 %; SE
+  accepterer kun 25/12/6 %. Resultater, reference, info og formler følger den valgte
+  sats. Statisk metadata, synlig FAQ og FAQ-JSON-LD beskriver alle tre svenske satser,
+  fordi satsvalget er klientstate. URL-state skjules før hydration, så et 12/6-procent-
+  delelink ikke blinker med 25 %, og beregningen samt analytics venter på den kontrollerede
+  state. DA/NO-copy, URL, canonical, public API og momslogikkens URL-form er bevaret.
+- **Review og rettelser 2026-09-25:** Første fresh review fandt den statiske FAQ/schema
+  stadig fastlåst til 25 % og for smalt URL-roundtrip. Failing tests blev tilføjet, FAQ,
+  metadata og schema blev gjort satsdækkende, og URL-tests bruger nu ikke-default beløb og
+  fratrækningsvalg. Slutreview fand ingen åbne P0-P2-fund.
 - **Acceptkriterier:**
-  1. 1.000 kr. bliver 1.250/1.120/1.060 kr. ved 25/12/6 % i beregning og copy.
+  1. 1.000 kr. bliver 1.250/1.120/1.060 kr. ved 25/12/6 % i beregning og copy. **PASS**
   2. Info/formler viser henholdsvis ×1,25/÷1,25/20 %, ×1,12/÷1,12/10,71 % og
-     ×1,06/÷1,06/5,66 % uden hardcoded 25 %-tekst.
-  3. DA forbliver fast 25 %; DA/SE URL-state og fuld gate er grønne.
+     ×1,06/÷1,06/5,66 % uden hardcoded 25 %-tekst. **PASS**
+  3. DA forbliver fast 25 %; DA/SE URL-state og fuld gate er grønne. **PASS**
+- **Kvalitetsgate 2026-09-25 08:03 CEST:** `npm run build` grøn (137 sider + typecheck),
+  `npm run test` grøn (615/615 tests, 65 filer), `npm run lint` grøn (367 filer) og
+  `npm audit --audit-level=high` 0 sårbarheder. Lokal production-HTTP-kontrol passede
+  health, DA/SE-metadata og alle tre svenske satser. React Doctor scorede 89/100 med kun
+  én ikke-korrektnessrelateret advarsel om den eksisterende store komponent.
 - **Forventet effekt:** Fjerner en konkret modsigelse på beraknare.se og beskytter
   tilliden til momsresultater.
 - **MÅL:** `/moms` på beraknare.se: Search Console baseline 1.298 visninger, 1 klik,
@@ -1071,9 +1086,8 @@ landmark=lån, piggybank=opsparing osv.).
     - Gate grøn: lint ok, 280/280 tests, build ok (128 pages).
 
 ## VERIFICÉR DEPLOY-log
-- **Åbne noter:** O5/C1/C2/C3 fra før dette T4-checkpoint afventer stadig den næste
-  batch. De må først verificeres efter et faktisk deploy-vindue; status ses af deres
-  SHA/tidspunkt nedenfor.
+- **Åbne noter:** O5/C1/C2/C3/T4 fra før dette T5-checkpoint er indholdskontrolleret
+  efter 07:30-vinduet og lukket nedenfor.
 - DEPLOY OK: billaan-ikoner (etape 6), calculator-list-ikoner (etape 3), footer-ikoner (etape 4) — verificeret 2026-08-23 18:20.
 - **Batch 07:30 24. aug.** inkluderede: etape 5 (komponent-ikoner), etape 8 (opengraph), biloekonomi, leasing, maanedsbudget, boernepenge blog, rygestop, rabat, proteinbehov, ugenummer, befordringsfradrag, alkoholenheder, flyttebudget, boligsalg, satser-opdatering, boligsalg blog.
   - DEPLOY OK 2026-09-23: `/alkoholenheder`, `/flyttebudget`, `/boligsalg` og `/blog/boligsalg-2026-guide-til-omkostninger-og-provenu` serverede det forventede live-indhold; `/api/health` svarede `status: ok`.
@@ -1091,21 +1105,11 @@ landmark=lån, piggybank=opsparing osv.).
   redirect-hop og bevarede query-parametre. `/blog` og DA-only `/ugenummer` gav 404,
   sitemap indeholdt de svenske kernesider men ikke blog, og `/api/health` svarede
   `status: ok`. Hermed er O4-noten lukket; ingen ældre åbne deploynoter står tilbage.
-- **VERIFICÉR DEPLOY:** O5 boligstøtte-screening, konsistent 2026-indhold, sikker
-  fragment-delestat, offline/query-cachebeskyttelse og copy-fejlfeedback `0ed3ec3`
-  2026-09-25 00:37 CEST. Verificér efter næste batch-vindue med faktisk indhold på
-  `/boligstoette` og `/blog/boligstoette-2026-nye-regler`; HTTP 200 alene er utilstrækkeligt.
-- **VERIFICÉR DEPLOY:** C1 `/procent` med svar-først DA/SE title, description, synligt
-  eksempel og uændret beregner `98306a7` 2026-09-25 00:52 CEST. Verificér efter
-  næste batch-vindue med faktisk markup på begge domæner; HTTP 200 alene utilstrækkeligt.
-- **VERIFICÉR DEPLOY:** C2 `/dato` med svar-først DA/SE title, description, H1/intro,
-  OG/schema og bevaret beregner `be7d30e` 2026-09-25 01:54 CEST. Verificér efter
-  næste batch-vindue med faktisk markup på begge domæner; HTTP 200 alene utilstrækkeligt.
-- **VERIFICÉR DEPLOY:** C3 `/tidsberegner` og `/moms` med svar-først DA/SE title,
-  description, H1/intro, OG/schema og bevarede beregnere `ef1079e` 2026-09-25
-  03:23 CEST. Verificér efter næste batch-vindue med faktisk markup på begge domæner;
-  HTTP 200 alene utilstrækkeligt.
-- **VERIFICÉR DEPLOY:** T4 `/tidsberegner` uden dobbelt 24-timers addition ved
-  over-midnat, med rene DA/SE URL-state tests `e339937` 2026-09-25 05:57 CEST.
-  Verificér efter næste batch-vindue med faktisk kørsel af 22:00–06:00 med og uden
-  næste dato; HTTP 200 alene utilstrækkeligt.
+- **DEPLOY OK 2026-09-25 08:04 CEST:** 07:30-batchen indeholder O5, C1, C2, C3 og
+  T4. Live `/boligstoette` + artikel viser standardinterval-/formue-afgrænsning,
+  offline-formue-CTA og den officielle beregner; DA/SE `/procent` viser det konkrete
+  10-procent-svar; DA/SE `/dato` viser svar-først "antal dage mellem to datoer";
+  DA/SE `/tidsberegner` og `/moms` viser C3-copy. Headless Chromium hydrerede T4's
+  22:00–06:00-delelinks og viste 8t 0 både med og uden næste dato, altså ingen 32 timer.
+  `/api/health` svarede samtidig `status: ok`. Dermed er O5/C1/C2/C3/T4-noterne lukket;
+  ingen ældre åbne deploynoter står tilbage.

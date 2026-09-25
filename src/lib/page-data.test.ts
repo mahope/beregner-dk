@@ -144,7 +144,7 @@ describe("getPageData", () => {
       locale: "se" as const,
       title: "Momskalkylator – inkl. och exkl. moms | Beräknare.se",
       answer: "1 000 kr. och få 1 250 kr.",
-      schema: "Gratis momskalkylator. Beräkna svensk moms på 25 % med priser inkl. och exkl. moms.",
+      schema: "Gratis momskalkylator. Beräkna svensk moms på 25 %, 12 % och 6 % med priser inkl. och exkl. moms.",
     },
   ])("has answer-first VAT metadata for $locale", ({ locale, title, answer, schema }) => {
     const data = getPageData("moms", locale)!;
