@@ -1,11 +1,12 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — R1 (rentefradrag: ét ratested, kilde og rettede modstridende FAQ'er) FÆRDIG
-2026-09-25 22:15 CEST. Deploynoter for C4-C10, D1, C11 og R1 er åbne og kan først
-verificeres efter 07:30-vinduet 2026-09-26.
-Næste iteration: (1) `/kvadratmeter`'s åbne del (materialer til 5-10 % spild, ny logik med
-tests); (2) D2 (børnetilskudssatser, lav trafikvirkning); (3) `/rentefradrag`'s primære
-procenttabel, hvis Mads kan finde den (se ❓ Til Mads).
+STATUS: KØ — K1 (kvadratmeter: materialebehov med spild, enheder og pris) FÆRDIG
+2026-09-25 22:20 CEST. Deploynoter for C4-C10, D1, C11, R1 og K1 er åbne og kan
+først verificeres efter 07:30-vinduet 2026-09-26.
+Næste iteration: (1) `/blog/boernepenge-2026-satser-og-regler` — 5.145 visninger,
+CTR 0,5 % på pos. 8,5, samme svar-først-mønster som C1-C6/C9 men på en artikel;
+(2) konsolidér `SkattefradragBeregner`'s kørselssatser i `satser-2026.ts` (❓ nedenfor);
+(3) D2 (børnetilskudssatser, lav trafikvirkning).
 
 ## Fase 3 — trafik-drevet
 
@@ -1463,6 +1464,60 @@ procenttabel, hvis Mads kan finde den (se ❓ Til Mads).
   `kommuneskatSnit: 25.1`, som afviger fra `satser-2026.ts` (3,17/1,59 kr./km). Ikke rørt
   her, fordi det er en selvstændig matematikændring med tests — ny opgave.
 
+#### 24. [x] FÆRDIG 2026-09-25 — K1 — Materialeberegning på `/kvadratmeter` (lukker C9's åbne del)
+
+- **Iteration start:** 2026-09-25 22:13 CEST. Datagrund: Search Console 20.914
+  visninger, 290 klik, **CTR 1,4 %**, position 5,0 pr. 2026-09-23; Plausible 376
+  besøgende/28d (+103 %), bounce 6 % pr. 2026-09-25.
+- **Problemfund:** Sidens egen tekst sagde "læg altid 5-10 % til for spild", men
+  værktøjet kunne prissætte råt areal (`KvadratmeterBeregner.tsx` havde ingen
+  materialelogik). Prose lovede altså noget, værktøjet ikke gjorde. Autocomplete
+  (gulv, antal ens felter) og konkurrenten peger i samme retning; hjemmeland.dk's
+  kvadratmeter-beregner anbefaler 10 % til gulvarbejder.
+- **Beslutning/implementering:** Nyt rent logik-modul
+  `src/lib/kvadratmeter-materialer.ts` (4 materialetyper: gulv, fliser, maling,
+  tapet) med `beregnMaterialbehov()` og `beregnMaterialpris()`. Rækkefølgen er
+  areal → antal ens felter → spild → afrunding **op** i hele enheder (liter,
+  ruller); materialer, der sælges pr. m², giver areal i stedet for pakker.
+  `KILDE` i modulet er kildeangivelse + `verifiedAt: 2026-09-25`.
+  **Dækning pr. enhed er en redigerbar standardværdi, ikke en påstand** — den
+  står på produktets eget datablad og afhænger af underlag og kvalitet, så den
+  må ikke låses som en fast kendsgerning. UI'et siger det samme.
+  `KvadratmeterBeregner` fik et "Beregn materialer"-afsnit med materialevalg,
+  antal ens felter, spild %, dækning, pris pr. enhed/m² og et synligt svar
+  ("Du skal købe 88 m² inkl. spild (8 m² spild)"). Delelink-state, reset og
+  alle tre domæner (da/se/no) er følgt med. Sidens DA/SE-materialafsnit er
+  opdateret med værktøjet, kilde-link og verificeringsdato, og den gamle
+  "8-10 m² pr. liter" er rettet til "8-12" + produktets egen rækkevidde.
+- **Verifikation 2026-09-25 22:20:** `npm run lint` grøn (489 filer),
+  `npm run test` grøn (1.072 tests, 102 filer), `npm run build` grøn (139 sider +
+  typecheck; de 7 kendte pre-existing CSS-advarsler). Lokal standalone-SSR-kontrol:
+  DA `/kvadratmeter` viser "Beregn materialer", "Du skal købe 88 m² inkl. spild
+  (8 m² spild)" for standard 10 x 8 m, `beraknare.se` viser "Beräkna material",
+  "Du behöver köpa", "inkl. spill" og "Materialet säljs per m²", og
+  `/api/health` svarede `status: ok`.
+- **Acceptkriterier:**
+  1. Værktøjet lægger spild på arealet og viser købsareal + spild i m² — ✅.
+  2. Maling og tapet rundes op i hele liter/ruller, aldrig ned — ✅ testet.
+  3. Antal ens felter ganges ind, før spild beregnes — ✅ testet.
+  4. Nye tests med kant-til-fælde: 0/negative/NaN-areal, 0 % spild, decimalt
+     antal felter, pris 0/negativ, præcis hel enhed — ✅ 20 tests.
+  5. Kilde + verificeringsdato står på siden; dækning pr. enhed er redigerbar og
+     ikke forklaret som en myndighedsfakta — ✅.
+  6. Fuld gate grøn — ✅.
+- **Forventet effekt:** `/kvadratmeter` er siden nr. 4 på DA-trafikken og vokser
+  103 %; konkurrenten og autocomplete peger på materialer, som var hullet her.
+  Værktøjet gør også siden troværdig, fordi den nu gør, hvad den siger. Direkte
+  CTR-virkning er begrænset (C9 har allerede løftet titlen) — effekten er flere
+  brugere, der bruger værktøjet længere, og færre, der går videre fordi tallene
+  ikke passede til det, de skulle købe.
+- **MÅL:** Search Console baseline 20.914 visninger, 290 klik, CTR 1,4 %, pos. 5,0
+  pr. 2026-09-23; Plausible 376 besøgende/28d pr. 2026-09-25 — genmål 2026-10-09.
+- **Kendte huller bevidst ikke lukket:** BBR-opslaget på samme side er urørt
+  (planens datagrense), og `daekningPrEnhedM2` for gulv er 0 fordi dansk
+  parketgulv sælges i pakker pr. 2-6 m² med produktvarierende indhold — pakken
+  kræver derfor et produktspecifikt tal, som værktøjet ikke kan gætte.
+
 #### D2. Ny kandidat — børnetilskudssatserne er ikke verificeret nogen steder
 
 - **Datagrund:** C10 fjernede de uverificerede "ca. 6.300/6.600 kr." fra artikel og
@@ -1517,11 +1572,9 @@ procenttabel, hvis Mads kan finde den (se ❓ Til Mads).
   flere felter.
 - ~~`/dage-til/[dato]`~~ er færdig som C7 den 2026-09-25, se opgave 18.
 
-- ~~`/kvadratmeter`~~ er svar-først siden 2026-09-25 (C9, opgave 20). Den åbne del er
-  indholdet: prose nævner 5-10 % spild, men værktøjet kan kun prissætte råt areal
-  (`KvadratmeterBeregner.tsx:199-230`). Autocomplete peger på gulv, cm/mm og antal ens
-  felter; konkurrenten Hjemmeland prissætter materialer. Det kræver ny beregningslogik
-  med tests og er bevidst ikke blandet ind i C9.
+- ~~`/kvadratmeter`~~ er svar-først siden 2026-09-25 (C9, opgave 20), og dens åbne
+  del er lukket som K1 den 2026-09-25, se opgave 24: værktøjet prissætter nu
+  materialer med spild, antal ens felter, enheder og pris, kildeført.
   MÅL: Search Console baseline 20.914 visninger, 290 klik, CTR 1,4 %, position 5,0
   pr. 2026-09-23; Plausible 376 besøgende/28d pr. 2026-09-25 — genmål 2026-10-09.
 - ~~`/braendstof`~~ er svar-først siden 2026-09-25 (C9, opgave 20).
@@ -2009,3 +2062,12 @@ landmark=lån, piggybank=opsparing osv.).
   være i DOM. Live `/skattefradrag` skal vise "33,6 % af de første 50.000 kr.".
   HTTP 200 alene utilstrækkeligt. **Kan først verificeres fra 07:30-vinduet 2026-09-26**;
   21:30-batchen 2026-09-25 indeholdt den ikke (se kontrol 22:20 ovenfor).
+- **VERIFICÉR DEPLOY:** K1 materialeberegning på `/kvadratmeter` — "Beregn
+  materialer"-afsnit med spild/antal felter/enheder/pris i værktøjet plus
+  kildeført materialafsnit på DA- og SE-siden — commit `792760c` 2026-09-25
+  22:20 CEST (merge-ref tilføjes ved merge). Verificér efter 07:30-vinduet
+  2026-09-26 på live DA `/kvadratmeter`: der skal stå "Beregn materialer" med
+  "Du skal købe 88 m² inkl. spild (8 m² spild)" for standard 10 x 8 m, og
+  kilde-linket til hjemmeland.dk skal være i DOM. Tjek også
+  `beraknare.se/kvadratmeter` for "Beräkna material", "inkl. spill" og
+  "Materialet säljs per m²". HTTP 200 alene utilstrækkeligt.

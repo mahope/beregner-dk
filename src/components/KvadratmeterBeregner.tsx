@@ -7,6 +7,16 @@ import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { useLocale } from "@/components/LocaleProvider";
 import { formatCurrency, getCurrencySuffix } from "@/lib/format";
+import {
+  MATERIALER,
+  STANDARD_SPILD_PCT,
+  beregnMaterialbehov,
+  beregnMaterialpris,
+  materialeEnhedNavn,
+  materialeNavn,
+  materialeVedId,
+  type MaterialeId,
+} from "@/lib/kvadratmeter-materialer";
 
 type FormType = "rektangel" | "cirkel" | "trekant" | "trapez";
 
@@ -48,6 +58,19 @@ export default function KvadratmeterBeregner() {
       trekantFormula: "Areal = (Grundlinje \u00d7 H\u00f8jde) / 2",
       trapezFormel: "Trapez:",
       trapezFormula: "Areal = ((Side 1 + Side 2) / 2) \u00d7 H\u00f8jde",
+      materialer: "Beregn materialer",
+      vaelgMateriale: "V\u00e6lg materiale",
+      antalFelter: "Antal ens felter (fx rum med samme st\u00f8rrelse)",
+      spildPct: "Spild i procent",
+      daekningPrEnhed: "D\u00e6kning pr. enhed",
+      daekningPrM2: "Materialet s\u00e6lges pr. m\u00b2",
+      prisPrMaterialeM2: "Pris pr. m\u00b2 (valgfrit)",
+      prisPrMaterialeEnhed: "Pris pr. enhed (valgfrit)",
+      skalKobe: "Du skal k\u00f8be",
+      medSpild: "inkl. spild",
+      spildM2: "spild",
+      daekningsKilde: "D\u00e6kningen st\u00e5r p\u00e5 produktets datablad \u2014 t\u00e6nk altid produktets egen v\u00e6rdi.",
+      spildKilde: "Tommelfingerreglen er 5-10 % spild; danske gulvleverand\u00f8rer anbefaler 10 %.",
     },
     se: {
       vaelgForm: "V\u00e4lj form",
@@ -83,6 +106,19 @@ export default function KvadratmeterBeregner() {
       trekantFormula: "Area = (Baslinje \u00d7 H\u00f6jd) / 2",
       trapezFormel: "Trapets:",
       trapezFormula: "Area = ((Sida 1 + Sida 2) / 2) \u00d7 H\u00f6jd",
+      materialer: "Ber\u00e4kna material",
+      vaelgMateriale: "V\u00e4lj material",
+      antalFelter: "Antal lika ytor (t.ex. rum med samma storlek)",
+      spildPct: "Spill i procent",
+      daekningPrEnhed: "T\u00e4ckning per enhet",
+      daekningPrM2: "Materialet s\u00e4ljs per m\u00b2",
+      prisPrMaterialeM2: "Pris per m\u00b2 (valfritt)",
+      prisPrMaterialeEnhed: "Pris per enhet (valfritt)",
+      skalKobe: "Du beh\u00f6ver k\u00f6pa",
+      medSpild: "inkl. spill",
+      spildM2: "spill",
+      daekningsKilde: "T\u00e4ckningen st\u00e5r p\u00e5 produktens datablad \u2014 anv\u00e4nd alltid produktets eget v\u00e4rde.",
+      spildKilde: "Tumregeln \u00e4r 5-10 % spill; svenska golvleverant\u00f6rer rekommenderar 10 %.",
     },
     no: {
       vaelgForm: "Velg form",
@@ -118,6 +154,19 @@ export default function KvadratmeterBeregner() {
       trekantFormula: "Areal = (Grunnlinje \u00d7 H\u00f8yde) / 2",
       trapezFormel: "Trapes:",
       trapezFormula: "Areal = ((Side 1 + Side 2) / 2) \u00d7 H\u00f8yde",
+      materialer: "Beregn materialer",
+      vaelgMateriale: "Velg materiale",
+      antalFelter: "Antall like flater (f.eks. rom med samme st\u00f8rrelse)",
+      spildPct: "Svinn i prosent",
+      daekningPrEnhed: "Dekning per enhet",
+      daekningPrM2: "Materialet selges per m\u00b2",
+      prisPrMaterialeM2: "Pris per m\u00b2 (valgfritt)",
+      prisPrMaterialeEnhed: "Pris per enhet (valgfritt)",
+      skalKobe: "Du m\u00e5 kj\u00f8pe",
+      medSpild: "inkl. svinn",
+      spildM2: "svinn",
+      daekningsKilde: "Dekningen st\u00e5r p\u00e5 produktets datablad \u2014 bruk alltid produktets egen verdi.",
+      spildKilde: "Tommelfingerregelen er 5-10 % svinn; norske gulvleverand\u00f8rer anbefaler 10 %.",
     },
   };
   const l = labels[locale as keyof typeof labels] || labels.da;
@@ -142,6 +191,14 @@ export default function KvadratmeterBeregner() {
 
   // Ekstra beregninger
   const [prisPerKvm, setPrisPerKvm] = useState<number>(0);
+
+  // Materialeberegning
+  const [materialeId, setMaterialeId] = useState<MaterialeId>("gulv");
+  const [antalFelter, setAntalFelter] = useState<number>(1);
+  const [spildPct, setSpildPct] = useState<number>(STANDARD_SPILD_PCT);
+  const [daekningPrEnhed, setDaekningPrEnhed] = useState<number>(materialeVedId("gulv").daekningPrEnhedM2);
+  const [prisPrMateriale, setPrisPrMateriale] = useState<number>(0);
+
   const hasLoadedUrl = useRef(false);
   const hasTracked = useRef(false);
 
@@ -161,6 +218,16 @@ export default function KvadratmeterBeregner() {
       if (inputs.side2 !== undefined) setSide2(inputs.side2);
       if (inputs.trapezHoejde !== undefined) setTrapezHoejde(inputs.trapezHoejde);
       if (inputs.prisPerKvm !== undefined) setPrisPerKvm(inputs.prisPerKvm);
+      if (inputs.materialeId !== undefined) {
+        const kategori = materialeVedId(inputs.materialeId);
+        setMaterialeId(kategori.id);
+        setSpildPct(kategori.spildPct);
+        setDaekningPrEnhed(kategori.daekningPrEnhedM2);
+      }
+      if (inputs.antalFelter !== undefined) setAntalFelter(inputs.antalFelter);
+      if (inputs.spildPct !== undefined) setSpildPct(inputs.spildPct);
+      if (inputs.daekningPrEnhed !== undefined) setDaekningPrEnhed(inputs.daekningPrEnhed);
+      if (inputs.prisPrMateriale !== undefined) setPrisPrMateriale(inputs.prisPrMateriale);
     }
   }, []);
 
@@ -177,11 +244,21 @@ export default function KvadratmeterBeregner() {
   const getShareableLink = useCallback(() => {
     const state: CalculationState = {
       type: 'kvadratmeter',
-      inputs: { formType, laengde, bredde, radius, grundlinje, hoejde, side1, side2, trapezHoejde, prisPerKvm },
+      inputs: {
+        formType, laengde, bredde, radius, grundlinje, hoejde, side1, side2, trapezHoejde, prisPerKvm,
+        materialeId, antalFelter, spildPct, daekningPrEnhed, prisPrMateriale,
+      },
       timestamp: Date.now(),
     };
     return generateShareableLink(state);
-  }, [formType, laengde, bredde, radius, grundlinje, hoejde, side1, side2, trapezHoejde, prisPerKvm]);
+  }, [formType, laengde, bredde, radius, grundlinje, hoejde, side1, side2, trapezHoejde, prisPerKvm, materialeId, antalFelter, spildPct, daekningPrEnhed, prisPrMateriale]);
+
+  const vaelgMateriale = useCallback((id: MaterialeId) => {
+    const kategori = materialeVedId(id);
+    setMaterialeId(kategori.id);
+    setSpildPct(kategori.spildPct);
+    setDaekningPrEnhed(kategori.daekningPrEnhedM2);
+  }, []);
 
   const handleReset = useCallback(() => {
     setFormType("rektangel");
@@ -194,7 +271,10 @@ export default function KvadratmeterBeregner() {
     setSide2(12);
     setTrapezHoejde(5);
     setPrisPerKvm(0);
-  }, []);
+    vaelgMateriale("gulv");
+    setAntalFelter(1);
+    setPrisPrMateriale(0);
+  }, [vaelgMateriale]);
 
   const beregning = useMemo(() => {
     let areal = 0;
@@ -228,6 +308,18 @@ export default function KvadratmeterBeregner() {
 
     return { areal, omkreds, formel, totalPris };
   }, [formType, laengde, bredde, radius, grundlinje, hoejde, side1, side2, trapezHoejde, prisPerKvm]);
+
+  const materiale = useMemo(() => materialeVedId(materialeId), [materialeId]);
+
+  const materialebehov = useMemo(
+    () => beregnMaterialbehov(beregning.areal, materiale, { antalFelter, spildPct, daekningPrEnhedM2: daekningPrEnhed }),
+    [beregning.areal, materiale, antalFelter, spildPct, daekningPrEnhed],
+  );
+
+  const materialetsSamletPris = useMemo(
+    () => beregnMaterialpris(materialebehov, prisPrMateriale),
+    [materialebehov, prisPrMateriale],
+  );
 
   const formatNumber = (num: number, decimals: number = 2) => {
     return new Intl.NumberFormat(locale === "se" ? "sv-SE" : locale === "no" ? "nb-NO" : "da-DK", {
@@ -470,6 +562,132 @@ export default function KvadratmeterBeregner() {
             <div className="flex-1 p-4 bg-green-100 dark:bg-green-900/20 rounded-lg text-center">
               <p className="text-sm text-gray-600 dark:text-gray-400">{l.samletPris}</p>
               <p className="text-2xl font-bold text-green-700 dark:text-green-400">{formatKr(beregning.totalPris)}</p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Materialeberegning */}
+      <div className="bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg p-6">
+        <h3 className="font-medium mb-1 dark:text-white">{l.materialer}</h3>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">{l.spildKilde}</p>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+          {MATERIALER.map((kategori) => (
+            <button
+              key={kategori.id}
+              type="button"
+              aria-pressed={materialeId === kategori.id}
+              onClick={() => vaelgMateriale(kategori.id)}
+              className={`p-3 rounded-lg border-2 text-left text-sm transition-all ${
+                materialeId === kategori.id
+                  ? "border-blue-500 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-300"
+                  : "border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:hover:border-gray-500"
+              }`}
+            >
+              {materialeNavn(kategori, locale)}
+            </button>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label htmlFor="kvadratmeter-antal-felter" className="block text-sm font-medium mb-2 dark:text-gray-200">
+              {l.antalFelter}
+            </label>
+            <input
+              id="kvadratmeter-antal-felter"
+              type="number"
+              min="1"
+              step="1"
+              value={antalFelter}
+              onChange={(e) => setAntalFelter(parseInt(e.target.value, 10) || 1)}
+              className="w-full px-4 py-3 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            />
+          </div>
+          <div>
+            <label htmlFor="kvadratmeter-spild" className="block text-sm font-medium mb-2 dark:text-gray-200">
+              {l.spildPct}
+            </label>
+            <div className="relative">
+              <input
+                id="kvadratmeter-spild"
+                type="number"
+                min="0"
+                step="1"
+                value={spildPct}
+                onChange={(e) => setSpildPct(parseFloat(e.target.value) || 0)}
+                className="w-full px-4 py-3 pr-10 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+              />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">%</span>
+            </div>
+          </div>
+          {materialebehov.enheder !== null ? (
+            <div>
+              <label htmlFor="kvadratmeter-daekning" className="block text-sm font-medium mb-2 dark:text-gray-200">
+                {l.daekningPrEnhed} (m&#178;)
+              </label>
+              <input
+                id="kvadratmeter-daekning"
+                type="number"
+                min="0"
+                step="0.5"
+                value={daekningPrEnhed || ""}
+                placeholder="0"
+                onChange={(e) => setDaekningPrEnhed(parseFloat(e.target.value) || 0)}
+                className="w-full px-4 py-3 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+              />
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{l.daekningsKilde}</p>
+            </div>
+          ) : (
+            <div>
+              <p className="text-sm font-medium mb-2 dark:text-gray-200">{l.daekningPrEnhed}</p>
+              <p className="px-4 py-3 rounded-lg bg-gray-50 dark:bg-gray-900/50 text-sm text-gray-600 dark:text-gray-400">
+                {l.daekningPrM2}
+              </p>
+            </div>
+          )}
+        </div>
+
+        <div className="mt-4">
+          <label htmlFor="kvadratmeter-pris-materiale" className="block text-sm font-medium mb-2 dark:text-gray-200">
+            {materialebehov.enheder !== null ? l.prisPrMaterialeEnhed : l.prisPrMaterialeM2}
+          </label>
+          <div className="relative max-w-xs">
+            <input
+              id="kvadratmeter-pris-materiale"
+              type="number"
+              min="0"
+              step="10"
+              value={prisPrMateriale || ""}
+              placeholder="0"
+              onChange={(e) => setPrisPrMateriale(parseFloat(e.target.value) || 0)}
+              className="w-full px-4 py-3 pr-24 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            />
+            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-gray-400">
+              {materialebehov.enheder !== null
+                ? `${getCurrencySuffix(locale)}/${materialeEnhedNavn(materiale, locale)}`
+                : `${getCurrencySuffix(locale)}/m²`}
+            </span>
+          </div>
+        </div>
+
+        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-center">
+            <p className="text-sm text-gray-600 dark:text-gray-400">{l.skalKobe}</p>
+            <p className="text-2xl font-bold text-blue-700 dark:text-blue-400">
+              {materialebehov.enheder !== null
+                ? `${materialebehov.enheder} ${materialeEnhedNavn(materiale, locale)}`
+                : `${formatNumber(materialebehov.arealMedSpildM2)} m²`}
+            </p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              {formatNumber(materialebehov.arealMedSpildM2)} m² {l.medSpild} ({formatNumber(materialebehov.spildM2)} m² {l.spildM2})
+            </p>
+          </div>
+          {materialetsSamletPris > 0 && (
+            <div className="p-4 bg-green-100 dark:bg-green-900/20 rounded-lg text-center">
+              <p className="text-sm text-gray-600 dark:text-gray-400">{l.samletPris}</p>
+              <p className="text-2xl font-bold text-green-700 dark:text-green-400">{formatKr(materialetsSamletPris)}</p>
             </div>
           )}
         </div>
