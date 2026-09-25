@@ -1,10 +1,11 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — C8 (pension-diagnose og -rettelse) FÆRDIG og merged 2026-09-25 20:26 CEST
-(`42a576e`). Deploynoter for C4, C5, C6, C7 og C8 er åbne og kan først verificeres efter
-07:30-vinduet 2026-09-26.
-Næste iteration: `/pension` er rettet på indhold — se opgave 19 for det åbne stykke
-(indkomstfelt til pensionstillægget), og overvej derefter de andre top-5-kandidater.
+STATUS: KØ — C9 (svar-først `/braendstof` og `/kvadratmeter`) FÆRDIG og merged 2026-09-25
+20:36 CEST (`d9aa21c`). Deploynoter for C4, C5, C6, C7, C8 og C9 er åbne og kan først
+verificeres efter 07:30-vinduet 2026-09-26.
+Næste iteration: `/blog/boernepenge-2026-satser-og-regler` (5.145 visninger, CTR 0,5 %,
+pos. 8,5) er den næste CTR-kandidat; derefter den åbne del af C8 (indkomstfelt til
+pensionstillægget) og `/rentefradrag`'s manglende primære kilde.
 
 ## Fase 3 — trafik-drevet
 
@@ -1707,7 +1708,7 @@ landmark=lån, piggybank=opsparing osv.).
   folkepensionsalder-tabellen med 65/65½/66/66½/67/68/69/70, pensionstillæg
   8.729/4.467 kr. og overskriften "Hvor kommer pensionen fra" i beregneren
   (ikke "De tre pensionssøjler"). HTTP 200 er ikke nok — tjek indholdet.
-- **VERIFICÉR DEPLOY:** C9 svar-først `/braendstof` og `/kvadratmeter` `MERGE_SHA`
+- **VERIFICÉR DEPLOY:** C9 svar-først   `/braendstof` og `/kvadratmeter` `d9aa21c`
   2026-09-25 20:35 CEST. Verificér efter 07:30-vinduet 2026-09-26: live DA
   `/braendstof` skal have title "Brændstofberegner: 500 km benzin koster 450 kr." og
   det samlede svar synligt i introafsnittet; live DA `/kvadratmeter` skal have title
