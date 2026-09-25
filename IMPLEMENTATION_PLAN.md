@@ -1,7 +1,7 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — C4 FÆRDIG; deploynoten for C4 er åben. Næste iteration: flere CTR-opgaver
-(/renteberegner, /kalorier, /alder, /brok) eller `/dage-til`-landingssider.
+STATUS: KØ — C5 FÆRDIG; deploynoter for C4 og C5 er åbne. Næste iteration: CTR på
+`/alder` og `/brok` eller `/dage-til`-landingssider.
 
 ## Fase 3 — trafik-drevet
 
@@ -885,6 +885,66 @@ STATUS: KØ — C4 FÆRDIG; deploynoten for C4 er åben. Næste iteration: flere
   CTR 0,5 %, position 7,5 pr. 2026-09-23; Plausible-baseline **ukendt** (siden
   står ikke i top-15), ikke 0. Effekt måles først efter mindst 14 dage.
 
+#### 16. [x] FÆRDIG 2026-09-25 — C5 — Svar-først på `/renteberegner` og `/kalorier`
+
+- **Iteration start:** 2026-09-25 18:58 CEST på `ceo/c5-rente-kalorier-ctr`.
+  C4-noten er åben, men 17:30-vinduet var passeret ved merge, så den kan først
+  verificeres efter næste batch.
+- **Datagrund:** Search Console 2026-08-26–2026-09-23: `/renteberegner` 13.535
+  visninger, 126 klik, CTR 0,9 %, position 7,5; `/kalorier` 12.261 visninger,
+  123 klik, CTR 1,0 %, position 8,3. Tilsammen ca. 25.800 visninger på position
+  7-8 med ~1 % CTR. Søgninger: "annuitetslån beregner" 352v pos 8, "renteberegner"
+  330v pos 7, "månedlig rente beregning" 49v pos 6; "kalorieberegner" 208v pos 17,
+  "avanceret kalorieberegner" 9v pos 13, "hvor mange kalorier skal jeg have om
+  dagen for at tabe mig" 1v pos 1. Plausible: `/renteberegner` 149 besøgende/28d,
+  `/kalorier` 277 besøgende/28d.
+- **Problem før ændring:** Begge titler var brand-tunge og generiske ("Renteberegner
+  - Beregn lån og ydelse gratis | MinBeregner.dk", 61 tegn;
+  "Kalorieberegner - Beregn dit daglige kaloriebehov gratis | MinBeregner.dk",
+  68 tegn og dermed afkortet i snippet). Ingen af siderne svaret synligt på det
+  konkrete spørgsmål, og ingen viste et regnestykke.
+- **Beslutning/implementering:** Samme svar-først-mønster som C1/C3/C4, men uden
+  nye komponenter: `description` (den synlige intro) er nu selve svaret, og
+  title/description/og/schema følger det samme eksempel på DA, SE og NO.
+  - `/renteberegner`: 100.000 kr, 5 %, 5 år → 1.887 kr./md. og 13.227 kr. i samlet
+    rente. Ny FAQ-spørgsmål med samme regnestykke. Den danske skatteafsnit-links til
+    `/rentefradrag`, der ejer den kildeførte 2026-sats, i stedet for at stå alene
+    med sit upræcise 33 %-tal.
+  - `/kalorier`: spørgsmålet "Hvor mange kalorier skal du have om dagen?" med
+    Mifflin-St Jeor-eksemplet mand 80 kg/180 cm/30 år: BMR 1.780 kcal, TDEE
+    2.759 kcal, og 2.259 kcal i et 500-kcal-underskud.
+- **Talene er verificeret mod koden, ikke antaget:** annuitetsformlen i
+  `src/components/RenteBeregner.tsx:131-141` giver 1.887,12 kr. og 13.227 kr. i
+  rente for 100.000 kr/5 %/60 terminer; Mifflin-St Jeor med faktor 1,55 i
+  `src/components/KalorieBeregner.tsx:15-21,168-201` giver 1.780/2.759/2.259.
+  Tallene er beregnet med de samme formler som komponenterne.
+- **Acceptkriterier:**
+  1. DA og SE renderer H1, det konkrete svar og beregneren. **PASS**
+     (`src/app/renteberegner/page.test.tsx`, `src/app/kalorier/page.test.tsx`)
+  2. Title ≤ 60 tegn og description ≤ 160 tegn på DA/SE/NO, med title som
+     spørgsmål/eksempel og samme tal i description, og synlig intro. **PASS**
+     (`src/lib/page-data.test.ts`, 6 nye testcases)
+  3. Dansk `/renteberegner` linker til `/rentefradrag` i skatteafsnittet. **PASS**
+  4. Ingen ændring i kalkulationskode, URL, canonical, hreflang, sitemap eller
+     `/api/v1`. **PASS** — diffen rører kun `page-data.ts`,
+     `page-data.test.ts` og de to sider.
+- **Kvalitetsgate 2026-09-25 19:02 CEST:** `npm run lint` grøn (469 filer),
+  `npm run test` grøn (927/927 tests, 90 filer), `npm run build` grøn (139 sider +
+  typecheck). Målrettet gate først: de 6 nye page-data-cases og 5 routetests var
+  grønne efter to rettelser (ogTitle lå ikke lig med metaTitle, og summen af
+  13.227 var oprindeligt 13.228). Lokal `next start`-kontrol: DA `/renteberegner`
+  og `/kalorier` gav 200 med den nye title, description og det synlige svar;
+  `/api/health` svarede `status: ok`.
+- **Forventet effekt:** De to sider står tilsammen for ca. 25.800 visninger/28d på
+  position 7-8. Løftes CTR fra ~1 % til 2,5 %, giver det ca. 390 ekstra klik pr.
+  måned på værktøjer, der allerede har kvalificeret trafik.
+- **Landet:** se commit på `ceo/c5-rente-kalorier-ctr` og merge-ref nedenfor.
+- **MÅL:** `/renteberegner` Search Console baseline 13.535 visninger, 126 klik,
+  CTR 0,9 %, position 7,5 pr. 2026-09-23; Plausible 149 besøgende/28d pr.
+  2026-09-25. `/kalorier` Search Console baseline 12.261 visninger, 123 klik,
+  CTR 1,0 %, position 8,3 pr. 2026-09-23; Plausible 277 besøgende/28d pr.
+  2026-09-25. Effekt måles først efter mindst 14 dage.
+
 ### ❓ Til Mads
 
 - **IndexNow runtime-konfiguration:** Sæt kun i Dokploys production-runtime
@@ -904,6 +964,17 @@ STATUS: KØ — C4 FÆRDIG; deploynoten for C4 er åben. Næste iteration: flere
   dokumentations- eller adfærdsændring kræver en eksplicit beslutning.
 
 ### Dokumenterede kandidatere efter top-5
+
+- `/alder` 5.838 visninger, 35 klik, CTR 0,6 %, position 7,8 (Search Console
+  2026-09-23) og "hvor gammel er jeg" 37v på position 35. Samme svar-først-mønster
+  som C1-C5; spørgsmålet skal også besvares synligt. MÅL: baseline 5.838/35/0,6 %/
+  7,8 pr. 2026-09-23, Plausible-baseline ukendt.
+- `/brok` 4.387 visninger, 28 klik, CTR 0,6 %, position 5,3. Position 5,3 med 0,6 %
+  CTR er det laveste hængende udbud tilbage. MÅL: baseline 4.387/28/0,6 %/5,3
+  pr. 2026-09-23, Plausible-baseline ukendt.
+- `/pension` 4.001 visninger, CTR 1,1 %, men position 12,2 med "pensionsberegner"
+  på position 22. Her er indholdet/rankingen problemet, ikke titlen, så den kræver
+  en diagnose før copy-ændring.
 
 - `/kvadratmeter` 370 besøgende/28d (+131 %): autocomplete og konkurrenter peger på
   gulv, cm/mm, antal ens felter og spild; prose nævner allerede 5-10 %, men koden gør

@@ -1,4 +1,5 @@
 import { generatePageMetadata } from "@/lib/page-helpers";
+import Link from "next/link";
 import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
 import RenteBeregner from "@/components/RenteBeregner";
@@ -135,6 +136,11 @@ export default async function RenteberegnerPage() {
           Fradraget er ca. <strong>33% af renteudgiften</strong>, hvilket reducerer din
           skattebetaling. Det betyder, at et lån med 5% rente reelt kun koster
           dig ca. <strong>3,35% efter skat</strong>.
+        </p>
+        <p>
+          Den præcise fradragsværdi afhænger af lånetypen og året. Se den
+          officielle 2026-sats og beregn effekten i{" "}
+          <Link href="/rentefradrag">vores rentefradragsberegner</Link>.
         </p>
 
         <div className="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-400 dark:border-blue-500 p-4 my-6 not-prose">
