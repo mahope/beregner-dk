@@ -12,6 +12,7 @@ interface Beregner {
   description: string;
   href: string;
   category: string;
+  keywords?: string[];
 }
 
 interface SearchBarProps {
@@ -27,15 +28,13 @@ export default function SearchBar({ beregnere }: SearchBarProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const results = query.length > 0
-    ? beregnere.filter((b) => {
-        const q = query.toLowerCase();
-        return (
-          b.title.toLowerCase().includes(q) ||
-          b.description.toLowerCase().includes(q) ||
-          b.category.toLowerCase().includes(q)
-        );
-      }).slice(0, 8)
+  const normalizedQuery = query.toLowerCase().trim();
+  const results = normalizedQuery.length > 0
+    ? beregnere.filter((b) =>
+        [b.title, b.description, b.category, ...(b.keywords ?? [])].some((value) =>
+          value.toLowerCase().includes(normalizedQuery),
+        ),
+      ).slice(0, 8)
     : [];
 
   const showDropdown = open && results.length > 0;
@@ -71,6 +70,7 @@ export default function SearchBar({ beregnere }: SearchBarProps) {
         window.location.href = results[activeIndex].href;
       } else if (e.key === "Escape") {
         setOpen(false);
+        setActiveIndex(-1);
         inputRef.current?.blur();
       }
     },
