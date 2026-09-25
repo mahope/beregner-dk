@@ -679,6 +679,8 @@ STATUS: KØ — T5 FÆRDIG; I1 (IndexNow) er næste opgave.
   tilliden til momsresultater.
 - **MÅL:** `/moms` på beraknare.se: Search Console baseline 1.298 visninger, 1 klik,
   CTR 0,1 %, position 26,7 pr. 2026-09-22; Plausible-baseline ukendt.
+- **Landet:** T5-kode, tests og plan ligger i commit `b685026`; merge til `master` er
+  `a889f5e` den 2026-09-25 08:08 CEST.
 
 #### 11. [ ] I1 — Integrer IndexNow uden at sende under iterationen
 
@@ -1109,7 +1111,11 @@ landmark=lån, piggybank=opsparing osv.).
   T4. Live `/boligstoette` + artikel viser standardinterval-/formue-afgrænsning,
   offline-formue-CTA og den officielle beregner; DA/SE `/procent` viser det konkrete
   10-procent-svar; DA/SE `/dato` viser svar-først "antal dage mellem to datoer";
-  DA/SE `/tidsberegner` og `/moms` viser C3-copy. Headless Chromium hydrerede T4's
-  22:00–06:00-delelinks og viste 8t 0 både med og uden næste dato, altså ingen 32 timer.
+  DA/SE `/tidsberegner` og `/moms` viser C3-copy. Headless Chromium hydrerede T4-delelinks
+  og viste 8t 0 både med og uden næste dato, altså ingen 32 timer.
   `/api/health` svarede samtidig `status: ok`. Dermed er O5/C1/C2/C3/T4-noterne lukket;
   ingen ældre åbne deploynoter står tilbage.
+- **VERIFICÉR DEPLOY:** T5 satsafhængige svenske momsformler, reference, info, URL-state,
+  FAQ og schema `a889f5e` 2026-09-25 08:08 CEST. Verificér efter næste batch-vindue med
+  faktisk hydreret 12/6 %-interaktion på `beraknare.se/moms`; HTTP 200 alene
+  utilstrækkeligt.
