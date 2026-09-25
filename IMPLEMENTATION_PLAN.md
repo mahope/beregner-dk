@@ -596,6 +596,8 @@ STATUS: KØ — C3 FÆRDIG; T4 (TidsBeregnerens dobbelte midnatstælling) er næ
   route-tests fejlede først med 12 forventede copy-fund og var grønne efter fixen.
   Lokal standalone-HTTP-kontrol passede DA/SE `/tidsberegner` og `/moms` med title,
   synlig copy og JSON-LD; `/api/health` svarede 200.
+- **Landet:** C3-kode, tests og plan i commit `6451710`; merge til `master` er
+  `ef1079e`. Begge refs blev pushet 2026-09-25 03:23 CEST.
 - **Forventet effekt:** Laver CTR-hængning ved position 6-7 bliver til kvalificeret
   trafik på to eksisterende værktøjer.
 - **Acceptkriterier:** Baselines for begge sider skrives før ændring; snippets svarer på
@@ -1073,3 +1075,7 @@ landmark=lån, piggybank=opsparing osv.).
 - **VERIFICÉR DEPLOY:** C2 `/dato` med svar-først DA/SE title, description, H1/intro,
   OG/schema og bevaret beregner `be7d30e` 2026-09-25 01:54 CEST. Verificér efter
   næste batch-vindue med faktisk markup på begge domæner; HTTP 200 alene utilstrækkeligt.
+- **VERIFICÉR DEPLOY:** C3 `/tidsberegner` og `/moms` med svar-først DA/SE title,
+  description, H1/intro, OG/schema og bevarede beregnere `ef1079e` 2026-09-25
+  03:23 CEST. Verificér efter næste batch-vindue med faktisk markup på begge domæner;
+  HTTP 200 alene utilstrækkeligt.
