@@ -1007,8 +1007,9 @@ diagnose af `/pension` (position 12,2).
   description og det synlige svar; `/api/health` svarede `status: ok`.
   Bemærk: port 3111 var allerede optaget af en anden lokal app, som svarede
   med et helt andet site — brug en fri port.
-- **Landet:** kode og tests i commit `9adbfe6`; merge til `master` er `7140173`.
-  Begge refs pushet 2026-09-25 19:16 CEST.
+- **Landet:** kode og tests i commit `9adbfe6`; plan i `8ed71e9`; endelig merge til
+  `master` er `aa2c32c` (en mellemmerge `7140173` blev pusheret ved den første
+  merge og er ikke destinationsreferencen). Alle refs pushet 2026-09-25 19:20 CEST.
 - **Forventet effekt:** 10.225 visninger/28d samlet på position 5-8 med ~0,6 %
   CTR. Løftes CTR til 2 %, giver det ca. 145 ekstra klik pr. måned. Den konkrete
   forældede fejl i `/alder`s snippet er desuden fjernet, hvilket alene kan give
@@ -1449,8 +1450,8 @@ landmark=lån, piggybank=opsparing osv.).
   "Hvor mange kalorier om dagen? | Kalorieberegner" med synligt
   "TDEE 2.759 kcal ved moderat aktivitet". HTTP 200 alene utilstrækkeligt.
   **Kan først verificeres fra 07:30-vinduet 2026-09-26.**
-- **VERIFICÉR DEPLOY:** C6 svar-først `/alder` og `/brok` `7140173` 2026-09-25
-  19:16 CEST. Verificér efter næste batch-vindue på live DA `/alder` (title
+- **VERIFICÉR DEPLOY:** C6 svar-først `/alder` og `/brok` `aa2c32c` 2026-09-25
+  19:20 CEST. Verificér efter næste batch-vindue på live DA `/alder` (title
   "Aldersberegner: hvor gammel er du i år, måneder og dage?" og synligt
   "36 år, 6 måneder og 10 dage pr. 25. september 2026" samt at den gamle
   "35 år, 10 måneder og 28 dage" er væk) og live DA/SE `/brok` (title med
