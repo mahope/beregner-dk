@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { CalendarPlus, Link2, Printer, RotateCcw, Save } from "lucide-react";
+import { CalendarPlus, CircleAlert, CircleCheck, Link2, MoreHorizontal, PencilLine, Printer, RotateCcw, TriangleAlert } from "lucide-react";
 import { todayIso } from "@/lib/barsel/dato";
 import { afkodPlan, hashMedPlan, kodPlan, planFraHash } from "@/lib/barsel/del-link";
 import { analyserPlan } from "@/lib/barsel/motor";
@@ -11,24 +11,29 @@ import { gemPlan, indlaesPlan, migrer, sletPlan } from "@/lib/barsel/storage";
 import type { BarselsPlan } from "@/lib/barsel/types";
 import { trackCalculation } from "@/lib/analytics";
 import ArbejdsgiverPanel, { downloadIcs, icsFor } from "./ArbejdsgiverPanel";
+import InfoTip from "./InfoTip";
 import Kalender from "./Kalender";
 import OekonomiVisning from "./OekonomiVisning";
 import Opsaetning from "./Opsaetning";
 import PeriodeEditor from "./PeriodeEditor";
 import PrintOversigt from "./PrintOversigt";
 import Status from "./Status";
-import { kr, tal } from "./farver";
+import Tidslinje from "./Tidslinje";
+import { harEksempelLoen, kr, tal } from "./farver";
 import "./barsel-print.css";
 
-function Trin({ nr, titel, beskrivelse, children, id }: { nr: number; titel: string; beskrivelse?: string; children: React.ReactNode; id: string }) {
+function Trin({ nr, titel, beskrivelse, children, id }: { nr: number; titel: React.ReactNode; beskrivelse?: string; children: React.ReactNode; id: string }) {
   return (
-    <section aria-labelledby={id} className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800 sm:p-6">
-      <div className="mb-4 flex items-start gap-3">
-        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-600 text-sm font-bold text-white" aria-hidden="true">
+    <section aria-labelledby={id} className="scroll-mt-20 p-4 sm:p-6 lg:scroll-mt-40 lg:p-8">
+      <div className="mb-5 flex items-start gap-3">
+        <span
+          className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 border-blue-700 text-sm font-bold text-blue-700 dark:border-blue-300 dark:text-blue-300"
+          aria-hidden="true"
+        >
           {nr}
         </span>
         <div>
-          <h2 id={id} className="text-xl font-bold text-gray-900 dark:text-white">
+          <h2 id={id} className="flex items-center gap-1 text-xl font-bold text-gray-900 dark:text-white">
             {titel}
           </h2>
           {beskrivelse && <p className="mt-0.5 text-sm text-gray-600 dark:text-gray-300">{beskrivelse}</p>}
@@ -36,6 +41,112 @@ function Trin({ nr, titel, beskrivelse, children, id }: { nr: number; titel: str
       </div>
       {children}
     </section>
+  );
+}
+
+const underoverskriftKlasse = "text-base font-semibold text-gray-900 dark:text-white";
+
+const SKABELON_TITEL: Record<SkabelonId, string> = {
+  klassisk: "Klassisk",
+  lige: "Lige deling",
+  sammen: "Mest tid sammen",
+};
+
+const SKABELON_KORT: Record<SkabelonId, string> = {
+  klassisk: "Den ene tager det meste",
+  lige: "I deler ugerne lige",
+  sammen: "I er hjemme samtidig",
+};
+
+const knapLet =
+  "inline-flex shrink-0 items-center gap-1.5 rounded-lg px-2 py-2 text-sm font-medium sm:px-2.5 text-gray-700 hover:bg-gray-100 hover:text-gray-900 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-blue-600 dark:text-gray-200 dark:hover:bg-gray-700 dark:hover:text-white";
+
+/** "More" menu holding the destructive reset, so it does not sit next to the everyday actions. */
+function MereMenu({ onNulstil }: { onNulstil: () => void }) {
+  const [aaben, setAaben] = useState(false);
+  const [bekraeft, setBekraeft] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const knapRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!aaben) return;
+    const luk = (e: Event) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setAaben(false);
+        setBekraeft(false);
+      }
+    };
+    const tast = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setAaben(false);
+        setBekraeft(false);
+        knapRef.current?.focus();
+      }
+    };
+    document.addEventListener("pointerdown", luk);
+    document.addEventListener("focusin", luk);
+    document.addEventListener("keydown", tast);
+    return () => {
+      document.removeEventListener("pointerdown", luk);
+      document.removeEventListener("focusin", luk);
+      document.removeEventListener("keydown", tast);
+    };
+  }, [aaben]);
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        ref={knapRef}
+        type="button"
+        aria-expanded={aaben}
+        aria-controls="barsel-mere"
+        aria-label="Flere handlinger"
+        onClick={() => {
+          setAaben((a) => !a);
+          setBekraeft(false);
+        }}
+        className={knapLet}
+      >
+        <MoreHorizontal className="h-4 w-4" aria-hidden="true" />
+      </button>
+      <div
+        id="barsel-mere"
+        hidden={!aaben}
+        className="absolute right-0 top-full z-40 mt-1 w-64 max-w-[calc(100vw-2rem)] rounded-lg border border-gray-200 bg-white p-2 text-sm shadow-lg dark:border-gray-600 dark:bg-gray-800"
+      >
+        {bekraeft ? (
+          <div className="p-1">
+            <p className="mb-2 text-gray-800 dark:text-gray-100">Slet planen og start forfra? Det kan ikke fortrydes.</p>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  onNulstil();
+                  setAaben(false);
+                  setBekraeft(false);
+                  knapRef.current?.focus();
+                }}
+                className="rounded-md bg-red-700 px-3 py-1.5 font-semibold text-white hover:bg-red-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700"
+              >
+                Ja, slet planen
+              </button>
+              <button
+                type="button"
+                onClick={() => setBekraeft(false)}
+                className="rounded-md border border-gray-300 px-3 py-1.5 font-semibold text-gray-800 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-100 dark:hover:bg-gray-700"
+              >
+                Annullér
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button type="button" onClick={() => setBekraeft(true)} className={`${knapLet} w-full`}>
+            <RotateCcw className="h-4 w-4" aria-hidden="true" />
+            Start forfra
+          </button>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -50,9 +161,8 @@ function fjernHash() {
 function Skelet() {
   return (
     <div aria-busy="true" aria-label="Indlæser barselsplanlæggeren" className="space-y-6">
-      <div className="h-16 animate-pulse rounded-2xl bg-gray-200 dark:bg-gray-800" />
-      <div className="h-[46rem] animate-pulse rounded-2xl bg-gray-200 dark:bg-gray-800 sm:h-[38rem]" />
-      <div className="h-[40rem] animate-pulse rounded-2xl bg-gray-200 dark:bg-gray-800" />
+      <div className="h-32 animate-pulse rounded-xl bg-gray-200 motion-reduce:animate-none dark:bg-gray-800 sm:h-16" />
+      <div className="h-[46rem] animate-pulse rounded-2xl bg-gray-200 motion-reduce:animate-none dark:bg-gray-800 sm:h-[38rem]" />
     </div>
   );
 }
@@ -62,7 +172,7 @@ export default function BarselPlanlaegger() {
   const [idag, setIdag] = useState("");
   const [gemt, setGemt] = useState<"gemt" | "fejl" | "">("");
   const [delStatus, setDelStatus] = useState("");
-  const [bekraeftNulstil, setBekraeftNulstil] = useState(false);
+  const [visKalender, setVisKalender] = useState(false);
   const [delt, setDelt] = useState<BarselsPlan | null>(null);
   const tracked = useRef(false);
 
@@ -119,6 +229,8 @@ export default function BarselPlanlaegger() {
 
   const fejl = analyse.beskeder.filter((b) => b.niveau === "fejl").length;
   const advarsler = analyse.beskeder.filter((b) => b.niveau === "advarsel").length;
+  const toForaeldre = plan.foraeldre.length > 1 && plan.konstellation !== "solo";
+  const eksempelLoen = plan.foraeldre.some(harEksempelLoen);
   const hjemme = new Set<number>();
   for (const a of analyse.foraeldre) for (const u of a.uger.values()) if (u.uge >= 0 && u.andel > 0) hjemme.add(u.uge);
 
@@ -126,24 +238,23 @@ export default function BarselPlanlaegger() {
     try {
       const url = `${window.location.origin}${window.location.pathname}${hashMedPlan(await kodPlan(plan))}`;
       await navigator.clipboard.writeText(url);
-      setDelStatus("Linket er kopieret. Planen ligger kun i linket – ikke på vores server.");
+      setDelStatus("Linket er kopieret. Planen ligger kun i linket, ikke på vores server.");
     } catch {
       setDelStatus("Kunne ikke kopiere linket i denne browser.");
     }
-    setTimeout(() => setDelStatus(""), 5000);
+    setTimeout(() => setDelStatus(""), 6000);
   };
 
   const nulstil = () => {
     sletPlan();
     setPlan(standardPlan(todayIso()));
-    setBekraeftNulstil(false);
   };
 
   return (
     <div className="barsel-planlaegger">
       <PrintOversigt plan={plan} analyse={analyse} oekonomi={oekonomi} idag={idag} />
 
-      <div className="space-y-6 print:hidden">
+      <div className="space-y-4 print:hidden">
         {delt && (
           <div role="alert" className="rounded-xl border border-blue-300 bg-blue-50 p-4 text-blue-950 dark:border-blue-800 dark:bg-blue-900/30 dark:text-blue-100">
             <p className="font-semibold">Du har åbnet et delt link med en barselsplan.</p>
@@ -157,7 +268,7 @@ export default function BarselPlanlaegger() {
                   setPlan(delt);
                   setDelt(null);
                 }}
-                className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+                className="rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800"
               >
                 Brug planen fra linket
               </button>
@@ -175,123 +286,181 @@ export default function BarselPlanlaegger() {
           </div>
         )}
 
-        {/* Summary + toolbar */}
-        <div className="rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 p-4 text-white shadow-lg sm:p-6">
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
-            <div>
-              <p className="text-sm text-blue-100">Forælder hjemme i</p>
-              <p className="text-2xl font-bold tabular-nums sm:text-3xl">{hjemme.size} uger</p>
-            </div>
-            <div>
-              <p className="text-sm text-blue-100">Indkomsttab efter skat*</p>
-              <p className="text-2xl font-bold tabular-nums sm:text-3xl">{kr(Math.max(0, oekonomi.tabNetto))}</p>
-            </div>
-            <div className="col-span-2 sm:col-span-1">
-              <p className="text-sm text-blue-100">Tjek af reglerne</p>
-              <p className="text-2xl font-bold sm:text-3xl">
-                {fejl + advarsler === 0 ? "Alt ser fint ud" : `${fejl + advarsler} ${fejl + advarsler === 1 ? "punkt" : "punkter"}`}
-              </p>
-              {fejl + advarsler > 0 && (
-                <a href="#trin-status" className="text-sm font-medium text-white underline underline-offset-2">
-                  Se hvad der skal rettes
-                </a>
-              )}
-            </div>
-          </div>
-          <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-white/20 pt-4">
-            <button type="button" onClick={() => window.print()} className="inline-flex items-center gap-2 rounded-lg bg-white px-3 py-2 text-sm font-semibold text-blue-800 hover:bg-blue-50">
-              <Printer className="h-4 w-4" aria-hidden="true" />
-              Print / gem PDF
-            </button>
-            <button type="button" onClick={delLink} className="inline-flex items-center gap-2 rounded-lg bg-white/15 px-3 py-2 text-sm font-semibold text-white hover:bg-white/25">
-              <Link2 className="h-4 w-4" aria-hidden="true" />
-              Del-link
-            </button>
-            <button
-              type="button"
-              onClick={() => downloadIcs(icsFor(plan, analyse, plan.foraeldre.map((_, i) => i)), "barselsplan.ics")}
-              className="inline-flex items-center gap-2 rounded-lg bg-white/15 px-3 py-2 text-sm font-semibold text-white hover:bg-white/25"
-            >
-              <CalendarPlus className="h-4 w-4" aria-hidden="true" />
-              Til kalender
-            </button>
-            {bekraeftNulstil ? (
-              <span className="inline-flex flex-wrap items-center gap-2 rounded-lg bg-white/10 px-2 py-1 text-sm">
-                Slet planen og start forfra?
-                <button type="button" onClick={nulstil} className="rounded-md bg-red-600 px-3 py-1.5 font-semibold text-white hover:bg-red-700">
-                  Ja, nulstil
-                </button>
-                <button type="button" onClick={() => setBekraeftNulstil(false)} className="rounded-md bg-white/20 px-3 py-1.5 font-semibold hover:bg-white/30">
-                  Annullér
-                </button>
-              </span>
-            ) : (
-              <button type="button" onClick={() => setBekraeftNulstil(true)} className="inline-flex items-center gap-2 rounded-lg bg-white/15 px-3 py-2 text-sm font-semibold text-white hover:bg-white/25">
-                <RotateCcw className="h-4 w-4" aria-hidden="true" />
-                Nulstil
+        {/* Calm summary that follows along on desktop while the plan is edited */}
+        <div className="rounded-xl border border-gray-200 bg-white px-4 py-3 dark:border-gray-700 dark:bg-gray-800 lg:sticky lg:top-16 lg:z-30 lg:shadow-sm">
+          <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
+            <dl className="grid grid-cols-2 gap-x-6 gap-y-2 sm:flex sm:flex-wrap sm:items-end sm:gap-x-8">
+              <div>
+                <dt className="text-xs text-gray-600 dark:text-gray-300">Hjemme med barnet</dt>
+                <dd className="text-lg font-semibold tabular-nums text-gray-900 dark:text-white">{hjemme.size} uger</dd>
+              </div>
+              <div>
+                <dt className="text-xs text-gray-600 dark:text-gray-300">
+                  Indkomsttab efter skat
+                  {eksempelLoen && (
+                    <a href="#trin-oekonomi" className="ml-1 underline underline-offset-2">
+                      (eksempel)
+                    </a>
+                  )}
+                </dt>
+                <dd className="text-lg font-semibold tabular-nums text-gray-900 dark:text-white">{kr(Math.max(0, oekonomi.tabNetto))}</dd>
+              </div>
+              <div className="col-span-2">
+                <dt className="sr-only">Tjek af reglerne</dt>
+                <dd>
+                  <a
+                    href="#tjek"
+                    className={`inline-flex items-center gap-1.5 rounded text-sm font-semibold underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 ${
+                      fejl > 0 ? "text-red-700 dark:text-red-300" : advarsler > 0 ? "text-amber-800 dark:text-amber-300" : "text-green-800 dark:text-green-300"
+                    }`}
+                  >
+                    {fejl > 0 ? (
+                      <CircleAlert className="h-4 w-4 shrink-0" aria-hidden="true" />
+                    ) : advarsler > 0 ? (
+                      <TriangleAlert className="h-4 w-4 shrink-0" aria-hidden="true" />
+                    ) : (
+                      <CircleCheck className="h-4 w-4 shrink-0" aria-hidden="true" />
+                    )}
+                    {fejl > 0 ? `${fejl + advarsler} ting skal rettes` : advarsler > 0 ? `${advarsler} ting at være opmærksom på` : "Planen følger reglerne"}
+                  </a>
+                </dd>
+              </div>
+            </dl>
+            <div className="-mx-2 flex items-center gap-0 sm:gap-0.5 lg:mx-0">
+              <button type="button" onClick={() => window.print()} className={knapLet}>
+                <Printer className="h-4 w-4" aria-hidden="true" />
+                Print
               </button>
-            )}
-            <span className="ml-auto inline-flex items-center gap-1.5 text-xs text-blue-100" role="status" aria-live="polite">
-              <Save className="h-3.5 w-3.5" aria-hidden="true" />
-              {gemt === "fejl" ? "Kunne ikke gemme i denne browser" : "Gemmes automatisk i din browser"} · *vejledende
-            </span>
+              <button type="button" onClick={delLink} className={knapLet}>
+                <Link2 className="h-4 w-4" aria-hidden="true" />
+                Del link
+              </button>
+              <button
+                type="button"
+                onClick={() => downloadIcs(icsFor(plan, analyse, plan.foraeldre.map((_, i) => i)), "barselsplan.ics")}
+                className={knapLet}
+              >
+                <CalendarPlus className="h-4 w-4" aria-hidden="true" />
+                <span className="sm:hidden">Kalender</span>
+                <span className="hidden sm:inline">Til kalender</span>
+              </button>
+              <MereMenu onNulstil={nulstil} />
+            </div>
           </div>
-          {delStatus && (
-            <p className="mt-2 text-sm text-white" role="status">
-              {delStatus}
+          {gemt === "fejl" && (
+            <p className="mt-2 text-xs text-red-700 dark:text-red-300" role="status">
+              Planen kunne ikke gemmes i denne browser. Brug Del link eller Print for at gemme den.
             </p>
           )}
         </div>
 
-        <Trin nr={1} id="trin-situation" titel="Jeres situation" beskrivelse="Vælg familieform og dato. Løn bruges kun til økonomien og bliver i din browser.">
-          <Opsaetning plan={plan} opdater={opdater} />
-        </Trin>
-
-        <Trin
-          nr={2}
-          id="trin-kalender"
-          titel="Kalenderen"
-          beskrivelse="Start fra en standardplan og tilpas uge for uge. Farverne viser, hvilke uger der bruges."
+        {/* Toast: floats, so it never pushes content around. */}
+        <p
+          role="status"
+          aria-live="polite"
+          className={
+            delStatus
+              ? "fixed bottom-4 left-1/2 z-50 w-[min(24rem,calc(100vw-2rem))] -translate-x-1/2 rounded-lg bg-gray-900 px-4 py-3 text-sm text-white shadow-lg dark:bg-gray-100 dark:text-gray-900"
+              : "sr-only"
+          }
         >
-          <div className="mb-5 grid gap-2 sm:grid-cols-3 print:hidden">
-            {SKABELONER.filter((s) => plan.foraeldre.length > 1 && plan.konstellation !== "solo" ? true : s.id === "klassisk").map((s) => (
-              <button
-                key={s.id}
-                type="button"
-                onClick={() => opdater((p) => anvendSkabelon(p, s.id as SkabelonId))}
-                className="rounded-xl border-2 border-gray-200 p-3 text-left hover:border-blue-500 hover:bg-blue-50 focus-visible:border-blue-600 dark:border-gray-600 dark:hover:border-blue-400 dark:hover:bg-blue-900/20"
-              >
-                <span className="block font-semibold text-gray-900 dark:text-white">
-                  {plan.foraeldre.length > 1 && plan.konstellation !== "solo" ? s.titel : "Standardplan"}
-                </span>
-                <span className="mt-0.5 block text-xs text-gray-600 dark:text-gray-300">
-                  {plan.foraeldre.length > 1 && plan.konstellation !== "solo" ? s.beskrivelse : "Alle dine uger i ét stræk fra fødslen."}
-                </span>
-              </button>
-            ))}
-          </div>
-          <Kalender plan={plan} analyse={analyse} opdater={opdater} />
-        </Trin>
+          {delStatus}
+        </p>
 
-        <Trin nr={3} id="trin-status" titel="Tjek af planen" beskrivelse="Opdateres i realtid efter barselsloven.">
-          <Status analyse={analyse} />
-        </Trin>
+        <div className="divide-y divide-gray-200 rounded-2xl border border-gray-200 bg-white dark:divide-gray-700 dark:border-gray-700 dark:bg-gray-800">
+          <Trin nr={1} id="trin-situation" titel="Jeres situation" beskrivelse="Vælg familie og dato. Planen står klar med det samme.">
+            <Opsaetning plan={plan} opdater={opdater} />
+          </Trin>
 
-        <Trin nr={4} id="trin-perioder" titel="Perioder og datoer" beskrivelse="Læg orlov, deltid og ferie ind med datoer – eller ret dem, du har malet i kalenderen.">
-          <PeriodeEditor plan={plan} analyse={analyse} opdater={opdater} />
-        </Trin>
+          <Trin nr={2} id="trin-plan" titel="Jeres plan" beskrivelse="Uge for uge. Vælg et udgangspunkt, og ret ugerne til.">
+            <div className="space-y-10">
+              <div>
+                {toForaeldre && (
+                  <fieldset className="mb-6">
+                    <legend className="mb-2 text-sm font-medium text-gray-700 dark:text-gray-200">Start fra en standardplan</legend>
+                    <div className="grid grid-cols-3 gap-2 sm:flex sm:flex-wrap">
+                      {SKABELONER.map((s) => (
+                        <button
+                          key={s.id}
+                          type="button"
+                          title={s.beskrivelse}
+                          onClick={() => opdater((p) => anvendSkabelon(p, s.id))}
+                          className="rounded-lg border border-gray-300 px-2 py-2 text-center text-sm leading-snug sm:text-left hover:border-blue-600 sm:px-3 hover:bg-blue-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 dark:border-gray-600 dark:hover:border-blue-400 dark:hover:bg-blue-900/20"
+                        >
+                          <span className="block font-semibold text-gray-900 dark:text-white">{SKABELON_TITEL[s.id]}</span>
+                          <span className="hidden text-xs text-gray-600 dark:text-gray-300 sm:block">{SKABELON_KORT[s.id]}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </fieldset>
+                )}
+                <Tidslinje plan={plan} analyse={analyse} />
+              </div>
 
-        <Trin nr={5} id="trin-oekonomi" titel="Økonomien" beskrivelse="Løn, løn under barsel og barselsdagpenge måned for måned.">
-          <OekonomiVisning plan={plan} analyse={analyse} oekonomi={oekonomi} />
-        </Trin>
+              <div>
+                <h3 id="tjek" className={`mb-3 scroll-mt-20 lg:scroll-mt-40 ${underoverskriftKlasse}`}>
+                  Tjek af planen
+                </h3>
+                <Status analyse={analyse} />
+              </div>
 
-        <Trin nr={6} id="trin-arbejdsgiver" titel="Send til arbejdsgiveren" beskrivelse="En færdig besked med præcise datoer – og de frister, I skal huske.">
-          <ArbejdsgiverPanel plan={plan} analyse={analyse} idag={idag} />
-        </Trin>
+              <div>
+                <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                  <h3 className={underoverskriftKlasse}>Ret ugerne i kalenderen</h3>
+                  <button
+                    type="button"
+                    aria-expanded={visKalender}
+                    aria-controls="barsel-kalender"
+                    onClick={() => setVisKalender((v) => !v)}
+                    className="inline-flex items-center gap-2 rounded-lg border border-gray-300 px-3 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 dark:border-gray-600 dark:text-gray-100 dark:hover:bg-gray-700 md:hidden"
+                  >
+                    <PencilLine className="h-4 w-4" aria-hidden="true" />
+                    {visKalender ? "Skjul kalenderen" : "Redigér i kalender"}
+                  </button>
+                </div>
+                <div id="barsel-kalender" className={visKalender ? "block" : "hidden md:block"}>
+                  <Kalender plan={plan} analyse={analyse} opdater={opdater} />
+                  {!toForaeldre && (
+                    <button
+                      type="button"
+                      onClick={() => opdater((p) => anvendSkabelon(p, "klassisk"))}
+                      className="mt-3 text-sm font-medium text-blue-700 underline underline-offset-2 hover:text-blue-900 dark:text-blue-300"
+                    >
+                      Gå tilbage til standardplanen
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <h3 className={`mb-3 ${underoverskriftKlasse}`}>Perioder og datoer</h3>
+                <PeriodeEditor plan={plan} analyse={analyse} opdater={opdater} />
+              </div>
+            </div>
+          </Trin>
+
+          <Trin nr={3} id="trin-oekonomi" titel="Økonomien" beskrivelse="Løn, løn under barsel og barselsdagpenge måned for måned.">
+            <OekonomiVisning plan={plan} analyse={analyse} oekonomi={oekonomi} />
+          </Trin>
+
+          <Trin
+            nr={4}
+            id="trin-arbejdsgiver"
+            titel={
+              <>
+                Besked til arbejdsgiveren
+                <InfoTip begreb="varsling" />
+              </>
+            }
+            beskrivelse="En færdig besked med datoer og de frister, I skal huske."
+          >
+            <ArbejdsgiverPanel plan={plan} analyse={analyse} idag={idag} />
+          </Trin>
+        </div>
 
         <p className="text-xs text-gray-600 dark:text-gray-400">
-          {tal(analyse.foraeldre.reduce((s, a) => s + a.brugtFoer + a.brugtEfter, 0), 1)} uger med barselsdagpenge er planlagt i alt. Planen gemmes kun lokalt i
-          din browser (localStorage) og sendes aldrig til os.
+          {tal(analyse.foraeldre.reduce((s, a) => s + a.brugtFoer + a.brugtEfter, 0), 1)} uger med barselsdagpenge er planlagt i alt. Planen gemmes automatisk i
+          din browser og sendes aldrig til os.
         </p>
       </div>
     </div>

@@ -49,15 +49,13 @@ export default async function BarselsplanlaeggerPage() {
 
       <article>
         <header className="barsel-side-indhold mb-6 max-w-3xl print:hidden">
-          <p className="mb-2 text-sm font-semibold uppercase tracking-wide text-blue-700 dark:text-blue-300">Gratis · opdateret med 2026-reglerne</p>
           <h1 className="mb-3 text-3xl font-bold text-gray-900 dark:text-white md:text-4xl">Barselsplanlægger 2026</h1>
           <p className="text-base leading-relaxed text-gray-700 dark:text-gray-300 sm:text-lg">
-            Læg jeres barsel ind i en kalender uge for uge, og se med det samme, hvilke uger der er øremærkede, hvad I kan overføre til hinanden, og hvad
-            det betyder for økonomien måned for måned. Når planen er klar, kan I printe den og sende en færdig besked med datoer til arbejdsgiveren.
+            Se jeres barsel uge for uge, hvad I får udbetalt, og hvornår I skal give arbejdsgiveren besked. Vælg familie og dato, så står planen klar.
           </p>
-          <p className="mt-3 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-950 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-100">
-            <strong>Vejledende.</strong> Tjek altid med{" "}
-            <a href={BARSEL_2026.source} className="underline" rel="noopener">
+          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+            Vejledende efter reglerne for 2026. Tjek altid med{" "}
+            <a href={BARSEL_2026.source} className="underline underline-offset-2" rel="noopener">
               borger.dk
             </a>{" "}
             og din arbejdsgiver. Planen gemmes kun i din browser.

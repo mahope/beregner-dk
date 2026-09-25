@@ -5,7 +5,7 @@ import { blokBeskrivelse, blokke, type Analyse } from "@/lib/barsel/motor";
 import type { Oekonomi } from "@/lib/barsel/oekonomi";
 import { KONSTELLATIONER, erAdoption } from "@/lib/barsel/regler";
 import type { BarselsPlan, Kategori } from "@/lib/barsel/types";
-import { KATEGORI_BG, KATEGORI_TEKST, LEGEND, kr, tal } from "./farver";
+import { FORKLARING, kr, tal, ugeFarve } from "./farver";
 import { ugeLabel } from "./Kalender";
 
 interface Props {
@@ -55,13 +55,13 @@ export default function PrintOversigt({ plan, analyse, oekonomi, idag }: Props) 
             </tr>
           </thead>
           <tbody>
-            {analyse.foraeldre.map((a) => (
+            {analyse.foraeldre.map((a, pi) => (
               <tr key={a.id}>
                 <th className="truncate pr-1 text-left text-[9px] font-semibold">{a.navn}</th>
                 {uger.map((w) => {
                   const k: Kategori = a.uger.get(w)?.kategori ?? "arbejde";
                   return (
-                    <td key={w} className={`h-4 p-0 ${KATEGORI_BG[k]} ${w === 0 ? "border-l-2 border-gray-900" : ""}`} />
+                    <td key={w} className={`h-4 p-0 ${ugeFarve(k, pi)} ${w === 0 ? "border-l-2 border-gray-900" : ""}`} />
                   );
                 })}
               </tr>
@@ -69,12 +69,13 @@ export default function PrintOversigt({ plan, analyse, oekonomi, idag }: Props) 
           </tbody>
         </table>
         <ul className="mt-1 flex flex-wrap gap-x-3 text-[9px]">
-          {LEGEND.map((k) => (
-            <li key={k} className="inline-flex items-center gap-1">
-              <span className={`inline-block h-2.5 w-2.5 border border-gray-400 ${KATEGORI_BG[k]}`} />
-              {KATEGORI_TEKST[k]}
+          {FORKLARING.map((f) => (
+            <li key={f.id} className="inline-flex items-center gap-1">
+              <span className={`inline-block h-2.5 w-3 border border-gray-400 ${f.swatch}`} />
+              {f.tekst}
             </li>
           ))}
+          <li>Hver forælder har sin egen farve.</li>
         </ul>
       </section>
 

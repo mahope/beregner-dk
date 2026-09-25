@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useId, useState } from "react";
+import type { LucideIcon } from "lucide-react";
+import InfoTip, { type Begreb } from "./InfoTip";
 
 export const inputKlasse =
   "w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white";
@@ -17,10 +19,11 @@ interface TalFeltProps {
   suffix?: string;
   hjaelp?: string;
   id?: string;
+  info?: Begreb;
 }
 
 /** Number input that keeps the raw text while typing (so "" and "3," work). */
-export function TalFelt({ label, value, onChange, min = 0, max, step = 1, suffix, hjaelp, id }: TalFeltProps) {
+export function TalFelt({ label, value, onChange, min = 0, max, step = 1, suffix, hjaelp, id, info }: TalFeltProps) {
   const autoId = useId();
   const inputId = id ?? autoId;
   const [tekst, setTekst] = useState(String(value));
@@ -32,9 +35,12 @@ export function TalFelt({ label, value, onChange, min = 0, max, step = 1, suffix
 
   return (
     <div>
-      <label htmlFor={inputId} className={labelKlasse}>
-        {label}
-      </label>
+      <div className="flex items-center gap-1">
+        <label htmlFor={inputId} className={labelKlasse}>
+          {label}
+        </label>
+        {info && <InfoTip begreb={info} className="mb-1" />}
+      </div>
       <div className="relative">
         <input
           id={inputId}
@@ -74,7 +80,7 @@ export function TalFelt({ label, value, onChange, min = 0, max, step = 1, suffix
 interface SegmentProps<T extends string> {
   label: string;
   value: T;
-  options: { value: T; label: string; beskrivelse?: string }[];
+  options: { value: T; label: string; beskrivelse?: string; ikon?: LucideIcon }[];
   onChange: (value: T) => void;
   kolonner?: string;
 }
@@ -91,10 +97,10 @@ export function Segment<T extends string>({ label, value, options, onChange, kol
           return (
             <label
               key={o.value}
-              className={`flex cursor-pointer flex-col rounded-lg border-2 px-3 py-2 text-sm transition-colors focus-within:ring-2 focus-within:ring-blue-500 ${
+              className={`flex cursor-pointer items-start gap-2.5 rounded-lg border px-3 py-2.5 text-sm transition-colors focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-blue-600 ${
                 valgt
-                  ? "border-blue-600 bg-blue-50 text-blue-900 dark:border-blue-400 dark:bg-blue-900/30 dark:text-blue-100"
-                  : "border-gray-200 bg-white text-gray-800 hover:border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:hover:border-gray-500"
+                  ? "border-blue-600 bg-blue-50 text-blue-950 ring-1 ring-blue-600 dark:border-blue-400 dark:bg-blue-900/30 dark:text-blue-50 dark:ring-blue-400"
+                  : "border-gray-300 bg-white text-gray-800 hover:border-gray-400 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:hover:border-gray-500"
               }`}
             >
               <input
@@ -105,8 +111,16 @@ export function Segment<T extends string>({ label, value, options, onChange, kol
                 onChange={() => onChange(o.value)}
                 className="sr-only"
               />
-              <span className="font-semibold">{o.label}</span>
-              {o.beskrivelse && <span className="mt-0.5 text-xs text-gray-600 dark:text-gray-300">{o.beskrivelse}</span>}
+              {o.ikon && (
+                <o.ikon
+                  className={`mt-0.5 h-4 w-4 shrink-0 ${valgt ? "text-blue-700 dark:text-blue-300" : "text-gray-500 dark:text-gray-400"}`}
+                  aria-hidden="true"
+                />
+              )}
+              <span className="flex min-w-0 flex-col">
+                <span className="font-semibold">{o.label}</span>
+                {o.beskrivelse && <span className="mt-0.5 text-xs text-gray-600 dark:text-gray-300">{o.beskrivelse}</span>}
+              </span>
             </label>
           );
         })}
