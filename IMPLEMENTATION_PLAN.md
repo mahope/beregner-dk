@@ -1166,6 +1166,73 @@ Næste iteration: `/pension` er rettet på indhold — se opgave 19 for det åbn
   positionen på "pensionsberegner" (var 22) og "beregn pension" (var 28) rykker, og at CTR'en
   på /pension ikke falder, fordi titlen nu er smallet.
 
+#### 20. [x] FÆRDIG 2026-09-25 — C9 — Svar-først på `/braendstof` og `/kvadratmeter`
+
+- **Iteration start:** 2026-09-25 20:10 CEST på `ceo/c9-braendstof-kvadratmeter-ctr`.
+  Køen efter C8 var tom; de to største uberørte CTR-sider blev taget.
+- **Datagrund:** Search Console 2026-08-26–2026-09-23: `/kvadratmeter` 20.914 visninger,
+  290 klik, CTR 1,4 %, position 5,0; `/braendstof` 16.371 visninger, 179 klik, CTR 1,1 %,
+  position 6,1. Tilsammen 37.285 visninger på position 5-6 — det største samlede
+  CTR-udbud der ikke var behandlet. Søgninger: "kvadratmeter" 1.830v pos 5,
+  "hvordan regner man kvadratmeter ud" 372v pos 3, "beregn kvadratmeter" 199v pos 3,
+  "kvadratmeter beregner" 172v pos 8; "benzin beregner" 130v/4k pos 6, "brændstof beregner"
+  100v pos 7, "benzinberegner" 50v pos 7. Plausible 2026-09-25: `/kvadratmeter` 376
+  besøgende/28d (+103 %, bounce 6 %), `/braendstof` 272 (+74 %, bounce 3 %).
+- **Problem før ændring:** Begge titler var brand-tunge og lovede intet konkret
+  ("Brændstofberegner - Beregn benzin, diesel og el | MinBeregner.dk" 61 tegn,
+  "Kvadratmeterberegner - Beregn areal online | MinBeregner.dk" 59 tegn), og ingen af
+  siderne svarede synligt på sit eget spørgsmål. `/braendstof` lagde desuden et gammelt
+  eksempel i FAQ'en (200 km/13 DKK = 173 DKK), der ikke hang sammen med komponentens
+  egne standardværdier.
+- **Beslutning/implementering:** Samme svar-først-mønster som C1/C3/C4/C5/C6, kun i
+  `page-data.ts` — ingen ændring i kalkulationskode, URL, canonical, hreflang, sitemap
+  eller `/api/v1`.
+  - `/braendstof` (DA/SE/NO): `metaTitle` "Brændstofberegner: 500 km benzin koster 450 kr."
+    (43 tegn, SE 42, NO 44), og `description` er selve regnestykket med 33,3 liter,
+    450 kr. og 0,90 kr. pr. km. Ny FAQ med samme tal og 90 kr. pr. 100 km.
+  - `/kvadratmeter` (DA/SE/NO): `metaTitle` "Kvadratmeterberegner: 5 x 4 m = 20 m²"
+    (36 tegn i alle tre domæner), `description` er svaret på "hvordan regner man
+    kvadratmeter ud", og ny FAQ svarer på "hvor meget koster 20 m² gulv" med 150 kr./m²
+    → 3.000 kr. plus de 5-10 % spild, som siden allerede nævner i prosaen.
+- **Talene er verificeret mod koden, ikke antaget:** `500 / 15 × 13,50 = 450 kr.`,
+  `13,50 / 15 = 0,90 kr. pr. km` og `100 / 15 = 6,67 l/100km` er præcis
+  `BraendstofBeregner.tsx:173-177` (`literForTur`, `turPris`, `prisPrKm`, `forbrugPr100km`)
+  med standardværdierne 13,5 kr./l og 15 km/l. Arealet er `laengde × bredde` og prisen
+  `areal × prisPerKvm` (`KvadratmeterBeregner.tsx:206,227`), så 5 × 4 = 20 m² og
+  20 × 150 = 3.000 kr. Samme standardværdier gælder alle tre domæner, fordi
+  `l.benzin`/tallene er identiske i DA/SE/NO.
+- **Acceptkriterier:**
+  1. DA/SE/NO renderer H1, det konkrete svar og værktøjet. **PASS**
+     (`src/app/braendstof/page.test.tsx` og `src/app/kvadratmeter/page.test.tsx`,
+     3 locales × 2 sider = 6 nye routetests)
+  2. `metaTitle` ≤ 60 tegn, `metaDescription` ≤ 160 tegn, `ogTitle` = `metaTitle`,
+     samme tal i description, metaDescription, ogDescription og schema på alle tre
+     domæner. **PASS** (`src/lib/page-data.test.ts`, 6 nye testcases)
+  3. Ingen ændring i kalkulationskode, URL, canonical, hreflang, sitemap eller
+     `/api/v1`; diffen rører kun `page-data.ts`, `page-data.test.ts` og de to nye
+     routetests. **PASS** — 4 filer i diffen.
+  4. Kategori-brødkrummen på `/braendstof` (SE) er uændret `/kategori/hverdag`, fordi
+     kategorislugs er fælles på tværs af domæner. **PASS** (en kandidatændring til
+     `/kategori/vardag` blev taget tilbage, fordi den ville 404'e).
+- **Kvalitetsgate 2026-09-25 20:25 CEST:** `npm run lint` grøn (481 filer),
+  `npm run test` grøn (1014/1014 tests, 97 filer), `npm run build` grøn (139 sider +
+  typecheck, kun de 7 kendte CSS-advarsler). Målrettet gate først: 47/47 i de tre
+  berørte testfiler efter to rettelser (ogDescription manglede "20 m²" på alle tre
+  domæner, og `next/dynamic` rendrer intet i statisk markup, så
+  `/braendstof`-testen mockede også `next/dynamic`). Lokal `next start` på port 3219:
+  DA, SE (Host: beraknare.se) og NO (Host: beregner.no) gav 200 med de nye titler og
+  det synlige svar; `/api/health` svarede `status: ok`.
+- **Forventet effekt:** 37.285 visninger/28d samlet på position 5-6. Løftes CTR fra
+  1,1-1,4 % til 2,5 %, giver det ca. 460 ekstra klik pr. måned på to værktøjer, der
+  begge vokser over 70 %.
+- **MÅL:** `/braendstof` Search Console baseline 16.371 visninger, 179 klik, CTR 1,1 %,
+  position 6,1 pr. 2026-09-23; Plausible 272 besøgende/28d pr. 2026-09-25.
+  `/kvadratmeter` Search Console baseline 20.914 visninger, 290 klik, CTR 1,4 %,
+  position 5,0 pr. 2026-09-23; Plausible 376 besøgende/28d pr. 2026-09-25.
+  Effekt måles først efter mindst 14 dage, altså fra 2026-10-09.
+- **Landet:** kode og tests i commit `351d881`; merge til `master` sker i denne
+  iteration.
+
 ### ❓ Til Mads
 
 - **IndexNow runtime-konfiguration:** Sæt kun i Dokploys production-runtime
@@ -1199,11 +1266,27 @@ Næste iteration: `/pension` er rettet på indhold — se opgave 19 for det åbn
   "beregn pension af løn". Ikke startet — kræver nyt inputfelt, delelink-state og testet UI.
 - ~~`/dage-til/[dato]`~~ er færdig som C7 den 2026-09-25, se opgave 18.
 
-- `/kvadratmeter` 370 besøgende/28d (+131 %): autocomplete og konkurrenter peger på
-  gulv, cm/mm, antal ens felter og spild; prose nævner allerede 5-10 %, men koden gør
-  det ikke. MÅL ved eventuel opgave: baseline 370 2026-09-23.
-- `/rentefradrag` 289 besøgende/28d (+160 %): høj vækst, men 33,6/25,6 % er
-  upræcise og mangler primær kilde. MÅL ved eventuel opgave: baseline 289 2026-09-23.
+- ~~`/kvadratmeter`~~ er svar-først siden 2026-09-25 (C9, opgave 20). Den åbne del er
+  indholdet: prose nævner 5-10 % spild, men værktøjet kan kun prissætte råt areal
+  (`KvadratmeterBeregner.tsx:199-230`). Autocomplete peger på gulv, cm/mm og antal ens
+  felter; konkurrenten Hjemmeland prissætter materialer. Det kræver ny beregningslogik
+  med tests og er bevidst ikke blandet ind i C9.
+  MÅL: Search Console baseline 20.914 visninger, 290 klik, CTR 1,4 %, position 5,0
+  pr. 2026-09-23; Plausible 376 besøgende/28d pr. 2026-09-25 — genmål 2026-10-09.
+- ~~`/braendstof`~~ er svar-først siden 2026-09-25 (C9, opgave 20).
+  MÅL: Search Console baseline 16.371 visninger, 179 klik, CTR 1,1 %, position 6,1
+  pr. 2026-09-23; Plausible 272 besøgende/28d pr. 2026-09-25 — genmål 2026-10-09.
+- **Næste CTR-kandidat:** `/blog/boernepenge-2026-satser-og-regler` — 5.145 visninger,
+  27 klik, **CTR 0,5 %**, position 8,5 pr. 2026-09-23. Søgningerne er konkrete
+  ("børnepenge 2026" 986v/3k pos 9, "børnepenge sats 2026" 339v pos 6,
+  "børnepenge 2026 udbetaling" 294v pos 10, "børne unge ydelse satser 2026" 136v pos 8),
+  så både svar-først-titel og et synligt 2026-talburk burde give effekt. Samme mønster som
+  C1-C6/C9, men på en blogartikel:kræver en ny routetest og kildeførte tal.
+  MÅL ved eventuel opgave: baseline 5.145 visninger, CTR 0,5 % pr. 2026-09-23.
+- `/rentefradrag` 299 besøgende/28d (+149 %): høj vækst og CTR 4,9 % — positionen er
+  allerede stærk, så her er **ikke** CTR problemet. Reelt hull: 33,6/25,6 % er
+  upræcise og mangler primær kilde, og siden bruges stadig ikke af `/renteberegner` på
+  andre domæner. MÅL ved eventuel opgave: baseline 289 2026-09-23.
 - `/dato` 1.008 besøgende/28d (+92 %): stærkeste side og allerede bred funktionstil;
   konkurrenten iKalender tilbyder arbejdsdage uden helligdager, mens vores side
   springer helligdage over. Ingen ændring før et konkret søgeintentionsgap kan dokumenteres.
@@ -1624,3 +1707,10 @@ landmark=lån, piggybank=opsparing osv.).
   folkepensionsalder-tabellen med 65/65½/66/66½/67/68/69/70, pensionstillæg
   8.729/4.467 kr. og overskriften "Hvor kommer pensionen fra" i beregneren
   (ikke "De tre pensionssøjler"). HTTP 200 er ikke nok — tjek indholdet.
+- **VERIFICÉR DEPLOY:** C9 svar-først `/braendstof` og `/kvadratmeter` `MERGE_SHA`
+  2026-09-25 20:35 CEST. Verificér efter 07:30-vinduet 2026-09-26: live DA
+  `/braendstof` skal have title "Brændstofberegner: 500 km benzin koster 450 kr." og
+  det samlede svar synligt i introafsnittet; live DA `/kvadratmeter` skal have title
+  "Kvadratmeterberegner: 5 x 4 m = 20 m²" og "Et rum på 5 x 4 m er 20 m²" synligt.
+  Tjek også `beraknare.se/braendstof` og `beraknare.se/kvadratmeter` for de svenske
+  titler. HTTP 200 alene utilstrækkeligt.
