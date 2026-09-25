@@ -93,6 +93,77 @@ describe("beregnFolkepension2026", () => {
       beregnFolkepension2026({ samliv: "enlig", aarligIndkomst: Number.NaN, samleverErPensionist: false }).iAlt,
     ).toBe(16273);
   });
+
+  it("regner kun 46 % af samleverens indkomst med, når samleveren ikke er pensionist", () => {
+    const result = beregnFolkepension2026({
+      samliv: "samlevende",
+      aarligIndkomst: 0,
+      samleverErPensionist: false,
+      aarligSamleverIndkomst: 200000,
+    });
+    expect(result.indkomstGrundlag).toBeCloseTo(200000 * 0.46, 6);
+    expect(result.samleverUdeladt).toBeCloseTo(200000 * 0.54, 6);
+    expect(result.tillaeg).toBe(4467);
+  });
+
+  it("regner hele samleverens indkomst med, når samleveren er pensionist", () => {
+    const result = beregnFolkepension2026({
+      samliv: "samlevende",
+      aarligIndkomst: 0,
+      samleverErPensionist: true,
+      aarligSamleverIndkomst: 200000,
+    });
+    expect(result.indkomstGrundlag).toBe(200000);
+    expect(result.samleverUdeladt).toBe(0);
+    expect(result.tillaeg).toBeCloseTo(4467 - 1200 * 0.16, 6);
+  });
+
+  it("lægger egen og samleverens indkomst sammen i grundlaget", () => {
+    const result = beregnFolkepension2026({
+      samliv: "samlevende",
+      aarligIndkomst: 200000,
+      samleverErPensionist: true,
+      aarligSamleverIndkomst: 10000,
+    });
+    expect(result.indkomstGrundlag).toBe(210000);
+    expect(result.nedsatMed).toBeCloseTo((210000 - 198800) * 0.16, 6);
+    expect(result.tillaeg).toBeCloseTo(4467 - (210000 - 198800) * 0.16, 6);
+  });
+
+  it("ignorerer samleverens indkomst for enlige", () => {
+    const result = beregnFolkepension2026({
+      samliv: "enlig",
+      aarligIndkomst: 0,
+      samleverErPensionist: false,
+      aarligSamleverIndkomst: 400000,
+    });
+    expect(result.indkomstGrundlag).toBe(0);
+    expect(result.samleverUdeladt).toBe(0);
+    expect(result.iAlt).toBe(16273);
+  });
+
+  it("behandler negativ eller ugyldig samleverindkomst som nul", () => {
+    const base = { samliv: "samlevende" as const, aarligIndkomst: 0, samleverErPensionist: false };
+    expect(
+      beregnFolkepension2026({ ...base, aarligSamleverIndkomst: -100000 }).indkomstGrundlag,
+    ).toBe(0);
+    expect(
+      beregnFolkepension2026({ ...base, aarligSamleverIndkomst: Number.NaN }).indkomstGrundlag,
+    ).toBe(0);
+    expect(beregnFolkepension2026(base).indkomstGrundlag).toBe(0);
+  });
+
+  it("bortfalder på den kombinerede indkomst af dig og din samlever", () => {
+    const result = beregnFolkepension2026({
+      samliv: "samlevende",
+      aarligIndkomst: 300000,
+      samleverErPensionist: true,
+      aarligSamleverIndkomst: 300000,
+    });
+    expect(result.bortfaldet).toBe(true);
+    expect(result.indkomstGrundlag).toBe(600000);
+    expect(result.iAlt).toBe(7544);
+  });
 });
 
 describe("folkepensionsalder", () => {

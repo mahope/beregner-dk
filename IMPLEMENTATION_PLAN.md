@@ -1,11 +1,10 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — D1 (fjernet dobbelt domæne-suffiks i 26 sidetitler) FÆRDIG 2026-09-25
-21:20 CEST. Deploynoter for C4-C10 er åbne og kan først verificeres efter 07:30-vinduet
-2026-09-26.
-Næste iteration: (1) åben del af C8 (indkomstfelt til pensionstillægget — ville ramme
-"beregn pensionstillæg" og "beregn pension af løn"); (2) `/rentefradrag`'s manglende
-primære kilde; (3) D2 (børnetilskudssatser, lav trafikvirkning).
+STATUS: KØ — C11 (indkomstfelt, så pensionstillægget regnes ned) FÆRDIG 2026-09-25
+21:32 CEST. Deploynoter for C4-C10, D1 og C11 er åbne og kan først verificeres efter
+07:30-vinduet 2026-09-26.
+Næste iteration: (1) `/rentefradrag`'s manglende primære kilde; (2) D2 (børnetilskudssatser,
+lav trafikvirkning); (3) `/kvadratmeter`'s åbne del (materialer til 5-10 % spild).
 
 ## Fase 3 — trafik-drevet
 
@@ -1344,6 +1343,64 @@ primære kilde; (3) D2 (børnetilskudssatser, lav trafikvirkning).
   27 klik, CTR 0,5 %, position 8,5 pr. 2026-09-23. Genmål 2026-10-09.
 - **Landet:** kode `c982651`, merge `76d8ad8` 2026-09-25 21:22 CEST.
 
+#### 22. [x] FÆRDIG 2026-09-25 — C11 — Indkomstfelt, så pensionstillægget regnes ned (åben del af C8)
+
+- **Iteration start:** 2026-09-25 21:23 CEST på `ceo/c11-pensionstillæg-indkomst`.
+  Planens egen første opgave efter D1: den åbne del af C8.
+- **Datagrund:** `/pension` Search Console baseline 4.001 visninger, 45 klik, CTR 1,1 %,
+  **position 12,2** pr. 2026-09-23. Søgningerne ligger langt nede: "pensionsberegner"
+  173v/1k pos. 22, "beregn pension" 89v pos. 28, "beregn pensionsopsparing" 78v pos. 24.
+  Google autocomplete (da-DK, verificeret i C8 samme dag) for "beregn pension" giver
+  *beregn pensionsalder*, *beregn pensionstillæg*, *beregn pensionstillæg 2026* og *beregn
+  pension af løn* — søgeintentioner værktøjet ikke kunne besvare, fordi det kørte med
+  folkepensionens fulde beløb uanset samliv og indkomst. Autocomplete er et kvalitativt
+  søgeintents-signal, ikke et volumenestimat.
+- **Problem før ændring:** `PensionBeregner.tsx` kaldte `beregnFolkepension2026` med
+  `samliv: "enlig", aarligIndkomst: 0`, så værktøjet altid viste 16.273 kr., selv om de
+  indkomstgrænser, 46 %-reglen og tillægget på 4.467 kr. allerede lå i `src/lib/folkepension.ts`
+  og var dokumenteret på siden. En bruger med fx ATP og arbejdsmarkedspension fik et tal,
+  der var for højt, ud at vide hvorfor.
+- **Beslutning/implementering:**
+  - `beregnFolkepension2026` får et valgfrit `aarligSamleverIndkomst` og anvender den
+    længe ubrugte konstant `samleverAndelMedRegel: 0.46` i selve funktionen. Resultatet
+    får `indkomstGrundlag` og `samleverUdeladt`, så UI'en kan forklare reglen.
+  - Værktøjet får fire nye felter: samlivsstatus, "er samleveren pensionist" (kun ved
+    samlevende), egen årlig indkomst ud over arbejdsindkomst og samleverens. Alle er med i
+    delelink-state og nulstilles af Reset.
+  - Resultatet får en synlig opdeling: grundbeløb, fuldt tillæg, nedsættelsen som en rød
+    linje, tillæg efter nedsættelse og i alt — med den anvendte sats og grænse i ord.
+  - `/pension` fortæller nu, at beregneren bruger præcis de grænser, der står i tabellen,
+    og den vage "ca. 13.000-15.000 kr/måned" i indledningen er erstattet af de kildeførte
+    12.011/16.273 kr.
+- **Faglig afgrænsning:** værktøjet regler stadig ikke ATP, arbejdsmarkedspension eller
+  privat pension ind i folkepensionen — brugeren skal selv opgive dem som indkomst. Det står
+  i note-teksten, og ATP-pension er ikke en del af folkepensionen (Kilde: borger.dk).
+- **Verifikation 2026-09-25 21:31 CEST:** `npm run lint` grøn (485 filer), `npm run test`
+  grøn (**1043/1043, 100 filer** — 6 nye lib-tests til de 16 eksisterende og 7 nye
+  komponenttests), `npm run build` grøn (141 ruter, ingen nye advarsler). Komponenttestene
+  dækker enlig uden indkomst (16.273), samlevende (12.011), nedsættelse ved 119.200 kr.
+  (10.093), bortfald ved 500.000 kr. (7.544), 46 %-reglen (108.000 kr. holdt ude),
+  pensionist-samlever (11.819) og delelink-roundtrip.
+- **Acceptkriterier:**
+  1. Værktøjet bruger aldrig 16.273 kr. som svar uden at sige hvorfor — grundbeløb, fuldt
+     tillæg, nedsættelse og i alt står hver for sig, og tallene kommer fra
+     `src/lib/folkepension.ts`. **PASS**
+  2. 46 %-reglen anvendes i beregningen, ikke kun i prosa. **PASS** (nye lib-tests)
+  3. Delelink og nulstilling bevares de nye felter. **PASS**
+  4. Ingen ændring i beregningslogik for opsparingen, URL, canonical, hreflang, sitemap
+     eller `/api/v1`; diffen rører kun folkepension-lib, beregner, pension-side og tests.
+     **PASS**
+  5. `npm run lint`, `npm run test` og `npm run build` er grønne. **PASS**
+- **MÅL:** `/pension` Search Console baseline 4.001 visninger, 45 klik, CTR 1,1 %, pos. 12,2
+  pr. 2026-09-23; Plausible 141 besøgende/28d, bounce 2 % pr. 2026-09-25. Sammenlign igen
+  2026-10-09: se om "pensionsberegner" (var pos. 22) og "beregn pension" (var pos. 28) rykker,
+  og at CTR'en ikke falder.
+- **Landet:** kode og tests committes i denne iteration; merge til `master` følger.
+- **Ikke gjort (bevidst):** ingen ny `/pensionstillæg`-side. Autocomplete-signalet er
+  kvalitativt, og en tynd side om et emne, der allerede er fuldt dækket på `/pension`,
+  kan skade domænet mere end det hjælper. Instrumentet er nu i stedet en sektion på
+  `/pension` med synlige tal.
+
 #### D2. Ny kandidat — børnetilskudssatserne er ikke verificeret nogen steder
 
 - **Datagrund:** C10 fjernede de uverificerede "ca. 6.300/6.600 kr." fra artikel og
@@ -1381,11 +1438,10 @@ primære kilde; (3) D2 (børnetilskudssatser, lav trafikvirkning).
   folkepensionstal var forkerte, og at beregneren brugte to opdigtede faktorer.
   MÅL: baseline 4.001 visninger, 45 klik, CTR 1,1 %, position 12,2 pr. 2026-09-23,
   Plausible 141 besøgende/28d pr. 2026-09-25 — genmål 2026-10-09.
-  **Åben del af C8:** værktøjet bruger stadig folkepensionens fulde beløb, fordi det ikke
-  kender ATP, arbejdsmarkedspension eller samliv. Næste naturlige skridt er et
-  indkomstfelt ("indkomst ud over arbejdsindkomst") koblet til `beregnFolkepension2026`,
-  som også ville ramme de dokumenterede søgninger "beregn pensionstillæg" og
-  "beregn pension af løn". Ikke startet — kræver nyt inputfelt, delelink-state og testet UI.
+  **Åben del af C8 er lukket** som C11 den 2026-09-25, se opgave 22: værktøjet har nu
+  samlivsstatus og indkomstfelter, så pensionstillægget regnes ned efter de samme
+  indkomstgrænser, som siden dokumenterer. Næste skridt på `/pension` er content, ikke
+  flere felter.
 - ~~`/dage-til/[dato]`~~ er færdig som C7 den 2026-09-25, se opgave 18.
 
 - ~~`/kvadratmeter`~~ er svar-først siden 2026-09-25 (C9, opgave 20). Den åbne del er
@@ -1851,3 +1907,12 @@ landmark=lån, piggybank=opsparing osv.).
   `/blog/boernepenge-2026-satser-og-regler` fortsat har sin rensede titel fra C10.
   HTTP 200 alene utilstrækkeligt. **Kan først verificeres fra 07:30-vinduet
   2026-09-26.**
+- **VERIFICÉR DEPLOY:** C11 indkomstfelt i `/pension` — samlivsstatus, samlever uden
+  pensionist (46 %-reglen), to indkomstfelter og den synlige opdeling
+  grundbeløb/tillæg/nedsættelse/i alt — committes 2026-09-25 21:32 CEST. Verificér efter
+  næste batch-vindue på live DA `/pension`: der skal stå "Folkepension 2026 — sådan er
+  den sat sammen" med rækkerne Grundbeløb 7.544 kr., Pensionstillæg, fuldt (enlig)
+  8.729 kr. og I alt pr. måned før skat 16.273 kr. ved standardværdierne, og prosaen skal
+  nævne at beregneren bruger grænserne fra tabellen. Tjek også at indledningens liste nu
+  siger 12.011 kr. til 16.273 kr. i stedet for "ca. 13.000-15.000 kr/måned".
+  HTTP 200 alene utilstrækkeligt. **Kan først verificeres fra 07:30-vinduet 2026-09-26.**
