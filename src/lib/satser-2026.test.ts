@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { BARSEL_2026, BOLIGSTOETTE_2026, SATSER_2026 as S, SU_2026 } from "./satser-2026";
+import { BARSEL_2026, BOLIGSTOETTE_2026, RENTEFRADRAG_2026 as R, SATSER_2026 as S, SU_2026 } from "./satser-2026";
 
 // These lock in the officially-verified 2026 figures (skm.dk / skat.dk).
 // If SKAT changes a rate, update satser-2026.ts AND this test together.
@@ -196,5 +196,25 @@ describe("SATSER_2026 single source of truth", () => {
       expect(S[k]).toBeGreaterThan(0);
       expect(S[k]).toBeLessThan(1);
     }
+  });
+});
+
+describe("RENTEFRADRAG_2026", () => {
+  test("beløbsgrænsebaseret to-trinssats", () => {
+    expect(R.highRate).toBe(0.336);
+    expect(R.lowRate).toBe(0.256);
+    expect(R.highRateLimitSingle).toBe(50000);
+    expect(R.highRateLimitCouple).toBe(100000);
+  });
+
+  test("SATSER_2026 peger på samme værdier som RENTEFRADRAG_2026", () => {
+    expect(S.rentefradragVaerdi).toBe(R.highRate);
+    expect(S.rentefradragVaerdiHoej).toBe(R.lowRate);
+  });
+
+  test("har en kilde og en verificeringsdato", () => {
+    expect(R.officialRules).toMatch(/^https:\/\//);
+    expect(R.ratesReference).toMatch(/^https:\/\//);
+    expect(R.verifiedAt).toMatch(/^\d{4}-\d{2}-\d{2}$/);
   });
 });
