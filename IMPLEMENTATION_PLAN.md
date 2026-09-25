@@ -1,8 +1,10 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — F1 (forsidens populærrække følger målt trafik) FÆRDIG, klar til merge
-2026-09-26 00:05 CEST
-2026-09-25 23:46-00:05 CEST. Deploynoterne C4-C11, R1, K1, S1, D2, L1 og F1 står åbne:
+STATUS: KØ — C12 (nedtælling svar-først + link til dage-til) FÆRDIG, klar til merge
+2026-09-26 00:58 CEST
+2026-09-26 00:18-00:58 CEST. Deployverificering kunne ikke køre: 07:30-vinduet er
+endnu ikke passeret. I stedet blev den sidste dokumenterede lav-CTR-side rettet.
+Deploynoterne C4-C11, R1, K1, S1, D2, L1, F1 og C12 står åbne:
 21:30-batchen 2026-09-25 indeholdt ikke dagens merges, og næste batch-vindue er
 07:30 2026-09-26. HTTP 200 er ikke bevis — C4's kontrol 22:20 fandt `/dage-til/juledagen`
 på **404**, `/pension` med den gamle "De tre pensionssøjler"-overskrift og
@@ -1757,7 +1759,86 @@ merges ikke til `master` mere før et menneske har kigget; (2) kørselsfradraget
      forældet igen, og der står ingen `{count}` i den serverede tekst.
   4. De 2 nye tests er grønne; `npm run lint`, `npm run test` og `npm run build` er grønne.
 
-#### 28. Forsøgt og **ikke** gjort den 2026-09-25 — kørselsfradragets primærkilde
+#### 30. [x] FÆRDIG 2026-09-26 — C12 — Svar-først på `/nedtaelling` + interne links til dage-til-siderne
+
+- **Iteration start:** 2026-09-26 00:18 CEST. Deployverificeringen kunne ikke køre
+  (07:30-vinduet er ikke passeret), så iterationen gik til den sidste dokumenterede
+  lav-CTR-side i stedet for at skrive en plan-only iteration.
+- **Datagrund:** Search Console beraknare.se 2026-08-26–2026-09-23: `/nedtaelling`
+  4.609 visninger, 9 klik, **CTR 0,2 %, position 9,5**. Søgningerne er præcis den
+  konkrete "hvornår"-intention, C7's dage-til-sider er bygget til: "nedräkning dagar"
+  152v pos 9, "hur många dagar är det kvar till 1 december" 100v pos 10, "… 1 oktober"
+  50v pos 7, "… 11 juni" 30v pos 8. Plausible: 20 besøgende/28d, bounce 4 % pr.
+  2026-09-25. DA-siden er ikke i GSC-toplisten (altså under 4.000 visninger).
+- **Fund:** siden var den tyndeste i den dokumenterede lav-CTR-klasse — 90 linjer, to
+  korte afsnit, ingen eksempel, ingen tal og **ingen link til de syv dage-til-sider**,
+  selv om C7 lagde dem i samme temaklynge. Den generiske H1 ("Nedtælling - hvor mange
+  dage til?") lovede heller ikke svaret. `/dato` fik heller ingen backlink herfra.
+- **Beslutning/implementering:** H1, intro, metaTitle, metaDescription, OG og
+  schema er nu svar-først på den konkrete intention ("hvor mange dage er der til en
+  dato?" / "hur många dagar är det kvar till ett datum?"). Siden har fået en
+  **regeltabel** med 30/45/60/100/365 dage → hele uger + dage; alle tal er ren
+  aritmetik (7 dage = 1 uge), så de kan aldrig blive forældede. Til sidst linker den
+  til alle syv dage-til-sider med deres eget spørgsmål som linktekst, genereret fra
+  `getDageTilEvents(locale)` + `getDageTilPrefix(locale)` — altså samme
+  single source som siderne selv, så listen kan ikke glide fra hinanden — og videre til
+  `/dato`. `no` får ingen dage-til-links, fordi domænet har ingen sådanne sider.
+  Ny FAQ-post i begge sprog svarer på "hvor mange dage er der til jul?" med henvisning
+  til den side, der tæller det ud dagligt.
+- **Verifikation 2026-09-26 00:56 CEST:** `npm run lint` grøn (495 filer),
+  `npm run test` grøn (**1.117/1.117 tests, 106 filer** — de 5 nye i
+  `src/app/nedtaelling/page.test.tsx` er de eneste ændring), `npm run build` grøn
+  (dynamiske ruter, ingen nye statiske sider).
+- **Landet:** kode, tests og plan i commit `0bd5e7d` på `ceo/nedtaelling-svar-fort`.
+- **Forventet effekt:** `/nedtaelling` er det naturlige stop for "nedräkning dagar",
+  men havde intet indhold at ranke med og ingen interne links. For det første får den
+  både svar-i-titlen og et emneanker til de syv dage-til-sider, hvilket også fordeler
+  linkjuice den anden vej. Effekten er dokumenteret på ~4.600 visninger/28d, altså
+  den mindste af CTR-opgaverne — den blev valgt, fordi den var den **sidste**
+  dokumenterede, og fordi diffen er lille nok til at holde gaten grøn.
+- **MÅL:** `/nedtaelling` SE Search Console baseline 4.609 visninger, 9 klik, CTR
+  0,2 %, position 9,5 pr. 2026-09-23; Plausible 20 besøgende/28d, bounce 4 %
+  pr. 2026-09-25 — genmål 2026-10-10. DA-baseline ukendt (ikke i top-15), ikke 0.
+- **Acceptkriterier:**
+  1. H1 og description lover det konkrete antal dage, ikke "værktøjet".
+  2. Uger/dage-tallet står synligt med korrekt aritmetik i begge sprog.
+  3. Alle syv dage-til-sider linkes fra siden med spørgsmålet som linktekst, hver med
+     sit eget sprog og sin egen slug, og `no` får ingen.
+  4. `/dato` backlink er til stede.
+  5. 5 nye tests + fuld gate grøn.
+
+#### 31. Ny kandidat — de tre sidste tynde sider i CTR-klassen
+
+- Efter C12 er **hele den dokumenterede lav-CTR-klasse dækket** på tværs af begge
+  domæner: alle DA-sider i GSC-top-15 med position 5-10 er svar-først (C1-C11), og på
+  SE er det samme sand for `/dato`, `/tidsberegner`, `/tidszone`, `/procent`, `/moms`,
+  `/alder`, `/kalorier`, `/renteberegner`, `/braendstof` og nu `/nedtaelling`.
+- Tilbage er kun to små SE-sider: `/vaegttab` (1.136 visninger, CTR 0,4 %, pos 8,3) og
+  `/enhedspris` (1.081, 0,4 %, pos 6,1). Begge har **substans** (hhv. 4 og 2 afsnit med
+  tal), så de er copy-arbejde, ikke indholdsarbejde, og effekten er lille.
+- **Vigtigere konklusion fra denne iteration:** den dokumenterede CTR-pool er
+  udtømt. Det betyder, at næste iteration enten skal (a) skaffe nye efterspørgselsdata
+  — nye Search Console-søgninger pr. side, kun de 15 største sider er med i
+  snapshottet — eller (b) gå efter **placering** frem for klik. Punkt (b) peger på
+  `/procent` (148.882 visninger, position 7,5): siden har allerede formler,
+  tricks-tabel og hverdagseksempler, så den mangler hverken copy dybde —
+  den mangler sandsynligvis interne links fra beslægtede værktøjer.
+
+#### D3. Nyt fund 2026-09-26 — `www.minberegner.dk` og `www.beraknare.se` findes ikke
+
+- Live-kontrol 2026-09-26 00:21: `https://www.minberegner.dk/procent` og
+  `https://www.beraknare.se/procent` svarer **404 med `text/plain` og 19 bytes fra
+  Cloudflare** — altså uden om Next.js nogensinde ser requesten. `www.beregner.no`
+  svarer slet ingen forbindelse. Til sammenligning svarer apex-domænerne 200, og
+  `http://` → `https://` giver korrekt 301, og `/dato/` → `/dato` giver 308.
+- **Konsekvens:** ethvert eksternt link, bogmærke eller indtastet `www`-adresse er
+  dødt og giver ingen linkværdi. Det er en reel, men uvis tabstørrelse — der er ingen
+  dokumenteret indgående `www`-trafik, og Direct/None (983/28d) er ikke opdelt på
+  vært.
+- **Kan ikke rettes herfra:** det kræver en DNS/CNAME for `www` plus en Traefik-router
+  i Dokploy. DNS- og domæneændringer er i projektets "Danger Zones" og kræver et
+  eksplicit ja. Skrevet under ❓ Til Mads.
+
 
 - ❓ Til Mads' punkt om kørselsfradraget blev undersøgt igen 2026-09-25 23:33-23:50
   i stedet for at gætte. Resultat: **ingen primærkilde fundet, intet tal ændret.**
@@ -1773,6 +1854,12 @@ merges ikke til `master` mere før et menneske har kigget; (2) kørselsfradraget
   rigtig browser-session eller JV' PDF-udgave, ikke robots-gatede søgemaskiner.
 
 ### ❓ Til Mads
+
+- **`www.minberegner.dk` og `www.beraknare.se` findes ikke (D3, 2026-09-26).** Begge
+  svarer 404 direkte fra Cloudflare, så `www`-varianter af enhver URL er døde. Det er
+  en fæld, hvis nogen deler et `www`-link, og det er gratis at lukke: en CNAME fra
+  `www` til apex og en 301/308 i Traefik. Det kræver DNS- og domæneændringer, som er
+  i projektets Danger Zones, så det gør jeg ikke uden et ja. Anbefaling: lav det.
 
 - **IndexNow runtime-konfiguration:** Sæt kun i Dokploys production-runtime
   `INDEXNOW_ENABLED=true`, en gyldig `INDEXNOW_API_KEY` på 8-128 tegn med
@@ -2375,3 +2462,12 @@ landmark=lån, piggybank=opsparing osv.).
   populærrækken skal begynde med "Datoberegner". Tjek også `beraknare.se/`: badge
   "31+", og rækken skal begynde med "Tidskalkylator" og indeholde "Nedräkningskalkylator".
   HTTP 200 alene utilstrækkeligt. **Kan først verificeres fra 07:30-vinduet 2026-09-26**.
+- **VERIFICÉR DEPLOY:** C12 `/nedtaelling` svar-først — ny H1 "Hvor mange dage er der
+  til en dato?" (SE: "Hur många dagar är det kvar till ett datum?"), synlig
+  uger/dage-tabel med rækken "100 dage / 14 uger / 2 dage", og links fra siden til
+  alle syv `/dage-til/*` (SE `/dagar-till/*`) — kode `0bd5e7d` 2026-09-26 00:58 CEST.
+  Verificér efter 07:30-vinduet 2026-09-26 på live DA `/nedtaelling`: H1'en skal være
+  den nye, tabellen skal vise de tre kolonner, og DOM skal indeholde
+  `href="/dage-til/juledagen"`. Tjek også `beraknare.se/nedtaelling`: svensk H1,
+  `href="/dagar-till/juldagen"` og **ingen** `/dage-til/`. HTTP 200 alene
+  utilstrækkeligt. **Kan først verificeres fra 07:30-vinduet 2026-09-26**.
