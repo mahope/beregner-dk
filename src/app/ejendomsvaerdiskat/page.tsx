@@ -37,6 +37,17 @@ export default async function EjendomsvaerdiskatPage() {
       <EjendomsvaerdiskatBeregner />
 
       {locale === "da" && (
+        <aside className="mt-8 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
+          <h2 className="text-lg font-semibold">Slå din egen adresse op</h2>
+          <p className="mt-1 text-gray-600 dark:text-gray-400">
+            På <a href="https://minboligskat.dk/" className="underline">minboligskat.dk</a> henter vi den
+            officielle foreløbige vurdering for din adresse og regner ejendomsværdiskat og grundskyld ud
+            med din kommunes promille, pensionistnedslag og skatterabat.
+          </p>
+        </aside>
+      )}
+
+      {locale === "da" && (
       <div className="mt-12 prose max-w-none dark:prose-invert">
         <h2>Det nye boligskattesystem (fra 2024)</h2>
         <p>
