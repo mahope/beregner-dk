@@ -1,6 +1,6 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — M1 er implementeret og lokalt verificeret; afventer merge og CI-run på første naturlige PR.
+STATUS: KØ — M1 FÆRDIG; M2 (BMI-enhedsroundtrip) er næste opgave.
 
 ## Fase 3 — trafik-drevet
 
@@ -732,7 +732,7 @@ STATUS: KØ — M1 er implementeret og lokalt verificeret; afventer merge og CI-
 - **Landet:** I1-kode, tests og plan ligger i commit `8e01ff2`; merge til `master` er
   `dd5f4af` den 2026-09-25 10:10 CEST. Begge refs pushes i denne iteration.
 
-#### 12. [ ] I GANG 2026-09-25 10:37 CEST — M1 — Ret Lighthouse-CI's serverstart
+#### 12. [x] FÆRDIG 2026-09-25 — M1 — Ret Lighthouse-CI's serverstart
 
 - **Iteration start:** 2026-09-25 10:37 CEST. `npm audit --audit-level=high` var grøn
   med 0 sårbarheder; den eksterne afhængighedsrapport fra 2026-08-23 er stale.
@@ -753,6 +753,8 @@ STATUS: KØ — M1 er implementeret og lokalt verificeret; afventer merge og CI-
 - **Kvalitetsgate 2026-09-25 10:40 CEST:** `npm run build` grøn (137 sider + typecheck;
   7 kendte CSS-optimeringsadvarsler), `npm run test` grøn (674/674 tests, 71 filer),
   `npm run lint` grøn (377 filer), `npm audit --audit-level=high` 0 sårbarheder.
+- **Landet:** M1-kode og plan ligger i commit `c84bd7c`; merge til `master` er
+  `0ba8f8f` den 2026-09-25 10:42 CEST. Begge refs blev pushet.
 - **Acceptkriterier:**
   1. Serveren starter efter `npm ci` + build, og LHCI kører faktisk Lighthouse.
      **LOKALT PASS:** samme `npm run start` + productionbuild gav 200 på forsiden;
@@ -1185,3 +1187,7 @@ landmark=lån, piggybank=opsparing osv.).
   instrumentation og beskyttet intern trigger `dd5f4af` 2026-09-25 10:10 CEST.
   Verificér efter næste batch-vindue med live health, `INDEXNOW`-keyfil og konfigureret
   runtime; HTTP 200 på health alene utilstrækkeligt.
+- **VERIFICÉR DEPLOY:** M1 Lighthouse-CI-serverstart via `npm run start` `0ba8f8f`
+  2026-09-25 10:42 CEST. Ændringen er CI-only og forventer ingen live-indholdsdelta;
+  efter næste batch-vindue kontrollérs master-definitionen og første naturlige PR-run,
+  ikke blot live health.
