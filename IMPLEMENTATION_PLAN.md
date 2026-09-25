@@ -1,6 +1,6 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — C13 landet på `master` 2026-09-26 01:15 CEST
+STATUS: KØ — C13 landet på `master` (kode+plan `6450593`) 2026-09-26 01:18 CEST
 2026-09-26 00:33-01:15 CEST. Deployverificering kunne stadig ikke køre: 07:30-vinduet er
 ikke passeret. Live-kontrol 00:33 bekræfter at 21:30-batchen 2026-09-25 heller ikke
 indeholdt dagens merges — `/dage-til/juledagen` er stadig **404**, `/nedtaelling` har
