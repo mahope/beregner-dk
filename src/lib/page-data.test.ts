@@ -142,6 +142,71 @@ describe("getPageData", () => {
   test.each([
     {
       locale: "da" as const,
+      title: "Aldersberegner: hvor gammel er du i år, måneder og dage?",
+      age: "36 år, 6 måneder og 10 dage",
+      days: "13.342 dage",
+      birthDate: "fødselsdato",
+    },
+    {
+      locale: "se" as const,
+      title: "Ålderskalkylator: hur gammal är du i år, månader och dagar?",
+      age: "36 år, 6 månader och 10 dagar",
+      days: "13.342 dagar",
+      birthDate: "födelsedatum",
+    },
+    {
+      locale: "no" as const,
+      title: "Alderskalkulator: hvor gammel er du i år, måneder og dager?",
+      age: "36 år, 6 måneder og 10 dager",
+      days: "13.342 dager",
+      birthDate: "fødselsdatoen",
+    },
+  ])("has answer-first age metadata for $locale", ({ locale, title, age, days, birthDate }) => {
+    const data = getPageData("alder", locale)!;
+
+    expect(data.metaTitle).toBe(title);
+    expect(data.metaTitle.length).toBeLessThanOrEqual(60);
+    expect(data.description).toContain(age);
+    expect(data.metaDescription).toContain(age);
+    expect(data.metaDescription.length).toBeLessThanOrEqual(160);
+    expect(data.ogTitle).toBe(title);
+    expect(data.ogDescription).toContain(age);
+    expect(data.schemaDescription).toContain(birthDate);
+    const daysFaq = data.faqItems.find((item) => item.answer.includes(days));
+    expect(daysFaq).toBeDefined();
+  });
+
+  test.each(["da", "se", "no"] as const)(
+    "dropper den frosne alders-sum i %s",
+    (locale) => {
+      const data = getPageData("alder", locale)!;
+
+      expect(data.metaDescription).not.toContain("35 år");
+      expect(data.description).not.toContain("35 år");
+    }
+  );
+
+  test.each([
+    { locale: "da" as const, title: "Brøkberegner: forkort 6/8 til 3/4 = 0,75 = 75 %", answer: "6/8 forkortet = 3/4 = 0,75 = 75 %" },
+    { locale: "se" as const, title: "Bråkkalkylator: förkorta 6/8 till 3/4 = 0,75 = 75 %", answer: "6/8 förkortat = 3/4 = 0,75 = 75 %" },
+  ])("has answer-first fraction metadata for $locale", ({ locale, title, answer }) => {
+    const data = getPageData("brok", locale)!;
+
+    expect(data.metaTitle).toBe(title);
+    expect(data.metaTitle.length).toBeLessThanOrEqual(60);
+    expect(data.description).toContain(answer);
+    expect(data.metaDescription).toContain("3/4 = 0,75 = 75 %");
+    expect(data.metaDescription.length).toBeLessThanOrEqual(160);
+    expect(data.ogTitle).toBe(title);
+    expect(data.ogDescription).toContain("3/4 = 0,75 = 75 %");
+    expect(data.schemaDescription).toContain("decimaltal");
+    const exampleFaq = data.faqItems.find((item) => item.question.includes("6/8"));
+    expect(exampleFaq).toBeDefined();
+  });
+
+  test.each([
+    {
+      locale: "da" as const,
       title: "Beregn antal dage mellem to datoer | MinBeregner.dk",
       heading: "Beregn antal dage mellem to datoer",
       intent: "antal dage mellem to datoer",
