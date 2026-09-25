@@ -7,9 +7,16 @@ import type { Locale } from "@/lib/i18n";
 import { getAvailableSlugs } from "@/lib/page-data";
 import { getDageTilPrefix, getDageTilSlugs } from "@/lib/dage-til";
 
+// The sitemap route is rendered per request (it resolves the host from
+// headers), so a wall-clock default would stamp every URL with the moment
+// Google fetches the file and make all 110+ unchanged pages look fresh on
+// every crawl. `lastmod` is therefore only emitted for the pages that really
+// do change without a new deploy: the daily group in `dailyUpdates` and the
+// dage-til pages, whose answer is recomputed per request. Everything else
+// omits `lastmod` rather than stating a freshness we cannot keep accurate.
 export function buildSitemap(
   domainConfig: DomainConfig,
-  lastModified = new Date()
+  now = new Date()
 ): MetadataRoute.Sitemap {
   const { locale, baseUrl } = domainConfig;
   const availableSlugs = getAvailableSlugs(locale).filter((slug) =>
@@ -22,19 +29,21 @@ export function buildSitemap(
     "bolan", "dagpenge", "pension", "boligstoette", "skattefradrag",
   ]);
   const dailyUpdates = new Set(["valuta"]);
-  const calculatorEntries: MetadataRoute.Sitemap = availableSlugs.map((slug) => ({
-    url: `${baseUrl}/${slug}`,
-    lastModified,
-    changeFrequency: dailyUpdates.has(slug) ? "daily" : "monthly",
-    priority: highPriority.has(slug) ? 0.9 : 0.8,
-  }));
+  const calculatorEntries: MetadataRoute.Sitemap = availableSlugs.map((slug) => {
+    const daily = dailyUpdates.has(slug);
+    return {
+      url: `${baseUrl}/${slug}`,
+      ...(daily ? { lastModified: now } : {}),
+      changeFrequency: daily ? ("daily" as const) : ("monthly" as const),
+      priority: highPriority.has(slug) ? 0.9 : 0.8,
+    };
+  });
   const categoryEntries: MetadataRoute.Sitemap = locale === "da"
     ? [
         "oekonomi", "bolig", "laan", "sundhed", "familie",
         "uddannelse", "erhverv", "hverdag", "praktisk", "matematik",
       ].map((slug) => ({
         url: `${baseUrl}/kategori/${slug}`,
-        lastModified,
         changeFrequency: "monthly" as const,
         priority: 0.7,
       }))
@@ -42,19 +51,18 @@ export function buildSitemap(
   const blogLinks = getFooterBlogLinks(locale);
   const blogEntries: MetadataRoute.Sitemap = blogLinks.length > 0
     ? [
-        { url: `${baseUrl}/blog`, lastModified, changeFrequency: "weekly" as const, priority: 0.7 },
+        { url: `${baseUrl}/blog`, changeFrequency: "weekly" as const, priority: 0.7 },
         ...getBlogSlugs(locale).map((slug) => ({
           url: `${baseUrl}/blog/${slug}`,
-          lastModified,
           changeFrequency: "monthly" as const,
           priority: 0.6,
         })),
       ]
     : [];
   const infoEntries: MetadataRoute.Sitemap = [
-    { url: `${baseUrl}/om`, lastModified, changeFrequency: "yearly" as const, priority: 0.5 },
-    { url: `${baseUrl}/privatlivspolitik`, lastModified, changeFrequency: "yearly" as const, priority: 0.3 },
-    { url: `${baseUrl}/cookiepolitik`, lastModified, changeFrequency: "yearly" as const, priority: 0.3 },
+    { url: `${baseUrl}/om`, changeFrequency: "yearly" as const, priority: 0.5 },
+    { url: `${baseUrl}/privatlivspolitik`, changeFrequency: "yearly" as const, priority: 0.3 },
+    { url: `${baseUrl}/cookiepolitik`, changeFrequency: "yearly" as const, priority: 0.3 },
   ];
   // Curated "hvor mange dage er der til X" pages. The answer changes every
   // day, so they are re-crawled daily.
@@ -62,7 +70,7 @@ export function buildSitemap(
   const dageTilEntries: MetadataRoute.Sitemap = dageTilPrefix
     ? getDageTilSlugs(locale).map((slug) => ({
         url: `${baseUrl}${dageTilPrefix}${slug}`,
-        lastModified,
+        lastModified: now,
         changeFrequency: "daily" as const,
         priority: 0.7,
       }))
@@ -71,7 +79,6 @@ export function buildSitemap(
   return [
     {
       url: baseUrl,
-      lastModified,
       changeFrequency: "weekly",
       priority: 1,
     },

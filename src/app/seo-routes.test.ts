@@ -53,6 +53,48 @@ describe("host-aware sitemap", () => {
   });
 });
 
+describe("sitemap lastmod hygiene", () => {
+  test("omits lastmod for pages that only change on deploy", () => {
+    for (const locale of ["da", "se"] as const) {
+      const sitemap = buildSitemap(getDomainConfigByLocale(locale), lastModified);
+      const stable = sitemap.filter((entry) => entry.changeFrequency !== "daily");
+      expect(stable.length, locale).toBeGreaterThan(50);
+      for (const entry of stable) {
+        expect(entry.lastModified, String(entry.url)).toBeUndefined();
+      }
+    }
+  });
+
+  test("keeps lastmod for the pages that really change every day", () => {
+    for (const locale of ["da", "se"] as const) {
+      const sitemap = buildSitemap(getDomainConfigByLocale(locale), lastModified);
+      const daily = sitemap.filter((entry) => entry.changeFrequency === "daily");
+      expect(daily.length, locale).toBeGreaterThan(0);
+      for (const entry of daily) {
+        expect(entry.lastModified, String(entry.url)).toEqual(lastModified);
+      }
+      expect(daily.map((entry) => String(entry.url))).toContain(
+        `${getDomainConfigByLocale(locale).baseUrl}/valuta`
+      );
+    }
+  });
+
+  test("stable entries are identical no matter when the sitemap is fetched", () => {
+    // The route resolves the host from headers, so it is rendered per request.
+    // Two fetches minutes apart must not claim the site changed in between.
+    for (const locale of ["da", "se"] as const) {
+      const config = getDomainConfigByLocale(locale);
+      const early = buildSitemap(config, new Date("2026-09-24T00:00:00.000Z"));
+      const late = buildSitemap(config, new Date("2026-09-26T03:00:00.000Z"));
+      const strip = (entries: ReturnType<typeof buildSitemap>) =>
+        JSON.stringify(
+          entries.filter((entry) => entry.changeFrequency !== "daily")
+        );
+      expect(strip(late), locale).toBe(strip(early));
+    }
+  });
+});
+
 describe("host-aware robots", () => {
   test("points each live host to its own sitemap", () => {
     expect(buildRobots(getDomainConfigByLocale("da")).sitemap).toBe(
