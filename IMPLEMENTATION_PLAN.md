@@ -809,20 +809,33 @@ STATUS: KØ — M2 FÆRDIG; M3 (BMI-børneguide-søgning) er næste opgave.
 - **Landet:** M2-kode, tests og plan ligger i commit `69c5260`; merge til `master` er
   `1745519` den 2026-09-25 15:32 CEST.
 
-#### 14. [ ] M3 — Route børne-BMI-søgninger til guiden
+#### 14. [x] FÆRDIG 2026-09-25 — M3 — Route børne-BMI-søgninger til guiden
 
+- **Iteration start:** 2026-09-25 15:27 CEST på `ceo/m3-bmi-child-search`.
 - **Datagrund:** O2 har adskilt sider og metadata, men `SearchBar` og
   `BeregnerAssistent` søger fortsat kun i beregnere. "BMI for mit barn" kan derfor matche
   `/bmi`, selv om værktøjet kun er for voksne.
-- **Scope:** Tilføj den danske BMI-for-børn-guide som søgeindhold på forsiden, lad
-  børneudtryk vælge guide før voksenværktøjet, og behold voksenquick-suggestionen.
-  Tilføj komponenttests; ændr ikke Plausible-events eller -metrikker.
+- **Beslutning/implementering:** Den danske BMI-for-børn-guide ligger i den nye
+  DA-only `src/lib/search-content.ts` som delt søgeindhold mellem forsiden og assistenten;
+  den er ikke lagt i `calculator-list` eller `page-data`. `SearchBar` matcher eksplicitte
+  keywords og trimmer tomme forespørgsler. Assistenten tilføjer kun guiden, når queryet
+  indeholder et børne-/percentiludtryk, så voksensuggestion og voksne BMI-intents ikke
+  routes til bloggen. Punctuation tokeniseres, så den eksisterende voksensuggestion med
+  spørgsmålstegn fortsat rangerer `/bmi` først. Escape lukker søgelisten og rydder den
+  aktive tastaturindstilling. Plausible-events og -metrikker er uændrede.
+- **Acceptkriterier:**
+  1. Søgning på "BMI for mit barn" viser guiden og ikke voksenværktøjet som bedste match. **PASS**
+  2. Søgning på "BMI for voksne" viser fortsat `/bmi`. **PASS**
+  3. Tastaturvalg, tomme resultater og eksisterende locale-adfærd er grønne. **PASS**
+  4. DA-only søgepost og regressionstests dækker både `SearchBar` og assistenten. **PASS**
+- **Kvalitetsgate 2026-09-25 15:58 CEST:** `npm run lint` grøn (464 filer),
+  `npm run test` grøn (907/907 tests, 86 filer), `npm run build` grøn (139 sider +
+  typecheck; 7 kendte CSS-optimeringsadvarsler), `npm audit --audit-level=high` 0
+  sårbarheder. Målrettet gate før fuld gate: 14/14 tests grønne.
+- **Landet:** M3-kode, tests og plan ligger i commit `5e9f081` på
+  `ceo/m3-bmi-child-search`; merge/push og deploy-note følger efter grøn gate.
 - **Forventet effekt:** Forhindrer en forkert voksen-handling og giver den relevante
   næste handling; effekt på organisk trafik måles ikke isoleret.
-- **Acceptkriterier:**
-  1. Søgning på "BMI for mit barn" viser guiden og ikke voksenværktøjet som bedste match.
-  2. Søgning på "BMI for voksne" viser fortsat `/bmi`.
-  3. Tastaturvalg, tomme resultater og eksisterende locale-adfærd er grønne.
 - **MÅL:** `/bmi` baseline 979 besøgende/28d 2026-09-23; bloggens baseline er ukendt
   og skal udfyldes fra næste snapshot før en reel effektvurdering.
 

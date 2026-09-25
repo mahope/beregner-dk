@@ -8,6 +8,7 @@ import { getTrendingHrefs } from "@/lib/trending";
 import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
 import { getAllDomainConfigs } from "@/lib/domain-config";
 import { getHomePageData, getHomeCalculators } from "@/lib/home-data";
+import { getSearchContent } from "@/lib/search-content";
 import { HomeContent } from "@/components/HomeContent";
 import CountryFlag from "@/components/CountryFlag";
 
@@ -58,12 +59,15 @@ export default async function Home() {
     grouped.set(b.category, list);
   }
 
-  const searchData = beregnere.map(({ title, description, href, category }) => ({
-    title,
-    description,
-    href,
-    category,
-  }));
+  const searchData = [
+    ...beregnere.map(({ title, description, href, category }) => ({
+      title,
+      description,
+      href,
+      category,
+    })),
+    ...getSearchContent(locale),
+  ];
 
   // Parse trust signals (format: "value|label")
   const parseSignal = (s: string) => {

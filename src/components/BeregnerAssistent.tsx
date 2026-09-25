@@ -3,8 +3,9 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { useLocale } from "@/components/LocaleProvider";
-import { t } from "@/lib/i18n";
+import { t, type Locale } from "@/lib/i18n";
 import { getCalculatorsByLocale } from "@/lib/calculator-list";
+import { getSearchContent } from "@/lib/search-content";
 import { CalcIcon } from "@/components/ui/icons";
 
 interface Match {
@@ -85,23 +86,33 @@ export default function BeregnerAssistent() {
   return <AssistentInner locale={locale} />;
 }
 
-function AssistentInner({ locale }: { locale: string }) {
+function AssistentInner({ locale }: { locale: Locale }) {
   const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [matches, setMatches] = useState<Match[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const allCalcs = useMemo(() => getCalculatorsByLocale(locale as "da" | "no" | "se"), [locale]);
-  const keywords = keywordsMap[locale] || keywordsMap.da;
-  const quickSuggestions = quickSuggestionsMap[locale as keyof typeof quickSuggestionsMap] || quickSuggestionsMap.da;
+  const searchContent = useMemo(() => getSearchContent(locale), [locale]);
+  const calculators = useMemo(() => getCalculatorsByLocale(locale), [locale]);
+  const keywords = useMemo(() => {
+    const map = { ...(keywordsMap[locale] || keywordsMap.da) };
+    for (const content of searchContent) {
+      if (content.keywords) map[content.href] = content.keywords;
+    }
+    return map;
+  }, [locale, searchContent]);
+  const quickSuggestions = quickSuggestionsMap[locale] || quickSuggestionsMap.da;
 
   useEffect(() => {
     const q = query.toLowerCase().trim();
     if (!q) { setMatches([]); return; }
 
-    const words = q.split(/\s+/);
+    const words = q.match(/[\p{L}\p{N}%]+/gu) ?? [];
+    const content = searchContent.filter(
+      (item) => !item.matchTerms || item.matchTerms.some((term) => q.includes(term)),
+    );
 
-    const results: Match[] = allCalcs
+    const results: Match[] = [...calculators, ...content]
       .map((calc) => {
         let score = 0;
         const titleLower = calc.title.toLowerCase();
@@ -126,7 +137,7 @@ function AssistentInner({ locale }: { locale: string }) {
       .slice(0, 5);
 
     setMatches(results);
-  }, [query, allCalcs, keywords]);
+  }, [query, calculators, searchContent, keywords]);
 
   if (!isOpen) {
     return (
