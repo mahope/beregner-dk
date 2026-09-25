@@ -1,7 +1,8 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — L1 (interne 404-links) FÆRDIG, klar til merge 2026-09-26 00:10 CEST
-2026-09-25 23:33-00:10 CEST. Deploynoterne C4-C11, R1, K1, S1, D2 og L1 står åbne:
+STATUS: KØ — F1 (forsidens populærrække følger målt trafik) FÆRDIG, klar til merge
+2026-09-26 00:05 CEST
+2026-09-25 23:46-00:05 CEST. Deploynoterne C4-C11, R1, K1, S1, D2, L1 og F1 står åbne:
 21:30-batchen 2026-09-25 indeholdt ikke dagens merges, og næste batch-vindue er
 07:30 2026-09-26. HTTP 200 er ikke bevis — C4's kontrol 22:20 fandt `/dage-til/juledagen`
 på **404**, `/pension` med den gamle "De tre pensionssøjler"-overskrift og
@@ -9,7 +10,7 @@ børnepenge-artiklen med dobbelt domænesuffiks.
 Næste iteration: (1) live-verificér alle noter indholdskontrolleret efter
 07:30-vinduet 2026-09-26; er de stadig ikke live, skrives `DEPLOY-MISSING` og der
 merges ikke til `master` mere før et menneske har kigget; (2) kørselsfradragets
-2026-sats — se ❓ Til Mads, må ikke gættes.
+2026-sats — se ❓ Til Mads, må ikke gættes (andet forsøg, 2026-09-25).
 
 ## Fase 3 — trafik-drevet
 
@@ -1705,6 +1706,57 @@ merges ikke til `master` mere før et menneske har kigget; (2) kørselsfradraget
   3. `relatedMap` har ingen døde links.
   4. `npm run lint`, `npm run test` og `npm run build` er grønne.
 
+#### 29. [x] FÆRDIG 2026-09-26 — F1 — Forsidens populærrække følger de målte top-beregnere
+
+- **Iteration start:** 2026-09-25 23:46 CEST. Kørte køens næste reelle opgave, mens
+  deployverificeringen venter på 07:30-vinduet 2026-09-26.
+- **Datagrund:** `/` er den største enkeltindgang (454 indgangsvisninger pr. 28 dage,
+  219 besøgende, **41-44 % bounce** mod 2-7 % på beregnerne), og researchfund 6 fra
+  2026-09-23 fandt, at forsiden hævder 44 beregnere, mens den faktiske danske katalog
+  har 78. Snapshottet 2026-09-25 18:57 viser, hvad de 454 faktisk søger:
+  DA `/dato` 1.029, `/bmi` 973, `/boligstoette` 519, `/kvadratmeter` 376,
+  `/rentefradrag` 299, `/tidsberegner` 292, `/kalorier` 277, `/braendstof` 272.
+- **Fund:** populærrækken på forsiden var `/loen-efter-skat`, `/bmi`, `/laaneberegner`,
+  `/moms`, `/valuta`, `/procent` — altså **seks af de otte mest besøgte danske beregnere
+  manglede**, mens løn, låne-, valuta- og procentværktøjet lå forrest. På beraknare.se var
+  det værre: populærrækken var `/bmi`, `/moms`, `/laaneberegner`, `/valuta`,
+  `/procent`, `/renteberegner`, `/lon-efter-skatt`, mens de faktiske svenske top-sider
+  var `/tidsberegner` (141), `/dato` (116), `/leasing` (44), `/nedtaelling` (20) og
+  `/tidszone` (15). `/nedtaelling` stod slet ikke på den svenske forside, selvom den er
+  den tredjemest besøgte svenske beregner. SE-forsidens bounce var 71 % mod 3-8 % på
+  kalkylatorerne.
+- **Beslutning/implementering:** DA-populærrækken er nu de otte målte top-sider i
+  faldende rækkefølge efterfulgt af `/loen-efter-skat`, der er sidens brandværktøj
+  (9 kort = 3 rækker i eksisterende `lg:grid-cols-3`). SE-populærrækken er de fem målte
+  svenske top-sider plus `/lon-efter-skatt`, og `/nedtaelling` er tilføjet med svensk
+  titel/beskrivelse. `no` er bevidst urørt: der er ingen trafikdata for beregner.no.
+  Tælleren er nu **afledt** i stedet for hardkodet: `getHomeCalculatorCount(locale)`
+  tæller de filtrede lister (DA 49, NO 28, SE 31), og `{count}` interpoleres i
+  `meta.description`, `hero.subtitle`, `trustSignals.calculators` og FAQ-svaret;
+  `HomeContent` bruger samme funktion. Forsidens "44 beregnere" var altså ikke bare
+  forældet — den var lavere end det, siden selv viste.
+- **Ny test i `src/lib/home-data.test.ts` (2 tests):** (1) det synlige tal i
+  badge/description/hero/FAQ er præcis `getHomeCalculatorCount(locale)` og der er ingen
+  `{count}`-rest tilbage; (2) populærrækken indeholder de målte top-sider for DA og SE.
+  Første test ville have fanget den forældede 44, da den nye liste har 49.
+- **Verifikation 2026-09-26 00:05 CEST:** `npm run lint` grøn (494 filer),
+  `npm run test` grøn (1.112/1.112, 105 filer — de 2 nye er de eneste ændring),
+  `npm run build` grøn (139 statiske sider).
+- **Forventet effekt:** lavere bounce på den største indgangsside, fordi de værktøjer
+  folk faktisk bruger ligger i første skærmbillede i stedet for i kategorierne længere
+  nede. På beraknare.se er effekten mindre i antal besøgende (485/28 dage) men
+  forholdene er de samme som på den danske forside.
+- **MÅL:** `/` DA baseline 219 besøgende/28d, 454 indgangsvisninger, bounce 41 % pr.
+  2026-09-25 (og 214/44 % pr. 2026-09-23); `/` SE baseline 18 besøgende, bounce 71 %
+  pr. 2026-09-25 — genmål 2026-10-09. Sekundært: bounce på `/` under 30 % DA.
+- **Acceptkriterier:**
+  1. DA-populærrækken er de otte målte top-sider + `/loen-efter-skat`.
+  2. SE-populærrækken er de fem målte top-sider + `/lon-efter-skatt`, og `/nedtaelling`
+     findes på den svenske forside.
+  3. Det viste beregnerantal på forsiden er afledt af listen, så det ikke kan blive
+     forældet igen, og der står ingen `{count}` i den serverede tekst.
+  4. De 2 nye tests er grønne; `npm run lint`, `npm run test` og `npm run build` er grønne.
+
 #### 28. Forsøgt og **ikke** gjort den 2026-09-25 — kørselsfradragets primærkilde
 
 - ❓ Til Mads' punkt om kørselsfradraget blev undersøgt igen 2026-09-25 23:33-23:50
@@ -2310,3 +2362,13 @@ landmark=lån, piggybank=opsparing osv.).
   (ikke `/bilberegner`) og `/blog/maanedsbudget-2026-komplet-guide` skal linke
   to gange til `/husleje` (ikke `/huslejeberegner`). HTTP 200 er ikke nok — de
   gamle stier gav også 200-sider hos læseren; tjek linkets `href` i DOM.
+- **VERIFICÉR DEPLOY:** F1 forsidens populærrække følger målt trafik (DA `/dato`,
+  `/bmi`, `/boligstoette`, `/kvadratmeter`, `/rentefradrag`, `/tidsberegner`,
+  `/kalorier`, `/braendstof` + `/loen-efter-skat`; SE `/tidsberegner`, `/dato`,
+  `/leasing`, `/nedtaelling`, `/tidszone` + `/lon-efter-skatt`) og det afledte
+  beregnerantal 49/28/31 i stedet for 44 — kode `<commit>`, ff-merge `<merge>` til
+  `master` 2026-09-26 00:05 CEST. Verificér efter 07:30-vinduet 2026-09-26 på live DA
+  `/`: badge skal sige "49+" og "49 beregnere med 2026-satser" i description, og
+  populærrækken skal begynde med "Datoberegner". Tjek også `beraknare.se/`: badge
+  "31+", og rækken skal begynde med "Tidskalkylator" og indeholde "Nedräkningskalkylator".
+  HTTP 200 alene utilstrækkeligt. **Kan først verificeres fra 07:30-vinduet 2026-09-26**.

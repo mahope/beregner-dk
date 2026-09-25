@@ -52,7 +52,7 @@ const daPageData: HomePageData = {
   meta: {
     title: "MinBeregner.dk - Gratis online beregnere til danskere",
     description:
-      "Danmarks samling af gratis online beregnere. Beregn løn efter skat, moms, lån, pension, feriepenge, BMI for voksne og meget mere. 44 beregnere med 2026-satser — helt gratis og uden login.",
+      "Danmarks samling af gratis online beregnere. Beregn løn efter skat, moms, lån, pension, feriepenge, BMI for voksne og meget mere. {count} beregnere med 2026-satser — helt gratis og uden login.",
     keywords: [
       "beregner",
       "online beregner",
@@ -73,10 +73,10 @@ const daPageData: HomePageData = {
   hero: {
     title: "Gratis Online Beregnere",
     subtitle:
-      "44+ gratis beregnere til økonomi, bolig, skat, sundhed og hverdag. Opdateret med 2026-satser — helt gratis og uden login.",
+      "{count}+ gratis beregnere til økonomi, bolig, skat, sundhed og hverdag. Opdateret med 2026-satser — helt gratis og uden login.",
   },
   trustSignals: {
-    calculators: "44+|Gratis beregnere",
+    calculators: "{count}+|Gratis beregnere",
     rates: "2026|Opdaterede satser",
     price: "0 kr.|Ingen login eller betaling",
     privacy: "Lokalt|Ingen input gemmes i database",
@@ -121,7 +121,7 @@ const daPageData: HomePageData = {
     {
       question: "Hvilke beregnere har I?",
       answer:
-        "Vi har 44 beregnere til økonomi (løn, skat, pension, dagpenge, feriepenge, moms), bolig (boliglån, ejendomsværdiskat, boligstøtte), lån (billån, forbrugslån, renteberegner), sundhed (BMI for voksne, kalorier) og hverdag (el, brændstof, dato). Vi tilføjer løbende nye beregnere.",
+        "Vi har {count} beregnere til økonomi (løn, skat, pension, dagpenge, feriepenge, moms), bolig (boliglån, ejendomsværdiskat, boligstøtte), lån (billån, forbrugslån, renteberegner), sundhed (BMI for voksne, kalorier) og hverdag (el, brændstof, dato). Vi tilføjer løbende nye beregnere.",
     },
   ],
   categoryOrder: [
@@ -139,29 +139,33 @@ const daPageData: HomePageData = {
 };
 
 const daCalculators: HomeCalculator[] = [
-  { title: "Løn efter skat", description: "Se hvad du får udbetalt efter skat, AM-bidrag og pension", href: "/loen-efter-skat", popular: true, category: "Økonomi" },
+  // Popular — de otte mest besøgte danske beregnere pr. 2026-09-25 (28 dage),
+  // efterfulgt af lønberegneren, som er sidens brandværktøj.
+  { title: "Datoberegner", description: "Beregn dage mellem datoer, arbejdsdage og alder", href: "/dato", popular: true, category: "Praktisk" },
   { title: "BMI Beregner for voksne", description: "Beregn BMI for voksne ud fra vægt og højde", href: "/bmi", popular: true, category: "Sundhed" },
-  { title: "Låneberegner", description: "Beregn ydelse, sammenlign lån og se afdragsplan", href: "/laaneberegner", popular: true, category: "Økonomi" },
-  { title: "Momsberegner", description: "Tillæg eller fratræk 25% moms nemt og hurtigt", href: "/moms", popular: true, category: "Økonomi" },
-  { title: "Valutaberegner", description: "Omregn mellem DKK, EUR, USD og andre valutaer", href: "/valuta", popular: true, category: "Økonomi" },
-  { title: "Procentberegner", description: "Beregn procent af et tal, stigning, fald og mere", href: "/procent", popular: true, category: "Matematik" },
+  { title: "Boligstøtte", description: "Se standardmaksima og formuegrænser for boligstøtte", href: "/boligstoette", popular: true, category: "Bolig" },
+  { title: "Kvadratmeterberegner", description: "Beregn areal af rum, haver og grunde", href: "/kvadratmeter", popular: true, category: "Matematik" },
+  { title: "Rentefradrag", description: "Beregn din skattebesparelse på rentefradrag", href: "/rentefradrag", popular: true, category: "Økonomi" },
+  { title: "Tidsberegner", description: "Beregn timer og minutter mellem tidspunkter", href: "/tidsberegner", popular: true, category: "Praktisk" },
+  { title: "Kalorieberegner", description: "Beregn dit daglige kaloriebehov og makroer", href: "/kalorier", popular: true, category: "Sundhed" },
+  { title: "Brændstofberegner", description: "Beregn pris for benzin, diesel eller el-bil", href: "/braendstof", popular: true, category: "Hverdag" },
+  { title: "Løn efter skat", description: "Se hvad du får udbetalt efter skat, AM-bidrag og pension", href: "/loen-efter-skat", popular: true, category: "Økonomi" },
+  // Non-popular
+  { title: "Låneberegner", description: "Beregn ydelse, sammenlign lån og se afdragsplan", href: "/laaneberegner", popular: false, category: "Økonomi" },
+  { title: "Momsberegner", description: "Tillæg eller fratræk 25% moms nemt og hurtigt", href: "/moms", popular: false, category: "Økonomi" },
+  { title: "Valutaberegner", description: "Omregn mellem DKK, EUR, USD og andre valutaer", href: "/valuta", popular: false, category: "Økonomi" },
+  { title: "Procentberegner", description: "Beregn procent af et tal, stigning, fald og mere", href: "/procent", popular: false, category: "Matematik" },
   { title: "Renteberegner", description: "Beregn ydelse, rente og tilbagebetaling på lån", href: "/renteberegner", popular: false, category: "Økonomi" },
   { title: "Opsparingsberegner", description: "Beregn renters rente og se din opsparing vokse", href: "/opsparing", popular: false, category: "Økonomi" },
-  { title: "Kvadratmeterberegner", description: "Beregn areal af rum, haver og grunde", href: "/kvadratmeter", popular: false, category: "Matematik" },
   { title: "Aldersberegner", description: "Beregn din præcise alder i år, måneder og dage", href: "/alder", popular: false, category: "Hverdag" },
   { title: "Timeprisberegner", description: "Find din timepris som freelancer eller selvstændig", href: "/timepris", popular: false, category: "Erhverv" },
-  { title: "Brændstofberegner", description: "Beregn pris for benzin, diesel eller el-bil", href: "/braendstof", popular: false, category: "Hverdag" },
   { title: "Elberegner", description: "Beregn dit elforbrug og se hvad dine apparater koster", href: "/elberegner", popular: false, category: "Hverdag" },
   { title: "Feriepenge", description: "Beregn hvor meget du har til gode i feriepenge", href: "/feriepenge", popular: false, category: "Økonomi" },
   { title: "Børnepenge", description: "Se hvad du kan få i børne- og ungeydelse 2026", href: "/boernepenge", popular: false, category: "Familie" },
   { title: "SU Beregner", description: "Beregn din SU og fribeløb baseret på din situation", href: "/su", popular: false, category: "Uddannelse" },
   { title: "Dagpengeberegner", description: "Beregn hvad du kan få i dagpenge ved ledighed", href: "/dagpenge", popular: false, category: "Økonomi" },
-  { title: "Boligstøtte", description: "Se standardmaksima og formuegrænser for boligstøtte", href: "/boligstoette", popular: false, category: "Bolig" },
-  { title: "Kalorieberegner", description: "Beregn dit daglige kaloriebehov og makroer", href: "/kalorier", popular: false, category: "Sundhed" },
-  { title: "Datoberegner", description: "Beregn dage mellem datoer, arbejdsdage og alder", href: "/dato", popular: false, category: "Praktisk" },
   { title: "Husleje Budget", description: "Find ud af hvad du har råd til i husleje", href: "/husleje", popular: false, category: "Bolig" },
   { title: "Tidszoneberegner", description: "Se hvad klokken er i andre lande", href: "/tidszone", popular: false, category: "Hverdag" },
-  { title: "Tidsberegner", description: "Beregn timer og minutter mellem tidspunkter", href: "/tidsberegner", popular: false, category: "Praktisk" },
   { title: "Pensionsberegner", description: "Beregn din fremtidige pension og folkepension", href: "/pension", popular: false, category: "Økonomi" },
   { title: "Efterløn", description: "Beregn din efterløn og se hvornår du kan gå", href: "/efterloen", popular: false, category: "Økonomi" },
   { title: "Barselsdagpenge", description: "Beregn barselsdagpenge og se orlovsperioder", href: "/barselsdagpenge", popular: false, category: "Familie" },
@@ -181,7 +185,6 @@ const daCalculators: HomeCalculator[] = [
   { title: "Bryllupsbudget", description: "Beregn komplet bryllupsbudget", href: "/bryllup", popular: false, category: "Familie" },
   { title: "Skattefradrag", description: "Beregn alle skattefradrag samlet", href: "/skattefradrag", popular: false, category: "Økonomi" },
   { title: "Forbrugslån", description: "Beregn ydelse og ÅOP på forbrugslån", href: "/forbrugslaan", popular: false, category: "Lån" },
-  { title: "Rentefradrag", description: "Beregn din skattebesparelse på rentefradrag", href: "/rentefradrag", popular: false, category: "Økonomi" },
   { title: "Ejendomsværdiskat", description: "Beregn ejendomsværdiskat og grundskyld 2026", href: "/ejendomsvaerdiskat", popular: false, category: "Bolig" },
   { title: "Arveafgift", description: "Beregn bo- og tillægsafgift ved arv", href: "/arveafgift", popular: false, category: "Økonomi" },
   { title: "Aktieskat", description: "Beregn skat på aktiegevinst — frit depot vs. ASK", href: "/aktieskat", popular: false, category: "Økonomi" },
@@ -198,7 +201,7 @@ const noPageData: HomePageData = {
   meta: {
     title: "Beregner.no - Gratis online kalkulatorer for Norge",
     description:
-      "Norges samling av gratis online kalkulatorer. Beregn moms, lån, renter, BMI for voksne og mye mer. 20+ kalkulatorer med 2026-satser — helt gratis og uten innlogging.",
+      "Norges samling av gratis online kalkulatorer. Beregn moms, lån, renter, BMI for voksne og mye mer. {count} kalkulatorer med 2026-satser — helt gratis og uten innlogging.",
     keywords: [
       "kalkulator",
       "online kalkulator",
@@ -218,10 +221,10 @@ const noPageData: HomePageData = {
   hero: {
     title: "Gratis Online Kalkulatorer",
     subtitle:
-      "20+ gratis kalkulatorer for økonomi, bolig, helse og hverdag. Oppdatert med 2026-satser — helt gratis og uten innlogging.",
+      "{count}+ gratis kalkulatorer for økonomi, bolig, helse og hverdag. Oppdatert med 2026-satser — helt gratis og uten innlogging.",
   },
   trustSignals: {
-    calculators: "20+|Gratis kalkulatorer",
+    calculators: "{count}+|Gratis kalkulatorer",
     rates: "2026|Oppdaterte satser",
     price: "0 kr|Ingen innlogging eller betaling",
     privacy: "Lokalt|Ingen inndata lagres i database",
@@ -266,7 +269,7 @@ const noPageData: HomePageData = {
     {
       question: "Hvilke kalkulatorer har dere?",
       answer:
-        "Vi har over 20 kalkulatorer for økonomi (moms, valuta, renter, opsparing), bolig (boliglån, strøm, solceller), lån (billån, leasing, forbrukslån), helse (BMI for voksne, kalorier) og hverdag (drivstoff, dato, tidssoner). Vi legger løpende til nye kalkulatorer.",
+        "Vi har {count} kalkulatorer for økonomi (moms, valuta, renter, opsparing), bolig (boliglån, strøm, solceller), lån (billån, leasing, forbrukslån), helse (BMI for voksne, kalorier) og hverdag (drivstoff, dato, tidssoner). Vi legger løpende til nye kalkulatorer.",
     },
   ],
   categoryOrder: [
@@ -322,7 +325,7 @@ const sePageData: HomePageData = {
   meta: {
     title: "Beräknare.se - Gratis online kalkylatorer för Sverige",
     description:
-      "Sveriges samling av gratis online kalkylatorer. Beräkna moms, lån, räntor, BMI för vuxna och mycket mer. 20+ kalkylatorer med 2026-satser — helt gratis och utan inloggning.",
+      "Sveriges samling av gratis online kalkylatorer. Beräkna moms, lån, räntor, BMI för vuxna och mycket mer. {count} kalkylatorer med 2026-satser — helt gratis och utan inloggning.",
     keywords: [
       "kalkylator",
       "online kalkylator",
@@ -342,10 +345,10 @@ const sePageData: HomePageData = {
   hero: {
     title: "Gratis Online Kalkylatorer",
     subtitle:
-      "20+ gratis kalkylatorer för ekonomi, bostad, hälsa och vardag. Uppdaterade med 2026-satser — helt gratis och utan inloggning.",
+      "{count}+ gratis kalkylatorer för ekonomi, bostad, hälsa och vardag. Uppdaterade med 2026-satser — helt gratis och utan inloggning.",
   },
   trustSignals: {
-    calculators: "20+|Gratis kalkylatorer",
+    calculators: "{count}+|Gratis kalkylatorer",
     rates: "2026|Uppdaterade satser",
     price: "0 kr|Ingen inloggning eller betalning",
     privacy: "Lokalt|Inga uppgifter sparas i databas",
@@ -390,7 +393,7 @@ const sePageData: HomePageData = {
     {
       question: "Vilka kalkylatorer har ni?",
       answer:
-        "Vi har över 20 kalkylatorer för ekonomi (moms, valuta, räntor, sparande), bostad (bolån, el, solceller), lån (billån, leasing, konsumtionslån), hälsa (BMI för vuxna, kalorier) och vardag (bränsle, datum, tidszoner). Vi lägger löpande till nya kalkylatorer.",
+        "Vi har {count} kalkylatorer för ekonomi (moms, valuta, räntor, sparande), bostad (bolån, el, solceller), lån (billån, leasing, konsumtionslån), hälsa (BMI för vuxna, kalorier) och vardag (bränsle, datum, tidszoner). Vi lägger löpande till nya kalkylatorer.",
     },
   ],
   categoryOrder: [
@@ -406,15 +409,20 @@ const sePageData: HomePageData = {
 };
 
 const seCalculators: HomeCalculator[] = [
-  // Popular
-  { title: "BMI Kalkylator för vuxna", description: "Beräkna BMI för vuxna utifrån vikt och längd", href: "/bmi", popular: true, category: "Hälsa" },
-  { title: "Momskalkylator", description: "Lägg till eller dra av 25% moms enkelt och snabbt", href: "/moms", popular: true, category: "Ekonomi" },
-  { title: "Lånekalkylator", description: "Beräkna månadskostnad, jämför lån och se amorteringsplan", href: "/laaneberegner", popular: true, category: "Lån" },
-  { title: "Valutakalkylator", description: "Räkna om mellan SEK, EUR, USD och andra valutor", href: "/valuta", popular: true, category: "Ekonomi" },
-  { title: "Procentkalkylator", description: "Beräkna procent av ett tal, ökning, minskning och mer", href: "/procent", popular: true, category: "Matematik" },
-  { title: "Räntekalkylator", description: "Beräkna räntor, amortering och total återbetalning på lån", href: "/renteberegner", popular: true, category: "Ekonomi" },
+  // Popular — de mest besökte svenska kalkylatorerna pr. 2026-09-25 (28 dage)
+  { title: "Tidskalkylator", description: "Beräkna timmar och minuter mellan tidpunkter", href: "/tidsberegner", popular: true, category: "Praktiskt" },
+  { title: "Datumkalkylator", description: "Beräkna dagar mellan datum, arbetsdagar och ålder", href: "/dato", popular: true, category: "Praktiskt" },
+  { title: "Leasing Kalkylator", description: "Beräkna leasingkostnad och jämför med billån", href: "/leasing", popular: true, category: "Lån" },
+  { title: "Nedräkningskalkylator", description: "Beräkna hur många dagar till ett givet datum", href: "/nedtaelling", popular: true, category: "Praktiskt" },
+  { title: "Tidszonskalkylator", description: "Se vad klockan är i andra länder", href: "/tidszone", popular: true, category: "Vardag" },
   { title: "Lön efter skatt", description: "Beräkna din nettolön efter svensk skatt", href: "/lon-efter-skatt", popular: true, category: "Ekonomi" },
   // Non-popular
+  { title: "BMI Kalkylator för vuxna", description: "Beräkna BMI för vuxna utifrån vikt och längd", href: "/bmi", popular: false, category: "Hälsa" },
+  { title: "Momskalkylator", description: "Lägg till eller dra av 25% moms enkelt och snabbt", href: "/moms", popular: false, category: "Ekonomi" },
+  { title: "Lånekalkylator", description: "Beräkna månadskostnad, jämför lån och se amorteringsplan", href: "/laaneberegner", popular: false, category: "Lån" },
+  { title: "Valutakalkylator", description: "Räkna om mellan SEK, EUR, USD och andra valutor", href: "/valuta", popular: false, category: "Ekonomi" },
+  { title: "Procentkalkylator", description: "Beräkna procent av ett tal, ökning, minskning och mer", href: "/procent", popular: false, category: "Matematik" },
+  { title: "Räntekalkylator", description: "Beräkna räntor, amortering och total återbetalning på lån", href: "/renteberegner", popular: false, category: "Ekonomi" },
   { title: "Sparkalkylator", description: "Beräkna ränta på ränta och se ditt sparande växa", href: "/opsparing", popular: false, category: "Ekonomi" },
   { title: "Kvadratmeterkalkylator", description: "Beräkna yta av rum, trädgårdar och tomter", href: "/kvadratmeter", popular: false, category: "Matematik" },
   { title: "Ålderskalkylator", description: "Beräkna din exakta ålder i år, månader och dagar", href: "/alder", popular: false, category: "Vardag" },
@@ -422,13 +430,9 @@ const seCalculators: HomeCalculator[] = [
   { title: "Bränslekalkylator", description: "Beräkna pris för bensin, diesel eller elbil", href: "/braendstof", popular: false, category: "Vardag" },
   { title: "Elkalkylator", description: "Beräkna din elförbrukning och se vad dina apparater kostar", href: "/elberegner", popular: false, category: "Vardag" },
   { title: "Kalorikalkylator", description: "Beräkna ditt dagliga kaloribehov och makros", href: "/kalorier", popular: false, category: "Hälsa" },
-  { title: "Datumkalkylator", description: "Beräkna dagar mellan datum, arbetsdagar och ålder", href: "/dato", popular: false, category: "Praktiskt" },
-  { title: "Tidszonskalkylator", description: "Se vad klockan är i andra länder", href: "/tidszone", popular: false, category: "Vardag" },
-  { title: "Tidskalkylator", description: "Beräkna timmar och minuter mellan tidpunkter", href: "/tidsberegner", popular: false, category: "Praktiskt" },
   { title: "Bolån", description: "Beräkna månadskostnad och kostnader för ditt bolån", href: "/boliglaan", popular: false, category: "Bostad" },
   { title: "Bolån 2026", description: "Beräkna amortering och räntekostnad med svenska bolåneregler", href: "/bolan", popular: false, category: "Bostad" },
   { title: "Billån", description: "Beräkna månadskostnad och ränta på billån", href: "/billaan", popular: false, category: "Lån" },
-  { title: "Leasing Kalkylator", description: "Beräkna leasingkostnad och jämför med billån", href: "/leasing", popular: false, category: "Lån" },
   { title: "Skuldfri Kalkylator", description: "Beräkna vägen ut ur skuld med lavin-/snöbollsmetoden", href: "/gaeldsfri", popular: false, category: "Lån" },
   { title: "Konsumtionslån", description: "Beräkna månadskostnad och effektiv ränta på konsumtionslån", href: "/forbrugslaan", popular: false, category: "Lån" },
   { title: "Beräknad Förlossning", description: "Beräkna förlossningsdatum och se graviditetsvecka", href: "/termin", popular: false, category: "Familj" },
@@ -460,8 +464,33 @@ const calculatorMap: Record<Locale, HomeCalculator[]> = {
 /*  Public API                                                         */
 /* ------------------------------------------------------------------ */
 
+export function getHomeCalculatorCount(locale: Locale): number {
+  return getHomeCalculators(locale).length;
+}
+
 export function getHomePageData(locale: Locale): HomePageData {
-  return pageDataMap[locale] ?? pageDataMap.da;
+  const data = pageDataMap[locale] ?? pageDataMap.da;
+  const count = String(getHomeCalculatorCount(locale));
+  return {
+    ...data,
+    meta: {
+      ...data.meta,
+      description: data.meta.description.replaceAll("{count}", count),
+      ogDescription: data.meta.ogDescription.replaceAll("{count}", count),
+    },
+    hero: {
+      ...data.hero,
+      subtitle: data.hero.subtitle.replaceAll("{count}", count),
+    },
+    trustSignals: {
+      ...data.trustSignals,
+      calculators: data.trustSignals.calculators.replace("{count}", count),
+    },
+    faqItems: data.faqItems.map((item) => ({
+      ...item,
+      answer: item.answer.replaceAll("{count}", count),
+    })),
+  };
 }
 
 export function getHomeCalculators(locale: Locale): HomeCalculator[] {

@@ -1,5 +1,9 @@
 import { describe, test, expect } from "vitest";
-import { getHomePageData, getHomeCalculators } from "./home-data";
+import {
+  getHomePageData,
+  getHomeCalculators,
+  getHomeCalculatorCount,
+} from "./home-data";
 import { isCalculatorAvailable } from "./calculator-list";
 
 describe("getHomePageData", () => {
@@ -92,6 +96,57 @@ describe("getHomeCalculators", () => {
     expect(hrefs).toContain("/lon-efter-skatt");
     expect(hrefs).toContain("/bolan");
     expect(hrefs).not.toContain("/loen-efter-skat");
+  });
+
+  test("the visible calculator count is derived, not hardcoded", () => {
+    for (const locale of ["da", "no", "se"] as const) {
+      const count = getHomeCalculatorCount(locale);
+      const data = getHomePageData(locale);
+      const copy = [
+        data.trustSignals.calculators,
+        data.meta.description,
+        data.hero.subtitle,
+        ...data.faqItems.map((item) => item.answer),
+      ].join(" ");
+      expect(copy, `${locale} copy has no leftover placeholder`).not.toContain("{count}");
+      expect(
+        copy,
+        `${locale} copy states the real calculator count (${count})`
+      ).toContain(`${count}`);
+    }
+  });
+
+  test("popular row follows the measured top pages per locale", () => {
+    const daPopular = getHomeCalculators("da")
+      .filter((c) => c.popular)
+      .map((c) => c.href);
+    for (const href of [
+      "/dato",
+      "/bmi",
+      "/boligstoette",
+      "/kvadratmeter",
+      "/rentefradrag",
+      "/tidsberegner",
+      "/kalorier",
+      "/braendstof",
+      "/loen-efter-skat",
+    ]) {
+      expect(daPopular, `DA popular ${href}`).toContain(href);
+    }
+
+    const sePopular = getHomeCalculators("se")
+      .filter((c) => c.popular)
+      .map((c) => c.href);
+    for (const href of [
+      "/tidsberegner",
+      "/dato",
+      "/leasing",
+      "/nedtaelling",
+      "/tidszone",
+      "/lon-efter-skatt",
+    ]) {
+      expect(sePopular, `SE popular ${href}`).toContain(href);
+    }
   });
 
   test("some calculators are marked popular", () => {

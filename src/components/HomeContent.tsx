@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Locale } from "@/lib/i18n";
+import { getHomeCalculatorCount } from "@/lib/home-data";
 
 export function HomeContent({ locale, siteName }: { locale: Locale; siteName: string }) {
   if (locale === "no") return <HomeContentNO siteName={siteName} />;
@@ -12,7 +13,7 @@ function HomeContentDA() {
     <section className="prose dark:prose-invert max-w-none mb-16">
       <h2>Om MinBeregner.dk — Danmarks gratis beregnerportal</h2>
       <p>
-        MinBeregner.dk samler over <strong>44 gratis online beregnere</strong> til danskere.
+        MinBeregner.dk samler{" "}<strong>{getHomeCalculatorCount("da")} gratis online beregnere</strong> til danskere.
         Alle beregnere er opdateret med de nyeste satser og regler for 2026, og beregningerne
         sker lokalt i din browser — vi lagrer ikke dine input i nogen database. Når du vælger
         en ekstern delingstjeneste, modtager den de kodede input. Nogle delelinks bruger
