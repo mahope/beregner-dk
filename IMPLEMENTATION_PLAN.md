@@ -1,8 +1,10 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — C7 (dage-til) FÆRDIG og merged 2026-09-25 19:50 CEST. Deploynoter for
-C4, C5, C6 og C7 er åbne og kan først verificeres efter 07:30-vinduet 2026-09-26.
-Næste iteration: diagnose af `/pension` (position 12,2) — CTR er ikke problemet dér.
+STATUS: KØ — C8 (pension-diagnose og -rettelse) FÆRDIG og merged 2026-09-25 20:26 CEST
+(`42a576e`). Deploynoter for C4, C5, C6, C7 og C8 er åbne og kan først verificeres efter
+07:30-vinduet 2026-09-26.
+Næste iteration: `/pension` er rettet på indhold — se opgave 19 for det åbne stykke
+(indkomstfelt til pensionstillægget), og overvej derefter de andre top-5-kandidater.
 
 ## Fase 3 — trafik-drevet
 
@@ -1089,9 +1091,80 @@ Næste iteration: diagnose af `/pension` (position 12,2) — CTR er ikke problem
   4. Tallet er 0 på selve datoen og tæller ikke dagen i dag med.
   5. Sitemap, interne links til `/dato` og `/nedtaelling` er med.
   6. `npm run lint`, `npm run test` og `npm run build` er grønne.
-- **Næste iteration:** diagnose af `/pension` (position 12,2, "pensionsberegner"
-  på pos. 22) og de øvrige kandidatere nedenfor — ikke flere copieskrevne sider
-  på række.
+- **Næste iteration:** se opgave 19. `/pension` er diagnosticeret og rettet; det åbne
+  stykke er indkomstfeltet til pensionstillægget. Derefter de øvrige kandidater nedenfor —
+  ikke flere copieskrevne sider på række.
+
+#### 19. [x] FÆRDIG 2026-09-25 — C8 — Diagnose af `/pension` + ret de tre folkepensionsfejl
+
+- **Iteration start:** 2026-09-25 19:51 CEST. Planen pegede på `/pension` som næste
+  diagnose; CTR var ikke problemet (1,1 %), så det var ranking og indhold.
+- **Datagrund:** `/pension` 4.001 visninger, 45 klik, CTR 1,1 %, **pos. 12,2** pr. 2026-09-23.
+  Søgningerne ligger alle langt nede: "pensionsberegner" 173v/1k **pos. 22**,
+  "beregn pension" 89v pos. 28, "beregn pensionsopsparing" 78v pos. 24,
+  "pensions beregner" 33v pos. 23. Plausible: 141 besøgende/28d (+36 %), bounce 2 % pr. 2026-09-25.
+- **Diagnose (dokumenteret, ikke gættet):**
+  1. **Søgeintentionen er en anden end værktøjets.** Google autocomplete (da-DK, 2026-09-25)
+     for "pensionsberegner" giver *pensionsberegner alder*, *pensionsberegner 2026*,
+     *pensionsberegner tidlig pension* plus leverandørnavne (pfa, pka, nordnet, velliv);
+     for "beregn pension" giver *beregn pensionsalder*, *beregn pensionstillæg*,
+     *beregn pensionstillæg 2026*, *beregn pension af løn*, *beregn pension efter skat*.
+     Værktøjet svarer på **opsparing** ("hvor meget skal jeg spare"), mens søgerne spørger om
+     **hvornår** og **hvad jeg får**. Siden havde ingen tabel med folkepensionsalder pr.
+     fødselsår og ingen beregning af pensionstillæg.
+  2. **Tre konkrete fagfejl**, alle verificeret mod borger.dk 25. september 2026:
+     pensionstillægget for gifte/samlevende stod som **4.367 kr.** (skal være **4.467 kr.**) i
+     både siden og FAQ; folkepensionsalder-tabellen sagde "Før 1963: 65-67 år" og
+     "Efter 1970: 70+ år (forventes)", mens den officielle skala er 65 / 65½ / 66 / 66½ / 67 /
+     68 / 69 / **70 år for født 1971 eller senere**; og beregneren lagde `grundbeløb + 70 % af
+     pensionstillæg` samt delte brugerens egen opsparing 70/30 mellem "Arbejdsmarked" og
+     "Privat" (`PensionBeregner.tsx:139-150`) — to faktorer uden kilde, der så ud som fakta.
+  3. Branding: `/pension` og `/arveafgift` havde `| Beregner.dk` i titel, meta og og-titel,
+     mens 75 andre sider bruger `| MinBeregner.dk` — domænet er minberegner.dk.
+  4. Bloggen `pension-hvor-meget-skal-du-spare-op` gentog både 4.367-fejlen og
+     "ca. 13.000-15.000 kr/måned" (officielt 16.273 kr. for enlige før skat).
+- **Beslutning/implementering:** Alle 2026-beløb, indkomstgrænser for pensionstillægget
+  (99.200/438.380 kr. 30,9 % enlig; 198.800/533.800 kr. 16 % samlevende m. pensionist;
+  198.800/366.400 kr. 32 % samlevende u. pensionist), 54 %-reglen for ikke-pensionist samlever
+  og folkepensionsalder-skalaen ligger nu i `src/lib/folkepension.ts` med kilde og
+  `verifiedAt`, og bruges af side, FAQ og beregner — samme mønster som barsel i O1.
+  `beregnFolkepension2026()` er en ren, testet funktion. Værktøjet bruger nu folkepensionens
+  fulde beløb for enlige (16.273 kr.) i stedet for det opdigtede 70 %-tal, og visualiseringen
+  er skåret fra tre "søjler" til **folkepension + din opsparing** med en note om, at
+  arbejdsmarkedspension ikke medregnes, fordi den afhænger af arbejdsgiveren. Samlet månedlig
+  pension stiger dermed 2.619 kr. (13.654 → 16.273 + opsparing), fordi tillægget først var
+  undervurderet — opsparingen er uændret. Titlen er gjort svar-først:
+  "Pensionsberegner 2026: folkepension 16.273 kr/md". Siden har nu ankrede `#folkepension-2026`
+  og `#folkepensionsalder` med tabeller kildeført til borger.dk.
+- **Faglig afgrænsning:** værktøjet beregner **ikke** den enkeltes folkepension, fordi den
+  afhænger af ATP, arbejdsmarkedspension og samliv. Siden siger det og peger på
+  PensionsInfo.dk og Udbetaling Danmarks egen beregner. Der påstås ingen aktuelle
+  Google-placeringer — DuckDuckGo, Mojeek og Google gav bot-blokering i denne iteration,
+  så kun autocomplete og Search Console er brugt som dokumentation.
+- **Verifikation 2026-09-25:** `npm run lint` grøn (479 filer), `npm run test` grøn
+  (1002/1002, 95 filer), `npm run build` grøn (137+2 sider, kun de 7 kendte CSS-advarsler),
+  `tsc --noEmit` uden nye fejl (den ene `es2018`-regex-advarsel i `StructuredData.test.tsx` er
+  pre-existing). 16 nye tests i `src/lib/folkepension.test.ts` dækker beløb, alle skift i
+  alder-skalaen, nedsættelsesformlen, nedsættelse ned til 0, bortfald på tværs af grænsen,
+  forskellige grænser for samlevende m./u. pensionist samt negativ og ugyldig indkomst.
+- **Landet:** kode `ad5970c`, merge `42a576e` 2026-09-25 20:26 CEST.
+- **Forventet effekt:** Først og fremmest korrekthed og tillid — tre offentligt tilgængelige
+  tal var forkerte, og to udviklede parametre stod som fakta. Sekundært: siden kan nu svare på
+  de to mest dokumenterede delintenter (folkepensionsalder, pensionstillæg) i stedet for kun
+  at linke videre. CTR på 1,1 % er ikke enestående; titlen er gjort svar-først alligevel,
+  fordi den nu kan det uden at lyve.
+- **Acceptkriterier:**
+  1. `4.367` findes ikke længere som 2026-gældende sats i `src/`.
+  2. Folkepensionsalder-tabellen er den officielle skala med 65/65½/66/66½/67/68/69/70.
+  3. Der er ingen hardkodede folkepensionsbeløb i `PensionBeregner.tsx`; de kommer fra
+     `src/lib/folkepension.ts` med kilde og verificeringsdato.
+  4. Beregneren gør ikke længere opdelingen "arbejdsmarked/privat" af egen opsparing.
+  5. Alle pensionstal på siden, i FAQ og i bloggen er ens.
+  6. `npm run lint`, `npm run test` og `npm run build` er grønne.
+- **MÅL:** `/pension` baseline 4.001 visninger, 45 klik, CTR 1,1 %, pos. 12,2 pr. 2026-09-23;
+  Plausible 141 besøgende/28d, bounce 2 % pr. 2026-09-25. Sammenlign igen 2026-10-09: se om
+  positionen på "pensionsberegner" (var 22) og "beregn pension" (var 28) rykker, og at CTR'en
+  på /pension ikke falder, fordi titlen nu er smallet.
 
 ### ❓ Til Mads
 
@@ -1114,10 +1187,16 @@ Næste iteration: diagnose af `/pension` (position 12,2) — CTR er ikke problem
 ### Dokumenterede kandidatere efter top-5
 
 - ~~`/alder`~~ og ~~`/brok`~~ er begge færdige som C6 den 2026-09-25.
-- `/pension` 4.001 visninger, CTR 1,1 %, men position 12,2 med "pensionsberegner"
-  på position 22. Her er indholdet/rankingen problemet, ikke titlen, så den kræver
-  en diagnose før copy-ændring. MÅL: baseline 4.001 visninger, 45 klik, CTR 1,1 %,
-  position 12,2 pr. 2026-09-23, Plausible 141 besøgende/28d pr. 2026-09-25.
+- ~~`/pension`~~ er diagnosticeret og rettet som C8 den 2026-09-25, se opgave 19.
+  Diagnosen viste, at søgeintentionen (hvornår/hvad) ikke var besvaret, at tre
+  folkepensionstal var forkerte, og at beregneren brugte to opdigtede faktorer.
+  MÅL: baseline 4.001 visninger, 45 klik, CTR 1,1 %, position 12,2 pr. 2026-09-23,
+  Plausible 141 besøgende/28d pr. 2026-09-25 — genmål 2026-10-09.
+  **Åben del af C8:** værktøjet bruger stadig folkepensionens fulde beløb, fordi det ikke
+  kender ATP, arbejdsmarkedspension eller samliv. Næste naturlige skridt er et
+  indkomstfelt ("indkomst ud over arbejdsindkomst") koblet til `beregnFolkepension2026`,
+  som også ville ramme de dokumenterede søgninger "beregn pensionstillæg" og
+  "beregn pension af løn". Ikke startet — kræver nyt inputfelt, delelink-state og testet UI.
 - ~~`/dage-til/[dato]`~~ er færdig som C7 den 2026-09-25, se opgave 18.
 
 - `/kvadratmeter` 370 besøgende/28d (+131 %): autocomplete og konkurrenter peger på
@@ -1540,3 +1619,8 @@ landmark=lån, piggybank=opsparing osv.).
   build-tidspunkt giver en ny dato og nye tal; kontrollér at tekst og tal stadig
   hænger sammen.
 
+- **VERIFICÉR DEPLOY:** C8 folkepension-rettelse `42a576e` 2026-09-25 20:26 CEST.
+  Verificér efter 07:30-vinduet 2026-09-26: `/pension` skal servere
+  folkepensionsalder-tabellen med 65/65½/66/66½/67/68/69/70, pensionstillæg
+  8.729/4.467 kr. og overskriften "Hvor kommer pensionen fra" i beregneren
+  (ikke "De tre pensionssøjler"). HTTP 200 er ikke nok — tjek indholdet.
