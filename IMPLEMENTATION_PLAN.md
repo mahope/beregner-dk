@@ -1,6 +1,6 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — M2 FÆRDIG; M3 (BMI-børneguide-søgning) er næste opgave.
+STATUS: KØ — M3 FÆRDIG; næste iteration er trafikresearch og prioritering af nye løftestænger.
 
 ## Fase 3 — trafik-drevet
 
