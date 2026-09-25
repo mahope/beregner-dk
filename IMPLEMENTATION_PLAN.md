@@ -1,15 +1,17 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — C13 landet på `master` (kode+plan `6450593`) 2026-09-26 01:18 CEST
-2026-09-26 00:33-01:15 CEST. Deployverificering kunne stadig ikke køre: 07:30-vinduet er
-ikke passeret. Live-kontrol 00:33 bekræfter at 21:30-batchen 2026-09-25 heller ikke
-indeholdt dagens merges — `/dage-til/juledagen` er stadig **404**, `/nedtaelling` har
-stadig den gamle H1, `/procent` den gamle titel, `/api/health` svarer `status: ok`.
-Alle noter C4-C12 står åbne. Næste iteration skal først og fremmest verificere
-indholdskontrolleret efter 07:30-vinduet 2026-09-26.
-Denne iteration gik i stedet efter et konkret fejl fund ved en fuld live-crawl
-(176 URL'er), som ville være sendt live med næste batch: **dobbelt domænesuffiks i
-`<title>` på alle ti `/kategori/*`-sider plus de to juridiske sider** (se C13).
+STATUS: KØ — C14 landet på `master` (kode+plan) 2026-09-26 01:15 CEST
+2026-09-26 01:03-01:15 CEST. **Retter en fejl i forrige iterations statuslinje:**
+O1/O2/O3 er *live*, og C1 er også live. Live-kontrol 01:05 bekræfter 5.085 kr. og
+ingen 4.695 på `/blog/barsel-2026-regler-og-satser`, "BMI for voksne" på `/bmi` og
+7.426 på `/su`. Sidste succesfulde batch er **17:30-vinduet 2026-09-25**: `/procent`
+har C1's nye titel, mens `/dage-til/juledagen` stadig er 404 og `/tidszone` har den
+gamle titel, så C4-C13, L1 og F1 ligger uuddejlet. Forrige iterations note kaldte
+C1's nye titel "den gamle variant fra før C1" — det var en fejllæsning. Der er gået
+ét deploy-vindue (21:30) siden C4's merge, så **endnu ikke `DEPLOY-MISSING`**.
+Denne iteration fandt og rettede en reel, siteomfattende fejl i sitemap'en
+(lastmod-stempel ved hvert request), som lå som ufærdigt researchfund 6 siden
+2026-09-23. Næste iteration skal verificere indhold efter 07:30-vinduet 2026-09-26.
 
 ## Fase 3 — trafik-drevet
 
@@ -1898,6 +1900,79 @@ Denne iteration gik i stedet efter et konkret fejl fund ved en fuld live-crawl
   `/procent` (148.882 visninger, position 7,5): siden har allerede formler,
   tricks-tabel og hverdagseksempler, så den mangler hverken copy dybde —
   den mangler sandsynligvis interne links fra beslægtede værktøjer.
+  ~~Denne hypotese er falsificeret 2026-09-26: `/procent` har allerede 25+
+  interne links, og svensk `/procent` er ikke dansk. Se D4.~~
+
+#### 34. [x] FÆRDIG 2026-09-26 — C14 — Sitemap'en stemplede alle sider som "ændret nu" ved hvert kald
+
+- **Iteration start:** 2026-09-26 01:03 CEST. Køen var tom (alle 33 opgaver
+  færdige, intet `I GANG`), så valget var mellem at skaffe nye efterspørgselsdata,
+  jeg ikke kan hente, eller et siteomfattende fund. Fund 6 fra researchen var det
+  eneste *dokumenterede, urettede* siteomfattende problem, så det blev valgt.
+- **Datagrund:** `minberegner.dk` har ca. 600.000 visninger/måned i Google med
+  0,6 % CTR, altså et **crawl- og placeringsproblem** før det er et
+  klikproblem. Sitemap'en er crawlens primære kort. Live `sitemap.xml` 01:05
+  CEST: 119 URL'er, **alle** med `<lastmod>2026-09-25T23:05:26.464Z</lastmod>` —
+  ét identisk klokkeslæt for hele sitet.
+- **Rodårsag (værre end researchfund 6 beskrev):** `buildSitemap` fik
+  `lastModified = new Date()` som **standardværdi**, og ruten er `ƒ (Dynamic)`
+  — bekræftet i build-output — fordi `getCurrentDomainConfig()` læser headers.
+  `new Date()` blev derfor evalueret **ved hvert request**, ikke ved hvert build.
+  Hver eneste Googlebot-hentning af sitemap'en sagde altså "alle 119 sider
+  blev netop ændret", uanset at intet var ændret. Det er præcis det signal,
+  Google dokumenterer at ignorere, når det ikke kan bekræftes, så det gjorde
+  `lastmod` værdiløst for de ~110 sider, der *kun* ændrer sig ved deploy, og
+  modarbejdede samtidig `changeFrequency: "monthly"`.
+- **Beslutning:** ikke en hårdkodet dato pr. side. En sådan manifest er
+  vedligeholdelsesfælden: en ny tekstændring ville ikke opdatere den, og
+  `lastmod` ville stå fast for evigt, hvilket er farligere end at springe den
+  over. Google anbefaler at `lastmod` **udelades**, når den ikke kan holdes
+  præcis. Derfor: `lastmod` udledes kun for den gruppe, der reelt ændrer sig
+  uden deploy — `dailyUpdates` (`/valuta`, Nationalbanken-kurser) og
+  dage-til-siderne, hvis svar genberegnes pr. request. Alle øvrige entries
+  udelader feltet. `changeFrequency` er uændret og dermed stadig sand.
+- **Verifikation 2026-09-26:** `npm run build` grøn (137+2 sider; kun de 7 kendte
+  pre-existing CSS-advarsler), `npm run test` grøn (1127/1127, 107 filer),
+  `npm run lint` grøn (496 filer). 3 nye tests i `src/app/seo-routes.test.ts`:
+  stabile sider har intet `lastmod`, dagssiderne har præcis det passede klokkeslæt,
+  og to builds med forskellige klokkeslæt er identiske for de stabile entries.
+  End-to-end mod rigtig standalone-server: DA 126 URL'er / **8** med `lastmod`
+  (`/valuta` + 7 dage-til), SE 64 URL'er / 8, og to hentninger 3 s fra hinanden
+  er identiske når `lastmod` fjernes. Før var det 119 af 119.
+- **Forventet effekt:** indirekte. Det flytter ingen side i rankingen i sig selv,
+  men det genopbygger det eneste ferskhedssignal, Google har til de ~110 sider,
+  der ændrer sig ved deploy (C1-C13, O1-O5), og det fjerner et dagligt crawl-
+  støjssignal på hele domænet. Målbar via Search Console: "Sidens senest
+  gennemskiftede" og crawl-statistikken, ikke via CTR.
+- **MÅL:** `/sitemap.xml` DA 119 URL'er med 119 `lastmod` (ét identisk
+  klokkeslæt) pr. 2026-09-26 01:05 CEST → mål 126 URL'er med 8 `lastmod` pr.
+  2026-10-10. **Ingen sidebaseret baseline**: denne opgave ændrer ingen enkeltside,
+  så den skal måles i Search Consoles crawl-rapporter, ikke i Plausible.
+- **Acceptkriterier:**
+  1. Ingen entry uden for `/valuta` og dage-til-siderne har et `lastmod`-felt.
+  2. `/valuta` og alle dage-til-sider har `lastmod` og `changeFrequency: "daily"`.
+  3. To sitemap-kald på forskellige tidspunkter er byte-identiske for de
+     stabile entries.
+  4. Ingen reducering af URL-antal, og hverken `robots.txt` eller
+     `/api/v1`-kontrakten er rørt.
+  5. `npm run lint`, `npm run test` og `npm run build` er grønne.
+
+#### D4. Nyt fund 2026-09-26 — tre hypoteser i køen er falsificeret
+
+- **`/procent` mangler interne links** (hypotesen fra kandidat 31) er **forkert**:
+  `/procent` har allerede 25+ interne links fra beslægtede værktøjer via
+  `RELATED_CALCULATORS` i `src/lib/calculator-list.ts:145-219`, inkl. `/moms`,
+  `/rabat`, `/renteberegner`, `/boliglaan`, `/kvadratmeter`, `/valuta` og
+  `/brok`. Linkstætheden er ikke det, der holder siden på position 7,5.
+- **Svensk `/procent` er dansk tekst** (den locale-leak, researchfund 4
+  beskriver generelt) er **forkert for denne side**: `sePages["procent"]`
+  (`src/lib/page-data.ts:3042-3062`) er fuldstændig svensk, svar-først med
+  "10 procent av 250 är 25", dvs. C1 dækkede begge domæner. SE's 21.843
+  visninger / 2 klik / CTR 0,0 % / pos. 10,3 er et **før-C1-baseline** og
+  må ikke bruges som dokumentation for et stadig eksisterende problem.
+- **"Sitemap-lastmod" som blot et uvigtigt fund** er **undervurderet**: det var
+  ikke et build-tidsproblem, men et request-tidsproblem, der træffer Googlebot
+  på hvert eneste kald. Se C14.
 
 #### D3. Nyt fund 2026-09-26 — `www.minberegner.dk` og `www.beraknare.se` findes ikke
 
@@ -2555,6 +2630,24 @@ landmark=lån, piggybank=opsparing osv.).
   svarede `status: ok`. C4 mergerede efter 17:30-vinduet 2026-09-25, så der er
   kun ét deploy-vindue (21:30) siden da — **endnu ikke `DEPLOY-MISSING`**, som
   kræver to. Næste vindue er 07:30 2026-09-26.
+- **Live-kontrol 2026-09-26 01:05 CEST (fjerde datapunkt) — retter fejllæsningen
+  ovenfor:** Sidste succesfulde batch er **17:30-vinduet 2026-09-25**. O1, O2, O3
+  **og C1 er live**: `/blog/barsel-2026-regler-og-satser` viser 5.085 og ingen
+  4.695, `/bmi` viser "BMI for voksne", `/su` viser 7.426, og `/procent` har
+  C1's titel "Procentberegner – beregn 10 procent af et tal". Den 00:33-note
+  kaldte denne titel "den gamle variant fra før C1" — **fejl**; C1's gamle titel
+  var "Procentberegner - Beregn procent nemt og gratis | MinBeregner.dk".
+  `/dage-til/juledagen` er stadig 404 og `/tidszone` har stadig den gamle titel,
+  så C4-C13, L1 og F1 ligger uuddejlet. Ét deploy-vindue (21:30) siden C4's
+  merge kl. 18:40 → stadig **ikke** `DEPLOY-MISSING`. Næste vindue 07:30.
+- **VERIFICÉR DEPLOY:** C14 sitemap-lastmod — kun `/valuta` og de 7 dage-til-sider
+  må have `<lastmod>`; de øvrige ~118 entries skal have **intet** `<lastmod>`-felt.
+  Kørende kode på `ceo/sitemap-lastmod`. Verificér efter 07:30-vinduet 2026-09-26
+  på live `https://minberegner.dk/sitemap.xml`: `<loc>`-antal skal være 126 (119
+  + de 7 dage-til-sider) på DA og 64 på SE, og `grep -c '<lastmod>'` skal give
+  **8** på begge — ikke 126. HTTP 200 er ikke nok, fordi den gamle sitemap også
+  svarer 200 med 119 lastmod. Tjek desuden at `<changefreq>daily</changefreq>`
+  kun står på `/valuta` og dage-til-siderne.
 - **VERIFICÉR DEPLOY:** C13 dobbelt domænesuffiks på de ti `/kategori/*`-sider,
   `/privatlivspolitik` og `/cookiepolitik` — kode på `ceo/kategori-dobbelt-titelsuffix`.
   Verificér efter 07:30-vinduet 2026-09-26 på live DA: `<title>` på
