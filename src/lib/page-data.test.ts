@@ -73,6 +73,75 @@ describe("getPageData", () => {
   test.each([
     {
       locale: "da" as const,
+      title: "Renteberegner: 100.000 kr. i 5 år = 1.887 kr./md.",
+      loanType: "annuitetslån",
+    },
+    {
+      locale: "se" as const,
+      title: "Räntekalkylator: 100.000 kr i 5 år = 1.887 kr/mån",
+      loanType: "annuitetslån",
+    },
+    {
+      locale: "no" as const,
+      title: "Rentekalkulator: 100.000 kr i 5 år = 1.887 kr/md",
+      loanType: "annuitetslån",
+    },
+  ])("has answer-first loan metadata for $locale", ({ locale, title, loanType }) => {
+    const data = getPageData("renteberegner", locale)!;
+
+    expect(data.metaTitle).toBe(title);
+    expect(data.metaTitle.length).toBeLessThanOrEqual(60);
+    expect(data.description).toContain("1.887");
+    expect(data.description).toContain("13.227");
+    expect(data.description).toContain(loanType);
+    expect(data.metaDescription).toContain("1.887");
+    expect(data.metaDescription).toContain("13.227");
+    expect(data.metaDescription.length).toBeLessThanOrEqual(160);
+    expect(data.ogTitle).toBe(title);
+    expect(data.ogDescription).toContain("1.887");
+    expect(data.ogDescription).toContain("13.227");
+    expect(data.schemaDescription).toContain(loanType);
+  });
+
+  test.each([
+    {
+      locale: "da" as const,
+      title: "Hvor mange kalorier om dagen? | Kalorieberegner",
+      question: "Hvor mange kalorier skal du have om dagen?",
+      diet: "2.259",
+    },
+    {
+      locale: "se" as const,
+      title: "Hur många kalorier per dag? | Kalorikalkylator",
+      question: "Hur många kalorier behöver du per dag?",
+      diet: "2.259",
+    },
+    {
+      locale: "no" as const,
+      title: "Hvor mange kalorier per dag? | Kalorikalkulator",
+      question: "Hvor mange kalorier trenger du per dag?",
+      diet: "2.259",
+    },
+  ])("has answer-first calorie metadata for $locale", ({ locale, title, question, diet }) => {
+    const data = getPageData("kalorier", locale)!;
+
+    expect(data.metaTitle).toBe(title);
+    expect(data.metaTitle.length).toBeLessThanOrEqual(60);
+    expect(data.description).toContain(question);
+    expect(data.description).toContain("1.780");
+    expect(data.description).toContain("2.759");
+    expect(data.metaDescription).toContain("1.780");
+    expect(data.metaDescription).toContain("2.759");
+    expect(data.metaDescription.length).toBeLessThanOrEqual(160);
+    expect(data.ogTitle).toBe(title);
+    expect(data.schemaDescription).toContain("BMR");
+    const dietFaq = data.faqItems.find((item) => item.answer.includes(diet));
+    expect(dietFaq).toBeDefined();
+  });
+
+  test.each([
+    {
+      locale: "da" as const,
       title: "Beregn antal dage mellem to datoer | MinBeregner.dk",
       heading: "Beregn antal dage mellem to datoer",
       intent: "antal dage mellem to datoer",
