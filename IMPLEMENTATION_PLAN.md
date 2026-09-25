@@ -832,8 +832,8 @@ STATUS: KØ — M2 FÆRDIG; M3 (BMI-børneguide-søgning) er næste opgave.
   `npm run test` grøn (907/907 tests, 86 filer), `npm run build` grøn (139 sider +
   typecheck; 7 kendte CSS-optimeringsadvarsler), `npm audit --audit-level=high` 0
   sårbarheder. Målrettet gate før fuld gate: 14/14 tests grønne.
-- **Landet:** M3-kode, tests og plan ligger i commit `5e9f081` på
-  `ceo/m3-bmi-child-search`; merge/push og deploy-note følger efter grøn gate.
+- **Landet:** M3-kode og tests ligger i commit `5e9f081`, planstatus i `e546b81`;
+  merge til `master` er `89ba868`. Begge refs blev pushet 2026-09-25 15:59 CEST.
 - **Forventet effekt:** Forhindrer en forkert voksen-handling og giver den relevante
   næste handling; effekt på organisk trafik måles ikke isoleret.
 - **MÅL:** `/bmi` baseline 979 besøgende/28d 2026-09-23; bloggens baseline er ukendt
@@ -1238,3 +1238,7 @@ landmark=lån, piggybank=opsparing osv.).
   felt-sync og WHR-grænse `1745519` 2026-09-25 15:32 CEST. Verificér efter næste
   batch-vindue med faktisk enhedsskift og delelink på `/bmi`; HTTP 200 alene er
   utilstrækkeligt.
+- **VERIFICÉR DEPLOY:** M3 DA-only BMI-søgning til børneguide, SearchBar/assistent-
+  keywords og tastaturrydning `89ba868` 2026-09-25 15:59 CEST. Verificér efter næste
+  batch-vindue med live DA `/`, hydreret søgning på "BMI for mit barn" og voksensuggestion
+  på `/bmi`; HTTP 200 alene er utilstrækkeligt.
