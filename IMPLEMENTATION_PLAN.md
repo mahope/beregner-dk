@@ -1,6 +1,6 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — C3 FÆRDIG; T4 (TidsBeregnerens dobbelte midnatstælling) er næste opgave.
+STATUS: KØ — T4 FÆRDIG; T5 (satsafhængigt svensk moms-UI) er næste opgave.
 
 ## Fase 3 — trafik-drevet
 
@@ -606,23 +606,46 @@ STATUS: KØ — C3 FÆRDIG; T4 (TidsBeregnerens dobbelte midnatstælling) er næ
   Plausible-baseline **ukendt**. Search Console: 71.966/23.735 visninger,
   207/39 klik, CTR 0,3/0,2 %, position 7,0/6,8 pr. 2026-09-22.
 
-#### 9. [ ] T4 — Ret TidsBeregnerens dobbelte midnatstælling
+#### 9. [x] FÆRDIG 2026-09-25 — T4 — Ret TidsBeregnerens dobbelte midnatstælling
 
+- **Iteration start:** 2026-09-25 05:23 CEST. T4 blev fortsat fra et lokalt
+  `ceo/tidsberegner-midnat`-checkpoint; ingen sideløbende opgave blev startet.
 - **Datagrund:** C3-review 2026-09-25 fandt P1: koden gør både `slutMinutter += 24h`
   og `totalDage = 1`, hvorefter `totalDage` igen lægges til. 22:00–06:00 bliver derfor
   32 timer, selvom FAQ, nattevagt-preset og beregnerens løfte forventer 8 timer.
 - **Scope:** Extract ren, testet tidslogik. Bevar URL-state og UI; understøt samme dag,
   over midnat uden datoer og eksplicit næste dato uden dobbelt 24-timers addition.
   Ret FAQ/preset, hvis den korrigerede logik ændrer den dokumenterede forventning.
+- **Implementering:** Beregningen ligger nu i `src/lib/tidsberegner.ts`. Heltidsdage
+  beregnes som UTC-datoafstand, mens den automatiske 24-timers forlængelse kun tilføjes,
+  når der ikke er dage mellem datoerne. 08:30–16:45 er derfor 8:15 uden datoer og
+  på samme dato; med næste dato er den korrekte elapsedtid 32:15. 22:00–06:00 er 8:00
+  både uden datoer, på samme dato og med næste dato. En 30-minutters pause trækkes fra i
+  alle varianter. To-dages dataintervaller om forårs-/efterårsskift,
+  ugyldige datoer/tider, omvendt datointerval og ikke-finitt pause er dækket; negative
+  og ekstreme pauseværdier bevarer den tidligere beregningsadfærd. DA/SE URL-state
+  roundtripper uændret.
 - **Acceptkriterier:**
-  1. 08:30–16:45 = 8:15 og 22:00–06:00 = 8:00, både med og uden næste dato.
-  2. 30 minutters pause trækkes fra i hver gyldige variant; negative/ugyldige intervaller
-     følger eksisterende UI-adfærd.
-  3. DA/SE dele-URL-state roundtripper og fuld gate er grøn.
+  1. 08:30–16:45 = 8:15 uden/samme dato (32:15 med næste dato), og 22:00–06:00 = 8:00
+     uden, samme eller næste dato. **PASS**
+  2. 30 minutters pause trækkes fra i hver gyldig variant; negative/ugyldige intervaller
+     følger eksisterende UI-adfærd. **PASS**
+  3. DA/SE dele-URL-state roundtripper og fuld gate er grøn. **PASS**
+- **Review 2026-09-25 05:49 CEST:** Første friske review fandt 1 P1 og 2 P2: ikke-finitt
+  pause kunne vise `NaN`, en ugyldig én-sidet dato blev ignoreret, og samme dato/DST manglede
+  i tests. De er rettet og dækket. Slutreview efter forårs- og efterårscase fandt
+  0 P0-P3.
+- **Kvalitetsgate 2026-09-25 05:55 CEST:** `npm run build` grøn (137 sider + typecheck;
+  7 kendte CSS-optimeringsadvarsler), `npm run test` grøn (604/604 tests, 64 filer),
+  `npm run lint` grøn (366 filer) og `npm audit --json` 0 sårbarheder. React Doctor
+  scannede den ændrede React-fil med 81/100 og ingen rapporterede issues. Lokal
+  standalone-SSR-kontrol passede `/tidsberegner`; `/api/health` svarede `status: ok`.
 - **Forventet effekt:** Genopretter beregningernes troværdighed på en side med høj
   søgetrafik; prioritet er korrekthed, ikke ny trafik.
 - **MÅL:** `/tidsberegner` baseline 292 besøgende/28d 2026-09-24; Search Console
   71.966 visninger, 207 klik, CTR 0,3 %, position 7,0 pr. 2026-09-22.
+- **Landet:** T4-kode, tests og plan forventes landet i næste commit/merge; merge- og
+  deployreferencer følger når de findes.
 
 #### 10. [ ] T5 — Gør svensk moms-UI og FAQ satsafhængige
 
@@ -1048,6 +1071,9 @@ landmark=lån, piggybank=opsparing osv.).
     - Gate grøn: lint ok, 280/280 tests, build ok (128 pages).
 
 ## VERIFICÉR DEPLOY-log
+- **Åbne noter:** O5/C1/C2/C3 fra før dette T4-checkpoint afventer stadig den næste
+  batch. De må først verificeres efter et faktisk deploy-vindue; status ses af deres
+  SHA/tidspunkt nedenfor.
 - DEPLOY OK: billaan-ikoner (etape 6), calculator-list-ikoner (etape 3), footer-ikoner (etape 4) — verificeret 2026-08-23 18:20.
 - **Batch 07:30 24. aug.** inkluderede: etape 5 (komponent-ikoner), etape 8 (opengraph), biloekonomi, leasing, maanedsbudget, boernepenge blog, rygestop, rabat, proteinbehov, ugenummer, befordringsfradrag, alkoholenheder, flyttebudget, boligsalg, satser-opdatering, boligsalg blog.
   - DEPLOY OK 2026-09-23: `/alkoholenheder`, `/flyttebudget`, `/boligsalg` og `/blog/boligsalg-2026-guide-til-omkostninger-og-provenu` serverede det forventede live-indhold; `/api/health` svarede `status: ok`.

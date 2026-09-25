@@ -7,6 +7,7 @@ import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { useLocale } from "@/components/LocaleProvider";
+import { beregnTidsinterval } from "@/lib/tidsberegner";
 
 const labels = {
   da: {
@@ -121,64 +122,10 @@ export default function TidsBeregner() {
     setFratraekPause(0);
   }, []);
 
-  const beregning = useMemo(() => {
-    const [startTime, startMin] = startTid.split(":").map(Number);
-    const [slutTime, slutMin] = slutTid.split(":").map(Number);
-
-    let startMinutter = startTime * 60 + startMin;
-    let slutMinutter = slutTime * 60 + slutMin;
-
-    // Hvis start og slut dato er sat, beregn total inkl. dage
-    let totalDage = 0;
-    if (startDato && slutDato) {
-      const start = new Date(startDato);
-      const slut = new Date(slutDato);
-      totalDage = Math.floor((slut.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
-      
-      if (totalDage < 0) {
-        return null;
-      }
-    }
-
-    // Håndter over midnat
-    if (slutMinutter < startMinutter) {
-      slutMinutter += 24 * 60;
-      if (!startDato || !slutDato) {
-        totalDage = 1;
-      }
-    }
-
-    let differensMinutter = slutMinutter - startMinutter;
-    
-    // Tilføj hele dage
-    differensMinutter += totalDage * 24 * 60;
-    
-    // Fratræk pause
-    differensMinutter -= fratraekPause;
-
-    if (differensMinutter < 0) differensMinutter = 0;
-
-    const totalTimer = differensMinutter / 60;
-    const timer = Math.floor(differensMinutter / 60);
-    const minutter = differensMinutter % 60;
-
-    // Beregn arbejdsdage (8 timer = 1 dag)
-    const arbejdsdage = (differensMinutter / 60 / 8).toFixed(2);
-
-    // Beregn i sekunder
-    const sekunder = differensMinutter * 60;
-
-    return {
-      timer,
-      minutter,
-      totalTimer: totalTimer.toFixed(2),
-      totalMinutter: differensMinutter,
-      sekunder,
-      arbejdsdage,
-      decimalTimer: totalTimer.toFixed(2),
-      overMidnat: slutMinutter > 24 * 60,
-    };
-  }, [startTid, slutTid, startDato, slutDato, fratraekPause]);
+  const beregning = useMemo(
+    () => beregnTidsinterval({ startTid, slutTid, startDato, slutDato, fratraekPause }),
+    [startTid, slutTid, startDato, slutDato, fratraekPause],
+  );
 
   return (
     <div className="space-y-8">
