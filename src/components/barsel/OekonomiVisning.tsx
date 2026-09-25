@@ -5,7 +5,10 @@ import { monthLabel } from "@/lib/barsel/dato";
 import type { Analyse } from "@/lib/barsel/motor";
 import type { Oekonomi } from "@/lib/barsel/oekonomi";
 import type { BarselsPlan } from "@/lib/barsel/types";
-import { PERSON_DOT, kr } from "./farver";
+import { Pencil } from "lucide-react";
+import { PERSON_DOT, harEksempelLoen, kr } from "./farver";
+import InfoTip from "./InfoTip";
+import { aabenDetaljer } from "./Opsaetning";
 
 interface Props {
   plan: BarselsPlan;
@@ -13,7 +16,30 @@ interface Props {
   oekonomi: Oekonomi;
 }
 
-const BAR = ["bg-rose-400 dark:bg-rose-500", "bg-blue-500 dark:bg-blue-400"] as const;
+const BAR = ["bg-pink-400 dark:bg-pink-500", "bg-blue-500 dark:bg-blue-400"] as const;
+
+/** Ask for the real salary instead of silently using the example salary from the default plan. */
+function EksempelLoen({ plan }: { plan: BarselsPlan }) {
+  const eksempel = plan.foraeldre.filter(harEksempelLoen);
+  if (eksempel.length === 0) return null;
+  return (
+    <div className="flex flex-col gap-3 rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-950 dark:border-blue-800 dark:bg-blue-950/40 dark:text-blue-50 sm:flex-row sm:items-center sm:justify-between">
+      <p>
+        <strong className="font-semibold">Tallene bygger på en eksempelløn på {kr(eksempel[0].maanedsloen)} om måneden</strong>
+        {eksempel.length < plan.foraeldre.length ? ` for ${eksempel.map((f) => f.navn).join(" og ")}` : ""}. Skriv jeres egen løn for at se, hvad
+        barslen betyder for jer.
+      </p>
+      <button
+        type="button"
+        onClick={() => aabenDetaljer(`barsel-detaljer-${eksempel[0].id}`)}
+        className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-blue-700 px-4 py-2 font-semibold text-white hover:bg-blue-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700"
+      >
+        <Pencil className="h-4 w-4" aria-hidden="true" />
+        Udfyld løn
+      </button>
+    </div>
+  );
+}
 
 export default function OekonomiVisning({ plan, analyse, oekonomi }: Props) {
   const [maal, setMaal] = useState<"netto" | "brutto">("netto");
@@ -32,10 +58,11 @@ export default function OekonomiVisning({ plan, analyse, oekonomi }: Props) {
 
   return (
     <div className="space-y-5">
+      <EksempelLoen plan={plan} />
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="rounded-xl bg-gradient-to-br from-rose-50 to-amber-50 p-4 dark:from-rose-900/20 dark:to-amber-900/20 sm:col-span-2">
+        <div className="rounded-lg border border-gray-200 p-4 dark:border-gray-700 sm:col-span-2">
           <p className="text-sm text-gray-700 dark:text-gray-200">Samlet indkomstnedgang i perioden ({maal === "netto" ? "efter skat, vejledende" : "før skat"})</p>
-          <p className="mt-1 text-3xl font-bold tabular-nums text-gray-900 dark:text-white">{kr(Math.max(0, tab))}</p>
+          <p className="mt-1 text-3xl font-semibold tabular-nums text-gray-900 dark:text-white">{kr(Math.max(0, tab))}</p>
           <p className="mt-1 text-xs text-gray-600 dark:text-gray-300">
             Sammenlignet med normal løn fra {monthLabel(oekonomi.maaneder[0])} til {monthLabel(oekonomi.maaneder[oekonomi.maaneder.length - 1])}.
           </p>
@@ -43,13 +70,16 @@ export default function OekonomiVisning({ plan, analyse, oekonomi }: Props) {
         {plan.foraeldre.map((f, i) => {
           const o = oekonomi.foraeldre[i];
           return (
-            <div key={f.id} className="rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
+            <div key={f.id} className="rounded-lg border border-gray-200 p-4 dark:border-gray-700">
               <p className="flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-white">
                 <span className={`h-2.5 w-2.5 rounded-full ${PERSON_DOT[i]}`} aria-hidden="true" />
                 {analyse.foraeldre[i].navn}
               </p>
               <p className="mt-1 text-sm text-gray-700 dark:text-gray-200">
-                {f.beskaeftigelse === "studerende" ? "SU fortsætter under orloven" : <>Barselsdagpenge: <strong className="tabular-nums">{kr(o.ugesats)}</strong>/uge før skat</>}
+                {f.beskaeftigelse === "studerende" ? "SU fortsætter under orloven" : <>
+                    Barselsdagpenge: <strong className="tabular-nums">{kr(o.ugesats)}</strong>/uge før skat
+                    <InfoTip begreb="dagpenge" className="-my-1" />
+                  </>}
               </p>
               <p className="text-sm text-gray-700 dark:text-gray-200">
                 Nedgang: <strong className="tabular-nums">{kr(Math.max(0, maal === "netto" ? o.tabNetto : o.tabBrutto))}</strong>

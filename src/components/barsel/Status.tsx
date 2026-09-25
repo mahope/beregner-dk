@@ -2,14 +2,32 @@
 
 import { CircleAlert, CircleCheck, Info, TriangleAlert } from "lucide-react";
 import type { Analyse, Besked, ForaelderAnalyse } from "@/lib/barsel/motor";
-import { PERSON_DOT, tal } from "./farver";
+import { PERSON_DOT, tal, ugeFarve } from "./farver";
+import InfoTip, { type Begreb } from "./InfoTip";
 
-function Maaler({ label, brugt, total, farve, forklaring }: { label: string; brugt: number; total: number; farve: string; forklaring?: string }) {
+function Maaler({
+  label,
+  brugt,
+  total,
+  farve,
+  forklaring,
+  info,
+}: {
+  label: string;
+  brugt: number;
+  total: number;
+  farve: string;
+  forklaring?: string;
+  info?: Begreb;
+}) {
   const pct = total > 0 ? Math.min(100, (brugt / total) * 100) : 0;
   return (
     <div>
       <div className="flex items-baseline justify-between gap-2 text-sm">
-        <span className="text-gray-700 dark:text-gray-200">{label}</span>
+        <span className="inline-flex items-center gap-0.5 text-gray-700 dark:text-gray-200">
+          {label}
+          {info && <InfoTip begreb={info} className="-my-1" />}
+        </span>
         <span className="font-semibold tabular-nums text-gray-900 dark:text-white">
           {tal(brugt, 1)} / {tal(total, 1)} uger
         </span>
@@ -33,8 +51,8 @@ function ForaelderStatus({ a, index, antal }: { a: ForaelderAnalyse; index: numb
   const r = a.rettigheder;
   if (r.rolle === "naertstaaende") {
     return (
-      <div className="rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
-        <h4 className="mb-3 flex items-center gap-2 font-semibold text-gray-900 dark:text-white">
+      <div>
+        <h4 className="mb-2 flex items-center gap-2 font-semibold text-gray-900 dark:text-white">
           <span className={`h-3 w-3 rounded-full ${PERSON_DOT[index]}`} aria-hidden="true" />
           {a.navn}
         </h4>
@@ -54,7 +72,7 @@ function ForaelderStatus({ a, index, antal }: { a: ForaelderAnalyse; index: numb
   const foer = a.forbrug.find((b) => b.spand.id === "foer");
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
+    <div>
       <h4 className="mb-1 flex items-center gap-2 font-semibold text-gray-900 dark:text-white">
         <span className={`h-3 w-3 rounded-full ${PERSON_DOT[index]}`} aria-hidden="true" />
         {a.navn}
@@ -70,22 +88,24 @@ function ForaelderStatus({ a, index, antal }: { a: ForaelderAnalyse; index: numb
             label={foer.spand.label}
             brugt={foer.brugt}
             total={foer.spand.uger}
-            farve="bg-violet-500"
+            farve={ugeFarve("graviditet", index)}
+            info="graviditetsorlov"
           />
         )}
         <Maaler
           label="Øremærkede uger"
           brugt={oeBrugt}
           total={oeTotal}
-          farve="bg-amber-500"
-          forklaring="Kan ikke overdrages. Går tabt, hvis de ikke holdes."
+          farve={ugeFarve("oeremaerket", index)}
+          info="oeremaerket"
         />
         {egneTotal > 0 && (
           <Maaler
-            label={antal > 1 ? "Egne delbare uger (brugt, overført eller udskudt)" : "Øvrige uger"}
+            label={antal > 1 ? "Delbare uger" : "Øvrige uger"}
+            info={antal > 1 ? "delbar" : undefined}
             brugt={egneBrugt}
             total={egneTotal}
-            farve="bg-sky-500"
+            farve={ugeFarve("egen", index)}
             forklaring={
               a.afgivet > 0 || a.udskudt > 0
                 ? [a.afgivet > 0 ? `${tal(a.afgivet, 1)} overført til den anden` : "", a.udskudt > 0 ? `${tal(a.udskudt, 1)} udskudt` : ""]
@@ -105,45 +125,67 @@ function ForaelderStatus({ a, index, antal }: { a: ForaelderAnalyse; index: numb
   );
 }
 
-const IKON = {
-  fejl: CircleAlert,
-  advarsel: TriangleAlert,
-  info: Info,
-} as const;
-
-const STIL = {
-  fejl: "border-red-300 bg-red-50 text-red-900 dark:border-red-800 dark:bg-red-900/20 dark:text-red-100",
-  advarsel: "border-amber-300 bg-amber-50 text-amber-950 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-100",
-  info: "border-blue-200 bg-blue-50 text-blue-950 dark:border-blue-800 dark:bg-blue-900/20 dark:text-blue-100",
-} as const;
-
+/**
+ * One combined field: a headline that says whether the plan follows the rules,
+ * the things to fix (if any), and the "good to know" notes underneath.
+ */
 export function BeskedListe({ beskeder }: { beskeder: Besked[] }) {
-  const alvorlige = beskeder.filter((b) => b.niveau !== "info");
+  const fejl = beskeder.filter((b) => b.niveau === "fejl");
+  const advarsler = beskeder.filter((b) => b.niveau === "advarsel");
+  const info = beskeder.filter((b) => b.niveau === "info");
+  const alvorlige = [...fejl, ...advarsler];
+  const n = alvorlige.length;
+  const Ikon = fejl.length > 0 ? CircleAlert : n > 0 ? TriangleAlert : CircleCheck;
+  const stil =
+    fejl.length > 0
+      ? "border-red-300 bg-red-50 dark:border-red-800 dark:bg-red-950/30"
+      : n > 0
+        ? "border-amber-300 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/30"
+        : "border-green-300 bg-green-50 dark:border-green-800 dark:bg-green-950/30";
+  const ikonFarve = fejl.length > 0 ? "text-red-700 dark:text-red-300" : n > 0 ? "text-amber-700 dark:text-amber-300" : "text-green-700 dark:text-green-300";
+  const overskrift = fejl.length > 0 ? `${n} ting skal rettes` : n > 0 ? `${n} ting at være opmærksom på` : "Planen følger reglerne";
+
   return (
-    <div>
-      {alvorlige.length === 0 && (
-        <p className="mb-2 flex items-center gap-2 rounded-lg border border-green-300 bg-green-50 px-3 py-2 text-sm font-medium text-green-900 dark:border-green-800 dark:bg-green-900/20 dark:text-green-100">
-          <CircleCheck className="h-5 w-5 shrink-0" aria-hidden="true" />
-          Planen overholder reglerne. Ingen uger går tabt ved en fejl.
-        </p>
+    <div className={`rounded-lg border p-4 text-gray-900 dark:text-gray-100 ${stil}`}>
+      <p className="flex items-center gap-2 font-semibold">
+        <Ikon className={`h-5 w-5 shrink-0 ${ikonFarve}`} aria-hidden="true" />
+        {overskrift}
+      </p>
+      {n === 0 && <p className="mt-1 text-sm text-gray-700 dark:text-gray-200">Ingen uger går tabt ved en fejl.</p>}
+      {n > 0 && (
+        <ul className="mt-3 space-y-3">
+          {alvorlige.map((b) => {
+            const BIkon = b.niveau === "fejl" ? CircleAlert : TriangleAlert;
+            return (
+              <li key={b.id} className="flex gap-2 text-sm">
+                <BIkon className={`mt-0.5 h-4 w-4 shrink-0 ${b.niveau === "fejl" ? "text-red-700 dark:text-red-300" : "text-amber-700 dark:text-amber-300"}`} aria-hidden="true" />
+                <div>
+                  <p className="font-semibold">
+                    <span className="sr-only">{b.niveau === "fejl" ? "Skal rettes: " : "Vær opmærksom: "}</span>
+                    {b.titel}
+                  </p>
+                  <p className="mt-0.5 text-gray-800 dark:text-gray-200">{b.tekst}</p>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
       )}
-      <ul className="space-y-2">
-        {beskeder.map((b) => {
-          const Ikon = IKON[b.niveau];
-          return (
-            <li key={b.id} className={`flex gap-2 rounded-lg border px-3 py-2 text-sm ${STIL[b.niveau]}`}>
-              <Ikon className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-              <div>
-                <p className="font-semibold">
-                  <span className="sr-only">{b.niveau === "fejl" ? "Fejl: " : b.niveau === "advarsel" ? "Advarsel: " : "Bemærk: "}</span>
-                  {b.titel}
-                </p>
-                <p className="mt-0.5 opacity-90">{b.tekst}</p>
-              </div>
-            </li>
-          );
-        })}
-      </ul>
+      {info.length > 0 && (
+        <div className="mt-3 border-t border-black/10 pt-3 dark:border-white/15">
+          <p className="mb-1.5 flex items-center gap-1.5 text-sm font-semibold">
+            <Info className="h-4 w-4 shrink-0 text-gray-600 dark:text-gray-300" aria-hidden="true" />
+            Godt at vide
+          </p>
+          <ul className="list-disc space-y-1.5 pl-6 text-sm text-gray-800 dark:text-gray-200">
+            {info.map((b) => (
+              <li key={b.id}>
+                <span className="font-medium">{b.titel}.</span> {b.tekst}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }
@@ -153,7 +195,8 @@ export default function Status({ analyse }: { analyse: Analyse }) {
   for (const a of analyse.foraeldre) for (const u of a.uger.values()) if (u.uge >= 0 && u.andel > 0) hjemme.add(u.uge);
   return (
     <div className="space-y-4">
-      <div className={`grid gap-4 ${analyse.foraeldre.length > 1 ? "md:grid-cols-2" : ""}`}>
+      <BeskedListe beskeder={analyse.beskeder} />
+      <div className={`grid gap-x-8 gap-y-5 ${analyse.foraeldre.length > 1 ? "md:grid-cols-2" : ""}`}>
         {analyse.foraeldre.map((a, i) => (
           <ForaelderStatus key={a.id} a={a} index={i} antal={analyse.foraeldre.length} />
         ))}
@@ -168,7 +211,6 @@ export default function Status({ analyse }: { analyse: Analyse }) {
         )}
         .
       </p>
-      <BeskedListe beskeder={analyse.beskeder} />
     </div>
   );
 }
