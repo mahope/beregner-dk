@@ -8,7 +8,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const baseUrl = dc.baseUrl;
 
   return {
-    title: "Guide til lån og renter: Forstå hvad du betaler | MinBeregner.dk",
+    title: "Guide til lån og renter: Forstå hvad du betaler",
     description:
       "Alt om lån i Danmark 2026: Annuitetslån vs. serielån, fast vs. variabel rente, ÅOP forklaret. Lær at sammenligne lån og find det billigste.",
     keywords: [

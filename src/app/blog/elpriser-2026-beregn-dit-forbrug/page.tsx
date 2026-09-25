@@ -8,7 +8,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const baseUrl = dc.baseUrl;
 
   return {
-    title: "Elpriser 2026: Sådan beregner du dit elforbrug | MinBeregner.dk",
+    title: "Elpriser 2026: Sådan beregner du dit elforbrug",
     description:
       "Guide til elpriser i 2026: Hvad koster strøm, hvordan læser du din elregning, og hvordan sparer du penge? Se gennemsnitligt forbrug og beregn dine udgifter.",
     keywords: [

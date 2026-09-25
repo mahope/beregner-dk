@@ -8,7 +8,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const baseUrl = dc.baseUrl;
 
   return {
-    title: "Boligsalg 2026: Guide til omkostninger og salgsprovenu | MinBeregner.dk",
+    title: "Boligsalg 2026: Guide til omkostninger og salgsprovenu",
     description:
       "Komplet guide til boligsalg i 2026: Hvad koster en ejendomsmægler? Hvor meget koster energimærke, tilstandsrapport og ejerskifteforsikring? Beregn dit nettoprovenu med vores gratis boligsalgsberegner.",
     keywords: [

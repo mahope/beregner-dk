@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Breadcrumbs from "@/components/Breadcrumbs";
 
 export const metadata: Metadata = {
-  title: "Embed Beregnere - Gratis Widgets | MinBeregner.dk",
+  title: "Embed Beregnere - Gratis Widgets",
   description:
     "Integrer gratis beregner-widgets på din hjemmeside. Momsberegner, BMI for voksne og mere. Kopier koden og indsæt.",
 };

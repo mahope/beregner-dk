@@ -8,7 +8,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const baseUrl = dc.baseUrl;
 
   return {
-    title: "Arveafgift i Danmark: Regler, satser og eksempler | MinBeregner.dk",
+    title: "Arveafgift i Danmark: Regler, satser og eksempler",
     description:
       "Komplet guide til arveafgift (boafgift) i 2026: Bundfradrag, satser for nære og fjerne arvinger, tillægsafgift og beregningseksempler.",
     keywords: [

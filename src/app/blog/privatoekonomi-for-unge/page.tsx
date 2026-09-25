@@ -11,7 +11,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const baseUrl = dc.baseUrl;
 
   return {
-    title: "Privatøkonomi for unge: 5 beregnere du skal kende | MinBeregner.dk",
+    title: "Privatøkonomi for unge: 5 beregnere du skal kende",
     description:
       "Guide til privatøkonomi for unge: SU-beregning, budget, husleje, opsparing og skat. 5 gratis beregnere der hjælper dig med at få styr på økonomien.",
     keywords: [

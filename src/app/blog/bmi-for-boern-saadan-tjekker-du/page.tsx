@@ -8,7 +8,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const baseUrl = dc.baseUrl;
 
   return {
-    title: "BMI for Børn - Sådan Tjekker Du (Komplet Guide 2026) | MinBeregner.dk",
+    title: "BMI for Børn - Sådan Tjekker Du (Komplet Guide 2026)",
     description:
       "BMI for børn skal vurderes med alders- og kønsspecifikke percentiler. Se formlen, WHO's væksttabeller og eksempler på 5., 50., 85. og 95. percentil.",
     keywords: [

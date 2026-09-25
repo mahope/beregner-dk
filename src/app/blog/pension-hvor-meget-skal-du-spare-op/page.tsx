@@ -9,7 +9,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const baseUrl = dc.baseUrl;
 
   return {
-    title: "Pension: Hvor Meget Skal Du Spare Op? Komplet Guide 2026 | MinBeregner.dk",
+    title: "Pension: Hvor Meget Skal Du Spare Op? Komplet Guide 2026",
     description:
       "Hvor meget skal du spare op til pension? Lær om tommelfingerregler, beregn dit behov, og forstå de tre pensionssøjler. Gratis pensionsberegner inkluderet.",
     keywords: [

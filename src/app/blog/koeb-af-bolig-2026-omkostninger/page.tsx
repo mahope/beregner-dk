@@ -8,7 +8,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const baseUrl = dc.baseUrl;
 
   return {
-    title: "Køb af bolig 2026: Alle omkostninger du skal kende | MinBeregner.dk",
+    title: "Køb af bolig 2026: Alle omkostninger du skal kende",
     description:
       "Komplet guide til boligkøb i 2026: Tinglysningsafgift, advokat, udbetaling, ejendomsværdiskat og alle skjulte omkostninger. Se det fulde billede.",
     keywords: [

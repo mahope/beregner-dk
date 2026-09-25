@@ -8,7 +8,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const baseUrl = dc.baseUrl;
 
   return {
-    title: "Fradrag 2026: Komplet guide til skattefradrag i Danmark | MinBeregner.dk",
+    title: "Fradrag 2026: Komplet guide til skattefradrag i Danmark",
     description:
       "Overblik over alle skattefradrag i 2026: Rentefradrag, kørselsfradrag, håndværkerfradrag, fagforening og mere. Se hvad du kan trække fra.",
     keywords: [

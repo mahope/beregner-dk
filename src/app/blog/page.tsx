@@ -7,7 +7,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const baseUrl = dc.baseUrl;
 
   return {
-    title: "Blog - Guides og tips | MinBeregner.dk",
+      title: "Blog - Guides og tips",
     description:
       "Læs vores guides om økonomi, beregninger og privatøkonomi. Lær hvordan du beregner moms, finder den rigtige husleje, og meget mere.",
     keywords: [
@@ -19,7 +19,7 @@ export async function generateMetadata(): Promise<Metadata> {
       "lån guide",
     ],
     openGraph: {
-      title: "Blog - Guides og tips | MinBeregner.dk",
+    title: "Blog - Guides og tips",
       description: "Guides og tips om økonomi og beregninger.",
       url: `${baseUrl}/blog`,
       type: "website",

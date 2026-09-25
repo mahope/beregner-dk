@@ -15,7 +15,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const baseUrl = dc.baseUrl;
 
   return {
-    title: "Barsel 2026: Sats, orlov og overdragelse | MinBeregner.dk",
+    title: "Barsel 2026: Sats, orlov og overdragelse",
     description: `Barsel 2026 med ${maxWeeklyRate} kr. pr. uge før skat, ${maxHourlyRate} kr. pr. time og de aktuelle regler for øremærket orlov, overdragelse og ansøgningsfrister.`,
     keywords: [
       "barsel 2026",

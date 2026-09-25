@@ -8,7 +8,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const baseUrl = dc.baseUrl;
 
   return {
-    title: "Sådan beregner du din reelle timeløn | MinBeregner.dk",
+    title: "Sådan beregner du din reelle timeløn",
     description:
       "Lær at beregne din faktiske timeløn inkl. alle skjulte goder som pension, frokost og ferie. Se hvad du virkelig tjener per time.",
     keywords: [

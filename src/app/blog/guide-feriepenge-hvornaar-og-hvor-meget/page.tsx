@@ -8,7 +8,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const baseUrl = dc.baseUrl;
 
   return {
-    title: "Guide: Feriepenge - Hvornår og Hvor Meget? | MinBeregner.dk",
+    title: "Guide: Feriepenge - Hvornår og Hvor Meget?",
     description:
       "Komplet guide til feriepenge i 2026: Hvornår får du dem udbetalt? Hvor meget får du? Lær om ferieåret, samtidighedsferie, og beregn dine egne feriepenge.",
     keywords: [
