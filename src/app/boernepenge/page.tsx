@@ -9,6 +9,7 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import Link from "next/link";
 import { formatNumber } from "@/lib/format";
 import { BOERNE_SATSER_2026, aarligBelob } from "@/lib/borneungeydelse";
+import { BARNETILSKUD_2026_KILDE, barnetilskudSats } from "@/lib/barnetilskud";
 
 export async function generateMetadata() {
   return generatePageMetadata("boernepenge");
@@ -105,23 +106,55 @@ export default async function BoernepengePage() {
 
         <h2>Ekstra ydelser til enlige forsørgere</h2>
         <p>
-          Enlige forsørgere kan derudover være berettiget til disse tilskud. Beløbene
-          fastsættes separat for børnetilskuddene og udbetales ikke som en del af
-          børne- og ungeydelsen — de står på borger.dk under Børnetilskud.
+          Enlige forsørgere kan derudover være berettiget til børnetilskud. Det er en{" "}
+          <strong>egen ydelse</strong> — den udbetales ikke sammen med børne- og
+          ungeydelsen, og beløbene står på en egen side hos{" "}
+          <a
+            href={BARNETILSKUD_2026_KILDE.source}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline"
+          >
+            borger.dk
+          </a>
+          . Satserne for 2026 er:
         </p>
         <ul>
           <li>
-            <strong>Ordinært børnetilskud:</strong> gives automatisk, pr. barn
+            <strong>Ordinært børnetilskud:</strong>{" "}
+            {formatNumber(barnetilskudSats("ordinært").belob, "da")} kr. pr. kvartal pr. barn,
+            gives automatisk til enlige forsørgere
           </li>
           <li>
-            <strong>Ekstra børnetilskud:</strong> gives automatisk (kun én gang uanset
-            antal børn)
+            <strong>Ekstra børnetilskud:</strong>{" "}
+            {formatNumber(barnetilskudSats("ekstra").belob, "da")} kr. pr. kvartal, gives
+            automatisk og kun én gang uanset antal børn
           </li>
           <li>
-            <strong>Særligt børnetilskud:</strong> kræver ansøgning og vurderes
-            individuelt
+            <strong>Særligt børnetilskud ved adoption:</strong>{" "}
+            {formatNumber(barnetilskudSats("særligt-adoption").belob, "da")} kr. pr. kvartal til
+            enlige adoptivforældre
+          </li>
+          <li>
+            <strong>Flerlinger:</strong>{" "}
+            {formatNumber(barnetilskudSats("flerlinger").belob, "da")} kr. pr. kvartal pr. barn
+            ud over det første, til og med det kvartal børnene fylder 7 år
+          </li>
+          <li>
+            <strong>Som pensionist:</strong>{" "}
+            {formatNumber(barnetilskudSats("pensionist-begge").belob, "da")} kr. pr. barn og{" "}
+            {formatNumber(barnetilskudSats("særligt-adoption").belob, "da")} kr. særligt, hvis I
+            begge er pensionister — eller{" "}
+            {formatNumber(barnetilskudSats("pensionist-en").belob, "da")} kr. særligt hvis kun én
+            af jer er pensionist
           </li>
         </ul>
+        <p className="text-sm text-gray-600 dark:text-gray-400">
+          Børnetilskuddene til enlige er skattefrie, og din indkomst påvirker dem ikke.
+          Pensionistbeløbene nedsættes med 3 % af indkomsten over grænsen for
+          pensionstillæg. Kilde: {BARNETILSKUD_2026_KILDE.source}, verificeret{" "}
+          {BARNETILSKUD_2026_KILDE.verifiedAt}.
+        </p>
 
         <div className="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-400 dark:border-blue-500 p-4 my-6 not-prose">
           <p className="font-medium text-blue-800 dark:text-blue-300">Ansøg og administrer</p>

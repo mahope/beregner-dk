@@ -9,6 +9,7 @@ import {
   aarligBelob,
   beregnAftrapning,
 } from "@/lib/borneungeydelse";
+import { BARNETILSKUD_2026, BARNETILSKUD_2026_KILDE, barnetilskudSats } from "@/lib/barnetilskud";
 
 export async function generateMetadata(): Promise<Metadata> {
   const dc = await getCurrentDomainConfig();
@@ -72,7 +73,7 @@ const faqItems = [
   },
   {
     question: "Hvad er forskellen på børnepenge og barnetilskud?",
-    answer: "Børne- og ungeydelsen (børnepenge) får alle forældre automatisk. Barnetilskud får enlige forsørgere oveni: et ordinært børnetilskud pr. barn, et ekstra børnetilskud (kun én gang uanset antal børn) og i særlige tilfælde et særligt børnetilskud. Beløbene står på borger.dk under Børnetilskud.",
+    answer: "Børne- og ungeydelsen (børnepenge) får alle forældre automatisk. Barnetilskud får enlige forsørgere oveni: 1.741 kr. pr. kvartal pr. barn, 1.774 kr. i ekstra børnetilskud (kun én gang uanset antal børn) og 5.025 kr. i særligt børnetilskud ved adoption. Børnetilskuddet er en egen ydelse med egne beløb hos borger.dk.",
   },
   {
     question: "Hvad er ungeydelse?",
@@ -236,41 +237,59 @@ export default function Boernepenge2026Page() {
             </tr>
           </thead>
           <tbody>
+            {BARNETILSKUD_2026.filter(
+              (sats) =>
+                sats.type === "ordinært" ||
+                sats.type === "ekstra" ||
+                sats.type === "særligt-adoption"
+            ).map((sats) => (
+              <tr key={sats.type}>
+                <td>{sats.label}</td>
+                <td>
+                  {da(sats.belob)} kr. pr. {sats.intervalNavn}
+                </td>
+                <td>{sats.bemaerkning}</td>
+              </tr>
+            ))}
             <tr>
-              <td>Ordinært børnetilskud</td>
-              <td>Se borger.dk</td>
-              <td>Pr. barn, gives automatisk</td>
-            </tr>
-            <tr>
-              <td>Ekstra børnetilskud</td>
-              <td>Se borger.dk</td>
-              <td>Kun én gang uanset antal børn</td>
-            </tr>
-            <tr>
-              <td>Særligt børnetilskud</td>
-              <td>Særlig vurdering</td>
-              <td>Kræver ansøgning</td>
+              <td>{barnetilskudSats("flerlinger").label}</td>
+              <td>
+                {da(barnetilskudSats("flerlinger").belob)} kr. pr. kvartal
+                pr. barn ud over det første
+              </td>
+              <td>{barnetilskudSats("flerlinger").bemaerkning}</td>
             </tr>
           </tbody>
         </table>
         <p className="text-sm text-gray-600 dark:text-gray-400 italic">
-          Børnetilskuddene fastsættes og reguleres hvert år. De ligger uden for
+          Børnetilskuddene fastsættes og reguleres hvert år og ligger uden for
           børne- og ungeydelsen, så de står på en egen side hos{" "}
           <a
-            href="https://www.borger.dk/familie-og-boern/familieydelser-oversigt/barnetilskud"
+            href={BARNETILSKUD_2026_KILDE.source}
             className="underline"
             rel="noopener noreferrer"
           >
             borger.dk
           </a>
-          . Brug beregneren ovenfor til børne- og ungeydelsen.
+          . Kilde: {BARNETILSKUD_2026_KILDE.source}, verificeret{" "}
+          {BARNETILSKUD_2026_KILDE.verifiedAt}. Brug beregneren ovenfor til børne- og
+          ungeydelsen.
         </p>
         <p>
-          Det <strong>ordinære børnetilskud</strong> gives automatisk til enlige forsørgere
-          og kræver ikke ansøgning. Det <strong>ekstra børnetilskud</strong> gives også
-          automatisk, men kun til én udbetaling pr. husstand — uanset om du har ét eller
-          flere børn. Det <strong>særlige børnetilskud</strong> kræver en ansøgning og
-          vurderes individuelt.
+          Det <strong>ordinære børnetilskud</strong> på{" "}
+          {da(barnetilskudSats("ordinært").belob)} kr. gives automatisk til enlige
+          forsørgere og kræver ikke ansøgning. Det <strong>ekstra børnetilskud</strong> på{" "}
+          {da(barnetilskudSats("ekstra").belob)} kr. gives også automatisk, men kun
+          til én udbetaling pr. husstand — uanset om du har ét eller flere børn. Begge er
+          skattefrie, og din indkomst har ingen betydning for dem. Det{" "}
+          <strong>særlige børnetilskud ved adoption</strong> på{" "}
+          {da(barnetilskudSats("særligt-adoption").belob)} kr. udbetales automatisk,
+          når du som enlig adopterer et barn. Er du pensionist, får du børnetilskud uden at
+          søge om det: {da(barnetilskudSats("pensionist-begge").belob)} kr. pr. barn
+          og {da(barnetilskudSats("særligt-adoption").belob)} kr. særligt hvis I
+          begge er pensionister, eller {da(barnetilskudSats("pensionist-en").belob)}{" "}
+          kr. særligt hvis kun én af jer er pensionist — nedsættelsen er 3 % af indkomsten
+          over grænsen for pensionstillæg.
         </p>
 
         <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4 my-6 not-prose">
