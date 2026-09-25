@@ -1,7 +1,8 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — C5 FÆRDIG; deploynoter for C4 og C5 er åbne. Næste iteration: CTR på
-`/alder` og `/brok` eller `/dage-til`-landingssider.
+STATUS: KØ — C6 FÆRDIG; deploynoter for C4, C5 og C6 er åbne og kan først verificeres
+efter 07:30-vinduet 2026-09-26. Næste iteration: `/dage-til`-landingssider eller
+diagnose af `/pension` (position 12,2).
 
 ## Fase 3 — trafik-drevet
 
@@ -946,6 +947,77 @@ STATUS: KØ — C5 FÆRDIG; deploynoter for C4 og C5 er åbne. Næste iteration:
   CTR 1,0 %, position 8,3 pr. 2026-09-23; Plausible 277 besøgende/28d pr.
   2026-09-25. Effekt måles først efter mindst 14 dage.
 
+#### 17. [x] FÆRDIG 2026-09-25 — C6 — Svar-først på `/alder` og `/brok`
+
+- **Iteration start:** 2026-09-25 19:05 CEST på `ceo/c6-alder-brok-ctr`. C4- og
+  C5-noterne er åbne, men begge blev merget efter 17:30-vinduet, så de kan først
+  verificeres efter 07:30-vinduet 2026-09-26.
+- **Datagrund:** Search Console 2026-08-26–2026-09-23: `/alder` 5.838 visninger,
+  35 klik, CTR 0,6 %, position 7,8; `/brok` 4.387 visninger, 28 klik, CTR 0,6 %,
+  position 5,3. `/brok` var det laveste hængende udbud (position 5,3 med 0,6 %).
+  `/alder`-søgninger: "aldersberegner" 319v pos 5, "beregn alder" 103v pos 9,
+  "hvor gammel er jeg" 37v pos 35, "alder beregner" 34v pos 9. Plausible: ingen af
+  de to sider står i top-15, så baseline er ukendt.
+- **Fagligt fund før ændring:** `metaDescription` på alle tre domæner hævdede
+  "Født 15/3/1990 = 35 år, 10 måneder og 28 dage" — et frosset svar, der var
+  korrekt for 2025-12-13 og ikke for i dag. Den samme forældede sum lå i det
+  synlige introafsnit på `/alder`. Det er en konkret fejl i den tekst, søgerne
+  ser i snippet.
+- **Autocomplete-research (25. september 2026, kvalitativt signal):**
+  - `forkort brøk` → "forkort brøken 9/12", "forkort brøken 28 35",
+    "forkort brøken mest muligt": intensionen er en *konkret brøk*, ikke
+    brandudtrykket. `brøk` → "brøk til procent", "brøk til decimaltal".
+  - `hvor gammel er jeg` → "hvor gammel er jeg i dage", "hvor gammel er jeg hvis
+    jeg er født i 2009": alder i dage er en reel, selvstændig intension.
+- **Beslutning/implementering:** Samme svar-først-mønster som C1/C3/C4/C5, kun i
+  `page-data.ts` — ingen ny komponent, ingen ændring i kalkulationskode, URL,
+  canonical, hreflang, sitemap eller `/api/v1`.
+  - `/alder` (DA/SE/NO): `metaTitle` er nu spørgsmålsformuleret
+    ("Aldersberegner: hvor gammel er du i år, måneder og dage?", 56 tegn;
+    SE 59, NO 59) og `ogTitle` er identisk med `metaTitle`. `description` (det
+    synlige introafsnit) er selve svaret med **dato præfiks**, så tallene er
+    sporbare og aldrig står som et udateret "faktum". Ny FAQ med spørgsmålet
+    "Hvor gammel er jeg præcist?" og "Hvor gammel er jeg i dage?".
+  - `/brok` (DA/SE): `metaTitle` "Brøkberegner: forkort 6/8 til 3/4 = 0,75 = 75 %"
+    (47 tegn) — head term plus et konkret regnestykke, der matcher
+    "forkort brøken 9/12"-intensionen. Ny FAQ med spørgsmålet "Hvad er 6/8 som
+    decimaltal og procent?". `/brok` findes kun på DA og SE, så NO er urørt.
+- **Talene er verificeret mod koden, ikke antaget:** `forkortBrok(6, 8)` i
+  `src/lib/brok.ts:24-43` giver 3/4, 0,75 og 75 (dækket af eksisterende test i
+  `src/lib/brok.test.ts`). Alderssummen er beregnet med samme algoritme som
+  `AlderBeregner.tsx:160-182` for fødselsdato 1990-03-15 og referencedato
+  2026-09-25: 36 år, 6 måneder, 10 dage og 13.342 dage.
+- **Acceptkriterier:**
+  1. DA/SE/NO viser H1, det konkrete svar og beregneren. **PASS**
+     (`src/app/alder/page.test.tsx`, 4 tests)
+  2. `metaTitle` ≤ 60 tegn, `metaDescription` ≤ 160 tegn, `ogTitle` = `metaTitle`,
+     samme tal i description, metaDescription og ogDescription på alle
+     domæner. **PASS** (`src/lib/page-data.test.ts`, 8 nye testcases)
+  3. Den frosne "35 år, 10 måneder og 28 dage"-sum findes ikke længere på DA, SE
+     eller NO. **PASS** (eksplicit `not.toContain("35 år")`-testcase)
+  4. Ingen ændring i kalkulationskode, URL, canonical, hreflang, sitemap eller
+     `/api/v1`; diffen rører kun `page-data.ts`, `page-data.test.ts` og de to nye
+     routetests. **PASS**
+- **Kvalitetsgate 2026-09-25 19:14 CEST:** `npm run lint` grøn (471 filer),
+  `npm run test` grøn (941/941 tests, 92 filer), `npm run build` grøn (139 sider +
+  typecheck). Målrettet gate først: 41/41 i de tre berørte filer efter to
+  rettelser (ogTitle lå ikke lig med metaTitle, og schema-ordet er
+  lokalt: "fødselsdato"/"födelsedatum"/"fødselsdatoen"). Lokal `next start`
+  på port 3217: DA og SE `/alder` og `/brok` gav 200 med den nye title,
+  description og det synlige svar; `/api/health` svarede `status: ok`.
+  Bemærk: port 3111 var allerede optaget af en anden lokal app, som svarede
+  med et helt andet site — brug en fri port.
+- **Landet:** kode og tests i commit `9adbfe6`; merge til `master` er `7140173`.
+  Begge refs pushet 2026-09-25 19:16 CEST.
+- **Forventet effekt:** 10.225 visninger/28d samlet på position 5-8 med ~0,6 %
+  CTR. Løftes CTR til 2 %, giver det ca. 145 ekstra klik pr. måned. Den konkrete
+  forældede fejl i `/alder`s snippet er desuden fjernet, hvilket alene kan give
+  CTR på de 5.838 visninger.
+- **MÅL:** `/alder` Search Console baseline 5.838 visninger, 35 klik, CTR 0,6 %,
+  position 7,8 pr. 2026-09-23; Plausible-baseline ukendt. `/brok` baseline 4.387
+  visninger, 28 klik, CTR 0,6 %, position 5,3 pr. 2026-09-23; Plausible-baseline
+  ukendt. Effekt måles først efter mindst 14 dage.
+
 ### ❓ Til Mads
 
 - **IndexNow runtime-konfiguration:** Sæt kun i Dokploys production-runtime
@@ -966,16 +1038,17 @@ STATUS: KØ — C5 FÆRDIG; deploynoter for C4 og C5 er åbne. Næste iteration:
 
 ### Dokumenterede kandidatere efter top-5
 
-- `/alder` 5.838 visninger, 35 klik, CTR 0,6 %, position 7,8 (Search Console
-  2026-09-23) og "hvor gammel er jeg" 37v på position 35. Samme svar-først-mønster
-  som C1-C5; spørgsmålet skal også besvares synligt. MÅL: baseline 5.838/35/0,6 %/
-  7,8 pr. 2026-09-23, Plausible-baseline ukendt.
-- `/brok` 4.387 visninger, 28 klik, CTR 0,6 %, position 5,3. Position 5,3 med 0,6 %
-  CTR er det laveste hængende udbud tilbage. MÅL: baseline 4.387/28/0,6 %/5,3
-  pr. 2026-09-23, Plausible-baseline ukendt.
+- ~~`/alder`~~ og ~~`/brok`~~ er begge færdige som C6 den 2026-09-25.
 - `/pension` 4.001 visninger, CTR 1,1 %, men position 12,2 med "pensionsberegner"
   på position 22. Her er indholdet/rankingen problemet, ikke titlen, så den kræver
-  en diagnose før copy-ændring.
+  en diagnose før copy-ændring. MÅL: baseline 4.001 visninger, 45 klik, CTR 1,1 %,
+  position 12,2 pr. 2026-09-23, Plausible 141 besøgende/28d pr. 2026-09-25.
+- `/dage-til/[dato]`: endnu ikke bygget. Datagrund: "hvor mange dage er der til
+  1 december" 959 visninger/2k pos 5 på `/dato` med 1 klik, og på SE
+  "dagar till 31 dec" 322v/0k pos 9 samt "hur många dagar är det kvar till
+  1 oktober" 50v/0k pos 7. Én ægte side pr. spørgsmål, kun datoer med reel
+  efterspørgsel, og ingen tusindvis af tynde varianter. Skal dække både DA og SE
+  og må ikke skade `/dato`, som er 1.029 besøgende/28d og stærkest voksende.
 
 - `/kvadratmeter` 370 besøgende/28d (+131 %): autocomplete og konkurrenter peger på
   gulv, cm/mm, antal ens felter og spild; prose nævner allerede 5-10 %, men koden gør
@@ -1367,11 +1440,22 @@ landmark=lån, piggybank=opsparing osv.).
 - **VERIFICÉR DEPLOY:** C4 svar-først `/tidszone`-tabel, spørgsmålstitel og
   description `c78a7a6` 2026-09-25 18:40 CEST. Verificér efter næste batch-vindue
   med live DA `/tidszone` (synligt svar + tabel) og SE `beraknare.se/tidszone`;
-  HTTP 200 alene utilstrækkeligt.
+  HTTP 200 alene utilstrækkeligt. **Kan først verificeres fra 07:30-vinduet
+  2026-09-26**, fordi merge skete efter 17:30-vinduet 2026-09-25.
 - **VERIFICÉR DEPLOY:** C5 svar-først `/renteberegner` og `/kalorier` `200ce4c`
   2026-09-25 19:05 CEST. Verificér efter næste batch-vindue på live DA: title
   "Renteberegner: 100.000 kr. i 5 år = 1.887 kr./md." med synligt
   "Samlet rente: 13.227 kr." + link til `/rentefradrag`, og title
   "Hvor mange kalorier om dagen? | Kalorieberegner" med synligt
   "TDEE 2.759 kcal ved moderat aktivitet". HTTP 200 alene utilstrækkeligt.
+  **Kan først verificeres fra 07:30-vinduet 2026-09-26.**
+- **VERIFICÉR DEPLOY:** C6 svar-først `/alder` og `/brok` `7140173` 2026-09-25
+  19:16 CEST. Verificér efter næste batch-vindue på live DA `/alder` (title
+  "Aldersberegner: hvor gammel er du i år, måneder og dage?" og synligt
+  "36 år, 6 måneder og 10 dage pr. 25. september 2026" samt at den gamle
+  "35 år, 10 måneder og 28 dage" er væk) og live DA/SE `/brok` (title med
+  "forkort 6/8 til 3/4 = 0,75 = 75 %" og samme svar synligt). HTTP 200 alene
+  utilstrækkeligt. Bemærk: tallene i `/alder`-teksten er dateret, så et senere
+  build-tidspunkt giver en ny dato og nye tal; kontrollér at tekst og tal stadig
+  hænger sammen.
 
