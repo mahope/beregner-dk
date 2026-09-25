@@ -11,7 +11,13 @@ vi.mock("@/components/AffiliateBox", () => ({
   SelvstaendigAffiliate: () => null,
 }));
 vi.mock("@/components/Breadcrumbs", () => ({ default: () => null }));
-vi.mock("@/components/FAQ", () => ({ default: () => null }));
+vi.mock("@/components/FAQ", () => ({
+  default: ({ items }: { items: { question: string; answer: string }[] }) => (
+    <ul>
+      {items.map((item) => <li key={item.question}>{item.question} {item.answer}</li>)}
+    </ul>
+  ),
+}));
 vi.mock("@/components/RelatedCalculators", () => ({ default: () => null }));
 vi.mock("@/components/Sidebar", () => ({ default: () => null }));
 
@@ -36,8 +42,8 @@ describe("moms page", () => {
     {
       locale: "se" as const,
       heading: "Momskalkylator",
-      answer: "Beräkna svensk moms på 25 %. Lägg till 1 000 kr. och få 1 250 kr. Dra av moms eller hitta momsandelen.",
-      schema: "Gratis momskalkylator. Beräkna svensk moms på 25 % med priser inkl. och exkl. moms.",
+      answer: "Beräkna svensk moms på 25 %, 12 % eller 6 %. Lägg till 1 000 kr. och få 1 250 kr. Dra av moms eller hitta momsandelen.",
+      schema: "Gratis momskalkylator. Beräkna svensk moms på 25 %, 12 % och 6 % med priser inkl. och exkl. moms.",
     },
   ])("viser det konkrete svar, schema og beregneren i $locale", async ({ locale, heading, answer, schema }) => {
     vi.mocked(getLocale).mockResolvedValue(locale);
@@ -49,5 +55,15 @@ describe("moms page", () => {
     expect(html).toContain(answer);
     expect(html).toContain(schema);
     expect(html).toContain("Momsværktøj");
+  });
+
+  test("viser formler for alle svenska momssatser i synlig FAQ", async () => {
+    vi.mocked(getLocale).mockResolvedValue("se");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("se"));
+
+    const html = renderToStaticMarkup(await MomsPage());
+
+    expect(html).toContain("1 000 kr × 1,25 = 1 250 kr, × 1,12 = 1 120 kr eller × 1,06 = 1 060 kr");
+    expect(html).toContain("Momsandelen är cirka 20 % vid 25 % moms, 10,71 % vid 12 % och 5,66 % vid 6 %");
   });
 });

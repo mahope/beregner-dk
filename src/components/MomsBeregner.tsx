@@ -8,10 +8,19 @@ import { PrintResult } from "@/components/PrintResult";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { AnimatedNumber, CopyResultButton, ResetButton } from "@/components/ui";
 import { useLocale } from '@/components/LocaleProvider';
-import { formatCurrency, getCurrencySuffix } from '@/lib/format';
+import { formatCurrency, formatNumber, getCurrencySuffix } from '@/lib/format';
+import type { Locale } from '@/lib/i18n';
 
-// Dansk momssats
-const sats = 0.25; // 25%
+const ALLOWED_MOMS_RATES: Record<Locale, readonly number[]> = {
+  da: [25],
+  no: [25],
+  se: [25, 12, 6],
+};
+
+function normalizeMomssats(value: unknown, locale: Locale): number {
+  const parsed = Number(value);
+  return ALLOWED_MOMS_RATES[locale].includes(parsed) ? parsed : 25;
+}
 
 const labels = {
   da: {
@@ -25,7 +34,6 @@ const labels = {
     beloebUdenMoms: "Beløb uden moms",
     beloebInklMoms: "Beløb inkl. moms",
     prisUdenMoms: "Pris uden moms",
-    momsProcent: "Moms (25%)",
     prisInklMoms: "Pris inkl. moms",
     momsSeparator: " + moms = ",
     calculatorName: "Momsberegner",
@@ -34,18 +42,19 @@ const labels = {
     tblMoms: "Moms",
     tblInklMoms: "Inkl. moms",
     infoTitle: "Om dansk moms",
+    loading: "Indlæser moms …",
     info1a: "Den danske momssats er ",
-    info1b: "25%",
-    info2: "For at beregne moms: Beløb × 0,25",
-    info3: "For at finde pris uden moms: Beløb ÷ 1,25",
-    info4: "Momsandelen af en pris inkl. moms er 20% (25/125)",
+    info1b: (rate: string) => `${rate} %`,
+    info2: (factor: string) => `For at beregne pris inkl. moms: Beløb × ${factor}`,
+    info3: (factor: string) => `For at finde pris uden moms: Beløb ÷ ${factor}`,
+    info4: (share: string) => `Momsandelen af en pris inkl. moms er ${share} %`,
     seFormler: "Se formler og beregningsmetoder",
-    formTillaegTitle: "Tillæg moms (25%):",
-    formTillaeg: "Pris inkl. moms = Pris uden moms × 1,25",
+    formTillaegTitle: (rate: string) => `Tillæg moms (${rate} %):`,
+    formTillaeg: (factor: string) => `Pris inkl. moms = Pris uden moms × ${factor}`,
     formFratraekTitle: "Fratræk moms:",
-    formFratraek: "Pris uden moms = Pris inkl. moms ÷ 1,25",
+    formFratraek: (factor: string) => `Pris uden moms = Pris inkl. moms ÷ ${factor}`,
     formFindTitle: "Find momsbeløbet:",
-    formFind: "Moms = Pris inkl. moms - (Pris inkl. moms ÷ 1,25)",
+    formFind: (factor: string) => `Moms = Pris inkl. moms - (Pris inkl. moms ÷ ${factor})`,
   },
   se: {
     hvadBeregne: "Vad vill du beräkna?",
@@ -58,7 +67,6 @@ const labels = {
     beloebUdenMoms: "Belopp utan moms",
     beloebInklMoms: "Belopp inkl. moms",
     prisUdenMoms: "Pris utan moms",
-    momsProcent: "Moms (25%)",
     prisInklMoms: "Pris inkl. moms",
     momsSeparator: " + moms = ",
     calculatorName: "Momsräknare",
@@ -67,18 +75,19 @@ const labels = {
     tblMoms: "Moms",
     tblInklMoms: "Inkl. moms",
     infoTitle: "Om svensk moms",
-    info1a: "Den svenska momssatsen är ",
-    info1b: "25%",
-    info2: "För att beräkna moms: Belopp × 0,25",
-    info3: "För att hitta pris utan moms: Belopp ÷ 1,25",
-    info4: "Momsandelen av ett pris inkl. moms är 20% (25/125)",
+    loading: "Läser in moms …",
+    info1a: "Den valda momssatsen är ",
+    info1b: (rate: string) => `${rate} %`,
+    info2: (factor: string) => `För att beräkna pris inkl. moms: Belopp × ${factor}`,
+    info3: (factor: string) => `För att hitta pris utan moms: Belopp ÷ ${factor}`,
+    info4: (share: string) => `Momsandelen av ett pris inkl. moms är ${share} %`,
     seFormler: "Se formler och beräkningsmetoder",
-    formTillaegTitle: "Lägg till moms (25%):",
-    formTillaeg: "Pris inkl. moms = Pris utan moms × 1,25",
+    formTillaegTitle: (rate: string) => `Lägg till moms (${rate} %):`,
+    formTillaeg: (factor: string) => `Pris inkl. moms = Pris utan moms × ${factor}`,
     formFratraekTitle: "Dra av moms:",
-    formFratraek: "Pris utan moms = Pris inkl. moms ÷ 1,25",
+    formFratraek: (factor: string) => `Pris utan moms = Pris inkl. moms ÷ ${factor}`,
     formFindTitle: "Hitta momsbeloppet:",
-    formFind: "Moms = Pris inkl. moms - (Pris inkl. moms ÷ 1,25)",
+    formFind: (factor: string) => `Moms = Pris inkl. moms - (Pris inkl. moms ÷ ${factor})`,
   },
 } as const;
 
@@ -88,6 +97,14 @@ export default function MomsBeregner() {
   const [beloeb, setBeloeb] = useState<number>(1000);
   const [beregningsType, setBeregningsType] = useState<"tillaegMoms" | "fratraekMoms" | "findMoms">("tillaegMoms");
   const [momssats, setMomssats] = useState<number>(25);
+  const [urlStateKontrolleret, setUrlStateKontrolleret] = useState(false);
+  const effectiveMomssats = normalizeMomssats(momssats, locale);
+  const sats = effectiveMomssats / 100;
+  const rateCopy = {
+    rate: formatNumber(effectiveMomssats, locale),
+    factor: formatNumber(1 + sats, locale, { maximumFractionDigits: 2 }),
+    share: formatNumber((sats / (1 + sats)) * 100, locale, { maximumFractionDigits: 2 }),
+  };
   const hasTracked = useRef(false);
   const hasLoadedUrl = useRef(false);
 
@@ -101,9 +118,10 @@ export default function MomsBeregner() {
       const inputs = urlState.inputs;
       if (inputs.beloeb !== undefined) setBeloeb(inputs.beloeb);
       if (inputs.beregningsType) setBeregningsType(inputs.beregningsType);
-      if (inputs.momssats !== undefined) setMomssats(Number(inputs.momssats));
+      if (inputs.momssats !== undefined) setMomssats(normalizeMomssats(inputs.momssats, locale));
     }
-  }, []);
+    setUrlStateKontrolleret(true);
+  }, [locale]);
 
   const handleReset = useCallback(() => {
     setBeloeb(1000);
@@ -115,14 +133,13 @@ export default function MomsBeregner() {
   const getShareableLink = useCallback(() => {
     const state: CalculationState = {
       type: 'moms',
-      inputs: { beloeb, beregningsType, momssats },
+      inputs: { beloeb, beregningsType, momssats: effectiveMomssats },
       timestamp: Date.now(),
     };
     return generateShareableLink(state);
-  }, [beloeb, beregningsType, momssats]);
+  }, [beloeb, beregningsType, effectiveMomssats]);
 
   const beregning = useMemo(() => {
-    const sats = momssats / 100;
     switch (beregningsType) {
       case "tillaegMoms": {
         // Beløb uden moms → tilføj moms
@@ -132,7 +149,7 @@ export default function MomsBeregner() {
           prisUdenMoms: beloeb,
           momsBeloeb,
           prisInklMoms,
-          momsProcent: momssats,
+          momsProcent: effectiveMomssats,
         };
       }
       case "fratraekMoms": {
@@ -143,7 +160,7 @@ export default function MomsBeregner() {
           prisUdenMoms,
           momsBeloeb,
           prisInklMoms: beloeb,
-          momsProcent: momssats,
+          momsProcent: effectiveMomssats,
         };
       }
       case "findMoms": {
@@ -154,7 +171,7 @@ export default function MomsBeregner() {
           prisUdenMoms,
           momsBeloeb,
           prisInklMoms: beloeb,
-          momsProcent: momssats,
+          momsProcent: effectiveMomssats,
         };
       }
       default:
@@ -162,14 +179,14 @@ export default function MomsBeregner() {
           prisUdenMoms: 0,
           momsBeloeb: 0,
           prisInklMoms: 0,
-          momsProcent: momssats,
+          momsProcent: effectiveMomssats,
         };
     }
-  }, [beloeb, beregningsType, momssats]);
+  }, [beloeb, beregningsType, effectiveMomssats, sats]);
 
   // Track calculation once per session
   useEffect(() => {
-    if (beregning && !hasTracked.current) {
+    if (urlStateKontrolleret && beregning && !hasTracked.current) {
       const cleanupScroll = initScrollDepthTracking("moms");
     const timer = setTimeout(() => {
         trackCalculation("moms");
@@ -177,7 +194,7 @@ export default function MomsBeregner() {
       }, 2000);
       return () => { clearTimeout(timer); cleanupScroll(); };
     }
-  }, [beregning]);
+  }, [beregning, urlStateKontrolleret]);
 
   const formatKr = (amount: number) => formatCurrency(amount, locale);
 
@@ -196,8 +213,9 @@ export default function MomsBeregner() {
       {/* Beregningstype valg */}
       <div>
         <label className="block text-sm font-medium mb-3">{l.hvadBeregne}</label>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div role="group" aria-label={l.hvadBeregne} className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <button type="button"
+            aria-pressed={beregningsType === "tillaegMoms"}
             onClick={() => setBeregningsType("tillaegMoms")}
             className={`p-4 rounded-lg border-2 text-left transition-all ${
               beregningsType === "tillaegMoms"
@@ -209,6 +227,7 @@ export default function MomsBeregner() {
             <div className="text-sm text-gray-500">{l.tillaegDesc}</div>
           </button>
           <button type="button"
+            aria-pressed={beregningsType === "fratraekMoms"}
             onClick={() => setBeregningsType("fratraekMoms")}
             className={`p-4 rounded-lg border-2 text-left transition-all ${
               beregningsType === "fratraekMoms"
@@ -220,6 +239,7 @@ export default function MomsBeregner() {
             <div className="text-sm text-gray-500">{l.fratraekDesc}</div>
           </button>
           <button type="button"
+            aria-pressed={beregningsType === "findMoms"}
             onClick={() => setBeregningsType("findMoms")}
             className={`p-4 rounded-lg border-2 text-left transition-all ${
               beregningsType === "findMoms"
@@ -237,14 +257,15 @@ export default function MomsBeregner() {
       {locale === "se" && (
         <div className="max-w-md">
           <label className="block text-sm font-medium mb-2">Momssats</label>
-          <div className="grid grid-cols-3 gap-2">
+          <div role="group" aria-label="Momssats" className="grid grid-cols-3 gap-2">
             {[{ v: 25, d: "Standard" }, { v: 12, d: "Mat, hotell" }, { v: 6, d: "Böcker, kultur" }].map((o) => (
               <button
                 key={o.v}
                 type="button"
+                aria-pressed={effectiveMomssats === o.v}
                 onClick={() => setMomssats(o.v)}
                 className={`p-3 rounded-lg border-2 text-center transition-all ${
-                  momssats === o.v
+                  effectiveMomssats === o.v
                     ? "border-blue-500 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300"
                     : "border-gray-200 dark:border-gray-600 dark:text-gray-300"
                 }`}
@@ -278,8 +299,14 @@ export default function MomsBeregner() {
         <ResetButton onReset={handleReset} />
       </div>
 
+      {!urlStateKontrolleret && (
+        <p role="status" aria-live="polite" className="rounded-lg bg-gray-50 p-4 text-center text-gray-600 dark:bg-gray-800 dark:text-gray-300">
+          {l.loading}
+        </p>
+      )}
+
       {/* Resultat */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 animate-stagger">
+      <div className={`grid grid-cols-1 md:grid-cols-3 gap-4 animate-stagger ${urlStateKontrolleret ? "" : "hidden"}`}>
         <div className="p-6 bg-gray-50 dark:bg-gray-800 rounded-xl text-center">
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">{l.prisUdenMoms}</p>
           <p className="text-2xl font-bold text-gray-700 dark:text-gray-200">
@@ -287,7 +314,7 @@ export default function MomsBeregner() {
           </p>
         </div>
         <div className="p-6 bg-blue-50 dark:bg-blue-900/20 rounded-xl text-center">
-          <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">{`${l.tblMoms} (${momssats}%)`}</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">{`${l.tblMoms} (${effectiveMomssats}%)`}</p>
           <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
             <AnimatedNumber value={beregning.momsBeloeb} formatFn={formatKr} />
           </p>
@@ -301,7 +328,7 @@ export default function MomsBeregner() {
       </div>
 
       {/* Share, Copy and Print buttons */}
-      <div className="flex justify-center gap-3">
+      <div className={`flex justify-center gap-3 ${urlStateKontrolleret ? "" : "hidden"}`}>
         <CopyResultButton text={`${formatKr(beregning.prisUdenMoms)}${l.momsSeparator}${formatKr(beregning.prisInklMoms)}`} />
         <ShareCalculation
           getShareableLink={getShareableLink}
@@ -315,7 +342,7 @@ export default function MomsBeregner() {
       </div>
 
       {/* Hurtig reference tabel */}
-      <div className="bg-white border rounded-lg overflow-hidden">
+      <div className={`bg-white border rounded-lg overflow-hidden ${urlStateKontrolleret ? "" : "hidden"}`}>
         <div className="p-4 bg-gray-50 border-b">
           <h3 className="font-medium">{l.hurtigReference}</h3>
         </div>
@@ -342,38 +369,38 @@ export default function MomsBeregner() {
       </div>
 
       {/* Info boks */}
-      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+      <div className={`bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 ${urlStateKontrolleret ? "" : "hidden"}`}>
         <h3 className="font-medium text-blue-800 dark:text-blue-200 mb-2 flex items-center gap-2"><Lightbulb className="h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden="true" focusable="false" />{l.infoTitle}</h3>
         <ul className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
-          <li>• {l.info1a}<strong>{l.info1b}</strong></li>
-          <li>• {l.info2}</li>
-          <li>• {l.info3}</li>
-          <li>• {l.info4}</li>
+          <li>• {l.info1a}<strong>{l.info1b(rateCopy.rate)}</strong></li>
+          <li>• {l.info2(rateCopy.factor)}</li>
+          <li>• {l.info3(rateCopy.factor)}</li>
+          <li>• {l.info4(rateCopy.share)}</li>
         </ul>
       </div>
 
       {/* Formler */}
-      <details className="bg-gray-50 dark:bg-gray-800 rounded-lg">
+      <details className={`bg-gray-50 dark:bg-gray-800 rounded-lg ${urlStateKontrolleret ? "" : "hidden"}`}>
         <summary className="p-4 cursor-pointer font-medium dark:text-gray-200">
           {l.seFormler}
         </summary>
         <div className="p-4 pt-0 space-y-4 text-sm dark:text-gray-300">
           <div>
-            <h4 className="font-medium mb-1 dark:text-gray-200">{l.formTillaegTitle}</h4>
+            <h4 className="font-medium mb-1 dark:text-gray-200">{l.formTillaegTitle(rateCopy.rate)}</h4>
             <code className="block bg-white dark:bg-gray-700 p-2 rounded border dark:border-gray-600 dark:text-gray-200">
-              {l.formTillaeg}
+              {l.formTillaeg(rateCopy.factor)}
             </code>
           </div>
           <div>
             <h4 className="font-medium mb-1 dark:text-gray-200">{l.formFratraekTitle}</h4>
             <code className="block bg-white dark:bg-gray-700 p-2 rounded border dark:border-gray-600 dark:text-gray-200">
-              {l.formFratraek}
+              {l.formFratraek(rateCopy.factor)}
             </code>
           </div>
           <div>
             <h4 className="font-medium mb-1 dark:text-gray-200">{l.formFindTitle}</h4>
             <code className="block bg-white dark:bg-gray-700 p-2 rounded border dark:border-gray-600 dark:text-gray-200">
-              {l.formFind}
+              {l.formFind(rateCopy.factor)}
             </code>
           </div>
         </div>
