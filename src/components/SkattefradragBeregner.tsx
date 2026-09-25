@@ -6,34 +6,12 @@ import { CopyResultButton, ResetButton } from "@/components/ui";
 import { initScrollDepthTracking, trackCalculation } from "@/lib/analytics";
 import { CalculationState, ShareableLink, generateShareableLink, getStateFromUrl } from "@/lib/calculation-state";
 import { formatNumber as formatNum, getCurrencySuffix } from '@/lib/format';
-import { beregnRentefradrag } from '@/lib/rentefradrag';
-import { RENTEFRADRAG_2026 } from '@/lib/satser-2026';
+import { beregnSkattefradrag } from '@/lib/skattefradrag';
+import { RENTEFRADRAG_2026, SATSER_2026, SKATTEFRADRAG_2026 } from '@/lib/satser-2026';
 
 const RENTEFRADRAG_HOEJ_PCT = (RENTEFRADRAG_2026.highRate * 100).toLocaleString('da-DK');
 const RENTEFRADRAG_LAV_PCT = (RENTEFRADRAG_2026.lowRate * 100).toLocaleString('da-DK');
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-
-// 2026 fradragssatser og grænser
-const SATSER_2026 = {
-  // Håndværkerfradrag (servicefradrag)
-  haandvaerkerMax: 12400, // pr. person pr. år (2026)
-  servicefradragMax: 6200, // serviceydelser (rengøring mv.)
-
-  // Kørselsfradrag
-  koerselBundgraense: 24, // km enkelt vej (12 km = 24 km dagligt)
-  koerselSatsLav: 2.28, // kr./km for 25-120 km
-  koerselSatsHoej: 1.14, // kr./km over 120 km
-  koerselDageMax: 216, // max arbejdsdage
-
-
-  // Fagforening og a-kasse
-  fagforeningMax: 7000, // max fradrag for fagforening (2026)
-
-  // Befordringsfradrag
-  // Generel skatteprocent for fradrag
-  kommuneskatSnit: 25.1, // gennemsnitlig kommuneskat
-  bundskat: 12.01,
-};
 
 export default function SkattefradragBeregner() {
   const { locale } = useLocale();
@@ -87,82 +65,22 @@ export default function SkattefradragBeregner() {
   useEffect(() => initScrollDepthTracking("skattefradrag"), []);
 
   const resultat = useMemo(() => {
-    // Kørselsfradrag
-    let koerselsFradrag = 0;
-    const km = Number(afstandKm);
-    const dage = Math.min(Number(arbejdsdage) || 216, SATSER_2026.koerselDageMax);
-    if (km > SATSER_2026.koerselBundgraense / 2) {
-      const dagligKm = km * 2; // tur-retur
-      const fradragsKm = dagligKm - SATSER_2026.koerselBundgraense;
-      if (fradragsKm > 0) {
-        const lavKm = Math.min(fradragsKm, 120 - SATSER_2026.koerselBundgraense);
-        const hoejKm = Math.max(0, fradragsKm - lavKm);
-        koerselsFradrag = Math.round((lavKm * SATSER_2026.koerselSatsLav + hoejKm * SATSER_2026.koerselSatsHoej) * dage);
-      }
-    }
-
-    // Rentefradrag
-    const rente = Number(aarligRente) || 0;
-    const renteFradrag = rente; // fuldt fradragsberettiget
-    // Beløbsgrænsebaseret to-trinssats, 33,6 % op til 50.000 kr. (enlig), 25,6 % over
-    const renteBesparelse = Math.round(beregnRentefradrag(rente, "single").besparelse);
-
-    // Fagforening + a-kasse
-    const fagforeningBeloeb = Math.min(Number(fagforening) || 0, SATSER_2026.fagforeningMax);
-    const aKasseBeloeb = Number(aKasse) || 0; // fuldt fradrag
-    const fagOgAkasse = fagforeningBeloeb + aKasseBeloeb;
-
-    // Håndværkerfradrag
-    const haandvaerkerBeloeb = Math.min(Number(haandvaerker) || 0, SATSER_2026.haandvaerkerMax);
-    const serviceBeloeb = Math.min(Number(serviceydelser) || 0, SATSER_2026.servicefradragMax);
-    const boligfradrag = haandvaerkerBeloeb + serviceBeloeb;
-
-    // Øvrige
-    const donationerBeloeb = Number(donationer) || 0;
-    const oevrigeBeloeb = Number(oevrigeFradrag) || 0;
-    const oevrigtTotal = donationerBeloeb + oevrigeBeloeb;
-
-    // Samlet
-    const samletFradrag = koerselsFradrag + renteFradrag + fagOgAkasse + oevrigtTotal;
-    // Boligfradrag er skattefradrag direkte, ikke ligningsmæssigt
-    const skattesats = (SATSER_2026.kommuneskatSnit + SATSER_2026.bundskat) / 100;
-    const besparelseAlmindelig = Math.round(samletFradrag * skattesats);
-    const besparelseBoligfradrag = Math.round(boligfradrag * 0.26); // 26% skatteværdi af servicefradrag
-    const totalBesparelse = besparelseAlmindelig + besparelseBoligfradrag + (renteBesparelse - Math.round(renteFradrag * skattesats));
-
-    const harFradrag = samletFradrag > 0 || boligfradrag > 0;
-
-    if (!hasTracked.current && harFradrag) {
+    const r = beregnSkattefradrag({
+      afstandKm: Number(afstandKm),
+      arbejdsdage: Number(arbejdsdage),
+      aarligRente: Number(aarligRente),
+      fagforening: Number(fagforening),
+      aKasse: Number(aKasse),
+      haandvaerker: Number(haandvaerker),
+      serviceydelser: Number(serviceydelser),
+      donationer: Number(donationer),
+      oevrigeFradrag: Number(oevrigeFradrag),
+    });
+    if (r && !hasTracked.current) {
       hasTracked.current = true;
       trackCalculation("skattefradrag");
     }
-
-    if (!harFradrag) return null;
-
-    const poster = [
-      ...(koerselsFradrag > 0 ? [{ navn: "Kørselsfradrag", beloeb: koerselsFradrag, type: "ligningsmæssigt" as const }] : []),
-      ...(renteFradrag > 0 ? [{ navn: "Rentefradrag", beloeb: renteFradrag, type: "kapitalindkomst" as const }] : []),
-      ...(fagforeningBeloeb > 0 ? [{ navn: "Fagforening", beloeb: fagforeningBeloeb, type: "ligningsmæssigt" as const }] : []),
-      ...(aKasseBeloeb > 0 ? [{ navn: "A-kasse", beloeb: aKasseBeloeb, type: "ligningsmæssigt" as const }] : []),
-      ...(haandvaerkerBeloeb > 0 ? [{ navn: "Håndværkerfradrag", beloeb: haandvaerkerBeloeb, type: "boligfradrag" as const }] : []),
-      ...(serviceBeloeb > 0 ? [{ navn: "Serviceydelser", beloeb: serviceBeloeb, type: "boligfradrag" as const }] : []),
-      ...(donationerBeloeb > 0 ? [{ navn: "Donationer/gaver", beloeb: donationerBeloeb, type: "ligningsmæssigt" as const }] : []),
-      ...(oevrigeBeloeb > 0 ? [{ navn: "Øvrige fradrag", beloeb: oevrigeBeloeb, type: "ligningsmæssigt" as const }] : []),
-    ];
-
-    return {
-      samletFradrag: samletFradrag + boligfradrag,
-      // Brug den rentekorrigerede besparelse (rentefradrag værdisættes til
-      // rentefradragsværdien, ikke den fulde skattesats).
-      totalBesparelse: Math.round(totalBesparelse),
-      besparelsePrMd: Math.round(totalBesparelse / 12),
-      poster,
-      koerselsFradrag,
-      renteFradrag,
-      renteBesparelse,
-      fagOgAkasse,
-      boligfradrag,
-    };
+    return r;
   }, [afstandKm, arbejdsdage, aarligRente, fagforening, aKasse, haandvaerker, serviceydelser, donationer, oevrigeFradrag]);
 
   const handleReset = useCallback(() => {
@@ -204,7 +122,15 @@ export default function SkattefradragBeregner() {
           </div>
         </div>
         <p className="text-xs text-gray-500 dark:text-gray-400">
-          Bundgrænse: {SATSER_2026.koerselBundgraense} km dagligt (12 km én vej). Fradrag gælder uanset transportmiddel.
+          Bundgrænse: {SATSER_2026.koerselBundgraense} km dagligt (12 km én vej), herefter{" "}
+          {SATSER_2026.koerselSatsLav.toLocaleString("da-DK")} kr./km op til{" "}
+          {SATSER_2026.koerselHoejGraense} km og{" "}
+          {SATSER_2026.koerselSatsHoej.toLocaleString("da-DK")} kr./km over. Fradrag gælder
+          uanset transportmiddel. Samme satser som på{" "}
+          <a href="/befordringsfradrag" className="underline hover:text-gray-700 dark:hover:text-gray-200">
+            befordringsfradraget
+          </a>
+          .
         </p>
       </div>
 
@@ -235,7 +161,7 @@ export default function SkattefradragBeregner() {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label htmlFor="fagforening" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Fagforening (max {formatKr(SATSER_2026.fagforeningMax)})
+              Fagforening (max {formatKr(SKATTEFRADRAG_2026.fagforeningMax)})
             </label>
             <div className="relative">
               <input id="fagforening" type="number" value={fagforening} onChange={(e) => setFagforening(e.target.value)}
@@ -264,7 +190,7 @@ export default function SkattefradragBeregner() {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label htmlFor="haandvaerker" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Håndværkerydelser (max {formatKr(SATSER_2026.haandvaerkerMax)})
+              Håndværkerydelser (max {formatKr(SKATTEFRADRAG_2026.haandvaerkerMax)})
             </label>
             <div className="relative">
               <input id="haandvaerker" type="number" value={haandvaerker} onChange={(e) => setHaandvaerker(e.target.value)}
@@ -275,7 +201,7 @@ export default function SkattefradragBeregner() {
           </div>
           <div>
             <label htmlFor="serviceydelser" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Serviceydelser (max {formatKr(SATSER_2026.servicefradragMax)})
+              Serviceydelser (max {formatKr(SKATTEFRADRAG_2026.servicefradragMax)})
             </label>
             <div className="relative">
               <input id="serviceydelser" type="number" value={serviceydelser} onChange={(e) => setServiceydelser(e.target.value)}
@@ -286,7 +212,9 @@ export default function SkattefradragBeregner() {
           </div>
         </div>
         <p className="text-xs text-gray-500 dark:text-gray-400">
-          Kun arbejdsløn kan fradrages (ikke materialer). Beløb pr. person pr. år.
+          Kun arbejdsløn kan fradrages (ikke materialer), og betalingen skal ske digitalt.
+          Beløb pr. person pr. år. Loftet for 2026 er endnu ikke verificeret mod en
+          myndighedskilde, så de to felter er vejledende — tjek beløbet hos skat.dk.
         </p>
       </div>
 

@@ -267,6 +267,38 @@ export const RENTEFRADRAG_2026 = {
   highRateLimitCouple: 100000,
 } as const;
 
+/**
+ * Skattefradrag — beløbsloft og fradragsværdi.
+ *
+ * Kørselsfradragets satser ligger i `SATSER_2026` og er delt med
+ * `/befordringsfradrag`, så de to sider ikke kan komme ud af trit.
+ *
+ * `haandvaerkerMax` og `servicefradragMax` er vores sider og værktøjets
+ * nuværende tal. De er **ikke** verificeret mod en primær 2026-kilde endnu:
+ * skat.dk's fradragssider er JS-renderede, og den sekundære kilde, der nævner
+ * beløbsloft for 2026, modsiger beløbene (se IMPLEMENTATION_PLAN.md, ❓ Til
+ * Mads). Indtil en primær kilde er fundet, er værktøjet derfor mærket
+ * vejledende for disse to felter, og tallene må ikke præsenteres som sikre.
+ *
+ * `boligfradragSkattevaerdi` er en forenkling: de præcise fradragsværdier er
+ * progressive, så 26 % er et vejledende gennemsnit for de samlede
+ * boligjob-/servicefradrag, ikke en myndighedssats.
+ */
+export const SKATTEFRADRAG_2026 = {
+  verifiedAt: "2026-09-25",
+  sources: {
+    koerselsfradrag: "https://skat.dk/borger/fradrag/koerselsfradrag",
+    haandvaerkerfradrag:
+      "https://borgerhaandbog.dk/skat-og-personlig-oekonomi/haandvaerkerfradrag",
+    rentefradrag: RENTEFRADRAG_2026.officialRules,
+  },
+  haandvaerkerMax: 12400, // pr. person pr. år (Boligjobordningen)
+  servicefradragMax: 6200, // serviceydelser, særskilt loft pr. person pr. år
+  fagforeningMax: 7000, // max fradrag for fagforening pr. år
+  koerselDageMax: 216, // antal fradragsberettigede arbejdsdage (indtastet af brugeren)
+  boligfradragSkattevaerdi: 0.26, // vejledende fradragsværdi for boligjob/service
+} as const;
+
 export type Barsel2026 = typeof BARSEL_2026;
 export type Su2026 = typeof SU_2026;
 export type Satser2026 = typeof SATSER_2026;
