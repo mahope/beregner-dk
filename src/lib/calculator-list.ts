@@ -161,7 +161,7 @@ const relatedMap: Record<string, string[]> = {
   "/fart": ["/tidsberegner", "/braendstof", "/kalorier", "/temperatur", "/dato"],
   "/enheder": ["/temperatur", "/kvadratmeter", "/procent", "/gennemsnit", "/valuta"],
   "/del-regning": ["/procent", "/rabat", "/budget", "/rejsebudget", "/enhedspris"],
-  "/boliglaan": ["/renteberegner", "/laaneberegner", "/andelsbolig", "/ejendomsvaerdiskat", "/rentefradrag", "/flyttebudget", "/boligsalg"],
+  "/boliglaan": ["/renteberegner", "/laaneberegner", "/andelsbolig", "/ejendomsvaerdiskat", "/rentefradrag", "/flyttebudget"],
   "/renteberegner": ["/boliglaan", "/laaneberegner", "/opsparing", "/procent", "/rentefradrag"],
   "/husleje": ["/boligstoette", "/boliglaan", "/ejendomsvaerdiskat", "/loen-efter-skat", "/kvadratmeter", "/flyttebudget"],
   "/boligstoette": ["/husleje", "/boernepenge", "/loen-efter-skat", "/su", "/dagpenge", "/flyttebudget"],
@@ -182,7 +182,7 @@ const relatedMap: Record<string, string[]> = {
   "/ejendomsvaerdiskat": ["/boliglaan", "/boligstoette", "/husleje", "/rentefradrag", "/loen-efter-skat", "/boligsalg"],
   "/arveafgift": ["/pension", "/efterloen", "/loen-efter-skat", "/opsparing", "/rentefradrag"],
   "/moms": ["/procent", "/timepris", "/loen-efter-skat", "/valuta", "/renteberegner"],
-  "/procent": ["/moms", "/rabat", "/renteberegner", "/opsparing", "/bmi"],
+  "/procent": ["/moms", "/rabat", "/renteberegner", "/opsparing", "/bmi", "/brok"],
   "/bmi": ["/kalorier", "/alder", "/procent", "/dato", "/tidsberegner"],
   "/kalorier": ["/bmi", "/procent", "/alder", "/dato", "/tidsberegner"],
   "/promille": ["/bmi", "/kalorier", "/rygestop", "/alkoholenheder", "/alder", "/procent"],
@@ -221,11 +221,25 @@ const relatedMap: Record<string, string[]> = {
   "/studielaan": ["/su", "/laaneberegner", "/forbrugslaan", "/renteberegner", "/opsparing"],
   "/ugenummer": ["/dato", "/alder", "/nedtaelling", "/tidsberegner", "/termin"],
   "/flyttebudget": ["/husleje", "/budget", "/boliglaan", "/boligstoette", "/kvadratmeter"],
-  "/boligsalg": ["/boliglaan", "/ejendomsvaerdiskat", "/andelsbolig", "/kvadratmeter", "/flyttebudget"],
+  "/boligsalg": ["/ejendomsvaerdiskat", "/andelsbolig", "/kvadratmeter", "/flyttebudget", "/boliglaan"],
 };
 
 /**
+ * The declared related links, exposed so tests can hold `relatedMap` to the
+ * same contract the renderer does. Read-only: only this module may edit it.
+ */
+export const RELATED_CALCULATORS: Readonly<Record<string, readonly string[]>> =
+  relatedMap;
+
+/**
  * Get related calculators for a given page, locale-filtered.
+ *
+ * `relatedMap` is the contract: every href declared there is rendered. An
+ * earlier `slice(0, 5)` silently dropped the tail, so 13 pages promised a link
+ * they never showed — `/dato`, `/tidsberegner` and `/kvadratmeter` all lost
+ * `/ugenummer` or `/flyttebudget`, and `/promille` lost `/procent`. The
+ * `MAX_RELATED` ceiling in `calculator-list.test.ts` keeps the grid at a
+ * balanced 3x2 instead.
  */
 export function getRelatedCalculators(
   currentHref: string,
@@ -239,8 +253,7 @@ export function getRelatedCalculators(
   const related = relatedHrefs
     .filter((href) => availableHrefs.has(href))
     .map((href) => allCalcs.find((c) => c.href === href)!)
-    .filter(Boolean)
-    .slice(0, 5);
+    .filter(Boolean);
 
   if (related.length === 0) {
     return allCalcs.filter((c) => c.href !== currentHref).slice(0, 5);
