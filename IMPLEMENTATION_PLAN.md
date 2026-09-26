@@ -24,7 +24,19 @@ sider er slashless, og `/moms/` 308'er korrekt), **manglende `no` i hreflang**
 (beregner.no 404'er på `/dato`, `/moms`, `/procent`, `/tidszone`, så der er
 intet at annotere) og **`/procent`** (7 forekomster af "rabat" + formler +
 hverdag + tricks + FAQ live, så 0,1 % CTR på 149.318 visninger er *placering*,
-ikke et indholdshul — kandidat 9 er lukket på indholdssiden). Se opgave 71.
+ikke et indholdshul — kandidat 9 er lukket på indholdssiden). En fjerde er
+lukket bagefter: **en crawl af alle 128 sitemap-URL'er** fandt 0 ikke-200, 0
+manglende titler, 0 manglende descriptions og præcis ét H1 på hver side, så
+site-wide metadata er *ikke* en voksende klasse. Se opgave 71.
+
+**Den største vækstmulighed på sitet ligger fast i en dataanmodning.** De
+352.092 visninger på `/procent`, `/dato` og `/tidsberegner` (59 % af sitets
+alle visninger) har 1.103 klik, og intet i de data jeg får kan skelne mellem
+*placering* (langhale på pos. 20-60 → interne links) og *snit* (pos. 5-8, men
+brugerne springer over → ny titel). Begge er billige, men modsatte, rettelser.
+Der ligger nu **én konkret anmodning** under ❓ Til Mads om de tre sideres
+søgestreng-rækker, med hvad hver kolonne afgør.
+
 
 **C43 fandt den eneste titelkollision på hele sitet — og den var lavet
 dagen før.** C36 gav artiklen `blog/hvad-er-klokken-i-usa-naar-den-er-12-i-danmark`
@@ -4536,6 +4548,17 @@ første halvdel af denne liste er fra DA-fladen, anden halvdel fra SE — de er
 - **Verifikation:** `npm run lint` grøn (532 filer), `npm run test` grøn
   (1397/1397, 133 filer), `npm run build` grøn (141 sider). Kun 5 minutters
   diff, så ingen ekstra review.
+- **Hele sitet gennemgået i samme time (negativt fund, lukker endnu en klasse).**
+  Standalone-buildet kørende på `:3111`, alle **128** DA-URL'er fra
+  `sitemap.xml` hentet og målt på status, `<title>`, meta description,
+  canonical og H1-antal:
+  **0** ikke-200, **0** sider mangler titel, **0** mangler description,
+  korteste titel 42 tegn, korteste description 55 tegn, og **alle 128 har
+  præcis ét `<h1>`**. Den eneste afvigelse var canonical mod `localhost:3000`,
+  hvilket er et lokalt artefakt — buildets fallback-baseURL — fordi live er
+  kontrolleret og korrekt. **Lukket: site-wide metadata er ikke en voksende
+  klasse.** Tilstanden kan genskabes med de tre linjer i `scripts/seo-check.sh`,
+  men kun for én URL ad gangen; en crawl af hele sitemap'en er hurtigere.
 - **Landet:** kode `d2ec667` på branch `ceo/dage-til-og-c44`.
 - **MÅL:** ingen trafikbaseret måling — ændringen er en vagt, ikke en
   indholdsændring. De 14 sider måles først 2026-10-10, fordi de er nye fra C7.
@@ -4860,7 +4883,36 @@ efter datagrund:
   kontrakt i Danger Zones: en tredjepart, der har integreret standardværdien,
   ville få et andet nettolønstal uden varsel. Skal jeg rette den, så
   `/api/v1/loen` læser `SATSER_2026` (og dokumentationen følger med), eller
-  behøver API'en at beholde de afrundede tal for bagward compatibility?
+   behøver API'en at beholde de afrundede tal for bagward compatibility?
+- **Én konkret dataanmodning låser sitets største vækstmulighed (C44,
+  2026-09-26).** Jeg kan ikke diagnosticere `/procent` (149.318 visninger,
+  **95 klik**, CTR 0,1 %, pos. 7,4) med de tal jeg får. Der er to helt
+   forskellige sygdomme, som ser ens ud i de data jeg har:
+   1. **Placering:** gennemsnitlig position 7,4 trækkes op af nogle få
+      hovedord, mens resten af de 149.318 visninger er langhale, hvor siden
+      ligger på 20-60. Så er svaret indhold/linkvægt, ikke titel.
+   2. **Snit:** siden vises på position 5-8 og brugerne springer den over. Så
+      er svaret titel/description — og det er den billigste rettelse, der
+      findes, fordi trafikken allerede er der.
+   De to kræver hver deres handling, og intet i `page-data.ts`, GSC's
+   side-rækker eller Plausible kan skelne mellem dem. **Anmodning:** én
+   Search Console-eksport, samme 28 dage som de andre snapshots
+   (2026-08-27 – 2026-09-24), med **søgestreng-rækker** — ikke siderækker — for
+   `/procent`, `/dato` og `/tidsberegner`. De tre dækker 352.092 visninger
+   og 1.103 klik, altså 59 % af alle visninger på sitet. Gerne som CSV
+   (`Search Console → Performance → Søgninger`, kolonnerne Søgning, Visninger,
+   Klik, CTR, Position). **Hvad hver kolonne afgør:**
+   - *Én søgning med >1.000 visninger på position 8-15* → åben sørgsmåls-side
+     til den spørgsmålsform, bygget på samme svar-først-mønster som
+     `dage-til` (C7) og artiklerne (C35/C36).
+   - *Mange søgninger med position 20+* → åben **placering**; så er næste
+     opgave interne links fra de trafikstærke forældre, ikke copy.
+   - *Position 5-8 med >1.000 visninger på flere forskellige søgninger* →
+   åben **snit**; så skriver jeg ny titel + description pr. side og måler
+     14 dage.
+   Uden disse rækker går næste iteration enten i stå eller på gæt, og det er
+   præcis de to greb, mine seneste otte iterationer har haft brug for.
+
 
 ### Dokumenterede kandidatere efter top-5
 
