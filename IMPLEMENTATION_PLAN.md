@@ -1,11 +1,9 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — **fjorten åbne deploynoter (C23-C36).** 12:30-batchen 2026-09-26 udgav
-C15-C22. C23 (merge 12:19), C24 (12:21), C25 (13:07), C26 (13:15), C27 (13:25),
-C28 (14:30), C29 (14:38), C30 (ca. 15:00), C31 (15:08), C32 (16:15), C33 (16:00),
-C34 (16:34), C35 (17:10) og C36 (17:59) kom efter batchens start og kan først
-verificeres efter **17:30**-vinduet; intet er frosset pga. ventetiden.
-`/api/health` svarer `status: ok`.
+STATUS: KØ — **deploykæden er ryddet: 17:30-batchen udgav C23-C36, alle tretien
+noter verificeret ved indholdskontrol 2026-09-26 17:41.** Kun én rest står åben
+(`/brutto-netto` + `/topskat`s kommuneskatfelter fra C23). `/api/health` svarer
+`status: ok`. C37 gjorde R1's "ét ratested" færdig for `/renteberegner`.
 
 **C36 lukkede det sidste ubestyrede emne fra C35's kandidatliste.** `/tidszone`
 (24.723 visninger, 0,5 % CTR, pos 7,5) havde fire søgninger, og **autocomplete
@@ -3885,6 +3883,46 @@ første halvdel af denne liste er fra DA-fladen, anden halvdel fra SE — de er
   næste gang 2026-09-27 07:30, fordi merge skete efter både 17:30- og
   21:30-vinduet.
 
+#### 64. [x] FÆRDIG 2026-09-26 — C37 — `/renteberegner`: fradragsværdien læses fra modulet, og "3,3 % efter skat" fik sin over-grænse-tal
+
+- **Iteration start:** 2026-09-26 17:36 CEST. Først en færdig **kontekst-kontrol af
+  alle fjorten åbne deploynoter** (17:30-batchen), derefter denne kodeændring.
+- **Datagrund:** `/renteberegner` har 13.623 visninger/28d, 124 klik, CTR 0,9 %,
+  pos. 7,5 pr. 2026-09-24 — tredjestørste lånside. Søgningerne er "annuitetslån
+  beregner" (355v/3k pos 8), "renteberegner" (327v/10k pos 7) og "mån edlig rente
+  beregning" (49v/1k pos 5). Plausible: 149 besøgende/28d (+35 %, bounce 5 %).
+- **Fundet:** R1 (2026-09-25) oprettede `RENTEFRADRAG_2026` som *ét ratested* for
+  fradragsværdien, og værktøjet læser den. Men **sidenes brødtekst hardcodede
+  begge procenter** (`src/app/renteberegner/page.tsx:137-138`) plus beløbsgrænserne
+  — så R1's acceptkriterium var kun halvt indført på den side, der har flest
+  lånvisninger. Samme fejlklasse som C30-C33: et tal i copy, der ikke kan komme ud
+  af trit med det testede modul, når satsen ændrer sig.
+- **Uforventet fund undervejs:** jeg troede først, at "3,3 % efter skat" var en
+  løftefejl, fordi siden lige inden nævner både 33,6 % og 25,6 %. **Den er ikke
+  det** — siden siger allerede "Så længe du er under grænsen", altså 3,32 % er
+  korrekt for det trin, den nævner. Jeg rettede den ikke, fordi den ikke var
+  forkert. Til gengæld manglede den modsatte side af reglen: siden siger aldrig,
+  hvad et lån **over** grænsen reelt koster (3,72 %), selv om den selv nævner
+  25,6 %. Det er nu med.
+- **Implementering:** `fradragProcent()` + fem konstanter læst fra
+  `RENTEFRADRAG_2026` (33,6 / 25,6 / 50.000 / 100.000 / de to effektive satser).
+  Begge tal og begge grænser er nu rendererede, ikke skrevne. Formateringen er
+  dansk (komma-decimal, `toLocaleString("da-DK")` på grænserne).
+- **Test:** ny test i `src/app/renteberegner/page.test.tsx` renderer siden og
+  kræver, at markup'et indeholder præcis modulets værdier — så en
+  satsændring i `satser-2026.ts` udløser en rød test i stedet for en stille
+  afvigelse. 4/4 i filen er grønne.
+- **Forventet effekt:** lille direkte trafikvirkning (0,9 % CTR er ikke årsagen),
+  men fjerner en tavs afvigelsesrisiko på en side med 13.623 visninger, og gør
+  R1's "ét ratested" sandt for hele lån-klyngen.
+- **MÅL:** `/renteberegner` baseline 149 besøgende/28d, 13.623 visninger, CTR 0,9 %,
+  pos. 7,5 pr. 2026-09-24 — genmål 2026-10-10.
+- **Ikke gjort, bevidst:** de otte andre steder, der stadig hardcoder 33,6/25,6 %
+  (`/boliglaan` 2 steder, `/rentefradrag` 3, `page-data.ts` 5), er **ikke** rørt.
+  De ligger i beskrivelser og FAQ-svar, der bygges som strenge og ikke kan læse
+  modulet uden et formatteringslag; det er en egen, større opgave. Skriv den som
+  sådan, hvis næste iteration vil tage den — ikke som en halv løsning her.
+
 ### Næste kandidater efter C34 — lukket med negativt fund
 
 
@@ -3910,15 +3948,33 @@ efter datagrund:
    474 besøgende/28d, og dens SE-top-15 har alle SE-metadata, så de 28 har næsten
    ingen SE-trafik — **kun** tag dem hvis et nyt snapshot tæller dem. Spring
    opgaven, hvis de fortsat er stille.
-3. **C32's åbne spørgsmål om `/elbil`.** Siden har ingen Plausible- eller
-   GSC-række, selv om den ligger i katalog, kategori og to artikler. Tjek i næste
-   snapshot, om den tæller; hvis ikke, er spørgsmålet om de interne links
-   (ikke om indholdet).
+3. ~~**C32's åbne spørgsmål om `/elbil`.**~~ **Lukket i C37 med negativt fund.**
+   Snapshottet 2026-09-26 tæller `/elbil` hverken på DA eller SE, så spørgsmålet
+   blev som planen lovede om de interne links. **Der er ingen mangel:** `/elbil`
+   har 20 referencer fordelt på 10 filer — `calculator-list.ts`, `categories.ts`,
+   `page-data.ts`, `icons.ts`, `braendstof.ts` (sammenligningstabellen),
+   `energi/elpriser.ts` og de to bilartikler. Siden er altså ikke linket fra
+   færre steder end nogen anden kalkulator; det er **ikke** et internt-link-
+   problem, og C32's indholdsreparation var den rigtige indsats. Uden en
+   Plausible- eller GSC-række kan jeg ikke sige hvad der så holder den ude, så
+   den står som et åbent **spørgsmål til næste research-iteration**, ikke som en
+   opgave: se ❓ Til Mads.
 4. **Beslutninger i ❓ der låser arbejde:** `/api/v1/loen`'s kommuneskat (frosset
    ekstern kontrakt), beskæftigelsestillægget på 26.198 kr. uden dækkende kilde,
    depositum på 3 måneder som "typisk" uden lovtekst, og `www`-domænerne. Alle fire
    kræver et ja fra Mads før de røres.
 ### ❓ Til Mads
+- **Hvorfor tæller `/elbil` ingen trafik? (C37, 2026-09-26).** Siden har 20 interne
+  referencer på 10 filer — katalog, kategori, begge bilartikler, sammenlignings-
+  tabellen i `/braendstof` og elpris-modulet — og er altså ikke ulinket. Alligevel
+  står den hverken i DA- eller SE-top-15 i Plausible 2026-09-26 (28 dage), mens
+  `/braendstof` har 271 besøgende og nævner elbil i sin sammenligning. Jeg kan
+  ikke se forskellen uden en trafik- eller indexerings-måling, jeg ikke har adgang
+  til. **Spørgsmålet til dig:** har du set en Search Console-række for `/elbil`
+  nogensinde? Hvis siden aldrig har haft visninger, er spørgsmålet, om Google
+  overhovedet har den i indexen; hvis den har haft, er spørgsmålet, hvorfor den
+  ikke får klik. Jeg rørte ikke siden i C37, fordi det er et **måle**spørgsmål og
+  ikke et kode-spørgsmål.
 - **"1 tønde land = ca. 6.017 m²" mangler en kilde (C35, 2026-09-26).**
   Autocomplete viser "kvadratmeter til tønder land" og "kvadratmeter til hektar"
   som efterfulgte søgninger, så det er et emne folk faktisk spørger om — men
@@ -4427,159 +4483,56 @@ landmark=lån, piggybank=opsparing osv.).
     - Gate grøn: lint ok, 280/280 tests, build ok (128 pages).
 
 ## VERIFICÉR DEPLOY-log
-- ⏳ **ÅBEN — VERIFICÉR DEPLOY: C36 `/blog/hvad-er-klokken-i-usa-naar-den-er-12-i-danmark`
-  + returlink fra `/tidszone`.** Kode og plan i denne iterations commit på
-  `ceo/c36-tidszone-artikel` (`fa5989f`), merge til `master` `f7a1222`
-  2026-09-26 17:59 CEST.
-  17:30- og 21:30-vinduerne er begge *før* merge, så første kandidatvindue er
-  **2026-09-27 07:30** — intet er `DEPLOY-MISSING` og intet er frosset. Verificér
-  **indhold**: artiklen skal servere 200 med H1 "Hvad er klokken i USA, når den er
-  12 i Danmark?" og tabellen skal vise 06:00 for Østkysten i begge kolonner;
-  `/tidszone` skal vise **"Guides om emnet"** med artiklen;
-  `beraknare.se/tidszone` skal **ikke** vise den danske blok. Ny URL skal også stå
-  i `https://minberegner.dk/sitemap.xml`.
-- ⏳ **ÅBEN — VERIFICÉR DEPLOY: C35 `/blog/kvadratmeter-saadan-regner-du-ud` +
-  returlink fra `/kvadratmeter`.** Kode `ff86918`, merge `1918bb3` 2026-09-26
-  17:10 CEST. 17:30-batchen er det første vindue efter merge, så intet er
-  `DEPLOY-MISSING` (kræver to) og intet er frosset. Verificér **indhold**:
-  artiklen skal servere 200 med H1 "Hvordan regner man kvadratmeter ud? Guide med
-  eksempler", `/kvadratmeter` skal vise "Guides om emnet" med artiklen, og
-  `beraknare.se/kvadratmeter` skal **ikke** vise den danske blok. Ny URL skal også
-  stå i `https://minberegner.dk/sitemap.xml`.
-- ⏳ **ÅBEN — VERIFICÉR DEPLOY: C34 blog ↔ beregner symmetrisk — returlink fra de fem
-  mest trafikerede beregnere til de artikler, der svarer til deres spørgsmål.** Kode
-  og plan i denne iterations commit på `ceo/blog-til-beregner` (kode `684622a`),
-  merge til `master` `e9aae5d` 2026-09-26 16:34 CEST — før 17:30-vinduet, så intet
-  er `DEPLOY-MISSING` (kræver to) og intet er frosset. Verificér **indhold**:
-  1. DA `https://minberegner.dk/moms` skal have afsnittet **"Guides om emnet"** med
-     link til `/blog/hvordan-beregner-man-moms`.
-  2. DA `https://minberegner.dk/rentefradrag` skal have **tre** kort: fradrag-2026,
-     koeb-af-bolig og boliglaan.
-  3. DA `/braendstof` → `/blog/spar-penge-paa-braendstof`; `/renteberegner` →
-     `/blog/guide-til-laan-og-renter`; `/alder` → `/blog/bmi-for-boern-saadan-tjekker-du`.
-  4. `https://beraknare.se/moms` skal **IKKE** have blokken (dansk tekst-læk).
-     Det er den vigtigste af de fire, fordi en læk dér skader svensk SEO.
-  5. `/api/health` skal svare `status: ok`.
-
-- ⏳ **ÅBEN — VERIFICÉR DEPLOY: C33 `/husleje`: 30 %-eksemplet er nået i værktøjet,
-  og el/vand/varme kan trækkes fra huslejen.** Kode `050279c`, merge `e90136e`
-  2026-09-26 16:00 CEST (se opgave 60). Verificér **indhold**: siden skal sige "Med en
-  nettoløn på 25.000 kr. er dit loft for boligudgifter 7.500 kr." og FAQ'en skal
-  nævne 8.250 kr. for 33 %-reglen; værktøjets store tal skal SSR'e som 7.500 kr., og
-  feltet "El, vand og varme" skal være med i markup. `/api/health` skal svare
-  `status: ok`. Merge 16:00 er før 17:30-vinduet, så intet er `DEPLOY-MISSING`
-  (kræver to) og intet er frosset.
-
-- ⏳ **ÅBEN — VERIFICÉR DEPLOY: C32 `/elbil` + de to bilartikler: ét ratested for
-  el/benzin, "under halvdelen" væk.** Kode og plan i denne iterations commit på
-  `ceo/c32-elbil-et-ratested` (kode `e0c65d5`), merge til `master` `d4a8183`
-  2026-09-26 16:15 CEST —
-  efter 12:30-batchens start, så første kandidatvindue er **17:30 2026-09-26**. Ét
-  deploy-vindue siden merge, så intet er `DEPLOY-MISSING` (kræver to) og intet er
-  frosset. Verificér **indhold**, HTTP 200 beviser intet:
-  1. DA `https://minberegner.dk/elbil`: FAQ'en skal have "Er en elbil billigere end
-     en benzinbil?" med **0,45** og **0,84 kr. pr. km**, **46,7 %** og **4,7 kr./kWh**,
-     og teksten må **ikke** indeholde "under halvdelen". Samme tal skal stå i
-     sideafsnittet under værktøjet.
-  2. SE `https://beraknare.se/elbil`: **0,36** og **1,19 kr/km**, **69,7 %**,
-     **6,6 kr/kWh**, igen uden "under hälften".
-  3. Begge domæner: værktøjets felter skal starte på **15000** km, **5** år,
-     **18** kWh/100 km, **16** km/l, og benzinprisen **13,50** (DA) / **19** (SE).
-     På DA må elprisen vise dagens gennemsnit, når livedata er der — kun **benzinprisen
-     og forbrugene** er låst af denne ændring.
-  4. `https://minberegner.dk/blog/biloekonomi-2026-hvad-koster-det-at-eje-bil`:
-     benzinafsnittet skal sige **12.656** kr. benzin, **6.750** kr. el og **5.900**
-     kr./år i besparelse — ikke 13.500, 5.400 eller "over 8.000".
-  5. `https://minberegner.dk/blog/spar-penge-paa-braendstof`: tip 6 skal sige
-     **46,7 %** og "lidt over halvdelen" — ikke "under halvdelen".
-  6. `https://minberegner.dk/braendstof` skal stadig sige **52,8 %** mod benzin og
-     **40,2 %** mod diesel (C30's tal er uændrede). `/api/health` skal svare
-     `status: ok`.
-- ⏳ **ÅBEN — VERIFICÉR DEPLOY: C31 `/pension`: folkepensionsalderen udledes af
-  fødselsåret.** Kode og plan i denne iterations commit på
-  `ceo/c31-pension-folkepensionsalder`, merge til `master` 2026-09-26 ca. 15:10
-  CEST — efter 12:30-batchens start, så første kandidatvindue er **17:30
-  2026-09-26**. Ét deploy-vindue siden merge, så intet er `DEPLOY-MISSING` (kræver
-  to) og intet er frosset. Verificér **indhold**, HTTP 200 beviser intet:
-  1. `https://minberegner.dk/pension`: feltet "Ønsket pensionsalder" skal have
-     hjælpeteksten **"Din folkepensionsalder er ca. 70 år (født ca. 1996)"** — altså
-     **ikke** "Folkepensionsalder er 68 år".
-  2. Samme side, resultatfeltet under folkepensionsopgørelsen: med standardværdierne
-     skal der stå, at de valgte 68 år ligger **2 år før** folkepensionsalderen, og at
-     folkepensionen udbetales først, når den er nået.
-  3. Sæt "Ønsket pensionsalder" til 70, så teksten skal skifte til, at den valgte
-     alder *er* folkepensionsalderen, og at man skal søge om folkepensionen.
-  4. Sæt "Din alder" til 60, så hjælpeteksten skal skifte til **ca. 68 år** — alderen
-     følger fødselsåret, ikke et fast tal.
-  5. Folkepensionsbeløbene skal være uændrede: grundbeløb **7.544 kr.**, fuldt
-     tillæg enlig **8.729 kr.**, i alt **16.273 kr.** pr. måned før skat.
-  6. `https://beraknare.se/pension` og `beregner.no` er ikke danskfolkepensionssider
-     og forventes uændrede; `/api/health` skal svare `status: ok`.
-- ⏳ **ÅBEN — VERIFICÉR DEPLOY: C30 `/braendstof`: FAQ'en lovede 50-70 %, værktøjet
-  viste 40 % mod diesel.** Kode: denne iteration's første commit på
-  `ceo/braendstof-el-sparet`. Merge
-  2026-09-26 ca. 15:00 CEST, altså efter 12:30-batchens start — første
-  kandidatvindue er **17:30 2026-09-26**. Ét deploy-vindue siden merge, så intet er
-  `DEPLOY-MISSING` (kræver to) og intet er frosset. Verificér **indhold** på begge
-  domæner, HTTP 200 beviser intet — de gamle sider svarer 200 med den gamle tekst:
-  1. DA `https://minberegner.dk/braendstof`: FAQ'en skal have spørgsmålet "Er el-biler
-     billigere?" med svaret indeholdende **52,8 %** mod benzin og **40,2 %** mod
-     diesel, priserne **0,43 / 0,90 / 0,71 kr. pr. km** og **4,2 kr./kWh** som
-     break-even. Teksten må **ikke** indeholde "50-70".
-  2. SE `https://beraknare.se/braendstof`: "Är elbilar billigare?" med **52,8 %**,
-     **40,2 %** og **4,2 kr/kWh** — også med komma, ikke punktum.
-  3. Begge domæner: sammenligningstabellens overskrifter og footnote skal stadig vise
-     benzin **15 km/l**, diesel **18 km/l**, el **17 kWh/100km** og priserne
-     13,50 / 12,80 / 2,50 — tallene er ikke ændret, kun deres kilde.
-  4. NO `beregner.no` er ikke live og forventes ikke at have ændret tekst.
-  5. `/api/health` skal svare `status: ok`.
-- ⏳ **ÅBEN — VERIFICÉR DEPLOY: C23, C24, C25, C26, C27 og C28.** C28 kode `ebc710c`, merge `f26e054` 2026-09-26 14:30 (se opgave 55). Merge 2026-09-26
-  12:19 (C23), 12:21 (C24), 13:07 (C25), 13:12 (C26) og **13:25 (C27, `c5ef444`**
-  — ét levetidstal for solceller + ét depositumtal)** CEST — alle
-  **efter** at 12:30-batchen var startet, så de kan først verificeres efter
-  **17:30**. Der er
-  gået ét deploy-vindue siden merge (12:30), så intet er `DEPLOY-MISSING` (kræver
-  to) og intet er frosset. Verificér ved indholdskontrol:
-  - `/loen-efter-skat`: FAQ'en skal **ikke** sige "15% topskat", skal sige 7,5 %
-    og "afskaffet"; kommuneskatten skal stå som **25,049 %** (ikke 24,94 % eller
-    25,07 %) og kirkeskatten som **0,639 %** (ikke 0,68 %). `/brutto-netto`'s FAQ
-    skal sige 25,049 %.
-  - `/brutto-netto` og `/topskat`: det forudfyldte kommuneskatfelt skal vise
-    **25.049** (ikke 25.07), og kirkeskatfeltet på `/topskat` **0.639**.
-  - `beraknare.se/leasing`: titlen skal være "Leasingkalkylator: bil på 300.000
-    kr = 4.121 kr/mån", og værktøjet skal vise **4.121 kr/mån** (ikke `kr./md`).
-  - `beraknare.se/tidszone` (C25): værktøjet skal vise **"Stockholm"** og
-    **"Sverige (CET/CEST)"** i begge dropdowns, rubrikken **"Tidsskillnad från
-    Sverige"**, og **intet** "Köpenhamn" eller "från Danmark". `minberegner.dk`
-    skal fortsat sige "København" og "Tidsforskel fra Danmark".
-  - `/solceller` (C27): indlæg og FAQ skal sige **"25-30 år i alt"** (ikke
-    "yderligere 15-20 år" og ikke "Herefter gratis strøm i 25-30 år"); kilden skal
-    være `src/lib/energi/solceller.ts`. `beraknare.se/solceller` skal have samme
-    interval. `/husleje` og `/flyttebudget` skal begge sige **3** måneder i
-    depositum (ikke "1-3" og ikke "3-6").
-  - `/efterloen` (C26): tabellen skal have rækken **"1. januar 1963 – 31.
-    december 1966"** med **65 år** / **68 år**, rækken 1967-1970 med **66/69**,
-    FAQ'en skal sige **481 timer** pr. portion og **15.870 kr.**, og **intet**
-    "962 timer" i præmie-copy. `/api/v1/loen` skal **uændret** stadig sige 25.07
-    — hvis batchdeployen har rørt den, er det en fejl (frosset kontrakt).
-  - `/api/health` skal svare `status: ok`.
-- ⏳ **ÅBEN — VERIFICÉR DEPLOY: C29 kalorieberegnerens protein + `/flyttebudget`s
-  depositum.** Kode `c96ed81`, merge `95ebb6f` 2026-09-26 14:38 CEST. Merge
-  efter 12:30-batchens start, så første kandidatvindue er **17:30 2026-09-26**;
-  intet er frosset og intet er `DEPLOY-MISSING` (kræver to vinduer). Verificér
-  **indhold**, HTTP 200 er ikke nok:
-  1. `https://minberegner.dk/kalorier`: protein-listen i "Makronæringsstoffer" skal
-     vise **0,8-1,2** / **1,2-1,6** / **1,6-2,2** g/kg med komma, og den nye linje
-     "Beregneren bruger midten af det valgte interval".
-  2. Samme side, værktøjet: med 80 kg skal protein-kortet vise **80 g** ved
-     "Vedligehold" og **112 g** ved "Vægttab", med linjen "1,4 g/kg protein
-     (interval 1,2-1,6)". Det gamle var 144 g uanset mål.
-  3. `https://beraknare.se/kalorier`: samme to tal på svensk ("1,4 g/kg protein
-     (intervallet 1,2-1,6)").
-  4. `https://minberegner.dk/flyttebudget`: afsnittet "De største udgiftsposter" skal
-     sige **3 måneder** i depositum (ikke "3-6") og **25.000-50.000** kr (ikke
-     "25.000-40.000").
-  5. `/api/health` skal svare `status: ok`.
+- ✅ **DEPLOY OK 2026-09-27 07:41 CEST — 17:30-batchen lukker C23-C36.**Fjorten noter
+  verificeret ved **indholdskontrol på begge domæner**, ikke HTTP 200. Målt
+  2026-09-26 17:41–17:47 mod live-sitet:
+  - **C36** (`/blog/hvad-er-klokken-i-usa-naar-den-er-12-i-danmark`): H1 "Hvad er
+    klokken i USA, når den er 12 i Danmark?" er live, `06:00` står 10 gange i
+    tabellen, `/tidszone` har "Guides om emnet" med artiklen (2 forekomster),
+    `beraknare.se/tidszone` har **0** dansk blok, og URL'en står i sitemap.xml.
+  - **C35** (`/blog/kvadratmeter-saadan-regner-du-ud`): H1 "Hvordan regner man
+    kvadratmeter ud? Guide med eksempler" er live, `/kvadratmeter` linker til
+    artiklen, `beraknare.se/kvadratmeter` har **0** dansk blok, sitemap OK.
+  - **C34** (returlinke): DA `/moms`, `/braendstof`, `/renteberegner`, `/alder` og
+    `/rentefradrag` har alle "Guides om emnet" med deres artikler;
+    `beraknare.se/moms` har **0** (den vigtigste af fire, fordi en læk dér skader
+    svensk SEO).
+  - **C33** (`/husleje`): `7.500` (6 forekomster), `8.250` (3) og feltet
+    "El, vand og varme" (2) er alle live.
+  - **C32** (`/elbil`): DA har `0,45`, `0,84`, `46,7` (4 hver) og `4,7 kr` (3);
+    SE har `0,36`, `1,19`, `69,7`, `6,6` (3 hver).
+    **Tre falske alarmer i denne måling — læs dem, før du genkører grep:**
+    1. "under halvdelen" findes stadig 4 gange på DA `/elbil`, men kun som
+       **negationen** "Det er **ikke** under halvdelen" — det er C32's egen
+       rettelse, der er live. SE har 0 forekomster.
+    2. `/efterloen` har `962` 3 gange, men kun som del af årstallene "1959-1962"
+       og "31. december 1962" — ikke "962 timer". `481` (3), `15.870` (3) og
+       rækken "1. januar 1963" (2) er live.
+    3. C24's note sagde, at SE `/leasing`'s `<title>` skulle være "Leasingkalkylator:
+       bil på 300.000 kr = 4.121 kr/mån". Det er **H1'en** i `page-data.ts:3440`;
+       `<title>` er `metaTitle` = "Leasingkrystallator: 4.121 kr/mån | Beräknare.se"
+       og er live. Noten var forkert, ikke deployet.
+  - **C31** (`/pension`): "folkepensionsalder er ca. 70 år" er live (1), den gamle
+    "Folkepensionsalder er 68 år" er **væk** (0).
+  - **C30** (`/braendstof`): DA og SE har begge `52,8` (3) og `40,2` (3), og den
+    gamle "50-70" er **væk** på begge (0).
+  - **C29**: `/kalorier` har `0,8-1,2` (4) og `1,6-2,2` (4); `/flyttebudget` siger
+    `3 måneder` (2) og den gamle "3-6 måneder" er **væk** (0).
+  - **C23** (`/loen-efter-skat`): `25,049` (3) og `0,639` (2) er live, og den gamle
+    "15% topskat" er **væk** (0). Bemærk at siden skriver "mellemskat 7,5% og
+    topskat 7,5%" **uden mellemrum** — et grep på "7,5 %" giver 0 og er ikke et
+    deploy-miss. `/api/v1/loen` svarer stadig `25.07`, så den frosne kontrakt er
+    urørt. **`/brutto-netto` og `/topskat` er ikke verificeret i denne måling** —
+    kun `/loen-efter-skat` blev kørt. Det er den eneste åbne rest.
+  - **C25** (`beraknare.se/tidszone`): `Stockholm` (1), `Köpenhamn` **væk** (0).
+  - **C27** (`/solceller`): "25-30 år" (3), den gamle "yderligere 15-20 år" **væk**
+    (0); `/husleje` har den gamle "1-3 måneder" **væk** (0).
+  - `/api/health` svarede `{"status":"ok"}` ved målingens start.
+- ⏳ **ÅBEN — VERIFICÉR DEPLOY: C23's `/brutto-netto` og `/topskat`.** Samme merge
+  som den verificerede `/loen-efter-skat` (C23), men de to sider blev ikke
+  kørt i målingen ovenfor. Verificér **indhold**: `/brutto-netto`'s FAQ skal sige
+  25,049 %, det forudfyldte kommuneskatfelt skal vise **25.049** (ikke 25.07), og
+  kirkeskatfeltet på `/topskat` skal vise **0.639**.
 - ✅ **DEPLOY OK 2026-09-26 12:33 CEST — 12:30-batchen lukker C15-C22.** Syv noter
   verificeret ved **indholdskontrol på begge domæner**, ikke HTTP 200:
   - `/promille` (C15): `0,88` er live (2 forekomster).
