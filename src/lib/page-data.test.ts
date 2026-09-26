@@ -2,6 +2,7 @@ import { describe, test, expect } from "vitest";
 import { getPageData, getAvailableSlugs } from "./page-data";
 import { getCalculatorHrefs, isCalculatorAvailable } from "./calculator-list";
 import { beregnPromille } from "./promille";
+import { sammenlignEnhedspris } from "./enhedspris";
 
 describe("getPageData", () => {
   test("returns data for known DA slug", () => {
@@ -332,6 +333,107 @@ describe("getPageData", () => {
       const soberFaq = data.faqItems.find((item) => /køre bil igen|köra bil igen/.test(item.question));
       expect(soberFaq?.answer).toContain("0,88 ‰");
       expect(soberFaq?.answer).toContain("5,9");
+    }
+  });
+
+  test.each([
+    {
+      locale: "da" as const,
+      title: "Enhedspris: 35 kr. for 2 kg = 17,50 kr. pr. kg",
+      visible: "35 kr. for 2 kg koster 17,50 kr. pr. kg",
+      perUnit: "17,50",
+      saving: "12,5 %",
+      faq: /billigst pr. kilo/,
+    },
+    {
+      locale: "se" as const,
+      title: "Jämförpris: 35 kr för 2 kg = 17,50 kr per kg",
+      visible: "35 kr för 2 kg kostar 17,50 kr per kg",
+      perUnit: "17,50",
+      saving: "12,5 %",
+      faq: /billigast per kilo/,
+    },
+  ])(
+    "has answer-first unit-price metadata for $locale",
+    ({ locale, title, visible, perUnit, saving, faq }) => {
+      const data = getPageData("enhedspris", locale)!;
+
+      expect(data.metaTitle).toBe(title);
+      expect(data.metaTitle.length).toBeLessThanOrEqual(60);
+      expect(data.description).toContain(visible);
+      expect(data.metaDescription).toContain(perUnit);
+      expect(data.metaDescription).toContain(saving);
+      expect(data.metaDescription.length).toBeLessThanOrEqual(160);
+      expect(data.ogTitle).toBe(title);
+      expect(data.ogDescription).toContain(perUnit);
+      expect(data.schemaDescription).toContain(perUnit);
+      const exampleFaq = data.faqItems.find((item) => faq.test(item.question));
+      expect(exampleFaq?.answer).toContain(perUnit);
+      expect(exampleFaq?.answer).toContain(saving);
+    }
+  );
+
+  test("enhedspris-eksemplet i metadata følger sammenlignEnhedspris", () => {
+    const example = sammenlignEnhedspris(20, 1, 35, 2)!;
+    expect(example.enhedsprisA).toBe(20);
+    expect(example.enhedsprisB).toBe(17.5);
+    expect(example.billigst).toBe("B");
+    expect(Math.round(example.besparelseProcent * 10) / 10).toBe(12.5);
+
+    for (const locale of ["da", "se"] as const) {
+      const data = getPageData("enhedspris", locale)!;
+      for (const text of [data.description, data.metaDescription, data.ogDescription, data.schemaDescription]) {
+        expect(text).toContain("17,50");
+        expect(text).toContain("12,5");
+      }
+    }
+  });
+
+  test.each([
+    {
+      locale: "da" as const,
+      title: "Vægttab: 6 kg på 12 uger = 550 kcal/dag",
+      visible: "6 kg på 12 uger kræver 550 kcal",
+      goal: /6 kg på 12 uger\?$/,
+    },
+    { locale: "se" as const, title: "Viktminskning: 6 kg på 12 veckor = 550 kcal/dag", visible: "6 kg på 12 veckor kräver 550 kcal", goal: /6 kg på 12 veckor\?$/ },
+    { locale: "no" as const, title: "Vekttap: 6 kg på 12 uker = 550 kcal/dag", visible: "6 kg på 12 uker krever 550 kcal", goal: /6 kg på 12 uker\?$/ },
+  ])(
+    "has answer-first weight-loss metadata for $locale",
+    ({ locale, title, visible, goal }) => {
+      const data = getPageData("vaegttab", locale)!;
+
+      expect(data.metaTitle).toBe(title);
+      expect(data.metaTitle.length).toBeLessThanOrEqual(60);
+      expect(data.description).toContain(visible);
+      expect(data.description).toContain("2.209");
+      expect(data.metaDescription).toContain("550 kcal");
+      expect(data.metaDescription).toContain("2.209");
+      expect(data.metaDescription.length).toBeLessThanOrEqual(160);
+      expect(data.ogTitle).toBe(title);
+      expect(data.ogDescription).toContain("2.209");
+      expect(data.schemaDescription).toContain("2.209");
+      const goalFaq = data.faqItems.find((item) => goal.test(item.question));
+      expect(goalFaq?.answer).toContain("2.759");
+      expect(goalFaq?.answer).toContain("550 kcal");
+      expect(goalFaq?.answer).toContain("2.209");
+    }
+  );
+
+  test("vægttab-eksemplet følger VaegttabBeregners formel", () => {
+    // Mifflin-St Jeor + aktivitetsfaktor 1,55 + 7.700 kcal pr. kg, som i VaegttabBeregner.tsx
+    const bmr = 10 * 80 + 6.25 * 180 - 5 * 30 + 5;
+    const tdee = bmr * 1.55;
+    const dagligtDeficit = (6 * 7700) / (12 * 7);
+    expect(bmr).toBe(1780);
+    expect(tdee).toBe(2759);
+    expect(dagligtDeficit).toBe(550);
+    expect(Math.round(tdee - dagligtDeficit)).toBe(2209);
+
+    for (const locale of ["da", "se", "no"] as const) {
+      const data = getPageData("vaegttab", locale)!;
+      expect(data.description).toContain("550");
+      expect(data.description).toContain("2.209");
     }
   });
 
