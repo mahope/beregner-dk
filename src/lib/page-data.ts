@@ -2,6 +2,7 @@ import type { Locale } from "./i18n";
 import { BARSEL_2026, SU_2026 } from "./satser-2026";
 import { SOLCELLE_LEVETID_AAR_MAX, SOLCELLE_LEVETID_AAR_MIN } from "./energi/solceller";
 import { besparelseProcent, breakEvenKwhPris, elbilSammenligning, prisPrKm, procent1Decimals } from "./braendstof";
+import { HUSLEJE_EKSEMPEL, HUSLEJE_STANDARD } from "./husleje";
 
 export type PageData = {
   slug: string;
@@ -22,6 +23,11 @@ export type PageData = {
 };
 
 const kr = (value: number) => value.toLocaleString("da-DK");
+
+// ─── /husleje — "25.000 kr netto -> max ca. 7.500 kr/md" er udledt af
+// HUSLEJE_STANDARD, som også er beregnerens starttilstand. Det er samme
+// regnestykke, og derfor kan siden og værktøjet ikke glide fra hinanden.
+const huslejeSvaer = `Tjener du ${kr(HUSLEJE_STANDARD.maanedligNettoLoen)} kr netto → max ca. ${kr(HUSLEJE_EKSEMPEL.maxBoligudgifter)} kr/md (30% reglen)`;
 
 // ─── /braendstof — de tal, FAQ'en lover, udledt af de samme forudsætninger som
 // sammenligningstabellen. Den gamle "50-70 %" holdt kun mod benzin (52,8 %)
@@ -1535,9 +1541,9 @@ const daPages: Record<string, PageData> = {
     "husleje": {
       slug: "husleje",
       title: "Husleje Budget Beregner - Hvad har du råd til? | MinBeregner.dk",
-      description: "Hvad har du råd til i husleje? Tjener du 25.000 kr netto → max ca. 7.500 kr/md (30% reglen). Beregn dit huslejebudget ud fra din indkomst og udgifter. Gratis beregner.",
+      description: `Hvad har du råd til i husleje? ${huslejeSvaer}. Beregn dit huslejebudget ud fra din indkomst og udgifter. Gratis beregner.`,
       metaTitle: "Husleje Budget Beregner - Hvad har du råd til? | MinBeregner.dk",
-      metaDescription: "Hvad har du råd til i husleje? Tjener du 25.000 kr netto → max ca. 7.500 kr/md (30% reglen). Beregn dit huslejebudget ud fra din indkomst og udgifter. Gratis beregner.",
+      metaDescription: `Hvad har du råd til i husleje? ${huslejeSvaer}. Beregn dit huslejebudget ud fra din indkomst og udgifter. Gratis beregner.`,
       keywords: ["husleje beregner", "hvad har jeg råd til i husleje", "husleje budget", "30% reglen husleje", "bolig budget", "lejlighed budget", "hvad må husleje koste"],
       ogTitle: "Husleje Budget Beregner - Find din max husleje",
       ogDescription: "Beregn hvor meget du kan bruge på husleje. Baseret på din indkomst og udgifter.",
@@ -1548,7 +1554,7 @@ const daPages: Record<string, PageData> = {
       schemaDescription: "Gratis husleje beregner. Find ud af hvor meget du kan bruge på husleje baseret på din indkomst og udgifter.",
       schemaCategory: "FinanceApplication",
       faqItems: [
-      { question: "Hvor meget af min løn bør gå til husleje?", answer: "Den klassiske tommelfingerregel er max 30% af din nettoindkomst. Nogle eksperter siger 33%. Husk at inkludere el, vand og varme i beregningen." },
+      { question: "Hvor meget af min løn bør gå til husleje?", answer: `Den klassiske tommelfingerregel er max 30% af din nettoindkomst — altså ${kr(HUSLEJE_EKSEMPEL.maxBoligudgifter)} kr i husleje, el, vand og varme for en nettoløn på ${kr(HUSLEJE_STANDARD.maanedligNettoLoen)} kr. Nogle eksperter siger 33%, som ville give ${kr(HUSLEJE_EKSEMPEL.maxBoligudgifter33)} kr. Husk at trække el, vand og varme fra huslejen: beregneren har et eget felt til det, så tallet er huslejen og ikke hele boligbudgettet.` },
       { question: "Hvad inkluderer huslejen typisk?", answer: "Basis husleje inkluderer ofte kun lejen. A conto varme og vand kan være inkluderet. El betaler du næsten altid selv. Internet og TV er sjældent inkluderet." },
       { question: "Hvor meget skal jeg have i depositum?", answer: "Typisk 3 måneders husleje i depositum + eventuelt forudbetalt husleje. Spar op til dette inden du begynder at lede efter bolig." },
       { question: "Skal jeg have opsparing ud over husleje?", answer: "Ja, eksperter anbefaler at have 3-6 måneders udgifter i en nødfond. Plus løbende opsparing på mindst 10% af din indkomst til fremtiden." },

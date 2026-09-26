@@ -8,6 +8,7 @@ import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { useLocale } from "@/components/LocaleProvider";
 import { formatCurrency, getCurrencySuffix } from "@/lib/format";
+import { beregnHusleje, HUSLEJE_STANDARD } from "@/lib/husleje";
 
 export default function HuslejeBudgetBeregner() {
   const { locale } = useLocale();
@@ -23,6 +24,8 @@ export default function HuslejeBudgetBeregner() {
       madDagligvarer: "Mad & dagligvarer",
       transport: "Transport",
       transportHelp: "Bil, bus, tog",
+      boligforbrug: "El, vand og varme",
+      boligforbrugHelp: "Betales ofte via a conto. Sæt 0, hvis det er inkluderet i huslejen.",
       forsikringer: "Forsikringer",
       mobilInternet: "Mobil & internet",
       abonnementer: "Abonnementer",
@@ -33,7 +36,9 @@ export default function HuslejeBudgetBeregner() {
       maaned: "måned",
       anbefaletMin: "10% (anbefalet min.)",
       duKanBruge: "Du kan bruge på husleje",
-      prMaanedInkl: "pr. måned inkl. el, vand og varme",
+      prMaaned: "pr. måned i husleje",
+      iAltBolig: "I alt med el, vand og varme",
+      prMaanedBolig: "pr. måned",
       godOekonomi: "God økonomi",
       acceptabelOekonomi: "Acceptabel økonomi",
       stramOekonomi: "Stram økonomi",
@@ -44,6 +49,7 @@ export default function HuslejeBudgetBeregner() {
       fasteUdgifterLabel: "Faste udgifter",
       opsparing: "Opsparing",
       regel30: "30% reglen",
+      regel33: "33 %-reglen ville give",
       ditBudget: "Dit budget",
       samletMaanedlig: "Samlet månedlig indkomst",
       tilgaengeligtHusleje: "Tilgængeligt til husleje",
@@ -63,6 +69,8 @@ export default function HuslejeBudgetBeregner() {
       madDagligvarer: "Mat & dagligvaror",
       transport: "Transport",
       transportHelp: "Bil, buss, tåg",
+      boligforbrug: "El, vatten och värme",
+      boligforbrugHelp: "Betalas ofta via a konto. Sätt 0 om det ingår i hyran.",
       forsikringer: "Försäkringar",
       mobilInternet: "Mobil & internet",
       abonnementer: "Abonnemang",
@@ -73,7 +81,9 @@ export default function HuslejeBudgetBeregner() {
       maaned: "månad",
       anbefaletMin: "10% (rekommenderat min.)",
       duKanBruge: "Du kan lägga på hyra",
-      prMaanedInkl: "per månad inkl. el, vatten och värme",
+      prMaaned: "per månad i hyra",
+      iAltBolig: "Totalt med el, vatten och värme",
+      prMaanedBolig: "per månad",
       godOekonomi: "God ekonomi",
       acceptabelOekonomi: "Acceptabel ekonomi",
       stramOekonomi: "Stram ekonomi",
@@ -84,6 +94,7 @@ export default function HuslejeBudgetBeregner() {
       fasteUdgifterLabel: "Fasta utgifter",
       opsparing: "Sparande",
       regel30: "30%-regeln",
+      regel33: "33 %-regeln skulle ge",
       ditBudget: "Din budget",
       samletMaanedlig: "Total månadsinkomst",
       tilgaengeligtHusleje: "Tillgängligt för hyra",
@@ -103,6 +114,8 @@ export default function HuslejeBudgetBeregner() {
       madDagligvarer: "Mat & dagligvarer",
       transport: "Transport",
       transportHelp: "Bil, buss, tog",
+      boligforbrug: "Strøm, vann og varme",
+      boligforbrugHelp: "Betales ofte via a-konto. Sett 0 hvis det er inkludert i husleien.",
       forsikringer: "Forsikringer",
       mobilInternet: "Mobil & internett",
       abonnementer: "Abonnementer",
@@ -113,7 +126,9 @@ export default function HuslejeBudgetBeregner() {
       maaned: "måned",
       anbefaletMin: "10% (anbefalt min.)",
       duKanBruge: "Du kan bruke på husleie",
-      prMaanedInkl: "per måned inkl. strøm, vann og varme",
+      prMaaned: "per måned i husleie",
+      iAltBolig: "Totalt med strøm, vann og varme",
+      prMaanedBolig: "per måned",
       godOekonomi: "God økonomi",
       acceptabelOekonomi: "Akseptabel økonomi",
       stramOekonomi: "Stram økonomi",
@@ -124,6 +139,7 @@ export default function HuslejeBudgetBeregner() {
       fasteUdgifterLabel: "Faste utgifter",
       opsparing: "Sparing",
       regel30: "30%-regelen",
+      regel33: "33 %-regelen ville gitt",
       ditBudget: "Ditt budsjett",
       samletMaanedlig: "Samlet månedlig inntekt",
       tilgaengeligtHusleje: "Tilgjengelig for husleie",
@@ -136,21 +152,23 @@ export default function HuslejeBudgetBeregner() {
   };
   const l = labels[locale as keyof typeof labels] || labels.da;
 
-  // Indkomst
-  const [maanedligNettoLoen, setMaanedligNettoLoen] = useState<number>(28000);
-  const [partnerLoen, setPartnerLoen] = useState<number>(0);
-  const [andreIndkomster, setAndreIndkomster] = useState<number>(0);
+  // Indkomst og udgifter starter i HUSLEJE_STANDARD, som er det samme eksempel
+  // siden og meta descriptionen lover ("25.000 kr netto -> ca. 7.500 kr/md").
+  const [maanedligNettoLoen, setMaanedligNettoLoen] = useState<number>(HUSLEJE_STANDARD.maanedligNettoLoen);
+  const [partnerLoen, setPartnerLoen] = useState<number>(HUSLEJE_STANDARD.partnerLoen);
+  const [andreIndkomster, setAndreIndkomster] = useState<number>(HUSLEJE_STANDARD.andreIndkomster);
 
   // Faste udgifter
-  const [madOgDagligvarer, setMadOgDagligvarer] = useState<number>(4000);
-  const [transport, setTransport] = useState<number>(2000);
-  const [forsikringer, setForsikringer] = useState<number>(1000);
-  const [mobilOgInternet, setMobilOgInternet] = useState<number>(500);
-  const [abonnementer, setAbonnementer] = useState<number>(500);
-  const [andreUdgifter, setAndreUdgifter] = useState<number>(1000);
+  const [madOgDagligvarer, setMadOgDagligvarer] = useState<number>(HUSLEJE_STANDARD.madOgDagligvarer);
+  const [transport, setTransport] = useState<number>(HUSLEJE_STANDARD.transport);
+  const [boligforbrug, setBoligforbrug] = useState<number>(HUSLEJE_STANDARD.boligforbrug);
+  const [forsikringer, setForsikringer] = useState<number>(HUSLEJE_STANDARD.forsikringer);
+  const [mobilOgInternet, setMobilOgInternet] = useState<number>(HUSLEJE_STANDARD.mobilOgInternet);
+  const [abonnementer, setAbonnementer] = useState<number>(HUSLEJE_STANDARD.abonnementer);
+  const [andreUdgifter, setAndreUdgifter] = useState<number>(HUSLEJE_STANDARD.andreUdgifter);
 
   // Opsparing
-  const [opsparingProcent, setOpsparingProcent] = useState<number>(10);
+  const [opsparingProcent, setOpsparingProcent] = useState<number>(HUSLEJE_STANDARD.opsparingProcent);
   const hasLoadedUrl = useRef(false);
   const hasTracked = useRef(false);
 
@@ -165,6 +183,7 @@ export default function HuslejeBudgetBeregner() {
       if (inputs.andreIndkomster !== undefined) setAndreIndkomster(inputs.andreIndkomster);
       if (inputs.madOgDagligvarer !== undefined) setMadOgDagligvarer(inputs.madOgDagligvarer);
       if (inputs.transport !== undefined) setTransport(inputs.transport);
+      if (inputs.boligforbrug !== undefined) setBoligforbrug(inputs.boligforbrug);
       if (inputs.forsikringer !== undefined) setForsikringer(inputs.forsikringer);
       if (inputs.mobilOgInternet !== undefined) setMobilOgInternet(inputs.mobilOgInternet);
       if (inputs.abonnementer !== undefined) setAbonnementer(inputs.abonnementer);
@@ -186,69 +205,55 @@ export default function HuslejeBudgetBeregner() {
   const getShareableLink = useCallback(() => {
     const state: CalculationState = {
       type: 'husleje-budget',
-      inputs: { maanedligNettoLoen, partnerLoen, andreIndkomster, madOgDagligvarer, transport, forsikringer, mobilOgInternet, abonnementer, andreUdgifter, opsparingProcent },
+      inputs: { maanedligNettoLoen, partnerLoen, andreIndkomster, madOgDagligvarer, transport, boligforbrug, forsikringer, mobilOgInternet, abonnementer, andreUdgifter, opsparingProcent },
       timestamp: Date.now(),
     };
     return generateShareableLink(state);
-  }, [maanedligNettoLoen, partnerLoen, andreIndkomster, madOgDagligvarer, transport, forsikringer, mobilOgInternet, abonnementer, andreUdgifter, opsparingProcent]);
+  }, [maanedligNettoLoen, partnerLoen, andreIndkomster, madOgDagligvarer, transport, boligforbrug, forsikringer, mobilOgInternet, abonnementer, andreUdgifter, opsparingProcent]);
 
   const handleReset = useCallback(() => {
-    setMaanedligNettoLoen(28000);
-    setPartnerLoen(0);
-    setAndreIndkomster(0);
-    setMadOgDagligvarer(4000);
-    setTransport(2000);
-    setForsikringer(1000);
-    setMobilOgInternet(500);
-    setAbonnementer(500);
-    setAndreUdgifter(1000);
-    setOpsparingProcent(10);
+    setMaanedligNettoLoen(HUSLEJE_STANDARD.maanedligNettoLoen);
+    setPartnerLoen(HUSLEJE_STANDARD.partnerLoen);
+    setAndreIndkomster(HUSLEJE_STANDARD.andreIndkomster);
+    setMadOgDagligvarer(HUSLEJE_STANDARD.madOgDagligvarer);
+    setTransport(HUSLEJE_STANDARD.transport);
+    setBoligforbrug(HUSLEJE_STANDARD.boligforbrug);
+    setForsikringer(HUSLEJE_STANDARD.forsikringer);
+    setMobilOgInternet(HUSLEJE_STANDARD.mobilOgInternet);
+    setAbonnementer(HUSLEJE_STANDARD.abonnementer);
+    setAndreUdgifter(HUSLEJE_STANDARD.andreUdgifter);
+    setOpsparingProcent(HUSLEJE_STANDARD.opsparingProcent);
   }, []);
 
-  const beregning = useMemo(() => {
-    const samletIndkomst = maanedligNettoLoen + partnerLoen + andreIndkomster;
-    const fasteUdgifter = madOgDagligvarer + transport + forsikringer +
-                          mobilOgInternet + abonnementer + andreUdgifter;
-    const opsparingBeloeb = samletIndkomst * (opsparingProcent / 100);
-    const tilHusleje = samletIndkomst - fasteUdgifter - opsparingBeloeb;
-    const maxHusleje30Pct = samletIndkomst * 0.30;
-    const maxHusleje33Pct = samletIndkomst * 0.33;
-    const anbefalet = Math.min(tilHusleje, maxHusleje30Pct);
+  const beregning = useMemo(
+    () =>
+      beregnHusleje({
+        maanedligNettoLoen,
+        partnerLoen,
+        andreIndkomster,
+        madOgDagligvarer,
+        transport,
+        boligforbrug,
+        forsikringer,
+        mobilOgInternet,
+        abonnementer,
+        andreUdgifter,
+        opsparingProcent,
+      }),
+    [maanedligNettoLoen, partnerLoen, andreIndkomster, madOgDagligvarer, transport,
+      boligforbrug, forsikringer, mobilOgInternet, abonnementer, andreUdgifter, opsparingProcent],
+  );
 
-    let vurdering: "god" | "ok" | "risikabel" = "god";
-    let vurderingTekst = "";
-
-    if (tilHusleje >= maxHusleje30Pct) {
-      vurdering = "god";
-      vurderingTekst = l.vurderingGod;
-    } else if (tilHusleje >= maxHusleje30Pct * 0.8) {
-      vurdering = "ok";
-      vurderingTekst = l.vurderingOk;
-    } else {
-      vurdering = "risikabel";
-      vurderingTekst = l.vurderingRisikabel;
-    }
-
-    return {
-      samletIndkomst,
-      fasteUdgifter,
-      opsparingBeloeb,
-      tilHusleje,
-      maxHusleje30Pct,
-      maxHusleje33Pct,
-      anbefalet,
-      vurdering,
-      vurderingTekst,
-      resterendeEfterHusleje: tilHusleje - anbefalet,
-    };
-  }, [maanedligNettoLoen, partnerLoen, andreIndkomster, madOgDagligvarer,
-      transport, forsikringer, mobilOgInternet, abonnementer, andreUdgifter, opsparingProcent, l]);
+  const vurderingTekst = beregning.vurdering === "god"
+    ? l.vurderingGod
+    : beregning.vurdering === "ok"
+      ? l.vurderingOk
+      : l.vurderingRisikabel;
 
   const formatKr = (amount: number) => formatCurrency(amount, locale, { maximumFractionDigits: 0, minimumFractionDigits: 0 });
 
   const getVurderingFarve = () => {
-    switch (beregning.vurdering) {
-      case "god": return "bg-green-100 text-green-800 border-green-300 dark:bg-green-900/20 dark:text-green-300 dark:border-green-700";
+    switch (beregning.vurdering) {      case "god": return "bg-green-100 text-green-800 border-green-300 dark:bg-green-900/20 dark:text-green-300 dark:border-green-700";
       case "ok": return "bg-yellow-100 text-yellow-800 border-yellow-300 dark:bg-yellow-900/20 dark:text-yellow-300 dark:border-yellow-700";
       case "risikabel": return "bg-red-100 text-red-800 border-red-300 dark:bg-red-900/20 dark:text-red-300 dark:border-red-700";
     }
@@ -326,6 +331,14 @@ export default function HuslejeBudgetBeregner() {
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{l.transportHelp}</p>
           </div>
           <div>
+            <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.boligforbrug}</label>
+            <div className="relative">
+              <input type="number" min="0" step="100" value={boligforbrug} onChange={(e) => setBoligforbrug(parseFloat(e.target.value) || 0)} className="w-full px-4 py-3 pr-12 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">{getCurrencySuffix(locale)}</span>
+            </div>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{l.boligforbrugHelp}</p>
+          </div>
+          <div>
             <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.forsikringer}</label>
             <div className="relative">
               <input type="number" min="0" step="100" value={forsikringer} onChange={(e) => setForsikringer(parseFloat(e.target.value) || 0)} className="w-full px-4 py-3 pr-12 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
@@ -386,9 +399,14 @@ export default function HuslejeBudgetBeregner() {
       <div className="p-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl text-center text-white">
         <p className="text-lg opacity-90 mb-2">{l.duKanBruge}</p>
         <p className="text-5xl md:text-6xl font-bold">
-          {formatKr(Math.max(0, beregning.anbefalet))}
+          {formatKr(beregning.anbefaletHusleje)}
         </p>
-        <p className="text-sm opacity-75 mt-2">{l.prMaanedInkl}</p>
+        <p className="text-sm opacity-75 mt-2">{l.prMaaned}</p>
+        {boligforbrug > 0 && (
+          <p className="text-sm opacity-75 mt-1">
+            {l.iAltBolig}: {formatKr(beregning.anbefaletBoligudgifter)} {l.prMaanedBolig}
+          </p>
+        )}
       </div>
 
       {/* Vurdering */}
@@ -404,7 +422,7 @@ export default function HuslejeBudgetBeregner() {
             <span className="inline-flex items-center gap-1.5"><Siren className="h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden="true" focusable="false" />{l.stramOekonomi}</span>
           )}
         </p>
-        <p className="text-sm">{beregning.vurderingTekst}</p>
+        <p className="text-sm">{vurderingTekst}</p>
       </div>
 
       {/* Detaljeret oversigt */}
@@ -414,7 +432,7 @@ export default function HuslejeBudgetBeregner() {
           <p className="text-sm text-gray-500 dark:text-gray-400">{l.samletIndkomst}</p>
         </div>
         <div className="p-4 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg text-center">
-          <p className="text-xl font-bold text-red-600 dark:text-red-400">{formatKr(beregning.fasteUdgifter)}</p>
+          <p className="text-xl font-bold text-red-600 dark:text-red-400">{formatKr(beregning.fasteUdgifter + boligforbrug)}</p>
           <p className="text-sm text-gray-500 dark:text-gray-400">{l.fasteUdgifterLabel}</p>
         </div>
         <div className="p-4 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg text-center">
@@ -422,10 +440,13 @@ export default function HuslejeBudgetBeregner() {
           <p className="text-sm text-gray-500 dark:text-gray-400">{l.opsparing}</p>
         </div>
         <div className="p-4 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg text-center">
-          <p className="text-xl font-bold text-green-600 dark:text-green-400">{formatKr(beregning.maxHusleje30Pct)}</p>
+          <p className="text-xl font-bold text-green-600 dark:text-green-400">{formatKr(beregning.maxBoligudgifter)}</p>
           <p className="text-sm text-gray-500 dark:text-gray-400">{l.regel30}</p>
         </div>
       </div>
+      <p className="-mt-4 text-xs text-gray-500 dark:text-gray-400">
+        {l.regel33}: {formatKr(beregning.maxBoligudgifter33)} {l.prMaanedBolig}
+      </p>
 
       {/* Budget oversigt */}
       <div className="bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg overflow-hidden">
@@ -445,6 +466,10 @@ export default function HuslejeBudgetBeregner() {
             <div className="flex justify-between text-gray-600 dark:text-gray-400">
               <span>{l.transport}</span>
               <span>-{formatKr(transport)}</span>
+            </div>
+            <div className="flex justify-between text-gray-600 dark:text-gray-400">
+              <span>{l.boligforbrug}</span>
+              <span>-{formatKr(boligforbrug)}</span>
             </div>
             <div className="flex justify-between text-gray-600 dark:text-gray-400">
               <span>{l.forsikringer}</span>
@@ -477,11 +502,11 @@ export default function HuslejeBudgetBeregner() {
       </div>
 
       <div className="flex justify-center">
-        <CopyResultButton text={`Max husleje: ${formatKr(Math.max(0, beregning.anbefalet))}/måned`} />
+        <CopyResultButton text={`Max husleje: ${formatKr(beregning.anbefaletHusleje)}/måned`} />
         <ShareCalculation
           getShareableLink={getShareableLink}
           calculatorName="Huslejebudget-beregner"
-          resultSummary={`Max husleje: ${formatKr(Math.max(0, beregning.anbefalet))}/måned`}
+          resultSummary={`Max husleje: ${formatKr(beregning.anbefaletHusleje)}/måned`}
         />
       </div>
 
