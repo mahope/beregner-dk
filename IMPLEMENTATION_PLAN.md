@@ -2,23 +2,24 @@
 
 STATUS: KØ — **to åbne deploynoter (C23 lønsidernes 2026-tal og C24 SE `/leasing`);
 syv noter lukket ved indholdskontrol 12:33.** 12:30-batchen 2026-09-26 udgav
-C15-C22. C23 (merge 12:19) og C24 (merge 12:21) kom efter batchens start og kan
-først verificeres efter **17:30**-vinduet; intet er frosset pga. ventetiden.
-C25 (SE `/tidszone` forankret i Sverige) er merged og følger samme batch.
-`/api/health` svarer `status: ok`.
+C15-C22. C23 (merge 12:19), C24 (merge 12:21), C25 (13:07) og C26 (13:15) kom
+efter batchens start og kan først verificeres efter **17:30**-vinduet; intet er
+frosset pga. ventetiden. `/api/health` svarer `status: ok`.
 
 Næste iteration skal **ikke** optimere CTR på de samme svar-først-sider igen, og
-den skal **ikke** gentage C25. C22's fire researchfund er nu alle lukket (C23,
-C24, C25), så næste iteration skal gå efter **placering/indhold** eller efter de
-krydsverificerede fund fra samme research, der endnu står ubekræftede i liste
-under opgave 49: `/efterloen`'s folkepensionsalder-tabel (modsiger den
-verificerede `folkepension.ts`), `EfterloensBeregner.tsx`'s 481 mod 962 timer,
-`/billaan`'s 7 %-rækker under "Rente 6 %", `/husleje` 1-3 mod `/flyttebudget`
-3-6 måneders depositum, `/solceller` 25-30 mod 15-20 år og `/gaeldsfri`'s
-`simuler(() => 0)`, der aldrig kan vise noget. **Bekræft den konkrete linje,
-før du ændrer noget.** Desuden: `/api/v1`'s kommuneskat-default på 25,07 %
-afviger fra den verificerede 25,049 % og kræver en beslutning, før den røres
-(se ❓).
+den skal **ikke** gentage C25/C26. C22's fire researchfund er lukket (C23, C24,
+C25) og to af dens lavere-prioritet fund er lukket som C26. **Bemærk:** C22's
+fund "`EfterloensBeregner.tsx:124` giver én præmieportion pr. 481 timer, mens UI
+og FAQ siger 962" pegede den forkerte vej — 481 er det korrekte tal, teksten var
+forkert. Det er lært: et fund skal læses helt, ikke kun fejlretningen.
+
+Næste kandidat er de **øvrige** ubekræftede fund fra samme research, som hver
+for sig skal bekræftes på den konkrete linje, før de ændres: `/billaan`'s
+eksempeltabel med 7 %-tal i to 7-års-rækker under overskriften "Rente 6 %"
+(167 besøgende/28d), `/husleje` (166) siger 1-3 måneders depositum mens
+`/flyttebudget` siger 3-6, og `/solceller`'s FAQ siger 25-30 år mod sidens 15-20.
+Desuden: `/api/v1`'s kommuneskat-default på 25,07 % afviger fra den verificerede
+25,049 % og kræver en beslutning, før den røres (se ❓).
 
 
 ## Fase 3 — trafik-drevet
@@ -2893,6 +2894,69 @@ første halvdel af denne liste er fra DA-fladen, anden halvdel fra SE — de er
   pr. 2026-09-26**. Genmål 2026-10-10. Det interessante tal er **placeringen**:
   titlen og FAQ'en er nu svar-først, så en bevægelse fra 12,5 mod top-10 er det
   realistiske mål, ikke en CTR-effekt på eksisterende visninger.
+
+#### 53. [x] FÆRDIG 2026-09-26 — C26 — `/efterloen` viste forkert alder og 962 timer for én præmieportion
+
+- **Iteration start:** 2026-09-26 13:07 CEST på `ceo/c26-efterloen-alder`, som
+  andre del af samme iteration som C25 (grøn gate, kun ~7 min brugt).
+- **Datagrund:** `/efterloen` er en lille side (**9 besøgende/28d**,
+  Plausible 2026-09-26) og har ingen GSC-række. Det er bevidst en
+  **korrekthedsopgave, ikke en trafikopgave**: C22's research fandt to
+  selvmodsigelser, og begge viste sig at ramme den officielle ordning.
+- **Fund 1 — alderstabellen modsiger både borger.dk og vores egen
+  `folkepension.ts`.** `EfterloensBeregner.tsx:86-104` og tabellen i
+  `src/app/efterloen/page.tsx:69-95` sagde 1961 → 63/68, 1963 → 64/69, 1965+ →
+  65/69+. borger.dk's skema (STAR) siger **1963-1966 → efterløn 65 / folkepension
+  68** og **1967-1970 → 66 / 69**, hvilket er præcis den skala, C8's
+  `folkepension.ts` verificerede og som `/efterloen`'s **egen FAQ**
+  (`page-data.ts:1326`) allerede sagde. Værktøjet lovede altså efterløn **ét år
+  for tidligt** for hele 1963-66-rækken og lovede folkepension et år for sent —
+  og lovede dermed ét år for meget på efterløn.
+- **Fund 2 — 962 mod 481 timer.** UI'en og FAQ'en sagde "mindst 962 timer/år kan
+  du optjene skattefri præmie", mens koden delte på 481 (`// ~481 hours per
+  portion`). borger.dk's præmieside er entydig: **481 arbejdstimer pr. portion**,
+  12 portioner = 5.772 timer. C22's rapport havde altså fundet den rigtige
+  kode-til-tekst-modstridelse, men den pegede den forkerte vej — det er **teksten**
+  der var forkert, ikke divideren. Samme side oplyser portionsbeløbet til
+  **15.870 kr. (fuldtid) / 10.580 kr. (deltid)**; koden havde 15.500 kr. uafhængigt
+  af forsikring. borger.dk oplyser desuden, at optjening **mens man er på
+  efterløn** forudsætter 2 års udskydelse + 3.120/2.496 timer i ventetiden —
+  det var slet ikke i modellen.
+- **Beslutning/implementering:** nyt modul `src/lib/efterloen.ts` med
+  kilde + verificeringsdato, de fem rækker fra borger.dk's skema, præmiekonstanterne
+  (481/12/15.870/10.580/3.120/2.496) og to funktioner: `efterloenAlder(fødselsår)`
+  og `praemiePortioner(timer, harUdskudt)`. Værktøjet og sidetabellen læser begge
+  fra modulet, så de ikke kan glide fra hinanden. **Tre konsekvente
+  adfærdsændringer, alle kildeført:** (1) fødselsårsfeltet er 1956-1970, fordi
+  bordet kun offentliggjør de år; ældre svarer "spørg din a-kasse" i stedet for et
+  gjættet tal. (2) 1959 er et interval (63½-64 år), som vises eksplicit.
+  (3) præmie kræver den ticked 2-års regel; ellers forklares hvorfor der er 0
+  portioner, i stedet for at vise et tal uden dækning. Forudfyldte timer er
+  1.560 (= 3.120/2), så feltet ikke længere starter på et tal uden kilde.
+- **Acceptkriterier:**
+  1. Født 1963-1966 → efterløn 65 år, folkepension 68 år, 3 år på efterløn. **PASS**
+  2. Født 1967-1970 → 66/69. Født 1956-1958 → 63/67 og 4 år. **PASS**
+  3. `folkepensionAge` er identisk med `folkepension.ts` for **alle** år
+     1956-1970 — håndhævet af en krystest mellem de to moduler. **PASS**
+  4. 481 timer = 1 portion, 5.772 timer = 12 portions (loft), 15.870/10.580 kr.
+     og ingen 962-timers-tærskel i copy. **PASS**
+  5. `/efterloen`'s FAQ og tabel er samlet i sync med værktøjet. **PASS**
+  6. `npm run test`, `npm run lint` og `npm run build` er grønne. **PASS**
+- **Kvalitetsgate 2026-09-26 13:12 CEST:** `npm run test` grøn (**1278/1278,
+  123 filer** — 14 nye i `src/lib/efterloen.test.ts`), `npm run lint` grøn
+  (514 filer), `npm run build` grøn (139 sider + typecheck). SSR-kontrol af den
+  byggede `/efterloen`: de nye tabelrækker, kilde-linket, 481-timers-teksten og
+  15.870 kr. er alle i den server-renderede side.
+- **Mål:** ingen CTR-baseline (siden har ingen GSC-række). Den nye krystest mod
+  `folkepension.ts` gør en fremtidig glide mellem de to moduler til en
+  **byggetids-fejl**, så de forkerte aldre kan ikke komme tilbage ved en senere
+  redigering.
+- **Forventet effekt:** lille trafikeffekt (9 besøgende/28d). Faglig korrekthed:
+  en læser får nu den alder, a-kassen og borger.dk oplyser, i stedet for en der
+  er ét år for tidlig. `/pension` og blogindlæggene er **urørte** — de bruger
+  `folkepension.ts` og var allerede korrekte.
+- **Kilder:** https://www.borger.dk/pension-og-efterloen/Efterloen-fleksydelse-delpension/efterloen/foer-du-gaar-paa-efterloen
+  og https://www.borger.dk/pension-og-efterloen/Efterloen-fleksydelse-delpension/efterloen/skattefri-praemie
 
 #### 52. [x] FÆRDIG 2026-09-26 — C25 — SE `/tidszone` var forankret i Danmark
 
