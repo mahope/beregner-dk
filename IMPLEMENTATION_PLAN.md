@@ -1,6 +1,25 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — **C52 er landet: `/moms`' kopier-, del- og printknap gav en
+STATUS: KØ — **C53 er landet: `/procent` skrev alle tal i forklaringen uden
+tusindtalsseparator, og resultaterne med punktum som decimaltegn.** Sidens
+største tal — hovedresultatet — kom fra `n.toFixed(2)`, som giver **"12.50%"**
+og ikke "12,50 %", og de fire forklaringer (`explainFindProcent`,
+`explainFindResultat`, `explainFindHeltal`, `explainStigning`) skrev
+**inputtallene helt uformateret**: "1125 er 12,50% af 9000", "10% af 2500 er
+250.00", "Stigning fra 40000 til 50000 er 25,00%". Det er præcis sidens egne
+GSC-søgninger: "en telefon er sat 1125 kr. ned. normalt koster den 9000 kr."
+(57 visninger) og "10 procent af" — brugeren indtaster firecifrede tal og får
+firecifrede tal tilbage uden separator, i en dansk sætning hvor 9.000 er det,
+der menes. Forklaringen er samtidig **det, der kopieres, printes og deles**,
+så fejlen lå i de tre mest brugte knapper. Alt er nu `formatNumber(..., locale)`
+fra `src/lib/format.ts` — samme konvention som `MomsBeregner` (C52) og
+`LoenstigningBeregner`; `AnimatedNumber`'s egen default var allerede
+`toLocaleString("da-DK")`, så kun `ProcentBeregner` stod uden. Nyt modul
+ikke nødvendigt. Gate grøn: lint, **1486 tests / 139 filer** (fra 1481 / 138)
+og build (141 sider). Kode + plan i ét commit på `ceo/procent-talformat`;
+første kandidatvindue **2026-09-27 07:30**. Se opgave 81.
+
+STATUS (forrige iteration) — **C52 er landet: `/moms`' kopier-, del- og printknap gav en
 regning uden momsen — på alle domæner.** De byggede teksten som
 `formatKr(prisUdenMoms) + " + moms = " + formatKr(prisInklMoms)`, altså
 **"1.000,00 kr. + moms = 1.250,00 kr."**: en etiket i stedet for et tal, præcis
@@ -53,10 +72,9 @@ tilstanden kalder `beregnAlder`, og et tomt eller umuligt datofelt giver intet
 resultat frem for "NaN dage". Kode + plan i ét commit på `ceo/dato-alder-lokaldato`;
 første kandidatvindue **2026-09-27 07:30**. Se opgave 78.
 
-**Fire deploynoter står åbne: C37, C49, C50 og nu C51**, alle med første
-kandidatvindue 2026-09-27 07:30 (C37: 12:30), plus **C52 fra denne
-iteration**. 21:30-vinduet den 26/9 er passeret, så intet kan verificeres før
-07:30. `beregner.no`-delen af enhver note verificeres ikke: den URL er et
+**Seks deploynoter står åbne: C37, C49, C50, C51, C52 og nu C53**, alle med
+første kandidatvindue 2026-09-27 07:30 (C37: 12:30). 21:30-vinduet den 26/9 er
+passeret, så intet kan verificeres før 07:30. `beregner.no`-delen af enhver note verificeres ikke: den URL er et
 separat site, ikke dette repo (se ❓).
 
 **Næste iteration: C52's auditklasse er lukket, så spørgsmålet er ikke længere
@@ -5496,7 +5514,103 @@ top-15, så ud over CTR er det eneste målbare signal `ad_clicked` på siden.
   substantiv og dermed gyldigt dansk, så det er ikke samme fejl; men
   artiklen burde linke til den nye `findMoms`-tilstand, fordi GSC's spørgsmål
   "hvordan trækker man moms fra" (pos. 1, men kun 1 visning) peger præcis
-  derhen. Lav prioritet.
+   derhen. Lav prioritet.
+
+#### 81. [x] FÆRDIG 2026-09-27 — C53 — `/procent`: forklaringen skrev tal uden tusindtalsseparator, og `.toFixed(2)` gav punktum i danske og svenske tal
+
+- **Iteration start:** 2026-09-27 00:01 CEST på `ceo/procent-talformat`. Køen var
+  tom (alle 80 opgaver færdige, intet `I GANG`). De fem åbne deploynoters
+  første kandidatvindue er 07:30 i morgen, altså efter iterationsgrænsen, så
+  ingen kunne verificeres. Køens punkt 3 (C47's metode) var lukket med `/moms`
+  i C52, og køens punkt 4 (`/moms`-emnet fra C45) er et databehov. Valget blev
+  derfor **C52's egen fejlklasse**, kørt på sitets største søgeflade: C52 fandt,
+  at `/moms`' kopierknap byggede en etiket i stedet for et tal. Samme klasse
+  audits som regel: *hvad skriver den tekst, brugeren kopierer?*
+- **Datagrund:** `/procent` er **nr. 1 i GSC for minberegner.dk med 149.318
+  visninger** (95 klik, CTR 0,1 %, pos. 7,4 pr. 2026-09-24) og nr. 3 på
+  beraknare.se (23.294 visninger, 2 klik, CTR 0,0 %, pos. 10,2). De to
+  søgninger GSC faktisk viser, er "en telefon er sat 1125 kr. ned. normalt
+  koster den 9000 kr. hvor stor er rabatten i procent?" (57 visninger, pos. 6)
+  og "10 procent af" (51 visninger, pos. 6) — **begge med tal uden separator**.
+- **Fund 1 — de fire forklaringer skrev inputtallene råt.** `explainFindProcent`,
+  `explainFindResultat`, `explainFindHeltal` og `explainStigning` tog
+  `deltal`/`heltal`/`procent`/`baseVal`/`fra`/`til` som **tal** og skrev dem
+  direkte i sætningen: "1125 er 12,50% af 9000", "10% af 2500 er 250.00",
+  "Hvis 1125 er 15%, så er 100% = 7500.00", "Stigning fra 40000 til 50000 er
+  25,00%". I dansk er 1.125 og 9.000 de rigtige former, og for et decimaltal
+  (2.500,5) skrev den **punktum** i en sætning, hvor resten bruger komma.
+- **Fund 2 — hovedresultatet havde samme fejl.** `AnimatedNumber`'s `formatFn`
+  var `(n) => n.toFixed(2)`, altså **"12.50%"** som sidens største tal. Komponentens
+  egen default i `AnimatedNumber` er `n.toLocaleString("da-DK")`, så det var
+  `ProcentBeregner`, der overrode en korrekt konvention — og de 18 andre
+  komponenter, der bruger `formatNumber` fra `src/lib/format.ts`
+  (`MomsBeregner` siden C52, `LoenstigningBeregner`, `BoernepengBeregner` …),
+  viste at det er `ProcentBeregner`, der stod uden.
+- **Hvorfor det betyder noget:** `forklaring` er ikke bare brødtekst. Den er
+  `CopyResultButton text=` (linje 359), `ShareCalculation resultSummary=`
+  (363) **og** `PrintResult resultSummary=` (367) — de tre knapper, der
+  flytter resultatet ud af værktøjet. En bruger der kopierer "10% af 2500 er
+  250.00" ind i en mail får et tal, der ikke kan læses som dansk.
+- **Ændring:** de fire `explain*` tager nu **allerede formaterede strenge**; et
+  lokalt `num()` (naturlige tal) og `fixed()` (to decimaler) i `useMemo` kalder
+  `formatNumber(value, locale, …)`. `fixed` bevarer præcis den gamle
+  `minimumFractionDigits: 2`, så diffen kun røffer **decimaltegnet og
+  tusindtalsseparatoren**, ikke antallet cifre. Hovedtallet bruger samme
+  `formatNumber` med `maximumFractionDigits: 2` (så 25 % vises "25%" — samme
+  som `LoenstigningBeregner` og som sidens egen description "10 procent af 250
+  er 25"). `locale` lagt i `useMemo`'s afhængigheder. Ingen ny fil, intet nyt
+  modul, ingen ændring i `src/lib/`.
+- **Test:** ny `src/components/ProcentBeregner.test.tsx` (5 tests) efter
+  C52's `MomsBeregner.test.tsx`-mønster — klik på **Kopiér** og aflæs
+  clipboard-strengen. Dækker GSC's egne tal (1.125 / 12,50% / 9.000), komma i
+  decimaler, **svensk mellemrum** ("1 125 är 12,50% av 9 000"), stigning med
+  begge værdier, og at "af 9000" ikke står nogen steder i DOM'en. Samme
+  clipboard-`Object.defineProperty`-greb og `\u00a0`-normalisering som C52's
+  test. **Fælden:** `ModeSelector` bruger `role="radio"`, ikke `button`, og de
+  svenske aria-labels er "Deltal (täljaren)"/"Heltal (nämnaren)", ikke en
+  dansk oversættelse af de danske — brugte 4 min på de to.
+- **Gate:** `npm run lint` grøn (544 filer), `npm run test` **1486 tests / 139
+  filer** grøn (fra 1481 / 138), `npm run build` grøn (141 sider, 7 kendte
+  pre-existing CSS-advarsler). Første kandidatvindue **2026-09-27 07:30**.
+- **MÅL:** `/procent` baseline **CTR 0,1 % / 95 klik på 149.318 visninger,
+  pos. 7,4** (GSC 2026-08-27 → 2026-09-24, fra promptens snapshot). Plausible
+  har ingen `/procent` på DA i top-15, så CTR er det eneste målbare signal.
+  **Mål 2026-10-10.** Bemærk at `.toFixed`-klassen er en **korrektigheds**-
+  og **tillids**-reparation, ikke en CTR-fremskridt i sig selv; en evt. stigning
+  i `/procent`'s CTR skal derfor læses sammen med at C1's svar-først-arbejde
+  nu har haft tid til at virke.
+- **Efterladt til næste iteration, bevidst.**
+  - **`toFixed(2)` står i 18 andre komponenter** (`KalorieBeregner` 6,
+    `Elberegner` 11, `BoliglaanBeregner` 3, `ArveafgiftBeregner` 3 …). C53's
+    fund generaliserer: de skal have samme `formatNumber`-behandling, men
+    **en komponent ad gangen med grøn gate imellem** — ikke 18 i ét hug. Og
+    de skal screenshotes, fordi nogle af dem kan være korrekte (f.eks. et
+    decimal-tal i en teknisk enhed, hvor punktum er det forventede). Start med
+    `KalorieBeregner` (12.332 visninger, 286 besøgende, +46 %) og
+    `ArveafgiftBeregner` (bloggen `/blog/arveafgift-regler-og-satser` er
+    faldende: 103 → 92).
+  - **`/procent`'s egne formler står med `×` og uden separator**
+    ("Procent = (Del / Heltal) × 100"). De er korrekte, men fire af dem står
+    på rækken lige under resultatet, så de læses som en del af svaret. Ikke
+    rørt — det er en redigeringsopgave, ikke en fejl.
+  - **Den 0,1 % CTR på 149.318 visninger er stadig uforklaret.** C53 har
+    bekræftet at siden er teknisk sund (self-canonical, `index, follow`, i
+    sitemap, H1 "Procentberegner", svar-først-blok, rent dansk `<title>`) og
+    at forklaringen nu er korrekt. Resten af forklaringen ligger i SERP'en:
+    hovedordet "procent" har konkurrence på tværs af domæner, og position
+    7,4 med 0,1 % tyder på at Google selv svarer på en del af søgningerne
+    (kalkulator/"folk spørger også"/definition). Det kan **ikke** løses med
+    en tekstændring, og det skal derfor ikke forsøges uden en ny GSC-række
+    med fordeling på søgning — samme konklusion som opgave 74's `boligstøtte`
+    og `alder`. Noteret i ❓ hvis Mads kan hente rækker for `/procent`'s
+    søgninger.
+  - **Kun `/procent` er auditet i denne klasse.** `TidszoneBeregner`'s
+    `l.summary`, `RenteBeregner`'s `l.copySummary`, `AlderBeregner`'s
+    `l.copySummary` og `DatoBeregner`'s `text` er alle samme
+    forklarings-og-knap-overflade og er **ikke** læst endnu. `/tidszone`
+    (24.723 visninger), `/tidsberegner` (72.382), `/alder` (6.013) og
+    `/dato` (130.392) gør klassen til den næste klare kø-post.
+
 
 ### Næste kandidater efter C34 — lukket med negativt fund
 
@@ -5661,7 +5775,8 @@ efter datagrund:
    er fire af fire noter grønne på en måling, der ikke måler noget.
 2. **Mål 2026-10-10** (se Måleprotokol): C1-C16 og C35-C47 måles 14 dage efter
    deres snapshot, og resultatet skrives ved siden af hver opgave.
-3. **C47's negative fund skal bruges som metode, ikke som emne.** Den viste,
+3. **C47's negative fund skal bruges som metode, ikke som emne.** *(Se den
+   nye, skarpere udgave i punkt 3b nedenfor — den har afløst denne.)* Den viste,
    at "værktøjet kan det, siden siger det ikke" er en helt anden og billigere
    klasse end "byg et nyt felt". Samme spørgsmål bør stilles til de øvrige
    trafikstærke sider, før der bygges nyt: **find feltet i værktøjet, der
@@ -5686,6 +5801,16 @@ efter datagrund:
    timer, som er tiden til 0 ‰** og ikke tiden til at komme under 0,5 ‰. Det
    er den næste opgave, og opskriften ligger klar i opgave 75. **Bemærk
    fælden der: brug ASCII i nye identifikere.**
+3b. **C53's efterladte liste er den næste klare kø-post: "hvad skriver den
+   tekst, brugeren kopierer?"** C52 fandt fejlen på `/moms`, C53 på `/procent`
+   — begge gange i `CopyResultButton`/`ShareCalculation`/`PrintResult`-strengen,
+   aldrig i selve regnestykket. Klassen er billig, mekanisk og har fundet en
+   reel fejl begge gange. **Ulæste af samme overflade:** `TidszoneBeregner`'s
+   `l.summary` (24.723 visninger), `RenteBeregner`'s `l.copySummary` (13.623),
+   `AlderBeregner`'s `l.copySummary` (6.013), `DatoBeregner`'s `text` (130.392),
+   samt de 18 komponenter med `toFixed(2)` — start med `KalorieBeregner`
+   (12.332) og `ArveafgiftBeregner`. **Én komponent ad gangen med grøn gate
+   imellem.** Se opgave 81's "Efterladt".
 4. **`/moms`-emnet fra C45 (Skats frister) ligger stadig åbent** og er for
    stort til en side-iteration. Det eneste, der kan gøres nu uden nye tal, er
    at finde ud af om **GSC har en række** for frister/indberetning — ellers
@@ -5715,6 +5840,30 @@ efter datagrund:
   og noterer, at NO-URL'en 404'er. Det er ærligt, men mindre end noterne lover.
   Bemærk desuden: **der er ingen beregner.no-trafik i nogen snapshot** — hverken
   Plausible eller GSC — hvilket er konsistent med et separat site.
+- ⏳ **VERIFICÉR DEPLOY: C53 `/procent` — alle tal i siden største
+  resultatblok skal have komma og tusindtalsseparator — kode + plan i ét commit
+  på branch `ceo/procent-talformat`.** Første kandidatvindue
+  **2026-09-27 07:30**. Verificér **indhold og interaktivitet**, HTTP 200
+  beviser intet — hele fundet er i klient-renderet tekst:
+  1. På `https://minberegner.dk/procent` med standardværdierne (25 af 100) skal
+     resultatblokkens forklaring være **"25 er 25,00% af 100"** — med **komma**,
+     ikke "25.00".
+  2. Skift til **"Find resultat"**, sæt Grundværdi til **2500** og Procent til
+     **10**. Forklaringen skal være **"10% af 2.500 er 250,00"**, og hovedtallet
+     skal vise **250** (aldrig "250.00" eller "2.500,00").
+  3. Skift til **"Procentvis ændring"**, sæt Fra **40000** og Til **50000**.
+     Forklaringen skal være **"Stigning fra 40.000 til 50.000 er 25,00%"** — de
+     to tusindtalsseparatorer er selve fundet.
+  4. Klik **Kopiér** i hvert af de tre tilfælde: klipbordet skal indeholde
+     præcis den samme formatterede sætning, og **ikke** en variant med
+     punktum. Det er den samme streng, der printes og deles.
+  5. `https://beraknare.se/procent` skal vise **"1 125 är 12,50% av 9 000"**
+     for deltal 1125 / heltal 9000 — **mellemrum** som tusindtalsseparator, ikke
+     punktum. Heltals-aria-label hedder svensk "Deltal (täljaren)".
+  6. **Negativ kontrol:** indtast et decimaltal, fx Grundværdi **2500,5** med
+     Procent 10. Forklaringen skal læse **"10% af 2.500,5 er 250,05"** — før
+     rettelsen skrev den "2500.5" med punktum.
+  7. `https://minberegner.dk/api/health` skal svare `status: ok`.
 - ⏳ **VERIFICÉR DEPLOY: C52 `/moms` — kopier/del/print gav en regning uden
   momsen, og de danske knapper sagde "Tillæg" — kode `aa585d3`, merge `328a656`
   2026-09-26 23:47 CEST på branch `ceo/moms-audit`.** Første kandidatvindue
