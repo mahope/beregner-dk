@@ -3720,7 +3720,7 @@ landmark=lån, piggybank=opsparing osv.).
     - Gate grøn: lint ok, 280/280 tests, build ok (128 pages).
 
 ## VERIFICÉR DEPLOY-log
-- ⏳ **ÅBEN — VERIFICÉR DEPLOY: C23, C24, C25, C26, C27 og C28.** C28 merged 2026-09-26 14:30 (se opgave 55). Merge 2026-09-26
+- ⏳ **ÅBEN — VERIFICÉR DEPLOY: C23, C24, C25, C26, C27 og C28.** C28 kode `ebc710c`, merge `f26e054` 2026-09-26 14:30 (se opgave 55). Merge 2026-09-26
   12:19 (C23), 12:21 (C24), 13:07 (C25), 13:12 (C26) og **13:25 (C27, `c5ef444`**
   — ét levetidstal for solceller + ét depositumtal)** CEST — alle
   **efter** at 12:30-batchen var startet, så de kan først verificeres efter
