@@ -25,7 +25,7 @@ describe("tidsberegner page", () => {
   test.each([
     {
       locale: "da" as const,
-      heading: "Tidsberegner",
+      heading: "Hvor lang tid er der mellem to klokkeslæt?",
       answer: "Beregn hvor lang tid der går mellem to klokkeslæt – i timer, minutter og decimaltimer. Træk en pause fra.",
       schema: "Gratis tidsberegner. Beregn tidsrum mellem to klokkeslæt og se resultatet i timer, minutter og decimaltimer.",
     },
@@ -45,5 +45,27 @@ describe("tidsberegner page", () => {
     expect(html).toContain(answer);
     expect(html).toContain(schema);
     expect(html).toContain("Tidsværktøj");
+  });
+
+  // Search Console: "hvor lang tid" 790 visninger pos. 6. Svar-først-tabellen
+  // er dansk, fordi spørgsmålet er dansk; den må ikke lække til beraknare.se,
+  // der har sit eget svar-først-sæt (C38).
+  test("da viser svar-først-tabellen med det lovede eksempel", async () => {
+    const html = renderToStaticMarkup(await TidsberegnerPage());
+
+    expect(html).toContain("Svar på de oftest søgte tidsrum");
+    expect(html).toContain("<strong>8 t 15 min</strong>");
+    expect(html).toContain("8.25 timer");
+    expect(html).toContain("(dagen efter)");
+  });
+
+  test("se får ikke den danske svar-først-tabel", async () => {
+    vi.mocked(getLocale).mockResolvedValue("se");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("se"));
+
+    const html = renderToStaticMarkup(await TidsberegnerPage());
+
+    expect(html).not.toContain("Svar på de oftest søgte tidsrum");
+    expect(html).not.toContain("dagen efter");
   });
 });

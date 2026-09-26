@@ -771,9 +771,12 @@ const daPages: Record<string, PageData> = {
       schemaDescription: "Gratis tidsberegner. Beregn tidsrum mellem to klokkeslæt og se resultatet i timer, minutter og decimaltimer.",
       schemaCategory: "UtilitiesApplication",
       faqItems: [
-      { question: "Hvordan beregner jeg arbejdstid?", answer: "Indtast mødetidspunkt og fyraftenstid. Træk frokostpause fra." },
-      { question: "Hvad er decimal timer?", answer: "1,5 timer = 1 time og 30 minutter. Bruges til timeregistrering." },
-      { question: "Tid over midnat?", answer: "Ja, beregneren håndterer tid over midnat automatisk." },
+      { question: "Hvor lang tid er der mellem to klokkeslæt?", answer: "Sæt start- og sluttidspunkt i feltet ovenfor. 08:30 til 16:45 er 8 timer og 15 minutter. Er sluttidspunktet tidligere end starttidspunktet, regner beregneren automatisk dagen efter, så 22:00 til 06:00 er 8 timer." },
+      { question: "Hvad er 08:30 til 16:45 i timer og minutter?", answer: "8 timer og 15 minutter. Det er netop det eksempel, der står i beskrivelsen af denne side, og det står i tabellen ovenfor." },
+      { question: "Hvordan beregner jeg arbejdstid?", answer: "Indtast mødetidspunkt og fyraftenstid, og træk en frokostpause fra. En arbejdsdag fra 08:00 til 16:00 er 8 timer, mens 09:00 til 17:00 med 30 minutters pause er 7 timer og 30 minutter." },
+      { question: "Kan jeg trække en pause fra?", answer: "Ja. Angiv pausen i minutter under 'Fratræk pause', så trækkes den fra, før timer, minutter og decimaltimer vises." },
+      { question: "Hvad er decimal timer?", answer: "1,5 timer = 1 time og 30 minutter. Bruges til timeregistrering. 08:30 til 16:45 er 8,25 timer." },
+      { question: "Tid over midnat?", answer: "Ja, beregneren håndterer tid over midnat automatisk. 22:00 til 06:00 er 8 timer og 0 minutter." },
       ],
     },
     "tidszone": {

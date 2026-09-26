@@ -727,3 +727,45 @@ describe("svenska svar på frågeformulerade sökningar", () => {
     expect(text).not.toMatch(/værktøj|værkti/);
   });
 });
+
+describe("danske svar på tids-søgninger", () => {
+  // Search Console 2026-08-27→09-24: /tidsberegner har 72.382 visninger og
+  // 207 klik — CTR 0,3 % på position 7,0, tredjestørste CTR-tab på sitet.
+  // Søgningerne er spørgsmål ("hvor lang tid" 790 visninger pos. 6, "time
+  // beregner" 119v pos. 8, "beregn tid" 94v pos. 7), men title/description
+  // lovede et eksempel ("08:30 til 16:45 er 8 timer og 15 minutter") der
+  // ikke stod nogen steder i brødteksten. FAQ'en er samme kilde som
+  // JSON-LD, så et spørgsmål der mangler her mangler også struktureret.
+  const frageForm = (slug: string) =>
+    getPageData(slug, "da")!.faqItems
+      .map((item) => `${item.question} ${item.answer}`)
+      .join(" ");
+
+  test("/tidsberegner svarer på 'hvor lang tid' med et konkret tal", () => {
+    const text = frageForm("tidsberegner");
+    expect(text).toContain("Hvor lang tid er der mellem to klokkeslæt?");
+    expect(text).toContain("08:30 til 16:45 er 8 timer og 15 minutter");
+  });
+
+  test("/tidsberegner svarar på head-ternerne 'time beregner' og 'beregn tid'", () => {
+    const text = frageForm("tidsberegner");
+    // "time beregner" er stavemåden af head-ordet; "beregn tid" er det
+    // danske spørgsmål. Begge skal kunne findes i FAQ'ens spørgsmål/svar.
+    expect(text.toLowerCase()).toContain("beregner jeg arbejdstid");
+    expect(text).toContain("Kan jeg trække en pause fra?");
+  });
+
+  test("/tidsberegner dækker både pause og tid over midnat med tal", () => {
+    const text = frageForm("tidsberegner");
+    expect(text).toContain("30 minutters pause er 7 timer og 30 minutter");
+    expect(text).toContain("22:00 til 06:00 er 8 timer");
+  });
+
+  test("FAQ'en er ikke længere de tre korte svar uden eksempel", () => {
+    const data = getPageData("tidsberegner", "da")!;
+    expect(data.faqItems.length).toBeGreaterThanOrEqual(6);
+    for (const item of data.faqItems) {
+      expect(item.answer.length).toBeGreaterThan(40);
+    }
+  });
+});

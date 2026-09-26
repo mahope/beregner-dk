@@ -2,9 +2,24 @@
 
 STATUS: KØ — **tre noter står åbne, ingen er `DEPLOY-MISSING`.** C37
 (`/renteberegner`) med første kandidatvindue 2026-09-27 12:30, C38 (svensk
-spørgsmålsform) og C39 (svensk `/procent`) med **2026-09-26 21:30** som
-første fælles kandidatvindue — begge merged efter 17:30. `/api/health`
+spørgsmålsform), C39 (svensk `/procent`) og nu C40 (DA `/tidsberegner`) med
+**2026-09-26 21:30** som første fælles kandidatvindue. `/api/health`
 svarer `status: ok`.
+
+**C40 fandt en klasse C1-C39 ikke havde set: titlen lovede et eksempel,
+brødteksten havde det ikke.** `/tidsberegner` er **tredjestørste CTR-tab på
+sitet** (72.382 visninger, 207 klik, **CTR 0,3 %**, pos. 7,0), og både
+`metaDescription` og `ogDescription` lovede *"Eksempel: 08:30 til 16:45 er 8
+timer og 15 minutter"* — men da live-brødteksten blev trukket ud, forekom
+"08:30" og "16:45" **én gang hver og kun i metadat**. H1 var det generiske
+"Tidsberegner", og ingen af de fire GSC-søgninger ("hvor lang tid" 790v pos. 6,
+"tidsberegner" 969v pos. 4, "time beregner" 119v pos. 8, "beregn tid" 94v pos. 7)
+stod som et spørgsmål nogen steder. Det er modsat C38, hvor SE-siden fik
+eksemplet i kroppen. H1, en **svar-først-tabel før værktøjet** og en FAQ, der
+spørger GSC-strengene, er rettet nu — og alle fem tabelrækker **beregnes af
+`beregnTidsinterval`**, så siden og værktøjet ikke kan glide fra hinanden. Se
+opgave 67. **Det er den nye klasse: auditér `metaDescription` mod den synlige
+brødtekst på de DA-sider, C1-C16 kun rørte i titlen.**
 
 **C39 tog kandidat 5 (svensk placering) og gav den sin første konkrete
 indholdsrettelse.** SE `/procent` har **23.294 visninger og 2 klik (pos. 10,2)**
@@ -4113,6 +4128,73 @@ første halvdel af denne liste er fra DA-fladen, anden halvdel fra SE — de er
   2026-09-25), så en samtidig indholdsændring ville gøre effekten umålbar.
   Samme for NO. Skrives som ny opgave, når C1 er målt.
 
+#### 67. [x] FÆRDIG 2026-09-26 — C40 — `/tidsberegner` lovede et eksempel i meta, der ikke stod på siden
+
+- **Iteration start:** 2026-09-26 18:52 CEST. Køen var tom (alle 66 opgaver
+  færdige, intet `I GANG`), de tre åbne deploynoter har første kandidatvindue
+  21:30 / 2026-09-27 12:30, så intet kunne verificeres. Kandidaterne 0-5 var
+  lukket, så denne iteration er den research, der fandt en **ny** klasse:
+  *titlen lover et eksempel, brødteksten ikke har det.*
+- **Datagrund:** Search Console 2026-08-27→09-24, `/tidsberegner` **72.382
+  visninger, 207 klik, CTR 0,3 %, pos. 7,0** — **tredjestørste CTR-tab på
+  sitet** efter `/procent` (149.318) og `/dato` (130.392). Søgningerne er
+  spørgsmål: "tidsberegner" 969v/29k pos. 4, **"hvor lang tid" 790v/1k pos. 6**,
+  "time beregner" 119v/1k pos. 8, "beregn tid" 94v/1k pos. 7.
+- **Fund (live-kontrol af minberegner.dk/tidsberegner):** `metaDescription` og
+  `ogDescription` lovede *"Eksempel: 08:30 til 16:45 er 8 timer og 15
+  minutter"*, men **"08:30" og "16:45" forekom én gang hver og kun i metadat** —
+  udtrukket brødtekst viste **nul** forekomster. H1 var det generiske
+  "Tidsberegner". Synlig FAQ var tre korte linjer uden eksempel, og ingen af
+  dem matchede en af de fire søgninger. Så title lovede præcis det, siden ikke
+  leverede — modsat C38, hvor SE-siden fik eksemplet i kroppen.
+- **Beslutning/implementering:** H1 er nu spørgsmålstformen **"Hvor lang tid er
+  der mellem to klokkeslæt?"** (DA kun; SE beholder sit eget svar-først-sæt fra
+  C38, og tabellen er locale-guarded så intet dansk lækker til beraknare.se).
+  **Ny svar-først-tabel** "Svar på de oftest søgte tidsrum" står **før
+  værktøjet** med fem gennemgående tidsrum: 08:30→16:45, 08:00→16:00,
+  09:00→17:00 m. 30 min pause, 13:15→14:45 og 22:00→06:00 (markeret
+  "dagen efter"). Første H2 er nu "Hvordan beregner du tid mellem to
+  klokkeslæt?".
+- **Ét ratested:** `src/lib/tids-eksempler.ts` bygger alle fem rækker ved at
+  kalde `beregnTidsinterval` — det samme modul `TidsBeregner` bruger — og
+  **kaster**, hvis et eksempel ikke kan beregnes. Der er ingen håndskrevet
+  procent- eller minut-tal tilbage på siden, så siden og værktøjet ikke kan
+  glide fra hinanden. FAQ'en er samme kilde som `FAQSchema`, så de nye
+  spørgsmål går automatisk ind i JSON-LD.
+- **FAQ:** seks spørgsmål i stedet for tre korte, hvoraf de svarer direkte på
+  GSC-strengene: "Hvor lang tid er der mellem to klokkeslæt?", "Hvad er 08:30
+  til 16:45 i timer og minutter?", "Hvordan beregner jeg arbejdstid?", "Kan jeg
+  trække en pause fra?", "Hvad er decimal timer?" og "Tid over midnat?".
+- **Test:** 4 nye tests i `tids-eksempler.test.ts` (bl.a. at 08:30→16:45
+  faktisk er 8 t 15 min / 8.25, at hver række kan genskabes af modulet, at
+  kun 22:00 er over midnat, og at alle klokkeslæt er gyldige HH:MM), 4 nye i
+  `page-data.test.ts` (spørgsmålstjek på alle fire GSC-strenge, at pause- og
+  midnatstal er med, at ingen FAQ-answer er under 40 tegn) og 2 ændrede/nye i
+  `page.test.tsx` (DA's nye H1, tabellen renderer, SE får **ikke** den danske
+  tabel). Den eksisterende H1-assertion blev opdateret — H1 ændres
+  med vilje, den var assertionsens emne.
+- **Verifikation 2026-09-26:** `npm run lint` grøn (531 filer), `npm run test`
+  grøn (**1.382/1.382**, 132 filer), `npm run build` grøn. Renderet SSR-markup
+  gennemgået: H1, alle fem tabelrækker, "8 t 15 min", "8.25 timer" og
+  "(dagen efter)" er alle i output, og JSON-LD har de seks nye spørgsmål.
+- **Landet:** kode `d5e0cb5` på branch `ceo/tidsberegner-svarforst`, merge til
+  `master` 2026-09-26.
+- **Forventet effekt:** 72.382 visninger ved 0,3 % CTR er 207 klik. Bare en
+  bevægelse til 1 % er **+500 klik/28d** på den største ikke-rettede
+  CTR-side. Det er et estimat, ikke en prognose: klassen "tittel lover
+  eksemplet, brødteksten har det ikke" er målt på ingen anden side endnu, så
+  C40 er også målingen af klassen.
+- **MÅL:** `/tidsberegner` baseline **72.382 visninger, 207 klik, CTR 0,3 %,
+  pos. 7,0** pr. 2026-09-24 (GSC). Plausible har ingen `/tidsberegner`-række i
+  28-dages-snapshottet 2026-09-26 14:07 (siden ligger på side 2) — **ukendt,
+  ikke nul**. **Genmål 2026-10-10.**
+- **Ikke gjort, bevidst:** `TidsBeregner` viser `decimalTimer` råt med **punkt**
+  ("8.25") mens sidens egen prose bruger dansk komma ("8,25 timer") — en
+  eksisterende inkonsistens i selve værktøjet. Tabellen gengiver modullets
+  rå-streng, så den matcher præcis hvad værktøjet viser; at rette
+  decimalformatet i værktøjet er en separat, visuel enhed og rørt ikke her.
+  SE `/tidsberegner` er urørt: C38's svar-først-sæt er endnu ikke målt.
+
 ### Næste kandidater efter C34 — lukket med negativt fund
 
 
@@ -4176,7 +4258,31 @@ efter datagrund:
    research-iteration, fordi det kræver **substanstjek** (kcal, aktivitet,
    BMR), ikke en titel. **Mål ikke før 2026-10-10**, så C38's effekt er målt
    først.
+6. **NY klasse fundet i C40 (2026-09-26): `metaDescription` mod synlig
+   brødtekst.** C1-C16 optimerede *titler*; auditten på `/tidsberegner` viste,
+   at en titel kan love et **eksempel, siden ikke viser**. Det er en anden
+   fejltype end lav CTR, fordi den er **selvmodsigende** og derfor verificérbar
+   uden trafikdata. **Næste opgave skal auditere de 13 øvrige DA-sider i
+   GSC-top-14** (kun `/tidsberegner` var fundet) med samme metode: træk den
+   synlige brødtekst ud og sammenlign den med det `metaDescription` lover.
+   Datagrund: hvert fund sidder på en side med 4.000-149.000 visninger på
+   position 5-10. **Mål C40 først (2026-10-10)** — klassen er endnu uprøvet,
+   så effekten måles på den ene side, før den generaliseres.
 ### ❓ Til Mads
+- ⏳ **VERIFICÉR DEPLOY: C40 — DA `/tidsberegner` svar-først med eksempeltabel.**
+  Kode `d5e0cb5`, merge `<merge-ref>` 2026-09-26 18:5x CEST på branch
+  `ceo/tidsberegner-svarforst`. Første kandidatvindue er **2026-09-26 21:30**
+  (merged efter 17:30). Verificér **indhold**: `https://minberegner.dk/tidsberegner`
+  skal have H1 **"Hvor lang tid er der mellem to klokkeslæt?"**, H2 **"Svar på
+  de oftest søgte tidsrum"** med **fem** rækker, hvoraf række 1 er
+  08:30 → 16:45 → **8 t 15 min** → **8.25 timer**, og række 5 er 22:00 → 06:00
+  med **"(dagen efter)"** ved svaret, og H2 **"Hvordan beregner du tid mellem to
+  klokkeslæt?"**. FAQ'en og JSON-LD skal begge have spørgsmålet **"Hvor lang tid
+  er der mellem to klokkeslæt?"** og **"Hvad er 08:30 til 16:45 i timer og
+  minutter?"**. `https://beraknare.se/tidsberegner` skal være **uændret** med
+  sit eget C38-svar-først-sæt og **ikke** have den danske tabel eller H1.
+  `https://beregner.no/tidsberegner` skal være uændret. `/api/health` skal
+  svare `status: ok`.
 - ⏳ **VERIFICÉR DEPLOY: C39 — SE `/procent` svarar på de tre svenske
   procent-frågorna, och 37 % skatt forsvann.** Kode `8796c16`, merge
   `927d213` 2026-09-26 18:27 CEST på branch `ceo/se-procent-sporsmal`.
@@ -4738,6 +4844,11 @@ landmark=lån, piggybank=opsparing osv.).
     - Gate grøn: lint ok, 280/280 tests, build ok (128 pages).
 
 ## VERIFICÉR DEPLOY-log
+- ⏳ **ÅBEN — VERIFICÉR DEPLOY: C40 — DA `/tidsberegner` svar-først med
+  eksempeltabel.** Se ❓ Til Mads for den fulde indholdsliste. Kode `d5e0cb5`,
+  merged 2026-09-26 efter 17:30, så første kandidatvindue er **2026-09-26
+  21:30**. Kun ét deploy-vindue er gået siden merge, altså endnu ikke
+  `DEPLOY-MISSING` (kræver to).
 - ⏳ **ÅBEN — VERIFICÉR DEPLOY: C39 — SE `/procent` svarar på de
   tre svenske procent-frågorna, och 37 % skatt forsvann.** Kode `8796c16`,
   merge `927d213` 2026-09-26 18:27 CEST. Første kandidatvindue 2026-09-26
