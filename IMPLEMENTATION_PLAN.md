@@ -2665,8 +2665,10 @@ Mads og afsnittet "Næste CTR-kandidat".
 - **MÅL:** `/blog/su-2026-satser-og-regler` baseline **ukendt** (ikke i top-15 pr.
   2026-09-26); `/su` baseline **ukendt** i dette snapshot (faldt 239→119 i
   2026-09-23-snapshottet). Første genmåling 2026-10-10.
-- **Landet:** kode, tests og plan i én commit på `ceo/c20-su-artikel`; merge til
-  `master` straks efter den grønne gate.
+- **Landet:** kode `cfb7da0`, merge `84842a1` til `master` 2026-09-26 11:24 CEST,
+  begge pushet (branch `ceo/c20-su-artikel` ligger også på origin). `/api/health`
+  svarede `status: ok` umiddelbart efter merge; live-artiklen er endnu den gamle,
+  fordi auto-deploy er slået fra.
 - **Kandidat 37 er hermed lukket.** Ingen navngiven sats-artikel er længre
   ubearbejdet, og der er ingen baseline til nogen af dem undtagen børnepenge.
 
@@ -3134,7 +3136,7 @@ landmark=lån, piggybank=opsparing osv.).
 ## VERIFICÉR DEPLOY-log
 - ⏳ **ÅBEN — VERIFICÉR DEPLOY: C15 `/promille`, C16 `/vaegttab` + `/enhedspris`,
   C18 pensionsguiden, C19 dagpenge-guiden og C20 SU-guiden.**
-  Merge-tidspunkter 2026-09-26 09:57 (C16), 10:52 (C18), 11:35 (C19) og 11:45
+  Merge-tidspunkter 2026-09-26 09:57 (C16), 10:52 (C18), 11:35 (C19) og 11:24
   (C20) CEST. Første kandidatvindue er **12:30** 2026-09-26; 07:30-batchen gik
   før alle fem merges. Verificér ved **indholdskontrol**, ikke HTTP 200:
   - `/promille` (DA): eksemplet 4 øl/4 öl på 80 kg = 0,88 ‰ og FAQ om, hvornår
