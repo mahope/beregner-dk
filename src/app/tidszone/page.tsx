@@ -47,7 +47,9 @@ export default async function TidszonePage() {
             Klokken 12 i Danmark er <strong>06 i New York</strong>, 05 i Chicago og{" "}
             <strong>03 i Los Angeles</strong>. Videre ud i verden er det 11 i London, 13 i Athen,
             08 i Nuuk, 19 i Shanghai, 20 i Tokyo og 21 i Sydney. Forklaringen er tidsforskellen:
-            Danmark ligger på CET (UTC+1) om vinteren og CEST (UTC+2) om sommeren.
+            Danmark ligger på CET (UTC+1) om vinteren og CEST (UTC+2) om sommeren. Tallene ovenfor
+            er vinterværdierne, som passerer i kolonnen til venstre; byer uden sommertid, fx Tokyo,
+            ligger en time tidligere, når Danmark har somertid.
           </p>
           <div className="overflow-x-auto">
             <table>
@@ -74,7 +76,8 @@ export default async function TidszonePage() {
             kolonner. Byer uden sommertid — fx Tokyo, Dubai og Sao Paulo — ligger en time
             tidligere, når Danmark har somertid. Skiftet sker ikke altid samme dag i USA, EU og
             Australien, så i de korte overgangsperioder kan forskellen afvige en time. Brug
-            tidszoneberegneren til et præcist klokkeslæt for en vilkårlig by, tidspunkt og dato.
+            tidszoneberegneren til et præcist klokkeslæt for en vilkårlig by: den følger
+            sommertiden for dagens dato og viser tidsforskel, klokken nu og et valgt tidspunkt.
           </p>
         </div>
       )}
@@ -86,7 +89,9 @@ export default async function TidszonePage() {
             Klockan 12 i Sverige är <strong>06 i New York</strong>, 05 i Chicago och{" "}
             <strong>03 i Los Angeles</strong>. Vidare ut i världen är det 11 i London, 13 i Aten,
             08 i Nuuk, 19 i Shanghai, 20 i Tokyo och 21 i Sydney. Förklaringen är tidsskillnaden:
-            Sverige ligger på CET (UTC+1) på vintern och CEST (UTC+2) på sommaren.
+            Sverige ligger på CET (UTC+1) på vintern och CEST (UTC+2) på sommaren. Siffrorna ovan är
+            vintervärdena, som passar i vänsterkolumnen; städer utan sommartid, till exempel Tokyo,
+            ligger en timme tidigare när Sverige har sommartid.
           </p>
           <div className="overflow-x-auto">
             <table>
@@ -113,7 +118,8 @@ export default async function TidszonePage() {
             kolumnerna. Städer utan sommartid — till exempel Tokyo, Dubai och São Paulo — ligger en
             timme tidigare när Sverige har sommartid. Byte sker inte alltid samma dag i USA, EU och
             Australien, så under de korta övergångsperioderna kan skillnaden avvika en timme. Använd
-            tidszonskalkylatorn för ett exakt klockslag för valfri stad, tidpunkt och datum.
+            tidszonsberäknaren för ett exakt klockslag för valfri stad: den följer sommartiden för
+            dagens datum och visar tidsskillnad, klockan nu och en vald tidpunkt.
           </p>
         </div>
       )}
@@ -144,7 +150,7 @@ export default async function TidszonePage() {
           <li><strong>London:</strong> 1 time bagud</li>
           <li><strong>New York:</strong> 6 timer bagud</li>
           <li><strong>Los Angeles:</strong> 9 timer bagud</li>
-          <li><strong>Tokyo:</strong> 8 timer foran</li>
+          <li><strong>Tokyo:</strong> 8 timer foran om vinteren, 7 timer mens Danmark har sommertid</li>
           <li><strong>Sydney:</strong> 9-10 timer foran</li>
         </ul>
 
@@ -178,7 +184,7 @@ export default async function TidszonePage() {
           <li><strong>London:</strong> 1 timme efter</li>
           <li><strong>New York:</strong> 6 timmar efter</li>
           <li><strong>Los Angeles:</strong> 9 timmar efter</li>
-          <li><strong>Tokyo:</strong> 8 timmar före</li>
+          <li><strong>Tokyo:</strong> 8 timmar före på vintern, 7 timmar när Sverige har sommartid</li>
           <li><strong>Sydney:</strong> 9-10 timmar före</li>
         </ul>
 

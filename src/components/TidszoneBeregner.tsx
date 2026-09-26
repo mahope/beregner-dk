@@ -7,39 +7,55 @@ import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { useLocale } from "@/components/LocaleProvider";
+import { utcOffsetMinutter, type DstRegel } from "@/lib/sommertid";
 
 interface Tidszone {
   id: string;
   navn: string;
-  offset: number; // UTC offset i minutter
+  offset: number; // UTC offset i minutter (vintertid)
+  offsetSommer?: number; // UTC offset i minutter (sommertid)
+  dst: DstRegel;
   by: string;
 }
 
-/** Hjemtidszonen (Danmark på .dk, Sverige på .se) ligger på CET = UTC+1. */
-const HJEM_UTC_FORSKEL = 60;
+/** Hjemtidszonen (Danmark på .dk, Sverige på .se): CET = UTC+1, CEST = UTC+2. */
+const HJEM_VINTER = 60;
+const HJEM_SOMMER = 120;
+const HJEM_DST: DstRegel = "eu";
 
 // `dk` er id'et for hjemtidszonen. Danmark og Sverige deler CET/CEST (UTC+1/+2),
 // så id'et og offsettet er uændret, mens navn og by mærkes pr. locale. Det holder
 // gamle delte links (`?d=...fraTidszone=dk`) gyldige på begge domæner.
+//
+// `offsetSommer` og `dst` er nødvendige, fordi vinteroffsetten alene gav
+// forkerte svar i den del af året, hvor Danmark har sommertid. Forskellen til
+// USA er 6 timer hele året, fordi USA skifter nogenlunde samtidig med Danmark,
+// men Tokyo (ingen sommertid) er 8 timer foran om vinteren og 7 timer foran
+// mens Danmark har CEST, og Sydney ligger mellem 8 og 10 timer foran. Det er den
+// bevægelse, brugeren ellers ikke så. `src/lib/sommertid.ts` slår sommer-
+// perioden op, og `TidszoneBeregner.test.tsx` holder offsettene samstemt med
+// `src/lib/tidszone-reference.ts`, som sidder i brødteksten.
 const tidszoner: Tidszone[] = [
-  { id: "dk", navn: "Danmark (CET/CEST)", offset: 60, by: "København" },
-  { id: "uk", navn: "Storbritannien (GMT/BST)", offset: 0, by: "London" },
-  { id: "us_east", navn: "USA Østkyst (EST/EDT)", offset: -300, by: "New York" },
-  { id: "us_west", navn: "USA Vestkyst (PST/PDT)", offset: -480, by: "Los Angeles" },
-  { id: "japan", navn: "Japan (JST)", offset: 540, by: "Tokyo" },
-  { id: "china", navn: "Kina (CST)", offset: 480, by: "Beijing" },
-  { id: "australia", navn: "Australien (AEST)", offset: 600, by: "Sydney" },
-  { id: "india", navn: "Indien (IST)", offset: 330, by: "Mumbai" },
-  { id: "dubai", navn: "Dubai (GST)", offset: 240, by: "Dubai" },
-  { id: "brazil", navn: "Brasilien (BRT)", offset: -180, by: "São Paulo" },
-  { id: "germany", navn: "Tyskland (CET/CEST)", offset: 60, by: "Berlin" },
-  { id: "france", navn: "Frankrig (CET/CEST)", offset: 60, by: "Paris" },
-  { id: "greece", navn: "Grækenland (EET/EEST)", offset: 120, by: "Athen" },
-  { id: "greenland", navn: "Grønland (WGT/WGST)", offset: -180, by: "Nuuk" },
-  { id: "thailand", navn: "Thailand (ICT)", offset: 420, by: "Bangkok" },
-  { id: "singapore", navn: "Singapore (SGT)", offset: 480, by: "Singapore" },
-  { id: "south_africa", navn: "Sydafrika (SAST)", offset: 120, by: "Johannesburg" },
+  { id: "dk", navn: "Danmark (CET/CEST)", offset: 60, offsetSommer: 120, dst: "eu", by: "København" },
+  { id: "uk", navn: "Storbritannien (GMT/BST)", offset: 0, offsetSommer: 60, dst: "eu", by: "London" },
+  { id: "us_east", navn: "USA Østkyst (EST/EDT)", offset: -300, offsetSommer: -240, dst: "us", by: "New York" },
+  { id: "us_west", navn: "USA Vestkyst (PST/PDT)", offset: -480, offsetSommer: -420, dst: "us", by: "Los Angeles" },
+  { id: "japan", navn: "Japan (JST)", offset: 540, dst: "ingen", by: "Tokyo" },
+  { id: "china", navn: "Kina (CST)", offset: 480, dst: "ingen", by: "Beijing" },
+  { id: "australia", navn: "Australien (AEST)", offset: 600, offsetSommer: 660, dst: "au", by: "Sydney" },
+  { id: "india", navn: "Indien (IST)", offset: 330, dst: "ingen", by: "Mumbai" },
+  { id: "dubai", navn: "Dubai (GST)", offset: 240, dst: "ingen", by: "Dubai" },
+  { id: "brazil", navn: "Brasilien (BRT)", offset: -180, dst: "ingen", by: "São Paulo" },
+  { id: "germany", navn: "Tyskland (CET/CEST)", offset: 60, offsetSommer: 120, dst: "eu", by: "Berlin" },
+  { id: "france", navn: "Frankrig (CET/CEST)", offset: 60, offsetSommer: 120, dst: "eu", by: "Paris" },
+  { id: "greece", navn: "Grækenland (EET/EEST)", offset: 120, offsetSommer: 180, dst: "eu", by: "Athen" },
+  { id: "greenland", navn: "Grønland (WGT/WGST)", offset: -180, offsetSommer: -120, dst: "eu", by: "Nuuk" },
+  { id: "thailand", navn: "Thailand (ICT)", offset: 420, dst: "ingen", by: "Bangkok" },
+  { id: "singapore", navn: "Singapore (SGT)", offset: 480, dst: "ingen", by: "Singapore" },
+  { id: "south_africa", navn: "Sydafrika (SAST)", offset: 120, dst: "ingen", by: "Johannesburg" },
 ];
+
+export const TIDSZONER_BEREGNER = tidszoner;
 
 export default function TidszoneBeregner() {
   const { locale } = useLocale();
@@ -91,7 +107,7 @@ export default function TidszoneBeregner() {
       hourSuffix: "t",
       dstTitle: "Om sommertid",
       dstBody:
-        "Denne beregner bruger standard tidsforskelle. Husk at sommertid (DST) kan påvirke den faktiske tidsforskel. Danmark skifter til sommertid sidste søndag i marts og tilbage sidste søndag i oktober.",
+        "Beregneren følger sommertiden for dagens dato, så tidsforskellen er den faktiske. Danmark skifter til sommertid sidste søndag i marts og tilbage sidste søndag i oktober, mens USA skifter anden søndag i marts og første søndag i november. I de få dage omkring skiftet kan svaret derfor afvige en time.",
       dateLocale: "da-DK",
     },
     se: {
@@ -140,7 +156,7 @@ export default function TidszoneBeregner() {
       hourSuffix: "h",
       dstTitle: "Om sommartid",
       dstBody:
-        "Den här beräknaren använder standardtidsskillnader. Kom ihåg att sommartid (DST) kan påverka den faktiska tidsskillnaden. Sverige byter till sommartid sista söndagen i mars och tillbaka sista söndagen i oktober.",
+        "Beräknaren följer sommartiden för dagens datum, så tidsskillnaden är den verkliga. Sverige byter till sommartid sista söndagen i mars och tillbaka sista söndagen i oktober, medan USA byter andra söndagen i mars och första söndagen i november. Under de få dagarna kring bytet kan svaret därför avvika en timme.",
       dateLocale: "sv-SE",
     },
   } as const;
@@ -208,9 +224,17 @@ export default function TidszoneBeregner() {
   const beregning = useMemo(() => {
     const fraTz = tidszoner.find(t => t.id === fraTidszone)!;
     const tilTz = tidszoner.find(t => t.id === tilTidszone)!;
-    
+
+    // Sommertiden afgør den faktiske forskel. Dagens dato bruges, fordi
+    // værktøjet ikke tager en dato ind: spørgsmålet "hvad er klokken i USA, når
+    // det er 12 i Danmark" handler om det aktuelle klokkeslæt. Uden dette svarede
+    // beregneren med vinterforskellen og lå en time forkert i halvdelen af året.
+    const iDag = aktuelTid;
+    const fraOffset = utcOffsetMinutter(fraTz.offset, fraTz.offsetSommer, fraTz.dst, iDag);
+    const tilOffset = utcOffsetMinutter(tilTz.offset, tilTz.offsetSommer, tilTz.dst, iDag);
+
     // Forskellen i minutter
-    const forskelMinutter = tilTz.offset - fraTz.offset;
+    const forskelMinutter = tilOffset - fraOffset;
     const forskelTimer = forskelMinutter / 60;
     
     // Beregn tid i destination
@@ -234,9 +258,9 @@ export default function TidszoneBeregner() {
     const now = new Date();
     const utcNow = now.getTime() + now.getTimezoneOffset() * 60000;
     
-    const fraLokalTid = new Date(utcNow + fraTz.offset * 60000);
-    const tilLokalTid = new Date(utcNow + tilTz.offset * 60000);
-    
+    const fraLokalTid = new Date(utcNow + fraOffset * 60000);
+    const tilLokalTid = new Date(utcNow + tilOffset * 60000);
+
     return {
       fraTz,
       tilTz,
@@ -399,12 +423,27 @@ export default function TidszoneBeregner() {
             {tidszoner
               .filter(tz => tz.id !== 'dk')
               .map((tz) => {
-                const forskel = (tz.offset - HJEM_UTC_FORSKEL) / 60;
+                const hjemNu = utcOffsetMinutter(HJEM_VINTER, HJEM_SOMMER, HJEM_DST, aktuelTid);
+                const forskel = (utcOffsetMinutter(tz.offset, tz.offsetSommer, tz.dst, aktuelTid) - hjemNu) / 60;
+                // Forskellen ændrer sig for de zoner, der skifter sommertid på
+                // et andet tidspunkt end Danmark. Da vises vinterværdien, ellers
+                // ville tallet se fast ud, mens det bevæger sig to gange om året.
+                const vinterDato = new Date(aktuelTid.getFullYear(), 0, 15);
+                const hjemVinter = utcOffsetMinutter(HJEM_VINTER, HJEM_SOMMER, HJEM_DST, vinterDato);
+                const forskelVinter =
+                  (utcOffsetMinutter(tz.offset, tz.offsetSommer, tz.dst, vinterDato) - hjemVinter) / 60;
+                const viserVinter = forskelVinter !== forskel;
+                const vinterOrd = locale === "se" ? "på vintern" : "om vinteren";
                 return (
                   <div key={tz.id} className="flex justify-between p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded">
                     <span className="dark:text-gray-300">{l.by[tz.id]}</span>
                     <span className="font-mono dark:text-white">
                       {forskel >= 0 ? '+' : ''}{forskel}{l.hourSuffix}
+                      {viserVinter && (
+                        <span className="text-gray-500 dark:text-gray-400">
+                          {' '}({forskelVinter >= 0 ? '+' : ''}{forskelVinter}{l.hourSuffix} {vinterOrd})
+                        </span>
+                      )}
                     </span>
                   </div>
                 );
