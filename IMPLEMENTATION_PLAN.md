@@ -1,6 +1,40 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — **C54 er landet: de to sidste UTC-datoer i beregnerne er væk, og
+STATUS: KØ — **C55 er landet: `/dato` har svaret "2 dage" på to datoer der er
+én dag hinanden, og delt tekst uden de datoer den gælder.** Auditten af
+`DatoBeregner` — sitets største side, 130.392 visninger og 1.045
+besøgende/28d — fandt **tre fund**. **1) En regnefejl over hele året:**
+"Antal dage" og "Kalenderdage i alt" blev begge regnet som
+`Math.ceil((slut - fra) / 86.400.000)`, altså i millisekunder. Mellem to
+lokale midnat er der 25 timer i det døgn hvor Danmark går tilbage
+(søndag 25. oktober 2026), altså 1,04 dage, som `ceil` runder op til **2**.
+Det samme sker for hvert interval der krydser skiftet: 28. september →
+29. december 2026 svarede **93** dage for **92**. Kun to af årets dage er
+sådan skrevet som 25 timer, men *alle* intervaller der krydser dem er
+fejl, og det er præcis de intervaller folk spørger om ("dage mellem datoer"
+450 visninger, "antal dage mellem to datoer" 248, begge pos. 5). Nu tæller
+`heleDageMellem` i `src/lib/lokal-dato.ts` på **kalenderfelterne læst som
+UTC**, hvor et dageinterval altid er hele 24 timer. **2) "fra nu" var en
+faktuel påstand om en dato brugeren selv vælger:** arbejdsdage-tilstandens
+store overskrift sagde "30 arbejdsdage fra nu" uanset hvad der stod i
+`Udgangsdato` — og udgangsdatoen er et felt brugerne ændrer. Den siger nu
+"30 arbejdsdage fra 5. januar 2026". **3) Den delte tekst var ikke
+selvstændig:** Kopier og Del gav "61 dage mellem datoer" / "30 dage
+tilføjet" / "30 arbejdsdage" — altså et tal uden de datoer det gælder, som
+er hele pointen ved `/dato`, at svaret er relativt. Nu med datoerne i ("61
+dage mellem 28. september 2026 og 29. december 2026"), med **ét** sted der
+bygger strengen, så kopier og del ikke kan komme til at sige hver sit
+(/moms gjorde netop det, før C52 lagde dem i samme kald), med entalform på
+"1 dag", med tusindtalsseparator på "1.000 dage", og med et negativt antal
+som "30 dage **før** 27. september 2026" frem for "‑30 dage tilføjet".
+Testene låser **tidszonen til `Europe/Copenhagen`** — i UTC er 25.–26.
+oktober præcis 24 timer, så fejlen kunne aldrig fejle på en byggemaskine
+med UTC-tid. Verificeret modsvejs: med den gamle komponent falder 6 af 12
+tests i filen. Gate grøn: lint (545 filer), **1499 tests / 140 filer** (fra
+1490 / 140) og build (141 sider). Kode + plan i ét commit på `ceo/dato-tekst`;
+første kandidatvindue **2026-09-27 07:30**. Se opgave 83.
+
+STATUS (forrige iteration) — **C54 er landet: de to sidste UTC-datoer i beregnerne er væk, og
 moms-guiden fortæller nu, hvilken knap man trykker på.** `AlderBeregner` (3
 forekomster) og `UgenummerBeregner` (2) byggede stadig "i dag" med
 `new Date().toISOString().split("T")[0]`, altså dagen i UTC — præcis den fejl C50
@@ -94,7 +128,7 @@ tilstanden kalder `beregnAlder`, og et tomt eller umuligt datofelt giver intet
 resultat frem for "NaN dage". Kode + plan i ét commit på `ceo/dato-alder-lokaldato`;
 første kandidatvindue **2026-09-27 07:30**. Se opgave 78.
 
-**Syv deploynoter står åbne: C37, C49, C50, C51, C52, C53 og nu C54**, alle med
+**Otte deploynoter står åbne: C37, C49, C50, C51, C52, C53, C54 og nu C55**, alle med
 første kandidatvindue 2026-09-27 07:30 (C37: 12:30). 21:30-vinduet den 26/9 er
 passeret, så intet kan verificeres før 07:30. `beregner.no`-delen af enhver note
 verificeres ikke: den URL er et separat site, ikke dette repo (se ❓).
@@ -5707,6 +5741,112 @@ top-15, så ud over CTR er det eneste målbare signal `ad_clicked` på siden.
   CTR der er ranking, ikke titel.
 
 
+#### 83. [x] FÆRDIG 2026-09-27 — C55 — `/dato` regnede dage i millisekunder, og delte tekst uden datoer
+
+- **Iteration start:** 2026-09-27 00:45 CEST på `ceo/dato-tekst`. Køen var tom
+  (alle 82 opgaver færdige, intet `I GANG`). De otte åbne deploynoters første
+  kandidatvindue er 07:30, altså efter iterationsgrænsen, så intet kunne
+  verificeres. Valget var **punkt 3b i køen** — klassen "hvad skriver den tekst,
+  brugeren kopierer?" — startet i rækkefølge efter visninger, så
+  `DatoBeregner` (130.392 visninger) før `TidszoneBeregner` (24.723) og
+  `KalorieBeregner` (12.332).
+- **Datagrund:** DA `/dato` Search Console **130.392 visninger, 801 klik, CTR
+  0,6 %, pos. 5,8** (GSC 2026-08-27 → 2026-09-24) og Plausible **1.045
+  besøgende/28d, 963 indgangsvisninger, bounce 5 %** pr. 2026-09-26 — den mest
+  besøgte enkelt-side på sitet, og dens tre største søgninger er alle *antal
+  dage mellem to datoer*: "hvor mange dage er der til 1 december" (996
+  visninger, pos. 5), "dage mellem datoer" (450, pos. 5), "antal dage mellem
+  to datoer" (248, pos. 5). Siden er altså bygget omkring præcis den
+  beregning C55 fandt en fejl i.
+- **Fund 1 — `Math.ceil` på millisekunder tæller et skifte for sommertid som
+  en ekstra dag.** `DatoBeregner` havde to steder med
+  `Math.ceil((slut - fra) / (1000 * 60 * 60 * 24))`: "Antal dage" i
+  dage-mellem-tilstanden og "Kalenderdage i alt" i arbejdsdage-tilstanden.
+  Mellem to lokale midnat er der 25 timer i det døgn hvor Danmark og Sverige
+  går tilbage, altså 1,0417 dage. Verificeret i Node med
+  `TZ=Europe/Copenhagen`:
+
+  | interval | sande dage | `Math.ceil` | `Math.round` |
+  |---|---|---|---|
+  | 25.→26. okt 2026 (søndag, tilbage) | 1 | **2** | 1 |
+  | 24.→26. okt 2026 | 2 | **3** | 2 |
+  | 28. sep → 29. dec 2026 | 92 | **93** | 92 |
+  | 28.→30. mar 2026 (søndag, frem) | 2 | 2 | 2 |
+
+  Kun to dage om året har 25 timer, men **alle** intervaller der krydser dem
+  var en dag for mange, og det er præcis dem folk spørger om. Nu går begge
+  steder gennem `heleDageMellem` i `src/lib/lokal-dato.ts` (ny funktion), som
+  tæller på kalenderfelterne læst som `Date.UTC` — der er et dageinterval
+  altid præcis 86.400.000 ms. Samme fejl fandt `git grep` **kun** på denne
+  fil blandt de trafikstærke, så `/nedtaelling` og `/dage-til/*` ikke er ramt
+  (de tæller fra i dag, ikke mellem to valgte datoer).
+- **Fund 2 — "fra nu" var en påstand om en dato brugeren selv vælger.**
+  Arbejdsdage-tilstandens store overskrift læste `{antalDage} arbejdsdage fra
+  nu` / `arbetsdagar från nu` (label `arbejdsdageFraNu`), men `Udgangsdato` er
+  et felt brugeren kan ændre, og standardværdien er kun *i dag* fordi den er
+  initialiseret til `tilIsoDato(new Date())`. Sætter man den til 5. januar
+  2026, sagde siden stadig "fra nu". Samme klasse som C52's "Tillæg moms": en
+  etiket der ikke kan være sand for den værdi, der er indtastet. Overskriften
+  siger nu `30 arbejdsdage fra 5. januar 2026` med den faktiske dato i kort
+  form (uden ugedagsnavn, så den bliver på én linje).
+- **Fund 3 — den delte tekst var ikke selvstændig.** `CopyResultButton` og
+  `ShareCalculation` fik hver deres egen ternær (otte grene, to steder) som
+  gav `"61 dage mellem datoer"`, `"30 dage tilføjet"`, `"30 arbejdsdage"` og
+  `"36 år, 6 mdr, 12 dage"`. Nu bygger **én** `resultatTekst` (C52's
+  lærepådom: to steder der bygger samme streng, divergerer), brugt af begge
+  knapper:
+  - dage mellem: `61 dage mellem 28. september 2026 og 29. december 2026`
+    (svensk: `92 dagar mellan 28 september 2026 och 29 december 2026`)
+  - tilføj dage: `1.000 dage fra 27. september 2026`, og ved negativt antal
+    `30 dage før 27. september 2026` — før skrev den `‑30 dage tilføjet`, altså
+    et minus tal der lagtages, hvilket er selvmodsigende
+  - arbejdsdage: `30 arbejdsdage fra 5. januar 2026`
+  - alder: `36 år, 6 mdr, 12 dage` (uændret, men går nu gennem
+    `formatNumber` som resten)
+
+  Datoerne bruger `formatDateShort` (dag, måned, år — **ikke** ugedagsnavn, der
+  gør sætningen for lang til en besked). Tilføjet er desuden **entalform**:
+  ét dag-tal hed "1 dage mellem datoer", hvilket er en fejl i den sætning
+  brugeren sender videre. Fire nye labelnøgler (`dageMellem`, `dagEntyd`,
+  `fra`, `foer`) på begge domæner; `dageMellemDatoer`, `dageTilfoejet`,
+  `arbejdsdageSummary` og `arbejdsdageFraNu` er fjernet, fordi de beskrev den
+  gamle tekst.
+- **Test:** `src/lib/lokal-dato.test.ts` får 3 tests for `heleDageMellem`
+  (almindelige intervaller, begge sommertidsretninger, fortegn) og
+  `DatoBeregner.test.tsx` får 6 (skiftet som én dag, ental/flertal DA og SE,
+  "fra nu" væk fra overskriften, negativt antal, tusindtalsseparator, samt
+  kopier-knappen klikket og **klipbordet læst** — knappen viser ikke strengen,
+  så en test der læser DOM'en ville være grøn med den gamle kode). Begge
+  filer sætter `process.env.TZ = "Europe/Copenhagen"` **før** import, fordi
+  det er hele pointen: i UTC er 25.–26. oktober præcis 24 timer, så uden
+  låst timezone kan fejlen ikke fejle på en byggemaskine. Verificeret modsvejs
+  med `git stash`: med den gamle `DatoBeregner.tsx` falder **6 af 12** tests
+  i filen.
+- **Gate:** `npm run lint` grøn (545 filer), `npm run test` **1499 tests / 140
+  filer** grøn (fra 1490 / 140), `npm run build` grøn (141 sider, 7 kendte
+  pre-existing CSS-advarsler). Første kandidatvindue **2026-09-27 07:30**.
+- **MÅL:** `/dato` baseline **130.392 visninger / 801 klik / CTR 0,6 % / pos.
+  5,8** (GSC 2026-08-27 → 2026-09-24) og **1.045 besøgende/28d, 963
+  indgangsvisninger, bounce 5 %** (Plausible 2026-09-26). **Mål 2026-10-10.**
+  Fund 1 og 2 er korrekthed og forventes **ikke** at kunne ses i trafiktallet
+  (de rammer to dage om året, hhv. kun brugere der ændrer udgangsdatoen).
+  Fund 3 kan derimod godt give flere klik på Kopiér og Del, hvilket er et
+  konverteringssignal — `trackResultCopied` og `trackShare` måles i Plausible
+  fremadrettet; **Mads skal hente dem, jeg må ikke ændre tracking.**
+- **Efterladt, bevidst.** De to næste i klassen er `TidszoneBeregner`'s
+  `l.summary` (24.723 visninger) og `RenteBeregner`'s `l.copySummary`
+  (13.623), derefter `AlderBeregner` (6.013) og `KalorieBeregner`'s
+  `toFixed(2)`-tal (12.332) — **én komponent ad gangen med grøn gate
+  imellem.** Bemærk at C53's note sagde "`toFixed(2)` står i 18 andre
+  komponenter": `git grep` i dag tæller **11** filer (`Elberegner` 4,
+  `BraendstofBeregner` 2, `BillaanBeregner` 2, og 1 i hver af
+  `PromilleBeregner`, `OpsparingsBeregner`, `LoenBeregner`,
+  `KvadratmeterBeregner`, `ForbrugslaanBeregner`, `BoliglaanBeregner`,
+  `BilBeregner`) — listen er mindre end antaget, og nogle af dem kan være
+  korrekte (et decimaltal i en teknisk enhed). Tallet i noten er rettet her,
+  så næste iteration ikke leder efter otte komponenter der ikke findes.
+
+
 ### Næste kandidater efter C34 — lukket med negativt fund
 
 
@@ -5900,12 +6040,15 @@ efter datagrund:
    tekst, brugeren kopierer?"** C52 fandt fejlen på `/moms`, C53 på `/procent`
    — begge gange i `CopyResultButton`/`ShareCalculation`/`PrintResult`-strengen,
    aldrig i selve regnestykket. Klassen er billig, mekanisk og har fundet en
-   reel fejl begge gange. **Ulæste af samme overflade:** `TidszoneBeregner`'s
-   `l.summary` (24.723 visninger), `RenteBeregner`'s `l.copySummary` (13.623),
-   `AlderBeregner`'s `l.copySummary` (6.013), `DatoBeregner`'s `text` (130.392),
-   samt de 18 komponenter med `toFixed(2)` — start med `KalorieBeregner`
-   (12.332) og `ArveafgiftBeregner`. **Én komponent ad gangen med grøn gate
-   imellem.** Se opgave 81's "Efterladt".
+   reel fejl begge gange. **Læst i C55:** `DatoBeregner` (130.392) — se opgave
+   83, hvor klassen også gav to fund oveni: et `Math.ceil` over millisekunder,
+   der regnede sommertidsskiftet som en ekstra dag, og en "fra nu"-påstand om
+   en dato brugeren selv vælger. **Ulæste af samme overflade:**
+   `TidszoneBeregner`'s `l.summary` (24.723 visninger), `RenteBeregner`'s
+   `l.copySummary` (13.623), `AlderBeregner`'s `l.copySummary` (6.013), samt
+   de 11 komponenter med `toFixed(2)` (C53 sagde 18 — `git grep` tæller 11) —
+   start med `KalorieBeregner` (12.332). **Én komponent ad gangen med grøn
+   gate imellem.** Se opgave 81's "Efterladt" og opgave 83's "Efterladt".
 4. **`/moms`-emnet fra C45 (Skats frister) ligger stadig åbent** og er for
    stort til en side-iteration. Det eneste, der kan gøres nu uden nye tal, er
    at finde ud af om **GSC har en række** for frister/indberetning — ellers
@@ -5935,6 +6078,36 @@ efter datagrund:
   og noterer, at NO-URL'en 404'er. Det er ærligt, men mindre end noterne lover.
   Bemærk desuden: **der er ingen beregner.no-trafik i nogen snapshot** — hverken
   Plausible eller GSC — hvilket er konsistent med et separat site.
+- ⏳ **VERIFICÉR DEPLOY: C55 `/dato` — "antal dage" tæller ikke længere et
+  sommertidsskifte som en dag, og Kopier/Del giver datoerne med — kode + plan
+  i ét commit på branch `ceo/dato-tekst`, første kandidatvindue
+  **2026-09-27 07:30**.** Verificér **indhold og beregning**; HTTP 200
+  beviser intet, hele fundet er i klient-renderede tal og tekst:
+  1. Åbn `/dato`, vælg **Dage mellem**, sæt **Fra dato = 25. oktober 2026**
+     og **Til dato = 26. oktober 2026**. **Antal dage** skal være **1**.
+     Før rettelsen stod der 2, fordi de 25 timer mellem de to midnat blev
+     rullet op til 2 dage. Det er det tydeligste af alle fundene.
+  2. Sæt **Fra = 28. september 2026** og **Til = 29. december 2026**:
+     **92** dage, ikke 93.
+  3. Vælg **Arbejdsdage**, sæt **Udgangsdato = 5. januar 2026** og
+     **Antal = 30**. Overskriften skal læse **"30 arbejdsdage fra 5. januar
+     2026"** og må **ikke** sige "fra nu" nogen steder i HTML'en.
+  4. I samme tilstand: klik **Kopiér** og sæt klipbordet ind i et felt.
+     Det skal give **`30 arbejdsdage fra 5. januar 2026`**. Før stod der
+     "30 arbejdsdage".
+  5. Vælg **Tilføj dage** med Udgangsdato 27. september 2026 og **Antal =
+     ‑30**: kopier skal give **`30 dage før 27. september 2026`**, aldrig
+     "‑30 dage tilføjet".
+  6. Vælg **Dage mellem** med 28. og 29. september 2026: kopier skal give
+     **`1 dag mellem 28. september 2026 og 29. september 2026`** — entalform,
+     "1 dage" er en fejl.
+  7. Samme med **Antal = 1000**: kopier skal give **`1.000 dage fra 27.
+     september 2026`** med punktum som tusindtalsseparator.
+  8. På `https://beraknare.se/dato` skal samme test med 2. november og 1.
+     december 2026 give **`29 dagar mellan 2 november 2026 och 1 december
+     2026`**.
+  9. `https://minberegner.dk/api/health` skal svare `status: ok`.
+
 - ⏳ **VERIFICÉR DEPLOY: C53 `/procent` — alle tal i siden største
   resultatblok skal have komma og tusindtalsseparator — kode + plan i ét commit
   på branch `ceo/procent-talformat`, kode `5c9c844`, merge `dfc1874`

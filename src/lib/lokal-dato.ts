@@ -41,6 +41,22 @@ export function parseIsoDato(iso: string): Date | null {
 }
 
 /**
+ * Helt antal kalenderdage mellem to lokale datoer, med fortegn.
+ *
+ * Millisekunderne mellem to lokale midnat er **ikke** et helt antal dage, når
+ * intervallet krydser et skifte for sommertid: 25. til 26. oktober 2026 er 25
+ * timer, altså 1,04 dage, som `Math.ceil` rounder op til 2 — en
+ * "antal dage mellem to datoer"-beregning ville svare 2 på to datoer der er
+ * præcis én dag hinanden. Derfor tæles på kalenderfelterne, læst som UTC hvor
+ * et dageinterval altid er hele 24 timer.
+ */
+export function heleDageMellem(fra: Date, til: Date): number {
+  const somUtc = (dato: Date) =>
+    Date.UTC(dato.getFullYear(), dato.getMonth(), dato.getDate());
+  return Math.round((somUtc(til) - somUtc(fra)) / 86400000);
+}
+
+/**
  * Flytter en dato et antal kalendermåneder frem eller tilbage. En dato der
  * ikke findes i måneden (31. januar plus én måned) lander på månedens sidste
  * dag, så januar ikke springer til 3. marts.
