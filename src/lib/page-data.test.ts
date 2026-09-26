@@ -666,3 +666,42 @@ describe("svensk leasing-metadata", () => {
     expect(text).not.toMatch(/[æø]/i);
   });
 });
+
+describe("svenska svar på frågeformulerade sökningar", () => {
+  // Search Console 2026-08-27→09-24: de tre svenska sidor med flest visninger
+  // rankar på frågeformulerede sökningar ("antal dagar mellan datum",
+  // "räkna ut timmar och minuter", "färetagsleasing bil kalkyl"), men frågan
+  // fanns inte på sidan. position 8-15 med 0,1-0,9 % CTR er et spørgsmål om
+  // svarform, ikke om titel.
+  const frageForm = (slug: string) =>
+    getPageData(slug, "se")!.faqItems.map((item) => `${item.question} ${item.answer}`).join(" ");
+
+  test("/dato svarar på de fire svenska dags-sökninger", () => {
+    const text = frageForm("dato").toLowerCase();
+    expect(text).toContain("hur många dagar är det mellan två datum");
+    expect(text).toContain("antalet dagar mellan datum");
+    expect(text).toContain("hur många dagar till 31 december");
+  });
+
+  test("/tidsberegner svarar på de svenska tids-sökninger", () => {
+    const text = frageForm("tidsberegner").toLowerCase();
+    expect(text).toContain("hur räknar jag ut timmar och minuter");
+    expect(text).toContain("hur lång tid det tar");
+    // 08:30→16:45 = 8:15 er kalkylatorens eget eksempel i descriptionen.
+    expect(text).toContain("08:30 till 16:45 är 8 timmar och 15 minuter");
+  });
+
+  test("/leasing nævner färetagsleasing og svarer på leasingkostnaden", () => {
+    const text = frageForm("leasing").toLowerCase();
+    expect(text).toContain("färetagsleasing");
+    expect(text).toContain("4.121 kr");
+  });
+
+  test("den svenska leasing-FAQ har ingen dansk rester eller brudt svensk", () => {
+    const text = frageForm("leasing");
+    // "värktiga" var en dansk læk, "földer" stavfel, og "mindre går att betala
+    // med bilen er till salu" var en sætning uden mening.
+    expect(text).not.toMatch(/värktiga|földer|er till salu|mindre går att betala/);
+    expect(text).not.toMatch(/værktøj|værkti/);
+  });
+});
