@@ -102,6 +102,10 @@ export default async function SUPage() {
                   <td>{kr(SU_2026.singleParentSupplement)} kr.</td>
                 </tr>
                 <tr>
+                  <td>Forsørgertillæg til enlig forsørger, der bor sammen med en på SU eller kontanthjælp</td>
+                  <td>{kr(SU_2026.singleParentSupplementSharedHome)} kr.</td>
+                </tr>
+                <tr>
                   <td>Handicaptillæg på videregående uddannelse</td>
                   <td>{kr(SU_2026.disabilitySupplement.videregaaende)} kr.</td>
                 </tr>
@@ -120,7 +124,12 @@ export default async function SUPage() {
             den fulde sats på {kr(SU_2026.udeboende)} kr. I en særlig ordning fra før{" "}
             {SU_2026.currentHomewardSchemeStart} kan den ældre faste sats på{" "}
             {kr(SU_2026.homewardLegacy)} kr. fortsat gælde. En berettiget enlig forsørger kan
-            herudover få forsørgertillæg på {kr(SU_2026.singleParentSupplement)} kr. pr. måned.
+            herudover få forsørgertillæg på {kr(SU_2026.singleParentSupplement)} kr. pr. måned,
+            eller {kr(SU_2026.singleParentSupplementSharedHome)} kr. hvis forsørgeren bor sammen
+            med en person på SU eller kontanthjælp efter sociallovens § 16, st. 1. Får du barn
+            under uddannelsen, kan du desuden få fødselsstøtte i op til{" "}
+            {SU_2026.rules.birthGrantStandardMonths} måneder — op til{" "}
+            {SU_2026.rules.birthGrantSingleParentMonths} måneder, hvis du er enlig forsørger.
             Forsørgertillæg og forældrelån er separate ydelser; se vilkårene hos{" "}
             <a href={SU_2026.sources.singleParentEligibility} target="_blank" rel="noopener noreferrer">su.dk</a>.
           </p>
@@ -141,8 +150,52 @@ export default async function SUPage() {
             <a href={SU_2026.sources.udeboendeUngdomsuddannelse} target="_blank" rel="noopener noreferrer">ungdomsuddannelse</a>,{" "}
             <a href={SU_2026.sources.homewardUngdomsuddannelse} target="_blank" rel="noopener noreferrer">hjemmeboende ungdom</a>,{" "}
             <a href={SU_2026.sources.youthHousing} target="_blank" rel="noopener noreferrer">ungdomsregler</a>,{" "}
-            <a href={SU_2026.sources.parents} target="_blank" rel="noopener noreferrer">forældre</a> og{" "}
+            <a href={SU_2026.sources.parents} target="_blank" rel="noopener noreferrer">forældre</a>,{" "}
+            <a href={SU_2026.sources.parentalIncome} target="_blank" rel="noopener noreferrer">forældreindkomst</a> og{" "}
             <a href={SU_2026.sources.disability} target="_blank" rel="noopener noreferrer">handicaptillæg</a>.
+          </p>
+
+          <h2>Hjemmeboende SU: forældrenes indkomst i {SU_2026.parentalIncomeYear}</h2>
+          <p>
+            I den aktuelle ordning er hjemmeboende SU ikke én fast sats. Den består af{" "}
+            {kr(SU_2026.homewardBase)} kr. i grundsats og et indkomstafhængigt tillæg på højst{" "}
+            {kr(SU_2026.homewardMaximumSupplement)} kr. Hvor i skalaen du lander, afhænger af
+            forældrenes indkomstgrundlag to år tidligere, så SU for 2026 bruger normalt
+            forældreindkomsten fra {SU_2026.parentalIncomeYear}.
+          </p>
+          <div className="overflow-x-auto">
+            <table>
+              <thead>
+                <tr>
+                  <th>Forældrenes indkomstgrundlag i {SU_2026.parentalIncomeYear}</th>
+                  <th>Din hjemmeboende SU pr. måned</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>{kr(SU_2026.parentalIncome.noSupplementAtOrAbove)} kr. eller mere</td>
+                  <td>{kr(SU_2026.homewardBase)} kr. (kun grundsats)</td>
+                </tr>
+                <tr>
+                  <td>Mellem de to grænser</td>
+                  <td>Tillægget falder trinvis ned fra {kr(SU_2026.homewardMaximumSupplement)} kr. til 0 kr.</td>
+                </tr>
+                <tr>
+                  <td>{kr(SU_2026.parentalIncome.maxSupplementAtOrBelow)} kr. eller mindre</td>
+                  <td>{kr(SU_2026.homewardMaximum)} kr. (fuldt tillæg)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            For hver søskende under 18 år trækker Udbetaling Danmark{" "}
+            {kr(SU_2026.parentalIncome.siblingUnder18Deduction)} kr. fra forældrenes indkomst, når
+            den beregnes. Det er et andet tal end årsfribeløbets forhøjelse på{" "}
+            {kr(SU_2026.freeAllowance.childUnder18Annual)} kr. pr. barn pr. år, fordi det ene
+            beregnes på forældrenes indkomst og det andet på dit eget. Har forældrene hver
+            adresse, vurderes normalt den forælder, hvis adresse du havde den første i den
+            pågældende måned. Se su.dk's{" "}
+            <a href={SU_2026.sources.parentalIncome} target="_blank" rel="noopener noreferrer">regler for tilfælde med kun én forælder</a>.
           </p>
 
           <h2>Fribeløb 2026</h2>
@@ -217,6 +270,7 @@ export default async function SUPage() {
             <li>SU-lån til forældre: op til {kr(SU_2026.loan.parentMonthly)} kr. pr. måned.</li>
             <li>Almindeligt SU-lån og forældrelån: i alt op til {kr(SU_2026.loan.combinedMonthly)} kr. pr. måned.</li>
             <li>Slutlån: op til {kr(SU_2026.loan.finalMonthly)} kr. pr. måned i de seneste {SU_2026.rules.finalLoanStandardMonths} måneder, i nogle tilfælde {SU_2026.rules.finalLoanExtendedMonths} måneder.</li>
+            <li>Udlandsstudielån: op til {kr(SU_2026.loan.abroadTotal)} kr. i alt til studieophold og/eller hel uddannelse i udlandet, forudsat at din egenbetaling overstiger det, udlandsstipendiet dækker.</li>
           </ul>
           <p>
             Renten er {kr(SU_2026.loan.duringStudyRate * 100)} % under studiet og{" "}

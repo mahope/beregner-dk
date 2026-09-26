@@ -2669,8 +2669,57 @@ Mads og afsnittet "Næste CTR-kandidat".
   begge pushet (branch `ceo/c20-su-artikel` ligger også på origin). `/api/health`
   svarede `status: ok` umiddelbart efter merge; live-artiklen er endnu den gamle,
   fordi auto-deploy er slået fra.
-- **Kandidat 37 er hermed lukket.** Ingen navngiven sats-artikel er længre
+  - **Kandidat 37 er hermed lukket.** Ingen navngiven sats-artikel er længre
   ubearbejdet, og der er ingen baseline til nogen af dem undtagen børnepenge.
+
+#### 47. [x] FÆRDIG 2026-09-26 — C21 — `/su` lovede forældreindkomst, men nævnte ingen af tallene
+
+- **Iteration start:** 2026-09-26 11:29 CEST på `ceo/c21-su-side`. Køen var tom
+  (alle 46 opgaver færdige, intet `I GANG`), og de fem åbne deploynoter har første
+  kandidatvindue 12:30, så intet kunne verificeres. C20's egen afsluttning pegede
+  på dette som det næste: de tal den verificerede, fandtes kun i artiklen.
+- **Datagrund:** `/su` **119 besøgende/28d pr. 2026-09-26** (snapshot 07:52) og
+  faldt 239→119 i 2026-09-23-snapshottet. Ikke i GSC-top-15, så **der er ingen
+  CTR-baseline** — derfor er titel/description **ikke** rørt i denne iteration.
+  Klyngereference: `/studielaan` og `/dagpenge` låt samme sted i trappen.
+- **Fund — landingssiden lovede indhold, den ikke havde.** `/su`s egen intro
+  (`src/app/su/page.tsx:41-48`) linker til guiden "med aldersgrænser,
+  **forældreindkomst**, fribeløb og officielle kilder", men siden nævner
+  forældreindkomst *ordet* og ingen *grænser*: den gamle sats-tabel sagde bare
+  "Den afhænger af forældrenes indkomstgrundlag to år tidligere"
+  (`src/lib/page-data.ts:1683`), og hjemmeboende-afsnittet havde ingen tabel. Sådan
+  besvarede `/su` præcis den søgning, den lovede at besvare — kun i artiklen.
+- **Beslutning/implementering:** intet nyt tal, kun de fire der allerede lå i
+  `SU_2026` og var verificeret mod su.dk den 2026-09-26:
+  1. Ny `<h2>`-sektion "Hjemmeboende SU: forældrenes indkomst i 2024" med
+     tre-rækkers tabel (fuldt tillæg ≤ 419.589 kr. / trinvis nedfald mellem
+     grænserne / kun grundsats ≥ 710.077 kr.), søskendefrådraget på 43.086 kr.
+     med den eksplicitte advarsel om forveksling med årsfribeløbets 34.129 kr.,
+     dobbelt adresse-reglen og kilde-linket til su.dk.
+  2. Ny række i sats-tabellen + løbende tekst: forsørgertillægget er
+     **2.966 kr.**, når forsørgeren bor med en på SU eller kontanthjælp efter
+     sociallovens § 16, st. 1 — ikke 7.426 kr. Fødselsstøtten (9/12 måneder) er
+     nævnt samme sted.
+  3. **Udlandsstudielån 129.106 kr.** i SU-lån-listen på `/su` (den stod kun i
+     artiklen).
+  4. `page-data.ts`: to nye FAQ-spørgsmål (forældreindkomst, udlandsstudielån) og
+     det eksisterende forsørgertillæg-svar udvidet med delt-bolig-satsen. FAQ'en
+     går dermed også ind i JSON-LD, så svarene kan vises i Google.
+- **Acceptkriterier:**
+  1. `/su` renderer 419.589, 710.077, 43.086, 2.966 og 129.106 kr. **PASS**
+  2. `page-data.ts`'s FAQ for `su` indeholder de samme tal. **PASS**
+  3. Forældreindkomstafsnittet står før fribeløbsafsnittet. **PASS**
+  4. Siden linker til su.dk's forældreindkomstregel. **PASS**
+  5. `npm run lint`, `npm run test` og `npm run build` er grønne. **PASS**
+- **Kvalitetsgate 2026-09-26 11:33 CEST:** `npm run test` grøn (**1249/1249,
+  120 filer** — 6 nye i `src/app/su/page.test.tsx`), `npm run lint` grøn
+  (510 filer), `npm run build` grøn (139 sider + typecheck, ingen nye advarsler).
+- **Forventet effekt:** `/su` kan nu besvare "hjemmeboende SU 2026 forældreindkomst"
+  uden at læseren skal ud på artiklen. Det er en konverterings- og
+  svar-først-effekt, ikke en CTR-effekt — der er ingen GSC-række at måle imod.
+- **MÅL:** `/su` baseline **119 besøgende/28d pr. 2026-09-26** (ikke i GSC-top-15,
+  ingen CTR-baseline). Første genmåling 2026-10-10.
+
 
 ### ❓ Til Mads
 - **Beskæftigelsestillægget på 26.198 kr/md (C19, 2026-09-26) — må ikke gættes.**
@@ -2780,13 +2829,13 @@ Mads og afsnittet "Næste CTR-kandidat".
   den skal skaffe nye efterspørgselsdata (GSC-rækker for `/blog/*` og for de
   næste 15 sider) eller gå efter placering/indhold, som C19/C20 gjorde. Uden nye
   tal er enhver CTR-justering en ukontrolleret ændring.
-- **Nye, ubearbejdede kilder i C20 (2026-09-26):** de tre tal jeg verificerede
-  direkte mod su.dk — forældreindkomstgrænserne 419.589/710.077 kr., søskendefrådrag
-  43.086 kr., forsørgertillæg ved delt bolig 2.966 kr. og udlandsstudielånet
-  129.106 kr. — findes **ikke** i `page-data.ts` FAQ eller på `/su`-siden, kun i
-  artiklen. Næste iteration kan udnytte dem på `/su` (Fase 3's egen
-  "undersøg teknikken"/konverteringsvinkel), fordi de besvarer præcis den søgning,
-  der sender folk til siden.
+- ~~**Nye, ubearbejdede kilder i C20 (2026-09-26):**~~ **Lukket som C21 den
+  2026-09-26, se opgave 47.** Forældreindkomstgrænserne 419.589/710.077 kr.,
+  søskendefrådraget 43.086 kr., forsørgertillægget ved delt bolig 2.966 kr. og
+  udlandsstudielånet 129.106 kr. stod kun i artiklen; de står nu **også** på `/su`
+  og i sidens FAQ/JSON-LD. `/su` fik derved sit eget svar på den søgning, dens
+  egen intro lovede. Næste skridt på `/su` kræver GSC-data — siden har ingen række
+  i top-15, så titel/description er bevidst urørt.
 - ~~`/rentefradrag`~~ er lukket som R1 den 2026-09-25, se opgave 23: ét ratested med
   kilde, fire rettede modstridelser og ingen "afhænger af din kommune"-påstand. MÅL:
   Search Console baseline 4.492 visninger, 219 klik, CTR 4,9 %, position 6,7 pr.
