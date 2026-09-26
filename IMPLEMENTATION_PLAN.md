@@ -1,12 +1,12 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
 STATUS: KØ — **syv åbne deploynoter (C15 `/promille`, C16 `/vaegttab` +
-`/enhedspris`, C18 pensionssatserne, C19 dagpenge-satserne, C20 SU-guiden, C21
-`/su`s forældreindkomst og C22 den svenska brødkrumme).** C15-C21 mergedes
-09:57-11:32 og er sat i 12:30-vinduet 2026-09-26; C22 mergerede 12:30 og kan
-først verificeres efter 17:30. Live 12:34 serverer stadig pre-batch-indhold, men
-vinduet var 4 minutter gammelt, så det er **ikke** `DEPLOY-MISSING`. Intet er
-frosset pga. ventetiden. `/api/health` svarer `status: ok`.
+`/enhedspris`,   C18 pensionssatserne, C19 dagpenge-satserne, C20 SU-guiden, C21 `/su`s
+  forældreindkomst og C22 den svenska brødkrumme).** C15-C21 mergedes
+  09:57-11:32 og er sat i 12:30-vinduet 2026-09-26; C22 mergerede 12:30 og kan
+  først verificeres efter 17:30. Live-kontrol 12:15 lå **før** vinduet og viste
+  pre-batch-indhold, hvilket beviser intet. Intet er frosset pga. ventetiden.
+  `/api/health` svarer `status: ok`.
 
 Næste iteration skal **ikke** optimere CTR på de samme svar-først-sider igen.
 Den skal enten gå efter **placering/indhold** (C19-C22 gjorde det) eller efter
@@ -3311,15 +3311,13 @@ landmark=lån, piggybank=opsparing osv.).
   (C20), 11:32 (C21) og **12:30 (C22)** CEST. Første kandidatvindue for de seks
   første noter er **12:30** 2026-09-26; 07:30-batchen gik før alle seks merges.
   **C22 mergede 12:30** og kan først verificeres efter 17:30-vinduet.
-  - **Indholdskontrol 12:34 CEST (lige efter 12:30-vinduets start):** `/api/health`
-    svarer `status: ok`, men `/su`, `/blog/su-2026-satser-og-regler`,
-    `/blog/dagpenge-saadan-finder-du-din-sats`, `/promille` og `/vaegttab` serverer
-    **stadig pre-batch-indhold** (dagpenge 10× `20.359`, ingen `0,88` på
-    `/promille`, ingen `419.589`/`2.966`/`129.106` på `/su`), og
-    `beraknare.se/dato` har stadig 2× `/kategori/hverdag`. Det er forventet:
-    vinduet var **4 minutter gammelt**, da kontrollen blev foretaget, og en
-    batch-deploy er ikke færdig på fire minutter. **Det er endnu ikke
-    `DEPLOY-MISSING`** — det kræver to vinduer. Genkontrollér efter 17:30.
+  - **Indholdskontrol 12:15-12:16 CEST — altså FØR 12:30-vinduet overhovedet
+    åbnede.** `/api/health` svarer `status: ok`, men `/su`,
+    `/blog/su-2026-satser-og-regler`, `/blog/dagpenge-saadan-finder-du-din-sats`,
+    `/promille` og `/vaegttab` serverer pre-batch-indhold (dagpenge 10× `20.359`,
+    ingen `0,88` på `/promille`, ingen `419.589`/`2.966`/`129.106` på `/su`), og
+    `beraknare.se/dato` har stadig 2× `/kategori/hverdag`. Det er **forventet og
+    beviser intet**: kontrollen lå før vinduet. Første reel mulighed er 12:30.
   - Verificér ved **indholdskontrol**, ikke HTTP 200:
   - `/promille` (DA): eksemplet 4 øl/4 öl på 80 kg = 0,88 ‰ og FAQ om, hvornår
     man må køre igen.
