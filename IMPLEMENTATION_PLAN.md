@@ -1,13 +1,10 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — S3 landet på `ceo/fradrag-2026-rater` 2026-09-26 05:25 CEST (se opgave 38:
-`/blog/fradrag-2026-komplet-guide` læser nu alle 2026-satser fra `SATSER_2026` i stedet for
-egne tal, og befordringsfradraget kræver ikke længere cykel/tog). **Live-kontrol 05:20
-CEST:** `/api/health` svarer `status: ok`; `/dato` er stadig forældet (C4-C14, L1, F1, D5,
-S2, S3 ligger uuddejlet), fordi 07:30-vinduet 2026-09-26 endnu ikke er kørt. Kun ét
-deploy-vindue (21:30 den 25/9) er gået siden C4's merge kl. 18:40, så **endnu ikke
-`DEPLOY-MISSING`**. Næste iteration skal verificere indhold efter 07:30-vinduet 2026-09-26
-— HTTP 200 beviser intet.
+STATUS: KØ — **alle 21 åbne deploynoter er lukket.** 07:30-batchen 2026-09-26 udgav
+C4-C14, D1, D2, D5, F1, K1, L1, R1 og S1-S3; live-indholdet er kontrolleret punkt for
+punkt (se `DEPLOY OK 2026-09-26` i VERIFICÉR DEPLOY-loggen). `/api/health` svarer
+`status: ok`. Nyt i køen: C15 (`/promille` svar-først) er landet på
+`ceo/promille-ctr` 2026-09-26 08:20 CEST og merger til `master` i denne iteration.
 
 
 ## Fase 3 — trafik-drevet
@@ -1890,8 +1887,13 @@ deploy-vindue (21:30 den 25/9) er gået siden C4's merge kl. 18:40, så **endnu 
 - Tilbage er kun to små SE-sider: `/vaegttab` (1.136 visninger, CTR 0,4 %, pos 8,3) og
   `/enhedspris` (1.081, 0,4 %, pos 6,1). Begge har **substans** (hhv. 4 og 2 afsnit med
   tal), så de er copy-arbejde, ikke indholdsarbejde, og effekten er lille.
+- ~~den dokumenterede CTR-pool er udtømt~~ **er falsificeret 2026-09-26:** C15 fandt
+  `/promille` i GSC-top-15 med position 7,9, som stadig havde den gamle
+  produkt-titel. Læs konklusionen nedenfor som "næsten udtømt" — de to SE-sider er
+  de eneste dokumenterede, ubearbejdede rest, hvis GSC- og Plausible-baselines
+  bekræfter dem.
 - **Vigtigere konklusion fra denne iteration:** den dokumenterede CTR-pool er
-  udtømt. Det betyder, at næste iteration enten skal (a) skaffe nye efterspørgselsdata
+  næsten udtømt. Det betyder, at næste iteration enten skal (a) skaffe nye efterspørgselsdata
   — nye Search Console-søgninger pr. side, kun de 15 største sider er med i
   snapshottet — eller (b) gå efter **placering** frem for klik. Punkt (b) peger på
   `/procent` (148.882 visninger, position 7,5): siden har allerede formler,
@@ -2208,6 +2210,63 @@ deploy-vindue (21:30 den 25/9) er gået siden C4's merge kl. 18:40, så **endnu 
   baseline og deres effekt kan ikke måles. En liste over de 15 mest viste
   `/blog/*`-sider med visninger, klik, CTR og position gør kandidat 37 målbar.
 
+#### 39. [x] FÆRDIG 2026-09-26 — C15 — Svar-først på `/promille` (sidste ubearbejdede DA-side i CTR-klassen)
+
+- **Iteration start:** 2026-09-26 07:52 CEST. Først blev alle 21 åbne deploynoter
+  lukket ved indholdskontrol efter 07:30-vinduet (se `DEPLOY OK 2026-09-26`), derefter
+  blev den næste dokumenterede opgave taget.
+- **Datagrund:** Search Console 2026-08-27–2026-09-24: `/promille` 4.159 visninger,
+  60 klik, **CTR 1,4 %, position 7,9**. Søgninger: "promille beregner" 1.038 visninger
+  (position 9), "promilleberegner" 170 (position 6), "beregn promille" 101
+  (position 11), "beregn alkoholpromille" 16 (position 9). Det er den **eneste** side i
+  GSC-top-15 for minberegner.dk med position 5-10, som ikke var svar-først — kandidat
+  31's påstand om en udtømt pool var derfor forker.
+- **Research 2026-09-26 08:05 CEST:** Google Autocomplete for `promille`,
+  `promille beregner`, `beregn promille` og `promilleberegner` (dansk klient) gav
+  "promillegrænse danmark", "promille beregner fald", "promille beregner hvornår må
+  jeg køre", "promille beregner formel", "beregn promille dagen efter" og
+  "beregn din promille". Autocomplete er et kvalitativt intents-signal, ikke
+  volumen; ingen aktuel Google-placering eller PAA-rangering er udledt af det.
+  Løftet er altså ikke bare "beregn", men **hvad bliver promillen for et konkret
+  antal øl, og hvornår må jeg køre igen**.
+- **Scope:** Kun DA- og SE-side-data, én ny FAQ og tests. Ingen ændring af
+  `beregnPromille`, `PromilleBeregner`, URL, canonical, hreflang, sitemap eller
+  public API.
+- **Beslutning/implementering:** Titel, description, OG og schema er nu svar-først på
+  det samme eksempel, som `beregnPromille(4, 80, "mand", 0)` faktisk returnerer:
+  0,88 ‰. DA: "Promilleberegner: 4 øl på 80 kg = 0,88 ‰" (40 tegn) med synlig intro
+  "4 øl til en mand på 80 kg giver 0,88 ‰."; SE: "Promillekalkylator: 4 öl på 80 kg
+  = 0,88 ‰" (42 tegn) med "4 öl till en man på 80 kg ger 0,88 ‰.". Begge
+  descriptions er ≤160 tegn, og begge nævner den **locale-specifikke** grænse
+  (0,5 ‰ DA / 0,2 ‰ SE), så svensk copy ikke lovede dansk lovgivning. Ny FAQ "Hvornår
+  kan jeg køre bil igen?" / "När kan jag köra bil igen?" besvarer
+  "dagen efter"-intents og siger, at 0,88 ‰ kræver 5,9 timer — tallet er
+  `timerTilNul` fra det testede modul, ikke et håndplukket tal.
+- **Tests:** Ny `src/app/promille/page.test.tsx` renderer DA og SE og kræver H1,
+  synligt svar, den rigtige grænse og at beregneren stadig er i DOM. To nye
+  `page-data`-tests låser titel/description/OG/schema for begge locales og kobler
+  eksemplet til `beregnPromille(4, 80, "mand", 0)` = 0,88 ‰ og 5,9 timer, så copy og
+  kode ikke kan glide fra hinanden. De nye assertions fejlede først mod den gamle
+  copy og var grønne efter ændringen.
+- **Kvalitetsgate 2026-09-26 08:16 CEST:** `npm run build` grøn (139 sider +
+  typecheck, ingen nye advarsler), `npm run test` grøn (1191/1191 tests, 111 filer),
+  `npm run lint` grøn (501 filer), `npm audit --audit-level=high` 0 sårbarheder.
+  Diffen er copy + tests, så der var ingen grund til et separat review ud over
+  de nye tests; de to runtime-tal er regnet fra modulet, ikke fra hukommelse.
+- **Forventet effekt:** `/promille` har allerede position 7,9, så effekten er CTR på
+  eksisterende kvalificeret trafik, ikke ny placering. 4.159 visninger/28d er den
+  mindste dokumenterede CTR-kandidat på DA, og den var den sidste i klassen.
+- **MÅL:** `/promille` Search Console baseline 4.159 visninger, 60 klik, CTR 1,4 %,
+  position 7,9 pr. 2026-09-24 (28 dage til 2026-09-24). Plausible-baseline for
+  `/promille` er **ukendt** — den står ikke i snapshotet og må ikke erstattes med 0.
+  Genmål først 2026-10-10.
+- **Kendte, urørte fund i samme fil (til næste iteration, ikke blandet ind her):**
+  `beregnPromille` sætter `maaKoere: promille < 0,5` fast i `src/lib/promille.ts:35`,
+  selv om grænsen er 0,2 ‰ i Sverige. Komponenten bruger dog selv `limit` fra
+  `PromilleBeregner.tsx:56,106`, så **UI'et er korrekt**, og den eksporterede
+  `maaKoere`-værdi bruges ingen steder i dag. Den er latente, men dårlig, fordi den
+  ligner en dansk regel.
+
 ### ❓ Til Mads
 
 - **Skal `beregner.no` nogensinde live sættes? (D5, 2026-09-26).** Domænet er
@@ -2287,6 +2346,10 @@ deploy-vindue (21:30 den 25/9) er gået siden C4's merge kl. 18:40, så **endnu 
 - ~~`/blog/boernepenge-2026-satser-og-regler`~~ er svar-først siden 2026-09-25
   (C10, opgave 21) med rensede 2026-satser. MÅL: Search Console baseline 5.145
   visninger, 27 klik, CTR 0,5 %, position 8,5 pr. 2026-09-23 — genmål 2026-10-09.
+- ~~`/promille`~~ er svar-først siden 2026-09-26 (C15, opgave 39) på **begge**
+  domæner med eksemplet 4 øl / 4 öl på 80 kg = 0,88 ‰ plus en FAQ om, hvornår man
+  må køre igen. MÅL: Search Console baseline 4.159 visninger, 60 klik, CTR 1,4 %,
+  position 7,9 pr. 2026-09-24 — genmål 2026-10-10.
 - **Næste CTR-kandidat:** `/pension` og `/procent` er allerede svar-først, og de
   fire øvrige top-CTR-sider er dækket. Den næste dokumenterede mulighed er
   `/blog/skat-2026-alt-du-skal-vide` og de øvrige artikler med samme
@@ -2639,6 +2702,44 @@ landmark=lån, piggybank=opsparing osv.).
     - Gate grøn: lint ok, 280/280 tests, build ok (128 pages).
 
 ## VERIFICÉR DEPLOY-log
+- **DEPLOY OK 2026-09-26 07:55 CEST — 07:30-batchen lukker alle 21 åbne noter.**
+  Sidste succesfulde batch før denne var 17:30-vinduet 2026-09-25; 21:30-vinduet
+  2026-09-25 indeholdt ingen af dagens merges. Kontrollen er **indholdskontrol på
+  begge domæner**, ikke HTTP-status alene:
+  - **Titler (alle med ét eller nul domænesuffiks):** `/tidszone` "Hvad er klokken i
+    USA, når den er 12 i Danmark? | Tidszone" (C4), `/renteberegner` "Renteberegner:
+    100.000 kr. i 5 år = 1.887 kr./md." (C5), `/kalorier` "Hvor mange kalorier om
+    dagen? | Kalorieberegner" (C5), `/alder` "Aldersberegner: hvor gammel er du i
+    år, måneder og dage?" (C6), `/brok` "Brøkberegner: forkort 6/8 til 3/4 = 0,75 =
+    75 %" (C6), `/dage-til/juledagen` "Hvor mange dage er der til juledagen? 90
+    dage" (C7), `/braendstof` "Brændstofberegner: 500 km benzin koster 450 kr." (C9),
+    `/kvadratmeter` "Kvadratmeterberegner: 5 x 4 m = 20 m²" (C9),
+    `/nedtaelling` "Nedtælling - hvor mange dage til en dato?" (C12),
+    `/kategori/bolig` "Boligberegnere — Boliglån, Husleje & Ejendomsskat |
+    MinBeregner.dk" (C13), `/privatlivspolitik` og `/cookiepolitik` med ét suffiks
+    (C13), `/blog/barsel-2026-regler-og-satser` "Barsel 2026: Sats, orlov og
+    overdragelse | MinBeregner.dk" (D1), `/blog/skat-2026-alt-du-skal-vide` "Skat
+    2026: personfradrag 54.100 kr, bundskat 12,01 % | MinBeregner.dk" (S2),
+    `/blog/boernepenge-2026-satser-og-regler` "Børnepenge 2026: 5.370 kr./kvartal
+    (0-2 år) | MinBeregner.dk" (C10/D2), `/pension` "Pensionsberegner 2026:
+    folkepension 16.273 kr/md" (C8/C11). SE: "Beräkna antal dagar mellan två
+    datum", "Vad är klockan i USA när det är 12 i Sverige?", "Bränslekalkylator:
+    500 km bensin kostar 450 kr", "Kvadratmeterkalkylator: 5 x 4 m = 20 m²",
+    "Ålderskalkylator: hur gammal är du i år, månader och dagar?".
+  - **Indhold:** `/renteberegner` 13.227 kr., `/kalorier` 2.759 kcal, `/pension`
+    "Hvor kommer pensionen fra" + 8.729 + 16.273 kr., `/braendstof` 450 kr.,
+    `/kvadratmeter` "Beregn materialer", `/nedtaelling` `href="/dage-til/juledagen"`,
+    `/dato` både "helligdage" og "ca. måneder" (D5), børnepenge-artiklen 4.248 og
+    1.741 kr. (C10/D2), skat-artiklen 25,049 % og 12.400 kr. (S2),
+    fradrag-guiden 3,17 kr. (S3), `/rentefradrag` 33,6 % (R1), `/skattefradrag`
+    3,17 (S1), forsiden 49 (F1), timeløn-artiklen `href="/bil"` og
+    månedsbudget-artiklen `href="/husleje"` (L1).
+  - **sitemap.xml:** DA 126 `<loc>` / **8** `<lastmod>`, SE 64 `<loc>` / **8**
+    `<lastmod>` (C14). `/dage-til/juledagen` er 200 på DA, og på beraknare.se er den
+    ét 301-hop til `/dagar-till/juldagen` (C7). SE `/nedtaelling` har
+    `href="/dagar-till/juldagen"` (C12).
+  - `/api/health` svarede `status: ok` under alle kontroller. **Ingen åbne deploynote
+    står tilbage.**
 - **Kontrol 2026-09-25 22:20 CEST (ingen note lukket endnu):** 21:30-batchen er ikke
   synlig. Live `/tidszone` (C4), `/alder` (C6), `/pension` (C8), `/braendstof` + 
   `/kvadratmeter` (C9) har stadig de gamle titler, og `/dage-til/juledagen` (C7) svarer
@@ -2707,19 +2808,19 @@ landmark=lån, piggybank=opsparing osv.).
     uændret under ❓ Til Mads; `/indexnow-key.txt` er ikke ruten, så et 404 på den
     sti er ikke et fejlfund.
   - `/api/health` svarede `status: ok` under alle kontroller.
-- **VERIFICÉR DEPLOY:** C4 svar-først `/tidszone`-tabel, spørgsmålstitel og
+- ✅ **LUKKET 2026-09-26 07:55** (se DEPLOY OK 2026-09-26) — var: C4 svar-først `/tidszone`-tabel, spørgsmålstitel og
   description `c78a7a6` 2026-09-25 18:40 CEST. Verificér efter næste batch-vindue
   med live DA `/tidszone` (synligt svar + tabel) og SE `beraknare.se/tidszone`;
   HTTP 200 alene utilstrækkeligt. **Kan først verificeres fra 07:30-vinduet
   2026-09-26**, fordi merge skete efter 17:30-vinduet 2026-09-25.
-- **VERIFICÉR DEPLOY:** C5 svar-først `/renteberegner` og `/kalorier` `200ce4c`
+- ✅ **LUKKET 2026-09-26 07:55** (se DEPLOY OK 2026-09-26) — var: C5 svar-først `/renteberegner` og `/kalorier` `200ce4c`
   2026-09-25 19:05 CEST. Verificér efter næste batch-vindue på live DA: title
   "Renteberegner: 100.000 kr. i 5 år = 1.887 kr./md." med synligt
   "Samlet rente: 13.227 kr." + link til `/rentefradrag`, og title
   "Hvor mange kalorier om dagen? | Kalorieberegner" med synligt
   "TDEE 2.759 kcal ved moderat aktivitet". HTTP 200 alene utilstrækkeligt.
   **Kan først verificeres fra 07:30-vinduet 2026-09-26.**
-- **VERIFICÉR DEPLOY:** C7 dage-til-sider `8950593` 2026-09-25 19:50 CEST.
+- ✅ **LUKKET 2026-09-26 07:55** (se DEPLOY OK 2026-09-26) — var: C7 dage-til-sider `8950593` 2026-09-25 19:50 CEST.
   Verificér efter næste batch-vindue: live DA `/dage-til/juledagen` (og de 6
   øvrige DA-slugs) samt SE `beraknare.se/dagar-till/juldagen` (og de øvrige
   SE-slugs) skal servere det korrekte antal dage i title og synligt i H1, og
@@ -2727,7 +2828,7 @@ landmark=lån, piggybank=opsparing osv.).
   `/dagar-till/juldagen`. Tjek desuden at sitemap på begge domæner indeholder
   de 7 sider. HTTP 200 alene utilstrækkeligt — tallet skal være dagens.
   **Kan først verificeres fra 07:30-vinduet 2026-09-26.**
-- **VERIFICÉR DEPLOY:** C6 svar-først `/alder` og `/brok` `aa2c32c` 2026-09-25
+- ✅ **LUKKET 2026-09-26 07:55** (se DEPLOY OK 2026-09-26) — var: C6 svar-først `/alder` og `/brok` `aa2c32c` 2026-09-25
   19:20 CEST. Verificér efter næste batch-vindue på live DA `/alder` (title
   "Aldersberegner: hvor gammel er du i år, måneder og dage?" og synligt
   "36 år, 6 måneder og 10 dage pr. 25. september 2026" samt at den gamle
@@ -2737,25 +2838,25 @@ landmark=lån, piggybank=opsparing osv.).
   build-tidspunkt giver en ny dato og nye tal; kontrollér at tekst og tal stadig
   hænger sammen.
 
-- **VERIFICÉR DEPLOY:** C8 folkepension-rettelse `42a576e` 2026-09-25 20:26 CEST.
+- ✅ **LUKKET 2026-09-26 07:55** (se DEPLOY OK 2026-09-26) — var: C8 folkepension-rettelse `42a576e` 2026-09-25 20:26 CEST.
   Verificér efter 07:30-vinduet 2026-09-26: `/pension` skal servere
   folkepensionsalder-tabellen med 65/65½/66/66½/67/68/69/70, pensionstillæg
   8.729/4.467 kr. og overskriften "Hvor kommer pensionen fra" i beregneren
   (ikke "De tre pensionssøjler"). HTTP 200 er ikke nok — tjek indholdet.
-- **VERIFICÉR DEPLOY:** C9 svar-først   `/braendstof` og `/kvadratmeter` `d9aa21c`
+- ✅ **LUKKET 2026-09-26 07:55** (se DEPLOY OK 2026-09-26) — var: C9 svar-først   `/braendstof` og `/kvadratmeter` `d9aa21c`
   2026-09-25 20:35 CEST. Verificér efter 07:30-vinduet 2026-09-26: live DA
   `/braendstof` skal have title "Brændstofberegner: 500 km benzin koster 450 kr." og
   det samlede svar synligt i introafsnittet; live DA `/kvadratmeter` skal have title
   "Kvadratmeterberegner: 5 x 4 m = 20 m²" og "Et rum på 5 x 4 m er 20 m²" synligt.
   Tjek også `beraknare.se/braendstof` og `beraknare.se/kvadratmeter` for de svenske
   titler. HTTP 200 alene utilstrækkeligt.
-- **VERIFICÉR DEPLOY:** C10 børnepenge-satser (4.248/3.342/1.114), svar-først-titel og
+- ✅ **LUKKET 2026-09-26 07:55** (se DEPLOY OK 2026-09-26) — var: C10 børnepenge-satser (4.248/3.342/1.114), svar-først-titel og
   kildeført 2026-ændringsafsnit på `/blog/boernepenge-2026-satser-og-regler`, samme
   satskilde i `/boernepenge` og `page-data.ts` `259da41` 2026-09-25 20:47 CEST.
   Ved live-kontrol: titlen skal være "Børnepenge 2026: 5.370 kr./kvartal (0-2 år) |
   MinBeregner.dk" (præcis ét domænesuffiks), og `4.251`, `17.004`, `3.345` og `1.115`
   må ikke forekomme på siden.
-- **VERIFICÉR DEPLOY:** D1 rens dobbelt domæne-suffiks i 27 sidetitler (25 blogartikler,
+- ✅ **LUKKET 2026-09-26 07:55** (se DEPLOY OK 2026-09-26) — var: D1 rens dobbelt domæne-suffiks i 27 sidetitler (25 blogartikler,
   `/blog`, `/embed`) `76d8ad8` 2026-09-25 21:22 CEST. Verificér efter næste
   batch-vindue på live: `<title>` på `/blog/barsel-2026-regler-og-satser` skal være
   "Barsel 2026: Sats, orlov og overdragelse | MinBeregner.dk" — altså præcis ét
@@ -2764,7 +2865,7 @@ landmark=lån, piggybank=opsparing osv.).
   `/blog/boernepenge-2026-satser-og-regler` fortsat har sin rensede titel fra C10.
   HTTP 200 alene utilstrækkeligt. **Kan først verificeres fra 07:30-vinduet
   2026-09-26.**
-- **VERIFICÉR DEPLOY:** C11 indkomstfelt i `/pension` — samlivsstatus, samlever uden
+- ✅ **LUKKET 2026-09-26 07:55** (se DEPLOY OK 2026-09-26) — var: C11 indkomstfelt i `/pension` — samlivsstatus, samlever uden
   pensionist (46 %-reglen), to indkomstfelter og den synlige opdeling
   grundbeløb/tillæg/nedsættelse/i alt — `b4f4dfc`, merge `a5a4c89` 2026-09-25 21:34 CEST. Verificér efter
   næste batch-vindue på live DA `/pension`: der skal stå "Folkepension 2026 — sådan er
@@ -2774,7 +2875,7 @@ landmark=lån, piggybank=opsparing osv.).
   siger 12.011 kr. til 16.273 kr. i stedet for "ca. 13.000-15.000 kr/måned".
   HTTP 200 alene utilstrækkeligt. **Kan først verificeres fra 07:30-vinduet 2026-09-26**;
   21:30-batchen 2026-09-25 indeholdt den ikke (se kontrol 22:20 ovenfor).
-- **VERIFICÉR DEPLOY:** R1 rentefradrag — ét ratested (`RENTEFRADRAG_2026` +
+- ✅ **LUKKET 2026-09-26 07:55** (se DEPLOY OK 2026-09-26) — var: R1 rentefradrag — ét ratested (`RENTEFRADRAG_2026` +
   `src/lib/rentefradrag.ts`), kilde med verificeringsdato på `/rentefradrag` og rettede
   FAQ'er/tabel på `/rentefradrag`, `/renteberegner`, `/boliglaan`, `/skattefradrag` og
   `fradrag-2026-komplet-guide` — commit `4e22336`, merge `9560189` 2026-09-25 22:15 CEST. Verificér efter
@@ -2784,7 +2885,7 @@ landmark=lån, piggybank=opsparing osv.).
   være i DOM. Live `/skattefradrag` skal vise "33,6 % af de første 50.000 kr.".
   HTTP 200 alene utilstrækkeligt. **Kan først verificeres fra 07:30-vinduet 2026-09-26**;
   21:30-batchen 2026-09-25 indeholdt den ikke (se kontrol 22:20 ovenfor).
-- **VERIFICÉR DEPLOY:** K1 materialeberegning på `/kvadratmeter` — "Beregn
+- ✅ **LUKKET 2026-09-26 07:55** (se DEPLOY OK 2026-09-26) — var: K1 materialeberegning på `/kvadratmeter` — "Beregn
   materialer"-afsnit med spild/antal felter/enheder/pris i værktøjet plus
   kildeført materialafsnit på DA- og SE-siden — commit `792760c` 2026-09-25
   22:20 CEST, merge `47c78bf` 2026-09-25 22:24 CEST til `master`. Verificér efter 07:30-vinduet
@@ -2793,7 +2894,7 @@ landmark=lån, piggybank=opsparing osv.).
   kilde-linket til hjemmeland.dk skal være i DOM. Tjek også
   `beraknare.se/kvadratmeter` for "Beräkna material", "inkl. spill" og
   "Materialet säljs per m²". HTTP 200 alene utilstrækkeligt.
-- **VERIFICÉR DEPLOY:** S1 skattefradrag — delt kørselsfradragssats, ét ratested og
+- ✅ **LUKKET 2026-09-26 07:55** (se DEPLOY OK 2026-09-26) — var: S1 skattefradrag — delt kørselsfradragssats, ét ratested og
   ny logik i `src/lib/skattefradrag.ts` — kode `972c92f`, merge `f70cd69` 2026-09-25
   22:52 CEST. Verificér efter 07:30-vinduet 2026-09-26 på live DA `/skattefradrag`:
   kørselsfradragsafsnittet skal vise "Bundgrænse: 24 km dagligt (12 km én vej),
@@ -2802,7 +2903,7 @@ landmark=lån, piggybank=opsparing osv.).
   verificeret mod en myndighedskilde. Tjek desuden at de gamle tal `2,28`, `1,14`
   og `25,1` ikke forekommer i den serverede HTML, og at live `/befordringsfradrag`
   bruger de samme satser. HTTP 200 alene utilstrækkeligt.
-- **VERIFICÉR DEPLOY:** D2 børnetilskudssatser — `src/lib/barnetilskud.ts` med de
+- ✅ **LUKKET 2026-09-26 07:55** (se DEPLOY OK 2026-09-26) — var: D2 børnetilskudssatser — `src/lib/barnetilskud.ts` med de
   verificerede 2026-beløb, kildeført børnetilskudstabel og -liste i
   `/blog/boernepenge-2026-satser-og-regler` og `/boernepenge` — kode `b8c535e`,
   ff-merge til `master` 2026-09-25 23:09 CEST. Verificér efter 07:30-vinduet
@@ -2814,13 +2915,13 @@ landmark=lån, piggybank=opsparing osv.).
   (den gamle, døde `/barnetilskud`-variant gav 404) og at live `/boernepenge` viser de
   samme beløb med pensionistlinjen 1.741 + 5.025 / 4.449 kr. HTTP 200 alene
   utilstrækkeligt — de gamle rækker gav også 200.
-- **VERIFICÉR DEPLOY:** L1 ret af tre 404-interne links + ny `internal-links.test.ts`
+- ✅ **LUKKET 2026-09-26 07:55** (se DEPLOY OK 2026-09-26) — var: L1 ret af tre 404-interne links + ny `internal-links.test.ts`
   `4e84395` 2026-09-26 00:12 CEST. Verificér efter 07:30-vinduet 2026-09-26 på
   live DA: `/blog/saadan-beregner-du-din-reelle-timeloen` skal linke til `/bil`
   (ikke `/bilberegner`) og `/blog/maanedsbudget-2026-komplet-guide` skal linke
   to gange til `/husleje` (ikke `/huslejeberegner`). HTTP 200 er ikke nok — de
   gamle stier gav også 200-sider hos læseren; tjek linkets `href` i DOM.
-- **VERIFICÉR DEPLOY:** F1 forsidens populærrække følger målt trafik (DA `/dato`,
+- ✅ **LUKKET 2026-09-26 07:55** (se DEPLOY OK 2026-09-26) — var: F1 forsidens populærrække følger målt trafik (DA `/dato`,
   `/bmi`, `/boligstoette`, `/kvadratmeter`, `/rentefradrag`, `/tidsberegner`,
   `/kalorier`, `/braendstof` + `/loen-efter-skat`; SE `/tidsberegner`, `/dato`,
   `/leasing`, `/nedtaelling`, `/tidszone` + `/lon-efter-skatt`) og det afledte
@@ -2830,7 +2931,7 @@ landmark=lån, piggybank=opsparing osv.).
   populærrækken skal begynde med "Datoberegner". Tjek også `beraknare.se/`: badge
   "31+", og rækken skal begynde med "Tidskalkylator" og indeholde "Nedräkningskalkylator".
   HTTP 200 alene utilstrækkeligt. **Kan først verificeres fra 07:30-vinduet 2026-09-26**.
-- **VERIFICÉR DEPLOY:** C12 `/nedtaelling` svar-først — ny H1 "Hvor mange dage er der
+- ✅ **LUKKET 2026-09-26 07:55** (se DEPLOY OK 2026-09-26) — var: C12 `/nedtaelling` svar-først — ny H1 "Hvor mange dage er der
   til en dato?" (SE: "Hur många dagar är det kvar till ett datum?"), synlig
   uger/dage-tabel med rækken "100 dage / 14 uger / 2 dage", og links fra siden til
   alle syv `/dage-til/*` (SE `/dagar-till/*`) — kode `0bd5e7d` 2026-09-26 00:58 CEST.
@@ -2858,7 +2959,7 @@ landmark=lån, piggybank=opsparing osv.).
   `/dage-til/juledagen` er stadig 404 og `/tidszone` har stadig den gamle titel,
   så C4-C13, L1 og F1 ligger uuddejlet. Ét deploy-vindue (21:30) siden C4's
   merge kl. 18:40 → stadig **ikke** `DEPLOY-MISSING`. Næste vindue 07:30.
-- **VERIFICÉR DEPLOY:** C14 sitemap-lastmod — kun `/valuta` og de 7 dage-til-sider
+- ✅ **LUKKET 2026-09-26 07:55** (se DEPLOY OK 2026-09-26) — var: C14 sitemap-lastmod — kun `/valuta` og de 7 dage-til-sider
   må have `<lastmod>`; de øvrige ~118 entries skal have **intet** `<lastmod>`-felt.
   Kode `0d57e31`, merge `3dcadfe` 2026-09-26 01:09 CEST. Verificér efter
   07:30-vinduet 2026-09-26
@@ -2867,7 +2968,7 @@ landmark=lån, piggybank=opsparing osv.).
   **8** på begge — ikke 126. HTTP 200 er ikke nok, fordi den gamle sitemap også
   svarer 200 med 119 lastmod. Tjek desuden at `<changefreq>daily</changefreq>`
   kun står på `/valuta` og dage-til-siderne.
-- **VERIFICÉR DEPLOY:** C13 dobbelt domænesuffiks på de ti `/kategori/*`-sider,
+- ✅ **LUKKET 2026-09-26 07:55** (se DEPLOY OK 2026-09-26) — var: C13 dobbelt domænesuffiks på de ti `/kategori/*`-sider,
   `/privatlivspolitik` og `/cookiepolitik` — kode på `ceo/kategori-dobbelt-titelsuffix`.
   Verificér efter 07:30-vinduet 2026-09-26 på live DA: `<title>` på
   `/kategori/bolig` skal være "Boligberegnere — Boliglån, Husleje & Ejendomsskat |
@@ -2884,7 +2985,7 @@ landmark=lån, piggybank=opsparing osv.).
   "Tidszoneberegner - Omregn tid mellem lande" (C4's svar-først-variant er ikke
   live). Ét deploy-vindue (21:30) siden C4's merge → stadig **ikke**
   `DEPLOY-MISSING`. Næste vindue 07:30 2026-09-26.
-- **VERIFICÉR DEPLOY:** D5 helligdage i arbejdsdage på `/dato` — se opgave 35.
+- ✅ **LUKKET 2026-09-26 07:55** (se DEPLOY OK 2026-09-26) — var: D5 helligdage i arbejdsdage på `/dato` — se opgave 35.
   Kode `9c979f4` på `ceo/dato-helligdage`, merge `68a25f6` 2026-09-26 04:35 CEST,
   efterfølgende fix   `961091e` (se nedenfor). Verificér **først
   efter 07:30-vinduet 2026-09-26**, og verificér **indhold**, ikke HTTP 200:
@@ -2914,7 +3015,7 @@ landmark=lån, piggybank=opsparing osv.).
   sin fortegn, så trækning af dage stadig virker. Ny test i `helligdage.test.ts`
   dækker, at de tre tal er identiske uanset rækkefølge, når intervallet sorteres.
   Gate efter fixen: **1170/1170** tests, lint grøn (498 filer), build grøn.
-- **VERIFICÉR DEPLOY:** S2 rettelse af `/blog/skat-2026-alt-du-skal-vide` — kode og
+- ✅ **LUKKET 2026-09-26 07:55** (se DEPLOY OK 2026-09-26) — var: S2 rettelse af `/blog/skat-2026-alt-du-skal-vide` — kode og
   tests i `c273317`, merge til `master` `a563e74` 2026-09-26 05:14 CEST. Verificér efter
   07:30-vinduet 2026-09-26 på **live DA** `/blog/skat-2026-alt-du-skal-vide`, og
   verificér **indhold**:
@@ -2929,7 +3030,7 @@ landmark=lån, piggybank=opsparing osv.).
      og kilderne skat.dk, skm.dk, svmn.dk + borgerhaandbog.dk skal være i DOM.
   5. DOM skal indeholde `href="/skattefradrag"` og `href="/befordringsfradrag"`.
   HTTP 200 er ikke nok — de gamle sider svarer 200 med de gamle tal.
-- **VERIFICÉR DEPLOY:** S3 fradrag-2026-guiden læser satser fra `SATSER_2026` og
+- ✅ **LUKKET 2026-09-26 07:55** (se DEPLOY OK 2026-09-26) — var: S3 fradrag-2026-guiden læser satser fra `SATSER_2026` og
   skelner service-/håndværkerfradrag. Verificér **indhold** på
   https://minberegner.dk/blog/fradrag-2026-komplet-guide: DOM skal vise
   `3,17 kr.` (ikke 2,23/1,12), fradragsværdien som "33,6 %"/"25,6 %", servicefradrag
