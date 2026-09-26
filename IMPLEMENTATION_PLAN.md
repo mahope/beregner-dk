@@ -1,31 +1,29 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — **to åbne deploynoter (C23 lønsidernes 2026-tal og C24 SE `/leasing`);
-syv noter lukket ved indholdskontrol 12:33.** 12:30-batchen 2026-09-26 udgav
-C15-C22. C23 (merge 12:19), C24 (merge 12:21), C25 (13:07), C26 (13:15) og C27
-(`c5ef444`, 13:25) kom
-efter batchens start og kan først verificeres efter **17:30**-vinduet; intet er
-frosset pga. ventetiden. C27 ligger i samme vindue. `/api/health`
-svarer `status: ok`.
+STATUS: KØ — **otte åbne deploynoter (C23-C28).** 12:30-batchen 2026-09-26 udgav
+C15-C22. C23 (merge 12:19), C24 (12:21), C25 (13:07), C26 (13:15), C27 (13:25) og
+C28 (`ceo/c28-dato-dagstalene`, 14:30) kom efter batchens start og kan først
+verificeres efter **17:30**-vinduet; intet er frosset pga. ventetiden.
+`/api/health` svarer `status: ok`.
 
-**C22's tre ubekræftede fund er nu alle lukket (C27, 13:25):** `/billaan`'s
-eksempeltabel viste sig **fejlagtig** — den er korrekt ved 7 %, fordi lånebeløbet
-er prisen minus kontantinsatsen (C22's lærepoint igen: læs fundet helt). De to
-andre var reelle: solcellerne stod med **tre forskellige levetider** (15-20 /
-25-30 / 25) på side, FAQ og beregner — nu ét tal i `src/lib/energi/solceller.ts`
-— og depositum stod som 1-3 måneder på `/husleje` mod 3-6 på `/flyttebudget` mod
-3 i begge værktøjer — nu 3 overalt. Ny test `src/app/fact-consistency.test.ts`
-vagter begge.
+**C28 fandt to tællefejl på sitets største side.** På `/dato` summerede de tre
+dagstyper til **ét mere end "Antal dage"** (systematisk, fordi tællerne var
+inklusive og det store tal er en forskel), og en helligdag på en weekend blev
+tællet **to gange** (26. december 2026 er både lørdag og 2. juledag). Begge er
+rettet, og nytårsaften er den eneste dag, der på dansk hverken er arbejdsdag,
+weekenddag eller helligdag — den forklares nu i stedet for at forsvinde fra
+summeringen. Se opgave 55.
 
 Næste iteration skal **ikke** optimere CTR på de samme svar-først-sider igen, og
-den skal **ikke** gentage C25/C26/C27. Kandidater der er ændret i research, men
-endnu ikke taget: kandidat 41 (`noPages` mangler `/enhedspris` — nul trafik, da
-`beregner.no` ikke er live) og kandidat 33 (`/pension` og `/arveafgift` serverer en
-forældet titel — bør tjekkes mod GSC, da `/pension` nu er rettet to gange). Det
-større åbne spørgsmål er uændret: **den dokumenterede CTR-pool er næsten
-udtømt**, så næste iteration skal skaffe nye efterspørgselsdata eller gå efter
-placering frem for klik. `/api/v1`'s kommuneskat-default (25,07 %) afviger stadig
-fra den verificerede 25,049 % og kræver Mads' beslutning (se ❓).
+den skal **ikke** gentage C25-C28. Kandidater der er fundet, men endnu ikke taget:
+**1) `/flyttebudget`** (C27-rest: indlægget siger stadig "3-6 måneders husleje" mod
+3 i FAQ'en på samme side, og "25.000-40.000 kr" i mæglerafsnittet mod 25.000-50.000
+i FAQ'en og i værktøjets egen slider), **2) `/kalorier`** (værktøjet bruger 1,8 g/kg
+protein uanset mål, mens side og FAQ siger 0,8-1,2 / 1,2-1,6 / 1,6-2,2 g/kg), **3)
+`/braendstof`** (FAQ'en lover el "50-70 % billigere", mens værktøjets egen
+sammenligningstabel giver 40 % mod diesel — 52,8 % holder kun mod benzin), **4)
+/husleje** og **5) `/pension`** (se listen under ❓). Kandidat 41 (`noPages` mangler
+`/enhedspris`) har fortsat nul trafik, da `beregner.no` ikke er live.
 
 
 ## Fase 3 — trafik-drevet
@@ -3139,6 +3137,104 @@ første halvdel af denne liste er fra DA-fladen, anden halvdel fra SE — de er
   tal, så den næste redigering ikke kan glide fra hinanden.
 
 
+
+#### 55. [x] FÆRDIG 2026-09-26 — C28 — `/dato`: dagstyperne summerede til mere end "Antal dage"
+
+- **Iteration start:** 2026-09-26 13:48 CEST på `ceo/c28-dato-dagstalene`. Køen var
+  tom (alle 54 opgaver færdige, intet `I GANG`), og de åbne deploynoter kan først
+  verificeres efter 17:30, så valget var en ny faktagrundlæggende opgave. En
+  read-only audit af de otte mest trafikrige værktøjer (`TidsBeregner`,
+  `BoligstoetteBeregner`, `DatoBeregner`, `HuslejeBudgetBeregner`,
+  `BraendstofBeregner`, `KalorierBeregner`) fandt dette og fire mindre fund.
+- **Datagrund:** `/dato` er sitets **største side** — 1.045 besøgende/28d (+76 %),
+  963 indgangssider, bounce 5 %, og Search Console 130.392 visninger, 801 klik,
+  CTR 0,6 %, position 5,8 pr. 2026-08-27→2026-09-24. De største søgninger er
+  "hvor mange dage er der til 1 december" (996 visninger, 2 klik, pos 5) og
+  "dage mellem datoer" (450 visninger, 11 klik, pos 5). Det er altså netop
+  svar-først-siden der gør fejlen særlig dyr.
+- **Fund 1 — systematisk +1 (BEKRÆFTET).** `DatoBeregner.tsx:208` beregner
+  `diffDays = slut − start` (**eksklusivt**), mens `taellArbejdsdage`,
+  `taellWeekender` og `taellHelligdage` er dokumenteret **inklusive** begge ender
+  (`src/lib/helligdage.ts:143,159,179` via `eachDay`). 28.→29. september 2026
+  viste derfor "Antal dage 1" ved siden af "Arbejdsdage 2, Weekenddage 0,
+  Helligdage 0". Standardvisningen på sitets største side summede altså til 31
+  dage, når der stod 30.
+- **Fund 2 — dobbelt-tælling af weekendhelligdage (BEKRÆFTET, nyt).** 26. december
+  2026 er både en lørdag og 2. juledag, så den blev tælt i både "Weekenddage" og
+  "Helligdage". Intervalet 20. december 2026 → 5. januar 2027 summerede til 17 mod
+  "Antal dage" 16; påskeintervallet 27. marts → 6. april 2026 (påskedag 5. april er
+  en søndag) til 11 mod 10. Det var et **selvstændigt** fund og ville ikke være
+  løst af en halvdels korrektion af fund 1.
+- **Beslutning/implementering:** tællerne kører nu over det halvåbne interval
+  `(fra, til]`, så de dækker præcis de `diffDays` dage, "Antal dage" står for.
+  Helligdagstælleren i UI'en er den nye `taellHelligdagePaaHverdag`, som springer
+  weekendhelligdage over, fordi de allerede tælles som weekenddage; bibliotekets
+  `taellHelligdage` er bevaret uændret (inkl. alle officielle helligdage), fordi
+  et eksisterende test bevidst forventer overlap på enkeltdagsniveau. Nytårsaften
+  er på dansk hverken arbejdsdag, weekenddag eller helligdag, så den kan ikke
+  ligge i felterne: komponenten viser nu en note, når den ligger i intervallet,
+  med præcis den regel `/dato`'s egen indlæg allerede dokumenterer
+  (`src/app/dato/page.tsx:111-115`). Den svenska kalender tæller nytårsaften som
+  helgdag, så summeringen er der præcis, og noteren vises kun på dansk.
+- **Kvalitetsgate 2026-09-26 14:29 CEST:** `npm run test` grøn (**1292/1292, 125
+  filer** — 1 ny fil), `npm run lint` grøn (516 filer), `npm run build` grøn
+  (typecheck inkluderet).
+- **Tests:** ny `src/components/DatoBeregner.test.tsx` (4 tests) renderer
+  komponenten via URL-state og summerer de faktiske felter for 1 dag, for
+  nytårsaftens-intervallet (med noter), for den svenska kalender og for samme dag.
+  `helligdage.test.ts` fik 12 tests for `taellNytarsaften`,
+  `taellHelligdagePaaHverdag` (inkl. påskedag på søndag og 7/5/6 helligdage på
+  hverdag i 2026/27/28) og en partitionstest over syv intervaller i begge
+  lokaler. Den er lavet som en **generel invariant**, så en fremtidig ændring i
+  kalenderen ikke kan bryde summeringen usynligt.
+- **MÅL:** `/dato` baseline **1.045 besøgende/28d, 963 indgangssider, bounce 5 %
+  pr. 2026-09-26**; Search Console baseline 130.392 visninger, 801 klik, CTR 0,6 %,
+  position 5,8 pr. 2026-08-27→2026-09-24 — genmål 2026-10-10.
+- **Acceptkriterier:**
+  1. Arbejdsdage + weekenddage + helligdage summerer til "Antal dage" for alle
+     intervaller i begge lokaler, nytårsaften undtaget. **PASS**
+  2. 28.→29. september 2026 viser 1 / 1 / 0 / 0, og samme dato→samme dato viser 0
+     i alle felter. **PASS**
+  3. 20. december 2026 → 5. januar 2027 summerer til 15 og forklarer den 16. dag
+     i en note. **PASS**
+  4. Den svenska side summerer til 16 uden note, fordi nytårsaften er helgdag der.
+     **PASS**
+  5. `npm run lint`, `npm run test` og `npm run build` er grønne. **PASS**
+- **Forventet effekt:** ingen direkte trafikstigning — det er en **tillids- og
+  korrekthedstask** på sitets største og hurtigst voksende side, hvor det store tal
+  og felterne nu kan summeres. Den konkrete søgeintention ("hvor mange dage er der
+  til X") er urørt, så CTR-baslinen ovenfor er ren.
+- **Falsificeret undervejs (C22's lærepoint):** min første hypotese var, at
+  halvåbent interval alene løste fund 2. Partitionstesten viste 17 mod 16, fordi
+  26. december blev tælt to gange. Fundet blev læst helt, ikke kun rettet.
+
+#### C28's øvrige fund — ikke taget, skrevet som næste kandidater
+
+- **`/flyttebudget` (C27-rest, 2 linjer).** `src/app/flyttebudget/page.tsx:51`
+  siger "Depositum svarer ofte til **3-6** måneders husleje" og "i gennemsnit
+  **25.000-40.000** kr" til mægler, mens samme sides FAQ siger "typisk 3 mdrs." og
+  "25.000-50.000 kr" (`src/lib/page-data.ts:1800`) og `FlyttebudgetBeregner.tsx:25`
+  selv har `max: 50000`. C27 rettede `page-data.ts`, men rørte ikke `page.tsx` —
+  samme systematik som C22's depositum-fund. **Næste opgave.**
+- **`/kalorier` (286 besøgende/28d).** `KalorierBeregner.tsx:195` regner protein som
+  `vægt * 1.8` uanset mål, mens side og FAQ (`page-data.ts:606`, `page.tsx:88-94`)
+  siger 0,8-1,2 / 1,2-1,6 / 1,6-2,2 g/kg for hhv. vedligehold, vægttab og
+  muskelopbygning. Ved sidens eget eksempel (80 kg) viser værktøjet 144 g for
+  "Vægttab" mod sidens 96-128 g.
+- **`/braendstof` (271 besøgende/28d).** FAQ'en lover el "typisk 50-70 % billigere
+  pr. km" (`page-data.ts:853`), men værktøjets egen sammenligningstabel
+  (`BraendstofBeregner.tsx:530-532`) giver 500 km: diesel 355,56 kr mod el 212,50
+  kr = **40 %**. 52,8 % holder kun mod benzin. Begge tal står i samme viewport.
+- **`/husleje`.** Sidens løfteindhold ("netto 25.000 kr → max ca. 7.500 kr/md")
+  kan ikke nås som standardværdi, fordi `HuslejeBudgetBeregner.tsx:140` starter på
+  28.000 kr → 8.400 kr. Regnestykket er korrekt; kun eksemplet er uopnåeligt.
+- **`/pension`.** `PensionBeregner.tsx:224` hardkoder "Folkepensionsalder er 68 år",
+  mens `src/lib/folkepension.ts:39-46` har en rigtig skala (65 → 70) som siden
+  viser. Samme mønster som C26 rettede i `EfterloensBeregner`.
+- **Rene.** `TidsBeregner` og `BoligstoetteBeregner` har ingen modstridende tal:
+  tidssidens 08:30-16:45 = 8 t 15 min, decimal-time-tabellen og frokostpausen
+  passer med `src/lib/tidsberegner.ts` og presets; boligstøttes side, komponent og
+  FAQ læser alle `BOLIGSTOETTE_2026`.
 ### ❓ Til Mads
 - **Solcellernes levetid mangler en primærkilde (C27, 2026-09-26).** Vi bruger
   25-30 år, som er det gængse branchestyret (paneler er typisk garanteret 25-30
@@ -3624,7 +3720,7 @@ landmark=lån, piggybank=opsparing osv.).
     - Gate grøn: lint ok, 280/280 tests, build ok (128 pages).
 
 ## VERIFICÉR DEPLOY-log
-- ⏳ **ÅBEN — VERIFICÉR DEPLOY: C23, C24, C25, C26 og C27.** Merge 2026-09-26
+- ⏳ **ÅBEN — VERIFICÉR DEPLOY: C23, C24, C25, C26, C27 og C28.** C28 merged 2026-09-26 14:30 (se opgave 55). Merge 2026-09-26
   12:19 (C23), 12:21 (C24), 13:07 (C25), 13:12 (C26) og **13:25 (C27, `c5ef444`**
   — ét levetidstal for solceller + ét depositumtal)** CEST — alle
   **efter** at 12:30-batchen var startet, så de kan først verificeres efter

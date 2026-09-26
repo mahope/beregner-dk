@@ -10,7 +10,8 @@ import { getIntlLocale, formatNumber } from '@/lib/format';
 import {
   foegArbejdsdage,
   taellArbejdsdage,
-  taellHelligdage,
+  taellHelligdagePaaHverdag,
+  taellNytarsaften,
   taellWeekender,
   type HelligdagLocale,
 } from '@/lib/helligdage';
@@ -66,6 +67,8 @@ const labels = {
     kalenderdageIAlt: "Kalenderdage i alt",
     fridageSprunget: "Weekenddage sprunget",
     helligdageIPerioden: "helligdage i perioden",
+    nytarsaftenNote:
+      "Nytårsaften er ikke en officiel helligdag og tælles heller ikke som arbejdsdag. Derfor ligger der {n} dag i antal dage, som ikke er fordelt på felterne ovenfor.",
     dinAlder: "Din alder",
     aarWord: "år",
     maanederWord: "måneder",
@@ -112,6 +115,8 @@ const labels = {
     kalenderdageIAlt: "Kalenderdagar totalt",
     fridageSprunget: "Skippade lörd/sön",
     helligdageIPerioden: "helgdagar i perioden",
+    nytarsaftenNote:
+      "Nyårsafton är inte en officiell helgdag och räknas inte heller som arbetsdag. Därför finns {n} dag i antalet dagar som inte är fördelad på rutorna ovan.",
     dinAlder: "Din ålder",
     aarWord: "år",
     maanederWord: "månader",
@@ -216,8 +221,18 @@ export default function DatoBeregner() {
         const fra = slut < start ? slut : start;
         const til = slut < start ? start : slut;
 
-        const arbejdsdage = taellArbejdsdage(fra, til, hl);
-        const helligdage = taellHelligdage(fra, til, hl);
+        // "Antal dage" er forskellen mellem datoerne, altså intervallet
+        // [fra, til). Tællerne skal derfor starte dagen efter `fra`, ellers
+        // summerer de tre dagstyper til ét mere end det store tal.
+        const dagEfterFra = new Date(fra);
+        dagEfterFra.setDate(dagEfterFra.getDate() + 1);
+
+        const arbejdsdage = taellArbejdsdage(dagEfterFra, til, hl);
+        // En helligdag på en lørdag eller søndag tælles som weekenddag, ellers
+        // tælles samme dag to gange, og felterne kan så summere til mere end
+        // "Antal dage".
+        const helligdage = taellHelligdagePaaHverdag(dagEfterFra, til, hl);
+        const nytarsaften = taellNytarsaften(dagEfterFra, til);
 
         return {
           type: "dage-mellem" as const,
@@ -226,7 +241,8 @@ export default function DatoBeregner() {
           maaneder: diffMonths,
           arbejdsdage,
           helligdage,
-          fridage: taellWeekender(fra, til),
+          nytarsaften,
+          fridage: taellWeekender(dagEfterFra, til),
         };
       }
 
@@ -261,7 +277,7 @@ export default function DatoBeregner() {
           formatteret: formatDate(resultatDato, intlLocale),
           samledeDage,
           fridage: taellWeekender(fra, til),
-          helligdage: taellHelligdage(fra, til, hl),
+          helligdage: taellHelligdagePaaHverdag(fra, til, hl),
         };
       }
 
@@ -479,6 +495,11 @@ export default function DatoBeregner() {
                   </p>
                 </div>
               </div>
+              {resultat.nytarsaften > 0 && locale === "da" && (
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {l.nytarsaftenNote.replace("{n}", String(resultat.nytarsaften))}
+                </p>
+              )}
             </div>
           )}
 

@@ -175,6 +175,33 @@ export function taellWeekender(from: Date, to: Date): number {
   return eachDay(from, to).filter((d) => WEEKEND_DAYS.has(d.getDay())).length;
 }
 
+/**
+ * Counts official public holidays in the inclusive interval that do not already
+ * fall on a weekend. A holiday on a Saturday or Sunday is counted by
+ * `taellWeekender`, so adding this to working days and weekend days makes the
+ * three categories cover every day of the interval exactly once.
+ */
+export function taellHelligdagePaaHverdag(
+  from: Date,
+  to: Date,
+  locale: HelligdagLocale
+): number {
+  if (to.getTime() < from.getTime()) return 0;
+  return eachDay(from, to).filter(
+    (d) => !WEEKEND_DAYS.has(d.getDay()) && erHelligdag(d, locale)
+  ).length;
+}
+
+/**
+ * Counts New Year's Eve in the inclusive interval [from, to]. It is a
+ * non-working day that is not an official holiday, so it is in none of the three
+ * day categories and callers need the figure to explain the remainder.
+ */
+export function taellNytarsaften(from: Date, to: Date): number {
+  if (to.getTime() < from.getTime()) return 0;
+  return eachDay(from, to).filter(erNytarsaften).length;
+}
+
 /** Counts official public holidays in the inclusive interval [from, to]. */
 export function taellHelligdage(
   from: Date,

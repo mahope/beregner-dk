@@ -6,6 +6,8 @@ import {
   getHelligdage,
   taellArbejdsdage,
   taellHelligdage,
+  taellHelligdagePaaHverdag,
+  taellNytarsaften,
   taellWeekender,
   type HelligdagLocale,
 } from "./helligdage";
@@ -311,65 +313,99 @@ describe("taellWeekender", () => {
   });
 });
 
-describe("foegArbejdsdage", () => {
-  test("én arbejdsdag fra en tirsdag er onsdag", () => {
-    expect(iso(foegArbejdsdage(d("2026-09-22"), 1, da))).toBe("2026-09-23");
+describe("taellNytarsaften", () => {
+  test("nytårsaften er ikke en helligdag og ikke en arbejdsdag", () => {
+    const nytarsaften = d("2026-12-31");
+    expect(taellNytarsaften(nytarsaften, nytarsaften)).toBe(1);
+    expect(taellHelligdage(nytarsaften, nytarsaften, da)).toBe(0);
+    expect(taellArbejdsdage(nytarsaften, nytarsaften, da)).toBe(0);
   });
 
-  test("springer weekender over", () => {
-    // Fredag 25. september 2026 + 1 arbejdsdag = mandag 28. september.
-    expect(iso(foegArbejdsdage(d("2026-09-25"), 1, da))).toBe("2026-09-28");
+  test("tæller højst én gang og kun i sit interval", () => {
+    expect(taellNytarsaften(d("2026-01-01"), d("2026-12-31"))).toBe(1);
+    expect(taellNytarsaften(d("2026-12-30"), d("2027-01-02"))).toBe(1);
+    expect(taellNytarsaften(d("2026-12-01"), d("2026-12-30"))).toBe(0);
   });
 
-  test("springer julehelligdage over", () => {
-    // 23. december 2026 (onsdag) + 1 arbejdsdag = 28. december,
-    // fordi 24./25./26. december er juleaftensdag og juledage.
-    expect(iso(foegArbejdsdage(d("2026-12-23"), 1, da))).toBe("2026-12-28");
-  });
-
-  test("springer nytår over", () => {
-    expect(iso(foegArbejdsdage(d("2026-12-30"), 1, da))).toBe("2027-01-04");
-  });
-
-  test("et helt år har mellem 250 og 262 arbejdsdage", () => {
-    for (let year = 2024; year <= 2032; year++) {
-      const antal = taellArbejdsdage(
-        d(`${year}-01-01`),
-        d(`${year}-12-31`),
-        da
-      );
-      expect(antal).toBeGreaterThanOrEqual(250);
-      expect(antal).toBeLessThanOrEqual(262);
+  test("et helt år indeholder præcis én nytårsaften", () => {
+    for (const aar of [2026, 2027, 2028]) {
+      expect(taellNytarsaften(d(`${aar}-01-01`), d(`${aar}-12-31`))).toBe(1);
     }
   });
 
-  test("2026 har 253 danske arbejdsdage", () => {
-    // 261 hverdage minus 7 helligdage på en hverdag minus nytårsaften.
-    expect(taellArbejdsdage(d("2026-01-01"), d("2026-12-31"), da)).toBe(253);
+  test("omvendt interval giver 0", () => {
+    expect(taellNytarsaften(d("2026-12-31"), d("2026-12-01"))).toBe(0);
+  });
+});
+
+describe("taellHelligdagePaaHverdag", () => {
+  test("springer helligdage, der allerede er weekenddage", () => {
+    // 26. december 2026 er en lørdag og 2. juledag.
+    expect(taellHelligdage(d("2026-12-26"), d("2026-12-26"), da)).toBe(1);
+    expect(taellHelligdagePaaHverdag(d("2026-12-26"), d("2026-12-26"), da)).toBe(0);
+    // 24. og 25. december ligger på en hverdag.
+    expect(taellHelligdagePaaHverdag(d("2026-12-24"), d("2026-12-26"), da)).toBe(2);
   });
 
-  test("nytårsaften er ikke en arbejdsdag men ikke en helligdag", () => {
-    expect(erHelligdag(d("2026-12-31"), da)).toBe(false);
-    expect(erArbejdsdag(d("2026-12-31"), da)).toBe(false);
+  test("en påskedag på en søndag tælles kun som weekenddag", () => {
+    // Påskedag 2026 er 5. april, en søndag.
+    expect(taellHelligdage(d("2026-04-05"), d("2026-04-05"), da)).toBe(1);
+    expect(taellHelligdagePaaHverdag(d("2026-04-05"), d("2026-04-05"), da)).toBe(0);
+    expect(taellHelligdagePaaHverdag(d("2026-04-05"), d("2026-04-06"), da)).toBe(1);
   });
 
-  test("0 arbejdsdage ændrer ikke datoen", () => {
-    expect(iso(foegArbejdsdage(d("2026-09-26"), 0, da))).toBe("2026-09-26");
+  test("tæller de danske helligdage, der ikke er weekenddage, på et helt år", () => {
+    for (const [aar, forventet] of [[2026, 7], [2027, 5], [2028, 6]] as const) {
+      expect(
+        taellHelligdagePaaHverdag(d(`${aar}-01-01`), d(`${aar}-12-31`), da)
+      ).toBe(forventet);
+    }
   });
 
-  test("negativt tal går baglæns og springer weekender over", () => {
-    // Mandag 28. september 2026 - 1 arbejdsdag = fredag 25. september.
-    expect(iso(foegArbejdsdage(d("2026-09-28"), -1, da))).toBe("2026-09-25");
+  test("omvendt interval giver 0", () => {
+    expect(taellHelligdagePaaHverdag(d("2026-12-26"), d("2026-12-24"), da)).toBe(0);
   });
+});
 
-  test("frem og tilbage er symmetriske", () => {
-    const start = d("2026-11-02");
-    const frem = foegArbejdsdage(start, 40, da);
-    expect(iso(foegArbejdsdage(frem, -40, da))).toBe(iso(start));
-  });
+/**
+ * The three day categories shown next to "Antal dage" on /dato must partition the
+ * days between the two dates, so a reader can add them up. New Year's Eve is the
+ * one day that belongs to none of them on the Danish side, and the Swedish
+ * calendar lists it as a holiday, so it is the only remainder there.
+ */
+describe("dagstallene dækker hver dag mellem to datoer én gang", () => {
+  const intervaller: [string, string][] = [
+    ["2026-01-01", "2026-01-07"],
+    ["2026-09-28", "2026-09-29"],
+    ["2026-12-20", "2027-01-05"],
+    ["2026-12-26", "2026-12-26"],
+    ["2026-03-27", "2026-04-06"],
+    ["2026-06-01", "2026-06-05"],
+    ["2026-12-31", "2026-12-31"],
+  ];
 
-  test("svensk juleaften og nyårsafton hoppes over", () => {
-    // 23. december 2026 + 1 svensk arbejdsdag = 28. december.
-    expect(iso(foegArbejdsdage(d("2026-12-23"), 1, se))).toBe("2026-12-28");
+  function dageEfter(start: Date): Date {
+    const dagen = new Date(start);
+    dagen.setDate(dagen.getDate() + 1);
+    return dagen;
+  }
+
+  test.each(intervaller)("%s til % summerer til antal dage", (fra, til) => {
+    const start = d(fra);
+    const end = d(til);
+    const intervalStart = dageEfter(start);
+    const antalDage = intervalStart.getTime() > end.getTime()
+      ? 0
+      : Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+
+    for (const locale of [da, se]) {
+      const summeret =
+        taellArbejdsdage(intervalStart, end, locale) +
+        taellWeekender(intervalStart, end) +
+        taellHelligdagePaaHverdag(intervalStart, end, locale) +
+        (locale === "se" ? 0 : taellNytarsaften(intervalStart, end));
+
+      expect(summeret).toBe(antalDage);
+    }
   });
 });
