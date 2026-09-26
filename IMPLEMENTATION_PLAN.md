@@ -4714,6 +4714,8 @@ første halvdel af denne liste er fra DA-fladen, anden halvdel fra SE — de er
 - **Verifikation:** `npm run test` grøn (**1400/1400**, 133 filer), `npm run
   lint` grøn (532 filer), `npm run build` grøn (~60 linjers diff, så ingen
   ekstra review).
+- **Landet:** kode `240c2c5` på branch `ceo/tidszone-nordatlanten`, merge
+  `54c8c86` til `master` 2026-09-26 20:52 CEST.
 - **MÅL:** `/tidszone` baseline **24.723 visninger / 115 klik / CTR 0,5 % /
   pos. 7,5** pr. 2026-09-24 (GSC). Autocomplete er et **kvalitativt**
   signal, så de fire søgninger har ingen baseline og skriver ingen.
@@ -5542,10 +5544,11 @@ landmark=lån, piggybank=opsparing osv.).
 
 ## VERIFICÉR DEPLOY-log
 - ⏳ **ÅBEN — VERIFICÉR DEPLOY: C46 — `/tidszone` har Grønland, Grækenland,
-  Portugal, Island og Kreta i tabellen.** Kode `HEAD`, merge `HEAD` 2026-09-26
-  20:5x CEST på branch `ceo/tidszone-nordatlanten`. Første kandidatvindue er
-  **2026-09-27 07:30** (merged efter 21:30). Nul deploy-vinduer er gået siden
-  merge, altså slet ikke `DEPLOY-MISSING` (kræver to). Verificér **indhold**:
+  Portugal, Island og Kreta i tabellen.** Kode `240c2c5`, merge `54c8c86`
+  2026-09-26 20:52 CEST på branch `ceo/tidszone-nordatlanten`. Første
+  kandidatvindue er **2026-09-27 07:30** (merged efter 21:30). Nul
+  deploy-vinduer er gået siden merge, altså slet ikke `DEPLOY-MISSING` (kræver
+  to). Verificér **indhold**:
   `https://minberegner.dk/tidszone` skal have **16** rækker i tabellen (11 før +
   5 nye) med **Nuuk 08:00/08:00, Lissabon 11:00/11:00, Reykjavik 11:00/10:00,
   Athen 13:00/13:00 og Heraklion (Kreta) 13:00/13:00**, og svar-først-brødteksten
