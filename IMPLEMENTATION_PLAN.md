@@ -4177,8 +4177,9 @@ første halvdel af denne liste er fra DA-fladen, anden halvdel fra SE — de er
   grøn (**1.382/1.382**, 132 filer), `npm run build` grøn. Renderet SSR-markup
   gennemgået: H1, alle fem tabelrækker, "8 t 15 min", "8.25 timer" og
   "(dagen efter)" er alle i output, og JSON-LD har de seks nye spørgsmål.
-- **Landet:** kode `d5e0cb5` på branch `ceo/tidsberegner-svarforst`, merge til
-  `master` 2026-09-26.
+- **Landet:** kode `d5e0cb5`, plan `a0c0b8d` på branch
+  `ceo/tidsberegner-svarforst`, merge `7c42f8e` til `master` 2026-09-26 18:59
+  CEST.
 - **Forventet effekt:** 72.382 visninger ved 0,3 % CTR er 207 klik. Bare en
   bevægelse til 1 % er **+500 klik/28d** på den største ikke-rettede
   CTR-side. Det er et estimat, ikke en prognose: klassen "tittel lover
@@ -4270,7 +4271,7 @@ efter datagrund:
    så effekten måles på den ene side, før den generaliseres.
 ### ❓ Til Mads
 - ⏳ **VERIFICÉR DEPLOY: C40 — DA `/tidsberegner` svar-først med eksempeltabel.**
-  Kode `d5e0cb5`, merge `<merge-ref>` 2026-09-26 18:5x CEST på branch
+  Kode `d5e0cb5`, merge `7c42f8e` 2026-09-26 18:59 CEST på branch
   `ceo/tidsberegner-svarforst`. Første kandidatvindue er **2026-09-26 21:30**
   (merged efter 17:30). Verificér **indhold**: `https://minberegner.dk/tidsberegner`
   skal have H1 **"Hvor lang tid er der mellem to klokkeslæt?"**, H2 **"Svar på
