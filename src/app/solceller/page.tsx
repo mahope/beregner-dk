@@ -8,6 +8,7 @@ import Sidebar from "@/components/Sidebar";
 import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
 import { getSpotGennemsnit12Mdr } from "@/lib/energi/server";
+import { SOLCELLE_LEVETID_AAR_MAX, SOLCELLE_LEVETID_AAR_MIN } from "@/lib/energi/solceller";
 
 export async function generateMetadata() {
   return generatePageMetadata("solceller");
@@ -43,7 +44,7 @@ export default async function SolcellerPage() {
         <div className="mt-12 prose dark:prose-invert max-w-none">
           <h2>Er solceller en god investering?</h2>
           <p>
-            Med <strong>stigende elpriser</strong> er solceller en <strong>attraktiv investering</strong> for de fleste husejere. Tilbagebetalingstiden er typisk <strong>7-12 år</strong>, og herefter producerer anlægget gratis strøm i yderligere 15-20 år.
+            Med <strong>stigende elpriser</strong> er solceller en <strong>attraktiv investering</strong> for de fleste husejere. Tilbagebetalingstiden er typisk <strong>7-12 år</strong>, og et anlæg producerer typisk strøm i {SOLCELLE_LEVETID_AAR_MIN}-{SOLCELLE_LEVETID_AAR_MAX} år i alt — altså 13-23 år mere efter tilbagebetalingen.
           </p>
 
           <h2>Sådan virker solceller</h2>
@@ -66,7 +67,7 @@ export default async function SolcellerPage() {
         <div className="mt-12 prose dark:prose-invert max-w-none">
           <h2>Är solceller en bra investering?</h2>
           <p>
-            Med <strong>stigande elpriser</strong> är solceller en <strong>attraktiv investering</strong> för de flesta villaägare. Återbetalningstiden är ofta <strong>7-12 år</strong>, och därefter producerar anläggningen el i ytterligare 15-20 år. Med <strong>grönt avdrag</strong> får du en skattereduktion på 20 % av kostnaden för material och arbete för solceller, vilket sänker priset direkt på fakturan.
+            Med <strong>stigande elpriser</strong> är solceller en <strong>attraktiv investering</strong> för de flesta villaägare. Återbetalningstiden är ofta <strong>7-12 år</strong>, och en anläggning producerar typisk el i {SOLCELLE_LEVETID_AAR_MIN}-{SOLCELLE_LEVETID_AAR_MAX} år totalt — alltså 13-23 år till efter återbetalningen. Med <strong>grönt avdrag</strong> får du en skattereduktion på 20 % av kostnaden för material och arbete för solceller, vilket sänker priset direkt på fakturan.
           </p>
 
           <h2>Så fungerar solceller</h2>

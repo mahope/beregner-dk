@@ -1,5 +1,6 @@
 import type { Locale } from "./i18n";
 import { BARSEL_2026, SU_2026 } from "./satser-2026";
+import { SOLCELLE_LEVETID_AAR_MAX, SOLCELLE_LEVETID_AAR_MIN } from "./energi/solceller";
 
 export type PageData = {
   slug: string;
@@ -1111,7 +1112,7 @@ const daPages: Record<string, PageData> = {
       schemaCategory: "UtilitiesApplication",
       faqItems: [
       { question: "Pris i Danmark?", answer: "60.000-100.000 DKK for 4-8 kWp inkl. montering." },
-      { question: "Tilbagebetalingstid?", answer: "Typisk 7-12 år. Herefter gratis strøm i 25-30 år." },
+      { question: "Tilbagebetalingstid?", answer: `Typisk 7-12 år. Anlægget producerer typisk strøm i ${SOLCELLE_LEVETID_AAR_MIN}-${SOLCELLE_LEVETID_AAR_MAX} år i alt, så der er typisk 13-23 år tilbage med gratis strøm, når investeringen er betalt.` },
       { question: "Hvor kommer produktionstallet fra?", answer: "Når du indtaster postnummer, henter beregneren den forventede årsproduktion fra EU-Kommissionens PVGIS 5.3 ud fra placering, tagretning og hældning med 14 % systemtab. Uden postnummer bruges et estimat på 950 kWh pr. kWp." },
       { question: "Hvad får jeg for overskudsstrøm?", answer: "Overskud sælges typisk til spotpris uden afgifter. Beregneren bruger som standard den gennemsnitlige spotpris de seneste 12 måneder i dit prisområde. Den strøm, du selv bruger, sparer dig for den fulde elpris inkl. nettarif, afgifter og moms." },
       { question: "Nettoafregning?", answer: "Du kan sælge overskudsstrøm til elnettet." },
@@ -1522,7 +1523,7 @@ const daPages: Record<string, PageData> = {
       faqItems: [
       { question: "Hvor meget af min løn bør gå til husleje?", answer: "Den klassiske tommelfingerregel er max 30% af din nettoindkomst. Nogle eksperter siger 33%. Husk at inkludere el, vand og varme i beregningen." },
       { question: "Hvad inkluderer huslejen typisk?", answer: "Basis husleje inkluderer ofte kun lejen. A conto varme og vand kan være inkluderet. El betaler du næsten altid selv. Internet og TV er sjældent inkluderet." },
-      { question: "Hvor meget skal jeg have i depositum?", answer: "Typisk 1-3 måneders husleje i depositum + eventuelt forudbetalt husleje. Spar op til dette inden du begynder at lede efter bolig." },
+      { question: "Hvor meget skal jeg have i depositum?", answer: "Typisk 3 måneders husleje i depositum + eventuelt forudbetalt husleje. Spar op til dette inden du begynder at lede efter bolig." },
       { question: "Skal jeg have opsparing ud over husleje?", answer: "Ja, eksperter anbefaler at have 3-6 måneders udgifter i en nødfond. Plus løbende opsparing på mindst 10% af din indkomst til fremtiden." },
       { question: "Er det bedre at leje eller købe?", answer: "Det afhænger af din situation. Leje giver fleksibilitet, køb opbygger formue. Som tommelfingerregel: Hvis du bliver 5+ år, kan køb ofte betale sig." },
       { question: "Hvad er typiske boligudgifter ud over husleje?", answer: "El (ca. 300-600 kr/md), internet (ca. 300 kr/md), indboforsikring (ca. 100-200 kr/md). Varme og vand er ofte a conto i huslejen." },
@@ -1796,7 +1797,7 @@ const daPages: Record<string, PageData> = {
       schemaCategory: "FinanceApplication",
       faqItems: [
         { question: "Hvad koster en gennemsnitlig flytning i Danmark?", answer: "En flytning koster typisk 15.000-50.000 kr afhængig af om du både sælger/privatkøber, depositum på ny bolig og mængde af istandsættelse." },
-        { question: "Hvad er den største udgift ved flytning?", answer: "Ejendomsmægler er ofte størst (25.000-50.000 kr), efterfulgt af depositum på ny lejebolig (3-6 mdrs. husleje) og istandsættelse." },
+        { question: "Hvad er den største udgift ved flytning?", answer: "Ejendomsmægler er ofte størst (25.000-50.000 kr), efterfulgt af depositum på ny lejebolig (typisk 3 mdrs. husleje) og istandsættelse." },
         { question: "Hvor meget koster en flyttemand?", answer: "En flyttemand koster typisk 5.000-15.000 kr for en standard 3-4 værelses lejlighed. Prisen afhænger af afstand, mængde og sæson." },
         { question: "Hvordan sparer jeg på flytningen?", answer: "Lej en flyttebil selv, rengør selv den gamle bolig, få flere tilbud på håndværkere, og sælg overskydende møbler inden flytning." },
       ],

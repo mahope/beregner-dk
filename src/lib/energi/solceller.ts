@@ -55,6 +55,21 @@ export function buildPvgisUrl(p: { lat: number; lon: number; angle: number; aspe
   return `https://re.jrc.ec.europa.eu/api/${PVGIS_VERSION}/PVcalc?${q.toString()}`;
 }
 
+/**
+ * Forventet produktionslevetid for et solcelleanlæg, i år. `solOekonomi`-modellen
+ * regner på tværs af anlæggets levetid, så beregningen bruger den nedre ende af
+ * intervallet: panelernes effektivitet falder med årene, og en længere levetid
+ * ville overvurdere den samlede besparelse.
+ *
+ * Kilde: intervallet er det gængse branchestyret for solcelleanlæg (panelernes
+ * garantier er typisk 25-30 år). En primærkilde er endnu ikke fundet, så
+ * besparelser baseret på levetiden er vejledende — se ❓ i
+ * IMPLEMENTATION_PLAN.md.
+ */
+export const SOLCELLE_LEVETID_AAR = 25;
+export const SOLCELLE_LEVETID_AAR_MIN = 25;
+export const SOLCELLE_LEVETID_AAR_MAX = 30;
+
 export type SolOekonomiInput = {
   /** Yearly production in kWh. */
   produktion: number;

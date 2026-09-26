@@ -15,7 +15,7 @@ import {
   prisomraadeForPostnummer,
   STANDARD_TARIFFER,
 } from "@/lib/energi/elpriser";
-import { HAELDNINGER, solOekonomi } from "@/lib/energi/solceller";
+import { HAELDNINGER, SOLCELLE_LEVETID_AAR, solOekonomi } from "@/lib/energi/solceller";
 import type { SpotGennemsnit } from "@/lib/energi/server";
 import { OMRAADE_NAVN } from "@/components/energi/PrisomraadeVaelger";
 
@@ -272,7 +272,7 @@ export default function SolcelleBeregner({ spotGennemsnit = null }: Props = {}) 
 
     const tilbagebetalingsAar = aarligBesparelse > 0 ? effektivAnlaegPris / aarligBesparelse : Number.POSITIVE_INFINITY;
 
-    const levetid = 25;
+    const levetid = SOLCELLE_LEVETID_AAR;
     const totalBesparelse = aarligBesparelse * levetid;
     const nettoGevinst = totalBesparelse - effektivAnlaegPris;
 
