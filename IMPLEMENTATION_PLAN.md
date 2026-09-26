@@ -24,8 +24,9 @@ strengen, **ikke** som præfiks, fordi `ShareCalculation` selv sætter
 `src/components/RenteBeregner.test.tsx` med **5 tests** — komponenten havde
 aldrig haft nogen. Verificeret modsvejs: med den gamle komponent falder **5 af
 5**. Gate grøn: lint (546 filer), **1510 tests / 141 filer** (fra 1505 / 140)
-og build (141 sider). Kode + plan i ét commit på `ceo/renteberegner-kopi`;
-første kandidatvindue **2026-09-27 07:30**. Se opgave 85.
+og build (141 sider). Kode + plan i ét commit på `ceo/renteberegner-kopi`, kode `efd3053`, merge
+`06e5442` 2026-09-27 01:57 CEST; første kandidatvindue **2026-09-27 07:30**.
+Se opgave 85.
 
 STATUS (forrige iteration) — **C56 er landet: `/tidszone`'s tidsforskel skrev brudtal med
 punktum i dansk og svensk tekst, og den delte tekst var en påstand der blev
@@ -7165,7 +7166,7 @@ landmark=lån, piggybank=opsparing osv.).
 
 ## VERIFICÉR DEPLOY-log
 - ⏳ **ÅBEN — C57 `/renteberegner`: delt tekst med rå rentesats, låntype og
-  ydelse, kode `HEAD`, merge `HEAD` 2026-09-27 01:5x CEST.** Første
+  ydelse, kode `efd3053`, merge `06e5442` 2026-09-27 01:57 CEST.** Første
   kandidatvindue **2026-09-27 07:30**. Indholdstjek ved det nye build: på
   `/renteberegner` med standardværdierne (1.000.000 kr., 5 %, 30 år) skal
   **Kopiér** give `1.000.000 kr. til 5 % i 30 år (annuitetslån). Månedlig
