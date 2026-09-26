@@ -1,17 +1,13 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — D5 landet på `master` 2026-09-26 04:35 CEST (kode `/dato` tæller nu
-helligdage, se opgave 35). Endelig merge `3f38e8a`.
-2026-09-26 04:30-04:35 CEST. **Live-kontrol 04:30 CEST:** `/api/health` svarer
-`status: ok`; `/procent` har C1's titel; `/tidszone` har stadig den gamle titel, så
-C4-C14, L1 og F1 ligger uuddejlet. Kun ét deploy-vindue (21:30 den 25/9) er gået
-siden C4's merge kl. 18:40, så **endnu ikke `DEPLOY-MISSING`**. Næste vindue er
-07:30 den 26/9.
-Denne iteration fandt ucommittet arbejde i træet (helligdage i `DatoBeregner`) fra
-en tidligere kørsel, som aldrig blev committet eller noteret. Det blev landet på
-`ceo/dato-helligdage` og fik en reel fejl rettet undervejs: "Weekenddage" blev
-regnet som `dage minus arbejdsdage`, altså inklusive helligdage. Næste iteration
-skal verificere indhold efter 07:30-vinduet 2026-09-26.
+STATUS: KØ — S2 landet på `ceo/skat-2026-artikel` 2026-09-26 05:12 CEST (se opgave 36:
+fire dokumenterede fejl rettet i `/blog/skat-2026-alt-du-skal-vide`). D5 ligger på `master`
+siden 04:35. **Live-kontrol 05:05 CEST:** `/api/health` svarer `status: ok`; `/dato` er
+stadig forældet (C4-C14, L1, F1, D5 ligger uuddejlet), fordi 07:30-vinduet 2026-09-26
+endnu ikke er kørt. Kun ét deploy-vindue (21:30 den 25/9) er gået siden C4's merge kl.
+18:40, så **endnu ikke `DEPLOY-MISSING`**. Næste iteration skal verificere indhold efter
+07:30-vinduet 2026-09-26 — HTTP 200 beviser intet.
+
 
 ## Fase 3 — trafik-drevet
 
@@ -2030,7 +2026,79 @@ skal verificere indhold efter 07:30-vinduet 2026-09-26.
      ignoreres.
   5. `npm run lint`, `npm run test` og `npm run build` er grønne.
 
-#### D4. Nyt fund 2026-09-26 — tre hypoteser i køen er falsificeret
+#### 36. [x] FÆRDIG 2026-09-26 — S2 — Ret fire dokumenterede fejl i `/blog/skat-2026-alt-du-skal-vide`
+
+- **Iteration start:** 2026-09-26 05:04 CEST. Køen var tom (alle 35 opgaver `[x]`, intet
+  `I GANG`), og 07:30-deployvinduet var ikke passeret, så intet kunne verificeres. Valget
+  blev planens **eget** næste CTR-kandidat: "`/blog/skat-2026-alt-du-skal-vide` og de
+  øvrige artikler med samme sats-spørgsmålmønster som børnepenge-artiklen".
+- **Datagrund:** artiklen er sitets mest generelle skatteemne og matcher konkrete
+  sats-intents (`rentefradrag 2026` 327 visninger/54k pos 2,
+  `børnepenge 2026` 986 visninger/3k pos 9). **Artiklen har ingen baseline** i
+  snapshottet — den ligger ikke i GSC-top-15, så effekten på CTR kan ikke isoleres
+  måles; grunden til at gøre den er fejlene, ikke en trafikprognose.
+- **Fire fejl, alle dokumenteret i repoets egne ratesteder (ikke gæt):**
+  1. **Kirkeskat "ca. 0,88 %"** mod `SATSER_2026.kirkeskatSnit = 0,00639` (SVMN,
+     verificeret 2026-08-24) — 0,24 procentpoint for højt, og "ca." dækkede ikke afstanden.
+  2. **Håndværkerfradrag "op til 12.900 kr"** mod `SKATTEFRADRAG_2026.haandvaerkerMax = 12.400`
+     (borgerhaandbog.dk, verificeret 2026-09-25) — og servicefradragets særskilte loft på
+     6.200 kr manglede helt.
+  3. **A-kasse "op til 7.000 kr"** — 7.000 kr er loftet for **fagforening**
+     (`SKATTEFRADRAG_2026.fagforeningMax`); A-kasse kan trækkes fuldt uden loft, hvilket
+     både `page-data.ts` og beregneren allerede siger. Artiklen havde det omvendt.
+  4. **Regneeksemplet hang ikke sammen.** Trinnene gav 40.000 − 3.200 − 3.878 − 8.105 −
+     1.100 ≈ 23.717 kr, mens konklusionen sagde "ca. 26.000-27.000 kr", og kirkeskat var
+     slet ikke med. Med beskæftigelsesfradraget som grundlagsnedsættelse — præcis som
+     `LoenBeregner.tsx:101-108` gør — bliver korrekt svar **26.395 kr/md**.
+- **Beslutning/implementering:** Alle tal læses nu fra `SATSER_2026` og
+  `SKATTEFRADRAG_2026`, som C8/C10/C11/R1/S1 har gjort det mønster for, så artiklen ikke
+  kan glide fra `/loen-efter-skat`, `/skattefradrag` og `/rentefradrag`. Eksemplet er
+  beregnet i modulen med samme formel som løn-beregneren. Kilder + verificeringsdato står
+  under tabellen (skat.dk, skm.dk, SVMN) og under fradragslisten (borgerhaandbog.dk), og
+  kørselsfradraget er mærket **vejledende**, fordi primærkilden ikke kan hentes maskinelt
+  (jf. S1 og ❓ Til Mads). Titel, description, H1 og indledning er svar-først med
+  personfradrag og bundskat. Uden kilde kunne vi ikke dokumentere 2025-tallene, så
+  "Hvad ændrede sig fra 2025 til 2026?" er erstattet af "De vigtigste punkter for 2026" med
+  en eksplicit note om hvorfor vi ikke sammenligner år. Marginalskatten er rettet fra
+  "op til ca. 55 %" til de afledte **57,7 %**. Artiklen linker nu til `/skattefradrag` og
+  `/befordringsfradrag` ud over de tre den allerede havde.
+- **Acceptkriterier:**
+  1. `0,88`, `12.900`, `25,1%`, "op til 7.000 kr for A-kasse", `51.600`,
+     `200-500 kr` og `26.000-27.000` forekommer ikke i den serverede HTML. **PASS**
+  2. Siden viser 25,049 %, 0,639 %, 12,75 %, 63.300 kr, 12.400 kr, 6.200 kr,
+     3,17/1,59 kr./km og A-kasse "uden loft". **PASS**
+  3. Nettoudbetalingen i eksemplet er 26.395 kr/md og følger samme formel som
+     `LoenBeregner`. **PASS**
+  4. Kilder + verificeringsdato er i DOM, og `/skattefradrag` + `/befordringsfradrag`
+     linkes. **PASS** (5 nye tests i `page.test.tsx`)
+  5. `npm run lint`, `npm run test` og `npm run build` er grønne. **PASS**
+- **Kvalitetsgate 2026-09-26 05:10 CEST:** `npm run lint` grøn (499 filer),
+  `npm run test` grøn (**1175/1175**, 109 filer), `npm run build` grøn (139 sider +
+  typecheck; kun de 7 kendte pre-existing CSS-advarsler). Målrettet gate først: 5/5 nye
+  tests grønne ved første kørsel.
+- **MÅL:** `/blog/skat-2026-alt-du-skal-vide` — **baseline ukendt** (ikke i GSC-top-15,
+  ikke i Plausible-top-15). Skal ikke opfindes som 0. Næste snapshot etablerer baseline;
+  sammenlign først efter 14 dage.
+- **Forventet effekt:** først og fremmest korrekthed på sitets mest generelle
+  skatteartikel — fire tal og et regneeksempel var forkerde eller uholdbare. Ingen
+  dokumenteret CTR-effekt, fordi der ikke er en baseline.
+- **Landet:** kode og tests i commit på `ceo/skat-2026-artikel` 2026-09-26 05:12 CEST.
+
+#### 37. Ny kandidat — blogartikler med det samme sats-mønster mangler baseline
+
+- S2 viste, at samme fejltype kan sidde i de øvrige sats-artikler. Bloggen har 27 artikler,
+  men GSC-snapshottet viser kun `/blog/boernepenge-2026-satser-og-regler` (C10, færdig)
+  og intet for `/blog/skat-2026-alt-du-skal-vide`. **Uden en baseline kan effekten af en
+  ny artikels CTR ikke måles**, og det er derfor S2 blev en korrektionsopgave.
+- Næste skridt er derfor **ikke** flere artikler blindt, men en baseline for de største
+  artikler. GSC-top-15 for artikler mangler i prompt-snapshottet; Mads kan levere det, eller
+  vi kan bruge Plausible-artikeltallene ved næste snapshot.
+- Kandidater der bør gennemgås med samme metode som C10/S2, når de har en baseline:
+  `/blog/arveafgift-regler-og-satser` (92-103 besøgende/28d, faldende),
+  `/blog/fradrag-2026-komplet-guide` (den rørte alle fradrag, som S1/R1 netop rettede),
+  `/blog/su-2026-satser-og-regler` (O3 rettede den, men bloggens egen baseline mangler),
+  `/blog/pension-hvor-meget-skal-du-spare-op` (gentog 4.367-fejlen ifølge C8).
+
 
 - **`/procent` mangler interne links** (hypotesen fra kandidat 31) er **forkert**:
   `/procent` har allerede 25+ interne links fra beslægtede værktøjer via
@@ -2754,8 +2822,9 @@ landmark=lån, piggybank=opsparing osv.).
   `DEPLOY-MISSING`. Næste vindue 07:30 2026-09-26.
 - **VERIFICÉR DEPLOY:** D5 helligdage i arbejdsdage på `/dato` — se opgave 35.
   Kode `9c979f4` på `ceo/dato-helligdage`, merge `68a25f6` 2026-09-26 04:35 CEST,
-  efterfølgende fix `961091e` (se nedenfor). Verificér **først
+  efterfølgende fix   `961091e` (se nedenfor). Verificér **først
   efter 07:30-vinduet 2026-09-26**, og verificér **indhold**, ikke HTTP 200:
+
   1. DA `https://minberegner.dk/dato`: FAQ'en skal indeholde spørgsmålet "Hvilke
      helligdage bruger beregneren?", og svaret skal liste de ni danske
      helligdage. Det gamle svar "Tæller beregneren arbejdsdage korrekt? … Store
@@ -2781,3 +2850,18 @@ landmark=lån, piggybank=opsparing osv.).
   sin fortegn, så trækning af dage stadig virker. Ny test i `helligdage.test.ts`
   dækker, at de tre tal er identiske uanset rækkefølge, når intervallet sorteres.
   Gate efter fixen: **1170/1170** tests, lint grøn (498 filer), build grøn.
+- **VERIFICÉR DEPLOY:** S2 rettelse af `/blog/skat-2026-alt-du-skal-vide` — kode og
+  tests på `ceo/skat-2026-artikel` 2026-09-26 05:12 CEST. Verificér efter
+  07:30-vinduet 2026-09-26 på **live DA** `/blog/skat-2026-alt-du-skal-vide`, og
+  verificér **indhold**:
+  1. `<title>` skal være "Skat 2026: personfradrag 54.100 kr, bundskat 12,01 % | MinBeregner.dk"
+     — altså svar-først og med præcis ét domænesuffiks (D1/C13-reglen).
+  2. Sats-tabellen skal vise **25,049 %** og **0,639 %** (ikke 25,1 % / 0,88 %), og
+     fradragslisten skal vise **12.400 kr** og **6.200 kr** for håndværker-/
+     servicefradrag (ikke 12.900 kr).
+  3. A-kasse skal stå som "fuldt fra uden loft", og 7.000 kr må kun stå som fagforeningens
+     loft.
+  4. Regneeksemplet skal vise **26.395 kr** i nettoudbetaling (ikke "26.000-27.000 kr"),
+     og kilderne skat.dk, skm.dk, svmn.dk + borgerhaandbog.dk skal være i DOM.
+  5. DOM skal indeholde `href="/skattefradrag"` og `href="/befordringsfradrag"`.
+  HTTP 200 er ikke nok — de gamle sider svarer 200 med de gamle tal.
