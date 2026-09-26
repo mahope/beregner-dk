@@ -4,22 +4,27 @@ STATUS: KØ — **to åbne deploynoter (C23 lønsidernes 2026-tal og C24 SE `/le
 syv noter lukket ved indholdskontrol 12:33.** 12:30-batchen 2026-09-26 udgav
 C15-C22. C23 (merge 12:19), C24 (merge 12:21), C25 (13:07) og C26 (13:15) kom
 efter batchens start og kan først verificeres efter **17:30**-vinduet; intet er
-frosset pga. ventetiden. `/api/health` svarer `status: ok`.
+frosset pga. ventetiden. C27 (merge 13:2x) ligger i samme vindue. `/api/health`
+svarer `status: ok`.
+
+**C22's tre ubekræftede fund er nu alle lukket (C27, 13:25):** `/billaan`'s
+eksempeltabel viste sig **fejlagtig** — den er korrekt ved 7 %, fordi lånebeløbet
+er prisen minus kontantinsatsen (C22's lærepoint igen: læs fundet helt). De to
+andre var reelle: solcellerne stod med **tre forskellige levetider** (15-20 /
+25-30 / 25) på side, FAQ og beregner — nu ét tal i `src/lib/energi/solceller.ts`
+— og depositum stod som 1-3 måneder på `/husleje` mod 3-6 på `/flyttebudget` mod
+3 i begge værktøjer — nu 3 overalt. Ny test `src/app/fact-consistency.test.ts`
+vagter begge.
 
 Næste iteration skal **ikke** optimere CTR på de samme svar-først-sider igen, og
-den skal **ikke** gentage C25/C26. C22's fire researchfund er lukket (C23, C24,
-C25) og to af dens lavere-prioritet fund er lukket som C26. **Bemærk:** C22's
-fund "`EfterloensBeregner.tsx:124` giver én præmieportion pr. 481 timer, mens UI
-og FAQ siger 962" pegede den forkerte vej — 481 er det korrekte tal, teksten var
-forkert. Det er lært: et fund skal læses helt, ikke kun fejlretningen.
-
-Næste kandidat er de **øvrige** ubekræftede fund fra samme research, som hver
-for sig skal bekræftes på den konkrete linje, før de ændres: `/billaan`'s
-eksempeltabel med 7 %-tal i to 7-års-rækker under overskriften "Rente 6 %"
-(167 besøgende/28d), `/husleje` (166) siger 1-3 måneders depositum mens
-`/flyttebudget` siger 3-6, og `/solceller`'s FAQ siger 25-30 år mod sidens 15-20.
-Desuden: `/api/v1`'s kommuneskat-default på 25,07 % afviger fra den verificerede
-25,049 % og kræver en beslutning, før den røres (se ❓).
+den skal **ikke** gentage C25/C26/C27. Kandidater der er ændret i research, men
+endnu ikke taget: kandidat 41 (`noPages` mangler `/enhedspris` — nul trafik, da
+`beregner.no` ikke er live) og kandidat 33 (`/pension` og `/arveafgift` serverer en
+forældet titel — bør tjekkes mod GSC, da `/pension` nu er rettet to gange). Det
+større åbne spørgsmål er uændret: **den dokumenterede CTR-pool er næsten
+udtømt**, så næste iteration skal skaffe nye efterspørgselsdata eller gå efter
+placering frem for klik. `/api/v1`'s kommuneskat-default (25,07 %) afviger stadig
+fra den verificerede 25,049 % og kræver Mads' beslutning (se ❓).
 
 
 ## Fase 3 — trafik-drevet
@@ -3061,8 +3066,93 @@ første halvdel af denne liste er fra DA-fladen, anden halvdel fra SE — de er
 - **Forventet effekt:** troværdighed på sitets mest brugte lønværktøj og korrekt
   JSON-LD; effekten er ikke målbar i trafiktal og skal ikke påstås som sådan.
 
+#### 54. [x] FÆRDIG 2026-09-26 — C27 — Solcellernes levetid og depositum stod i tre hver
+
+- **Iteration start:** 2026-09-26 13:18 CEST på `ceo/c27-solceller-og-depositum`.
+  Køen var tom (alle 53 opgaver færdige, intet `I GANG`), og STATUS pegede på de tre
+  **ubekræftede** fund fra C22's research. Som aftalt blev hvert fund læst på den
+  konkrete linje, før det blev ændret — ét af dem viste sig at være **fejlagtigt**.
+- **Fund 1 — `/billaan`'s eksempeltabel: FALSIFICERET, ingen kodeændret.** Fundet
+  sagde "7 %-tal i to 7-års-rækker under overskriften *Rente 6 %*". Der er ingen
+  sådan overskrift: tabellen har en `Ränta`-kolonne, og alle tre rækker står til
+  7 %. Regnestykket holder: lånebeløbet er *prisen minus kontantinsatsen*, så
+  række 1 er 150.000 − 30.000 = 120.000 kr over 60 måneder → 2.375 kr
+  (tabellen siger 2.376) og 2.376 × 60 + 30.000 = 172.560 (tabellen siger
+  172.600). Række 2: 200.000 over 84 måneder → 3.019 kr (3.020) og
+  3.020 × 84 + 50.000 = 303.680 (303.700). Række 3: 280.000 over 84 måneder →
+  4.227 kr (4.228) og 4.228 × 84 + 70.000 = 425.152 (425.200). Alle tre er
+  korrekte annuitetsbetalinger ved 7 %. **Dette er C22's lærepoint gentaget:**
+  et fund skal læses helt, ikke kun fejlretningen.
+- **Fund 2 — solcellernes levetid: BEKRÆFTET, tre forskellige tal i live-kopien.**
+  `/solceller`'s indlæg sagde "herefter producerer anlægget gratis strøm i
+  yderligere **15-20 år**" (`src/app/solceller/page.tsx:46`, samme fejl i den
+  svenska tekst i linje 69), FAQ'en sagde "Herefter gratis strøm i **25-30 år**"
+  (`src/lib/page-data.ts:1114` → 7-12 + 25-30 = 32-42 år i alt), og
+  `SolcelleBeregner` regnede med `const levetid = 25` (hårdkodet,
+  `src/components/SolcelleBeregner.tsx:275`). Tre tal, ingen kilde.
+- **Beslutning/implementering:** `SOLCELLE_LEVETID_AAR = 25` +
+  `SOLCELLE_LEVETID_AAR_MIN/MAX = 25/30` ligger nu ét sted i
+  `src/lib/energi/solceller.ts`, og **alt tre** læser derfra: beregneren, sidens
+  danske og svenska indlæg og FAQ'en. Beregningen bruger den **nedre** ende af
+  intervallet, fordi panelernes output falder med årene, så den samlede besparelse
+  ikke overvurderes. Copy'en siger nu "producerer typisk strøm i 25-30 år i alt —
+  altså 13-23 år mere efter tilbagebetalingen", hvilket er entydigt med
+  tilbagebetalingen på 7-12 år. Ny test `src/app/fact-consistency.test.ts`
+  (6 tests) garderer både at konstanten bruges og at de gamle formuleringer
+  ("yderligere 15-20 år", "Herefter gratis strøm i") ikke kan komme tilbage.
+- **Fund 3 — depositum på lejebolig: BEKRÆFTET, siderne modsagde værktøjerne.**
+  `/husleje`'s FAQ sagde "**1-3** måneders husleje i depositum"
+  (`src/lib/page-data.ts:1525`), `/flyttebudget`'s FAQ sagde "**3-6** mdrs.
+  husleje" (linje 1799), mens `HuslejeBudgetBeregner` siger "spare op til **3**
+  måneders husleje i depositum" på begge domæner
+  (`src/components/HuslejeBudgetBeregner.tsx:54,134`). Rettet til ét tal — 3
+  måneder — i begge FAQ'er. Depositummet er **typisk** praksis, ikke et lovkrav, så
+  formuleringen siger "typisk" og intet om en maksimal grænse. Den samme test
+  garderer, at de to intervaller ikke kan komme tilbage.
+- **Datagrund:** `/solceller` er ikke blandt de 15 største sider, men er en af
+  sitets bedste voksende energiværktøjer, og `/husleje` (166 besøgende/28d) +
+  `/flyttebudget` er bolig-sider med købsintention. Målene er derfor **ikke**
+  CTR-baselines; effekten er korrekthed og tillid, ikke flere klik.
+- **MÅL:** `/husleje` baseline 166 besøgende/28d 2026-09-26 (uændret). Ingen
+  baseline for `/solceller` (ikke i Plausible-top-15); næste snapshot bør give
+  den, hvis siden er stor nok til at tælle.
+- **Acceptkriterier:**
+  1. Der er præcis ét sted i repoet, der definerer solcellernes levetid, og
+     beregner, dansk indlæg, svensk indlæg og FAQ læser det. **PASS**
+  2. "15-20 år" og "Herefter gratis strøm i 25-30 år" findes ikke i solcellernes
+     danske eller svenska copy. **PASS**
+  3. Depositum står som 3 måneder på `/husleje`, `/flyttebudget` og i
+     `HuslejeBudgetBeregner` (DA + SE). **PASS**
+  4. Ny test dækker begge fund og kan fange en regression. **PASS**
+  5. `npm run lint`, `npm run test` og `npm run build` er grønne. **PASS**
+- **Kvalitetsgate 2026-09-26 13:25 CEST:** `npm run test` grøn (**1284/1284, 124
+  filer** — 1 ny fil med 6 tests), `npm run lint` grøn (515 filer), `npm run
+  build` grøn (**139 sider** + typecheck).
+- **Forsøgt og opgivet:** primærkilder blev forsøgt hentet (Energistyrelsen,
+  AIDA, retsinformation, Bing/DuckDuckGo) — energistyrelsen og aida.dk's
+  søgning gav 404, retsinformation er JS-renderet, og begge søgemaskiner
+  bot-blokerer. Levetidsintervallet er derfor skrevet som **branchestyret** med
+  eksplicit note i koden, ikke som en kildeført myndighedsfakta. Se ❓.
+- **Forventet effekt:** lille og konkret — to sider længere ikke modsige sig
+  selv eller deres værktøj. Den strukturelle gevinst er, at intervallet nu er ét
+  tal, så den næste redigering ikke kan glide fra hinanden.
+
 
 ### ❓ Til Mads
+- **Solcellernes levetid mangler en primærkilde (C27, 2026-09-26).** Vi bruger
+  25-30 år, som er det gængse branchestyret (paneler er typisk garanteret 25-30
+  år), og beregningen bruger 25 som nedre ende. Jeg kunne ikke hente en
+  myndigheds- eller standard-kilde: Energistyrelsen og AIDA's søgesider gav 404,
+  retsinformation er JS-renderet, og Bing/DuckDuckGo bot-blokerer webfetch. Findes
+  den primærkilde, skal den og kun den citeres i `src/lib/energi/solceller.ts` —
+  intervallet er én konstant, så siden, FAQ'en og beregneren følger med. Samme
+  mønster som kørselsfradraget (S1) og rentefradraget (R1).
+- **Depositum på 3 måneder er praksis, ikke et fundet lovkrav (C27, 2026-09-26).**
+  `/husleje` sagde 1-3 måneder, `/flyttebudget` 3-6, og begge værktøjer 3. Alt står
+  nu på 3 måneder, formuleret som "typisk". Jeg har ikke fundet en lovtekst eller
+  forbrugerombudsmandens vejledning, der siger, at 3 måneder er et loft for privat
+  udlejning (almene boliger har en anden ordning). Skal en kilde ind, er det én
+  sætning i to FAQ'er plus de to `tipDepositum`-strenge.
 - **Beskæftigelsestillægget på 26.198 kr/md (C19, 2026-09-26) — må ikke gættes.**
   Beskæftigelsesministeriets "Satser for 2026" oplyser de seks dagpenge-satser og
   G-dag, men **ikke** beskæftigelsestillægget. Alligevel står 26.198 kr på
@@ -3533,9 +3623,10 @@ landmark=lån, piggybank=opsparing osv.).
     - Gate grøn: lint ok, 280/280 tests, build ok (128 pages).
 
 ## VERIFICÉR DEPLOY-log
-- ⏳ **ÅBEN — VERIFICÉR DEPLOY: C23, C24, C25 og C26.** Merge 2026-09-26
-  12:19 (C23), 12:21 (C24), 13:07 (C25) og 13:12 (C26) CEST — alle **efter** at
-  12:30-batchen var startet, så de kan først verificeres efter **17:30**. Der er
+- ⏳ **ÅBEN — VERIFICÉR DEPLOY: C23, C24, C25, C26 og C27.** Merge 2026-09-26
+  12:19 (C23), 12:21 (C24), 13:07 (C25), 13:12 (C26) og 13:2x (C27) CEST — alle
+  **efter** at 12:30-batchen var startet, så de kan først verificeres efter
+  **17:30**. Der er
   gået ét deploy-vindue siden merge (12:30), så intet er `DEPLOY-MISSING` (kræver
   to) og intet er frosset. Verificér ved indholdskontrol:
   - `/loen-efter-skat`: FAQ'en skal **ikke** sige "15% topskat", skal sige 7,5 %
@@ -3550,6 +3641,11 @@ landmark=lån, piggybank=opsparing osv.).
     **"Sverige (CET/CEST)"** i begge dropdowns, rubrikken **"Tidsskillnad från
     Sverige"**, og **intet** "Köpenhamn" eller "från Danmark". `minberegner.dk`
     skal fortsat sige "København" og "Tidsforskel fra Danmark".
+  - `/solceller` (C27): indlæg og FAQ skal sige **"25-30 år i alt"** (ikke
+    "yderligere 15-20 år" og ikke "Herefter gratis strøm i 25-30 år"); kilden skal
+    være `src/lib/energi/solceller.ts`. `beraknare.se/solceller` skal have samme
+    interval. `/husleje` og `/flyttebudget` skal begge sige **3** måneder i
+    depositum (ikke "1-3" og ikke "3-6").
   - `/efterloen` (C26): tabellen skal have rækken **"1. januar 1963 – 31.
     december 1966"** med **65 år** / **68 år**, rækken 1967-1970 med **66/69**,
     FAQ'en skal sige **481 timer** pr. portion og **15.870 kr.**, og **intet**
