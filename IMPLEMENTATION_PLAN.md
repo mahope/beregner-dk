@@ -1,21 +1,27 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — **fem noter står åbne, syv er lukket `DEPLOY OK`, ingen er
-`DEPLOY-MISSING`.** VIGTIGT NYT FUND: **`beregner.no` er et separat site, ikke
-dette repo** (URL-skema `/kalkulator/*`), så alle `beregner.no`-tjek i planens
-noter **kan ikke fejle** og er ingen beviser — se den konsoliderede note i
-VERIFICÉR DEPLOY-loggen. **C48** (`/promille` svarer på "hvornår må jeg køre bil"
-med tiden til at komme **under lovens grænse**, ikke tiden til 0 ‰ — et
-sikkerhedsfund, kode + plan i én commit på `ceo/promille-graensetid`, merge
-**2026-09-26 22:2x**, første kandidatvindue **2026-09-27 07:30**). C37
-(`/renteberegner`) med første kandidatvindue 2026-09-27 12:30, C38 (svensk
-spørgsmålsform), C39 (svensk `/procent`) og **C45** (juleaften + julafton) med
-**2026-09-26 21:30** som første fælles kandidatvindue, plus **C42** (de
-relaterede links renderer det, de lover, og `/brok` får en indgang) med
-første vindue **2026-09-27 07:30**, **C43** (artiklen og `/tidszone` kan
-ikke længere have samme headline) i samme vindue og **C46** (`/tidszone`
-får de fire lande, autocomplete spørger efter) også der. `/api/health`
-svarer `status: ok`.
+STATUS: KØ — **C49 er landet: `/tidszone` regnede med vintertid hele året.**
+Forskellene til Tokyo, Sydney, Mumbai, Beijing, São Paulo, Bangkok, Singapore og
+Johannesburg lå en time forkert i de syv måneder, Danmark har CEST, og noten på
+siden forklarede fejlen i stedet for at rette den. Nu følger beregneren
+sommertiden, overgangsdatoerne er verificeret mod systemets tz-database for 2026
+og 2027, og et kryds-tjek holder beregnerens offsette samstemt med modulet, der
+driver tabellen i brødteksten. Kode `fa51af7`, merge `20a69f1` 2026-09-26 22:47,
+første kandidatvindue **2026-09-27 07:30**. Se opgave 77.
+
+**Fire deploynoter står åbne** (C37, C42, C43 og C46, alle med første
+kandidatvindue 2026-09-27 07:30 undtagen C37: 12:30) plus **C49** i samme
+vindue. `beregner.no`-delen af enhver note verificeres ikke: den URL er et
+separat site, ikke dette repo (se ❓). `/api/health` svarer `status: ok`.
+
+**Bemærk til næste iteration om en fælde, der kostede tid i C49.** Labels i
+`TidszoneBeregner` lå i et `as const`-objekt, og en ny nøgle (`vinterWord`)
+blev fundet med `Object.keys` og læst korrekt med `Object.entries` på samme
+linje, men renderede tom i JSX. Den eneste sikre løsning i tidsnød var at
+flytte værdien ud som en lokal `const` i selve map-callback'en. Ved næste
+større ændring i den fil bør `l.*`-opslaget testes direkte, ikke via
+`textContent`-assertions på hele siden — en fejl i etiketten er usynlig, fordi
+resten af siden renderer fint.
 
 **C48 lukkede opgave 75's fund, som var skrevet ud, målt og aldrig landet — og
 den afslørede en auditmetode, der er billigere end nogen anden.** Den så,
@@ -5084,6 +5090,95 @@ første halvdel af denne liste er fra DA-fladen, anden halvdel fra SE — de er
   ledte til, er ofte små, når man først har fundet dem.
 
 
+#### 77. [x] FÆRDIG 2026-09-26 — C49 — `/tidszone`: værktøjet regnede med vintertid hele året
+
+**C49 er C47's metode anvendt på de to sider, køen pegede på, og den gav
+sitt største fund endnu: ikke en tekst, der lovede for meget, men en
+beregning, der var en time forkert i syv måneder.** `TidszoneBeregner` havde
+ét `offset`-felt pr. zone, sat til vinterværdien, og brugte det både til
+tidsforskellen, til "klokken nu" og til den konverterede klokkeslæt. Noten på
+siden sagde det endda ærligt: "Denne beregner bruger standard tidsforskelle" —
+altså var fejlen kendt og forklaret i stedet for rettet. Brødteksten i
+svar-først-kassen vidste det bedre, fordi den viser en vinter- og en
+sommerkolonne fra sit eget modul (`tidszone-reference.ts`), som C46 netop
+havde udvidet med Grønland, Lissabon, Athen og Kreta. **Det er C48's mønster
+igen: en konstant i komponenten, der duplikerer et modul.**
+
+**Hvilke tal var forkerede.** Forskellen til Danmark er 6 timer hele året for
+New York, fordi USA skifter nogenlende samtidig med Danmark — så *den* behøver
+ikke at ændre sig for at bevise, at rettelsen virker. Det gør de zoner, der
+ikke følger Danmark: **Tokyo +7 om sommeren og +8 om vinteren, Sydney +8 og
++10, Johannesburg 0 og +1, Mumbai +3,5 og +4,5, São Paulo −5 og −4, Beijing,
+Bangkok og Singapore.** Det er 8 af de 16 viste zoner, og de ligger i
+mekanismen brugeren kopierer videre til et møde.
+
+**Rettelsen.** `src/lib/sommertid.ts` (ny) slår sommerperioden op pr. regel —
+`eu`, `us`, `au`, `ingen` — og `utcOffsetMinutter` giver den effektive offset.
+`TidszoneBeregner` bruger den i alle tre steder. Overgangsdatoerne er
+**verificeret mod systemets egen tz-database** (`zoneinfo`) for 2026 og 2027,
+ikke mod en huskelse: EU 29/3→25/10, USA 8/3→1/11, Sydney 5/4→4/10, og **Nuuk
+følger EU's datoer** (WGT/WGST siden 2023), hvilket ikke stod i modulet før.
+Testene hæfter dagen for skiftet fast, fordi det er præcis der en
+ugedagsfejl dukker op — og `sidsteSoendagIMaaned` måtte skrives særskilt, fordi
+"femte søndag i oktober 2026" ligger i november.
+
+**Den længere rækkevidde: et kryds-tjek mellem de to datakilder.** Samme by
+havde sit offset i komponenten og i `tidszone-reference.ts`, og intet holdt dem
+sammen. `TidszoneBeregner.test.tsx` sammenligner nu alle 16 byer, så et brud på
+den ene side fanges af den anden. Det er det samme rædselskab, der gjorde
+C48's `maaKoere`-fund muligt, nu gjort permanent i stedet for noteret.
+
+**Tre copy-rettelser, fordi løftet skulle være sandt.**
+1. Noten siger nu, at beregneren følger sommertiden for dagens dato, og nævner
+   de to forskellige skiftedatoer. Det gamle "standardtidsforskelle" var ikke
+   længere sandt.
+2. Svar-først-brødteksten siger, at tallene er **vinterværdierne** — de er
+   præcis kolonnen til venstre i tabellen lige under, som også nævner, at
+   Tokyo ligger en time tidligere, når Danmark har somertid.
+3. **"Populære tidsforskelle" skrev "Tokyo: 8 timer foran"**, hvilket kun
+   holder 29/3–25/10, fordi Tokyo ikke har sommertid. Nu: "8 timer foran om
+   vinteren, 7 timer mens Danmark har sommertid" (SE: 8 timmar före på
+   vintern, 7 timmar när Sverige har sommartid). Sydney og resten var i forvejn
+   skrevet som et interval, fordi de vidste det.
+
+**Et løfte, der ikke kunne holdes, blev fjernet.** Brødteksten sagde "Brug
+tidszoneberegneren til et præcist klokkeslæt for en vilkårlig by, tidspunkt og
+**dato**". Værktøjet tager **ikke en dato ind** — kun time og minut. Det er
+C40's fejltype (en `metaDescription`/brødtekst, der lovede et felt, der ikke
+findes), fundet to dage senere i en anden klasse. Teksten siger nu, hvad
+værktøjet faktisk gør: følger sommertiden for dagens dato, viser tidsforskel,
+klokken nu og et valgt tidspunkt.
+
+**MÅL:** `/tidszone` baseline **24.723 visninger / 115 klik / CTR 0,5 % /
+pos. 7,5** pr. 2026-09-24 (GSC). Største søgning: "tidszoner" 764v pos. 10;
+"hvad er klokken i usa når den er 12 i danmark" 183v pos. 6. Rettelsen er først
+og fremmest en **sandhedsrettelse**, ikke en CTR-indsats: en bruger, der får det
+forkerte svar i juli, får ikke et klik, fordi han stoler på det. Effekten
+måles som færre forkerte svar, ikke som flere klik. **Genmål 2026-10-10.**
+
+**Beslutning, der lå i vejen, og blev taget eksplicit.** Værktøjet har ingen
+datofelt, så DST-perioden er slået op for **dagens dato**. Det er det, et
+spørgsmål som "hvad er klokken i USA, når det er 12 i Danmark" handler om, og
+et datofelt ville være en ny UI-kontrakt plus en ny tilstand i det delte link.
+Skal næste iteration tilføje det, er det en selvstændig opgave — se ❓.
+
+**Tre negative fund, skrevet ned så ingen senere iteration bruger tid på dem.**
+- **"2026 har 253 arbejdsdage" på `/dato` er korrekt.** Talt ud fra
+  `helligdage.ts`: 261 hverdage minus 7 helligdage på hverdag minus
+  nytårsaften (torsdag 2026) = 253. Til gengæld er tallet **hardkodet** på
+  siden og bliver forældet i januar; det er en reel, men lille, opgave, fordi
+  den samme funktion findes i modulet.
+- **`/dato` nævner alle fire tilstande.** C45's åbne eksempel "flere tilstande
+  end siden nævner" holder for `/tidszone` (den nævnte ikke konverteringen af
+  et bestemt tidspunkt, kun dens tidsforskel) men **ikke** for `/dato`: siden
+  har "Sådan bruger du datoberegneren" med alle fire. Den beskriver dog kun
+  *dage, uger, måneder, arbejdsdage og weekenddage* i tilstand 1, hvor
+  værktøjet viser **også helligdage** og nytårsaftens-noten.
+- **Dansk og svensk feriedagstabel er enslydende** med modulet: 9 danske
+  helligdage og 15 svenske rødager, og de to lister i de to landes tips er
+  korrekte. Den svenske liste nævner "alla helgons dag", som Danmark
+  korrekt ikke har, og omvendt nævner den danske ikke de svenske.
+
 ### Næste kandidater efter C34 — lukket med negativt fund
 
 
@@ -5292,6 +5387,30 @@ efter datagrund:
   og noterer, at NO-URL'en 404'er. Det er ærligt, men mindre end noterne lover.
   Bemærk desuden: **der er ingen beregner.no-trafik i nogen snapshot** — hverken
   Plausible eller GSC — hvilket er konsistent med et separat site.
+- ⏳ **VERIFICÉR DEPLOY: C49 `/tidszone` følger sommertiden — `fa51af7`, merge
+  `20a69f1` 2026-09-26 22:47 CEST** på branch `ceo/tidszone-dato-tilstande`.
+  Første kandidatvindue **2026-09-27 07:30**. Verificér **indhold**, HTTP 200
+  beviser intet:
+  - `https://minberegner.dk/tidszone` og `https://beraknare.se/tidszone` skal have
+    en note under værktøjet, der **starter med "Beregneren følger sommertiden
+    for dagens dato"** (SE: "Beräknaren följer sommartiden för dagens datum").
+    Den gamle sætning "Denne beregner bruger standard tidsforskelle" må **ikke**
+    stå noget sted.
+  - Begge sider skal i "Tidsforskel fra Danmark"/"Tidsskillnad från Sverige" have
+    **Tokyo med to tal** (efter 25/10-2026: `+7t (+8t om vinteren)` /
+    `+7h (+8h på vintern)`) og **Sydney med to tal** (`+9t (+10t om vinteren)`
+    i vinterperioden, `+8t (+10t ...)` i sommerperioden), mens **London,
+    New York, Los Angeles, Berlin, Paris, Athen og Nuuk står med ét tal** — de
+    følger Danmarks skift. Tallet afhænger af, hvilken dag siden serveres, så
+    tjek at de to tal står samlet på **samme** række, ikke på hver sin.
+  - Svar-først-kassen skal sige at tallene er **vinterværdier** ("Tallene ovenfor
+    er vinterværdierne" / "Siffrorna ovan är vintervärdena").
+  - Brødteksten under "Populære tidsforskelle" skal have **"Tokyo: 8 timer foran
+    om vinteren, 7 timer mens Danmark har sommertid"** (SE: "8 timmar före på
+    vintern, 7 timmar när Sverige har sommartid").
+  - `https://minberegner.dk/tidszone` må **ikke** længere sige "til et præcist
+    klokkeslæt for en vilkårlig by, tidspunkt og dato", fordi værktøjet ikke
+    tager en dato ind.
 - ✅ **DEPLOY OK 2026-09-26 21:45, se konsolideret note.** C47 — `/alder` svarer på "alder mellem to datoer".**
   Kode `95c8712` + `f882eac`, merge `a0f99a9` + `4b0d039` 2026-09-26 21:11 og
   21:15 CEST på branch `ceo/alder-mellem-to-datoer`. Første kandidatvindue **2026-09-26 21:30**
