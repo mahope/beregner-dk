@@ -1,14 +1,16 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — **fire åbne deploynoter (C15 `/promille`, C16 `/vaegttab` + `/enhedspris`,
-C18 pensionssatserne og C19 dagpenge-satserne), første kandidatvindue 12:30
-2026-09-26.** 07:30-batchen 2026-09-26 lukkede alle 21 tidligere noter ved
-indholdskontrol (se `DEPLOY OK 2026-09-26`). C16 mergerede 09:57, C18 10:52 og
-C19 11:35 CEST, og kan først verificeres efter 12:30-vinduet; intet er frosset
-pga. ventetiden. `/dage-til/juledagen` svarer 200 — C7 er live. Kandidat 37 er
-nu lukket: SU-artiklen er færdig som C20 (opgave 46). Næste opgave se ❓ Til
-Mads og afsnittet "Næste CTR-kandidat".
-`/api/health` svarer `status: ok`.
+STATUS: KØ — **seks åbne deploynoter (C15 `/promille`, C16 `/vaegttab` +
+`/enhedspris`, C18 pensionssatserne, C19 dagpenge-satserne, C20 SU-guiden og C21
+`/su`s forældreindkomst), første kandidatvindue 12:30 2026-09-26.** 07:30-batchen
+2026-09-26 lukkede alle 21 tidligere noter ved indholdskontrol (se
+`DEPLOY OK 2026-09-26`). C16 mergerede 09:57, C18 10:52, C19 11:35, C20 11:24 og
+C21 11:32 CEST, og kan først verificeres efter 12:30-vinduet; intet er frosset
+pga. ventetiden. `/dage-til/juledagen` svarer 200 — C7 er live. Kandidaterne 37 og
+SU-klyngen er lukket (C20, C21). Næste iteration skal **ikke** optimere CTR på de
+samme svar-først-sider igen — den skal skaffe nye efterspørgselsdata (GSC-rækker
+for `/blog/*` og de næste 15 sider) eller gå efter placering/indhold, som C19-C21
+gjorde. `/api/health` svarer `status: ok`.
 
 
 ## Fase 3 — trafik-drevet
@@ -3184,10 +3186,11 @@ landmark=lån, piggybank=opsparing osv.).
 
 ## VERIFICÉR DEPLOY-log
 - ⏳ **ÅBEN — VERIFICÉR DEPLOY: C15 `/promille`, C16 `/vaegttab` + `/enhedspris`,
-  C18 pensionsguiden, C19 dagpenge-guiden og C20 SU-guiden.**
-  Merge-tidspunkter 2026-09-26 09:57 (C16), 10:52 (C18), 11:35 (C19) og 11:24
-  (C20) CEST. Første kandidatvindue er **12:30** 2026-09-26; 07:30-batchen gik
-  før alle fem merges. Verificér ved **indholdskontrol**, ikke HTTP 200:
+  C18 pensionsguiden, C19 dagpenge-guiden, C20 SU-guiden og C21 `/su`.**
+  Merge-tidspunkter 2026-09-26 09:57 (C16), 10:52 (C18), 11:35 (C19), 11:24
+  (C20) og 11:32 (C21) CEST. Første kandidatvindue er **12:30** 2026-09-26;
+  07:30-batchen gik før alle seks merges. Verificér ved **indholdskontrol**,
+  ikke HTTP 200:
   - `/promille` (DA): eksemplet 4 øl/4 öl på 80 kg = 0,88 ‰ og FAQ om, hvornår
     man må køre igen.
   - `/vaegttab` (DA/SE/NO) og `/enhedspris` (DA/SE): svar-først-blokken.
@@ -3199,6 +3202,10 @@ landmark=lån, piggybank=opsparing osv.).
     udeboende", "Kort svar:", 419.589, 710.077, 43.086, 2.966 og 129.106 kr.;
     `/su` og kategoriens FAQ skal vise verificeringsdato **2026-09-26** (var
     2026-09-24).
+  - `/su` (C21): afsnittet "Hjemmeboende SU: forældrenes indkomst i 2024" med
+    419.589/710.077/43.086 kr., sats-rækken med forsørgertillæg ved delt bolig
+    **2.966 kr.**, udlandsstudielånet **129.106 kr.** i lånelisten og to nye
+    FAQ-svar.
   - `/api/health` skal svare `status: ok` under alle kontroller.
   Er indholdet stadig gammelt efter **to** batch-vinduer, skrives
   `DEPLOY-MISSING` og der merges ikke til `master` før et menneske har kigget.
