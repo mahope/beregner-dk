@@ -9,6 +9,8 @@ import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/
 import { ModeSelector, ModeOption } from "@/components/ModeSelector";
 import { AnimatedNumber, CopyResultButton, ResetButton } from "@/components/ui";
 import { useLocale } from "@/components/LocaleProvider";
+import { formatNumber } from "@/lib/format";
+import type { Locale } from "@/lib/i18n";
 
 type BeregningsMode = "find-procent" | "find-resultat" | "find-heltal" | "stigning";
 
@@ -48,10 +50,10 @@ const labels = {
     formulaHeltal: "Heltal = Del × (100 / Procent)",
     formulaAendring: "Ændring = ((Ny - Gammel) / Gammel) × 100",
     calcName: "Procentberegner",
-    explainFindProcent: (deltal: number, pct: string, heltal: number) => `${deltal} er ${pct}% af ${heltal}`,
-    explainFindResultat: (procent: number, baseVal: number, val: string) => `${procent}% af ${baseVal} er ${val}`,
-    explainFindHeltal: (deltal: number, procent: number, val: string) => `Hvis ${deltal} er ${procent}%, så er 100% = ${val}`,
-    explainStigning: (erStigning: boolean, fra: number, til: number, pct: string) =>
+    explainFindProcent: (deltal: string, pct: string, heltal: string) => `${deltal} er ${pct}% af ${heltal}`,
+    explainFindResultat: (procent: string, baseVal: string, val: string) => `${procent}% af ${baseVal} er ${val}`,
+    explainFindHeltal: (deltal: string, procent: string, val: string) => `Hvis ${deltal} er ${procent}%, så er 100% = ${val}`,
+    explainStigning: (erStigning: boolean, fra: string, til: string, pct: string) =>
       `${erStigning ? "Stigning" : "Fald"} fra ${fra} til ${til} er ${pct}%`,
   },
   se: {
@@ -89,10 +91,10 @@ const labels = {
     formulaHeltal: "Heltal = Del × (100 / Procent)",
     formulaAendring: "Förändring = ((Ny - Gammal) / Gammal) × 100",
     calcName: "Procentkalkylator",
-    explainFindProcent: (deltal: number, pct: string, heltal: number) => `${deltal} är ${pct}% av ${heltal}`,
-    explainFindResultat: (procent: number, baseVal: number, val: string) => `${procent}% av ${baseVal} är ${val}`,
-    explainFindHeltal: (deltal: number, procent: number, val: string) => `Om ${deltal} är ${procent}%, så är 100% = ${val}`,
-    explainStigning: (erStigning: boolean, fra: number, til: number, pct: string) =>
+    explainFindProcent: (deltal: string, pct: string, heltal: string) => `${deltal} är ${pct}% av ${heltal}`,
+    explainFindResultat: (procent: string, baseVal: string, val: string) => `${procent}% av ${baseVal} är ${val}`,
+    explainFindHeltal: (deltal: string, procent: string, val: string) => `Om ${deltal} är ${procent}%, så är 100% = ${val}`,
+    explainStigning: (erStigning: boolean, fra: string, til: string, pct: string) =>
       `${erStigning ? "Ökning" : "Minskning"} från ${fra} till ${til} är ${pct}%`,
   },
 } as const;
@@ -169,6 +171,13 @@ export default function ProcentBeregner() {
   }, [l]);
 
   const resultat = useMemo(() => {
+    const num = (value: number) => formatNumber(value, locale as Locale);
+    const fixed = (value: number) =>
+      formatNumber(value, locale as Locale, {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
+
     switch (mode) {
       case "find-procent":
         if (heltal === 0) return null;
@@ -176,7 +185,7 @@ export default function ProcentBeregner() {
         return {
           type: "find-procent" as const,
           resultat: procentAfHeltal,
-          forklaring: l.explainFindProcent(deltal, procentAfHeltal.toFixed(2), heltal),
+          forklaring: l.explainFindProcent(num(deltal), fixed(procentAfHeltal), num(heltal)),
         };
 
       case "find-resultat":
@@ -184,7 +193,7 @@ export default function ProcentBeregner() {
         return {
           type: "find-resultat" as const,
           resultat: resultatVaerdi,
-          forklaring: l.explainFindResultat(procent, baseVal, resultatVaerdi.toFixed(2)),
+          forklaring: l.explainFindResultat(num(procent), num(baseVal), fixed(resultatVaerdi)),
         };
 
       case "find-heltal":
@@ -193,7 +202,7 @@ export default function ProcentBeregner() {
         return {
           type: "find-heltal" as const,
           resultat: heltalVaerdi,
-          forklaring: l.explainFindHeltal(deltal, procent, heltalVaerdi.toFixed(2)),
+          forklaring: l.explainFindHeltal(num(deltal), num(procent), fixed(heltalVaerdi)),
         };
 
       case "stigning":
@@ -206,13 +215,18 @@ export default function ProcentBeregner() {
           resultat: procentAendring,
           aendring,
           erStigning,
-          forklaring: l.explainStigning(erStigning, fra, til, Math.abs(procentAendring).toFixed(2)),
+          forklaring: l.explainStigning(
+            erStigning,
+            num(fra),
+            num(til),
+            fixed(Math.abs(procentAendring)),
+          ),
         };
 
       default:
         return null;
     }
-  }, [mode, deltal, heltal, procent, baseVal, fra, til, l]);
+  }, [mode, deltal, heltal, procent, baseVal, fra, til, l, locale]);
 
   // Track calculation once per session
   useEffect(() => {
@@ -347,8 +361,8 @@ export default function ProcentBeregner() {
               value={resultat.resultat}
               formatFn={(n) =>
                 resultat.type === "find-procent" || resultat.type === "stigning"
-                  ? `${n.toFixed(2)}%`
-                  : n.toFixed(2)
+                  ? `${formatNumber(n, locale as Locale, { maximumFractionDigits: 2 })}%`
+                  : formatNumber(n, locale as Locale, { maximumFractionDigits: 2 })
               }
             />
           </p>
