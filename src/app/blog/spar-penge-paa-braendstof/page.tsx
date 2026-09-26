@@ -2,6 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
+import { elbilSammenligning } from "@/lib/braendstof";
+
+const elbil = elbilSammenligning("da");
+const f2 = (value: number) => value.toFixed(2).replace(".", ",");
+const f1 = (value: number) => value.toFixed(1).replace(".", ",");
 
 export async function generateMetadata(): Promise<Metadata> {
   const dc = await getCurrentDomainConfig();
@@ -195,8 +200,11 @@ export default function SparBraendstofGuidePage() {
         <h2>6. Elbil: Det billigste alternativ</h2>
         <p>
           Hvis du kører mange kilometer, er en elbil den mest økonomiske løsning for brændstof.
-          Opladning hjemme koster under halvdelen af benzin per kilometer. Dog er købsprisen
-          højere, så den samlede økonomi afhænger af dit kørselsbehov.
+          Med vores standarder ({elbil.forudsætninger.elKwhPer100km} kWh/100 km til {f2(elbil.forudsætninger.elKwhPris)} kr/kWh mod {elbil.forudsætninger.benzinKmPerLiter} km/l til {f2(elbil.forudsætninger.benzinLiterPris)} kr/l) koster
+          opladning hjemme {f2(elbil.elPrisPrKm)} kr. pr. km mod benzins {f2(elbil.benzinPrisPrKm)} kr. pr. km — {f1(elbil.besparelseProcent)} % billigere, altså
+          lidt over halvdelen. En benzinbil på 7 l/100 km som i tabellen ovenfor koster derimod
+          0,91 kr. pr. km, og så er el under halvdelen. Dog er købsprisen højere, så den samlede
+          økonomi afhænger af dit kørselsbehov.
         </p>
         <p>
           <strong>Break-even:</strong> De fleste elbiler begynder at spare penge efter ca.

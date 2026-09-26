@@ -2,8 +2,11 @@ import { describe, it, expect } from "vitest";
 import { getPageData } from "./page-data";
 import {
   BRAENDSTOF_FORUDSETNINGER,
+  ELBIL_FORUDSETNINGER,
   besparelseProcent,
   breakEvenKwhPris,
+  elbilForudsætninger,
+  elbilSammenligning,
   prisPrKm,
   procent1Decimals,
 } from "./braendstof";
@@ -134,3 +137,71 @@ const elSpoergsmaal = /el-?biler billigere|elbiler billigere|elbilar billigare/i
 function medKomma(value: number): string {
   return procent1Decimals(value).toFixed(1).replace(".", ",");
 }
+
+describe("elbilForudsætninger", () => {
+  it("er standarderne /elbil-værktøjet bruger, ikke en tredje sæt", () => {
+    expect(ELBIL_FORUDSETNINGER.da).toEqual({
+      elKwhPris: 2.5,
+      elKwhPer100km: 18,
+      benzinLiterPris: 13.5,
+      benzinKmPerLiter: 16,
+      kmPrAar: 15000,
+      aar: 5,
+    });
+    expect(ELBIL_FORUDSETNINGER.se).toEqual({
+      elKwhPris: 2,
+      elKwhPer100km: 18,
+      benzinLiterPris: 19,
+      benzinKmPerLiter: 16,
+      kmPrAar: 15000,
+      aar: 5,
+    });
+  });
+
+  it("giver svensk på beraknare.se og dansk overalt ellers", () => {
+    expect(elbilForudsætninger("se")).toBe(ELBIL_FORUDSETNINGER.se);
+    expect(elbilForudsætninger("da")).toBe(ELBIL_FORUDSETNINGER.da);
+    expect(elbilForudsætninger("no")).toBe(ELBIL_FORUDSETNINGER.da);
+    expect(elbilForudsætninger("")).toBe(ELBIL_FORUDSETNINGER.da);
+  });
+});
+
+describe("elbilSammenligning", () => {
+  it("giver 0,45 mod 0,84 kr. pr. km på dansk — 46,7 %, ikke under halvdelen", () => {
+    const da = elbilSammenligning("da");
+    expect(da.elPrisPrKm).toBeCloseTo(0.45, 6);
+    expect(da.benzinPrisPrKm).toBeCloseTo(0.84375, 6);
+    expect(da.besparelseProcent).toBe(46.7);
+    // Løftet "under halvdelen" er falsk ved værktøjets egne standarder.
+    expect(da.elPrisPrKm / da.benzinPrisPrKm).toBeGreaterThan(0.5);
+  });
+
+  it("gør el dyrere end benzin over 4,7 kr./kWh", () => {
+    expect(elbilSammenligning("da").breakEvenKwhPris).toBe(4.7);
+  });
+
+  it("giver ca. 5.900 kr. pr. år på 15.000 km", () => {
+    expect(elbilSammenligning("da").aarligBesparelse).toBe(5900);
+  });
+
+  it("giver svensk 0,36 mod 1,19 kr. pr. km og ca. 12.400 kr. pr. år", () => {
+    const se = elbilSammenligning("se");
+    expect(se.elPrisPrKm).toBeCloseTo(0.36, 6);
+    expect(se.benzinPrisPrKm).toBeCloseTo(1.1875, 6);
+    expect(se.besparelseProcent).toBe(69.7);
+    expect(se.aarligBesparelse).toBe(12400);
+  });
+
+  it("ligger samme vej som /braendstof-tabellen, så de to sammenligninger ikke kan glide fra hinanden", () => {
+    const tabel = procent1Decimals(besparelseProcent("benzin"));
+    const elbil = elbilSammenligning("da").besparelseProcent;
+    // 18 kWh/100 km og 16 km/l er hver især dyrere for el end tabellens 17 og 15.
+    expect(elbil).toBeLessThan(tabel);
+    expect(BRAENDSTOF_FORUDSETNINGER.benzin.kmPerLiter).toBeLessThan(
+      ELBIL_FORUDSETNINGER.da.benzinKmPerLiter,
+    );
+    expect(BRAENDSTOF_FORUDSETNINGER.el.kwhPer100km).toBeLessThan(
+      ELBIL_FORUDSETNINGER.da.elKwhPer100km,
+    );
+  });
+});
