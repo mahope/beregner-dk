@@ -1,11 +1,11 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — **to åbne deploynoter (C15 `/promille` og C16 `/vaegttab` + `/enhedspris`),
-første kandidatvindue 12:30 2026-09-26.** 07:30-batchen 2026-09-26 lukkede alle 21
-tidligere noter ved indholdskontrol (se `DEPLOY OK 2026-09-26`). C16 mergerede 09:57
-CEST og kan først verificeres efter 12:30-vinduet; intet er frosset pga. ventetiden.
-Nyt i køen: **C17** — arveafgift-artiklen er gjort svar-først, og tre dokumenterede
-fejl er rettet (se opgave 42). `/api/health` svarer `status: ok`.
+STATUS: KØ — **tre åbne deploynoter (C15 `/promille`, C16 `/vaegttab` + `/enhedspris` og
+C18 pensionssatserne), første kandidatvindue 12:30 2026-09-26.** 07:30-batchen 2026-09-26
+lukkede alle 21 tidligere noter ved indholdskontrol (se `DEPLOY OK 2026-09-26`). C16
+mergerede 09:57 og C18 10:52 CEST, og kan først verificeres efter 12:30-vinduet; intet
+er frosset pga. ventetiden. Ny i køen: **C19** — se kandidat 37 om artikler uden
+baseline. `/api/health` svarer `status: ok`.
 
 
 ## Fase 3 — trafik-drevet
@@ -2406,6 +2406,68 @@ fejl er rettet (se opgave 42). `/api/health` svarer `status: ok`.
 - **Landet:** kode, tests og plan i én commit på `ceo/c17-arveafgift-article`; merge
   til `master` straks efter den grønne gate.
 
+#### 43. [x] FÆRDIG 2026-09-26 — C18 — Pensionsguiden sagde 63.000 kr for et loft, der er 68.700 kr
+
+- **Iteration start:** 2026-09-26 10:45 CEST på `ceo/c18-pensionssatser`. C15/C16/C17
+  havde alle åbne deploynoter med første kandidatvindue 12:30, så intet kunne
+  verificeres. Den dokumenterede CTR-klasse er udtømt på de 15 største GSC-sider,
+  så valget var et korrekthetsfund i den pension-klynge, som ingen tidligere
+  opgave rørte i teksten.
+- **Datagrund:** `/pension` 140 besøgende/28d (+31 %, bounce 2 %) pr. 2026-09-26.
+  GSC har ingen baseline for `/pension` eller for pensionsguiden i snapshottet, så
+  effekten måles i Plausible og i klyngegens indhold, ikke i CTR.
+- **Fundet (én reel fejl, plus en mangel):**
+  1. `src/app/blog/pension-hvor-meget-skal-du-spare-op/page.tsx` skrev **"max
+     ~63.000 kr/år"** for ratepension i to steder ( privat-pensionsafsnittet og
+     "5 ting"-kortet), mens **samme artikels egen FAQ**, `/pension` og
+     `/blog/fradrag-2026-komplet-guide` sagde 68.700 kr. Artiklen modsagde altså
+     både satsmodulet og sig selv. 63.000 kan ikke dokumenteres i nogen kilde.
+  2. **Ingen af de fire tal var bundet til `SATSER_2026`.** `ratepensionMax` og
+     `aldersopsparingMax` lå i modulet med skat.dk som kilde, mens artiklen og
+     siden havde tal som tekstliterals — præcis den fejltype S2 fandt i
+     skat-2026-guiden og S3 lukkede i fradrag-2026-guiden.
+- **Regelverket er verificeret, ikke antaget:** SKAT's side "Fradrag for
+  indbetalinger til pension i 2026" (2026-02-26) siger "op til 68.700 kr. i 2026",
+  og info.skat.dk C.A.10.2.2.3.3 bekræfter beløbsgrænsen på 68.700 kr. (2025:
+  65.500 kr.). Modulets værdi er altså rigtig; **det var artiklen, der afveg** —
+  samme lære som C17. Aldersopsparingens 9.900 kr. er uændret og allerede
+  kildeført i modulet.
+- **Beslutning/implementering:** Pensionsguiden og `/pension` læser nu begge
+  `ratepensionMax`/`aldersopsparingMax` fra `SATSER_2026` gennem
+  `formatNumber(…, "da")`, præcis som S3 gjorde i fradrag-guiden. De fire
+  hårdkodede tal er væk; 63.000 er ikke tilføjet nogen steder. **Ingen** ændring i
+  `PensionBeregner`, `folkepension.ts`, beregningslogik, URL, canonical, hreflang,
+  sitemap eller `/api/v1`. Folkepensionsbeløbene i artiklens FAQ (16.273 / 7.544 /
+  8.729 / 12.011) er checket mod `FOLKEPENSION_2026` og passer.
+- **Acceptkriterier:**
+  1. "63.000" findes ikke i pensionsguiden eller på `/pension`. **PASS**
+  2. Begge læser begge loft fra `SATSER_2026`; ingen rate er en tekstliteral. **PASS**
+  3. Den renderede guide viser "68.700 kr/år" og "9.900 kr/år". **PASS** (ny
+     route-rendertest, 7 tests i `src/app/pension-satser.test.tsx`)
+  4. Modulets `ratepensionMax` låstes til SKAT's dokumenterede 68.700, så en
+     fremtidig ændring kræver en bevidst kode- og kildeændring. **PASS**
+  5. `npm run lint`, `npm run test` og `npm run build` er grønne. **PASS**
+- **Kvalitetsgate 2026-09-26 10:51 CEST:** `npm run lint` grøn (505 filer),
+  `npm run test` grøn (**1215/1215 tests, 115 filer**), `npm run build` grøn
+  (139 sider + typecheck, kun de 7 kendte pre-existing CSS-advarsler). Målrettet
+  kørsel først: 7/7 i den nye testfil.
+- **Forventet effekt:** Det er en tillids- og korrekthedsrettelse, ikke en
+  trafik-rettelse: en guide der anbefaler "max ratepension først" med et for lavt
+  loft undervurderer den fradragsværdi, den selv anbefaler. `/pension` har 140
+  besøgende/28d, så den absolutte effekt er lille; det samme gælder
+  pensionsguiden, hvis trafik ikke er oplyst.
+- **MÅL:** `/pension` baseline **140 besøgende/28d pr. 2026-09-26**. Pensionsguidens
+  Plausible-baseline er **ukendt** (ikke i top-15). Effekt måles først fra
+  **2026-10-10** (14 dage) og da ved at se, om artiklen og siden stadig viser
+  samme tal.
+- **Landet:** kode, tests og plan i én commit på `ceo/c18-pensionssatser`; merge
+  til `master` straks efter den grønne gate.
+- **Bemærk til `src/app/blog-rates.test.ts:21`:** den lister "68.700" under
+  `staleLiterals` med kommentaren "gammelt ratepension-loft". Det er **ikke** et
+  gammelt loft — 68.700 er 2026-værdien. Assertionen er stadig korrekt (literaler
+  må ikke hardcodes), men kommentaren er misvisende og bør rettes ved næste
+  gennemgang af den test.
+
 #### 41. Ny kandidat — `noPages` mangler `/enhedspris`, så beregner.no viser dansk
 
 - C16 fandt, at `src/lib/page-data.ts` har `enhedspris` i `daPages` og `sePages`
@@ -2419,6 +2481,22 @@ fejl er rettet (se opgave 42). `/api/health` svarer `status: ok`.
   helbreds-svenske-kunster, når `beregner.no` eventuelt slås til. Skriv en NO-post
   per manglende slug, og fang det i en test der kræver at alle
   `calculator-list`-slugs har en post i hver `*-Pages`.
+
+#### 44. Ny kandidat — C19: de tre næste sats-artikler uden baseline
+
+- Kandidat 37 sagde, at næste skridt **ikke** er flere artikler blindt, men en
+  baseline for de største. GSC-snapshottet viser kun børnepenge-artiklen blandt
+  blogartiklerne, så baseline for resten skal hentes fra Mads eller fra næste
+  Plausible-snapshot.
+- C18 har nu lukket det ene navngivne eksempel i kandidat 37
+  (`/blog/pension-hvor-meget-skal-du-spare-op`). De to øvrige stadig ubearbejdede
+  er `/blog/su-2026-satser-og-regler` (O3 rettede satserne, men bloggens egen
+  struktur og baseline mangler) og `/blog/dagpenge-saadan-finder-du-din-sats`
+  (bloggen nævner dimittendsats 14.557/13.437 kr., som ingen anden side i repoet
+  bruger — skal verificeres mod dagpenge-satsmodulet, før den citeres).
+- **Metode:** samme som C10/S2/C18 — verificér hvert tal mod sit satsmodul, bind
+  det til modulet, gør artiklen svar-først med en tidlig CTA, og skriv baseline
+  ind FØR ændringen. Én artikel pr. iteration.
 
 ### ❓ Til Mads
 - **Skal `beregner.no` nogensinde live sættes? (D5, 2026-09-26).** Domænet er
@@ -3236,3 +3314,14 @@ landmark=lån, piggybank=opsparing osv.).
   vise 184.711 / 245.866 / 554.134 kr, og teksten må **ikke** indeholde "86.636",
   "147.791", "652.209" eller "15% gaveafgift". `/arveafgift` skal linke tilbage til
   guiden. HTTP 200 beviser intet.
+
+- **VERIFICÉR DEPLOY:** C18 pensionssatserne — kode `PLACEHOLDER_SHA`, merge
+  `PLACEHOLDER_MERGE` 2026-09-26 10:52 CEST. Første kandidatvindue er
+  **12:30 2026-09-26**. Verificér **indhold** på
+  https://minberegner.dk/blog/pension-hvor-meget-skal-du-spare-op og
+  https://minberegner.dk/pension, HTTP 200 er ikke nok:
+  1. Guiden skal vise **"max 68.700 kr/år"** for ratepension i både
+     "Søjle 3: Privat opsparing" og punkt 3 i "5 ting"-kortet. Den gamle tekst
+     "max ~63.000 kr/år" må **ikke** forekomme nogen steder på siden.
+  2. Både guide og `/pension` skal vise **"9.900 kr/år"** for aldersopsparing.
+  3. `/pension` skal vise "op til 68.700 kr/år i 2026" under "Ratepension".

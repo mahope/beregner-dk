@@ -2,7 +2,18 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
 import { InlineAd } from "@/components/ads/AdBanner";
+import { formatNumber } from "@/lib/format";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
+import { SATSER_2026 } from "@/lib/satser-2026";
+
+/**
+ * Loftene for ratepension og aldersopsparing leses fra SATSER_2026, saa denne
+ * guide ikke kan glide fra `/pension`, `/blog/fradrag-2026-komplet-guide` og
+ * satsmodulet, naar et aarstal reguleres.
+ */
+const ratepensionMax = () => `${formatNumber(SATSER_2026.ratepensionMax, "da")} kr`;
+const aldersopsparingMax = () =>
+  `${formatNumber(SATSER_2026.aldersopsparingMax, "da")} kr`;
 
 export async function generateMetadata(): Promise<Metadata> {
   const dc = await getCurrentDomainConfig();
@@ -54,7 +65,7 @@ const faqItems = [
   },
   {
     question: "Hvad er forskellen på ratepension og aldersopsparing?",
-    answer: "Ratepension giver fradrag nu og beskattes ved udbetaling. Aldersopsparing giver ingen fradrag, men udbetales skattefrit. Max aldersopsparing er 9.900 kr/år (2026), mens ratepension kan være op til 68.700 kr/år.",
+    answer: `Ratepension giver fradrag nu og beskattes ved udbetaling. Aldersopsparing giver ingen fradrag, men udbetales skattefrit. Max aldersopsparing er ${aldersopsparingMax()}/år (2026), mens ratepension kan være op til ${ratepensionMax()}/år.`,
   },
   {
     question: "Hvad sker der med min pension hvis jeg dør før pensionsalderen?",
@@ -195,8 +206,8 @@ export default function PensionGuidePage() {
           Ud over de obligatoriske ordninger kan du selv spare op via:
         </p>
         <ul>
-          <li><strong>Ratepension:</strong> Fradrag nu, skat ved udbetaling (max ~63.000 kr/år)</li>
-          <li><strong>Aldersopsparing:</strong> Ingen fradrag, skattefri udbetaling (max 9.900 kr/år)</li>
+          <li><strong>Ratepension:</strong> Fradrag nu, skat ved udbetaling (max {ratepensionMax()}/år)</li>
+          <li><strong>Aldersopsparing:</strong> Ingen fradrag, skattefri udbetaling (max {aldersopsparingMax()}/år)</li>
           <li><strong>Frie midler:</strong> Aktier, obligationer, ejendom (lagerbeskatning)</li>
         </ul>
 
@@ -431,10 +442,10 @@ export default function PensionGuidePage() {
               <strong>2. Udnyt arbejdsgiverbidrag</strong> - Forhandl højere pensionsbidrag i stedet for løn
             </li>
             <li>
-              <strong>3. Max ratepension først</strong> - Få skattefradrag nu (op til ~63.000 kr/år)
+              <strong>3. Max ratepension først</strong> - Få skattefradrag nu (op til {ratepensionMax()}/år)
             </li>
             <li>
-              <strong>4. Tilføj aldersopsparing</strong> - 9.900 kr/år skattefrit ved udbetaling
+              <strong>4. Tilføj aldersopsparing</strong> - {aldersopsparingMax()}/år skattefrit ved udbetaling
             </li>
             <li>
               <strong>5. Tjek omkostninger</strong> - Høje administrationsgebyrer spiser dit afkast
