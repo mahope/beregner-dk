@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { ShareCalculation } from "@/components/ShareCalculation";
 import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
+import { beregnAlder } from "@/lib/alder";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { useLocale } from '@/components/LocaleProvider';
 import { getIntlLocale } from '@/lib/format';
@@ -149,55 +150,25 @@ export default function AlderBeregner() {
       return null;
     }
 
-    const foedselsDate = new Date(foedselsdato);
-    const beregningsDate = new Date(beregningsDato);
+    const alder = beregnAlder({ foedselsdato, beregningsdato: beregningsDato });
 
-    if (foedselsDate > beregningsDate) {
+    if (!alder) {
       return null;
     }
+    const {
+      aar,
+      maaneder,
+      dage,
+      totalDage,
+      totalUger,
+      totalMaaneder,
+      totalTimer,
+      totalMinutter,
+      dageTilFoedselsdag,
+      naesteFoedselsdagAlder,
+    } = alder;
 
-    // Beregn præcis alder
-    let aar = beregningsDate.getFullYear() - foedselsDate.getFullYear();
-    let maaneder = beregningsDate.getMonth() - foedselsDate.getMonth();
-    let dage = beregningsDate.getDate() - foedselsDate.getDate();
-
-    // Juster for negative dage
-    if (dage < 0) {
-      maaneder--;
-      const sidsteMaaned = new Date(beregningsDate.getFullYear(), beregningsDate.getMonth(), 0);
-      dage += sidsteMaaned.getDate();
-    }
-
-    // Juster for negative måneder
-    if (maaneder < 0) {
-      aar--;
-      maaneder += 12;
-    }
-
-    // Beregn totaler
-    const diffTime = beregningsDate.getTime() - foedselsDate.getTime();
-    const totalDage = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-    const totalUger = Math.floor(totalDage / 7);
-    const totalMaaneder = aar * 12 + maaneder;
-    const totalTimer = totalDage * 24;
-    const totalMinutter = totalTimer * 60;
-
-    // Find næste fødselsdag
-    let naesteFoedselsdag = new Date(
-      beregningsDate.getFullYear(),
-      foedselsDate.getMonth(),
-      foedselsDate.getDate()
-    );
-    if (naesteFoedselsdag <= beregningsDate) {
-      naesteFoedselsdag = new Date(
-        beregningsDate.getFullYear() + 1,
-        foedselsDate.getMonth(),
-        foedselsDate.getDate()
-      );
-    }
-    const dageTilFoedselsdag = Math.ceil(
-      (naesteFoedselsdag.getTime() - beregningsDate.getTime()) / (1000 * 60 * 60 * 24)
-    );
+    const foedselsDate = new Date(foedselsdato);
 
     // Stjernetegn
     const stjernetegnIndex = getStjernetegnIndex(foedselsDate);
@@ -219,7 +190,7 @@ export default function AlderBeregner() {
       totalTimer,
       totalMinutter,
       dageTilFoedselsdag,
-      naesteFoedselsdagAlder: aar + (maaneder > 0 || dage > 0 ? 1 : 1),
+      naesteFoedselsdagAlder,
       stjernetegn,
       ugedagFoedt,
     };
