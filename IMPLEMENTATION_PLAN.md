@@ -6201,7 +6201,8 @@ efter datagrund:
   Plausible eller GSC — hvilket er konsistent med et separat site.
 - ⏳ **VERIFICÉR DEPLOY: C56 `/tidszone` — brudtal med komma, og en delt tekst
   der siger hvilken dato den gælder — kode + plan i ét commit på branch
-  `ceo/tidszone-kopi`, første kandidatvindue **2026-09-27 07:30**.** Verificér
+  `ceo/tidszone-kopi`, kode `8d77558`, merge `67d4cb1` 2026-09-27 01:29 CEST.
+  Første kandidatvindue **2026-09-27 07:30**.** Verificér
   **indhold**; HTTP 200 beviser intet, hele fundet er i klient-renderede tal og
   i strengen på Kopier/Del:
   1. Åbn `/tidszone`, sæt **Til tidszone = Indien (IST)**. Tidsforskellen skal
@@ -7028,8 +7029,9 @@ landmark=lån, piggybank=opsparing osv.).
     - Gate grøn: lint ok, 280/280 tests, build ok (128 pages).
 
 ## VERIFICÉR DEPLOY-log
-- ⏳ **ÅBEN — C56 `/tidszone` brudtal med komma + delt tekst med dato, kode på
-  `ceo/tidszone-kopi`, første kandidatvindue **2026-09-27 07:30**.** Indholdstjek
+- ⏳ **ÅBEN — C56 `/tidszone` brudtal med komma + delt tekst med dato, kode
+  `8d77558`, merge `67d4cb1` 2026-09-27 01:29 CEST.** Første kandidatvindue
+  **2026-09-27 07:30**. Indholdstjek
   ved det nye build: sæt **Til tidszone = Indien (IST)**, så skal forskelsen stå
   som `+3,5 timer` / "Mumbai er 3,5 timer foran København" / `+3,5t (+4,5t om
   vinteren)` — før stod der `3.5` med punktum på alle tre. Klik **Kopiér** med
