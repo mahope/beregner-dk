@@ -15,6 +15,7 @@ const AM = SATSER_2026.amBidrag;
 const BUNDSKAT = SATSER_2026.bundskat;
 const KOMMUNE_SNIT = SATSER_2026.kommuneskatSnit;
 const KIRKESKAT_SNIT = SATSER_2026.kirkeskatSnit;
+const KOMMUNE_SNIT_PCT = (KOMMUNE_SNIT * 100).toFixed(3);
 const MELLEMSKAT_GRAENSE = SATSER_2026.mellemskatGraense;
 const MELLEMSKAT = SATSER_2026.mellemskat;
 const TOPSKAT_GRAENSE = SATSER_2026.topskatGraense;
@@ -141,7 +142,7 @@ export default function BruttoNettoBeregner() {
 
   const [oensketNetto, setOensketNetto] = useState<string>('25000');
   const [periode, setPeriode] = useState<'maaned' | 'aar'>('maaned');
-  const [kommuneSkat, setKommuneSkat] = useState<string>('25.07');
+  const [kommuneSkat, setKommuneSkat] = useState<string>(KOMMUNE_SNIT_PCT);
   const [medKirkeskat, setMedKirkeskat] = useState(false);
 
   const hasLoadedUrl = useRef(false);
@@ -182,7 +183,7 @@ export default function BruttoNettoBeregner() {
   const handleReset = useCallback(() => {
     setOensketNetto('25000');
     setPeriode('maaned');
-    setKommuneSkat('25.07');
+    setKommuneSkat(KOMMUNE_SNIT_PCT);
     setMedKirkeskat(false);
   }, []);
 
@@ -191,7 +192,7 @@ export default function BruttoNettoBeregner() {
     if (nettoInput <= 0) return null;
 
     const nettoAar = periode === 'maaned' ? nettoInput * 12 : nettoInput;
-    const komPct = (parseFloat(kommuneSkat) || 25.07) / 100;
+    const komPct = (parseFloat(kommuneSkat) || KOMMUNE_SNIT) / 100;
     const kirPct = medKirkeskat ? KIRKESKAT_SNIT : 0;
 
     const bruttoAar = findBruttoFraNetto(nettoAar, komPct, kirPct);

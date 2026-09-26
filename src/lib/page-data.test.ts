@@ -608,3 +608,32 @@ describe("getAvailableSlugs", () => {
     }
   });
 });
+
+describe("2026-skattetall i lønsidernes FAQ", () => {
+  const supersede = ["24,94", "25,07", "0,68%", "15% topskat"];
+
+  test.each(["loen-efter-skat", "brutto-netto"])(
+    "%s nævner kun den verificerede kommuneskat",
+    (slug) => {
+      const data = getPageData(slug, "da")!;
+      const text = [data.description, ...data.faqItems.map((i) => `${i.question} ${i.answer}`)].join(
+        " "
+      );
+
+      expect(text).toContain("25,049");
+      for (const stale of supersede) {
+        expect(text, `${slug} nævner ${stale}`).not.toContain(stale);
+      }
+    }
+  );
+
+  test("topkat-spørgsmålet beskriver 2026-brackets, ikke den afskaffede 15 %", () => {
+    const data = getPageData("loen-efter-skat", "da")!;
+    const faq = data.faqItems.find((item) =>
+      item.question.includes("Hvordan beregnes min løn efter skat")
+    );
+
+    expect(faq?.answer).toContain("7,5%");
+    expect(faq?.answer).toContain("afskaffet");
+  });
+});

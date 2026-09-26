@@ -81,14 +81,14 @@ export default async function LoenPage() {
         <h3>5. Kommuneskat (varierer)</h3>
         <p>
           <strong>Kommuneskatten</strong> varierer fra kommune til kommune.
-          Landsgennemsnittet er ca. 25,07% i 2026. De billigste kommuner ligger
+          Landsgennemsnittet er ca. 25,05% i 2026. De billigste kommuner ligger
           omkring 22%, mens de dyreste er over 27%.
         </p>
 
         <h3>6. Kirkeskat (valgfri)</h3>
         <p>
           Medlemmer af folkekirken betaler <strong>kirkeskat</strong> på ca.
-          0,6-1% (gennemsnit 0,68%).
+          0,6-1% (gennemsnit 0,639%).
         </p>
 
         <h3>7. Nyt: Mellemskat, topskat og top-topskat (2026)</h3>

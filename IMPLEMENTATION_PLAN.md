@@ -9,11 +9,11 @@ STATUS: KØ — **syv åbne deploynoter (C15 `/promille`, C16 `/vaegttab` +
   `/api/health` svarer `status: ok`.
 
 Næste iteration skal **ikke** optimere CTR på de samme svar-først-sider igen.
-Den skal enten gå efter **placering/indhold** (C19-C22 gjorde det) eller efter
-de **åbne fund fra C22's research**, som endnu ikke er løst: `/leasing` (SE)
-har uændrede stub-metadata og norsk FAQ-tekst, `/tidszone` (SE) er forankret i
-Danmark, `/loen-efter-skat`'s FAQ siger den afskaffede 15 % topskat, og
-kommuneskaten står som 24,94 %, 25,07 % og 25,049 % tre steder.
+Den skal enten gå efter **placering/indhold** (C19-C23 gjorde det) eller lukke de
+to åbne fund fra C22's research: SE `/leasing` (uændrede stub-metadata, norsk
+FAQ-tekst, `kr./md`) og SE `/tidszone` (forankret i Danmark). Bemærk desuden:
+`/api/v1`'s kommuneskat-default på 25,07 % afviger fra den verificerede 25,049 %
+og kræver en beslutning, før den røres (se ❓).
 
 
 ## Fase 3 — trafik-drevet
@@ -2793,6 +2793,9 @@ kommuneskaten står som 24,94 %, 25,07 % og 25,049 % tre steder.
 
 #### 49. Ny kandidat — fire ubearbejdede fund fra C22's research (prioriteret)
 
+**Del 1 og 2 er lukket som opgave 50 (C23) 2026-09-26 — se nedenfor. Del 3 og 4
+(SE `/leasing` og SE `/tidszone`) står åbne.**
+
 Fundene er verificeret i koden med fil/linje, men **ikke** rettet i denne
 iteration (tidsbudget). Rangordnet efter trafik × tillid:
 
@@ -2840,6 +2843,55 @@ præmieportion pr. 481 timer, mens UI og FAQ siger 962 timer. **Bemærk:** den
 første halvdel af denne liste er fra DA-fladen, anden halvdel fra SE — de er
  fundet af to parallelle research-spor og er **ikke** alle krydsverificerede af
  mig. Den næste iteration skal bekræfte den konkrete linje, før den ændrer noget.
+
+#### 50. [x] FÆRDIG 2026-09-26 — C23 — Lønsiderne sagde 15 % topskat og tre forskellige kommuneskatter
+
+- **Iteration start:** 2026-09-26 12:18 CEST på `ceo/c23-loenstal-2026`. Køen var
+  tom efter C22, og tidsbudgetten tillod én lille, velafgrænset rigtig forbedring
+  mere. C22's researchfund 1 og 2 var de to mindst ambitiøse og mest
+  tillidsskadelige, så de blev taget.
+- **Datagrund:** ingen ny sidebaseret baseline — `/loen-efter-skat` og
+  `/brutto-netto` er ikke i GSC-top-15. Det er bevidst en **korrektheds**-opgave,
+  fordi fejlen er synlig for den læser, der lander på siden, og fordi den går
+  ind i `FAQSchema`-JSON-LD, som Google kan vise som svar i søgeresultater.
+- **Fund 1 — afskaffet topskat som gældende lov.** `page-data.ts:1203` sagde
+  "Tjener du over topskattegrænsen, betales også **15% topskat**", mens det
+  **samme FAQ-array** to linjer længere nede (`:1205`) siger "Den gamle topskat på
+  15% er afskaffet" og oplyser 7,5 % / 7,5 % / 5 %. Sidens egen prosa og
+  `SATSER_2026` er enige om de nye brackets, så kilden var den ene række.
+- **Fund 2 — kommuneskatten 2026 i tre værdier.** Korrekt og kildeført er
+  `SATSER_2026.kommuneskatSnit = 25,049 %` (svmn.dk, jf. research-fund 7 og
+  `satser-2026.test.ts`). Men `page-data.ts:1207` sagde **24,94 %** (hverken den
+  gamle eller den nye værdi), `loen-efter-skat/page.tsx:84` sagde **25,07 %**
+  **på samme side**, `page-data.ts:1231` sagde 25,07 % i `/brutto-netto`'s FAQ,
+  og begge beregnere hardcodede `25.07` som forudfyldt værdi —
+  `BruttoNettoBeregner.tsx:16` importerede endda `KOMMUNE_SNIT` **uden at bruge
+  den**, mens `:195` læste kirkeskatten fra modulet. Kirkeskatten var tilsvarende
+  hårdkodet til 0,68 % i `TopskatBeregner.tsx`.
+- **Beslutning/implementering:** ét tal, ét sted. Copyen siger nu 25,049 %
+  (FAQ) / ca. 25,05 % (prosa) og 0,639 % for kirkeskat, og begge beregnere henter
+  forudfyldt værdi **og** fallback fra `SATSER_2026` i stedet for et hårdkodet
+  tal. Topskat-svaret er skrevet om til 2026-brackets med den eksplicitte
+  afskaffelsesnote. **Helt bevidst ikke rørt:** `/api/v1/loen` og
+  `/api/v1`-dokumentationen bruger stadig 25,07 % / 0,68 %, fordi `/api/v1` er en
+  frosset ekstern kontrakt i Danger Zones — det kræver Mads' beslutning, ikke en
+  iteration (skrevet under ❓).
+- **Acceptkriterier:**
+  1. Ingen lønside nævner 24,94 %, 25,07 %, 0,68 % eller "15% topskat". **PASS**
+  2. `/loen-efter-skat` og `/brutto-netto`'s FAQ nævner 25,049 %. **PASS**
+  3. Topskat-svaret indeholder 7,5 % og "afskaffet". **PASS**
+  4. Ingen hardkodet 25,07/0,68 tilbage i komponenter eller på lønsiderne. **PASS**
+  5. `/api/v1` er byte-for-byte urørt. **PASS**
+  6. `npm run lint`, `npm run test` og `npm run build` er grønne. **PASS**
+- **Kvalitetsgate 2026-09-26 12:31 CEST:** `npm run test` grøn (**1258/1258,
+  121 filer** — 3 nye i `page-data.test.ts`), `npm run lint` grøn (511 filer),
+  `npm run build` grøn (139 sider + typecheck; kun de 7 kendte pre-existing
+  CSS-advarsler).
+- **Mål:** ingen CTR-baseline. Den nye test `2026-skattetall i lønsidernes FAQ`
+  gør de fire forældede tal til en **byggetids-fejl**, så de kan ikke komme
+  tilbage ved en senere redigering.
+- **Forventet effekt:** troværdighed på sitets mest brugte lønværktøj og korrekt
+  JSON-LD; effekten er ikke målbar i trafiktal og skal ikke påstås som sådan.
 
 
 ### ❓ Til Mads
@@ -2903,8 +2955,17 @@ første halvdel af denne liste er fra DA-fladen, anden halvdel fra SE — de er
   `SATSER_2026` + `SKATTEFRADRAG_2026` gennem det testede modul
   `src/lib/skattefradrag.ts`.
 - Public `/api/v1/bmi` er bevidst uændret, fordi `/api/v1` er en frosset ekstern
-  kontrakt. Den returner fortsat rå BMI med voksengrænser uden alder. En eventuel
+  kontrakt. Den returnerer fortsat rå BMI med voksengrænser uden alder. En eventuel
   dokumentations- eller adfærdsændring kræver en eksplicit beslutning.
+- **`/api/v1/loen`'s kommuneskat-default er forældet (C23, 2026-09-26).** API'en
+  bruger `kommuneskatSnit: 25.07` og `kirkeskat 0.68`
+  (`src/app/api/v1/loen/route.ts:6,21`, dokumentationen i `src/app/api/v1/route.ts:33-37`),
+  mens den verificerede 2026-værdi er 25,049 % / 0,639 % i `SATSER_2026`. **C23 har
+  rettet UI og copy, men ikke API'en**, fordi `/api/v1` er en frosset ekstern
+  kontrakt i Danger Zones: en tredjepart, der har integreret standardværdien,
+  ville få et andet nettolønstal uden varsel. Skal jeg rette den, så
+  `/api/v1/loen` læser `SATSER_2026` (og dokumentationen følger med), eller
+  behøver API'en at beholde de afrundede tal for bagward compatibility?
 
 ### Dokumenterede kandidatere efter top-5
 
