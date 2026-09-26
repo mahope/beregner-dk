@@ -2,7 +2,7 @@
 
 STATUS: KØ — **ni åbne deploynoter (C23-C29).** 12:30-batchen 2026-09-26 udgav
 C15-C22. C23 (merge 12:19), C24 (12:21), C25 (13:07), C26 (13:15), C27 (13:25),
-C28 (14:30) og C29 (`ceo/c29-kalorier-protein`, 14:35) kom efter batchens start og
+C28 (14:30) og C29 (`ceo/c29-kalorier-protein`, 14:38) kom efter batchens start og
 kan først verificeres efter **17:30**-vinduet; intet er frosset pga. ventetiden.
 `/api/health` svarer `status: ok`.
 
@@ -3838,7 +3838,7 @@ landmark=lån, piggybank=opsparing osv.).
     — hvis batchdeployen har rørt den, er det en fejl (frosset kontrakt).
   - `/api/health` skal svare `status: ok`.
 - ⏳ **ÅBEN — VERIFICÉR DEPLOY: C29 kalorieberegnerens protein + `/flyttebudget`s
-  depositum.** Kode `KODE_SHA`, merge `MERGE_SHA` 2026-09-26 14:35 CEST. Merge
+  depositum.** Kode `c96ed81`, merge `95ebb6f` 2026-09-26 14:38 CEST. Merge
   efter 12:30-batchens start, så første kandidatvindue er **17:30 2026-09-26**;
   intet er frosset og intet er `DEPLOY-MISSING` (kræver to vinduer). Verificér
   **indhold**, HTTP 200 er ikke nok:
