@@ -1,10 +1,19 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — **tolv åbne deploynoter (C23-C32).** 12:30-batchen 2026-09-26 udgav
+STATUS: KØ — **tolv åbne deploynoter (C23-C32) + C33.** 12:30-batchen 2026-09-26 udgav
 C15-C22. C23 (merge 12:19), C24 (12:21), C25 (13:07), C26 (13:15), C27 (13:25),
-C28 (14:30), C29 (14:38), C30 (ca. 15:00), C31 (15:08) og C32
-(`ceo/c32-elbil-et-ratested`) kom efter batchens start og kan først verificeres efter
-**17:30**-vinduet; intet er frosset pga. ventetiden. `/api/health` svarer `status: ok`.
+C28 (14:30), C29 (14:38), C30 (ca. 15:00), C31 (15:08), C32 og C33 (16:10) kom efter
+batchens start og kan først verificeres efter **17:30**-vinduet; intet er frosset pga.
+ventetiden. `/api/health` svarer `status: ok`.
+
+**C33 gjorde C28's sidste kandidat til en reel fejl, ikke et kosmetisk problem.**
+`/husleje` lovede "25.000 kr netto → max ca. 7.500 kr/md", mens værktøjet startede på
+28.000 kr. Men værktøjet havde **intet felt for el, vand og varme** — selv om resultatet
+stod som "pr. måned inkl. el, vand og varme", FAQ'en sagde "husk at inkludere el, vand og
+varme", og sidens egen liste tæller dem med. En lejer med 1.800 kr. i el og varme læste
+et tal 1.800 kr. for højt. Der er nu ét ratested (`src/lib/husleje.ts`), reglen dækker
+husleje + boligforbrug som skrevet, og værktøjets standardtilstand **er** det eksempel,
+siden citerer. Se opgave 60.
 
 **C32 gjorde C30's advarsel bogstavelig.** `/elbil` havde sine egne forudsætninger
 hardkodet (18 kWh/100 km, 16 km/l) ved siden af `src/lib/braendstof.ts` (17 og 15), og
@@ -46,15 +55,14 @@ weekenddag eller helligdag — den forklares nu i stedet for at forsvinde fra
 summeringen. Se opgave 55.
 
 Næste iteration skal **ikke** optimere CTR på de samme svar-først-sider igen, og
-den skal **ikke** gentage C26-C32. Den eneste tilbage fra C28's kandidatliste er
-**`/husleje`** (166 besøgende/28d, sidens løfteindhold er uopnåeligt som
-standardværdi) — nærmere beskrevet under ❓ og i C28's kandidatliste. C32's eget fund:
-**`/elbil` har ingen trafikbaseline** i Plausible eller GSC, selv om den ligger i
-katalog, kategori og to artikler — hvis næste snapshot tæller den, er der noget at
-lære; hvis ikke, er spørgsmålet om siden overhovedet er linket nok. Kandidat 41
-(`noPages` mangler `/enhudspris`) har fortsat nul trafik, da `beregner.no` ikke er
-live. `/kalorier` og `/flyttebudget` er lukket i C29, `/braendstof` i C30,
-`/pension`s folkepensionsalder i C31, `/elbil`s forudsætninger i C32.
+den skal **ikke** gentage C26-C33. **C28's kandidatliste er nu tom** — se afsnittet
+"Næste kandidater efter C33" for den næste opgave: den hedder **blog → beregner**, fordi
+`/blog/barsel-2026-regler-og-satser` stadig har sitets dårligste afgang uden for
+forsiden (85 % bounce på 183 besøgende/28d), og 28-dages-vinduet ligger mest *før* O1's
+CTA blev deployet. Kandidat 41 (`noPages` mangler `/enhudspris`) har fortsat nul
+trafik, da `beregner.no` ikke er live. `/kalorier` og `/flyttebudget` er lukket i C29,
+`/braendstof` i C30, `/pension`s folkepensionsalder i C31, `/elbil`s forudsætninger i
+C32 og `/husleje` i C33.
 
 
 ## Fase 3 — trafik-drevet
@@ -3496,6 +3504,67 @@ første halvdel af denne liste er fra DA-fladen, anden halvdel fra SE — de er
   det er ikke en CTR-klasse. Det er en tillidsopgave: elbil-læseren får samme tal i
   værktøjet, i FAQ'en og i artiklerne, og et løfte, der var konkret forkert, er væk.
 
+#### 60. [x] FÆRDIG 2026-09-26 — C33 — `/husleje`: eksemplet er nået i værktøjet, og el/vand/varme kan trækkes fra
+
+- **Iteration start:** 2026-09-26 15:49 CEST. Køen var tom (alle 59 opgaver færdige,
+  intet `I GANG`), de tolv åbne deploynoter kan først verificeres efter 17:30, og
+  STATUS pegede på den **eneste** tilbage fra C28's kandidatliste: `/husleje`.
+- **Datagrund:** `/husleje` 166 besøgende/28d (+18 %), bounce 5 %, 5 indgangssider
+  pr. 2026-09-26. Ingen række i GSC-snapshottet, så **ingen CTR-baseline** findes —
+  titel og description er derfor urørt i denne omgang, og opgaven er en
+  korrekthedstask.
+- **Fund 1 — løfteindholdet var uopnåeligt, som C28 skrev.** Siden og
+  meta descriptionen lovede "Tjener du 25.000 kr netto → max ca. 7.500 kr/md", men
+  `HuslejeBudgetBeregner.tsx:140` startede på **28.000** kr, så værktøjet viste
+  8.400 kr. Regnestykket var korrekt; eksemplet lå bare uden for rækkevidde af den
+  standard, enhver læser mød først.
+- **Fund 2 — værktøjet lovede et tal, det ikke kunne regne på.** Resultatet stod som
+  "pr. måned **inkl. el, vand og varme**", FAQ'en sagde "Husk at inkludere el, vand og
+  varme i beregningen", og sidens egen liste nævner a conto varme/vand og el — men
+  værktøjet havde **intet felt** for det. En lejer, der betaler 1.800 kr. i el og
+  varme, læste altså et tal, der lå 1.800 kr. for højt. Det er samme fejltype som
+  C28-C32: siden lovede noget, værktøjet ikke leverede.
+- **Fund 3 — død kode og en ubesvaret påstand.** `maxHusleje33Pct` blev beregnet og
+  aldrig vist, selv om siden og FAQ'en begge siger "Nogle kilder siger 33 %".
+- **Fund 4 (lille) — "God økonomi" ved nul indkomst.** Vurderingen sammenlignede
+  `tilHusleje >= maxHusleje30Pct`, så 0 mod 0 gav **"god"**. Nu er vurderingen
+  "risikabel", når den samlede indkomst er 0.
+- **Beslutning/implementering:** ét sted — `src/lib/husleje.ts` med
+  `HUSLEJE_REGNEL_30` / `HUSLEJE_REGNEL_33`, den rene `beregnHusleje(input)` og
+  `HUSLEJE_STANDARD`, som er **både** værktøjets starttilstand **og** det eksempel,
+  siden og metadataen citerer. Modellen er ændret, så reglen dækker husleje **og**
+  boligforbrug, som siden og FAQ'en siger: loftet er 30 % af indkomsten til
+  husleje + el + vand + varme, og det nye "El, vand og varme"-felt trækker derfor
+  huslejen ned en-for-en. Værktøjet har nul hardkodede tal (kun `HUSLEJE_STANDARD.*`
+  i `useState` og reset), 33 %-linjen vises, og DA/SE/NO har alle feltet. Sidens
+  brødtekst og FAQ'en renderer de udledte tal; 1.800 kr. i eksemplet er en
+  illustration ("har du …"), ikke et gennemsnit, og det ligger i modulet.
+- **Landet:** se git log for kode- og plan-commit på `ceo/c33-husleje-30pct-og-boligforbrug`.
+- **Kvalitetsgate 2026-09-26 16:00 CEST:** `npm run build` grøn (139 sider +
+  typecheck, ingen nye advarsler), `npm run test` grøn (**1358/1358, 130 filer** —
+  14 nye tests: 10 i `husleje.test.ts`, 4 i `fact-consistency.test.ts`),
+  `npm run lint` grøn (524 filer). Lokal standalone-SSR: `/api/health` svarer
+  `status: ok`; `/husleje` serverer "Med en nettoløn på 25.000 kr. er dit loft for
+  boligudgifter 7.500 kr.", værktøjet SSR'er **7.500 kr.** som sit store tal, og
+  33 %-linjen og feltet er med i markup.
+- **MÅL:** `/husleje` baseline 166 besøgende/28d pr. 2026-09-26. Ingen CTR-baseline
+  (ikke i GSC-top-15), så titler er urørte. Genmål 2026-10-10; hvis indgangssiderne
+  (5 → 963 for `/dato` som reference) stiger, skyldes det at læseren nu kan nå
+  eksemplet med ét klik.
+- **Acceptkriterier:**
+  1. Værktøjets starttilstand er `HUSLEJE_STANDARD`, og siden+metadata+FAQ'en
+     citerer tal fra samme modul. **PASS**
+  2. Værktøjet viser 7.500 kr. i standardtilstanden, som siden lover. **PASS**
+  3. "El, vand og varme" findes som felt i DA, SE og NO, trækkes fra huslejen og
+     vises i budgetoversigten. **PASS**
+  4. 33 %-reglen vises, så sidens påstand er besvaret. **PASS**
+  5. Nul indkomst giver "risikabel", ikke "god". **PASS**
+  6. `npm run lint`, `npm run test` og `npm run build` er grønne. **PASS**
+- **Forventet effekt:** Ingen målbar trafikstigning i sig selv (ingen CTR-række).
+  Det er en tillidsopgave: 166 læsere pr. 28 dage får et værktøj, der regner det
+  samme som siden siger, og et tal, der ikke længer er 1.800 kr. for højt for
+  lejere med el og varme.
+
 #### C28's øvrige fund — ikke taget, skrevet som næste kandidater
 
 - ~~**`/flyttebudget` (C27-rest, 2 linjer)~~ — lukket i C29 den 2026-09-26.~~ Page-
@@ -3509,9 +3578,12 @@ første halvdel af denne liste er fra DA-fladen, anden halvdel fra SE — de er
 - ~~**`/braendstof` (271 besøgende/28d)~~ — lukket i C30 den 2026-09-26.~~ FAQ'en lovede
   el "typisk 50-70 % billigere pr. km" mod 40,2 % mod diesel i værktøjets egen tabel.
   Nu er besparelsen **udledet** af forudsætningerne og nævnt pr. brændstoffype.
-- **`/husleje`.** Sidens løfteindhold ("netto 25.000 kr → max ca. 7.500 kr/md")
-  kan ikke nås som standardværdi, fordi `HuslejeBudgetBeregner.tsx:140` starter på
-  28.000 kr → 8.400 kr. Regnestykket er korrekt; kun eksemplet er uopnåeligt.
+- ~~**`/husleje`**~~ — **lukket i C33 den 2026-09-26, se opgave 60.**~~ Sagen var
+  større end "eksemplet er uopnåeligt": værktøjet havde intet felt for el, vand og
+  varme, selv om resultatet, FAQ'en og sidens egen liste siger at huslejetallet
+  inkluderer dem. Nu er der ét ratested (`src/lib/husleje.ts`), standardtilstanden
+  **er** eksemplet, og reglen dækker husleje + boligforbrug som skrevet.
+  MÅL: 166 besøgende/28d pr. 2026-09-26 — genmål 2026-10-10.
 - **`/pension`.** ~~`PensionBeregner.tsx:224` hardkoder "Folkepensionsalder er 68
   år"~~ — **lukket i C31 den 2026-09-26.**~~ Alderen er nu udledt fra fødselsåret
   via `folkepensionsalderForAlder`, og resultatfeltet fortæller, om den valgte alder
@@ -3521,6 +3593,36 @@ første halvdel af denne liste er fra DA-fladen, anden halvdel fra SE — de er
   tidssidens 08:30-16:45 = 8 t 15 min, decimal-time-tabellen og frokostpausen
   passer med `src/lib/tidsberegner.ts` og presets; boligstøttes side, komponent og
   FAQ læser alle `BOLIGSTOETTE_2026`.
+
+### Næste kandidater efter C33 — C28's liste er nu tom
+
+C33 lukkede det sidste fund fra C28's audit, så listen er **udtømt**. De følgende er
+valgt på *ny* datagrund, ikke på rest fra C26-C32:
+
+1. **Blog → beregner: mangler der en næste handling i indlæggene med trafik?**
+   Datagrund: `/blog/barsel-2026-regler-og-satser` 183 besøgende/28d (+83 %) på
+   **85 % bounce** — sitets klart dårligste afgang uden for forsiden, og bloggen er
+   den næststørste trafikklasse. O1 lagde en CTA i den 2026-09-23, men 28-dages
+   vinduet (2026-08-29→09-26) ligger mest **før** deployen, så effekten er umålt.
+   Opgaven: statisk audit af de 20 indlæg — hvilke har et link til den relevante
+   beregner, hvor tidligt i teksten det står, og hvilke ender på en kildeliste
+   uden næste handling. Ret de uden. Datagrænse: 85 % bounce på 183 besøgende er
+   for lille til at optimere på pct, så **audit først, ændringer kun med dokumenteret
+   mangel**.
+2. **28 DA-sider har ingen svensk metadata.** `page-data.ts` har 79 DA-sider mod
+   53 SE og 28 NO, så de 28 manglende falder tilbage på dansk titel, description og
+   FAQ på beraknare.se (researchfund #4's locale-leak). Datagrund: beraknare.se har
+   474 besøgende/28d, og dens SE-top-15 har alle SE-metadata, så de 28 har næsten
+   ingen SE-trafik — **kun** tag dem hvis et nyt snapshot tæller dem. Spring
+   opgaven, hvis de fortsat er stille.
+3. **C32's åbne spørgsmål om `/elbil`.** Siden har ingen Plausible- eller
+   GSC-række, selv om den ligger i katalog, kategori og to artikler. Tjek i næste
+   snapshot, om den tæller; hvis ikke, er spørgsmålet om de interne links
+   (ikke om indholdet).
+4. **Beslutninger i ❓ der låser arbejde:** `/api/v1/loen`'s kommuneskat (frosset
+   ekstern kontrakt), beskæftigelsestillægget på 26.198 kr. uden dækkende kilde,
+   depositum på 3 måneder som "typisk" uden lovtekst, og `www`-domænerne. Alle fire
+   kræver et ja fra Mads før de røres.
 ### ❓ Til Mads
 - **To proteinværktøjer, to svar (C29, 2026-09-26).** `/kalorier` regner nu
   protein fra målet (0,8-2,2 g/kg), mens `/proteinbehov` regner det fra
@@ -4015,6 +4117,15 @@ landmark=lån, piggybank=opsparing osv.).
     - Gate grøn: lint ok, 280/280 tests, build ok (128 pages).
 
 ## VERIFICÉR DEPLOY-log
+- ⏳ **ÅBEN — VERIFICÉR DEPLOY: C33 `/husleje`: 30 %-eksemplet er nået i værktøjet,
+  og el/vand/varme kan trækkes fra huslejen.** Kode `ce0e0f6`, merge `PLACEHOLDER`
+  2026-09-26 16:10 CEST (se opgave 60). Verificér **indhold**: siden skal sige "Med en
+  nettoløn på 25.000 kr. er dit loft for boligudgifter 7.500 kr." og FAQ'en skal
+  nævne 8.250 kr. for 33 %-reglen; værktøjets store tal skal SSR'e som 7.500 kr., og
+  feltet "El, vand og varme" skal være med i markup. `/api/health` skal svare
+  `status: ok`. Merge 16:10 er før 17:30-vinduet, så intet er `DEPLOY-MISSING`
+  (kræver to) og intet er frosset.
+
 - ⏳ **ÅBEN — VERIFICÉR DEPLOY: C32 `/elbil` + de to bilartikler: ét ratested for
   el/benzin, "under halvdelen" væk.** Kode og plan i denne iterations commit på
   `ceo/c32-elbil-et-ratested` (kode `e0c65d5`), merge til `master` `d4a8183`

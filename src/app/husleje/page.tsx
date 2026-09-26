@@ -12,6 +12,8 @@ import {
 import Breadcrumbs from "@/components/Breadcrumbs";
 import RelatedCalculators from "@/components/RelatedCalculators";
 import { ForsikringAffiliate } from "@/components/AffiliateBox";
+import { HUSLEJE_EKSEMPEL, HUSLEJE_EKSEMPEL_FORBRUG, HUSLEJE_EKSEMPEL_MED_FORBRUG, HUSLEJE_STANDARD } from "@/lib/husleje";
+import { formatCurrency } from "@/lib/format";
 
 export async function generateMetadata() {
   return generatePageMetadata("husleje");
@@ -21,6 +23,10 @@ export default async function HuslejePage() {
   const locale = await getLocale();
   const domainConfig = await getCurrentDomainConfig();
   const pageData = getPageData("husleje", locale) || getPageData("husleje", "da")!;
+
+  // Eksemplet er det samme som værktøjets starttilstand, så tallet på siden er
+  // altid det, læseren ser da han/hun åbner beregneren.
+  const kr = (value: number) => formatCurrency(value, "da", { maximumFractionDigits: 0, minimumFractionDigits: 0 });
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -68,13 +74,17 @@ export default async function HuslejePage() {
           giver mere <strong>buffer til uforudsete udgifter</strong>.
         </p>
         <p>
-          <strong>Eksempel:</strong> Med en nettoløn på 25.000 kr bør din husleje max være
-          7.500 kr inkl. el, vand og varme.
+          <strong>Eksempel:</strong> Med en nettoløn på {kr(HUSLEJE_STANDARD.maanedligNettoLoen)} er
+          dit loft for boligudgifter {kr(HUSLEJE_EKSEMPEL.maxBoligudgifter)} — og det er både husleje,
+          el, vand og varme, der skal dele det. Har du {kr(HUSLEJE_EKSEMPEL_FORBRUG)} i el og varme
+          om måneden, er der {kr(HUSLEJE_EKSEMPEL_MED_FORBRUG.anbefaletHusleje)} til huslejen.
+          Beregneren ovenfor starter med præcis det samme eksempel, så du kan se reglen regne det ud.
         </p>
 
         <h3>Hvad inkluderer "husleje"?</h3>
         <p>
-          Når du beregner dit <strong>boligbudget</strong>, skal du huske alle <strong>boligrelaterede udgifter</strong>:
+          Når du beregner dit <strong>boligbudget</strong>, skal du huske alle <strong>boligrelaterede udgifter</strong>.
+          El, vand og varme har deres eget felt i beregneren, fordi de ofte ikke er en del af lejen:
         </p>
         <ul>
           <li>Grundleje/husleje</li>
