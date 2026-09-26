@@ -172,7 +172,7 @@ export default async function TidszonePage() {
           att <strong>spara energi</strong> genom att utnyttja dagsljuset bättre.
         </p>
 
-        <h3>Populära tidsskillnader från Centraleuropa</h3>
+        <h3>Populära tidsskillnader från Sverige</h3>
         <ul>
           <li><strong>London:</strong> 1 timme efter</li>
           <li><strong>New York:</strong> 6 timmar efter</li>
