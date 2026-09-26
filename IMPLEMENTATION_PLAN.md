@@ -6080,8 +6080,8 @@ efter datagrund:
   Plausible eller GSC — hvilket er konsistent med et separat site.
 - ⏳ **VERIFICÉR DEPLOY: C55 `/dato` — "antal dage" tæller ikke længere et
   sommertidsskifte som en dag, og Kopier/Del giver datoerne med — kode + plan
-  i ét commit på branch `ceo/dato-tekst`, første kandidatvindue
-  **2026-09-27 07:30**.** Verificér **indhold og beregning**; HTTP 200
+  i ét commit på branch `ceo/dato-tekst`, kode `fb89220`, merge `122535d`
+  2026-09-27 01:11 CEST. Første kandidatvindue **2026-09-27 07:30**.** Verificér **indhold og beregning**; HTTP 200
   beviser intet, hele fundet er i klient-renderede tal og tekst:
   1. Åbn `/dato`, vælg **Dage mellem**, sæt **Fra dato = 25. oktober 2026**
      og **Til dato = 26. oktober 2026**. **Antal dage** skal være **1**.
