@@ -5262,6 +5262,16 @@ landmark=lån, piggybank=opsparing osv.).
     - Gate grøn: lint ok, 280/280 tests, build ok (128 pages).
 
 ## VERIFICÉR DEPLOY-log
+- ⏳ **ÅBEN — VERIFICÉR DEPLOY: C44 — `dage-til`-fladen er auditet og
+  permanent vagtet.** Kode `d2ec667` + `aa6698c`, merge `016f2e7` 2026-09-26
+  20:13 CEST på branch `ceo/dage-til-og-c44`. Første kandidatvindue er
+  **2026-09-26 21:30** (merged før den). Nul deploy-vinduer er gået siden merge,
+  altså slet ikke `DEPLOY-MISSING` (kræver to). **Bemærk: den eneste kodeændring
+  er en testfil, så intet på sitet skal se anderledes ud.** Verificér alligevel
+  `https://minberegner.dk/dage-til/1-december` (200, self-canonical, titlen
+  "Hvor mange dage er der til 1. december? … dage | MinBeregner.dk"),
+  `https://minberegner.dk/dage-til/finvis-somhelst` (404) og at
+  `/api/health` svarer `status: ok`. Se opgave 71.
 - ⏳ **ÅBEN — VERIFICÉR DEPLOY: C43 — artiklen og `/tidszone` kan ikke længere
   have samme headline.** Kode `3eb38de`, merge `4d358d9` 2026-09-26 19:50
   CEST på branch `ceo/procent-konsistens`. Første kandidatvindue er
