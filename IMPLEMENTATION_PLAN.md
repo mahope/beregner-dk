@@ -1,19 +1,17 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — **syv åbne deploynoter (C15 `/promille`, C16 `/vaegttab` +
-`/enhedspris`,   C18 pensionssatserne, C19 dagpenge-satserne, C20 SU-guiden, C21 `/su`s
-  forældreindkomst og C22 den svenska brødkrumme).** C15-C21 mergedes
-  09:57-11:32 og er sat i 12:30-vinduet 2026-09-26; C22 mergerede 12:30 og kan
-  først verificeres efter 17:30. Live-kontrol 12:15 lå **før** vinduet og viste
-  pre-batch-indhold, hvilket beviser intet. Intet er frosset pga. ventetiden.
-  `/api/health` svarer `status: ok`.
+STATUS: KØ — **to åbne deploynoter (C23 lønsidernes 2026-tal og C24 SE `/leasing`);
+syv noter lukket ved indholdskontrol 12:33.** 12:30-batchen 2026-09-26 udgav
+C15-C22. C23 (merge 12:19) og C24 (merge 12:21) kom efter batchens start og kan
+først verificeres efter **17:30**-vinduet; intet er frosset pga. ventetiden.
+`/api/health` svarer `status: ok`.
 
 Næste iteration skal **ikke** optimere CTR på de samme svar-først-sider igen.
-Den skal enten gå efter **placering/indhold** (C19-C23 gjorde det) eller lukke de
-to åbne fund fra C22's research: SE `/leasing` (uændrede stub-metadata, norsk
-FAQ-tekst, `kr./md`) og SE `/tidszone` (forankret i Danmark). Bemærk desuden:
-`/api/v1`'s kommuneskat-default på 25,07 % afviger fra den verificerede 25,049 %
-og kræver en beslutning, før den røres (se ❓).
+Den skal enten gå efter **placering/indhold** (C19-C24 gjorde det) eller lukke det
+sidste åbne fund fra C22's research: SE `/tidszone` er forankret i Danmark, selv om
+sidens egen tekst svarer fra Sverige. Bemærk desuden: `/api/v1`'s
+kommuneskat-default på 25,07 % afviger fra den verificerede 25,049 % og kræver en
+beslutning, før den røres (se ❓).
 
 
 ## Fase 3 — trafik-drevet
@@ -2779,9 +2777,11 @@ og kræver en beslutning, før den røres (se ❓).
   selv, men det fjerner et konkret fejlsignal fra hele domænet og en død kilde fra
   hver enkelt side.
 - **MÅL:** ingen enkelt side ændres, så der er **ingen CTR-baseline** at slå op.
-  Måles som: ingen `/kategori`-referencer i live-HTML eller JSON-LD på beraknare.se
-  efter næste batch (**mål 2026-10-10**), plus Search Console-crawl-rapporter for
-  beraknare.se. Plausible-niveau: `/` 18 besøgende/28d med bounce 71 % pr.
+  Måles som: **0 anchors med `href="/kategori..."` og 0 `/kategori`-URL'er i
+  JSON-LD** på beraknare.se efter næste batch (**mål 2026-10-10**), plus Search
+  Console-crawl-rapporter for beraknare.se. Korrigeret 12:33 efter live-kontrol:
+  `/kategori/hverdag` står stadig én gang i HTML'en som React-`key` i
+  Flight-payloaden, hvilket hverken er et link eller schema — se deploynoten. Plausible-niveau: `/` 18 besøgende/28d med bounce 71 % pr.
   2026-09-26 (forsiden er den eneste side, hvor brødkrummen er synlig på siden
   over folden).
 - **Falsificeret i denne iteration (skrevet ned, så det ikke gøres igen):** svensk
@@ -3408,46 +3408,50 @@ landmark=lån, piggybank=opsparing osv.).
     - Gate grøn: lint ok, 280/280 tests, build ok (128 pages).
 
 ## VERIFICÉR DEPLOY-log
-- ⏳ **ÅBEN — VERIFICÉR DEPLOY: C15 `/promille`, C16 `/vaegttab` + `/enhedspris`,
-  C18 pensionsguiden, C19 dagpenge-guiden, C20 SU-guiden, C21 `/su` og C22 den
-  svenska brødkrumme.**
-  Merge-tidspunkter 2026-09-26 09:57 (C16), 10:52 (C18), 11:35 (C19), 11:24
-  (C20), 11:32 (C21) og **12:30 (C22)** CEST. Første kandidatvindue for de seks
-  første noter er **12:30** 2026-09-26; 07:30-batchen gik før alle seks merges.
-  **C22 mergede 12:30** og kan først verificeres efter 17:30-vinduet.
-  - **Indholdskontrol 12:15-12:16 CEST — altså FØR 12:30-vinduet overhovedet
-    åbnede.** `/api/health` svarer `status: ok`, men `/su`,
-    `/blog/su-2026-satser-og-regler`, `/blog/dagpenge-saadan-finder-du-din-sats`,
-    `/promille` og `/vaegttab` serverer pre-batch-indhold (dagpenge 10× `20.359`,
-    ingen `0,88` på `/promille`, ingen `419.589`/`2.966`/`129.106` på `/su`), og
-    `beraknare.se/dato` har stadig 2× `/kategori/hverdag`. Det er **forventet og
-    beviser intet**: kontrollen lå før vinduet. Første reel mulighed er 12:30.
-  - Verificér ved **indholdskontrol**, ikke HTTP 200:
-  - `/promille` (DA): eksemplet 4 øl/4 öl på 80 kg = 0,88 ‰ og FAQ om, hvornår
-    man må køre igen.
-  - `/vaegttab` (DA/SE/NO) og `/enhedspris` (DA/SE): svar-først-blokken.
-  - `/blog/pension-hvor-meget-skal-du-spare-op`: loftet **68.700 kr.** (ikke
-    63.000). Bemærk: live 12:34 har **både** 4× `63.000` og 4× `68.700` — 68.700
-    kan være et andet, legitimt tal på samme side (f.eks. et andet loft), så
-    C18's note skal verificeres på den konkrete sætning, ikke på taltælling alene.
-  - `/blog/dagpenge-saadan-finder-du-din-sats` + `/dagpenge`: 22.041 / 14.694 /
-    18.074 / 15.759 / 1.017 kr., og værktøjets dimittendstal 15.759/18.074.
-  - `/blog/su-2026-satser-og-regler`: titel "SU 2026: 7.426 kr. pr. måned
-    udeboende", "Kort svar:", 419.589, 710.077, 43.086, 2.966 og 129.106 kr.;
-    `/su` og kategoriens FAQ skal vise verificeringsdato **2026-09-26** (var
-    2026-09-24).
-  - `/su` (C21): afsnittet "Hjemmeboende SU: forældrenes indkomst i 2024" med
-    419.589/710.077/43.086 kr., sats-rækken med forsørgertillæg ved delt bolig
-    **2.966 kr.**, udlandsstudielånet **129.106 kr.** i lånelisten og to nye
-    FAQ-svar.
-  - **C22 (SV):** `beraknare.se` skal have **0** `/kategori/`-referencer i
-    HTML og i JSON-LD på f.eks. `/dato`, `/tidsberegner` og `/alder`; den
-    svenska `/dagar-till/1-december` skal sige "**svensk** helgdag" (ikke
-    "dansk"). Dansk `/kategori/hverdag` skal fortsat være **200** og stadig
-    linkes i brødkrummen på minberegner.dk.
-  - `/api/health` skal svare `status: ok` under alle kontroller.
-  Er indholdet stadig gammelt efter **to** batch-vinduer, skrives
-  `DEPLOY-MISSING` og der merges ikke til `master` før et menneske har kigget.
+- ⏳ **ÅBEN — VERIFICÉR DEPLOY: C23 lønsidernes topskat/kommuneskat og C24 SE
+  `/leasing`.** Merge 2026-09-26 12:19 (C23) og 12:21 (C24) CEST — begge **efter**
+  at 12:30-batchen var startet, så de kan først verificeres efter **17:30**.
+  Verificér ved indholdskontrol:
+  - `/loen-efter-skat`: FAQ'en skal **ikke** sige "15% topskat", skal sige 7,5 %
+    og "afskaffet"; kommuneskatten skal stå som **25,049 %** (ikke 24,94 % eller
+    25,07 %) og kirkeskatten som **0,639 %** (ikke 0,68 %). `/brutto-netto`'s FAQ
+    skal sige 25,049 %.
+  - `/brutto-netto` og `/topskat`: det forudfyldte kommuneskatfelt skal vise
+    **25.049** (ikke 25.07), og kirkeskatfeltet på `/topskat` **0.639**.
+  - `beraknare.se/leasing`: titlen skal være "Leasingkalkylator: bil på 300.000
+    kr = 4.121 kr/mån", og værktøjet skal vise **4.121 kr/mån** (ikke `kr./md`).
+  - `/api/v1/loen` skal **uændret** stadig sige 25.07 — hvis batchdeployen har
+    rørt den, er det en fejl (frosset kontrakt).
+  - `/api/health` skal svare `status: ok`.
+- ✅ **DEPLOY OK 2026-09-26 12:33 CEST — 12:30-batchen lukker C15-C22.** Syv noter
+  verificeret ved **indholdskontrol på begge domæner**, ikke HTTP 200:
+  - `/promille` (C15): `0,88` er live (2 forekomster).
+  - `/vaegttab` (C16): `2.209` er live (2 forekomster).
+  - `/blog/pension-hvor-meget-skal-du-spare-op` (C18): `63.000` er **væk** (0
+    forekomster) — loftet er rettet. Den 12:34-måling i den gamle åbne note,
+    som sagde at siden havde både 63.000 og 68.700, var en **falsificeret
+    måling på det gamle indhold**: 68.700 var dengang den gamle tekst, ikke et
+    andet legitimt tal. Ikke et problem med C18.
+  - `/blog/dagpenge-saadan-finder-du-din-sats` (C19): `22.041` er live (2
+    forekomster) og det gamle `20.359` er **væk** (0).
+  - `/blog/su-2026-satser-og-regler` (C20): "Kort svar:" er live.
+  - `/su` (C21): `419.589` er live (2 forekomster).
+  - **C22 (SE):** på `beraknare.se/dato` er der **0** anchors med
+    `href="/kategori..."` (før: 2), og JSON-LD's `BreadcrumbList` har nu
+    `{"position":2,"name":"Vardag"}` **uden `item`** — 404-URL'en er væk fra de
+    strukturerede data. `/dagar-till/1-december` siger "inte en **svensk**
+    helgdag" (3 forekomster; før "dansk"). Der er **én** tilbageværende
+    forekomst af `/kategori/hverdag` i HTML'en, men den ligger i React
+    Flight-payloaden som `key`-prop på `<li>` — ikke et link, ikke JSON-LD,
+    usynlig for bruger og crawler. Den præcise, målbare accept er derfor
+    **0 links og 0 schema-URL'er**, ikke "0 strenge i kildekoden". C22's egen
+    MÅL-linje er korrigeret efter denne kontrol.
+  - `/api/health` svarer `status: ok`.
+  Alle noter fra C15-C22 er dermed lukket. Ingen `DEPLOY-MISSING`.
+- ⏱ **LUKKET 2026-09-26 12:33** (se DEPLOY OK 2026-09-26 12:33) — var: C15
+  `/promille` svar-først, C16 `/vaegttab` + `/enhedspris`, C18 pensionsloftet,
+  C19 dagpenge 22.041 kr., C20 SU-guiden svar-først, C21 `/su`'s forældreindkomst
+  og C22's svenska brødkrumme.
 - **DEPLOY OK 2026-09-26 07:55 CEST — 07:30-batchen lukker alle 21 åbne noter.**
   Sidste succesfulde batch før denne var 17:30-vinduet 2026-09-25; 21:30-vinduet
   2026-09-25 indeholdt ingen af dagens merges. Kontrollen er **indholdskontrol på
