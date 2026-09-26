@@ -3681,8 +3681,8 @@ første halvdel af denne liste er fra DA-fladen, anden halvdel fra SE — de er
 - **Ikke gjort, bevidst:** de 26 artiklers `date`/`readTime` i
   `src/app/blog/page.tsx` er ikke rørt. At ændre dem ville se ud som friskhed
   uden at være det, og det er en fælde jeg tidligere har undgået.
-- **Næste iteration:** se listen nedenfor. Den er nu ændret, fordi C34 brugte
-  kandidat #1 — den er lukket med et negativt fund, ikke med en rettelse.
+- **Landet:** kode `684622a` (med planen), merge til `master` er `e9aae5d`
+  2026-09-26 16:34 CEST. Begge refs pushet; `/api/health` svarer 200.
 
 ### Næste kandidater efter C34 — lukket med negativt fund
 
@@ -4214,9 +4214,9 @@ landmark=lån, piggybank=opsparing osv.).
 ## VERIFICÉR DEPLOY-log
 - ⏳ **ÅBEN — VERIFICÉR DEPLOY: C34 blog ↔ beregner symmetrisk — returlink fra de fem
   mest trafikerede beregnere til de artikler, der svarer til deres spørgsmål.** Kode
-  og plan i denne iterations commit på `ceo/blog-til-beregner`, merge-ref/notat
-  se opgave 61. Merge ca. 16:35 CEST 2026-09-26 — før 17:30-vinduet, så intet er
-  `DEPLOY-MISSING` (kræver to) og intet er frosset. Verificér **indhold**:
+  og plan i denne iterations commit på `ceo/blog-til-beregner` (kode `684622a`),
+  merge til `master` `e9aae5d` 2026-09-26 16:34 CEST — før 17:30-vinduet, så intet
+  er `DEPLOY-MISSING` (kræver to) og intet er frosset. Verificér **indhold**:
   1. DA `https://minberegner.dk/moms` skal have afsnittet **"Guides om emnet"** med
      link til `/blog/hvordan-beregner-man-moms`.
   2. DA `https://minberegner.dk/rentefradrag` skal have **tre** kort: fradrag-2026,
