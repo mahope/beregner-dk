@@ -3315,8 +3315,8 @@ landmark=lån, piggybank=opsparing osv.).
   "147.791", "652.209" eller "15% gaveafgift". `/arveafgift` skal linke tilbage til
   guiden. HTTP 200 beviser intet.
 
-- **VERIFICÉR DEPLOY:** C18 pensionssatserne — kode `PLACEHOLDER_SHA`, merge
-  `PLACEHOLDER_MERGE` 2026-09-26 10:52 CEST. Første kandidatvindue er
+- **VERIFICÉR DEPLOY:** C18 pensionssatserne — kode `7dcde36`, merge
+  `ddc7bde` 2026-09-26 10:52 CEST. Første kandidatvindue er
   **12:30 2026-09-26**. Verificér **indhold** på
   https://minberegner.dk/blog/pension-hvor-meget-skal-du-spare-op og
   https://minberegner.dk/pension, HTTP 200 er ikke nok:
