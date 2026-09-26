@@ -1,14 +1,34 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — **otte noter står åbne, ingen er `DEPLOY-MISSING`.** C37
-(`/renteberegner`) med første kandidatvindue 2026-09-27 12:30, C38 (svensk
-spørgsmålsform), C39 (svensk `/procent`), C40 (DA `/tidsberegner`) og **C45**
-(juleaften + julafton) med **2026-09-26 21:30** som første fælles
-kandidatvindue, plus **C42** (de relaterede links renderer det, de lover, og
-`/brok` får en indgang) med første vindue **2026-09-27 07:30**, **C43**
-(artiklen og `/tidszone` kan ikke længere have samme headline) i samme
-vindue og **C46** (`/tidszone` får de fire lande, autocomplete spørger efter)
-i samme vindue. `/api/health` svarer `status: ok`.
+STATUS: KØ — **ni noter står åbne, ingen er `DEPLOY-MISSING`.** **C47**
+(`/alder` svarer på "alder mellem to datoer") med første kandidatvindue
+**2026-09-26 21:30** (merged 21:11, før batchen). C37 (`/renteberegner`)
+med første kandidatvindue 2026-09-27 12:30, C38 (svensk spørgsmålsform),
+C39 (svensk `/procent`) og **C45** (juleaften + julafton) med
+**2026-09-26 21:30** som første fælles kandidatvindue, plus **C42** (de
+relaterede links renderer det, de lover, og `/brok` får en indgang) med
+første vindue **2026-09-27 07:30**, **C43** (artiklen og `/tidszone` kan
+ikke længere have samme headline) i samme vindue og **C46** (`/tidszone`
+får de fire lande, autocomplete spørger efter) også der. `/api/health`
+svarer `status: ok`.
+
+**C47 gjorde C45's stærkeste åbne kandidat færdig — og fandt en fejl i
+koden, ikke i teksten.** C45 skrev, at `/alder` manglede spørgsmålet
+"beregn alder mellem to datoer", men at det *krævede en GSC-række før det
+blev bygget*. Rækken findes: `/alder` er GSC's nr. 13 på dansk (**6.013
+visninger, 35 klik, CTR 0,6 %, pos. 7,8**) og nr. 9 på svensk (**2.895
+visninger, 8 klik, CTR 0,3 %, pos. 7,7** med "räkna ut ålder" 169v pos. 8,
+"räkna ålder" 137v pos. 8, "beräkna ålder" 71v pos. 5). Så den betingelse var
+opfyldt, og det viste sig, at **værktøjet allerede kunne det hele tiden**:
+`AlderBeregner` har haft feltet "Beregn alder pr. dato" med vilje, men
+siden nævnte det aldrig — "mellem to datoer" stod nul gange i hele
+teksten. Det var altså ikke et nyt felt, men en **ubeskrivet
+funktion**. Undervejs fandt en reel fejl: `new Date("1990-03-15")` tolkes
+som UTC-midnat, mens koden læser `.getDate()` — så en besøgende i Danmark,
+Sverige eller Norge fik det rigtige svar, mens enhver bag UTC fik dagen i
+går. Datoer læses nu som lokal kalender, hvilket også gør at serverrenderet
+eksempeltabel og klientværktøjet er tvunget til at være enige. Se opgave
+74.
 
 **C46 lukkede den eneste åbne *datagrund* fra C45's autocomplete-audit, uden at
 røre en eneste titel.** "tidszone grønland", "grækenland", "portugal" og
@@ -4728,6 +4748,96 @@ første halvdel af denne liste er fra DA-fladen, anden halvdel fra SE — de er
   svar-først-revision hører til genmålingen 2026-10-10.
 
 
+#### 74. [x] FÆRDIG 2026-09-26 — C47 — `/alder`: værktøjet kunne "alder mellem to datoer" hele tiden, men siden sagde det aldrig
+
+- **Iteration start:** 2026-09-26 21:05 CEST på `ceo/alder-mellem-to-datoer`.
+  Køen var tom (alle 73 opgaver færdige, intet `I GANG`), og alle otte åbne
+  deploynoters første vinduer var 21:30 eller senere — efter denne
+  iterations start — så intet var verificerbart. Valget blev **kandidat 11's
+  `/alder`**, som C45 selv kaldte "den stærkeste åbne kandidat".
+- **Datagrund:** `/alder` er GSC's nr. 13 på dansk — **6.013 visninger, 35
+  klik, CTR 0,6 %, pos. 7,8** pr. 2026-09-24 — med "aldersberegner" 315v/26k
+  **pos. 5** og "beregn alder" 100v/0k pos. 9. På svensk nr. 9: **2.895
+  visninger, 8 klik, CTR 0,3 %, pos. 7,7**, "räkna ut ålder" 169v pos. 8,
+  "räkna ålder" 137v pos. 8, "beräkna ålder" 71v **pos. 5**, "ålderskalkylator"
+  52v pos. 8. Autocomplete 2026-09-26 20:31 har **"beregn alder mellem to
+  datoer" som forslag 3** til "beregn alder". Plausible gav `/alder` ingen
+  række i DA-top-15, men SE `/alder` 15 besøgende (+50 %, bounce 0 %).
+  **C45's egen betingelse var opfyldt** — den krævede "en række i GSC", og
+  `/alder` står i begge lister.
+- **Det fund, der gjorde opgaven lille:** C45 skrev, at spørgsmålet
+  "mangled helt". Det gjorde det kun i **teksten**. `AlderBeregner.tsx:106`
+  har haft et `beregningsDato`-felt siden URL-state blev delt
+  (`getStateFromUrl`, `type: 'alder'` med nøglen `beregningsdato`), og
+  komponenten har altid vist "Der er N dage til din næste fødselsdag" for den
+  valgte dato. Live havde siden **0** forekomster af "mellem to datoer" mod
+  19 af "fødselsdato". Så dette var en **ubeskrivet funktion**, ikke et
+  manglende værktøj — og derfor en tekstopgave med tal fra værktøjet, nøjagtig
+  som C38-C41's mønster.
+- **Beslutning:** tabellen skal **regnes, ikke skrives**. Alderlogikken lå
+  inde i komponentens `useMemo` og var dermed hverken testbar alene eller
+  tilgængelig for en serverrenderet side, så den blev flyttet til
+  `src/lib/alder.ts` som `beregnAlder({foedselsdato, beregningsdato})`.
+  `src/lib/alder-eksempler.ts` genererer `ALDER_EKSEEMPLER` fra den, så
+  siden og værktøjet ikke kan komme i uoverenssættelse. Samme konstruktion
+  som `tids-eksempler.ts` efter C40 — det er blevet husets svar-først-mønster.
+  Komponenten bruger nu modulet, så der kun findes **én** alderlogik i repoet.
+- **Fejl fundet undervejs — en reel, ikke en kosmetisk.** `new
+  Date("1990-03-15")` tolkes som **UTC**-midnat, mens koden læser
+  `.getFullYear()/.getMonth()/.getDate()`, som er **lokale** getters. I Danmark,
+  Sverige og Norge (UTC, +1, +2) er det uden betydning, så ingen besøgende på
+  de tre domæner har set en fejl — men **enhver besøgende bag UTC fik dagen
+  i går**, og den samme kode kører nu også server-side til eksempeltabelen,
+  hvor et container-TZ derfor ville have kunnet ændre tabellen. `parseDato`
+  bygger nu datoen af kalenderfelterne selv, så resultatet er
+  **tidszoneuafhængigt** — og det er låst i en test.- **Fem rækker, hver med en begrundelse:** det eksempel, siden *allerede*
+  lover i sin description (født 15. marts 1990 → 25. sep. 2026 = 36 år, 6
+  måneder, 10 dage, 13.342 dage); **det samme fødselsdato tilbage i tiden**
+  (→ 1. maj 2010 = 20 år, 1 måned, 16 dage) — det er selve spørgsmålet fra
+  autocomplete; hele år (1. jan. 2000 → 1. jan. 2025); **skudårsfødselsdag**
+  (29. feb. 2004 → 28. feb. 2026 = 21 år, 11 måneder, 30 dage, og næste
+  fødselsdag 1. marts fordi 2026 ikke er skudår); og et barn (15. juli 2015 →
+  15. jan. 2026), hvor måneder og dage er hele svaret. Datoformaterne er
+  samme kalenderpars som modulet bruger, så de kan heller ikke glide.
+- **FAQ:** 2 nye par i `page-data.ts` for **da og se** — "Kan jeg beregne
+  alder mellem to datoer?" og "Hvor gammel var jeg den 1. maj 2010?" (SE:
+  "Kan jag beräkna ålder mellan två datum?" / "Hur gammal var jag den 1 maj
+  2010?"). Svarene er værktøjets egen adfærd, med fødselsdatoen fra
+  eksemplet. **`no` er bevidst urørt** — beregner.dk-domænet har ingen
+  dokumenteret trafik, så en fast dato-tabel der ville være en ukontrolleret
+  tilføjelse. En test fanger det, hvis norsk siden begynder at vise den.
+- **Test:** 14 nye i `src/lib/alder.test.ts` — bl.a. **skudår begge veje**
+  (29. feb. 2004 → 28. feb. 2026 *og* → 29. feb. 2028), at dage lånes fra den
+  forudgående måned (31. jan. → 30. mar.), at fødselsdagen selv er 0/0/0, at
+  næste fødselsdag er næste årsdag også *på* fødselsdagen (365 dage, 37 år),
+  at umulige datostrenge og "31. februar" afvises, og at hver række i
+  `ALDER_EKSEEMPLER` er identisk med `beregnAlder`'s svar — så tabellen er
+  grøn, kun hvis logikken er. 5 nye i `src/app/alder/page.test.tsx` kræver
+  H2'en i **begge** sprog, alle fem formaterede rækker i HTML'en, de to nye
+  spørgsmål i FAQ'en, og at norsk *ikke* får tabellen.
+- **Verifikation 2026-09-26:** `npm run test` grøn (**1419/1419**, 134
+  filer), `npm run lint` grøn (535 filer), `npm run build` grøn (exit 0,
+  141 statiske sider, kun de 7 kendte pre-existing CSS-advarsler). Første
+  build fangede en typefejl i flytningen (`beregningsdato` mod
+  `beregningsDato`) — den er rettet, og det er grunden til, at builden er
+  med i gaten og ikke kun testen. `npm audit` urørt, ingen afhængigheder
+  ændret.
+- **Landet:** kode `95c8712` på branch `ceo/alder-mellem-to-datoer`, merge
+  `a0f99a9` til `master` 2026-09-26 21:11 CEST.
+- **MÅL:** DA `/alder` baseline **6.013 visninger / 35 klik / CTR 0,6 % /
+  pos. 7,8** pr. 2026-09-24; SE `/alder` **2.895 / 8 / 0,3 % / 7,7**.
+  Plausible: SE `/alder` 15 besøgende/28d (+50 %) pr. 2026-09-26, ingen
+  DA-række. Autocomplete er kvalitativt og skriver ingen. Forventningen er
+  **flere impressions** på "beregn alder" (100v, pos. 9) og
+  "aldersberegner" (315v, pos. 5) fra en side der nu svarer på spørgsmålet —
+  ikke et CTR-spring, for det er stadig et hovedord. **Genmål 2026-10-10.**
+- **Ikke gjort, bevidst:** `<title>`/meta er urørt — C4 sat dem, og en
+  titelmæssig svar-først-revision hører til genmålingen 2026-10-10. Ingen ny
+  `/alder-mellem-datoer/*`-underside: spørgsmålet er et **felt i et
+  eksisterende værktøj**, ikke et emne med eget indhold, så en underside
+  ville være tynd SEO-fyld. Og ingen norsk tabel, jf. overfor.
+
+
 ### Næste kandidater efter C34 — lukket med negativt fund
 
 
@@ -4847,15 +4957,22 @@ efter datagrund:
        eksempeltabel. Autocomplete er altså et tidligt signal endnu C40's
        GSC-rækker viste; det er værd at bruge som **bekræftelse** af en
        svar-først-ændring, ikke som erstatning for den.
-     - **`/alder` — et reelt, ubearbejdet hul.** "beregn alder mellem to datoer"
-       er forslag 3 for "beregn alder", og live har siden **0** forekomster af
-       "mellem to datoer" (mod 19 for "fødselsdato", som den altså *er* bygget
-       til). Spørgsmålet — "hvor gammel var jeg den 1. maj 2010?" — mangler altså
-       helt. **Ikke bygget i C45:** det er et nyt felt i værktøjet plus logik, og
-       uden en GSC-række ville det være en ukontrolleret tilføjelse. Samlet med
-       `/alder`'s 6.013 visninger / CTR 0,6 % / pos. 7,8 er det den stærkeste
-       åbne kandidat, men den kræver en række i GSC (side 16+ eller en
-       særskilt måling) før den bygges.
+     - **`/alder` — et reelt, ubearbejdet hul.** "beregn alder mellem to
+       datoer" er forslag 3 for "beregn alder", og live har siden **0**
+       forekomster af "mellem to datoer" (mod 19 for "fødselsdato", som den
+       altså *er* bygget til). Spørgsmålet — "hvor gammel var jeg den 1. maj
+       2010?" — mangler altså helt. **Ikke bygget i C45:** det er et nyt felt
+       i værktøjet plus logik, og uden en GSC-række ville det være en
+       ukontrolleret tilføjelse. Samlet med `/alder`'s 6.013 visninger / CTR
+       0,6 % / pos. 7,8 er det den stærkeste åbne kandidat, men den kræver
+       en række i GSC (side 16+ eller en særskilt måling) før den bygges.
+       ~~**Lukket i C47 (2026-09-26).**~~ Betingelsen holdt: `/alder` står som
+       **nr. 13 i den danske GSC-liste** (6.013 visninger, 35 klik, CTR 0,6 %,
+       pos. 7,8) og **nr. 9 på svensk** (2.895, 8 klik, 0,3 %, pos. 7,7). Og
+       C45's diagnose var delvis forkert: værktøjet havde **allerede** et
+       "Beregn alder pr. dato"-felt — siden nævnte det bare aldrig. Så det
+       var en ubeskrevet funktion, ikke et nyt felt. Se opgave 74.
+       **Mål 2026-10-10.**
      - **`/moms` — autocomplete peger på et andet produkt.** Topforslagene er
        "moms indberetning", "moms frister 2026" og "moms indberetning 2026",
        altså Skat-afgiftsangivelse og frister, ikke beregning. Værktøjet er
@@ -4875,21 +4992,47 @@ efter datagrund:
        liste (`sommerferie`, `efterårsferie`, `skoleåret`), som hører hjemme på
        `/nedtaelling`. Se opgave 73.
 
-### Prioriteret kø efter C46
+### Prioriteret kø efter C47
 
 1. **Verificér de ni åbne deploynoter** i 21:30- og 07:30-vinduerne — rent
    indholdskontrol, intet skal merges.
-2. **Mål 2026-10-10** (se Måleprotokol): C1-C16 og C35-C46 måles 14 dage efter
+2. **Mål 2026-10-10** (se Måleprotokol): C1-C16 og C35-C47 måles 14 dage efter
    deres snapshot, og resultatet skrives ved siden af hver opgave.
-3. **Kandidat 11 — kræver en GSC-række før kode:** `/alder` svarer ikke på
-   "beregn alder mellem to datoer" (0 forekomster mod 19 for "fødselsdato"),
-   selv om autocomplete rangerer det som forslag 3. Find rækken for `/alder`
-   (6.013 visninger, CTR 0,6 %, pos. 7,8) og byg så et as-of-felt — eller
-   skriv den som ❓, hvis efterspørgslen viser sig at være lille.
-4. **Til Mads' fire beslutninger** under ❓ — de låser bl.a.
+3. **C47's negative fund skal bruges som metode, ikke som emne.** Den viste,
+   at "værktøjet kan det, siden siger det ikke" er en helt anden og billigere
+   klasse end "byg et nyt felt". Samme spørgsmål bør stilles til de øvrige
+   trafikstærke sider, før der bygges nyt: **find feltet i værktøjet, der
+   siden ikke fortæller om.** Konkret åbne eksempler: `/dato` og `/tidszone`
+   har flere tilstande end siden nævner; `/promille` (4.159 visninger) og
+   `/braendstof` (16.580) har begge sammenligningstabeller, hvis hensigt
+   brødteksten ikke siger. Det er en audit, ikke et byggearbejde, så det
+   passer i en iteration.
+4. **`/moms`-emnet fra C45 (Skats frister) ligger stadig åbent** og er for
+   stort til en side-iteration. Det eneste, der kan gøres nu uden nye tal, er
+   at finde ud af om **GSC har en række** for frister/indberetning — ellers
+   skal det skrives som ❓, fordi det ellers er et emne bygget på autocomplete
+   alene, hvilket C38-C41 tre gange har vist ikke er nok.
+5. **Til Mads' fire beslutninger** under ❓ — de låser bl.a.
    `/api/v1/loen`'s kommuneskat, domænerne og `www`-redirects.
 
 ### ❓ Til Mads
+- ⏳ **VERIFICÉR DEPLOY: C47 — `/alder` svarer på "alder mellem to datoer".**
+  Kode `95c8712`, merge `a0f99a9` 2026-09-26 21:11 CEST på branch
+  `ceo/alder-mellem-to-datoer`. Første kandidatvindue **2026-09-26 21:30**
+  (merged før batchen). Verificér **indhold**: `https://minberegner.dk/alder`
+  skal have H2 **"Svar på de oftest stillede aldersspørgsmål"** med en tabel
+  på **fem** rækker, hvor række 1 er født 15. marts 1990 → 25. september 2026
+  → **"36 år, 6 måneder og 10 dage"** → 13.342, og række 2 er samme fødselsdato
+  → 1. maj 2010 → **"20 år, 1 måneder og 16 dage"**; række 4 skal vise
+  **"21 år, 11 måneder og 30 dage"** for 29. februar 2004 → 28. februar 2026.
+  FAQ'en skal have **"Kan jeg beregne alder mellem to datoer?"** og **"Hvor
+  gammel var jeg den 1. maj 2010?"**. `https://beraknare.se/alder` skal have H2
+  **"Svar på de vanligaste åldersfrågorna"** med de svenske svar (**"20 år, 1
+  månader och 16 dagar"**) og de svenske spørgsmål, og **ikke** den danske
+  H2. `https://beregner.no/alder` skal være uændret og **ikke** have nogen af
+  H2'erne. Værktøjets "Beregn alder pr. dato"/"Beräkna ålder per datum" skal
+  stadig virke. `/api/health` skal svare `status: ok`. Se VERIFICÉR
+  DEPLOY-loggen.
 - ⏳ **VERIFICÉR DEPLOY: C43 — artiklen og `/tidszone` kan ikke længere have
   samme headline.** Kode `3eb38de`, merge `4d358d9` 2026-09-26 19:50 CEST på
   branch `ceo/procent-konsistens`. Første kandidatvindue **2026-09-27 07:30**
@@ -5543,6 +5686,23 @@ landmark=lån, piggybank=opsparing osv.).
     - Gate grøn: lint ok, 280/280 tests, build ok (128 pages).
 
 ## VERIFICÉR DEPLOY-log
+- ⏳ **ÅBEN — VERIFICÉR DEPLOY: C47 — `/alder` svarer på "alder mellem to
+  datoer".** Kode `95c8712`, merge `a0f99a9` 2026-09-26 21:11 CEST på branch
+  `ceo/alder-mellem-to-datoer`. Første kandidatvindue er **2026-09-26 21:30**
+  (merged før den). Nul deploy-vinduer er gået siden merge, altså slet ikke
+  `DEPLOY-MISSING` (kræver to). Verificér **indhold**:
+  `https://minberegner.dk/alder` skal have H2 **"Svar på de oftest stillede
+  aldersspørgsmål"** med **fem** rækker, hvor række 1 er født 15. marts 1990 →
+  25. september 2026 → **"36 år, 6 måneder og 10 dage"** → 13.342, række 2 er
+  samme fødselsdato → 1. maj 2010 → **"20 år, 1 måneder og 16 dage"**, og
+  række 4 er 29. februar 2004 → 28. februar 2026 → **"21 år, 11 måneder og 30
+  dage"**; FAQ'en skal have **"Kan jeg beregne alder mellem to datoer?"** og
+  **"Hvor gammel var jeg den 1. maj 2010?"**;
+  `https://beraknare.se/alder` skal have H2 **"Svar på de vanligaste
+  åldersfrågorna"** med **"20 år, 1 månader och 16 dagar"** og de svenske
+  spørgsmål, og **ikke** den danske H2; `https://beregner.no/alder` skal være
+  uændret og **ikke** have nogen af H2'erne; `/api/health` skal svare
+  `status: ok`. Se opgave 74.
 - ⏳ **ÅBEN — VERIFICÉR DEPLOY: C46 — `/tidszone` har Grønland, Grækenland,
   Portugal, Island og Kreta i tabellen.** Kode `240c2c5`, merge `54c8c86`
   2026-09-26 20:52 CEST på branch `ceo/tidszone-nordatlanten`. Første
