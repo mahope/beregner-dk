@@ -15,15 +15,13 @@ import {
   taellWeekender,
   type HelligdagLocale,
 } from '@/lib/helligdage';
+import { parseIsoDato, plusIsoMaaneder, tilIsoDato } from '@/lib/lokal-dato';
+import { beregnAlder } from '@/lib/alder';
 
 type BeregningsMode = "dage-mellem" | "tilfoej-dage" | "arbejdsdage" | "alder";
 
 function helligdagLocale(locale: string): HelligdagLocale {
   return locale === "se" ? "se" : "da";
-}
-
-function getDaysInMonth(year: number, month: number): number {
-  return new Date(year, month + 1, 0).getDate();
 }
 
 function formatDate(date: Date, intlLocale: string): string {
@@ -140,14 +138,14 @@ export default function DatoBeregner() {
   const l = labels[locale as keyof typeof labels] || labels.da;
   const [mode, setMode] = useState<BeregningsMode>("dage-mellem");
 
-  // Dage mellem mode
-  const today = new Date().toISOString().split("T")[0];
+  // Dage mellem mode. Datoerne er kalenderdatoer i læserens egen tidszone:
+  // `toISOString()` skriver dem i UTC, så en dansk læser kl. 01.00 ville få
+  // dagen i går som standard.
+  const today = tilIsoDato(new Date());
   const [startDato, setStartDato] = useState<string>(today);
-  const [slutDato, setSlutDato] = useState<string>(() => {
-    const d = new Date();
-    d.setMonth(d.getMonth() + 1);
-    return d.toISOString().split("T")[0];
-  });
+  const [slutDato, setSlutDato] = useState<string>(
+    () => plusIsoMaaneder(today, 1) ?? today
+  );
 
   // Tilføj dage mode
   const [baseDato, setBaseDato] = useState<string>(today);
@@ -193,13 +191,11 @@ export default function DatoBeregner() {
   }, [mode, startDato, slutDato, baseDato, antalDage, foedselsdato]);
 
   const handleReset = useCallback(() => {
-    const today = new Date().toISOString().split("T")[0];
-    const nextMonth = new Date();
-    nextMonth.setMonth(nextMonth.getMonth() + 1);
+    const iDag = tilIsoDato(new Date());
     setMode("dage-mellem");
-    setStartDato(today);
-    setSlutDato(nextMonth.toISOString().split("T")[0]);
-    setBaseDato(today);
+    setStartDato(iDag);
+    setSlutDato(plusIsoMaaneder(iDag, 1) ?? iDag);
+    setBaseDato(iDag);
     setAntalDage(30);
     setFoedselsdato("1990-01-01");
   }, []);
@@ -207,8 +203,11 @@ export default function DatoBeregner() {
   const resultat = useMemo(() => {
     switch (mode) {
       case "dage-mellem": {
-        const start = new Date(startDato);
-        const slut = new Date(slutDato);
+        // Et tomt datofelt giver ingen dato at regne på, så der vises intet
+        // resultat frem for "NaN dage".
+        const start = parseIsoDato(startDato);
+        const slut = parseIsoDato(slutDato);
+        if (!start || !slut) return null;
         const diffTime = slut.getTime() - start.getTime();
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
         const diffWeeks = Math.floor(Math.abs(diffDays) / 7);
@@ -247,7 +246,8 @@ export default function DatoBeregner() {
       }
 
       case "tilfoej-dage": {
-        const base = new Date(baseDato);
+        const base = parseIsoDato(baseDato);
+        if (!base) return null;
         const resultatDato = new Date(base);
         resultatDato.setDate(resultatDato.getDate() + antalDage);
 
@@ -259,7 +259,8 @@ export default function DatoBeregner() {
       }
 
       case "arbejdsdage": {
-        const base = new Date(baseDato);
+        const base = parseIsoDato(baseDato);
+        if (!base) return null;
         const hl = helligdagLocale(locale);
         const resultatDato = foegArbejdsdage(base, antalDage, hl);
 
@@ -282,49 +283,24 @@ export default function DatoBeregner() {
       }
 
       case "alder": {
-        const foedt = new Date(foedselsdato);
-        const nu = new Date();
-
-        let aar = nu.getFullYear() - foedt.getFullYear();
-        let maaneder = nu.getMonth() - foedt.getMonth();
-        let dage = nu.getDate() - foedt.getDate();
-
-        if (dage < 0) {
-          maaneder--;
-          dage += getDaysInMonth(nu.getFullYear(), nu.getMonth() - 1);
-        }
-        if (maaneder < 0) {
-          aar--;
-          maaneder += 12;
-        }
-
-        const totalDage = Math.floor(
-          (nu.getTime() - foedt.getTime()) / (1000 * 60 * 60 * 24)
-        );
-        const totalUger = Math.floor(totalDage / 7);
-
-        // Næste fødselsdag
-        const naesteFoedselsdag = new Date(
-          nu.getFullYear(),
-          foedt.getMonth(),
-          foedt.getDate()
-        );
-        if (naesteFoedselsdag <= nu) {
-          naesteFoedselsdag.setFullYear(naesteFoedselsdag.getFullYear() + 1);
-        }
-        const dageTilFoedselsdag = Math.ceil(
-          (naesteFoedselsdag.getTime() - nu.getTime()) / (1000 * 60 * 60 * 24)
-        );
+        // Samme modul som `/alder` bruger, så de to værktøjer ikke kan give
+        // forskellige svar på den samme fødselsdato. Et tomt eller umuligt
+        // felt, og en fødselsdato i fremtiden, giver intet resultat.
+        const alder = beregnAlder({
+          foedselsdato,
+          beregningsdato: tilIsoDato(new Date()),
+        });
+        if (!alder) return null;
 
         return {
           type: "alder" as const,
-          aar,
-          maaneder,
-          dage,
-          totalDage,
-          totalUger,
-          dageTilFoedselsdag,
-          naesteFoedselsdag: formatDate(naesteFoedselsdag, intlLocale),
+          aar: alder.aar,
+          maaneder: alder.maaneder,
+          dage: alder.dage,
+          totalDage: alder.totalDage,
+          totalUger: alder.totalUger,
+          dageTilFoedselsdag: alder.dageTilFoedselsdag,
+          naesteFoedselsdag: formatDate(alder.naesteFoedselsdagDato, intlLocale),
         };
       }
 
