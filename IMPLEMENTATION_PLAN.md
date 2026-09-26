@@ -5716,8 +5716,8 @@ efter datagrund:
   Bemærk desuden: **der er ingen beregner.no-trafik i nogen snapshot** — hverken
   Plausible eller GSC — hvilket er konsistent med et separat site.
 - ⏳ **VERIFICÉR DEPLOY: C52 `/moms` — kopier/del/print gav en regning uden
-  momsen, og de danske knapper sagde "Tillæg" — kode + plan i ét commit på
-  branch `ceo/moms-audit`, se git log.** Første kandidatvindue
+  momsen, og de danske knapper sagde "Tillæg" — kode `aa585d3`, merge `328a656`
+  2026-09-26 23:47 CEST på branch `ceo/moms-audit`.** Første kandidatvindue
   **2026-09-27 07:30**. Verificér **indhold**, HTTP 200 beviser intet:
   1. `https://minberegner.dk/moms` skal have knapperne **"Læg moms til"** og
      **"Træk moms fra"** og **ikke** have "Tillæg moms" eller "Fratræk moms"
@@ -6472,8 +6472,9 @@ landmark=lån, piggybank=opsparing osv.).
     - Gate grøn: lint ok, 280/280 tests, build ok (128 pages).
 
 ## VERIFICÉR DEPLOY-log
-- ⏳ **ÅBEN — C52 `/moms`.** Se noten under ❓ Til Mads for de fem
-  indholdstjek. Første kandidatvindue **2026-09-27 07:30**.
+- ⏳ **ÅBEN — C52 `/moms`, kode `aa585d3`, merge `328a656` 2026-09-26 23:47
+  CEST.** Se noten under ❓ Til Mads for de fem indholdstjek. Første
+  kandidatvindue **2026-09-27 07:30**.
 - ✅ **DEPLOY OK 2026-09-26 21:45 CEST — 21:30-batchen lukker C38, C39, C40,
   C41, C44, C45 og C47.** Syv noter verificeret ved **indholdskontrol**, ikke HTTP
   200. Målt 21:39-21:45 mod live-sitet. `/api/health` svarer `status: ok` på både
