@@ -5,6 +5,7 @@ import FAQ from "@/components/FAQ";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import RelatedCalculators from "@/components/RelatedCalculators";
+import RelateredeArtikler from "@/components/RelateredeArtikler";
 import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
 import { BilforsikringAffiliate } from "@/components/AffiliateBox";
@@ -131,6 +132,8 @@ export default async function BraendstofPage() {
 
       {/* Related Calculators */}
       <RelatedCalculators current="/braendstof" />
+
+      <RelateredeArtikler current="/braendstof" locale={locale} />
     </div>
   );
 }

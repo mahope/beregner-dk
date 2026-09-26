@@ -9,6 +9,7 @@ import {
 } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import RelatedCalculators from "@/components/RelatedCalculators";
+import RelateredeArtikler from "@/components/RelateredeArtikler";
 import Sidebar from "@/components/Sidebar";
 import { SelvstaendigAffiliate } from "@/components/AffiliateBox";
 
@@ -206,6 +207,8 @@ export default async function MomsPage() {
 
       {/* Related Calculators */}
       <RelatedCalculators current="/moms" />
+
+      <RelateredeArtikler current="/moms" locale={locale} />
       </div>
       <Sidebar currentHref="/moms" adSlotId="moms-sidebar" />
     </div>
