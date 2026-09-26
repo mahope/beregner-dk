@@ -5,6 +5,7 @@ import { getPageData } from "@/lib/page-data";
 import FAQ from "@/components/FAQ";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import RelatedCalculators from "@/components/RelatedCalculators";
+import RelateredeArtikler from "@/components/RelateredeArtikler";
 import Breadcrumbs from "@/components/Breadcrumbs";
 
 export async function generateMetadata() {
@@ -132,6 +133,8 @@ export default async function AlderPage() {
 
       {/* Related Calculators */}
       <RelatedCalculators current="/alder" />
+
+      <RelateredeArtikler current="/alder" locale={locale} />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import Breadcrumbs from "@/components/Breadcrumbs";
 import FAQ from "@/components/FAQ";
 import RelatedCalculators from "@/components/RelatedCalculators";
+import RelateredeArtikler from "@/components/RelateredeArtikler";
 import RentefradragBeregner from "@/components/RentefradragBeregner";
 import {
   CalculatorSchema,
@@ -149,6 +150,8 @@ export default async function RentefradragPage() {
             </h2>
             <RelatedCalculators current="/rentefradrag" />
           </section>
+
+          <RelateredeArtikler current="/rentefradrag" locale={locale} />
         </article>
       </main>
     </div>

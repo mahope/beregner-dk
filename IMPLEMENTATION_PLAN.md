@@ -1,10 +1,21 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — **tolv åbne deploynoter (C23-C32) + C33.** 12:30-batchen 2026-09-26 udgav
+STATUS: KØ — **tretten åbne deploynoter (C23-C33) + C34.** 12:30-batchen 2026-09-26 udgav
 C15-C22. C23 (merge 12:19), C24 (12:21), C25 (13:07), C26 (13:15), C27 (13:25),
-C28 (14:30), C29 (14:38), C30 (ca. 15:00), C31 (15:08), C32 og C33 (16:00) kom efter
-batchens start og kan først verificeres efter **17:30**-vinduet; intet er frosset pga.
-ventetiden. `/api/health` svarer `status: ok`.
+C28 (14:30), C29 (14:38), C30 (ca. 15:00), C31 (15:08), C32 (16:15), C33 (16:00) og
+C34 (16:35) kom efter batchens start og kan først verificeres efter **17:30**-vinduet;
+intet er frosset pga. ventetiden. `/api/health` svarer `status: ok`.
+
+**C34 lukkede blog → beregner-kandidaten med et negativt fund, og det var
+opgaven.** Alle 26 indlæg har allerede et link til den relevante beregner i 1-5 %
+af artiklens krop, og 24/26 ender med en relateret-blok — så "hvilke mangler en
+næste handling" gav ingenting at rette. Den modsatte retning manglede derimod:
+af 138 indlæg → beregner-kanter havde kun **11** en returlink, spredt i ni siders
+brødtekst. Koblingen ligger nu ét sted (`src/lib/blog-kobling.ts`), og de fem
+beregnere med flest visninger — `/moms` 23.426, `/braendstof` 16.580,
+`/renteberegner` 13.623, `/alder` 6.013, `/rentefradrag` 4.556 — renderer de
+indlæg, der svarer til deres spørgsmål. Blokken vises kun på de danske domæner, så
+der ikke lækker dansk tekst til beraknare.se. Se opgave 61.
 
 **C33 gjorde C28's sidste kandidat til en reel fejl, ikke et kosmetisk problem.**
 `/husleje` lovede "25.000 kr netto → max ca. 7.500 kr/md", mens værktøjet startede på
@@ -55,14 +66,15 @@ weekenddag eller helligdag — den forklares nu i stedet for at forsvinde fra
 summeringen. Se opgave 55.
 
 Næste iteration skal **ikke** optimere CTR på de samme svar-først-sider igen, og
-den skal **ikke** gentage C26-C33. **C28's kandidatliste er nu tom** — se afsnittet
-"Næste kandidater efter C33" for den næste opgave: den hedder **blog → beregner**, fordi
-`/blog/barsel-2026-regler-og-satser` stadig har sitets dårligste afgang uden for
-forsiden (85 % bounce på 183 besøgende/28d), og 28-dages-vinduet ligger mest *før* O1's
-CTA blev deployet. Kandidat 41 (`noPages` mangler `/enhudspris`) har fortsat nul
-trafik, da `beregner.no` ikke er live. `/kalorier` og `/flyttebudget` er lukket i C29,
-`/braendstof` i C30, `/pension`s folkepensionsalder i C31, `/elbil`s forudsætninger i
-C32 og `/husleje` i C33.
+den skal **ikke** gentage C26-C34. **C28's kandidatliste er tom, og C34 lukkede
+den næste (blog → beregner) med et negativt fund** — se afsnittet "Næste
+kandidater efter C34". Den næste opgave er derfor **nye artikler til `/tidszone`
+og `/kvadratmeter`**: de er de næststørste sider i Search Console (24.723 og
+20.959 visninger), og ingen artikel svarer til deres emne, så de fik bevidst ingen
+kobling i C34. Kandidat 41 (`noPages` mangler `/enhudspris`) har fortsat nul
+trafik, da `beregner.no` ikke er live. `/kalorier` og `/flyttebudget` er lukket i
+C29, `/braendstof` i C30, `/pension`s folkepensionsalder i C31, `/elbil`s
+forudsætninger i C32, `/husleje` i C33 og blogens returlinkes symmetri i C34.
 
 
 ## Fase 3 — trafik-drevet
@@ -3595,21 +3607,103 @@ første halvdel af denne liste er fra DA-fladen, anden halvdel fra SE — de er
   passer med `src/lib/tidsberegner.ts` og presets; boligstøttes side, komponent og
   FAQ læser alle `BOLIGSTOETTE_2026`.
 
-### Næste kandidater efter C33 — C28's liste er nu tom
+#### 61. [x] FÆRDIG 2026-09-26 — C34 — Blog → beregner-auditen: CTA'en findes alle steder, og returlinkene manglede
 
-C33 lukkede det sidste fund fra C28's audit, så listen er **udtømt**. De følgende er
-valgt på *ny* datagrund, ikke på rest fra C26-C32:
+- **Iteration start:** 2026-09-26 16:07 CEST. Tog C33's næste kandidat (blog →
+  beregner). De tolv åbne deploynoter kan først verificeres efter 17:30.
+- **Datagrund:** `/blog/barsel-2026-regler-og-satser` 183 besøgende/28d (+83 %) på
+  **85 % bounce**; bloggen er sitets næststørste trafikklasse. Plus GSC
+  2026-08-27→09-24 for de fem beregnere, der blev koblet.
+- **Auditens negative resultat — og det er et resultat.** Kandidat #1 bad om at
+  finde indlæg, der mangler et link til den relevante beregner, eller som ender på
+  en kildeliste uden næste handling. **Alle 26 indlæg har allerede begge dele.**
+  Målt på filen, ikke på følelse: første interne beregnerlink ligger i **1-5 % af
+  artiklens krop** i alle 26 (median 3 %), og 24/26 ender med en relateret-blok
+  (`Relaterede artikler` eller `Relaterede beregnere`). Kun
+  `guide-til-laan-og-renter` og `spar-penge-paa-braendstof` ender på FAQ'en i
+  stedet — begge har linket til deres beregner i 4-5 %. **Der var intet at rette i
+  den retning**, så opgaven lukkes med tallene, ikke med flere links. (De to
+  undtagelser får en relateret-blok, når næste iteration har tid — lav prioritet.)
+- **Fund 1 — den modsatte retning manglede næsten helt.** 138 kanter
+  indlæg → beregner, men kun **11** af dem havde en returlink; de lå spredt i
+  ni siders brødtekst som enkeltstående sætninger. Så missionens krav "de
+  relevante beregnere skal linke tilbage" var opfyldt for **9 af ~70**
+  beregnersider. Det er den dokumenterede mangel, der blev rettet.
+- **Fund 2 — de fire største indgangsartikler mangler en forfatter-side at gå
+  tilbage til.** `/moms` (23.426 visninger), `/braendstof` (16.580),
+  `/renteberegner` (13.623), `/alder` (6.013) og `/rentefradrag` (4.556) er alle
+  på position 5-9 med 0,2-5,0 % CTR. De læser, der lander på beregnen for at
+  *forstå* emnet, havde ingen vej videre.
+- **Beslutning/implementering:** ét centralt sted — `src/lib/blog-kobling.ts` med
+  `BEREGNER_ARTIKLER` (beregner-sti → artikler med titel + én linje), så
+  koblingen ikke spredes i brødtekst igen. `src/components/RelateredeArtikler.tsx`
+  renderer blokken i samme visuelle sprog som `RelatedCalculators`. `locale`
+  gives som prop fra siden, der **allerede** har slået den op — så der kommer
+  ikke et ekstra `getLocale()`-kald pr. side, og ingen eksisterende side-test
+  skulle røres. Blokken vises kun ved `locale === "da"`, fordi indlæggene er
+  danske: ellers ville den tilføje dansk tekst på beraknare.se, som er præcis
+  researchfund #4's locale-leak.
+- **Omfang valgt efter GSC, ikke efter lyst:** de fem beregnere med flest
+  visninger blandt dem, der mangler en returlink. `/tidszone` (24.723) og
+  `/kvadratmeter` (20.959) har flere, men ingen artikel svarer til deres
+  emne — dem må ikke kobles til en tangential guide.
+- **Kvalitetsgate 2026-09-26 16:30 CEST:** `npm run build` grøn (139 sider +
+  typecheck, ingen nye advarsler), `npm run test` grøn (**1363/1363, 131 filer** —
+  5 nye i `blog-kobling.test.ts`), `npm run lint` grøn (527 filer). Lokal
+  standalone-SSR: `/api/health` svarer `status: ok`; `/moms` renderer
+  "Guides om emnet" + `/blog/hvordan-beregner-man-moms`, `/rentefradrag` renderer
+  alle tre af sine artikler, og **`beraknare.se/moms` renderer ingen dansk blok**
+  (0 forekomster af "Guides om emnet") — locale-lækken er undgået.
+- **MÅL:** de otte indlæg, der nu får en indgangsside med dokumenteret trafik.
+  Baseline pr. 2026-09-26 (Plausible 28d, kun to af dem har en række):
+  `/blog/barsel-2026-regler-og-satser` 183 besøgende (uændret af denne ændring),
+  `/blog/arveafgift-regler-og-satser` 92. De øvrige seks har ingen række. For
+  `/rentefradrag` (226 klik/28d, 5,0 % CTR, pos 6,6) er **dobbeltvirkningen** den
+  målbare størrelse: beregneren får læsere, der hellere forstår end regner, og
+  `fradrag-2026-komplet-guide` + de to boligartikler får indgangslinks fra en
+  side med 4.556 visninger. Genmål **2026-10-10**; kig på artiklernes
+  visninger/klik i GSC, ikke på beregnernes bounce (den er allerede 2-7 %, så
+  den kan ikke bevæge sig mærkbart).
+- **Acceptkriterier:**
+  1. Koblingen ligger i ét modul, ikke i sidernes brødtekst. **PASS**
+  2. De fem beregnere renderer blokken på DA. **PASS**
+  3. Blokken renderer **intet** på beraknare.se. **PASS** (verificeret i SSR)
+  4. En test fejler, hvis en koblet beregner ikke har returlinket. **PASS**
+     (verificeret: `/tidszone` er ukoblet og ville fejle modstandelsen)
+  5. `npm run lint`, `npm run test` og `npm run build` er grønne. **PASS**
+- **Forventet effekt:** **lav i denne iteration, og det er ærligt at sige.**
+  Beregnerne har allerede 2-7 % bounce, så dette er ikke en bounce-opgave. Det
+  er en link-ophold-opgave: syv indlæg får deres første indgangsside fra en side
+  med dokumenteret trafik, og de to største (moms, brændstof) får en guide mere
+  at læse videre på. Måles i GSC efter 14 dage. Hvis ingenting rører sig, er
+  næste skridt at skrive **nye** artikler til `/tidszone` og `/kvadratmeter` — de
+  to største ubestyrede emner — frem for flere returlinks.
+- **Ikke gjort, bevidst:** de 26 artiklers `date`/`readTime` i
+  `src/app/blog/page.tsx` er ikke rørt. At ændre dem ville se ud som friskhed
+  uden at være det, og det er en fælde jeg tidligere har undgået.
+- **Næste iteration:** se listen nedenfor. Den er nu ændret, fordi C34 brugte
+  kandidat #1 — den er lukket med et negativt fund, ikke med en rettelse.
 
-1. **Blog → beregner: mangler der en næste handling i indlæggene med trafik?**
-   Datagrund: `/blog/barsel-2026-regler-og-satser` 183 besøgende/28d (+83 %) på
-   **85 % bounce** — sitets klart dårligste afgang uden for forsiden, og bloggen er
-   den næststørste trafikklasse. O1 lagde en CTA i den 2026-09-23, men 28-dages
-   vinduet (2026-08-29→09-26) ligger mest **før** deployen, så effekten er umålt.
-   Opgaven: statisk audit af de 20 indlæg — hvilke har et link til den relevante
-   beregner, hvor tidligt i teksten det står, og hvilke ender på en kildeliste
-   uden næste handling. Ret de uden. Datagrænse: 85 % bounce på 183 besøgende er
-   for lille til at optimere på pct, så **audit først, ændringer kun med dokumenteret
-   mangel**.
+### Næste kandidater efter C34 — lukket med negativt fund
+
+C34 lukkede kandidat #1 (blog → beregner) med et **negativt** resultat: der var
+intet at rette i den retning, planen bad om. Returlinkene er gjort symmetriske
+for de fem trafikstørste beregnere. Resten af listen er **uændret** og prioriteret
+efter datagrund:
+
+0. **Nye artikler til de to største ubestyrede emner.** `/tidszone` (24.723
+   visninger, 0,5 % CTR, pos 7,5) og `/kvadratmeter` (20.959, 1,4 %, pos 5,0) er
+   de næststørste sider i GSC, og **ingen artikel svarer til deres emne** — de er
+   derfor bevidst ikke koblet i C34. Emnerne er fundet i autocomplete: "hvad er
+   klokken i usa når den er 12 i danmark" (183 visninger, pos 6) og "hvordan
+   regner man kvadratmeter ud" (357, pos 3). Én gennemarbejdet side ad gangen med
+   konkrete danske tal og kildeangivelse. C34's måling er forberedt til at svare
+   på, om returlinks overhovedet virker her — hvis de ikke gør det, er nye artikler
+   næste skridt, ikke flere links.
+1. ~~**Blog → beregner**~~ — **lukket i C34 med negativt audit-resultat.**~~ Alle 26
+   indlæg har allerede et link til den relevante beregner i 1-5 % af kroppen, og
+   24/26 ender med en relateret-blok. Der var intet at rette. Returlinkene er gjort
+   symmetriske for de fem beregnere med flest visninger. Mål 2026-10-10.
 2. **28 DA-sider har ingen svensk metadata.** `page-data.ts` har 79 DA-sider mod
    53 SE og 28 NO, så de 28 manglende falder tilbage på dansk titel, description og
    FAQ på beraknare.se (researchfund #4's locale-leak). Datagrund: beraknare.se har
@@ -4118,6 +4212,21 @@ landmark=lån, piggybank=opsparing osv.).
     - Gate grøn: lint ok, 280/280 tests, build ok (128 pages).
 
 ## VERIFICÉR DEPLOY-log
+- ⏳ **ÅBEN — VERIFICÉR DEPLOY: C34 blog ↔ beregner symmetrisk — returlink fra de fem
+  mest trafikerede beregnere til de artikler, der svarer til deres spørgsmål.** Kode
+  og plan i denne iterations commit på `ceo/blog-til-beregner`, merge-ref/notat
+  se opgave 61. Merge ca. 16:35 CEST 2026-09-26 — før 17:30-vinduet, så intet er
+  `DEPLOY-MISSING` (kræver to) og intet er frosset. Verificér **indhold**:
+  1. DA `https://minberegner.dk/moms` skal have afsnittet **"Guides om emnet"** med
+     link til `/blog/hvordan-beregner-man-moms`.
+  2. DA `https://minberegner.dk/rentefradrag` skal have **tre** kort: fradrag-2026,
+     koeb-af-bolig og boliglaan.
+  3. DA `/braendstof` → `/blog/spar-penge-paa-braendstof`; `/renteberegner` →
+     `/blog/guide-til-laan-og-renter`; `/alder` → `/blog/bmi-for-boern-saadan-tjekker-du`.
+  4. `https://beraknare.se/moms` skal **IKKE** have blokken (dansk tekst-læk).
+     Det er den vigtigste af de fire, fordi en læk dér skader svensk SEO.
+  5. `/api/health` skal svare `status: ok`.
+
 - ⏳ **ÅBEN — VERIFICÉR DEPLOY: C33 `/husleje`: 30 %-eksemplet er nået i værktøjet,
   og el/vand/varme kan trækkes fra huslejen.** Kode `050279c`, merge `e90136e`
   2026-09-26 16:00 CEST (se opgave 60). Verificér **indhold**: siden skal sige "Med en
