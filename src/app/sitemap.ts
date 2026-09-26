@@ -122,5 +122,6 @@ function getBlogSlugs(locale: Locale): string[] {
     "maanedsbudget-2026-komplet-guide",
     "boernepenge-2026-satser-og-regler",
     "boligsalg-2026-guide-til-omkostninger-og-provenu",
+    "kvadratmeter-saadan-regner-du-ud",
   ];
 }

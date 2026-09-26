@@ -233,6 +233,15 @@ const blogPosts = [
     date: "2026-08-24",
     readTime: "9 min",
   },
+  {
+    slug: "kvadratmeter-saadan-regner-du-ud",
+    title: "Hvordan regner man kvadratmeter ud? Guide med eksempler",
+    description:
+      "Areal = længde × bredde. Sådan regner du kvadratmeter ud på vægge, gulv og i rum — med eksempler, materialespild og BBR-areal.",
+    category: "Bolig & Hverdag",
+    date: "2026-09-26",
+    readTime: "7 min",
+  },
 ];
 
 export default function BlogPage() {
