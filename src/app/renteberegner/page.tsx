@@ -10,7 +10,24 @@ import {
 import { getCurrentDomainConfig, getLocale } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
 import { generatePageMetadata } from "@/lib/page-helpers";
+import { RENTEFRADRAG_2026 } from "@/lib/satser-2026";
 import Link from "next/link";
+
+/** Fradragsværdien som dansk procenttal med ét decimal, læst fra modulet. */
+function fradragProcent(værdi: number): string {
+  return (værdi * 100).toFixed(1).replace(".", ",");
+}
+
+/**
+ * Den reelle rente efter fradrag, for et lån til 5 % — den sats siden bruger i
+ * sit eksempel. Beregnes af fradragsværdien, så den ikke kan komme ud af trit
+ * med de to trin i `RENTEFRADRAG_2026`.
+ */
+const EKSEMPEL_RENTE = 0.05;
+const foersteProcent = fradragProcent(RENTEFRADRAG_2026.highRate);
+const overProcent = fradragProcent(RENTEFRADRAG_2026.lowRate);
+const foersteEfterSkat = fradragProcent(EKSEMPEL_RENTE * (1 - RENTEFRADRAG_2026.highRate));
+const overEfterSkat = fradragProcent(EKSEMPEL_RENTE * (1 - RENTEFRADRAG_2026.lowRate));
 
 export async function generateMetadata() {
   return generatePageMetadata("renteberegner");
@@ -134,10 +151,13 @@ export default async function RenteberegnerPage() {
         <h2>Skattefradrag for renter</h2>
         <p>
           I Danmark kan du få <strong>fradrag for renteudgifter</strong> på private lån.
-          Fradraget svarer til <strong>33,6%</strong> af de første 50.000 kr. i renteudgifter
-          (100.000 kr. for par) og <strong>25,6%</strong> af beløbet over grænsen, hvilket
+          Fradraget svarer til <strong>{foersteProcent}%</strong> af de første{" "}
+          {RENTEFRADRAG_2026.highRateLimitSingle.toLocaleString("da-DK")} kr. i
+          renteudgifter ({RENTEFRADRAG_2026.highRateLimitCouple.toLocaleString("da-DK")}{" "}
+          kr. for par) og <strong>{overProcent}%</strong> af beløbet over grænsen, hvilket
           reducerer din skattebetaling. Så længe du er under grænsen koster et lån med 5%
-          rente dig reelt kun ca. <strong>3,3% efter skat</strong>.
+          rente dig reelt kun ca. <strong>{foersteEfterSkat}% efter skat</strong> — over
+          grænsen er det ca. {overEfterSkat}%.
         </p>
         <p>
           Fradragsværdien afhænger af beløbsgrænsen og året — ikke af din kommune. Se
