@@ -1,10 +1,18 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — **ti åbne deploynoter (C23-C30).** 12:30-batchen 2026-09-26 udgav
+STATUS: KØ — **elleve åbne deploynoter (C23-C31).** 12:30-batchen 2026-09-26 udgav
 C15-C22. C23 (merge 12:19), C24 (12:21), C25 (13:07), C26 (13:15), C27 (13:25),
-C28 (14:30), C29 (`ceo/c29-kalorier-protein`, 14:38) og C30 (`ceo/braendstof-el-sparet`)
+C28 (14:30), C29 (14:38), C30 (ca. 15:00) og C31 (`ceo/c31-pension-folkepensionsalder`)
 kom efter batchens start og kan først verificeres efter **17:30**-vinduet; intet er
 frosset pga. ventetiden. `/api/health` svarer `status: ok`.
+
+**C31 fjernede et løfte, der var forkert for værktøjets egen standardbruger.**
+`/pension`'s hjælpetekst sagde "Folkepensionsalder er 68 år (stigende)", mens siden
+ovenfor viser skalaen 65-70 år efter fødselsår. En 30-årig — værktøjets default —
+har folkepensionsalder 70 år, så standardværdien på 68 år lå to år for tidligt og
+sparetiden var regnet for kort. Alderen udledes nu fra fødselsåret gennem det testede
+modul, og resultatet siger eksplicit, om den valgte alder ligger før eller efter
+folkepensionsalderen. Se opgave 58.
 
 **C30 fjernede et løfte, som `/braendstof`s eget værktøj modsagde.** FAQ'en lovede i
 alle tre sprog, at el er "typisk 50-70 % billigere pr. km", men værktøjets egen
@@ -31,16 +39,14 @@ weekenddag eller helligdag — den forklares nu i stedet for at forsvinde fra
 summeringen. Se opgave 55.
 
 Næste iteration skal **ikke** optimere CTR på de samme svar-først-sider igen, og
-den skal **ikke** gentage C26-C30. Kandidater der er fundet, men endnu ikke taget:
-**1) `/husleje`** (166 besøgende/28d, sidens løfteindhold er uopnåeligt som
-standardværdi) og **2) `/pension`** (140 besøgende,
-`PensionBeregner.tsx:224` hardkoder folkepensionsalderen, som `src/lib/folkepension.ts`
-allerede skalaerer) — begge nærmere beskrevet under ❓ og i C28's kandidatliste.
-C30's eget fund: **`/elbil`** bruger sine egne forudsætninger i stedet for
-`src/lib/braendstof.ts`, så de to el/benzin-sammenligninger kan glide fra hinanden;
-konsolidering taget som egen opgave. Kandidat 41 (`noPages` mangler `/enhudspris`) har
-fortsat nul trafik, da `beregner.no` ikke er live. `/kalorier` og `/flyttebudget` er
-lukket i C29, `/braendstof` i C30.
+den skal **ikke** gentage C26-C31. Den eneste tilbage fra C28's kandidatliste er
+**`/husleje`** (166 besøgende/28d, sidens løfteindhold er uopnåeligt som
+standardværdi) — nærmere beskrevet under ❓ og i C28's kandidatliste. C30's eget fund:
+**`/elbil`** bruger sine egne forudsætninger i stedet for `src/lib/braendstof.ts`, så
+de to el/benzin-sammenligninger kan glide fra hinanden; konsolidering taget som egen
+opgave. Kandidat 41 (`noPages` mangler `/enhudspris`) har fortsat nul trafik, da
+`beregner.no` ikke er live. `/kalorier` og `/flyttebudget` er lukket i C29,
+`/braendstof` i C30, `/pension`s folkepensionsalder i C31.
 
 
 ## Fase 3 — trafik-drevet
@@ -3364,6 +3370,54 @@ første halvdel af denne liste er fra DA-fladen, anden halvdel fra SE — de er
   `braendstof.ts` er en reel konsolidering og tages som sit egen opgave, når tiden
   er til det — ikke som en sidevirkning her.
 
+#### 58. [x] FÆRDIG 2026-09-26 — C31 — `/pension`: værktøjet lovede folkepensionsalder 68 år for alle
+
+- **Iteration start:** 2026-09-26 14:54 CEST. Køen var tom (alle 57 opgaver færdige,
+  intet `I GANG`). Deploy-vinduerne er lukket til 17:30, så de elleve åbne noter kan
+  ikke verificeres; intet var gammelt nok til `DEPLOY-MISSING`.
+- **Datagrund:** `/pension` 140 besøgende/28d (+31 %, bounce 2 %) pr. 2026-09-26.
+  Search Console: 6.013 visninger, 35 klik, CTR 0,6 %, position 7,8 pr. 2026-08-27→
+  2026-09-24. Kandidaten var C28's egen fund, ikke et nyt CTR-fund.
+- **Fundet:** `PensionBeregner.tsx:224` havde `helpText="Folkepensionsalder er 68 år
+  (stigende)"`, mens samme sides egen tabel (renderet fra
+  `folkepensionsalderRækker()`) siger 65-70 år efter fødselsår, og det testede modul
+  `src/lib/folkepension.ts:38-47` har hele skalaen. **Værktøjets egen standardbruger er
+  30 år → født ca. 1996 → folkepensionsalder 70 år**, så hjælpeteksten undervurderer
+  den valgte alder med to år. Konsekvensen er reel: en 30-årig, der vælger "Ønsket
+  pensionsalder 68" (standardværdien), regner på at spare to år for lidt, og værktøjet
+  siger intet om, at folkepensionen først udbetales ved folkepensionsalderen. Samme
+  mønster som C26 rettede i `EfterloensBeregner`.
+- **Beslutning/implementering:** `folkepensionsalderForAlder(alder, nuAar?)` er ny
+  ren funktion i `src/lib/folkepension.ts`. Den estimerer fødselsåret som
+  `nuAar - alder`, bruger altid det **højeste** trin i året (aldrig lavere end den
+  reelle alder, samme konservative valg som `efterloenAlder`) og sætter `praecis:
+  false` for de to fødselsår, der går på tværs af et halvt trin (1954, 1955).
+  Værktøjet læser den i stedet for det hardkodede 68, og resultatfeltet siger nu
+  eksplicit, om den valgte alder ligger før, på eller efter folkepensionsalderen — med
+  "du skal selv søge" i de to sidste tilfælde. Fødselsåret er et estimat, så
+  formuleringerne bruger "ca.". Beregningen, URL-state, delelink, reset og alle
+  beløb er urørt; ingen ny felt, ingen title- eller description-ændring.
+- **Kvalitetsgate 2026-09-26 15:00 CEST:** `npm run build` grøn (typecheck
+  inkluderet), `npm run test` grøn (**1334/1334, 128 filer** — 8 nye tests: 4 i
+  `folkepension.test.ts`, 4 i `PensionBeregner.test.tsx`), `npm run lint` grøn
+  (521 filer). De nye komponenttests fejlede ikke undervejs; de låser den udledte alder
+  for 30- og 60-årige, at "68 år"-teksten er væk, og alle tre relationer.
+- **MÅL:** `/pension` baseline **140 besøgende/28d, bounce 2 % pr. 2026-09-26**;
+  Search Console baseline 6.013 visninger, 35 klik, CTR 0,6 %, position 7,8 pr.
+  2026-09-24 — genmål 2026-10-10. Titlen er urørt, så dette er ren korrekthedstask.
+- **Acceptkriterier:**
+  1. `PensionBeregner.tsx` indeholder ingen hardkodet folkepensionsalder. **PASS**
+  2. Standardbrugeren (30 år) ser "Din folkepensionsalder er ca. 70 år (født ca. 1996)"
+     i stedet for "Folkepensionsalder er 68 år". **PASS**
+  3. Resultatfeltet siger, om den valgte alder ligger før/på/efter folkepensionsalderen,
+     og nævner at folkepensionen skal søges. **PASS**
+  4. `folkepensionsalderForAlder` er testet på skalaens skifteår, på et tværgående år
+     (65½ / 66½) og på fødselsår før 1954. **PASS**
+  5. `npm run lint`, `npm run test` og `npm run build` er grønne. **PASS**
+- **Forventet effekt:** Ingen direkte CTR-stigning. Det er en tillidsopgave: en læser
+  på en side med 2 % bounce får nu det samme svar i værktøjet som i tabellen ovenfor,
+  og sparetiden beregnes mod den alder, hvor folkepensionen faktisk begynder.
+
 #### C28's øvrige fund — ikke taget, skrevet som næste kandidater
 
 - ~~**`/flyttebudget` (C27-rest, 2 linjer)~~ — lukket i C29 den 2026-09-26.~~ Page-
@@ -3380,9 +3434,11 @@ første halvdel af denne liste er fra DA-fladen, anden halvdel fra SE — de er
 - **`/husleje`.** Sidens løfteindhold ("netto 25.000 kr → max ca. 7.500 kr/md")
   kan ikke nås som standardværdi, fordi `HuslejeBudgetBeregner.tsx:140` starter på
   28.000 kr → 8.400 kr. Regnestykket er korrekt; kun eksemplet er uopnåeligt.
-- **`/pension`.** `PensionBeregner.tsx:224` hardkoder "Folkepensionsalder er 68 år",
-  mens `src/lib/folkepension.ts:39-46` har en rigtig skala (65 → 70) som siden
-  viser. Samme mønster som C26 rettede i `EfterloensBeregner`.
+- **`/pension`.** ~~`PensionBeregner.tsx:224` hardkoder "Folkepensionsalder er 68
+  år"~~ — **lukket i C31 den 2026-09-26.**~~ Alderen er nu udledt fra fødselsåret
+  via `folkepensionsalderForAlder`, og resultatfeltet fortæller, om den valgte alder
+  ligger før eller efter folkepensionsalderen. Samme mønster som C26 rettede i
+  `EfterloensBeregner`.
 - **Rene.** `TidsBeregner` og `BoligstoetteBeregner` har ingen modstridende tal:
   tidssidens 08:30-16:45 = 8 t 15 min, decimal-time-tabellen og frokostpausen
   passer med `src/lib/tidsberegner.ts` og presets; boligstøttes side, komponent og
@@ -3491,7 +3547,9 @@ første halvdel af denne liste er fra DA-fladen, anden halvdel fra SE — de er
   Plausible 141 besøgende/28d pr. 2026-09-25 — genmål 2026-10-09.
   **Åben del af C8 er lukket** som C11 den 2026-09-25, se opgave 22: værktøjet har nu
   samlivsstatus og indkomstfelter, så pensionstillægget regnes ned efter de samme
-  indkomstgrænser, som siden dokumenterer. Næste skridt på `/pension` er content, ikke
+  indkomstgrænser, som siden dokumenterer. Folkepensionsalderen er tilsvarende lukket
+  som **C31** den 2026-09-26, se opgave 58: værktøjet hardkodede "68 år" for alle,
+  mens skalaen er 65-70 år efter fødselsår. Næste skridt på `/pension` er content, ikke
   flere felter.
 - ~~`/dage-til/[dato]`~~ er færdig som C7 den 2026-09-25, se opgave 18.
 
@@ -3879,6 +3937,26 @@ landmark=lån, piggybank=opsparing osv.).
     - Gate grøn: lint ok, 280/280 tests, build ok (128 pages).
 
 ## VERIFICÉR DEPLOY-log
+- ⏳ **ÅBEN — VERIFICÉR DEPLOY: C31 `/pension`: folkepensionsalderen udledes af
+  fødselsåret.** Kode og plan i denne iterations commit på
+  `ceo/c31-pension-folkepensionsalder`, merge til `master` 2026-09-26 ca. 15:10
+  CEST — efter 12:30-batchens start, så første kandidatvindue er **17:30
+  2026-09-26**. Ét deploy-vindue siden merge, så intet er `DEPLOY-MISSING` (kræver
+  to) og intet er frosset. Verificér **indhold**, HTTP 200 beviser intet:
+  1. `https://minberegner.dk/pension`: feltet "Ønsket pensionsalder" skal have
+     hjælpeteksten **"Din folkepensionsalder er ca. 70 år (født ca. 1996)"** — altså
+     **ikke** "Folkepensionsalder er 68 år".
+  2. Samme side, resultatfeltet under folkepensionsopgørelsen: med standardværdierne
+     skal der stå, at de valgte 68 år ligger **2 år før** folkepensionsalderen, og at
+     folkepensionen udbetales først, når den er nået.
+  3. Sæt "Ønsket pensionsalder" til 70, så teksten skal skifte til, at den valgte
+     alder *er* folkepensionsalderen, og at man skal søge om folkepensionen.
+  4. Sæt "Din alder" til 60, så hjælpeteksten skal skifte til **ca. 68 år** — alderen
+     følger fødselsåret, ikke et fast tal.
+  5. Folkepensionsbeløbene skal være uændrede: grundbeløb **7.544 kr.**, fuldt
+     tillæg enlig **8.729 kr.**, i alt **16.273 kr.** pr. måned før skat.
+  6. `https://beraknare.se/pension` og `beregner.no` er ikke danskfolkepensionssider
+     og forventes uændrede; `/api/health` skal svare `status: ok`.
 - ⏳ **ÅBEN — VERIFICÉR DEPLOY: C30 `/braendstof`: FAQ'en lovede 50-70 %, værktøjet
   viste 40 % mod diesel.** Kode: denne iteration's første commit på
   `ceo/braendstof-el-sparet`. Merge

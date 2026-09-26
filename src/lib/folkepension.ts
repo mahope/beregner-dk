@@ -163,6 +163,42 @@ export function folkepensionsalder(fodselsdato: Date | string): number {
   return alder;
 }
 
+export interface FolkepensionsalderForAlder {
+  /** Det estimerede fødselsår, regnet ud fra alderen. */
+  fodselsaar: number;
+  /** Folkepensionsalderen for det fødselsår, 65-70 år. */
+  alder: number;
+  /**
+   * `false` når fødselsåret går på tværs af to trin i skalaen (fx 1954, der
+   * skifter fra 65 til 65½ år 1. juli). Så afhænger den præcise alder af
+   * fødselsdatoen.
+   */
+  praecis: boolean;
+}
+
+/**
+ * Folkepensionsalder ud fra en alder, når fødselsdatoen ikke er kendt.
+ *
+ * Fødselsåret estimeres som `nuAar - alder`, og der bruges altid det **højeste**
+ * alderstrin i året, så værktøjet aldrig lover en lavere alder end den reelle
+ * (samme konservative valg som `efterloenAlder`).
+ */
+export function folkepensionsalderForAlder(
+  alder: number,
+  nuAar = new Date().getFullYear(),
+): FolkepensionsalderForAlder {
+  const fodselsaar = nuAar - Math.floor(alder);
+  const aarSlut = `${fodselsaar}-12-31`;
+
+  const trin = FOLKEPENSION_2026.alderSkala.filter((step) => step.fra.slice(0, 4) === String(fodselsaar));
+
+  return {
+    fodselsaar,
+    alder: folkepensionsalder(aarSlut),
+    praecis: new Set(trin.map((step) => step.alder)).size <= 1,
+  };
+}
+
 /** "65 ½ år" — halve år skrives med ½, så tallene kan læses i løbende tekst. */
 export function formatFolkepensionsalder(alder: number): string {
   const heltal = Math.floor(alder);
