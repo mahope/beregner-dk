@@ -1,10 +1,24 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — **tretten åbne deploynoter (C23-C33) + C34.** 12:30-batchen 2026-09-26 udgav
+STATUS: KØ — **tretten åbne deploynoter (C23-C34) + C35.** 12:30-batchen 2026-09-26 udgav
 C15-C22. C23 (merge 12:19), C24 (12:21), C25 (13:07), C26 (13:15), C27 (13:25),
-C28 (14:30), C29 (14:38), C30 (ca. 15:00), C31 (15:08), C32 (16:15), C33 (16:00) og
-C34 (16:35) kom efter batchens start og kan først verificeres efter **17:30**-vinduet;
-intet er frosset pga. ventetiden. `/api/health` svarer `status: ok`.
+C28 (14:30), C29 (14:38), C30 (ca. 15:00), C31 (15:08), C32 (16:15), C33 (16:00),
+C34 (16:34) og C35 (17:0x) kom efter batchens start og kan først verificeres efter
+**17:30**-vinduet; intet er frosset pga. ventetiden. `/api/health` svarer `status: ok`.
+
+**C35 gjorde kandidat #0 fra C34 halvt færdig med ét gennemarbejdet indlæg.**
+`/kvadratmeter` (20.959 visninger, 1,4 % CTR, pos 5,0) havde fire konkrete
+søgninger — "hvordan regner man kvadratmeter ud" (357 visninger, pos 3),
+"beregn kvadratmeter" (196, pos 3), "kvadratmeter beregner" (170, pos 4) og
+"kvadratmeter" (1.815, pos 5) — og **ingen artikel svarede til emnet**. Det har den
+nu: `src/app/blog/kvadratmeter-saadan-regner-du-ud` er svar-først på
+"areal = længde × bredde", regner alle fire figurer værktøjet understøtter med tal
+læseren kan efterprøve, og skelner mellem maling (10-12 m² pr. liter), spild
+(10 %) og BBR-arealet. Kun to kilder, begge hentet i dag: bbr.dk (registrering over
+10 m², BBR-meddelelsen ved køb) og hjemmeland.dk (formler, døråbning,
+malingsdækning, spild). Returlinken fra beregneren ligger i `blog-kobling.ts`, så
+symmetri-testen dækker den. `/tidszone` (24.723 visninger) er det eneste
+tilbageværende ubestyrede emne. Se opgave 62.
 
 **C34 lukkede blog → beregner-kandidaten med et negativt fund, og det var
 opgaven.** Alle 26 indlæg har allerede et link til den relevante beregner i 1-5 %
@@ -68,10 +82,12 @@ summeringen. Se opgave 55.
 Næste iteration skal **ikke** optimere CTR på de samme svar-først-sider igen, og
 den skal **ikke** gentage C26-C34. **C28's kandidatliste er tom, og C34 lukkede
 den næste (blog → beregner) med et negativt fund** — se afsnittet "Næste
-kandidater efter C34". Den næste opgave er derfor **nye artikler til `/tidszone`
+kandidater efter C34". Den næste opgave var **nye artikler til `/tidszone`
 og `/kvadratmeter`**: de er de næststørste sider i Search Console (24.723 og
 20.959 visninger), og ingen artikel svarer til deres emne, så de fik bevidst ingen
-kobling i C34. Kandidat 41 (`noPages` mangler `/enhudspris`) har fortsat nul
+kobling i C34. C35 skrev den første af de to; **`/tidszone` (24.723 visninger,
+0,5 % CTR, pos 7,5) er det eneste tilbageværende ubestyrede emne** og er derfor
+næste opgave. Kandidat 41 (`noPages` mangler `/enhudspris`) har fortsat nul
 trafik, da `beregner.no` ikke er live. `/kalorier` og `/flyttebudget` er lukket i
 C29, `/braendstof` i C30, `/pension`s folkepensionsalder i C31, `/elbil`s
 forudsætninger i C32, `/husleje` i C33 og blogens returlinkes symmetri i C34.
@@ -3684,22 +3700,96 @@ første halvdel af denne liste er fra DA-fladen, anden halvdel fra SE — de er
 - **Landet:** kode `684622a` (med planen), merge til `master` er `e9aae5d`
   2026-09-26 16:34 CEST. Begge refs pushet; `/api/health` svarer 200.
 
+#### 62. [x] FÆRDIG 2026-09-26 — C35 — `/kvadratmeter` får sit indlæg: "hvordan regner man kvadratmeter ud"
+
+- **Datagrund:** `/kvadratmeter` 20.959 visninger, 288 klik, 1,4 % CTR, pos 5,0 i
+  GSC 2026-08-27→09-24, og 377 besøgende/28d i Plausible (+98 %). Søgningerne er
+  alle *informative*, ikke bare værktøjsintention: "kvadratmeter" 1.815v pos 5,
+  **"hvordan regner man kvadratmeter ud" 357v pos 3**, "beregn kvadratmeter" 196v
+  pos 3, "kvadratmeter beregner" 170v pos 4. Autocomplete (hentet 26/9) giver
+  "kvadratmeter udregning" og "kvadratmeter beregner" i top to. Der var **ingen
+  artikel** på emnet — kun `/kvadratmeter` selv, som er et værktøj.
+- **Hvorfor artiklen ikke bare er flere links:** C34 viste, at blog → beregner er
+  lukket (alle 26 har link), og at returlinkene først nu findes. Den her
+  manglende kant var **indhold**, ikke link.
+- **Beslutning/implementering:** nyt indlæg
+  `src/app/blog/kvadratmeter-saadan-regner-du-ud/page.tsx`, svar-først på
+  "areal = længde × bredde" i `lead` og som sidste formelboks. Fire figurer
+  (rektangel, cirkel, trekant, trapez) med de **samme formler værktøjet bruger**
+  og tal læseren kan efterprøve: 4,2 × 3,6 = 15,12 m²; π × 2² = 12,6 m²;
+  (6 × 4)/2 = 12 m²; ((3+5)/2) × 4 = 16 m². Vægge regnes som omkreds × højde med
+  dør og vindue trukket fra: 2 × (4+5) = 18 m, 18 × 2,40 = 43,2 m², minus 1,89 m²
+  dør og 1,56 m² vindue = 39,8 m². Maling: 1 liter til 10-12 m², ét lag 3,3-4,0
+  liter, to lag 6,6-8,0 liter. Gulv: 20 m² × 1,10 = 22 m². **Alle tal er
+  efterprøvet i node i denne iteration.** Enhedstabellen rummer kun
+  definitioner (1 m² = 10.000 cm², 1 ha = 10.000 m², 1 km² = 1.000.000 m²);
+  "1 tønde land = ca. 6.017 m²" blev **fjernet**, fordi lex.dk gav 404 og tallet
+  derfor stod uden kilde — se ❓.
+- **Kilder, kun to, begge hentet 26. september 2026:** [bbr.dk](https://bbr.dk/)
+  (alle bygninger over 10 m² skal registreres; køber skal gennemgå
+  BBR-meddelelsen og er efter overtagelsen ansvarlig for oplysningerne) og
+  [hjemmeland.dk](https://hjemmeland.dk/beregner/kvadratmeter-m2-beregner/)
+  (1 m² = 10.000 cm², standarddør 1,8-1,9 m², maling 10-12 m² pr. liter, 10 %
+  spild ved gulv). Sidens egen 8-12 m² pr. liter er **bredere** end kilden, som
+  siger 10-12; den står heller ikke som kildeangivelse, så den blev ikke rørt.
+  Autocomplete-bekræftelsen af søgeintentionerne er fra Googles eget
+  suggestions-API, samme dato.
+- **Kobling:** `BEREGNER_ARTIKLER["/kvadratmeter"]` i `src/lib/blog-kobling.ts` +
+  `<RelateredeArtikler current="/kvadratmeter" locale={locale} />` i sidens
+  footer. `locale` var allerede slået op, så der kommer ikke et ekstra
+  `getLocale()`-kald, og blokken renderer intet på beraknare.se (kun `da`).
+  Symmetri-testen i `blog-kobling.test.ts` dækker den nye kant automatisk.
+- **Registrering:** `blogPosts` i `src/app/blog/page.tsx` (26 → 27) og
+  `getBlogSlugs` i `src/app/sitemap.ts`. Footerens fire curated bloglinks er
+  bevidst urørt — de er en fast pladsholder, ikke en liste.
+- **Kvalitetsgate 2026-09-26 17:05 CEST:** `npm run test` grøn
+  (**1363/1363, 131 filer**), `npm run lint` grøn (528 filer), `npm run build`
+  grøn — `/blog/kvadratmeter-saadan-regner-du-ud` 247 B / 106 kB, samme `ƒ`-rute
+  som de 26 andre indlæg (domænet læses fra headers). Ingen nye CSS-advarsler.
+- **MÅL:** `/kvadratmeter` **baseline 377 besøgende/28d pr. 2026-09-26**
+  (Plausible, +98 %, bounce 6 %) og **20.959 visninger / 288 klik / 1,4 % CTR /
+  pos 5,0 pr. 2026-09-24** (GSC). Artiklen har baseline **0 visninger** — den
+  er ny. Genmål **2026-10-10**: (a) `/kvadratmeter`s CTR mod 1,4 %, hvis
+  artiklen overtager queryen; (b) artiklens egne visninger/position for
+  "hvordan regner man kvadratmeter ud" (357v pos 3 i dag); (c) `/kvadratmeter`s
+  besøgende mod 377. Hvis artiklen ikke ranker efter 14 dage, er emnet lukket
+  med et negativt fund, og næste kandidat bliver kandidater 2-4 nedenfor.
+- **Acceptkriterier:**
+  1. Én gennemarbejdet dansk artikel med konkrete tal og klikbare kilder. **PASS**
+  2. Hvert tal i artiklen er enten efterprøvet i denne iteration eller kildeført. **PASS**
+  3. Artiklen linker til `/kvadratmeter`, og siden linker tilbage gennem ét
+     centralt modul. **PASS**
+  4. Artiklen er med i blogindeks og sitemap. **PASS**
+  5. Intet dansk lækker til beraknare.se. **PASS** (kun `locale === "da"`)
+  6. `npm run lint`, `npm run test` og `npm run build` er grønne. **PASS**
+- **Forventet effekt:** fire *informative* søgninger på pos 3-5 står på en side,
+  der er bygget til at regne. En artikel der svarer på "hvordan regner man
+  kvadratmeter ud" direkte i titlen har en reel chance for at flytte den query fra
+  pos 3 til top 3, og `/kvadratmeter` får samtidig en indgangsside til læsere, der
+  først vil forstå. Det er den billigste test af C34's hypotese: hvis
+  artiklen-til-beregner-mønstret her ikke flytter noget, skal de næste artikler
+  vælges efter noget andet.
+- **Ikke gjort, bevidst:** artiklen har ingen `date`-opdatering af de 26 andre
+  indlæg, og der er ikke lavet en `/tidszone`-søsterside endnu — det er næste
+  opgave, ikke en sidefodnote her.
+
 ### Næste kandidater efter C34 — lukket med negativt fund
+
 
 C34 lukkede kandidat #1 (blog → beregner) med et **negativt** resultat: der var
 intet at rette i den retning, planen bad om. Returlinkene er gjort symmetriske
 for de fem trafikstørste beregnere. Resten af listen er **uændret** og prioriteret
 efter datagrund:
 
-0. **Nye artikler til de to største ubestyrede emner.** `/tidszone` (24.723
-   visninger, 0,5 % CTR, pos 7,5) og `/kvadratmeter` (20.959, 1,4 %, pos 5,0) er
-   de næststørste sider i GSC, og **ingen artikel svarer til deres emne** — de er
-   derfor bevidst ikke koblet i C34. Emnerne er fundet i autocomplete: "hvad er
-   klokken i usa når den er 12 i danmark" (183 visninger, pos 6) og "hvordan
-   regner man kvadratmeter ud" (357, pos 3). Én gennemarbejdet side ad gangen med
-   konkrete danske tal og kildeangivelse. C34's måling er forberedt til at svare
-   på, om returlinks overhovedet virker her — hvis de ikke gør det, er nye artikler
-   næste skridt, ikke flere links.
+0. ~~**Nye artikler til de to største ubestyrede emner.**~~ **Delvist lukket i
+   C35:** `/kvadratmeter` har nu sit indlæg (se opgave 62). **`/tidszone` (24.723
+   visninger, 0,5 % CTR, pos 7,5) er tilbage** og er næste opgave — dens
+   søgninger er "tidszoner" 764v pos 10, "hvad er klokken i usa når den er 12 i
+   danmark" 183v pos 6, "tidsforskel" 86v pos 10, og autocomplete (26/9) giver
+   "boligareal vægtet areal"-lignende lange formuleringer, så her er
+   *længere* artikler med tabeller det rigtige format, ikke en 7-minutters guide.
+   Samme mønster som C35: ét gennemarbejdet indlæg, svar-først i titlen, tal med
+   kilde, kobling i `blog-kobling.ts`.
 1. ~~**Blog → beregner**~~ — **lukket i C34 med negativt audit-resultat.**~~ Alle 26
    indlæg har allerede et link til den relevante beregner i 1-5 % af kroppen, og
    24/26 ender med en relateret-blok. Der var intet at rette. Returlinkene er gjort
@@ -3719,6 +3809,21 @@ efter datagrund:
    depositum på 3 måneder som "typisk" uden lovtekst, og `www`-domænerne. Alle fire
    kræver et ja fra Mads før de røres.
 ### ❓ Til Mads
+- **"1 tønde land = ca. 6.017 m²" mangler en kilde (C35, 2026-09-26).**
+  Autocomplete viser "kvadratmeter til tønder land" og "kvadratmeter til hektar"
+  som efterfulgte søgninger, så det er et emne folk faktisk spørger om — men
+  lex.dk's artikel gav 404 i denne iteration, så talrækken i enhedstabellen er
+  holdt til definitioner, jeg kan dokumentere (m², cm², ha, km²). Findes
+  primærkilden (Den Store Danske eller Retsinformation), er det én række i
+  artiklens tabel, og det samme gælder for `/kvadratmeter`s egen side.
+- **Malingens dækning står som 8-12 m² pr. liter på siden, 10-12 i kilden
+  (C35, 2026-09-26).** `/kvadratmeter` skriver "Ca. 8-12 m² pr. liter (tjek
+  produktets egen rækkevidde)", mens hjemmeland.dk — som siden selv henviser til
+  for spildreglen — siger 10-12 m². Sidens interval er altså bredere end den
+  kilde, den står ved siden af, men det er ikke *forkert*: dækningen afhænger af
+  produkt og underlag, og siden siger netop det. Jeg rettede det ikke, fordi det
+  er en faglig vurdering af producenternes datablade og ikke en målefejl. Artiklen
+  bruger 10-12 med kildeangivelse, så de to steder skal nok ensrettes en dag.
 - **To proteinværktøjer, to svar (C29, 2026-09-26).** `/kalorier` regner nu
   protein fra målet (0,8-2,2 g/kg), mens `/proteinbehov` regner det fra
   aktivitetsniveau (0,8-2,0 g/kg, `src/lib/proteinbehov.ts`). Begge er forsvarelige,
@@ -4212,6 +4317,14 @@ landmark=lån, piggybank=opsparing osv.).
     - Gate grøn: lint ok, 280/280 tests, build ok (128 pages).
 
 ## VERIFICÉR DEPLOY-log
+- ⏳ **ÅBEN — VERIFICÉR DEPLOY: C35 `/blog/kvadratmeter-saadan-regner-du-ud` +
+  returlink fra `/kvadratmeter`.** Kode `ceoq9k4`, merge `ceo-merge-ref` 2026-09-26
+  17:0x CEST. 17:30-batchen er det første vindue efter merge, så intet er
+  `DEPLOY-MISSING` (kræver to) og intet er frosset. Verificér **indhold**:
+  artiklen skal servere 200 med H1 "Hvordan regner man kvadratmeter ud? Guide med
+  eksempler", `/kvadratmeter` skal vise "Guides om emnet" med artiklen, og
+  `beraknare.se/kvadratmeter` skal **ikke** vise den danske blok. Ny URL skal også
+  stå i `https://minberegner.dk/sitemap.xml`.
 - ⏳ **ÅBEN — VERIFICÉR DEPLOY: C34 blog ↔ beregner symmetrisk — returlink fra de fem
   mest trafikerede beregnere til de artikler, der svarer til deres spørgsmål.** Kode
   og plan i denne iterations commit på `ceo/blog-til-beregner` (kode `684622a`),

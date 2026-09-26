@@ -73,6 +73,14 @@ export const BEREGNER_ARTIKLER: Record<string, ArtikelKobling[]> = {
         "Hvornår BMI kan bruges for børn, hvad grænserne er, og hvornår du skal bruge vægt og højde.",
     },
   ],
+  "/kvadratmeter": [
+    {
+      slug: "kvadratmeter-saadan-regner-du-ud",
+      titel: "Hvordan regner man kvadratmeter ud?",
+      beskrivelse:
+        "De fire arealformler med tal, maling og spild på materialer, og forskellen på dit mål og BBR-arealet.",
+    },
+  ],
 };
 
 /**

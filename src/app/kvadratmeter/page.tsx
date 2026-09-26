@@ -8,6 +8,7 @@ import {
 } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import RelatedCalculators from "@/components/RelatedCalculators";
+import RelateredeArtikler from "@/components/RelateredeArtikler";
 import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
 
@@ -163,6 +164,9 @@ export default async function KvadratmeterPage() {
 
       {/* Related Calculators */}
       <RelatedCalculators current="/kvadratmeter" />
+
+      {/* Returlink til indlægget om emnet (kun danske domæner) */}
+      <RelateredeArtikler current="/kvadratmeter" locale={locale} />
     </div>
   );
 }
