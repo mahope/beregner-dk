@@ -5,8 +5,9 @@ C18 pensionssatserne og C19 dagpenge-satserne), første kandidatvindue 12:30
 2026-09-26.** 07:30-batchen 2026-09-26 lukkede alle 21 tidligere noter ved
 indholdskontrol (se `DEPLOY OK 2026-09-26`). C16 mergerede 09:57, C18 10:52 og
 C19 11:35 CEST, og kan først verificeres efter 12:30-vinduet; intet er frosset
-pga. ventetiden. `/dage-til/juledagen` svarer 200 — C7 er live. Næste opgave:
-`/blog/su-2026-satser-og-regler` (sidste punkt i kandidat 37), se opgave 45.
+pga. ventetiden. `/dage-til/juledagen` svarer 200 — C7 er live. Kandidat 37 er
+nu lukket: SU-artiklen er færdig som C20 (opgave 46). Næste opgave se ❓ Til
+Mads og afsnittet "Næste CTR-kandidat".
 `/api/health` svarer `status: ok`.
 
 
@@ -2147,8 +2148,11 @@ pga. ventetiden. `/dage-til/juledagen` svarer 200 — C7 er live. Næste opgave:
 - Kandidater der bør gennemgås med samme metode som C10/S2, når de har en baseline:
   `/blog/arveafgift-regler-og-satser` (92-103 besøgende/28d, faldende),
   `/blog/fradrag-2026-komplet-guide` (den rørte alle fradrag, som S1/R1 netop rettede),
-  `/blog/su-2026-satser-og-regler` (O3 rettede den, men bloggens egen baseline mangler),
-  `/blog/pension-hvor-meget-skal-du-spare-op` (gentog 4.367-fejlen ifølge C8).
+  `/blog/su-2026-satser-og-regler` (**lukket som C20 2026-09-26, se opgave 46** —
+  ingen fagfejl fundet, men tre officielle tal manglede) og
+  `/blog/pension-hvor-meget-skal-du-spare-op` (**lukket som C18**).
+  **Kandidaten er dermed lukket**; se "Næste CTR-kandidat" for hvad der
+  kan måles nu.
 
 
 - **`/procent` mangler interne links** (hypotesen fra kandidat 31) er **forkert**:
@@ -2500,8 +2504,8 @@ pga. ventetiden. `/dage-til/juledagen` svarer 200 — C7 er live. Næste opgave:
   det til modulet, gør artiklen svar-først med en tidlig CTA, og skriv baseline
   ind FØR ændringen. Én artikel pr. iteration.
 - **Status 2026-09-26 11:35:** dagpenge-artiklen er færdig som opgave 45 (C19).
-  `/blog/su-2026-satser-og-regler` er det eneste ubearbejdede punkt tilbage i
-  kandidat 37 og er **næste opgave**.
+- **Status 2026-09-26 11:20:** SU-artiklen er færdig som opgave 46 (C20), og dermed
+  er **hele kandidat 37 lukket**. Der er ingen ubearbejdet sats-artikel tilbage.
 
 #### 45. [x] FÆRDIG 2026-09-26 — C19 — Dagpenge-guiden sagde 20.359 kr, ministeriet siger 22.041 kr
 
@@ -2590,9 +2594,81 @@ pga. ventetiden. `/dage-til/juledagen` svarer 200 — C7 er live. Næste opgave:
 - **Landet:** kode, tests og plan i én commit på `ceo/c19-dagpenge-satser`; merge
   til `master` straks efter den grønne gate. Kode `9a9b112`, merge `611607c`
   2026-09-26 11:35 CEST, begge pushet.
-- **Åbne dele af C19:** `/blog/su-2026-satser-og-regler` (bloggens egen struktur
-  og baseline mangler; satserne er allerede rettet af O3) og en primærkilde til
-  beskæftigelsestillægget på 26.198 kr, som bm.dk **ikke** oplyser.
+- **Åbne dele af C19:** `/blog/su-2026-satser-og-regler` er lukket som C20 den
+  2026-09-26 (opgave 46). Den anden del — en primærkilde til
+  beskæftigelsestillægget på 26.198 kr, som bm.dk **ikke** oplyser — står åben og
+  kan ikke lukkes herfra.
+
+#### 46. [x] FÆRDIG 2026-09-26 — C20 — SU-guiden er svar-først og har tre nye dokumenterede 2026-tal
+
+- **Iteration start:** 2026-09-26 11:16 CEST på `ceo/c20-su-artikel`. Kandidat 37
+  og 44 pegede begge på SU-artiklen som det eneste ubearbejdede punkt. De fire
+  åbne deploynoter har første kandidatvindue 12:30, så intet kunne verificeres.
+- **Datagrund:** `/blog/su-2026-satser-og-regler` er **ikke** blandt top-15 i
+  Plausible-snapshottet 2026-09-26 07:52, og GSC-snapshottet har ingen række for
+  den. **Baseline er ukendt** — ikke forsømt. `/su` er heller ikke i top-15, men
+  lå tidligere i "største fald" (239→119 i 2026-09-23-snapshottet). Klynge-
+  reference: `/studielaan` og `/dagpenge` ligger samme sted i trappen. Effekten
+  måles i Plausible fra næste snapshot, ikke i CTR.
+- **Fund — modsat C17/C18/C19 fandt jeg ingen tredje satssamling.** O3 har bundet
+  artiklen, siden og værktøjet til `SU_2026`, så artiklen læser *alle* beløb fra
+  modulet. Jeg verificerede dog hvert tal mod su.dk's egne satssider den
+  2026-09-26, og **alle ni tal i modulet er korrekte**: udeboende 7.426,
+  hjemmeboende 1.154/3.202/2.048, legacy 3.692, forsørgertillæg 7.426,
+  handicaptillæg 10.562/6.624, fribeløb 15.297/20.749/23.598/45.420/3.921,
+  barn 34.129, SU-lån 3.799/1.900/5.699/9.801. **Der var ingen fagfejl at rette.**
+- **Fundet derimod — tre officielle 2026-tal fandtes slet ikke i modulet**, selv
+  om de står i de kilder artiklen allerede linker:
+  1. **Forældreindkomstgrænserne for hjemmeboende SU.** Artiklen siger, at satsen
+     afhænger af forældrenes indkomst i 2024, men nævner aldrig *hvor* grænserne
+     går. su.dk: fuldt tillæg ved 419.589 kr. eller lavere, intet tillæg ved
+     710.077 kr. eller højere, og 43.086 kr. fradrag pr. søskende under 18 år. Det
+     er præcis den konkrete søgning, artiklen lovede at besvare.
+  2. **Forsørgertillæg ved delt bolig: 2.966 kr.** — ikke 7.426 — når forsørgeren
+     bor med en person på SU eller kontanthjælp efter § 16 st. 1 nr. 1 i LAP.
+     Modulet kendte kun den høje sats. Fødselsstøtten (op til 9 måneder, 12 for
+     enlige forsørgere, svarende til en måneds SU) manglede også.
+  3. **Udlandsstudielån 2026: 129.106 kr. i alt.** står i den same SU-lån-tabel som
+     de tre lån, modulet kendte. Artiklen nævnte det slet ikke.
+- **Beslutning/implementering:**
+  1. `SU_2026` har nu `parentalIncome` (tre tal), `singleParentSupplementSharedHome`,
+     `loan.abroadTotal` og `rules.birthGrant*`. `verifiedAt` er opdateret
+     2026-09-24 → **2026-09-26**, fordi alle tal er genverificeret i dag. Det
+     udløser automatisk opdatering i `/su`, kategoriens FAQ og studielånsiden.
+  2. Artiklen er svar-først: titel/H1 er nu **"SU 2026: 7.426 kr. pr. måned
+     udeboende"** (fra "Nye satser og regler for studerende"), description
+     indeholder alle fire nøgletal, og et **"Kort svar:"**-afsnit besvarer
+     udeboende, hjemmeboende, fribeløb og SU-lån i fire linjer. D1/C13-reglen
+     holder: ét domænesuffiks, ingen dobbelt.
+  3. Nye afsnit: en to-rækkers tabel over forældreindkomstgrænserne med den
+     eksplicitte advarsel om at 43.086 kr. (forældreindkomst) og 34.129 kr.
+     (årsfribeløb) er to forskellige tal, en sætning om 2.966 kr. og
+     fødselsstøtten, og udlandsstudielånet i lånlisten.
+  4. Tre nye FAQ-spørgsmål (forældreindkomst, udlandsstudielån, forsørgertillæg),
+     så JSON-LD svarer på de konkrete søgninger.
+- **Acceptkriterier:**
+  1. Alle ni eksisterende modultal er bekræftet mod su.dk's satssider. **PASS**
+  2. `parentalIncome.maxSupplementAtOrBelow` (419.589) <
+     `noSupplementAtOrAbove` (710.077) låst som konsistensvagt. **PASS**
+  3. Artiklen renderer 419.589, 710.077, 43.086, 2.966 og 129.106 kr. **PASS**
+  4. Titlen er modulet udeboendesats, og "Kort svar" står før første tabel. **PASS**
+  5. CTA'en til `/su` ligger stadig før første `<table>`. **PASS**
+  6. `npm run lint`, `npm run test` og `npm run build` er grønne. **PASS**
+- **Kvalitetsgate 2026-09-26 11:20 CEST:** `npm run lint` grøn (509 filer),
+  `npm run test` grøn (**1243/1243 tests, 119 filer**), `npm run build` grøn
+  (139 sider + typecheck, ingen nye advarsler). Målrettet kørsel først: 18/18 i
+  `satser-2026.test.ts` og den nye artikel-test.
+- **Forventet effekt:** Korrekthed og svar-først skrivning på en artikel uden
+  baseline. Den konkrete værdi er de tre nye tal: en studerende, der googler
+  "hjemmeboende SU 2026 forældreindkomst", har førhen ikke fundet grænserne
+  nogen steder på sitet.
+- **MÅL:** `/blog/su-2026-satser-og-regler` baseline **ukendt** (ikke i top-15 pr.
+  2026-09-26); `/su` baseline **ukendt** i dette snapshot (faldt 239→119 i
+  2026-09-23-snapshottet). Første genmåling 2026-10-10.
+- **Landet:** kode, tests og plan i én commit på `ceo/c20-su-artikel`; merge til
+  `master` straks efter den grønne gate.
+- **Kandidat 37 er hermed lukket.** Ingen navngiven sats-artikel er længre
+  ubearbejdet, og der er ingen baseline til nogen af dem undtagen børnepenge.
 
 ### ❓ Til Mads
 - **Beskæftigelsestillægget på 26.198 kr/md (C19, 2026-09-26) — må ikke gættes.**
@@ -2693,11 +2769,22 @@ pga. ventetiden. `/dage-til/juledagen` svarer 200 — C7 er live. Næste opgave:
   (beraknare.se) — genmål 2026-10-10. **Den dokumenterede CTR-klasse er nu tom på
   de data, der findes** — næste iteration skal enten skaffe nye GSC-søgninger
   (kun de 15 største sider er med i snapshottet) eller gå efter placering/indhold.
-- **Næste CTR-kandidat:** `/pension` og `/procent` er allerede svar-først, og de
-  fire øvrige top-CTR-sider er dækket. Den næste dokumenterede mulighed er
-  `/blog/skat-2026-alt-du-skal-vide` og de øvrige artikler med samme
-  sats-spørgsmålsmønster som børnepenge-artiklen — kræver en ny baseline fra
-  Search Console, fordi snapshotet kun viser artiklen for børnepenge.
+- **Næste CTR-kandidat:** `/pension` og `/procent` er allerede svar-først, og de fire
+  øvrige top-CTR-sider er dækket. **Alle 15 DA-sider i GSC-top-15 er nu svar-først**
+  (C1-C16 dækker `/procent`, `/dato`, `/tidsberegner`, `/tidszone`, `/moms`,
+  `/kvadratmeter`, `/braendstof`, `/renteberegner`, `/kalorier`, `/boligstoette`,
+  `/alder`, `/brok`, `/rentefradrag`, `/promille`; `/blog/boernepenge-2026-satser-og-regler`
+  som C10). **Næste iteration skal derfor ikke optimere CTR på de samme sider igen** —
+  den skal skaffe nye efterspørgselsdata (GSC-rækker for `/blog/*` og for de
+  næste 15 sider) eller gå efter placering/indhold, som C19/C20 gjorde. Uden nye
+  tal er enhver CTR-justering en ukontrolleret ændring.
+- **Nye, ubearbejdede kilder i C20 (2026-09-26):** de tre tal jeg verificerede
+  direkte mod su.dk — forældreindkomstgrænserne 419.589/710.077 kr., søskendefrådrag
+  43.086 kr., forsørgertillæg ved delt bolig 2.966 kr. og udlandsstudielånet
+  129.106 kr. — findes **ikke** i `page-data.ts` FAQ eller på `/su`-siden, kun i
+  artiklen. Næste iteration kan udnytte dem på `/su` (Fase 3's egen
+  "undersøg teknikken"/konverteringsvinkel), fordi de besvarer præcis den søgning,
+  der sender folk til siden.
 - ~~`/rentefradrag`~~ er lukket som R1 den 2026-09-25, se opgave 23: ét ratested med
   kilde, fire rettede modstridelser og ingen "afhænger af din kommune"-påstand. MÅL:
   Search Console baseline 4.492 visninger, 219 klik, CTR 4,9 %, position 6,7 pr.
@@ -3045,6 +3132,25 @@ landmark=lån, piggybank=opsparing osv.).
     - Gate grøn: lint ok, 280/280 tests, build ok (128 pages).
 
 ## VERIFICÉR DEPLOY-log
+- ⏳ **ÅBEN — VERIFICÉR DEPLOY: C15 `/promille`, C16 `/vaegttab` + `/enhedspris`,
+  C18 pensionsguiden, C19 dagpenge-guiden og C20 SU-guiden.**
+  Merge-tidspunkter 2026-09-26 09:57 (C16), 10:52 (C18), 11:35 (C19) og 11:45
+  (C20) CEST. Første kandidatvindue er **12:30** 2026-09-26; 07:30-batchen gik
+  før alle fem merges. Verificér ved **indholdskontrol**, ikke HTTP 200:
+  - `/promille` (DA): eksemplet 4 øl/4 öl på 80 kg = 0,88 ‰ og FAQ om, hvornår
+    man må køre igen.
+  - `/vaegttab` (DA/SE/NO) og `/enhedspris` (DA/SE): svar-først-blokken.
+  - `/blog/pension-hvor-meget-skal-du-spare-op`: loftet **68.700 kr.** (ikke
+    63.000).
+  - `/blog/dagpenge-saadan-finder-du-din-sats` + `/dagpenge`: 22.041 / 14.694 /
+    18.074 / 15.759 / 1.017 kr., og værktøjets dimittendstal 15.759/18.074.
+  - `/blog/su-2026-satser-og-regler`: titel "SU 2026: 7.426 kr. pr. måned
+    udeboende", "Kort svar:", 419.589, 710.077, 43.086, 2.966 og 129.106 kr.;
+    `/su` og kategoriens FAQ skal vise verificeringsdato **2026-09-26** (var
+    2026-09-24).
+  - `/api/health` skal svare `status: ok` under alle kontroller.
+  Er indholdet stadig gammelt efter **to** batch-vinduer, skrives
+  `DEPLOY-MISSING` og der merges ikke til `master` før et menneske har kigget.
 - **DEPLOY OK 2026-09-26 07:55 CEST — 07:30-batchen lukker alle 21 åbne noter.**
   Sidste succesfulde batch før denne var 17:30-vinduet 2026-09-25; 21:30-vinduet
   2026-09-25 indeholdt ingen af dagens merges. Kontrollen er **indholdskontrol på

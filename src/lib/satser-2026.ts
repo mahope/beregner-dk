@@ -100,7 +100,7 @@ export const BARSEL_2026 = {
 } as const;
 
 export const SU_2026 = {
-  verifiedAt: "2026-09-24",
+  verifiedAt: "2026-09-26",
   sources: {
     homewardVideregaaende:
       "https://www.su.dk/satser/videregaaende-uddannelser-satser-for-su-til-hjemmeboende",
@@ -146,15 +146,28 @@ export const SU_2026 = {
     minimumLoanAge: 18,
     finalLoanStandardMonths: 12,
     finalLoanExtendedMonths: 24,
+    birthGrantStandardMonths: 9,
+    birthGrantSingleParentMonths: 12,
   },
   udeboende: 7426,
   homewardBase: 1154,
   homewardMaximum: 3202,
   homewardMaximumSupplement: 2048,
   homewardLegacy: 3692,
+  /**
+   * Indkomstgrundlag for hjemmeboende stillesående SU. Grænserne gælder
+   * forældreindkomsten i `parentalIncomeYear` (2024) efter fradrag for
+   * søskende under 18 år. Kilde: su.dk, satser for hjemmeboende VU.
+   */
+  parentalIncome: {
+    maxSupplementAtOrBelow: 419589,
+    noSupplementAtOrAbove: 710077,
+    siblingUnder18Deduction: 43086,
+  },
   youthLegacy18To19Base: 1643,
   youthAway18To19Base: 4764,
   singleParentSupplement: 7426,
+  singleParentSupplementSharedHome: 2966,
   disabilitySupplement: {
     videregaaende: 10562,
     erhverv: 6624,
@@ -172,6 +185,7 @@ export const SU_2026 = {
     parentMonthly: 1900,
     combinedMonthly: 5699,
     finalMonthly: 9801,
+    abroadTotal: 129106,
     duringStudyRate: 0.04,
     afterGraduationRate: 0.0285,
     repaymentMinYears: 7,
