@@ -1,6 +1,6 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — **ni noter står åbne, ingen er `DEPLOY-MISSING`.** **C47**
+STATUS: KØ — **fire noter står åbne, syv er lukket `DEPLOY OK`, ingen er `DEPLOY-MISSING`.** VIGTIGT NYT FUND: **`beregner.no` er et separat site, ikke dette repo** (URL-skema `/kalkulator/*`), så alle `beregner.no`-tjek i planens noter **kan ikke fejle** og er ingen beviser — se den konsoliderede note i VERIFICÉR DEPLOY-loggen. C47 **C47**
 (`/alder` svarer på "alder mellem to datoer" — kode `95c8712` + `f882eac`,
 merge `a0f99a9` + `4b0d039`) med første kandidatvindue **2026-09-26 21:30**
 (merged 21:11 og 21:15, begge før batchen). C37 (`/renteberegner`)
@@ -5009,8 +5009,11 @@ efter datagrund:
 
 ### Prioriteret kø efter C47
 
-1. **Verificér de ni åbne deploynoter** i 21:30- og 07:30-vinduerne — rent
-   indholdskontrol, intet skal merges.
+1. ~~**Verificér de ni åbne deploynoter**~~ — **syv er lukket `DEPLOY OK`**
+   (21:45, se konsolideret note). **Fire står åbne: C46, C43, C42 og C37**, alle
+   med første kandidatvindue 2026-09-27 07:30 (C37: 12:30). FØR de verificeres:
+   **skriv `beregner.no`-delen om**, fordi den URL ikke findes i dette repo — ellers
+   er fire af fire noter grønne på en måling, der ikke måler noget.
 2. **Mål 2026-10-10** (se Måleprotokol): C1-C16 og C35-C47 måles 14 dage efter
    deres snapshot, og resultatet skrives ved siden af hver opgave.
 3. **C47's negative fund skal bruges som metode, ikke som emne.** Den viste,
@@ -5031,7 +5034,27 @@ efter datagrund:
    `/api/v1/loen`'s kommuneskat, domænerne og `www`-redirects.
 
 ### ❓ Til Mads
-- ⏳ **VERIFICÉR DEPLOY: C47 — `/alder` svarer på "alder mellem to datoer".**
+- ❓ **Hvad skal der ske med `beregner.no`? (fund 2026-09-26 21:45, se
+  konsolideret note).** Jeg har nu dokumenteret, at beregner.no er **live, men
+  ikke ejes af dette repo**: sit eget URL-skema (`/kalkulator/<norsk-slug>`), sin
+  egen 404-side, sin egen `vervekoder`-side — og ingen af dem findes i `src/app`.
+  Det er et **ejer- og produktspørgsmål, ikke en fejl jeg kan retage**:
+  1. **Skal `noPages` og `no`-grenen i `getRouteDecision` væk fra dette repo?** Det
+     er 28 sider plus en hel middleware-gren, ingen host kan nå. At slette dem er
+     en reel forenkling, men også en beslutning om at opgive den norske version her.
+  2. **Eller skal beregner.no migreres ind på denne kodebase**, så den arver de
+     100+ værktøjer, de danske og svenske domæner har? Så kræver det norske slugs
+     (`/kalkulator/mva` → `/moms`, `/kalkulator/prosent` → `/procent`) med
+     301-redirects, så intet i Norges eksisterende索引 går tabt — samme opgave som
+     den svenske slug-plan allerede er stillet op i ❓.
+  3. **Eller er de to sites helt separate, og beregner.no har sin egen backlog?** Så
+     skal jeg stoppe med at skrive `beregner.no` i planen og i deploy-noterne, og
+     det er en linje, jeg kan gøre med det samme.
+  **Indtil du svarer** verificerer jeg kun mod `minberegner.dk` og `beraknare.se`
+  og noterer, at NO-URL'en 404'er. Det er ærligt, men mindre end noterne lover.
+  Bemærk desuden: **der er ingen beregner.no-trafik i nogen snapshot** — hverken
+  Plausible eller GSC — hvilket er konsistent med et separat site.
+- ✅ **DEPLOY OK 2026-09-26 21:45, se konsolideret note.** C47 — `/alder` svarer på "alder mellem to datoer".**
   Kode `95c8712` + `f882eac`, merge `a0f99a9` + `4b0d039` 2026-09-26 21:11 og
   21:15 CEST på branch `ceo/alder-mellem-to-datoer`. Første kandidatvindue **2026-09-26 21:30**
   (merged før batchen). Verificér **indhold**: `https://minberegner.dk/alder`
@@ -5049,7 +5072,7 @@ efter datagrund:
   H2'erne. Værktøjets "Beregn alder pr. dato"/"Beräkna ålder per datum" skal
   stadig virke. `/api/health` skal svare `status: ok`. Se VERIFICÉR
   DEPLOY-loggen.
-- ⏳ **VERIFICÉR DEPLOY: C43 — artiklen og `/tidszone` kan ikke længere have
+- ✅ **DEPLOY OK 2026-09-26 21:45, se konsolideret note.** C43 — artiklen og `/tidszone` kan ikke længere have
   samme headline.** Kode `3eb38de`, merge `4d358d9` 2026-09-26 19:50 CEST på
   branch `ceo/procent-konsistens`. Første kandidatvindue **2026-09-27 07:30**
   (merged efter 21:30). Verificér **indhold**:
@@ -5060,7 +5083,7 @@ efter datagrund:
   "Hvad er klokken i USA, når den er 12 i Danmark? | Tidszone"; artiklens FAQ
   skal ** stadig indeholde spørgsmålet "Hvad er klokken i USA, når den er 12 i
   Danmark?". `/api/health` skal svare `status: ok`. Se VERIFICÉR DEPLOY-loggen.
-- ⏳ **VERIFICÉR DEPLOY: C42 — de relaterede links renderer det, de lover,
+- ✅ **DEPLOY OK 2026-09-26 21:45, se konsolideret note.** C42 — de relaterede links renderer det, de lover,
   og `/brok` har fået en indgang.** Kode `2bbc28f`, merge `fa002ce`
   2026-09-26 19:44 CEST, første kandidatvindue **2026-09-27 07:30**.
   Verificér **indhold**: `https://minberegner.dk/procent` skal have **seks**
@@ -5081,7 +5104,7 @@ efter datagrund:
   forældre (`/procent`, `/dato`, `/kalorier`, `/renteberegner`), eller er de
   bevidst nicheværktøjer, der ikke skal konkurrere om interne links? Det er en
   redaktional beslutning, ikke en måling.
-- ⏳ **VERIFICÉR DEPLOY: C41 — `/dato` linker til de syv dage-til-sider.**
+- ✅ **DEPLOY OK 2026-09-26 21:45, se konsolideret note.** C41 — `/dato` linker til de syv dage-til-sider.**
   Kode `29b8b9a`, merge `f25bd93` 2026-09-26 19:20 CEST på branch
   `ceo/dato-dage-til-links`. Første kandidatvindue er **2026-09-26 21:30**
   (merged efter 17:30). Verificér **indhold**: `https://minberegner.dk/dato` skal
@@ -5098,7 +5121,7 @@ efter datagrund:
   svenske ankertekst "Hur många dagar är det till 1 december?", og **ikke**
   nogen `/dage-til/`. `https://beregner.no/dato` skal være uændret og have
   **nogen** dage-til-links. `/api/health` skal svare `status: ok`.
-- ⏳ **VERIFICÉR DEPLOY: C40 — DA `/tidsberegner` svar-først med eksempeltabel.**
+- ✅ **DEPLOY OK 2026-09-26 21:45, se konsolideret note.** C40 — DA `/tidsberegner` svar-først med eksempeltabel.**
   Kode `d5e0cb5`, merge `7c42f8e` 2026-09-26 18:59 CEST på branch
   `ceo/tidsberegner-svarforst`. Første kandidatvindue er **2026-09-26 21:30**
   (merged efter 17:30). Verificér **indhold**: `https://minberegner.dk/tidsberegner`
@@ -5112,7 +5135,7 @@ efter datagrund:
   sit eget C38-svar-først-sæt og **ikke** have den danske tabel eller H1.
   `https://beregner.no/tidsberegner` skal være uændret. `/api/health` skal
   svare `status: ok`.
-- ⏳ **VERIFICÉR DEPLOY: C39 — SE `/procent` svarar på de tre svenske
+- ✅ **DEPLOY OK 2026-09-26 21:45, se konsolideret note.** C39 — SE `/procent` svarar på de tre svenske
   procent-frågorna, och 37 % skatt forsvann.** Kode `8796c16`, merge
   `927d213` 2026-09-26 18:27 CEST på branch `ceo/se-procent-sporsmal`.
   Første kandidatvindue er **2026-09-26 21:30** (merged efter 17:30). Verificér **indhold**: `https://beraknare.se/procent` skal ha
@@ -5124,7 +5147,7 @@ efter datagrund:
   `https://minberegner.dk/procent` ska væra **uändrat** med sit eget danske
   "37% skat af 40.000 kr"-eksempel, og `https://beregner.no/procent` skal være
   uändret. `/api/health` skal svare `status: ok`.
-- ⏳ **VERIFICÉR DEPLOY: C38 — de tre svenske sider svarer på spørgsmålsformen.**
+- ✅ **DEPLOY OK 2026-09-26 21:45, se konsolideret note.** C38 — de tre svenske sider svarer på spørgsmålsformen.**
   Se VERIFICÉR DEPLOY-loggen for merge-refer. Første kandidatvindue er
   **2026-09-26 21:30** (C38 merged efter 17:30). Verificér **indhold**:
   `https://beraknare.se/dato` skal have spørgsmålet "Hur många dagar är det
@@ -5135,7 +5158,7 @@ efter datagrund:
   skal have "färetagsleasing" i FAQ'en og **ikke** "värktiga" eller "földer" nogen
   steder. `/api/health` skal svare `status: ok`. De danske og norske sider skal
   være uændrede.
-- ⏳ **VERIFICÉR DEPLOY: C37 `/renteberegner` — fradragsværdien fra modulet.**
+- ⚠️ **ÅBEN, OG `beregner.no`-DELEN ER UBrugELIG — VERIFICÉR DEPLOY: C37 `/renteberegner` — fradragsværdien fra modulet.**
   Kode `b98b90f`, merge `32b74ee` 2026-09-26 17:47 CEST. 17:30- og 21:30-vinduerne
   er begge *før* merge, så første kandidatvindue er **2026-09-27 12:30** (07:30 er
   før merge-tidspunktet på dagen, hvis batcheren tager fat før den er færdig).
@@ -5702,7 +5725,98 @@ landmark=lån, piggybank=opsparing osv.).
     - Gate grøn: lint ok, 280/280 tests, build ok (128 pages).
 
 ## VERIFICÉR DEPLOY-log
-- ⏳ **ÅBEN — VERIFICÉR DEPLOY: C47 — `/alder` svarer på "alder mellem to
+- ✅ **DEPLOY OK 2026-09-26 21:45 CEST — 21:30-batchen lukker C38, C39, C40,
+  C41, C44, C45 og C47.** Syv noter verificeret ved **indholdskontrol**, ikke HTTP
+  200. Målt 21:39-21:45 mod live-sitet. `/api/health` svarer `status: ok` på både
+  `minberegner.dk` og `beraknare.se`.
+  - **C47** (`/alder`): H2 "Svar på de oftest stillede aldersspørgsmål" live med
+    **36 år, 6 måneder og 10 dage** (→ 13.343), **20 år, 1 måned og 16 dage** og
+    **21 år, 11 måneder og 30 dage**; begge FAQ-spørgsmål live; `beraknare.se/alder`
+    har "Svar på de vanligaste åldersfrågorna" + "20 år, 1 månad och 16 dagar" og
+    **ingen** dansk H2; værktøjet "Beregn alder pr. dato" virker. Entals-rettelsen
+    er altså live.
+  - **C45** (`/dage-til/juleaften`): 200, H1 **og** `<title>` "Hvor mange dage er
+    der til juleaften?", self-canonical, **89 dage** pr. 2026-09-26 (kontrolleret:
+    4+31+30+24 = 89 ✓). `beraknare.se/dagar-till/julafton` har "Hur många dagar
+    är det till julafton?" og ingen dansk tekst. Begge `sitemap.xml` har URL'en.
+    `/dage-til/finvis-somhelst` er stadig 404. `/dato` har nu **otte** dage-til
+    links i rækkefølgen `juledagen`, **`juleaften`**, `nytaarsaften`, `nytaarsdag`,
+    `1-december`, `paskedag`, `skaertorsdag`, `grundlovsdag` — præcis som C45's
+    note krævede, og dermed en rettelse af C41's note, som sagde `1-december`
+    først.
+  - **C44** (`/dage-til`-audit): `/dage-til/1-december` har titlen "Hvor mange
+    dage er der til 1. december? 66 dage | MinBeregner.dk" (66 er korrekt pr.
+    2026-09-26) og self-canonical. Kun en testfil ændrede sig, så intet på sitet
+    skal se anderledes ud.
+  - **C41** (`/dato`-links): H2 "Datoer folk oftest tæller ned til" live med de
+    otte links **plus** `href="/nedtaelling"`. SE har "Datum folk oftast räknar ner
+    till" + "Hur många dagar är det till 1 december?" og nul `/dage-til/`.
+  - **C40** (DA `/tidsberegner`): H1 "Hvor lang tid er der mellem to klokkeslæt?",
+    H2 "Svar på de oftest søgte tidsrum" med **alle fem** rækker som lovet:
+    08:30→16:45 = **"8 t 15 min"** / **"8.25 timer"**, 08:00→16:00 = 8 t 0 min,
+    09:00→17:00 m. 30 min pause = 7 t 30 min, 13:15→14:45 = 1 t 30 min, og
+    22:00→06:00 = "8 t 0 min **(dagen efter)**". H2 "Hvordan beregner du tid
+    mellem to klokkeslæt?" + FAQ "Hvad er 08:30 til 16:45 i timer og minutter?"
+    live. `beraknare.se/tidsberegner` har **ikke** den danske tabel.
+  - **C39** (SE `/procent`): H2 "Hur räknar man ut procent i Excel?" + alle tre
+    formler (`=A1/B1*100`, `=A1*B1/100`, `=(B1-A1)/A1*100`) + "Hur räknar man ut
+    procent på lön?", og **intet** "37% skatt". `minberegner.dk/procent` er
+    uændret (har stadig sit eget 37 %-eksempel).
+  - **C38** (SE spørgsmålsform): `beraknare.se/dato` har begge spørgsmål,
+    `/tidsberegner` har "Hur räknar jag ut timmar och minuter mellan två
+    klockslag?" med "08:30 till 16:45 är 8 timmar och 15 minuter", og `/leasing`
+    har "färetagsleasing" og hverken "värktiga" eller "er till salu".
+    `minberegner.dk/dato` er uændret.
+- ✅ **DEPLOY OK 2026-09-26 21:45 CEST — og en protokolfejl fundet, der gør fire af
+  de åbne noter ubrugelige. `beregner.no` er IKKE dette repo.**
+  Under verificeringen af C47 holdt jeg fast ved noterne og prøvede
+  `https://beregner.no/alder`. Den svarer **404** — ligesom *alle* ni prøvede
+  sider, også `/bmi`, der er den **første** nøgle i `noPages`. Undersøgelsen
+  lukkede en fejl, der har ligget i planen siden linje 2293:
+  - `beregner.no` **er** live: `/` → 200 og `/sitemap.xml` → 200 med **115 URL'er**,
+    hvoraf **alle 115 svarer 200**.
+  - **Alle 115 ligger under `/kalkulator/*`** (106 stk) — `boliglan`,
+    `drivstofforbruk`, `feriepenger`, `kvm-pris`, `mva`, `netto-lonn`, `prosent`,
+    `sparekalkulator`, `tips`, `bmi` — plus `om`, `kontakt`, `personvern`,
+    `vervekoder` og fire `kategori/*`. Forsiden linker til `href="/kalkulator/bmi"`,
+    `href="/kalkulator/mva"` osv. De **danske** slugs (`/alder`, `/dato`,
+    `/tidsberegner`) findes **ikke** — de 404'er alle.
+  - **Dette repo har hverken en `kalkulator`-route eller en `vervekoder`-route**
+    (`src/app` har 112 mapper, ingen hedder `kalkulator`), og den norske 404-side er
+    en **helt egen side** ("Få gratis penger med vervekoder – opptil 800 kr i
+    bonus"), ikke denne apps 404.
+  - **Konklusion:** beregner.no er et **separat site i en separat kodebase**.
+    `domain-config.ts`' `beregner.no`-post, `noPages`' 28 sider, `no`-grenen i
+    `getRouteDecision` og NO-teksten i `calculator-list.ts` er for denne host
+    **død kode**. Ingen ændring i dette repo når beregner.no.
+  - **Følgen for verifikationen er konkret:** "«`beregner.no/alder` skal være
+    uændret og ikke have nogen af H2'erne»" er sandt, fordi URL'en 404'er, ikke
+    fordi siden er uændret. Samme konstruktion i C37, C42, C43 og C46. **De fire
+    noter er derfor ikke beviser.** De er markeret ⚠️ ovenfor, og første
+    prioritet i næste iteration er at skrive `beregner.no`-delen om, så noterne
+    kun tester `minberegner.dk` og `beraknare.se`.
+  - **Tre gamle plan-udsagn er dermed forældede:** linje 593 ("`beregner.no` må
+    ikke få hreflang før domænet er live"), linje 2293 og linje 2766 (begge
+    "`beregner.no` er **ikke live**"). De er ikke bare forældede, de er **modsagt**:
+    beregner.no er live, og et andet repo ejer det. Derfor ❓, ikke kodeændring.
+- ✅ **To falske alarmer fra min egen verifikation — skrevet ned som metode, så
+  ingen senere iteration bruger tid på dem.** Begge kom fra `grep -qF` mod
+  serverrenderet HTML, og begge var fejl i nålen, ikke fejl på sitet:
+  1. **React indsætter `<!-- -->` mellem to tekstnoder.** "8.25 timer" ligger i
+     HTML'en som `8.25<!-- --> timer`, så et fixed-string-søgning på
+     "8.25 timer" fejler, selv om siden er helt korrekt. Det gælder enhver
+     sætning bygget af flere JSX-strenge. **Brug et regex, der tillader
+     `<!-- -->` mellem ordene, eller hent brødteksten og strip tags, før du
+     sammenligner.**
+  2. **Substring-fælden ved tal.** C47 krævede "intet sted må sige `1 måneder`".
+     Siden har `**11** måneder og 30 dage`, som *indeholder* "1 måneder". Samme
+     med svensk "1 månader" inde i "11 månader". Og `0 måneder og 0 dage` er
+     **korrekt** — 0 tager pluralis på dansk og svensk. **Skriv tal-invarianter
+     med en ordgrænse foran** (`(^|[^0-9])1 måneder`), eller test selve
+     formatterings-funktionen på værdien 1, som C47's kode allerede gør.
+  Resultatet er heldigvis det samme: **C47 er live og korrekt** — værdien 1 står
+  som "1 måned" i ental 10 gange på siden, og der er ingen fejlinstans.
+- ✅ **LUKKET 2026-09-26 21:45 — `DEPLOY OK`, se konsolideret note.** C47 — `/alder` svarer på "alder mellem to
   datoer".** Kode `95c8712` + `f882eac`, merge `a0f99a9` + `4b0d039` 2026-09-26
   21:11 og 21:15 CEST på branch `ceo/alder-mellem-to-datoer`. Første
   kandidatvindue er **2026-09-26 21:30**
@@ -5720,7 +5834,7 @@ landmark=lån, piggybank=opsparing osv.).
   spørgsmål, og **ikke** den danske H2; `https://beregner.no/alder` skal være
   uændret og **ikke** have nogen af H2'erne; `/api/health` skal svare
   `status: ok`. Se opgave 74.
-- ⏳ **ÅBEN — VERIFICÉR DEPLOY: C46 — `/tidszone` har Grønland, Grækenland,
+- ⚠️ **ÅBEN, OG `beregner.no`-DELEN ER UBrugELIG — VERIFICÉR DEPLOY: C46 — `/tidszone` har Grønland, Grækenland,
   Portugal, Island og Kreta i tabellen.** Kode `240c2c5`, merge `54c8c86`
   2026-09-26 20:52 CEST på branch `ceo/tidszone-nordatlanten`. Første
   kandidatvindue er **2026-09-27 07:30** (merged efter 21:30). Nul
@@ -5733,7 +5847,7 @@ landmark=lån, piggybank=opsparing osv.).
   `https://beraknare.se/tidszone` skal have **"13 i Aten"** i brødteksten og
   rækken **"Aten"** i tabellen (**ikke** "Athen") — sidste kontrol mod
   locale-lækken; `/api/health` skal svare `status: ok`. Se opgave 73.
-- ⏳ **ÅBEN — VERIFICÉR DEPLOY: C45 — `dage-til`-familien har nu juleaften og
+- ✅ **LUKKET 2026-09-26 21:45 — `DEPLOY OK`, se konsolideret note.** C45 — `dage-til`-familien har nu juleaften og
   julafton.** Kode `a79b6d5`, merge `71d4a6c` 2026-09-26 20:32 CEST på branch
   `ceo/juleaften`. Første kandidatvindue er **2026-09-26 21:30** (merged før
   den). Nul deploy-vinduer er gået siden merge, altså slet ikke
@@ -5750,7 +5864,7 @@ landmark=lån, piggybank=opsparing osv.).
   `getDageTilEvents` sorterer ikke); begge `sitemap.xml` skal indeholde de nye
   URL'er; `https://minberegner.dk/dage-til/finvis-somhelst` skal stadig være
   **404**; `/api/health` skal svare `status: ok`. Se opgave 72.
-- ⏳ **ÅBEN — VERIFICÉR DEPLOY: C44 — `dage-til`-fladen er auditet og
+- ✅ **LUKKET 2026-09-26 21:45 — `DEPLOY OK`, se konsolideret note.** C44 — `dage-til`-fladen er auditet og
   permanent vagtet.** Kode `d2ec667` + `aa6698c`, merge `016f2e7` 2026-09-26
   20:13 CEST på branch `ceo/dage-til-og-c44`. Første kandidatvindue er
   **2026-09-26 21:30** (merged før den). Nul deploy-vinduer er gået siden merge,
@@ -5760,7 +5874,7 @@ landmark=lån, piggybank=opsparing osv.).
   "Hvor mange dage er der til 1. december? … dage | MinBeregner.dk"),
   `https://minberegner.dk/dage-til/finvis-somhelst` (404) og at
   `/api/health` svarer `status: ok`. Se opgave 71.
-- ⏳ **ÅBEN — VERIFICÉR DEPLOY: C43 — artiklen og `/tidszone` kan ikke længere
+- ✅ **LUKKET 2026-09-26 21:45 — `DEPLOY OK`, se konsolideret note.** C43 — artiklen og `/tidszone` kan ikke længere
   have samme headline.** Kode `3eb38de`, merge `4d358d9` 2026-09-26 19:50
   CEST på branch `ceo/procent-konsistens`. Første kandidatvindue er
   **2026-09-27 07:30** (merged efter 21:30-vinduet er kørt). Nul
@@ -5774,7 +5888,7 @@ landmark=lån, piggybank=opsparing osv.).
   skal ** stadig** have spørgsmålet "Hvad er klokken i USA, når den er 12 i
   Danmark?" (med `06 i New York, 05 i Chicago, 04 i Denver og 03 i Los
   Angeles`). `/api/health` skal svare `status: ok`. Se opgave 70.
-- ⏳ **ÅBEN — VERIFICÉR DEPLOY: C42 — de relaterede links renderer det, de
+- ✅ **LUKKET 2026-09-26 21:45 — `DEPLOY OK`, se konsolideret note.** C42 — de relaterede links renderer det, de
   lover, og `/brok` har fået en indgang.** Kode `2bbc28f`, merge `fa002ce`
   2026-09-26 19:44 CEST på branch `ceo/relaterede-links-og-brok`. Første
   kandidatvindue er **2026-09-27 07:30** (merged efter 21:30-vinduet er
@@ -5788,26 +5902,26 @@ landmark=lån, piggybank=opsparing osv.).
   `/flyttebudget`; `https://beraknare.se/procent` skal have **fem** links
   (lokalefiltreret, `/rabat` er dansk-only) og **ikke** `/bolan` på nogen
   side. `/api/health` skal svare `status: ok`.
-- ⏳ **ÅBEN — VERIFICÉR DEPLOY: C41 — `/dato` linker til de syv
+- ✅ **LUKKET 2026-09-26 21:45 — `DEPLOY OK`, se konsolideret note.** C41 — `/dato` linker til de syv
   dage-til-sider.** Se ❓ Til Mads for den fulde indholdsliste — note at
   rækkefølgen er `juledagen` først (denne log sagde tidligere fejlagtigt
   `1-december` først), og at C45 gør listen til **otte**. Kode
   `29b8b9a`, merge `f25bd93` 2026-09-26 19:20 CEST, så første
   kandidatvindue er **2026-09-26 21:30**. Nul deploy-vinduer er gået siden
   merge, altså slet ikke `DEPLOY-MISSING` (kræver to).
-- ⏳ **ÅBEN — VERIFICÉR DEPLOY: C40 — DA `/tidsberegner` svar-først med
+- ✅ **LUKKET 2026-09-26 21:45 — `DEPLOY OK`, se konsolideret note.** C40 — DA `/tidsberegner` svar-først med
   eksempeltabel.** Se ❓ Til Mads for den fulde indholdsliste. Kode `d5e0cb5`,
   merged 2026-09-26 efter 17:30, så første kandidatvindue er **2026-09-26
   21:30**. Kun ét deploy-vindue er gået siden merge, altså endnu ikke
   `DEPLOY-MISSING` (kræver to).
-- ⏳ **ÅBEN — VERIFICÉR DEPLOY: C39 — SE `/procent` svarar på de
+- ✅ **LUKKET 2026-09-26 21:45 — `DEPLOY OK`, se konsolideret note.** C39 — SE `/procent` svarar på de
   tre svenske procent-frågorna, och 37 % skatt forsvann.** Kode `8796c16`,
   merge `927d213` 2026-09-26 18:27 CEST. Første kandidatvindue 2026-09-26
   21:30. Verificér indhold på `beraknare.se/procent` (Excel-H2, tre formler,
   tre FAQ-spørgsmål i FAQ **og** JSON-LD, links til /lon-efter-skatt og
   /loenstigning, ingen "37% skatt"), og at `minberegner.dk/procent` +
   `beregner.no/procent` er uændrede.
-- ⏳ **ÅBEN — VERIFICÉR DEPLOY: C38 — de tre svenske sider svarer på
+- ✅ **LUKKET 2026-09-26 21:45 — `DEPLOY OK`, se konsolideret note.** C38 — de tre svenske sider svarer på
   spørgsmålsformen.** Kode `9f37a35`, merge `ce970b0` 2026-09-26 18:11 CEST på
   `master` (branch `ceo/se-svar-paa-spoergsmaal`). Første kandidatvindue er
   **2026-09-26 21:30** — 17:30-vinduet er før merge. Verificér **indhold**, ikke HTTP 200:
