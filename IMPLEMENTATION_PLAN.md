@@ -13,6 +13,20 @@ ikke længere have samme headline) i samme vindue og **C46** (`/tidszone`
 får de fire lande, autocomplete spørger efter) også der. `/api/health`
 svarer `status: ok`.
 
+**Seneste iteration (2026-09-26 22:00-22:45) landede ingen kode — og det
+er sigtet ligeud sagt i opgave 75.** Den kørte C47's auditmetode på
+`/promille` og `/braendstof`: `/braendstof` lukket med negativt fund,
+`/promille` gav **et sikkerhedsfund** (`maaKoere` er hardkodet til den
+danske grænse 0,5 ‰ i `src/lib/promille.ts:47`, og FAQ'en svarer på
+"hvornår kan jeg køre bil igen" med 5,9 timer, som er tiden til **0 ‰**
+og ikke tiden til at komme under 0,5 ‰). Rettelsen er udarbejdet med alle
+tal, kodeopskrift og testplan, men blev kasseret af en værktøjsfejl: mit
+eget output blev korrupt, da jeg skrev den danske konstant
+`PROMILLEGRÆNSE` — først `O`→`A`, så et tabt `L` — og `read`, `sed` og `rg`
+viste alle den korrupte tekst som om den var rigtig. **Fremover: ASCII i
+identifikere, og kund bytes med `node -e` når et navn slår fejl.** Næste
+iteration tager opgave 75 som en ren, implementeret tekst- og logikopgave.
+
 **C47 gjorde C45's stærkeste åbne kandidat færdig — og fandt en fejl i
 koden, ikke i teksten.** C45 skrev, at `/alder` manglede spørgsmålet
 "beregn alder mellem to datoer", men at det *krævede en GSC-række før det
@@ -4853,6 +4867,111 @@ første halvdel af denne liste er fra DA-fladen, anden halvdel fra SE — de er
   ville være tynd SEO-fyld. Og ingen norsk tabel, jf. overfor.
 
 
+#### 75. [x] Audit 2026-09-26 — C47's metode på `/promille` og `/braendstof`: én reel fejl fundet, og en værktøjsfejl der lå i koden
+
+- **Iteration start:** 2026-09-26 21:59 CEST. Køen var tom (alle 74 opgaver
+  færdige, intet `I GANG`), og de fire åbne deploynoters første vinduer er
+  **2026-09-27 07:30** (C37: 12:30) — efter denne iterations grænse, så intet
+  var verificerbart. Valget var køens punkt 3: kør C47's metode på de
+  trafikstærke sider, der endnu ikke er auditet.
+- **Resultat: intet landet.** Jeg nåede at finde fejlen og skrive rettelsen,
+  men ikke at få den grøn — se "Værktøjsfælde" sidst i denne opgave. Det er
+  ærligt, og næste iteration kan tage den som en ren tekstopgave.
+- **Auditens metode (C47's):** find feltet i værktøjet, som siden ikke
+  fortæller om — og omvendt, om brødteksten lover noget, værktøjet ikke kan.
+  Læst blev `PromilleBeregner.tsx` (188 linjer) + `promille/page.tsx` (108) og
+  `BraendstofBeregner.tsx` (554) + `braendstof/page.tsx` (139), plus hele
+  `page-data.ts`-teksten for begge slugs i DA og SE.
+- **`/braendstof` (16.580 visninger, 180 klik, CTR 1,1 %, pos. 6,1) — negativt
+  fund.** Værktøjet har tre beregningstyper (`turPris`, `kmPris`, `forbrug`),
+  tre brændstoftyper og en sammenligningstabel, og **siden nævner ingen af dem
+  i brødteksten** — men siden *beskrivelse* siger "Beregn pris, forbrug og
+  årlig omkostning for benzin, diesel og el", og FAQ'en dækker el-mod-benzin
+  og el-mod-diesel med tal fra `braendstof.ts`. Det er altså C47's mønster
+  *allerede* lukket her. Klassen er lukket for `/braendstof`.
+- **`/promille` (4.159 visninger, 60 klik, CTR 1,4 %, pos. 7,9) — et fund, og
+  det er et sikkerhedsfund.** Værktøjet viser **to forskellige tidsrum**
+  (`PromilleBeregner.tsx:170-174`): "Tid til 0 ‰" (`timerTilNul`) og
+  grænsevurderingen i badge'en. Det **`timerTilGraense` — timer til at komme
+  under lovens grænse — findes ikke i værktøjet og står ikke i siden.** Den
+  går tabt i to steder, og det ene er en reel fejl:
+  1. **`maaKoere` er hardkodet til 0,5 ‰ i `promille.ts:47`, uanset domæne.**
+     Komponenten regner selv med `LIMIT = { da: 0.5, se: 0.2, no: 0.2 }`
+     (`PromilleBeregner.tsx:51`), så UI'en er rigtig, men **biblioteket er
+     ikke** — enhver server- eller ny komponent, der bruger `maaKoere`, får det
+     danske svar på beraknare.se, hvor grænsen er 0,2 ‰. Samme fejlklasse som
+     C38's locale-leak, bare i logikken.
+  2. **FAQ'en svarer på "Hvornår kan jeg køre bil igen?" med 5,9 timer, men
+     5,9 er tiden til 0 ‰** (`page-data.ts` DA og SE). Sætningen er "promillen
+     skal blot regnes ned til under 0,5 ‰. 4 øl på 80 kg = 0,88 ‰, som kræver
+     5,9 timer at blive bragt ned". Læseren kan regne sig frem til, at han
+     må køre efter ca. 2,5 time — **det er ulovligt** — fordi det tal, der
+     svares på, ikke er det tal, der bestemmer lovligheden. Tallene er i sig
+     korrekte (0,88 ‰ og 5,9 h er regnet rigtigt af `page-data.test.ts:325`),
+     men de to tidsrum er ikke adskilt.
+- **Rettelsen er skrevet ud og verificeret i tal, ikke landet.** Alt nedenfor
+  er regnet med repoets egen formel, så tallene er ikke gættet:
+  | Situation | Promille | Under dansk grænse 0,5 ‰ | Under svensk grænse 0,2 ‰ | Til 0 ‰ |
+  |---|---|---|---|---|
+  | 4 øl, mand 80 kg, nu | 0,88 | **2,6 t** | 4,6 t | 5,9 t |
+  | samme, 2 t efter | 0,58 | 0,6 t | 2,6 t | 3,9 t |
+  | 2 genstande, kvinde 60 kg | 0,73 | 1,6 t | 3,6 t | 4,9 t |
+  | 6 genstande, mand 70 kg | 1,51 | 6,8 t | 8,8 t | 10,1 t |
+  (0,88 / 2,6 / 5,9 er verificeret mod `page-data.test.ts`'s eksisterende
+  0,88-assertion; resten er min egen gennemregning af `promille.ts`.)
+  **Sådan bør det bygges, i husets mønster fra C40/C47:**
+  1. `src/lib/promille.ts`: tilføj `PROMILLEGRANSE = { da: 0.5, se: 0.2, no: 0.2 }`
+     (ascii-navn, se fælden nedenfor), flyt `LIMIT` ud af komponenten, og giv
+     `beregnPromille` et valgfrit femte argument `graense = 0.5`. Tilføj
+     `timerTilGraense(promille, graense) = ceil((promille − graense)/0,15 × 10)/10`
+     — **rund op, aldrig ned**, så svaret aldrig er for optimistisk — og lad
+     både den og `maaKoere` bruge den afrundede promille, som `timerTilNul`
+     gør i dag.
+  2. `src/lib/promille-eksempler.ts`: de fire rækker ovenfor genereret fra
+     `beregnPromille`, med situationen i `{ da, se }` — præcis som
+     `alder-eksempler.ts`. Så siden og værktøjet ikke kan glide fra hinanden.
+  3. `src/app/promille/page.tsx`: en tabel "Hvornår er du igen promillefri?"
+     (SE "När är du åter nykter?") med kolonnerne *Situation / Promille nu /
+     Under 0,5 ‰ / Helt ædru (0 ‰)*, grænsen hentet fra domænet.
+  4. `src/components/PromilleBeregner.tsx`: tredje kort i resultatpanelet,
+     "Under grænsen om N timer" ved siden af gram og "Helt ædru om".
+  5. `page-data.ts`: skriv FAQ-svaret om, så de to tal står adskilt med de
+     **danske** tal (2,6 og 5,9) og de **svenske** (4,6 og 5,9), regnet fra
+     eksempelmodulet — ikke skrevet i hånden.
+  6. Tests: `timerTilGraense ≤ timerTilNul` for alle genstande/vægt/køn/
+     grænser, at `maaKoere` følger den grænse den får, at de fire rækker er
+     fundet (C44's lektion: en test der er grøn på en tom liste er værd
+     ingenting), og at SE-rækkerne ikke kan få dansk tekst.
+- **MÅL:** `/promille` baseline **4.159 visninger / 60 klik / CTR 1,4 % /
+  pos. 7,9** pr. 2026-09-24 (GSC); Plausible gav den ingen DA-række i
+  top-15. Autocomplete 2026-09-26 22:05 (DA): "promille beregner" er
+  **forslag 1** til "promille", og GSC har "promille beregner" 1.038v pos. 9
+  — så hovedordet er bekræftet, mens spørgsmålsformen er det ikke: DA har ingen
+  "hvornår er jeg promillefri"-forslag, **SE har derimod "hur länge sitter
+  promille i blodet"** (forslag 2 til "hur länge promille") og "promille
+  dagen efter". Forventningen er derfor først **flere impressions på
+  spørgsmålsformen på beraknare.se** og et bedre svar på dansk, ikke et
+  CTR-spring på hovedordet. **Genmål 2026-10-10.**
+- **Værktøjsfælde, som kostede denne iteration — skrevet ned, så næste ikke
+  taber den igen.** Jeg ville kalde konstanten `PROMILLEGRÆNSE` med dansk Æ.
+  Det gik galt på tre måder, alle med samme årsag: **mit eget output blev
+  korrupt på vej til filen.** Først fik importlinjen en `O` erstattet af et `A`
+  (`PRAMILLEGRÆNSE`), så fik en perl-replacement et `L` tabt
+  (`PROMILEGRÆNSE`), og hele tiden viste `read`, `sed` og `rg` den tekst, de
+  skulle have vist — fordi homoglyffer *ligner* det rigtige. Følgen var 20
+  minutter på `ReferenceError` på et navn, der så rigtigt ud i tre
+  værktøjer. **Regel for fremover: brug ASCII i identifikere i ny kode**
+  (`PROMILLEGRANSE`, ikke `PROMILLEGRÆNSE`) — repoet har allerede
+  `praemieManglerForudsætning` og `tidszoneRækker`, så ASCII er ikke en
+  ny praksis. **Og når et navn slår fejl, skal bytes kundes, ikke øjne:**
+  `node -e "console.log([...s].map(c=>c.codePointAt(0).toString(16)))"` på den
+  konkrete linje. `grep`/`rg`/`sed` siger intet om homoglyffer.
+- **Ingen kode landet.** `git checkout -- src/` ryddede ændringerne, og de to
+  nye filer er slettet. `master` er urørt. Iterationen er derfor en
+  **research/notat-iteration** med et fuldt udarbejdet, målt og
+  implementationsklar fund — ikke en færdig opgave, og det står som sådan.
+
+
 ### Næste kandidater efter C34 — lukket med negativt fund
 
 
@@ -5025,6 +5144,13 @@ efter datagrund:
    `/braendstof` (16.580) har begge sammenligningstabeller, hvis hensigt
    brødteksten ikke siger. Det er en audit, ikke et byggearbejde, så det
    passer i en iteration.
+   **Auditet er kørt (2026-09-26, se opgave 75): `/braendstof` er lukket med
+   et negativt fund, og `/promille` har en reel sikkerhedsfejl** —
+   `maaKoere` i `src/lib/promille.ts:47` er hardkodet til den danske grænse
+   0,5 ‰, og FAQ'en svarer på "Hvornår kan jeg køre bil igen?" med **5,9
+   timer, som er tiden til 0 ‰** og ikke tiden til at komme under 0,5 ‰. Det
+   er den næste opgave, og opskriften ligger klar i opgave 75. **Bemærk
+   fælden der: brug ASCII i nye identifikere.**
 4. **`/moms`-emnet fra C45 (Skats frister) ligger stadig åbent** og er for
    stort til en side-iteration. Det eneste, der kan gøres nu uden nye tal, er
    at finde ud af om **GSC har en række** for frister/indberetning — ellers
