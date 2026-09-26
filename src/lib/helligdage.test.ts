@@ -289,6 +289,26 @@ describe("taellWeekender", () => {
   test("omvendt interval giver 0", () => {
     expect(taellWeekender(d("2026-12-31"), d("2026-12-01"))).toBe(0);
   });
+
+  test("et interval tælles uafhængigt af rækkefølgen, når det sorteres", () => {
+    // Dato-inputsene tillader slutdato før startdato, så kalenderen sorterer
+    // intervallet før tællerne kører. Uden den sortering ville alle tre tal
+    // blive 0, fordi tællerne afviser omvendte intervaller.
+    const forventet = { arbejdsdage: 20, weekenddage: 8, helligdage: 3 };
+    const fra = d("2026-12-01");
+    const til = d("2026-12-31");
+
+    for (const [a, b] of [
+      [fra, til],
+      [til, fra],
+    ]) {
+      const lav = a.getTime() <= b.getTime() ? a : b;
+      const høj = a.getTime() <= b.getTime() ? b : a;
+      expect(taellArbejdsdage(lav, høj, da)).toBe(forventet.arbejdsdage);
+      expect(taellWeekender(lav, høj)).toBe(forventet.weekenddage);
+      expect(taellHelligdage(lav, høj, da)).toBe(forventet.helligdage);
+    }
+  });
 });
 
 describe("foegArbejdsdage", () => {

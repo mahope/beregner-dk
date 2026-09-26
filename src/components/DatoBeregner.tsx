@@ -210,8 +210,14 @@ export default function DatoBeregner() {
         const diffMonths = Math.round(Math.abs(diffDays) / 30.44);
         const hl = helligdagLocale(locale);
 
-        const arbejdsdage = taellArbejdsdage(start, slut, hl);
-        const helligdage = taellHelligdage(start, slut, hl);
+        // Slutdatoen kan ligge før startdatoen, så intervallet sorteres før
+        // tællerne kører. `dage` beholder sin fortegn, så et negativt tal stadig
+        // kan trækkes fra.
+        const fra = slut < start ? slut : start;
+        const til = slut < start ? start : slut;
+
+        const arbejdsdage = taellArbejdsdage(fra, til, hl);
+        const helligdage = taellHelligdage(fra, til, hl);
 
         return {
           type: "dage-mellem" as const,
@@ -220,7 +226,7 @@ export default function DatoBeregner() {
           maaneder: diffMonths,
           arbejdsdage,
           helligdage,
-          fridage: taellWeekender(start, slut),
+          fridage: taellWeekender(fra, til),
         };
       }
 
