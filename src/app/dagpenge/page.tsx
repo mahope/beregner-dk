@@ -7,6 +7,8 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import { FAQ } from "@/components/FAQ";
 import { RelatedCalculators } from "@/components/RelatedCalculators";
 import Sidebar from "@/components/Sidebar";
+import { formatNumber } from "@/lib/format";
+import { DAGPENGE_2026 } from "@/lib/satser-2026";
 
 export async function generateMetadata() {
   return generatePageMetadata("dagpenge");
@@ -16,6 +18,7 @@ export default async function DagpengePage() {
   const locale = await getLocale();
   const domainConfig = await getCurrentDomainConfig();
   const pageData = getPageData("dagpenge", locale) || getPageData("dagpenge", "da")!;
+  const kr = (belob: number) => `${formatNumber(belob, locale)} kr`;
 
   return (
     <div className="flex flex-col lg:flex-row gap-8">
@@ -64,7 +67,11 @@ export default async function DagpengePage() {
             <tbody>
               <tr>
                 <td>Max dagpengesats</td>
-                <td>22.041 kr</td>
+                <td>{kr(DAGPENGE_2026.fuldtid)}</td>
+              </tr>
+              <tr>
+                <td>Max dagpengesats (deltidsforsikret)</td>
+                <td>{kr(DAGPENGE_2026.deltid)}</td>
               </tr>
               <tr>
                 <td>Med beskæftigelsestillæg (3 mdr)</td>
@@ -72,7 +79,11 @@ export default async function DagpengePage() {
               </tr>
               <tr>
                 <td>Dimittend (ikke-forsørger)</td>
-                <td>ca. 15.174 kr</td>
+                <td>{kr(DAGPENGE_2026.dimittendFuldtidUdenForsorgerpligt)}</td>
+              </tr>
+              <tr>
+                <td>Dimittend (forsørger)</td>
+                <td>{kr(DAGPENGE_2026.dimittendFuldtidMedForsorgerpligt)}</td>
               </tr>
             </tbody>
           </table>
@@ -81,9 +92,9 @@ export default async function DagpengePage() {
         <h3>Hvad påvirker din dagpengesats?</h3>
         <ul>
           <li><strong>Din tidligere løn:</strong> Dagpenge = 90% af løn efter 8% AM-bidrag</li>
-          <li><strong>Maxsatsen:</strong> Uanset din løn kan du højst få 22.041 kr/md i 2026</li>
+          <li><strong>Maxsatsen:</strong> Uanset din løn kan du højst få {kr(DAGPENGE_2026.fuldtid)}/md i 2026</li>
           <li><strong>Beskæftigelsestillæg:</strong> Op til 26.198 kr/md de første 3 måneder</li>
-          <li><strong>Arbejdstid:</strong> Deltidsansatte får forholdsmæssigt mindre</li>
+          <li><strong>Arbejdstid:</strong> Deltidsforsikrede får {kr(DAGPENGE_2026.deltid)}/md — 2/3 af fuldtidssatsen</li>
           <li><strong>A-kasse medlemskab:</strong> Du skal have været medlem i mindst 1 år</li>
         </ul>
 
@@ -91,7 +102,7 @@ export default async function DagpengePage() {
         <p>
           For at få ret til dagpenge skal du opfylde et <strong>indkomstkrav</strong>. I 2026 skal du
           have haft en samlet indkomst på mindst <strong>263.232 kr</strong> inden for de seneste 3 år,
-          eller have haft <strong>fuldtidsarbejde</strong> i mindst <strong>1.924 timer</strong> inden for de seneste 3 år.
+          eller have haft <strong>fuldtidsarbejde</strong> i mindst <strong>{kr(DAGPENGE_2026.indkomstkravTimer)} timer</strong> inden for de seneste {DAGPENGE_2026.indkomstkravAar} år.
         </p>
 
         <h3>Supplerende dagpenge</h3>
@@ -103,7 +114,11 @@ export default async function DagpengePage() {
         <div className="bg-green-50 dark:bg-green-900/20 border-l-4 border-green-400 dark:border-green-500 p-4 my-6 not-prose">
           <p className="font-medium text-green-800 dark:text-green-300">Opdateret med 2026-satser</p>
           <p className="text-green-700 dark:text-green-400">
-            Satserne er de officielle 2026-satser fra Beskæftigelsesministeriet (bm.dk). Sidst verificeret februar 2026.
+            Satserne er de officielle 2026-satser fra Beskæftigelsesministeriet (bm.dk).
+            Max-, deltids- og dimittendsatserne er verificeret mod ministeriets sats-tabel den{" "}
+            {new Intl.DateTimeFormat("da-DK", { day: "numeric", month: "long", year: "numeric" }).format(
+              new Date(DAGPENGE_2026.verifiedAt),
+            )}.
           </p>
         </div>
       </section>

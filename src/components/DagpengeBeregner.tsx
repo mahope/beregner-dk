@@ -10,16 +10,19 @@ import { useLocale } from "@/components/LocaleProvider";
 import { getCurrencySuffix } from "@/lib/format";
 import { AffiliateBox } from "./AffiliateBox";
 import { adtractionLink } from "@/lib/adtraction";
+import { DAGPENGE_2026 } from "@/lib/satser-2026";
 
 // Officielle 2026 dagpenge-satser
-// Kilde: bm.dk/satser/satser-for-2026, a-kasser.dk
+// Kilde: bm.dk/satser/satser-for-2026 (Beskæftigelsesministeriet), verificeret
+// 2026-09-26. Se `DAGPENGE_2026` i src/lib/satser-2026.ts for dimittend- og
+// G-dag-satserne, som /dagpenge og blogguiden læser fra samme modul.
 const SATSER_2026 = {
-  maxDagpenge: 22041, // Max dagpengesats kr/måned (2026)
+  maxDagpenge: DAGPENGE_2026.fuldtid, // Max dagpengesats kr/måned (2026)
   beskaeftigelsesTillaeg: 26198, // Med beskæftigelsestillæg, de første 3 mdr
-  dagpengeProcent: 90, // % af beregningsgrundlag
+  dagpengeProcent: DAGPENGE_2026.dagpengeProcent * 100, // % af beregningsgrundlag
   amBidragProcent: 8, // AM-bidrag fratrækkes først
-  dimittendsats: 15174, // Dimittend-sats (ikke-forsørgere, 2026 estimat)
-  dimittendsatsForsorger: 22041, // Dimittend-sats forsørgere = max sats
+  dimittendsats: DAGPENGE_2026.dimittendFuldtidUdenForsorgerpligt, // Dimittend uden forsørgelsespligt
+  dimittendsatsForsorger: DAGPENGE_2026.dimittendFuldtidMedForsorgerpligt, // Dimittend med forsørgelsespligt
 };
 
 interface DagpengeResultat {
