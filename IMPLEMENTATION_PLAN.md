@@ -1,12 +1,29 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — **fem noter står åbne, ingen er `DEPLOY-MISSING`.** C37
+STATUS: KØ — **seks noter står åbne, ingen er `DEPLOY-MISSING`.** C37
 (`/renteberegner`) med første kandidatvindue 2026-09-27 12:30, C38 (svensk
 spørgsmålsform), C39 (svensk `/procent`), C40 (DA `/tidsberegner`) og C41
 (`/dato` → `dage-til`) med **2026-09-26 21:30** som første fælles
 kandidatvindue, plus **C42** (de relaterede links renderer det, de lover, og
-`/brok` får en indgang) med første vindue **2026-09-27 07:30**.
-`/api/health` svarer `status: ok`.
+`/brok` får en indgang) med første vindue **2026-09-27 07:30** og **C43**
+(artiklen og `/tidszone` kan ikke længere have samme headline) i samme
+vindue som C42. `/api/health` svarer `status: ok`.
+
+**C43 fandt den eneste titelkollision på hele sitet — og den var lavet
+dagen før.** C36 gav artiklen `blog/hvad-er-klokken-i-usa-naar-den-er-12-i-danmark`
+headline'en **"Hvad er klokken i USA, når den er 12 i Danmark?"**, som er
+`/tidszone`'s egen `<title>` (24.723 visninger, pos. 7,5) — samme domæne,
+samme headline, to URL'er, og Google skal vælge. Normaliserer man alle 104
+danske headlines (alt før første `|`) er der **præcis én** kollision, så
+klassen er lille men skarp. Artiklen hedder nu "Hvad er klokken i USA?
+Tidsforskel for 16 byer" — den dækker det, den faktisk har stoff til, og
+spørgsmålet bliver hos værktøjssiden med de 24.723 visninger. En ny test
+læser artiklernes titler direkte fra filerne og fejler på den gamle titel.
+Se opgave 70. Samme audit gav tre negative fund, som er skrevet ned, så ingen
+senere iteration bruger tid på dem: **alle procent-eksempler er regnet
+rigtigt** (0 afvigelser på 124 sider), brand-suffikset er inkonsistent men er
+copy, ikke fejl, og `/procent` åbner på et andet eksempel end sin titel
+lover — et UX-valg uden måling bag sig.
 
 **C42 lukkede den sidste åbne kandidat og fandt en fejl, der lå i koden, ikke i
 indholdet.** Kandidaten "interne kæder, der kun hænger én vej" er nu lukket:
@@ -4394,6 +4411,73 @@ første halvdel af denne liste er fra DA-fladen, anden halvdel fra SE — de er
   sitet** linket til hver side og rapporteret 35 for 0. Del altid op efter
   kilde, ellers måler man katalogens navigation og   kalder det kæder.
 
+#### 70. [x] FÆRDIG 2026-09-26 — C43 — Cannibalisering: `/tidszone` og C36's egen artikel havde **samme headline**
+
+- **Iteration start:** 2026-09-26 19:44 CEST. Køen var tom (alle 69 opgaver
+  færdige, intet `I GANG`), de fem åbne deploynoter har første vindue 21:30
+  (C38-C41) og 07:30 (C42), så intet var verificerbart. Valget blev en ny
+  klasse målt på GSC's største side.
+- **Datagrund:** `/tidszone` **24.723 visninger, 115 klik, CTR 0,5 %, pos. 7,5**
+  — GSC's 4. største danske side. Dens næststørste egen søgning er **"hvad er
+  klokken i usa når den er 12 i danmark" (183 visninger, pos. 6)**, og det er
+  præcis den headline C36 i går (2026-09-26 18:xx) gav artiklen
+  `src/app/blog/hvad-er-klokken-i-usa-naar-den-er-12-i-danmark` — som H1,
+  som `<title>` og som første keywords-streng. **C36 skabte altså selv
+  kollisionen, og den var på vej live.** Bevis fra live-HTML:
+  `minberegner.dk/tidszone` → `Hvad er klokken i USA, når den er 12 i Danmark? | Tidszone`
+  og `minberegner.dk/blog/hvad-er-klokken-…` → `…12 i Danmark? | MinBeregner.dk`
+  — **headline'en er byte-identisk på to URL'er i samme domæne.**
+- **Klassens størrelse målt først (C41's metode):** alle `metaTitle` i
+  `page-data.ts` (79 da / 28 no / 53 se) og alle 26 artiklers `title`,
+  normaliseret på headline (alt før første `|`, lowercase): **104 headlines
+  på da, 54 på no, 79 på se — og præcis én kollision, den ovenfor.** Ikke en
+  voksende klasse, men en ægte fejltype med en skarp regel: *to sider i samme
+  domæne må ikke have samme headline*, fordi Google skal vælge.
+- **Beslutning:** `/tidszone` beholder spørgsmålet. Den har 24.723 visninger og
+  fire egne søgninger ("tidszoner" 764v pos. 10, "tidszone beregner" 115v
+  pos. 3, spørgsmålet 183v pos. 6, "tidsforskel" 86v pos. 10), og C4 satte titlen
+  bevidst. Artiklen er **én dag gammel, har nul søgehistorik** og dækker et
+  **bredere** emne end sin titel (16 byer i forskelstabel, amerikanske zoner
+  ved 12/14/16/21 dansk tid, sommertidsdatoer 2026). Artiklen hedder nu
+  **"Hvad er klokken i USA? Tidsforskel for 16 byer"** (H1 + `title` +
+  `og:title`), som er 58 tegn med suffiks — den dækker de to søgninger
+  artiklen faktisk har stoff til ("hvad er klokken i usa" + "tidsforskel") og
+  efterlader det præcise spørgsmål til værktøjssiden. **FAQ'en beholder
+  spørgsmålet** — to sider må godt svare på samme spørgsmål; det er titlen,
+  der skal være forskellig.
+- **Test:** ny `src/app/title-collision.test.ts` (4 tests) — ingen delte
+  headlines i nogen af de tre locales, og den læser artiklernes `title` direkte
+  fra `src/app/blog/*/page.tsx`, fordi blogmetadata ikke ligger i `page-data`.
+  **Fælden er bevidst provokeret:** med artiklens gamle titel failer den
+  `har ingen delte headlines på da` med præcis
+  `hvad er klokken i usa, når den er 12 i danmark? -> /tidszone, /blog/hvad-er-klokken-i-usa-naar-den-er-12-i-danmark`.
+- **Verifikation 2026-09-26 19:52:** `npm run build` grøn (141 sider),
+  `npm run test` grøn (**1.396/1.396**, 133 filer), `npm run lint` grøn
+  (532 filer).
+- **MÅL:** `/tidszone` baseline **24.723 visninger / 115 klik / CTR 0,5 % /
+  pos. 7,5** pr. 2026-09-24 (GSC); artiklen har ingen række (ny, ulive) —
+  **ukendt, ikke nul**. Forventningen er ikke flere visninger, men at
+  `/tidszone` beholder positionen på det præcise spørgsmål, fordi domænet
+  ikke længere kan vælge mellem to sider med samme titel. **Genmål 2026-10-10.**
+- **Tre negative fund fra samme audit (skrevet ned, så ingen senere
+  iteration bruger tid på dem):**
+  1. **Alle procent-eksempler er regnet rigtigt.** Script over alle 124 sider
+     (`X % af Y = Z` og `A x B = C m²`) fandt **0 afvigelser** — C28-C33's
+     metode er gennemført på hele sitet, ikke kun på de sider de greb.
+  2. **Brand-suffikset i `<title>` er inkonsistent, men det er ikke et
+     fejl-fund.** 17 topsider: 5 ender `| MinBeregner.dk`, to ender
+     `| Tidszone` og `| Kalorieberegner` (altså *ikke* branden), resten har
+     intet suffiks. Suffikset er håndskrevet pr. side i `page-data.ts`, ikke
+     genereret. Jeg rørte det ikke: det er copy-arbejde på de samme
+     svar-først-sider, der er lukket til 2026-10-10, og en ensretning ville
+     være en ren skønhedskure, ikke en målt effekt.
+  3. **`/procent` (149.318 visninger, CTR 0,1 %) åbner på et andet eksempel
+     end titlen lover** — titlen siger "beregn 10 procent af et tal", men
+     værktøjet starter i "Find procent" med `25 er 25.00% af 100`. Tallene
+     *står* i brødteksten (C41 lukkede den klasse korrekt), så det er en
+     designvalg, ikke en løftebrud. Jeg ændrede ikke default, fordi det er et
+     UX-valg uden måling bag sig. **Skrivet op som kandidat, ikke gjort.**
+
 ### Næste kandidater efter C34 — lukket med negativt fund
 
 
@@ -4477,8 +4561,35 @@ efter datagrund:
    nul redaktionelle indgående links — rettet, og nu permanent vagtet i
    `calculator-list.test.ts`. Resten af de 19 trafiksider har 2-30
    indgående links hver, så **klassen er lukket**. Se opgave 69.
-   **Mål C41 og C42 begge 2026-10-10.**
+    **Mål C41 og C42 begge 2026-10-10.**
+  8. ~~**Cannibalisering: samme headline på to sider i samme domæne.**~~
+    **Lukket i C43 (2026-09-26).** Alle 104 da / 54 no / 79 se-headlines er
+    normaliseret og sammenholdt side ↔ artikler: **én** kollision, mellem
+    `/tidszone` og C36's egen tidszone-artikel. Rettet ved at give artiklen en
+    bredere headline, og vagtet permanent i `src/app/title-collision.test.ts`,
+    som bevidst fejler på den gamle titel. Se opgave 70.
+  9. **Ny, åben: `/procent` (149.318 visninger, CTR 0,1 %, pos. 7,4) åbner
+    på et andet eksempel end titlen lover.** Titlen er "beregn 10 procent af
+    et tal", men `ProcentBeregner`'s default er modalen "Find procent" med
+    `25 er 25.00% af 100`; den lovede `10 procent af 250 = 25` står i
+    brødteksten og kræver ét klik i modalvælgeren. Det er **ikke** et
+    løftebrud — C41 lukkede den klasse korrekt, fordi tallene står på siden —
+    så rettelsen er et **designvalg**: skal standardtilstanden følge sidens
+    egen headline-eksempel? Det kan ikke svares uden trafikdata, og derfor
+    står det her i stedet for er gjort. Mål `/procent` 2026-10-10.
+
 ### ❓ Til Mads
+- ⏳ **VERIFICÉR DEPLOY: C43 — artiklen og `/tidszone` kan ikke længere have
+  samme headline.** Kode `HEAD`, merge `HEAD` 2026-09-26 19:5x CEST på branch
+  `ceo/procent-konsistens` (se commit-refer i VERIFICÉR DEPLOY-loggen). Første
+  kandidatvindue **2026-09-27 07:30** (merged efter 21:30). Verificér
+  **indhold**: `https://minberegner.dk/blog/hvad-er-klokken-i-usa-naar-den-er-12-i-danmark`
+  skal have H1 og `<title>` **"Hvad er klokken i USA? Tidsforskel for 16 byer"**
+  (med `| MinBeregner.dk`), **ikke** "…når den er 12 i Danmark?";
+  `https://minberegner.dk/tidszone` skal være **uændret** med
+  "Hvad er klokken i USA, når den er 12 i Danmark? | Tidszone"; artiklens FAQ
+  skal ** stadig indeholde spørgsmålet "Hvad er klokken i USA, når den er 12 i
+  Danmark?". `/api/health` skal svare `status: ok`. Se VERIFICÉR DEPLOY-loggen.
 - ⏳ **VERIFICÉR DEPLOY: C42 — de relaterede links renderer det, de lover,
   og `/brok` har fået en indgang.** Kode `2bbc28f`, merge `fa002ce`
   2026-09-26 19:44 CEST, første kandidatvindue **2026-09-27 07:30**.

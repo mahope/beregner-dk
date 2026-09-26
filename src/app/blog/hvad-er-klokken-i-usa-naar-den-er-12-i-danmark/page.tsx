@@ -10,7 +10,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const baseUrl = dc.baseUrl;
 
   return {
-    title: "Hvad er klokken i USA, når den er 12 i Danmark?",
+    title: "Hvad er klokken i USA? Tidsforskel for 16 byer",
     description:
       "Når det er 12 i Danmark, er det 06 i New York, 05 i Chicago, 04 i Denver og 03 i Los Angeles. Se hele tabellen for USA og resten af verden — med sommertid.",
     keywords: [
@@ -22,7 +22,7 @@ export async function generateMetadata(): Promise<Metadata> {
       "forskel på tid danmark usa",
     ],
     openGraph: {
-      title: "Hvad er klokken i USA, når den er 12 i Danmark?",
+      title: "Hvad er klokken i USA? Tidsforskel for 16 byer",
       description:
         "Hele tabellen: 06 i New York, 05 i Chicago, 04 i Denver og 03 i Los Angeles — plus tidsforskelen til resten af verden.",
       url: `${baseUrl}/blog/${SLUG}`,
@@ -88,7 +88,7 @@ export default function TidszoneUsaPage() {
         <header className="mb-8 not-prose">
           <span className="text-sm text-blue-600 font-medium">Praktisk &amp; Rejse</span>
           <h1 className="text-3xl md:text-4xl font-bold mt-2 mb-4">
-            Hvad er klokken i USA, når den er 12 i Danmark?
+            Hvad er klokken i USA? Tidsforskel for 16 byer
           </h1>
           <div className="flex items-center gap-4 text-sm text-gray-500">
             <span>26. september 2026</span>
