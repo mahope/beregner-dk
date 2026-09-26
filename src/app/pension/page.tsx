@@ -10,6 +10,8 @@ import {
 } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { FOLKEPENSION_2026, folkepensionsalderRækker } from "@/lib/folkepension";
+import { formatNumber } from "@/lib/format";
+import { SATSER_2026 } from "@/lib/satser-2026";
 import RelatedCalculators from "@/components/RelatedCalculators";
 
 export async function generateMetadata() {
@@ -179,14 +181,14 @@ export default async function PensionPage() {
         <ul>
           <li>Udbetales over 10-30 år</li>
           <li>Beskattes som almindelig indkomst ved udbetaling</li>
-          <li>Fradrag for indbetalinger (op til 68.700 kr/år i 2026)</li>
+          <li>Fradrag for indbetalinger (op til {formatNumber(SATSER_2026.ratepensionMax, "da")} kr/år i 2026)</li>
         </ul>
 
         <h3>Aldersopsparing</h3>
         <ul>
           <li>Udbetales skattefrit</li>
           <li>Ingen fradrag for indbetalinger</li>
-          <li>Max 9.900 kr/år (2026)</li>
+          <li>Max {formatNumber(SATSER_2026.aldersopsparingMax, "da")} kr/år (2026)</li>
         </ul>
 
         <h3>Livrente</h3>
