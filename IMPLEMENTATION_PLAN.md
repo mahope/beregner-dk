@@ -2722,6 +2722,72 @@ gjorde. `/api/health` svarer `status: ok`.
 - **MÅL:** `/su` baseline **119 besøgende/28d pr. 2026-09-26** (ikke i GSC-top-15,
   ingen CTR-baseline). Første genmåling 2026-10-10.
 
+#### 48. [x] FÆRDIG 2026-09-26 — C22 — Brødkrummen på alle 60 svenska sider linkede til en 404
+
+- **Iteration start:** 2026-09-26 12:05 CEST på `ceo/c22-svensk-brodkrumme`. Køen var
+  tom (alle 47 opgaver færdige, intet `I GANG`), og de seks åbne deploynoter har
+  første kandidatvindue 12:30, så intet kunne verificeres. C21's afsluttning sagde,
+  at næste iteration skulle gå efter **placering/indhold**; det blev et siteomfattende
+  fund på den svenska flade i stedet for endnu en CTR-justering.
+- **Datagrund:** hele beraknare.se har **188.000 visninger/28d i Google med 0,2 %
+  CTR**, og de to største svenska sider alene er `/dato` (88.498 visninger, 87 klik,
+  CTR 0,1 %, pos 8,4) og `/tidsberegner` (55.186 visninger, 114 klik, 0,2 %, pos 8,2).
+- **Fund — verificeret på live først, ikke kun i koden.** `curl` 12:10:
+  `beraknare.se/kategori/hverdag` → **404**, `minberegner.dk/kategori/hverdag` → 200.
+  Og live-HTML for `beraknare.se/dato` indeholdt **5 forekomster af
+  `/kategori/hverdag`**, heraf i JSON-LD:
+  `{"@type":"ListItem","position":2,"name":"Vardag","item":"https://beraknare.se/kategori/hverdag"}`
+  — altså et `BreadcrumbList`, hvor position 2 peger på en 404.
+  Rodårsag: `routing.ts:18` erklærer `/blog` og `/kategori` for dansk-only
+  (`danishOnlySections`), men `breadcrumbCategoryHref` er skrevet i `page-data.ts`
+  for **alle** 53 `sePages` + 7 `/dagar-till/*` (sidstnævnte via
+  `DageTilPage.tsx:214`, som endda bruger `/kategori/praktisk`, ikke `hverdag`).
+  `Breadcrumbs.tsx` linkede krummerne uden at spørge routen.
+  **Bemærk:** den tidligere note i planen (C9, linje 1221-1223) skrev, at dette var
+  uændret, fordi "kategorislugs er fælles på tværs af domæner". Den begrundelse er
+  **falsificeret**: det er ikke sluggen, der er dansk, det er hele `/kategori`-sektionen.
+- **Beslutning/implementering:** breadcrumb-krummer afgøres nu af den route, de
+  faktisk peger på. `Breadcrumbs.tsx` kalder `getRouteDecision(domainConfig, href)`
+  og renderer krummer som link **kun** når routen er `allow`; ellers er krummer ren
+  tekst. Det er domæne-aware ved konstruktion, så en ny dansk-only sektion kan ikke
+  genindføre fejlen, og det gælder også en evt. NO-sektion senere. `BreadcrumbSchema`
+  har nu valgfrit `url`, så `item` **udelades** i stedet for at pege på en 404.
+  Sidstnævnte krumme (den aktuelle side) havde aldrig et `item` før; det er nu
+  eksplicit. `dage-til.ts:282` rettet samtidig: den svenska `/dagar-till/1-december`
+  sagde "1 december är inte en **dansk** helgdag" → "**svensk** helgdag".
+- **Acceptkriterier:**
+  1. Dansk `/kategori/*`-krumme er stadig et link på minberegner.dk, og JSON-LD
+     har `item`-URL'en. **PASS**
+  2. På beraknare.se er ingen krumme et link til `/kategori/*`, og JSON-LD
+     position 2 har **intet** `item`. **PASS**
+  3. Hjemmelen er stadig et link på begge domæner; den aktuelle side er aldrig et
+     link. **PASS**
+  4. **Ingen** svensk eller norsk side (alle 53 + 7 + NO-slugs) renderer et
+     `/kategori`-link, og **alle** danske sider gør. **PASS** (ny test, 6 assertions
+     inkl. to loops over hele kataloget)
+  5. Dansk `<title>`/canonical/hreflang, sitemap og `/api/v1` er urørte. **PASS**
+  6. `npm run lint`, `npm run test` og `npm run build` er grønne. **PASS**
+- **Kvalitetsgate 2026-09-26 12:27 CEST:** `npm run test` grøn (**1255/1255,
+  121 filer** — 6 nye i `src/components/Breadcrumbs.test.tsx`), `npm run lint` grøn
+  (511 filer), `npm run build` grøn (139 sider + typecheck, ingen nye advarsler).
+- **Forventet effekt:** fjerner en 404-linket intern struktur fra 60 svenska sider,
+  som Google læser både i DOM og i strukturerede data. Det er et crawl- og
+  troværdigheds-fix, ikke et CTR-fix: det retter ikke beraknare.se's lave CTR i sig
+  selv, men det fjerner et konkret fejlsignal fra hele domænet og en død kilde fra
+  hver enkelt side.
+- **MÅL:** ingen enkelt side ændres, så der er **ingen CTR-baseline** at slå op.
+  Måles som: ingen `/kategori`-referencer i live-HTML eller JSON-LD på beraknare.se
+  efter næste batch (**mål 2026-10-10**), plus Search Console-crawl-rapporter for
+  beraknare.se. Plausible-niveau: `/` 18 besøgende/28d med bounce 71 % pr.
+  2026-09-26 (forsiden er den eneste side, hvor brødkrummen er synlig på siden
+  over folden).
+- **Falsificeret i denne iteration (skrevet ned, så det ikke gøres igen):** svensk
+  `/dato`-metadata **er** allerede svar-først og spejler DA-mønsteret efter C2
+  (`page-data.test.ts:443-447` låser titel, intention og månedstal for begge
+  domæner). Forslaget om at sætte et hardkodet "60 dagar" i den svenska titel er
+  derfor **forkert**: det ville afvige fra DA-mønsteret og gå stale. SE `/dato`'s
+  lavere CTR (0,1 % mod 0,6 %) skyldes **placering** (8,4 mod 5,8), ikke titel.
+
 
 ### ❓ Til Mads
 - **Beskæftigelsestillægget på 26.198 kr/md (C19, 2026-09-26) — må ikke gættes.**
