@@ -5,6 +5,7 @@ import { ShareCalculation } from "@/components/ShareCalculation";
 import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { beregnAlder } from "@/lib/alder";
+import { formatAlder } from "@/lib/alder-eksempler";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { useLocale } from '@/components/LocaleProvider';
 import { getIntlLocale } from '@/lib/format';
@@ -21,7 +22,6 @@ export default function AlderBeregner() {
       useToday: "Brug i dag",
       yourExactAge: "Din præcise alder",
       yearUnit: "år",
-      monthsAndDays: (m: number, d: number) => `${m} måneder og ${d} dage`,
       nextBirthday: (days: number, age: number) => (
         <><Cake className="mr-1.5 inline h-4 w-4 align-text-bottom text-pink-500" strokeWidth={1.75} aria-hidden="true" focusable="false" />Der er <strong>{days} dage</strong> til din næste fødselsdag (du fylder {age} år)</>
       ),
@@ -64,7 +64,6 @@ export default function AlderBeregner() {
       useToday: "Använd idag",
       yourExactAge: "Din exakta ålder",
       yearUnit: "år",
-      monthsAndDays: (m: number, d: number) => `${m} månader och ${d} dagar`,
       nextBirthday: (days: number, age: number) => (
         <><Cake className="mr-1.5 inline h-4 w-4 align-text-bottom text-pink-500" strokeWidth={1.75} aria-hidden="true" focusable="false" />Det är <strong>{days} dagar</strong> till din nästa födelsedag (du fyller {age} år)</>
       ),
@@ -275,7 +274,7 @@ export default function AlderBeregner() {
               {beregning.aar} {l.yearUnit}
             </p>
             <p className="text-xl opacity-90">
-              {l.monthsAndDays(beregning.maaneder, beregning.dage)}
+              {formatAlder(beregning, locale)}
             </p>
           </div>
 
