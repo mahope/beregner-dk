@@ -9,6 +9,23 @@ kandidatvindue, plus **C42** (de relaterede links renderer det, de lover, og
 (artiklen og `/tidszone` kan ikke længere have samme headline) i samme
 vindue som C42. `/api/health` svarer `status: ok`.
 
+**C44 lukkede det sidste ubedømte sted i C43's egen testklasse og fandt intet
+at rette i indholdet.** C43's cannibaliseringstest læser `page-data.ts` og
+blogfiler fra disk, så de 14 `dage-til`-landingssider — genereret fra
+`src/lib/dage-til.ts` — var usynlige for den. De er auditet live: ingen blød
+404, alle 7 DA-slugs i sitemap med self-canonical og **regnet efter** tal
+(2026-09-26 → 1. dec = 66 dage, → juledagen = 90, og live siger 66 og 90), og
+ingen af de 14 headlines kolliderer. Testen dækker dem nu, plus en assertion
+på at de faktisk bliver fundet — ellers ville den være grøn, hvis modulet
+engang returnerede tomt. Tre negative fund er skrevet ned, så ingen senere
+iteration bruger tid på dem: **canonical-slash** (jeg så `/moms` med
+trailing slash og frygtede en self-canonical der redirecter — alle 11 kontrollerede
+sider er slashless, og `/moms/` 308'er korrekt), **manglende `no` i hreflang**
+(beregner.no 404'er på `/dato`, `/moms`, `/procent`, `/tidszone`, så der er
+intet at annotere) og **`/procent`** (7 forekomster af "rabat" + formler +
+hverdag + tricks + FAQ live, så 0,1 % CTR på 149.318 visninger er *placering*,
+ikke et indholdshul — kandidat 9 er lukket på indholdssiden). Se opgave 71.
+
 **C43 fandt den eneste titelkollision på hele sitet — og den var lavet
 dagen før.** C36 gav artiklen `blog/hvad-er-klokken-i-usa-naar-den-er-12-i-danmark`
 headline'en **"Hvad er klokken i USA, når den er 12 i Danmark?"**, som er
@@ -4476,7 +4493,53 @@ første halvdel af denne liste er fra DA-fladen, anden halvdel fra SE — de er
      værktøjet starter i "Find procent" med `25 er 25.00% af 100`. Tallene
      *står* i brødteksten (C41 lukkede den klasse korrekt), så det er en
      designvalg, ikke en løftebrud. Jeg ændrede ikke default, fordi det er et
-     UX-valg uden måling bag sig. **Skrivet op som kandidat, ikke gjort.**
+      UX-valg uden måling bag sig. **Skrivet op som kandidat, ikke gjort.**
+
+#### 71. [x] FÆRDIG 2026-09-26 — C44 — Auditér den `dage-til`-flade, C43's test så aldrig
+
+- **Hvorfor:** C43's cannibaliseringstest læser `page-data.ts` og blogfiler fra
+  disk. De 14 `dage-til`-landingssider genereres fra `src/lib/dage-til.ts` og
+  har **ingen** `page-data.ts`-post, så de var usynlige for testen. `/dato` har
+  130.392 visninger, og dets næststørste søgning (996 visninger, pos. 5) er præcis
+  den, dage-til-siderne skal fange. Det var det sidste ubedømte sted i den klasse.
+- **Auditfund (live, mod minberegner.dk 2026-09-26 omkring 20:10 CEST):**
+  1. **Ingen blød 404.** `/dage-til/finvis-somhelst` og `/dage-til/1-december2`
+     svarer **404** (ikke 200 med forsiden), så der er ikke et uendeligt
+     duplikatrum med canonical på roden. Undtagelsen forklaret: slugs er
+     `1-december`, ikke `december-1` — jeg testede den intuitive og fik 404.
+  2. **Alle 7 DA-slugs står i sitemap.xml** med self-canonical og
+     svar-først-titel, fx `Hvor mange dage er der til 1. december? 66 dage |
+     MinBeregner.dk`. Tallet er **regnet efter**: 2026-09-26 → 1. dec = 4+31+30+1
+     = 66; → juledagen = 4+31+30+25 = 90, og live siger 90. ✓
+  3. **Ingen headline-kollision.** De 7 DA- og 7 SE-spørgsmål er alle
+     forskellige, og ingen er lig `/dato`s eller `/nedtaelling`s H1.
+- **Rettelse:** `src/app/title-collision.test.ts` tager nu `dage-til`-siderne
+  med i alle tre locales, plus en assertion på at `getDageTilEvents` faktisk
+  finder dem — uden den ville testen stadig være grøn, hvis modulet engang
+  returnerede tomt. Det er præcis den stille fejl C43-pulsen havde.
+- **Tre negative fund fra samme time (skrevet ned, så ingen senere iteration
+  bruger tid på dem):**
+  1. **Canonical med slashes: falsk alarm.** Jeg så `/moms` med
+     `href="…/moms/"` og frygtede en self-canonical der redirecter — den
+     klassens skjulte dræber. En ren kontrol af 11 DA-sider viser **alle**
+     slashless, og `/moms/` + `/dato/` 308'er korrekt til slashless. Ikke et
+     fund. Gemt, fordi jeg brugte tid på det.
+  2. **Manglende `no` i hreflang: falsk alarm.** `/dato` har kun da/sv/x-default,
+     men `beregner.no/dato`, `/moms`, `/procent` og `/tidszone` svarer alle
+     **404**, så der er ingen NO-side at annotere.
+  3. **`/procent` er indholdsmæssigt færdig, så 0,1 % CTR er placering.**
+     Live har siden 7 forekomster af "rabat" (GSCs næststørste søgning er
+     netop rabatten i procent, 57 visninger) og H2'erne "Formler",
+     "Procentregning i hverdagen", "Hurtige procent-tricks" og "Ofte stillede
+     spørgsmål". **Kandidat 9 er dermed lukket på indholdssiden:** der er hverken
+     et manglende eksempel eller et manglende emne at fylde — kun position.
+- **Verifikation:** `npm run lint` grøn (532 filer), `npm run test` grøn
+  (1397/1397, 133 filer), `npm run build` grøn (141 sider). Kun 5 minutters
+  diff, så ingen ekstra review.
+- **Landet:** kode `d2ec667` på branch `ceo/dage-til-og-c44`.
+- **MÅL:** ingen trafikbaseret måling — ændringen er en vagt, ikke en
+  indholdsændring. De 14 sider måles først 2026-10-10, fordi de er nye fra C7.
+
 
 ### Næste kandidater efter C34 — lukket med negativt fund
 
@@ -4568,15 +4631,16 @@ efter datagrund:
     `/tidszone` og C36's egen tidszone-artikel. Rettet ved at give artiklen en
     bredere headline, og vagtet permanent i `src/app/title-collision.test.ts`,
     som bevidst fejler på den gamle titel. Se opgave 70.
-  9. **Ny, åben: `/procent` (149.318 visninger, CTR 0,1 %, pos. 7,4) åbner
-    på et andet eksempel end titlen lover.** Titlen er "beregn 10 procent af
-    et tal", men `ProcentBeregner`'s default er modalen "Find procent" med
-    `25 er 25.00% af 100`; den lovede `10 procent af 250 = 25` står i
-    brødteksten og kræver ét klik i modalvælgeren. Det er **ikke** et
-    løftebrud — C41 lukkede den klasse korrekt, fordi tallene står på siden —
-    så rettelsen er et **designvalg**: skal standardtilstanden følge sidens
-    egen headline-eksempel? Det kan ikke svares uden trafikdata, og derfor
-    står det her i stedet for er gjort. Mål `/procent` 2026-10-10.
+  9. ~~**`/procent` (149.318 visninger, CTR 0,1 %, pos. 7,4) åbner
+     på et andet eksempel end titlen lover.**~~ **Lukket på indholdssiden i
+     C44 (2026-09-26).** Live har siden 7 forekomster af "rabat" — GSCs
+     næststørste søgning på siden er netop rabatten i procent (57 visninger,
+     pos. 6) — samt H2'erne "Formler", "Procentregning i hverdagen",
+     "Hurtige procent-tricks" og "Ofte stillede spørgsmål". Der er altså hverken
+     et manglende eksempel eller et manglende emne at fylde; det, der mangler,
+     er **placering** på et konkurrencepræget hovedord. `/procent` er den
+     største CTR-kandidat på sitet og stadig urørt, så genmål 2026-10-10 før
+     næste skridt. Se opgave 71.
 
 ### ❓ Til Mads
 - ⏳ **VERIFICÉR DEPLOY: C43 — artiklen og `/tidszone` kan ikke længere have
