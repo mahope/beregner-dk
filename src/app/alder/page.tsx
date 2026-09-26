@@ -7,6 +7,17 @@ import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import RelatedCalculators from "@/components/RelatedCalculators";
 import RelateredeArtikler from "@/components/RelateredeArtikler";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import { ALDER_EKSEEMPLER, formatAlder } from "@/lib/alder-eksempler";
+import { getIntlLocale } from "@/lib/format";
+
+function formatDato(iso: string, locale: "da" | "no" | "se"): string {
+  const [aar, maaned, dag] = iso.split("-").map(Number);
+  return new Intl.DateTimeFormat(getIntlLocale(locale), {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(new Date(aar, maaned - 1, dag));
+}
 
 export async function generateMetadata() {
   return generatePageMetadata("alder");
@@ -16,6 +27,7 @@ export default async function AlderPage() {
   const locale = await getLocale();
   const domainConfig = await getCurrentDomainConfig();
   const pageData = getPageData("alder", locale) || getPageData("alder", "da")!;
+  const intlLocale = getIntlLocale(locale);
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -38,7 +50,65 @@ export default async function AlderPage() {
         </p>
       </div>
 
-      {/* Calculator */}
+      {/* Svar-først: Google autocomplete (2026-09-26) har "beregn alder mellem
+          to datoer" som tredje forslag til "beregn alder", og GSC viser
+          6.013 visninger på pos. 7,8 med 0,6 % CTR. Værktøjet har haft feltet
+          "Beregn alder pr. dato" hele tiden, men siden nævnte det aldrig:
+          "mellem to datoer" stod nul gange. Tallene nedenfor kommer fra
+          `beregnAlder` — samme modul som værktøjet bruger. */}
+      {(locale === "da" || locale === "se") && (
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 mb-8">
+        <h2 className="text-xl font-bold mb-3 dark:text-white">
+          {locale === "se"
+            ? "Svar på de vanligaste åldersfrågorna"
+            : "Svar på de oftest stillede aldersspørgsmål"}
+        </h2>
+        <p className="text-gray-600 dark:text-gray-400 mb-4">
+          {locale === "se"
+            ? "Båda fälten kan fyllas i: födelsedatum och det datum du vill räkna fram till. Då räknar vårktöjet hela år, månader och dagar."
+            : "Begge felter kan udfyldes: fødselsdato og den dato, du vil regne frem til. Så tæller værktøjet hele år, måneder og dage."}
+        </p>
+        <div className="overflow-x-auto">
+          <table>
+            <thead>
+              <tr>
+                <th>{locale === "se" ? "Född" : "Født"}</th>
+                <th>{locale === "se" ? "Räknar till" : "Regner til"}</th>
+                <th>{locale === "se" ? "Alder" : "Alder"}</th>
+                <th>{locale === "se" ? "Dagar levda" : "Dage levet"}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {ALDER_EKSEEMPLER.map((eksempel) => (
+                <tr key={`${eksempel.foedselsdato}-${eksempel.beregningsdato}`}>
+                  <td>{formatDato(eksempel.foedselsdato, locale)}</td>
+                  <td>{formatDato(eksempel.beregningsdato, locale)}</td>
+                  <td>
+                    <strong>{formatAlder(eksempel, locale)}</strong>
+                  </td>
+                  <td>
+                    {new Intl.NumberFormat(intlLocale).format(eksempel.totalDage)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p className="text-sm text-gray-600 dark:text-gray-400 mt-3">
+          {locale === "se"
+            ? `Född ${formatDato(ALDER_EKSEEMPLER[0].foedselsdato, locale)} var du alltså ${formatAlder(ALDER_EKSEEMPLER[1], locale)} ${formatDato(ALDER_EKSEEMPLER[1].beregningsdato, locale)} — og ${formatAlder(ALDER_EKSEEMPLER[0], locale)} ${formatDato(ALDER_EKSEEMPLER[0].beregningsdato, locale)}.`
+            : `Født ${formatDato(ALDER_EKSEEMPLER[0].foedselsdato, locale)} var du altså ${formatAlder(ALDER_EKSEEMPLER[1], locale)} ${formatDato(ALDER_EKSEEMPLER[1].beregningsdato, locale)} — og ${formatAlder(ALDER_EKSEEMPLER[0], locale)} ${formatDato(ALDER_EKSEEMPLER[0].beregningsdato, locale)}.`}
+        </p>
+        <ul className="mt-4 space-y-2">
+          {ALDER_EKSEEMPLER.map((eksempel) => (
+            <li key={`bem-${eksempel.foedselsdato}-${eksempel.beregningsdato}`} className="text-sm text-gray-600 dark:text-gray-400">
+              {eksempel.bemaerkning[locale === "se" ? "se" : "da"]}
+            </li>
+          ))}
+        </ul>
+      </div>
+      )}
+
       <div className="bg-white rounded-2xl shadow-sm p-6 md:p-8 mb-8">
         <AlderBeregner />
       </div>

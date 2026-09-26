@@ -2,6 +2,8 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import { getDomainConfigByLocale } from "@/lib/domain-config";
 import { getCurrentDomainConfig, getLocale } from "@/lib/get-locale";
+import { ALDER_EKSEEMPLER, formatAlder } from "@/lib/alder-eksempler";
+import { getPageData } from "@/lib/page-data";
 import AlderPage from "./page";
 
 vi.mock("@/components/AlderBeregner", () => ({
@@ -45,5 +47,58 @@ describe("alder page", () => {
     const html = renderToStaticMarkup(await AlderPage());
 
     expect(html).not.toContain("35 år, 10 måneder og 28 dage");
+  });
+
+  test.each([
+    { locale: "da" as const, overskrift: "Svar på de oftest stillede aldersspørgsmål" },
+    { locale: "se" as const, overskrift: "Svar på de vanligaste åldersfrågorna" },
+  ])("svarer på spørgsmålet om alder mellem to datoer i $locale", async ({ locale, overskrift }) => {
+    vi.mocked(getLocale).mockResolvedValue(locale);
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale(locale));
+
+    const html = renderToStaticMarkup(await AlderPage());
+
+    expect(html).toContain(overskrift);
+    // Rækkerne kommer fra ALDER_EKSEEMPLER, som beregnes af beregnAlder.
+    for (const eksempel of ALDER_EKSEEMPLER) {
+      expect(html).toContain(formatAlder(eksempel, locale));
+    }
+  });
+
+  test("tabellen viser præcis de fem rækker, modulet genererer", async () => {
+    const html = renderToStaticMarkup(await AlderPage());
+
+    expect(ALDER_EKSEEMPLER).toHaveLength(5);
+    for (const eksempel of ALDER_EKSEEMPLER) {
+      expect(html).toContain(formatAlder(eksempel, "da"));
+    }
+  });
+
+  test("tastaturet siger det samme som tabellen, så copy og værktøj ikke kan glide fra hinanden", async () => {
+    const html = renderToStaticMarkup(await AlderPage());
+    const faq = getPageData("alder", "da")!.faqItems;
+
+    const sporgsmaal = faq.map((item) => item.question);
+    expect(sporgsmaal).toContain("Kan jeg beregne alder mellem to datoer?");
+    expect(sporgsmaal).toContain("Hvor gammel var jeg den 1. maj 2010?");
+
+    for (const item of faq) {
+      for (const eksempel of ALDER_EKSEEMPLER) {
+        const talt = formatAlder(eksempel, "da");
+        if (item.answer.includes(talt)) {
+          expect(html).toContain(talt);
+        }
+      }
+    }
+  });
+
+  test("har ikke en fast dato-tabel på norsk, som der ikke er trafikdata for", async () => {
+    vi.mocked(getLocale).mockResolvedValue("no");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("no"));
+
+    const html = renderToStaticMarkup(await AlderPage());
+
+    expect(html).not.toContain("Svar på de oftest stillede aldersspørgsmål");
+    expect(html).toContain("Alderskalkulator");
   });
 });
