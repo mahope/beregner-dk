@@ -336,6 +336,21 @@ describe("getPageData", () => {
     }
   });
 
+  test("FAQ skelner mellem under lovens grænse og helt ædru", () => {
+    // Reelt sikkerhedsfund fra C47's audit: svaret på "hvornår må jeg køre bil
+    // igen" gav tiden til 0 ‰, som er 3,3 timer for lang tid. Begge tal skal
+    // stå, og de skal være regnet med den grænse, der gælder i landet.
+    for (const [locale, under, helt] of [
+      ["da", "2,6 timer", "5,9 timer"],
+      ["se", "4,6 timmar", "5,9 timmar"],
+    ] as const) {
+      const data = getPageData("promille", locale)!;
+      const soberFaq = data.faqItems.find((item) => /køre bil igen|köra bil igen/.test(item.question));
+      expect(soberFaq?.answer).toContain(under);
+      expect(soberFaq?.answer).toContain(helt);
+    }
+  });
+
   test.each([
     {
       locale: "da" as const,
