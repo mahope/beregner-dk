@@ -1,16 +1,19 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — **seks åbne deploynoter (C15 `/promille`, C16 `/vaegttab` +
-`/enhedspris`, C18 pensionssatserne, C19 dagpenge-satserne, C20 SU-guiden og C21
-`/su`s forældreindkomst), første kandidatvindue 12:30 2026-09-26.** 07:30-batchen
-2026-09-26 lukkede alle 21 tidligere noter ved indholdskontrol (se
-`DEPLOY OK 2026-09-26`). C16 mergerede 09:57, C18 10:52, C19 11:35, C20 11:24 og
-C21 11:32 CEST, og kan først verificeres efter 12:30-vinduet; intet er frosset
-pga. ventetiden. `/dage-til/juledagen` svarer 200 — C7 er live. Kandidaterne 37 og
-SU-klyngen er lukket (C20, C21). Næste iteration skal **ikke** optimere CTR på de
-samme svar-først-sider igen — den skal skaffe nye efterspørgselsdata (GSC-rækker
-for `/blog/*` og de næste 15 sider) eller gå efter placering/indhold, som C19-C21
-gjorde. `/api/health` svarer `status: ok`.
+STATUS: KØ — **syv åbne deploynoter (C15 `/promille`, C16 `/vaegttab` +
+`/enhedspris`, C18 pensionssatserne, C19 dagpenge-satserne, C20 SU-guiden, C21
+`/su`s forældreindkomst og C22 den svenska brødkrumme).** C15-C21 mergedes
+09:57-11:32 og er sat i 12:30-vinduet 2026-09-26; C22 mergerede 12:30 og kan
+først verificeres efter 17:30. Live 12:34 serverer stadig pre-batch-indhold, men
+vinduet var 4 minutter gammelt, så det er **ikke** `DEPLOY-MISSING`. Intet er
+frosset pga. ventetiden. `/api/health` svarer `status: ok`.
+
+Næste iteration skal **ikke** optimere CTR på de samme svar-først-sider igen.
+Den skal enten gå efter **placering/indhold** (C19-C22 gjorde det) eller efter
+de **åbne fund fra C22's research**, som endnu ikke er løst: `/leasing` (SE)
+har uændrede stub-metadata og norsk FAQ-tekst, `/tidszone` (SE) er forankret i
+Danmark, `/loen-efter-skat`'s FAQ siger den afskaffede 15 % topskat, og
+kommuneskaten står som 24,94 %, 25,07 % og 25,049 % tre steder.
 
 
 ## Fase 3 — trafik-drevet
@@ -2788,6 +2791,56 @@ gjorde. `/api/health` svarer `status: ok`.
   derfor **forkert**: det ville afvige fra DA-mønsteret og gå stale. SE `/dato`'s
   lavere CTR (0,1 % mod 0,6 %) skyldes **placering** (8,4 mod 5,8), ikke titel.
 
+#### 49. Ny kandidat — fire ubearbejdede fund fra C22's research (prioriteret)
+
+Fundene er verificeret i koden med fil/linje, men **ikke** rettet i denne
+iteration (tidsbudget). Rangordnet efter trafik × tillid:
+
+1. **`/loen-efter-skat`'s FAQ siger den afskaffede 15 % topskat som gældende
+   lov** (`page-data.ts:1203`: "Tjener du over topskattegrænsen, betales også
+   15% topskat") — to linjer længere nede i **samme array** står modsætningen
+   ("Den gamle topskat på 15% er afskaffet", `:1205`), som sidens egen prosa og
+   `SATSER_2026` (7,5 % / 7,5 % / 5 %) også siger. Fejlen er dermed synlig **og**
+   går ind i `FAQSchema`-JSON-LD på en lønside. Ét linjeskifte.
+2. **Kommuneskat 2026 står som tre forskellige tal.** Korrekt er
+   `SATSER_2026.kommuneskatSnit = 25,049 %` (verificeret i research-fund 7 og
+   håndhævet af `satser-2026.test.ts`). Men: `page-data.ts:1207` siger
+   **24,94 %** på `/loen-efter-skat` (hverken gammel eller ny værdi),
+   `loen-efter-skat/page.tsx:84` siger **25,07 %** på **samme side**,
+   `page-data.ts:1231` siger 25,07 % i `/brutto-netto`'s FAQ, og
+   `BruttoNettoBeregner.tsx:16` importerer `KOMMUNE_SNIT` uden at bruge den,
+   mens `:195` bruger kirkeskatten fra modulet. Skarpeste tegn på et gammelt tal.
+   **Forbehold:** `/api/v1/loen` og `/api/v1`-dokumentationen bruger også 25,07 %
+   og 0,68 %, og `/api/v1` er en **frosset ekstern kontrakt** i Danger Zones — så
+   rett den kun efter en eksplicit beslutning om API'en (jf. ❓ Til Mads).
+3. **SE `/leasing` er uændrede stub-metadata** (`page-data.ts:3406-3422`):
+   titel "Leasing Kalkylator", description "Gratis kalkylator", og tre
+   placeholder-FAQ-spørgsmål med **norsk** tekst (*jeg*, *kalkylatoren*). Desuden
+   viser `LeasingBeregner.tsx:299,304,309,332,336` den danske enhed `kr./md` på
+   svensk. Trafik: 46 besøgende, 3.181 visninger, 30 klik, **pos 12,5** — altså
+   lige under top-10, hvor svar-først metadata har størst effekt. `no`-varianten
+   er en klon af samme stub og bør rettes i samme pas, ellers divergerer de to.
+4. **SE `/tidszone` er forankret i Danmark** (`TidszoneBeregner.tsx:88,105,125,129`:
+   "Danmark (CET/CEST)", "Köpenhamn", "Tidsskillnad från Danmark"), mens sidens
+   egen svenska metadata og prosa svarer på "Vad är klockan i USA när det är 12
+   i Sverige?". **Talberøringen er ikke berørt** — Sverige og Danmark deler
+   CET/CEST — så det er en mærkning, ikke en regnefejl. 3.189 visninger/28d
+   (SE), men ikke i DA-top-15.
+
+**Andre fund fra samme research, lavere prioritet (kun nævnt, ikke verificeret
+yderligere):** `/efterloen` bruger en folkepensionsalder-tabel der modsiger den
+verificerede `folkepension.ts` (født 1963: 69 år her, 68 år på `/pension`), og
+udbetaler derfor ét år for meget; `/billaan`'s eksempeltabel har 7 %-tal i to
+7-års-rækker under overskriften "Rente 6 %"; `/husleje` siger 1-3 måneders
+depositum mens `/flyttebudget` siger 3-6; `/solceller`'s FAQ siger 25-30 år mod
+sidens 15-20; `/gaeldsfri`'s "Effekt af ekstra afdrag"-boks kan aldrig vise noget,
+fordi baseline-kaldet `simuler(() => 0)` stadig anvender den lukkede `ekstra`
+(`GaeldsfriBeregner.tsx:248`); `EfterloensBeregner.tsx:124` giver én
+præmieportion pr. 481 timer, mens UI og FAQ siger 962 timer. **Bemærk:** den
+første halvdel af denne liste er fra DA-fladen, anden halvdel fra SE — de er
+ fundet af to parallelle research-spor og er **ikke** alle krydsverificerede af
+ mig. Den næste iteration skal bekræfte den konkrete linje, før den ændrer noget.
+
 
 ### ❓ Til Mads
 - **Beskæftigelsestillægget på 26.198 kr/md (C19, 2026-09-26) — må ikke gættes.**
@@ -3252,16 +3305,29 @@ landmark=lån, piggybank=opsparing osv.).
 
 ## VERIFICÉR DEPLOY-log
 - ⏳ **ÅBEN — VERIFICÉR DEPLOY: C15 `/promille`, C16 `/vaegttab` + `/enhedspris`,
-  C18 pensionsguiden, C19 dagpenge-guiden, C20 SU-guiden og C21 `/su`.**
+  C18 pensionsguiden, C19 dagpenge-guiden, C20 SU-guiden, C21 `/su` og C22 den
+  svenska brødkrumme.**
   Merge-tidspunkter 2026-09-26 09:57 (C16), 10:52 (C18), 11:35 (C19), 11:24
-  (C20) og 11:32 (C21) CEST. Første kandidatvindue er **12:30** 2026-09-26;
-  07:30-batchen gik før alle seks merges. Verificér ved **indholdskontrol**,
-  ikke HTTP 200:
+  (C20), 11:32 (C21) og **12:30 (C22)** CEST. Første kandidatvindue for de seks
+  første noter er **12:30** 2026-09-26; 07:30-batchen gik før alle seks merges.
+  **C22 mergede 12:30** og kan først verificeres efter 17:30-vinduet.
+  - **Indholdskontrol 12:34 CEST (lige efter 12:30-vinduets start):** `/api/health`
+    svarer `status: ok`, men `/su`, `/blog/su-2026-satser-og-regler`,
+    `/blog/dagpenge-saadan-finder-du-din-sats`, `/promille` og `/vaegttab` serverer
+    **stadig pre-batch-indhold** (dagpenge 10× `20.359`, ingen `0,88` på
+    `/promille`, ingen `419.589`/`2.966`/`129.106` på `/su`), og
+    `beraknare.se/dato` har stadig 2× `/kategori/hverdag`. Det er forventet:
+    vinduet var **4 minutter gammelt**, da kontrollen blev foretaget, og en
+    batch-deploy er ikke færdig på fire minutter. **Det er endnu ikke
+    `DEPLOY-MISSING`** — det kræver to vinduer. Genkontrollér efter 17:30.
+  - Verificér ved **indholdskontrol**, ikke HTTP 200:
   - `/promille` (DA): eksemplet 4 øl/4 öl på 80 kg = 0,88 ‰ og FAQ om, hvornår
     man må køre igen.
   - `/vaegttab` (DA/SE/NO) og `/enhedspris` (DA/SE): svar-først-blokken.
   - `/blog/pension-hvor-meget-skal-du-spare-op`: loftet **68.700 kr.** (ikke
-    63.000).
+    63.000). Bemærk: live 12:34 har **både** 4× `63.000` og 4× `68.700` — 68.700
+    kan være et andet, legitimt tal på samme side (f.eks. et andet loft), så
+    C18's note skal verificeres på den konkrete sætning, ikke på taltælling alene.
   - `/blog/dagpenge-saadan-finder-du-din-sats` + `/dagpenge`: 22.041 / 14.694 /
     18.074 / 15.759 / 1.017 kr., og værktøjets dimittendstal 15.759/18.074.
   - `/blog/su-2026-satser-og-regler`: titel "SU 2026: 7.426 kr. pr. måned
@@ -3272,6 +3338,11 @@ landmark=lån, piggybank=opsparing osv.).
     419.589/710.077/43.086 kr., sats-rækken med forsørgertillæg ved delt bolig
     **2.966 kr.**, udlandsstudielånet **129.106 kr.** i lånelisten og to nye
     FAQ-svar.
+  - **C22 (SV):** `beraknare.se` skal have **0** `/kategori/`-referencer i
+    HTML og i JSON-LD på f.eks. `/dato`, `/tidsberegner` og `/alder`; den
+    svenska `/dagar-till/1-december` skal sige "**svensk** helgdag" (ikke
+    "dansk"). Dansk `/kategori/hverdag` skal fortsat være **200** og stadig
+    linkes i brødkrummen på minberegner.dk.
   - `/api/health` skal svare `status: ok` under alle kontroller.
   Er indholdet stadig gammelt efter **to** batch-vinduer, skrives
   `DEPLOY-MISSING` og der merges ikke til `master` før et menneske har kigget.
