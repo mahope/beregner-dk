@@ -3100,6 +3100,9 @@ const sePages: Record<string, PageData> = {
       schemaCategory: "UtilitiesApplication",
       faqItems: [
       { question: "Hur beräknar jag procent av ett tal?", answer: "Multiplicera talet med X och dela med 100. Exempel: 25% av 200 = 50." },
+      { question: "Hur räknar man ut procent i Excel?", answer: "Skriv =A1/B1 om du vill ha andelen, eller =A1/B1*100 om du vill ha procent direkt. 2 500 kr av 10 000 kr ger 0,25, alltså 25 procent. Formatera cellen som procent om du inte skriver *100." },
+      { question: "Hur räknar man ut hur stor del av en summa som är X?", answer: "Dividera beloppet med summan. 2 500 kr av en nota på 10 000 kr = 2 500 / 10 000 = 0,25 = 25 procent." },
+      { question: "Hur räknar man ut procent på lön?", answer: "Räkna ut skillnaden mellan ny och gammal lön och dividera med den gamla lönen. 33 000 kr mot 30 000 kr ger 3 000 / 30 000 = 10 procent." },
       { question: "Hur beräknar jag procentuell ökning?", answer: "((Ny - Gammal) / Gammal) × 100. Från 100 till 125 = 25% ökning." },
       { question: "Vad är procentenheter vs procent?", answer: "Procentenheter är absolut förändring, procent är relativ. Räntan från 2% till 3% = 1 procentenhet men 50% ökning." },
       { question: "Hur lägger jag till procent?", answer: "Multiplicera med (1 + procent/100). Lägg 20% till 150: 150 × 1,20 = 180." },

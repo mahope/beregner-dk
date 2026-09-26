@@ -673,8 +673,8 @@ describe("svenska svar på frågeformulerade sökningar", () => {
   // "räkna ut timmar och minuter", "färetagsleasing bil kalkyl"), men frågan
   // fanns inte på sidan. position 8-15 med 0,1-0,9 % CTR er et spørgsmål om
   // svarform, ikke om titel.
-  const frageForm = (slug: string) =>
-    getPageData(slug, "se")!.faqItems.map((item) => `${item.question} ${item.answer}`).join(" ");
+  const frageForm = (slug: string, locale: "da" | "no" | "se" = "se") =>
+    getPageData(slug, locale)!.faqItems.map((item) => `${item.question} ${item.answer}`).join(" ");
 
   test("/dato svarar på de fire svenska dags-sökninger", () => {
     const text = frageForm("dato").toLowerCase();
@@ -695,6 +695,28 @@ describe("svenska svar på frågeformulerade sökningar", () => {
     const text = frageForm("leasing").toLowerCase();
     expect(text).toContain("färetagsleasing");
     expect(text).toContain("4.121 kr");
+  });
+
+  // SE /procent har 23.294 visninger og 2 klik (pos. 10,2) — så meget
+  // inside på side 2. Autocomplete (hl=sv, 2026-09-26) viser at de svenske
+  // søgningerne er spørgsmål om konkrete opgaver: "hur räknar man ut
+  // procent i excel", "procent av summa" og "hur räknar man ut procent på
+  // lön". Ingen af dem fandtes på siden.
+  test("/procent svarar på de svenska procent-søgninger", () => {
+    const text = frageForm("procent").toLowerCase();
+    expect(text).toContain("hur räknar man ut procent i excel");
+    expect(text).toContain("=a1/b1*100");
+    expect(text).toContain("hur stor del av en summa");
+    expect(text).toContain("hur räknar man ut procent på lön");
+  });
+
+  // Dansk/norsk skal være urørt: den danske sides tax-eksempel (37 %) er en
+  // dansk sats på en svensk side, og det er svensken der mangler tal.
+  test("de danske og norske /procent-sider er uændrede", () => {
+    for (const locale of ["da", "no"] as const) {
+      const text = frageForm("procent", locale);
+      expect(text).not.toMatch(/i excel/i);
+    }
   });
 
   test("den svenska leasing-FAQ har ingen dansk rester eller brudt svensk", () => {
