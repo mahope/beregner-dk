@@ -199,6 +199,21 @@ describe("slug-opløsning", () => {
   test("hver event har et unikt id", () => {
     expect(new Set(DAGE_TIL_EVENTS.map((e) => e.id)).size).toBe(DAGE_TIL_EVENTS.length);
   });
+
+  test("juleaften ligger præcis én dag før juledagen i begge sprog", () => {
+    const juleaften = DAGE_TIL_EVENTS.find((e) => e.id === "juleaften");
+    const juledagen = DAGE_TIL_EVENTS.find((e) => e.id === "juledagen");
+    expect(juleaften).toBeDefined();
+    expect(juledagen).toBeDefined();
+    for (const locale of ["da", "se"] as const) {
+      expect(getDageTilSlugs(locale)).toContain(juleaften![locale].slug);
+      expect(juleaften![locale].copy.question).toContain(juleaften![locale].copy.short);
+      const from = getNextAnchorDate(juleaften!.anchor[locale], iso("2026-09-25"));
+      const to = getNextAnchorDate(juledagen!.anchor[locale], iso("2026-09-25"));
+      expect((to.getTime() - from.getTime()) / dayMs).toBe(1);
+      expect(getDageTilAnswer(juleaften!, locale, iso("2026-09-25")).days).toBe(90);
+    }
+  });
 });
 
 describe("dato-anker", () => {
