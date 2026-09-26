@@ -8,11 +8,16 @@ import { generateShareableLink, getStateFromUrl, CalculationState } from '@/lib/
 import { trackCalculation, initScrollDepthTracking } from '@/lib/analytics';
 import { AffiliateBox } from "./AffiliateBox";
 import { adtractionLink } from "@/lib/adtraction";
+import {
+  efterloenAlder,
+  praemieManglerForudsætning,
+  praemiePortioner,
+  SKATTEFRI_PRAEMIE_2026,
+} from "@/lib/efterloen";
 
 // 2026 satser (kilde: bm.dk, borger.dk)
 const MAX_EFTERLOEN_91 = 20057;  // 91% af max dagpenge (22.041 × 0,91)
 const MAX_EFTERLOEN_100 = 22041; // 100% for 2 års udskydelse
-const PRAEMIE_PER_PORTION = 15500;
 
 export default function EfterloensBeregner() {
   const [birthYear, setBirthYear] = useState<string>('1963');
@@ -20,7 +25,7 @@ export default function EfterloensBeregner() {
   const [yearsContributed, setYearsContributed] = useState<string>('30');
   const [postpone2Years, setPostpone2Years] = useState(false);
   const [workWhileOnEfterloen, setWorkWhileOnEfterloen] = useState(false);
-  const [hoursPerYear, setHoursPerYear] = useState<string>('962');
+  const [hoursPerYear, setHoursPerYear] = useState<string>('1560');
   const hasLoadedUrl = useRef(false);
   const hasTracked = useRef(false);
 
@@ -67,7 +72,7 @@ export default function EfterloensBeregner() {
     setYearsContributed('30');
     setPostpone2Years(false);
     setWorkWhileOnEfterloen(false);
-    setHoursPerYear('962');
+    setHoursPerYear('1560');
   }, []);
 
   const result = useMemo(() => {
@@ -80,28 +85,20 @@ export default function EfterloensBeregner() {
       return { eligible: false, reason: 'Du skal have indbetalt efterlønsbidrag i mindst 30 år.' };
     }
 
-    // Calculate efterløn age based on birth year
-    let efterloenAge: number;
-    let folkepensionAge: number;
-    if (year <= 1960) {
-      efterloenAge = 62;
-      folkepensionAge = 67;
-    } else if (year === 1961) {
-      efterloenAge = 63;
-      folkepensionAge = 68;
-    } else if (year === 1962) {
-      efterloenAge = 63.5;
-      folkepensionAge = 68;
-    } else if (year === 1963) {
-      efterloenAge = 64;
-      folkepensionAge = 69;
-    } else if (year === 1964) {
-      efterloenAge = 64.5;
-      folkepensionAge = 69;
-    } else {
-      efterloenAge = 65;
-      folkepensionAge = 69 + Math.floor((year - 1965) / 5);
+    // Efterløns- og folkepensionsalder fra borger.dk's skema (se src/lib/efterloen.ts)
+    const alder = efterloenAlder(year);
+
+    if (alder.udenForTabel) {
+      return {
+        eligible: false,
+        reason:
+          'Fødselsåret er nyere end den offentliggjorte tabel. Efterlønsalderen stiger løbende, så spørg din a-kasse.',
+      };
     }
+
+    const efterloenAge = alder.efterloensalder;
+    const folkepensionAge = alder.folkepensionsalder!;
+    const maxAarEfterloen = alder.maxAarPaaEfterloen!;
 
     // Calculate monthly amount
     let monthlyAmount: number;
@@ -112,29 +109,32 @@ export default function EfterloensBeregner() {
     }
 
     // Calculate efterløn period
-    const efterloenYears = folkepensionAge - efterloenAge - (postpone2Years ? 2 : 0);
+    const efterloenYears = maxAarEfterloen - (postpone2Years ? 2 : 0);
 
     // Tax estimate (~38% average)
     const taxRate = 0.38;
     const monthlyAfterTax = Math.round(monthlyAmount * (1 - taxRate));
 
-    // Calculate premium portions if working
-    let praemiePortioner = 0;
-    if (workWhileOnEfterloen && hours >= 962) {
-      praemiePortioner = Math.min(12, Math.floor((hours / 481))); // ~481 hours per portion
-    }
-    const totalPraemie = praemiePortioner * PRAEMIE_PER_PORTION;
+    // Skattefri præmie: 481 timer pr. portion, maks 12 portioner. Kræver at
+    // efterlønnen er udskudt 2 år (borger.dk, se src/lib/efterloen.ts).
+    const portioner = workWhileOnEfterloen
+      ? praemiePortioner(hours, postpone2Years)
+      : 0;
+    const praemieMangler = workWhileOnEfterloen && praemieManglerForudsætning(hours, postpone2Years);
+    const totalPraemie = portioner * SKATTEFRI_PRAEMIE_2026.portion[insurance];
 
     return {
       eligible: true,
       efterloenAge,
       folkepensionAge,
+      alderPraecis: alder.praecis,
       efterloenYears,
       monthlyAmount: Math.round(monthlyAmount),
       monthlyAfterTax,
       yearlyAmount: Math.round(monthlyAmount * 12),
       totalAmount: Math.round(monthlyAmount * 12 * efterloenYears),
-      praemiePortioner,
+      praemiePortioner: portioner,
+      praemieMangler,
       totalPraemie,
       postponeBonus: postpone2Years,
     };
@@ -153,10 +153,13 @@ export default function EfterloensBeregner() {
               type="number"
               value={birthYear}
               onChange={(e) => setBirthYear(e.target.value)}
-              min="1955"
-              max="1990"
+              min="1956"
+              max="1970"
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:ring-blue-400"
             />
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              Tabel med efterlønsalder er offentliggjort for fødte 1956-1970
+            </p>
           </div>
 
           <div>
@@ -241,13 +244,16 @@ export default function EfterloensBeregner() {
                   value={hoursPerYear}
                   onChange={(e) => setHoursPerYear(e.target.value)}
                   min="0"
-                  max="1924"
+                  max="5772"
                   className="w-full px-4 py-3 pr-14 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:ring-blue-400"
                 />
                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 text-sm">timer</span>
               </div>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Ved mindst 962 timer/år kan du optjene skattefri præmie
+                Hver 481 timer giver én skattefri præmieportion på 15.870 kr.
+                (10.580 kr. for deltidsforsikrede). Maks 12 portioner. Forudfyldt
+                er 1.560 timer, som er de 3.120 timer borger.dk kræver i de to års
+                udskydelse
               </p>
             </div>
           )}
@@ -273,6 +279,12 @@ export default function EfterloensBeregner() {
                 <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                   Folkepension: {result.folkepensionAge} år
                 </div>
+                {result.alderPraecis === false && (
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    Født i 1959 er fødselsdatoen afgørende: 63½ år til 30. juni,
+                    ellers 64 år
+                  </div>
+                )}
               </div>
 
               <div className="bg-white dark:bg-gray-700 rounded-lg p-4 shadow-sm">
@@ -304,6 +316,15 @@ export default function EfterloensBeregner() {
                   </div>
                 </div>
               </div>
+
+              {workWhileOnEfterloen && result.praemieMangler && (
+                <p className="text-xs text-yellow-700 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-3">
+                  For at optjene skattefri præmie fra efterløn skal du have ventet
+                  2 år med at gå på efterløn. Sæt flueben for 2-års reglen
+                  ovenfor, eller optjén præmien via dit efterlønsbevis, inden du
+                  går på efterløn.
+                </p>
+              )}
 
               {workWhileOnEfterloen && result.praemiePortioner && result.praemiePortioner > 0 && (
                 <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-4">
@@ -357,8 +378,9 @@ export default function EfterloensBeregner() {
         <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
           <h4 className="font-semibold text-green-800 dark:text-green-300 mb-2 flex items-center gap-2"><Trophy className="h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden="true" focusable="false" />Præmieordningen</h4>
           <p className="text-sm text-green-700 dark:text-green-400">
-            Arbejder du mindst 962 timer/år mens du er på efterløn, 
-            kan du optjene skattefri præmieportioner på ca. 15.500 kr. hver.
+            Som udgangspunkt udløser 481 arbejdstimer én skattefri præmieportion på
+            15.870 kr. for fuldtidsforsikrede (10.580 kr. for deltidsforsikrede), og
+            du kan højst optjene 12 portioner. Kilde: borger.dk, verificeret 26/9 2026.
           </p>
         </div>
       </div>
