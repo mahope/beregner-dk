@@ -8,6 +8,7 @@ import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { useLocale } from "@/components/LocaleProvider";
 import { getIntlLocale } from "@/lib/format";
 import { isoUge, antalUgerIIsoAar, IsoUgeResultat } from "@/lib/ugenummer";
+import { tilIsoDato } from "@/lib/lokal-dato";
 
 const labels = {
   da: {
@@ -28,9 +29,9 @@ export default function UgenummerBeregner() {
   const { locale } = useLocale();
   const l = labels[locale as keyof typeof labels] || labels.da;
 
-  const [datoStr, setDatoStr] = useState<string>(() =>
-    new Date().toISOString().split("T")[0]
-  );
+  // `toISOString()` skriver dagen i UTC, så en dansk læser kl. 01.00 ville få
+  // i går som standard — og dermed ugenummeret for i går. Se `lokal-dato.ts`.
+  const [datoStr, setDatoStr] = useState<string>(() => tilIsoDato(new Date()));
 
   const hasTracked = useRef(false);
 
@@ -45,7 +46,7 @@ export default function UgenummerBeregner() {
   }, []);
 
   const handleReset = useCallback(() => {
-    setDatoStr(new Date().toISOString().split("T")[0]);
+    setDatoStr(tilIsoDato(new Date()));
   }, []);
 
   const getShareableLink = useCallback(() => {

@@ -1,6 +1,28 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — **C53 er landet: `/procent` skrev alle tal i forklaringen uden
+STATUS: KØ — **C54 er landet: de to sidste UTC-datoer i beregnerne er væk, og
+moms-guiden fortæller nu, hvilken knap man trykker på.** `AlderBeregner` (3
+forekomster) og `UgenummerBeregner` (2) byggede stadig "i dag" med
+`new Date().toISOString().split("T")[0]`, altså dagen i UTC — præcis den fejl C50
+rettede på `/dato` i sidste iteration. Kl. 00.30 dansk tid er UTC stadig dagen
+før, så en læser i Danmark, Sverige og Norge fik **dagen i går** som standard, og
+på `/ugenummer` dermed også **ugenummeret for i går** i de timer, hvor det kan
+gøre en forskel. Alle fem bruger nu `tilIsoDato` fra `src/lib/lokal-dato.ts`.
+Testen `src/components/standarddato.test.tsx` **låser tidszonen til
+`Europe/Copenhagen`** og sætter klokken til 00.30 — uden det kan fejlen ikke
+kunne fejle på en byggemaskine med UTC-tid. Verificeret modsvejs: med den gamle
+kode falder 3 af de 4 tests, med den nye er alle 4 grønne. Samme gennemgang fandt
+en **fejl i C52's egen efterspørgselsnote**: `/blog/hvordan-beregner-man-moms` er
+ikke nævnt i promptens GSC-liste, men den fanger præcis den søgning C52 ville dække
+("hvordan trækker man moms fra"). Guiden lærer tre regnestykker — læg til, træk
+fra, find momsbeløbet — og `/moms` har præcis tre knapper med præcis de navne, men
+guiden sagde det aldrig, og dens første link til beregneren lå **nederst** efter otte
+afsnit. Nu ligger linket i indledningen, og CTA-afsnittet navngiver alle tre knapper
+med hvert regnestykke og sit tal. Gate grøn: lint (545 filer), **1490 tests / 140
+filer** (fra 1486 / 139) og build (141 sider). Kode + plan i ét commit på
+`ceo/lokale-datoer`; første kandidatvindue **2026-09-27 07:30**. Se opgave 82.
+
+STATUS (forrige iteration) — **C53 er landet: `/procent` skrev alle tal i forklaringen uden
 tusindtalsseparator, og resultaterne med punktum som decimaltegn.** Sidens
 største tal — hovedresultatet — kom fra `n.toFixed(2)`, som giver **"12.50%"**
 og ikke "12,50 %", og de fire forklaringer (`explainFindProcent`,
@@ -72,33 +94,50 @@ tilstanden kalder `beregnAlder`, og et tomt eller umuligt datofelt giver intet
 resultat frem for "NaN dage". Kode + plan i ét commit på `ceo/dato-alder-lokaldato`;
 første kandidatvindue **2026-09-27 07:30**. Se opgave 78.
 
-**Seks deploynoter står åbne: C37, C49, C50, C51, C52 og nu C53**, alle med
+**Syv deploynoter står åbne: C37, C49, C50, C51, C52, C53 og nu C54**, alle med
 første kandidatvindue 2026-09-27 07:30 (C37: 12:30). 21:30-vinduet den 26/9 er
-passeret, så intet kan verificeres før 07:30. `beregner.no`-delen af enhver note verificeres ikke: den URL er et
-separat site, ikke dette repo (se ❓).
+passeret, så intet kan verificeres før 07:30. `beregner.no`-delen af enhver note
+verificeres ikke: den URL er et separat site, ikke dette repo (se ❓).
 
-**Næste iteration: C52's auditklasse er lukket, så spørgsmålet er ikke længere
-"hvilken trafikstærke side mangler en audit" men "hvad gør en helt anden klasse
-mest trafik".** De otte sider i C47-C52's række er kørt, og kun `/moms` gav
-fund i koden ud over `/promille` og de tre sider med datofelter — dvs. den
-billige metode er **udtømt på dette sæt af sider**. To konkrete
-efterladensværdige spor fra C52:
-1. **`MOMS_SATS = 0.25` i `src/lib/energi/elpriser.ts:12`** er en hårdkodet
-   duplikat af det nye `src/lib/moms.ts`. Den ligger på missionens
-   rør-ikke-liste, så det kræver en iteration, der kører elprisernes tests
-   og gør det ordentligt — ikke en løbetid.
-2. **`/blog/hvordan-beregner-man-moms`** burde linke til `findMoms`-tilstanden
-   på `/moms` (GSC: "hvordan trækker man moms fra", pos. 1 men kun 1
-   visning).
+**To negative fund fra C54, så ingen senere iteration bruger tid på dem.**
+1. **"2026 har 253 arbejdsdage" på `/dato` er korrekt** — den så ud som en fejl,
+   fordi 2026 har 261 hverdage. `taellArbejdsdage` tæller dog **også nytårsaften
+   31. december som ikke-arbejdsdag** (`erNytarsaften` i `src/lib/helligdage.ts`),
+   og 31. december 2026 er en torsdag: 261 − 7 helligdage på hverdag − 1
+   nytårsaften = **253**. Siden siger det selv to steder ("Weekender, helligdage og
+   nytårsaften springes over" og en note om nytårsaften), så tal, side og værktøj
+   er enige. Ikke en fejl — men et tal der **ser** forkert ud, fordi læseren
+   regner 254. Hvis nogen senere efterprøver det, er definitionen ovenfor svaret.
+2. **META på de fire største CTR-sider er ikke det problem, de ligner.** DA
+   `/tidsberegner` (72.382 visninger, CTR 0,3 %, pos. 7,0) har titlen "Tidsberegner
+   – timer mellem klokkeslæt | MinBeregner.dk" med eksemplet "08:30 til 16:45 er
+   8 timer og 15 minutter" i både title og description; `/moms` har "Momsberegner
+   25 % – inkl. og ekskl. moms" med 1.000 → 1.250 i description; `/alder` har
+   "Aldersberegner: hvor gammel er du i år, måneder og dage?" med regneeksemplet;
+   `/kalorier` har "Hvor mange kalorier om dagen? | Kalorieberegner" med BMR/TDEE.
+   Alle fire har altså **head-termen først og et konkret tal med**, hvilket er præcis
+   det CTR-gættet siger på. Lav CTR på danske head-termer ved position 5-8 er derfor
+   **et rankingsproblem, ikke et titelproblem** på dette sæt sider. Flere
+   titel-eksperter i en iteration er spildt tid.
 
-Ellers er de ubearbejdede mål fra C51's note uændrede: de to øvrige
-`toISOString().split("T")`-forekomster (`AlderBeregner` 3, `UgenummerBeregner`
-2) og "2026 har 253 arbejdsdage" på `/dato`. **Bemærk at
-`AlderBeregner`/`UgenummerBeregner` er præcis de samme to filer, der med
-`UgenummerBeregner` også er den næste klasse efter `/moms`:** de bruger UTC
-`toISOString()`-datoer, som C50 netop rettede på `/dato`. Det er en reel
-forekomst-til-forekomst-klasse, ikke ét fund, så den tager en hel iteration at
-gøre ordentligt.
+**Næste iteration: C54 lukkede de tre sidste løbetråde fra C51/C52's noter, så
+den næste opgave skal være en klasse der flytter trafik, ikke en fjerde
+restfejl.** De tre var: `MOMS_SATS = 0.25` i `src/lib/energi/elpriser.ts:12`
+(hårdkodet duplikat af `src/lib/moms.ts`, på rør-ikke-listen, kræver en iteration
+der kører elprisernes tests), moms-guidens manglende knapnavne, og de fem
+UTC-datoer. **Alle tre er lukket nu** — `MOMS_SATS` er bevidst * ikke* rørt i C54,
+fordi det kræver elprisernes tests og derfor ikke må dele commit med en
+dato-rettelse.
+
+**Foreslået næste opgave (C55) — de tre danske sider der vokser uden at få
+søstersider.** Plausible 28 dage: `/boligstoette` 532 besøgende (+94 %, 2 %
+bounce, 483 indgangssider), `/kvadratmeter` 377 (+98 %, 350 indgangssider) og
+`/rentefradrag` 306 (+151 %, CTR 5,0 % i GSC, pos. 6,6 med "rentefradrag 2026" på
+pos. 2). De tre er de hurtigst voksende danske sider og de tre med højest
+indgangsandel pr. besøg, og ingen af dem har et indlæg der fanger spørgsmålformen
+sådan som C35 gjorde for `/kvadratmeter` og C36 for `/tidszone`. Én side ad gangen,
+med ægte tal og kilde, målt mod baseline.
+
 
 **Fælden fra C51 gjaldt også denne iteration, og den samme regel redder igen:**
 et nyt navn skal findes med `grep` i den fil der bruger det, før det skrives i
@@ -5611,6 +5650,60 @@ top-15, så ud over CTR er det eneste målbare signal `ad_clicked` på siden.
     (24.723 visninger), `/tidsberegner` (72.382), `/alder` (6.013) og
     `/dato` (130.392) gør klassen til den næste klare kø-post.
 
+#### 82. [x] FÆRDIG 2026-09-27 — C54 — De to sidste UTC-datoer i beregnerne, og moms-guiden der ikke sagde hvilken knap
+
+- **Iteration start:** 2026-09-27 00:26 CEST på `ceo/lokale-datoer`. Køen var
+  tom (alle 81 opgaver færdige, intet `I GANG`). De syv åbne deploynoters første
+  kandidatvindue er 07:30, altså efter iterationsgrænsen, så intet kunne
+  verificeres. Valget blev de to konkrete løbetråde fra C51's og C52's noter,
+  fordi de er **nævnt med fil og linje** og derfor ikke kræver ny research.
+- **Datagrund:** `/alder` 6.013 GSC-visninger (35 klik, CTR 0,6 %, pos. 7,8) og
+  `/ugenummer` er ikke i GSC's top-15, men er en del af `/dato`-familien på
+  Plausible (besøgende fra dansk/svensk/norsk timezone). Metoden er C50's:
+  find den forekomst-til-forekomst-klasse, C50 netop rettede på `/dato`.
+- **Fund 1 — fem UTC-datoer, to filer.** `AlderBeregner` havde tre
+  `new Date().toISOString().split("T")[0]` (initial state, reset, "Brug i dag"-knap)
+  og `UgenummerBeregner` to (initial state, reset). `toISOString()` skriver i
+  UTC, så kl. 00.00-02.00 dansk/svensk/norsk tid gav **dagen i går** som standard.
+  På `/alder` er det en dag på alderen (kun synlig på fødselsdagen); på
+  `/ugenummer` er det **ugenummeret for i går**, fordi `isoUge` tæller fra den
+  indtastede ISO-dato. Alle fem bruger nu `tilIsoDato(new Date())` fra
+  `src/lib/lokal-dato.ts` (C50's modul) — ingen ny fil, ingen ny afhængighed.
+- **Fund 2 — guiden lærer tre regnestykker, værktøjet har tre knapper, guiden
+  sagde aldrig hvilken.** `/blog/hvordan-beregner-man-moms` har tre H3-afsnit
+  ("Læg moms til", "Træk moms fra", "Find momsbeløbet"), og `MomsBeregner` har
+  præcis tre knapper med præcis de navne (C52's `labels.tillaegTitle` /
+  `fratraekTitle` / `findTitle`) — men guiden linkede til `/moms` **én gang, nederst
+  efter otte afsnit**, og uden at nævne en eneste knap. GSC's "hvordan trækker man
+  moms fra" lå på pos. 1 med 1 visning, altså en søgning vi svarer på svært dårligt
+  på selve værktøjet. Nu ligger linket i indledningen (C34's regel: CTA før tredje
+  hovedsektion), og CTA-afsnittet er en liste med knapnavn + regnestykke + tal fra
+  guidens egne eksempler (800 → 1.000, 1.000 → 800, 1.000 indeholder 200 = 20 %).
+  H2'en "Tillæg moms til en pris" → "Læg moms til en pris", så guiden og værktøjet
+  bruger samme ord som C52 fastsatte. Keywords "tillæg moms"/"fratræk moms" er
+  **beholdt** — det er søgeord, ikke dansk.
+- **Test:** `src/components/standarddato.test.tsx` (ny, 4 tests) sætter
+  `process.env.TZ = "Europe/Copenhagen"` og `vi.setSystemTime("2026-09-27T00:30:00")`,
+  hvor UTC er 2026-09-26 og dansk tid 2026-09-27. **Dette er hele pointen:** på en
+  byggemaskine med UTC-tid kan fejlen slet ikke fejle, så uden en låst timezone
+  ville testen være grøn med den gamle kode. Verificeret modsvejs med `git stash`:
+  med den gamle kode falder 3 af 4 tests, med den nye er alle 4 grønne. Første test
+  siger eksplicit at de to datoer er på hver sin dag, så en fremtidig ændring af
+  tidspunktet ses.
+- **Gate:** `npm run lint` grøn (545 filer), `npm run test` **1490 tests / 140
+  filer** grøn (fra 1486 / 139), `npm run build` grøn (141 sider, 7 kendte
+  pre-existing CSS-advarsler). Første kandidatvindue **2026-09-27 07:30**.
+- **MÅL:** `/alder` baseline 6.013 visninger / 35 klik / CTR 0,6 % / pos. 7,8
+  (GSC 2026-08-27 → 2026-09-24) og 15 besøgende/28d i Plausible 2026-09-26.
+  `/ugenummer`: ingen GSC-række i snapshot. **Mål 2026-10-10.** Rettelsen er en
+  korrekthedsting i de timer, hvor den træffer, så den forventes **ikke** at
+  kunne ses i trafiktallet; den er skrevet her, fordi "ingen effekt" så ikke
+  læses som en fejl i C54.
+- **Negative fund (se topnoten):** "2026 har 253 arbejdsdage" på `/dato` er
+  **korrekt** (261 hverdage − 7 helligdage på hverdag − nytårsaften 31/12), og
+  META på de fire største CTR-sider har allerede head-term + konkret tal, så lav
+  CTR der er ranking, ikke titel.
+
 
 ### Næste kandidater efter C34 — lukket med negativt fund
 
@@ -6622,6 +6715,15 @@ landmark=lån, piggybank=opsparing osv.).
     - Gate grøn: lint ok, 280/280 tests, build ok (128 pages).
 
 ## VERIFICÉR DEPLOY-log
+- ⏳ **ÅBEN — C54 lokal dato i `/alder` + `/ugenummer`, moms-guide-knapper,
+  kode `PENDING`, merge `PENDING` 2026-09-27 00:5x CEST.** Første
+  kandidatvindue **2026-09-27 07:30**. Indholdstjek ved det nye build: på
+  `/alder` og `/ugenummer` skal datofeltet ved 00.30 dansk tid vise **dagens**
+  dato og ikke i går (kan ikke ses uden for det tidsrum, så verificér i stedet at
+  `Ugenummer 39` og "Brug i dag" findes og at knappen virker), og på
+  `/blog/hvordan-beregner-man-moms` skal indledningen linke til `/moms`, og
+  CTA-afsnittet skal have **tre** listepunkter med "Læg moms til", "Træk moms fra"
+  og "Find moms".
 - ⏳ **ÅBEN — C52 `/moms`, kode `aa585d3`, merge `328a656` 2026-09-26 23:47
   CEST.** Se noten under ❓ Til Mads for de fem indholdstjek. Første
   kandidatvindue **2026-09-27 07:30**.

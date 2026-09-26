@@ -77,7 +77,9 @@ export default function MomsGuidePage() {
 
         <p className="lead">
           Moms (merværdiafgift) er en afgift på 25% der lægges på næsten alle varer og 
-          tjenesteydelser i Danmark. I denne guide lærer du, hvordan du beregner moms korrekt.
+          tjenesteydelser i Danmark. I denne guide lærer du, hvordan du beregner moms korrekt. 
+          Har du et beløb, du vil regne på med det samme, kan du bruge vores{" "}
+          <Link href="/moms" className="text-blue-600 hover:underline">momsberegner</Link>.
         </p>
 
         <h2>Hvad er moms?</h2>
@@ -93,7 +95,7 @@ export default function MomsGuidePage() {
 
         <h2>Sådan beregner du moms</h2>
         
-        <h3>Tillæg moms til en pris</h3>
+        <h3>Læg moms til en pris</h3>
         <p>
           Når du har en pris uden moms og vil finde prisen inkl. moms:
         </p>
@@ -172,8 +174,28 @@ export default function MomsGuidePage() {
 
         <h2>Brug vores momsberegner</h2>
         <p>
-          Du behøver ikke regne i hovedet. Brug vores gratis momsberegner til at 
-          tillægge eller fratrække moms med det samme.
+          Du behøver ikke regne i hovedet. Vores{" "}
+          <Link href="/moms" className="text-blue-600 hover:underline">momsberegner</Link>{" "}
+          har en knap til hver af de tre regnestykker ovenfor, så du indtaster ét beløb
+          og får svaret med det samme:
+        </p>
+        <ul>
+          <li>
+            <strong>Læg moms til</strong> — du har et beløb uden moms og vil have prisen
+            inkl. moms (800 kr bliver 1.000 kr).
+          </li>
+          <li>
+            <strong>Træk moms fra</strong> — du har en pris inkl. moms og vil finde
+            prisen uden moms (1.000 kr bliver 800 kr).
+          </li>
+          <li>
+            <strong>Find moms</strong> — du vil se, hvor stor en andel af en pris inkl.
+            moms der er (1.000 kr indeholder 200 kr, svarende til 20 %).
+          </li>
+        </ul>
+        <p>
+          Beregneren bruger den danske sats på 25 %, og du kan kopiere, dele og printe
+          resultatet, når du er færdig.
         </p>
 
         <div className="not-prose my-8">

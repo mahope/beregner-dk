@@ -6,6 +6,7 @@ import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { beregnAlder } from "@/lib/alder";
 import { formatAlder } from "@/lib/alder-eksempler";
+import { tilIsoDato } from "@/lib/lokal-dato";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { useLocale } from '@/components/LocaleProvider';
 import { getIntlLocale } from '@/lib/format';
@@ -103,8 +104,10 @@ export default function AlderBeregner() {
   };
   const l = labels[locale as keyof typeof labels] || labels.da;
   const [foedselsdato, setFoedselsdato] = useState<string>("");
-  const [beregningsDato, setBeregningsDato] = useState<string>(
-    new Date().toISOString().split("T")[0]
+  // `toISOString()` skriver dagen i UTC, så en dansk læser kl. 01.00 ville få
+  // i går som standard. Se `src/lib/lokal-dato.ts`.
+  const [beregningsDato, setBeregningsDato] = useState<string>(() =>
+    tilIsoDato(new Date())
   );
   const hasLoadedUrl = useRef(false);
   const hasTracked = useRef(false);
@@ -141,7 +144,7 @@ export default function AlderBeregner() {
 
   const handleReset = useCallback(() => {
     setFoedselsdato("");
-    setBeregningsDato(new Date().toISOString().split("T")[0]);
+    setBeregningsDato(tilIsoDato(new Date()));
   }, []);
 
   const beregning = useMemo(() => {
@@ -253,7 +256,7 @@ export default function AlderBeregner() {
             className="w-full px-4 py-3 border rounded-lg text-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white"
           />
           <button type="button"
-            onClick={() => setBeregningsDato(new Date().toISOString().split("T")[0])}
+            onClick={() => setBeregningsDato(tilIsoDato(new Date()))}
             className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 mt-1"
           >
             {l.useToday}
