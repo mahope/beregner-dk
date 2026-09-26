@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { generatePageMetadata } from "@/lib/page-helpers";
 import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
@@ -149,6 +150,25 @@ export default async function ArveafgiftPage() {
         </div>
       </div>
       )}
+
+      <section className="mt-12">
+        <div className="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-400 p-4 not-prose">
+          <p className="font-medium text-blue-800 dark:text-blue-300">
+            Læs guiden om regler og satser
+          </p>
+          <p className="text-blue-700 dark:text-blue-400">
+            Vores{" "}
+            <Link
+              href="/blog/arveafgift-regler-og-satser"
+              className="underline font-medium"
+            >
+              guide til arveafgift
+            </Link>{" "}
+            gennemgår bundfradraget, kredsene, tillægsafgiften og to fulde regneeksempler
+            på 1.500.000 kr til børn og 800.000 kr til en søskende.
+          </p>
+        </div>
+      </section>
 
       <section className="mt-12">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">
