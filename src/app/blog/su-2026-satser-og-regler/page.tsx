@@ -9,9 +9,9 @@ export async function generateMetadata(): Promise<Metadata> {
   const baseUrl = dc.baseUrl;
 
   return {
-    title: "SU 2026: Nye satser og regler for studerende",
+    title: "SU 2026: 7.426 kr. pr. måned udeboende",
     description:
-      "Se officielle SU-satser for 2026, aldersgrænser, fribeløb, forsørgertillæg og SU-lån. Med kilder fra su.dk.",
+      "SU 2026: udeboende får 7.426 kr. pr. måned, hjemmeboende 1.154-3.202 kr. Fribeløb fra 15.297 kr., SU-lån op til 3.799 kr. Alle tal fra su.dk.",
     keywords: [
       "SU 2026",
       "SU satser 2026",
@@ -19,11 +19,13 @@ export async function generateMetadata(): Promise<Metadata> {
       "SU hjemmeboende 2026",
       "fribeløb 2026",
       "SU-lån 2026",
+      "hjemmeboende SU forældreindkomst",
       "studerende økonomi",
     ],
     openGraph: {
-      title: "SU 2026: Nye satser og regler for studerende",
-      description: "Officielle 2026-satser for SU, fribeløb, forsørgertillæg og SU-lån.",
+      title: "SU 2026: 7.426 kr. pr. måned udeboende",
+      description:
+        "SU 2026: udeboende 7.426 kr. pr. måned, hjemmeboende 1.154-3.202 kr., fribeløb fra 15.297 kr. og SU-lån op til 3.799 kr.",
       url: `${baseUrl}/blog/su-2026-satser-og-regler`,
       type: "article",
       siteName: dc.siteName,
@@ -54,6 +56,18 @@ const faqItems = [
     question: "Kan man få SU-lån i 2026?",
     answer: `Ja. Almindeligt SU-lån er op til ${kr(SU_2026.loan.ordinaryMonthly)} kr. pr. måned. Slutlån er op til ${kr(SU_2026.loan.finalMonthly)} kr. i de seneste ${SU_2026.rules.finalLoanStandardMonths} måneder, i nogle tilfælde ${SU_2026.rules.finalLoanExtendedMonths} måneder.`,
   },
+  {
+    question: "Hvor meget hjemmeboende SU får jeg efter forældrenes indkomst?",
+    answer: `Din hjemmeboende SU er ${kr(SU_2026.homewardBase)} kr. i grundsats plus et tillæg på højst ${kr(SU_2026.homewardMaximumSupplement)} kr. Du får fuldt tillæg, hvis forældrenes indkomstgrundlag i ${SU_2026.parentalIncomeYear} er ${kr(SU_2026.parentalIncome.maxSupplementAtOrBelow)} kr. eller lavere, og intet tillæg, hvis det er ${kr(SU_2026.parentalIncome.noSupplementAtOrAbove)} kr. eller højere.`,
+  },
+  {
+    question: "Kan jeg få SU-lån til mit studie i udlandet?",
+    answer: `Ja. Udlandsstudielånet er op til ${kr(SU_2026.loan.abroadTotal)} kr. i alt i 2026 og dækker studieophold og/eller hel uddannelse i udlandet. Det er forudsat, at din egenbetaling er større end det, udlandsstipendiet dækker.`,
+  },
+  {
+    question: "Hvad er forsørgertillægget?",
+    answer: `Forsørgertillægget er ${kr(SU_2026.singleParentSupplement)} kr. pr. måned før skat til berettigede enlige forsørgere. Bor du sammen med en person på SU eller kontanthjælp efter sociallovens § 16, st. 1, er det ${kr(SU_2026.singleParentSupplementSharedHome)} kr.`,
+  },
 ];
 
 export default function SU2026GuidePage() {
@@ -73,16 +87,28 @@ export default function SU2026GuidePage() {
         <header className="mb-8 not-prose">
           <span className="text-sm text-blue-600 dark:text-blue-400 font-medium">Uddannelse & Økonomi</span>
           <h1 className="text-3xl md:text-4xl font-bold mt-2 text-gray-900 dark:text-white">
-            SU 2026: Nye satser og regler for studerende
+            SU 2026: {kr(SU_2026.udeboende)} kr. pr. måned udeboende
           </h1>
           <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 dark:text-gray-400 mt-4">
-            <time dateTime="2026-09-24">Opdateret 24. september 2026</time>
+            <time dateTime="2026-09-26">Opdateret 26. september 2026</time>
             <span aria-hidden="true">•</span>
             <span>9 min læsetid</span>
           </div>
         </header>
 
         <p className="text-lg">
+          <strong>Kort svar:</strong> Som udeboende på videregående uddannelse får du{" "}
+          <strong>{kr(SU_2026.udeboende)} kr. pr. måned før skat</strong> i 2026. Som
+          hjemmeboende får du {kr(SU_2026.homewardBase)} kr. i grundsats plus op til{" "}
+          {kr(SU_2026.homewardMaximumSupplement)} kr. i tillæg efter forældrenes indkomst
+          to år tidligere, altså {kr(SU_2026.homewardBase)}-
+          {kr(SU_2026.homewardMaximum)} kr. Fribeløbet starter ved{" "}
+          {kr(SU_2026.freeAllowance.youthWithSu)} kr. pr. måned på ungdomsuddannelse og{" "}
+          {kr(SU_2026.freeAllowance.videregaaendeWithSu)} kr. på videregående uddannelse,
+          og du kan låne op til {kr(SU_2026.loan.ordinaryMonthly)} kr. pr. måned oveni.
+        </p>
+
+        <p>
           SU er den månedlige støtte fra staten til studerende på godkendte uddannelser. Satserne for
           2026 er justeret, og især hjemmeboende studerende skal holde 2024-forældreindkomst og det
           aktuelle studieforløb ind i beregningen.
@@ -192,6 +218,39 @@ export default function SU2026GuidePage() {
           {kr(SU_2026.homewardBase)} til {kr(SU_2026.homewardMaximum)} kr. pr. måned.
         </p>
         <p>
+          Hvor i skalaen du lander, afhenger af forældrenes indkomstgrundlag i{" "}
+          {SU_2026.parentalIncomeYear}. De to ydre grænser er:
+        </p>
+        <div className="overflow-x-auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Forældrenes indkomst i {SU_2026.parentalIncomeYear}</th>
+                <th>Din hjemmeboende SU pr. måned</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>{kr(SU_2026.parentalIncome.noSupplementAtOrAbove)} kr. eller mere</td>
+                <td>{kr(SU_2026.homewardBase)} kr. (kun grundsats)</td>
+              </tr>
+              <tr>
+                <td>{kr(SU_2026.parentalIncome.maxSupplementAtOrBelow)} kr. eller mindre</td>
+                <td>{kr(SU_2026.homewardMaximum)} kr. (fuldt tillæg)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p>
+          Mellem grænserne falder tillægget trinvis ned fra{" "}
+          {kr(SU_2026.homewardMaximumSupplement)} kr. til 0 kr. For hver søskende under 18 år
+          trækker Udbetaling Danmark {kr(SU_2026.parentalIncome.siblingUnder18Deduction)} kr.
+          fra forældrenes indkomst, når den beregnes. Det er et andet tal end
+          årsfribeløbets forhøjelse på {kr(SU_2026.freeAllowance.childUnder18Annual)} kr. pr.
+          barn pr. år, fordi det ene beregnes på forældrenes indkomst og det andet på dit
+          eget.
+        </p>
+        <p>
           Har forældrene hver adresse, vurderes normalt den forælder, hvis adresse du havde den
           første i den pågældende måned. En særlig regel kan gælde efter samlivsændringer og i
           undtagelsessituationer. Se su.dk's{" "}
@@ -211,6 +270,16 @@ export default function SU2026GuidePage() {
           {kr(SU_2026.singleParentSupplement)} kr. i forsørgertillæg. Forsørgertillægget og
           forældrelånet er separate ordninger; se{" "}
           <a href={SU_2026.sources.singleParentEligibility} target="_blank" rel="noopener noreferrer">betingelserne for enlige forsørgere</a>.
+        </p>
+        <p>
+          Bor du som forsørger sammen med en person, der får SU eller kontanthjælp efter
+          sociallovens § 16, st. 1, nr. 1, er forsørgertillægget i stedet{" "}
+          {kr(SU_2026.singleParentSupplementSharedHome)} kr. pr. måned. Får du barn under
+          uddannelsen, kan du desuden få fødselsstøtte i op til{" "}
+          {SU_2026.rules.birthGrantStandardMonths} måneder — dog op til{" "}
+          {SU_2026.rules.birthGrantSingleParentMonths} måneder, hvis du er enlig forsørger.
+          Den svarer til en måneds SU. Se{" "}
+          <a href={SU_2026.sources.parents} target="_blank" rel="noopener noreferrer">satserne for støtte til forældre</a>.
         </p>
         <h2>18-19 år og udeboendesats</h2>
         <p>
@@ -286,6 +355,7 @@ export default function SU2026GuidePage() {
           <li>SU-lån til forældre: op til {kr(SU_2026.loan.parentMonthly)} kr. pr. måned.</li>
           <li>Almindeligt SU-lån og forældrelån: i alt op til {kr(SU_2026.loan.combinedMonthly)} kr. pr. måned.</li>
           <li>Slutlån: op til {kr(SU_2026.loan.finalMonthly)} kr. pr. måned i de seneste {SU_2026.rules.finalLoanStandardMonths} måneder, i nogle tilfælde {SU_2026.rules.finalLoanExtendedMonths} måneder.</li>
+          <li>Udlandsstudielån: op til {kr(SU_2026.loan.abroadTotal)} kr. i alt til studieophold og/eller hel uddannelse i udlandet, hvis din egenbetaling overstiger udlandsstipendiet.</li>
         </ul>
         <p>
           Pr. {SU_2026.verifiedAt} er renten{" "}

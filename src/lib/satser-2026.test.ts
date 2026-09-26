@@ -74,7 +74,7 @@ describe("SATSER_2026 single source of truth", () => {
   });
 
   test("SU 2026", () => {
-    expect(SU_2026.verifiedAt).toBe("2026-09-24");
+    expect(SU_2026.verifiedAt).toBe("2026-09-26");
     expect(SU_2026.parentalIncomeYear).toBe(2024);
     expect(SU_2026.currentHomewardSchemeStart).toBe("1. juli 2014");
     expect(SU_2026.rules.youthEducationAge).toBe(18);
@@ -93,6 +93,12 @@ describe("SATSER_2026 single source of truth", () => {
     expect(SU_2026.youthLegacy18To19Base).toBe(1643);
     expect(SU_2026.youthAway18To19Base).toBe(4764);
     expect(SU_2026.singleParentSupplement).toBe(7426);
+    expect(SU_2026.singleParentSupplementSharedHome).toBe(2966);
+    expect(SU_2026.parentalIncome.maxSupplementAtOrBelow).toBe(419589);
+    expect(SU_2026.parentalIncome.noSupplementAtOrAbove).toBe(710077);
+    expect(SU_2026.parentalIncome.siblingUnder18Deduction).toBe(43086);
+    expect(SU_2026.rules.birthGrantStandardMonths).toBe(9);
+    expect(SU_2026.rules.birthGrantSingleParentMonths).toBe(12);
     expect(SU_2026.disabilitySupplement.videregaaende).toBe(10562);
     expect(SU_2026.disabilitySupplement.erhverv).toBe(6624);
     expect(SU_2026.freeAllowance.youthWithSu).toBe(15297);
@@ -107,6 +113,15 @@ describe("SATSER_2026 single source of truth", () => {
       SU_2026.loan.combinedMonthly,
     );
     expect(SU_2026.loan.finalMonthly).toBe(9801);
+    expect(SU_2026.loan.abroadTotal).toBe(129106);
+    // Grænserne for forældreindkomst skal ligge i rigtig rækkefølge, ellers
+    // beskriver hjemmeboende-afsnittet en tillægsordning, der ikke kan bestå.
+    expect(SU_2026.parentalIncome.maxSupplementAtOrBelow).toBeLessThan(
+      SU_2026.parentalIncome.noSupplementAtOrAbove,
+    );
+    expect(SU_2026.parentalIncome.siblingUnder18Deduction).toBeGreaterThan(
+      SU_2026.freeAllowance.childUnder18Annual,
+    );
     expect(SU_2026.loan.duringStudyRate).toBe(0.04);
     expect(SU_2026.loan.afterGraduationRate).toBe(0.0285);
     expect(SU_2026.loan.repaymentMinYears).toBe(7);
