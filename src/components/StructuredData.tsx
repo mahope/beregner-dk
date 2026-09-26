@@ -28,7 +28,8 @@ interface WebSiteSchemaProps {
 
 interface BreadcrumbItem {
   name: string;
-  url: string;
+  /** Omitted for crumbs that are not a navigable page (e.g. a category that only exists on another domain, or the current page). */
+  url?: string;
 }
 
 interface BreadcrumbSchemaProps {
@@ -130,7 +131,7 @@ export function BreadcrumbSchema({ items }: BreadcrumbSchemaProps) {
       "@type": "ListItem",
       position: index + 1,
       name: item.name,
-      item: item.url,
+      ...(item.url ? { item: item.url } : {}),
     })),
   };
 

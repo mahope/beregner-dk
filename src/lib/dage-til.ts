@@ -279,7 +279,7 @@ export const DAGE_TIL_EVENTS: DageTilEvent[] = [
         question: "Hur många dagar är det till 1 december?",
         facts: [
           "1 december är första dagen i december, och december har 31 dagar.",
-          "1 december är inte en dansk helgdag, men datumet är fast och flyttar sig aldrig.",
+          "1 december är inte en svensk helgdag, men datumet är fast och flyttar sig aldrig.",
           "Från 1 december är det exakt 30 dagar till julafton den 24 december.",
         ],
         faq: [
