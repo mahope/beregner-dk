@@ -3964,6 +3964,15 @@ efter datagrund:
    depositum på 3 måneder som "typisk" uden lovtekst, og `www`-domænerne. Alle fire
    kræver et ja fra Mads før de røres.
 ### ❓ Til Mads
+- ⏳ **VERIFICÉR DEPLOY: C37 `/renteberegner` — fradragsværdien fra modulet.**
+  Kode `b98b90f`, merge `32b74ee` 2026-09-26 17:47 CEST. 17:30- og 21:30-vinduerne
+  er begge *før* merge, så første kandidatvindue er **2026-09-27 12:30** (07:30 er
+  før merge-tidspunktet på dagen, hvis batcheren tager fat før den er færdig).
+  Verificér **indhold**: `https://minberegner.dk/renteberegner` skal sige
+  **33,6%** og **25,6%** som `<strong>`, **50.000 kr.** / **100.000 kr.** på
+  dansk format, og "over grænsen er det ca. **3,7%**". `/api/health` skal svare
+  `status: ok`. 17:30-batchen er allerede kørt, så intet er `DEPLOY-MISSING` og
+  intet er frosset.
 - **Hvorfor tæller `/elbil` ingen trafik? (C37, 2026-09-26).** Siden har 20 interne
   referencer på 10 filer — katalog, kategori, begge bilartikler, sammenlignings-
   tabellen i `/braendstof` og elpris-modulet — og er altså ikke ulinket. Alligevel
