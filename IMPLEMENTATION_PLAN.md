@@ -5842,7 +5842,8 @@ efter datagrund:
   Plausible eller GSC — hvilket er konsistent med et separat site.
 - ⏳ **VERIFICÉR DEPLOY: C53 `/procent` — alle tal i siden største
   resultatblok skal have komma og tusindtalsseparator — kode + plan i ét commit
-  på branch `ceo/procent-talformat`.** Første kandidatvindue
+  på branch `ceo/procent-talformat`, kode `5c9c844`, merge `dfc1874`
+  2026-09-27 00:41 CEST.** Første kandidatvindue
   **2026-09-27 07:30**. Verificér **indhold og interaktivitet**, HTTP 200
   beviser intet — hele fundet er i klient-renderet tekst:
   1. På `https://minberegner.dk/procent` med standardværdierne (25 af 100) skal
