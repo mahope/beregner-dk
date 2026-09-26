@@ -4766,6 +4766,37 @@ efter datagrund:
      løser dem. **Anbefaling:** kør samme autocomplete-audit på de øvrige
      trafikstærke sider (`/tidszone`, `/moms`, `/tidsberegner`, `/alder`) og se,
      om nogen *fast* dato, by eller relation mangler en side. Se opgave 72.
+  11. **C45's autocomplete-audit er delvist kørt (samme time, kun fire sider).**
+     Metoden virker, men den skal bruges som **kvalitativt signal** — den giver
+     formuleringer, ikke volumen, så intet her må ændres uden GSC-tal. Fire fund,
+     hver ét klassesvar:
+     - **`/tidsberegner` — bekræftet vundet.** "beregn tid mellem klokkeslæt"
+       erforslag 7 for "beregn tid", og det er præcis C40's nye H1 og
+       eksempeltabel. Autocomplete er altså et tidligt signal endnu C40's
+       GSC-rækker viste; det er værd at bruge som **bekræftelse** af en
+       svar-først-ændring, ikke som erstatning for den.
+     - **`/alder` — et reelt, ubearbejdet hul.** "beregn alder mellem to datoer"
+       er forslag 3 for "beregn alder", og live har siden **0** forekomster af
+       "mellem to datoer" (mod 19 for "fødselsdato", som den altså *er* bygget
+       til). Spørgsmålet — "hvor gammel var jeg den 1. maj 2010?" — mangler altså
+       helt. **Ikke bygget i C45:** det er et nyt felt i værktøjet plus logik, og
+       uden en GSC-række ville det være en ukontrolleret tilføjelse. Samlet med
+       `/alder`'s 6.013 visninger / CTR 0,6 % / pos. 7,8 er det den stærkeste
+       åbne kandidat, men den kræver en række i GSC (side 16+ eller en
+       særskilt måling) før den bygges.
+     - **`/moms` — autocomplete peger på et andet produkt.** Topforslagene er
+       "moms indberetning", "moms frister 2026" og "moms indberetning 2026",
+       altså Skat-afgiftsangivelse og frister, ikke beregning. Værktøjet er
+       korrekt for GSCs "momsberegner" (1.693 visninger, pos. 7), men
+       **søgeintentionen på selve ordet "moms" er en anden**. Det er et
+       indholdsspørgsmål om Skats frister med officielle datoer — et selvstændigt
+       emne, ikke en linje i en eksisterende side, og for stort til en
+       side-iteration. Noteret, ikke bygget.
+     - **`/tidszone` — efterspørgslen er bredere end artiklens 16 amerikanske
+       byer.** "tidszone grønland", "grækenland", "portugal" og "kreta" ligger
+       blandt forslagene til "tidszone", og C36's artikel dækker kun USA. Det er
+       et databehov (byer med korrekt DST-regel), ikke en tekstændring, så det
+       må ikke løses med et par flere rækker i tabellen.
 
 ### Prioriteret kø efter C45
 
@@ -4773,8 +4804,11 @@ efter datagrund:
    indholdskontrol, intet skal merges.
 2. **Mål 2026-10-10** (se Måleprotokol): C1-C16 og C35-C45 måles 14 dage efter
    deres snapshot, og resultatet skrives ved siden af hver opgave.
-3. **Kandidat 10:** autocomplete-audit af de øvrige trafikstærke sider for
-   faste datoer eller emner uden egen side.
+3. **Kandidat 11 — kræver en GSC-række før kode:** `/alder` svarer ikke på
+   "beregn alder mellem to datoer" (0 forekomster mod 19 for "fødselsdato"),
+   selv om autocomplete rangerer det som forslag 3. Find rækken for `/alder`
+   (6.013 visninger, CTR 0,6 %, pos. 7,8) og byg så et as-of-felt — eller
+   skriv den som ❓, hvis efterspørgslen viser sig at være lille.
 4. **Til Mads' fire beslutninger** under ❓ — de låser bl.a.
    `/api/v1/loen`'s kommuneskat, domænerne og `www`-redirects.
 
