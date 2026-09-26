@@ -1,10 +1,17 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — **otte åbne deploynoter (C23-C28).** 12:30-batchen 2026-09-26 udgav
-C15-C22. C23 (merge 12:19), C24 (12:21), C25 (13:07), C26 (13:15), C27 (13:25) og
-C28 (`ceo/c28-dato-dagstalene`, 14:30) kom efter batchens start og kan først
-verificeres efter **17:30**-vinduet; intet er frosset pga. ventetiden.
+STATUS: KØ — **ni åbne deploynoter (C23-C29).** 12:30-batchen 2026-09-26 udgav
+C15-C22. C23 (merge 12:19), C24 (12:21), C25 (13:07), C26 (13:15), C27 (13:25),
+C28 (14:30) og C29 (`ceo/c29-kalorier-protein`, 14:35) kom efter batchens start og
+kan først verificeres efter **17:30**-vinduet; intet er frosset pga. ventetiden.
 `/api/health` svarer `status: ok`.
+
+**C29 rettede et fejltal i makro-fordelingen på `/kalorier`.** Værktøjet satte
+protein til 1,8 g/kg uanset mål, mens siden selv siger 0,8-1,2 / 1,2-1,6 / 1,6-2,2
+g/kg for vedligehold, vægttab og muskelopbygning — 144 g for "Vægttab" på 80 kg mod
+sidens 96-128 g. Der er nu ét ratested (`src/lib/makroer.ts`), protein-kortet viser
+g/kg og interval, og sidens egne lister læser fra samme modul. Samme iteration
+lukkede C27's `/flyttebudget`-rest. Se opgave 56.
 
 **C28 fandt to tællefejl på sitets største side.** På `/dato` summerede de tre
 dagstyper til **ét mere end "Antal dage"** (systematisk, fordi tællerne var
@@ -15,15 +22,15 @@ weekenddag eller helligdag — den forklares nu i stedet for at forsvinde fra
 summeringen. Se opgave 55.
 
 Næste iteration skal **ikke** optimere CTR på de samme svar-først-sider igen, og
-den skal **ikke** gentage C25-C28. Kandidater der er fundet, men endnu ikke taget:
-**1) `/flyttebudget`** (C27-rest: indlægget siger stadig "3-6 måneders husleje" mod
-3 i FAQ'en på samme side, og "25.000-40.000 kr" i mæglerafsnittet mod 25.000-50.000
-i FAQ'en og i værktøjets egen slider), **2) `/kalorier`** (værktøjet bruger 1,8 g/kg
-protein uanset mål, mens side og FAQ siger 0,8-1,2 / 1,2-1,6 / 1,6-2,2 g/kg), **3)
-`/braendstof`** (FAQ'en lover el "50-70 % billigere", mens værktøjets egen
-sammenligningstabel giver 40 % mod diesel — 52,8 % holder kun mod benzin), **4)
-/husleje** og **5) `/pension`** (se listen under ❓). Kandidat 41 (`noPages` mangler
-`/enhedspris`) har fortsat nul trafik, da `beregner.no` ikke er live.
+den skal **ikke** gentage C25-C29. Kandidater der er fundet, men endnu ikke taget:
+**1) `/braendstof`** (271 besøgende/28d, FAQ'en lover el "50-70 % billigere", mens
+værktøjets egen sammenligningstabel giver 40 % mod diesel — 52,8 % holder kun mod
+benzin), **2) `/husleje`** (166 besøgende, sidens løfteindhold er uopnåeligt som
+standardværdi), **3) `/pension`** (140 besøgende, `PensionBeregner.tsx:224`
+hardkoder folkepensionsalderen, som `src/lib/folkepension.ts` allerede skalaerer)
+— alle tre er nærmere beskrevet under ❓ og i C28's kandidatliste. Kandidat 41
+(`noPages` mangler `/enhudspris`) har fortsat nul trafik, da `beregner.no` ikke er
+live. `/kalorier` og `/flyttebudget` er lukket i C29.
 
 
 ## Fase 3 — trafik-drevet
@@ -3208,19 +3215,92 @@ første halvdel af denne liste er fra DA-fladen, anden halvdel fra SE — de er
   halvåbent interval alene løste fund 2. Partitionstesten viste 17 mod 16, fordi
   26. december blev tælt to gange. Fundet blev læst helt, ikke kun rettet.
 
+#### 56. [x] FÆRDIG 2026-09-26 — C29 — `/kalorier`: proteinmængden følger nu dit mål
+
+- **Iteration start:** 2026-09-26 14:08 CEST på `ceo/c29-kalorier-protein`. Køen var
+  tom (alle 55 opgaver færdige, intet `I GANG`), og de otte åbne deploynoter kan først
+  verificeres efter 17:30, så valget var et nyt faktagrundlæggende fund fra C28's
+  kandidatliste. Kandidaterne blev prioriteret efter trafik: `/kalorier` (286
+  besøgende/28d) og `/braendstof` (271) ligger over `/flyttebudget`, `/husleje` (166)
+  og `/pension` (140).
+- **Datagrund:** `/kalorier` 286 besøgende/28d (+46 %), 255 indgangssider, bounce 4 %;
+  Search Console 12.332 visninger, 124 klik, CTR 1,0 %, position 8,2 pr.
+  2026-08-27→2026-09-24. Største søgning "kalorieberegner" 204 visninger, 1 klik,
+  position 17 — positionen er lav, men siden er allerede svar-først (C5), så det
+  åbne her var **ikke** titlen, men et konkret fejltal i værktøjet.
+- **Fund (BEKRÆFTET, egen kode mod sidens egen tekst):** `KalorieBeregner.tsx:195`
+  sat `protein = vaegt * 1.8` **uanset mål**, mens `/kalorier`'s egen tekst i begge
+  lokaler lister 0,8-1,2 g/kg for vedligehold, 1,2-1,6 for vægttab og 1,6-2,2 for
+  muskelopbygning (`page.tsx:86-96` DA, `:174-184` SE), og FAQ'en gentager det samme
+  (`page-data.ts:606` DA, `:1874` SE). Ved sidens eget eksempel på 80 kg viste
+  værktøjet **144 g** for "Vægttab" (1,8 g/kg) mod sidens 96-128 g — og 144 g for
+  "Vedligehold", som slet ikke er i det dokumenterede interval. Fedt (25 %) og
+  kulhydrater (resten) var korrekte, så det var **én** konstant, der slog hele
+  makro-fordelingen.
+- **Beslutning/implementering:** Ny delt enhedsfil `src/lib/makroer.ts` er
+  single source for protein-intervallerne pr. mål, fedtandelen (25 %) og
+  kcal-pr.-gram. `beregnMakroer()` bruger **midten** af det valgte interval, så
+  værktøjet ikke kan glide fra siden igen. Protein-kortet viser nu g/kg'en og
+  intervallet (`1,4 g/kg protein (interval 1,2-1,6)`), så brugeren kan se hvorfor
+  tallene ændrer sig. Sidens to lister (DA + SE) renderer nu intervallerne fra
+  samme modul i stedet for hardkodede tal, med én ekstra linje om midten. Midterne er
+  et estimat, ikke en ordination — samme forbehold som siden.
+- **C27-rest, samme systematik som C22's depositumfund:** `flyttebudget/page.tsx:51`
+  sagde "3-6 måneders husleje" og "25.000-40.000 kr" hos mægler mod "typisk 3 mdrs."
+  og "25.000-50.000 kr" i samme sides FAQ (`page-data.ts:1800`) og mod værktøjets
+  egen slider (`FlyttebudgetBeregner.tsx:28`, max 60000). Rettet til 3 måneder og
+  25.000-50.000 kr.
+- **Tests:** ny `src/lib/makroer.test.ts` (11 tests) — midten af hvert interval,
+  protein stiger med målet, intervallerne overlapper ikke, fedt er 25 %, summen af
+  makro-kalorier er lig kalorierne (og kulhydrater er aldrig negative) for fem
+  kalorieindhold, protein ligger **altid** i det dokumenterede interval for 35-200 kg
+  × alle tre mål, og 0 kg giver 0 protein i stedet for negativt. Ny
+  `src/components/KalorieBeregner.test.tsx` (5 tests) renderer komponenten via
+  URL-state: 80 kg giver 80 / 112 / 152 g for vedligehold / tab / opbyg, g/kg'en og
+  intervallet står i proteinfeltet, og den svenska visning bruger decimal-komma. Den
+  sidste test låser den konkrete regression ved UI-niveau, ikke kun i modulet.
+- **Kvalitetsgate 2026-09-26 14:28 CEST:** `npm run test` grøn (**1308/1308, 127
+  filer** — 2 nye filer), `npm run lint` grøn (519 filer), `npm run build` grøn
+  (typecheck inkluderet, 137 sider).
+- **MÅL:** `/kalorier` baseline **286 besøgende/28d, 255 indgangssider, bounce 4 %
+  pr. 2026-09-26**; Search Console baseline 12.332 visninger, 124 klik, CTR 1,0 %,
+  position 8,2 pr. 2026-08-27→2026-09-24 — genmål 2026-10-10.
+- **Acceptkriterier:**
+  1. 80 kg viser 80 g protein ved vedligehold, 112 g ved vægttab og 152 g ved
+     muskelopbygning, og hvert resultat ligger i sidens dokumenterede interval.
+     **PASS**
+  2. Protein-kortet viser g/kg'en og intervallet i begge lokaler, med
+     locale-decimal. **PASS**
+  3. Sidens proteinlister læder intervallerne fra `src/lib/makroer.ts`, så de ikke
+     kan afvige fra værktøjet. **PASS**
+  4. Fedt er 25 % af kalorierne, kulhydrater resten, og summen er lig
+     kaloriebehovet. **PASS**
+  5. `/flyttebudget` siger 3 måneder i depositum og 25.000-50.000 kr hos mægler,
+     samme sted som FAQ'en og slideren. **PASS**
+  6. `npm run lint`, `npm run test` og `npm run build` er grønne. **PASS**
+- **Forventet effekt:** ingen direkte CTR-stigning — det er en **tillids- og
+  korrekthedstask** på en side, der allerede er svar-først, og hvor værktøjet
+  tidligere sagde noget andet end siden. To sider med samme navn, men forskellige
+  tal, er præcis den slags fejl der får folk til at gå i googlen i stedet. Den
+  konkrete søgeintention er urørt, så CTR-baslinen ovenfor er ren.
+- **Utaget bevidst:** proteinbehovet **er ikke** kilt til `/proteinbehov`
+  (`src/lib/proteinbehov.ts`, aktivitetsbaseret 0,8-2,0 g/kg). Kalorieberegneren
+  kender aktivitetsniveau og mål, proteinbehov-værktøjet kender kun aktivitet, så
+  de to svar på "hvad skal jeg spise" giver forskellige tal uden fælles grund.
+  Det er et reelt begreb (samme faglige område, to rækkevidder), men det kræver en
+  beslutning om, hvilken der er source of truth — noteret, ikke løst i denne
+  iteration.
+
 #### C28's øvrige fund — ikke taget, skrevet som næste kandidater
 
-- **`/flyttebudget` (C27-rest, 2 linjer).** `src/app/flyttebudget/page.tsx:51`
-  siger "Depositum svarer ofte til **3-6** måneders husleje" og "i gennemsnit
-  **25.000-40.000** kr" til mægler, mens samme sides FAQ siger "typisk 3 mdrs." og
-  "25.000-50.000 kr" (`src/lib/page-data.ts:1800`) og `FlyttebudgetBeregner.tsx:25`
-  selv har `max: 50000`. C27 rettede `page-data.ts`, men rørte ikke `page.tsx` —
-  samme systematik som C22's depositum-fund. **Næste opgave.**
-- **`/kalorier` (286 besøgende/28d).** `KalorierBeregner.tsx:195` regner protein som
-  `vægt * 1.8` uanset mål, mens side og FAQ (`page-data.ts:606`, `page.tsx:88-94`)
-  siger 0,8-1,2 / 1,2-1,6 / 1,6-2,2 g/kg for hhv. vedligehold, vægttab og
-  muskelopbygning. Ved sidens eget eksempel (80 kg) viser værktøjet 144 g for
-  "Vægttab" mod sidens 96-128 g.
+- ~~**`/flyttebudget` (C27-rest, 2 linjer)~~ — lukket i C29 den 2026-09-26.~~ Page-
+  afsnittet sagde "3-6 måneders husleje" og "25.000-40.000 kr" hos mægler mod
+  "typisk 3 mdrs." / "25.000-50.000 kr" i samme sides FAQ; begge tal er nu rettet,
+  så C27's depositumfund er lukket på alle tre steder.
+- ~~**`/kalorier` (286 besøgende/28d)~~ — lukket i C29 den 2026-09-26.~~ Protein var
+  `vægt * 1.8` uanset mål mod sidens og FAQ'ens 0,8-1,2 / 1,2-1,6 / 1,6-2,2 g/kg.
+  Nu er der ét ratested (`src/lib/makroer.ts`), værktøjet bruger midten af det
+  valgte interval, og protein-kortet viser g/kg og interval.
 - **`/braendstof` (271 besøgende/28d).** FAQ'en lover el "typisk 50-70 % billigere
   pr. km" (`page-data.ts:853`), men værktøjets egen sammenligningstabel
   (`BraendstofBeregner.tsx:530-532`) giver 500 km: diesel 355,56 kr mod el 212,50
@@ -3236,6 +3316,13 @@ første halvdel af denne liste er fra DA-fladen, anden halvdel fra SE — de er
   passer med `src/lib/tidsberegner.ts` og presets; boligstøttes side, komponent og
   FAQ læser alle `BOLIGSTOETTE_2026`.
 ### ❓ Til Mads
+- **To proteinværktøjer, to svar (C29, 2026-09-26).** `/kalorier` regner nu
+  protein fra målet (0,8-2,2 g/kg), mens `/proteinbehov` regner det fra
+  aktivitetsniveau (0,8-2,0 g/kg, `src/lib/proteinbehov.ts`). Begge er forsvarelige,
+  men en læser der spørger "hvor meget protein skal jeg have" kan få to forskellige
+  tal for samme person. Skal de slås sammen, eller skal den ene side linke bevidst til
+  den anden som "samme grund, andet spørgsmål"? Det er en faglig redaktionel
+  beslutning, ikke en teknisk — derfor rørt den ikke i C29.
 - **Solcellernes levetid mangler en primærkilde (C27, 2026-09-26).** Vi bruger
   25-30 år, som er det gængse branchestyret (paneler er typisk garanteret 25-30
   år), og beregningen bruger 25 som nedre ende. Jeg kunne ikke hente en
@@ -3750,6 +3837,23 @@ landmark=lån, piggybank=opsparing osv.).
     "962 timer" i præmie-copy. `/api/v1/loen` skal **uændret** stadig sige 25.07
     — hvis batchdeployen har rørt den, er det en fejl (frosset kontrakt).
   - `/api/health` skal svare `status: ok`.
+- ⏳ **ÅBEN — VERIFICÉR DEPLOY: C29 kalorieberegnerens protein + `/flyttebudget`s
+  depositum.** Kode `KODE_SHA`, merge `MERGE_SHA` 2026-09-26 14:35 CEST. Merge
+  efter 12:30-batchens start, så første kandidatvindue er **17:30 2026-09-26**;
+  intet er frosset og intet er `DEPLOY-MISSING` (kræver to vinduer). Verificér
+  **indhold**, HTTP 200 er ikke nok:
+  1. `https://minberegner.dk/kalorier`: protein-listen i "Makronæringsstoffer" skal
+     vise **0,8-1,2** / **1,2-1,6** / **1,6-2,2** g/kg med komma, og den nye linje
+     "Beregneren bruger midten af det valgte interval".
+  2. Samme side, værktøjet: med 80 kg skal protein-kortet vise **80 g** ved
+     "Vedligehold" og **112 g** ved "Vægttab", med linjen "1,4 g/kg protein
+     (interval 1,2-1,6)". Det gamle var 144 g uanset mål.
+  3. `https://beraknare.se/kalorier`: samme to tal på svensk ("1,4 g/kg protein
+     (intervallet 1,2-1,6)").
+  4. `https://minberegner.dk/flyttebudget`: afsnittet "De største udgiftsposter" skal
+     sige **3 måneder** i depositum (ikke "3-6") og **25.000-50.000** kr (ikke
+     "25.000-40.000").
+  5. `/api/health` skal svare `status: ok`.
 - ✅ **DEPLOY OK 2026-09-26 12:33 CEST — 12:30-batchen lukker C15-C22.** Syv noter
   verificeret ved **indholdskontrol på begge domæner**, ikke HTTP 200:
   - `/promille` (C15): `0,88` er live (2 forekomster).

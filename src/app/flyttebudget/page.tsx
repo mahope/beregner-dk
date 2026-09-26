@@ -48,7 +48,7 @@ export default async function FlyttebudgetPage() {
 
           <h2>De største udgiftsposter</h2>
           <p>
-            <strong>Ejendomsmægler</strong> koster som regel 2-5% af salgsprisen, i gennemsnit 25.000-40.000 kr. <strong>Depositum</strong> svarer ofte til 3-6 måneders husleje, mens <strong>flyttemand</strong> typisk koster 5.000-15.000 kr afhængig af mængde og afstand.
+            <strong>Ejendomsmægler</strong> koster som regel 2-5% af salgsprisen, i gennemsnit 25.000-50.000 kr. <strong>Depositum</strong> svarer typisk til 3 måneders husleje, mens <strong>flyttemand</strong> typisk koster 5.000-15.000 kr afhængig af mængde og afstand.
           </p>
 
           <h2>Sådan sparer du på flytningen</h2>

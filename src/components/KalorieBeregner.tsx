@@ -5,7 +5,9 @@ import { InputField } from "./InputField";
 import { ShareCalculation } from "@/components/ShareCalculation";
 import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
+import { beregnMakroer, type KalorieMaal } from "@/lib/makroer";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
+import { formatNumber } from "@/lib/format";
 import { useLocale } from "@/components/LocaleProvider";
 
 type Koen = "mand" | "kvinde";
@@ -42,6 +44,8 @@ const labels = {
     tdeeLabel: "Vedligehold (TDEE)",
     makrofordeling: "Foreslået makrofordeling",
     protein: "Protein",
+    proteinPrKg: "g/kg protein",
+    proteinInterval: "interval",
     fedt: "Fedt",
     kulhydrater: "Kulhydrater",
     hvadBetyder: "Hvad betyder tallene?",
@@ -82,6 +86,8 @@ const labels = {
     tdeeLabel: "Underhåll (TDEE)",
     makrofordeling: "Föreslagen makrofördelning",
     protein: "Protein",
+    proteinPrKg: "g/kg protein",
+    proteinInterval: "intervallet",
     fedt: "Fett",
     kulhydrater: "Kolhydrater",
     hvadBetyder: "Vad betyder siffrorna?",
@@ -106,13 +112,14 @@ const labels = {
 export default function KalorieBeregner() {
   const { locale } = useLocale();
   const l = labels[locale as keyof typeof labels] || labels.da;
+  const dec = (value: number) => formatNumber(value, locale, { maximumFractionDigits: 1 });
 
   const [alder, setAlder] = useState<number>(30);
   const [koen, setKoen] = useState<Koen>("mand");
   const [vaegt, setVaegt] = useState<number>(75);
   const [hoejde, setHoejde] = useState<number>(175);
   const [aktivitet, setAktivitet] = useState<AktivitetsNiveau>("moderat");
-  const [maal, setMaal] = useState<"vedligehold" | "tab" | "opbyg">("vedligehold");
+  const [maal, setMaal] = useState<KalorieMaal>("vedligehold");
 
   const hasLoadedUrl = useRef(false);
   const hasTracked = useRef(false);
@@ -191,10 +198,8 @@ export default function KalorieBeregner() {
         maalBeskrivelse = l.maalVedligeholdDesc;
     }
 
-    // Makronæringsstoffer
-    const protein = vaegt * 1.8;
-    const fedt = (anbefaletKalorier * 0.25) / 9;
-    const kulhydrater = Math.max(0, (anbefaletKalorier - (protein * 4) - (fedt * 9)) / 4);
+    // Makronæringsstoffer — protein følger dit mål (0,8-1,2 / 1,2-1,6 / 1,6-2,2 g/kg)
+    const makro = beregnMakroer({ vaegtKg: vaegt, kalorier: anbefaletKalorier, maal });
 
     // Alle tre mål til sammenligning
     const tabKcal = Math.round(tdee - 500);
@@ -202,9 +207,9 @@ export default function KalorieBeregner() {
     const opbygKcal = Math.round(tdee + 300);
 
     // Makro-procenter
-    const proteinKcal = protein * 4;
-    const fedtKcal = fedt * 9;
-    const kulhKcal = kulhydrater * 4;
+    const proteinKcal = makro.protein * 4;
+    const fedtKcal = makro.fedt * 9;
+    const kulhKcal = makro.kulhydrater * 4;
     const totalKcal = proteinKcal + fedtKcal + kulhKcal;
     const proteinPct = totalKcal > 0 ? (proteinKcal / totalKcal) * 100 : 0;
     const fedtPct = totalKcal > 0 ? (fedtKcal / totalKcal) * 100 : 0;
@@ -215,9 +220,12 @@ export default function KalorieBeregner() {
       tdee: Math.round(tdee),
       anbefalet: Math.round(anbefaletKalorier),
       maalBeskrivelse,
-      protein: Math.round(protein),
-      fedt: Math.round(fedt),
-      kulhydrater: Math.round(Math.max(0, kulhydrater)),
+      protein: Math.round(makro.protein),
+      proteinGPerKg: makro.proteinGPerKg,
+      proteinGPerKgMin: makro.proteinGPerKgMin,
+      proteinGPerKgMax: makro.proteinGPerKgMax,
+      fedt: Math.round(makro.fedt),
+      kulhydrater: Math.round(Math.max(0, makro.kulhydrater)),
       tabKcal, vedligKcal, opbygKcal,
       proteinPct, fedtPct, kulhPct,
     };
@@ -365,6 +373,9 @@ export default function KalorieBeregner() {
               <p className="text-sm text-red-600 dark:text-red-400">{l.protein}</p>
               <p className="font-bold text-xl dark:text-white">{resultat.protein}g</p>
               <p className="text-xs text-gray-500 dark:text-gray-400">{resultat.protein * 4} kcal ({resultat.proteinPct.toFixed(0)}%)</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                {dec(resultat.proteinGPerKg)} {l.proteinPrKg} ({l.proteinInterval} {dec(resultat.proteinGPerKgMin)}-{dec(resultat.proteinGPerKgMax)})
+              </p>
             </div>
             <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
               <p className="text-sm text-yellow-600 dark:text-yellow-400">{l.fedt}</p>
