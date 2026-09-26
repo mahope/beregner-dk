@@ -2,9 +2,10 @@
 
 STATUS: KØ — **to åbne deploynoter (C23 lønsidernes 2026-tal og C24 SE `/leasing`);
 syv noter lukket ved indholdskontrol 12:33.** 12:30-batchen 2026-09-26 udgav
-C15-C22. C23 (merge 12:19), C24 (merge 12:21), C25 (13:07) og C26 (13:15) kom
+C15-C22. C23 (merge 12:19), C24 (merge 12:21), C25 (13:07), C26 (13:15) og C27
+(`c5ef444`, 13:25) kom
 efter batchens start og kan først verificeres efter **17:30**-vinduet; intet er
-frosset pga. ventetiden. C27 (merge 13:2x) ligger i samme vindue. `/api/health`
+frosset pga. ventetiden. C27 ligger i samme vindue. `/api/health`
 svarer `status: ok`.
 
 **C22's tre ubekræftede fund er nu alle lukket (C27, 13:25):** `/billaan`'s
@@ -3624,7 +3625,8 @@ landmark=lån, piggybank=opsparing osv.).
 
 ## VERIFICÉR DEPLOY-log
 - ⏳ **ÅBEN — VERIFICÉR DEPLOY: C23, C24, C25, C26 og C27.** Merge 2026-09-26
-  12:19 (C23), 12:21 (C24), 13:07 (C25), 13:12 (C26) og 13:2x (C27) CEST — alle
+  12:19 (C23), 12:21 (C24), 13:07 (C25), 13:12 (C26) og **13:25 (C27, `c5ef444`**
+  — ét levetidstal for solceller + ét depositumtal)** CEST — alle
   **efter** at 12:30-batchen var startet, så de kan først verificeres efter
   **17:30**. Der er
   gået ét deploy-vindue siden merge (12:30), så intet er `DEPLOY-MISSING` (kræver
