@@ -1,7 +1,14 @@
 import { FAQSchema } from "@/components/StructuredData";
+import { formatNumber } from "@/lib/format";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
+import { RENTEFRADRAG_2026, SATSER_2026, SKATTEFRADRAG_2026 } from "@/lib/satser-2026";
 import type { Metadata } from "next";
 import Link from "next/link";
+
+const kr = (amount: number) => `${formatNumber(amount, "da")} kr`;
+const krPerKm = (amount: number) =>
+  `${formatNumber(amount, "da", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} kr.`;
+const pct = (rate: number) => `${formatNumber(rate * 100, "da", { maximumFractionDigits: 1 })} %`;
 
 export async function generateMetadata(): Promise<Metadata> {
   const dc = await getCurrentDomainConfig();
@@ -38,17 +45,25 @@ const faqItems = [
   {
     question: "Hvilke fradrag kan man få i 2026?",
     answer:
-      "De vigtigste fradrag i 2026 er: rentefradrag (boliglån), befordringsfradrag (over 24 km), fagforeningskontingent, A-kasse, håndværkerfradrag (serviceydelser) og pensionsindbetaling.",
+      "De vigtigste fradrag i 2026 er: rentefradrag (boliglån), befordringsfradrag (over 24 km), fagforeningskontingent, A-kasse, servicefradrag (rengøring, havearbejde) og pensionsindbetaling.",
   },
   {
-    question: "Hvad er håndværkerfradraget i 2026?",
-    answer:
-      "Håndværkerfradraget (serviceydelser) giver fradrag for op til 12.900 kr per person i 2026 for arbejdsløn til rengøring, havearbejde, vinduespudsning og lignende serviceydelser i hjemmet.",
+    question: "Hvad er servicefradraget i 2026?",
+    answer: `Servicefradraget for rengøring, havearbejde og børnepasning i hjemmet er ${kr(
+      SKATTEFRADRAG_2026.servicefradragMax
+    )} pr. person i 2026. Beløbet er vejledende, indtil det er bekræftet mod en primærkilde. Håndværkerfradraget er et separat fradrag på ${kr(
+      SKATTEFRADRAG_2026.haandvaerkerMax
+    )} for grønne og energibesparende arbejder.`,
   },
   {
     question: "Hvor meget sparer jeg på rentefradraget?",
-    answer:
-      "De første 50.000 kr. i renteudgifter (100.000 kr. for par) har en fradragsværdi på 33,6%, og beløbet over grænsen 25,6%. Værdien afhænger altså af beløbsgrænsen, ikke af din kommune. Betaler du 50.000 kr i renter, sparer du ca. 16.800 kr i skat.",
+    answer: `De første ${kr(
+      RENTEFRADRAG_2026.highRateLimitSingle
+    )} i renteudgifter (${kr(
+      RENTEFRADRAG_2026.highRateLimitCouple
+    )} for par) har en fradragsværdi på ${pct(
+      RENTEFRADRAG_2026.highRate
+    )}, og beløbet over grænsen ${pct(RENTEFRADRAG_2026.lowRate)}. Værdien afhænger altså af beløbsgrænsen, ikke af din kommune.`,
   },
 ];
 
@@ -97,12 +112,12 @@ export default function FradragGuidePage() {
             <tbody>
               <tr>
                 <td>Beskæftigelsesfradrag</td>
-                <td>63.300 kr</td>
+                <td>{kr(SATSER_2026.beskaeftigelsesfradragMax)}</td>
                 <td>Automatisk</td>
               </tr>
               <tr>
                 <td>Personfradrag</td>
-                <td>54.100 kr</td>
+                <td>{kr(SATSER_2026.personfradrag)}</td>
                 <td>Automatisk</td>
               </tr>
               <tr>
@@ -117,7 +132,7 @@ export default function FradragGuidePage() {
               </tr>
               <tr>
                 <td>Fagforening</td>
-                <td>7.000 kr</td>
+                <td>{kr(SKATTEFRADRAG_2026.fagforeningMax)}</td>
                 <td>Automatisk*</td>
               </tr>
               <tr>
@@ -126,13 +141,18 @@ export default function FradragGuidePage() {
                 <td>Automatisk*</td>
               </tr>
               <tr>
-                <td>Håndværkerfradrag (service)</td>
-                <td>12.900 kr</td>
+                <td>Servicefradrag (renøring, havearbejde)</td>
+                <td>{kr(SKATTEFRADRAG_2026.servicefradragMax)}</td>
+                <td>Selvoplyst</td>
+              </tr>
+              <tr>
+                <td>Håndværkerfradrag (grønne arbejder)</td>
+                <td>{kr(SKATTEFRADRAG_2026.haandvaerkerMax)}</td>
                 <td>Selvoplyst</td>
               </tr>
               <tr>
                 <td>Ratepension</td>
-                <td>68.700 kr</td>
+                <td>{kr(SATSER_2026.ratepensionMax)}</td>
                 <td>Automatisk</td>
               </tr>
             </tbody>
@@ -149,10 +169,15 @@ export default function FradragGuidePage() {
         </p>
         <ul>
           <li>
-            <strong>De første 50.000 kr. (100.000 kr. for par):</strong> 33,6% fradragsværdi
+            <strong>
+              De første {kr(RENTEFRADRAG_2026.highRateLimitSingle)} (
+              {kr(RENTEFRADRAG_2026.highRateLimitCouple)} for par):
+            </strong>{" "}
+            {pct(RENTEFRADRAG_2026.highRate)} fradragsværdi
           </li>
           <li>
-            <strong>Beløbet over grænsen:</strong> 25,6% fradragsværdi
+            <strong>Beløbet over grænsen:</strong> {pct(RENTEFRADRAG_2026.lowRate)}{" "}
+            fradragsværdi
           </li>
         </ul>
         <p>
@@ -164,46 +189,82 @@ export default function FradragGuidePage() {
 
         <h2>2. Befordringsfradrag (kørselsfradrag)</h2>
         <p>
-          Har du mere end <strong>24 km</strong> mellem din bopæl og arbejdsplads, kan du få befordringsfradrag.
-          I 2026 er satserne:
+          Har du mere end <strong>{SATSER_2026.koerselBundgraense} km</strong> mellem din bopæl
+          og arbejdsplads, kan du få befordringsfradrag. Satsen for 2026 er:
         </p>
         <ul>
-          <li><strong>25-120 km:</strong> 2,23 kr per km (begge veje tæller)</li>
-          <li><strong>Over 120 km:</strong> 1,12 kr per km</li>
+          <li>
+            <strong>
+              {SATSER_2026.koerselBundgraense}-{SATSER_2026.koerselHoejGraense} km:
+            </strong>{" "}
+            {krPerKm(SATSER_2026.koerselSatsLav)} (begge veje tæller)
+          </li>
+          <li>
+            <strong>Over {SATSER_2026.koerselHoejGraense} km:</strong>{" "}
+            {krPerKm(SATSER_2026.koerselSatsHoej)}
+          </li>
         </ul>
         <p>
-          Fradraget beregnes for den korteste vej og gælder uanset transportmiddel (bil, tog, cykel).
-          Du skal selv oplyse det på din forskudsopgørelse.
+          Fradraget beregnes for den korteste vej og kræver, at du kører i et motorkøretøj
+          (Ligningsloven § 9 a) — du får ikke befordringsfradrag for at cykle, gå eller køre
+          i bus og tog. Du skal selv oplyse det på din forskudsopgørelse. Beregn dit fradrag med
+          vores{" "}
+          <Link href="/befordringsfradrag" className="text-blue-600 hover:underline">
+            befordringsfradrag-beregner
+          </Link>
+          .
+        </p>
+        <p className="text-sm text-gray-600 dark:text-gray-400">
+          * Satserne er vejledende, indtil de er bekræftet mod en primærkilde: skat.dk's
+          kørselsfradragsside er ikke maskinlæsbar, og en dansk sekundærkilde angiver
+          2,28 kr./km over 120 km i stedet for 1,59 kr./km. Tjek altid den aktuelle sats i din
+          forskudsopgørelse.
         </p>
 
-        <h2>3. Håndværkerfradrag (serviceydelser)</h2>
+        <h2>3. Servicefradrag og håndværkerfradrag</h2>
         <p>
-          I 2026 kan du trække op til <strong>12.900 kr</strong> fra per person for arbejdsløn til
-          serviceydelser i hjemmet:
+          De to ordninger er lette at blande sammen, fordi de begge hører til
+          Boligjobordningen — men de har hver sit loft og hvert sit formål.
         </p>
         <ul>
-          <li>Rengøring og vinduespudsning</li>
-          <li>Havearbejde (plæneklipning, hækklipning)</li>
-          <li>Børnepasning i hjemmet</li>
-          <li>Almindelig vedligeholdelse (maling, tapetsering)</li>
+          <li>
+            <strong>Servicefradrag ({kr(SKATTEFRADRAG_2026.servicefradragMax)} pr. person):</strong>{" "}
+            rengøring, vinduespudsning, havearbejde (plæneklipning, hækklipning) og
+            børnepasning i hjemmet
+          </li>
+          <li>
+            <strong>
+              Håndværkerfradrag ({kr(SKATTEFRADRAG_2026.haandvaerkerMax)} pr. person):
+            </strong>{" "}
+            grønne og energibesparende forbedringer af din bolig, fx isolering, energirigtige
+            vinduer og døre, varmepumpe, solceller og ladestander
+          </li>
         </ul>
         <p>
           <strong>Vigtigt:</strong> Kun arbejdslønnen kan fradrages — ikke materialer. Betalingen
-          skal ske elektronisk (aldrig kontant).
+          skal ske elektronisk og via en momsregistreret virksomhed (aldrig kontant), og
+          fradraget indberettes selv i TastSelv på skat.dk.
+        </p>
+        <p className="text-sm text-gray-600 dark:text-gray-400">
+          * Beløbsloftet og fradragsværdien (ca.{" "}
+          {pct(SKATTEFRADRAG_2026.boligfradragSkattevaerdi)}) er vejledende, indtil de er
+          bekræftet mod en primærkilde for 2026 — se IMPLEMENTATION_PLAN.md, opgave S1.
         </p>
 
         <h2>4. Fagforening og A-kasse</h2>
         <p>
-          Kontingent til fagforening kan fradrages med op til <strong>7.000 kr</strong> om året.
-          A-kasse-kontingent er fuldt fradragsberettiget. Begge indberettes typisk automatisk,
-          men tjek at beløbene er korrekte på din forskudsopgørelse.
+          Kontingent til fagforening kan fradrages med op til{" "}
+          {kr(SKATTEFRADRAG_2026.fagforeningMax)} om året. A-kasse-kontingent er fuldt
+          fradragsberettiget. Begge indberettes typisk automatisk, men tjek at beløbene er
+          korrekte på din forskudsopgørelse.
         </p>
 
         <h2>5. Pension</h2>
         <p>
-          Indbetalinger til ratepension er fradragsberettigede med op til <strong>68.700 kr</strong> i 2026.
-          Indbetalinger til livrente har ingen loft. Bemærk at aldersopsparing ikke giver fradrag
-          (til gengæld er udbetalingen skattefri).
+          Indbetalinger til ratepension er fradragsberettigede med op til{" "}
+          {kr(SATSER_2026.ratepensionMax)} i 2026. Indbetalinger til livrente har ingen loft.
+          Bemærk at aldersopsparing over {kr(SATSER_2026.aldersopsparingMax)} ikke giver
+          fradrag (til gengæld er udbetalingen skattefri).
         </p>
         <p>
           Beregn din pension med vores{" "}
@@ -211,6 +272,7 @@ export default function FradragGuidePage() {
         </p>
 
         <h2>6. Gaver til velgørenhed</h2>
+
         <p>
           Du kan trække gaver til godkendte velgørende organisationer fra med op til <strong>18.300 kr</strong> i
           2026. Gaverne indberettes automatisk af organisationen.
