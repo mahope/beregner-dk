@@ -7,6 +7,8 @@ import FAQ from "@/components/FAQ";
 import RelatedCalculators from "@/components/RelatedCalculators";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import Link from "next/link";
+import { getDageTilEvents, getDageTilPrefix, isDageTilLocale } from "@/lib/dage-til";
 
 export async function generateMetadata() {
   return generatePageMetadata("dato");
@@ -16,6 +18,16 @@ export default async function DatoPage() {
   const locale = await getLocale();
   const domainConfig = await getCurrentDomainConfig();
   const pageData = getPageData("dato", locale) || getPageData("dato", "da")!;
+  // Search Console (2026-08-27→09-24) har "hvor mange dage er der til 1 december"
+  // (996 visninger, pos. 5) og "hvor mange dage er der tilbage af 2026" (223, pos. 5)
+  // som to af sidens fire søgninger. `/dage-til/*`-siderne svarer på begge, men
+  // `/dato` linkede til ingen af dem: hele kæden lå kun den anden vej.
+  const dageTilLinks = isDageTilLocale(locale)
+    ? getDageTilEvents(locale).map((event) => ({
+        href: `${getDageTilPrefix(locale)}${event[locale].slug}`,
+        question: event[locale].copy.question,
+      }))
+    : [];
 
   return (
     <div>
@@ -196,6 +208,41 @@ export default async function DatoPage() {
             juldagen, annandag jul och nyårsafton.
           </p>
         </div>
+      </div>
+      )}
+
+      {dageTilLinks.length > 0 && (
+      <div className="prose dark:prose-invert max-w-none mt-12">
+        <h2>
+          {locale === "se"
+            ? "Datum folk oftast räknar ner till"
+            : "Datoer folk oftest tæller ned til"}
+        </h2>
+        <p>
+          {locale === "se"
+            ? "Vill du veta exakt hur många dagar som är kvar till ett bestämt datum? Sidan för varje datum räknar om sig själv varje dag, så talet är alltid aktuellt."
+            : "Vil du se det præcise antal dage til en bestemt dato? Siden for hver dato tæller sig selv frem hver dag, så tallet er altid aktuelt."}
+        </p>
+        <ul>
+          {dageTilLinks.map((link) => (
+            <li key={link.href}>
+              <Link href={link.href}>{link.question}</Link>
+            </li>
+          ))}
+        </ul>
+        <p>
+          {locale === "se" ? (
+            <>
+              Vill du bara räkna ner till ett datum och se det som veckor och dagar kan du
+              använda <Link href="/nedtaelling">nedräkningen</Link>.
+            </>
+          ) : (
+            <>
+              Vil du bare tælle ned til én dato og se det som uger og dage, kan du bruge{" "}
+              <Link href="/nedtaelling">nedtællingen</Link>.
+            </>
+          )}
+        </p>
       </div>
       )}
 
