@@ -4,6 +4,8 @@ import DatoBeregner from "./DatoBeregner";
 import { LocaleProvider } from "./LocaleProvider";
 import { encodeCalculationState } from "@/lib/calculation-state";
 import { getDomainConfig } from "@/lib/domain-config";
+import { beregnAlder } from "@/lib/alder";
+import { tilIsoDato } from "@/lib/lokal-dato";
 
 vi.mock("@/lib/analytics", () => ({
   trackCalculation: vi.fn(),
@@ -112,5 +114,62 @@ describe("DatoBeregner — dage mellem", () => {
     expect(tile(/^Arbejdsdage$/)).toBe(0);
     expect(tile(/^Weekenddage$/)).toBe(0);
     expect(tile(/^Helligdage$/)).toBe(0);
+  });
+});
+
+/** Renderer et vilkårligt delelink-state, så alderstilstanden kan læses. */
+function renderAlder(foedselsdato: string, locale: "da" | "se" = "da") {
+  const encoded = encodeCalculationState({
+    type: "dato",
+    inputs: { mode: "alder", foedselsdato },
+    timestamp: 1700000000000,
+  });
+  window.history.replaceState({}, "", `/dato?s=${encoded}`);
+  const config =
+    locale === "se" ? getDomainConfig("beraknare.se") : getDomainConfig("localhost");
+
+  render(
+    <LocaleProvider locale={locale} domainConfig={config}>
+      <DatoBeregner />
+    </LocaleProvider>
+  );
+}
+
+describe("DatoBeregner — alder", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    cleanup();
+  });
+
+  test("svarer som `/alder`-modulet gør med samme fødselsdato", async () => {
+    renderAlder("1990-03-15");
+
+    const forventet = beregnAlder({
+      foedselsdato: "1990-03-15",
+      beregningsdato: tilIsoDato(new Date()),
+    });
+    await waitFor(() => {
+      expect(screen.getByText(new RegExp(`^${forventet?.aar} år$`))).toBeTruthy();
+    });
+    expect(
+      screen.getByText(`${forventet?.maaneder} måneder og ${forventet?.dage} dage`)
+    ).toBeTruthy();
+    // Totalerne formateres med locale, så daltes tusindtalsseparator.
+    expect(
+      screen.getByText((forventet?.totalDage ?? 0).toLocaleString("da-DK"))
+    ).toBeTruthy();
+  });
+
+  test("en fødselsdato i fremtiden viser intet resultat frem for negativ alder", async () => {
+    renderAlder("2030-01-01");
+
+    await waitFor(() => {
+      expect(screen.getByText(/^Fødselsdato$/)).toBeTruthy();
+    });
+    expect(screen.queryByText(/NaN/)).toBeNull();
+    expect(screen.queryByText(/^Din alder$/)).toBeNull();
   });
 });

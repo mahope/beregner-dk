@@ -1,17 +1,20 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — **C49 er landet: `/tidszone` regnede med vintertid hele året.**
-Forskellene til Tokyo, Sydney, Mumbai, Beijing, São Paulo, Bangkok, Singapore og
-Johannesburg lå en time forkert i de syv måneder, Danmark har CEST, og noten på
-siden forklarede fejlen i stedet for at rette den. Nu følger beregneren
-sommertiden, overgangsdatoerne er verificeret mod systemets tz-database for 2026
-og 2027, og et kryds-tjek holder beregnerens offsette samstemt med modulet, der
-driver tabellen i brødteksten. Kode `fa51af7`, merge `20a69f1` 2026-09-26 22:47,
-første kandidatvindue **2026-09-27 07:30**. Se opgave 77.
+STATUS: KØ — **C50 er landet: `/dato`'s standarddatoer var UTC-forskudt, og
+alder-tilstanden duplikerede `/alder`'s modul.** `DatoBeregner` byggede dagens
+dato med `toISOString().split("T")[0]`, hvilket skriver i UTC — så en dansk læser
+fik **dagen i går som standard** kl. 00-02, og "til dato" var systematisk **én
+dag for tidligt** hele døgnet, fordi en lokal dato kl. 00.00 skrives som dagen
+før i UTC. Samme komponent havde sin egen alder-beregning med UTC-tolkede
+fødselsdatoer, som `src/lib/alder.ts` allerede løste korrekt i C47. Nu læser
+`/dato` kalenderdatoer gennem ét nyt modul (`src/lib/lokal-dato.ts`), alder-
+tilstanden kalder `beregnAlder`, og et tomt eller umuligt datofelt giver intet
+resultat frem for "NaN dage". Kode + plan i ét commit på `ceo/dato-alder-lokaldato`;
+første kandidatvindue **2026-09-27 07:30**. Se opgave 78.
 
 **Fire deploynoter står åbne** (C37, C42, C43 og C46, alle med første
-kandidatvindue 2026-09-27 07:30 undtagen C37: 12:30) plus **C49** i samme
-vindue. `beregner.no`-delen af enhver note verificeres ikke: den URL er et
+kandidatvindue 2026-09-27 07:30 undtagen C37: 12:30) plus **C48** og **C50** i
+samme vindue. `beregner.no`-delen af enhver note verificeres ikke: den URL er et
 separat site, ikke dette repo (se ❓). `/api/health` svarer `status: ok`.
 
 **Bemærk til næste iteration om en fælde, der kostede tid i C49.** Labels i
@@ -5179,6 +5182,85 @@ Skal næste iteration tilføje det, er det en selvstændig opgave — se ❓.
   korrekte. Den svenske liste nævner "alla helgons dag", som Danmark
   korrekt ikke har, og omvendt nævner den danske ikke de svenske.
 
+#### 78. [x] FÆRDIG 2026-09-26 — C50 — `/dato`: standarddatoerne var UTC-forskudt, og alder-tilstanden duplikerede `alder.ts`
+
+**C50 er C48/C49's metode anvendt på sitets næststørste side.** `/dato` har
+1045 besøgende/28d (+76 %) og **130.392 visninger** i GSC (sitet nr. 2), er
+**indgangsside nr. 1 (963)**, og lå i køen som den sidste trafikstærke side,
+C47's audit ikke havde rørt. Den gav tre fund, hvoraf ét er en reel fejl, der
+rammer alle besøgende.
+
+**Fund 1 — standardtilstanden var forskudt en dag ( reel fejl).**
+`DatoBeregner` byggede dagens dato med `new Date().toISOString().split("T")[0]`.
+`toISOString()` skriver i **UTC**, så:
+- kl. 00.00-02.00 dansk tid (hele året, og hele døgnet i UTC+0-vinteren) viste
+  **dagen i går** i begge datofelter;
+- "Til dato" var **systematisk én dag for tidligt hele døgnet**: standarden er
+  `d.setMonth(d.getMonth() + 1)` på en *lokal* dato, som så skrives i UTC — så
+  27. september kl. 00.00 lokal (CEST) bliver "2026-10-26", ikke "2026-10-27".
+  Det gjorde standardvisningen til **29 dage i stedet for 30** hele døgnet;
+- i **januar** sprang "til dato" desuden til **3. marts**, fordi
+  `setMonth(+1)` på 31. januar ruller over i næste måned. Nu klemmes den til
+  månedens sidste dag (28. februar 2026, 29. februar 2028).
+
+**Fund 2 — alder-tilstanden duplikerede et modul, der allerede var rettet.**
+C47 fandt i `/alder` at `new Date("1990-03-15")` tolteres som UTC-midnat, mens
+koden læser `.getDate()` — altså dagen i går for enhver læser bag UTC — og
+flyttede læsningen ind i `alder.ts`'s `parseDato`. **`DatoBeregner`'s
+alder-tilstand stod stadig med hele regnestykket inline**, tolkede
+`foedselsdato` på samme måde og lavede selv næste fødselsdag. Den brugte
+`Math.ceil` til dage-til-fødselsdag, mens modulet bruger `Math.floor` — to
+værktøjer, to svar, ingen test. Nu kalder tilstanden `beregnAlder`, og modulet
+leverer `naesteFoedselsdagDato`, så komponenten ikke skal finde datoen igen.
+**Dette er præcis C48's og C49's mønster: en konstant i komponenten, der
+duplikerer et modul** — og det lå på den side med flest indgangssider.
+
+**Fund 3 — tomme felter gav "NaN".** Alle fire tilstande lavede
+`new Date(inputværdi)` uden at tjekke feltet. Rydder man et datofelt, stod der
+"NaN dage" / "NaN år" / "Invalid Date" på en side med 963 indgangssider. Nu
+går alle tilstande gennem `parseIsoDato`, som afviser tomme, korte og umulige
+datoer (31. februar), og et felt uden gyldig dato viser **intet resultat**
+frem for et tal, der ikke betyder noget. Det er samme regel som BMI's
+barnestate: vis hellere ingenting end noget stille forkert.
+
+**Rettelsen.** Ét nyt modul `src/lib/lokal-dato.ts` med `tilIsoDato` (kalender-
+felter → "YYYY-MM-DD"), `parseIsoDato` (lokal læsning, afviser 31. februar) og
+`plusIsoMaaneder` (månedsskift med klemning). `alder.ts` bruger nu dets
+`parseIsoDato` i stedet for sin private kopi, så der er **én** læsning af
+kalenderdatoer i hele `src/lib`. Komponenten bruger modulet til standardværdier,
+reset og alle fire tilstande.
+
+**Én intern link, der er dokumenteret af værktøjet selv.** `/dato`'s alder-
+tilstand regner alderen **i dag**, mens `/alder` (6.013 visninger, pos. 7,8) kan
+finde alderen på en vilkårlig dato. Siden sagde det aldrig, så læseren med
+spørgsmålet "hvor gammel var jeg den 1. maj 2010?" skulle finde ud af det selv.
+Punkt 4 under "Sådan bruger du datoberegneren" linker nu til `/alder` — samme
+fund som C47's på `/alder` i modsat retning.
+
+**MÅL:** `/dato` baseline **1.045 besøgende/28d 2026-09-26** (Plausible),
+**130.392 visninger / 801 klik / CTR 0,6 % / pos. 5,8** (GSC 2026-08-27 →
+2026-09-24). Rettelsen er først og fremmest en **sandhedsrettelse**: en læser,
+der får "29 dage" i standardvisningen, får ikke et klik, fordi han stoler på
+den. Effekten måles som færre forkerte standardvisninger, ikke som flere klik.
+**Genmål 2026-10-10.**
+
+**To negative fund, skrevet ned så ingen senere iteration bruger tid på dem.**
+- **De samme tre filer har flere `toISOString().split("T")`**: `AlderBeregner`
+  (3) og `UgenummerBeregner` (2). De er **ikke** rettet her, fordi de ikke er
+  nået af en trafikmåling i dette snapshot, og de skal løses i én samlet
+  opgave med test — ikke som sidespor.
+- **"2026 har 253 arbejdsdage" på `/dato` er stadig hardkodet** (gentaget fra
+  C49's negative fund) og bliver forældet i januar. Samme funktion findes i
+  `helligdage.ts`; det er en lille, velafgrænset opgave, men den har ingen
+  trafikgrund og er derfor ikke blandet ind her.
+
+**Kvalitetsgate 2026-09-26 23:05:** `npm run test` grøn (**1451/1451** i 137
+filer), `npm run lint` grøn (541 filer), `npm run build` grøn (141 sider, ingen
+advarsler i output). **Ni nye tests**: syv i `lokal-dato.test.ts` og to i
+`DatoBeregner.test.tsx`, hvor den ene slår alder-tilstanden mod `beregnAlder` —
+så de to værktøjer ikke kan glide fra hinanden igen, og den anden håndterer en
+fødselsdato i fremtiden.
+
 ### Næste kandidater efter C34 — lukket med negativt fund
 
 
@@ -5387,6 +5469,27 @@ efter datagrund:
   og noterer, at NO-URL'en 404'er. Det er ærligt, men mindre end noterne lover.
   Bemærk desuden: **der er ingen beregner.no-trafik i nogen snapshot** — hverken
   Plausible eller GSC — hvilket er konsistent med et separat site.
+- ⏳ **VERIFICÉR DEPLOY: C50 `/dato` — standarddatoer i lokal tid, alderen fra
+  `alder.ts`, ingen "NaN" på tomme felter — kode + plan i ét commit på branch
+  `ceo/dato-alder-lokaldato`, merge-ref indsættes i den afsluttende plan-commit.**
+  Første kandidatvindue **2026-09-27 07:30**. Verificér **indhold**, HTTP 200
+  beviser intet:
+  1. Hent `https://minberegner.dk/dato` **mellem 00:00 og 02:00 dansk tid**.
+     "Fra dato"-feltet skal vise **dagens** dato, ikke dagen i går. Det er det
+     eneste af fundene, der er synligt uden at røre ved værktøjet, og det er
+     derfor testen er skrevet på kalenderfelterne i stedet.
+  2. "Til dato" skal være **præcis én måned efter "Fra dato"** — aldrig 3. marts
+     i januar. Tjek både ved hård reload og ved at trykke på Reset.
+  3. `/dato`'s punkt 4 ("4. Alder") skal indeholde et link med `href="/alder"`.
+  4. `/dato` må **ikke** vise "NaN" nogen steder. Det kræver et tomt felt, så
+     det kan kun efterprøves interaktivt; verificér i stedet at kilderne er
+     live ved at hente `/_next/static/chunks/`-builden efter `dato` og bekræfte
+     at alder-tilstanden findes. **Hvis du vil have den fulde kontrol:** åbn
+     `/dato`, vælg "Alder", sæt fødselsdato til **1. maj 2010**, og læs
+     "Hvor gammel var jeg …"-svaret; det skal være præcis det samme som på
+     `/alder` med samme dato.
+  5. `https://beraknare.se/dato` skal have de svenske labels ("Antal dagar",
+     "Veckor", "Helgdagar") uændret, og `/api/health` skal svare `status: ok`.
 - ⏳ **VERIFICÉR DEPLOY: C49 `/tidszone` følger sommertiden — `fa51af7`, merge
   `20a69f1` 2026-09-26 22:47 CEST** på branch `ceo/tidszone-dato-tilstande`.
   Første kandidatvindue **2026-09-27 07:30**. Verificér **indhold**, HTTP 200

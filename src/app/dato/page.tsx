@@ -90,7 +90,9 @@ export default async function DatoPage() {
         <h3>4. Alder</h3>
         <p>
           Beregn din <strong>præcise alder</strong> i år, måneder og dage. Se også hvor mange
-          dage du har levet, og hvornår du fylder år.
+          dage du har levet, og hvornår du fylder år. Vil du finde ud af, hvor gammel du
+          var på en bestemt dato, kan du bruge{" "}
+          <Link href="/alder">aldersberegneren</Link>.
         </p>
 
         <h2>Nyttige datofakta</h2>
