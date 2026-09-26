@@ -2,6 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
+import { elbilSammenligning } from "@/lib/braendstof";
+
+/** Eksemplet i artiklen skal regne lige som /elbil gør, så tal, der ikke kan glide fra hinanden. */
+const elbil = elbilSammenligning("da");
+const kr = (value: number) => Math.round(value).toLocaleString("da-DK");
+const f2 = (value: number) => value.toFixed(2).replace(".", ",");
 
 export async function generateMetadata(): Promise<Metadata> {
   const dc = await getCurrentDomainConfig();
@@ -199,7 +205,7 @@ export default function BiloekonomiPage() {
           <li><strong>El (offentlig lynlader)</strong>: ca. 4-6 kr/kWh</li>
         </ul>
         <p>
-          Kører du 15.000 km om året i en benzinbil der går 16 km/l, bruger du ca. 938 liter til ca. 13.500 kr. En elbil der bruger 18 kWh/100 km, koster ca. 5.400 kr i strøm ved hjemmeladning — en besparelse på over 8.000 kr/år.
+          Kører du {kr(elbil.forudsætninger.kmPrAar)} km om året i en benzinbil der går {elbil.forudsætninger.benzinKmPerLiter} km/l, bruger du ca. {kr(elbil.forudsætninger.kmPrAar / elbil.forudsætninger.benzinKmPerLiter)} liter til {kr(elbil.benzinPrisPrKm * elbil.forudsætninger.kmPrAar)} kr. En elbil der bruger {elbil.forudsætninger.elKwhPer100km} kWh/100 km, koster ca. {kr(elbil.elPrisPrKm * elbil.forudsætninger.kmPrAar)} kr i strøm ved {f2(elbil.forudsætninger.elKwhPris)} kr./kWh — en besparelse på ca. {kr(elbil.aarligBesparelse)} kr./år. Det er de samme forudsætelser som elbilberegneren bruger.
         </p>
         <p>
           Brug vores <Link href="/braendstof" className="text-blue-600 hover:underline">brændstofberegner</Link> til at se, hvad dit kørselsbehov koster, eller <Link href="/elbil" className="text-blue-600 hover:underline">sammenlign elbil med benzinbil</Link>.

@@ -47,3 +47,68 @@ export function breakEvenKwhPris(type: Exclude<BraendstofType, "el">): number {
 export function procent1Decimals(value: number): number {
   return Math.round(value * 10) / 10;
 }
+
+/**
+ * The defaults behind the /elbil tool. Deliberately a second set: the table on
+ * /braendstof is a conservative fleet average, this is one modern car. Both
+ * point the same way — 18 kWh/100 km costs more than the table's 17 and 16 km/l
+ * saves less than the table's 15 — so /elbil's saving (46.7 %) is the smaller
+ * of the two. The test "de to sammenligninger peger samme vej" locks that, so a
+ * future edit has to be a conscious choice.
+ */
+export const ELBIL_FORUDSETNINGER = {
+  da: {
+    elKwhPris: 2.5,
+    elKwhPer100km: 18,
+    benzinLiterPris: 13.5,
+    benzinKmPerLiter: 16,
+    kmPrAar: 15000,
+    aar: 5,
+  },
+  se: {
+    elKwhPris: 2,
+    elKwhPer100km: 18,
+    benzinLiterPris: 19,
+    benzinKmPerLiter: 16,
+    kmPrAar: 15000,
+    aar: 5,
+  },
+} as const;
+
+export type ElbilLocale = keyof typeof ELBIL_FORUDSETNINGER;
+
+/** Anything that is not the Swedish site gets the Danish defaults. */
+export function elbilForudsætninger(locale: string) {
+  return locale === "se" ? ELBIL_FORUDSETNINGER.se : ELBIL_FORUDSETNINGER.da;
+}
+
+/** Price per km for el or petrol under the /elbil defaults, in DKK. */
+export function elbilPrisPrKm(locale: string, type: "el" | "benzin"): number {
+  const f = elbilForudsætninger(locale);
+  return type === "el"
+    ? (f.elKwhPer100km / 100) * f.elKwhPris
+    : f.benzinLiterPris / f.benzinKmPerLiter;
+}
+
+/**
+ * What the /elbil defaults actually add up to. The page prose, both FAQ
+ * answers and the biloekonomi article read this, so none of them can promise
+ * something the tool does not show.
+ */
+export function elbilSammenligning(locale: string) {
+  const f = elbilForudsætninger(locale);
+  const elPrisPrKm = elbilPrisPrKm(locale, "el");
+  const benzinPrisPrKm = elbilPrisPrKm(locale, "benzin");
+  const besparelse = benzinPrisPrKm > 0 ? ((benzinPrisPrKm - elPrisPrKm) / benzinPrisPrKm) * 100 : 0;
+  return {
+    forudsætninger: f,
+    elPrisPrKm,
+    benzinPrisPrKm,
+    /** Rounded for display: 46.666 -> 46.7 */
+    besparelseProcent: procent1Decimals(besparelse),
+    /** Rounded to the nearest 100 for prose: 5906.25 -> 5900 */
+    aarligBesparelse: Math.round(((benzinPrisPrKm - elPrisPrKm) * f.kmPrAar) / 100) * 100,
+    /** El price per kWh where el costs the same per km as petrol. */
+    breakEvenKwhPris: procent1Decimals(benzinPrisPrKm / (f.elKwhPer100km / 100)),
+  };
+}

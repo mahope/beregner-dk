@@ -1,10 +1,17 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — **elleve åbne deploynoter (C23-C31).** 12:30-batchen 2026-09-26 udgav
+STATUS: KØ — **tolv åbne deploynoter (C23-C32).** 12:30-batchen 2026-09-26 udgav
 C15-C22. C23 (merge 12:19), C24 (12:21), C25 (13:07), C26 (13:15), C27 (13:25),
-C28 (14:30), C29 (14:38), C30 (ca. 15:00) og C31 (`ceo/c31-pension-folkepensionsalder`)
-kom efter batchens start og kan først verificeres efter **17:30**-vinduet; intet er
-frosset pga. ventetiden. `/api/health` svarer `status: ok`.
+C28 (14:30), C29 (14:38), C30 (ca. 15:00), C31 (15:08) og C32
+(`ceo/c32-elbil-et-ratested`) kom efter batchens start og kan først verificeres efter
+**17:30**-vinduet; intet er frosset pga. ventetiden. `/api/health` svarer `status: ok`.
+
+**C32 gjorde C30's advarsel bogstavelig.** `/elbil` havde sine egne forudsætninger
+hardkodet (18 kWh/100 km, 16 km/l) ved siden af `src/lib/braendstof.ts` (17 og 15), og
+tre steder lovede at el koster "under halvdelen" af benzin — ved værktøjets **egne**
+standarder er el 0,45 mod benzins 0,84 kr. pr. km, altså 53 %. Der er nu ét modul, alle
+tre løfteafsnit renderer tal fra det, og `biloekonomi`-artiklens regnestykke (13.500 /
+5.400 / "over 8.000") er rettet til 12.656 / 6.750 / ca. 5.900. Se opgave 59.
 
 **C31 fjernede et løfte, der var forkert for værktøjets egen standardbruger.**
 `/pension`'s hjælpetekst sagde "Folkepensionsalder er 68 år (stigende)", mens siden
@@ -39,14 +46,15 @@ weekenddag eller helligdag — den forklares nu i stedet for at forsvinde fra
 summeringen. Se opgave 55.
 
 Næste iteration skal **ikke** optimere CTR på de samme svar-først-sider igen, og
-den skal **ikke** gentage C26-C31. Den eneste tilbage fra C28's kandidatliste er
+den skal **ikke** gentage C26-C32. Den eneste tilbage fra C28's kandidatliste er
 **`/husleje`** (166 besøgende/28d, sidens løfteindhold er uopnåeligt som
-standardværdi) — nærmere beskrevet under ❓ og i C28's kandidatliste. C30's eget fund:
-**`/elbil`** bruger sine egne forudsætninger i stedet for `src/lib/braendstof.ts`, så
-de to el/benzin-sammenligninger kan glide fra hinanden; konsolidering taget som egen
-opgave. Kandidat 41 (`noPages` mangler `/enhudspris`) har fortsat nul trafik, da
-`beregner.no` ikke er live. `/kalorier` og `/flyttebudget` er lukket i C29,
-`/braendstof` i C30, `/pension`s folkepensionsalder i C31.
+standardværdi) — nærmere beskrevet under ❓ og i C28's kandidatliste. C32's eget fund:
+**`/elbil` har ingen trafikbaseline** i Plausible eller GSC, selv om den ligger i
+katalog, kategori og to artikler — hvis næste snapshot tæller den, er der noget at
+lære; hvis ikke, er spørgsmålet om siden overhovedet er linket nok. Kandidat 41
+(`noPages` mangler `/enhudspris`) har fortsat nul trafik, da `beregner.no` ikke er
+live. `/kalorier` og `/flyttebudget` er lukket i C29, `/braendstof` i C30,
+`/pension`s folkepensionsalder i C31, `/elbil`s forudsætninger i C32.
 
 
 ## Fase 3 — trafik-drevet
@@ -3420,6 +3428,74 @@ første halvdel af denne liste er fra DA-fladen, anden halvdel fra SE — de er
   på en side med 2 % bounce får nu det samme svar i værktøjet som i tabellen ovenfor,
   og sparetiden beregnes mod den alder, hvor folkepensionen faktisk begynder.
 
+#### 59. [x] FÆRDIG 2026-09-26 — C32 — `/elbil`: ét ratested, og "under halvdelen" holdt ikke
+
+- **Iteration start:** 2026-09-26 15:30 CEST. Køen var tom (alle 58 opgaver færdige,
+  intet `I GANG`), og de elleve åbne deploynoter kan først verificeres i 17:30-vinduet.
+  Valget var C30's eget fund, som STATUS pegede på som egen opgave.
+- **Datagrund:** `/elbil` står ikke i Plausible-top-15 eller i GSC-snapshottet, så
+  den har **ingen målt baseline** — kun 11 interne referencer i koden
+  (`calculator-list.ts:76,202`, `categories.ts:83`, to blogindlæg, ikonet). Nærmeste
+  målbare slægtning er `/bil` (27 besøgende/28d, faldet 48 → 27) og SE `/bil` (1.719
+  visninger, position 32,9). Derfor er opgaven en tillidsopgave, ikke en
+  trafikopgave, og det står skrevet i MÅL-linjen.
+- **Fundet:** C30's advarsel holdt stik. `/elbil` havde sine egne forudsætninger
+  hardkodet i `ElbilBenzinBeregner.tsx` (18 kWh/100 km, 16 km/l, 2,50/13,50 kr. DA og
+  2/19 kr. SE), mens `src/lib/braendstof.ts` holder 17 kWh/100 km og 15 km/l. To
+  el/benzin-sammenligninger på samme site, ingen fælles kilde. Og tre steder lovede
+  "under halvdelen":
+  1. `src/lib/page-data.ts:59` (DA FAQ): "Ved normale priser koster el ofte under
+     halvdelen af benzin pr. km." Ved værktøjets **egne** standarder er el 0,45 mod
+     benzins 0,84375 kr. pr. km — altså **53 % af benzinprisen**. Løftet er falsk,
+     præcis som C30's "50-70 %" var.
+  2. `src/app/elbil/page.tsx:58` (DA prosa) og `:82` (SE prosa) sagde det samme. SE
+     holdt tilfældigt ved 69,7 %, men var heller ikke bundet til værktøjet.
+  3. `src/app/blog/spar-penge-paa-braendstof/page.tsx:198`: "Opladning hjemme koster
+     under halvdelen af benzin per kilometer" — holdt kun fordi artiklens egen tabel
+     bruger 7 l/100 km (0,91 kr. pr. km), altså en **anden benzinbil** end værktøjets.
+- **Dertil et regnestykke, der ikke holdt:** `biloekonomi`-artiklens
+  brændstofafsnit lovede "ca. 938 liter til ca. 13.500 kr" og "ca. 5.400 kr i strøm"
+  og "en besparelse på over 8.000 kr/år". 938 liter × 13,50 = **12.656**, og 5.400 kr
+  for 2.700 kWh forudsætter **2,00** kr./kWh — altså den svenska elpris, ikke
+  værktøjets danske 2,50. Regnestykket med 2,50 giver 6.750 kr. og en besparelse på
+  **5.906** kr., altså under de lovede 8.000. To af tre tal var for høje.
+- **Beslutning/implementering:** ét sted — `ELBIL_FORUDSETNINGER` i
+  `src/lib/braendstof.ts` med `elbilForudsætninger(locale)` (alt ikke-`se` får dansk)
+  og `elbilSammenligning(locale)`, som giver el-pris pr. km, benzin-pris pr. km,
+  besparelse i procent, årlig besparelse og break-even-pris pr. kWh. Værktøjet læser
+  alle sine standarder (også reset) derfra, så `/elbil` og `/braendstof` ikke længere
+  kan glide fra hinanden. De to sæt er bevidst forskellige — tabellen på `/braendstof`
+  er et konservativt flådesnit, `/elbil` er én moderne bil — og en test låser
+  retningen, så en fremtidig ændring skal være en bevidst beslutning. DA-FAQ, SE-FAQ,
+  sidens prosa i begge sprog og **begge blogartikler** renderer nu de udledte tal.
+  `/braendstof`'s egne tal (52,8 % / 40,2 %, 0,43/0,90/0,71) er urørt, så C30's åbne
+  deploynote kan stadig verificeres mod præcis de tal.
+- **Landet:** kode + plan i denne iterations commit på `ceo/c32-elbil-et-ratested`
+  (merge-ref noteres nedenst). `/api/health` svarer `status: ok`.
+- **Kvalitetsgate 2026-09-26 16:12 CEST:** `npm run build` grøn (typecheck
+  inkluderet), `npm run test` grøn (**1344/1344, 129 filer** — 10 nye tests: 7 i
+  `braendstof.test.ts`, 3 i den nye `ElbilBenzinBeregner.test.tsx`), `npm run lint`
+  grøn (522 filer).
+- **MÅL:** `/elbil` har **ingen trafikbaseline** i snapshottet (ikke i top-15, ikke i
+  GSC) — genmåles først når Plausible/GSC melder den. Titler og description er
+  urørte, så dette er ren korrekthedstask. Til gengæld er alle tre løfteafsnit nu
+  falsificerbare: tallene 0,45/0,84 kr. pr. km, 46,7 %, 4,7 kr./kWh og 5.900 kr./år
+  står på side, FAQ og blog og kommer fra ét modul.
+- **Acceptkriterier:**
+  1. `ElbilBenzinBeregner.tsx` indeholder ingen hardkodede 18/16/2,5/13,5/2/19 —
+     de læses fra `ELBIL_FORUDSETNINGER`. **PASS**
+  2. "under halvdelen" er væk fra `/elbil`-siden, FAQ'en og
+     `spar-penge-paa-braendstof`. **PASS**
+  3. DA-FAQ'en siger 0,45 mod 0,84 kr. pr. km, 46,7 % og 4,7 kr./kWh; SE-FAQ'en siger
+     0,36 mod 1,19 kr/km, 69,7 % og 6,6 kr/kWh. **PASS**
+  4. `biloekonomi`-afsnittet siger 12.656 kr. benzin, 6.750 kr. el og ca. 5.900 kr. i
+     besparelse — ikke 13.500/5.400/"over 8.000". **PASS**
+  5. `/braendstof`'s 52,8 % / 40,2 % og tabelværdierne er uændrede. **PASS**
+  6. `npm run lint`, `npm run test` og `npm run build` er grønne. **PASS**
+- **Forventet effekt:** Ingen målbar trafikstigning — `/elbil` har ingen baseline, og
+  det er ikke en CTR-klasse. Det er en tillidsopgave: elbil-læseren får samme tal i
+  værktøjet, i FAQ'en og i artiklerne, og et løfte, der var konkret forkert, er væk.
+
 #### C28's øvrige fund — ikke taget, skrevet som næste kandidater
 
 - ~~**`/flyttebudget` (C27-rest, 2 linjer)~~ — lukket i C29 den 2026-09-26.~~ Page-
@@ -3939,6 +4015,30 @@ landmark=lån, piggybank=opsparing osv.).
     - Gate grøn: lint ok, 280/280 tests, build ok (128 pages).
 
 ## VERIFICÉR DEPLOY-log
+- ⏳ **ÅBEN — VERIFICÉR DEPLOY: C32 `/elbil` + de to bilartikler: ét ratested for
+  el/benzin, "under halvdelen" væk.** Kode og plan i denne iterations commit på
+  `ceo/c32-elbil-et-ratested`, merge til `master` 2026-09-26 ca. 16:15 CEST —
+  efter 12:30-batchens start, så første kandidatvindue er **17:30 2026-09-26**. Ét
+  deploy-vindue siden merge, så intet er `DEPLOY-MISSING` (kræver to) og intet er
+  frosset. Verificér **indhold**, HTTP 200 beviser intet:
+  1. DA `https://minberegner.dk/elbil`: FAQ'en skal have "Er en elbil billigere end
+     en benzinbil?" med **0,45** og **0,84 kr. pr. km**, **46,7 %** og **4,7 kr./kWh**,
+     og teksten må **ikke** indeholde "under halvdelen". Samme tal skal stå i
+     sideafsnittet under værktøjet.
+  2. SE `https://beraknare.se/elbil`: **0,36** og **1,19 kr/km**, **69,7 %**,
+     **6,6 kr/kWh**, igen uden "under hälften".
+  3. Begge domæner: værktøjets felter skal starte på **15000** km, **5** år,
+     **18** kWh/100 km, **16** km/l, og benzinprisen **13,50** (DA) / **19** (SE).
+     På DA må elprisen vise dagens gennemsnit, når livedata er der — kun **benzinprisen
+     og forbrugene** er låst af denne ændring.
+  4. `https://minberegner.dk/blog/biloekonomi-2026-hvad-koster-det-at-eje-bil`:
+     benzinafsnittet skal sige **12.656** kr. benzin, **6.750** kr. el og **5.900**
+     kr./år i besparelse — ikke 13.500, 5.400 eller "over 8.000".
+  5. `https://minberegner.dk/blog/spar-penge-paa-braendstof`: tip 6 skal sige
+     **46,7 %** og "lidt over halvdelen" — ikke "under halvdelen".
+  6. `https://minberegner.dk/braendstof` skal stadig sige **52,8 %** mod benzin og
+     **40,2 %** mod diesel (C30's tal er uændrede). `/api/health` skal svare
+     `status: ok`.
 - ⏳ **ÅBEN — VERIFICÉR DEPLOY: C31 `/pension`: folkepensionsalderen udledes af
   fødselsåret.** Kode og plan i denne iterations commit på
   `ceo/c31-pension-folkepensionsalder`, merge til `master` 2026-09-26 ca. 15:10

@@ -1,4 +1,5 @@
 import { generatePageMetadata } from "@/lib/page-helpers";
+import { elbilSammenligning } from "@/lib/braendstof";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
 import { getElprisData } from "@/lib/energi/server";
@@ -19,6 +20,11 @@ export default async function ElbilPage() {
   const domainConfig = await getCurrentDomainConfig();
   const locale = domainConfig.locale;
   const pageData = getPageData("elbil", locale) || getPageData("elbil", "da")!;
+  // Sproget lover de samme tal som værktøjet viser, så de læses fra ét sted.
+  const elbil = elbilSammenligning(locale);
+  const f2 = (n: number) => n.toFixed(2).replace(".", ",");
+  const f1 = (n: number) => n.toFixed(1).replace(".", ",");
+  const seTusind = (n: number) => n.toLocaleString("sv-SE");
   // Live Danish spot prices are only relevant on the Danish site.
   const elprisData = locale === "da" ? await getElprisData() : null;
 
@@ -55,8 +61,13 @@ export default async function ElbilPage() {
             <p>
               På <strong>energi</strong> er en elbil næsten altid billigere at køre. En elbil bruger
               typisk <strong>15-20 kWh pr. 100 km</strong>, mens en benzinbil bruger <strong>5-7
-              liter</strong>. Ved normale priser koster strømmen ofte under halvdelen af benzinen pr.
-              kørt kilometer.
+              liter</strong>. Beregnerens egne standarder — {elbil.forudsætninger.elKwhPer100km} kWh pr. 100
+              km til {f2(elbil.forudsætninger.elKwhPris)} kr./kWh mod {elbil.forudsætninger.benzinKmPerLiter} km/l
+              til {f2(elbil.forudsætninger.benzinLiterPris)} kr./l — giver {f2(elbil.elPrisPrKm)} kr. pr. km
+              for el mod {f2(elbil.benzinPrisPrKm)} kr. pr. km for benzin, altså{" "}
+              {f1(elbil.besparelseProcent)} % billigere pr. km. Det er ikke under halvdelen, og over{" "}
+              {f1(elbil.breakEvenKwhPris)} kr./kWh — altså ved offentlig opladning — er el dyrere end
+              benzin.
             </p>
             <h2>Husk merprisen ved køb</h2>
             <p>
@@ -79,8 +90,12 @@ export default async function ElbilPage() {
             <p>
               På <strong>energi</strong> är en elbil nästan alltid billigare att köra. En elbil drar
               cirka <strong>15-20 kWh per 100 km</strong>, medan en bensinbil drar <strong>5-7
-              liter</strong>. Vid normala priser kostar elen ofta under hälften av bensinen per körd
-              kilometer.
+              liter</strong>. Kalkylatorns egna standardvärden — {elbil.forudsætninger.elKwhPer100km} kWh
+              per 100 km till {f2(elbil.forudsætninger.elKwhPris)} kr/kWh mot{" "}
+              {elbil.forudsætninger.benzinKmPerLiter} km/l till {f2(elbil.forudsætninger.benzinLiterPris)}{" "}
+              kr/l — ger {f2(elbil.elPrisPrKm)} kr per km för el mot {f2(elbil.benzinPrisPrKm)} kr per km
+              för bensin, alltså {f1(elbil.besparelseProcent)} % billigare per km. Över{" "}
+              {f1(elbil.breakEvenKwhPris)} kr/kWh — alltså vid offentlig laddning — är el dyrare än bensin.
             </p>
             <h2>Tänk på merpriset vid köp</h2>
             <p>

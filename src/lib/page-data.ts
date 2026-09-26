@@ -1,7 +1,7 @@
 import type { Locale } from "./i18n";
 import { BARSEL_2026, SU_2026 } from "./satser-2026";
 import { SOLCELLE_LEVETID_AAR_MAX, SOLCELLE_LEVETID_AAR_MIN } from "./energi/solceller";
-import { besparelseProcent, breakEvenKwhPris, prisPrKm, procent1Decimals } from "./braendstof";
+import { besparelseProcent, breakEvenKwhPris, elbilSammenligning, prisPrKm, procent1Decimals } from "./braendstof";
 
 export type PageData = {
   slug: string;
@@ -37,6 +37,18 @@ const krPrKm = (value: number, decimals: number) =>
 /** Procent med komma — dansk, svensk og norsk bruger ikke punktum. */
 const pct = (value: number) => value.toFixed(1).replace(".", ",");
 
+// ─── /elbil — de tal, siden og FAQ'en lover, udledt af værktöjets egne standardværdier. Den gamle
+// "under halvdelen" holdt ikke ved 16 km/l: el kostede 0,45 mod benzins 0,84
+// kr. pr. km, altså 53 % af benzinprisen.
+const elbilDa = elbilSammenligning("da");
+const elbilSe = elbilSammenligning("se");
+/** Et beløb med to decimaler og dansk komma: 2.5 -> "2,50". */
+const krTal = (value: number) => value.toFixed(2).replace(".", ",");
+/** Tusindtalsseparator som i Sverige: 12400 -> "12 400". */
+const seKr = (value: number) => value.toLocaleString("sv-SE");
+/** Pris pr. km med svensk notation: 1.1875 -> "1,19 kr/km". */
+const seKrPrKm = (value: number) => value.toFixed(2).replace(".", ",") + " kr/km";
+
 // ─── DANISH (da) PAGE DATA ─────────────────────────────────────────────────
 
 const daPages: Record<string, PageData> = {
@@ -56,8 +68,8 @@ const daPages: Record<string, PageData> = {
       schemaDescription: "Sammenlign den årlige energiudgift for elbil og benzinbil og se tilbagebetalingstid på en dyrere elbil.",
       schemaCategory: "FinanceApplication",
       faqItems: [
-        { question: "Er en elbil billigere end en benzinbil?", answer: "På energi er en elbil næsten altid billigere: en elbil bruger typisk 15-20 kWh pr. 100 km, mens en benzinbil bruger 5-7 liter. Ved normale priser koster el ofte under halvdelen af benzin pr. km. Til gengæld er elbiler ofte dyrere at købe — brug beregneren til at se, hvornår merprisen er tjent hjem." },
-        { question: "Hvor meget sparer man på en elbil om året?", answer: "Med 15.000 km om året sparer de fleste 5.000-10.000 kr om året på energi ved at køre el frem for benzin, afhængigt af el- og benzinpris. Beregneren viser din konkrete besparelse." },
+        { question: "Er en elbil billigere end en benzinbil?", answer: `På energi er en elbil næsten altid billigere: en elbil bruger typisk 15-20 kWh pr. 100 km, mens en benzinbil bruger 5-7 liter. Beregnerens standarder — ${elbilDa.forudsætninger.elKwhPer100km} kWh pr. 100 km til ${krTal(elbilDa.forudsætninger.elKwhPris)} kr./kWh mod ${elbilDa.forudsætninger.benzinKmPerLiter} km/l til ${krTal(elbilDa.forudsætninger.benzinLiterPris)} kr./l — giver ${krPrKm(elbilDa.elPrisPrKm, 2)} for el mod ${krPrKm(elbilDa.benzinPrisPrKm, 2)} for benzin, altså ${pct(elbilDa.besparelseProcent)} % billigere pr. km. Det er ikke under halvdelen, og over ${pct(elbilDa.breakEvenKwhPris)} kr./kWh — altså ved offentlig opladning — er el dyrere end benzin. Til gengæld er elbiler ofte dyrere at købe — brug beregneren til at se, hvornår merprisen er tjent hjem.` },
+        { question: "Hvor meget sparer man på en elbil om året?", answer: `Med beregnerens standarder på ${kr(elbilDa.forudsætninger.kmPrAar)} km om året er besparelsen ca. ${kr(elbilDa.aarligBesparelse)} kr. om året. Den afhænger af el- og benzinpris, så indtast dine egne tal for at se det konkrete beløb.` },
         { question: "Hvad indgår ikke i beregningen?", answer: "Beregneren sammenligner energiudgiften (el vs. benzin). Forsikring, service, dæk, grøn ejerafgift og værditab varierer meget fra bil til bil og indgår ikke — men energiudgiften er den største løbende forskel." },
         { question: "Hvornår er det billigst at lade elbilen?", answer: "Oftest om natten. Beregneren finder de fire billigste sammenhængende timer mellem kl. 18 og 08 ud fra dagens og morgendagens timepriser inkl. nettarif, afgifter og moms. Morgendagens priser kommer ca. kl. 13." },
         { question: "Hvilken elpris bruger beregneren?", answer: "Standard er dagens gennemsnitlige elpris i dit prisområde (DK1 vest eller DK2 øst for Storebælt) fra Energi Data Service plus nettarif, Energinets tariffer, elafgift og moms. Du kan altid rette den til din egen pris." },
@@ -2480,8 +2492,8 @@ const sePages: Record<string, PageData> = {
       schemaDescription: "Jämför den årliga energikostnaden för elbil och bensinbil och se återbetalningstid på en dyrare elbil.",
       schemaCategory: "FinanceApplication",
       faqItems: [
-        { question: "Är en elbil billigare än en bensinbil?", answer: "På energi är en elbil nästan alltid billigare: en elbil drar cirka 15-20 kWh per 100 km, en bensinbil 5-7 liter. Vid normala priser kostar el ofta under hälften av bensin per km. Elbilar är dock ofta dyrare att köpa — kalkylatorn visar när merpriset är intjänat." },
-        { question: "Hur mycket sparar man på en elbil per år?", answer: "Med 1 500 mil (15 000 km) per år sparar de flesta 5 000-12 000 kr per år på energi genom att köra el i stället för bensin, beroende på el- och bensinpris." },
+        { question: "Är en elbil billigare än en bensinbil?", answer: `På energi är en elbil nästan alltid billigare: en elbil drar cirka 15-20 kWh per 100 km, en bensinbil 5-7 liter. Kalkylatorns standardvärden — ${elbilSe.forudsætninger.elKwhPer100km} kWh per 100 km till ${krTal(elbilSe.forudsætninger.elKwhPris)} kr/kWh mot ${elbilSe.forudsætninger.benzinKmPerLiter} km/l till ${krTal(elbilSe.forudsætninger.benzinLiterPris)} kr/l — ger ${seKrPrKm(elbilSe.elPrisPrKm)} för el mot ${seKrPrKm(elbilSe.benzinPrisPrKm)} för bensin, alltså ${pct(elbilSe.besparelseProcent)} % billigare per km. Över ${pct(elbilSe.breakEvenKwhPris)} kr/kWh — alltså vid offentlig laddning — är el dyrare än bensin. Elbilar är dock ofta dyrare att köpa — kalkylatorn visar när merpriset är intjänat.` },
+        { question: "Hur mycket sparar man på en elbil per år?", answer: `Med kalkylatorns standardvärden på ${seKr(elbilSe.forudsætninger.kmPrAar)} km per år är besparingen ca. ${seKr(elbilSe.aarligBesparelse)} kr per år. Den beror på el- och bensinpris, så fyll i dina egna tal.` },
         { question: "Vad ingår inte i beräkningen?", answer: "Kalkylatorn jämför energikostnaden (el vs. bensin). Försäkring, service, däck, fordonsskatt och värdeminskning varierar mycket och ingår inte — men energikostnaden är den största löpande skillnaden." },
       ],
     },

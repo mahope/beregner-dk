@@ -8,6 +8,7 @@ import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { useLocale } from "@/components/LocaleProvider";
 import { billigsteNatVindue, gennemsnitsPris, type PriceArea } from "@/lib/energi/elpriser";
+import { elbilForudsætninger } from "@/lib/braendstof";
 import type { ElprisData } from "@/lib/energi/server";
 import { kr2 } from "@/components/energi/ElprisGraf";
 import EnergiKilde from "@/components/energi/EnergiKilde";
@@ -74,6 +75,7 @@ const dagNavn = (date: string) =>
 export default function ElbilBenzinBeregner({ elprisData = null, nu }: Props = {}) {
   const { locale } = useLocale();
   const l = labels[locale as keyof typeof labels] || labels.da;
+  const f = elbilForudsætninger(locale);
   const live = locale === "da" ? elprisData : null;
   const [omraade, setOmraade] = useState<PriceArea>("DK2");
   const dagensGns = (a: PriceArea) => {
@@ -81,16 +83,16 @@ export default function ElbilBenzinBeregner({ elprisData = null, nu }: Props = {
     return dag ? gennemsnitsPris(dag.hours).total : null;
   };
   const liveGns = dagensGns(omraade);
-  const standardElPrice = liveGns !== null ? round2(liveGns) : locale === "se" ? 2 : 2.5;
+  const standardElPrice = liveGns !== null ? round2(liveGns) : f.elKwhPris;
   const ladeVindue = live && nu ? billigsteNatVindue(live.omraader[omraade].dage, nu, 4) : null;
   const fmt = (n: number) => Math.round(n).toLocaleString(locale === "se" ? "sv-SE" : locale === "no" ? "nb-NO" : "da-DK");
 
-  const [kmPerYear, setKmPerYear] = useState<number>(15000);
-  const [years, setYears] = useState<number>(5);
-  const [evUse, setEvUse] = useState<number>(18);
+  const [kmPerYear, setKmPerYear] = useState<number>(f.kmPrAar);
+  const [years, setYears] = useState<number>(f.aar);
+  const [evUse, setEvUse] = useState<number>(f.elKwhPer100km);
   const [elPrice, setElPrice] = useState<number>(standardElPrice);
-  const [petrolUse, setPetrolUse] = useState<number>(16);
-  const [petrolPrice, setPetrolPrice] = useState<number>(locale === "se" ? 19 : 13.5);
+  const [petrolUse, setPetrolUse] = useState<number>(f.benzinKmPerLiter);
+  const [petrolPrice, setPetrolPrice] = useState<number>(f.benzinLiterPris);
   const [priceDiff, setPriceDiff] = useState<number>(0);
 
   const hasLoadedUrl = useRef(false);
@@ -123,14 +125,14 @@ export default function ElbilBenzinBeregner({ elprisData = null, nu }: Props = {
   }, []);
 
   const handleReset = useCallback(() => {
-    setKmPerYear(15000);
-    setYears(5);
-    setEvUse(18);
+    setKmPerYear(f.kmPrAar);
+    setYears(f.aar);
+    setEvUse(f.elKwhPer100km);
     setElPrice(standardElPrice);
-    setPetrolUse(16);
-    setPetrolPrice(locale === "se" ? 19 : 13.5);
+    setPetrolUse(f.benzinKmPerLiter);
+    setPetrolPrice(f.benzinLiterPris);
     setPriceDiff(0);
-  }, [locale, standardElPrice]);
+  }, [f, standardElPrice]);
 
   const skiftOmraade = (a: PriceArea) => {
     setOmraade(a);
