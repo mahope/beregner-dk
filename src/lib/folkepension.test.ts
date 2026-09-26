@@ -3,6 +3,7 @@ import {
   FOLKEPENSION_2026,
   beregnFolkepension2026,
   folkepensionsalder,
+  folkepensionsalderForAlder,
   folkepensionsalderRækker,
   formatFolkepensionsalder,
 } from "./folkepension";
@@ -206,3 +207,26 @@ describe("folkepensionsalder", () => {
     expect(rækker[rækker.length - 1]).toMatchObject({ foedselsdato: "1. januar 1971", alder: 70 });
   });
 });
+
+describe("folkepensionsalderForAlder", () => {
+  it("giver 70 år for en 30-årig, fordi skalaen kun er offentliggjort til 1971", () => {
+    expect(folkepensionsalderForAlder(30, 2026)).toEqual({ fodselsaar: 1996, alder: 70, praecis: true });
+  });
+
+  it("følger skalaen for de øvrige fødselsår", () => {
+    expect(folkepensionsalderForAlder(60, 2026)).toMatchObject({ fodselsaar: 1966, alder: 68 });
+    expect(folkepensionsalderForAlder(55, 2026)).toMatchObject({ fodselsaar: 1971, alder: 70 });
+    expect(folkepensionsalderForAlder(70, 2026)).toMatchObject({ fodselsaar: 1956, alder: 67 });
+    expect(folkepensionsalderForAlder(76, 2026)).toMatchObject({ fodselsaar: 1950, alder: 65 });
+  });
+
+  it("tager det højeste trin i et år der går på tværs af to trin", () => {
+    expect(folkepensionsalderForAlder(72, 2026)).toMatchObject({ fodselsaar: 1954, alder: 65.5, praecis: false });
+    expect(folkepensionsalderForAlder(71, 2026)).toMatchObject({ fodselsaar: 1955, alder: 66.5, praecis: false });
+  });
+
+  it("markerer et helt år i skalaen som præcist", () => {
+    expect(folkepensionsalderForAlder(63, 2026)).toMatchObject({ fodselsaar: 1963, alder: 68, praecis: true });
+  });
+});
+

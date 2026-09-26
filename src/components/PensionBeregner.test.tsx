@@ -47,6 +47,63 @@ function setIndkomst(label: string, value: string) {
 const EGEN_INDKOMST = "Din årlige indkomst ud over arbejdsindkomst";
 const SAMLEVER_INDKOMST = "Samleverens årlige indkomst ud over arbejdsindkomst";
 
+describe("PensionBeregner — folkepensionsalder følger fødselsåret, ikke et fast tal", () => {
+  beforeEach(() => {
+    window.history.replaceState({}, "", "/pension");
+    vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    cleanup();
+  });
+
+  test("viser den udledte folkepensionsalder i stedet for et fast 68 år", async () => {
+    renderPension();
+
+    // Standardbrugeren er 30 år, så fødselsåret er 1996 — over 1971-skiftet.
+    await waitFor(() => {
+      expect(folkepensionTotal()).toMatch(/16\.273\skr\./);
+    });
+    const fodselsaar = new Date().getFullYear() - 30;
+    expect(fodselsaar).toBeGreaterThanOrEqual(1971);
+    expect(screen.getByText(`Din folkepensionsalder er ca. 70 år (født ca. ${fodselsaar})`)).toBeInTheDocument();
+    expect(screen.queryByText(/Folkepensionsalder er 68 år/)).not.toBeInTheDocument();
+  });
+
+  test("forklarer at den valgte alder ligger før folkepensionsalderen", async () => {
+    renderPension();
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(/2 år før din folkepensionsalder på ca\. 70 år/),
+      ).toBeInTheDocument();
+    });
+    expect(screen.getByText(/folkepensionen udbetales først, når du har nået folkepensionsalderen/)).toBeInTheDocument();
+  });
+
+  test("nævner at folkepensionen skal søges for, når alderen er valgt til 70", async () => {
+    renderPension();
+    fireEvent.change(screen.getByLabelText("Ønsket pensionsalder"), { target: { value: "70" } });
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(/Din valgte alder er din folkepensionsalder på ca\. 70 år/),
+      ).toBeInTheDocument();
+    });
+    expect(screen.getByText(/husk at du skal selv søge om folkepensionen/)).toBeInTheDocument();
+  });
+
+  test("følger alderen, så en 60-årig får 68 år", async () => {
+    renderPension();
+    fireEvent.change(screen.getByLabelText("Din alder"), { target: { value: "60" } });
+
+    const fodselsaar = new Date().getFullYear() - 60;
+    await waitFor(() => {
+      expect(screen.getByText(`Din folkepensionsalder er ca. 68 år (født ca. ${fodselsaar})`)).toBeInTheDocument();
+    });
+  });
+});
+
 describe("PensionBeregner — pensionstillæg efter indkomst", () => {
   beforeEach(() => {
     window.history.replaceState({}, "", "/pension");
@@ -135,8 +192,7 @@ describe("PensionBeregner — pensionstillæg efter indkomst", () => {
     expect(folkepensionTotal()).toMatch(/11\.819\skr\./);
   });
 
-  test("deler samlivsstatus og indkomst i delelinket", async () => {
-    renderPension();
+  test("deler samlivsstatus og indkomst i delelinket", async () => {    renderPension();
     await waitFor(() => {
       expect(folkepensionTotal()).toMatch(/16\.273\skr\./);
     });

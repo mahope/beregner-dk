@@ -9,7 +9,7 @@ import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { useLocale } from '@/components/LocaleProvider';
 import { formatCurrency } from '@/lib/format';
-import { beregnFolkepension2026, type FolkepensionSamliv } from '@/lib/folkepension';
+import { beregnFolkepension2026, formatFolkepensionsalder, folkepensionsalderForAlder, type FolkepensionSamliv } from '@/lib/folkepension';
 
 interface AarData {
   aar: number;
@@ -203,6 +203,15 @@ export default function PensionBeregner() {
 
   const formatKr = (amount: number) => formatCurrency(amount, locale, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 
+  const folkepensionsalder = useMemo(
+    () => folkepensionsalderForAlder(alder),
+    [alder],
+  );
+
+  const aarForskel = Math.abs(pensionsalder - folkepensionsalder.alder).toLocaleString("da-DK", {
+    maximumFractionDigits: 1,
+  });
+
   return (
     <div className="space-y-8">
       {/* Input */}
@@ -221,7 +230,11 @@ export default function PensionBeregner() {
             onChange={setPensionsalder}
             min={alder + 1}
             max={80}
-            helpText="Folkepensionsalder er 68 år (stigende)"
+            helpText={
+              folkepensionsalder.praecis
+                ? `Din folkepensionsalder er ca. ${formatFolkepensionsalder(folkepensionsalder.alder)} (født ca. ${folkepensionsalder.fodselsaar})`
+                : `Din folkepensionsalder er ca. ${formatFolkepensionsalder(folkepensionsalder.alder)} — den præcise alder afhænger af fødselsdatoen i ${folkepensionsalder.fodselsaar}`
+            }
           />
           <InputField
             label="Nuværende pensionsopsparing"
@@ -437,6 +450,13 @@ export default function PensionBeregner() {
                   tjener. Kilde: borger.dk, verificeret 25. september 2026. Din egen
                   arbejdsmarkedspension er ikke medregnet, fordi den afhænger af din arbejdsgiver —
                   se hele din pension på PensionsInfo.dk.
+                </p>
+                <p className="mt-2">
+                  {pensionsalder < folkepensionsalder.alder
+                    ? `Du har valgt at gå på pension ${aarForskel} år før din folkepensionsalder på ca. ${formatFolkepensionsalder(folkepensionsalder.alder)} — folkepensionen udbetales først, når du har nået folkepensionsalderen.`
+                    : pensionsalder > folkepensionsalder.alder
+                      ? `Du har valgt at gå på pension ${aarForskel} år efter din folkepensionsalder på ca. ${formatFolkepensionsalder(folkepensionsalder.alder)} — folkepensionen er fra det tidspunkt tilgængelig, men du skal selv søge om den.`
+                      : `Din valgte alder er din folkepensionsalder på ca. ${formatFolkepensionsalder(folkepensionsalder.alder)} — husk at du skal selv søge om folkepensionen.`}
                 </p>
               </div>
             </div>
