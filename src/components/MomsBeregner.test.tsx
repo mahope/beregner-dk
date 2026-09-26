@@ -38,13 +38,55 @@ function getResultText(container: HTMLElement) {
 }
 
 describe("MomsBeregner", () => {
+  let clipboardWrite: ReturnType<typeof vi.fn>;
+
+  /** Intl sætter et kernende mellemrum i beløb — samme normalisering som getResultText. */
+  function sidsteKopieredeTekst(): string {
+    return String(clipboardWrite.mock.calls[0]?.[0] ?? "").replace(/\u00a0/g, " ");
+  }
+
   beforeEach(() => {
     window.history.replaceState({}, "", "/moms");
+    clipboardWrite = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, "clipboard", {
+      value: { writeText: clipboardWrite },
+      configurable: true,
+    });
     vi.clearAllMocks();
   });
 
   afterEach(() => {
     cleanup();
+  });
+
+  test("kopierer en tekst der indeholder momsen som tal", async () => {
+    // Den gamle separator læst "1.000,00 kr. + moms = 1.250,00 kr." — momsen
+    // var en etiket uden et tal, så det kopierede resultat ikke lod sig regne på.
+    renderMoms("da");
+
+    const kopier = screen.getByRole("button", { name: "Kopiér resultat" });
+    fireEvent.click(kopier);
+
+    expect(sidsteKopieredeTekst()).toBe("1.000,00 kr. uden moms + 250,00 kr. moms (25 %) = 1.250,00 kr. inkl. moms");
+  });
+
+  test("find-modes opsummering svarer på andelen, ikke på en differens", async () => {
+    renderMoms("da");
+
+    fireEvent.click(screen.getByRole("button", { name: /Find moms/ }));
+    fireEvent.change(screen.getByLabelText("Beløb inkl. moms"), { target: { value: 1250 } });
+    fireEvent.click(screen.getByRole("button", { name: "Kopiér resultat" }));
+
+    expect(sidsteKopieredeTekst()).toBe("Moms i 1.250,00 kr. er 250,00 kr. (20 % af beløbet)");
+  });
+
+  test("svensk opsummering følger den sats, brugeren valgte", async () => {
+    renderMoms("se");
+
+    fireEvent.click(screen.getByRole("button", { name: /^6%/ }));
+    fireEvent.click(screen.getByRole("button", { name: "Kopiera resultat" }));
+
+    expect(sidsteKopieredeTekst()).toBe("1 000,00 kr utan moms + 60,00 kr moms (6 %) = 1 060,00 kr inkl. moms");
   });
 
   test.each([

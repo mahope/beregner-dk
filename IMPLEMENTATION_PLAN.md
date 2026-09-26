@@ -1,6 +1,28 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — **C51 er landet: `/tidsberegner` havde to datofelter i værktøjet
+STATUS: KØ — **C52 er landet: `/moms`' kopier-, del- og printknap gav en
+regning uden momsen — på alle domæner.** De byggede teksten som
+`formatKr(prisUdenMoms) + " + moms = " + formatKr(prisInklMoms)`, altså
+**"1.000,00 kr. + moms = 1.250,00 kr."**: en etiket i stedet for et tal, præcis
+der hvor momsen skulle stå. Det er den tekst brugeren kopierer ind i en mail
+eller et regningsprogram, og den lod sig ikke regne på. `findMoms` har nu sin
+egen sætning (**"Moms i 1.250,00 kr. er 250,00 kr. (20 % af beløbet)"** — en
+andel, ikke en differens), fordi de to knapper ellers gav samme tal uden
+forskel. Samme gennemgang fandt **en dansk sprogfejl i samme fil**: knapperne
+hed "Tillæg moms" og "Fratræk moms", mens den svenske side — oversat *fra* den
+danske — korrekt sagde "Lägg till moms" og "Dra av moms". Den danske var en
+maskinoversættelse tilbage fra svensk, fordi "Tillæg" er et substantiv. Rettet
+til **"Læg moms til"** / **"Træk moms fra"** i knapper, brødtekst, FAQ,
+formeloverskrift og `/embed`'s widget-beskrivelse. Undervejs er den
+**forbeholdslåsning, kø-punkt 3 stillede op, betalt**: hele momsregnestykket
+ ligger nu i `src/lib/moms.ts` (satser, faktor, andel, beregning,
+reference-rækker og opsummering), så intet findes to steder, og
+"Hurtig reference" genereres af samme `beregnMoms` som værktøjet. Gate grøn:
+lint, **1481 tests / 138 filer** (fra 1432 / 135) og build. Kode + plan i ét
+commit på `ceo/moms-audit`; første kandidatvindue **2026-09-27 07:30**. Se
+opgave 80.
+
+STATUS (forrige iteration) — **C51 er landet: `/tidsberegner` havde to datofelter i værktøjet
 og nul omtaler på siden.** Komponenten har haft `Startdato (valgfri)` og
 `Slutdato (valgfri)` siden sidens begyndelse, og de er det eneste, der gør
 siden i stand til at svare på "hvor mange timer er der mellem to datoer" —
@@ -32,26 +54,38 @@ resultat frem for "NaN dage". Kode + plan i ét commit på `ceo/dato-alder-lokal
 første kandidatvindue **2026-09-27 07:30**. Se opgave 78.
 
 **Fire deploynoter står åbne: C37, C49, C50 og nu C51**, alle med første
-kandidatvindue 2026-09-27 07:30 (C37: 12:30). 21:30-vinduet den 26/9 er
-passeret, så intet kan verificeres før 07:30. `beregner.no`-delen af enhver
-note verificeres ikke: den URL er et separat site, ikke dette repo (se ❓).
+kandidatvindue 2026-09-27 07:30 (C37: 12:30), plus **C52 fra denne
+iteration**. 21:30-vinduet den 26/9 er passeret, så intet kan verificeres før
+07:30. `beregner.no`-delen af enhver note verificeres ikke: den URL er et
+separat site, ikke dette repo (se ❓).
 
-**Næste iteration: `/moms` er det eneste trafikstærke side i C47's
-auditrække, der endnu er urørt** (23.426 visninger, 40 klik, CTR 0,2 %,
-pos. 6,9; GSC's største søgning "momsberegner" 1.693 visninger pos. 7).
-C51's gennemgang af `/tidsberegner` tog 40 minutter, så det er realistisk
-som én iteration. **Pas på den fælde, der kostede C51 25 minutter:** repoets
-eksisterende stavemåde er **`TIDS_EKSEEMPLER`** (to E'er: eks-**EEM**-pler),
-og den nye kode skrev `TIDS_EKSEAMPLER` med ét E. Typecheck, lint og build
-fangede den ikke, fordi et ubrugt navn i et JSX-udtryk er gyldig TypeScript;
-den viste sig først som en `ReferenceError` i vitest. Det forvirrende var, at
-samme fejlnavn stod **bundet i det første JSX-udtryk og frit i de næste** — så
-den første forekomst ville have givet `undefined` i stedet for at fejle. Verifikér
-derfor et nyt symbol med `grep` i den fil der bruger det, **før** du skriver det
-i flere filer. Øvrige ubearbejdede mål: `/moms`' manglende lib-modul (hele
-momsregnestykket ligger inline i komponenten, se ❓), de to øvrige
+**Næste iteration: C52's auditklasse er lukket, så spørgsmålet er ikke længere
+"hvilken trafikstærke side mangler en audit" men "hvad gør en helt anden klasse
+mest trafik".** De otte sider i C47-C52's række er kørt, og kun `/moms` gav
+fund i koden ud over `/promille` og de tre sider med datofelter — dvs. den
+billige metode er **udtømt på dette sæt af sider**. To konkrete
+efterladensværdige spor fra C52:
+1. **`MOMS_SATS = 0.25` i `src/lib/energi/elpriser.ts:12`** er en hårdkodet
+   duplikat af det nye `src/lib/moms.ts`. Den ligger på missionens
+   rør-ikke-liste, så det kræver en iteration, der kører elprisernes tests
+   og gør det ordentligt — ikke en løbetid.
+2. **`/blog/hvordan-beregner-man-moms`** burde linke til `findMoms`-tilstanden
+   på `/moms` (GSC: "hvordan trækker man moms fra", pos. 1 men kun 1
+   visning).
+
+Ellers er de ubearbejdede mål fra C51's note uændrede: de to øvrige
 `toISOString().split("T")`-forekomster (`AlderBeregner` 3, `UgenummerBeregner`
-2) og "2026 har 253 arbejdsdage" på `/dato`.
+2) og "2026 har 253 arbejdsdage" på `/dato`. **Bemærk at
+`AlderBeregner`/`UgenummerBeregner` er præcis de samme to filer, der med
+`UgenummerBeregner` også er den næste klasse efter `/moms`:** de bruger UTC
+`toISOString()`-datoer, som C50 netop rettede på `/dato`. Det er en reel
+forekomst-til-forekomst-klasse, ikke ét fund, så den tager en hel iteration at
+gøre ordentligt.
+
+**Fælden fra C51 gjaldt også denne iteration, og den samme regel redder igen:**
+et nyt navn skal findes med `grep` i den fil der bruger det, før det skrives i
+flere filer.
+
 
 **Bemærk til næste iteration om en fælde, der kostede tid i C49.** Labels i
 `TidszoneBeregner` lå i et `as const`-objekt, og en ny nøgle (`vinterWord`)
@@ -5366,6 +5400,104 @@ eksempel med kun ét datofelt, og én i `tidsberegner.test.ts` for `heleDoegn`.
   ændring i flagets betydning rammer også den. Betingelsen i siden er derfor
   den mindste indgreb.
 
+#### 80. [x] FÆRDIG 2026-09-26 — C52 — `/moms`: kopier/del/print gav en regning uden momsen, og "Tillæg" er ikke dansk
+
+**C52 er C47's metode anvendt på det eneste tilbageværende mål i rækken —
+`/moms`.** Den har 24.426 visninger i GSC (40 klik, CTR 0,2 %, pos. 6,9) og
+GSC's største søgning på sig er "momsberegner" (1.693 visninger, pos. 7). Den
+afveg fra de øvrige auditmål ved at **ikke have noget lib-modul**: hele
+momsregnestykket lå inline i `MomsBeregner.tsx` (410 linjer). Den
+forbeholdslåsning i kø-punkt 3 er altså betalt, og auditten gav **to fund i
+koden** — ikke i teksten.
+
+**Fund 1 — kopier, del og print gav en regning uden momsen ( reel fejl, alle
+domæner).** `momsSeparator` var `" + moms = "`, og den blev brugt som
+`formatKr(prisUdenMoms) + separator + formatKr(prisInklMoms)`. Resultatet var
+**"1.000,00 kr. + moms = 1.250,00 kr."** — en regning med en etiket i stedet
+for et tal, hvor momsen skulle stå, i alle tre steder: `CopyResultButton`,
+`ShareCalculation` og `PrintResult`. Det er den tekst brugeren kopierer ind i
+en mail eller et regningsprogram, og den lod sig ikke regne på. Svensk har
+samme fejl. Der var ingen test på strengen, hvilket er grunden til at den
+overlevede; `MomsBeregner.test.tsx` testede rate, reference-tabel og URL-state
+men aldrig den tekst der faktisk forlader siden.
+
+**Rettelsen.** Ny `opsummering()` i `src/lib/moms.ts` giver **én sætning pr.
+valg**, på begge domæner, med momsen som tal:
+- DA tillæg: `1.000,00 kr. uden moms + 250,00 kr. moms (25 %) = 1.250,00 kr. inkl. moms`
+- DA fratræk: `1.250,00 kr. inkl. moms − 250,00 kr. moms = 1.000,00 kr. uden moms`
+- DA find: `Moms i 1.250,00 kr. er 250,00 kr. (20 % af beløbet)`
+- SE tillæg: `1 000,00 kr utan moms + 60,00 kr moms (6 %) = 1 060,00 kr inkl. moms`
+
+"Find moms" får sin **egen** sætning, fordi det besvarer et andet spørgsmål end
+de to andre: ikke en differens, men en andel. `findMoms` og `fratraekMoms` er
+samme regnestykke i værktøjet (det er dokumenteret og testet bevidst — de er
+to navne på det samme svar, og værktøjet viser alle tre tal), så det er den
+**forskellige sætning**, der gør knapperne forskellige for læseren.
+
+**Fund 2 — "Tillæg" er ikke dansk ( reel sprogfejl, kun DA).** Knapperne hed
+**"Tillæg moms"** og **"Fratræk moms"**, og `MomsBeregner`'s `labels.se` hedder
+**"Lägg till moms"** og **"Dra av moms"** — altså var den danske side en
+maskinoversættelse *tilbage* fra svensk: "Tillæg" er et substantiv
+("tilføjelse"), ikke et verbum i imperativ. Svensk stod med det rigtige verbum,
+fordi den ikke var oversat fra dansk. Samme fejl i sidens brødtekst
+("**Tillæg moms:** Gang beløbet med 1,25"), i FAQ'en ("Tillæg: gang med
+1,25"), i formeloverskriften og i `/embed`'s beskrivelse af moms-widgeten.
+Rettet til **"Læg moms til"** og **"Træk moms fra"** — de imperativer,
+sidens *egen* `description` allerede brugte ("**Læg** moms til 1.000 kr. og få
+1.250 kr. **Træk** også moms fra"), så de tre steder nu er ens.
+
+**Datagrund for fund 1.** Det er ikke en hypotese: `momsSeparator` optrådte tre
+gange i samme fil med samme fejl, og GSC's 40 klik på 24.426 visninger er for
+en side, hvor brugeren skal kunne tage resultatet med sig. Fund 2's datagrund
+er **selvmodsigelsen mellem `labels.da` og `labels.se` i én fil** — samme
+klasse som C48's `maaKoere`-fund, fundet ved at læse biblioteket *mod*
+komponenten.
+
+**Det nye modul, der var forudsætningen.** `src/lib/moms.ts` rummer nu hele
+regnestykket: `MOMS_SATSER`, `normalizeMomssats`, `momsFaktor`, `momsAndel`,
+`beregnMoms`, `MOMS_REFERENCE_BELOEB` + `referenceRaekker` og `opsummering`.
+`MomsBeregner` importerer alle svy, så ingen sats, faktor eller andel længere
+findes to steder. "Hurtig reference" genereres af `referenceRaekker`, altså af
+samme `beregnMoms` som værktøjet — C40/C48's mønster, anvendt på `/moms`.
+Den svenske satsliste (`Standard` / `Mat, hotell` / `Böcker, kultur`) ligger
+i modulet som `MOMS_SATS_VALG_SE` i stedet for at være et inline-objekt i JSX.
+
+**Test.** `src/lib/moms.test.ts` (23 tests) dækker faktor og andel ved alle tre
+satser, at 25/125 = 0,20 (den brødteksten lover), at dansk og norsk URL-state
+med 12 eller 6 % **faller tilbage på 25 %**, at taltast, tom streng, `NaN` og
+7,5 % også gør det, at tillæg og fratræk er hinandens modsætning ved alle tre
+satser, at **0 ikke giver NaN**, at `findMoms` og `fratraekMoms` er identiske,
+at hver reference-række er `beregnMoms`-output, og at ingen opsummering
+indeholder `"+ moms ="` uden et tal. `MomsBeregner.test.tsx` fik tre tests der
+klikker på **Kopiér** og aflæser strengen — de ville have fanget fund 1.
+Der er brugt `Object.defineProperty(navigator, "clipboard", …)` i `beforeEach`,
+fordi jsdom ikke implementerer clipboard, og `CopyResultButton` ellers falder
+i sin `execCommand`-nødvej, som heller ikke virker i jsdom. **Bemærk til
+næste iteration:** Intl sætter et kernende mellemrum i beløbene, så assertioner
+på dansk OG svensk currency skal normalisere `\u00a0` (som `getResultText` gør).
+
+**Gate.** `npm run lint` grøn, `npm run test` **1481 tests / 138 filer** grøn
+(før: 1432 / 135 — altså +49), `npm run build` grøn. Kode + plan i ét commit på
+`ceo/moms-audit`.
+
+**MÅL:** `/moms` baseline **CTR 0,2 % / 40 klik på 24.426 visninger, pos. 6,9
+(GSC 2026-08-27 → 2026-09-24)**. Plausible har ingen `/moms` på DA i
+top-15, så ud over CTR er det eneste målbare signal `ad_clicked` på siden.
+**Mål 2026-10-10.**
+
+**Efterladt til næste iteration, bevidst.**
+- `MOMS_SATS = 0.25` i `src/lib/energi/elpriser.ts:12` er stadig sin egen
+  hardkodede konstant. Den er det samme tal, som det nye modul kender, men
+  `/moms`'s `src/lib/energi/` er på missionens rør-ikke-liste, så det kræver
+  en iteration der kører elprisernes tests. **Det er den første konkrete
+  inspektion af den rør-ikke-liste, og den bør gøres ordentligt.**
+- Bloggen `/blog/hvordan-beregner-man-moms` har samme emne og bruger
+  "Tillæg moms til en pris" som **overskrift**. Som overskrift er det et
+  substantiv og dermed gyldigt dansk, så det er ikke samme fejl; men
+  artiklen burde linke til den nye `findMoms`-tilstand, fordi GSC's spørgsmål
+  "hvordan trækker man moms fra" (pos. 1, men kun 1 visning) peger præcis
+  derhen. Lav prioritet.
+
 ### Næste kandidater efter C34 — lukket med negativt fund
 
 
@@ -5583,6 +5715,27 @@ efter datagrund:
   og noterer, at NO-URL'en 404'er. Det er ærligt, men mindre end noterne lover.
   Bemærk desuden: **der er ingen beregner.no-trafik i nogen snapshot** — hverken
   Plausible eller GSC — hvilket er konsistent med et separat site.
+- ⏳ **VERIFICÉR DEPLOY: C52 `/moms` — kopier/del/print gav en regning uden
+  momsen, og de danske knapper sagde "Tillæg" — kode + plan i ét commit på
+  branch `ceo/moms-audit`, se git log.** Første kandidatvindue
+  **2026-09-27 07:30**. Verificér **indhold**, HTTP 200 beviser intet:
+  1. `https://minberegner.dk/moms` skal have knapperne **"Læg moms til"** og
+     **"Træk moms fra"** og **ikke** have "Tillæg moms" eller "Fratræk moms"
+     nogen steder i HTML'en — heller ikke i `<title>`, `metaDescription` eller
+     FAQ-schemet. Samme på `beraknare.se`, hvor **"Lägg till moms"** og
+     **"Dra av moms"** skal være uændrede.
+  2. Sæt beløbet til **1.000**, klik **Kopiér** og sæt klipboardet ind i
+     et felt. Det skal give præcis
+     **`1.000,00 kr. uden moms + 250,00 kr. moms (25 %) = 1.250,00 kr. inkl. moms`**
+     — **momsen skal være et tal**, ikke et ord. Det er den fejl, hele
+     fundet handler om.
+  3. Skift til **"Find moms"** med beløbet 1.250. Opsummeringen skal så være
+     **`Moms i 1.250,00 kr. er 250,00 kr. (20 % af beløbet)`** — ikke en
+     differens.
+  4. På `beraknare.se/moms` skal 6 % give
+     **`1 000,00 kr utan moms + 60,00 kr moms (6 %) = 1 060,00 kr inkl. moms`**
+     efter samme klik.
+  5. `https://minberegner.dk/api/health` skal svare `status: ok`.
 - ⏳ **VERIFICÉR DEPLOY: C51 `/tidsberegner` — de to datofelter er
   forklaret, og "dage" var ikke dage — kode `bef8d38`, merge `4452940`
   2026-09-26 23:37 CEST på branch `ceo/tidsberegner-flere-dage`.** Første
@@ -6319,6 +6472,8 @@ landmark=lån, piggybank=opsparing osv.).
     - Gate grøn: lint ok, 280/280 tests, build ok (128 pages).
 
 ## VERIFICÉR DEPLOY-log
+- ⏳ **ÅBEN — C52 `/moms`.** Se noten under ❓ Til Mads for de fem
+  indholdstjek. Første kandidatvindue **2026-09-27 07:30**.
 - ✅ **DEPLOY OK 2026-09-26 21:45 CEST — 21:30-batchen lukker C38, C39, C40,
   C41, C44, C45 og C47.** Syv noter verificeret ved **indholdskontrol**, ikke HTTP
   200. Målt 21:39-21:45 mod live-sitet. `/api/health` svarer `status: ok` på både
