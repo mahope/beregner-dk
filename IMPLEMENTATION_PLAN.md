@@ -1,11 +1,11 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — **én åben deploynote (C15, `/promille`), første kandidatvindue 12:30
-2026-09-26.** 07:30-batchen 2026-09-26 lukkede alle 21 tidligere noter ved
-indholdskontrol (se `DEPLOY OK 2026-09-26`). C15 mergerede 08:24 CEST og kan først
-verificeres efter 12:30-vinduet. Nyt i køen: **C16** (`/vaegttab` + `/enhedspris`
-svar-først) er landet på `ceo/c16-vaegttab-enhedspris-ctr` 2026-09-26 09:57 CEST og
-merger til `master` i denne iteration. `/api/health` svarer `status: ok`.
+STATUS: KØ — **to åbne deploynoter (C15 `/promille` og C16 `/vaegttab` + `/enhedspris`),
+første kandidatvindue 12:30 2026-09-26.** 07:30-batchen 2026-09-26 lukkede alle 21
+tidligere noter ved indholdskontrol (se `DEPLOY OK 2026-09-26`). C16 mergerede 09:57
+CEST og kan først verificeres efter 12:30-vinduet; intet er frosset pga. ventetiden.
+Nyt i køen: **C17** — arveafgift-artiklen er gjort svar-først, og tre dokumenterede
+fejl er rettet (se opgave 42). `/api/health` svarer `status: ok`.
 
 
 ## Fase 3 — trafik-drevet
@@ -2342,6 +2342,70 @@ merger til `master` i denne iteration. `/api/health` svarer `status: ok`.
 - **Landet:** kode og tests i commit `e83f017`; merge til `master` sker i denne
   iteration.
 
+#### 42. [x] FÆRDIG 2026-09-26 — C17 — Arveafgift-artiklen: tre dokumenterede fejl rettet, svar-først + tidlig CTA
+
+- **Iteration start:** 2026-09-26 10:03 CEST på `ceo/c17-arveafgift-article`. C15's og
+  C16's deploynoter var åbne med første kandidatvindue 12:30, så intet kunne
+  verificeres. Den dokumenterede CTR-klasse er udtømt (C16), og kandidat 37 peger på
+  de sats-artikler, der mangler en baseline — det gjorde C17 til den næste opgave med
+  både data og reel fejlrisiko.
+- **Datagrund:** Plausible 2026-09-26 07:52: `/blog/arveafgift-regler-og-satser`
+  **92 besøgende/28d, faldende 103 → 92** — det største dokumenterede fald blandt
+  blogartiklerne. GSC har **ingen** baseline for artiklen (snapshottet viser kun
+  `/blog/boernepenge-2026-satser-og-regler`), så effekten måles i Plausible.
+- **Fund under gennemgangen (tre reelle fejl, ikke copy-typering):**
+  1. **Eksemplet modsagde vores egen beregner.** Artiklen tog tillægsafgiften som
+     25 % af *afgiftsgrundlaget* (407.700 → 86.636 kr, samlet afgift 147.791 kr,
+     modtager 652.209 kr). `ArveafgiftBeregner.tsx:142-147` regner
+     `(beloeb - boafgift) * 0,25` = 25 % af arven *efter* boafgift = 184.711 kr, samlet
+     245.866 kr, modtager 554.134 kr. Artiklen understod altså søskendes afgift med
+     98.075 kr i sit eget gennemgangseksempel.
+  2. **Sats-tabellen var vagt forkert.** Rækkerne sagde "15 % + 25 %" og "36,25 %"
+     uden at sige, at 36,25 % er 15 % + 25 % *af resten* — den samme forveksling som
+     gjorde eksemplet forkert. Rækkerne er nu bundet til konfigurationen og siger det.
+  3. **Gaveafgift-påstanden var udokumenteret og formodentlig forkert.** Artiklen
+     hævdede, at gaver over grænsen "beskattes med 15 % gaveafgift". Gaveafgift er
+     ikke det samme som boafgift, og påstanden kunne ikke dokumenteres i en
+     myndighedskilde i denne iteration, så den er **fjernet** i stedet for bekræftet.
+- **Regelverket er verificeret, ikke antaget:** Skatteministeriets boafgift-faktaside
+  (via da.wikipedia `Boafgift`, hentet 2026-09-26) angiver præcis den model, vores
+  beregner bruger: "Nære slægtninge … betaler 15 % i boafgift. Andre betaler en
+  tillægsboafgift på 25 %. Dvs. afgiften her i alt bliver (15 % + 25 % af resten =)
+  36,25 %." Beregnerens matematik er altså rigtig; det var artiklen, der afveg.
+  **Ikke verificeret i denne iteration:** gavegrænserne (74.100 / 26.600 kr) og
+  bundfradraget 392.300 kr — sidstnævnte står uændret i `SATSER_2026` med
+  skm.dk-citation fra tidligere iterationer, første-grænserne står kun i artiklen og
+  er derfor ikke opdateret, blot omformuleret til at pege på SKAT.
+- **Beslutning/implementering:** Artiklen er gjort svar-først efter C10/S2-mønsteret:
+  title/H1 "Arveafgift 2026: 1 mio. kr. til børn koster 91.155 kr." (51 tegn), et
+  kort svar-afsnit med 91.155 kr / 392.300 kr / 15 % / 36,25 %, **CTA til
+  `/arveafgift` før tredje hovedsektion** og en ny tredje FAQ med præcis samme regnestykke.
+  Bundfradrag og satser læses nu fra `SATSER_2026` i stedet for at være hårdkodede i
+  artiklen, så de ikke kan glide fra beregneren igen. `/arveafgift` har fået
+  tilbage-link til guiden. Ingen ændring i `ArveafgiftBeregner`, beregningslogik,
+  URL, canonical, hreflang, sitemap eller `/api/v1`.
+- **Acceptkriterier:**
+  1. Title og H1 er svar-først med et konkret 2026-tal. **PASS** (ny route-test)
+  2. Artiklens bundfradrag/satser kommer fra `SATSER_2026`, og eksemplet er bundet til
+     beregnerens formel: 407.700 / 61.155 / 184.711 / 245.866 / 554.134. **PASS**
+     (3 nye tests, den tredje udregner beløbene fra konfigurationen)
+  3. De tre fund er væk: ingen 86.636 / 147.791 / 652.209, ingen "15% gaveafgift",
+     og tillægsafgiftens grundlag står eksplicit i tabellen. **PASS**
+  4. CTA'en ligger før tredje hovedsektion, og siden linker tilbage. **PASS**
+  5. `npm run lint`, `npm run test` og `npm run build` er grønne. **PASS**
+- **Kvalitetsgate 2026-09-26 10:36 CEST:** `npm run lint` grøn (504 filer),
+  `npm run test` grøn (**1208/1208 tests, 114 filer**), `npm run build` grøn
+  (137+2 sider + typecheck). Målrettet kørsel først: 5/5 i den nye testfil.
+- **Forventet effekt:** Artiklen er Danmarks næststørste faldende blogside med en
+  konkret fejl i sit eget hovedeksempel, så rettelsen fjerner en tillidsfejl først og
+  CTR/links bagefter. 92 besøgende/28d er et lille volumengrundlag; effekten på
+  `/arveafgift` (ukendt Plausible-baseline) er den vigtigere at måle.
+- **MÅL:** `/blog/arveafgift-regler-og-satser` baseline **92 besøgende/28d pr.
+  2026-09-26** (forrige 28 dage: 103). `/arveafgift` Plausible-baseline **ukendt** —
+  den står ikke i top-15. Effekt måles først fra **2026-10-10** (14 dage).
+- **Landet:** kode, tests og plan i én commit på `ceo/c17-arveafgift-article`; merge
+  til `master` straks efter den grønne gate.
+
 #### 41. Ny kandidat — `noPages` mangler `/enhedspris`, så beregner.no viser dansk
 
 - C16 fandt, at `src/lib/page-data.ts` har `enhedspris` i `daPages` og `sePages`
@@ -3146,8 +3210,8 @@ landmark=lån, piggybank=opsparing osv.).
   kræver et motorkøretøj.   HTTP 200 beviser intet. Merge 2026-09-26 05:25 CEST —
   første kandidatvindue er 07:30 2026-09-26.
 - **VERIFICÉR DEPLOY:** C16 svar-først på `/vaegttab` (DA/SE/NO) og `/enhedspris`
-  (DA/SE) — kode `e83f017`, merge følger i denne iteration (ca. 10:05 CEST).
-  Første kandidatvindue er **17:30 2026-09-26** (12:30 går forbi merge-tidspunktet).
+  (DA/SE) — kode `e83f017`, merge `bebdaf8` 2026-09-26 09:57 CEST. Første
+  kandidatvindue er **12:30 2026-09-26** (07:30 gik forbi merge-tidspunktet).
   Verificér **indhold**, HTTP 200 er ikke nok:
   1. DA `https://minberegner.dk/vaegttab`: `<title>` skal være "Vægttab: 6 kg på
      12 uger = 550 kcal/dag | MinBeregner.dk", og introafsnittet under H1 skal
@@ -3163,3 +3227,12 @@ landmark=lån, piggybank=opsparing osv.).
   5. Begge `/vaegttab`-domæner: FAQ'en skal have et svar med "2.759 kcal" (TDEE).
      `beraknare.no` er ikke live og forventes ikke at have ændret tekst.
 
+
+- **VERIFICÉR DEPLOY:** C17 arveafgift-artiklen — kode og merge-ref følger i denne
+  iteration (ca. 10:45 CEST). Første kandidatvindue er **12:30 2026-09-26**.
+  Verificér **indhold** på https://minberegner.dk/blog/arveafgift-regler-og-satser:
+  `<title>` og H1 skal være "Arveafgift 2026: 1 mio. kr. til børn koster 91.155 kr.",
+  introen skal vise 91.155 kr / 392.300 kr / 36,25 %, eksemplet til søskende skal
+  vise 184.711 / 245.866 / 554.134 kr, og teksten må **ikke** indeholde "86.636",
+  "147.791", "652.209" eller "15% gaveafgift". `/arveafgift` skal linke tilbage til
+  guiden. HTTP 200 beviser intet.

@@ -2,15 +2,27 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
+import { SATSER_2026 } from "@/lib/satser-2026";
+
+const BUNDFRADRAG = SATSER_2026.arveBundfradrag;
+const BOAFGIFT_PCT = Math.round(SATSER_2026.boafgift * 100);
+const TILLAEGS_PCT = Math.round(SATSER_2026.tillaegsboafgift * 100);
+const BUND_FAEDRET = new Intl.NumberFormat("da-DK").format(BUNDFRADRAG);
+// 15 % boafgift + 25 % tillægsafgift af resten = 36,25 % af afgiftsgrundlaget
+const EFFEKTIV_PCT = Math.round(
+  (SATSER_2026.boafgift +
+    SATSER_2026.tillaegsboafgift * (1 - SATSER_2026.boafgift)) *
+    10000,
+) / 100;
 
 export async function generateMetadata(): Promise<Metadata> {
   const dc = await getCurrentDomainConfig();
   const baseUrl = dc.baseUrl;
 
   return {
-    title: "Arveafgift i Danmark: Regler, satser og eksempler",
+    title: "Arveafgift 2026: 1 mio. kr. til børn koster 91.155 kr.",
     description:
-      "Komplet guide til arveafgift (boafgift) i 2026: Bundfradrag, satser for nære og fjerne arvinger, tillægsafgift og beregningseksempler.",
+      "Arveafgift (boafgift) 2026: Et barn arver 1 mio. kr. og betaler 91.155 kr. Se bundfradrag på 392.300 kr, 15 % for nære arvinger og 36,25 % for søskende.",
     keywords: [
       "arveafgift 2026",
       "boafgift 2026",
@@ -22,8 +34,9 @@ export async function generateMetadata(): Promise<Metadata> {
       "boafgift beregning",
     ],
     openGraph: {
-      title: "Arveafgift i Danmark: Regler, satser og eksempler",
-      description: "Alt om arveafgift i 2026 — satser, bundfradrag og beregning.",
+      title: "Arveafgift 2026: 1 mio. kr. til børn koster 91.155 kr.",
+      description:
+        "Arveafgift 2026: 91.155 kr for et barn der arver 1 mio. kr. Bundfradrag, satser og to regneeksempler.",
       url: `${baseUrl}/blog/arveafgift-regler-og-satser`,
       type: "article",
       siteName: dc.siteName,
@@ -39,12 +52,15 @@ const faqItems = [
   {
     question: "Hvad er arveafgiften i Danmark i 2026?",
     answer:
-      "Boafgiften er 15% for nære arvinger (børn, børnebørn, forældre) og 15% + 25% tillægsafgift for fjerne arvinger (søskende, venner). Ægtefæller betaler ingen arveafgift.",
+      "Boafgiften er 15 % for nære arvinger (børn, børnebørn, forældre). Søskende og andre fjere arvinger betaler 15 % boafgift plus 25 % tillægsafgift af beløbet efter boafgift, svarende til 36,25 % af afgiftsgrundlaget. Ægtefæller betaler ingen arveafgift.",
   },
   {
     question: "Hvad er bundfradraget for arveafgift i 2026?",
-    answer:
-      "Bundfradraget (det afgiftsfri beløb) er 392.300 kr i 2026. Det gælder per bo, ikke per arving. Boafgift beregnes kun af beløbet over bundfradraget.",
+    answer: `Bundfradraget (det afgiftsfri beløb) er ${BUND_FAEDRET} kr i 2026. Det gælder per bo, ikke per arving. Boafgift beregnes kun af beløbet over bundfradraget.`,
+  },
+  {
+    question: "Hvad koster arveafgiften, hvis et barn arver 1.000.000 kr?",
+    answer: `Barnet arver 1.000.000 kr. Bundfradraget er ${BUND_FAEDRET} kr, så afgiftsgrundlaget er 607.700 kr. Afgiften er 15 % = 91.155 kr, og barnet modtager 908.845 kr.`,
   },
   {
     question: "Betaler ægtefæller arveafgift?",
@@ -70,7 +86,7 @@ export default function ArveafgiftGuidePage() {
         <header className="mb-8 not-prose">
           <span className="text-sm text-blue-600 dark:text-blue-400 font-medium">Arv & Økonomi</span>
           <h1 className="text-3xl md:text-4xl font-bold mt-2 text-gray-900 dark:text-white">
-            Arveafgift i Danmark: Regler, satser og eksempler
+            Arveafgift 2026: 1 mio. kr. til børn koster 91.155 kr.
           </h1>
           <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400 mt-4">
             <time dateTime="2026-02-17">17. februar 2026</time>
@@ -84,6 +100,23 @@ export default function ArveafgiftGuidePage() {
           (populært kaldet arveafgift). Reglerne kan virke komplicerede, men i denne guide
           gennemgår vi satserne, bundfradraget og giver konkrete beregningseksempler.
         </p>
+
+        <p>
+          <strong>Kort svar:</strong> Et barn, der arver 1.000.000 kr, betaler{" "}
+          <strong>91.155 kr i arveafgift</strong> — fordi bundfradraget er{" "}
+          {BUND_FAEDRET} kr, og resten (607.700 kr) beskattes med {BOAFGIFT_PCT} %.
+          Søskende og andre fjere arvinge betaler {BOAFGIFT_PCT} % boafgift plus{" "}
+          {TILLAEGS_PCT} % tillægsafgift af beløbet efter boafgift, svarende til{" "}
+          {EFFEKTIV_PCT} % af afgiftsgrundlaget. Ægtefæller betaler ingen arveafgift.
+        </p>
+
+        <div className="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-400 p-4 my-6 not-prose">
+          <p className="font-medium text-blue-800 dark:text-blue-300">Beregn arveafgiften for dit bo</p>
+          <p className="text-blue-700 dark:text-blue-400">
+            <Link href="/arveafgift" className="underline font-medium">Arveafgift-beregneren</Link>{" "}
+            regner bundfradrag, boafgift og tillægsafgift for præcis den arvingstype, du vælger.
+          </p>
+        </div>
 
         <h2>Arveafgift-satser 2026</h2>
         <div className="overflow-x-auto">
@@ -105,27 +138,27 @@ export default function ArveafgiftGuidePage() {
               </tr>
               <tr>
                 <td>Børn, børnebørn, forældre</td>
-                <td>15%</td>
+                <td>{BOAFGIFT_PCT}%</td>
                 <td>0%</td>
-                <td>15%</td>
+                <td>{BOAFGIFT_PCT}%</td>
               </tr>
               <tr>
                 <td>Stedbørn, svigerbørn</td>
-                <td>15%</td>
+                <td>{BOAFGIFT_PCT}%</td>
                 <td>0%</td>
-                <td>15%</td>
+                <td>{BOAFGIFT_PCT}%</td>
               </tr>
               <tr>
                 <td>Søskende, niecer, nevøer</td>
-                <td>15%</td>
-                <td>25%</td>
-                <td>36,25%</td>
+                <td>{BOAFGIFT_PCT}%</td>
+                <td>{TILLAEGS_PCT}% af beløbet efter boafgift</td>
+                <td>{EFFEKTIV_PCT}%</td>
               </tr>
               <tr>
                 <td>Venner, andre</td>
-                <td>15%</td>
-                <td>25%</td>
-                <td>36,25%</td>
+                <td>{BOAFGIFT_PCT}%</td>
+                <td>{TILLAEGS_PCT}% af beløbet efter boafgift</td>
+                <td>{EFFEKTIV_PCT}%</td>
               </tr>
             </tbody>
           </table>
@@ -133,8 +166,8 @@ export default function ArveafgiftGuidePage() {
 
         <h2>Bundfradraget</h2>
         <p>
-          I 2026 er bundfradraget <strong>392.300 kr per bo</strong>. Det betyder, at der først skal
-          betales boafgift af den del af arven, der overstiger 392.300 kr. Bundfradraget gælder
+          I 2026 er bundfradraget <strong>{BUND_FAEDRET} kr per bo</strong>. Det betyder, at der først skal
+          betales boafgift af den del af arven, der overstiger {BUND_FAEDRET} kr. Bundfradraget gælder
           for hele boet — ikke per arving.
         </p>
 
@@ -145,25 +178,27 @@ export default function ArveafgiftGuidePage() {
         </p>
         <ol>
           <li>Bobeholdning: 1.500.000 kr</li>
-          <li>Bundfradrag: -392.300 kr</li>
+          <li>Bundfradrag: −{BUND_FAEDRET} kr</li>
           <li>Afgiftspligtigt beløb: 1.107.700 kr</li>
-          <li>Boafgift (15%): 166.155 kr</li>
-          <li>Til fordeling mellem børn: 1.333.845 kr (666.923 kr hver)</li>
+          <li>Boafgift ({BOAFGIFT_PCT}%): 166.155 kr</li>
+          <li>Til fordeling mellem børn: 1.333.845 kr (ca. 666.923 kr hver)</li>
         </ol>
 
         <h3>Eksempel 2: Arv til søskende</h3>
         <p>
-          En person efterlader 800.000 kr til sin bror:
+          En person efterlader 800.000 kr til sin bror. Søskende betaler boafgift{" "}
+          {BOAFGIFT_PCT} % og tillægsafgift {TILLAEGS_PCT} % af beløbet <em>efter</em> boafgift. Der
+          er intet bundfradrag for tillægsafgiften:
         </p>
         <ol>
           <li>Bobeholdning: 800.000 kr</li>
-          <li>Bundfradrag: -392.300 kr</li>
+          <li>Bundfradrag: −{BUND_FAEDRET} kr</li>
           <li>Afgiftspligtigt beløb: 407.700 kr</li>
-          <li>Boafgift (15%): 61.155 kr</li>
-          <li>Rest efter boafgift: 346.545 kr</li>
-          <li>Tillægsafgift (25% af rest): 86.636 kr</li>
-          <li>Samlet afgift: 147.791 kr</li>
-          <li>Arving modtager: 652.209 kr</li>
+          <li>Boafgift ({BOAFGIFT_PCT}%): 61.155 kr</li>
+          <li>Beløb efter boafgift: 738.845 kr</li>
+          <li>Tillægsafgift ({TILLAEGS_PCT}%): 184.711 kr</li>
+          <li>Samlet afgift: 245.866 kr</li>
+          <li>Arving modtager: 554.134 kr</li>
         </ol>
 
         <h2>Ægtefæller: Ingen arveafgift</h2>
@@ -174,7 +209,7 @@ export default function ArveafgiftGuidePage() {
 
         <h2>Gaver i levende live</h2>
         <p>
-          Du kan give afgiftsfri gaver til nære familiemedlemmer op til en vis grænse hvert år:
+          Gaver til nære familiemedlemmer kan gives afgiftsfrit op til en vis grænse hvert år:
         </p>
         <ul>
           <li><strong>Børn og børnebørn:</strong> Op til 74.100 kr/år (2026) afgiftsfrit</li>
@@ -182,7 +217,9 @@ export default function ArveafgiftGuidePage() {
           <li><strong>Ægtefæller:</strong> Ubegrænset afgiftsfrit</li>
         </ul>
         <p>
-          Gaver over disse beløb beskattes med 15% gaveafgift.
+          Gavegrænserne og reglerne for gaver <em>over</em> grænsen fastsættes af
+          Skattestyrelsen og ændrer sig ikke på samme måde som boafgiftssatserne. Tjek deres
+          side om gaveafgift, før du regner på en gave over grænsen.
         </p>
 
         <h2>Pensioner og forsikringer</h2>
