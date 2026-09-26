@@ -1,7 +1,26 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — **C50 er landet: `/dato`'s standarddatoer var UTC-forskudt, og
-alder-tilstanden duplikerede `/alder`'s modul.** `DatoBeregner` byggede dagens
+STATUS: KØ — **C51 er landet: `/tidsberegner` havde to datofelter i værktøjet
+og nul omtaler på siden.** Komponenten har haft `Startdato (valgfri)` og
+`Slutdato (valgfri)` siden sidens begyndelse, og de er det eneste, der gør
+siden i stand til at svare på "hvor mange timer er der mellem to datoer" —
+men **hverken brødteksten, svar-først-tabellen, FAQ'en eller metadata nævnte
+dem**, og ingen af de fem eksempler brugte dem. Google autocomplete (DA,
+2026-09-26 23:22) viser efterspørgslen: "hvor mange timer er der mellem to
+datoer" er forslag 4 til sitets nr. 2-søgning på siden, og "hvor lang tid er
+der fra dato til dato" er forslag 3 til "hvor lang tid er der fra" (GSC:
+790 visninger, pos. 6). Nu har tabellen to rækker med datofelter, siden har et
+afsnit på begge domæner der forklarer hvornår de skal bruges, og værktøjet
+siger det samme under felterne. Ved samme gennemgang fandt auditten to ting
+mere: tabellen skrev **"(dagen efter)"** på et interval der slutter *tre*
+dage senere, og den fjerde tile i "Detaljeret visning" regnede timer/24 og
+**kaldte resultatet "dage"** — 0,33 dage for en otte timers dag. Nu er det
+`heleDoegn` i modulet, mærket "hele døgn". Kode + plan i ét commit på
+`ceo/tidsberegner-flere-dage`; første kandidatvindue **2026-09-27 07:30**.
+Se opgave 79.
+
+STATUS (forrige iteration) — **C50 er landet: `/dato`'s standarddatoer var
+UTC-forskudt, og alder-tilstanden duplikerede `/alder`'s modul.** `DatoBeregner` byggede dagens
 dato med `toISOString().split("T")[0]`, hvilket skriver i UTC — så en dansk læser
 fik **dagen i går som standard** kl. 00-02, og "til dato" var systematisk **én
 dag for tidligt** hele døgnet, fordi en lokal dato kl. 00.00 skrives som dagen
@@ -12,19 +31,27 @@ tilstanden kalder `beregnAlder`, og et tomt eller umuligt datofelt giver intet
 resultat frem for "NaN dage". Kode + plan i ét commit på `ceo/dato-alder-lokaldato`;
 første kandidatvindue **2026-09-27 07:30**. Se opgave 78.
 
-**Fem deploynoter står åbne** (C37, C42, C43 og C46, alle med første
-kandidatvindue 2026-09-27 07:30 undtagen C37: 12:30) plus **C48** og **C50** i
-samme vindue. `beregner.no`-delen af enhver note verificeres ikke: den URL er et
-separat site, ikke dette repo (se ❓). `/api/health` svarer `status: ok`.
+**Fire deploynoter står åbne: C37, C49, C50 og nu C51**, alle med første
+kandidatvindue 2026-09-27 07:30 (C37: 12:30). 21:30-vinduet den 26/9 er
+passeret, så intet kan verificeres før 07:30. `beregner.no`-delen af enhver
+note verificeres ikke: den URL er et separat site, ikke dette repo (se ❓).
 
-**Næste iteration: `/dato` er nu lukket som auditmål, så C47's metode skal
-flyttes til de næste to trafikstærke sider med endnu ubearbejdet indhold —
-`/tidsberegner` (287 besøgende, 72.382 visninger) og `/moms` (23.426
-visninger).** Den konkrete opskrift er i opgave 78: læs biblioteket *mod*
-komponenten, se efter en konstant der duplikerer et modul, og se efter hvilke
-tilstande værktøjet har som brødteksten ikke nævner. De to øvrige
+**Næste iteration: `/moms` er det eneste trafikstærke side i C47's
+auditrække, der endnu er urørt** (23.426 visninger, 40 klik, CTR 0,2 %,
+pos. 6,9; GSC's største søgning "momsberegner" 1.693 visninger pos. 7).
+C51's gennemgang af `/tidsberegner` tog 40 minutter, så det er realistisk
+som én iteration. **Pas på den fælde, der kostede C51 25 minutter:** repoets
+eksisterende stavemåde er **`TIDS_EKSEEMPLER`** (to E'er: eks-**EEM**-pler),
+og den nye kode skrev `TIDS_EKSEAMPLER` med ét E. Typecheck, lint og build
+fangede den ikke, fordi et ubrugt navn i et JSX-udtryk er gyldig TypeScript;
+den viste sig først som en `ReferenceError` i vitest. Det forvirrende var, at
+samme fejlnavn stod **bundet i det første JSX-udtryk og frit i de næste** — så
+den første forekomst ville have givet `undefined` i stedet for at fejle. Verifikér
+derfor et nyt symbol med `grep` i den fil der bruger det, **før** du skriver det
+i flere filer. Øvrige ubearbejdede mål: `/moms`' manglende lib-modul (hele
+momsregnestykket ligger inline i komponenten, se ❓), de to øvrige
 `toISOString().split("T")`-forekomster (`AlderBeregner` 3, `UgenummerBeregner`
-2) ligger som en samlet, velafgrænset opgave uden trafikgrund.
+2) og "2026 har 253 arbejdsdage" på `/dato`.
 
 **Bemærk til næste iteration om en fælde, der kostede tid i C49.** Labels i
 `TidszoneBeregner` lå i et `as const`-objekt, og en ny nøgle (`vinterWord`)
@@ -5270,6 +5297,75 @@ advarsler i output). **Ni nye tests**: syv i `lokal-dato.test.ts` og to i
 så de to værktøjer ikke kan glide fra hinanden igen, og den anden håndterer en
 fødselsdato i fremtiden.
 
+#### 79. [x] FÆRDIG 2026-09-26 — C51 — `/tidsberegner`: værktøjet kunne "mellem to datoer" hele tiden, siden sagde det aldrig
+
+**C51 er C47's metode anvendt på sitets nr. 3-side.** `/tidsberegner` har
+287 besøgende/28d (+51 %) og **72.382 visninger** i GSC (nr. 3, 207 klik,
+CTR 0,3 %, pos. 7,0) og blev udpeget som næste trafikstærke auditmål i C50.
+Den gav tre fund, hvoraf ét var en fejl i den synlige tekst.
+
+**Fund 1 — to datofelter i værktøjet, nul omtaler på siden ( reel fejl).**
+`TidsBeregner` har haft `startDato`/`slutDato` — mærket "(valgfri)" — siden
+sidens begyndelse, og de er **det eneste, der gør siden i stand til at svare
+på "hvor mange timer er der mellem to datoer"**. Live-HTML'en på master
+havde **0 forekomster** af "dato" i hele `/tidsberegner`'s brødtekst, og ingen
+af de fem svar-først-eksempler brugte felterne: læseren med en weekend eller
+en ferie fik det forkerte svar, fordi han ikke havde nogen grund til at kigge
+på de to felter under klokkeslættene.
+
+**Datagrund.** Autocomplete DA 2026-09-26 23:22: "hvor mange timer er der
+mellem to datoer" er **forslag 4** til "hvor mange timer er der mellem", og
+"hvor lang tid er der fra dato til dato" er **forslag 3** til "hvor lang tid
+er der fra" — og "hvor lang tid" er GSC's nr. 2-søgning på netop denne side
+(790 visninger, pos. 6). Det er samme relation, som C45-C47 afslørede på
+`/tidszone` og `/alder`: **værktøjet kan det, siden siger det ikke.**
+
+**Rettelsen.** To nye rækker i `TIDS_EKSEEMPLER` (fredag 16:00 → mandag 09:00
+= **65 t 0 min**, og tre arbejdsdage med to frokostpauser), beregnet af
+`beregnTidsinterval` som alle andre, så tabellen ikke kan glide fra værktøjet.
+`formatTidsvar(eksempel, locale)` giver dansk "65 t 0 min" og svensk
+"65 h 0 min" — danske forkortelser på beraknare.se er en locale-leak, selv om
+C38 kun testede hele sætninger. Et H2-afsnit på **begge domæner** forklarer,
+hvornår de to datofelter skal bruges, med kontrasten: *samme* interval er 65
+timer med datoer og **17 t 0 min** uden, og begge tal hentes fra modulet.
+Værktøjet har nu selv en linje under felterne (DA + SE).
+
+**Fund 2 — tabellen skrev "(dagen efter)" på et interval, der slutter tre
+dage senere.** `overMidnat` betyder "sluttidspunktet er tidligere end
+starttidspunktet", og siden-først-rækken oversatte det til "(dagen efter)".
+Uden datofelter er det sandt; med datofelter er det ikke. Annotationen vises
+nu kun på eksempler uden datofelter, og testen siger eksplicit hvad flaget
+betyder.
+
+**Fund 3 — "dage" var ikke dage.** Komponentens fjerde tile i "Detaljeret
+visning" regnede `parseFloat(totalTimer) / 24` og kaldte resultatet
+`l.dageWord` — så otte timers arbejdsdag viste som **"0,33 dage"**. Nu
+regner modulet `heleDoegn = totalMinutter / 1440`, og etiketten er
+"hele døgn" / "hela dygn". Samme klasse som C48-C50: beregning i komponenten
+og et navn, der ikke passer til tallet.
+
+**MÅL:** `/tidsberegner` baseline **287 besøgende/28d 2026-09-26**
+(Plausible), **72.382 visninger / 207 klik / CTR 0,3 % / pos. 7,0** (GSC
+2026-08-27 → 2026-09-24). Mål igen 2026-10-10.
+
+**Kvalitetsgate 2026-09-26 23:35:** `npm run build` grøn (141 sider),
+`npm run test` grøn (**1455/1455** i 137 filer), `npm run lint` grøn
+(541 filer). **Fire nye tests**: to i `tids-eksempler.test.ts` (at eksemplerne
+med datofelter virker, at brødtekstens tal er 65/17 timer, og at den
+svenske notationsform ikke får danske forkortelser), én der forbyder et
+eksempel med kun ét datofelt, og én i `tidsberegner.test.ts` for `heleDoegn`.
+
+**To negative fund, skrevet ned så ingen senere iteration bruger tid på dem.**
+- **`fratraekPause` større end intervallet giver stille "0 t 0 min"**
+  (`Math.max(0, …)` i `tidsberegner.ts:77`). Det er et gulv, ikke en fejl, men
+  brugeren får intet at vide hvorfor. Ikke rettet: en nullstilling ville få
+  hele resultatpanelet til at forsvinde, hvilket er et dårligere svar end
+  0. Kræver en egen beslutning om UX.
+- **Revidering af `overMidnat`-flaget i selve modulet** ville være renere end
+  betingelsen i siden, men flaget bruges af `TidsBeregner` til en badge, og en
+  ændring i flagets betydning rammer også den. Betingelsen i siden er derfor
+  den mindste indgreb.
+
 ### Næste kandidater efter C34 — lukket med negativt fund
 
 
@@ -5442,8 +5538,17 @@ efter datagrund:
    `/braendstof` (16.580) har begge sammenligningstabeller, hvis hensigt
    brødteksten ikke siger. Det er en audit, ikke et byggearbejde, så det
    passer i en iteration.
-   **Auditet er kørt (2026-09-26, se opgave 75): `/braendstof` er lukket med
-   et negativt fund, og `/promille` har en reel sikkerhedsfejl** —
+   **Kørt på `/braendstof`, `/promille`, `/tidszone`, `/dato` og
+   `/tidsberegner`** (se opgaver 75-79). `braendstof` er lukket med et
+   negativt fund; `promille`, `tidszone` og `dato` gav hver en reel fejl;
+   `tidsberegner` gav to (ubeskrevne datofelter og en "dage"-etiket på et
+   døgnstal). **`/moms` er det eneste tilbage i denne klasse.** Den afviger
+   fra de andre ved at **ikke have noget lib-modul**: hele momsregnestykket
+   ligger inline i `MomsBeregner.tsx` (410 linjer), inklusive
+   `ALLOWED_MOMS_RATES` og faktor-/andelsberegningen til copy'en. Før der
+   bygges på den, skal den læses mod `src/lib/` for at se, om nogen anden
+   side har en moms-faktor, den duplikerer.
+   Det oprindelige fund står her:
    `maaKoere` i `src/lib/promille.ts:47` er hardkodet til den danske grænse
    0,5 ‰, og FAQ'en svarer på "Hvornår kan jeg køre bil igen?" med **5,9
    timer, som er tiden til 0 ‰** og ikke tiden til at komme under 0,5 ‰. Det
@@ -5478,6 +5583,25 @@ efter datagrund:
   og noterer, at NO-URL'en 404'er. Det er ærligt, men mindre end noterne lover.
   Bemærk desuden: **der er ingen beregner.no-trafik i nogen snapshot** — hverken
   Plausible eller GSC — hvilket er konsistent med et separat site.
+- ⏳ **VERIFICÉR DEPLOY: C51 `/tidsberegner` — de to datofelter er
+  forklaret, og "dage" var ikke dage — kode + plan i ét commit på branch
+  `ceo/tidsberegner-flere-dage`.** Første kandidatvindue **2026-09-27 07:30**.
+  Verificér **indhold**, HTTP 200 beviser intet:
+  1. `https://minberegner.dk/tidsberegner` skal have H2 **"Beregner tid på tværs
+     af datoer"** med en tabel, der indeholder rækkerne **16:00 → 09:00** med
+     Dato **"25. sep. – 28. sep."** og svaret **"65 t 0 min"**, og H2-afsnittet
+     skal sige **"17 t 0 min"** i kontrasten.
+  2. Rækken **22:00 → 06:00** skal stadig stå med **"(dagen efter)"**, og
+     rækken 16:00 → 09:00 må **ikke** have den annotation — den slutter tre
+     dage senere.
+  3. Under værktøjets datofelter skal stå **"Skal intervallet dække mere end
+     ét døgn, indtast begge datoer…"**.
+  4. "Detaljeret visning"'s sidste tile skal vise **"hele døgn"** (ikke
+     "dage") med værdien **2,71** for 16:00 → 09:00 over de tre dage.
+  5. `https://beraknare.se/tidsberegner` skal have H2 **"Beräkna tid över flera
+     datum"**, svenske labels, **"65 h 0 min"** og **"17 h 0 min"** (ikke "t"),
+     og må **ikke** have den danske svar-først-tabel. `/api/health` skal svare
+     `status: ok`.
 - ⏳ **VERIFICÉR DEPLOY: C50 `/dato` — standarddatoer i lokal tid, alderen fra
   `alder.ts`, ingen "NaN" på tomme felter — kode + plan i ét commit på branch
   `ceo/dato-alder-lokaldato`, kode `a42d87e`, merge `4ec1da3` 2026-09-26 23:04
