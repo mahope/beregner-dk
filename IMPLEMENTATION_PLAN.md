@@ -1,10 +1,25 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — **deploykæden er ryddet: 17:30-batchen udgav C23-C36, alle tallet
-noter verificeret ved indholdskontrol 2026-09-26 17:41.** To noter står åbne:
-C37 (`/renteberegner`) med første kandidatvindue 2026-09-27 12:30, og C38
-(svensk spørgsmålsform, merge i denne iteration) med 21:30-vinduet som første
-kandidat. `/api/health` svarer `status: ok`.
+STATUS: KØ — **tre noter står åbne, ingen er `DEPLOY-MISSING`.** C37
+(`/renteberegner`) med første kandidatvindue 2026-09-27 12:30, C38 (svensk
+spørgsmålsform) og C39 (svensk `/procent`) med **2026-09-26 21:30** som
+første fælles kandidatvindue — begge merged efter 17:30. `/api/health`
+svarer `status: ok`.
+
+**C39 tog kandidat 5 (svensk placering) og gav den sin første konkrete
+indholdsrettelse.** SE `/procent` har **23.294 visninger og 2 klik (pos. 10,2)**
+— tredjestørste svenske visningsside, lige under side 1, og nul CTR.
+C38 lod den urørt, fordi GSC-listen for siden ikke viser nogen søgning.
+Google Autocomplete (`hl=sv`, hentet i dag) siger, hvad de svenske brugere
+*spørger om*: "hur räknar man ut procent i excel", "procent av summa" og
+"hur räknar man ut procent på lön" — **ingen af dem fandtes på siden**,
+mens de fire eksisterende FAQ-par svarer på "beräkna procent" og
+"procentuell ökning formel", der ikke løftes. Siden har nu en synlig
+Excel-tabel med tre formler, de tre spørgsmål i både synlig FAQ og
+JSON-LD, og to interne links til `/lon-efter-skatt` og `/loenstigning`.
+Undervejs fandtes en fagfejl: siden skrev **37 % skatt** på en svensk løn —
+en *dansk* sats. Skatteverket gav 404, så opgaven opfandt ingen erstatning og
+sætningen siger nu, at satsen afhænger af kommun og inkomstnivå. Se opgave 66.
 
 **C38 gik efter den eneste klasse, C1-C16 ikke havde dækket: svensk
 spørgsmålsform.** Snapshot 2026-09-26 14:07 + GSC viser, at beraknare.se har
@@ -4026,6 +4041,78 @@ første halvdel af denne liste er fra DA-fladen, anden halvdel fra SE — de er
   de har SE-metadata og SE-head-ord, så deres problem er **placering**, og
   det løses med indhold og interne links, ikke med copy.
 
+#### 66. [x] FÆRDIG 2026-09-26 — C39 — SE `/procent`: svar på de tre svenske procent-spørgninger, og en dansk skattesats forsvandt
+
+- **Iteration start:** 2026-09-26 18:20. Kandidat 5 fra C38 (svensk placering).
+- **Datagrund:** SE `/procent` **23.294 visninger, 2 klik, CTR 0,0 %, pos. 10,2**
+  (GSC 2026-08-27 – 2026-09-24) — sitets **tredjestørste svenske visningsside**
+  og den med dærst CTR. Position 10,2 er lige under side 1, altså 23.294
+  visninger uden et eneste klik. C38 lod den bevidst urørt, fordi GSC-listen for
+  siden ikke viser nogen søgning — så der var intet dokumenteret. Det er
+  stadig sandt, så arbejdet tager **ikke** GSC-søgningerne, men den
+  dansk-svenske oversættelse: en forespørgelse om, hvad *svenske* brugere
+  faktisk skriver, da autocomplete er et offentligt, læsevenligt signal.
+- **Research 2026-09-26 18:30 CEST** (`suggestqueries.google.com`, `hl=sv`):
+  de svenske søgninger er **spørgsmål om konkrete opgaver**, og tre af dem
+  fandtes **ikke på siden**:
+  - "hur räknar man ut procent i excel" (+ "procentuell ökning excel",
+    "procentuell ökning mellan två tal excel") — Excel-formlen.
+  - "procent av summa" / "beräkna procent av summa" / "procent av ett belopp"
+    — andel af en summa.
+  - "hur räknar man ut procent på lön" / "procenträknare lön"
+    — procent på løn.
+  Siden svarede i forvejen på "beräkna procent", "procent av", "procent av två
+  tal" og "procentuell ökning formel", så de fire eksisterende FAQ-par er
+  uangribelige — de er korrekte, de svarer bare på det folk spørger om.
+- **Tre ændringer, alle i `locale === "se"` (DA/NO urørt):**
+  1. **Synligt afsnit "Hur räknar man ut procent i Excel?"** med en
+     tabel på tre formler — `=A1/B1*100` (andel), `=A1*B1/100` (beloppet) og
+     `=(B1-A1)/A1*100` (ændring) — hver med et tal en læser kan efterprøve
+     (2 500 af 10 000 = 25; 10 procent af 10 000 = 1 000; 10 000 → 12 500 = 25).
+     Tabellen siger også, at `=A1/B1` kræver celleformatering som procent,
+     hvilket er det fejl de fleste gør i Excel.
+  2. **Tre nye svenske FAQ-par** i `sePages["procent"]`, så de samme tre
+     søgninger er **også** besvaret i den synlige FAQ **og i JSON-LD**
+     (C38's mønster, se opgave 65).
+  3. **To interne links** til de svenska værktøj der besvarer næste
+     spørgsmål i samme klasse: `/lon-efter-skatt` og `/loenstigning`. Det er
+     den interne linkvægt-del af kandidat 5, på to konkrete kanter i stedet
+     for på hele siden. (`/rabat` er `daOnly` og findes ikke på
+     beraknare.se, så den er bevidst ikke brugt.)
+- **Fagfejl fundet undervejs:** den svenske sides "vardagssektion" skrev
+  **"Skatt: 37% skatt på 40 000 kr = 14 800 kr i skatt"**. 37 % er en
+  *dansk* sats (kommune- + statsskat for en dansk middelindkomst); i Sverige er
+  skatten kommunal skatt **plus** statlig skatt, så 37 % er ikke en sats, der
+  kan dokumenteres for en svensk løn. Skatteverkets to sider gav **404** ved
+  hentning i denne iteration (som C27's solceller), så jeg **opfandt ingen
+  erstatningssats**: sætningen siger nu, at satsen afhænger af kommun og
+  inkomstnivå, og linker til `/lon-efter-skatt`. Den danske side beholder sit
+  eget eksempel — det ændrer sig ikke ved en svensk rettelse.
+- **Test:** 4 nye tests. `page-data.test.ts` kræver, at SE `/procent` svarer
+  på de tre konkrete autocomplete-strenge (og at `=A1/B1*100` er med), og at
+  DA/NO **ikke** har fået Excel-teksten — så et svenskstættet brud på
+  locale-adskillelsen fær rødt. `procent/page.test.tsx` kræver, at den
+  svenska rendering har Excel-tabellen og begge links, at "37% skatt" er
+  væk, og at den **danske** rendering stadig har sit eget skatteksempel.
+- **Verifikation 2026-09-26:** `npm run lint` grøn (529 filer),
+  `npm run test` grøn (**1372/1372, 131 filer**), `npm run build` grøn
+  (137+ sider, kun de 7 kendte pre-existing CSS-advarsler). `npm audit` urørt
+  — ingen afhængigheder ændret. Ingen IndexNow-submission kørt.
+- **Forventet effekt:** indirekte via **placering**. CTR'en kan ikke måles på
+  en side på position 10,2 — síden måles på, om den passerer ind på
+  top 10, og sá er det **23.294 visninger** i bevægelse. Det er en
+  dokumenteret, men utestet antagelse (samme som C38), så effekten skrives
+  som måling, ikke som løfte.
+- **MÅL:** SE `/procent` baseline **23.294 visninger, 2 klik, CTR 0,0 %, pos.
+  10,2** pr. 2026-09-24. Plausible har ingen `/procent`-række for beraknare.se i
+  28-dages-snapshottet (siden ligger på side 2), sé forventningen måles
+  **først i Search Console**. **Genmål 2026-10-10.**
+- **Ikke gjort, bevidst:** DA `/procent` (149.318 visninger) får **ikke** den
+  samme Excel-sektion. Det er bevidst: C1's titel-/description-ændring på
+  siden er endnu ikke målt (GSC-vinduet slutter 2026-09-24, C1 merged
+  2026-09-25), så en samtidig indholdsændring ville gøre effekten umålbar.
+  Samme for NO. Skrives som ny opgave, når C1 er målt.
+
 ### Næste kandidater efter C34 — lukket med negativt fund
 
 
@@ -4071,7 +4158,14 @@ efter datagrund:
    ekstern kontrakt), beskæftigelsestillægget på 26.198 kr. uden dækkende kilde,
    depositum på 3 måneder som "typisk" uden lovtekst, og `www`-domænerne. Alle fire
    kræver et ja fra Mads før de røres.
-5. **Ny klasse fundet i C38: svensk *placering*, ikke CTR.** SE `/bil` pos. 32,9,
+5. **Delvis lukket i C39 (2026-09-26).** SE `/procent` — den største
+   ubearbejdede side i klassen — har nu de tre svenske spørgsmål, de to
+   interne kanter de svarer på, og ingen dansk skattesats. Se opgave 66.
+   **Mål 2026-10-10.** Øvrige SE-sider i klassen er urørte: `/bil` (pos.
+   32,9), `/kalorier` (pos. 20,7), `/moms` (pos. 23,6), `/renteberegner` (pos.
+   26,6). De har små visningstal (1.414-2.774), så de skal **kun** åbnes, hvis
+   et nyt GSC-snapshot giver dem mere.
+5b. **Ny klasse fundet i C38: svensk *placering*, ikke CTR.** SE `/bil` pos. 32,9,
    `/kalorier` pos. 20,7, `/moms` pos. 23,6, `/renteberegner` pos. 26,6 og
    `/procent` pos. 10,2 med 23.294 visninger og **0,0 % CTR**. Alle har svensk
    metadata og svenske head-ord, så copy er udelukket som årsag. Det, der mangler,
@@ -4083,6 +4177,18 @@ efter datagrund:
    BMR), ikke en titel. **Mål ikke før 2026-10-10**, så C38's effekt er målt
    først.
 ### ❓ Til Mads
+- ⏳ **VERIFICÉR DEPLOY: C39 — SE `/procent` svarar på de tre svenske
+  procent-frågorna, och 37 % skatt forsvann.** Se VERIFICÉR DEPLOY-loggen
+  för merge-refer. Første kandidatvindue er **2026-09-26 21:30** (merged
+  efter 17:30). Verificér **indhold**: `https://beraknare.se/procent` skal ha
+  H2 **"Hur räknar man ut procent i Excel?"**, tabellen med `=A1/B1*100`,
+  `=A1*B1/100` och `=(B1-A1)/A1*100`, frågorna "Hur räknar man ut procent
+  i Excel?" / "Hur räknar man ut hur stor del av en summa som är X?" / "Hur
+  räknar man ut procent på lön?" i både synlig FAQ och JSON-LD, länk
+  till `/lon-efter-skatt` och `/loenstigning`, och **inte** "37% skatt".
+  `https://minberegner.dk/procent` ska væra **uändrat** med sit eget danske
+  "37% skat af 40.000 kr"-eksempel, og `https://beregner.no/procent` skal være
+  uändret. `/api/health` skal svare `status: ok`.
 - ⏳ **VERIFICÉR DEPLOY: C38 — de tre svenske sider svarer på spørgsmålsformen.**
   Se VERIFICÉR DEPLOY-loggen for merge-refer. Første kandidatvindue er
   **2026-09-26 21:30** (C38 merged efter 17:30). Verificér **indhold**:
@@ -4103,6 +4209,16 @@ efter datagrund:
   dansk format, og "over grænsen er det ca. **3,7%**". `/api/health` skal svare
   `status: ok`. 17:30-batchen er allerede kørt, så intet er `DEPLOY-MISSING` og
   intet er frosset.
+- **Sveriges kommunalskatt mangler en primærkilde (C39, 2026-09-26).** SE
+  `/procent` skrev "37% skatt av 40 000 kr" — en dansk sats. Jeg ville erstatte
+  den med den svenska, men skatteverket.se’s to sider gav begge 404 ved
+  hentning (samme mønster som C27's solceller), så siden siger nu blot, at
+  satsen afhænger af kommun og inkomstnivå, og linker til `/lon-efter-skatt`.
+  **Findes primærkilden** (Skatteverkets side om kommunalskatt og det
+  årlige bundsnit for 2026), er det **en** bullet + evt. en FAQ, fordi tallet
+  så bruges på `/lon-efter-skatt` og i Lønekalkylatoren. Uden en kilde
+  medstør jeg ikke et procentsal på en svensk side — det er præcist, hvad
+  den her fejl var.
 - **Hvorfor tæller `/elbil` ingen trafik? (C37, 2026-09-26).** Siden har 20 interne
   referencer på 10 filer — katalog, kategori, begge bilartikler, sammenlignings-
   tabellen i `/braendstof` og elpris-modulet — og er altså ikke ulinket. Alligevel

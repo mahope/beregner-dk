@@ -48,4 +48,30 @@ describe("procent page", () => {
     expect(html).toContain(answer);
     expect(html).toContain("Procentværktøj");
   });
+
+  test("den svenska siden har Excel-formlerna og säger inte på dansk skatt", async () => {
+    vi.mocked(getLocale).mockResolvedValue("se");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("se"));
+
+    const html = renderToStaticMarkup(await ProcentPage());
+
+    // Autocomplete (hl=sv): "hur räknar man ut procent i excel".
+    expect(html).toContain("Hur räknar man ut procent i Excel?");
+    expect(html).toContain("=A1/B1*100");
+    expect(html).toContain("=A1*B1/100");
+    // Interne links til de svenska værktøj, der besvarar den næste
+    // spørgsmål i samme klasse.
+    expect(html).toContain('href="/lon-efter-skatt"');
+    expect(html).toContain('href="/loenstigning"');
+    // 37 % er en dansk sats og kan ikke dokumenteres for svensk lön.
+    expect(html).not.toContain("37% skatt");
+    expect(html).toContain("kommunal skatt");
+  });
+
+  test("den danske siden beholder sit eget skatteksempel", async () => {
+    const html = renderToStaticMarkup(await ProcentPage());
+
+    expect(html).toContain("37% skat af 40.000 kr");
+    expect(html).not.toContain("i Excel");
+  });
 });

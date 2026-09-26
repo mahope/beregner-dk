@@ -1,3 +1,4 @@
+import Link from "next/link";
 import ProcentBeregner from "@/components/ProcentBeregner";
 import { generatePageMetadata } from "@/lib/page-helpers";
 import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
@@ -193,7 +194,13 @@ export default async function ProcentPage() {
             mer
           </li>
           <li>
-            <strong>Skatt:</strong> 37% skatt på 40 000 kr = 14 800 kr i skatt
+            <strong>Skatt:</strong> Skatt i Sverige är kommunal skatt
+            plus statlig skatt, så procentsatsen beror på din kommun och
+            inkomstnivå. Får ett färdigt nettolön:{" "}
+            <Link href="/lon-efter-skatt" className="text-blue-700 underline">
+              lön efter skatt
+            </Link>
+            .
           </li>
         </ul>
 
@@ -236,6 +243,55 @@ export default async function ProcentPage() {
             </tbody>
           </table>
         </div>
+
+        <h2>Hur räknar man ut procent i Excel?</h2>
+        <p>
+          Skriver du procent i Excel är det här formlerna du behöver. Anta
+          att beloppet står i A1 och jämförelsetalet i B1:
+        </p>
+        <div className="overflow-x-auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Fråga</th>
+                <th>Formel</th>
+                <th>Exempel</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Vad är A1 som procent av B1?</td>
+                <td>
+                  <code>=A1/B1*100</code>
+                </td>
+                <td>2 500 av 10 000 = 25</td>
+              </tr>
+              <tr>
+                <td>Vad är A1 procent av B1?</td>
+                <td>
+                  <code>=A1*B1/100</code>
+                </td>
+                <td>10 procent av 10 000 = 1 000</td>
+              </tr>
+              <tr>
+                <td>Hur stor ändring är det från A1 till B1?</td>
+                <td>
+                  <code>=(B1-A1)/A1*100</code>
+                </td>
+                <td>10 000 till 12 500 = 25</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p>
+          Skriver du <code>=A1/B1</code> får du andelen (0,25) och måste
+          då formatera cellen som procent. Vill du se kronor och procent
+          samtidigt på en löneforhåndring är det{" "}
+          <Link href="/loenstigning" className="text-blue-700 underline">
+            löneökning i procent
+          </Link>{" "}
+          du söker efter.
+        </p>
 
         <h2>Procenträkningens formler</h2>
         <ul>
