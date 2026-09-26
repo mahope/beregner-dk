@@ -1,10 +1,11 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — **alle 21 åbne deploynoter er lukket.** 07:30-batchen 2026-09-26 udgav
-C4-C14, D1, D2, D5, F1, K1, L1, R1 og S1-S3; live-indholdet er kontrolleret punkt for
-punkt (se `DEPLOY OK 2026-09-26` i VERIFICÉR DEPLOY-loggen). `/api/health` svarer
-`status: ok`. Nyt i køen: C15 (`/promille` svar-først) er landet på
-`ceo/promille-ctr` 2026-09-26 08:20 CEST og merger til `master` i denne iteration.
+STATUS: KØ — **én åben deploynote (C15, `/promille`), første kandidatvindue 12:30
+2026-09-26.** 07:30-batchen 2026-09-26 lukkede alle 21 tidligere noter ved
+indholdskontrol (se `DEPLOY OK 2026-09-26`). C15 mergerede 08:24 CEST og kan først
+verificeres efter 12:30-vinduet. Nyt i køen: **C16** (`/vaegttab` + `/enhedspris`
+svar-først) er landet på `ceo/c16-vaegttab-enhedspris-ctr` 2026-09-26 09:57 CEST og
+merger til `master` i denne iteration. `/api/health` svarer `status: ok`.
 
 
 ## Fase 3 — trafik-drevet
@@ -2267,8 +2268,95 @@ punkt (se `DEPLOY OK 2026-09-26` i VERIFICÉR DEPLOY-loggen). `/api/health` svar
   `maaKoere`-værdi bruges ingen steder i dag. Den er latente, men dårlig, fordi den
   ligner en dansk regel.
 
-### ❓ Til Mads
+#### 40. [x] FÆRDIG 2026-09-26 — C16 — Svar-først på `/vaegttab` og `/enhedspris` (sidste to dokumenterede lav-CTR-sider)
 
+- **Iteration start:** 2026-09-26 09:45 CEST på `ceo/c16-vaegttab-enhedspris-ctr`.
+  C15's deploynote var åben med første kandidatvindue 12:30, så intet kunne
+  verificeres; køen var ellers tom, så valget var planens egen dokumenterede
+  rest (kandidat 31).
+- **Datagrund:** Search Console 2026-08-27–2026-09-24 på **beraknare.se**:
+  `/vaegttab` 1.186 visninger, 4 klik, **CTR 0,3 %, position 8,3**;
+  `/enhedspris` 1.144 visninger, 4 klik, **CTR 0,3 %, position 6,1** med
+  søgningerne "räkna ut kilopris" 126v pos 7, "jämförpris" 66v pos 6, "kilopris"
+  43v pos 10 og "räkna ut kg pris" 23v pos 8. Det er de **eneste to sider** i
+  GSC-snapshottet på begge domæner med position 5-10, der endnu ikke var
+  svar-først efter C1-C15. Plausible: ingen af de to står i top-15 på
+  beraknare.se, så **Plausible-baseline er ukendt** (ikke 0).
+- **Problem før ændring:** begge titler var brand- og produkttunge med tomme løfter
+  ("Vægttab Beregner - Beregn dit kalorieunderskud | MinBeregner.dk",
+  "Enhedspris beregner - Sammenlign kilopris og literpris | MinBeregner.dk"), og
+  ingen af siderne svaret synligt på sit eget spørgsmål. `/vaegttab`'s synlige
+  intro var en enkelt sætning ("Beregn dit daglige kaloriemål for vægttab.")
+  uden et eneste tal, selv om siden ellers har to konkrete FAQ'er med tal.
+- **Beslutning/implementering:** Samme svar-først-mønster som C1-C9/C15, kun i
+  `page-data.ts` — ingen ændring i kalkulationskode, URL, canonical, hreflang,
+  sitemap eller `/api/v1`. `metaTitle` ≤ 60 tegn på alle tre domæner,
+  `ogTitle` = `metaTitle`, og description/metaDescription/ogDescription/
+  schemaDescription + én ny FAQ pr. side bærer **samme tal**:
+  - `/vaegttab` (DA/SE/NO): "Vægttab: 6 kg på 12 uger = 550 kcal/dag" (39 tegn) med
+    synlig intro om mand 80 kg, 180 cm, 30 år, moderat aktivitet: 550 kcal
+    underskud og **2.209 kcal/dag**. Ny FAQ med spørgsmålet "Hvor mange kalorier
+    skal jeg spise for at tabe 6 kg på 12 uger?" og BMR 1.780 × 1,55 = TDEE
+    2.759.
+  - `/enhedspris` (DA/SE): "Enhedspris: 35 kr. for 2 kg = 17,50 kr. pr. kg"
+    (46 tegn) med synlig intro om 17,50 kr./kg og **12,5 %** billigere. Ny FAQ med
+    spørgsmålet "Hvilken pakke er billigst pr. kilo i praksis?". SE får svensk
+    variant på egen slug-inhold; **NO `/enhedspris` har ingen `noPages`-post** og
+    falder derfor tilbage på dansk (se ny kandidat 41).
+- **Talene er verificeret mod koden, ikke antaget:** `sammenlignEnhedspris(20, 1,
+  35, 2)` i `src/lib/enhedspris.ts:19-49` giver 20,00 vs. **17,50** kr/kg,
+  `billigst: "B"` og besparelse **12,5 %** — de samme standardværdier som
+  `EnhedsprisBeregner.tsx:56-59`, så eksemplet er præcis det, værktøjet viser ved
+  indlæsning. Vægttabstallene er regnet med præcis formlerne i
+  `VaegttabBeregner.tsx`: Mifflin-St Jeor `10·80 + 6,25·180 − 5·30 + 5 = 1.780`
+  (`:25-31`), aktivitetsfaktor `moderat: 1.55` (`:14-19`) → TDEE **2.759**,
+  `KCAL_PR_KG = 7700` (`:22-23`) → underskud `6 × 7700 / (12 × 7) = 550` og
+  dagligt mål **2.209**. Samme mand/højde/alder som `/kalorier` (C5), så de to
+  sundhedsværktøjer ikke modsiger hinanden.
+- **Acceptkriterier:**
+  1. DA/SE/NO renderer H1, det konkrete svar og værktøjet. **PASS**
+     (`src/app/vaegttab/page.test.tsx`, 3 locales; `src/app/enhedspris/page.test.tsx`, 2 locales)
+  2. `metaTitle` ≤ 60 tegn, `ogTitle` = `metaTitle`, `metaDescription` ≤ 160 tegn
+     og samme tal i description, metaDescription, ogDescription og schema på alle
+     domæner. **PASS** (`src/lib/page-data.test.ts`, 6 nye testcases)
+  3. Eksemplerne er bundet til koden: `sammenlignEnhedspris(20, 1, 35, 2)` =
+     17,50 kr/kg + 12,5 %, og vægttabsformlen = 1.780 / 2.759 / 550 / 2.209, så
+     copy og beregning ikke kan glide fra hinanden. **PASS** (2 nye tests)
+  4. Ingen ændring i kalkulationskode, URL, canonical, hreflang, sitemap eller
+     `/api/v1`; diffen rører kun `page-data.ts`, `page-data.test.ts` og to nye
+     routetests. **PASS** — 4 filer i diffen
+  5. `npm run lint`, `npm run test` og `npm run build` er grønne. **PASS**
+- **Kvalitetsgate 2026-09-26 09:57 CEST:** `npm run lint` grøn (503 filer),
+  `npm run test` grøn (**1203/1203 tests, 113 filer**), `npm run build` grøn
+  (Compiled successfully + typecheck). Målrettet gate først: 56/56 i de tre
+  berørte testfiler ved første kørsel.
+- **Forventet effekt:** 2.330 visninger/28d samlet på position 6-8 med 0,3 % CTR.
+  Løftes CTR til 2 %, giver det ca. 40 ekstra klik pr. måned. Effekten er den
+  mindste i CTR-klassen, fordi volumen er det; klassen er nu **udtømt** på de
+  dokumenterede data.
+- **MÅL:** `/vaegttab` Search Console baseline 1.186 visninger, 4 klik, CTR 0,3 %,
+  position 8,3 pr. 2026-09-24 (beraknare.se). `/enhedspris` baseline 1.144
+  visninger, 4 klik, CTR 0,3 %, position 6,1 pr. 2026-09-24. Plausible-baseline
+  for begge er **ukendt** — de står ikke i top-15. Effekt måles først fra
+  **2026-10-10** (14 dage).
+- **Landet:** kode og tests i commit `e83f017`; merge til `master` sker i denne
+  iteration.
+
+#### 41. Ny kandidat — `noPages` mangler `/enhedspris`, så beregner.no viser dansk
+
+- C16 fandt, at `src/lib/page-data.ts` har `enhedspris` i `daPages` og `sePages`
+  men **ikke** i `noPages`, selv om `calculator-list.ts:89` lister slugs for alle
+  tre domæner. `/enhedspris` på `beregner.no` falder derfor tilbage på den
+  danske tekst via `getPageData(slug, locale) || getPageData(slug, "da")`.
+- **Begrænsning:** `beregner.no` er **ikke live** (404 på `/` og `/api/health`,
+  domænet står i `hiddenDomains`), så fejlen har nul trafik betydning nu. Den er
+  dog den samme locale-leak-type som O4 beskriver, og den bør rettes samlet med
+  evt. dansk `page-data` for `/budget`, `/del-regning` og andre
+  helbreds-svenske-kunster, når `beregner.no` eventuelt slås til. Skriv en NO-post
+  per manglende slug, og fang det i en test der kræver at alle
+  `calculator-list`-slugs har en post i hver `*-Pages`.
+
+### ❓ Til Mads
 - **Skal `beregner.no` nogensinde live sættes? (D5, 2026-09-26).** Domænet er
   konfigureret i `src/lib/domain-config.ts`, men står i `hiddenDomains` og svarer
   404 på både `/` og `/api/health`, så det er ikke live. `helligdagLocale()` i
@@ -2350,6 +2438,12 @@ punkt (se `DEPLOY OK 2026-09-26` i VERIFICÉR DEPLOY-loggen). `/api/health` svar
   domæner med eksemplet 4 øl / 4 öl på 80 kg = 0,88 ‰ plus en FAQ om, hvornår man
   må køre igen. MÅL: Search Console baseline 4.159 visninger, 60 klik, CTR 1,4 %,
   position 7,9 pr. 2026-09-24 — genmål 2026-10-10.
+- ~~`/vaegttab`~~ og ~~`/enhedspris`~~ er svar-først siden 2026-09-26 (C16,
+  opgave 40) på henholdsvis DA/SE/NO og DA/SE. MÅL: Search Console baseline
+  1.186 visninger/4 klik/CTR 0,3 %/pos 8,3 og 1.144/4/0,3 %/6,1 pr. 2026-09-24
+  (beraknare.se) — genmål 2026-10-10. **Den dokumenterede CTR-klasse er nu tom på
+  de data, der findes** — næste iteration skal enten skaffe nye GSC-søgninger
+  (kun de 15 største sider er med i snapshottet) eller gå efter placering/indhold.
 - **Næste CTR-kandidat:** `/pension` og `/procent` er allerede svar-først, og de
   fire øvrige top-CTR-sider er dækket. Den næste dokumenterede mulighed er
   `/blog/skat-2026-alt-du-skal-vide` og de øvrige artikler med samme
@@ -3049,5 +3143,23 @@ landmark=lån, piggybank=opsparing osv.).
   https://minberegner.dk/blog/fradrag-2026-komplet-guide: DOM skal vise
   `3,17 kr.` (ikke 2,23/1,12), fradragsværdien som "33,6 %"/"25,6 %", servicefradrag
   og håndværkerfradrag som to rækker, og teksten skal sige at befordringsfradraget
-  kræver et motorkøretøj. HTTP 200 beviser intet. Merge 2026-09-26 05:25 CEST —
+  kræver et motorkøretøj.   HTTP 200 beviser intet. Merge 2026-09-26 05:25 CEST —
   første kandidatvindue er 07:30 2026-09-26.
+- **VERIFICÉR DEPLOY:** C16 svar-først på `/vaegttab` (DA/SE/NO) og `/enhedspris`
+  (DA/SE) — kode `e83f017`, merge følger i denne iteration (ca. 10:05 CEST).
+  Første kandidatvindue er **17:30 2026-09-26** (12:30 går forbi merge-tidspunktet).
+  Verificér **indhold**, HTTP 200 er ikke nok:
+  1. DA `https://minberegner.dk/vaegttab`: `<title>` skal være "Vægttab: 6 kg på
+     12 uger = 550 kcal/dag | MinBeregner.dk", og introafsnittet under H1 skal
+     indeholde "550 kcal" og "2.209 kcal". Den gamle titel var "Vægttab Beregner -
+     Beregn dit kalorieunderskud | MinBeregner.dk".
+  2. SE `https://beraknare.se/vaegttab`: `<title>` skal være "Viktminskning: 6 kg
+     på 12 veckor = 550 kcal/dag | Beräknare.se" med "2.209 kcal" i introen.
+  3. DA `https://minberegner.dk/enhedspris`: `<title>` skal være "Enhedspris:
+     35 kr. for 2 kg = 17,50 kr. pr. kg | MinBeregner.dk", og introen skal
+     indeholde "17,50 kr. pr. kg" og "12,5 %".
+  4. SE `https://beraknare.se/enhedspris`: svensk titel "Jämförpris: 35 kr för 2
+     kg = 17,50 kr per kg | Beräknare.se" og samme to tal synligt.
+  5. Begge `/vaegttab`-domæner: FAQ'en skal have et svar med "2.759 kcal" (TDEE).
+     `beraknare.no` er ikke live og forventes ikke at have ændret tekst.
+
