@@ -4178,9 +4178,9 @@ efter datagrund:
    først.
 ### ❓ Til Mads
 - ⏳ **VERIFICÉR DEPLOY: C39 — SE `/procent` svarar på de tre svenske
-  procent-frågorna, och 37 % skatt forsvann.** Se VERIFICÉR DEPLOY-loggen
-  för merge-refer. Første kandidatvindue er **2026-09-26 21:30** (merged
-  efter 17:30). Verificér **indhold**: `https://beraknare.se/procent` skal ha
+  procent-frågorna, och 37 % skatt forsvann.** Kode `8796c16`, merge
+  `927d213` 2026-09-26 18:27 CEST på branch `ceo/se-procent-sporsmal`.
+  Første kandidatvindue er **2026-09-26 21:30** (merged efter 17:30). Verificér **indhold**: `https://beraknare.se/procent` skal ha
   H2 **"Hur räknar man ut procent i Excel?"**, tabellen med `=A1/B1*100`,
   `=A1*B1/100` och `=(B1-A1)/A1*100`, frågorna "Hur räknar man ut procent
   i Excel?" / "Hur räknar man ut hur stor del av en summa som är X?" / "Hur
@@ -4738,6 +4738,13 @@ landmark=lån, piggybank=opsparing osv.).
     - Gate grøn: lint ok, 280/280 tests, build ok (128 pages).
 
 ## VERIFICÉR DEPLOY-log
+- ⏳ **ÅBEN — VERIFICÉR DEPLOY: C39 — SE `/procent` svarar på de
+  tre svenske procent-frågorna, och 37 % skatt forsvann.** Kode `8796c16`,
+  merge `927d213` 2026-09-26 18:27 CEST. Første kandidatvindue 2026-09-26
+  21:30. Verificér indhold på `beraknare.se/procent` (Excel-H2, tre formler,
+  tre FAQ-spørgsmål i FAQ **og** JSON-LD, links til /lon-efter-skatt og
+  /loenstigning, ingen "37% skatt"), og at `minberegner.dk/procent` +
+  `beregner.no/procent` er uændrede.
 - ⏳ **ÅBEN — VERIFICÉR DEPLOY: C38 — de tre svenske sider svarer på
   spørgsmålsformen.** Kode `9f37a35`, merge `ce970b0` 2026-09-26 18:11 CEST på
   `master` (branch `ceo/se-svar-paa-spoergsmaal`). Første kandidatvindue er
