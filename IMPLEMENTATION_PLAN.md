@@ -1,10 +1,19 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — **ni åbne deploynoter (C23-C29).** 12:30-batchen 2026-09-26 udgav
+STATUS: KØ — **ti åbne deploynoter (C23-C30).** 12:30-batchen 2026-09-26 udgav
 C15-C22. C23 (merge 12:19), C24 (12:21), C25 (13:07), C26 (13:15), C27 (13:25),
-C28 (14:30) og C29 (`ceo/c29-kalorier-protein`, 14:38) kom efter batchens start og
-kan først verificeres efter **17:30**-vinduet; intet er frosset pga. ventetiden.
-`/api/health` svarer `status: ok`.
+C28 (14:30), C29 (`ceo/c29-kalorier-protein`, 14:38) og C30 (`ceo/braendstof-el-sparet`)
+kom efter batchens start og kan først verificeres efter **17:30**-vinduet; intet er
+frosset pga. ventetiden. `/api/health` svarer `status: ok`.
+
+**C30 fjernede et løfte, som `/braendstof`s eget værktøj modsagde.** FAQ'en lovede i
+alle tre sprog, at el er "typisk 50-70 % billigere pr. km", men værktøjets egen
+sammenligningstabel giver 52,8 % mod benzin og **40,2 % mod diesel** — diesel er
+billigere pr. km end benzin i forvejen. Intervallet holdt altså kun mod den ene af de
+to brændstoftyper, og ved offentlig opladning (3-6 kr./kWh) er el dyrere end diesel
+over 4,2 kr./kWh. Der er nu ét ratested (`src/lib/braendstof.ts`), sammenligningstabellen
+læser det, og FAQ'en **renderer** besparelsen pr. brændstoffype i stedet for at løfte
+et interval. Se opgave 57.
 
 **C29 rettede et fejltal i makro-fordelingen på `/kalorier`.** Værktøjet satte
 protein til 1,8 g/kg uanset mål, mens siden selv siger 0,8-1,2 / 1,2-1,6 / 1,6-2,2
@@ -22,15 +31,16 @@ weekenddag eller helligdag — den forklares nu i stedet for at forsvinde fra
 summeringen. Se opgave 55.
 
 Næste iteration skal **ikke** optimere CTR på de samme svar-først-sider igen, og
-den skal **ikke** gentage C25-C29. Kandidater der er fundet, men endnu ikke taget:
-**1) `/braendstof`** (271 besøgende/28d, FAQ'en lover el "50-70 % billigere", mens
-værktøjets egen sammenligningstabel giver 40 % mod diesel — 52,8 % holder kun mod
-benzin), **2) `/husleje`** (166 besøgende, sidens løfteindhold er uopnåeligt som
-standardværdi), **3) `/pension`** (140 besøgende, `PensionBeregner.tsx:224`
-hardkoder folkepensionsalderen, som `src/lib/folkepension.ts` allerede skalaerer)
-— alle tre er nærmere beskrevet under ❓ og i C28's kandidatliste. Kandidat 41
-(`noPages` mangler `/enhudspris`) har fortsat nul trafik, da `beregner.no` ikke er
-live. `/kalorier` og `/flyttebudget` er lukket i C29.
+den skal **ikke** gentage C26-C30. Kandidater der er fundet, men endnu ikke taget:
+**1) `/husleje`** (166 besøgende/28d, sidens løfteindhold er uopnåeligt som
+standardværdi) og **2) `/pension`** (140 besøgende,
+`PensionBeregner.tsx:224` hardkoder folkepensionsalderen, som `src/lib/folkepension.ts`
+allerede skalaerer) — begge nærmere beskrevet under ❓ og i C28's kandidatliste.
+C30's eget fund: **`/elbil`** bruger sine egne forudsætninger i stedet for
+`src/lib/braendstof.ts`, så de to el/benzin-sammenligninger kan glide fra hinanden;
+konsolidering taget som egen opgave. Kandidat 41 (`noPages` mangler `/enhudspris`) har
+fortsat nul trafik, da `beregner.no` ikke er live. `/kalorier` og `/flyttebudget` er
+lukket i C29, `/braendstof` i C30.
 
 
 ## Fase 3 — trafik-drevet
@@ -3291,6 +3301,69 @@ første halvdel af denne liste er fra DA-fladen, anden halvdel fra SE — de er
   beslutning om, hvilken der er source of truth — noteret, ikke løst i denne
   iteration.
 
+#### 57. [x] FÆRDIG 2026-09-26 — C30 — `/braendstof`: FAQ'en lovede el 50-70 % billigere, værktøjet viser 40 % mod diesel
+
+- **Iteration start:** 2026-09-26 14:37 CEST på `ceo/braendstof-el-sparet`. Køen var
+  tom (alle 56 opgaver færdige, intet `I GANG`), og de ni åbne deploynoter (C23-C29)
+  kan først verificeres efter 17:30-vinduet, så valget var C28's førstelistede
+  kandidat.
+- **Datagrund:** `/braendstof` **271 besøgende/28d (+69 %), bounce 3 %** pr.
+  2026-09-26; Search Console **16.580 visninger, 180 klik, CTR 1,1 %, position 6,1**
+  pr. 2026-08-27→2026-09-24. Søgninger: "benzin beregner" 133v/4k pos 6, "brændstof
+  beregner" 97v/1k pos 7, "benzinberegner" 52v/4k pos 7, "hvorfor er diesel dyrere end
+  benzin" 48v/1k **pos 1**. Den sidste søgning er allerede nummer ét, så vejen derhen
+  virker — siden skal bare svare på den, ikke lokke med et løfte den ikke holder.
+- **Fund (BEKRÆFTET, egen kode mod egen kode):** FAQ'en i alle tre lokaler lovede el
+  "typisk 50-70 % billigere pr. km" (`page-data.ts:853` DA, `:2119` NO, `:3272` SE).
+  Værktøjets egen sammenligningstabel (`BraendstofBeregner.tsx:530-532`) bruger
+  benzin 15 km/l à 13,50 kr = 0,900 kr./km, diesel 18 km/l à 12,80 kr = 0,711 kr./km
+  og el 17 kWh/100km à 2,50 kr = 0,425 kr./km. Det er **52,8 % mod benzin** — faldt
+  heldvis i intervallet — men **40,2 % mod diesel**, under 50 %. Diesel er billigere
+  pr. km end benzin i forvejen, så det lave interval er ikke en fejl i tabellen men i
+  løftet. Ved værktøjets eget eget hint om offentlig opladning (3-6 kr./kWh) er el
+  desuden **dyrere** end diesel over 4,2 kr./kWh. Alle tal stod i samme viewport.
+- **Beslutning/implementering:** Ny `src/lib/braendstof.ts` er single source for
+  forudsætningerne og priserne pr. km: `BRAENDSTOF_FORUDSETNINGER`, `prisPrKm()`,
+  `besparelseProcent()` og `breakEvenKwhPris()`. `BraendstofBeregner.tsx` læser
+  nu forudsætningerne i stedet for de seks hardkodede tal (startværdier, reset og
+  sammenligningstabellen), og kolonneoverskrifterne + `compareNote` bygges af dem, så
+  en prisændring slår igennem alle steder. FAQ'en er ikke længere et håndskrevet
+  interval: den renderer `besparelseProcent()` for benzin **og** diesel, siger hvorfor
+  de to tal afviger, og nævner break-even ved offentlig opladning. Bevidst valgt: det
+  er samme systematik som C27's depositumfund, C28's dagstal og C29's makroer — find
+  en tekst, der modsiger værktøjet, og gør tallet **udledt** i stedet for gentaget.
+- **Tests:** ny `src/lib/braendstof.test.ts` (**18 tests**) — pr. km for alle tre
+  typer, forudsætningerne læses ét sted, besparelsen er 52,8 / 40,2 % med kommatal,
+  mod diesel er **mindre** end mod benzin, break-even er 4,18 mod diesel og 5,29 mod
+  benzin, og ved break-even er de to pr. km lige dyre. Derudover fire tests der
+  læser `page-data.ts`' rigtige FAQ i **alle tre** sprog: at "50-70" er væk, at begge
+  udledte grader står, at benzin-graden står før diesel-graden, og at procent skrives
+  med komma — det sidste blev fundet i denne iteration, da første kørsel skrev
+  "52.8 %" på en dansk side.
+- **Kvalitetsgate 2026-09-26 14:52 CEST:** `npm run build` grøn (typecheck
+  inkluderet), `npm run test` grøn (**1326/1326, 128 filer** — 1 ny fil),
+  `npm run lint` grøn (521 filer), `npm audit --json` 0 sårbarheder.
+- **MÅL:** `/braendstof` baseline **271 besøgende/28d, bounce 3 % pr. 2026-09-26**;
+  Search Console baseline 16.580 visninger, 180 klik, CTR 1,1 %, position 6,1 pr.
+  2026-08-27→2026-09-24 — genmål 2026-10-10. Titlen er **urørt** (C9's svar-først-variant
+  står), så dette er ren korrekthedstask, ikke en CTR-eksperiment.
+- **Acceptkriterier:**
+  1. Ingen af de tre sprogversioner indeholder "50-70" i el-svaret. **PASS**
+  2. El-svaret nævner 52,8 % mod benzin og 40,2 % mod diesel, begge udledt af
+     `braendstof.ts`. **PASS**
+  3. `BraendstofBeregner.tsx` indeholder ingen hardkodede 13,50 / 12,80 / 2,50 / 15 /
+     18 / 17 til sammenligningstabellen. **PASS**
+  4. Procent og kr./km staves med komma i dansk, svensk og norsk. **PASS**
+  5. `npm run lint`, `npm run test` og `npm run build` er grønne. **PASS**
+- **Forventet effekt:** ingen direkte CTR-stigning. Det er en tillidsopgave på en side
+  med 271 besøgende og bounce 3 %, hvor løftet og tabellen lå i samme skærmbillede.
+  Værdien er, at "hvorfor er diesel dyrere end benzin" (allerede position 1) nu har et
+  svar på siden, og at tallene ikke kan glide fra hinanden igen.
+- **Utaget bevidst:** `/elbil` sammenligner kun el mod benzin og er derfor ikke i
+  konflikt, men den bruger sine egne forudsætninger. At slå `/elbil` sammen med
+  `braendstof.ts` er en reel konsolidering og tages som sit egen opgave, når tiden
+  er til det — ikke som en sidevirkning her.
+
 #### C28's øvrige fund — ikke taget, skrevet som næste kandidater
 
 - ~~**`/flyttebudget` (C27-rest, 2 linjer)~~ — lukket i C29 den 2026-09-26.~~ Page-
@@ -3301,10 +3374,9 @@ første halvdel af denne liste er fra DA-fladen, anden halvdel fra SE — de er
   `vægt * 1.8` uanset mål mod sidens og FAQ'ens 0,8-1,2 / 1,2-1,6 / 1,6-2,2 g/kg.
   Nu er der ét ratested (`src/lib/makroer.ts`), værktøjet bruger midten af det
   valgte interval, og protein-kortet viser g/kg og interval.
-- **`/braendstof` (271 besøgende/28d).** FAQ'en lover el "typisk 50-70 % billigere
-  pr. km" (`page-data.ts:853`), men værktøjets egen sammenligningstabel
-  (`BraendstofBeregner.tsx:530-532`) giver 500 km: diesel 355,56 kr mod el 212,50
-  kr = **40 %**. 52,8 % holder kun mod benzin. Begge tal står i samme viewport.
+- ~~**`/braendstof` (271 besøgende/28d)~~ — lukket i C30 den 2026-09-26.~~ FAQ'en lovede
+  el "typisk 50-70 % billigere pr. km" mod 40,2 % mod diesel i værktøjets egen tabel.
+  Nu er besparelsen **udledet** af forudsætningerne og nævnt pr. brændstoffype.
 - **`/husleje`.** Sidens løfteindhold ("netto 25.000 kr → max ca. 7.500 kr/md")
   kan ikke nås som standardværdi, fordi `HuslejeBudgetBeregner.tsx:140` starter på
   28.000 kr → 8.400 kr. Regnestykket er korrekt; kun eksemplet er uopnåeligt.
@@ -3807,6 +3879,24 @@ landmark=lån, piggybank=opsparing osv.).
     - Gate grøn: lint ok, 280/280 tests, build ok (128 pages).
 
 ## VERIFICÉR DEPLOY-log
+- ⏳ **ÅBEN — VERIFICÉR DEPLOY: C30 `/braendstof`: FAQ'en lovede 50-70 %, værktøjet
+  viste 40 % mod diesel.** Kode: denne iteration's første commit på
+  `ceo/braendstof-el-sparet`. Merge
+  2026-09-26 ca. 15:00 CEST, altså efter 12:30-batchens start — første
+  kandidatvindue er **17:30 2026-09-26**. Ét deploy-vindue siden merge, så intet er
+  `DEPLOY-MISSING` (kræver to) og intet er frosset. Verificér **indhold** på begge
+  domæner, HTTP 200 beviser intet — de gamle sider svarer 200 med den gamle tekst:
+  1. DA `https://minberegner.dk/braendstof`: FAQ'en skal have spørgsmålet "Er el-biler
+     billigere?" med svaret indeholdende **52,8 %** mod benzin og **40,2 %** mod
+     diesel, priserne **0,43 / 0,90 / 0,71 kr. pr. km** og **4,2 kr./kWh** som
+     break-even. Teksten må **ikke** indeholde "50-70".
+  2. SE `https://beraknare.se/braendstof`: "Är elbilar billigare?" med **52,8 %**,
+     **40,2 %** og **4,2 kr/kWh** — også med komma, ikke punktum.
+  3. Begge domæner: sammenligningstabellens overskrifter og footnote skal stadig vise
+     benzin **15 km/l**, diesel **18 km/l**, el **17 kWh/100km** og priserne
+     13,50 / 12,80 / 2,50 — tallene er ikke ændret, kun deres kilde.
+  4. NO `beregner.no` er ikke live og forventes ikke at have ændret tekst.
+  5. `/api/health` skal svare `status: ok`.
 - ⏳ **ÅBEN — VERIFICÉR DEPLOY: C23, C24, C25, C26, C27 og C28.** C28 kode `ebc710c`, merge `f26e054` 2026-09-26 14:30 (se opgave 55). Merge 2026-09-26
   12:19 (C23), 12:21 (C24), 13:07 (C25), 13:12 (C26) og **13:25 (C27, `c5ef444`**
   — ét levetidstal for solceller + ét depositumtal)** CEST — alle

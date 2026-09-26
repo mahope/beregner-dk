@@ -1,6 +1,7 @@
 import type { Locale } from "./i18n";
 import { BARSEL_2026, SU_2026 } from "./satser-2026";
 import { SOLCELLE_LEVETID_AAR_MAX, SOLCELLE_LEVETID_AAR_MIN } from "./energi/solceller";
+import { besparelseProcent, breakEvenKwhPris, prisPrKm, procent1Decimals } from "./braendstof";
 
 export type PageData = {
   slug: string;
@@ -21,6 +22,20 @@ export type PageData = {
 };
 
 const kr = (value: number) => value.toLocaleString("da-DK");
+
+// ─── /braendstof — de tal, FAQ'en lover, udledt af de samme forudsætninger som
+// sammenligningstabellen. Den gamle "50-70 %" holdt kun mod benzin (52,8 %)
+// og var for højt mod diesel (40,2 %), som værktøjet selv viser.
+const elModBenzinPct = procent1Decimals(besparelseProcent("benzin"));
+const elModDieselPct = procent1Decimals(besparelseProcent("diesel"));
+const elModDieselBreakEven = procent1Decimals(breakEvenKwhPris("diesel"));
+const elPris = prisPrKm("el");
+const benzinPris = prisPrKm("benzin");
+const dieselPris = prisPrKm("diesel");
+const krPrKm = (value: number, decimals: number) =>
+  value.toFixed(decimals).replace(".", ",") + " kr. pr. km";
+/** Procent med komma — dansk, svensk og norsk bruger ikke punktum. */
+const pct = (value: number) => value.toFixed(1).replace(".", ",");
 
 // ─── DANISH (da) PAGE DATA ─────────────────────────────────────────────────
 
@@ -850,7 +865,7 @@ const daPages: Record<string, PageData> = {
       { question: "Hvad koster 500 km i benzin?", answer: "Ved 15 km/l bruger turen 500 ÷ 15 = 33,3 liter. 33,3 l × 13,50 kr. = 450 kr., altså 0,90 kr. pr. km eller 90 kr. pr. 100 km." },
       { question: "Beregn brændstofudgifter?", answer: "Distance / km/l × literpris. 200 km / 15 km/l × 13 DKK/l = 173 DKK." },
       { question: "Normal km/liter?", answer: "Benzin: 12-18 km/l. Diesel: 15-22 km/l." },
-      { question: "Er el-biler billigere?", answer: "Ja, typisk 50-70% billigere pr. km i brændstof." },
+      { question: "Er el-biler billigere?", answer: `Ja, når du regner på brændstoffet alene: ${pct(elModBenzinPct)} % billigere pr. km end benzin (${krPrKm(elPris, 2)} mod ${krPrKm(benzinPris, 2)}). Mod diesel er besparelsen ${pct(elModDieselPct)} %, fordi diesel i forvejen er billigere pr. km (${krPrKm(dieselPris, 2)}). Beregningen bruger 13,50 kr./l benzin, 12,80 kr./l diesel og 2,50 kr./kWh el — altså billig el. Ved offentlig opladning til 3-6 kr./kWh bliver el dyrere end diesel over ${pct(elModDieselBreakEven)} kr./kWh.` },
       { question: "Hvad påvirker forbruget?", answer: "Kørestil, hastighed, vejr, dæktryk, aircondition." },
       ],
     },
@@ -2116,7 +2131,7 @@ const noPages: Record<string, PageData> = {
       { question: "Hva koster 500 km med bensin?", answer: "Ved 15 km/l bruker turen 500 ÷ 15 = 33,3 liter. 33,3 l × 13,50 kr. = 450 kr., altså 0,90 kr. per km eller 90 kr. per 100 km." },
       { question: "Beregn drivstoffutgifter?", answer: "Distanse / km/l × literpris. 200 km / 15 km/l × 18 NOK/l = 240 NOK." },
       { question: "Normal km/liter?", answer: "Bensin: 12-18 km/l. Diesel: 15-22 km/l." },
-      { question: "Er elbiler billigere?", answer: "Ja, typisk 50-70% billigere per km i drivstoff." },
+      { question: "Er elbiler billigere?", answer: `Ja, når du bare regner på drivstoffet: ${pct(elModBenzinPct)} % billigere per km enn bensin (${krPrKm(elPris, 2)} mot ${krPrKm(benzinPris, 2)}). Mot diesel er besparingen ${pct(elModDieselPct)} %, fordi diesel allerede koster mindre per km (${krPrKm(dieselPris, 2)}). Beregningen bruker 13,50 kr./l bensin, 12,80 kr./l diesel og 2,50 kr./kWh el. Offentlig lading på 3-6 kr./kWh gjør el dyrere enn diesel over ${pct(elModDieselBreakEven)} kr./kWh.` },
       { question: "Hva påvirker forbruket?", answer: "Kjørestil, hastighet, vær, dekktrykk, air condition." },
       ],
     },
@@ -3269,7 +3284,7 @@ const sePages: Record<string, PageData> = {
       { question: "Vad kostar 500 km med bensin?", answer: "Vid 15 km/l använder resan 500 ÷ 15 = 33,3 liter. 33,3 l × 13,50 kr. = 450 kr., alltså 0,90 kr. per km eller 90 kr. per 100 km." },
       { question: "Beräkna bränslekostnader?", answer: "Distans / km/l × literpris. 200 km / 15 km/l × 18 SEK/l = 240 SEK." },
       { question: "Normal km/liter?", answer: "Bensin: 12-18 km/l. Diesel: 15-22 km/l." },
-      { question: "Är elbilar billigare?", answer: "Ja, typiskt 50-70% billigare per km i bränsle." },
+      { question: "Är elbilar billigare?", answer: `Ja, om man bara räknar drivmedlet: ${pct(elModBenzinPct)} % billigare per km än bensin (${krPrKm(elPris, 2)} mot ${krPrKm(benzinPris, 2)}). Mot diesel är besparingen ${pct(elModDieselPct)} %, eftersom diesel redan kostar mindre per km (${krPrKm(dieselPris, 2)}). Beräkningen använder 13,50 kr/l bensin, 12,80 kr/l diesel och 2,50 kr/kWh el. Offentlig laddning på 3-6 kr/kWh gör el dyrare än diesel över ${pct(elModDieselBreakEven)} kr/kWh.` },
       { question: "Vad påverkar förbrukningen?", answer: "Körstil, hastighet, väder, däcktryck, AC." },
       ],
     },

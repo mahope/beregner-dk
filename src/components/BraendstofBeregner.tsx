@@ -8,6 +8,9 @@ import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { useLocale } from '@/components/LocaleProvider';
 import { formatCurrency, formatNumber as formatNum } from '@/lib/format';
+import { BRAENDSTOF_FORUDSETNINGER, prisPrKm } from '@/lib/braendstof';
+
+const F = BRAENDSTOF_FORUDSETNINGER;
 
 export default function BraendstofBeregner() {
   const { locale } = useLocale();
@@ -40,10 +43,10 @@ export default function BraendstofBeregner() {
       perMonth: "Pr. måned",
       compareTitle: "Sammenlign brændstofpriser",
       colDistance: "Distance",
-      colBenzin: "Benzin (15 km/l)",
-      colDiesel: "Diesel (18 km/l)",
-      colEl: "El (17 kWh/100km)",
-      compareNote: "Baseret på benzin 13,50 kr/l, diesel 12,80 kr/l, el 2,50 kr/kWh",
+      colBenzin: `Benzin (${F.benzin.kmPerLiter} km/l)`,
+      colDiesel: `Diesel (${F.diesel.kmPerLiter} km/l)`,
+      colEl: `El (${F.el.kwhPer100km} kWh/100km)`,
+      compareNote: `Baseret på benzin ${F.benzin.literPris.toFixed(2).replace(".", ",")} kr/l, diesel ${F.diesel.literPris.toFixed(2).replace(".", ",")} kr/l, el ${F.el.kwhPris.toFixed(2).replace(".", ",")} kr/kWh`,
       calcName: "Brændstofberegner",
     },
     se: {
@@ -73,10 +76,10 @@ export default function BraendstofBeregner() {
       perMonth: "Per månad",
       compareTitle: "Jämför bränslepriser",
       colDistance: "Sträcka",
-      colBenzin: "Bensin (15 km/l)",
-      colDiesel: "Diesel (18 km/l)",
-      colEl: "El (17 kWh/100km)",
-      compareNote: "Baserat på bensin 13,50 kr/l, diesel 12,80 kr/l, el 2,50 kr/kWh",
+      colBenzin: `Bensin (${F.benzin.kmPerLiter} km/l)`,
+      colDiesel: `Diesel (${F.diesel.kmPerLiter} km/l)`,
+      colEl: `El (${F.el.kwhPer100km} kWh/100km)`,
+      compareNote: `Baserat på bensin ${F.benzin.literPris.toFixed(2).replace(".", ",")} kr/l, diesel ${F.diesel.literPris.toFixed(2).replace(".", ",")} kr/l, el ${F.el.kwhPris.toFixed(2).replace(".", ",")} kr/kWh`,
       calcName: "Bränslekalkylator",
     },
   } as const;
@@ -86,12 +89,12 @@ export default function BraendstofBeregner() {
   
   // Fælles
   const [braendstofType, setBraendstofType] = useState<"benzin" | "diesel" | "el">("benzin");
-  const [literPris, setLiterPris] = useState<number>(13.5);
-  const [kmPerLiter, setKmPerLiter] = useState<number>(15);
+  const [literPris, setLiterPris] = useState<number>(F.benzin.literPris);
+  const [kmPerLiter, setKmPerLiter] = useState<number>(F.benzin.kmPerLiter);
   
   // El-bil
-  const [kwhPris, setKwhPris] = useState<number>(2.5);
-  const [kwhPer100km, setKwhPer100km] = useState<number>(17);
+  const [kwhPris, setKwhPris] = useState<number>(F.el.kwhPris);
+  const [kwhPer100km, setKwhPer100km] = useState<number>(F.el.kwhPer100km);
   
   // Tur beregning
   const [distance, setDistance] = useState<number>(100);
@@ -142,10 +145,10 @@ export default function BraendstofBeregner() {
   const handleReset = useCallback(() => {
     setBeregningsType("turPris");
     setBraendstofType("benzin");
-    setLiterPris(13.5);
-    setKmPerLiter(15);
-    setKwhPris(2.5);
-    setKwhPer100km(17);
+    setLiterPris(F.benzin.literPris);
+    setKmPerLiter(F.benzin.kmPerLiter);
+    setKwhPris(F.el.kwhPris);
+    setKwhPer100km(F.el.kwhPer100km);
     setDistance(100);
     setLiterBrugt(50);
     setKmKoert(750);
@@ -527,9 +530,9 @@ export default function BraendstofBeregner() {
             </thead>
             <tbody>
               {[50, 100, 200, 500, 1000].map((km) => {
-                const benzinPris = (km / 15) * 13.5;
-                const dieselPris = (km / 18) * 12.8;
-                const elPris = (km / 100) * 17 * 2.5;
+                const benzinPris = km * prisPrKm("benzin");
+                const dieselPris = km * prisPrKm("diesel");
+                const elPris = km * prisPrKm("el");
                 return (
                   <tr key={km} className="border-b last:border-b-0 dark:border-gray-700">
                     <td className="py-2 font-medium">{km} km</td>
