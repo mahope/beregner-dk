@@ -637,3 +637,32 @@ describe("2026-skattetall i lønsidernes FAQ", () => {
     expect(faq?.answer).toContain("afskaffet");
   });
 });
+
+describe("svensk leasing-metadata", () => {
+  const data = getPageData("leasing", "se")!;
+
+  test("er svar-først med kalkylatorens egne standardtal", () => {
+    // Uværdierne er kalkylatorens default: 300.000 kr bilpris, 150.000 kr
+    // restværde, 4,5 % rente, 30.000 kr kontantinsats, 36 måneder.
+    // afskrivning 120.000/36 = 3.333,33 + 4,5 %/12 på 210.000 = 787,50.
+    expect(data.title).toBe("Leasingkalkylator: bil på 300.000 kr = 4.121 kr/mån");
+    expect(data.metaTitle.length).toBeLessThanOrEqual(60);
+    expect(data.metaDescription).toContain("4.121 kr");
+    expect(data.metaDescription.length).toBeLessThanOrEqual(160);
+    expect(data.ogTitle).toBe(data.metaTitle);
+    expect(data.ogDescription).toContain("4.121 kr");
+    expect(data.schemaDescription).toContain("4.121 kr");
+  });
+
+  test("FAQ'en er skrevet på svenska og bruger kalkylatorens tal", () => {
+    const text = data.faqItems.map((item) => `${item.question} ${item.answer}`).join(" ");
+
+    expect(text).toContain("4.121 kr");
+    expect(text).toContain("178.350 kr");
+    expect(text).toMatch(/leasingkalkylatorn|kalkylatorn/);
+    // Ingen norske eller danske rester i den svenska FAQ. å/ä/ö er ægte
+    // svenske bogstaver, så det er kun æ og ø der afslører et dansk/norsk leak.
+    expect(text).not.toMatch(/jeg|kalkylatoren på mobilen|hvor mye/i);
+    expect(text).not.toMatch(/[æø]/i);
+  });
+});
