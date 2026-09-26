@@ -2754,7 +2754,7 @@ landmark=lån, piggybank=opsparing osv.).
   `DEPLOY-MISSING`. Næste vindue 07:30 2026-09-26.
 - **VERIFICÉR DEPLOY:** D5 helligdage i arbejdsdage på `/dato` — se opgave 35.
   Kode `9c979f4` på `ceo/dato-helligdage`, merge `68a25f6` 2026-09-26 04:35 CEST,
-  efterfølgende fix `f4d0f8b` (se nedenfor). Verificér **først
+  efterfølgende fix `961091e` (se nedenfor). Verificér **først
   efter 07:30-vinduet 2026-09-26**, og verificér **indhold**, ikke HTTP 200:
   1. DA `https://minberegner.dk/dato`: FAQ'en skal indeholde spørgsmålet "Hvilke
      helligdage bruger beregneren?", og svaret skal liste de ni danske
@@ -2772,7 +2772,7 @@ landmark=lån, piggybank=opsparing osv.).
   5. Valgfrit men stærkest: kør `/dato` med start 1. december 2026 og slut
      31. december 2026. Forventes: 31 kalenderdage, 20 arbejdsdage, 8
      weekenddage, 3 helligdage. Er der kun fire felter, er den gamle kode live.
-- **Efterfølgende fix samme iteration (`f4d0f8b`).** Efter merge gennemgik jeg
+- **Efterfølgende fix samme iteration (`961091e`).** Efter merge gennemgik jeg
   kanttilfældet slutdato før startdato. Dato-inputsene har ingen `min`/`max`, så
   det kan ske, og `taellWeekender`/`taellHelligdage` returnerer 0 for et omvendt
   interval. Før D5 viste UI'et i så fald *alle* dage som "weekenddage", altså var
