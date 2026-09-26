@@ -7,16 +7,22 @@ import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { useLocale } from '@/components/LocaleProvider';
 import { getIntlLocale, formatNumber } from '@/lib/format';
+import {
+  foegArbejdsdage,
+  taellArbejdsdage,
+  taellHelligdage,
+  taellWeekender,
+  type HelligdagLocale,
+} from '@/lib/helligdage';
 
 type BeregningsMode = "dage-mellem" | "tilfoej-dage" | "arbejdsdage" | "alder";
 
-function getDaysInMonth(year: number, month: number): number {
-  return new Date(year, month + 1, 0).getDate();
+function helligdagLocale(locale: string): HelligdagLocale {
+  return locale === "se" ? "se" : "da";
 }
 
-function isWeekend(date: Date): boolean {
-  const day = date.getDay();
-  return day === 0 || day === 6;
+function getDaysInMonth(year: number, month: number): number {
+  return new Date(year, month + 1, 0).getDate();
 }
 
 function formatDate(date: Date, intlLocale: string): string {
@@ -53,11 +59,13 @@ const labels = {
     uger: "Uger",
     caMaaneder: "Ca. måneder",
     arbejdsdage: "Arbejdsdage",
-    weekenddage: "Weekenddage",
+    fridage: "Weekenddage",
+    helligdage: "Helligdage",
     resultat: "Resultat",
     arbejdsdageFraNu: "arbejdsdage fra nu",
     kalenderdageIAlt: "Kalenderdage i alt",
-    weekenddageSprunget: "Weekenddage sprunget",
+    fridageSprunget: "Weekenddage sprunget",
+    helligdageIPerioden: "helligdage i perioden",
     dinAlder: "Din alder",
     aarWord: "år",
     maanederWord: "måneder",
@@ -97,11 +105,13 @@ const labels = {
     uger: "Veckor",
     caMaaneder: "Ca. månader",
     arbejdsdage: "Arbetsdagar",
-    weekenddage: "Helgdagar",
+    fridage: "Lördagar/söndagar",
+    helligdage: "Helgdagar",
     resultat: "Resultat",
     arbejdsdageFraNu: "arbetsdagar från nu",
     kalenderdageIAlt: "Kalenderdagar totalt",
-    weekenddageSprunget: "Överhoppade helgdagar",
+    fridageSprunget: "Skippade lörd/sön",
+    helligdageIPerioden: "helgdagar i perioden",
     dinAlder: "Din ålder",
     aarWord: "år",
     maanederWord: "månader",
@@ -198,16 +208,10 @@ export default function DatoBeregner() {
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
         const diffWeeks = Math.floor(Math.abs(diffDays) / 7);
         const diffMonths = Math.round(Math.abs(diffDays) / 30.44);
+        const hl = helligdagLocale(locale);
 
-        // Tæl arbejdsdage
-        let arbejdsdage = 0;
-        const current = new Date(start);
-        while (current <= slut) {
-          if (!isWeekend(current)) {
-            arbejdsdage++;
-          }
-          current.setDate(current.getDate() + 1);
-        }
+        const arbejdsdage = taellArbejdsdage(start, slut, hl);
+        const helligdage = taellHelligdage(start, slut, hl);
 
         return {
           type: "dage-mellem" as const,
@@ -215,7 +219,8 @@ export default function DatoBeregner() {
           uger: diffWeeks,
           maaneder: diffMonths,
           arbejdsdage,
-          weekenddage: Math.abs(diffDays) - arbejdsdage,
+          helligdage,
+          fridage: taellWeekender(start, slut),
         };
       }
 
@@ -233,26 +238,24 @@ export default function DatoBeregner() {
 
       case "arbejdsdage": {
         const base = new Date(baseDato);
-        let dageAtTilfoeje = antalDage;
-        const resultatDato = new Date(base);
-
-        while (dageAtTilfoeje > 0) {
-          resultatDato.setDate(resultatDato.getDate() + 1);
-          if (!isWeekend(resultatDato)) {
-            dageAtTilfoeje--;
-          }
-        }
+        const hl = helligdagLocale(locale);
+        const resultatDato = foegArbejdsdage(base, antalDage, hl);
 
         // Tæl samlede dage inkl. weekender
         const diffTime = resultatDato.getTime() - base.getTime();
         const samledeDage = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        // Et negativt antal løber baglæns, så intervallet skal vendes for tællingerne.
+        const fra = antalDage >= 0 ? base : resultatDato;
+        const til = antalDage >= 0 ? resultatDato : base;
 
         return {
           type: "arbejdsdage" as const,
           resultatDato,
           formatteret: formatDate(resultatDato, intlLocale),
           samledeDage,
-          weekenddage: samledeDage - antalDage,
+          fridage: taellWeekender(fra, til),
+          helligdage: taellHelligdage(fra, til, hl),
         };
       }
 
@@ -442,7 +445,7 @@ export default function DatoBeregner() {
                   {resultat.uger} {l.ugerWord} {l.ogWord} {Math.abs(resultat.dage) % 7} {l.dageWord}
                 </p>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                 <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
                   <p className="text-sm text-gray-600 dark:text-gray-400">{l.uger}</p>
                   <p className="text-2xl font-bold dark:text-gray-200">{resultat.uger}</p>
@@ -458,9 +461,15 @@ export default function DatoBeregner() {
                   </p>
                 </div>
                 <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg text-center">
-                  <p className="text-sm text-gray-600 dark:text-gray-400">{l.weekenddage}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{l.fridage}</p>
                   <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
-                    {resultat.weekenddage}
+                    {resultat.fridage}
+                  </p>
+                </div>
+                <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg text-center">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{l.helligdage}</p>
+                  <p className="text-2xl font-bold text-red-600 dark:text-red-400">
+                    {resultat.helligdage}
                   </p>
                 </div>
               </div>
@@ -486,15 +495,21 @@ export default function DatoBeregner() {
                   {resultat.formatteret}
                 </p>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-3 gap-4">
                 <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
                   <p className="text-sm text-gray-600 dark:text-gray-400">{l.kalenderdageIAlt}</p>
                   <p className="text-2xl font-bold dark:text-gray-200">{resultat.samledeDage}</p>
                 </div>
                 <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg text-center">
-                  <p className="text-sm text-gray-600 dark:text-gray-400">{l.weekenddageSprunget}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{l.fridageSprunget}</p>
                   <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
-                    {resultat.weekenddage}
+                    {resultat.fridage}
+                  </p>
+                </div>
+                <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg text-center">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{l.helligdageIPerioden}</p>
+                  <p className="text-2xl font-bold text-red-600 dark:text-red-400">
+                    {resultat.helligdage}
                   </p>
                 </div>
               </div>
