@@ -1,6 +1,7 @@
 import { describe, test, expect } from "vitest";
 import { getPageData, getAvailableSlugs } from "./page-data";
 import { getCalculatorHrefs, isCalculatorAvailable } from "./calculator-list";
+import { beregnPromille } from "./promille";
 
 describe("getPageData", () => {
   test("returns data for known DA slug", () => {
@@ -280,6 +281,58 @@ describe("getPageData", () => {
     expect(data.schemaDescription).toContain("decimaltal");
     const exampleFaq = data.faqItems.find((item) => item.question.includes("6/8"));
     expect(exampleFaq).toBeDefined();
+  });
+
+  test.each([
+    {
+      locale: "da" as const,
+      title: "Promilleberegner: 4 øl på 80 kg = 0,88 ‰",
+      visible: "4 øl til en mand på 80 kg giver 0,88 ‰",
+      answer: "4 øl på 80 kg = 0,88 ‰",
+      drivingAfter: "5,9 timer",
+      limit: "0,5 ‰",
+    },
+    {
+      locale: "se" as const,
+      title: "Promillekalkylator: 4 öl på 80 kg = 0,88 ‰",
+      visible: "4 öl till en man på 80 kg ger 0,88 ‰",
+      answer: "4 öl på 80 kg = 0,88 ‰",
+      drivingAfter: "5,9 timmar",
+      limit: "0,2 ‰",
+    },
+  ])(
+    "has answer-first promille metadata for $locale",
+    ({ locale, title, visible, answer, drivingAfter, limit }) => {
+      const data = getPageData("promille", locale)!;
+
+      expect(data.metaTitle).toBe(title);
+      expect(data.metaTitle.length).toBeLessThanOrEqual(60);
+      expect(data.description).toContain(visible);
+      expect(data.metaDescription).toContain(answer);
+      expect(data.metaDescription).toContain(limit);
+      expect(data.metaDescription.length).toBeLessThanOrEqual(160);
+      expect(data.ogTitle).toBe(title);
+      expect(data.ogDescription).toContain(answer);
+      expect(data.schemaDescription).toContain(answer);
+      const soberFaq = data.faqItems.find((item) => /køre bil igen|köra bil igen/.test(item.question));
+      expect(soberFaq?.answer).toContain(answer);
+      expect(soberFaq?.answer).toContain(drivingAfter);
+    }
+  );
+
+  test("promille-eksemplet i metadata følger beregningen", () => {
+    const example = beregnPromille(4, 80, "mand", 0)!;
+    expect(example.promille).toBe(0.88);
+    expect(example.timerTilNul).toBe(5.9);
+
+    for (const locale of ["da", "se"] as const) {
+      const data = getPageData("promille", locale)!;
+      expect(data.description).toContain("0,88 ‰");
+      expect(data.metaDescription).toContain("0,88 ‰");
+      const soberFaq = data.faqItems.find((item) => /køre bil igen|köra bil igen/.test(item.question));
+      expect(soberFaq?.answer).toContain("0,88 ‰");
+      expect(soberFaq?.answer).toContain("5,9");
+    }
   });
 
   test.each([
