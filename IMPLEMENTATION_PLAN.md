@@ -2793,8 +2793,8 @@ og kræver en beslutning, før den røres (se ❓).
 
 #### 49. Ny kandidat — fire ubearbejdede fund fra C22's research (prioriteret)
 
-**Del 1 og 2 er lukket som opgave 50 (C23) 2026-09-26 — se nedenfor. Del 3 og 4
-(SE `/leasing` og SE `/tidszone`) står åbne.**
+**Del 1 og 2 er lukket som opgave 50 (C23), del 3 som opgave 51 (C24) 2026-09-26.
+Kun del 4 (SE `/tidszone`) står åbne.**
 
 Fundene er verificeret i koden med fil/linje, men **ikke** rettet i denne
 iteration (tidsbudget). Rangordnet efter trafik × tillid:
@@ -2843,6 +2843,49 @@ præmieportion pr. 481 timer, mens UI og FAQ siger 962 timer. **Bemærk:** den
 første halvdel af denne liste er fra DA-fladen, anden halvdel fra SE — de er
  fundet af to parallelle research-spor og er **ikke** alle krydsverificerede af
  mig. Den næste iteration skal bekræfte den konkrete linje, før den ændrer noget.
+
+#### 51. [x] FÆRDIG 2026-09-26 — C24 — SE `/leasing` havde autogenereret stub-metadata og norsk FAQ
+
+- **Iteration start:** 2026-09-26 12:20 CEST på `ceo/c24-leasing-se`. Samme
+  iteration som C23, efter at den grønne gate var passeret; den tredje og sidste
+  lille forbedring inden for budgettet.
+- **Datagrund:** `/leasing` på beraknare.se har **46 besøgende/28d** og
+  **3.181 visninger, 30 klik, CTR 0,9 %, position 12,5** (GSC 2026-08-27..09-24).
+  Det er den **eneste** svenska side tæt på top-10, altså hvor svar-først
+  metadata har størst effekt: 30 klik er alt, siden ligger lige under grænsen.
+- **Fund.** `page-data.ts:3404-3422` (SE) var en rå stub: titel "Leasing
+  Kalkylator", metaDescription "Beräkna leasingbetalning och jämför leasing vs.
+  billån. Gratis kalkylator.", keywords med bare "leasing"/"kalkylator"/"gratis",
+  og tre placeholder-FAQ-svarmål med **norsk** (*jeg*, *kalkylatoren*).
+  `LeasingBeregner.tsx` viste samtidig den **danske** enhed `kr./md` på alle tre
+  resultatlinjer og i copy/resultSummary.
+- **Beslutning/implementering:** tal fra kalkylatorens **egne** standardværdier, så
+  de ikke kan være opdigtede: 300.000 kr bilpris, 150.000 kr restværde, 4,5 %
+  rente, 30.000 kr kontantinsats, 36 måneder → afskrivning 120.000/36 = 3.333,33
+  + 4,5 %/12 på 210.000 = 787,50 = **4.121 kr/mån**, **178.350 kr** totalt,
+  **28.350 kr** rente. Enheden `kr./md` er nu `kr./{l.months}`, som i resten af
+  komponenten allerede findes: `mån` (SE), `md` (DA), `mnd` (NO). FAQ'en er
+  skrevet om til fem reelle spørgsmål med de samme tal.
+  **Rettet i researchen:** C22's rapport sagde, at `no`-varianten var en
+  klon af den svenske stub. Den er **ikke** — `noPages["leasing"]`
+  (`page-data.ts:2251`) er norsk, så der opstår ingen divergens, og NO er
+  bevidst urørt (domænet er ikke live, se ❓).
+- **Acceptkriterier:**
+  1. SE-titlen er svar-først med kalkylatorens eget standardtal, ≤ 60 tegn. **PASS**
+  2. metaDescription/ogDescription/schemaDescription indeholder 4.121 kr og er
+     ≤ 160 tegn. **PASS**
+  3. FAQ'en er svensk, bruger 4.121/178.350 kr. og har ingen æ/ø. **PASS**
+  4. Ingen `kr./md` på svensk (eller norsk/dansk) leasing-uddata. **PASS**
+  5. DA og NO er bevidst uændrede; ingen anden side rørt. **PASS**
+  6. `npm run lint`, `npm run test` og `npm run build` er grønne. **PASS**
+- **Kvalitetsgate 2026-09-26 12:22 CEST:** `npm run test` grøn (**1260/1260,
+  121 filer** — 2 nye i `page-data.test.ts`), `npm run lint` grøn (511 filer),
+  `npm run build` grøn (139 sider + typecheck, ingen nye advarsler).
+- **MÅL:** `/leasing` (SE) Search Console baseline **3.181 visninger, 30 klik,
+  CTR 0,9 %, position 12,5 pr. 2026-09-24**; Plausible **46 besøgende/28d
+  pr. 2026-09-26**. Genmål 2026-10-10. Det interessante tal er **placeringen**:
+  titlen og FAQ'en er nu svar-først, så en bevægelse fra 12,5 mod top-10 er det
+  realistiske mål, ikke en CTR-effekt på eksisterende visninger.
 
 #### 50. [x] FÆRDIG 2026-09-26 — C23 — Lønsiderne sagde 15 % topskat og tre forskellige kommuneskatter
 

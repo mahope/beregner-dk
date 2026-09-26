@@ -296,17 +296,17 @@ export default function LeasingBeregner() {
                   <div className="space-y-3">
                     <div className="bg-white dark:bg-gray-700 rounded-lg p-4 shadow-sm border-l-4 border-blue-500">
                       <div className="text-sm font-medium text-blue-600 dark:text-blue-400">{l.leasing}</div>
-                      <div className="text-xl font-bold text-gray-900 dark:text-white">{formatKr(result.maanedligYdelse)} kr./md</div>
+                      <div className="text-xl font-bold text-gray-900 dark:text-white">{formatKr(result.maanedligYdelse)} kr./{l.months}</div>
                       <div className="text-xs text-gray-500 dark:text-gray-400">{l.totalDuEjerIkke.replace("{total}", `${formatKr(result.totalLeasing)} kr.`)}</div>
                     </div>
                     <div className="bg-white dark:bg-gray-700 rounded-lg p-4 shadow-sm border-l-4 border-green-500">
                       <div className="text-sm font-medium text-green-600 dark:text-green-400">{l.billaan}</div>
-                      <div className="text-xl font-bold text-gray-900 dark:text-white">{formatKr(result.maanedligLaan)} kr./md</div>
+                      <div className="text-xl font-bold text-gray-900 dark:text-white">{formatKr(result.maanedligLaan)} kr./{l.months}</div>
                       <div className="text-xs text-gray-500 dark:text-gray-400">{l.totalDuEjer.replace("{total}", `${formatKr(result.totalLaan)} kr.`)}</div>
                     </div>
                     <div className="bg-white dark:bg-gray-700 rounded-lg p-4 shadow-sm border-l-4 border-purple-500">
                       <div className="text-sm font-medium text-purple-600 dark:text-purple-400">{l.kontantkoeb}</div>
-                      <div className="text-xl font-bold text-gray-900 dark:text-white">{formatKr(result.kontantMaanedlig)} kr./md*</div>
+                      <div className="text-xl font-bold text-gray-900 dark:text-white">{formatKr(result.kontantMaanedlig)} kr./{l.months}*</div>
                       <div className="text-xs text-gray-500 dark:text-gray-400">{l.vaerdtabNote}</div>
                     </div>
                   </div>
@@ -329,11 +329,11 @@ export default function LeasingBeregner() {
 
       {/* Share */}
       <div className="flex justify-center mt-6 gap-3">
-        <CopyResultButton text={result ? `Leasing: ${formatKr(result.maanedligYdelse)} kr./md — Lån: ${formatKr(result.maanedligLaan)} kr./md` : ''} />
+        <CopyResultButton text={result ? `Leasing: ${formatKr(result.maanedligYdelse)} kr./{l.months} — Lån: ${formatKr(result.maanedligLaan)} kr./{l.months}` : ''} />
         <ShareCalculation
           getShareableLink={getShareableLink}
           calculatorName="Leasing Beregner"
-          resultSummary={result ? `Leasing: ${formatKr(result.maanedligYdelse)} kr./md` : ''}
+          resultSummary={result ? `Leasing: ${formatKr(result.maanedligYdelse)} kr./{l.months}` : ''}
         />
       </div>
 
