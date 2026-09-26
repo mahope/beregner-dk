@@ -1,13 +1,37 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — **seks noter står åbne, ingen er `DEPLOY-MISSING`.** C37
+STATUS: KØ — **syv noter står åbne, ingen er `DEPLOY-MISSING`.** C37
 (`/renteberegner`) med første kandidatvindue 2026-09-27 12:30, C38 (svensk
-spørgsmålsform), C39 (svensk `/procent`), C40 (DA `/tidsberegner`) og C41
-(`/dato` → `dage-til`) med **2026-09-26 21:30** som første fælles
+spørgsmålsform), C39 (svensk `/procent`), C40 (DA `/tidsberegner`) og **C45**
+(juleaften + julafton) med **2026-09-26 21:30** som første fælles
 kandidatvindue, plus **C42** (de relaterede links renderer det, de lover, og
 `/brok` får en indgang) med første vindue **2026-09-27 07:30** og **C43**
 (artiklen og `/tidszone` kan ikke længere have samme headline) i samme
 vindue som C42. `/api/health` svarer `status: ok`.
+
+**C45 lukkede C23's sidste åbne note og fyldte et hul i `dage-til`-fladen,
+som familien selv afslørede.** C23's `/loen-efter-skat` blev verificeret i
+17:30-batchen, men `/brutto-netto` og `/topskat` blev ikke kørt — de er
+verificeret nu ved indholdskontrol (`25,049` 3 gange + `25.049` på
+`/brutto-netto`, `0.639` i kirkeskatfeltet på `/topskat`), så **C23 er helt
+lukket**. Det samme audit fandt det største hul i julefladen: familien
+indeholder `1-december`, `juledagen` og `nytaarsaften`, men **ikke juleaften** —
+`/dage-til/juleaften` svarede 404, selv om juledagens *egen brødtekst* siger
+"Juleaften er 24. december, juleaften 25. december…". Google autocomplete i
+begge sprog (hentet 2026-09-26 20:31) bekræfter efterspørgslen: DA "hvor mange
+dage er der til juleaften" og "…til den 24 december" ligger blandt
+forslagene, SE "hur många dagar är det till julafton" og "…till julafton 2026"
+ligger i top-5. Begge sprog har nu siden, og da strukturen er genereret fra
+`src/lib/dage-til.ts`, kommer de automatisk i sitemap, i `/dato`s og
+`/nedtaelling`s lister og i overskriftstesten. Se opgave 72.
+
+**To negative fund, så ingen senere iteration bruger tid på dem.**
+`npm audit` er **0 sårbarheder** (133 filer, 1398 tests) — `AFHAENGIGHEDER.md`
+siger 1 kritisk + 7 høje for dette projekt, men det er et scan fra 2026-08-23
+og er forældet. Og `engines`/`.nvmrc` mangler stadig, men `Dockerfile` fastslår
+`FROM node:22-alpine`, så byggeserveren *kan ikke* vælge Node 18 som i
+jordemoderstudy-fallet 23. august; en `engines`-erklæring ville være
+dokumentation, ikke en fejl-fiksering, og er derfor bevidst ikke lavet.
 
 **C44 lukkede det sidste ubedømte sted i C43's egen testklasse og fandt intet
 at rette i indholdet.** C43's cannibaliseringstest læser `page-data.ts` og
@@ -4564,6 +4588,74 @@ første halvdel af denne liste er fra DA-fladen, anden halvdel fra SE — de er
   indholdsændring. De 14 sider måles først 2026-10-10, fordi de er nye fra C7.
 
 
+#### 72. [x] FÆRDIG 2026-09-26 — C45 — `dage-til`-familien sprang juleaften over, og C23's sidste to sider blev verificeret
+
+- **Iteration start:** 2026-09-26 20:26 CEST på `ceo/juleaften`. Køen var tom
+  (alle 71 opgaver færdige, intet `I GANG`), og de otte åbne deploynoters
+  første kandidatvinduer er 21:30 eller senere — dvs. efter denne iterations
+  45-minutters grænse. Den eneste note, der *kunne* verificeres nu, var C23's
+  `/brutto-netto` + `/topskat`, som 17:30-målingen sprang over.
+- **Verifikation af C23's rest (lukket):** målt ved indholdskontrol 20:27.
+  `/brutto-netto` har 3 × `25,049` + 1 × `25.049`, `/topskat` har `0.639` i
+  kirkeskatfeltet. `/api/health` → `{"status":"ok"}`. **C23 er dermed helt
+  lukket.** Se VERIFICÉR DEPLOY-loggen.
+- **Datagrund for den nye opgave.** Familien `dage-til` har syv DA-slugs
+  (`juledagen`, `nytaarsaften`, `nytaarsdag`, `1-december`, `paskedag`,
+  `skaertorsdag`, `grundlovsdag`) og syv SE-slugs. Den dækker **ikke
+  juleaften**: `https://minberegner.dk/dage-til/juleaften` svarede **404**,
+  mens `/dage-til/juledagen` svarede 200 — og juledagens *egen brødtekst* siger
+  "Juleaften er 24. december, juledag 25. december og 2. juledag 26.
+  december." Familien springer altså over den dato, den selv nævner, og kun
+  dagen *efter* den findes. GSC viser, at familien virker, når datoen findes:
+  "hvor mange dage er der til 1 december" er 996 visninger på pos. 5 pr.
+  2026-09-24 (sitets næststørste søgning). Autocomplete, hentet 2026-09-26
+  20:31, bekræfter efterspørgslen i begge sprog:
+  - DA: "hvor mange dage er der til juleaften", "hvor mange dage er der til den
+    24 december" og "hvor mange dage er der til jul" ligger alle blandt
+    forslagene til "hvor mange dage er der til".
+  - SE: "hur många dagar är det till julafton" er første forslag til "hur många
+    dagar är det till jul", og "…till julafton 2026" og "…till julafton i
+    sverige" ligger i top-5.
+- **Ændring:** ét nyt event i `src/lib/dage-til.ts` (id `juleaften`, fast
+  anker 24. december i begge sprog, DA-slug `juleaften`, SE-slug `julafton`,
+  spørgsmål + tre fakta + tre FAQ på hvert sprog). Fordi hele fladen er
+  genereret fra modulet, følger alt uden ekstra kode: to sider, to
+  sitemap-URL'er, links fra `/dato` og `/nedtaelling` på begge domæner,
+  dækning af `title-collision.test.ts` og `dage-til-routes.test.tsx`.
+  Rækkefølgen i listerne er `juledagen`, `juleaften`, `nytaarsaften`,
+  `nytaarsdag`, `1-december`, `paskedag`, `skaertorsdag`, `grundlovsdag` —
+  de to juledadter står dermed sammen.
+- **Fakta er tjekket mod repoets eget ratested, ikke mod hukommelsen.**
+  `src/lib/helligdage.ts` tæller 24. december som helligdag på begge sprog
+  ("Juleaftensdag" / "Julafton"), og kommentaren i modulet forklarer, at
+  nytårsaften 31. december *kun* mangler på den danske side. Derfor står der i
+  juleaftens fakta, at juleaften er helligdag "mens nytårsaften 31. december
+  ikke gør" (DA) og at begge er helgdagar (SE). Ugedagen er regnet, ikke
+  gættet: 24. december 2026 er en **torsdag**, 2027 en **fredag** — begge står
+  i FAQ'en, og en test fejler, hvis de fjernes fra hinanden.
+- **Ny test:** `juleaften ligger præcis én dag før juledagen i begge sprog`
+  i `src/lib/dage-til.test.ts` — den slår op på id'et (så den ikke kan løbe
+  på array-position som de ældre tests gør), tjekker at slugs, spørgsmål og
+  anker er konsistente, at afstanden til juledagen er 1 dag og at svaret fra
+  2026-09-25 er 90 dage mod juledagens 91.
+- **En fejl i planen fundet og rettet undervejs.** C41/C42's deploynoter siger,
+  at den første `dage-til`-link på `/dato` er `/dage-til/1-december`. Den er
+  `/dage-til/juledagen` — `getDageTilEvents` **sorterer ikke**, den returnerer
+  `DAGE_TIL_EVENTS` i array-rækkefølge, og `juledagen` står først. Noterne er
+  rettet, ellers ville næste iteration have jagtet en fejl, der ikke findes.
+- **Verifikation:** `npm run lint` grøn (532 filer), `npm run test` grøn
+  (**1398/1398**, 133 filer), `npm run build` grøn. 61 linjers diff, så ingen
+  ekstra review.
+- **Landet:** kode `a79b6d5` på branch `ceo/juleaften`, merge `71d4a6c`.
+- **MÅL:** `/dage-til/juleaften` og `/dagar-till/julafton` er nye sider uden
+  baseline. Sammenlign **2026-10-10** (14 dage) mod de søvende søgninger i
+  GSC: målet er, at "hvor mange dage er der til juleaften" ranker på egen URL
+  frem for at blive besvaret af `/dato`, og at familien samlet set ikke mister
+  visninger til `/dato`. Baseline for berørte forældreside: `/dato` 1.045
+  besøgende/28d pr. 2026-09-26, 130.392 visninger, CTR 0,6 %, pos. 5,8;
+  `/nedtaelling` har ingen række i GSC-top-15.
+
+
 ### Næste kandidater efter C34 — lukket med negativt fund
 
 
@@ -4664,6 +4756,27 @@ efter datagrund:
      er **placering** på et konkurrencepræget hovedord. `/procent` er den
      største CTR-kandidat på sitet og stadig urørt, så genmål 2026-10-10 før
      næste skridt. Se opgave 71.
+  10. **Ny klasse fundet i C45: datoer, der *nævnes* i familien, men ikke har
+     en side.** Autocomplete (DA+SE, 2026-09-26) er en billigere kilde end GSC
+     til spørgsmålet "hvilke datoer spørger folk efter", fordi den kræver ingen
+     impressions-data — den afslørede juleaften. De samme forslag rummer
+     fortsat emner, der er **variable** (`sommerferie`, `efterårsferie`,
+     `skoleåret`, `måneden`) og derfor bevidst ikke egner sig som statiske
+     `/dage-til/*`-sider; de hører hjemme på `/nedtaelling`, som allerede
+     løser dem. **Anbefaling:** kør samme autocomplete-audit på de øvrige
+     trafikstærke sider (`/tidszone`, `/moms`, `/tidsberegner`, `/alder`) og se,
+     om nogen *fast* dato, by eller relation mangler en side. Se opgave 72.
+
+### Prioriteret kø efter C45
+
+1. **Verificér de otte åbne deploynoter** i 21:30- og 07:30-vinduerne — rent
+   indholdskontrol, intet skal merges.
+2. **Mål 2026-10-10** (se Måleprotokol): C1-C16 og C35-C45 måles 14 dage efter
+   deres snapshot, og resultatet skrives ved siden af hver opgave.
+3. **Kandidat 10:** autocomplete-audit af de øvrige trafikstærke sider for
+   faste datoer eller emner uden egen side.
+4. **Til Mads' fire beslutninger** under ❓ — de låser bl.a.
+   `/api/v1/loen`'s kommuneskat, domænerne og `www`-redirects.
 
 ### ❓ Til Mads
 - ⏳ **VERIFICÉR DEPLOY: C43 — artiklen og `/tidszone` kan ikke længere have
@@ -4703,8 +4816,13 @@ efter datagrund:
   `ceo/dato-dage-til-links`. Første kandidatvindue er **2026-09-26 21:30**
   (merged efter 17:30). Verificér **indhold**: `https://minberegner.dk/dato` skal
   have H2 **"Datoer folk oftest tæller ned til"** med **syv** links
-  `/dage-til/*`, hvoraf den første er `/dage-til/1-december` med ankerteksten
-  **"Hvor mange dage er der til 1. december?"**, og et link til `/nedtaelling`.
+  `/dage-til/*` i rækkefølgen `juledagen`, `nytaarsaften`, `nytaarsdag`,
+  `1-december`, `paskedag`, `skaertorsdag`, `grundlovsdag` — den første er
+  altså `/dage-til/juledagen`, **ikke** `/dage-til/1-december`, som denne note
+  tidligere sagde (`getDageTilEvents` sorterer ikke) — og `/dage-til/1-december`
+  skal være med med ankerteksten **"Hvor mange dage er der til 1. december?"**,
+  plus et link til `/nedtaelling`. **C45 gør listen til otte** (juleaften
+  indeni som nummer to) — se C45's egen note.
   Blokken skal stå **før** FAQ'en. `https://beraknare.se/dato` skal have H2
   **"Datum folk oftast räknar ner till"** med syv `/dagar-till/*`-links og den
   svenske ankertekst "Hur många dagar är det till 1 december?", og **ikke**
@@ -5314,6 +5432,23 @@ landmark=lån, piggybank=opsparing osv.).
     - Gate grøn: lint ok, 280/280 tests, build ok (128 pages).
 
 ## VERIFICÉR DEPLOY-log
+- ⏳ **ÅBEN — VERIFICÉR DEPLOY: C45 — `dage-til`-familien har nu juleaften og
+  julafton.** Kode `a79b6d5`, merge `71d4a6c` 2026-09-26 20:32 CEST på branch
+  `ceo/juleaften`. Første kandidatvindue er **2026-09-26 21:30** (merged før
+  den). Nul deploy-vinduer er gået siden merge, altså slet ikke
+  `DEPLOY-MISSING` (kræver to). Verificér **indhold**:
+  `https://minberegner.dk/dage-til/juleaften` (200) skal have H1
+  **"Hvor mange dage er der til juleaften?"**, `<title>` med samme spørgsmål,
+  self-canonical på `/dage-til/juleaften` og **90 dage** pr. 2026-09-26 (den
+  ændres dagligt, så tjek at tallet svarer til dagens dato minus 24. december);
+  `https://beraknare.se/dagar-till/julafton` (200) skal have **"Hur många dagar
+  är det till julafton?"** og **ikke** dansk tekst; `https://minberegner.dk/dato`
+  skal have H2 "Datoer folk oftest tæller ned til" med **otte** links, hvor
+  den **første** er `/dage-til/juledagen` og den **anden** `/dage-til/juleaften`
+  (**ikke** `/dage-til/1-december` først — noteret tidligere i planen var forkert,
+  `getDageTilEvents` sorterer ikke); begge `sitemap.xml` skal indeholde de nye
+  URL'er; `https://minberegner.dk/dage-til/finvis-somhelst` skal stadig være
+  **404**; `/api/health` skal svare `status: ok`. Se opgave 72.
 - ⏳ **ÅBEN — VERIFICÉR DEPLOY: C44 — `dage-til`-fladen er auditet og
   permanent vagtet.** Kode `d2ec667` + `aa6698c`, merge `016f2e7` 2026-09-26
   20:13 CEST på branch `ceo/dage-til-og-c44`. Første kandidatvindue er
@@ -5353,7 +5488,9 @@ landmark=lån, piggybank=opsparing osv.).
   (lokalefiltreret, `/rabat` er dansk-only) og **ikke** `/bolan` på nogen
   side. `/api/health` skal svare `status: ok`.
 - ⏳ **ÅBEN — VERIFICÉR DEPLOY: C41 — `/dato` linker til de syv
-  dage-til-sider.** Se ❓ Til Mads for den fulde indholdsliste. Kode
+  dage-til-sider.** Se ❓ Til Mads for den fulde indholdsliste — note at
+  rækkefølgen er `juledagen` først (denne log sagde tidligere fejlagtigt
+  `1-december` først), og at C45 gør listen til **otte**. Kode
   `29b8b9a`, merge `f25bd93` 2026-09-26 19:20 CEST, så første
   kandidatvindue er **2026-09-26 21:30**. Nul deploy-vinduer er gået siden
   merge, altså slet ikke `DEPLOY-MISSING` (kræver to).
@@ -5382,7 +5519,7 @@ landmark=lån, piggybank=opsparing osv.).
   - `minberegner.dk/dato`, `/tidsberegner`, `/leasing` skal være **uændrede** —
     ændringen er kun i `sePages`.
   - `/api/health` skal svare `status: ok`.
-- ✅ **DEPLOY OK 2026-09-27 07:41 CEST — 17:30-batchen lukker C23-C36.**Fjorten noter
+- ✅ **DEPLOY OK 2026-09-26 17:41 CEST — 17:30-batchen lukker C23-C36.**Fjorten noter
   verificeret ved **indholdskontrol på begge domæner**, ikke HTTP 200. Målt
   2026-09-26 17:41–17:47 mod live-sitet:
   - **C36** (`/blog/hvad-er-klokken-i-usa-naar-den-er-12-i-danmark`): H1 "Hvad er
@@ -5427,11 +5564,13 @@ landmark=lån, piggybank=opsparing osv.).
   - **C27** (`/solceller`): "25-30 år" (3), den gamle "yderligere 15-20 år" **væk**
     (0); `/husleje` har den gamle "1-3 måneder" **væk** (0).
   - `/api/health` svarede `{"status":"ok"}` ved målingens start.
-- ⏳ **ÅBEN — VERIFICÉR DEPLOY: C23's `/brutto-netto` og `/topskat`.** Samme merge
-  som den verificerede `/loen-efter-skat` (C23), men de to sider blev ikke
-  kørt i målingen ovenfor. Verificér **indhold**: `/brutto-netto`'s FAQ skal sige
-  25,049 %, det forudfyldte kommuneskatfelt skal vise **25.049** (ikke 25.07), og
-  kirkeskatfeltet på `/topskat` skal vise **0.639**.
+- ✅ **DEPLOY OK 2026-09-26 20:27 CEST — C23's sidste to sider er verificeret,
+  så C23 er helt lukket.** 17:30-batchen verificerede `/loen-efter-skat` men
+  sprang de to øvrige sider over. Målt ved indholdskontrol, ikke HTTP 200:
+  `https://minberegner.dk/brutto-netto` har **3** forekomster af `25,049` plus
+  ét `25.049` i `<title>`-linjen, og `https://minberegner.dk/topskat` har
+  **`0.639`** i kirkeskatfeltet (og 2 × `25.049` i samme side). `/api/health`
+  svarede `{"status":"ok"}` 200.
 - ✅ **DEPLOY OK 2026-09-26 12:33 CEST — 12:30-batchen lukker C15-C22.** Syv noter
   verificeret ved **indholdskontrol på begge domæner**, ikke HTTP 200:
   - `/promille` (C15): `0,88` er live (2 forekomster).
