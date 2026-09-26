@@ -6,6 +6,7 @@ import FAQ from "@/components/FAQ";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import RelatedCalculators from "@/components/RelatedCalculators";
+import RelateredeArtikler from "@/components/RelateredeArtikler";
 import { tidszoneRækker } from "@/lib/tidszone-reference";
 
 export async function generateMetadata() {
@@ -198,6 +199,9 @@ export default async function TidszonePage() {
 
       {/* Related Calculators */}
       <RelatedCalculators current="/tidszone" />
+
+      {/* Returlink til indlægget om emnet (kun danske domæner) */}
+      <RelateredeArtikler current="/tidszone" locale={locale} />
     </div>
   );
 }

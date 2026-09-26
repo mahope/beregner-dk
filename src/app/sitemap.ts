@@ -123,5 +123,6 @@ function getBlogSlugs(locale: Locale): string[] {
     "boernepenge-2026-satser-og-regler",
     "boligsalg-2026-guide-til-omkostninger-og-provenu",
     "kvadratmeter-saadan-regner-du-ud",
+    "hvad-er-klokken-i-usa-naar-den-er-12-i-danmark",
   ];
 }

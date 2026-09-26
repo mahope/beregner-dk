@@ -242,6 +242,15 @@ const blogPosts = [
     date: "2026-09-26",
     readTime: "7 min",
   },
+  {
+    slug: "hvad-er-klokken-i-usa-naar-den-er-12-i-danmark",
+    title: "Hvad er klokken i USA, når den er 12 i Danmark?",
+    description:
+      "Når det er 12 i Danmark, er det 06 i New York, 05 i Chicago, 04 i Denver og 03 i Los Angeles. Se hele tabellen for USA og resten af verden — med sommertid.",
+    category: "Praktisk & Rejse",
+    date: "2026-09-26",
+    readTime: "8 min",
+  },
 ];
 
 export default function BlogPage() {
