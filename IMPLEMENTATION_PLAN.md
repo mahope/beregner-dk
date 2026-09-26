@@ -3397,6 +3397,8 @@ første halvdel af denne liste er fra DA-fladen, anden halvdel fra SE — de er
   "du skal selv søge" i de to sidste tilfælde. Fødselsåret er et estimat, så
   formuleringerne bruger "ca.". Beregningen, URL-state, delelink, reset og alle
   beløb er urørt; ingen ny felt, ingen title- eller description-ændring.
+- **Landet:** kode + plan i commit `7a118fe`; merge til `master` er `f5304ec`
+  2026-09-26 15:08 CEST. Begge refs pushet. `/api/health` svarer `status: ok`.
 - **Kvalitetsgate 2026-09-26 15:00 CEST:** `npm run build` grøn (typecheck
   inkluderet), `npm run test` grøn (**1334/1334, 128 filer** — 8 nye tests: 4 i
   `folkepension.test.ts`, 4 i `PensionBeregner.test.tsx`), `npm run lint` grøn
