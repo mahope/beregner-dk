@@ -5693,6 +5693,8 @@ top-15, så ud over CTR er det eneste målbare signal `ad_clicked` på siden.
 - **Gate:** `npm run lint` grøn (545 filer), `npm run test` **1490 tests / 140
   filer** grøn (fra 1486 / 139), `npm run build` grøn (141 sider, 7 kendte
   pre-existing CSS-advarsler). Første kandidatvindue **2026-09-27 07:30**.
+- **Landet:** kode `a9552bc`, merge `8cd62f8` 2026-09-27 00:53 CEST på
+  `ceo/lokale-datoer`.
 - **MÅL:** `/alder` baseline 6.013 visninger / 35 klik / CTR 0,6 % / pos. 7,8
   (GSC 2026-08-27 → 2026-09-24) og 15 besøgende/28d i Plausible 2026-09-26.
   `/ugenummer`: ingen GSC-række i snapshot. **Mål 2026-10-10.** Rettelsen er en
@@ -6716,7 +6718,7 @@ landmark=lån, piggybank=opsparing osv.).
 
 ## VERIFICÉR DEPLOY-log
 - ⏳ **ÅBEN — C54 lokal dato i `/alder` + `/ugenummer`, moms-guide-knapper,
-  kode `PENDING`, merge `PENDING` 2026-09-27 00:5x CEST.** Første
+  kode `a9552bc`, merge `8cd62f8` 2026-09-27 00:53 CEST.** Første
   kandidatvindue **2026-09-27 07:30**. Indholdstjek ved det nye build: på
   `/alder` og `/ugenummer` skal datofeltet ved 00.30 dansk tid vise **dagens**
   dato og ikke i går (kan ikke ses uden for det tidsrum, så verificér i stedet at
