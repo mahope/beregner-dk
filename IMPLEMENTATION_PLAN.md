@@ -4270,6 +4270,8 @@ første halvdel af denne liste er fra DA-fladen, anden halvdel fra SE — de er
   + H2 "Datoer folk oftest tæller ned til" + `/nedtaelling`, SE 7
   `/dagar-till/*`-links + H2 "Datum folk oftast räknar ner till" +
   "Hur många dagar är det till 1 december?", NO nul af begge dele.
+- **Landet:** kode `29b8b9a`, merge `f25bd93` til `master` 2026-09-26 19:20
+  CEST på branch `ceo/dato-dage-til-links`.
 - **Forventet effekt:** `/dato` har allerede positionen (pos. 5) på begge
   søgninger, så dette er **ikke** et CTR-spil — det er, at læseren på sitets
   største indgang kan gå fra sit spørgsmål direkte til sit svar i ét klik.
@@ -4375,6 +4377,18 @@ efter datagrund:
    tælle `href="/slug"`-forekomster i den hentede markup af de største sider.
    Mål C41 først (2026-10-10).
 ### ❓ Til Mads
+- ⏳ **VERIFICÉR DEPLOY: C41 — `/dato` linker til de syv dage-til-sider.**
+  Kode `29b8b9a`, merge `f25bd93` 2026-09-26 19:20 CEST på branch
+  `ceo/dato-dage-til-links`. Første kandidatvindue er **2026-09-26 21:30**
+  (merged efter 17:30). Verificér **indhold**: `https://minberegner.dk/dato` skal
+  have H2 **"Datoer folk oftest tæller ned til"** med **syv** links
+  `/dage-til/*`, hvoraf den første er `/dage-til/1-december` med ankerteksten
+  **"Hvor mange dage er der til 1. december?"**, og et link til `/nedtaelling`.
+  Blokken skal stå **før** FAQ'en. `https://beraknare.se/dato` skal have H2
+  **"Datum folk oftast räknar ner till"** med syv `/dagar-till/*`-links og den
+  svenske ankertekst "Hur många dagar är det till 1 december?", og **ikke**
+  nogen `/dage-til/`. `https://beregner.no/dato` skal være uændret og have
+  **nogen** dage-til-links. `/api/health` skal svare `status: ok`.
 - ⏳ **VERIFICÉR DEPLOY: C40 — DA `/tidsberegner` svar-først med eksempeltabel.**
   Kode `d5e0cb5`, merge `7c42f8e` 2026-09-26 18:59 CEST på branch
   `ceo/tidsberegner-svarforst`. Første kandidatvindue er **2026-09-26 21:30**
@@ -4950,6 +4964,11 @@ landmark=lån, piggybank=opsparing osv.).
     - Gate grøn: lint ok, 280/280 tests, build ok (128 pages).
 
 ## VERIFICÉR DEPLOY-log
+- ⏳ **ÅBEN — VERIFICÉR DEPLOY: C41 — `/dato` linker til de syv
+  dage-til-sider.** Se ❓ Til Mads for den fulde indholdsliste. Kode
+  `29b8b9a`, merge `f25bd93` 2026-09-26 19:20 CEST, så første
+  kandidatvindue er **2026-09-26 21:30**. Nul deploy-vinduer er gået siden
+  merge, altså slet ikke `DEPLOY-MISSING` (kræver to).
 - ⏳ **ÅBEN — VERIFICÉR DEPLOY: C40 — DA `/tidsberegner` svar-først med
   eksempeltabel.** Se ❓ Til Mads for den fulde indholdsliste. Kode `d5e0cb5`,
   merged 2026-09-26 efter 17:30, så første kandidatvindue er **2026-09-26
