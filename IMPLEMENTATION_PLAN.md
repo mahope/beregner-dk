@@ -1,10 +1,31 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — **fire noter står åbne, ingen er `DEPLOY-MISSING`.** C37
+STATUS: KØ — **fem noter står åbne, ingen er `DEPLOY-MISSING`.** C37
 (`/renteberegner`) med første kandidatvindue 2026-09-27 12:30, C38 (svensk
-spørgsmålsform), C39 (svensk `/procent`), C40 (DA `/tidsberegner`) og nu C41
+spørgsmålsform), C39 (svensk `/procent`), C40 (DA `/tidsberegner`) og C41
 (`/dato` → `dage-til`) med **2026-09-26 21:30** som første fælles
-kandidatvindue. `/api/health` svarer `status: ok`.
+kandidatvindue, plus **C42** (de relaterede links renderer det, de lover, og
+`/brok` får en indgang) med første vindue **2026-09-27 07:30**.
+`/api/health` svarer `status: ok`.
+
+**C42 lukkede den sidste åbne kandidat og fandt en fejl, der lå i koden, ikke i
+indholdet.** Kandidaten "interne kæder, der kun hænger én vej" er nu lukket:
+af de 19 sider med dokumenteret trafik har 18 redaktionelle indgående links
+(2-30 pr. side), og den eneste undtagelse — **`/brok`, 4.640 visninger på
+pos. 5,3 med nul indgående links** — er rettet. Men grafen afslørede en
+**stille `slice(0, 5)`** i `getRelatedCalculators`: 13 af 81 sider erklærer 6
+eller 7 relaterede beregnere, og den afskaffede hale blev aldrig vist. Så
+`/dato` (130.392 visninger) og `/tidsberegner` (72.382) tabte begge
+`/ugenummer`, og `/promille` tabte `/procent` — altså de fire mest trafikerede
+forældre, der så ud til at linke til `/ugenummer`. Tabellen er nu kontrakten,
+og otte tests holder den. Se opgave 69.
+
+**Næste iteration skal ikke genoptage hverken C41's eller C42's interne
+linkklasse** — begge er lukket og måles 2026-10-10, og C42's metode-lære
+står i opgaven: del grafen i *redaktionelle* og *globale* indgående links,
+ellers måler man katalogens navigation. Kandidat 2, 3 og 7 er lukket,
+kandidat 5 er delvis lukket i C39, og kandidat 4 er fire beslutninger under ❓
+der kræver et ja fra Mads. Se listen under "Næste kandidater efter C34".
 
 **C41 lukkede C40's nye klasse med et negativt fund og fandt en anden.**
 C40 fandt på `/tidsberegner` en `metaDescription`, der lovede et eksempel,
@@ -4292,7 +4313,90 @@ første halvdel af denne liste er fra DA-fladen, anden halvdel fra SE — de er
   dokumenteret behov. Tilføjelse af interne links fra `/dato` er det samme
   spørgsmål i mindre mål, og det er gjort nu for de sider, der findes.
 
+#### 69. [x] FÆRDIG 2026-09-26 — C42 — Kandidaten "interne kæder, der kun hænger én vej" lukket med ét fund: en stille `slice(0, 5)` og `/brok` uden en eneste indgang
+
+- **Iteration start:** 2026-09-26 19:30 CEST. Køen var tom (68 opgaver færdige,
+  intet `I GANG`). Kandidat #7 fra C41 var den eneste åbne, og auditten førte
+  til **to** fund — ét klassen lukker og ét der rettes.
+- **Auditmetode:** C41's egen. Jeg byggede hele sitets interne linkgraf
+  programmatisk og delte den i to: **redaktionelle** indgående links
+  (sidekroppe, `relatedMap`, `blog-kobling`, artikel→artikel) og **globale**
+  (Header, Footer, Sidebar, katalog). Det er opdelingen, der gør fundet
+  verificérbart: en tælling af *alle* hrefs ville vist 0 for alt, fordi
+  sidens katalog ligger på enhver side.
+- **Resultat: klassen er lukket som klasse.** Af de 19 sider med dokumenteret
+  trafik har **18** redaktionelle indgående links (2-30 pr. side), spredt på
+  artikler, `relatedMap` og to kilder, der var dækket af C34-C41. Der er altså
+  ingen anden forældreløs trafikside. Det eneste **negative** resultat er, at
+  grebet `href="/slug"` i kilden ikke kan bruges alene: næsten alle links
+  kommer fra datatabeller, som et regex i en sides brødtekst ikke ser. Den
+  metode, der virker, er linkgrafen.
+- **Fund 1, rettet — `getRelatedCalculators` klipped i strid med sin egen
+  tabel.** Funktionen sluttede med `.slice(0, 5)`, men **13 af 81** sider
+  erklærer 6 eller 7 relaterede beregnere, så den afskaffede hale blev
+  **aldrig vist**. Det er ikke en kosmetisk uoverensstemmelse, det er
+  internt linkvægt, der aldrig blev sendt: `/dato` (**130.392 visninger**) og
+  `/tidsberegner` (**72.382**) tabte begge `/ugenummer`, `/kvadratmeter`
+  (20.959) tabte `/flyttebudget`, og `/promille` tabte `/procent` — altså
+  netop **149.318-visningers-siden**, den `/promille` burde sende folk videre
+  til. `/ugenummer` mistede dermed fire af de fire højestrafikede forældre,
+  `/flyttebudget` fire, `/boligsalg` to. `slice(0, 5)` er væk, tabellen er
+  kontrakten, og `/boliglaan` er trimmet fra 7 til 6, så gitteret er 3×2 på
+  alle sider. Verificeret i den **renderede** markup: `/procent` 6 links
+  (`… /bmi /brok`), `/dato` 6 (`… /pension /ugenummer`), `/tidsberegner` 6
+  (`… /kalorier /ugenummer`), `/promille` 6 (`… /alder /procent`),
+  `/kvadratmeter` 6 (`… /elberegner /flyttebudget`).
+- **Fund 2, rettet — `/brok` er den eneste trafikside på sitet med nul
+  redaktionelle indgående links.** **4.640 visninger, pos. 5,3, CTR 0,7 %**
+  — GSC's 12. største side. Den lå i `relatedMap` som *nøgle* uden at nogen
+  side *pegede på* den, og den står hverken i navigation, footer, forside,
+  `home-data` eller sidens populærliste (`getPopularCalculators` har 8
+  poster, og `/brok` er ikke en af dem). Eneste indgang var
+  `/kategori/matematik`. Forældreløs på 4.640 visninger er præcis C41's
+  diagnose, bare en halv ø i hver retning, så `/procent` — sitets største
+  side med 30 indgående links — linker nu til `/brok`, og parret er
+  symmetrisk, fordi `/brok` allerede pegede på `/procent`.
+- **Test:** 8 nye tests i `src/lib/calculator-list.test.ts` (nu 20) — alle
+  erklærede links *renderes* i da/no/se, ingen side erklærer mere end 6,
+  ingen side linker til sig selv eller gentager en link, hvert mål er en
+  virkelig beregner, plus tre navngyne regressionsvagter: `/procent` →
+  `/brok`, "hver side med dokumenteret GSC-trafik har en indgående link", og
+  de ti navngyne links, som `slice(0, 5)` tabte. **Fælden er bevidst præcis:**
+  jeg lagde `slice(0, 5)` og `/procent`-fjernels `/brok` tilbage og fik
+  **3 røde tests** med de rigtige navne, så vagterne kan ikke være døde.
+- **Verifikation 2026-09-26 19:44:** `npm run lint` grøn (531 filer),
+  `npm run test` grøn (**1.392/1.392**, 132 filer), `npm run build` grøn
+  (**141 sider**). Standalone-server: `/api/health` → `status: ok`, de fem
+  sider ovenfor gengivet med 6 links hver, `beraknare.se/procent` med 5
+  (lokalefiltreret) og ingen dansk-only `/rabat`.
+- **Landet:** kode `2bbc28f`, merge `fa002ce` til `master` 2026-09-26 19:44
+  CEST på branch `ceo/relaterede-links-og-brok`.
+- **MÅL:** `/brok` baseline **4.640 visninger, 31 klik, CTR 0,7 %, pos. 5,3**
+  pr. 2026-09-24 (GSC) — ingen Plausible-række, fordi siden ikke står i
+  28-dages-top-15, så **ukendt, ikke nul**. `/ugenummer` og `/flyttebudget`
+  har heller ingen række; deres forældres data er ovenfor. `/procent`
+  uændret (149.318 visninger, 95 klik) — svaret skal komme på ** `/brok`,
+  `/ugenummer` og `/flyttebudget`, ikke på `/procent`. **Genmål 2026-10-10.**
+- **Forventet effekt:** lille i absolut tal, dokumenteret i klasse: en forældreløs
+  side med 4.640 visninger på pos. 5,3 kan ikke ranke bedre end sider, der
+  **modtager** linkvægt, og `/ugenummer` + `/flyttebudget` får nu fire af de
+  fire mest trafikerede forældre i stedet for nul. Skrives som måling, ikke
+  som løfte — denne klasse er målt på **nul** sider endnu.
+- **Ikke gjort, bevidst:** ni nøgler i `relatedMap` er stadig ikke mål i nogen
+  andens liste (`/bolan`, `/fart`, `/loenstigning`, `/ohm`, `/planetvaegt`,
+  `/aegloesning`, `/1rm`, `/elbil`, `/solceller`). De har ingen dokumenteret
+  trafik, og en "alle nøgler skal være mål"-test ville være ren vilje, så den
+  er bevidst *ikke* skrevet; listen ligger i stedet som en opgave under
+  ❓. `/elbil` er stadig et målespørgsmål, ikke et linkspørgsmål.
+- **Metode-lære til næste iteration:** `/brok` blev fundet, fordi jeg
+  delte grafen i *redaktionelle* og *globale* indgående links. En ren
+  "tæl href"-audit (C41's foreslåede metode) ville have fundet **hele
+  sitet** linket til hver side og rapporteret 35 for 0. Del altid op efter
+  kilde, ellers måler man katalogens navigation og   kalder det kæder.
+
 ### Næste kandidater efter C34 — lukket med negativt fund
+
+
 
 
 C34 lukkede kandidat #1 (blog → beregner) med et **negativt** resultat: der var
@@ -4364,19 +4468,38 @@ efter datagrund:
    sammensætning ("benzinberegner" vs. "benzin beregner") gør det ubrugeligt
    som fejlsignal. Det eneste verificérbare signal uden trafikdata er en
    **selvmodsigelse mellem to steder på samme side**. Se opgave 68.
-7. **Ny klasse fundet i C41: interne kæder, der kun hænger én vej.**
-   `/dato` — 130.392 visninger, 963 indgangssider — linkede til nul af de syv
-   `dage-til`-sider, hvis egen ankertekst ("Hvor mange dage er der til 1.
-   december?") matcher sitets næststørste søgning (996 visninger, pos. 5).
-   `/nedtaelling` linkede til alle svy. Det er rettet og testet. **Næste
-   opgave skal auditere de øvrige trafikstærke sider for samme fejl:**
-   hvilke højtrafiksider har et værktøj eller en artikel, der *findes* og
-   *har faciliteten selv*, men som ingen side med trafik peger på?
-   Datagrund: hver kandidat ligger på en side med 4.000-149.000 visninger
-   på position 5-10, og den konkrete metode er den samme som ovenfor —
-   tælle `href="/slug"`-forekomster i den hentede markup af de største sider.
-   Mål C41 først (2026-10-10).
+7. ~~**Ny klasse fundet i C41: interne kæder, der kun hænger én vej.**~~
+   **Lukket i C42 med ét fund og ét negativt resultat.** `/dato` linkede til
+   nul af de syv `dage-til`-sider, hvis egen ankertekst ("Hvor mange dage er
+   der til 1. december?") matcher sitets næststørste søgning (996 visninger,
+   pos. 5). `/nedtaelling` linkede til alle svy. Auditten af de øvrige
+   trafikstærke sider fandt **kun `/brok`** (4.640 visninger, pos. 5,3) med
+   nul redaktionelle indgående links — rettet, og nu permanent vagtet i
+   `calculator-list.test.ts`. Resten af de 19 trafiksider har 2-30
+   indgående links hver, så **klassen er lukket**. Se opgave 69.
+   **Mål C41 og C42 begge 2026-10-10.**
 ### ❓ Til Mads
+- ⏳ **VERIFICÉR DEPLOY: C42 — de relaterede links renderer det, de lover,
+  og `/brok` har fået en indgang.** Kode `2bbc28f`, merge `fa002ce`
+  2026-09-26 19:44 CEST, første kandidatvindue **2026-09-27 07:30**.
+  Verificér **indhold**: `https://minberegner.dk/procent` skal have **seks**
+  relaterede links hvoraf det **sidste er `/brok`**; `/dato` skal linke til
+  `/ugenummer`; `/promille` skal linke til `/procent`; `/kvadratmeter` skal
+  linke til `/flyttebudget`; `https://beraknare.se/procent` skal have **fem**
+  links (lokalefiltreret) og ingen dansk-only `/rabat`. `/api/health` skal
+  svare `status: ok`. Se VERIFICÉR DEPLOY-loggen.
+- **Nye `relatedMap`-nøgler, der ingen side peger på (C42, 2026-09-26).**
+  Efter at `/brok` fik sin indgang, er der **ni** beregnere, der er nøgle i
+  `relatedMap` — altså de viser en "Relaterede beregnere"-blok — men ikke er
+  mål i nogen andens liste: `/bolan`, `/fart`, `/loenstigning`, `/ohm`,
+  `/planetvaegt`, `/aegloesning`, `/1rm`, `/elbil`, `/solceller`. De har
+  **ingen dokumenteret trafik** i GSC- eller Plausible-snapshottet, så jeg kan
+  ikke prioritere dem på data, og jeg ville ikke skrive en test, der bare
+  siger "alle nøgler skal være mål" — den ville være ren vilje. **Spørgsmålet
+  til dig:** skal de ni enten gives en reel indgang fra de trafikstørste
+  forældre (`/procent`, `/dato`, `/kalorier`, `/renteberegner`), eller er de
+  bevidst nicheværktøjer, der ikke skal konkurrere om interne links? Det er en
+  redaktional beslutning, ikke en måling.
 - ⏳ **VERIFICÉR DEPLOY: C41 — `/dato` linker til de syv dage-til-sider.**
   Kode `29b8b9a`, merge `f25bd93` 2026-09-26 19:20 CEST på branch
   `ceo/dato-dage-til-links`. Første kandidatvindue er **2026-09-26 21:30**
@@ -4964,6 +5087,20 @@ landmark=lån, piggybank=opsparing osv.).
     - Gate grøn: lint ok, 280/280 tests, build ok (128 pages).
 
 ## VERIFICÉR DEPLOY-log
+- ⏳ **ÅBEN — VERIFICÉR DEPLOY: C42 — de relaterede links renderer det, de
+  lover, og `/brok` har fået en indgang.** Kode `2bbc28f`, merge `fa002ce`
+  2026-09-26 19:44 CEST på branch `ceo/relaterede-links-og-brok`. Første
+  kandidatvindue er **2026-09-27 07:30** (merged efter 21:30-vinduet er
+  kørt). Nul deploy-vinduer er gået siden merge, altså slet ikke
+  `DEPLOY-MISSING` (kræver to). Verificér **indhold**:
+  `https://minberegner.dk/procent` skal have **seks** links i
+  "Relaterede beregnere" hvoraf det **sidste** er `/brok`;
+  `https://minberegner.dk/dato` skal linke til `/ugenummer` (og stadig have
+  C41's dage-til-blok); `https://minberegner.dk/promille` skal linke til
+  `/procent`; `https://minberegner.dk/kvadratmeter` skal linke til
+  `/flyttebudget`; `https://beraknare.se/procent` skal have **fem** links
+  (lokalefiltreret, `/rabat` er dansk-only) og **ikke** `/bolan` på nogen
+  side. `/api/health` skal svare `status: ok`.
 - ⏳ **ÅBEN — VERIFICÉR DEPLOY: C41 — `/dato` linker til de syv
   dage-til-sider.** Se ❓ Til Mads for den fulde indholdsliste. Kode
   `29b8b9a`, merge `f25bd93` 2026-09-26 19:20 CEST, så første
