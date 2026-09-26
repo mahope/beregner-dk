@@ -12,10 +12,19 @@ tilstanden kalder `beregnAlder`, og et tomt eller umuligt datofelt giver intet
 resultat frem for "NaN dage". Kode + plan i ét commit på `ceo/dato-alder-lokaldato`;
 første kandidatvindue **2026-09-27 07:30**. Se opgave 78.
 
-**Fire deploynoter står åbne** (C37, C42, C43 og C46, alle med første
+**Fem deploynoter står åbne** (C37, C42, C43 og C46, alle med første
 kandidatvindue 2026-09-27 07:30 undtagen C37: 12:30) plus **C48** og **C50** i
 samme vindue. `beregner.no`-delen af enhver note verificeres ikke: den URL er et
 separat site, ikke dette repo (se ❓). `/api/health` svarer `status: ok`.
+
+**Næste iteration: `/dato` er nu lukket som auditmål, så C47's metode skal
+flyttes til de næste to trafikstærke sider med endnu ubearbejdet indhold —
+`/tidsberegner` (287 besøgende, 72.382 visninger) og `/moms` (23.426
+visninger).** Den konkrete opskrift er i opgave 78: læs biblioteket *mod*
+komponenten, se efter en konstant der duplikerer et modul, og se efter hvilke
+tilstande værktøjet har som brødteksten ikke nævner. De to øvrige
+`toISOString().split("T")`-forekomster (`AlderBeregner` 3, `UgenummerBeregner`
+2) ligger som en samlet, velafgrænset opgave uden trafikgrund.
 
 **Bemærk til næste iteration om en fælde, der kostede tid i C49.** Labels i
 `TidszoneBeregner` lå i et `as const`-objekt, og en ny nøgle (`vinterWord`)
@@ -5471,9 +5480,9 @@ efter datagrund:
   Plausible eller GSC — hvilket er konsistent med et separat site.
 - ⏳ **VERIFICÉR DEPLOY: C50 `/dato` — standarddatoer i lokal tid, alderen fra
   `alder.ts`, ingen "NaN" på tomme felter — kode + plan i ét commit på branch
-  `ceo/dato-alder-lokaldato`, merge-ref indsættes i den afsluttende plan-commit.**
-  Første kandidatvindue **2026-09-27 07:30**. Verificér **indhold**, HTTP 200
-  beviser intet:
+  `ceo/dato-alder-lokaldato`, kode `a42d87e`, merge `4ec1da3` 2026-09-26 23:04
+  CEST.** Første kandidatvindue **2026-09-27 07:30**. Verificér **indhold**,
+  HTTP 200 beviser intet:
   1. Hent `https://minberegner.dk/dato` **mellem 00:00 og 02:00 dansk tid**.
      "Fra dato"-feltet skal vise **dagens** dato, ikke dagen i går. Det er det
      eneste af fundene, der er synligt uden at røre ved værktøjet, og det er
