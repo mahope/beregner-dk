@@ -4623,9 +4623,9 @@ landmark=lån, piggybank=opsparing osv.).
 
 ## VERIFICÉR DEPLOY-log
 - ⏳ **ÅBEN — VERIFICÉR DEPLOY: C38 — de tre svenske sider svarer på
-  spørgsmålsformen.** Kode: branch `ceo/se-svar-paa-spoergsmaal`, merge til `master` 2026-09-26
-  18:2x CEST (merge-refer noteres i et separat notat commit, som C37's). Første kandidatvindue **2026-09-26 21:30** (17:30 er før
-  merge). Verificér **indhold**, ikke HTTP 200:
+  spørgsmålsformen.** Kode `9f37a35`, merge `ce970b0` 2026-09-26 18:11 CEST på
+  `master` (branch `ceo/se-svar-paa-spoergsmaal`). Første kandidatvindue er
+  **2026-09-26 21:30** — 17:30-vinduet er før merge. Verificér **indhold**, ikke HTTP 200:
   - `beraknare.se/dato`: FAQ har "Hur många dagar är det mellan två datum?" og
     "Hur många dagar till 31 december?" i både synlig tekst og FAQPage-JSON-LD.
   - `beraknare.se/tidsberegner`: FAQ har "Hur räknar jag ut timmar och minuter
