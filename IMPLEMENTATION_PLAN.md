@@ -1,12 +1,13 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — S2 landet på `ceo/skat-2026-artikel` 2026-09-26 05:12 CEST (se opgave 36:
-fire dokumenterede fejl rettet i `/blog/skat-2026-alt-du-skal-vide`). D5 ligger på `master`
-siden 04:35. **Live-kontrol 05:05 CEST:** `/api/health` svarer `status: ok`; `/dato` er
-stadig forældet (C4-C14, L1, F1, D5 ligger uuddejlet), fordi 07:30-vinduet 2026-09-26
-endnu ikke er kørt. Kun ét deploy-vindue (21:30 den 25/9) er gået siden C4's merge kl.
-18:40, så **endnu ikke `DEPLOY-MISSING`**. Næste iteration skal verificere indhold efter
-07:30-vinduet 2026-09-26 — HTTP 200 beviser intet.
+STATUS: KØ — S3 landet på `ceo/fradrag-2026-rater` 2026-09-26 05:25 CEST (se opgave 38:
+`/blog/fradrag-2026-komplet-guide` læser nu alle 2026-satser fra `SATSER_2026` i stedet for
+egne tal, og befordringsfradraget kræver ikke længere cykel/tog). **Live-kontrol 05:20
+CEST:** `/api/health` svarer `status: ok`; `/dato` er stadig forældet (C4-C14, L1, F1, D5,
+S2, S3 ligger uuddejlet), fordi 07:30-vinduet 2026-09-26 endnu ikke er kørt. Kun ét
+deploy-vindue (21:30 den 25/9) er gået siden C4's merge kl. 18:40, så **endnu ikke
+`DEPLOY-MISSING`**. Næste iteration skal verificere indhold efter 07:30-vinduet 2026-09-26
+— HTTP 200 beviser intet.
 
 
 ## Fase 3 — trafik-drevet
@@ -2085,6 +2086,50 @@ endnu ikke er kørt. Kun ét deploy-vindue (21:30 den 25/9) er gået siden C4's 
 - **Landet:** kode og tests i `c273317`; merge til `master` `a563e74` 2026-09-26
   05:14 CEST. Begge refs pushet.
 
+#### 38. [x] FÆRDIG 2026-09-26 — S3 — Fradrag-2026-guiden læser satserne fra det delte modul
+
+- **Iteration start:** 2026-09-26 05:20 CEST. Køen var tom (36 opgaver færdige), så
+  valget var kandidat 37: de sats-tunge blogartikler med samme fejltype som S2.
+  `/blog/fradrag-2026-komplet-guide` var den dokumenterbare: den var den eneste
+  sats-artikel, S1/R1 netop havde ændret under sig.
+- **Fund (opgaven startede som en baselines-hvis-opgave, blev en fejlopgave):**
+  1. **Tre forskellige kørselsfradrag-sæt i repoet.** Artiklen sagde 2,23/1,12 kr./km,
+     `SATSER_2026` siger 3,17/1,59 (kilde: skat.dk, ifølge S1) og en dansk
+     sekundærkilde siger 2,28/1,14. Artiklens tal fandtes i **ingen** kilde.
+  2. **Tredje håndværkerfradrag-tal:** artiklen sagde 12.900 kr., modulet siger
+     12.400/6.200 kr. — og artiklen blandede de to ordninger sammen ved at liste
+     maling/tapetsering (almindeligt vedligeholdelse) under ét fradrag.
+  3. **Faktuel fejl om transportmiddel:** artiklen skrev, at befordringsfradraget
+     "gælder uanset transportmiddel (bil, tog, cykel)". Befordringsfradrag kræver
+     befordring i motorkøretøj (LL § 9 a) — cykel, bus og tog giver intet fradrag.
+     Vores eget `SATSER_2026` har kun lavere bro-satser for tog/Offentlig
+     (`koerselBroStorebaeltOff`), altså samme forståelse i koden.
+- **Scope holdt small:** kun artiklen + en vagt-test. Ingen ny beregner, ingen
+  ændring af `SATSER_2026`' tal (det er ❓-sagen, se nedenfor), ingen ændring af
+  `/skattefradrag` eller `/befordringsfradrag`.
+- **Beslutning/implementation:** artiklen importerer nu `SATSER_2026`,
+  `RENTEFRADRAG_2026` og `SKATTEFRADRAG_2026` og formatterer alle beløb/satser
+  gennem `formatNumber`, så den ikke længere kan glide fra værktøjerne. De to
+  uverificerede områder (kørselsfradrag-sats, håndværker-/servicefradrag-loft) er
+  mærket **vejledende** med kildebegrundning, præcis som S1 gjorde i UI'en.
+  Håndværkerfradrag og servicefradrag er nu to separate ordninger med hvert sit loft,
+  og artiklen har et nyt link til `/befordringsfradrag`.
+- **Harness:** ny `src/app/blog-rates.test.ts` (13 assertions) som fejler, hvis
+  artiklen igen indeholder en af de ni forældede tekstliteraler (2,23 / 1,12 /
+  12.900 / 33,6 / 25,6 / 68.700 / 63.300 / 54.100 / 7.000) eller hvis den
+  slutter at importere satsmodulet. Det er S2-fejltypen som permanent regel.
+- **Verifikation:** `npm run lint` grøn (500 filer), `npm run test` grøn
+  (1186 tests / 110 filer), `npm run build` grøn (137 sider + typecheck).
+- **MÅL:** `/blog/fradrag-2026-komplet-guide` — **baseline ukendt**: artiklen er
+  ikke blandt de 15 største i Plausible- eller GSC-snapshottet, så effekten kan
+  ikke måles pr. besøgende. Det er skrevet op under ❓ (kræver GSC-side-tal for
+  `/blog/*`); indtil da måles effekten kun som færre 404-/modstridelses-risici.
+- **Forventet effekt:** artiklen er linked fra tre relevante sider, så en læser
+  der rammer den ikke længere får et tal, der modsiger vores eget værktøj. Det er
+  en tillids- og korrekthedseffekt; den tælles ikke som trafikvækst.
+- **Kilder:** borgerhaandbog.dk/skat-og-personlig-oekonomi/haandvaerkerfradrag
+  (sekundær, hentet 2026-09-26), Ligningsloven § 9 a, `SATSER_2026`.
+
 #### 37. Ny kandidat — blogartikler med det samme sats-mønster mangler baseline
 
 - S2 viste, at samme fejltype kan sidde i de øvrige sats-artikler. Bloggen har 27 artikler,
@@ -2144,6 +2189,24 @@ endnu ikke er kørt. Kun ét deploy-vindue (21:30 den 25/9) er gået siden C4's 
   lige nu, og 2,28/1,14 forbliver ude. Markeret som "vejledende" i UI, som S1
   allerede gjorde. Næste forsøg bør ramme `info.skat.dk`' søgning med en
   rigtig browser-session eller JV' PDF-udgave, ikke robots-gatede søgemaskiner.
+
+- **Håndværkerfradragets og servicefradragets 2026-loft (S3, nyt fund 2026-09-26) —
+  tre kilder, tre tal.** Vores `SKATTEFRADRAG_2026` siger 12.400 kr. (håndværker) og
+  6.200 kr. (service) og er mærket vejledende. Den fradragsguide, der allerede står som
+  kilde i modulet, siger derimod **9.000 kr. pr. person for håndværkerfradraget — kun
+  grønne/energibesparende arbejder** — og **18.300 kr. pr. person for servicefradraget**
+  (rengøring, havearbejde, børnepasning), hentet 2026-09-26. Den siger desuden
+  udtrykkeligt, at maling/tapetsering/køkkenudskiftning **ikke** er omfattet i 2026.
+  Borgerhåndbog er en sekundærkilde (med tydelige oversættelsesrest-fejl på siden),
+  så jeg har **ikke** ændret modulet. Er tallene rigtige, er det ét par tal i
+  `SKATTEFRADRAG_2026`, og både `/skattefradrag` og artiklen følger automatisk med.
+  Bemærk at artiklens gamle "18.300 kr." stod under **velgørenhedsfradrag** — det er
+  måske en sammenfaldning med servicefradragets beløb, så det tal er også
+  uverificeret og bør efterprøves.
+- **GSC-side-tal for `/blog/*` (S3):** snapshottet viser kun
+  `/blog/boernepenge-2026-satser-og-satler`, så de øvrige artikler har ingen
+  baseline og deres effekt kan ikke måles. En liste over de 15 mest viste
+  `/blog/*`-sider med visninger, klik, CTR og position gør kandidat 37 målbar.
 
 ### ❓ Til Mads
 
@@ -2866,3 +2929,10 @@ landmark=lån, piggybank=opsparing osv.).
      og kilderne skat.dk, skm.dk, svmn.dk + borgerhaandbog.dk skal være i DOM.
   5. DOM skal indeholde `href="/skattefradrag"` og `href="/befordringsfradrag"`.
   HTTP 200 er ikke nok — de gamle sider svarer 200 med de gamle tal.
+- **VERIFICÉR DEPLOY:** S3 fradrag-2026-guiden læser satser fra `SATSER_2026` og
+  skelner service-/håndværkerfradrag. Verificér **indhold** på
+  https://minberegner.dk/blog/fradrag-2026-komplet-guide: DOM skal vise
+  `3,17 kr.` (ikke 2,23/1,12), fradragsværdien som "33,6 %"/"25,6 %", servicefradrag
+  og håndværkerfradrag som to rækker, og teksten skal sige at befordringsfradraget
+  kræver et motorkøretøj. HTTP 200 beviser intet. Merge 2026-09-26 05:25 CEST —
+  første kandidatvindue er 07:30 2026-09-26.
