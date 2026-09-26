@@ -2,6 +2,7 @@ import TidsBeregner from "@/components/TidsBeregner";
 import { generatePageMetadata } from "@/lib/page-helpers";
 import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
+import { TIDS_EKSEEMPLER } from "@/lib/tids-eksempler";
 import RelatedCalculators from "@/components/RelatedCalculators";
 import FAQ from "@/components/FAQ";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
@@ -28,11 +29,59 @@ export default async function TidsberegnerPage() {
       <Breadcrumbs items={[{ name: pageData.breadcrumbCategory, href: pageData.breadcrumbCategoryHref }, { name: pageData.title, href: "/tidsberegner" }]} />
 
       <h1 className="text-3xl md:text-4xl font-bold mb-4">
-        {pageData.title}
+        {locale === "da"
+          ? "Hvor lang tid er der mellem to klokkeslæt?"
+          : pageData.title}
       </h1>
       <p className="text-gray-600 mb-8 text-lg">
         {pageData.description}
       </p>
+
+      {/* Svar-først: Search Console viser 790 visninger (pos. 6) på søgningen
+          "hvor lang tid" og 969 (pos. 4) på "tidsberegner", men spørgsmålet
+          stod ingen steder på siden. Tallene nedenfor kommer fra
+          `beregnTidsinterval` — samme modul som værktøjet bruger. */}
+      {locale === "da" && (
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 mb-8">
+        <h2 className="text-xl font-bold mb-3 dark:text-white">
+          Svar på de oftest søgte tidsrum
+        </h2>
+        <div className="overflow-x-auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Start</th>
+                <th>Slut</th>
+                <th>Pause</th>
+                <th>Svar</th>
+                <th>Decimaltimer</th>
+              </tr>
+            </thead>
+            <tbody>
+              {TIDS_EKSEEMPLER.map((eksempel) => (
+                <tr key={`${eksempel.start}-${eksempel.slut}`}>
+                  <td>{eksempel.start}</td>
+                  <td>{eksempel.slut}</td>
+                  <td>{eksempel.pause > 0 ? `${eksempel.pause} min` : "Ingen"}</td>
+                  <td>
+                    <strong>{eksempel.svar}</strong>
+                    {eksempel.overMidnat && " (dagen efter)"}
+                  </td>
+                  <td>{eksempel.decimalTimer} timer</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p className="text-sm text-gray-600 dark:text-gray-400 mt-3">
+          {TIDS_EKSEEMPLER[0].start} til {TIDS_EKSEEMPLER[0].slut} er altså{" "}
+          <strong>{TIDS_EKSEEMPLER[0].svar}</strong> ={" "}
+          {TIDS_EKSEEMPLER[0].decimalTimer} decimaltimer. Indtast dine egne
+          klokkeslæt ovenfor, og beregneren trækker automatisk en frokostpause
+          fra, hvis du angiver den.
+        </p>
+      </div>
+      )}
 
       <div className="bg-white rounded-xl shadow-sm p-6 md:p-8 mb-8">
         <TidsBeregner />
@@ -41,7 +90,7 @@ export default async function TidsberegnerPage() {
       {/* SEO Content */}
       {locale === "da" && (
       <div className="prose max-w-none mb-8">
-        <h2>Sådan bruger du tidsberegneren</h2>
+        <h2>Hvordan beregner du tid mellem to klokkeslæt?</h2>
         <p>
           Vores <strong>tidsberegner</strong> hjælper dig med at beregne den <strong>præcise tid</strong> mellem
           to tidspunkter. Den er ideel til:
