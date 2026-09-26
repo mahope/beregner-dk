@@ -1200,11 +1200,11 @@ const daPages: Record<string, PageData> = {
       schemaDescription: "Gratis lønberegner. Se hvad du får udbetalt efter skat, AM-bidrag og pension.",
       schemaCategory: "FinanceApplication",
       faqItems: [
-      { question: "Hvordan beregnes min løn efter skat?", answer: "Din nettoløn beregnes ved først at trække AM-bidrag (8%) fra bruttolønnen. Derefter trækkes bundskat, kommuneskat og eventuel kirkeskat fra den skattepligtige indkomst efter fradrag. Tjener du over topskattegrænsen, betales også 15% topskat." },
+      { question: "Hvordan beregnes min løn efter skat?", answer: "Din nettoløn beregnes ved først at trække AM-bidrag (8%) fra bruttolønnen. Derefter trækkes bundskat, kommuneskat og eventuel kirkeskat fra den skattepligtige indkomst efter fradrag. Tjener du over topskattegrænsen, betales der i 2026 mellemskat 7,5% og topskat 7,5% — den gamle topskat på 15% er afskaffet." },
       { question: "Hvad er AM-bidrag?", answer: "AM-bidrag (arbejdsmarkedsbidrag) er 8% af din bruttoløn før andre fradrag. Bidraget går til at finansiere dagpenge, efterløn og andre arbejdsmarkedsordninger. AM-bidrag trækkes før skat beregnes." },
       { question: "Hvornår skal jeg betale mellemskat eller topskat i 2026?", answer: "I 2026 er der indført et nyt skattesystem: Mellemskat på 7,5% af indkomst over 641.200 kr, topskat på 7,5% over 777.900 kr, og top-topskat på 5% over 2.592.700 kr (alle efter AM-bidrag). Den gamle topskat på 15% er afskaffet." },
       { question: "Hvad er personfradraget i 2026?", answer: "Personfradraget i 2026 er 54.100 kr (op fra 49.700 kr). Det betyder, at du ikke betaler skat af de første 54.100 kr af din årlige indkomst (efter AM-bidrag). Alle skatteydere får automatisk dette fradrag." },
-      { question: "Hvorfor varierer kommuneskatten?", answer: "Hver kommune fastsætter sin egen skatteprocent baseret på kommunens økonomi og serviceniveau. I 2026 varierer kommuneskatten fra ca. 22,5% (Rudersdal) til 27,8% (Langeland). Landsgennemsnittet er omkring 24,94%." },
+      { question: "Hvorfor varierer kommuneskatten?", answer: "Hver kommune fastsætter sin egen skatteprocent baseret på kommunens økonomi og serviceniveau. I 2026 varierer kommuneskatten fra ca. 22,5% (Rudersdal) til 27,8% (Langeland). Landsgennemsnittet er 25,049%." },
       { question: "Hvad er forskellen på brutto og netto?", answer: "Bruttoløn er din løn før skat og bidrag. Nettoløn er det beløb, du faktisk får udbetalt på kontoen efter alle fradrag. Forskellen udgøres af AM-bidrag, skat, pension og eventuelle andre fradrag." },
       { question: "Hvordan påvirker pension min skat?", answer: "Arbejdsgiverbetalt pension trækkes fra bruttolønnen før AM-bidrag beregnes, hvilket reducerer din skattepligtige indkomst. Det betyder, at du betaler mindre i skat nu, men skal betale skat når du hæver pensionen." },
       { question: "Er denne beregner præcis?", answer: "Beregneren giver et godt estimat baseret på gennemsnitlige satser. Din faktiske nettoløn kan variere afhængigt af dine specifikke fradrag, kommune og situation. For præcis beregning, brug SKAT's officielle værktøjer." },
@@ -1228,7 +1228,7 @@ const daPages: Record<string, PageData> = {
       faqItems: [
       { question: "Hvordan beregner jeg brutto fra netto?", answer: "Indtast din ønskede månedsløn efter skat, og beregneren finder den bruttoløn der giver dig netop denne udbetaling efter AM-bidrag, bundskat, kommuneskat og eventuel mellemskat/topskat." },
       { question: "Hvad er forskellen på brutto og netto?", answer: "Bruttoløn er din løn før skat og afgifter. Nettoløn er det du faktisk får udbetalt. Forskellen er AM-bidrag (8%), bundskat (12,01%), kommuneskat (ca. 25%) og eventuel mellemskat/topskat." },
-      { question: "Hvor meget skal jeg tjene for at få 25.000 kr. udbetalt?", answer: "Med gennemsnitlig kommuneskat (25,07%) og uden kirkeskat skal du tjene ca. 40.000-42.000 kr. brutto for at få ca. 25.000 kr. udbetalt. Det præcise beløb afhænger af din kommune." },
+      { question: "Hvor meget skal jeg tjene for at få 25.000 kr. udbetalt?", answer: "Med gennemsnitlig kommuneskat (25,049%) og uden kirkeskat skal du tjene ca. 40.000-42.000 kr. brutto for at få ca. 25.000 kr. udbetalt. Det præcise beløb afhænger af din kommune." },
       { question: "Kan jeg bruge beregneren til lønforhandling?", answer: "Ja! Indtast den udbetaling du ønsker, og se hvilken bruttoløn du skal forhandle dig til. Husk at pension, fradrag og andre forhold også påvirker din udbetaling." },
       ],
     },

@@ -20,12 +20,15 @@ const TOP_TOPSKAT = SATSER_2026.topTopskat;
 const PERSONFRADRAG = SATSER_2026.personfradrag;
 const BESKAEFTIGELSESFRADRAG_PCT = SATSER_2026.beskaeftigelsesfradragPct;
 const BESKAEFTIGELSESFRADRAG_MAX = SATSER_2026.beskaeftigelsesfradragMax;
+const KOMMUNE_SNIT = SATSER_2026.kommuneskatSnit;
+const KOMMUNE_SNIT_PCT = (KOMMUNE_SNIT * 100).toFixed(3);
+const KIRKESKAT_SNIT_PCT = (SATSER_2026.kirkeskatSnit * 100).toFixed(3);
 
 export default function TopskatBeregner() {
   const [aarsindkomst, setAarsindkomst] = useState<string>('600000');
-  const [kommuneSkat, setKommuneSkat] = useState<string>('25.07');
+  const [kommuneSkat, setKommuneSkat] = useState<string>(KOMMUNE_SNIT_PCT);
   const [kirkeskat, setKirkeskat] = useState(false);
-  const [kirkeSkatPct, setKirkeSkatPct] = useState<string>('0.68');
+  const [kirkeSkatPct, setKirkeSkatPct] = useState<string>(KIRKESKAT_SNIT_PCT);
 
   const hasLoadedUrl = useRef(false);
   const hasTracked = useRef(false);
@@ -64,17 +67,17 @@ export default function TopskatBeregner() {
 
   const handleReset = useCallback(() => {
     setAarsindkomst('600000');
-    setKommuneSkat('25.07');
+    setKommuneSkat(KOMMUNE_SNIT_PCT);
     setKirkeskat(false);
-    setKirkeSkatPct('0.68');
+    setKirkeSkatPct(KIRKESKAT_SNIT_PCT);
   }, []);
 
   const result = useMemo(() => {
     const brutto = parseFloat(aarsindkomst) || 0;
     if (brutto <= 0) return null;
 
-    const komPct = (parseFloat(kommuneSkat) || 25.07) / 100;
-    const kirPct = kirkeskat ? (parseFloat(kirkeSkatPct) || 0.68) / 100 : 0;
+    const komPct = (parseFloat(kommuneSkat) || KOMMUNE_SNIT) / 100;
+    const kirPct = kirkeskat ? (parseFloat(kirkeSkatPct) || SATSER_2026.kirkeskatSnit) / 100 : 0;
 
     // AM-bidrag
     const amBidrag = brutto * AM_BIDRAG;
