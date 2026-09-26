@@ -2588,7 +2588,8 @@ pga. ventetiden. `/dage-til/juledagen` svarer 200 — C7 er live. Næste opgave:
   Klynge-reference: `/barselsdagpenge` 200 besøgende/28d pr. 2026-09-26.
   Første genmåling 2026-10-10.
 - **Landet:** kode, tests og plan i én commit på `ceo/c19-dagpenge-satser`; merge
-  til `master` straks efter den grønne gate.
+  til `master` straks efter den grønne gate. Kode `9a9b112`, merge `611607c`
+  2026-09-26 11:35 CEST, begge pushet.
 - **Åbne dele af C19:** `/blog/su-2026-satser-og-regler` (bloggens egen struktur
   og baseline mangler; satserne er allerede rettet af O3) og en primærkilde til
   beskæftigelsestillægget på 26.198 kr, som bm.dk **ikke** oplyser.
@@ -3393,6 +3394,27 @@ landmark=lån, piggybank=opsparing osv.).
   og håndværkerfradrag som to rækker, og teksten skal sige at befordringsfradraget
   kræver et motorkøretøj.   HTTP 200 beviser intet. Merge 2026-09-26 05:25 CEST —
   første kandidatvindue er 07:30 2026-09-26.
+- **VERIFICÉR DEPLOY:** C19 dagpenge-satserne — kode `9a9b112`, merge `611607c`
+  2026-09-26 11:35 CEST. Første kandidatvindue er **12:30 2026-09-26**.
+  Verificér **indhold** på
+  https://minberegner.dk/blog/dagpenge-saadan-finder-du-din-sats og
+  https://minberegner.dk/dagpenge, HTTP 200 er ikke nok:
+  1. Guidens `<title>` og H1 skal være "Dagpenge 2026: Max sats er 22.041 kr. pr.
+     måned", og "Kort svar"-afsnittet skal vise 22.041 kr, 14.694 kr, 15.759 kr
+     (71 %) og 18.074 kr (82 %).
+  2. Sats-tabellen skal indeholde alle otte rækker med 22.041 / 14.694 / 18.074 /
+     12.049 / 15.759 / 10.506 / 1.017 / 509 kr, og ved-byline'en skal læse
+     "Satser verificeret 26. september 2026".
+  3. Teksten må **ikke** indeholde "20.359", "952", "13.573", "14.557", "13.437",
+     "120 kr/time" eller "22.600". De gamle sider svarer 200 med de gamle tal.
+  4. Eksemplerne skal vise 16.560 kr (20.000 kr løn, under loftet) og 24.840 kr
+     (30.000 kr løn, over loftet → 22.041), og der skal stå "ca. 26.620 kr" som
+     lønloft. FAQ'en skal have svar på "Hvornår rammer man maxsatsen?" og
+     "Hvad er en G-dag?" med 1.017 kr.
+  5. `/dagpenge` skal vise deltidssatsen 14.694 kr og dimittend-rækkerne 15.759 kr
+     og 18.074 kr i tabellen, og **ikke** "15.174".
+  6. Tidlig CTA: `href="/dagpenge"` skal ligge før artiklens første `<table>`.
+
 - **VERIFICÉR DEPLOY:** C16 svar-først på `/vaegttab` (DA/SE/NO) og `/enhedspris`
   (DA/SE) — kode `e83f017`, merge `bebdaf8` 2026-09-26 09:57 CEST. Første
   kandidatvindue er **12:30 2026-09-26** (07:30 gik forbi merge-tidspunktet).
