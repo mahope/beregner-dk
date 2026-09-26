@@ -8,6 +8,7 @@ import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { useLocale } from "@/components/LocaleProvider";
 import { utcOffsetMinutter, type DstRegel } from "@/lib/sommertid";
+import { formatNumber } from "@/lib/format";
 
 interface Tidszone {
   id: string;
@@ -93,15 +94,22 @@ export default function TidszoneBeregner() {
       toZone: "Til tidszone",
       timeDiff: "Tidsforskel",
       hoursWord: "timer",
-      diffSentence: (tilBy: string, abs: number, ahead: boolean, fraBy: string) =>
-        `${tilBy} er ${abs} timer${ahead ? " foran" : " bagud"} ${fraBy}`,
+      // `forskel` er allerede formateret, så brudtal skrives med komma på alle
+      // domæner. Se `formaterForskel`.
+      diffSentence: (tilBy: string, forskel: string, ahead: boolean, fraBy: string) =>
+        `${tilBy} er ${forskel} timer${ahead ? " foran" : " bagud"} ${fraBy}`,
       convertTitle: "Konverter et specifikt tidspunkt",
       hourLabel: "Time",
       minuteLabel: "Minut",
       dayBefore: "(dagen før)",
       nextDay: "(næste dag)",
-      summary: (fraTid: string, fraBy: string, tilTid: string, tilBy: string, dagTekst: string) =>
-        `${fraTid} i ${fraBy} = ${tilTid} i ${tilBy} ${dagTekst}`,
+      // Den kopierede tekst skal kunne tåles at læse uden for den side, den er
+      // kopieret fra. Før C56 var den "12:00 i København = 19:00 i Tokyo" uden
+      // dato og uden forskel — en påstand, der er sand i dag og forkert til
+      // vinter, fordi forskellen følger sommertiden. Derfor står der både
+      // forskellen og den dato, den gælder for, i strengen.
+      summary: (fraTid: string, fraBy: string, tilTid: string, tilBy: string, dagTekst: string, forskel: string, dato: string) =>
+        `${fraTid} i ${fraBy} = ${tilTid} i ${tilBy}${dagTekst ? ` ${dagTekst}` : ""}. ${forskel}. Gælder ${dato} — forskellen følger sommertiden.`,
       calcName: "Tidszoneberegner",
       diffFromHome: "Tidsforskel fra Danmark",
       hourSuffix: "t",
@@ -142,15 +150,15 @@ export default function TidszoneBeregner() {
       toZone: "Till tidszon",
       timeDiff: "Tidsskillnad",
       hoursWord: "timmar",
-      diffSentence: (tilBy: string, abs: number, ahead: boolean, fraBy: string) =>
-        `${tilBy} är ${abs} timmar${ahead ? " före" : " efter"} ${fraBy}`,
+      diffSentence: (tilBy: string, forskel: string, ahead: boolean, fraBy: string) =>
+        `${tilBy} är ${forskel} timmar${ahead ? " före" : " efter"} ${fraBy}`,
       convertTitle: "Konvertera en specifik tidpunkt",
       hourLabel: "Timme",
       minuteLabel: "Minut",
       dayBefore: "(dagen innan)",
       nextDay: "(nästa dag)",
-      summary: (fraTid: string, fraBy: string, tilTid: string, tilBy: string, dagTekst: string) =>
-        `${fraTid} i ${fraBy} = ${tilTid} i ${tilBy} ${dagTekst}`,
+      summary: (fraTid: string, fraBy: string, tilTid: string, tilBy: string, dagTekst: string, forskel: string, dato: string) =>
+        `${fraTid} i ${fraBy} = ${tilTid} i ${tilBy}${dagTekst ? ` ${dagTekst}` : ""}. ${forskel}. Gäller ${dato} — skillnaden följer sommartiden.`,
       calcName: "Tidszonsberäknare",
       diffFromHome: "Tidsskillnad från Sverige",
       hourSuffix: "h",
@@ -278,6 +286,24 @@ export default function TidszoneBeregner() {
     return `${timer.toString().padStart(2, '0')}:${minutter.toString().padStart(2, '0')}`;
   };
 
+  // Tidsforskellen er ikke altid et helt tal: Indien (UTC+5.30) ligger 3,5
+  // timer foran Danmark om sommeren. `String(3.5)` skrev "3.5" med punktum i
+  // dansk og svensk tekst, på tre steder: i det store tal, i sætningen under
+  // det og i huskelisten. Ét format her, så de tre ikke kan komme til at sige
+  // hver sit — samme konvention som `formatNumber` i `MomsBeregner`.
+  const formaterForskel = (timer: number) =>
+    formatNumber(timer, locale, { maximumFractionDigits: 2 });
+
+  // Datoen i den delte tekst. Den skal være læsbar i en sætning, altså lang
+  // form ("27. september 2026"), ikke 27/09/2026.
+  const formatDatoLang = (dato: Date) => {
+    return dato.toLocaleDateString(l.dateLocale, {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+  };
+
   const formatDato = (dato: Date) => {
     return dato.toLocaleTimeString(l.dateLocale, {
       hour: '2-digit',
@@ -291,6 +317,28 @@ export default function TidszoneBeregner() {
     if (beregning.dagForskel === 1) return l.nextDay;
     return "";
   };
+
+  // Ét sted bygger forskelsætningen og ét sted bygger den delte tekst, så
+  // Kopier og Del ikke kan komme til at sige hver sit (/moms gjorde netop det,
+  // før C52 lagde dem i samme kald).
+  const forskelsaetning = () =>
+    l.diffSentence(
+      l.by[beregning.tilTz.id],
+      formaterForskel(Math.abs(beregning.forskelTimer)),
+      beregning.forskelTimer >= 0,
+      l.by[beregning.fraTz.id]
+    );
+
+  const deltTekst = () =>
+    l.summary(
+      formatTid(timer, minutter),
+      l.by[beregning.fraTz.id],
+      formatTid(beregning.tilTimer, beregning.tilMinutter),
+      l.by[beregning.tilTz.id],
+      getDagTekst(),
+      forskelsaetning(),
+      formatDatoLang(aktuelTid)
+    );
 
   return (
     <div className="space-y-8">
@@ -342,11 +390,11 @@ export default function TidszoneBeregner() {
       <div className="p-4 bg-gray-100 dark:bg-gray-800 rounded-lg text-center">
         <p className="text-gray-600 dark:text-gray-400">
           {l.timeDiff}: <strong className="dark:text-white">
-            {beregning.forskelTimer >= 0 ? '+' : ''}{beregning.forskelTimer} {l.hoursWord}
+            {beregning.forskelTimer >= 0 ? '+' : ''}{formaterForskel(beregning.forskelTimer)} {l.hoursWord}
           </strong>
         </p>
         <p className="text-sm text-gray-500 dark:text-gray-400">
-          {l.diffSentence(l.by[beregning.tilTz.id], Math.abs(beregning.forskelTimer), beregning.forskelTimer >= 0, l.by[beregning.fraTz.id])}
+          {forskelsaetning()}
         </p>
       </div>
 
@@ -405,11 +453,11 @@ export default function TidszoneBeregner() {
 
       {/* Share button */}
       <div className="flex justify-center gap-3">
-        <CopyResultButton text={l.summary(formatTid(timer, minutter), l.by[beregning.fraTz.id], formatTid(beregning.tilTimer, beregning.tilMinutter), l.by[beregning.tilTz.id], getDagTekst())} />
+        <CopyResultButton text={deltTekst()} />
         <ShareCalculation
           getShareableLink={getShareableLink}
           calculatorName={l.calcName}
-          resultSummary={l.summary(formatTid(timer, minutter), l.by[beregning.fraTz.id], formatTid(beregning.tilTimer, beregning.tilMinutter), l.by[beregning.tilTz.id], getDagTekst())}
+          resultSummary={deltTekst()}
         />
       </div>
 
@@ -438,10 +486,10 @@ export default function TidszoneBeregner() {
                   <div key={tz.id} className="flex justify-between p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded">
                     <span className="dark:text-gray-300">{l.by[tz.id]}</span>
                     <span className="font-mono dark:text-white">
-                      {forskel >= 0 ? '+' : ''}{forskel}{l.hourSuffix}
+                      {forskel >= 0 ? '+' : ''}{formaterForskel(forskel)}{l.hourSuffix}
                       {viserVinter && (
                         <span className="text-gray-500 dark:text-gray-400">
-                          {' '}({forskelVinter >= 0 ? '+' : ''}{forskelVinter}{l.hourSuffix} {vinterOrd})
+                          {' '}({forskelVinter >= 0 ? '+' : ''}{formaterForskel(forskelVinter)}{l.hourSuffix} {vinterOrd})
                         </span>
                       )}
                     </span>

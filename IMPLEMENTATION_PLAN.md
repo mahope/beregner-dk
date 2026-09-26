@@ -1,6 +1,36 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — **C55 er landet: `/dato` har svaret "2 dage" på to datoer der er
+STATUS: KØ — **C56 er landet: `/tidszone`'s tidsforskel skrev brudtal med
+punktum i dansk og svensk tekst, og den delte tekst var en påstand der blev
+forkert til vinter.** Den fjerdestørste side i Search Console (24.723
+visninger, 0,5 % CTR, pos. 7,5) har to fund i samme klasse som C55's.
+**1) Indien er den eneste zone med et brudtal** (UTC+5.30), så dens forskel
+til Danmark er 3,5 timer i sommertid og 4,5 om vinteren — og alle tre steder
+der viser den, skrev den med `${forskelTimer}` i en template, altså
+`String(3.5)` → **"3.5" med punktum** i det store tal, i sætningen
+("Mumbai er 3.5 timer foran København") og i huskelisten ("+3.5t"). Nu går alle
+tre gennem ét `formaterForskel` med `formatNumber` fra `src/lib/format.ts`,
+og `l.diffSentence` tager en formateret streng i stedet for et tal. Det er
+C53's fund igen — og den slap forbi C53's `toFixed(2)`-søgning, fordi tallet
+kom fra `/60` på et heltal, ikke fra `toFixed`. **2) Den delte tekst var en
+påstand, der udløb:** `l.summary` gav `"12:00 i København = 19:00 i Tokyo"`
+uden dato, men beregningen slår bevidst sommertiden op for **dagens dato** og
+værktøjet tager ingen dato ind, så Tokyo ligger 7 timer foran i sommertid og
+8 om vinteren. Samme klokkeslæt gav 19:00 i juli og 20:00 i december, og den
+kopierede streng var den samme begge gange — en bruger der sendte svaret
+videre tre måneder senere, gav en time forkert. Nu bygger ét `deltTekst()`
+både forskellen og den dato den gælder for, brugt af Kopier *og* Del
+("… Tokyo er 7 timer foran København. Gælder 1. juli 2026 — forskellen
+følger sommertiden."), så læseren kan se hvilken sæson svaret gælder. Testene
+bruger fake timers med klokken sat til 1. juli og 1. december 2026 og låser
+tidszonen til `Europe/Copenhagen` — uden låst dato kan fejlen kun fejle
+halvdelen af året. Kopier-knappen klikkes og klipbordet læses, fordi knappen
+ikke viser strengen. Verificeret modsvejs: med den gamle komponent falder 6 af
+13 tests. Gate grøn: lint (545 filer), **1505 tests / 140 filer** (fra 1499 /
+140) og build (141 sider). Kode + plan i ét commit på `ceo/tidszone-kopi`;
+første kandidatvindue **2026-09-27 07:30**. Se opgave 84.
+
+STATUS (forrige iteration) — **C55 er landet: `/dato` har svaret "2 dage" på to datoer der er
 én dag hinanden, og delt tekst uden de datoer den gælder.** Auditten af
 `DatoBeregner` — sitets største side, 130.392 visninger og 1.045
 besøgende/28d — fandt **tre fund**. **1) En regnefejl over hele året:**
@@ -5846,6 +5876,93 @@ top-15, så ud over CTR er det eneste målbare signal `ad_clicked` på siden.
   korrekte (et decimaltal i en teknisk enhed). Tallet i noten er rettet her,
   så næste iteration ikke leder efter otte komponenter der ikke findes.
 
+#### 84. [x] FÆRDIG 2026-09-27 — C56 — `/tidszone`: brudtal med punktum i dansk tekst, og en delt påstand der bliver forkert til vinter
+
+- **Iteration start:** 2026-09-27 01:11 CEST på `ceo/tidszone-kopi`. Køen var
+  tom (alle 83 opgaver færdige, intet `I GANG`) og de åbne deploynoters første
+  kandidatvindue er 07:30 — efter iterationsgrænsen, så intet kunne
+  verificeres. Valget var **punkt 3b i køen** (C55's "Efterladt"), og
+  `TidszoneBeregner` var den næste i rækkefølge efter visninger.
+- **Datagrund:** DA `/tidszone` Search Console **24.723 visninger, 115 klik, CTR
+  0,5 %, pos. 7,5** (GSC 2026-08-27 → 2026-09-24). Søgningerne er præcis den
+  konvertering, Kopier og Del skriver ud: "hvad er klokken i usa når den er 12
+  i danmark" (**183 visninger, pos. 6**), "tidszoner" (764, pos. 10),
+  "tidsforskel" (86, pos. 10). Lav CTR ved position 6-7,5 er titlen og ikke
+  beregningen. SE `/tidszone` har 3.189 visninger / 0,3 % / pos. 7,7, så samme
+  fejl lå på begge domæner.
+- **Fund 1 — et brudtal skrevet med punktum i dansk og svensk tekst.** Indien er
+  den eneste zone med et brudtal (UTC+5.30), og dens forskel til Danmark er
+  derfor **3,5 timer** (210 minutter) i dansk sommertid og 4,5 om vinteren.
+  Alle tre steder der viser forskellen, skrev den med `${beregning.forskelTimer}`
+  i en template, altså `String(3.5)` → **"3.5" med punktum**:
+  det store tal (`+3.5 timer`), sætningen under det (`Mumbai er 3.5 timer foran
+  København`) og huskelisten (`+3.5t`). Det er C53's fund igen, samme
+  overflade, og den lå i en komponent C53 ikke havde set — hunde af grunden
+  til at `git grep` på `toFixed(2)` alene ikke fandt denne: tallet kom fra
+  `/60` på et heltal, ikke fra `toFixed`. Nu går alle tre gennem **én**
+  `formaterForskel`, som kalder `formatNumber(timer, locale, {maximumFractionDigits:
+  2})` fra `src/lib/format.ts` — samme konvention som `MomsBeregner` (C52) og
+  `ProcentBeregner` (C53). `l.diffSentence` tager nu en **formateret streng**
+  i stedet for et tal, så den ikke kan glemme formateringen.
+- **Fund 2 — den delte tekst var en påstand, der bliver falsk uden at nogen
+  kan se det.** `l.summary` gav `"12:00 i København = 19:00 i Tokyo"`. Men
+  `beregning` bruger bevidst **dagens dato** til at slå sommertiden op (kommentaren
+  siger det: "Uden dette svarede beregneren med vinterforskellen og lå en time
+  forkert i halvdelen af året"), og værktøjet tager ingen dato ind. Tokyo ligger
+  7 timer foran i dansk sommertid og 8 om vinteren, så **samme klokkeslæt gav
+  19:00 om sommeren og 20:00 om vinteren** — og den kopierede streng var den
+  samme begge gange. En bruger der kopierede svaret i juli og sendte det i
+  december, gav en time forkert. Det er en skærpelse af den klasse C55 fandt på
+  `/dato` ("den delte tekst var ikke selvstændig"): her er teksten ikke bare
+  ufuldstændig, den **udløber**. Nu bygger **én** `deltTekst()`, brugt af
+  både `CopyResultButton` og `ShareCalculation` (C55's lærepådom), som
+  indeholder forskellen og den dato den gælder for:
+  - DA sommer: `12:00 i København = 19:00 i Tokyo. Tokyo er 7 timer foran København. Gælder 1. juli 2026 — forskellen følger sommertiden.`
+  - DA vinter: `12:00 i København = 20:00 i Tokyo. Tokyo er 8 timer foran København. Gælder 1. december 2026 — forskellen følger sommertiden.`
+  - SE: `12:00 i Stockholm = 06:00 i New York. New York är 6 timmar efter Stockholm. Gäller 1 juli 2026 — skillnaden följer sommartiden.`
+
+  Forskelsætningen genbruges fra samme sted som på skærmen (`forskelsaetning()`),
+  så den delte tekst ikke kan sige en anden forskel end den, siden viser.
+  Datoen er lang form uden klokkeslæt (`27. september 2026`), fordi ugedagsnavn
+  gør strengen for lang til en besked (samme valg som C55).
+  Bivirkning at kende: `Intl` giver negationstegnet U+2212 i svensk (`−1h`) og
+  almindeligt bindestreg i dansk (`-1t`), som før. Det er et typografisk
+  bedre tegn, ikke en ny fejl, og den eksisterende test på den danske huskeliste
+  (`/London-1t(?! \()/`) holder.
+- **Test:** `TidszoneBeregner.test.tsx` vokser fra 7 til **13** tests, i en ny
+  `describe` med **fake timers** og klokken sat til 1. juli 2026 (sommer) og
+  1. december 2026 (vinter) — fordi forskellen flytter sig to gange om året, så
+  uden låst dato ville testen kunne være grøn med den gamle kode halvdelen af
+  året. Filen sætter desuden `process.env.TZ = "Europe/Copenhagen"` **før**
+  import, samme som `standarddato.test.tsx`, fordi sommertidsreglen læses i
+  læserens egen tid. De 6 nye: komma på alle tre steder DA, brudtal følger
+  sæsonen (3,5 → 4,5), komma SE, delt tekst med forskel + dato DA sommer, samme
+  klokkeslæt med **et andet svar** til vinter, og svensk sæt. Kopier-knappen er
+  klikket og **klipbordet læst** gennem et `navigator.clipboard`-mock, samme
+  mønster som `MomsBeregner.test.tsx` — knappen viser ikke strengen, så en test
+  der læser DOM'en ville være grøn med den gamle kode. Verificeret modsvejs med
+  `git stash` på kun komponenten: **6 af 13** tests falder.
+- **Gate:** `npm run lint` grøn (545 filer), `npm run test` **1505 tests / 140
+  filer** grøn (fra 1499 / 140), `npm run build` grøn (141 sider). Første
+  kandidatvindue **2026-09-27 07:30**.
+- **MÅL:** `/tidszone` baseline **24.723 visninger / 115 klik / CTR 0,5 % / pos.
+  7,5** (GSC 2026-08-27 → 2026-09-24) og **287 besøgende/28d, 266
+  indgangsvisninger, bounce 6 %** (Plausible 2026-09-26). SE `/tidszone`
+  baseline **3.189 visninger / 11 klik / 0,3 % / pos. 7,7**. **Mål 2026-10-10.**
+  Fund 1 er korrekthed i to af nitten synlige byer (kun Indien har brudtal) og
+  forventes ikke at kunne ses i trafiktallet. Fund 2 kan give flere klik på
+  Kopiér og Del (`trackResultCopied` / `trackShare` i Plausible — **Mads skal
+  hente dem, jeg må ikke ændre tracking**), men effekten på CTR er indirekte:
+  en delt tekst der holder, er den eneste grunde til at en læser deler den igen.
+- **Efterladt, bevidst.** Resten af klassen, i rækkefølge efter visninger:
+  `RenteBeregner`'s `l.copySummary` (13.623), `KalorieBeregner`'s `toFixed(2)`
+  (12.332), `AlderBeregner`'s `l.copySummary` (6.013), `PromilleBeregner`
+  (4.159 — dens egen `bacText` bruger faktisk allerede `.replace(".", ",")`, så
+  den skal læses for andre fund, ikke for dette), derefter de ni `toFixed(2)`
+  i listen fra opgave 83's "Efterladt" — hvor `Elberegner` (4) og
+  `BraendstofBeregner` (2) er de største. **Én komponent ad gangen med grøn
+  gate imellem.**
+
 
 ### Næste kandidater efter C34 — lukket med negativt fund
 
@@ -6040,15 +6157,19 @@ efter datagrund:
    tekst, brugeren kopierer?"** C52 fandt fejlen på `/moms`, C53 på `/procent`
    — begge gange i `CopyResultButton`/`ShareCalculation`/`PrintResult`-strengen,
    aldrig i selve regnestykket. Klassen er billig, mekanisk og har fundet en
-   reel fejl begge gange. **Læst i C55:** `DatoBeregner` (130.392) — se opgave
-   83, hvor klassen også gav to fund oveni: et `Math.ceil` over millisekunder,
-   der regnede sommertidsskiftet som en ekstra dag, og en "fra nu"-påstand om
-   en dato brugeren selv vælger. **Ulæste af samme overflade:**
-   `TidszoneBeregner`'s `l.summary` (24.723 visninger), `RenteBeregner`'s
-   `l.copySummary` (13.623), `AlderBeregner`'s `l.copySummary` (6.013), samt
-   de 11 komponenter med `toFixed(2)` (C53 sagde 18 — `git grep` tæller 11) —
-   start med `KalorieBeregner` (12.332). **Én komponent ad gangen med grøn
-   gate imellem.** Se opgave 81's "Efterladt" og opgave 83's "Efterladt".
+   reel fejl **hver eneste gang den er kørt** — nu fire for fire (C52, C53,
+   C55, C56). **Læst i rækkefølge efter visninger:** `DatoBeregner` (130.392)
+   → se opgave 83, `TidszoneBeregner` (24.723) → se opgave 84. **Ulæste af samme
+   overflade:** `RenteBeregner`'s `l.copySummary` (13.623),
+   `KalorieBeregner` (12.332), `AlderBeregner`'s `l.copySummary` (6.013) — og
+   de 11 komponenter med `toFixed(2)` (C53 sagde 18 — `git grep` tæller 11).
+   **Bemærk fra C56:** `toFixed(2)` er **ikke** en fuldstændig søgning på
+   denne klasse. C56's brudtal kom fra `/60` på et heltal, altså en template
+   med et rått tal, som `git grep toFixed` aldrig kan finde. Den rigtige
+   søgning er derfor **templates med rå tal indeni brødtekst** — `(forskel)}`
+   i `TidszoneBeregner` var fundet ved at læse siden, ikke ved at grepe.
+   **Én komponent ad gangen med grøn gate imellem.** Se opgave 81's, 83's og
+   84's "Efterladt".
 4. **`/moms`-emnet fra C45 (Skats frister) ligger stadig åbent** og er for
    stort til en side-iteration. Det eneste, der kan gøres nu uden nye tal, er
    at finde ud af om **GSC har en række** for frister/indberetning — ellers
@@ -6078,6 +6199,23 @@ efter datagrund:
   og noterer, at NO-URL'en 404'er. Det er ærligt, men mindre end noterne lover.
   Bemærk desuden: **der er ingen beregner.no-trafik i nogen snapshot** — hverken
   Plausible eller GSC — hvilket er konsistent med et separat site.
+- ⏳ **VERIFICÉR DEPLOY: C56 `/tidszone` — brudtal med komma, og en delt tekst
+  der siger hvilken dato den gælder — kode + plan i ét commit på branch
+  `ceo/tidszone-kopi`, første kandidatvindue **2026-09-27 07:30**.** Verificér
+  **indhold**; HTTP 200 beviser intet, hele fundet er i klient-renderede tal og
+  i strengen på Kopier/Del:
+  1. Åbn `/tidszone`, sæt **Til tidszone = Indien (IST)**. Tidsforskellen skal
+     stå som **"+3,5 timer"** og sætningen som **"Mumbai er 3,5 timer foran
+     København"**, huskelisten som **"+3,5t (+4,5t om vinteren)"**. Før stod der
+     `3.5` med punktum på alle tre steder. Det er det tydeligste af fundene.
+  2. Klik **Kopiér** med **Til tidszone = Japan (JST)**. Klipbordet skal give
+     `12:00 i København = 19:00 i Tokyo. Tokyo er 7 timer foran København.
+     Gælder 1. juli 2026 — forskellen følger sommertiden.` Før stod der kun
+     `12:00 i København = 19:00 i Tokyo` — uden dato, altså en påstand der var
+     forkert i vinterhalvåret.
+  3. Samme på `beraknare.se/tidszone`: `Mumbai är 3,5 timmar före Stockholm` og
+     svensk delt tekst med "Gäller … — skillnaden följer sommartiden.".
+  `/api/health` skal svare `status: ok`. Se VERIFICÉR DEPLOY-loggen.
 - ⏳ **VERIFICÉR DEPLOY: C55 `/dato` — "antal dage" tæller ikke længere et
   sommertidsskifte som en dag, og Kopier/Del giver datoerne med — kode + plan
   i ét commit på branch `ceo/dato-tekst`, kode `fb89220`, merge `122535d`
@@ -6890,6 +7028,15 @@ landmark=lån, piggybank=opsparing osv.).
     - Gate grøn: lint ok, 280/280 tests, build ok (128 pages).
 
 ## VERIFICÉR DEPLOY-log
+- ⏳ **ÅBEN — C56 `/tidszone` brudtal med komma + delt tekst med dato, kode på
+  `ceo/tidszone-kopi`, første kandidatvindue **2026-09-27 07:30**.** Indholdstjek
+  ved det nye build: sæt **Til tidszone = Indien (IST)**, så skal forskelsen stå
+  som `+3,5 timer` / "Mumbai er 3,5 timer foran København" / `+3,5t (+4,5t om
+  vinteren)` — før stod der `3.5` med punktum på alle tre. Klik **Kopiér** med
+  **Japan (JST)**: klipbordet skal give `12:00 i København = 19:00 i Tokyo. Tokyo
+  er 7 timer foran København. Gælder 1. juli 2026 — forskellen følger
+  sommertiden.` Svensk skal give "Mumbai är 3,5 timmar före Stockholm" og "Gäller
+  … — skillnaden följer sommartiden.".
 - ⏳ **ÅBEN — C54 lokal dato i `/alder` + `/ugenummer`, moms-guide-knapper,
   kode `a9552bc`, merge `8cd62f8` 2026-09-27 00:53 CEST.** Første
   kandidatvindue **2026-09-27 07:30**. Indholdstjek ved det nye build: på
