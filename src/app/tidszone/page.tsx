@@ -7,7 +7,7 @@ import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import RelatedCalculators from "@/components/RelatedCalculators";
 import RelateredeArtikler from "@/components/RelateredeArtikler";
-import { tidszoneRækker } from "@/lib/tidszone-reference";
+import { TIDSZONER, tidszoneRækker } from "@/lib/tidszone-reference";
 
 export async function generateMetadata() {
   return generatePageMetadata("tidszone");
@@ -45,9 +45,9 @@ export default async function TidszonePage() {
           <h2 className="text-xl font-bold mb-2">Når det er 12 i Danmark, er det 06 i New York</h2>
           <p className="mb-4">
             Klokken 12 i Danmark er <strong>06 i New York</strong>, 05 i Chicago og{" "}
-            <strong>03 i Los Angeles</strong>. Videre ud i verden er det 11 i London, 19 i
-            Shanghai, 20 i Tokyo og 21 i Sydney. Forklaringen er tidsforskellen: Danmark ligger på
-            CET (UTC+1) om vinteren og CEST (UTC+2) om sommeren.
+            <strong>03 i Los Angeles</strong>. Videre ud i verden er det 11 i London, 13 i Athen,
+            08 i Nuuk, 19 i Shanghai, 20 i Tokyo og 21 i Sydney. Forklaringen er tidsforskellen:
+            Danmark ligger på CET (UTC+1) om vinteren og CEST (UTC+2) om sommeren.
           </p>
           <div className="overflow-x-auto">
             <table>
@@ -84,9 +84,9 @@ export default async function TidszonePage() {
           <h2 className="text-xl font-bold mb-2">När det är 12 i Sverige är det 06 i New York</h2>
           <p className="mb-4">
             Klockan 12 i Sverige är <strong>06 i New York</strong>, 05 i Chicago och{" "}
-            <strong>03 i Los Angeles</strong>. Vidare ut i världen är det 11 i London, 19 i
-            Shanghai, 20 i Tokyo och 21 i Sydney. Förklaringen är tidsskillnaden: Sverige ligger på
-            CET (UTC+1) på vintern och CEST (UTC+2) på sommaren.
+            <strong>03 i Los Angeles</strong>. Vidare ut i världen är det 11 i London, 13 i Aten,
+            08 i Nuuk, 19 i Shanghai, 20 i Tokyo och 21 i Sydney. Förklaringen är tidsskillnaden:
+            Sverige ligger på CET (UTC+1) på vintern och CEST (UTC+2) på sommaren.
           </p>
           <div className="overflow-x-auto">
             <table>
@@ -98,7 +98,7 @@ export default async function TidszonePage() {
                 </tr>
               </thead>
               <tbody>
-                {tidszoneRækker().map((raekke) => (
+                {tidszoneRækker(TIDSZONER, "se").map((raekke) => (
                   <tr key={raekke.by}>
                     <td>{raekke.by}</td>
                     <td>{raekke.vinter}</td>

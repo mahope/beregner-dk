@@ -1,13 +1,25 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — **syv noter står åbne, ingen er `DEPLOY-MISSING`.** C37
+STATUS: KØ — **otte noter står åbne, ingen er `DEPLOY-MISSING`.** C37
 (`/renteberegner`) med første kandidatvindue 2026-09-27 12:30, C38 (svensk
 spørgsmålsform), C39 (svensk `/procent`), C40 (DA `/tidsberegner`) og **C45**
 (juleaften + julafton) med **2026-09-26 21:30** som første fælles
 kandidatvindue, plus **C42** (de relaterede links renderer det, de lover, og
-`/brok` får en indgang) med første vindue **2026-09-27 07:30** og **C43**
+`/brok` får en indgang) med første vindue **2026-09-27 07:30**, **C43**
 (artiklen og `/tidszone` kan ikke længere have samme headline) i samme
-vindue som C42. `/api/health` svarer `status: ok`.
+vindue og **C46** (`/tidszone` får de fire lande, autocomplete spørger efter)
+i samme vindue. `/api/health` svarer `status: ok`.
+
+**C46 lukkede den eneste åbne *datagrund* fra C45's autocomplete-audit, uden at
+røre en eneste titel.** "tidszone grønland", "grækenland", "portugal" og
+"kreta" lå blandt Googles forslag, men ingen af dem fandtes i `TIDSZONER` — så
+C45's egen advarsel holdt: det var et databehov, ikke en tekstændring. Nu ligger
+de i modulet med IANA-offsets (Nuuk WGT/WGST = UTC-3/-2 siden marts 2023,
+Athen og Kreta EET/EEST, Lissabon WET/WEST, Reykjavik UTC+0 uden sommertid), i
+beregnerens zoneliste og i svar-først-brødteksten på begge domæner. Én fælde
+var fundet undervejs: byen hedder **Athen** på dansk og **Aten** på svensk, og
+tabellen er delt, så `TidszoneInfo` har fået et `bySe`-felt — ellers havde
+C38's "ingen locale-leak"-fund være blevet modsagt af C46. Se opgave 73.
 
 **C45 lukkede C23's sidste åbne note og fyldte et hul i `dage-til`-fladen,
 som familien selv afslørede.** C23's `/loen-efter-skat` blev verificeret i
@@ -4656,6 +4668,64 @@ første halvdel af denne liste er fra DA-fladen, anden halvdel fra SE — de er
   `/nedtaelling` har ingen række i GSC-top-15.
 
 
+#### 73. [x] FÆRDIG 2026-09-26 — C46 — `/tidszone`: de fire lande, autocomplete spørger efter, lå i datamodulet
+
+- **Iteration start:** 2026-09-26 20:47 CEST på `ceo/tidszone-nordatlanten`.
+  Køen var tom (alle 72 opgaver færdige, intet `I GANG`), de otte åbne
+  deploynoters første vinduer er 21:30 eller senere — efter denne iterations
+  grænse — så intet var verificerbart. Valget blev den **ene** åbne
+  datagrund fra C45's autocomplete-audit, der ikke krævede nye tal.
+- **Datagrund:** `/tidszone` er GSC's **4. største danske side: 24.723
+  visninger, 115 klik, CTR 0,5 %, pos. 7,5** pr. 2026-09-24, og Plausible
+  gav den ikke en række i 28-dages-top-15. Dens største egen søgning er
+  **"tidszoner" (764 visninger, pos. 10)** — altså det generiske ord, ikke
+  spørgsmålet. C45's autocomplete-audit (hentet 2026-09-26 20:31) fandt
+  **fire huller i selve datasættet**: "tidszone grønland", "tidszone grækenland",
+  "tidszone portugal" og "tidszone kreta". `TIDSZONER` i
+  `src/lib/tidszone-reference.ts` havde **11 byer, ingen af dem de fire**,
+  og `TidszoneBeregner.tsx`'s zone-liste (15 zoner) manglede dem også.
+- **Beslutning:** bygge det i **datamodulet**, ikke som ekstra tekst — det var
+  C45's egen advarsel ("et databehov … må ikke løses med et par flere rækker i
+  tabellen"). Fem nye rækker med IANA-offsets, kildeangivet i modulens
+  headerkommentar:
+  | By | Vinter | Sommer | Kilde |
+  |---|---|---|---|
+  | Nuuk | 08:00 | 08:00 | America/Nuuk: WGT = UTC-3 siden marts 2023, WGST = UTC-2 |
+  | Lissabon | 11:00 | 11:00 | Europe/Lisbon: WET UTC+0 / WEST UTC+1 |
+  | Reykjavik | 11:00 | 10:00 | Atlantic/Reykjavik: UTC+0, ingen sommertid |
+  | Athen | 13:00 | 13:00 | Europe/Athens: EET UTC+2 / EEST UTC+3 |
+  | Heraklion (Kreta) | 13:00 | 13:00 | samme sone som Athen |
+  Klokkeslættene er **regnet af modulet ved 12 i Danmark**, ikke skrevet i
+  tabellen. Svar-først-afsnittet på begge domæner nævner nu 13 i Athen og 08 i
+  Nuuk, så de fire søgninger også findes i brødteksten.
+- **Locale-læk undgået bevidst:** byen hedder **Athen** på dansk og **Aten** på
+  svensk, og tabellen er delt af DA- og SE-siden. `TidszoneInfo` har derfor
+  fået et valgfrit `bySe`, og `tidszoneRækker(zoner, "se")` bruges på
+  beraknare.se. De fire øvrige bynavne er identiske på begge sprog. Samme
+  læk-hedning i `TidszoneBeregner.tsx`: zone-listen har per-sprog `navn`/`by`
+  (`Grækenland`/`Grekland`, `Athen`/`Aten`, `Grønland`/`Grönland`). Beregnerens
+  liste fik de to nye zoner, fordi kun de har et offset, værktøjet ikke dækker
+  (Lissabon og Reykjavik er 0, som London allerede dækker).
+- **Test:** 2 nye i `src/lib/tidszone-reference.test.ts` (nu 7 i filen) —
+  de fire landes **vinter- og sommerklokkeslæt** er låst til talene ovenfor,
+  og den svenske liste indeholder "Aten", **ikke** "Athen", og ingen bynavn
+  forekommer to gange. Fælden er bevidst hård: en fejl-offset eller en
+  manglende `bySe` giver rødt.
+- **Verifikation:** `npm run test` grøn (**1400/1400**, 133 filer), `npm run
+  lint` grøn (532 filer), `npm run build` grøn (~60 linjers diff, så ingen
+  ekstra review).
+- **MÅL:** `/tidszone` baseline **24.723 visninger / 115 klik / CTR 0,5 % /
+  pos. 7,5** pr. 2026-09-24 (GSC). Autocomplete er et **kvalitativt**
+  signal, så de fire søgninger har ingen baseline og skriver ingen.
+  Forventningen er flere **impressions** på "tidszoner" (764v, pos. 10) fra
+  den bredere dækning, ikke et CTR-spring. **Genmål 2026-10-10.**
+- **Ikke gjort, bevidst:** ingen ny `/dage-til/*`-lignende underside for
+  Grønland (Kalaallit Nunaat har sin egen myndighedsside, og GSC har ingen
+  række), og `/tidszone`s `<title>` er urørt — C4 sat den bevidst, og C43
+  flyttede for nylig et spørgsmål *hen* til den, så en titelmæssig
+  svar-først-revision hører til genmålingen 2026-10-10.
+
+
 ### Næste kandidater efter C34 — lukket med negativt fund
 
 
@@ -4796,13 +4866,18 @@ efter datagrund:
        byer.** "tidszone grønland", "grækenland", "portugal" og "kreta" ligger
        blandt forslagene til "tidszone", og C36's artikel dækker kun USA. Det er
        et databehov (byer med korrekt DST-regel), ikke en tekstændring, så det
-       må ikke løses med et par flere rækker i tabellen.
+       må ikke løses med et par flere rækker i tabellen. **Lukket i C46:** de
+       fire lande ligger nu i `TIDSZONER` med IANA-offsets, i beregnerens
+       zoneliste og i svar-først-brødteksten. Det afsluttede emnet; **åbent for
+       den næste autocomplete-audit** er de **variable** datoer fra samme
+       liste (`sommerferie`, `efterårsferie`, `skoleåret`), som hører hjemme på
+       `/nedtaelling`. Se opgave 73.
 
-### Prioriteret kø efter C45
+### Prioriteret kø efter C46
 
-1. **Verificér de otte åbne deploynoter** i 21:30- og 07:30-vinduerne — rent
+1. **Verificér de ni åbne deploynoter** i 21:30- og 07:30-vinduerne — rent
    indholdskontrol, intet skal merges.
-2. **Mål 2026-10-10** (se Måleprotokol): C1-C16 og C35-C45 måles 14 dage efter
+2. **Mål 2026-10-10** (se Måleprotokol): C1-C16 og C35-C46 måles 14 dage efter
    deres snapshot, og resultatet skrives ved siden af hver opgave.
 3. **Kandidat 11 — kræver en GSC-række før kode:** `/alder` svarer ikke på
    "beregn alder mellem to datoer" (0 forekomster mod 19 for "fødselsdato"),
@@ -5466,6 +5541,18 @@ landmark=lån, piggybank=opsparing osv.).
     - Gate grøn: lint ok, 280/280 tests, build ok (128 pages).
 
 ## VERIFICÉR DEPLOY-log
+- ⏳ **ÅBEN — VERIFICÉR DEPLOY: C46 — `/tidszone` har Grønland, Grækenland,
+  Portugal, Island og Kreta i tabellen.** Kode `HEAD`, merge `HEAD` 2026-09-26
+  20:5x CEST på branch `ceo/tidszone-nordatlanten`. Første kandidatvindue er
+  **2026-09-27 07:30** (merged efter 21:30). Nul deploy-vinduer er gået siden
+  merge, altså slet ikke `DEPLOY-MISSING` (kræver to). Verificér **indhold**:
+  `https://minberegner.dk/tidszone` skal have **16** rækker i tabellen (11 før +
+  5 nye) med **Nuuk 08:00/08:00, Lissabon 11:00/11:00, Reykjavik 11:00/10:00,
+  Athen 13:00/13:00 og Heraklion (Kreta) 13:00/13:00**, og svar-først-brødteksten
+  skal sige "13 i Athen" og "08 i Nuuk";
+  `https://beraknare.se/tidszone` skal have **"13 i Aten"** i brødteksten og
+  rækken **"Aten"** i tabellen (**ikke** "Athen") — sidste kontrol mod
+  locale-lækken; `/api/health` skal svare `status: ok`. Se opgave 73.
 - ⏳ **ÅBEN — VERIFICÉR DEPLOY: C45 — `dage-til`-familien har nu juleaften og
   julafton.** Kode `a79b6d5`, merge `71d4a6c` 2026-09-26 20:32 CEST på branch
   `ceo/juleaften`. Første kandidatvindue er **2026-09-26 21:30** (merged før
