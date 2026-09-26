@@ -1,8 +1,9 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
 STATUS: KØ — **ni noter står åbne, ingen er `DEPLOY-MISSING`.** **C47**
-(`/alder` svarer på "alder mellem to datoer") med første kandidatvindue
-**2026-09-26 21:30** (merged 21:11, før batchen). C37 (`/renteberegner`)
+(`/alder` svarer på "alder mellem to datoer" — kode `95c8712` + `f882eac`,
+merge `a0f99a9` + `4b0d039`) med første kandidatvindue **2026-09-26 21:30**
+(merged 21:11 og 21:15, begge før batchen). C37 (`/renteberegner`)
 med første kandidatvindue 2026-09-27 12:30, C38 (svensk spørgsmålsform),
 C39 (svensk `/procent`) og **C45** (juleaften + julafton) med
 **2026-09-26 21:30** som første fælles kandidatvindue, plus **C42** (de
@@ -4793,7 +4794,7 @@ første halvdel af denne liste er fra DA-fladen, anden halvdel fra SE — de er
   **tidszoneuafhængigt** — og det er låst i en test.- **Fem rækker, hver med en begrundelse:** det eksempel, siden *allerede*
   lover i sin description (født 15. marts 1990 → 25. sep. 2026 = 36 år, 6
   måneder, 10 dage, 13.342 dage); **det samme fødselsdato tilbage i tiden**
-  (→ 1. maj 2010 = 20 år, 1 måned, 16 dage) — det er selve spørgsmålet fra
+  (→ 1. maj 2010 = 20 år, 1 måned og 16 dage) — det er selve spørgsmålet fra
   autocomplete; hele år (1. jan. 2000 → 1. jan. 2025); **skudårsfødselsdag**
   (29. feb. 2004 → 28. feb. 2026 = 21 år, 11 måneder, 30 dage, og næste
   fødselsdag 1. marts fordi 2026 ikke er skudår); og et barn (15. juli 2015 →
@@ -4806,7 +4807,19 @@ første halvdel af denne liste er fra DA-fladen, anden halvdel fra SE — de er
   eksemplet. **`no` er bevidst urørt** — beregner.dk-domænet har ingen
   dokumenteret trafik, så en fast dato-tabel der ville være en ukontrolleret
   tilføjelse. En test fanger det, hvis norsk siden begynder at vise den.
-- **Test:** 14 nye i `src/lib/alder.test.ts` — bl.a. **skudår begge veje**
+- **Ental og flertal, fundet ved at læse den færdige side.** Den nye tabel
+  skrev "**1 måneder**", fordi `AlderBeregner` altid har brugt
+  `` `${m} måneder og ${d} dage` `` uden at se efter tallet. Samme
+  oversættelsesglider som C38's fire svenske sætningsfejl, bare i **værktøjets
+  egen grammatik** — og den ville have stået på en side, hvis hele pointen
+  er tillid til tallene. `formatAlder` tager nu ental ved 1 i begge sprog (og
+  flertal ved 0, som dansk kræver), og **`AlderBeregner` bruger samme
+  formatter**, så der kun findes én grammatik i repoet; de to
+  `monthsAndDays`-felter er fjernet fra komponentens labels i stedet. Den
+  første negative test var for naiv — `not.toContain("1 måneder")` fejlede på
+  "**11** måneder" — så mønsteret bruger en tal-grænse. Den negative test er
+  bevaret, fordi et tal-grænse-mønster er præcist, mens substring ikke er.
+- **Test:** 16 nye i `src/lib/alder.test.ts` — bl.a. **skudår begge veje**
   (29. feb. 2004 → 28. feb. 2026 *og* → 29. feb. 2028), at dage lånes fra den
   forudgående måned (31. jan. → 30. mar.), at fødselsdagen selv er 0/0/0, at
   næste fødselsdag er næste årsdag også *på* fødselsdagen (365 dage, 37 år),
@@ -4815,15 +4828,17 @@ første halvdel af denne liste er fra DA-fladen, anden halvdel fra SE — de er
   grøn, kun hvis logikken er. 5 nye i `src/app/alder/page.test.tsx` kræver
   H2'en i **begge** sprog, alle fem formaterede rækker i HTML'en, de to nye
   spørgsmål i FAQ'en, og at norsk *ikke* får tabellen.
-- **Verifikation 2026-09-26:** `npm run test` grøn (**1419/1419**, 134
+- **Verifikation 2026-09-26:** `npm run test` grøn (**1421/1421**, 134
   filer), `npm run lint` grøn (535 filer), `npm run build` grøn (exit 0,
   141 statiske sider, kun de 7 kendte pre-existing CSS-advarsler). Første
   build fangede en typefejl i flytningen (`beregningsdato` mod
   `beregningsDato`) — den er rettet, og det er grunden til, at builden er
   med i gaten og ikke kun testen. `npm audit` urørt, ingen afhængigheder
   ændret.
-- **Landet:** kode `95c8712` på branch `ceo/alder-mellem-to-datoer`, merge
-  `a0f99a9` til `master` 2026-09-26 21:11 CEST.
+- **Landet:** kode `95c8712` + `f882eac` på branch
+  `ceo/alder-mellem-to-datoer`, merge `a0f99a9` (tabel) og `4b0d039` (ental)
+  til `master` 2026-09-26 21:11 og 21:15 CEST — **begge før 21:30-batchen**,
+  så deploynoten dækker den endelige tekst.
 - **MÅL:** DA `/alder` baseline **6.013 visninger / 35 klik / CTR 0,6 % /
   pos. 7,8** pr. 2026-09-24; SE `/alder` **2.895 / 8 / 0,3 % / 7,7**.
   Plausible: SE `/alder` 15 besøgende/28d (+50 %) pr. 2026-09-26, ingen
@@ -5017,14 +5032,15 @@ efter datagrund:
 
 ### ❓ Til Mads
 - ⏳ **VERIFICÉR DEPLOY: C47 — `/alder` svarer på "alder mellem to datoer".**
-  Kode `95c8712`, merge `a0f99a9` 2026-09-26 21:11 CEST på branch
-  `ceo/alder-mellem-to-datoer`. Første kandidatvindue **2026-09-26 21:30**
+  Kode `95c8712` + `f882eac`, merge `a0f99a9` + `4b0d039` 2026-09-26 21:11 og
+  21:15 CEST på branch `ceo/alder-mellem-to-datoer`. Første kandidatvindue **2026-09-26 21:30**
   (merged før batchen). Verificér **indhold**: `https://minberegner.dk/alder`
   skal have H2 **"Svar på de oftest stillede aldersspørgsmål"** med en tabel
   på **fem** rækker, hvor række 1 er født 15. marts 1990 → 25. september 2026
   → **"36 år, 6 måneder og 10 dage"** → 13.342, og række 2 er samme fødselsdato
-  → 1. maj 2010 → **"20 år, 1 måneder og 16 dage"**; række 4 skal vise
-  **"21 år, 11 måneder og 30 dage"** for 29. februar 2004 → 28. februar 2026.
+  → 1. maj 2010 → **"20 år, 1 måned og 16 dage"**; række 4 skal vise
+  **"21 år, 11 måneder og 30 dage"** for 29. februar 2004 → 28. februar 2026,
+  og **intet** sted må sige "1 måneder" eller "1 månader".
   FAQ'en skal have **"Kan jeg beregne alder mellem to datoer?"** og **"Hvor
   gammel var jeg den 1. maj 2010?"**. `https://beraknare.se/alder` skal have H2
   **"Svar på de vanligaste åldersfrågorna"** med de svenske svar (**"20 år, 1
@@ -5687,19 +5703,20 @@ landmark=lån, piggybank=opsparing osv.).
 
 ## VERIFICÉR DEPLOY-log
 - ⏳ **ÅBEN — VERIFICÉR DEPLOY: C47 — `/alder` svarer på "alder mellem to
-  datoer".** Kode `95c8712`, merge `a0f99a9` 2026-09-26 21:11 CEST på branch
-  `ceo/alder-mellem-to-datoer`. Første kandidatvindue er **2026-09-26 21:30**
+  datoer".** Kode `95c8712` + `f882eac`, merge `a0f99a9` + `4b0d039` 2026-09-26
+  21:11 og 21:15 CEST på branch `ceo/alder-mellem-to-datoer`. Første
+  kandidatvindue er **2026-09-26 21:30**
   (merged før den). Nul deploy-vinduer er gået siden merge, altså slet ikke
   `DEPLOY-MISSING` (kræver to). Verificér **indhold**:
   `https://minberegner.dk/alder` skal have H2 **"Svar på de oftest stillede
   aldersspørgsmål"** med **fem** rækker, hvor række 1 er født 15. marts 1990 →
   25. september 2026 → **"36 år, 6 måneder og 10 dage"** → 13.342, række 2 er
-  samme fødselsdato → 1. maj 2010 → **"20 år, 1 måneder og 16 dage"**, og
+  samme fødselsdato → 1. maj 2010 → **"20 år, 1 måned og 16 dage"**, og
   række 4 er 29. februar 2004 → 28. februar 2026 → **"21 år, 11 måneder og 30
   dage"**; FAQ'en skal have **"Kan jeg beregne alder mellem to datoer?"** og
   **"Hvor gammel var jeg den 1. maj 2010?"**;
   `https://beraknare.se/alder` skal have H2 **"Svar på de vanligaste
-  åldersfrågorna"** med **"20 år, 1 månader och 16 dagar"** og de svenske
+  åldersfrågorna"** med **"20 år, 1 månad och 16 dagar"** og de svenske
   spørgsmål, og **ikke** den danske H2; `https://beregner.no/alder` skal være
   uændret og **ikke** have nogen af H2'erne; `/api/health` skal svare
   `status: ok`. Se opgave 74.
