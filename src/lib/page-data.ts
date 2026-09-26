@@ -3,6 +3,16 @@ import { BARSEL_2026, SU_2026 } from "./satser-2026";
 import { SOLCELLE_LEVETID_AAR_MAX, SOLCELLE_LEVETID_AAR_MIN } from "./energi/solceller";
 import { besparelseProcent, breakEvenKwhPris, elbilSammenligning, prisPrKm, procent1Decimals } from "./braendstof";
 import { HUSLEJE_EKSEMPEL, HUSLEJE_STANDARD } from "./husleje";
+import { PROMILLE_EKSEAMPLER, formatPromille, formatTimer } from "./promille-eksempler";
+
+/**
+ * FAQ-svarene om "hvornår må jeg køre bil igen" har to forskellige tal: tiden
+ * til at komme UNDER lovgrænsen, og tiden til at være helt ædru. Kun det
+ * første må bruges til at køre bil — så de skrives fra eksempelmodulet,
+ * der regner dem med samme formel som værktøjet bruger.
+ */
+const PROMILLE_4_OEL = PROMILLE_EKSEAMPLER[0];
+const PROMILLE_4_OEL_ER = `${formatPromille(PROMILLE_4_OEL.promille)} ‰`;
 
 export type PageData = {
   slug: string;
@@ -357,7 +367,7 @@ const daPages: Record<string, PageData> = {
         { question: "Hvad er promillegrænsen i Danmark?", answer: "Det er ulovligt at køre bil med en promille over 0,5 ‰. Ved høje promiller stiger straffen, og over 2,0 ‰ mister man som udgangspunkt kørekortet ubetinget." },
         { question: "Hvor meget er én genstand?", answer: "Én genstand svarer til 12 gram ren alkohol — cirka en almindelig øl (33 cl), et lille glas vin (12 cl) eller et snapseglas spiritus (4 cl). En stærk øl kan være 1,5-2 genstande." },
         { question: "Er beregningen præcis?", answer: "Nej, det er et estimat. Mad, stofskifte, medicin og helbred påvirker den faktiske promille. Kør aldrig bil i tvivl — promillen kan være højere end beregnet." },
-        { question: "Hvornår kan jeg køre bil igen?", answer: "Kroppen forbrænder omkring 0,15 ‰ i timen, så promillen skal blot regnes ned til under 0,5 ‰. 4 øl på 80 kg = 0,88 ‰, som kræver 5,9 timer at blive bragt ned — og du skal bruge det nødvendige øvrige til at blive helt ædru. Morgenstunden efter er den farligste, fordi promillen ofte er højere end man tror." },
+        { question: "Hvornår kan jeg køre bil igen?", answer: `4 øl på 80 kg = ${PROMILLE_4_OEL_ER}. Der er to forskellige tal, og det er nemlig det kortere, der bestemmer: du må køre bil, når promillen er under 0,5 ‰, og det tager ${formatTimer(PROMILLE_4_OEL.timerTilGraenseDa, "da")}. Helt ædru er du først efter ${formatTimer(PROMILLE_4_OEL.timerTilNul, "da")}, fordi kroppen kun forbrænder omkring 0,15 ‰ i timen. En tommers mortel: du kan godt være lovlig ude at køre klokken 03 og stadig være fuld om morgenen. Morgenstunden efter er den farligste, fordi promillen ofte er højere end man tror.` },
       ],
     },
     "del-regning": {
@@ -2738,7 +2748,7 @@ const sePages: Record<string, PageData> = {
         { question: "Vad är promillegränsen i Sverige?", answer: "Gränsen för rattfylleri är 0,2 ‰. Vid 1,0 ‰ räknas det som grovt rattfylleri. Gränsen är betydligt lägre än i Danmark (0,5 ‰)." },
         { question: "Hur mycket är ett standardglas?", answer: "Ett standardglas motsvarar 12 gram ren alkohol — ungefär en vanlig öl (33 cl), ett litet glas vin (12 cl) eller en snaps sprit (4 cl)." },
         { question: "Är beräkningen exakt?", answer: "Nej, det är en uppskattning. Mat, ämnesomsättning, medicin och hälsa påverkar den faktiska promillen. Kör aldrig bil om du är osäker." },
-        { question: "När kan jag köra bil igen?", answer: "Kroppen bryter ner ungefär 0,15 ‰ per timme, så promillen måste räknas ned till under 0,2 ‰. 4 öl på 80 kg = 0,88 ‰, vilket kräver 5,9 timmar — och du måste ändå ta den tid det tar att bli helt nykter. Morgonen efter är den farligaste, eftersom promillen ofta är högre än man tror." },
+        { question: "När kan jag köra bil igen?", answer: `4 öl på 80 kg = ${PROMILLE_4_OEL_ER}. Det finns två olika tal, och det är det kortare som avgör: du får köra bil när promillen är under 0,2 ‰, och det tar ${formatTimer(PROMILLE_4_OEL.timerTilGraenseSe, "se")}. Helt nykter är du först efter ${formatTimer(PROMILLE_4_OEL.timerTilNul, "se")}, eftersom kroppen bara bryter ner ungefär 0,15 ‰ per timme. Tolv glas är alltså fullt lagliga kvar vid tre på natten och du är fortfarande berusad på morgonen. Morgonen efter är den farligaste, eftersom promillen ofta är högre än man tror.` },
       ],
     },
     "del-regning": {

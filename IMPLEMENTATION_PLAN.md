@@ -1,11 +1,15 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — **fire noter står åbne, syv er lukket `DEPLOY OK`, ingen er `DEPLOY-MISSING`.** VIGTIGT NYT FUND: **`beregner.no` er et separat site, ikke dette repo** (URL-skema `/kalkulator/*`), så alle `beregner.no`-tjek i planens noter **kan ikke fejle** og er ingen beviser — se den konsoliderede note i VERIFICÉR DEPLOY-loggen. C47 **C47**
-(`/alder` svarer på "alder mellem to datoer" — kode `95c8712` + `f882eac`,
-merge `a0f99a9` + `4b0d039`) med første kandidatvindue **2026-09-26 21:30**
-(merged 21:11 og 21:15, begge før batchen). C37 (`/renteberegner`)
-med første kandidatvindue 2026-09-27 12:30, C38 (svensk spørgsmålsform),
-C39 (svensk `/procent`) og **C45** (juleaften + julafton) med
+STATUS: KØ — **fem noter står åbne, syv er lukket `DEPLOY OK`, ingen er
+`DEPLOY-MISSING`.** VIGTIGT NYT FUND: **`beregner.no` er et separat site, ikke
+dette repo** (URL-skema `/kalkulator/*`), så alle `beregner.no`-tjek i planens
+noter **kan ikke fejle** og er ingen beviser — se den konsoliderede note i
+VERIFICÉR DEPLOY-loggen. **C48** (`/promille` svarer på "hvornår må jeg køre bil"
+med tiden til at komme **under lovens grænse**, ikke tiden til 0 ‰ — et
+sikkerhedsfund, kode + plan i én commit på `ceo/promille-graensetid`, merge
+**2026-09-26 22:2x**, første kandidatvindue **2026-09-27 07:30**). C37
+(`/renteberegner`) med første kandidatvindue 2026-09-27 12:30, C38 (svensk
+spørgsmålsform), C39 (svensk `/procent`) og **C45** (juleaften + julafton) med
 **2026-09-26 21:30** som første fælles kandidatvindue, plus **C42** (de
 relaterede links renderer det, de lover, og `/brok` får en indgang) med
 første vindue **2026-09-27 07:30**, **C43** (artiklen og `/tidszone` kan
@@ -13,19 +17,39 @@ ikke længere have samme headline) i samme vindue og **C46** (`/tidszone`
 får de fire lande, autocomplete spørger efter) også der. `/api/health`
 svarer `status: ok`.
 
-**Seneste iteration (2026-09-26 22:00-22:45) landede ingen kode — og det
-er sigtet ligeud sagt i opgave 75.** Den kørte C47's auditmetode på
-`/promille` og `/braendstof`: `/braendstof` lukket med negativt fund,
-`/promille` gav **et sikkerhedsfund** (`maaKoere` er hardkodet til den
-danske grænse 0,5 ‰ i `src/lib/promille.ts:47`, og FAQ'en svarer på
-"hvornår kan jeg køre bil igen" med 5,9 timer, som er tiden til **0 ‰**
-og ikke tiden til at komme under 0,5 ‰). Rettelsen er udarbejdet med alle
-tal, kodeopskrift og testplan, men blev kasseret af en værktøjsfejl: mit
-eget output blev korrupt, da jeg skrev den danske konstant
-`PROMILLEGRÆNSE` — først `O`→`A`, så et tabt `L` — og `read`, `sed` og `rg`
-viste alle den korrupte tekst som om den var rigtig. **Fremover: ASCII i
-identifikere, og kund bytes med `node -e` når et navn slår fejl.** Næste
-iteration tager opgave 75 som en ren, implementeret tekst- og logikopgave.
+**C48 lukkede opgave 75's fund, som var skrevet ud, målt og aldrig landet — og
+den afslørede en auditmetode, der er billigere end nogen anden.** Den så,
+at opgave 75's fejl ikke lå i teksten, men i en **konstant, der var hardkodet
+ét sted og duplikeret et andet**: `maaKoere` i `src/lib/promille.ts` svarede
+med den danske grænse 0,5 ‰, mens komponenten havde sit eget
+`LIMIT = { da: 0.5, se: 0.2, no: 0.2 }`. Det er præcis C38's locale-leak igen,
+bare i logikken, og det fandt man ved at læse biblioteket *mod* komponenten —
+ikke ved at læse siden. Den fandt også, at FAQ'en svarede på "Hvornår kan jeg
+køre bil igen?" med **5,9 timer**, som er tiden til 0 ‰: læseren kan regne sig
+frem til ca. 2,5 time, og **det er ulovligt**. Nu findes `timerTilGraense` i
+modulet (rundt **op**, aldrig ned, på den afrundede promille siden viser), de
+fire eksempelrækker genereres af `beregnPromille` i `src/lib/promille-eksempler.ts`
+præcis som C40 gjorde for `/alder`, tabellen står på begge domæner med den
+grænse der gælder i landet, og FAQ'en er skrevet fra eksempelmodulet. Se
+opgave 76.
+
+**To negative fund fra C47's audit er skrevet ned, så ingen senere iteration
+bruger tid på dem.** `npm audit` er **0 sårbarheder** (135 filer, 1432 tests) —
+`AFHAENGIGHEDER.md` siger 1 kritisk + 7 høje for dette projekt, men det er et
+scan fra 2026-08-23 og er forældet. Og `engines`/`.nvmrc` mangler stadig, men
+`Dockerfile` fastslår `FROM node:22-alpine`, så byggeserveren *kan ikke* vælge
+Node 18 som i jordemoderstudy-fallet 23. august; en `engines`-erklæring ville være
+dokumentation, ikke en fejl-fiksering, og er derfor bevidst ikke lavet. CSS-
+advarslen i `next build` (7 warnings while optimizing generated CSS) er
+**forhåndsværende** — verificeret ved at bygge `master` uden ændringer.
+
+**C47's negative fund skal bruges som metode, ikke som emne.** Den viste, at
+"værktøjet kan det, siden siger det ikke" er en helt anden og billigere klasse
+end "byg et nyt felt". Samme spørgsmål bør stilles til de øvrige
+trafikstærke sider, før der bygges nyt: **find feltet i værktøjet, der siden
+ikke fortæller om.** Konkret åbne eksempler: `/dato` og `/tidszone` har flere
+tilstande end siden nævner. `/braendstof` er lukket med negativt fund;
+`/promille` gav et sikkerhedsfund, som nu er rettet.
 
 **C47 gjorde C45's stærkeste åbne kandidat færdig — og fandt en fejl i
 koden, ikke i teksten.** C45 skrev, at `/alder` manglede spørgsmålet
@@ -4972,6 +4996,94 @@ første halvdel af denne liste er fra DA-fladen, anden halvdel fra SE — de er
   implementationsklar fund — ikke en færdig opgave, og det står som sådan.
 
 
+#### 76. [x] FÆRDIG 2026-09-26 — C48 — `/promille`: værktøjet svarede på "hvornår må jeg køre bil" med tiden til 0 ‰
+
+- **Iteration start:** 2026-09-26 22:17 CEST. Køen var tom (alle 75 opgaver
+  færdige, intet `I GANG`), og de fire åbne deploynoters første vinduer er
+  **2026-09-27 07:30** (C37: 12:30) — efter denne iterations grænse, så intet
+  var verificerbart. Valget var køens punkt 3: opgave 75's fund, som var skrevet
+  ud og målt, men aldrig landet.
+- **Fundet var et sikkerhedsfund, og det er nu rettet.** To fejl, begge
+  bekræftet i live-output før rettelsen:
+  1. **Biblioteket svarede med den danske grænse overalt.** `maaKoere` var
+     hardkodet til `promille < 0.5` i `src/lib/promille.ts`, mens komponenten
+     havde sit eget `LIMIT = { da: 0.5, se: 0.2, no: 0.2 }`. UI'en var
+     rigtig, men enhver ny eller server-side bruger af `maaKoere` fik det
+     danske svar på beraknare.se, hvor lovens grænse er 0,2 ‰. Samme
+     fejlklasse som C38's locale-leak, bare i logikken. Nu ligger grænsen i
+     `PROMILLEGRANSE = { da: 0.5, se: 0.2, no: 0.2 }` i modulet, og
+     `beregnPromille` tager den som valgfrit femte argument, så komponent,
+     tabeller og FAQ ikke kan være uenige om hvilket land der regnes for.
+  2. **FAQ'en svarede på det forker spørgsmål.** "Hvornår kan jeg køre bil
+     igen?" svarede **5,9 timer**, som er tiden til 0 ‰. Læseren kan regne sig
+     frem til ca. 2,5 time — og det er ulovligt, fordi det er tiden til at
+     komme **under 0,5 ‰**, der bestemmer lovligheden. Den svenske svar var
+     værre: den sagde "ned till under 0,2 ‰ … 5,9 timmar", altså det danske
+     tidsrum på den svenske grænse. Begge svar er nu skrevet fra
+     eksempelmodulet, ikke i hånden.
+- **Tilføjet: `timerTilGraense(promille, graense)`.** Den manglede helt, både i
+  værktøjet og på siden. Den **ruller op, aldrig ned** (`ceil((p − g)/0,15 ×
+  10)/10`), så et svar aldrig kan være for optimistisk, og den bruger den
+  **afrundede** promille, som siden viser — så tallet læseren ser og tallet der
+  regnes på ikke kan glide fra hinanden. `timerTilNul` gør nu det samme, så de
+  to tidsrum udledes af præcis samme værdi.
+- **Rettelsens fire dele, i husets mønster fra C40/C47:**
+  1. `src/lib/promille.ts` — `PROMILLEGRANSE`, `graenseForLocale`,
+     `timerTilGraense`, valgfrit femte argument. **ASCII i identifikate**, som
+     opgave 75's værktøjsfælde kræver.
+  2. `src/lib/promille-eksempler.ts` — fire rækker **genereret af
+     `beregnPromille`**, præcis som `alder-eksempler.ts`, og hver række bærer
+     **begge** lovgrænser, så tabellen kan vise dansk 0,5 ‰ og svensk 0,2 ‰
+     uden to opgørelser af samme tal.
+  3. `src/app/promille/page.tsx` — tabellen "Hvornår er du igen promillefri?" /
+     "När är du åter nykter?" med kolonnerne *Situation / Promille nu / Under
+     {grænse} / Helt ædru (0 ‰)*, grænsen hentet fra domænet, plus et nyt afsnit
+     "To forskellige tal" i brødteksten på begge sprog.
+  4. `src/components/PromilleBeregner.tsx` — tredje kort i resultatpanelet,
+     "Under grænsen om 0,5 ‰", så det kortere tal ikke længere findes ét
+     sted og det længere et andet. Badge'en læser nu grænsen fra modulet i
+     stedet for to hardkodede strenge.
+- **Tallene er verificeret i en test, ikke i teksten.** Alle fire rækker er
+  hæftet i `promille-eksempler.test.ts`: 0,88/2,6/4,6/5,9 · 0,58/0,6/2,6/3,9 ·
+  0,73/1,6/3,6/4,9 · 1,51/6,8/8,8/10,1. Det er præcis opgave 75's tabel, og den
+  første kørsel fandt **én fejl i min egen formatter** (`2,60 timer` i stedet for
+  `2,6 timer`) — formatteren brugte promillens to decimaler. Rettet, og
+  formateringen har nu egen test.
+- **Dertil fire nye assertions, der låser fejlklassen:**
+  - `timerTilGraense ≤ timerTilNul` for alle rækker, og den svenske grænse
+    giver aldrig kortere tid end den danske.
+  - Rækkerne er fundet (`length === 4`) — C44's lektion: en test der er grøn på
+    en tom liste er værd intet.
+  - Hver bemærkning findes på begge sprog, og **en liste på 17 ord** (bl.a.
+    "genstande", "højere", "danske", "helt ædru" / "standardglas", "högre",
+    "svenska", "helt nykter") sikrer at ingen dansk tekst kan lække til svensk.
+    Den liste fandt **én rigtig lækage**: række 2 skrev "Under den danske
+    grænsen" i den svenske tekst. Rettet.
+  - `page-data.test.ts` kræver nu at FAQ'en indeholder **både** "2,6 timer" og
+    "5,9 timer" (DA) og "4,6 timmar" og "5,9 timmar" (SE), så de to tidsrum
+    ikke kan glide sammen igen.
+- **Verificeret lokalt før merge, på den rigtige server.** `next build` er
+  grøn, `next start` + curl på `/promille` med `Host: beraknare.se` giver 200,
+  og begge sider renderer tabellen med de rigtige tal og den rigtige grænse pr.
+  domæne. Det eneste `0,5 ‰` på den svenske side er den tilsigtede
+  sammenligning med Danmark i FAQ'en — kontrolleret, ikke antaget.
+- **MÅL:** `/promille` baseline **4.159 visninger / 60 klik / CTR 1,4 % /
+  pos. 7,9** pr. 2026-09-24 (GSC). Plausible gav ingen DA-række i top-15, så
+  de danske tal er GSC's. Autocomplete 2026-09-26 22:05 (DA): "promille
+  beregner" er forslag 1 til "promille", men DA har **ingen**
+  "hvornår er jeg promillefri"-forslag, mens SE har "hur länge sitter promille i
+  blodet" (forslag 2) og "promille dagen efter". Forventningen er derfor først
+  **flere impressions på spørgsmålsformen på beraknare.se** og et bedre svar
+  på dansk — ikke et CTR-spring på hovedordet. Et korrekt svar er også et
+  hensigtsspørgsmål for Google at vise i sit snippet. **Genmål 2026-10-10.**
+- **Bemærk til næste iteration:** opgave 75 skrev, at opgaven krævede "et
+  valgfrit femte argument" — det viste sig at være den *eneste* API-ændring.
+  `PromilleResultat` fik ét nyt felt, og ingen anden fil i repoet konstruerer
+  resultatet direkte, så ingen kaldssted uden for værktøjet og testene skulle
+  rettes. Det er værd at huske: de "ubeskrivne funktioner" C47's metode
+  ledte til, er ofte små, når man først har fundet dem.
+
+
 ### Næste kandidater efter C34 — lukket med negativt fund
 
 
@@ -5156,7 +5268,7 @@ efter datagrund:
    at finde ud af om **GSC har en række** for frister/indberetning — ellers
    skal det skrives som ❓, fordi det ellers er et emne bygget på autocomplete
    alene, hvilket C38-C41 tre gange har vist ikke er nok.
-5. **Til Mads' fire beslutninger** under ❓ — de låser bl.a.
+6. **Til Mads' fire beslutninger** under ❓ — de låser bl.a.
    `/api/v1/loen`'s kommuneskat, domænerne og `www`-redirects.
 
 ### ❓ Til Mads
@@ -6549,3 +6661,25 @@ landmark=lån, piggybank=opsparing osv.).
      "max ~63.000 kr/år" må **ikke** forekomme nogen steder på siden.
   2. Både guide og `/pension` skal vise **"9.900 kr/år"** for aldersopsparing.
   3. `/pension` skal vise "op til 68.700 kr/år i 2026" under "Ratepension".
+
+- **VERIFICÉR DEPLOY:** **C48** — `/promille` svarer på "hvornår må jeg køre bil
+  igen" med **tiden til at komme UNDER lovens grænse**, ikke tiden til 0 ‰.
+  Kode + plan i én commit på branch `ceo/promille-graensetid`, merge til `master`
+  **2026-09-26 22:2x CEST**. Første kandidatvindue **2026-09-27 07:30**.
+  Verificér **indhold**, HTTP 200 er ikke nok:
+  1. `https://minberegner.dk/promille` skal have H2 **"Hvornår er du igen
+     promillefri?"** med fire rækker, hvor række 1 er **0,88 ‰ / 2,6 timer /
+     5,9 timer** og række 4 er **1,51 ‰ / 6,8 timer / 10,1 timer**. Kolonnen
+     skal hedde **"Under 0,5 ‰"**, og detektøren i værktøjet skal have **tre**
+     kort med **"Under grænsen om 0,5 ‰"** mellem gram og "Tid til 0 ‰".
+  2. FAQ'en på `/promille` skal **indeholde både "2,6 timer" og "5,9 timer"**.
+     Den gamle sætning "skal blot regnes ned til under 0,5 ‰ … kræver 5,9
+     timer" må **ikke** forekomme nogen steder på siden — den er den fejl, der
+     fik læseren til at regne 3,3 timer for tidligt.
+  3. `https://beraknare.se/promille` skal have H2 **"När är du åter nykter?"**,
+     kolonnen **"Under 0,2 ‰"**, række 1 **0,88 ‰ / 4,6 timmar / 5,9 timmar**,
+     række 4 **1,51 ‰ / 8,8 timmar / 10,1 timmar**, og FAQ'en skal indeholde
+     **"4,6 timmar"** og **"5,9 timmar"**. Der må **ikke** stå "0,5 ‰" i
+     værktøjet på beraknare.se (kun i den tilsigtede sammenligning med
+     Danmark i FAQ'en).
+  4. `/api/health` skal svare `status: ok`.
