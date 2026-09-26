@@ -6665,7 +6665,7 @@ landmark=lån, piggybank=opsparing osv.).
 - **VERIFICÉR DEPLOY:** **C48** — `/promille` svarer på "hvornår må jeg køre bil
   igen" med **tiden til at komme UNDER lovens grænse**, ikke tiden til 0 ‰.
   Kode + plan i én commit på branch `ceo/promille-graensetid`, merge til `master`
-  **2026-09-26 22:2x CEST**. Første kandidatvindue **2026-09-27 07:30**.
+  **2026-09-26 22:28 CEST**. Første kandidatvindue **2026-09-27 07:30**.
   Verificér **indhold**, HTTP 200 er ikke nok:
   1. `https://minberegner.dk/promille` skal have H2 **"Hvornår er du igen
      promillefri?"** med fire rækker, hvor række 1 er **0,88 ‰ / 2,6 timer /
