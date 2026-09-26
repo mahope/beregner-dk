@@ -2753,7 +2753,8 @@ landmark=lån, piggybank=opsparing osv.).
   live). Ét deploy-vindue (21:30) siden C4's merge → stadig **ikke**
   `DEPLOY-MISSING`. Næste vindue 07:30 2026-09-26.
 - **VERIFICÉR DEPLOY:** D5 helligdage i arbejdsdage på `/dato` — se opgave 35.
-  Kode på `ceo/dato-helligdage`, merge 2026-09-26 04:35 CEST. Verificér **først
+  Kode `9c979f4` på `ceo/dato-helligdage`, merge `68a25f6` 2026-09-26 04:35 CEST,
+  efterfølgende fix `f4d0f8b` (se nedenfor). Verificér **først
   efter 07:30-vinduet 2026-09-26**, og verificér **indhold**, ikke HTTP 200:
   1. DA `https://minberegner.dk/dato`: FAQ'en skal indeholde spørgsmålet "Hvilke
      helligdage bruger beregneren?", og svaret skal liste de ni danske
@@ -2771,3 +2772,12 @@ landmark=lån, piggybank=opsparing osv.).
   5. Valgfrit men stærkest: kør `/dato` med start 1. december 2026 og slut
      31. december 2026. Forventes: 31 kalenderdage, 20 arbejdsdage, 8
      weekenddage, 3 helligdage. Er der kun fire felter, er den gamle kode live.
+- **Efterfølgende fix samme iteration (`f4d0f8b`).** Efter merge gennemgik jeg
+  kanttilfældet slutdato før startdato. Dato-inputsene har ingen `min`/`max`, så
+  det kan ske, og `taellWeekender`/`taellHelligdage` returnerer 0 for et omvendt
+  interval. Før D5 viste UI'et i så fald *alle* dage som "weekenddage", altså var
+  inputtet allerede misvisende; nu viste det tre nuller. Intervallet sorteres derfor
+  i "dage mellem"-tilstanden, præcis som i "arbejdsdage"-tilstanden. `dage` beholder
+  sin fortegn, så trækning af dage stadig virker. Ny test i `helligdage.test.ts`
+  dækker, at de tre tal er identiske uanset rækkefølge, når intervallet sorteres.
+  Gate efter fixen: **1170/1170** tests, lint grøn (498 filer), build grøn.
