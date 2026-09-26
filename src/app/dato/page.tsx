@@ -72,7 +72,7 @@ export default async function DatoPage() {
         <ul>
           <li>Vælg startdato</li>
           <li>Indtast antal arbejdsdage</li>
-          <li>Weekender springes automatisk over</li>
+          <li>Weekender, helligdage og nytårsaften springes over</li>
         </ul>
 
         <h3>4. Alder</h3>
@@ -88,7 +88,8 @@ export default async function DatoPage() {
           <li>1 uge = 7 dage</li>
           <li>1 arbejdsuge = typisk 5 dage</li>
           <li>1 år &asymp; 52 uger</li>
-          <li>1 år &asymp; 260 arbejdsdage (uden helligdage)</li>
+          <li>1 år &asymp; 260 hverdage (uden helligdage)</li>
+          <li>2026 har 253 arbejdsdage</li>
         </ul>
 
         <h2>Skudår</h2>
@@ -106,9 +107,12 @@ export default async function DatoPage() {
         <div className="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-400 dark:border-blue-500 p-4 my-6 not-prose">
           <p className="font-medium text-blue-800">Tip</p>
           <p className="text-blue-700">
-            Beregneren tager ikke højde for helligdage ved beregning af
-            arbejdsdage, da disse varierer fra år til år. Tilføj selv ekstra
-            dage for helligdage i din periode.
+            Arbejdsdage tælles mandag til fredag og springer de offentlige
+            helligdage over: nytårsdag, skærtorsdag, langfredag, påskedag,
+            2. påskedag, grundlovsdag, juleaftensdag, juledag og 2. juledag.
+            Nytårsaften er ikke en helligdag, men er heller ikke en
+            arbejdsdag, så den springes også over. Store bededag var
+            afskaffet som helligdag i 2024.
           </p>
         </div>
       </div>
@@ -151,7 +155,7 @@ export default async function DatoPage() {
         <ul>
           <li>Välj startdatum</li>
           <li>Ange antal arbetsdagar</li>
-          <li>Helger hoppas automatiskt över</li>
+          <li>Helger och röda dagar hoppas över</li>
         </ul>
 
         <h3>4. Ålder</h3>
@@ -167,7 +171,7 @@ export default async function DatoPage() {
           <li>1 vecka = 7 dagar</li>
           <li>1 arbetsvecka = vanligtvis 5 dagar</li>
           <li>1 år &asymp; 52 veckor</li>
-          <li>1 år &asymp; 260 arbetsdagar (utan helgdagar)</li>
+          <li>1 år &asymp; 260 vardagar (utan helgdagar)</li>
         </ul>
 
         <h2>Skottår</h2>
@@ -185,9 +189,11 @@ export default async function DatoPage() {
         <div className="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-400 dark:border-blue-500 p-4 my-6 not-prose">
           <p className="font-medium text-blue-800">Tips</p>
           <p className="text-blue-700">
-            Räknaren tar inte hänsyn till helgdagar vid beräkning av
-            arbetsdagar, eftersom dessa varierar från år till år. Lägg själv till extra
-            dagar för helgdagar under din period.
+            Arbetsdagar räknas måndag till fredag och hoppar över Sveriges
+            rödagar: nyårsdagen, trettondedag jul, långfredagen, påskdagen,
+            annandag påsk, första maj, kristi himmelsfärdsdag, nationaldagen,
+            midsommarafton och midsommardagen, alla helgons dag, julafton,
+            juldagen, annandag jul och nyårsafton.
           </p>
         </div>
       </div>

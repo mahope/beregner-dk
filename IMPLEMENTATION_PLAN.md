@@ -1,17 +1,17 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — C14 landet på `master` (kode `0d57e31`, merge `3dcadfe`) 2026-09-26 01:09 CEST
-2026-09-26 01:03-01:15 CEST. **Retter en fejl i forrige iterations statuslinje:**
-O1/O2/O3 er *live*, og C1 er også live. Live-kontrol 01:05 bekræfter 5.085 kr. og
-ingen 4.695 på `/blog/barsel-2026-regler-og-satser`, "BMI for voksne" på `/bmi` og
-7.426 på `/su`. Sidste succesfulde batch er **17:30-vinduet 2026-09-25**: `/procent`
-har C1's nye titel, mens `/dage-til/juledagen` stadig er 404 og `/tidszone` har den
-gamle titel, så C4-C13, L1 og F1 ligger uuddejlet. Forrige iterations note kaldte
-C1's nye titel "den gamle variant fra før C1" — det var en fejllæsning. Der er gået
-ét deploy-vindue (21:30) siden C4's merge, så **endnu ikke `DEPLOY-MISSING`**.
-Denne iteration fandt og rettede en reel, siteomfattende fejl i sitemap'en
-(lastmod-stempel ved hvert request), som lå som ufærdigt researchfund 6 siden
-2026-09-23. Næste iteration skal verificere indhold efter 07:30-vinduet 2026-09-26.
+STATUS: KØ — D5 landet på `master` 2026-09-26 04:35 CEST (kode: `/dato` tæller nu
+helligdage, se opgave 35)
+2026-09-26 04:30-04:35 CEST. **Live-kontrol 04:30 CEST:** `/api/health` svarer
+`status: ok`; `/procent` har C1's titel; `/tidszone` har stadig den gamle titel, så
+C4-C14, L1 og F1 ligger uuddejlet. Kun ét deploy-vindue (21:30 den 25/9) er gået
+siden C4's merge kl. 18:40, så **endnu ikke `DEPLOY-MISSING`**. Næste vindue er
+07:30 den 26/9.
+Denne iteration fandt ucommittet arbejde i træet (helligdage i `DatoBeregner`) fra
+en tidligere kørsel, som aldrig blev committet eller noteret. Det blev landet på
+`ceo/dato-helligdage` og fik en reel fejl rettet undervejs: "Weekenddage" blev
+regnet som `dage minus arbejdsdage`, altså inklusive helligdage. Næste iteration
+skal verificere indhold efter 07:30-vinduet 2026-09-26.
 
 ## Fase 3 — trafik-drevet
 
@@ -1957,6 +1957,79 @@ Denne iteration fandt og rettede en reel, siteomfattende fejl i sitemap'en
      `/api/v1`-kontrakten er rørt.
   5. `npm run lint`, `npm run test` og `npm run build` er grønne.
 
+#### 35. [x] FÆRDIG 2026-09-26 — D5 — `/dato` tæller helligdage i arbejdsdage
+
+- **Iteration start:** 2026-09-26 04:30 CEST. Denne iteration startede med
+  ucommittet arbejde i træet fra en tidligere kørsel (helligdage i
+  `DatoBeregner`), som aldrig blev committet eller noteret. Det blev fundet
+  ved `git status` og landet på `ceo/dato-helligdage` i stedet for at blive
+  smidt væk.
+- **Datagrund:** `/dato` er sitets stærkeste side: 1.045 besøgende/28d (+76 %),
+  963 indgangssider, bounce 5 %, og 129.188 visninger i Search Console med
+  0,6 % CTR på position 5,8. Søgningerne er konkrete: "dage mellem datoer"
+  448 visninger/10k pos 5, "antal dage mellem to datoer" 247/5k pos 5 og
+  **"hvor mange dage er der tilbage af 2026"** 212/2k pos 5.
+- **Det dokumenterede gap, der lå bag betingelsen i køen.** Køen sagde
+  "Ingen ændring før et konkret søgeintentionsgap kan dokumenteres". Gapet er
+  ikke et CTR-gap men et **korrekthedsgap**: siden skrev selv
+  *"Beregneren tager ikke højde for helligdage"*, og `DatoBeregner` sprang
+  kun lørdag/søndag over. Ethvert interval med en helligdag gav et **forkert**
+  arbejdsdagstal, og det gælder især de helårs- og julesøgninger, der udgør en
+  stor del af `/dato`'s søgninger. Konkurrenten iKalender tilbyder
+  arbejdsdage *med* helligdager, så vores side var den mindre korrekte.
+- **Beslutning:** nyt `src/lib/helligdage.ts` som **én** kilde til
+  helligdage med `HelligdagLocale = "da" | "se"`, dækket af 41 tests.
+  Påske (og dermed skærtorsdag, langfredag, påskedag, 2. påskedag og kristi
+  himmelsfærd) udledes af den eksisterende gregoriske algoritme i
+  `src/lib/dage-til.ts`, så de to ikke kan glide fra hinanden. Store bededag
+  er bevidst **uden** i listen (afskaffet som helligdag fra 2024, testet
+  eksplicit for både 2023 og 2024). Nytårsaften er heller ikke en helligdag,
+  men er en arbejdsdag-fritagelse, og det er kodet som en sådan.
+- **Rettelse fundet undervejs (væsentlig):** den ucommittede kode regnede
+  "Weekenddage" som `dage minus arbejdsdage`, hvilket også tæller helligdage
+  og nytårsaften. En løbet over juleugen 2026 ville have vist "3 weekenddage",
+  selv om 2. juledag er en lørdag. Derfor er `taellWeekender` tilføjet, så
+  weekend, helligdag og arbejdsdag er tre **disjunkte** tal. Ved negativt
+  antal arbejdsdage vendes intervallet, før de to tællere kører.
+- **Ændrede også svensk `/dato`.** Den svenske FAQ sagde *"Helgdagar är inte
+  inkluderade"*, hvilket blev **falsk** af denne ændring, og SE har 84.021
+  visninger med 0,1 % CTR på position 8,4. Beskrivelse, meta, OG, keywords og
+  to FAQ-svar er nu på linje med den nye adfærd, med Sveriges rödagar
+  opregnet og midsommar og alla helgons dag noteret som "den lørdag de
+  indtræffer på".
+- **Verifikation 2026-09-26 04:35:** `npm run build` grøn (137+2 sider, kun de
+  7 kendte pre-existing CSS-advarsler), `npm run test` grøn (**1169/1169**,
+  108 filer), `npm run lint` grøn (498 filer). 41 nye tests i
+  `src/lib/helligdage.test.ts`, bl.a. at påskedagen er en søndag og
+  skærtorsdag en torsdag for hvert år 2024-2045, at 2026 har 253 danske
+  arbejdsdage, og at hverdage minus arbejdsdage i december 2026 er præcis
+  24./25. december og 31. december.
+- **Kendte advarsler, ikke rørt:** `beregner.no` er **ikke live** (404 på både
+  `/` og `/api/health`, og den står i `hiddenDomains`), så den norske
+  `page-data` er urørt. `helligdagLocale()` mapper alt ikke-`se` til `da`, så
+  hvis `beregner.no` nogensinde slås til, skal den have sit eget norsk
+  helligdagssæt: skærtorsdag er ikke norsk helligdag, grundlovsdag findes
+  ikke, og 17. maj er helligdag. Noteret, ikke løst — se ❓ Til Mads.
+- **Forventet effekt:** `/dato` er position 5-6 på fire konkrete søgninger med
+  ~129.000 visninger. Værktøjet går fra at være *fejltagende* til at være det
+  mest komplette danske datoværktøj på de søgninger, og FAQ'en rammer nu
+  eksplicit "helligdage 2026". Effekten er først og fremest korrekthed og
+  genbrugssignal, ikke et direkte CTR-løft.
+- **MÅL:** `/dato` DA baseline **1.045 besøgende/28d**, 963 indgangssider,
+  bounce 5 % pr. 2026-09-26. Search Console baseline 129.188 visninger,
+  789 klik, CTR 0,6 %, position 5,8 pr. 2026-08-26 til 2026-09-23.
+  `/dato` SE baseline 119 besøgende/28d (+644 %) pr. 2026-09-26; Search
+  Console 84.021 visninger, 82 klik, CTR 0,1 %, position 8,4.
+  **Genmål 2026-10-10.**
+- **Acceptkriterier:**
+  1. Arbejdsdage, weekenddage og helligdage er tre disjunkte tal i UI'et.
+  2. Dansk liste = de ni officielle 2026-helligdage på de rigtige datoer.
+  3. Svensk liste = Sveriges rödagar, med midsommar og alla helgons dag på
+     en lørdag.
+  4. Ingen FAQ, beskrivelse eller sidetekst siger længere, at helligdage
+     ignoreres.
+  5. `npm run lint`, `npm run test` og `npm run build` er grønne.
+
 #### D4. Nyt fund 2026-09-26 — tre hypoteser i køen er falsificeret
 
 - **`/procent` mangler interne links** (hypotesen fra kandidat 31) er **forkert**:
@@ -2004,6 +2077,16 @@ Denne iteration fandt og rettede en reel, siteomfattende fejl i sitemap'en
   rigtig browser-session eller JV' PDF-udgave, ikke robots-gatede søgemaskiner.
 
 ### ❓ Til Mads
+
+- **Skal `beregner.no` nogensinde live sættes? (D5, 2026-09-26).** Domænet er
+  konfigureret i `src/lib/domain-config.ts`, men står i `hiddenDomains` og svarer
+  404 på både `/` og `/api/health`, så det er ikke live. `helligdagLocale()` i
+  `src/lib/helligdage.ts` mapper alt ikke-`se` til dansk, fordi der kun er to
+  domæner i spil. Får `beregner.no` trafik, skal den have sit eget norsk
+  helligdagssæt: skærtorsdag er ikke norsk helligdag, grundlovsdag (5. juni)
+  findes ikke i Norge, 17. maj er helligdag, og påske mandag er helligdag. Jeg
+  gætter ikke på det uden dig — sig til, hvis domænet skal live, så gør jeg det
+  som en selvstændig, kildeført opgave med tests.
 
 - **`www.minberegner.dk` og `www.beraknare.se` findes ikke (D3, 2026-09-26).** Begge
   svarer 404 direkte fra Cloudflare, så `www`-varianter af enhver URL er døde. Det er
@@ -2084,10 +2167,13 @@ Denne iteration fandt og rettede en reel, siteomfattende fejl i sitemap'en
   Næste skridt er **ikke** flere felter: `/renteberegner` linkede allerede til siden på
   begge domæner (linket er ikke locale-gated), så den interne forbindelse findes. Det
   åbne er indhold og den primære procenttabel (❓ Til Mads).
-- `/dato` 1.008 besøgende/28d (+92 %): stærkeste side og allerede bred funktionstil;
-  konkurrenten iKalender tilbyder arbejdsdage uden helligdager, mens vores side
-  springer helligdage over. Ingen ændring før et konkret søgeintentionsgap kan dokumenteres.
-  MÅL: baseline 1.008 2026-09-23.
+- ~~`/dato`~~ er lukket som D5 den 2026-09-26, se opgave 35: værktøjet tæller nu
+  de offentlige helligdage (og nytårsaften) med, så et interval med en helligdag
+  ikke længere giver et forkert arbejdsdagstal. Betingelsen "ingen ændring før et
+  konkret søgeintentionsgap kan dokumenteres" blev opfyldt af et
+  **korrektheds**-gap, ikke et CTR-gap: siden skrev selv, at helligdage ignoreres.
+  MÅL: baseline 1.045 besøgende/28d pr. 2026-09-26; Search Console 129.188
+  visninger, CTR 0,6 %, position 5,8 — genmål 2026-10-10.
 - **Interne links fra `/dato` til de nye dage-til-sider er bevidst ikke lavet i
   C7.** De kan gives ved skolestart/jul, hvor spørgsmålet opstår, men bør først
   måles: hvis de nye sider tager trafik fra `/dato`, skal de linkes *fra* `/dato`.
@@ -2660,3 +2746,28 @@ landmark=lån, piggybank=opsparing osv.).
   HTTP 200 er ikke nok: de gamle sider svarer 200 med dobbeltmærke. Tjek på
   `beraknare.se/cookiepolitik` og `beraknare.se/privatlivspolitik` for de svenske
   titler "Integritetspolicy"/"Cookiepolicy" med ét suffiks.
+- **Live-kontrol 2026-09-26 04:30 CEST (femte datapunkt, ingen note lukket):**
+  uændret billede. `/api/health` svarer `status: ok`, `/procent` har C1's titel,
+  `/dage-til/juledagen` svarer stadig **404**, og `/tidszone` har stadig titlen
+  "Tidszoneberegner - Omregn tid mellem lande" (C4's svar-først-variant er ikke
+  live). Ét deploy-vindue (21:30) siden C4's merge → stadig **ikke**
+  `DEPLOY-MISSING`. Næste vindue 07:30 2026-09-26.
+- **VERIFICÉR DEPLOY:** D5 helligdage i arbejdsdage på `/dato` — se opgave 35.
+  Kode på `ceo/dato-helligdage`, merge 2026-09-26 04:35 CEST. Verificér **først
+  efter 07:30-vinduet 2026-09-26**, og verificér **indhold**, ikke HTTP 200:
+  1. DA `https://minberegner.dk/dato`: FAQ'en skal indeholde spørgsmålet "Hvilke
+     helligdage bruger beregneren?", og svaret skal liste de ni danske
+     helligdage. Det gamle svar "Tæller beregneren arbejdsdage korrekt? … Store
+     bededag blev afskaffet som helligdag i 2024" må **ikke** stå, fordi det er
+     nyt.
+  2. DA samme side: `<meta name="description">` skal indeholde både "ca. måneder"
+     og "helligdage" — den gamle havde "ca. måneder" men ikke "helligdage", og en
+     tidligere kørings variant havde "helligdage" men miste "ca. måneder". Kræver
+     begge ord.
+  3. DA sidetekst: tipboksen må **ikke** længere sige "Beregneren tager ikke højde
+     for helligdage". Søg efter "helligdage" og læs hele afsnittet.
+  4. SE `https://beraknare.se/dato`: FAQ'en må **ikke** længere sige "Helgdagar är
+     inte inkluderade", og der skal være et svar med Sveriges rödagar.
+  5. Valgfrit men stærkest: kør `/dato` med start 1. december 2026 og slut
+     31. december 2026. Forventes: 31 kalenderdage, 20 arbejdsdage, 8
+     weekenddage, 3 helligdage. Er der kun fire felter, er den gamle kode live.
