@@ -3228,8 +3228,8 @@ landmark=lån, piggybank=opsparing osv.).
      `beraknare.no` er ikke live og forventes ikke at have ændret tekst.
 
 
-- **VERIFICÉR DEPLOY:** C17 arveafgift-artiklen — kode og merge-ref følger i denne
-  iteration (ca. 10:45 CEST). Første kandidatvindue er **12:30 2026-09-26**.
+- **VERIFICÉR DEPLOY:** C17 arveafgift-artiklen — kode `b13e254`, merge `cf56831`
+  2026-09-26 10:45 CEST. Første kandidatvindue er **12:30 2026-09-26**.
   Verificér **indhold** på https://minberegner.dk/blog/arveafgift-regler-og-satser:
   `<title>` og H1 skal være "Arveafgift 2026: 1 mio. kr. til børn koster 91.155 kr.",
   introen skal vise 91.155 kr / 392.300 kr / 36,25 %, eksemplet til søskende skal
