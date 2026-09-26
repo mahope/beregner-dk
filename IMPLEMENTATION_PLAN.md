@@ -4,14 +4,21 @@ STATUS: KØ — **to åbne deploynoter (C23 lønsidernes 2026-tal og C24 SE `/le
 syv noter lukket ved indholdskontrol 12:33.** 12:30-batchen 2026-09-26 udgav
 C15-C22. C23 (merge 12:19) og C24 (merge 12:21) kom efter batchens start og kan
 først verificeres efter **17:30**-vinduet; intet er frosset pga. ventetiden.
+C25 (SE `/tidszone` forankret i Sverige) er merged og følger samme batch.
 `/api/health` svarer `status: ok`.
 
-Næste iteration skal **ikke** optimere CTR på de samme svar-først-sider igen.
-Den skal enten gå efter **placering/indhold** (C19-C24 gjorde det) eller lukke det
-sidste åbne fund fra C22's research: SE `/tidszone` er forankret i Danmark, selv om
-sidens egen tekst svarer fra Sverige. Bemærk desuden: `/api/v1`'s
-kommuneskat-default på 25,07 % afviger fra den verificerede 25,049 % og kræver en
-beslutning, før den røres (se ❓).
+Næste iteration skal **ikke** optimere CTR på de samme svar-først-sider igen, og
+den skal **ikke** gentage C25. C22's fire researchfund er nu alle lukket (C23,
+C24, C25), så næste iteration skal gå efter **placering/indhold** eller efter de
+krydsverificerede fund fra samme research, der endnu står ubekræftede i liste
+under opgave 49: `/efterloen`'s folkepensionsalder-tabel (modsiger den
+verificerede `folkepension.ts`), `EfterloensBeregner.tsx`'s 481 mod 962 timer,
+`/billaan`'s 7 %-rækker under "Rente 6 %", `/husleje` 1-3 mod `/flyttebudget`
+3-6 måneders depositum, `/solceller` 25-30 mod 15-20 år og `/gaeldsfri`'s
+`simuler(() => 0)`, der aldrig kan vise noget. **Bekræft den konkrete linje,
+før du ændrer noget.** Desuden: `/api/v1`'s kommuneskat-default på 25,07 %
+afviger fra den verificerede 25,049 % og kræver en beslutning, før den røres
+(se ❓).
 
 
 ## Fase 3 — trafik-drevet
@@ -2791,10 +2798,10 @@ beslutning, før den røres (se ❓).
   derfor **forkert**: det ville afvige fra DA-mønsteret og gå stale. SE `/dato`'s
   lavere CTR (0,1 % mod 0,6 %) skyldes **placering** (8,4 mod 5,8), ikke titel.
 
-#### 49. Ny kandidat — fire ubearbejdede fund fra C22's research (prioriteret)
+#### 49. [x] FÆRDIG 2026-09-26 — C22's fire researchfund (alle fire lukket som C23, C24 og C25)
 
-**Del 1 og 2 er lukket som opgave 50 (C23), del 3 som opgave 51 (C24) 2026-09-26.
-Kun del 4 (SE `/tidszone`) står åbne.**
+**Del 1 og 2 er lukket som opgave 50 (C23), del 3 som opgave 51 (C24) og del 4
+som opgave 52 (C25) 2026-09-26. Alle fire fund er lukket.**
 
 Fundene er verificeret i koden med fil/linje, men **ikke** rettet i denne
 iteration (tidsbudget). Rangordnet efter trafik × tillid:
@@ -2886,6 +2893,60 @@ første halvdel af denne liste er fra DA-fladen, anden halvdel fra SE — de er
   pr. 2026-09-26**. Genmål 2026-10-10. Det interessante tal er **placeringen**:
   titlen og FAQ'en er nu svar-først, så en bevægelse fra 12,5 mod top-10 er det
   realistiske mål, ikke en CTR-effekt på eksisterende visninger.
+
+#### 52. [x] FÆRDIG 2026-09-26 — C25 — SE `/tidszone` var forankret i Danmark
+
+- **Iteration start:** 2026-09-26 13:04 CEST på `ceo/c25-tidszone-locale`. Køen
+  havde ingen `I GANG`-opgave, og STATUS pegede på det sidste åbne fund fra C22.
+- **Datagrund:** `/tidszone` på beraknare.se har **3.189 visninger, 11 klik,
+  CTR 0,3 %, position 7,7** (GSC 2026-08-27..09-24) og 15 besøgende/28d
+  (Plausible 2026-09-26). Den danske side har 24.723 visninger, så **værktøjet er
+  delt mellem domænerne** — det er derfor en skrivfejl i et klientværktøj træffer
+  begge. Svenske søgninger på emnet er dokumenteret i GSC, bl.a. "hvad är det
+  för klok hos er" og "tidsskillnad Sverige-USA".
+- **Fund.** C22's rapport (`:2826-2831`) var korrekt: `TidszoneBeregner.tsx`
+  mærkede hjemtidszonen som "Danmark (CET/CEST)" / "Köpenhamn" på **begge**
+  domæner, tabellen hed "Tidsskillnad från Danmark", og sommertidsteksten sagde
+  "Danmark byter till sommartid" — mens sidens egen svenska H2, tabel og prosa
+  svarer fra Sverige (`src/app/tidszone/page.tsx:83-116`, `page-data.ts:3168-3171`
+  med metaTitle "Vad är klockan i USA när det är 12 i Sverige?"). **Talberøringen
+  var ikke berørt:** Sverige og Danmark deler CET/CEST (UTC+1/+2), så det var en
+  mærkning, ikke en regnefejl. Sidens egen popularitetsrubrik for SE sagde
+  desuden "från Centraleuropa", selv om resten af siden bruger Sverige.
+- **Beslutning/implementering:** hjemtidszonen beholder sit id `dk` og sit offset
+  (UTC+1) — **delt URL-state som `?d=...fraTidszone=dk` forbliver gyldig på begge
+  domæner** — men navn og by mærkes nu pr. locale: DA "Danmark (CET/CEST)" /
+  "København", SE **"Sverige (CET/CEST)" / "Stockholm"**. Rubrikken blev omdøbt
+  fra `diffFromDenmark` til `diffFromHome` ("Tidsforskel fra Danmark" /
+  "Tidsskillnad från Sverige"), sommertidsteksten peger på Sverige på svensk, og
+  popularitetstabellen bruger den navngivne konstant `HJEM_UTC_FORSKEL` i stedet
+  for et hårdkodet 60. SE-sidens rubrik er "Populära tidsskillnader från Sverige".
+  Samme gennemgang af de danske forankringer i `TidsBeregner.tsx` og
+  `DatoBeregner.tsx` (de to største svenska værktøjer) fandt **ingen** `Danmark`/
+  `København`, så fundet var unikt for dette værktøj.
+- **Acceptkriterier:**
+  1. SE-værktøjet viser "Stockholm", "Sverige (CET/CEST)" og "Tidsskillnad från
+     Sverige" og **ikke** "Köpenhamn" eller "från Danmark". **PASS**
+  2. DA-værktøjet er uændret: "København", "Tidsforskel fra Danmark", ingen
+     "Sverige". **PASS**
+  3. Tidsforskel, dag-skift og URL-state er uændrede; `fraTidszone=dk` indlæses
+     stadig i begge locales. **PASS** (ny test)
+  4. DA-siden er uændret; kun SE-prosas rubrik er præciseret. **PASS**
+  5. `npm run test`, `npm run lint` og `npm run build` er grønne. **PASS**
+- **Kvalitetsgate 2026-09-26 13:05 CEST:** `npm run test` grøn (**1264/1264,
+  122 filer** — 4 nye i `TidszoneBeregner.test.tsx`), `npm run lint` grøn
+  (512 filer), `npm run build` grøn (139 sider + typecheck; kun den ene kendte
+  pre-existing CSS-advarselslinje).
+- **MÅL:** `/tidszone` (SE) Search Console baseline **3.189 visninger, 11 klik,
+  CTR 0,3 %, position 7,7 pr. 2026-09-24**; Plausible **15 besøgende/28d
+  pr. 2026-09-26**. Genmål 2026-10-10. DA(`/tidszone`) forventes uændret:
+  24.723 visninger, 115 klik, CTR 0,5 %, position 7,5 — det er en kontrol.
+- **Forventet effekt:** svensk relevans og tillid på det svenska værktøj, ikke en
+  stor CTR-effekt på dansk. Værktøjet på beraknare.se får samme svar-først
+  forankring som sidens tekst, hvilket også er det Google læser forpligtigende
+  data (FAQ/tabel) på.
+
+
 
 #### 50. [x] FÆRDIG 2026-09-26 — C23 — Lønsiderne sagde 15 % topskat og tre forskellige kommuneskatter
 

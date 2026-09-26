@@ -15,6 +15,12 @@ interface Tidszone {
   by: string;
 }
 
+/** Hjemtidszonen (Danmark på .dk, Sverige på .se) ligger på CET = UTC+1. */
+const HJEM_UTC_FORSKEL = 60;
+
+// `dk` er id'et for hjemtidszonen. Danmark og Sverige deler CET/CEST (UTC+1/+2),
+// så id'et og offsettet er uændret, mens navn og by mærkes pr. locale. Det holder
+// gamle delte links (`?d=...fraTidszone=dk`) gyldige på begge domæner.
 const tidszoner: Tidszone[] = [
   { id: "dk", navn: "Danmark (CET/CEST)", offset: 60, by: "København" },
   { id: "uk", navn: "Storbritannien (GMT/BST)", offset: 0, by: "London" },
@@ -76,7 +82,7 @@ export default function TidszoneBeregner() {
       summary: (fraTid: string, fraBy: string, tilTid: string, tilBy: string, dagTekst: string) =>
         `${fraTid} i ${fraBy} = ${tilTid} i ${tilBy} ${dagTekst}`,
       calcName: "Tidszoneberegner",
-      diffFromDenmark: "Tidsforskel fra Danmark",
+      diffFromHome: "Tidsforskel fra Danmark",
       hourSuffix: "t",
       dstTitle: "Om sommertid",
       dstBody:
@@ -85,7 +91,7 @@ export default function TidszoneBeregner() {
     },
     se: {
       navn: {
-        dk: "Danmark (CET/CEST)",
+        dk: "Sverige (CET/CEST)",
         uk: "Storbritannien (GMT/BST)",
         us_east: "USA Östkusten (EST/EDT)",
         us_west: "USA Västkusten (PST/PDT)",
@@ -102,7 +108,7 @@ export default function TidszoneBeregner() {
         south_africa: "Sydafrika (SAST)",
       } as Record<string, string>,
       by: {
-        dk: "Köpenhamn", uk: "London", us_east: "New York", us_west: "Los Angeles",
+        dk: "Stockholm", uk: "London", us_east: "New York", us_west: "Los Angeles",
         japan: "Tokyo", china: "Beijing", australia: "Sydney", india: "Mumbai",
         dubai: "Dubai", brazil: "São Paulo", germany: "Berlin", france: "Paris",
         thailand: "Bangkok", singapore: "Singapore", south_africa: "Johannesburg",
@@ -122,11 +128,11 @@ export default function TidszoneBeregner() {
       summary: (fraTid: string, fraBy: string, tilTid: string, tilBy: string, dagTekst: string) =>
         `${fraTid} i ${fraBy} = ${tilTid} i ${tilBy} ${dagTekst}`,
       calcName: "Tidszonsberäknare",
-      diffFromDenmark: "Tidsskillnad från Danmark",
+      diffFromHome: "Tidsskillnad från Sverige",
       hourSuffix: "h",
       dstTitle: "Om sommartid",
       dstBody:
-        "Den här beräknaren använder standardtidsskillnader. Kom ihåg att sommartid (DST) kan påverka den faktiska tidsskillnaden. Danmark byter till sommartid sista söndagen i mars och tillbaka sista söndagen i oktober.",
+        "Den här beräknaren använder standardtidsskillnader. Kom ihåg att sommartid (DST) kan påverka den faktiska tidsskillnaden. Sverige byter till sommartid sista söndagen i mars och tillbaka sista söndagen i oktober.",
       dateLocale: "sv-SE",
     },
   } as const;
@@ -375,17 +381,17 @@ export default function TidszoneBeregner() {
         />
       </div>
 
-      {/* Populære tidszoner fra Danmark */}
+      {/* Populære tidszoner fra hjemtidszonen */}
       <div className="bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg overflow-hidden">
         <div className="p-4 bg-gray-50 dark:bg-gray-700 border-b dark:border-gray-600">
-          <h3 className="font-medium dark:text-white">{l.diffFromDenmark}</h3>
+          <h3 className="font-medium dark:text-white">{l.diffFromHome}</h3>
         </div>
         <div className="p-4">
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
             {tidszoner
               .filter(tz => tz.id !== 'dk')
               .map((tz) => {
-                const forskel = (tz.offset - 60) / 60;
+                const forskel = (tz.offset - HJEM_UTC_FORSKEL) / 60;
                 return (
                   <div key={tz.id} className="flex justify-between p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded">
                     <span className="dark:text-gray-300">{l.by[tz.id]}</span>
