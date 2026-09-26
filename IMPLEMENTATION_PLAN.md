@@ -3470,8 +3470,8 @@ første halvdel af denne liste er fra DA-fladen, anden halvdel fra SE — de er
   sidens prosa i begge sprog og **begge blogartikler** renderer nu de udledte tal.
   `/braendstof`'s egne tal (52,8 % / 40,2 %, 0,43/0,90/0,71) er urørt, så C30's åbne
   deploynote kan stadig verificeres mod præcis de tal.
-- **Landet:** kode + plan i denne iterations commit på `ceo/c32-elbil-et-ratested`
-  (merge-ref noteres nedenst). `/api/health` svarer `status: ok`.
+- **Landet:** kode `e0c65d5`, plan samlet i samme commit; merge til `master` er
+  `d4a8183` 2026-09-26 16:15 CEST. Begge refs pushet. `/api/health` svarer 200.
 - **Kvalitetsgate 2026-09-26 16:12 CEST:** `npm run build` grøn (typecheck
   inkluderet), `npm run test` grøn (**1344/1344, 129 filer** — 10 nye tests: 7 i
   `braendstof.test.ts`, 3 i den nye `ElbilBenzinBeregner.test.tsx`), `npm run lint`
@@ -4017,7 +4017,8 @@ landmark=lån, piggybank=opsparing osv.).
 ## VERIFICÉR DEPLOY-log
 - ⏳ **ÅBEN — VERIFICÉR DEPLOY: C32 `/elbil` + de to bilartikler: ét ratested for
   el/benzin, "under halvdelen" væk.** Kode og plan i denne iterations commit på
-  `ceo/c32-elbil-et-ratested`, merge til `master` 2026-09-26 ca. 16:15 CEST —
+  `ceo/c32-elbil-et-ratested` (kode `e0c65d5`), merge til `master` `d4a8183`
+  2026-09-26 16:15 CEST —
   efter 12:30-batchens start, så første kandidatvindue er **17:30 2026-09-26**. Ét
   deploy-vindue siden merge, så intet er `DEPLOY-MISSING` (kræver to) og intet er
   frosset. Verificér **indhold**, HTTP 200 beviser intet:
