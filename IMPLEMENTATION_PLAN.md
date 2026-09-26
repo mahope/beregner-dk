@@ -2,7 +2,7 @@
 
 STATUS: KØ — **tolv åbne deploynoter (C23-C32) + C33.** 12:30-batchen 2026-09-26 udgav
 C15-C22. C23 (merge 12:19), C24 (12:21), C25 (13:07), C26 (13:15), C27 (13:25),
-C28 (14:30), C29 (14:38), C30 (ca. 15:00), C31 (15:08), C32 og C33 (16:10) kom efter
+C28 (14:30), C29 (14:38), C30 (ca. 15:00), C31 (15:08), C32 og C33 (16:00) kom efter
 batchens start og kan først verificeres efter **17:30**-vinduet; intet er frosset pga.
 ventetiden. `/api/health` svarer `status: ok`.
 
@@ -3539,7 +3539,8 @@ første halvdel af denne liste er fra DA-fladen, anden halvdel fra SE — de er
   i `useState` og reset), 33 %-linjen vises, og DA/SE/NO har alle feltet. Sidens
   brødtekst og FAQ'en renderer de udledte tal; 1.800 kr. i eksemplet er en
   illustration ("har du …"), ikke et gennemsnit, og det ligger i modulet.
-- **Landet:** se git log for kode- og plan-commit på `ceo/c33-husleje-30pct-og-boligforbrug`.
+- **Landet:** kode `050279c` (med planen), merge til `master` er `e90136e`
+  2026-09-26 16:00 CEST. Begge refs pushet; `/api/health` svarer 200.
 - **Kvalitetsgate 2026-09-26 16:00 CEST:** `npm run build` grøn (139 sider +
   typecheck, ingen nye advarsler), `npm run test` grøn (**1358/1358, 130 filer** —
   14 nye tests: 10 i `husleje.test.ts`, 4 i `fact-consistency.test.ts`),
@@ -4118,12 +4119,12 @@ landmark=lån, piggybank=opsparing osv.).
 
 ## VERIFICÉR DEPLOY-log
 - ⏳ **ÅBEN — VERIFICÉR DEPLOY: C33 `/husleje`: 30 %-eksemplet er nået i værktøjet,
-  og el/vand/varme kan trækkes fra huslejen.** Kode `ce0e0f6`, merge `PLACEHOLDER`
-  2026-09-26 16:10 CEST (se opgave 60). Verificér **indhold**: siden skal sige "Med en
+  og el/vand/varme kan trækkes fra huslejen.** Kode `050279c`, merge `e90136e`
+  2026-09-26 16:00 CEST (se opgave 60). Verificér **indhold**: siden skal sige "Med en
   nettoløn på 25.000 kr. er dit loft for boligudgifter 7.500 kr." og FAQ'en skal
   nævne 8.250 kr. for 33 %-reglen; værktøjets store tal skal SSR'e som 7.500 kr., og
   feltet "El, vand og varme" skal være med i markup. `/api/health` skal svare
-  `status: ok`. Merge 16:10 er før 17:30-vinduet, så intet er `DEPLOY-MISSING`
+  `status: ok`. Merge 16:00 er før 17:30-vinduet, så intet er `DEPLOY-MISSING`
   (kræver to) og intet er frosset.
 
 - ⏳ **ÅBEN — VERIFICÉR DEPLOY: C32 `/elbil` + de to bilartikler: ét ratested for
