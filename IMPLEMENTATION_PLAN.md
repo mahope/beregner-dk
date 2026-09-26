@@ -3,7 +3,7 @@
 STATUS: KØ — **fjorten åbne deploynoter (C23-C36).** 12:30-batchen 2026-09-26 udgav
 C15-C22. C23 (merge 12:19), C24 (12:21), C25 (13:07), C26 (13:15), C27 (13:25),
 C28 (14:30), C29 (14:38), C30 (ca. 15:00), C31 (15:08), C32 (16:15), C33 (16:00),
-C34 (16:34), C35 (17:10) og C36 (17:55) kom efter batchens start og kan først
+C34 (16:34), C35 (17:10) og C36 (17:59) kom efter batchens start og kan først
 verificeres efter **17:30**-vinduet; intet er frosset pga. ventetiden.
 `/api/health` svarer `status: ok`.
 
@@ -3879,7 +3879,11 @@ første halvdel af denne liste er fra DA-fladen, anden halvdel fra SE — de er
   Hawaii mangler og at værktøjet bruger standardforskelle. Greenland, Kreta,
   Tyrkiet, Bali og Auckland står i tabellerne som **opslagstabeller**, ikke som
   løfter om at værktøjet kan regne dem.
-- **Landet:** kode og plan i denne iterations commit på `ceo/c36-tidszone-artikel`.
+- **Landet:** kode og plan i `fa5989f` på `ceo/c36-tidszone-artikel`, merge til
+  `master` er `f7a1222` 2026-09-26 17:59 CEST. Begge refs pushet; `/api/health`
+  svarer 200 med `status: ok` **på den gamle kode** — batch-deployeren kører
+  næste gang 2026-09-27 07:30, fordi merge skete efter både 17:30- og
+  21:30-vinduet.
 
 ### Næste kandidater efter C34 — lukket med negativt fund
 
@@ -4425,7 +4429,8 @@ landmark=lån, piggybank=opsparing osv.).
 ## VERIFICÉR DEPLOY-log
 - ⏳ **ÅBEN — VERIFICÉR DEPLOY: C36 `/blog/hvad-er-klokken-i-usa-naar-den-er-12-i-danmark`
   + returlink fra `/tidszone`.** Kode og plan i denne iterations commit på
-  `ceo/c36-tidszone-artikel`, merge til `master` 2026-09-26 ca. 17:58 CEST.
+  `ceo/c36-tidszone-artikel` (`fa5989f`), merge til `master` `f7a1222`
+  2026-09-26 17:59 CEST.
   17:30- og 21:30-vinduerne er begge *før* merge, så første kandidatvindue er
   **2026-09-27 07:30** — intet er `DEPLOY-MISSING` og intet er frosset. Verificér
   **indhold**: artiklen skal servere 200 med H1 "Hvad er klokken i USA, når den er
