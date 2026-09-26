@@ -1,4 +1,11 @@
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+/**
+ * Tidszonen låses til Danmark, fordi to af testene tæller dage hen over et
+ * skifte for sommertid. I UTC er 25.–26. oktober 2026 præcis 24 timer, så
+ * fejlen aldrig kunne fejle på en maskine med UTC-tid.
+ */
+process.env.TZ = "Europe/Copenhagen";
+
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import DatoBeregner from "./DatoBeregner";
 import { LocaleProvider } from "./LocaleProvider";
@@ -105,6 +112,17 @@ describe("DatoBeregner — dage mellem", () => {
     expect(screen.queryByText(/Nyårsafton är inte en officiell helgdag/)).toBeNull();
   });
 
+  test("et skifte for sommertid tælles som én dag, ikke to", async () => {
+    // 25. oktober 2026 er søndagen hvor Danmark går tilbage. Mellem de to
+    // midnat går der 25 timer, og en Math.ceil på millisekunderne svarede 2
+    // på to datoer der er præcis én dag hinanden.
+    renderDato("2026-10-25", "2026-10-26", "da");
+
+    await waitFor(() => {
+      expect(antalDage(/^Antal dage$/)).toBe(1);
+    });
+  });
+
   test("samme dag giver nul i alle felter", async () => {
     renderDato("2026-12-31", "2026-12-31", "da");
 
@@ -171,5 +189,126 @@ describe("DatoBeregner — alder", () => {
     });
     expect(screen.queryByText(/NaN/)).toBeNull();
     expect(screen.queryByText(/^Din alder$/)).toBeNull();
+  });
+});
+
+/** Renderer et delelink-state for en af de to datotilstande med udgangsdato. */
+function renderUdgangsdato(
+  inputs: { mode: "tilfoej-dage" | "arbejdsdage"; baseDato: string; antalDage: number },
+  locale: "da" | "se" = "da"
+) {
+  const encoded = encodeCalculationState({
+    type: "dato",
+    inputs,
+    timestamp: 1700000000000,
+  });
+  window.history.replaceState({}, "", `/dato?s=${encoded}`);
+  const config =
+    locale === "se" ? getDomainConfig("beraknare.se") : getDomainConfig("localhost");
+
+  render(
+    <LocaleProvider locale={locale} domainConfig={config}>
+      <DatoBeregner />
+    </LocaleProvider>
+  );
+}
+
+/**
+ * Klikker Kopiér og giver tilbage præcis det der landede i klipbordet.
+ * Det er den streng brugeren sender videre, så det er den der skal testes —
+ * knappen viser den ikke.
+ */
+async function kopiTekst(): Promise<string> {
+  const skrevet: string[] = [];
+  Object.defineProperty(navigator, "clipboard", {
+    configurable: true,
+    value: {
+      writeText: (tekst: string) => {
+        skrevet.push(tekst);
+        return Promise.resolve();
+      },
+    },
+  });
+  fireEvent.click(screen.getByRole("button", { name: /Kopiér resultat|Kopiera resultat/ }));
+  await waitFor(() => {
+    expect(skrevet).toHaveLength(1);
+  });
+  return skrevet[0];
+}
+
+describe("DatoBeregner — teksten brugeren kopierer og deler", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    cleanup();
+  });
+
+  test("et dag-tal nævner de to datoer det gælder", async () => {
+    // Mandag 28. september til tirsdag 29. september 2026. Uden datoerne i
+    // teksten sagde den "1 dage mellem datoer", som ingen kan bruge.
+    renderDato("2026-09-28", "2026-09-29", "da");
+
+    await waitFor(() => {
+      expect(antalDage(/^Antal dage$/)).toBe(1);
+    });
+    // Ét tal, ét ord: dansk har to former, og "1 dage" er en fejl i den
+    // sætning brugeren kopierer.
+    expect(await kopiTekst()).toBe("1 dag mellem 28. september 2026 og 29. september 2026");
+  });
+
+  test("et flertal får dage, og det samme på svensk", async () => {
+    renderDato("2026-09-28", "2026-12-29", "se");
+
+    await waitFor(() => {
+      expect(antalDage(/^Antal dagar$/)).toBe(92);
+    });
+    expect(await kopiTekst()).toBe("92 dagar mellan 28 september 2026 och 29 december 2026");
+  });
+
+  test("arbejdsdage-tilstanden siger hvilken dato den løber fra, ikke 'fra nu'", async () => {
+    // Udgangsdatoen er et felt brugeren selv kan ændre, så en etiket der
+    // hævder "fra nu" er en faktuel påstand om en dato brugeren netop har
+    // valgt fra.
+    renderUdgangsdato({
+      mode: "arbejdsdage",
+      baseDato: "2026-01-05",
+      antalDage: 30,
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText(/30 arbejdsdage fra 5\. januar 2026/)).toBeTruthy();
+    });
+    expect(screen.queryByText(/fra nu/)).toBeNull();
+    expect(await kopiTekst()).toBe("30 arbejdsdage fra 5. januar 2026");
+  });
+
+  test("et negativt antal trækker fra i stedet for at blive lagt til", async () => {
+    renderUdgangsdato({
+      mode: "tilfoej-dage",
+      baseDato: "2026-09-27",
+      antalDage: -30,
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText(/^Resultat$/)).toBeTruthy();
+    });
+    // Før skrev den "-30 dage tilføjet": et minus tal der lagtages.
+    expect(await kopiTekst()).toBe("30 dage før 27. september 2026");
+    expect(screen.queryByText(/-\d+ dage tilføjet/)).toBeNull();
+  });
+
+  test("et stort antal får tusindtalsseparator", async () => {
+    renderUdgangsdato({
+      mode: "tilfoej-dage",
+      baseDato: "2026-09-27",
+      antalDage: 1000,
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText(/^Resultat$/)).toBeTruthy();
+    });
+    expect(await kopiTekst()).toBe("1.000 dage fra 27. september 2026");
   });
 });

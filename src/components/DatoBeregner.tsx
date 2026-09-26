@@ -15,7 +15,7 @@ import {
   taellWeekender,
   type HelligdagLocale,
 } from '@/lib/helligdage';
-import { parseIsoDato, plusIsoMaaneder, tilIsoDato } from '@/lib/lokal-dato';
+import { heleDageMellem, parseIsoDato, plusIsoMaaneder, tilIsoDato } from '@/lib/lokal-dato';
 import { beregnAlder } from '@/lib/alder';
 
 type BeregningsMode = "dage-mellem" | "tilfoej-dage" | "arbejdsdage" | "alder";
@@ -27,6 +27,18 @@ function helligdagLocale(locale: string): HelligdagLocale {
 function formatDate(date: Date, intlLocale: string): string {
   return date.toLocaleDateString(intlLocale, {
     weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
+
+/**
+ * Kort dato til deleteksten: "27. september 2026". Uden ugedagsnavn, fordi
+ * teksten skal kunne ligge i én linje i en mail eller en besked.
+ */
+function formatDateShort(date: Date, intlLocale: string): string {
+  return date.toLocaleDateString(intlLocale, {
     year: "numeric",
     month: "long",
     day: "numeric",
@@ -61,7 +73,7 @@ const labels = {
     fridage: "Weekenddage",
     helligdage: "Helligdage",
     resultat: "Resultat",
-    arbejdsdageFraNu: "arbejdsdage fra nu",
+    arbejdsdageFra: "arbejdsdage fra",
     kalenderdageIAlt: "Kalenderdage i alt",
     fridageSprunget: "Weekenddage sprunget",
     helligdageIPerioden: "helligdage i perioden",
@@ -74,9 +86,10 @@ const labels = {
     totalUger: "Total uger",
     naesteFoedselsdag: "Næste fødselsdag",
     om: "Om",
-    dageMellemDatoer: "dage mellem datoer",
-    dageTilfoejet: "dage tilføjet",
-    arbejdsdageSummary: "arbejdsdage",
+    dageMellem: "mellem",
+    dagEntyd: "dag",
+    fra: "fra",
+    foer: "før",
     aarSummary: "år",
     mdrSummary: "mdr",
     dageSummary: "dage",
@@ -109,7 +122,7 @@ const labels = {
     fridage: "Lördagar/söndagar",
     helligdage: "Helgdagar",
     resultat: "Resultat",
-    arbejdsdageFraNu: "arbetsdagar från nu",
+    arbejdsdageFra: "arbetsdagar från",
     kalenderdageIAlt: "Kalenderdagar totalt",
     fridageSprunget: "Skippade lörd/sön",
     helligdageIPerioden: "helgdagar i perioden",
@@ -122,9 +135,10 @@ const labels = {
     totalUger: "Totalt veckor",
     naesteFoedselsdag: "Nästa födelsedag",
     om: "Om",
-    dageMellemDatoer: "dagar mellan datum",
-    dageTilfoejet: "dagar tillagda",
-    arbejdsdageSummary: "arbetsdagar",
+    dageMellem: "mellan",
+    dagEntyd: "dag",
+    fra: "från",
+    foer: "före",
     aarSummary: "år",
     mdrSummary: "mån",
     dageSummary: "dagar",
@@ -208,8 +222,7 @@ export default function DatoBeregner() {
         const start = parseIsoDato(startDato);
         const slut = parseIsoDato(slutDato);
         if (!start || !slut) return null;
-        const diffTime = slut.getTime() - start.getTime();
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        const diffDays = heleDageMellem(start, slut);
         const diffWeeks = Math.floor(Math.abs(diffDays) / 7);
         const diffMonths = Math.round(Math.abs(diffDays) / 30.44);
         const hl = helligdagLocale(locale);
@@ -265,8 +278,7 @@ export default function DatoBeregner() {
         const resultatDato = foegArbejdsdage(base, antalDage, hl);
 
         // Tæl samlede dage inkl. weekender
-        const diffTime = resultatDato.getTime() - base.getTime();
-        const samledeDage = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        const samledeDage = heleDageMellem(base, resultatDato);
 
         // Et negativt antal løber baglæns, så intervallet skal vendes for tællingerne.
         const fra = antalDage >= 0 ? base : resultatDato;
@@ -308,6 +320,43 @@ export default function DatoBeregner() {
         return null;
     }
   }, [mode, startDato, slutDato, baseDato, antalDage, foedselsdato]);
+
+  const baseDatoKort = useMemo(() => {
+    const base = parseIsoDato(baseDato);
+    return base ? formatDateShort(base, intlLocale) : "";
+  }, [baseDato, intlLocale]);
+
+  // Én tekst til både kopier og deling, så de to aldrig kan komme til at sige
+  // hver sit (/moms gjorde det, før C52 lagde dem i samme kald). Et dag-tal er
+  // værd intet uden de datoer det gælder, så datoerne er med i alle tre
+  // datotilstande: modtageren får ellers "61 dage mellem datoer" og ingen
+  // idé om hvilke.
+  const resultatTekst = useMemo(() => {
+    if (!resultat) return "";
+    switch (resultat.type) {
+      case "dage-mellem": {
+        const fra = parseIsoDato(startDato);
+        const til = parseIsoDato(slutDato);
+        if (!fra || !til) return "";
+        const antal = Math.abs(resultat.dage);
+        return `${formatNumber(antal, locale)} ${antal === 1 ? l.dagEntyd : l.dageWord} ${l.dageMellem} ${formatDateShort(fra, intlLocale)} ${l.ogWord} ${formatDateShort(til, intlLocale)}`;
+      }
+      case "tilfoej-dage": {
+        if (!baseDatoKort) return "";
+        const antal = Math.abs(antalDage);
+        return `${formatNumber(antal, locale)} ${antal === 1 ? l.dagEntyd : l.dageWord} ${antalDage < 0 ? l.foer : l.fra} ${baseDatoKort}`;
+      }
+      case "arbejdsdage": {
+        if (!baseDatoKort) return "";
+        const antal = Math.abs(antalDage);
+        return `${formatNumber(antal, locale)} ${l.arbejdsdageWord} ${antalDage < 0 ? l.foer : l.fra} ${baseDatoKort}`;
+      }
+      case "alder":
+        return `${formatNumber(resultat.aar, locale)} ${l.aarSummary}, ${formatNumber(resultat.maaneder, locale)} ${l.mdrSummary}, ${formatNumber(resultat.dage, locale)} ${l.dageSummary}`;
+      default:
+        return "";
+    }
+  }, [resultat, startDato, slutDato, antalDage, baseDatoKort, locale, intlLocale, l]);
 
   const modes = [
     {
@@ -492,7 +541,7 @@ export default function DatoBeregner() {
             <div className="space-y-4">
               <div className="p-6 bg-green-100 dark:bg-green-900/20 rounded-xl text-center">
                 <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
-                  {antalDage} {l.arbejdsdageFraNu}
+                  {antalDage} {l.arbejdsdageFra} {baseDatoKort}
                 </p>
                 <p className="text-2xl font-bold text-green-700 dark:text-green-300 capitalize">
                   {resultat.formatteret}
@@ -559,23 +608,11 @@ export default function DatoBeregner() {
       )}
 
       <div className="flex justify-center">
-        <CopyResultButton text={
-          resultat?.type === "dage-mellem" ? `${resultat.dage} ${l.dageMellemDatoer}` :
-          resultat?.type === "tilfoej-dage" ? `${antalDage} ${l.dageTilfoejet}` :
-          resultat?.type === "arbejdsdage" ? `${antalDage} ${l.arbejdsdageSummary}` :
-          resultat?.type === "alder" ? `${resultat.aar} ${l.aarSummary}, ${resultat.maaneder} ${l.mdrSummary}, ${resultat.dage} ${l.dageSummary}` :
-          ""
-        } />
+        <CopyResultButton text={resultatTekst} />
         <ShareCalculation
           getShareableLink={getShareableLink}
           calculatorName={l.calculatorName}
-          resultSummary={
-            resultat?.type === "dage-mellem" ? `${resultat.dage} ${l.dageMellemDatoer}` :
-            resultat?.type === "tilfoej-dage" ? `${antalDage} ${l.dageTilfoejet}` :
-            resultat?.type === "arbejdsdage" ? `${antalDage} ${l.arbejdsdageSummary}` :
-            resultat?.type === "alder" ? `${resultat.aar} ${l.aarSummary}, ${resultat.maaneder} ${l.mdrSummary}, ${resultat.dage} ${l.dageSummary}` :
-            undefined
-          }
+          resultSummary={resultatTekst || undefined}
         />
       </div>
     </div>
