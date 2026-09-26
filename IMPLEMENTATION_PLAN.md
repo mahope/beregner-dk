@@ -1,10 +1,23 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — **tre noter står åbne, ingen er `DEPLOY-MISSING`.** C37
+STATUS: KØ — **fire noter står åbne, ingen er `DEPLOY-MISSING`.** C37
 (`/renteberegner`) med første kandidatvindue 2026-09-27 12:30, C38 (svensk
-spørgsmålsform), C39 (svensk `/procent`) og nu C40 (DA `/tidsberegner`) med
-**2026-09-26 21:30** som første fælles kandidatvindue. `/api/health`
-svarer `status: ok`.
+spørgsmålsform), C39 (svensk `/procent`), C40 (DA `/tidsberegner`) og nu C41
+(`/dato` → `dage-til`) med **2026-09-26 21:30** som første fælles
+kandidatvindue. `/api/health` svarer `status: ok`.
+
+**C41 lukkede C40's nye klasse med et negativt fund og fandt en anden.**
+C40 fandt på `/tidsberegner` en `metaDescription`, der lovede et eksempel,
+brødteksten ikke havde. C41 auditerede de 13 øvrige DA-sider i GSC-top-14
+med samme metode: **hvert tal i hver `metaDescription` findes på siden**, så
+det var en enkelt fejltype, ikke en mønsterklasse — og det er skrevet ned, så
+ingen senere iteration bruger tid på den. Audittens *fugtige* søgestreng gav
+imod, at GSC skriver "benzin beregner", hvor siden skriver "benzinberegner":
+dansk sammensætning gør exact-match ubrugeligt som fejlsignal. Det fund,
+der holdt, var et andet: **`/dato` linkede til nul af de syv `dage-til`-sider**,
+hvis egen ankertekst er "Hvor mange dage er der til 1. december?" — GSC's
+næststørste søgning på sitets næststørste side (996 visninger, pos. 5).
+Kæden hang kun én vej, fordi `/nedtaelling` linkede til alle svy. Se opgave 68.
 
 **C40 fandt en klasse C1-C39 ikke havde set: titlen lovede et eksempel,
 brødteksten havde det ikke.** `/tidsberegner` er **tredjestørste CTR-tab på
@@ -4196,6 +4209,87 @@ første halvdel af denne liste er fra DA-fladen, anden halvdel fra SE — de er
   decimalformatet i værktøjet er en separat, visuel enhed og rørt ikke her.
   SE `/tidsberegner` er urørt: C38's svar-først-sæt er endnu ikke målt.
 
+#### 68. [x] FÆRDIG 2026-09-26 — C41 — Auditér C40's klasse på 13 DA-sider (negativt fund) og giv `/dato` de interne links, dens egne søgninger kræver
+
+- **Iteration start:** 2026-09-26 19:11 CEST. Køen var tom (67 opgaver færdige,
+  intet `I GANG`). De fire åbne deploynoter har første kandidatvindue 21:30 /
+  2026-09-27 12:30, så intet kunne verificeres i denne iteration. Kandidat #6
+  (C40's `metaDescription`-mod-brødtekst-klasse) var den eneste åbne, så den
+  blev auditeret — og auditten førte til et **andre** fund, som blev rettet.
+- **Datagrund:** Search Console 2026-08-27→09-24, `/dato` **130.392
+  visninger, 801 klik, CTR 0,6 %, pos. 5,8** — sitets **næststørste side** og
+  **største indgang** (963 indgangssider, 1.045 besøgende/28d, bounce 5 %).
+  To af sidens fire søgninger er spørgsmål om en enkelt fremtidig dato:
+  **"hvor mange dage er der til 1 december" 996 visninger/2k pos. 5** og
+  **"hvor mange dage er der tilbage af 2026" 223 visninger/2k pos. 5**. Den
+  fjerde og tredje er "dage mellem datoer" (450/11k, pos. 5) og "antal dage
+  mellem to datoer" (248/5k, pos. 5).
+- **Auditmetode:** live HTML hentet fra en dev-server på alle 13 øvrige
+  DA-sider i GSC-top-14, og hver sides `metaDescription` holdt op mod sin egen
+  udtrukne brødtekst. Kriteriet var C40's: *lover metadatet et tal eller et
+  eksempel, som den synlige side ikke viser?*
+- **Resultat: negativt.** På alle 13 sider er **hvert tal i `metaDescription`
+  at finde i brødteksten** (kun to falske positive: `2026.` og `0,10.` er
+  fundet som tal med tilhørende punktum). C40's fund var altså en **enkelt
+  fejltype**, ikke en mønsterklasse: titlen på `/tidsberegner` lovede et
+  eksempel, der kun fandtes i metadat. **Kandidaten lukkes hermed som klasse.**
+  En kontrol på **søgestrengens exact-match** mod brødteksten gav derimod
+  mange fund, som auditen **ikke** tæller som fejl: "benzinberegner" står på
+  siden som ét ord, GSC skriver "benzin beregner" med mellemrum, og det samme
+  gælder "kvadratmeter beregner", "tidszoner beregner" og "boligstøtte
+  beregner". Dansk sammensætning gør exact-match ubrugeligt som fejlsignal;
+  det er kun **selvmodsigelsen mellem to steder på samme side**, der er
+  verificérbar uden trafikdata.
+- **Det fund, der blev rettet — en kæde, der kun hang én vej.** `/dato`
+  linkede til **nogle** `dage-til`-sider: nul. Verificeret programmatisk på
+  den hentede markup (`grep '/dage-til'` → 0 forekomster) og i koden. Men
+  `/nedtaelling` linker til alle svy af dem (C7's test), og de sider var lavet
+  netop for de to GSC-søgninger ovenfor: `dage-til.ts`'s egen spørgsmålstekst
+  for 1. december er **"Hvor mange dage er der til 1. december?"** — GSC's
+  søgestreng med komma. Så det største søgetrafik-anker på sitet havde nul
+  udgående links til de sider, der svarer på dets største spørgsmål, og de
+  sider fik al deres linkvægt fra en side med 20 besøgende.
+- **Implementering:** `src/app/dato/page.tsx` har nu samme blok som
+  `/nedtaelling` (H2 + svy links med `event.copy.question` som ankertekst +
+  en modsætning til `/nedtaelling`), bygget af de samme
+  `getDageTilEvents`/`getDageTilPrefix`, så **DA får `/dage-til/*` og SE får
+  `/dagar-till/*`** med svensk H2 og svensk ankertekst, og **NO får ingen** —
+  `isDageTilLocale` sørger for det, så intet dansk lækker til en tredje
+  domæne. Blokken står efter brødteksten og **før** FAQ'en. Returlinken
+  `/nedtaelling` → `/dato` er dermed symmetrisk med den nye `/dato` → `/nedtaelling`.
+- **Test:** 3 nye tests i `src/app/dato/page.test.tsx` (nu 5) — DA linker til
+  **alle** `getDageTilSlugs("da")` og til `/nedtaelling` og har ankerteksten
+  "Hvor mange dage er der til 1. december?"; SE linker til alle
+  `getDageTilSlugs("se")` under `/dagar-till/`, har den svenske H2, og har
+  **ikke** `/dage-til/`; NO har ingen af dem. Fælden er bevidst bred: en
+  ny dage-til-side uden link fra `/dato` gør testen rød, fordi den løber over
+  `getDageTilSlugs` og ikke en håndskrevet liste.
+- **Verifikation 2026-09-26:** `npm run lint` grøn (531 filer), `npm run test`
+  grøn (**1.385/1.385**, 132 filer), `npm run build` grøn (**141 sider**).
+  Renderet markup gennemgået på alle tre domæner: DA 7 `/dage-til/*`-links
+  + H2 "Datoer folk oftest tæller ned til" + `/nedtaelling`, SE 7
+  `/dagar-till/*`-links + H2 "Datum folk oftast räknar ner till" +
+  "Hur många dagar är det till 1 december?", NO nul af begge dele.
+- **Forventet effekt:** `/dato` har allerede positionen (pos. 5) på begge
+  søgninger, så dette er **ikke** et CTR-spil — det er, at læseren på sitets
+  største indgang kan gå fra sit spørgsmål direkte til sit svar i ét klik.
+  Det kan både øge `/dage-til/*`'es reelle besøg (og dermed deres placering)
+  og sænke bounce på indgangen, fordi siden får en tydelig næste handling
+  frem for kun et værktøj. Effekten skrives som måling, ikke som løfte: den er
+  en **internt-link-klasse**, og den er målt på nul sider endnu.
+- **MÅL:** `/dato` baseline **130.392 visninger, 801 klik, CTR 0,6 %, pos. 5,8**
+  pr. 2026-09-24 (GSC) og **1.045 besøgende/28d, 963 indgangssider, bounce 5 %**
+  pr. 2026-09-26 (Plausible). `/dage-til/1-december` og `/dage-till/*` har
+  ingen Plausible-række i 28-dages-snapshottet — **ukendt, ikke nul**.
+  **Genmål 2026-10-10.**
+- **Ikke gjort, bevidst:** ingen ny `dage-til`-side for "hvor mange dage er der
+  tilbage af 2026". Svaret er "dage til 31. december" og `/dage-til/nytaarsaften`
+  dækker det, men GSC's søgning er skrevet om **året** ("tilbage af 2026"), og
+  en ny `/dage-til/2026`-rute ville være en tynd variant af en side, der
+  findes, så længe spørgsmålet ikke har sin egen søgevolumen. Holdt til der er
+  dokumenteret behov. Tilføjelse af interne links fra `/dato` er det samme
+  spørgsmål i mindre mål, og det er gjort nu for de sider, der findes.
+
 ### Næste kandidater efter C34 — lukket med negativt fund
 
 
@@ -4259,16 +4353,27 @@ efter datagrund:
    research-iteration, fordi det kræver **substanstjek** (kcal, aktivitet,
    BMR), ikke en titel. **Mål ikke før 2026-10-10**, så C38's effekt er målt
    først.
-6. **NY klasse fundet i C40 (2026-09-26): `metaDescription` mod synlig
-   brødtekst.** C1-C16 optimerede *titler*; auditten på `/tidsberegner` viste,
-   at en titel kan love et **eksempel, siden ikke viser**. Det er en anden
-   fejltype end lav CTR, fordi den er **selvmodsigende** og derfor verificérbar
-   uden trafikdata. **Næste opgave skal auditere de 13 øvrige DA-sider i
-   GSC-top-14** (kun `/tidsberegner` var fundet) med samme metode: træk den
-   synlige brødtekst ud og sammenlign den med det `metaDescription` lover.
-   Datagrund: hvert fund sidder på en side med 4.000-149.000 visninger på
-   position 5-10. **Mål C40 først (2026-10-10)** — klassen er endnu uprøvet,
-   så effekten måles på den ene side, før den generaliseres.
+6. ~~**NY klasse fundet i C40: `metaDescription` mod synlig brødtekst.**~~
+   **Lukket i C41 med negativt fund.** Alle 13 øvrige DA-sider i GSC-top-14
+   blev auditeret med C40's metode (live-HTML, `metaDescription` holdt op mod
+   den udtrukne brødtekst), og **hvert tal i hver meta findes på siden**.
+   C40 var en enkelt fejltype, ikke en mønsterklasse. En side kan altså ikke
+   vurderes ved, om GSC's søgestreng forekommer *exact* — dansk
+   sammensætning ("benzinberegner" vs. "benzin beregner") gør det ubrugeligt
+   som fejlsignal. Det eneste verificérbare signal uden trafikdata er en
+   **selvmodsigelse mellem to steder på samme side**. Se opgave 68.
+7. **Ny klasse fundet i C41: interne kæder, der kun hænger én vej.**
+   `/dato` — 130.392 visninger, 963 indgangssider — linkede til nul af de syv
+   `dage-til`-sider, hvis egen ankertekst ("Hvor mange dage er der til 1.
+   december?") matcher sitets næststørste søgning (996 visninger, pos. 5).
+   `/nedtaelling` linkede til alle svy. Det er rettet og testet. **Næste
+   opgave skal auditere de øvrige trafikstærke sider for samme fejl:**
+   hvilke højtrafiksider har et værktøj eller en artikel, der *findes* og
+   *har faciliteten selv*, men som ingen side med trafik peger på?
+   Datagrund: hver kandidat ligger på en side med 4.000-149.000 visninger
+   på position 5-10, og den konkrete metode er den samme som ovenfor —
+   tælle `href="/slug"`-forekomster i den hentede markup af de største sider.
+   Mål C41 først (2026-10-10).
 ### ❓ Til Mads
 - ⏳ **VERIFICÉR DEPLOY: C40 — DA `/tidsberegner` svar-først med eksempeltabel.**
   Kode `d5e0cb5`, merge `7c42f8e` 2026-09-26 18:59 CEST på branch
