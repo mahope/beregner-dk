@@ -6,6 +6,8 @@ import FAQ from "@/components/FAQ";
 import RelatedCalculators from "@/components/RelatedCalculators";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import { PROTEIN_G_PER_KG, type KalorieMaal } from "@/lib/makroer";
+import { formatNumber } from "@/lib/format";
 
 export async function generateMetadata() {
   return generatePageMetadata("kalorier");
@@ -15,6 +17,11 @@ export default async function KalorierPage() {
   const locale = await getLocale();
   const domainConfig = await getCurrentDomainConfig();
   const pageData = getPageData("kalorier", locale) || getPageData("kalorier", "da")!;
+  const dec = (value: number) => formatNumber(value, locale, { maximumFractionDigits: 1 });
+  const proteinRange = (maal: KalorieMaal) => {
+    const { min, max } = PROTEIN_G_PER_KG[maal];
+    return `${dec(min)}-${dec(max)}`;
+  };
 
   return (
     <div>
@@ -85,13 +92,16 @@ export default async function KalorierPage() {
         </p>
         <ul>
           <li>
-            <strong>Vedligehold:</strong> 0.8-1.2g per kg kropsvægt
+            <strong>Vedligehold:</strong> {proteinRange("vedligehold")} g per kg kropsvægt
           </li>
           <li>
-            <strong>Vægttab:</strong> 1.2-1.6g per kg (bevarer muskler)
+            <strong>Vægttab:</strong> {proteinRange("tab")} g per kg (bevarer muskler)
           </li>
           <li>
-            <strong>Muskelopbygning:</strong> 1.6-2.2g per kg
+            <strong>Muskelopbygning:</strong> {proteinRange("opbyg")} g per kg
+          </li>
+          <li>
+            Beregneren bruger midten af det valgte interval, så proteinmængden følger dit mål
           </li>
         </ul>
         <p>1g protein = 4 kalorier</p>
@@ -173,13 +183,16 @@ export default async function KalorierPage() {
         </p>
         <ul>
           <li>
-            <strong>Underhåll:</strong> 0,8-1,2 g per kg kroppsvikt
+            <strong>Underhåll:</strong> {proteinRange("vedligehold")} g per kg kroppsvikt
           </li>
           <li>
-            <strong>Viktnedgång:</strong> 1,2-1,6 g per kg (bevarar muskler)
+            <strong>Viktnedgång:</strong> {proteinRange("tab")} g per kg (bevarar muskler)
           </li>
           <li>
-            <strong>Muskeluppbyggnad:</strong> 1,6-2,2 g per kg
+            <strong>Muskeluppbyggnad:</strong> {proteinRange("opbyg")} g per kg
+          </li>
+          <li>
+            Kalkylatorn använder mitten av det valda intervallet, så proteinmängden följer ditt mål
           </li>
         </ul>
         <p>1 g protein = 4 kalorier</p>
