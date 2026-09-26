@@ -108,6 +108,71 @@ export const DAGE_TIL_EVENTS: DageTilEvent[] = [
     },
   },
   {
+    id: "juleaften",
+    anchor: {
+      da: { kind: "fixed", month: 12, day: 24, offsetDays: 0 },
+      se: { kind: "fixed", month: 12, day: 24, offsetDays: 0 },
+    },
+    da: {
+      slug: "juleaften",
+      copy: {
+        short: "juleaften",
+        question: "Hvor mange dage er der til juleaften?",
+        facts: [
+          "Juleaften er 24. december — altid samme dato, uanset hvilken ugedag den falder på.",
+          "Juleaften er dagen før juledagen, så de to ligger altid én dag fra hinanden.",
+          "I 2026 falder juleaften på en torsdag. Juleaften står i kalenderen som helligdag, mens nytårsaften 31. december ikke gør.",
+        ],
+        faq: [
+          {
+            question: "Tæller dagen i dag med?",
+            answer:
+              "Nej. Tallet er forskellen mellem dagens dato og juleaften, så vælger du 23. december som dags dato, står der 1 dag tilbage.",
+          },
+          {
+            question: "Hvornår er juleaften næste gang?",
+            answer:
+              "Juleaften er altid 24. december. I 2026 falder den på en torsdag og i 2027 på en fredag, så datoen er fast, men ugedagen skifter.",
+          },
+          {
+            question: "Hvad er forskellen på juleaften og juledagen?",
+            answer:
+              "Juleaften er 24. december og juledagen 25. december. Når juleaften er tællet ned, har du altså præcis én dag tilbage.",
+          },
+        ],
+      },
+    },
+    se: {
+      slug: "julafton",
+      copy: {
+        short: "julafton",
+        question: "Hur många dagar är det till julafton?",
+        facts: [
+          "Julafton är 24 december — alltid samma datum, oavsett vilken veckodag den infaller på.",
+          "Julafton är dagen före juldagen, så de två ligger alltid en dag ifrån varandra.",
+          "År 2026 infaller julafton på en torsdag. Både julafton och nyårsafton 31 december räknas som helgdagar i den svenska kalendern.",
+        ],
+        faq: [
+          {
+            question: "Räknas dagen i dag med?",
+            answer:
+              "Nej. Talet är skillnaden mellan dagens datum och julafton, så väljer du 23 december som dagens datum står det 1 dag kvar.",
+          },
+          {
+            question: "När är julafton nästa gång?",
+            answer:
+              "Julafton är alltid 24 december. År 2026 infaller den på en torsdag och 2027 på en fredag, så datumet är fast men veckodagen växlar.",
+          },
+          {
+            question: "Vad är skillnaden mellan julafton och juldagen?",
+            answer:
+              "Julafton är 24 december och juldagen 25 december. När julafton är räknad ned har du alltså exakt en dag kvar.",
+          },
+        ],
+      },
+    },
+  },
+  {
     id: "nytaarsaften",
     anchor: {
       da: { kind: "fixed", month: 12, day: 31, offsetDays: 0 },
