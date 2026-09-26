@@ -2082,7 +2082,8 @@ endnu ikke er kørt. Kun ét deploy-vindue (21:30 den 25/9) er gået siden C4's 
 - **Forventet effekt:** først og fremmest korrekthed på sitets mest generelle
   skatteartikel — fire tal og et regneeksempel var forkerde eller uholdbare. Ingen
   dokumenteret CTR-effekt, fordi der ikke er en baseline.
-- **Landet:** kode og tests i commit på `ceo/skat-2026-artikel` 2026-09-26 05:12 CEST.
+- **Landet:** kode og tests i `c273317`; merge til `master` `a563e74` 2026-09-26
+  05:14 CEST. Begge refs pushet.
 
 #### 37. Ny kandidat — blogartikler med det samme sats-mønster mangler baseline
 
@@ -2851,7 +2852,7 @@ landmark=lån, piggybank=opsparing osv.).
   dækker, at de tre tal er identiske uanset rækkefølge, når intervallet sorteres.
   Gate efter fixen: **1170/1170** tests, lint grøn (498 filer), build grøn.
 - **VERIFICÉR DEPLOY:** S2 rettelse af `/blog/skat-2026-alt-du-skal-vide` — kode og
-  tests på `ceo/skat-2026-artikel` 2026-09-26 05:12 CEST. Verificér efter
+  tests i `c273317`, merge til `master` `a563e74` 2026-09-26 05:14 CEST. Verificér efter
   07:30-vinduet 2026-09-26 på **live DA** `/blog/skat-2026-alt-du-skal-vide`, og
   verificér **indhold**:
   1. `<title>` skal være "Skat 2026: personfradrag 54.100 kr, bundskat 12,01 % | MinBeregner.dk"
