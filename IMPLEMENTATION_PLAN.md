@@ -4580,10 +4580,10 @@ efter datagrund:
 
 ### ❓ Til Mads
 - ⏳ **VERIFICÉR DEPLOY: C43 — artiklen og `/tidszone` kan ikke længere have
-  samme headline.** Kode `HEAD`, merge `HEAD` 2026-09-26 19:5x CEST på branch
-  `ceo/procent-konsistens` (se commit-refer i VERIFICÉR DEPLOY-loggen). Første
-  kandidatvindue **2026-09-27 07:30** (merged efter 21:30). Verificér
-  **indhold**: `https://minberegner.dk/blog/hvad-er-klokken-i-usa-naar-den-er-12-i-danmark`
+  samme headline.** Kode `3eb38de`, merge `4d358d9` 2026-09-26 19:50 CEST på
+  branch `ceo/procent-konsistens`. Første kandidatvindue **2026-09-27 07:30**
+  (merged efter 21:30). Verificér **indhold**:
+  `https://minberegner.dk/blog/hvad-er-klokken-i-usa-naar-den-er-12-i-danmark`
   skal have H1 og `<title>` **"Hvad er klokken i USA? Tidsforskel for 16 byer"**
   (med `| MinBeregner.dk`), **ikke** "…når den er 12 i Danmark?";
   `https://minberegner.dk/tidszone` skal være **uændret** med
@@ -5198,6 +5198,20 @@ landmark=lån, piggybank=opsparing osv.).
     - Gate grøn: lint ok, 280/280 tests, build ok (128 pages).
 
 ## VERIFICÉR DEPLOY-log
+- ⏳ **ÅBEN — VERIFICÉR DEPLOY: C43 — artiklen og `/tidszone` kan ikke længere
+  have samme headline.** Kode `3eb38de`, merge `4d358d9` 2026-09-26 19:50
+  CEST på branch `ceo/procent-konsistens`. Første kandidatvindue er
+  **2026-09-27 07:30** (merged efter 21:30-vinduet er kørt). Nul
+  deploy-vinduer er gået siden merge, altså slet ikke `DEPLOY-MISSING`
+  (kræver to). Verificér **indhold**:
+  `https://minberegner.dk/blog/hvad-er-klokken-i-usa-naar-den-er-12-i-danmark`
+  skal have H1 **og** `<title>` **"Hvad er klokken i USA? Tidsforskel for 16
+  byer | MinBeregner.dk"** og **ikke** "…når den er 12 i Danmark?";
+  `https://minberegner.dk/tidszone` skal være **uændret** med
+  "Hvad er klokken i USA, når den er 12 i Danmark? | Tidszone"; artiklens FAQ
+  skal ** stadig** have spørgsmålet "Hvad er klokken i USA, når den er 12 i
+  Danmark?" (med `06 i New York, 05 i Chicago, 04 i Denver og 03 i Los
+  Angeles`). `/api/health` skal svare `status: ok`. Se opgave 70.
 - ⏳ **ÅBEN — VERIFICÉR DEPLOY: C42 — de relaterede links renderer det, de
   lover, og `/brok` har fået en indgang.** Kode `2bbc28f`, merge `fa002ce`
   2026-09-26 19:44 CEST på branch `ceo/relaterede-links-og-brok`. Første
