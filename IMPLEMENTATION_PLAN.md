@@ -1,9 +1,34 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — **deploykæden er ryddet: 17:30-batchen udgav C23-C36, alle tretien
-noter verificeret ved indholdskontrol 2026-09-26 17:41.** Kun én rest står åben
-(`/brutto-netto` + `/topskat`s kommuneskatfelter fra C23). `/api/health` svarer
-`status: ok`. C37 gjorde R1's "ét ratested" færdig for `/renteberegner`.
+STATUS: KØ — **deploykæden er ryddet: 17:30-batchen udgav C23-C36, alle tallet
+noter verificeret ved indholdskontrol 2026-09-26 17:41.** To noter står åbne:
+C37 (`/renteberegner`) med første kandidatvindue 2026-09-27 12:30, og C38
+(svensk spørgsmålsform, merge i denne iteration) med 21:30-vinduet som første
+kandidat. `/api/health` svarer `status: ok`.
+
+**C38 gik efter den eneste klasse, C1-C16 ikke havde dækket: svensk
+spørgsmålsform.** Snapshot 2026-09-26 14:07 + GSC viser, at beraknare.se har
+**499 besøgende/28d (+151 %)** med `/dato` 119 (+644 %), `/tidsberegner` 147
+(+206 %) og `/leasing` 46 — og at disse tre sider har 88.498 + 55.186 + 3.181
+visninger til position 8,4 / 8,2 / 12,5 med 0,1-0,9 % CTR. En audit af alle ti
+svenske top-sider mod hver enkelt GSC-søgningsstreng falsificerede først
+hypotesen om danske head-ord (alle sider bruger Tidskalkylator,
+Momskalkylator, Kalorikalkylator m.fl.) og fandt så det reelle gap:
+**søgningerne er spørgsmål, og spørgsmålet stod ikke på siden** — "antal dagar
+mellan datum" (384 visninger, pos. 9), "räkna ut timmar och minuter" (121, pos.
+10) og "färetagsleasing" (196, pos. 11, nul forekomster på hele siden). Se
+opgave 65.
+
+**C37's `/renteberegner` er stadig åben og måles 2026-10-10.** Næste iteration
+skal **ikke** optimere CTR på de samme svar-først-sider igen (alle 15 DA-sider
+og alle SE-top-15 er dækket af C1-C16 og C38), og den skal **ikke** gentage
+C26-C38. **Kandidat 2 er lukket for sidste gang** (C38: de 28 DA-sider uden
+svensk metadata er danske ydelsessider, og det nye snapshot tæller dem ikke),
+kandidat 3 blev lukket i C37 med et negativt fund, og kandidat 4 er fire
+beslutninger under ❓ der kræver et ja fra Mads. Den nye klasse er **kandidat 5:
+svensk placering** — SE `/procent` (23.294 visninger, 0,0 % CTR), `/bil` pos.
+32,9, `/kalorier` pos. 20,7, `/moms` pos. 23,6 — hvor copy er udelukket og
+det mangler svensk substans og intern linkvægt. Mål C38 først (2026-10-10).
 
 **C36 lukkede det sidste ubestyrede emne fra C35's kandidatliste.** `/tidszone`
 (24.723 visninger, 0,5 % CTR, pos 7,5) havde fire søgninger, og **autocomplete
@@ -3923,6 +3948,84 @@ første halvdel af denne liste er fra DA-fladen, anden halvdel fra SE — de er
   modulet uden et formatteringslag; det er en egen, større opgave. Skriv den som
   sådan, hvis næste iteration vil tage den — ikke som en halv løsning her.
 
+#### 65. [x] FÆRDIG 2026-09-26 — C38 — De tre svenske sider med flest visninger svarer på spørgsmålsformen
+
+- **Iteration start:** 2026-09-26 18:05 CEST. Køen var tom (alle 64 opgaver
+  færdige, intet `I GANG`), og de tre åbne kandidater var lukket: kandidat 2 er
+  stadig betinget af et nyt snapshot, kandidat 3 blev lukket i C37, og kandidat 4
+  kræver et ja fra Mads. C37's åbne deploynote kan først verificeres i
+  2026-09-27 12:30-vinduet. Så denne iteration blev en audit af den **ene**
+  dokumenterede klasse, C1-C16 ikke havde dækket: svensk **spørgsmålsform**.
+- **Datagrund (GSC beraknare.se 2026-08-27→09-24):** `/dato` 88.498 visninger,
+  87 klik, **CTR 0,1 %, pos. 8,4**; `/tidsberegner` 55.186 visninger, 114 klik,
+  **CTR 0,2 %, pos. 8,2**; `/procent` 23.294, 2 klik, **CTR 0,0 %, pos. 10,2**;
+  `/leasing` 3.181, 30 klik, **CTR 0,9 %, pos. 12,5**. Sammen 170.000 visninger
+  på fire sider, alle på position 8-13, alle under 1 % CTR. Plausible
+  2026-09-26 14:07: beraknare.se 499 besøgende/28d (+151 %), `/tidsberegner` 147
+  (+206 %, bounce 7 %), `/dato` 119 (+644 %, bounce 4 %), `/leasing` 46 (+84 %,
+  bounce 5 %).
+- **Auditmetode:** live HTML hentet fra alle ti svenske top-sider, og hver af
+  GSC's konkrete søgningsstrenge testet mod titel, H1 og **hele** sidens tekst.
+  Resultatet er skrevet ned som en tabel, så næste iteration ikke skal gentage
+  auditen.
+- **Hypotese der blev falsificeret:** at de svenske sider bruger danske eller
+  svenske oversættelses-glider. **Alle fire sider bruger det svenske hovedord**
+  — Tidskalkylator, Momskalkylator, Kalorikalkylator, Bränslekalkylator,
+  Räntekalkylator, Ålderskalkylator, Leasingkalkylator — i titel, H1 og brødtekst.
+  Det er derfor **ikke** en locale-leak, og det er derfor heller ikke det, der
+  holder positionerne nede.
+- **Det fund, der er gjort:** søgningerne er **spørgsmål**, og spørgsmålet stod
+  ikke på siden. På `/dato` fandtes ingen af "antal dagar mellan datum"
+  (384 visninger, pos. 9), "hur många dagar mellan två datum" (358, pos. 8) eller
+  "dagar till 31 dec" (346, pos. 9) — titlen siger "två datum", aldrig
+  "mellan datum". På `/tidsberegner` fandtes heller ikke "räkna ut timmar och
+  minuter" (121, pos. 10) eller "räkna timmar" (147, pos. 7). På `/leasing`
+  fandtes **"färetagsleasing" nul gange** i hele siden, selv om det står i
+  keywords og er den største søgning (196 visninger, pos. 11).
+- **Implementering (kun `sePages`, dansk og norsk urørt):** 3 nye
+  spørgsmålsformulerede FAQ-par på `/dato`, 2 på `/tidsberegner` og 1 på
+  `/leasing` — spørgsmålet er formuleret som søgningen, svaret er
+  værktøjets egen adfærd. `/dato`'s "antal dage" er en ren forskel
+  (`DatoBeregner.tsx:213`), så svaret siger det udtrykkeligt; månederne er
+  fortsat et estimat på 30,44 dage, og det siger svaret ikke noget om.
+  `/tidsberegner`'s eksempel (08:30→16:45 = 8:15) er sidens egen
+  `metaDescription`, ikke et nyt tal. `/leasing`'s færetagsleasing-svar bruger
+  kalkylatorens egne standardtal (4.121 kr) og siger eksplicit, at den **ikke**
+  beregner skatten, fordi det afhænger af driftsform — det er det eneste sted,
+  hvor en leasingartikel normalt gætter, så det er skrevet som en afvisning.
+- **Fire svenske sætningsfejl rettet undervejs** (`page-data.ts:3456-3457`):
+  "Låg restvärde" (skal være "Ett lågt"), "mindre går att betala med bilen är
+  till salu" (en sætning uden mening), "Med värktiga standardvärden" (**"värktiga"
+  findes ikke på svensk** — en dansk læk fra "værktøj") og "som földer" →
+  "som fölger". Den tredje er den alvorlige: den stod i et svar, der læses højt.
+- **Test:** 4 nye tests i `src/lib/page-data.test.ts` (nu 60 i filen) kræver, at
+  de tre svenske sider svarer på de konkrete GSC-strenge, at leasing-svaret
+  indeholder færetagsleasing og 4.121 kr, og at de fire brudte formuleringer
+  ikke kommer tilbage. Fælden er bevidst hård: en oversættelse eller et
+  refaktor-bryd svarformen, går testen rød.
+- **Verifikation 2026-09-26:** `npm run test` grøn (**1368/1368, 131 filer**),
+  `npm run lint` grøn (529 filer), `npm run build` grøn (137+ sider, kun de 7
+  kendte pre-existing CSS-advarsler). `npm audit` urørt — ingen
+  afhængigheder ændret.
+- **Forventet effekt:** indirekte via placering, da CTR'en ikke er årsagen.
+  Hypotesen er, at en side der *besvarer* spørgsmålet ranker bedre på det end
+  en der kun har head-ordet; det er en dokumenteret, men **utestet** antagelse,
+  så effekten skrives som måling, ikke som løfte. Størst potentiale på
+  `/dato` (88.498 visninger) og `/tidsberegner` (55.186).
+- **MÅL:** SE `/dato` 88.498 visninger, CTR 0,1 %, pos. 8,4; SE
+  `/tidsberegner` 55.186, CTR 0,2 %, pos. 8,2; SE `/leasing` 3.181, CTR 0,9 %,
+  pos. 12,5 — alle pr. 2026-09-24. Plausible: beraknare.se 499 besøgende/28d,
+  `/dato` 119, `/tidsberegner` 147, `/leasing` 46 pr. 2026-09-26.
+  **Genmål 2026-10-10.**
+- **Ikke gjort, bevidst:** SE `/procent` (23.294 visninger, **0,0 % CTR**,
+  pos. 10,2) er bevidst urørt. Den har dansk-svensk oversættelse, korrekt
+  head-ord og ingen spørgsmålsform i GSC-listen — så der er intet dokumenteret
+  at rette, og en Titelændring på sitets tredjestørste visningsside uden data
+  ville være en ukontrolleret ændring. Samme for SE `/bil` (pos. 32,9),
+  `/kalorier` (pos. 20,7), `/moms` (pos. 23,6) og `/renteberegner` (pos. 26,6):
+  de har SE-metadata og SE-head-ord, så deres problem er **placering**, og
+  det løses med indhold og interne links, ikke med copy.
+
 ### Næste kandidater efter C34 — lukket med negativt fund
 
 
@@ -3942,12 +4045,17 @@ efter datagrund:
    indlæg har allerede et link til den relevante beregner i 1-5 % af kroppen, og
    24/26 ender med en relateret-blok. Der var intet at rette. Returlinkene er gjort
    symmetriske for de fem beregnere med flest visninger. Mål 2026-10-10.
-2. **28 DA-sider har ingen svensk metadata.** `page-data.ts` har 79 DA-sider mod
-   53 SE og 28 NO, så de 28 manglende falder tilbage på dansk titel, description og
-   FAQ på beraknare.se (researchfund #4's locale-leak). Datagrund: beraknare.se har
-   474 besøgende/28d, og dens SE-top-15 har alle SE-metadata, så de 28 har næsten
-   ingen SE-trafik — **kun** tag dem hvis et nyt snapshot tæller dem. Spring
-   opgaven, hvis de fortsat er stille.
+2. ~~**28 DA-sider har ingen svensk metadata.**~~ **Springes endnu en gang,
+   2026-09-26 (C38).** Betingelsen var "tag dem kun hvis et nyt snapshot tæller
+   dem". Snapshot 2026-09-26 14:07 tæller dem ** ikke**: SE-top-15 er
+   `/tidsberegner`, `/dato`, `/leasing`, `/nedtaelling`, `/`, `/alder`,
+   `/tidszone`, `/kalorier`, `/elberegner`, `/loenstigning`, `/timepris`, `/moms`,
+   `/gaeldsfri`, `/renteberegner`, `/loen-konverter` — og **alle 15 har
+   SE-metadata** i `sePages` (verificeret programmatisk mod `page-data.ts`).
+   De 28 DA-sider uden SE-metadata er desuden *danske* ydelsessider
+   (løn, skat, pension, boligstøtte, barsel, SU, feriepenge …), som ikke kan
+   rangere på svenske søgninger. Det er ikke en voksende klasse, det er en
+   død klasse. **Lukket.**
 3. ~~**C32's åbne spørgsmål om `/elbil`.**~~ **Lukket i C37 med negativt fund.**
    Snapshottet 2026-09-26 tæller `/elbil` hverken på DA eller SE, så spørgsmålet
    blev som planen lovede om de interne links. **Der er ingen mangel:** `/elbil`
@@ -3963,7 +4071,29 @@ efter datagrund:
    ekstern kontrakt), beskæftigelsestillægget på 26.198 kr. uden dækkende kilde,
    depositum på 3 måneder som "typisk" uden lovtekst, og `www`-domænerne. Alle fire
    kræver et ja fra Mads før de røres.
+5. **Ny klasse fundet i C38: svensk *placering*, ikke CTR.** SE `/bil` pos. 32,9,
+   `/kalorier` pos. 20,7, `/moms` pos. 23,6, `/renteberegner` pos. 26,6 og
+   `/procent` pos. 10,2 med 23.294 visninger og **0,0 % CTR**. Alle har svensk
+   metadata og svenske head-ord, så copy er udelukket som årsag. Det, der mangler,
+   er **internt linkvægt på beraknare.se** og/eller svensk substans på de
+   svenske *undersider* (ikke hovedsiden). Dataside: SE `/kalorier` har kun
+   "kaloribehov" én gang i hele teksten, mens GSC viser fire søgninger på netop
+   "kaloribehov" (41/33/27 visninger, pos. 34/49/47) — et reelt emne for næste
+   research-iteration, fordi det kræver **substanstjek** (kcal, aktivitet,
+   BMR), ikke en titel. **Mål ikke før 2026-10-10**, så C38's effekt er målt
+   først.
 ### ❓ Til Mads
+- ⏳ **VERIFICÉR DEPLOY: C38 — de tre svenske sider svarer på spørgsmålsformen.**
+  Se VERIFICÉR DEPLOY-loggen for merge-refer. Første kandidatvindue er
+  **2026-09-26 21:30** (C38 merged efter 17:30). Verificér **indhold**:
+  `https://beraknare.se/dato` skal have spørgsmålet "Hur många dagar är det
+  mellan två datum?" og "Hur många dagar till 31 december?" i både den synlige
+  FAQ og JSON-LD, `https://beraknare.se/tidsberegner` skal have "Hur räknar
+  jag ut timmar och minuter mellan två klockslag?" med eksemplet
+  "08:30 till 16:45 är 8 timmar och 15 minuter", og `https://beraknare.se/leasing`
+  skal have "färetagsleasing" i FAQ'en og **ikke** "värktiga" eller "földer" nogen
+  steder. `/api/health` skal svare `status: ok`. De danske og norske sider skal
+  være uændrede.
 - ⏳ **VERIFICÉR DEPLOY: C37 `/renteberegner` — fradragsværdien fra modulet.**
   Kode `b98b90f`, merge `32b74ee` 2026-09-26 17:47 CEST. 17:30- og 21:30-vinduerne
   er begge *før* merge, så første kandidatvindue er **2026-09-27 12:30** (07:30 er
@@ -4492,6 +4622,19 @@ landmark=lån, piggybank=opsparing osv.).
     - Gate grøn: lint ok, 280/280 tests, build ok (128 pages).
 
 ## VERIFICÉR DEPLOY-log
+- ⏳ **ÅBEN — VERIFICÉR DEPLOY: C38 — de tre svenske sider svarer på
+  spørgsmålsformen.** Kode: branch `ceo/se-svar-paa-spoergsmaal`, merge til `master` 2026-09-26
+  18:2x CEST (merge-refer noteres i et separat notat commit, som C37's). Første kandidatvindue **2026-09-26 21:30** (17:30 er før
+  merge). Verificér **indhold**, ikke HTTP 200:
+  - `beraknare.se/dato`: FAQ har "Hur många dagar är det mellan två datum?" og
+    "Hur många dagar till 31 december?" i både synlig tekst og FAQPage-JSON-LD.
+  - `beraknare.se/tidsberegner`: FAQ har "Hur räknar jag ut timmar och minuter
+    mellan två klockslag?" med "08:30 till 16:45 är 8 timmar och 15 minuter".
+  - `beraknare.se/leasing`: FAQ har "färetagsleasing" og 4.121 kr, og siden
+    hverken siger "värktiga", "földer" eller "er till salu".
+  - `minberegner.dk/dato`, `/tidsberegner`, `/leasing` skal være **uændrede** —
+    ændringen er kun i `sePages`.
+  - `/api/health` skal svare `status: ok`.
 - ✅ **DEPLOY OK 2026-09-27 07:41 CEST — 17:30-batchen lukker C23-C36.**Fjorten noter
   verificeret ved **indholdskontrol på begge domæner**, ikke HTTP 200. Målt
   2026-09-26 17:41–17:47 mod live-sitet:
