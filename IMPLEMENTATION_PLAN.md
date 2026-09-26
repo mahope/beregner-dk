@@ -2949,6 +2949,20 @@ landmark=lån, piggybank=opsparing osv.).
   svarede `status: ok`. C4 mergerede efter 17:30-vinduet 2026-09-25, så der er
   kun ét deploy-vindue (21:30) siden da — **endnu ikke `DEPLOY-MISSING`**, som
   kræver to. Næste vindue er 07:30 2026-09-26.
+- **VERIFICÉR DEPLOY:** C15 `/promille` svar-først — kode `bc17c14`, merge
+  `849f131` 2026-09-26 08:24 CEST. Første kandidatvindue er **12:30 2026-09-26**.
+  Verificér **indhold** på begge domæner, HTTP 200 er ikke nok:
+  1. DA `https://minberegner.dk/promille`: `<title>` skal være "Promilleberegner: 4 øl
+     på 80 kg = 0,88 ‰", og introafsnittet under H1 skal begynde "4 øl til en mand
+     på 80 kg giver 0,88 ‰". Den gamle titel var "Promilleberegner - Beregn din
+     alkoholpromille | MinBeregner.dk" — den må **ikke** forekomme.
+  2. DA samme side: `<meta name="description">` skal indeholde både "0,88 ‰" og
+     "grænsen på 0,5 ‰".
+  3. SE `https://beraknare.se/promille`: `<title>` skal være "Promillekalkylator:
+     4 öl på 80 kg = 0,88 ‰", og **ikke** "0,5 ‰" nogen steder i den synlige tekst
+     eller i metadata — svensk grænse er 0,2 ‰.
+  4. Begge domæner: FAQ'en skal indeholde spørgsmålet "Hvornår kan jeg køre bil igen?"
+     hhv. "När kan jag köra bil igen?" med svaret "5,9 timer" hhv. "5,9 timmar".
 - **Live-kontrol 2026-09-26 01:05 CEST (fjerde datapunkt) — retter fejllæsningen
   ovenfor:** Sidste succesfulde batch er **17:30-vinduet 2026-09-25**. O1, O2, O3
   **og C1 er live**: `/blog/barsel-2026-regler-og-satser` viser 5.085 og ingen
