@@ -299,6 +299,56 @@ export const SKATTEFRADRAG_2026 = {
   boligfradragSkattevaerdi: 0.26, // vejledende fradragsværdi for boligjob/service
 } as const;
 
+/**
+ * Dagpenge — de seks offentlige 2026-satser plus G-dag.
+ *
+ * Kilde: Beskæftigelsesministeriets "Satser for 2026" (bm.dk/satser/satser-for-2026),
+ * hentet og læst 2026-09-26. Ministeriet oplyser, at satserne gælder fra
+ * 1. januar 2026, og at kilden for tallene er Styrelsen for Arbejdsmarked og
+ * Rekruttering (STAR).
+ *
+ * Ministeriet oplyser **ikke** beskæftigelsestillægget, og tallet må derfor
+ * ikke hentes herfra — det står i værktøjet med en anden kildeangivelse, se
+ * IMPLEMENTATION_PLAN.md (❓ Til Mads).
+ *
+ * `fuldtidTimerPerAar` er 37 timer × 52 uger = 1.924 timer, og
+ * `dagpengeperiodeTimer` er to års fuldtidsarbejde = 3.848 timer, som er den
+ * periode dagpenge normalt kan udbetales for. Felterne under `fuldtidTimerPerAar`
+ * er **ikke** i ministeriets sats-tabel: de er rettigheds- og periodetal fra
+ * dagpengeordningen, som værktøjet og FAQ'erne i forvejen har brugt, og som
+ * derfor indgår her for at kun ét sted skal vedligeholdes.
+ *
+ * De seks satser er ikke seks uafhængige tal: deltidssatsen er 2/3 af
+ * fuldtidssatsen, og dimittendsatserne er hhv. 71,5 % (uden forsørgelsespligt)
+ * og 82 % (med forsørgelsespligt) af fuldtidsmax. Forholdene er dog **udledt**
+ * af ministeriets tal, ikke selvstændige krav i reglerne, og bruges kun i
+ * `dagpenge.test.ts` som konsistensvagt mod tastefejl.
+ */
+export const DAGPENGE_2026 = {
+  source: "https://bm.dk/satser/satser-for-2026",
+  verifiedAt: "2026-09-26",
+  fuldtid: 22041, // fuldtidsforsikrede, kr/md
+  deltid: 14694, // deltidsforsikrede, kr/md (2/3 af fuldtid)
+  dimittendFuldtidMedForsorgerpligt: 18074, // dimittend, fuldtid, med forsørgelsespligt
+  dimittendDeltidMedForsorgerpligt: 12049, // dimittend, deltid, med forsørgelsespligt (2/3)
+  dimittendFuldtidUdenForsorgerpligt: 15759, // dimittend, fuldtid, uden forsørgelsespligt
+  dimittendDeltidUdenForsorgerpligt: 10506, // dimittend, deltid, uden forsørgelsespligt (2/3)
+  dagpengeProcent: 0.9, // 90 % af løn efter AM-bidrag (dagpengelovens regel)
+  fuldtidTimerPerAar: 1924, // 37 timer × 52 uger
+  dagpengeperiodeTimer: 3848, // to års dagpenge for en fuldtidsforsikret
+  gaDag: 1017, // arbejdsgivernes dagpengegodtgørelse, hel godtgørelse, kr/dag
+  gaDagHalv: 509, // halv dagpengegodtgørelse, kr/dag
+  aKasseMedlemskabMdr: 12, // 1 års medlemskab for ret til dagpenge
+  dimittendUddannelseMdr: 18, // min. uddannelseslængde for dimittendsats
+  dimittendTilmeldingDage: 14, // seneste tilmelding til A-kassen efter uddannelsen
+  indkomstkravTimer: 1924, // fuldtidsarbejde i de seneste 3 år
+  indkomstkravAar: 3,
+  supplerendeUger: 30, // supplerende dagpenge, max 30 uger
+  supplerendePeriodeUger: 104, // …inden for 104 uger
+  supplerendeTimestraenPerMdr: 130, // under 130 arbejdstimer pr. måned
+} as const;
+
 export type Barsel2026 = typeof BARSEL_2026;
 export type Su2026 = typeof SU_2026;
 export type Satser2026 = typeof SATSER_2026;
+export type Dagpenge2026 = typeof DAGPENGE_2026;

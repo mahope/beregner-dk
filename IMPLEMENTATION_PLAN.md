@@ -1,11 +1,13 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — **tre åbne deploynoter (C15 `/promille`, C16 `/vaegttab` + `/enhedspris` og
-C18 pensionssatserne), første kandidatvindue 12:30 2026-09-26.** 07:30-batchen 2026-09-26
-lukkede alle 21 tidligere noter ved indholdskontrol (se `DEPLOY OK 2026-09-26`). C16
-mergerede 09:57 og C18 10:52 CEST, og kan først verificeres efter 12:30-vinduet; intet
-er frosset pga. ventetiden. Ny i køen: **C19** — se kandidat 37 om artikler uden
-baseline. `/api/health` svarer `status: ok`.
+STATUS: KØ — **fire åbne deploynoter (C15 `/promille`, C16 `/vaegttab` + `/enhedspris`,
+C18 pensionssatserne og C19 dagpenge-satserne), første kandidatvindue 12:30
+2026-09-26.** 07:30-batchen 2026-09-26 lukkede alle 21 tidligere noter ved
+indholdskontrol (se `DEPLOY OK 2026-09-26`). C16 mergerede 09:57, C18 10:52 og
+C19 11:35 CEST, og kan først verificeres efter 12:30-vinduet; intet er frosset
+pga. ventetiden. `/dage-til/juledagen` svarer 200 — C7 er live. Næste opgave:
+`/blog/su-2026-satser-og-regler` (sidste punkt i kandidat 37), se opgave 45.
+`/api/health` svarer `status: ok`.
 
 
 ## Fase 3 — trafik-drevet
@@ -2497,8 +2499,112 @@ baseline. `/api/health` svarer `status: ok`.
 - **Metode:** samme som C10/S2/C18 — verificér hvert tal mod sit satsmodul, bind
   det til modulet, gør artiklen svar-først med en tidlig CTA, og skriv baseline
   ind FØR ændringen. Én artikel pr. iteration.
+- **Status 2026-09-26 11:35:** dagpenge-artiklen er færdig som opgave 45 (C19).
+  `/blog/su-2026-satser-og-regler` er det eneste ubearbejdede punkt tilbage i
+  kandidat 37 og er **næste opgave**.
+
+#### 45. [x] FÆRDIG 2026-09-26 — C19 — Dagpenge-guiden sagde 20.359 kr, ministeriet siger 22.041 kr
+
+- **Iteration start:** 2026-09-26 11:00 CEST på `ceo/c19-dagpenge-satser`. De tre
+  åbne deploynoter (C15/C16/C18) har alle første kandidatvindue 12:30, så intet
+  kunne verificeres. GSC-snapshottet har ingen baseline for dagpenge-artiklen, og
+  C19-kandidaten bad om en baseline FØR ændringen — valget blev derfor et fund,
+  ikke en CTR-justering.
+- **Datagrund:** `/blog/dagpenge-saadan-finder-du-din-sats` og `/dagpenge` er
+  **ikke** blandt top-15-siderne i Plausible-snapshottet 2026-09-26 07:52, og
+  GSC-snapshottet (2026-08-27→2026-09-24) har ingen rækker for dem. **Baseline er
+  derfor ukendt** — ikke forsømt. Artiklen ligger i samme klynge som
+  `/barselsdagpenge` (200 besøgende/28d) og `/efterloen`, så effekten måles i
+  Plausible fra næste snapshot, ikke i CTR.
+- **Fundet — fire tal, ingen af dem kunne dokumenteres.** Bloggen havde sine egne
+  dagpenge-satser, og ingen af dem matchede hverken ministeriet eller værktøjet:
+
+  | Påstand i artiklen | Ministeriets 2026-tal | Konsekvens |
+  |---|---|---|
+  | Max dagpenge 20.359 kr/md | 22.041 kr/md | **1.682 kr/md for lavt** |
+  | Max deltid 13.573 kr/md | 14.694 kr/md | 1.121 kr/md for lavt |
+  | Dimittend 14.557 kr/md (71,5 %) | 15.759 kr/md uden forsørgelsespligt | 1.202 kr/md for lavt |
+  | Dimittend 13.437 kr/md (66 %) | 18.074 kr/md med / 15.759 kr/md uden | forkert konstruktion |
+
+  Derudover var "952 kr/dag", "ca. 120 kr/time", "første 3 måneder / derefter" og
+  "ca. 22.600 kr"-loftet ikke dokumenterede påstande. 952 kr/dag er ikke en
+  dagpenge-sats overhovedet (G-dag er 1.017 kr/dag), og 66 % findes ingen steder:
+  dimittend er 71,5 % uden og 82 % med forsørgelsespligt.
+  **Der var tre uafhængige satser i repoet om de samme tal** — artiklen, siden og
+  værktøjet — og ingen af dem havde kilde. Det er samme fejltype som S2/C17/C18.
+- **Regelverket er verificeret, ikke antaget:** Beskæftigelsesministeriets
+  "Satser for 2026" (bm.dk/satser/satser-for-2026) er hentet direkte 2026-09-26 og
+  oplyser præcis de seks satser: fuldtid 22.041, deltid 14.694, dimittend
+  fuldtid/deltid med forsørgelsespligt 18.074/12.049 og uden 15.759/10.506, plus
+  G-dag 1.017/509 kr. Ministeriet oplyder, at satserne gælder fra 1. januar 2026
+  med STAR som primærkilde. **Modulet og siden var altså nogenlunde rigtige på
+  max-satsen; artiklen og værktøjets dimittend-estimat var forkerte.**
+- **Beslutning/implementering:**
+  1. Ny `DAGPENGE_2026` i `src/lib/satser-2026.ts` med kilde, `verifiedAt` og de
+     seks satser + G-dag. Kun de otte beløb er fra bm.dk; rettigheds- og
+     periodetal (1.924/3.848 timer, 1 års medlemskab, 18 mdr uddannelse, 14 dage,
+     30/104 uger) er samlet ét sted, men **ikke** i ministeriets tabel — det står
+     sagt eksplicit i modulets docblock.
+  2. `DagpengeBeregner.tsx` læser nu max, procent og begge dimittendsatser fra
+     modulet. Den gamle `15174` var kommenteret "2026 estimat" og lå 585 kr under
+     ministeriets 15.759; `dimittendsatsForsorger` var sat til max-satsen
+     22.041 i stedet for 18.074. **Ingen ændring i beregningslogikken** — begge
+     dimittendfelter var døde konstanter, så rettelsen er risikofri. `beskaeftigelsesTillaeg`
+     (26.198) er bevidst **uændret**, se ❓ Til Mads.
+  3. `/dagpenge` læser samme modul i tabellen, i "Hvad påvirker din dagpengesats"
+     og i indkomstkravet, og tabellen har nu alle fire satslinjer plus deltid. Den
+     angiver verificeringsdato for de fire beløb, der faktisk er verificeret.
+  4. Artiklen er svar-først: titel/H1 "Dagpenge 2026: Max sats er 22.041 kr. pr.
+     måned" (D1/C13-reglen: ét domænesuffiks, følger af skabelonen), "Kort svar"-afsnit
+     med alle fire beløb, tidlig CTA til `/dagpenge` **før** den første tabel, en
+     otterækkers sats-tabel med kilde og verificeringsdato, to regneeksempler der
+     følger værktøjets formel (20.000 → 16.560 kr under loftet; 30.000 → 24.840 kr
+     over loftet), et beregnet lønloft på ca. 26.620 kr, dimittend-afsnittet uden
+     den konstruerede 3-månedersforskydning, et nyt G-dag-afsnit og to nye
+     FAQ-spørgsmål (hvornår rammer man maxsatsen, hvad er en G-dag).
+  5. Uverificerede påstande er **fjernet**, ikke tilpasset: 20.359, 952, 120
+     kr/time, 13.573, 14.557, 13.437, 66 % og 22.600 findes ikke lenger.
+- **Acceptkriterier:**
+  1. Artiklen viser 22.041 / 14.694 / 18.074 / 15.759 / 1.017 kr. **PASS**
+  2. Ingen af de otte gamle tal findes i artiklen eller på siden. **PASS**
+  3. Værktøjets `dimittendsats` er 15.759 og `dimittendsatsForsorger` 18.074,
+     begre fra modulet, og ingen beregningslogik er ændret. **PASS**
+  4. Artiklen, siden og værktøjet læser alle fra `DAGPENGE_2026`. **PASS**
+  5. Modulets tal er låst til bm.dk, og 2/3- og 71,5 %/82 %-forholdene er
+     konsistensvagte mod tastefejl. **PASS** (ny `src/lib/dagpenge.test.ts`, 7 tests)
+  6. Renders den, indeholder artiklen 22.041/14.694/18.074/15.759/1.017, og CTA'en
+     ligger før første `<table>`. **PASS** (ny route-rendertest, 11 tests)
+  7. `npm run lint`, `npm run test` og `npm run build` er grønne. **PASS**
+- **Kvalitetsgate 2026-09-26 11:26 CEST:** `npm run lint` grøn (508 filer),
+  `npm run test` grøn (**1236/1236 tests, 118 filer**), `npm run build` grøn
+  (139 sider + typecheck, ingen nye advarsler). Målrettet kørsel først: 21/21 i de
+  tre nye/berørte testfiler.
+- **Forventet effekt:** Korrekthed og tillid, ikke trafik i sig selv. En guide der
+  underoplyser max-satsen med 1.682 kr/md og opgiver en dimittendsats, der ikke
+  findes, skader de få læsere der faktisk bruger tallene. Baseline for begge sider
+  er ukendt, så effekten kan ikke kvantificeres før næste Plausible-snapshot.
+- **MÅL:** `/blog/dagpenge-saadan-finder-du-din-sats` baseline **ukendt** (ikke i
+  top-15 pr. 2026-09-26); `/dagpenge` baseline **ukendt** (ikke i top-15).
+  Klynge-reference: `/barselsdagpenge` 200 besøgende/28d pr. 2026-09-26.
+  Første genmåling 2026-10-10.
+- **Landet:** kode, tests og plan i én commit på `ceo/c19-dagpenge-satser`; merge
+  til `master` straks efter den grønne gate.
+- **Åbne dele af C19:** `/blog/su-2026-satser-og-regler` (bloggens egen struktur
+  og baseline mangler; satserne er allerede rettet af O3) og en primærkilde til
+  beskæftigelsestillægget på 26.198 kr, som bm.dk **ikke** oplyser.
 
 ### ❓ Til Mads
+- **Beskæftigelsestillægget på 26.198 kr/md (C19, 2026-09-26) — må ikke gættes.**
+  Beskæftigelsesministeriets "Satser for 2026" oplyser de seks dagpenge-satser og
+  G-dag, men **ikke** beskæftigelsestillægget. Alligevel står 26.198 kr på
+  `/dagpenge` (side, taltabel, punktliste og `page-data.ts`-beskrivelsen) og i
+  `DagpengeBeregner`, hvor kilden er kommenteret "bm.dk/satser/satser-for-2026" —
+  altså en kildeangivelse, der ikke dækker tallet. Beløbet er ikke ændret af C19,
+  fordi jeg ikke kan dokumentere det: en primærkilde skal findes (STAR's
+  "Satser for dagpenge" eller Folketingets opgørelse af dagpenge- og
+  beskæftigelsestillægssatser), og så rettes **ét** tal i modulet, så siden og
+  værktøjet følger med automatisk. Indtil da bør tallet ikke pryde af en
+  kildeangivelse, det ikke kommer fra.
 - **Skal `beregner.no` nogensinde live sættes? (D5, 2026-09-26).** Domænet er
   konfigureret i `src/lib/domain-config.ts`, men står i `hiddenDomains` og svarer
   404 på både `/` og `/api/health`, så det er ikke live. `helligdagLocale()` i
