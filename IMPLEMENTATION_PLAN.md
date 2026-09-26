@@ -3533,10 +3533,11 @@ landmark=lån, piggybank=opsparing osv.).
     - Gate grøn: lint ok, 280/280 tests, build ok (128 pages).
 
 ## VERIFICÉR DEPLOY-log
-- ⏳ **ÅBEN — VERIFICÉR DEPLOY: C23 lønsidernes topskat/kommuneskat og C24 SE
-  `/leasing`.** Merge 2026-09-26 12:19 (C23) og 12:21 (C24) CEST — begge **efter**
-  at 12:30-batchen var startet, så de kan først verificeres efter **17:30**.
-  Verificér ved indholdskontrol:
+- ⏳ **ÅBEN — VERIFICÉR DEPLOY: C23, C24, C25 og C26.** Merge 2026-09-26
+  12:19 (C23), 12:21 (C24), 13:07 (C25) og 13:12 (C26) CEST — alle **efter** at
+  12:30-batchen var startet, så de kan først verificeres efter **17:30**. Der er
+  gået ét deploy-vindue siden merge (12:30), så intet er `DEPLOY-MISSING` (kræver
+  to) og intet er frosset. Verificér ved indholdskontrol:
   - `/loen-efter-skat`: FAQ'en skal **ikke** sige "15% topskat", skal sige 7,5 %
     og "afskaffet"; kommuneskatten skal stå som **25,049 %** (ikke 24,94 % eller
     25,07 %) og kirkeskatten som **0,639 %** (ikke 0,68 %). `/brutto-netto`'s FAQ
@@ -3545,8 +3546,15 @@ landmark=lån, piggybank=opsparing osv.).
     **25.049** (ikke 25.07), og kirkeskatfeltet på `/topskat` **0.639**.
   - `beraknare.se/leasing`: titlen skal være "Leasingkalkylator: bil på 300.000
     kr = 4.121 kr/mån", og værktøjet skal vise **4.121 kr/mån** (ikke `kr./md`).
-  - `/api/v1/loen` skal **uændret** stadig sige 25.07 — hvis batchdeployen har
-    rørt den, er det en fejl (frosset kontrakt).
+  - `beraknare.se/tidszone` (C25): værktøjet skal vise **"Stockholm"** og
+    **"Sverige (CET/CEST)"** i begge dropdowns, rubrikken **"Tidsskillnad från
+    Sverige"**, og **intet** "Köpenhamn" eller "från Danmark". `minberegner.dk`
+    skal fortsat sige "København" og "Tidsforskel fra Danmark".
+  - `/efterloen` (C26): tabellen skal have rækken **"1. januar 1963 – 31.
+    december 1966"** med **65 år** / **68 år**, rækken 1967-1970 med **66/69**,
+    FAQ'en skal sige **481 timer** pr. portion og **15.870 kr.**, og **intet**
+    "962 timer" i præmie-copy. `/api/v1/loen` skal **uændret** stadig sige 25.07
+    — hvis batchdeployen har rørt den, er det en fejl (frosset kontrakt).
   - `/api/health` skal svare `status: ok`.
 - ✅ **DEPLOY OK 2026-09-26 12:33 CEST — 12:30-batchen lukker C15-C22.** Syv noter
   verificeret ved **indholdskontrol på begge domæner**, ikke HTTP 200:
