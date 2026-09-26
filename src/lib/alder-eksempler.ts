@@ -94,13 +94,24 @@ function uddrag(r: AlderResultat) {
   };
 }
 
-/** "36 år, 6 måneder og 10 dage" / "36 år, 6 månader och 10 dagar". */
-export function formatAlder(resultat: { aar: number; maaneder: number; dage: number }, locale: Locale): string {
-  const aar = resultat.aar;
-  const maaneder = resultat.maaneder;
-  const dage = resultat.dage;
+/**
+ * "36 år, 6 måneder og 10 dage" / "36 år, 6 månader och 10 dagar".
+ *
+ * Dansk og svensk bruger ental ved 1, og dansk bruger altid flertal ved 0 —
+ * "0 måneder og 0 dage", ikke "0 måned". Værktøjet bruger den samme
+ * formatter, så de to aldrig viser forskellige grammatikker for samme tal.
+ */
+export function formatAlder(
+  resultat: { aar: number; maaneder: number; dage: number },
+  locale: Locale
+): string {
+  const { aar, maaneder, dage } = resultat;
   if (locale === "se") {
-    return `${aar} år, ${maaneder} månader och ${dage} dagar`;
+    const maanederTekst = maaneder === 1 ? "1 månad" : `${maaneder} månader`;
+    const dageTekst = dage === 1 ? "1 dag" : `${dage} dagar`;
+    return `${aar} år, ${maanederTekst} och ${dageTekst}`;
   }
-  return `${aar} år, ${maaneder} måneder og ${dage} dage`;
+  const maanederTekst = maaneder === 1 ? "1 måned" : `${maaneder} måneder`;
+  const dageTekst = dage === 1 ? "1 dag" : `${dage} dage`;
+  return `${aar} år, ${maanederTekst} og ${dageTekst}`;
 }

@@ -102,8 +102,31 @@ describe("ALDER_EKSEEMPLER", () => {
     const tilbage = ALDER_EKSEEMPLER[1];
     expect(tilbage.foedselsdato).toBe(foerste.foedselsdato);
     expect(tilbage).toMatchObject({ aar: 20, maaneder: 1, dage: 16 });
-    expect(formatAlder(tilbage, "da")).toBe("20 år, 1 måneder og 16 dage");
-    expect(formatAlder(tilbage, "se")).toBe("20 år, 1 månader och 16 dagar");
+    expect(formatAlder(tilbage, "da")).toBe("20 år, 1 måned og 16 dage");
+    expect(formatAlder(tilbage, "se")).toBe("20 år, 1 månad och 16 dagar");
+  });
+
+  test("ental og flertal, og null i flertal", () => {
+    // "1 måneder" var den fejl, C47's egen tabel introducerede, fordi
+    // værktøjet førhen skrev `${m} måneder` uden at se efter tallet.
+    expect(formatAlder({ aar: 20, maaneder: 1, dage: 1 }, "da")).toBe("20 år, 1 måned og 1 dag");
+    expect(formatAlder({ aar: 20, maaneder: 1, dage: 1 }, "se")).toBe("20 år, 1 månad och 1 dag");
+    expect(formatAlder({ aar: 25, maaneder: 0, dage: 0 }, "da")).toBe("25 år, 0 måneder og 0 dage");
+    expect(formatAlder({ aar: 25, maaneder: 0, dage: 0 }, "se")).toBe("25 år, 0 månader och 0 dagar");
+    expect(formatAlder({ aar: 36, maaneder: 6, dage: 10 }, "da")).toBe("36 år, 6 måneder og 10 dage");
+    expect(formatAlder({ aar: 36, maaneder: 6, dage: 10 }, "se")).toBe("36 år, 6 månader och 10 dagar");
+    expect(formatAlder({ aar: 36, maaneder: 6, dage: 10 }, "no")).toBe("36 år, 6 måneder og 10 dage");
+  });
+
+  test("hvert eksempel er formateret uden fejlmorphing", () => {
+    // Negativt mønster med tal-grænse: "11 måneder" må ikke fejle, fordi
+    // teksten indeholder bogstaverne i "1 måneder".
+    const fejlMønstre = /(^|[^0-9])1 (måneder|månader|dage|dagar)\b/;
+    for (const eksempel of ALDER_EKSEEMPLER) {
+      for (const locale of ["da", "se", "no"] as const) {
+        expect(formatAlder(eksempel, locale)).not.toMatch(fejlMønstre);
+      }
+    }
   });
 
   test("alle eksempler har en bemærkning på begge sprog", () => {
