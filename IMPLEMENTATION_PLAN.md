@@ -1,9 +1,9 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — **tretten åbne deploynoter (C23-C34) + C35.** 12:30-batchen 2026-09-26 udgav
+STATUS: KØ — **tretten åbne deploynoter (C23-C35).** 12:30-batchen 2026-09-26 udgav
 C15-C22. C23 (merge 12:19), C24 (12:21), C25 (13:07), C26 (13:15), C27 (13:25),
 C28 (14:30), C29 (14:38), C30 (ca. 15:00), C31 (15:08), C32 (16:15), C33 (16:00),
-C34 (16:34) og C35 (17:0x) kom efter batchens start og kan først verificeres efter
+C34 (16:34) og C35 (17:10) kom efter batchens start og kan først verificeres efter
 **17:30**-vinduet; intet er frosset pga. ventetiden. `/api/health` svarer `status: ok`.
 
 **C35 gjorde kandidat #0 fra C34 halvt færdig med ét gennemarbejdet indlæg.**
@@ -3772,6 +3772,8 @@ første halvdel af denne liste er fra DA-fladen, anden halvdel fra SE — de er
 - **Ikke gjort, bevidst:** artiklen har ingen `date`-opdatering af de 26 andre
   indlæg, og der er ikke lavet en `/tidszone`-søsterside endnu — det er næste
   opgave, ikke en sidefodnote her.
+- **Landet:** kode og plan i `ff86918`, merge til `master` er `1918bb3` 2026-09-26
+  17:10 CEST. Begge refs pushet; `/api/health` svarer 200.
 
 ### Næste kandidater efter C34 — lukket med negativt fund
 
@@ -4318,8 +4320,8 @@ landmark=lån, piggybank=opsparing osv.).
 
 ## VERIFICÉR DEPLOY-log
 - ⏳ **ÅBEN — VERIFICÉR DEPLOY: C35 `/blog/kvadratmeter-saadan-regner-du-ud` +
-  returlink fra `/kvadratmeter`.** Kode `ceoq9k4`, merge `ceo-merge-ref` 2026-09-26
-  17:0x CEST. 17:30-batchen er det første vindue efter merge, så intet er
+  returlink fra `/kvadratmeter`.** Kode `ff86918`, merge `1918bb3` 2026-09-26
+  17:10 CEST. 17:30-batchen er det første vindue efter merge, så intet er
   `DEPLOY-MISSING` (kræver to) og intet er frosset. Verificér **indhold**:
   artiklen skal servere 200 med H1 "Hvordan regner man kvadratmeter ud? Guide med
   eksempler", `/kvadratmeter` skal vise "Guides om emnet" med artiklen, og
