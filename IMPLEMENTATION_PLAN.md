@@ -1,10 +1,22 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — **tretten åbne deploynoter (C23-C35).** 12:30-batchen 2026-09-26 udgav
+STATUS: KØ — **fjorten åbne deploynoter (C23-C36).** 12:30-batchen 2026-09-26 udgav
 C15-C22. C23 (merge 12:19), C24 (12:21), C25 (13:07), C26 (13:15), C27 (13:25),
 C28 (14:30), C29 (14:38), C30 (ca. 15:00), C31 (15:08), C32 (16:15), C33 (16:00),
-C34 (16:34) og C35 (17:10) kom efter batchens start og kan først verificeres efter
-**17:30**-vinduet; intet er frosset pga. ventetiden. `/api/health` svarer `status: ok`.
+C34 (16:34), C35 (17:10) og C36 (17:55) kom efter batchens start og kan først
+verificeres efter **17:30**-vinduet; intet er frosset pga. ventetiden.
+`/api/health` svarer `status: ok`.
+
+**C36 lukkede det sidste ubestyrede emne fra C35's kandidatliste.** `/tidszone`
+(24.723 visninger, 0,5 % CTR, pos 7,5) havde fire søgninger, og **autocomplete
+(hentet 26/9) bekræfter præcis de formuleringer, artiklen nu svarer på**:
+"hvad er klokken i usa når den er 12 i danmark" (183v pos 6) plus
+"… når den er 21/16/14 i danmark", "hvad er klokken i usa miami" og
+"hvad er klokken i usa est"; desuden "tidszoner kort/usa/verden" (764v pos 10 på
+"tidszoner") og "tidsforskel grønland/thailand/bali/japan/tyrkiet/kreta/new york".
+Indlægget `src/app/blog/hvad-er-klokken-i-usa-naar-den-er-12-i-danmark` har alle
+amerikanske zoner ved 12, 14, 16 og 21 dansk tid, 16 byer i forskelstabel og de
+**præcise sommertidsdatoer for 2026**. Se opgave 63.
 
 **C35 gjorde kandidat #0 fra C34 halvt færdig med ét gennemarbejdet indlæg.**
 `/kvadratmeter` (20.959 visninger, 1,4 % CTR, pos 5,0) havde fire konkrete
@@ -80,17 +92,16 @@ weekenddag eller helligdag — den forklares nu i stedet for at forsvinde fra
 summeringen. Se opgave 55.
 
 Næste iteration skal **ikke** optimere CTR på de samme svar-først-sider igen, og
-den skal **ikke** gentage C26-C34. **C28's kandidatliste er tom, og C34 lukkede
-den næste (blog → beregner) med et negativt fund** — se afsnittet "Næste
-kandidater efter C34". Den næste opgave var **nye artikler til `/tidszone`
-og `/kvadratmeter`**: de er de næststørste sider i Search Console (24.723 og
-20.959 visninger), og ingen artikel svarer til deres emne, så de fik bevidst ingen
-kobling i C34. C35 skrev den første af de to; **`/tidszone` (24.723 visninger,
-0,5 % CTR, pos 7,5) er det eneste tilbageværende ubestyrede emne** og er derfor
-næste opgave. Kandidat 41 (`noPages` mangler `/enhudspris`) har fortsat nul
-trafik, da `beregner.no` ikke er live. `/kalorier` og `/flyttebudget` er lukket i
-C29, `/braendstof` i C30, `/pension`s folkepensionsalder i C31, `/elbil`s
-forudsætninger i C32, `/husleje` i C33 og blogens returlinkes symmetri i C34.
+den skal **ikke** gentage C26-C36. **C28's kandidatliste er tom, og C34 lukkede
+blog → beregner med et negativt fund** — se afsnittet "Næste kandidater efter C34".
+C35 skrev artiklen til `/kvadratmeter`, og **C36 skrev den sidste til `/tidszone`**,
+så de otte testdirekte svar-først-sider har nu alle deres artikel. Næste opgave er
+derfor kandidater 2-4 i "Næste kandidater efter C34": de 28 DA-sider uden svensk
+metadata (springes hvis et nyt snapshot fortsat ikke tæller dem), C32's åbne
+spørgsmål om `/elbil`, eller de fire beslutninger under ❓ der kræver et ja fra Mads.
+`/kalorier` og `/flyttebudget` er lukket i C29, `/braendstof` i C30, `/pension`s
+folkepensionsalder i C31, `/elbil`s forudsætninger i C32, `/husleje` i C33,
+bloggens returlinkes symmetri i C34, `/kvadratmeter` i C35 og `/tidszone` i C36.
 
 
 ## Fase 3 — trafik-drevet
@@ -3775,6 +3786,101 @@ første halvdel af denne liste er fra DA-fladen, anden halvdel fra SE — de er
 - **Landet:** kode og plan i `ff86918`, merge til `master` er `1918bb3` 2026-09-26
   17:10 CEST. Begge refs pushet; `/api/health` svarer 200.
 
+#### 63. [x] FÆRDIG 2026-09-26 — C36 — `/tidszone` får sit indlæg: "hvad er klokken i USA, når den er 12 i Danmark"
+
+- **Datagrund:** `/tidszone` 24.723 visninger, 115 klik, **0,5 % CTR, pos 7,5** i
+  GSC 2026-08-27→09-24 (fjerdestørste side i Search Console efter `/procent`,
+  `/dato` og `/tidsberegner`). Søgningerne er "tidszoner" 764v pos 10, "hvad er
+  klokken i usa når den er 12 i danmark" 183v pos 6, "tidszoner beregner" 115v
+  pos 3 og "tidsforskel" 86v pos 10. **Autocomplete hentet 26. september 2026**
+  bekræfter præcis de længere formuleringer, planen forudså, og mere endnu:
+  "hvad er klokken i usa når den er 21 / 16 / 14 i danmark", "… usa miami",
+  "… usa est", "… usa los angeles", "tidszoner kort / usa / verden / europa" og
+  "tidsforskel grønland / thailand / bali danmark / japan danmark / tyrkiet /
+  kreta / new york".
+- **Hvorfor artiklen ikke bare er flere links:** samme begrundelse som C35. C34
+  viste, at blog → beregner er lukket; den manglende kant var **indhold**.
+  Siden svarede på spørgsmålet med tre byer (New York, Chicago, Los Angeles) og
+  nævnte ingen af resten: ikke Arizona, ikke Alaska, ikke Hawaii, ikke
+  Grønland, ikke de præcise sommertidsdatoer.
+- **Beslutning/implementering:** nyt indlæg
+  `src/app/blog/hvad-er-klokken-i-usa-naar-den-er-12-i-danmark/page.tsx`.
+  **Svar-først i `lead` og i metadata:** "12 i Danmark = 06 i New York, 05 i
+  Chicago, 04 i Denver, 03 i Los Angeles". Tre tabeller: (a) alle amerikanske
+  zoner ved 12 dansk, vinter og sommer; (b) østkyst, midtvest, bjergbælter,
+  stillehav, Alaska og Hawaii ved **14, 16 og 21** dansk — de tre øvrige
+  autocomplete-formuleringer; (c) 16 byer/lande med forskel i vinter- og
+  sommertid **plus** "kl. 14 dansk → by". Dertil sommertidsdatoer for 2026,
+  regneeksemplet (1 + 5 = 6 timer), mødetidspunkter, kilder og FAQ.
+- **Et fund undervejs, der gav artiklen sin substans:** **de to kolonner er ens
+  for alle amerikanske zoner undtagen Arizona og Hawaii.** Danmark og USA
+  skifter begge til sommertid, men på hver sin dato, så forskydningerne
+  ophæver hinanden. Det er en regel folk fejler konstant, og den er efterprøvet
+  i node. Arizona og Hawaii har afskaffet sommertiden, og derfor står de to tal
+  forskelligt. Samme logik gør **Berlin/Paris/Madrid 0 timer** hele året (kun
+  opgaven skrev "Berlin: samme som Danmark" uden at sige det til hele året).
+- **Kilder, fire, alle hentet 26. september 2026:**
+  [15 U.S. Code § 260a](https://www.law.cornell.edu/uscode/text/15/260a) (lovteksten:
+  klokken flyttes fra 02:00 den anden søndag i marts til 02:00 den første søndag
+  i november, ændret fra 2005 af Energy Policy Act),
+  [15 U.S. Code § 263](https://www.law.cornell.edu/uscode/text/15/263)
+  (navnene på USA's ni standardzoner),
+  [timeanddate.com — tidszoner verden](https://www.timeanddate.com/time/zones/)
+  (UTC-forskellene for hver forkortelse: EST −5, EDT −4, AKST −9, HST −10,
+  CET +1, CEST +2, JST +9, IST +5:30, ICT +7, TRT +3 m.fl.),
+  [timeanddate.com — Danmark 2026](https://www.timeanddate.com/time/change/denmark?year=2026)
+  (29. marts 2026 kl. 03:00 frem, 25. oktober 2026 kl. 03:00 tilbage, første
+  sommertid 1916) og
+  [timeanddate.com — Sydney 2026](https://www.timeanddate.com/time/change/australia/sydney?year=2026)
+  (4. oktober 2026 kl. 02:00 frem, 5. april 2026 kl. 03:00 tilbage).
+  **Havet uden kilder:** "arbejdstid i USA er typisk kl. 09-17" er skrevet som en
+  tommelfingerregel, ikke som et kildeført tal.
+- **Kobling:** `BEREGNER_ARTIKLER["/tidszone"]` i `src/lib/blog-kobling.ts` +
+  `<RelateredeArtikler current="/tidszone" locale={locale} />` i sidens footer.
+  `locale` var allerede slået op, så der kommer ikke et ekstra `getLocale()`-kald,
+  og blokken renderer intet på beraknare.se. Symmetri-testen i
+  `blog-kobling.test.ts` dækker den nye kant automatisk.
+- **Registrering:** `blogPosts` i `src/app/blog/page.tsx` (27 → 28) og
+  `getBlogSlugs` i `src/app/sitemap.ts`.
+- **Kvalitetsgate 2026-09-26 17:52 CEST:** `npm run test` grøn (**1363/1363, 131
+  filer**), `npm run lint` grøn (529 filer), `npm run build` grøn — route
+  `/blog/hvad-er-klokken-i-usa-naar-den-er-12-i-danmark` 249 B / 106 kB, samme
+  `ƒ`-rute som de 27 andre indlæg. Ingen nye CSS-advarsler.
+- **MÅL:** `/tidszone` **baseline 24.723 visninger / 115 klik / 0,5 % CTR /
+  pos 7,5 pr. 2026-09-24** (GSC) og **15 besøgende/28d** —Bemærk: GSC's
+  `/tidszone` har 24.723 visninger, men Plausible gav den ingen top-15-placering
+  i 28-dages snapshotet, så **CTR og artiklens egne visninger er den primære
+  måleenhed her, ikke besøgende**. Artiklen har baseline **0 visninger** — den er
+  ny. Genmål **2026-10-10**: (a) `/tidszone`s CTR mod 0,5 %; (b) artiklens
+  visninger og position for "hvad er klokken i usa når den er 12 i danmark"
+  (183v pos 6 i dag) og for "tidszoner" (764v pos 10); (c) om artiklen overhovedet
+  ranker for de fire autocomplete-formuleringer om kl. 12/14/16/21.
+- **Acceptkriterier:**
+  1. Én gennemarbejdet dansk artikel med konkrete tal og klikbare kilder. **PASS**
+  2. Hvert tal i tabellerne er enten kildeført (UTC-offsetterne) eller efterprøvet i
+     node i denne iteration (alle klokkeslæt). **PASS**
+  3. Artiklen linker til `/tidszone` og `/tidsberegner`, og siden linker tilbage
+     gennem ét centralt modul. **PASS**
+  4. Artiklen er med i blogindeks og sitemap. **PASS**
+  5. Intet dansk lækker til beraknare.se. **PASS** (kun `locale === "da"`)
+  6. `npm run lint`, `npm run test` og `npm run build` er grønne. **PASS**
+- **Forventet effekt:** fire forskellige konkrete klokkeslæt (12, 14, 16, 21) plus
+  "miami", "est" og "los angeles" er det, Google autocomplete viser, at folk
+  faktisk skriver. `/tidszone` har 0,5 % CTR på pos 7,5, så **trafikken er der
+  allerede** — den mangler et svar der får folk til at klikke. Det er den samme
+  billige hypotese som C35, og hvis den heller ikke flytter noget her, er
+  artikler-til-værktøj mønstret slut som vækstmotor, og næste iteration skal
+  bruge et andet middel.
+- **Ikke gjort, bevidst:** artiklen er **ikke** svensk, selv om autocomplete på
+  beraknare.se viser "dagar mellan datum"-mønstre for `/dato` og `/tidszone`
+  har 3.189 visninger der. En svensk søsterside er en reel opgave med egen
+  metadata og 301-redirecte, ikke en time. `/tidszone`-værktøjet **dækker kun 15
+  byer** og bruger standardforhold, så artiklen siger ærligt, at Arizona og
+  Hawaii mangler og at værktøjet bruger standardforskelle. Greenland, Kreta,
+  Tyrkiet, Bali og Auckland står i tabellerne som **opslagstabeller**, ikke som
+  løfter om at værktøjet kan regne dem.
+- **Landet:** kode og plan i denne iterations commit på `ceo/c36-tidszone-artikel`.
+
 ### Næste kandidater efter C34 — lukket med negativt fund
 
 
@@ -3783,15 +3889,13 @@ intet at rette i den retning, planen bad om. Returlinkene er gjort symmetriske
 for de fem trafikstørste beregnere. Resten af listen er **uændret** og prioriteret
 efter datagrund:
 
-0. ~~**Nye artikler til de to største ubestyrede emner.**~~ **Delvist lukket i
-   C35:** `/kvadratmeter` har nu sit indlæg (se opgave 62). **`/tidszone` (24.723
-   visninger, 0,5 % CTR, pos 7,5) er tilbage** og er næste opgave — dens
-   søgninger er "tidszoner" 764v pos 10, "hvad er klokken i usa når den er 12 i
-   danmark" 183v pos 6, "tidsforskel" 86v pos 10, og autocomplete (26/9) giver
-   "boligareal vægtet areal"-lignende lange formuleringer, så her er
-   *længere* artikler med tabeller det rigtige format, ikke en 7-minutters guide.
-   Samme mønster som C35: ét gennemarbejdet indlæg, svar-først i titlen, tal med
-   kilde, kobling i `blog-kobling.ts`.
+0. ~~**Nye artikler til de to største ubestyrede emner.**~~ **Lukket i C35 og
+   C36:** `/kvadratmeter` (se opgave 62) og `/tidszone` (se opgave 63) har nu
+   hver sit gennemarbejdede indlæg med tabeller, tal med kilde og kobling i
+   `blog-kobling.ts`. Autocomplete viste, at de længere formuleringer
+   ("hvad er klokken i usa når den er 21 i danmark", "tidsforskel grønland",
+   "tidszoner kort") var det rigtige format — artiklerne er skrevet efter dem.
+   **Mål begge 2026-10-10, før der skrives en tredje.**
 1. ~~**Blog → beregner**~~ — **lukket i C34 med negativt audit-resultat.**~~ Alle 26
    indlæg har allerede et link til den relevante beregner i 1-5 % af kroppen, og
    24/26 ender med en relateret-blok. Der var intet at rette. Returlinkene er gjort
@@ -4319,6 +4423,16 @@ landmark=lån, piggybank=opsparing osv.).
     - Gate grøn: lint ok, 280/280 tests, build ok (128 pages).
 
 ## VERIFICÉR DEPLOY-log
+- ⏳ **ÅBEN — VERIFICÉR DEPLOY: C36 `/blog/hvad-er-klokken-i-usa-naar-den-er-12-i-danmark`
+  + returlink fra `/tidszone`.** Kode og plan i denne iterations commit på
+  `ceo/c36-tidszone-artikel`, merge til `master` 2026-09-26 ca. 17:58 CEST.
+  17:30- og 21:30-vinduerne er begge *før* merge, så første kandidatvindue er
+  **2026-09-27 07:30** — intet er `DEPLOY-MISSING` og intet er frosset. Verificér
+  **indhold**: artiklen skal servere 200 med H1 "Hvad er klokken i USA, når den er
+  12 i Danmark?" og tabellen skal vise 06:00 for Østkysten i begge kolonner;
+  `/tidszone` skal vise **"Guides om emnet"** med artiklen;
+  `beraknare.se/tidszone` skal **ikke** vise den danske blok. Ny URL skal også stå
+  i `https://minberegner.dk/sitemap.xml`.
 - ⏳ **ÅBEN — VERIFICÉR DEPLOY: C35 `/blog/kvadratmeter-saadan-regner-du-ud` +
   returlink fra `/kvadratmeter`.** Kode `ff86918`, merge `1918bb3` 2026-09-26
   17:10 CEST. 17:30-batchen er det første vindue efter merge, så intet er
