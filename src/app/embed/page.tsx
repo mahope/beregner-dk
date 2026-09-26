@@ -11,7 +11,7 @@ const widgets = [
   {
     title: "Momsberegner",
     slug: "moms",
-    description: "Tillæg eller fratræk 25% moms",
+    description: "Læg 25% moms til eller træk moms fra",
     width: 500,
     height: 400,
   },

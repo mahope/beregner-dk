@@ -65,8 +65,8 @@ export default async function MomsPage() {
           Der er tre typiske beregninger, når du arbejder med moms:
         </p>
         <ul>
-          <li><strong>Tillæg moms:</strong> Gang beløbet med 1,25. Eksempel: 1.000 kr &times; 1,25 = 1.250 kr inkl. moms</li>
-          <li><strong>Fratræk moms:</strong> Divider beløbet med 1,25. Eksempel: 1.250 kr &divide; 1,25 = 1.000 kr ekskl. moms</li>
+          <li><strong>Læg moms til:</strong> Gang beløbet med 1,25. Eksempel: 1.000 kr &times; 1,25 = 1.250 kr inkl. moms</li>
+          <li><strong>Træk moms fra:</strong> Divider beløbet med 1,25. Eksempel: 1.250 kr &divide; 1,25 = 1.000 kr ekskl. moms</li>
           <li><strong>Find momsandelen:</strong> Gang beløbet inkl. moms med 0,20. Eksempel: 1.250 kr &times; 0,20 = 250 kr i moms</li>
         </ul>
         <p>

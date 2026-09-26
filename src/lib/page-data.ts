@@ -1228,7 +1228,7 @@ const daPages: Record<string, PageData> = {
       schemaCategory: "FinanceApplication",
       faqItems: [
       { question: "Hvad er den danske momssats?", answer: "Den danske moms er 25%. Varer og ydelser pålægges 25% moms." },
-      { question: "Hvordan beregner man moms?", answer: "Tillæg: gang med 1,25. Fratræk: divider med 1,25. 100 kr ekskl. = 125 kr inkl." },
+      { question: "Hvordan beregner man moms?", answer: "Læg til: gang med 1,25. Træk fra: divider med 1,25. 100 kr ekskl. = 125 kr inkl." },
       { question: "Hvad er momsandelen?", answer: "Momsandelen i en pris inkl. moms er 20% (25/125 = 0,20)." },
       { question: "Hvornår kan virksomheder trække moms fra?", answer: "Momsregistrerede virksomheder kan trække købsmoms fra og afregner med SKAT." },
       ],

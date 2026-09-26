@@ -9,25 +9,23 @@ import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/
 import { AnimatedNumber, CopyResultButton, ResetButton } from "@/components/ui";
 import { useLocale } from '@/components/LocaleProvider';
 import { formatCurrency, formatNumber, getCurrencySuffix } from '@/lib/format';
-import type { Locale } from '@/lib/i18n';
-
-const ALLOWED_MOMS_RATES: Record<Locale, readonly number[]> = {
-  da: [25],
-  no: [25],
-  se: [25, 12, 6],
-};
-
-function normalizeMomssats(value: unknown, locale: Locale): number {
-  const parsed = Number(value);
-  return ALLOWED_MOMS_RATES[locale].includes(parsed) ? parsed : 25;
-}
+import {
+  beregnMoms,
+  momsAndel,
+  momsFaktor,
+  MOMS_SATS_VALG_SE,
+  normalizeMomssats,
+  opsummering,
+  referenceRaekker,
+  type MomsBeregningstype,
+} from '@/lib/moms';
 
 const labels = {
   da: {
     hvadBeregne: "Hvad vil du beregne?",
-    tillaegTitle: "Tillæg moms",
+    tillaegTitle: "Læg moms til",
     tillaegDesc: "Beløb uden moms → inkl. moms",
-    fratraekTitle: "Fratræk moms",
+    fratraekTitle: "Træk moms fra",
     fratraekDesc: "Beløb inkl. moms → uden moms",
     findTitle: "Find moms",
     findDesc: "Se momsandelen i et beløb",
@@ -35,7 +33,6 @@ const labels = {
     beloebInklMoms: "Beløb inkl. moms",
     prisUdenMoms: "Pris uden moms",
     prisInklMoms: "Pris inkl. moms",
-    momsSeparator: " + moms = ",
     calculatorName: "Momsberegner",
     hurtigReference: "Hurtig reference",
     tblUdenMoms: "Uden moms",
@@ -49,7 +46,7 @@ const labels = {
     info3: (factor: string) => `For at finde pris uden moms: Beløb ÷ ${factor}`,
     info4: (share: string) => `Momsandelen af en pris inkl. moms er ${share} %`,
     seFormler: "Se formler og beregningsmetoder",
-    formTillaegTitle: (rate: string) => `Tillæg moms (${rate} %):`,
+    formTillaegTitle: (rate: string) => `Læg moms til (${rate} %):`,
     formTillaeg: (factor: string) => `Pris inkl. moms = Pris uden moms × ${factor}`,
     formFratraekTitle: "Fratræk moms:",
     formFratraek: (factor: string) => `Pris uden moms = Pris inkl. moms ÷ ${factor}`,
@@ -68,7 +65,6 @@ const labels = {
     beloebInklMoms: "Belopp inkl. moms",
     prisUdenMoms: "Pris utan moms",
     prisInklMoms: "Pris inkl. moms",
-    momsSeparator: " + moms = ",
     calculatorName: "Momsräknare",
     hurtigReference: "Snabbreferens",
     tblUdenMoms: "Utan moms",
@@ -95,15 +91,14 @@ export default function MomsBeregner() {
   const { locale } = useLocale();
   const l = labels[locale as keyof typeof labels] || labels.da;
   const [beloeb, setBeloeb] = useState<number>(1000);
-  const [beregningsType, setBeregningsType] = useState<"tillaegMoms" | "fratraekMoms" | "findMoms">("tillaegMoms");
+  const [beregningsType, setBeregningsType] = useState<MomsBeregningstype>("tillaegMoms");
   const [momssats, setMomssats] = useState<number>(25);
   const [urlStateKontrolleret, setUrlStateKontrolleret] = useState(false);
   const effectiveMomssats = normalizeMomssats(momssats, locale);
-  const sats = effectiveMomssats / 100;
   const rateCopy = {
     rate: formatNumber(effectiveMomssats, locale),
-    factor: formatNumber(1 + sats, locale, { maximumFractionDigits: 2 }),
-    share: formatNumber((sats / (1 + sats)) * 100, locale, { maximumFractionDigits: 2 }),
+    factor: formatNumber(momsFaktor(effectiveMomssats), locale, { maximumFractionDigits: 2 }),
+    share: formatNumber(momsAndel(effectiveMomssats) * 100, locale, { maximumFractionDigits: 2 }),
   };
   const hasTracked = useRef(false);
   const hasLoadedUrl = useRef(false);
@@ -139,50 +134,11 @@ export default function MomsBeregner() {
     return generateShareableLink(state);
   }, [beloeb, beregningsType, effectiveMomssats]);
 
-  const beregning = useMemo(() => {
-    switch (beregningsType) {
-      case "tillaegMoms": {
-        // Beløb uden moms → tilføj moms
-        const momsBeloeb = beloeb * sats;
-        const prisInklMoms = beloeb + momsBeloeb;
-        return {
-          prisUdenMoms: beloeb,
-          momsBeloeb,
-          prisInklMoms,
-          momsProcent: effectiveMomssats,
-        };
-      }
-      case "fratraekMoms": {
-        // Beløb inkl. moms → find pris uden moms
-        const prisUdenMoms = beloeb / (1 + sats);
-        const momsBeloeb = beloeb - prisUdenMoms;
-        return {
-          prisUdenMoms,
-          momsBeloeb,
-          prisInklMoms: beloeb,
-          momsProcent: effectiveMomssats,
-        };
-      }
-      case "findMoms": {
-        // Find momsandelen i et beløb inkl. moms
-        const prisUdenMoms = beloeb / (1 + sats);
-        const momsBeloeb = beloeb - prisUdenMoms;
-        return {
-          prisUdenMoms,
-          momsBeloeb,
-          prisInklMoms: beloeb,
-          momsProcent: effectiveMomssats,
-        };
-      }
-      default:
-        return {
-          prisUdenMoms: 0,
-          momsBeloeb: 0,
-          prisInklMoms: 0,
-          momsProcent: effectiveMomssats,
-        };
-    }
-  }, [beloeb, beregningsType, effectiveMomssats, sats]);
+  const beregning = useMemo(
+    () => beregnMoms(beloeb, beregningsType, effectiveMomssats),
+    [beloeb, beregningsType, effectiveMomssats]
+  );
+  const referenceRaekke = useMemo(() => referenceRaekker(effectiveMomssats), [effectiveMomssats]);
 
   // Track calculation once per session
   useEffect(() => {
@@ -197,6 +153,21 @@ export default function MomsBeregner() {
   }, [beregning, urlStateKontrolleret]);
 
   const formatKr = (amount: number) => formatCurrency(amount, locale);
+
+  const resultatTekst = useMemo(
+    () =>
+      opsummering(
+        beregningsType,
+        beregning,
+        effectiveMomssats,
+        {
+          pris: (tal) => formatCurrency(tal, locale),
+          procent: (tal) => formatNumber(tal, locale, { maximumFractionDigits: 2 }),
+        },
+        locale === "se" ? "se" : "da"
+      ),
+    [beregningsType, beregning, effectiveMomssats, locale]
+  );
 
   const getInputLabel = () => {
     switch (beregningsType) {
@@ -258,20 +229,20 @@ export default function MomsBeregner() {
         <div className="max-w-md">
           <label className="block text-sm font-medium mb-2">Momssats</label>
           <div role="group" aria-label="Momssats" className="grid grid-cols-3 gap-2">
-            {[{ v: 25, d: "Standard" }, { v: 12, d: "Mat, hotell" }, { v: 6, d: "Böcker, kultur" }].map((o) => (
+            {MOMS_SATS_VALG_SE.map((o) => (
               <button
-                key={o.v}
+                key={o.sats}
                 type="button"
-                aria-pressed={effectiveMomssats === o.v}
-                onClick={() => setMomssats(o.v)}
+                aria-pressed={effectiveMomssats === o.sats}
+                onClick={() => setMomssats(o.sats)}
                 className={`p-3 rounded-lg border-2 text-center transition-all ${
-                  effectiveMomssats === o.v
+                  effectiveMomssats === o.sats
                     ? "border-blue-500 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300"
                     : "border-gray-200 dark:border-gray-600 dark:text-gray-300"
                 }`}
               >
-                <div className="font-semibold">{o.v}%</div>
-                <div className="text-xs text-gray-500 dark:text-gray-400">{o.d}</div>
+                <div className="font-semibold">{o.sats}%</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">{o.navn}</div>
               </button>
             ))}
           </div>
@@ -329,15 +300,15 @@ export default function MomsBeregner() {
 
       {/* Share, Copy and Print buttons */}
       <div className={`flex justify-center gap-3 ${urlStateKontrolleret ? "" : "hidden"}`}>
-        <CopyResultButton text={`${formatKr(beregning.prisUdenMoms)}${l.momsSeparator}${formatKr(beregning.prisInklMoms)}`} />
+        <CopyResultButton text={resultatTekst} />
         <ShareCalculation
           getShareableLink={getShareableLink}
           calculatorName={l.calculatorName}
-          resultSummary={`${formatKr(beregning.prisUdenMoms)}${l.momsSeparator}${formatKr(beregning.prisInklMoms)}`}
+          resultSummary={resultatTekst}
         />
         <PrintResult
           calculatorName={l.calculatorName}
-          resultSummary={`${formatKr(beregning.prisUdenMoms)}${l.momsSeparator}${formatKr(beregning.prisInklMoms)}`}
+          resultSummary={resultatTekst}
         />
       </div>
 
@@ -356,11 +327,11 @@ export default function MomsBeregner() {
               </tr>
             </thead>
             <tbody>
-              {[100, 500, 1000, 5000, 10000].map((amount) => (
-                <tr key={amount} className="border-b last:border-b-0">
-                  <td className="py-2">{formatKr(amount)}</td>
-                  <td className="py-2">{formatKr(amount * sats)}</td>
-                  <td className="py-2 font-medium">{formatKr(amount * (1 + sats))}</td>
+              {referenceRaekke.map((r) => (
+                <tr key={r.prisUdenMoms} className="border-b last:border-b-0">
+                  <td className="py-2">{formatKr(r.prisUdenMoms)}</td>
+                  <td className="py-2">{formatKr(r.momsBeloeb)}</td>
+                  <td className="py-2 font-medium">{formatKr(r.prisInklMoms)}</td>
                 </tr>
               ))}
             </tbody>
