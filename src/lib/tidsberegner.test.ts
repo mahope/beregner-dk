@@ -10,6 +10,23 @@ const baseInput: TidsintervalInput = {
 };
 
 describe("beregnTidsinterval", () => {
+  test("heleDoegn er døgn, ikke kalenderdage", () => {
+    // 8 t 15 min = 495 min = 0,34 døgn. Før blev deret regnet i komponenten og
+    // kaldt "dage", hvilket læses som 0,33 dage.
+    const resultat = beregnTidsinterval(baseInput)!;
+    expect(resultat.heleDoegn).toBe("0.34");
+
+    const heleDag = beregnTidsinterval({
+      ...baseInput,
+      startTid: "16:00",
+      slutTid: "09:00",
+      startDato: "2026-09-25",
+      slutDato: "2026-09-28",
+    })!;
+    expect(heleDag.totalMinutter).toBe(3900);
+    expect(heleDag.heleDoegn).toBe("2.71");
+  });
+
   test("beregner et interval på samme dag", () => {
     const result = beregnTidsinterval(baseInput)!;
 

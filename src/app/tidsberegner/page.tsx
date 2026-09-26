@@ -2,11 +2,28 @@ import TidsBeregner from "@/components/TidsBeregner";
 import { generatePageMetadata } from "@/lib/page-helpers";
 import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
-import { TIDS_EKSEEMPLER } from "@/lib/tids-eksempler";
+import {
+  TIDS_EKSEEMPLER,
+  TIDS_EKSEMPEL_FLERE_DAGE,
+  TIDS_UDEN_DATOER,
+  formatTidsvar,
+} from "@/lib/tids-eksempler";
 import RelatedCalculators from "@/components/RelatedCalculators";
 import FAQ from "@/components/FAQ";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
+
+/** "2026-09-25" → "25. sep.". Datoerne læses i UTC, så de kan ikke glide en dag. */
+function formatDato(iso: string | undefined, locale: "da" | "se"): string {
+  if (!iso) return "";
+  const dato = new Date(`${iso}T00:00:00Z`);
+  if (Number.isNaN(dato.getTime())) return iso;
+  return new Intl.DateTimeFormat(locale === "se" ? "sv-SE" : "da-DK", {
+    day: "numeric",
+    month: "short",
+    timeZone: "UTC",
+  }).format(dato);
+}
 
 export async function generateMetadata() {
   return generatePageMetadata("tidsberegner");
@@ -40,7 +57,9 @@ export default async function TidsberegnerPage() {
       {/* Svar-først: Search Console viser 790 visninger (pos. 6) på søgningen
           "hvor lang tid" og 969 (pos. 4) på "tidsberegner", men spørgsmålet
           stod ingen steder på siden. Tallene nedenfor kommer fra
-          `beregnTidsinterval` — samme modul som værktøjet bruger. */}
+          `beregnTidsinterval` — samme modul som værktøjet bruger.
+          C51 lagde de to rækker med datofelter ind, fordi værktøjet kan
+          intervaller på tværs af datoer, men siden ikke nævnte det. */}
       {locale === "da" && (
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 mb-8">
         <h2 className="text-xl font-bold mb-3 dark:text-white">
@@ -52,6 +71,7 @@ export default async function TidsberegnerPage() {
               <tr>
                 <th>Start</th>
                 <th>Slut</th>
+                <th>Dato</th>
                 <th>Pause</th>
                 <th>Svar</th>
                 <th>Decimaltimer</th>
@@ -62,10 +82,16 @@ export default async function TidsberegnerPage() {
                 <tr key={`${eksempel.start}-${eksempel.slut}`}>
                   <td>{eksempel.start}</td>
                   <td>{eksempel.slut}</td>
+                  <td>
+                    {eksempel.startDato
+                      ? `${formatDato(eksempel.startDato, "da")} – ${formatDato(eksempel.slutDato, "da")}`
+                      : "Samme dag"}
+                  </td>
                   <td>{eksempel.pause > 0 ? `${eksempel.pause} min` : "Ingen"}</td>
                   <td>
                     <strong>{eksempel.svar}</strong>
-                    {eksempel.overMidnat && " (dagen efter)"}
+                    {eksempel.overMidnat && !eksempel.startDato &&
+                      " (dagen efter)"}
                   </td>
                   <td>{eksempel.decimalTimer} timer</td>
                 </tr>
@@ -82,6 +108,7 @@ export default async function TidsberegnerPage() {
         </p>
       </div>
       )}
+
 
       <div className="bg-white rounded-xl shadow-sm p-6 md:p-8 mb-8">
         <TidsBeregner />
@@ -109,7 +136,36 @@ export default async function TidsberegnerPage() {
           <li>
             <strong>Nattevagter</strong> - beregn tid over midnat
           </li>
+          <li>
+            <strong>Intervaller på flere dage</strong> - beregn fra en dato og
+            et klokkeslæt til en anden dato og et andet klokkeslæt
+          </li>
         </ul>
+
+        <h2>Beregner tid på tværs af datoer</h2>
+        <p>
+          Under de to klokkeslæt ligger der to <strong>valgfrie datofelter</strong>.
+          Uden dem regner beregneren inden for samme døgn, og den tager så
+          automatisk natten med, når sluttidspunktet er tidligere end
+          starttidspunktet. Det dækker en arbejdsdag og en nattevagt. Men skal
+          tiden dække mere end ét døgn — en weekend, en ferie, en turnus over
+          flere dage — så skal begge datoer ind, ellers regner beregneren kun
+          det, der ligger mellem klokkeslættene.
+        </p>
+        <p>
+          Et gennemgående eksempel: <strong>fredag kl. {TIDS_EKSEMPEL_FLERE_DAGE.start} til mandag kl.{" "}
+          {TIDS_EKSEMPEL_FLERE_DAGE.slut}</strong> er{" "}
+          <strong>{formatTidsvar(TIDS_EKSEMPEL_FLERE_DAGE, "da")}</strong> ={" "}
+          {TIDS_EKSEMPEL_FLERE_DAGE.decimalTimer} decimaltimer, fordi de tre
+          fulde døgn regnes med. Uden datoerne ville det samme interval være{" "}
+          {TIDS_UDEN_DATOER.da} — kun det, der ligger mellem klokkeslættene.
+        </p>
+        <p>
+          Er startdatoen tidligere end slutdatoen, viser beregneren intet
+          resultat, fordi et interval ikke kan gå baglæns. Er der kun indtastet
+          én dato, bruges den anden som samme dag — så begge datoer skal derfor
+          ind, hvis intervallet går over en dag.
+        </p>
 
         <h2>Decimal timer vs. timer:minutter</h2>
         <p>
@@ -153,7 +209,36 @@ export default async function TidsberegnerPage() {
           <li>
             <strong>Nattpass</strong> - beräkna tid över midnatt
           </li>
+          <li>
+            <strong>Intervall som spänner flera dagar</strong> - beräkna från
+            ett datum och en tid till ett annat datum och en annan tid
+          </li>
         </ul>
+
+        <h2>Beräkna tid över flera datum</h2>
+        <p>
+          Under de två klockslagen finns två <strong>valfria datumfält</strong>.
+          Utan dem räknar verktyget inom ett dygn, och det tar då automatiskt
+          med natten när sluttiden är tidigare än starttiden. Det räcker till
+          en arbetsdag eller ett nattpass. Ska tiden omfatta mer än ett dygn —
+          en weekend, en semester, ett skift över flera dagar — ska båda
+          datum indateras, annars räknar verktyget bara det som ligger
+          mellan klockslagen.
+        </p>
+        <p>
+          Ett återkommande exempel: <strong>fredag kl. {TIDS_EKSEMPEL_FLERE_DAGE.start} till måndag kl.{" "}
+          {TIDS_EKSEMPEL_FLERE_DAGE.slut}</strong> är{" "}
+          <strong>{formatTidsvar(TIDS_EKSEMPEL_FLERE_DAGE, "se")}</strong> ={" "}
+          {TIDS_EKSEMPEL_FLERE_DAGE.decimalTimer} decimaltimmar, för de tre
+          fulla dygnen räknas med. Utan datum skulle samma intervall bli{" "}
+          {TIDS_UDEN_DATOER.se} — bara det som ligger mellan klockslagen.
+        </p>
+        <p>
+          Är startdatumet efter slutdatumet visar verktyget inget resultat, eftersom
+          ett intervall inte kan gå bakåt. Är bara ett datum ifyllt används det
+          andra som samma dag — så båda datum behöver alltså ifyllas om
+          intervallet går över en dag.
+        </p>
 
         <h2>Decimaltimmar vs. timmar:minuter</h2>
         <p>

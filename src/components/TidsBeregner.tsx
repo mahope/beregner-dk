@@ -25,6 +25,9 @@ const labels = {
     timerWord: "timer",
     arbejdsdage8t: "Arbejdsdage (8t)",
     dageWord: "dage",
+    doegnWord: "hele døgn",
+    datoHint:
+      "Skal intervallet dække mere end ét døgn, indtast begge datoer — beregneren bruger dem til at tælle de fulde døgn med.",
     detaljeretVisning: "Detaljeret visning",
     minutterWord: "minutter",
     sekunderWord: "sekunder",
@@ -52,6 +55,9 @@ const labels = {
     timerWord: "timmar",
     arbejdsdage8t: "Arbetsdagar (8h)",
     dageWord: "dagar",
+    doegnWord: "hela dygn",
+    datoHint:
+      "Ska intervallet omfatta mer än ett dygn, fyll i båda datumen — verktyget räknar med dem för att lägga till de fulla dygnen.",
     detaljeretVisning: "Detaljerad vy",
     minutterWord: "minuter",
     sekunderWord: "sekunder",
@@ -178,6 +184,10 @@ export default function TidsBeregner() {
         </div>
       </div>
 
+      <p className="text-sm text-gray-500 dark:text-gray-400">
+        {l.datoHint}
+      </p>
+
       {/* Pause fratræk */}
       <div className="max-w-md">
         <label className="block text-sm font-medium mb-2 dark:text-gray-200">
@@ -249,9 +259,9 @@ export default function TidsBeregner() {
               </div>
               <div>
                 <p className="text-3xl font-bold text-gray-700 dark:text-gray-200">
-                  {(parseFloat(beregning.totalTimer) / 24).toFixed(2)}
+                  {beregning.heleDoegn}
                 </p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">{l.dageWord}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{l.doegnWord}</p>
               </div>
             </div>
           </div>

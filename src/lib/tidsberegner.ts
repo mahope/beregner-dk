@@ -27,6 +27,8 @@ export interface TidsintervalResultat {
   sekunder: number;
   arbejdsdage: string;
   decimalTimer: string;
+  /** Hele døgn (24 timer), ikke kalenderdage. 65 timer = 2,71 døgn. */
+  heleDoegn: string;
   overMidnat: boolean;
 }
 
@@ -85,6 +87,7 @@ export function beregnTidsinterval(input: TidsintervalInput): TidsintervalResult
     sekunder: totalMinutter * 60,
     arbejdsdage: (totalTimer / 8).toFixed(2),
     decimalTimer: totalTimer.toFixed(2),
+    heleDoegn: (totalMinutter / MINUTTER_PER_DAG).toFixed(2),
     overMidnat,
   };
 }
