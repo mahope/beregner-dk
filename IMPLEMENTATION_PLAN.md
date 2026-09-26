@@ -1,6 +1,33 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — **C56 er landet: `/tidszone`'s tidsforskel skrev brudtal med
+STATUS: KØ — **C57 er landet: `/renteberegner`'s delte tekst skrev rentesatsen
+råt ind i sætningen og sagde hverken hvilken låntype eller hvilken ydelse den
+ged sig.** `l.copySummary` blev kaldt med `(formatKr(hovedstol), rente,
+loebetid, formatKr(samletRente))`, altså med **renten som råt tal**:
+`${amount} til ${rate}% i ${years} år - samlet rente ${interest}`. Da er
+C53's fund igen — 3,5 % blev **"3.5%"** i dansk og svensk tekst — og da slap
+den forbi både C53's `toFixed(2)`-søgning og C56's `/60`-søgning, fordi tallet
+aldrig gik gennem hverken. Resten af sætningen var **kun et input og ét
+summertal**: brugeren fik at vide hvor meget han lånt og hvad det kostede i
+alt, men ikke hvilken af de to låntyper der var regnet på (præcis den
+forskel, siden selv bruger som skelningspunkt i sin tabel: annuitetslån har
+**fast** månedlig ydelse, serielån har **faldende**), og ikke den ydelse
+læseren egentlig er ude efter. Nu bygger ét `deltTekst()` hele sætningen med
+alle tal gennem samme `formatKr`/`formatNumber` som skærmen bruger:
+`1.000.000 kr. til 5 % i 30 år (annuitetslån). Månedlig ydelse 5.368 kr. og
+samlet rente 932.558 kr.` — låntypen i parentes, ydelsen med sit eget label,
+og serielånets to ydelser fordi der ikke er én fast. Kopier og Del får
+præcis samme streng (testen læser Del-linkets `href`, fordi forskellene er
+usynlige i DOM'en — C52's lærepådom). Låntypen står i parentes fremst i
+strengen, **ikke** som præfiks, fordi `ShareCalculation` selv sætter
+`"Renteberegner: "` foran, og et præfiks ville givet dobbelt kolon. Ny fil
+`src/components/RenteBeregner.test.tsx` med **5 tests** — komponenten havde
+aldrig haft nogen. Verificeret modsvejs: med den gamle komponent falder **5 af
+5**. Gate grøn: lint (546 filer), **1510 tests / 141 filer** (fra 1505 / 140)
+og build (141 sider). Kode + plan i ét commit på `ceo/renteberegner-kopi`;
+første kandidatvindue **2026-09-27 07:30**. Se opgave 85.
+
+STATUS (forrige iteration) — **C56 er landet: `/tidszone`'s tidsforskel skrev brudtal med
 punktum i dansk og svensk tekst, og den delte tekst var en påstand der blev
 forkert til vinter.** Den fjerdestørste side i Search Console (24.723
 visninger, 0,5 % CTR, pos. 7,5) har to fund i samme klasse som C55's.
@@ -158,10 +185,11 @@ tilstanden kalder `beregnAlder`, og et tomt eller umuligt datofelt giver intet
 resultat frem for "NaN dage". Kode + plan i ét commit på `ceo/dato-alder-lokaldato`;
 første kandidatvindue **2026-09-27 07:30**. Se opgave 78.
 
-**Otte deploynoter står åbne: C37, C49, C50, C51, C52, C53, C54 og nu C55**, alle med
-første kandidatvindue 2026-09-27 07:30 (C37: 12:30). 21:30-vinduet den 26/9 er
-passeret, så intet kan verificeres før 07:30. `beregner.no`-delen af enhver note
-verificeres ikke: den URL er et separat site, ikke dette repo (se ❓).
+**Deploynoter:** i alt ni åbne (C37, C49, C50, C51, C52, C53, C54, C55, C56) plus
+C57 fra denne iteration — alle med første kandidatvindue 2026-09-27 07:30 (C37:
+12:30). 21:30-vinduet den 26/9 er passeret, så intet kan verificeres før 07:30.
+`beregner.no`-delen af enhver note verificeres ikke: den URL er et separat site,
+ikke dette repo (se ❓).
 
 **To negative fund fra C54, så ingen senere iteration bruger tid på dem.**
 1. **"2026 har 253 arbejdsdage" på `/dato` er korrekt** — den så ud som en fejl,
@@ -5955,13 +5983,120 @@ top-15, så ud over CTR er det eneste målbare signal `ad_clicked` på siden.
   hente dem, jeg må ikke ændre tracking**), men effekten på CTR er indirekte:
   en delt tekst der holder, er den eneste grunde til at en læser deler den igen.
 - **Efterladt, bevidst.** Resten af klassen, i rækkefølge efter visninger:
-  `RenteBeregner`'s `l.copySummary` (13.623), `KalorieBeregner`'s `toFixed(2)`
-  (12.332), `AlderBeregner`'s `l.copySummary` (6.013), `PromilleBeregner`
-  (4.159 — dens egen `bacText` bruger faktisk allerede `.replace(".", ",")`, så
-  den skal læses for andre fund, ikke for dette), derefter de ni `toFixed(2)`
-  i listen fra opgave 83's "Efterladt" — hvor `Elberegner` (4) og
-  `BraendstofBeregner` (2) er de største. **Én komponent ad gangen med grøn
-  gate imellem.**
+  ~~`RenteBeregner`'s `l.copySummary` (13.623)~~ — **lukket i C57**, se opgave
+  85. `KalorieBeregner`'s `toFixed(2)` (12.332), `AlderBeregner`'s
+  `l.copySummary` (6.013), `PromilleBeregner` (4.159 — dens egen `bacText`
+  bruger faktisk allerede `.replace(".", ",")`, så den skal læses for andre
+  fund, ikke for dette), derefter de ni `toFixed(2)` i listen fra opgave 83's
+  "Efterladt" — hvor `Elberegner` (4) og `BraendstofBeregner` (2) er de
+  største. **Én komponent ad gangen med grøn gate imellem.**
+
+
+
+#### 85. [x] FÆRDIG 2026-09-27 — C57 — `/renteberegner`: delt tekst med rå rentesats, uden låntype og uden ydelse
+
+- **Iteration start:** 2026-09-27 01:35 CEST på `ceo/renteberegner-kopi`. Køen var
+  tom (alle 84 opgaver færdige, intet `I GANG`) og de åbne deploynoters første
+  kandidatvindue er 07:30 — efter iterationsgrænsen, så intet kunne verificeres.
+  Valget var **punkt 3b i køen** (C56's "Efterladt"), som peger på
+  `RenteBeregner` som den største side i klassen.
+- **Datagrund:** DA `/renteberegner` Search Console **13.623 visninger, 124 klik,
+  CTR 0,9 %, pos. 7,5** (GSC 2026-08-27 → 2026-09-24); 149 besøgende/28d,
+  bounce 5 % (Plausible 2026-09-26). Søgningerne er "annuitetslån beregner"
+  (355, pos. 8), "renteberegner" (327, pos. 7) — altså præcis den beslutning
+  værktøjet skal hjælpe med. SE har 2.772 visninger / 0,1 % / pos. 26,6, så
+  samme fejl lå på begge domæner.
+- **Fund 1 — rentesatsen kom råt ind i en dansk sætning.** `l.copySummary` blev
+  kaldt med `(formatKr(hovedstol), rente, loebetid, formatKr(samletRente))`, altså
+  **renten som et `number`**, og skrev den med `${rate}` i en template. Indtastede
+  3,5 % (feltets `step` er 0,1, så det er et tastetryk) gav derfor
+  **"1.000.000 kr. til 3.5% i 30 år"** — punktum i dansk og svensk tekst. Det er
+  C53's og C56's fund, og denne gang slap den fordi **begge søgninger** er
+  forgæves: tallet kom aldrig gennem `toFixed` (C53) eller `/60` på et heltal
+  (C56), det kom lige fra et `<input type=number>`-state. Den gamle tekst havde
+  heller ikke mellemrum før procenttegnet.
+- **Fund 2 — den delte tekst var ikke selvstændig, den var halv.** Den gamle streng
+  var `"1.000.000 kr. til 5% i 30 år - samlet rente 932.558 kr."`: **ét input og
+  ét summertal**. Den sagde hverken hvilken låntype der var regnet på — præcis den
+  forskel siden selv bruger som skelningspunkt i sin egen tabel
+  (`src/app/renteberegner/page.tsx:94-96`: månedlig ydelse *Fast* for
+  annuitetslån, *Faldende over tid* for serielån) — og ikke den ydelse læseren er
+  ude efter. Modtageren kan ikke regne videre på tallene, fordi "932.558 kr."
+  uden låntype og uden ydelse kan være begge dele. Samme klasse som C55's og
+  C56's fund, en niveau lavere: teksten var ikke *forkert*, den var *utilstrækkelig*
+  præcis på de to ting siden selv bruger som skel.
+- **Løsning:** ét `deltTekst()` bygger hele sætningen, brugt af **både**
+  `CopyResultButton` og `ShareCalculation` (C55/C56's lærepådom — de to var kaldt
+  med hver sin gentagelse af argumenterne, så de kunne komme til at sige hver sit).
+  Alle tal går gennem samme `formatKr` og `formatNumber` som skærmen bruger, så
+  den delte tekst ikke kan vise et andet tal end den, siden viser:
+  - DA annuitet: `1.000.000 kr. til 5 % i 30 år (annuitetslån). Månedlig ydelse 5.368 kr. og samlet rente 932.558 kr.`
+  - DA serielån: `1.000.000 kr. til 5 % i 30 år (serielån). Første måneds ydelse 6.944 kr., sidste måneds ydelse 2.789 kr. og samlet rente 752.083 kr.`
+  - SE: `1 000 000 kr till 5 % i 30 år (annuitetslån). Månatlig betalning 5 368 kr och total ränta 932 558 kr`
+  Serielån får **begge** ydelser, fordi der netop ikke er én fast. Låntypen står i
+  **parentes fremst** og ikke som præfiks, fordi `ShareCalculation` selv sætter
+  `"Renteberegner: "` foran sit `resultSummary` (`src/components/ShareCalculation.tsx:135-137`)
+  — et præfiks ville givet `Renteberegner: Annuitetslån: …`. Labels til de tre nye
+  dele er hentet fra de **eksisterende** labels, så værktøjet og den delte tekst
+  ikke kan glide fra hinanden: `l.annuitet`/`l.serielaan` (kun til låntypen i
+  sætningen, via `loanTypeInSentence`), `l.monthlyPayment`, `l.firstMonthPayment`,
+  `l.lastMonthPaymentInline` og `l.totalInterestInline`. De to nye `Inline`-labels
+  er nødvendige fordi `l.totalInterest` er "Samlet rente" med stort S — et
+  kort-label midt i en sætning — og fordi den anden betaling ellers ville få et
+  stort `S` midt i sætningen. Dansk `kr.` bærer sit eget punktum, og derfor
+  skriver sætningen **ikke** en afsluttende punktum efter beløbene; svensk `kr`
+  gør ikke, og den danske og svenske sætning ender derfor hver med sit eget
+  korrekte sidste tegn. Samme formateringskonvention som `MomsBeregner` (C52),
+  `ProcentBeregner` (C53) og `TidszoneBeregner` (C56).
+- **Test:** ny `src/components/RenteBeregner.test.tsx` med **5 tests** —
+  komponenten havde **aldrig haft nogen**, hvilket er grunden til at fejlen
+  kunne ligge så længe. Klipbordet mockes og **læses** gennem
+  `navigator.clipboard`, samme mønster som `MomsBeregner.test.tsx`, fordi
+  Kopier-knappen ikke viser strengen — en test der læser DOM'en ville være grøn
+  med den gamle kode. Den femte test åbner Del-dialogen og læser **Del-linkets
+  `href`**, fordi `ShareCalculation` koder `shareText` ind i Twitter/Facebook/
+  mail-URL'en: det er det eneste sted hvor "Del bruger samme streng som Kopier"
+  kan bevises, da forskellene er usynlige i DOM'en. Verificeret modsvejs med
+  `git checkout master --` på kun komponenten: **5 af 5** tests falder.
+- **Gate:** `npm run lint` grøn (546 filer), `npm run test` **1510 tests / 141
+  filer** grøn (fra 1505 / 140), `npm run build` grøn (141 sider). Første
+  kandidatvindue **2026-09-27 07:30**.
+- **MÅL:** `/renteberegner` baseline **13.623 visninger / 124 klik / CTR 0,9 % /
+  pos. 7,5** (GSC 2026-08-27 → 2026-09-24) og **149 besøgende/28d, bounce 5 %**
+  (Plausible 2026-09-26). SE `/renteberegner` baseline **2.772 visninger / 2
+  klik / 0,1 % / pos. 26,6**. **Mål 2026-10-10.** Effekten er først og fremmest
+  på deling: `trackResultCopied` / `trackShare` i Plausible (**Mads skal hente
+  dem, jeg må ikke ændre tracking**). En delt tekst der kan bruges, er den
+  eneste grunde til at læseren deler den igen — og det er de to fund, der
+  gør den ubrugelig, ikke titlen.
+- **Bevidst ikke gjort, og hvorfor.** `if (!hovedstol || !rente || !loebetid)
+  return null` betyder at **0 % rente giver intet resultat** — hele resultatfeltet
+  forsvinder, uden forklaring. Det er en reel funktionel mangel (rentefri lån er
+  et dansk produkt), men den kan **ikke** rettes ved at slette `!rente`:
+  annuitetsformlen dividerer med `Math.pow(1+r, n) - 1`, som er 0 ved r = 0, så
+  man får `NaN` i stedet. En korrekt løsning kræver at feltet bliver
+  `number | ""`, så et tomt felt (som `parseFloat("") || 0` gør til 0) kan
+  skelnes fra et bevidst 0 — ellers ville der poppe en fuld 0 %-beregning op
+  imens brugeren endnu ikke har tastet. Det er et større greb end denne
+  opgaves omfang, så det er skrevet her frem for gjort halvt. Noteret som
+  **C58-kandidat**: adskil "tomt felt" fra "0 %" i `RenteBeregner` med
+  `rente: number | ""` og en egen 0 %-gren, plus test på "feltet er tomt →
+  intet resultat" og "0 % → hovedstol delt i løbetiden, 0 kr. i rente".
+- **Bemærkning til søgningen efter denne klasse.** Fire iterationer i træk
+  (C53, C55, C56, C57) har nu fundet den samme fejl — et tal fra et råt state
+  eller en heltalsdivision skrevet direkte i dansk tekst — på **fire forskellige
+  sider**, fordi `git grep` på `toFixed(2)` kun finder én af måderne den opstår
+  på. Den næste måde at søge bredt er at søge på **template-interpolation af et
+  tal-state** (`${rate}`, `${years}`, `${aar}`) i komponenter, ikke på
+  formatteringskald. Den søgning er ikke kørt endnu, og det er den næste
+  iteration jeg vil bruge den på.
+- **Efterladt, bevidst.** Resten af klassen, i rækkefølge efter visninger:
+  `KalorieBeregner`'s `toFixed(2)` (12.332) er nu den største, derefter
+  `AlderBeregner`'s `l.copySummary` (6.013), `PromilleBeregner` (4.159 — dens
+  egen `bacText` bruger allerede `.replace(".", ",")`, så den skal læses for
+  andre fund), derefter de ni `toFixed(2)` fra opgave 83's "Efterladt" — hvor
+  `Elberegner` (4) og `BraendstofBeregner` (2) er de største. **Én komponent ad
+  gangen med grøn gate imellem.**
 
 
 ### Næste kandidater efter C34 — lukket med negativt fund
@@ -7029,6 +7164,18 @@ landmark=lån, piggybank=opsparing osv.).
     - Gate grøn: lint ok, 280/280 tests, build ok (128 pages).
 
 ## VERIFICÉR DEPLOY-log
+- ⏳ **ÅBEN — C57 `/renteberegner`: delt tekst med rå rentesats, låntype og
+  ydelse, kode `HEAD`, merge `HEAD` 2026-09-27 01:5x CEST.** Første
+  kandidatvindue **2026-09-27 07:30**. Indholdstjek ved det nye build: på
+  `/renteberegner` med standardværdierne (1.000.000 kr., 5 %, 30 år) skal
+  **Kopiér** give `1.000.000 kr. til 5 % i 30 år (annuitetslån). Månedlig
+  ydelse 5.368 kr. og samlet rente 932.558 kr.` — før stod der
+  `1.000.000 kr. til 5% i 30 år - samlet rente 932.558 kr.`. Sæt **Årlig rente**
+  til `3.5`: den skal give **`til 3,5 %`** med komma, ikke `3.5%`. Tryk
+  **Serielån**: teksten skal begynde `(serielån)` og indeholde både
+  `Første måneds ydelse 6.944 kr.` og `sidste måneds ydelse 2.789 kr.`.
+  `beraknare.se/renteberegner` skal give `1 000 000 kr till 5 % i 30 år
+  (annuitetslån). Månatlig betalning 5 368 kr och total ränta 932 558 kr`.
 - ⏳ **ÅBEN — C56 `/tidszone` brudtal med komma + delt tekst med dato, kode
   `8d77558`, merge `67d4cb1` 2026-09-27 01:29 CEST.** Første kandidatvindue
   **2026-09-27 07:30**. Indholdstjek

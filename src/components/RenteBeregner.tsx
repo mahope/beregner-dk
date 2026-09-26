@@ -6,9 +6,19 @@ import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { useLocale } from '@/components/LocaleProvider';
-import { formatCurrency, getCurrencySuffix } from '@/lib/format';
+import { formatCurrency, formatNumber, getCurrencySuffix } from '@/lib/format';
 
 type BeregningsType = "annuitet" | "serielaan";
+
+/** Alle dele af den delte sætning er allerede formaterede strenge. */
+type Sammenligning = {
+  belob: string;
+  rente: string;
+  aar: string;
+  laantype: string;
+  ydelser: string;
+  renteIalt: string;
+};
 
 export default function RenteBeregner() {
   const { locale } = useLocale();
@@ -39,8 +49,11 @@ export default function RenteBeregner() {
       annuitetDesc: "Ved annuitetslån er din månedlige ydelse fast gennem hele lånets løbetid. I starten betaler du mest i rente og mindst i afdrag. Over tid skifter forholdet, så du betaler mere i afdrag og mindre i rente.",
       serielaanDesc: "Ved serielån er dit månedlige afdrag fast, men den samlede ydelse falder over tid, fordi renten beregnes af en stadig mindre restgæld. Du betaler mindre i samlet rente, men starter med højere ydelser.",
       calcName: "Renteberegner",
-      copySummary: (amount: string, rate: number, years: number, interest: string) =>
-        `${amount} til ${rate}% i ${years} år - samlet rente ${interest}`,
+      lastMonthPaymentInline: "sidste måneds ydelse",
+      totalInterestInline: "samlet rente",
+      loanTypeInSentence: { annuitet: "annuitetslån", serielaan: "serielån" },
+      copySummary: (s: Sammenligning) =>
+        `${s.belob} til ${s.rente} % i ${s.aar} år (${s.laantype}). ${s.ydelser} og ${s.renteIalt}`,
     },
     se: {
       loanAmountLabel: "Lånebelopp (huvudstol)",
@@ -67,8 +80,11 @@ export default function RenteBeregner() {
       annuitetDesc: "Vid annuitetslån är din månatliga betalning fast under hela lånets löptid. I början betalar du mest i ränta och minst i amortering. Med tiden skiftar förhållandet, så att du betalar mer i amortering och mindre i ränta.",
       serielaanDesc: "Vid serielån är din månatliga amortering fast, men den totala betalningen sjunker med tiden eftersom räntan beräknas på en allt mindre skuld. Du betalar mindre i total ränta, men börjar med högre betalningar.",
       calcName: "Räntekalkylator",
-      copySummary: (amount: string, rate: number, years: number, interest: string) =>
-        `${amount} till ${rate}% i ${years} år - total ränta ${interest}`,
+      lastMonthPaymentInline: "sista månadens betalning",
+      totalInterestInline: "total ränta",
+      loanTypeInSentence: { annuitet: "annuitetslån", serielaan: "serielån" },
+      copySummary: (s: Sammenligning) =>
+        `${s.belob} till ${s.rente} % i ${s.aar} år (${s.laantype}). ${s.ydelser} och ${s.renteIalt}`,
     },
   } as const;
   const l = labels[locale as keyof typeof labels] || labels.da;
@@ -203,6 +219,29 @@ export default function RenteBeregner() {
   }, [hovedstol, rente, loebetid, type]);
 
   const formatKr = (beloeb: number) => formatCurrency(beloeb, locale, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+
+  // Ét sted bygger den delte tekst, så Kopier og Del ikke kan sige hver sit.
+  // Rentesatsen kom råt fra et talfelt, så 3,5 % blev "3.5%" i dansk tekst.
+  const deltTekst = (() => {
+    if (!beregning) return "";
+
+    const renteTekst = formatNumber(rente, locale, { maximumFractionDigits: 2 });
+    const loebetidTekst = formatNumber(loebetid, locale);
+    const laantype = beregning.type === "annuitet" ? l.loanTypeInSentence.annuitet : l.loanTypeInSentence.serielaan;
+    const ydelser = beregning.type === "annuitet"
+      ? `${l.monthlyPayment} ${formatKr(beregning.maanedligYdelse)}`
+      : `${l.firstMonthPayment} ${formatKr(beregning.foersteMaanedsYdelse)}, ` +
+        `${l.lastMonthPaymentInline} ${formatKr(beregning.sidsteMaanedsYdelse)}`;
+
+    return l.copySummary({
+      belob: formatKr(hovedstol),
+      rente: renteTekst,
+      aar: loebetidTekst,
+      laantype,
+      ydelser,
+      renteIalt: `${l.totalInterestInline} ${formatKr(beregning.samletRente)}`,
+    });
+  })();
 
   return (
     <div className="space-y-8">
@@ -397,11 +436,11 @@ export default function RenteBeregner() {
 
           {/* Share button */}
           <div className="flex justify-center gap-3">
-            <CopyResultButton text={l.copySummary(formatKr(hovedstol), rente, loebetid, formatKr(beregning.samletRente))} />
+            <CopyResultButton text={deltTekst} />
             <ShareCalculation
               getShareableLink={getShareableLink}
               calculatorName={l.calcName}
-              resultSummary={l.copySummary(formatKr(hovedstol), rente, loebetid, formatKr(beregning.samletRente))}
+              resultSummary={deltTekst}
             />
           </div>
 
