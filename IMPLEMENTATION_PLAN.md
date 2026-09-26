@@ -16,8 +16,8 @@ mere: tabellen skrev **"(dagen efter)"** på et interval der slutter *tre*
 dage senere, og den fjerde tile i "Detaljeret visning" regnede timer/24 og
 **kaldte resultatet "dage"** — 0,33 dage for en otte timers dag. Nu er det
 `heleDoegn` i modulet, mærket "hele døgn". Kode + plan i ét commit på
-`ceo/tidsberegner-flere-dage`; første kandidatvindue **2026-09-27 07:30**.
-Se opgave 79.
+`ceo/tidsberegner-flere-dage`, kode `bef8d38`, merge `4452940` 2026-09-26
+23:37 CEST; første kandidatvindue **2026-09-27 07:30**. Se opgave 79.
 
 STATUS (forrige iteration) — **C50 er landet: `/dato`'s standarddatoer var
 UTC-forskudt, og alder-tilstanden duplikerede `/alder`'s modul.** `DatoBeregner` byggede dagens
@@ -5584,8 +5584,9 @@ efter datagrund:
   Bemærk desuden: **der er ingen beregner.no-trafik i nogen snapshot** — hverken
   Plausible eller GSC — hvilket er konsistent med et separat site.
 - ⏳ **VERIFICÉR DEPLOY: C51 `/tidsberegner` — de to datofelter er
-  forklaret, og "dage" var ikke dage — kode + plan i ét commit på branch
-  `ceo/tidsberegner-flere-dage`.** Første kandidatvindue **2026-09-27 07:30**.
+  forklaret, og "dage" var ikke dage — kode `bef8d38`, merge `4452940`
+  2026-09-26 23:37 CEST på branch `ceo/tidsberegner-flere-dage`.** Første
+  kandidatvindue **2026-09-27 07:30**.
   Verificér **indhold**, HTTP 200 beviser intet:
   1. `https://minberegner.dk/tidsberegner` skal have H2 **"Beregner tid på tværs
      af datoer"** med en tabel, der indeholder rækkerne **16:00 → 09:00** med
