@@ -1,7 +1,7 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — D5 landet på `master` 2026-09-26 04:35 CEST (kode: `/dato` tæller nu
-helligdage, se opgave 35)
+STATUS: KØ — D5 landet på `master` 2026-09-26 04:35 CEST (kode `/dato` tæller nu
+helligdage, se opgave 35). Endelig merge `3f38e8a`.
 2026-09-26 04:30-04:35 CEST. **Live-kontrol 04:30 CEST:** `/api/health` svarer
 `status: ok`; `/procent` har C1's titel; `/tidszone` har stadig den gamle titel, så
 C4-C14, L1 og F1 ligger uuddejlet. Kun ét deploy-vindue (21:30 den 25/9) er gået
