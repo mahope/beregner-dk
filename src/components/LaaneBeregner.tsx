@@ -278,8 +278,8 @@ export default function LaaneBeregner() {
     <div className="space-y-8">
       {/* Lånetype valg */}
       <div>
-        <label className="block text-sm font-medium mb-3 dark:text-gray-200">{l.calcType}</label>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <label id="laane-beregningstype-gruppe" className="block text-sm font-medium mb-3 dark:text-gray-200">{l.calcType}</label>
+        <div role="group" aria-labelledby="laane-beregningstype-gruppe" className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <button type="button"
             onClick={() => setLaaneType("annuitet")}
             className={`p-4 rounded-lg border-2 text-left ${
@@ -320,9 +320,9 @@ export default function LaaneBeregner() {
       <div className="bg-gray-50 rounded-lg p-6 dark:bg-gray-800 dark:border dark:border-gray-700">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.loanAmount}</label>
+            <label htmlFor="laane-loanamount" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.loanAmount}</label>
             <div className="relative">
-              <input
+              <input id="laane-loanamount"
                 type="number"
                 min="1000"
                 step="1000"
@@ -334,9 +334,9 @@ export default function LaaneBeregner() {
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.annualRate}</label>
+            <label htmlFor="laane-annualrate" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.annualRate}</label>
             <div className="relative">
-              <input
+              <input id="laane-annualrate"
                 type="number"
                 min="0"
                 max="50"
@@ -349,9 +349,9 @@ export default function LaaneBeregner() {
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.term}</label>
+            <label htmlFor="laane-term" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.term}</label>
             <div className="relative">
-              <input
+              <input id="laane-term"
                 type="number"
                 min="1"
                 max="30"
@@ -364,9 +364,9 @@ export default function LaaneBeregner() {
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.setupFee}</label>
+            <label htmlFor="laane-setupfee" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.setupFee}</label>
             <div className="relative">
-              <input
+              <input id="laane-setupfee"
                 type="number"
                 min="0"
                 step="100"
@@ -384,9 +384,9 @@ export default function LaaneBeregner() {
             <h4 className="font-medium mb-3 dark:text-white">{l.loan2Title}</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.annualRate}</label>
+                <label htmlFor="laane-annualrate-2" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.annualRate}</label>
                 <div className="relative">
-                  <input
+                  <input id="laane-annualrate-2"
                     type="number"
                     min="0"
                     max="50"
@@ -399,9 +399,9 @@ export default function LaaneBeregner() {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.term}</label>
+                <label htmlFor="laane-term-2" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.term}</label>
                 <div className="relative">
-                  <input
+                  <input id="laane-term-2"
                     type="number"
                     min="1"
                     max="30"

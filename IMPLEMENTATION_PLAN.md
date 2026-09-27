@@ -1,5 +1,7 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
+STATUS: KØ — **C63 er landet: 34 `\u003clabel\u003e` på seks beregnere var uden binding, og fire felter pr. gældspost i `/gaeldsfri` havde overhovedet intet navn — hverken label, aria-label eller andet.** Køen var tom (alle 90 opgaver færdige, intet `I GANG`), og planens egen "Efterladt, bevidst"-note fra C62 navngavnæste snit af label-klassen, ordnet efter GSC-visninger. Rettet er `/huslejebudget` (11 labels), `/laane` (7), `/befordringsfradrag` (7), `/boliglaan` (3), `/gaeldsfri` (3) og `/valuta` (3). **Målingen er taget på ny, fordi C62's egen tælling var lidt for lås:** et `<label>` regnes som bundet, hvis det har `for`/`htmlFor` **eller** et `id` der bruges i `aria-labelledby` (sådan er knapgrupperne bygget, bl.a. i `/braendstof` og `/moms`). Før den rettelse tæller scriptet gruppe-etiketterne som fejl. Korrekt tælt er **151 ubundne labels i 58 filer** før denne iteration — altså omtrent C62's 146/56, så det var samme klasse. Efter C63 er der **117 i 51 filer** tilbage. Fire fund ud over de 34 bindinger: **`/gaeldsfri`s fire felter pr. gældspost havde intet navn** (kun en `<span>`-kolonneoverskrift, der kun vises på den første post, og placeholders — samme fejltype som C62 fandt på `/rentefradrag`s lån), **`/gaeldsfri`s ✕-knap havde intet navn** (kun `&#10005;`), **`/laane`s sammenligningstilstand gentager "Rente" og "Løbetid"** fra hovedrækken, så to felter har samme synlige tekst (lovligt, men derfor `-2` på id'et), og **harnessen havde en fejl**: en etiket der står over flere linjer i JSX kunne ikke findes, fordi regex'en ikke kollapsede hvidrum som testing-library gør det — det var den, der fik `/huslejebudget`s "Ønsket opsparing" til at fejle. `label-a11y.test.tsx` er udvidet fra 25 til **37 tests** i DA og SE, **verificeret modsvejs: alle 12 nye falder** med de gamle komponenter. Gate grøn: lint (549 filer), **1574 tests / 144 filer** (fra 1562 / 144) og build (141 sider). Kode + plan i ét commit på `ceo/labels-runde3`; første kandidatvindue **2026-09-27 07:30**. Se opgave 91.
+
 STATUS: KØ — **C62 er landet: otte af sitets mest besøgte beregnere havde
 formularfelter uden navn for skærmlæsere, og del-dialogen havde et navnløst
 `<label>` på hver eneste side.** Køen var tom (alle 89 opgaver færdige, intet
@@ -7675,6 +7677,31 @@ landmark=lån, piggybank=opsparing osv.).
     - Gate grøn: lint ok, 280/280 tests, build ok (128 pages).
 
 ## VERIFICÉR DEPLOY-log
+- ⏳ **ÅBEN — C63 34 ubundne labels på seks beregnere plus fire navnløse felter pr. gældspost i `/gaeldsfri` — kode + plan i ét commit på branch `ceo/labels-runde3`, kode `COMMIT_SHA`, merge `MERGE_SHA` 2026-09-27 04:40 CEST. Første kandidatvindue **2026-09-27 07:30**.**
+  **HTTP 200 beviser intet her:** ændringen er `htmlFor`/`id`/`aria-label` i
+  klient-renderede felter. I DevTools på hver af de seks sider:
+  `document.querySelectorAll('label:not([for]):not([id])').length` → **0**,
+  og `document.querySelectorAll('input:not([id]):not([aria-label])').length`
+  → **0**. Bemærk at gruppe-etiketterne **skal** have et `id` (de bruges i
+  `aria-labelledby`), så de tælles med i det første tal.
+  1. `/laane`: 1.000.000 kr., 5 %, 30 år → **samme** ydelse som før. Vælg
+      **Sammenlign**: de to ekstra felter skal have navn, og de har samme
+      synlige tekst som hovedrækken.
+  2. `/huslejebudget`: 11 felter, alle med navn — inklusive "**Ønsket
+      opsparing**", der står over tre linjer.
+  3. `/befordringsfradrag`: km/dag, arbejdsdage, indkomst og de to
+      bro-afdrag har navn; de to checkbokse skal kunne findes med
+      `getByLabelText`. Beregningen er uà0ndret — 22 km hver vej dag skal
+      give **samme** fradrag.
+  4. `/boliglaan`: løbetidsvælgeren har navn, lånetypen er en `role="group"`.
+  5. `/valuta`: fra-valuta, til-valuta og beløb har navn; den tredje etiket
+      indeholder den valgte valuta.
+  6. `/gaeldsfri`: hver gældspost skal have **navn, gæld, rente og min. afdrag**
+      med postens nummer. Tryk "**+ Tilføj gældspost**": den nye posts felter
+      skal höre nummer 2, og sletknappen skal sige "**Fjern gældspost 2**"
+      (skærmlæser: knappen må hedde noget andet end "knap").
+  7. `beraknare.se/laane`, `/valuta` og `/befordringsfradrag` skal have de samme
+      bindinger. `https://minberegner.dk/api/health` skal svare `status: ok`.
 - ⏳ **ÅBEN — C62 otte beregnere til: 35 talfelter og 13 knapgrupper uden navn
   for skærmlæsere, plus et navnløst `<label>` i del-dialogen på ALLE
   beregnere — kode + plan i ét commit på branch `ceo/labels-runde2`, kode
@@ -8754,3 +8781,71 @@ landmark=lån, piggybank=opsparing osv.).
   iterationstypisk snit, ikke otte. Den næste ordre er igen GSC-visninger:
   `/laane` (7 labels), `/befordringsfradrag` (7), `/huslejebudget` (11),
   `/boliglaan` (3), `/gaeldsfri` (3), `/valuta` (3) m.fl.
+
+#### 91. [x] FÆRDIG 2026-09-27 — C63 — 34 ubundne labels på seks beregnere, og fire navnløse felter pr. gældspost i `/gaeldsfri`
+
+- **Datagrund:** køen var tom (alle 90 opgaver færdige, intet `I GANG`), og
+  C62's "Efterladt, bevidst" note pegede på resten af label-klassen, ordnet
+  efter GSC-visninger: `/laane`, `/befordringsfradrag`, `/huslejebudget`,
+  `/boliglaan`, `/gaeldsfri`, `/valuta`. `/befordringsfradrag` er desuden en af
+  de dataintegrationer missionen siger ikke skal røres uden tests — her er der
+  kun ændret attributter, ingen beregning, og beregningstestene er urørte.
+- **Målt ordentligt, med en tælling der genkender gruppe-etiketter.** Et
+  `<label>` tælles som bundet, hvis det har `for`/`htmlFor` **eller** et `id`
+  der bruges i `aria-labelledby` — det er sådan knapgrupperne er bygget i
+  `/braendstof`, `/moms`, `/promille` og `/kalorier`. Før C63 gav en naiv
+  tælling 164 tal og sagde "146/56 i C62's note"; de 164 var gruppe-etiketter,
+  der ikke skal have en `for`. Korrekt baseline: **151 i 58 filer**.
+  Tællingen skal ske på `<label`-åbningstaggen, aldrig på en CSS-klasse, og
+  altid med gruppe-mønsteret med.
+- **Fund 1 — `/gaeldsfri`: fire felter pr. gældspost havde intet navn.** Navn,
+  gæld, rente og min. afdrag var kun kendet af en `<span>`-kolonneoverskrift,
+  der vises på `idx === 0`, altså kun over den første post, og af
+  `placeholder` ("50.000", "8", "1.500"). Samme fejltype som C62 fandt på
+  `/rentefradrag`s lån. Nu `aria-label={`${l.navn} ${idx + 1}`}` o.l. — med
+  postens nummer, så to poster ikke hedder det samme. Beviset er i testen:
+  efter "Tilføj gældspost" skal de ni aria-labels være **ni forskellige**.
+- **Fund 2 — `/gaeldsfri`: sletteknappen hed ingenting.** `<button>` med
+  `&#10005;` og intet navn er en knap, skærmlæseren kun kan læse som "knap".
+  Ny nøgle `fjernGaeldspost` i **da/se/no** ("Fjern gældspost", "Ta bort
+  skuldpost", "Fjern gjeldspost").
+- **Fund 3 — `/laane`: samme synlige tekst to steder.** Sammenligningstilstanden
+  har sit eget "Rente" og "Løbetid" oveni hovedrækkens. Id'erne er derfor
+  `laane-annualrate` / `laane-annualrate-2`. Ligesom `/kvadratmeter`s to
+  "Pris pr. m²" er det lovligt — testen bruger `getAllByLabelText`.
+- **Fund 4 — checkbokse i `/befordringsfradrag` var *indpakket* i `<label>`.**
+  Det er gyldig HTML og virker med skærmlæser, så det var ikke en fejl — men
+  feltet kunne ikke findes med `getByLabelText`, og de er gjort eksplicit
+  (`htmlFor` + `id`) for at være sammenlignelige med resten. Bemærk at
+  rutevælgeren (`RuteAfstand`) kun findes på nogle domæner, så antallet på
+  `/befordringsfradrag` er "mindst syv" og ikke et fast tal.
+- **Beslutning — id'erne afledes af locale-**nøglen**, ikke af den oversatte
+  tekst** (`l.loanAmount` → `laane-loanamount`). En dansk oversættelse eller et
+  nyt sprog kan så ikke få id og synlig tekst til at glide fra hinanden. Det
+  afviger fra C61/C62's id'er, der var skrevet i dansk; fordelene ved nøglen er
+  større, fordi de er afledt af den kode der renderer etiketten.
+- **Harness-fix.** `expectEveryFieldHasAName` kollapser nu hvidrum i
+  etiketteteksten, inden den bygger regex. Uden det fandt testen ikke
+  `/huslejebudget`s "Ønsket opsparing: 10 % (2.500 kr./måned)", fordi den står
+  over tre linjer i JSX — altså ville harnessen have fejlet på den kode, der
+  *er* korrekt, hvilket er værre end at den ikke tester noget.
+- **Test:** `label-a11y.test.tsx` udvidet fra 25 til **37 tests** (144 filer,
+  **1574 tests fra 1562**). Seks nye sider i DA og SE. Bevis på dækning som i
+  C62: `/laane` måles på **hvilke id'er** der er i DOM'en pr. lånetype, fordi
+  annuitets- og serietilstanden har præcis de samme fire felter (to sæt, ikke
+  tre), og `/gaeldsfri` på at aria-labels er unikke efter tilføjelse.
+  **Verificeret modsvejs: alle 12 nye tests falder** med de gamle komponenter.
+- **Gate:** `npm run lint` grøn (549 filer), `npm run test` **1574 tests / 144
+  filer** grøn, `npm run build` grøn (141 sider, 7 kendte CSS-advarsler).
+- **MÅL:** `/laane` og `/befordringsfradrag` har ingen GSC-række i snapshottet,
+  så der kan ikke skrives CTR-baseline for dem; `/boliglaan` og `/valuta` er
+  heller ikke i top-14. Ændringen forventes **ikke** at løfte CTR — den
+  retter en funktionsfejl for skærmlæsere, ikke en titel, og skærmlæserbrug
+  trackes ikke (tracking-opsætningen må ikke ændres). Virkningen er
+  verificeret i testene. `/huslejebudget` og `/gaeldsfri` er heller ikke i
+  snapshot-tet; `/gaeldsfri` lå 7 Gæld/28d 2026-09-24.
+- **Efterladt, bevidst:** **117 ubundne labels i 51 filer.** Næste ordre er
+  igen efter det, brugeren kan ramme: `/efterloen` (6), `/leasing` (5 — er
+  desuden en af de fire trafikstærke svenske sider, 3.181 visninger), så
+  `/enheder` (4), `/ejendomsvaerdiskat` (4), `/boligsalg` (4) og
+  `/rygestop`/`rabat`/`motionkalorier` (3 hver).

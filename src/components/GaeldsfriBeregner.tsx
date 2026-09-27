@@ -29,6 +29,7 @@ export default function GaeldsfriBeregner() {
       minAfdragMd: "Min. afdrag/md",
       placeholder: "F.eks. Forbrugsl\u00e5n",
       tilfoejGaeldspost: "+ Tilf\u00f8j g\u00e6ldspost",
+      fjernGaeldspost: "Fjern g\u00e6ldspost",
       ekstraAfdragLabel: "Ekstra afdrag pr. m\u00e5ned",
       ekstraAfdragHint: "Bel\u00f8b ud over minimum der g\u00e5r til g\u00e6ldsafvikling",
       afviklingsmetode: "Afviklingsmetode",
@@ -63,6 +64,7 @@ export default function GaeldsfriBeregner() {
       minAfdragMd: "Min. avbetalning/m\u00e5n",
       placeholder: "T.ex. Konsumtionsl\u00e5n",
       tilfoejGaeldspost: "+ L\u00e4gg till skuldpost",
+      fjernGaeldspost: "Ta bort skuldpost",
       ekstraAfdragLabel: "Extra avbetalning per m\u00e5nad",
       ekstraAfdragHint: "Belopp ut\u00f6ver minimum som g\u00e5r till skuldavveckling",
       afviklingsmetode: "Avvecklingsmetod",
@@ -97,6 +99,7 @@ export default function GaeldsfriBeregner() {
       minAfdragMd: "Min. avdrag/mnd",
       placeholder: "F.eks. Forbruksl\u00e5n",
       tilfoejGaeldspost: "+ Legg til gjeldspost",
+      fjernGaeldspost: "Fjern gjeldspost",
       ekstraAfdragLabel: "Ekstra avdrag per m\u00e5ned",
       ekstraAfdragHint: "Bel\u00f8p utover minimum som g\u00e5r til gjeldsavvikling",
       afviklingsmetode: "Avviklingsmetode",
@@ -272,16 +275,17 @@ export default function GaeldsfriBeregner() {
     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 md:p-8">
       {/* Input */}
       <div className="space-y-4 mb-6">
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">
+        <label id="gaeldsfri-gaeldsposter-gruppe" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
           {l.dineGaeldsposter}
         </label>
-        <div className="space-y-3">
+        <div role="group" aria-labelledby="gaeldsfri-gaeldsposter-gruppe" className="space-y-3">
           {poster.map((post, idx) => (
             <div key={post.id} className="flex flex-wrap gap-2 items-end">
               <div className="w-full sm:w-auto sm:flex-1">
                 {idx === 0 && <span className="text-xs text-gray-500 dark:text-gray-400">{l.navn}</span>}
                 <input
                   type="text"
+                  aria-label={`${l.navn} ${idx + 1}`}
                   value={post.navn}
                   onChange={(e) => updatePost(post.id, 'navn', e.target.value)}
                   placeholder={l.placeholder}
@@ -291,26 +295,26 @@ export default function GaeldsfriBeregner() {
               <div className="flex-1 min-w-[100px]">
                 {idx === 0 && <span className="text-xs text-gray-500 dark:text-gray-400">{l.gaeld}</span>}
                 <div className="relative">
-                  <input type="number" value={post.gaeld} onChange={(e) => updatePost(post.id, 'gaeld', e.target.value)} placeholder="50.000" className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+                  <input type="number" aria-label={`${l.gaeld} ${idx + 1}`} value={post.gaeld} onChange={(e) => updatePost(post.id, 'gaeld', e.target.value)} placeholder="50.000" className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
                   <span className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 text-xs">kr</span>
                 </div>
               </div>
               <div className="w-20">
                 {idx === 0 && <span className="text-xs text-gray-500 dark:text-gray-400">{l.rente}</span>}
                 <div className="relative">
-                  <input type="number" step="0.1" value={post.rente} onChange={(e) => updatePost(post.id, 'rente', e.target.value)} placeholder="8" className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-lg text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+                  <input type="number" step="0.1" aria-label={`${l.rente} ${idx + 1}`} value={post.rente} onChange={(e) => updatePost(post.id, 'rente', e.target.value)} placeholder="8" className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-lg text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
                   <span className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 text-xs">%</span>
                 </div>
               </div>
               <div className="flex-1 min-w-[100px]">
                 {idx === 0 && <span className="text-xs text-gray-500 dark:text-gray-400">{l.minAfdragMd}</span>}
                 <div className="relative">
-                  <input type="number" value={post.minAfdrag} onChange={(e) => updatePost(post.id, 'minAfdrag', e.target.value)} placeholder="1.500" className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+                  <input type="number" aria-label={`${l.minAfdragMd} ${idx + 1}`} value={post.minAfdrag} onChange={(e) => updatePost(post.id, 'minAfdrag', e.target.value)} placeholder="1.500" className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
                   <span className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 text-xs">kr</span>
                 </div>
               </div>
               {poster.length > 1 && (
-                <button type="button" onClick={() => removePost(post.id)} className="px-2 py-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg text-sm">
+                <button type="button" aria-label={`${l.fjernGaeldspost} ${idx + 1}`} onClick={() => removePost(post.id)} className="px-2 py-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg text-sm">
                   &#10005;
                 </button>
               )}
@@ -323,16 +327,16 @@ export default function GaeldsfriBeregner() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">{l.ekstraAfdragLabel}</label>
+            <label htmlFor="gaeldsfri-ekstraafdraglabel" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">{l.ekstraAfdragLabel}</label>
             <div className="relative">
-              <input type="number" value={ekstraAfdrag} onChange={(e) => setEkstraAfdrag(e.target.value)} placeholder="0" className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+              <input id="gaeldsfri-ekstraafdraglabel" type="number" value={ekstraAfdrag} onChange={(e) => setEkstraAfdrag(e.target.value)} placeholder="0" className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">kr</span>
             </div>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{l.ekstraAfdragHint}</p>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">{l.afviklingsmetode}</label>
-            <div className="flex gap-3">
+            <label id="gaeldsfri-afviklingsmetode-gruppe" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">{l.afviklingsmetode}</label>
+            <div role="group" aria-labelledby="gaeldsfri-afviklingsmetode-gruppe" className="flex gap-3">
               <button type="button" onClick={() => setMetode('lavine')} className={`flex-1 py-3 rounded-lg border-2 text-sm font-medium transition-all ${metode === 'lavine' ? 'border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' : 'border-gray-200 dark:border-gray-600 dark:text-gray-200'}`}>
                 {l.lavine}
               </button>

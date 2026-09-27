@@ -547,8 +547,8 @@ export default function BoliglaanBeregner() {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.termLabel}</label>
-                <select
+                <label htmlFor="boliglaan-termlabel" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.termLabel}</label>
+                <select id="boliglaan-termlabel"
                   value={loebetid}
                   onChange={(e) => setLoebetid(parseInt(e.target.value))}
                   className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg text-lg bg-white dark:bg-gray-800 dark:text-white"
@@ -562,8 +562,8 @@ export default function BoliglaanBeregner() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.loanType}</label>
-                <div className="flex flex-col gap-2">
+                <label id="boliglaan-laantype-gruppe" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.loanType}</label>
+                <div role="group" aria-labelledby="boliglaan-laantype-gruppe" className="flex flex-col gap-2">
                   {([
                     { type: "fastforrentet" as LaanType, label: l.fixedRate },
                     { type: "variabel" as LaanType, label: l.variableRate },
@@ -837,8 +837,8 @@ export default function BoliglaanBeregner() {
               />
 
               <div>
-                <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.termLabel}</label>
-                <select
+                <label htmlFor="boliglaan-termlabel-2" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.termLabel}</label>
+                <select id="boliglaan-termlabel-2"
                   value={raadLoebetid}
                   onChange={(e) => setRaadLoebetid(parseInt(e.target.value))}
                   className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg text-lg bg-white dark:bg-gray-800 dark:text-white"

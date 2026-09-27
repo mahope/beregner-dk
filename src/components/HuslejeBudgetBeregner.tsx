@@ -266,9 +266,9 @@ export default function HuslejeBudgetBeregner() {
         <h3 className="text-lg font-medium mb-4 dark:text-white flex items-center gap-2"><Wallet className="h-5 w-5 shrink-0" strokeWidth={1.75} aria-hidden="true" focusable="false" />{l.dinIndkomst}</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.dinNettoLoen}</label>
+            <label htmlFor="huslejebudget-dinnettoloen" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.dinNettoLoen}</label>
             <div className="relative">
-              <input
+              <input id="huslejebudget-dinnettoloen"
                 type="number"
                 min="0"
                 step="500"
@@ -280,9 +280,9 @@ export default function HuslejeBudgetBeregner() {
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.partnerRoommate}</label>
+            <label htmlFor="huslejebudget-partnerroommate" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.partnerRoommate}</label>
             <div className="relative">
-              <input
+              <input id="huslejebudget-partnerroommate"
                 type="number"
                 min="0"
                 step="500"
@@ -294,9 +294,9 @@ export default function HuslejeBudgetBeregner() {
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.andreIndkomster}</label>
+            <label htmlFor="huslejebudget-andreindkomster" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.andreIndkomster}</label>
             <div className="relative">
-              <input
+              <input id="huslejebudget-andreindkomster"
                 type="number"
                 min="0"
                 step="100"
@@ -316,54 +316,54 @@ export default function HuslejeBudgetBeregner() {
         <h3 className="text-lg font-medium mb-4 dark:text-white flex items-center gap-2"><ClipboardList className="h-5 w-5 shrink-0" strokeWidth={1.75} aria-hidden="true" focusable="false" />{l.fasteUdgifter}</h3>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           <div>
-            <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.madDagligvarer}</label>
+            <label htmlFor="huslejebudget-maddagligvarer" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.madDagligvarer}</label>
             <div className="relative">
-              <input type="number" min="0" step="100" value={madOgDagligvarer} onChange={(e) => setMadOgDagligvarer(parseFloat(e.target.value) || 0)} className="w-full px-4 py-3 pr-12 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+              <input id="huslejebudget-maddagligvarer" type="number" min="0" step="100" value={madOgDagligvarer} onChange={(e) => setMadOgDagligvarer(parseFloat(e.target.value) || 0)} className="w-full px-4 py-3 pr-12 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">{getCurrencySuffix(locale)}</span>
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.transport}</label>
+            <label htmlFor="huslejebudget-transport" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.transport}</label>
             <div className="relative">
-              <input type="number" min="0" step="100" value={transport} onChange={(e) => setTransport(parseFloat(e.target.value) || 0)} className="w-full px-4 py-3 pr-12 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+              <input id="huslejebudget-transport" type="number" min="0" step="100" value={transport} onChange={(e) => setTransport(parseFloat(e.target.value) || 0)} className="w-full px-4 py-3 pr-12 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">{getCurrencySuffix(locale)}</span>
             </div>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{l.transportHelp}</p>
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.boligforbrug}</label>
+            <label htmlFor="huslejebudget-boligforbrug" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.boligforbrug}</label>
             <div className="relative">
-              <input type="number" min="0" step="100" value={boligforbrug} onChange={(e) => setBoligforbrug(parseFloat(e.target.value) || 0)} className="w-full px-4 py-3 pr-12 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+              <input id="huslejebudget-boligforbrug" type="number" min="0" step="100" value={boligforbrug} onChange={(e) => setBoligforbrug(parseFloat(e.target.value) || 0)} className="w-full px-4 py-3 pr-12 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">{getCurrencySuffix(locale)}</span>
             </div>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{l.boligforbrugHelp}</p>
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.forsikringer}</label>
+            <label htmlFor="huslejebudget-forsikringer" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.forsikringer}</label>
             <div className="relative">
-              <input type="number" min="0" step="100" value={forsikringer} onChange={(e) => setForsikringer(parseFloat(e.target.value) || 0)} className="w-full px-4 py-3 pr-12 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+              <input id="huslejebudget-forsikringer" type="number" min="0" step="100" value={forsikringer} onChange={(e) => setForsikringer(parseFloat(e.target.value) || 0)} className="w-full px-4 py-3 pr-12 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">{getCurrencySuffix(locale)}</span>
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.mobilInternet}</label>
+            <label htmlFor="huslejebudget-mobilinternet" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.mobilInternet}</label>
             <div className="relative">
-              <input type="number" min="0" step="50" value={mobilOgInternet} onChange={(e) => setMobilOgInternet(parseFloat(e.target.value) || 0)} className="w-full px-4 py-3 pr-12 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+              <input id="huslejebudget-mobilinternet" type="number" min="0" step="50" value={mobilOgInternet} onChange={(e) => setMobilOgInternet(parseFloat(e.target.value) || 0)} className="w-full px-4 py-3 pr-12 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">{getCurrencySuffix(locale)}</span>
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.abonnementer}</label>
+            <label htmlFor="huslejebudget-abonnementer" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.abonnementer}</label>
             <div className="relative">
-              <input type="number" min="0" step="50" value={abonnementer} onChange={(e) => setAbonnementer(parseFloat(e.target.value) || 0)} className="w-full px-4 py-3 pr-12 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+              <input id="huslejebudget-abonnementer" type="number" min="0" step="50" value={abonnementer} onChange={(e) => setAbonnementer(parseFloat(e.target.value) || 0)} className="w-full px-4 py-3 pr-12 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">{getCurrencySuffix(locale)}</span>
             </div>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{l.abonnementerHelp}</p>
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.andreUdgifter}</label>
+            <label htmlFor="huslejebudget-andreudgifter" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.andreUdgifter}</label>
             <div className="relative">
-              <input type="number" min="0" step="100" value={andreUdgifter} onChange={(e) => setAndreUdgifter(parseFloat(e.target.value) || 0)} className="w-full px-4 py-3 pr-12 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+              <input id="huslejebudget-andreudgifter" type="number" min="0" step="100" value={andreUdgifter} onChange={(e) => setAndreUdgifter(parseFloat(e.target.value) || 0)} className="w-full px-4 py-3 pr-12 border rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">{getCurrencySuffix(locale)}</span>
             </div>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{l.andreUdgifterHelp}</p>
@@ -373,10 +373,10 @@ export default function HuslejeBudgetBeregner() {
 
       {/* Opsparing */}
       <div>
-        <label className="block text-sm font-medium mb-2 dark:text-gray-200">
+        <label htmlFor="huslejebudget-oensketopsparing" className="block text-sm font-medium mb-2 dark:text-gray-200">
           {l.oensketOpsparing}: {opsparingProcent}% ({formatKr(beregning.opsparingBeloeb)}/{l.maaned})
         </label>
-        <input
+        <input id="huslejebudget-oensketopsparing"
           type="range"
           min="0"
           max="30"
