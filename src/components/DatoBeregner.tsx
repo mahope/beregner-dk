@@ -406,8 +406,9 @@ export default function DatoBeregner() {
         {mode === "dage-mellem" && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.fraDato}</label>
+              <label htmlFor="dato-fra-dato" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.fraDato}</label>
               <input
+                id="dato-fra-dato"
                 type="date"
                 value={startDato}
                 onChange={(e) => setStartDato(e.target.value)}
@@ -415,8 +416,9 @@ export default function DatoBeregner() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.tilDato}</label>
+              <label htmlFor="dato-til-dato" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.tilDato}</label>
               <input
+                id="dato-til-dato"
                 type="date"
                 value={slutDato}
                 onChange={(e) => setSlutDato(e.target.value)}
@@ -429,10 +431,11 @@ export default function DatoBeregner() {
         {(mode === "tilfoej-dage" || mode === "arbejdsdage") && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-2 dark:text-gray-200">
+              <label htmlFor="dato-udgangsdato" className="block text-sm font-medium mb-2 dark:text-gray-200">
                 {l.udgangsdato}
               </label>
               <input
+                id="dato-udgangsdato"
                 type="date"
                 value={baseDato}
                 onChange={(e) => setBaseDato(e.target.value)}
@@ -440,11 +443,12 @@ export default function DatoBeregner() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2 dark:text-gray-200">
+              <label htmlFor="dato-antal" className="block text-sm font-medium mb-2 dark:text-gray-200">
                 {l.antal} {mode === "arbejdsdage" ? l.arbejdsdageWord : l.dageWord}
               </label>
               <div className="relative">
                 <input
+                  id="dato-antal"
                   type="number"
                   value={antalDage}
                   onChange={(e) => setAntalDage(parseInt(e.target.value) || 0)}
@@ -461,10 +465,11 @@ export default function DatoBeregner() {
 
         {mode === "alder" && (
           <div>
-            <label className="block text-sm font-medium mb-2 dark:text-gray-200">
+            <label htmlFor="dato-foedselsdato" className="block text-sm font-medium mb-2 dark:text-gray-200">
               {l.foedselsdato}
             </label>
             <input
+              id="dato-foedselsdato"
               type="date"
               value={foedselsdato}
               onChange={(e) => setFoedselsdato(e.target.value)}
