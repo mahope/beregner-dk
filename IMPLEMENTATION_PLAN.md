@@ -7723,6 +7723,19 @@ landmark=lån, piggybank=opsparing osv.).
     - Gate grøn: lint ok, 280/280 tests, build ok (128 pages).
 
 ## VERIFICÉR DEPLOY-log
+- ⏳ **ÅBEN — C67 `scripts/locale-leak.mjs`: danske strenge i komponenter der
+  monteres på beraknare.se, målt af scriptet i stedet for i hånd. Kode + plan i
+  ét commit på branch `ceo/locale-leak-script`. Første kandidatvindue
+  **2026-09-27 12:30** (for 07:30 dækker det kun de fire ældre noter).**
+  **HTTP 200 beviser intet:** intet af dette ændrer renderet markup — nye filer
+  kun, ingen beregning, ingen tekst, ingen CSS. Sådan verificeres det:
+  1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
+  2. `curl -s https://minberegner.dk/tidszone`, `/moms` og `/elberegner` skal
+     være **byte-identiske** med i dag — det er det stærkeste bevis, fordi
+     ændringen ikke rører nogen af dem.
+  3. `node scripts/locale-leak.mjs --gate` skal give exit 0 på den udgivne
+     kode. Den læser kun `src/`, så den er identisk lokalt og live; det beviser
+     at *filen* kom med, ikke at sidens adfærd er uændret.
 - ⏳ **ÅBEN — C66 `/tidszone` skrev "Aten" på minberegner.dk — de to
   tidszone-tabeller var slået sammen til én, og `dk`-zonens by hedder nu
   København/Stockholm fra samme række som navnet.** Kode + plan i ét commit på
@@ -9078,8 +9091,75 @@ landmark=lån, piggybank=opsparing osv.).
      Usynligt nu af (1). C66 gør det i det mindste *rene* med `erSvensk` ét
      sted, men retter ikke `no`. Skrevet op som opgave 98.
 
-#### 95. [ ] 2026-09-27 — C67 — gør locale-leak-målingen til et script, så den ikke koster en halv time igen
+#### 95. [x] FÆRDIG 2026-09-27 — C67 — gør locale-leak-målingen til et script, så den ikke koster en halv time igen
 
+- **Landet:** `scripts/locale-leak.mjs` + `src/lib/locale-leak-gate.test.ts` (7
+  tests) på `ceo/locale-leak-script`. Kørsel: `node scripts/locale-leak.mjs`
+  (menneske), `--gate` (udgangs-kode), `--json` (maskin), `--weak` (den
+  tvetydige mængde). Scriptet læser selv `calculator-list.ts` og bygger grafen
+  side → komponent → komponent, så **de 70 SE-monterede komponenter er fundet,
+  ikke håndskrevet** — en ny kalkulator flytter tallet, en håndskrevet liste
+  ville have løjet. `routing.ts`-porten (`isCalculatorAvailable`) er modellens
+  `daOnly`-regel, så en `daOnly`-sides komponent er død pr. definition.
+- **Dommelaget er otte mekaniske regler**, ikke en hensigtserklæring: (R1)
+  kun monteret på en `daOnly`-side, (R2) komponenten returnerer `null` for
+  ikke-`da`, (R3) monteret under `{locale === "da" && …}` — fundet ved at gå
+  baglæns fra JSX-brugen klamme for klamme til den omsluttende `{`, (R4) guard-
+  variabel (`kildeInflation = locale === "da" ? … : null`), (R5) `AffiliateBox`-
+  prop eller -tabel, (R6) rækken bærer sin egen `navnSe`/`labelDa`/`bySe`,
+  (R7) tabellen læses aldrig på den nøgle, (R8) defaultværdi i signaturen.
+  R1 og R2 er præcis de to ting, der kostede C65 mest.
+- **Målet i dag:** 119 kandidater i 70 komponenter — **47 døde, 72 kræver øjne,
+  0 ureviewet**. C65 fandt 31 med en håndskrivet liste; scriptet finder de
+  samme klasser plus fire ting C65 aldrig så.
+- **Fund ud over målingen — fire klasser C65 ikke havde set:**
+  1. **`src/components/energi/` var aldrig scannet.** C65 så kun på
+     `src/components/*Beregner.tsx`, så de fire undermapper slap igennem.
+     `PrisomraadeVaelger` skriver "Øst (DK2)", "Østdanmark (DK2)" og
+     "Sjælland, øerne og Bornholm", `ElprisGraf` skriver "Vælg dag" og
+     "Morgendagens priser offentliggøres ca. kl. 13", `EnergiKilde` skriver
+     ", nettarif er en standardværdi (gennemsnitlig C-kunde)" — på komponenter
+     der monteres på `/elberegner`, som er SE-tilgængelig. Se opgave 99.
+  2. **Delt tekst har sin egen klasse.** `GaeldsfriBeregner.tsx:422` sætter
+     `calculatorName="Gældsfri Beregner"` selv om `/gaeldsfri` hedder
+     "Skuldfri" på beraknare.se (`calculator-list.ts:96`), og `:194` skriver
+     "Gæld ${p.id}" på hver gældspost. Del-linket på beraknare.se er dansk.
+  3. **`å` er ikke et dansk bogstav.** Første kørsel meldte 12 *korrekte*
+     svenske strenge i `BolanBeregner` ("Ränta (% per år)", "Månadskostnad",
+     "Lånebelopp") — svensk skriver å, dansk skriver ø. Markøren er nu
+     `æ`/`ø` + en dansk ordliste, og den tvetydige mængde ligger i `--weak`
+     (21 ureviewet: 12 i `BolanBeregner`, 6 i `LonEfterSkattBeregner`, 2 i
+     `BilBeregner`, 1 i `LeasingBeregner` — alle krydscheckede som svenske
+     eller gyldige, men de er *registreret* frem for usynlige).
+  4. **`\u`-escapes skjulte en streng.** `GaeldsfriBeregner` skriver
+     `"G\u00e6ldsfri Beregner"`, som en æ/ø-scanner aldrig ser. Værdier
+     dekodes nu, og det afslørede den anden del af fund #2 i samme fil.
+- **Gaten hænger kun på det, der er dømt.** `--gate` fejler på en
+  *ureviewet* kandidat, og `REVIEWED` i scriptet er den domsliste, C65's
+  krydscheck skrev, med grunden til hver afslagelse bevaret. En entry med
+  `verdict: "KRÆVER ØJNE"` er **ikke** en dækkende: den betyder at lækagen er
+  bekræftet og sporet i en åben opgave, og porten er grøn fordi den er kendt,
+  ikke fordi den er ligegyldig. Der er 12 sådanne entries, alle med
+  opgavenummer på.
+- **Gaten er testet, modsvejs.** `locale-leak-gate.test.ts` har 7 tests; den
+  bærende planter en dansk modulscope-streng i `MomsBeregner` og kræver at
+  gaten *fejler* — uden R1-R8 ville den være en stemplet gummi. Den låser også
+  de 12 svenske `BolanBeregner`-strenge ude. Første restore skrev via
+  `cat`-heredoc og efterlod én ekstra newline i `MomsBeregner.tsx`; den er nu
+  byte-exakt via `writeFileSync(readFileSync(...))`.
+- **Beslutning om CI, jf. opgavens egen Bemærk:** scriptet kører i gaten som
+  en vitest-test, ikke som en rå tekstscanning i CI — en ren scanning ville
+  løbe efter C65's 30 falske positiver, og en port ingen tør bruge, bliver
+  slået fra.
+- **Forventet effekt:** ingen direkte trafik. Værdien er at næste måling er
+  gratis, og at fire konkrete fejldomæner er fundet og skrevet op som opgave
+  99 i stedet for at leve videre i en håndskrevet find-liste.
+- **MÅL:** beraknare.se 516 besøgende/28d (+159 %) pr. 2026-09-27;
+  minberegner.dk 7.218 besøgende/28d (+42 %). `/elberegner` 11 besøgende/28d
+  SE, `/` 20 besøgende/28d SE (bounce 75 %). **Mål 2026-10-11.**
+- **Gate:** lint (551 filer), **1606 tests / 146 filer** (fra 1599 / 145) og
+  build (141 sider) grønne. `tsc --noEmit` har uændret 7 forhåndsfejl i
+  testfiler og er ikke del af gaten.
 - **Datagrund:** C65 brugte ca. 20 minutter på en måling, der endte med **én**
   bekræftet fejl ud af 31 fund. Det er det dyraste fund i planen pr. rettet fejl.
   Næste måling skal derfor være gratis, og den skal pege på de to ting, der
@@ -9153,6 +9233,53 @@ landmark=lån, piggybank=opsparing osv.).
   en linje i `IMPLEMENTATION_PLAN.md` om hvad `no` er: lanceret, lukket eller
   uafklaret. 3. Gaten grøn. **Ingen kodeændring uden Mads' svar** — lukning af
   et domæne er en domænebeslutning, ikke en refaktor.
+
+#### 99. [ ] 2026-09-27 — C71 — de fire locale-leak-domener scriptet fandt: `src/components/energi/` og delt tekst
+
+- **Datagrund:** målt af `scripts/locale-leak.mjs` (opgave 95), som for første
+  gang scannede **hele** `src/components/` og ikke kun `*Beregner.tsx`.
+  C65 brugte 20 minutter på 31 fund og fandt én fejl; scriptet fandt fire
+  domener, C65 aldrig så. De er `REVIEWED` i scriptet som *bekræftede*
+  (`verdict: "KRÆVER ØJNE"`), så gaten er grøn på dem — de er kendte, ikke
+  ignorerede.
+- **Domene 1 — `src/components/energi/` (7 strenge, aldrig målt).**
+  `PrisomraadeVaelger.tsx:7,10` skriver "Øst (DK2)", "Østdanmark (DK2)",
+  "Sjælland, øerne og Bornholm"; `ElprisGraf.tsx:45,55` skriver "Vælg dag"
+  og "Morgendagens priser offentliggøres ca. kl. 13"; `EnergiKilde.tsx:26`
+  skriver ", nettarif er en standardværdi (gennemsnitlig C-kunde)". Alle
+  monteres på `/elberegner`, som er SE-tilgængelig.
+  **Forsigtighed:** elpriserne er danske elspotområder (DK1/DK2) — de er
+  reelle danske data, ikke oversættelige navne, så rettelsen er en
+  `locale === "da"`-gate eller en `se`-form, ikke en oversættelse af
+  "Østdanmark". Rør ikke `src/lib/energi/` — kør `src/lib/energi/*.test.ts`.
+- **Domene 2 — delt tekst (3 strenge).** `GaeldsfriBeregner.tsx:422` sætter
+  `calculatorName="Gældsfri Beregner"`, men `/gaeldsfri` hedder **"Skuldfri"**
+  på beraknare.se (`calculator-list.ts:96`); `:194` skriver "Gæld ${p.id}" på
+  hver gældspost. `KonfirmationBeregner.tsx:493` blander
+  `${l.underskudPaa}` med dansk kode omkring. Klassen er **ny**: ingen tidligere
+  måling har set på del-link-tekster, og den er værd at måle videre, fordi
+  `/gaeldsfri` er 7 besøgende/28d SE og del-knappen findes på alle 70 sider.
+- **Domene 3 — `TidszoneBeregner.tsx:477` "på vintern"** i delt tekst. Afslået
+  i scriptet som gyldigt svensk ("på vintern" er svensk), men noteret fordi
+  samme del-tekst-klasse er åben ovenfor.
+- **Domene 4 — `PrisomraadeVaelger` `<option>`-værdier** er danske
+  (`Øst (DK2)`), så en svensk læser får en dansk dropdown. Samme gate-spørgsmål
+  som domene 1.
+- **Scope:** mål først hver streng mod den kode der renderer den (scriptets
+  R1-R8 dækker det mekaniske; det her er det redaktionelle), ret de der er
+  synlige for en svensk læser, og **udvid `REVIEWED` i scriptet løbende** —
+  hver rettelse skal fjerne sin entry, så listen ikke bliver en mopskive.
+- **Acceptkriterier:**
+  1. `node scripts/locale-leak.mjs --gate` grøn, og `REVIEWED` er kortere
+     end i dag.
+  2. Ingen dansk streng fra domene 1-3 står i et render på beraknare.se;
+     verificér i DOM'en, ikke med en 200.
+  3. `/elberegner` på beraknare.se har en svensk eller skjult prisområde-vælger,
+     og beregningen på dansk er uændret (kør `src/lib/energi`-tests + de
+     berørte beregner-tests).
+  4. Gaten grøn.
+- **MÅL:** beraknare.se 516 besøgende/28d (+159 %) pr. 2026-09-27;
+  `/elberegner` 11 besøgende/28d SE (+83 %). **Mål 2026-10-11.**
 
 #### 98. [ ] 2026-09-27 — C70 — `TidszoneBeregner` har intet `no`-sprog (afhænger af opgave 97)
 
