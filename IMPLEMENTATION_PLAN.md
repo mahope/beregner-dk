@@ -10263,3 +10263,17 @@ den kategori er **ikke** et fund:
 - **Lukket i C75** (`ceo/knapgrupper`): `node scripts/knapgruppe-scan.mjs`
   → **0 filer / 0 uavngivne**, begge scanner-gates opdateret i samme
   commit. Læs C75-STATUS.
+
+### VERIFICÉR DEPLOY — åbne noter (2026-09-27 09:30)
+
+- ⏳ **VERIFICÉR DEPLOY: C76 — otte beregnersider skrev tal med punktum i
+  dansk/svensk tekst.** `/kvadratmeter` (formelen for alle fire geometriske
+  former), `/bil` (`prKm` — nåede Kopier **og** Del), `/billaan` (`apr`,
+  `prisPrKm`), `/forbrugslaan` (`apr`, `samletAar`), `/boliglaan` (samlet
+  rente) og `/elberegner` (6 steder). **Verificér indhold, ikke HTTP 200:**
+  `curl -s https://minberegner.dk/kvadratmeter | grep -c 'm²'` skal vise
+  formelen med **komma** ("3,5 × 2,5 = 8,75 m²", ikke "3.5 × 2.5"), og
+  `/boliglaan` skal vise samlet rente som "1,90 %" / "1.90%". Samme grep på
+  `/bil` og `/forbrugslaan` på **https://beraknare.se**. Kode `d701486`,
+  merge `0d9351c` 2026-09-27 09:30 CEST; første kandidatvindue
+  **2026-09-27 12:30**.
