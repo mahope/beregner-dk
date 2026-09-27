@@ -7821,7 +7821,7 @@ landmark=lån, piggybank=opsparing osv.).
 
 ## VERIFICÉR DEPLOY-log
 
-### ⏳ **VERIFICÉR DEPLOY: C91 — Halloween som kurateret `dage-til`-dato (31. oktober) i da og se, PLUS en levende 404-rettelse på `/dage-til/1-december`.** Kode + plan i ét commit på `ceo/halloween-dage-til`; første kandidatvindue **2026-09-27 17:30**. Verificér ved **indhold og statuskode, ikke HTTP 200 alene**:
+### ⏳ **VERIFICÉR DEPLOY: C91 — Halloween som kurateret `dage-til`-dato (31. oktober) i da og se, PLUS en levende 404-rettelse på `/dage-til/1-december`.** Kode `b5a2e48`, merge `540a78e` 2026-09-27 14:48 CEST på branch `ceo/halloween-dage-til`. Første kandidatvindue **2026-09-27 17:30**. Verificér ved **indhold og statuskode, ikke HTTP 200 alene**:
 1. `curl -s -o /dev/null -w '%{http_code}' https://minberegner.dk/dage-til/halloween` skal være **200**, og `<title>` skal være **"Hvor mange dage er der til Halloween? 34 dage | MinBeregner.dk"** på 27. september — altså *dagens* tal, ikke et hårdkodet 34.
 2. Samme curl skal finde **3** `"@type":"Question"`, `<h1>Hvor mange dage er der til Halloween?</h1>`, og facts med "Alle helgenes dag er 1. november" og "ikke en dansk helligdag".
 3. `curl -s https://minberegner.dk/sitemap.xml | grep -c 'dage-til/halloween'` skal være **1** (sitemap bygges af samme liste, så den følger automatisk med).
