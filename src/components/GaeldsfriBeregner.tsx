@@ -39,6 +39,8 @@ export default function GaeldsfriBeregner() {
       samletGaeld: "Samlet g\u00e6ld",
       gaeldsfriOm: "G\u00e6ldsfri om",
       samletRente: "Samlet rente",
+      gaeldPost: "G\u00e6ld",
+      kalkulatorNavn: "G\u00e6ldsfri Beregner",
       totalBetalt: "Total betalt",
       effektEkstra: "Effekt af ekstra afdrag",
       duSparer: "Du sparer",
@@ -74,6 +76,8 @@ export default function GaeldsfriBeregner() {
       samletGaeld: "Total skuld",
       gaeldsfriOm: "Skuldfri om",
       samletRente: "Total r\u00e4nta",
+      gaeldPost: "Skuld",
+      kalkulatorNavn: "Skuldfri ber\u00e4knare",
       totalBetalt: "Totalt betalt",
       effektEkstra: "Effekt av extra avbetalning",
       duSparer: "Du sparar",
@@ -109,6 +113,8 @@ export default function GaeldsfriBeregner() {
       samletGaeld: "Samlet gjeld",
       gaeldsfriOm: "Gjeldfri om",
       samletRente: "Samlet rente",
+      gaeldPost: "Gjeld",
+      kalkulatorNavn: "Gjeldfri-kalkulator",
       totalBetalt: "Totalt betalt",
       effektEkstra: "Effekt av ekstra avdrag",
       duSparer: "Du sparer",
@@ -191,7 +197,7 @@ export default function GaeldsfriBeregner() {
   const result = useMemo(() => {
     const aktive = poster
       .map(p => ({
-        navn: p.navn || `G\u00e6ld ${p.id}`,
+        navn: p.navn || `${l.gaeldPost} ${p.id}`,
         gaeld: parseFloat(p.gaeld) || 0,
         rente: (parseFloat(p.rente) || 0) / 100 / 12,
         minAfdrag: parseFloat(p.minAfdrag) || 0,
@@ -419,7 +425,7 @@ export default function GaeldsfriBeregner() {
         <CopyResultButton text={result ? `${l.gaeldsfriOm} ${result.aar} ${l.aar} ${result.mdr} ${l.mdr} \u2014 ${l.samletRente}: ${formatKr(result.valgt.totalRente)} kr.` : ''} />
         <ShareCalculation
           getShareableLink={getShareableLink}
-          calculatorName="G\u00e6ldsfri Beregner"
+          calculatorName={l.kalkulatorNavn}
           resultSummary={result ? `${l.gaeldsfriOm} ${result.aar} ${l.aar} ${result.mdr} ${l.mdr}` : ''}
         />
       </div>
