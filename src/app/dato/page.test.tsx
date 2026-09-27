@@ -1,5 +1,5 @@
 import { renderToStaticMarkup } from "react-dom/server";
-import { beforeEach, describe, expect, test, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { getDomainConfigByLocale } from "@/lib/domain-config";
 import { getCurrentDomainConfig, getLocale } from "@/lib/get-locale";
 import { getDageTilSlugs } from "@/lib/dage-til";
@@ -87,5 +87,51 @@ describe("dato page", () => {
 
     expect(html).not.toContain("/dage-til/");
     expect(html).not.toContain("/dagar-till/");
+  });
+});
+
+describe("dato page — dage tilbage i året", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-09-27T12:00:00Z"));
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  test("da svarer på 'hvor mange dage er der tilbage af 2026' med dagens tal", async () => {
+    vi.mocked(getLocale).mockResolvedValue("da");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("da"));
+
+    const html = renderToStaticMarkup(await DatoPage());
+
+    expect(html).toContain("<h2>Hvor mange dage er der tilbage af 2026?</h2>");
+    expect(html).toContain("<strong>95 dage tilbage af 2026</strong>");
+    expect(html).toContain("13 uger og 4 dage");
+    expect(html).toContain('href="/dage-til/1-december"');
+    expect(html).toContain('href="/dage-til/nytaarsaften"');
+  });
+
+  test("se svarer på 'dagar kvar av 2026' med dagens tal", async () => {
+    vi.mocked(getLocale).mockResolvedValue("se");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("se"));
+
+    const html = renderToStaticMarkup(await DatoPage());
+
+    expect(html).toContain("<h2>Hur många dagar är det kvar av 2026?</h2>");
+    expect(html).toContain("<strong>95 dagar kvar av 2026</strong>");
+    expect(html).toContain('href="/dagar-till/1-december"');
+    expect(html).toContain('href="/dagar-till/nyarsafton"');
+  });
+
+  test("tallet følger dagen, så siden kan ikke stå med gårsdags svar", async () => {
+    vi.setSystemTime(new Date("2026-12-31T08:00:00Z"));
+    vi.mocked(getLocale).mockResolvedValue("da");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("da"));
+
+    const html = renderToStaticMarkup(await DatoPage());
+
+    expect(html).toContain("<h2>Hvor mange dage er der tilbage af 2026?</h2>");
+    expect(html).toContain("<strong>0 dage tilbage af 2026</strong>");
   });
 });

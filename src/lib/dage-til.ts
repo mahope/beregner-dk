@@ -629,6 +629,34 @@ export function daysBetween(from: Date, to: Date): number {
   );
 }
 
+export interface DageTilbageIAaret {
+  year: number;
+  dage: number;
+  uger: number;
+  dageEfterUger: number;
+  sidsteDag: Date;
+}
+
+/**
+ * Days left in the calendar year. "Hvor mange dage er der tilbage af 2026?"
+ * (227 visninger, pos. 5 i dansk GSC) er ikke det samme som "hvor mange dage
+ * er der til nytår?": året er slut 31. december, uanset hvad man kalder
+ * dagen. Tallet er 0 nytårsaften, fordi det sidste døgn *er* 31. december.
+ */
+export function dageTilbageIAaret(today: Date): DageTilbageIAaret {
+  const start = toUtcMidnight(today);
+  const year = start.getUTCFullYear();
+  const sidsteDag = new Date(Date.UTC(year, 11, 31));
+  const dage = daysBetween(start, sidsteDag);
+  return {
+    year,
+    dage,
+    uger: Math.floor(dage / 7),
+    dageEfterUger: dage % 7,
+    sidsteDag,
+  };
+}
+
 export interface DageTilAnswer {
   days: number;
   weeks: number;
