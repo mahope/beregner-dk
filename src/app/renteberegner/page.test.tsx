@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, test, vi } from "vitest";
 import { getDomainConfigByLocale } from "@/lib/domain-config";
 import { getCurrentDomainConfig, getLocale } from "@/lib/get-locale";
 import { RENTEFRADRAG_2026 } from "@/lib/satser-2026";
+import { getPageData } from "@/lib/page-data";
 import RenteberegnerPage from "./page";
 
 vi.mock("@/components/RenteBeregner", () => ({
@@ -70,5 +71,29 @@ describe("renteberegner page", () => {
     expect(html).toContain(`<strong>${procent(0.05 * (1 - RENTEFRADRAG_2026.highRate))}% efter skat</strong>`);
     // …og 5 % × (1 − 25,6 %) = 3,72 % → 3,7 % over grænsen
     expect(html).toContain(`over grænsen er det ca. ${procent(0.05 * (1 - RENTEFRADRAG_2026.lowRate))}%.`);
+  });
+
+  test("svarer på formlen, Excel og nominel mod effektiv — de tre ting dansk autocomplete spørger om", async () => {
+    const html = renderToStaticMarkup(await RenteberegnerPage());
+
+    // "annuitetslån formel" og "annuitetslån formel bevis"
+    expect(html).toContain("ydelse = P × r ÷ (1 − (1 + r)");
+    expect(html).toContain("Summen af den geometriske række");
+    // "annuitetslån excel", "renteberegner excel", "annuitetslån excel skabelon"
+    expect(html).toContain("=YDELSE(0,04/12;240;-200000)");
+    expect(html).toContain("=RENTENPERIODER(0,04/12;-1211,96;200000)");
+    expect(html).toContain("1.211,96");
+    // "månedlig rente til årlig rente", "månedlig rente formel"
+    expect(html).toContain("Månedlig rente til årlig rente");
+    expect(html).toContain("12,68 % om året");
+  });
+
+  test("de to nye spørgsmål ligger i page-data, og dermed i JSON-LD", () => {
+    // FAQ-komponenten og StructuredData er begge mocket væk i denne fil, så
+    // svarene læses i den tabel de begge får fra.
+    const spg = getPageData("renteberegner", "da")!.faqItems.map((f) => f.question);
+
+    expect(spg).toContain("Hvilken formel beregner et annuitetslån, og hvordan gør man det i Excel?");
+    expect(spg).toContain("Hvad er forskellen på nominel og effektiv rente?");
   });
 });

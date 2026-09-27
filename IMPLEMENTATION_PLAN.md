@@ -1,3 +1,5 @@
+STATUS: KØ — **C85 er landet: `/renteberegner` er det sidste ubearbejdede medlem af dansk top-15 i GSC, og dens søgeklynge er ikke "beregn min rente" — den er "formlen" og "Excel". Siden havde nul forekomster af ordet `Excel` og nul af `formel`.** Køen havde ingen `I GANG`-opgave, så dette var C84-listenens punkt 1. **Målt først:** DA-autocomplete (`hl=da`, `gl=dk`, 13:10) under **"annuitetslån"** giver 10 variationer, hvoraf **fire er Excel** ("annuitetslån excel", "annuitetslån excel skabelon", "annuitetslån beregner excel", "annuitetslån formel excel") og **to er selve beviset** ("annuitetslån formel", "annuitetslån formel bevis" — en gymnasiopgave). Under **"månedlig rente"**: "månedlig rente til årlig rente", "månedlig rente formel", "månedlig rente kredittkort", "månedlig rente sparekonto". Under **"renteberegner"**: "renteberegner excel", "renteberegner morarenter", "renteberegner boliglån". **Sprog-asymmetrien igen, og den er her helt konkret:** SE-siden har et afsnit "**Nominell kontra effektiv ränta**" og et FAQ-spørgsmål "**Effektiv rente?**"; DA-siden har **ingen af delene** — mens dansk autocomplete spørger om præcis "månedlig rente til årlig rente". **Rettelsen (kun `da`):** et nyt `<h2>` **"Formlen for et annuitetslån — og de samme tal i Excel"** med ydelsesformlen, det efterprøvbare eksempel og en treleds-begrundelse (hver ydelse er 1/(1+r), 1/(1+r)², … og summen af den geometriske række er (1−(1+r)^−n)/r — det er "beviset"), en Excel-tabel med **`=YDELSE(0,04/12;240;-200000)`**, **`=RENTENPERIODER(0,04/12;-1211,96;200000)`** og den samlede rente, samt **"Månedlig rente til årlig rente"** med 1 %/måned = **12,68 %**/år og 4 %/år = **4,07 %** effektivt. **Tallene er egne, ikke lånt:** 200.000 kr. @ 4 % i 20 år → ydelse **1.211,96 kr.**, i alt 290.870,56 kr., renter 90.870,56 kr. — beregnet i node, ikke kopieret fra en side (C82's Excel-afsnit gjorde det samme, og sidens egne 100.000/5 %/5 år-tal er uændrede). **Minus-tegnet i Excel er en fælde, og den er skrevet ned:** med `YDELSE` skal lånebeløbet ind som `-200000`, ellers kommer ydelsen ud negativ — det er derfor siden siger det eksplicit. **Harness:** `page.test.tsx` **4 → 6 tests** — ét der kræver formlen, geometriske forklaring, begge Excel-funktioner og de to procentsatser i den server-renderede HTML, ét der kræver de to nye spørgsmål i `page-data.ts`. **Modsvejs verificeret: begge falder** med den gamle kode. **To forhindringer fundet undervejs, begge ærlige:** (1) `page.test.tsx` mocker **både** `FAQ` **og** `StructuredData` væk, så FAQ'en er slet ikke i testens HTML — min første test læste derfor et element, der aldrig kunne være der; den læser nu `page-data.ts` direkte, som er den tabel begge komponenter får fra. (2) min første assertion skrev "summen af den geometriske række" med lille s, mens JSX'en sætter stor S — fundet fordi testen *faldt*. Samme fejlklasse som målefejl nr. 7-13. Gate grøn: lint (556 filer), **1726 tests / 151 filer** (fra 1724 / 151), build (**141 sider**). Se opgave 114. **MÅL:** `/renteberegner` baseline **13.560 visninger / 117 klik / CTR 0,9 % / pos. 7,5 pr. 2026-08-28 → 2026-09-25** — måles igen 2026-10-11.
+
 STATUS: KØ — **C84 er landet: `/tidszone`'s egen meta-tekst løj om sit eget indhold. Den lovede "tidsforskel til 12 byer" i den indekserede beskrivelse — tabellen har haft 16 byer siden C46 lagde fire i, og nu 21.** Køen havde ingen `I GANG`-opgave, så dette er C82's åbne kandidat #1 og #2's fætter: mål autocomplete, se hvad siden svarer på. **Målt først:** DA-autocomplete (`hl=da`, `gl=dk`, 13:00) giver **10 variationer under "hvad er klokken i usa"** — bl.a. "…når den er 12 i danmark" (GSC: 180 visninger, pos. 6), "…når den er 21 i danmark", "…når den er 14 i danmark", "…når den er 16 i danmark", "…est", "…los angeles" — og **10 under "tidsforskel"**, hvoraf fire pegede på byer, siden ikke havde: **"tidsforskel thailand", "tidsforskel bali danmark", "tidsforskel tyrkiet", "tidsforskel new york"** (den fandtes), mens "hvad er klokken i" spørger efter **Thailand, Tyrkiet, Canada og Spanien**. SE-autocomplete (`hl=se`, `gl=se`) spørger om Japan, Grønland, Island og Australien — dem har siden alle. **Rettelsen:** de fem manglende destinationer i `src/lib/tidszone-reference.ts` — **Toronto** (UTC-5/-4, som New York), **Madrid** (følger Danmarks CEST), **Istanbul** (fast UTC+3, Tyrkiet afskaffede sommertid i 2016), **Bangkok** (fast UTC+7) og **Denpasar (Bali)** (fast UTC+8) — **21 byer i alt**, to nye FAQ-par i `page-data.ts` med navngivet sommer/vinter ("I dansk sommertid er det 17 i Bangkok, 13 i Istanbul og 06 i Toronto … I vintertid er det 18, 14 og 06"), og **metaDescription rettet fra "12 byer" til "21 byer" i begge sprog** (SE: "till 12 städer" → "till 21 städer"). **Fundet ud over målingen — og det er pointen med at læse ens egen tekst:** `metaDescription` lovede 12 byer, fordi C46 tilføjede fire uden at røre den. Det er en *indekseret* løgn om sit eget indhold, altså præcis CTR-klassen Fase 3 prioriterer, fundet ved at koble to filer sammen i stedet for at læse dem hver for sig. **Harness:** `tidszone-reference.test.ts` **7 → 9 tests** — ét med de fem nye rækkers tal, ét der **udleder tallet af byer fra `metaDescription` i `da` og `se` og kræver at det er lig med `TIDSZONER.length`**, så den samme afdrift ikke kan komme tilbage ved næste tilføjelse. **Modsvejs verificeret: begge nye tests falder** med den gamle kode. **Målefejl nr. 13 (min egen, samme klasse som nr. 9-12):** min første regex var `/til (\d+) (?:byer|städer)/` — den er væk på den svenske "till", så `Number(undefined)` gav **NaN**, og testen ville have været grøn for alt andet end ét tal. Rettet til `/till? (\d+)/`; fundet fordi testen *faldt* med NaN i stedet for med 12 mod 21. Gate grøn: lint (556 filer), **1724 tests / 151 filer** (fra 1722 / 151), build (**141 sider**). Kode + plan i ét commit på `ceo/tidszone-destinationer`; se opgave 113. **MÅL:** `/tidszone` baseline **24.485 visninger / 110 klik / CTR 0,4 % / pos. 7,5 pr. 2026-08-28 → 2026-09-25** — måles igen 2026-10-11.
 
 STATUS: KØ — **C83 er landet: `/moms` er sitets fjerdestørste danske side i Google (23.225 visninger, CTR 0,2 %, pos. 6,9) og den havde svar på nul af de spørgsmål, dens egen søgeklynge stiller — den forklarede i stedet, hvilke *ydelser* der er momsfrie, mens folk spørger om *varer*.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den), så valget var C82's egen åbne kandidat #3: samme metode på de næste GSC-sider. **Målt først, rettet så.** DA-autocomplete (`hl=da`, `gl=dk`, hentet 13:00 i dag) giver **19 variationer under "moms på"** — "moms på bøger", "moms på fødevarer", "moms på parkering", "moms på træning", "moms på frugt og grønt", "moms på bøger afskaffes hvornår" — og **6 under "hvordan trækker man moms fra"** ("…et beløb", "…et tal", "…et køb", "25 moms fra", "tysk moms fra"). Siden havde **0** af dem: den nævner ingen vare, og den eneste omtale af bøger var i en liste om undtagne *ydelser*. **Den konkrete asymmetri — C82's metode:** SE-siden har *tre* satser og siger, hvilke varer der bruger hvilken ("12 %: livsmedel", "6 %: böcker"), mens DA-siden siger "25 %" og intet om varer. Det er altså ikke et tilfælde, men den ene sproggren mangler det svar den anden har. **Rettelsen:** to nye synlige afsnit ("Der er kun én dansk momssats — også på fødevarer" og "Er der moms på det, jeg køber? Sådan tjekker du det"), **fire nye FAQ-par i `page-data.ts`** — som dermed også kommer i JSON-LD'en — og **én faglig præcisering: listen sagde "Aviser og tidsskrifter (0% moms)"**, hvilket er forkert i lovterminologien: en vare der er undtaget fra momsloven har ingen moms, ikke 0 % moms. Bøger, aviser og tidsskrifter står nu samlet, og siden siger eksplicit hvorfor det betyder noget (prisen er den samme med og uden moms) — og at Sverige gør det modsat. **Tal der kan efterprøves:** en bog til 249 kr. koster 249 kr.; en fødevare til 80 kr. ekskl. moms koster 100 kr. inkl. moms; 1.250 kr. inkl. moms ÷ 1,25 = 1.000 kr. ekskl. moms. `/tidszone` og `/renteberegner` blev **ikke** rørt — de er målt næste iteration, fordi de er C83's arv, hvis tiden rækker. **Én kildefejl jeg ikke skjuler:** jeg fik **ikke** hentet momslovens konsoliderede tekst (retsinformation.dk er en JS-side, webfetch gav tomt svar; skat.dk/erhverv/moms er kun navigation). Pastandene er derfor skrevet om Danmarks sats og undtagelser uden et dybt link, og **skal efterprøves mod momsloven, før de bruges i en annonce eller et blogindlæg.** **Harness:** `page.test.tsx` er **3 → 6 tests** — ét der kræver alle fem konkrete svar, ét der *forbyder* den gamte "0% moms"-sætning, ét der kræver de fire nye spørgsmål i FAQ'en — **verificeret modsvejs: alle 3 falder** med den gamle kode (`git stash` + kørsel), og de to svenske tests er urørte, fordi SE-siden ikke mangler noget. Gate grøn: lint (556 filer), **1722 tests / 151 filer** (fra 1719 / 151), build (**141 sider**). Kode + plan i ét commit på `ceo/moms-da-svar`; se opgave 112. **MÅL:** `/moms` baseline **23.225 visninger / 40 klik / CTR 0,2 % / pos. 6,9 pr. 2026-08-28 → 2026-09-25** — måles igen 2026-10-11.
@@ -7827,7 +7829,24 @@ landmark=lån, piggybank=opsparing osv.).
      sin klynge — de tre satser). Særlig kontrol: SE skal stadig sige
      "1 000 kr × 1,25 = 1 250 kr, × 1,12 = 1 120 kr eller × 1,06 = 1 060 kr".
 
-### ⏳ **VERIFICÉR DEPLOY: C84 — `/tidszone`: 21 byer i tabellen (Toronto, Madrid, Istanbul, Bangkok, Denpasar) og metaDescription rettet fra "12 byer" til "21 byer" i begge sprog.** Kode + plan i ét commit på `ceo/tidszone-destinationer`, merge afventer push. Første kandidatvindue **2026-09-27 17:30** (eller det næste vindue efter merge).
+### ⏳ **VERIFICÉR DEPLOY: C85 — `/renteberegner` dansk: annuitetsformlen, Excel (`YDELSE`/`RENTENPERIODER`) og nominel mod effektiv (13.560 visninger, CTR 0,9 %, pos. 7,5).** Kode + plan i ét commit på `ceo/renteberegner-formel`. Første kandidatvindue **2026-09-27 17:30** (eller det næste vindue efter merge).
+  **HTTP 200 beviser intet:** intet af dette rører `RenteBeregner` eller et
+  regnestykke — kun ny brødtekst i `page.tsx` og to `faqItems`. Sådan
+  verificeres det:
+  1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
+  2. **Indhold:** siden skal finde `<h2>Formlen for et annuitetslån` og
+     `=YDELSE(0,04/12;240;-200000)` og `=RENTENPERIODER(0,04/12;-1211,96;200000)`
+     og `Månedlig rente til årlig rente` og `12,68 % om året`.
+  3. **Tallene skal være rigtige:** ydelsen på 200.000 kr. @ 4 % i 240 måneder
+     er 1.211,96 kr.; samlet rente 90.870,56 kr. Tjek mod Excel selv.
+  4. **FAQSchema:** `grep -c '"@type":"Question"'` skal være **6** (før: 4).
+  5. **Værktøjet skal være urørt:** de to eksisterende tal — 1.887 kr./md og
+     13.227 kr. i samlet rente for 100.000 kr. @ 5 % i 5 år — skal stadig stå
+     i `<h1>`-afsnittet, og C37's fradragsafsnit skal have 33,6 % / 25,6 %.
+  6. `https://beraknare.se/renteberegner` skal være **uændret** — SE har allerede
+     "Nominell kontra effektiv ränta".
+
+### ⏳ **VERIFICÉR DEPLOY: C84 — `/tidszone`: 21 byer i tabellen (Toronto, Madrid, Istanbul, Bangkok, Denpasar) og metaDescription rettet fra "12 byer" til "21 byer" i begge sprog.** Kode `b9b4ca3`, merge `88fa49a` 2026-09-27 13:07 CEST på branch `ceo/tidszone-destinationer`. Første kandidatvindue **2026-09-27 17:30**.
   **HTTP 200 beviser intet:** rækkerne er statiske data og teksten ligger i
   metaattributten, som curl *kan* se. Sådan verificeres det:
   1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
@@ -10846,6 +10865,63 @@ tekst på `/tidszone`), men Kopier-strengen med datoen kræver en browser.
 4. **🔒 Uforandrede forbehold:** hreflang er korrekt (`hrefLang` med stort L);
    svenske slugs kræver Mads' go; `/bmi` og `/su`s fald måles 2026-10-11.
 5. **Mål 2026-10-10 / 2026-10-11** (se Måleprotokol).
+
+#### 114. [x] FÆRDIG 2026-09-27 — C85 — `/renteberegner`: annuitetsformlen, Excel-funktionerne og nominel mod effektiv — de tre ting klyngen spørger om
+
+- **Datagrund:** `/renteberegner` er det **sidste ubearbejdede medlem af
+  dansk top-15** i GSC (**13.560 visninger, 117 klik, CTR 0,9 %, pos. 7,5**).
+  Søgninger: "annuitetslån beregner" 361v pos 8, "renteberegner" 322v pos 7,
+  "månedlig rente beregning" 48v pos 5. **SE står på pos. 25,6** med 2.831
+  visninger og 3 klik, så der er plads der også.
+- **Målt først (autocomplete 13:10):** "annuitetslån" → 10 variationer med
+  **fire Excel-varianter** og **to formel-varianter** (den ene "annuitetslån
+  formel bevis"); "månedlig rente" → "til årlig rente", "formel", "kredittkort",
+  "sparekonto"; "renteberegner" → "excel", "morarenter", "boliglån".
+  **Målt på koden:** `grep -c "Excel"` → **0**, `grep -c "formel"` → **0**.
+- **Asymmetrien:** SE har `<h2>Nominell kontra effektiv ränta</h2>` og
+  FAQ-spørgsmålet "Effektiv rente?"; DA har **ingen af delene**.
+- **Rettelsen (kun `da`):** `<h2>Formlen for et annuitetslån — og de samme tal i
+  Excel</h2>` med formlen, eksemplet og beviset; `<h3>De samme tal i Excel</h3>`
+  med `=YDELSE`, `=RENTENPERIODER` og samlet rente; `<h3>Månedlig rente til
+  årlig rente</h3>` med 12,68 % og 4,07 %; to nye `faqItems`.
+- **Tal, der er egne og kan efterprøves:** 200.000 kr. @ 4 % i 20 år →
+  1.211,96 kr./md, 290.870,56 kr. i alt, 90.870,56 kr. i renter (beregnet i
+  node). Sidens eksisterende 100.000/5 %/5 år-tal er urørte.
+- **Harness:** `page.test.tsx` **4 → 6 tests**, **modsvejs verificeret** (begge
+  nye falder med gammel kode). **Fælderne:** `FAQ` *og* `StructuredData` er
+  begge mocket væk i denne fil, så den nye FAQ-test læser `page-data.ts`
+  direkte; og JSX'en sætter "**S**ummen" med stort S, som min assertion ikke
+  gjorde.
+- **Gate grøn:** lint 556 filer, **1726 tests / 151 filer** (fra 1724 / 151),
+  build 141 sider. Branch `ceo/renteberegner-formel`.
+- **MÅL:** `/renteberegner` baseline **13.560 visninger / 117 klik / CTR 0,9 % /
+  pos. 7,5** (GSC 2026-08-28 → 2026-09-25) og 146 besøgende/28d DA (+29 %).
+  Måles igen 2026-10-11.
+
+### Næste kandidater efter C85
+
+0. **🔒 Opgave 97 er `BLOCKED`** (Mads' svar), 98 afhænger af den. Browser-noter:
+   C52, C55, C56, C57 og C60 ligger som kliksekvens i `❓ Til Mads` nederst.
+1. **✅ Dansk top-15 er nu lukket:** `/procent`, `/dato`, `/tidsberegner`,
+   `/tidszone`, `/moms`, `/renteberegner` har alle fået det svar, deres egen
+   søgeklynge spørger om (C82-C85). **Lav ikke CTR på dem igen** — mål i stedet
+   om svarene flytter position *eller* CTR efter 14 dage.
+2. **🆕 Samme måling på de næste lag:** `/boligstoette` (6.697 v, CTR 2,6 %,
+   pos. 8,7 — høj CTR, altså et *placerings*-problem: "beregn boligstøtte"
+   508v pos 10, "boligsikring beregner" 186v pos 11), `/kalorier` (12.477 v,
+   0,1 %... nærmere 1,0 %, pos. 8,2, og "kalorieberegner" 203v **pos. 17** —
+   her skal selve værktøjet findes, ikke brødteksten), `/promille` (4.513 v,
+   1,5 %, pos. 7,9) og `/alder` (6.149 v, 0,6 %, pos. 7,8, "hvor gammel er jeg"
+   pos. **33**).
+3. **🆕 Svensk CTR, hvor der er både plads og klik:** `/tidszone` (3.256 v,
+   0,4 %, pos. 7,7), `/leasing` (3.151 v, 1,0 %, pos. 12,4), `/alder` (3.060 v,
+   0,3 %, pos. 7,7), `/nedtaelling` (5.163 v, 0,2 %, pos. 9,4). SE's egen
+   søgeklynge er målt for `/dato` og `/tidsberegner` (C38), ikke for disse.
+4. **⏬ Nedprioriteret:** de 22 filer / 35 ubundne labels i
+   `label-a11y-scan.mjs` (kun sider uden for top-15), se punkt 4 i C82-listen.
+5. **🔒 Uforandrede forbehold:** hreflang er korrekt (`hrefLang` med stort L);
+   svenske slugs kræver Mads' go; `/bmi` og `/su`s fald måles 2026-10-11.
+6. **Mål 2026-10-10 / 2026-10-11** (se Måleprotokol).
 
 #### 109. [x] FÆRDIG 2026-09-27 — C80 — erklær Node-runtime-kontrakten: `engines.node`, `.nvmrc` og en test der holder de tre sammen
 

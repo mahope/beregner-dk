@@ -124,6 +124,91 @@ export default async function RenteberegnerPage() {
           </table>
         </div>
 
+        <h2>Formlen for et annuitetslån — og de samme tal i Excel</h2>
+        <p>
+          Ydelsen i et annuitetslån er den samme hver måned, og den findes med
+          én formel. Med lånebeløb <strong>P</strong>, den månedlige rente{" "}
+          <strong>r</strong> og <strong>n</strong> måneders løbetid:
+        </p>
+        <p>
+          <code>ydelse = P &times; r &divide; (1 &minus; (1 + r)<sup>&minus;n</sup>)</code>
+        </p>
+        <p>
+          Eksempel: du låner <strong>200.000 kr.</strong> til <strong>4 %</strong> i
+          20 år. Den månedlige rente er 0,04 &divide; 12 = 0,003333, og n = 240
+          måneder. Ydelsen bliver <strong>1.211,96 kr. pr. måned</strong> — i alt
+          290.870,56 kr., hvoraf 90.870,56 kr. er renter.
+        </p>
+        <p>
+          Formlen er ikke en tommelfingerregel. Hver ydelse dækker kun en
+          brøkdel af det resterende lån — 1 &divide; (1 + r), 1 &divide; (1 + r)²
+          og så videre i 240 led. Summen af den geometriske række er præcis
+          (1 &minus; (1 + r)<sup>&minus;n</sup>) &divide; r, og derfor er
+          lånebeløbet P = ydelse &times; den sum. Flytter du bare renterne til
+          en anden side af ligheden får du beviset, som det er det
+          &ldquo;annuitetslån formel bevis&rdquo; spørger om.
+        </p>
+
+        <h3>De samme tal i Excel</h3>
+        <p>
+          Excel har begge funktioner indbygget. Den danske Excel bruger
+          <strong> semikolon</strong> som skilletegn, og den skal have lånebeløbet
+          ind som et negativt tal for at ydelsen kommer ud positiv:
+        </p>
+        <div className="overflow-x-auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Spørgsmål</th>
+                <th>Formel</th>
+                <th>Resultat</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Hvad er ydelsen på 200.000 kr. over 240 måneder?</td>
+                <td>
+                  <code>=YDELSE(0,04/12;240;-200000)</code>
+                </td>
+                <td>1.211,96 kr.</td>
+              </tr>
+              <tr>
+                <td>Hvor mange måneder varer lånet på den ydelse?</td>
+                <td>
+                  <code>=RENTENPERIODER(0,04/12;-1211,96;200000)</code>
+                </td>
+                <td>240 måneder</td>
+              </tr>
+              <tr>
+                <td>Hvad er den samlede rente på lånet?</td>
+                <td>
+                  <code>=YDELSE(0,04/12;240;-200000)*240-200000</code>
+                </td>
+                <td>90.870,56 kr.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Månedlig rente til årlig rente</h3>
+        <p>
+          Den rente banken oplyser er den <strong>nominelle</strong> årlige
+          rente. Den <strong>effektive</strong> årlige rente regner også med, at
+          renten tilskrives hver måned, og den er derfor den faireste at
+          sammenligne lån på.
+        </p>
+        <ul>
+          <li>
+            1 % <strong>pr. måned</strong> er (1,01)<sup>12</sup> &minus; 1 =
+            <strong>12,68 % om året</strong>
+          </li>
+          <li>
+            4 % <strong>om året</strong> er 0,04 &divide; 12 = 0,3333 % pr.
+            måned, hvilket svarer til (1 + 0,003333)<sup>12</sup> &minus; 1 =
+            <strong>4,07 % effektivt</strong>
+          </li>
+        </ul>
+
         <h2>Tips til at få et godt lån</h2>
         <ul>
           <li>
