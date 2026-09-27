@@ -7790,8 +7790,8 @@ landmark=lån, piggybank=opsparing osv.).
 ## VERIFICÉR DEPLOY-log
 - ⏳ **ÅBEN — C73: `beraknare.se/del-regning`'s tællerknapper skal hedde "Färre
   personer"/"Fler personer" (de læste dansk), og `scripts/locale-leak.mjs` har
-  fået regel R4 + to plantede tests. Kode `3a360e1` + plan, merge `MERGE_SHA`
-  2026-09-27 MERGE_TIME CEST på branch `ceo/delregning-se-knapnavn`. Første
+  fået regel R4 + to plantede tests. Kode `3a360e1` + plan, merge `ef102be`
+  2026-09-27 08:29 CEST på branch `ceo/delregning-se-knapnavn`. Første
   kandidatvindue 12:30.**
   **HTTP 200 beviser intet:** intet af dette rører `src/lib/` eller en
   beregning — kun to strenge i et `se:`-objekt. Sådan verificeres det:
