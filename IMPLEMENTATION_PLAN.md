@@ -7796,9 +7796,9 @@ landmark=lån, piggybank=opsparing osv.).
 ## VERIFICÉR DEPLOY-log
 - ⏳ **VERIFICÉR DEPLOY: C75: de 12 uavngivne knapgrupper er navngivet
   (`role="group"` + `aria-labelledby`/`aria-label` i 10 filer), de to
-  scanner-gates er opdateret, og `label-a11y.test.tsx` er 111 → 118 tests.
-  Kode `«C75»`, merge `«C75»` 2026-09-27 09:3x CEST på branch
-  `ceo/knapgrupper`. Første kandidatvindue **2026-09-27 12:30**.**
+  scanner-gates er opdateret, og   `label-a11y.test.tsx` er 111 → 118 tests. Kode `7c6d4d1`, merge `d5233af`
+  2026-09-27 09:35 CEST på branch `ceo/knapgrupper`. Første kandidatvindue
+  **2026-09-27 12:30**.**
   **HTTP 200 beviser intet:** intet af dette rører `src/lib/` eller en
   beregning — kun `aria-`/`role`-attributter, fire `id`'er og én ny
   oversættelsesnøgle. Sådan verificeres det:
