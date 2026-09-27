@@ -1,3 +1,5 @@
+STATUS: KØ — **C74 er landet: måleren for den accessibility-klasse, `label-a11y-scan.mjs` ikke kan se, ligger nu i repoet som et script med fire navngivne regler og ni plantede tests.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den), og alle åbne deploy-noter er fra dagens 07:35-/08:29-merges med første vindue 12:30, så intet kunne verificeres i denne iteration. **Klasse:** en gruppe af toggle-knapper — en periode, en enhed, et view — i en beholder der ikke navngiver sættet. Den opstod hos C72, som fandt `/brutto-netto`s periodeknapper uden `<label>`, gruppe eller `aria-label`; `label-a11y-scan.mjs` tæller kun `<label>`-elementer, så den ser den slags ikke som konstruktion. Samme fejltype som C70 (311/88 i stedet for 97/45) og C72. **Målt på ren kode: 10 filer / 12 uavngivne grupper** — størst er `/tidsberegner` (3 knapper, Normal/Kontor/Nat, **72.725 visninger**), så listen er skrevet op som **opgave 104** med rækkefølge efter GSC, ikke efter antal. **Dækningen er kontrolleret i begge retninger:** scanneren **fandt** `/brutto-netto` før C72's rettelse og **finder den ikke** nu, fordi C72 lagde `role="group"` + `aria-labelledby` på den. **Harness-fejl undervejs, samme type som de tre forrige:** en selvlukkende `<input type="radio">` blev lagt på stakken uden nogen `</…>` at poppe, så næste `</div>` poppede den *første* knap i stedet for beholderen, og radiogrupper kom ud som 0 fund — fundet ved at køre den **plantede** test, altså præcis sådan den er skrevet til at bruges. **Og planens egen kandidat #3 var en målefejl:** den hævdede at `/brok` stadig manglede redaktionelle indgående links, fordi `git grep brok src/app` kun giver `src/app/brok/`. Det er forkert — `/procent` linker til `/brok` siden C42 via `relatedMap` i `calculator-list.ts:185`, låst af en navngiven vagt i `calculator-list.test.ts`. Et grep i `src/app` kan ikke se en datatabel i `src/lib`; det er præcis den advarsel C42 selv skrev ned. **Femte målefejl i træk, og den lå i kandidatlisten.** **Ingen a11y-rettelse landede i denne iteration, bevidst:** 45-minutters budgettet og gaten er den bindende del, så måleren — som gør rettelsen billig og datagrundet — var hele leverancen. Gate grøn: lint (554 filer), **1676 tests / 149 filer** (fra 1667 / 148) og build (141 sider). Kode + plan i ét commit på `ceo/knapgruppe-scan`; se opgave 103.
+
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
 STATUS: KØ — **C73 er landet: 07:30-batchen er verificeret ved indhold (14 noter lukket), og verificeringen fandt en rigtig fejl: `/del-regning` læste "Færre personer" på beraknare.se — fordi C71 selv lagde de danske ord ind i `se`-blokken.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den), og 16 åbne noter var ældre end det seneste deploy-vindue, så noterne var iterationens pligter først. De er lukket ved **indholdskontrol**, ikke HTTP 200: `/tidszone` har **17** `<tr>` med Nuuk 08:00/08:00, Lissabon 11:00/11:00, Reykjavik 11:00/10:00, Athen og Heraklion 13:00/13:00 (C46), og dropdown'en siger **"Athen"** på dansk og **"Aten"** på svensk (C66's rettelse); `/dato`, `/tidsberegner`, `/tidszone`, `/promille`, `/moms`, `/kvadratmeter`, `/renteberegner` og `/alder` har **0** ubundne `<label>` i den server-renderede HTML (C61/C62), og grupperne bærer `aria-labelledby` (`moms-beregning-gruppe`, `kvadratmeter-form-gruppe`); `/del-regning` på beraknare.se har **danske** tællernavne; `beraknare.se` er svensk (12 × "Bostad", 0 danske markører) og `/gaeldsfri` har 0 hits på "Gældsfri Beregner" (C68/C69). **C52, C56, C57 og C67 kan ikke verificeres med curl** — de kræver Kopiér/knap-klik i en browser — og er ladt åbne, fordi de siger det ærligt. **Fundet fra noterne er en rigtig fejl, og den er C71's egen:** C71 gav `/del-regning`s tællerknapper navne (`l.færre`/`l.flere`) og kopierede de **danske** ord ind i `se`-blokken, så beraknare.se læste "Færre personer" på en side hvis øvrige ord er svenske. **Måleren kunne ikke se den, og det er den fjerde målefejl i træk fra én årsag: `localeObjectRanges` springer *alle* strenge i et `da:`/`se:`/`no:`-objekt over, fordi det er dér oversættelserne bor.** Lækagen der *er* inde i en labels-tabel er altså usynlig som konstruktion. **R4** er derfor en ny regel i `scripts/locale-leak.mjs`: **en `se:`-værdi må ikke indeholde `æ` eller `ø`** — svensk skriver aldrig nogen af dem, så reglen kan ikke give falske fund, og den bruges bevidst **ikke** på `no:`, der selv skriver begge tegn (C68's lektion om `ø` som dansk markør). Den målte **præcis én** streng i hele repoet, og det var den rigtige. `locale-leak-gate.test.ts` er **9 → 11 tests** med to plantede fixtures: den ene skal gøre gaten rød, den anden låser at norsk `æ`/`ø` og en `da:`-fallback *inde i* `se` ikke giver en ny vurdering. **Verificeret modsvejs: 4 tests falder med den gamle komponent**, og R4's egen plantede test falder, når reglen slås fra — den første version af plantet brugte "Vaskemaskine", som ikke indeholder æ eller ø, og var derfor grøn på en regel der ikke virkede; det er samme fejltype som C70's målefejl, fundet af at køre plantet *uden* reglen. To fejl i R4 blev fundet på samme måde: et *nested* `da: { … }` blev kun dækket til `{` og ikke til dens afsluttende klamme, og nøglen blev læst med et regex der krævede et anførselstegn i et vindue der *slutter* lige før det, så `da: "højde"` gav nøglen `?` og blev meldt. `label-a11y.test.tsx`'s `/delregning`-test kræver nu i `se`, at knapnavnet **ikke** indeholder æ eller ø — "har navn" var ikke nok, det var præcis der fejlen lå. Gate grøn: lint (553 filer), **1667 tests / 148 filer** (fra 1665 / 148) og build (141 sider); `label-a11y-scan.mjs` uændret 23/36, `locale-leak.mjs --gate` exit 0 med **117 kandidater / 85 døde / 32 kræver øjne / 0 ureviewet** (uændret, fordi den danske streng lå i en labels-tabel og derfor *aldrig* har været talt med). Kode `3a360e1` på `ceo/delregning-se-knapnavn`; se opgave 102.
@@ -7788,6 +7790,10 @@ landmark=lån, piggybank=opsparing osv.).
     - Gate grøn: lint ok, 280/280 tests, build ok (128 pages).
 
 ## VERIFICÉR DEPLOY-log
+- ⏳ **VERIFICÉR DEPLOY: C74: måleren for knapgrupper uden navn (`scripts/knapgruppe-scan.mjs` + `src/lib/group-scan-gate.test.ts`, 9 tests) og planen.** Kode + plan i ét commit på `ceo/knapgruppe-scan`. Første kandidatvindue **2026-09-27 12:30**.**
+  **HTTP 200 beviser intet:** intet af dette rører `src/lib/` eller en beregning — kun et script og en testfil under `src/lib/`. Sådan verificeres det:
+  1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
+  2. `node scripts/knapgruppe-scan.mjs` skal give **10 filer / 12 uavngivne** — uændret, fordi scanneren kun læser `src/` og tallene derfor er identiske lokalt og live. Det beviser at *filerne* kom med, ikke at nogen beregning ændrede sig.
 - ⏳ **ÅBEN — C73: `beraknare.se/del-regning`'s tællerknapper skal hedde "Färre
   personer"/"Fler personer" (de læste dansk), og `scripts/locale-leak.mjs` har
   fået regel R4 + to plantede tests. Kode `3a360e1` + plan, merge `ef102be`
@@ -9870,6 +9876,44 @@ landmark=lån, piggybank=opsparing osv.).
   mest trafikrelevante er lukket. Næste snit tages når et nyt snapshot peger
   på en side, der stadig er i klassen.
 
+### Næste kandidater efter C74
+
+0. **✅ Opgave 103 lukket i C74** — måleren for knapgrupper uden navn findes
+   nu i repoet, som **opgave 100 gjorde for label-klassen**: script med fire
+   navngivne regler og én plantet fixture pr. regel. Læs C74-STATUS.
+0b. **🔒 Opgave 97 er `BLOCKED`** — `beregner.no` er en anden udgivelse
+   (se `❓ Til Mads`). Dermed er **opgave 98** unødig indtil svaret kommer.
+1. **🔜 Opgave 104 — luk de 12 uavngivne knapgrupper C74 målte.** Målingen er
+   gratis at vælge: `node scripts/knapgruppe-scan.mjs` giver hele listen med
+   fil, linje, knapantal og gruppe-role på under to sekunder. Samme regel som
+   altid: **efter hvad brugeren kan ramme, ikke efter antal.** Listen er
+   10 filer / 12 grupper:
+   - `/tidsberegner` (`TidsBeregner.tsx:287`, **3 knapper** — Normal/Kontor/Nat,
+     **72.725 visninger i dansk GSC**, 285 besøgende/28d) — størst i klassen.
+   - `/boliglaan` (`:484`), `/opsparing` (`:403`), `/leasing` (`:251`,
+     3.151 visninger i svensk GSC), `/timepris` (`:330`), `/del-regning`
+     (`:109` — `−`/`+`-tællerne), `/barselsdagpenge` (`BarselBeregner.tsx:301`),
+     `/barselsplanlaegger` (`:120`, `:262`, `:329` — **3 grupper**),
+     `barsel/ArbejdergiverPanel.tsx` (`:119`) og `CookieConsent.tsx` (`:55`).
+   - **Mønsteret er C64/C70/C72's:** `role="group"` + `aria-labelledby` på en
+     `<span id>`/`<label id>` der bærer den synlige overskrift. Hvor en synlig
+     etiket allerede findes, genbruges den.
+   - **Rettet skal dækkes af `label-a11y.test.tsx`** i DA og SE, verificeret
+     modsvejs, og **tallet i `group-scan-gate.test.ts` skal opdateres i samme
+     commit** — ellers låser gaten næste agent fast i et tal, der ikke holder.
+2. **Resten af label-klassen: 23 filer / 36 ubundne labels.** Uændret siden
+   C72, fordi C74 ikke rørte den. `node scripts/label-a11y-scan.mjs`.
+3. **De 10 øvrige komponenter med `toFixed(2)`** — `/brok` er målt ren
+   (C42), så klassens næste ubearbejdede side skal vælges på ny.
+4. ~~**`/brok` uden redaktionelle indgående links**~~ — **LUKKET som
+   målefejl, se C74-STATUS: `/brok` har indgang fra `/procent` siden C42, og
+   kandidatens `git grep brok src/app` kunne ikke se den, fordi den kommer fra
+   `relatedMap` i `calculator-list.ts:185`.** Det er præcis den fejl C42
+   advarede om ("del altid op efter kilde, ellers måler man katalogens
+   navigation og kalder det kæder") — den femte målefejl i træk, samme
+   fejltype som C70 og C72.
+5. **Mål 2026-10-10 / 2026-10-11** (se Måleprotokol): C1-C16 og C35-C74 måles
+
 ### Næste kandidater efter C72
 
 0. **✅ Opgave 101 lukket i C72** — de syv mest trafikrelevante filer i
@@ -10015,6 +10059,82 @@ landmark=lån, piggybank=opsparing osv.).
 - **Efterladt, bevidst:** C52, C56, C57 og C67 er stadig åbne deploy-noter, fordi
   de kræver Kopiér eller et knap-klik i en browser. De er **ikke** lukket på en
   HTTP 200.
+
+#### 103. [x] FÆRDIG 2026-09-27 — C74 — måleren for knapgrupper uden navn: et script med en test pr. regel
+
+- **Iteration start:** 2026-09-27 08:40 CEST. Køen havde ingen `I GANG`-opgave
+  (97 er `BLOCKED`, 98 afhænger af den), og de åbne deploy-noter er alle fra
+  dagens 07:35- og 08:29-merges med første vindue 12:30 — de kan ikke
+  verificeres nu. Kandidat #2 fra C72 var det eneste åbne arbejde med reel
+  leverance; kandidat #3 viste sig at være en målefejl (se nederst).
+- **Hvorfor måleren var nødvendig:** `scripts/label-a11y-scan.mjs` tæller
+  **kun `<label>`-elementer**. C72 fandt `/brutto-netto`s periodeknapper, der
+  havde hverken `<label>`, gruppe eller `aria-label` — to navnløse knapper i
+  træk. Den slags er usynlig for scanneren som konstruktion: måleren ser kun
+  det den er skrevet til at se. Samme fejltype som C70 (den håndtællede
+  klasse som 311/88) og C72 (en knapgruppe uden etiket).
+- **Leverance:** `scripts/knapgruppe-scan.mjs` (fire navngivne regler) +
+  `src/lib/group-scan-gate.test.ts` (**9 tests**, én plantet fixture pr. regel),
+  gensidigt bundne som C71's par.
+  - **R1** — læs åbningstaggens attributter ved at gå fra `<navn` til det første
+    `>` uden for et `{…}`-udtryk, aldrig `<navn\b([^>]*)>`. Samme fejl som C64.
+  - **R2** — attributværdier læses i hånden, og `${…}` normaliseres væk **før**
+    sammenligningen af `id` med `aria-labelledby` (også før `split(/\s+/)`,
+    fordi `${i + 1}` selv indeholder et mellemrum). Samme fælder som C64/C71.
+  - **R3** — en navngivet **forfader** dækker hele gruppen under sig; radio-
+    knapper tæller med, fordi de er valg i en gruppe.
+  - **R4** — meld kun den **yderste** kandidat, så ét snit ikke tælles
+    dybde × dybde (C63/C64's fejl).
+- **Målt på ren kode: 10 filer / 12 uavngivne grupper** — se opgave 104 for
+  listen og rækkefølgen. Dækningen er kontrolleret i begge retninger:
+  `/brutto-netto` **er** fundet af scanneren før C72's rettelse og **er ikke**
+  fundet nu, fordi C72 lagde `role="group"` + `aria-labelledby` på den.
+- **Harness-fejl fundet undervejs, samme type som de tre forrige:** en
+  selvlukkende `<input type="radio">` blev lagt på stakken uden en `</…>` at
+  poppe, så den næste `</div>` poppede den *første* knap i stedet for
+  beholderen, og radiogrupper kom ud som 0 fund. Fundet af at køre den
+  **plantede** test — præcis sådan som den er skrevet til at bruges. Selvlukkende
+  knapper tæller nu men lægges ikke på stakken.
+- **Femte målefejl i træk, og den lå i planens egen kandidatliste:**
+  *"Næste kandidater efter C72" punkt 3* hævdede, at `/brok` stadig manglede
+  redaktionelle indgående links, fordi `git grep brok src/app` kun giver
+  `src/app/brok/`. Det er **forkert**: `/procent` linker til `/brok` siden C42,
+  via `relatedMap` i `src/lib/calculator-list.ts:185`, og det er låst af en
+  navngiven regressionsvagt i `calculator-list.test.ts`. Et grep i `src/app`
+  kan ikke se en datatabel, der ligger i `src/lib` — det er præcis den
+  advarsel C42 selv skrev ned ("del altid op efter kilde, ellers måler man
+  katalogens navigation og kalder det kæder"). Kandidaten er lukket her, så
+  ingen iteration brænder tid på den.
+- **Ingen a11y-rettelse landede i denne iteration, bevidst:** tidsbudgettet var
+  45 min, og gaten (lint + 1676 tests + build) er den bindende del. Måleren
+  gør rettelsen billig og datagrundet for næste iteration, hvilket var hele
+  formålet med kandidaten.
+- **Verifikation 2026-09-27 08:50:** `npm run lint` grøn (554 filer),
+  `npm run test` grøn (**1676 tests / 149 filer**, fra 1667 / 148 — de 9 er
+  `group-scan-gate.test.ts`), `npm run build` grøn (**141 sider**).
+  `node scripts/knapgruppe-scan.mjs` uændret **10 filer / 12 uavngivne**;
+  `node scripts/label-a11y-scan.mjs` uændret 23/36 (denne iteration rørte
+  ikke label-klassen).
+- **Landet:** kode + plan i ét commit på `ceo/knapgruppe-scan`.
+- **Mål scanneren igen 2026-10-11** sammen med label-klassens 23/36.
+
+#### 104. [ ] Opgave — luk de 12 uavngivne knapgrupper fra C74's måling
+
+- **Datagrund:** C74's måling, 10 filer / 12 grupper. Prioriter efter GSC og
+  Plausible, ikke efter antal: `/tidsberegner` (72.725 visninger DA, 285
+  besøgende/28d) er størst, og `/boliglaan` + `/opsparing` + `/leasing` +
+  `/timepris` + `/del-regning` følger. Se listen under
+  "Næste kandidater efter C74".
+- **Rettelse:** `role="group"` + `aria-labelledby` på en `<span id>` (eller den
+  eksisterende `<label id>`) der bærer den synlige overskrift — C64/C70/C72's
+  mønster. Hvor gruppen ikke har en synlig overskrift, bruges en `aria-label`
+  på den synlige tekst.
+- **Acceptkriterier:**
+  1. `node scripts/knapgruppe-scan.mjs` giver **0 uavngivne**, og
+     `group-scan-gate.test.ts`'s låste tal er opdateret **i samme commit**.
+  2. `label-a11y.test.tsx` dækker de rettede grupper i DA og SE,
+     verificeret modsvejs.
+  3. Ingen beregningslogik røres.
 
 ### Næste kandidater efter C73
 
