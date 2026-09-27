@@ -283,8 +283,8 @@ export default function TidsBeregner() {
 
           {/* Quick presets */}
           <div className="p-4 bg-blue-50 rounded-lg dark:bg-blue-900/20">
-            <h3 className="font-medium mb-3 dark:text-white flex items-center gap-2"><Zap className="h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden="true" focusable="false" />{l.hurtigeEksempler}</h3>
-            <div className="flex flex-wrap gap-2">
+            <h3 id="tidsberegner-eksempler-gruppe" className="font-medium mb-3 dark:text-white flex items-center gap-2"><Zap className="h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden="true" focusable="false" />{l.hurtigeEksempler}</h3>
+            <div role="group" aria-labelledby="tidsberegner-eksempler-gruppe" className="flex flex-wrap gap-2">
               <button type="button"
                 onClick={() => { setStartTid("08:00"); setSlutTid("16:00"); setFratraekPause(30); }}
                 className="px-3 py-1 bg-white border rounded hover:bg-gray-50 text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-600"

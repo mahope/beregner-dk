@@ -75,6 +75,7 @@ export default function BoliglaanBeregner() {
     da: {
       calcPayment: "Beregn ydelse",
       whatCanIAfford: "Hvad har jeg råd til?",
+      vaelgVisning: "Vælg visning",
       propertyPrice: "Boligpris",
       downPayment: "Udbetaling",
       interestRate: "Rente (% p.a.)",
@@ -139,6 +140,7 @@ export default function BoliglaanBeregner() {
     se: {
       calcPayment: "Beräkna betalning",
       whatCanIAfford: "Vad har jag råd med?",
+      vaelgVisning: "Välj vy",
       propertyPrice: "Bostadens pris",
       downPayment: "Kontantinsats",
       interestRate: "Ränta (% p.a.)",
@@ -203,6 +205,7 @@ export default function BoliglaanBeregner() {
     no: {
       calcPayment: "Beregn betaling",
       whatCanIAfford: "Hva har jeg råd til?",
+      vaelgVisning: "Velg visning",
       propertyPrice: "Boligpris",
       downPayment: "Egenkapital",
       interestRate: "Rente (% p.a.)",
@@ -481,7 +484,7 @@ export default function BoliglaanBeregner() {
   return (
     <div className="space-y-8 print-area">
       {/* Visning toggle */}
-      <div className="flex rounded-lg border border-gray-200 dark:border-gray-600 overflow-hidden">
+      <div role="group" aria-label={l.vaelgVisning} className="flex rounded-lg border border-gray-200 dark:border-gray-600 overflow-hidden">
         <button type="button"
           onClick={() => setVisning("beregner")}
           className={`flex-1 py-3 text-sm font-medium transition-colors ${

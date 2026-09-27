@@ -295,10 +295,10 @@ export default function BarselBeregner() {
           )}
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+            <label id="barsel-du-er-gruppe" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
               {l.youAre}
             </label>
-            <div className="flex gap-4">
+            <div role="group" aria-labelledby="barsel-du-er-gruppe" className="flex gap-4">
               <button type="button"
                 aria-pressed={parent === 'mor'}
                 onClick={() => setParent('mor')}

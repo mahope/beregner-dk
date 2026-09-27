@@ -22,6 +22,7 @@ export default function LeasingBeregner() {
       months: "mdr",
       renteAOP: "Rente (\u00c5OP)",
       udbetaling: "Udbetaling",
+      vaelgVisning: "V\u00e6lg visning",
       leasingberegning: "Leasingberegning",
       sammenlign: "Sammenlign",
       maanedligLeasingydelse: "M\u00e5nedlig leasingydelse",
@@ -51,6 +52,7 @@ export default function LeasingBeregner() {
       months: "m\u00e5n",
       renteAOP: "R\u00e4nta (eff.)",
       udbetaling: "Kontantinsats",
+      vaelgVisning: "V\u00e4lj vy",
       leasingberegning: "Leasingber\u00e4kning",
       sammenlign: "J\u00e4mf\u00f6r",
       maanedligLeasingydelse: "M\u00e5natlig leasingkostnad",
@@ -80,6 +82,7 @@ export default function LeasingBeregner() {
       months: "mnd",
       renteAOP: "Rente (eff.)",
       udbetaling: "Egenkapital",
+      vaelgVisning: "Velg visning",
       leasingberegning: "Leasingberegning",
       sammenlign: "Sammenlign",
       maanedligLeasingydelse: "M\u00e5nedlig leasingkostnad",
@@ -248,7 +251,7 @@ export default function LeasingBeregner() {
           </div>
 
           <div>
-            <div className="flex gap-4">
+            <div role="group" aria-label={l.vaelgVisning} className="flex gap-4">
               <button type="button" onClick={() => setVisning('leasing')} className={`flex-1 py-2.5 rounded-lg border-2 text-sm font-medium transition-all ${visning === 'leasing' ? 'border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' : 'border-gray-200 hover:border-gray-300 dark:border-gray-600 dark:text-gray-200'}`}>
                 {l.leasingberegning}
               </button>

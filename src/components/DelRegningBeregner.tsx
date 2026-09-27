@@ -106,7 +106,7 @@ export default function DelRegningBeregner() {
           </div>
           <div>
             <label htmlFor="delregning-personer" className="block text-xs text-gray-600 dark:text-gray-400 mb-1">{l.people}</label>
-            <div className="flex items-center gap-2">
+            <div role="group" aria-label={l.people} className="flex items-center gap-2">
               <button type="button" aria-label={l.færre} onClick={() => setPeople(Math.max(1, people - 1))}
                 className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 text-lg font-bold">−</button>
               <input id="delregning-personer" type="number" min="1" value={people} onChange={(e) => setPeople(Math.max(1, Number(e.target.value)))}
@@ -116,8 +116,8 @@ export default function DelRegningBeregner() {
             </div>
           </div>
           <div>
-            <label htmlFor="delregning-drikkepenge" className="block text-xs text-gray-600 dark:text-gray-400 mb-1">{l.tip} (%)</label>
-            <div className="flex flex-wrap gap-2 mb-2" role="group" aria-label={`${l.tip} (%)`}>
+            <label id="delregning-drikkepenge-gruppe" htmlFor="delregning-drikkepenge" className="block text-xs text-gray-600 dark:text-gray-400 mb-1">{l.tip} (%)</label>
+            <div className="flex flex-wrap gap-2 mb-2" role="group" aria-labelledby="delregning-drikkepenge-gruppe">
               {TIP_PRESETS.map((p) => (
                 <button key={p} type="button" onClick={() => setTip(p)}
                   className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${

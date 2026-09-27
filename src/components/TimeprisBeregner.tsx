@@ -16,6 +16,7 @@ export default function TimeprisBeregner() {
     da: {
       findTimepris: "Find din timepris",
       seIndtjening: "Se din indtjening",
+      vaelgVisning: "V\u00e6lg visning",
       oensketNettoLoen: "\u00d8nsket nettol\u00f8n pr. m\u00e5ned",
       oensketNettoLoenHelp: "Hvad vil du have udbetalt?",
       arbejdstimerUge: "Arbejdstimer pr. uge",
@@ -74,6 +75,7 @@ export default function TimeprisBeregner() {
     se: {
       findTimepris: "Hitta ditt timpris",
       seIndtjening: "Se din inkomst",
+      vaelgVisning: "V\u00e4lj vy",
       oensketNettoLoen: "\u00d6nskad nettol\u00f6n per m\u00e5nad",
       oensketNettoLoenHelp: "Vad vill du ha utbetalt?",
       arbejdstimerUge: "Arbetstimmar per vecka",
@@ -132,6 +134,7 @@ export default function TimeprisBeregner() {
     no: {
       findTimepris: "Finn din timepris",
       seIndtjening: "Se din inntekt",
+      vaelgVisning: "Velg visning",
       oensketNettoLoen: "\u00d8nsket nettol\u00f8nn per m\u00e5ned",
       oensketNettoLoenHelp: "Hva vil du ha utbetalt?",
       arbejdstimerUge: "Arbeidstimer per uke",
@@ -327,7 +330,7 @@ export default function TimeprisBeregner() {
   return (
     <div className="space-y-8">
       {/* Valg af beregningstype */}
-      <div className="flex rounded-lg border border-gray-200 dark:border-gray-600 overflow-hidden">
+      <div role="group" aria-label={l.vaelgVisning} className="flex rounded-lg border border-gray-200 dark:border-gray-600 overflow-hidden">
         <button type="button"
           onClick={() => setBeregningsType("fraLoen")}
           className={`flex-1 py-3 text-sm font-medium transition-colors ${
