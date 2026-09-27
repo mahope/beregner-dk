@@ -1,3 +1,5 @@
+STATUS: KØ — **C81 er landet: 67 af repoets 160 `metaTitle`-strenge var længere end Googles afkortningsgrænse, fordi hver af dem bar sit eget domænenavn i halen — altså præcis den del, der bliver klippet væk. `/bmi` — sitets næststørste side — havde en 76-tegns-titel på dansk og 77 på svensk.** Køen havde ingen `I GANG`-opgave, og C80 (Node-runtime-kontrakten) var merged og pushet 11:50. **Målt først, rettet så:** 67 titler over 60 tegn (47 da, 29 se, 10 no senere reduceret) — efter at strippe domænenavnet var **kun 6** stadig for lange, og de er håndtrimmet. Alle 160 er nu ≤ 60, og `page-data.test.ts` har **2 nye tests** der låser det pr. alle tre sprog, så en ny side ikke kan genindføre en afkortet titel. **Hvorfor det er CTR og ikke kosmetik:** for en 76-tegns-titel viser Google de første ~60 tegn, altså er det brand-navnet der forsvinder, ikke løftet — titlen *ligner* en færdig title og er det ikke. **En eksisterende test fangede en rigtig fejl i min egen rettelse:** `page-data.test.ts` kræver at BMI-titlen siger "vuxna", og jeg havde skrevet "för **v**oksna" — den test er hele pointen med at have den. **Målefejl nr. 11 (min egen, fundet af testen):** jeg skrev også en for streng ny test ("titlen må aldrig være bare et domænenavn"), som faldt på `/elberegner`s helt korrekte "Elberegner | MinBeregner.dk" — testen var skrevet til at fange noget, der ikke er en fejl, så den er fjernet igen. **To negative målinger fra C80's forfældelighed, der lukker Fase 3's blog-bounce-spørgsmål:** artiklen `/blog/barsel-2026-regler-og-satser` (185 besøgende/28d, bounce 85 %) har **allerede** et svar-først-kort med link til `/barselsdagpenge` 10 linjer inde i brødteksten plus to yderligere beregnerlinks og to relaterede artikler; `/blog/boernepenge-2026-satser-og-regler` har 5 links til `/boernepenge` og 4 til hver `/boligstoette` og `/barselsdagpenge`. **Høj bounce på en side, der besvarer sit spørgsmål i første skærmbillede, er den forventede form, ikke et manglende link** — samme fejlklasse som C68's og C74's målefejl.
+
 STATUS: KØ — **C80 er landet: projektet erklærer nu hvilken Node-version det kræver — `engines.node` + `.nvmrc` + en test der låser alle tre erklæringer mod hinanden. Det er præcis den fejl, der brændte jordemoderstudy ned 23. august (Next.js 16 installeret, bygserveren kørte Node 18, og det viste sig først i produktion), og `~/.local/oxloop/AFHAENGIGHEDER.md` har stået med `engines: NEJ, nvmrc: nej` for beregner-dk siden 23/8.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den), og de tre åbne deploynoter (C76, C77, C78) har første vindue **12:30**, som ikke var passeret kl. 11:42 — så intet kunne verificeres. **Før valget blev kørt tre målinger, fordi Fase 3's topprioritet er CTR, ikke kodehygiejne, og to af dem gav negative svar der er værd at have skrevet ned.** (1) **`page-data.ts` har nul dansk lækage på beraknare.se:** alle tre locale-blokke (da 79 sider, no 28, se 53) scannet på `æ`/`ø` — svensk skriver aldrig nogen af dem, så reglen kan ikke give falske fund — gav **0 / 0 / 0**. Det er første gang denne fil er målt; `locale-leak.mjs` springer den over, fordi den *er* en oversættelsestabel, altså af præcis den grund C68 skrev om. (2) **Ingen højtrafiksides titl løfter en et andet tal end sin egen:** `curl` på alle otte — 1.887/13.227 på `/renteberegner`, "450 kr."/"0,90 kr. pr. km" på `/braendstof`, 20 m² på `/kvadratmeter`, 0,88 på `/promille`, 3/4 + 0,75 på `/brok`, 1.780/2.759 på `/kalorier`, "36 år, 6 måneder og 10 dage" på `/alder` — **12 af 12 fund**. (3) **Alle 81 calculatør-slugs har page-data i hvert sprog de serveres på** — de 23 eneste undtagelser ligger alle i `no`, som ikke serveres (C79's 404-bevis). **To målefejl i træk fra mig selv (nr. 9 og 10), begge fundet i samme minut:** nr. 9 var et regex der sammenlignede `"/dato"` med slugs uden skråstreg og meldte **243** sider som manglende metadata — dvs. *hele sættet* page-data så ud som manglende; nr. 10 var `Number("^15.5.25".replace(/^[^\d]*/, ""))` → `NaN`, altså en Next-version-tjek der aldrig kunne fejle. Begse fangede den **plantede** del af testen, som er præcis hvorfor den er skrevet. **Målingen der førte til opgaven:** `npm audit` → **0 sårbarheder** (scan-et fra 23/8 sagde 1 kritisk + 7 høj — de er lukket siden), men **Dockerfile bruger `node:22-alpine` mens `package.json` ikke erklærede noget og `.nvmrc` ikke fandtes**. Se `DEPLOY OK`-noten for merge-ref.
 
 STATUS: KØ — **C79 er landet: syv deploy-noter lukket ved indholdskontrol, og en rigtig ny fejl fundet undervejs — `beregner.no` svarer HTTP 404 på beregnersider, så C65's norske halvdel kan *aldrig* verificeres.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den). Klokken var 11:21, så **12:30-vinduet var ikke passeret** og C76/C77/C78 måtte ligge åbne — men **ni noter fra 00:41–05:05** var ældre end det seneste *passerede* vindue (07:30), og de var iterationens pligter. **Lukket `DEPLOY OK` ved indhold:** **C49** (`/tidszone` har sommertids-noten på begge domæner, den gamle "bruger standard tidsforskelle" står **0** steder, Tokyo 20:00 og Sydney 21:00 fra 12 dansk — korrekt for 27. september), **C50** (`/dato`'s felter står `2026-09-27` og `2026-10-27` — dagens dato og **præcis én måned** senere, `href="/alder"` findes, SE har "Antal dagar"/"Veckor"/"Helgdagar"), **C51** (alle seks DA-strenge + alle tre SE-strenge i `svar-først`-tabellen), **C53** (`/procent`s standardtilstand siger **"25,00% af 100"** med komma), **C59** (`/alder` har **13.343** — de 13.342 der stadig står, er statiske eksempler — og kopier-sætningen "36 år, 6 måneder og 10 dage pr. 25. september 2026" findes i DA, den svenske sætning på SE), **C65** (SE har "Kylskåp"/"Dammsugare"/"Torktumlare"/"Glödlampa" og **0** danske apparatnavne, mens minberegner.dk stadig har "Køleskab"/"Glødepære") og **C66** (DA 8× "Athen", SE 8× "Aten"). **Delvist lukket:** C56 — brudtallene står med komma ("3,5"/"4,5" i ren tekst), men Kopier-strengen kræver en browser. **Ny fejl, fundet fordi jeg ville verificere C65's NO-side:** `curl -sI https://beregner.no/elberegner` svarer **HTTP 404**. Det er samme årsag som C37's gamle advarsel ("`beregner.no`-DELEN ER UBrugELIG") og som opgave 97's `BLOCKED`-status — og det er derfor `getAllDomainConfigs()` eksplicit skjuler `beregner.no` i `hiddenDomains`. **Konklusionen er derfor skrevet ned, så ingen senere iteration spilder tid på den:** C65's norske halvdel er **ikke** en fejl, den er **uverificerbar**, fordi domænet ikke serverer siden. **To målefejl i træk fra mig selv — nr. 7 og 8 — begge fundet ved at krydschecke mod live-HTML'en i stedet for at tro et grep.** (1) Jeg søgte `hreflang=` og fandt **ingenting**, og var tæt på at "rette" en ikke-eksisterende fejl: Next.js skriver **`hrefLang`** med stort L. HTML-attributnavne er case-insensitive, så hreflang'en er korrekt — og den er faktisk helt rigtig: `da` → minberegner.dk, `sv` → beraknare.se, `x-default` → minberegner.dk, på **begge** domæner, bygget af `buildPageMetadata` + `getAllDomainConfigs()`. (2) Jeg greb `dage-til[a-z/-]*` og så `/dage-til/1-december` som **manglende i begge sitemapmer** — regex'en klippede slugs ved **cifret**. Siden står i begge, og svarer 200 på begge domæner. **Bemærk at det er præcis den fælde C74 skrev ned** ("et grep i `src/app` kan ikke se en datatabel i `src/lib`") — her som et grep der ikke kan se et slug med et tal i. **Fire ting jeg bekræftede er *allerede* færdige, så næste iteration ikke laver dem igen:** hreflang (som ovenfor), SE-titler på `/dato` og `/tidsberegner` (svenske og svar-først), `/bmi` og `/su`s metadata/canonical/sitemap (rene — **faldet er derfor ikke en defekt**, se nyt kandidatpunkt 6), og barsel-bloggen linker allerede til `/barselsdagpenge`, `/barselsplanlaegger` og `/boernepenge` (så **bouncen på 85 % er ikke "manglende links"**). **Ingen kode rørt** — leverancen er otte lukkede noter og en renset kandidatliste; gaten er derfor uændret grøn fra C78 (lint 555 filer, 1709 tests / 150 filer, build 141 sider), og det er sagt *uden* at have kørt den i denne iteration. Se `DEPLOY OK 2026-09-27 11:25` i VERIFICÉR DEPLOY-loggen.
@@ -10501,6 +10503,47 @@ tekst på `/tidszone`), men Kopier-strengen med datoen kræver en browser.
   tests / 150 filer, build 141 sider); den er *ikke* kørt i denne iteration,
   fordi ingen kildefil blev ændret.
 
+#### 110. [x] FÆRDIG 2026-09-27 — C81 — 67 titler over Googles afkortningsgrænse: domænenavnet i halen er præcis det, der klippet væk
+
+- **Målt før rettelsen:** **67 af 160** `metaTitle` over 60 tegn — 47 da, 29 se,
+  10 no. Længste: `/sparemaal` 77, `/konfirmation` 76, **`/bmi` 76 (da) / 77 (se)
+  / 75 (no)**, `/motion-kalorier` 75, `/temperatur` 74, `/ejendomsvaerdiskat` 74.
+  `curl` på de 15 mest trafikrelevante sider viste **14 af 15 under 60** — det er
+  altså *ikke* de store sider, det er hale-klassen, og det er derfor en måling
+  af hele tabellen, ikke en håndtælling af top-siderne.
+- **Rettelsen:** domænenavnet (`| MinBeregner.dk`, `| Beräknare.se`,
+  `| Beregner.no`) er fjernet fra de titler der var for lange. **Google afkorter
+  ved ca. 60 tegn, så for en 76-tegns-titel forsvinder brand-navnet og ikke
+  løftet** — ændringen er derfor ikke et nyt løfte, men en titel der fortæller
+  hvad den faktisk viser. 60 titler beholder domænenavnet, fordi de er korte
+  nok til at det kan vises. Efter stripningen var **6** stadig for lange; de er
+  håndtrimmet (SE `/bmi`, `/temperatur`, `/aegloesning`, `/afkast`, NO `/bmi`,
+  `/konfirmation`).
+- **Harness:** `page-data.test.ts` får en `describe("metaTitle-længde")` med
+  **2 tests** — ingen titel over 60 tegn i **da/se/no**, og at alle tre sprog
+  faktisk er i målingen (en dansk-only liste ville være grøn, mens 29 svenske
+  titler brændte af samme grund).
+- **En eksisterende test fangede en fejl i min egen rettelse:** BMI-titlen skal
+  sige "vuxna" (`page-data.test.ts:35`), og jeg havde skrevet "för voksna".
+  **Målefejl nr. 11:** min egen nye test "titlen må aldrig være bare et
+  domænenavn" faldt på `/elberegner`s korrekte "Elberegner | MinBeregner.dk" —
+  den testede noget, der ikke er en fejl, så den er fjernet.
+- **MÅL (skriv før ændringen, mål igen 2026-10-11):** `/bmi` 967 besøgende/28d
+  DA, bounce 4 % (faldet 1268 → 967). `/bmi` er **ikke** i GSC's top-15, så
+  effekten måles i Plausible og i en ny GSC-læsning. `/tidszone` 24.485
+  visninger (uændret titel), `/temperatur`, `/proteinbehov`, `/sparemaal` og
+  `/konfirmation` har hver især under 100 besøgende/28d — de er ændret for
+  **invariantens** skyld, ikke for deres egen trafiks.
+- **Gate:** lint (556 filer), **1717 tests / 151 filer** (fra 1715 / 151), build
+  (**141 sider**). ⚠️ **Observeret flake:** ét `npm run test` umiddelbart efter
+  redigeringen gav **5 fejl i 2 filer**; tre efterfølgende fulde kørsel er grønne
+  (1717/1717 to gange efter hinanden). Samme mønster som C70's note om
+  `MomsBeregner` — hvis det optræder igen, skal de to filer navngives.
+- **Negativ måling der lukker Fase 3's blog-punkt:** bouncen på
+  `/blog/barsel-2026-regler-og-satser` (85 %) er **ikke** manglende links —
+  artiklen har et svar-først-kort med link til `/barselsdagpenge` 10 linjer inde,
+  to beregnerlinks mere og to relaterede artikler. Se `❓ Til Mads`-punktet.
+
 #### 109. [x] FÆRDIG 2026-09-27 — C80 — erklær Node-runtime-kontrakten: `engines.node`, `.nvmrc` og en test der holder de tre sammen
 
 - **Datagrund:** `~/.local/oxloop/AFHAENGIGHEDER.md` (scan 2026-08-23) står med
@@ -10595,3 +10638,43 @@ tekst på `/tidszone`), men Kopier-strengen med datoen kræver en browser.
   **Verificér byg-loggen, ikke kun HTTP 200:** dokploy-buildet må ikke vise
   `npm EBADENGINE` (det ville betyde at `engines` og billedets Node er uenig),
   og `https://minberegner.dk/api/health` skal svare `status: ok`.
+
+- ⏳ **VERIFICÉR DEPLOY: C81 — 67 `metaTitle` var længere end Googles
+  afkortningsgrænse (brand-navnet i halen), herunder `/bmi` 76/77/75 tegn.**
+  Rettet ved at fjerne domænenavnet fra de for lange titler og håndtrimme de
+  6 der stadig var for lange; `page-data.test.ts` har 2 nye tests der låser ≤ 60
+  tegn i da/se/no. **Verificér indhold, ikke HTTP 200:**
+  1. `curl -s https://minberegner.dk/bmi | grep -o '<title>[^<]*</title>'` skal
+     give en titel på **højst 60 tegn** (før: 76 med `| MinBeregner.dk` i halen).
+  2. Samme på `https://beraknare.se/bmi` (før 77) og `https://beregner.no/bmi`
+     (før 75).
+  3. Titlen skal **stadig** sige "vuxna"/"voksne"-vokset: `page-data.test.ts:35`
+     låser det, så en grøn test er beviset. Kode + plan i ét commit på
+     `ceo/titellangde`; første kandidatvindue **2026-09-27 17:30** (denne merge
+     sker efter 12:30-vinduet).
+
+### ❓ Til Mads — de fem deploy-noter der kræver en browser (C52, C55, C56, C57, C60)
+
+> Disse fem kan **ikke** lukkes med `curl`, fordi de handler om den tekst
+> **Kopiér** og **Del** lægger i klipbordet — den ligger i knappens
+> `navigator.clipboard`-kald, ikke i DOM'en. Det er derfor de har ligget åbne
+> siden i morges. En gennemgang tager ca. 10 minutter: åbn hver side, tryk
+> **Kopiér**, og sæt resultatet ind her. **Ingen kode ændres.**
+>
+> 1. **/moms** (C52) — indtast 1.250 kr. med 25 % moms → **Kopiér**. Skrivet
+>    tekst skal indeholde **1.250 kr. og 250 kr. moms** (begge tal), og ordet
+>    "Tillæg" må **ikke** stå (det er det danske svar på "Tillägg").
+> 2. **/dato** (C55) — indtast 1. jan. 2026 → 31. dec. 2026 → **Kopiér**.
+>    Skrevet tekst skal sige **365 dage** og **nævne begge datoer**.
+> 3. **/tidszone** (C56) — **Kopiér** ved en by med DST-skift. Skrevet tekst skal
+>    bruge **komma** i brudtallene ("3,5" ikke "3.5") og skal **nævne datoen**,
+>    fordi samme tal skifter om til vinter.
+> 4. **/renteberegner** (C57) — **Kopiér**. Skrevet tekst skal indeholde
+>    **rentesatsen, låntype og ydelsen** (fx "5 %", "annuitetslån", "1.887 kr."),
+>    ikke bare ét råtal.
+> 5. **/promille** (C60) — 4 øl, 80 kg, mand, 0 timer → **Kopiér**. Skrevet
+>    tekst skal indeholde **alle fire input og promillen** ("4 genstande, 80 kg,
+>    Mand, 0 timer siden: 0,88 ‰"), ikke kun promillen.
+>
+> Når de fem er skrevet her, kan næste iteration lukke dem med `DEPLOY OK` uden
+> at røre koden.
