@@ -7834,7 +7834,7 @@ landmark=lån, piggybank=opsparing osv.).
 
 ## VERIFICÉR DEPLOY-log
 
-### ⏳ **VERIFICÉR DEPLOY: C97 — de ni `/dage-til/*`-titler er under Googles afkortningsgrænse i begge sprog (62-66 tegn DA, 61-67 SE → 46-52).** Kode + plan i ét commit på `ceo/dage-til-titler`. Første kandidatvindue **2026-09-27 17:30**. HTTP 200 beviser intet, det er `<title>` der ændrer sig:
+### ⏳ **VERIFICÉR DEPLOY: C97 — de ni `/dage-til/*`-titler er under Googles afkortningsgrænse i begge sprog (62-66 tegn DA, 61-67 SE → 46-52).** Kode `69ffb83`, merge `32d2c14` 2026-09-27 16:11 CEST på branch `ceo/dage-til-titler`. Første kandidatvindue **2026-09-27 17:30**. HTTP 200 beviser intet, det er `<title>` der ændrer sig:
    1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
    2. `curl -s https://minberegner.dk/dage-til/grundlovsdag` skal have **"Hvor mange dage er der til grundlovsdag?"** i `<title>` og **0** fund på **"MinBeregner.dk"** i `<title>` (resten af siden er urørt).
    3. Samme for `https://beraknare.se/dagar-till/nationaldagen` med **"Hur många dagar är det till nationaldagen?"** og 0 på "Beräknare.se" i `<title>`.
