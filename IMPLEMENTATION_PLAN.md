@@ -10310,7 +10310,8 @@ den kategori er **ikke** et fund:
   tests i DA + SE, **verificeret modsvejs: 10 af 11 falder** med de gamle
   komponenter (den 11. er svensks `LoenBeregner`-test, som var grøn før
   rettelsen fordi den kun testede *fravær* af punktum).
-- **Landet:** kode på `ceo/decimal-komma-2`.
+- **Landet:** kode `24b108d` på `ceo/decimal-komma-2`, merge `a4f26a4`
+  2026-09-27 10:43 CEST; første kandidatvindue **2026-09-27 12:30**.
 - **Gate:** lint (555 filer), **1704 tests / 150 filer** (fra 1693 / 149),
   build (141 sider). Ingen beregningslogik rørt.
 - **MÅL:** `/boliglaan` og `/lon-efter-skat` har ingen baseline i
