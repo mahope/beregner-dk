@@ -7,6 +7,7 @@ import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { useLocale } from "@/components/LocaleProvider";
+import { formatNumber } from "@/lib/format";
 import { billigsteNatVindue, gennemsnitsPris, type PriceArea } from "@/lib/energi/elpriser";
 import { elbilForudsætninger } from "@/lib/braendstof";
 import type { ElprisData } from "@/lib/energi/server";
@@ -241,7 +242,7 @@ export default function ElbilBenzinBeregner({ elprisData = null, nu }: Props = {
               {r.payback !== null && (
                 <div className="flex justify-between border-t pt-1.5 dark:border-gray-600">
                   <span className="text-gray-600 dark:text-gray-400">{l.payback}</span>
-                  <span className="font-medium dark:text-gray-200">{r.payback.toFixed(1)} {l.yearsUnit}</span>
+                  <span className="font-medium dark:text-gray-200">{formatNumber(r.payback, locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 })} {l.yearsUnit}</span>
                 </div>
               )}
             </div>

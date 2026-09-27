@@ -130,6 +130,10 @@ export default function BoliglaanBeregner() {
       fixed5: "5% fast (30 år)",
       fShort: "F-kort",
       bankLoan: "Banklån",
+      rangeFixed4: "ca. 3,5-4,0%",
+      rangeFixed5: "ca. 4,5-5,0%",
+      rangeFShort: "ca. 3,5-4,0%",
+      rangeBankLoan: "ca. 5,0-7,0%",
       ratesDisclaimer: "Renterne er vejledende. Kontakt din bank for aktuelle tilbud.",
       year10: "10 år",
       year15: "15 år",
@@ -195,6 +199,10 @@ export default function BoliglaanBeregner() {
       fixed5: "5 % fast (30 år)",
       fShort: "Rörlig",
       bankLoan: "Banklån",
+      rangeFixed4: "ca. 3,5-4,0 %",
+      rangeFixed5: "ca. 4,5-5,0 %",
+      rangeFShort: "ca. 3,5-4,0 %",
+      rangeBankLoan: "ca. 5,0-7,0 %",
       ratesDisclaimer: "Räntorna är vägledande. Kontakta din bank för aktuella erbjudanden.",
       year10: "10 år",
       year15: "15 år",
@@ -260,6 +268,10 @@ export default function BoliglaanBeregner() {
       fixed5: "5 % fast (30 år)",
       fShort: "Flytende",
       bankLoan: "Banklån",
+      rangeFixed4: "ca. 3,5-4,0 %",
+      rangeFixed5: "ca. 4,5-5,0 %",
+      rangeFShort: "ca. 3,5-4,0 %",
+      rangeBankLoan: "ca. 5,0-7,0 %",
       ratesDisclaimer: "Rentene er veiledende. Kontakt banken din for aktuelle tilbud.",
       year10: "10 år",
       year15: "15 år",
@@ -450,13 +462,13 @@ export default function BoliglaanBeregner() {
       samletBetaling: Math.round(samletBetaling),
       samletRenter: Math.round(samletRenter),
       skattefradrag: Math.round(skattefradrag),
-      belaaningsgrad: belaaningsgrad.toFixed(1),
+      belaaningsgrad: formatNumber(belaaningsgrad, locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 }),
       vurdering,
       maanedligeOmkostninger,
       maanedligeOmkostningerEfterSkat,
       amortisering,
     };
-  }, [boligpris, udbetaling, rente, loebetid, laanType, bidragssats, ejendomsskat, forsikring, ejerforening, l]);
+  }, [boligpris, udbetaling, rente, loebetid, laanType, bidragssats, ejendomsskat, forsikring, ejerforening, l, locale]);
 
   // Omvendt beregning: "Hvad har jeg råd til?"
   const raadTilResultat = useMemo(() => {
@@ -535,7 +547,7 @@ export default function BoliglaanBeregner() {
                 max={boligpris}
                 step={10000}
                 unit={currSuffix}
-                helpText={`${formatKr(udbetaling)} (${((udbetaling / boligpris) * 100).toFixed(1)}%)`}
+                helpText={`${formatKr(udbetaling)} (${formatNumber((udbetaling / boligpris) * 100, locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%)`}
               />
 
               <InputField
@@ -924,19 +936,19 @@ export default function BoliglaanBeregner() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
           <div>
             <span className="text-blue-600 dark:text-blue-400 font-medium">{l.fixed4}</span>
-            <p className="dark:text-gray-300">ca. 3.5-4.0%</p>
+            <p className="dark:text-gray-300">{l.rangeFixed4}</p>
           </div>
           <div>
             <span className="text-blue-600 dark:text-blue-400 font-medium">{l.fixed5}</span>
-            <p className="dark:text-gray-300">ca. 4.5-5.0%</p>
+            <p className="dark:text-gray-300">{l.rangeFixed5}</p>
           </div>
           <div>
             <span className="text-blue-600 dark:text-blue-400 font-medium">{l.fShort}</span>
-            <p className="dark:text-gray-300">ca. 3.5-4.0%</p>
+            <p className="dark:text-gray-300">{l.rangeFShort}</p>
           </div>
           <div>
             <span className="text-blue-600 dark:text-blue-400 font-medium">{l.bankLoan}</span>
-            <p className="dark:text-gray-300">ca. 5.0-7.0%</p>
+            <p className="dark:text-gray-300">{l.rangeBankLoan}</p>
           </div>
         </div>
         <p className="text-xs text-blue-700 dark:text-blue-300 mt-2">{l.ratesDisclaimer}</p>

@@ -8,7 +8,7 @@ import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { SATSER_2026 } from "@/lib/satser-2026";
 import { useLocale } from '@/components/LocaleProvider';
-import { formatCurrency, getCurrencySuffix } from '@/lib/format';
+import { formatCurrency, formatNumber, getCurrencySuffix } from '@/lib/format';
 
 type Relation =
   | "aegtefaelle"
@@ -79,6 +79,7 @@ function harTillaeg(relation: Relation): boolean {
 export default function ArveafgiftBeregner() {
   const { locale } = useLocale();
   const formatKr = (amount: number) => formatCurrency(amount, locale, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+  const formatPct = (pct: number) => formatNumber(pct, locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
   const [arvebeloeb, setArvebeloeb] = useState<string>("");
   const [relation, setRelation] = useState<Relation>("barn");
   const hasLoadedUrl = useRef(false);
@@ -349,7 +350,7 @@ export default function ArveafgiftBeregner() {
                 Effektiv afgiftssats
               </p>
               <p className="text-2xl font-bold dark:text-white">
-                {resultat.effektivSats.toFixed(1)}%
+                {formatPct(resultat.effektivSats)}%
               </p>
             </div>
 
@@ -375,13 +376,13 @@ export default function ArveafgiftBeregner() {
         <div className="flex justify-center gap-3">
           <CopyResultButton text={relation === "aegtefaelle"
             ? `Ingen afgift - ${formatKr(resultat.arvebeloeb)} arves afgiftsfrit`
-            : `Afgift: ${formatKr(resultat.samletAfgift)} (${resultat.effektivSats.toFixed(1)}%) - Arv efter afgift: ${formatKr(resultat.arvEfterAfgift)}`} />
+            : `Afgift: ${formatKr(resultat.samletAfgift)} (${formatPct(resultat.effektivSats)}%) - Arv efter afgift: ${formatKr(resultat.arvEfterAfgift)}`} />
           <ShareCalculation
             getShareableLink={getShareableLink}
             calculatorName="Arveafgiftberegner"
             resultSummary={relation === "aegtefaelle"
               ? `Ingen afgift - ${formatKr(resultat.arvebeloeb)} arves afgiftsfrit`
-              : `Afgift: ${formatKr(resultat.samletAfgift)} (${resultat.effektivSats.toFixed(1)}%) - Arv efter afgift: ${formatKr(resultat.arvEfterAfgift)}`}
+              : `Afgift: ${formatKr(resultat.samletAfgift)} (${formatPct(resultat.effektivSats)}%) - Arv efter afgift: ${formatKr(resultat.arvEfterAfgift)}`}
           />
         </div>
       )}

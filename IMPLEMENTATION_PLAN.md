@@ -1,4 +1,4 @@
-STATUS: KØ — **C76 er landet: otte beregnersider skrev tal med punktum i dansk og svensk tekst, og `/bil`s pris pr. km stod også i den tekst brugeren kopierer og deler — den sjættende iteration i træk hvor klassen "hvad skriver den tekst, brugeren kopierer?" har fundet en reel fejl.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den), og de åbne deploynoter (C73 08:29, C74 08:46, C75 09:25) har første kandidatvindue **12:30**, så intet kunne verificeres i denne iteration. **Valget var planens egen kandidat #3** — "de 10 øvrige komponenter med `toFixed(2)`" — fordi det er den eneste resterende klasse i køen med et dokumenteret fund i hver eneste iteration, og fordi Phase 3's egen regel siger at kodehygiejne kun tages når den *blokerer* noget: her gjorde den det, fordi `/bil`s tal havnede i `CopyResultButton` **og** i `ShareCalculation`s `resultSummary`. **Rettet (6 filer, 13 `toFixed`-steder):** `/kvadratmeter` (formel-linjen for alle fire geometriske former — "3.5 × 2.5 = 8.75 m²" bliver "3,5 × 2,5 = 8,75 m²"), `/bil` (`prKm` — nåede Kopier **og** Del), `/billaan` (`apr`, `prisPrKm`), `/forbrugslaan` (`apr`, `samletAar`), `/boliglaan` (samlet rente "1.90% p.a." → "1,90 %"), `/elberegner` (6 steder). **Mønstret er C53's:** `formatNumber` fra `src/lib/format.ts` med samme decimalantal som det `toFixed` erstattede, så *kun* decimaltegnet ændrer sig. **Fire fund ud over decimaltegnet:** (1) **`/kvadratmeter` havde sin egen locale-følsomme `formatNumber` lokalt i komponenten** (linje 326) — den var allerede korrekt og brugte 10 steder (bla. `CopyResultButton` og `ShareCalculation`), men lå *nedenfor* det `useMemo` der bygger formlen, så den kunne ikke bruges der. Den er flyttet ovenfor, og `formel` bruger den nu. **Fælden var en TDZ-fejl jeg selv skabte:** min første version importerede `formatNumber` fra `@/lib/format` og skyggegør den lokale binding med samme navn, så `useMemo` læste `Cannot access 'formatNumber2' before initialization`. Fundet af den kørende test, ikke ved at læse diffen. (2) **`/elberegner` skrev "kr" hardkodet** i elafgift-leddet, mens de to naboer bruger `getCurrencySuffix(locale)` — altså "0.253 kr" på den danske side, der ellers skriver "kr.". (3) **`toFixed(0)`-kaldene fik tusindtalsseparator gratis** ved at gå gennem `formatNumber`: `/elberegner`s årlige kWh/pris går fra "12030" til "12.030". (4) **Klassen er 47 steder i repoet, ikke 10** — `grep -rn "toFixed(" src/ | grep -v test` giver **47**, så planens kandidat #3 undervurderer den. Den fulde resterende liste står under opgave 105. **Målingen er ærlig om sin egen dødde kant:** `toFixed(0)` kan aldrig lave et decimaltegn, så de steder i `/kalorier`, `/timepris` og `/opsparing` med `toFixed(0)` er **ikke** fund. **Ingen ny måler/gate blev skrevet i denne iteration** — 45-minutters budgettet gik til de 13 rettelser og gaten, så de resterende fund er skrevet som **opgave 105** med fuld liste i stedet for som et script. Det er en reel mangel, ikke en valgt afvejning: indtil scanneren findes skal næste agent selv køre `grep -rn "toFixed(" src/ | grep -v test`. **Gate grøn:** lint (554 filer), **1693 tests / 149 filer** (uændret fra C75) og build (141 sider). Kode `d701486` på `ceo/decimal-komma`; se opgave 105.
+STATUS: KØ — **C77 er landet: de ni næste `toFixed`-steder er rettet, og fundet var en rigtig svensk lækage som hverken C76's liste eller `locale-leak.mjs` kunne se: `/boliglaan`s fire rentespænd ("ca. 3.5-4.0%") var hardkodede *uden for* `labels`-objektet, så beraknare.se viste dansk notation med punktum på en side der ellers skriver "3 000 000 kr" med mellemrum.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den), og alle åbne deploynoter er fra 08:29/08:46/09:25/09:48 med første kandidatvindue **12:30**, så intet kunne verificeres i denne iteration. **Valget var C76's egen liste, i dens egen rækkefølge** — `/arveafgift` først, fordi det var det eneste punkt hvor fundet nåede Kopier- og Del-teksten. **Rettet (6 filer, 10 steder):** `ArveafgiftBeregner` (`effektivSats` — displayet *og* begge del-strenge), `BoliglaanBeregner` (`belaaningsgrad` — **var en streng i resultat-objektet**, så `locale` måtte ind i memoens deps; `l` er `labels[locale]` og dækker det ikke alene — plus `helpText` på udbetalingsfeltet), `ElbilBenzinBeregner` (`payback`), `LoenBeregner` (`effektivSkat`), `LaaneBeregner` (`aopAnnuitet`) og `OpsparingsBeregner` (rente-andel — hvor **fallback-værdien var en hårdkodet `"0.0"`**, nu `formatPct(0)`, ellers ville siden have vist "0,0" det ene sted og "0.0" det andet). **Mønstret er C76's:** `formatNumber` med samme decimalantal som det erstattede `toFixed`, så *kun* decimaltegnet ændrer sig. **Testens første version faldt på de netop fundne rentespænd *og* på tusindtalsseparatoren** i "3.000.000", fordi den scannede hele container-teksten med `/\d\.\d/`; den blev skrevet om til at slå fast på konkrete værdier, hvilket er skarpere og ikke kan give falske fund på korrekt notation. **To fejl i testen, fundet af at køre den:** feltet blev slået op med `getAllByRole("textbox")[0]` (nu `#arvebeloeb` på id), og jeg havde antaget den effektive arveafgiftssats var "15,0 %" — den er **9,1 %**, fordi boafgiften kun beregnes af arven *over* bundfradraget på 392.300 kr. Testen faldt altså på **min egen** regnefejl, ikke på koden. **`decimal-komma.test.tsx` er de 11 tests, C76 lod være at skrive** — 11 i DA + SE, **verificeret modsvejs: 10 af 11 falder** med de gamle komponenter. **Den nye lækage er den sjette målefejl i træk, og igen af samme art som C70/C73:** en streng uden for `labels` er usynlig for både `locale-leak.mjs` og `label-a11y-scan.mjs`, fordi de læser oversættelses-tabellerne — en scanner for denne klasse må derfor ikke kun søge i `labels`. **Der er stadig ingen scanner** for `toFixed`-klassen (34 → 24 steder), bevidst: den skal have undtagelse for geo-koordinaterne, `.replace(".", ",")` og `toFixed(0)`. **En fejl jeg selv lavede undervejs, som næste agent bør kende:** et `python3`-heredoc-script til at sætte STATUS-linjen **skrev hele planen på ét linje og ødelagde 780 KB af den**; `git checkout -- IMPLEMENTATION_PLAN.md` reddede den, fordi planen endnu ikke var committet. Skriv store ændringer i `IMPLEMENTATION_PLAN.md` med `edit`, ikke med et shell-script. Gate grøn: lint (555 filer), **1704 tests / 150 filer** (fra 1693 / 149) og build (141 sider). Kode + plan i ét commit på `ceo/decimal-komma-2`; se opgave 106.
 
 ---
 
@@ -10256,7 +10256,75 @@ den kategori er **ikke** et fund:
   `TopskatBeregner.tsx:24,25` — `KOMMUNE_SNIT_PCT` o.l. med `toFixed(3)`.
 - **Rækkefølge:** `/arveafgift` først (fundet i Kopier- og Del-teksten),
   så `/elbil` + `/boliglaan` + `/lon-efter-skat` + `/laane`, så
-  `/opsparing`.
+  `/opsparing`. **Taget i C77** — se opgave 106.
+
+#### 106. [x] FÆRDIG 2026-09-27 — C77 — de ni næste `toFixed`-steder, og en rigtig svensk lækage som måleren ikke kunne se
+
+- **Datagrund:** C76's egen måling, rækkefølgen efter GSC.
+  `/boliglaan` er en af sitets mest trafikrelevante låneregnesider,
+  `/lon-efter-skat` findes på **to** domæner, `/arveafgift` ligger i
+  C73/C76's trafiktabel (90-104 besøgende/28d). Planen havde ingen `I GANG`
+  (97 er `BLOCKED`, 98 afhænger af den), og alle åbne deploynoter er fra
+  08:29/08:46/09:25/09:48 med første vindue **12:30**, så intet kunne
+  verificeres i denne iteration.
+- **Rettet (6 filer, 10 steder), mønstret er C76's:** `formatNumber` fra
+  `src/lib/format` med **samme decimalantal** som det `toFixed` erstattede,
+  så kun decimaltegnet ændrer sig. En `formatPct`-hjælper er lagt ind i de
+  fire komponenter, der ikke allerede havde en sådan, fordi de ellers
+  skriver den samme options-genvej fire gange.
+  - `ArveafgiftBeregner` — `effektivSats` i displayet **og i begge
+    Kopier/Del-strenge** (altså den tekst brugeren tager med ud)
+  - `BoliglaanBeregner` — `belaaningsgrad` (**var en streng i
+    resultat-objektet**, så den krævede `locale` i memoens deps — de blev
+    tilføjet; `l` er `labels[locale]`, så den dækker det ikke alene) og
+    `helpText` på udbetalingsfeltet
+  - `ElbilBenzinBeregner` — `payback` ("6.4 år")
+  - `LoenBeregner` — `effektivSkat`
+  - `LaaneBeregner` — `aopAnnuitet`
+  - `OpsparingsBeregner` — rente-andel, inkl. **fallback-værdien**, der var
+    en **hårdkodet `"0.0"`** — den er nu `formatPct(0)`. Ellers ville
+    `/opsparing` have vist "0,0" det ene sted og "0.0" det andet.
+- **Den reel fejl var den slags, C76's liste ikke havde set: `/boliglaan`s
+  fire rentespænd var hardkodede *uden for* `labels`-objektet.**
+  "ca. 3.5-4.0%", "ca. 4.5-5.0%", "ca. 3.5-4.0%", "ca. 5.0-7.0%" stod som
+  rå JSX ved linje 927-940, så **beraknare.se viste dansk notation med
+  punktum** på en side der ellers skriver "3 000 000 kr" med mellemrum.
+  Nye `rangeFixed4`/`rangeFixed5`/`rangeFShort`/`rangeBankLoan`-nøgler i alle
+  tre sprog, da svensk og norsk begge bruger komma. **Dette er den sjette
+  målefejl i træk, og igen af samme art som C70/C73:** en streng uden for
+  `labels` er usynlig for `locale-leak.mjs` og for `label-a11y-scan.mjs`,
+  fordi begge læser oversættelses-tabellerne.
+- **Fundet af den nye test, ikke ved at læse diffen:** testens første
+  version scannede hele container-teksten med `/\d\.\d/` og faldt på
+  **tusindtalsseparatoren** i "3.000.000" *og* på de netop fundne
+  rentespænd. Den blev skrevet om til at slå fast på **konkrete værdier**
+  ("9,1%", "5,0%", "ca. 3,5-4,0 %"), som er skarpere end et regex og ikke
+  kan give falske fund på korrekt notation.
+- **To fejl i testen, fundet af at køre den:** (1) feltet blev slået op med
+  `getAllByRole("textbox")[0]`, hvilket er en antagelse om felt-rækkefølgen;
+  nu hentes `#arvebeloeb` på id. (2) Jeg antog den effektive arveafgiftssats
+  var "15,0 %" — den er **9,1 %**, fordi boafgift kun beregnes af arven
+  *over* bundfradraget på 392.300 kr. Testen faldt altså på **min egen**
+  regnefejl, ikke på koden.
+- **`decimal-komma.test.tsx` er de 11 tests, C76 lod være at skrive.** 11
+  tests i DA + SE, **verificeret modsvejs: 10 af 11 falder** med de gamle
+  komponenter (den 11. er svensks `LoenBeregner`-test, som var grøn før
+  rettelsen fordi den kun testede *fravær* af punktum).
+- **Landet:** kode på `ceo/decimal-komma-2`.
+- **Gate:** lint (555 filer), **1704 tests / 150 filer** (fra 1693 / 149),
+  build (141 sider). Ingen beregningslogik rørt.
+- **MÅL:** `/boliglaan` og `/lon-efter-skat` har ingen baseline i
+  snapshottet; `/arveafgift` 90 besøgende/28d pr. 2026-09-27. Ændringen
+  forventes **ikke** at løfte CTR — den retter viste tal. Verificér ved
+  indhold efter deploy: `curl -s https://beraknare.se/boliglaan | grep -c
+  'ca. 3,5-4,0'` skal være ≥ 1, og samme på minberegner.dk (uden mellemrum
+  før %). Mål igen **2026-10-11**.
+- **Mangler stadig:** der er **ingen scanner** for `toFixed`-klassen. C76
+  skrev det, C77 skrev testen i stedet, og det er bevidst valgt: de 34 → 24
+  resterende steder er håndtællede, og en scanner skal have undtagelse for
+  geo-koordinaterne (`rute.ts`, `RuteAfstand.tsx`), `.replace(".", ",")`-kaldene
+  og `toFixed(0)`. Indtil den findes: `grep -rn "toFixed(" src/ | grep -v
+  "\.test\."` efterfulgt af at `toFixed(0)`-kaldene sorteres fra.
 
 #### 104. [x] FÆRDIG 2026-09-27 — C75 — luk de 12 uavngivne knapgrupper fra C74's måling
 
@@ -10265,6 +10333,23 @@ den kategori er **ikke** et fund:
   commit. Læs C75-STATUS.
 
 ### VERIFICÉR DEPLOY — åbne noter (2026-09-27 09:30)
+
+- ⏳ **VERIFICÉR DEPLOY: C77 — ni procenter skrev decimal med punktum i dansk
+  og svensk tekst, og `/boliglaan`s fire rentespænd var danske på
+  beraknare.se.** Rettet: `/arveafgift` (`effektivSats` — nåede Kopier **og**
+  Del), `/boliglaan` (`belaaningsgrad` + `helpText`), `/elbil` (`payback`),
+  `/lon-efter-skat` (`effektivSkat`), `/laane` (`aopAnnuitet`),
+  `/opsparing` (rente-andel). **Verificér indhold, ikke HTTP 200:**
+  1. `curl -s https://beraknare.se/boliglaan | grep -c 'ca. 3,5-4,0 %'` skal
+     være ≥ 1 — før stod der **"ca. 3.5-4.0%"** med punktum på den svenske
+     side.
+  2. Samme curl på **https://minberegner.dk/boliglaan** skal finde
+     `ca. 3,5-4,0%` (dansk, uden mellemrum før %) — den danske notation må
+     ikke have taget skade.
+  3. `/arveafgift` med et arvebeløb: den effektive sats skal stå som
+     **"9,1 %"** (boafgift kun over bundfradraget på 392.300 kr.), ikke
+     "9.1%". Kode + plan i ét commit på `ceo/decimal-komma-2`; første
+     kandidatvindue **2026-09-27 12:30**.
 
 - ⏳ **VERIFICÉR DEPLOY: C76 — otte beregnersider skrev tal med punktum i
   dansk/svensk tekst.** `/kvadratmeter` (formelen for alle fire geometriske

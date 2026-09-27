@@ -6,7 +6,7 @@ import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { useLocale } from "@/components/LocaleProvider";
-import { formatCurrency, getCurrencySuffix } from "@/lib/format";
+import { formatCurrency, formatNumber, getCurrencySuffix } from "@/lib/format";
 
 type LaaneType = "annuitet" | "serie" | "sammenlign";
 
@@ -273,6 +273,7 @@ export default function LaaneBeregner() {
   }, [hovedstol, loebetidAar, renteSats, stiftelsesgebyr, rente2, loebetid2]);
 
   const formatKr = (amount: number) => formatCurrency(amount, locale, { maximumFractionDigits: 0, minimumFractionDigits: 0 });
+  const formatPct = (pct: number) => formatNumber(pct, locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 
   return (
     <div className="space-y-8">
@@ -446,7 +447,7 @@ export default function LaaneBeregner() {
               <p className="text-sm text-gray-500 dark:text-gray-400">{l.totalRepayment}</p>
             </div>
             <div className="p-4 bg-white border rounded-lg text-center dark:bg-gray-800 dark:border-gray-700">
-              <p className="text-xl font-bold text-gray-700 dark:text-gray-200">{beregning.aopAnnuitet.toFixed(1)}%</p>
+              <p className="text-xl font-bold text-gray-700 dark:text-gray-200">{formatPct(beregning.aopAnnuitet)}%</p>
               <p className="text-sm text-gray-500 dark:text-gray-400">{l.aprApprox}</p>
             </div>
           </div>
