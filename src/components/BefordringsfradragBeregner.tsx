@@ -146,32 +146,32 @@ export default function BefordringsfradragBeregner() {
       {visRute && <RuteAfstand onAfstand={brugAfstand} />}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className={labelCls}>{l.kmPerDag}</label>
+          <label htmlFor="befordringsfradrag-kmperdag" className={labelCls}>{l.kmPerDag}</label>
           <div className="relative">
-            <input type="number" min="0" max="400" step="1" value={kmPerDag} onChange={(e) => setKmPerDag(Number(e.target.value))} className={inputCls} />
+            <input id="befordringsfradrag-kmperdag" type="number" min="0" max="400" step="1" value={kmPerDag} onChange={(e) => setKmPerDag(Number(e.target.value))} className={inputCls} />
             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">km</span>
           </div>
         </div>
 
         <div>
-          <label className={labelCls}>{l.arbejdsdage}</label>
+          <label htmlFor="befordringsfradrag-arbejdsdage" className={labelCls}>{l.arbejdsdage}</label>
           <div className="relative">
-            <input type="number" min="0" max="365" step="1" value={arbejdsdage} onChange={(e) => setArbejdsdage(Number(e.target.value))} className={inputCls} />
+            <input id="befordringsfradrag-arbejdsdage" type="number" min="0" max="365" step="1" value={arbejdsdage} onChange={(e) => setArbejdsdage(Number(e.target.value))} className={inputCls} />
             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">{l.dage}</span>
           </div>
         </div>
 
         <div>
-          <label className={labelCls}>{l.indkomst}</label>
+          <label htmlFor="befordringsfradrag-indkomst" className={labelCls}>{l.indkomst}</label>
           <div className="relative">
-            <input type="number" min="0" step="1000" value={indkomst} onChange={(e) => setIndkomst(Number(e.target.value))} className={inputCls} />
+            <input id="befordringsfradrag-indkomst" type="number" min="0" step="1000" value={indkomst} onChange={(e) => setIndkomst(Number(e.target.value))} className={inputCls} />
             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">kr</span>
           </div>
         </div>
 
         <div className="flex items-end">
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" checked={yderkommune} onChange={(e) => setYderkommune(e.target.checked)} className="w-4 h-4 rounded border-gray-300" />
+          <label htmlFor="befordringsfradrag-yderkommune" className="flex items-center gap-2 cursor-pointer">
+            <input id="befordringsfradrag-yderkommune" type="checkbox" checked={yderkommune} onChange={(e) => setYderkommune(e.target.checked)} className="w-4 h-4 rounded border-gray-300" />
             <span className="text-sm text-gray-700 dark:text-gray-200">{l.yderkommune}</span>
           </label>
         </div>
@@ -183,22 +183,22 @@ export default function BefordringsfradragBeregner() {
         </summary>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
           <div>
-            <label className={labelCls}>{l.broStorebaelt}</label>
+            <label htmlFor="befordringsfradrag-brostorebaelt" className={labelCls}>{l.broStorebaelt}</label>
             <div className="relative">
-              <input type="number" min="0" step="1" value={broStorebaelt} onChange={(e) => setBroStorebaelt(Number(e.target.value))} className={inputCls} />
+              <input id="befordringsfradrag-brostorebaelt" type="number" min="0" step="1" value={broStorebaelt} onChange={(e) => setBroStorebaelt(Number(e.target.value))} className={inputCls} />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">{l.ture}</span>
             </div>
           </div>
           <div>
-            <label className={labelCls}>{l.broOeresund}</label>
+            <label htmlFor="befordringsfradrag-brooeresund" className={labelCls}>{l.broOeresund}</label>
             <div className="relative">
-              <input type="number" min="0" step="1" value={broOeresund} onChange={(e) => setBroOeresund(Number(e.target.value))} className={inputCls} />
+              <input id="befordringsfradrag-brooeresund" type="number" min="0" step="1" value={broOeresund} onChange={(e) => setBroOeresund(Number(e.target.value))} className={inputCls} />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">{l.ture}</span>
             </div>
           </div>
           <div className="flex items-end">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" checked={broOffentlig} onChange={(e) => setBroOffentlig(e.target.checked)} className="w-4 h-4 rounded border-gray-300" />
+            <label htmlFor="befordringsfradrag-brooffentlig" className="flex items-center gap-2 cursor-pointer">
+              <input id="befordringsfradrag-brooffentlig" type="checkbox" checked={broOffentlig} onChange={(e) => setBroOffentlig(e.target.checked)} className="w-4 h-4 rounded border-gray-300" />
               <span className="text-sm text-gray-700 dark:text-gray-200">{l.broOffentlig}</span>
             </label>
           </div>

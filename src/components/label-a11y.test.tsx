@@ -17,17 +17,23 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, test, vi } from "vitest";
 import AlderBeregner from "./AlderBeregner";
+import BefordringsfradragBeregner from "./BefordringsfradragBeregner";
+import BoliglaanBeregner from "./BoliglaanBeregner";
 import BraendstofBeregner from "./BraendstofBeregner";
 import BrokBeregner from "./BrokBeregner";
 import DatoBeregner from "./DatoBeregner";
+import GaeldsfriBeregner from "./GaeldsfriBeregner";
+import HuslejeBudgetBeregner from "./HuslejeBudgetBeregner";
 import KalorieBeregner from "./KalorieBeregner";
 import KvadratmeterBeregner from "./KvadratmeterBeregner";
+import LaaneBeregner from "./LaaneBeregner";
 import MomsBeregner from "./MomsBeregner";
 import PromilleBeregner from "./PromilleBeregner";
 import RentefradragBeregner from "./RentefradragBeregner";
 import RenteBeregner from "./RenteBeregner";
 import TidsBeregner from "./TidsBeregner";
 import TidszoneBeregner from "./TidszoneBeregner";
+import ValutaBeregner from "./ValutaBeregner";
 import { LocaleProvider } from "./LocaleProvider";
 import { getDomainConfig } from "@/lib/domain-config";
 
@@ -108,7 +114,11 @@ function expectEveryFieldHasAName(container: HTMLElement) {
     // `getAllByLabelText`, ikke `getByLabelText`: to felter på samme side kan
     // have samme synlige tekst (fx to "Pris pr. m²" på /kvadratmeter), og det
     // er lovligt. Det skal bare ikke fejle på dem.
-    expect(screen.getAllByLabelText(new RegExp(escapeRegExp(label?.textContent?.trim() ?? "")))).toContain(felt);
+    // Mellemrumskolonnen skal kollapses først: etiketten kan stå over flere
+    // linjer i JSX, og det testing-library gør ved opslaget, skal vores regex
+    // også gøre — ellers kan vi ikke finde etiketten, der lige så vel er fundet.
+    const etiket = (label?.textContent ?? "").replace(/\s+/g, " ").trim();
+    expect(screen.getAllByLabelText(new RegExp(escapeRegExp(etiket)))).toContain(felt);
   }
 }
 
@@ -253,6 +263,76 @@ describe("Feltnavn for skærmlæsere — de fire mest besøgte beregnere", () =>
 
         expectFieldsAreNamed(container);
         expect(container.querySelectorAll("input").length).toBe(5);
+      });
+
+      test("/laane: beløb, rente, løbetid og gebyr har navn i alle tre lånetyper", () => {
+        const { container } = renderIn(locale, LaaneBeregner);
+        const laanetyper = Array.from(container.querySelectorAll("button")).slice(0, 3) as HTMLElement[];
+        expect(laanetyper.length).toBe(3);
+
+        const setMuligeFelter = new Set<string>();
+        for (const laanetype of laanetyper) {
+          fireEvent.click(laanetype);
+          expectFieldsAreNamed(container);
+          registrerFelter(container, setMuligeFelter);
+        }
+        // Sammenligningstilstanden har to ekstra felter (rente og løbetid til det
+        // andet lån). Annuitets- og serietilstanden har præcis de samme fire
+        // felter, så der er to sæt id'er, ikke tre — og det er netop derfor
+        // sættene måles på id og ikke på antal.
+        expect(setMuligeFelter.size).toBe(2);
+        expect(container.querySelectorAll('[role="group"][aria-labelledby]').length).toBe(1);
+      });
+
+      test("/huslejebudget: elleve beløbsfelter har navn", () => {
+        const { container } = renderIn(locale, HuslejeBudgetBeregner);
+        expectFieldsAreNamed(container);
+        expect(container.querySelectorAll("input").length).toBe(11);
+      });
+
+      test("/befordringsfradrag: km, arbejdsdage, indkomst, yderkommune og broer har navn", () => {
+        const { container } = renderIn(locale, BefordringsfradragBeregner);
+        expectFieldsAreNamed(container);
+        // Syv egne felter. Rutevælgeren kommer oveni på de domæner, hvor den
+        // er slået til, og dens felter skal også have navn — derfor tæller vi
+        // "mindst syv" og lader expectFieldsAreNamed dække resten.
+        expect(container.querySelectorAll("input").length).toBeGreaterThanOrEqual(7);
+        expect(container.querySelectorAll("input[type=checkbox]").length).toBe(2);
+      });
+
+      test("/boliglaan: løbetid har navn og lånetypen er en navngiven gruppe", () => {
+        const { container } = renderIn(locale, BoliglaanBeregner);
+        expectFieldsAreNamed(container);
+        expect(container.querySelectorAll("select").length).toBeGreaterThanOrEqual(1);
+        expect(container.querySelectorAll('[role="group"][aria-labelledby]').length).toBeGreaterThanOrEqual(1);
+      });
+
+      test("/valuta: fra, til og beløb har navn", () => {
+        const { container } = renderIn(locale, ValutaBeregner);
+        expectFieldsAreNamed(container);
+        expect(container.querySelectorAll("select").length).toBe(2);
+        expect(container.querySelectorAll("input").length).toBe(1);
+      });
+
+      test("/gaeldsfri: hver gældspost har navn, også den der tilføjes", () => {
+        const { container } = renderIn(locale, GaeldsfriBeregner);
+        expectFieldsAreNamed(container);
+        expect(container.querySelectorAll('[role="group"][aria-labelledby]').length).toBe(2);
+
+        const tilfoej = Array.from(container.querySelectorAll("button")).find((knap) =>
+          (knap.textContent ?? "").includes(locale === "se" ? "Lägg till" : "Tilføj"),
+        ) as HTMLElement | undefined;
+        expect(tilfoej).toBeDefined();
+        fireEvent.click(tilfoej as HTMLElement);
+
+        expectFieldsAreNamed(container);
+        // To poster á fire felter: den anden posts felter må ikke hedde det
+        // samme som den førsts — de får nummeret i aria-label'en.
+        const navne = Array.from(container.querySelectorAll("input")).map((felt) =>
+          felt.getAttribute("aria-label"),
+        );
+        expect(new Set(navne).size).toBe(navne.length);
+        expect(container.querySelectorAll("input").length).toBe(9);
       });
     });
   }

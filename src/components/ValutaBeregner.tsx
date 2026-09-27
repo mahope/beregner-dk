@@ -261,8 +261,8 @@ export default function ValutaBeregner({ officielleKurser = null }: Props) {
       {/* Input sektion */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
         <div>
-          <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.fra}</label>
-          <select
+          <label htmlFor="valuta-fra" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.fra}</label>
+          <select id="valuta-fra"
             value={fraValuta}
             onChange={(e) => setFraValuta(e.target.value)}
             className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg text-lg bg-white dark:bg-gray-800 dark:text-white"
@@ -288,8 +288,8 @@ export default function ValutaBeregner({ officielleKurser = null }: Props) {
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.til}</label>
-          <select
+          <label htmlFor="valuta-til" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.til}</label>
+          <select id="valuta-til"
             value={tilValuta}
             onChange={(e) => setTilValuta(e.target.value)}
             className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg text-lg bg-white dark:bg-gray-800 dark:text-white"
@@ -305,9 +305,9 @@ export default function ValutaBeregner({ officielleKurser = null }: Props) {
 
       {/* Bel\u00f8b input */}
       <div className="max-w-md mx-auto">
-        <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.beloebI} {fraValuta}</label>
+        <label htmlFor="valuta-beloebi" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.beloebI} {fraValuta}</label>
         <div className="relative">
-          <input
+          <input id="valuta-beloebi"
             type="number"
             min="0"
             step="any"
