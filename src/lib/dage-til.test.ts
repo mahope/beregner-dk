@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 import {
   DAGE_TIL_EVENTS,
+  dageTilbageIAaret,
   daysBetween,
   easterSunday,
   formatTargetDate,
@@ -224,5 +225,42 @@ describe("dato-anker", () => {
       expect(days).toBeGreaterThanOrEqual(0);
       expect(days).toBeLessThan(400);
     }
+  });
+});
+
+describe("dageTilbageIAaret", () => {
+  test("tæller dagene til og med 31. december", () => {
+    // 27. september 2026 → 31. december 2026
+    const svar = dageTilbageIAaret(new Date("2026-09-27T10:00:00Z"));
+    expect(svar.year).toBe(2026);
+    expect(svar.dage).toBe(95);
+    expect(svar.uger).toBe(13);
+    expect(svar.dageEfterUger).toBe(4);
+    expect(svar.sidsteDag.toISOString()).toBe("2026-12-31T00:00:00.000Z");
+  });
+
+  test("står på 0 nytårsaften, fordi det sidste døgn er 31. december", () => {
+    const svar = dageTilbageIAaret(new Date("2026-12-31T23:59:00Z"));
+    expect(svar.dage).toBe(0);
+    expect(svar.uger).toBe(0);
+  });
+
+  test("tæller 365 dage fra 1. januar i et almindeligt år", () => {
+    const svar = dageTilbageIAaret(new Date("2026-01-01T00:00:00Z"));
+    expect(svar.dage).toBe(364);
+    expect(dageTilbageIAaret(new Date("2026-01-02T00:00:00Z")).dage).toBe(363);
+  });
+
+  test("tæller 366 dage i et skudår, fordi 29. februar er med", () => {
+    const skud = dageTilbageIAaret(new Date("2028-01-01T00:00:00Z"));
+    expect(skud.year).toBe(2028);
+    expect(skud.dage).toBe(365);
+    expect(dageTilbageIAaret(new Date("2028-03-01T00:00:00Z")).dage).toBe(305);
+  });
+
+  test("tager ikke hensyn til klokkeslættet i døgnet", () => {
+    const morgen = dageTilbageIAaret(new Date("2026-09-27T00:01:00Z"));
+    const aftenaar = dageTilbageIAaret(new Date("2026-09-27T23:59:00Z"));
+    expect(morgen.dage).toBe(aftenaar.dage);
   });
 });

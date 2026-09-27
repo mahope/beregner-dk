@@ -8,7 +8,7 @@ import RelatedCalculators from "@/components/RelatedCalculators";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Link from "next/link";
-import { getDageTilEvents, getDageTilPrefix, isDageTilLocale } from "@/lib/dage-til";
+import { dageTilbageIAaret, getDageTilEvents, getDageTilPrefix, isDageTilLocale } from "@/lib/dage-til";
 
 export async function generateMetadata() {
   return generatePageMetadata("dato");
@@ -28,6 +28,12 @@ export default async function DatoPage() {
         question: event[locale].copy.question,
       }))
     : [];
+  // "hvor mange dage er der tilbage af 2026?" (227 visninger, pos. 5 i dansk
+  // GSC) og "dagar till 31 dec" (367 visninger i svensk) er to søgninger om
+  // årets sidste dag — ikke om nytårsdag. Siden havde nul forekomster af
+  // "tilbage af", så taleren faldt hele vejen. Tallet regnes fra dagens dato,
+  // altså er den samme server-renderede side svar på dagens spørgsmål.
+  const tilbage = dageTilbageIAaret(new Date());
 
   return (
     <div>
@@ -93,6 +99,20 @@ export default async function DatoPage() {
           dage du har levet, og hvornår du fylder år. Vil du finde ud af, hvor gammel du
           var på en bestemt dato, kan du bruge{" "}
           <Link href="/alder">aldersberegneren</Link>.
+        </p>
+
+        <h2>Hvor mange dage er der tilbage af {tilbage.year}?</h2>
+        <p>
+          Der er <strong>{tilbage.dage} dage tilbage af {tilbage.year}</strong> —{" "}
+          altså {tilbage.uger} uger og {tilbage.dageEfterUger} dage. Det er den
+          officielle kalender, ikke kalorier: årets sidste dag er 31. december,
+          så tællingen står på 0 nytårsaften og begynder forfra 1. januar.
+        </p>
+        <p>
+          Er du mere interesseret i datoen end i årstiden, så tæller{" "}
+          <a href="/dage-til/1-december">dagene til 1. december</a> og{" "}
+          <a href="/dage-til/nytaarsaften">nytårsaften</a> — de er forskellige
+          spørgsmål med forskellige tal.
         </p>
 
         <h2>Nyttige datofakta</h2>
@@ -176,6 +196,20 @@ export default async function DatoPage() {
         <p>
           Beräkna din <strong>exakta ålder</strong> i år, månader och dagar. Se också hur många
           dagar du har levt, och när du fyller år.
+        </p>
+
+        <h2>Hur många dagar är det kvar av {tilbage.year}?</h2>
+        <p>
+          Det är <strong>{tilbage.dage} dagar kvar av {tilbage.year}</strong> —
+          alltså {tilbage.uger} veckor och {tilbage.dageEfterUger} dagar. Det
+          gäller kalenderåret, inte räkenskapsåret: årets sista dag är 31
+          december, så räknaren står på 0 nyårsafton och börjar om 1 januari.
+        </p>
+        <p>
+          Vill du räkna till ett bestämt datum i stället för till årsskiftet
+          finns <a href="/dagar-till/1-december">dagarna till 1 december</a> och{" "}
+          <a href="/dagar-till/nyarsafton">nyårsafton</a> — olika frågor med
+          olika siffror.
         </p>
 
         <h2>Nyttiga datumfakta</h2>
