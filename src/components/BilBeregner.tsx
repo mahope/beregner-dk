@@ -7,7 +7,7 @@ import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { useLocale } from "@/components/LocaleProvider";
-import { formatCurrency, getCurrencySuffix } from "@/lib/format";
+import { formatCurrency, formatNumber, getCurrencySuffix } from "@/lib/format";
 
 type Braendstoftype = "benzin" | "diesel" | "el" | "hybrid";
 
@@ -241,9 +241,9 @@ export default function BilBeregner() {
       daek: Math.round(daek),
       aarligt: Math.round(aarligtTotal),
       maanedligt: Math.round(maanedligtTotal),
-      prKm: prKm.toFixed(2),
+      prKm: formatNumber(prKm, locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
     };
-  }, [bilpris, braendstof, kmPrLiter, kmPrAar, braendstofpris, forsikring, vaerditab, kwh100km, elpris]);
+  }, [bilpris, braendstof, kmPrLiter, kmPrAar, braendstofpris, forsikring, vaerditab, kwh100km, elpris, locale]);
 
   const formatKr = (amount: number) => formatCurrency(amount, locale, { maximumFractionDigits: 0, minimumFractionDigits: 0 });
 

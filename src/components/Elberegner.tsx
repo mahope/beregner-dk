@@ -6,7 +6,7 @@ import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { useLocale } from "@/components/LocaleProvider";
-import { getCurrencySuffix } from "@/lib/format";
+import { formatNumber, getCurrencySuffix } from "@/lib/format";
 import { gennemsnitsPris, type PriceArea } from "@/lib/energi/elpriser";
 import type { ElprisData } from "@/lib/energi/server";
 import ElprisGraf, { kr2 } from "@/components/energi/ElprisGraf";
@@ -306,18 +306,18 @@ export default function Elberegner({ elprisData = null, nu }: Props = {}) {
     const momsAndel = 100 - elspotAndel - transportAndel - afgiftAndel;
 
     return {
-      dagligtKwh: dagligtKwh.toFixed(2),
-      maanedligtKwh: maanedligtKwh.toFixed(1),
-      aarligtKwh: aarligtKwh.toFixed(0),
-      dagligPris: (dagligtKwh * elpris).toFixed(2),
-      maanedligPris: (maanedligtKwh * elpris).toFixed(0),
-      aarligPris: (aarligtKwh * elpris).toFixed(0),
+      dagligtKwh: formatNumber(dagligtKwh, locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+      maanedligtKwh: formatNumber(maanedligtKwh, locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 }),
+      aarligtKwh: formatNumber(aarligtKwh, locale, { maximumFractionDigits: 0 }),
+      dagligPris: formatNumber(dagligtKwh * elpris, locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+      maanedligPris: formatNumber(maanedligtKwh * elpris, locale, { maximumFractionDigits: 0 }),
+      aarligPris: formatNumber(aarligtKwh * elpris, locale, { maximumFractionDigits: 0 }),
       perApparat,
       gennemsnitKwh,
       forskelPct,
       prisAndele: { elspot: elspotAndel, transport: transportAndel, afgift: afgiftAndel, moms: momsAndel },
     };
-  }, [apparater, elpris, husstandType, l.unavngivet]);
+  }, [apparater, elpris, husstandType, l.unavngivet, locale]);
 
   const husstandLabels: Record<string, string> = {
     lejlighed1: l.lejlighed1,
@@ -616,15 +616,15 @@ export default function Elberegner({ elprisData = null, nu }: Props = {}) {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
           <div className="flex items-center gap-1">
             <span className="w-3 h-3 rounded-sm bg-blue-500 inline-block" />
-            <span className="dark:text-gray-300">{l.spotpris} ({ELPRIS_KOMPONENTER.elspot.toFixed(2)} {getCurrencySuffix(locale)})</span>
+            <span className="dark:text-gray-300">{l.spotpris} ({formatNumber(ELPRIS_KOMPONENTER.elspot, locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {getCurrencySuffix(locale)})</span>
           </div>
           <div className="flex items-center gap-1">
             <span className="w-3 h-3 rounded-sm bg-yellow-500 inline-block" />
-            <span className="dark:text-gray-300">{l.transportLabel} ({ELPRIS_KOMPONENTER.transport.toFixed(2)} {getCurrencySuffix(locale)})</span>
+            <span className="dark:text-gray-300">{l.transportLabel} ({formatNumber(ELPRIS_KOMPONENTER.transport, locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {getCurrencySuffix(locale)})</span>
           </div>
           <div className="flex items-center gap-1">
             <span className="w-3 h-3 rounded-sm bg-red-400 inline-block" />
-            <span className="dark:text-gray-300">{l.elafgift} ({ELPRIS_KOMPONENTER.elafgift.toFixed(3)} kr)</span>
+            <span className="dark:text-gray-300">{l.elafgift} ({formatNumber(ELPRIS_KOMPONENTER.elafgift, locale, { minimumFractionDigits: 3, maximumFractionDigits: 3 })} {getCurrencySuffix(locale)})</span>
           </div>
           <div className="flex items-center gap-1">
             <span className="w-3 h-3 rounded-sm bg-purple-400 inline-block" />

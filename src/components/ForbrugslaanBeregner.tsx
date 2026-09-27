@@ -9,7 +9,7 @@ import { CopyResultButton, ResetButton } from "@/components/ui";
 import { useCalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { useLocale } from "@/components/LocaleProvider";
-import { formatCurrency, getCurrencySuffix } from "@/lib/format";
+import { formatCurrency, formatNumber, getCurrencySuffix } from "@/lib/format";
 import { adtractionLink } from "@/lib/adtraction";
 
 interface AffiliateLink {
@@ -263,10 +263,10 @@ export default function ForbrugslaanBeregner() {
       maanedligYdelse: Math.round(maanedligYdelse),
       samletBelob: Math.round(samletBelob),
       samletRente: Math.round(samletRente),
-      apr: apr.toFixed(2),
-      samletAar: samletAar.toFixed(1),
+      apr: formatNumber(apr, locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+      samletAar: formatNumber(samletAar, locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 }),
     };
-  }, [laanebelob, loebetid, rentesats]);
+  }, [laanebelob, loebetid, rentesats, locale]);
 
   const maanedligYdelseFormatted = formatKr(result.maanedligYdelse);
   const samletBelobFormatted = formatKr(result.samletBelob);

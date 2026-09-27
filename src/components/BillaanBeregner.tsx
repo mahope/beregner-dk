@@ -9,7 +9,7 @@ import { CopyResultButton, ResetButton } from "@/components/ui";
 import { useCalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { useLocale } from "@/components/LocaleProvider";
-import { formatCurrency, getCurrencySuffix } from "@/lib/format";
+import { formatCurrency, formatNumber, getCurrencySuffix } from "@/lib/format";
 import { adtractionLink } from "@/lib/adtraction";
 
 interface AffiliateLink {
@@ -274,10 +274,10 @@ export default function BillaanBeregner() {
       maanedligYdelse: Math.round(maanedligYdelse),
       samletBelob: Math.round(samletBelob),
       samletRente: Math.round(samletRente),
-      apr: apr.toFixed(2),
-      prisPrKm: prisPrKm.toFixed(2),
+      apr: formatNumber(apr, locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+      prisPrKm: formatNumber(prisPrKm, locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
     };
-  }, [bilpris, udbetaling, loebetid, rentesats]);
+  }, [bilpris, udbetaling, loebetid, rentesats, locale]);
 
   const maanedligYdelseFormatted = formatKr(result.maanedligYdelse);
   const samletBelobFormatted = formatKr(result.samletBelob);

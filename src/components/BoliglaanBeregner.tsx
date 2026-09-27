@@ -10,7 +10,7 @@ import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { useLocale } from "@/components/LocaleProvider";
-import { formatCurrency, getCurrencySuffix } from "@/lib/format";
+import { formatCurrency, formatNumber, getCurrencySuffix } from "@/lib/format";
 
 type LaanType = "fastforrentet" | "variabel" | "afdragsfrit";
 type Visning = "beregner" | "raadtil";
@@ -700,7 +700,9 @@ export default function BoliglaanBeregner() {
                   </div>
                   <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                     <p className="text-sm text-gray-500 dark:text-gray-400">{l.totalRate}</p>
-                    <p className="font-bold text-lg dark:text-white">{(rente + bidragssats).toFixed(2)}% p.a.</p>
+                    <p className="font-bold text-lg dark:text-white">
+                      {formatNumber(rente + bidragssats, locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}% p.a.
+                    </p>
                   </div>
                 </div>
 
