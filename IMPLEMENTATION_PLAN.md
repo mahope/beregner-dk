@@ -1,5 +1,31 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
+STATUS: KØ — **C62 er landet: otte af sitets mest besøgte beregnere havde
+formularfelter uden navn for skærmlæsere, og del-dialogen havde et navnløst
+`<label>` på hver eneste side.** Køen var tom (alle 89 opgaver færdige, intet
+`I GANG`), og planens egen kandidat #1 efter C61 var resten af label-klassen
+ordnet efter GSC-visninger. Rettet er `/moms` (23.426 visninger), `/kvadratmeter`
+(20.959), `/braendstof` (16.580), `/renteberegner` (13.623), `/kalorier`
+(12.332), `/alder` (6.013), `/brok` (4.640) og `/rentefradrag` (4.556) —
+**102.129 månedlige visninger**, de otte mest trafikfarlige rester i klassen.
+Det er ikke kosmetik: 35 talfelter var `<input>` uden `id` under et `<label>`
+uden `for`, og 13 knapgrupper (brændstof, geometrisk form, køn, mål, lånetype,
+civilstand, lån) havde intet navn. `/rentefradrag`s lånfelter havde kun
+placeholdere, som forsvinder ved indtastning. **Klassen er målt ordentligt
+først:** et script der parker `<label`-åbningstaggen tæller **181 ubundne labels
+i 65 filer** mod planens tidligere "41 filer / 129" — efter C62 er der **146 i
+56 filer** tilbage. Fire fund ud over bindingerne: `/kvadratmeter` har to
+felter med **samme synlige tekst** ("Pris pr. m²"), `/rentefradrag`s aria-labels
+skal findes igen efter "Tilføj lån", del-dialogens `socialLabel` er en
+**fælles** fejl der rammer alle beregnere, og C61's bevis på dækning var for
+svagt (antal felter pr. tilstand) — nu måles hvilke `id`'er der er i DOM'en,
+fordi `/dato`s fire tilstande og `/braendstof`s to pristyper har lige mange
+felter. `label-a11y.test.tsx` er udvidet fra 9 til **25 tests** i DA og SE,
+**verificeret modsvejs: 16 af 25 falder** med de gamle komponenter. Gate grøn:
+lint (549 filer), **1562 tests / 144 filer** (fra 1546 / 144) og build (141
+sider). Kode + plan i ét commit på `ceo/labels-runde2`; første kandidatvindue
+**2026-09-27 07:30**. Se opgave 90.
+
 STATUS: KØ — **C61 er landet: de tre mest besøgte sider på sitet havde
 formularfelter uden navn for skærmlæsere.** Køen var tom (alle 88 opgaver
 færdige, intet `I GANG`), og planens næste kandidat #1 var C59's a11y-fund
@@ -7649,6 +7675,32 @@ landmark=lån, piggybank=opsparing osv.).
     - Gate grøn: lint ok, 280/280 tests, build ok (128 pages).
 
 ## VERIFICÉR DEPLOY-log
+- ⏳ **ÅBEN — C62 otte beregnere til: 35 talfelter og 13 knapgrupper uden navn
+  for skærmlæsere, plus et navnløst `<label>` i del-dialogen på ALLE
+  beregnere — kode + plan i ét commit på branch `ceo/labels-runde2`, kode
+  `KODE_SHA`, merge `MERGE_SHA` 2026-09-27 04:2x CEST. Første
+  kandidatvindue **2026-09-27 07:30**.**
+  **HTTP 200 beviser intet her:** ændringen er `htmlFor`/`id`/`aria-labelledby`
+  i klient-renderede felter, så den skal verificeres i DOM'en. I DevTools på
+  hver af de otte sider: `document.querySelectorAll('label:not([for])').length`
+  → skal være **0** (`/moms`, `/kvadratmeter`, `/renteberegner` og `/alder` er
+  de fire med mindst chatter). Bemærk at `role="group"`-grupperne **skal** have
+  et `id` på `<label>`, så de tælles med; et `<label>` med hverken `for` eller
+  `id` er det, der skal være 0.
+  1. `/braendstof`: 9 felter + 2 grupper. Vælg **el** → 3 felter; **benzin** →
+      skift mellem turpris / km-pris / forbrug → hver sit sæt.
+  2. `/kvadratmeter`: 9 felter + 1 gruppe, fire former. Rektangel 2, cirkel 1,
+      trekant 2, trapez 3. Beregningen skal give **samme** m² som før.
+  3. `/moms`: 1-2 grupper. I `se` kommer "Momssats"-gruppen til med 25/12/6 %.
+  4. `/renteberegner`: lånebeløb 500.000, 5 %, 20 år → **samme** ydelse som før.
+  5. `/kalorier`: køn, aktivitetsniveau og mål er tre navngivne grupper.
+  6. `/alder`: fødselsdato + beregningsdato har begge navn.
+  7. `/brok` og `/rentefradrag`: tæller/nævner hhv. lånfelter har navn. På
+      `/rentefradrag` skal "Tilføj lån" give **fem** navngivne felter.
+  8. Del-dialogen på **alle** sider: "Del på sociale medier" skal være en
+      `role="group"` med `aria-labelledby`.
+  9. `beraknare.se` skal have de samme bindinger. `https://minberegner.dk/api/health`
+      skal svare `status: ok`.
 - ⏳ **ÅBEN — C61 `/dato`, `/tidsberegner`, `/tidszone` og `/promille`: 16
   formularfelter uden navn for skærmlæsere — kode + plan i ét commit på branch
   `ceo/label-trafiksider`, kode `8604c03`, merge `8c2dceb` 2026-09-27 03:09
@@ -8632,3 +8684,73 @@ landmark=lån, piggybank=opsparing osv.).
   (se punkt 9 i køen: C44 fandt indholdet i orden, kun placeringen mangler).
   Den a11y-rettelse og en evt. CTR-rettelse på samme side skal **ikke** blandes
   i én iteration, ellers ved man ikke hvilken der virkede.
+
+#### 90. [x] FÆRDIG 2026-09-27 — C62 — otte beregnere til: 35 formularfelter og 13 knapgrupper uden navn på otte af sitets mest besøgte sider
+
+- **Datagrund:** køen var tom (alle 89 opgaver færdige, intet `I GANG`), og
+  planens egen kandidat #1 efter C61 var resten af label-klassen, ordnet efter
+  GSC-visninger. Rettet er de otte komponenter med flest visninger blandt dem,
+  samlet **102.129 månedlige visninger** i dansk GSC 2026-08-27 → 2026-09-24:
+  `/moms` (23.426, nr. 5), `/kvadratmeter` (20.959, nr. 6), `/braendstof`
+  (16.580, nr. 7), `/renteberegner` (13.623, nr. 8), `/kalorier` (12.332, nr. 9),
+  `/alder` (6.013, nr. 11), `/brok` (4.640, nr. 13) og `/rentefradrag` (4.556,
+  nr. 14).
+- **Egentlig klassestørrelse er målt, ikke antaget.** Et node-script der parker
+  `<label`-åbningstaggen og tæller dem uden `htmlFor`/`for` finder **181 ubundne
+  labels i 65 filer** i `src/components/` — planens "41 filer / 129 labels" fra
+  C61 var et groft grep (dels `htmlFor` på andre linjer, dels CSS-klasse-greps
+  der kun rammer 23 af filerne). Efter C62 er der **146 ubundne labels i 56
+  filer** tilbage. Tællingen skal ske på `<label` **inden for åbningstaggen**,
+  aldrig på en CSS-klasse og aldrig som "linjer med `<label` minus linjer med
+  `htmlFor`".
+- **Fund 1 — 9 talfelter + 4 grupper i `/braendstof` (16.580 visninger).** Alle
+  ni `<input>` manglede `id`, og de to knapgrupper (brændstof, og hvad der skal
+  beregnes) var navnløse. Samme mønster som C60's kønsvalg: `role="group"` +
+  `aria-labelledby` på gruppen, id'er præfikset `braendstof-`. `/kvadratmeter`
+  (20.959) havde **9 talfelter** og fire geometriske former, hver med sit eget
+  sæt felter — derfor måtte `{l.hoejde}` (trekant og trapez) ikke få samme id.
+- **Fund 2 — `/kvadratmeter` har to felter med samme synlige tekst.**
+  `kvadratmeter-pris-m2` ("Pris pr. m²") og `kvadratmeter-pris-materiale`
+  (`l.prisPrMaterialeM2` / `l.prisPrMaterialeEnhed`) er begive "Pris pr. m²
+  (valgfrit)" i dansk, så skærmlæseren hører samme navn på to forskellige
+  felter. Det er ikke en bindingsfejl, men det er en tvetydighed. **Jeg har
+  ikke ændret teksten** — det er en redaktionel beslutning, se `❓ Til Mads`.
+  Testen bruger derfor `getAllByLabelText` og afviser feltet hvis det ikke er
+  blandt træffene.
+- **Fund 3 — `/rentefradrag`s lånfelter var kun placeholdere.** Hvert lån er to
+  `<input>` med `placeholder` ("Lån 1 (navn)", "Årlig rente (kr.)") og **intet
+  navn** — en placeholder er ikke et label, fordi den forsvinder ved indtastning.
+  Nu `aria-label="Lån N navn"` / `"Lån N årlig rente i kroner"`, hvilket er det
+  korrekte for et felt i en gentaget række. Testen klikker "Tilføj lån" og
+  tjekker igen, fordi indekset i aria-label'en flytter sig.
+- **Fund 4 — `/share`-dialogen havde et navnløst `<label>` på ALLE
+  beregnere.** `ShareCalculation.tsx`'s `socialLabel` ("Del på sociale medier")
+  var en `<label>` uden binding over tre links. Den er ikke en enkelt
+  sides fejl: den renderes i hver beregner, som har deling, så rettelsen her
+  lukker den for hele sitet.
+- **Test:** `label-a11y.test.tsx` udvidet fra 9 til **25 tests** (144 filer,
+  1562 tests fra 1546). Samme tre låse pr. renderet tilstand, i **DA og SE**.
+  Bevis på dækning er skærpet fra C61: `registrerFelter` samler **hvilke `id`'er**
+  der er i DOM'en pr. tilstand, ikke hvor mange felter der er — `/dato` har fire
+  tilstande med samme antal felter i to af dem, og `/braendstof`s "turPris" og
+  "kmPris" deler præcis samme tre felter, så en antalstælling ville have set
+  ens ud. `/braendstof` forventer 4 forskellige id-sæt, `/kvadratmeter` 4.
+  Beregningstyperne i `/braendstof` slås op **efter** hvert skift af brændstof,
+  ikke fra en liste taget på forhånd — en forhåndsliste ville være afkoblet fra
+  DOM'en, når `el` fjerner dem. **Verificeret modsvejs: 16 af 25 falder** med de
+  ni gamle komponenter.
+- **Gate:** `npm run lint` grøn (549 filer), `npm run test` **1562 tests / 144
+  filer** grøn (fra 1546 / 144), `npm run build` grøn.
+- **MÅL:** `/moms` **23.426 visninger / 40 klik / CTR 0,2 % / pos. 6,9**,
+  `/kvadratmeter` **20.959 / 288 / 1,4 % / 5,0**, `/braendstof` **16.580 / 180 /
+  1,1 % / 6,1**, `/renteberegner` **13.623 / 124 / 0,9 % / 7,5**, `/kalorier`
+  **12.332 / 124 / 1,0 % / 8,2**, `/alder` **6.013 / 35 / 0,6 % / 7,8**,
+  `/brok` **4.640 / 31 / 0,7 % / 5,3**, `/rentefradrag` **4.556 / 226 / 5,0 % /
+  6,6** (GSC 2026-08-27 → 2026-09-24). **Mål 2026-10-10.** Ændringen forventes
+  **ikke** at løfte CTR — den retter en funktionsfejl for skærmlæsere, ikke en
+  titel, og den er ikke målbar i Plausible, fordi skærmlæserbrug ikke trackes
+  (tracking-opsætningen må ikke ændres). Virkningen er verificeret i testene.
+- **Efterladt, bevidst:** **146 ubundne labels i 56 filer** er ikke rørt — ét
+  iterationstypisk snit, ikke otte. Den næste ordre er igen GSC-visninger:
+  `/laane` (7 labels), `/befordringsfradrag` (7), `/huslejebudget` (11),
+  `/boliglaan` (3), `/gaeldsfri` (3), `/valuta` (3) m.fl.

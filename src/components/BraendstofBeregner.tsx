@@ -232,8 +232,8 @@ export default function BraendstofBeregner() {
     <div className="space-y-8">
       {/* Brændstoftype */}
       <div>
-        <label className="block text-sm font-medium mb-3 dark:text-gray-200">{l.fuelType}</label>
-        <div className="grid grid-cols-3 gap-3">
+        <label id="braendstof-type-gruppe" className="block text-sm font-medium mb-3 dark:text-gray-200">{l.fuelType}</label>
+        <div role="group" aria-labelledby="braendstof-type-gruppe" className="grid grid-cols-3 gap-3">
           <button type="button"
             onClick={() => setBraendstofType("benzin")}
             className={`p-4 rounded-lg border-2 transition-all ${
@@ -272,8 +272,8 @@ export default function BraendstofBeregner() {
 
       {braendstofType !== "el" && (
         <div>
-          <label className="block text-sm font-medium mb-3 dark:text-gray-200">{l.whatCalc}</label>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <label id="braendstof-beregning-gruppe" className="block text-sm font-medium mb-3 dark:text-gray-200">{l.whatCalc}</label>
+          <div role="group" aria-labelledby="braendstof-beregning-gruppe" className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <button type="button"
               onClick={() => setBeregningsType("turPris")}
               className={`p-3 rounded-lg border-2 text-left ${
@@ -313,9 +313,10 @@ export default function BraendstofBeregner() {
         {braendstofType === "el" ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.elPrice}</label>
+              <label htmlFor="braendstof-el-pris" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.elPrice}</label>
               <div className="relative">
                 <input
+                  id="braendstof-el-pris"
                   type="number"
                   min="0"
                   step="0.1"
@@ -328,9 +329,10 @@ export default function BraendstofBeregner() {
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{l.elPriceHint}</p>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.elConsumption}</label>
+              <label htmlFor="braendstof-el-forbrug" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.elConsumption}</label>
               <div className="relative">
                 <input
+                  id="braendstof-el-forbrug"
                   type="number"
                   min="0"
                   step="1"
@@ -343,9 +345,10 @@ export default function BraendstofBeregner() {
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{l.elConsumptionHint}</p>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.distance}</label>
+              <label htmlFor="braendstof-distance" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.distance}</label>
               <div className="relative">
                 <input
+                  id="braendstof-distance"
                   type="number"
                   min="0"
                   step="10"
@@ -360,9 +363,10 @@ export default function BraendstofBeregner() {
         ) : beregningsType === "forbrug" ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.fuelTanked(braendstofType === "benzin" ? l.benzin : l.diesel)}</label>
+              <label htmlFor="braendstof-liter-brugt" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.fuelTanked(braendstofType === "benzin" ? l.benzin : l.diesel)}</label>
               <div className="relative">
                 <input
+                  id="braendstof-liter-brugt"
                   type="number"
                   min="0"
                   step="1"
@@ -374,9 +378,10 @@ export default function BraendstofBeregner() {
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.kmDriven}</label>
+              <label htmlFor="braendstof-km-koert" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.kmDriven}</label>
               <div className="relative">
                 <input
+                  id="braendstof-km-koert"
                   type="number"
                   min="0"
                   step="10"
@@ -388,9 +393,10 @@ export default function BraendstofBeregner() {
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.fuelPrice(braendstofType === "benzin" ? l.benzin : l.diesel)}</label>
+              <label htmlFor="braendstof-liter-pris" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.fuelPrice(braendstofType === "benzin" ? l.benzin : l.diesel)}</label>
               <div className="relative">
                 <input
+                  id="braendstof-liter-pris"
                   type="number"
                   min="0"
                   step="0.1"
@@ -405,9 +411,10 @@ export default function BraendstofBeregner() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.fuelPrice(braendstofType === "benzin" ? l.benzin : l.diesel)}</label>
+              <label htmlFor="braendstof-liter-pris" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.fuelPrice(braendstofType === "benzin" ? l.benzin : l.diesel)}</label>
               <div className="relative">
                 <input
+                  id="braendstof-liter-pris"
                   type="number"
                   min="0"
                   step="0.1"
@@ -419,9 +426,10 @@ export default function BraendstofBeregner() {
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.carKmPerLiter}</label>
+              <label htmlFor="braendstof-km-liter" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.carKmPerLiter}</label>
               <div className="relative">
                 <input
+                  id="braendstof-km-liter"
                   type="number"
                   min="1"
                   step="0.5"
@@ -434,9 +442,10 @@ export default function BraendstofBeregner() {
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{l.carKmPerLiterHint}</p>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.distance}</label>
+              <label htmlFor="braendstof-distance" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.distance}</label>
               <div className="relative">
                 <input
+                  id="braendstof-distance"
                   type="number"
                   min="0"
                   step="10"

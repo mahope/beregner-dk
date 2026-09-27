@@ -283,8 +283,8 @@ export default function KalorieBeregner() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.koen}</label>
-            <div className="flex gap-4">
+            <label id="kalorie-koen-gruppe" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.koen}</label>
+            <div role="group" aria-labelledby="kalorie-koen-gruppe" className="flex gap-4">
               <button type="button"
                 onClick={() => setKoen("mand")}
                 className={`flex-1 py-3 rounded-lg border-2 transition-colors ${
@@ -315,8 +315,8 @@ export default function KalorieBeregner() {
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.aktivitetsniveau}</label>
-            <div className="space-y-2">
+            <label id="kalorie-aktivitet-gruppe" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.aktivitetsniveau}</label>
+            <div role="group" aria-labelledby="kalorie-aktivitet-gruppe" className="space-y-2">
               {(Object.keys(AKTIVITETS_FAKTORER) as AktivitetsNiveau[]).map((key) => (
                 <button type="button"
                   key={key}
@@ -335,8 +335,8 @@ export default function KalorieBeregner() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.ditMaal}</label>
-            <div className="flex gap-2">
+            <label id="kalorie-mael-gruppe" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.ditMaal}</label>
+            <div role="group" aria-labelledby="kalorie-mael-gruppe" className="flex gap-2">
               {([
                 { id: "tab" as const, label: l.maalTab, border: "border-green-500 bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300" },
                 { id: "vedligehold" as const, label: l.maalVedligehold, border: "border-blue-500 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300" },

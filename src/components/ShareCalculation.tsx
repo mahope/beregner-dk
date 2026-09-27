@@ -299,10 +299,10 @@ export function ShareCalculation({
                 <>
               {/* Social Share */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label id="share-social-gruppe" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   {l.socialLabel}
                 </label>
-                <div className="flex gap-3">
+                <div role="group" aria-labelledby="share-social-gruppe" className="flex gap-3">
                   <a
                     href={socialLinks.twitter}
                     target="_blank"

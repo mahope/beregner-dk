@@ -334,8 +334,8 @@ export default function KvadratmeterBeregner() {
     <div className="space-y-8">
       {/* Form valg */}
       <div>
-        <label className="block text-sm font-medium mb-3 dark:text-gray-200">{l.vaelgForm}</label>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <label id="kvadratmeter-form-gruppe" className="block text-sm font-medium mb-3 dark:text-gray-200">{l.vaelgForm}</label>
+        <div role="group" aria-labelledby="kvadratmeter-form-gruppe" className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <button type="button"
             onClick={() => setFormType("rektangel")}
             className={`p-4 rounded-lg border-2 transition-all ${
@@ -388,9 +388,10 @@ export default function KvadratmeterBeregner() {
         {formType === "rektangel" && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.laengde}</label>
+              <label htmlFor="kvadratmeter-laengde" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.laengde}</label>
               <div className="relative">
                 <input
+                  id="kvadratmeter-laengde"
                   type="number"
                   min="0"
                   step="0.1"
@@ -402,9 +403,10 @@ export default function KvadratmeterBeregner() {
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.bredde}</label>
+              <label htmlFor="kvadratmeter-bredde" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.bredde}</label>
               <div className="relative">
                 <input
+                  id="kvadratmeter-bredde"
                   type="number"
                   min="0"
                   step="0.1"
@@ -420,9 +422,10 @@ export default function KvadratmeterBeregner() {
 
         {formType === "cirkel" && (
           <div className="max-w-xs">
-            <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.radius}</label>
+            <label htmlFor="kvadratmeter-radius" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.radius}</label>
             <div className="relative">
               <input
+                id="kvadratmeter-radius"
                 type="number"
                 min="0"
                 step="0.1"
@@ -439,9 +442,10 @@ export default function KvadratmeterBeregner() {
         {formType === "trekant" && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.grundlinje}</label>
+              <label htmlFor="kvadratmeter-grundlinje" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.grundlinje}</label>
               <div className="relative">
                 <input
+                  id="kvadratmeter-grundlinje"
                   type="number"
                   min="0"
                   step="0.1"
@@ -453,9 +457,10 @@ export default function KvadratmeterBeregner() {
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.hoejde}</label>
+              <label htmlFor="kvadratmeter-hoejde" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.hoejde}</label>
               <div className="relative">
                 <input
+                  id="kvadratmeter-hoejde"
                   type="number"
                   min="0"
                   step="0.1"
@@ -473,9 +478,10 @@ export default function KvadratmeterBeregner() {
         {formType === "trapez" && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.oeversteSide}</label>
+              <label htmlFor="kvadratmeter-oeverste-side" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.oeversteSide}</label>
               <div className="relative">
                 <input
+                  id="kvadratmeter-oeverste-side"
                   type="number"
                   min="0"
                   step="0.1"
@@ -487,9 +493,10 @@ export default function KvadratmeterBeregner() {
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.nedersteSide}</label>
+              <label htmlFor="kvadratmeter-nederste-side" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.nedersteSide}</label>
               <div className="relative">
                 <input
+                  id="kvadratmeter-nederste-side"
                   type="number"
                   min="0"
                   step="0.1"
@@ -501,9 +508,10 @@ export default function KvadratmeterBeregner() {
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.hoejde}</label>
+              <label htmlFor="kvadratmeter-trapez-hoejde" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.hoejde}</label>
               <div className="relative">
                 <input
+                  id="kvadratmeter-trapez-hoejde"
                   type="number"
                   min="0"
                   step="0.1"
@@ -544,9 +552,10 @@ export default function KvadratmeterBeregner() {
         <h3 className="font-medium mb-4 dark:text-white">{l.beregnPris}</h3>
         <div className="flex flex-col md:flex-row gap-4 items-end">
           <div className="flex-1">
-            <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.prisPrM2}</label>
+            <label htmlFor="kvadratmeter-pris-m2" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.prisPrM2}</label>
             <div className="relative">
               <input
+                id="kvadratmeter-pris-m2"
                 type="number"
                 min="0"
                 step="10"
