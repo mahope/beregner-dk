@@ -91,6 +91,22 @@ describe("AlderBeregner", () => {
     expect(container).toBeTruthy();
   });
 
+  test("Del sender præcis den tekst Kopier lægger i klipbordet", () => {
+    // Forskellene mellem Kopier og Del er usynlige i DOM'en: Del-linket ligger i
+    // en modal, så strengen skal læses i `href` (C57's lærepådom). `/moms` har
+    // engang sendt to forskellige tekster fra de to knapper, og det kan kun
+    // findes her.
+    const { container } = renderAlder("da");
+    fireEvent.click(screen.getByRole("button", { name: "Kopiér resultat" }));
+    const kopieret = String(clipboardWrite.mock.calls[0]?.[0] ?? "");
+    fireEvent.click(screen.getByRole("button", { name: "Del beregning" }));
+    const delLink = Array.from(container.querySelectorAll("a")).find((a) =>
+      a.getAttribute("href")?.startsWith("https://twitter.com/intent/tweet"),
+    );
+    const delTekst = new URL(delLink?.getAttribute("href") ?? "https://x.com/").searchParams.get("text") ?? "";
+    expect(decodeURIComponent(delTekst)).toBe(`Aldersberegner: ${kopieret}`);
+  });
+
   test("svensk delt tekst er oversat hele vejen", () => {
     expect(kopier("se")).toBe(
       "Född 15 mars 1990 — 36 år, 6 månader och 10 dagar per 25 september 2026.",
