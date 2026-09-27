@@ -115,3 +115,64 @@ export function formatAlder(
   const dageTekst = dage === 1 ? "1 dag" : `${dage} dage`;
   return `${aar} år, ${maanederTekst} og ${dageTekst}`;
 }
+
+/** Første og sidste fødselsår i fødselsårs-tabellen på /alder. */
+export const FODSELSAAR_MIN = 1989;
+export const FODSELSAAR_MAX = 2010;
+
+export interface FoedselsaarRaekke {
+  /** Fødselsåret, som læseren har skrevet i søgefeltet. */
+  aar: number;
+  /** Hele år, når fødselsdagen endnu ikke er nået (født 31. december). */
+  minAlder: number;
+  /** Hele år, når fødselsdagen er nået (født 1. januar). */
+  maxAlder: number;
+  /** Dage levet for den senest fødte i året. */
+  minDage: number;
+  /** Dage levet for den tidligst fødte i året. */
+  maxDage: number;
+}
+
+/**
+ * "Hvor gammel er jeg, hvis jeg er født i 2007?" — det er den hyppigste
+ * søgning på /alder, og et fødselsår giver ikke én alder men to, fordi
+ * fødselsdagen ikke altid er nået. Rækkerne regnes derfor på de to yderste
+ * fødselsdatoer i året med `beregnAlder` — samme modul som værktøjet bruger —
+ * så tabellen ikke kan sige noget, logikken modsiger.
+ *
+ * Reference-datoen er et argument, ikke "i dag", så en test kan låse tallene
+ * på en bestemt dag.
+ */
+export function foedselsaarRaekker(referenceIso: string): FoedselsaarRaekke[] {
+  const raekker: FoedselsaarRaekke[] = [];
+  for (let aar = FODSELSAAR_MIN; aar <= FODSELSAAR_MAX; aar++) {
+    const tidligst = beregnAlder({
+      foedselsdato: `${aar}-01-01`,
+      beregningsdato: referenceIso,
+    });
+    const senest = beregnAlder({
+      foedselsdato: `${aar}-12-31`,
+      beregningsdato: referenceIso,
+    });
+    if (!tidligst || !senest) {
+      throw new Error(
+        `Fødselsårs-tabellen kan ikke beregne ${aar} mod reference-datoen ${referenceIso}`
+      );
+    }
+    raekker.push({
+      aar,
+      minAlder: senest.aar,
+      maxAlder: tidligst.aar,
+      minDage: senest.totalDage,
+      maxDage: tidligst.totalDage,
+    });
+  }
+  return raekker;
+}
+
+/** "18–19 år" — eller ét tal, hvis begge ende er ens. */
+export function formatAlderRaekke(r: FoedselsaarRaekke): string {
+  return r.minAlder === r.maxAlder
+    ? `${r.minAlder} år`
+    : `${r.minAlder}–${r.maxAlder} år`;
+}
