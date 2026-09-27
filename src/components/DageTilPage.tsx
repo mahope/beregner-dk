@@ -134,15 +134,24 @@ export async function buildDageTilMetadata(
     `${getDomainConfigByLocale("se").baseUrl}/dagar-till/${event.se.slug}`;
   languages["x-default"] = languages.da;
 
+  // The title carries the question and the answer, and *not* the site name:
+  // `| MinBeregner.dk` pushed all nine titles to 61-67 characters, so Google
+  // clipped away the tail — the part that carries no search intent. The site
+  // name is still sent as `og:site_name` and is still in every other page's
+  // title; these nine are the exception because their question alone is the
+  // whole lift. C81 locked this for the 160 `page-data` titles, and this is
+  // the same rule applied to the nine the gate could not see.
+  const titleText = `${event[dageLocale].copy.question} ${count(days, u.day, u.days)}`;
+
   return {
-    title: { absolute: `${event[dageLocale].copy.question} ${count(days, u.day, u.days)} | ${siteName}` },
+    title: { absolute: titleText },
     description: `${event[dageLocale].copy.question} ${headline}. ${target}. ${
       dageLocale === "da"
         ? "Tallet opdateres hver dag, og du kan regne alle andre datoer med datoberegneren."
         : "Talet uppdateras varje dag, och du kan räkna alla andra datum med datumräknaren."
     }`,
     openGraph: {
-      title: `${event[dageLocale].copy.question} ${count(days, u.day, u.days)}`,
+      title: titleText,
       description: `${headline}. ${target} (${targetIso}).`,
       url: canonical,
       type: "website",

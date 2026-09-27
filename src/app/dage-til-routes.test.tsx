@@ -1,11 +1,12 @@
 import { describe, expect, test, vi, beforeEach, afterAll } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { getDomainConfigByLocale } from "@/lib/domain-config";
-import { getDageTilSlugs } from "@/lib/dage-til";
+import { getDageTilSlugs, getDageTilEvents, getDageTilPrefix } from "@/lib/dage-til";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { getRouteDecision } from "@/lib/routing";
 import { buildSitemap } from "./sitemap";
 import DageTilPage from "./dage-til/[dato]/page";
+import { buildDageTilMetadata } from "@/components/DageTilPage";
 
 vi.mock("@/components/Breadcrumbs", () => ({ default: () => null }));
 vi.mock("@/components/FAQ", () => ({ default: () => null }));
@@ -169,5 +170,56 @@ describe("dage-til side", () => {
     await expect(
       DageTilPage({ params: Promise.resolve({ dato: "juledagen" }) })
     ).rejects.toThrow();
+  });
+});
+
+describe("dage-til titler", () => {
+  // C81 locked every `page-data` title to 60 characters, because Google clips
+  // the tail — but these nine titles are built in `buildDageTilMetadata` and
+  // have no entry in `page-data.ts`, so the gate could not see them. Measured
+  // on the live site they were 61-67 characters in both languages. The test
+  // calls the real producer instead of rebuilding the string, so it cannot
+  // pass on a copy of the old rule (C44's lesson).
+  const I_DAG = new Date("2026-09-27T12:00:00.000Z");
+
+  async function titelFor(
+    locale: "da" | "se",
+    slug: string
+  ): Promise<string> {
+    const prefix = getDageTilPrefix(locale);
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale(locale));
+    const metadata = await buildDageTilMetadata(prefix, slug, I_DAG);
+    const title = metadata.title;
+    return (typeof title === "string" ? title : (title?.absolute ?? "")) as string;
+  }
+
+  for (const locale of ["da", "se"] as const) {
+    test(`alle dage-til-titler er under Googles afkortningsgraense i ${locale}`, async () => {
+      const events = getDageTilEvents(locale);
+      expect(events.length).toBeGreaterThan(5);
+      for (const event of events) {
+        const slug = event[locale].slug;
+        const titel = await titelFor(locale, slug);
+        expect(titel.length, `${slug}: "${titel}"`).toBeLessThanOrEqual(60);
+      }
+    });
+  }
+
+  test("titlen har stadig spoergsmaalet og dage-tallet, og ingen brand i halen", async () => {
+    // Uden denne kunne titlen blive kortere ved at miste svaret — det er den
+    // del, der skiller den fra de andre otte dage-til-sider i et resultat.
+    const grundlovsdag = getDageTilEvents("da").find((e) => e.da.slug === "grundlovsdag")!;
+    const titel = await titelFor("da", grundlovsdag.da.slug);
+    expect(titel).toBe("Hvor mange dage er der til grundlovsdag? 251 dage");
+    expect(titel).toContain(grundlovsdag.da.copy.question);
+    expect(titel).not.toContain("MinBeregner.dk");
+  });
+
+  test("brandstaarnet sendes stadig som og:site_name", async () => {
+    const juledagen = getDageTilEvents("se").find((e) => e.se.slug === "juldagen")!;
+    const prefix = getDageTilPrefix("se");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("se"));
+    const metadata = await buildDageTilMetadata(prefix, juledagen.se.slug, I_DAG);
+    expect(metadata.openGraph?.siteName).toBe("Beräknare.se");
   });
 });
