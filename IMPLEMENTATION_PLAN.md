@@ -10745,9 +10745,9 @@ verificering der ikke kan slå igennem er lige så dårlig som en der kan.
      `1.125 / 9.000 = 12,5`, og `"@type":"FAQPage"` skal have **7**
      `Question` i stedet for 4.
   4. `https://beraknare.se/procent` skal være **uændret** (dvs. stadig
-     "Hur räknar man ut procent i Excel?" og **ikke** dansk). Kode + plan i
-     ét commit på `ceo/procent-da-svar`; første kandidatvindue
-     **2026-09-27 17:30**.
+     "Hur räknar man ut procent i Excel?" og **ikke** dansk). Kode
+     `0f8a52b`, merge `5925633` **2026-09-27 12:39 CEST** på
+     `ceo/procent-da-svar`; første kandidatvindue **2026-09-27 17:30**.
 
 - ⏳ **VERIFICÉR DEPLOY: C78 — `/tidsberegner` skrev "8.25 timer" i den
   server-renderede HTML på begge domæner, altså i den tekst Google
