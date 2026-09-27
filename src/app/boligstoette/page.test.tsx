@@ -86,4 +86,43 @@ describe("boligstoette page", () => {
       value: "no-referrer",
     });
   });
+
+  test("siger at boligstøtte ikke er boligsikring, og peger på Realkredit Danmark", async () => {
+    const page = await BoligstoettePage();
+    const html = renderToStaticMarkup(
+      <LocaleProvider
+        locale="da"
+        domainConfig={{
+          locale: "da",
+          baseUrl: "https://minberegner.dk",
+          siteName: "MinBeregner.dk",
+          ogLocale: "da_DK",
+          analyticsDataDomain: "minberegner.dk",
+          countryFlag: "",
+          countryName: "danskere",
+          currency: "DKK",
+          hreflangCode: "da",
+        }}
+      >
+        {page}
+      </LocaleProvider>,
+    );
+
+    expect(html).toContain("Boligstøtte er ikke boligsikring");
+    expect(html).toContain("tilskud fra staten");
+    expect(html).toContain("obligatorisk opsparingsordning");
+    expect(html).toContain("Realkredit Danmark");
+    // Det afgørende: boligsikring må ikke fremstilles som en ydelse, man kan søge om.
+    expect(html).toContain("ikke en støtte, du kan søge om");
+  });
+
+  test("spørgsmålet om forskellen ligger i FAQ'en, så det kommer i JSON-LD", async () => {
+    const { getPageData } = await import("@/lib/page-data");
+    const faq = getPageData("boligstoette", "da")!.faqItems;
+
+    const fundet = faq.find((f) => f.question.includes("boligsikring"));
+    expect(fundet).toBeDefined();
+    expect(fundet!.answer).toContain("Realkredit Danmark");
+    expect(fundet!.answer).toContain("ingen månedlig ydelse");
+  });
 });

@@ -234,6 +234,24 @@ export default async function BoligstoettePage() {
             med andre regler. Den officielle beregner afgør, hvilken ordning der gælder.
           </p>
 
+          <h2>Boligstøtte er ikke boligsikring</h2>
+          <p>
+            De to ord bliver ofte blandet sammen, men de handler om hver sit:{" "}
+            <strong>boligstøtte</strong> er en{" "}
+            <strong>tilskud fra staten</strong> til lejere i den private boligsektor, og
+            det er denne side beregner. <strong>Boligsikring</strong> er derimod en{" "}
+            <strong>obligatorisk opsparingsordning</strong>, du skal gennem som køber af en
+            eksisterende bolig — du lånter mod din egen opsparing og betaler det tilbage
+            på vilkår, ligesom et andet lån. Boligsikring er altså ikke en støtte, du kan
+            søge om, og den giver ingen månedlig ydelse.
+          </p>
+          <p>
+            Er du ved at købe bolig, er det <strong>Realkredit Danmark</strong> du skal
+            have fat i, fordi de administrerer ordningen. Regler og beløb for boligsikring
+            står hos dem, og de ændres uafhængigt af boligstøtten — så læs ikke den ene
+            ordning ind i den anden.
+          </p>
+
           <h3>Vil du se den fulde guide?</h3>
           <p>
             Læs <Link href="/blog/boligstoette-2026-nye-regler">boligstøtte 2026-guiden</Link>{" "}
