@@ -11163,7 +11163,10 @@ verificering der ikke kan slå igennem er lige så dårlig som en der kan.
      "gränsen för rattfylleri vid 0,2 ‰".
   5. Sidens `<meta name="description">` skal indeholte både **"0,5 ‰"** og
      **"Sverige, Tyskland og Norge"** — de to dele må ikke glide fra hinanden
-     igen (C84's fejlklasse, fanget af `page-data.test.ts`).
+     igen (C84's fejlklasse, fanget af `page-data.test.ts`). Kode `400aff2`,
+     merge `605ed39` **2026-09-27 13:33 CEST** på
+     `ceo/promillegraense-udlandet`; første kandidatvindue
+     **2026-09-27 17:30**.
 
 - ⏳ **VERIFICÉR DEPLOY: C82 — `/procent` dansk: den forkerte skattepåstand er
   fjernet, Excel-afsnittet og to nye interne links er lagt på, og tre nye
