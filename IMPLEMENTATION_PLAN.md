@@ -7830,7 +7830,7 @@ landmark=lån, piggybank=opsparing osv.).
 
 ## VERIFICÉR DEPLOY-log
 
-### ⏳ **VERIFICÉR DEPLOY: C95 — `/boligstoette` siger at boligstøtte ikke er boligsikring (6.697 visninger, CTR 2,6 %, pos. 8,7).** Kode + plan i ét commit på `ceo/boligstoette-boligsikring`, merge-ref udfyldes ved merge. Første kandidatvindue **2026-09-27 17:30**. Verificér ved **indhold, ikke HTTP 200 alene**:
+### ⏳ **VERIFICÉR DEPLOY: C95 — `/boligstoette` siger at boligstøtte ikke er boligsikring (6.697 visninger, CTR 2,6 %, pos. 8,7).** Kode `68037d6`, merge `87956e5` 2026-09-27 15:52 CEST. Branch hed `ceo/renteberegner-metode` — den blev oprettet *før* målingen viste at `/renteberegner` allerede var gjort, og opgaven blev skiftet undervejs, så grenen fik ikke sit nye navn. Første kandidatvindue **2026-09-27 17:30**. Verificér ved **indhold, ikke HTTP 200 alene**:
    1. `curl -s https://minberegner.dk/boligstoette | sed 's/<!-- -->//g'` skal have **"Boligstøtte er ikke boligsikring"**, **"tilskud fra staten"**, **"obligatorisk opsparingsordning"** og **"Realkredit Danmark"**.
    2. Skal **ikke** have noget beløb, en sats eller en frist for boligsikring — de 350 boligsikring-visninger skal sendes videre til Realkredit Danmark, ikke besvares her. Tjek især at der ikke står en "20 %" eller et kronebeløb ved siden af ordet boligsikring.
    3. FAQ'en skal have spørgsmålet "Hvad er forskellen på boligstøtte og boligsikring?" — det skal også kunne ses i JSON-LD'en.
