@@ -11668,9 +11668,10 @@ verificering der ikke kan slå igennem er lige så dårlig som en der kan.
   5. `https://beraknare.se/kvadratmeter` skal være **uændret**: **0** fund på
      "Sådan regner du kvadratmeter ud med tal" og på `3,14 × 3 × 3`, og
      titlen stadig "Kvadratmeterkalkylator: 5 x 4 m = 20 m²".
-  6. `https://minberegner.dk/api/health` skal svare `status: ok`. Kode + plan
-     i ét commit på `ceo/kvadratmeter-metode`; første kandidatvindue
-     **2026-09-27 17:30** (denne merge sker efter 12:30-vinduet).
+  6. `https://minberegner.dk/api/health` skal svare `status: ok`. Kode `baf064b`,
+     merge `a54930b` **2026-09-27 15:30 CEST** på
+     `ceo/kvadratmeter-metode`; første kandidatvindue **2026-09-27 17:30**
+     (denne merge sker efter 12:30-vinduet).
 
 - ⏳ **VERIFICÉR DEPLOY: C92 — stavemålen af fåretagsleasing, 12→21 byer i
   `ogDescription`, og tre svenske titler der svarer på søgningen.** Kun
