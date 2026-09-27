@@ -60,10 +60,15 @@ import RygestopBeregner from "./RygestopBeregner";
 import TidsBeregner from "./TidsBeregner";
 import TidszoneBeregner from "./TidszoneBeregner";
 import TopskatBeregner from "./TopskatBeregner";
+import TimeprisBeregner from "./TimeprisBeregner";
 import ValutaBeregner from "./ValutaBeregner";
 import VaegttabBeregner from "./VaegttabBeregner";
+import BarselBeregner from "./BarselBeregner";
+import BarselPlanlaegger from "./barsel/BarselPlanlaegger";
+import CookieConsent from "./CookieConsent";
 import { LocaleProvider } from "./LocaleProvider";
 import { getDomainConfig } from "@/lib/domain-config";
+import { t } from "@/lib/i18n";
 
 vi.mock("@/lib/analytics", () => ({
   trackCalculation: vi.fn(),
@@ -185,6 +190,15 @@ function modeKnapper(container: HTMLElement): HTMLElement[] {
 function registrerFelter(container: HTMLElement, saet: Set<string>) {
   saet.add(Array.from(container.querySelectorAll("input")).map((felt) => felt.id).join(","));
 }
+
+/**
+ * Den nye `vaelgVisning`-nøgle i de fire view-toggles. Låst her, så en svensk
+ * oversættelse der får et dansk tegn ind fanges: R4 i `locale-leak.mjs` ser
+ * `se:`-værdier, men kun i `se:`/`no:`/`da:`-objekter — den læser ikke testfilers
+ * forventninger.
+ */
+const VELG_VISNING = { da: "Vælg visning", se: "Välj vy" } as const;
+const EKSEMPLER = { da: "Hurtige eksempler", se: "Snabbexempel" } as const;
 
 describe("Feltnavn for skærmlæsere — de fire mest besøgte beregnere", () => {
   for (const locale of ["da", "se"] as const) {
@@ -555,9 +569,11 @@ describe("Feltnavn for skærmlæsere — de fire mest besøgte beregnere", () =>
             expect(knap.getAttribute("aria-label") ?? "").not.toMatch(/[æø]/);
           }
         }
-        expect(
-          container.querySelector('[role="group"][aria-label]')?.querySelectorAll("button").length,
-        ).toBe(4);
+        // C75 satte tællerrækken ("Antal personer") *før* denne gruppe i
+        // DOM'en, så "første gruppe med aria-label" er ikke længere
+        // drikkepenge-presettene. Vi slår den op på sin egen synlige etiket.
+        const tipGruppe = container.querySelector('[role="group"][aria-labelledby="delregning-drikkepenge-gruppe"]');
+        expect(tipGruppe?.querySelectorAll("button").length).toBe(4);
       });
 
       test("/feriepenge: bruttoløn, periode og feriedage har navn", () => {
@@ -662,8 +678,100 @@ describe("Feltnavn for skærmlæsere — de fire mest besøgte beregnere", () =>
         const gruppe = container.querySelector('[role="group"][aria-labelledby]');
         expect(gruppe?.querySelectorAll("button").length).toBe(2);
       });
+
+      // C75 — de 12 uavngivne knapgrupper `knapgruppe-scan.mjs` målte.
+      // `label-a11y-scan.mjs` tæller kun `<label>`, så den ser en knapgruppe
+      // uden etiket slet ikke; grupperne er derfor målt i der egen script.
+      // Her låses de i den *renderede* DOM, fordi scanneren kun læser kildekode.
+
+      test("/tidsberegner: de tre eksempel-presets er en gruppe med navn", () => {
+        // 72.725 visninger — den mest trafikrelevante gruppe i klassen.
+        // Beregningen er live (starttid har en forudvalgt værdi), så grupperne
+        // er i DOM'en uden at vi gør noget.
+        const { container } = renderIn(locale, TidsBeregner);
+        const gruppe = container.querySelector('[role="group"][aria-labelledby="tidsberegner-eksempler-gruppe"]');
+        expect(gruppe).not.toBeNull();
+        expect(gruppe?.querySelectorAll("button").length).toBe(3);
+        // Navnet skal komme fra en synlig overskrift, ikke fra aria-label alene.
+        expect(screen.getByRole("group", { name: EKSEMPLER[locale] })).toBeInTheDocument();
+      });
+
+      test("/boliglaan: visningsknapperne er en navngiven gruppe", () => {
+        const { container } = renderIn(locale, BoliglaanBeregner);
+        expectFieldsAreNamed(container);
+        const gruppe = screen.getByRole("group", { name: VELG_VISNING[locale] });
+        expect(gruppe.querySelectorAll("button").length).toBe(2);
+        // Knapperne skal stadig skifte visning, ellers navngiver vi døde ting.
+        fireEvent.click(screen.getByText(locale === "se" ? "Vad har jag råd med?" : locale === "no" ? "Hva har jeg råd til?" : "Hvad har jeg råd til?"));
+        expect(gruppe.querySelectorAll("button").length).toBe(2);
+      });
+
+      test("/opsparing: visningsknapperne er en navngiven gruppe", () => {
+        const { container } = renderIn(locale, OpsparingsBeregner);
+        expectFieldsAreNamed(container);
+        expect(screen.getByRole("group", { name: VELG_VISNING[locale] }).querySelectorAll("button").length).toBe(2);
+      });
+
+      test("/leasing: visningsknapperne er en navngiven gruppe", () => {
+        const { container } = renderIn(locale, LeasingBeregner);
+        expectFieldsAreNamed(container);
+        expect(screen.getByRole("group", { name: VELG_VISNING[locale] }).querySelectorAll("button").length).toBe(2);
+      });
+
+      test("/timepris: beregningstype-knapperne er en navngiven gruppe", () => {
+        const { container } = renderIn(locale, TimeprisBeregner);
+        expectFieldsAreNamed(container);
+        expect(screen.getByRole("group", { name: VELG_VISNING[locale] }).querySelectorAll("button").length).toBe(2);
+      });
+
+      test("/del-regning: tællerknapperne hører til gruppen 'Antal personer'", () => {
+        // −/+ er hver især navngivet (C71), så her er det *rækken* der manglede
+        // et navn: en skærmlæser læste to tællere og et felt uden sammenhæng.
+        const { container } = renderIn(locale, DelRegningBeregner);
+        expectFieldsAreNamed(container);
+        const gruppe = screen.getByRole("group", { name: /antal personer/i });
+        expect(gruppe.querySelectorAll("button").length).toBe(2);
+        expect(gruppe.querySelectorAll("input").length).toBe(1);
+        // Tælleren skal stadig virke, ellers døde vi to funktioner.
+        const felt = gruppe.querySelector("input") as HTMLInputElement;
+        const før = Number(felt.value);
+        fireEvent.click(gruppe.querySelectorAll("button")[1]);
+        expect(Number(felt.value)).toBe(før + 1);
+        fireEvent.click(gruppe.querySelectorAll("button")[0]);
+        expect(Number(felt.value)).toBe(før);
+      });
+
+      test("cookie-banneret: acceptér/afvis er en gruppe med bannerets egen overskrift som navn", () => {
+        renderIn(locale, CookieConsent);
+        const gruppe = screen.getByRole("group", { name: t(locale, "ui.cookieTitle") });
+        expect(gruppe.querySelectorAll("button").length).toBe(2);
+        // Navnet skal være den synlige overskrift, så stemmestyringen stemmer
+        // med det, brugeren ser.
+        expect(document.getElementById("cookie-titel")?.textContent).toBe(t(locale, "ui.cookieTitle"));
+      });
     });
   }
+
+  // `/barselsdagpenge` og `/barselsplanlaegger` er `daOnly` i `calculator-list.ts`,
+  // så de har ingen `se`/`no`-gren — hardkodede danske strenge er korrekte her,
+  // samme port som C65-C69 målte.
+  describe("daOnly — barsel", () => {
+    test("/barselsdagpenge: mor/far er en gruppe med navnet 'Du er'", () => {
+      const { container } = renderIn("da", BarselBeregner);
+      expectFieldsAreNamed(container);
+      const gruppe = container.querySelector('[role="group"][aria-labelledby="barsel-du-er-gruppe"]');
+      expect(gruppe?.querySelectorAll("button").length).toBe(2);
+      expect(document.getElementById("barsel-du-er-gruppe")?.textContent?.trim()).toBe("Du er");
+    });
+
+    test("/barselsplanlaegger: handlingsknapperne er en gruppe", () => {
+      const { container } = renderIn("da", BarselPlanlaegger);
+      const gruppe = screen.getByRole("group", { name: "Handlinger for planen" });
+      // Print, Del link, Til kalender + "Flere handlinger"-menuen.
+      expect(gruppe.querySelectorAll("button").length).toBeGreaterThanOrEqual(3);
+      expect(container.querySelector('[aria-label="Vælg hvilken plan du vil bruge"]')).toBeNull();
+    });
+  });
 
   test("Kønsvalget i /promille er en navngiven gruppe, ikke et navnløst felt", () => {
     renderIn("da", PromilleBeregner);

@@ -142,8 +142,11 @@ describe("ubundne-<label>-scanner", () => {
     // låser den næste agent fast i en vished, der ikke holder. C72 lukkede de
     // næste filer i halen (23/36 her); C71 lukkede de syv filer med tre ubundne
     // labels (30/48); C64→C70's håndtælling sagde 38/70,
-    // fordi den beholdt `/elberegner`s gruppe-etiket, som *er* bundet gennem
+    // fordi den beholdt `/elberegner`s gruppe-etiket, som *er* bundet gennom
     // `aria-labelledby={`elberegner-apparat-${index + 1}`}` — R2's fælde.
-    expect(`${r.filer} filer / ${r.ubundte} ubundne`).toBe("23 filer / 36 ubundne");
+    // C75 tog den ene etiket i `/barselsdagpenge` med, fordi "Du er"-etiketten
+    // blev gruppe-etiketten for mor/far-knapperne (`barsel-du-er-gruppe`), så
+    // den er bundet gennem `aria-labelledby` og ikke længere tæller med.
+    expect(`${r.filer} filer / ${r.ubundte} ubundne`).toBe("22 filer / 35 ubundne");
   });
 });

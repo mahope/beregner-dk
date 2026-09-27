@@ -1,3 +1,7 @@
+STATUS: KØ — **C75 er landet: knapgruppe-klassen er lukket — 10 filer / 12 uavngivne grupper er blevet 0 / 0, og scanneren har nu to plantede tests til at sige det med.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den), og de to åbne deploynoter (C73 08:29, C74 08:46) har første kandidatvindue **12:30**, så intet kunne verificeres i denne iteration. **Klasse:** to eller flere knapper i én beholder, der ikke navngiver sættet — C72's `/brutto-netto`-fund ("Pr. måned"/"Pr. år" uden `<label>`, gruppe eller `aria-label`). Målt af C74's `scripts/knapgruppe-scan.mjs`. **Rettet:** alle 12, i rækkefølge efter GSC — `/tidsberegner` (3 presets, **72.725 visninger**), `/boliglaan`, `/opsparing`, `/leasing`, `/timepris`, `/del-regning`, `/barselsdagpenge`, `/barselsplanlaegger` (3 grupper), `barsel/ArbejdsgiverPanel` og `CookieConsent`. **Mønstret er C64/C70/C72's:** `role="group"` + `aria-labelledby` på en synlig overskrift/etiket der får et `id` (6 steder: tidsberegner-`<h3>`, cookie-`<p>`, barsel-"Du er"-`<label>`, barsel-slet-`<p>`, barsel-meldings-`<h4>`, delregning-drikkepenge-`<label>`), og `aria-label` hvor der ikke *er* en synlig etiket (de fire view-toggles + to barselsgrupper). **Den nye `vaelgVisning`-nøgle får alle tre sprog** (da "Vælg visning", se "Välj vy", no "Velg visning") — se-stengen er æ/ø-fri, så C73's R4 ikke giver et fund. **`label-a11y.test.tsx` er 111 → 118 tests** i DA og SE + en DA-only blok til barsel, **verificeret modsvejs: 18 tests falder** med de gamle komponenter. **Fire fund ud over at sætte attributterne:** (1) **drikkepenge-presettene i `/del-regning` bar på "første gruppe med aria-label"** i en ældre test fra C71 — min nye tællergruppe kom *før* den i DOM'en, så testen fandt 2 i stedet for 4. Rettelsen er ikke en tilpasset tæller: `delregning-drikkepenge`-`<label>`et blev gruppe-etiketten, præcis C70's mønster, så testen slår nu gruppen op på dens id. (2) **`/tidsberegner`s beregning er live** (starttid har en forudvalgt værdi), så preset-gruppen er i DOM'en uden et klik — min første test bad om at trykke på en "Beregn"-knap der ikke findes. (3) **Et `<label>` uden `htmlFor` kan ikke bindes med `for`** — barsel-"Du er"-etiketten er derfor `aria-labelledby`-målet, ikke etiketten for et felt. (4) **Klassen er bredere end "én kontrol":** 5 af de 12 er *separate handlinger* (Print/Del link/Til kalender, Kopiér/Del/.ics, Acceptér/Afvis), ikke valg i én kontrol. De er navngivet fordi et navn findes, ikke fordi klassen krævede det — det står her, så næste agent ikke læser scanneren som "finder kun toggle-grupper". **Begge scanner-gates er opdateret i samme commit** (C71's advarsel): `group-scan-gate.test.ts` 10/12 → 0/0 plus en ny test på at `prFil` er tom, fordi 0 også kan nås ved at slå scanneren fra; `label-scan-gate.test.ts` 23/36 → **22/35**, fordi barsel-"Du er" nu er bundet gennem sit `id`. Gate grøn: lint (554 filer), **1693 tests / 149 filer** (fra 1676 / 149) og build (141 sider); `node scripts/knapgruppe-scan.mjs` → **0 filer / 0 uavngivne**; `node scripts/locale-leak.mjs --gate` exit 0 med **117 kandidater / 85 døde / 32 kræver øjne / 0 ureviewet** (uændret). Kode + plan i ét commit på `ceo/knapgrupper`; se opgave 104.
+
+---
+
 STATUS: KØ — **C74 er landet: måleren for den accessibility-klasse, `label-a11y-scan.mjs` ikke kan se, ligger nu i repoet som et script med fire navngivne regler og ni plantede tests.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den), og alle åbne deploy-noter er fra dagens 07:35-/08:29-merges med første vindue 12:30, så intet kunne verificeres i denne iteration. **Klasse:** en gruppe af toggle-knapper — en periode, en enhed, et view — i en beholder der ikke navngiver sættet. Den opstod hos C72, som fandt `/brutto-netto`s periodeknapper uden `<label>`, gruppe eller `aria-label`; `label-a11y-scan.mjs` tæller kun `<label>`-elementer, så den ser den slags ikke som konstruktion. Samme fejltype som C70 (311/88 i stedet for 97/45) og C72. **Målt på ren kode: 10 filer / 12 uavngivne grupper** — størst er `/tidsberegner` (3 knapper, Normal/Kontor/Nat, **72.725 visninger**), så listen er skrevet op som **opgave 104** med rækkefølge efter GSC, ikke efter antal. **Dækningen er kontrolleret i begge retninger:** scanneren **fandt** `/brutto-netto` før C72's rettelse og **finder den ikke** nu, fordi C72 lagde `role="group"` + `aria-labelledby` på den. **Harness-fejl undervejs, samme type som de tre forrige:** en selvlukkende `<input type="radio">` blev lagt på stakken uden nogen `</…>` at poppe, så næste `</div>` poppede den *første* knap i stedet for beholderen, og radiogrupper kom ud som 0 fund — fundet ved at køre den **plantede** test, altså præcis sådan den er skrevet til at bruges. **Og planens egen kandidat #3 var en målefejl:** den hævdede at `/brok` stadig manglede redaktionelle indgående links, fordi `git grep brok src/app` kun giver `src/app/brok/`. Det er forkert — `/procent` linker til `/brok` siden C42 via `relatedMap` i `calculator-list.ts:185`, låst af en navngiven vagt i `calculator-list.test.ts`. Et grep i `src/app` kan ikke se en datatabel i `src/lib`; det er præcis den advarsel C42 selv skrev ned. **Femte målefejl i træk, og den lå i kandidatlisten.** **Ingen a11y-rettelse landede i denne iteration, bevidst:** 45-minutters budgettet og gaten er den bindende del, så måleren — som gør rettelsen billig og datagrundet — var hele leverancen. Gate grøn: lint (554 filer), **1676 tests / 149 filer** (fra 1667 / 148) og build (141 sider). Kode + plan i ét commit på `ceo/knapgruppe-scan`; se opgave 103.
 
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
@@ -7790,6 +7794,31 @@ landmark=lån, piggybank=opsparing osv.).
     - Gate grøn: lint ok, 280/280 tests, build ok (128 pages).
 
 ## VERIFICÉR DEPLOY-log
+- ⏳ **VERIFICÉR DEPLOY: C75: de 12 uavngivne knapgrupper er navngivet
+  (`role="group"` + `aria-labelledby`/`aria-label` i 10 filer), de to
+  scanner-gates er opdateret, og `label-a11y.test.tsx` er 111 → 118 tests.
+  Kode `«C75»`, merge `«C75»` 2026-09-27 09:3x CEST på branch
+  `ceo/knapgrupper`. Første kandidatvindue **2026-09-27 12:30**.**
+  **HTTP 200 beviser intet:** intet af dette rører `src/lib/` eller en
+  beregning — kun `aria-`/`role`-attributter, fire `id`'er og én ny
+  oversættelsesnøgle. Sådan verificeres det:
+  1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
+  2. `node scripts/knapgruppe-scan.mjs` skal give **0 filer / 0 uavngivne** —
+     uændret, fordi scanneren kun læser `src/`. Beviser at *filerne* kom med.
+  3. **Indhold, fordi det er det der ændrede sig:** på `/tidsberegner`,
+     `/boliglaan`, `/opsparing`, `/timepris` og `/del-regning` skal
+     `grep -o 'role="group"'` give **én** ekstra `role="group"` hver, og
+     `grep -c 'aria-label="Vælg visning"'` skal være **1** på de fire
+     view-toggles (og `"Välj vy"` på beraknare.se — ikke "Vælg", R4).
+  4. `curl -s https://beraknare.se/boliglaan | grep -c "Välj vy"` skal være 1,
+     `grep -c "Vælg visning"` skal være 0.
+  5. **Funktionen skal stadig virke:** view-knapperne på `/boliglaan` skal
+     skifte mellem "Beregn ydelse" og "Hvad har jeg råd til?", og tællerne på
+     `/del-regning` skal stadig hæve/sænke antallet. Det kræver et
+     knap-klik, altså en browser — testene dækker det, curl gør ikke.
+  6. `node scripts/locale-leak.mjs --gate` skal give exit 0 med **0 ureviewet**
+     og **117 / 85 / 32** — uændret.
+
 - ⏳ **VERIFICÉR DEPLOY: C74: måleren for knapgrupper uden navn (`scripts/knapgruppe-scan.mjs` + `src/lib/group-scan-gate.test.ts`, 9 tests) og planen.** Kode `1918cae`, merge `a05edd5` 2026-09-27 08:46 CEST på branch `ceo/knapgruppe-scan`. Første kandidatvindue **2026-09-27 12:30**.**
   **HTTP 200 beviser intet:** intet af dette rører `src/lib/` eller en beregning — kun et script og en testfil under `src/lib/`. Sådan verificeres det:
   1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
@@ -9883,26 +9912,14 @@ landmark=lån, piggybank=opsparing osv.).
    navngivne regler og én plantet fixture pr. regel. Læs C74-STATUS.
 0b. **🔒 Opgave 97 er `BLOCKED`** — `beregner.no` er en anden udgivelse
    (se `❓ Til Mads`). Dermed er **opgave 98** unødig indtil svaret kommer.
-1. **🔜 Opgave 104 — luk de 12 uavngivne knapgrupper C74 målte.** Målingen er
-   gratis at vælge: `node scripts/knapgruppe-scan.mjs` giver hele listen med
-   fil, linje, knapantal og gruppe-role på under to sekunder. Samme regel som
-   altid: **efter hvad brugeren kan ramme, ikke efter antal.** Listen er
-   10 filer / 12 grupper:
-   - `/tidsberegner` (`TidsBeregner.tsx:287`, **3 knapper** — Normal/Kontor/Nat,
-     **72.725 visninger i dansk GSC**, 285 besøgende/28d) — størst i klassen.
-   - `/boliglaan` (`:484`), `/opsparing` (`:403`), `/leasing` (`:251`,
-     3.151 visninger i svensk GSC), `/timepris` (`:330`), `/del-regning`
-     (`:109` — `−`/`+`-tællerne), `/barselsdagpenge` (`BarselBeregner.tsx:301`),
-     `/barselsplanlaegger` (`:120`, `:262`, `:329` — **3 grupper**),
-     `barsel/ArbejdergiverPanel.tsx` (`:119`) og `CookieConsent.tsx` (`:55`).
-   - **Mønsteret er C64/C70/C72's:** `role="group"` + `aria-labelledby` på en
-     `<span id>`/`<label id>` der bærer den synlige overskrift. Hvor en synlig
-     etiket allerede findes, genbruges den.
-   - **Rettet skal dækkes af `label-a11y.test.tsx`** i DA og SE, verificeret
-     modsvejs, og **tallet i `group-scan-gate.test.ts` skal opdateres i samme
-     commit** — ellers låser gaten næste agent fast i et tal, der ikke holder.
-2. **Resten af label-klassen: 23 filer / 36 ubundne labels.** Uændret siden
-   C72, fordi C74 ikke rørte den. `node scripts/label-a11y-scan.mjs`.
+1. **✅ Opgave 104 lukket i C75 — knapgruppe-klassen er 0 / 0.** Alle 12
+   uavngivne grupper er navngivet med `role="group"` + `aria-labelledby`/`aria-label`.
+   Begge scanner-gates er opdateret i samme commit. Læs C75-STATUS — især de
+   fire fund ud over bindingerne, især at **klassen er bredere end "én kontrol"**:
+   5 af de 12 er separate handlinger, som er navngivet fordi et navn findes.
+2. **Resten af label-klassen: 22 filer / 35 ubundne labels** (fra 23/36 i C72 —
+   barsel-"Du er"-etiketten blev bundet som gruppe-etiket i C75).
+   `node scripts/label-a11y-scan.mjs`.
 3. **De 10 øvrige komponenter med `toFixed(2)`** — `/brok` er målt ren
    (C42), så klassens næste ubearbejdede side skal vælges på ny.
 4. ~~**`/brok` uden redaktionelle indgående links**~~ — **LUKKET som

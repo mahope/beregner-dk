@@ -168,14 +168,24 @@ describe("uavngivet-knapgruppe-scanner", () => {
     expect(r.fund[0].rolle).toBe("radiogroup");
   });
 
-  it("repoets egen kode: kun de filer, der står i planens måling", () => {
+  it("repoets egen kode: klassen er lukket, så tallet skal være nul", () => {
     // Den bærende påstand på det rigtige træ: tallet må kun flytte sig i samme
     // commit som en rettelse af klassen, ellers låser den næste agent fast i en
     // vished, der ikke holder — præcis den fejl `label-scan-gate.test.ts`
-    // fangede i C71, da den forventede 30/48 og fik 23/36.
+    // fangede i C71, da den forventede 30/48 og fik 23/36. C75 navngav alle 12
+    // grupper, så 10/12 blev 0/0 i samme commit som rettelsen.
     const r = JSON.parse(
       execFileSync("node", [SCRIPT, "--json"], { cwd: ROOT, encoding: "utf8" }),
     ) as Rapport;
-    expect(`${r.filer} filer / ${r.uavngivne} uavngivne`).toBe("10 filer / 12 uavngivne");
+    expect(`${r.filer} filer / ${r.uavngivne} uavngivne`).toBe("0 filer / 0 uavngivne");
+  });
+
+  it("repoets egen kode: hver fil der rettedes, skal være helt væk", () => {
+    // Tallet 0 kan også nås ved at slå scanneren fra. `prFil` skal derfor være
+    // tom, så der ikke kan stå en fil med 0 fund i den.
+    const r = JSON.parse(
+      execFileSync("node", [SCRIPT, "--json"], { cwd: ROOT, encoding: "utf8" }),
+    ) as Rapport;
+    expect(Object.keys(r.prFil)).toEqual([]);
   });
 });

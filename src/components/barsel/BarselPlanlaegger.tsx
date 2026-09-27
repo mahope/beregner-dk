@@ -116,8 +116,8 @@ function MereMenu({ onNulstil }: { onNulstil: () => void }) {
       >
         {bekraeft ? (
           <div className="p-1">
-            <p className="mb-2 text-gray-800 dark:text-gray-100">Slet planen og start forfra? Det kan ikke fortrydes.</p>
-            <div className="flex gap-2">
+            <p id="barsel-slet-spørgsmaal" className="mb-2 text-gray-800 dark:text-gray-100">Slet planen og start forfra? Det kan ikke fortrydes.</p>
+            <div role="group" aria-labelledby="barsel-slet-spørgsmaal" className="flex gap-2">
               <button
                 type="button"
                 onClick={() => {
@@ -259,7 +259,7 @@ export default function BarselPlanlaegger() {
           <div role="alert" className="rounded-xl border border-blue-300 bg-blue-50 p-4 text-blue-950 dark:border-blue-800 dark:bg-blue-900/30 dark:text-blue-100">
             <p className="font-semibold">Du har åbnet et delt link med en barselsplan.</p>
             <p className="mt-1 text-sm">Du har også din egen gemte plan. Hvilken vil du bruge? Den anden bliver overskrevet.</p>
-            <div className="mt-3 flex flex-wrap gap-2">
+            <div role="group" aria-label="Vælg hvilken plan du vil bruge" className="mt-3 flex flex-wrap gap-2">
               <button
                 type="button"
                 onClick={() => {
@@ -326,7 +326,7 @@ export default function BarselPlanlaegger() {
                 </dd>
               </div>
             </dl>
-            <div className="-mx-2 flex items-center gap-0 sm:gap-0.5 lg:mx-0">
+            <div role="group" aria-label="Handlinger for planen" className="-mx-2 flex items-center gap-0 sm:gap-0.5 lg:mx-0">
               <button type="button" onClick={() => window.print()} className={knapLet}>
                 <Printer className="h-4 w-4" aria-hidden="true" />
                 Print

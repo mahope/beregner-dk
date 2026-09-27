@@ -102,7 +102,7 @@ export default function ArbejdsgiverPanel({ plan, analyse, idag }: Props) {
         const varsler = analyse.varsler.filter((v) => v.foraelder === f.id);
         return (
           <article key={f.id} className="flex flex-col rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
-            <h4 className="mb-2 flex items-center gap-2 font-semibold text-gray-900 dark:text-white">
+            <h4 id={`besked-overskrift-${f.id}`} className="mb-2 flex items-center gap-2 font-semibold text-gray-900 dark:text-white">
               <span className={`h-3 w-3 rounded-full ${PERSON_DOT[i]}`} aria-hidden="true" />
               Besked fra {a.navn}
             </h4>
@@ -116,7 +116,7 @@ export default function ArbejdsgiverPanel({ plan, analyse, idag }: Props) {
               rows={14}
               className="w-full flex-1 resize-y rounded-lg border border-gray-200 bg-gray-50 p-3 font-mono text-xs leading-relaxed text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
             />
-            <div className="mt-3 flex flex-wrap gap-2">
+            <div role="group" aria-labelledby={`besked-overskrift-${f.id}`} className="mt-3 flex flex-wrap gap-2">
               <button
                 type="button"
                 onClick={async () => saet(`k${f.id}`, (await kopier(tekst)) ? "Kopieret!" : "Kunne ikke kopiere – markér teksten og kopiér selv.")}

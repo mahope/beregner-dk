@@ -143,6 +143,7 @@ export default function OpsparingsBeregner({ dstInflation = null }: { dstInflati
     da: {
       calcSavings: "Beregn opsparing",
       reachGoal: "N\u00e5 et m\u00e5l",
+      vaelgVisning: "V\u00e6lg visning",
       startAmount: "Startbel\u00f8b (kr)",
       monthlyDeposit: "M\u00e5nedlig indbetaling (kr)",
       annualRate: "\u00c5rlig rente (%)",
@@ -188,6 +189,7 @@ export default function OpsparingsBeregner({ dstInflation = null }: { dstInflati
     se: {
       calcSavings: "Ber\u00e4kna sparande",
       reachGoal: "N\u00e5 ett m\u00e5l",
+      vaelgVisning: "V\u00e4lj vy",
       startAmount: "Startbelopp (kr)",
       monthlyDeposit: "M\u00e5natlig ins\u00e4ttning (kr)",
       annualRate: "\u00c5rsr\u00e4nta (%)",
@@ -233,6 +235,7 @@ export default function OpsparingsBeregner({ dstInflation = null }: { dstInflati
     no: {
       calcSavings: "Beregn sparing",
       reachGoal: "N\u00e5 et m\u00e5l",
+      vaelgVisning: "Velg visning",
       startAmount: "Startbel\u00f8p (kr)",
       monthlyDeposit: "M\u00e5nedlig innskudd (kr)",
       annualRate: "\u00c5rlig rente (%)",
@@ -400,7 +403,7 @@ export default function OpsparingsBeregner({ dstInflation = null }: { dstInflati
 
   return (
     <div className="space-y-8">
-      <div className="flex rounded-lg border border-gray-200 dark:border-gray-600 overflow-hidden">
+      <div role="group" aria-label={l.vaelgVisning} className="flex rounded-lg border border-gray-200 dark:border-gray-600 overflow-hidden">
         <button type="button"
           onClick={() => setVisning("beregner")}
           className={`flex-1 py-3 text-sm font-medium transition-colors ${
