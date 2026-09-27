@@ -11265,9 +11265,9 @@ verificering der ikke kan slå igennem er lige så dårlig som en der kan.
   6. `https://beraknare.se/alder` skal være **uændret** i den nye sektion:
      **0** hits på "Hvor gammel er jeg, hvis jeg er født i 2007?" og på
      "Sådan beregner du alder i Excel".
-  7. `https://minberegner.dk/api/health` skal svare `status: ok`. Kode +
-     plan i ét commit på `ceo/alder-foedselsaar`; første kandidatvindue
-     **2026-09-27 17:30**.
+  7. `https://minberegner.dk/api/health` skal svare `status: ok`. Kode
+     `03882ca`, merge `15e9cef` **2026-09-27 13:57 CEST** på
+     `ceo/alder-foedselsaar`; første kandidatvindue **2026-09-27 17:30**.
 
 
 - ⏳ **VERIFICÉR DEPLOY: C82 — `/procent` dansk: den forkerte skattepåstand er
