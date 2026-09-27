@@ -63,6 +63,7 @@ export default function BruttoNettoBeregner() {
       desiredPayout: "Ønsket udbetaling (netto)",
       perMonth: "Pr. måned",
       perYear: "Pr. år",
+      periodeLabel: "Beregnesperiode",
       municipalTax: "Kommuneskat (%)",
       paysChurchTax: "Betaler kirkeskat",
       youNeedToEarn: "Du skal tjene",
@@ -89,6 +90,7 @@ export default function BruttoNettoBeregner() {
       desiredPayout: "Önskad utbetalning (netto)",
       perMonth: "Per månad",
       perYear: "Per år",
+      periodeLabel: "Beräkningsperiod",
       municipalTax: "Kommunalskatt (%)",
       paysChurchTax: "Betalar kyrkoskatt",
       youNeedToEarn: "Du behöver tjäna",
@@ -115,6 +117,7 @@ export default function BruttoNettoBeregner() {
       desiredPayout: "Ønsket utbetaling (netto)",
       perMonth: "Per måned",
       perYear: "Per år",
+      periodeLabel: "Beregningsperiode",
       municipalTax: "Kommuneskatt (%)",
       paysChurchTax: "Betaler kirkeskatt",
       youNeedToEarn: "Du må tjene",
@@ -237,16 +240,16 @@ export default function BruttoNettoBeregner() {
         {/* Input */}
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+            <label htmlFor="brutto-netto-oensket" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
               {l.desiredPayout}
             </label>
             <div className="relative">
-              <input type="number" value={oensketNetto} onChange={(e) => setOensketNetto(e.target.value)} className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+              <input id="brutto-netto-oensket" type="number" value={oensketNetto} onChange={(e) => setOensketNetto(e.target.value)} className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">{getCurrencySuffix(locale)}</span>
             </div>
           </div>
 
-          <div className="flex gap-4">
+          <div className="flex gap-4" role="group" aria-label={l.periodeLabel}>
             <button type="button" onClick={() => setPeriode('maaned')} className={`flex-1 py-2.5 rounded-lg border-2 text-sm font-medium transition-all ${periode === 'maaned' ? 'border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' : 'border-gray-200 dark:border-gray-600 dark:text-gray-200'}`}>
               {l.perMonth}
             </button>
@@ -256,9 +259,9 @@ export default function BruttoNettoBeregner() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">{l.municipalTax}</label>
+            <label htmlFor="brutto-netto-kommuneskat" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">{l.municipalTax}</label>
             <div className="relative">
-              <input type="number" step="0.01" value={kommuneSkat} onChange={(e) => setKommuneSkat(e.target.value)} className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+              <input id="brutto-netto-kommuneskat" type="number" step="0.01" value={kommuneSkat} onChange={(e) => setKommuneSkat(e.target.value)} className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">%</span>
             </div>
           </div>

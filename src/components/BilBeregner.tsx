@@ -271,8 +271,8 @@ export default function BilBeregner() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">{l.braendstoftype}</label>
-            <div className="grid grid-cols-2 gap-2">
+            <label id="bil-braendstof-gruppe" className="block text-sm font-medium mb-2">{l.braendstoftype}</label>
+            <div className="grid grid-cols-2 gap-2" role="group" aria-labelledby="bil-braendstof-gruppe">
               {[
                 { key: "benzin", label: l.benzin },
                 { key: "diesel", label: l.diesel },

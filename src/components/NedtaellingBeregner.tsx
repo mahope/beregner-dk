@@ -109,8 +109,8 @@ export default function NedtaellingBeregner() {
       <div className="grid md:grid-cols-2 gap-6">
         <div className="space-y-4">
           <div>
-            <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">{l.target}</label>
-            <input type="date" value={target} onChange={(e) => setTarget(e.target.value)}
+            <label htmlFor="nedtaelling-target" className="block text-xs text-gray-600 dark:text-gray-400 mb-1">{l.target}</label>
+            <input id="nedtaelling-target" type="date" value={target} onChange={(e) => setTarget(e.target.value)}
               className="w-full px-4 py-2.5 border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
           </div>
           <div className="flex justify-end">
