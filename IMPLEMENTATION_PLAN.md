@@ -11284,6 +11284,20 @@ tekst på `/tidszone`), men Kopier-strengen med datoen kræver en browser.
 - **MÅL:** de ni sider er ikke i GSC-listen endnu, så deres baseline er ukendt
   og måles første gang 2026-10-11. Nærmeste baseline er `/dato` **131.419
   visninger / 803 klik / CTR 0,6 % / pos. 5,8**.
+- **Klassen er nu målt lukket i alle tre steder, og det er skrevet ned for at
+  spare næste agent en måling:** (1) `page-data.ts` har **161** `metaTitle`,
+  alle ≤ 60 siden C81 og låst af hans test; (2) de ni `dage-til`-titler er
+  rettet og låst af C97's test, som kalder den rigtige producer; (3) de **20
+  blogindlæg** har 52 titelstrenge i `src/app/blog/*/page.tsx`, **alle ≤ 60**
+  (27-42 tegn) — men intet låste dem, så de var kun korrekte heldigt.
+  `title-collision.test.ts` har nu **en lås på dem**, samme mønster som C44's
+  lap af de ni `dage-til`-sider i samme fil. **To negative målinger undervejs,
+  begge ærlige:** `.next/server/app` indeholder **0 `.html`-filer** i denne
+  Next-version, så "mål titlerne i bygge-outputtet" kan ikke lade sig gøre
+  (prøvet, 0 filer); og blogindlæggene har **ét** sprog pr. fil — samme
+  `title` bruges på begge domæner — så en flersproget titellås ville kun have
+  låst den ene. Den rigtige måling er derfor mod *kilden*, som er hvad de to
+  andre gater også gør.
 
 #### 126. [x] FÆRDIG 2026-09-27 — C96 — `/brok` svarer på "brøk regneregler" (autocompletes nr. 1 under "brøk") med de fire regler, formlen for procent og en brøkdel af et tal
 
