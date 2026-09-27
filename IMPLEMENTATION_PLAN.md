@@ -7678,7 +7678,7 @@ landmark=lån, piggybank=opsparing osv.).
 - ⏳ **ÅBEN — C62 otte beregnere til: 35 talfelter og 13 knapgrupper uden navn
   for skærmlæsere, plus et navnløst `<label>` i del-dialogen på ALLE
   beregnere — kode + plan i ét commit på branch `ceo/labels-runde2`, kode
-  `KODE_SHA`, merge `MERGE_SHA` 2026-09-27 04:2x CEST. Første
+  `a2aea06`, merge `c2b836d` 2026-09-27 04:26 CEST. Første
   kandidatvindue **2026-09-27 07:30**.**
   **HTTP 200 beviser intet her:** ændringen er `htmlFor`/`id`/`aria-labelledby`
   i klient-renderede felter, så den skal verificeres i DOM'en. I DevTools på
