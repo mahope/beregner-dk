@@ -276,38 +276,46 @@ export default function KvadratmeterBeregner() {
     setPrisPrMateriale(0);
   }, [vaelgMateriale]);
 
+  const formatNumber = (num: number, decimals: number = 2) => {
+    return new Intl.NumberFormat(locale === "se" ? "sv-SE" : locale === "no" ? "nb-NO" : "da-DK", {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: decimals,
+    }).format(num);
+  };
   const beregning = useMemo(() => {
     let areal = 0;
     let omkreds = 0;
     let formel = "";
 
+    const t = (n: number) => formatNumber(n);
+
     switch (formType) {
       case "rektangel":
         areal = laengde * bredde;
         omkreds = 2 * (laengde + bredde);
-        formel = `${laengde} \u00d7 ${bredde} = ${areal} m\u00b2`;
+        formel = `${t(laengde)} \u00d7 ${t(bredde)} = ${t(areal)} m\u00b2`;
         break;
       case "cirkel":
         areal = Math.PI * radius * radius;
         omkreds = 2 * Math.PI * radius;
-        formel = `\u03c0 \u00d7 ${radius}\u00b2 = ${areal.toFixed(2)} m\u00b2`;
+        formel = `\u03c0 \u00d7 ${t(radius)}\u00b2 = ${t(areal)} m\u00b2`;
         break;
       case "trekant":
         areal = (grundlinje * hoejde) / 2;
         omkreds = 0;
-        formel = `(${grundlinje} \u00d7 ${hoejde}) / 2 = ${areal} m\u00b2`;
+        formel = `(${t(grundlinje)} \u00d7 ${t(hoejde)}) / 2 = ${t(areal)} m\u00b2`;
         break;
       case "trapez":
         areal = ((side1 + side2) / 2) * trapezHoejde;
         omkreds = 0;
-        formel = `((${side1} + ${side2}) / 2) \u00d7 ${trapezHoejde} = ${areal} m\u00b2`;
+        formel = `((${t(side1)} + ${t(side2)}) / 2) \u00d7 ${t(trapezHoejde)} = ${t(areal)} m\u00b2`;
         break;
     }
 
     const totalPris = prisPerKvm > 0 ? areal * prisPerKvm : 0;
 
     return { areal, omkreds, formel, totalPris };
-  }, [formType, laengde, bredde, radius, grundlinje, hoejde, side1, side2, trapezHoejde, prisPerKvm]);
+  }, [formType, laengde, bredde, radius, grundlinje, hoejde, side1, side2, trapezHoejde, prisPerKvm, locale]);
 
   const materiale = useMemo(() => materialeVedId(materialeId), [materialeId]);
 
@@ -320,13 +328,6 @@ export default function KvadratmeterBeregner() {
     () => beregnMaterialpris(materialebehov, prisPrMateriale),
     [materialebehov, prisPrMateriale],
   );
-
-  const formatNumber = (num: number, decimals: number = 2) => {
-    return new Intl.NumberFormat(locale === "se" ? "sv-SE" : locale === "no" ? "nb-NO" : "da-DK", {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: decimals,
-    }).format(num);
-  };
 
   const formatKr = (amount: number) => formatCurrency(amount, locale, { maximumFractionDigits: 0, minimumFractionDigits: 0 });
 
