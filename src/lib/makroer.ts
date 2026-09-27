@@ -15,6 +15,110 @@ export type KalorieMaal = "vedligehold" | "tab" | "opbyg";
 
 export const MAAL_ORDRE: KalorieMaal[] = ["vedligehold", "tab", "opbyg"];
 
+export type KalorieKoen = "mand" | "kvinde";
+
+export type AktivitetsNiveau =
+  | "stillesiddende"
+  | "let"
+  | "moderat"
+  | "aktiv"
+  | "meget_aktiv";
+
+/** Numeric activity multipliers — display text lives in the component labels. */
+export const AKTIVITETS_FAKTORER: Record<AktivitetsNiveau, number> = {
+  stillesiddende: 1.2,
+  let: 1.375,
+  moderat: 1.55,
+  aktiv: 1.725,
+  meget_aktiv: 1.9,
+};
+
+/** Daily deficit the tool uses for weight loss, and its gain counterpart. */
+export const KALORIE_UNDERSKUD = 500;
+export const KALORIE_OVERSKUD = 300;
+
+/**
+ * Mifflin-St Jeor. Moved out of the component so the page's "kalorier pr dag"
+ * table is computed by the same function the calculator uses — the table
+ * cannot drift from the tool.
+ */
+export function beregnBmr(
+  koen: KalorieKoen,
+  vaegtKg: number,
+  hoejdeCm: number,
+  alder: number,
+): number {
+  if (koen === "mand") {
+    return 10 * vaegtKg + 6.25 * hoejdeCm - 5 * alder + 5;
+  }
+  return 10 * vaegtKg + 6.25 * hoejdeCm - 5 * alder - 161;
+}
+
+export function beregnTdee(bmr: number, aktivitet: AktivitetsNiveau): number {
+  return bmr * AKTIVITETS_FAKTORER[aktivitet];
+}
+
+/**
+ * Calories for a goal. The weight-loss floor is BMR — the body needs its
+ * basal burn just to stay alive — so the recommendation can never promise a
+ * deficit that is not physically possible.
+ */
+export function kalorierForMaal(
+  bmr: number,
+  tdee: number,
+  maal: KalorieMaal,
+): number {
+  const bmrKcal = Math.round(bmr);
+  if (maal === "tab") {
+    return Math.max(bmrKcal, Math.round(tdee - KALORIE_UNDERSKUD));
+  }
+  if (maal === "opbyg") {
+    return Math.round(tdee + KALORIE_OVERSKUD);
+  }
+  return Math.round(tdee);
+}
+
+/** The height, age and activity level the "kalorier pr dag" table assumes. */
+export const PR_DAG_FORUDSETNINGER = {
+  hoejdeCm: 180,
+  alder: 30,
+  aktivitet: "moderat" as AktivitetsNiveau,
+};
+
+export const PR_DAG_VAEGTE = [60, 70, 80, 90];
+
+export interface KaloriePrDagRaekke {
+  vaegtKg: number;
+  mand: number;
+  kvinde: number;
+  tabMand: number;
+  tabKvinde: number;
+}
+
+/**
+ * The table answers "kalorier pr dag mand/kvinde" — the search cluster the
+ * page had no visible text for. Every number is the tool's own output for the
+ * stated assumptions, so the table is a set of examples, not a second truth.
+ */
+export function kaloriePrDagRaekker(
+  vaegte: number[] = PR_DAG_VAEGTE,
+): KaloriePrDagRaekke[] {
+  const { hoejdeCm, alder, aktivitet } = PR_DAG_FORUDSETNINGER;
+  return vaegte.map((vaegtKg) => {
+    const mandBmr = beregnBmr("mand", vaegtKg, hoejdeCm, alder);
+    const kvindeBmr = beregnBmr("kvinde", vaegtKg, hoejdeCm, alder);
+    const mandTdee = beregnTdee(mandBmr, aktivitet);
+    const kvindeTdee = beregnTdee(kvindeBmr, aktivitet);
+    return {
+      vaegtKg,
+      mand: kalorierForMaal(mandBmr, mandTdee, "vedligehold"),
+      kvinde: kalorierForMaal(kvindeBmr, kvindeTdee, "vedligehold"),
+      tabMand: kalorierForMaal(mandBmr, mandTdee, "tab"),
+      tabKvinde: kalorierForMaal(kvindeBmr, kvindeTdee, "tab"),
+    };
+  });
+}
+
 export const PROTEIN_G_PER_KG: Record<
   KalorieMaal,
   { min: number; max: number }

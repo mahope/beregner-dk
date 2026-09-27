@@ -6,21 +6,19 @@ import { ShareCalculation } from "@/components/ShareCalculation";
 import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { beregnMakroer, type KalorieMaal } from "@/lib/makroer";
+import {
+  AKTIVITETS_FAKTORER,
+  KALORIE_UNDERSKUD,
+  beregnBmr,
+  beregnTdee,
+  kalorierForMaal,
+  type AktivitetsNiveau,
+} from "@/lib/makroer";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { formatNumber } from "@/lib/format";
 import { useLocale } from "@/components/LocaleProvider";
 
 type Koen = "mand" | "kvinde";
-type AktivitetsNiveau = "stillesiddende" | "let" | "moderat" | "aktiv" | "meget_aktiv";
-
-// Numeric activity multipliers (display text lives in the labels object)
-const AKTIVITETS_FAKTORER: Record<AktivitetsNiveau, number> = {
-  stillesiddende: 1.2,
-  let: 1.375,
-  moderat: 1.55,
-  aktiv: 1.725,
-  meget_aktiv: 1.9,
-};
 
 const labels = {
   da: {
@@ -187,15 +185,8 @@ export default function KalorieBeregner() {
   }, []);
 
   const resultat = useMemo(() => {
-    // Mifflin-St Jeor formel
-    let bmr: number;
-    if (koen === "mand") {
-      bmr = 10 * vaegt + 6.25 * hoejde - 5 * alder + 5;
-    } else {
-      bmr = 10 * vaegt + 6.25 * hoejde - 5 * alder - 161;
-    }
-
-    const tdee = bmr * AKTIVITETS_FAKTORER[aktivitet];
+    const bmr = beregnBmr(koen, vaegt, hoejde, alder);
+    const tdee = beregnTdee(bmr, aktivitet);
 
     // Alle tre mål til sammenligning. Et underskud må aldrig føre
     // anbefalingen under basalstofskiftet — kroppen skal bruge BMR bare for at
@@ -204,18 +195,18 @@ export default function KalorieBeregner() {
     // lovede 0,5 kg pr. uge. Gulvet er BMR, altså et tal værktøjet selv regner,
     // ikke en ny konstant.
     const bmrKcal = Math.round(bmr);
-    const tabKcal = Math.max(bmrKcal, Math.round(tdee - 500));
-    const vedligKcal = Math.round(tdee);
-    const opbygKcal = Math.round(tdee + 300);
+    const tabKcal = kalorierForMaal(bmr, tdee, "tab");
+    const vedligKcal = kalorierForMaal(bmr, tdee, "vedligehold");
+    const opbygKcal = kalorierForMaal(bmr, tdee, "opbyg");
 
     // Hvad der faktisk er anvendt, så teksten ikke lover et underskud der
     // aldrig blev brugt
     const underskud = Math.max(0, Math.round(tdee - tabKcal));
     const overskud = Math.max(0, opbygKcal - vedligKcal);
-    const paaBmr = maal === "tab" && bmrKcal >= Math.round(tdee - 500);
+    const paaBmr =
+      maal === "tab" && bmrKcal >= Math.round(tdee - KALORIE_UNDERSKUD);
 
-    const anbefalet =
-      maal === "tab" ? tabKcal : maal === "opbyg" ? opbygKcal : vedligKcal;
+    const anbefalet = kalorierForMaal(bmr, tdee, maal);
     const maalBeskrivelse =
       maal === "tab"
         ? paaBmr

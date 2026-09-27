@@ -6,7 +6,7 @@ import FAQ from "@/components/FAQ";
 import RelatedCalculators from "@/components/RelatedCalculators";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
-import { PROTEIN_G_PER_KG, type KalorieMaal } from "@/lib/makroer";
+import { PROTEIN_G_PER_KG, kaloriePrDagRaekker, type KalorieMaal } from "@/lib/makroer";
 import { formatNumber } from "@/lib/format";
 
 export async function generateMetadata() {
@@ -43,6 +43,52 @@ export default async function KalorierPage() {
 
       {locale === "da" && (
       <div className="mt-12 prose max-w-none">
+        <h2>Hvor mange kalorier pr dag?</h2>
+        <p>
+          Det er det tal de fleste søger på, og det afhænger af{" "}
+          <strong>vægt, højde, alder, køn og hvor aktiv du er</strong> — altså
+          af alle fem felter i værktøjet ovenfor. Herunder er tallene for en
+          mand og en kvinde på <strong>180 cm og 30 år</strong> med{" "}
+          <strong>moderat aktivitet</strong> (træner 1-3 gange om ugen), som er
+          den aktivitet de fleste ligger på.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Vægt</th>
+              <th>Mand, kalorier pr dag</th>
+              <th>Kvinde, kalorier pr dag</th>
+              <th>Mand, vægttab</th>
+              <th>Kvinde, vægttab</th>
+            </tr>
+          </thead>
+          <tbody>
+            {kaloriePrDagRaekker().map((raekke) => (
+              <tr key={raekke.vaegtKg}>
+                <td>{dec(raekke.vaegtKg)} kg</td>
+                <td>{dec(raekke.mand)} kcal</td>
+                <td>{dec(raekke.kvinde)} kcal</td>
+                <td>{dec(raekke.tabMand)} kcal</td>
+                <td>{dec(raekke.tabKvinde)} kcal</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p>
+          Kolonnen <strong>vægttab</strong> er 500 kcal under dagens forbrug, så
+          tallet <strong>2.259 kcal</strong> for en mand på 80 kg er både det
+          værktøjet viser og det, <a href="/vaegttab">/vaegttab</a> regner ud fra
+          0,5 kg tab pr. uge. Er du lille og inaktiv, kan 500 kcal ikke tages
+          uden at komme under dit basalstofskifte — så lægger værktøjet et
+          mindre underskud i stedet.
+        </p>
+        <p>
+          Er tallene højere eller lavere end du forventer, er det
+          aktivitetsniveauet der er forkert, ikke din vægt. Svarer du{" "}
+          <a href="/motion-kalorier">stillesiddende</a> men træner tre gange om
+          ugen, er du ikke stillesiddende.
+        </p>
+
         <h2>Forstå dit kaloriebehov</h2>
         <p>
           Dit <strong>kaloriebehov</strong> afhænger af flere faktorer: alder, køn, vægt, højde

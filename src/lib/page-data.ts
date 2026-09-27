@@ -652,6 +652,9 @@ const daPages: Record<string, PageData> = {
       { question: "Hvor mange kalorier for at tabe mig?", answer: "Spis ca. 500 kcal under din TDEE, svarende til ca. 0,5 kg tab pr. uge. Mand, 80 kg, 180 cm og 30 år med moderat aktivitet: ca. 2.259 kcal om dagen." },
       { question: "Hvor meget protein?", answer: "Vedligehold: 0,8-1,2g/kg. Vægttab: 1,2-1,6g/kg. Muskelopbygning: 1,6-2,2g/kg." },
       { question: "Er beregneren præcis?", answer: "Bruger Mifflin-St Jeor formlen. Individuelle variationer kan være 10-15%." },
+      { question: "Hvor mange kalorier skal jeg have?", answer: "En mand på 80 kg, 180 cm og 30 år med moderat aktivitet har et dagligt forbrug på 2.759 kcal. En kvinde på samme mål har 2.502 kcal. Skriv dine egne tal i værktøjet for det præcise tal." },
+      { question: "Hvor mange kalorier skal jeg forbrænde for at tabe 1 kg?", answer: "Der skal bruges ca. 7.700 kcal pr. kilo fedt, så 1 kg kræver et underskud på 7.700 kcal fordelt over en uge. Det svarer til 500 kcal om dagen." },
+      { question: "Er kalorieberegneren gratis?", answer: "Ja. Værktøjet er en gratis hjemmeside — du skal ikke oprette en konto, og det virker direkte i browseren på computer og telefon." },
       ],
     },
     "vaegttab": {

@@ -6,6 +6,13 @@ import {
   FEDT_ANDEL,
   KCAL_PER_G,
   MAAL_ORDRE,
+  AKTIVITETS_FAKTORER,
+  beregnBmr,
+  beregnTdee,
+  kalorierForMaal,
+  kaloriePrDagRaekker,
+  PR_DAG_FORUDSETNINGER,
+  PR_DAG_VAEGTE,
   type KalorieMaal,
 } from "./makroer";
 
@@ -110,5 +117,59 @@ describe("beregnMakroer", () => {
         beregnMakroer({ vaegtKg: VAEGT, kalorier: KALORIER, maal })
       ).not.toThrow();
     }
+  });
+});
+
+describe("BMR, TDEE og kalorier pr dag", () => {
+  it("regner Mifflin-St Jeor for mand og kvinde", () => {
+    // 10*80 + 6,25*180 - 5*30 + 5 = 1.780 (mand), -161 i stedet for +5 (kvinde)
+    expect(beregnBmr("mand", 80, 180, 30)).toBeCloseTo(1780, 5);
+    expect(beregnBmr("kvinde", 80, 180, 30)).toBeCloseTo(1614, 5);
+  });
+
+  it("ganger BMR med aktivitetsfaktoren", () => {
+    expect(beregnTdee(1780, "moderat")).toBeCloseTo(1780 * 1.55, 5);
+    expect(AKTIVITETS_FAKTORER.stillesiddende).toBe(1.2);
+  });
+
+  it("laegger et underskud paa 500 og et overskud paa 300", () => {
+    const bmr = beregnBmr("mand", 80, 180, 30);
+    const tdee = beregnTdee(bmr, "moderat");
+    expect(kalorierForMaal(bmr, tdee, "vedligehold")).toBe(2759);
+    expect(kalorierForMaal(bmr, tdee, "tab")).toBe(2259);
+    expect(kalorierForMaal(bmr, tdee, "opbyg")).toBe(3059);
+  });
+
+  it("laegger aldrig vaegttabsbehovet under basalstofskiftet", () => {
+    // 30 kg, 100 cm, 100 aar, kvinde, stillesiddende: et 500 kcal underskud
+    // ville give et negativt anbefalet indtag
+    const bmr = beregnBmr("kvinde", 30, 100, 100);
+    const tdee = beregnTdee(bmr, "stillesiddende");
+    expect(kalorierForMaal(bmr, tdee, "tab")).toBe(Math.round(bmr));
+    expect(kalorierForMaal(bmr, tdee, "tab")).toBeGreaterThan(0);
+  });
+
+  it("giver 80 kg mand de tal siden allerede lover i sin egen tekst", () => {
+    const raekke = kaloriePrDagRaekker([80])[0];
+    // 1.780 BMR og 2.759 TDEE staar i metaDescription, 2.259 i FAQ'en
+    expect(raekke.mand).toBe(2759);
+    expect(raekke.tabMand).toBe(2259);
+  });
+
+  it("har en kvinderaeekke der er laevendere end mandsraekken paa samme vaegt", () => {
+    for (const raekke of kaloriePrDagRaekker()) {
+      expect(raekke.kvinde).toBeLessThan(raekke.mand);
+      expect(raekke.tabKvinde).toBeLessThan(raekke.tabMand);
+      expect(raekke.tabKvinde).toBeLessThan(raekke.kvinde);
+    }
+  });
+
+  it("bruger de forudsætninger som tabellen siger i teksten", () => {
+    expect(PR_DAG_FORUDSETNINGER).toEqual({
+      hoejdeCm: 180,
+      alder: 30,
+      aktivitet: "moderat",
+    });
+    expect(kaloriePrDagRaekker()).toHaveLength(PR_DAG_VAEGTE.length);
   });
 });
