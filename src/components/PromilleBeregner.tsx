@@ -7,6 +7,7 @@ import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { useLocale } from "@/components/LocaleProvider";
 import { beregnPromille, graenseForLocale, Koen } from "@/lib/promille";
+import { formatNumber } from "@/lib/format";
 
 const labels = {
   da: {
@@ -18,6 +19,7 @@ const labels = {
     hours: "Timer siden første genstand",
     yourBac: "Din anslåede promille",
     mayDrive: (gr: string) => `Du er under grænsen på ${gr}`,
+    atGraensen: (gr: string) => `Du er præcis på grænsen (${gr}) — kør ikke bil`,
     mayNotDrive: (gr: string) => `Du er over grænsen på ${gr} — kør ikke bil`,
     grams: "Ren alkohol",
     timeToZero: "Tid til 0 ‰",
@@ -27,6 +29,13 @@ const labels = {
       "Kør aldrig efter alkohol. Dette er et gennemsnitligt estimat efter Widmark-formlen — din faktiske promille afhænger af mad, stofskifte og meget andet.",
     name: "Promilleberegner",
     drinkHint: "1 genstand = 12 g ren alkohol (fx 33 cl øl, 12 cl vin eller 4 cl spiritus)",
+    noResult: "Indtast antal genstande og kropsvægt — uden dem kan promillen ikke beregnes.",
+    unknown: "—",
+    copyFrame: (led: string, verdikt: string, tidsrum: string) =>
+      tidsrum ? `${led} ${verdikt} ${tidsrum}` : `${led} ${verdikt}`,
+    copyTimesUnder: (heltAedru: string) => `Du er allerede under grænsen — helt ædru om ${heltAedru} time.`,
+    copyTimesOver: (tilGraense: string, heltAedru: string) =>
+      `Under grænsen igen om ${tilGraense} time, helt ædru om ${heltAedru} time.`,
   },
   se: {
     drinks: "Antal standardglas",
@@ -37,15 +46,23 @@ const labels = {
     hours: "Timmar sedan första glaset",
     yourBac: "Din uppskattade promille",
     mayDrive: (gr: string) => `Du är under gränsen på ${gr}`,
+    atGraensen: (gr: string) => `Du är precis på gränsen (${gr}) — kör inte bil`,
     mayNotDrive: (gr: string) => `Du är över gränsen på ${gr} — kör inte bil`,
     grams: "Ren alkohol",
     timeToZero: "Tid till 0 ‰",
     timeToLimit: "Under gränsen om",
     hoursUnit: "timmar",
     driveNote:
-      "Kör aldrig efter alkohol. Detta är en genomsnittlig uppskattning enligt Widmark-formeln — din faktiska promille beror på mat, ämnesomsättning och mycket annat.",
+      "Kör aldrig efter alkohol. Detta är en genomsnittlig uppskattning enligt Widmark-formlen — din faktiska promille beror på mat, ämnesomsättning och mycket annat.",
     name: "Promillekalkylator",
     drinkHint: "1 standardglas = 12 g ren alkohol (t.ex. 33 cl öl, 12 cl vin eller 4 cl sprit)",
+    noResult: "Fyll i antal standardglas och kroppsvikt — utan dem går promillen inte att beräkna.",
+    unknown: "—",
+    copyFrame: (led: string, verdikt: string, tidsrum: string) =>
+      tidsrum ? `${led} ${verdikt} ${tidsrum}` : `${led} ${verdikt}`,
+    copyTimesUnder: (heltNykter: string) => `Du är redan under gränsen — helt nykter om ${heltNykter} timmar.`,
+    copyTimesOver: (tilGraense: string, heltNykter: string) =>
+      `Under gränsen igen om ${tilGraense} timmar, helt nykter om ${heltNykter} timmar.`,
   },
 } as const;
 
@@ -56,7 +73,7 @@ export default function PromilleBeregner() {
   // It comes from the library so the tool, the tables and the FAQ cannot
   // disagree about which country is being calculated for.
   const limit = graenseForLocale(locale);
-  const limitTekst = `${String(limit).replace(".", ",")} ‰`;
+  const limitTekst = `${formatNumber(limit, locale)} ‰`;
 
   const [drinks, setDrinks] = useState<number>(3);
   const [weight, setWeight] = useState<number>(75);
@@ -106,8 +123,45 @@ export default function PromilleBeregner() {
   }, [drinks, weight, sex, hours]);
 
   const r = useMemo(() => beregnPromille(drinks, weight, sex, hours, limit), [drinks, weight, sex, hours, limit]);
-  const mayDrive = r ? r.maaKoere : true;
-  const bacText = r ? r.promille.toFixed(2).replace(".", ",") : "0,00";
+  const mayDrive = r ? r.maaKoere : false;
+  const bacText = r ? formatNumber(r.promille, locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : l.unknown;
+  const timeToLimit = r && !r.paaGraensen
+    ? formatNumber(r.timerTilGraense, locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 })
+    : l.unknown;
+  const timeToZero = r
+    ? formatNumber(r.timerTilNul, locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 })
+    : l.unknown;
+
+  /**
+   * The text the reader copies or shares. It is the only place the string is
+   * built, because `/moms` once sent two different strings from the two
+   * buttons, and because a promille without its four inputs is a legal claim
+   * nobody can check or reuse: 0,66 ‰ means nothing on its own.
+   */
+  const verdikt = !r
+    ? ""
+    : r.maaKoere
+      ? l.mayDrive(limitTekst)
+      : r.paaGraensen
+        ? l.atGraensen(limitTekst)
+        : l.mayNotDrive(limitTekst);
+
+  const tidsrum = !r || r.paaGraensen
+    ? ""
+    : r.maaKoere
+      ? l.copyTimesUnder(timeToZero)
+      : l.copyTimesOver(timeToLimit, timeToZero);
+
+  const deltTekst = r
+    ? l.copyFrame(
+        `${formatNumber(drinks, locale)} ${locale === "se" ? "standardglas" : "genstande"}, ` +
+          `${formatNumber(weight, locale)} kg, ${sex === "mand" ? l.man : l.woman}, ` +
+          `${formatNumber(hours, locale)} ${locale === "se" ? "timmar" : "timer"} ${locale === "se" ? "sedan" : "siden"}: ` +
+          `${bacText} ‰`,
+        verdikt,
+        tidsrum
+      )
+    : l.noResult;
 
   const field = (label: string, value: number, onChange: (n: number) => void, step: string, unit: string) => (
     <div>
@@ -153,46 +207,55 @@ export default function PromilleBeregner() {
 
         <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-6 md:sticky md:top-24 self-start">
           <div className="space-y-4 animate-fade-in">
-            <div className={`rounded-lg p-4 text-center ${mayDrive ? "bg-green-100 dark:bg-green-900/30" : "bg-red-100 dark:bg-red-900/30"}`}>
-              <div className="text-sm font-medium text-gray-600 dark:text-gray-300">{l.yourBac}</div>
-              <div className={`text-4xl font-bold ${mayDrive ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
-                {bacText} ‰
-              </div>
-              <div className={`text-xs mt-1 font-medium ${mayDrive ? "text-green-700 dark:text-green-400" : "text-red-700 dark:text-red-400"}`}>
-                {mayDrive ? l.mayDrive(limitTekst) : l.mayNotDrive(limitTekst)}
-              </div>
-            </div>
+            {r ? (
+              <>
+                <div className={`rounded-lg p-4 text-center ${mayDrive ? "bg-green-100 dark:bg-green-900/30" : r.paaGraensen ? "bg-amber-100 dark:bg-amber-900/30" : "bg-red-100 dark:bg-red-900/30"}`}>
+                  <div className="text-sm font-medium text-gray-600 dark:text-gray-300">{l.yourBac}</div>
+                  <div className={`text-4xl font-bold ${mayDrive ? "text-green-600 dark:text-green-400" : r.paaGraensen ? "text-amber-600 dark:text-amber-400" : "text-red-600 dark:text-red-400"}`}>
+                    {bacText} ‰
+                  </div>
+                  <div className={`text-xs mt-1 font-medium ${mayDrive ? "text-green-700 dark:text-green-400" : r.paaGraensen ? "text-amber-700 dark:text-amber-400" : "text-red-700 dark:text-red-400"}`}>
+                    {verdikt}
+                  </div>
+                </div>
 
-            <div className="grid grid-cols-3 gap-3">
-              <div className="bg-white dark:bg-gray-700 rounded-lg p-3 text-center shadow-sm">
-                <div className="text-xs text-gray-500 dark:text-gray-400">{l.grams}</div>
-                <div className="text-lg font-bold text-gray-900 dark:text-white">{r ? r.gramAlkohol : 0} g</div>
-              </div>
-              <div className="bg-white dark:bg-gray-700 rounded-lg p-3 text-center shadow-sm">
-                <div className="text-xs text-gray-500 dark:text-gray-400">
-                  {l.timeToLimit} {limitTekst}
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="bg-white dark:bg-gray-700 rounded-lg p-3 text-center shadow-sm">
+                    <div className="text-xs text-gray-500 dark:text-gray-400">{l.grams}</div>
+                    <div className="text-lg font-bold text-gray-900 dark:text-white">{formatNumber(r.gramAlkohol, locale)} g</div>
+                  </div>
+                  <div className="bg-white dark:bg-gray-700 rounded-lg p-3 text-center shadow-sm">
+                    <div className="text-xs text-gray-500 dark:text-gray-400">
+                      {l.timeToLimit} {limitTekst}
+                    </div>
+                    <div className="text-lg font-bold text-gray-900 dark:text-white">
+                      {timeToLimit} {l.hoursUnit}
+                    </div>
+                  </div>
+                  <div className="bg-white dark:bg-gray-700 rounded-lg p-3 text-center shadow-sm">
+                    <div className="text-xs text-gray-500 dark:text-gray-400">{l.timeToZero}</div>
+                    <div className="text-lg font-bold text-gray-900 dark:text-white">
+                      {timeToZero} {l.hoursUnit}
+                    </div>
+                  </div>
                 </div>
-                <div className="text-lg font-bold text-gray-900 dark:text-white">
-                  {r ? r.timerTilGraense.toFixed(1).replace(".", ",") : "0"} {l.hoursUnit}
-                </div>
-              </div>
-              <div className="bg-white dark:bg-gray-700 rounded-lg p-3 text-center shadow-sm">
-                <div className="text-xs text-gray-500 dark:text-gray-400">{l.timeToZero}</div>
-                <div className="text-lg font-bold text-gray-900 dark:text-white">
-                  {r ? r.timerTilNul.toFixed(1).replace(".", ",") : "0"} {l.hoursUnit}
-                </div>
-              </div>
-            </div>
 
-            <p className="text-xs text-gray-500 dark:text-gray-400">{l.driveNote}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{l.driveNote}</p>
+              </>
+            ) : (
+              /* Uden et resultat må værktøjet ikke svare "du er under grænsen":
+                 det er en tilladelse til at køre bil, og den må ikke komme fra
+                 et felt brugeren endnu ikke har tastet. */
+              <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-8">{l.noResult}</p>
+            )}
           </div>
         </div>
       </div>
 
       <div className="flex justify-center mt-6 gap-3">
-        <CopyResultButton text={`${l.yourBac}: ${bacText} ‰`} />
+        <CopyResultButton text={deltTekst} />
         <ShareCalculation getShareableLink={getShareableLink} calculatorName={l.name}
-          resultSummary={`${l.yourBac}: ${bacText} ‰`} />
+          resultSummary={deltTekst} />
       </div>
     </div>
   );

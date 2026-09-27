@@ -43,6 +43,17 @@ export interface PromilleResultat {
   timerTilNul: number; // hours until BAC reaches 0
   timerTilGraense: number; // hours until BAC is below the legal limit
   maaKoere: boolean; // below the legal driving limit
+  /**
+   * The displayed promille is *exactly* the legal limit. Both the Danish and
+   * the Swedish rules make it an offence to drive when the concentration
+   * *exceeds* the limit, so at 0.50 ‰ (DA) / 0.20 ‰ (SE) nobody is over it —
+   * but nobody is under it either, and `maaKoere` stays false on purpose, so
+   * the tool never tells a borderline reader to get behind the wheel. The
+   * flag exists so the wording can say "på grænsen" instead of claiming the
+   * reader is "over grænsen", which the page's own text ("ulovligt at køre
+   * bil med en promille over 0,5 ‰") contradicts.
+   */
+  paaGraensen: boolean;
 }
 
 /**
@@ -78,5 +89,6 @@ export function beregnPromille(
     timerTilNul: Math.ceil((afrundet / ELIMINATION_PR_TIME) * 10) / 10,
     timerTilGraense: timerTilGraense(afrundet, graense),
     maaKoere: afrundet < graense,
+    paaGraensen: afrundet === graense,
   };
 }
