@@ -1,3 +1,5 @@
+STATUS: KØ — **C79 er landet: syv deploy-noter lukket ved indholdskontrol, og en rigtig ny fejl fundet undervejs — `beregner.no` svarer HTTP 404 på beregnersider, så C65's norske halvdel kan *aldrig* verificeres.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den). Klokken var 11:21, så **12:30-vinduet var ikke passeret** og C76/C77/C78 måtte ligge åbne — men **ni noter fra 00:41–05:05** var ældre end det seneste *passerede* vindue (07:30), og de var iterationens pligter. **Lukket `DEPLOY OK` ved indhold:** **C49** (`/tidszone` har sommertids-noten på begge domæner, den gamle "bruger standard tidsforskelle" står **0** steder, Tokyo 20:00 og Sydney 21:00 fra 12 dansk — korrekt for 27. september), **C50** (`/dato`'s felter står `2026-09-27` og `2026-10-27` — dagens dato og **præcis én måned** senere, `href="/alder"` findes, SE har "Antal dagar"/"Veckor"/"Helgdagar"), **C51** (alle seks DA-strenge + alle tre SE-strenge i `svar-først`-tabellen), **C53** (`/procent`s standardtilstand siger **"25,00% af 100"** med komma), **C59** (`/alder` har **13.343** — de 13.342 der stadig står, er statiske eksempler — og kopier-sætningen "36 år, 6 måneder og 10 dage pr. 25. september 2026" findes i DA, den svenske sætning på SE), **C65** (SE har "Kylskåp"/"Dammsugare"/"Torktumlare"/"Glödlampa" og **0** danske apparatnavne, mens minberegner.dk stadig har "Køleskab"/"Glødepære") og **C66** (DA 8× "Athen", SE 8× "Aten"). **Delvist lukket:** C56 — brudtallene står med komma ("3,5"/"4,5" i ren tekst), men Kopier-strengen kræver en browser. **Ny fejl, fundet fordi jeg ville verificere C65's NO-side:** `curl -sI https://beregner.no/elberegner` svarer **HTTP 404**. Det er samme årsag som C37's gamle advarsel ("`beregner.no`-DELEN ER UBrugELIG") og som opgave 97's `BLOCKED`-status — og det er derfor `getAllDomainConfigs()` eksplicit skjuler `beregner.no` i `hiddenDomains`. **Konklusionen er derfor skrevet ned, så ingen senere iteration spilder tid på den:** C65's norske halvdel er **ikke** en fejl, den er **uverificerbar**, fordi domænet ikke serverer siden. **To målefejl i træk fra mig selv — nr. 7 og 8 — begge fundet ved at krydschecke mod live-HTML'en i stedet for at tro et grep.** (1) Jeg søgte `hreflang=` og fandt **ingenting**, og var tæt på at "rette" en ikke-eksisterende fejl: Next.js skriver **`hrefLang`** med stort L. HTML-attributnavne er case-insensitive, så hreflang'en er korrekt — og den er faktisk helt rigtig: `da` → minberegner.dk, `sv` → beraknare.se, `x-default` → minberegner.dk, på **begge** domæner, bygget af `buildPageMetadata` + `getAllDomainConfigs()`. (2) Jeg greb `dage-til[a-z/-]*` og så `/dage-til/1-december` som **manglende i begge sitemapmer** — regex'en klippede slugs ved **cifret**. Siden står i begge, og svarer 200 på begge domæner. **Bemærk at det er præcis den fælde C74 skrev ned** ("et grep i `src/app` kan ikke se en datatabel i `src/lib`") — her som et grep der ikke kan se et slug med et tal i. **Fire ting jeg bekræftede er *allerede* færdige, så næste iteration ikke laver dem igen:** hreflang (som ovenfor), SE-titler på `/dato` og `/tidsberegner` (svenske og svar-først), `/bmi` og `/su`s metadata/canonical/sitemap (rene — **faldet er derfor ikke en defekt**, se nyt kandidatpunkt 6), og barsel-bloggen linker allerede til `/barselsdagpenge`, `/barselsplanlaegger` og `/boernepenge` (så **bouncen på 85 % er ikke "manglende links"**). **Ingen kode rørt** — leverancen er otte lukkede noter og en renset kandidatliste; gaten er derfor uændret grøn fra C78 (lint 555 filer, 1709 tests / 150 filer, build 141 sider), og det er sagt *uden* at have kørt den i denne iteration. Se `DEPLOY OK 2026-09-27 11:25` i VERIFICÉR DEPLOY-loggen.
+
 STATUS: KØ — **C78 er landet: `/tidsberegner` skrev "8.25 timer" i den server-renderede HTML — altså i den tekst Google indekserer — på sitets tredjestørste side. Det er den samme `toFixed`-klasse som C76 og C77 har arbejdet på, men på en større side end nogen af de otte de rettede, og den lå i en del af kæden hverken C76's eller C77's håndtælling nævnte: de fire `toFixed(2)` i `src/lib/tidsberegner.ts` — altså *i beregningsmodulet*, der derved lå dansk notation fast for hele sitet.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den), "Næste kandidater efter C73" var udtømt (punkt 3 lukket i C75, punkt 4 var en målefejl lukket i C74, punkt 1 kræver en browser), og alle åbne deploynoter er fra 08:29/08:46/09:25/09:48 med første vindue **12:30** — så intet kunne verificeres. Valget var derfor C77's *egne* åbne måling, resten af `toFixed`-klassen. **Målt på den live side før rettelsen:** `curl -s https://minberegner.dk/tidsberegner` gav **13** `>\d.\d\d<` i ren tekst, beraknare.se **5** — bl.a. `<td>8.25 timer</td>` i eksempel-tabellen, "= 8.25 decimaltimer" i brødteksten, `<td>65.00 timer</td>`, og på beraknare.se ">8.00<" og ">0.33<". **Datagrund:** `/tidsberegner` er **tredjestørste** side i dansk GSC (**72.725 visninger**, CTR 0,3 %, pos. 7,0) og **andenstørste** på beraknare.se (**57.541**) — større end nogen af C76's otte sider — plus 285 besøgende/28d DA (+48 %) og 151 SE (+196 %). **Rettelsen er et designskift, ikke et tegnskift:** `TidsintervalResultat`'s fire strenge blev `number` (`totalTimer`, `arbejdsdage`, `decimalTimer`, `heleDoegn`), og alle otte forbrugere formatterer nu med `formatNumber` — 4 skærmsteder **+ CopyResultButton og `ShareCalculation.resultSummary`** i `TidsBeregner.tsx`, og 4 steder i tabellen og brødteksten i `page.tsx`; `TidsEksempel.decimalTimer` blev `number` med samme følge. Samme decimalantal som det erstattede `toFixed`, så *kun* decimaltegnet ændrer sig. **Tre fund ud over rettelsen, og de er pointen med at måle en klasse på dens sidste halvdel.** (1) **En eksisterende test lå fejlen fast:** `src/app/tidsberegner/page.test.tsx:58` sagde `expect(html).toContain("8.25 timer")` — den *krævede* punktum i den indekserede tekst. (2) **C77's egen `/arveafgift`-test var vakuum-grøn:** den løb over `[data-share-text]`, **et attribut der ikke findes nogen steder i repoet** — listen var tom, og `for (const t of tomt)` passerer. Nu læser begge tests det `CopyResultButton` faktisk skriver i klipbordet (C57's metode), fordi DOM'en ikke viser den streng. Samme fejltype som de seks målefejl, planen fører. (3) **To negative fund lukker to åbne punkter i C76's liste:** `BruttoNettoBeregner.tsx:18` og `TopskatBeregner.tsx:24,25` (`KOMMUNE_SNIT_PCT`, `.toFixed(3)`) er **korrekte** — de fylder `<input type="number">` (`BruttoNettoBeregner.tsx:264`, `TopskatBeregner.tsx:180`), og HTML-spec'en kræver punktum i et number-felts `value` uanset sprog; browseren viser "25,049" på dansk. At "rette" det til komma ville have ødelagt feltet, fordi `parseFloat("25,049")` er 25. C76 skrev "skal verificeres mod DOM'en" — verificeret, svaret er *ladt være*. **Tests:** `decimal-komma.test.tsx` **11 → 16** med en `/tidsberegner`-blok (DA + SE + Kopier-teksten i begge sprog + at heltal stadig vises "8,00"), **verificeret modsvejs: alle 5 nye falder** med de gamle komponenter. `tidsberegner.test.ts` (7) og `tids-eksempler.test.ts` (3) fulgte med i den nye kontrakt. **En fejl i min egen rettelse, fundet ved at tælle kaldene bagefter:** konstanten hedder `TIDS_EKSEMPEL_FLERE_DAGE` med ét E, min perl-regex skrev dobbelt, og den rettede kun 2 af 4 steder i `page.tsx`. Gate grøn: lint (555 filer), **1709 tests / 150 filer** (fra 1704 / 150) og build (141 sider). Kode + plan i ét commit på `ceo/decimal-komma-3`; se opgave 107. **Resten af `toFixed`-klassen er nu lukket** — de otte reelle steder er rettet, resten af C76's liste er død kode og to verificeret korrekte fund — **så en scanner giver noget nu, ikke endnu et snit af listen.**
 
 ---
@@ -10417,7 +10419,94 @@ den kategori er **ikke** et fund:
   død kode og de to verificeret korrekte `type="number`-fund. **Det er derfor
   en scanner, der giver noget nu, ikke endnu et snit af listen.**
 
+### DEPLOY OK 2026-09-27 11:25 CEST — 07:30-batchen lukker syv noter ved indholdskontrol (C79)
+
+Alle svy var merger **før** 07:30-vinduet (00:41–05:05), så de var forfaldne
+og er verificeret ved **indhold**, ikke HTTP 200. `/api/health` svarede
+`status: ok` kl. 11:21.
+
+| Note | Side | Bevis (live 2026-09-27 11:2x) |
+|---|---|---|
+| **C49** | `/tidszone` DA+SE | Sommertids-noten findes på begge ("Beregneren følger sommertiden for dagens dato" / "Beräknaren följer sommartiden för dagens datum"); den gamle "bruger standard tidsforskelle" står **0** steder på begge; Tokyo 20:00 og Sydney 21:00 fra 12 dansk — korrekt 27. september |
+| **C50** | `/dato` DA+SE | `value="2026-09-27"` og `value="2026-10-27"` — dagens dato og **præcis én måned** senere; `href="/alder"` findes i punkt 4; SE har "Antal dagar", "Veckor", "Helgdagar" |
+| **C51** | `/tidsberegner` DA+SE | Alle seks DA-strenge i `svar-først`-tabellen ("Beregner tid på tværs af datoer", "65 t 0 min", "17 t 0 min", "hele døgn", "dagen efter", "Skal intervallet dække mere end ét døgn") og alle tre SE-strenge ("Beräkna tid över flera datum", "65 h 0 min", "17 h 0 min") |
+| **C53** | `/procent` DA | Standardtilstandens forklaring er **"25,00% af 100"** med komma. *Delvis:* de indtastningsafhængige varianter og Kopier-strengen kræver en browser |
+| **C59** | `/alder` DA+SE | **13.343** i payload'en (de 13.342 der står, er statiske eksempelrækker); kopier-sætningen "36 år, 6 måneder og 10 dage pr. 25. september 2026" findes i DA; SE har den svenske sætning |
+| **C65** | `/elberegner` **SE** | "Kylskåp", "Dammsugare", "Torktumlare", "Glödlampa" findes; **0** danske apparatnavne. minberegner.dk har stadig "Køleskab" og "Glødepære". **NO kan ikke verificeres** — se noterne underaf |
+| **C66** | `/tidszone` DA+SE | DA 8× "Athen", SE 8× "Aten" |
+
+**C65's norske halvdel er uverificerbar, ikke fejlende.** `curl -sI
+https://beregner.no/elberegner` svarer **HTTP 404** — domænet serverer ikke
+beregnersider. Samme årsag som C37's advarsel og som opgave 97's `BLOCKED`.
+`getAllDomainConfigs()` skjuler derfor `beregner.no` i `hiddenDomains`, hvilket
+er korrekt: en hreflang til en 404-side ville være en fejl. **Skriv ikke en
+note om den norske halvdel igen.**
+
+**C56 er delvist lukket:** brudtallene står med komma ("3,5" og "4,5" i ren
+tekst på `/tidszone`), men Kopier-strengen med datoen kræver en browser.
+
+** Stadig åbne, fordi de kræver Kopiér/knap-klik:** C52, C55, C57, C60.
+
+### Næste kandidater efter C79
+
+0b. **🔒 Opgave 97 er `BLOCKED`** — `beregner.no` er en anden udgivelse. C79 har
+   nu **bevis** på at domænet ikke serverer beregnersider (404), så spørgsmålet
+   er ikke langer "hvorfor er den ikke verificeret" men "skal den overhovedet".
+   Dermed er **opgave 98** (`TidszoneBeregner` mangler et `no`-sprog) unødig
+   indtil svaret kommer.
+1. **C52, C55, C56, C57 og C60 kan ikke lukkes uden en browser.** De kræver
+   Kopiér eller et knap-klik. De kan lukkes med **én** manuel gennemgang (~10
+   min) — en note i `❓ Til Mads` med kliksekvensen pr. side.
+2. **Resten af label-klassen: 22 filer / 35 ubundne labels.** Gratis at vælge:
+   `node scripts/label-a11y-scan.mjs`.
+3. **Label- og knapgruppe-klasserne er lukket på de trafikrelevante sider.**
+   C79 har desuden bekræftet, at **CTR-arbejdet er bredt gjort**: `/procent`
+   (C1), `/dato` (C2), `/moms` og `/tidszone` har alle i forvejen svar-først
+   title og description på DA *og* SE. **Lav ikke CTR på de samme sider igen.**
+4. **hreflang er korrekt og skal ikke røres.** DA↔SV + `x-default` udledes
+   automatisk af `buildPageMetadata` + `getAllDomainConfigs()` og er verificeret
+   i markup'en på begge domæner. Bemærk at Next.js skriver **`hrefLang`** med
+   stort L — et grep på `hreflang=` giver **0** fund og er en målefejl.
+5. **Svenske slugs på beraknare.se — research, ikke build.** SE `/dato` har
+   **92.832 visninger** til **0,1 % CTR** på pos. 8,3, og slug'en er dansk.
+   Research-fund #4 siger dog, at en slug-migrering **ikke er dokumenteret** at
+   hjælpe, og en migration uden Search Console-bevis kan tabe de 92.832
+   visningers placering. **Kræver en måling før kode.**
+6. **Hvorfor falder `/bmi` (967, −24 %) og `/su` (114, −54 %)?** C79 har
+   **udelukket de tre billige forklaringer**: metadata er svar-først og
+   korrekt, canonical er rigtig, og begge sider står i sitemapmet. Bouncen er
+   4 % hhv. lav, så brugerne bruger værktøjet — det er **ranking eller
+   konkurrence**, og det kan kun måles i Search Console, ikke i koden.
+7. **Mål 2026-10-10 / 2026-10-11** (se Måleprotokol): C1-C16 og C35-C79 måles
+   14 dage efter deres snapshot.
+
+#### 108. [x] FÆRDIG 2026-09-27 — C79 — luk de otte forfaldne deploy-noter ved indhold, og find `beregner.no`'s 404
+
+- **Datagrund:** noterne C49–C65 var merger 00:41–05:05, altså ældre end det
+  seneste *passerede* deploy-vindue (07:30). HTTP 200 beviser intet for disse
+  fund — de ligger i tal, labels og markup.
+- **Leverance:** syv noter `DEPLOY OK` (C49, C50, C51, C53, C59, C65-SE, C66),
+  C56 delvist, og C65's NO-side fundet **uverificerbar** med bevis.
+- **Fund ud over noterne:** `beregner.no/elberegner` → **HTTP 404**.
+- **To målefejl i min egen måling (nr. 7 og 8 i træk), begge rettet ved
+  krydscheck mod live-HTML:** `hreflang=` vs `hrefLang`, og et regex der klippede
+  `/dage-til/1-december` ved cifret. Begge ville have ført til en rettelse af en
+  ikke-eksisterende fejl.
+- **Bekræftet allerede færdigt (skriv det, så det ikke gøres igen):** hreflang,
+  SE-metadata på `/dato` + `/tidsberegner`, `/bmi` + `/su`s metadata/canonical/
+  sitemap, barsel-bloggens links til tre beregnere.
+- **Ingen kode rørt.** Gaten er uændret grøn fra C78 (lint 555 filer, 1709
+  tests / 150 filer, build 141 sider); den er *ikke* kørt i denne iteration,
+  fordi ingen kildefil blev ændret.
+
 ### VERIFICÉR DEPLOY — åbne noter (2026-09-27 11:05)
+
+> **Bemærk:** listen nedenfor er uændret af C79, så noterne står stadig med
+> `⏳`. **C49, C50, C51, C53, C59, C65 (SE) og C66 er lukket `DEPLOY OK`** — se
+> `DEPLOY OK 2026-09-27 11:25` ovenfor. **C56 er delvist lukket.** Det der
+> reelt stadig er åbent: **C76, C77, C78** (første vindue 12:30) og **C52, C55,
+> C56, C57, C60** (kræver en browser).
+
 
 - ⏳ **VERIFICÉR DEPLOY: C78 — `/tidsberegner` skrev "8.25 timer" i den
   server-renderede HTML på begge domæner, altså i den tekst Google
