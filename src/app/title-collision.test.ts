@@ -77,6 +77,19 @@ describe("title-collision", () => {
     });
   }
 
+  it("alle blogtitler er under Googles afkortningsgrænse", () => {
+    // C81 locked the 160 `page-data` titles to 60 characters and C97 did the
+    // same for the nine `dage-til` titles, which that gate cannot see. The
+    // blog titles are the third place a `<title>` is written, and nothing
+    // locked them — measured 27/9 they are all 27-42 characters, so this is a
+    // *lock*, not a regression test: it is meant to pass on today's code and
+    // to fail the first post that grows past what Google shows.
+    expect(posts.length).toBeGreaterThan(20);
+    for (const post of posts) {
+      expect(post.title.length, `${post.slug}: "${post.title}"`).toBeLessThanOrEqual(60);
+    }
+  });
+
   it("dækker de genererede dage-til-sider", () => {
     // Without this the check above would still pass if `getDageTilEvents`
     // ever returned nothing, which is exactly the silent failure C44 fixed.
