@@ -33,8 +33,9 @@ delte tekst ikke kan glide fra hinanden. Svensk får hele sætningen på svensk.
 tests, men ingen der læste klipbordet — derfor kunne tekstfejlen ligge).
 Verificeret modsvejs: med den gamle komponent falder **11 af 17**. Gate grøn:
 lint (546 filer), **1522 tests / 141 filer** (fra 1510 / 141) og build (141
-sider). Kode + plan i ét commit på `ceo/kalorier-bmr-gulv`; første
-kandidatvindue **2026-09-27 07:30**. Se opgave 86.
+sider). Kode + plan i ét commit `1221877` på `ceo/kalorier-bmr-gulv`, merge
+`37d499d` 2026-09-27 02:01 CEST; første kandidatvindue **2026-09-27 07:30**.
+Se opgave 86.
 
 STATUS (forrige iteration) — **C57 er landet: `/renteberegner`'s delte tekst skrev rentesatsen
 råt ind i sætningen og sagde hverken hvilken låntype eller hvilken ydelse den
@@ -7380,8 +7381,8 @@ landmark=lån, piggybank=opsparing osv.).
 
 ## VERIFICÉR DEPLOY-log
 - ⏳ **ÅBEN — C58 `/kalorier`: intet negativt kaloriebehov, "0,5" med komma og
-  en delt tekst med de fem input, kode `HEAD`, merge `HEAD` 2026-09-27 02:2x
-  CEST.** Første kandidatvindue **2026-09-27 07:30**. Indholdstjek ved det nye
+  en delt tekst med de fem input, kode `1221877`, merge `37d499d` 2026-09-27
+  02:01 CEST.** Første kandidatvindue **2026-09-27 07:30**. Indholdstjek ved det nye
   build: på `/kalorier` med standardværdierne (30 år, mand, 80 kg, 180 cm,
   moderat, målet **Tab vægt**) skal **Kopiér** give
   `2.259 kcal/dag (for at tabe ca. 0,5 kg pr. uge). Baseret på 30 år, mand,
