@@ -110,10 +110,13 @@ export default function AktieskatBeregner() {
         {/* Input */}
         <div className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+            <label
+              id="aktieskat-depottype"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2"
+            >
               Vis beregning for
             </label>
-            <div className="flex gap-2">
+            <div className="flex gap-2" role="group" aria-labelledby="aktieskat-depottype">
               {([['begge', 'Sammenlign'], ['frit', 'Frit depot'], ['ask', 'ASK']] as const).map(([key, label]) => (
                 <button type="button"
                   key={key}
@@ -131,11 +134,15 @@ export default function AktieskatBeregner() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+            <label
+              htmlFor="aktieskat-gevinst"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2"
+            >
               Realiseret gevinst (kr.)
             </label>
             <div className="relative">
               <input
+                id="aktieskat-gevinst"
                 type="number"
                 value={gevinst}
                 onChange={(e) => setGevinst(e.target.value)}
@@ -150,11 +157,15 @@ export default function AktieskatBeregner() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+            <label
+              htmlFor="aktieskat-tab"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2"
+            >
               Realiseret tab til modregning (kr.)
             </label>
             <div className="relative">
               <input
+                id="aktieskat-tab"
                 type="number"
                 value={tab}
                 onChange={(e) => setTab(e.target.value)}

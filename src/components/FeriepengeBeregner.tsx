@@ -105,11 +105,15 @@ export default function FeriepengeBeregner() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-2 dark:text-gray-200">
+            <label
+              htmlFor="feriepenge-brutto"
+              className="block text-sm font-medium mb-2 dark:text-gray-200"
+            >
               Bruttoløn ({periode === "maaned" ? "pr. måned" : "pr. år"})
             </label>
             <div className="relative">
               <input
+                id="feriepenge-brutto"
                 type="number"
                 min="0"
                 step="1000"
@@ -122,8 +126,8 @@ export default function FeriepengeBeregner() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2 dark:text-gray-200">Periode</label>
-            <div className="flex gap-4">
+            <label id="feriepenge-periode" className="block text-sm font-medium mb-2 dark:text-gray-200">Periode</label>
+            <div className="flex gap-4" role="group" aria-labelledby="feriepenge-periode">
               <button type="button"
                 onClick={() => setPeriode("maaned")}
                 className={`flex-1 py-3 rounded-lg border-2 transition-colors ${
@@ -150,11 +154,15 @@ export default function FeriepengeBeregner() {
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-2 dark:text-gray-200">
+            <label
+              htmlFor="feriepenge-feriedage"
+              className="block text-sm font-medium mb-2 dark:text-gray-200"
+            >
               Antal feriedage at udbetale
             </label>
             <div className="relative">
               <input
+                id="feriepenge-feriedage"
                 type="number"
                 min="1"
                 max="25"

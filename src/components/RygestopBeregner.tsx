@@ -85,25 +85,25 @@ export default function RygestopBeregner() {
     <div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
-          <label className={labelCls}>{l.cigaretter}</label>
+          <label htmlFor="rygestop-cigaretter" className={labelCls}>{l.cigaretter}</label>
           <div className="relative">
-            <input type="number" min="1" max="100" step="1" value={cigaretterPrDag} onChange={(e) => setCigaretterPrDag(Number(e.target.value))} className={inputCls} />
+            <input id="rygestop-cigaretter" type="number" min="1" max="100" step="1" value={cigaretterPrDag} onChange={(e) => setCigaretterPrDag(Number(e.target.value))} className={inputCls} />
             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">stk</span>
           </div>
         </div>
 
         <div>
-          <label className={labelCls}>{l.pakkepris}</label>
+          <label htmlFor="rygestop-pakkepris" className={labelCls}>{l.pakkepris}</label>
           <div className="relative">
-            <input type="number" min="1" max="500" step="0.5" value={pakkeprisKr} onChange={(e) => setPakkeprisKr(Number(e.target.value))} className={inputCls} />
+            <input id="rygestop-pakkepris" type="number" min="1" max="500" step="0.5" value={pakkeprisKr} onChange={(e) => setPakkeprisKr(Number(e.target.value))} className={inputCls} />
             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">kr</span>
           </div>
         </div>
 
         <div>
-          <label className={labelCls}>{l.pakkestoerrelse}</label>
+          <label htmlFor="rygestop-pakkestoerrelse" className={labelCls}>{l.pakkestoerrelse}</label>
           <div className="relative">
-            <input type="number" min="1" max="100" step="1" value={cigaretterPrPakke} onChange={(e) => setCigaretterPrPakke(Number(e.target.value))} className={inputCls} />
+            <input id="rygestop-pakkestoerrelse" type="number" min="1" max="100" step="1" value={cigaretterPrPakke} onChange={(e) => setCigaretterPrPakke(Number(e.target.value))} className={inputCls} />
             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">stk</span>
           </div>
           <p className="text-xs text-gray-400 mt-1">Standardpakken i Danmark indeholder 20.</p>

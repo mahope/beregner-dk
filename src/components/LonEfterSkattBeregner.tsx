@@ -69,10 +69,13 @@ export default function LonEfterSkattBeregner() {
         {/* Inmatning */}
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+            <label
+              htmlFor="lon-efter-skatt-lon"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2"
+            >
               Lön
             </label>
-            <div className="flex gap-2 mb-2">
+            <div className="flex gap-2 mb-2" role="group" aria-label="Period">
               <button
                 type="button"
                 onClick={() => setPeriode("manad")}
@@ -98,6 +101,7 @@ export default function LonEfterSkattBeregner() {
             </div>
             <div className="relative">
               <input
+                id="lon-efter-skatt-lon"
                 type="number"
                 value={lon}
                 onChange={(e) => setLon(Number(e.target.value))}
@@ -111,11 +115,15 @@ export default function LonEfterSkattBeregner() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+            <label
+              htmlFor="lon-efter-skatt-kommunalskatt"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2"
+            >
               Kommunalskatt (%)
             </label>
             <div className="relative">
               <input
+                id="lon-efter-skatt-kommunalskatt"
                 type="number"
                 step="0.01"
                 value={kommunalskatt}
@@ -129,8 +137,9 @@ export default function LonEfterSkattBeregner() {
             </p>
           </div>
 
-          <label className="flex items-center gap-3">
+          <label htmlFor="lon-efter-skatt-kyrko" className="flex items-center gap-3">
             <input
+              id="lon-efter-skatt-kyrko"
               type="checkbox"
               checked={kyrkomedlem}
               onChange={(e) => setKyrkomedlem(e.target.checked)}

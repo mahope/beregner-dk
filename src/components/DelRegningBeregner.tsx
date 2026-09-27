@@ -12,6 +12,8 @@ const labels = {
   da: {
     total: "Regningens beløb",
     people: "Antal personer",
+    færre: "Færre personer",
+    flere: "Flere personer",
     tip: "Drikkepenge",
     perPerson: "Pr. person",
     tipAmount: "Drikkepenge",
@@ -22,6 +24,8 @@ const labels = {
   se: {
     total: "Notans belopp",
     people: "Antal personer",
+    færre: "Færre personer",
+    flere: "Flere personer",
     tip: "Dricks",
     perPerson: "Per person",
     tipAmount: "Dricks",
@@ -93,27 +97,27 @@ export default function DelRegningBeregner() {
       <div className="grid md:grid-cols-2 gap-6">
         <div className="space-y-4">
           <div>
-            <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">{l.total}</label>
+            <label htmlFor="delregning-total" className="block text-xs text-gray-600 dark:text-gray-400 mb-1">{l.total}</label>
             <div className="relative">
-              <input type="number" min="0" step="1" value={total} onChange={(e) => setTotal(Number(e.target.value))}
+              <input id="delregning-total" type="number" min="0" step="1" value={total} onChange={(e) => setTotal(Number(e.target.value))}
                 className="w-full px-4 py-2.5 pr-10 border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">kr</span>
             </div>
           </div>
           <div>
-            <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">{l.people}</label>
+            <label htmlFor="delregning-personer" className="block text-xs text-gray-600 dark:text-gray-400 mb-1">{l.people}</label>
             <div className="flex items-center gap-2">
-              <button type="button" onClick={() => setPeople(Math.max(1, people - 1))}
+              <button type="button" aria-label={l.færre} onClick={() => setPeople(Math.max(1, people - 1))}
                 className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 text-lg font-bold">−</button>
-              <input type="number" min="1" value={people} onChange={(e) => setPeople(Math.max(1, Number(e.target.value)))}
+              <input id="delregning-personer" type="number" min="1" value={people} onChange={(e) => setPeople(Math.max(1, Number(e.target.value)))}
                 className="flex-1 text-center px-4 py-2.5 border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
-              <button type="button" onClick={() => setPeople(people + 1)}
+              <button type="button" aria-label={l.flere} onClick={() => setPeople(people + 1)}
                 className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 text-lg font-bold">+</button>
             </div>
           </div>
           <div>
-            <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">{l.tip} (%)</label>
-            <div className="flex flex-wrap gap-2 mb-2">
+            <label htmlFor="delregning-drikkepenge" className="block text-xs text-gray-600 dark:text-gray-400 mb-1">{l.tip} (%)</label>
+            <div className="flex flex-wrap gap-2 mb-2" role="group" aria-label={`${l.tip} (%)`}>
               {TIP_PRESETS.map((p) => (
                 <button key={p} type="button" onClick={() => setTip(p)}
                   className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
@@ -126,7 +130,7 @@ export default function DelRegningBeregner() {
               ))}
             </div>
             <div className="relative">
-              <input type="number" min="0" step="1" value={tip} onChange={(e) => setTip(Number(e.target.value))}
+              <input id="delregning-drikkepenge" type="number" min="0" step="1" value={tip} onChange={(e) => setTip(Number(e.target.value))}
                 className="w-full px-4 py-2.5 pr-10 border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">%</span>
             </div>
