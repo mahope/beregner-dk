@@ -101,6 +101,31 @@ export default async function DatoPage() {
           <Link href="/alder">aldersberegneren</Link>.
         </p>
 
+        <h2>Sådan tæller du dage mellem to datoer i Excel</h2>
+        <p>
+          Læg startdatoen i <strong>A1</strong> og slutdatoen i{" "}
+          <strong>B1</strong>, så er den korte formel{" "}
+          <code>=B1-A1</code>. Den tæller forskellen i hele døgn: 1. januar
+          2026 til 1. januar 2027 er <strong>365 dage</strong>.
+        </p>
+        <p>
+          <code>=DATEDIF(A1;B1;&quot;d&quot;)</code> giver præcis det samme tal,
+          men kan også tælle i måneder og år:{" "}
+          <code>=DATEDIF(A1;B1;&quot;m&quot;)</code> giver hele måneder og{" "}
+          <code>=DATEDIF(A1;B1;&quot;y&quot;)</code> hele år. 15. marts 2026 til
+          25. september 2026 er <strong>194 dage</strong> — altså 6 hele måneder.
+        </p>
+        <p>
+          Dansk Excel bruger <strong>semikolon</strong> som skilletegn, fordi
+          komma er decimaltegn. <code>DATEDIF</code> er et skjult navn: det
+          står ikke i formelassistenten, men virker i alle Excel-versioner.
+        </p>
+        <p>
+          Skal du tælle <strong>arbejdsdage</strong> eller se hvilke
+          helligdage der ligger imellem, gør datoberegneren det samme uden at
+          du skal skrive en eneste formel.
+        </p>
+
         <h2>Hvor mange dage er der tilbage af {tilbage.year}?</h2>
         <p>
           Der er <strong>{tilbage.dage} dage tilbage af {tilbage.year}</strong> —{" "}
@@ -196,6 +221,33 @@ export default async function DatoPage() {
         <p>
           Beräkna din <strong>exakta ålder</strong> i år, månader och dagar. Se också hur många
           dagar du har levt, och när du fyller år.
+        </p>
+
+        <h2>Så räknar du ut dagar mellan två datum i Excel</h2>
+        <p>
+          Lägg startdatumet i <strong>A1</strong> och slutdatumet i{" "}
+          <strong>B1</strong>, så är den korta formeln <code>=B1-A1</code>. Den
+          räknar skillnaden i hela dygn: 1 januari 2026 till 1 januari 2027 är{" "}
+          <strong>365 dagar</strong>.
+        </p>
+        <p>
+          <code>=DATEDIF(A1;B1;&quot;d&quot;)</code> ger exakt samma tal, men kan
+          även räkna i månader och år:{" "}
+          <code>=DATEDIF(A1;B1;&quot;m&quot;)</code> ger hela månader och{" "}
+          <code>=DATEDIF(A1;B1;&quot;y&quot;)</code> hela år. 15 mars 2026 till
+          25 september 2026 är <strong>194 dagar</strong> — alltså 6 hela
+          månader.
+        </p>
+        <p>
+          Svensk Excel använder <strong>semikolon</strong> som avgränsare,
+          eftersom komma är decimaltecken. <code>DATEDIF</code> är ett dolt
+          namn: det syns inte i formelassistenten, men fungerar i alla
+          Excel-versioner.
+        </p>
+        <p>
+          Vill du räkna <strong>arbetsdagar</strong> eller se vilka helgdagar
+          som ligger emellan gör datokalkylatorn samma sak utan att du skriver
+          en enda formel.
         </p>
 
         <h2>Hur många dagar är det kvar av {tilbage.year}?</h2>
