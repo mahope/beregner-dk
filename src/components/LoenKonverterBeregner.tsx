@@ -115,22 +115,22 @@ export default function LoenKonverterBeregner() {
       <div className="grid md:grid-cols-2 gap-6">
         <div className="space-y-4">
           <div>
-            <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">{l.amount}</label>
-            <input type="number" min="0" value={amount} onChange={(e) => setAmount(Number(e.target.value))}
+            <label htmlFor="loen-konverter-belob" className="block text-xs text-gray-600 dark:text-gray-400 mb-1">{l.amount}</label>
+            <input id="loen-konverter-belob" type="number" min="0" value={amount} onChange={(e) => setAmount(Number(e.target.value))}
               className="w-full px-4 py-2.5 border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
           </div>
           <div>
-            <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">{l.unit}</label>
-            <div className="grid grid-cols-3 gap-2">
+            <label id="loen-konverter-enhed" className="block text-xs text-gray-600 dark:text-gray-400 mb-1">{l.unit}</label>
+            <div className="grid grid-cols-3 gap-2" role="group" aria-labelledby="loen-konverter-enhed">
               {unitBtn("time", l.time)}
               {unitBtn("maaned", l.maaned)}
               {unitBtn("aar", l.aar)}
             </div>
           </div>
           <div>
-            <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">{l.hours}</label>
+            <label htmlFor="loen-konverter-timer" className="block text-xs text-gray-600 dark:text-gray-400 mb-1">{l.hours}</label>
             <div className="relative">
-              <input type="number" min="1" step="0.5" value={hours} onChange={(e) => setHours(Number(e.target.value))}
+              <input id="loen-konverter-timer" type="number" min="1" step="0.5" value={hours} onChange={(e) => setHours(Number(e.target.value))}
                 className="w-full px-4 py-2.5 pr-16 border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 text-sm">{l.hoursUnit}</span>
             </div>

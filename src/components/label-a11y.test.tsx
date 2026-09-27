@@ -17,12 +17,18 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, test, vi } from "vitest";
 import AlderBeregner from "./AlderBeregner";
+import AlkoholenhederBeregner from "./AlkoholenhederBeregner";
 import BefordringsfradragBeregner from "./BefordringsfradragBeregner";
+import BolanBeregner from "./BolanBeregner";
 import BoliglaanBeregner from "./BoliglaanBeregner";
+import BoligsalgBeregner from "./BoligsalgBeregner";
 import BraendstofBeregner from "./BraendstofBeregner";
 import BrokBeregner from "./BrokBeregner";
 import BoernepengBeregner from "./BoernepengBeregner";
 import DatoBeregner from "./DatoBeregner";
+import EjendomsvaerdiskatBeregner from "./EjendomsvaerdiskatBeregner";
+import EnhederBeregner from "./EnhederBeregner";
+import EfterloensBeregner from "./EfterloensBeregner";
 import Elberegner from "./Elberegner";
 import EnhedsprisBeregner from "./EnhedsprisBeregner";
 import GaeldsfriBeregner from "./GaeldsfriBeregner";
@@ -31,6 +37,7 @@ import KalorieBeregner from "./KalorieBeregner";
 import KvadratmeterBeregner from "./KvadratmeterBeregner";
 import LaaneBeregner from "./LaaneBeregner";
 import LeasingBeregner from "./LeasingBeregner";
+import LoenKonverterBeregner from "./LoenKonverterBeregner";
 import LoenstigningBeregner from "./LoenstigningBeregner";
 import MomsBeregner from "./MomsBeregner";
 import PensionBeregner from "./PensionBeregner";
@@ -424,6 +431,82 @@ describe("Feltnavn for skærmlæsere — de fire mest besøgte beregnere", () =>
         const grupper = Array.from(container.querySelectorAll('[role="group"][aria-labelledby]'));
         const etiket = container.querySelector(`#${CSS.escape(grupper[0].getAttribute("aria-labelledby") ?? "")}`);
         expect(etiket?.textContent).toMatch(/\d/);
+      });
+
+      // C69: 27 ubundne `<label>` på syv beregnere, ordnet efter hvor de lå i
+      // målingen (planens "resten af label-klassen"). Rækkefølgen er ikke efter
+      // antal alene: `/efterloen` (6) er den eneste der stadig var helt uberørt,
+      // og `/bolan` er en af de få sider der findes på **to** domæner.
+      test("/efterloen: fødselsår, forsikringsstatus og de to checkbokse har navn", () => {
+        const { container } = renderIn(locale, EfterloensBeregner);
+        expectFieldsAreNamed(container);
+        // Forsikringsstatus er *knapper* (Fuldtid/Deltid), ikke et felt, så
+        // etiketten kan ikke bindes med `for` — den er en navngiven gruppe.
+        const gruppe = container.querySelector('[role="group"][aria-labelledby="efterloen-forsikringsstatus"]');
+        expect(gruppe).not.toBeNull();
+        expect(gruppe?.querySelectorAll("button").length).toBe(2);
+        expect(container.querySelectorAll("input[type=checkbox]").length).toBe(2);
+      });
+
+      test("/efterloen: arbejdstimer-feltet dukker op med navn, når checkboksen sættes", () => {
+        const { container } = renderIn(locale, EfterloensBeregner);
+        // Bevis på at vi ikke bare tjekker ét sæt felter: feltet er betinget af
+        // "Jeg vil arbejde ved siden af", så uden klik ville vi aldrig se det.
+        expect(container.querySelector("#efterloen-arbejdstimer")).toBeNull();
+        fireEvent.click(container.querySelector("#efterloen-arbejder-sidenom") as HTMLElement);
+        expect(container.querySelector("#efterloen-arbejdstimer")).not.toBeNull();
+        expectFieldsAreNamed(container);
+      });
+
+      test("/ejendomsvaerdiskat: værdi, grundværdi og kommune har navn", () => {
+        const { container } = renderIn(locale, EjendomsvaerdiskatBeregner);
+        expectFieldsAreNamed(container);
+        expect(container.querySelector("#ejendomsvaerdiskat-kommune")).not.toBeNull();
+        // Grundskyldspromille-feltet findes kun ved "Anden kommune".
+        expect(container.querySelector("#ejendomsvaerdiskat-promille")).toBeNull();
+        const vaelger = container.querySelector("#ejendomsvaerdiskat-kommune") as HTMLSelectElement;
+        fireEvent.change(vaelger, { target: { value: "custom" } });
+        expect(container.querySelector("#ejendomsvaerdiskat-promille")).not.toBeNull();
+        expectFieldsAreNamed(container);
+      });
+
+      test("/boligsalg: mæglertype er en radiogroup, tinglysning er et navngivet felt", () => {
+        const { container } = renderIn(locale, BoligsalgBeregner);
+        expectFieldsAreNamed(container);
+        const gruppe = container.querySelector('[role="radiogroup"][aria-labelledby="boligsalg-maeglertype"]');
+        expect(gruppe?.querySelectorAll("input[type=radio]").length).toBe(2);
+        // De to radioknapper skal kunne findes hver for sig, ellers kan
+        // skærmlæseren ikke skelne procent fra fast pris.
+        for (const id of ["boligsalg-maegler-procent", "boligsalg-maegler-fast"]) {
+          const etiket = (container.querySelector(`label[for="${id}"]`)?.textContent ?? "").replace(/\s+/g, " ").trim();
+          expect(screen.getByLabelText(etiket)).toBe(container.querySelector(`#${id}`));
+        }
+      });
+
+      test("/enheder: værdi, fra, til og enhedsgruppe har navn", () => {
+        const { container } = renderIn(locale, EnhederBeregner);
+        expectFieldsAreNamed(container);
+        const gruppe = container.querySelector('[role="group"][aria-labelledby="enheder-gruppe"]');
+        expect(gruppe?.querySelectorAll("button").length).toBe(3);
+      });
+
+      test("/bolan: pris, lån og rente har navn", () => {
+        const { container } = renderIn(locale, BolanBeregner);
+        expectFieldsAreNamed(container);
+        expect(container.querySelectorAll("input").length).toBeGreaterThanOrEqual(3);
+      });
+
+      test("/alkoholenheder: volumen, promille og antal har navn", () => {
+        const { container } = renderIn(locale, AlkoholenhederBeregner);
+        expectFieldsAreNamed(container);
+        expect(container.querySelectorAll("input").length).toBeGreaterThanOrEqual(3);
+      });
+
+      test("/loen-konverter: beløb, enhedsgruppe og timer har navn", () => {
+        const { container } = renderIn(locale, LoenKonverterBeregner);
+        expectFieldsAreNamed(container);
+        const gruppe = container.querySelector('[role="group"][aria-labelledby="loen-konverter-enhed"]');
+        expect(gruppe?.querySelectorAll("button").length).toBe(3);
       });
     });
   }

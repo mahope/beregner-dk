@@ -162,12 +162,13 @@ export default function EjendomsvaerdiskatBeregner() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-2 dark:text-gray-200">
+            <label htmlFor="ejendomsvaerdiskat-vaerdi" className="block text-sm font-medium mb-2 dark:text-gray-200">
               <Home className="inline w-4 h-4 mr-1" />
               Ejendomsværdi (kr)
             </label>
             <div className="relative">
               <input
+                id="ejendomsvaerdiskat-vaerdi"
                 type="number"
                 min="0"
                 max="50000000"
@@ -186,12 +187,13 @@ export default function EjendomsvaerdiskatBeregner() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2 dark:text-gray-200">
+            <label htmlFor="ejendomsvaerdiskat-grundvaerdi" className="block text-sm font-medium mb-2 dark:text-gray-200">
               <Percent className="inline w-4 h-4 mr-1" />
               Grundværdi (kr)
             </label>
             <div className="relative">
               <input
+                id="ejendomsvaerdiskat-grundvaerdi"
                 type="number"
                 min="0"
                 max="20000000"
@@ -212,11 +214,12 @@ export default function EjendomsvaerdiskatBeregner() {
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-2 dark:text-gray-200">
+            <label htmlFor="ejendomsvaerdiskat-kommune" className="block text-sm font-medium mb-2 dark:text-gray-200">
               <Calculator className="inline w-4 h-4 mr-1" />
               Kommune
             </label>
             <select
+              id="ejendomsvaerdiskat-kommune"
               value={valgtKommune}
               onChange={(e) => setValgtKommune(e.target.value)}
               className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg text-lg dark:bg-gray-700 dark:text-white"
@@ -230,11 +233,12 @@ export default function EjendomsvaerdiskatBeregner() {
             </select>
             {valgtKommune === "custom" && (
               <div className="mt-2">
-                <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">
+                <label htmlFor="ejendomsvaerdiskat-promille" className="block text-sm text-gray-600 dark:text-gray-400 mb-1">
                   Grundskyldspromille (‰)
                 </label>
                 <div className="relative">
                   <input
+                    id="ejendomsvaerdiskat-promille"
                     type="number"
                     min="1"
                     max="35"

@@ -175,16 +175,16 @@ export default function BoligsalgBeregner() {
         <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl space-y-3">
           <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">{l.maeglerSettings}</h3>
           <div>
-            <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">{l.maeglerType}</label>
-            <div className="flex gap-4">
-              <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-                <input type="radio" name="maeglerType" value="procent"
+            <label id="boligsalg-maeglertype" className="block text-sm text-gray-600 dark:text-gray-400 mb-1">{l.maeglerType}</label>
+            <div className="flex gap-4" role="radiogroup" aria-labelledby="boligsalg-maeglertype">
+              <label htmlFor="boligsalg-maegler-procent" className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                <input id="boligsalg-maegler-procent" type="radio" name="maeglerType" value="procent"
                   checked={values.maeglerType === "procent"}
                   onChange={() => setValue("maeglerType", "procent" as unknown as boolean)}
                   className="accent-blue-600" /> {l.procent}
               </label>
-              <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-                <input type="radio" name="maeglerType" value="fast"
+              <label htmlFor="boligsalg-maegler-fast" className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                <input id="boligsalg-maegler-fast" type="radio" name="maeglerType" value="fast"
                   checked={values.maeglerType === "fast"}
                   onChange={() => setValue("maeglerType", "fast" as unknown as boolean)}
                   className="accent-blue-600" /> {l.fixed}
@@ -235,8 +235,8 @@ export default function BoligsalgBeregner() {
         {/* Tinglysning toggle */}
         <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl space-y-3">
           <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">{l.tinglysningSettings}</h3>
-          <label className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300">
-            <input type="checkbox"
+          <label htmlFor="boligsalg-tinglysning" className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300">
+            <input id="boligsalg-tinglysning" type="checkbox"
               checked={values.tinglysningInkluderet}
               onChange={(e) => setValue("tinglysningInkluderet", e.target.checked)}
               className="rounded accent-blue-600 w-4 h-4" />
