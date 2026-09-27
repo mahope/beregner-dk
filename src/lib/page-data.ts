@@ -1234,7 +1234,12 @@ const daPages: Record<string, PageData> = {
       { question: "Hvordan beregner man moms?", answer: "Læg til: gang med 1,25. Træk fra: divider med 1,25. 100 kr ekskl. = 125 kr inkl." },
       { question: "Hvad er momsandelen?", answer: "Momsandelen i en pris inkl. moms er 20% (25/125 = 0,20)." },
       { question: "Hvornår kan virksomheder trække moms fra?", answer: "Momsregistrerede virksomheder kan trække købsmoms fra og afregner med SKAT." },
-      ],
+      { question: "Er der moms på bøger i Danmark?", answer: "Nej. Bøger, aviser og tidsskrifter er undtaget fra momsloven, så der betales ingen moms: en bog til 249 kr. koster 249 kr. I Sverige er bøger derimod 6 % moms." },
+      { question: "Hvorfor er fødevarer ikke billigere med lavere moms?", answer: "Danmark har kun én momssats på 25 % og ingen reducerede satser, så fødevarer er 25 % moms: 80 kr. ekskl. moms koster 100 kr. inkl. moms. I Sverige er mad 12 % moms, fordi Sverige har satsen 25 %, 12 % og 6 %." },
+      { question: "Hvordan trækker man 25 % moms fra et beløb?", answer: "Divider beløbet med 1,25: 1.250 kr. inkl. moms ÷ 1,25 = 1.000 kr. ekskl. moms. Momsbeløbet er forskellen på 250 kr., og momsandelen i en pris inkl. moms er 20 %, ikke 25 %." },
+      { question: "Hvilke varer og ydelser er momsfrie?", answer: "Sundhedsydelser, undervisning, finansielle tjenesteydelser, udlejning af bolig, personbefordring i Danmark samt bøger, aviser og tidsskrifter er undtaget fra momsloven. Resten af handelsvarerne er 25 % moms." },
+    ],
+
     },
     "loen-efter-skat": {
       slug: "loen-efter-skat",

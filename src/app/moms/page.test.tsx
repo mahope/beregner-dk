@@ -66,4 +66,40 @@ describe("moms page", () => {
     expect(html).toContain("1 000 kr × 1,25 = 1 250 kr, × 1,12 = 1 120 kr eller × 1,06 = 1 060 kr");
     expect(html).toContain("Momsandelen är cirka 20 % vid 25 % moms, 10,71 % vid 12 % och 5,66 % vid 6 %");
   });
+
+  test("svarer på de spørgsmål den danske søgeklynge stiller: bøger, fødevarer og 25 % fra", async () => {
+    const html = renderToStaticMarkup(await MomsPage());
+
+    // "moms på bøger" og "moms på bøger afskaffes hvornår" — autocomplete, 0 svar før denne.
+    expect(html).toContain("En bog til 249 kr.");
+    expect(html).toContain("Bøger, avis og forbrugsudstyr:");
+    // "moms på fødevarer" / "moms på frugt og grønt" — Danmark har kun 25 %.
+    expect(html).toContain("Der er kun én dansk momssats");
+    expect(html).toContain("En fødevare til 80 kr. ekskl. moms koster 100 kr. inkl. moms");
+    // "hvordan trækker man moms fra et beløb" og de fem variationer under det.
+    expect(html).toContain("1.250 kr. inkl. moms ÷ 1,25 = 1.000 kr. ekskl. moms");
+    // "tysk moms fra" — dansk virksomhed, tysk leverandør.
+    expect(html).toContain("En dansk virksomhed, der køber tjenester i Tyskland, betaler ikke tysk moms");
+  });
+
+  test("den danske side siger ikke, at bøger har 0 % moms", async () => {
+    const html = renderToStaticMarkup(await MomsPage());
+
+    // Undtaget fra momsloven er ikke det samme som 0 % moms. Den gamle liste sagde
+    // "Aviser og tidsskrifter (0% moms)", som er en fejl i lovterminologien.
+    expect(html).not.toContain("Aviser og tidsskrifter (0% moms)");
+  });
+
+  test("de fire nye spørgsmål står i den danske FAQ og dermed i JSON-LD", async () => {
+    const html = renderToStaticMarkup(await MomsPage());
+
+    for (const spg of [
+      "Er der moms på bøger i Danmark?",
+      "Hvorfor er fødevarer ikke billigere med lavere moms?",
+      "Hvordan trækker man 25 % moms fra et beløb?",
+      "Hvilke varer og ydelser er momsfrie?",
+    ]) {
+      expect(html).toContain(spg);
+    }
+  });
 });

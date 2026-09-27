@@ -1,3 +1,5 @@
+STATUS: KØ — **C83 er landet: `/moms` er sitets fjerdestørste danske side i Google (23.225 visninger, CTR 0,2 %, pos. 6,9) og den havde svar på nul af de spørgsmål, dens egen søgeklynge stiller — den forklarede i stedet, hvilke *ydelser* der er momsfrie, mens folk spørger om *varer*.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den), så valget var C82's egen åbne kandidat #3: samme metode på de næste GSC-sider. **Målt først, rettet så.** DA-autocomplete (`hl=da`, `gl=dk`, hentet 13:00 i dag) giver **19 variationer under "moms på"** — "moms på bøger", "moms på fødevarer", "moms på parkering", "moms på træning", "moms på frugt og grønt", "moms på bøger afskaffes hvornår" — og **6 under "hvordan trækker man moms fra"** ("…et beløb", "…et tal", "…et køb", "25 moms fra", "tysk moms fra"). Siden havde **0** af dem: den nævner ingen vare, og den eneste omtale af bøger var i en liste om undtagne *ydelser*. **Den konkrete asymmetri — C82's metode:** SE-siden har *tre* satser og siger, hvilke varer der bruger hvilken ("12 %: livsmedel", "6 %: böcker"), mens DA-siden siger "25 %" og intet om varer. Det er altså ikke et tilfælde, men den ene sproggren mangler det svar den anden har. **Rettelsen:** to nye synlige afsnit ("Der er kun én dansk momssats — også på fødevarer" og "Er der moms på det, jeg køber? Sådan tjekker du det"), **fire nye FAQ-par i `page-data.ts`** — som dermed også kommer i JSON-LD'en — og **én faglig præcisering: listen sagde "Aviser og tidsskrifter (0% moms)"**, hvilket er forkert i lovterminologien: en vare der er undtaget fra momsloven har ingen moms, ikke 0 % moms. Bøger, aviser og tidsskrifter står nu samlet, og siden siger eksplicit hvorfor det betyder noget (prisen er den samme med og uden moms) — og at Sverige gør det modsat. **Tal der kan efterprøves:** en bog til 249 kr. koster 249 kr.; en fødevare til 80 kr. ekskl. moms koster 100 kr. inkl. moms; 1.250 kr. inkl. moms ÷ 1,25 = 1.000 kr. ekskl. moms. `/tidszone` og `/renteberegner` blev **ikke** rørt — de er målt næste iteration, fordi de er C83's arv, hvis tiden rækker. **Én kildefejl jeg ikke skjuler:** jeg fik **ikke** hentet momslovens konsoliderede tekst (retsinformation.dk er en JS-side, webfetch gav tomt svar; skat.dk/erhverv/moms er kun navigation). Pastandene er derfor skrevet om Danmarks sats og undtagelser uden et dybt link, og **skal efterprøves mod momsloven, før de bruges i en annonce eller et blogindlæg.** **Harness:** `page.test.tsx` er **3 → 6 tests** — ét der kræver alle fem konkrete svar, ét der *forbyder* den gamte "0% moms"-sætning, ét der kræver de fire nye spørgsmål i FAQ'en — **verificeret modsvejs: alle 3 falder** med den gamle kode (`git stash` + kørsel), og de to svenske tests er urørte, fordi SE-siden ikke mangler noget. Gate grøn: lint (556 filer), **1722 tests / 151 filer** (fra 1719 / 151), build (**141 sider**). Kode + plan i ét commit på `ceo/moms-da-svar`; se opgave 112. **MÅL:** `/moms` baseline **23.225 visninger / 40 klik / CTR 0,2 % / pos. 6,9 pr. 2026-08-28 → 2026-09-25** — måles igen 2026-10-11.
+
 STATUS: KØ — **C82 er landet: sitets største side løj om dansk skat, og den manglede de svar, dens egen søgeklynge er fuld af. `/procent` skrev "37 % skat af 40.000 kr = 14.800 kr i skat" i brødteksten — en *marginalsats* brugt som et gennemsnit.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den), og 12:30-batchen var ikke kørt da iterationen startede kl. 12:28, så de åbne noter lå åbne i første halvdel og blev lukket efter gaten. **Før valget blev målt i to retninger, fordi Fase 3's topprioritet er CTR.** (1) **Alle 14 mest trafikrelevante sider har allerede svar-først title og description i DA og SE** — C79/C80's arbejde, bekræftet ved `curl` på `/procent`, `/dato`, `/tidsberegner`, `/moms`, `/tidszone` DA og `/procent`, `/dato`, `/tidsberegner`, `/nedtaelling`, `/moms` SE; `/procent`s titel er "Procentberegner – beregn 10 procent af et tal" og beskrivelsen starter med "10 procent af et tal er tallet × 0,10. 10 procent af 250 er 25." **Det er altså ikke titlen, der mangler — det er indholdet under den.** (2) **Siden har desuden alle strukturerede data på plads**: `FAQPage` (4 `Question`), `WebApplication`, `BreadcrumbList`, `Answer`, `Organization`, `index, follow` og tre `hrefLang` — så schema er heller ikke flaskehalsen. **Fælden lå i sidens egen historie:** commit `8796c16` (26/9) gjorde præcis denne rettelse på den **svenske** side, målt på svensk autocomplete, og skrev bevidst "Kun locale `se` er ændret; dansk og norsk er urørt" — og låste det med to tests. Dansk fik derfor hverken Excel-afsnittet eller de to nye interne links, selv om **`/procent` er GSC's største side: 149.546 visninger, 96 klik, CTR 0,1 %, pos. 7,4** — 25 % af alle månedens visninger på sitet. **Målt før rettelsen:** dansk autocomplete (`hl=da`, `gl=dk`, hentet 12:35 i dag) giver **11 variationer under "procent i excel"** ("procent i excel formel", "beregn procent i excel", "minus procent i excel", "plus procent i excel", "procent stigning i excel", "fratræk procent i excel", "procent formler i excel"), **10 under "hvordan regner man procent"** (især "hvordan regner man procent forskel mellem to tal" og "hvordan regner man procent af et tal") og **4 under "rabat i procent"**. Siden havde **0** af dem. **Rettelsen:** samme metode som `8796c16`, i dansk — et synligt Excel-afsnit med de tre formler og tal der kan efterprøves, to nye interne links (`/loenstigning` og `/loen-efter-skat`), og **tre nye FAQ-par i `page-data.ts`**, som dermed også kommer i JSON-LD'en: "Hvordan regner man procent i Excel?", "Hvordan regner man procentforskellen mellem to tal?" og "Hvor stor er rabatten i procent?". **Rabat-tallet er GSC's egen søgning:** "en telefon er sat 1125 kr. ned. normalt koster den 9000 kr. hvor stor er rabatten i procent?" (**54 visninger, 1 klik, pos. 6**) er 1.125 ÷ 9.000 = **12,5 %**, og den regnes nu både i brødteksten og i FAQ'en. **Fagfejlen er rettet uden at opfinde en erstatningssats** — 37 % er kommuneskat (i gennemsnit 25,049 %, `SATSER_2026.kommuneskatSnit`) + statslig bundskat (12,01 %), og bundskatten slår først ind over `mellemskatGraense` = **641.200 kr**, så på 40.000 kr er den statslige del **0 %** og skatten er arbejdsmarkedsbidrag plus kommuneskat på den skattepligtige base. Sætningen siger nu det samme som den svenske: skatten afhænger af kommune og indkomst, og linket til `/loen-efter-skat` giver det rigtige tal. **Målefejl nr. 12 (min egen, samme klasse som nr. 9-11):** min første kontrol for C76 var `>[0-9]+\.[0-9]+` uden afsluttende `<` — den matcher **danske tusindtalsseparatorer** ("3.000.000 kr.", "15.738 kr."), altså **68 falske fund på `/billaan` og 30 på `/forbrugslaan`**. Med krav om `<` eller `kr`/`%` bagefter er tallet **0 på alle 11 sider på begge domæner**. **Harness:** `page.test.tsx` er **4 → 5 tests** (den gamle "den danske siden beholder sit eget skatteksempel" låste den forkerte påstand — den er erstattet af en der låser Excel-afsnittet, de to links og **fraværet** af "37% skat af 40.000 kr" og "14.800"), og en ny **paritets-test** kræver de tre formler i **baade** `da` og `se`, så asymmetrien fra `8796c16` ikke kan komme tilbage. `page-data.test.ts`'s "de danske og norske /procent-sider er uændrede" låste `da` — den er delt, så kun **`no` er urørt** (beregner.no serverer ikke beregnersider, C79). **Verificeret modsvejs: alle 3 nye tests falder** med den gamle kode. Gate grøn: lint (556 filer), **1719 tests / 151 filer** (fra 1717 / 151), build (**141 sider**). Kode + plan i ét commit på `ceo/procent-da-svar`; se opgave 111. **12:30-batchen er lukket ved indhold før merge:** C76, C77, C78 og C80 er `DEPLOY OK` — `/tidsberegner` har **0** tal med decimalpunkt på begge domæner (før 13 og 5), `beraknare.se/boliglaan` har `ca. 3,5-4,0 %` med mellemrum før % (svensk notation) mens den danske side har `ca. 3,5-4,0%` (altså intakt), `/kvadratmeter` m.fl. har **0** på **11 sider × 2 domæner**, og `/api/health` svarer `status: ok`. Se `DEPLOY OK 2026-09-27 12:38`.
 
 STATUS: KØ — **C81 er landet: 67 af repoets 160 `metaTitle`-strenge var længere end Googles afkortningsgrænse, fordi hver af dem bar sit eget domænenavn i halen — altså præcis den del, der bliver klippet væk. `/bmi` — sitets næststørste side — havde en 76-tegns-titel på dansk og 77 på svensk.** Køen havde ingen `I GANG`-opgave, og C80 (Node-runtime-kontrakten) var merged og pushet 11:50. **Målt først, rettet så:** 67 titler over 60 tegn (47 da, 29 se, 10 no senere reduceret) — efter at strippe domænenavnet var **kun 6** stadig for lange, og de er håndtrimmet. Alle 160 er nu ≤ 60, og `page-data.test.ts` har **2 nye tests** der låser det pr. alle tre sprog, så en ny side ikke kan genindføre en afkortet titel. **Hvorfor det er CTR og ikke kosmetik:** for en 76-tegns-titel viser Google de første ~60 tegn, altså er det brand-navnet der forsvinder, ikke løftet — titlen *ligner* en færdig title og er det ikke. **En eksisterende test fangede en rigtig fejl i min egen rettelse:** `page-data.test.ts` kræver at BMI-titlen siger "vuxna", og jeg havde skrevet "för **v**oksna" — den test er hele pointen med at have den. **Målefejl nr. 11 (min egen, fundet af testen):** jeg skrev også en for streng ny test ("titlen må aldrig være bare et domænenavn"), som faldt på `/elberegner`s helt korrekte "Elberegner | MinBeregner.dk" — testen var skrevet til at fange noget, der ikke er en fejl, så den er fjernet igen. **To negative målinger fra C80's forfældelighed, der lukker Fase 3's blog-bounce-spørgsmål:** artiklen `/blog/barsel-2026-regler-og-satser` (185 besøgende/28d, bounce 85 %) har **allerede** et svar-først-kort med link til `/barselsdagpenge` 10 linjer inde i brødteksten plus to yderligere beregnerlinks og to relaterede artikler; `/blog/boernepenge-2026-satser-og-regler` har 5 links til `/boernepenge` og 4 til hver `/boligstoette` og `/barselsdagpenge`. **Høj bounce på en side, der besvarer sit spørgsmål i første skærmbillede, er den forventede form, ikke et manglende link** — samme fejlklasse som C68's og C74's målefejl.
@@ -7803,6 +7805,32 @@ landmark=lån, piggybank=opsparing osv.).
     - Gate grøn: lint ok, 280/280 tests, build ok (128 pages).
 
 ## VERIFICÉR DEPLOY-log
+### DEPLOY OK 2026-09-27 12:58 CEST — 12:30-batchen lukker C73, C74 og C75 ved indholdskontrol (C83)
+
+Alle tre merges lå 08:29–09:35 CEST, altså før 12:30-vinduet, og er verificeret
+kl. 12:56–12:58 mod live-sitet. `/api/health` svarer `status: ok`
+(`timestamp 2026-09-27T10:58:52Z`).
+
+- **C73** (`/del-regning`'s tællerknapper + R4 i `locale-leak.mjs`):
+  `beraknare.se/del-regning` har **0** "Færre personer"/"Flere personer" og **1**
+  "Färre personer"/"Fler personer" hver. `minberegner.dk/del-regning` har
+  **1** dansk og **0** svensk — altså er kun `se`-blokken ændret, præcis som
+  rettelsen siger.
+- **C75** (12 uavngivne knapgrupper + scanner-gates):
+  `role="group"` findes nu i den server-renderede HTML på alle fem sider, i
+  begge sprog — `/tidsberegner` 1/1, `/boliglaan` 2/2, `/opsparing` 2/2,
+  `/timepris` 1/1, `/del-regning` 2/2. Den nye nøgle står med **1** "Vælg
+  visning" på de fire view-toggles i dansk (`/boliglaan`, `/opsparing`,
+  `/timepris`, `/leasing`) og **0** svensk; beraknare.se har **1** "Välj vy" og
+  **0** "Vælg visning" på de samme fire (R4: ingen æ/ø i `se`).
+  `node scripts/knapgruppe-scan.mjs` → **0 filer / 0 uavngivne** lokalt.
+- **C74** (måleren, `scripts/knapgruppe-scan.mjs` + 9 tests): **målerens egen
+  kontrolværdi er blevet overhalet af C75.** Noten krævede "10 filer / 12
+  uavngivne" fordi den var skrevet før C75 rettede dem; det korrekte tal nu er
+  **0 / 0**, og det er C75's note der låser det i `group-scan-gate.test.ts`.
+  C74's deploy-bevis er derfor kun: filerne findes i repoet, og de otte
+  `role="group"`-fund ovenfor er C74-scannerens klasse rettet i markup.
+
 - ⏳ **VERIFICÉR DEPLOY: C75: de 12 uavngivne knapgrupper er navngivet
   (`role="group"` + `aria-labelledby`/`aria-label` i 10 filer), de to
   scanner-gates er opdateret, og   `label-a11y.test.tsx` er 111 → 118 tests. Kode `7c6d4d1`, merge `d5233af`
@@ -10658,6 +10686,74 @@ tekst på `/tidszone`), men Kopier-strengen med datoen kræver en browser.
    **Mål igen 2026-10-11.**
 8. **Mål 2026-10-10 / 2026-10-11** (se Måleprotokol): C1-C16 og C35-C82 måles
    14 dage efter deres snapshot. C82's CTR-mål står under opgave 111.
+
+#### 112. [x] FÆRDIG 2026-09-27 — C83 — `/moms` dansk: svar på de 19 "moms på"-spørgsmål, og en fejl i lovterminologien rettet
+
+- **Datagrund:** `/moms` er **fjerdestørste** danske side i GSC (**23.225
+  visninger, 40 klik, CTR 0,2 %, pos. 6,9**; 1.684 visninger på brand-søgningen
+  "momsberegner" alene, pos. 7). Fase 3's topprioritet er CTR på position 5-10,
+  og C80-C82 viste at titel/description allerede er svar-først — så hullet er
+  indholdet under dem.
+- **Målt før rettelsen (autocomplete, `hl=da`/`gl=dk`, 2026-09-27 13:00):**
+  **19** variationer under "moms på" (bøger, bøger afskaffes hvornår, fødevarer,
+  frugt og grønt, parkering, træning, fitness, temu), **6** under "hvordan
+  trækker man moms fra" (et beløb, et tal, et køb, 25 moms fra, tysk moms fra),
+  **10** under "moms fra" (frankrig, england, usa, norge, fradrag,
+  fradragsprocent) og **10** under "moms beregner" (bil, told, ekskl/inkl, tysk).
+  Siden svarede på **0** af "moms på"-formerne. Den **eneste** vare nævnt var
+  "Aviser og tidsskrifter (0% moms)" i listen over undtagne *ydelser*.
+- **Sprog-asymmetrien, som er beviset på at rettingen er rigtig:** SE-siden
+  (`page.tsx` `locale === "se"`) lister Sveriges tre satser *og siger hvilke varer
+  der bruger hvilken* ("12 %: livsmedel, restaurang, hotell", "6 %: böcker,
+  tidningar, kollektivtrafik, idrott, kultur"). DA-siden sagde "25 %" og holdt
+  op. Samme fejltype som `8796c16` (SE fik svarene, DA ikke) — den bare modsat.
+- **Rettelsen (kun `da`; `se` er bevidst urørt):** to nye `<h3>`-afsnit og en
+  ny punktliste i `src/app/moms/page.tsx`, fire nye `faqItems` i
+  `src/lib/page-data.ts` (→ JSON-LD), og EU-listen får en linje om tysk
+  købsmoms/omvendt betalingsansvar. Efterprøvbare tal: bog 249 kr. → 249 kr.;
+  fødevare 80 kr. ekskl. → 100 kr. inkl.; 1.250 ÷ 1,25 = 1.000.
+- **Faglig præcisering:** "Aviser og tidsskrifter (0% moms)" er fjernet. En vare
+  der er *undtaget fra momsloven* har ingen moms — ikke 0 % moms. Bøger, aviser
+  og tidsskrifter står nu som én linje, og siden siger eksplicit at prisen er
+  den samme med og uden moms, og at Sverige gør det modsat (6 %).
+- **⚠️ Kilde der ikke blev verificeret (ærligt noteret):** retsinformation.dk
+  (`/eli/lov/2022/1214`) er en JS-side — `webfetch` returnerede tomt; skat.dk's
+  `/erhverv/moms` er navigation uden brødtekst. Påstandene er derfor skrevet
+  uden dybt link. **Efterprøv mod momslovens sats- og undtagelsesbestemmelser,
+  før de genbruges i en annonce eller et nyt blogindlæg.**
+- **Harness:** `src/app/moms/page.test.tsx` **3 → 6 tests**. Ét kræver de fem
+  konkrete svar i den server-renderede HTML, ét **forbyder** "Aviser og
+  tidsskrifter (0% moms)", ét kræver de fire nye spørgsmål i FAQ'en. **Modsvejs
+  verificeret:** med `git stash` på de to kildefiler falder **alle 3** nye tests,
+  de to svenske + `test.each` består. Ingen ny test på SE, fordi SE ikke
+  mangler noget.
+- **Gate grøn:** lint 556 filer, **1722 tests / 151 filer** (fra 1719 / 151),
+  build 141 sider. Kode + plan i ét commit på `ceo/moms-da-svar`.
+- **MÅL:** `/moms` baseline **23.225 visninger / 40 klik / CTR 0,2 % / pos. 6,9**
+  (GSC 2026-08-28 → 2026-09-25) og **~168 besøgende/28d** (ikke i Plausible-snapshottet;
+  `/moms` står uden for top-15 med 91 visninger). Måles igen 2026-10-11.
+
+### Næste kandidater efter C83
+
+0. **🔒 Opgave 97 er `BLOCKED`** (Mads' svar), 98 afhænger af den. Browser-noter:
+   C52, C55, C56, C57 og C60 ligger som kliksekvens i `❓ Til Mads` nederst.
+1. **🆕 Mål C83-metoden på `/tidszone` (24.485 v, CTR 0,4 %, pos. 7,5).**
+   Autocomplete (mål først, `hl=da` og `hl=se`): "tidszoner" 750v pos 10,
+   "hvad er klokken i usa når den er 12 i danmark" 180v pos 6, "tidszoner
+   beregner" 113v pos 3, "tidsforskel" 87v pos 10. C36 har allerede et
+   blogindlæg om USA-spørgsmålet, så spørg først om siden svarer på det.
+2. **🆕 `/renteberegner` (13.560 v, CTR 0,9 %, pos. 7,5).** "annuitetslån
+   beregner" 361v pos 8, "renteberegner" 322v pos 7, "månedlig rente
+   beregning" 48v pos 5. Bemærk at SE-siden står på **pos. 25,6** med 2.831
+   visninger — her er der plads, ikke bare CTR.
+3. **🔒 CTR på `/procent`, `/dato`, `/moms`, `/tidszone`, `/tidsberegner` er
+   lukket** (C79-C83). Lav ikke CTR på dem igen — mål i stedet om C82/C83's
+   svar flytter position *eller* CTR efter 14 dage.
+4. **⏬ Nedprioriteret:** de 22 filer / 35 ubundne labels i
+   `label-a11y-scan.mjs` (kun sider uden for top-15), se punkt 4 i C82-listen.
+5. **🔒 Uforandrede forbehold:** hreflang er korrekt (`hrefLang` med stort L);
+   svenske slugs kræver Mads' go; `/bmi` og `/su`s fald måles 2026-10-11.
+6. **Mål 2026-10-10 / 2026-10-11** (se Måleprotokol).
 
 #### 109. [x] FÆRDIG 2026-09-27 — C80 — erklær Node-runtime-kontrakten: `engines.node`, `.nvmrc` og en test der holder de tre sammen
 

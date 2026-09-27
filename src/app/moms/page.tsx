@@ -84,7 +84,34 @@ export default async function MomsPage() {
           <li>Finansielle tjenesteydelser (bank, forsikring)</li>
           <li>Udlejning af fast ejendom (bolig)</li>
           <li>Personbefordring (bus, tog, fly inden for DK)</li>
-          <li>Aviser og tidsskrifter (0% moms)</li>
+          <li>Bøger, aviser og tidsskrifter</li>
+        </ul>
+        <p>
+          Momsfrit betyder, at varen er <em>undtaget</em> fra momsloven — der betales ikke 0 % moms,
+          der betales slet ingen moms. Prisen er derfor den samme med og uden moms. En bog til 249 kr.
+          koster 249 kr. Til sammenligning er bøger i Sverige 6 % moms.
+        </p>
+
+        <h3>Der er kun én dansk momssats — også på fødevarer</h3>
+        <p>
+          Danmark har ingen reducerede momssatser. Fødevarer, drikkevarer, biler og tøj er derfor
+          alle 25 % moms, og det er derfor de oftest stillede spørgsmål om
+          &ldquo;moms på fødevarer&rdquo; og &ldquo;moms på frugt og grønt&rdquo; har samme svar: den fulde
+          sats. En fødevare til 80 kr. ekskl. moms koster 100 kr. inkl. moms, fordi 80 kr. &times; 1,25
+          = 100 kr.
+        </p>
+        <p>
+          Undtagelserne er de ydelser, der er listet ovenfor. <strong>Bøger er en af de få varer,
+          der er helt uden moms</strong> — resten af handelsvarerne er 25 % moms. I Sverige er det
+          omvendt: mad er 12 % og bøger 6 % moms, fordi Sverige har tre satser.
+        </p>
+
+        <h3>Er der moms på det, jeg køber? Sådan tjekker du det</h3>
+        <ul>
+          <li><strong>Se om der står &ldquo;inkl. moms&rdquo; eller &ldquo;ekskl. moms&rdquo;:</strong> prisen på hylden er ofte ekskl. moms, så 100 kr. bliver 125 kr. i kassen</li>
+          <li><strong>Fødevarer, restauranter og tøj:</strong> altid 25 %</li>
+          <li><strong>Bøger, avis og forbrugsudstyr:</strong> uden moms</li>
+          <li><strong>Transport:</strong> bus og tog i Danmark er uden moms, et fly uden for Danmark har 25 %</li>
         </ul>
 
         <h3>Momsregistrering for virksomheder (2026)</h3>
@@ -110,6 +137,7 @@ export default async function MomsPage() {
         </p>
         <ul>
           <li><strong>Inden for EU:</strong> Privatpersoner betaler normalt momsen i sælgerlandet. Virksomheder kan bruge reverse charge</li>
+          <li><strong>Tysk købsmoms:</strong> En dansk virksomhed, der køber tjenester i Tyskland, betaler ikke tysk moms. Ved omvendt betalingsansvar registrerer virksomheden selv beløbet med 25 % i sin egen afregning</li>
           <li><strong>Uden for EU:</strong> Du betaler dansk moms (25%) + eventuel told ved import over 1.150 kr</li>
         </ul>
 
