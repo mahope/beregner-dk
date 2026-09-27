@@ -1,6 +1,11 @@
 import type { DomainConfig } from "./domain-config";
 import { isCalculatorAvailable, isCalculatorPath } from "./calculator-list";
-import { getDageTilSlugFromPathname, isDageTilLocale, resolveDageTilSlug } from "./dage-til";
+import {
+  getDageTilPrefix,
+  getDageTilSlugFromPathname,
+  isDageTilLocale,
+  resolveDageTilSlug,
+} from "./dage-til";
 
 export type RouteDecision =
   | { type: "allow" }
@@ -53,12 +58,19 @@ export function getRouteDecision(
     }
     const resolved = resolveDageTilSlug(dageTil.slug, domainConfig.locale);
     if (!resolved) return { type: "not-found" };
-    if (!resolved.isOwnLocale) {
+    // The path prefix carries the language, so it — not the spelling of the
+    // slug — decides which locale the request is in. A slug spelled the same
+    // in both languages (`1-december`, `halloween`) resolves to "own locale"
+    // on either domain, so testing the slug alone let the request fall
+    // through and then 404 in the page component instead of redirecting.
+    const ownPrefix = getDageTilPrefix(domainConfig.locale);
+    if (!ownPrefix) return { type: "not-found" };
+    if (dageTil.prefix !== ownPrefix || !resolved.isOwnLocale) {
       return {
         type: "redirect",
-        destination: `/${domainConfig.locale === "da" ? "dage-til" : "dagar-till"}/${
-          resolved.localeSlug
-        }`,
+        // `ownPrefix` ends in a slash — the old hardcoded prefix did not, and
+        // the extra separator showed up as "/dagar-till//juldagen".
+        destination: `${ownPrefix}${resolved.localeSlug}`,
         status: 301,
       };
     }
