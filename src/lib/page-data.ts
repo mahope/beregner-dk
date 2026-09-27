@@ -693,6 +693,9 @@ const daPages: Record<string, PageData> = {
       { question: "Hvordan beregner jeg procentvis stigning?", answer: "((Ny - Gammel) / Gammel) × 100. Fra 100 til 125 = 25% stigning." },
       { question: "Hvad er procentpoint vs procent?", answer: "Procentpoint er absolut ændring, procent er relativ. Renten fra 2% til 3% = 1 procentpoint men 50% stigning." },
       { question: "Hvordan lægger jeg procent til?", answer: "Gang med (1 + procent/100). Læg 20% til 150: 150 × 1,20 = 180." },
+      { question: "Hvordan regner man procent i Excel?", answer: "Skriv =A1/B1*100, hvis du vil have procent direkte, og =A1*B1/100, hvis du vil have X procent af et tal. Et fald fra 9.000 kr til 7.875 kr er =(B1-A1)/A1*100 = -12,5 %. Formater cellen som procent, hvis du ikke skriver *100." },
+      { question: "Hvordan regner man procentforskellen mellem to tal?", answer: "Forskellen er ((nyt tal - gammelt tal) / gammelt tal) × 100. Går en pris fra 9.000 kr til 7.875 kr, er faldet (7.875 - 9.000) / 9.000 = -12,5 %." },
+      { question: "Hvor stor er rabatten i procent?", answer: "Rabatten er (pris før rabat - pris efter rabat) / pris før rabat × 100. Er en vare på 9.000 kr sat 1.125 kr. ned, er rabatten 1.125 / 9.000 = 12,5 %." },
       ],
     },
     "kvadratmeter": {

@@ -1,3 +1,5 @@
+STATUS: KØ — **C82 er landet: sitets største side løj om dansk skat, og den manglede de svar, dens egen søgeklynge er fuld af. `/procent` skrev "37 % skat af 40.000 kr = 14.800 kr i skat" i brødteksten — en *marginalsats* brugt som et gennemsnit.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den), og 12:30-batchen var ikke kørt da iterationen startede kl. 12:28, så de åbne noter lå åbne i første halvdel og blev lukket efter gaten. **Før valget blev målt i to retninger, fordi Fase 3's topprioritet er CTR.** (1) **Alle 14 mest trafikrelevante sider har allerede svar-først title og description i DA og SE** — C79/C80's arbejde, bekræftet ved `curl` på `/procent`, `/dato`, `/tidsberegner`, `/moms`, `/tidszone` DA og `/procent`, `/dato`, `/tidsberegner`, `/nedtaelling`, `/moms` SE; `/procent`s titel er "Procentberegner – beregn 10 procent af et tal" og beskrivelsen starter med "10 procent af et tal er tallet × 0,10. 10 procent af 250 er 25." **Det er altså ikke titlen, der mangler — det er indholdet under den.** (2) **Siden har desuden alle strukturerede data på plads**: `FAQPage` (4 `Question`), `WebApplication`, `BreadcrumbList`, `Answer`, `Organization`, `index, follow` og tre `hrefLang` — så schema er heller ikke flaskehalsen. **Fælden lå i sidens egen historie:** commit `8796c16` (26/9) gjorde præcis denne rettelse på den **svenske** side, målt på svensk autocomplete, og skrev bevidst "Kun locale `se` er ændret; dansk og norsk er urørt" — og låste det med to tests. Dansk fik derfor hverken Excel-afsnittet eller de to nye interne links, selv om **`/procent` er GSC's største side: 149.546 visninger, 96 klik, CTR 0,1 %, pos. 7,4** — 25 % af alle månedens visninger på sitet. **Målt før rettelsen:** dansk autocomplete (`hl=da`, `gl=dk`, hentet 12:35 i dag) giver **11 variationer under "procent i excel"** ("procent i excel formel", "beregn procent i excel", "minus procent i excel", "plus procent i excel", "procent stigning i excel", "fratræk procent i excel", "procent formler i excel"), **10 under "hvordan regner man procent"** (især "hvordan regner man procent forskel mellem to tal" og "hvordan regner man procent af et tal") og **4 under "rabat i procent"**. Siden havde **0** af dem. **Rettelsen:** samme metode som `8796c16`, i dansk — et synligt Excel-afsnit med de tre formler og tal der kan efterprøves, to nye interne links (`/loenstigning` og `/loen-efter-skat`), og **tre nye FAQ-par i `page-data.ts`**, som dermed også kommer i JSON-LD'en: "Hvordan regner man procent i Excel?", "Hvordan regner man procentforskellen mellem to tal?" og "Hvor stor er rabatten i procent?". **Rabat-tallet er GSC's egen søgning:** "en telefon er sat 1125 kr. ned. normalt koster den 9000 kr. hvor stor er rabatten i procent?" (**54 visninger, 1 klik, pos. 6**) er 1.125 ÷ 9.000 = **12,5 %**, og den regnes nu både i brødteksten og i FAQ'en. **Fagfejlen er rettet uden at opfinde en erstatningssats** — 37 % er kommuneskat (i gennemsnit 25,049 %, `SATSER_2026.kommuneskatSnit`) + statslig bundskat (12,01 %), og bundskatten slår først ind over `mellemskatGraense` = **641.200 kr**, så på 40.000 kr er den statslige del **0 %** og skatten er arbejdsmarkedsbidrag plus kommuneskat på den skattepligtige base. Sætningen siger nu det samme som den svenske: skatten afhænger af kommune og indkomst, og linket til `/loen-efter-skat` giver det rigtige tal. **Målefejl nr. 12 (min egen, samme klasse som nr. 9-11):** min første kontrol for C76 var `>[0-9]+\.[0-9]+` uden afsluttende `<` — den matcher **danske tusindtalsseparatorer** ("3.000.000 kr.", "15.738 kr."), altså **68 falske fund på `/billaan` og 30 på `/forbrugslaan`**. Med krav om `<` eller `kr`/`%` bagefter er tallet **0 på alle 11 sider på begge domæner**. **Harness:** `page.test.tsx` er **4 → 5 tests** (den gamle "den danske siden beholder sit eget skatteksempel" låste den forkerte påstand — den er erstattet af en der låser Excel-afsnittet, de to links og **fraværet** af "37% skat af 40.000 kr" og "14.800"), og en ny **paritets-test** kræver de tre formler i **baade** `da` og `se`, så asymmetrien fra `8796c16` ikke kan komme tilbage. `page-data.test.ts`'s "de danske og norske /procent-sider er uændrede" låste `da` — den er delt, så kun **`no` er urørt** (beregner.no serverer ikke beregnersider, C79). **Verificeret modsvejs: alle 3 nye tests falder** med den gamle kode. Gate grøn: lint (556 filer), **1719 tests / 151 filer** (fra 1717 / 151), build (**141 sider**). Kode + plan i ét commit på `ceo/procent-da-svar`; se opgave 111. **12:30-batchen er lukket ved indhold før merge:** C76, C77, C78 og C80 er `DEPLOY OK` — `/tidsberegner` har **0** tal med decimalpunkt på begge domæner (før 13 og 5), `beraknare.se/boliglaan` har `ca. 3,5-4,0 %` med mellemrum før % (svensk notation) mens den danske side har `ca. 3,5-4,0%` (altså intakt), `/kvadratmeter` m.fl. har **0** på **11 sider × 2 domæner**, og `/api/health` svarer `status: ok`. Se `DEPLOY OK 2026-09-27 12:38`.
+
 STATUS: KØ — **C81 er landet: 67 af repoets 160 `metaTitle`-strenge var længere end Googles afkortningsgrænse, fordi hver af dem bar sit eget domænenavn i halen — altså præcis den del, der bliver klippet væk. `/bmi` — sitets næststørste side — havde en 76-tegns-titel på dansk og 77 på svensk.** Køen havde ingen `I GANG`-opgave, og C80 (Node-runtime-kontrakten) var merged og pushet 11:50. **Målt først, rettet så:** 67 titler over 60 tegn (47 da, 29 se, 10 no senere reduceret) — efter at strippe domænenavnet var **kun 6** stadig for lange, og de er håndtrimmet. Alle 160 er nu ≤ 60, og `page-data.test.ts` har **2 nye tests** der låser det pr. alle tre sprog, så en ny side ikke kan genindføre en afkortet titel. **Hvorfor det er CTR og ikke kosmetik:** for en 76-tegns-titel viser Google de første ~60 tegn, altså er det brand-navnet der forsvinder, ikke løftet — titlen *ligner* en færdig title og er det ikke. **En eksisterende test fangede en rigtig fejl i min egen rettelse:** `page-data.test.ts` kræver at BMI-titlen siger "vuxna", og jeg havde skrevet "för **v**oksna" — den test er hele pointen med at have den. **Målefejl nr. 11 (min egen, fundet af testen):** jeg skrev også en for streng ny test ("titlen må aldrig være bare et domænenavn"), som faldt på `/elberegner`s helt korrekte "Elberegner | MinBeregner.dk" — testen var skrevet til at fange noget, der ikke er en fejl, så den er fjernet igen. **To negative målinger fra C80's forfældelighed, der lukker Fase 3's blog-bounce-spørgsmål:** artiklen `/blog/barsel-2026-regler-og-satser` (185 besøgende/28d, bounce 85 %) har **allerede** et svar-først-kort med link til `/barselsdagpenge` 10 linjer inde i brødteksten plus to yderligere beregnerlinks og to relaterede artikler; `/blog/boernepenge-2026-satser-og-regler` har 5 links til `/boernepenge` og 4 til hver `/boligstoette` og `/barselsdagpenge`. **Høj bounce på en side, der besvarer sit spørgsmål i første skærmbillede, er den forventede form, ikke et manglende link** — samme fejlklasse som C68's og C74's målefejl.
 
 STATUS: KØ — **C80 er landet: projektet erklærer nu hvilken Node-version det kræver — `engines.node` + `.nvmrc` + en test der låser alle tre erklæringer mod hinanden. Det er præcis den fejl, der brændte jordemoderstudy ned 23. august (Next.js 16 installeret, bygserveren kørte Node 18, og det viste sig først i produktion), og `~/.local/oxloop/AFHAENGIGHEDER.md` har stået med `engines: NEJ, nvmrc: nej` for beregner-dk siden 23/8.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den), og de tre åbne deploynoter (C76, C77, C78) har første vindue **12:30**, som ikke var passeret kl. 11:42 — så intet kunne verificeres. **Før valget blev kørt tre målinger, fordi Fase 3's topprioritet er CTR, ikke kodehygiejne, og to af dem gav negative svar der er værd at have skrevet ned.** (1) **`page-data.ts` har nul dansk lækage på beraknare.se:** alle tre locale-blokke (da 79 sider, no 28, se 53) scannet på `æ`/`ø` — svensk skriver aldrig nogen af dem, så reglen kan ikke give falske fund — gav **0 / 0 / 0**. Det er første gang denne fil er målt; `locale-leak.mjs` springer den over, fordi den *er* en oversættelsestabel, altså af præcis den grund C68 skrev om. (2) **Ingen højtrafiksides titl løfter en et andet tal end sin egen:** `curl` på alle otte — 1.887/13.227 på `/renteberegner`, "450 kr."/"0,90 kr. pr. km" på `/braendstof`, 20 m² på `/kvadratmeter`, 0,88 på `/promille`, 3/4 + 0,75 på `/brok`, 1.780/2.759 på `/kalorier`, "36 år, 6 måneder og 10 dage" på `/alder` — **12 af 12 fund**. (3) **Alle 81 calculatør-slugs har page-data i hvert sprog de serveres på** — de 23 eneste undtagelser ligger alle i `no`, som ikke serveres (C79's 404-bevis). **To målefejl i træk fra mig selv (nr. 9 og 10), begge fundet i samme minut:** nr. 9 var et regex der sammenlignede `"/dato"` med slugs uden skråstreg og meldte **243** sider som manglende metadata — dvs. *hele sættet* page-data så ud som manglende; nr. 10 var `Number("^15.5.25".replace(/^[^\d]*/, ""))` → `NaN`, altså en Next-version-tjek der aldrig kunne fejle. Begse fangede den **plantede** del af testen, som er præcis hvorfor den er skrevet. **Målingen der førte til opgaven:** `npm audit` → **0 sårbarheder** (scan-et fra 23/8 sagde 1 kritisk + 7 høj — de er lukket siden), men **Dockerfile bruger `node:22-alpine` mens `package.json` ikke erklærede noget og `.nvmrc` ikke fandtes**. Se `DEPLOY OK`-noten for merge-ref.
@@ -10544,51 +10546,118 @@ tekst på `/tidszone`), men Kopier-strengen med datoen kræver en browser.
   artiklen har et svar-først-kort med link til `/barselsdagpenge` 10 linjer inde,
   to beregnerlinks mere og to relaterede artikler. Se `❓ Til Mads`-punktet.
 
-### Næste kandidater efter C81
+#### 111. [x] FÆRDIG 2026-09-27 — C82 — `/procent` dansk: løgnen om skatten rettet, og de svar klyngen søger på lagt på plads
 
-> **C79's liste er delvis afsluttet — læs denne først.** Punkt 1 er skrevet ud som
-> en kliksekvens i `❓ Til Mads` nederst (Mads' 10 minutter, ikke en iteration).
-> Punkt 2 er ** nedprioriteret med et tal**, se (b). Punkt 3 er bekræftet af C80 og
-> C81. Punkt 4 er uændret. Punkt 5 og 6 kan ikke løses i koden.
+- **Iteration start:** 2026-09-27 12:28 CEST. Køen havde ingen `I GANG`-opgave
+  (97 er `BLOCKED`, 98 afhænger af den), og 12:30-batchen var endnu ikke kørt, så
+  C76/C77/C78/C80 lå åbne i første halvdel af iterationen.
+- **Målt først, i to retninger, fordi Fase 3's topprioritet er CTR:**
+  1. **14 mest trafikrelevante sider har allerede svar-først title og
+     description i DA og SE** (verificeret ved `curl` 12:31: `/procent`,
+     `/dato`, `/tidsberegner`, `/moms`, `/tidszone` på minberegner.dk og
+     `/procent`, `/dato`, `/tidsberegner`, `/nedtaelling`, `/moms` på
+     beraknare.se). `/procent`: "Procentberegner – beregn 10 procent af et
+     tal" / "10 procent af et tal er tallet × 0,10. 10 procent af 250 er 25."
+     **Titel og description er altså ikke flaskehalsen.**
+  2. **Strukturerede data er på plads** på `/procent`: `FAQPage` med 4
+     `Question`, `WebApplication`, `BreadcrumbList`, `Answer`, `Organization`,
+     `ImageObject`, `<meta name="robots" content="index, follow"/>` og
+     `hrefLang` da/sv/x-default. **Schema er heller ikke flaskehalsen.**
+- **Fundet:** klassen fra `8796c16` (26/9) var kun udført på **svensk**. Den
+  commit skrev selv "Kun locale `se` er ændret; dansk og norsk er urørt" og
+  låste det med to tests. `/procent` er **GSC's største side: 149.546
+  visninger, 96 klik, CTR 0,1 %, pos. 7,4** — ca. 25 % af sitets månedlige
+  visninger — så den mindre side fik svaret og den største ikke.
+- **Målt på dansk autocomplete** (`hl=da`, `gl=dk`, 2026-09-27 12:35):
+  "procent i excel" → **11** variationer ("procent i excel formel", "beregn
+  procent i excel", "minus procent i excel", "plus procent i excel", "procent
+  stigning i excel", "fratræk procent i excel", "procent formler i excel");
+  "hvordan regner man procent" → **10** (især "hvordan regner man procent
+  forskel mellem to tal" og "hvordan regner man procent af et tal");
+  "rabat i procent" → **4**; "hvad er 10 procent af" → 10 konkrete beløb.
+  Den danske side havde **0** af dem. GSC bekræfter klassen med søgningen
+  "en telefon er sat 1125 kr. ned. normalt koster den 9000 kr. hvor stor er
+  rabatten i procent?" (**54 visninger, 1 klik, pos. 6**).
+- **Rettelse (kun `locale === "da"`-grenen, `no` urørt):**
+  1. **Fagfejl:** "Skat: 37% skat af 40.000 kr = 14.800 kr i skat" er fjernet.
+     37 % er kommuneskat (snit 25,049 %, `SATSER_2026.kommuneskatSnit`) +
+     statslig bundskat (12,01 %, `SATSER_2026.bundskat`), og bundskatten slår
+     først ind over `mellemskatGraense` = **641.200 kr** — på 40.000 kr er
+     den statslige del **0 %**. Sætningen siger nu, at skatten afhænger af
+     kommune og indkomst, og linker til `/loen-efter-skat` — præcis som den
+     svenske gren gør. **Ingen erstatningssats er opfundet**, fordi ratestedet
+     allerede findes i repoet.
+  2. **Nyt synligt afsnit** "Hvordan regner man procent i Excel?" med de tre
+     formler (`=A1/B1*100`, `=A1*B1/100`, `=(B1-A1)/A1*100`), tal der kan
+     efterprøves, og to interne links (`/loenstigning` og `/loen-efter-skat`).
+     Det stod kun på beraknare.se før.
+  3. **Rabat-eksemplet** i "Procentregning i hverdagen" har nu GSC's egne tal:
+     1.125 kr ned på 9.000 kr = **12,5 %**.
+  4. **Tusindtalsseparator:** "25% moms på 1000 kr = 250 kr i moms (1250 kr
+     total)" → "1.000 kr" / "1.250 kr" (C76/C77's notationsklasse).
+  5. **Tre nye FAQ-par** i `page-data.ts` — de kommer i både den synlige FAQ og
+     `FAQSchema`-JSON-LD'en, fordi begge læser `faqItems`.
+- **Harness:** `page.test.tsx` **4 → 5 tests**. Den gamle test
+  *"den danske siden beholder sit eget skatteksempel"* låste den forkerte
+  påstand med `toContain("37% skat af 40.000 kr")` — den er erstattet af en
+  der kræver Excel-afsnittet, de to links, og **fraværet** af både
+  "37% skat af 40.000 kr", "14.800" og "på 1000 kr". En ny
+  **paritets-test** kræver de tre formler i `da` **og** `se` — det er den der
+  låser `8796c16`'s asymmetri. `page-data.test.ts`: "de danske og norske
+  /procent-sider er uændrede" delt, så kun **`no` er urørt** og `da` får en
+  egen test med de tre spørgsmål plus rabattallet.
+  **Verificeret modsvejs: alle 3 nye tests falder** med den gamle kode.
+- **Målefejl nr. 12 (min egen, samme klasse som nr. 9-11):** min første
+  indholdskontrol for C76 var `>[0-9]+\.[0-9]+` **uden afsluttende `<`** — den
+  matcher danske tusindtalsseparatorer og gav **68 falske fund på `/billaan`**
+  og **30 på `/forbrugslaan`**. Med krav om `<` eller `kr`/`%` bagefter er
+  tallet **0 på alle 11 sider på begge domæner**. C78-notens egen kontrol
+  (`>[0-9]+\.[0-9]{2}<`) har altså kravet rigtigt, og det er den der bruges.
+- **Gate:** lint (556 filer), **1719 tests / 151 filer** (fra 1717 / 151),
+  build (**141 sider**). Ingen beregningslogik rørt — kun brødtekst, FAQ og
+  links på én side.
+- **MÅL:** `/procent` 149.546 visninger / 96 klik / **CTR 0,1 %** / pos. 7,4
+  (GSC 2026-08-28 → 09-25), **1045 → nye tal 2026-10-11**. `/procent` er ikke
+  i Plausible's top-15, fordi værktøjet bruges og bounces væk; effekten måles
+  derfor i **GSC's CTR og i de nye søgninger** ("procent i excel",
+  "rabat i procent"). Beraknare.se `/procent`: 24.701 visninger, 2 klik,
+  CTR 0,0 %, pos. 10,1 — urørt af denne iteration.
+- **Landet:** kode + plan i ét commit på `ceo/procent-da-svar`. Første
+  kandidatvindue **2026-09-27 17:30**.
 
-**Iterations pligt først:** C76, C77 og C78 har alle **12:30** som første
-kandidatvindue (merge 09:25/09:48/10:55), så de skal verificeres ved indhold så
-snart batchen er kørt. C81's egen note har **17:30**.
+### Næste kandidater efter C82
 
-0b. **🔒 Opgave 97 er `BLOCKED`** — `beregner.no` er en anden udgivelse, og C79
-    har *bevis* på at domænet ikke serverer beregnersider. Dermed er opgave 98
-    unødig indtil svaret kommer.
-1. **🔒 Browser-noter:** C52, C55, C56, C57 og C60 ligger som en
-    kliksekvens-pr. side i `❓ Til Mads`. De lukkes med Mads' svar, ikke med kode.
-2. **⏬ Nedprioriteret med et tal:** de **22 filer / 35 ubundne labels** i
-    `label-a11y-scan.mjs` er *kun* `/aegloesning`, `/afkast`, `/arveafgift`,
-    `/bryllup`, `/elbil`, `/1rm`, `/fart`, `/gennemsnit`, `/konfirmation`,
-    `/kropsfedt`, `/ohm`, `/planetvaegt`, `/proteinbehov`, `/rejsebudget`,
-    `/solceller`, `/sparemaal`, `/sygedagpenge`, `/temperatur`, `/vandbehov` og
-    `barsel/*` — **ingen af dem står i DA- eller SE-top-15 hver i Plausible eller
-    GSC**. Fase 3 siger at kodehygiejne kun kommer når den blokerer noget, så
-    klassen skal **ikke** tages nu. Den er dog stadig en reel WCAG-mangel, og
-    scanneren + testen ligger i repoet, så den kan lukkes senere på en time.
-3. **🔒 CTR på de store sider er lukket, og det er nu *dokumenteret*:** C80
-    målte alle 15 mest trafikrelevante titler (14 af 15 under 60 tegn), C81
-    lukkede resten af klassen, og C80 fandt **0** dansk lækage i `page-data.ts`.
-    `/procent`, `/dato`, `/moms`, `/tidszone` og nu `/tidsberegner` har alle
-    svar-først title **og** description på DA *og* SE. Lav ikke CTR på dem igen.
-4. **hreflang er korrekt og skal ikke røres.** Bemærk at Next.js skriver
-    **`hrefLang`** med stort L — et grep på `hreflang=` giver 0 fund.
-5. **Svenske slugs på beraknare.se — research, ikke build.** SE `/dato` har
-    92.832 visninger til 0,1 % CTR på pos. 8,3, og slug'en er dansk.
-    `alternateSlugs` + `routing.ts` har **allerede** 301-mekanismen (den bruges
-    af `loen-efter-skat` ↔ `lon-efter-skat`), så det er ikke en arkitekturopgave —
-    men en slug-migrering uden Search Console-bevis kan tabe de 92.832
-    visningers placering. Kræver Mads' go.
-6. **Hvorfor falder `/bmi` (967, −24 %) og `/su` (114, −54 %)?** Metadata,
-    canonical og sitemap er rene, og **C81's titelændring** er det første
-    reelle bud på siden for `/bmi` — den var 76 tegn. Bouncen er 4 %, så
-    brugerne bruger værktøjet; resten er ranking eller konkurrence og kan kun
-    måles i Search Console. **Mål igen 2026-10-11.**
-7. **Mål 2026-10-10 / 2026-10-11** (se Måleprotokol): C1-C16 og C35-C81 måles
-    14 dage efter deres snapshot. C81's CTR-mål står under opgave 110.
+0. **🔒 Opgave 97 er `BLOCKED`** (Mads' svar), 98 afhænger af den. C79 har
+   *bevis* på at `beregner.no` ikke serverer beregnersider (404).
+1. **🔒 Browser-noter:** C52, C55, C56, C57 og C60 ligger som kliksekvens i
+   `❓ Til Mads` nederst. De lukkes med Mads' svar, ikke med kode.
+2. **🔒 CTR på de store sider er lukket og dokumenteret** — C80, C81 og C82.
+   `/procent`, `/dato`, `/moms`, `/tidszone` og `/tidsberegner` har alle
+   svar-først title, description **og** synlige svar. Lav ikke CTR på dem igen.
+3. **🆕 Samme metode som C82 på de næste to:** `8796c16` viste at
+   **sprog-asymmetri er en reel fejlklasse** — svensk fik svar på
+   spørgsmålsklyngen, dansk ikke. Målautocomplete (hl=da / hl=se) på de
+   næste GSC-sider og se om den ene sproggren mangler svar den anden har:
+   `/moms` (23.225 visninger DA, 1.684 på "momsberegner"), `/tidszone`
+   (24.485), `/renteberegner` (13.560, 361 visninger på "annuitetslån
+   beregner"). **Eneste forbehold:** C82's Excel-sektion lå på `/procent`,
+   som er `no`-serveret på papiret men 404 i praksis — se punkt 0.
+4. **⏬ Nedprioriteret med et tal:** de **22 filer / 35 ubundne labels** i
+   `label-a11y-scan.mjs` er *kun* sider uden plads i DA- eller SE-top-15.
+   Reel WCAG-mangel, men Fase 3 siger at kodehygiejne kun kommer når den
+   blokerer noget. Scannere + tests ligger i repoet, så det kan lukkes på
+   en time senere.
+5. **🔒 hreflang er korrekt og skal ikke røres.** Next.js skriver
+   **`hrefLang`** med stort L — et grep på `hreflang=` giver 0 fund.
+6. **🔒 Svenske slugs på beraknare.se — research, ikke build.** Kræver Mads'
+   go, fordi en slug-migrering uden Search Console-bevis kan tabe 92.832
+   visningers placering.
+7. **🔒 Hvorfor falder `/bmi` (967, −24 %) og `/su` (114, −54 %)?** Metadata,
+   canonical, sitemap og hreflang er rene; C81's titelændring var det første
+   reelle bud på `/bmi`. Bounce 4 %, så resten er ranking eller konkurrence.
+   **Mål igen 2026-10-11.**
+8. **Mål 2026-10-10 / 2026-10-11** (se Måleprotokol): C1-C16 og C35-C82 måles
+   14 dage efter deres snapshot. C82's CTR-mål står under opgave 111.
 
 #### 109. [x] FÆRDIG 2026-09-27 — C80 — erklær Node-runtime-kontrakten: `engines.node`, `.nvmrc` og en test der holder de tre sammen
 
@@ -10624,14 +10693,61 @@ snart batchen er kørt. C81's egen note har **17:30**.
   **indhold** efter deploy: build-loggen må ikke advare om `EBADENGINE`, og
   `https://minberegner.dk/api/health` skal svare `status: ok`.
 
-### VERIFICÉR DEPLOY — åbne noter (2026-09-27 11:05)
+### DEPLOY OK 2026-09-27 12:38 CEST — 12:30-batchen lukker fire noter ved indholdskontrol (C82)
 
-> **Bemærk:** listen nedenfor er uændret af C79, så noterne står stadig med
-> `⏳`. **C49, C50, C51, C53, C59, C65 (SE) og C66 er lukket `DEPLOY OK`** — se
-> `DEPLOY OK 2026-09-27 11:25` ovenfor. **C56 er delvist lukket.** Det der
-> reelt stadig er åbent: **C76, C77, C78** (første vindue 12:30) og **C52, C55,
-> C56, C57, C60** (kræver en browser).
+Alle fire var merger **før** 12:30-vinduet (C76 09:30, C77 09:48, C78 10:55,
+C80 11:50), så de var forfaldne og er verificeret ved **indhold**, ikke HTTP
+200. `/api/health` svarede `status: ok`.
 
+| Note | Bevis (live 2026-09-27 12:36-12:37) |
+|---|---|
+| **C78** | `/tidsberegner` DA **0** og SE **0** hits på `>[0-9]+\.[0-9]{2}<` — før 13 og 5 |
+| **C77** | `beraknare.se/boliglaan` har **1** hit på `ca. 3,5-4,0 %` (med mellemrum før %, svensk); `minberegner.dk/boliglaan` har **1** på `ca. 3,5-4,0%` (dansk notation intakt) |
+| **C76** | **0** hits på `>[0-9]+\.[0-9]{1,2}<` og `>[0-9]+\.[0-9]{1,2} kr\|%` på **11 sider × 2 domæner** (`/kvadratmeter`, `/bil`, `/billaan`, `/forbrugslaan`, `/boliglaan`, `/elberegner`, `/arveafgift`, `/elbil`, `/lon-efter-skat`, `/laane`, `/opsparing`) |
+| **C80** | `https://minberegner.dk/api/health` → `{"status":"ok"}`. `EBADENGINE` kan ikke ses med `curl` — det kræver byg-loggen i Dokploy |
+
+**C81 er stadig åben** og har første vindue **17:30**: `/bmi`-titlen er stadig
+**66 tegn** inkl. `<title>`-tagget (altså 58 synlige) — altså **den gamle,
+76-tegns titel med `| MinBeregner.dk` i halen**. Bemærk at det er den gamle
+titel: en merge efter 12:30 kan ikke være live, så dette er forventet.
+
+**⚠️ Målefejl nr. 12, som lå i C76's egen note:** notens kontrol-streng var
+`curl -s https://minberegner.dk/kvadratmeter | grep -c 'm²'`, og den kan aldrig
+have slået igennem — siden skriver formlen **symbolske**
+("Areal = Længde × Bredde"), ikke "3,5 × 2,5 = 8,75 m²". Beviset for C76 er derfor
+heltallet: **0 tal med decimalpunkt** i den server-renderede HTML. Og min egen
+første kontrol i denne iteration var `>[0-9]+\.[0-9]+` **uden afsluttende `<`**,
+hvilket matcher **danske tusindtalsseparatorer** — 68 falske fund på
+`/billaan`, 30 på `/forbrugslaan`. Begge dele er skrevet ned, fordi en
+verificering der ikke kan slå igennem er lige så dårlig som en der kan.
+
+### VERIFICÉR DEPLOY — åbne noter (2026-09-27 12:38)
+
+> **Bemærk:** listen nedenfor er uændret af C82, så noterne står stadig med
+> `⏳`. **C49, C50, C51, C53, C59, C65 (SE) og C66 er lukket `DEPLOY OK`** (se
+> `DEPLOY OK 2026-09-27 11:25`), og **C76, C77, C78 og C80 er lukket `DEPLOY OK`**
+> (se `DEPLOY OK 2026-09-27 12:38` ovenfor). **C56 er delvist lukket.** Det der
+> reelt stadig er åbent: **C81** (første vindue 17:30) og **C52, C55, C56, C57,
+> C60** (kræver en browser).
+
+
+- ⏳ **VERIFICÉR DEPLOY: C82 — `/procent` dansk: den forkerte skattepåstand er
+  fjernet, Excel-afsnittet og to nye interne links er lagt på, og tre nye
+  FAQ-par kommer i både synlig FAQ og JSON-LD.** Kun `locale === "da"`-grenen
+  er rørt; `no` er urørt. **Verificér indhold, ikke HTTP 200:**
+  1. `curl -s https://minberegner.dk/procent | grep -c '37% skat af 40.000 kr'`
+     skal være **0** — før fandtes den i brødteksten.
+  2. Samme curl skal finde `Hvordan regner man procent i Excel?`,
+     `=A1/B1*100`, `=(B1-A1)/A1*100`, `href="/loenstigning"` og
+     `href="/loen-efter-skat"`, og **ikke** `på 1000 kr` (skal være
+     `1.000 kr`).
+  3. FAQ'en skal vise **"Hvor stor er rabatten i procent?"** med
+     `1.125 / 9.000 = 12,5`, og `"@type":"FAQPage"` skal have **7**
+     `Question` i stedet for 4.
+  4. `https://beraknare.se/procent` skal være **uændret** (dvs. stadig
+     "Hur räknar man ut procent i Excel?" og **ikke** dansk). Kode + plan i
+     ét commit på `ceo/procent-da-svar`; første kandidatvindue
+     **2026-09-27 17:30**.
 
 - ⏳ **VERIFICÉR DEPLOY: C78 — `/tidsberegner` skrev "8.25 timer" i den
   server-renderede HTML på begge domæner, altså i den tekst Google

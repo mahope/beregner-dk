@@ -725,13 +725,25 @@ describe("svenska svar på frågeformulerade sökningar", () => {
     expect(text).toContain("hur räknar man ut procent på lön");
   });
 
-  // Dansk/norsk skal være urørt: den danske sides tax-eksempel (37 %) er en
-  // dansk sats på en svensk side, og det er svensken der mangler tal.
-  test("de danske og norske /procent-sider er uændrede", () => {
-    for (const locale of ["da", "no"] as const) {
-      const text = frageForm("procent", locale);
-      expect(text).not.toMatch(/i excel/i);
-    }
+  // Norsk er stadig urørt: beregner.no serverer ikke beregnersider (C79), så
+  // den norske blok skal ikke få dansk eller svensk indhold.
+  test("den norske /procent-side er urørt", () => {
+    expect(frageForm("procent", "no")).not.toMatch(/i excel/i);
+  });
+
+  // DA /procent er GSC's største side: 149.546 visninger, 96 klik, CTR 0,1 %,
+  // pos. 7,4. Dansk autocomplete (hl=da, 2026-09-27) viser at klyngen er
+  // spørgsmål om konkrete opgaver — især Excel og rabat — og at de ikke fandtes
+  // på siden.
+  test("/procent svarer på de danske procent-søgninger", () => {
+    const text = frageForm("procent", "da").toLowerCase();
+    expect(text).toContain("hvordan regner man procent i excel");
+    expect(text).toContain("=a1/b1*100");
+    expect(text).toContain("hvordan regner man procentforskellen mellem to tal");
+    expect(text).toContain("hvor stor er rabatten i procent");
+    // Rabattallet fra GSC: "en telefon er sat 1125 kr. ned. normalt koster
+    // den 9000 kr." (54 visninger, pos. 6) er 12,5 %.
+    expect(text).toContain("1.125 / 9.000 = 12,5");
   });
 
   test("den svenska leasing-FAQ har ingen dansk rester eller brudt svensk", () => {

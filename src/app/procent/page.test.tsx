@@ -68,10 +68,43 @@ describe("procent page", () => {
     expect(html).toContain("kommunal skatt");
   });
 
-  test("den danske siden beholder sit eget skatteksempel", async () => {
+  test("den danske side har Excel-formlerna og ingen dansk sats på et helt beløb", async () => {
     const html = renderToStaticMarkup(await ProcentPage());
 
-    expect(html).toContain("37% skat af 40.000 kr");
-    expect(html).not.toContain("i Excel");
+    // Dansk autocomplete (hl=da, 2026-09-27) peger på "procent i excel
+    // formel", "minus procent i excel" og "procent stigning i excel" — de
+    // samme formler fandtes kun på den svenske side.
+    expect(html).toContain("Hvordan regner man procent i Excel?");
+    expect(html).toContain("=A1/B1*100");
+    expect(html).toContain("=A1*B1/100");
+    expect(html).toContain("=(B1-A1)/A1*100");
+    expect(html).toContain('href="/loenstigning"');
+    expect(html).toContain('href="/loen-efter-skat"');
+    // 37 % er kommuneskat + statslig bundskat, og den statslige del først
+    // slår ind over 641.200 kr (SATSER_2026.mellemskatGraense) — så den må
+    // ikke stå som et resultat for 40.000 kr.
+    expect(html).not.toContain("37% skat af 40.000 kr");
+    expect(html).not.toContain("14.800");
+    // Dansk tusindtalsseparator i brødteksten.
+    expect(html).not.toContain("på 1000 kr");
+  });
+
+  // 8796c16 lod dansk og norsk urørt, fordi arbejdet var på den svenske
+  // side. Det er samme metode, så formlerne skal findes i begge sprog.
+  test("begge sprog har de tre Excel-formler", async () => {
+    for (const [locale, overskrift] of [
+      ["da", "Hvordan regner man procent i Excel?"],
+      ["se", "Hur räknar man ut procent i Excel?"],
+    ] as const) {
+      vi.mocked(getLocale).mockResolvedValue(locale);
+      vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale(locale));
+
+      const html = renderToStaticMarkup(await ProcentPage());
+
+      expect(html).toContain(overskrift);
+      for (const formel of ["=A1/B1*100", "=A1*B1/100", "=(B1-A1)/A1*100"]) {
+        expect(html).toContain(formel);
+      }
+    }
   });
 });
