@@ -1,7 +1,7 @@
 import type { Locale } from "./i18n";
 import { BARSEL_2026, SU_2026 } from "./satser-2026";
 import { SOLCELLE_LEVETID_AAR_MAX, SOLCELLE_LEVETID_AAR_MIN } from "./energi/solceller";
-import { besparelseProcent, breakEvenKwhPris, elbilSammenligning, prisPrKm, procent1Decimals } from "./braendstof";
+import { BRAENDSTOF_EGENT_FORBRUG, BRAENDSTOF_EKSEMPEL_KM, BRAENDSTOF_FORUDSETNINGER, besparelseProcent, braendstofEksempelRækker, breakEvenKwhPris, elbilSammenligning, heleKroner, literPr100km, prisPrKm, procent1Decimals } from "./braendstof";
 import { HUSLEJE_EKSEMPEL, HUSLEJE_STANDARD } from "./husleje";
 import { PROMILLE_EKSEAMPLER, formatPromille, formatTimer } from "./promille-eksempler";
 
@@ -52,6 +52,22 @@ const krPrKm = (value: number, decimals: number) =>
   value.toFixed(decimals).replace(".", ",") + " kr. pr. km";
 /** Procent med komma — dansk, svensk og norsk bruger ikke punktum. */
 const pct = (value: number) => value.toFixed(1).replace(".", ",");
+
+/** Regnestykket i FAQ'en og på siden, samme tal som siden viser i tabellen. */
+const braendstofEksempel = braendstofEksempelRækker();
+const braendstofEksempelKm = BRAENDSTOF_EKSEMPEL_KM;
+const braendstofEksempelBenzin = kommatal(braendstofEksempel[0].maengde);
+const braendstofEksempelBenzinPris = heleKroner(braendstofEksempel[0].pris);
+const braendstofBenzinPr100 = kommatal(literPr100km(BRAENDSTOF_FORUDSETNINGER.benzin.kmPerLiter));
+const braendstofBenzinLavPr100 = kommatal(literPr100km(18));
+const braendstofBenzinHoejPr100 = kommatal(literPr100km(12));
+const braendstofEgetKmPrLiter = kommatal(
+  BRAENDSTOF_EGENT_FORBRUG.km / BRAENDSTOF_EGENT_FORBRUG.liter,
+);
+/** Et tal med dansk komma: 33.333 -> "33,3". */
+function kommatal(value: number) {
+  return procent1Decimals(value).toFixed(1).replace(".", ",");
+}
 
 // ─── /elbil — de tal, siden og FAQ'en lover, udledt af værktöjets egne standardværdier. Den gamle
 // "under halvdelen" holdt ikke ved 16 km/l: el kostede 0,45 mod benzins 0,84
@@ -915,6 +931,8 @@ const daPages: Record<string, PageData> = {
       { question: "Hvad koster 500 km i benzin?", answer: "Ved 15 km/l bruger turen 500 ÷ 15 = 33,3 liter. 33,3 l × 13,50 kr. = 450 kr., altså 0,90 kr. pr. km eller 90 kr. pr. 100 km." },
       { question: "Beregn brændstofudgifter?", answer: "Distance / km/l × literpris. 200 km / 15 km/l × 13 DKK/l = 173 DKK." },
       { question: "Normal km/liter?", answer: "Benzin: 12-18 km/l. Diesel: 15-22 km/l." },
+      { question: "Hvordan regner man benzinforbrug ud?", answer: `Distance delt med km/l. ${braendstofEksempelKm} km ÷ 15 km/l = ${braendstofEksempelBenzin} liter, og ${braendstofEksempelBenzin} l × 13,50 kr. = ${braendstofEksempelBenzinPris} kr. Har du kun l/100 km fra tankinstrumentet, er det 100 divideret med l/100 km: 15 km/l = ${braendstofBenzinPr100} l/100 km.` },
+      { question: "Hvor meget benzin bruger en bil?", answer: `Et typisk dansk benzinbil kører 12-18 km/l, altså ${braendstofBenzinLavPr100}-${braendstofBenzinHoejPr100} l/100 km på tankinstrumentet. Find dit eget med fire fulde tankfyld: liter påfyldt delt med km kørt er dit km/l — 40 liter over 380 km er 380 ÷ 40 = ${braendstofEgetKmPrLiter} km/l.` },
       { question: "Er el-biler billigere?", answer: `Ja, når du regner på brændstoffet alene: ${pct(elModBenzinPct)} % billigere pr. km end benzin (${krPrKm(elPris, 2)} mod ${krPrKm(benzinPris, 2)}). Mod diesel er besparelsen ${pct(elModDieselPct)} %, fordi diesel i forvejen er billigere pr. km (${krPrKm(dieselPris, 2)}). Beregningen bruger 13,50 kr./l benzin, 12,80 kr./l diesel og 2,50 kr./kWh el — altså billig el. Ved offentlig opladning til 3-6 kr./kWh bliver el dyrere end diesel over ${pct(elModDieselBreakEven)} kr./kWh.` },
       { question: "Hvad påvirker forbruget?", answer: "Kørestil, hastighed, vejr, dæktryk, aircondition." },
       ],

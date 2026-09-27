@@ -1,3 +1,5 @@
+STATUS: KØ — **C94 er landet: `/braendstof` er sitets sjettestørste danske side (16.764 visninger, CTR 1,1 %, pos. 6,0) og rangerer selv på position 6 for "benzin beregner", men viste aldrig regnestykket — og den svarede ikke på den enhed, de fleste søger med.** Køen havde ingen `I GANG`-opgave (119 er kilde-blokeret, 97 er `BLOCKED` og 98 afhænger af den), og alle åbne deploy-noter har første vindue **17:30** — det er 15:40, så intet kunne verificeres i starten af iterationen. Valget er C93's åbne kandidat #2, samme klasse som `/kvadratmeter`. **Målt først:** DA-autocomplete (`hl=da`, `gl=dk`, 15:41) giver under **"benzin beregner"** 10 variationer hvoraf **seks spørger om pris, km eller udgift** ("benzin beregner pris", "benzin beregner km", "benzin udgift beregner"), og under **"benzin forbrug"** 10 hvoraf **fire spørger om at finde sit eget forbrug** ("beregn benzin forbrug bil", "benzin forbrug danmark"). Den server-renderede side havde fire generiske overskrifter og **0** regnestykker. **Rettelsen:** et nyt `<h2>` "Sådan regner du benzinforbrug og pris ud med tal" med **hele regnestykket** for benzin (500 ÷ 15 = 33,3 l × 13,50 kr. = **450 kr.**), diesel (**356 kr.**) og el (**213 kr.**), to `<h3>` der svarer på resten af klyngen — "Sådan finder du dit eget forbrug" (fire tankfyld: 380 ÷ 40 = **9,5 km/l**) og "**km/l eller l/100 km?**" (tankinstrumentet viser l/100 km, værktøjer viser km/l, og omregningen er 100 ÷ den anden enhed) — samt to nye FAQ-par i `page-data.ts`, som dermed også kommer i JSON-LD'en. **Hvert tal er afprøvbart i den trykte tekst:** mængden afrundes *før* prisen ganges, så læseren kan regne hvert led efter, og en test låser `heleKroner(maengde × enhedPris) === pris` pr. række. **Den rigtige fejl, fundet ved at koble tabellen til listen:** siden skrev "Benzin: 12-18 km/l (5,5-8,3 l/100km)", men 100 ÷ 18 = **5,6**; diesel-linjen var rigtig, fordi 100 ÷ 22 = 4,5. Begge tal udledes nu af samme `literPr100km()` som tabellen, så en indekseret tekst ikke kan modsige sit eget indhold igen — C84's fejlklasse. **To målefejl i træk, begge fundet fordi jeg troede på et grep (nr. 16 og 17).** nr. 16: mine første greb mod den server-renderede HTML fandt **0** på "356 kr.", "213 kr." og "5,6-8,3" — React skriver `<!-- -->` mellem to tekstnoder i en JSX-celle, så `356<!-- --> kr.` ikke matcher "356 kr."; efter `sed 's/<!-- -->//g'` gav alle 18 tal deres forventede antal fund. nr. 17: min negative lås på beraknare.se brugte "500 ÷ 15" — en streng der *er* på den svenske side, i den svenske FAQ som testen mocker væk, altså en vakuum-grøn lås i C77's klasse; erstattet af fem strenge der kun findes i den nye danske blok. **Målt på rigtig server** (`next start`, port 3411 verificeret fri *inden* start): dansk 200 med alle 18 tal, svensk 200 med "Typisk förbrukning" og 0 danske markører. `braendstof.test.ts` **32 → 41**, `page.test.tsx` **3 → 8**; **verificeret modsvejs: 3 af 4 nye sidetests falder** med kun `page.tsx` på master. Ingen beregningslogik, `se` eller `no` rørt. Gate grøn: lint (556 filer), **1784 tests / 151 filer** (fra 1771 / 151), build (**141 sider**), `locale-leak.mjs --gate` exit 0. Kode + plan i ét commit på `ceo/braendstof-metode`; se opgave 124. **MÅL:** `/braendstof` baseline **16.764 visninger / 184 klik / CTR 1,1 % / pos. 6,0 pr. 2026-08-28 → 2026-09-25** — måles igen 2026-10-11.
+
 STATUS: KØ — **C93 er landet: `/kvadratmeter` — sitets fjerdestørste danske side i Google — rangerer selv på position 3 for "hvordan regner man kvadratmeter ud", men viste aldrig regnestykket. Formlerne stod symbolske ("Areal = Længde × Bredde"), så det spørgsmål, siden er skrevet til, var ikke besvaret synligt.** Køen havde ingen `I GANG`-opgave (119 er kilde-blokeret, 97 er `BLOCKED` og 98 afhænger af den), og alle åbne deploy-noter har første vindue **17:30** — det er 15:30, så intet kunne verificeres i starten af iterationen. **Valget kom fra en måling, ikke fra en idé:** C79-C83 låser CTR på `/procent`, `/dato`, `/moms`, `/tidszone` og `/tidsberegner`, og punkt 6 i C92's liste siger at "dansk top-15 er lukket". Men `/kvadratmeter` er **fjerdestørst i dansk GSC (20.988 visninger)** og havde kun fået C76's komma-rettelse, ingen svar-rettelse. **Datagrund (GSC 2026-08-28 → 09-25):** 20.988 visninger, 294 klik, **CTR 1,4 %**, pos. 4,9 — laveste CTR på sitets ti største danske sider. Søgningerne er `"kvadratmeter"` (1.819 v, pos. 5), **`"hvordan regner man kvadratmeter ud"` (359 v, pos. 3)**, `"beregn kvadratmeter"` (191 v, pos. 3) og `"kvadratmeter beregner"` (176 v, pos. 4) — altså tre af fire er spørgsmål om *hvordan*, ikke navnet på et værktøj. Plausible: 380 besøgende/28d (**+91 %**, bounce 6 %). **Målt på den live side før rettelsen:** `<h2>`/`<h3>` var "Om arealberegning", "Almindelige anvendelser", "BBR-areal vs. boligareal" og "Materialeberegning" — altså fire generiske afsnit og **0** forekomster af noget regnestykke. `KvadratmeterBeregner.tsx:53-59` skrev de fire formler symbolsk (`Areal = Længde × Bredde`, `Areal = π × r²`, `Areal = (Grundlinje × Højde) / 2`, `Areal = ((Side 1 + Side 2) / 2) × Højde`). Titlen og beskrivelsen var *allerede* svar-første — `curl` gav "Kvadratmeterberegner: 5 x 4 m = 20 m²" og "Et rum på 5 x 4 m er 20 m². Areal = længde × bredde." — altså præcis samme konklusion som C82 nåede for `/procent`: **det er ikke titlen, der mangler, det er indholdet under den.** **Rettelsen** er ét nyt `<h2>` i den `locale === "da"`-gren, sat direkte under beregneren og *før* "Om arealberegning", med fire regneeksempler der alle kan efterprøves: rektangel 5 m × 4 m = **20 m²**; cirkel radius 3 m = **3,14 × 3 × 3 = 28,3 m²** (med diameter-halveringen); trekant grundlinje 6 m og højde 4 m = **(6 × 4) / 2 = 12 m²**; trapez sider 4 m og 6 m, højde 3 m = **((4 + 6) / 2) × 3 = 15 m²**; og prisen 20 m² × 150 kr./m² = **3.000 kr.** To nye FAQ-par i `page-data.ts` — "Hvordan regner man kvadratmeter ud?" (GSC's egen formulering) og "Hvor mange m² er et værelse på 3 x 4 meter?" — som dermed også kommer i JSON-LD'en via `FAQSchema`. **Fundet der lå i vejen, og det ændrede teksten:** siden har *allerede* et blogindlæg med præcis samme spørgsmål som titel — `/blog/kvadratmeter-saadan-regner-du-ud` (408 linjer), hvis `<h1>` er "Hvordan regner man kvadratmeter ud?" Så mit nye `<h2>` fik **"med tal"** hængt på: søgefrasen er bevaret, men de to sider jagter ikke længere den samme overskrift, og beregneren ejer det korte svar mens indlægget ejer den lange vej. Krydslinket findes i forvejen data-drevet (`blog-kobling.ts:76`), så jeg hardcoded **ikke** et link til indlægget i `page.tsx` — det ville have dupliceret `RelateredeArtikler`. **Ingen beregningslogik rørt** (C76's komma-rettelse står), ingen `se`, ingen `no`. **Målt på en rigtig server, ikke bare i test:** `next start` på port 3411, porten verificeret fri *inden* start (målefejl nr. 15's lære). DA `/kvadratmeter` **200** med alle fem strenge ×2 (synlig tekst + RSC-payload), begge nye spørgsmål i FAQ'en og **0** `>[0-9]+\.[0-9]{2}<` (C76's regression holder). SE `/kvadratmeter` **200** med **0** fund på de danske strenge og uændret titel. `/dage-til/halloween` 200 som kontrol. **Harness:** `page.test.tsx` **3 → 6** tests — de fire regnestykker, de to nye FAQ-spørgsmål, og en lås på at den svenske side er urørt. **Verificeret modsvejs: 2 af de 3 nye tests falder** med den gamle kode (den tredje er en negativ lås og passerer med vilje begge veje). Gate grøn: lint (556 filer), **1771 tests / 151 filer** (fra 1768 / 151), build (**141 sider**), `locale-leak.mjs --gate` exit 0. Branch `ceo/kvadratmeter-metode`. **MÅL:** `/kvadratmeter` baseline **20.988 visninger / 294 klik / CTR 1,4 % / pos. 4,9 pr. 2026-08-28 → 2026-09-25** — måles igen 2026-10-11.
 STATUS: KØ — **C92 er landet: svensk CTR fundet ved at læse GSC's egne søgninger — siden skrev "färetagsleasing" med ä, så ordet kunne aldrig ramme den søgning, den er skrevet for.** Køen havde én åben opgave, 119, som kræver en citable dansk tabel; alle kilder var utilgængelige i denne iteration (se nedenfor), så valget var planens egen kandidat #3, "Svensk CTR". **Datagrund (svensk GSC 2026-08-28→09-25):** `/nedtaelling` **5.163 visninger, 12 klik, CTR 0,2 %, pos. 9,4**; `/tidszone` **3.256 v, 12 klik, CTR 0,4 %, pos. 7,7**; `/leasing` **3.151 v, 32 klik, CTR 1,0 %, pos. 12,4**. Ved pos. 7-12 afgør titlen om der klikkes — det er billigeste vækst, der findes. **Fire reelle fejl, målt før rettelse:** (1) **`/leasing` skrev "färetagsleasing" med ä** i både `keywords` og FAQ'en — GSC's største svenske søgninger er **"fåretagsleasing bil kalkyl" (194 v, pos. 11)** og **"beräkna leasing bil fåretag" (172 v, pos. 15)**, altså med **å**. Siden skrev det ord, ingen svensk søgning kan ramme; det lå i 4 strenge. (2) **`/tidszone` skrev "12 byer" i `ogDescription` i begge sprog**, mens `TIDSZONER` har **21** rækker. C84 rettede `metaDescription` fra 12 til 21 — men kun den, så **den rigtige fejl overlevede rettelsen**, og den lå i netop den streng C84's egen fejlklasse handler om. (3) **Titel-halealene var afkortet nøgleord, ikke brand:** svensk `| Tidszon` og dansk `| Tidszone` — C81 viste at det er præcis den hale Google klipper væk. (4) **Titelne startede med tal og brødte hovedordet:** `/leasing` startede med "4.121 kr/mån" mens søgningerne er "fåretagsleasing" og "beräkna"; `/nedtaelling` skrev "Nedräkning - hur många dagar", så GSC's største søgning **"nedräkning dagar" (170 v, pos. 9)** stod splittet af en tankestreger. **Harness:** `page-data.test.ts` har nu 6 nye/ændrede tests, **verificeret modsvews: alle 6 falder** med den gamle `page-data.ts`. Bytallet læses fra `TIDSZONER.length` og sammenlignes mod **enhver** streng der nævner et bytal, så en ny by kan ikke slippe forbi. **Tre fejl i mine egne tests, fundet da de kørte:** (a) `perl` ramte kun `färetagsleasing` og ikke `Färetagsleasing` med stort F — 2 af 4 strenge stod tilbage; (b) jeg krævede ordet i *alle* felter, men `title` og `metaDescription` skal ikke nævne det — kravet er skarpet til "aldrig med ä", som er den reelle invariant; (c) jeg krævede et bytal i **alle tre** sprog, men `no` nævner aldrig et — kravet blev "hvor det nævner et", plus en lås på at mindst ét sprog gør. Gate grøn: lint (556 filer), **1768 tests / 151 filer** (fra 1763 / 151) og build (141 sider); `locale-leak.mjs --gate` exit 0. Kode `8d06081`, merge `8bea16d` **2026-09-27 15:07 CEST** på `ceo/se-ctr-nedtaelling`; første kandidatvindue **2026-09-27 17:30**. Se opgave 122.
 
@@ -7826,6 +7828,12 @@ landmark=lån, piggybank=opsparing osv.).
 
 ## VERIFICÉR DEPLOY-log
 
+### ⏳ **VERIFICÉR DEPLOY: C94 — `/braendstof` dansk: regnestykkerne for benzin, diesel og el, km/l ↔ l/100 km og tankfyld-metoden (16.764 visninger, CTR 1,1 %, pos. 6,0).** Kode + plan i ét commit på `ceo/braendstof-metode`, merge-ref udfyldes ved merge. Første kandidatvindue **2026-09-27 17:30**. Verificér ved **indhold, ikke HTTP 200 alene**:
+   1. `curl -s https://minberegner.dk/braendstof | sed 's/<!-- -->//g'` skal have **"500 ÷ 15 = 33,3 l"**, **"500 ÷ 18 = 27,8 l"**, **"500 × 17 ÷ 100 = 85 kWh"**, **"356 kr."**, **"213 kr."**, **"380 ÷ 40"**, **"9,5 km/l"** og **"5,6-8,3 l/100km"**.
+   2. Den gamle fejl skal være væk: **0** fund på **"5,5-8,3"**.
+   3. `sed`-trinnet er ikke valgfrit — React skriver `<!-- -->` mellem tekstnoder, så et rå grep giver falske 0-tal (målefejl nr. 16).
+   4. `curl -s https://beraknare.se/braendstof | sed 's/<!-- -->//g'` skal have **"Typisk förbrukning"** og **0** på "Sådan regner du", "Priserne er rundet" og "Om brændstofforbrug".
+
 ### ⏳ **VERIFICÉR DEPLOY: C91 — Halloween som kurateret `dage-til`-dato (31. oktober) i da og se, PLUS en levende 404-rettelse på `/dage-til/1-december`.** Kode `b5a2e48`, merge `540a78e` 2026-09-27 14:48 CEST på branch `ceo/halloween-dage-til`. Første kandidatvindue **2026-09-27 17:30**. Verificér ved **indhold og statuskode, ikke HTTP 200 alene**:
 1. `curl -s -o /dev/null -w '%{http_code}' https://minberegner.dk/dage-til/halloween` skal være **200**, og `<title>` skal være **"Hvor mange dage er der til Halloween? 34 dage | MinBeregner.dk"** på 27. september — altså *dagens* tal, ikke et hårdkodet 34.
 2. Samme curl skal finde **3** `"@type":"Question"`, `<h1>Hvor mange dage er der til Halloween?</h1>`, og facts med "Alle helgenes dag er 1. november" og "ikke en dansk helligdag".
@@ -11220,6 +11228,87 @@ tekst på `/tidszone`), men Kopier-strengen med datoen kræver en browser.
   så tallene ikke kan stå i strengen og afvige fra tabellen; (5) ét afsnit,
   ikke en hel underside, og et link videre til `/kalorier` og `/proteinbehov`.
 
+#### 124. [x] FÆRDIG 2026-09-27 — C94 — `/braendstof` svarer synligt på "benzin forbrug" med tre regnestykker, km/l ↔ l/100 km og tankfyld-metoden
+
+- **Datagrund:** dansk GSC (2026-08-28 → 09-25) `/braendstof` **16.764
+  visninger, 184 klik, CTR 1,1 %, pos. 6,0** — **sjettestørste danske side**.
+  Søgningerne: `"benzin beregner"` 136 v pos. 6, `"brændstof beregner"` 94 v
+  pos. 7, `"benzinberegner"` 51 v pos. 7, `"hvorfor er diesel dyrere end
+  benzin"` 48 v pos. 1. Plausible: 267 besøgende/28d, **+57 %**, bounce 3 %.
+- **Hvorfor netop denne side:** C93's åbne kandidat #2, samme klasse som
+  `/kvadratmeter` — siden er skrevet om forbrug uden nogensinde at vise
+  regnestykket. Kandidat #1 (`/kvadratmeter` SE, pos. 11,3) ligger for dybt
+  til at en titel løser den, så den rykkes ned (se listen efter C94).
+- **Målt først (autocomplete `hl=da`, `gl=dk`, 15:41):** under **"benzin
+  beregner"** 10 variationer, hvoraf **seks er spørgsmål om pris, km eller
+  udgift** ("benzin beregner pris", "benzin beregner km", "benzin udgift
+  beregner", "benzin forbrug beregner", "el vs benzin beregner", "diesel
+  eller benzin beregner"); under **"benzin forbrug"** 10 variationer hvoraf
+  **fire er "find mit eget forbrug"** ("beregn benzin forbrug bil",
+  "benzin forbrug danmark", "benzin forbrug påhængsmotor", "generator benzin
+  forbrug"). Den server-renderede `/braendstof` havde **fire generiske
+  overskrifter** ("Om brændstofforbrug", "Typiske forbrug", "Sådan reducerer
+  du forbruget", "Benzin vs. Diesel vs. El") og **0** regnestykker. Titlen var
+  *allerede* svar-først ("Brændstofberegner: 500 km benzin koster 450 kr.") —
+  altså igen indholdet, ikke titlen (C92's konklusion).
+- **Rettelse:** ét nyt `<h2>` **"Sådan regner du benzinforbrug og pris ud med
+  tal"** i den `locale === "da"`-gren, lige under beregneren: en tabel med
+  drivmiddel / forbrug / **hele regnestykket** / pris / pr. km for benzin
+  (500 ÷ 15 = 33,3 l, 33,3 liter × 13,50 kr. = **450 kr.**, 0,90 kr. pr. km),
+  diesel (500 ÷ 18 = 27,8 l × 12,80 kr. = **356 kr.**, 0,71 kr.) og el
+  (500 × 17 ÷ 100 = 85 kWh × 2,50 kr. = **213 kr.**, 0,43 kr.). Plus to
+  `<h3>` der svarer på resten af klyngen: **"Sådan finder du dit eget
+  forbrug"** (fire tankfyld på 40 liter over 380 km → 380 ÷ 40 = **9,5 km/l**
+  = 10,5 l/100 km) og **"km/l eller l/100 km?"** (omregningen 100 ÷ den anden
+  enhed, 15 km/l = 6,7 l/100 km = igen 14,9 km/l). **To nye FAQ-par** i
+  `page-data.ts` — som dermed også kommer i JSON-LD'en.
+- **Hver eneste mængde og pris er prøve-afprøvbart i den trykte tekst.** Det
+  er derfor mængden afrundes *før* prisen ganges, så "33,3 liter × 13,50 kr."
+  giver 449,55 → 450 kr. i stedet for at prisen komme fra en skjult
+  fuldpræcis værdi. `braendstofEksempelRækker()` i `src/lib/braendstof.ts`
+  returnerer rækkerne, og `heleKroner(maengde × enhedPris) === pris` er låst
+  i en test, så egenskaben overlever en senere redigering. Benzinrækken er
+  dermed den 450 kr., titlen og beskrivelsen allerede lovede — C84's fejlklasse
+  kan ikke komme tilbage her.
+- **Den rigtige fejl, fundet fordi tal og tekst blev koblet sammen:** den
+  gamle liste skrev **"Benzin: 12-18 km/l (5,5-8,3 l/100km)"**, men 100 ÷ 18 =
+  5,6. Diesel-linjen var rigtig (4,5-6,7), fordi 100 ÷ 22 = 4,5. Begge
+  l/100 km-tal udledes nu af `literPr100km()`, så listen ikke kan komme i
+  strid med tabellen længere nede på samme side — samme fejltype som C84
+  (`metaDescription` lovede 12 byer, tabellen havde 21).
+- **Målefejl nr. 16 (min egen):** mine første greb mod den server-renderede
+  HTML fandt **0** hits på "356 kr.", "213 kr." og "5,6-8,3 l/100km" — tre
+  tal der *stod* i siden. React skriver `<!-- -->` mellem to tekstnoder i en
+  JSX-celle, så `<strong>{pris} kr.</strong>` bliver `356<!-- --> kr.`.
+  Samme årsag som C74's "et grep i `src/app` kan ikke se en datatabel i
+  `src/lib`": **en måling mod markup skal rense separatorerne, ellers
+  rapporterer den en fejl der ikke er der.** Efter `sed 's/<!-- -->//g'`
+  gav alle 18 tal sit forventede antal fund.
+- **Målefejl nr. 17 (min egen, samme klasse som C77's vakuum-grønne test):**
+  min negative lås på den svenske side brugte `"500 ÷ 15"`, og den *er* på
+  beraknare.se — i den **svenske FAQ**, som `page.test.tsx` mocker væk. Låsen
+  var altså grøn uden at teste noget. Erstattet af fem strenge der kun findes
+  i den nye danske blok.
+- **Verificeret modsvejs:** 3 af 4 nye tests i `page.test.tsx` falder med kun
+  `page.tsx` på master; resten af klassen (lib + FAQ) falder med de andre to
+  filer. Den negative SE/NO-lås passerer begge veje med vilje.
+- **Målt på rigtig server** (`next start` på port 3411, porten verificeret
+  fri *inden* start): dansk **200** med alle tre regnestykker, alle tre priser,
+  alle tre pr.-km-tal, "380 ÷ 40", "9,5 km/l", "10,5 l/100 km",
+  "6,7 l/100 km er igen 14,9 km/l", "5,6-8,3 l/100km" og **0** på den gamle
+  "5,5-8,3". Svensk **200** med "Typisk förbrukning" og **0** danske markører
+  ("Sådan regner du", "Priserne er rundet", "Om brændstofforbrug").
+- **Harness:** `braendstof.test.ts` **32 → 41** (omregningen begge veje + tre
+  nøgletal + den afprøvbare egenskab + at el-rækken har ingen l/100 km + at
+  en anden distance følger med), `page.test.tsx` **3 → 8**.
+- **Ingen beregningslogik rørt** i `BraendstofBeregner.tsx`, ingen `se`, ingen
+  `no`, ingen affiliate-links, ingen titler.
+- **Gate:** lint (556 filer), **1784 tests / 151 filer** (fra 1771 / 151),
+  build (**141 sider**), `locale-leak.mjs --gate` exit 0 med 117 / 85 / 32 /
+  0 ureviewet (uændret). Branch `ceo/braendstof-metode`.
+- **MÅL:** `/braendstof` baseline **16.764 visninger / 184 klik / CTR 1,1 %,
+  pos. 6,0 pr. 2026-08-28 → 2026-09-25** — måles igen 2026-10-11.
+
 #### 123. [x] FÆRDIG 2026-09-27 — C93 — `/kvadratmeter` svarer synligt på "hvordan regner man kvadratmeter ud" med fire regneeksempler
 
 - **Datagrund:** dansk GSC (2026-08-28 → 09-25) `/kvadratmeter` **20.988
@@ -11410,6 +11499,36 @@ tekst på `/tidszone`), men Kopier-strengen med datoen kræver en browser.
   der linker til familien) pr. 2026-08-28 → 2026-09-25. Den nye sides
   baseline er **ikke kendt** (den er ikke indekseret endnu) — måles første
   gang 2026-10-11.
+
+### Næste kandidater efter C94
+
+0. **🔒 Opgave 97 er `BLOCKED`,** 98 afhænger af den. **🔒 Opgave 119 er
+   kilde-blokeret** (se ❓ Til Mads). Browser-noter: C52, C55, C56, C57 og
+   C60 ligger i ❓ Til Mads nederst.
+1. **⏬ Nedprioriteret: `/kvadratmeter` SE (3.181 v, 6 klik, pos. 11,3).** C93's
+   gamle kandidat #1 er **rykket ned af målingen**, ikke af mangel på tid:
+   pos. 11,3 er for dybt til at en titel eller et regnestykke løser — samme
+   konklusion som C92's punkt 5 gjorde for `/renteberegner` (pos. 25,6). Den
+   skal måles på *hvorfor* den er der. Den svenske `/kvadratmeter` får derfor
+   først regneeksempler, hvis den overhovedet flytter sig op mod pos. 7.
+2. **🆕 `/renteberegner` (13.560 v, 117 klik, CTR 0,9 %, pos. 7,5)** er det
+   næste snit i C94's klasse og **dansk**, altså samme marked som GSC's
+   sjettestørste side. Søgningerne er "annuitetslån beregner" 361 v pos. 8,
+   "renteberegner" 322 v pos. 7, "månedlig rente beregning" 48 v pos. 5 — tre
+   forskellige spørgsmål, som C83's måling (autocomplete → svar-først i
+   brødteksten) er metoden til. Brug forinden: samme tabel-mønstret som
+   C93/C94, med tal fra `src/lib/renteberegner.ts`.
+3. **🆕 `/kalorier` SE (2.697 v, 6 klik, pos. 19,8)** — samme rækkefølge-logik
+   som punkt 1: for dybt til en titel, mål hvorfor først.
+4. **✅ `/braendstof` DA er lukket** (opgave 124) — mål effekten 2026-10-11,
+   lav ikke ny CTR på siden før da.
+5. **✅ Dansk top-15 er lukket** (C82-C90 + C93 + C94) — mål i stedet effekten
+   14 dage efter.
+6. **⏬ Nedprioriteret:** 22 filer / 35 ubundne labels (kun sider uden for
+   top-15).
+7. **🔒 Uforandrede forbehold:** hreflang korrekt (`hrefLang` med stort L);
+   svenske slugs kræver Mads' go; `/bmi` og `/su` måles 2026-10-11.
+8. **Mål 2026-10-10 / 2026-10-11** (se Måleprotokol).
 
 ### Næste kandidater efter C93
 
