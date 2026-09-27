@@ -31,13 +31,14 @@ afvige). **3) Fund fra samme gennemgang:** `new Date("1990-03-15")` tolceres som
 lokal tid, så **stjernetegn, ugedag og fødselsdato** var dagen før for enhver
 læser vest for UTC — samme fejl som C54 fjernede to steder af, og den lå også i
 den delte tekst. Nu én `formatDato` på lokal midnat, brugt af både skærm og
-Kopier. `AlderBeregner.test.tsx` er **ny med 4 tests** (komponenten havde
+Kopier. `AlderBeregner.test.tsx` er **ny med 5 tests** (komponenten havde
 ingen); `alder.test.ts` **låser tidszonen til `Europe/Copenhagen`** — i UTC er
 alle døgn 24 timer, så de to nye DST-tests kan aldrig fejle på en byggemaskine.
-Verificeret modsvejs: de to nye lib-tests og "Dage levet"-testen falder med den
-gamle kode. Gate grøn: lint (547 filer), **1528 tests / 142 filer** (fra 1522 /
-141) og build (141 sider). Kode + plan i ét commit på `ceo/alder-kopi`, merge
-2026-09-27 03:0x CEST; første kandidatvindue **2026-09-27 07:30**. Se opgave 87.
+Verificeret modsvejs: **3 af 5** komponenttests og de to nye lib-tests falder
+med den gamle kode. Gate grøn: lint (547 filer), **1529 tests / 142 filer** (fra
+1522 / 141) og build (141 sider). Kode + plan i ét commit på `ceo/alder-kopi`, kode
+`c849044`, merge `d1b0767` 2026-09-27 02:22 CEST; første kandidatvindue
+**2026-09-27 07:30**. Se opgave 87.
 
 STATUS (forrige iteration) — **C58 er landet: **C58 er landet: `/kalorier` anbefalede negative kalorier, og den
 delte tekst var ét tal uden de fem input det afhænger af.** Klassen fra punkt 3b
@@ -6376,26 +6377,30 @@ top-15, så ud over CTR er det eneste målbare signal `ad_clicked` på siden.
   alle i UTC+, så dette har **ikke** ramt danske brugere — det er fundet fordi
   klassen er "find det sted, hvor den samme værdi læses to måder", ikke fordi
   nogen har meldt en fejl.
-- **Test:** `src/components/AlderBeregner.test.tsx` er **ny, 4 tests** —
+- **Test:** `src/components/AlderBeregner.test.tsx` er **ny, 5 tests** —
   komponenten havde ingen. Den klikker Kopier og læser **klipbordet** (knappen
-  viser ikke strengen, jf. C56), låser tidszonen til `Europe/Copenhagen`, og
-  dækker: begge datoer i strengen, samme ental/flertal som skærmen (finder skærmens
-  egen "11 år, 1 måned og 0 dage" og kræver at Kopier siger det samme), hele
-  den svenske sætning, og "Dage levet" = 13.343. `alder.test.ts` vokser fra 16
-  til **18** tests med de to DST-regressioner.
-- **Efterladt, bevidst.** 1) `ShareCalculation`s **Del-dialog** (Twitter-,
-  Facebook- og mail-linket) er ikke testet her — C57's test læser Del-linkets
-  `href`, men linket ligger i en modal, der først skal åbnes, og den test krævede
-   mere tid end denne iteration havde. Det er den næste test at skrive, fordi
-   den låser Kopier mod Del i `AlderBeregner`; samme mønster bør køres på de
-   fire andre komponenter, C52-C57 rørte. 2) Datofelterne på `/alder` har et
+  viser ikke strengen, jf. C56), åbner **Del-dialogen** og læser **Twitter-
+  linkets `href`**, fordi forskellene mellem de to knapper er usynlige i
+  DOM'en — og `/moms` har engang sendt to forskellige tekster fra dem, så testen
+  låser at de siger præcis det samme. Tidszonen låses til `Europe/Copenhagen`.
+  Dækker: begge datoer i strengen, samme ental/flertal som skærmen (finder
+  skærmens egen "11 år, 1 måned og 0 dage" og kræver at Kopier siger det
+  samme), Kopier = Del, hele den svenske sætning, og "Dage levet" = 13.343.
+  `alder.test.ts` vokser fra 16 til **18** tests med de to DST-regressioner.
+  **Verificeret modsvejs** med den gamle komponent fra `0050be7`: **3 af 5**
+  falder. De 2 der bliver grønne er "Dage levet" (rettelsen ligger i `alder.ts`,
+  som ikke var stashed) og Kopier = Del — den sidste er korrekt: de to steder
+  sagde det samme, de sagde bare for lidt, præcis som i C58.
+- **Efterladt, bevidst.** 1) Datofelterne på `/alder` har et
   `<label>` uden `htmlFor` og uden `id` på inputtet, så de er **ikke
   programmatisk tilknyttet** — skærmlæsere får inputfeltet læst uden navn, og
   `getByLabelText` kan ikke finde dem (testen må gå via `querySelectorAll`).
   Det er en reel a11y-fejl, men den kræver DOM-ændring i en publiceret side, så
-  den er **C60-kandidat**, ikke en sideopgave i dette hug. 3) `PromilleBeregner`
-  (4.159 visninger) er **næste i rækkefølgen** i denne klasse.
-- **Gate:** `npm run lint` grøn (547 filer), `npm run test` **1528 tests / 142
+  den er **C60-kandidat**, ikke en sideopgave i dette hug. 2) `PromilleBeregner`
+  (4.159 visninger) er **næste i rækkefølgen** i denne klasse, og skal have
+  samme test (Kopier mod Del), fordi `/moms` har engang sendt to forskellige
+  tekster fra de to knapper.
+- **Gate:** `npm run lint` grøn (547 filer), `npm run test` **1529 tests / 142
   filer** grøn (fra 1522 / 141), `npm run build` grøn (141 sider). Første
   kandidatvindue **2026-09-27 07:30**.
 - **MÅL:** `/alder` baseline **6.013 visninger / 35 klik / CTR 0,6 % / pos. 7,8**
