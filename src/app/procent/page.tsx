@@ -68,11 +68,12 @@ export default async function ProcentPage() {
         <ul>
           <li>
             <strong>Rabatter:</strong> 25% rabat på en vare til 400 kr = du
-            sparer 100 kr
+            sparer 100 kr. En vare, der koster 9.000 kr og er sat 1.125 kr.
+            ned, har en rabat på 1.125 ÷ 9.000 = 12,5 %
           </li>
           <li>
-            <strong>Moms:</strong> 25% moms på 1000 kr = 250 kr i moms (1250 kr
-            total)
+            <strong>Moms:</strong> 25% moms på 1.000 kr = 250 kr i moms (1.250
+            kr total)
           </li>
           <li>
             <strong>Renter:</strong> 5% rente på 10.000 kr = 500 kr i rente
@@ -82,7 +83,15 @@ export default async function ProcentPage() {
             mere
           </li>
           <li>
-            <strong>Skat:</strong> 37% skat af 40.000 kr = 14.800 kr i skat
+            <strong>Skat:</strong> Skatten er ikke én sats. Kommuneskatten er i
+            gennemsnit ca. 25 %, og dertil kommer arbejdsmarkedsbidrag samt
+            statslig indkomstskat for de højeste indkomster. Hvad du reelt
+            betaler afhænger af din kommune og din indkomst — få et færdigt
+            tal med{" "}
+            <Link href="/loen-efter-skat" className="text-blue-700 underline">
+              løn efter skat
+            </Link>
+            .
           </li>
         </ul>
 
@@ -125,6 +134,54 @@ export default async function ProcentPage() {
             </tbody>
           </table>
         </div>
+
+        <h2>Hvordan regner man procent i Excel?</h2>
+        <p>
+          Skriver du procent i Excel er det her formlerne du skal bruge. Antag
+          at beløbet står i A1 og sammenligningstallet i B1:
+        </p>
+        <div className="overflow-x-auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Spørgsmål</th>
+                <th>Formel</th>
+                <th>Eksempel</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Hvad er A1 i procent af B1?</td>
+                <td>
+                  <code>=A1/B1*100</code>
+                </td>
+                <td>2.500 af 10.000 = 25</td>
+              </tr>
+              <tr>
+                <td>Hvad er A1 procent af B1?</td>
+                <td>
+                  <code>=A1*B1/100</code>
+                </td>
+                <td>10 procent af 10.000 = 1.000</td>
+              </tr>
+              <tr>
+                <td>Hvor stor er ændringen fra A1 til B1?</td>
+                <td>
+                  <code>=(B1-A1)/A1*100</code>
+                </td>
+                <td>9.000 til 7.875 = -12,5</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p>
+          Skriver du <code>=A1/B1</code> får du andelen (0,25), og så skal cellen
+          formateres som procent. En løn, der stiger i procent, regner du med{" "}
+          <Link href="/loenstigning" className="text-blue-700 underline">
+            lønstigning i procent
+          </Link>
+          .
+        </p>
 
         <h2>Procentregningens formler</h2>
         <ul>
