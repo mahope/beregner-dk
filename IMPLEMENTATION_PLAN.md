@@ -6645,7 +6645,7 @@ efter datagrund:
 ### ❓ Til Mads
 - ⏳ **VERIFICÉR DEPLOY: C59 `/alder` — "Dage levet" tæller kalenderdage, og den
   delte tekst har begge datoer — kode + plan i ét commit på branch
-  `ceo/alder-kopi`, kode `<KODE_SHA>`, merge `<MERGE_SHA>` 2026-09-27 02:2x
+  `ceo/alder-kopi`, kode `c849044`, merge `d1b0767` 2026-09-27 02:22
   CEST. Første kandidatvindue **2026-09-27 07:30**.** Verificér **indhold**;
   HTTP 200 beviser intet, hele fundet er i tal der renderes på klienten:
   1. `/alder`, fødselsdato **15. marts 1990**, beregningsdato **25. september
