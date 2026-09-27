@@ -6708,6 +6708,41 @@ efter datagrund:
    `/api/v1/loen`'s kommuneskat, domænerne og `www`-redirects.
 
 ### ❓ Til Mads
+- ⏳ **VERIFICÉR DEPLOY: C60 `/promille` — et tomt felt gav en grøn
+  tilladelse til at køre bil, "præcis på grænsen" erstattede den falske
+  "over grænsen", og den delte tekst har nu de fire input — kode + plan i ét
+  commit på branch `ceo/promille-audit`, kode `137936a`, merge `aded200`
+  2026-09-27 02:46 CEST. Første kandidatvindue **2026-09-27 07:30**.**
+  Verificér **indhold og interaktivitet**; HTTP 200 beviser intet, hele fundet
+  er i klient-renderede kort og i strengen på Kopier/Del:
+  1. Åbn `/promille`, **markér feltet "Antal genstande" og slet det** (eller
+     sæt kropsvægt til 0). Kortet må **ikke** blive grønt med "Du er under
+     grænsen på 0,5 ‰" — det skal sige "Indtast antal genstande og kropsvægt —
+     uden dem kan promillen ikke beregnes.", og der må ikke stå "0,00 ‰" eller
+     nogen ‰-tegn. Før stod der et grønt "under grænsen"-kort, altså en
+     tilladelse til at køre bil fra et felt brugeren ikke havde tastet færdig.
+  2. Sæt **1 genstand, 44 kg, Kvinde, 0 timer**. Promillen skal være
+     **0,50 ‰** og kortet skal sige **"Du er præcis på grænsen (0,5 ‰) — kør
+     ikke bil"** i ravn. Før sagde det "Du er over grænsen på 0,5 ‰ — kør ikke
+     bil", altså noget sidens egen brødtekst ("ulovligt at køre bil med en
+     promille over 0,5 ‰") modsiger. Flisen "Under grænsen om 0,5 ‰" skal stå
+     **—**, ikke "0 timer".
+  3. Sæt **4 genstande, 80 kg, Mand, 0 timer** og klik **Kopiér**. Klipbordet
+     skal give
+     **`4 genstande, 80 kg, Mand, 0 timer siden: 0,88 ‰. Du er under grænsen på 0,5 ‰. Du er allerede under grænsen — helt ædru om 5,9 time.`**
+     Før stod der kun "Din anslåede promille: 0,88 ‰" — ét tal uden de fire
+     tal, det afhænger af.
+  4. Åbn **Del beregning** i samme opsætning. Twitter-linkets tekst skal være
+     præcis **`Promilleberegner: 4 genstande, 80 kg, Mand, 0 timer siden: 0,88
+     ‰. …`** — altså Kopier-strengen bag præfikset, ikke en anden sætning.
+  5. Sæt **6 genstande, 70 kg, Mand, 0 timer**: kortet skal stadig sige **"Du
+     er over grænsen på 0,5 ‰ — kør ikke bil"**, og flisen skal vise den
+     positive tid til grænsen. Den nye tilstand må ikke have sluget den gamle.
+  6. `https://beraknare.se/promille` med 3 standardglas, 75 kg, 2 timmar skal
+     give **`3 standardglas, 75 kg, Man, 2 timmar sedan: 0,41 ‰. Du är över
+     gränsen på 0,2 ‰. …`** — svensk sætning, og 0,2-grænsen fordi den er
+     svensk.
+  7. `https://minberegner.dk/api/health` skal svare `status: ok`.
 - ⏳ **VERIFICÉR DEPLOY: C59 `/alder` — "Dage levet" tæller kalenderdage, og den
   delte tekst har begge datoer — kode + plan i ét commit på branch
   `ceo/alder-kopi`, kode `c849044`, merge `d1b0767` 2026-09-27 02:22
