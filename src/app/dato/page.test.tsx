@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { getDomainConfigByLocale } from "@/lib/domain-config";
 import { getCurrentDomainConfig, getLocale } from "@/lib/get-locale";
 import { getDageTilSlugs } from "@/lib/dage-til";
+import { getPageData } from "@/lib/page-data";
 import DatoPage from "./page";
 
 vi.mock("next/dynamic", () => ({
@@ -133,5 +134,64 @@ describe("dato page — dage tilbage i året", () => {
 
     expect(html).toContain("<h2>Hvor mange dage er der tilbage af 2026?</h2>");
     expect(html).toContain("<strong>0 dage tilbage af 2026</strong>");
+  });
+});
+
+// Svensk autocomplete under "dagar mellan två datum" (GSC: 367 visninger,
+// pos. 8) har 7 af 10 variationer med "excel" — "antal dagar mellan två
+// datum excel", "hur många dagar mellan två datum excel", "excel formel
+// antal dagar mellan datum excel". Dansk autocomplete under "antal dage
+// mellem to datoer" har tre. Begge `/dato`-sider havde 0 forekomster af
+// "Excel" i den server-renderede HTML.
+describe("dato page — antal dagar mellan datum i Excel", () => {
+  test.each([
+    {
+      locale: "da" as const,
+      heading: "<h2>Sådan tæller du dage mellem to datoer i Excel</h2>",
+      days: "<strong>365 dage</strong>",
+      days194: "<strong>194 dage</strong>",
+      months: "altså 6 hele måneder",
+      semicolon: "Dansk Excel bruger <strong>semikolon</strong>",
+    },
+    {
+      locale: "se" as const,
+      heading: "<h2>Så räknar du ut dagar mellan två datum i Excel</h2>",
+      days: "<strong>365 dagar</strong>",
+      days194: "<strong>194 dagar</strong>",
+      months: "alltså 6 hela månader",
+      semicolon: "Svensk Excel använder <strong>semikolon</strong>",
+    },
+  ])(
+    "viser formlerne og de samme tal i $locale",
+    async ({ locale, heading, days, days194, months, semicolon }) => {
+      vi.mocked(getLocale).mockResolvedValue(locale);
+      vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale(locale));
+
+      const html = renderToStaticMarkup(await DatoPage());
+
+      expect(html).toContain(heading);
+      expect(html).toContain("<code>=B1-A1</code>");
+      expect(html).toContain(days);
+      expect(html).toContain("<code>=DATEDIF(A1;B1;&quot;d&quot;)</code>");
+      expect(html).toContain("<code>=DATEDIF(A1;B1;&quot;m&quot;)</code>");
+      expect(html).toContain("<code>=DATEDIF(A1;B1;&quot;y&quot;)</code>");
+      expect(html).toContain(days194);
+      expect(html).toContain(months);
+      expect(html).toContain(semicolon);
+    }
+  );
+
+  test("begge sprog har de to nye spørgsmål i FAQ'en, som også går i JSON-LD", async () => {
+    for (const locale of ["da", "se"] as const) {
+      const faq = getPageData("dato", locale)!.faqItems;
+      const excel = faq.filter((item) => item.question.includes("Excel"));
+
+      expect(excel).toHaveLength(2);
+      expect(excel[0].question).not.toBe(excel[1].question);
+      for (const item of excel) {
+        expect(item.answer).toContain("=B1-A1");
+        expect(item.answer).toContain("DATEDIF");
+      }
+    }
   });
 });

@@ -1,3 +1,5 @@
+STATUS: KØ — **C98 er landet: `/dato` er GSC's næststørste danske side (131.419 visninger, CTR 0,6 %, pos. 5,8) *og* beraknare.se's største (92.832 visninger, CTR 0,1 %, pos. 8,3) — og begge sprog har 0 forekomster af "Excel", selv om 7 af 10 svenske og 3 af 7 danske autocomplete-variationer i sidens egen søgeklynge er Excel-spørgsmål.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den, 119 er kilde-blokeret), C97 skrev ingen ny kandidatliste, og alle åbne deploy-noter (C81, C82, C87, C88, C92, C93) har første vindue **17:30** — det var 16:15, så intet kunne verificeres. Valget blev fundet ved at måle køens svenske CTR-kandidater (`/tidszone` 3.256 v, `/leasing` 3.151 v, `/alder` 3.060 v, `/nedtaelling` 5.163 v) og se, at **den største svenska side slet ikke stod på listen**. **Målt først, målt begge sprog:** SE-autocomplete (`hl=se`, `gl=se`, 16:20) under **"dagar mellan två datum"** (GSC: 367 v pos. 8) giver 10 variationer hvoraf **syv indeholder "excel"** — "dagar mellan två datum excel", "antal dagar mellan två datum excel", "räkna dagar mellan två datum excel", "antalet dagar mellan två datum excel", "hur många dagar mellan två datum excel", "räkna antalet dagar mellan två datum excel" og "excel formel antal dagar mellan datum excel"; under **"dagar mellan datum"** (793 v pos. 8) 3 af 10, under **"antal dagar mellan datum"** (406 v pos. 9) 3 af 10, og under **"dagar mellan två datum formel"** **2 af 2**. DA-autocomplete under **"dage mellem datoer"** (450 v pos. 4) har "dage mellem datoer excel" som **nr. 2**, og under **"antal dage mellem to datoer"** (249 v pos. 5) har 3 af 7 excel. På de **live** sider: `grep -c -i excel` giver **0** på både `minberegner.dk/dato` og `beraknare.se/dato`, og `grep -ri excel src/app/dato/` giver **0**. Begge titler er allerede svar-først ("Beregn antal dage mellem to datoer", "Beräkna antal dagar mellan två datum") — altså **for tredje gang ikke titlen, men kroppen under den** (samme konklusion som C82 og C85). **Rettelsen:** ét nyt `<h2>` i hver sproggren — "Sådan tæller du dage mellem to datoer i Excel" / "Så räknar du ut dagar mellan två datum i Excel" — med `=B1-A1`, `=DATEDIF(A1;B1;"d"/"m"/"y")`, semiklon-noten i begge sprog, og at `DATEDIF` er et skjult navn. Plus **to nye FAQ-par i hvert sprog** i `page-data.ts`, som dermed også kommer i JSON-LD'en. **Tal regnet, ikke kopieret** (C82's metode, og den reddede mig fra en fejl): 1. jan 2026 → 1. jan 2027 = **365 dage** (`=B1-A1`) og 15. marts 2026 → 25. september 2026 = **194 dage** og **6 hele måneder** — de to sidste tal er desuden de samme som C88's alders-eksempel, altså sidens egne. **Målefejl undgået ved at regne:** min første hensigt var at bruge "1. januar 2026 → 31. december 2026 = 365 dage", som sidens Kopiér-tekst ifølge C55's åbne browsernote siger. `daysBetween` siger **364** (1. januar er dag 1, 31. december er dag 365, forskel 364). Jeg brugte derfor parret 1. jan 2026 → **1. jan 2027** i stedet. **Fundet, jeg ikke retter i denne iteration:** C55's note og `daysBetween` kan ikke begge være rigtige for 1. jan→31. dec 2026; det kan kun afgøres i en browser (Kopiér-knappen), og ligger derfor i `❓ Til Mads`. **Én påstand bevidst undladet:** jeg navngav ikke en lokalisert `NETWORKDAYS`-funktion, fordi dens danske og svenske navn er noget jeg ikke har verificeret — i stedet peger afsnittet på værktøjet til arbejdsdage. Samme disciplin som opgave 119 og C95. **Harness:** `dato/page.test.tsx` **8 → 11 tests**, ny `describe` der kræver overskriften, alle fire formler, begge tal og semiklon-sætningen i **bade** sprog, plus en test der kræver **præcis to** Excel-spørgsmål i hvert sprog og at de er forskellige. **Verificeret modsvejs: alle 3 nye tests falder** med kun `page.tsx` + `page-data.ts` på master. **Gate grøn:** lint (556 filer), **1802 tests / 151 filer** (fra 1798 / 151), build (**141 sider**), `locale-leak.mjs --gate` exit 0. Ingen beregningslogik, ingen `no`, ingen anden side rørt. Kode + plan i ét commit på `ceo/dato-excel`; se opgave 128. **MÅL:** `/dato` DA **131.419 visninger / 803 klik / CTR 0,6 % / pos. 5,8** og SE **92.832 visninger / 88 klik / CTR 0,1 % / pos. 8,3**, begge pr. **2026-08-28 → 2026-09-25** — måles igen 2026-10-11. Forventningen er højere CTR på de positioner siden allerede har, ikke nye visninger.
+
 STATUS: KØ — **C97 er landet: de ni `/dage-til/*`-titler var 61-67 tegn på begge domæner — altså den afkortningsfejl, C81 lukkede for 160 `page-data`-titler, men som lå lige uden for den gate.** Samme iteration som C96 (se den forrige STATUS); denne er den anden opgave, og den blev fundet fordi C96's `/brok`-arbede efterlod 20 minutter, så kandidatlisten blev læst igen. Køen havde ingen `I GANG`-opgave, og alle åbne deploy-noter har første vindue **17:30** — det er 16:09, så intet kunne verificeres. Valget var det punkt, fire iterationer (C91, C92, C93) havde skrevet op som "en designbeslutning for alle ni sider (hvad af de to mister vi?)" — og målingen viser, at det slet ikke var en designbeslutning, men en **hullet gate**. **Målt først, målt rigtigt:** min første curl-runde gav 5 af 16 sider site-defaulttitlen, fordi jeg brugte danske slugs på beraknare.se (C91's fælde: `curl` uden `-L` på en 301) og Halloween endnu ikke er deployet. Målt på de **rigtige** URL'er fra begge sitemapmer: alle 8 danske titler er **62-66 tegn** og alle 8 svenske **61-67** — f.eks. "Hvor mange dage er der til grundlovsdag? 251 dage | MinBeregner.dk" (**66**) og "Hur många dagar är det till nationaldagen? 252 dagar | Beräknare.se" (**67**). Googles grænse er ca. 60, så **afkortningen rammer alle ni sider i begge sprog, og den klipper `| MinBeregner.dk` væk.** **Hvorfor gaten ikke så det:** C81's test i `page-data.test.ts` læser `metaTitle` for de 160 slugs i tabellen — og `dage-til`-titlerne bygges af `buildDageTilMetadata` i `DageTilPage.tsx` og har **ingen** `page-data`-post. Samme blindhed som `title-collision.test.ts` havde med de ni sider, og som C44 allerede havde lappet *én* gang i den anden test. **Beslutningen, fire iterationer havde udskudt:** brandet i halen er præcis den del, der bliver klippet væk (C81's egen lære), og spørgsmålet plus dage-tallet er hele søgeintentionen — så **brandet ud, svaret bliver**. Titlen bliver nu `${spørgsmål} ${dage}` = 46-52 tegn i begge sprog, og **`og:site_name` sendes stadig**, så Facebook/LinkedIn beholder brandet. **Harness:** `src/app/dage-til-routes.test.tsx` **15 → 18 tests** med en ny `describe("dage-til titler")` der **kald den rigtige producer** (`buildDageTilMetadata(prefix, slug, I_DAG)`) for alle ni begge sprog og kræver ≤ 60 — altså ikke en genkopiering af den gamle regel, hvilket er C44's lære om at en måler skal ramme den kode der faktisk renderer. Plus to låse: at grundlovsdagstitlen stadig er spørgsmålet *og* dage-tallet (så den ikke bliver kortere ved at miste svaret) og at `og:site_name` er urørt. **Verificeret modsvejs: 3 af 4 falder** med kun `DageTilPage.tsx` på master ("expected 62 to be less than or equal to 60" / "61" og den lange skærforskel i grundlovsdagstitlen); den fjerde er `og:site_name`-låsen. Gate grøn: lint (556 filer), **1798 tests / 151 filer** (fra 1794 / 151), build (**141 sider**), `locale-leak.mjs --gate` exit 0. `dage-til.ts` urørt, ingen beregningslogik rørt. Kode + plan i ét commit på `ceo/dage-til-titler`; se opgave 127. **MÅL:** de ni `dage-til`-sider er **ikke** synlige i GSC-listen (baseline ukendt — de måles første gang 2026-10-11); `/dato` **131.419 visninger / 803 klik / CTR 0,6 % / pos. 5,8** og `/nedtaelling` (bær de ni i deres brødtekst) er de nærmeste baseline.
 
 STATUS: KØ — **C96 er landet: `/brok` — 4.881 visninger, CTR 0,6 % på position 5,3, altså lav CTR på en god position — havde nul svar på den søgning, dansk autocomplete har som nr. 1 under "brøk". Siden forklarede at *forkorte* en brøk, mens folk spørger efter at *regne med* brøker.** Valget var C95's åbne kandidat #2 og det første uforbrugte snit i C82-C95's klasse; køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den, 119 er kilde-blokeret), og alle åbne deploy-noter har første vindue **17:30** — det er 16:05, så intet kunne verificeres i starten af iterationen. **Målt først:** DA-autocomplete (`hl=da`, `gl=dk`, 16:05) under **"brøk"** giver 10 variationer hvoraf **nr. 1 er "brøk regneregler"** — resten er "brøk til procent"/"brøk til decimaltal" (4 af 10); under **"brøk til procent"** er fire af ti "formel"/"regner"/"omskriv"; under **"hvad er en brøk"** står **"hvad er en brøkdel af et tal"** som nr. 3 og resten er ægte/uægte/uforkortelig brøk. På den **live** side (110 KB HTML) var der **0** fund på **"regneregel"**, **"formel"**, **"brøkdel af"**, **"÷"** og **"×"**, og FAQ'ens 4 spørgsmål rørte ingen af delene. Titlen og beskrivelsen var *allerede* svar-først ("Brøkberegner: forkort 6/8 til 3/4 = 0,75 = 75 %") — så det er igen **ikke titlen, men kroppen under den**, samme konklusion som C82. **Rettelsen (kun `da`):** et nyt `<h2>` "Brøkregning: de fire regneregler" med alle fire regler som regnestykker (1/2 + 1/3 = 3/6 + 2/6 = 5/6, 3/4 − 1/4 = 2/4 = 1/2, 1/2 × 2/3 = (1 × 2)/(2 × 3) = 2/6 = 1/3, 1/2 ÷ 2/3 = 1/2 × 3/2 = 3/4) og den fælde, der driller mest — plus/minus er de eneste to af de fire, hvor nævnerne skal være ens *inden* regningen. **Tre nye `<h3>`:** formlen **procent = brøk × 100** med tabellen 1/2, 1/4, 3/4, 1/8, 2/3, 5/6, 7/10; **"Sådan regner du en brøkdel af et tal"** med (3 × 200) ÷ 4 = **150 kr.**, 1/4 af 1.000 = 250 kr., 2/5 af 250 = 100 kr. og krydschecket at 3/4 = 75 % og 75 % af 200 = 150, plus et link til `/procent`; og dermed **tre nye FAQ-par i `page-data.ts`** (som også går i JSON-LD'en): "Hvad er regnereglerne for brøker?", "Hvad er en brøkdel af et tal?" og "Hvad er forskellen på en ægte og en uægte brøk?". **Hvorfor tallene ikke er skrevet i hånden:** alle otte tal i brødteksten og alle 14 i tabellen udledes af `forkortBrok` gennem to hjælpere i `page.tsx` — **samme modul som værktøjet bruger** — så C84's fejlklasse (indekseret tekst der modsiger sit eget indhold) kan ikke ske igen på siden, og en test krydschecker `procent ≈ decimal × 100` pr. række. **Harness:** `brok/page.test.tsx` **2 → 6** (regneregler, tabel, brøkdel, SE-lås med 0 danske markører på beraknare.se — C82's lektion), **verificeret modsvejs: 3 af 4 falder** med kun `page.tsx` på master; den fjerde er et lås, der skal være grønt før og efter. `page-data.test.ts` **+4**, **verificeret modsvejs: 3 af 4 falder** med den gamle `page-data.ts`. **Én målefejl undgået ved at læse koden først:** min første hensigt var at tilføje et "regn brøkdel af et tal"-felt i `BrokBeregner` — men værktøjet har kun to felter (tæller og nævner) og det er en funktionsudvidelse, ikke en tekst rettelse; i stedet får spørgsmålet et regnestykke og et link til `/procent`, som er den side der faktisk kan regne det. **Gate grøn:** lint (556 filer), **1794 tests / 151 filer** (fra 1786 / 151), build (**141 sider**), `locale-leak.mjs --gate` exit 0. `brok.ts` urørt (kun læst), `se` urørt, ingen dataintegration rørt. Kode + plan i ét commit på `ceo/brok-regneregler`; se opgave 126. **MÅL:** `/brok` baseline **4.881 visninger / 31 klik / CTR 0,6 % / pos. 5,3 pr. 2026-08-28 → 2026-09-25** — måles igen 2026-10-11. Forventningen er højere CTR på de positioner siden allerede har, ikke nye visninger.
@@ -11299,6 +11301,70 @@ tekst på `/tidszone`), men Kopier-strengen med datoen kræver en browser.
   låst den ene. Den rigtige måling er derfor mod *kilden*, som er hvad de to
   andre gater også gør.
 
+#### 128. [x] FÆRDIG 2026-09-27 — C98 — `/dato` svarer på "antal dagar mellan två datum excel" (7 af 10 svenske variationer) og "antal dage mellem to datoer excel" med formlerne i begge sprog
+
+- **Datagrund:** `/dato` er GSC's næststørste danske side (**131.419 v /
+  803 klik / CTR 0,6 % / pos. 5,8**) og beraknare.se's største (**92.832 v /
+  88 klik / CTR 0,1 % / pos. 8,3**) — altså positioner 4-9 med lav CTR, som
+  Fase 3 definerer som den billigste vækst. De fire største danske søgninger
+  er "dage mellem datoer" (450 v), "antal dage mellem to datoer" (249 v),
+  "hvor mange dage er der til 1 december" (1.020 v) og "hvor mange dage er
+  der tilbage af 2026" (227 v); de fire største svenska er "dagar mellan
+  datum" (793 v), "antal dagar mellan datum" (406 v), "hur många dagar mellan
+  två datum" (367 v) og "dagar till 31 dec" (367 v). **Excel stod ikke i
+  nogen af dem, men stod i 7 af 10 svenske og 3 af 7 danske variationer under
+  præcis de søgninger** (autocomplete hentet 16:20 med `hl=se`/`hl=da`).
+- **Målt på de live sider, ikke på koden alene:** `grep -c -i excel` → **0**
+  på `minberegner.dk/dato` **og** `beraknare.se/dato`; `grep -ri excel
+  src/app/dato/` → **0**. Begge titler er svar-først (verificeret med `curl`),
+  så brødteksten var det eneste sted, svaret kunne mangle.
+- **Rettelse:** ét nyt `<h2>` pr. sprog med `=B1-A1`, `=DATEDIF(...;"d")`,
+  `"m"`, `"y"`, semiklon som skilletegn i begge sprog, og at `DATEDIF` er et
+  skjult navn. To nye FAQ-par pr. sprog i `page-data.ts` (kommer i JSON-LD).
+- **Tal regnet, ikke kopieret:** 1. jan 2026 → 1. jan 2027 = **365**; 15. marts
+  2026 → 25. september 2026 = **194 dage / 6 hele måneder**. De to sidste er de
+  samme tal som C88's alders-eksempel bruger, altså sidens egne.
+- **Målefejl undgået ved at regne:** "1. jan 2026 → 31. december 2026 = 365
+  dage" står i C55's åbne browsernote, men `daysBetween` siger **364**. Parret
+  er derfor skiftet til 1. jan 2026 → 1. jan 2027, og uoverensstemmelsen er
+  skrevet op under `❓ Til Mads` i stedet for at blive gentaget på siden.
+- **Én påstand bevidst undladet:** ingen lokalisert `NETWORKDAYS`-funktion er
+  nævnt, fordi dens danske/svenske navn ikke er verificeret; afsnittet peger
+  i stedet på værktøjet til arbejdsdage.
+- **Harness:** `src/app/dato/page.test.tsx` **8 → 11 tests**. **Verificeret
+  modsvejs: alle 3 nye falder** med kun `page.tsx` + `page-data.ts` på master.
+- **Gate:** lint (556 filer), **1802 tests / 151 filer** (fra 1798 / 151),
+  build (**141 sider**), `locale-leak.mjs --gate` exit 0. Ingen beregningslogik,
+  ingen `no`, ingen anden side rørt. Branch `ceo/dato-excel`.
+- **MÅL:** se STATUS. Begge domæner måles igen **2026-10-11**.
+
+### Næste kandidater efter C98
+
+0. **🔒 Opgave 97 er `BLOCKED`,** 98 afhænger af den. **🔒 Opgave 119 er
+   kilde-blokeret.** Browser-noter: C52, C55, C56, C57, C60 ligger i
+   `❓ Til Mads`.
+1. **✅ `/dato` er lukket i begge sprog** (opgave 128) — mål effekten
+   2026-10-11, lav ikke Excel eller CTR på siden igen før da.
+2. **🆕 Excel-klassen er målt på ét par sider, ikke på sitet.** `/tidsberegner`
+   er **57.541 v / 116 klik / CTR 0,2 % / pos. 8,1** på beraknare.se og
+   **72.725 v** på dansk, og C85's Excel-afsnit er kun på `/renteberegner`.
+   Mål `hl=se` under "räkna timmar mellan" og "timmar mellan tider" — hvis
+   excel-klyngen findes, er det samme rettelse på en større svensk side.
+3. **🆕 Svensk CTR, de fire kandidater C98 målte forbi:** `/tidszone`
+   (3.256 v), `/leasing` (3.151 v, **pos. 12,4** — lavere, altså et
+   rankingproblem først), `/alder` (3.060 v, C88's Excel-sektion er kun `da`)
+   og `/nedtaelling` (5.163 v, pos. 9,4). Mål autocomplete i hver, før der
+   bygges.
+4. **🆕 `/promille` svensk halvdel:** kun hvis svensk autocomplete under
+   "promillegräns" eller "rattonyktering gräns" viser spørgsmål, siden ikke
+   svarer på.
+5. **⏬ Nedprioriteret:** 22 filer / 35 ubundne labels (kun sider uden for
+   top-15). Dansk top-15 er lukket (C82-C90).
+6. **🔒 Uforandrede forbehold:** hreflang korrekt (`hrefLang` med stort L);
+   svenske slugs kræver Mads' go; `/bmi` og `/su` måles 2026-10-11.
+7. **Mål 2026-10-10 / 2026-10-11** (se Måleprotokol).
+
+
 #### 126. [x] FÆRDIG 2026-09-27 — C96 — `/brok` svarer på "brøk regneregler" (autocompletes nr. 1 under "brøk") med de fire regler, formlen for procent og en brøkdel af et tal
 
 - **Datagrund:** dansk GSC (2026-08-28 → 09-25) `/brok` **4.881 visninger, 31
@@ -12248,3 +12314,26 @@ kalorier skal jag ha om dagen" (pos. 1 på `/kalorier`).
 >
 > Når de fem er skrevet her, kan næste iteration lukke dem med `DEPLOY OK` uden
 > at røre koden.
+
+### ⏳ **VERIFICÉR DEPLOY: C98 — `/dato` har nu et Excel-afsnit i begge sprog ("Sådan tæller du dage mellem to datoer i Excel" / "Så räknar du ut dagar mellan två datum i Excel") med `=B1-A1` og `=DATEDIF(...;"d"/"m"/"y")`, og to nye FAQ-par pr. sprog som også kommer i JSON-LD'en.** Kun `locale === "da"`- og `locale === "se"`-grenen i `src/app/dato/page.tsx` og to par i hver `page-data.ts`-blok er rørt — ingen beregningslogik, ingen `no`, ingen anden side. **Verificér indhold, ikke HTTP 200:**
+  1. `curl -s https://minberegner.dk/dato | grep -c 'Sådan tæller du dage mellem to datoer i Excel'` skal være **1** — før fandtes overskriften ikke, og `grep -c -i excel` gav **0**.
+  2. Samme curl skal finde `=B1-A1`, `DATEDIF(A1;B1;&quot;d&quot;)`, `=DATEDIF(A1;B1;&quot;m&quot;)`, `=DATEDIF(A1;B1;&quot;y&quot;)`, **365 dage**, **194 dage**, "6 hele måneder" og "Dansk Excel bruger".
+  3. `curl -s https://beraknare.se/dato | grep -c 'Så räknar du ut dagar mellan två datum i Excel'` skal være **1**, og samme curl skal finde **365 dagar**, **194 dagar**, "6 hela månader" og "Svensk Excel använder".
+  4. Begge FAQ'er skal have **7** spørgsmål i stedet for 5, og de to nye skal hedde "…i Excel?" og "Kan Excel …". Ingen danske `æ`/`ø` må stå i beraknare.se's nye tekst.
+  5. `https://minberegner.dk/api/health` skal svare `status: ok`. Kode + plan i ét commit på `ceo/dato-excel`; første kandidatvindue **2026-09-27 17:30**.
+
+### ❓ Til Mads — C55's browsernote og `daysBetween` kan ikke begge være rigtige
+
+C55's åbne note beder om at verificere at Kopiér-teksten på `/dato` siger
+**365 dage** for parret 1. januar 2026 → 31. december 2026. C98 regnede det
+par i node med samme definition som modulet og fik **364** — 1. januar er
+dag 1 og 31. december dag 365 i et ikke-skudår, så forskellen er 364.
+En af de to er forkert, og det kan **kun** afgøres i en browser, fordi
+Kopiér-knappens tekst ikke ligger i DOM'en. C98 skrev derfor **ikke** 365 for
+det par på siden, men brugte 1. januar 2026 → 1. januar 2027 (= 365) i
+Excel-afsnittet, så den nye tekst ikke arver fejlen.
+
+**Spørgsmålet:** gå ind på `/dato`, sæt 1. jan. 2026 → 31. dec. 2026, tryk
+**Kopiér** og skriv tallet her. 364 = korrekt (og C55's note skal rettes),
+365 = en med vilje, der tæller begge dage med, og så skal `dage-til`- og FAQ-
+teksterne sige det samme.

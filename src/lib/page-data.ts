@@ -799,6 +799,8 @@ const daPages: Record<string, PageData> = {
       { question: "Hvilke helligdage bruger beregneren?", answer: "De ni danske helligdage: nytårsdag 1. januar, skærtorsdag, langfredag, påskedag og 2. påskedag (alle fire påskehelligdage), grundlovsdag 5. juni, juleaftensdag 24. december, juledag 25. december og 2. juledag 26. december. Påskedagen beregnes af den gregorianske algoritme og kan derfor ligge mellem 22. marts og 25. april." },
       { question: "Kan jeg trække dage fra?", answer: "Ja! Indtast et negativt tal for at gå tilbage i tid." },
       { question: "Skudår?", answer: "Ja, beregneren håndterer skudår korrekt." },
+      { question: "Hvordan beregner jeg dage mellem to datoer i Excel?", answer: "Med =B1-A1. Har startdatoen i A1 og slutdatoen i B1, trækker formlen den korte forskel: 1. januar 2026 til 1. januar 2027 er 365 dage. =DATEDIF(A1;B1;\"d\") giver præcis det samme tal, og med \"m\" får du hele måneder (15. marts 2026 til 25. september 2026 er 194 dage og 6 hele måneder) og med \"y\" hele år. Dansk Excel bruger semikolon." },
+      { question: "Kan Excel tælle dage mellem datoer?", answer: "Ja, og det er to formler: =B1-A1 er den korte, mens =DATEDIF(A1;B1;\"d\") tæller i dage, \"m\" i måneder og \"y\" i år. DATEDIF er et skjult navn, så det står ikke i formelassistenten, men virker i alle Excel-versioner. Vil du have arbejdsdage og helligdage med, gør datoberegneren det samme." },
       ],
     },
     "tidsberegner": {
@@ -3241,6 +3243,8 @@ const sePages: Record<string, PageData> = {
       { question: "Hur många dagar till 31 december?", answer: "Ange dagens datum som startdatum och 31 december som slutdatum, så ser du antalet dagar. Kalkylatorn tar også med helgdagar om du vill se hur många arbetsdagar som återstår." },
       { question: "Kan jag dra av dagar?", answer: "Ja! Ange ett negativt tal för att gå bakåt i tiden." },
       { question: "Skottår?", answer: "Ja, kalkylatorn hanterar skottår korrekt." },
+      { question: "Hur räknar jag ut antalet dagar mellan datum i Excel?", answer: "Med =B1-A1. Har startdatumet i A1 och slutdatumet i B1 drar formeln den korta skillnaden: 1 januari 2026 till 1 januari 2027 är 365 dagar. =DATEDIF(A1;B1;\"d\") ger exakt samma tal, och med \"m\" får du hela månader (15 mars 2026 till 25 september 2026 är 194 dagar och 6 hela månader) och med \"y\" hela år. Svensk Excel använder semikolon." },
+      { question: "Kan Excel räkna ut antalet dagar mellan två datum?", answer: "Ja, och det är två formler: =B1-A1 är den korta, medan =DATEDIF(A1;B1;\"d\") räknar i dagar, \"m\" i månader och \"y\" i år. DATEDIF är ett dolt namn, så det syns inte i formelassistenten, men fungerar i alla Excel-versioner. Vill du ha arbetsdagar och helgdagar med gör datokalkylatorn samma sak." },
       ],
     },
     "tidsberegner": {
