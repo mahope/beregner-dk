@@ -127,9 +127,9 @@ export default function BudgetBeregner() {
         {/* Inputs */}
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">{l.income}</label>
+            <label htmlFor="budget-indkomst" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">{l.income}</label>
             <div className="relative">
-              <input type="number" value={income} onChange={(e) => setIncome(Number(e.target.value))}
+              <input id="budget-indkomst" type="number" value={income} onChange={(e) => setIncome(Number(e.target.value))}
                 className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">{currency}</span>
             </div>
@@ -138,9 +138,9 @@ export default function BudgetBeregner() {
           <p className="text-sm font-medium text-gray-700 dark:text-gray-200 pt-2">{l.expensesTitle}</p>
           {EXPENSE_KEYS.map((k) => (
             <div key={k}>
-              <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">{l[k]}</label>
+              <label htmlFor={`budget-udgift-${k}`} className="block text-xs text-gray-600 dark:text-gray-400 mb-1">{l[k]}</label>
               <div className="relative">
-                <input type="number" value={expenses[k]} onChange={(e) => setExpense(k, Number(e.target.value))}
+                <input id={`budget-udgift-${k}`} type="number" value={expenses[k]} onChange={(e) => setExpense(k, Number(e.target.value))}
                   className="w-full px-4 py-2.5 pr-12 border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">{currency}</span>
               </div>

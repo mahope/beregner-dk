@@ -216,8 +216,8 @@ export default function LoenBeregner() {
           />
 
           <div>
-            <label className="block text-sm font-medium mb-2 dark:text-gray-200">Periode</label>
-            <div className="flex gap-4">
+            <label id="loen-periode-gruppe" className="block text-sm font-medium mb-2 dark:text-gray-200">Periode</label>
+            <div className="flex gap-4" role="group" aria-labelledby="loen-periode-gruppe">
               <button type="button"
                 onClick={() => setPeriode("maaned")}
                 className={`flex-1 py-3 rounded-lg border-2 transition-colors ${
@@ -244,10 +244,11 @@ export default function LoenBeregner() {
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-2 dark:text-gray-200">
+            <label htmlFor="loen-kommune" className="block text-sm font-medium mb-2 dark:text-gray-200">
               Kommune
             </label>
             <select
+              id="loen-kommune"
               value={valgtKommune}
               onChange={(e) => {
                 const kommuneNavn = e.target.value;

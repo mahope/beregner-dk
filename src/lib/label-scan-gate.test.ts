@@ -139,10 +139,11 @@ describe("ubundne-<label>-scanner", () => {
     ) as Rapport;
     expect(r.dinglende).toBe(0);
     // Tallet **skal** ændre sig i samme commit som en rettelse af klassen, ellers
-    // låser den næste agent fast i en vished, der ikke holder. C71 lukkede de syv
-    // filer med tre ubundne labels (30/48 her); C64→C70's håndtælling sagde 38/70,
+    // låser den næste agent fast i en vished, der ikke holder. C72 lukkede de
+    // næste filer i halen (23/36 her); C71 lukkede de syv filer med tre ubundne
+    // labels (30/48); C64→C70's håndtælling sagde 38/70,
     // fordi den beholdt `/elberegner`s gruppe-etiket, som *er* bundet gennem
     // `aria-labelledby={`elberegner-apparat-${index + 1}`}` — R2's fælde.
-    expect(`${r.filer} filer / ${r.ubundte} ubundne`).toBe("30 filer / 48 ubundne");
+    expect(`${r.filer} filer / ${r.ubundte} ubundne`).toBe("23 filer / 36 ubundne");
   });
 });

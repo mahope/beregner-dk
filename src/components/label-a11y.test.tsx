@@ -23,8 +23,11 @@ import BefordringsfradragBeregner from "./BefordringsfradragBeregner";
 import BolanBeregner from "./BolanBeregner";
 import BoliglaanBeregner from "./BoliglaanBeregner";
 import BoligsalgBeregner from "./BoligsalgBeregner";
+import BilBeregner from "./BilBeregner";
 import BraendstofBeregner from "./BraendstofBeregner";
 import BrokBeregner from "./BrokBeregner";
+import BruttoNettoBeregner from "./BruttoNettoBeregner";
+import BudgetBeregner from "./BudgetBeregner";
 import BoernepengBeregner from "./BoernepengBeregner";
 import DatoBeregner from "./DatoBeregner";
 import DelRegningBeregner from "./DelRegningBeregner";
@@ -38,6 +41,9 @@ import GaeldsfriBeregner from "./GaeldsfriBeregner";
 import HuslejeBudgetBeregner from "./HuslejeBudgetBeregner";
 import KalorieBeregner from "./KalorieBeregner";
 import KvadratmeterBeregner from "./KvadratmeterBeregner";
+import LoenBeregner from "./LoenBeregner";
+import NedtaellingBeregner from "./NedtaellingBeregner";
+import OpsparingsBeregner from "./OpsparingsBeregner";
 import LaaneBeregner from "./LaaneBeregner";
 import LeasingBeregner from "./LeasingBeregner";
 import LoenKonverterBeregner from "./LoenKonverterBeregner";
@@ -53,6 +59,7 @@ import RenteBeregner from "./RenteBeregner";
 import RygestopBeregner from "./RygestopBeregner";
 import TidsBeregner from "./TidsBeregner";
 import TidszoneBeregner from "./TidszoneBeregner";
+import TopskatBeregner from "./TopskatBeregner";
 import ValutaBeregner from "./ValutaBeregner";
 import VaegttabBeregner from "./VaegttabBeregner";
 import { LocaleProvider } from "./LocaleProvider";
@@ -583,6 +590,68 @@ describe("Feltnavn for skærmlæsere — de fire mest besøgte beregnere", () =>
         const { container } = renderIn(locale, RygestopBeregner);
         expectFieldsAreNamed(container);
         expect(container.querySelectorAll("#rygestop-cigaretter, #rygestop-pakkepris, #rygestop-pakkestoerrelse").length).toBe(3);
+      });
+
+      test("/brutto-netto: ønsket udbetalning og kommuneskat har navn", () => {
+        const { container } = renderIn(locale, BruttoNettoBeregner);
+        expectFieldsAreNamed(container);
+        expect(container.querySelector("#brutto-netto-oensket")).not.toBeNull();
+        expect(container.querySelector("#brutto-netto-kommuneskat")).not.toBeNull();
+        // Knappenavnet "Pr. måned"/"Pr. år" gav ingen gruppe-navn, så en
+        // skærmlæser læste to navnløse knapper efter hinanden.
+        const gruppe = container.querySelector('[role="group"][aria-label]');
+        expect(gruppe?.querySelectorAll("button").length).toBe(2);
+      });
+
+      test("/topskat: bruttoindkomst og kommuneskat har navn", () => {
+        const { container } = renderIn(locale, TopskatBeregner);
+        expectFieldsAreNamed(container);
+        expect(container.querySelectorAll("#topskat-aarsindkomst, #topskat-kommuneskat").length).toBe(2);
+      });
+
+      test("/opsparing: rentetilskrivning er en gruppe, inflation er et navngivet felt", () => {
+        const { container } = renderIn(locale, OpsparingsBeregner);
+        expectFieldsAreNamed(container);
+        // "Rentetilskrivning" er knapper, ikke et felt, så den kan ikke bindes
+        // med `for` — den er gruppens navn.
+        const gruppe = container.querySelector('[role="group"][aria-labelledby]');
+        expect(gruppe?.querySelectorAll("button").length).toBe(3);
+        // Inflationskontrollen var *indpakket* i etiketten: gyldig HTML, men
+        // ufindelig for `getByLabelText`.
+        expect(container.querySelector("#opsparing-vis-inflation")).not.toBeNull();
+        expect(container.querySelectorAll('[role="group"][aria-labelledby]').length).toBe(1);
+      });
+
+      test("/budget: indkomst og alle udgiftsfelter har hver sit navn", () => {
+        const { container } = renderIn(locale, BudgetBeregner);
+        expectFieldsAreNamed(container);
+        expect(container.querySelector("#budget-indkomst")).not.toBeNull();
+        // Udgifterne kommer fra et array, så id'et må følge nøglen — ellers
+        // ville alle felter få det samme id.
+        const udgifter = Array.from(container.querySelectorAll('[id^="budget-udgift-"]'));
+        expect(udgifter.length).toBeGreaterThan(3);
+        expect(new Set(udgifter.map((f) => f.id)).size).toBe(udgifter.length);
+      });
+
+      test("/bil: brændstoftypen er en navngiven gruppe", () => {
+        const { container } = renderIn(locale, BilBeregner);
+        expectFieldsAreNamed(container);
+        const gruppe = container.querySelector('[role="group"][aria-labelledby]');
+        expect(gruppe?.querySelectorAll("button").length).toBe(4);
+      });
+
+      test("/nedtaelling: dato-feltet har navn", () => {
+        const { container } = renderIn(locale, NedtaellingBeregner);
+        expectFieldsAreNamed(container);
+        expect(container.querySelector("#nedtaelling-target")?.getAttribute("type")).toBe("date");
+      });
+
+      test("/lon-efter-skatt: kommune-vælgeren har navn, periode-knapperne er en gruppe", () => {
+        const { container } = renderIn(locale, LoenBeregner);
+        expectFieldsAreNamed(container);
+        expect(container.querySelector("#loen-kommune")?.tagName).toBe("SELECT");
+        const gruppe = container.querySelector('[role="group"][aria-labelledby]');
+        expect(gruppe?.querySelectorAll("button").length).toBe(2);
       });
     });
   }

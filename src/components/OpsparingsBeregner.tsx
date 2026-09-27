@@ -437,8 +437,8 @@ export default function OpsparingsBeregner({ dstInflation = null }: { dstInflati
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.compounding}</label>
-            <div className="flex gap-4">
+            <label id="opsparing-rentetilskrivning-gruppe" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.compounding}</label>
+            <div className="flex gap-4" role="group" aria-labelledby="opsparing-rentetilskrivning-gruppe">
               {([
                 { id: "maanedlig" as Frekvens, label: l.monthly },
                 { id: "kvartal" as Frekvens, label: l.quarterly },
@@ -460,8 +460,9 @@ export default function OpsparingsBeregner({ dstInflation = null }: { dstInflati
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            <label className="flex items-center gap-2 cursor-pointer">
+            <label htmlFor="opsparing-vis-inflation" className="flex items-center gap-2 cursor-pointer">
               <input
+                id="opsparing-vis-inflation"
                 type="checkbox"
                 checked={visInflation}
                 onChange={(e) => setVisInflation(e.target.checked)}

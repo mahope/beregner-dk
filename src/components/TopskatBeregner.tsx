@@ -164,9 +164,9 @@ export default function TopskatBeregner() {
         {/* Input */}
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Bruttoindkomst (pr. år)</label>
+            <label htmlFor="topskat-aarsindkomst" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Bruttoindkomst (pr. år)</label>
             <div className="relative">
-              <input type="number" value={aarsindkomst} onChange={(e) => setAarsindkomst(e.target.value)} className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+              <input id="topskat-aarsindkomst" type="number" value={aarsindkomst} onChange={(e) => setAarsindkomst(e.target.value)} className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">kr</span>
             </div>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
@@ -175,9 +175,9 @@ export default function TopskatBeregner() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Kommuneskat (%)</label>
+            <label htmlFor="topskat-kommuneskat" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Kommuneskat (%)</label>
             <div className="relative">
-              <input type="number" step="0.01" value={kommuneSkat} onChange={(e) => setKommuneSkat(e.target.value)} className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+              <input id="topskat-kommuneskat" type="number" step="0.01" value={kommuneSkat} onChange={(e) => setKommuneSkat(e.target.value)} className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">%</span>
             </div>
           </div>

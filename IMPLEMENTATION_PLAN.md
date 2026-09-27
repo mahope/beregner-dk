@@ -1,5 +1,7 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
+STATUS: KØ — **C72 er landet: de syv mest trafikrelevante filer i label-klassens hale er lukket, så klassen er nede på 23 filer / 36 ubundne — og måleren afslørde sig selv midt i gaten.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED` på Mads' svar, 98 afhænger af den), så kandidat #1 efter C71 blev taget. **Første måling på den nye scanner:** 30 filer / 48 ubundne, og scanneren kørtes først — så valget var datagrundet, ikke en håndtælling. **Snittet er de syv filer med mest trafik i halen, ikke de syv med flest labels**, fordi C61–C71 altid gik efter det brugeren kan ramme, og de mest besøgte sider nu er *rensede*: de 30 filer er det, der er tilbage, naar `/dato`, `/tidsberegner`, `/tidszone`, `/kvadratmeter`, `/boliglaan`, `/huslejebudget`, `/befordringsfradrag`, `/rentefradrag`, `/braendstof`, `/pension`, `/boernepenge`, `/efterloen`, `/gaeldsfri` og `/elberegner` er lukket. Rettet er `/brutto-netto` (2), `/topskat` (2), `/opsparing` (2), `/budget` (2), `/bil` (1), `/nedtaelling` (1) og `/lon-efter-skat` (2) — **12 labels, syv filer.** Fire fund ud over bindingerne, og de er hele pointen med at måle en klasse på sidste halvdel: **`/brutto-netto`s periode-knapper ("Pr. måned"/"Pr. år") havde intet navn overhovedet** — ingen `<label>`, ingen gruppe, så en skærmlæser læste to navnløse knapper i træk. Det er C64's `/elberegner`-fund igen, og scanneren kan **ikke** finde det: den tæller kun `<label>`-elementer, så en knapgruppe uden etiket er usynlig for den. Samme fejltype som C70's målefejl — måleren ser kun det den er skrevet til at se. **`/opsparing`s inflationskontrol var *indpakket* i `<label>`** (gyldig HTML, virker med skærmlæser, men ufindelig for `getByLabelText`) — C64's `/pension`-fund. **`/bil`s brændstofvælger og `/opsparing`s rentetilskrivning er knapgrupper**, så etiketten er blevet `role="group"` + `aria-labelledby` (C64/C70's mønster), og **`/budget`s udgiftsfelter kommer fra et array**, så `id` må følge nøglen — ellers få alle felter det samme id, og testen tæller derfor både at de er navngivet *og* at id'erne er unikke. **Harness-find undervejs, som er selve beviset på målerens værdi:** `label-scan-gate.test.ts` låser scannerens tal på repoets egen kode og **faldt** — forventede 30/48, fik 23/36. Det er præcis den fejl C71 byggede testen for at fange, og den fangede den øjeblikkeligt: tallet er opdateret i samme commit, ikke "senere". `label-a11y.test.tsx` er udvidet fra 81 til **95 tests** i DA og SE (**+14**), **verificeret modsvejs: alle 14 falder** med de gamle komponenter. Gate grøn: lint (553 filer), **1665 tests / 148 filer** (fra 1651 / 148) og build (141 sider). Kode + plan i ét commit på `ceo/labels-runde6`; første kandidatvindue **2026-09-27 12:30**. Se opgave 101.
+
 STATUS: KØ — **C71 er landet: måleren for label-klassen findes nu i repoet, og de tre målefejl der har kostet tre iterationer ligger som *navngivne regler med en test hver*, ikke som noter i denne plan.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den), og kandidat #2 efter C70 — "skriv C70's målingsfejl ned som en test, ikke bare en note" — var både billigere og mere værd end endnu et snit af den samme klasse. **`scripts/label-a11y-scan.mjs` + `src/lib/label-scan-gate.test.ts` (8 tests) er de nye filer, og de er gensidigt bundne: testen kan ikke køre uden scanneren, og scannerens tal er låst i testen.** Reglerne er **R1** (find åbningstaggen ved at gå fra `<label` til det første `>` der ikke står i et `{…}`-udtryk — `<label\b([^>]*)>` afkorter ved `setX(1)>` og så en bunden etiket som ubundet, C64's fejl), **R2** (normalisér `${…}` væk *før* sammenligningen, og normalisér før `split(/\s+/)` — `${i + 1}` indeholder selv et mellemrum, så en rå split skærer gruppe-etiketten i to), **R3** (skriv **begge** bindinger, `for` *og* `htmlFor`; case-insensitivt `\bfor` kan ikke matche inde i `htmlFor`, fordi `l` er et ordtegn — det er C70's fejl, der gjorde klassen til 311/88). Hver regel har en **plantet** fixture der fejler uden den. **Måleren svarede 37 filer / 69 ubundne på den rene kode, og planen havde ført 38/70 siden C70** — forskellen er `/elberegner`s gruppe-etiket, som *er* bundet gennem `aria-labelledby={`elberegner-apparat-${index + 1}`}`; C64 rettede den, men håndtællingen beholdt den. R2 er præcis den fælde, planen selv oplyser to gange. **Et fjerde fund ud over R1-R3, som ingen af de tre dækkede: attribut-værdier skal læses i hånden, ikke med regex.** `\{([^}]*)\}` rammer altid den `}` der lukker `${…}`, ikke den der lukker hele udtrykket — så både `id` og `aria-labelledby` læstes som `` `gruppe-${i + 1 ``, aldrig ens, og **alle** knapgrupper i repoet blev rapporteret som ubundne. Rettelsen er `attributVærdi()`, der læber klammerne. **Dinglende `for=` er slået fra som standard med vilje:** en fil-lokalt id-scan kan ikke se de id'er et barnkomponent-render, så den læser 48 `for=` på `src/` som dinglende, selv om de er bundet i DOM'en. Den ægte prøv ligger i `label-a11y.test.tsx`, som læser den renderede container; flaget `--danglende` er der, hvis nogen vil se det. **Og så blev klassen lukket et snit videre, fordi måleren nu er gratis:** de syv filer med tre ubundne labels hver — `/aktieskat`, `/delregning`, `/feriepenge`, `/lon-efter-skatt`, `/motionkalorier`, `/rabat`, `/rygestop` — er **30 filer / 48 ubundne** nu, lukket med samme mønster som C61-C70 og dækket af **14 nye tests i `label-a11y.test.tsx` (65 → 81)**, verificeret modsvejs: alle 14 falder med de gamle komponenter. Fire fund ud over bindingerne: **`/delregning`s tællerknapper hed "−" og "+" og intet andet**, så en skærmlæser læste "minus" uden at vide at den lavede én person færre (nye `l.færre`/`l.flere` i da/se); **`/lon-efter-skatt`s "Lön" dækkede både periode-knapperne og lønfeltet** — ét navn på to felter, C64's `/elberegner`-fejl igen, nu etiket-på-felt plus `role="group" aria-label="Period"` på knapperne; samme fils kirkemedlemskab-checkboks var *indpakket* i `<label>` (C64's `/pension`-fund); **`/aktieskat`s "Vis beregning for" og `/feriepenge`s "Periode" er knapgrupper**, så de er `role="group"` + `aria-labelledby`; **`/rabat` har to beregningstilstande og derfor to felter ad gangen**, så testen tæller de to i DOM'en og ikke tre. Gate grøn: lint (553 filer), **1651 tests / 148 filer** (fra 1637 / 147) og build (141 sider); `node scripts/locale-leak.mjs --gate` uændret 117/85/32 med 0 ureviewet. Kode + plan i ét commit på `ceo/label-scan-gate`. Se opgave 100.
 
 STATUS: KØ — **C70 er landet: 27 ubundne `<label>` på syv beregnere, og målingen startede med en fejl i min egen målemetode, som ville have gjort at denne iteration så ud som om den intet havde fundet.** Køen havde to åbne opgaver: 97 (afventer Mads' svar, markeret `BLOCKED`) og 99 (lukket i C69, se forrige STATUS). Resten af label-klassen var C64's "Efterladt, bevidst": 96 ubundne labels i 44 filer. **Fælden lå i måleren, ikke i koden:** mit tællescript søgte `\bfor=` og fandt derfor *ikke* `htmlFor=` — så `/kvadratmeter` (13 labels, rettet i C62) så ud som værende helt uberørt, og klassen målte **311 labels i 88 filer** i stedet for 97/45. `For` i `htmlFor` står ikke efter en ordgrænse, fordi `l` er et ordtegn. Med `\b(htmlFor|for)\s*=` giver den **97 i 45 filer** — altså C64's egen tælling, bekræftet uafhængigt. **Samme fælde som C63/C64's to andre** (multi-linje-etiketter, `${…}` i template-literals): en måling af en accessibility-klasse skal *selv* have en test, ellers låser den bare den næste agent fast i det samme hul. Rettet er `/efterloen` (6), `/ejendomsvaerdiskat` (4), `/boligsalg` (4), `/enheder` (4), `/bolan` (3), `/alkoholenheder` (3) og `/loen-konverter` (3). **Rækkefølgen er ikke efter antal alene:** `/efterloen` var den eneste fil i top-8 der stadig var helt uberørt, og `/bolan` er en af de få sider der findes på **to** domæner. Fire fund ud over bindingerne: **`/efterloen`s "Forsikringsstatus" er knapper, ikke et felt** (Fuldtid/Deltid), så etiketten kan ikke bindes med `for` — den er en `role="group"` med `aria-labelledby`, samme mønster som C64's `/elberegner`. **`/boligsalg`s "Mæglertype" er et radiogroup** (procent/fast pris), og de to radioknapper skal kunne findes hver for sig. **`/ejendomsvaerdiskat`s "Grundskyldspromille" findes kun ved "Anden kommune"**, så en test der ikke slår til den værdi ville aldrig se feltet. **`/enheder` og `/loen-konverter` har knapgrupper** (enhedskategori, tidsenhed) der også var navnløse. `label-a11y.test.tsx` er udvidet fra 51 til **67 tests** i DA og SE, **verificeret modsvejs: alle 16 nye falder** med de gamle komponenter. Målingen efter rettelsen: **70 ubundne labels i 38 filer** (fra 97/45). **Harness-find undervejs:** `/boligsalg`s radioknapper har en `<label>` hvis tekst begynder med et mellemrum (`<input … /> {l.procent}`), så et opslag på `textContent` uden `.trim()` fejler — samme fælde som C63's multi-linje-etiketter, nu i den anden ende. **Observeret flake:** ét `npm run test`-kørsel gav 5 fejl i `MomsBeregner.test.tsx`, som ikke har noget med denne ændring at gøre; filen er grøn isoleret og i en ny kørsel af hele suiten (1629/1629). Gate grøn: lint (552 filer), **1629 tests / 147 filer** (fra 1613 / 147) og build (141 sider). Kode + plan i ét commit på `ceo/labels-runde5`; første kandidatvindue **2026-09-27 12:30** (den er 07:30 kun for de ældre noter). Se Næste kandidater efter C70. **Målingen af accessibility-klasser er selv en harness-fejl-klasse** — tre fælder i træk nu, alle fundet ved at krydschecke mod den kode der faktisk renderer.
@@ -6816,6 +6818,7 @@ efter datagrund:
   navn, eller (c) en anden app med sit eget indhold? Svar (a) gør opgave 98
   (`TidszoneBeregner` mangler `no`) rigtig prioritet; svar (b) eller (c) gør den
   overflødig. **Jeg rører ikke domænet, DNS'en eller porten uden dit svar.**
+- ⏳ **VERIFICÉR DEPLOY: C72 — tolv ubundne `<label>` på syv beregnere, og fire fund ud over bindingerne.** `/brutto-netto` (2 felter + **periodenavngiven knapgruppe**, der havde intet navn), `/topskat` (2), `/opsparing` (2 — heraf var inflationskontrollen *indpakket* i `<label>`), `/budget` (2), `/bil` (1), `/nedtaelling` (1) og `/lon-efter-skat` (2). **Verificér indhold, ikke HTTP 200** — hele ændringen er `for`/`id` og `role="group"` i markup, som et HTTP 200 slet ikke afslører: ``curl -s https://minberegner.dk/brutto-netto | grep -c 'role="group"'` skal give mindst 1 (før: 0), og `<input id="brutto-netto-oensket"` skal findes. Samme grep på `/opsparing`, `/bil`, `/loen-efter-skat` og `/nedtaelling` på **https://beraknare.se** (sidernes markup er den samme; `/topskat` er daOnly og findes kun på minberegner.dk). Kode + plan i ét commit på `ceo/labels-runde6`; første kandidatvindue **2026-09-27 12:30**.
 - ⏳ **VERIFICÉR DEPLOY: C66 `/tidszone` skrev "Aten" på minberegner.dk, fordi
   de to tidszone-tabeller modsagde hinanden.** "Athen" er dansk, "Aten" er
   svensk, og dropdown'en + huskelisten på den danske side skrev den svenske
@@ -9712,6 +9715,85 @@ landmark=lån, piggybank=opsparing osv.).
   efter det, brugeren kan ramme: `/efterloen` (6), `/boligsalg` (4),
   `/ejendomsvaerdiskat` (4), `/enheder` (4), `/aktieskat` (3),
   `/alkoholenheder` (3) og `/bolan` (3). Se Næste kandidater efter C64.
+
+
+#### 101. [x] FÆRDIG 2026-09-27 — C72 — Luk de syv mest trafikrelevante filer i label-klassens hale
+
+- **Iteration start:** 2026-09-27 07:05 CEST på `ceo/labels-runde6`. Køen havde
+  ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den), så kandidat #1
+  efter C71.
+- **Datagrund:** scanneren svarede **30 filer / 48 ubundne labels**
+  (`node scripts/label-a11y-scan.mjs`, første kørsel på den nye måler).
+  De syv er **ikke** dem med flest labels — det er dem, hvor siden stadig findes i
+  de trafikdata vi har. `/brutto-netto` er flagship-siden bag løneregningen og har
+  interne links fra `calculator-list.ts:209`; `/budget` og `/opsparing` ligger i
+  kredsen omkring `/loen-efter-skat` og `/pension` (`calculator-list.ts:169-170`);
+  `/bil` er i top-siden over brændstof og elbil (`:180`, `:200`); `/nedtaelling`
+  har **5.163 visninger i svensk GSC** (pos. 9,4) og **21 besøgende/28d** på
+  beraknare.se; `/lon-efter-skat` er daOnly men har egen `/api/v1/loen`-kontrakt;
+  `/topskat` er daOnly med interne links (`:216`).
+- **Beslutning/implementering:**
+  - `/brutto-netto`: `htmlFor`+`id` på de to talfelter, **og** periode-knapperne
+    fik `role="group" aria-label={l.periodeLabel}` — de havde *intet* navn. Ny nøgle
+    `periodeLabel` i alle tre locales ("Beregnesperiode" / "Beräkningsperiod" /
+    "Beregningsperiode"), fordi komponenten renderer på beraknare.se selv om siden
+    er daOnly.
+  - `/topskat`: to `htmlFor`+`id` på bruttoindkomst og kommuneskat. De er
+    hardkodede danske strenge, men siden er `daOnly`, så det er korrekt.
+  - `/opsparing`: rentetilskrivning er knapgruppe → `role="group"` +
+    `aria-labelledby` på etikettens id; inflationskontrollen var indpakket i
+    `<label>` → eksplicit `htmlFor`+`id`.
+  - `/budget`: `htmlFor`+`id` på indkomst og på hvert udgiftsfelt fra
+    `EXPENSE_KEYS` med `id={`budget-udgift-${k}`}`.
+  - `/bil`: brændstofvælgeren er knapgruppe → `role="group"` +
+    `aria-labelledby`.
+  - `/nedtaelling`: `htmlFor`+`id` på dato-feltet (`type="date"`).
+  - `/lon-efter-skat` (`LoenBeregner`): kommune-`<select>` fik `htmlFor`+`id`,
+    periode-knapperne fik `role="group" aria-labelledby`.
+- **Harness:** `label-scan-gate.test.ts` låser scannerens tal på repoets egen
+  kode og **faldt med det samme**, da klassen blev lukket — den fejl C71 byggede den
+  test for at fange. Tallet er opdateret i samme commit (23/36), ikke i en senere.
+- **MÅL:** måleren: **30 filer / 48 ubundne** → **23 filer / 36 ubundne** pr.
+  2026-09-27, målbar med `node scripts/label-a11y-scan.mjs` (under to sekunder).
+  `/nedtaelling` **21 besøgende/28d SE**, `/bil` 25–47/28d DA og 1.708 visninger SE.
+  Ændringen forventes **ikke** at løfte CTR — den retter en funktionsfejl for
+  skærmlæsere, og skærmlæserbrug **trackes ikke** (**tracking-opsætningen må
+  ikke ændres**). Virkningen er derfor verificeret i de 14 nye tests, ikke i tal.
+  **Mål scanneren igen 2026-10-11.**
+- **Efterladt, bevidst:** **23 filer / 36 ubundne labels.** Resten er *hale*: de
+  mest trafikrelevante er lukket. Næste snit tages når et nyt snapshot peger
+  på en side, der stadig er i klassen.
+
+### Næste kandidater efter C72
+
+0. **✅ Opgave 101 lukket i C72** — de syv mest trafikrelevante filer i
+   label-klassens hale er lukket: **23 filer / 36 ubundne** (fra 30/48). Læs
+   C72-STATUS: scanneren **kan ikke** se en knapgruppe uden etiket, så sidste
+   halvdel af klassen rummer fund den ikke kan finde.
+0b. **🔒 Opgave 97 er `BLOCKED`** — `beregner.no` er en anden udgivelse;
+   spørgsmålet om ejerskab ligger i `❓ Til Mads`. Dermed er **opgave 98**
+   (`TidszoneBeregner` mangler et `no`-sprog) også unødig indtil svaret kommer.
+1. **Resten af label-klassen: 23 filer / 36 ubundne labels.** Gratis at vælge:
+   `node scripts/label-a11y-scan.mjs` giver hele listen med fil, linje og etikettens
+   tekst på under to sekunder. Samme regel: efter hvad brugeren kan ramme.
+   **Bemærk at klassen er næsten udtæmt på de trafikrelevante sider** — en ny
+   iteration bør hellere tage et snit i en *anden* klasse, medmindre et nyt
+   snapshot peger på en side her.
+2. **Knapgrupper uden navn — en klasse scanneren ikke kan se.** C72 fandt
+   `/brutto-netto`s periode-knapper, der havde hverken `<label>`, gruppe eller
+   `aria-label`. En tilsvarende måling (`role="group"`-knapgrupper uden
+   `aria-label`/`aria-labelledby`) er **billigere end resten af label-klassen** og
+   rammer de samme sider — den skal skrives som et **script med en test pr. regel**,
+   som C71 gjorde for `label-a11y-scan.mjs`.
+3. **De 10 øvrige komponenter med `toFixed(2)`** og resten af rækken i klassen
+   "hvad skriver den tekst, brugeren kopierer?" — `/brok` (4.881 visninger) er stadig
+   først, men er **målt ren**: `BrokBeregner.tsx:37` bruger `toLocaleString` med
+   `maximumFractionDigits`, så `CopyResultButton` skriver "3/4 = 0,75 = 75 %" med
+   rigtige tegn. C42's andet fund på `/brok` står stadig: **siden har ingen
+   redaktionelle indgînde links** (`git grep brok src/app` giver kun
+   `src/app/brok/`), så den er afhængig af navigation alene. Det er det næste
+   konkrete trafikfund i klassen.
+4. **Mål 2026-10-10 / 2026-10-11** (se Måleprotokol): C1-C16 og C35-C72 måles
 
 ### Næste kandidater efter C71
 
