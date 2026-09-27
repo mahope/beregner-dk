@@ -1,3 +1,5 @@
+STATUS: KØ — **C89 er landet: `/kalorier` svarer nu på "hvor mange kalorier pr dag" — den største danske søgeklynge på siden — med en tabel over mand, kvinde og vægttab ved 60/70/80/90 kg, regnet af værkøjets *egne* formel.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den), og de fire åbne deploynoter (C83-C86) har første vindue **17:30**, som ikke var passeret kl. 14:12, så intet kunne verificeres. Valget var C88-listenens punkt 2. **Målt først:** DA-autocomplete (`hl=da`, `gl=dk`, 14:13) under **"kalorier pr dag"** giver 10 variationer, hvoraf **ni er køn/vægt-spørgsmål** ("… kvinde", "… mand", "… voksen mand", "… voksen kvinde", "… dame", "… mann", "… mænd", "… vægttab", "… beregner"), og under **"hvor mange kalorier skal jeg"** er nummer ét **"hvor mange kalorier skal jeg have"** mens nummer otte er **"hvor mange kalorier skal jeg forbrænde for at tabe 1 kg"**. Den server-renderede `/kalorier` havde **0** forekomster af "kalorier pr dag" — altså hele klyngen gik til konkurrenterne. **En måling, der sparede mig en fejl (nr. 14):** jeg ville skifte titlens "om dagen" til "pr dag", fordi det er det folk søger på — men autocomplete under **"kalorier om dagen"** har OGSÅ 10 variationer ("… mand", "… kvinde", "… for at tabe sig", "… gravid", "1200 kalorier om dagen"). Begge formuleringer er i brug, så **titlen er ikke problemet**, og C79/C81's lås i `page-data.test.ts` (svart-først, ≤60 tegn) er rigtig — den blev ikke rørt. **Rettelsen (kun `da`):** et nyt `<h2>` **"Hvor mange kalorier pr dag?"** som **første** synlige afsnit, med tabellen 60/70/80/90 kg × mand / kvinde / mand-vægttab / kvinde-vægttab (2.449/2.192 … 2.914/2.657, vægttab 1.949/1.692 … 2.414/2.157) og forudsætningerne skrevet ud (180 cm, 30 år, moderat aktivitet), to interne links (`/vaegttab` og `/motion-kalorier`) og tre nye FAQ-par i `page-data.ts` — som dermed også kommer i JSON-LD'en. **Tallene er sidens egen sandhed, ikke nye tal:** BMR-formlen lå *inde i* `KalorieBeregner.tsx`, så tabellen kunne ikke have brugt den uden at kode-dubleres; den er derfor flyttet til `beregnBmr`/`beregnTdee`/`kalorierForMaal` i `src/lib/makroer.ts`, som **både** komponenten og siden nu kalder — og 80 kg-mand-rækken lander på **2.759 / 2.259**, altså præcis de tal siden *allerede* lovede i sin `metaDescription` og sin FAQ. Rækken er derfor en krydscheck af værktøjet mod sin egen tekst, ikke en ny påstand. **Målefejl nr. 14 (min egen):** `rg -rn "bmr"` — `-r` er ripgreps *replace*-flag, så formlen kom ud som `n = 10 * vaegt + 6.25 * hoejde …`. Fundet fordi jeg læste det samme stykke to gange. **En hel klynge målt og bevidst ikke bygget (opgave 119):** dansk autocomplete under **"kalorier"** er **9 af 10 madvarer** (æg, banan, vandmelon, jordbær, avocado, kirsebær, kartofler, vindruer, havregryn) og under **"kalorie indhold"** 10 af 10. Det er en *madvaretabel*, ikke en kalorieberegner, og de ni variationer under "kalorier i æg" er æggehvide/æggeblomme/æggekage/uden blomme — altså pr. del, ikke pr. 100 g. Jeg fandt ingen dansk kilde jeg kunne hente og citere i denne iteration (`frasco.dk` svarer ikke, DTU's kostviddatabase er en JS-app, Open Food Facts har danske *produkt*-data med spredning på 363-369 kcal for havregryn), så **den ligger som opgave 119 med kildekrav i stedet for som gættede tal** — faglig korrekhed slår vækst her. **Harness:** `makroer.test.ts` **11 → 18 tests** (Mifflin for begge køn, faktor-multiplikationen, 500/300, BMR-gulvet ved 30 kg/100 år, og den 80 kg-mand-lås mod sidens egne tal), `kalorier/page.test.tsx` **1 → 3** (tabellen i den server-renderede HTML med alle fire rækker + de to links; de tre nye spørgsmål og 2.502-kvinde-tallet i `page-data.ts`) — **modsvejs verificeret: 1 af de 2 nye side-tests falder** med den gamle `page.tsx` (den anden læser `page-data.ts`, som ikke var stakket tilbage, så den *skal* være grøn). Gate grøn: lint (556 filer), **1749 tests / 151 filer** (fra 1740 / 151), build (**141 sider**). Kode + plan i ét commit på `ceo/kalorier-pr-dag`; se opgave 118. **MÅL:** `/kalorier` baseline **12.477 visninger / 126 klik / CTR 1,0 % / pos. 8,2 pr. 2026-08-28 → 2026-09-25** — måles igen 2026-10-11.
+
 STATUS: KØ — **C88 er landet: `/alder` svarer nu på den søgning, fem af de otte variationer under "hvor gammel er jeg" er den samme — og FAQ'en sagde dage-tallet en dag for lavt i alle tre sprog.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den), og de eneste curl-verificerbare åbne deploynoter (C81, C82) har første vindue **17:30**, så intet kunne verificeres. Valget var C87-listenens punkt 1. **Målt først:** dansk autocomplete (`hl=da`, `gl=dk`, 13:50) under **"hvor gammel er jeg"** giver otte variationer, hvoraf **fem** er "… hvis jeg er født i 2009 / 2006 / 2008 / 2007 / 1989" — altså ét spørgsmål, fem gange. GSC: `/alder` har **6.149 visninger, 37 klik, CTR 0,6 %, pos. 7,8**, mens **"hvor gammel er jeg" alene står på pos. 33**: de 34 visninger er der, men de rammer ikke den tekst, der svarer på spørgsmålet. Under **"beregn alder"** kom derudover **`ud fra fødselsdato excel`**, **`i excel`**, **`ud fra cpr`** og **`ud fra cpr excel`**. Siden havde **nul** forekomster af "hvis jeg er født i" og **nul** af `DATEDIF`. **Rettelsen (kun `da`):** `<h2>` **"Hvor gammel er jeg, hvis jeg er født i 2007?"** med tabellen Født i år / Alder / Dage levet for **1989-2010**, fordi et fødselsår giver to aldre — født 1. januar er du den ældste i dit år, født 31. december den yngste — og det er hele pointen med svaret. Rækkerne regnes i `foedselsaarRaekker(referenceIso)` på de to yderste fødselsdatoer med `beregnAlder`, altså **samme modul som værktøjet bruger**; datoen er et argument, så en test kan låse tallene, og siden kalder den med `tilIsoDato(new Date())` — `getLocale()` læser `headers()`, så siden er dynamisk og tabellen følger dagen, samme mønster som `/dato`s felter. Kolonnen "Dage levet" svarer samtidig på **"hvor gammel er jeg i dage"**. Plus `<h3>` **"Sådan beregner du alder i Excel"** med fire `DATEDIF`-formler, hvoraf den sidste giver hele alderen i én celle. **Den rigtige fejl, fundet fordi den lå i det svaret, jeg byggede videre på:** FAQ'en sagde **13.342** dage for født 15. marts 1990 pr. 25. september 2026 — i **da, se og no**. `beregnAlder` siger **13.343** (36 × 365 + 9 skuddage = 13.149 til 15. marts 2026, + 194 dage = 13.343), og Excel-tabellen bruger netop de tal, så den nye tekst ville have arvet den gamle fejl. Det er en *indekseret* tekst, der modsiger sit eget beregningsmodul — C84's og C87's fejlklasse. **Og en eksisterende test låste fejlen:** `page-data.test.ts` krævede "13.342 dage" / "13.342 dagar" / "13.342 dager", samme fejltype som C78's `expect(html).toContain("8.25 timer")`; testen er rettet, og en ny test krydschecker FAQ'en mod `beregnAlder`. **Tre nye FAQ-par** (de kommer også i JSON-LD'en) — de ligger i `page-data.test.ts`, fordi `FAQ` er mocket væk i `page.test.tsx` (C85's fælde). **To ting jeg bevidst ikke hævder:** Excel's 29. februar-opførsel i et skudår og CPR-århundredet er ikke rørt, fordi det er påstande jeg ikke har testet; siden siger i stedet "skriv fødselsdatoen ind som en rigtig dato". `page.test.tsx` **9 → 15 tests**, **modsvejs verificeret: 4 af de 6 nye falder** med gammel kode (de to andre er låse på intervalformen og de fem autocomplete-år). Gate grøn: lint (556 filer), **1740 tests / 151 filer** (fra 1734 / 151), build (141 sider); `locale-leak.mjs --gate` exit 0, uændret 117/85/32 med 0 ureviewet. Kode + plan i ét commit på `ceo/alder-foedselsaar`; se opgave 117. **MÅL:** `/alder` baseline **6.149 visninger / 37 klik / CTR 0,6 % / pos. 7,8 pr. 2026-08-28 → 2026-09-25** — måles igen 2026-10-11.
 
 STATUS: KØ — **C87 er landet: `/promille` svarer nu på otte af de ti søgninger under "promillegrænse", som dansk autocomplete viser — Tyskland, Italien, Norge, Frankrig, Spanien, Grækenland, Polen og Storbritannien. Siden havde præcis to af dem.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den), og de eneste curl-verificerbare åbne deploynoter (C81, C82) har første vindue **17:30**, så intet kunne verificeres. Valget var C86's egen åbne kandidat #1: samme måling, samme side. **Målt først:** dansk autocomplete under **"promillegrænse"** giver 10 variationer — `… danmark`, `… sverige`, `… tyskland`, `… italien`, `… norge`, `… frankrig`, `… spanien`, `… cykel`, `… grækenland` + selve termet. Siden havde to afsnit (Danmark 0,5 og Sverige 0,2) og **null** af de otte andre. **Rettelsen (kun `da`):** `<h2>Promillegrænsen i udlandet</h2>` med **12 lande** i en tabel (land / grænse / særregel for nye og professionelle bilister) og den fælde tabellen findes for: **2 øl på 80 kg = 0,44 ‰ er under den danske grænse og over den svenske og norske på 0,2 ‰ — samme krop, samme aften, to domme.** Tallene kommer fra WHO's landeoversigt (hentet 27/9), og siden siger eksplicit at tabellen er **vejledende** og at reglerne ændrer sig. **Tallene bor i modulet, teksten på siden** — ny `PROMILLEGRANSE_UDLAND: Record<string, number>` i `src/lib/promille.ts` (tal kun, ingen danske strenge, ellers kunne modulet lække til beraknare.se), landnavne og særregler i `page.tsx`s `da`-gren. **Og en test krydschecker tabellen mod `PROMILLEGRANSE`**, altså den fejlklasse C84 fandt (en indekseret tekst der løj om sit eget indhold), låst før den kan ske igen. **To fund, begge ærlige.** (1) **En eksisterende test fangede en rigtig fejl i min egen metaDescription:** `page-data.test.ts:294` låser at den danske `metaDescription` indeholder **"0,5 ‰"** — min første erstatning droppede den for at nævne fire lande, så den danske *lov* forsvandt fra den indekserede beskrivelse. Rettet til at sige begge dele (122 → 146 tegn, under de 160 der låses). (2) **Målefejl nr. 14, min egen:** den nye data-test slog op på `"Sverige og"` i spørgsmålsteksten "…i Norge og Sverige?", som ikke findes, så den fik `undefined` — fundet fordi testen *faldt* med en TypeError frem for med et forkert tal. **`page.test.tsx` kan ikke teste FAQ'en**, fordi `FAQ` er mocket væk i filen (C85's fælde), så de tre FAQ-tests ligger i `page-data.test.ts`, som læser præcis den tabel `FAQ` og `FAQSchema` får. **`page.test.tsx` 3 → 7 tests, `page-data.test.ts` +3, modsvejs verificeret: 3 af 4 og 2 af 3 falder** med den gamle kode; de to der ikke falder er låse på at `se`/`no` er urørte, mærket som låse. Gate grøn: lint (556 filer), **1734 tests / 151 filer** (fra 1727 / 151), build (141 sider); `locale-leak.mjs --gate` exit 0, `label-a11y-scan.mjs` uændret 22/35, `knapgruppe-scan.mjs` 0/0. Kode + plan i ét commit på `ceo/promillegraense-udlandet`; se opgave 116. **MÅL:** `/promille` baseline **4.513 visninger / 67 klik / CTR 1,5 % / pos. 7,9 pr. 2026-08-28 → 2026-09-25** — måles igen 2026-10-11.
@@ -7814,6 +7816,9 @@ landmark=lån, piggybank=opsparing osv.).
     - Gate grøn: lint ok, 280/280 tests, build ok (128 pages).
 
 ## VERIFICÉR DEPLOY-log
+
+### ⏳ **VERIFICÉR DEPLOY: C89 — `/kalorier` dansk: tabellen "hvor mange kalorier pr dag?" (12.477 visninger, CTR 1,0 %, pos. 8,2).** Kode + plan i ét commit på `ceo/kalorier-pr-dag`. Første kandidatvindue **2026-09-27 17:30**. Verificér ved **indhold**: siden skal have `<h2>Hvor mange kalorier pr dag?</h2>`, fire `<td>`-rækker (60/70/80/90 kg), `<td>2.759 kcal</td>`, `href="/motion-kalorier"`, og FAQ'en skal have "Hvor mange kalorier skal jeg have?".
+
 ### ⏳ **VERIFICÉR DEPLOY: C83 — `/moms` dansk svarer på søgeklyngen (23.225 visninger, CTR 0,2 %, pos. 6,9).** Kode `ae51764`, merge `5659e28` 2026-09-27 13:03 CEST på branch `ceo/moms-da-svar`. Første kandidatvindue **2026-09-27 17:30**.
   **HTTP 200 beviser intet:** hele ændringen er ny brødtekst og fire nye
   `faqItems` i `page-data.ts` — sidens regnestykker er urørte. Sådan
@@ -11119,6 +11124,85 @@ tekst på `/tidszone`), men Kopier-strengen med datoen kræver en browser.
   `ceo/alder-foedselsaar`.
 - **MÅL:** `/alder` baseline **6.149 visninger / 37 klik / CTR 0,6 % / pos. 7,8
   pr. 2026-08-28 → 2026-09-25** — måles igen 2026-10-11.
+
+#### 118. [x] FÆRDIG 2026-09-27 — C89 — `/kalorier` svarer på "hvor mange kalorier pr dag" med en tabel af værkøjets egne tal
+
+- **Datagrund:** `/kalorier` er **12.477 visninger / 126 klik / CTR 1,0 % / pos.
+  8,2** i dansk GSC (2026-08-28 → 2026-09-25) og 294 besøgende/28d (+51 %,
+  bounce 4 %). Brand-søgningen stod dog på **pos. 17** ("kalorieberegner", 203
+  visninger) og "avanceret kalorieberegner" på pos. 13 — dvs. de *eksakte*
+  ord rankede dårligere end siden gennemsnitligt, hvilket er symptomet på en
+  side der ikke svarer på head-spørgsmålet.
+- **Målt:** DA-autocomplete under "kalorier pr dag" → 9 af 10 variationer er
+  køn/vægt ("… kvinde", "… mand", "… voksen mand", "… voksen kvinde", "… dame",
+  "… mann", "… mænd", "… vægttab", "… beregner"); under "hvor mange kalorier skal
+  jeg" → #1 "hvor mange kalorier skal jeg have", #8 "hvor mange kalorier skal
+  jeg forbrænde for at tabe 1 kg". Live-HTML: **0** forekomster af "kalorier
+  pr dag".
+- **Målt og fundet samme minut (nr. 14, min egen):** "kalorier om dagen" har
+  OGSÅ 10 variationer, altså er titlens ordlyd i brug. `page-data.test.ts`'s
+  lås på "Hvor mange kalorier om dagen? | Kalorieberegner" er derfor rigtigt og
+  urørt.
+- **Rettelse:** nyt `<h2>` "Hvor mange kalorier pr dag?" som første synlige
+  afsnit med tabellen (60/70/80/90 kg), forudsætningerne i prosa (180 cm, 30 år,
+  moderat aktivitet), links til `/vaegttab` og `/motion-kalorier`, og tre nye
+  FAQ-par (kalorier for 1 kg = 7.700 kcal = 500/dag; gratis uden konto; "hvor
+  mange kalorier skal jeg have" med 2.759 mand / 2.502 kvinde).
+- **Ingen dobbelt sandhed:** BMR/TDEE lå inde i komponenten, så de blev flyttet
+  til `src/lib/makroer.ts` (`beregnBmr`, `beregnTdee`, `kalorierForMaal`,
+  `AKTIVITETS_FAKTORER`, `KALORIE_UNDERSKUD`, `KALORIE_OVERSKUD`) og kaldes nu
+  af både komponenten og siden. 80 kg-mand-rækken = **2.759 / 2.259**, de tal
+  siden allerede lovede — testen låser krydschecket.
+- **Harness:** `makroer.test.ts` 11 → 18, `kalorier/page.test.tsx` 1 → 3;
+  modsvejs falder 1 af de 2 nye side-tests.
+- **Gate:** lint (556 filer), **1749 tests / 151 filer** (fra 1740 / 151), build
+  (141 sider). Branch `ceo/kalorier-pr-dag`.
+- **MÅL:** `/kalorier` baseline **12.477 visninger / 126 klik / CTR 1,0 % / pos.
+  8,2 pr. 2026-08-28 → 2026-09-25** — måles igen 2026-10-11.
+
+#### 119. [ ] Kø — madvare-klyngen på "kalorier" (kræver en kilde, før den bygges)
+
+- **Datagrund:** DA-autocomplete under "kalorier" → **9 af 10** er madvarer
+  (æg, banan, vandmelon, jordbær, avocado, kirsebær, kartofler, vindruer,
+  havregryn); under "kalorie indhold" → **10 af 10**; under "kalorier i æg" →
+  æggehvide, æggeblomme, æggekage, æggekage med bacon, æg uden blomme,
+  æggesalat, æggemad. Det er den næststørste danske klynge på ordet, og
+  `/kalorier` har **0** tabeller over madvarer.
+- **Hvorfor den ligger og ikke er bygget nu:** den kræver en *kildefølt*
+  værdi pr. vare, og den eneste citable danske tabel kunne ikke hentes i
+  iterationen (frasco.dk svarer ikke; DTU's kostviddatabase er en JS-app;
+  Open Food Facts har danske produktdata med spredning, f.eks. havregryn
+  363-369 kcal/100 g). Gættede kalorietal ville være præcis den fejlklasse
+  planen fører.
+- **Acceptkriterier:** (1) en citable dansk eller nordisk tabel er hentet og
+  kilden er nævnt *på siden*; (2) pr. 100 g **og** pr. typisk portion, fordi
+  klyngen spørger begge dele ("kalorier i 2 gulerødder"); (3) rå og tilberedt
+  er skelnet, når det betyder noget; (4) hver række i et modul med egen test,
+  så tallene ikke kan stå i strengen og afvige fra tabellen; (5) ét afsnit,
+  ikke en hel underside, og et link videre til `/kalorier` og `/proteinbehov`.
+
+### Næste kandidater efter C89
+
+0. **🔒 Opgave 97 er `BLOCKED`,** 98 afhænger af den. Browser-noter: C52, C55,
+   C56, C57 og C60 ligger i `❓ Til Mads` nederst.
+1. **🆕 Opgave 119 — madvare-klyngen på "kalorier"** (9 af 10 variationer er
+   madvarer). Kræver en hentet, citabel kilde før den bygges.
+2. **✅ `/kalorier` er lukket i denne iteration** (opgave 118) — mål effekten
+   2026-10-11, lav ikke CTR eller indhold på siden igen før da.
+3. **🆕 Svensk CTR:** `/tidszone` (3.256 v), `/leasing` (3.151 v, pos. 12,4),
+   `/alder` (3.060 v), `/nedtaelling` (5.163 v, pos. 9,4).
+4. **✅ Dansk top-15 er lukket** (C82-C89) — mål i stedet effekten 14 dage efter.
+5. **🆕 `/promille` svensk halvdel:** kun hvis svensk autocomplete under
+   "promillegräns" eller "rattonyktering gräns" viser spørgsmål, siden ikke
+   svarer på.
+6. **🆕 `/dato`-klyngens spørgsmål:** "hvor mange dage er der til 1 december"
+   (1.020 visninger, 2 klik, pos. 5) besvares af `/dage-til/*`, men GSC viser at
+   søgningen rammer `/dato` — mål om `/dage-til/*` har en `<title>` der svarer
+   på spørgsmålet.
+7. **⏬ Nedprioriteret:** 22 filer / 35 ubundne labels (kun sider uden for top-15).
+8. **🔒 Uforandrede forbehold:** hreflang korrekt (`hrefLang` med stort L);
+   svenske slugs kræver Mads' go; `/bmi` og `/su` måles 2026-10-11.
+9. **Mål 2026-10-10 / 2026-10-11** (se Måleprotokol).
 
 ### Næste kandidater efter C88
 
