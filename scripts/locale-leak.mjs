@@ -115,21 +115,27 @@ const REVIEWED = [
   },
   {
     file: "src/components/energi/PrisomraadeVaelger.tsx",
-    verdict: "KRÆVER ØJNE",
+    verdict: "DØD",
     reason:
-      "Bekræftet fejl, aldrig målt før: C65 scannede kun src/components/*Beregner.tsx, så undermappen src/components/energi/ blev aldrig kigget på. 'Øst (DK2)'/'Østdanmark (DK2)'/'Sjælland, øerne og Bornholm' er danske elpriszoner og står på beraknare.se. Se opgave 99.",
+      "Alle tre `src/components/energi/`-komponenter monteres kun inden for `live`, og `live` er `locale === \"da\" ? elprisData : null` — i `Elberegner.tsx:76` (PrisomraadeVaelger:336, ElprisGraf:363, EnergiKilde:364) og i `ElbilBenzinBeregner.tsx:79` (:190, :281). Samme indbyggede port som `HomeContent` (C68), bare i forælderen og ikke i filen. Verificeret på det live site: `https://beraknare.se/solceller` har **0** hits på \"Egetforbrug\" og \"Østdanmark\", fordi `SolcelleBeregner.tsx:447` også gater hele elpris-blokken med `erDa`.",
   },
   {
     file: "src/components/energi/ElprisGraf.tsx",
-    verdict: "KRÆVER ØJNE",
+    verdict: "DØD",
     reason:
-      "Bekræftet fejl, aldrig målt før (samme blinde plet som PrisomraadeVaelger): 'Vælg dag' og 'Morgendagens priser offentliggøres ca. kl. 13' er dansk på en SE-monteret komponent. Se opgave 99.",
+      "Alle tre `src/components/energi/`-komponenter monteres kun inden for `live`, og `live` er `locale === \"da\" ? elprisData : null` — i `Elberegner.tsx:76` (PrisomraadeVaelger:336, ElprisGraf:363, EnergiKilde:364) og i `ElbilBenzinBeregner.tsx:79` (:190, :281). Samme indbyggede port som `HomeContent` (C68), bare i forælderen og ikke i filen. Verificeret på det live site: `https://beraknare.se/solceller` har **0** hits på \"Egetforbrug\" og \"Østdanmark\", fordi `SolcelleBeregner.tsx:447` også gater hele elpris-blokken med `erDa`.",
   },
   {
     file: "src/components/energi/EnergiKilde.tsx",
-    verdict: "KRÆVER ØJNE",
+    verdict: "DØD",
     reason:
-      "Bekræftet fejl, aldrig målt før: ', nettarif er en standardværdi (gennemsnitlig C-kunde)' er dansk brødtekst i en SE-monteret komponent. Se opgave 99.",
+      "Alle tre `src/components/energi/`-komponenter monteres kun inden for `live`, og `live` er `locale === \"da\" ? elprisData : null` — i `Elberegner.tsx:76` (PrisomraadeVaelger:336, ElprisGraf:363, EnergiKilde:364) og i `ElbilBenzinBeregner.tsx:79` (:190, :281). Samme indbyggede port som `HomeContent` (C68), bare i forælderen og ikke i filen. Verificeret på det live site: `https://beraknare.se/solceller` har **0** hits på \"Egetforbrug\" og \"Østdanmark\", fordi `SolcelleBeregner.tsx:447` også gater hele elpris-blokken med `erDa`.",
+  },
+  {
+    file: "src/components/KonfirmationBeregner.tsx",
+    verdict: "DØD",
+    reason:
+      "Krydschecket: `${l.underskudPaa} ${formatKr(...)} ${l.udgifterOverstiger}` (:493) bruger tre nøgler, der alle findes i `da`, `se` og `no` (:62-63, :103-104, :145-146). `formatKr` er lokalt defineret med `locale`-betinget `toLocaleString`, så tallet følger domænet. Fundet var en målefejl: scanneren så `l.`-interpolation som \"dansk kode rundt om\".",
   },
   {
     file: "src/components/GaeldsfriBeregner.tsx",
