@@ -13,6 +13,11 @@
  * - Island har hele året UTC+0 og bruger ikke sommertid (Atlantic/Reykjavik).
  * - Lissabon er WET (UTC+0) og WEST (UTC+1); Athen og Kreta er EET (UTC+2)
  *   og EEST (UTC+3), jf. IANA Europe/Lisbon og Europe/Athens.
+ * - Madrid følger Danmark (CET/CEST), mens Istanbul er fast UTC+3 hele året,
+ *   fordi Tyrkiet afskaffede sommertid i 2016, jf. IANA Europe/Istanbul.
+ * - Toronto er UTC-5/-4 ligesom New York, mens Bangkok er fast UTC+7 og
+ *   Denpasar (Bali) fast UTC+8, jf. IANA America/Toronto, Asia/Bangkok og
+ *   Asia/Makassar.
  *
  * Værdierne bruges kun til at vise "hvad er klokken, når det er 12 i
  * Danmark/Sverige". Den præcise konvertering bruger TidszoneBeregneren.
@@ -40,11 +45,16 @@ export const TIDSZONER: readonly TidszoneInfo[] = [
   { by: "Athen", bySe: "Aten", utcVinter: 2, utcSommer: 3 },
   { by: "Heraklion (Kreta)", utcVinter: 2, utcSommer: 3 },
   { by: "New York", utcVinter: -5, utcSommer: -4 },
+  { by: "Toronto", utcVinter: -5, utcSommer: -4 },
   { by: "Chicago", utcVinter: -6, utcSommer: -5 },
   { by: "Los Angeles", utcVinter: -8, utcSommer: -7 },
   { by: "Sao Paulo", utcVinter: -3 },
+  { by: "Madrid", utcVinter: 1, utcSommer: 2 },
+  { by: "Istanbul", utcVinter: 3 },
   { by: "Dubai", utcVinter: 4 },
   { by: "Mumbai", utcVinter: 5.5 },
+  { by: "Bangkok", utcVinter: 7 },
+  { by: "Denpasar (Bali)", utcVinter: 8 },
   { by: "Shanghai", utcVinter: 8 },
   { by: "Tokyo", utcVinter: 9 },
   { by: "Sydney", utcVinter: 10, utcSommer: 11 },

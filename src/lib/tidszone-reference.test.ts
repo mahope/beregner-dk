@@ -1,4 +1,5 @@
 import { describe, expect, test } from "vitest";
+import { getPageData } from "./page-data";
 import {
   brugerSommertid,
   DANSK_UTC_SOMMER,
@@ -82,5 +83,31 @@ describe("tidszone-reference", () => {
     expect(navne).not.toContain("Athen");
     expect(navne).toContain("Nuuk");
     expect(new Set(navne).size).toBe(navne.length);
+  });
+
+  test("de naeste destinationer fra autocomplete staar i tabellen", () => {
+    const raekker = tidszoneRækker();
+    const find = (by: string) => raekker.find((r) => r.by === by);
+
+    // "tidsforskel thailand" og "hvad er klokken i thailand": Bangkok er fast UTC+7.
+    expect(find("Bangkok")).toEqual({ by: "Bangkok", vinter: "18:00", sommer: "17:00" });
+    // "tidsforskel bali danmark": Bali er fast UTC+8, samme som Shanghai.
+    expect(find("Denpasar (Bali)")).toEqual({ by: "Denpasar (Bali)", vinter: "19:00", sommer: "18:00" });
+    // "tidsforskel tyrkiet": Istanbul er fast UTC+3, Tyrkiet har ingen sommertid.
+    expect(find("Istanbul")).toEqual({ by: "Istanbul", vinter: "14:00", sommer: "13:00" });
+    // "hvad er klokken i spanien": Madrid følger Danmarks sommertid.
+    expect(find("Madrid")).toEqual({ by: "Madrid", vinter: "12:00", sommer: "12:00" });
+    // "hvad er klokken i canada": Toronto ligger som New York.
+    expect(find("Toronto")).toEqual({ by: "Toronto", vinter: "06:00", sommer: "06:00" });
+  });
+
+  test("antallet af byer i metaDescription følger tabellen", () => {
+    // C46 lagde fire byer i tabellen uden at rette "12 byer" i metaDescription,
+    // altsaa lovede den indekserede tekst et tal, der ikke passede længere.
+    for (const locale of ["da", "se"] as const) {
+      const { metaDescription } = getPageData("tidszone", locale)!;
+      const loevet = Number(metaDescription.match(/till? (\d+) (?:byer|städer)/)?.[1]);
+      expect(loevet).toBe(TIDSZONER.length);
+    }
   });
 });
