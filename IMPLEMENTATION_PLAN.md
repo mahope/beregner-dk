@@ -1,5 +1,7 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
+STATUS: KØ — **C73 er landet: 07:30-batchen er verificeret ved indhold (14 noter lukket), og verificeringen fandt en rigtig fejl: `/del-regning` læste "Færre personer" på beraknare.se — fordi C71 selv lagde de danske ord ind i `se`-blokken.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den), og 16 åbne noter var ældre end det seneste deploy-vindue, så noterne var iterationens pligter først. De er lukket ved **indholdskontrol**, ikke HTTP 200: `/tidszone` har **17** `<tr>` med Nuuk 08:00/08:00, Lissabon 11:00/11:00, Reykjavik 11:00/10:00, Athen og Heraklion 13:00/13:00 (C46), og dropdown'en siger **"Athen"** på dansk og **"Aten"** på svensk (C66's rettelse); `/dato`, `/tidsberegner`, `/tidszone`, `/promille`, `/moms`, `/kvadratmeter`, `/renteberegner` og `/alder` har **0** ubundne `<label>` i den server-renderede HTML (C61/C62), og grupperne bærer `aria-labelledby` (`moms-beregning-gruppe`, `kvadratmeter-form-gruppe`); `/del-regning` på beraknare.se har **danske** tællernavne; `beraknare.se` er svensk (12 × "Bostad", 0 danske markører) og `/gaeldsfri` har 0 hits på "Gældsfri Beregner" (C68/C69). **C52, C56, C57 og C67 kan ikke verificeres med curl** — de kræver Kopiér/knap-klik i en browser — og er ladt åbne, fordi de siger det ærligt. **Fundet fra noterne er en rigtig fejl, og den er C71's egen:** C71 gav `/del-regning`s tællerknapper navne (`l.færre`/`l.flere`) og kopierede de **danske** ord ind i `se`-blokken, så beraknare.se læste "Færre personer" på en side hvis øvrige ord er svenske. **Måleren kunne ikke se den, og det er den fjerde målefejl i træk fra én årsag: `localeObjectRanges` springer *alle* strenge i et `da:`/`se:`/`no:`-objekt over, fordi det er dér oversættelserne bor.** Lækagen der *er* inde i en labels-tabel er altså usynlig som konstruktion. **R4** er derfor en ny regel i `scripts/locale-leak.mjs`: **en `se:`-værdi må ikke indeholde `æ` eller `ø`** — svensk skriver aldrig nogen af dem, så reglen kan ikke give falske fund, og den bruges bevidst **ikke** på `no:`, der selv skriver begge tegn (C68's lektion om `ø` som dansk markør). Den målte **præcis én** streng i hele repoet, og det var den rigtige. `locale-leak-gate.test.ts` er **9 → 11 tests** med to plantede fixtures: den ene skal gøre gaten rød, den anden låser at norsk `æ`/`ø` og en `da:`-fallback *inde i* `se` ikke giver en ny vurdering. **Verificeret modsvejs: 4 tests falder med den gamle komponent**, og R4's egen plantede test falder, når reglen slås fra — den første version af plantet brugte "Vaskemaskine", som ikke indeholder æ eller ø, og var derfor grøn på en regel der ikke virkede; det er samme fejltype som C70's målefejl, fundet af at køre plantet *uden* reglen. To fejl i R4 blev fundet på samme måde: et *nested* `da: { … }` blev kun dækket til `{` og ikke til dens afsluttende klamme, og nøglen blev læst med et regex der krævede et anførselstegn i et vindue der *slutter* lige før det, så `da: "højde"` gav nøglen `?` og blev meldt. `label-a11y.test.tsx`'s `/delregning`-test kræver nu i `se`, at knapnavnet **ikke** indeholder æ eller ø — "har navn" var ikke nok, det var præcis der fejlen lå. Gate grøn: lint (553 filer), **1667 tests / 148 filer** (fra 1665 / 148) og build (141 sider); `label-a11y-scan.mjs` uændret 23/36, `locale-leak.mjs --gate` exit 0 med **117 kandidater / 85 døde / 32 kræver øjne / 0 ureviewet** (uændret, fordi den danske streng lå i en labels-tabel og derfor *aldrig* har været talt med). Kode `3a360e1` på `ceo/delregning-se-knapnavn`; se opgave 102.
+
 STATUS: KØ — **C72 er landet: de syv mest trafikrelevante filer i label-klassens hale er lukket, så klassen er nede på 23 filer / 36 ubundne — og måleren afslørde sig selv midt i gaten.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED` på Mads' svar, 98 afhænger af den), så kandidat #1 efter C71 blev taget. **Første måling på den nye scanner:** 30 filer / 48 ubundne, og scanneren kørtes først — så valget var datagrundet, ikke en håndtælling. **Snittet er de syv filer med mest trafik i halen, ikke de syv med flest labels**, fordi C61–C71 altid gik efter det brugeren kan ramme, og de mest besøgte sider nu er *rensede*: de 30 filer er det, der er tilbage, naar `/dato`, `/tidsberegner`, `/tidszone`, `/kvadratmeter`, `/boliglaan`, `/huslejebudget`, `/befordringsfradrag`, `/rentefradrag`, `/braendstof`, `/pension`, `/boernepenge`, `/efterloen`, `/gaeldsfri` og `/elberegner` er lukket. Rettet er `/brutto-netto` (2), `/topskat` (2), `/opsparing` (2), `/budget` (2), `/bil` (1), `/nedtaelling` (1) og `/lon-efter-skat` (2) — **12 labels, syv filer.** Fire fund ud over bindingerne, og de er hele pointen med at måle en klasse på sidste halvdel: **`/brutto-netto`s periode-knapper ("Pr. måned"/"Pr. år") havde intet navn overhovedet** — ingen `<label>`, ingen gruppe, så en skærmlæser læste to navnløse knapper i træk. Det er C64's `/elberegner`-fund igen, og scanneren kan **ikke** finde det: den tæller kun `<label>`-elementer, så en knapgruppe uden etiket er usynlig for den. Samme fejltype som C70's målefejl — måleren ser kun det den er skrevet til at se. **`/opsparing`s inflationskontrol var *indpakket* i `<label>`** (gyldig HTML, virker med skærmlæser, men ufindelig for `getByLabelText`) — C64's `/pension`-fund. **`/bil`s brændstofvælger og `/opsparing`s rentetilskrivning er knapgrupper**, så etiketten er blevet `role="group"` + `aria-labelledby` (C64/C70's mønster), og **`/budget`s udgiftsfelter kommer fra et array**, så `id` må følge nøglen — ellers få alle felter det samme id, og testen tæller derfor både at de er navngivet *og* at id'erne er unikke. **Harness-find undervejs, som er selve beviset på målerens værdi:** `label-scan-gate.test.ts` låser scannerens tal på repoets egen kode og **faldt** — forventede 30/48, fik 23/36. Det er præcis den fejl C71 byggede testen for at fange, og den fangede den øjeblikkeligt: tallet er opdateret i samme commit, ikke "senere". `label-a11y.test.tsx` er udvidet fra 81 til **95 tests** i DA og SE (**+14**), **verificeret modsvejs: alle 14 falder** med de gamle komponenter. Gate grøn: lint (553 filer), **1665 tests / 148 filer** (fra 1651 / 148) og build (141 sider). Kode `8c737a4`, merge `c7179c2` 2026-09-27 07:35 CEST; første kandidatvindue **2026-09-27 12:30**. Se opgave 101.
 
 STATUS: KØ — **C71 er landet: måleren for label-klassen findes nu i repoet, og de tre målefejl der har kostet tre iterationer ligger som *navngivne regler med en test hver*, ikke som noter i denne plan.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den), og kandidat #2 efter C70 — "skriv C70's målingsfejl ned som en test, ikke bare en note" — var både billigere og mere værd end endnu et snit af den samme klasse. **`scripts/label-a11y-scan.mjs` + `src/lib/label-scan-gate.test.ts` (8 tests) er de nye filer, og de er gensidigt bundne: testen kan ikke køre uden scanneren, og scannerens tal er låst i testen.** Reglerne er **R1** (find åbningstaggen ved at gå fra `<label` til det første `>` der ikke står i et `{…}`-udtryk — `<label\b([^>]*)>` afkorter ved `setX(1)>` og så en bunden etiket som ubundet, C64's fejl), **R2** (normalisér `${…}` væk *før* sammenligningen, og normalisér før `split(/\s+/)` — `${i + 1}` indeholder selv et mellemrum, så en rå split skærer gruppe-etiketten i to), **R3** (skriv **begge** bindinger, `for` *og* `htmlFor`; case-insensitivt `\bfor` kan ikke matche inde i `htmlFor`, fordi `l` er et ordtegn — det er C70's fejl, der gjorde klassen til 311/88). Hver regel har en **plantet** fixture der fejler uden den. **Måleren svarede 37 filer / 69 ubundne på den rene kode, og planen havde ført 38/70 siden C70** — forskellen er `/elberegner`s gruppe-etiket, som *er* bundet gennem `aria-labelledby={`elberegner-apparat-${index + 1}`}`; C64 rettede den, men håndtællingen beholdt den. R2 er præcis den fælde, planen selv oplyser to gange. **Et fjerde fund ud over R1-R3, som ingen af de tre dækkede: attribut-værdier skal læses i hånden, ikke med regex.** `\{([^}]*)\}` rammer altid den `}` der lukker `${…}`, ikke den der lukker hele udtrykket — så både `id` og `aria-labelledby` læstes som `` `gruppe-${i + 1 ``, aldrig ens, og **alle** knapgrupper i repoet blev rapporteret som ubundne. Rettelsen er `attributVærdi()`, der læber klammerne. **Dinglende `for=` er slået fra som standard med vilje:** en fil-lokalt id-scan kan ikke se de id'er et barnkomponent-render, så den læser 48 `for=` på `src/` som dinglende, selv om de er bundet i DOM'en. Den ægte prøv ligger i `label-a11y.test.tsx`, som læser den renderede container; flaget `--danglende` er der, hvis nogen vil se det. **Og så blev klassen lukket et snit videre, fordi måleren nu er gratis:** de syv filer med tre ubundne labels hver — `/aktieskat`, `/delregning`, `/feriepenge`, `/lon-efter-skatt`, `/motionkalorier`, `/rabat`, `/rygestop` — er **30 filer / 48 ubundne** nu, lukket med samme mønster som C61-C70 og dækket af **14 nye tests i `label-a11y.test.tsx` (65 → 81)**, verificeret modsvejs: alle 14 falder med de gamle komponenter. Fire fund ud over bindingerne: **`/delregning`s tællerknapper hed "−" og "+" og intet andet**, så en skærmlæser læste "minus" uden at vide at den lavede én person færre (nye `l.færre`/`l.flere` i da/se); **`/lon-efter-skatt`s "Lön" dækkede både periode-knapperne og lønfeltet** — ét navn på to felter, C64's `/elberegner`-fejl igen, nu etiket-på-felt plus `role="group" aria-label="Period"` på knapperne; samme fils kirkemedlemskab-checkboks var *indpakket* i `<label>` (C64's `/pension`-fund); **`/aktieskat`s "Vis beregning for" og `/feriepenge`s "Periode" er knapgrupper**, så de er `role="group"` + `aria-labelledby`; **`/rabat` har to beregningstilstande og derfor to felter ad gangen**, så testen tæller de to i DOM'en og ikke tre. Gate grøn: lint (553 filer), **1651 tests / 148 filer** (fra 1637 / 147) og build (141 sider); `node scripts/locale-leak.mjs --gate` uændret 117/85/32 med 0 ureviewet. Kode + plan i ét commit på `ceo/label-scan-gate`. Se opgave 100.
@@ -6779,6 +6781,34 @@ efter datagrund:
    `/api/v1/loen`'s kommuneskat, domænerne og `www`-redirects.
 
 ### ❓ Til Mads
+- ❓ **NYT 2026-09-27 (C73): TRE DEPLOY-NOTER KAN IKKE LUKKES UDEN EN
+  BROWSER — de kræver Kopier eller et knap-klik. ~10 minutter for et menneske,
+  ellers står de åbne for evigt.** En agent kan hente den server-renderede HTML,
+  men **ikke** læse udbyderens klipbord og **ikke** skifte en tilstand ved at
+  trykke på en knap. Derfor er disse tre noter bevidst *ikke* lukket på en
+  HTTP 200 — det er præcis den fejl, tidligere noter har advaret om. Kliksekvensen
+  er skrevet ud, så det kun er en gennemgang:
+  1. **`/moms`** (C52): sæt beløb 1.000 kr. → tryk **Kopiér**. Den delte tekst
+     skal være **"Moms i 1.250,00 kr. er 250,00 kr. (20 % af beløbet)"** — en
+     andel, ikke en differens — og må **ikke** være den gamle
+     `1.000,00 kr. + moms = 1.250,00 kr.`. Knapperne skal hedde **"Læg moms
+     til"** og **"Træk moms fra"** på dansk (de hed "Tillæg moms"/"Fratræk
+     moms" før, en maskinoversættelse fra svensk) og "Lägg till moms"/"Dra av
+     moms" på `beraknare.se/moms`, hvor tallene skal have tusindtalsmellemrum
+     ("1 000,00 kr").
+  2. **`/renteberegner`** (C57): 1.000.000 kr., 5 %, 30 år → **Kopiér** skal give
+     `1.000.000 kr. til 5 % i 30 år (annuitetslån). Månedlig ydelse 5.368 kr. og
+     samlet rente 932.558 kr.` Sæt **Årlig rente** til `3.5` → teksten skal
+     sige `til 3,5 %` med komma. Tryk **Serielån** → `(serielån)` +
+     `Første måneds ydelse 6.944 kr.` + `sidste måneds ydelse 2.789 kr.`.
+  3. **`/tidszone`** (C56): sæt **Til tidszone = Indien (IST)** → forskelsen skal
+     stå som `+3,5 timer` og "Mumbai er 3,5 timer foran København" (før stod der
+     `3.5` med punktum). **Kopiér** med Japan (JST) skal give
+     `12:00 i København = 19:00 i Tokyo. Tokyo er 7 timer foran København.
+     Gælder 1. juli 2026 — forskellen følger sommertiden.`
+  **Hvis du foretrækker det:** svar "noter lukket" her, og jeg skriver dem som
+  verificeret af din gennemgang i næste batch-note — men kun hvis du faktisk har
+  lavet kliksekvenserne, ellers gør noterne ingen nytte.
 - ❓ **SKAL `beregner.no` LANCERES, eller er navnet reserveret? (opgave 97).**
   Målt under C66: `https://beregner.no/` svarer **200**, men `/moms`,
   `/procent`, `/dato`, `/tidszone` og `/elberegner` svarer alle **404** — med
@@ -7758,6 +7788,82 @@ landmark=lån, piggybank=opsparing osv.).
     - Gate grøn: lint ok, 280/280 tests, build ok (128 pages).
 
 ## VERIFICÉR DEPLOY-log
+- ⏳ **ÅBEN — C73: `beraknare.se/del-regning`'s tællerknapper skal hedde "Färre
+  personer"/"Fler personer" (de læste dansk), og `scripts/locale-leak.mjs` har
+  fået regel R4 + to plantede tests. Kode `3a360e1` + plan, merge `MERGE_SHA`
+  2026-09-27 MERGE_TIME CEST på branch `ceo/delregning-se-knapnavn`. Første
+  kandidatvindue 12:30.**
+  **HTTP 200 beviser intet:** intet af dette rører `src/lib/` eller en
+  beregning — kun to strenge i et `se:`-objekt. Sådan verificeres det:
+  1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
+  2. `curl -s https://beraknare.se/del-regning | grep -c "Færre personer"` skal
+     være **0** og `grep -c "Färre personer"` skal være **1** (før: 1 og 0).
+     Samme for "Flere"/"Fler". Tællerkontrollen skal stadig fungere: **+** hæver
+     antallet, **−** sænker det.
+  3. `https://minberegner.dk/del-regning` skal fortsat sige **"Færre
+     personer"** og **"Flere personer"** på dansk — rettelsen må ikke have rørt
+     `da`-blokken.
+  4. `node scripts/locale-leak.mjs --gate` skal give exit 0 med **0 ureviewet**
+     og **117 kandidater / 85 døde / 32 kræver øjne** — uændret. Scriptet læser
+     kun `src/`, så tallene er identiske lokalt og live; det beviser at
+     *filerne* kom med, ikke at sidens adfærd er ændret.
+  5. `/kalorier` og de øvrige C-nævnte sider skal være uændrede — denne
+     iteration rørte ingen beregning.
+
+- ✅ **DEPLOY OK 2026-09-27 08:30 CEST — 07:30-batchen lukker 14 noter: C46,
+  C61, C62, C63, C64, C66, C68, C69, C70, C71 og C58 + C54's blogdel +
+  C52/C56/C57/C67 er *ladt åbne* med grund.** Alle merges (C46 26/9 20:52 →
+  C71 27/9 07:18) lå før 07:30-vinduet. Målt 08:22-08:28 mod live-sitet;
+  `/api/health` svarer `status: ok`.
+  - **C46** (`/tidszone`): **17** `<tr>` (16 rækker + hoved), herunder
+    **Lissabon 11:00/11:00, Reykjavik 11:00/10:00, Nuuk 08:00/08:00, Athen
+    13:00/13:00, Heraklion (Kreta) 13:00/13:00**; brødteksten siger "13 i
+    Athen" og "08 i Nuuk".
+  - **C66** (samme side, rettelsen): dropdown'en siger
+    **`<option value="greece">Athen - Grækenland`** på minberegner.dk og
+    **`Aten - Grekland`** på beraknare.se, og brødteksten "13 i Aten" på den
+    svenske. Det er præcis den modsætning C66 lavede, så begge dele er live.
+  - **C61/C62/C63/C64/C70/C71** (label-klassen): `curl` tæller
+    `<label>`-åbningstagge uden `for`/`id` i den server-renderede HTML, og på
+    `/dato`, `/tidsberegner`, `/tidszone`, `/promille`, `/moms`,
+    `/kvadratmeter`, `/renteberegner` og `/alder` er tallet **0**. Gruppenes
+    bindinger er med: `/moms` har
+    `role="group" aria-labelledby="moms-beregning-gruppe"`, `/kvadratmeter`
+    `…="kvadratmeter-form-gruppe"`. `/del-regning` på beraknare.se har
+    tællernavn — **men dansk** ("Færre personer"), hvilket blev fundet her og
+    rettet i C73, se opgave 102.
+    **Begrænsning, der skal med i næste note:** server-HTML'en viser kun det
+    felt der mountes i starttilstanden, så et krav om "9 felter" eller "fire
+    tilstande" kan ikke verificeres med curl. Det er gjort i testene, ikke her.
+  - **C68** (dispatcher-reglen): `beraknare.se/` er svensk — 12 × "Bostad",
+    2 × "Ekonomi och lån", 2 × "Hälsa och kropp", **0** danske markører, og 0
+    hits på "MinBeregner.dk — Danmarks gratis beregnerportal". Den afslåede
+    konklusion holder altså på den udgivne kode.
+  - **C69** (`/gaeldsfri`): `beraknare.se/gaeldsfri` har **0** hits på
+    "Gældsfri Beregner" og 2 på "Skuldfri"; `minberegner.dk/gaeldsfri` har
+    stadig sit danske navn (2 hits). Del-dialogens egen tekst er klient-
+    renderet, så de to sidste kontroller kræver en browser — se punkt 3 nedenfor.
+  - **C58** (`/kalorier`): standardværdierne (30 år, mand, 80 kg, 180 cm,
+    moderat, målet Tab vægt) giver **2.259** kcal/dag ved siden af vedligehold
+    **2.759**, og siden siger **"0,5 kg"** 6 gange og **"0.5 kg"** 0 gange.
+    Det er den del af noten der kan ses i HTML'en; Kopier-teksten og de tre
+    ombyggede tilfælde (264 kcal, -53 kcal, 7 g, 8.836 kcal) er
+    klient-renderede og **kræver en browser**.
+  - **C54** (blogdel): `/blog/hvordan-beregner-man-moms` har 4 × `href="/moms"`
+    og alle **tre** CTA-punkter ("Læg moms til", "Træk moms fra", "Find
+    moms"). Ugenummeret i `/ugenummer` er klient-renderet ("Ugenummer " står
+    uden tal), så den del af noten er **uverificeret her**.
+  - **C52, C56, C57 og C67 er bevidst ladt åbne.** C52 og C57 kræver Kopiér
+    (udbyder-klik-tastatur kan ikke læses med curl, og resultaterne er
+    klient-renderede), C56 kræver zoneskift + Kopiér, og C67 er en ren
+    scriptændring hvis eneste synlige effekt er en ny regel. De er **ikke**
+    lukket på en HTTP 200 — det er præcis den fejl tidligere noter har
+    advaret om.
+  - **Læren, der gentager sig for tredje gang:** en batch-verify skal skelne
+    mellem "kan ses i server-HTML" og "kræver en klik-rundt". De fleste
+    noter blandt C46-C71 er af den anden slags, og de er skrevet som om de var
+    den første.
+
 - ⏳ **ÅBEN — C71: `scripts/label-a11y-scan.mjs` + `src/lib/label-scan-gate.test.ts`
   (ny måler med 8 tests, én pr. regel) og 21 ubundne `<label>` lukket på syv
   beregnere (`/aktieskat`, `/delregning`, `/feriepenge`, `/lon-efter-skatt`,
@@ -9851,4 +9957,91 @@ landmark=lån, piggybank=opsparing osv.).
    skal skrives i `❓ Til Mads` — den næste iteration kan godt starte med det og
    gå videre med 95, fordi svaret ikke låser noget kodearbejde.
 5. **Mål 2026-10-10 / 2026-10-11** (se Måleprotokol): C1-C16 og C35-C66 måles
+   14 dage efter deres snapshot, og resultatet skrives ved siden af hver opgave.
+
+#### 102. [x] FÆRDIG 2026-09-27 — C73 — luk de 16 åbne deploy-noter ved indhold, og ret den `/del-regning`-lækage som verificeringen fandt
+
+- **Iteration start:** 2026-09-27 08:20 CEST på `ceo/delregning-se-knapnavn`.
+  Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den), og
+  **16 åbne VERIFICÉR-noter var ældre end det seneste deploy-vindue** (07:30,
+  de seneste merges 06:15-07:18), så pligten lå dér først.
+- **Datagrund:** 14 af noterne er lukket ved indholdskontrol, og fundet er fra
+  C71's egen kode, ikke fra en måling af en klasse. Se den konsoliderede
+  `DEPLOY OK 2026-09-27 08:30`-note i VERIFICÉR DEPLOY-loggen for hele listen.
+  `/del-regning` er en **SE-side** (`calculator-list.ts:88`, `se`-titel "Dela
+  notan") og derfor monteret på beraknare.se; dens knapper er den primære
+  kontrol på siden (antallet af personer regningen deles på).
+- **Fundet:** `DelRegningBeregner.tsx:27-28` havde `se: { færre: "Færre
+  personer", flere: "Flere personer" }`. Beviset er på det live site:
+  `https://beraknare.se/del-regning` (200) har "Færre personer" og "Flere
+  personer" i DOM'en, mens `<title>` er "Dela notan - Beräkna belopp per
+  person med dricks" og H1 "Dela notan - fördela beloppet mellan flera". Rettet
+  til **"Färre personer"** / **"Fler personer"**.
+- **Målerens fjerde målefejl i træk, og årsagen er samme som C61-C72's:**
+  `localeObjectRanges` i `scripts/locale-leak.mjs` springer **alle** strenge i
+  et `da:`/`se:`/`no:`-objekt over — korrekt, fordi det er dér oversættelserne
+  bor — og dermed også en dansk værdi i den *svenska* blok. Lækagen der per
+  definition ligger i en labels-tabel var usynlig som konstruktion.
+  **R4** tager derfor et andet snit: **en værdi i en `se:`-blok må ikke
+  indeholde `æ` eller `ø`.** Svensk skriver aldrig nogen af dem, så reglen kan
+  ikke give falske fund; den bruges **ikke** på `no:`, der selv skriver begge
+  tegn (C68's lektion om `ø`). Målingen gav **én** streng i hele repoet, og
+  den var rigtig.
+- **To fejl i R4 selv, fundet fordi plantene kørtes *uden* reglen:** (a) et
+  *nested* `da: { … }` blev dækket af et interval der sluttede ved `{` og ikke
+  ved den afsluttende klamme, så intet blev undtaget — samme
+  klamme-parentes-fejl som `locale-leak.mjs` havde i `localeObjectRanges`, nu
+  gentaget af mig; løst ved at begge bruger den fælles `braceRange()`.
+  (b) nøglen blev læst med `/(\w+)\s*:\s*["'`]$/` på et vindue der *slutter
+  lige før* det åbne anførselstegn, så nøglen var altid `?` og en `da: "højde"`
+  inde i `se` blev meldt. Desuden var det første plant "Vaskemaskine", som
+  hverken har æ eller ø — plantet var grønt på en regel der ikke virkede, så
+  det er præcis C70/C71's målefejl.
+- **Tests:** `locale-leak-gate.test.ts` **9 → 11** med to plantede fixtures —
+  den ene skal gøre gaten rød på en `se:`-streng alene, den anden låser at
+  norsk `æ`/`ø` og en `da:`-fallback *inde i* `se` ikke giver en ny vurdering.
+  **Verificeret modsvejs:** 4 tests falder med den gamle komponent
+  (`/delregning` i `se`, gaten, og de to tests der antager en ren repo — de
+  fejler fordi den rigtige lækage gør gaten rød), og R4's egen plantede test
+  falder når reglen slås fra. `label-a11y.test.tsx`'s `/delregning`-test
+  kræver nu i `se` at knapnavnet **ikke** indeholder æ eller ø: "har navn" var
+  ikke nok, det var der fejlen lå.
+- **MÅL:** `beraknare.se/del-regning` 200 med danske knapnavn (baseline pr.
+  2026-09-27) → **"Färre personer" / "Fler personer"** efter deploy.
+  Forventes **0** i trafik: det er en rettelse af to knapnavne, ikke en titel,
+  og skærmlæserbrug trackes ikke (**tracking-opsætningen må ikke ændres**).
+  Virkningen er derfor verificeret i de 11 + 1 nye tests, ikke i tal.
+  **Mål scanneren igen 2026-10-11** sammen med label-klassens 23/36.
+- **Efterladt, bevidst:** C52, C56, C57 og C67 er stadig åbne deploy-noter, fordi
+  de kræver Kopiér eller et knap-klik i en browser. De er **ikke** lukket på en
+  HTTP 200.
+
+### Næste kandidater efter C73
+
+0. **✅ Opgave 102 lukket i C73** — 16 åbne noter ved indholdskontrol, og
+   fundet var en rigtig lækage i C71's egen kode. Læs C73-STATUS: måleren
+   springer *alle* strenge i et locale-objekt over, så en dansk værdi i `se` var
+   usynlig; R4 lapper præcis det huller.
+0b. **🔒 Opgave 97 er `BLOCKED`** — `beregner.no` er en anden udgivelse;
+   spørgsmålet om ejerskab ligger i `❓ Til Mads`. Dermed er **opgave 98**
+   (`TidszoneBeregner` mangler et `no`-sprog) også unødig indtil svaret kommer.
+1. **Uden en browser kan deploy-noter ikke lukkes.** C52, C56 og C57 står åbne
+   fordi de kræver Kopiér. De tre kan lukkes med **én** manuel gennemgang
+   (~10 minutter) i stedet for tre iterationer: en note i ❓ Til Mads med den
+   præcise kliksekvens for hver side er nok, så en menneske kan gøre det.
+   Skriv den, hvis noterne skal lukkes i en løsende iteration.
+2. **Resten af label-klassen: 23 filer / 36 ubundne labels.** Gratis at vælge:
+   `node scripts/label-a11y-scan.mjs` giver hele listen med fil, linje og
+   etikettens tekst på under to sekunder. Samme regel: efter hvad brugeren kan
+   ramme. **Bemærk at klassen er næsten udtæmt på de trafikrelevante sider** — en
+   ny iteration bør hellere tage et snit i en *anden* klasse.
+3. **Knapgrupper uden navn — en klasse scanneren ikke kan se.** `/brutto-netto`s
+   periode-knapper fandt C72. Samme måling som `label-a11y-scan.mjs` gjorde for
+   labels (C71's mønster: **script + en test pr. regel**): `role="group"`-grupper
+   uden `aria-label`/`aria-labelledby`. C72's fund er beviset på at klassen findes.
+4. **`/brok` mangler redaktionelle indlægslinks** (4.881 visninger, 0,6 % CTR,
+   pos. 5,3) — `git grep brok src/app` giver kun `src/app/brok/`, så siden er
+   afhængig af navigation alene. Det er det næste konkrete trafikfund i klassen
+   "hvad skriver den tekst, brugeren kopierer?" (C42's andet fund).
+5. **Mål 2026-10-10 / 2026-10-11** (se Måleprotokol): C1-C16 og C35-C73 måles
    14 dage efter deres snapshot, og resultatet skrives ved siden af hver opgave.

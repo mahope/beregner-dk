@@ -149,4 +149,61 @@ describe("locale-leak scanner", () => {
       writeFileSync(target, original);
     }
   });
+
+  it("flags a Danish value inside the se: block — the leak R1-R3 cannot see", () => {
+    // C71 gave /del-regning's tællerknapper names and pasted the Danish words
+    // into `se`, so beraknare.se served "Færre personer" on an otherwise Swedish
+    // page. Every other rule skips locale objects — that is where translations
+    // live — so without R4 the string is invisible by construction. Planted:
+    // the gate must go red on the Swedish block alone.
+    const target = resolve(ROOT, "src", "components", "MomsBeregner.tsx");
+    const original = readFileSync(target);
+    try {
+      writeFileSync(
+        target,
+        `${original.toString("utf8")}\n` +
+          `const PLANTET_LABELS = { da: { apparat: "Støvsuger" }, se: { apparat: "Støvsuger" } };\n` +
+          `export function Plantet3() { return <div>{PLANTET_LABELS.se.apparat}</div>; }\n`
+      );
+      const failing = () =>
+        execFileSync("node", [SCRIPT, "--gate"], { cwd: ROOT, stdio: "pipe" });
+      expect(failing).toThrow();
+      // Egen streng, ikke den i DelRegningBeregner: ellers ville plantet være
+      // grønt på grund af en virkelig lækage, og R4's egen dækning ville være
+      // ubevis. Samme argument som i "flags a module-scope Danish string".
+      expect(JSON.stringify(scan().unreviewed)).toContain("Støvsuger");
+    } finally {
+      writeFileSync(target, original);
+    }
+  });
+
+  it("does not flag Norwegian æ/ø, nor a Danish fallback nested in se", () => {
+    // The safety property of R4. Norwegian writes æ and ø itself ("Færre
+    // personer" is correct in Norwegian), so the same test must not run on a
+    // `no:` block — C68's lesson about `ø` as a Danish marker. And a `da:`
+    // object nested inside `se:` is a fallback, not Swedish copy, so it must
+    // stay out too. Both plants must leave the gate green.
+    const target = resolve(ROOT, "src", "components", "MomsBeregner.tsx");
+    const original = readFileSync(target);
+    try {
+      writeFileSync(
+        target,
+        `${original.toString("utf8")}\n` +
+          `const PLANTET_OK = {\n` +
+          `  no: { faerre: "Færre personer", bokmaal: "lønn" },\n` +
+          `  se: { opphoeg: { da: "højde", se: "höjd" } },\n` +
+          `};\n` +
+          `export function Plantet4() { return <div>{PLANTET_OK.no.faerre}</div>; }\n`
+      );
+      expect(() =>
+        execFileSync("node", [SCRIPT, "--gate"], { cwd: ROOT, stdio: "pipe" })
+      ).not.toThrow();
+      expect(JSON.stringify(scan().unreviewed)).not.toContain("Færre personer");
+      // `ø` i den norske blok er det samme argument: norsk skriver ø, så det må
+      // ikke give en ny vurdering hverken.
+      expect(JSON.stringify(scan().unreviewed)).not.toContain("lønn");
+    } finally {
+      writeFileSync(target, original);
+    }
+  });
 });

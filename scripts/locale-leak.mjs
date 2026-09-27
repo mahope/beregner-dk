@@ -198,29 +198,30 @@ function stripNoise(src) {
   return out;
 }
 
+/** [openBrace, matchingCloseBrace] for the block whose `{` is at `open`. */
+function braceRange(src, open) {
+  let depth = 0;
+  for (let i = open; i < src.length; i++) {
+    const c = src[i];
+    if (c === "{") depth++;
+    else if (c === "}") {
+      depth--;
+      if (depth === 0) return [open, i];
+    }
+  }
+  return null;
+}
+
 /** Brace-matched ranges of every `da:` / `se:` / `no:` object literal. */
 function localeObjectRanges(src) {
   const ranges = [];
   const keyRe = new RegExp(`(^|[\\s,{])(${LOCALE_KEYS.join("|")})\\s*:\\s*\\{`, "g");
   let m;
   while ((m = keyRe.exec(src)) !== null) {
-    const open = src.indexOf("{", m.index);
-    let depth = 0;
-    let end = -1;
-    for (let i = open; i < src.length; i++) {
-      const c = src[i];
-      if (c === "{") depth++;
-      else if (c === "}") {
-        depth--;
-        if (depth === 0) {
-          end = i;
-          break;
-        }
-      }
-    }
-    if (end === -1) continue;
-    ranges.push([open, end]);
-    keyRe.lastIndex = end;
+    const range = braceRange(src, src.indexOf("{", m.index));
+    if (!range) continue;
+    ranges.push(range);
+    keyRe.lastIndex = range[1];
   }
   // `da: "…"`, `se: "…"` — a bare string on a locale key, no braces.
   const bareRe = new RegExp(`(^|[\\s,{])(${LOCALE_KEYS.join("|")})\\s*:\\s*"`, "g");
@@ -233,6 +234,73 @@ function localeObjectRanges(src) {
 
 function inRanges(ranges, offset) {
   return ranges.some(([a, b]) => offset >= a && offset <= b);
+}
+
+/**
+ * R4 — a Danish value sitting in the `se:` block itself.
+ *
+ * `localeObjectRanges` skips every string inside a `da:`/`se:`/`no:` object,
+ * because that is where the translations live. But it then also skips a
+ * *Danish* value that was pasted into the Swedish block, so the one class of
+ * leak that is by definition inside a labels table is invisible to the scan.
+ * Not hypothetical: C71 gave `/del-regning`'s tællerknapper names
+ * (`l.færre`/`l.flere`) and copied the Danish words into `se`, so beraknare.se
+ * served "Færre personer" on a page whose every other word is Swedish.
+ *
+ * Swedish never writes `æ` or `ø` — they are Danish letters — so the rule has
+ * no false positives by construction, and it is a rule rather than a note
+ * because C65-C72 have each found a measurement that was blind in exactly one
+ * predictable place.
+ *
+ * Deliberately NOT applied to `no:`. Norwegian writes `æ` and `ø` itself, so
+ * the same test would be wrong there — C68's lesson about `ø` as a Danish
+ * marker. And a nested locale object *inside* the `se` block (a `da:` fallback
+ * for a value only Swedish needs) is skipped: it is not Swedish copy.
+ */
+function seBlockDanishStrings(src) {
+  const found = [];
+  const keyRe = /(^|[\s,{])se\s*:\s*\{/g;
+  let m;
+  while ((m = keyRe.exec(src)) !== null) {
+    const range = braceRange(src, src.indexOf("{", m.index));
+    if (!range) continue;
+    const [open, end] = range;
+    const block = src.slice(open, end + 1);
+    // A nested locale object inside the Swedish block is not Swedish copy: it
+    // is a `da:` fallback or a nested `no:` table. Brace-matched, because a
+    // range that stops at the `{` covers nothing and the plant in the gate
+    // test caught exactly that.
+    const nested = [];
+    const nestedRe = /(^|[\s,{])(da|no)\s*:\s*\{/g;
+    let n;
+    while ((n = nestedRe.exec(block)) !== null) {
+      const inner = braceRange(block, block.indexOf("{", n.index));
+      if (inner) nested.push([open + inner[0], open + inner[1]]);
+      nestedRe.lastIndex = inner ? inner[1] : n.index;
+    }
+    const strRe = /(["'`])(?:\\.|(?!\1)[^\\\n])*\1/g;
+    let s;
+    while ((s = strRe.exec(block)) !== null) {
+      const abs = open + s.index;
+      if (inRanges(nested, abs)) continue;
+      const value = unescapeUnicode(s[0].slice(1, -1));
+      if (value.length < 2 || value.length > 200) continue;
+      // The quote itself is not in the window: `abs` points *at* the opening
+      // quote, so the key is whatever sits directly before it. That is also why
+      // the key showed as `?` in the gate test's plant before this was fixed.
+      const keyMatch = /(\w+)\s*:\s*["'`]?$/.exec(src.slice(Math.max(0, abs - 60), abs));
+      const key = keyMatch ? keyMatch[1] : null;
+      // `da: "højde"` on a bare key inside the `se` block is a fallback for a
+      // value only one domain needs — not Swedish copy. The nested-object form
+      // (`da: { … }`) is covered by `nested` above; this covers the bare one,
+      // and the gate test's plant caught exactly the gap.
+      if (key === "da" || key === "no") continue;
+      if (!DA_CHARS.test(value)) continue;
+      found.push({ offset: abs, string: value, key });
+    }
+    keyRe.lastIndex = end;
+  }
+  return found;
 }
 
 /**
@@ -733,6 +801,7 @@ function run() {
 
   const all = [];
   for (const file of seFiles) {
+    const raw = read(file) || "";
     for (const f of scanStrings(file, WEAK)) {
       const v = verdict(f, file);
       const reviewed = REVIEWED.find(
@@ -748,6 +817,28 @@ function run() {
         string: f.string,
         verdict: v.verdict,
         reason: v.reason,
+        reviewed: Boolean(reviewed),
+        reviewNote: reviewed ? reviewed.reason : null,
+      });
+    }
+    // R4 — Danish copy inside the `se:` block. Verdict is fixed: there is no
+    // port, dispatcher or dead table that makes `æ` correct in Swedish text.
+    for (const f of seBlockDanishStrings(stripNoise(raw))) {
+      const reviewed = REVIEWED.find(
+        (r) =>
+          r.file === rel(file) &&
+          r.rule === "R4" &&
+          (r.string === undefined || (r.key === f.key && r.string === f.string))
+      );
+      all.push({
+        file: rel(file),
+        line: lineOf(raw, f.offset),
+        key: f.key,
+        table: null,
+        string: f.string,
+        verdict: "KRÆVER ØJNE",
+        reason:
+          "dansk streng i se:-blokken — svensk skriver aldrig æ eller ø, så værdien er ikke oversat",
         reviewed: Boolean(reviewed),
         reviewNote: reviewed ? reviewed.reason : null,
       });
