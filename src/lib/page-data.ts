@@ -722,6 +722,8 @@ const daPages: Record<string, PageData> = {
       schemaCategory: "UtilitiesApplication",
       faqItems: [
       { question: "Hvordan beregner jeg kvadratmeter?", answer: "Gang længde med bredde. 5m x 4m = 20 m²." },
+      { question: "Hvordan regner man kvadratmeter ud?", answer: "Arealet er længde × bredde. 5 m × 4 m er 20 m². En cirkel med radius 3 m er 3,14 × 3 × 3 = 28,3 m², en trekant med grundlinje 6 m og højde 4 m er (6 × 4) / 2 = 12 m², og et trapez med siderne 4 m og 6 m og højden 3 m er ((4 + 6) / 2) × 3 = 15 m²." },
+      { question: "Hvor mange m² er et værelse på 3 x 4 meter?", answer: "3 m × 4 m = 12 m². Et værelse på 3,5 × 4,2 m er 14,7 m². Husk at lægge 5-10 % til, hvis du skal købe gulv eller maling til det." },
       { question: "Hvor meget koster 20 m² gulv?", answer: "Gulvet koster 20 m² × pris pr. m². Ved 150 kr./m² bliver det 3.000 kr. for 20 m². Læg 5-10 % til for tilskæring og spild." },
       { question: "Hvad er forskellen på m² og m?", answer: "Meter måler længde. Kvadratmeter måler areal/flade." },
       { question: "Omregning?", answer: "1 m² = 10.000 cm². 10.000 m² = 1 hektar. 1 m² ≈ 10,76 sq ft." },

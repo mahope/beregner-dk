@@ -50,6 +50,48 @@ export default async function KvadratmeterPage() {
       {/* BBR lookup: Danish register, Danish locale only */}
       {locale === "da" && <BoligOpslag />}
 
+      {/* Metoden med tal: "hvordan regner man kvadratmeter ud" (359 visninger,
+          pos. 3 i dansk GSC) er sitets fjerdestørste søgning, og værktøjet
+          skrev kun formlerne symbolske ("Areal = Længde × Bredde"). */}
+      {locale === "da" && (
+      <div className="prose max-w-none mb-8">
+        <h2>Sådan regner du kvadratmeter ud med tal</h2>
+        <p>
+          Arealet er altid <strong>længde × bredde</strong> — det eneste, der
+          ændrer sig, er hvilken figur der ligger under. Her er de fire
+          regneeksempler med tal, du kan efterprøve:
+        </p>
+        <ul>
+          <li>
+            <strong>Rektangel</strong> (et værelse, en flise, et gulv):{" "}
+            længde × bredde. Et rum på 5 m × 4 m er{" "}
+            <strong>5 × 4 = 20 m²</strong>.
+          </li>
+          <li>
+            <strong>Cirkel</strong> (en rund tabel, en brønd, en rund flise):
+            3,14 × radius × radius. En cirkel med radius 3 m er{" "}
+            <strong>3,14 × 3 × 3 = 28,3 m²</strong>. Måler du i diameter skal
+            du halvere den først, så en diameter på 6 m er igen radius 3 m.
+          </li>
+          <li>
+            <strong>Trekant</strong>: (grundlinje × højde) / 2. En grundlinje på
+            6 m med en højde på 4 m er <strong>(6 × 4) / 2 = 12 m²</strong>.
+            Den kan altid deles i to rektangler.
+          </li>
+          <li>
+            <strong>Trapez</strong> (fire sider, hvor to er parallelle): ((de to
+            parallelle sider) / 2) × højde. Sider på 4 m og 6 m med en højde på
+            3 m er <strong>((4 + 6) / 2) × 3 = 15 m²</strong>.
+          </li>
+        </ul>
+        <p>
+          Skal du købe gulv, fliser eller maling, er det samme tal ganget med
+          prisen pr. m². 20 m² til 150 kr./m² er <strong>3.000 kr.</strong>,
+          og så lægger du 5-10 % til for tilskæring og spild.
+        </p>
+      </div>
+      )}
+
       {/* Informativ tekst - SEO */}
       {locale === "da" && (
       <div className="prose max-w-none mb-8">

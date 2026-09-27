@@ -1,3 +1,4 @@
+STATUS: KØ — **C93 er landet: `/kvadratmeter` — sitets fjerdestørste danske side i Google — rangerer selv på position 3 for "hvordan regner man kvadratmeter ud", men viste aldrig regnestykket. Formlerne stod symbolske ("Areal = Længde × Bredde"), så det spørgsmål, siden er skrevet til, var ikke besvaret synligt.** Køen havde ingen `I GANG`-opgave (119 er kilde-blokeret, 97 er `BLOCKED` og 98 afhænger af den), og alle åbne deploy-noter har første vindue **17:30** — det er 15:30, så intet kunne verificeres i starten af iterationen. **Valget kom fra en måling, ikke fra en idé:** C79-C83 låser CTR på `/procent`, `/dato`, `/moms`, `/tidszone` og `/tidsberegner`, og punkt 6 i C92's liste siger at "dansk top-15 er lukket". Men `/kvadratmeter` er **fjerdestørst i dansk GSC (20.988 visninger)** og havde kun fået C76's komma-rettelse, ingen svar-rettelse. **Datagrund (GSC 2026-08-28 → 09-25):** 20.988 visninger, 294 klik, **CTR 1,4 %**, pos. 4,9 — laveste CTR på sitets ti største danske sider. Søgningerne er `"kvadratmeter"` (1.819 v, pos. 5), **`"hvordan regner man kvadratmeter ud"` (359 v, pos. 3)**, `"beregn kvadratmeter"` (191 v, pos. 3) og `"kvadratmeter beregner"` (176 v, pos. 4) — altså tre af fire er spørgsmål om *hvordan*, ikke navnet på et værktøj. Plausible: 380 besøgende/28d (**+91 %**, bounce 6 %). **Målt på den live side før rettelsen:** `<h2>`/`<h3>` var "Om arealberegning", "Almindelige anvendelser", "BBR-areal vs. boligareal" og "Materialeberegning" — altså fire generiske afsnit og **0** forekomster af noget regnestykke. `KvadratmeterBeregner.tsx:53-59` skrev de fire formler symbolsk (`Areal = Længde × Bredde`, `Areal = π × r²`, `Areal = (Grundlinje × Højde) / 2`, `Areal = ((Side 1 + Side 2) / 2) × Højde`). Titlen og beskrivelsen var *allerede* svar-første — `curl` gav "Kvadratmeterberegner: 5 x 4 m = 20 m²" og "Et rum på 5 x 4 m er 20 m². Areal = længde × bredde." — altså præcis samme konklusion som C82 nåede for `/procent`: **det er ikke titlen, der mangler, det er indholdet under den.** **Rettelsen** er ét nyt `<h2>` i den `locale === "da"`-gren, sat direkte under beregneren og *før* "Om arealberegning", med fire regneeksempler der alle kan efterprøves: rektangel 5 m × 4 m = **20 m²**; cirkel radius 3 m = **3,14 × 3 × 3 = 28,3 m²** (med diameter-halveringen); trekant grundlinje 6 m og højde 4 m = **(6 × 4) / 2 = 12 m²**; trapez sider 4 m og 6 m, højde 3 m = **((4 + 6) / 2) × 3 = 15 m²**; og prisen 20 m² × 150 kr./m² = **3.000 kr.** To nye FAQ-par i `page-data.ts` — "Hvordan regner man kvadratmeter ud?" (GSC's egen formulering) og "Hvor mange m² er et værelse på 3 x 4 meter?" — som dermed også kommer i JSON-LD'en via `FAQSchema`. **Fundet der lå i vejen, og det ændrede teksten:** siden har *allerede* et blogindlæg med præcis samme spørgsmål som titel — `/blog/kvadratmeter-saadan-regner-du-ud` (408 linjer), hvis `<h1>` er "Hvordan regner man kvadratmeter ud?" Så mit nye `<h2>` fik **"med tal"** hængt på: søgefrasen er bevaret, men de to sider jagter ikke længere den samme overskrift, og beregneren ejer det korte svar mens indlægget ejer den lange vej. Krydslinket findes i forvejen data-drevet (`blog-kobling.ts:76`), så jeg hardcoded **ikke** et link til indlægget i `page.tsx` — det ville have dupliceret `RelateredeArtikler`. **Ingen beregningslogik rørt** (C76's komma-rettelse står), ingen `se`, ingen `no`. **Målt på en rigtig server, ikke bare i test:** `next start` på port 3411, porten verificeret fri *inden* start (målefejl nr. 15's lære). DA `/kvadratmeter` **200** med alle fem strenge ×2 (synlig tekst + RSC-payload), begge nye spørgsmål i FAQ'en og **0** `>[0-9]+\.[0-9]{2}<` (C76's regression holder). SE `/kvadratmeter` **200** med **0** fund på de danske strenge og uændret titel. `/dage-til/halloween` 200 som kontrol. **Harness:** `page.test.tsx` **3 → 6** tests — de fire regnestykker, de to nye FAQ-spørgsmål, og en lås på at den svenske side er urørt. **Verificeret modsvejs: 2 af de 3 nye tests falder** med den gamle kode (den tredje er en negativ lås og passerer med vilje begge veje). Gate grøn: lint (556 filer), **1771 tests / 151 filer** (fra 1768 / 151), build (**141 sider**), `locale-leak.mjs --gate` exit 0. Branch `ceo/kvadratmeter-metode`. **MÅL:** `/kvadratmeter` baseline **20.988 visninger / 294 klik / CTR 1,4 % / pos. 4,9 pr. 2026-08-28 → 2026-09-25** — måles igen 2026-10-11.
 STATUS: KØ — **C92 er landet: svensk CTR fundet ved at læse GSC's egne søgninger — siden skrev "färetagsleasing" med ä, så ordet kunne aldrig ramme den søgning, den er skrevet for.** Køen havde én åben opgave, 119, som kræver en citable dansk tabel; alle kilder var utilgængelige i denne iteration (se nedenfor), så valget var planens egen kandidat #3, "Svensk CTR". **Datagrund (svensk GSC 2026-08-28→09-25):** `/nedtaelling` **5.163 visninger, 12 klik, CTR 0,2 %, pos. 9,4**; `/tidszone` **3.256 v, 12 klik, CTR 0,4 %, pos. 7,7**; `/leasing` **3.151 v, 32 klik, CTR 1,0 %, pos. 12,4**. Ved pos. 7-12 afgør titlen om der klikkes — det er billigeste vækst, der findes. **Fire reelle fejl, målt før rettelse:** (1) **`/leasing` skrev "färetagsleasing" med ä** i både `keywords` og FAQ'en — GSC's største svenske søgninger er **"fåretagsleasing bil kalkyl" (194 v, pos. 11)** og **"beräkna leasing bil fåretag" (172 v, pos. 15)**, altså med **å**. Siden skrev det ord, ingen svensk søgning kan ramme; det lå i 4 strenge. (2) **`/tidszone` skrev "12 byer" i `ogDescription` i begge sprog**, mens `TIDSZONER` har **21** rækker. C84 rettede `metaDescription` fra 12 til 21 — men kun den, så **den rigtige fejl overlevede rettelsen**, og den lå i netop den streng C84's egen fejlklasse handler om. (3) **Titel-halealene var afkortet nøgleord, ikke brand:** svensk `| Tidszon` og dansk `| Tidszone` — C81 viste at det er præcis den hale Google klipper væk. (4) **Titelne startede med tal og brødte hovedordet:** `/leasing` startede med "4.121 kr/mån" mens søgningerne er "fåretagsleasing" og "beräkna"; `/nedtaelling` skrev "Nedräkning - hur många dagar", så GSC's største søgning **"nedräkning dagar" (170 v, pos. 9)** stod splittet af en tankestreger. **Harness:** `page-data.test.ts` har nu 6 nye/ændrede tests, **verificeret modsvews: alle 6 falder** med den gamle `page-data.ts`. Bytallet læses fra `TIDSZONER.length` og sammenlignes mod **enhver** streng der nævner et bytal, så en ny by kan ikke slippe forbi. **Tre fejl i mine egne tests, fundet da de kørte:** (a) `perl` ramte kun `färetagsleasing` og ikke `Färetagsleasing` med stort F — 2 af 4 strenge stod tilbage; (b) jeg krævede ordet i *alle* felter, men `title` og `metaDescription` skal ikke nævne det — kravet er skarpet til "aldrig med ä", som er den reelle invariant; (c) jeg krævede et bytal i **alle tre** sprog, men `no` nævner aldrig et — kravet blev "hvor det nævner et", plus en lås på at mindst ét sprog gør. Gate grøn: lint (556 filer), **1768 tests / 151 filer** (fra 1763 / 151) og build (141 sider); `locale-leak.mjs --gate` exit 0. Kode `8d06081`, merge `8bea16d` **2026-09-27 15:07 CEST** på `ceo/se-ctr-nedtaelling`; første kandidatvindue **2026-09-27 17:30**. Se opgave 122.
 
 ---
@@ -11219,6 +11220,40 @@ tekst på `/tidszone`), men Kopier-strengen med datoen kræver en browser.
   så tallene ikke kan stå i strengen og afvige fra tabellen; (5) ét afsnit,
   ikke en hel underside, og et link videre til `/kalorier` og `/proteinbehov`.
 
+#### 123. [x] FÆRDIG 2026-09-27 — C93 — `/kvadratmeter` svarer synligt på "hvordan regner man kvadratmeter ud" med fire regneeksempler
+
+- **Datagrund:** dansk GSC (2026-08-28 → 09-25) `/kvadratmeter` **20.988
+  visninger, 294 klik, CTR 1,4 %, pos. 4,9** — fjerdestørste danske side og
+  **laveste CTR på sitets ti største**. Søgningerne: `"kvadratmeter"` 1.819 v
+  pos. 5, **`"hvordan regner man kvadratmeter ud"` 359 v pos. 3**,
+  `"beregn kvadratmeter"` 191 v pos. 3, `"kvadratmeter beregner"` 176 v pos. 4.
+  Plausible: 380 besøgende/28d, **+91 %**, bounce 6 %.
+- **Hvorfor netop denne side:** C79-C83 låser CTR på `/procent`, `/dato`,
+  `/moms`, `/tidszone`, `/tidsberegner`, og C92's punkt 6 siger at dansk
+  top-15 er lukket. `/kvadratmeter` er alligevel nr. 4 i visninger og havde
+  kun C76's komma-rettelse.
+- **Målt før rettelsen (live 2026-09-27 15:2x CEST):** fire generiske
+  overskrifter ("Om arealberegning", "Almindelige anvendelser", "BBR-areal
+  vs. boligareal", "Materialeberegning") og **0** regnestykker. Titlen og
+  beskrivelsen var allerede svar-første
+  ("Kvadratmeterberegner: 5 x 4 m = 20 m²"), altså var indholdet
+  flaskehalsen — samme konklusion som C92's måling for `/procent`.
+- **Rettelse:** ét nyt `<h2>` "Sådan regner du kvadratmeter ud med tal" i den
+  `locale === "da"`-gren, direkte under beregneren, med 20 m² (5 × 4),
+  28,3 m² (3,14 × 3 × 3), 12 m² ((6 × 4) / 2), 15 m² (((4 + 6) / 2) × 3) og
+  3.000 kr. (20 m² × 150 kr./m²). To nye FAQ-par i `page-data.ts`, som også
+  kommer i JSON-LD'en.
+- **Kollisionen der lå i vejen:** `/blog/kvadratmeter-saadan-regner-du-ud`
+  har samme spørgsmål som `<h1>`. Derfor fik overskriften "med tal", så de to
+  sider ikke jagter samme frase. Krydslinket lå allerede i `blog-kobling.ts`,
+  så intet link blev hardcodet.
+- **Harness:** `page.test.tsx` **3 → 6**. Modsvejs verificeret: 2 af 3 nye
+  tests falder med den gamle kode.
+- **Gate:** lint (556 filer), **1771 tests / 151 filer** (fra 1768 / 151),
+  build (141 sider), `locale-leak.mjs --gate` exit 0.
+- **MÅL:** `/kvadratmeter` baseline **20.988 visninger / 294 klik / CTR 1,4 %,
+  pos. 4,9 pr. 2026-08-28 → 2026-09-25** — måles igen 2026-10-11.
+
 #### 122. [x] FÆRDIG 2026-09-27 — C92 — stavemålen af fåretagsleasing, 12→21 byer i ogDescription, og svenske titler der svarer på søgningen
 
 - **Datagrund:** svensk GSC 2026-08-28→09-25. `/nedtaelling` 5.163 v / 12
@@ -11375,6 +11410,41 @@ tekst på `/tidszone`), men Kopier-strengen med datoen kræver en browser.
   der linker til familien) pr. 2026-08-28 → 2026-09-25. Den nye sides
   baseline er **ikke kendt** (den er ikke indekseret endnu) — måles første
   gang 2026-10-11.
+
+### Næste kandidater efter C93
+
+0. **🔒 Opgave 97 er `BLOCKED`,** 98 afhænger af den. **🔒 Opgave 119 er
+   kilde-blokeret** (se ❓ Til Mads). Browser-noter: C52, C55, C56, C57 og
+   C60 ligger i ❓ Til Mads nederst.
+1. **🆕 `/kvadratmeter` SE (3.181 v, 6 klik, CTR 0,2 %, pos. 11,3)** har
+   ingen pendant til C93's regneeksempler, og den ligger dybt. Samme fire
+   eksempler på svensk er det næste snit i denne klasse — C93 lå bevidst
+   kun den danske gren, fordi den danske side er den med 20.988 visninger.
+2. **🆕 `/braendstof` (16.764 v, 184 klik, CTR 1,1 %, pos. 6,0)** er den
+   næste side i samme klasse: GSC's søgninger er "benzin beregner" 136 v
+   pos. 6, "brændstof beregner" 94 v pos. 7, "benzinberegner" 51 v pos. 4,
+   og brødteksten har i dag kun fire generiske `<h3>` ("Om brændstofforbrug",
+   "Typiske forbrug", "Sådan reducerer du forbruget", "Benzin vs. Diesel
+   vs. El") — samme mønster som `/kvadratmeter` havde.
+3. **✅ `/kvadratmeter` DA er lukket** (opgave 123) — mål effekten 2026-10-11,
+   lav ikke ny CTR på siden før da.
+4. **🆕 De ni `dage-til`-titler er 62-66 tegn** (fra C91's liste, uændret):
+   `buildDageTilMetadata` sætter `${question} ${count} | ${siteName}`, så
+   løftet og dage-tallet er begge med. At trimme er en **designbeslutning for
+   alle ni sider** (hvad af de to mister vi?), ikke en tegnskiftrettelse.
+5. **✅ `/dage-til/*` intern linking er lukket** — `/dato` og `/nedtaelling`
+   renderer begge `getDageTilEvents(locale)` i *alle* ni rækker (kun to var
+   håndlinket i brødteksten), og `DageTilPage.tsx:192` krydslinker de øvrige
+   otte. C91's punkt 4 er dermed lukket; det åbne er kun at måle om de ni
+   sider er indekseret.
+6. **✅ Svensk CTR er lukket** (opgave 122) — mål 2026-10-11.
+7. **✅ Dansk top-15 er lukket** (C82-C90 + C93) — mål i stedet effekten 14
+   dage efter.
+8. **⏬ Nedprioriteret:** 22 filer / 35 ubundne labels (kun sider uden for
+   top-15).
+9. **🔒 Uforandrede forbehold:** hreflang korrekt (`hrefLang` med stort L);
+   svenske slugs kræver Mads' go; `/bmi` og `/su` måles 2026-10-11.
+10. **Mål 2026-10-10 / 2026-10-11** (se Måleprotokol).
 
 ### Næste kandidater efter C92
 
@@ -11581,6 +11651,26 @@ verificering der ikke kan slå igennem er lige så dårlig som en der kan.
 > reelt stadig er åbent: **C81** (første vindue 17:30) og **C52, C55, C56, C57,
 > C60** (kræver en browser).
 
+
+### ⏳ **VERIFICÉR DEPLOY: C93 — `/kvadratmeter` dansk har nu fire regneeksempler med tal under beregneren ("Sådan regner du kvadratmeter ud med tal") og to nye FAQ-par, som også kommer i JSON-LD'en.** Kun den `locale === "da"`-gren i `src/app/kvadratmeter/page.tsx` og to linjer i `page-data.ts`'e danske blok er rørt — ingen beregningslogik, ingen `se`, ingen `no`. **Verificér indhold, ikke HTTP 200:**
+  1. `curl -s https://minberegner.dk/kvadratmeter | grep -c 'Sådan regner du
+     kvadratmeter ud med tal'` skal være **≥ 1** — før fandtes overskriften
+     ikke.
+  2. Samme curl skal finde **alle fire** regnestykker: `5 × 4 = 20 m²`,
+     `3,14 × 3 × 3 = 28,3 m²`, `(6 × 4) / 2 = 12 m²` og
+     `((4 + 6) / 2) × 3 = 15 m²` — de stod ingen af steder før, kun de
+     symbolske formler i `KvadratmeterBeregner`.
+  3. Samme curl skal finde `Hvordan regner man kvadratmeter ud?` og `Hvor
+     mange m² er et værelse på 3 x 4 meter?` i både den synlige FAQ og
+     JSON-LD'en, og `3.000 kr.`.
+  4. `curl -s https://minberegner.dk/kvadratmeter | rg -c '>[0-9]+\.[0-9]{2}<'`
+     skal være **0** — C76's komma-rettelse må ikke have taget skade.
+  5. `https://beraknare.se/kvadratmeter` skal være **uændret**: **0** fund på
+     "Sådan regner du kvadratmeter ud med tal" og på `3,14 × 3 × 3`, og
+     titlen stadig "Kvadratmeterkalkylator: 5 x 4 m = 20 m²".
+  6. `https://minberegner.dk/api/health` skal svare `status: ok`. Kode + plan
+     i ét commit på `ceo/kvadratmeter-metode`; første kandidatvindue
+     **2026-09-27 17:30** (denne merge sker efter 12:30-vinduet).
 
 - ⏳ **VERIFICÉR DEPLOY: C92 — stavemålen af fåretagsleasing, 12→21 byer i
   `ogDescription`, og tre svenske titler der svarer på søgningen.** Kun
