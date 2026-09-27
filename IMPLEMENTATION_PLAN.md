@@ -1,5 +1,7 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
+STATUS: KØ — **C65 (del 1) er landet: `/elberegner` skrev danske apparatnavne på beraknare.se og beregner.no — og målingen viser, at resten af klassen næsten er uskadelig.** Køen havde én opgave, 93, som bad om at måle før rettelse. Målingen blev taget på to måder: et script der fandt 31 SE-monterede komponenter med danske strenge, og så en håndværksmæssig krydscheck af hvert fund mod den kode, der faktisk renderer. **Resultatet: 1 bekræftet fejl ud af 31 fund.** Planens egen forventning var fejl i `PensionBeregner` — men `/pension` er `daOnly` i `calculator-list.ts:121`, så siden giver 404 på beraknare.se og de fem danske strenge kan aldrig vises for en svensk læser. Beviset på, at porten virker, er at de øvrige 30 fund alle faldt ved krydschecken: `AffiliateBox` går til `null` på ikke-da (`AffiliateBox.tsx:34`), `BoligOpslug` monteres kun inden for `{locale === "da" && …}` (`kvadratmeter/page.tsx:51`), `TidszoneBeregner`/`VaegttabBeregner`/`EnhederBeregner`/`SolcelleBeregner`/`PlanetVaegtBeregner` har danske data, men displayen går gennem `l.navn`, `l.by`, `l.activity` og `labelDa/labelSe/labelNo`, som alle er oversat, `DageTilPage` bruger `dageLocale === "da" ? … : …`, og `OrganizationSchema`'s danske standard-`description` er en død default — `layout.tsx:109` sender altid `getTranslations(locale).site.description`. **Den eneste rigtige fund var den mest trivielle at overse: `STANDARD_APPARATER` i `Elberegner.tsx` ligger i modulscope, *uden for* `labels`-objektet, så dropdown'en skrev "Køleskab (40W)", "Vaskemaskine (per vask)", "Støvsuger", "Hårtørrer", "Glødepære" på to domæner der ikke måtte tale dansk.** Listen har nu `navnSe`/`navnNo` pr. apparat — samme mønster som `RETNINGSFAKTORER` i `SolcelleBeregner` — og begge steder hvor den bruges (`<option>`-teksten og `vaelgStandardApparat`) går gennem `apparatNavn(s)`. Nyt `elberegner-locale.test.tsx` med **7 tests i da/se/no**, **verificeret modsvejs: 6 af 7 falder** med den gamle kode. Én skelnen i testen er værd at huske: **"Støvsuger" og "Ovn" er dansk *og* norsk**, så de må ikke stå i norsk-negativlisten — ellers låser testen fejlen ind, fordi den så mangler. Gate grøn: lint (550 filer), **1595 tests / 145 filer** (fra 1588 / 144) og build (141 sider). Kode + plan i ét commit på `ceo/locale-leak-runde1`. Se opgave 93. **Målingen er den egentlige leverance:** den er skrevet op med hele fundlisten og grunden til hvert afslag, så næste iteration ikke skal bruge en halv time på at finde de samme 30 døde strenge igen. Resten er skrevet op som opgave 94 (den uoversatte `tidszoner`-kopi) og opgave 95 (scriptet som harness, så næste måling er gratis).
+
 STATUS: KØ — **C64 er landet: 17 ubundne `<label>` på syv beregnere, hvor ét af fundene var værre end de øvrige — `/elberegner` havde ét navn på to felter.** Køen var tom (alle 91 opgaver færdige, intet `I GANG`), og planens egen "Efterladt, bevidst"-note fra C63 navngavnæste snit af label-klassen. Snittet er nu taget efter **hvad brugeren kan ramme** (Plausible 28d + GSC), ikke efter antal labels: `/leasing` (5 labels; 3.181 visninger i svensk GSC, 45 besøgende/28d på beraknare.se), `/elberegner` (3; 11 besøgende/28d SE, +83 %), `/enhedspris` (3; 1.144 visninger SE), `/vaegttab` (2; 1.186 visninger SE), `/pension` (2; **139 besøgende/28d DA**, +26 %), `/boernepenge` (1; **138 besøgende/28d DA**, +151 %) og `/loenstigning` (1; ny side på beraknare.se). Fire fund ud over bindingerne: **`/elberegner`s etiket "Apparat N" dækkede to felter** (vælger + navnfelt), så den var ikke bare ubundet — den var *tvetydig*, og en `<label>` må kun have én kontrol; den er nu en `role="group"` med `aria-labelledby`, og hvert felt har sit eget `aria-label` med samme præfiks. **`/enhedspris` skrev "Pris" og "Mængde" to gange** (vare A og B), altså to felter med samme synlige tekst pr. etiket-par; id'erne er derfor `enhedspris-pris-a/-b` og `enhedspris-maengde-a/-b` (ASCII, fordi et `id` med æøå er et spring i `querySelector`). **`/boernepenge`s indkomstfelt havde både en ubundet synlig etiket og en `aria-label` med andre ord** ("Husstandens samlede indkomst (årlig)" mod "Husstandens samlede årlige indkomst") — det er WCAG 2.5.3 *label in name*: det tilgængelige navn skal indeholde den synlige tekst, ellers stemmer stemmestyringen ikke med det, der står på skærmen. `aria-label`en er fjernet, så den synlige etikettetekst er navnet. **`/pension`s samlever-checkboks var *indpakket* i `<label>`** (gyldig HTML, virker med skærmlæser) men kunne ikke findes med `getByLabelText` — gjort eksplicit som i C63. `label-a11y.test.tsx` er udvidet fra 37 til **51 tests** i DA og SE, **verificeret modsvejs: alle 14 nye falder** med de gamle komponenter. **Harness-fix ud over feltbindingerne:** `label-a11y.test.tsx` havde to *uhandlede* `document.execCommand is not a function`-rejections fra `CopyResultButton`s jsdom-fallback, som gjorde at filen **exited 1 selv om alle 37 tests var grønne** — fundet ved at køre filen isoleret; `document.execCommand` er nu stubbet som i `BoligstoetteBeregner.test.tsx`. **Målingen er taget på ny igen:** et `<label>` tælles som bundet, hvis det har `for`/`htmlFor` **eller** et `id` brugt i `aria-labelledby`; den tælling kan heller ikke længere tage `${…}`-udtryk i template-literals for fejl (den gav `/elberegner` en falsk ubundet etiket, fordi `aria-labelledby={\`…\${index + 1}\`}` ikke kan sluges ordentligt). Før C64: **113 ubundne labels i 51 filer** (C63's note sagde 117/51 — de 8 skyldes bl.a. labels med `>` inde i attribut-udtryk, som `<label\b([^>]*)>` afkorter). Efter C64 er der **96 i 44 filer** tilbage, og alle syv rørte filer er helt rene. Gate grøn: lint (549 filer), **1588 tests / 144 filer** (fra 1574 / 144) og build (141 sider). Kode + plan i ét commit på `ceo/labels-runde4`, kode `b4e8335`, merge `1d8c117` 2026-09-27 04:28 CEST; første kandidatvindue **2026-09-27 07:30**. Se opgave 92. **Køen er ikke længere tom:** målingen afgav et nyt fund, der er skrevet op som **opgave 93** — de hardkodede danske strenge i live-komponenter, som er locale-leak på beraknare.se (research-fund #4's klasse). Den er næste iteration, fordi den er målbar, billig og en reel fejl.
 
 STATUS: KØ — **C63 er landet: 34 `\u003clabel\u003e` på seks beregnere var uden binding, og fire felter pr. gældspost i `/gaeldsfri` havde overhovedet intet navn — hverken label, aria-label eller andet.** Køen var tom (alle 90 opgaver færdige, intet `I GANG`), og planens egen "Efterladt, bevidst"-note fra C62 navngavnæste snit af label-klassen, ordnet efter GSC-visninger. Rettet er `/huslejebudget` (11 labels), `/laane` (7), `/befordringsfradrag` (7), `/boliglaan` (3), `/gaeldsfri` (3) og `/valuta` (3). **Målingen er taget på ny, fordi C62's egen tælling var lidt for lås:** et `<label>` regnes som bundet, hvis det har `for`/`htmlFor` **eller** et `id` der bruges i `aria-labelledby` (sådan er knapgrupperne bygget, bl.a. i `/braendstof` og `/moms`). Før den rettelse tæller scriptet gruppe-etiketterne som fejl. Korrekt tælt er **151 ubundne labels i 58 filer** før denne iteration — altså omtrent C62's 146/56, så det var samme klasse. Efter C63 er der **117 i 51 filer** tilbage. Fire fund ud over de 34 bindinger: **`/gaeldsfri`s fire felter pr. gældspost havde intet navn** (kun en `<span>`-kolonneoverskrift, der kun vises på den første post, og placeholders — samme fejltype som C62 fandt på `/rentefradrag`s lån), **`/gaeldsfri`s ✕-knap havde intet navn** (kun `&#10005;`), **`/laane`s sammenligningstilstand gentager "Rente" og "Løbetid"** fra hovedrækken, så to felter har samme synlige tekst (lovligt, men derfor `-2` på id'et), og **harnessen havde en fejl**: en etiket der står over flere linjer i JSX kunne ikke findes, fordi regex'en ikke kollapsede hvidrum som testing-library gør det — det var den, der fik `/huslejebudget`s "Ønsket opsparing" til at fejle. `label-a11y.test.tsx` er udvidet fra 25 til **37 tests** i DA og SE, **verificeret modsvejs: alle 12 nye falder** med de gamle komponenter. Gate grøn: lint (549 filer), **1574 tests / 144 filer** (fra 1562 / 144) og build (141 sider). Kode + plan i ét commit på `ceo/labels-runde3`; første kandidatvindue **2026-09-27 07:30**. Se opgave 91.
@@ -6772,6 +6774,7 @@ efter datagrund:
   streng på en dansk-only-side ikke er en fejl. **Ingen beslutning nødvendig**
   ud over det normale: det er rettelse af vores egen fejl, ikke en
   redaktionel ændring.
+- ⏳ **VERIFICÉR DEPLOY: C65 `/elberegner` — apparatnavne i dropdown'en var danske på beraknare.se og beregner.no.** "Køleskab (40W)", "Vaskemaskine (per vask)", "Hårtørrer", "Glødepære" stod i dropdown'en på begge ikke-danske domæner, fordi `STANDARD_APPARATER` lå i modulscope uden for `labels`. Nu `Kylskåp`/`Dammsugare`/`Hårtorkare`/`Glödlampa` på SE og `Kjøleskap`/`Hårtørker` på NO. **Verificér indhold, ikke HTTP 200** — hele fundet er i klient-renderede `<option>`-tekster: 1. Åbn **https://beraknare.se/elberegner** og ånk dropdown'en "Vælg standard…". Den skal vise **"Kylskåp (40W)", "Dammsugare (1400W)", "Diskmaskin (1800W)", "Torktumlare (3000W)", "Glödlampa (60W)"** — ikke "Køleskab" eller "Glødepære". 2. Vælg "Kylskåp", og se at **navnefeltet til højre også** siger Kylskåp (det er den anden halvdel af funktionen). 3. Samme på **https://minberegner.dk/elberegner**: der skal stadig stå **"Køleskab (40W)"** — den danske liste må ikke være bleven ændret. Kode + plan i ét commit på `ceo/locale-leak-runde1`; første kandidatvindue **2026-09-27 07:30** (merge ~05:35 CEST). Se opgave 93.
 - ⏳ **VERIFICÉR DEPLOY: C60 `/promille` — et tomt felt gav en grøn
   tilladelse til at køre bil, "præcis på grænsen" erstattede den falske
   "over grænsen", og den delte tekst har nu de fire input — kode + plan i ét
@@ -8886,7 +8889,139 @@ landmark=lån, piggybank=opsparing osv.).
   `/enheder` (4), `/ejendomsvaerdiskat` (4), `/boligsalg` (4) og
   `/rygestop`/`rabat`/`motionkalorier` (3 hver).
 
-#### 93. [ ] 2026-09-27 — C65 — hardkodede danske strenge i live-komponenter (locale-leak på beraknare.se)
+#### 93. [x] DEL 1 FÆRDIG 2026-09-27 — C65 — hardkodede danske strenge i live-komponenter: 31 fund, 1 bekræftet fejl
+- **Målingen (den egentlige leverance).** To måder, fordi en ren
+  tekstscanning gav 30 falske positiver: (1) et script, der for hver
+  SE-monteret komponent fandt danske strenge *uden for* et `da:/se:/no`-objekt
+  (dvs. en reel, uoversat streng) — 31 komponenter, 240 strenge; (2) en
+  krydscheck af hvert fund mod den kode, der faktisk renderer. Krydschecken er
+  det, der gør fundlisten brugbar, og den skal genkøbes af enhver der læser den:
+
+  | Komponent | Fund | Domæne | Status |
+  |---|---|---|---|
+  | `Elberegner` `STANDARD_APPARATER` | 15 apparatnavne | alle | **BEKRÆFTET — rettet** |
+  | `HomeContent` | 84 strenge, `getHomeCalculatorCount("da")` hårdkodet | `/` | ⚠️ uafklaret — ny opgave |
+  | `AffiliateBox` / `ForbrugslaanBeregner` / `BillaanBeregner` | dansk annoncekopi | 5 SE-sider | Afslået: `AffiliateBox.tsx:34` `if (locale !== "da") return null` |
+  | `TidszoneBeregner` `tidszoner` | 17 danske lande-/bynavne | `/tidszone` | Afslået som visning: display bruger `l.navn[tz.id]`/`l.by[tz.id]` (`TidszoneBeregner.tsx:369`) — men kopien er en fælde, se opgave 94 |
+  | `VaegttabBeregner` `AKTIVITETSFAKTORER` | 10 danske aktivitetstekster | `/vaegttab` | Afslået: display bruger `l.activity[key].label` (`:330`); kun `.faktor` læses fra tabellen (`:200`) |
+  | `BoligOpslug` | 8 strenge | `/kvadratmeter` | Afslået: `kvadratmeter/page.tsx:51` monterer den kun `{locale === "da" && …}` |
+  | `StructuredData` `OrganizationSchema` | dansk `description`-default | 53 SE-sider | Afslået: `layout.tsx:109` sender altid `getTranslations(locale).site.description` |
+  | `LoenstigningBeregner` | "Inflation pr. år", "Reallønsstigning" | `/loenstigning` | Afslået: ligger inden for `{kildeInflation && …}`, og `kildeInflation = locale === "da" ? … : null` (`:39`) |
+  | `SolcelleBeregner` | danske himmelretninger | `/solceller` | Afslået: `labelDa`/`labelSe`/`labelNo` pr. retning |
+  | `EnhederBeregner`, `PlanetVaegtBeregner` | "Sømil", "Månen" | `/enheder`, `/planetvaegt` | Afslået: `da`/`se`-par i dataobjektet |
+  | `DageTilPage` | "Nedtæller" | `/dage-til`, `/dagar-till` | Afslået: `dageLocale === "da" ? "Nedtæller" : "Nedräknare"` (`:278`) |
+  | `LonEfterSkattBeregner` | "Total skatt/år", "per månad" | `/lon-efter-skatt` (seOnly) | Afslået: "skatt", "år", "mån" er gyldigt svensk |
+  | Øvrige 18 | template-literals, CSS-klasser, danske **kommentarer** | — | Afslået: matcher `>text<`/`"…"` på tværs af kommentarer og multilinje-strenge |
+
+- **Fund ud over rettelsen — planens egen forventning var forkert.**
+  `/pension` er `daOnly` (`src/lib/calculator-list.ts:121` +
+  `isCalculatorAvailable`), så opgave 93's "fem danske strenge i
+  `PensionBeregner`, som renderer på beraknare.se" var ikke en fejl overhovedet:
+  siden svarer 404 på SE. Det er samme slags fejltagelse som C63's
+  "ubundne labels", fordi en streng i en komponent er en streng — ikke nødvendigvis
+  en streng en svensk læser ser. **Målingen skal derfor altid krydscheckes mod
+  `isCalculatorAvailable` og `getRouteDecision`, ikke mod filnavnet.**
+- **Rettelsen.** `STANDARD_APPARATER` ligger i modulscope uden for `labels`, så
+  ingen af de tre locale-objekter kunne oversætte den. Hvert apparat har nu
+  `navnSe`/`navnNo`, og de to forbrugssteder (`<option>`-teksten og
+  `vaelgStandardApparat`, som sætter navnet i tekstfeltet) går begge gennem
+  `apparatNavn(s)`. Mønsteret er bevidst samme som `RETNINGSFAKTORER` i
+  `SolcelleBeregner` — data-tabele med en tekst pr. domæne, ikke en tekst pr.
+  domæne i selve komponenten.
+- **Nyt test.** `src/components/elberegner-locale.test.tsx`, 7 tests i da/se/no:
+  dropdown'en på hvert domæne, at ingen dansk streng overlever i `se`, at kun de
+  fælles dansk-norske ord står på `no`, og at et valg sætter det *oversatte*
+  navn i tekstfeltet (ikke bare i dropdown'en — det var den anden halvdel af
+  funktionen). Modsvejs verificeret: 6 af 7 falder med den gamle kode.
+- **Lærestreg for den næste måling af denne klasse:** en streng i en
+  modulscope-tabel er uskyldig indtil det modsatte er vist, og en streng i en
+  `labels`/`l.*`-klynge er uskyldig indtil displayen er fulgt. Scriptet i
+  punkt 1 fandt 30 strenge, der ved opfølgning viste sig at være døde — det er
+  derfor opgave 95 eksisterer.
+- **MÅL:** `/elberegner` **11 besøgende/28d på beraknare.se (+83 %)**
+  pr. 2026-09-27; beregner.dk 7.218 besøgende/28d (+42 %). **Mål 2026-10-11.**
+  `/elberegner` har ingen GSC-linje, så effekten måles i Plausible og ved at den
+  svenske dropdown er læsbar for en svensk læser.
+- **Del 2 ( ikke gjort, se opgave 94/95):** `HomeContent` er den eneste
+  uafklarede kandidat, og den er den dyreste (84 strenge + SEO-tekst der hårdkoder
+  `getHomeCalculatorCount("da")`).
+
+#### 94. [ ] 2026-09-27 — C66 — `TidszoneBeregner` har to tidszone-tabeller, kun den ene oversat
+
+- **Datagrund:** fundet under C65's måling. `TidszoneBeregner.tsx:39-57` har en
+  `tidszoner`-array med danske lande- og bynavne ("Storbritannien",
+  "USA Østkyst", "Kina", "Australien", "Tyskland", "Grækenland", "Grønland",
+  "Sydafrika") og danske `by` ("København", "Lissabon", "Athen", "São Paulo").
+  Displayen bruger **en anden** struktur, `l.navn`/`l.by` (`:369`, `:384`), som
+  **er** oversat til se og no — derfor er det ikke en synlig fejl i dag. Men
+  `src/lib/tidszone-reference.ts` har den tredje kopi, med `bySe` per række
+  (`:89`). Tre tabeller, to oversættelsesmekanismer, og ingen der fortjener
+  navnet `single source of truth`.
+- **Hvorfor det er en reel risiko, ikke kosmetik:** `TIDSZONER_BEREGNER` er
+  eksporteret (`:59`). Den bruges ingen steder i dag (`rg` over `src/app` giver
+  nul fund), så en fremtidig redigering — fx for at tilføje en lande-post eller
+  rydde op efter C46's `/tidszone`-arbejde — kan let bruge den i stedet for
+  `l.navn`, og så står dansk på et svensk domæne igen, uden at nogen test
+  dækker det.
+- **Acceptkriterier:**
+  1. Én tabel. `tidszoner`-arrayet og `l.navn`/`l.by` er slået sammen, så
+     `navn` og `by` kommer fra samme række (samme som `tidszone-reference.ts`:
+     ét `by` + ét `bySe` pr. zone).
+  2. `TIDSZONER_BEREGNER` er fjernet hvis intet bruger den, ellers eksporterer
+     den den fælles tabel.
+  3. `TidszoneBeregner.test.tsx` køres i **da og se** og slår på den nye
+     struktur, så en regression i `navn`/`by` fanges.
+  4. Gaten grøn.
+- **MÅL:** `/tidszone` 24.723 visninger i DA-GSC (0,5 % CTR) og 3.189 i SE-GSC,
+  15 besøgende/28d på beraknare.se pr. 2026-09-27. **Mål 2026-10-11** (eller
+  før: reelt for brugeren, hvis en zone-post tilføjes).
+
+#### 95. [ ] 2026-09-27 — C67 — gør locale-leak-målingen til et script, så den ikke koster en halv time igen
+
+- **Datagrund:** C65 brugte ca. 20 minutter på en måling, der endte med **én**
+  bekræftet fejl ud af 31 fund. Det er det dyraste fund i planen pr. rettet fejl.
+  Næste måling skal derfor være gratis, og den skal pege på de to ting, der
+  koster tid: (a) en streng i modulscope uden for `labels`, (b) en streng i en
+  data-tabel, hvis displayegenskaber døde stenge.
+- **Scope:** `scripts/locale-leak.mjs` (eller en `*.test.ts` der kører i gaten)
+  med to tilstande. **Modus 1 — kandidater:** de 55 SE-monterede komponenter
+  findes fra `calculator-list.ts` + `routing.ts` (ikke håndskrevet), og danske
+  strenge uden for `da:/se:/no`-objekter listes med fil og linje. **Modus 2 —
+  dommelag:** for hvert fund spørgs om komponenten (a) ender i `locale !==
+  "da"`, (b) er monteret under `{locale === "da" && …}` i sin side, eller (c)
+  faktisk bruger den fundne streng — ellers rapporteres den som død med
+  begrundelsen, så næste læser ikke genkøber afslaget.
+- **Acceptkriterier:** køres i gaten (typecheck/lint/test), exit 1 hvis en
+  komponent der monteres på beraknare.se får en ny dansk streng i modulscope,
+  og køres manuelt med `node scripts/locale-leak.mjs` for at få dommelaget.
+- **Bemærk:** skal **ikke** hænge i CI på en ren tekstscanning uden dommelaget —
+  ellers bliver den en grøn-gate der løber efter C65's 30 falske positiver, og
+  en port ingen tør bruge, bliver slået fra. Modus 1 alene som warn er det
+  ærlige valg.
+
+#### 96. [ ] 2026-09-27 — C68 — `HomeContent`'s danske forside-tekst er uafklaret efter C65
+
+- **Datagrund:** C65 fandt 84 danske strenge i `HomeContent` (bl.a. `<h2>Om
+  MinBeregner.dk — Danmarks gratis beregnerportal</h2>` og
+  `getHomeCalculatorCount("da")` hårdkodet i kaldet) og kunne **ikke** afslå
+  fundet ved krydscheck — `src/app/page.tsx:46-48` renderer `HomeContent` for
+  alle domæner, så i modsætning til `AffiliateBox` og `BoligOpslug` er der
+  ingen `locale`-gate i filen. Det er altså sandsynligvis en rigtig fejl, men den
+  er den største i klassen og blev ikke nået i C65 del 1.
+- **Datagrund til prioritet:** `/` er 226 besøgende/28d (+44 %) på
+  minberegner.dk, men **20 besøgende/28d og 75 % bounce på beraknare.se** — den
+  dårligste bounce på hele sitet. Forsiden er dansk på et svensk domæne.
+- **Scope:** find ud af om `HomeContent` er dansk med vilje (f.eks. fordi
+  `getHomePageData(locale)` allerede giver forside-overskrifter pr. domæne, og
+  `HomeContent` er den lange danske SEO-tekst under dem). Hvis den er dansk med
+  vilje, skal det være en bevidst `locale === "da"`-gate med en note — ikke en
+  tilfældighed. Hvis ikke, skal den have `da`/`se`/`no`-nøgler.
+- **Acceptkriterier:** 1. Fundet er afslået *eller* rettet, med begrundelse i
+  planen. 2. Ingen dansk brødtekst står på beraknare.se's forside. 3. Gaten
+  grøn. 4. bounce på beraknare.se `/` genmåles 2026-10-11.
+- **MÅL:** beraknare.se `/` 20 besøgende/28d, bounce 75 % pr. 2026-09-27.
+  **Mål 2026-10-11.**
+
 
 - **Datagrund:** fundet under C64's måling af label-klassen.
   `PensionBeregner` har mindst fem danske strenge direkte i JSX: "Udbetalingsperiode

@@ -20,22 +20,33 @@ interface Apparat {
   timerPerDag: number;
 }
 
-const STANDARD_APPARATER = [
-  { id: "computer", navn: "Computer/laptop", watt: 150, timerPerDag: 8 },
-  { id: "tv", navn: "TV", watt: 100, timerPerDag: 4 },
-  { id: "koeleskab", navn: "Køleskab", watt: 40, timerPerDag: 24 },
-  { id: "vaskemaskine", navn: "Vaskemaskine (per vask)", watt: 500, timerPerDag: 1 },
-  { id: "opvaskemaskine", navn: "Opvaskemaskine", watt: 1800, timerPerDag: 1 },
-  { id: "elkedel", navn: "Elkedel", watt: 2000, timerPerDag: 0.1 },
-  { id: "stoevsuger", navn: "Støvsuger", watt: 1400, timerPerDag: 0.25 },
-  { id: "haartorrer", navn: "Hårtørrer", watt: 1500, timerPerDag: 0.1 },
-  { id: "ovn", navn: "Ovn", watt: 2500, timerPerDag: 0.5 },
-  { id: "microovn", navn: "Mikroovn", watt: 1000, timerPerDag: 0.25 },
-  { id: "toerretumbler", navn: "Tørretumbler", watt: 3000, timerPerDag: 0.5 },
-  { id: "gaming-pc", navn: "Gaming PC", watt: 500, timerPerDag: 4 },
-  { id: "router", navn: "Router/WiFi", watt: 10, timerPerDag: 24 },
-  { id: "lampe-led", navn: "LED lampe", watt: 10, timerPerDag: 5 },
-  { id: "lampe-gloede", navn: "Glødepære", watt: 60, timerPerDag: 5 },
+// Navnene er oversat pr. domæne, fordi listen er data og lå uden for
+// `labels`-objektet: dropdown'en skrev ellers "Køleskab", "Støvsuger" og
+// "Glødepære" på beraknare.se og beregner.no. Samme mønster som
+// `RETNINGSFAKTORER` i `SolcelleBeregner` (labelDa/labelSe/labelNo).
+const STANDARD_APPARATER: {
+  id: string;
+  navn: string;
+  navnSe: string;
+  navnNo: string;
+  watt: number;
+  timerPerDag: number;
+}[] = [
+  { id: "computer", navn: "Computer/laptop", navnSe: "Dator/bärbar", navnNo: "Datamaskin/bærbar", watt: 150, timerPerDag: 8 },
+  { id: "tv", navn: "TV", navnSe: "TV", navnNo: "TV", watt: 100, timerPerDag: 4 },
+  { id: "koeleskab", navn: "Køleskab", navnSe: "Kylskåp", navnNo: "Kjøleskap", watt: 40, timerPerDag: 24 },
+  { id: "vaskemaskine", navn: "Vaskemaskine (per vask)", navnSe: "Tvättmaskin (per tvätt)", navnNo: "Vaskemaskin (per vask)", watt: 500, timerPerDag: 1 },
+  { id: "opvaskemaskine", navn: "Opvaskemaskine", navnSe: "Diskmaskin", navnNo: "Oppvaskmaskin", watt: 1800, timerPerDag: 1 },
+  { id: "elkedel", navn: "Elkedel", navnSe: "Elkettle", navnNo: "Vannkoker", watt: 2000, timerPerDag: 0.1 },
+  { id: "stoevsuger", navn: "Støvsuger", navnSe: "Dammsugare", navnNo: "Støvsuger", watt: 1400, timerPerDag: 0.25 },
+  { id: "haartorrer", navn: "Hårtørrer", navnSe: "Hårtorkare", navnNo: "Hårtørker", watt: 1500, timerPerDag: 0.1 },
+  { id: "ovn", navn: "Ovn", navnSe: "Ugn", navnNo: "Ovn", watt: 2500, timerPerDag: 0.5 },
+  { id: "microovn", navn: "Mikroovn", navnSe: "Mikrovågsugn", navnNo: "Mikrobølgeovn", watt: 1000, timerPerDag: 0.25 },
+  { id: "toerretumbler", navn: "Tørretumbler", navnSe: "Torktumlare", navnNo: "Tørketrommel", watt: 3000, timerPerDag: 0.5 },
+  { id: "gaming-pc", navn: "Gaming PC", navnSe: "Gaming-dator", navnNo: "Spill-PC", watt: 500, timerPerDag: 4 },
+  { id: "router", navn: "Router/WiFi", navnSe: "Router/WiFi", navnNo: "Ruter/WiFi", watt: 10, timerPerDag: 24 },
+  { id: "lampe-led", navn: "LED lampe", navnSe: "LED-lampa", navnNo: "LED-lys", watt: 10, timerPerDag: 5 },
+  { id: "lampe-gloede", navn: "Glødepære", navnSe: "Glödlampa", navnNo: "Glødelampe", watt: 60, timerPerDag: 5 },
 ];
 
 const GENNNEMSNIT_KWH = {
@@ -165,6 +176,9 @@ export default function Elberegner({ elprisData = null, nu }: Props = {}) {
   };
   const l = labels[locale as keyof typeof labels] || labels.da;
 
+  const apparatNavn = (s: (typeof STANDARD_APPARATER)[number]) =>
+    locale === "se" ? s.navnSe : locale === "no" ? s.navnNo : s.navn;
+
   const [apparater, setApparater] = useState<Apparat[]>([
     { id: crypto.randomUUID(), navn: "", watt: 0, timerPerDag: 0 },
   ]);
@@ -256,7 +270,7 @@ export default function Elberegner({ elprisData = null, nu }: Props = {}) {
       setApparater(
         apparater.map((a) =>
           a.id === id
-            ? { ...a, navn: standard.navn, watt: standard.watt, timerPerDag: standard.timerPerDag }
+            ? { ...a, navn: apparatNavn(standard), watt: standard.watt, timerPerDag: standard.timerPerDag }
             : a
         )
       );
@@ -375,7 +389,7 @@ export default function Elberegner({ elprisData = null, nu }: Props = {}) {
                     <option value="">{l.vaelgStandard}</option>
                     {STANDARD_APPARATER.map((s) => (
                       <option key={s.id} value={s.id}>
-                        {s.navn} ({s.watt}W)
+                        {apparatNavn(s)} ({s.watt}W)
                       </option>
                     ))}
                   </select>
