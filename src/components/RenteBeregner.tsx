@@ -306,8 +306,8 @@ export default function RenteBeregner() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.loanType}</label>
-            <div className="flex gap-4">
+            <label id="rente-laantype-gruppe" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.loanType}</label>
+            <div role="group" aria-labelledby="rente-laantype-gruppe" className="flex gap-4">
               <button
                 type="button"
                 onClick={() => setType("annuitet")}

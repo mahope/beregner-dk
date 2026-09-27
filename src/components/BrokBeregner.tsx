@@ -79,10 +79,10 @@ export default function BrokBeregner() {
 
   const r = useMemo(() => forkortBrok(Math.trunc(numerator), Math.trunc(denominator)), [numerator, denominator]);
 
-  const field = (label: string, value: number, onChange: (n: number) => void) => (
+  const field = (id: string, label: string, value: number, onChange: (n: number) => void) => (
     <div>
-      <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">{label}</label>
-      <input type="number" step="1" value={value} onChange={(e) => onChange(Number(e.target.value))}
+      <label htmlFor={id} className="block text-xs text-gray-600 dark:text-gray-400 mb-1">{label}</label>
+      <input id={id} type="number" step="1" value={value} onChange={(e) => onChange(Number(e.target.value))}
         className="w-full px-4 py-2.5 border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white text-center text-lg" />
     </div>
   );
@@ -98,9 +98,9 @@ export default function BrokBeregner() {
     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 md:p-8">
       <div className="grid md:grid-cols-2 gap-6">
         <div className="space-y-3">
-          {field(l.numerator, numerator, setNumerator)}
+          {field("brok-taeler", l.numerator, numerator, setNumerator)}
           <div className="border-t-2 border-gray-300 dark:border-gray-600" />
-          {field(l.denominator, denominator, setDenominator)}
+          {field("brok-naevner", l.denominator, denominator, setDenominator)}
           <div className="flex justify-end pt-1">
             <ResetButton onReset={handleReset} />
           </div>

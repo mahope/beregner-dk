@@ -16,8 +16,16 @@
  */
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, test, vi } from "vitest";
+import AlderBeregner from "./AlderBeregner";
+import BraendstofBeregner from "./BraendstofBeregner";
+import BrokBeregner from "./BrokBeregner";
 import DatoBeregner from "./DatoBeregner";
+import KalorieBeregner from "./KalorieBeregner";
+import KvadratmeterBeregner from "./KvadratmeterBeregner";
+import MomsBeregner from "./MomsBeregner";
 import PromilleBeregner from "./PromilleBeregner";
+import RentefradragBeregner from "./RentefradragBeregner";
+import RenteBeregner from "./RenteBeregner";
 import TidsBeregner from "./TidsBeregner";
 import TidszoneBeregner from "./TidszoneBeregner";
 import { LocaleProvider } from "./LocaleProvider";
@@ -97,7 +105,10 @@ function expectEveryFieldHasAName(container: HTMLElement) {
     }
     const label = container.querySelector(`label[for="${id}"]`);
     expect(label, `Feltet #${id} har ingen <label for>`).not.toBeNull();
-    expect(screen.getByLabelText(new RegExp(escapeRegExp(label?.textContent?.trim() ?? "")))).toBe(felt);
+    // `getAllByLabelText`, ikke `getByLabelText`: to felter på samme side kan
+    // have samme synlige tekst (fx to "Pris pr. m²" på /kvadratmeter), og det
+    // er lovligt. Det skal bare ikke fejle på dem.
+    expect(screen.getAllByLabelText(new RegExp(escapeRegExp(label?.textContent?.trim() ?? "")))).toContain(felt);
   }
 }
 
@@ -114,6 +125,16 @@ function expectFieldsAreNamed(container: HTMLElement) {
  */
 function modeKnapper(container: HTMLElement): HTMLElement[] {
   return Array.from(container.querySelectorAll("button")).slice(0, 4) as HTMLElement[];
+}
+
+/**
+ * Bevis at vi ikke bare tjekker ét sæt felter: hver renderet tilstand skal have
+ * sit **eget** sæt `id`'er, ellers ville en fejl i kun ét af sættene glide
+ * igennem. Sammenligner vi kun antallet, kan to tilstande med lige mange
+ * felter se ens ud.
+ */
+function registrerFelter(container: HTMLElement, saet: Set<string>) {
+  saet.add(Array.from(container.querySelectorAll("input")).map((felt) => felt.id).join(","));
 }
 
 describe("Feltnavn for skærmlæsere — de fire mest besøgte beregnere", () => {
@@ -151,6 +172,87 @@ describe("Feltnavn for skærmlæsere — de fire mest besøgte beregnere", () =>
         const { container } = renderIn(locale, PromilleBeregner);
         expectFieldsAreNamed(container);
         expect(container.querySelectorAll("input").length).toBe(3);
+      });
+
+      test("/braendstof: alle felter har navn i alle typer brændstof og beregning", () => {
+        const { container } = renderIn(locale, BraendstofBeregner);
+        const setMuligeAntal = new Set<string>();
+        const brændstofKnapper = () => Array.from(container.querySelectorAll("button")).slice(0, 3) as HTMLElement[];
+
+        for (const brændstofKnap of brændstofKnapper()) {
+          fireEvent.click(brændstofKnap);
+          expectFieldsAreNamed(container);
+          registrerFelter(container, setMuligeAntal);
+
+          // Beregningstyperne findes kun når brændstoffet ikke er el, så de skal
+          // slås op *efter* hvert skift af brændstof — ikke fra en liste taget
+          // på forhånd, som ville være afkoblet fra DOM'en.
+          for (const beregningsKnap of Array.from(container.querySelectorAll("button")).slice(3, 6) as HTMLElement[]) {
+            fireEvent.click(beregningsKnap);
+            expectFieldsAreNamed(container);
+            registrerFelter(container, setMuligeAntal);
+          }
+        }
+        expect(setMuligeAntal.size).toBe(4);
+      });
+
+      test("/kvadratmeter: alle felter har navn i alle fire geometriske former", () => {
+        const { container } = renderIn(locale, KvadratmeterBeregner);
+        const formKnapper = Array.from(container.querySelectorAll("button")).slice(0, 4) as HTMLElement[];
+        expect(formKnapper.length).toBe(4);
+
+        const setMuligeFelter = new Set<string>();
+        for (const formKnap of formKnapper) {
+          fireEvent.click(formKnap);
+          expectFieldsAreNamed(container);
+          registrerFelter(container, setMuligeFelter);
+        }
+        expect(setMuligeFelter.size).toBe(4);
+      });
+
+      test("/kalorier: køn, aktivitetsniveau og mål er navngivne grupper", () => {
+        const { container } = renderIn(locale, KalorieBeregner);
+        expectFieldsAreNamed(container);
+        expect(container.querySelectorAll('[role="group"][aria-labelledby]').length).toBe(3);
+      });
+
+      test("/moms: beregningstypen er en navngiven gruppe, også i svensk", () => {
+        const { container } = renderIn(locale, MomsBeregner);
+        expectFieldsAreNamed(container);
+        expect(container.querySelectorAll('[role="group"][aria-labelledby]').length).toBeGreaterThanOrEqual(1);
+      });
+
+      test("/renteberegner: lånetype er en navngiven gruppe", () => {
+        const { container } = renderIn(locale, RenteBeregner);
+        expectFieldsAreNamed(container);
+        expect(container.querySelectorAll('[role="group"][aria-labelledby]').length).toBe(1);
+      });
+
+      test("/alder: fødselsdato og beregningsdato har navn", () => {
+        const { container } = renderIn(locale, AlderBeregner);
+        expectFieldsAreNamed(container);
+        expect(container.querySelectorAll("input").length).toBe(2);
+      });
+
+      test("/brok: tæller og nævner har navn", () => {
+        const { container } = renderIn(locale, BrokBeregner);
+        expectFieldsAreNamed(container);
+        expect(container.querySelectorAll("input").length).toBe(2);
+      });
+
+      test("/rentefradrag: hvert lån har navn, også efter at et lån er lagt til", () => {
+        const { container } = renderIn(locale, RentefradragBeregner);
+        expectFieldsAreNamed(container);
+        expect(container.querySelectorAll("input").length).toBe(3);
+
+        const tilfoej = Array.from(container.querySelectorAll("button")).find((knap) =>
+          (knap.textContent ?? "").includes("Tilføj lån"),
+        ) as HTMLElement | undefined;
+        expect(tilfoej).toBeDefined();
+        fireEvent.click(tilfoej as HTMLElement);
+
+        expectFieldsAreNamed(container);
+        expect(container.querySelectorAll("input").length).toBe(5);
       });
     });
   }

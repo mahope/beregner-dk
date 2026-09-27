@@ -183,8 +183,8 @@ export default function MomsBeregner() {
     <div className="space-y-8 print-area">
       {/* Beregningstype valg */}
       <div>
-        <label className="block text-sm font-medium mb-3">{l.hvadBeregne}</label>
-        <div role="group" aria-label={l.hvadBeregne} className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <label id="moms-beregning-gruppe" className="block text-sm font-medium mb-3">{l.hvadBeregne}</label>
+        <div role="group" aria-labelledby="moms-beregning-gruppe" className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <button type="button"
             aria-pressed={beregningsType === "tillaegMoms"}
             onClick={() => setBeregningsType("tillaegMoms")}
@@ -227,8 +227,8 @@ export default function MomsBeregner() {
       {/* Momssats (svenska reducerade satser) */}
       {locale === "se" && (
         <div className="max-w-md">
-          <label className="block text-sm font-medium mb-2">Momssats</label>
-          <div role="group" aria-label="Momssats" className="grid grid-cols-3 gap-2">
+          <label id="moms-sats-gruppe" className="block text-sm font-medium mb-2">Momssats</label>
+          <div role="group" aria-labelledby="moms-sats-gruppe" className="grid grid-cols-3 gap-2">
             {MOMS_SATS_VALG_SE.map((o) => (
               <button
                 key={o.sats}

@@ -143,10 +143,10 @@ export default function RentefradragBeregner() {
         {/* Input Section */}
         <div className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+            <label id="rentefradrag-civilstand-gruppe" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
               Civil status
             </label>
-            <div className="flex gap-4">
+            <div role="group" aria-labelledby="rentefradrag-civilstand-gruppe" className="flex gap-4">
               <button type="button"
                 onClick={() => setCivilStatus('single')}
                 className={`flex-1 py-3 px-4 rounded-lg border-2 transition-all ${
@@ -171,14 +171,15 @@ export default function RentefradragBeregner() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+            <label id="rentefradrag-laan-gruppe" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
               Dine lån og årlige renteudgifter
             </label>
-            <div className="space-y-3">
+            <div role="group" aria-labelledby="rentefradrag-laan-gruppe" className="space-y-3">
               {loans.map((loan, index) => (
                 <div key={loan.id} className="flex gap-2">
                   <input
                     type="text"
+                    aria-label={`Lån ${index + 1} navn`}
                     value={loan.name}
                     onChange={(e) => updateLoan(loan.id, 'name', e.target.value)}
                     placeholder={`Lån ${index + 1} (navn)`}
@@ -187,6 +188,7 @@ export default function RentefradragBeregner() {
                   <div className="relative flex-1">
                     <input
                       type="number"
+                      aria-label={`Lån ${index + 1} årlig rente i kroner`}
                       value={loan.annualInterest}
                       onChange={(e) => updateLoan(loan.id, 'annualInterest', e.target.value)}
                       placeholder="Årlig rente (kr.)"
@@ -214,11 +216,12 @@ export default function RentefradragBeregner() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+            <label htmlFor="rentefradrag-renteindtaegter" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
               Årlige renteindtægter (hvis nogen)
             </label>
             <div className="relative">
               <input
+                id="rentefradrag-renteindtaegter"
                 type="number"
                 value={interestIncome}
                 onChange={(e) => setInterestIncome(e.target.value)}

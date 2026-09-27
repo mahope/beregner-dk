@@ -269,8 +269,9 @@ export default function AlderBeregner() {
       {/* Input */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.birthDate}</label>
+          <label htmlFor="alder-foedselsdato" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.birthDate}</label>
           <input
+            id="alder-foedselsdato"
             type="date"
             value={foedselsdato}
             onChange={(e) => setFoedselsdato(e.target.value)}
@@ -279,8 +280,9 @@ export default function AlderBeregner() {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.calcAgePerDate}</label>
+          <label htmlFor="alder-beregningsdato" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.calcAgePerDate}</label>
           <input
+            id="alder-beregningsdato"
             type="date"
             value={beregningsDato}
             onChange={(e) => setBeregningsDato(e.target.value)}
