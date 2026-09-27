@@ -10544,6 +10544,52 @@ tekst på `/tidszone`), men Kopier-strengen med datoen kræver en browser.
   artiklen har et svar-først-kort med link til `/barselsdagpenge` 10 linjer inde,
   to beregnerlinks mere og to relaterede artikler. Se `❓ Til Mads`-punktet.
 
+### Næste kandidater efter C81
+
+> **C79's liste er delvis afsluttet — læs denne først.** Punkt 1 er skrevet ud som
+> en kliksekvens i `❓ Til Mads` nederst (Mads' 10 minutter, ikke en iteration).
+> Punkt 2 er ** nedprioriteret med et tal**, se (b). Punkt 3 er bekræftet af C80 og
+> C81. Punkt 4 er uændret. Punkt 5 og 6 kan ikke løses i koden.
+
+**Iterations pligt først:** C76, C77 og C78 har alle **12:30** som første
+kandidatvindue (merge 09:25/09:48/10:55), så de skal verificeres ved indhold så
+snart batchen er kørt. C81's egen note har **17:30**.
+
+0b. **🔒 Opgave 97 er `BLOCKED`** — `beregner.no` er en anden udgivelse, og C79
+    har *bevis* på at domænet ikke serverer beregnersider. Dermed er opgave 98
+    unødig indtil svaret kommer.
+1. **🔒 Browser-noter:** C52, C55, C56, C57 og C60 ligger som en
+    kliksekvens-pr. side i `❓ Til Mads`. De lukkes med Mads' svar, ikke med kode.
+2. **⏬ Nedprioriteret med et tal:** de **22 filer / 35 ubundne labels** i
+    `label-a11y-scan.mjs` er *kun* `/aegloesning`, `/afkast`, `/arveafgift`,
+    `/bryllup`, `/elbil`, `/1rm`, `/fart`, `/gennemsnit`, `/konfirmation`,
+    `/kropsfedt`, `/ohm`, `/planetvaegt`, `/proteinbehov`, `/rejsebudget`,
+    `/solceller`, `/sparemaal`, `/sygedagpenge`, `/temperatur`, `/vandbehov` og
+    `barsel/*` — **ingen af dem står i DA- eller SE-top-15 hver i Plausible eller
+    GSC**. Fase 3 siger at kodehygiejne kun kommer når den blokerer noget, så
+    klassen skal **ikke** tages nu. Den er dog stadig en reel WCAG-mangel, og
+    scanneren + testen ligger i repoet, så den kan lukkes senere på en time.
+3. **🔒 CTR på de store sider er lukket, og det er nu *dokumenteret*:** C80
+    målte alle 15 mest trafikrelevante titler (14 af 15 under 60 tegn), C81
+    lukkede resten af klassen, og C80 fandt **0** dansk lækage i `page-data.ts`.
+    `/procent`, `/dato`, `/moms`, `/tidszone` og nu `/tidsberegner` har alle
+    svar-først title **og** description på DA *og* SE. Lav ikke CTR på dem igen.
+4. **hreflang er korrekt og skal ikke røres.** Bemærk at Next.js skriver
+    **`hrefLang`** med stort L — et grep på `hreflang=` giver 0 fund.
+5. **Svenske slugs på beraknare.se — research, ikke build.** SE `/dato` har
+    92.832 visninger til 0,1 % CTR på pos. 8,3, og slug'en er dansk.
+    `alternateSlugs` + `routing.ts` har **allerede** 301-mekanismen (den bruges
+    af `loen-efter-skat` ↔ `lon-efter-skat`), så det er ikke en arkitekturopgave —
+    men en slug-migrering uden Search Console-bevis kan tabe de 92.832
+    visningers placering. Kræver Mads' go.
+6. **Hvorfor falder `/bmi` (967, −24 %) og `/su` (114, −54 %)?** Metadata,
+    canonical og sitemap er rene, og **C81's titelændring** er det første
+    reelle bud på siden for `/bmi` — den var 76 tegn. Bouncen er 4 %, så
+    brugerne bruger værktøjet; resten er ranking eller konkurrence og kan kun
+    måles i Search Console. **Mål igen 2026-10-11.**
+7. **Mål 2026-10-10 / 2026-10-11** (se Måleprotokol): C1-C16 og C35-C81 måles
+    14 dage efter deres snapshot. C81's CTR-mål står under opgave 110.
+
 #### 109. [x] FÆRDIG 2026-09-27 — C80 — erklær Node-runtime-kontrakten: `engines.node`, `.nvmrc` og en test der holder de tre sammen
 
 - **Datagrund:** `~/.local/oxloop/AFHAENGIGHEDER.md` (scan 2026-08-23) står med
