@@ -151,26 +151,26 @@ export default function EnhederBeregner() {
       <div className="grid md:grid-cols-2 gap-6">
         <div className="space-y-4">
           <div>
-            <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">{l.group}</label>
-            <div className="grid grid-cols-3 gap-2">
+            <label id="enheder-gruppe" className="block text-xs text-gray-600 dark:text-gray-400 mb-1">{l.group}</label>
+            <div className="grid grid-cols-3 gap-2" role="group" aria-labelledby="enheder-gruppe">
               {groupBtn("laengde")}
               {groupBtn("vaegt")}
               {groupBtn("volumen")}
             </div>
           </div>
           <div>
-            <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">{l.value}</label>
-            <input type="number" step="any" value={value} onChange={(e) => setValue(Number(e.target.value))}
+            <label htmlFor="enheder-vaerdi" className="block text-xs text-gray-600 dark:text-gray-400 mb-1">{l.value}</label>
+            <input id="enheder-vaerdi" type="number" step="any" value={value} onChange={(e) => setValue(Number(e.target.value))}
               className={selectCls} />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">{l.from}</label>
-              <select value={from} onChange={(e) => setFrom(e.target.value)} className={selectCls}>{options}</select>
+              <label htmlFor="enheder-fra" className="block text-xs text-gray-600 dark:text-gray-400 mb-1">{l.from}</label>
+              <select id="enheder-fra" value={from} onChange={(e) => setFrom(e.target.value)} className={selectCls}>{options}</select>
             </div>
             <div>
-              <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">{l.to}</label>
-              <select value={to} onChange={(e) => setTo(e.target.value)} className={selectCls}>{options}</select>
+              <label htmlFor="enheder-til" className="block text-xs text-gray-600 dark:text-gray-400 mb-1">{l.to}</label>
+              <select id="enheder-til" value={to} onChange={(e) => setTo(e.target.value)} className={selectCls}>{options}</select>
             </div>
           </div>
           <div className="flex justify-end">

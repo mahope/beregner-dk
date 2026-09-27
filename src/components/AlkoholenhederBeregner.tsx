@@ -99,25 +99,25 @@ export default function AlkoholenhederBeregner() {
   return (
     <div>
       <div className="mb-4">
-        <label className={labelCls}>{l.volume}</label>
+        <label htmlFor="alkoholenheder-volume" className={labelCls}>{l.volume}</label>
         <div className="relative">
-          <input type="number" min="1" max="500" step="1" value={volumeCl} onChange={(e) => setVolumeCl(Number(e.target.value))} className={inputCls} />
+          <input id="alkoholenheder-volume" type="number" min="1" max="500" step="1" value={volumeCl} onChange={(e) => setVolumeCl(Number(e.target.value))} className={inputCls} />
           <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">{l.cl}</span>
         </div>
       </div>
 
       <div className="mb-4">
-        <label className={labelCls}>{l.abv}</label>
+        <label htmlFor="alkoholenheder-abv" className={labelCls}>{l.abv}</label>
         <div className="relative">
-          <input type="number" min="0.1" max="100" step="0.1" value={abvPct} onChange={(e) => setAbvPct(Number(e.target.value))} className={inputCls} />
+          <input id="alkoholenheder-abv" type="number" min="0.1" max="100" step="0.1" value={abvPct} onChange={(e) => setAbvPct(Number(e.target.value))} className={inputCls} />
           <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">{l.pct}</span>
         </div>
       </div>
 
       <div className="mb-4">
-        <label className={labelCls}>{l.antal}</label>
+        <label htmlFor="alkoholenheder-antal" className={labelCls}>{l.antal}</label>
         <div className="relative">
-          <input type="number" min="0.1" max="100" step="0.5" value={antal} onChange={(e) => setAntal(Number(e.target.value))} className={inputCls} />
+          <input id="alkoholenheder-antal" type="number" min="0.1" max="100" step="0.5" value={antal} onChange={(e) => setAntal(Number(e.target.value))} className={inputCls} />
         </div>
       </div>
 

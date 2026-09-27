@@ -146,10 +146,11 @@ export default function EfterloensBeregner() {
         {/* Input Section */}
         <div className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+            <label htmlFor="efterloen-foedselsaar" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
               Fødselsår
             </label>
             <input
+              id="efterloen-foedselsaar"
               type="number"
               value={birthYear}
               onChange={(e) => setBirthYear(e.target.value)}
@@ -163,10 +164,10 @@ export default function EfterloensBeregner() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+            <label id="efterloen-forsikringsstatus" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
               Forsikringsstatus
             </label>
-            <div className="flex gap-4">
+            <div className="flex gap-4" role="group" aria-labelledby="efterloen-forsikringsstatus">
               <button type="button"
                 onClick={() => setInsurance('full')}
                 className={`flex-1 py-3 px-4 rounded-lg border-2 transition-all ${
@@ -191,11 +192,12 @@ export default function EfterloensBeregner() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+            <label htmlFor="efterloen-aar-bidrag" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
               År med efterlønsbidrag
             </label>
             <div className="relative">
               <input
+                id="efterloen-aar-bidrag"
                 type="number"
                 value={yearsContributed}
                 onChange={(e) => setYearsContributed(e.target.value)}
@@ -208,8 +210,9 @@ export default function EfterloensBeregner() {
           </div>
 
           <div className="space-y-3">
-            <label className="flex items-center gap-3 cursor-pointer">
+            <label htmlFor="efterloen-udskyder-2-aar" className="flex items-center gap-3 cursor-pointer">
               <input
+                id="efterloen-udskyder-2-aar"
                 type="checkbox"
                 checked={postpone2Years}
                 onChange={(e) => setPostpone2Years(e.target.checked)}
@@ -220,8 +223,9 @@ export default function EfterloensBeregner() {
               </span>
             </label>
 
-            <label className="flex items-center gap-3 cursor-pointer">
+            <label htmlFor="efterloen-arbejder-sidenom" className="flex items-center gap-3 cursor-pointer">
               <input
+                id="efterloen-arbejder-sidenom"
                 type="checkbox"
                 checked={workWhileOnEfterloen}
                 onChange={(e) => setWorkWhileOnEfterloen(e.target.checked)}
@@ -235,11 +239,12 @@ export default function EfterloensBeregner() {
 
           {workWhileOnEfterloen && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+              <label htmlFor="efterloen-arbejdstimer" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
                 Forventede arbejdstimer pr. år
               </label>
               <div className="relative">
                 <input
+                  id="efterloen-arbejdstimer"
                   type="number"
                   value={hoursPerYear}
                   onChange={(e) => setHoursPerYear(e.target.value)}

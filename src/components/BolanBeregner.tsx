@@ -66,17 +66,17 @@ export default function BolanBeregner() {
         {/* Inmatning */}
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Bostadens pris</label>
+            <label htmlFor="bolan-bostadspris" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Bostadens pris</label>
             <div className="relative">
-              <input type="number" value={bostadsvarde} onChange={(e) => setBostadsvarde(Number(e.target.value))}
+              <input id="bolan-bostadspris" type="number" value={bostadsvarde} onChange={(e) => setBostadsvarde(Number(e.target.value))}
                 className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">kr</span>
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Lånebelopp</label>
+            <label htmlFor="bolan-lanebelopp" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Lånebelopp</label>
             <div className="relative">
-              <input type="number" value={lanebelopp} onChange={(e) => setLanebelopp(Number(e.target.value))}
+              <input id="bolan-lanebelopp" type="number" value={lanebelopp} onChange={(e) => setLanebelopp(Number(e.target.value))}
                 className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">kr</span>
             </div>
@@ -87,9 +87,9 @@ export default function BolanBeregner() {
             )}
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Ränta (% per år)</label>
+            <label htmlFor="bolan-ranta" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Ränta (% per år)</label>
             <div className="relative">
-              <input type="number" step="0.01" value={ranta} onChange={(e) => setRanta(Number(e.target.value))}
+              <input id="bolan-ranta" type="number" step="0.01" value={ranta} onChange={(e) => setRanta(Number(e.target.value))}
                 className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">%</span>
             </div>
