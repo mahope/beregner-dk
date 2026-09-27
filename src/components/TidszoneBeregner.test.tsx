@@ -107,12 +107,111 @@ describe("TidszoneBeregner", () => {
       TIDSZONER.find((zone) => zone.by === navn || zone.bySe === navn);
 
     for (const zone of TIDSZONER_BEREGNER) {
-      const reference = by(zone.id === "australia" ? "Sydney" : zone.by.replace("København", "Danmark").replace("Stockholm", "Sverige"));
+      const reference = by(zone.bySe ?? zone.by);
+      // `dk` springes over med vilje: reference-modulet har ingen række for
+      // Danmark/Sverige, fordi CET-offsetten der er dens egen udgangspunkt
+      // (`DANSK_UTC_VINTER`), ikke en by den kan sammenlignes med. Før C66 lå der
+      // en `.replace("København", "Danmark")` i dette opslag — den så ud til at
+      // dække hjemtidszonen, men "Danmark" findes ikke i `TIDSZONER`, så den
+      // gjorde intet andet end at skjule, at rækken aldrig blev tjekket.
       if (!reference) continue;
       expect(zone.offset / 60, `${zone.id} har forkert vinteroffset`).toBe(reference.utcVinter);
       expect((zone.offsetSommer ?? zone.offset) / 60, `${zone.id} har forkert sommeroffset`).toBe(
         reference.utcSommer ?? reference.utcVinter
       );
+    }
+
+    // Tællen sikrer, at krydschecket ikke bliver tomt ved en fremtidig redigering.
+    const tjekkede = TIDSZONER_BEREGNER.filter((zone) => by(zone.bySe ?? zone.by));
+    expect(tjekkede.length).toBeGreaterThanOrEqual(9);
+  });
+
+  test("zonenavn og by kommer fra samme række, oversat pr. locale", () => {
+    // Før C66 lå de samme oplysninger to steder: et array i modulscope med danske
+    // navne, og et `labels`-objekt med `navn`/`by` pr. locale, som displayen
+    // brugte. Arrayet var altså halvt dødt — og en redigering der havde brugt
+    // `tz.navn` ville have skrevet dansk på beraknare.se uden at nogen test så
+    // det. Nu er der én række pr. zone med dansk form + `Se`-variant.
+    const dansk = renderTidszone("da");
+    const danskValg = selectOptions(dansk.container).join(" | ");
+    dansk.unmount();
+
+    const svensk = renderTidszone("se");
+    const svenskValg = selectOptions(svensk.container).join(" | ");
+    svensk.unmount();
+
+    for (const zone of TIDSZONER_BEREGNER) {
+      expect(danskValg, `${zone.id} mangler i den danske dropdown`).toContain(
+        `${zone.by} - ${zone.navn}`
+      );
+      expect(svenskValg, `${zone.id} mangler i den svenske dropdown`).toContain(
+        `${zone.bySe ?? zone.by} - ${zone.navnSe ?? zone.navn}`
+      );
+      // En zone med en `Se`-variant må ikke vise den danske form på beraknare.se.
+      if (zone.navnSe) {
+        expect(svenskValg, `${zone.id} viser stadig dansk navn på svensk`).not.toContain(
+          `${zone.bySe ?? zone.by} - ${zone.navn}`
+        );
+      }
+      if (zone.bySe) {
+        expect(svenskValg, `${zone.id} viser stadig dansk by på svensk`).not.toContain(
+          `${zone.by} - `
+        );
+      }
+    }
+  });
+
+  test("kun de zoner, hvor svensk afviger, har en Se-variant", () => {
+    // `labels.se` havde engang en `greece: "Aten"` — den svenske form, kopieret
+    // ned i den danske. Derfor stod "Aten" i dropdown'en på minberegner.dk, mens
+    // brødteksten på samme side sagde "13 i Athen". Tællen låser den konvention:
+    // tilføjes der en zone, skal den have en `Se`-variant, hvis ordet afviger.
+    const afvigende = TIDSZONER_BEREGNER.filter((zone) => zone.navnSe || zone.bySe);
+
+    expect(afvigende.map((zone) => zone.id)).toEqual([
+      "dk",
+      "us_east",
+      "us_west",
+      "greece",
+      "greenland",
+    ]);
+
+    for (const zone of afvigende) {
+      if (zone.navnSe) expect(zone.navnSe, `${zone.id} har en Se-variant, der ikke afviger`).not.toBe(zone.navn);
+      if (zone.bySe) expect(zone.bySe, `${zone.id} har en bySe, der ikke afviger`).not.toBe(zone.by);
+    }
+  });
+
+  test("Athen hedder Athen på dansk, også i dropdown'en", () => {
+    // Den konkrete fejl C66 fandt. `labels.se.by.greece` sagde "Aten", og den
+    // værdi var kopieret ned i `labels.da.by` — så "Aten" stod i dropdown'en på
+    // minberegner.dk og i huskelisten, mens brødteksten på samme side sagde
+    // "13 i Athen". Dansk er Athen, svensk er Aten.
+    const dansk = renderTidszone("da");
+    const danskTekst = dansk.container.textContent ?? "";
+    expect(selectOptions(dansk.container)).toContain("Athen - Grækenland (EET/EEST)");
+    expect(danskTekst).not.toContain("Aten");
+    dansk.unmount();
+
+    const svensk = renderTidszone("se");
+    expect(selectOptions(svensk.container)).toContain("Aten - Grekland (EET/EEST)");
+    expect(svensk.container.textContent).not.toContain("Athen");
+    svensk.unmount();
+  });
+
+  test("de byer de to tabeller deler, hedder det samme på dansk", () => {
+    // Samme sammenligning som offset-krydschecket, men på navnet. Uden den kunne
+    // de to tabeller kalde den samme by to ting og ingen kunne se det — C66's
+    // "Aten" kom netop af, at de tre tabeller holdt hinanden oppe i stedet for
+    // hinanden.
+    for (const zone of TIDSZONER) {
+      for (const navn of [zone.by, zone.bySe].filter(Boolean) as string[]) {
+        const samme = TIDSZONER_BEREGNER.find(
+          (kandidat) => kandidat.by === navn || kandidat.bySe === navn
+        );
+        if (!samme) continue;
+        expect(samme.by, `reference-modulet kalder byen ${navn}, beregneren ${samme.by}`).toBe(zone.by);
+      }
     }
   });
 

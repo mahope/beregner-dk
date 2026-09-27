@@ -1,5 +1,7 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
+STATUS: KØ — **C66 er landet: `/tidszone` skrev "Aten" på minberegner.dk, fordi bynavnene lå i to tabeller, og den ene havde den svenske form kopieret ind i den danske.** Opgave 94 bad om at slå `TidszoneBeregner`s to tabeller sammen — og arbejdet fandt straks den fejl, de to tabeller havde skjult: `labels.se.by.greece` sagde "Aten" (svensk), og den værdi var kopieret ned i `labels.da.by`. Så dropdown'en **og** huskelisten på den danske side skrev **"Aten"**, mens brødteksten på *samme side* sagde "13 i Athen". Verificeret på det live site før rettelsen: `https://minberegner.dk/tidszone` indeholdt `<option value="greece">Aten - Grækenland (EET/EEST)</option>` to gange (fra- og til-vælgeren) plus `<span class="dark:text-gray-300">Aten</span>` i huskelisten. Modulet `src/lib/tidszone-reference.ts` havde hele tiden `by: "Athen", bySe: "Aten"` — altså vidste den rigtige tabel det hele tiden, og ingen hangt sammen. Nu er der **én række pr. zone**: `navn`/`by` er den danske form, `navnSe`/`bySe` er kun sat hvor den svenske afviger (5 zoner: `dk`, `us_east`, `us_west`, `greece`, `greenland`), præcis den konvention `tidszone-reference.ts` allerede brugte, så de to tabeller nu læses ens. De 32 `navn`/`by`-linjer i `labels` er væk, og de døde danske navne i modulscope med. **Harness-fix ud over sammenlægningen:** det samme spørgsmål — "er vi på svensk?" — blev stillet på to måder i komponenten, ét sted som `labels[locale] || labels.da` og ét sted som et bogstaveligt `locale === "se"` til `vinterOrd`, og de to kan glide fra hinanden; de er nu én afgørelse, `erSvensk`, som både zonenavnene og brødteksten læser. Den døde `.replace("København", "Danmark")` i testens offset-krydscheck viste sig også at være en **no-op** — "Danmark" findes ikke i `TIDSZONER`, så hjemtidszonen aldrig blev krydschecket; den er nu bevidst sprunget over med en tælling (≥9 zoner), der låser dækningen mod en fremtidig redigering. `TidszoneBeregner.test.tsx` er udvidet fra 13 til **17 tests**, **verificeret modsvejs: 3 af 4 nye falder** med den gamle kode (den fjerde, bynavn-krydschecket mod reference-modulet, læser selve arrayet og passede derfor også før — den er en lås, ikke en regressionstest, og er mærket som sådan). **To fund ud over opgavens scope, målt fordi de lå i vejen:** (a) **`/tidszone` 404'er på beregner.no** — ja, alle kalkulatorer gør: `curl -o /dev/null -w '%{http_code}' https://beregner.no/moms` → 404, samme for `/procent`, `/dato`, `/elberegner`, `/tidszone`, mens `/` er 200. Det passer med `hiddenDomains = new Set(["localhost", "beregner.no"])` (`domain-config.ts:91`) og med at `isCalculatorAvailable("/moms", "no")` er `true` — så porten i koden siger ja, men domænet er ikke lanceret, og den konkrete 404 er den danske `not-found`, ikke `locale-unavailable`-rewriten. **Følgen er at `no`-strenge ikke er synlige for nogen i dag**, også ikke C65's `navnNo`/`Hårtørker`. Det er ikke en fejl, men det er en *dokumenteret* antagelse, C65's planlinje havde den ikke. (b) `TidszoneBeregner` har **intet `no`-sprog**: `labels` har kun `da` og `se`, så `l` falder tilbage på dansk. Usynligt nu af (a), latent den dag domænet lanceres — samme fordelagt som C66's `erSvensk` gør, at det falder rent. Gate grøn: lint (550 filer), **1599 tests / 145 filer** (fra 1595 / 145; de 7 af dem er C65's `elberegner-locale.test.tsx`) og build (141 sider). `tsc --noEmit` har **7 forhåndsfejl** i testfiler (`title-collision`, `Breadcrumbs`, `label-a11y`, `StructuredData`) — uændrede af denne iteration, ingen i de rørte filer; `tsc` er derfor ikke del af gaten, kun `lint` + `test` + `build`. Kode + plan i ét commit på `ceo/tidszone-en-tabel`; første kandidatvindue **2026-09-27 07:30**. Se opgave 94.
+
 STATUS: KØ — **C65 (del 1) er landet: `/elberegner` skrev danske apparatnavne på beraknare.se og beregner.no — og målingen viser, at resten af klassen næsten er uskadelig.** Køen havde én opgave, 93, som bad om at måle før rettelse. Målingen blev taget på to måder: et script der fandt 31 SE-monterede komponenter med danske strenge, og så en håndværksmæssig krydscheck af hvert fund mod den kode, der faktisk renderer. **Resultatet: 1 bekræftet fejl ud af 31 fund.** Planens egen forventning var fejl i `PensionBeregner` — men `/pension` er `daOnly` i `calculator-list.ts:121`, så siden giver 404 på beraknare.se og de fem danske strenge kan aldrig vises for en svensk læser. Beviset på, at porten virker, er at de øvrige 30 fund alle faldt ved krydschecken: `AffiliateBox` går til `null` på ikke-da (`AffiliateBox.tsx:34`), `BoligOpslug` monteres kun inden for `{locale === "da" && …}` (`kvadratmeter/page.tsx:51`), `TidszoneBeregner`/`VaegttabBeregner`/`EnhederBeregner`/`SolcelleBeregner`/`PlanetVaegtBeregner` har danske data, men displayen går gennem `l.navn`, `l.by`, `l.activity` og `labelDa/labelSe/labelNo`, som alle er oversat, `DageTilPage` bruger `dageLocale === "da" ? … : …`, og `OrganizationSchema`'s danske standard-`description` er en død default — `layout.tsx:109` sender altid `getTranslations(locale).site.description`. **Den eneste rigtige fund var den mest trivielle at overse: `STANDARD_APPARATER` i `Elberegner.tsx` ligger i modulscope, *uden for* `labels`-objektet, så dropdown'en skrev "Køleskab (40W)", "Vaskemaskine (per vask)", "Støvsuger", "Hårtørrer", "Glødepære" på to domæner der ikke måtte tale dansk.** Listen har nu `navnSe`/`navnNo` pr. apparat — samme mønster som `RETNINGSFAKTORER` i `SolcelleBeregner` — og begge steder hvor den bruges (`<option>`-teksten og `vaelgStandardApparat`) går gennem `apparatNavn(s)`. Nyt `elberegner-locale.test.tsx` med **7 tests i da/se/no**, **verificeret modsvejs: 6 af 7 falder** med den gamle kode. Én skelnen i testen er værd at huske: **"Støvsuger" og "Ovn" er dansk *og* norsk**, så de må ikke stå i norsk-negativlisten — ellers låser testen fejlen ind, fordi den så mangler. Gate grøn: lint (550 filer), **1595 tests / 145 filer** (fra 1588 / 144) og build (141 sider). Kode + plan i ét commit på `ceo/locale-leak-runde1`. Se opgave 93. **Målingen er den egentlige leverance:** den er skrevet op med hele fundlisten og grunden til hvert afslag, så næste iteration ikke skal bruge en halv time på at finde de samme 30 døde strenge igen. Resten er skrevet op som opgave 94 (den uoversatte `tidszoner`-kopi) og opgave 95 (scriptet som harness, så næste måling er gratis).
 
 STATUS: KØ — **C64 er landet: 17 ubundne `<label>` på syv beregnere, hvor ét af fundene var værre end de øvrige — `/elberegner` havde ét navn på to felter.** Køen var tom (alle 91 opgaver færdige, intet `I GANG`), og planens egen "Efterladt, bevidst"-note fra C63 navngavnæste snit af label-klassen. Snittet er nu taget efter **hvad brugeren kan ramme** (Plausible 28d + GSC), ikke efter antal labels: `/leasing` (5 labels; 3.181 visninger i svensk GSC, 45 besøgende/28d på beraknare.se), `/elberegner` (3; 11 besøgende/28d SE, +83 %), `/enhedspris` (3; 1.144 visninger SE), `/vaegttab` (2; 1.186 visninger SE), `/pension` (2; **139 besøgende/28d DA**, +26 %), `/boernepenge` (1; **138 besøgende/28d DA**, +151 %) og `/loenstigning` (1; ny side på beraknare.se). Fire fund ud over bindingerne: **`/elberegner`s etiket "Apparat N" dækkede to felter** (vælger + navnfelt), så den var ikke bare ubundet — den var *tvetydig*, og en `<label>` må kun have én kontrol; den er nu en `role="group"` med `aria-labelledby`, og hvert felt har sit eget `aria-label` med samme præfiks. **`/enhedspris` skrev "Pris" og "Mængde" to gange** (vare A og B), altså to felter med samme synlige tekst pr. etiket-par; id'erne er derfor `enhedspris-pris-a/-b` og `enhedspris-maengde-a/-b` (ASCII, fordi et `id` med æøå er et spring i `querySelector`). **`/boernepenge`s indkomstfelt havde både en ubundet synlig etiket og en `aria-label` med andre ord** ("Husstandens samlede indkomst (årlig)" mod "Husstandens samlede årlige indkomst") — det er WCAG 2.5.3 *label in name*: det tilgængelige navn skal indeholde den synlige tekst, ellers stemmer stemmestyringen ikke med det, der står på skærmen. `aria-label`en er fjernet, så den synlige etikettetekst er navnet. **`/pension`s samlever-checkboks var *indpakket* i `<label>`** (gyldig HTML, virker med skærmlæser) men kunne ikke findes med `getByLabelText` — gjort eksplicit som i C63. `label-a11y.test.tsx` er udvidet fra 37 til **51 tests** i DA og SE, **verificeret modsvejs: alle 14 nye falder** med de gamle komponenter. **Harness-fix ud over feltbindingerne:** `label-a11y.test.tsx` havde to *uhandlede* `document.execCommand is not a function`-rejections fra `CopyResultButton`s jsdom-fallback, som gjorde at filen **exited 1 selv om alle 37 tests var grønne** — fundet ved at køre filen isoleret; `document.execCommand` er nu stubbet som i `BoligstoetteBeregner.test.tsx`. **Målingen er taget på ny igen:** et `<label>` tælles som bundet, hvis det har `for`/`htmlFor` **eller** et `id` brugt i `aria-labelledby`; den tælling kan heller ikke længere tage `${…}`-udtryk i template-literals for fejl (den gav `/elberegner` en falsk ubundet etiket, fordi `aria-labelledby={\`…\${index + 1}\`}` ikke kan sluges ordentligt). Før C64: **113 ubundne labels i 51 filer** (C63's note sagde 117/51 — de 8 skyldes bl.a. labels med `>` inde i attribut-udtryk, som `<label\b([^>]*)>` afkorter). Efter C64 er der **96 i 44 filer** tilbage, og alle syv rørte filer er helt rene. Gate grøn: lint (549 filer), **1588 tests / 144 filer** (fra 1574 / 144) og build (141 sider). Kode + plan i ét commit på `ceo/labels-runde4`, kode `b4e8335`, merge `1d8c117` 2026-09-27 04:28 CEST; første kandidatvindue **2026-09-27 07:30**. Se opgave 92. **Køen er ikke længere tom:** målingen afgav et nyt fund, der er skrevet op som **opgave 93** — de hardkodede danske strenge i live-komponenter, som er locale-leak på beraknare.se (research-fund #4's klasse). Den er næste iteration, fordi den er målbar, billig og en reel fejl.
@@ -6767,6 +6769,37 @@ efter datagrund:
    `/api/v1/loen`'s kommuneskat, domænerne og `www`-redirects.
 
 ### ❓ Til Mads
+- ❓ **SKAL `beregner.no` LANCERES, eller er navnet reserveret? (opgave 97).**
+  Målt under C66: `https://beregner.no/` svarer **200**, men `/moms`,
+  `/procent`, `/dato`, `/tidszone` og `/elberegner` svarer alle **404** — med
+  den danske "Siden finnes ikke"-side, ikke den `locale-unavailable`-side
+  middleware'en sender til. Koden siger imidlertid at `no` *skulle* have alle
+  de kalkulatorer (`isCalculatorAvailable("/moms", "no")` er `true`), og
+  `domain-config.ts:91` har dem i `hiddenDomains` med kommentaren "domains not
+  yet launched". Så det er en beslutning, der mangler, ikke en fejl — men den
+  gør C65's og C66's `no`-arbejde uverificerbart for virkelige brugere.
+  **De tre mulige svar er ikke ens** (se opgave 97): skal `no` lanceres snart, er
+  klassen af manglende norske strenge rigtig prioritet; skal det ikke, kan jeg
+  lukke porten så koden siger, hvad der sker, i stedet for at 404'en er en
+  bivirkning. **Jeg rører ikke domænet uden dit svar** — det er en
+  domænebeslutning, ikke en refaktor. Skriv blot "lanceres", "lanceres ikke"
+  eller "uvist" her i planen, så spørgsmåket er lukket.
+- ⏳ **VERIFICÉR DEPLOY: C66 `/tidszone` skrev "Aten" på minberegner.dk, fordi
+  de to tidszone-tabeller modsagde hinanden.** "Athen" er dansk, "Aten" er
+  svensk, og dropdown'en + huskelisten på den danske side skrev den svenske
+  form, mens brødteksten på *samme side* sagde "13 i Athen". Nu er der én række
+  pr. zone med dansk form + `bySe`/`navnSe` kun hvor svensk afviger (5 zoner),
+  samme konvention som `tidszone-reference.ts` allerede brugte. **Verificér
+  indhold, ikke HTTP 200** — hele fundet er i klient-renderede `<option>`-tekster:
+  1. `curl -s https://minberegner.dk/tidszone | rg 'value="greece"'` skal vise
+     **"Athen - Grækenland (EET/EEST)"**, ikke "Aten". Samme i huskelisten.
+  2. På **https://beraknare.se/tidszone** skal dropdowns sige **"Aten -
+     Grekland (EET/EEST)"** og **"Stockholm - Sverige (CET/CEST)"** — altså
+     uændret svensk, og "Athen" må ikke forekomme.
+  3. Tallet skal være uændret: 12:00 i København = 06:00 i New York, og Sydney
+     skal stadig stå `+8t (+10t om vinteren)`. Se VERIFICÉR DEPLOY-loggen for
+     den fulde liste. Kode + plan i ét commit på `ceo/tidszone-en-tabel`;
+     første kandidatvindue **2026-09-27 07:30**. Se opgave 94.
 - **Dansk UI-tekst på beraknare.se (opgave 93).** Fundet 2026-09-27 under
   C64's måling: `PensionBeregner` har mindst fem hardkodede danske strenge, og
   siden renderer på begge domæner. Der er sikkert mere af det samme i andre
@@ -7689,6 +7722,36 @@ landmark=lån, piggybank=opsparing osv.).
     - Gate grøn: lint ok, 280/280 tests, build ok (128 pages).
 
 ## VERIFICÉR DEPLOY-log
+- ⏳ **ÅBEN — C66 `/tidszone` skrev "Aten" på minberegner.dk — de to
+  tidszone-tabeller var slået sammen til én, og `dk`-zonens by hedder nu
+  København/Stockholm fra samme række som navnet.** Kode + plan i ét commit på
+  branch `ceo/tidszone-en-tabel`; første kandidatvindue **2026-09-27 07:30**.
+  Se opgave 94.**
+  **HTTP 200 beviser intet her:** hele fundet er i de klient-renderede
+  `<option>`-tekster og i huskelisten, og det er en *rettelse* af en forkert
+  streng, så en 200 er lige så lidt bevis som før.
+  1. Åbn **https://minberegner.dk/tidszone** og ånk **begge** dropdowns
+     ("Fra tidszone" og "Til tidszone"). **Grækenland** skal stå som
+     **"Athen - Grækenland (EET/EEST)"** — ikke "Aten". Gør et
+     `curl -s https://minberegner.dk/tidszone | rg 'value="greece"'` og se at
+     rækken siger `Athen`.
+  2. Rul ned til **"Tidsforskel fra Danmark"**-listen. Der skal stå **"Athen"**
+     med `+1t`. Før stod der "Aten".
+  3. **Brødteksten skal stadig sige "13 i Athen"** (den kommer fra
+     `tidszone-reference.ts`) — den er dansk hele tiden og må ikke være ændret.
+  4. **Danmark-zonen skal være uændret på dansk:** "København - Danmark
+     (CET/CEST)" i dropdowns, "København - Danmark (CET/CEST)" som delt tekst.
+  5. Samme på **https://beraknare.se/tidszone**: dropdowns skal sige
+     **"Stockholm - Sverige (CET/CEST)"** og **"Aten - Grekland (EET/EEST)"**,
+     altså uændret svensk. Og **"Athen" må ikke forekomme** på den side.
+  6. **Beregneren skal give præcis samme tal som før** — den ændrede kode rører
+     ingen offset: 12:00 i København = 06:00 i New York, 12:00 i København =
+     19:00 i Tokyo i sommer (20:00 i vinter). Tjek især at `+8t (+10t om
+     vinteren)` for Sydney og `+7t (+8t om vinteren)` for Tokyo stadig står.
+  7. Et gammelt delt link skal stadig virke: åbn
+     `/tidszone?d=<type:tidszone|inputs:fraTidszone=dk>`-formateret link fra
+     **Kopiér link** på dansk — "Fra tidszone" skal stadig stå på Danmark.
+  8. `https://minberegner.dk/api/health` skal svare `status: ok`.
 - ⏳ **ÅBEN — C64 17 ubundne labels på syv beregnere, ét navn på to felter i
   `/elberegner` og en `aria-label` der modsagde sin egen synlige etiket i
   `/boernepenge` — kode + plan i ét commit på branch `ceo/labels-runde4`, kode
@@ -8946,7 +9009,7 @@ landmark=lån, piggybank=opsparing osv.).
   uafklarede kandidat, og den er den dyreste (84 strenge + SEO-tekst der hårdkoder
   `getHomeCalculatorCount("da")`).
 
-#### 94. [ ] 2026-09-27 — C66 — `TidszoneBeregner` har to tidszone-tabeller, kun den ene oversat
+#### 94. [x] 2026-09-27 — C66 — `TidszoneBeregner` havde to tidszone-tabeller, kun den ene oversat — og den danske havde "Aten"
 
 - **Datagrund:** fundet under C65's måling. `TidszoneBeregner.tsx:39-57` har en
   `tidszoner`-array med danske lande- og bynavne ("Storbritannien",
@@ -8975,6 +9038,44 @@ landmark=lån, piggybank=opsparing osv.).
 - **MÅL:** `/tidszone` 24.723 visninger i DA-GSC (0,5 % CTR) og 3.189 i SE-GSC,
   15 besøgende/28d på beraknare.se pr. 2026-09-27. **Mål 2026-10-11** (eller
   før: reelt for brugeren, hvis en zone-post tilføjes).
+- **RESULTAT (C66, se STATUS):** alle fire acceptkriterier er opfyldt. Ad 2:
+  `TIDSZONER_BEREGNER` er **beholdt** — ikke fordi `src/app` bruger den
+  (`rg` giver nul fund uden for testen), men fordi testens offset-krydscheck mod
+  `tidszone-reference.ts` skal kunne læse den, og en død indgang i en død
+  tabel er dækkets eneste grund til at eksistere. Den har nu en doc-kommentar,
+  der siger præcis det. Ad 3: 4 nye tests, 3 verificeret modsvejs.
+- **Den egentlige fund — "Aten" på minberegner.dk.** Acceptkriterium 1's
+  forudsætning ("det er ikke en synlig fejl i dag") holdt kun for de *andre*
+  felter. Ved at slå tabellerne sammen forsvandt de 32 `navn`/`by`-linjer i
+  `labels` — og da den danske `by.greece` forsvandt, stod der "Athen" tilbage
+  fra arrayet, som hele tiden havde haft den danske form. De to tabeller havde
+  altså **modsagt hinanden om bynavne**, og den danske side læste den forkerte.
+  Bevis på det live site, før rettelsen:
+  `https://minberegner.dk/tidszone` → `<option value="greece">Aten - Grækenland
+  (EET/EEST)</option>` (2×, begge vælgere) + `<span
+  class="dark:text-gray-300">Aten</span>` i huskelisten, mens brødteksten på
+  samme side siger "13 i Athen" (fra `tidszone-reference.ts`, som havde
+  `by: "Athen", bySe: "Aten"` hele tiden). Konklusionen er generel, ikke lokal:
+  **en dublet-tabel er ikke altid en fejl, men den er næsten altid et sted, hvor
+  de to holdt oppe hinanden i stedet for hinanden.** De tre tabeller holdt
+  hinanden oppe; kun `tidszone-reference.ts` havde det rigtige svar, og ingen
+  læste den anden.
+- **Fund uden for scope, målt fordi de lå i vejen — begge skal have en opgave:**
+  1. **`/tidszone` — og alle andre kalkulatorer — 404'er på beregner.no.**
+     Målt 2026-09-27: `/` → 200, men `/moms`, `/procent`, `/dato`, `/tidszone`
+     og `/elberegner` → 404 med den danske `not-found`-side, **ikke** den
+     `locale-unavailable`-rewrite middleware'en laver. Kodeporten siger imidlertid
+     ja: `isCalculatorAvailable("/moms", "no")` er `true` (`/moms` har hverken
+     `daOnly` eller `seOnly`). Og `domain-config.ts:91` har
+     `hiddenDomains = new Set(["localhost", "beregner.no"])` — beregner.no er et
+     **ikke lanceret** domæne. Følgen er reel og bør stå i planen, fordi den
+     gør C65's NO-arbejde forebyggende: **`no`-strenge er ikke synlige for nogen i
+     dag.** Skrevet op som opgave 97.
+  2. **`TidszoneBeregner` har intet `no`-sprog.** `labels` har kun `da` og `se`,
+     så `l = labels[locale] || labels.da` giver dansk på beregner.no den dag
+     domænet lanceres — 24 timers advarsel om hele danske tidszoneværktøjet.
+     Usynligt nu af (1). C66 gør det i det mindste *rene* med `erSvensk` ét
+     sted, men retter ikke `no`. Skrevet op som opgave 98.
 
 #### 95. [ ] 2026-09-27 — C67 — gør locale-leak-målingen til et script, så den ikke koster en halv time igen
 
@@ -9021,6 +9122,57 @@ landmark=lån, piggybank=opsparing osv.).
   grøn. 4. bounce på beraknare.se `/` genmåles 2026-10-11.
 - **MÅL:** beraknare.se `/` 20 besøgende/28d, bounce 75 % pr. 2026-09-27.
   **Mål 2026-10-11.**
+
+#### 97. [ ] 2026-09-27 — C69 — afklar om beregner.no skal lanceres, eller porten skal lukke `no`
+
+- **Datagrund:** målt under C66. `https://beregner.no/` svarer **200**, men
+  `/moms`, `/procent`, `/dato`, `/tidszone` og `/elberegner` svarer alle **404**
+  med den danske `not-found`-side — ikke den `locale-unavailable`-rewrite
+  middleware'en sender ukendte domæner til. Kodeporten siger imidlertid ja:
+  `isCalculatorAvailable("/moms", "no")` er `true`, fordi `/moms` hverken har
+  `daOnly` eller `seOnly` i `calculator-list.ts:79`.
+- **Hvorfor det ikke er en refaktor men en beslutning:** det er **forventeligt** ud fra
+  `domain-config.ts:91`, `hiddenDomains = new Set(["localhost", "beregner.no"])` —
+  kommentaren siger eksplicit "domains not yet launched". Det er altså en
+  beslutning, der mangler, ikke en fejl. Men beslutningen er uafskrevet i koden,
+  og **den gør C65's og C66's arbejde uverificerbart for `no`**: de oversatte
+  `no`-strenge kan ikke ses af nogen, og ingen test kan se dem live.
+- **Scope (kræver Mads' svar, ikke en iteration):** er `beregner.no` et domæne
+  der skal lanceres snart, eller et reserveret navn? Der er tre mulige svar, og
+  de er **ikke** ens:
+  1. **Lanceres snart** → så er `no`-klassen (opgave 98) rigtig prioritet, og
+     alle `no`-fund fra C65/C66 skal måles live i stedet for i tests.
+  2. **Lanceres ikke** → `no` skal lukkes eksplicit i `calculator-list.ts` (alle
+     ikke-`daOnly`/`seOnly`-defs skal få `no`-porte, eller `isCalculatorAvailable`
+     skal kræve et eksplicit `no`-flag), så koden siger hvad der sker, og 404'en
+     er en *beslutning* i stedet for en *bivirkning*.
+  3. **Uafklaret** → skriv det i planen som et `❓ Til Mads`-spørgsmål og lad
+     porten være som den er, men noter at `no` er ubevidst ubeskyttet.
+- **Acceptkriterier:** 1. `❓ Til Mads` har spørgsmålet. 2. Uanset svar står der
+  en linje i `IMPLEMENTATION_PLAN.md` om hvad `no` er: lanceret, lukket eller
+  uafklaret. 3. Gaten grøn. **Ingen kodeændring uden Mads' svar** — lukning af
+  et domæne er en domænebeslutning, ikke en refaktor.
+
+#### 98. [ ] 2026-09-27 — C70 — `TidszoneBeregner` har intet `no`-sprog (afhænger af opgave 97)
+
+- **Datagrund:** målt under C66. `labels` i `TidszoneBeregner.tsx` har kun `da`
+  og `se`, og `const l = labels[locale] || labels.da` giver derfor **dansk** på
+  beregner.no — hele værktøjet, inklusive dropdown, huskeliste, klokkeslæt og
+  sommertidsnote. Usynligt i dag, fordi beregner.no 404'er på alt ud over `/`
+  (opgave 97), men det er 24 timers advarsel om et dansk domæne.
+- **Afhængighed:** opgave 97. Hvis svaret er "lanceres ikke", er denne opgave
+  **gratuleringens fallenhed** — så er det nok at slå `no` fra i porten. Hvis
+  svaret er "lanceres snart", skal `TidszoneBeregner` have et rigtigt `no`-sprog:
+  `Tidssone`, `Fra tidssone`, `Timeforskjell`, `timer`, `(dagen før)`,
+  `(neste dag)`, `Tidsforskjell fra Norge`, `hjemmetidssonen er Norge` — samme
+  mønster som C65 gjorde for `STANDARD_APPARATER` (`navnNo` pr. post), altså
+  **ikke** en `labels.no`-nøgle, fordi `by`/`navn` nu ligger i rækkerne.
+- **Acceptkriterier:** hvis domænet er lukket: `isCalculatorAvailable("/tidszone", "no")`
+  er `false` med en test på det. Hvis domænet er live: `TidszoneBeregner.test.tsx`
+  kører i **da, se og no**, og `no`-renderet indeholder ingen danske
+  `navn`/`by`-former. Gaten grøn i begge tilfælde.
+- **MÅL:** ingen brugerdata endnu — beregner.no har ingen trafikmåling. Mål først
+  14 dage efter en eventuel lancering.
 
 
 - **Datagrund:** fundet under C64's måling af label-klassen.
@@ -9155,12 +9307,16 @@ landmark=lån, piggybank=opsparing osv.).
 
 ### Næste kandidater efter C64
 
-1. **Opgave 93 — de hardkodede danske strenge i live-komponenter.** Fundet under
-   C64: `/pension` har mindst fem. Det er research-fund #4's locale-leak, og den
-   er værst hvor den er synlig for en svensk læser. Den skal måles før den
-   rettes: et script der finder `<label>`, `<option>`, `<h2>` og knaptekster
-   med danske tegn/s ord i `src/components/*Beregner.tsx`, krydschecket mod
-   hvor mange af de sider der faktisk renderer på beraknare.se.
+0. **✅ Opgave 94 lukket i C66** — se opgave 94 og C66-STATUS. **Den lærer
+   opgave 95 noget vigtigt:** C65 brugte 20 minutter på en måling med 1 fund ud
+   af 31, fordi tabellerne lå spredt. C66 fandt derimod en *synlig* fejl på 2
+   minutter ved bare at slå to tabeller sammen. **Så når opgave 95's script
+   scanner for "danske strenge i modulscope", skal det også lede efter
+   dubletter** — to strukturer der beskriver det samme. Det er den fejltype der
+   kostede C65 sin tid, og den er ikke en tekstscanning.
+1. ~~**Opgave 93 — de hardkodede danske strenge i live-komponenter.**~~ —
+   **Lukket i C65 del 1** (1 bekræftet fejl ud af 31 fund) og målingen er
+   delvis lukket af C66. Resten kræver opgave 95's script, ikke en ny måling.
 2. **Resten af label-klassen: 44 filer / 96 ubundne labels** (C64 lukkede
    7 filer / 17 labels). Samme rækkefølge: efter bruger-relevante data før
    efter antal. `/efterloen` (6) er den eneste der endnu er uberørt og har
@@ -9168,5 +9324,9 @@ landmark=lån, piggybank=opsparing osv.).
 3. **De 10 øvrige komponenter med `toFixed(2)`** (C53 sagde 18, `git grep`
    tæller 11) og resten af rækken i klassen "hvad skriver den tekst, brugeren
    kopierer?" — `/brok` (4.640 visninger) er stadig først i den række.
-4. **Mål 2026-10-10 / 2026-10-11** (se Måleprotokol): C1-C16 og C35-C64 måles
+4. **Nye tabeller i C66: opgave 97 (er `no` lanceret?) og opgave 98
+   (`TidszoneBeregner` mangler et `no`-sprog).** 97 er et spørgsmål til Mads og
+   skal skrives i `❓ Til Mads` — den næste iteration kan godt starte med det og
+   gå videre med 95, fordi svaret ikke låser noget kodearbejde.
+5. **Mål 2026-10-10 / 2026-10-11** (se Måleprotokol): C1-C16 og C35-C66 måles
    14 dage efter deres snapshot, og resultatet skrives ved siden af hver opgave.

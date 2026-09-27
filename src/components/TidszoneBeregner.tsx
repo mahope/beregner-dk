@@ -10,13 +10,32 @@ import { useLocale } from "@/components/LocaleProvider";
 import { utcOffsetMinutter, type DstRegel } from "@/lib/sommertid";
 import { formatNumber } from "@/lib/format";
 
+/**
+ * Én række pr. tidszone. Navn og by ligger i *samme* række som offsetten, så
+ * en zone ikke kan have en dansk by og et svensk navn.
+ *
+ * `navn` og `by` er den danske form. `navnSe`/`bySe` er kun sat, når den
+ * svenske form afviger — samme konvention som `src/lib/tidszone-reference.ts`
+ * (`by` + `bySe`), så de to tabeller læses ens.
+ *
+ * Før C66 lå de samme oplysninger to steder: dette array med danske navne, og et
+ * `labels`-objekt med `navn`/`by` pr. locale, som displayen brugte. Arrayet var
+ * altså halvt dødt, og en redigering der havde brugt `tz.navn` ville have skrevet
+ * dansk på beraknare.se uden at nogen test kunne se det. Én række, én oversættelse.
+ */
 interface Tidszone {
   id: string;
+  /** Zonenavn med offset-forklaring, fx "Danmark (CET/CEST)". Dansk form. */
   navn: string;
+  /** Svensk form af `navn`, når den afviger. */
+  navnSe?: string;
   offset: number; // UTC offset i minutter (vintertid)
   offsetSommer?: number; // UTC offset i minutter (sommertid)
   dst: DstRegel;
+  /** Byen i zonen, fx "København". Dansk form. */
   by: string;
+  /** Svensk form af `by`, når den afviger (Athen = Aten). */
+  bySe?: string;
 }
 
 /** Hjemtidszonen (Danmark på .dk, Sverige på .se): CET = UTC+1, CEST = UTC+2. */
@@ -25,8 +44,9 @@ const HJEM_SOMMER = 120;
 const HJEM_DST: DstRegel = "eu";
 
 // `dk` er id'et for hjemtidszonen. Danmark og Sverige deler CET/CEST (UTC+1/+2),
-// så id'et og offsettet er uændret, mens navn og by mærkes pr. locale. Det holder
-// gamle delte links (`?d=...fraTidszone=dk`) gyldige på begge domæner.
+// så id'et og offsettet er uændret, mens navn og by mærkes pr. locale med `Se`-
+// varianter. Det holder gamle delte links (`?d=...fraTidszone=dk`) gyldige på
+// begge domæner.
 //
 // `offsetSommer` og `dst` er nødvendige, fordi vinteroffsetten alene gav
 // forkerte svar i den del af året, hvor Danmark har sommertid. Forskellen til
@@ -36,11 +56,17 @@ const HJEM_DST: DstRegel = "eu";
 // bevægelse, brugeren ellers ikke så. `src/lib/sommertid.ts` slår sommer-
 // perioden op, og `TidszoneBeregner.test.tsx` holder offsettene samstemt med
 // `src/lib/tidszone-reference.ts`, som sidder i brødteksten.
+//
+// Kun de zoner, hvor den svenske form faktisk afviger, har en `Se`-variant:
+// Danmark/Sverige, USA's to kyster, Grækenland og Grønland. Resten står med det
+// samme ord på begge sprog (London, Tokyo, Dubai, São Paulo …), så en `navnSe`
+// der bare gentager `navn` ville være en løgn, testen `de zoner der afviger …`
+// fanger.
 const tidszoner: Tidszone[] = [
-  { id: "dk", navn: "Danmark (CET/CEST)", offset: 60, offsetSommer: 120, dst: "eu", by: "København" },
+  { id: "dk", navn: "Danmark (CET/CEST)", navnSe: "Sverige (CET/CEST)", offset: 60, offsetSommer: 120, dst: "eu", by: "København", bySe: "Stockholm" },
   { id: "uk", navn: "Storbritannien (GMT/BST)", offset: 0, offsetSommer: 60, dst: "eu", by: "London" },
-  { id: "us_east", navn: "USA Østkyst (EST/EDT)", offset: -300, offsetSommer: -240, dst: "us", by: "New York" },
-  { id: "us_west", navn: "USA Vestkyst (PST/PDT)", offset: -480, offsetSommer: -420, dst: "us", by: "Los Angeles" },
+  { id: "us_east", navn: "USA Østkyst (EST/EDT)", navnSe: "USA Östkusten (EST/EDT)", offset: -300, offsetSommer: -240, dst: "us", by: "New York" },
+  { id: "us_west", navn: "USA Vestkyst (PST/PDT)", navnSe: "USA Västkusten (PST/PDT)", offset: -480, offsetSommer: -420, dst: "us", by: "Los Angeles" },
   { id: "japan", navn: "Japan (JST)", offset: 540, dst: "ingen", by: "Tokyo" },
   { id: "china", navn: "Kina (CST)", offset: 480, dst: "ingen", by: "Beijing" },
   { id: "australia", navn: "Australien (AEST)", offset: 600, offsetSommer: 660, dst: "au", by: "Sydney" },
@@ -49,13 +75,18 @@ const tidszoner: Tidszone[] = [
   { id: "brazil", navn: "Brasilien (BRT)", offset: -180, dst: "ingen", by: "São Paulo" },
   { id: "germany", navn: "Tyskland (CET/CEST)", offset: 60, offsetSommer: 120, dst: "eu", by: "Berlin" },
   { id: "france", navn: "Frankrig (CET/CEST)", offset: 60, offsetSommer: 120, dst: "eu", by: "Paris" },
-  { id: "greece", navn: "Grækenland (EET/EEST)", offset: 120, offsetSommer: 180, dst: "eu", by: "Athen" },
-  { id: "greenland", navn: "Grønland (WGT/WGST)", offset: -180, offsetSommer: -120, dst: "eu", by: "Nuuk" },
+  { id: "greece", navn: "Grækenland (EET/EEST)", navnSe: "Grekland (EET/EEST)", offset: 120, offsetSommer: 180, dst: "eu", by: "Athen", bySe: "Aten" },
+  { id: "greenland", navn: "Grønland (WGT/WGST)", navnSe: "Grönland (WGT/WGST)", offset: -180, offsetSommer: -120, dst: "eu", by: "Nuuk" },
   { id: "thailand", navn: "Thailand (ICT)", offset: 420, dst: "ingen", by: "Bangkok" },
   { id: "singapore", navn: "Singapore (SGT)", offset: 480, dst: "ingen", by: "Singapore" },
   { id: "south_africa", navn: "Sydafrika (SAST)", offset: 120, dst: "ingen", by: "Johannesburg" },
 ];
 
+/**
+ * Den fælles tabel. Eksporteres, fordi `TidszoneBeregner.test.tsx` krydschecker
+ * offsettene mod `src/lib/tidszone-reference.ts` — den eneste anden tabel med
+ * de samme zoner. Der er ingen anden forbruger i `src/app`.
+ */
 export const TIDSZONER_BEREGNER = tidszoner;
 
 export default function TidszoneBeregner() {
@@ -63,32 +94,6 @@ export default function TidszoneBeregner() {
 
   const labels = {
     da: {
-      navn: {
-        dk: "Danmark (CET/CEST)",
-        uk: "Storbritannien (GMT/BST)",
-        us_east: "USA Østkyst (EST/EDT)",
-        us_west: "USA Vestkyst (PST/PDT)",
-        japan: "Japan (JST)",
-        china: "Kina (CST)",
-        australia: "Australien (AEST)",
-        india: "Indien (IST)",
-        dubai: "Dubai (GST)",
-        brazil: "Brasilien (BRT)",
-        germany: "Tyskland (CET/CEST)",
-        france: "Frankrig (CET/CEST)",
-        greece: "Grækenland (EET/EEST)",
-        greenland: "Grønland (WGT/WGST)",
-        thailand: "Thailand (ICT)",
-        singapore: "Singapore (SGT)",
-        south_africa: "Sydafrika (SAST)",
-      } as Record<string, string>,
-      by: {
-        dk: "København", uk: "London", us_east: "New York", us_west: "Los Angeles",
-        japan: "Tokyo", china: "Beijing", australia: "Sydney", india: "Mumbai",
-        dubai: "Dubai", brazil: "São Paulo", germany: "Berlin", france: "Paris",
-        thailand: "Bangkok", singapore: "Singapore", south_africa: "Johannesburg",
-        greece: "Aten", greenland: "Nuuk",
-      } as Record<string, string>,
       nowIn: (by: string) => `Klokken nu i ${by}`,
       fromZone: "Fra tidszone",
       toZone: "Til tidszone",
@@ -119,32 +124,6 @@ export default function TidszoneBeregner() {
       dateLocale: "da-DK",
     },
     se: {
-      navn: {
-        dk: "Sverige (CET/CEST)",
-        uk: "Storbritannien (GMT/BST)",
-        us_east: "USA Östkusten (EST/EDT)",
-        us_west: "USA Västkusten (PST/PDT)",
-        japan: "Japan (JST)",
-        china: "Kina (CST)",
-        australia: "Australien (AEST)",
-        india: "Indien (IST)",
-        dubai: "Dubai (GST)",
-        brazil: "Brasilien (BRT)",
-        germany: "Tyskland (CET/CEST)",
-        france: "Frankrike (CET/CEST)",
-        greece: "Grekland (EET/EEST)",
-        greenland: "Grönland (WGT/WGST)",
-        thailand: "Thailand (ICT)",
-        singapore: "Singapore (SGT)",
-        south_africa: "Sydafrika (SAST)",
-      } as Record<string, string>,
-      by: {
-        dk: "Stockholm", uk: "London", us_east: "New York", us_west: "Los Angeles",
-        japan: "Tokyo", china: "Beijing", australia: "Sydney", india: "Mumbai",
-        dubai: "Dubai", brazil: "São Paulo", germany: "Berlin", france: "Paris",
-        thailand: "Bangkok", singapore: "Singapore", south_africa: "Johannesburg",
-        greece: "Aten", greenland: "Nuuk",
-      } as Record<string, string>,
       nowIn: (by: string) => `Klockan nu i ${by}`,
       fromZone: "Från tidszon",
       toZone: "Till tidszon",
@@ -169,6 +148,16 @@ export default function TidszoneBeregner() {
     },
   } as const;
   const l = labels[locale as keyof typeof labels] || labels.da;
+
+  // Én afgørelse for hele komponenten: er vi på svensk? Zonenavnene læser den
+  // samme afgørelse som `labels`, så en ny locale uden eget `labels`-objekt
+  // (i dag `no`, som ikke er live endnu) får ét sprog frem for at blande danske
+  // zonenavne med dansk brødtekst. Før C66 blev det samme spørgsmål stillet på
+  // to måder — ét sted som `labels[locale] || labels.da` og ét sted som et
+  // bogstaveligt `locale === "se"` — og de to kan glide fra hinanden.
+  const erSvensk = l === labels.se;
+  const zoneBy = (tz: Tidszone) => (erSvensk ? tz.bySe ?? tz.by : tz.by);
+  const zoneNavn = (tz: Tidszone) => (erSvensk ? tz.navnSe ?? tz.navn : tz.navn);
 
   const [fraTidszone, setFraTidszone] = useState<string>("dk");
   const [tilTidszone, setTilTidszone] = useState<string>("us_east");
@@ -323,18 +312,18 @@ export default function TidszoneBeregner() {
   // før C52 lagde dem i samme kald).
   const forskelsaetning = () =>
     l.diffSentence(
-      l.by[beregning.tilTz.id],
+      zoneBy(beregning.tilTz),
       formaterForskel(Math.abs(beregning.forskelTimer)),
       beregning.forskelTimer >= 0,
-      l.by[beregning.fraTz.id]
+      zoneBy(beregning.fraTz)
     );
 
   const deltTekst = () =>
     l.summary(
       formatTid(timer, minutter),
-      l.by[beregning.fraTz.id],
+      zoneBy(beregning.fraTz),
       formatTid(beregning.tilTimer, beregning.tilMinutter),
-      l.by[beregning.tilTz.id],
+      zoneBy(beregning.tilTz),
       getDagTekst(),
       forskelsaetning(),
       formatDatoLang(aktuelTid)
@@ -345,11 +334,11 @@ export default function TidszoneBeregner() {
       {/* Aktuelle tider */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-center">
-          <p className="text-sm text-gray-600 dark:text-gray-400">{l.nowIn(l.by[beregning.fraTz.id])}</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400">{l.nowIn(zoneBy(beregning.fraTz))}</p>
           <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">{formatDato(beregning.fraLokalTid)}</p>
         </div>
         <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
-          <p className="text-sm text-gray-600 dark:text-gray-400">{l.nowIn(l.by[beregning.tilTz.id])}</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400">{l.nowIn(zoneBy(beregning.tilTz))}</p>
           <p className="text-3xl font-bold text-green-600 dark:text-green-400">{formatDato(beregning.tilLokalTid)}</p>
         </div>
       </div>
@@ -366,7 +355,7 @@ export default function TidszoneBeregner() {
           >
             {tidszoner.map((tz) => (
               <option key={tz.id} value={tz.id}>
-                {l.by[tz.id]} - {l.navn[tz.id]}
+                {zoneBy(tz)} - {zoneNavn(tz)}
               </option>
             ))}
           </select>
@@ -381,7 +370,7 @@ export default function TidszoneBeregner() {
           >
             {tidszoner.map((tz) => (
               <option key={tz.id} value={tz.id}>
-                {l.by[tz.id]} - {l.navn[tz.id]}
+                {zoneBy(tz)} - {zoneNavn(tz)}
               </option>
             ))}
           </select>
@@ -441,12 +430,12 @@ export default function TidszoneBeregner() {
       <div className="p-8 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-2xl text-white">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
           <div className="text-center">
-            <p className="text-sm opacity-75">{l.by[beregning.fraTz.id]}</p>
+            <p className="text-sm opacity-75">{zoneBy(beregning.fraTz)}</p>
             <p className="text-4xl font-bold">{formatTid(timer, minutter)}</p>
           </div>
           <div className="text-center text-4xl">→</div>
           <div className="text-center">
-            <p className="text-sm opacity-75">{l.by[beregning.tilTz.id]}</p>
+            <p className="text-sm opacity-75">{zoneBy(beregning.tilTz)}</p>
             <p className="text-4xl font-bold">
               {formatTid(beregning.tilTimer, beregning.tilMinutter)}
             </p>
@@ -485,10 +474,10 @@ export default function TidszoneBeregner() {
                 const forskelVinter =
                   (utcOffsetMinutter(tz.offset, tz.offsetSommer, tz.dst, vinterDato) - hjemVinter) / 60;
                 const viserVinter = forskelVinter !== forskel;
-                const vinterOrd = locale === "se" ? "på vintern" : "om vinteren";
+                const vinterOrd = erSvensk ? "på vintern" : "om vinteren";
                 return (
                   <div key={tz.id} className="flex justify-between p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded">
-                    <span className="dark:text-gray-300">{l.by[tz.id]}</span>
+                    <span className="dark:text-gray-300">{zoneBy(tz)}</span>
                     <span className="font-mono dark:text-white">
                       {forskel >= 0 ? '+' : ''}{formaterForskel(forskel)}{l.hourSuffix}
                       {viserVinter && (
