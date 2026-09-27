@@ -7790,7 +7790,7 @@ landmark=lån, piggybank=opsparing osv.).
     - Gate grøn: lint ok, 280/280 tests, build ok (128 pages).
 
 ## VERIFICÉR DEPLOY-log
-- ⏳ **VERIFICÉR DEPLOY: C74: måleren for knapgrupper uden navn (`scripts/knapgruppe-scan.mjs` + `src/lib/group-scan-gate.test.ts`, 9 tests) og planen.** Kode + plan i ét commit på `ceo/knapgruppe-scan`. Første kandidatvindue **2026-09-27 12:30**.**
+- ⏳ **VERIFICÉR DEPLOY: C74: måleren for knapgrupper uden navn (`scripts/knapgruppe-scan.mjs` + `src/lib/group-scan-gate.test.ts`, 9 tests) og planen.** Kode `1918cae`, merge `a05edd5` 2026-09-27 08:46 CEST på branch `ceo/knapgruppe-scan`. Første kandidatvindue **2026-09-27 12:30**.**
   **HTTP 200 beviser intet:** intet af dette rører `src/lib/` eller en beregning — kun et script og en testfil under `src/lib/`. Sådan verificeres det:
   1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
   2. `node scripts/knapgruppe-scan.mjs` skal give **10 filer / 12 uavngivne** — uændret, fordi scanneren kun læser `src/` og tallene derfor er identiske lokalt og live. Det beviser at *filerne* kom med, ikke at nogen beregning ændrede sig.
