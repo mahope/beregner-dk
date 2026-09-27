@@ -1,3 +1,5 @@
+STATUS: KØ — **C84 er landet: `/tidszone`'s egen meta-tekst løj om sit eget indhold. Den lovede "tidsforskel til 12 byer" i den indekserede beskrivelse — tabellen har haft 16 byer siden C46 lagde fire i, og nu 21.** Køen havde ingen `I GANG`-opgave, så dette er C82's åbne kandidat #1 og #2's fætter: mål autocomplete, se hvad siden svarer på. **Målt først:** DA-autocomplete (`hl=da`, `gl=dk`, 13:00) giver **10 variationer under "hvad er klokken i usa"** — bl.a. "…når den er 12 i danmark" (GSC: 180 visninger, pos. 6), "…når den er 21 i danmark", "…når den er 14 i danmark", "…når den er 16 i danmark", "…est", "…los angeles" — og **10 under "tidsforskel"**, hvoraf fire pegede på byer, siden ikke havde: **"tidsforskel thailand", "tidsforskel bali danmark", "tidsforskel tyrkiet", "tidsforskel new york"** (den fandtes), mens "hvad er klokken i" spørger efter **Thailand, Tyrkiet, Canada og Spanien**. SE-autocomplete (`hl=se`, `gl=se`) spørger om Japan, Grønland, Island og Australien — dem har siden alle. **Rettelsen:** de fem manglende destinationer i `src/lib/tidszone-reference.ts` — **Toronto** (UTC-5/-4, som New York), **Madrid** (følger Danmarks CEST), **Istanbul** (fast UTC+3, Tyrkiet afskaffede sommertid i 2016), **Bangkok** (fast UTC+7) og **Denpasar (Bali)** (fast UTC+8) — **21 byer i alt**, to nye FAQ-par i `page-data.ts` med navngivet sommer/vinter ("I dansk sommertid er det 17 i Bangkok, 13 i Istanbul og 06 i Toronto … I vintertid er det 18, 14 og 06"), og **metaDescription rettet fra "12 byer" til "21 byer" i begge sprog** (SE: "till 12 städer" → "till 21 städer"). **Fundet ud over målingen — og det er pointen med at læse ens egen tekst:** `metaDescription` lovede 12 byer, fordi C46 tilføjede fire uden at røre den. Det er en *indekseret* løgn om sit eget indhold, altså præcis CTR-klassen Fase 3 prioriterer, fundet ved at koble to filer sammen i stedet for at læse dem hver for sig. **Harness:** `tidszone-reference.test.ts` **7 → 9 tests** — ét med de fem nye rækkers tal, ét der **udleder tallet af byer fra `metaDescription` i `da` og `se` og kræver at det er lig med `TIDSZONER.length`**, så den samme afdrift ikke kan komme tilbage ved næste tilføjelse. **Modsvejs verificeret: begge nye tests falder** med den gamle kode. **Målefejl nr. 13 (min egen, samme klasse som nr. 9-12):** min første regex var `/til (\d+) (?:byer|städer)/` — den er væk på den svenske "till", så `Number(undefined)` gav **NaN**, og testen ville have været grøn for alt andet end ét tal. Rettet til `/till? (\d+)/`; fundet fordi testen *faldt* med NaN i stedet for med 12 mod 21. Gate grøn: lint (556 filer), **1724 tests / 151 filer** (fra 1722 / 151), build (**141 sider**). Kode + plan i ét commit på `ceo/tidszone-destinationer`; se opgave 113. **MÅL:** `/tidszone` baseline **24.485 visninger / 110 klik / CTR 0,4 % / pos. 7,5 pr. 2026-08-28 → 2026-09-25** — måles igen 2026-10-11.
+
 STATUS: KØ — **C83 er landet: `/moms` er sitets fjerdestørste danske side i Google (23.225 visninger, CTR 0,2 %, pos. 6,9) og den havde svar på nul af de spørgsmål, dens egen søgeklynge stiller — den forklarede i stedet, hvilke *ydelser* der er momsfrie, mens folk spørger om *varer*.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den), så valget var C82's egen åbne kandidat #3: samme metode på de næste GSC-sider. **Målt først, rettet så.** DA-autocomplete (`hl=da`, `gl=dk`, hentet 13:00 i dag) giver **19 variationer under "moms på"** — "moms på bøger", "moms på fødevarer", "moms på parkering", "moms på træning", "moms på frugt og grønt", "moms på bøger afskaffes hvornår" — og **6 under "hvordan trækker man moms fra"** ("…et beløb", "…et tal", "…et køb", "25 moms fra", "tysk moms fra"). Siden havde **0** af dem: den nævner ingen vare, og den eneste omtale af bøger var i en liste om undtagne *ydelser*. **Den konkrete asymmetri — C82's metode:** SE-siden har *tre* satser og siger, hvilke varer der bruger hvilken ("12 %: livsmedel", "6 %: böcker"), mens DA-siden siger "25 %" og intet om varer. Det er altså ikke et tilfælde, men den ene sproggren mangler det svar den anden har. **Rettelsen:** to nye synlige afsnit ("Der er kun én dansk momssats — også på fødevarer" og "Er der moms på det, jeg køber? Sådan tjekker du det"), **fire nye FAQ-par i `page-data.ts`** — som dermed også kommer i JSON-LD'en — og **én faglig præcisering: listen sagde "Aviser og tidsskrifter (0% moms)"**, hvilket er forkert i lovterminologien: en vare der er undtaget fra momsloven har ingen moms, ikke 0 % moms. Bøger, aviser og tidsskrifter står nu samlet, og siden siger eksplicit hvorfor det betyder noget (prisen er den samme med og uden moms) — og at Sverige gør det modsat. **Tal der kan efterprøves:** en bog til 249 kr. koster 249 kr.; en fødevare til 80 kr. ekskl. moms koster 100 kr. inkl. moms; 1.250 kr. inkl. moms ÷ 1,25 = 1.000 kr. ekskl. moms. `/tidszone` og `/renteberegner` blev **ikke** rørt — de er målt næste iteration, fordi de er C83's arv, hvis tiden rækker. **Én kildefejl jeg ikke skjuler:** jeg fik **ikke** hentet momslovens konsoliderede tekst (retsinformation.dk er en JS-side, webfetch gav tomt svar; skat.dk/erhverv/moms er kun navigation). Pastandene er derfor skrevet om Danmarks sats og undtagelser uden et dybt link, og **skal efterprøves mod momsloven, før de bruges i en annonce eller et blogindlæg.** **Harness:** `page.test.tsx` er **3 → 6 tests** — ét der kræver alle fem konkrete svar, ét der *forbyder* den gamte "0% moms"-sætning, ét der kræver de fire nye spørgsmål i FAQ'en — **verificeret modsvejs: alle 3 falder** med den gamle kode (`git stash` + kørsel), og de to svenske tests er urørte, fordi SE-siden ikke mangler noget. Gate grøn: lint (556 filer), **1722 tests / 151 filer** (fra 1719 / 151), build (**141 sider**). Kode + plan i ét commit på `ceo/moms-da-svar`; se opgave 112. **MÅL:** `/moms` baseline **23.225 visninger / 40 klik / CTR 0,2 % / pos. 6,9 pr. 2026-08-28 → 2026-09-25** — måles igen 2026-10-11.
 
 STATUS: KØ — **C82 er landet: sitets største side løj om dansk skat, og den manglede de svar, dens egen søgeklynge er fuld af. `/procent` skrev "37 % skat af 40.000 kr = 14.800 kr i skat" i brødteksten — en *marginalsats* brugt som et gennemsnit.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den), og 12:30-batchen var ikke kørt da iterationen startede kl. 12:28, så de åbne noter lå åbne i første halvdel og blev lukket efter gaten. **Før valget blev målt i to retninger, fordi Fase 3's topprioritet er CTR.** (1) **Alle 14 mest trafikrelevante sider har allerede svar-først title og description i DA og SE** — C79/C80's arbejde, bekræftet ved `curl` på `/procent`, `/dato`, `/tidsberegner`, `/moms`, `/tidszone` DA og `/procent`, `/dato`, `/tidsberegner`, `/nedtaelling`, `/moms` SE; `/procent`s titel er "Procentberegner – beregn 10 procent af et tal" og beskrivelsen starter med "10 procent af et tal er tallet × 0,10. 10 procent af 250 er 25." **Det er altså ikke titlen, der mangler — det er indholdet under den.** (2) **Siden har desuden alle strukturerede data på plads**: `FAQPage` (4 `Question`), `WebApplication`, `BreadcrumbList`, `Answer`, `Organization`, `index, follow` og tre `hrefLang` — så schema er heller ikke flaskehalsen. **Fælden lå i sidens egen historie:** commit `8796c16` (26/9) gjorde præcis denne rettelse på den **svenske** side, målt på svensk autocomplete, og skrev bevidst "Kun locale `se` er ændret; dansk og norsk er urørt" — og låste det med to tests. Dansk fik derfor hverken Excel-afsnittet eller de to nye interne links, selv om **`/procent` er GSC's største side: 149.546 visninger, 96 klik, CTR 0,1 %, pos. 7,4** — 25 % af alle månedens visninger på sitet. **Målt før rettelsen:** dansk autocomplete (`hl=da`, `gl=dk`, hentet 12:35 i dag) giver **11 variationer under "procent i excel"** ("procent i excel formel", "beregn procent i excel", "minus procent i excel", "plus procent i excel", "procent stigning i excel", "fratræk procent i excel", "procent formler i excel"), **10 under "hvordan regner man procent"** (især "hvordan regner man procent forskel mellem to tal" og "hvordan regner man procent af et tal") og **4 under "rabat i procent"**. Siden havde **0** af dem. **Rettelsen:** samme metode som `8796c16`, i dansk — et synligt Excel-afsnit med de tre formler og tal der kan efterprøves, to nye interne links (`/loenstigning` og `/loen-efter-skat`), og **tre nye FAQ-par i `page-data.ts`**, som dermed også kommer i JSON-LD'en: "Hvordan regner man procent i Excel?", "Hvordan regner man procentforskellen mellem to tal?" og "Hvor stor er rabatten i procent?". **Rabat-tallet er GSC's egen søgning:** "en telefon er sat 1125 kr. ned. normalt koster den 9000 kr. hvor stor er rabatten i procent?" (**54 visninger, 1 klik, pos. 6**) er 1.125 ÷ 9.000 = **12,5 %**, og den regnes nu både i brødteksten og i FAQ'en. **Fagfejlen er rettet uden at opfinde en erstatningssats** — 37 % er kommuneskat (i gennemsnit 25,049 %, `SATSER_2026.kommuneskatSnit`) + statslig bundskat (12,01 %), og bundskatten slår først ind over `mellemskatGraense` = **641.200 kr**, så på 40.000 kr er den statslige del **0 %** og skatten er arbejdsmarkedsbidrag plus kommuneskat på den skattepligtige base. Sætningen siger nu det samme som den svenske: skatten afhænger af kommune og indkomst, og linket til `/loen-efter-skat` giver det rigtige tal. **Målefejl nr. 12 (min egen, samme klasse som nr. 9-11):** min første kontrol for C76 var `>[0-9]+\.[0-9]+` uden afsluttende `<` — den matcher **danske tusindtalsseparatorer** ("3.000.000 kr.", "15.738 kr."), altså **68 falske fund på `/billaan` og 30 på `/forbrugslaan`**. Med krav om `<` eller `kr`/`%` bagefter er tallet **0 på alle 11 sider på begge domæner**. **Harness:** `page.test.tsx` er **4 → 5 tests** (den gamle "den danske siden beholder sit eget skatteksempel" låste den forkerte påstand — den er erstattet af en der låser Excel-afsnittet, de to links og **fraværet** af "37% skat af 40.000 kr" og "14.800"), og en ny **paritets-test** kræver de tre formler i **baade** `da` og `se`, så asymmetrien fra `8796c16` ikke kan komme tilbage. `page-data.test.ts`'s "de danske og norske /procent-sider er uændrede" låste `da` — den er delt, så kun **`no` er urørt** (beregner.no serverer ikke beregnersider, C79). **Verificeret modsvejs: alle 3 nye tests falder** med den gamle kode. Gate grøn: lint (556 filer), **1719 tests / 151 filer** (fra 1717 / 151), build (**141 sider**). Kode + plan i ét commit på `ceo/procent-da-svar`; se opgave 111. **12:30-batchen er lukket ved indhold før merge:** C76, C77, C78 og C80 er `DEPLOY OK` — `/tidsberegner` har **0** tal med decimalpunkt på begge domæner (før 13 og 5), `beraknare.se/boliglaan` har `ca. 3,5-4,0 %` med mellemrum før % (svensk notation) mens den danske side har `ca. 3,5-4,0%` (altså intakt), `/kvadratmeter` m.fl. har **0** på **11 sider × 2 domæner**, og `/api/health` svarer `status: ok`. Se `DEPLOY OK 2026-09-27 12:38`.
@@ -7805,6 +7807,41 @@ landmark=lån, piggybank=opsparing osv.).
     - Gate grøn: lint ok, 280/280 tests, build ok (128 pages).
 
 ## VERIFICÉR DEPLOY-log
+### ⏳ **VERIFICÉR DEPLOY: C83 — `/moms` dansk svarer på søgeklyngen (23.225 visninger, CTR 0,2 %, pos. 6,9).** Kode `ae51764`, merge `5659e28` 2026-09-27 13:03 CEST på branch `ceo/moms-da-svar`. Første kandidatvindue **2026-09-27 17:30**.
+  **HTTP 200 beviser intet:** hele ændringen er ny brødtekst og fire nye
+  `faqItems` i `page-data.ts` — sidens regnestykker er urørte. Sådan
+  verificeres det:
+  1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
+  2. **Indhold:** `curl -s https://minberegner.dk/moms` skal finde
+     "En bog til 249 kr." og "Der er kun én dansk momssats" og
+     "En fødevare til 80 kr. ekskl. moms koster 100 kr. inkl. moms" og
+     "En dansk virksomhed, der køber tjenester i Tyskland, betaler ikke tysk moms".
+  3. **Den gamle fejl skal være væk:** `grep -c "Aviser og tidsskrifter (0% moms)"`
+     skal være **0** (før: 1).
+  4. **FAQ'en skal have 8 spørgsmål** og fire af dem skal stå i JSON-LD'en:
+     `grep -c '"@type":"Question"'` skal være **8** (før: 4).
+  5. **beregneren skal være urørt:** `/moms` skal stadig vise værktøjet med
+     knapperne for at lægge til, trække fra og finde momsandelen. Kræver et
+     klik, altså en browser — testene dækker det, curl gør ikke.
+  6. `https://beraknare.se/moms` skal være **uændret** (SE har allerede svar på
+     sin klynge — de tre satser). Særlig kontrol: SE skal stadig sige
+     "1 000 kr × 1,25 = 1 250 kr, × 1,12 = 1 120 kr eller × 1,06 = 1 060 kr".
+
+### ⏳ **VERIFICÉR DEPLOY: C84 — `/tidszone`: 21 byer i tabellen (Toronto, Madrid, Istanbul, Bangkok, Denpasar) og metaDescription rettet fra "12 byer" til "21 byer" i begge sprog.** Kode + plan i ét commit på `ceo/tidszone-destinationer`, merge afventer push. Første kandidatvindue **2026-09-27 17:30** (eller det næste vindue efter merge).
+  **HTTP 200 beviser intet:** rækkerne er statiske data og teksten ligger i
+  metaattributten, som curl *kan* se. Sådan verificeres det:
+  1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
+  2. `curl -s https://minberegner.dk/tidszone | grep -c "<tr>"` skal være **22**
+     (21 byer + hovedrække; C73 målte 17 → 16 byer + hoved).
+  3. **Indhold:** tabellen skal finde `Bangkok`, `Istanbul`, `Madrid`,
+     `Toronto` og `Denpasar (Bali)`, og `<title>`/`metaDescription` skal sige
+     **"til 21 byer"** (før: "til 12 byer") på minberegner.dk og
+     **"till 21 städer"** på beraknare.se.
+  4. **Tallene skal være rigtige ved 12 i Danmark:** Bangkok 18:00/17:00,
+     Istanbul 14:00/13:00, Madrid 12:00/12:00, Toronto 06:00/06:00.
+  5. **SE skal have de samme byer** på dansk navneform (de har intet `bySe`),
+     og `Athen` skal stadig stå som `Aten` der (C66/C84's asymmetri-regel).
+
 ### DEPLOY OK 2026-09-27 12:58 CEST — 12:30-batchen lukker C73, C74 og C75 ved indholdskontrol (C83)
 
 Alle tre merges lå 08:29–09:35 CEST, altså før 12:30-vinduet, og er verificeret
@@ -10754,6 +10791,61 @@ tekst på `/tidszone`), men Kopier-strengen med datoen kræver en browser.
 5. **🔒 Uforandrede forbehold:** hreflang er korrekt (`hrefLang` med stort L);
    svenske slugs kræver Mads' go; `/bmi` og `/su`s fald måles 2026-10-11.
 6. **Mål 2026-10-10 / 2026-10-11** (se Måleprotokol).
+
+#### 113. [x] FÆRDIG 2026-09-27 — C84 — `/tidszone`: fem målte destinationer i tabellen, og meta-teksten rettet fra "12 byer" til "21 byer"
+
+- **Datagrund:** `/tidszone` er **femtestørste** danske side i GSC (**24.485
+  visninger, 110 klik, CTR 0,4 %, pos. 7,5**). Klynjen er spørgsmålsformet:
+  "hvad er klokken i usa når den er 12 i danmark" (**180 v, pos. 6**),
+  "tidszoner" (750 v, pos. 10), "tidszoner beregner" (113 v, pos. 3),
+  "tidsforskel" (87 v, pos. 10).
+- **Målt først (autocomplete 13:00, `hl=da`/`gl=dk`):** "hvad er klokken i usa"
+  → 10 variationer, hvoraf **fire nye tidsstumper** ("…når den er 21/14/16 i
+  danmark"), "…est", "…los angeles", "…miami"; "tidsforskel" → 10, hvoraf
+  **"tidsforskel thailand", "tidsforskel bali danmark" og "tidsforskel tyrkiet"**
+  var byer, siden ikke havde. "hvad er klokken i" spørger efter bl.a.
+  **Thailand, Tyrkiet, Canada og Spanien**. SE-klyngen spørger om Japan,
+  Grønland, Island og Australien — alle dækket.
+- **Rettelsen:** fem rækker i `TIDSZONER` (`src/lib/tidszone-reference.ts`) med
+  kildekommentar, **to nye FAQ-par i `page-data.ts`**, og `metaDescription`
+  rettet i **begge** sprog.
+- **Den indekserede fejl:** `metaDescription` lovede *"Se tidsforskel til 12
+  byer"* — sandt da C46 skrev den, mens tabellen siden har haft 16 (nu 21). Det
+  er en løgn om sit eget indhold i den tekst Google viser, altså samme
+  fejltype som C82's skattefejl, fundet ved at koble `page-data.ts` med
+  `tidszone-reference.ts`.
+- **Harness:** `tidszone-reference.test.ts` **7 → 9 tests**. Den ene nye test
+  **udleder** antallet af byer fra `metaDescription` med
+  `/till? (\d+) (?:byer|städer)/` og kræver `TIDSZONER.length` — altså kan den
+  ikke reddes ved at næste agent tilføjer byer uden at rette teksten. Bemærk
+  `till?`: min første regex skrev `til` og læste den svenske "till" som *mangler*,
+  hvilket gav `NaN` i stedet for 12 mod 21 (**målefejl nr. 13**).
+  **Modsvejs verificeret:** begge nye tests falder med den gamle kode.
+- **Gate grøn:** lint 556 filer, **1724 tests / 151 filer** (fra 1722 / 151),
+  build 141 sider. Kode + plan i ét commit på `ceo/tidszone-destinationer`.
+- **MÅL:** `/tidszone` baseline **24.485 visninger / 110 klik / CTR 0,4 % /
+  pos. 7,5** (GSC 2026-08-28 → 2026-09-25) og **15 besøgende/28d** SE.
+  Måles igen 2026-10-11.
+
+### Næste kandidater efter C84
+
+0. **🔒 Opgave 97 er `BLOCKED`** (Mads' svar), 98 afhænger af den. Browser-noter:
+   C52, C55, C56, C57 og C60 ligger som kliksekvens i `❓ Til Mads` nederst.
+1. **🆕 `/renteberegner` (13.560 v, CTR 0,9 %, pos. 7,5 DA) — det eneste
+   ubearbejdede medlem af top-15 i dansk GSC.** Søgninger: "annuitetslån
+   beregner" 361v pos 8, "renteberegner" 322v pos 7, "månedlig rente
+   beregning" 48v pos 5, "beregn månedlig ydelse på lån" pos 14. **SE står på
+   pos. 25,6** med 2.831 visninger og 3 klik, så her er der både plads *og* CTR.
+   Mål autocomplete `hl=da` **og** `hl=se` først, og se om siden svarer på
+   "annuitetslån"-formen — C37 rettede allerede fradragsværdien der.
+2. **🔒 CTR på `/procent`, `/dato`, `/moms`, `/tidszone`, `/tidsberegner` er
+   lukket** (C79-C84). Lav ikke CTR på dem igen — mål i stedet om C82-C84's
+   svar flytter position *eller* CTR efter 14 dage.
+3. **⏬ Nedprioriteret:** de 22 filer / 35 ubundne labels i
+   `label-a11y-scan.mjs` (kun sider uden for top-15), se punkt 4 i C82-listen.
+4. **🔒 Uforandrede forbehold:** hreflang er korrekt (`hrefLang` med stort L);
+   svenske slugs kræver Mads' go; `/bmi` og `/su`s fald måles 2026-10-11.
+5. **Mål 2026-10-10 / 2026-10-11** (se Måleprotokol).
 
 #### 109. [x] FÆRDIG 2026-09-27 — C80 — erklær Node-runtime-kontrakten: `engines.node`, `.nvmrc` og en test der holder de tre sammen
 
