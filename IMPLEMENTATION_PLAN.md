@@ -7832,7 +7832,7 @@ landmark=lån, piggybank=opsparing osv.).
 
 ## VERIFICÉR DEPLOY-log
 
-### ⏳ **VERIFICÉR DEPLOY: C96 — `/brok` dansk: de fire regneregler, formlen procent = brøk × 100 med tabel, og brøkdel af et tal (4.881 visninger, CTR 0,6 %, pos. 5,3).** Kode + plan i ét commit på `ceo/brok-regneregler`. Første kandidatvindue **2026-09-27 17:30**. Verificér ved **indhold, ikke HTTP 200 alene** — hele ændringen er ny brødtekst og tre nye `faqItems`:
+### ⏳ **VERIFICÉR DEPLOY: C96 — `/brok` dansk: de fire regneregler, formlen procent = brøk × 100 med tabel, og brøkdel af et tal (4.881 visninger, CTR 0,6 %, pos. 5,3).** Kode `54ae8e0`, merge `2551f2d` 2026-09-27 16:29 CEST på branch `ceo/brok-regneregler`. Verificér ved **indhold, ikke HTTP 200 alene** — hele ændringen er ny brødtekst og tre nye `faqItems`:
    1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
    2. `curl -s https://minberegner.dk/brok | sed 's/<!-- -->//g'` skal finde **"Brøkregning: de fire regneregler"**, **"3/6 + 2/6 = 5/6"**, **"1/2 × 2/3"**, **"1/2 ÷ 2/3"**, **"procent = brøk × 100"**, **"(3 × 200) ÷ 4"** og **"150 kr."**.
    3. Tabellen skal have 7 `<tr>`-rækker med **0,5 / 0,25 / 0,75 / 0,125 / 0,667 / 0,833 / 0,7** i decimal-kolonnen (Bemærk: `sed`-trinnet er ikke valgfrit — React skriver `<!-- -->` mellem tekstnoder, målefejl nr. 16).
