@@ -1,3 +1,4 @@
+STATUS: KØ — **C87 er landet: `/promille` svarer nu på otte af de ti søgninger under "promillegrænse", som dansk autocomplete viser — Tyskland, Italien, Norge, Frankrig, Spanien, Grækenland, Polen og Storbritannien. Siden havde præcis to af dem.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den), og de eneste curl-verificerbare åbne deploynoter (C81, C82) har første vindue **17:30**, så intet kunne verificeres. Valget var C86's egen åbne kandidat #1: samme måling, samme side. **Målt først:** dansk autocomplete under **"promillegrænse"** giver 10 variationer — `… danmark`, `… sverige`, `… tyskland`, `… italien`, `… norge`, `… frankrig`, `… spanien`, `… cykel`, `… grækenland` + selve termet. Siden havde to afsnit (Danmark 0,5 og Sverige 0,2) og **null** af de otte andre. **Rettelsen (kun `da`):** `<h2>Promillegrænsen i udlandet</h2>` med **12 lande** i en tabel (land / grænse / særregel for nye og professionelle bilister) og den fælde tabellen findes for: **2 øl på 80 kg = 0,44 ‰ er under den danske grænse og over den svenske og norske på 0,2 ‰ — samme krop, samme aften, to domme.** Tallene kommer fra WHO's landeoversigt (hentet 27/9), og siden siger eksplicit at tabellen er **vejledende** og at reglerne ændrer sig. **Tallene bor i modulet, teksten på siden** — ny `PROMILLEGRANSE_UDLAND: Record<string, number>` i `src/lib/promille.ts` (tal kun, ingen danske strenge, ellers kunne modulet lække til beraknare.se), landnavne og særregler i `page.tsx`s `da`-gren. **Og en test krydschecker tabellen mod `PROMILLEGRANSE`**, altså den fejlklasse C84 fandt (en indekseret tekst der løj om sit eget indhold), låst før den kan ske igen. **To fund, begge ærlige.** (1) **En eksisterende test fangede en rigtig fejl i min egen metaDescription:** `page-data.test.ts:294` låser at den danske `metaDescription` indeholder **"0,5 ‰"** — min første erstatning droppede den for at nævne fire lande, så den danske *lov* forsvandt fra den indekserede beskrivelse. Rettet til at sige begge dele (122 → 146 tegn, under de 160 der låses). (2) **Målefejl nr. 14, min egen:** den nye data-test slog op på `"Sverige og"` i spørgsmålsteksten "…i Norge og Sverige?", som ikke findes, så den fik `undefined` — fundet fordi testen *faldt* med en TypeError frem for med et forkert tal. **`page.test.tsx` kan ikke teste FAQ'en**, fordi `FAQ` er mocket væk i filen (C85's fælde), så de tre FAQ-tests ligger i `page-data.test.ts`, som læser præcis den tabel `FAQ` og `FAQSchema` får. **`page.test.tsx` 3 → 7 tests, `page-data.test.ts` +3, modsvejs verificeret: 3 af 4 og 2 af 3 falder** med den gamle kode; de to der ikke falder er låse på at `se`/`no` er urørte, mærket som låse. Gate grøn: lint (556 filer), **1734 tests / 151 filer** (fra 1727 / 151), build (141 sider); `locale-leak.mjs --gate` exit 0, `label-a11y-scan.mjs` uændret 22/35, `knapgruppe-scan.mjs` 0/0. Kode + plan i ét commit på `ceo/promillegraense-udlandet`; se opgave 116. **MÅL:** `/promille` baseline **4.513 visninger / 67 klik / CTR 1,5 % / pos. 7,9 pr. 2026-08-28 → 2026-09-25** — måles igen 2026-10-11.
 STATUS: KØ — **C86 er landet: 10 af de 11 variationer dansk autocomplete har under "promille efter" er det samme spørgsmål — hvor mange promille giver N øl? — og `/promille` havde et afsnit om hvad én genstand er, men ingen der regnede genstandene.** Køen havde ingen `I GANG`-opgave, så dette var C85-listenens punkt 2 målt i stedet for gættet. **Målt først:** DA-autocomplete (`hl=da`, `gl=dk`, 13:12) under **"promille efter"** → 10 variationer: "1 øl", "1 glas vin", "2 øl", "1 genstand", "10 genstande", "en starköl", "2 glas vin", "3 øl", "3 genstande", "1 flaske vin". Under **"promille"** → "promille beregner" (1.149 visninger i GSC, pos. 9), "promillegrænse danmark", "promillegrænse tyskland", "promillegrænse sverige", "promillegrænse italien". **Målt på koden:** siden forklarede *genstanden* (12 gram) og fordelingsfaktoren (0,68/0,55), men **havde ingen tabel over N genstande** — altså svaret lå i to afsnit, brugeren skulle selv sætte sammen. **Rettelsen (kun `da`):** et nyt `<h2>` **"Hvor mange promille er N øl?"** med regnestykket og en tabel 1/2/3/4/6 genstande × 80 kg mand / 70 kg mand / 60 kg kvinde (0,22/0,44/0,66/0,88/1,32 — 0,25/0,50/0,76/1,01/1,51 — 0,36/0,73/1,09/1,45/2,18), plus en linje der sætter 0,5 ‰-grænsen på den: **mellem to og tre øl** for 80 kg, ved to øl for 70 kg, efter halvandet for 60 kg. **Tal fra samme standard som resten af siden** (12 g pr. genstand, Widmark-faktorerne), og de tre tal de har til fælles med sidens *egen* "Hvornår er du igen promillefri?"-tabel (0,88 for 4 genstande/80 kg, 0,73 for 2 genstande/60 kg kvinde, 1,51 for 6 genstande/70 kg mand) **stemmer alle tre** — altså er den nye tabel ikke en ny sandhed, men sidens egen. **Én fejl undgået ved at regne på:** min første sætning sagde "grænsen nås efter to øl" for 80 kg, men 2 øl er **0,44 ‰**, altså *under* grænsen — den siger nu "mellem to og tre øl (0,66 ‰ efter tre)". **En forhindring fundet:** `page.test.tsx` mocker `@/components/FAQ` væk, så FAQ'en er ikke i testens HTML; min første version af testen krævede det nye FAQ-spørgsmål og faldt derfor på noget, der ikke kan testes dér. Samme fælde som C85's. **Harness:** `page.test.tsx` **2 → 3 tests**, **modsvejs verificeret** (den nye test falder med gammel kode). Gate grøn: lint (556 filer), **1727 tests / 151 filer** (fra 1726 / 151), build (**141 sider**). Se opgave 115. **MÅL:** `/promille` baseline **4.513 visninger / 67 klik / CTR 1,5 % / pos. 7,9 pr. 2026-08-28 → 2026-09-25** — måles igen 2026-10-11.
 
 STATUS: KØ — **C85 er landet: `/renteberegner` er det sidste ubearbejdede medlem af dansk top-15 i GSC, og dens søgeklynge er ikke "beregn min rente" — den er "formlen" og "Excel". Siden havde nul forekomster af ordet `Excel` og nul af `formel`.** Køen havde ingen `I GANG`-opgave, så dette var C84-listenens punkt 1. **Målt først:** DA-autocomplete (`hl=da`, `gl=dk`, 13:10) under **"annuitetslån"** giver 10 variationer, hvoraf **fire er Excel** ("annuitetslån excel", "annuitetslån excel skabelon", "annuitetslån beregner excel", "annuitetslån formel excel") og **to er selve beviset** ("annuitetslån formel", "annuitetslån formel bevis" — en gymnasiopgave). Under **"månedlig rente"**: "månedlig rente til årlig rente", "månedlig rente formel", "månedlig rente kredittkort", "månedlig rente sparekonto". Under **"renteberegner"**: "renteberegner excel", "renteberegner morarenter", "renteberegner boliglån". **Sprog-asymmetrien igen, og den er her helt konkret:** SE-siden har et afsnit "**Nominell kontra effektiv ränta**" og et FAQ-spørgsmål "**Effektiv rente?**"; DA-siden har **ingen af delene** — mens dansk autocomplete spørger om præcis "månedlig rente til årlig rente". **Rettelsen (kun `da`):** et nyt `<h2>` **"Formlen for et annuitetslån — og de samme tal i Excel"** med ydelsesformlen, det efterprøvbare eksempel og en treleds-begrundelse (hver ydelse er 1/(1+r), 1/(1+r)², … og summen af den geometriske række er (1−(1+r)^−n)/r — det er "beviset"), en Excel-tabel med **`=YDELSE(0,04/12;240;-200000)`**, **`=RENTENPERIODER(0,04/12;-1211,96;200000)`** og den samlede rente, samt **"Månedlig rente til årlig rente"** med 1 %/måned = **12,68 %**/år og 4 %/år = **4,07 %** effektivt. **Tallene er egne, ikke lånt:** 200.000 kr. @ 4 % i 20 år → ydelse **1.211,96 kr.**, i alt 290.870,56 kr., renter 90.870,56 kr. — beregnet i node, ikke kopieret fra en side (C82's Excel-afsnit gjorde det samme, og sidens egne 100.000/5 %/5 år-tal er uændrede). **Minus-tegnet i Excel er en fælde, og den er skrevet ned:** med `YDELSE` skal lånebeløbet ind som `-200000`, ellers kommer ydelsen ud negativ — det er derfor siden siger det eksplicit. **Harness:** `page.test.tsx` **4 → 6 tests** — ét der kræver formlen, geometriske forklaring, begge Excel-funktioner og de to procentsatser i den server-renderede HTML, ét der kræver de to nye spørgsmål i `page-data.ts`. **Modsvejs verificeret: begge falder** med den gamle kode. **To forhindringer fundet undervejs, begge ærlige:** (1) `page.test.tsx` mocker **både** `FAQ` **og** `StructuredData` væk, så FAQ'en er slet ikke i testens HTML — min første test læste derfor et element, der aldrig kunne være der; den læser nu `page-data.ts` direkte, som er den tabel begge komponenter får fra. (2) min første assertion skrev "summen af den geometriske række" med lille s, mens JSX'en sætter stor S — fundet fordi testen *faldt*. Samme fejlklasse som målefejl nr. 7-13. Gate grøn: lint (556 filer), **1726 tests / 151 filer** (fra 1724 / 151), build (**141 sider**). Se opgave 114. **MÅL:** `/renteberegner` baseline **13.560 visninger / 117 klik / CTR 0,9 % / pos. 7,5 pr. 2026-08-28 → 2026-09-25** — måles igen 2026-10-11.
@@ -10986,6 +10987,93 @@ tekst på `/tidszone`), men Kopier-strengen med datoen kræver en browser.
    svenske slugs kræver Mads' go; `/bmi` og `/su` måles 2026-10-11.
 8. **Mål 2026-10-10 / 2026-10-11** (se Måleprotokol).
 
+#### 116. [x] FÆRDIG 2026-09-27 — C87 — `/promille` svarer på "promillegrænse tyskland/italien/norge/frankrig/spanien/grækenland" — de otte af de ti variationer siden ikke havde
+
+- **Datagrund:** `/promille` (**4.513 visninger, 67 klik, CTR 1,5 %, pos. 7,9**), og
+  GSC's største enkelt-søgning på siden er brand-søgningen **"promille beregner"
+  (1.149 visninger)**. C86's åbne kandidat #1.
+- **Målt først:** dansk autocomplete (`hl=da`, `gl=dk`, 13:27) under
+  **"promillegrænse"** → 10 variationer: `… danmark`, `… sverige`, `… tyskland`,
+  `… italien`, `… norge`, `… frankrig`, `… spanien`, `… cykel`, `… grækenland`
+  (+ selve termet). Siden havde **to** af dem (Danmark og Sverige, hver et
+  afsnit) — **otte var ubesvarede**, heraf fire lande Danmark har ingen grænse
+  forventet at blive spurgt om (Tyskland, Italien, Norge, Polen).
+- **Rettelsen (kun `da`):** `<h2>Promillegrænsen i udlandet</h2>` med **12
+  lande** i en tabel (land / grænse / særregel for nye og professionelle
+  bilister), ét afsnit der siger at grænsen *ikke* er 0,5 ‰ overalt, og den
+  konkrete fælde fra tabellen: **2 øl på 80 kg = 0,44 ‰ er under den danske
+  grænse og over den svenske og norske på 0,2 ‰ — samme krop, samme aften,
+  to domme.** Tallene er fra WHO's landeoversigt (hentet 27/9 via
+  `Drunk_driving_law_by_country`, der selv citerer WHO 2018), og siden siger
+  eksplicit at tabellen er **vejledende** og at reglerne ændrer sig.
+- **Tallene bor i modulet, teksten på siden:** ny
+  `PROMILLEGRANSE_UDLAND: Record<string, number>` i `src/lib/promille.ts` —
+  tal kun, ingen danske strenge, fordi modulet ellers kunne lække til
+  beraknare.se. Landnavne og særregler ligger i `page.tsx` i den `da`-gren.
+  Samme fejlklasse som C84's `metaDescription`-drift, og den er låst: se
+  `promille.test.ts` og `page.test.tsx` nedenfor.
+- **MetaDescription og ogDescription** erstattede "se grænsen på 0,5 ‰" med
+  "se grænsen på 0,5 ‰ her og i Sverige, Tyskland og Norge" (122 → 146 tegn,
+  under de 160 C81's tests låser). `description` (den synlige) er urørt.
+- **Tre nye FAQ-par i `page-data.ts`** — og dermed også i JSON-LD'en, som er
+  der Google læser snippet fra: "Hvad er promillegrænsen i Tyskland?",
+  "Hvad er promillegrænsen i Norge og Sverige?" og "Må jeg køre med 0,4
+  promille i udlandet?".
+- **Harness:** `page.test.tsx` **3 → 7 tests** — ét der kræver alle elleve
+  lande i den server-renderede HTML, ét der **krydschecker tabellens tal mod
+  `PROMILLEGRANSE`** for Danmark/Sverige/Norge (så siden aldrig kan trykke en
+  anden grænse end den beregneren sammenligner mod), ét der kræver
+  forbeholdet "vejledende" + "WHO", og ét der kræver at **den svenske side er
+  urørt** af den danske måling. `page-data.test.ts` **+3 tests** om de tre
+  spørgsmål og om at svarene bruger `PROMILLEGRANSE_UDLAND`'s tal.
+  **Verificeret modsvejs: 3 af de 4 nye side-tests og 2 af de 3 nye
+  data-tests falder** med den gamle kode. De to sidste er **låse, ikke
+  regressionstester** (se/no urørt), mærket som sådan i kommentaren.
+- **To fund, begge ærlige.** (1) **En eksisterende test fangede en rigtig fejl
+  i min egen metaDescription**: `page-data.test.ts:294` låser at den danske
+  `metaDescription` indeholder **"0,5 ‰"** — den danske grænse. Min første
+  erstatning droppede den og nævnte kun landene, så den *lov* om sit eget
+  indhold forsvandt fra den indekserede beskrivelse. Rettet til at sige begge
+  dele. Det er præcis den fejltype C84 fandt, nu fundet af C84's egen test.
+  (2) **Min egen nye test havde en fejl** (målefejl nr. 14): den slog op på
+  `"Sverige og"` i spørgsmålsteksten "…i Norge og Sverige?", som ikke findes,
+  så den fik `undefined` — fundet fordi testen *faldt* med en TypeError
+  frem for med et forkert tal.
+- **`page.test.tsx` kan ikke teste FAQ'en**, fordi `FAQ` er mocket væk i
+  filen (C85's fælde) — derfor ligger de tre data-tests i
+  `page-data.test.ts`, som læser præcis den tabel `FAQ` og `FAQSchema` får.
+- **Gate grøn:** lint 556 filer, **1734 tests / 151 filer** (fra 1727 / 151),
+  build 141 sider; `locale-leak.mjs --gate` exit 0; `label-a11y-scan.mjs`
+  uændret 22/35; `knapgruppe-scan.mjs` 0/0. Branch
+  `ceo/promillegraense-udlandet`.
+- **MÅL:** `/promille` baseline **4.513 visninger / 67 klik / CTR 1,5 % /
+  pos. 7,9 pr. 2026-08-28 → 2026-09-25** — måles igen 2026-10-11.
+
+### Næste kandidater efter C87
+
+0. **🔒 Opgave 97 er `BLOCKED`,** 98 afhænger af den. Browser-noter: C52, C55,
+   C56, C57 og C60 ligger i `❓ Til Mads` nederst.
+1. **🆕 `/alder` (6.149 v, CTR 0,6 %, pos. 7,8)** — "hvor gammel er jeg" står
+   på **pos. 33**; C47 lagde "alder mellem to datoer" på siden, så mål først
+   hvad resten af klyngen spørger. Samme metode som C86/C87.
+2. **🆕 `/kalorier` (12.477 v, 1,0 %, pos. 8,2)** — brand-søgningen står på
+   **pos. 17** mens siden samlet er 8,2, altså et *værktøj*-problem, ikke et
+   brødtekst-problem. Mål autocomplete under "kalorieberegner" og se hvad
+   værktøjet mangler.
+3. **🆕 Svensk CTR:** `/tidszone` (3.256 v), `/leasing` (3.151 v, pos. 12,4),
+   `/alder` (3.060 v), `/nedtaelling` (5.163 v, pos. 9,4).
+4. **✅ Dansk top-15 er lukket** (C82-C87) — lav ikke CTR på de lukkede sider
+   igen; mål i stedet effekten 14 dage efter.
+5. **🆕 `/promille` svensk halvdel:** C87 målte kun dansk (dansk autocomplete).
+   SE har egen "Promillegränsen i Sverige" (0,2 ‰) og en kalorie-/genstands-
+   tabel der ligner den danske, så mængden her er lille — *kun* hvis
+   svensk autocomplete under "promillegräns" eller "rattonyktering gräns"
+   viser spørgsmål, siden ikke svarer på.
+6. **⏬ Nedprioriteret:** 22 filer / 35 ubundne labels (kun sider uden for top-15).
+7. **🔒 Uforandrede forbehold:** hreflang korrekt (`hrefLang` med stort L);
+   svenske slugs kræver Mads' go; `/bmi` og `/su` måles 2026-10-11.
+8. **Mål 2026-10-10 / 2026-10-11** (se Måleprotokol).
+
 #### 109. [x] FÆRDIG 2026-09-27 — C80 — erklær Node-runtime-kontrakten: `engines.node`, `.nvmrc` og en test der holder de tre sammen
 
 - **Datagrund:** `~/.local/oxloop/AFHAENGIGHEDER.md` (scan 2026-08-23) står med
@@ -11057,6 +11145,25 @@ verificering der ikke kan slå igennem er lige så dårlig som en der kan.
 > reelt stadig er åbent: **C81** (første vindue 17:30) og **C52, C55, C56, C57,
 > C60** (kræver en browser).
 
+
+- ⏳ **VERIFICÉR DEPLOY: C87 — `/promille` har nu svar på otte af de ti
+  variationer under "promillegrænse" (Tyskland, Italien, Norge, Frankrig,
+  Spanien, Grækenland, Polen, Storbritannien).** Kun `locale === "da"`-grenen
+  er rørt; `se` og `no` er urørte. **Verificér indhold, ikke HTTP 200:**
+  1. `curl -s https://minberegner.dk/promille | grep -c 'Promillegrænsen i
+     udlandet'` skal være **1** — før fandtes afsnittet ikke.
+  2. Samme curl skal finde **12** `<tr>` i udlandstabellen med
+     `<td>Tyskland</td><td>0,5 ‰`, `<td>Sverige</td><td>0,2 ‰`,
+     `<td>Norge</td><td>0,2 ‰` og `<td>Storbritannien</td><td>0,8 ‰`.
+  3. Samme curl skal finde sætningen **"2 øl på 80 kg er 0,44 ‰"** og
+     **"under den danske grænse, men over den svenske og norske på 0,2 ‰"**,
+     og ordet **"vejledende"** (forbeholdet om at reglerne ændrer sig).
+  4. `https://beraknare.se/promille` skal være **uændret**: **0** hits på
+     "Promillegrænsen i udlandet" og "udlandet" i alt, og stadig
+     "gränsen för rattfylleri vid 0,2 ‰".
+  5. Sidens `<meta name="description">` skal indeholte både **"0,5 ‰"** og
+     **"Sverige, Tyskland og Norge"** — de to dele må ikke glide fra hinanden
+     igen (C84's fejlklasse, fanget af `page-data.test.ts`).
 
 - ⏳ **VERIFICÉR DEPLOY: C82 — `/procent` dansk: den forkerte skattepåstand er
   fjernet, Excel-afsnittet og to nye interne links er lagt på, og tre nye
