@@ -431,6 +431,9 @@ const daPages: Record<string, PageData> = {
         { question: "Hvad er 6/8 som decimaltal og procent?", answer: "6/8 = 0,75 = 75 %. Tælleren 6 divideres med nævneren 8, og resultatet ganges med 100 for at give procent. Forkortet er brøken 3/4." },
         { question: "Hvordan laver jeg en brøk om til procent?", answer: "Divider tæller med nævner og gang med 100. Fx er 3/4 = 0,75 = 75 %. Beregneren viser både decimaltal og procent samtidig." },
         { question: "Kan beregneren håndtere uægte brøker?", answer: "Ja. En uægte brøk, hvor tælleren er større end nævneren (fx 10/4), forkortes og vises også som decimaltal (2,5) og procent (250 %)." },
+        { question: "Hvad er regnereglerne for brøker?", answer: "Plus og minus kræver ens nævnere: 1/2 + 1/3 = 3/6 + 2/6 = 5/6. Gange kræver tæller ganges med tæller og nævner med nævner: 1/2 × 2/3 = 2/6 = 1/3. Dele er at bytte om og vende nævneren op og ned: 1/2 ÷ 2/3 = 1/2 × 3/2 = 3/4. Forkort altid til sidst." },
+        { question: "Hvad er en brøkdel af et tal?", answer: "En brøkdel af et tal er tælleren gange med tallet, divideret med nævneren. 3/4 af 200 kr. er (3 × 200) ÷ 4 = 150 kr. Samme svar får du via procent: 3/4 er 75 %, og 75 % af 200 er 150 kr." },
+        { question: "Hvad er forskellen på en ægte og en uægte brøk?", answer: "En ægte brøk har tælleren mindre end nævneren, så værdien er under 1: 3/4 = 0,75. En uægte brøk har tælleren større end nævneren, så værdien er over 1: 10/4 = 2,5. Beregneren viser begge dele, fordi den også sætter dem i decimaltal og procent." },
       ],
     },
     "enheder": {

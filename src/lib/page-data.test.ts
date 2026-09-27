@@ -4,6 +4,7 @@ import { getCalculatorHrefs, isCalculatorAvailable } from "./calculator-list";
 import { beregnPromille, PROMILLEGRANSE_UDLAND } from "./promille";
 import { sammenlignEnhedspris } from "./enhedspris";
 import { TIDSZONER } from "./tidszone-reference";
+import { forkortBrok } from "./brok";
 
 describe("getPageData", () => {
   test("returns data for known DA slug", () => {
@@ -963,5 +964,45 @@ describe("svensk CTR på tid- og dato-siderne", () => {
     expect(titel).toMatch(/beräkna|beräkn/);
     expect(titel).not.toMatch(/^\d/);
     expect(titel.length).toBeLessThanOrEqual(60);
+  });
+});
+
+describe("/brok — svar på regneregel-klyngen", () => {
+  // FAQ'en er mocket væk i src/app/brok/page.test.tsx (C85's fælde), så de tre
+  // nye spørgsmål testes her, hvor de ligger som data — og dermed også som
+  // JSON-LD, som er der Google's snippet læser.
+  const da = getPageData("brok", "da")!;
+
+  test("de tre nye spørgsmål er i den danske FAQ", () => {
+    for (const spoergsmaal of [
+      "Hvad er regnereglerne for brøker?",
+      "Hvad er en brøkdel af et tal?",
+      "Hvad er forskellen på en ægte og en uægte brøk?",
+    ]) {
+      expect(da.faqItems.map((f) => f.question), spoergsmaal).toContain(spoergsmaal);
+    }
+  });
+
+  test("regnereglerne i FAQ'en er de samme fire som brødteksten", () => {
+    // Uden denne lås kan svaret i de strukturerede data komme på afveje fra det,
+    // læseren ser — C84's fejlklasse, bare i FAQ'en.
+    const regler = da.faqItems.find((f) => f.question.includes("regnereglerne"))!;
+    for (const stykke of ["3/6 + 2/6 = 5/6", "1/2 × 2/3 = 2/6 = 1/3", "1/2 ÷ 2/3 = 1/2 × 3/2 = 3/4"]) {
+      expect(regler.answer, stykke).toContain(stykke);
+    }
+  });
+
+  test("brøkdel-svaret i FAQ'en er det samme tal som brødteksten", () => {
+    const brokdel = da.faqItems.find((f) => f.question.includes("brøkdel af et tal"))!;
+    expect(brokdel.answer).toContain("(3 × 200) ÷ 4 = 150 kr.");
+    // 3/4 = 75 %, og 75 % af 200 er 150 — krydscheck mod modulet.
+    const r = forkortBrok(3, 4)!;
+    expect(brokdel.answer).toContain(`${String(Math.round(r.procent)).replace(".", ",")} %`);
+  });
+
+  test("den svenske FAQ har ikke fået de danske svar", () => {
+    const se = getPageData("brok", "se")!;
+    const sporsmal = se.faqItems.map((f) => f.question).join(" ");
+    expect(sporsmal).not.toMatch(/regnereglerne for brøker|brøkdel af et tal/);
   });
 });
