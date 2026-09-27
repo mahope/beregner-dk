@@ -82,12 +82,6 @@ const NON_COPY_ATTRS = [
  */
 const REVIEWED = [
   {
-    file: "src/components/HomeContent.tsx",
-    verdict: "KRÆVER ØJNE",
-    reason:
-      "Bekræftet klasse, uafklaret: src/app/page.tsx renderer HomeContent for alle domæner uden locale-gate, så hele den danske forside-tekst står på beraknare.se (20 besøgende/28d, bounce 75 %). Se opgave 96.",
-  },
-  {
     file: "src/components/ForbrugslaanBeregner.tsx",
     verdict: "DØD",
     reason:
@@ -316,6 +310,87 @@ function affiliateRanges(src) {
   return ranges;
 }
 
+/**
+ * Brace-matched body range of every top-level `function X(…) {}` in a file.
+ * Only declarations at column 0 count: a nested function is part of its
+ * parent's branch, not a branch of its own.
+ */
+function topLevelFunctions(src) {
+  const out = [];
+  const re = /(^|\n)(?:export\s+)?function\s+([A-Za-z0-9_$]+)\s*\(([^)]*)\)\s*\{/g;
+  let m;
+  while ((m = re.exec(src)) !== null) {
+    // The match ends on the body brace, and the params may contain `{`
+    // themselves (destructured props), so the brace is taken from the match
+    // and not from the next `{` in the file.
+    const open = m.index + m[0].length - 1;
+    let depth = 0;
+    let end = -1;
+    for (let i = open; i < src.length; i++) {
+      if (src[i] === "{") depth++;
+      else if (src[i] === "}") {
+        depth--;
+        if (depth === 0) {
+          end = i;
+          break;
+        }
+      }
+    }
+    if (end === -1) continue;
+    out.push({ name: m[2], params: m[3], start: open, end });
+    re.lastIndex = end;
+  }
+  return out;
+}
+
+/**
+ * The locale dispatch of a file: which top-level function renders which locale.
+ * `HomeContent` is the canonical case — `if (locale === "se") return <SE />`
+ * — and it is invisible from the page that mounts it, because the gate is
+ * inside the component.
+ *
+ * Returns null unless **every** locale in `LOCALE_KEYS` is accounted for. A
+ * dispatcher that only handles `se` still falls through to its default branch
+ * on `no`, and that default really is what a Norwegian reader would see — so a
+ * partial dispatcher is reported, not excused.
+ */
+function localeDispatch(src) {
+  const fns = topLevelFunctions(src);
+  const byName = new Set(fns.map((f) => f.name));
+  for (const fn of fns) {
+    if (!/\blocale\b/.test(fn.params)) continue;
+    const body = src.slice(fn.start, fn.end);
+    const branches = new Map();
+    for (const b of body.matchAll(
+      /if\s*\(\s*locale\s*===\s*"(da|se|no)"\s*\)\s*return\s*<?\s*([A-Za-z0-9_$]+)/g
+    )) {
+      if (byName.has(b[2])) branches.set(b[1], b[2]);
+    }
+    if (branches.size === 0) continue;
+    const rest = LOCALE_KEYS.filter((l) => !branches.has(l));
+    if (rest.length !== 1) continue;
+    const diverted = new Set(branches.values());
+    const falls = [...body.matchAll(/return\s*<?\s*([A-Za-z0-9_$]+)[\s/>;]/g)]
+      .map((x) => x[1])
+      .filter((n) => byName.has(n) && !diverted.has(n));
+    if (falls.length === 0) continue;
+    const byLocale = new Map(branches);
+    byLocale.set(rest[0], falls[falls.length - 1]);
+    return { dispatcher: fn.name, byLocale, fns };
+  }
+  return null;
+}
+
+let dispatchCache = null;
+
+function dispatchFor(file) {
+  if (!dispatchCache) dispatchCache = new Map();
+  if (!dispatchCache.has(file)) {
+    dispatchCache.set(file, localeDispatch(stripNoise(read(file) || "")));
+  }
+  return dispatchCache.get(file);
+}
+
 function resolveComponentPath(path) {  for (const cand of [
     join(SRC, "components", `${path}.tsx`),
     join(SRC, "components", `${path}.ts`),
@@ -485,13 +560,34 @@ function verdict(finding, file) {
     return { verdict: "DØD", reason: 'komponenten returnerer null når locale !== "da"' };
   }
 
-  // R3 — mounted only inside a `locale === "da" &&` guard in its page.
+  // R3 — the file dispatches per locale and this string sits in one of the
+  // branches. `HomeContent`'s Danish homepage text is 34 finds in one file,
+  // and every one of them renders on the Danish domain only, because the gate
+  // is the component's own `if (locale === "se") return <HomeContentSE />`.
+  // The page that mounts it cannot see that gate, so the scanner has to.
+  const dispatch = dispatchFor(file);
+  if (dispatch) {
+    const owner = dispatch.fns.find(
+      (f) => finding.offset >= f.start && finding.offset <= f.end
+    );
+    if (owner) {
+      for (const [loc, name] of dispatch.byLocale) {
+        if (name !== owner.name) continue;
+        return {
+          verdict: "DØD",
+          reason: `locale-dispatcher: ${dispatch.dispatcher} sender "${loc}" til ${owner.name}, så strengen kan kun vises på ${loc}`,
+        };
+      }
+    }
+  }
+
+  // R4 — mounted only inside a `locale === "da" &&` guard in its page.
   const mount = mountGuardFor(file);
   if (mount && mount.guarded) {
     return { verdict: "DØD", reason: `monteret under {locale === "da" && …} i ${mount.page}` };
   }
 
-  // R4 — guarded by a variable assigned `locale === "da" ? … : null`
+  // R5 — guarded by a variable assigned `locale === "da" ? … : null`
   // (`kildeInflation` in LoenstigningBeregner).
   const guardVars = [...src.matchAll(/const\s+(\w+)\s*=\s*locale\s*===\s*"da"\s*\?/g)].map((x) => x[1]);
   for (const v of guardVars) {
@@ -500,7 +596,7 @@ function verdict(finding, file) {
     }
   }
 
-  // R5 — the copy is a prop for a component that renders nothing outside
+  // R6 — the copy is a prop for a component that renders nothing outside
   // Denmark. `BillaanBeregner` and `ForbrugslaanBeregner` hold 30 Danish
   // strings that are all `AffiliateBox` copy; the box itself returns null.
   const adRanges = affiliateRanges(read(file) || "");
@@ -525,7 +621,7 @@ function verdict(finding, file) {
     }
   }
 
-  // R6 — the row carries its own translation sibling (`navn` + `navnSe`,
+  // R7 — the row carries its own translation sibling (`navn` + `navnSe`,
   // `labelDa` + `labelSe`, `by` + `bySe`).
   if (key) {
     const sibling = new RegExp(`\\b${key}(?:Se|Da|No)\\s*:`);
@@ -535,7 +631,7 @@ function verdict(finding, file) {
     }
   }
 
-  // R7 — the table is read, but never on this key: the string is dead data.
+  // R8 — the table is read, but never on this key: the string is dead data.
   if (table && key && !jsx) {
     const reads = tableReads(src, table);
     if (reads.length > 0) {
@@ -547,7 +643,7 @@ function verdict(finding, file) {
     }
   }
 
-  // R8 — a default parameter value: used only when the caller omits the prop.
+  // R9 — a default parameter value: used only when the caller omits the prop.
   if (/=\s*["'`][^"'`]*["'`]\s*[,)]/.test(src.slice(finding.offset - 4, finding.offset + 80))) {
     return { verdict: "DØD", reason: "defaultværdi i signaturen, bruges kun når proppen mangler" };
   }
