@@ -1,5 +1,7 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
+STATUS: KØ — **C64 er landet: 17 ubundne `<label>` på syv beregnere, hvor ét af fundene var værre end de øvrige — `/elberegner` havde ét navn på to felter.** Køen var tom (alle 91 opgaver færdige, intet `I GANG`), og planens egen "Efterladt, bevidst"-note fra C63 navngavnæste snit af label-klassen. Snittet er nu taget efter **hvad brugeren kan ramme** (Plausible 28d + GSC), ikke efter antal labels: `/leasing` (5 labels; 3.181 visninger i svensk GSC, 45 besøgende/28d på beraknare.se), `/elberegner` (3; 11 besøgende/28d SE, +83 %), `/enhedspris` (3; 1.144 visninger SE), `/vaegttab` (2; 1.186 visninger SE), `/pension` (2; **139 besøgende/28d DA**, +26 %), `/boernepenge` (1; **138 besøgende/28d DA**, +151 %) og `/loenstigning` (1; ny side på beraknare.se). Fire fund ud over bindingerne: **`/elberegner`s etiket "Apparat N" dækkede to felter** (vælger + navnfelt), så den var ikke bare ubundet — den var *tvetydig*, og en `<label>` må kun have én kontrol; den er nu en `role="group"` med `aria-labelledby`, og hvert felt har sit eget `aria-label` med samme præfiks. **`/enhedspris` skrev "Pris" og "Mængde" to gange** (vare A og B), altså to felter med samme synlige tekst pr. etiket-par; id'erne er derfor `enhedspris-pris-a/-b` og `enhedspris-maengde-a/-b` (ASCII, fordi et `id` med æøå er et spring i `querySelector`). **`/boernepenge`s indkomstfelt havde både en ubundet synlig etiket og en `aria-label` med andre ord** ("Husstandens samlede indkomst (årlig)" mod "Husstandens samlede årlige indkomst") — det er WCAG 2.5.3 *label in name*: det tilgængelige navn skal indeholde den synlige tekst, ellers stemmer stemmestyringen ikke med det, der står på skærmen. `aria-label`en er fjernet, så den synlige etikettetekst er navnet. **`/pension`s samlever-checkboks var *indpakket* i `<label>`** (gyldig HTML, virker med skærmlæser) men kunne ikke findes med `getByLabelText` — gjort eksplicit som i C63. `label-a11y.test.tsx` er udvidet fra 37 til **51 tests** i DA og SE, **verificeret modsvejs: alle 14 nye falder** med de gamle komponenter. **Harness-fix ud over feltbindingerne:** `label-a11y.test.tsx` havde to *uhandlede* `document.execCommand is not a function`-rejections fra `CopyResultButton`s jsdom-fallback, som gjorde at filen **exited 1 selv om alle 37 tests var grønne** — fundet ved at køre filen isoleret; `document.execCommand` er nu stubbet som i `BoligstoetteBeregner.test.tsx`. **Målingen er taget på ny igen:** et `<label>` tælles som bundet, hvis det har `for`/`htmlFor` **eller** et `id` brugt i `aria-labelledby`; den tælling kan heller ikke længere tage `${…}`-udtryk i template-literals for fejl (den gav `/elberegner` en falsk ubundet etiket, fordi `aria-labelledby={\`…\${index + 1}\`}` ikke kan sluges ordentligt). Før C64: **113 ubundne labels i 51 filer** (C63's note sagde 117/51 — de 8 skyldes bl.a. labels med `>` inde i attribut-udtryk, som `<label\b([^>]*)>` afkorter). Efter C64 er der **96 i 44 filer** tilbage, og alle syv rørte filer er helt rene. Gate grøn: lint (549 filer), **1588 tests / 144 filer** (fra 1574 / 144) og build (141 sider). Kode + plan i ét commit på `ceo/labels-runde4`; første kandidatvindue **2026-09-27 07:30**. Se opgave 92. **Køen er ikke længere tom:** målingen afgav et nyt fund, der er skrevet op som **opgave 93** — de hardkodede danske strenge i live-komponenter, som er locale-leak på beraknare.se (research-fund #4's klasse). Den er næste iteration, fordi den er målbar, billig og en reel fejl.
+
 STATUS: KØ — **C63 er landet: 34 `\u003clabel\u003e` på seks beregnere var uden binding, og fire felter pr. gældspost i `/gaeldsfri` havde overhovedet intet navn — hverken label, aria-label eller andet.** Køen var tom (alle 90 opgaver færdige, intet `I GANG`), og planens egen "Efterladt, bevidst"-note fra C62 navngavnæste snit af label-klassen, ordnet efter GSC-visninger. Rettet er `/huslejebudget` (11 labels), `/laane` (7), `/befordringsfradrag` (7), `/boliglaan` (3), `/gaeldsfri` (3) og `/valuta` (3). **Målingen er taget på ny, fordi C62's egen tælling var lidt for lås:** et `<label>` regnes som bundet, hvis det har `for`/`htmlFor` **eller** et `id` der bruges i `aria-labelledby` (sådan er knapgrupperne bygget, bl.a. i `/braendstof` og `/moms`). Før den rettelse tæller scriptet gruppe-etiketterne som fejl. Korrekt tælt er **151 ubundne labels i 58 filer** før denne iteration — altså omtrent C62's 146/56, så det var samme klasse. Efter C63 er der **117 i 51 filer** tilbage. Fire fund ud over de 34 bindinger: **`/gaeldsfri`s fire felter pr. gældspost havde intet navn** (kun en `<span>`-kolonneoverskrift, der kun vises på den første post, og placeholders — samme fejltype som C62 fandt på `/rentefradrag`s lån), **`/gaeldsfri`s ✕-knap havde intet navn** (kun `&#10005;`), **`/laane`s sammenligningstilstand gentager "Rente" og "Løbetid"** fra hovedrækken, så to felter har samme synlige tekst (lovligt, men derfor `-2` på id'et), og **harnessen havde en fejl**: en etiket der står over flere linjer i JSX kunne ikke findes, fordi regex'en ikke kollapsede hvidrum som testing-library gør det — det var den, der fik `/huslejebudget`s "Ønsket opsparing" til at fejle. `label-a11y.test.tsx` er udvidet fra 25 til **37 tests** i DA og SE, **verificeret modsvejs: alle 12 nye falder** med de gamle komponenter. Gate grøn: lint (549 filer), **1574 tests / 144 filer** (fra 1562 / 144) og build (141 sider). Kode + plan i ét commit på `ceo/labels-runde3`; første kandidatvindue **2026-09-27 07:30**. Se opgave 91.
 
 STATUS: KØ — **C62 er landet: otte af sitets mest besøgte beregnere havde
@@ -6763,6 +6765,13 @@ efter datagrund:
    `/api/v1/loen`'s kommuneskat, domænerne og `www`-redirects.
 
 ### ❓ Til Mads
+- **Dansk UI-tekst på beraknare.se (opgave 93).** Fundet 2026-09-27 under
+  C64's måling: `PensionBeregner` har mindst fem hardkodede danske strenge, og
+  siden renderer på begge domæner. Der er sikkert mere af det samme i andre
+  komponenter — jeg måler det i opgave 93, før jeg retter noget, fordi en dansk
+  streng på en dansk-only-side ikke er en fejl. **Ingen beslutning nødvendig**
+  ud over det normale: det er rettelse af vores egen fejl, ikke en
+  redaktionel ændring.
 - ⏳ **VERIFICÉR DEPLOY: C60 `/promille` — et tomt felt gav en grøn
   tilladelse til at køre bil, "præcis på grænsen" erstattede den falske
   "over grænsen", og den delte tekst har nu de fire input — kode + plan i ét
@@ -7677,6 +7686,32 @@ landmark=lån, piggybank=opsparing osv.).
     - Gate grøn: lint ok, 280/280 tests, build ok (128 pages).
 
 ## VERIFICÉR DEPLOY-log
+- ⏳ **ÅBEN — C64 17 ubundne labels på syv beregnere, ét navn på to felter i
+  `/elberegner` og en `aria-label` der modsagde sin egen synlige etiket i
+  `/boernepenge` — kode + plan i ét commit på branch `ceo/labels-runde4`. Første
+  kandidatvindue **2026-09-27 07:30** (merge-ref indsættes ved merge).**
+  **HTTP 200 beviser intet her:** ændringen er `htmlFor`/`id`/`aria-label`/
+  `aria-labelledby` i klient-renderede felter. I DevTools på hver af de syv sider:
+  `document.querySelectorAll('label:not([for]):not([id])').length` → **0**,
+  `document.querySelectorAll('input:not([id]):not([aria-label])').length` → **0**
+  og `document.querySelectorAll('select:not([id]):not([aria-label])').length` → **0**.
+  Bemærk at gruppe-etiketterne **skal** have et `id` (de bruges i
+  `aria-labelledby`), så de tælles med i det første tal.
+  1. `/leasing`: bilpris, restværdi, løbetid, rente og udbetaling har navn.
+      350.000 kr., 36 mdr., 5 %, 0kr. udbetaling skal give **samme** ydelse som før.
+  2. `/elberegner`: "Apparat 1" skal være en `role="group"` med
+      `aria-labelledby`, og **begge** felter under den (vælger + navn) skal have
+      hvert sit navn. Watt og timer pr. enhed har `for`/`id`.
+  3. `/enhedspris`: de fire felter (pris + mængde for A og B) skal have navn, og
+      de to par må ikke pege på det samme `id`. Enhedsvælgeren er en gruppe.
+  4. `/vaegttab`: køn og aktivitetsniveau er to navngivne grupper; beregningen uændret.
+  5. `/pension`: "Udbetalingsperiode (år)" har navn, og checkboksen skal kunne
+      findes med navnet (sæt samlivsstatus til "Gift eller samlevende" for at se den).
+  6. `/boernepenge`: indkomstfeltets **synlige** etiket skal være dets navn —
+      DevTools: feltet må ikke have nogen `aria-label`, kun `id`.
+  7. `/loenstigning`: gammel og ny løn har navn; beregningen uændret.
+  8. `beraknare.se` skal have de samme bindinger på de syv sider.
+      `https://minberegner.dk/api/health` skal svare `status: ok`.
 - ⏳ **ÅBEN — C63 34 ubundne labels på seks beregnere plus fire navnløse felter pr. gældspost i `/gaeldsfri` — kode + plan i ét commit på branch `ceo/labels-runde3`, kode `c419419`, merge `b408e3d` 2026-09-27 04:43 CEST. Første kandidatvindue **2026-09-27 07:30**.**
   **HTTP 200 beviser intet her:** ændringen er `htmlFor`/`id`/`aria-label` i
   klient-renderede felter. I DevTools på hver af de seks sider:
@@ -8849,3 +8884,153 @@ landmark=lån, piggybank=opsparing osv.).
   desuden en af de fire trafikstærke svenske sider, 3.181 visninger), så
   `/enheder` (4), `/ejendomsvaerdiskat` (4), `/boligsalg` (4) og
   `/rygestop`/`rabat`/`motionkalorier` (3 hver).
+
+#### 93. [ ] 2026-09-27 — C65 — hardkodede danske strenge i live-komponenter (locale-leak på beraknare.se)
+
+- **Datagrund:** fundet under C64's måling af label-klassen.
+  `PensionBeregner` har mindst fem danske strenge direkte i JSX: "Udbetalingsperiode
+  (år)", "Samlivsstatus", "Enlig", "Gift eller samlevende" og "Min
+  ægtefælle/samlever er også folkepensionsmodtager". `/pension` er dansk **og**
+  svensk (`/pension` ligger i navigationen, og siden falder tilbage til
+  dansk page-data med `getPageData("pension", locale) || getPageData("pension",
+  "da")`), så dansk UI-tekst kan stå på beraknare.se. Det er research-fund #4's
+  locale-leak, som indtil nu kun var dokumenteret for `/loen-efter-skat`,
+  `/ugenummer`, `/flyttebudget` og `/boligsalg`.
+- **Scope (først måle, så rette).** 1) Script der finder `<label>`, `<option>`,
+  `<h2>`, knap- og `<p>`-tekster med danske markører (æ/ø/å, "kr", "år",
+  "tilføj") i `src/components/*Beregner.tsx`, **krydschecket** mod hvilke af
+  de sider der faktisk renderer på beraknare.se — en dansk streng på en
+  daOnly-side er ikke en fejl. 2) Ret de fund, der er synlige for en svensk
+  læser, med nøgler i `da`/`se`/`no`. 3) `label-a11y.test.tsx` køres fortsat i
+  DA og SE, fordi en ny nøgle ikke må glide fra sit `id`' (C63's beslutning).
+- **Forventet effekt:** tillid og **ingen dansk tekst på et svensk domæne**.
+  `/pension` er ikke i beraknare.se's top-15, så effekten er lille i trafik —
+  opgaven er derfor valgt fordi den er målbar og billig, ikke fordi den er stor.
+- **Acceptkriterier:**
+  1. Målingen er skrevet i planen med fil, linje og om siden renderer på SE.
+  2. Ingen dansk streng står i en komponent, der renderer på beraknare.se.
+  3. Nye nøgler findes i **alle tre** locales (da/se/no) — en nøgle der kun
+     findes i `da` er den samme fejl i en ny form.
+  4. `npm run lint`, `npm run test` og `npm run build` er grønne.
+- **MÅL:** `/pension` 139 besøgende/28d DA (bounce 2 %) pr. 2026-09-27;
+  beraknare.se 516 besøgende/28d (+159 %) pr. 2026-09-27. **Mål 2026-10-11.**
+- **Bemærk:** `/pension` blev desuden diagnosticeret og rettet som C8/C11/C31
+  (se "Dokumenterede kandidatere efter top-5"), så indholdet er i orden; det er
+  kun UI-teksten, der står på dansk.
+
+#### 92. [x] FÆRDIG 2026-09-27 — C64 — 17 ubundne labels på syv beregnere, ét navn på to felter i `/elberegner`, og en `aria-label` der modsagde sin egen synlige etiket i `/boernepenge`
+
+- **Datagrund:** køen var tom (alle 91 opgaver færdige, intet `I GANG`), og
+  C63's "Efterladt, bevidst" pegede på resten af label-klassen. Snittet er taget
+  efter **hvad brugeren kan ramme** — Plausible 28d 2026-09-27 og GSC
+  2026-08-27 → 2026-09-24 — fordi det er den eneste måde klassen bliver
+  trafikrelevant frem for pligtsyn:
+  | Side | Ubundne labels | Datagrund |
+  |---|---|---|
+  | `/leasing` | 5 | 3.181 visninger i svensk GSC, 45 besøgende/28d SE (+80 %) |
+  | `/elberegner` | 3 | 11 besøgende/28d SE (+83 %) |
+  | `/enhedspris` | 3 | 1.144 visninger SE (pos. 6,1) |
+  | `/vaegttab` | 2 | 1.186 visninger SE (pos. 8,3) |
+  | `/pension` | 2 | **139 besøgende/28d DA** (+26 %, bounce 2 %) |
+  | `/boernepenge` | 1 | **138 besøgende/28d DA** (+151 %, bounce 1 %) |
+  | `/loenstigning` | 1 | ny side på beraknare.se (10 besøgende/28d) |
+- **Målt ordentligt, og tællingen blev to gange rettet undervejs.** Et
+  `<label>` tælles som bundet, hvis det har `for`/`htmlFor` **eller** et `id`
+  der bruges i `aria-labelledby` — sådan er knapgrupperne bygget siden C61.
+  To fælder i tællingen, begge noteret for at spare næste iteration dem:
+  1) Et `<label …>` må måles på **åbningstaggen**, altså `<label\b([^>]*)>`.
+     C63's note sagde "117 ubundne i 51 filer"; den tælling giver **113/51**.
+     Forskellen er bl.a. labels med et `>` inde i et attribut-udtryk, som
+     `[^>]*` afkorter, så de aldrig matcher.
+  2) `${…}`-udtryk i template-literals kan ikke sluges ordentligt:
+     `aria-labelledby={\`elberegner-apparat-${index + 1}\`}` gav et falsk
+     "ubundet" på den etiket, der *er* bundet. Tællingen normaliserer nu
+     `${…}` væk på begge sider. **Denne fælde ville have gjort at C64 så
+     ud som om den ikke havde lukket `/elberegner`.**
+- **Fund 1 — `/elberegner`: ét navn på to felter.** Etiketten "Apparat N"
+  dækkede både en `<select>` (vælg standardapparat) og et `<input>` (skriv eget
+  navn). En `<label>` må kun have én kontrol, så den var ikke bare ubundet —
+  den var *tvetydig*, og selv en skærmlæser der følger den, ved ikke hvilket
+  af de to felter der er tale om. Nu `role="group"` + `aria-labelledby` på
+  den fælles container, og hvert felt har sit eget `aria-label` med samme
+  præfiks ("Apparat 1 — Vælg standard", "Apparat 1 — eller skriv navn"), så
+  det tilgængelige navn stadig indeholder den synlige tekst. Watt og timer
+  pr. enhed fik `for`/`id` med `index + 1`.
+- **Fund 2 — `/enhedspris`: samme synlige tekst to steder.** `productCol` tegnes
+  for vare A og B, så "Pris" og "Mængde" optræder to gange. Id'erne er derfor
+  `enhedspris-pris-a` / `-b` og `enhedspris-maengde-a` / `-b` — **ASCII**, fordi
+  et `id` med æøå er et spring i `querySelector` og i CSS-vælgere. Samme
+  forbehold som `/kvadratmeter`s to "Pris pr. m²" i C62, som blev løst med
+  `getAllByLabelText`; her er det løst ved at id'erne er forskellige, fordi
+  produkterne kan have forskellig pris. Enhedsvælgeren (knapper) er en gruppe.
+- **Fund 3 — `/boernepenge`: `aria-label` der modsagde sin egen etiket.**
+  Indkomstfeltet havde en **ubundet** synlig etiket ("Husstandens samlede
+  indkomst (årlig)") *og* en `aria-label` ("Husstandens samlede årlige
+  indkomst"). `aria-label` vinder over etiketten, så det tilgængelige navn var
+  ikke det, der stod på skærmen — det er WCAG 2.5.3 *label in name*, og det er
+  præcis den fejl, der gør at stemmestyring og øjne peger på to ting.
+  Rettelsen er at **fjerne** `aria-label` og binde den synlige etiket med
+  `for`/`id`, så navnet er den tekst, læseren kan se.
+- **Fund 4 — `/pension`: checkboks indpakket i `<label>`.** Som i C63's
+  `/befordringsfradrag` er det gyldig HTML og virker med skærmlæser, men feltet
+  kunne ikke findes med `getByLabelText`. Nu eksplicit `for`/`id`
+  (`pension-samlever-pensionist`). Bemærk at feltet **først** dukker op når
+  samlivsstatus er "Gift eller samlevende", så testen slår det frem — ellers
+  ville den være grøn uden at have set checkboksen.
+- **Fund 5 — `/pension` har dansk tekst i koden.** Se `❓ Til Mads` og
+  opgave 93: "Udbetalingsperiode (år)", "Samlivsstatus", "Enlig", "Gift eller
+  samlevende" og "Min ægtefælle/samlever er også folkepensionsmodtager" er
+  hardkodede danske strenge i en komponent, der renderer på **alle** domæner.
+  Det er research-fund #4's locale-leak, fundet mens klassen blev målt. Ikke
+  rettet her, fordi det kræver nye nøgler i tre locales og derfor er en egen
+  opgave med sit eget testbehov.
+- **Test:** `label-a11y.test.tsx` udvidet fra 37 til **51 tests** (144 filer,
+  **1588 tests fra 1574**). Syv nye sider i DA og SE. Bevis på dækning som i
+  C62/C63: `/enhedspris` måles på at de fire `id`'er er forskellige, og
+  `/elberegner` på at gruppens `aria-labelledby` peger på en etiket, der
+  indeholder apparatets nummer. **Verificeret modsvejs: alle 14 nye tests
+  falder** med de gamle komponenter (kontrolleret ved at `git checkout`e de syv
+  komponenter til HEAD og køre filen).
+- **Harness-fix, der lå uden for feltbindingerne.** `label-a11y.test.tsx` havde
+  to **uhandlede** `TypeError: document.execCommand is not a function` fra
+  `CopyResultButton`s jsdom-fallback, fordi jsdom hverken har
+  `navigator.clipboard` eller `execCommand`. Alle 37 tests var grønne, men
+  filen **exited 1** — fundet ved at køre filen isoleret, som kun gør efter en
+  konkret mistænkelig adfærd. `document.execCommand` stubbes nu som i
+  `BoligstoetteBeregner.test.tsx`. Samme fælde kan ligge i andre filer; den
+  bør tages med, når de testes isoleret.
+- **Gate:** `npm run lint` grøn (549 filer), `npm run test` **1588 tests / 144
+  filer** grøn (fra 1574 / 144), `npm run build` grøn (141 sider, 7 kendte
+  CSS-advarsler). Gate-definitionen er `npm run lint` + `npm run test` +
+  `npm run build` — der er ingen typecheck-script i `package.json`, men
+  `next build` typechecker med.
+- **MÅL:** `/pension` **139 besøgende/28d** (bounce 2 %, +26 %) og
+  `/boernepenge` **138 besøgende/28d** (bounce 1 %, +151 %) pr. 2026-09-27;
+  `/leasing` 45 besøgende/28d SE, `/elberegner` 11 SE, `/vaegttab` og
+  `/enhedspris` 1.186/1.144 visninger i svensk GSC. **Mål 2026-10-11.**
+  Bemærk ændringen forventes **ikke** at løfte CTR — den retter en
+  funktionsfejl for skærmlæsere, ikke en titel — og den er ikke målbar i
+  Plausible, fordi skærmlæserbrug ikke trackes (**tracking-opsætningen må ikke
+  ændres**). Virkningen er derfor verificeret i testene, ikke i tal.
+- **Efterladt, bevidst:** **96 ubundne labels i 44 filer.** Næste ordre er igen
+  efter det, brugeren kan ramme: `/efterloen` (6), `/boligsalg` (4),
+  `/ejendomsvaerdiskat` (4), `/enheder` (4), `/aktieskat` (3),
+  `/alkoholenheder` (3) og `/bolan` (3). Se Næste kandidater efter C64.
+
+### Næste kandidater efter C64
+
+1. **Opgave 93 — de hardkodede danske strenge i live-komponenter.** Fundet under
+   C64: `/pension` har mindst fem. Det er research-fund #4's locale-leak, og den
+   er værst hvor den er synlig for en svensk læser. Den skal måles før den
+   rettes: et script der finder `<label>`, `<option>`, `<h2>` og knaptekster
+   med danske tegn/s ord i `src/components/*Beregner.tsx`, krydschecket mod
+   hvor mange af de sider der faktisk renderer på beraknare.se.
+2. **Resten af label-klassen: 44 filer / 96 ubundne labels** (C64 lukkede
+   7 filer / 17 labels). Samme rækkefølge: efter bruger-relevante data før
+   efter antal. `/efterloen` (6) er den eneste der endnu er uberørt og har
+   seks; `/boligsalg`, `/ejendomsvaerdiskat` og `/enheder` (4 hver).
+3. **De 10 øvrige komponenter med `toFixed(2)`** (C53 sagde 18, `git grep`
+   tæller 11) og resten af rækken i klassen "hvad skriver den tekst, brugeren
+   kopierer?" — `/brok` (4.640 visninger) er stadig først i den række.
+4. **Mål 2026-10-10 / 2026-10-11** (se Måleprotokol): C1-C16 og C35-C64 måles
+   14 dage efter deres snapshot, og resultatet skrives ved siden af hver opgave.

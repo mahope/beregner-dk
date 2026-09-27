@@ -207,18 +207,18 @@ export default function BoernepengBeregner() {
       {/* Indkomst og indstillinger */}
       <div className="space-y-6">
         <div>
-          <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+          <label htmlFor="boernepeng-indkomst" className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
             Husstandens samlede indkomst (årlig)
           </label>
           <div className="relative">
             <input
+              id="boernepeng-indkomst"
               type="number"
               min="0"
               step="10000"
               value={husstandsIndkomst}
               onChange={(e) => setHusstandsIndkomst(parseFloat(e.target.value) || 0)}
               className="w-full px-4 py-3 pr-14 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              aria-label="Husstandens samlede årlige indkomst"
             />
             <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">kr/år</span>
           </div>
