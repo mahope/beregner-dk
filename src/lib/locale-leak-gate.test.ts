@@ -96,4 +96,57 @@ describe("locale-leak scanner", () => {
     // Danish letter. This locks that false positive out.
     expect(JSON.stringify(scan().unreviewed)).not.toContain("BolanBeregner");
   });
+
+  it("refuses Danish copy that sits in the Danish branch of a locale dispatcher", () => {
+    // HomeContent was the scanner's biggest reviewed entry: 38 finds, and a
+    // note claiming the whole Danish homepage text stood on beraknare.se. It
+    // does not — the file dispatches internally. Planted here so the verdict
+    // cannot be lost with the REVIEWED entry it replaced (opgave 96).
+    const target = resolve(ROOT, "src", "components", "MomsBeregner.tsx");
+    const original = readFileSync(target);
+    try {
+      writeFileSync(
+        target,
+        `${original.toString("utf8")}\n` +
+          `function PlantetSE() { return <div>Gratis kalkylator</div>; }\n` +
+          `function PlantetNO() { return <div>Gratis kalkulator</div>; }\n` +
+          `function PlantetDA() { return <div>Tørremaskine (per vask)</div>; }\n` +
+          `export function Plantet({ locale }: { locale: string }) {\n` +
+          `  if (locale === "no") return <PlantetNO />;\n` +
+          `  if (locale === "se") return <PlantetSE />;\n` +
+          `  return <PlantetDA />;\n` +
+          `}\n`
+      );
+      expect(execFileSync("node", [SCRIPT, "--gate"], { cwd: ROOT, stdio: "pipe" })).toBeTruthy();
+      expect(JSON.stringify(scan().unreviewed)).not.toContain("Tørremaskine");
+    } finally {
+      writeFileSync(target, original);
+    }
+  });
+
+  it("still flags a dispatcher that leaves a locale on its default branch", () => {
+    // The safety property of the rule above: a file that only diverts `se` falls
+    // through to its default on `no`, and that default is what a Norwegian
+    // reader would see — so it must not be excused.
+    const target = resolve(ROOT, "src", "components", "MomsBeregner.tsx");
+    const original = readFileSync(target);
+    try {
+      writeFileSync(
+        target,
+        `${original.toString("utf8")}\n` +
+          `function PlantetSE2() { return <div>Gratis kalkylator</div>; }\n` +
+          `function PlantetDA2() { return <div>Opvaskemaskine (per vask)</div>; }\n` +
+          `export function Plantet2({ locale }: { locale: string }) {\n` +
+          `  if (locale === "se") return <PlantetSE2 />;\n` +
+          `  return <PlantetDA2 />;\n` +
+          `}\n`
+      );
+      const failing = () =>
+        execFileSync("node", [SCRIPT, "--gate"], { cwd: ROOT, stdio: "pipe" });
+      expect(failing).toThrow();
+      expect(JSON.stringify(scan().unreviewed)).toContain("Opvaskemaskine");
+    } finally {
+      writeFileSync(target, original);
+    }
+  });
 });
