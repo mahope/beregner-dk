@@ -21,19 +21,26 @@ import BefordringsfradragBeregner from "./BefordringsfradragBeregner";
 import BoliglaanBeregner from "./BoliglaanBeregner";
 import BraendstofBeregner from "./BraendstofBeregner";
 import BrokBeregner from "./BrokBeregner";
+import BoernepengBeregner from "./BoernepengBeregner";
 import DatoBeregner from "./DatoBeregner";
+import Elberegner from "./Elberegner";
+import EnhedsprisBeregner from "./EnhedsprisBeregner";
 import GaeldsfriBeregner from "./GaeldsfriBeregner";
 import HuslejeBudgetBeregner from "./HuslejeBudgetBeregner";
 import KalorieBeregner from "./KalorieBeregner";
 import KvadratmeterBeregner from "./KvadratmeterBeregner";
 import LaaneBeregner from "./LaaneBeregner";
+import LeasingBeregner from "./LeasingBeregner";
+import LoenstigningBeregner from "./LoenstigningBeregner";
 import MomsBeregner from "./MomsBeregner";
+import PensionBeregner from "./PensionBeregner";
 import PromilleBeregner from "./PromilleBeregner";
 import RentefradragBeregner from "./RentefradragBeregner";
 import RenteBeregner from "./RenteBeregner";
 import TidsBeregner from "./TidsBeregner";
 import TidszoneBeregner from "./TidszoneBeregner";
 import ValutaBeregner from "./ValutaBeregner";
+import VaegttabBeregner from "./VaegttabBeregner";
 import { LocaleProvider } from "./LocaleProvider";
 import { getDomainConfig } from "@/lib/domain-config";
 
@@ -46,6 +53,17 @@ vi.mock("@/lib/analytics", () => ({
 }));
 
 const domainConfig = getDomainConfig("localhost");
+
+// jsdom har hverken `navigator.clipboard` eller `document.execCommand`, så
+// `CopyResultButton`s fallback kaster `TypeError: document.execCommand is not a
+// function`. Det var to uhandlede rejections, som gjorde at *denne fil alene*
+// exited 1 selv om alle dens tests var grønne. Vi stubber fallbacken, fordi vi
+// ikke tester kopiering her — det gør de andre testfiler med klipbord.
+Object.defineProperty(document, "execCommand", {
+  value: () => true,
+  configurable: true,
+  writable: true,
+});
 
 function renderIn(locale: "da" | "se", Component: () => React.JSX.Element) {
   return render(
@@ -333,6 +351,79 @@ describe("Feltnavn for skærmlæsere — de fire mest besøgte beregnere", () =>
         );
         expect(new Set(navne).size).toBe(navne.length);
         expect(container.querySelectorAll("input").length).toBe(9);
+      });
+
+      test("/leasing: bilpris, restværdi, løbetid, rente og udbetaling har navn", () => {
+        const { container } = renderIn(locale, LeasingBeregner);
+        expectFieldsAreNamed(container);
+        expect(container.querySelectorAll("input").length).toBe(5);
+      });
+
+      test("/pension: udbetalingsperiode og samlever-pensionist har navn", () => {
+        const { container } = renderIn(locale, PensionBeregner);
+        expectFieldsAreNamed(container);
+
+        // Checkboksen dukker kun op når samlivsstatus er "samlevende", så den
+        // skal slås frem — ellers ville vi aldrig se den.
+        const samlevende = Array.from(container.querySelectorAll("option")).find(
+          (option) => option.textContent === "Gift eller samlevende",
+        ) as HTMLOptionElement | undefined;
+        expect(samlevende).toBeDefined();
+        fireEvent.change(container.querySelector("#pension-samliv") as HTMLSelectElement, {
+          target: { value: "samlevende" },
+        });
+        expectFieldsAreNamed(container);
+        expect(container.querySelector("#pension-samlever-pensionist")).not.toBeNull();
+      });
+
+      test("/boernepenge: indkomst, enlig og delt forældremyndighed har navn", () => {
+        const { container } = renderIn(locale, BoernepengBeregner);
+        expectFieldsAreNamed(container);
+        expect(container.querySelectorAll("input[type=checkbox]").length).toBe(2);
+
+        const tilfoej = Array.from(container.querySelectorAll("button")).find((knap) =>
+          (knap.textContent ?? "").includes("Tilføj barn"),
+        ) as HTMLElement | undefined;
+        expect(tilfoej).toBeDefined();
+        fireEvent.click(tilfoej as HTMLElement);
+        expectFieldsAreNamed(container);
+      });
+
+      test("/vaegttab: køn og aktivitetsniveau er navngivne grupper", () => {
+        const { container } = renderIn(locale, VaegttabBeregner);
+        expectFieldsAreNamed(container);
+        expect(container.querySelectorAll('[role="group"][aria-labelledby]').length).toBe(2);
+      });
+
+      test("/enhedspris: pris og mængde har navn for begge varer, enhed er en gruppe", () => {
+        const { container } = renderIn(locale, EnhedsprisBeregner);
+        expectFieldsAreNamed(container);
+        // Pris og mængde står under hver vare, så fire felter skal have navn —
+        // og de må ikke hedde det samme, ellers kan skærmlæseren ikke skelne dem.
+        expect(container.querySelectorAll("input").length).toBe(4);
+        const etiketter = Array.from(container.querySelectorAll("input")).map(
+          (felt) => container.querySelector(`label[for="${felt.id}"]`)?.textContent?.trim(),
+        );
+        const priser = etiketter.filter((navn) => navn !== undefined);
+        expect(new Set(priser).size).toBe(2);
+        expect(container.querySelectorAll('[role="group"][aria-labelledby]').length).toBe(1);
+      });
+
+      test("/loenstigning: gammel og ny løn har navn", () => {
+        const { container } = renderIn(locale, LoenstigningBeregner);
+        expectFieldsAreNamed(container);
+        expect(container.querySelectorAll("input").length).toBeGreaterThanOrEqual(2);
+      });
+
+      test("/elberegner: apparat, watt og timer pr. enhed har navn", () => {
+        const { container } = renderIn(locale, Elberegner);
+        expectFieldsAreNamed(container);
+        // "Apparat N" dækker to felter (valg af standardapparat og eget navn),
+        // så den er en gruppe — ellers ville den være en etiket uden binding.
+        expect(container.querySelectorAll('[role="group"][aria-labelledby]').length).toBeGreaterThanOrEqual(1);
+        const grupper = Array.from(container.querySelectorAll('[role="group"][aria-labelledby]'));
+        const etiket = container.querySelector(`#${CSS.escape(grupper[0].getAttribute("aria-labelledby") ?? "")}`);
+        expect(etiket?.textContent).toMatch(/\d/);
       });
     });
   }

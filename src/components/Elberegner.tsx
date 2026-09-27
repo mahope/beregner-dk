@@ -362,11 +362,12 @@ export default function Elberegner({ elprisData = null, nu }: Props = {}) {
               className="flex flex-wrap gap-4 items-end p-4 bg-gray-50 dark:bg-gray-800 rounded-lg"
             >
               <div className="flex-1 min-w-[200px]">
-                <label className="block text-sm font-medium mb-1 dark:text-gray-200">
+                <label id={`elberegner-apparat-${index + 1}`} className="block text-sm font-medium mb-1 dark:text-gray-200">
                   {l.apparat} {index + 1}
                 </label>
-                <div className="flex flex-col sm:flex-row gap-2">
+                <div className="flex flex-col sm:flex-row gap-2" role="group" aria-labelledby={`elberegner-apparat-${index + 1}`}>
                   <select
+                    aria-label={`${l.apparat} ${index + 1} — ${l.vaelgStandard}`}
                     className="max-w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 dark:text-white"
                     onChange={(e) => vaelgStandardApparat(apparat.id, e.target.value)}
                     value=""
@@ -380,6 +381,7 @@ export default function Elberegner({ elprisData = null, nu }: Props = {}) {
                   </select>
                   <input
                     type="text"
+                    aria-label={`${l.apparat} ${index + 1} — ${l.ellerSkrivNavn}`}
                     placeholder={l.ellerSkrivNavn}
                     value={apparat.navn}
                     onChange={(e) => opdaterApparat(apparat.id, "navn", e.target.value)}
@@ -389,9 +391,10 @@ export default function Elberegner({ elprisData = null, nu }: Props = {}) {
               </div>
 
               <div className="w-28">
-                <label className="block text-sm font-medium mb-1 dark:text-gray-200">{l.watt}</label>
+                <label htmlFor={`elberegner-watt-${index + 1}`} className="block text-sm font-medium mb-1 dark:text-gray-200">{l.watt}</label>
                 <div className="relative">
                   <input
+                    id={`elberegner-watt-${index + 1}`}
                     type="number"
                     min="0"
                     value={apparat.watt || ""}
@@ -404,9 +407,10 @@ export default function Elberegner({ elprisData = null, nu }: Props = {}) {
               </div>
 
               <div className="w-28">
-                <label className="block text-sm font-medium mb-1 dark:text-gray-200">{l.timerDag}</label>
+                <label htmlFor={`elberegner-timer-${index + 1}`} className="block text-sm font-medium mb-1 dark:text-gray-200">{l.timerDag}</label>
                 <div className="relative">
                   <input
+                    id={`elberegner-timer-${index + 1}`}
                     type="number"
                     step="0.5"
                     min="0"

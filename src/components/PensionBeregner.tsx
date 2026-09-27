@@ -277,8 +277,9 @@ export default function PensionBeregner() {
             helpText="Historisk gennemsnit: ca. 2%"
           />
           <div>
-            <label className="block text-sm font-medium mb-2 dark:text-gray-200">Udbetalingsperiode (år)</label>
+            <label htmlFor="pension-udbetalingsperiode" className="block text-sm font-medium mb-2 dark:text-gray-200">Udbetalingsperiode (år)</label>
             <select
+              id="pension-udbetalingsperiode"
               value={udbetalingsperiode}
               onChange={(e) => setUdbetalingsperiode(parseInt(e.target.value))}
               className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg text-lg bg-white dark:bg-gray-800 dark:text-white"
@@ -318,8 +319,9 @@ export default function PensionBeregner() {
             </p>
           </div>
           {samliv === "samlevende" && (
-            <label className="flex items-start gap-3 p-3 border border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer">
+            <label htmlFor="pension-samlever-pensionist" className="flex items-start gap-3 p-3 border border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer">
               <input
+                id="pension-samlever-pensionist"
                 type="checkbox"
                 checked={samleverErPensionist}
                 onChange={(e) => setSamleverErPensionist(e.target.checked)}

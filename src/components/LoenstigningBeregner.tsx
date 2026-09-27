@@ -91,11 +91,11 @@ export default function LoenstigningBeregner({ dstInflation = null }: { dstInfla
     [kildeInflation, oldLoen, newLoen, inflation],
   );
 
-  const field = (label: string, value: number, onChange: (n: number) => void) => (
+  const field = (id: string, label: string, value: number, onChange: (n: number) => void) => (
     <div>
-      <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">{label}</label>
+      <label htmlFor={id} className="block text-xs text-gray-600 dark:text-gray-400 mb-1">{label}</label>
       <div className="relative">
-        <input type="number" min="0" step="100" value={value} onChange={(e) => onChange(Number(e.target.value))}
+        <input id={id} type="number" min="0" step="100" value={value} onChange={(e) => onChange(Number(e.target.value))}
           className="w-full px-4 py-2.5 pr-10 border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
         <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">kr</span>
       </div>
@@ -106,8 +106,8 @@ export default function LoenstigningBeregner({ dstInflation = null }: { dstInfla
     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 md:p-8">
       <div className="grid md:grid-cols-2 gap-6">
         <div className="space-y-4">
-          {field(l.old, oldLoen, setOldLoen)}
-          {field(l.new, newLoen, setNewLoen)}
+          {field("loenstigning-gammel", l.old, oldLoen, setOldLoen)}
+          {field("loenstigning-ny", l.new, newLoen, setNewLoen)}
           <div className="flex justify-end">
             <ResetButton onReset={handleReset} />
           </div>

@@ -207,42 +207,42 @@ export default function LeasingBeregner() {
         {/* Input */}
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">{l.bilpris}</label>
+            <label htmlFor="leasing-bilpris" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">{l.bilpris}</label>
             <div className="relative">
-              <input type="number" value={bilpris} onChange={(e) => setBilpris(e.target.value)} className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+              <input id="leasing-bilpris" type="number" value={bilpris} onChange={(e) => setBilpris(e.target.value)} className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">{getCurrencySuffix(locale)}</span>
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">{l.restvaerdi}</label>
+            <label htmlFor="leasing-restvaerdi" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">{l.restvaerdi}</label>
             <div className="relative">
-              <input type="number" value={restvaerdi} onChange={(e) => setRestvaerdi(e.target.value)} className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+              <input id="leasing-restvaerdi" type="number" value={restvaerdi} onChange={(e) => setRestvaerdi(e.target.value)} className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">{getCurrencySuffix(locale)}</span>
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">{l.loebetid}</label>
+              <label htmlFor="leasing-loebetid" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">{l.loebetid}</label>
               <div className="relative">
-                <input type="number" value={loebetid} onChange={(e) => setLoebetid(e.target.value)} className="w-full px-4 py-3 pr-14 border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+                <input id="leasing-loebetid" type="number" value={loebetid} onChange={(e) => setLoebetid(e.target.value)} className="w-full px-4 py-3 pr-14 border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 text-sm">{l.months}</span>
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">{l.renteAOP}</label>
+              <label htmlFor="leasing-rente" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">{l.renteAOP}</label>
               <div className="relative">
-                <input type="number" step="0.1" value={rente} onChange={(e) => setRente(e.target.value)} className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+                <input id="leasing-rente" type="number" step="0.1" value={rente} onChange={(e) => setRente(e.target.value)} className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">%</span>
               </div>
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">{l.udbetaling}</label>
+            <label htmlFor="leasing-udbetaling" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">{l.udbetaling}</label>
             <div className="relative">
-              <input type="number" value={udbetaling} onChange={(e) => setUdbetaling(e.target.value)} className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+              <input id="leasing-udbetaling" type="number" value={udbetaling} onChange={(e) => setUdbetaling(e.target.value)} className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">{getCurrencySuffix(locale)}</span>
             </div>
           </div>
