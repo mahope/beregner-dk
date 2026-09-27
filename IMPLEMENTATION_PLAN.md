@@ -1,3 +1,7 @@
+STATUS: KØ — **C92 er landet: svensk CTR fundet ved at læse GSC's egne søgninger — siden skrev "färetagsleasing" med ä, så ordet kunne aldrig ramme den søgning, den er skrevet for.** Køen havde én åben opgave, 119, som kræver en citable dansk tabel; alle kilder var utilgængelige i denne iteration (se nedenfor), så valget var planens egen kandidat #3, "Svensk CTR". **Datagrund (svensk GSC 2026-08-28→09-25):** `/nedtaelling` **5.163 visninger, 12 klik, CTR 0,2 %, pos. 9,4**; `/tidszone` **3.256 v, 12 klik, CTR 0,4 %, pos. 7,7**; `/leasing` **3.151 v, 32 klik, CTR 1,0 %, pos. 12,4**. Ved pos. 7-12 afgør titlen om der klikkes — det er billigeste vækst, der findes. **Fire reelle fejl, målt før rettelse:** (1) **`/leasing` skrev "färetagsleasing" med ä** i både `keywords` og FAQ'en — GSC's største svenske søgninger er **"fåretagsleasing bil kalkyl" (194 v, pos. 11)** og **"beräkna leasing bil fåretag" (172 v, pos. 15)**, altså med **å**. Siden skrev det ord, ingen svensk søgning kan ramme; det lå i 4 strenge. (2) **`/tidszone` skrev "12 byer" i `ogDescription` i begge sprog**, mens `TIDSZONER` har **21** rækker. C84 rettede `metaDescription` fra 12 til 21 — men kun den, så **den rigtige fejl overlevede rettelsen**, og den lå i netop den streng C84's egen fejlklasse handler om. (3) **Titel-halealene var afkortet nøgleord, ikke brand:** svensk `| Tidszon` og dansk `| Tidszone` — C81 viste at det er præcis den hale Google klipper væk. (4) **Titelne startede med tal og brødte hovedordet:** `/leasing` startede med "4.121 kr/mån" mens søgningerne er "fåretagsleasing" og "beräkna"; `/nedtaelling` skrev "Nedräkning - hur många dagar", så GSC's største søgning **"nedräkning dagar" (170 v, pos. 9)** stod splittet af en tankestreger. **Harness:** `page-data.test.ts` har nu 6 nye/ændrede tests, **verificeret modsvews: alle 6 falder** med den gamle `page-data.ts`. Bytallet læses fra `TIDSZONER.length` og sammenlignes mod **enhver** streng der nævner et bytal, så en ny by kan ikke slippe forbi. **Tre fejl i mine egne tests, fundet da de kørte:** (a) `perl` ramte kun `färetagsleasing` og ikke `Färetagsleasing` med stort F — 2 af 4 strenge stod tilbage; (b) jeg krævede ordet i *alle* felter, men `title` og `metaDescription` skal ikke nævne det — kravet er skarpet til "aldrig med ä", som er den reelle invariant; (c) jeg krævede et bytal i **alle tre** sprog, men `no` nævner aldrig et — kravet blev "hvor det nævner et", plus en lås på at mindst ét sprog gør. Gate grøn: lint (556 filer), **1768 tests / 151 filer** (fra 1763 / 151) og build (141 sider); `locale-leak.mjs --gate` exit 0. Kode `8d06081`, merge `8bea16d` **2026-09-27 15:07 CEST** på `ceo/se-ctr-nedtaelling`; første kandidatvindue **2026-09-27 17:30**. Se opgave 122.
+
+---
+
 STATUS: KØ — **C91 er landet: Halloween er nu en kurateret `dage-til`-dato i begge sprog, og undervejs fandt jeg en levende 404, der lå på præcis den side, der svarer på GSC's næststørste "dage"-søgning.** Opgave 121 (se den forrige STATUS for C90). **Målt først:** DA-autocomplete under **"hvor mange dage er der til"** (14:31) har **"… halloween" som nr. 5 af 10** og under **"dage til"** **"dage til halloween" som nr. 8**; under "halloween" er **"halloween 2026" nr. 1**. Det er 34 dage væk i dag, altså præcis det sæson, søgningen er spids i. `/dage-til/halloween` var **HTTP 404 på begge domæner**, og `DAGE_TIL_EVENTS` havde 8 rækker uden Halloween. **Rettelsen er kun modulet** — én række med fast anker `month: 10, day: 31` i da og se, sat **sidst** i listen fordi `dage-til.test.ts:102` bruger `DAGE_TIL_EVENTS[0]` som juledagen. Sitemap, hrefLang, `/dato`s liste, `/nedtaelling`s liste og brødkrummer følger automatisk med `getDageTilSlugs`, så ingen af dem er rørt manuelt. **Fælden opgaven selv advarede om, er skrevet ud på siden:** Halloween har to datoer at forveksle med — 31. oktober og 1. november — så fire facts og tre FAQ-par pr. sprog siger det begge steder, med kilder hentet i dag (svensk Wikipedia "Alla helgons dag": alle helgons dag flyttedes 1953 til lørdagen mellem 31. oktober og 6. november; Lag (1989:253) om allmänna helgdagar: Halloween är inte en allmän helgdag), og **en test låser forvekslingsstrengen pr. sprog med hvert sprog egen notation** (dansk "1. november" med punktum, svensk "1 november" uden) — én fælles streng ville kun have låst det ene sprog. **Den rigtige fejl, og den er ældre end opgaven:** `/dage-til/1-december` på **beraknare.se** og `/dagar-till/1-december` på **minberegner.dk** svarede **404**, selv om begge sider findes i begge sitemapmer. Bevis: `Host: beraknare.se /dage-til/1-december` → 404, mens `/dage-til/juledagen` på samme domæne → 301. **Årsagen** er at routing afgør "egen locale" alene på *staveformen* af slug'en, men det er **path-prefixet**, der fortæller hvilket sprog anmodningen er i. `1-december` staves ens i begge sprog, så den så ud til at være "egen" på begge domæner, faldt igennem `routing.ts` og blev afvist af `DageTilRoute`s prefix-port. Rettelsen er, at prefixet er autoriteten, og der redirectes hvis **enten** prefixet **eller** slug'en er det andet sprog — den anden disjunkts halvdel er nødvendig, ellers `/dage-til/juldagen` (dansk prefix, svensk slug) ville være gået fra 301 til 404. Det er en reel trafikfejl: **`/dage-til/1-december` er den side, der svarer på "hvor mange dage er der til 1 december" (1.020 visninger, pos. 5)**, og Halloween ville have arvet samme 404 fra første dag. **En fejl i min egen rettelse, fanget af den eksisterende suite samme sekund:** `getDageTilPrefix` returnerer prefixet *med* afsluttende skråstreg, mens den gamle kode havde det hardkodet uden — destinationen blev `/dagar-till//juldagen`, og tre eksisterende redirect-tests faldt. **Målefejl nr. 15 (min egen, samme klasse som nr. 9-14):** min første lokale `curl` sagde 404 på `/dage-til/halloween`, og det så ud som om siden ikke fandtes. **En `next start` fra en tidligere iteration havde allerede port 3111**, min nye server fik `EADDRINUSE`, og alle svar kom fra den *gamle* bygning. Lært op som måleregel: et svar fra en server kan ikke tilskrives ens egen kode, medmindre porten er verificeret fri *inden* start. **Målt i browseren, ikke bare i test:** dansk 200 med "Hvor mange dage er der til Halloween? 34 dage | MinBeregner.dk", 3 FAQ-par i JSON-LD'en og tre hreflang-varianter; svensk 200 med "Hur många dagar är det till Halloween? 34 dagar | Beräknare.se" og **0** danske markører; og alle otte krydsdomæne-kombinationer svarer nu 301 med korrekt `Location`. **Harness:** `dage-til.test.ts` 39 → **43**, `dage-til-routes.test.tsx` 13 → **15**, **verificeret modsvejs: 5 tests falder** med den gamle kode. **Gate:** lint (556 filer), **1763 tests / 151 filer** (fra 1757 / 151), build (**141 ruter** — uændret, fordi `/dage-til/[dato]` er dynamisk), `locale-leak.mjs --gate` exit 0 med 117/85/32/0 (de nye svenske strenge har hverken `æ` eller `ø`, så C73's R4 giver intet fund). Branch `ceo/halloween-dage-til`. **MÅL:** baseline `/dato` **131.419 visninger / 803 klik / CTR 0,6 % / pos. 5,8 pr. 2026-08-28 → 2026-09-25**; Halloween-siden er endnu ikke indekseret, så dens baseline måles første gang 2026-10-11.
 
 STATUS: KØ — **C90 er landet: `/dato` — GSC's næststørste danske side — svarer nu på "hvor mange dage er der tilbage af 2026?" med dagens tal i begge sprog, og den havde nul forekomster af formuleringen.** Samme iteration som C89 (se den forrige STATUS); denne er den anden og sidste opgave, derfor to merges. **Målt først:** GSC (2026-08-28 → 2026-09-25) giver `/dato` **131.419 visninger / 803 klik / CTR 0,6 % / pos. 5,8** — sitets næststørste danske side — og to af dens søgninger er præcis de to spørgsmål om årets sidste dage: "hvor mange dage er der tilbage af 2026" (**227 visninger, pos. 5**) og "hvor mange dage er der til 1 december" (1.020, pos. 5). Plausible: 1.045 besøgende/28d (+71 %, bounce 5 %). DA-autocomplete under **"hvor mange dage er der til"** (14:19) giver "… tilbage af 2026" som nr. 7 af 10, og under **"dage til"** som nr. 5. Svensk GSC har samme spørgsmål som **"dagar till 31 dec" (367 visninger, pos. 9)**. Den server-renderede `/dato` indeholdt **0** "tilbage af" og **0** "hvor mange dage er der tilbage". **Hvorfor de eksisterende `/dage-til/*`-sider ikke dækkede det:** de svarer på *hvilken dato* — "hvor mange dage er der til nytår?" — mens søgningen spørger *hvornår året er slut*. `/dage-til/nytaarsaften` findes og svarer korrekt, men den er et andet spørgsmål med et andet tal, og det er den forskel der holdt spørgsmålet ude. **Rettelsen:** `dageTilbageIAaret(today)` i `src/lib/dage-til.ts` (tal og datoer i modulet, **ingen danske strenge** — ellers kunne modulet lække til beraknare.se, C73's R4) plus et nyt `<h2>` i **begge** sproggrene: "Hvor mange dage er der tilbage af 2026?" (**95 dage** = 13 uger og 4 dage i dag) og "Hur många dagar är det kvar av 2026?" (**95 dagar**). Siden er dynamisk, så tallet regnes pr. request og kan ikke stå med gårsdags svar — en test låser netop det ved at sætte systemklokken til 31. december og kræve 0. Hvert sprog linker videre til sin egen `dage-til`/`dagar-till`-side for 1. december og nytårsaften (begge verificeret HTTP 200), fordi det er præcis forskellen på de to spørgsmål. **To ting målt og bevidst ikke bygget.** (1) **`/dage-til/1-november` svarer HTTP 404** — routen dækker kun de otte kuraterede datoer, og GSC viser "hur många dagar är det kvar till 1 november" (19 v, pos. 5). En kalender med 365 varianter er præcis de "tusindvis af tynde varianter" kontrakten forbyder, så det bliver en kurateret dato ad gangen. **Halloween (31. oktober)** står i *begge* DA-autocomplete-lister ("hvor mange dage er der til halloween", "dage til halloween") og er en fast dato — den ligger i køen som opgave 121. (2) "sommerferie" og "efterårsferien" står også i autocomplete, men er kommunevise, og modulet har en dokumenteret regel om at variable ankre *ikke* gættes — den regel står. **Min egen regnefejl, fanget af den nye test:** jeg skrev at 1. marts 2028 giver 306 dage til 31. december; det er **305**. Testen faldt, og Python bekræftede 305 — samme klasse som de øvrige målefejl, og grunden til at tallene sidder i et modul med test i stedet for i brødteksten. **Harness:** `dage-til.test.ts` **34 → 39** (dagens tal, 0 nytårsaften, 365/366 i almindeligt og skudår, og at klokkeslættet i døgnet ikke påvirker tallet), `dato/page.test.tsx` **5 → 8** (de to sprog + nulstillingen nytårsaften) — **modsvejs verificeret: alle 3 nye side-tests falder** med den gamle `page.tsx`. Gate grøn: lint (556 filer), **1757 tests / 151 filer** (fra 1749 / 151), build (**141 sider**), `locale-leak.mjs --gate` exit 0. Se opgave 120. **MÅL:** `/dato` baseline **131.419 visninger / 803 klik / CTR 0,6 % / pos. 5,8 pr. 2026-08-28 → 2026-09-25** — måles igen 2026-10-11.
@@ -11184,17 +11188,82 @@ tekst på `/tidszone`), men Kopier-strengen med datoen kræver en browser.
   æggesalat, æggemad. Det er den næststørste danske klynge på ordet, og
   `/kalorier` har **0** tabeller over madvarer.
 - **Hvorfor den ligger og ikke er bygget nu:** den kræver en *kildefølt*
-  værdi pr. vare, og den eneste citable danske tabel kunne ikke hentes i
-  iterationen (frasco.dk svarer ikke; DTU's kostviddatabase er en JS-app;
-  Open Food Facts har danske produktdata med spredning, f.eks. havregryn
-  363-369 kcal/100 g). Gættede kalorietal ville være præcis den fejlklasse
-  planen fører.
+  værdi pr. vare, og den eneste citable danske tabel kunne ikke hentes.
+  Gættede kalorietal ville være præcis den fejlklasse planen fører.
+- **⚠️ Kildejerngang nr. 2 (C92, 2026-09-27 15:05) — spild ikke en tredje
+  iteration på de samme kilder.** Prøvet i denne rækkefølge, alle med curl
+  *og* webfetch:
+  | Kilde | Resultat |
+  |---|---|
+  | `frasco.dk` | HTTP 000, ingen forbindelse (domænet er dødt) |
+  | `francofooddata.dk` + `www.` | HTTP 000 |
+  | `kostviddatabase.kk.dk` (København Kommune) | HTTP 000 |
+  | `kostviddatabase.dk`, `fdev.dk` | HTTP 000 |
+  | Open Food Facts API (`/api/v2/search`, danske produkter) | **HTTP 503** — serveren svarer "temporarily unavailable … not available to anonymous users" |
+  | da.wikipedia.org API, `Infoboks næringsindhold` | **Virker**, men kun 2 af 24 fødevarer har den: `Havregryn` (368 kcal) og `Banan`. `Kartoffel`, `Gulerod`, `Æg`, `Vindrue`, `Jordbær`, `Kirsebær`, `Avocado`, `Vandmelon`, `Kylling`, `Laks`, `Ost`, `Mælk`, `Hvedebrød`, `Smør`, `Broccoli` har **ikke** infoboksen. Kilden er desuden *Wikipedia*, ikke DTU. |
+  **Konklusion:** der er ingen citable dansk tabel tilgængelig fra en agent i
+  denne iteration. Wikipedia-vejen er lukket som hovedkilde (2/24) — brug den
+  kun til at *krydschecke* to-tre tal, aldrig som grundlag for en tabel.
+  **Ny præmis for den næste agent:** byg den **ikke** som en færdig
+  madvare-tabel. (a) Få Mads til at give adgang til en kilde
+  (`❓ Til Mads`), eller (b) byg i stedet det, der *kan* dokumenteres i dag:
+  de danske ** portionsværdier for de fire-fem hovedgrupper** i
+  Sundhedsstyrelsens kostanbefalinger (Find flere oplysninger i
+  `Mål hver dag` → tallerkken og 400/600 kcal) — citable, danske, og de
+  svarrer på "hvor mange kalorier skal jeg have om dagen", som er GSC's
+  søgning på `/kalorier` (1 v, pos. 1).
 - **Acceptkriterier:** (1) en citable dansk eller nordisk tabel er hentet og
   kilden er nævnt *på siden*; (2) pr. 100 g **og** pr. typisk portion, fordi
   klyngen spørger begge dele ("kalorier i 2 gulerødder"); (3) rå og tilberedt
   er skelnet, når det betyder noget; (4) hver række i et modul med egen test,
   så tallene ikke kan stå i strengen og afvige fra tabellen; (5) ét afsnit,
   ikke en hel underside, og et link videre til `/kalorier` og `/proteinbehov`.
+
+#### 122. [x] FÆRDIG 2026-09-27 — C92 — stavemålen af fåretagsleasing, 12→21 byer i ogDescription, og svenske titler der svarer på søgningen
+
+- **Datagrund:** svensk GSC 2026-08-28→09-25. `/nedtaelling` 5.163 v / 12
+  klik / CTR 0,2 % / pos. 9,4; `/tidszone` 3.256 v / 12 klik / 0,4 % / 7,7;
+  `/leasing` 3.151 v / 32 klik / 1,0 % / 12,4. Ved pos. 7-12 afgør titlen om der
+  klikkes. Søgningerne er læst fra GSC, ikke gættet.
+- **Rettelse (kun `src/lib/page-data.ts`, ingen beregningslogik):**
+  1. `färetagsleasing` → `fåretagsleasing` i 6 strenge (keywords, FAQ-spørgsmål
+     og -svar, `Färetagsleasing` med stort F inklusive). GSC: "fåretagsleasing
+     bil kalkyl" 194 v pos. 11, "beräkna leasing bil fåretag" 172 v pos. 15.
+  2. `ogDescription` "12 byer"/"12 städer" → **21** i da og se. `TIDSZONER`
+     har 21 rækker. C84 rettede `metaDescription` men ikke `ogDescription`,
+     så fejlen overlevede sin egen rettelse.
+  3. Brand-halealen `| Tidszon` / `| Tidszone` fjernet fra `/tidszone` i begge
+     sprog — C81 (67 titler over afkortningsgrænsen) viste at halen er det
+     første Google klipper væk. Ingen anden svensk titel har den slags hale.
+  4. `/leasing` SE `metaTitle`+`ogTitle`: "Leasingkalkylator: 4.121 kr/mån |
+     Beräknare.se" (46) → "Fåretagsleasing bil - beräkna leasingkostnaden" (60).
+  5. `/nedtaelling` SE `metaTitle`+`ogTitle`: "Nedräkning - hur många dagar
+     till ett datum? | Beräknare.se" (59) → "Nedräkning dagar - hur många
+     dagar kvar till ett datum?" (55). Hovedordet "nedräkning dagar" (170 v,
+     pos. 9) stod før splittet af en tankestreger.
+- **Harness:** `page-data.test.ts` 6 nye/ændrede tests — stavemåden i FAQ og i
+  keywords/title/description, bytallet læst fra `TIDSZONER.length` og
+  sammenlignet mod enhver streng der nævner et bytal, ingen afkortet hale,
+  `/nedtaelling` har "nedräkning dagar" ubrudt, `/leasing` har søgeordet og
+  starter ikke med et tal. **Verificeret modsvejs: alle 6 falder** med den gamle
+  `page-data.ts`.
+- **Tre fejl i mine egne tests, fundet ved at køre dem:** `perl` ramte kun
+  `färetagsleasing` og ikke `Färetagsleasing` med stort F; kravet om ordet i
+  *alle* felter var for stramt (title/metaDescription skal ikke nævne det) og
+  blev skarpet til "aldrig med ä"; kravet om et bytal i alle tre sprog var en
+  målefejl, fordi `no` aldrig nævner et — blev til "hvor det nævner et" plus en
+  lås på at mindst ét sprog gør.
+- **Gate:** lint (556 filer), **1768 tests / 151 filer** (fra 1763 / 151), build
+  (141 sider), `locale-leak.mjs --gate` exit 0. Branch `ceo/se-ctr-nedtaelling`,
+  kode `8d06081`, merge `8bea16d` 2026-09-27 15:07 CEST.
+- **MÅL:** måles **2026-10-11**. Baselines fra svensk GSC 2026-08-28→09-25:
+  `/nedtaelling` 5.163 v / 12 klik / CTR 0,2 % / pos. 9,4 · `/tidszone` 3.256 v
+  / 12 klik / 0,4 % / 7,7 · `/leasing` 3.151 v / 32 klik / 1,0 % / 12,4. Kun
+  `ogDescription` og titler er rørt, så `description` er uændret — en effekt
+  kan derfor kun tilskrives titlen.
+- **Ikke bygget:** `/renteberegner` SE (2.831 v, 3 klik, pos. **25,6**) og
+  `/kalorier` SE (2.697 v, 6 klik, pos. 19,8) er for langt nede til at en
+  titel løser dem; se næste kandidater.
 
 #### 120. [x] FÆRDIG 2026-09-27 — C90 — `/dato` svarer på "hvor mange dage er der tilbage af 2026?" i begge sprog, med dagens tal
 
@@ -11306,6 +11375,38 @@ tekst på `/tidszone`), men Kopier-strengen med datoen kræver en browser.
   der linker til familien) pr. 2026-08-28 → 2026-09-25. Den nye sides
   baseline er **ikke kendt** (den er ikke indekseret endnu) — måles første
   gang 2026-10-11.
+
+### Næste kandidater efter C92
+
+0. **🔒 Opgave 97 er `BLOCKED`,** 98 afhænger af den. Browser-noter: C52, C55,
+   C56, C57 og C60 ligger i `❓ Til Mads` nederst.
+1. **✅ Svensk CTR er lukket i denne iteration** (opgave 122: `/nedtaelling`
+   5.163 v, `/tidszone` 3.256 v, `/leasing` 3.151 v) — mål effekten
+   **2026-10-11**, lav ikke ny CTR på de tre sider før da.
+2. **🔒 Opgave 119 er kilde-blokeret, ikke prioritets-blokeret.** C92 har
+   prøvet *alle* tilgængelige veje (se kildejerngang-tavlen under opgave 119):
+   frasco.dk/francofooddata.dk døde, KK's kostviddatabase død, Open Food Facts
+   503, da.wikipedia's DTU-infoboks findes på **2 af 24** fødevarer. **Byg den
+   ikke igen som madvare-tabel.** Den nye præmis står under opgave 119: enten
+   Mads giver en kilde, eller byg de citable **portionsværdier** fra
+   Sundhedsstyrelsen i stedet.
+3. **🆕 De ni `dage-til`-titler er 62-66 tegn** (fra C91's liste, uændret):
+   `buildDageTilMetadata` sætter `${question} ${count} | ${siteName}`, så
+   løftet og dage-tallet er begge med. At trimme er en **designbeslutning for
+   alle ni sider** (hvad af de to mister vi?), ikke en tegnskiftrettelse.
+4. **🆕 `/dage-til/*` er ikke nævnt som klynge i GSC-listen** — mål om de ni
+   sider overhovedet er indekseret; hvis ikke, skal `/dato` og `/nedtaelling`
+   håndlinke alle ni (pt. har `/dato` kun to).
+5. **🆕 Svensk CTR, næste snit:** `/renteberegner` (2.831 v, 3 klik, pos.
+   **25,6**) og `/kalorier` (2.697 v, 6 klik, pos. 19,8) ligger for langt nede
+   til at en titel løser dem — de skal måles på *hvorfor* de er der, ikke på
+   titel. `/bil` (1.708 v, pos. 31,7) ligeså. Til gengæld er `/nedtaelling`
+   SE's `description` uændret i C92, så næste snit skal ramme den.
+6. **✅ Dansk top-15 er lukket** (C82-C90) — mål i stedet effekten 14 dage efter.
+7. **⏬ Nedprioriteret:** 22 filer / 35 ubundne labels (kun sider uden for top-15).
+8. **🔒 Uforandrede forbehold:** hreflang korrekt (`hrefLang` med stort L);
+   svenske slugs kræver Mads' go; `/bmi` og `/su` måles 2026-10-11.
+9. **Mål 2026-10-10 / 2026-10-11** (se Måleprotokol).
 
 ### Næste kandidater efter C91
 
@@ -11481,6 +11582,31 @@ verificering der ikke kan slå igennem er lige så dårlig som en der kan.
 > C60** (kræver en browser).
 
 
+- ⏳ **VERIFICÉR DEPLOY: C92 — stavemålen af fåretagsleasing, 12→21 byer i
+  `ogDescription`, og tre svenske titler der svarer på søgningen.** Kun
+  `src/lib/page-data.ts` er rørt — ingen beregningslogik, ingen dansk eller
+  norsk tekst. **Verificér indhold, ikke HTTP 200:**
+  1. `curl -s https://beraknare.se/leasing | grep -c 'fåretagsleasing'` skal være
+     **≥ 1** i `<title>` og i FAQ'en. Før stod der **"färetagsleasing"** med ä
+     i keywords og FAQ, altså et ord GSC's søgninger ("fåretagsleasing bil
+     kalkyl" 194 v, "beräkna leasing bil fåretag" 172 v) ikke kan ramme.
+  2. Samme curl skal finde **0** hits på `färetagsleasing`.
+  3. `curl -s https://beraknare.se/leasing | grep -o '<title>[^<]*</title>'` skal
+     give **"Fåretagsleasing bil - beräkna leasingkostnaden"** — før startede
+     titlen med beløbet "4.121 kr/mån".
+  4. `curl -s https://beraknare.se/tidszone | grep -c '21 städer'` skal være
+     **≥ 1**, og `grep -c '12 städer'` skal være **0** — `ogDescription` skrev
+     stadig 12 efter at `metaDescription` var rettet til 21 i C84.
+  5. Samme to greps på `https://minberegner.dk/tidszone` med `21 byer` /
+     `12 byer`.
+  6. `curl -s https://beraknare.se/nedtaelling | grep -o '<title>[^<]*</title>'`
+     skal give **"Nedräkning dagar - hur många dagar kvar till ett datum?"**
+     (55 tegn) — før stod hovedordet "nedräkning dagar" splittet af en
+     tankestreger.
+  7. `https://minberegner.dk/api/health` skal svare `status: ok`. Kode
+     `8d06081`, merge `8bea16d` **2026-09-27 15:07 CEST** på
+     `ceo/se-ctr-nedtaelling`; første kandidatvindue **2026-09-27 17:30**.
+
 - ⏳ **VERIFICÉR DEPLOY: C87 — `/promille` har nu svar på otte af de ti
   variationer under "promillegrænse" (Tyskland, Italien, Norge, Frankrig,
   Spanien, Grækenland, Polen, Storbritannien).** Kun `locale === "da"`-grenen
@@ -11613,6 +11739,23 @@ verificering der ikke kan slå igennem er lige så dårlig som en der kan.
      låser det, så en grøn test er beviset. Kode + plan i ét commit på
      `ceo/titellangde`; første kandidatvindue **2026-09-27 17:30** (denne merge
      sker efter 12:30-vinduet).
+
+### ❓ Til Mads — en citable dansk kalorikilde til `/kalorier` (ny i C92)
+
+Opgave 119 er skrevet op for flere iterationer siden og kan ikke bygges uden
+en kilde. C92 har nu prøvet **alle** veje en agent har (frasco.dk og
+francofooddata.dk svarer ikke, København Kommunes kostviddatabase svarer ikke,
+Open Food Facts API svarer 503 for anonyme, og da.wikipedias DTU-infoboks
+findes på 2 af 24 fødevarer). Gættede kalorietal vil skade sitet, så opgaven
+ligger.
+
+**Spørgsmålet:** har du adgang til en dansk fødevaredatabase jeg kan læse —
+eller skal `/kalorier` få de tal, der *kan* dokumenteres i dag?
+
+Det jeg kan bygge uden din hjælp er de citable **portionsværdier** fra
+Sundhedsstyrelsens kostanbefalinger (tallerkenmodellen: 400/600 kcal, måltider
+som 25 % af dagsbehovet), som svarer direkte på GSC's søgning "hvor mange
+kalorier skal jag ha om dagen" (pos. 1 på `/kalorier`).
 
 ### ❓ Til Mads — de fem deploy-noter der kræver en browser (C52, C55, C56, C57, C60)
 
