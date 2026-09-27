@@ -139,8 +139,9 @@ export default function TidsBeregner() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.starttidspunkt}</label>
+            <label htmlFor="tid-start-tidspunkt" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.starttidspunkt}</label>
             <input
+              id="tid-start-tidspunkt"
               type="time"
               value={startTid}
               onChange={(e) => setStartTid(e.target.value)}
@@ -148,10 +149,11 @@ export default function TidsBeregner() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2 dark:text-gray-200">
+            <label htmlFor="tid-start-dato" className="block text-sm font-medium mb-2 dark:text-gray-200">
               {l.startdato} <span className="text-gray-400 dark:text-gray-500">{l.valgfri}</span>
             </label>
             <input
+              id="tid-start-dato"
               type="date"
               value={startDato}
               onChange={(e) => setStartDato(e.target.value)}
@@ -162,8 +164,9 @@ export default function TidsBeregner() {
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.sluttidspunkt}</label>
+            <label htmlFor="tid-slut-tidspunkt" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.sluttidspunkt}</label>
             <input
+              id="tid-slut-tidspunkt"
               type="time"
               value={slutTid}
               onChange={(e) => setSlutTid(e.target.value)}
@@ -171,10 +174,11 @@ export default function TidsBeregner() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2 dark:text-gray-200">
+            <label htmlFor="tid-slut-dato" className="block text-sm font-medium mb-2 dark:text-gray-200">
               {l.slutdato} <span className="text-gray-400 dark:text-gray-500">{l.valgfri}</span>
             </label>
             <input
+              id="tid-slut-dato"
               type="date"
               value={slutDato}
               onChange={(e) => setSlutDato(e.target.value)}
@@ -190,11 +194,12 @@ export default function TidsBeregner() {
 
       {/* Pause fratræk */}
       <div className="max-w-md">
-        <label className="block text-sm font-medium mb-2 dark:text-gray-200">
+        <label htmlFor="tid-fratraek-pause" className="block text-sm font-medium mb-2 dark:text-gray-200">
           {l.fratraekPause}
         </label>
         <div className="relative">
           <input
+            id="tid-fratraek-pause"
             type="number"
             min="0"
             max="480"

@@ -357,8 +357,9 @@ export default function TidszoneBeregner() {
       {/* Valg af tidszoner */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.fromZone}</label>
+          <label htmlFor="tz-fra-zone" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.fromZone}</label>
           <select
+            id="tz-fra-zone"
             value={fraTidszone}
             onChange={(e) => setFraTidszone(e.target.value)}
             className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
@@ -371,8 +372,9 @@ export default function TidszoneBeregner() {
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.toZone}</label>
+          <label htmlFor="tz-til-zone" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.toZone}</label>
           <select
+            id="tz-til-zone"
             value={tilTidszone}
             onChange={(e) => setTilTidszone(e.target.value)}
             className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
@@ -403,8 +405,9 @@ export default function TidszoneBeregner() {
         <h3 className="font-medium mb-4 dark:text-white">{l.convertTitle}</h3>
         <div className="grid grid-cols-2 gap-4 max-w-xs">
           <div>
-            <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.hourLabel}</label>
+            <label htmlFor="tz-time" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.hourLabel}</label>
             <select
+              id="tz-time"
               value={timer}
               onChange={(e) => setTimer(parseInt(e.target.value))}
               className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
@@ -415,8 +418,9 @@ export default function TidszoneBeregner() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2 dark:text-gray-200">{l.minuteLabel}</label>
+            <label htmlFor="tz-minut" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.minuteLabel}</label>
             <select
+              id="tz-minut"
               value={minutter}
               onChange={(e) => setMinutter(parseInt(e.target.value))}
               className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"

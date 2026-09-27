@@ -1,6 +1,33 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — **C60 er landet: `/promille` gav en tilladelse til at køre bil på
+STATUS: KØ — **C61 er landet: de tre mest besøgte sider på sitet havde
+formularfelter uden navn for skærmlæsere.** Køen var tom (alle 88 opgaver
+færdige, intet `I GANG`), og planens næste kandidat #1 var C59's a11y-fund
+genfundet i `/promille` — "værd at tælle før der rettes, fordi rettelsen kan
+være én fælles ændring". Tællingen viser, at det **ikke** er én fælles ændring,
+men en klasse på **45 filer og 145 `<label>` uden `htmlFor`**. Denne iteration
+lukkede de fire mest trafikfarlige. **Fundet er ikke kosmetik:** `/dato` (130.392
+visninger), `/tidsberegner` (72.382) og `/tidszone` (24.723) er de tre mest
+besøgte sider i dansk GSC, og deres felter var `<label>` *uden* `for` og
+`<input>`/`<select>` *uden* `id` — en skærmlæser læser altså "redigeringsfelt"
+uden at vide hvilket af de fire felter det er, og kan ikke hoppe til det. Nu har
+alle 16 felter på de fire sider et navn, kønsvalget i `/promille` er en
+`role="group"` med `aria-labelledby` i stedet for et navnløst felt,
+`PromilleBeregner`'s `field()` har fået et `id`-argument, og
+`label-a11y.test.tsx` er **ny med 9 tests** der låser tre ting pr. renderet
+tilstand — at hvert `<label>` er bundet til noget, at bindingen peger på noget
+der findes, og at hvert felt kan findes med `getByLabelText` — i **DA og SE**.
+`/dato` gennemgås i alle fire tilstande, fordi hver tilstand har sit eget sæt
+felter. **Verificeret modsvejs: alle 9 falder med den gamle kode.** To fælder
+blev fundet undervejs og er noteret i opgaven: jsdoms `getAttribute("htmlFor")`
+er **null**, fordi DOM'en hedder `for` og `getAttribute` ikke lowercase'er (brug
+`label.htmlFor`), og et råt `knap.click()` uden for `fireEvent` skifter ikke
+tilstand i React, så testen ville være grøn på det ene sæt felter. Gate grøn:
+lint (549 filer), **1546 tests / 144 filer** (fra 1537 / 143) og build (141
+sider). Kode + plan i ét commit på `ceo/label-trafiksider`; første
+kandidatvindue **2026-09-27 07:30**. Se opgave 89.
+
+STATUS (forrige iteration) — **C60 er landet: `/promille` gav en tilladelse til at køre bil på
 to måder, den ikke måtte give, og delte et tal uden de fire tal det afhænger
 af.** Køen var tom (alle 87 opgaver færdige, intet `I GANG`), og planens egen
 kø pegede på `PromilleBeregner` (4.159 visninger, 60 klik, CTR 1,4 %, pos. 7,9
@@ -7622,6 +7649,33 @@ landmark=lån, piggybank=opsparing osv.).
     - Gate grøn: lint ok, 280/280 tests, build ok (128 pages).
 
 ## VERIFICÉR DEPLOY-log
+- ⏳ **ÅBEN — C61 `/dato`, `/tidsberegner`, `/tidszone` og `/promille`: 16
+  formularfelter uden navn for skærmlæsere — kode + plan i ét commit på branch
+  `ceo/label-trafiksider`, første kandidatvindue **2026-09-27 07:30**.**
+  **HTTP 200 beviser intet her:** ændringen er `htmlFor`/`id`-attributter i
+  klient-renderede felter, så den skal verificeres i DOM'en — helst med en
+  skærmlæser, men en ren kontrol er at åbn DevTools og skrive:
+  `document.querySelectorAll('label:not([for])').length` → skal være **0** på
+  hver af de fire sider. Samme for `input:not([id]):not([aria-label])` og
+  `select:not([id])` → **0**. Det sidste kan ikke ses ved at kigge på siden,
+  fordi et felt uden navn ser identisk ud med et med.
+  1. `/dato`: skift gennem alle fire tilstande og verificér for hver. **Dage
+     mellem** har 2 felter (`dato-fra-dato`, `dato-til-dato`), **Tilføj dage**
+     og **Arbejdsdage** har 2 (`dato-udgangsdato`, `dato-antal`), **Alder** har 1
+     (`dato-foedselsdato`). Før stod alle fem som navnløse.
+  2. `/tidsberegner`: 5 felter — `tid-start-tidspunkt`, `tid-start-dato`,
+     `tid-slut-tidspunkt`, `tid-slut-dato`, `tid-fratraek-pause`. **Ingen
+     ændring i beregningen** — et klokkeslæt skal stadig give samme resultat.
+  3. `/tidszone`: 4 `select`s — `tz-fra-zone`, `tz-til-zone`, `tz-time`,
+     `tz-minut`. Vælg f.eks. Japan og bekræft at forskellen stadig er 7 timer
+     (C56's rettelse skal ikke være gået tabt).
+  4. `/promille`: 3 felter (`promille-genstande`, `promille-vaegt`,
+     `promille-timer`) og kønsvalget skal være en **navngiven gruppe** — i
+     DevTools: gruppen skal have `role="group"` og `aria-labelledby`. 4
+     genstande / 80 kg / mand skal stadig give **0,88 ‰** (C60's rettelse).
+  5. `beraknare.se` skal have de samme `for`/`id` — kør kontrol 1-4 på de fire
+     svenska sider.
+  6. `https://minberegner.dk/api/health` skal svare `status: ok`.
 - ⏳ **ÅBEN — C58 `/kalorier`: intet negativt kaloriebehov, "0,5" med komma og
   en delt tekst med de fem input, kode `1221877`, merge `37d499d` 2026-09-27
   02:01 CEST.** Første kandidatvindue **2026-09-27 07:30**. Indholdstjek ved det nye
@@ -8473,11 +8527,8 @@ landmark=lån, piggybank=opsparing osv.).
 
 ### Næste kandidater efter C60
 
-1. **`PromilleBeregner`'s talfelter mangler `htmlFor`** (C59's a11y-fund,
-   gentaget her). `field()` renderer `<label>` uden `htmlFor` og inputtet uden
-   `id`, så tre af sites mest brugte værktøjer har talfelter uden navn for
-   skærmlæsere. Samme `field()`-mønster findes i andre beregnere — værd at
-   tælle før der rettes, fordi rettelsen kan være én fælles ændring.
+1. ~~**`PromilleBeregner`'s talfelter mangler `htmlFor`**~~ — **Lukket i C61
+   (2026-09-27), og klassen er talt: 45 filer / 145 labels.** Se opgave 89.
 2. **De 10 øvrige komponenter med `toFixed(2)`** (C53 sagde 18, `git grep`
    tæller 11, hvoraf `PromilleBeregner` nu er lukket) — samme klasse som C53.
 3. **Rækkefølgen efter `PromilleBeregner` (4.159 visninger) i klassen "hvad
@@ -8486,3 +8537,97 @@ landmark=lån, piggybank=opsparing osv.).
    redaktionelle indgående links, så den har to åbne fund.
 4. **Mål 2026-10-10** (se Måleprotokol): C1-C16 og C35-C60 måles 14 dage
    efter deres snapshot, og resultatet skrives ved siden af hver opgave.
+
+### Næste kandidater efter C61
+
+1. **Resten af label-klassen: 41 filer / 129 `<label>` uden `htmlFor`** (C61
+   lukkede 4 filer / 16 labels). Rækkefølgen skal være **efter GSC-visninger**,
+   fordi det er den eneste måde klassen bliver trafikrelevant frem for
+   pligtsyn: `/braendstof` (16.580 visninger, **11 labels**),
+   `/kalorier` (12.332, 3), `/rentefradrag` (4.556, 3), `/alder` (6.013, 2),
+   `/laane` (7 labels), `/befordringsfradrag` (7) og `/huslejebudget`
+   (11 labels). Samme tre-lås-tilgængelig-tilgang som `label-a11y.test.tsx`:
+   **udvid den eksisterende testfil med de nye komponenter, ikke en ny fil pr.
+   beregner.** Bemærk at grep-mønstret `block text-xs text-gray-600 …` kun
+   rammer 23 af de 45 filer — `/dato`, `/tidsberegner` og `/tidszone` bruger
+   `block text-sm font-medium mb-2 …`, så **tællingen skal ske på `<label`
+   uden `htmlFor` i samme fil**, aldrig på en CSS-klasse.
+2. **Et felt uden navn er ikke altid et `<input>`** — C61 fandt kønsvalget i
+   `/promille`, der er knapper og derfor ikke fanges af `input`-tællingen.
+   Samme mønster (knap-gruppe under et `<label>`) bør greppes bevidst, før
+   klassen meldes lukket, ellers står der en rest.
+3. **De 10 øvrige komponenter med `toFixed(2)`** og resten af rækken i
+   klassen "hvad skriver den tekst, brugeren kopierer?" — `/brok` (4.640) er
+   stadig først i den række og har to åbne fund.
+4. **Mål 2026-10-10** (se Måleprotokol): C1-C16 og C35-C61 måles 14 dage
+   efter deres snapshot.
+
+#### 89. [x] FÆRDIG 2026-09-27 — C61 — `/dato`, `/tidsberegner` og `/tidszone`: 16 formularfelter på sitets tre mest besøgte sider havde intet navn for skærmlæsere
+
+- **Datagrund:** planens kø pegede på kandidat #1 (C59's a11y-fund, gentaget
+  i C60). Tællingen før rettelsen er fundet og er klassens størrelse:
+  **45 filer, 145 `<label>` uden `htmlFor` i `src/components/`.** Rettet her er
+  de fire komponenter med flest visninger i dansk GSC: `/dato` (130.392
+  visninger, 801 klik, CTR 0,6 %, pos. 5,8 — nr. 2), `/tidsberegner` (72.382,
+  207, 0,3 %, pos. 7,0 — nr. 3), `/tidszone` (24.723, 115, 0,5 %, pos. 7,5 —
+  nr. 4) og `/promille` (4.159, 60, 1,4 %, pos. 7,9 — nr. 14, C60's egen
+  efterladte post). Tilsammen **232.656 månedlige visninger**.
+- **Fund — ikke kosmetik, men en funktionsfejl for skærmlæsere.** Alle 16 felter
+  var `<label>` *uden* `for` og `<input>`/`<select>` *uden* `id`. Uden
+  `for`/`id` har `<label>` ingen binding, så den synlige tekst er ikke knyttet
+  til feltet: skærmlæseren læser "redigeringsfelt" uden at vide hvilket af de
+  fire felter på `/dato` det er, og kan ikke bruge den genvej, der springer til
+  et navngivet felt. På `/dato` er det hele formen, fordi de fire tilstande
+  ("Dage mellem", "Tilføj dage", "Arbejdsdage", "Alder") hver består af netop
+  de felter, hvis navn forsvinder. Nu: `htmlFor` på hvert `<label>`, matchende
+  `id` på hvert felt, præfikset på sidens domæne (`dato-`, `tid-`, `tz-`,
+  `promille-`) så et id aldrig kan kollidere med et andet værktøjs.
+- **Fund 2 — kønsvalget i `/promille` er knapper, ikke et felt.** Det fanges
+  ikke af nogen `input`-tælling, men `<label>` "Køn" hang over to knapper uden
+  binding, så gruppen havde heller intet navn. Nu `role="group"` +
+  `aria-labelledby` på en `<label id>`, som er den korrekte konstruktion for en
+  knap-gruppe. `PromilleBeregner`'s `field()` har fået et `id` som første
+  argument, så de tre talfelter hver får et navn.
+- **Test:** `src/components/label-a11y.test.tsx` **ny, 9 tests** (549 → 550
+  filer i lint). Låser **tre** ting pr. renderet tilstand, ikke ét: (1) hvert
+  `<label>` er bundet — via `for` **eller** via `id` brugt i `aria-labelledby`,
+   så knap-gruppen ikke fejler af at være undtagelsen; (2) bindingen peger på et
+   element der faktisk findes; (3) hvert felt kan findes med `getByLabelText` —
+   altså den knap skærmlæseren bruger til at hoppe til feltet. Derudover låses
+   at `id`'er er unikke (et duplikat gør `for` tvetydig), at `/dato`'s fire
+   tilstande har hver sit eget sæt felter (så testen ikke er grøn på det ene
+   sæt), og at `/tidsberegner` har 5 felter, `/tidszone` 4 `select`s og
+   `/promille` 3 felter. Kørt i **DA og SE**.
+  **Verificeret modsvejs: alle 9 tests falder med den gamle kode** — de fire
+  komponenter uden `for`/`id` plus kønsgruppen.
+- **To fælder fundet undervejs, begge noteret i testens overskrift for at
+  spare næste iteration dem.** 1) `label.getAttribute("htmlFor")` er **null**
+  i jsdom, fordi DOM-attributten hedder `for` og `getAttribute` her ikke
+  lowercase'er argumentet — brug `label.htmlFor` (DOM-property). 2) Et råt
+  `knap.click()` skifter **ikke** tilstand i React; uden `fireEvent` står
+  tilstanden uændret, og testen ville være grøn efter at have tjekket ét sæt
+  felter fire gange. Begge er fælden, der lader en a11y-test lyse grøn uden at
+  dække noget.
+- **Efterladt, bevidst:** de øvrige **41 filer / 129 labels** i klassen er ikke
+  rørt — de er ét iterationstypisk snit, ikke fire, og rækkefølgen skal være
+  efter GSC-visninger. Se Næste kandidater efter C61. Bemærk at
+  CSS-klasse-greps **ikke** kan bruges til at tælle resten: kun 23 af de 45
+  filer bruger `block text-xs text-gray-600 dark:text-gray-400 mb-1`, mens
+  `/dato`, `/tidsberegner` og `/tidszone` bruger
+  `block text-sm font-medium mb-2 dark:text-gray-200`.
+- **Gate:** `npm run lint` grøn (549 filer), `npm run test` **1546 tests / 144
+  filer** grøn (fra 1537 / 143), `npm run build` grøn (141 sider, compiled
+  successfully).
+- **MÅL:** `/dato` baseline **130.392 visninger / 801 klik / CTR 0,6 % / pos.
+  5,8**, `/tidsberegner` **72.382 / 207 / 0,3 % / 7,0**, `/tidszone` **24.723 /
+  115 / 0,5 % / 7,5**, `/promille` **4.159 / 60 / 1,4 % / 7,9** (GSC
+  2026-08-27 → 2026-09-24). Plausible 28d 2026-09-27: `/dato` 1.045 (+71 %),
+  `/tidszone` ikke i top-15, `/promille` ikke i top-15. **Mål 2026-10-10.**
+  Bemærk ændringen forventes **ikke** at løfte CTR — den retter en
+  funktionsfejl for skærmlæsere, ikke en titel. Den er heller ikke målbar i
+  Plausible, fordi vi ikke tracker skærmlæserbrug, og **tracking-opsætningen
+  må ikke ændres**. Virkningen er derfor verificeret i testene, ikke i tal.
+- **Måleprotokol-notat:** `/dato` er samtidig sidens største CTR-kandidat
+  (se punkt 9 i køen: C44 fandt indholdet i orden, kun placeringen mangler).
+  Den a11y-rettelse og en evt. CTR-rettelse på samme side skal **ikke** blandes
+  i én iteration, ellers ved man ikke hvilken der virkede.

@@ -163,11 +163,11 @@ export default function PromilleBeregner() {
       )
     : l.noResult;
 
-  const field = (label: string, value: number, onChange: (n: number) => void, step: string, unit: string) => (
+  const field = (id: string, label: string, value: number, onChange: (n: number) => void, step: string, unit: string) => (
     <div>
-      <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">{label}</label>
+      <label htmlFor={id} className="block text-xs text-gray-600 dark:text-gray-400 mb-1">{label}</label>
       <div className="relative">
-        <input type="number" step={step} min="0" value={value} onChange={(e) => onChange(Number(e.target.value))}
+        <input id={id} type="number" step={step} min="0" value={value} onChange={(e) => onChange(Number(e.target.value))}
           className="w-full px-4 py-2.5 pr-12 border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
         {unit && <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 text-sm">{unit}</span>}
       </div>
@@ -178,12 +178,12 @@ export default function PromilleBeregner() {
     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 md:p-8">
       <div className="grid md:grid-cols-2 gap-6">
         <div className="space-y-4">
-          {field(l.drinks, drinks, setDrinks, "1", "")}
+          {field("promille-genstande", l.drinks, drinks, setDrinks, "1", "")}
           <p className="text-xs text-gray-400 dark:text-gray-500 -mt-2">{l.drinkHint}</p>
-          {field(l.weight, weight, setWeight, "1", "kg")}
+          {field("promille-vaegt", l.weight, weight, setWeight, "1", "kg")}
 
-          <div>
-            <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">{l.sex}</label>
+          <div role="group" aria-labelledby="promille-koen">
+            <label id="promille-koen" className="block text-xs text-gray-600 dark:text-gray-400 mb-1">{l.sex}</label>
             <div className="grid grid-cols-2 gap-2">
               {(["mand", "kvinde"] as const).map((s) => (
                 <button key={s} type="button" onClick={() => setSex(s)}
@@ -198,7 +198,7 @@ export default function PromilleBeregner() {
             </div>
           </div>
 
-          {field(l.hours, hours, setHours, "0.5", l.hoursUnit)}
+          {field("promille-timer", l.hours, hours, setHours, "0.5", l.hoursUnit)}
 
           <div className="flex justify-end">
             <ResetButton onReset={handleReset} />
