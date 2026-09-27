@@ -1,7 +1,8 @@
-STATUS: KØ — **C75 er landet: knapgruppe-klassen er lukket — 10 filer / 12 uavngivne grupper er blevet 0 / 0, og scanneren har nu to plantede tests til at sige det med.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den), og de to åbne deploynoter (C73 08:29, C74 08:46) har første kandidatvindue **12:30**, så intet kunne verificeres i denne iteration. **Klasse:** to eller flere knapper i én beholder, der ikke navngiver sættet — C72's `/brutto-netto`-fund ("Pr. måned"/"Pr. år" uden `<label>`, gruppe eller `aria-label`). Målt af C74's `scripts/knapgruppe-scan.mjs`. **Rettet:** alle 12, i rækkefølge efter GSC — `/tidsberegner` (3 presets, **72.725 visninger**), `/boliglaan`, `/opsparing`, `/leasing`, `/timepris`, `/del-regning`, `/barselsdagpenge`, `/barselsplanlaegger` (3 grupper), `barsel/ArbejdsgiverPanel` og `CookieConsent`. **Mønstret er C64/C70/C72's:** `role="group"` + `aria-labelledby` på en synlig overskrift/etiket der får et `id` (6 steder: tidsberegner-`<h3>`, cookie-`<p>`, barsel-"Du er"-`<label>`, barsel-slet-`<p>`, barsel-meldings-`<h4>`, delregning-drikkepenge-`<label>`), og `aria-label` hvor der ikke *er* en synlig etiket (de fire view-toggles + to barselsgrupper). **Den nye `vaelgVisning`-nøgle får alle tre sprog** (da "Vælg visning", se "Välj vy", no "Velg visning") — se-stengen er æ/ø-fri, så C73's R4 ikke giver et fund. **`label-a11y.test.tsx` er 111 → 118 tests** i DA og SE + en DA-only blok til barsel, **verificeret modsvejs: 18 tests falder** med de gamle komponenter. **Fire fund ud over at sætte attributterne:** (1) **drikkepenge-presettene i `/del-regning` bar på "første gruppe med aria-label"** i en ældre test fra C71 — min nye tællergruppe kom *før* den i DOM'en, så testen fandt 2 i stedet for 4. Rettelsen er ikke en tilpasset tæller: `delregning-drikkepenge`-`<label>`et blev gruppe-etiketten, præcis C70's mønster, så testen slår nu gruppen op på dens id. (2) **`/tidsberegner`s beregning er live** (starttid har en forudvalgt værdi), så preset-gruppen er i DOM'en uden et klik — min første test bad om at trykke på en "Beregn"-knap der ikke findes. (3) **Et `<label>` uden `htmlFor` kan ikke bindes med `for`** — barsel-"Du er"-etiketten er derfor `aria-labelledby`-målet, ikke etiketten for et felt. (4) **Klassen er bredere end "én kontrol":** 5 af de 12 er *separate handlinger* (Print/Del link/Til kalender, Kopiér/Del/.ics, Acceptér/Afvis), ikke valg i én kontrol. De er navngivet fordi et navn findes, ikke fordi klassen krævede det — det står her, så næste agent ikke læser scanneren som "finder kun toggle-grupper". **Begge scanner-gates er opdateret i samme commit** (C71's advarsel): `group-scan-gate.test.ts` 10/12 → 0/0 plus en ny test på at `prFil` er tom, fordi 0 også kan nås ved at slå scanneren fra; `label-scan-gate.test.ts` 23/36 → **22/35**, fordi barsel-"Du er" nu er bundet gennem sit `id`. Gate grøn: lint (554 filer), **1693 tests / 149 filer** (fra 1676 / 149) og build (141 sider); `node scripts/knapgruppe-scan.mjs` → **0 filer / 0 uavngivne**; `node scripts/locale-leak.mjs --gate` exit 0 med **117 kandidater / 85 døde / 32 kræver øjne / 0 ureviewet** (uændret). Kode + plan i ét commit på `ceo/knapgrupper`; se opgave 104.
+STATUS: KØ — **C76 er landet: otte beregnersider skrev tal med punktum i dansk og svensk tekst, og `/bil`s pris pr. km stod også i den tekst brugeren kopierer og deler — den sjættende iteration i træk hvor klassen "hvad skriver den tekst, brugeren kopierer?" har fundet en reel fejl.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den), og de åbne deploynoter (C73 08:29, C74 08:46, C75 09:25) har første kandidatvindue **12:30**, så intet kunne verificeres i denne iteration. **Valget var planens egen kandidat #3** — "de 10 øvrige komponenter med `toFixed(2)`" — fordi det er den eneste resterende klasse i køen med et dokumenteret fund i hver eneste iteration, og fordi Phase 3's egen regel siger at kodehygiejne kun tages når den *blokerer* noget: her gjorde den det, fordi `/bil`s tal havnede i `CopyResultButton` **og** i `ShareCalculation`s `resultSummary`. **Rettet (6 filer, 13 `toFixed`-steder):** `/kvadratmeter` (formel-linjen for alle fire geometriske former — "3.5 × 2.5 = 8.75 m²" bliver "3,5 × 2,5 = 8,75 m²"), `/bil` (`prKm` — nåede Kopier **og** Del), `/billaan` (`apr`, `prisPrKm`), `/forbrugslaan` (`apr`, `samletAar`), `/boliglaan` (samlet rente "1.90% p.a." → "1,90 %"), `/elberegner` (6 steder). **Mønstret er C53's:** `formatNumber` fra `src/lib/format.ts` med samme decimalantal som det `toFixed` erstattede, så *kun* decimaltegnet ændrer sig. **Fire fund ud over decimaltegnet:** (1) **`/kvadratmeter` havde sin egen locale-følsomme `formatNumber` lokalt i komponenten** (linje 326) — den var allerede korrekt og brugte 10 steder (bla. `CopyResultButton` og `ShareCalculation`), men lå *nedenfor* det `useMemo` der bygger formlen, så den kunne ikke bruges der. Den er flyttet ovenfor, og `formel` bruger den nu. **Fælden var en TDZ-fejl jeg selv skabte:** min første version importerede `formatNumber` fra `@/lib/format` og skyggegør den lokale binding med samme navn, så `useMemo` læste `Cannot access 'formatNumber2' before initialization`. Fundet af den kørende test, ikke ved at læse diffen. (2) **`/elberegner` skrev "kr" hardkodet** i elafgift-leddet, mens de to naboer bruger `getCurrencySuffix(locale)` — altså "0.253 kr" på den danske side, der ellers skriver "kr.". (3) **`toFixed(0)`-kaldene fik tusindtalsseparator gratis** ved at gå gennem `formatNumber`: `/elberegner`s årlige kWh/pris går fra "12030" til "12.030". (4) **Klassen er 47 steder i repoet, ikke 10** — `grep -rn "toFixed(" src/ | grep -v test` giver **47**, så planens kandidat #3 undervurderer den. Den fulde resterende liste står under opgave 105. **Målingen er ærlig om sin egen dødde kant:** `toFixed(0)` kan aldrig lave et decimaltegn, så de steder i `/kalorier`, `/timepris` og `/opsparing` med `toFixed(0)` er **ikke** fund. **Ingen ny måler/gate blev skrevet i denne iteration** — 45-minutters budgettet gik til de 13 rettelser og gaten, så de resterende fund er skrevet som **opgave 105** med fuld liste i stedet for som et script. Det er en reel mangel, ikke en valgt afvejning: indtil scanneren findes skal næste agent selv køre `grep -rn "toFixed(" src/ | grep -v test`. **Gate grøn:** lint (554 filer), **1693 tests / 149 filer** (uændret fra C75) og build (141 sider). Kode `d701486` på `ceo/decimal-komma`; se opgave 105.
 
 ---
 
+STATUS: KØ — **C75 er landet: knapgruppe-klassen er lukket — 10 filer / 12 uavngivne grupper er blevet 0 / 0, og scanneren har nu to plantede tests til at sige det med.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den), og de to åbne deploynoter (C73 08:29, C74 08:46) har første kandidatvindue **12:30**, så intet kunne verificeres i denne iteration. **Klasse:** to eller flere knapper i én beholder, der ikke navngiver sættet — C72's `/brutto-netto`-fund ("Pr. måned"/"Pr. år" uden `<label>`, gruppe eller `aria-label`). Målt af C74's `scripts/knapgruppe-scan.mjs`. **Rettet:** alle 12, i rækkefølge efter GSC — `/tidsberegner` (3 presets, **72.725 visninger**), `/boliglaan`, `/opsparing`, `/leasing`, `/timepris`, `/del-regning`, `/barselsdagpenge`, `/barselsplanlaegger` (3 grupper), `barsel/ArbejdsgiverPanel` og `CookieConsent`. **Mønstret er C64/C70/C72's:** `role="group"` + `aria-labelledby` på en synlig overskrift/etiket der får et `id` (6 steder: tidsberegner-`<h3>`, cookie-`<p>`, barsel-"Du er"-`<label>`, barsel-slet-`<p>`, barsel-meldings-`<h4>`, delregning-drikkepenge-`<label>`), og `aria-label` hvor der ikke *er* en synlig etiket (de fire view-toggles + to barselsgrupper). **Den nye `vaelgVisning`-nøgle får alle tre sprog** (da "Vælg visning", se "Välj vy", no "Velg visning") — se-stengen er æ/ø-fri, så C73's R4 ikke giver et fund. **`label-a11y.test.tsx` er 111 → 118 tests** i DA og SE + en DA-only blok til barsel, **verificeret modsvejs: 18 tests falder** med de gamle komponenter. **Fire fund ud over at sætte attributterne:** (1) **drikkepenge-presettene i `/del-regning` bar på "første gruppe med aria-label"** i en ældre test fra C71 — min nye tællergruppe kom *før* den i DOM'en, så testen fandt 2 i stedet for 4. Rettelsen er ikke en tilpasset tæller: `delregning-drikkepenge`-`<label>`et blev gruppe-etiketten, præcis C70's mønster, så testen slår nu gruppen op på dens id. (2) **`/tidsberegner`s beregning er live** (starttid har en forudvalgt værdi), så preset-gruppen er i DOM'en uden et klik — min første test bad om at trykke på en "Beregn"-knap der ikke findes. (3) **Et `<label>` uden `htmlFor` kan ikke bindes med `for`** — barsel-"Du er"-etiketten er derfor `aria-labelledby`-målet, ikke etiketten for et felt. (4) **Klassen er bredere end "én kontrol":** 5 af de 12 er *separate handlinger* (Print/Del link/Til kalender, Kopiér/Del/.ics, Acceptér/Afvis), ikke valg i én kontrol. De er navngivet fordi et navn findes, ikke fordi klassen krævede det — det står her, så næste agent ikke læser scanneren som "finder kun toggle-grupper". **Begge scanner-gates er opdateret i samme commit** (C71's advarsel): `group-scan-gate.test.ts` 10/12 → 0/0 plus en ny test på at `prFil` er tom, fordi 0 også kan nås ved at slå scanneren fra; `label-scan-gate.test.ts` 23/36 → **22/35**, fordi barsel-"Du er" nu er bundet gennem sit `id`. Gate grøn: lint (554 filer), **1693 tests / 149 filer** (fra 1676 / 149) og build (141 sider); `node scripts/knapgruppe-scan.mjs` → **0 filer / 0 uavngivne**; `node scripts/locale-leak.mjs --gate` exit 0 med **117 kandidater / 85 døde / 32 kræver øjne / 0 ureviewet** (uændret). Kode + plan i ét commit på `ceo/knapgrupper`; se opgave 104.
 STATUS: KØ — **C74 er landet: måleren for den accessibility-klasse, `label-a11y-scan.mjs` ikke kan se, ligger nu i repoet som et script med fire navngivne regler og ni plantede tests.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den), og alle åbne deploy-noter er fra dagens 07:35-/08:29-merges med første vindue 12:30, så intet kunne verificeres i denne iteration. **Klasse:** en gruppe af toggle-knapper — en periode, en enhed, et view — i en beholder der ikke navngiver sættet. Den opstod hos C72, som fandt `/brutto-netto`s periodeknapper uden `<label>`, gruppe eller `aria-label`; `label-a11y-scan.mjs` tæller kun `<label>`-elementer, så den ser den slags ikke som konstruktion. Samme fejltype som C70 (311/88 i stedet for 97/45) og C72. **Målt på ren kode: 10 filer / 12 uavngivne grupper** — størst er `/tidsberegner` (3 knapper, Normal/Kontor/Nat, **72.725 visninger**), så listen er skrevet op som **opgave 104** med rækkefølge efter GSC, ikke efter antal. **Dækningen er kontrolleret i begge retninger:** scanneren **fandt** `/brutto-netto` før C72's rettelse og **finder den ikke** nu, fordi C72 lagde `role="group"` + `aria-labelledby` på den. **Harness-fejl undervejs, samme type som de tre forrige:** en selvlukkende `<input type="radio">` blev lagt på stakken uden nogen `</…>` at poppe, så næste `</div>` poppede den *første* knap i stedet for beholderen, og radiogrupper kom ud som 0 fund — fundet ved at køre den **plantede** test, altså præcis sådan den er skrevet til at bruges. **Og planens egen kandidat #3 var en målefejl:** den hævdede at `/brok` stadig manglede redaktionelle indgående links, fordi `git grep brok src/app` kun giver `src/app/brok/`. Det er forkert — `/procent` linker til `/brok` siden C42 via `relatedMap` i `calculator-list.ts:185`, låst af en navngiven vagt i `calculator-list.test.ts`. Et grep i `src/app` kan ikke se en datatabel i `src/lib`; det er præcis den advarsel C42 selv skrev ned. **Femte målefejl i træk, og den lå i kandidatlisten.** **Ingen a11y-rettelse landede i denne iteration, bevidst:** 45-minutters budgettet og gaten er den bindende del, så måleren — som gør rettelsen billig og datagrundet — var hele leverancen. Gate grøn: lint (554 filer), **1676 tests / 149 filer** (fra 1667 / 148) og build (141 sider). Kode + plan i ét commit på `ceo/knapgruppe-scan`; se opgave 103.
 
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
@@ -10135,7 +10136,7 @@ landmark=lån, piggybank=opsparing osv.).
 - **Landet:** kode + plan i ét commit på `ceo/knapgruppe-scan`.
 - **Mål scanneren igen 2026-10-11** sammen med label-klassens 23/36.
 
-#### 104. [ ] Opgave — luk de 12 uavngivne knapgrupper fra C74's måling
+#### 104. [x] Opgave — luk de 12 uavngivne knapgrupper fra C74's måling (lukket i C75)
 
 - **Datagrund:** C74's måling, 10 filer / 12 grupper. Prioriter efter GSC og
   Plausible, ikke efter antal: `/tidsberegner` (72.725 visninger DA, 285
@@ -10182,3 +10183,83 @@ landmark=lån, piggybank=opsparing osv.).
    "hvad skriver den tekst, brugeren kopierer?" (C42's andet fund).
 5. **Mål 2026-10-10 / 2026-10-11** (se Måleprotokol): C1-C16 og C35-C73 måles
    14 dage efter deres snapshot, og resultatet skrives ved siden af hver opgave.
+
+#### 105. [x] FÆRDIG 2026-09-27 — C76 — otte beregnersider skrev tal med punktum i dansk og svensk tekst; `/bil`s tal stod i Kopier- og Del-teksten
+
+- **Datagrund:** planens egen kandidat #3 ("de 10 øvrige komponenter med
+  `toFixed(2)`"). Trafik: `/kvadratmeter` **20.988 visninger** GSC, 380
+  besøgende/28d (+91 %), bounce 6 %; `/boliglaan` + `/billaan` +
+  `/forbrugslaan` er tre af sitets mest trafikrelevante låneregnesider;
+  `/elberegner` 11 besøgende/28d SE (+83 %); `/bil` 25–47 besøgende/28d DA
+  og 1.708 visninger SE. Klassen har fundet en reel fejl i hver eneste
+  iteration siden C52 (C52-C60 = ni fund, ingen tomme).
+- **Rettet (6 filer, 13 steder), alle med `formatNumber(x, locale, …)` med
+  samme decimalantal som det erstattede `toFixed`:** `KvadratmeterBeregner`
+  (formelen for alle fire geometriske former), `BilBeregner` (`prKm` —
+  nåede `CopyResultButton` **og** `ShareCalculation.resultSummary`),
+  `BillaanBeregner` (`apr`, `prisPrKm`), `ForbrugslaanBeregner` (`apr`,
+  `samletAar`), `BoliglaanBeregner` (samlet rente), `Elberegner` (6 steder).
+- **Fund ud over decimaltegnet:**
+  1. `/kvadratmeter` havde en **egen locale-følsom `formatNumber` lokalt i
+     komponenten** (linje 326) — allerede korrekt, brugt 10 steder, men
+     *nedenfor* det `useMemo` der bygger formlen. Flyttet ovenfor.
+     **Fælden var en TDZ-fejl jeg selv skabte:** min første version
+     importerede `formatNumber` fra `@/lib/format` og skyggegør den lokale
+     binding med samme navn → `Cannot access 'formatNumber2' before
+     initialization`. Fundet af den kørende test.
+  2. `/elberegner` skrev **"kr" hardkodet** i elafgift-leddet, mens de to
+     naboer bruger `getCurrencySuffix(locale)`.
+  3. `toFixed(0)`-kaldene fik **tusindtalsseparator gratis** ved at gå
+     gennem `formatNumber` (`/elberegner`: "12030" → "12.030").
+- **Landet:** kode `d701486` på `ceo/decimal-komma`.
+- **Gate:** lint (554 filer), **1693 tests / 149 filer** (uændret fra C75),
+  build (141 sider). Ingen beregningslogik rørt.
+- **MÅL:** `/kvadratmeter` baseline 380 besøgende/28d pr. 2026-09-27, GSC
+  20.988 visninger. Ændringen forventes **ikke** at løfte CTR — den retter
+  viste tal. Verificeres ved indhold efter deploy: `curl -s
+  https://minberegner.dk/kvadratmeter | grep -c '3,5'` skal være > 0 for
+  et eksempel med decimaler. Mål igen **2026-10-11**.
+
+#### C76's fund — resten af `toFixed`-klassen, målt (34 steder, ikke fund endnu)
+
+**Målt** med `grep -rn "toFixed(" src/ | grep -v "\.test\."` → **47 steder**.
+13 er lukket i C76. **De 34 resterende, med min vurdering af hvilke der
+kan nå brugeren** — en ren `toFixed(0)` kan ikke lave et decimaltegn, så
+den kategori er **ikke** et fund:
+
+- **Kan nå skærmen eller Kopier/Del — reelle fund, samme mønster som C76:**
+  - `ElbilBenzinBeregner.tsx:244` — `r.payback.toFixed(1)` + `l.yearsUnit`
+    → "6.4 år". `/elbil`.
+  - `BoliglaanBeregner.tsx:453` — `belaaningsgrad.toFixed(1)`; **skal
+    verificeres om den vises** (den er i et beregningsresultat-objekt).
+  - `BoliglaanBeregner.tsx:538` — `helpText` med `.toFixed(1)}%)` → "20.0%".
+  - `LoenBeregner.tsx:346` — `effektivSkat.toFixed(1)}%` → "55.7%".
+    `/lon-efter-skat` findes på **to** domæner.
+  - `LaaneBeregner.tsx:449` — `aopAnnuitet.toFixed(1)}%` → "1.1%".
+  - `ArveafgiftBeregner.tsx:352,378,384` — `effektivSats.toFixed(1)}%`.
+    **378 og 384 er i `CopyResultButton`- og `ShareCalculation`-teksten** —
+    samme alvorlige fund som `/bil`s var.
+  - `OpsparingsBeregner.tsx:514` — rente-andel `.toFixed(1)}%`.
+  - `Elberegner.tsx:510,564` — skal verificeres mod DOM'en.
+- **Død kode, ikke et fund:** `OpsparingsBeregner.tsx:381`
+  (`realRente` beregnes og returneres, men bruges **aldrig** — kun
+  `realSaldo` vises ved linje 495-497). Skrive ned, ikke rørt.
+- **Korrekte — `.replace(".", ",")` med det samme:** `LoenBeregner.tsx:418`,
+  `BraendstofBeregner.tsx:49,82`, `app/renteberegner/page.tsx:18`,
+  `app/elbil/page.tsx:25,26`, begge blogartikler, `lib/promille-eksempler.ts:96,102`,
+  `lib/page-data.ts:52,54,62,66`.
+- **Skal være punktum:** `RuteAfstand.tsx:61` og `lib/rute.ts:89,113` er
+  **geo-koordinater** (`lat.toFixed(6)`) — punktum er korrekt der. En
+  kommende scanner skal have en undtagelse for dem, ellers melder den
+  klassen sig frem som fejl.
+- **Modulscope-konstanter, skal verificeres:** `BruttoNettoBeregner.tsx:18`,
+  `TopskatBeregner.tsx:24,25` — `KOMMUNE_SNIT_PCT` o.l. med `toFixed(3)`.
+- **Rækkefølge:** `/arveafgift` først (fundet i Kopier- og Del-teksten),
+  så `/elbil` + `/boliglaan` + `/lon-efter-skat` + `/laane`, så
+  `/opsparing`.
+
+#### 104. [x] FÆRDIG 2026-09-27 — C75 — luk de 12 uavngivne knapgrupper fra C74's måling
+
+- **Lukket i C75** (`ceo/knapgrupper`): `node scripts/knapgruppe-scan.mjs`
+  → **0 filer / 0 uavngivne**, begge scanner-gates opdateret i samme
+  commit. Læs C75-STATUS.
