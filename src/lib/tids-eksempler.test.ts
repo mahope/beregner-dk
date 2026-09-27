@@ -15,7 +15,7 @@ describe("TIDS_EKSEEMPLER", () => {
     // Search Console: "08:30 til 16:45 er 8 timer og 15 minutter" er løftet i
     // title/description, så det SKAL være det, værktøjet faktisk regner.
     expect(telefon!.svar).toBe("8 t 15 min");
-    expect(telefon!.decimalTimer).toBe("8.25");
+    expect(telefon!.decimalTimer).toBeCloseTo(8.25, 2);
   });
 
   test("hvert eksempel er beregnet af beregnTidsinterval, ikke håndskrevet", () => {
@@ -96,7 +96,7 @@ describe("TIDS_EKSEEMPLER", () => {
     expect(TIDS_EKSEMPEL_FLERE_DAGE.startDato).toBe("2026-09-25");
     expect(TIDS_EKSEMPEL_FLERE_DAGE.slutDato).toBe("2026-09-28");
     expect(TIDS_EKSEMPEL_FLERE_DAGE.svar).toBe("65 t 0 min");
-    expect(TIDS_EKSEMPEL_FLERE_DAGE.decimalTimer).toBe("65.00");
+    expect(TIDS_EKSEMPEL_FLERE_DAGE.decimalTimer).toBeCloseTo(65, 2);
     expect(TIDS_UDEN_DATOER.da).toBe("17 t 0 min");
     expect(TIDS_UDEN_DATOER.se).toBe("17 h 0 min");
     // Samme tal, men med den notationsform hvert domæne bruger — danske

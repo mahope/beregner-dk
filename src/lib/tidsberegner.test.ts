@@ -14,7 +14,7 @@ describe("beregnTidsinterval", () => {
     // 8 t 15 min = 495 min = 0,34 døgn. Før blev deret regnet i komponenten og
     // kaldt "dage", hvilket læses som 0,33 dage.
     const resultat = beregnTidsinterval(baseInput)!;
-    expect(resultat.heleDoegn).toBe("0.34");
+    expect(resultat.heleDoegn).toBeCloseTo(0.34, 2);
 
     const heleDag = beregnTidsinterval({
       ...baseInput,
@@ -24,7 +24,7 @@ describe("beregnTidsinterval", () => {
       slutDato: "2026-09-28",
     })!;
     expect(heleDag.totalMinutter).toBe(3900);
-    expect(heleDag.heleDoegn).toBe("2.71");
+    expect(heleDag.heleDoegn).toBeCloseTo(2.71, 2);
   });
 
   test("beregner et interval på samme dag", () => {
@@ -33,7 +33,7 @@ describe("beregnTidsinterval", () => {
     expect(result.timer).toBe(8);
     expect(result.minutter).toBe(15);
     expect(result.totalMinutter).toBe(495);
-    expect(result.totalTimer).toBe("8.25");
+    expect(result.totalTimer).toBeCloseTo(8.25, 2);
     expect(result.overMidnat).toBe(false);
   });
 
@@ -45,7 +45,7 @@ describe("beregnTidsinterval", () => {
     })!;
 
     expect(result.totalMinutter).toBe(480);
-    expect(result.totalTimer).toBe("8.00");
+    expect(result.totalTimer).toBeCloseTo(8.00, 2);
     expect(result.overMidnat).toBe(true);
   });
 
@@ -59,7 +59,7 @@ describe("beregnTidsinterval", () => {
     })!;
 
     expect(result.totalMinutter).toBe(480);
-    expect(result.totalTimer).toBe("8.00");
+    expect(result.totalTimer).toBeCloseTo(8.00, 2);
     expect(result.overMidnat).toBe(true);
   });
 
@@ -71,7 +71,7 @@ describe("beregnTidsinterval", () => {
     })!;
 
     expect(result.totalMinutter).toBe(1935);
-    expect(result.totalTimer).toBe("32.25");
+    expect(result.totalTimer).toBeCloseTo(32.25, 2);
     expect(result.overMidnat).toBe(false);
   });
 
@@ -83,7 +83,7 @@ describe("beregnTidsinterval", () => {
     })!;
 
     expect(result.totalMinutter).toBe(495);
-    expect(result.totalTimer).toBe("8.25");
+    expect(result.totalTimer).toBeCloseTo(8.25, 2);
   });
 
   test.each([
@@ -97,7 +97,7 @@ describe("beregnTidsinterval", () => {
     })!;
 
     expect(result.totalMinutter).toBe(3375);
-    expect(result.totalTimer).toBe("56.25");
+    expect(result.totalTimer).toBeCloseTo(56.25, 2);
   });
 
   test.each([

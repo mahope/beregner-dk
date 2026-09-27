@@ -11,7 +11,8 @@ export interface TidsEksempel {
   minutter: number;
   /** "8 t 15 min" — samme notationsform som CopyResultButton bruger. */
   svar: string;
-  decimalTimer: string;
+  /** Tal, ikke streng: decimaltegnet formatteres på det domæne, siden viser på. */
+  decimalTimer: number;
   overMidnat: boolean;
   /** Hvorfor eksemplet er med, kort og konkret. */
   bemaerkning: string;

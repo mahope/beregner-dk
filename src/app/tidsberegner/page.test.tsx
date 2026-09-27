@@ -55,7 +55,10 @@ describe("tidsberegner page", () => {
 
     expect(html).toContain("Svar på de oftest søgte tidsrum");
     expect(html).toContain("<strong>8 t 15 min</strong>");
-    expect(html).toContain("8.25 timer");
+    // C78: denne assertion lå "8.25 timer" fast — altså den fejl, der stod i
+    // den server-renderede HTML og dermed i den tekst Google indekserer.
+    expect(html).toContain("8,25 timer");
+    expect(html).not.toContain("8.25 timer");
     expect(html).toContain("(dagen efter)");
   });
 

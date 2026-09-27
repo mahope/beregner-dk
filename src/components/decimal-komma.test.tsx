@@ -21,6 +21,7 @@ import ArveafgiftBeregner from "./ArveafgiftBeregner";
 import LaaneBeregner from "./LaaneBeregner";
 import LoenBeregner from "./LoenBeregner";
 import BoliglaanBeregner from "./BoliglaanBeregner";
+import TidsBeregner from "./TidsBeregner";
 import { LocaleProvider } from "./LocaleProvider";
 import { getDomainConfig } from "@/lib/domain-config";
 import type { Locale } from "@/lib/i18n";
@@ -58,6 +59,26 @@ function helTekst(container: HTMLElement): string {
   return container.textContent ?? "";
 }
 
+/**
+ * Læser den tekst `CopyResultButton` faktisk skriver i klipbordet, efter
+ * C57's metode. DOM'en viser ikke den streng — den er kun et `text`-prop på
+ * knappen — så en test der læser container-teksten ville aldrig se den.
+ *
+ *Bemærk: `ShareCalculation` har **ikke** et `data-share-text`-attribut, så
+ * C77's `/arveafgift`-test løb over en tom liste og var dermed grøn uden at
+ * se noget. Det er samme fejltype som de målefejl, planen har fem af.
+ */
+async function tekstIKlipbordet(): Promise<string> {
+  const skrevet: string[] = [];
+  Object.defineProperty(navigator, "clipboard", {
+    value: { writeText: (t: string) => skrevet.push(t) },
+    configurable: true,
+  });
+  const knap = screen.getByRole("button", { name: /Kopiér resultat|Kopiera resultat/ });
+  fireEvent.click(knap);
+  return skrevet.join("\n");
+}
+
 afterEach(cleanup);
 
 describe("decimal-komma — procenter i dansk og svensk tekst", () => {
@@ -88,16 +109,16 @@ describe("decimal-komma — procenter i dansk og svensk tekst", () => {
       expect(tekst).not.toContain("9.1%");
     });
 
-    test("da: teksten i Kopier og Del bruger også komma", () => {
+    test("da: teksten i Kopier og Del bruger også komma", async () => {
       medArvebeloeb("da");
       // `CopyResultButton` og `ShareCalculation` får samme streng; vi læser
-      // den fra DOM'en, fordi den er det brugeren faktisk tager med ud.
-      const delteTekster = Array.from(document.querySelectorAll("[data-share-text]")).map(
-        (n) => n.getAttribute("data-share-text") ?? "",
-      );
-      // Uanset hvordan knappen er bygget, må ingen streng i DOM'en have
-      // punktum som decimalseparator.
-      for (const t of delteTekster) expect(t).not.toContain("9.1%");
+      // den fra klipbordet, fordi det er det brugeren faktisk tager med ud.
+      // C77's version løb over `[data-share-text]`, et attribut der ikke
+      // findes nogen steder i repoet — listen var tom og testen grøn uden
+      // at have set noget.
+      const delt = await tekstIKlipbordet();
+      expect(delt).toContain("9,1%");
+      expect(delt).not.toContain("9.1%");
     });
   });
 
@@ -151,6 +172,72 @@ describe("decimal-komma — procenter i dansk og svensk tekst", () => {
       const tekst = helTekst(renderIn(<BoliglaanBeregner />, "se").container);
       expect(tekst).toContain("5,0%");
       expect(tekst).not.toContain("5.0%");
+    });
+  });
+
+  /**
+   * C78's fund. `/tidsberegner` er sitets **tredjestørste** side i dansk
+   * GSC (72.725 visninger) og andenstørste på beraknare.se (57.541), og de fire
+   * `toFixed(2)` i `lib/tidsberegner.ts` nåede *alt*: eksempel-tabellen og
+   * brødteksten i den server-renderede HTML — altså den tekst Google
+   * indekserer — samt resultatet, Kopiér- og Del-teksten.
+   *
+   * Testen slår fast på **konkrete værdier** (08:30→16:45 = 8,25 timer =
+   * 1,03 arbejdsdage = 0,34 døgn) frem for et regex over hele teksten, efter
+   * C77's lektie: et `/\d\.\d/` faldt på tusindtalsseparatoren i "3.000.000".
+   */
+  describe("/tidsberegner (decimaltimer, arbejdsdage og hele døgn)", () => {
+    /** 08:30 → 16:45 = 8 t 15 min = 495 min. */
+    function medInterval(locale: Locale) {
+      const { container } = renderIn(<TidsBeregner />, locale);
+      const start = container.querySelector<HTMLInputElement>("#tid-start-tidspunkt");
+      const slut = container.querySelector<HTMLInputElement>("#tid-slut-tidspunkt");
+      if (!start || !slut) throw new Error("tidsfelterne ikke i DOM'en");
+      fireEvent.change(start, { target: { value: "08:30" } });
+      fireEvent.change(slut, { target: { value: "16:45" } });
+      return container;
+    }
+
+    test("da: de fire resultattal skriver komma", () => {
+      const tekst = helTekst(medInterval("da"));
+      expect(tekst).toContain("8,25");
+      expect(tekst).toContain("1,03");
+      expect(tekst).toContain("0,34");
+    });
+
+    test("se: de fire resultattal skriver også komma", () => {
+      const tekst = helTekst(medInterval("se"));
+      expect(tekst).toContain("8,25");
+      expect(tekst).toContain("1,03");
+      expect(tekst).toContain("0,34");
+    });
+
+    test("da: teksten i Kopier og Del bruger også komma", async () => {
+      medInterval("da");
+      const delt = await tekstIKlipbordet();
+      // "8 t 15 min (8,25 timer)" — decimaltimeret skal have samme notation
+      // på skærmen og i den tekst brugeren tager med ud.
+      expect(delt).toContain("8,25");
+      expect(delt).not.toMatch(/\d\.\d/);
+    });
+
+    test("se: Kopier-teksten bruger også komma", async () => {
+      medInterval("se");
+      const delt = await tekstIKlipbordet();
+      expect(delt).toContain("8,25");
+      expect(delt).not.toMatch(/\d\.\d/);
+    });
+
+    test("heltallet vises med to decimaler, som før", () => {
+      // 08:00 → 16:00 er præcis 8 timer. Det skal stadig stå "8,00" — en
+      // rettelse af decimaltegnet må ikke slå nullerne væk.
+      const { container } = renderIn(<TidsBeregner />, "da");
+      const start = container.querySelector<HTMLInputElement>("#tid-start-tidspunkt");
+      const slut = container.querySelector<HTMLInputElement>("#tid-slut-tidspunkt");
+      if (!start || !slut) throw new Error("tidsfelterne ikke i DOM'en");
+      fireEvent.change(start, { target: { value: "08:00" } });
+      fireEvent.change(slut, { target: { value: "16:00" } });
+      expect(helTekst(container)).toContain("8,00");
     });
   });
 });
