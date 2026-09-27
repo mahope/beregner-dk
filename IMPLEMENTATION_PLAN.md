@@ -7651,7 +7651,8 @@ landmark=lån, piggybank=opsparing osv.).
 ## VERIFICÉR DEPLOY-log
 - ⏳ **ÅBEN — C61 `/dato`, `/tidsberegner`, `/tidszone` og `/promille`: 16
   formularfelter uden navn for skærmlæsere — kode + plan i ét commit på branch
-  `ceo/label-trafiksider`, første kandidatvindue **2026-09-27 07:30**.**
+  `ceo/label-trafiksider`, kode `8604c03`, merge `8c2dceb` 2026-09-27 03:09
+  CEST. Første kandidatvindue **2026-09-27 07:30**.**
   **HTTP 200 beviser intet her:** ændringen er `htmlFor`/`id`-attributter i
   klient-renderede felter, så den skal verificeres i DOM'en — helst med en
   skærmlæser, men en ren kontrol er at åbn DevTools og skrive:
