@@ -562,6 +562,73 @@ export const DAGE_TIL_EVENTS: DageTilEvent[] = [
       },
     },
   },
+  {
+    id: "halloween",
+    anchor: {
+      da: { kind: "fixed", month: 10, day: 31, offsetDays: 0 },
+      se: { kind: "fixed", month: 10, day: 31, offsetDays: 0 },
+    },
+    da: {
+      slug: "halloween",
+      copy: {
+        short: "Halloween",
+        question: "Hvor mange dage er der til Halloween?",
+        facts: [
+          "Halloween er 31. oktober, og datoen er fast — den flytter sig aldrig, uanset hvilken ugedag den falder på.",
+          "Den lette forveksling er 1. november: Halloween er aftenen, Alle helgenes dag er dagen efter. De to ligger altid præcis én dag fra hinanden.",
+          "Halloween er ikke en dansk helligdag, så butikker og arbejdsplads har normal åbent både 31. oktober og 1. november.",
+          "Ugedagen skifter: 31. oktober 2026 er en lørdag, 2027 en søndag og 2028 en tirsdag.",
+        ],
+        faq: [
+          {
+            question: "Er Halloween det samme som Alle helgenes dag?",
+            answer:
+              "Nej. Halloween er aftenen 31. oktober, og Alle helgenes dag er 1. november. Er du i tvivl om, hvilken af de to du egentlig vil have nedtællet til, er tallet her præcis 1 dag mindre end det er til 1. november.",
+          },
+          {
+            question: "Tæller dagen i dag med?",
+            answer:
+              "Nej. Tallet er forskellen mellem dagens dato og Halloween, så vælger du 30. oktober som dags dato, står der 1 dag tilbage.",
+          },
+          {
+            question: "Hvornår er Halloween næste gang?",
+            answer:
+              "Halloween er altid 31. oktober. Datoen er fast, så du kan regne den ud uden at slå den op i en kalender — det er ugedagen, der flytter sig. 2026 er den en lørdag, 2027 en søndag og 2028 en tirsdag.",
+          },
+        ],
+      },
+    },
+    se: {
+      slug: "halloween",
+      copy: {
+        short: "Halloween",
+        question: "Hur många dagar är det till Halloween?",
+        facts: [
+          "Halloween, som på svenska också kallas allhelgonaafton, är 31 oktober — alltid samma datum.",
+          "Det är lätt att förväxla med allhelgonadagen 1 november. De två ligger alltid exakt en dag ifrån varandra.",
+          "Halloween är inte en allmän helgdag i Sverige. Det är allhelgonadagen 1 november och alla helgons dag som är helgdagar, och den senare ligger sedan 1953 på den lördag som infaller mellan 31 oktober och 6 november.",
+          "Veckodagen växlar: 31 oktober 2026 är en lördag, 2027 en söndag och 2028 en tisdag.",
+        ],
+        faq: [
+          {
+            question: "Är Halloween samma sak som allhelgonadagen?",
+            answer:
+              "Nej. Halloween, eller allhelgonaafton, är 31 oktober och allhelgonadagen är 1 november. Är du osäker på vilken av dem du egentligen räknar ner till, är talet här exakt 1 dag mindre än det är till 1 november.",
+          },
+          {
+            question: "Räknas dagen i dag med?",
+            answer:
+              "Nej. Talet är skillnaden mellan dagens datum och Halloween, så väljer du 30 oktober som dagens datum står det 1 dag kvar.",
+          },
+          {
+            question: "När är Halloween nästa gång?",
+            answer:
+              "Halloween är alltid 31 oktober. Datumet är fast, så du kan räkna ut det utan att slå upp något — det är veckodagen som växlar. 2026 är det en lördag, 2027 en söndag och 2028 en tisdag.",
+          },
+        ],
+      },
+    },
+  },
 ];
 
 /** Locales that have a real dage-til landing page. */

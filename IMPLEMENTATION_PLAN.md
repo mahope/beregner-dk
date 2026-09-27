@@ -1,3 +1,5 @@
+STATUS: KØ — **C91 er landet: Halloween er nu en kurateret `dage-til`-dato i begge sprog, og undervejs fandt jeg en levende 404, der lå på præcis den side, der svarer på GSC's næststørste "dage"-søgning.** Opgave 121 (se den forrige STATUS for C90). **Målt først:** DA-autocomplete under **"hvor mange dage er der til"** (14:31) har **"… halloween" som nr. 5 af 10** og under **"dage til"** **"dage til halloween" som nr. 8**; under "halloween" er **"halloween 2026" nr. 1**. Det er 34 dage væk i dag, altså præcis det sæson, søgningen er spids i. `/dage-til/halloween` var **HTTP 404 på begge domæner**, og `DAGE_TIL_EVENTS` havde 8 rækker uden Halloween. **Rettelsen er kun modulet** — én række med fast anker `month: 10, day: 31` i da og se, sat **sidst** i listen fordi `dage-til.test.ts:102` bruger `DAGE_TIL_EVENTS[0]` som juledagen. Sitemap, hrefLang, `/dato`s liste, `/nedtaelling`s liste og brødkrummer følger automatisk med `getDageTilSlugs`, så ingen af dem er rørt manuelt. **Fælden opgaven selv advarede om, er skrevet ud på siden:** Halloween har to datoer at forveksle med — 31. oktober og 1. november — så fire facts og tre FAQ-par pr. sprog siger det begge steder, med kilder hentet i dag (svensk Wikipedia "Alla helgons dag": alle helgons dag flyttedes 1953 til lørdagen mellem 31. oktober og 6. november; Lag (1989:253) om allmänna helgdagar: Halloween är inte en allmän helgdag), og **en test låser forvekslingsstrengen pr. sprog med hvert sprog egen notation** (dansk "1. november" med punktum, svensk "1 november" uden) — én fælles streng ville kun have låst det ene sprog. **Den rigtige fejl, og den er ældre end opgaven:** `/dage-til/1-december` på **beraknare.se** og `/dagar-till/1-december` på **minberegner.dk** svarede **404**, selv om begge sider findes i begge sitemapmer. Bevis: `Host: beraknare.se /dage-til/1-december` → 404, mens `/dage-til/juledagen` på samme domæne → 301. **Årsagen** er at routing afgør "egen locale" alene på *staveformen* af slug'en, men det er **path-prefixet**, der fortæller hvilket sprog anmodningen er i. `1-december` staves ens i begge sprog, så den så ud til at være "egen" på begge domæner, faldt igennem `routing.ts` og blev afvist af `DageTilRoute`s prefix-port. Rettelsen er, at prefixet er autoriteten, og der redirectes hvis **enten** prefixet **eller** slug'en er det andet sprog — den anden disjunkts halvdel er nødvendig, ellers `/dage-til/juldagen` (dansk prefix, svensk slug) ville være gået fra 301 til 404. Det er en reel trafikfejl: **`/dage-til/1-december` er den side, der svarer på "hvor mange dage er der til 1 december" (1.020 visninger, pos. 5)**, og Halloween ville have arvet samme 404 fra første dag. **En fejl i min egen rettelse, fanget af den eksisterende suite samme sekund:** `getDageTilPrefix` returnerer prefixet *med* afsluttende skråstreg, mens den gamle kode havde det hardkodet uden — destinationen blev `/dagar-till//juldagen`, og tre eksisterende redirect-tests faldt. **Målefejl nr. 15 (min egen, samme klasse som nr. 9-14):** min første lokale `curl` sagde 404 på `/dage-til/halloween`, og det så ud som om siden ikke fandtes. **En `next start` fra en tidligere iteration havde allerede port 3111**, min nye server fik `EADDRINUSE`, og alle svar kom fra den *gamle* bygning. Lært op som måleregel: et svar fra en server kan ikke tilskrives ens egen kode, medmindre porten er verificeret fri *inden* start. **Målt i browseren, ikke bare i test:** dansk 200 med "Hvor mange dage er der til Halloween? 34 dage | MinBeregner.dk", 3 FAQ-par i JSON-LD'en og tre hreflang-varianter; svensk 200 med "Hur många dagar är det till Halloween? 34 dagar | Beräknare.se" og **0** danske markører; og alle otte krydsdomæne-kombinationer svarer nu 301 med korrekt `Location`. **Harness:** `dage-til.test.ts` 39 → **43**, `dage-til-routes.test.tsx` 13 → **15**, **verificeret modsvejs: 5 tests falder** med den gamle kode. **Gate:** lint (556 filer), **1763 tests / 151 filer** (fra 1757 / 151), build (**141 ruter** — uændret, fordi `/dage-til/[dato]` er dynamisk), `locale-leak.mjs --gate` exit 0 med 117/85/32/0 (de nye svenske strenge har hverken `æ` eller `ø`, så C73's R4 giver intet fund). Branch `ceo/halloween-dage-til`. **MÅL:** baseline `/dato` **131.419 visninger / 803 klik / CTR 0,6 % / pos. 5,8 pr. 2026-08-28 → 2026-09-25**; Halloween-siden er endnu ikke indekseret, så dens baseline måles første gang 2026-10-11.
+
 STATUS: KØ — **C90 er landet: `/dato` — GSC's næststørste danske side — svarer nu på "hvor mange dage er der tilbage af 2026?" med dagens tal i begge sprog, og den havde nul forekomster af formuleringen.** Samme iteration som C89 (se den forrige STATUS); denne er den anden og sidste opgave, derfor to merges. **Målt først:** GSC (2026-08-28 → 2026-09-25) giver `/dato` **131.419 visninger / 803 klik / CTR 0,6 % / pos. 5,8** — sitets næststørste danske side — og to af dens søgninger er præcis de to spørgsmål om årets sidste dage: "hvor mange dage er der tilbage af 2026" (**227 visninger, pos. 5**) og "hvor mange dage er der til 1 december" (1.020, pos. 5). Plausible: 1.045 besøgende/28d (+71 %, bounce 5 %). DA-autocomplete under **"hvor mange dage er der til"** (14:19) giver "… tilbage af 2026" som nr. 7 af 10, og under **"dage til"** som nr. 5. Svensk GSC har samme spørgsmål som **"dagar till 31 dec" (367 visninger, pos. 9)**. Den server-renderede `/dato` indeholdt **0** "tilbage af" og **0** "hvor mange dage er der tilbage". **Hvorfor de eksisterende `/dage-til/*`-sider ikke dækkede det:** de svarer på *hvilken dato* — "hvor mange dage er der til nytår?" — mens søgningen spørger *hvornår året er slut*. `/dage-til/nytaarsaften` findes og svarer korrekt, men den er et andet spørgsmål med et andet tal, og det er den forskel der holdt spørgsmålet ude. **Rettelsen:** `dageTilbageIAaret(today)` i `src/lib/dage-til.ts` (tal og datoer i modulet, **ingen danske strenge** — ellers kunne modulet lække til beraknare.se, C73's R4) plus et nyt `<h2>` i **begge** sproggrene: "Hvor mange dage er der tilbage af 2026?" (**95 dage** = 13 uger og 4 dage i dag) og "Hur många dagar är det kvar av 2026?" (**95 dagar**). Siden er dynamisk, så tallet regnes pr. request og kan ikke stå med gårsdags svar — en test låser netop det ved at sætte systemklokken til 31. december og kræve 0. Hvert sprog linker videre til sin egen `dage-til`/`dagar-till`-side for 1. december og nytårsaften (begge verificeret HTTP 200), fordi det er præcis forskellen på de to spørgsmål. **To ting målt og bevidst ikke bygget.** (1) **`/dage-til/1-november` svarer HTTP 404** — routen dækker kun de otte kuraterede datoer, og GSC viser "hur många dagar är det kvar till 1 november" (19 v, pos. 5). En kalender med 365 varianter er præcis de "tusindvis af tynde varianter" kontrakten forbyder, så det bliver en kurateret dato ad gangen. **Halloween (31. oktober)** står i *begge* DA-autocomplete-lister ("hvor mange dage er der til halloween", "dage til halloween") og er en fast dato — den ligger i køen som opgave 121. (2) "sommerferie" og "efterårsferien" står også i autocomplete, men er kommunevise, og modulet har en dokumenteret regel om at variable ankre *ikke* gættes — den regel står. **Min egen regnefejl, fanget af den nye test:** jeg skrev at 1. marts 2028 giver 306 dage til 31. december; det er **305**. Testen faldt, og Python bekræftede 305 — samme klasse som de øvrige målefejl, og grunden til at tallene sidder i et modul med test i stedet for i brødteksten. **Harness:** `dage-til.test.ts` **34 → 39** (dagens tal, 0 nytårsaften, 365/366 i almindeligt og skudår, og at klokkeslættet i døgnet ikke påvirker tallet), `dato/page.test.tsx` **5 → 8** (de to sprog + nulstillingen nytårsaften) — **modsvejs verificeret: alle 3 nye side-tests falder** med den gamle `page.tsx`. Gate grøn: lint (556 filer), **1757 tests / 151 filer** (fra 1749 / 151), build (**141 sider**), `locale-leak.mjs --gate` exit 0. Se opgave 120. **MÅL:** `/dato` baseline **131.419 visninger / 803 klik / CTR 0,6 % / pos. 5,8 pr. 2026-08-28 → 2026-09-25** — måles igen 2026-10-11.
 
 STATUS: KØ — **C89 er landet: `/kalorier` svarer nu på "hvor mange kalorier pr dag" — den største danske søgeklynge på siden — med en tabel over mand, kvinde og vægttab ved 60/70/80/90 kg, regnet af værkøjets *egne* formel.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den), og de fire åbne deploynoter (C83-C86) har første vindue **17:30**, som ikke var passeret kl. 14:12, så intet kunne verificeres. Valget var C88-listenens punkt 2. **Målt først:** DA-autocomplete (`hl=da`, `gl=dk`, 14:13) under **"kalorier pr dag"** giver 10 variationer, hvoraf **ni er køn/vægt-spørgsmål** ("… kvinde", "… mand", "… voksen mand", "… voksen kvinde", "… dame", "… mann", "… mænd", "… vægttab", "… beregner"), og under **"hvor mange kalorier skal jeg"** er nummer ét **"hvor mange kalorier skal jeg have"** mens nummer otte er **"hvor mange kalorier skal jeg forbrænde for at tabe 1 kg"**. Den server-renderede `/kalorier` havde **0** forekomster af "kalorier pr dag" — altså hele klyngen gik til konkurrenterne. **En måling, der sparede mig en fejl (nr. 14):** jeg ville skifte titlens "om dagen" til "pr dag", fordi det er det folk søger på — men autocomplete under **"kalorier om dagen"** har OGSÅ 10 variationer ("… mand", "… kvinde", "… for at tabe sig", "… gravid", "1200 kalorier om dagen"). Begge formuleringer er i brug, så **titlen er ikke problemet**, og C79/C81's lås i `page-data.test.ts` (svart-først, ≤60 tegn) er rigtig — den blev ikke rørt. **Rettelsen (kun `da`):** et nyt `<h2>` **"Hvor mange kalorier pr dag?"** som **første** synlige afsnit, med tabellen 60/70/80/90 kg × mand / kvinde / mand-vægttab / kvinde-vægttab (2.449/2.192 … 2.914/2.657, vægttab 1.949/1.692 … 2.414/2.157) og forudsætningerne skrevet ud (180 cm, 30 år, moderat aktivitet), to interne links (`/vaegttab` og `/motion-kalorier`) og tre nye FAQ-par i `page-data.ts` — som dermed også kommer i JSON-LD'en. **Tallene er sidens egen sandhed, ikke nye tal:** BMR-formlen lå *inde i* `KalorieBeregner.tsx`, så tabellen kunne ikke have brugt den uden at kode-dubleres; den er derfor flyttet til `beregnBmr`/`beregnTdee`/`kalorierForMaal` i `src/lib/makroer.ts`, som **både** komponenten og siden nu kalder — og 80 kg-mand-rækken lander på **2.759 / 2.259**, altså præcis de tal siden *allerede* lovede i sin `metaDescription` og sin FAQ. Rækken er derfor en krydscheck af værktøjet mod sin egen tekst, ikke en ny påstand. **Målefejl nr. 14 (min egen):** `rg -rn "bmr"` — `-r` er ripgreps *replace*-flag, så formlen kom ud som `n = 10 * vaegt + 6.25 * hoejde …`. Fundet fordi jeg læste det samme stykke to gange. **En hel klynge målt og bevidst ikke bygget (opgave 119):** dansk autocomplete under **"kalorier"** er **9 af 10 madvarer** (æg, banan, vandmelon, jordbær, avocado, kirsebær, kartofler, vindruer, havregryn) og under **"kalorie indhold"** 10 af 10. Det er en *madvaretabel*, ikke en kalorieberegner, og de ni variationer under "kalorier i æg" er æggehvide/æggeblomme/æggekage/uden blomme — altså pr. del, ikke pr. 100 g. Jeg fandt ingen dansk kilde jeg kunne hente og citere i denne iteration (`frasco.dk` svarer ikke, DTU's kostviddatabase er en JS-app, Open Food Facts har danske *produkt*-data med spredning på 363-369 kcal for havregryn), så **den ligger som opgave 119 med kildekrav i stedet for som gættede tal** — faglig korrekhed slår vækst her. **Harness:** `makroer.test.ts` **11 → 18 tests** (Mifflin for begge køn, faktor-multiplikationen, 500/300, BMR-gulvet ved 30 kg/100 år, og den 80 kg-mand-lås mod sidens egne tal), `kalorier/page.test.tsx` **1 → 3** (tabellen i den server-renderede HTML med alle fire rækker + de to links; de tre nye spørgsmål og 2.502-kvinde-tallet i `page-data.ts`) — **modsvejs verificeret: 1 af de 2 nye side-tests falder** med den gamle `page.tsx` (den anden læser `page-data.ts`, som ikke var stakket tilbage, så den *skal* være grøn). Gate grøn: lint (556 filer), **1749 tests / 151 filer** (fra 1740 / 151), build (**141 sider**). Kode + plan i ét commit på `ceo/kalorier-pr-dag`; se opgave 118. **MÅL:** `/kalorier` baseline **12.477 visninger / 126 klik / CTR 1,0 % / pos. 8,2 pr. 2026-08-28 → 2026-09-25** — måles igen 2026-10-11.
@@ -7819,6 +7821,14 @@ landmark=lån, piggybank=opsparing osv.).
 
 ## VERIFICÉR DEPLOY-log
 
+### ⏳ **VERIFICÉR DEPLOY: C91 — Halloween som kurateret `dage-til`-dato (31. oktober) i da og se, PLUS en levende 404-rettelse på `/dage-til/1-december`.** Kode + plan i ét commit på `ceo/halloween-dage-til`; første kandidatvindue **2026-09-27 17:30**. Verificér ved **indhold og statuskode, ikke HTTP 200 alene**:
+1. `curl -s -o /dev/null -w '%{http_code}' https://minberegner.dk/dage-til/halloween` skal være **200**, og `<title>` skal være **"Hvor mange dage er der til Halloween? 34 dage | MinBeregner.dk"** på 27. september — altså *dagens* tal, ikke et hårdkodet 34.
+2. Samme curl skal finde **3** `"@type":"Question"`, `<h1>Hvor mange dage er der til Halloween?</h1>`, og facts med "Alle helgenes dag er 1. november" og "ikke en dansk helligdag".
+3. `curl -s https://minberegner.dk/sitemap.xml | grep -c 'dage-til/halloween'` skal være **1** (sitemap bygges af samme liste, så den følger automatisk med).
+4. **`curl -sI https://beraknare.se/dage-til/1-december` skal svare `301` med `Location: …/dagar-till/1-december`** — det var **404** før denne iteration, på en side der svarer på GSC's "hvor mange dage er der til 1 december" (1.020 visninger, pos. 5). Samme for `https://minberegner.dk/dagar-till/1-december` → 301 til `/dage-til/1-december`.
+5. `https://beraknare.se/dagar-till/halloween` skal være **200** med `<title>Hur många dagar är det till Halloween? 34 dagar | Beräknare.se</title>`, **0** danske markører ("Alle helgenes dag", "helligdag", "1. november"), og `https://minberegner.dk/dage-til/halloween` skal finde **0** svenske strenge.
+6. `https://minberegner.dk/api/health` skal svare `status: ok`.
+
 ### ⏳ **VERIFICÉR DEPLOY: C90 — `/dato` svarer på "hvor mange dage er der tilbage af 2026?" i da og se (131.419 visninger, CTR 0,6 %, pos. 5,8).** Kode `7dd98e6`, merge `c7e56ea` 2026-09-27 14:23 CEST på branch `ceo/dato-dage-tilbage`. Første kandidatvindue **2026-09-27 17:30**. Verificér ved **indhold**: `/dato` på begge domæner skal have et `<h2>` med "tilbage af"/"kvar av" og **dagens** tal (95 dage på 27. september), altså ikke et hårdkodet 95; tallet skal nulstilles til 0 nytårsaften.
 
 
@@ -11210,20 +11220,121 @@ tekst på `/tidszone`), men Kopier-strengen med datoen kræver en browser.
 - **MÅL:** `/dato` baseline **131.419 visninger / 803 klik / CTR 0,6 % / pos. 5,8
   pr. 2026-08-28 → 2026-09-25** — måles igen 2026-10-11.
 
-#### 121. [ ] Kø — Halloween som kurateret `dage-til`-dato (31. oktober)
+#### 121. [x] FÆRDIG 2026-09-27 — C91 — Halloween som kurateret `dage-til`-dato (31. oktober) i begge sprog, og en levende 404 på de slugs de to sprog deler
 
-- **Datagrund:** DA-autocomplete under "hvor mange dage er der til" har
-  "… halloween" (nr. 5 af 10) og under "dage til" "dage til halloween" (nr. 8).
-  31. oktober er en **fast** dato, altså præcis den slags `DAGE_TIL_EVENTS`
-  er bygget til, og Halloween bruges i både Danmark og Sverige (SAMEDAG).
-- **Acceptkriterier:** (1) ny `DAGE_TIL_EVENTS`-række med fast anker
-  `month: 10, day: 31` i da og se; (2) egen `facts` og mindst ét FAQ-par pr.
-  sprog, fordi Halloween har to datoer at forveksle (31. oktober og
-  All Saints' Day 1. november) — det er præcis fælden; (3) `/dato` og
-  `/nedtaelling` får den med i listen automatisk via `getDageTilEvents`, så
-  ingen af dem røres manuelt; (4) sitemap og `hrefLang` følger med, fordi de
-  bygges af samme liste; (5) `dage-til.test.ts` udvides med rækken, så
-  `getDageTilSlugs` ikke kan tabe den.
+- **Datagrund:** DA-autocomplete under **"hvor mange dage er der til"** (14:31)
+  har **"… halloween" som nr. 5 af 10**; under **"dage til"** ligger
+  **"dage til halloween" som nr. 8 af 10**; under **"dage til halloween"**
+  kommer derudover **"antal dage til halloween"**. Under **"halloween"** er
+  **"halloween 2026" nr. 1**. 31. oktober er en **fast** dato i begge lande,
+  altså præcis den slags `DAGE_TIL_EVENTS` er bygget til. Dagens søgning er
+  særlig spids omkring Halloween — det er 34 dage væk.
+- **Målt på koden først:** `DAGE_TIL_EVENTS` havde 8 rækker, ingen Halloween,
+  og `/dage-til/halloween` var HTTP 404 på begge domæner.
+- **Rettelsen (kun modulet, slugs og copy):** ny række `id: "halloween"` med
+  fast anker `month: 10, day: 31` i **da og se**. Bevidst **sidst i listen**,
+  fordi `dage-til.test.ts:102` tager `DAGE_TIL_EVENTS[0]` som juledagen —
+  en indsættelse ville have brudt tre eksisterende tests på indeks, ikke på
+  adfærd. Alt andet følger automatisk, som opgaven krævede:
+  `getDageTilSlugs` driver **sitemap** (`lastModified: now`, `daily`, 0.7),
+  **`/dato`**s og **`/nedtaelling`**s lister, `hrefLang` og `Breadcrumbs` — ingen
+  af dem er rørt manuelt, og ingen af dem *kunne* være det.
+- **Fælden opgaven navngav, skrevet ud på siden:** Halloween har to datoer at
+  forveksle med. Fire facts + tre FAQ-par pr. sprog siger det begge steder,
+  og **en test låser det pr. sprog med hvert sprog egen notation** — dansk
+  "1. november" med punktum, svensk "1 november" uden. Én fælles streng ville
+  kun have låst det ene sprog. Kilderne er hentet: **svensk Wikipedia
+  "Alla helgons dag"** (alle helgons dag flyttedes 1953 til lørdagen mellem
+  31. oktober og 6. november; allhelgonaafton er fast 31. oktober) og
+  **Lag (1989:253) om allmänna helgdagar** for det svenske påstand, at
+  Halloween ikke är en allmän helgdag. Ugedagerne (2026 lørdag, 2027 søndag,
+  2028 tirsdag) er regnet i node, ikke husket.
+- **Den rigtige fejl, fundet fordi jeg ville verificere den nye side, og den
+  er ældre end denne opgave:** `/dage-til/1-december` på **beraknare.se** og
+  `/dagar-till/1-december` på **minberegner.dk** svarede **404**, selv om
+  begge sider findes i begge sitemapmer. Bevis lokalt før rettelsen:
+  `Host: beraknare.se /dage-til/1-december` → 404, mens
+  `Host: beraknare.se /dage-til/juledagen` → 301. **Årsagen:** routing afgør
+  "egen locale" alene på *staveformen* af slug'en
+  (`resolveDageTilSlug(...).isOwnLocale`), men det er **path-prefixet**, der
+  fortæller hvilket sprog anmodningen er i. `1-december` staves ens i begge
+  sprog, så den så ud til at være "egen" på begge domæner, faldt igennem
+  `routing.ts` og blev så afvist af `DageTilRoute`'s
+  `getDageTilPrefix(locale) !== prefix`-port. Rettelsen er i
+  `src/lib/routing.ts`: prefixet er nu autoriteten, og der redirectes hvis
+  **enten** prefixet **eller** slug'en er det andet sprog — den anden
+  disjunkts halvdel er nødvendig, ellers `/dage-til/juldagen` (dansk prefix,
+  svensk slug) ville være gået fra 301 til 404. Dette er en rigtig
+  trafikfejl: `/dage-til/1-december` er den side, der svarer på GSC's
+  **"hvor mange dage er der til 1 december" (1.020 visninger, pos. 5)**.
+- **En fejl i min egen rettelse, fanget af den eksisterende suite samme
+  sekund:** `getDageTilPrefix` returnerer prefixet **med** afsluttende
+  skråstreg, mens den gamle kode havde `/dage-til` hardkodet **uden** — så
+  destinationen blev `/dagar-till//juldagen`, og de tre eksisterende
+  redirect-tests faldt. Rettet til `${ownPrefix}${resolved.localeSlug}`.
+- **Målefejl nr. 15 (min egen, samme klasse som nr. 9-14):** min første
+  lokale `curl` sagde 404 på `/dage-til/halloween`, og det så ud som om
+  siden ikke fandtes. **En `next start` fra en tidligere iteration havde
+  allerede port 3111**, min nye server fik `EADDRINUSE`, og alle svar kom fra
+  den *gamle* bygning. Beviset: samme kommando returnerede 200 for
+  `/dage-til/juledagen`, og loggen viste `port: 3111` i fejlen. Lært op som
+  måleregel: et svar fra en server kan ikke tilskrives ens egen kode, medmindre
+  porten er verificeret fri **inden** start.
+- **Harness:** `dage-til.test.ts` 39 → **43** (fast anker i begge sprog,
+  slug i begge lister, præcis 1 dag før 1. november med 34 dage / 4 uger /
+  6 dage pr. 27. september 2026, forvekslingsstrengen pr. sprog, 0 dage på
+  dagen selv og rulling til 2027-10-31), `dage-til-routes.test.tsx` 13 → **15**
+  (delt-slug-redirectionen i begge retninger + den modsatte fælde som
+  regressionsvagt). **Verificeret modsvejs: 5 tests falder** (4 i
+  `dage-til.test.ts`, routing-fixen i `dage-til-routes.test.tsx`).
+- **Målt i browseren (ikke bare i test):** dansk 200 med titel
+  "Hvor mange dage er der til Halloween? 34 dage | MinBeregner.dk", 3
+  FAQ-par i JSON-LD'en, canonical + **tre** hreflang-varianter
+  (`/dage-til/halloween`, `beraknare.se/dagar-till/halloween`,
+  `x-default`); svensk 200 med "Hur många dagar är det till Halloween?
+  34 dagar | Beräknare.se" og **0** danske markører; og alle otte
+  krydsdomæne-kombinationer svarer nu 301 med korrekt `Location` (før: to
+  af dem 404).
+- **Gate:** lint (556 filer), **1763 tests / 151 filer** (fra 1757 / 151),
+  build (**141 ruter** — uændret, fordi `/dage-til/[dato]` er dynamisk og en
+  ny slug derfor ikke tilføjer en rute), `locale-leak.mjs --gate` exit 0 med
+  **117 / 85 / 32 / 0 ureviewet** (uændret — de nye svenske strenge indeholder
+  hverken `æ` eller `ø`, så C73's R4 giver intet fund). Branch
+  `ceo/halloween-dage-til`.
+- **MÅL:** de otte gamle `dage-til`-sider + den nye. Baseline fra GSC:
+  `/dato` **131.419 visninger / 803 klik / CTR 0,6 % / pos. 5,8** (den side
+  der linker til familien) pr. 2026-08-28 → 2026-09-25. Den nye sides
+  baseline er **ikke kendt** (den er ikke indekseret endnu) — måles første
+  gang 2026-10-11.
+
+### Næste kandidater efter C91
+
+0. **🔒 Opgave 97 er `BLOCKED`,** 98 afhænger af den. Browser-noter: C52, C55,
+   C56, C57 og C60 ligger i `❓ Til Mads` nederst.
+1. **🆕 Opgave 119 — madvare-klyngen på "kalorier"** (9 af 10 variationer er
+   madvarer). Kræver en hentet, citabel kilde før den bygges — C89's
+   forgæves forsøg (frasco.dk svarer ikke, DTU er en JS-app) bør genforsøges
+   med **Open Food Facts API** eller **Livsmedevaredata fra DTU via
+   eksisterende tabel**, ellers skal den skrives ned som kilde-blokeret.
+2. **🆕 De ni `dage-til`-titler er 62-66 tegn** (Googles grænse er ca. 60,
+   C81's lære) — målt på den kørende server: juledagen 62, juleaften 62,
+   nytårsaften 64, nytårsdagen 64, 1. december 64, påskedag 62,
+   skærtorsdag 65, grundlovsdag 66, **Halloween 62** altså den *korteste*.
+   `buildDageTilMetadata` sætter `${question} ${count} | ${siteName}`, så
+   løftet og dage-tallet er begge med. At trimme er en **designbeslutning for
+   alle ni sider** (hvad af de to mister vi?), ikke en tegnskiftrettelse.
+3. **🆕 `/dage-til/*` er ikke nævnt som klynge i GSC-listen** — mål om de
+   ni sider overhovedet er indekseret; hvis ikke, er `lastModified: now` +
+   `daily` alene ikke nok, og der skal interne links fra `/dato` og
+   `/nedtaelling` til hver side (pt. har `/dato` kun to af dem håndlinket).
+4. **✅ `/kalorier` og `/dato` er lukket** (118 og 120) — mål effekten
+   2026-10-11, ikke rør indholdet igen før da.
+5. **🆕 Svensk CTR:** `/tidszone` (3.256 v), `/leasing` (3.151 v, pos. 12,4),
+   `/alder` (3.060 v), `/nedtaelling` (5.163 v, pos. 9,4).
+6. **✅ Dansk top-15 er lukket** (C82-C90) — mål i stedet effekten 14 dage efter.
+7. **🔒 Uforandrede forbehold:** hreflang korrekt (`hrefLang` med stort L);
+   svenske slugs kræver Mads' go; `/bmi` og `/su` måles 2026-10-11.
+8. **Mål 2026-10-10 / 2026-10-11** (se Måleprotokol).
 
 ### Næste kandidater efter C90
 

@@ -85,6 +85,42 @@ describe("dage-til routing", () => {
     });
   });
 
+  test("et slug der staves ens i begge sprog redirectes stadig paa det forkerte domaene", () => {
+    // `1-december` hedder det samme paa begge domaener, saa det slaar ikke
+    // igennem at teste slugen alene — for det 404'ede i stedet for at
+    // redirecte. Det er path-prefixet, der forteller hvilket sprog vi er i.
+    for (const slug of getDageTilSlugs("da")) {
+      const eget = getRouteDecision(da, `/dage-til/${slug}`);
+      if (getDageTilSlugs("se").includes(slug)) {
+        expect(eget, slug).toEqual({ type: "allow" });
+        expect(getRouteDecision(se, `/dage-til/${slug}`), slug).toEqual({
+          type: "redirect",
+          destination: `/dagar-till/${slug}`,
+          status: 301,
+        });
+        expect(getRouteDecision(da, `/dagar-till/${slug}`), slug).toEqual({
+          type: "redirect",
+          destination: `/dage-til/${slug}`,
+          status: 301,
+        });
+      }
+    }
+  });
+
+  test("et slug med sit eget sprogstavemaade redirectes stadig naar prefixet er rigtigt", () => {
+    // Modsat fælde: dansk prefix med svensk slug skal stadig redirecte.
+    expect(getRouteDecision(da, "/dage-til/juldagen")).toEqual({
+      type: "redirect",
+      destination: "/dage-til/juledagen",
+      status: 301,
+    });
+    expect(getRouteDecision(se, "/dagar-till/juledagen")).toEqual({
+      type: "redirect",
+      destination: "/dagar-till/juldagen",
+      status: 301,
+    });
+  });
+
   test("ukendte slugs er 404, ikke en omdirigering", () => {
     expect(getRouteDecision(da, "/dage-til/tacohoedag")).toEqual({ type: "not-found" });
     expect(getRouteDecision(se, "/dagar-till/tacodagen")).toEqual({ type: "not-found" });

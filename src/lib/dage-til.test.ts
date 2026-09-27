@@ -215,6 +215,61 @@ describe("slug-opløsning", () => {
       expect(getDageTilAnswer(juleaften!, locale, iso("2026-09-25")).days).toBe(90);
     }
   });
+
+  test("Halloween er fast 31. oktober i begge sprog", () => {
+    const halloween = DAGE_TIL_EVENTS.find((e) => e.id === "halloween");
+    expect(halloween).toBeDefined();
+    for (const locale of ["da", "se"] as const) {
+      expect(halloween!.anchor[locale]).toMatchObject({
+        kind: "fixed",
+        month: 10,
+        day: 31,
+      });
+      expect(getDageTilSlugs(locale)).toContain(halloween![locale].slug);
+      expect(halloween![locale].copy.question).toContain(
+        halloween![locale].copy.short
+      );
+    }
+  });
+
+  test("Halloween ligger præcis én dag før 1. november — den forveksling, siden advarer om", () => {
+    const halloween = DAGE_TIL_EVENTS.find((e) => e.id === "halloween")!;
+    for (const locale of ["da", "se"] as const) {
+      const svar = getDageTilAnswer(halloween, locale, iso("2026-09-27"));
+      expect(toISO(svar.targetDate)).toBe("2026-10-31");
+      expect(svar.days).toBe(34);
+      expect(svar.weeks).toBe(4);
+      expect(svar.daysLeft).toBe(6);
+      expect(daysBetween(svar.targetDate, iso("2026-11-01"))).toBe(1);
+    }
+  });
+
+  test("skriver den forvekslede dato ud i begge sprog, med hvert sprog egen notation", () => {
+    // Svensk skriver "1 november", dansk "1. november" — derfor pr. sprog og ikke
+    // én fælles streng, ellers låser den kun det ene sprog.
+    const halloween = DAGE_TIL_EVENTS.find((e) => e.id === "halloween")!;
+    const foerveksling = { da: "1. november", se: "1 november" } as const;
+    for (const locale of ["da", "se"] as const) {
+      const tekst = [
+        ...halloween[locale].copy.facts,
+        ...halloween[locale].copy.faq.map((item) => `${item.question} ${item.answer}`),
+      ].join(" ");
+      expect(tekst).toContain(foerveksling[locale]);
+    }
+  });
+
+  test("står på 0 på selve Halloween og ruller først til næste år", () => {
+    const halloween = DAGE_TIL_EVENTS.find((e) => e.id === "halloween")!;
+    for (const locale of ["da", "se"] as const) {
+      const iDag = getDageTilAnswer(halloween, locale, iso("2026-10-31"));
+      expect(iDag.days).toBe(0);
+      expect(iDag.isToday).toBe(true);
+      // 1. november er dagen efter: først næste Halloween.
+      expect(toISO(getDageTilAnswer(halloween, locale, iso("2026-11-01")).targetDate)).toBe(
+        "2027-10-31"
+      );
+    }
+  });
 });
 
 describe("dato-anker", () => {
