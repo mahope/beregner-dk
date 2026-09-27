@@ -972,6 +972,8 @@ const daPages: Record<string, PageData> = {
       { question: "Hvad er ydelsen på 100.000 kr. med 5 % rente i 5 år?", answer: "Ca. 1.887 kr. om måneden i et annuitetslån, i alt 13.227 kr. i rente over de 60 terminer." },
       { question: "ÅOP?", answer: "Årlige Omkostninger i Procent inkl. alle gebyrer." },
       { question: "Fradrag?", answer: "Se vores rentefradragsberegner for den aktuelle fradragsværdi." },
+      { question: "Hvilken formel beregner et annuitetslån, og hvordan gør man det i Excel?", answer: "Ydelsen er P × r ÷ (1 − (1 + r)^-n), hvor r er den månedlige rente og n antal måneder. Et lån på 200.000 kr. til 4 % i 20 år giver 1.211,96 kr. pr. måned. I Excel er det =YDELSE(0,04/12;240;-200000) — lånebeløbet skal ind som et negativt tal." },
+      { question: "Hvad er forskellen på nominel og effektiv rente?", answer: "Den nominelle rente er den, banken oplyser, fx 4 % om året. Den effektive rente regner også med månedlig tilskrivning, så 4 % nominelt er 4,07 % effektivt. Omvendt er 1 % pr. måned 12,68 % om året. Sammenlign altid lån på den effektive rente." },
       ],
     },
     "opsparing": {
