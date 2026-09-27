@@ -14,7 +14,57 @@ import {
   formatPromille,
   formatTimer,
 } from "@/lib/promille-eksempler";
-import { graenseForLocale } from "@/lib/promille";
+import { graenseForLocale, PROMILLEGRANSE_UDLAND } from "@/lib/promille";
+
+/**
+ * Rækkeorden følger grænsen: de strengste først, fordi det er dem, danske
+ * læsere spørger om ("promillegrænse sverige", "promillegrænse norge",
+ * "promillegrænse tyskland" — dansk autocomplete, 27/9). Tallene kommer fra
+ * PROMILLEGRANSE_UDLAND, så tabellen ikke kan komme i strid med beregnerens
+ * egen grænse; det er låst i page.test.tsx.
+ */
+const PROMILLEGRAENSER_UDLAND: { land: string; nokkel: string; saerregel: string }[] = [
+  {
+    land: "Sverige",
+    nokkel: "sverige",
+    saerregel: "Ingen særregel — grænsen er den samme for alle bilister",
+  },
+  { land: "Norge", nokkel: "norge", saerregel: "Ingen særregel" },
+  { land: "Polen", nokkel: "polen", saerregel: "Ingen særregel" },
+  {
+    land: "Tyskland",
+    nokkel: "tyskland",
+    saerregel: "0,0 ‰ under 21 år og de første 2 år med kørekort, og 0,3 ‰ hvis du samtidig begår en anden trafikforseelse",
+  },
+  {
+    land: "Frankrig",
+    nokkel: "frankrig",
+    saerregel: "0,2 ‰ de første 3 år med kørekort og for buschauffører",
+  },
+  {
+    land: "Spanien",
+    nokkel: "spanien",
+    saerregel: "0,3 ‰ de første 2 år og for tungtransport, 0,0 ‰ under 18 år",
+  },
+  {
+    land: "Italien",
+    nokkel: "italien",
+    saerregel: "0,0 ‰ de første 3 år med kørekort og for erhvervskørsel",
+  },
+  {
+    land: "Grækenland",
+    nokkel: "graekenland",
+    saerregel: "0,2 ‰ de første 2 år, for motorcykel og for erhvervskørsel",
+  },
+  { land: "Holland", nokkel: "holland", saerregel: "0,2 ‰ de første 5 år med kørekort" },
+  { land: "Østrig", nokkel: "oestrig", saerregel: "0,1 ‰ de første 2 år med kørekort" },
+  { land: "Danmark", nokkel: "danmark", saerregel: "Ingen særregel" },
+  {
+    land: "Storbritannien",
+    nokkel: "storbritannien",
+    saerregel: "0,5 ‰ i Skotland — ellers er det 0,8 ‰",
+  },
+];
 
 export async function generateMetadata() {
   return generatePageMetadata("promille");
@@ -202,6 +252,42 @@ export default async function PromillePage() {
               alkohol forbrændes langsomt — du kan sagtens være over grænsen morgenen efter en
               festaften. Beregneren er kun et <strong>estimat</strong>: mad, stofskifte, medicin og
               helbred påvirker den faktiske promille. Kør aldrig i tvivl.
+            </p>
+            <h2>Promillegrænsen i udlandet</h2>
+            <p>
+              Har du tænkt dig at køre bil i udlandet, så er grænsen <strong>ikke</strong> 0,5 ‰
+              overalt. I Sverige og Norge er den 0,2 ‰ — altså den halve af den danske — mens
+              Storbritannien ligger højere med 0,8 ‰. Resten af Europa har stort set den
+              danske grænse på 0,5 ‰, men med strengere regler for nye og professionelle
+              bilister. Tabellen er en oversigt fra WHO's landeoversigt over promillegrænser
+              (hentet 27. september 2026) — den er vejledende, fordi reglerne ændrer sig, så
+              tjek altid det enkelte lands love før du kører.
+            </p>
+            <div className="overflow-x-auto">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Land</th>
+                    <th>Grænse</th>
+                    <th>Strengere regel for nye og professionelle bilister</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {PROMILLEGRAENSER_UDLAND.map((land) => (
+                    <tr key={land.nokkel}>
+                      <td>{land.land}</td>
+                      <td>{`${String(PROMILLEGRANSE_UDLAND[land.nokkel]).replace(".", ",")} ‰`}</td>
+                      <td>{land.saerregel}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <p>
+              Det vigtigste at tage med er det: <strong>2 øl på 80 kg er 0,44 ‰</strong> — under
+              den danske grænse, men over den svenske og norske på 0,2 ‰. Samme krop, samme
+              aften, to forskellige domme. Beregneren ovenfor regner promillen, og tabellen
+              fortæller dig, hvad du skal sammenligne den med.
             </p>
             <h2>To forskellige tal: under grænsen og helt ædru</h2>
             <p>

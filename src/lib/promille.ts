@@ -33,6 +33,36 @@ export const PROMILLEGRANSE: Record<"da" | "se" | "no", number> = {
 
 export const PROMILLEGRANSE_DA = PROMILLEGRANSE.da;
 
+/**
+ * Legal driving limits per country, in ‰, for the /promille page's
+ * "grænsen i udlandet" table. Numbers only — the country names and the
+ * special rules are Danish copy on the page itself, so the library stays
+ * locale-free and cannot leak to beraknare.se.
+ *
+ * Denmark, Sweden and Norway are locked against PROMILLEGRANSE by
+ * src/app/promille/page.test.tsx, so the printed table can never contradict
+ * the limit the calculator itself compares against.
+ *
+ * Source: WHO's country overview of legal BAC limits, retrieved 2026-09-27
+ * (en.wikipedia.org/wiki/Drunk_driving_law_by_country, which cites WHO 2018).
+ * These are ordinary-driver limits; the page's table states the separate
+ * lower limit for new and professional drivers, which is not in this map.
+ */
+export const PROMILLEGRANSE_UDLAND: Record<string, number> = {
+  danmark: 0.5,
+  sverige: 0.2,
+  norge: 0.2,
+  polen: 0.2,
+  tyskland: 0.5,
+  frankrig: 0.5,
+  spanien: 0.5,
+  italien: 0.5,
+  graekenland: 0.5,
+  holland: 0.5,
+  oestrig: 0.5,
+  storbritannien: 0.8,
+};
+
 export function graenseForLocale(locale: string): number {
   return PROMILLEGRANSE[locale as keyof typeof PROMILLEGRANSE] ?? PROMILLEGRANSE.da;
 }

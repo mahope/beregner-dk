@@ -2,6 +2,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import { getDomainConfigByLocale } from "@/lib/domain-config";
 import { getCurrentDomainConfig, getLocale } from "@/lib/get-locale";
+import { PROMILLEGRANSE } from "@/lib/promille";
 import PromillePage from "./page";
 
 vi.mock("@/components/PromilleBeregner", () => ({
@@ -65,5 +66,75 @@ describe("promille page", () => {
     expect(html).toContain("1,45 ‰");
     // Grænsen skal være sat rigtigt ind mellem to og tre øl for en 80 kg mand.
     expect(html).toContain("mellem to og tre øl");
+  });
+
+  test("svarer på promillegrænsen i de lande, dansk autocomplete spørger om", async () => {
+    const html = renderToStaticMarkup(await PromillePage());
+
+    // De ti variationer under "promillegrænse" i dansk autocomplete (27/9):
+    // … danmark, sverige, tyskland, italien, norge, frankrig, spanien, cykel
+    // og grækenland. Siden havde kun Danmark og Sverige.
+    expect(html).toContain("Promillegrænsen i udlandet");
+    for (const land of [
+      "Tyskland",
+      "Norge",
+      "Italien",
+      "Frankrig",
+      "Spanien",
+      "Grækenland",
+      "Sverige",
+      "Polen",
+      "Holland",
+      "Østrig",
+      "Storbritannien",
+    ]) {
+      expect(html).toContain(`<td>${land}</td>`);
+    }
+    // Domene 2 af autocomplete-klyngen er ikke et land: "promillegrænse cykel"
+    // gælder færdselsloven, ikke et andet lands lov, og cykler har ingen
+    // promillegrænse i Danmark. Siden skal ikke finde på en.
+    expect(html).toContain("0,8 ‰");
+  });
+
+  test("tabellens tal er de samme som dem beregneren selv sammenligner mod", async () => {
+    const html = renderToStaticMarkup(await PromillePage());
+
+    // Samme fejlklasse som C84's metaDescription-drift: en tabel med egne
+    // tal kan glide fra modulet, der beskriver dem. Danmark, Sverige og
+    // Norge låser derfor på PROMILLEGRANSE, så siden aldrig kan trykke en
+    // anden grænse end den beregneren bruger.
+    for (const [land, nokkel] of [
+      ["Danmark", "da"],
+      ["Sverige", "se"],
+      ["Norge", "no"],
+    ] as const) {
+      const forventet = `${String(PROMILLEGRANSE[nokkel]).replace(".", ",")} ‰`;
+      const raekke = new RegExp(`<tr><td>${land}</td><td>${forventet}</td>`);
+      expect(html).toMatch(raekke);
+    }
+    // Og de to tal, konklusionen bygger på, skal komme fra tabellen ovenfor —
+    // ellers står påstanden alene.
+    expect(html).toContain("2 øl på 80 kg er 0,44 ‰");
+    expect(html).toContain("under den danske grænse, men over den svenske og norske på 0,2 ‰");
+  });
+
+  test("tabellen er vejledende, fordi reglerne ændrer sig", async () => {
+    const html = renderToStaticMarkup(await PromillePage());
+
+    // Raterne er fra WHO's landeoversigt, og en forkert grænse i en tabel er
+    // en fejl folk kører bil efter. Siden skal sige det, den er.
+    expect(html).toContain("vejledende");
+    expect(html).toContain("WHO");
+  });
+
+  test("de danske og svenske grænser er uændrede af udlandstabellen", async () => {
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("se"));
+    const html = renderToStaticMarkup(await PromillePage());
+
+    // Udlandstabellen er dansk, fordi målingen kun var dansk. Den må derfor
+    // ikke lække til beraknare.se, og den svenske side skal stadig svare med
+    // Sveriges egen grænse.
+    expect(html).not.toContain("Promillegrænsen i udlandet");
+    expect(html).toContain("gränsen för rattfylleri vid <strong>0,2 ‰</strong>");
   });
 });

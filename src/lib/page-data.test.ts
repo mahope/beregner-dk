@@ -1,7 +1,7 @@
 import { describe, test, expect } from "vitest";
 import { getPageData, getAvailableSlugs } from "./page-data";
 import { getCalculatorHrefs, isCalculatorAvailable } from "./calculator-list";
-import { beregnPromille } from "./promille";
+import { beregnPromille, PROMILLEGRANSE_UDLAND } from "./promille";
 import { sammenlignEnhedspris } from "./enhedspris";
 
 describe("getPageData", () => {
@@ -830,6 +830,49 @@ describe("metaTitle-længde", () => {
     // grund — 29 svenske titler var over grænsen.
     for (const locale of LOCALE_LIST) {
       expect(getAvailableSlugs(locale).length, locale).toBeGreaterThan(20);
+    }
+  });
+});
+
+describe("/promille — svar på udlandsklyngen", () => {
+  const da = getPageData("promille", "da")!;
+
+  test("de tre nye spørgsmål er i den danske FAQ, som også går i JSON-LD", () => {
+    // FAQ'en er mocket væk i src/app/promille/page.test.tsx (C85's fælde),
+    // så den skal testes her, hvor den ligger som data.
+    for (const spoergsmaal of [
+      "Hvad er promillegrænsen i Tyskland?",
+      "Hvad er promillegrænsen i Norge og Sverige?",
+      "Må jeg køre med 0,4 promille i udlandet?",
+    ]) {
+      expect(da.faqItems.map((f) => f.question), spoergsmaal).toContain(spoergsmaal);
+    }
+  });
+
+  test("svarene bruger de samme tal som PROMILLEGRANSE_UDLAND", () => {
+    // Samme fejlklasse som C84's metaDescription-drift: et svar i FAQ'en der
+    // nævner en anden grænse end tabellen og modulet, er en løgn i de
+    // strukturerede data — præcis der Google's snippet læser.
+    const tyskland = da.faqItems.find((f) => /Tyskland\?$/.test(f.question))!;
+    expect(tyskland.answer).toContain(
+      `${String(PROMILLEGRANSE_UDLAND.tyskland).replace(".", ",")} promille`
+    );
+    const norden = da.faqItems.find((f) => /i Norge og Sverige\?$/.test(f.question))!;
+    for (const nokkel of ["norge", "sverige"] as const) {
+      expect(norden.answer).toContain(
+        `${String(PROMILLEGRANSE_UDLAND[nokkel]).replace(".", ",")} promille`
+      );
+    }
+  });
+
+  test("den svenske og norske /promille er uændrede af den danske måling", () => {
+    // Målingen var dansk (dansk autocomplete), så de to andre sprog skal være
+    // urørte — ellers lækker dansk til beraknare.se, og det er hele pointen
+    // med kun at røre den ene gren.
+    for (const locale of ["se", "no"] as const) {
+      const andet = getPageData("promille", locale);
+      if (!andet) continue;
+      expect(andet.faqItems.map((f) => f.question).join(" ")).not.toContain("udlandet");
     }
   });
 });
