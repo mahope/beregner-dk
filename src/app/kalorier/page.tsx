@@ -75,13 +75,20 @@ export default async function KalorierPage() {
         </p>
         <ul>
           <li>
-            <strong>500 kcal underskud/dag</strong> = ca. 0.5 kg tab/uge
+            <strong>500 kcal underskud/dag</strong> = ca. 0,5 kg tab/uge
           </li>
           <li>
             <strong>1000 kcal underskud/dag</strong> = ca. 1 kg tab/uge (ikke
             anbefalet længe)
           </li>
         </ul>
+        <p>
+          Beregneren <strong>regner aldrig et underskud, der fører dig under dit
+          basalstofskifte</strong> — kroppen skal bruge BMR bare for at leve. Er
+          du lille og inaktiv, kan 500 kcal underskud ikke lade sig gøre, og
+          værktøjet skriver da det underskud, der faktisk er muligt, i stedet for
+          500.
+        </p>
 
         <h2>Makronæringsstoffer</h2>
 
@@ -173,6 +180,12 @@ export default async function KalorierPage() {
             rekommenderat under längre tid)
           </li>
         </ul>
+        <p>
+          Kalkylatorn räknar <strong>aldrig ett underskott som tar dig under din
+          basalämnesomsättning</strong> — kroppen behöver BMR bara för att leva. Är
+          du liten och inaktiv går 500 kcal underskott inte att genomföra, och
+          verktyget skriver då det underskott som faktiskt går, i stället för 500.
+        </p>
 
         <h2>Makronäringsämnen</h2>
 

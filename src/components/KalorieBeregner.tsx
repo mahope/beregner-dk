@@ -51,11 +51,16 @@ const labels = {
     hvadBetyder: "Hvad betyder tallene?",
     infoBmr: "Kalorier din krop brænder i hvile (bare for at leve)",
     infoTdee: "Totalt dagligt forbrug inkl. aktivitet",
-    info500: "Giver ca. 0.5 kg vægttab pr. uge",
+    info500: "Giver ca. 0,5 kg vægttab pr. uge",
     info300: "Giver overskud til muskelopbygning",
-    maalTabDesc: "For at tabe ca. 0.5 kg pr. uge",
+    maalTabDesc: "For at tabe ca. 0,5 kg pr. uge",
     maalOpbygDesc: "For at opbygge muskelmasse",
     maalVedligeholdDesc: "For at vedligeholde din vægt",
+    maalPaaBmr: "Ned til dit basalstofskifte — du kan ikke spise mindre end kroppen bruger i hvile",
+    deltBaseretPa: "Baseret på",
+    deltVedligehold: "Vedligehold er",
+    saaledesUnderskud: "så underskuddet er",
+    saaledesOverskud: "så overskuddet er",
     calculatorName: "Kalorieberegner",
     aktivitet: {
       stillesiddende: { label: "Stillesiddende", beskrivelse: "Kontorarbejde, ingen motion" },
@@ -98,6 +103,11 @@ const labels = {
     maalTabDesc: "För att gå ner ca 0,5 kg per vecka",
     maalOpbygDesc: "För att bygga muskelmassa",
     maalVedligeholdDesc: "För att bibehålla din vikt",
+    maalPaaBmr: "Ned till din basalämnesomsättning — du kan inte äta mindre än kroppen förbrukar i vila",
+    deltBaseretPa: "Baserat på",
+    deltVedligehold: "Underhåll är",
+    saaledesUnderskud: "så underskottet är",
+    saaledesOverskud: "så överskottet är",
     calculatorName: "Kaloriräknare",
     aktivitet: {
       stillesiddende: { label: "Stillasittande", beskrivelse: "Kontorsarbete, ingen motion" },
@@ -113,6 +123,12 @@ export default function KalorieBeregner() {
   const { locale } = useLocale();
   const l = labels[locale as keyof typeof labels] || labels.da;
   const dec = (value: number) => formatNumber(value, locale, { maximumFractionDigits: 1 });
+  // Alle heltal på skærmen og i den delte tekst går gennem num, så et tal med
+  // fire cifre får tusindtalsseparator. Fedt- og kulhydratmængden kan nå over
+  // 999 g ved de største inputs, så det er ikke et spørgsmål om skønhed.
+  const num = (value: number) => formatNumber(value, locale);
+  const firstLower = (s: string) =>
+    s.charAt(0).toLocaleLowerCase(locale === "se" ? "sv-SE" : "da-DK") + s.slice(1);
 
   const [alder, setAlder] = useState<number>(30);
   const [koen, setKoen] = useState<Koen>("mand");
@@ -181,30 +197,36 @@ export default function KalorieBeregner() {
 
     const tdee = bmr * AKTIVITETS_FAKTORER[aktivitet];
 
-    let anbefaletKalorier: number;
-    let maalBeskrivelse: string;
-
-    switch (maal) {
-      case "tab":
-        anbefaletKalorier = tdee - 500;
-        maalBeskrivelse = l.maalTabDesc;
-        break;
-      case "opbyg":
-        anbefaletKalorier = tdee + 300;
-        maalBeskrivelse = l.maalOpbygDesc;
-        break;
-      default:
-        anbefaletKalorier = tdee;
-        maalBeskrivelse = l.maalVedligeholdDesc;
-    }
-
-    // Makronæringsstoffer — protein følger dit mål (0,8-1,2 / 1,2-1,6 / 1,6-2,2 g/kg)
-    const makro = beregnMakroer({ vaegtKg: vaegt, kalorier: anbefaletKalorier, maal });
-
-    // Alle tre mål til sammenligning
-    const tabKcal = Math.round(tdee - 500);
+    // Alle tre mål til sammenligning. Et underskud må aldrig føre
+    // anbefalingen under basalstofskiftet — kroppen skal bruge BMR bare for at
+    // leve. Uden dette gulv gav 100 år, 30 kg, 100 cm, kvinde, stillesiddende
+    // og målet "tab" **-183 kcal** i overskriften, -5 g fedt og en delt tekst der
+    // lovede 0,5 kg pr. uge. Gulvet er BMR, altså et tal værktøjet selv regner,
+    // ikke en ny konstant.
+    const bmrKcal = Math.round(bmr);
+    const tabKcal = Math.max(bmrKcal, Math.round(tdee - 500));
     const vedligKcal = Math.round(tdee);
     const opbygKcal = Math.round(tdee + 300);
+
+    // Hvad der faktisk er anvendt, så teksten ikke lover et underskud der
+    // aldrig blev brugt
+    const underskud = Math.max(0, Math.round(tdee - tabKcal));
+    const overskud = Math.max(0, opbygKcal - vedligKcal);
+    const paaBmr = maal === "tab" && bmrKcal >= Math.round(tdee - 500);
+
+    const anbefalet =
+      maal === "tab" ? tabKcal : maal === "opbyg" ? opbygKcal : vedligKcal;
+    const maalBeskrivelse =
+      maal === "tab"
+        ? paaBmr
+          ? l.maalPaaBmr
+          : l.maalTabDesc
+        : maal === "opbyg"
+          ? l.maalOpbygDesc
+          : l.maalVedligeholdDesc;
+
+    // Makronæringsstoffer — protein følger dit mål (0,8-1,2 / 1,2-1,6 / 1,6-2,2 g/kg)
+    const makro = beregnMakroer({ vaegtKg: vaegt, kalorier: anbefalet, maal });
 
     // Makro-procenter
     const proteinKcal = makro.protein * 4;
@@ -216,10 +238,13 @@ export default function KalorieBeregner() {
     const kulhPct = totalKcal > 0 ? (kulhKcal / totalKcal) * 100 : 0;
 
     return {
-      bmr: Math.round(bmr),
-      tdee: Math.round(tdee),
-      anbefalet: Math.round(anbefaletKalorier),
+      bmr: bmrKcal,
+      tdee: vedligKcal,
+      anbefalet,
       maalBeskrivelse,
+      paaBmr,
+      underskud,
+      overskud,
       protein: Math.round(makro.protein),
       proteinGPerKg: makro.proteinGPerKg,
       proteinGPerKgMin: makro.proteinGPerKgMin,
@@ -230,6 +255,27 @@ export default function KalorieBeregner() {
       proteinPct, fedtPct, kulhPct,
     };
   }, [alder, koen, vaegt, hoejde, aktivitet, maal, l]);
+
+  // Ét sted bygger den delte tekst, brugt af både Kopier og Del, så de to ikke
+  // kan komme til at sige hver sit (samme lærepådom som /dato og /tidszone).
+  // Den skal være selvstændig: et kaloriebehov afhænger af køn, alder, vægt,
+  // højde, aktivitetsniveau og mål, så tallet uden dem kan ikke bruges.
+  const deltTekst = () => {
+    const dele = [
+      `${num(resultat.anbefalet)} kcal/dag (${resultat.maalBeskrivelse.toLowerCase()}).`,
+      `${l.deltBaseretPa} ${num(alder)} ${l.alderUnit}, ${firstLower(l[koen])}, ${num(vaegt)} kg, ${num(hoejde)} cm, ${firstLower(l.aktivitet[aktivitet].label)}.`,
+    ];
+    if (maal === "tab") {
+      dele.push(
+        `${l.deltVedligehold} ${num(resultat.vedligKcal)} kcal/dag, ${l.saaledesUnderskud} ${num(resultat.underskud)} kcal/dag.`
+      );
+    } else if (maal === "opbyg") {
+      dele.push(
+        `${l.deltVedligehold} ${num(resultat.vedligKcal)} kcal/dag, ${l.saaledesOverskud} ${num(resultat.overskud)} kcal/dag.`
+      );
+    }
+    return dele.join(" ");
+  };
 
   return (
     <div className="space-y-8">
@@ -322,7 +368,7 @@ export default function KalorieBeregner() {
         <div className="text-center mb-6">
           <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">{l.dagligtKaloriebehov}</p>
           <p className="text-5xl font-bold text-green-600 dark:text-green-400">
-            {resultat.anbefalet} kcal
+            {num(resultat.anbefalet)} kcal
           </p>
           <p className="text-gray-500 dark:text-gray-400 mt-2">{resultat.maalBeskrivelse}</p>
         </div>
@@ -331,29 +377,29 @@ export default function KalorieBeregner() {
         <div className="grid grid-cols-3 gap-3 mb-6">
           <div className={`p-3 rounded-lg text-center ${maal === "tab" ? "bg-green-100 dark:bg-green-900/30 ring-2 ring-green-500" : "bg-gray-50 dark:bg-gray-700"}`}>
             <p className="text-xs text-gray-500 dark:text-gray-400">{l.vaegttab}</p>
-            <p className="font-bold text-lg dark:text-white">{resultat.tabKcal}</p>
-            <p className="text-xs text-gray-400">-500 kcal</p>
+            <p className="font-bold text-lg dark:text-white">{num(resultat.tabKcal)}</p>
+            <p className="text-xs text-gray-400">-{num(resultat.underskud)} kcal</p>
           </div>
           <div className={`p-3 rounded-lg text-center ${maal === "vedligehold" ? "bg-blue-100 dark:bg-blue-900/30 ring-2 ring-blue-500" : "bg-gray-50 dark:bg-gray-700"}`}>
             <p className="text-xs text-gray-500 dark:text-gray-400">{l.vedligehold}</p>
-            <p className="font-bold text-lg dark:text-white">{resultat.vedligKcal}</p>
+            <p className="font-bold text-lg dark:text-white">{num(resultat.vedligKcal)}</p>
             <p className="text-xs text-gray-400">TDEE</p>
           </div>
           <div className={`p-3 rounded-lg text-center ${maal === "opbyg" ? "bg-orange-100 dark:bg-orange-900/30 ring-2 ring-orange-500" : "bg-gray-50 dark:bg-gray-700"}`}>
             <p className="text-xs text-gray-500 dark:text-gray-400">{l.muskelopbyg}</p>
-            <p className="font-bold text-lg dark:text-white">{resultat.opbygKcal}</p>
-            <p className="text-xs text-gray-400">+300 kcal</p>
+            <p className="font-bold text-lg dark:text-white">{num(resultat.opbygKcal)}</p>
+            <p className="text-xs text-gray-400">+{num(resultat.overskud)} kcal</p>
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-4 mb-6">
           <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg text-center">
             <p className="text-sm text-gray-500 dark:text-gray-400">{l.bmrLabel}</p>
-            <p className="font-bold text-lg dark:text-white">{resultat.bmr} kcal</p>
+            <p className="font-bold text-lg dark:text-white">{num(resultat.bmr)} kcal</p>
           </div>
           <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg text-center">
             <p className="text-sm text-gray-500 dark:text-gray-400">{l.tdeeLabel}</p>
-            <p className="font-bold text-lg dark:text-white">{resultat.tdee} kcal</p>
+            <p className="font-bold text-lg dark:text-white">{num(resultat.tdee)} kcal</p>
           </div>
         </div>
 
@@ -371,21 +417,21 @@ export default function KalorieBeregner() {
           <div className="grid grid-cols-3 gap-4 text-center">
             <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
               <p className="text-sm text-red-600 dark:text-red-400">{l.protein}</p>
-              <p className="font-bold text-xl dark:text-white">{resultat.protein}g</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">{resultat.protein * 4} kcal ({resultat.proteinPct.toFixed(0)}%)</p>
+              <p className="font-bold text-xl dark:text-white">{num(resultat.protein)}g</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">{num(resultat.protein * 4)} kcal ({resultat.proteinPct.toFixed(0)}%)</p>
               <p className="text-xs text-gray-500 dark:text-gray-400">
                 {dec(resultat.proteinGPerKg)} {l.proteinPrKg} ({l.proteinInterval} {dec(resultat.proteinGPerKgMin)}-{dec(resultat.proteinGPerKgMax)})
               </p>
             </div>
             <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
               <p className="text-sm text-yellow-600 dark:text-yellow-400">{l.fedt}</p>
-              <p className="font-bold text-xl dark:text-white">{resultat.fedt}g</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">{resultat.fedt * 9} kcal ({resultat.fedtPct.toFixed(0)}%)</p>
+              <p className="font-bold text-xl dark:text-white">{num(resultat.fedt)}g</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">{num(resultat.fedt * 9)} kcal ({resultat.fedtPct.toFixed(0)}%)</p>
             </div>
             <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
               <p className="text-sm text-blue-600 dark:text-blue-400">{l.kulhydrater}</p>
-              <p className="font-bold text-xl dark:text-white">{resultat.kulhydrater}g</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">{resultat.kulhydrater * 4} kcal ({resultat.kulhPct.toFixed(0)}%)</p>
+              <p className="font-bold text-xl dark:text-white">{num(resultat.kulhydrater)}g</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">{num(resultat.kulhydrater * 4)} kcal ({resultat.kulhPct.toFixed(0)}%)</p>
             </div>
           </div>
         </div>
@@ -393,11 +439,11 @@ export default function KalorieBeregner() {
 
       {/* Del beregning */}
       <div className="flex justify-center">
-        <CopyResultButton text={`${resultat.anbefalet} kcal/dag (${resultat.maalBeskrivelse.toLowerCase()})`} />
+        <CopyResultButton text={deltTekst()} />
         <ShareCalculation
           getShareableLink={getShareableLink}
           calculatorName={l.calculatorName}
-          resultSummary={`${resultat.anbefalet} kcal/dag (${resultat.maalBeskrivelse.toLowerCase()})`}
+          resultSummary={deltTekst()}
         />
       </div>
 
