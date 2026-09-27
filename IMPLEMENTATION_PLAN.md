@@ -7817,7 +7817,7 @@ landmark=lån, piggybank=opsparing osv.).
 
 ## VERIFICÉR DEPLOY-log
 
-### ⏳ **VERIFICÉR DEPLOY: C89 — `/kalorier` dansk: tabellen "hvor mange kalorier pr dag?" (12.477 visninger, CTR 1,0 %, pos. 8,2).** Kode + plan i ét commit på `ceo/kalorier-pr-dag`. Første kandidatvindue **2026-09-27 17:30**. Verificér ved **indhold**: siden skal have `<h2>Hvor mange kalorier pr dag?</h2>`, fire `<td>`-rækker (60/70/80/90 kg), `<td>2.759 kcal</td>`, `href="/motion-kalorier"`, og FAQ'en skal have "Hvor mange kalorier skal jeg have?".
+### ⏳ **VERIFICÉR DEPLOY: C89 — `/kalorier` dansk: tabellen "hvor mange kalorier pr dag?" (12.477 visninger, CTR 1,0 %, pos. 8,2).** Kode `af84858`, merge `26b3421` 2026-09-27 14:19 CEST på branch `ceo/kalorier-pr-dag`. Første kandidatvindue **2026-09-27 17:30**. Verificér ved **indhold**: siden skal have `<h2>Hvor mange kalorier pr dag?</h2>`, fire `<td>`-rækker (60/70/80/90 kg), `<td>2.759 kcal</td>`, `href="/motion-kalorier"`, og FAQ'en skal have "Hvor mange kalorier skal jeg have?".
 
 ### ⏳ **VERIFICÉR DEPLOY: C83 — `/moms` dansk svarer på søgeklyngen (23.225 visninger, CTR 0,2 %, pos. 6,9).** Kode `ae51764`, merge `5659e28` 2026-09-27 13:03 CEST på branch `ceo/moms-da-svar`. Første kandidatvindue **2026-09-27 17:30**.
   **HTTP 200 beviser intet:** hele ændringen er ny brødtekst og fire nye
