@@ -1,12 +1,37 @@
 import { generatePageMetadata } from "@/lib/page-helpers";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
+import { forkortBrok } from "@/lib/brok";
+import { formatNumber } from "@/lib/format";
 import BrokBeregner from "@/components/BrokBeregner";
 import FAQ from "@/components/FAQ";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import RelatedCalculators from "@/components/RelatedCalculators";
 import Sidebar from "@/components/Sidebar";
+
+/**
+ * Worked examples for the prose block. The numbers are always derived from
+ * `forkortBrok`, so a printed value can never contradict the calculator above
+ * it (C84's failure class).
+ */
+const OMREGNINGEKSEMPLER: [number, number][] = [
+  [1, 2],
+  [1, 4],
+  [3, 4],
+  [1, 8],
+  [2, 3],
+  [5, 6],
+  [7, 10],
+];
+
+function decimaltal(taeller: number, naevner: number): string {
+  return formatNumber(forkortBrok(taeller, naevner)!.decimal, "da", { maximumFractionDigits: 3 });
+}
+
+function procent(taeller: number, naevner: number): string {
+  return formatNumber(forkortBrok(taeller, naevner)!.procent, "da", { maximumFractionDigits: 1 });
+}
 
 export async function generateMetadata() {
   return generatePageMetadata("brok");
@@ -54,10 +79,82 @@ export default async function BrokPage() {
             </p>
             <h2>Brøk, decimaltal og procent</h2>
             <p>
-              Beregneren viser samtidig brøken som <strong>decimaltal</strong> (3/4 = 0,75) og{" "}
+              Beregneren viser samtidig brøken som <strong>decimaltal</strong>               (3/4 = 0,75) og{" "}
               <strong>procent</strong> (75 %). Det er praktisk i skolen, i køkkenet og alle andre
               steder, hvor du skal skifte mellem de tre måder at skrive et forhold på. Indtast hele
               tal i tæller og nævner.
+            </p>
+            <h2>Brøkregning: de fire regneregler</h2>
+            <p>
+              Beregneren forkorter én brøk. Når du skal <strong>regne med</strong> brøker — lægge dem
+              sammen, trække dem fra, gange og dele dem — er der fire regler, og alle fire er
+              regnestykker du kan læse fra venstre til højre:
+            </p>
+            <ul>
+              <li>
+                <strong>Plus:</strong> nævnerne skal være ens. 1/2 + 1/3 = 3/6 + 2/6 ={" "}
+                <strong>5/6</strong> = {decimaltal(5, 6)} = {procent(5, 6)} %.
+              </li>
+              <li>
+                <strong>Minus:</strong> nævnerne skal være ens, og så forkorter du. 3/4 − 1/4 = 2/4 ={" "}
+                <strong>1/2</strong> = {decimaltal(1, 2)} = {procent(1, 2)} %.
+              </li>
+              <li>
+                <strong>Gange:</strong> tæller ganges med tæller, nævner med nævner, og så forkorter
+                du. 1/2 × 2/3 = (1 × 2)/(2 × 3) = 2/6 = <strong>1/3</strong> = {decimaltal(1, 3)} ={" "}
+                {procent(1, 3)} %.
+              </li>
+              <li>
+                <strong>Dele:</strong> byt om, og vend den nævner, du flytter op. 1/2 ÷ 2/3 = 1/2 × 3/2
+                = 3/4 = <strong>{decimaltal(3, 4)}</strong> = {procent(3, 4)} %.
+              </li>
+            </ul>
+            <p>
+              Den fælde, der driller flest, er <strong>plus og minus</strong>: de er de eneste to af de
+              fire, hvor nævnerne skal være ens inden regningen. Kan du ikke få dem til at blive ens,
+              kan du ikke regne — og det er derfor de to regler tager længst tid.
+            </p>
+            <h3>Sådan omregner du en brøk til procent og decimaltal</h3>
+            <p>
+              Formlen er én linje: <strong>procent = brøk × 100</strong>. Decimaltallet får du ved at
+              dividere tæller med nævner. Samme brøk kan altså skrives på tre måder, og alle tre er
+              i tabellen:
+            </p>
+            <div className="overflow-x-auto">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Brøk</th>
+                    <th>Decimaltal</th>
+                    <th>Procent</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {OMREGNINGEKSEMPLER.map(([t, n]) => (
+                    <tr key={`${t}/${n}`}>
+                      <td>
+                        {t}/{n}
+                      </td>
+                      <td>{decimaltal(t, n)}</td>
+                      <td>{procent(t, n)} %</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <h3>Sådan regner du en brøkdel af et tal</h3>
+            <p>
+              Det er det, de fleste egentlig bruger brøker til. <strong>3/4 af 200 kr.</strong> betyder
+              at tage tælleren gange med beløbet og dividere med nævneren: (3 × 200) ÷ 4 ={" "}
+              <strong>150 kr.</strong> Tilsvarende er 1/4 af 1.000 kr. = 1.000 ÷ 4 = 250 kr., og 2/5
+              af 250 kr. = (2 × 250) ÷ 5 = 100 kr. Skriv brøkdelen som procent, og du får det samme
+              svar: 3/4 er 75 %, og 75 % af 200 er 150.
+            </p>
+            <p>
+              <a href="/procent" className="underline hover:no-underline">
+                Procentberegneren
+              </a>{" "}
+              tager den anden vej: den regner procent af et beløb, som er det samme tal.
             </p>
           </div>
         )}

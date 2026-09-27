@@ -1,3 +1,5 @@
+STATUS: KØ — **C96 er landet: `/brok` — 4.881 visninger, CTR 0,6 % på position 5,3, altså lav CTR på en god position — havde nul svar på den søgning, dansk autocomplete har som nr. 1 under "brøk". Siden forklarede at *forkorte* en brøk, mens folk spørger efter at *regne med* brøker.** Valget var C95's åbne kandidat #2 og det første uforbrugte snit i C82-C95's klasse; køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den, 119 er kilde-blokeret), og alle åbne deploy-noter har første vindue **17:30** — det er 16:05, så intet kunne verificeres i starten af iterationen. **Målt først:** DA-autocomplete (`hl=da`, `gl=dk`, 16:05) under **"brøk"** giver 10 variationer hvoraf **nr. 1 er "brøk regneregler"** — resten er "brøk til procent"/"brøk til decimaltal" (4 af 10); under **"brøk til procent"** er fire af ti "formel"/"regner"/"omskriv"; under **"hvad er en brøk"** står **"hvad er en brøkdel af et tal"** som nr. 3 og resten er ægte/uægte/uforkortelig brøk. På den **live** side (110 KB HTML) var der **0** fund på **"regneregel"**, **"formel"**, **"brøkdel af"**, **"÷"** og **"×"**, og FAQ'ens 4 spørgsmål rørte ingen af delene. Titlen og beskrivelsen var *allerede* svar-først ("Brøkberegner: forkort 6/8 til 3/4 = 0,75 = 75 %") — så det er igen **ikke titlen, men kroppen under den**, samme konklusion som C82. **Rettelsen (kun `da`):** et nyt `<h2>` "Brøkregning: de fire regneregler" med alle fire regler som regnestykker (1/2 + 1/3 = 3/6 + 2/6 = 5/6, 3/4 − 1/4 = 2/4 = 1/2, 1/2 × 2/3 = (1 × 2)/(2 × 3) = 2/6 = 1/3, 1/2 ÷ 2/3 = 1/2 × 3/2 = 3/4) og den fælde, der driller mest — plus/minus er de eneste to af de fire, hvor nævnerne skal være ens *inden* regningen. **Tre nye `<h3>`:** formlen **procent = brøk × 100** med tabellen 1/2, 1/4, 3/4, 1/8, 2/3, 5/6, 7/10; **"Sådan regner du en brøkdel af et tal"** med (3 × 200) ÷ 4 = **150 kr.**, 1/4 af 1.000 = 250 kr., 2/5 af 250 = 100 kr. og krydschecket at 3/4 = 75 % og 75 % af 200 = 150, plus et link til `/procent`; og dermed **tre nye FAQ-par i `page-data.ts`** (som også går i JSON-LD'en): "Hvad er regnereglerne for brøker?", "Hvad er en brøkdel af et tal?" og "Hvad er forskellen på en ægte og en uægte brøk?". **Hvorfor tallene ikke er skrevet i hånden:** alle otte tal i brødteksten og alle 14 i tabellen udledes af `forkortBrok` gennem to hjælpere i `page.tsx` — **samme modul som værktøjet bruger** — så C84's fejlklasse (indekseret tekst der modsiger sit eget indhold) kan ikke ske igen på siden, og en test krydschecker `procent ≈ decimal × 100` pr. række. **Harness:** `brok/page.test.tsx` **2 → 6** (regneregler, tabel, brøkdel, SE-lås med 0 danske markører på beraknare.se — C82's lektion), **verificeret modsvejs: 3 af 4 falder** med kun `page.tsx` på master; den fjerde er et lås, der skal være grønt før og efter. `page-data.test.ts` **+4**, **verificeret modsvejs: 3 af 4 falder** med den gamle `page-data.ts`. **Én målefejl undgået ved at læse koden først:** min første hensigt var at tilføje et "regn brøkdel af et tal"-felt i `BrokBeregner` — men værktøjet har kun to felter (tæller og nævner) og det er en funktionsudvidelse, ikke en tekst rettelse; i stedet får spørgsmålet et regnestykke og et link til `/procent`, som er den side der faktisk kan regne det. **Gate grøn:** lint (556 filer), **1794 tests / 151 filer** (fra 1786 / 151), build (**141 sider**), `locale-leak.mjs --gate` exit 0. `brok.ts` urørt (kun læst), `se` urørt, ingen dataintegration rørt. Kode + plan i ét commit på `ceo/brok-regneregler`; se opgave 126. **MÅL:** `/brok` baseline **4.881 visninger / 31 klik / CTR 0,6 % / pos. 5,3 pr. 2026-08-28 → 2026-09-25** — måles igen 2026-10-11. Forventningen er højere CTR på de positioner siden allerede har, ikke nye visninger.
+
 STATUS: KØ — **C95 er landet: `/boligstoette` erklærede "boligsikring" som søgeord og svarede på nul af det. 2 af sidens 4 største søgninger er boligsikring, og kroppen nævnte ordet 0 gange.** Køen havde ingen `I GANG`-opgave, så valget var C94's kandidat #2 — `/renteberegner` — **men målingen af den viste at den allerede var gjort**: commit `9d4df42` (27/9 13:11, før denne iteration startede) lagde formlen, Excel-funktionerne og effektiv rente på siden, og den ligger i live-HTML'en som **0 fund på "Excel", "formel", "YDELSE" og "PMT"** fordi den endnu ikke er deployet. Den er altså ikke dobbeltarbejde, den er bare uafviklet. Det er grunden til at kandidatlisten er skrevet om i denne iteration. **Målt først:** dansk GSC (2026-08-28 → 09-25) giver `/boligstoette` **6.697 visninger, 176 klik, CTR 2,6 %, pos. 8,7**, og Plausible **526 besøgende/28d (+85 %, bounce 2 %)** — sitets fjerdemest besøgte side. Søgningerne er `"beregn boligstøtte"` 508 v pos. 10, `"boligstøtte beregner"` 276 v pos. 13, **`"boligsikring beregner"` 186 v pos. 11** og **`"beregn boligsikring"` 164 v pos. 9** — altså **to af fire er søgninger efter det modsatte ord**. DA-autocomplete under **"boligsikring"** (15:49) giver 10 variationer hvoraf **seks er boligsikring-spørgsmål** ("boligsikring beregning", "boligsikring regler", "boligsikring formue", "boligsikring pensionist formue", "boligsikring andelsbolig"). På den live side stod "boligsikring" **2 gange i hele HTML'en, begge i `<meta name="keywords">`** — kroppen nævnte det 0 gange. **Rettelsen:** ét nyt `<h2>` "Boligstøtte er ikke boligsikring", der siger at boligstøtte er *et tilskud fra staten til lejere* (det siden beregner), mens boligsikring er *en obligatorisk opsparingsordning, du låner mod din egen opsparing og betaler tilbage på vilkår* — altså ikke en støtte, du kan søge om, og uden månedlig ydelse — plus et spor til Realkredit Danmark. **Ét nyt FAQ-par**, som dermed også kommer i JSON-LD'en. **Hvorfor rettelsen er så kort som den er, og det er pointen:** "boligsikring formue" og "boligsikring pensionist formue" er søgninger *med beløb i sig*, og de kan kun svares med en kilde. **Realkredit Danmark var ikke tilgængelig fra loopet** — webfetch "Transport error", `curl` på to sider svarer HTTP 000, borger.dk 404. Så der står **ingen beløb på siden**, kun definitionen og sporet til administratoren. Samme disciplin som opgave 119, der ligger kilde-blokeret af samme grund; at skrive beløb uden kilde ville være den fejlklasse Fase 3 forbyder. **Harness:** `page.test.tsx` **2 → 4**, hvoraf den nye også låser den afgørende sætning "ikke en støtte, du kan søge om"; **verificeret modsvejs: begge falder** med kun de to filer på master. `BOLIGSTOETTE_2026` og de beskyttede dataintegrationer urørt, kun `da`. Gate grøn: lint (556 filer), **1786 tests / 151 filer** (fra 1784 / 151), build (**141 sider**), `locale-leak.mjs --gate` exit 0. Kode + plan i ét commit på `ceo/boligstoette-boligsikring`; se opgave 125. **MÅL:** `/boligstoette` baseline **6.697 visninger / 176 klik / CTR 2,6 % / pos. 8,7 pr. 2026-08-28 → 2026-09-25** og **526 besøgende/28d / bounce 2 % pr. 2026-09-27** — måles igen 2026-10-11. Forventningen er *ikke* flere visninger på de 350 boligsikring-visninger; de skal videre til Realkredit Danmark.
 
 STATUS: KØ — **C94 er landet: `/braendstof` er sitets sjettestørste danske side (16.764 visninger, CTR 1,1 %, pos. 6,0) og rangerer selv på position 6 for "benzin beregner", men viste aldrig regnestykket — og den svarede ikke på den enhed, de fleste søger med.** Køen havde ingen `I GANG`-opgave (119 er kilde-blokeret, 97 er `BLOCKED` og 98 afhænger af den), og alle åbne deploy-noter har første vindue **17:30** — det er 15:40, så intet kunne verificeres i starten af iterationen. Valget er C93's åbne kandidat #2, samme klasse som `/kvadratmeter`. **Målt først:** DA-autocomplete (`hl=da`, `gl=dk`, 15:41) giver under **"benzin beregner"** 10 variationer hvoraf **seks spørger om pris, km eller udgift** ("benzin beregner pris", "benzin beregner km", "benzin udgift beregner"), og under **"benzin forbrug"** 10 hvoraf **fire spørger om at finde sit eget forbrug** ("beregn benzin forbrug bil", "benzin forbrug danmark"). Den server-renderede side havde fire generiske overskrifter og **0** regnestykker. **Rettelsen:** et nyt `<h2>` "Sådan regner du benzinforbrug og pris ud med tal" med **hele regnestykket** for benzin (500 ÷ 15 = 33,3 l × 13,50 kr. = **450 kr.**), diesel (**356 kr.**) og el (**213 kr.**), to `<h3>` der svarer på resten af klyngen — "Sådan finder du dit eget forbrug" (fire tankfyld: 380 ÷ 40 = **9,5 km/l**) og "**km/l eller l/100 km?**" (tankinstrumentet viser l/100 km, værktøjer viser km/l, og omregningen er 100 ÷ den anden enhed) — samt to nye FAQ-par i `page-data.ts`, som dermed også kommer i JSON-LD'en. **Hvert tal er afprøvbart i den trykte tekst:** mængden afrundes *før* prisen ganges, så læseren kan regne hvert led efter, og en test låser `heleKroner(maengde × enhedPris) === pris` pr. række. **Den rigtige fejl, fundet ved at koble tabellen til listen:** siden skrev "Benzin: 12-18 km/l (5,5-8,3 l/100km)", men 100 ÷ 18 = **5,6**; diesel-linjen var rigtig, fordi 100 ÷ 22 = 4,5. Begge tal udledes nu af samme `literPr100km()` som tabellen, så en indekseret tekst ikke kan modsige sit eget indhold igen — C84's fejlklasse. **To målefejl i træk, begge fundet fordi jeg troede på et grep (nr. 16 og 17).** nr. 16: mine første greb mod den server-renderede HTML fandt **0** på "356 kr.", "213 kr." og "5,6-8,3" — React skriver `<!-- -->` mellem to tekstnoder i en JSX-celle, så `356<!-- --> kr.` ikke matcher "356 kr."; efter `sed 's/<!-- -->//g'` gav alle 18 tal deres forventede antal fund. nr. 17: min negative lås på beraknare.se brugte "500 ÷ 15" — en streng der *er* på den svenske side, i den svenske FAQ som testen mocker væk, altså en vakuum-grøn lås i C77's klasse; erstattet af fem strenge der kun findes i den nye danske blok. **Målt på rigtig server** (`next start`, port 3411 verificeret fri *inden* start): dansk 200 med alle 18 tal, svensk 200 med "Typisk förbrukning" og 0 danske markører. `braendstof.test.ts` **32 → 41**, `page.test.tsx` **3 → 8**; **verificeret modsvejs: 3 af 4 nye sidetests falder** med kun `page.tsx` på master. Ingen beregningslogik, `se` eller `no` rørt. Gate grøn: lint (556 filer), **1784 tests / 151 filer** (fra 1771 / 151), build (**141 sider**), `locale-leak.mjs --gate` exit 0. Kode + plan i ét commit på `ceo/braendstof-metode`; se opgave 124. **MÅL:** `/braendstof` baseline **16.764 visninger / 184 klik / CTR 1,1 % / pos. 6,0 pr. 2026-08-28 → 2026-09-25** — måles igen 2026-10-11.
@@ -7830,6 +7832,13 @@ landmark=lån, piggybank=opsparing osv.).
 
 ## VERIFICÉR DEPLOY-log
 
+### ⏳ **VERIFICÉR DEPLOY: C96 — `/brok` dansk: de fire regneregler, formlen procent = brøk × 100 med tabel, og brøkdel af et tal (4.881 visninger, CTR 0,6 %, pos. 5,3).** Kode + plan i ét commit på `ceo/brok-regneregler`. Første kandidatvindue **2026-09-27 17:30**. Verificér ved **indhold, ikke HTTP 200 alene** — hele ændringen er ny brødtekst og tre nye `faqItems`:
+   1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
+   2. `curl -s https://minberegner.dk/brok | sed 's/<!-- -->//g'` skal finde **"Brøkregning: de fire regneregler"**, **"3/6 + 2/6 = 5/6"**, **"1/2 × 2/3"**, **"1/2 ÷ 2/3"**, **"procent = brøk × 100"**, **"(3 × 200) ÷ 4"** og **"150 kr."**.
+   3. Tabellen skal have 7 `<tr>`-rækker med **0,5 / 0,25 / 0,75 / 0,125 / 0,667 / 0,833 / 0,7** i decimal-kolonnen (Bemærk: `sed`-trinnet er ikke valgfrit — React skriver `<!-- -->` mellem tekstnoder, målefejl nr. 16).
+   4. `grep -c '"@type":"Question"'` skal være **7** (før: 4), og de tre nye spørgsmål skal kunne læses i JSON-LD'en.
+   5. `https://beraknare.se/brok` skal være **uændret** og have **0** på "Brøkregning", "regneregler" og "procent = brøk".
+
 ### ⏳ **VERIFICÉR DEPLOY: C95 — `/boligstoette` siger at boligstøtte ikke er boligsikring (6.697 visninger, CTR 2,6 %, pos. 8,7).** Kode `68037d6`, merge `87956e5` 2026-09-27 15:52 CEST. Branch hed `ceo/renteberegner-metode` — den blev oprettet *før* målingen viste at `/renteberegner` allerede var gjort, og opgaven blev skiftet undervejs, så grenen fik ikke sit nye navn. Første kandidatvindue **2026-09-27 17:30**. Verificér ved **indhold, ikke HTTP 200 alene**:
    1. `curl -s https://minberegner.dk/boligstoette | sed 's/<!-- -->//g'` skal have **"Boligstøtte er ikke boligsikring"**, **"tilskud fra staten"**, **"obligatorisk opsparingsordning"** og **"Realkredit Danmark"**.
    2. Skal **ikke** have noget beløb, en sats eller en frist for boligsikring — de 350 boligsikring-visninger skal sendes videre til Realkredit Danmark, ikke besvares her. Tjek især at der ikke står en "20 %" eller et kronebeløb ved siden af ordet boligsikring.
@@ -11235,6 +11244,66 @@ tekst på `/tidszone`), men Kopier-strengen med datoen kræver en browser.
   så tallene ikke kan stå i strengen og afvige fra tabellen; (5) ét afsnit,
   ikke en hel underside, og et link videre til `/kalorier` og `/proteinbehov`.
 
+#### 126. [x] FÆRDIG 2026-09-27 — C96 — `/brok` svarer på "brøk regneregler" (autocompletes nr. 1 under "brøk") med de fire regler, formlen for procent og en brøkdel af et tal
+
+- **Datagrund:** dansk GSC (2026-08-28 → 09-25) `/brok` **4.881 visninger, 31
+  klik, CTR 0,6 %, pos. 5,3**. Det er **lav CTR på en god position** — Fase
+  3's klareste CTR-signal, fordi trafikken er der, men titlen og kroppen ikke
+  fanger. Valget var C95's åbne kandidat #2 og det første uforbrugte snit i
+  C82-C95's klasse.
+- **Målt først, rettet så.** DA-autocomplete (`hl=da`, `gl=dk`, 16:05) giver
+  under **"brøk"** 10 variationer hvoraf **nr. 1 er "brøk regneregler"** — og
+  resten er klyngen "brøk til procent" / "brøk til decimaltal" (4 af 10).
+  Under **"brøk til procent"** er der 10 variationer hvoraf **fire er
+  formler/værktøjer** ("brøk til procent formel", "brøk til procent regner",
+  "omskriv brøk til procent", "brøk til procent lommeregner"). Under **"hvad er
+  en brøk"** står **"hvad er en brøkdel af et tal"** som nr. 3, og resten er
+  "ægte/uægte/uforkortelig brøk". På den **live** side (110 KB HTML) var der
+  **0** fund på **"regneregel"**, **"formel"**, **"brøkdel af"**, **"÷"** og
+  **"×"** — brødteksten var to afsnit om forkortning, og FAQ'en havde 4
+  spørgsmål hvor ingen rørte regnereglerne. Titlen og beskrivelsen var
+  *allerede* svar-først ("Brøkberegner: forkort 6/8 til 3/4 = 0,75 = 75 %"), så
+  det er igen **ikke titlen, men kroppen under den** — samme konklusion som
+  C82.
+- **Rettelsen (kun `da`):** et nyt `<h2>` **"Brøkregning: de fire regneregler"**
+  med alle fire regler som regnestykker læsbare fra venstre til højre — plus
+  `1/2 + 1/3 = 3/6 + 2/6 = 5/6`, minus `3/4 − 1/4 = 2/4 = 1/2`, gange
+  `1/2 × 2/3 = (1 × 2)/(2 × 3) = 2/6 = 1/3`, dele `1/2 ÷ 2/3 = 1/2 × 3/2 =
+  3/4` — og den fælde der driller mest (plus/minus er de eneste to, hvor
+  nævnerne skal være ens *inden* regningen). Så **tre `<h3>`**: "Sådan
+  omregner du en brøk til procent og decimaltal" (formlen **procent = brøk ×
+  100** + tabel 1/2, 1/4, 3/4, 1/8, 2/3, 5/6, 7/10), "Sådan regner du en
+  brøkdel af et tal" (**(3 × 200) ÷ 4 = 150 kr.**, 1/4 af 1.000 = 250 kr., 2/5
+  af 250 = 100 kr., og krydschecket at 3/4 = 75 % og 75 % af 200 = 150) med et
+  link til `/procent`, og dermed **tre nye FAQ-par i `page-data.ts`** — som også
+  kommer i JSON-LD'en: "Hvad er regnereglerne for brøker?", "Hvad er en
+  brøkdel af et tal?" og "Hvad er forskellen på en ægte og en uægte brøk?"
+- **Hvorfor tallene ikke er skrevet i hånden:** alle otte tal i brødteksten og
+  alle 14 i tabellen udledes af `forkortBrok` gennem to små hjælpere i
+  `page.tsx` (`decimaltal`, `procent`), altså **samme modul som værktøjet
+  bruger** — C84's fejlklasse (en indekseret tekst der modsiger sit eget
+  indhold) kan ikke ske igen på denne side. En test krydschecker desuden
+  invarianten `procent ≈ decimal × 100` pr. række, så de to kolonner ikke kan
+  rykke sig fra hinanden.
+- **Harness:** `src/app/brok/page.test.tsx` **2 → 6 tests** — fire nye
+  (regnereglerne, tabellen, brøkdel-af-et-tal, og en SE-lås der kræver 0
+  danske markører på beraknare.se, C82's lektion). **Verificeret modsvejs: 3 af
+  4 falder** med kun `page.tsx` på master; den fjerde (SE-låsen) er et lås, der
+  skal være grønt både før og efter. `page-data.test.ts` **+4** med de tre nye
+  spørgsmål, en lås på at FAQ'ens fire regler er de samme som brødtekstens og
+  en lås på at brøkdel-tallet er 75 % ifølge modulet — **verificeret modsvejs:
+  3 af 4 falder** med den gamle `page-data.ts` (den fjerde er SE-låsen).
+  `page.test.tsx` mocker `@/components/FAQ` væk (C85's fælde), så FAQ-tests
+  ligger i `page-data.test.ts`, som læser præcis den tabel `FAQ` og
+  `FAQSchema` får.
+- **Gate grøn:** lint (556 filer), **1794 tests / 151 filer** (fra 1786 / 151),
+  build (**141 sider**), `locale-leak.mjs --gate` exit 0. Kode + plan i ét
+  commit på `ceo/brok-regneregler`. `brok.ts` urørt (kun læst), `se` urørt,
+  ingen dataintegration rørt.
+- **MÅL:** `/brok` baseline **4.881 visninger / 31 klik / CTR 0,6 % / pos. 5,3
+  pr. 2026-08-28 → 2026-09-25** — måles igen 2026-10-11. Forventningen er
+  højere CTR på de positioner den allerede har, ikke nye visninger.
+
 #### 125. [x] FÆRDIG 2026-09-27 — C95 — `/boligstoette` siger at boligstøtte ikke er boligsikring, og svaret kommer i FAQ'en og JSON-LD'en
 
 - **Datagrund:** dansk GSC (2026-08-28 → 09-25) `/boligstoette` **6.697
@@ -11566,6 +11635,34 @@ tekst på `/tidszone`), men Kopier-strengen med datoen kræver en browser.
   der linker til familien) pr. 2026-08-28 → 2026-09-25. Den nye sides
   baseline er **ikke kendt** (den er ikke indekseret endnu) — måles første
   gang 2026-10-11.
+
+### Næste kandidater efter C96
+
+0. **🔒 Opgave 97 er `BLOCKED`,** 98 afhænger af den. **🔒 Opgave 119 er
+   kilde-blokeret** (se ❓ Til Mads). Browser-noter: C52, C55, C56, C57 og
+   C60 ligger i ❓ Til Mads nederst.
+1. **✅ `/brok` er lukket** (opgave 126) — mål effekten 2026-10-11, lav ikke
+   ny CTR eller nyt indhold på siden før da.
+2. **🆕 `/brok` SE (1 v, ikke i GSC-listen) — mål først.** `/brok` er dansk
+   markeret; den svenske udgave har **0** i svensk GSC's top-15. Før der
+   skrives svensk regneblok skal det måles, om siden overhovedet er indekseret
+   på beraknare.se — ellers er arbejdet på ikke-indekseret indhold.
+3. **⏬ Nedprioriteret: `/kvadratmeter` SE (3.181 v, pos. 11,3)**, `/kalorier`
+   SE (2.697 v, pos. 19,8) og `/bil` SE (1.708 v, pos. 31,7) — for dybt til at
+   en titel eller et regnestykke løser dem; mål *hvorfor* de er der, som C92's
+   punkt 5 gjorde for `/renteberegner` (pos. 25,6).
+4. **🆕 `/brok` har to spørgsmål, værktøjet ikke kan svare på:** "hvad er en
+   brøkdel af et tal" er nu besvaret i brødteksten *med et link til
+   `/procent`*, fordi det er en funktionsudvidelse af `BrokBeregner` (se
+   opgave 126). Hvis GSC efter 14 dage viser at klyngen vokser, er det den
+   næste kodeopgave — ikke en tekstopgave.
+5. **✅ Dansk top-16 er lukket** (C82-C90 + C93 + C94 + C95 + C96) — mål i
+   stedet effekten 14 dage efter.
+6. **⏬ Nedprioriteret:** 22 filer / 35 ubundne labels (kun sider uden for
+   top-15).
+7. **🔒 Uforandrede forbehold:** hreflang korrekt (`hrefLang` med stort L);
+   svenske slugs kræver Mads' go; `/bmi` og `/su` måles 2026-10-11.
+8. **Mål 2026-10-10 / 2026-10-11** (se Måleprotokol).
 
 ### Næste kandidater efter C95
 
