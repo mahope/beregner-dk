@@ -19,16 +19,23 @@ export interface TidsintervalInput {
   fratraekPause?: number;
 }
 
+/**
+ * Resultatet er **tal**, ikke formaterede strenge: decimaltegnet afhænger af
+ * sproget, og et beregningsmod må ikke lå sig låse til dansk notation. Skærm,
+ * Kopiér- og Del-teksten formatterer derfor med `formatNumber` fra
+ * `src/lib/format` — ellers skrev denne side "8.25 timer" på både
+ * minberegner.dk og beraknare.se.
+ */
 export interface TidsintervalResultat {
   timer: number;
   minutter: number;
-  totalTimer: string;
+  totalTimer: number;
   totalMinutter: number;
   sekunder: number;
-  arbejdsdage: string;
-  decimalTimer: string;
+  arbejdsdage: number;
+  decimalTimer: number;
   /** Hele døgn (24 timer), ikke kalenderdage. 65 timer = 2,71 døgn. */
-  heleDoegn: string;
+  heleDoegn: number;
   overMidnat: boolean;
 }
 
@@ -82,12 +89,12 @@ export function beregnTidsinterval(input: TidsintervalInput): TidsintervalResult
   return {
     timer: Math.floor(totalMinutter / 60),
     minutter: totalMinutter % 60,
-    totalTimer: totalTimer.toFixed(2),
+    totalTimer: totalTimer,
     totalMinutter,
     sekunder: totalMinutter * 60,
-    arbejdsdage: (totalTimer / 8).toFixed(2),
-    decimalTimer: totalTimer.toFixed(2),
-    heleDoegn: (totalMinutter / MINUTTER_PER_DAG).toFixed(2),
+    arbejdsdage: totalTimer / 8,
+    decimalTimer: totalTimer,
+    heleDoegn: totalMinutter / MINUTTER_PER_DAG,
     overMidnat,
   };
 }

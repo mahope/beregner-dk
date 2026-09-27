@@ -2,6 +2,7 @@ import TidsBeregner from "@/components/TidsBeregner";
 import { generatePageMetadata } from "@/lib/page-helpers";
 import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
+import { formatNumber } from "@/lib/format";
 import {
   TIDS_EKSEEMPLER,
   TIDS_EKSEMPEL_FLERE_DAGE,
@@ -23,6 +24,18 @@ function formatDato(iso: string | undefined, locale: "da" | "se"): string {
     month: "short",
     timeZone: "UTC",
   }).format(dato);
+}
+
+/**
+ * Eksemplernes decimaltimer er tal, ikke strenge (se `TidsintervalResultat`),
+ * så notationen vælges her. Før dette skrev tabellen og brødteksten
+ * "8.25 timer" på både minberegner.dk og beraknare.se.
+ */
+function formatTimer(tal: number, locale: "da" | "se" | "no"): string {
+  return formatNumber(tal, locale, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 }
 
 export async function generateMetadata() {
@@ -93,7 +106,7 @@ export default async function TidsberegnerPage() {
                     {eksempel.overMidnat && !eksempel.startDato &&
                       " (dagen efter)"}
                   </td>
-                  <td>{eksempel.decimalTimer} timer</td>
+                  <td>{formatTimer(eksempel.decimalTimer, locale)} timer</td>
                 </tr>
               ))}
             </tbody>
@@ -102,7 +115,7 @@ export default async function TidsberegnerPage() {
         <p className="text-sm text-gray-600 dark:text-gray-400 mt-3">
           {TIDS_EKSEEMPLER[0].start} til {TIDS_EKSEEMPLER[0].slut} er altså{" "}
           <strong>{TIDS_EKSEEMPLER[0].svar}</strong> ={" "}
-          {TIDS_EKSEEMPLER[0].decimalTimer} decimaltimer. Indtast dine egne
+          {formatTimer(TIDS_EKSEEMPLER[0].decimalTimer, locale)} decimaltimer. Indtast dine egne
           klokkeslæt ovenfor, og beregneren trækker automatisk en frokostpause
           fra, hvis du angiver den.
         </p>
@@ -156,7 +169,7 @@ export default async function TidsberegnerPage() {
           Et gennemgående eksempel: <strong>fredag kl. {TIDS_EKSEMPEL_FLERE_DAGE.start} til mandag kl.{" "}
           {TIDS_EKSEMPEL_FLERE_DAGE.slut}</strong> er{" "}
           <strong>{formatTidsvar(TIDS_EKSEMPEL_FLERE_DAGE, "da")}</strong> ={" "}
-          {TIDS_EKSEMPEL_FLERE_DAGE.decimalTimer} decimaltimer, fordi de tre
+          {formatTimer(TIDS_EKSEMPEL_FLERE_DAGE.decimalTimer, locale)} decimaltimer, fordi de tre
           fulde døgn regnes med. Uden datoerne ville det samme interval være{" "}
           {TIDS_UDEN_DATOER.da} — kun det, der ligger mellem klokkeslættene.
         </p>
@@ -229,7 +242,7 @@ export default async function TidsberegnerPage() {
           Ett återkommande exempel: <strong>fredag kl. {TIDS_EKSEMPEL_FLERE_DAGE.start} till måndag kl.{" "}
           {TIDS_EKSEMPEL_FLERE_DAGE.slut}</strong> är{" "}
           <strong>{formatTidsvar(TIDS_EKSEMPEL_FLERE_DAGE, "se")}</strong> ={" "}
-          {TIDS_EKSEMPEL_FLERE_DAGE.decimalTimer} decimaltimmar, för de tre
+          {formatTimer(TIDS_EKSEMPEL_FLERE_DAGE.decimalTimer, locale)} decimaltimmar, för de tre
           fulla dygnen räknas med. Utan datum skulle samma intervall bli{" "}
           {TIDS_UDEN_DATOER.se} — bara det som ligger mellan klockslagen.
         </p>

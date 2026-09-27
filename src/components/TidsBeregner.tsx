@@ -8,6 +8,7 @@ import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { useLocale } from "@/components/LocaleProvider";
 import { beregnTidsinterval } from "@/lib/tidsberegner";
+import { formatNumber } from "@/lib/format";
 
 const labels = {
   da: {
@@ -133,6 +134,14 @@ export default function TidsBeregner() {
     [startTid, slutTid, startDato, slutDato, fratraekPause],
   );
 
+  // `beregnTidsinterval` returnerer tal, så notationen vælges her og ikke i
+  // beregningsmodulet — samme mønster som C76/C77's `formatPct`.
+  const f2 = (n: number) =>
+    formatNumber(n, locale as "da" | "se" | "no", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+
   return (
     <div className="space-y-8">
       {/* Input */}
@@ -233,14 +242,14 @@ export default function TidsBeregner() {
             <div className="p-6 bg-green-100 rounded-xl text-center dark:bg-green-900/20">
               <p className="text-sm text-gray-600 mb-1 dark:text-gray-400">{l.decimalTimer}</p>
               <p className="text-4xl font-bold text-green-700 dark:text-green-400">
-                {beregning.decimalTimer}
+                {f2(beregning.decimalTimer)}
               </p>
               <p className="text-xs text-gray-500 dark:text-gray-400">{l.timerWord}</p>
             </div>
             <div className="p-6 bg-purple-100 rounded-xl text-center dark:bg-purple-900/20">
               <p className="text-sm text-gray-600 mb-1 dark:text-gray-400">{l.arbejdsdage8t}</p>
               <p className="text-4xl font-bold text-purple-700 dark:text-purple-300">
-                {beregning.arbejdsdage}
+                {f2(beregning.arbejdsdage)}
               </p>
               <p className="text-xs text-gray-500 dark:text-gray-400">{l.dageWord}</p>
             </div>
@@ -259,12 +268,12 @@ export default function TidsBeregner() {
                 <p className="text-sm text-gray-500 dark:text-gray-400">{l.sekunderWord}</p>
               </div>
               <div>
-                <p className="text-3xl font-bold text-gray-700 dark:text-gray-200">{beregning.totalTimer}</p>
+                <p className="text-3xl font-bold text-gray-700 dark:text-gray-200">{f2(beregning.totalTimer)}</p>
                 <p className="text-sm text-gray-500 dark:text-gray-400">{l.timerDecimal}</p>
               </div>
               <div>
                 <p className="text-3xl font-bold text-gray-700 dark:text-gray-200">
-                  {beregning.heleDoegn}
+                  {f2(beregning.heleDoegn)}
                 </p>
                 <p className="text-sm text-gray-500 dark:text-gray-400">{l.doegnWord}</p>
               </div>
@@ -273,11 +282,11 @@ export default function TidsBeregner() {
 
           {/* Share button */}
           <div className="flex justify-center gap-3">
-            <CopyResultButton text={`${beregning.timer}${l.timerAbbr} ${beregning.minutter}${l.minAbbr} (${beregning.decimalTimer} ${l.timerWord})`} />
+            <CopyResultButton text={`${beregning.timer}${l.timerAbbr} ${beregning.minutter}${l.minAbbr} (${f2(beregning.decimalTimer)} ${l.timerWord})`} />
             <ShareCalculation
               getShareableLink={getShareableLink}
               calculatorName={l.calculatorName}
-              resultSummary={`${beregning.timer}${l.timerAbbr} ${beregning.minutter}${l.minAbbr} (${beregning.decimalTimer} ${l.timerWord})`}
+              resultSummary={`${beregning.timer}${l.timerAbbr} ${beregning.minutter}${l.minAbbr} (${f2(beregning.decimalTimer)} ${l.timerWord})`}
             />
           </div>
 

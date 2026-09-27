@@ -1,4 +1,4 @@
-STATUS: KØ — **C77 er landet: de ni næste `toFixed`-steder er rettet, og fundet var en rigtig svensk lækage som hverken C76's liste eller `locale-leak.mjs` kunne se: `/boliglaan`s fire rentespænd ("ca. 3.5-4.0%") var hardkodede *uden for* `labels`-objektet, så beraknare.se viste dansk notation med punktum på en side der ellers skriver "3 000 000 kr" med mellemrum.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den), og alle åbne deploynoter er fra 08:29/08:46/09:25/09:48 med første kandidatvindue **12:30**, så intet kunne verificeres i denne iteration. **Valget var C76's egen liste, i dens egen rækkefølge** — `/arveafgift` først, fordi det var det eneste punkt hvor fundet nåede Kopier- og Del-teksten. **Rettet (6 filer, 10 steder):** `ArveafgiftBeregner` (`effektivSats` — displayet *og* begge del-strenge), `BoliglaanBeregner` (`belaaningsgrad` — **var en streng i resultat-objektet**, så `locale` måtte ind i memoens deps; `l` er `labels[locale]` og dækker det ikke alene — plus `helpText` på udbetalingsfeltet), `ElbilBenzinBeregner` (`payback`), `LoenBeregner` (`effektivSkat`), `LaaneBeregner` (`aopAnnuitet`) og `OpsparingsBeregner` (rente-andel — hvor **fallback-værdien var en hårdkodet `"0.0"`**, nu `formatPct(0)`, ellers ville siden have vist "0,0" det ene sted og "0.0" det andet). **Mønstret er C76's:** `formatNumber` med samme decimalantal som det erstattede `toFixed`, så *kun* decimaltegnet ændrer sig. **Testens første version faldt på de netop fundne rentespænd *og* på tusindtalsseparatoren** i "3.000.000", fordi den scannede hele container-teksten med `/\d\.\d/`; den blev skrevet om til at slå fast på konkrete værdier, hvilket er skarpere og ikke kan give falske fund på korrekt notation. **To fejl i testen, fundet af at køre den:** feltet blev slået op med `getAllByRole("textbox")[0]` (nu `#arvebeloeb` på id), og jeg havde antaget den effektive arveafgiftssats var "15,0 %" — den er **9,1 %**, fordi boafgiften kun beregnes af arven *over* bundfradraget på 392.300 kr. Testen faldt altså på **min egen** regnefejl, ikke på koden. **`decimal-komma.test.tsx` er de 11 tests, C76 lod være at skrive** — 11 i DA + SE, **verificeret modsvejs: 10 af 11 falder** med de gamle komponenter. **Den nye lækage er den sjette målefejl i træk, og igen af samme art som C70/C73:** en streng uden for `labels` er usynlig for både `locale-leak.mjs` og `label-a11y-scan.mjs`, fordi de læser oversættelses-tabellerne — en scanner for denne klasse må derfor ikke kun søge i `labels`. **Der er stadig ingen scanner** for `toFixed`-klassen (34 → 24 steder), bevidst: den skal have undtagelse for geo-koordinaterne, `.replace(".", ",")` og `toFixed(0)`. **En fejl jeg selv lavede undervejs, som næste agent bør kende:** et `python3`-heredoc-script til at sætte STATUS-linjen **skrev hele planen på ét linje og ødelagde 780 KB af den**; `git checkout -- IMPLEMENTATION_PLAN.md` reddede den, fordi planen endnu ikke var committet. Skriv store ændringer i `IMPLEMENTATION_PLAN.md` med `edit`, ikke med et shell-script. Gate grøn: lint (555 filer), **1704 tests / 150 filer** (fra 1693 / 149) og build (141 sider). Kode + plan i ét commit på `ceo/decimal-komma-2`; se opgave 106.
+STATUS: KØ — **C78 er landet: `/tidsberegner` skrev "8.25 timer" i den server-renderede HTML — altså i den tekst Google indekserer — på sitets tredjestørste side. Det er den samme `toFixed`-klasse som C76 og C77 har arbejdet på, men på en større side end nogen af de otte de rettede, og den lå i en del af kæden hverken C76's eller C77's håndtælling nævnte: de fire `toFixed(2)` i `src/lib/tidsberegner.ts` — altså *i beregningsmodulet*, der derved lå dansk notation fast for hele sitet.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den), "Næste kandidater efter C73" var udtømt (punkt 3 lukket i C75, punkt 4 var en målefejl lukket i C74, punkt 1 kræver en browser), og alle åbne deploynoter er fra 08:29/08:46/09:25/09:48 med første vindue **12:30** — så intet kunne verificeres. Valget var derfor C77's *egne* åbne måling, resten af `toFixed`-klassen. **Målt på den live side før rettelsen:** `curl -s https://minberegner.dk/tidsberegner` gav **13** `>\d.\d\d<` i ren tekst, beraknare.se **5** — bl.a. `<td>8.25 timer</td>` i eksempel-tabellen, "= 8.25 decimaltimer" i brødteksten, `<td>65.00 timer</td>`, og på beraknare.se ">8.00<" og ">0.33<". **Datagrund:** `/tidsberegner` er **tredjestørste** side i dansk GSC (**72.725 visninger**, CTR 0,3 %, pos. 7,0) og **andenstørste** på beraknare.se (**57.541**) — større end nogen af C76's otte sider — plus 285 besøgende/28d DA (+48 %) og 151 SE (+196 %). **Rettelsen er et designskift, ikke et tegnskift:** `TidsintervalResultat`'s fire strenge blev `number` (`totalTimer`, `arbejdsdage`, `decimalTimer`, `heleDoegn`), og alle otte forbrugere formatterer nu med `formatNumber` — 4 skærmsteder **+ CopyResultButton og `ShareCalculation.resultSummary`** i `TidsBeregner.tsx`, og 4 steder i tabellen og brødteksten i `page.tsx`; `TidsEksempel.decimalTimer` blev `number` med samme følge. Samme decimalantal som det erstattede `toFixed`, så *kun* decimaltegnet ændrer sig. **Tre fund ud over rettelsen, og de er pointen med at måle en klasse på dens sidste halvdel.** (1) **En eksisterende test lå fejlen fast:** `src/app/tidsberegner/page.test.tsx:58` sagde `expect(html).toContain("8.25 timer")` — den *krævede* punktum i den indekserede tekst. (2) **C77's egen `/arveafgift`-test var vakuum-grøn:** den løb over `[data-share-text]`, **et attribut der ikke findes nogen steder i repoet** — listen var tom, og `for (const t of tomt)` passerer. Nu læser begge tests det `CopyResultButton` faktisk skriver i klipbordet (C57's metode), fordi DOM'en ikke viser den streng. Samme fejltype som de seks målefejl, planen fører. (3) **To negative fund lukker to åbne punkter i C76's liste:** `BruttoNettoBeregner.tsx:18` og `TopskatBeregner.tsx:24,25` (`KOMMUNE_SNIT_PCT`, `.toFixed(3)`) er **korrekte** — de fylder `<input type="number">` (`BruttoNettoBeregner.tsx:264`, `TopskatBeregner.tsx:180`), og HTML-spec'en kræver punktum i et number-felts `value` uanset sprog; browseren viser "25,049" på dansk. At "rette" det til komma ville have ødelagt feltet, fordi `parseFloat("25,049")` er 25. C76 skrev "skal verificeres mod DOM'en" — verificeret, svaret er *ladt være*. **Tests:** `decimal-komma.test.tsx` **11 → 16** med en `/tidsberegner`-blok (DA + SE + Kopier-teksten i begge sprog + at heltal stadig vises "8,00"), **verificeret modsvejs: alle 5 nye falder** med de gamle komponenter. `tidsberegner.test.ts` (7) og `tids-eksempler.test.ts` (3) fulgte med i den nye kontrakt. **En fejl i min egen rettelse, fundet ved at tælle kaldene bagefter:** konstanten hedder `TIDS_EKSEMPEL_FLERE_DAGE` med ét E, min perl-regex skrev dobbelt, og den rettede kun 2 af 4 steder i `page.tsx`. Gate grøn: lint (555 filer), **1709 tests / 150 filer** (fra 1704 / 150) og build (141 sider). Kode + plan i ét commit på `ceo/decimal-komma-3`; se opgave 107. **Resten af `toFixed`-klassen er nu lukket** — de otte reelle steder er rettet, resten af C76's liste er død kode og to verificeret korrekte fund — **så en scanner giver noget nu, ikke endnu et snit af listen.**
 
 ---
 
@@ -10333,7 +10333,107 @@ den kategori er **ikke** et fund:
   → **0 filer / 0 uavngivne**, begge scanner-gates opdateret i samme
   commit. Læs C75-STATUS.
 
-### VERIFICÉR DEPLOY — åbne noter (2026-09-27 09:30)
+#### 107. [x] FÆRDIG 2026-09-27 — C78 — `/tidsberegner`: sitets tredjestørste side skrev "8.25 timer" i den HTML, Google indekserer
+
+- **Iteration start:** 2026-09-27 10:55 CEST. Køen havde ingen `I GANG`-opgave
+  (97 er `BLOCKED`, 98 afhænger af den), og de åbne deploynoter er fra
+  08:29/08:46/09:25/09:48 med første vindue **12:30** — de kan ikke verificeres
+  nu. "Næste kandidater efter C73" var udtømt (punkt 3 lukket i C75, punkt 4 var
+  en målefejl lukket i C74, punkt 1 kræver en browser), så valget blev C77's
+  **egen** åbne måling: resten af `toFixed`-klassen.
+- **Datagrund:** `/tidsberegner` er **tredjestørste** side i dansk GSC (**72.725
+  visninger**, 204 klik, CTR 0,3 %, pos. 7,0) og **andenstørste** på
+  beraknare.se (**57.541 visninger**, 0,2 %, pos. 8,1) — altså større end nogen
+  af de otte sider C76 rettede. Plausible: 285 besøgende/28d DA (+48 %, bounce
+  6 %), 151 besøgende/28d SE (+196 %, bounce 7 %).
+- **Fundet, målt på den live side før rettelsen.** `curl -s
+  https://minberegner.dk/tidsberegner` gav **13** `>\d.\d\d<` i ren tekst og
+  beraknare.se **5**. Konteksten er entydig:
+  - `<td>8.25<!-- --> timer</td>` — i eksempel-tabellen
+  - `= 8.25 decimaltimer. Indtast dine egne klokkeslæt` — i **brødteksten**
+  - `<td>65.00<!-- --> timer</td>`, `<td>80.00<!-- --> timer</td>`
+  - på beraknare.se: `>8.00<`, `>1.00<`, `>0.33<`, `65.00` — dansk notation på
+    en svensk side.
+  **Det er server-renderet HTML**, altså den tekst Google indekserer — ikke et
+  client-render-artifakt. C76/C77's fund nåede Kopier og Del; her nåede
+  fejlen *sitet selv i sin søgeindeks*.
+- **Rettelse — et designskift, ikke et tegnskift.** De fire `toFixed(2)` lå i
+  **`TidsintervalResultat`**, altså i beregningsmodulet, som derved lå fast
+  dansk notation. Signaturen `totalTimer: string` → `number` (og
+  `arbejdsdage`, `decimalTimer`, `heleDoegn`), og **alle otte** forbrugere
+  formatterer nu med `formatNumber` fra `src/lib/format`:
+  `TidsBeregner.tsx` (4 skærmsteder + **CopyResultButton og
+  `ShareCalculation.resultSummary`**) og `page.tsx` (4 steder i tabellen og
+  brødteksten). `TidsEksempel.decimalTimer` blev `number` med samme følge.
+  `f2` / `formatTimer` bruger `minimumFractionDigits: 2,
+  maximumFractionDigits: 2` — samme decimalantal som det erstattede `toFixed`,
+  så **kun decimaltegnet** ændrer sig. Tusindtalsseparatoren kommer gratis med,
+  som i C76.
+  *Husk `tids-eksempler.ts` eksporterer `TIDS_EKSEMPEL_FLERE_DAGE` — med ét E
+  i "EKSEMPEL". Min første perl-regex skrev `EKSEMPEL` og rettede kun 2 af 4
+  steder; fundet ved at tælle `formatTimer(`-kaldene bagefter.*
+- **En fejl i den eksisterende test, som lå fejlen fast.** C77's
+  `/arveafgift`-test løb over `[data-share-text]` — **et attribut der ikke
+  findes nogen steder i repoet.** Listen var tom, og `for (const t of tomt)`
+  passerer, så testen var grøn uden at have set noget. Samme fejltype som de
+  målefejl, planen har seks af. Nu læser begge tests det, `CopyResultButton`
+  faktisk skriver i klipbordet (C57's metode) — DOM'en viser den streng ikke,
+  den er kun et `text`-prop på knappen.
+- **En eksisterende server-renderings-test lå fejlen fast.**
+  `src/app/tidsberegner/page.test.tsx:58` sagde `expect(html).toContain("8.25
+  timer")` — den *krævede* punktum i den indekserede tekst. Nu `toContain("8,25
+  timer")` **og** `not.toContain("8.25 timer")`.
+- **Negative fund, der lukker to åbne punkter i C76's liste:**
+  1. **`BruttoNettoBeregner.tsx:18` og `TopskatBeregner.tsx:24,25` er korrekte
+     — rør ikke dem.** `KOMMUNE_SNIT_PCT = (KOMMUNE_SNIT * 100).toFixed(3)` er
+     en `useState`-initialværdi for et felt, og begge felter er
+     **`<input type="number">` (`BruttoNettoBeregner.tsx:264`,
+     `TopskatBeregner.tsx:180`)**. HTML-spec'en siger at et number-felts
+     `value` er et gyldigt flydende tal med **punktum**, uanset brugerens
+     sprog — browseren viser "25,049" på en dansk skærm. Live:
+     `value="25.049"`, og `parseFloat` ville læse "25,049" som 25. At "rette"
+     det til komma ville **ødelægge** feltet. C76 skrev "skal verificeres mod
+     DOM'en" — verificeret, og svaret er *ladt være*.
+  2. `OpsparingsBeregner.tsx:381` (`realRente`) er stadig **død kode** — skrevet
+     ned i C76, bekræftet, ikke rørt.
+- **Tests:** `decimal-komma.test.tsx` er **11 → 16** med en `/tidsberegner`-blok
+  (DA + SE + Kopier-teksten i begge sprog + at heltal stadig vises "8,00").
+  **Verificeret modsvews: alle 5 nye falder** med de gamle komponenter
+  (kun `tidsberegner.ts` + `TidsBeregner.tsx` på stash). `tidsberegner.test.ts`
+  (7) og `tids-eksempler.test.ts` (3) fulgte med i den nye kontrakt
+  (`toBe("8.25")` → `toBeCloseTo(8.25, 2)`).
+- **MÅL:** `/tidsberegner` baseline **285 besøgende/28d** DA og **151/28d** SE
+  pr. 2026-09-27; GSC 72.725 visninger DA, 57.541 SE. Ændringen forventes
+  **ikke** at løfte CTR — den retter tal i den indekserede tekst. Verificér ved
+  **indhold** efter deploy: `curl -s https://minberegner.dk/tidsberegner |
+  rg -o '>[0-9]+\.[0-9]{2}<'` skal give **0**, og samme på
+  https://beraknare.se/tidsberegner. Mål igen **2026-10-11**.
+- **Landet:** kode + plan i ét commit på `ceo/decimal-komma-3`.
+- **Gate:** lint (555 filer), **1709 tests / 150 filer** (fra 1704 / 150),
+  build (**141 sider**, 7 kendte pre-existing CSS-advarsler). Ingen
+  beregningslogik rørt — kun typen på de fire strenge og deres formatering.
+- **Mangler stadig:** der er **ingen scanner** for `toFixed`-klassen, og efter
+  C78 er de **otte** reelle steder lukket. Resten af C76's liste er nu *kun*
+  død kode og de to verificeret korrekte `type="number`-fund. **Det er derfor
+  en scanner, der giver noget nu, ikke endnu et snit af listen.**
+
+### VERIFICÉR DEPLOY — åbne noter (2026-09-27 11:05)
+
+- ⏳ **VERIFICÉR DEPLOY: C78 — `/tidsberegner` skrev "8.25 timer" i den
+  server-renderede HTML på begge domæner, altså i den tekst Google
+  indekserer.** Rettet ved at gøre `TidsintervalResultat`'s fire talfelter til
+  `number` og formatere dem med `formatNumber` — 4 skærmsteder +
+  **CopyResultButton og Del** i `TidsBeregner`, 4 steder i tabellen og
+  brødteksten i `page.tsx`. **Verificér indhold, ikke HTTP 200:**
+  1. `curl -s https://minberegner.dk/tidsberegner | rg -o '>[0-9]+\.[0-9]{2}<'`
+     skal give **0** — før gav det 13, bl.a. `<td>8.25 timer</td>` og
+     "= 8.25 decimaltimer" i brødteksten.
+  2. Samme på `https://beraknare.se/tidsberegner` skal give **0** — før 5.
+  3. Begge sider skal nu finde `8,25 timer` og `65,00 timer` **med komma**,
+     og `8,00` for et heltal (nullerne må ikke være faldet væk).
+  4. `/tidsberegner` skal regne uændret: 08:30→16:45 = "8 t 15 min" og 0,34
+     døgn. Kode + plan i ét commit på `ceo/decimal-komma-3`; første
+     kandidatvindue **2026-09-27 12:30**.
 
 - ⏳ **VERIFICÉR DEPLOY: C77 — ni procenter skrev decimal med punktum i dansk
   og svensk tekst, og `/boliglaan`s fire rentespænd var danske på
