@@ -24,8 +24,8 @@ const labels = {
   se: {
     total: "Notans belopp",
     people: "Antal personer",
-    færre: "Færre personer",
-    flere: "Flere personer",
+    færre: "Färre personer",
+    flere: "Fler personer",
     tip: "Dricks",
     perPerson: "Per person",
     tipAmount: "Dricks",

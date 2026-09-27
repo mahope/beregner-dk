@@ -546,6 +546,15 @@ describe("Feltnavn for skærmlæsere — de fire mest besøgte beregnere", () =>
           expect(knap.getAttribute("aria-label")?.trim().length ?? 0).toBeGreaterThan(1);
           expect(knap.textContent?.trim()).toMatch(/^[−+]$/);
         }
+        // "Har navn" er ikke nok: navnet skal være på det sprog, siden er på.
+        // C71 lagde nøglerne `færre`/`flere` ind ved at kopiere de danske ord
+        // direkte i `se`-blokken, så beraknare.se læste "Færre personer" på en
+        // svensk side. Svensk skriver aldrig æ eller ø.
+        if (locale === "se") {
+          for (const knap of tæller) {
+            expect(knap.getAttribute("aria-label") ?? "").not.toMatch(/[æø]/);
+          }
+        }
         expect(
           container.querySelector('[role="group"][aria-label]')?.querySelectorAll("button").length,
         ).toBe(4);
