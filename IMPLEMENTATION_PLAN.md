@@ -1,5 +1,65 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
+STATUS: KØ — **C60 er landet: `/promille` gav en tilladelse til at køre bil på
+to måder, den ikke måtte give, og delte et tal uden de fire tal det afhænger
+af.** Køen var tom (alle 87 opgaver færdige, intet `I GANG`), og planens egen
+kø pegede på `PromilleBeregner` (4.159 visninger, 60 klik, CTR 1,4 %, pos. 7,9
+— nr. 14 i den danske GSC-liste) som næste i klassen "hvad skriver den tekst,
+brugeren kopierer?". Det er **syvende fund i træk** (C52, C53, C55, C56, C57,
+C58, C59), og her er fundene de alvorligste i klassen, fordi værktøjet handler om
+lov. **1) Et felt brugeren ikke har tastet færdig gav en grøn tilladelse.**
+`mayDrive = r ? r.maaKoere : true`, så når `beregnPromille` returnerede `null`
+— altså når genstande eller kropsvægt var 0, hvilket `Number("")` gør i det
+øjeblik man markerer et talfelt for at skrive om — blev der vist et **grønt**
+kort med "Du er under grænsen på 0,5 ‰". Det er en tilladelse til at køre bil,
+der kom fra et tomt felt, og værktøjet kan ikke skelne "0 genstande" fra
+"feltet er lige blevet slettet". Nu er tilstanden neutral: en kort linje der
+beder om input, ingen konklusion, ingen promille, ingen ‰-tegn, og flisen
+"Under grænsen om" viser **—** i stedet for `0 timer`. **2) Præcis på
+grænsen sagde "over grænsen".** `afrundet` er rundet til to decimaler, så
+promillen lander på nøjagtig 0,50 ‰ (DA) eller 0,20 ‰ (SE) for helt almindelige
+indtastninger — 1 genstand, 44 kg, kvinde er 12 / (0,55 × 44) = 0,4959 → 0,50,
+og det er **ét input, ingen time-intervaller**: enhver hel genstand, hel kilo og
+kvinders fordelingsfaktor der falder i båndet 0,495–0,505. Både dansk og
+svensk færdselslov gør det til en lovovertrædelse at køre, når promillen
+**overstiger** grænsen, og `/promille`'s **egen brødtekst** siger "Det er
+ulovligt at køre bil med en promille **over 0,5 ‰**" to gange. Værktøjet sagde
+imidlertid "Du er **over** grænsen på 0,5 ‰ — kør ikke bil" og viste samtidig
+flisen "**Under grænsen om 0 timer**" — to påstande i samme skærmbillede, hvor
+den ene er en direkte modsigelse af sidens egen lovformulering, og hvor den
+andre er en invitation til at køre med det samme. Der er nu et **tredje
+udfald**, `paaGraensen`, der siger "Du er præcis på grænsen (0,5 ‰) — kør ikke
+bil" i ravn, og flisen viser **—** i stedet for 0 timer. **`maaKoere` er
+bevidst uændret** (den er `afrundet < graense`): rettelsen er kun ordlyden, så
+værktøjet bliver aldrig mere tilladende end før, og den eksisterende test der
+låser `maaKoere === false` ved 0,5 står uændret. **3) Den delte tekst var ét
+tal uden sine fire input.** Kopier og Del gav "Din anslåede promille: 0,66 ‰" —
+promillen alene, uden genstande, vægt, køn eller timer. Det er C57's, C58's og
+C59's fund for syvende gang, og her er det det værste af dem: tallet er en
+lovlig konklusion, der ikke kan tjekkes mod skærmen og ikke kan bruges senere,
+fordi det er en anden promille. Nu bygger ét `deltTekst()` hele strengen til
+**både** knapper: *"4 genstande, 80 kg, Mand, 0 timer siden: 0,88 ‰. Du er
+under grænsen på 0,5 ‰. Du er allerede under grænsen — helt ædru om 5,9
+time."* Tidsrummene følger udfaldet, så "Under grænsen igen om 0,0 time" ikke
+kan stå ved en promille under grænsen. **Søgning (b) — decimaler i literals —
+er kørt for første gang** på denne komponent (C53-C59 sprang den over): de
+tre `.toFixed(n).replace(".", ",")` og `String(limit).replace(".", ",")` er
+erstattet af `formatNumber` fra `src/lib/format.ts`, så tallene går gennem samme
+locale-formatter som resten af sitet og ikke kan få punktum i dansk eller svensk
+tekst. `PromilleBeregner.test.tsx` er **ny med 8 tests** — komponenten havde
+ingen, hvilket er hele grunden for at fejlen lå: ingen læste klipbordet. Den
+klikker Kopier og læser **hvad der blev skrevet** i `clipboard.writeText` (det
+er den streng, knappen får; knappen viser den ikke, jf. C56), åbner
+**Del-dialogen** og læser **Twitter-linkets `href`**, fordi forskellene mellem
+de to knapper er usynlige i DOM'en, og låser at Del = Kopier bag
+`ShareCalculation`s "Promilleberegner: "-præfiks. **Verificeret modsvejs:** med
+den gamle komponent falder **6 af 8**. De 2 der bliver grønne er dem, der kun
+tester det gamle korrekte talformatering. `promille.test.ts` og
+`promille-eksempler.test.ts` er urørte og grønne. Gate grøn: lint (548 filer),
+**1537 tests / 143 filer** (fra 1529 / 142) og build (141 sider). Kode + plan i
+ét commit på `ceo/promille-audit`; første kandidatvindue **2026-09-27 07:30**.
+Se opgave 88.
+
 STATUS: KØ — **C59 er landet: `/alder` har regnet "Dage levet" i millisekunder,
 og den delte tekst var et tal uden de to datoer alderen er et svar på.** Den
 tolvtestrække-klasse ("hvad skriver den tekst, brugeren kopierer?") har fundet
@@ -8301,3 +8361,93 @@ landmark=lån, piggybank=opsparing osv.).
      værktøjet på beraknare.se (kun i den tilsigtede sammenligning med
      Danmark i FAQ'en).
   4. `/api/health` skal svare `status: ok`.
+
+#### 88. [x] FÆRDIG 2026-09-27 — C60 — `/promille`: en tilladelse til at køre bil fra et tomt felt, "over grænsen" ved præcis 0,5, og en delt tekst uden sine fire input
+
+- **Datagrund:** `/promille` er **nr. 14 i den danske GSC-liste** (4.159
+  visninger, 60 klik, CTR 1,4 %, pos. 7,9) og planens kø pegede på den som
+  næste i klassen "hvad skriver den tekst, brugeren kopierer?" efter
+  `AlderBeregner` (C59, 6.013 visninger).
+- **Fund 1 — `mayDrive = r ? r.maaKoere : true` (`PromilleBeregner.tsx:109` i
+  den gamle kode) er en tilladelse fra et tomt felt.** `beregnPromille`
+  returnerer `null` for `antalGenstande <= 0` eller `vaegtKg <= 0`, og
+  `Number("")` er `0`, så netop det øjeblik brugeren markerer et talfelt for at
+  skrive om, skifter værktøjet til et **grønt** "Du er under grænsen på
+  0,5 ‰". Værktøjet kan ikke skelne "0 genstande" fra "feltet er slettet", og
+  på sitets mest sikkerhedskritiske værktøj må det ikke gætte i
+  tilladende retning. Nu: neutral tilstand med `l.noResult`, ingen konklusion,
+  ingen promille, ingen ‰-tegn, flisen "Under grænsen om" viser `l.unknown`.
+  Mønsteret er `AegloesningBeregner.tsx:135-138`s `r ? … : <neutral>`.
+- **Fund 2 — "Du er over grænsen" ved præcis 0,50 ‰ modsiger sidens egen
+  lovformulering.** `afrundet` er `Math.round(promille * 100) / 100`, så
+  promillen lander på præcis grænsen for helt almindelige input: 1 genstand,
+  44 kg, kvinde → 12 / (0,55 × 44) = 0,4959 → **0,50**. Der kræves altså ingen
+  time-intervaller, kun hel genstand, hel kilo og kvinders fordelingsfaktor i
+  båndet 0,495–0,505. Både dansk og svensk færdselslov gør det til en
+  lovovertrædelse at køre, når koncentrationen **overstiger** grænsen, og
+  `/promille`'s egen brødtekst siger "Det er ulovligt at køre bil med en
+  promille **over 0,5 ‰**" to gange (`src/app/promille/page.tsx:140,147`) og
+  "du må køre, når promillen er **under** 0,5 ‰" (linje 74). Værktøjet sagde
+  imidlertid "over grænsen" og viste samtidig "**Under grænsen om 0 timer**".
+  Ny tilstand `paaGraensen` i `PromilleResultat` (ren tilføjelse; `maaKoere` er
+  bevidst uændret, så værktøjet aldrig bliver mere tilladende end før, og
+  `promille.test.ts:41-46`'s låsning af `maaKoere === false` ved 0,5 står
+  uændret) + ravn banner "Du er præcis på grænsen (0,5 ‰) — kør ikke bil" og
+  `—` i flisen. Samme fejl på SE's 0,2-grænse.
+- **Fund 3 — delt tekst uden de fire input (C57/C58/C59 for syvende gang).**
+  `"${l.yourBac}: ${bacText} ‰"` gav "Din anslåede promille: 0,66 ‰" uden
+  genstande, vægt, køn eller timer. Nu ét `deltTekst()` til begge knapper med
+  alle fire input, promillen, grænsen og de to tidsrum, hvor tidsrummene
+  følger udfaldet (aldrig "Under grænsen igen om 0,0 time" under grænsen).
+- **Fund 4 — søgning (b), decimaler i literals, kørt for første gang** på denne
+  komponent: `toFixed(2).replace(".", ",")`, to `toFixed(1).replace(".", ",")`
+  og `String(limit).replace(".", ",")` → `formatNumber` fra `src/lib/format.ts`.
+- **Test:** `src/components/PromilleBeregner.test.tsx` **ny, 8 tests** (komponenten
+  havde ingen). Læser `clipboard.writeText`-argumentet (den streng knappen får),
+  Del-dialogens Twitter-`href`, og låser at Del = Kopier bag "Promilleberegner: ".
+  Dækker: tomt felt ingen "under grænsen", nul-vægt ingen konklusion, 0,50 siger
+  "på grænsen" og ikke "over grænsen" og ikke "0 timer", over grænsen siger
+  stadig "over grænsen", DA-strengen har alle fire input + 0,41 + 0,5, SE har
+  standardglas/timmar/0,2, og 0,88 med komma. **Verificeret modsvejs:** 6 af 8
+  falder med den gamle komponent.
+- **Efterladt, bevidst.** 1) Datofelter mangler `htmlFor` — samme a11y-fejl som
+  C59 fandt på `/alder`, men her er felterne talfelter med synlig label
+  *uden* `htmlFor`, så skærmlæsere læser dem uden navn. **C61-kandidat**; ikke
+   taget her, fordi det er en DOM-ændring i samme fil som tre andre rettelser.
+  2) `timerTilGraense` tæller fra den **viste** promille, så "under grænsen
+  igen" er først synligt, når displayet viser 0,49. Det er bevidst (C48's
+  lærepådom: tallet læst og tallet regnet må ikke kunne være uenige) og er
+  ikke en fejl, men det er grunden til at flisen siger `—` på grænsen i stedet
+  for et opdigtet "0,1 time".
+- **Gate:** `npm run lint` grøn (548 filer), `npm run test` **1537 tests / 143
+  filer** grøn (fra 1529 / 142), `npm run build` grøn (141 sider).
+- **MÅL:** `/promille` baseline **4.159 visninger / 60 klik / CTR 1,4 % / pos.
+  7,9** (GSC 2026-08-27 → 2026-09-24). Plausible: ikke blandt top-15 i
+  snapshot 2026-09-27. **Mål 2026-10-10.** Bemærk at ændringen **ikke**
+  forventes at løfte CTR — den retter tre forkerte eller ubrugelige udsagn i
+  det mest trafikfarlige værktøj på sitet. Effekten måles i `trackResultCopied` /
+  `trackShare` (**Mads skal hente dem, jeg må ikke ændre tracking**).
+- **Bemærk til søgningen efter denne klasse, opdateret.** Søgning (b) er nu
+  kørt — på én komponent, og den gav ingen *synlig* fejl, kun tre
+  konventionbrud. Søgning (c) — "regn formlerne igennem på randen af deres
+  interval" — har igen fundet den alvorligste fejl, og igen fordi den spørger
+  "hvad sker der lige uden for gyldigt input" og "hvad sker der i det øjeblik,
+  værdien er præcis lovens grænse", ikke fordi nogen læste 200 linjer kritisk.
+  De to tests, der bliver grønne modsvejs, er dem der kun tester det gamle
+  korrekte — det er det forventede billede.
+
+### Næste kandidater efter C60
+
+1. **`PromilleBeregner`'s talfelter mangler `htmlFor`** (C59's a11y-fund,
+   gentaget her). `field()` renderer `<label>` uden `htmlFor` og inputtet uden
+   `id`, så tre af sites mest brugte værktøjer har talfelter uden navn for
+   skærmlæsere. Samme `field()`-mønster findes i andre beregnere — værd at
+   tælle før der rettes, fordi rettelsen kan være én fælles ændring.
+2. **De 10 øvrige komponenter med `toFixed(2)`** (C53 sagde 18, `git grep`
+   tæller 11, hvoraf `PromilleBeregner` nu er lukket) — samme klasse som C53.
+3. **Rækkefølgen efter `PromilleBeregner` (4.159 visninger) i klassen "hvad
+   skriver den tekst, brugeren kopierer?"**: `/brok` (4.640, pos. 5,3) og
+   `/tidszone`-søstersiderne. `/brok` er desuden den side C42 fandt uden
+   redaktionelle indgående links, så den har to åbne fund.
+4. **Mål 2026-10-10** (se Måleprotokol): C1-C16 og C35-C60 måles 14 dage
+   efter deres snapshot, og resultatet skrives ved siden af hver opgave.
