@@ -1,8 +1,13 @@
 import { describe, it, expect } from "vitest";
 import { getPageData } from "./page-data";
 import {
+  BRAENDSTOF_EGENT_FORBRUG,
   BRAENDSTOF_FORUDSETNINGER,
   ELBIL_FORUDSETNINGER,
+  braendstofEksempelRækker,
+  heleKroner,
+  kmPrLiter,
+  literPr100km,
   besparelseProcent,
   breakEvenKwhPris,
   elbilForudsætninger,
@@ -203,5 +208,74 @@ describe("elbilSammenligning", () => {
     expect(BRAENDSTOF_FORUDSETNINGER.el.kwhPer100km).toBeLessThan(
       ELBIL_FORUDSETNINGER.da.elKwhPer100km,
     );
+  });
+});
+
+describe("literPr100km og kmPrLiter", () => {
+  it("omregner km/l til l/100 km, som tankinstrumentet viser", () => {
+    expect(literPr100km(15)).toBe(6.7);
+    expect(literPr100km(18)).toBe(5.6);
+    expect(literPr100km(12)).toBe(8.3);
+    expect(literPr100km(22)).toBe(4.5);
+    expect(literPr100km(15)).toBe(6.7);
+  });
+
+  it("omregner den anden vej", () => {
+    expect(kmPrLiter(6.7)).toBe(14.9);
+    expect(kmPrLiter(10.5)).toBe(9.5);
+  });
+
+  it("giver 0 i stedet for uendelig ved et ugyldigt forbrug", () => {
+    expect(literPr100km(0)).toBe(0);
+    expect(kmPrLiter(0)).toBe(0);
+    expect(literPr100km(-1)).toBe(0);
+  });
+});
+
+describe("braendstofEksempelRækker", () => {
+  const rækker = braendstofEksempelRækker();
+
+  it("regner benzinrækken til de 450 kr., titlen og beskrivelsen lover", () => {
+    const benzin = rækker[0];
+    expect(benzin.type).toBe("benzin");
+    expect(benzin.forbrug).toBe(15);
+    expect(benzin.maengde).toBe(33.3);
+    expect(benzin.pris).toBe(450);
+    expect(benzin.prisPrKm).toBeCloseTo(0.9, 10);
+  });
+
+  it("regner diesel og el på samme måde", () => {
+    const diesel = rækker[1];
+    expect(diesel.forbrug).toBe(18);
+    expect(diesel.maengde).toBe(27.8);
+    expect(diesel.pris).toBe(356);
+    expect(diesel.prisPrKm).toBeCloseTo(0.7111, 4);
+
+    const el = rækker[2];
+    expect(el.forbrug).toBe(17);
+    expect(el.maengde).toBe(85);
+    expect(el.pris).toBe(213);
+    expect(el.prisPrKm).toBeCloseTo(0.425, 10);
+  });
+
+  it("gør hvert regnestykke på siden efterprøvbart med hånden", () => {
+    // Prisen er rundet op til hele kroner fra den *afroundede* mængde, så det
+    // trykte "33,3 l × 13,50 kr." kan efterprøves som det står — ikke bare
+    // regnes på en skjult fuldpræcis værdi.
+    for (const række of rækker) {
+      expect(heleKroner(række.maengde * række.enhedPris)).toBe(række.pris);
+    }
+  });
+
+  it("laver el-rækken ingen l/100 km om, fordi der ikke er liter", () => {
+    expect(rækker[2].literPr100km).toBeNull();
+    expect(rækker[0].literPr100km).toBe(6.7);
+  });
+
+  it("følger en anden distance uden at ændre forudsætningerne", () => {
+    const tusinde = braendstofEksempelRækker(1000);
+    expect(tusinde[0].maengde).toBe(66.7);
+    expect(tusinde[0].pris).toBe(900);
+    expect(tusinde[0].prisPrKm).toBeCloseTo(0.9, 10);
   });
 });

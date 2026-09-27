@@ -48,6 +48,107 @@ export function procent1Decimals(value: number): number {
   return Math.round(value * 10) / 10;
 }
 
+/** The distance every worked example on the page uses. */
+export const BRAENDSTOF_EKSEMPEL_KM = 500;
+
+/**
+ * Litres per 100 km from km per litre. Fuel gauges in Denmark show l/100 km
+ * while this tool and most manuals use km/l, so the page has to translate.
+ * 15 km/l -> 6,7 l/100 km.
+ */
+export function literPr100km(kmPerLiter: number): number {
+  if (kmPerLiter <= 0) return 0;
+  return procent1Decimals(100 / kmPerLiter);
+}
+
+/** km per litre from litres per 100 km: 6,7 l/100 km -> 14,9 km/l. */
+export function kmPrLiter(literPr100km: number): number {
+  if (literPr100km <= 0) return 0;
+  return procent1Decimals(100 / literPr100km);
+}
+
+/** Whole kroner, the unit the page's own examples use. 449,55 -> 450. */
+export function heleKroner(value: number): number {
+  return Math.round(value);
+}
+
+export type BraendstofEksempelRække = {
+  type: BraendstofType;
+  /** "liter" or "kWh" — the unit the arithmetic above is in. */
+  enhed: "liter" | "kWh";
+  /** The consumption figure the page divides by: 15 km/l or 17 kWh/100 km. */
+  forbrug: number;
+  forbrugsEnhed: "km/l" | "kWh/100km";
+  /** Litres (or kWh) for the example distance, one decimal: 33,3. */
+  maengde: number;
+  /** The rounded quantity times the unit price, in whole kroner. */
+  pris: number;
+  /** Unit price as used in the multiplication: 13,5 or 2,5. */
+  enhedPris: number;
+  prisPrKm: number;
+  literPr100km: number | null;
+};
+
+/**
+ * The worked example behind the page's "Sådan regner du" table. The litres are
+ * rounded to one decimal *before* the price is multiplied, so every step in
+ * the printed arithmetic is one the reader can check by hand — and the first
+ * row is the same 450 kr. the title and description have always promised.
+ */
+export function braendstofEksempelRækker(km: number = BRAENDSTOF_EKSEMPEL_KM): BraendstofEksempelRække[] {
+  const benzin = BRAENDSTOF_FORUDSETNINGER.benzin;
+  const diesel = BRAENDSTOF_FORUDSETNINGER.diesel;
+  const el = BRAENDSTOF_FORUDSETNINGER.el;
+  const maengde = (kmPerLiter: number) => procent1Decimals(km / kmPerLiter);
+
+  const benzinM = maengde(benzin.kmPerLiter);
+  const dieselM = maengde(diesel.kmPerLiter);
+  const elM = procent1Decimals((km / 100) * el.kwhPer100km);
+
+  return [
+    {
+      type: "benzin",
+      enhed: "liter",
+      forbrug: benzin.kmPerLiter,
+      forbrugsEnhed: "km/l",
+      maengde: benzinM,
+      enhedPris: benzin.literPris,
+      pris: heleKroner(benzinM * benzin.literPris),
+      prisPrKm: prisPrKm("benzin"),
+      literPr100km: literPr100km(benzin.kmPerLiter),
+    },
+    {
+      type: "diesel",
+      enhed: "liter",
+      forbrug: diesel.kmPerLiter,
+      forbrugsEnhed: "km/l",
+      maengde: dieselM,
+      enhedPris: diesel.literPris,
+      pris: heleKroner(dieselM * diesel.literPris),
+      prisPrKm: prisPrKm("diesel"),
+      literPr100km: literPr100km(diesel.kmPerLiter),
+    },
+    {
+      type: "el",
+      enhed: "kWh",
+      forbrug: el.kwhPer100km,
+      forbrugsEnhed: "kWh/100km",
+      maengde: elM,
+      enhedPris: el.kwhPris,
+      pris: heleKroner(elM * el.kwhPris),
+      prisPrKm: prisPrKm("el"),
+      literPr100km: null,
+    },
+  ];
+}
+
+/**
+ * The tank-fill arithmetic behind "find your own consumption": litres added
+ * over kilometres driven. Real drivers have a trip computer, but plenty do the
+ * sum themselves, and it is the one answer the tool cannot give for them.
+ */
+export const BRAENDSTOF_EGENT_FORBRUG = { liter: 40, km: 380 } as const;
+
 /**
  * The defaults behind the /elbil tool. Deliberately a second set: the table on
  * /braendstof is a conservative fleet average, this is one modern car. Both

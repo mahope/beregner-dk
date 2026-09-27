@@ -9,6 +9,15 @@ import RelateredeArtikler from "@/components/RelateredeArtikler";
 import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
 import { BilforsikringAffiliate } from "@/components/AffiliateBox";
+import { formatNumber } from "@/lib/format";
+import {
+  BRAENDSTOF_EKSEMPEL_KM,
+  BRAENDSTOF_EGENT_FORBRUG,
+  BRAENDSTOF_FORUDSETNINGER,
+  braendstofEksempelRækker,
+  kmPrLiter,
+  literPr100km,
+} from "@/lib/braendstof";
 
 export async function generateMetadata() {
   return generatePageMetadata("braendstof");
@@ -18,6 +27,24 @@ export default async function BraendstofPage() {
   const locale = await getLocale();
   const domainConfig = await getCurrentDomainConfig();
   const pageData = getPageData("braendstof", locale) || getPageData("braendstof", "da")!;
+
+  /** Danish decimals, so every number in the prose is checkable by hand. */
+  const tal = (value: number, dec = 1) => formatNumber(value, "da", { maximumFractionDigits: dec });
+  /** Priser får altid to decimaler, så "13,50 kr." og "0,90 kr." kan efterprøves. */
+  const kr = (value: number) =>
+    formatNumber(value, "da", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const heleKroner = (value: number) => formatNumber(value, "da", { maximumFractionDigits: 0 });
+  const drivmiddelNavn: Record<string, string> = { benzin: "Benzin", diesel: "Diesel", el: "El" };
+  const braendstofKm = BRAENDSTOF_EKSEMPEL_KM;
+  const eksempelRækker = braendstofEksempelRækker();
+  const egentForbrug = BRAENDSTOF_EGENT_FORBRUG;
+  const egentForbrugKmPrLiter = egentForbrug.km / egentForbrug.liter;
+  const egentForbrugLiterPr100km = literPr100km(egentForbrugKmPrLiter);
+  const benzinForbrug = BRAENDSTOF_FORUDSETNINGER.benzin.kmPerLiter;
+  const benzinPr100 = literPr100km(benzinForbrug);
+  const benzinKmPrLiter = kmPrLiter(benzinPr100);
+  const benzinLav = 12;
+  const benzinHoej = 18;
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -49,6 +76,71 @@ export default async function BraendstofPage() {
       {/* Informativ tekst - SEO */}
       {locale === "da" && (
       <div className="prose max-w-none mb-8">
+        <h2>Sådan regner du benzinforbrug og pris ud med tal</h2>
+        <p>
+          Regnestykket er det samme hver gang: <strong>distance delt med forbrug</strong> giver
+          mængden, og mængden ganget med <strong>literprisen</strong> giver prisen. Her er de tre
+          drivmidler regnet på {braendstofKm} km med de forudsætninger, beregneren selv bruger.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Drivmiddel</th>
+              <th>Forbrug</th>
+              <th>Regnestykke</th>
+              <th>Pris</th>
+              <th>Pr. km</th>
+            </tr>
+          </thead>
+          <tbody>
+            {eksempelRækker.map((r) => (
+              <tr key={r.type}>
+                <td>{drivmiddelNavn[r.type]}</td>
+                <td>{tal(r.forbrug)} {r.forbrugsEnhed}</td>
+                <td>
+                  {r.type === "el"
+                    ? `${braendstofKm} × ${tal(r.forbrug)} ÷ 100 = ${tal(r.maengde)} kWh`
+                    : `${braendstofKm} ÷ ${tal(r.forbrug)} = ${tal(r.maengde)} l`}
+                  <br />
+                  {tal(r.maengde)} {r.enhed} × {kr(r.enhedPris)} kr. ={" "}
+                  <strong>{heleKroner(r.pris)} kr.</strong>
+                </td>
+                <td>{heleKroner(r.pris)} kr.</td>
+                <td>{kr(r.prisPrKm)} kr.</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p>
+          Priserne er rundet op til hele kroner, så benzinrækken er den 450 kr., titlen lover.
+          Bemærk at benzin er dyrere pr. km end diesel, selv om benzin ofte står billigere pr. liter
+          — det er afstanden pr. liter, der afgør prisen pr. km.
+        </p>
+
+        <h3>Sådan finder du dit eget forbrug</h3>
+        <p>
+          Har din bil ikke en turcomputer, så find forbruget selv: <strong>liter påfyldt delt med
+          km kørt</strong> er dit km/l. Fire påfyldninger på {egentForbrug.liter} liter over{" "}
+          {egentForbrug.km} km giver {egentForbrug.km} ÷ {egentForbrug.liter} ={" "}
+          <strong>{tal(egentForbrugKmPrLiter)} km/l</strong>, altså{" "}
+          {tal(egentForbrugLiterPr100km)} l/100 km. Kør gerne 300-400 km på fire fulde tankfyld —
+          en enkelt fyldning rammes let af en forkert aflæsning.
+        </p>
+
+        <h3>km/l eller l/100 km?</h3>
+        <p>
+          Tankinstrumentet viser l/100 km, mens værktøjer og manualer bruger km/l, og det er derfor
+          de samme tal kan se ud til at modsige hinanden. Omregningen er bare 100 divideret med
+          den anden enhed: {benzinForbrug} km/l er {tal(benzinPr100)} l/100 km, og{" "}
+          {tal(benzinPr100)} l/100 km er igen {tal(benzinKmPrLiter)} km/l. Et typisk dansk benzinbil
+          kører {benzinLav}-{benzinHoej} km/l, altså{" "}
+          {tal(literPr100km(benzinHoej))}-{tal(literPr100km(benzinLav))} l/100 km.
+        </p>
+      </div>
+      )}
+
+      {locale === "da" && (
+      <div className="prose max-w-none mb-8">
         <h2>Om brændstofforbrug</h2>
         <p>
           At forstå dit <strong>brændstofforbrug</strong> hjælper dig med at <strong>budgettere bilkørsel</strong>
@@ -58,8 +150,8 @@ export default async function BraendstofPage() {
 
         <h3>Typiske forbrug</h3>
         <ul>
-          <li><strong>Benzin:</strong> 12-18 km/l (5,5-8,3 l/100km)</li>
-          <li><strong>Diesel:</strong> 15-22 km/l (4,5-6,7 l/100km)</li>
+          <li><strong>Benzin:</strong> 12-18 km/l ({tal(literPr100km(18))}-{tal(literPr100km(12))} l/100km)</li>
+          <li><strong>Diesel:</strong> 15-22 km/l ({tal(literPr100km(22))}-{tal(literPr100km(15))} l/100km)</li>
           <li><strong>El:</strong> 15-20 kWh/100km (svarer til ca. 5-7 km/kWh)</li>
           <li><strong>Hybrid:</strong> 18-25 km/l (benzin-ækvivalent)</li>
         </ul>
