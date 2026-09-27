@@ -7828,7 +7828,7 @@ landmark=lån, piggybank=opsparing osv.).
 
 ## VERIFICÉR DEPLOY-log
 
-### ⏳ **VERIFICÉR DEPLOY: C94 — `/braendstof` dansk: regnestykkerne for benzin, diesel og el, km/l ↔ l/100 km og tankfyld-metoden (16.764 visninger, CTR 1,1 %, pos. 6,0).** Kode + plan i ét commit på `ceo/braendstof-metode`, merge-ref udfyldes ved merge. Første kandidatvindue **2026-09-27 17:30**. Verificér ved **indhold, ikke HTTP 200 alene**:
+### ⏳ **VERIFICÉR DEPLOY: C94 — `/braendstof` dansk: regnestykkerne for benzin, diesel og el, km/l ↔ l/100 km og tankfyld-metoden (16.764 visninger, CTR 1,1 %, pos. 6,0).** Kode `7a929de`, merge `51d66d9` 2026-09-27 15:47 CEST på branch `ceo/braendstof-metode`. Første kandidatvindue **2026-09-27 17:30**. Verificér ved **indhold, ikke HTTP 200 alene**:
    1. `curl -s https://minberegner.dk/braendstof | sed 's/<!-- -->//g'` skal have **"500 ÷ 15 = 33,3 l"**, **"500 ÷ 18 = 27,8 l"**, **"500 × 17 ÷ 100 = 85 kWh"**, **"356 kr."**, **"213 kr."**, **"380 ÷ 40"**, **"9,5 km/l"** og **"5,6-8,3 l/100km"**.
    2. Den gamle fejl skal være væk: **0** fund på **"5,5-8,3"**.
    3. `sed`-trinnet er ikke valgfrit — React skriver `<!-- -->` mellem tekstnoder, så et rå grep giver falske 0-tal (målefejl nr. 16).
