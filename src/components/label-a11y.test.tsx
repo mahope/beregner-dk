@@ -16,6 +16,7 @@
  */
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, test, vi } from "vitest";
+import AktieskatBeregner from "./AktieskatBeregner";
 import AlderBeregner from "./AlderBeregner";
 import AlkoholenhederBeregner from "./AlkoholenhederBeregner";
 import BefordringsfradragBeregner from "./BefordringsfradragBeregner";
@@ -26,11 +27,13 @@ import BraendstofBeregner from "./BraendstofBeregner";
 import BrokBeregner from "./BrokBeregner";
 import BoernepengBeregner from "./BoernepengBeregner";
 import DatoBeregner from "./DatoBeregner";
+import DelRegningBeregner from "./DelRegningBeregner";
 import EjendomsvaerdiskatBeregner from "./EjendomsvaerdiskatBeregner";
 import EnhederBeregner from "./EnhederBeregner";
 import EfterloensBeregner from "./EfterloensBeregner";
 import Elberegner from "./Elberegner";
 import EnhedsprisBeregner from "./EnhedsprisBeregner";
+import FeriepengeBeregner from "./FeriepengeBeregner";
 import GaeldsfriBeregner from "./GaeldsfriBeregner";
 import HuslejeBudgetBeregner from "./HuslejeBudgetBeregner";
 import KalorieBeregner from "./KalorieBeregner";
@@ -38,12 +41,16 @@ import KvadratmeterBeregner from "./KvadratmeterBeregner";
 import LaaneBeregner from "./LaaneBeregner";
 import LeasingBeregner from "./LeasingBeregner";
 import LoenKonverterBeregner from "./LoenKonverterBeregner";
+import LonEfterSkattBeregner from "./LonEfterSkattBeregner";
 import LoenstigningBeregner from "./LoenstigningBeregner";
 import MomsBeregner from "./MomsBeregner";
+import MotionKalorierBeregner from "./MotionKalorierBeregner";
 import PensionBeregner from "./PensionBeregner";
 import PromilleBeregner from "./PromilleBeregner";
 import RentefradragBeregner from "./RentefradragBeregner";
+import RabatBeregner from "./RabatBeregner";
 import RenteBeregner from "./RenteBeregner";
+import RygestopBeregner from "./RygestopBeregner";
 import TidsBeregner from "./TidsBeregner";
 import TidszoneBeregner from "./TidszoneBeregner";
 import ValutaBeregner from "./ValutaBeregner";
@@ -507,6 +514,75 @@ describe("Feltnavn for skærmlæsere — de fire mest besøgte beregnere", () =>
         expectFieldsAreNamed(container);
         const gruppe = container.querySelector('[role="group"][aria-labelledby="loen-konverter-enhed"]');
         expect(gruppe?.querySelectorAll("button").length).toBe(3);
+      });
+
+      test("/aktieskat: depottype er en gruppe, gevinst og tab er felter", () => {
+        const { container } = renderIn(locale, AktieskatBeregner);
+        expectFieldsAreNamed(container);
+        const gruppe = container.querySelector('[role="group"][aria-labelledby="aktieskat-depottype"]');
+        expect(gruppe?.querySelectorAll("button").length).toBe(3);
+        expect(container.querySelector("#aktieskat-gevinst")).not.toBeNull();
+        expect(container.querySelector("#aktieskat-tab")).not.toBeNull();
+      });
+
+      test("/delregning: beløb, antal personer og drikkepenge har navn — også knapperne", () => {
+        const { container } = renderIn(locale, DelRegningBeregner);
+        expectFieldsAreNamed(container);
+        // Tællerknapperne hed bare "−" og "+", så en skærmlæser læste
+        // "minus" og "plus" uden at vide hvad de gjorde ved. De skal have
+        // hver sit eget navn — de er knapper, ikke piltaster i et talfelt.
+        const tæller = Array.from(
+          container.querySelector("#delregning-personer")?.parentElement?.querySelectorAll("button") ?? [],
+        );
+        expect(tæller.length).toBeGreaterThanOrEqual(2);
+        for (const knap of tæller) {
+          expect(knap.getAttribute("aria-label")?.trim().length ?? 0).toBeGreaterThan(1);
+          expect(knap.textContent?.trim()).toMatch(/^[−+]$/);
+        }
+        expect(
+          container.querySelector('[role="group"][aria-label]')?.querySelectorAll("button").length,
+        ).toBe(4);
+      });
+
+      test("/feriepenge: bruttoløn, periode og feriedage har navn", () => {
+        const { container } = renderIn(locale, FeriepengeBeregner);
+        expectFieldsAreNamed(container);
+        const gruppe = container.querySelector('[role="group"][aria-labelledby="feriepenge-periode"]');
+        expect(gruppe?.querySelectorAll("button").length).toBe(2);
+        expect(container.querySelector("#feriepenge-feriedage")).not.toBeNull();
+      });
+
+      test("/lon-efter-skatt: løn, kommunalskatt og kirkemedlemskab har navn", () => {
+        const { container } = renderIn(locale, LonEfterSkattBeregner);
+        expectFieldsAreNamed(container);
+        // "Løn" dækkede både periode-knapperne og lønfeltet. Nu binder den
+        // synlige etikette til feltet, og knapperne er deres egen gruppe.
+        expect(container.querySelector('[role="group"][aria-label="Period"]')?.querySelectorAll("button").length).toBe(2);
+        expect(container.querySelector("#lon-efter-skatt-lon")).not.toBeNull();
+        expect(container.querySelector("#lon-efter-skatt-kyrko")).not.toBeNull();
+      });
+
+      test("/motionkalorier: aktivitet, vægt og varighed har navn", () => {
+        const { container } = renderIn(locale, MotionKalorierBeregner);
+        expectFieldsAreNamed(container);
+        expect(container.querySelector("#motionkalorier-aktivitet")?.tagName).toBe("SELECT");
+        expect(container.querySelectorAll("#motionkalorier-vaegt, #motionkalorier-varighed").length).toBe(2);
+      });
+
+      test("/rabat: alle tre tilstandes felter har navn", () => {
+        const { container } = renderIn(locale, RabatBeregner);
+        expectFieldsAreNamed(container);
+        // Filen har to beregningstilstande, og hver har sit eget sæt felter —
+        // derfor tælles de to der *er* i DOM'en, ikke tre.
+        const felter = container.querySelectorAll("#rabat-originalpris, #rabat-procent, #rabat-tilbudspris");
+        expect(felter.length).toBe(2);
+        expect(container.querySelector("#rabat-originalpris")).not.toBeNull();
+      });
+
+      test("/rygestop: cigaretter, pakkepris og pakkestørrelse har navn", () => {
+        const { container } = renderIn(locale, RygestopBeregner);
+        expectFieldsAreNamed(container);
+        expect(container.querySelectorAll("#rygestop-cigaretter, #rygestop-pakkepris, #rygestop-pakkestoerrelse").length).toBe(3);
       });
     });
   }

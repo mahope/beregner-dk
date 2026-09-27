@@ -99,8 +99,8 @@ export default function MotionKalorierBeregner() {
       <div className="grid md:grid-cols-2 gap-6">
         <div className="space-y-4">
           <div>
-            <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">{l.activity}</label>
-            <select value={activity} onChange={(e) => setActivity(e.target.value)}
+            <label htmlFor="motionkalorier-aktivitet" className="block text-xs text-gray-600 dark:text-gray-400 mb-1">{l.activity}</label>
+            <select id="motionkalorier-aktivitet" value={activity} onChange={(e) => setActivity(e.target.value)}
               className="w-full px-4 py-2.5 border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white">
               {AKTIVITETER.map((a) => (
                 <option key={a.id} value={a.id}>{l.act[a.id]}</option>
@@ -108,17 +108,17 @@ export default function MotionKalorierBeregner() {
             </select>
           </div>
           <div>
-            <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">{l.weight}</label>
+            <label htmlFor="motionkalorier-vaegt" className="block text-xs text-gray-600 dark:text-gray-400 mb-1">{l.weight}</label>
             <div className="relative">
-              <input type="number" min="0" step="1" value={weight} onChange={(e) => setWeight(Number(e.target.value))}
+              <input id="motionkalorier-vaegt" type="number" min="0" step="1" value={weight} onChange={(e) => setWeight(Number(e.target.value))}
                 className="w-full px-4 py-2.5 pr-12 border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">kg</span>
             </div>
           </div>
           <div>
-            <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">{l.duration}</label>
+            <label htmlFor="motionkalorier-varighed" className="block text-xs text-gray-600 dark:text-gray-400 mb-1">{l.duration}</label>
             <div className="relative">
-              <input type="number" min="0" step="5" value={duration} onChange={(e) => setDuration(Number(e.target.value))}
+              <input id="motionkalorier-varighed" type="number" min="0" step="5" value={duration} onChange={(e) => setDuration(Number(e.target.value))}
                 className="w-full px-4 py-2.5 pr-12 border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">{l.minutes}</span>
             </div>

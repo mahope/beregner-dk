@@ -122,11 +122,11 @@ export default function RabatBeregner() {
 
       <div className="mt-6 space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+          <label htmlFor="rabat-originalpris" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
             {l.originalPris}
           </label>
           <div className="relative">
-            <input
+            <input id="rabat-originalpris"
               type="number" min="0" step="0.01" value={originalPris}
               onChange={(e) => setOriginalPris(Number(e.target.value))}
               className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white"
@@ -137,11 +137,11 @@ export default function RabatBeregner() {
 
         {mode === "pris-efter-rabat" && (
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+            <label htmlFor="rabat-procent" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
               {l.rabatProcent}
             </label>
             <div className="relative">
-              <input
+              <input id="rabat-procent"
                 type="number" min="0" max="100" step="0.1" value={rabatProcent}
                 onChange={(e) => setRabatProcent(Number(e.target.value))}
                 className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white"
@@ -153,11 +153,11 @@ export default function RabatBeregner() {
 
         {mode === "find-rabat-procent" && (
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+            <label htmlFor="rabat-tilbudspris" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
               {l.tilbudspris}
             </label>
             <div className="relative">
-              <input
+              <input id="rabat-tilbudspris"
                 type="number" min="0" step="0.01" value={tilbudspris}
                 onChange={(e) => setTilbudspris(Number(e.target.value))}
                 className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg dark:border-gray-600 dark:bg-gray-700 dark:text-white"
