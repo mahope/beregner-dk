@@ -1,4 +1,4 @@
-import { parseIsoDato } from "@/lib/lokal-dato";
+import { heleDageMellem, parseIsoDato } from "@/lib/lokal-dato";
 
 export interface AlderInput {
   /** "YYYY-MM-DD" */
@@ -21,8 +21,6 @@ export interface AlderResultat {
   /** Datoen for næste fødselsdag, så værktøjet ikke skal finde den igen. */
   naesteFoedselsdagDato: Date;
 }
-
-const MS_PER_DAG = 1000 * 60 * 60 * 24;
 
 /**
  * Alderen mellem to datoer, i hele år, måneder og dage.
@@ -59,9 +57,13 @@ export function beregnAlder(input: AlderInput): AlderResultat | null {
     maaneder += 12;
   }
 
-  const totalDage = Math.floor(
-    (beregningsDate.getTime() - foedselsDate.getTime()) / MS_PER_DAG
-  );
+  // Kalenderdage, ikke millisekunder: mellem to lokale midnat er der 23 timer
+  // det døgn hvor Danmark går frem (søndag 29. marts 2026) og 25 timer det døgn
+  // hvor Danmark går tilbage (søndag 25. oktober 2026). Et interval der
+  // krydser et af dem har derfor ikke et helt døgn pr. døgn, og "Dage levet"
+  // holdt op med at være en kalenderdag for cirka halvdelen af alle
+  // fødselsdatoer. Samme grund som C55's `heleDageMellem` på `/dato`.
+  const totalDage = heleDageMellem(foedselsDate, beregningsDate);
   const totalTimer = totalDage * 24;
 
   // Næste fødselsdag er altid næste årsdag, så alderen der er altid ett år
@@ -84,9 +86,9 @@ export function beregnAlder(input: AlderInput): AlderResultat | null {
     totalMaaneder: aar * 12 + maaneder,
     totalTimer,
     totalMinutter: totalTimer * 60,
-    dageTilFoedselsdag: Math.floor(
-      (naesteFoedselsdag.getTime() - beregningsDate.getTime()) / MS_PER_DAG
-    ),
+    // Samme kalenderdag-regning som `totalDage`. En fødselsdag i den uge hvor
+    // uret stilles om gav "363 dage" for et interval på 364.
+    dageTilFoedselsdag: heleDageMellem(beregningsDate, naesteFoedselsdag),
     naesteFoedselsdagAlder: aar + 1,
     naesteFoedselsdagDato: naesteFoedselsdag,
   };

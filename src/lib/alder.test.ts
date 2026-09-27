@@ -1,3 +1,13 @@
+/**
+ * Tidszonen låses til Danmark, fordi det er dér fejlen lå: mellem to lokale
+ * midnat er der 23 timer det døgn Danmark går frem (29. marts 2026) og 25 timer
+ * det døgn Danmark går tilbage (25. oktober 2026). På en maskine med UTC-tid
+ * er alle dage 24 timer, så de to tests til sidst kan aldrig fejle der — de
+ * skal kun fejle, fordi regnestykket tæller millisekunder i stedet for
+ * kalenderdage.
+ */
+process.env.TZ = "Europe/Copenhagen";
+
 import { describe, expect, test } from "vitest";
 import { beregnAlder } from "./alder";
 import { ALDER_EKSEEMPLER, formatAlder } from "./alder-eksempler";
@@ -6,7 +16,7 @@ describe("beregnAlder", () => {
   test("tæller hele år, måneder og dage", () => {
     const r = beregnAlder({ foedselsdato: "1990-03-15", beregningsdato: "2026-09-25" });
     expect(r).not.toBeNull();
-    expect(r).toMatchObject({ aar: 36, maaneder: 6, dage: 10, totalDage: 13342 });
+    expect(r).toMatchObject({ aar: 36, maaneder: 6, dage: 10, totalDage: 13343 });
   });
 
   test("totalerne er uafhængige af den kalenderkonvention, måneder og dage bruger", () => {
@@ -17,6 +27,29 @@ describe("beregnAlder", () => {
     expect(r?.totalMaaneder).toBe(1);
     expect(r?.totalTimer).toBe(58 * 24);
     expect(r?.totalMinutter).toBe(58 * 24 * 60);
+  });
+
+  test("tæller kalenderdage, ikke millisekunder, når uret stilles om", () => {
+    // 15. marts 1990 → 25. september 2026 krydser 37 gange op og 36 gange ned,
+    // så der går én time mere end 13.343 døgn. Før C59 sagde "Dage levet"
+    // 13342 her — og i eksempeltabellen på /alder.
+    const r = beregnAlder({ foedselsdato: "1990-03-15", beregningsdato: "2026-09-25" });
+    expect(r?.totalDage).toBe(13343);
+    expect(r?.totalTimer).toBe(13343 * 24);
+    // Og et interval der kun krydder nedslaget, 24. okt. → 27. okt. 2026.
+    const e = beregnAlder({ foedselsdato: "2026-10-24", beregningsdato: "2026-10-27" });
+    expect(e?.totalDage).toBe(3);
+  });
+
+  test("nedtællingen til fødselsdagen tæller også kalenderdage", () => {
+    // Fødselsdag 25. oktober: det døgn Danmark går tilbage har 25 timer, så
+    // intervallet 26. okt. 2026 → 25. okt. 2027 er 364 dage og 23 timer. Før
+    // C59 sagde siden "Der er 363 dage til din næste fødselsdag".
+    const r = beregnAlder({ foedselsdato: "1990-10-25", beregningsdato: "2026-10-26" });
+    expect(r?.dageTilFoedselsdag).toBe(364);
+    // Samme fødselsdag, dagen hvor uret stilles om: et døgn før, ikke to.
+    const i = beregnAlder({ foedselsdato: "1990-10-25", beregningsdato: "2026-10-24" });
+    expect(i?.dageTilFoedselsdag).toBe(1);
   });
 
   test("låner dage fra den måned, der går umiddelbart forud", () => {

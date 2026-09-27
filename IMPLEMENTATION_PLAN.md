@@ -1,6 +1,45 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — **C58 er landet: `/kalorier` anbefalede negative kalorier, og den
+STATUS: KØ — **C59 er landet: `/alder` har regnet "Dage levet" i millisekunder,
+og den delte tekst var et tal uden de to datoer alderen er et svar på.** Den
+tolvtestrække-klasse ("hvad skriver den tekst, brugeren kopierer?") har fundet
+en reel fejl **for sjette gang i træk** — og denne gang lå den to steder i
+samme fil, hvoraf det ene var **ikke** en streng men et regnestykke. **1) "Dage
+levet" var en dag for kort for cirka halvdelen af alle fødselsdatoer.**
+`totalDage` var `Math.floor((slut - fra) / 86.400.000)`, altså i millisekunder.
+Mellem to lokale midnat er der **23 timer** det døgn Danmark går frem (søndag
+29. marts 2026) og **25 timer** det døgn Danmark går tilbage (søndag 25. oktober
+2026), så et interval der krydser skiftet har ikke et helt døgn pr. døgn. Sitets
+**eget eksempel** på siden — 15. marts 1990 → 25. september 2026 — sagde
+**13342**, som er 13343 kalenderdage, fordi intervallet krydser 37 gange op og
+36 gange ned i uret. Samme fejl lå i `dageTilFoedselsdag`: en fødselsdag **25.
+oktober** fik "Der er **363** dage til din næste fødselsdag" for 364 dage. Begge
+tæller nu med `heleDageMellem` — den samme kalenderhjælper C55 byggede til
+`/dato` for præcis denne fejl, som altså lå i to moduler og ikke ét. **2) Den
+delte tekst var "36 år, 6 mdr, 10 dage"** — et tal uden fødselsdag og
+beregningsdag, i det værktøj der *netop* handler om "alder pr. dato" (C47 lagde
+feltet), og i en streng der bliver ligegyldig den dag et delt link læses, fordi
+alderen da er en anden. Den skrev desuden **sin egen grammatik**: skærmens store
+tal kommer fra `formatAlder` ("1 måned og 1 dag"), mens den delte tekst skrev
+"1 mdr, 1 dage" — to sprog for samme tal i samme værktøj. Nu bygger ét
+`deltTekst()` hele strengen til **både** Kopier og Del: *"Født 15. marts 1990 —
+36 år, 6 måneder og 10 dage pr. 25. september 2026."* Alderen kommer fra den
+samme `formatAlder` som skærmen bruger, så de to ikke kan komme fra hinanden,
+og `l.copySummary` er **fjernet fra begge locales** (den var det, der lod dem
+afvige). **3) Fund fra samme gennemgang:** `new Date("1990-03-15")` tolceres som
+**UTC-midnat** mens `.getDay()`, `.getDate()` og `toLocaleDateString` læses i
+lokal tid, så **stjernetegn, ugedag og fødselsdato** var dagen før for enhver
+læser vest for UTC — samme fejl som C54 fjernede to steder af, og den lå også i
+den delte tekst. Nu én `formatDato` på lokal midnat, brugt af både skærm og
+Kopier. `AlderBeregner.test.tsx` er **ny med 4 tests** (komponenten havde
+ingen); `alder.test.ts` **låser tidszonen til `Europe/Copenhagen`** — i UTC er
+alle døgn 24 timer, så de to nye DST-tests kan aldrig fejle på en byggemaskine.
+Verificeret modsvejs: de to nye lib-tests og "Dage levet"-testen falder med den
+gamle kode. Gate grøn: lint (547 filer), **1528 tests / 142 filer** (fra 1522 /
+141) og build (141 sider). Kode + plan i ét commit på `ceo/alder-kopi`, merge
+2026-09-27 03:0x CEST; første kandidatvindue **2026-09-27 07:30**. Se opgave 87.
+
+STATUS (forrige iteration) — **C58 er landet: **C58 er landet: `/kalorier` anbefalede negative kalorier, og den
 delte tekst var ét tal uden de fem input det afhænger af.** Klassen fra punkt 3b
 i køen (C52, C53, C55, C56, C57 — "hvad skriver den tekst, brugeren kopierer?")
 har nu fundet en reel fejl **for femte gang i træk**, og her var den
@@ -6288,7 +6327,96 @@ top-15, så ud over CTR er det eneste målbare signal `ad_clicked` på siden.
   blik.
 
 
+#### 87. [x] FÆRDIG 2026-09-27 — C59 — `/alder`: "Dage levet" tællede millisekunder, og den delte tekst var et tal uden de to datoer
+
+- **Datagrund:** `/alder` er **nr. 13 i den danske GSC-liste** (6.013 visninger,
+  35 klik, CTR 0,6 %, pos. 7,8) og **nr. 9 på svensk** (2.895, 8 klik, 0,3 %,
+  pos. 7,7). Køens rækkefølge er efter visninger, så `AlderBeregner` var
+  næste efter `KalorieBeregner` (C58), og `PromilleBeregner` (4.159) er den
+  næste efter denne.
+- **Fund 1 — `src/lib/alder.ts` tæller millisekunder, to steder.**
+  `totalDage` (linje 62) og `dageTilFoedselsdag` (linje 87) var begge
+  `Math.floor((slut - fra) / MS_PER_DAG)`. Kalenderdage og millisekunder er
+  ikke det samme i Danmark to gange om året, så **"Dage levet"** — og alt der
+  udledes af det (uger, måneder, timer, minutter, altså fire af de seks tal i
+  den detaljerede tabel) — var **én dag for kort** for de fødselsdatoer hvor
+  antallet af urets frem- og tilbagstillinger i intervallet er ulige. Det er
+  ikke et hjørnefælde: sidens **eget eksempel** er et af dem (15. marts 1990 →
+  25. september 2026 krydser 37 op og 36 ned) og stod som **13342** i stedet for
+  13343 — i værktøet *og* i eksempeltabellen på siden. Samme årsag som C55's
+  fund på `/dato`, i et andet modul: **den samme fejl lå to steder**, så en
+  søgning efter `Math.floor` på ét sted ville ikke have fundet den anden.
+  Rettelsen er `heleDageMellem` fra `src/lib/lokal-dato.ts` — den hjælper C55
+  lagde ind i repoet, som altså allerede var den rigtige løsning.
+- **Fund 2 — `AlderBeregner.tsx`'s `l.copySummary` var en påstand uden
+  vilkår.** Kopier og Del gav "36 år, 6 mdr, 10 dage": ingen fødselsdag, ingen
+  beregningsdag. Det er hele pointen med `/alder` — siden blev bygget om til
+  "alder pr. dato" i C47, og *delt* resultat uden datoerne kan hverken
+  tjekkes mod skærmen eller bruges senere, fordi alderen da er en anden.
+- **Fund 3 — samme streng havde sin egen grammatik.** Skærmens store tal går
+  gennem `formatAlder` i `src/lib/alder-eksempler.ts`, hvis egen JSDoc lover at
+  "værktøjet bruger den samme formatter, så de to aldrig viser forskellige
+  grammatikker for samme tal" — men `copySummary` skrev sine egne tal: `1 mdr,
+  1 dage` i dansk, `1 mån, 1 dagar` i svensk, ingen "og", ingen ental. Løftet i
+  formatterens egen dokumentation var altså ikke sandt for den tredje
+  udgave af tallet. Nu er der **én** `deltTekst()`, som begge knapper bruger,
+  med `formatAlder(b, locale)` og begge datoer:
+  DA *"Født 15. marts 1990 — 36 år, 6 måneder og 10 dage pr. 25. september
+  2026."* / SE *"Född 15 mars 1990 — 36 år, 6 månader och 10 dagar per 25
+  september 2026."* `l.copySummary` er slettet fra **begge** locales, så det er
+  ikke længere muligt for dem at afvige.
+- **Fund 4 — UTC-midnat læst i lokal tid.** `new Date("1990-03-15")` tolteres
+  som **UTC**-midnat, mens `getStjernetegnIndex(foedselsDate)`,
+  `l.weekdays[foedselsDate.getDay()]` og `toLocaleDateString` læses i **lokal**
+  tid. For en læser vest for UTC er det dagen **før**: stjernetegnet, ugedagen
+  født og den viste fødselsdato var alle en dag tidligere. Samme fejltype som
+  C54 fjernede to steder af, og den lå også i den fødselsdato den delte tekst
+  nu skriver. Én `formatDato(iso)` på lokal midnat bruges nu af både
+  "Født på en"-flisen og Kopier. **Mærk:** Danmark, Sverige og Norge ligger
+  alle i UTC+, så dette har **ikke** ramt danske brugere — det er fundet fordi
+  klassen er "find det sted, hvor den samme værdi læses to måder", ikke fordi
+  nogen har meldt en fejl.
+- **Test:** `src/components/AlderBeregner.test.tsx` er **ny, 4 tests** —
+  komponenten havde ingen. Den klikker Kopier og læser **klipbordet** (knappen
+  viser ikke strengen, jf. C56), låser tidszonen til `Europe/Copenhagen`, og
+  dækker: begge datoer i strengen, samme ental/flertal som skærmen (finder skærmens
+  egen "11 år, 1 måned og 0 dage" og kræver at Kopier siger det samme), hele
+  den svenske sætning, og "Dage levet" = 13.343. `alder.test.ts` vokser fra 16
+  til **18** tests med de to DST-regressioner.
+- **Efterladt, bevidst.** 1) `ShareCalculation`s **Del-dialog** (Twitter-,
+  Facebook- og mail-linket) er ikke testet her — C57's test læser Del-linkets
+  `href`, men linket ligger i en modal, der først skal åbnes, og den test krævede
+   mere tid end denne iteration havde. Det er den næste test at skrive, fordi
+   den låser Kopier mod Del i `AlderBeregner`; samme mønster bør køres på de
+   fire andre komponenter, C52-C57 rørte. 2) Datofelterne på `/alder` har et
+  `<label>` uden `htmlFor` og uden `id` på inputtet, så de er **ikke
+  programmatisk tilknyttet** — skærmlæsere får inputfeltet læst uden navn, og
+  `getByLabelText` kan ikke finde dem (testen må gå via `querySelectorAll`).
+  Det er en reel a11y-fejl, men den kræver DOM-ændring i en publiceret side, så
+  den er **C60-kandidat**, ikke en sideopgave i dette hug. 3) `PromilleBeregner`
+  (4.159 visninger) er **næste i rækkefølgen** i denne klasse.
+- **Gate:** `npm run lint` grøn (547 filer), `npm run test` **1528 tests / 142
+  filer** grøn (fra 1522 / 141), `npm run build` grøn (141 sider). Første
+  kandidatvindue **2026-09-27 07:30**.
+- **MÅL:** `/alder` baseline **6.013 visninger / 35 klik / CTR 0,6 % / pos. 7,8**
+  (GSC 2026-08-27 → 2026-09-24). SE `/alder` baseline **2.895 visninger / 8
+  klik / 0,3 % / pos. 7,7**. **Mål 2026-10-10.** Bemærk at denne ændring
+  **ikke** forventes at løfte CTR — den retter tal, der var forkerte, og en tekst
+  der var ubrugelig at dele. Effekten skal måles i `trackResultCopied` /
+  `trackShare` (**Mads skal hente dem, jeg må ikke ændre tracking**).
+- **Bemærk til søgningen efter denne klasse, opdateret.** Se seks fund i træk
+  nu (C52, C53, C55, C56, C57, C58, C59). C59's vigtigste læring: **C58's
+  søgning (c) — "regn formlerne igennem på randen af deres interval" — er den
+  der virker, og den er billigere end den lyder.** Den fandt her både
+  millisekunder-fejlen og UTC-fejlen ved at spørge "hvordan læses denne værdi to
+  steder" og "hvad er sandheden for den her dato", ikke ved at læse 400 linjer
+  kritisk. Søgning (b) — **decimaler i literals** — er stadig **ikke kørt**:
+  `grep -n "[0-9]\.[0-9]" src/components/*.tsx src/lib/*.ts`. Den er billig og
+  bør køre   som en del af næste komponent i klassen.
+
 ### Næste kandidater efter C34 — lukket med negativt fund
+
+
 
 
 
@@ -6485,9 +6613,11 @@ efter datagrund:
    C55, C56). **Læst i rækkefølge efter visninger:** `DatoBeregner` (130.392)
    → se opgave 83, `TidszoneBeregner` (24.723) → se opgave 84,
    `RenteBeregner` (13.623) → se opgave 85, `KalorieBeregner` (12.332) → se
-   opgave 86. **Ulæste af samme overflade:**
-   `AlderBeregner`'s `l.copySummary` (6.013), `PromilleBeregner` (4.159) — og
-   de 11 komponenter med `toFixed(2)` (C53 sagde 18 — `git grep` tæller 11).
+   opgave 86, `AlderBeregner` (6.013) → se opgave 87. **Næste i rækkefølgen:
+   `PromilleBeregner` (4.159)** — og C59's to sidste tests skal med, fordi de er
+   dem der låser Kopier mod Del. **Ulæste af samme overflade:**
+   de 11 komponenter med `toFixed(2)` (C53 sagde 18 — `git grep` tæller 11), og
+   **søgning (b) decimaler i literals**, der stadig ikke er kørt.
    **Bemærk fra C56:** `toFixed(2)` er **ikke** en fuldstændig søgning på
    denne klasse. C56's brudtal kom fra `/60` på et heltal, altså en template
    med et rått tal, som `git grep toFixed` aldrig kan finde. Den rigtige
@@ -6513,6 +6643,18 @@ efter datagrund:
    `/api/v1/loen`'s kommuneskat, domænerne og `www`-redirects.
 
 ### ❓ Til Mads
+- ⏳ **VERIFICÉR DEPLOY: C59 `/alder` — "Dage levet" tæller kalenderdage, og den
+  delte tekst har begge datoer — kode + plan i ét commit på branch
+  `ceo/alder-kopi`, kode `<KODE_SHA>`, merge `<MERGE_SHA>` 2026-09-27 02:2x
+  CEST. Første kandidatvindue **2026-09-27 07:30**.** Verificér **indhold**;
+  HTTP 200 beviser intet, hele fundet er i tal der renderes på klienten:
+  1. `/alder`, fødselsdato **15. marts 1990**, beregningsdato **25. september
+     2026** → "Dage levet" skal stå **13.343** (var 13.342).
+  2. Samme opsætning → **Kopiér resultat** skal lægge
+     "Født 15. marts 1990 — 36 år, 6 måneder og 10 dage pr. 25. september 2026."
+     i klipbordet (var "36 år, 6 mdr, 10 dage").
+  3. `/alder` på **beraknare.se** skal give den svenske sætning.
+  `/api/health` skal svare `status: ok`. Se VERIFICÉR DEPLOY-loggen.
 - ❓ **Skal `/kalorier` have et hårdt kaloriegulv ud over BMR? (C58,
   2026-09-27).** C58 lagde BMR som gulv under anbefalingen, fordi det er den
   etablerede regel og et tal værktøjet selv regner. Men **BMR er ikke et

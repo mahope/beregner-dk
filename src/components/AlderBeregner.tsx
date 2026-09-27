@@ -39,7 +39,8 @@ export default function AlderBeregner() {
       ageInDays: "Alder i dage",
       ageInHours: "Alder i timer",
       ageInMinutes: "Alder i minutter",
-      copySummary: (aar: number, mdr: number, dage: number) => `${aar} år, ${mdr} mdr, ${dage} dage`,
+      copyFrame: (alder: string, fodt: string, prDato: string) =>
+        `Født ${fodt} — ${alder} pr. ${prDato}.`,
       calcName: "Aldersberegner",
       errorFutureBirth: "Fødselsdatoen kan ikke være efter beregningsdatoen.",
       emptyPrompt: "Indtast din fødselsdato for at se din præcise alder",
@@ -81,7 +82,8 @@ export default function AlderBeregner() {
       ageInDays: "Ålder i dagar",
       ageInHours: "Ålder i timmar",
       ageInMinutes: "Ålder i minuter",
-      copySummary: (aar: number, mdr: number, dage: number) => `${aar} år, ${mdr} mån, ${dage} dagar`,
+      copyFrame: (alder: string, fodt: string, prDato: string) =>
+        `Född ${fodt} — ${alder} per ${prDato}.`,
       calcName: "Ålderskalkylator",
       errorFutureBirth: "Födelsedatumet kan inte vara efter beräkningsdatumet.",
       emptyPrompt: "Ange ditt födelsedatum för att se din exakta ålder",
@@ -170,7 +172,11 @@ export default function AlderBeregner() {
       naesteFoedselsdagAlder,
     } = alder;
 
-    const foedselsDate = new Date(foedselsdato);
+    // `new Date("1990-03-15")` tolceres som UTC-midnat, og `.getDay()`,
+    // `.getDate()` og `toLocaleDateString` læses i lokal tid — så en læser
+    // vest for UTC fik dagen før stjernetegn, ugedag og fødselsdato. Samme
+    // fejl som C54 fjernede to steder af, og den lå også i den delte tekst.
+    const foedselsDate = new Date(`${foedselsdato}T00:00:00`);
 
     // Stjernetegn
     const stjernetegnIndex = getStjernetegnIndex(foedselsDate);
@@ -232,6 +238,31 @@ export default function AlderBeregner() {
   const formatNumber = (num: number) => {
     return new Intl.NumberFormat(intlLocale).format(num);
   };
+
+  const formatDato = (iso: string) =>
+    new Date(`${iso}T00:00:00`).toLocaleDateString(intlLocale, {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+
+  // Én streng til Kopier og Del. Alderen kommer fra `formatAlder`, altså den
+  // formatter skærmens store tal bruger, så de to ikke kan komme til at vise
+  // hver sin grammatik for samme tal — den delte tekst skrev "1 mdr, 1 dage",
+  // mens skærmen skrev "1 måned og 1 dag". Og begge datoerne er med, fordi
+  // alder er et svar på "hvor gammel er jeg denne dato": et tal uden fødselsdag
+  // og beregningsdag kan ikke bruges til at tjekke svaret, og et delt link er
+  // typisk læst måneder senere, da alderen har ændret sig.
+  const deltTekst = (b: {
+    aar: number;
+    maaneder: number;
+    dage: number;
+  }) =>
+    l.copyFrame(
+      formatAlder(b, locale),
+      formatDato(foedselsdato),
+      formatDato(beregningsDato)
+    );
 
   return (
     <div className="space-y-8">
@@ -325,11 +356,7 @@ export default function AlderBeregner() {
                 <div>
                   <p className="font-medium dark:text-gray-200">{l.bornOnA} {beregning.ugedagFoedt}</p>
                   <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {new Date(foedselsdato).toLocaleDateString(intlLocale, {
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric"
-                    })}
+                    {formatDato(foedselsdato)}
                   </p>
                 </div>
               </div>
@@ -374,11 +401,11 @@ export default function AlderBeregner() {
           </div>
 
           <div className="flex justify-center">
-            <CopyResultButton text={l.copySummary(beregning.aar, beregning.maaneder, beregning.dage)} />
+            <CopyResultButton text={deltTekst(beregning)} />
             <ShareCalculation
               getShareableLink={getShareableLink}
               calculatorName={l.calcName}
-              resultSummary={beregning ? l.copySummary(beregning.aar, beregning.maaneder, beregning.dage) : undefined}
+              resultSummary={beregning ? deltTekst(beregning) : undefined}
             />
           </div>
         </>
