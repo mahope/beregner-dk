@@ -784,3 +784,40 @@ describe("danske svar på tids-søgninger", () => {
     }
   });
 });
+
+/**
+ * Google afkorter titlen ved ca. 60 tegn. 67 af repoets 160 `metaTitle`-strenge
+ * var længere end det, fordi hver af dem bar sit domænenavn i halen — altså den
+ * del, der alligevel bliver klippet væk. Det gjorde titlen ærlig og målbar:
+ * den er nu under afkortningsgrænsen, så det der står i `<title>` er det
+ * samme som det der vises. Se opgave 110.
+ */
+describe("metaTitle-længde", () => {
+  const LOCALE_LIST = ["da", "se", "no"] as const;
+  const GRÆNSE = 60;
+
+  function alleTitler(): { locale: string; slug: string; titel: string }[] {
+    return LOCALE_LIST.flatMap((locale) =>
+      getAvailableSlugs(locale).map((slug) => ({
+        locale,
+        slug,
+        titel: getPageData(slug, locale)!.metaTitle,
+      }))
+    );
+  }
+
+  test("ingen titler er længere end Googles afkortningsgrænse", () => {
+    const lange = alleTitler()
+      .filter((t) => t.titel.length > GRÆNSE)
+      .map((t) => `${t.locale}/${t.slug} (${t.titel.length}): ${t.titel}`);
+    expect(lange).toEqual([]);
+  });
+
+  test("alle tre sprog er dækket af målingen", () => {
+    // En kun dansk-liste ville være grøn, mens beraknare.se brændte af samme
+    // grund — 29 svenske titler var over grænsen.
+    for (const locale of LOCALE_LIST) {
+      expect(getAvailableSlugs(locale).length, locale).toBeGreaterThan(20);
+    }
+  });
+});
