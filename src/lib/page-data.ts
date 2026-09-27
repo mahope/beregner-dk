@@ -744,8 +744,11 @@ const daPages: Record<string, PageData> = {
       faqItems: [
       { question: "Hvor gammel er jeg præcist?", answer: "Født 15. marts 1990 er du 36 år, 6 måneder og 10 dage pr. 25. september 2026. Indtast din egen fødselsdato for at få alderen i år, måneder og dage." },
       { question: "Hvordan beregnes min alder?", answer: "Vi tæller hele år, måneder og dage fra din fødselsdato til i dag." },
-      { question: "Hvor gammel er jeg i dage?", answer: "Alderen i dage er antallet af dage mellem fødselsdatoen og i dag. Eksempel: født 15. marts 1990 er der gået 13.342 dage pr. 25. september 2026." },
+      { question: "Hvor gammel er jeg i dage?", answer: "Alderen i dage er antallet af dage mellem fødselsdatoen og i dag. Eksempel: født 15. marts 1990 er der gået 13.343 dage pr. 25. september 2026." },
       { question: "Stjernetegn?", answer: "Dit stjernetegn bestemmes af din fødselsdato. Der er 12 stjernetegn." },
+      { question: "Hvor gammel er jeg, hvis jeg er født i 2007?", answer: "Et fødselsår giver to aldre, fordi fødselsdagen ikke altid er nået: født 1. januar 2007 er du den ældste i dit år, født 31. december den yngste. Derfor står der en alder fra og en alder til for hvert år i tabellen på siden, og dage-levet-tallet går fra 6.845 til 7.209 dage pr. 27. september 2026." },
+      { question: "Hvordan beregner jeg alder i Excel?", answer: "Med DATEDIF. Har fødselsdatoen i A1 og den dato, du vil regne til, i B1, er =DATEDIF(A1;B1;\"Y\") hele år, =DATEDIF(A1;B1;\"M\") måneder og =DATEDIF(A1;B1;\"D\") dage. Født 15. marts 1990 til 25. september 2026 giver 36, 438 og 13.343. Vil du hele alderen i én celle: =DATEDIF(A1;B1;\"Y\")&\" år, \"&DATEDIF(A1;B1;\"YM\")&\" måneder og \"&DATEDIF(A1;B1;\"YD\")&\" dage\". Dansk Excel bruger semikolon." },
+      { question: "Kan jeg beregne min alder ud fra CPR-nummeret?", answer: "Ja, men skriv fødselsdatoen ind som en rigtig dato først. CPR'ens seks første cifre er DDMMYY, og hos kvinder er dagen 40 tal højere — så 41. maj er 1. maj. Er der kun en fødselsdato, du regner til, sætter du B1 til =I2(), så Excel regner til dagens dato hver dag." },
       { question: "Kan jeg beregne alder mellem to datoer?", answer: "Ja. Værktøjet har to felter: fødselsdato og 'Beregn alder pr. dato'. Udfylder du begge, tæller det hele år, måneder og dage frem til den dato, du vælger — født 15. marts 1990 giver 20 år, 1 måned og 16 dage pr. 1. maj 2010." },
       { question: "Hvor gammel var jeg den 1. maj 2010?", answer: "Født 15. marts 1990 var du 20 år, 1 måned og 16 dage den 1. maj 2010. Sæt 'Beregn alder pr. dato' til den dato, du vil se alderen på." },
       { question: "Skudår?", answer: "Ja, beregneren tager højde for skudår og varierende månedslængder." },
@@ -2025,7 +2028,7 @@ const noPages: Record<string, PageData> = {
       faqItems: [
       { question: "Hvor gammel er jeg nøyaktig?", answer: "Født 15. mars 1990 er du 36 år, 6 måneder og 10 dager per 25. september 2026. Skriv inn din egen fødselsdato for å få alderen i år, måneder og dager." },
       { question: "Hvordan beregnes alderen min?", answer: "Vi teller hele år, måneder og dager fra fødselsdatoen din til i dag." },
-      { question: "Hvor gammel er jeg i dager?", answer: "Alderen i dager er antallet dager mellom fødselsdatoen og i dag. Eksempel: født 15. mars 1990 er det gått 13.342 dager per 25. september 2026." },
+      { question: "Hvor gammel er jeg i dager?", answer: "Alderen i dager er antallet dager mellom fødselsdatoen og i dag. Eksempel: født 15. mars 1990 er det gått 13.343 dager per 25. september 2026." },
       { question: "Stjernetegn?", answer: "Stjernetegnet ditt bestemmes av fødselsdatoen. Det finnes 12 stjernetegn." },
       { question: "Skuddår?", answer: "Ja, kalkulatoren tar hensyn til skuddår og varierende månedslengder." },
       ],
@@ -3180,7 +3183,7 @@ const sePages: Record<string, PageData> = {
       faqItems: [
       { question: "Hur gammal är jag exakt?", answer: "Född 15 mars 1990 är du 36 år, 6 månader och 10 dagar per 25 september 2026. Fyll i ditt eget födelsedatum för att få åldern i år, månader och dagar." },
       { question: "Hur beräknas min ålder?", answer: "Vi räknar hela år, månader och dagar från ditt födelsedatum till idag." },
-      { question: "Hur gammal är jag i dagar?", answer: "Åldern i dagar är antalet dagar mellan födelsedatum och idag. Exempel: född 15 mars 1990 har det gått 13.342 dagar per 25 september 2026." },
+      { question: "Hur gammal är jag i dagar?", answer: "Åldern i dagar är antalet dagar mellan födelsedatum och idag. Exempel: född 15 mars 1990 har det gått 13.343 dagar per 25 september 2026." },
       { question: "Stjärntecken?", answer: "Ditt stjärntecken bestäms av ditt födelsedatum. Det finns 12 stjärntecken." },
       { question: "Kan jag beräkna ålder mellan två datum?", answer: "Ja. Kalkylatorn har två fält: födelsedatum och 'Beräkna ålder per datum'. Fyller du i båda räknar den hela år, månader och dagar fram till det datum du väljer — född 15 mars 1990 ger 20 år, 1 månad och 16 dagar per 1 maj 2010." },
       { question: "Hur gammal var jag den 1 maj 2010?", answer: "Född 15 mars 1990 var du 20 år, 1 månad och 16 dagar den 1 maj 2010. Sätt 'Beräkna ålder per datum' till det datum du vill se åldern på." },

@@ -1,3 +1,5 @@
+STATUS: KØ — **C88 er landet: `/alder` svarer nu på den søgning, fem af de otte variationer under "hvor gammel er jeg" er den samme — og FAQ'en sagde dage-tallet en dag for lavt i alle tre sprog.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den), og de eneste curl-verificerbare åbne deploynoter (C81, C82) har første vindue **17:30**, så intet kunne verificeres. Valget var C87-listenens punkt 1. **Målt først:** dansk autocomplete (`hl=da`, `gl=dk`, 13:50) under **"hvor gammel er jeg"** giver otte variationer, hvoraf **fem** er "… hvis jeg er født i 2009 / 2006 / 2008 / 2007 / 1989" — altså ét spørgsmål, fem gange. GSC: `/alder` har **6.149 visninger, 37 klik, CTR 0,6 %, pos. 7,8**, mens **"hvor gammel er jeg" alene står på pos. 33**: de 34 visninger er der, men de rammer ikke den tekst, der svarer på spørgsmålet. Under **"beregn alder"** kom derudover **`ud fra fødselsdato excel`**, **`i excel`**, **`ud fra cpr`** og **`ud fra cpr excel`**. Siden havde **nul** forekomster af "hvis jeg er født i" og **nul** af `DATEDIF`. **Rettelsen (kun `da`):** `<h2>` **"Hvor gammel er jeg, hvis jeg er født i 2007?"** med tabellen Født i år / Alder / Dage levet for **1989-2010**, fordi et fødselsår giver to aldre — født 1. januar er du den ældste i dit år, født 31. december den yngste — og det er hele pointen med svaret. Rækkerne regnes i `foedselsaarRaekker(referenceIso)` på de to yderste fødselsdatoer med `beregnAlder`, altså **samme modul som værktøjet bruger**; datoen er et argument, så en test kan låse tallene, og siden kalder den med `tilIsoDato(new Date())` — `getLocale()` læser `headers()`, så siden er dynamisk og tabellen følger dagen, samme mønster som `/dato`s felter. Kolonnen "Dage levet" svarer samtidig på **"hvor gammel er jeg i dage"**. Plus `<h3>` **"Sådan beregner du alder i Excel"** med fire `DATEDIF`-formler, hvoraf den sidste giver hele alderen i én celle. **Den rigtige fejl, fundet fordi den lå i det svaret, jeg byggede videre på:** FAQ'en sagde **13.342** dage for født 15. marts 1990 pr. 25. september 2026 — i **da, se og no**. `beregnAlder` siger **13.343** (36 × 365 + 9 skuddage = 13.149 til 15. marts 2026, + 194 dage = 13.343), og Excel-tabellen bruger netop de tal, så den nye tekst ville have arvet den gamle fejl. Det er en *indekseret* tekst, der modsiger sit eget beregningsmodul — C84's og C87's fejlklasse. **Og en eksisterende test låste fejlen:** `page-data.test.ts` krævede "13.342 dage" / "13.342 dagar" / "13.342 dager", samme fejltype som C78's `expect(html).toContain("8.25 timer")`; testen er rettet, og en ny test krydschecker FAQ'en mod `beregnAlder`. **Tre nye FAQ-par** (de kommer også i JSON-LD'en) — de ligger i `page-data.test.ts`, fordi `FAQ` er mocket væk i `page.test.tsx` (C85's fælde). **To ting jeg bevidst ikke hævder:** Excel's 29. februar-opførsel i et skudår og CPR-århundredet er ikke rørt, fordi det er påstande jeg ikke har testet; siden siger i stedet "skriv fødselsdatoen ind som en rigtig dato". `page.test.tsx` **9 → 15 tests**, **modsvejs verificeret: 4 af de 6 nye falder** med gammel kode (de to andre er låse på intervalformen og de fem autocomplete-år). Gate grøn: lint (556 filer), **1740 tests / 151 filer** (fra 1734 / 151), build (141 sider); `locale-leak.mjs --gate` exit 0, uændret 117/85/32 med 0 ureviewet. Kode + plan i ét commit på `ceo/alder-foedselsaar`; se opgave 117. **MÅL:** `/alder` baseline **6.149 visninger / 37 klik / CTR 0,6 % / pos. 7,8 pr. 2026-08-28 → 2026-09-25** — måles igen 2026-10-11.
+
 STATUS: KØ — **C87 er landet: `/promille` svarer nu på otte af de ti søgninger under "promillegrænse", som dansk autocomplete viser — Tyskland, Italien, Norge, Frankrig, Spanien, Grækenland, Polen og Storbritannien. Siden havde præcis to af dem.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den), og de eneste curl-verificerbare åbne deploynoter (C81, C82) har første vindue **17:30**, så intet kunne verificeres. Valget var C86's egen åbne kandidat #1: samme måling, samme side. **Målt først:** dansk autocomplete under **"promillegrænse"** giver 10 variationer — `… danmark`, `… sverige`, `… tyskland`, `… italien`, `… norge`, `… frankrig`, `… spanien`, `… cykel`, `… grækenland` + selve termet. Siden havde to afsnit (Danmark 0,5 og Sverige 0,2) og **null** af de otte andre. **Rettelsen (kun `da`):** `<h2>Promillegrænsen i udlandet</h2>` med **12 lande** i en tabel (land / grænse / særregel for nye og professionelle bilister) og den fælde tabellen findes for: **2 øl på 80 kg = 0,44 ‰ er under den danske grænse og over den svenske og norske på 0,2 ‰ — samme krop, samme aften, to domme.** Tallene kommer fra WHO's landeoversigt (hentet 27/9), og siden siger eksplicit at tabellen er **vejledende** og at reglerne ændrer sig. **Tallene bor i modulet, teksten på siden** — ny `PROMILLEGRANSE_UDLAND: Record<string, number>` i `src/lib/promille.ts` (tal kun, ingen danske strenge, ellers kunne modulet lække til beraknare.se), landnavne og særregler i `page.tsx`s `da`-gren. **Og en test krydschecker tabellen mod `PROMILLEGRANSE`**, altså den fejlklasse C84 fandt (en indekseret tekst der løj om sit eget indhold), låst før den kan ske igen. **To fund, begge ærlige.** (1) **En eksisterende test fangede en rigtig fejl i min egen metaDescription:** `page-data.test.ts:294` låser at den danske `metaDescription` indeholder **"0,5 ‰"** — min første erstatning droppede den for at nævne fire lande, så den danske *lov* forsvandt fra den indekserede beskrivelse. Rettet til at sige begge dele (122 → 146 tegn, under de 160 der låses). (2) **Målefejl nr. 14, min egen:** den nye data-test slog op på `"Sverige og"` i spørgsmålsteksten "…i Norge og Sverige?", som ikke findes, så den fik `undefined` — fundet fordi testen *faldt* med en TypeError frem for med et forkert tal. **`page.test.tsx` kan ikke teste FAQ'en**, fordi `FAQ` er mocket væk i filen (C85's fælde), så de tre FAQ-tests ligger i `page-data.test.ts`, som læser præcis den tabel `FAQ` og `FAQSchema` får. **`page.test.tsx` 3 → 7 tests, `page-data.test.ts` +3, modsvejs verificeret: 3 af 4 og 2 af 3 falder** med den gamle kode; de to der ikke falder er låse på at `se`/`no` er urørte, mærket som låse. Gate grøn: lint (556 filer), **1734 tests / 151 filer** (fra 1727 / 151), build (141 sider); `locale-leak.mjs --gate` exit 0, `label-a11y-scan.mjs` uændret 22/35, `knapgruppe-scan.mjs` 0/0. Kode + plan i ét commit på `ceo/promillegraense-udlandet`; se opgave 116. **MÅL:** `/promille` baseline **4.513 visninger / 67 klik / CTR 1,5 % / pos. 7,9 pr. 2026-08-28 → 2026-09-25** — måles igen 2026-10-11.
 STATUS: KØ — **C86 er landet: 10 af de 11 variationer dansk autocomplete har under "promille efter" er det samme spørgsmål — hvor mange promille giver N øl? — og `/promille` havde et afsnit om hvad én genstand er, men ingen der regnede genstandene.** Køen havde ingen `I GANG`-opgave, så dette var C85-listenens punkt 2 målt i stedet for gættet. **Målt først:** DA-autocomplete (`hl=da`, `gl=dk`, 13:12) under **"promille efter"** → 10 variationer: "1 øl", "1 glas vin", "2 øl", "1 genstand", "10 genstande", "en starköl", "2 glas vin", "3 øl", "3 genstande", "1 flaske vin". Under **"promille"** → "promille beregner" (1.149 visninger i GSC, pos. 9), "promillegrænse danmark", "promillegrænse tyskland", "promillegrænse sverige", "promillegrænse italien". **Målt på koden:** siden forklarede *genstanden* (12 gram) og fordelingsfaktoren (0,68/0,55), men **havde ingen tabel over N genstande** — altså svaret lå i to afsnit, brugeren skulle selv sætte sammen. **Rettelsen (kun `da`):** et nyt `<h2>` **"Hvor mange promille er N øl?"** med regnestykket og en tabel 1/2/3/4/6 genstande × 80 kg mand / 70 kg mand / 60 kg kvinde (0,22/0,44/0,66/0,88/1,32 — 0,25/0,50/0,76/1,01/1,51 — 0,36/0,73/1,09/1,45/2,18), plus en linje der sætter 0,5 ‰-grænsen på den: **mellem to og tre øl** for 80 kg, ved to øl for 70 kg, efter halvandet for 60 kg. **Tal fra samme standard som resten af siden** (12 g pr. genstand, Widmark-faktorerne), og de tre tal de har til fælles med sidens *egen* "Hvornår er du igen promillefri?"-tabel (0,88 for 4 genstande/80 kg, 0,73 for 2 genstande/60 kg kvinde, 1,51 for 6 genstande/70 kg mand) **stemmer alle tre** — altså er den nye tabel ikke en ny sandhed, men sidens egen. **Én fejl undgået ved at regne på:** min første sætning sagde "grænsen nås efter to øl" for 80 kg, men 2 øl er **0,44 ‰**, altså *under* grænsen — den siger nu "mellem to og tre øl (0,66 ‰ efter tre)". **En forhindring fundet:** `page.test.tsx` mocker `@/components/FAQ` væk, så FAQ'en er ikke i testens HTML; min første version af testen krævede det nye FAQ-spørgsmål og faldt derfor på noget, der ikke kan testes dér. Samme fælde som C85's. **Harness:** `page.test.tsx` **2 → 3 tests**, **modsvejs verificeret** (den nye test falder med gammel kode). Gate grøn: lint (556 filer), **1727 tests / 151 filer** (fra 1726 / 151), build (**141 sider**). Se opgave 115. **MÅL:** `/promille` baseline **4.513 visninger / 67 klik / CTR 1,5 % / pos. 7,9 pr. 2026-08-28 → 2026-09-25** — måles igen 2026-10-11.
 
@@ -11049,30 +11051,103 @@ tekst på `/tidszone`), men Kopier-strengen med datoen kræver en browser.
 - **MÅL:** `/promille` baseline **4.513 visninger / 67 klik / CTR 1,5 % /
   pos. 7,9 pr. 2026-08-28 → 2026-09-25** — måles igen 2026-10-11.
 
-### Næste kandidater efter C87
+#### 117. [x] FÆRDIG 2026-09-27 — C88 — `/alder` svarer på "hvor gammel er jeg, hvis jeg er født i 2007?" med 22 fødselsår, og FAQ'ens dage-tal var en dag for lavet i alle tre sprog
+
+- **Datagrund:** dansk autocomplete (`hl=da`, `gl=dk`, hentet 13:50 i dag) under
+  **"hvor gammel er jeg"** giver **otte** variationer, og **fem** af dem er det
+  samme spørgsmål med et år i: `… hvis jeg er født i 2009 / 2006 / 2008 / 2007 /
+  1989`. GSC: `/alder` har **6.149 visninger, 37 klik, CTR 0,6 %, pos. 7,8**, og
+  **"hvor gammel er jeg" står alene på pos. 33** — de 34 visninger er altså
+  der, men de rammer ikke den tekst, der svarer på spørgsmålet. Siden havde
+  **nul** forekomster af "hvis jeg er født i". To variationer til i samme
+  autocomplete-gruppe: **"beregn alder"** → `ud fra fødselsdato`, `ud fra
+  fødselsdato excel`, `i excel`, `ud fra cpr`, `ud fra cpr excel`,
+  `mellem to datoer` (den sidste lå der siden C47) og `ud fra dato`.
+- **Rettelsen (kun `da`):** et nyt `<h2>` **"Hvor gammel er jeg, hvis jeg er
+  født i 2007?"** med tabellen **Født i år / Alder / Dage levet** for
+  **1989-2010** (22 rækker). Forklaringen står *i* tabellen: et fødselsår
+  giver to aldre, fordi fødselsdagen ikke altid er nået, så født 1. januar er
+  du den ældste i dit år og født 31. december den yngste. Rækkerne kommer fra
+  `foedselsaarRaekker(referenceIso)` i `src/lib/alder-eksempler.ts`, som
+  regner på de to yderste fødselsdatoer med `beregnAlder` — **samme modul som
+  værktøjet bruger** — så tabellen ikke kan sige noget, logikken modsiger.
+  Datoen er et **argument**, ikke "i dag", så en test kan låse tallene; siden
+  kalder den med `tilIsoDato(new Date())` og `getLocale()` læser `headers()`,
+  altså er siden dynamisk og tabellen følger dagen — samme mønster som `/dato`s
+  felter (C50). Kolonnen "Dage levet" svarer samtidig på **"hvor gammel er jeg
+  i dage"**, der også står i autocomplete. Og et `<h3>` **"Sådan beregner du
+  alder i Excel"** med fire `DATEDIF`-formler, hvoraf den sidste giver hele
+  alderen i én celle (`=DATEDIF(A1;B1;"Y")&" år, "&DATEDIF(A1;B1;"YM")&"
+  måneder og "&DATEDIF(A1;B1;"YD")&" dage"`), plus CPR-noten om de 40 dage.
+- **Tal der kan efterprøves, og de er sidens egne:** 15. marts 1990 →
+  25. september 2026 = **36 år, 6 måneder og 10 dage**, **13.343 dage**
+  (`beregnAlder` i node, ikke kopieret) og **438 måneder**. Excel-tabellen
+  bruger præcis de tal, `ALDER_EKSEEMPLER[0]` allerede lå i modulet med, så de
+  to steder ikke kan glide fra hinanden — en test siger det.
+- **Den rigtige fejl, fundet fordi den lå i det svaret, jeg var ved at
+  bygge videre på:** FAQ'ens svar på **"Hvor gammel er jeg i dage?"** sagde
+  **13.342** dage — i **alle tre sprog**. `beregnAlder` siger **13.343**
+  (36 år × 365 dage + 9 skuddage til 15. marts 2026 = 13.149, plus 194 dage til
+  25. september = 13.343). Det er en *indekseret* tekst, der modsiger
+  beregningsmodulet på sitets egen største aldersside — C84's og C87's
+  fejlklasse. **Og en eksisterende test låste fejlen:** `page-data.test.ts`
+  krævede `"13.342 dage"` i da, `"13.342 dagar"` i se og `"13.342 dager"` i no.
+  Samme fejltype som C78's `expect(html).toContain("8.25 timer")`; testen er
+  rettet til 13.343 og en ny test krydschecker FAQ'en mod `beregnAlder`, så
+  afdriften ikke kan komme tilbage.
+- **Tre nye FAQ-par** i `page-data.ts` — de kommer dermed også i JSON-LD'en:
+  "Hvor gammel er jeg, hvis jeg er født i 2007?", "Hvordan beregner jeg alder
+  i Excel?" og "Kan jeg beregne min alder ud fra CPR-nummeret?".
+  `page.test.tsx` kan ikke teste FAQ'en, fordi `FAQ` er mocket væk i filen
+  (C85's og C86's fælde), så de ligger i `page-data.test.ts` og i
+  `page.test.tsx` som et krydscheck af spørgsmålene.
+- **Én ting jeg bevidst ikke hævder:** Excel's opførsel for en fødselsdag den
+  29. februar i et skudår (1. marts som erstatning) er ikke noget jeg har
+  testet, så sætningen blev fjernet igen i stedet for at stå som en påstand.
+  CPR-århundredet er heller ikke rørt, fordi reglen har en undtagelse jeg ikke
+  ville hævde; siden siger i stedet "skriv fødselsdatoen ind som en rigtig
+  dato".
+- **Fasthålt uden opgave:** `se` og `no` er urørte i den nye sektion — de har
+  hverken autocomplete-måling eller trafikdata for den (samme afslag som C64's
+  `/leasing` og C65's `/pension`), og FAQ-rettelsen tager alle tre sprog med,
+  fordi den er en *rettelse* og ikke en tilføjelse.
+- **Gate grøn:** lint (556 filer), **1740 tests / 151 filer** (fra 1734 / 151),
+  build (141 sider); `locale-leak.mjs --gate` exit 0 og uændret 117/85/32 med 0
+  ureviewet. `page.test.tsx` **9 → 15 tests**, **modsvejs verificeret: 4 af de
+  6 nye falder** med den gamle kode (de to der ikke falder er låse på
+  intervalformen og på de fem autocomplete-år, mærket som låse). Branch
+  `ceo/alder-foedselsaar`.
+- **MÅL:** `/alder` baseline **6.149 visninger / 37 klik / CTR 0,6 % / pos. 7,8
+  pr. 2026-08-28 → 2026-09-25** — måles igen 2026-10-11.
+
+### Næste kandidater efter C88
 
 0. **🔒 Opgave 97 er `BLOCKED`,** 98 afhænger af den. Browser-noter: C52, C55,
    C56, C57 og C60 ligger i `❓ Til Mads` nederst.
-1. **🆕 `/alder` (6.149 v, CTR 0,6 %, pos. 7,8)** — "hvor gammel er jeg" står
-   på **pos. 33**; C47 lagde "alder mellem to datoer" på siden, så mål først
-   hvad resten af klyngen spørger. Samme metode som C86/C87.
+1. **✅ `/alder` er lukket i denne iteration** (opgave 117) — mål effekten
+   2026-10-11, lav ikke CTR på siden igen før da.
 2. **🆕 `/kalorier` (12.477 v, 1,0 %, pos. 8,2)** — brand-søgningen står på
    **pos. 17** mens siden samlet er 8,2, altså et *værktøj*-problem, ikke et
    brødtekst-problem. Mål autocomplete under "kalorieberegner" og se hvad
    værktøjet mangler.
 3. **🆕 Svensk CTR:** `/tidszone` (3.256 v), `/leasing` (3.151 v, pos. 12,4),
    `/alder` (3.060 v), `/nedtaelling` (5.163 v, pos. 9,4).
-4. **✅ Dansk top-15 er lukket** (C82-C87) — lav ikke CTR på de lukkede sider
+4. **✅ Dansk top-15 er lukket** (C82-C88) — lav ikke CTR på de lukkede sider
    igen; mål i stedet effekten 14 dage efter.
 5. **🆕 `/promille` svensk halvdel:** C87 målte kun dansk (dansk autocomplete).
    SE har egen "Promillegränsen i Sverige" (0,2 ‰) og en kalorie-/genstands-
    tabel der ligner den danske, så mængden her er lille — *kun* hvis
    svensk autocomplete under "promillegräns" eller "rattonyktering gräns"
    viser spørgsmål, siden ikke svarer på.
-6. **⏬ Nedprioriteret:** 22 filer / 35 ubundne labels (kun sider uden for top-15).
-7. **🔒 Uforandrede forbehold:** hreflang korrekt (`hrefLang` med stort L);
+6. **🆕 `/dato`-klyngens spørgsmål:** "hvor mange dage er der til 1 december"
+   (1.020 visninger, 2 klik, pos. 5) og "…til 1 november" er besvaret af
+   `/dage-til/*`, men GSC viser at søgningen rammer `/dato` — mål om
+   `/dage-til/*` har en `<title>` der svarer på spørgsmålet.
+7. **⏬ Nedprioriteret:** 22 filer / 35 ubundne labels (kun sider uden for top-15).
+8. **🔒 Uforandrede forbehold:** hreflang korrekt (`hrefLang` med stort L);
    svenske slugs kræver Mads' go; `/bmi` og `/su` måles 2026-10-11.
-8. **Mål 2026-10-10 / 2026-10-11** (se Måleprotokol).
+9. **Mål 2026-10-10 / 2026-10-11** (se Måleprotokol).
+
 
 #### 109. [x] FÆRDIG 2026-09-27 — C80 — erklær Node-runtime-kontrakten: `engines.node`, `.nvmrc` og en test der holder de tre sammen
 
@@ -11161,12 +11236,39 @@ verificering der ikke kan slå igennem er lige så dårlig som en der kan.
   4. `https://beraknare.se/promille` skal være **uændret**: **0** hits på
      "Promillegrænsen i udlandet" og "udlandet" i alt, og stadig
      "gränsen för rattfylleri vid 0,2 ‰".
-  5. Sidens `<meta name="description">` skal indeholte både **"0,5 ‰"** og
+  5. Sidens `<meta name="description">` skal indeholde både **"0,5 ‰"** og
      **"Sverige, Tyskland og Norge"** — de to dele må ikke glide fra hinanden
      igen (C84's fejlklasse, fanget af `page-data.test.ts`). Kode `400aff2`,
      merge `605ed39` **2026-09-27 13:33 CEST** på
      `ceo/promillegraense-udlandet`; første kandidatvindue
      **2026-09-27 17:30**.
+
+- ⏳ **VERIFICÉR DEPLOY: C88 — `/alder` får en fødselsårs-tabel (22 år), et
+  Excel-afsnit med DATEDIF, og FAQ'ens dage-tal er rettet fra 13.342 til
+  13.343 i alle tre sprog.** Kun den nye sektion er `da`-kun; FAQ-rettelsen
+  gælder da/se/no. **Verificér indhold, ikke HTTP 200:**
+  1. `curl -s https://minberegner.dk/alder | grep -c 'Hvor gammel er jeg, hvis
+     jeg er født i 2007?'` skal være **1** — før fandtes overskriften ikke.
+  2. Samme curl skal finde **22** `<td>` med fødselsårene **1989** og **2010**
+     (`<td>1989</td>`, `<td>2010</td>`), og **22** forekomster af
+     `<strong>` med et aldersinterval i formen `36–37 år`.
+  3. Samme curl skal finde `<td>2007</td><td><strong>18–19 år</strong>` **og**
+     dagespalten `6.845–7.209` **pr. 27. september 2026** — tallene er daglige,
+     så efter næste deploy-vindue er sidste-cifrene anderledes, men
+     intervalformen `18–19 år` for 2007 holder, indtil fødselsdagen passerer.
+  4. Samme curl skal finde `Sådan beregner du alder i Excel`,
+     `DATEDIF(A1;B1;&quot;Y&quot;)`, `DATEDIF(A1;B1;&quot;YM&quot;)`,
+     `DATEDIF(A1;B1;&quot;YD&quot;)` og tallene **36** / **438** / **13.343**.
+  5. `curl -s https://minberegner.dk/alder | grep -c '13.342'` skal være **0**,
+     og `grep -c '13.343'` skal være mindst 1. Samme to greps på
+     `https://beraknare.se/alder` (svensk: `13.343 dagar`).
+  6. `https://beraknare.se/alder` skal være **uændret** i den nye sektion:
+     **0** hits på "Hvor gammel er jeg, hvis jeg er født i 2007?" og på
+     "Sådan beregner du alder i Excel".
+  7. `https://minberegner.dk/api/health` skal svare `status: ok`. Kode +
+     plan i ét commit på `ceo/alder-foedselsaar`; første kandidatvindue
+     **2026-09-27 17:30**.
+
 
 - ⏳ **VERIFICÉR DEPLOY: C82 — `/procent` dansk: den forkerte skattepåstand er
   fjernet, Excel-afsnittet og to nye interne links er lagt på, og tre nye

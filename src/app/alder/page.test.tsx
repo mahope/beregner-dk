@@ -2,7 +2,16 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import { getDomainConfigByLocale } from "@/lib/domain-config";
 import { getCurrentDomainConfig, getLocale } from "@/lib/get-locale";
-import { ALDER_EKSEEMPLER, formatAlder } from "@/lib/alder-eksempler";
+import {
+  ALDER_EKSEEMPLER,
+  FODSELSAAR_MAX,
+  FODSELSAAR_MIN,
+  formatAlder,
+  formatAlderRaekke,
+  foedselsaarRaekker,
+} from "@/lib/alder-eksempler";
+import { beregnAlder } from "@/lib/alder";
+import { tilIsoDato } from "@/lib/lokal-dato";
 import { getPageData } from "@/lib/page-data";
 import AlderPage from "./page";
 
@@ -99,6 +108,106 @@ describe("alder page", () => {
     const html = renderToStaticMarkup(await AlderPage());
 
     expect(html).not.toContain("Svar på de oftest stillede aldersspørgsmål");
+    expect(html).not.toContain("Hvor gammel er jeg, hvis jeg er født i 2007?");
     expect(html).toContain("Alderskalkulator");
+  });
+
+  // Autocomplete under "hvor gammel er jeg" (hl=da, gl=dk, hentet 2026-09-27)
+  // giver fem forslag i formen "hvor gammel er jeg hvis jeg er født i 2006/2007/
+  // 2008/2009/1989". GSC: "hvor gammel er jeg" står på pos. 33, siden samlet på
+  // pos. 7,8 med 0,6 % CTR. Tabellen er svaret på den klynge.
+  test("svarer på 'hvor gammel er jeg, hvis jeg er født i …' med en alder fra og en alder til pr. dagens dato", async () => {
+    const html = renderToStaticMarkup(await AlderPage());
+    const raekker = foedselsaarRaekker(tilIsoDato(new Date()));
+
+    expect(html).toContain("Hvor gammel er jeg, hvis jeg er født i 2007?");
+    for (const raekke of raekker) {
+      expect(html).toContain(`<td>${raekke.aar}</td>`);
+      expect(html).toContain(`<strong>${formatAlderRaekke(raekke)}</strong>`);
+    }
+  });
+
+  test("fødselsårs-tabellen dækker de år, dansk autocomplete faktisk viser", async () => {
+    const aar = new Set(foedselsaarRaekker(tilIsoDato(new Date())).map((r) => r.aar));
+
+    // De fem år, autocomplete gav under "hvor gammel er jeg".
+    for (const autocompleteAar of [1989, 2006, 2007, 2008, 2009]) {
+      expect(aar.has(autocompleteAar)).toBe(true);
+    }
+    expect(Math.min(...aar)).toBe(FODSELSAAR_MIN);
+    expect(Math.max(...aar)).toBe(FODSELSAAR_MAX);
+    expect(aar.size).toBe(FODSELSAAR_MAX - FODSELSAAR_MIN + 1);
+  });
+
+  // Et fødselsår giver to aldre. Uden denne test kunne en række miste sin
+  // "til"-alder og svare forkert på præcis den søgning, tabellen er lavet til.
+  test("giver hvert fødselsår højst ét års aldersforskel, og alderen er dagene fødselsdagen fortjener", async () => {
+    for (const raekke of foedselsaarRaekker(tilIsoDato(new Date()))) {
+      expect(raekke.maxAlder - raekke.minAlder).toBeLessThanOrEqual(1);
+      expect(raekke.minAlder).toBeGreaterThanOrEqual(0);
+
+      const senest = beregnAlder({
+        foedselsdato: `${raekke.aar}-12-31`,
+        beregningsdato: tilIsoDato(new Date()),
+      })!;
+      const tidligst = beregnAlder({
+        foedselsdato: `${raekke.aar}-01-01`,
+        beregningsdato: tilIsoDato(new Date()),
+      })!;
+      expect(raekke.minDage).toBe(senest.totalDage);
+      expect(raekke.maxDage).toBe(tidligst.totalDage);
+      expect(raekke.maxDage - raekke.minDage).toBeGreaterThan(300);
+    }
+  });
+
+  test("svarer på 'beregn alder i Excel' med DATEDIF og sidens egne tal", async () => {
+    const html = renderToStaticMarkup(await AlderPage());
+
+    expect(html).toContain("Sådan beregner du alder i Excel");
+    for (const formel of [
+      "=DATEDIF(A1;B1;",
+      "DATEDIF(A1;B1;&quot;Y&quot;)",
+      "DATEDIF(A1;B1;&quot;M&quot;)",
+      "DATEDIF(A1;B1;&quot;D&quot;)",
+      "DATEDIF(A1;B1;&quot;YM&quot;)",
+      "DATEDIF(A1;B1;&quot;YD&quot;)",
+    ]) {
+      expect(html).toContain(formel);
+    }
+    // Tallene i Excel-tabellen er sidens egne eksempel, regnet af modulet.
+    const eksempel = ALDER_EKSEEMPLER[0];
+    expect(eksempel.aar).toBe(36);
+    expect(eksempel.maaneder).toBe(6);
+    expect(eksempel.dage).toBe(10);
+    expect(eksempel.totalDage).toBe(13343);
+    expect(eksempel.aar * 12 + eksempel.maaneder).toBe(438);
+    expect(html).toContain("13.343");
+  });
+
+  // C84's og C87's lære: en indekseret tekst må ikke sige et tal, logikken
+  // modsiger. Før denne rettelse stod der 13.342 dage i FAQ'en — i alle tre
+  // sprog, og page-data.test.ts låste det.
+  test("FAQ'ens dage-tal er det beregnAlder giver for den samme dato", () => {
+    const faq = getPageData("alder", "da")!.faqItems;
+    const iDage = faq.find((item) => item.question === "Hvor gammel er jeg i dage?");
+    const rigtigt = beregnAlder({
+      foedselsdato: "1990-03-15",
+      beregningsdato: "2026-09-25",
+    })!;
+
+    expect(rigtigt.totalDage).toBe(13343);
+    expect(iDage?.answer).toContain("13.343");
+    expect(iDage?.answer).not.toContain("13.342");
+  });
+
+  // FAQ'en ligger i page-data, fordi page.test.tsx mocker FAQ-komponenten væk
+  // (C85's og C86's fælde). Den skal derfor svara på de samme søgninger som
+  // brødteksten — ellers er svaret kun i den ene af de to.
+  test("FAQ'en stiller de tre nye spørgsmål, som autocomplete viser", () => {
+    const spoergsmaal = getPageData("alder", "da")!.faqItems.map((item) => item.question);
+
+    expect(spoergsmaal).toContain("Hvor gammel er jeg, hvis jeg er født i 2007?");
+    expect(spoergsmaal).toContain("Hvordan beregner jeg alder i Excel?");
+    expect(spoergsmaal).toContain("Kan jeg beregne min alder ud fra CPR-nummeret?");
   });
 });

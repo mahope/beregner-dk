@@ -7,7 +7,8 @@ import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import RelatedCalculators from "@/components/RelatedCalculators";
 import RelateredeArtikler from "@/components/RelateredeArtikler";
 import Breadcrumbs from "@/components/Breadcrumbs";
-import { ALDER_EKSEEMPLER, formatAlder } from "@/lib/alder-eksempler";
+import { ALDER_EKSEEMPLER, formatAlder, formatAlderRaekke, foedselsaarRaekker } from "@/lib/alder-eksempler";
+import { tilIsoDato } from "@/lib/lokal-dato";
 import { getIntlLocale } from "@/lib/format";
 
 function formatDato(iso: string, locale: "da" | "no" | "se"): string {
@@ -28,6 +29,12 @@ export default async function AlderPage() {
   const domainConfig = await getCurrentDomainConfig();
   const pageData = getPageData("alder", locale) || getPageData("alder", "da")!;
   const intlLocale = getIntlLocale(locale);
+  // Sidens kalenderdato, læst i læserens tidszone. `getLocale()` læser
+  // `headers()`, så siden er dynamisk og tallene følger dagen — samme mønster
+  // som /dato's felter. Formateres til en hel dato, så en tabeltal derfra aldrig
+  // kan løbe fra den dato den er regnet til.
+  const iDag = tilIsoDato(new Date());
+  const foedselsaar = foedselsaarRaekker(iDag);
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -112,6 +119,109 @@ export default async function AlderPage() {
       <div className="bg-white rounded-2xl shadow-sm p-6 md:p-8 mb-8">
         <AlderBeregner />
       </div>
+
+      {/* Fødselsårs-tabellen. Google autocomplete (hl=da, gl=dk, hentet
+          2026-09-27) giver otte forslag under "hvor gammel er jeg", og fem af
+          dem er "hvor gammel er jeg hvis jeg er født i 2006/2007/2008/2009/
+          1989". GSC viser 6.149 visninger på siden med CTR 0,6 % og pos. 7,8,
+          mens "hvor gammel er jeg" alene står på pos. 33 — de 34 visninger er
+          altså der, men de rammer ikke den tekst, der svarer på spørgsmålet.
+          Rækkerne kommer fra `foedselsaarRaekker`, som regner på de to yderste
+          fødselsdatoer i hvert år med `beregnAlder` — samme modul som
+          værktøjet bruger. */}
+      {locale === "da" && (
+      <div className="prose max-w-none mb-8">
+        <h2>Hvor gammel er jeg, hvis jeg er født i 2007?</h2>
+        <p>
+          Et fødselsår giver ikke én alder, men to: fødselsdagen er jo ikke altid nået. Derfor står der
+          en alder <strong>fra</strong> og en alder <strong>til</strong> for hvert år — født 1. januar
+          er du den ældste i dit år, født 31. december den yngste. Alle tal her er regnet til{" "}
+          <strong>{formatDato(iDag, locale)}</strong>.
+        </p>
+        <div className="overflow-x-auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Født i år</th>
+                <th>Alder {formatDato(iDag, locale)}</th>
+                <th>Dage levet</th>
+              </tr>
+            </thead>
+            <tbody>
+              {foedselsaar.map((raekke) => (
+                <tr key={raekke.aar}>
+                  <td>{raekke.aar}</td>
+                  <td>
+                    <strong>{formatAlderRaekke(raekke)}</strong>
+                  </td>
+                  <td>
+                    {new Intl.NumberFormat(intlLocale).format(raekke.minDage)}
+                    {"–"}
+                    {new Intl.NumberFormat(intlLocale).format(raekke.maxDage)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p>
+          Er dit fødselsår ikke i tabellen, eller vil du have dagen, måneden og dagen: indtast din
+          fødselsdato i værktøjet ovenfor. Så får du også, hvor mange dage der er til din næste
+          fødselsdag.
+        </p>
+
+        <h3>Sådan beregner du alder i Excel</h3>
+        <p>
+          Har du fødselsdatoen i <strong>A1</strong> og den dato, du vil regne til, i{" "}
+          <strong>B1</strong>, er det fire formler. Dansk Excel bruger semikolon mellem argumenterne.
+        </p>
+        <div className="overflow-x-auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Formel</th>
+                <th>Resultat</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <code>=DATEDIF(A1;B1;&quot;Y&quot;)</code>
+                </td>
+                <td>Hele år, som alderen skrives i dag: 36</td>
+              </tr>
+              <tr>
+                <td>
+                  <code>=DATEDIF(A1;B1;&quot;M&quot;)</code>
+                </td>
+                <td>Samlet antal måneder siden fødslen: 438</td>
+              </tr>
+              <tr>
+                <td>
+                  <code>=DATEDIF(A1;B1;&quot;D&quot;)</code>
+                </td>
+                <td>Samlet antal dage: 13.343</td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    =DATEDIF(A1;B1;&quot;Y&quot;)&amp; &quot; år, &quot;&amp;DATEDIF(A1;B1;&quot;YM&quot;)&amp; &quot;
+                    måneder og &quot;&amp;DATEDIF(A1;B1;&quot;YD&quot;)&amp; &quot; dage&quot;
+                  </code>
+                </td>
+                <td>Hele alderen i én celle: 36 år, 6 måneder og 10 dage</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p>
+          Har du kun dit CPR-nummer, så skriv fødselsdatoen ind som en rigtig dato — dag og måned fra
+          CPR'en og året med de rigtige hundredtal. Bemærk at CPR'ens dag er 40 tal højere for
+          kvinder, så den skal formateres som dato, inden den bruges. Og vil du regne alderen til i
+          dag, sætter du B1 til <code>=I2()</code> — så opdaterer Excel sig selv hver dag.
+        </p>
+      </div>
+      )}
 
       {/* Informativ tekst - SEO */}
       {locale === "da" && (
