@@ -3,6 +3,7 @@ import { getPageData, getAvailableSlugs } from "./page-data";
 import { getCalculatorHrefs, isCalculatorAvailable } from "./calculator-list";
 import { beregnPromille, PROMILLEGRANSE_UDLAND } from "./promille";
 import { sammenlignEnhedspris } from "./enhedspris";
+import { TIDSZONER } from "./tidszone-reference";
 
 describe("getPageData", () => {
   test("returns data for known DA slug", () => {
@@ -706,10 +707,27 @@ describe("svenska svar på frågeformulerade sökningar", () => {
     expect(text).toContain("08:30 till 16:45 är 8 timmar och 15 minuter");
   });
 
-  test("/leasing nævner färetagsleasing og svarer på leasingkostnaden", () => {
+  // Svensk GSC 2026-08-28→09-25: "fåretagsleasing bil kalkyl" 194 visninger
+  // pos. 11 og "beräkna leasing bil fåretag" 172 visninger pos. 15. Siden
+  // skrev "färetagsleasing" med ä i både keywords og FAQ — altså et ord, der
+  // ingen svensk søgning kan ramme. Ordet hedder fåretagsleasing (å).
+  test("/leasing nævner fåretagsleasing og svarer på leasingkostnaden", () => {
     const text = frageForm("leasing").toLowerCase();
-    expect(text).toContain("färetagsleasing");
+    expect(text).toContain("fåretagsleasing");
+    expect(text).not.toContain("färetagsleasing");
     expect(text).toContain("4.121 kr");
+  });
+
+  test("/leasing skriver fåretagsleasing med å overalt det står", () => {
+    const data = getPageData("leasing", "se")!;
+    const felter = [data.title, data.metaTitle, data.metaDescription, data.ogTitle, ...data.keywords];
+    // Ordet skal findes i keywords og i titlen — det er de to, GSC kan matche
+    // på — men kravet er ikke "overalt", kun "aldrig med ä".
+    const medOrdet = felter.filter((t) => /f[åä]retagsleasing/i.test(t));
+    expect(medOrdet.length).toBeGreaterThanOrEqual(2);
+    for (const tekst of felter) {
+      expect(tekst, `"${tekst}"`).not.toMatch(/färetagsleasing/i);
+    }
   });
 
   // SE /procent har 23.294 visninger og 2 klik (pos. 10,2) — så meget
@@ -874,5 +892,76 @@ describe("/promille — svar på udlandsklyngen", () => {
       if (!andet) continue;
       expect(andet.faqItems.map((f) => f.question).join(" ")).not.toContain("udlandet");
     }
+  });
+});
+
+describe("svensk CTR på tid- og dato-siderne", () => {
+  // Svensk GSC 2026-08-28→09-25: /tidszone 3.256 visninger, 12 klik, CTR
+  // 0,4 %, pos. 7,7. /nedtaelling 5.163 visninger, 12 klik, CTR 0,2 %,
+  // pos. 9,4. /leasing 3.151 visninger, 32 klik, CTR 1,0 %, pos. 12,4.
+  // Ved pos. 7-12 er det titlen, der afgør om der klikkes — ikke placeringen.
+
+  // C84 rettede /tidszone fra "12 byer" til "21 byer", men kun i
+  // metaDescription. ogDescription stod stadig med 12 i begge sprog, så den
+  // rigtige fejl overlevede rettelsen. Tallet læses fra TIDSZONER, så en ny
+  // by kan ikke slippe forbi uden at denne test falder.
+  test("/tidszone oplyser samme antal byer som tabellen har, hvor det nævner et", () => {
+    const byer = TIDSZONER.length;
+    expect(byer).toBeGreaterThan(0);
+    for (const locale of ["da", "se", "no"] as const) {
+      const data = getPageData("tidszone", locale);
+      if (!data) continue;
+      for (const [felt, tekst] of [
+        ["metaDescription", data.metaDescription],
+        ["ogDescription", data.ogDescription],
+      ] as const) {
+        // `no` nævner ikke et bytal nogen steder — det er ikke en fejl, så
+        // kravet er kun på de strenge der faktisk oplyser et tal.
+        const naever = [...tekst.matchAll(/(\d+) (byer|städer|stader)/gi)];
+        for (const fund of naever) {
+          expect(Number(fund[1]), `${locale}.${felt}: "${tekst}"`).toBe(byer);
+        }
+      }
+    }
+    // Mindst ét sprog skal oplyse tallet, ellers låser testen ingenting.
+    const medTal = ["da", "se", "no"].some((locale) => {
+      const data = getPageData("tidszone", locale as "da" | "se" | "no");
+      return data ? /\d+ (byer|städer|stader)/i.test(data.metaDescription) : false;
+    });
+    expect(medTal).toBe(true);
+  });
+
+  // Brand-navnet i halen klippes væk af Google, og C81 (67 titler over
+  // afkortningsgrænsen) viste at netop den hale er det, der forsvinder.
+  // "/tidszone" skrev "| Tidszon" i svensk og "| Tidszone" i dansk — altså
+  // en afkortet form af nøgleordet i stedet for domænenavnet.
+  test("/tidszone har hverken afkortet nøgleord eller afkortet brand i titlen", () => {
+    for (const locale of ["da", "se", "no"] as const) {
+      const data = getPageData("tidszone", locale);
+      if (!data) continue;
+      const hale = data.metaTitle.split("|").slice(1).join("|").trim();
+      expect(hale, `${locale}: metaTitle har en hale "${hale}"`).not.toMatch(/^tidszon/i);
+    }
+  });
+
+  // "nedräkning dagar" er GSC's største søgning på /nedtaelling (170 v, pos. 9).
+  // Den gamle titel skrev "Nedräkning - hur många dagar", så de to ord i hoved-
+  // ordet stod splittet af en tankestreger — Google læser dem som to ord.
+  test("/nedtaelling har hovedordet 'nedräkning dagar' ubrudt i titlen", () => {
+    const titel = getPageData("nedtaelling", "se")!.metaTitle.toLowerCase();
+    expect(titel).toContain("nedräkning dagar");
+    expect(titel).toContain("kvar till");
+    expect(titel.length).toBeLessThanOrEqual(60);
+  });
+
+  // /leasing startede titlen med et beløb ("4.121 kr/mån"), mens GSC's to
+  // største søgninger er "fåretagsleasing bil kalkyl" og "beräkna leasing bil
+  // fåretag" — det ord, siden før skrev med ä, lå ikke i titlen overhovedet.
+  test("/leasing titlen svarer på søgningen i stedet for at starte med et beløb", () => {
+    const titel = getPageData("leasing", "se")!.metaTitle.toLowerCase();
+    expect(titel).toContain("fåretagsleasing");
+    expect(titel).toMatch(/beräkna|beräkn/);
+    expect(titel).not.toMatch(/^\d/);
+    expect(titel.length).toBeLessThanOrEqual(60);
   });
 });
