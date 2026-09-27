@@ -7819,7 +7819,7 @@ landmark=lån, piggybank=opsparing osv.).
 
 ## VERIFICÉR DEPLOY-log
 
-### ⏳ **VERIFICÉR DEPLOY: C90 — `/dato` svarer på "hvor mange dage er der tilbage af 2026?" i da og se (131.419 visninger, CTR 0,6 %, pos. 5,8).** Kode + plan i ét commit på `ceo/dato-dage-tilbage`. Første kandidatvindue **2026-09-27 17:30**. Verificér ved **indhold**: `/dato` på begge domæner skal have et `<h2>` med "tilbage af"/"kvar av" og **dagens** tal (95 dage på 27. september), altså ikke et hårdkodet 95; tallet skal nulstilles til 0 nytårsaften.
+### ⏳ **VERIFICÉR DEPLOY: C90 — `/dato` svarer på "hvor mange dage er der tilbage af 2026?" i da og se (131.419 visninger, CTR 0,6 %, pos. 5,8).** Kode `7dd98e6`, merge `c7e56ea` 2026-09-27 14:23 CEST på branch `ceo/dato-dage-tilbage`. Første kandidatvindue **2026-09-27 17:30**. Verificér ved **indhold**: `/dato` på begge domæner skal have et `<h2>` med "tilbage af"/"kvar av" og **dagens** tal (95 dage på 27. september), altså ikke et hårdkodet 95; tallet skal nulstilles til 0 nytårsaften.
 
 
 ### ⏳ **VERIFICÉR DEPLOY: C89 — `/kalorier` dansk: tabellen "hvor mange kalorier pr dag?" (12.477 visninger, CTR 1,0 %, pos. 8,2).** Kode `af84858`, merge `26b3421` 2026-09-27 14:19 CEST på branch `ceo/kalorier-pr-dag`. Første kandidatvindue **2026-09-27 17:30**. Verificér ved **indhold**: siden skal have `<h2>Hvor mange kalorier pr dag?</h2>`, fire `<td>`-rækker (60/70/80/90 kg), `<td>2.759 kcal</td>`, `href="/motion-kalorier"`, og FAQ'en skal have "Hvor mange kalorier skal jeg have?".
