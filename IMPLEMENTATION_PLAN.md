@@ -7677,7 +7677,7 @@ landmark=lån, piggybank=opsparing osv.).
     - Gate grøn: lint ok, 280/280 tests, build ok (128 pages).
 
 ## VERIFICÉR DEPLOY-log
-- ⏳ **ÅBEN — C63 34 ubundne labels på seks beregnere plus fire navnløse felter pr. gældspost i `/gaeldsfri` — kode + plan i ét commit på branch `ceo/labels-runde3`, kode `COMMIT_SHA`, merge `MERGE_SHA` 2026-09-27 04:40 CEST. Første kandidatvindue **2026-09-27 07:30**.**
+- ⏳ **ÅBEN — C63 34 ubundne labels på seks beregnere plus fire navnløse felter pr. gældspost i `/gaeldsfri` — kode + plan i ét commit på branch `ceo/labels-runde3`, kode `c419419`, merge `b408e3d` 2026-09-27 04:43 CEST. Første kandidatvindue **2026-09-27 07:30**.**
   **HTTP 200 beviser intet her:** ændringen er `htmlFor`/`id`/`aria-label` i
   klient-renderede felter. I DevTools på hver af de seks sider:
   `document.querySelectorAll('label:not([for]):not([id])').length` → **0**,
