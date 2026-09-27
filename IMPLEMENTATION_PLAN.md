@@ -7754,7 +7754,8 @@ landmark=lån, piggybank=opsparing osv.).
 - ⏳ **ÅBEN — C69 `/gaeldsfri` delte dansk værktøjsnavn på beraknare.se:
   `ShareCalculation`s `calculatorName` lå i JSX, ikke i `labels`, og går ind i
   Twitter-`href` og mail-`subject`. Kode + plan i ét commit på branch
-  `ceo/locale-leak-energi`. Første kandidatvindue **2026-09-27 07:30**.
+  `ceo/locale-leak-energi`, kode `5e8a417`, merge `8a40846` 2026-09-27 06:38
+  CEST. Første kandidatvindue **2026-09-27 07:30**.
   Samme batch dækker C68's og C67's noter.**
   **HTTP 200 beviser intet:** intet af dette rører en beregning, kun to strenge i
   del-teksten. Sådan verificeres det:
