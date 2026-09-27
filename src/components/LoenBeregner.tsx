@@ -10,7 +10,7 @@ import { SATSER_2026 } from "@/lib/satser-2026";
 import { KOMMUNER } from "@/lib/kommuner";
 import { AnimatedNumber, CopyResultButton, ResetButton } from "@/components/ui";
 import { useLocale } from '@/components/LocaleProvider';
-import { formatCurrency } from '@/lib/format';
+import { formatCurrency, formatNumber } from '@/lib/format';
 
 // 2026 danske skattesatser fra den fælles kilde (src/lib/satser-2026.ts)
 const SKATTESATSER = {
@@ -197,6 +197,7 @@ export default function LoenBeregner() {
   }, [bruttoLoen, periode, medKirkeskat, kommuneSkat, valgtKommune, pension, beregning.maanedligNetto]);
 
   const formatKr = (beloeb: number) => formatCurrency(beloeb, locale, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+  const formatPct = (pct: number) => formatNumber(pct, locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 
   return (
     <div className="space-y-8 print-area">
@@ -343,7 +344,7 @@ export default function LoenBeregner() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-center">
           <p className="text-sm text-gray-600 dark:text-gray-400">
-            Effektiv skatteprocent: <strong className="dark:text-white">{beregning.effektivSkat.toFixed(1)}%</strong>
+            Effektiv skatteprocent: <strong className="dark:text-white">{formatPct(beregning.effektivSkat)}%</strong>
           </p>
         </div>
         {ekstraBeregning !== null && (

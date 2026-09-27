@@ -8,7 +8,7 @@ import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { useLocale } from "@/components/LocaleProvider";
-import { formatCurrency, getCurrencySuffix } from "@/lib/format";
+import { formatCurrency, formatNumber, getCurrencySuffix } from "@/lib/format";
 import type { Inflation } from "@/lib/statbank";
 import { InflationKilde } from "@/components/InflationKilde";
 
@@ -400,6 +400,7 @@ export default function OpsparingsBeregner({ dstInflation = null }: { dstInflati
   }, [maalBeloeb, maalStart, maalMaanedlig, maalRente]);
 
   const formatKr = (beloeb: number) => formatCurrency(beloeb, locale, { maximumFractionDigits: 0, minimumFractionDigits: 0 });
+  const formatPct = (pct: number) => formatNumber(pct, locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 
   return (
     <div className="space-y-8">
@@ -511,7 +512,7 @@ export default function OpsparingsBeregner({ dstInflation = null }: { dstInflati
                   <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
                     <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">{l.gain}</p>
                     <p className="text-xl font-bold text-green-600 dark:text-green-400">
-                      +{beregning.samletIndskud > 0 ? ((beregning.samletRente / beregning.samletIndskud) * 100).toFixed(1) : "0.0"}%
+                      +{beregning.samletIndskud > 0 ? formatPct((beregning.samletRente / beregning.samletIndskud) * 100) : formatPct(0)}%
                     </p>
                   </div>
                 </div>
