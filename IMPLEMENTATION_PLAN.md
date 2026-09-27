@@ -1,6 +1,42 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — **C57 er landet: `/renteberegner`'s delte tekst skrev rentesatsen
+STATUS: KØ — **C58 er landet: `/kalorier` anbefalede negative kalorier, og den
+delte tekst var ét tal uden de fem input det afhænger af.** Klassen fra punkt 3b
+i køen (C52, C53, C55, C56, C57 — "hvad skriver den tekst, brugeren kopierer?")
+har nu fundet en reel fejl **for femte gang i træk**, og her var den
+mest alvorlig: **anbefalingen var ikke bare dårligt formateret, den var
+umulig.** `anbefaletKalorier = tdee - 500` uden noget gulv, så **100 år, 30 kg,
+100 cm, kvinde, stillesiddende, målet "tab"** gav BMR 264, TDEE 317 og dermed
+**-183 kcal** i sideens største tal, **-5 g fedt** og **-45 kcal** i makrofanen,
+og Kopier lagde **"-183 kcal/dag (for at tabe ca. 0.5 kg pr. uge)"** i
+klipbordet. Det er en anbefaling, en læser kan følge. To fund mere i samme
+fil: **"0.5 kg" med punktum i dansk** lå i `labels.da.info500` *og*
+`labels.da.maalTabDesc` — den sidste gik lige ind i klipbordet, mens den svenske
+søster skrev "0,5" og sidens **egen FAQ** skrev "0,5" (C53's fund igen, og
+denne gang i en streng-literal, som `git grep toFixed` aldrig kan finde) — og
+**ikke ét af tallene på skærmen gik gennem `formatNumber`**, så et resultat med
+fire cifre viste "8836 kcal" og "1087g" uden tusindtalsseparator i dansk og
+svensk tekst. Nu går alle heltal gennem `num`, ét `deltTekst()` bygger hele
+den delte tekst til **både** Kopier og Del: *"2.259 kcal/dag (for at tabe ca.
+0,5 kg pr. uge). Baseret på 30 år, mand, 80 kg, 180 cm, moderat aktivitet.
+Vedligehold er 2.759 kcal/dag, så underskuddet er 500 kcal/dag."* — altså de
+fem input, målet, **og det underskud der faktisk blev brugt**, så tallet kan
+regnes videre på. **Gulvet er BMR**, altså et tal værktøjet selv regner, ikke
+en ny konstant; når det rammer, siger både skærm og delt tekst det
+("Ned til dit basalstofskifte — du kan ikke spise mindre end kroppen bruger i
+hvile"), og sammenligningstabellen skriver **"-53 kcal"** i stedet for
+**"-500 kcal"**. Overskriften kommer nu fra den **samme** beregning som den
+valgte flise, så de to ikke kan komme til at vise hver sit tal. Nye labels er
+hentet fra de eksisterende knap- og aktivitetslabels, så værktøjet og den
+delte tekst ikke kan glide fra hinanden. Svensk får hele sætningen på svensk.
+`KalorieBeregner.test.tsx` vokser fra **5 til 17 tests** (komponenten havde
+tests, men ingen der læste klipbordet — derfor kunne tekstfejlen ligge).
+Verificeret modsvejs: med den gamle komponent falder **11 af 17**. Gate grøn:
+lint (546 filer), **1522 tests / 141 filer** (fra 1510 / 141) og build (141
+sider). Kode + plan i ét commit på `ceo/kalorier-bmr-gulv`; første
+kandidatvindue **2026-09-27 07:30**. Se opgave 86.
+
+STATUS (forrige iteration) — **C57 er landet: `/renteberegner`'s delte tekst skrev rentesatsen
 råt ind i sætningen og sagde hverken hvilken låntype eller hvilken ydelse den
 ged sig.** `l.copySummary` blev kaldt med `(formatKr(hovedstol), rente,
 loebetid, formatKr(samletRente))`, altså med **renten som råt tal**:
@@ -6091,13 +6127,164 @@ top-15, så ud over CTR er det eneste målbare signal `ad_clicked` på siden.
   tal-state** (`${rate}`, `${years}`, `${aar}`) i komponenter, ikke på
   formatteringskald. Den søgning er ikke kørt endnu, og det er den næste
   iteration jeg vil bruge den på.
-- **Efterladt, bevidst.** Resten af klassen, i rækkefølge efter visninger:
-  `KalorieBeregner`'s `toFixed(2)` (12.332) er nu den største, derefter
-  `AlderBeregner`'s `l.copySummary` (6.013), `PromilleBeregner` (4.159 — dens
-  egen `bacText` bruger allerede `.replace(".", ",")`, så den skal læses for
-  andre fund), derefter de ni `toFixed(2)` fra opgave 83's "Efterladt" — hvor
-  `Elberegner` (4) og `BraendstofBeregner` (2) er de største. **Én komponent ad
-  gangen med grøn gate imellem.**
+- **Efterladt, bevidst.** `KalorieBeregner` er lukket med C58, og dens
+  hypotese var **forkert**: `git grep toFixed` fandt seks `toFixed(0)` (heltals
+  procenter, altså uden decimaltegn) og **ingen `toFixed(2)`**. Den egentlige
+  fejl lå et andet sted — et resultat der var ** negativt** — og den blev fundet
+  ved at læse regnestykket, ikke ved at grepe. Resten af klassen i rækkefølge
+  efter visninger: `AlderBeregner`'s `l.copySummary` (6.013),
+  `PromilleBeregner` (4.159 — dens egen `bacText` bruger allerede
+  `.replace(".", ",")`, så den skal læses for andre fund), derefter de ni
+  `toFixed(2)` fra opgave 83's "Efterladt" — hvor `Elberegner` (4) og
+  `BraendstofBeregner` (2) er de største. **Én komponent ad gangen med grøn
+  gate imellem.**
+
+#### 86. [x] FÆRDIG 2026-09-27 — C58 — `/kalorier`: negative kalorier, "0.5" i dansk tekst, og en delt tekst uden de fem input
+
+- **Iteration start:** 2026-09-27 01:53 CEST på `ceo/kalorier-bmr-gulv`. Køen var
+  tom (alle 85 opgaver færdige, intet `I GANG`) og de fire åbne deploynoters
+  første kandidatvindue er 07:30 — efter iterationsgrænsen, så intet kunne
+  verificeres. Valget var **punkt 3b i køen** (C57's "Efterladt"), som peger på
+  `KalorieBeregner` som den største side i klassen.
+- **Datagrund:** DA `/kalorier` Search Console **12.332 visninger, 124 klik,
+  CTR 1,0 %, pos. 8,2** (GSC 2026-08-27 → 2026-09-24); 286 besøgende/28d,
+  bounce 4 % (Plausible 2026-09-26). Søgningerne er "kalorieberegner"
+  (204 visninger, **pos. 17**), "avanceret kalorieberegner" (9, pos. 13) og
+  "hvor mange kalorier skal jeg have om dagen for at tabe mig" (1, pos. 1).
+  SE `/kalorier` 2.714 visninger / 0,2 % / pos. 20,7 — "kaloribehov" (41,
+  pos. 34), "kalorikalkylator" (37, pos. 11), "kaloribehov kvinna" (33,
+  pos. 49). Samme fejl lå på begge domæner, fordi den lå i komponenten.
+  DA-Ctr'en er 1,0 % — den bedste på sitet sammen med `/rentefradrag` (5,0 %)
+  og `/boligstoette` (2,6 %) — så **titlen er ikke flaskehalsen her**; det er
+  tallet, siden viser.
+- **Fund 1 — anbefalingen kunne være negativ.** `anbefaletKalorier = tdee - 500`
+  uden noget gulv. BMR for mand er `10*vægt + 6,25*højde - 5*alder + 5` og for
+  kvinde det samme minus 166, altså **6,25`·`højde − 5`·`alder − 161** som lavest.
+  Værktøjets `InputField` har `min`/`max` som HTML-attributter, men **klemmer
+  ikke** indtastningen, og tilstanden kan sættes fra URL'en. Derfor:
+  100 år, 30 kg, 100 cm, kvinde, stillesiddende (faktor 1,2) → BMR 264,
+  TDEE 316,8, **anbefalet -183,2 → -183 kcal** i sideens største tal.
+  Følgevirkninger i samme skærmbillede: `beregnMakroer` fik negative kalorier,
+  så **fedt blev -5 g** (`kalorier × 0,25 / 9`) og **-45 kcal**, kulhydrater
+  blev 0 (kun reddet af `Math.max(0, …)`), og makro-procenterne delte sig på
+  summen af en **negativ** total. Og Kopier lagde
+  `"-183 kcal/dag (for at tabe ca. 0.5 kg pr. uge)"` i klipbordet. Det er en
+  anbefaling, en læser kan følge — den farligste fejlklasse på sitet, fordi
+  den er handling, ikke formulering.
+- **Løsning 1 — gulvet er BMR.** Alle tre mål regnes nu **én gang**:
+  `bmrKcal = Math.round(bmr)`, `tabKcal = Math.max(bmrKcal, Math.round(tdee - 500))`,
+  `vedligKcal = Math.round(tdee)`, `opbygKcal = Math.round(tdee + 300)`, og
+  overskriftens `anbefalet` er **den valgte af de tre**. Det er ikke en ny
+  konstant, det er et tal værktøjet selv regner, og det er den etablerede
+  regel: kroppen skal bruge BMR bare for at leve. Rækkefølgen er bevidst —
+  den gamle kode regnede `anbefalet` og `tabKcal` som to uafhængige
+  udtryk for det samme tal, hvilket er præcis C55's lærepådom om at have ét
+  sted. Konsekvensen er synlig på tre steder, ikke én:
+  1. `maalBeskrivelse` bliver den nye `l.maalPaaBmr` ("Ned til dit
+     basalstofskifte — du kan ikke spise mindre end kroppen bruger i hvile")
+     i stedet for at love 0,5 kg pr. uge.
+  2. Sammenligningstabellen skriver **`-53 kcal`** (hvad der faktisk går) i
+     stedet for det hårde `-500 kcal`, og `+300 kcal` bliver `+num(overskud)`.
+  3. `deltTekst()` skriver **"så underskuddet er 53 kcal/dag."** i stedet for
+     500, så læseren ikke fører et løfte videre som værktøjet ikke holder.
+  Svensk får `maalPaaBmr` på svensk. Siden forklarer reglen i **begge**
+  sprog under "Vægttab og kalorieunderskud" / "Viktnedgång och
+  kalorieunderskott", fordi et værktøj der har en regel skal sige den.
+- **Fund 2 — "0.5" med punktum i dansk, to steder, hvoraf det ene gik i
+  klipbordet.** `labels.da.info500` ("Giver ca. 0.5 kg vægttab pr. uge") og
+  `labels.da.maalTabDesc` ("For at tabe ca. 0.5 kg pr. uge"). Den svenske
+  søster skrev begge steder **"0,5"**, og sidens **egen FAQ** i
+  `src/lib/page-data.ts` skriver "0,5" i alle fire svar. Det er C53's fund
+  igen, og det slap fordi det er en **streng-literal**: `git grep toFixed` kan
+  aldrig finde den, fordi tallet ikke kommer fra `toFixed`. Bemærk også at
+  opgave 85's hypotese om `KalorieBeregner` var **forkert** — de seks
+  `toFixed(0)` i filen giver heltal, altså ingen decimaler. Rettet til "0,5"
+  i begge danske labels og i `src/app/kalorier/page.tsx:78` (dansk brødtekst;
+  den svenske linje 176 var allerede korrekt).
+- **Fund 3 — intet tal på skærmen gik gennem `formatNumber`.** Alle 16 heltal
+  blev skrevet råt: `{resultat.anbefalet} kcal`, de tre fliser, BMR, TDEE og
+  de tre makrogram med deres kcal. Det er **ikke** et spørgsmål om skønhed:
+  fedt- og kulhydratmængden kan nå fire cifre. 300 kg, 250 cm, 15 år,
+  meget aktiv (1,9) → BMR 4.492,5, TDEE 8.535,75, **+300 = 8.836 kcal** og
+  kulhydrater **1.087 g** — altså "8836 kcal" og "1087g" i dansk og svensk
+  tekst, hvor læseren venter "8.836 kcal". Ny hjælper `num = (v) =>
+  formatNumber(v, locale)` brugt på **alle** heltal, samme konvention som
+  `MomsBeregner` (C52), `ProcentBeregner` (C53) og `RenteBeregner` (C57).
+  `dec()` (g/kg med én decimal) var allerede korrekt. De tre `toFixed(0)` er
+  **ladt som de er** — en heltalsprocent har intet decimaltegn.
+- **Fund 4 — den delte tekst var ét tal og en målbeskrivelse.** Den gamle streng
+  var `"2.259 kcal/dag (for at tabe ca. 0.5 kg pr. uge)"`: **intet** om de fem
+  input tallet afhænger af. Et kaloriebehov uden køn, alder, vægt, højde og
+  aktivitetsniveau kan ikke bruges af modtageren, og slet ikke et halvt år
+  senere. Nu bygger ét `deltTekst()` hele sætningen, brugt af **både**
+  `CopyResultButton` og `ShareCalculation` (C55/C56's lærepådom):
+  - DA, målet "tab": `2.259 kcal/dag (for at tabe ca. 0,5 kg pr. uge). Baseret på 30 år, mand, 80 kg, 180 cm, moderat aktivitet. Vedligehold er 2.759 kcal/dag, så underskuddet er 500 kcal/dag.`
+  - SE, målet "opbyg": `3 059 kcal/dag (för att bygga muskelmassa). Baserat på 30 år, man, 80 kg, 180 cm, måttlig aktivitet. Underhåll är 2 759 kcal/dag, så överskottet är 300 kcal/dag.`
+  - DA, målet "vedligehold": to sætninger, ingen tredje — der er intet
+    underskud at fortælle.
+  Alle tal gennem `num`, så den delte tekst ikke kan vise et andet tal end
+  siden viser. `Baseret på` / aktivitetens egen label / kønnets egen label er
+  hentet fra de **eksisterende** knap- og aktivitetslabels, så værktøjet og
+  den delte tekst ikke kan glide fra hinanden. Aktivitetens label
+  nedskrives med `firstLower` — kun første tegn — så "Måttlig aktivitet"
+  bliver "måttlig aktivitet" midt i sætningen uden at `toLowerCase()` gør
+  indholdet til småt. Sætningen har **perioder** mellem delene, fordi de er
+  tre sætninger og ikke én; det var netop det, min første forventning til
+  testen havde overset.
+- **Test:** `KalorieBeregner.test.tsx` vokser fra **5 til 17 tests**. De 5
+  gamle (protein følger målet) var grønne før og efter og rører ikke ved
+  ændringen. Klipbordet mockes og **læses** gennem `navigator.clipboard`,
+  samme mønster som `MomsBeregner.test.tsx`, fordi Kopier-knappen ikke viser
+  strengen — en test der læser DOM'en ville være grøn med den gamle kode. Del
+  bevises ved at læse **Del-på-Twitter-linkets `href`**, fordi
+  `ShareCalculation` koder `shareText` ind i URL'en; den bruges også til at
+  låse præfikset (`"Kalorieberegner: "`) fast, da længere-strengen-præfikset
+  er præcis den fejl C57 undgik ved at skrive låntypen i parentes. Negative
+  makroer testes på **de to tal der vises** (gram og kcal), ikke på hele
+  blokkens tekst, fordi proteinblokken indeholder intervallet "1,2-1,6" og
+  et råt `/-\d/` derfor ville finde et **korrekt** tegn.
+  Verificeret modsvejs med `git stash push -- <de to kodefiler>`: **11 af 17**
+  tests falder. De 6 der bliver grønne er de 5 gamle protein-tests plus
+  "Del sender præcis den tekst Kopier lægger i klipbordet" — den sidste er
+  korrekt: de to steder sagde det samme, de sagde bare for lidt.
+- **Gate:** `npm run lint` grøn (546 filer), `npm run test` **1522 tests / 141
+  filer** grøn (fra 1510 / 141), `npm run build` grøn (141 sider). Første
+  kandidatvindue **2026-09-27 07:30**.
+- **MÅL:** `/kalorier` baseline **12.332 visninger / 124 klik / CTR 1,0 % /
+  pos. 8,2** (GSC 2026-08-27 → 2026-09-24) og **286 besøgende/28d, bounce
+  4 %** (Plausible 2026-09-26). SE `/kalorier` baseline **2.714 visninger / 6
+  klik / 0,2 % / pos. 20,7**. **Mål 2026-10-10.** Effekten er først og fremmest
+  på deling: `trackResultCopied` / `trackShare` i Plausible (**Mads skal hente
+  dem, jeg må ikke ændre tracking**), fordi den delte tekst nu kan bruges. Og
+  på `/procent`-lighed: pos. 17 på sitets største kaloriesøgning er et
+  **indekserings**problem, ikke et CTR-problem, så næste grep der er et
+  blogindlæg der svarer på "kalorieberegner" og linke tilbage — ikke titlen.
+- **Bemærkning til søgningen efter denne klasse, opdateret.** Fem
+  iterationer i træk (C53, C55, C56, C57, C58) har fundet en reel fejl i
+  "den tekst brugeren kopierer". To af de fem (**C57, C58**) slap fordi den
+  `git grep` **ikke** kan finde: den ene kom fra et råt state, den anden fra en
+  streng-literal. Søgningen skal derfor være **to søgninger**: (a) template-
+  interpolation af et tal-state (`${rate}`, `${anbefalet}`) og (b) **decimaler i
+  literals** — `grep -n "[0-9]\.[0-9]" src/components/*.tsx src/lib/*.ts` og
+  se hvilke der er i dansk tekst. (b) er ikke kørt endnu, og den er billig.
+  Den tredje og nyeste måde er **at regne eksisterende formler igennem på
+  randen af deres interval**: negativt kaloriebehov, `NaN` ved `n = 0`,
+  division med nul. Den fandt den alvorligste fejl og er den dyreste at
+  køre, fordi den kræver at man forstår regnestykket — men den er den der
+  beskytter fagligt.
+- **Efterladt, bevidst.** 1) `InputField` **klemmer ikke** `min`/`max` — kun
+  browserens `min`/`max`-attribut, som ikke gælder på tastaturinput. Det er
+  grunden til at -183 kcal kunne nå skærmen, og det rammer **alle** 60+
+   `InputField`-brugere. En fælles `clamp` i `InputField` er et stort greb i
+   sig selv og er derfor **ikke** gjort i denne iteration; skrevet her som
+   **C59-kandidat** med hver brugers egen `min`/`max` som kilde.
+  2) `AlderBeregner`'s `l.copySummary` (6.013 visninger) er det næste i
+  rækkefølge efter visninger, og `PromilleBeregner` (4.159) derefter.
+  3) **Det negative-fund-spørgsmål for de andre kostværktøjer:** beregneren på
+  `/kalorier` var den eneste, der kunne give et negativt dagligt behov, fordi
+  den er den eneste med et fast underskud i kcal. `/vaegttab` (samme emne,
+  `recommendedPre` med "0,5 kg/uge") er det næste sted at læse med det samme
+  blik.
 
 
 ### Næste kandidater efter C34 — lukket med negativt fund
@@ -6295,17 +6482,27 @@ efter datagrund:
    aldrig i selve regnestykket. Klassen er billig, mekanisk og har fundet en
    reel fejl **hver eneste gang den er kørt** — nu fire for fire (C52, C53,
    C55, C56). **Læst i rækkefølge efter visninger:** `DatoBeregner` (130.392)
-   → se opgave 83, `TidszoneBeregner` (24.723) → se opgave 84. **Ulæste af samme
-   overflade:** `RenteBeregner`'s `l.copySummary` (13.623),
-   `KalorieBeregner` (12.332), `AlderBeregner`'s `l.copySummary` (6.013) — og
+   → se opgave 83, `TidszoneBeregner` (24.723) → se opgave 84,
+   `RenteBeregner` (13.623) → se opgave 85, `KalorieBeregner` (12.332) → se
+   opgave 86. **Ulæste af samme overflade:**
+   `AlderBeregner`'s `l.copySummary` (6.013), `PromilleBeregner` (4.159) — og
    de 11 komponenter med `toFixed(2)` (C53 sagde 18 — `git grep` tæller 11).
    **Bemærk fra C56:** `toFixed(2)` er **ikke** en fuldstændig søgning på
    denne klasse. C56's brudtal kom fra `/60` på et heltal, altså en template
    med et rått tal, som `git grep toFixed` aldrig kan finde. Den rigtige
    søgning er derfor **templates med rå tal indeni brødtekst** — `(forskel)}`
    i `TidszoneBeregner` var fundet ved at læse siden, ikke ved at grepe.
-   **Én komponent ad gangen med grøn gate imellem.** Se opgave 81's, 83's og
-   84's "Efterladt".
+   **Bemærk fra C58, der lukker klassen som metode:** de fem fund i træk
+   (C52, C53, C55, C56, C57) er fundet ved at læse den tekst, der kopieres.
+   C58 fandt den **alvorligste** fejl i klassen — negative kalorier — og den
+   slap for **alle** de søgninger, fordi den lå i selve regnestykket og ikke i
+   en streng. Derfor er der nu **tre** søgninger, ikke to:
+   (a) template-interpolation af et tal-state, (b) **decimaler i literals**
+   (`grep -n "[0-9]\.[0-9]" src/components/*.tsx` — se hvilke der står i dansk
+   tekst), og (c) **regn formlerne igennem på randen af deres interval**
+   (negativt behov, `NaN`, division med nul). (b) og (c) er ikke kørt endnu.
+   **Én komponent ad gangen med grøn gate imellem.** Se opgave 81's, 83's, 84's,
+   85's og 86's "Efterladt".
 4. **`/moms`-emnet fra C45 (Skats frister) ligger stadig åbent** og er for
    stort til en side-iteration. Det eneste, der kan gøres nu uden nye tal, er
    at finde ud af om **GSC har en række** for frister/indberetning — ellers
@@ -6315,6 +6512,23 @@ efter datagrund:
    `/api/v1/loen`'s kommuneskat, domænerne og `www`-redirects.
 
 ### ❓ Til Mads
+- ❓ **Skal `/kalorier` have et hårdt kaloriegulv ud over BMR? (C58,
+  2026-09-27).** C58 lagde BMR som gulv under anbefalingen, fordi det er den
+  etablerede regel og et tal værktøjet selv regner. Men **BMR er ikke et
+  kostråd**: for den lille inaktive bruger der udløste fundet er BMR 264 kcal,
+  så værktøjet nu siger "264 kcal/dag" til en 30 kg tung person. Det er ikke
+  en anbefaling en diætist ville give. I klinisk praksis og i dansk
+  kostvejledning bruges ofte et **fast bund** på **ca. 1.200 kcal for kvinder
+  og 1.500 for mænd** ud over BMR, fordi intet under det er realistisk og fordi
+  et lavere tal i praksis hænger sammen med underernæring.
+  Jeg har **bevidst ikke** indført det: det er en faglig konstant, jeg ikke kan
+  kilde til en dansk myndighed, og opgaven siger at faglig korrekthed går forud
+  for volumen — så et tal uden kilde ville være værre end BMR. **Beslutningen
+  er din eller en diætists:** skal jeg (1) beholde BMR som eneste gulv, (2)
+  lægge 1.200/1.500 oveni med en note om kilden, eller (3) markere værktøjet
+  tydeligere som vejledende for små personer? Uden svar beholder jeg (1).
+  Samme spørgsmål gælder `/vaegttab` og de andre kostværktøjer — de bør
+  kobles sammen, så der ikke er to forskellige regler på sitet.
 - ❓ **Hvad skal der ske med `beregner.no`? (fund 2026-09-26 21:45, se
   konsolideret note).** Jeg har nu dokumenteret, at beregner.no er **live, men
   ikke ejes af dette repo**: sit eget URL-skema (`/kalkulator/<norsk-slug>`), sin
@@ -7165,6 +7379,26 @@ landmark=lån, piggybank=opsparing osv.).
     - Gate grøn: lint ok, 280/280 tests, build ok (128 pages).
 
 ## VERIFICÉR DEPLOY-log
+- ⏳ **ÅBEN — C58 `/kalorier`: intet negativt kaloriebehov, "0,5" med komma og
+  en delt tekst med de fem input, kode `HEAD`, merge `HEAD` 2026-09-27 02:2x
+  CEST.** Første kandidatvindue **2026-09-27 07:30**. Indholdstjek ved det nye
+  build: på `/kalorier` med standardværdierne (30 år, mand, 80 kg, 180 cm,
+  moderat, målet **Tab vægt**) skal **Kopiér** give
+  `2.259 kcal/dag (for at tabe ca. 0,5 kg pr. uge). Baseret på 30 år, mand,
+  80 kg, 180 cm, moderat aktivitet. Vedligehold er 2.759 kcal/dag, så
+  underskuddet er 500 kcal/dag.` — før stod der
+  `2.259 kcal/dag (for at tabe ca. 0.5 kg pr. uge)`. Sæt **Alder 100**,
+  **Vægt 30**, **Højde 100**, **Kvinde**, **Stillesiddende**, målet **Tab
+  vægt**: overskriften skal være **264 kcal** (ikke -183), beskrivelsen skal
+  sige **"Ned til dit basalstofskifte"** (ikke "0,5 kg"), vægttab-flisen skal
+  sige **-53 kcal** (ikke -500), og fedt skal være **7 g** (ikke -5). Sæt
+  **Opbyg** med 300 kg / 250 cm / 15 år / **Meget aktiv**: overskriften skal
+  være **8.836 kcal** med tusindtalsseparator. `beraknare.se/kalorier` med
+  målet **Bygg upp** skal give `3 059 kcal/dag (för att bygga muskelmassa).
+  Baserat på 30 år, man, 80 kg, 180 cm, måttlig aktivitet. Underhåll är 2 759
+  kcal/dag, så överskottet är 300 kcal/dag.` Begge sider skal have afsnittet om
+  at værktøjet aldrig regner under basalstofskiftet, og **intet sted** må stå
+  "0.5 kg".
 - ⏳ **ÅBEN — C57 `/renteberegner`: delt tekst med rå rentesats, låntype og
   ydelse, kode `efd3053`, merge `06e5442` 2026-09-27 01:57 CEST.** Første
   kandidatvindue **2026-09-27 07:30**. Indholdstjek ved det nye build: på
