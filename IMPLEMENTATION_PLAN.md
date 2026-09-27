@@ -7759,7 +7759,7 @@ landmark=lån, piggybank=opsparing osv.).
   (ny måler med 8 tests, én pr. regel) og 21 ubundne `<label>` lukket på syv
   beregnere (`/aktieskat`, `/delregning`, `/feriepenge`, `/lon-efter-skatt`,
   `/motionkalorier`, `/rabat`, `/rygestop`). Kode + plan i ét commit på branch
-  `ceo/label-scan-gate`, kode `f3d51b9`, merge `da3842f` 2026-09-27 07:22
+  `ceo/label-scan-gate`, kode `f3d51b9`, merge `da3842f` 2026-09-27 07:18
   CEST. Første kandidatvindue **2026-09-27 12:30** (07:30 er for kort tid til en
   build).**
   **HTTP 200 beviser intet:** intet af dette rører `src/lib/` eller en beregning —
