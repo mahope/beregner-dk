@@ -1,3 +1,5 @@
+STATUS: KØ — **C86 er landet: 10 af de 11 variationer dansk autocomplete har under "promille efter" er det samme spørgsmål — hvor mange promille giver N øl? — og `/promille` havde et afsnit om hvad én genstand er, men ingen der regnede genstandene.** Køen havde ingen `I GANG`-opgave, så dette var C85-listenens punkt 2 målt i stedet for gættet. **Målt først:** DA-autocomplete (`hl=da`, `gl=dk`, 13:12) under **"promille efter"** → 10 variationer: "1 øl", "1 glas vin", "2 øl", "1 genstand", "10 genstande", "en starköl", "2 glas vin", "3 øl", "3 genstande", "1 flaske vin". Under **"promille"** → "promille beregner" (1.149 visninger i GSC, pos. 9), "promillegrænse danmark", "promillegrænse tyskland", "promillegrænse sverige", "promillegrænse italien". **Målt på koden:** siden forklarede *genstanden* (12 gram) og fordelingsfaktoren (0,68/0,55), men **havde ingen tabel over N genstande** — altså svaret lå i to afsnit, brugeren skulle selv sætte sammen. **Rettelsen (kun `da`):** et nyt `<h2>` **"Hvor mange promille er N øl?"** med regnestykket og en tabel 1/2/3/4/6 genstande × 80 kg mand / 70 kg mand / 60 kg kvinde (0,22/0,44/0,66/0,88/1,32 — 0,25/0,50/0,76/1,01/1,51 — 0,36/0,73/1,09/1,45/2,18), plus en linje der sætter 0,5 ‰-grænsen på den: **mellem to og tre øl** for 80 kg, ved to øl for 70 kg, efter halvandet for 60 kg. **Tal fra samme standard som resten af siden** (12 g pr. genstand, Widmark-faktorerne), og de tre tal de har til fælles med sidens *egen* "Hvornår er du igen promillefri?"-tabel (0,88 for 4 genstande/80 kg, 0,73 for 2 genstande/60 kg kvinde, 1,51 for 6 genstande/70 kg mand) **stemmer alle tre** — altså er den nye tabel ikke en ny sandhed, men sidens egen. **Én fejl undgået ved at regne på:** min første sætning sagde "grænsen nås efter to øl" for 80 kg, men 2 øl er **0,44 ‰**, altså *under* grænsen — den siger nu "mellem to og tre øl (0,66 ‰ efter tre)". **En forhindring fundet:** `page.test.tsx` mocker `@/components/FAQ` væk, så FAQ'en er ikke i testens HTML; min første version af testen krævede det nye FAQ-spørgsmål og faldt derfor på noget, der ikke kan testes dér. Samme fælde som C85's. **Harness:** `page.test.tsx` **2 → 3 tests**, **modsvejs verificeret** (den nye test falder med gammel kode). Gate grøn: lint (556 filer), **1727 tests / 151 filer** (fra 1726 / 151), build (**141 sider**). Se opgave 115. **MÅL:** `/promille` baseline **4.513 visninger / 67 klik / CTR 1,5 % / pos. 7,9 pr. 2026-08-28 → 2026-09-25** — måles igen 2026-10-11.
+
 STATUS: KØ — **C85 er landet: `/renteberegner` er det sidste ubearbejdede medlem af dansk top-15 i GSC, og dens søgeklynge er ikke "beregn min rente" — den er "formlen" og "Excel". Siden havde nul forekomster af ordet `Excel` og nul af `formel`.** Køen havde ingen `I GANG`-opgave, så dette var C84-listenens punkt 1. **Målt først:** DA-autocomplete (`hl=da`, `gl=dk`, 13:10) under **"annuitetslån"** giver 10 variationer, hvoraf **fire er Excel** ("annuitetslån excel", "annuitetslån excel skabelon", "annuitetslån beregner excel", "annuitetslån formel excel") og **to er selve beviset** ("annuitetslån formel", "annuitetslån formel bevis" — en gymnasiopgave). Under **"månedlig rente"**: "månedlig rente til årlig rente", "månedlig rente formel", "månedlig rente kredittkort", "månedlig rente sparekonto". Under **"renteberegner"**: "renteberegner excel", "renteberegner morarenter", "renteberegner boliglån". **Sprog-asymmetrien igen, og den er her helt konkret:** SE-siden har et afsnit "**Nominell kontra effektiv ränta**" og et FAQ-spørgsmål "**Effektiv rente?**"; DA-siden har **ingen af delene** — mens dansk autocomplete spørger om præcis "månedlig rente til årlig rente". **Rettelsen (kun `da`):** et nyt `<h2>` **"Formlen for et annuitetslån — og de samme tal i Excel"** med ydelsesformlen, det efterprøvbare eksempel og en treleds-begrundelse (hver ydelse er 1/(1+r), 1/(1+r)², … og summen af den geometriske række er (1−(1+r)^−n)/r — det er "beviset"), en Excel-tabel med **`=YDELSE(0,04/12;240;-200000)`**, **`=RENTENPERIODER(0,04/12;-1211,96;200000)`** og den samlede rente, samt **"Månedlig rente til årlig rente"** med 1 %/måned = **12,68 %**/år og 4 %/år = **4,07 %** effektivt. **Tallene er egne, ikke lånt:** 200.000 kr. @ 4 % i 20 år → ydelse **1.211,96 kr.**, i alt 290.870,56 kr., renter 90.870,56 kr. — beregnet i node, ikke kopieret fra en side (C82's Excel-afsnit gjorde det samme, og sidens egne 100.000/5 %/5 år-tal er uændrede). **Minus-tegnet i Excel er en fælde, og den er skrevet ned:** med `YDELSE` skal lånebeløbet ind som `-200000`, ellers kommer ydelsen ud negativ — det er derfor siden siger det eksplicit. **Harness:** `page.test.tsx` **4 → 6 tests** — ét der kræver formlen, geometriske forklaring, begge Excel-funktioner og de to procentsatser i den server-renderede HTML, ét der kræver de to nye spørgsmål i `page-data.ts`. **Modsvejs verificeret: begge falder** med den gamle kode. **To forhindringer fundet undervejs, begge ærlige:** (1) `page.test.tsx` mocker **både** `FAQ` **og** `StructuredData` væk, så FAQ'en er slet ikke i testens HTML — min første test læste derfor et element, der aldrig kunne være der; den læser nu `page-data.ts` direkte, som er den tabel begge komponenter får fra. (2) min første assertion skrev "summen af den geometriske række" med lille s, mens JSX'en sætter stor S — fundet fordi testen *faldt*. Samme fejlklasse som målefejl nr. 7-13. Gate grøn: lint (556 filer), **1726 tests / 151 filer** (fra 1724 / 151), build (**141 sider**). Se opgave 114. **MÅL:** `/renteberegner` baseline **13.560 visninger / 117 klik / CTR 0,9 % / pos. 7,5 pr. 2026-08-28 → 2026-09-25** — måles igen 2026-10-11.
 
 STATUS: KØ — **C84 er landet: `/tidszone`'s egen meta-tekst løj om sit eget indhold. Den lovede "tidsforskel til 12 byer" i den indekserede beskrivelse — tabellen har haft 16 byer siden C46 lagde fire i, og nu 21.** Køen havde ingen `I GANG`-opgave, så dette er C82's åbne kandidat #1 og #2's fætter: mål autocomplete, se hvad siden svarer på. **Målt først:** DA-autocomplete (`hl=da`, `gl=dk`, 13:00) giver **10 variationer under "hvad er klokken i usa"** — bl.a. "…når den er 12 i danmark" (GSC: 180 visninger, pos. 6), "…når den er 21 i danmark", "…når den er 14 i danmark", "…når den er 16 i danmark", "…est", "…los angeles" — og **10 under "tidsforskel"**, hvoraf fire pegede på byer, siden ikke havde: **"tidsforskel thailand", "tidsforskel bali danmark", "tidsforskel tyrkiet", "tidsforskel new york"** (den fandtes), mens "hvad er klokken i" spørger efter **Thailand, Tyrkiet, Canada og Spanien**. SE-autocomplete (`hl=se`, `gl=se`) spørger om Japan, Grønland, Island og Australien — dem har siden alle. **Rettelsen:** de fem manglende destinationer i `src/lib/tidszone-reference.ts` — **Toronto** (UTC-5/-4, som New York), **Madrid** (følger Danmarks CEST), **Istanbul** (fast UTC+3, Tyrkiet afskaffede sommertid i 2016), **Bangkok** (fast UTC+7) og **Denpasar (Bali)** (fast UTC+8) — **21 byer i alt**, to nye FAQ-par i `page-data.ts` med navngivet sommer/vinter ("I dansk sommertid er det 17 i Bangkok, 13 i Istanbul og 06 i Toronto … I vintertid er det 18, 14 og 06"), og **metaDescription rettet fra "12 byer" til "21 byer" i begge sprog** (SE: "till 12 städer" → "till 21 städer"). **Fundet ud over målingen — og det er pointen med at læse ens egen tekst:** `metaDescription` lovede 12 byer, fordi C46 tilføjede fire uden at røre den. Det er en *indekseret* løgn om sit eget indhold, altså præcis CTR-klassen Fase 3 prioriterer, fundet ved at koble to filer sammen i stedet for at læse dem hver for sig. **Harness:** `tidszone-reference.test.ts` **7 → 9 tests** — ét med de fem nye rækkers tal, ét der **udleder tallet af byer fra `metaDescription` i `da` og `se` og kræver at det er lig med `TIDSZONER.length`**, så den samme afdrift ikke kan komme tilbage ved næste tilføjelse. **Modsvejs verificeret: begge nye tests falder** med den gamle kode. **Målefejl nr. 13 (min egen, samme klasse som nr. 9-12):** min første regex var `/til (\d+) (?:byer|städer)/` — den er væk på den svenske "till", så `Number(undefined)` gav **NaN**, og testen ville have været grøn for alt andet end ét tal. Rettet til `/till? (\d+)/`; fundet fordi testen *faldt* med NaN i stedet for med 12 mod 21. Gate grøn: lint (556 filer), **1724 tests / 151 filer** (fra 1722 / 151), build (**141 sider**). Kode + plan i ét commit på `ceo/tidszone-destinationer`; se opgave 113. **MÅL:** `/tidszone` baseline **24.485 visninger / 110 klik / CTR 0,4 % / pos. 7,5 pr. 2026-08-28 → 2026-09-25** — måles igen 2026-10-11.
@@ -7829,6 +7831,18 @@ landmark=lån, piggybank=opsparing osv.).
      sin klynge — de tre satser). Særlig kontrol: SE skal stadig sige
      "1 000 kr × 1,25 = 1 250 kr, × 1,12 = 1 120 kr eller × 1,06 = 1 060 kr".
 
+### ⏳ **VERIFICÉR DEPLOY: C86 — `/promille` dansk: tabellen over hvor mange promille N øl giver (4.513 visninger, CTR 1,5 %, pos. 7,9).** Kode + plan i ét commit på `ceo/promille-noel`. Første kandidatvindue **2026-09-27 17:30** (eller det næste vindue efter merge).
+  **HTTP 200 beviser intet:** intet rører `PromilleBeregner` eller
+  Widmark-formlen — kun ny brødtekst og ét `faqItem`.
+  1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
+  2. **Indhold:** siden skal finde `Hvor mange promille er N øl?` og
+     `0,44 ‰` og `1,45 ‰` og `mellem to og tre øl`.
+  3. **De nye tal skal stemme med den eksisterende tabel ovenfor:** 0,88 for
+     4 genstande/80 kg, 0,73 for 2 genstande/60 kg kvinde, 1,51 for 6
+     genstande/70 kg mand.
+  4. **FAQSchema:** `grep -c '"@type":"Question"'` skal være **6** (før: 5).
+  5. `https://beraknare.se/promille` skal være **uændret**.
+
 ### ⏳ **VERIFICÉR DEPLOY: C85 — `/renteberegner` dansk: annuitetsformlen, Excel (`YDELSE`/`RENTENPERIODER`) og nominel mod effektiv (13.560 visninger, CTR 0,9 %, pos. 7,5).** Kode + plan i ét commit på `ceo/renteberegner-formel`. Første kandidatvindue **2026-09-27 17:30** (eller det næste vindue efter merge).
   **HTTP 200 beviser intet:** intet af dette rører `RenteBeregner` eller et
   regnestykke — kun ny brødtekst i `page.tsx` og to `faqItems`. Sådan
@@ -10922,6 +10936,55 @@ tekst på `/tidszone`), men Kopier-strengen med datoen kræver en browser.
 5. **🔒 Uforandrede forbehold:** hreflang er korrekt (`hrefLang` med stort L);
    svenske slugs kræver Mads' go; `/bmi` og `/su`s fald måles 2026-10-11.
 6. **Mål 2026-10-10 / 2026-10-11** (se Måleprotokol).
+
+#### 115. [x] FÆRDIG 2026-09-27 — C86 — `/promille`: tabellen over hvor mange promille N øl giver, bygget på sidens egen genstand
+
+- **Datagrund:** `/promille` (**4.513 visninger, 67 klik, CTR 1,5 %, pos. 7,9**),
+  og brand-søgningen **"promille beregner" har 1.149 visninger** — den største
+  absolutte søgning på siden.
+- **Målt først:** "promille efter" → 10 variationer, alle samme spørgsmål
+  ("1 øl", "1 glas vin", "2 øl", "1 genstand", "10 genstande", "en starköl",
+  "3 øl", "3 genstande", "1 flaske vin"). "promillegrænse" spørger desuden efter
+  Tyskland, Sverige og Italien — **den tabellen er der ikke**, kun Danmarks og
+  Sveriges.
+- **Rettelsen (kun `da`):** `<h2>Hvor mange promille er N øl?</h2>` med
+  regnestykket og tabellen 1/2/3/4/6 genstande × 80 kg mand / 70 kg mand /
+  60 kg kvinde, en linje om hvornår 0,5 ‰ nås, og ét nyt FAQ-spørgsmål.
+- **Krydstjek mod sidens egen tabel:** 0,88 (4 genstande, 80 kg), 0,73 (2
+  genstande, 60 kg kvinde) og 1,51 (6 genstande, 70 kg mand) står i begge — så
+  den nye tabel er ikke en ny sandhed, men sidens egen, hvilket er det bedste
+  bevis på at den er rigtig.
+- **En fejl undgået ved at regne:** "grænsen nås efter to øl" for en 80 kg mand
+  er **forkert** (2 øl = 0,44 ‰). Teksten siger nu "mellem to og tre øl".
+- **Harness:** `page.test.tsx` **2 → 3 tests**, modsvejs verificeret.
+  `FAQ` er mocket væk i filen, så FAQ-indhold ikke kan testes dér (samme
+  fælde som C85).
+- **Gate grøn:** lint 556 filer, **1727 tests / 151 filer** (fra 1726 / 151),
+  build 141 sider. Branch `ceo/promille-noel`.
+- **MÅL:** baseline **4.513 visninger / 67 klik / CTR 1,5 % / pos. 7,9**.
+
+### Næste kandidater efter C86
+
+0. **🔒 Opgave 97 er `BLOCKED`,** 98 afhænger af den. Browser-noter: C52, C55,
+   C56, C57 og C60 ligger i `❓ Til Mads` nederst.
+1. **🆕 `/promillegrænse` i udlandet** — samme måling, samme side: GTC
+   ("promillegrænse tyskland"), Sverige (0,2 ‰), Italien (0,5), Norge, Spanien,
+   Frankrig, USA står i dansk autocomplete, og siden har kun Danmark og
+   Sverige. Det er ét afsnit i samme fil og samme målemetode.
+2. **🆕 `/alder` (6.149 v, CTR 0,6 %, pos. 7,8)** — "hvor gammel er jeg" står
+   på **pos. 33**; C47 lagde "alder mellem to datoer" på siden, så mål først
+   hvad resten af klyngen spørger.
+3. **🆕 `/kalorier` (12.477 v, 1,0 %, pos. 8,2)** — brand-søgningen står på
+   **pos. 17** mens siden samlet er 8,2, altså er der et *værktøj*-problem,
+   ikke et brødtekst-problem.
+4. **✅ Dansk top-15 er lukket** (C82-C86) — lav ikke CTR på de lukkede sider
+   igen; mål i stedet effekten 14 dage efter.
+5. **🆕 Svensk CTR:** `/tidszone` (3.256 v), `/leasing` (3.151 v, pos. 12,4),
+   `/alder` (3.060 v), `/nedtaelling` (5.163 v, pos. 9,4).
+6. **⏬ Nedprioriteret:** 22 filer / 35 ubundne labels (kun sider uden for top-15).
+7. **🔒 Uforandrede forbehold:** hreflang korrekt (`hrefLang` med stort L);
+   svenske slugs kræver Mads' go; `/bmi` og `/su` måles 2026-10-11.
+8. **Mål 2026-10-10 / 2026-10-11** (se Måleprotokol).
 
 #### 109. [x] FÆRDIG 2026-09-27 — C80 — erklær Node-runtime-kontrakten: `engines.node`, `.nvmrc` og en test der holder de tre sammen
 

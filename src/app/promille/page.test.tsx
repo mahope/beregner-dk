@@ -53,4 +53,17 @@ describe("promille page", () => {
       expect(html).toContain("Promilleværktøj");
     }
   );
+
+  test("svarer på hvor mange promille N øl giver, med tal for tre kropsvægte", async () => {
+    const html = renderToStaticMarkup(await PromillePage());
+
+    // "promille efter 1/2/3 øl", "promille efter 1 glas vin" — de ti variationer
+    // under "promille efter" i dansk autocomplete.
+    expect(html).toContain("Hvor mange promille er N øl?");
+    expect(html).toContain("0,44 ‰");
+    expect(html).toContain("0,88 ‰");
+    expect(html).toContain("1,45 ‰");
+    // Grænsen skal være sat rigtigt ind mellem to og tre øl for en 80 kg mand.
+    expect(html).toContain("mellem to og tre øl");
+  });
 });

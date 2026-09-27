@@ -135,6 +135,67 @@ export default async function PromillePage() {
               almindelig øl (33 cl, 4,6 %), et lille glas vin (12 cl) eller et snapseglas spiritus
               (4 cl). En stærk øl eller et stort glas vin kan sagtens være 1,5–2 genstande.
             </p>
+            <h2>Hvor mange promille er N øl?</h2>
+            <p>
+              Det er det mest søgte spørgsmål om promille, og svaret afhænger af
+              kropsvægten. Regnestykket er <strong>promille = gram alkohol &divide;
+              (kropsvægt &times; fordelingsfaktor)</strong>, og én pilsner på 33
+              cl er ca. <strong>12 gram</strong> — altså én genstand. Tabellen
+              regner med fulde genstande, altså uden alkohol i kroppen inden
+              dansketiden:
+            </p>
+            <div className="overflow-x-auto">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Genstande</th>
+                    <th>80 kg (mand)</th>
+                    <th>70 kg (mand)</th>
+                    <th>60 kg (kvinde)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>1 øl / 1 glas vin</td>
+                    <td>0,22 ‰</td>
+                    <td>0,25 ‰</td>
+                    <td>0,36 ‰</td>
+                  </tr>
+                  <tr>
+                    <td>2 øl / 2 glas vin</td>
+                    <td>0,44 ‰</td>
+                    <td>0,50 ‰</td>
+                    <td>0,73 ‰</td>
+                  </tr>
+                  <tr>
+                    <td>3 øl / 3 glas vin</td>
+                    <td>0,66 ‰</td>
+                    <td>0,76 ‰</td>
+                    <td>1,09 ‰</td>
+                  </tr>
+                  <tr>
+                    <td>4 øl / 4 glas vin</td>
+                    <td>0,88 ‰</td>
+                    <td>1,01 ‰</td>
+                    <td>1,45 ‰</td>
+                  </tr>
+                  <tr>
+                    <td>6 øl / 6 glas vin</td>
+                    <td>1,32 ‰</td>
+                    <td>1,51 ‰</td>
+                    <td>2,18 ‰</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p>
+              Sådan kan du se grænsen på 0,5 ‰: for en 80 kg mand nås den
+              mellem to og tre øl (0,66 ‰ efter tre), for en 70 kg mand ved to
+              øl (0,50 ‰), og for en 60 kg kvinde efter halvandet (0,55 ‰). Og
+              kroppen bruger tid — efter yderligere en time er der ca. 0,15 ‰
+              mindre. Tast dine egne tal ind i promilleberegneren ovenfor for et
+              præcist estimat.
+            </p>
             <h2>Promillegrænsen i Danmark</h2>
             <p>
               Det er ulovligt at køre bil med en promille <strong>over 0,5 ‰</strong>. Husk, at
