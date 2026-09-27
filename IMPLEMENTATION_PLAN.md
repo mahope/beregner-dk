@@ -7753,6 +7753,23 @@ landmark=lån, piggybank=opsparing osv.).
     - Gate grøn: lint ok, 280/280 tests, build ok (128 pages).
 
 ## VERIFICÉR DEPLOY-log
+- ⏳ **ÅBEN — C70: 27 ubundne `<label>` på syv beregnere (`/efterloen`,
+  `/ejendomsvaerdiskat`, `/boligsalg`, `/enheder`, `/bolan`, `/alkoholenheder`,
+  `/loen-konverter`) — felter uden navn for skærmlæsere. Kode + plan i ét commit
+  på branch `ceo/labels-runde5`, kode `9432f43`, merge `0fc42ed` 2026-09-27 06:43
+  CEST. Første kandidatvindue **2026-09-27 12:30** (07:30 er for kort tid til en
+  build).** Ingen af de syv sider er blandt GSC's top-15, så effekten på trafik
+  er **nul forventet** — det er en funktionsfejl, ikke en titel. Sådan verificeres
+  det:
+  1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
+  2. **Beregningsresultaterne skal være uændrede** — intet i denne ændring rører
+     `src/lib/`. Tjek tre tal pr. side mod i dag: `/efterloen` med fødselsår 1962
+     og 20 års bidrag, `/ejendomsvaerdiskat` med 500.000 kr. i København,
+     `/enheder` 1 km → m. De skal være identiske.
+  3. `/boligsalg` skal fortsat kunne vælge mæglerprocent/fast pris, og
+     "Tinglysning inkluderet" skal stadig afsløre "Ny boligs pris".
+  4. `https://beraknare.se/bolan` skal fungere: `/bolan` er `seOnly`, så de tre
+     felter (pris, lån, rente) skal have svenske navne — kontrollér i DOM'en.
 - ⏳ **ÅBEN — C69 `/gaeldsfri` delte dansk værktøjsnavn på beraknare.se:
   `ShareCalculation`s `calculatorName` lå i JSX, ikke i `labels`, og går ind i
   Twitter-`href` og mail-`subject`. Kode + plan i ét commit på branch
