@@ -1,3 +1,5 @@
+STATUS: KØ — **C95 er landet: `/boligstoette` erklærede "boligsikring" som søgeord og svarede på nul af det. 2 af sidens 4 største søgninger er boligsikring, og kroppen nævnte ordet 0 gange.** Køen havde ingen `I GANG`-opgave, så valget var C94's kandidat #2 — `/renteberegner` — **men målingen af den viste at den allerede var gjort**: commit `9d4df42` (27/9 13:11, før denne iteration startede) lagde formlen, Excel-funktionerne og effektiv rente på siden, og den ligger i live-HTML'en som **0 fund på "Excel", "formel", "YDELSE" og "PMT"** fordi den endnu ikke er deployet. Den er altså ikke dobbeltarbejde, den er bare uafviklet. Det er grunden til at kandidatlisten er skrevet om i denne iteration. **Målt først:** dansk GSC (2026-08-28 → 09-25) giver `/boligstoette` **6.697 visninger, 176 klik, CTR 2,6 %, pos. 8,7**, og Plausible **526 besøgende/28d (+85 %, bounce 2 %)** — sitets fjerdemest besøgte side. Søgningerne er `"beregn boligstøtte"` 508 v pos. 10, `"boligstøtte beregner"` 276 v pos. 13, **`"boligsikring beregner"` 186 v pos. 11** og **`"beregn boligsikring"` 164 v pos. 9** — altså **to af fire er søgninger efter det modsatte ord**. DA-autocomplete under **"boligsikring"** (15:49) giver 10 variationer hvoraf **seks er boligsikring-spørgsmål** ("boligsikring beregning", "boligsikring regler", "boligsikring formue", "boligsikring pensionist formue", "boligsikring andelsbolig"). På den live side stod "boligsikring" **2 gange i hele HTML'en, begge i `<meta name="keywords">`** — kroppen nævnte det 0 gange. **Rettelsen:** ét nyt `<h2>` "Boligstøtte er ikke boligsikring", der siger at boligstøtte er *et tilskud fra staten til lejere* (det siden beregner), mens boligsikring er *en obligatorisk opsparingsordning, du låner mod din egen opsparing og betaler tilbage på vilkår* — altså ikke en støtte, du kan søge om, og uden månedlig ydelse — plus et spor til Realkredit Danmark. **Ét nyt FAQ-par**, som dermed også kommer i JSON-LD'en. **Hvorfor rettelsen er så kort som den er, og det er pointen:** "boligsikring formue" og "boligsikring pensionist formue" er søgninger *med beløb i sig*, og de kan kun svares med en kilde. **Realkredit Danmark var ikke tilgængelig fra loopet** — webfetch "Transport error", `curl` på to sider svarer HTTP 000, borger.dk 404. Så der står **ingen beløb på siden**, kun definitionen og sporet til administratoren. Samme disciplin som opgave 119, der ligger kilde-blokeret af samme grund; at skrive beløb uden kilde ville være den fejlklasse Fase 3 forbyder. **Harness:** `page.test.tsx` **2 → 4**, hvoraf den nye også låser den afgørende sætning "ikke en støtte, du kan søge om"; **verificeret modsvejs: begge falder** med kun de to filer på master. `BOLIGSTOETTE_2026` og de beskyttede dataintegrationer urørt, kun `da`. Gate grøn: lint (556 filer), **1786 tests / 151 filer** (fra 1784 / 151), build (**141 sider**), `locale-leak.mjs --gate` exit 0. Kode + plan i ét commit på `ceo/boligstoette-boligsikring`; se opgave 125. **MÅL:** `/boligstoette` baseline **6.697 visninger / 176 klik / CTR 2,6 % / pos. 8,7 pr. 2026-08-28 → 2026-09-25** og **526 besøgende/28d / bounce 2 % pr. 2026-09-27** — måles igen 2026-10-11. Forventningen er *ikke* flere visninger på de 350 boligsikring-visninger; de skal videre til Realkredit Danmark.
+
 STATUS: KØ — **C94 er landet: `/braendstof` er sitets sjettestørste danske side (16.764 visninger, CTR 1,1 %, pos. 6,0) og rangerer selv på position 6 for "benzin beregner", men viste aldrig regnestykket — og den svarede ikke på den enhed, de fleste søger med.** Køen havde ingen `I GANG`-opgave (119 er kilde-blokeret, 97 er `BLOCKED` og 98 afhænger af den), og alle åbne deploy-noter har første vindue **17:30** — det er 15:40, så intet kunne verificeres i starten af iterationen. Valget er C93's åbne kandidat #2, samme klasse som `/kvadratmeter`. **Målt først:** DA-autocomplete (`hl=da`, `gl=dk`, 15:41) giver under **"benzin beregner"** 10 variationer hvoraf **seks spørger om pris, km eller udgift** ("benzin beregner pris", "benzin beregner km", "benzin udgift beregner"), og under **"benzin forbrug"** 10 hvoraf **fire spørger om at finde sit eget forbrug** ("beregn benzin forbrug bil", "benzin forbrug danmark"). Den server-renderede side havde fire generiske overskrifter og **0** regnestykker. **Rettelsen:** et nyt `<h2>` "Sådan regner du benzinforbrug og pris ud med tal" med **hele regnestykket** for benzin (500 ÷ 15 = 33,3 l × 13,50 kr. = **450 kr.**), diesel (**356 kr.**) og el (**213 kr.**), to `<h3>` der svarer på resten af klyngen — "Sådan finder du dit eget forbrug" (fire tankfyld: 380 ÷ 40 = **9,5 km/l**) og "**km/l eller l/100 km?**" (tankinstrumentet viser l/100 km, værktøjer viser km/l, og omregningen er 100 ÷ den anden enhed) — samt to nye FAQ-par i `page-data.ts`, som dermed også kommer i JSON-LD'en. **Hvert tal er afprøvbart i den trykte tekst:** mængden afrundes *før* prisen ganges, så læseren kan regne hvert led efter, og en test låser `heleKroner(maengde × enhedPris) === pris` pr. række. **Den rigtige fejl, fundet ved at koble tabellen til listen:** siden skrev "Benzin: 12-18 km/l (5,5-8,3 l/100km)", men 100 ÷ 18 = **5,6**; diesel-linjen var rigtig, fordi 100 ÷ 22 = 4,5. Begge tal udledes nu af samme `literPr100km()` som tabellen, så en indekseret tekst ikke kan modsige sit eget indhold igen — C84's fejlklasse. **To målefejl i træk, begge fundet fordi jeg troede på et grep (nr. 16 og 17).** nr. 16: mine første greb mod den server-renderede HTML fandt **0** på "356 kr.", "213 kr." og "5,6-8,3" — React skriver `<!-- -->` mellem to tekstnoder i en JSX-celle, så `356<!-- --> kr.` ikke matcher "356 kr."; efter `sed 's/<!-- -->//g'` gav alle 18 tal deres forventede antal fund. nr. 17: min negative lås på beraknare.se brugte "500 ÷ 15" — en streng der *er* på den svenske side, i den svenske FAQ som testen mocker væk, altså en vakuum-grøn lås i C77's klasse; erstattet af fem strenge der kun findes i den nye danske blok. **Målt på rigtig server** (`next start`, port 3411 verificeret fri *inden* start): dansk 200 med alle 18 tal, svensk 200 med "Typisk förbrukning" og 0 danske markører. `braendstof.test.ts` **32 → 41**, `page.test.tsx` **3 → 8**; **verificeret modsvejs: 3 af 4 nye sidetests falder** med kun `page.tsx` på master. Ingen beregningslogik, `se` eller `no` rørt. Gate grøn: lint (556 filer), **1784 tests / 151 filer** (fra 1771 / 151), build (**141 sider**), `locale-leak.mjs --gate` exit 0. Kode + plan i ét commit på `ceo/braendstof-metode`; se opgave 124. **MÅL:** `/braendstof` baseline **16.764 visninger / 184 klik / CTR 1,1 % / pos. 6,0 pr. 2026-08-28 → 2026-09-25** — måles igen 2026-10-11.
 
 STATUS: KØ — **C93 er landet: `/kvadratmeter` — sitets fjerdestørste danske side i Google — rangerer selv på position 3 for "hvordan regner man kvadratmeter ud", men viste aldrig regnestykket. Formlerne stod symbolske ("Areal = Længde × Bredde"), så det spørgsmål, siden er skrevet til, var ikke besvaret synligt.** Køen havde ingen `I GANG`-opgave (119 er kilde-blokeret, 97 er `BLOCKED` og 98 afhænger af den), og alle åbne deploy-noter har første vindue **17:30** — det er 15:30, så intet kunne verificeres i starten af iterationen. **Valget kom fra en måling, ikke fra en idé:** C79-C83 låser CTR på `/procent`, `/dato`, `/moms`, `/tidszone` og `/tidsberegner`, og punkt 6 i C92's liste siger at "dansk top-15 er lukket". Men `/kvadratmeter` er **fjerdestørst i dansk GSC (20.988 visninger)** og havde kun fået C76's komma-rettelse, ingen svar-rettelse. **Datagrund (GSC 2026-08-28 → 09-25):** 20.988 visninger, 294 klik, **CTR 1,4 %**, pos. 4,9 — laveste CTR på sitets ti største danske sider. Søgningerne er `"kvadratmeter"` (1.819 v, pos. 5), **`"hvordan regner man kvadratmeter ud"` (359 v, pos. 3)**, `"beregn kvadratmeter"` (191 v, pos. 3) og `"kvadratmeter beregner"` (176 v, pos. 4) — altså tre af fire er spørgsmål om *hvordan*, ikke navnet på et værktøj. Plausible: 380 besøgende/28d (**+91 %**, bounce 6 %). **Målt på den live side før rettelsen:** `<h2>`/`<h3>` var "Om arealberegning", "Almindelige anvendelser", "BBR-areal vs. boligareal" og "Materialeberegning" — altså fire generiske afsnit og **0** forekomster af noget regnestykke. `KvadratmeterBeregner.tsx:53-59` skrev de fire formler symbolsk (`Areal = Længde × Bredde`, `Areal = π × r²`, `Areal = (Grundlinje × Højde) / 2`, `Areal = ((Side 1 + Side 2) / 2) × Højde`). Titlen og beskrivelsen var *allerede* svar-første — `curl` gav "Kvadratmeterberegner: 5 x 4 m = 20 m²" og "Et rum på 5 x 4 m er 20 m². Areal = længde × bredde." — altså præcis samme konklusion som C82 nåede for `/procent`: **det er ikke titlen, der mangler, det er indholdet under den.** **Rettelsen** er ét nyt `<h2>` i den `locale === "da"`-gren, sat direkte under beregneren og *før* "Om arealberegning", med fire regneeksempler der alle kan efterprøves: rektangel 5 m × 4 m = **20 m²**; cirkel radius 3 m = **3,14 × 3 × 3 = 28,3 m²** (med diameter-halveringen); trekant grundlinje 6 m og højde 4 m = **(6 × 4) / 2 = 12 m²**; trapez sider 4 m og 6 m, højde 3 m = **((4 + 6) / 2) × 3 = 15 m²**; og prisen 20 m² × 150 kr./m² = **3.000 kr.** To nye FAQ-par i `page-data.ts` — "Hvordan regner man kvadratmeter ud?" (GSC's egen formulering) og "Hvor mange m² er et værelse på 3 x 4 meter?" — som dermed også kommer i JSON-LD'en via `FAQSchema`. **Fundet der lå i vejen, og det ændrede teksten:** siden har *allerede* et blogindlæg med præcis samme spørgsmål som titel — `/blog/kvadratmeter-saadan-regner-du-ud` (408 linjer), hvis `<h1>` er "Hvordan regner man kvadratmeter ud?" Så mit nye `<h2>` fik **"med tal"** hængt på: søgefrasen er bevaret, men de to sider jagter ikke længere den samme overskrift, og beregneren ejer det korte svar mens indlægget ejer den lange vej. Krydslinket findes i forvejen data-drevet (`blog-kobling.ts:76`), så jeg hardcoded **ikke** et link til indlægget i `page.tsx` — det ville have dupliceret `RelateredeArtikler`. **Ingen beregningslogik rørt** (C76's komma-rettelse står), ingen `se`, ingen `no`. **Målt på en rigtig server, ikke bare i test:** `next start` på port 3411, porten verificeret fri *inden* start (målefejl nr. 15's lære). DA `/kvadratmeter` **200** med alle fem strenge ×2 (synlig tekst + RSC-payload), begge nye spørgsmål i FAQ'en og **0** `>[0-9]+\.[0-9]{2}<` (C76's regression holder). SE `/kvadratmeter` **200** med **0** fund på de danske strenge og uændret titel. `/dage-til/halloween` 200 som kontrol. **Harness:** `page.test.tsx` **3 → 6** tests — de fire regnestykker, de to nye FAQ-spørgsmål, og en lås på at den svenske side er urørt. **Verificeret modsvejs: 2 af de 3 nye tests falder** med den gamle kode (den tredje er en negativ lås og passerer med vilje begge veje). Gate grøn: lint (556 filer), **1771 tests / 151 filer** (fra 1768 / 151), build (**141 sider**), `locale-leak.mjs --gate` exit 0. Branch `ceo/kvadratmeter-metode`. **MÅL:** `/kvadratmeter` baseline **20.988 visninger / 294 klik / CTR 1,4 % / pos. 4,9 pr. 2026-08-28 → 2026-09-25** — måles igen 2026-10-11.
@@ -7828,6 +7830,11 @@ landmark=lån, piggybank=opsparing osv.).
 
 ## VERIFICÉR DEPLOY-log
 
+### ⏳ **VERIFICÉR DEPLOY: C95 — `/boligstoette` siger at boligstøtte ikke er boligsikring (6.697 visninger, CTR 2,6 %, pos. 8,7).** Kode + plan i ét commit på `ceo/boligstoette-boligsikring`, merge-ref udfyldes ved merge. Første kandidatvindue **2026-09-27 17:30**. Verificér ved **indhold, ikke HTTP 200 alene**:
+   1. `curl -s https://minberegner.dk/boligstoette | sed 's/<!-- -->//g'` skal have **"Boligstøtte er ikke boligsikring"**, **"tilskud fra staten"**, **"obligatorisk opsparingsordning"** og **"Realkredit Danmark"**.
+   2. Skal **ikke** have noget beløb, en sats eller en frist for boligsikring — de 350 boligsikring-visninger skal sendes videre til Realkredit Danmark, ikke besvares her. Tjek især at der ikke står en "20 %" eller et kronebeløb ved siden af ordet boligsikring.
+   3. FAQ'en skal have spørgsmålet "Hvad er forskellen på boligstøtte og boligsikring?" — det skal også kunne ses i JSON-LD'en.
+
 ### ⏳ **VERIFICÉR DEPLOY: C94 — `/braendstof` dansk: regnestykkerne for benzin, diesel og el, km/l ↔ l/100 km og tankfyld-metoden (16.764 visninger, CTR 1,1 %, pos. 6,0).** Kode `7a929de`, merge `51d66d9` 2026-09-27 15:47 CEST på branch `ceo/braendstof-metode`. Første kandidatvindue **2026-09-27 17:30**. Verificér ved **indhold, ikke HTTP 200 alene**:
    1. `curl -s https://minberegner.dk/braendstof | sed 's/<!-- -->//g'` skal have **"500 ÷ 15 = 33,3 l"**, **"500 ÷ 18 = 27,8 l"**, **"500 × 17 ÷ 100 = 85 kWh"**, **"356 kr."**, **"213 kr."**, **"380 ÷ 40"**, **"9,5 km/l"** og **"5,6-8,3 l/100km"**.
    2. Den gamle fejl skal være væk: **0** fund på **"5,5-8,3"**.
@@ -11228,6 +11235,66 @@ tekst på `/tidszone`), men Kopier-strengen med datoen kræver en browser.
   så tallene ikke kan stå i strengen og afvige fra tabellen; (5) ét afsnit,
   ikke en hel underside, og et link videre til `/kalorier` og `/proteinbehov`.
 
+#### 125. [x] FÆRDIG 2026-09-27 — C95 — `/boligstoette` siger at boligstøtte ikke er boligsikring, og svaret kommer i FAQ'en og JSON-LD'en
+
+- **Datagrund:** dansk GSC (2026-08-28 → 09-25) `/boligstoette` **6.697
+  visninger, 176 klik, CTR 2,6 %, pos. 8,7**. Plausible: **526
+  besøgende/28d (+85 %, bounce 2 %)** — sitets fjerdemest besøgte side. To af
+  de fire største søgninger er **ikke** om boligstøtte: `"boligsikring
+  beregner"` 186 v pos. 11 og `"beregn boligsikring"` 164 v pos. 9, mens de to
+  andre er `"beregn boligstøtte"` 508 v pos. 10 og `"boligstøtte beregner"`
+  276 v pos. 13. Altså **ca. 350 af 6.697 visninger (5 %) er søgninger efter
+  det modsatte ord** — ikke en fejl i CTR, men en fejl i *hvad siden er*.
+- **Målt først (autocomplete `hl=da`, `gl=dk`, 15:49):** under **"boligsikring"**
+  10 variationer hvoraf **seks er boligsikring-spørgsmål** ("boligsikring
+  beregning", "boligsikring regler", "boligsikring formue", "boligsikring
+  pensionist formue", "boligsikring pensionist", "boligsikring andelsbolig")
+  og fire er boligstøtte-spørgsmål. Den samme søgning sender altså folk videre
+  i to retninger, og Google har valgt at vise dem *denne* side.
+- **Målt på den live side før rettelsen:** `<h2>` var "Hvad er boligstøtte?",
+  "Standardmaksimumsbeløb i 2026", "Formue påvirker boligstøtten", "Hvilke
+  huslejeudgifter tæller med?", "Boligstøtte og boligydelse" — og
+  **"boligsikring" stod 2 gange i hele HTML'en, begge gange i `<meta
+  name="keywords">`. Kroppen nævnte det 0 gange.** Siden erklærer altså
+  boligsikring som søgeord og svarer på intet om det: en indekseret love, der
+  ikke har noget indhold bagved, samme fejlklasse som C84.
+- **Rettelsen:** ét nyt `<h2>` **"Boligstøtte er ikke boligsikring"** i den
+  `locale === "da"`-gren, lige før guide-afsnittet. Det siger præcis to ting:
+  boligstøtte er **et tilskud fra staten til lejere** (det siden beregner), og
+  boligsikring er **en obligatorisk opsparingsordning, du låner mod din egen
+  opsparing og betaler tilbage på vilkår** — altså ikke en støtte, du kan søge
+  om, og uden månedlig ydelse. Det peger på Realkredit Danmark som
+  administrator og siger, at reglerne ændrer sig uafhængigt af boligstøtten.
+  **Ét nyt FAQ-par** i `page-data.ts`, som dermed også kommer i JSON-LD'en.
+- **Hvorfor ikke skrive mere om boligsikring:** "boligsikring formue" og
+  "boligsikring pensionist formue" er reelle søgninger med beløb i sig, og de
+  kan kun svares med en kilde. **Realkredit Danmark var ikke tilgængelig fra
+  loopet** — `webfetch` gav "Transport error", og `curl` på både
+  `/bolger/boligsikring` og roden svarede **HTTP 000** (ingen forbindelse);
+  borger.dk's tilsvarende underside svarede 404. Så der står **ingen beløb på
+  siden**, kun definitionen og et spor til den autoritative kilde. Samme
+  disciplin som opgave 119, der ligger kilde-blokeret af præcis den grund.
+  **Uden en kilde ville siden have skullet finde på tal** — det er den
+  fejlklasse Fase 3 forbyder, og den er dyrere end den tabte søgning.
+- **Harness:** `page.test.tsx` **2 → 4**. Den nye test låser desuden den
+  afgørende sætning — "ikke en støtte, du kan søge om" — så en senere
+  redigering ikke kan gøre boligsikring til noget, man kan søge om.
+  **Verificeret modsvejs: begge nye tests falder** med kun de to filer på
+  master.
+- **Ingen beregningslogik rørt** — `BOLIGSTOETTE_2026` i `satser-2026.ts` er
+  urørt, og de beskyttede dataintegrationer (`bbr*`, `energi/`, `adresse*`)
+  er ikke rørt. Kun `da`; `se`/`no` urørt.
+- **Gate:** lint (556 filer), **1786 tests / 151 filer** (fra 1784 / 151),
+  build (**141 sider**), `locale-leak.mjs --gate` exit 0 med 117 / 85 / 32 /
+  0 ureviewet (uændret — de nye strenge er danske og rammer ingen `se`-værdi).
+  Branch `ceo/boligstoette-boligsikring`.
+- **MÅL:** `/boligstoette` baseline **6.697 visninger / 176 klik / CTR 2,6 %,
+  pos. 8,7 pr. 2026-08-28 → 2026-09-25**; Plausible **526 besøgende/28d,
+  bounce 2 % pr. 2026-09-27**. Måles igen 2026-10-11. Forventningen er
+  **ikke flere visninger på de 350 boligsikring-visninger** — de skal videre
+  til Realkredit Danmark. Forventningen er en **lavere bounce og et bedre
+  match mellem søgning og indhold** på de 6.347 øvrige.
+
 #### 124. [x] FÆRDIG 2026-09-27 — C94 — `/braendstof` svarer synligt på "benzin forbrug" med tre regnestykker, km/l ↔ l/100 km og tankfyld-metoden
 
 - **Datagrund:** dansk GSC (2026-08-28 → 09-25) `/braendstof` **16.764
@@ -11499,6 +11566,40 @@ tekst på `/tidszone`), men Kopier-strengen med datoen kræver en browser.
   der linker til familien) pr. 2026-08-28 → 2026-09-25. Den nye sides
   baseline er **ikke kendt** (den er ikke indekseret endnu) — måles første
   gang 2026-10-11.
+
+### Næste kandidater efter C95
+
+0. **🔒 Opgave 97 er `BLOCKED`,** 98 afhænger af den. **🔒 Opgave 119 er
+   kilde-blokeret** (se ❓ Til Mads). Browser-noter: C52, C55, C56, C57 og
+   C60 ligger i ❓ Til Mads nederst.
+1. **✅ `/renteberegner` er allerede gjort** — commit `9d4df42` (27/9 13:11) lagde
+   formlen, Excel-funktionerne og effektiv rente på siden. Den lå i
+   kandidatlisten som "næste snit", fordi listen var skrevet *før* det commit.
+   **Læren, derfor er den her:** en kandidatliste kan pege på arbejde, der er
+   landet i samme døgn. Mål den konkrete streng på den **live** side, før du
+   går i gang — ikke på `master` og ikke på listen.
+2. **🆕 `/brok` (4.881 v, 31 klik, **CTR 0,6 % på pos. 5,3**)** er det næste
+   uforbrugte snit. Lav CTR på en *god* position er Fase 3's klareste
+   CTR-signal, og siden har kun to `<h2>` ("Forkort en brøk", "Brøk, decimaltal
+   og procent") og 0 fund på "Excel", "formel" og "bevis". GSC giver ingen
+   søgningsliste for siden, så **mål først** med DA-autocomplete under
+   "brøk", "hvad er en brøk" og "brøk til procent" — det er samme metode som
+   C82-C94. Forsigtighed: `/procent` (C82) og `/kvadratmeter` (C93) har begge
+   fået et Excel-afsnit, så tjek at svaret ikke er dublet.
+3. **⏬ Nedprioriteret: `/kvadratmeter` SE (3.181 v, pos. 11,3)** — for dybt
+   til at en titel eller et regnestykke løser den; mål *hvorfor* den er der,
+   som C92's punkt 5 gjorde for `/renteberegner` (pos. 25,6).
+4. **⏬ Nedprioriteret:** `/kalorier` SE (2.697 v, pos. 19,8) og `/bil` SE
+   (1.708 v, pos. 31,7) — samme begrundelse.
+5. **✅ `/braendstof` DA (opgave 124) og `/boligstoette` (opgave 125) er
+   lukket** — mål effekten 2026-10-11, lav ikke ny CTR på siderne før da.
+6. **✅ Dansk top-15 er lukket** (C82-C90 + C93 + C94 + C95) — mål i stedet
+   effekten 14 dage efter.
+7. **⏬ Nedprioriteret:** 22 filer / 35 ubundne labels (kun sider uden for
+   top-15).
+8. **🔒 Uforandrede forbehold:** hreflang korrekt (`hrefLang` med stort L);
+   svenske slugs kræver Mads' go; `/bmi` og `/su` måles 2026-10-11.
+9. **Mål 2026-10-10 / 2026-10-11** (se Måleprotokol).
 
 ### Næste kandidater efter C94
 
