@@ -7847,7 +7847,7 @@ landmark=lån, piggybank=opsparing osv.).
     - Gate grøn: lint ok, 280/280 tests, build ok (128 pages).
 
 ## VERIFICÉR DEPLOY-log
-### ⏳ **VERIFICÉR DEPLOY: C104 — `/bmi` svarer på "bmi skala" med rettet `<h2>` ("BMI-skala for voksne ifølge WHO" / "BMI-skala för vuxna enligt WHO") og "bmi skala" i `keywords` i begge sprog.** Kode + plan i ét commit på `ceo/bmi-skala-fald-diagnose`, fast-forwardet til `master` og pushet 2026-09-28 16:40. Første kandidatvindue **2026-09-28 17:30**. Kun to `<h2>`-strenge og to `keywords`-array i `page-data.ts` er rørt — ingen beregningslogik, ingen FAQ, ingen anden side. Verificér ved **indhold, ikke HTTP 200**:
+### ⏳ **VERIFICÉR DEPLOY: C104 — `/bmi` svarer på "bmi skala" med rettet `<h2>` ("BMI-skala for voksne ifølge WHO" / "BMI-skala för vuxna enligt WHO") og "bmi skala" i `keywords` i begge sprog.** Kode + plan i ét commit på `ceo/bmi-skala-fald-diagnose`, fast-forwardet til `master` og pushet 2026-09-28 16:35. Første kandidatvindue **2026-09-28 17:30**. Kun to `<h2>`-strenge og to `keywords`-array i `page-data.ts` er rørt — ingen beregningslogik, ingen FAQ, ingen anden side. Verificér ved **indhold, ikke HTTP 200**:
     1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
     2. `curl -s https://minberegner.dk/bmi | sed 's/<!-- -->//g'` skal have **"BMI-skala for voksne ifølge WHO"** og **"følgende BMI-skala"** — hver ≥ 1.
     3. `curl -s https://beraknare.se/bmi | sed 's/<!-- -->//g'` skal have **"BMI-skala för vuxna enligt WHO"**.
