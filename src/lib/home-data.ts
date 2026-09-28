@@ -607,7 +607,11 @@ export function getDageTilKort(
       description: answer.isToday
         ? `${ord.dag} … ${dato} — det er ${ord.idag}.`
         : `${answer.days} ${ord.dag} ${ord.til} ${dato}.`,
-      href: `/${prefix}/${event[sprog].slug}`,
+      // `prefix` already carries both slashes ("/dage-til/"). Wrapping it in
+      // `/${prefix}/${slug}` produced "//dage-til//juledagen", and a leading
+      // "//" is a protocol-relative URL — the browser resolved every card to a
+      // host named "dage-til" instead of this site.
+      href: `${prefix}${event[sprog].slug}`,
       popular: false,
       category: "",
     };

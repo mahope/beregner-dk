@@ -10,7 +10,6 @@ import { beregnere } from "./categories";
 import {
   getDageTilAnswer,
   getDageTilEvents,
-  getDageTilPrefix,
   getDageTilSlugs,
   type DageTilLocale,
 } from "./dage-til";
@@ -246,13 +245,33 @@ describe("getDageTilKort", () => {
   const idag = new Date();
 
   test("forsiden linker hver dage-til-side dens eget sprog serverer", () => {
+    // The expected prefix is written out literally on purpose. Deriving it from
+    // getDageTilPrefix made the test build the very string the code built, so a
+    // malformed href passed — the prefix already carries both slashes, and
+    // "//dage-til//juledagen" is a protocol-relative URL to a host named
+    // "dage-til". A measurement must not repeat the expression it measures.
+    const forventetPrefix: Record<string, string> = {
+      da: "/dage-til/",
+      se: "/dagar-till/",
+    };
+
     for (const locale of ["da", "se"] as const) {
       const slugge = getDageTilSlugs(locale);
       const hrefs = getDageTilKort(locale, idag).map((k) => k.href);
-      const prefix = getDageTilPrefix(locale)!;
       expect(slugge.length).toBeGreaterThan(0);
       for (const slug of slugge) {
-        expect(hrefs, `${locale}/${slug}`).toContain(`/${prefix}/${slug}`);
+        expect(hrefs, `${locale}/${slug}`).toContain(`${forventetPrefix[locale]}${slug}`);
+      }
+    }
+  });
+
+  test("intet href på forsiden må starte med to skråstreg", () => {
+    // A leading "//" is protocol-relative, so the card would leave the site.
+    for (const locale of ["da", "se", "no"] as const) {
+      for (const kort of getDageTilKort(locale, idag)) {
+        expect(kort.href, `${locale}/${kort.title}`).not.toMatch(/^\/\//);
+        expect(kort.href, `${locale}/${kort.title}`).not.toContain("//");
+        expect(kort.href, `${locale}/${kort.title}`).toMatch(/^\/[a-z-]+\/[a-z0-9-]+$/);
       }
     }
   });
