@@ -3,7 +3,12 @@ import { getIntlLocale } from "./format";
 
 const MS_PER_DAY = 86_400_000;
 
-export type DageTilKind = "fixed" | "easter" | "easterOffset" | "midsummer";
+export type DageTilKind =
+  | "fixed"
+  | "easter"
+  | "easterOffset"
+  | "midsummer"
+  | "advent";
 
 export interface DageTilAnchor {
   kind: DageTilKind;
@@ -13,6 +18,11 @@ export interface DageTilAnchor {
   day: number;
   /** Dage relativt til påskedagen, kun relevant for kind "easterOffset" */
   offsetDays: number;
+  /**
+   * Dage relativt til 1. advent, kun relevant for kind "advent". Advent har
+   * fire søndage, så offset 7/14/21 er de tre næste.
+   */
+  adventOffsetDays?: number;
 }
 
 export interface DageTilCopy {
@@ -759,6 +769,205 @@ export const DAGE_TIL_EVENTS: DageTilEvent[] = [
       },
     },
   },
+  {
+    id: "paskafton",
+    anchor: {
+      da: { kind: "easterOffset", month: 0, day: 0, offsetDays: -2 },
+      se: { kind: "easterOffset", month: 0, day: 0, offsetDays: -2 },
+    },
+    da: {
+      slug: "langfredag",
+      copy: {
+        short: "langfredag",
+        question: "Hvor mange dage er der til langfredag?",
+        facts: [
+          "Langfredag er 2 dage før påskedag og altid en fredag, så datoen flytter sig med påsken.",
+          "Langfredag, påskedag og 2. påskedag er alle danske helligdage — det gør langfredag til den eneste helligdag i påskeugen, der ikke er en søndag.",
+          "Påskeaften og langfredag er den samme dag: påskeaften er det religiøse navn, langfredag det navn, danskerne bruger.",
+          "I 2026 er langfredag 3. april, i 2027 26. marts og i 2028 14. april.",
+        ],
+        faq: [
+          {
+            question: "Er påskeaften det samme som langfredag?",
+            answer:
+              "Ja. Påskeaften er det religiøse navn for den fredag, der ligger umiddelbart før påskedagen, og i hverdagssproget hedder den langfredag. Derfor står de to navne altid på samme dato.",
+          },
+          {
+            question: "Tæller dagen i dag med?",
+            answer:
+              "Nej. Tallet er forskellen mellem dagens dato og langfredag, så vælger du den torsdag der går forud, står der 1 dag tilbage.",
+          },
+          {
+            question: "Hvornår er langfredag næste gang?",
+            answer:
+              "Langfredag er altid 2 dage før påskedag, så du kan regne den ud fra påskedagen uden at slå den op. I 2027 er påskedagen 28. marts, så langfredagen er 26. marts.",
+          },
+        ],
+      },
+    },
+    se: {
+      slug: "paskafton",
+      copy: {
+        short: "påskafton",
+        question: "Hur många dagar är det till påskafton?",
+        facts: [
+          "Påskafton är dagen innan påskdagen och alltid en fredag — samma dag som långfredagen.",
+          "Långfredagen, påskdagen och annandag påsk är alla allmänna helgdagar enligt lag (1989:253) om allmänna helgdagar.",
+          "I 2026 är påskafton 3 april, 2027 26 mars och 2028 14 april.",
+          "Påsklovet slutar ofta på påskafton, men det bestäms av din kommun. Påskafton är fast, påsklovet är det inte.",
+        ],
+        faq: [
+          {
+            question: "Är påskafton samma sak som långfredagen?",
+            answer:
+              "Ja. Det är två namn för samma fredag: långfredagen är det juridiska namnet i lagen om allmänna helgdagar, och påskafton är det vanliga namnet. Därför hamnar de alltid på samma datum.",
+          },
+          {
+            question: "Räknas dagen i dag med?",
+            answer:
+              "Nej. Talet är skillnaden mellan dagens datum och påskafton, så väljer du torsdagen innan står det 1 dag kvar.",
+          },
+          {
+            question: "När är påskafton nästa gång?",
+            answer:
+              "Påskafton är alltid 2 dagar före påskdagen, så du kan räkna ut den utan att slå upp något. 2027 infaller påskdagen 28 mars, så påskafton är 26 mars.",
+          },
+        ],
+      },
+    },
+  },
+  {
+    id: "valborg",
+    anchor: {
+      da: { kind: "fixed", month: 2, day: 14, offsetDays: 0 },
+      se: { kind: "fixed", month: 2, day: 14, offsetDays: 0 },
+    },
+    da: {
+      slug: "valborg",
+      copy: {
+        short: "valborg",
+        question: "Hvor mange dage er der til valborg?",
+        facts: [
+          "Valborgsmässoaften er 14. februar, og datoen er fast — den flytter sig aldrig, uanset hvilken ugedag den falder på.",
+          "Valborg er ikke en helligdag, men den er den største danske forårsfest sammen med påske.",
+          "Den er heller ikke altid dagen før askonsdagen: askonsdagen er påskedag minus 46 dage og flytter sig, mens valborg bliver liggende 14. februar. I 2026 ligger valborg 4 dage før askonsdagen, i 2027 ligger det 4 dage efter den, og i 2030 ligger det 20 dage før.",
+        ],
+        faq: [
+          {
+            question: "Hvilken dag i året er valborg?",
+            answer:
+              "Valborg er altid 14. februar. Den kan både være en mandag og en søndag, men datoen flytter sig aldrig.",
+          },
+          {
+            question: "Er valborg en helligdag?",
+            answer:
+              "Nej. Valborg står ikke i listen over danske helligdage, så butikker og arbejdspladser har normal åbent. Den er en fest, ikke en helligdag.",
+          },
+          {
+            question: "Er valborg dagen før askonsdagen?",
+            answer:
+              "Ikke altid. Askonsdagen er påskedag minus 46 dage, så den flytter sig, mens valborg bliver liggende 14. februar. I 2027 er askonsdagen 10. februar, altså ligger valborg 4 dage efter den.",
+          },
+        ],
+      },
+    },
+    se: {
+      slug: "valborg",
+      copy: {
+        short: "valborg",
+        question: "Hur många dagar är det till valborg?",
+        facts: [
+          "Valborgsmässoafton är 14 februari — alltid samma datum, oavsett vilken veckodag det infaller på.",
+          "Valborg är inte en allmän helgdag enligt lag (1989:253) om allmänna helgdagar, men den firas som en röd dag av de flesta arbetsgivare.",
+          "Den är inte heller alltid dagen före askonsdagen: askonsdagen är påskdagen minus 46 dagar och flyttar sig, medan valborg ligger kvar 14 februari. 2026 ligger valborg 4 dagar före askonsdagen, 2027 ligger det 4 dagar efter den och 2030 ligger det 20 dagar före.",
+        ],
+        faq: [
+          {
+            question: "Vilken dag på året är valborg?",
+            answer:
+              "Valborg är alltid 14 februari. Den kan vara både en måndag och en söndag, men datumet flyttar sig aldrig.",
+          },
+          {
+            question: "Är valborg en röd dag?",
+            answer:
+              "Inte enligt lagen. Valborg saknas i listan över allmänna helgdagar, så butiker har öppet. I praktiken firas den ändå av de flesta, ungefär som midsommarafton.",
+          },
+          {
+            question: "Är valborg dagen före askonsdagen?",
+            answer:
+              "Inte alltid. Askonsdagen är påskdagen minus 46 dagar, så den flyttar sig, medan valborg ligger kvar 14 februari. 2027 är askonsdagen 10 februari, alltså ligger valborg 4 dagar efter den.",
+          },
+        ],
+      },
+    },
+  },
+  {
+    id: "advent",
+    anchor: {
+      da: { kind: "advent", month: 0, day: 0, offsetDays: 0, adventOffsetDays: 0 },
+      se: { kind: "advent", month: 0, day: 0, offsetDays: 0, adventOffsetDays: 0 },
+    },
+    da: {
+      slug: "1-advent",
+      copy: {
+        short: "1. advent",
+        question: "Hvor mange dage er der til 1. advent?",
+        facts: [
+          "1. advent er altid den første søndag i december, og den ligger altid mellem 27. november og 3. december.",
+          "Advent har fire søndage, og den fjerde ligger altid mellem 18. og 24. december — altså tæt på juledagen.",
+          "I 2026 er 1. advent 29. november, i 2027 28. november og i 2028 3. december.",
+          "1. advent er ikke en helligdag, men den er en søndag, så for de fleste er det en fridag.",
+        ],
+        faq: [
+          {
+            question: "Hvornår er 1. advent?",
+            answer:
+              "Advent begynder altid den søndag, der ligger mellem 27. november og 3. december. Det er den eneste regel, du skal kende, for datoen flytter sig hvert år — 2028 er den så sent som 3. december.",
+          },
+          {
+            question: "Hvor lang tid varer advent?",
+            answer:
+              "Advent er de fire søndage op til juledagen. Siden 1. advent ligger mellem 27. november og 3. december, varer perioden mellem 22 og 28 dage.",
+          },
+          {
+            question: "Er 1. advent en helligdag?",
+            answer:
+              "Nej. Advent er en kristen festperiode, ikke en helligdag i Danmark. Den er dog altid en søndag, så for de fleste er den en fridag på samme måde som andre søndage.",
+          },
+        ],
+      },
+    },
+    se: {
+      slug: "1-advent",
+      copy: {
+        short: "1 advent",
+        question: "Hur många dagar är det till 1 advent?",
+        facts: [
+          "1 advent är alltid den första söndagen i advent, och infaller alltid mellan 27 november och 3 december.",
+          "Advent har fyra söndagar, och den fjärde infaller alltid mellan 18 och 24 december — alltså nära juldagen.",
+          "Första advent är inte en allmän helgdag enligt lag (1989:253) om allmänna helgdagar. Däremot är den en söndag, och alla söndagar är röda dagar i Sverige.",
+          "2026: 29 november, 2027: 28 november och 2028: 3 december.",
+        ],
+        faq: [
+          {
+            question: "När är 1 advent?",
+            answer:
+              "Advent börjar alltid den söndag som infaller mellan 27 november och 3 december. Det är den enda regeln du behöver, eftersom datumet flyttar sig varje år — 2028 infaller den så sent som 3 december.",
+          },
+          {
+            question: "Hur länge varar advent?",
+            answer:
+              "Advent är de fyra söndagarna fram till juldagen. Eftersom 1 advent infaller mellan 27 november och 3 december pågår perioden mellan 22 och 28 dagar.",
+          },
+          {
+            question: "Är 1 advent en röd dag?",
+            answer:
+              "Ja, men bara för att den är en söndag. Adventssöndagarna står inte själva i lagen (1989:253) om allmänna helgdagar, till skillnad från långfredagen, påskdagen och annandag påsk.",
+          },
+        ],
+      },
+    },
+  },
 ];
 
 /** Locales that have a real dage-til landing page. */
@@ -816,12 +1025,35 @@ export function midsommarafton(year: number, offsetDays = 0): Date {
   throw new Error(`Ingen fredag 19.-25. juni ${year}`);
 }
 
+/**
+ * 1. advent for a year: the Sunday that falls between 27 November and
+ * 3 December inclusive, because advent always has four Sundays and the
+ * fourth always lands in the week of 18-24 December. The window is a
+ * property of the four-Sunday rule, not a convention, so the date can be
+ * computed rather than looked up. `adventOffsetDays` shifts from it, so
+ * 0 is 1. advent, 7 is 2. advent.
+ */
+export function forstaAdvent(year: number, adventOffsetDays = 0): Date {
+  for (let day = 27; day <= 33; day++) {
+    const candidate = new Date(Date.UTC(year, 10, day));
+    if (candidate.getUTCDay() === 0) {
+      return new Date(candidate.getTime() + adventOffsetDays * MS_PER_DAY);
+    }
+  }
+  // Unreachable: the 27 November-3 December window is seven days long and
+  // therefore always contains exactly one Sunday.
+  throw new Error(`Ingen søndag 27. november-3. december ${year}`);
+}
+
 function anchorInYear(anchor: DageTilAnchor, year: number): Date {
   if (anchor.kind === "fixed") {
     return new Date(Date.UTC(year, anchor.month - 1, anchor.day));
   }
   if (anchor.kind === "midsummer") {
     return midsommarafton(year, anchor.offsetDays);
+  }
+  if (anchor.kind === "advent") {
+    return forstaAdvent(year, anchor.adventOffsetDays ?? 0);
   }
   const easter = easterSunday(year);
   return new Date(easter.getTime() + anchor.offsetDays * MS_PER_DAY);

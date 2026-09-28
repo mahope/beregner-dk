@@ -5,6 +5,7 @@ import {
   daysBetween,
   easterSunday,
   formatTargetDate,
+  forstaAdvent,
   getDageTilAnswer,
   getDageTilEventBySlug,
   getDageTilSlugs,
@@ -107,6 +108,172 @@ describe("midsommarafton", () => {
     expect(resolveDageTilSlug("midsommarafton", "da")?.localeSlug).toBe(
       "sankthansaftensdag"
     );
+  });
+});
+
+describe("forstaAdvent", () => {
+  test.each([
+    [2024, "2024-12-01"],
+    [2025, "2025-11-30"],
+    [2026, "2026-11-29"],
+    [2027, "2027-11-28"],
+    [2028, "2028-12-03"],
+    [2029, "2029-12-02"],
+    [2033, "2033-11-27"],
+  ])("1. advent i %i er %s", (year, expected) => {
+    expect(toISO(forstaAdvent(year))).toBe(expected);
+  });
+
+  test("er altid en søndag mellem 27. november og 3. december", () => {
+    for (let year = 1990; year <= 2050; year++) {
+      const date = forstaAdvent(year);
+      expect(date.getUTCDay()).toBe(0);
+      const monthDay = `${date.getUTCMonth() + 1}-${date.getUTCDate()}`;
+      expect(monthDay === "11-27" || monthDay === "11-28" || monthDay === "11-29" ||
+        monthDay === "11-30" || monthDay === "12-1" || monthDay === "12-2" ||
+        monthDay === "12-3").toBe(true);
+    }
+  });
+
+  test("advent har fire søndage, så den fjerde ligger mellem 18. og 24. december", () => {
+    for (let year = 1990; year <= 2050; year++) {
+      const tredje = forstaAdvent(year, 14);
+      const fjerde = forstaAdvent(year, 21);
+      expect(fjerde.getUTCDay()).toBe(0);
+      expect(fjerde.getTime() - forstaAdvent(year).getTime()).toBe(21 * dayMs);
+      expect(fjerde.getUTCMonth()).toBe(11);
+      expect(fjerde.getUTCDate()).toBeGreaterThanOrEqual(18);
+      expect(fjerde.getUTCDate()).toBeLessThanOrEqual(24);
+      expect(tredje.getTime()).toBeLessThan(fjerde.getTime());
+    }
+  });
+
+  test("eventet ligger præcis på 1. advent i begge sprog", () => {
+    const advent = DAGE_TIL_EVENTS.find((e) => e.id === "advent");
+    expect(advent).toBeDefined();
+    for (const locale of ["da", "se"] as const) {
+      const anchor = advent!.anchor[locale];
+      expect(anchor.kind).toBe("advent");
+      expect(toISO(getNextAnchorDate(anchor, iso("2026-09-25")))).toBe("2026-11-29");
+      // Efter 1. advent er næste søndag 2. advent — altså ikke 1. december.
+      expect(toISO(getNextAnchorDate(anchor, iso("2026-11-29")))).toBe("2026-11-29");
+      expect(toISO(getNextAnchorDate(anchor, iso("2026-11-30")))).toBe("2027-11-28");
+    }
+    expect(getDageTilSlugs("da")).toContain("1-advent");
+    expect(getDageTilSlugs("se")).toContain("1-advent");
+    expect(getDageTilEventBySlug("1-advent", "se")?.id).toBe("advent");
+  });
+});
+
+describe("påskafton", () => {
+  test.each([
+    [2024, "2024-03-29"],
+    [2025, "2025-04-18"],
+    [2026, "2026-04-03"],
+    [2027, "2027-03-26"],
+    [2028, "2028-04-14"],
+  ])("påskafton i %i er %s", (year, expected) => {
+    expect(toISO(getNextAnchorDate({ kind: "easterOffset", month: 0, day: 0, offsetDays: -2 }, iso(`${year}-01-01`)))).toBe(expected);
+  });
+
+  test("er altid en fredag to dage før påskedagen", () => {
+    for (let year = 1990; year <= 2050; year++) {
+      const dato = new Date(Date.UTC(year, 0, 1));
+      const fredag = getNextAnchorDate(
+        { kind: "easterOffset", month: 0, day: 0, offsetDays: -2 },
+        dato
+      );
+      expect(fredag.getUTCDay()).toBe(5);
+      expect((easterSunday(year).getTime() - fredag.getTime()) / dayMs).toBe(2);
+    }
+  });
+
+  test("ligger mellem skærtorsdag og påskedag i begge sprog", () => {
+    const paskafton = DAGE_TIL_EVENTS.find((e) => e.id === "paskafton");
+    const skaertorsdag = DAGE_TIL_EVENTS.find((e) => e.id === "skaertorsdag");
+    const paskedag = DAGE_TIL_EVENTS.find((e) => e.id === "paskedag");
+    expect(paskafton).toBeDefined();
+    expect(skaertorsdag).toBeDefined();
+    expect(paskedag).toBeDefined();
+    for (const locale of ["da", "se"] as const) {
+      const iDag = iso("2027-01-15");
+      const torsdag = getNextAnchorDate(skaertorsdag!.anchor[locale], iDag);
+      const fredag = getNextAnchorDate(paskafton!.anchor[locale], iDag);
+      const sondag = getNextAnchorDate(paskedag!.anchor[locale], iDag);
+      expect((fredag.getTime() - torsdag.getTime()) / dayMs).toBe(1);
+      expect((sondag.getTime() - fredag.getTime()) / dayMs).toBe(2);
+      expect(toISO(fredag)).toBe("2027-03-26");
+    }
+  });
+
+  test("begge sprog har deres eget slug, og de to navne er den samme dato", () => {
+    const paskafton = DAGE_TIL_EVENTS.find((e) => e.id === "paskafton");
+    expect(getDageTilSlugs("da")).toContain("langfredag");
+    expect(getDageTilSlugs("se")).toContain("paskafton");
+    // Svensk kalder dagen påskafton, dansk langfredag — men det er én dato.
+    expect(paskafton!.da.slug).toBe("langfredag");
+    expect(paskafton!.se.slug).toBe("paskafton");
+    expect(resolveDageTilSlug("langfredag", "se")?.localeSlug).toBe("paskafton");
+    expect(resolveDageTilSlug("paskafton", "da")?.localeSlug).toBe("langfredag");
+    for (const locale of ["da", "se"] as const) {
+      expect(paskafton![locale].copy.question).toContain(
+        paskafton![locale].copy.short
+      );
+    }
+  });
+
+  test("begge sprog kalder den anden, så læseren ikke tror de er to dage", () => {
+    const paskafton = DAGE_TIL_EVENTS.find((e) => e.id === "paskafton");
+    expect(paskafton!.se.copy.facts.join(" ")).toContain("långfredagen");
+    expect(paskafton!.da.copy.facts.join(" ")).toContain("Påskeaften");
+  });
+});
+
+describe("valborg", () => {
+  test("er fast 14. februar i begge sprog", () => {
+    const valborg = DAGE_TIL_EVENTS.find((e) => e.id === "valborg");
+    expect(valborg).toBeDefined();
+    for (const locale of ["da", "se"] as const) {
+      expect(valborg!.anchor[locale]).toEqual({
+        kind: "fixed",
+        month: 2,
+        day: 14,
+        offsetDays: 0,
+      });
+      expect(toISO(getNextAnchorDate(valborg!.anchor[locale], iso("2026-09-25")))).toBe(
+        "2027-02-14"
+      );
+      expect(toISO(getNextAnchorDate(valborg!.anchor[locale], iso("2026-02-13")))).toBe(
+        "2026-02-14"
+      );
+    }
+    expect(getDageTilSlugs("da")).toContain("valborg");
+    expect(getDageTilSlugs("se")).toContain("valborg");
+  });
+
+  test("er ikke altid dagen før askonsdagen — den påstand, siden advarer om", () => {
+    // Askonsdagen er påskedag minus 46 dage; valborg ligger fast 14. februar.
+    const afstand = (year: number) =>
+      (Date.UTC(year, 1, 14) - (easterSunday(year).getTime() - 46 * dayMs)) / dayMs;
+    expect(afstand(2024)).toBe(0);
+    expect(afstand(2027)).toBe(4);
+    expect(afstand(2030)).toBe(-20);
+    // Begge sprog skal sige de samme tre tal, ellers kan den ene sprogside
+    // modsige den anden (C84's fejlklasse).
+    const valborg = DAGE_TIL_EVENTS.find((e) => e.id === "valborg")!;
+    for (const locale of ["da", "se"] as const) {
+      const tekst = [
+        ...valborg[locale].copy.facts,
+        ...valborg[locale].copy.faq.map((f) => `${f.question} ${f.answer}`),
+      ].join(" ");
+      expect(tekst).toMatch(/4 dage før|4 dagar före/);
+      expect(tekst).toMatch(/4 dage efter|4 dagar efter/);
+      expect(tekst).toMatch(/20 dage før|20 dagar före/);
+      // Hvert sprog sin dato-notering: dansk "14. februar", svensk "14 februari".
+      expect(tekst).toContain(
+        locale === "da" ? "14. februar" : "14 februari"
+      );
+    }
   });
 });
 
@@ -257,6 +424,19 @@ describe("slug-opløsning", () => {
     expect(new Set(se).size).toBe(se.length);
     expect(da).toContain("1-december");
     expect(se).toContain("1-december");
+  });
+
+  test("alle slugs er ASCII, fordi sitemap-URL'en er procentkodet", () => {
+    // Sitemap'en indeholder /dagar-till/paskafton, men `new URL()` giver
+    // pathname "/dagar-till/p%C3%A5skafton" for et slug med å. Slug-resolveren
+    // læser den kodede sti, finder ingen event og returnerer not-found, så
+    // hele den svenske IndexNow-indsendelsen springes over. Derfor: ASCII-slug,
+    // ligesom paskdagen, skartorsdagen og nyarsafton.
+    for (const locale of ["da", "se"] as const) {
+      for (const slug of getDageTilSlugs(locale)) {
+        expect(slug, `slug i ${locale}`).toMatch(/^[a-z0-9-]+$/);
+      }
+    }
   });
 
   test("alle events har spørgsmål og mindst to fakta i begge sprog", () => {
