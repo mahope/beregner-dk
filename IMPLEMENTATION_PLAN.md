@@ -1,3 +1,7 @@
+STATUS: KØ — **C120 er landet: beraknare.se `/tidsberegner` — domænets andenstørste side (59.270 visninger, CTR 0,2 %, pos. 8,1) — havde C51's hele svar-først-tabel som `da`-only, altså 0 fund på "8 t 15 min", "1 t 30 min" og "80,00". Samme fejlklasse som C119's `/kvadratmeter`, men 18× større og på en side der ligger på Googles første side.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den, 119 er kilde-blokeret), og de tre åbne noter (C115, C118, C119) har første vindue **2026-09-29 07:30** — det var 23:09, så intet kunne verificeres. Valget kom af at **måle paritet på de otte største sider i begge sprog** på rigtig server (live, begge domæner) i stedet for at gå på den svenske CTR-kandidatliste, som punkt 4 i C105's liste advarede for. **Målt først:** 6 sider × 2 domæner, ord / `<h2>` / FAQ — DA 5.146/9/10 på `/tidsberegner` mod SE **4.587/8/9**, og grep på de *live* sider gav "8 t 15 min" **DA 8 mod SE 0**, "1 t 30 min" **2 mod 0**, "80,00" **2 mod 0**, "Svar på de oftest søgte" **2 mod 0**. SE-autocomplete under "räkna ut timmar och minuter" har "räkna ut timmar från minuter" (nr. 7) og "räkna timmar till minuter" (nr. 10) — altså **begge retninger** i omvandlingen, som siden svarade på nul af; GSC's egne søgninger er "tidskalkylator" 313 v pos. 5, "räkna timmar" 167 v pos. 7, "räkna ut timmar och minuter" 130 v pos. 10, "räkna ut tid" 126 v pos. 10. **Rettelsen (kun `se`):** 1) `locale === "da"`-porten om svar-først-tabellen er **løftet** — den er nu begge sprog, men svaret formateres med `formatTidsvar`, så beraknare.se får **"8 h 15 min"** og ikke den danske "t" (C73's R4); kolonneoverskrifterne "Datum/Paus/Decimaltimmar" og "Samma dag" er svenske. 2) Nyt `<h2>` **"Räkna om minuter till timmar – och tillbaka"** med otte rækker (15/30/45/60/90/120/480/495 min) hvor timer og restminutter er **udregnet** (div/mod 60), plus den modsatte retning (7,5 × 60 = 450 min) og et link til `/fart`. 3) **To nye FAQ-par**, som dermed også kommer i JSON-LD'en: **9 → 11** på rigtig server. 4) SE's `<h1>` er nu spørgsmålsform som den danske ("Hur lång tid är det mellan två klockslag?") i stedet for "Tidskalkylator" — C81's lære, at brandet i *titlen* er det der bliver klippet væk, og `<title>` beholder "Tidskalkylator". **Harness: den gamle negative lås lå på den fejltype, den skulle have fanget.** `se får ikke den danske svar-først-tabel` krævede `not.toContain("Svar på de oftest søgte tidsrum")` — altså låste den **tilstanden før rettelsen** i stedet for en egenskab, så den ville have blokeret svar-rettelsen. Det er C94's negative SE-lås på "500 ÷ 15" og C119's på "3,14 × 3 × 3" i tredje forklædning. C38's hensigt — svensk læsere må ikke se dansk — er bevaret som **to reelle låse**: SE *skal* have sin egen tabel med alle syv rækker læst af `TIDS_EKSEEMPLER`, og SE må **ikke** have syv danske markører. **Verificeret modsvejs: 5 af 5 nye/ændrede tests falder** på master's `page.tsx` + `page-data.ts` (`git stash`). **Målefejl nr. 23 (min egen):** min danske-markør-liste indeholdt `"dagen efter)"` — men "dagen efter" er *korrekt svensk*, så låsen ville have forbudt den rigtige tekst. Fundet fordi testen faldt med hele den server-renderede HTML, ikke fordi den var grøn. Samme klasse som nr. 9-22. **Og en harness-fælde nr. 24:** en flerlinjet template-literal med et nestet objekt-argument *inde i* `expect(...).toContain(...)"` kastede `ReferenceError: minutter is not defined` under vitest, selv om `for (const minuter of …)` var korrekt — løst ved at trække `formatNumber`-kaldet ud i en `const`. Fundet fordi to tests faldt med en ReferenceError frem for med en tekstafvigelse. **Målt på rigtig server** (port 3571, fri verificeret *inden* start, C91/C117's lære): SE **4.587 → 5.413 ord**, **8 → 10 `<h2>`**, FAQ **9 → 11**, alle otte omvandlingsrækker + `495 ÷ 60 = 8,25` + `450 minuter` + `href="/fart"` i markupken og **0** på alle syv danske markører; DA uændret **9 `<h2>` / 5.146 ord / 10 spørgsmål** med sin egen tabel intakt; `/api/health` → `status: ok`. Gate grøn: lint (**573 filer**), **2.499 tests / 163 filer** (fra 2.494 / 163), build (**141 sider**), `locale-leak.mjs --gate` exit 0, `knapgruppe-scan.mjs` **0/0**. Kun `page.tsx`, to `faqItems` i `page-data.ts` og testfilen er rørt — **ingen beregningslogik ændret, den danske sproggren urørt**. Kode + plan i ét commit på `ceo/se-tidsberegner-svarforst`; se opgave 150. **MÅL:** beraknare.se `/tidsberegner` baseline **59.270 visninger / 123 klik / CTR 0,2 % / pos. 8,1** pr. 2026-08-29 → 2026-09-26 (søgninger: "tidskalkylator" 313 v pos. 5, "räkna timmar" 167 v pos. 7, "räkna ut timmar och minuter" 130 v pos. 10, "räkna ut tid" 126 v pos. 10) — måles igen **2026-10-12**.
+
+---
+
 STATUS: KØ — **C119 er landet: beraknare.se `/kvadratmeter` lå på position 11,2 med 0,2 % CTR og 3.249 visninger — og svarede på nul regnestykker, fordi C83–C94's svar-rettelser var `da`-only. Den svenska tvilling var 1.428 ord tyndere end den danske (2.933 mod 4.361) og havde 3 `<h2>` mod 6.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den, 119 er kilde-blokeret), og de to åbne noter (C114, C115) har første vindue **2026-09-29 07:30** — det var 22:26, så intet kunne verificeres. Valget var punkt 4 i C105's kandidatliste, der lige nu var den eneste venstre slet ikke lå trafik på: beraknare.se er +157 % og dens største sider ligger på pos. 8-12, altså lige under C105's egen tærskel, **men forudsætningen — at de svenske tvillinger nu findes fra forsiden — blev leveret af C118 i går.** **Målt først, målt på rigtig server (live, begge domæner):** DA 132.663 bytes / 6 `<h2>` / 4.361 ord, SE 105.857 bytes / **3** `<h2>` / **2.933 ord** — altså *målt* forskel, ikke regnet. SE-autocomplete (`hl=se`, `gl=se`, 22:28) under **"räkna ut kvadratmeter"** giver 10 variationer hvoraf **fem er selve geometrien** — vägg, golv, tak, cirkel, triangel (+ gräsmatta, rum, "fyra olika sidor", tomt) — og under **"hur räknar man ut kvadratmeter"** giver 10 hvoraf **syv er spørgsmålsformuleringer** ("i ett rum", "på en vägg", "på en triangel", "på en cirkel", "i en lägenhet", "pris", "på ett tak"). **Rettelsen (kun `se`):** et nyt `<h2>` **"Så här räknar man ut kvadratmeter med siffror"** med de samme fire regneeksempler som C93 lagde på dansk — 5 × 4 = **20 m²**, 3,14 × 3 × 3 = **28,3 m²**, (6 × 4) / 2 = **12 m²**, ((4 + 6) / 2) × 3 = **15 m²** — plus diameter-halveringen, triangel-halveringen, pristallet (20 m² × 150 kr = **3 000 kr**) og 5-10 % til kapning, og **form-ordene fra autocomplete står i indledningen** ("golv, vägg, tak, en cirkel og en triangel"), fordi de er søgningerne og ikke en bivirkning. **To nye FAQ-par** ("Hur räknar man ut kvadratmeter?" og "Hur många m² är ett rum på 3 x 4 meter?"), som dermed også kommer i JSON-LD'en: **5 → 7** på rigtig server. **Ingen tal står hårdkodet to steder:** nyt modul `src/lib/areal-eksempler.ts` (π = 3,14, de fire arealer *udregnet* ikke skrevet, `PRIS_EKSEMPEL` med `pris: 20 * 150`) leverer alle fem tal til siden gennem `formatNumber`, så **den svenska og den danske sproggren ikke kan komme i mellemkrig om et facit** — det er C84's fejlklasse (indekseret tekst der modsiger sit eget indhold), og en test krydschecker nu at de fire `= X m²` står i **begge** markupker. **Harness: den gamle negative lås lå på den fejltype, han ville have fanget.** `den svenske side er urørt af danske regneeksempler` krævede `not.toContain("3,14 × 3 × 3")` på beraknare.se — altså låste den **tilstanden før rettelsen** i stedet for en egenskab, så den ville have blokeret svar-rettelsen. C94's negative SE-lås gjorde præcis det samme. Den er erstattet af to reelle låse: SE **skal** have den svenske overskrift og alle fire regnestykker, og SE må **ikke** have fire danske markører ("Sådan regner du", "længde × bredde", "pr. m²", "fliser") — målt på rigtig server til 0 hver. **Verificeret modsvejs: 3 af de 3 nye sidetests falder** med kun `page.tsx` + `page-data.ts` på master; `areal-eksempler.test.ts` er ny med 5 tests. **Én målefejl undgået ved at kende den:** mit første grep på `"3 000 kr"` gav **0** på den svenske side, fordi `Intl.NumberFormat("sv-SE")` skriver tusindtalsseparatoren som `U+00A0` (verificeret: `33 a0 30 30 30`) — præcis C111's fælde, så testen normaliserer `[\u00a0\u202f]` og låser det normaliserede resultat. **Målt på rigtig server** (port 3541, verificeret fri *inden* start, C117's lære): SE **2.933 → 3.769 ord**, **3 → 4 `<h2>`**, FAQ-spørgsmål **5 → 7**, alle fire regnestykker og form-ordene i markupken, **0** danske markører; DA uændret 4.361 ord / 6 `<h2>` / 8 spørgsmål; `/api/health` → `status: ok`. Gate grøn: lint (**573 filer**), **2.494 tests / 163 filer** (fra 2.485 / 162), build (**141 sider**), `locale-leak.mjs --gate` exit 0 med uændret 117/85/32 og 0 ureviewet, `knapgruppe-scan.mjs` 0/0. Kun `page.tsx`, `page-data.ts` (to `faqItems`), det nye modul + to testfiler er rørt — **ingen beregningslogik ændret, `da` urørt, `KvadratmeterBeregner.tsx` urørt**. Kode + plan i ét commit på `ceo/se-kvadratmeter-metode`; se opgave 149. **MÅL:** beraknare.se `/kvadratmeter` baseline **3.249 visninger / 6 klik / CTR 0,2 % / pos. 11,2 pr. 2026-08-29 → 2026-09-26** — måles igen **2026-10-12**. Forventningen er flere visninger *og* højere CTR, fordi de syv spørgsmålsformuleringer nu besvares synligt; hvis den bare flytter sig uden at klikke, er pos. 11,2 et rangeringsproblem og ikke et svarproblem, og så skal den måles om, ikke bygges videre på.
 
 ---
@@ -14056,3 +14060,66 @@ domæner**, altså ingen protocol-relative href.
   4. KONTROL: `https://minberegner.dk/kvadratmeter` skal fortsat have **8**
      spørgsmål, 6 `<h2>` og 4.361 ord.
   5. `https://minberegner.dk/api/health` skal svare `status: ok`.
+
+#### 150. [x] FÆRDIG 2026-09-28 — C120 — **beraknare.se `/tidsberegner` (59.270 v, pos. 8,1) får C51's svar-først-tabel, minuter↔timmar-tabellen og to nye FAQ-par**
+
+**Datagrund:** svensk GSC 2026-08-29 → 2026-09-26: `/tidsberegner` **59.270
+visninger, 123 klik, CTR 0,2 %, pos. 8,1** — beraknare.se's andenstørste
+side. Søgningerne er "tidskalkylator" 313 v pos. 5, "räkna timmar" 167 v
+pos. 7, "räkna ut timmar och minuter" 130 v pos. 10, "räkna ut tid" 126 v
+pos. 10. SE-autocomplete under "räkna ut timmar och minuter" har "räkna ut
+timmar från minuter" (nr. 7) og "räkna timmar till minuter" (nr. 10).
+
+**Målt først, målt paritet på 6 sider × 2 domæner** (ikke på den svenske
+CTR-kandidatliste, som C105's punkt 4 advarede for): DA 5.146 ord / 9 `<h2>`
+/ 10 FAQ mod SE 4.587 / 8 / 9 på `/tidsberegner`; på de *live* sider gav
+grep "8 t 15 min" **DA 8 mod SE 0**, "1 t 30 min" 2 mod 0, "80,00" 2 mod 0,
+"Svar på de oftest søgte" 2 mod 0.
+
+**Rettelse (kun `se`):** `locale === "da"`-porten om svar-først-tabellen er
+løftet; svaret formateres med `formatTidsvar`, så SE får "8 h 15 min" og
+ikke den danske "t" (C73's R4). Nyt `<h2>` "Räkna om minuter till timmar –
+och tillbaka" med otte **udregnede** rækker + den modsatte retning +
+`/fart`-link. To nye `faqItems` (FAQ 9 → 11, dermed også i JSON-LD'en). SE's
+`<h1>` er spørgsmålsform som den danske; `<title>` beholder brandet.
+
+**Harness:** den gamme negative lås (`not.toContain("Svar på de oftest søgte
+tidsrum")`) låste **tilstanden før rettelsen** — C94's og C119's klasse.
+Erstattet af to reelle låse (SE skal have sin tabel + alle syv rækker læst
+af `TIDS_EKSEEMPLER`; SE må ikke have syv danske markører).
+`page.test.tsx` 14 → **18**. **Verificeret modsvejs: 5 af 5 falder** på
+master-koden.
+
+**Mål:** SE **4.587 → 5.413 ord**, **8 → 10 `<h2>`**, FAQ **9 → 11**, 0
+danske markører; DA uændret 9 / 5.146 / 10; `/api/health` → ok.
+
+**Gate:** lint 573 filer, **2.499 tests / 163 filer** (fra 2.494 / 163),
+build 141 sider, `locale-leak.mjs --gate` exit 0, `knapgruppe-scan.mjs` 0/0.
+Ingen beregningslogik rørt, dansk sproggren urørt.
+
+**MÅL:** SE baseline **59.270 v / 123 klik / CTR 0,2 % / pos. 8,1** pr.
+2026-08-29 → 2026-09-26 — måles igen **2026-10-12**.
+
+- ⏳ **VERIFICÉR DEPLOY: C120 — beraknare.se `/tidsberegner` har egen
+  svar-først-tabel, minuter↔timmar-sektion og to nye FAQ-spørgsmål.** Kode +
+  plan i ét commit på `ceo/se-tidsberegner-svarforst`, squashet til `master`.
+  Første kandidatvindue **2026-09-29 07:30** (23:30 er efter 21:30-batchen).
+  Kun `src/app/tidsberegner/page.tsx`, to `faqItems` i `src/lib/page-data.ts`
+  og `page.test.tsx` er rørt — **den danske sproggren er urørt**, ingen
+  beregningslogik ændret. Verificér på **https://beraknare.se/tidsberegner**
+  ved **indhold, ikke HTTP 200**:
+  1. `<h2>Svar på de vanligaste tidsintervallen</h2>` skal findes, og
+     `8 h 15 min` skal give **2 fund** (synlig tekst + RSC-payload).
+  2. `Räkna om minuter till timmar` skal findes, og `495 ÷ 60 = 8,25`,
+     `450 minuter` og `href="/fart"` skal være til stede.
+  3. `curl -s https://beraknare.se/tidsberegner | sed 's/<!-- -->//g'` skal
+     have **0** fund på "Svar på de oftest søgte tidsrum", "Samme dag",
+     "Pause</th>", "Decimaltimer</th>", "8 t 15 min", "1 t 30 min" og
+     "80,00 timer".
+  4. FAQ-spørgsmål i JSON-LD'en: **11** (var 9). Tæl med
+     `grep -o '"@type":"Question"' | wc -l` — **ikke** `grep -c`, der tæller
+     linjer (målefejl fra C96).
+  5. KONTROL: `https://minberegner.dk/tidsberegner` skal fortsat have **10**
+     spørgsmål, **9** `<h2>`, 5.146 ord og **0** på "Räkna om minuter till
+     timmar".
+  6. `https://minberegner.dk/api/health` skal svare `status: ok`.

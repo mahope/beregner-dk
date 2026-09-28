@@ -6,10 +6,12 @@ import { getPageData } from "@/lib/page-data";
 import { formatNumber } from "@/lib/format";
 import { TEMPO_EKSEMPLER, beregnTempo, formatSekunder } from "@/lib/tidsberegner";
 import {
+  TIDS_EKSEEMPLER,
   TIDS_EKSEMPEL_DAG,
   TIDS_EKSEMPEL_MIDNAT,
   TIDS_EKSEMPEL_PAUSE,
   excelDifferens,
+  formatTidsvar,
   totalMinutter,
 } from "@/lib/tids-eksempler";
 import TidsberegnerPage from "./page";
@@ -41,7 +43,7 @@ describe("tidsberegner page", () => {
     },
     {
       locale: "se" as const,
-      heading: "Tidskalkylator",
+      heading: "Hur lång tid är det mellan två klockslag?",
       answer: "Beräkna hur lång tid det går mellan två klockslag – i timmar, minuter och decimaltimmar. Dra av en rast.",
       schema: "Gratis tidskalkylator. Beräkna tidsintervall mellan två klockslag och se resultatet i timmar, minuter och decimaltimmar.",
     },
@@ -58,8 +60,14 @@ describe("tidsberegner page", () => {
   });
 
   // Search Console: "hvor lang tid" 790 visninger pos. 6. Svar-først-tabellen
-  // er dansk, fordi spørgsmålet er dansk; den må ikke lække til beraknare.se,
-  // der har sit eget svar-først-sæt (C38).
+  // er dansk, fordi spørgsmålet er dansk; den må ikke lække til beraknare.se.
+  // C38 lagde den her som en `not.toContain`-lås på **hele tabellen** — altså
+  // låst på tilstanden før C120, i stedet for på en egenskab. Det er C94's
+  // negative SE-lås på "500 ÷ 15" og C119's på "3,14 × 3 × 3" i tredje
+  // forklædning: en måler, der er grøn fordi den forbyder rettelsen. C38's
+  // hensigt — "svensk læsere skal ikke se dansk" — er bevaret som de to
+  // reelle låse nedenfor: SE *skal* have sin egen tabel, og SE må ikke have
+  // danske markører.
   test("da viser svar-først-tabellen med det lovede eksempel", async () => {
     const html = renderToStaticMarkup(await TidsberegnerPage());
 
@@ -72,14 +80,50 @@ describe("tidsberegner page", () => {
     expect(html).toContain("(dagen efter)");
   });
 
-  test("se får ikke den danske svar-først-tabel", async () => {
+  test("se viser sin egen svar-først-tabel med alle syv intervaller", async () => {
     vi.mocked(getLocale).mockResolvedValue("se");
     vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("se"));
 
     const html = renderToStaticMarkup(await TidsberegnerPage());
 
-    expect(html).not.toContain("Svar på de oftest søgte tidsrum");
-    expect(html).not.toContain("dagen efter");
+    expect(html).toContain("Svar på de vanligaste tidsintervallen");
+    // Svensk notation i svaret: "h" ikke den danske "t" (C73's R4).
+    expect(html).toContain("<strong>8 h 15 min</strong>");
+    expect(html).toContain("8,25 timmar");
+    expect(html).toContain("Samma dag");
+    expect(html).toContain("Paus</th>");
+    expect(html).toContain("Decimaltimmar</th>");
+    expect(html).toContain("(dagen efter)");
+    // Alle syv rækker fra modulet, i begge sprog — tabellen er data, ikke
+    // håndskrevet tekst, så den ikke kan tabe en linje.
+    for (const eksempel of TIDS_EKSEEMPLER) {
+      expect(html).toContain(`>${eksempel.start}</td>`);
+      expect(html).toContain(`>${eksempel.slut}</td>`);
+    }
+  });
+
+  test("se-tabellen lækker ingen danske markører", async () => {
+    vi.mocked(getLocale).mockResolvedValue("se");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("se"));
+
+    const html = renderToStaticMarkup(await TidsberegnerPage());
+
+    for (const daFragment of [
+      "Svar på de oftest søgte tidsrum",
+      "Samme dag",
+      "Pause</th>",
+      "Decimaltimer</th>",
+      "8 t 15 min",
+      "1 t 30 min",
+      "80,00 timer",
+    ]) {
+      expect(html).not.toContain(daFragment);
+    }
+    // "dagen efter" er svensk, så den skal findes — ellers låsen ovenfor
+    // ville være vakuum-grøn for den. Den lå i den gamle test, der låste
+    // *tilstanden før rettelsen*; "dagen efter" er korrekt svensk og blev
+    // fundet ved at læse den fejlslagne liste (målefejl nr. 23).
+    expect(html).toContain("dagen efter");
   });
 });
 
@@ -253,5 +297,96 @@ describe("Excel-svaret på /tidsberegner", () => {
       expect(tempoSvar).toContain("5:00");
       expect(tempoSvar).toContain("4:59");
     }
+  });
+});
+
+/**
+ * C120. SE-autocomplete under "räkna ut timmar och minuter" har "räkna ut
+ * timmar från minuter" (nr. 7) og "räkna timmar till minuter" (nr. 10) —
+ * altså begge retninger i omvandlingen. Den svenska side svarade på ingen af
+ * dem. Tabellens tal er **udregnet** (div/mod 60) i `page.tsx`, og testen
+ * læser dem fra samme moduls `TIDS_EKSEEMPLER` og `formatTidsvar`, så
+ * C84's fejlklasse — en indekseret tekst der modsiger sit eget indhold —
+ * ikke kan ske på denne blok.
+ */
+const MINUTER = [15, 30, 45, 60, 90, 120, 480, 495];
+
+describe("minuter ↔ timmar på beraknare.se", () => {
+  beforeEach(() => {
+    vi.mocked(getLocale).mockResolvedValue("se");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("se"));
+  });
+
+  test("se har sektionen med divisionen og alle otte rækker", async () => {
+    const html = renderToStaticMarkup(await TidsberegnerPage());
+
+    expect(html).toContain("Räkna om minuter till timmar");
+    expect(html).toContain("minuter ÷ 60 = timmar");
+    expect(html).toContain("timmar × 60 = minuter");
+    for (const minuter of MINUTER) {
+      const decimal = formatNumber(minuter / 60, "se", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
+      expect(html).toContain(minuter + " ÷ 60 = " + decimal);
+    }
+    // Den modsatte retning står i brødteksten, med tal der kan efterprøves.
+    expect(html).toContain("7,5 timmar");
+    expect(html).toContain("450 minuter");
+    // 495 minuter er 08:30–16:45, altså TIDS_EKSEMPEL_DAG — krydschecket mod
+    // modulet, så de to tabeller ikke kan komme i mellemkrig om et facit.
+    expect(html).toContain("8 h 15 min");
+    expect(totalMinutter(TIDS_EKSEMPEL_DAG)).toBe(495);
+    expect(html).toContain('href="/fart"');
+  });
+
+  test("omvandlingen i tabellen er den samme regel som formatTidsvar", () => {
+    for (const minuter of MINUTER) {
+      const timer = Math.floor(minuter / 60);
+      const restMinutter = minuter % 60;
+      // timer x 60 + restMinutter skal give minutter tilbage. Det er praecis
+      // definitionen paa, at tabellens tal ikke er skrevet i haanden ved
+      // siden af logikken.
+      expect(timer * 60 + restMinutter).toBe(minuter);
+      expect(formatTidsvar({ timer, minutter: restMinutter }, "se")).toBe(
+        timer + " h " + restMinutter + " min"
+      );
+    }
+  });
+
+  test("da får ikke den svenska omvandlingssektion", async () => {
+    vi.mocked(getLocale).mockResolvedValue("da");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("da"));
+
+    const html = renderToStaticMarkup(await TidsberegnerPage());
+
+    expect(html).not.toContain("Räkna om minuter till timmar");
+    expect(html).not.toContain("450 minuter");
+    // ...men har sin egen decimal-liste, som lå før denne sektion.
+    expect(html).toContain("15 min = 0,25 timer");
+  });
+
+  test("FAQ'en svarer på omvandlingen og på 08:30–16:45, så det kommer i JSON-LD'en", () => {
+    // `FAQ` er mocket væk (C85's fælde), så påstanden ligger i page-data,
+    // som er den tabel FAQSchema får.
+    const faq = getPageData("tidsberegner", "se")!.faqItems;
+    const spg = faq.map((i) => i.question);
+
+    expect(spg.some((q) => q.includes("minuter till timmar"))).toBe(true);
+    expect(spg.some((q) => q.includes("08:30 till 16:45"))).toBe(true);
+    expect(spg).toHaveLength(11);
+
+    // Svarene skal bære de samme tal som tabellen på siden.
+    const omvandling = faq.find((i) => i.question.includes("minuter till timmar"))!.answer;
+    expect(omvandling).toContain("90 minuter ÷ 60 = 1,50 timmar");
+    expect(omvandling).toContain("7,5 timmar × 60 = 450 minuter");
+    const klockslag = faq.find((i) => i.question.includes("08:30 till 16:45"))!.answer;
+    expect(klockslag).toContain("8 timmar och 15 minuter");
+    expect(klockslag).toContain("8,25 decimaltimmar");
+
+    // Dansk er urørt: ingen af de to nye spørgsmål.
+    const daSpg = getPageData("tidsberegner", "da")!.faqItems.map((i) => i.question);
+    expect(daSpg).toHaveLength(10);
+    expect(daSpg.some((q) => q.includes("minuter til timer"))).toBe(false);
   });
 });

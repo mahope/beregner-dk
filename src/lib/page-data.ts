@@ -3312,6 +3312,8 @@ const sePages: Record<string, PageData> = {
       { question: "Varför får jag ett negativt tal i Excel?", answer: "För att Excel drar sluttiden från starttiden utan att veta att nattpasset slutar följande dag. 22:00 till 06:00 ger därför -0,67 dygn. Använd =MOD(B1-A1;1)*24, så tar den med de 24 timmarna igen och visar 8 timmar — precis som kalkylatorn gör." },
       { question: "Hur räknar man ut tempo i minuter per kilometer?", answer: "Dividera loptiden i minuter med distansen i kilometer. 5 km på 25 minuter ger 25 ÷ 5 = 5:00 per kilometer, och en halvmaraton på 1 timme och 45 minuter ger 4:59 per kilometer." },
       { question: "Vad är ett bra tempo för ett maraton?", answer: "Tempot avgörs av tiden: 3 timmar och 30 minuter på 42,2 km är 4:59 per kilometer. För att hitta distansen i stället delar du tiden med tempot, så 2 timmar vid 5:00 per kilometer blir 24 km." },
+      { question: "Hur räknar jag om minuter till timmar?", answer: "Dividera minuterna med 60. 90 minuter ÷ 60 = 1,50 timmar, alltså 1 timme och 30 minuter. Åt andra hållet gäller timmar × 60 = minuter, så 7,5 timmar × 60 = 450 minuter." },
+      { question: "Vad är 08:30 till 16:45 i timmar och minuter?", answer: "Det är 8 timmar och 15 minuter, alltså 8,25 decimaltimmar. Räkna ut det direkt i tabellen över vanliga tidsintervall ovanför, eller skriv in klockslagen i kalkylatorn." },
       ],
     },
     "tidszone": {

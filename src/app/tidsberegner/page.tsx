@@ -44,6 +44,19 @@ const TEMPO_NAEVN_SE: Record<TempoEksempel["id"], string> = {
   maraton: "Maraton (42,2 km)",
 };
 
+/**
+ * Minuter → timmar, for den omvandlingsklynge SE-autocomplete har under
+ * "räkna ut timmar och minuter" ("… från minuter", "… till minuter").
+ * Timer og restminutter er **udregnet** (div/mod 60), altså samme to regler
+ * som `beregnTidsinterval` bruger, så tabellen ikke kan modsige værktøjet.
+ */
+const MINUTER_TILL_TIMMAR = [15, 30, 45, 60, 90, 120, 480, 495].map((minutter) => ({
+  minutter,
+  timer: Math.floor(minutter / 60),
+  restMinutter: minutter % 60,
+  decimalTimer: minutter / 60,
+}));
+
 /** "2026-09-25" → "25. sep.". Datoerne læses i UTC, så de kan ikke glide en dag. */function formatDato(iso: string | undefined, locale: "da" | "se"): string {
   if (!iso) return "";
   const dato = new Date(`${iso}T00:00:00Z`);
@@ -75,6 +88,8 @@ export default async function TidsberegnerPage() {
   const locale = await getLocale();
   const domainConfig = await getCurrentDomainConfig();
   const pageData = getPageData("tidsberegner", locale) || getPageData("tidsberegner", "da")!;
+  /** Svar-først-tabellen findes i de to sprog, der serverer kalkulatorer. */
+  const daSe = locale === "se" ? "se" : "da";
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -90,7 +105,9 @@ export default async function TidsberegnerPage() {
       <h1 className="text-3xl md:text-4xl font-bold mb-4">
         {locale === "da"
           ? "Hvor lang tid er der mellem to klokkeslæt?"
-          : pageData.title}
+          : locale === "se"
+            ? "Hur lång tid är det mellan två klockslag?"
+            : pageData.title}
       </h1>
       <p className="text-gray-600 mb-8 text-lg">
         {pageData.description}
@@ -101,11 +118,17 @@ export default async function TidsberegnerPage() {
           stod ingen steder på siden. Tallene nedenfor kommer fra
           `beregnTidsinterval` — samme modul som værktøjet bruger.
           C51 lagde de to rækker med datofelter ind, fordi værktøjet kan
-          intervaller på tværs af datoer, men siden ikke nævnte det. */}
-      {locale === "da" && (
+          intervaller på tværs af datoer, men siden ikke nævnte det.
+          C120 løftede `locale === "da"`-porten: beraknare.se/tidsberegner er
+          domænets andenstørste side (59.270 visninger) og havde 0 fund på
+          "8 t 15 min", "1 t 30 min" og "80,00" — hele svar-først-tabellen var
+          dansk-only. Svaret formateres med `formatTidsvar`, så beraknare.se
+          får "8 h 15 min" og ikke den danske "t" (C73's R4). */}
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 mb-8">
         <h2 className="text-xl font-bold mb-3 dark:text-white">
-          Svar på de oftest søgte tidsrum
+          {daSe === "se"
+            ? "Svar på de vanligaste tidsintervallen"
+            : "Svar på de oftest søgte tidsrum"}
         </h2>
         <div className="overflow-x-auto">
           <table>
@@ -113,10 +136,10 @@ export default async function TidsberegnerPage() {
               <tr>
                 <th>Start</th>
                 <th>Slut</th>
-                <th>Dato</th>
-                <th>Pause</th>
+                <th>{daSe === "se" ? "Datum" : "Dato"}</th>
+                <th>{daSe === "se" ? "Paus" : "Pause"}</th>
                 <th>Svar</th>
-                <th>Decimaltimer</th>
+                <th>{daSe === "se" ? "Decimaltimmar" : "Decimaltimer"}</th>
               </tr>
             </thead>
             <tbody>
@@ -126,30 +149,44 @@ export default async function TidsberegnerPage() {
                   <td>{eksempel.slut}</td>
                   <td>
                     {eksempel.startDato
-                      ? `${formatDato(eksempel.startDato, "da")} – ${formatDato(eksempel.slutDato, "da")}`
-                      : "Samme dag"}
+                      ? `${formatDato(eksempel.startDato, daSe)} – ${formatDato(eksempel.slutDato, daSe)}`
+                      : daSe === "se"
+                        ? "Samma dag"
+                        : "Samme dag"}
                   </td>
                   <td>{eksempel.pause > 0 ? `${eksempel.pause} min` : "Ingen"}</td>
                   <td>
-                    <strong>{eksempel.svar}</strong>
-                    {eksempel.overMidnat && !eksempel.startDato &&
-                      " (dagen efter)"}
+                    <strong>{formatTidsvar(eksempel, daSe)}</strong>
+                    {eksempel.overMidnat && !eksempel.startDato && " (dagen efter)"}
                   </td>
-                  <td>{formatTimer(eksempel.decimalTimer, locale)} timer</td>
+                  <td>
+                    {formatTimer(eksempel.decimalTimer, locale)}{" "}
+                    {daSe === "se" ? "timmar" : "timer"}
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
         <p className="text-sm text-gray-600 dark:text-gray-400 mt-3">
-          {TIDS_EKSEEMPLER[0].start} til {TIDS_EKSEEMPLER[0].slut} er altså{" "}
-          <strong>{TIDS_EKSEEMPLER[0].svar}</strong> ={" "}
-          {formatTimer(TIDS_EKSEEMPLER[0].decimalTimer, locale)} decimaltimer. Indtast dine egne
-          klokkeslæt ovenfor, og beregneren trækker automatisk en frokostpause
-          fra, hvis du angiver den.
+          {locale === "se" ? (
+            <>
+              {TIDS_EKSEEMPLER[0].start} till {TIDS_EKSEEMPLER[0].slut} är alltså{" "}
+              <strong>{formatTidsvar(TIDS_EKSEEMPLER[0], "se")}</strong> ={" "}
+              {formatTimer(TIDS_EKSEEMPLER[0].decimalTimer, "se")} decimaltimmar. Fyll i dina egna
+              klockslag ovanför, så drar kalkylatorn automatiskt av en lunchrast om du anger den.
+            </>
+          ) : (
+            <>
+              {TIDS_EKSEEMPLER[0].start} til {TIDS_EKSEEMPLER[0].slut} er altså{" "}
+              <strong>{formatTidsvar(TIDS_EKSEEMPLER[0], "da")}</strong> ={" "}
+              {formatTimer(TIDS_EKSEEMPLER[0].decimalTimer, "da")} decimaltimer. Indtast dine egne
+              klokkeslæt ovenfor, og beregneren trækker automatisk en frokostpause
+              fra, hvis du angiver den.
+            </>
+          )}
         </p>
       </div>
-      )}
 
 
       <div className="bg-white rounded-xl shadow-sm p-6 md:p-8 mb-8">
@@ -484,6 +521,54 @@ export default async function TidsberegnerPage() {
           <li>45 min = 0,75 timmar</li>
           <li>1 timme 15 min = 1,25 timmar</li>
         </ul>
+
+        {/* C120: SE-autocomplete under "räkna ut timmar och minuter" har
+            "räkna ut timmar från minuter" (nr. 7) og "räkna timmar till
+            minuter" (nr. 10) — altså båda riktningarna i omvandlingen. Den
+            svenska sidan svarade på ingen av dem. Alla tal räknas från
+            `totalMinutter`, så de kan inte glida ifrån `decimalTimer`. */}
+        <h2>Räkna om minuter till timmar – och tillbaka</h2>
+        <p>
+          Omvandlingen är alltid <strong>minuter ÷ 60 = timmar</strong>, och
+          den andra vägen är <strong>timmar × 60 = minuter</strong>. Decimaltimmar
+          är samma sak med kommatecken: 90 minuter är 1,50 timmar, och 1,50
+          timmar är 90 minuter igen.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Minuter</th>
+              <th>Timmar och minuter</th>
+              <th>Decimaltimmar</th>
+              <th>Divisionen</th>
+            </tr>
+          </thead>
+          <tbody>
+            {MINUTER_TILL_TIMMAR.map((række) => (
+              <tr key={række.minutter}>
+                <td>{række.minutter}</td>
+                <td>
+                  {formatTidsvar(
+                    { timer: række.timer, minutter: række.restMinutter },
+                    "se"
+                  )}
+                </td>
+                <td>{formatTimer(række.decimalTimer, "se")}</td>
+                <td>
+                  {række.minutter} ÷ 60 = {formatTimer(række.decimalTimer, "se")}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p>
+          Den andra vägen är <strong>timmar × 60 = minuter</strong>: 7,5 timmar
+          blir 450 minuter, alltså 7 timmar och 30 minuter. Och 495 minuter
+          timmar tillbaka till 08:30–16:45 ovan — det är samma par rader som
+          verktyget räknar. Vill du veta hur långt du kommit under ett lopp
+          delar du tiden med tempot i stället, och det står under{" "}
+          <a href="/fart">fartberäknaren</a>.
+        </p>
 
         <h2>Tips för exakt tidsregistrering</h2>
         <ul>
