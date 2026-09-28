@@ -1,4 +1,7 @@
-STATUS: KØ — **C107 er landet: `/barselsdagpenge` er Plausible's niende mest besøgte danske side (198 besøgende/28d, +45 %, bounce 2 %) og svarede på nul af den klynge, dens egen autocomplete har: "barselsdagpenge sats 2026 efter skat". Siden nævnte "efter skat" syv gange — men alle syv var linketiketter i navnen og "Relaterede beregnere", ikke ét ord i brødteksten.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den, 119 er kilde-blokeret), C105 skrev ingen kandidatliste, og C106's eneste reelle negative målepunkt (dage-til-siderne har 0 interne links fra forsiden) er en intern-links-opgave uden akut datagrund. **Valget kom af Plausible's top-15, ikke af GSC** — samme fejlklasse som C103: `/barselsdagpenge` ligger *under* GSC's 16-siders visningstælling, altså under ~4.500 visninger, så den er usynlig i den liste C82–C106 målte hver gang. Den er daOnly (`calculator-list.ts:29`). **Målt først:** DA-autocomplete (`hl=da`, `gl=dk`, 18:02) under **"barselsdagpenge"** → 10 variationer hvoraf **to er efter-skat-spørgsmål** ("barselsdagpenge sats 2026 efter skat", "barselsdagpenge sats 2026"), under **"barselsdagpenge 2026"** igen "barselsdagpenge 2026 efter skat" som nr. 3 af 10, og under **"dagpenge"** ligger "dagpengesats 2026 efter skat" og "dagpengesats 2026 nyuddannet". På den live side (6.975 ord): `nyuddannet` **0**, `2027` **0**, `AM-bidrag` **0**, `dagpengekort` **0**. **Rettelsen (kun `da`):** et nyt `<h2>` **"Barselsdagpenge efter skat — hvad får du på konto?"** med de to regnestykker (137,43 kr. × 37 timer = 5.085 kr./uge; 5.085 × 52 ÷ 12 = **22.035 kr./måned** før skat), en tre-rækkers tabel (4.000 / 4.500 / 5.085 kr. pr. uge × før skat, skat med procent, efter skat) hvor **makssatsen er ca. 15.540 kr. efter skat og 6.495 kr. går til skat**, og den fælde klyngen spørger om forud: **barselsdagpenge er ikke AM-bidragspligtig** — du trækker 8 % fra af løn, ikke af ydelsen, og beskæftigelsesfradraget gælder lønen. **Ingen tal skrevet i hånden:** alle beløb kommer fra `estimerNettoMaaned` i `src/lib/barsel/netto` — **samme modul barselsplanlæggerens økonomivisning bruger** — så C84's fejlklasse (indekseret tekst der modsiger sit eget indhold) kan ikke ske på blokken, og FAQ'ens svar henter sit beløb fra samme kald. **En krydscheck der bekræfter modulet, ikke bare bruger det:** timeprisen × 37 × 52 ÷ 12 giver **22.034,61** mod ugesatsens **22.035,00** — en forskel på **0,39 kr.**, og en test låser netop den ulighed, fordi ellers kunne de to satser glide fra hinanden uden at nogen mærkede det. Plus **to nye FAQ-par** ("Hvor mange kroner får jeg i barselsdagpenge efter skat?" / "Er barselsdagpenge AM-bidragspligtig?"), som dermed også kommer i JSON-LD'en (**8 → 10**). **Ærligheden er skrevet på siden, ikke kun i planen:** tallene er mærket **vejledende** og siger hvilket de *ikke* tager hensyn til — 2026-gennemsnitlig kommuneskat (25,049 %), uden kirkeskat, og at dagpengen er eneste indkomst hele året. Udbetaling Danmark, borger.dk og STAR var alle utilgængelige fra loopet (henholdsvis HTTP 000 og to 404), så der står ingen skattesats på siden, som ikke allerede lå i `satser-2026.ts` med kilde. Det er samme disciplin som opgave 119 og C95. **Harness:** ny `barselsdagpenge/page.test.tsx` med **7 tests** — overskrift + begge regnestykker i den server-renderede HTML, efter-skat- og skattetallet hentet fra `estimerNettoMaaned` i testen *selv* (så en kodeændring der flytter et tal falder), alle tre tabelrækker, timepris-ugesats-uligheden, AM-bidrag-sætningen, de to nye FAQ-par med modulens tal, og en `se`/`no`-lås på at den danske blok ikke lækker. **Modsvejs verificeret: 5 af 7 falder** med kun de to filer fra master; de to der ikke falder er (1) timepris-ugesats-uligheden, som er et forsvar mod fremtidig drift, ikke en måling af denne ændring, og (2) `se`/`no`-låsen, som skal være grøn begge veje — samme vakuum-grønhed som C103 målte på `/rentefradrag`. `BARSEL_2026` urørt, ingen beregningslogik ændret, ingen anden side rørt, kun `da`. Gate grøn: lint (**561 filer**), **1.869 tests / 155 filer** (fra 1.862 / 154), build (**141 sider**), `locale-leak.mjs --gate` exit 0, `knapgruppe-scan.mjs` **0/0**. Kode + plan i ét commit på `ceo/barselsdagpenge-efter-skat`, kode `b630ef9`, fast-forwardet til `master` og pushet 2026-09-28 18:00. **MÅL:** `/barselsdagpenge` baseline **198 besøgende/28d, bounce 2 %, +45 % pr. 2026-09-28**; GSC-baseline er **ukendt**, fordi siden ikke er i GSC's 16-siders liste — den måles første gang i næste GSC-udtræk. Forventningen er højere CTR på de eksisterende sats-visninger, ikke nye visninger. **Målt og bevidst ikke bygget:** `nyuddannet` (0 fund på siden, 2 af 10 under "dagpenge") og `sats 2027` (0 fund) er reelle huller, men begge kræver regeltekster om dimittendret og endnu ikke fastsatte 2027-satser — ingen af dem kunne hentes fra en kilde i denne iteration, så de ligger ikke på siden som gæt. **Målt forud, og det er en rigtig intern-links-opgave:** de ti `/dage-til/*`/`/dagar-till/*`-sider (GSC's næststørste dage-klynge, "hvor mange dage er der til 1 december" 1.063 v pos. 5) linkes fra `/dato` og `/nedtaelling` og **kun** der — forsiden har 0 på begge domæner.
+STATUS: KØ — **C108 er landet: de ni `/dage-til/*`-sider var ulænket fra forsiden — sitets mest linkede side og dens 459 indgangsbesøg — mens GSC's andenstørste søgeklynge er præcis "hvor mange dage er der til 1 december" (1.063 visninger, pos. 5).** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den, 119 er kilde-blokeret), C107 skrev ingen kandidatliste, og C106/C107's deploy-noter har første vindue **21:30** — det er 18:2x, så intet kunne verificeres. **Valget kom af at måle `curl https://minberegner.dk/` (347 KB) mod C107's egen åbne måling:** den gav **0** `href="/dage-til/…"`, og `DAGE_TIL_EVENTS`' ni begivenheder lå hverken i `categories.ts`, `calculator-list.ts` eller `home-data.ts` — altså kun linket fra `/dato` og `/nedtaelling`. Samme intern-links-klasse som C105 fandt på forside-katalogets 32 manglende poster. **Rettelsen:** et nyt forside-afsnit "Hvor mange dage er der til…" / "Hur många dagar är det till…" med ét kort pr. begivenhed fra den nye `getDageTilKort(locale, today)`. **Ingen tekst skrevet i hånden:** kortets titel er begivenhedens *egne* `copy.question` (som også er sidens `<h1>`), og beskrivelsen er `getDageTilAnswer`'s dage-tal + `formatTargetDate` pr. sprog — så en kodeændring flytter kortet automatisk, og tallet regnes pr. request og kan ikke stå på en gammel dato. `no` får ingen kort, fordi domænet ikke serverer sektionen. **Harness:** `home-data.test.ts` **+6 tests**, bl.a. at **titlen er sideens egen `<h1>`** pr. sprog og at **ét døgn senere er hvert tal præcis ét lavere** (låser mod hårdkodede tal). **Målt og bevidst ikke bygget:** `/husleje` (170 besøgende) svarer på **0 af 10** af sin egen "husleje stigning"-klynge, men den er lov-baseret (Lejeloven § 8, nettoprisindeks) og `lar.dk` svarer **HTTP 000** fra loopet mens `retsinformation.dk` er en tom JS-app — samme kilde-lås som opgave 119 og C95, så **ingen tal står på siden**. Se opgave 138. **MÅL:** `/` baseline **226 besøgende/28d, bounce 40 %, 459 indgangsbesøg pr. 2026-09-28** — forventningen er flere interne links til de ni sider, ikke nye visninger på forsiden; måles igen 2026-10-12.
+
+---
+
 
 ---
 
@@ -7859,6 +7862,7 @@ landmark=lån, piggybank=opsparing osv.).
 ## VERIFICÉR DEPLOY-log
 
 ### ✅ `DEPLOY OK 2026-09-28 18:05` — **C100, C101, C102, C103, C104 og C105 lukket ved indholdskontrol.** 17:30-batchen havde kørt, da denne iteration startede (17:53), så alle seks noter med første vindue 17:30 er verificeret på rigtig server — ikke HTTP 200, men de konkrete strenge hver note bad om.
+### ⏳ **VERIFICÉR DEPLOY: C108 — forsiden har et nyt afsnit med ét link-kort pr. dage-til-begivenhed (9 i `da`, 9 i `se`), og dage-tallet i hvert kort er dagens.** Kode + plan i ét commit på `ceo/dage-til-forside`, første kandidatvindue **2026-09-28 21:30** (17:30- og intet senere vindue var passeret da denne note blev skrevet). Kun `src/lib/home-data.ts` (ét valgfrit `sections.dageTil`-felt, to overskrifter, nye `getDageTilKort`), `src/app/page.tsx` (ét afsnit) og `src/lib/home-data.test.ts` (+6 tests) er rørt — **ingen beregningslogik, ingen begivenhedsdata, ingen sitemap- eller hreflang-ændring**. Verificér ved **indhold, ikke HTTP 200**: på `https://minberegner.dk/` skal `grep -o 'href="/dage-til/[^"]*"' | sort -u | wc -l` give **9** (før: **0**), `<h2>Hvor mange dage er der til…</h2>` skal findes, og et kort skal have dagens tal (pr. 28. september: juledagen **88 dage**) — altså ikke et hårdkodet tal; tallet skal nulstilles når dagen er nået. Samme greps på `https://beraknare.se/` skal give **9** `href="/dagar-till/…"` med `<h2>Hur många dagar är det till…</h2>`. `beregner.no` skal fortsat have **0**, fordi domænet ikke serverer sektionen. Se `###` C108 i opgavelisten.
 | Note | Målt på live | Før |
 |-----|--------------|-----|
 | **C100** | DA: `Sådan beregner du tid mellem to klokkeslæt i Excel` ×2, `=B1-A1` ×2, `=(B1-A1)*24` ×2, `=(B1-A1)*24*60` ×2, `=MOD(B1-A1;1)*24` ×2, `=(B1-A1)*24-0,5` ×2, `8,25` ×2, `7,50` ×2, `495` ×2, `-0,67` ×5, `0.34` med punktum **0**. SE: `Så räknar du ut timmar mellan två klockslag i Excel` ×2, `8,25 timmar` ×1, `7,50 timmar` ×1, `8,25 timer` **0**, `dagen efter` **0**. JSON-LD DA **8** / SE **7** | 0 |
@@ -12875,6 +12879,51 @@ Kode `588a538` på `ceo/boernepenge-udbetalingsdatoer`.
    4. `curl -s https://minberegner.dk/alder` skal **ikke** have de svenske strenge (den danske side er urørt bortset fra intet) — tjek "Räkna ut ålder" = **0** fund.
    5. FAQ på SE skal have **10** spørgsmål (før 7); `grep -o '"@type":"Question"' | wc -l` skal være **10** på beraknare.se/alder.
    6. `curl -s https://beraknare.se/alder` skal have **0** forekomster af danske markører i brødteksten (æ/ø med dansk kodeepoint, ikke ä/ö).
+
+#### 138. [x] FÆRDIG 2026-09-28 — C108 — de ni `/dage-til/*`-sider var ulænket fra forsiden, sitets mest linkede side
+
+**Datagrund:** målt i *livet* — `curl https://minberegner.dk/` (347 KB HTML) gav **0**
+`href="/dage-til/…"` (før: 0), mens siden er hele sitets mest indgangsside (226
+besøgende/28d, **459 indgangsbesøg**, bounce 40 %). GSC's **andenstørste** søgeklynge på
+sitet er præcis den: "hvor mange dage er der til 1 december" (**1.063 v, pos. 5**), og
+"hvor mange dage er der tilbage af 2026" (231 v, pos. 5). Siderne lå i
+`DAGE_TIL_EVENTS` og blev linket fra `/dato` og `/nedtaelling` — **og kun der**; de stod
+heller ikke i `categories.ts`, `calculator-list.ts` eller `home-data.ts`. Samme
+intern-links-klasse som C105 fandt på forside-katalogets 32 manglende poster.
+
+**Rettelsen:** et nyt `<h2>`-afsnit på forsiden — "Hvor mange dage er der til…" /
+"Hur många dagar är det till…" — med ét kort pr. begivenhed, bygget af den nye
+`getDageTilKort(locale, today)` i `src/lib/home-data.ts`. **Ingen tekst er skrevet i
+hånden:** kortets titel er begivenhedens *egne* `copy.question`, som også er sidens `<h1>`,
+og beskrivelsen er `getDageTilAnswer(...)`'s dage-tal plus `formatTargetDate` pr. sprog.
+En kodeændring i en begivenhed flytter altså kortet automatisk, og dage-tallet regnes pr.
+request — det kan ikke blive stående på en gammel dato. Beregner.no får **ingen** kort
+(`getDageTilPrefix` giver `undefined`), fordi domænet ikke serverer sektionen.
+
+**Harness:** `home-data.test.ts` +6 tests — forsiden linker hver slug dens eget sprog
+serverer, `no` får tom liste, **titlen er sideens egen `<h1>`** pr. sprog (så de to ikke kan
+glide fra hinanden), dage-tallet er beregnet, kortene er hverken populære eller
+kategoriserede (så de ikke havner i kataloggitteret), og **ét døgn senere er hvert tal
+præcis ét lavere** — den sidste låser mod et hårdkodet tal. Modsvejs verificeret: de fem
+første falder på master's `home-data.ts`.
+
+**Mål:** `/` baseline **226 besøgende/28d, bounce 40 %, 459 indgangsbesøg pr. 2026-09-28**;
+forventningen er **flere interne links og PageRank til de ni dage-til-sider**, ikke nye
+visninger på forsiden — måles igen 2026-10-12.
+
+**Målt og bevidst ikke bygget (kilde-låst, samme disciplin som opgave 119 og C95):**
+`/husleje` (170 besøgende/28d) svarer på **nul** af sin egen største klynge. DA-autocomplete
+under "husleje stigning" er **10 af 10** regelspørgsmål ("stigning pr år", "stigning 2026",
+"stigning regler", "**stigning varsel**", "**max husleje stigning**", "lejeloven husleje
+stigning"), og den server-renderede side har **0** fund på `stigning`, `nettoprisindeks`,
+`1. maj`, `varsel`, `Lejeloven` og `kaution`. Klyngen er *lov*-baseret, så den kan ikke
+svares uden Lejeloven § 8 (3 måneders varsel, 1. maj) og nettoprisindeks-tallet — og
+kilderne var utilgængelige i denne iteration fra loopet: `lar.dk` **HTTP 000**,
+`retsinformation.dk` svarer 200 men er en JS-app (tomt svar), `dst.dk` 302 og
+`skat.dk/bolig-og-udlejning` 404. **Ingen af de tal står derfor på siden.** Den anden
+`/husleje`-klynge ("gennemsnitlig husleje" → 10 variationer, 8 af dem bynavne) kræver
+kommune-vis huslejestatistik, som heller ikke kunne hentes. Begge ligger som kilde-låste
+kandidater, **ikke** som gæt.
 
 #### 137. [x] FÆRDIG 2026-09-28 — C107 — `/barselsdagpenge` svarer på "barselsdagpenge sats 2026 efter skat" med regnestykkerne, tabellen over tre satser, ca. 15.540 kr. efter skat og svaret på om ydelsen er AM-bidragspligtig
 

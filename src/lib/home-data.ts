@@ -1,4 +1,12 @@
 import { isCalculatorAvailable } from "./calculator-list";
+import {
+  formatTargetDate,
+  formatTargetYear,
+  getDageTilAnswer,
+  getDageTilEvents,
+  getDageTilPrefix,
+  type DageTilLocale,
+} from "./dage-til";
 import type { Locale } from "./i18n";
 
 /* ------------------------------------------------------------------ */
@@ -25,6 +33,12 @@ export interface HomePageData {
   };
   sections: {
     popular: string;
+    /**
+     * Heading for the countdown-link section. Only the locales that serve
+     * /dage-til pages carry it; beregner.no serves no dage-til section at all,
+     * so it is absent there rather than rendered empty.
+     */
+    dageTil?: string;
     whyUse: string;
     features: {
       free: { title: string; description: string };
@@ -83,6 +97,7 @@ const daPageData: HomePageData = {
   },
   sections: {
     popular: "Populære beregnere",
+    dageTil: "Hvor mange dage er der til…",
     whyUse: "Hvorfor bruge MinBeregner.dk?",
     features: {
       free: {
@@ -407,6 +422,7 @@ const sePageData: HomePageData = {
   },
   sections: {
     popular: "Populära kalkylatorer",
+    dageTil: "Hur många dagar är det till…",
     whyUse: "Varför använda Beräknare.se?",
     features: {
       free: {
@@ -549,4 +565,51 @@ export function getHomeCalculators(locale: Locale): HomeCalculator[] {
   return (calculatorMap[locale] ?? calculatorMap.da).filter((calculator) =>
     isCalculatorAvailable(calculator.href, locale)
   );
+}
+
+/** Per-locale words for the countdown line. Each is that language's own. */
+const dageTilOrd: Record<DageTilLocale, { dag: string; til: string; idag: string }> = {
+  da: { dag: "dage", til: "til", idag: "i dag" },
+  se: { dag: "dagar", til: "till", idag: "i dag" },
+};
+
+/**
+ * The ten /dage-til pages as homepage cards.
+ *
+ * They were reachable from /dato and /nedtaelling and nowhere else — including
+ * the homepage, the site's most linked page — while "hvor mange dage er der
+ * til 1 december" is the second largest query cluster on the site.
+ *
+ * Every string is derived from the event module: the title is the event's own
+ * `question`, which is also that page's <h1>, and the day count is computed by
+ * getDageTilAnswer for `today`. A card therefore cannot describe a countdown
+ * the linked page does not show, and cannot go stale — the number moves with
+ * the calendar because it is recalculated per request.
+ *
+ * Empty for any locale without the section (beregner.no serves no dage-til
+ * pages), which is why getDageTilEvents guards the locale.
+ */
+export function getDageTilKort(
+  locale: Locale,
+  today: Date
+): HomeCalculator[] {
+  const prefix = getDageTilPrefix(locale);
+  if (!prefix) return [];
+
+  return getDageTilEvents(locale).map((event) => {
+    const sprog = locale as DageTilLocale;
+    const answer = getDageTilAnswer(event, sprog, today);
+    const ord = dageTilOrd[sprog];
+    const dato = `${formatTargetDate(answer.targetDate, sprog)} ${formatTargetYear(answer.targetDate)}`;
+
+    return {
+      title: event[sprog].copy.question,
+      description: answer.isToday
+        ? `${ord.dag} … ${dato} — det er ${ord.idag}.`
+        : `${answer.days} ${ord.dag} ${ord.til} ${dato}.`,
+      href: `/${prefix}/${event[sprog].slug}`,
+      popular: false,
+      category: "",
+    };
+  });
 }

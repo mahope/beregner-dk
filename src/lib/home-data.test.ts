@@ -3,9 +3,17 @@ import {
   getHomePageData,
   getHomeCalculators,
   getHomeCalculatorCount,
+  getDageTilKort,
 } from "./home-data";
 import { isCalculatorAvailable } from "./calculator-list";
 import { beregnere } from "./categories";
+import {
+  getDageTilAnswer,
+  getDageTilEvents,
+  getDageTilPrefix,
+  getDageTilSlugs,
+  type DageTilLocale,
+} from "./dage-til";
 
 describe("getHomePageData", () => {
   test("returns data for all locales", () => {
@@ -230,6 +238,76 @@ describe("getHomeCalculators", () => {
       const source = siteKatalog.get(calc.href);
       if (!source) continue;
       expect(calc.category, `${calc.href} category`).toBe(source.category);
+    }
+  });
+});
+
+describe("getDageTilKort", () => {
+  const idag = new Date();
+
+  test("forsiden linker hver dage-til-side dens eget sprog serverer", () => {
+    for (const locale of ["da", "se"] as const) {
+      const slugge = getDageTilSlugs(locale);
+      const hrefs = getDageTilKort(locale, idag).map((k) => k.href);
+      const prefix = getDageTilPrefix(locale)!;
+      expect(slugge.length).toBeGreaterThan(0);
+      for (const slug of slugge) {
+        expect(hrefs, `${locale}/${slug}`).toContain(`/${prefix}/${slug}`);
+      }
+    }
+  });
+
+  test("beregner.no får ingen kort, fordi domænet ikke serverer dage-til", () => {
+    expect(getDageTilKort("no", idag)).toEqual([]);
+    expect(getDageTilSlugs("no")).toEqual([]);
+  });
+
+  test("kortets titel er sideens egen <h1>, så de to ikke kan glide fra hinanden", () => {
+    for (const locale of ["da", "se"] as const) {
+      const sprog = locale as DageTilLocale;
+      const events = getDageTilEvents(locale);
+      const kort = getDageTilKort(locale, idag);
+      expect(kort).toHaveLength(events.length);
+      for (const [i, event] of events.entries()) {
+        expect(kort[i].title).toBe(event[sprog].copy.question);
+      }
+    }
+  });
+
+  test("dage-tallet i beskrivelsen er beregnet, ikke skrevet i hånden", () => {
+    for (const locale of ["da", "se"] as const) {
+      const sprog = locale as DageTilLocale;
+      const ord = sprog === "da" ? "dage" : "dagar";
+      const events = getDageTilEvents(locale);
+      for (const [i, event] of events.entries()) {
+        const svar = getDageTilAnswer(event, sprog, idag);
+        const forventet = svar.isToday
+          ? `det er idag.`
+          : `${svar.days} ${ord} till`.replace("till", sprog === "da" ? "til" : "till");
+        expect(getDageTilKort(locale, idag)[i].description).toContain(
+          forventet
+        );
+      }
+    }
+  });
+
+  test("kortene er hverken populære eller i en kategori, så de ikke havner i kataloggitteret", () => {
+    for (const kort of getDageTilKort("da", idag)) {
+      expect(kort.popular).toBe(false);
+      expect(kort.category).toBe("");
+    }
+  });
+
+  test("kortene følger kalenderen: samme kald en dag senere flytter antallet", () => {
+    const foer = getDageTilKort("da", new Date("2026-09-28T12:00:00Z"));
+    const senere = getDageTilKort("da", new Date("2026-09-29T12:00:00Z"));
+    const foerDage = foer.map((k) => k.description);
+    const senereDage = senere.map((k) => k.description);
+    expect(senereDage).not.toEqual(foerDage);
+    for (const [i, d] of foerDage.entries()) {
+      const tal = Number(d.match(/^(\d+) dage/)?.[1]);
+      const ny = Number(senereDage[i].match(/^(\d+) dage/)?.[1]);
+      expect(ny).toBe(tal - 1);
     }
   });
 });

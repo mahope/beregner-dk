@@ -7,7 +7,7 @@ import { CalcIcon, CategoryIcon, getCategoryColor } from "@/components/ui/icons"
 import { getTrendingHrefs } from "@/lib/trending";
 import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
 import { getAllDomainConfigs } from "@/lib/domain-config";
-import { getHomePageData, getHomeCalculators } from "@/lib/home-data";
+import { getDageTilKort, getHomePageData, getHomeCalculators } from "@/lib/home-data";
 import { getSearchContent } from "@/lib/search-content";
 import { HomeContent } from "@/components/HomeContent";
 import CountryFlag from "@/components/CountryFlag";
@@ -51,6 +51,7 @@ export default async function Home() {
 
   const popularBeregnere = beregnere.filter((b) => b.popular);
   const oevrigeBeregnere = beregnere.filter((b) => !b.popular);
+  const dageTilKort = getDageTilKort(locale, new Date());
 
   const grouped = new Map<string, typeof beregnere>();
   for (const b of oevrigeBeregnere) {
@@ -155,6 +156,32 @@ export default async function Home() {
           })}
         </div>
       </section>
+
+      {/* Countdown pages — the site's second largest query cluster, which the
+          homepage did not link at all before this section existed. */}
+      {data.sections.dageTil && dageTilKort.length > 0 && (
+        <section className="mb-16">
+          <h2 className="text-2xl font-bold mb-6 dark:text-white">
+            {data.sections.dageTil}
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {dageTilKort.map((kort) => (
+              <Link
+                key={kort.href}
+                href={kort.href}
+                className="group block p-6 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border-2 border-transparent hover:border-blue-500 dark:hover:border-blue-400 transition-all"
+              >
+                <h3 className="text-xl font-semibold group-hover:text-blue-600 dark:group-hover:text-blue-400 dark:text-white transition-colors">
+                  {kort.title}
+                </h3>
+                <p className="text-gray-600 dark:text-gray-300 mt-2 text-sm">
+                  {kort.description}
+                </p>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Categorized sections */}
       {data.categoryOrder.map(({ key }) => {
