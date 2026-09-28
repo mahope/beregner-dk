@@ -197,4 +197,69 @@ describe("moms page", () => {
       expect(html).toContain(spg);
     }
   });
+
+  test("svarar på 'räkna ut moms baklänges' med regel, tabell och 499-fällan", async () => {
+    vi.mocked(getLocale).mockResolvedValue("se");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("se"));
+
+    const html = renderToStaticMarkup(await MomsPage());
+
+    // "räkna ut moms baklänges" — autocomplete nr. 2, 0 svar før denne.
+    expect(html).toContain("Så räknar du ut moms baklänges");
+    expect(html).toContain("dela med 1,25");
+    // Tabell från baklaengesTabel() — 1 250 -> 1 000 -> 250, pr. rad.
+    expect(html).toContain("1 250 kr");
+    expect(html).toContain("1 000 kr");
+    expect(html).toContain("250 kr");
+    // 499 kr är det belopp som gör skillnaden mellan 20 %-metoden och ÷ 1,25
+    // synlig. Forventningerne kommer fra beregnMoms, inte från handen.
+    const med499 = beregnMoms(499, "fratraekMoms", 25);
+    expect(html).toContain(`${formatNumber(med499.prisUdenMoms, "se", { maximumFractionDigits: 2 })} kr`);
+    expect(html).toContain(`${formatNumber(med499.momsBeloeb, "se", { maximumFractionDigits: 2 })} kr`);
+    // Tillbakakopplingen: 1 000 exkl. × 1,25 = 1 250 inkl.
+    expect(html).toContain("1 000 kr exkl.");
+  });
+
+  test("visar momsberegnern i Excel med svenska formler — ingen dansk MOMS()", async () => {
+    vi.mocked(getLocale).mockResolvedValue("se");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("se"));
+
+    const html = renderToStaticMarkup(await MomsPage());
+
+    // Svensk Excel har ingen inbyggd momsfunktion — formlarna är enkla
+    // multiplikationer, inte den danska MOMS()-funktionen.
+    expect(html).toContain("Moms i Excel");
+    expect(html).toContain("=A1*1,25");
+    expect(html).toContain("=A1/1,25");
+    expect(html).toContain("=A1*0,20");
+    expect(html).toContain("=A1-A1/1,25");
+    expect(html).toContain("semikolon");
+    // Negativ lås: den danska MOMS()-funktionen finns inte i svensk Excel.
+    expect(html).not.toContain("=MOMS(");
+  });
+
+  test("nya spørgsmål står i den svenska FAQ och dermed i JSON-LD", async () => {
+    vi.mocked(getLocale).mockResolvedValue("se");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("se"));
+
+    const html = renderToStaticMarkup(await MomsPage());
+
+    for (const spg of [
+      "Hur räknar man ut moms baklänges?",
+      "Hur beräknar man moms i Excel?",
+    ]) {
+      expect(html).toContain(spg);
+    }
+  });
+
+  test("den svenska sidan läcker ingen danske markører", async () => {
+    vi.mocked(getLocale).mockResolvedValue("se");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("se"));
+
+    const html = renderToStaticMarkup(await MomsPage());
+
+    // "baglæns" er dansk — svensk är "baklänges". MOMS() er dansk Excel.
+    expect(html).not.toContain("baglæns");
+    expect(html).not.toContain("=MOMS(");
+  });
 });

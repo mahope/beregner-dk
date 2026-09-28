@@ -1,3 +1,6 @@
+STATUS: KØ — **C123 er landet: beraknare.se `/moms` (1.481 visninger, CTR 0,1 %, pos. 21,8) er den største første-sides-asymmetri på hele domænet — DA 6.244 ord / 4 `<h2>` / 11 FAQ mod SE 3.628 / 3 / 4 — og svarede på nul af de to søgninger, dens egen klynge stiller: "räkna ut moms baklänges" (autocomplete nr. 2) og Excel (0 forekomster).** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den, 119 er kilde-blokeret), og de syv åbne noter (C114, C115, C118–C122) har første vindue **2026-09-29 07:30** — det var 00:26, så intet kunne verificeres. Valget kom af at **måle paritet på de fem resterende svenske GSC-sider** (live, begge domæner): `/moms` 6.244/4/11 mod **3.628/3/4** (2.616 ords forskel — størst), `/renteberegner` 4.235/8/6 mod 2.987/6/4, `/braendstof` 4.094/5/7 mod 3.073/3/5, `/kalorier` 4.092/7/7 mod 3.255/6/4, `/bil` 3.248/6/4 mod 3.257/6/4 (paritet). C83/C109 (`/moms`), C85 (`/renteberegner`), C89 (`/kalorier`) og C94 (`/braendstof`) var alle **kun `da`** — de svenske tvillinger har aldrig fået sin svar-rettelse. **Målt først, rettet så.** SE-autocomplete (`hl=se`, `gl=se`, 00:31) under **"räkna ut moms"** giver 10 variationer hvoraf **nr. 2 er "räkna ut moms baklänges"** og under **"moms kalkylator"** er 6 af 10 i ex/inkl/utan-klyngen (dækket af sidens beregner). På den live side var `baklänges` **0** og `Excel` **0**. **Rettelsen (kun `se`).** To nye `<h3>` under "Om moms i Sverige (2026)": **"Så räknar du ut moms baklänges"** (÷ 1,25-reglen, tre eksempler, 20 %-genvägen med 499-fällen, fem-rækkers tabellen og "lägga på momsen igen") og **"Moms i Excel"** (fire formler — `=A1*1,25`, `=A1/1,25`, `=A1*0,20`, `=A1-A1/1,25` — plus semikolon- och Tal-format-fällna). **Svensk Excel har ingen MOMS()-funktion** (det er dansk), så formlarna er enkla multiplikationer — verificeret mod fem svenske kilder. **Ingen tal står hårdkodet to steder:** nyt `src/lib/moms-eksempler.ts` udregner hvert tal som `beregnMoms` / `fratraekRaekker` — samme modul værktøjet bruger. **To nye FAQ-par** (SE 4 → **6**, dermed også i JSON-LD'en). **Målefejl nr. 29 (min egen):** min første negativlås på "kr." gav 15 falske fund på den live side — "kr." findes i scripts/JSON, ikke i synlig tekst. Rettet til to strenge der kun findes i den nye danske blok. **Harness:** `moms-eksempler.test.ts` ny med 4 tests (eksemplene er dem `beregnMoms` regner; 499-fällen; tabellen er `fratraekRaekker(25)`; `krSe` formatterer med svensk locale inkl. non-breaking space). `page.test.tsx` **16 → 20**, **verificeret modsvejs: 3 af 4 nye falder** med master-koden (den fjerde er en negativ lås, grøn begge veje). **Gate grøn:** lint (579 filer), **2.542 tests / 166 filer** (fra 2.534 / 165), build (141 sider), `locale-leak.mjs --gate` exit 0, `knapgruppe-scan.mjs` 0/0. Målt på rigtig server (port 3611, verificeret fri *inden* start): SE har begge nye `<h3>`, alle fire formler, "dela med 1,25", "1 000 kr exkl.", FAQ **6** (var 4) og **0** på "baglæns"/"=MOMS("/"Sådan beregner"; DA uændret (4 `<h2>`, 11 FAQ, 0 svenske markører); `/api/health` → `status: ok`. Kode + plan i ét commit på `ceo/se-moms-baklaenges-excel`. **MÅL:** `/moms` baseline **1.481 visninger / 2 klik / CTR 0,1 % / pos. 21,8 pr. 2026-08-29 → 2026-09-26** — måles igen 2026-10-12. **Næste kandidater efter C123:** `/renteberegner` SE (2.849 v, pos. 24,1 — C85 var kun `da`, DA har annuitetsformlen + Excel + månedlig→årlig), `/braendstof` SE (1.677 v, pos. 12,9 — C94 var kun `da`), `/kalorier` SE (2.703 v, pos. 18,8 — C89 var kun `da`).
+
+---
 STATUS: KØ — **C122 er landet: beraknare.se `/nedtaelling` er domænets største endnu ubehandlede side på første side (5.361 visninger, 4 klik, CTR 0,2 %, pos. 9,4) og svarede på nul af de to svenske søgninger, dens egen side danner: "nedräkning dagar excel" (autocomplete nr. 4) og "nedräkning dagar timmar minuter sekunder" (nr. 5).** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den, 119 er kilde-blokeret), og de seks åbne noter (C114, C115, C118, C119, C120, C121) har første vindue **2026-09-29 07:30** — det var 00:09, så intet kunne verificeres. Valget kom af at **gå den anden vek end C114–C121 alle gik**: de otte har lukket hele dansk GSC-top-16 *og* de otte største beraknare.se-sider, så næste iteration skulle måle paritet — og målingen siger at **pariteten er lukket**: live, 4 sider × 2 domæner, ord/`<h2>`/FAQ er `/nedtaelling` 1.031/6/4 mod **978/6/4**, `/enhedspris` 830/4/4 mod 771/4/4, `/vaegttab` 890/7/5 mod 849/7/5, `/leasing` 974/6/3 mod 965/6/6. Ingen af dem har en førstesides-asymmetri at lukke. Efter at have talt fandt jeg det største *åbne* brændstof: **5.361 visninger på pos. 9,4 med 0,2 % CTR**, og det er den eneste beraknare.se-side i GSC's top-15 med CTR under 0,5 % der C114–C121 ikke rørte. **Målt først, målt begge sprog.** SE-autocomplete (`hl=se`, `gl=se`, 00:13) under **"nedräkning dagar"** (GSC: 178 v pos. 9) giver 10 variationer hvoraf **to er spørgsmål siden ikke svarer på**: nr. 4 "**nedräkning dagar excel**" og nr. 5 "**nedräkning dagar timmar minuter sekunder**" (resten er app-/værktøjsjagter: iphone, app, app gratis, samsung, skriva ut, barn, plus "nedräkning 100 dagar"). Under **"dagar kvar till"** er nr. 1 "**dagar kvar till julafton**" — den svarside findes allerede (`/dagar-till/julafton`). DA-autocomplete under "nedtælling dage" giver **kun 3** variationer (app, "nedtælling 100 dage") og **intet Excel-svar** — så klyngen er målt i svensk alene, og rettelsen er derfor kun `se`, samme disciplin som C114 og C119. På den **live** side: `excel` **0 fund**, `timmar`/`minuter`/`sekunder` **0 fund hver** — hele begge klynger gik til konkurrenterne. **Rettelsen (kun `se`):** to nye overskrifter — **`<h2>` "Så räknar du ut dagar kvar i Excel"** med `=DATEDIF(IDAG();A1;"d")`, semikolon-noten og at `DATEDIF` er et *dolt* namn, regnestykket **29. september 2026 → julafton 2026 kl. 09:30 = 86 dagar = 12 hela veckor + 2 dagar**, og fælden der glemmes mest: `DATEDIF` kan **kun** rækne fremad, så `=DATEDIF(A1;IDAG();"d")` giver `#NUM!` når datoen er passeret (værktøjet viser i stedet hvor mange dage der er gået) — plus **`<h3>` "Timmar, minuter och sekunder kvar"**, der er svaret på den anden søgning: `DATEDIF` tæller **kun hele dage** og smider dagens brøkdel væk, så det er `A1−IDAG()` der skal ganges med (×24 / ×1440 / ×86400), fordi Excel lagrar en dato som et brøktal af et døgn. Fire formelrækker, **Tal**-format-noten og et link videre til `/dato`. **Ingen tal står hårdkodet to steder:** nyt `src/lib/nedtaelling-eksempler.ts` bygger hvert tal på **`beregnNedtaelling`** — samme modul som `NedtaellingBeregner` bruger — så siden kan ikke glide fra værktøjet (C84's fejlklasse), og formateringen går gennem `formatNumber(x, "se")`, som giver svensk tusindtalsseparator. **Målefejl nr. 28 (min egen, samme klasse som nr. 9-27):** min sproglås på den svenske side var et *substring*-søg på "dage" — som gav fund på **`dagens`**, **`dagen`** og på slug-præfikset **`dagar-till/`**, altså tre falske fund på rigtig svensk, præcis C121's "bakåt"/"när". Rettet til ord-grænser. **Og fire rigtige danske lækager i min egen nye blok, fundet af netop den lås:** "Det den viser" (skal være "visar"), "Hele dage", "Timer, med minutter og sekunder" og "Minutter i alt" — den første, tredje og fjerde skrev jeg som dansk/norsk i et svenskafsnit, og det er C73's R4-klasse, som `locale-leak.mjs` **ikke** kan se her fordi teksten ligger i JSX og ikke i en `se:`-tabel. **Harness:** `nedtaelling-eksempler.test.ts` **ny, 10 tests** — at dage-tallet er *identisk* med `beregnNedtaelling`s, at 29. september → 24. december er 86, at hele veckor + restdage summerer til 86 (12 × 7 + 2), at klokkeslættet er 570 minutter, at hele dage i timer er 2.064 mens `=(A1−IDAG())*24` er 2.073,5 (forskellen er præcis de 9,5 time), at minutter er **124.410** og sekunder **7.464.600** regnet *uafhængigt* af modulet, at `MOD(…;1)`-skrivningen giver samme tal, at eksemplet er fremad (så `DATEDIF` ikke giver `#NUM!`), format-låse på de tre konstanter, og at et umuligt datum giver `null` i stedet for et forkert tal. `page.test.tsx` **6 → 11** — de to overskrifter og alle fire formler i HTML-escapet form (målefejl 27), `#NUM!`-fælden, **at alle fem tal i blokken er dem fra eksempelmodulet formateret med `Intl("sv-SE")`**, at dansk **ikke** har blokken (klyngen er kun målt på svensk), sproglåsen med ord-grænser, og at bare `se` har de to nye spørgsmål. **Verificeret modsvejs: 4 af de 5 nye sidetests falder** med master-koden; den femte er dansk-låsen og skal være grøn begge veje. **Gate grøn:** lint (**577 filer**), **2.534 tests / 165 filer** (fra 2.518 / 164), build (**141 sider**), `locale-leak.mjs --gate` exit 0, `knapgruppe-scan.mjs` **0/0**. Ingen beregningslogik ændret — `nedtaelling.ts` er urørt, kun læst. Kode + plan i ét commit på `ceo/se-nedtaelling-excel`; se opgave 152. **MÅL:** beraknare.se `/nedtaelling` baseline **5.361 visninger / 12 klik / CTR 0,2 % / pos. 9,4** (søgninger: "nedräkning dagar" 178 v pos. 9, "hur många dagar" 28 v pos. 10, "dagar kvar till" 25 v pos. 10) pr. **2026-08-29 → 2026-09-26** — måles igen **2026-10-13**. Forventningen er højere CTR på den position siden allerede har, ikke nye visninger.
 
 ---
@@ -14368,3 +14371,72 @@ nye falder** med master-koden.
      **4 spørgsmål** og **0 fund på "DATEDIF"** — den danske blok er
      bevidst ikke bygget, fordi klyngen kun er målt på svensk.
   7. `https://minberegner.dk/api/health` skal svare `status: ok`.
+
+#### 153. [x] FÆRDIG 2026-09-29 — C123 — **beraknare.se `/moms` (1.481 v, CTR 0,1 %, pos. 21,8) svarer på "räkna ut moms baklänges" og Excel — den største første-sides-asymmetri på domænet**
+
+**Datagrund:** svensk GSC 2026-08-29 → 2026-09-26: `/moms` **1.481
+visninger, 2 klik, CTR 0,1 %, pos. 21,8** — femtestørste side på beraknare.se
+og den største paritetsforskel: DA 6.244 ord / 4 `<h2>` / 11 FAQ mod SE 3.628 / 3 / 4.
+
+**Valget kom af at måle paritet på de fem resterende svenske GSC-sider** (live,
+begge domæner): `/moms` 6.244/4/11 mod **3.628/3/4** (2.616 ords forskel —
+størst), `/renteberegner` 4.235/8/6 mod 2.987/6/4, `/braendstof` 4.094/5/7 mod
+3.073/3/5, `/kalorier` 4.092/7/7 mod 3.255/6/4, `/bil` 3.248/6/4 mod 3.257/6/4
+(paritet). C83/C109 (`/moms`), C85 (`/renteberegner`), C89 (`/kalorier`) og C94
+(`/braendstof`) var alle **kun `da`** — de svenske tvillinger har aldrig fået sin
+svar-rettelse.
+
+**Målt først.** SE-autocomplete (`hl=se`, `gl=se`, 00:31) under **"räkna ut
+moms"** giver 10 variationer hvoraf **nr. 2 er "räkna ut moms baklänges"**; under
+**"moms kalkylator"** er 6 af 10 i ex/inkl/utan-klyngen (dækket af sidens
+beregner). På den live side var `baklänges` **0** og `Excel` **0**.
+
+**Rettelsen (kun `se`).** To nye `<h3>` under "Om moms i Sverige (2026)":
+**"Så räknar du ut moms baklänges"** (÷ 1,25-reglen, tre eksempler, 20 %-genvägen
+med 499-fällen, fem-rækkers tabellen og "lägga på momsen igen") og **"Moms i
+Excel"** (fire formler — `=A1*1,25`, `=A1/1,25`, `=A1*0,20`, `=A1-A1/1,25` —
+plus semikolon- og Tal-format-fällna). **Svensk Excel har ingen MOMS()-funktion**
+(det er dansk), så formlarna er enkla multiplikationer — verificeret mod fem
+svenske kilder (dagensteknik.se, excelmallen.com, onslip.com, fortnox.se,
+zervant.com).
+
+**Ingen tal står hårdkodet to steder:** nyt `src/lib/moms-eksempler.ts` udregner
+hvert tal som `beregnMoms` / `fratraekRaekker` — samme modul værktøjet bruger.
+
+**Målefejl nr. 29 (min egen):** min første negativlås på "kr." gav 15 falske
+fund på den live side — "kr." findes i scripts/JSON, ikke i synlig tekst. Rettet
+til to strenge der kun findes i den nye danske blok.
+
+**Harness:** `moms-eksempler.test.ts` ny med 4 tests (eksemplene er dem
+`beregnMoms` regner; 499-fällen; tabellen er `fratraekRaekker(25)`; `krSe`
+formatterer med svensk locale inkl. non-breaking space). `page.test.tsx`
+**16 → 20**, **verificeret modsvejs: 3 af 4 nye falder** med master-koden (den
+fjerde er en negativ lås, grøn begge veje).
+
+**Gate grøn:** lint (579 filer), **2.542 tests / 166 filer** (fra 2.534 / 165),
+build (141 sider), `locale-leak.mjs --gate` exit 0, `knapgruppe-scan.mjs` 0/0.
+Målt på rigtig server (port 3611, verificeret fri *inden* start): SE har begge
+nye `<h3>`, alle fire formler, "dela med 1,25", "1 000 kr exkl.", FAQ **6** (var
+4) og **0** på "baglæns"/"=MOMS("/"Sådan beregner"; DA uændret (4 `<h2>`, 11
+FAQ, 0 svenske markører); `/api/health` → `status: ok`.
+
+- ⏳ **VERIFICÉR DEPLOY: C123 — beraknare.se `/moms` har to nye `<h3>` ("Så
+  räknar du ut moms baklänges" og "Moms i Excel"), fire Excel-formler, en
+  fem-rækkers baklänges-tabel og to nye FAQ-spørgsmål (4 → 6).** Kode + plan i
+  ét commit på `ceo/se-moms-baklaenges-excel`, squashet til `master`. Første
+  kandidatvindue **2026-09-29 07:30** (00:50 er efter 21:30-batchen). Kun
+  `src/app/moms/page.tsx`, det nye `src/lib/moms-eksempler.ts`, to `faqItems` i
+  `page-data.ts` og to testfiler er rørt — **ingen beregningslogik ændret,
+  `moms.ts` urørt, dansk urørt**. Verificér på **https://beraknare.se/moms**
+  ved **indhold, ikke HTTP 200**:
+  1. `<h3>Så räknar du ut moms baklänges</h3>` og `<h3>Moms i Excel</h3>` skal
+     begge findes i markupken.
+  2. Formlerne: `=A1*1,25`, `=A1/1,25`, `=A1*0,20`, `=A1-A1/1,25` — og **0**
+     forekomster af `=MOMS(` (dansk Excel-funktion findes ikke på svensk).
+  3. `dela med 1,25`, `1 000 kr exkl.` og tallene **399,2** / **99,8** skal
+     findes (499-fällen).
+  4. FAQ-spørgsmål i JSON-LD'en: **6** (var 4). Tæl med
+     `grep -o '"@type":"Question"' | wc -l`.
+  5. KONTROL: `https://minberegner.dk/moms` skal have **4 `<h2>`**, **11
+     spørgsmål**, `=MOMS(A1;25;0;0)` og **0** på "baklänges"/"=A1*1,25".
+  6. `https://minberegner.dk/api/health` skal svare `status: ok`.

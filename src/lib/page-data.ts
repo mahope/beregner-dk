@@ -3760,9 +3760,11 @@ const sePages: Record<string, PageData> = {
       { question: "Hur beräknar man moms vid 25 %, 12 % och 6 %?", answer: "Lägg till: 1 000 kr × 1,25 = 1 250 kr, × 1,12 = 1 120 kr eller × 1,06 = 1 060 kr. Dra av: dividera beloppet inkl. moms med samma faktor." },
       { question: "Vad är momsandelen i ett pris inklusive moms?", answer: "Momsandelen är cirka 20 % vid 25 % moms, 10,71 % vid 12 % och 5,66 % vid 6 %." },
       { question: "När kan företag dra av moms?", answer: "Momsregistrerade företag kan dra av ingående moms och rapporterar till Skatteverket." },
+      { question: "Hur räknar man ut moms baklänges?", answer: "Del priset med 1,25: 1 250 kr inkl. moms ÷ 1,25 = 1 000 kr exkl. moms, och momsen var 250 kr. Kortvägen är att ta 20 % av priset (1 250 × 0,20 = 250), men den ger ett runt tal på 499 kr — 499 ÷ 1,25 = 399,20 kr exkl. moms." },
+      { question: "Hur beräknar man moms i Excel?", answer: "Svensk Excel har ingen inbyggd momsfunktion, så du skriver formeln själv: =A1*1,25 lägger till moms, =A1/1,25 räknar baklänges och =A1*0,20 ger momsandelen. Använd semikolon som argumentavskiljare i svensk Excel och se till att cellen är formaterad som Tal, inte text." },
       ],
     },
-};
+  };
 
 // ─── LOOKUP FUNCTIONS ────────────────────────────────────────────────────────
 

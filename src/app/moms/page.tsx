@@ -14,6 +14,7 @@ import Sidebar from "@/components/Sidebar";
 import { SelvstaendigAffiliate } from "@/components/AffiliateBox";
 import { formatNumber } from "@/lib/format";
 import { beregnMoms, DEFAULT_MOMS_SATS, fratraekRaekker, momsFaktor } from "@/lib/moms";
+import { baklaengesEksempler, baklaengesTabel, krSe } from "@/lib/moms-eksempler";
 
 export async function generateMetadata() {
   return generatePageMetadata("moms");
@@ -332,6 +333,94 @@ export default async function MomsPage() {
           Observera att momsandelen i ett pris <em>inklusive</em> 25% moms är 20% (inte 25%), eftersom
           momsen beräknas på priset utan moms: 25 / 125 = 0,20. För 12% moms är andelen ca 10,71% och för
           6% moms ca 5,66%.
+        </p>
+
+        <h3>Så räknar du ut moms baklänges</h3>
+        <p>
+          &ldquo;Baklänges&rdquo; är det du gör när du har prisen <em>med</em> moms och vill veta
+          hur mycket det var <em>för</em> moms. Det är den enda regeln: <strong>dela med 1,25</strong>.
+          De tre vanliga priserna ser ut så här:
+        </p>
+        <ul>
+          {baklaengesEksempler().map((r) => (
+            <li key={r.prisInklMoms}>
+              <strong>{krSe(r.prisInklMoms)} inkl. moms</strong> &divide; 1,25 ={" "}
+              <strong>{krSe(r.prisUdenMoms)} exkl. moms</strong> — och momsen var{" "}
+              {krSe(r.momsBeloeb)}
+            </li>
+          ))}
+        </ul>
+        <p>
+          <strong>Hittar du momsen direkt i priset:</strong> ta 20 % av beloppet. 1 250 kr &times; 0,20
+          = <strong>250 kr i moms</strong>. Det är den kortare vägen, men den kan ge ett runt tal,
+          eftersom 499 &minus; 499 / 1,25 = {krSe(baklaengesEksempler()[1].momsBeloeb)} — alltså 100 kr
+          om du tar 20 % av de 499 kr.
+        </p>
+        <table className="w-full text-left my-6">
+          <thead>
+            <tr className="border-b">
+              <th className="py-2 pr-4">Pris inkl. moms</th>
+              <th className="py-2 pr-4">÷ 1,25 = exkl. moms</th>
+              <th className="py-2 pr-4">Momsbelopp</th>
+              <th className="py-2">Momsandelen</th>
+            </tr>
+          </thead>
+          <tbody>
+            {baklaengesTabel().map((r) => (
+              <tr key={r.prisInklMoms} className="border-b">
+                <td className="py-2 pr-4">{krSe(r.prisInklMoms)}</td>
+                <td className="py-2 pr-4">{krSe(r.prisUdenMoms)}</td>
+                <td className="py-2 pr-4">{krSe(r.momsBeloeb)}</td>
+                <td className="py-2">20 %</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p>
+          <strong>Och när du ska lägga på momsen igen:</strong> 1 000 kr exkl. &times; 1,25
+          = 1 250 kr inkl. De två reglerna är varandras motsats, så talet kan alltid hittas tillbaka.
+        </p>
+
+        <h3>Moms i Excel</h3>
+        <p>
+          Har du en faktura- eller prislista är det snabbare att låta Excel räkna det. Svensk Excel
+          har ingen inbyggd momsfunktion, så du skriver formeln själv:
+        </p>
+        <table className="w-full text-left my-6">
+          <thead>
+            <tr className="border-b">
+              <th className="py-2 pr-4">Formel</th>
+              <th className="py-2 pr-4">Gör vad</th>
+              <th className="py-2">Exempel</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr className="border-b">
+              <td className="py-2 pr-4"><code>=A1*1,25</code></td>
+              <td className="py-2 pr-4">lägga till moms på ett belopp utan moms</td>
+              <td className="py-2">1 000 kr exkl. &rarr; {krSe(beregnMoms(1000, "tillaegMoms", DEFAULT_MOMS_SATS).prisInklMoms)} inkl.</td>
+            </tr>
+            <tr className="border-b">
+              <td className="py-2 pr-4"><code>=A1/1,25</code></td>
+              <td className="py-2 pr-4">belopp med moms, räknat baklänges</td>
+              <td className="py-2">1 250 kr inkl. &rarr; {krSe(beregnMoms(1250, "fratraekMoms", DEFAULT_MOMS_SATS).prisUdenMoms)} exkl.</td>
+            </tr>
+            <tr className="border-b">
+              <td className="py-2 pr-4"><code>=A1*0,20</code></td>
+              <td className="py-2 pr-4">momsandelen i ett belopp inkl. moms</td>
+              <td className="py-2">1 250 kr inkl. &rarr; {krSe(beregnMoms(1250, "fratraekMoms", DEFAULT_MOMS_SATS).momsBeloeb)} i moms</td>
+            </tr>
+            <tr className="border-b">
+              <td className="py-2 pr-4"><code>=A1-A1/1,25</code></td>
+              <td className="py-2 pr-4">momsen i ett belopp inkl. moms</td>
+              <td className="py-2">1 250 kr inkl. &rarr; {krSe(beregnMoms(1250, "fratraekMoms", DEFAULT_MOMS_SATS).momsBeloeb)} i moms</td>
+            </tr>
+          </tbody>
+        </table>
+        <p>
+          <strong>Passa när du kopierar:</strong> i svensk Excel använder formler <em>semikolon</em>{" "}
+          som tecken mellan argumenten — i engelsk Excel är det komma. Om formeln står kvar som text
+          måste cellen formateras som Tal.
         </p>
 
         <h3>Momsfria varor och tjänster</h3>
