@@ -7843,6 +7843,22 @@ landmark=lån, piggybank=opsparing osv.).
     - Gate grøn: lint ok, 280/280 tests, build ok (128 pages).
 
 ## VERIFICÉR DEPLOY-log
+### ⏳ **VERIFICÉR DEPLOY: C102 — `/blog/boernepenge-2026-satser-og-regler` har de præcise udbetalingsdatoer for 2026, pr.-måned-kolonnen og beløb for flere børn (5.517 v, CTR 0,6 %, pos. 8,4).** Kode `588a538` + plan `c811043`, fast-forwardet til `master` og pushet 2026-09-28 15:08. Første kandidatvindue **2026-09-28 17:30**. Verificér ved **indhold, ikke HTTP 200**:
+   1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
+   2. `curl -s https://minberegner.dk/blog/boernepenge-2026-satser-og-regler` skal
+      have **"Udbetalingsdatoer i 2026 — de præcise datoer"** og
+      **"Hvad betyder det for en familie med flere børn?"** (to nye `<h2>`).
+   3. **`grep -c "18. september"` skal være ≥ 1** — det er den mest kendte af de tre
+      forskudte datoer, og den findes kun i den nye kode.
+   4. `grep -c "Omregnet pr. måned"` skal være **1** (ny kolonne i satstabellen),
+      og `grep -c "er ikke en officiel sats"` skal være **1** — kolonnen må ikke
+      fremstå som en sats fra myndighederne.
+   5. `grep -c '"@type":"Question"'` i JSON-LD'en skal være **10** (var 6): de fire
+      nye FAQ-par kommer automatisk med i schemaet.
+   6. **Sats-tabellen skal være uændret** i de fire kolonner den altid har haft:
+      `grep -c "5.370 kr pr. kvartal"` ≥ 1, `grep -c "21.480 kr"` ≥ 1. Hvis de er
+      væk, er der rørt ved `BOERNE_SATSER_2026`, hvilket denne iteration ikke gør.
+
 ### ✅ **DEPLOY OK 2026-09-28 15:05 — C73, C74 og C75 lukket ved indholdskontrol (ikke HTTP 200).** `curl` mod begge domæner 15:03-15:04; `/api/health` svarede `status: ok`.
 
 - **C73:** `beraknare.se/del-regning` giver `grep -c "Færre personer"` = **0** og
