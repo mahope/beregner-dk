@@ -147,6 +147,35 @@ export function beregnFolkepension2026(input: FolkepensionInput): FolkepensionRe
   };
 }
 
+/**
+ * Samme nedsættelse som den Excel-formel, siden viser.
+ *
+ * Den er skrevet uden `bortfaldOver` med vilje: `MIN(tillaegFuld, …)` kan aldrig
+ * give mere end hele tillægget, så bortfaldet er indbygget i samme led, og
+ * formelen og `beregnFolkepension2026` kan ikke komme til at give hver sit svar.
+ */
+export function folkepensionMedFormel(
+  samliv: FolkepensionSamliv,
+  aarligIndkomst: number,
+  samleverErPensionist = false,
+): { grundbeloeb: number; tillaegFuld: number; tillaeg: number; iAlt: number } {
+  const grundbeloeb = FOLKEPENSION_2026.grundbeloeb;
+  const tillaegFuld =
+    samliv === "enlig" ? FOLKEPENSION_2026.tillaeg.enlig : FOLKEPENSION_2026.tillaeg.samlevende;
+  const graense =
+    samliv === "enlig"
+      ? FOLKEPENSION_2026.indkomstgraenser.enlig
+      : samleverErPensionist
+        ? FOLKEPENSION_2026.indkomstgraenser.samlevendeMedPensionist
+        : FOLKEPENSION_2026.indkomstgraenser.samlevendeUdenPensionist;
+  const nedsatMed = Math.min(
+    tillaegFuld,
+    Math.max(0, (beligIndkomst(aarligIndkomst) - graense.nedsaetningOver) * graense.pct),
+  );
+  const tillaeg = tillaegFuld - nedsatMed;
+  return { grundbeloeb, tillaegFuld, tillaeg, iAlt: grundbeloeb + tillaeg };
+}
+
 function isoDato(dato: Date | string): string {
   if (typeof dato === "string") return dato.slice(0, 10);
   return dato.toISOString().slice(0, 10);

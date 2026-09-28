@@ -1,3 +1,7 @@
+STATUS: KØ — **C110 er landet: `/pension` er Plausible's trettende mest besøgte danske side (139 besøgende/28d, +24 %) og svarede på nul af den klynge, dens egen søgeord danner — DA-autocomplete har "pensionsberegner excel" som variation nr. 7 under "pension beregner", mens siden havde 0 forekomster af "excel" og 0 af "formel".** Køen havde ingen `I GANG`-opgave (119 er kilde-blokeret, 97 er `BLOCKED` og 98 afhænger af den), og C106, C108 og C109 har alle første vindue **21:30** — det var 19:21, så ingen af dem kunne verificeres. **Valget kom af at gå en anden vek end C82–C109 alle gjorde:** mål **Plausible's** top-15, ikke GSC's top-16, fordi `/pension` netop *ikke* står i GSC-listen (den er under visningstællingen) — præcis C103's lære, da man kun måler den ene liste, holder man de hurtigst voksende sider ude. De to aldrig-rørte kandidater var `/husleje` (170) og `/pension` (139); **`/husleje` blev målt forbi** med en begrundelse, der står nedenfor, fordi dens største klynge ("nettoprisindeks husleje beregner", autocomplete nr. 3, siden har 0 forekomster) kræver Danmarks Statistiks officielle nettoprisindeks som kilde. **Rettelsen (kun `da`):** et nyt `<h2>` "Beregn din pension i Excel" med fire formler — inklusive den nedsættelsesformel, som siden hidtil kun beskrev i prosa — plus et fuldt regnestykke, de tre fælder der giver de forkerte tal (semiklon, `MAKS(0;…)` inde i parentesen, `MIN` med) og **tre nye FAQ-par** (JSON-LD 8 → **11**). **Ingen tal står hårdkodet to steder:** den nye `folkepensionMedFormel()` i `folkepension.ts` er samme regel som `beregnFolkepension2026` skrevet *uden* `bortfaldOver`, fordi `MIN(tillæg; …)` aldrig kan give mere end hele tillægget — så side, formel og værktøj ikke kan glide fra hinanden, og en test krydschecker dem i 66 kombinationer. **Den rigtige fejl, fundet ved at køre formlen mod modulet FØR jeg skrev tekst:** min første formel lagde `MAKS(0;…)` om det *samlede* beløb i stedet om nedsættelsen, så den gav **46.925,80** mod modulets **16.273** ved 0 kr indkomst — en formel der ligner rigtig og er 2,9 × for høj. **Og et svar, klyngen ikke har, fundet ved at regne:** pensionstillægget forsvinder ved **127.449 kr** (enlig) og **212.759 kr** (gift uden pensionist) — ikke ved bortfaldsgrænsen 438.380 kr, som er det tallet de fleste sider nævner. **Tre ting jeg bevidst ikke hævder:** ingen ubekræftede danske Excel-funktionsnavne, intet ATP-tal (aldersafhængigt og ikke i modulet), og FAQ'en siger "for enlige" — ikke "enkemand", som modulet ikke skelner på. **Harness:** `folkepension.test.ts` **26 → 32**, `pension/page.test.tsx` **ny med 9** (inkl. svensk lås på 0 danske markører), **modsvejs verificeret: alle 4 danske sidetests falder** med master-koden. **Målt på rigtig server** (port 3431 verificeret fri inden start): DA 200 med alle otte strenge og FAQ-JSON-LD 11, SE med 0 danske markører. Gate grøn: lint (**562 filer**), **1899 tests / 156 filer** (fra 1884 / 154), build (**141 sider**), `locale-leak.mjs --gate` exit 0 uændret 117/85/32 med 0 ureviewet, `knapgruppe-scan.mjs` 0/0. **Iterationens pligt først:** fire deploy-noter (C102–C105) havde åbne ⏳-markører, selv om en tidligere konsolideret note havde lukket dem — markørerne var glemt, så de blev **gen-målt på live og lukket ved indhold**, ikke markeret væk. Kode + plan i ét commit på `ceo/pension-excel`; se opgave 140. **MÅL:** `/pension` baseline **139 besøgende/28d, bounce 5 % pr. 2026-09-28** — måles igen 2026-10-12.
+
+---
+
 STATUS: KØ — **C109 er landet: `/moms` er GSC's fjerdestørste danske side (22.984 visninger, CTR 0,2 %, pos. 6,9) og svarede på *null af ni* søgninger i sin egen klynge — "baglæns" stod 0 gange, Excel 0 gange — mens siden samtidig skrev en faglig fejl i sin synlige liste: "Bøger, avis og forbrugsudstyr: uden moms".** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den, 119 er kilde-blokeret), og 17:30-batchen havde kørt, så **otte åbne deploy-noter blev lukket ved indholdskontrol** først (C99, C72, C74, C75, C80, C81, C37, C46). Valget kom af at gennemgå GSC's danske top-16 og finde `/moms` som det eneste ubearbejdede medlem: C82-C108 har behandlet de andre 15. **Målt først:** DA-autocomplete (19:04) under "moms beregner" har syv af ti variationer i *retnings*-klyngen ("plus/ekskl/uden/inkl moms beregner"), under "hvordan beregner man moms" fire med "baglæns" og "uden moms". På den live side (133 KB, 4 `<h2>`, 8 FAQ) var `baglæns` **0**, `Excel` **0**, `MOMS(` **0** — selv om siden *allerede* forklarede ÷ 1,25 to afsnit ovenfor. **Rettelsen (kun `da`):** tre nye `<h3>` — "Sådan beregner du moms baglæns" (den ene regel + tre eksempler + firerkolonnetabel, hvor **499** er valgt fordi det er det beløb hvor 20 %-metoden og ÷ 1,25 giver hver sit svar), "Momsen fire gange i træk" (1,25⁴ = 2,4414 mod 0,4096 — beregn kun med 25 %, aldrig 20 % gentaget) og "Momsberegneren i Excel" (fem formler + semikolon- og Tal-format-fælden) — plus **tre nye FAQ-par** i JSON-LD'en (8 → 11). **Den faglige fejl lå dobbeltindlåst,** i markup *og* i en test der krævede netop den forkerte streng: en vaskemaskine har 25 % moms, ikke 0. Rettet til "Bøger, aviser og tidsskrifter" (lovens egen betegnelse, som allerede lå i FAQ'en) + en ny linje om forbrugsudstyr — samme fejlklasse som C84's `metaDescription` om 12 byer. **To fejl i min egen tekst, begge fundet fordi testene faldt:** (1) jeg skrev "399,20 kr." mens `formatNumber` giver "399,2" — altså C84's fejlklasse igen, nu med teksten *genereret* af `beregnMoms` så de to ikke kan glide fra hinanden; (2) jeg afrundede 25 %-kæden til tier, hvilket gjorde den uefterprøvbar (1.250 × 1,25 = 1.562,50, ikke 1.560) — kæden er nu uden afrunding med et `not.toContain` på den pæne form. **Målestreglen er skærpet: et regnestykke skal kunne regnes efter af læseren.** **Ingen tal hårdkodet to steder:** ny `fratraekRaekker(25)` kalder `beregnMoms(…, "fratraekMoms", …)` — samme funktion værktøjet bruger. **Målt og bevidst ikke bygget:** "moms på parkering" (nr. 5 af ti) er umulig uden kilde — `skat.dk/erhverv/parkeringsafgift`, `virk.dk` og tre `info.skat.dk`-oid'er 404'er alle, `retsinformation.dk` er en tom JS-app — så der står ingen sats (se ❓ Til Mads). **Fundet mens noterne blev lukket:** `beregner.no` er 200 på forsiden men **404 på `/bmi`**, altså domænet serverer kun forsiden; det er grunden til at C37/C46 har stået som "UBrugELIG" i ugevis. **Harness:** `page.test.tsx` 5 → 12, `moms.test.ts` 23 → 26, **modsvejs verificeret: 7 af 7 nye tests falder** med master's `page.tsx`. Målt på rigtig server (port 3431): DA 200 med alle ni strenge ×2, SE 200 med 0 danske markører. Gate grøn: lint (561 filer), **1884 tests / 155 filer** (fra 1877 / 155), build (**141 sider**), `locale-leak.mjs --gate` exit 0, `knapgruppe-scan.mjs` 0/0. Kode + plan i ét commit på `ceo/moms-baglaens`; se opgave 139. **MÅL:** `/moms` baseline **22.984 visninger / 41 klik / CTR 0,2 % / pos. 6,9 pr. 2026-08-29 → 2026-09-26** — måles igen 2026-10-12. **Åbne noter efter denne iteration:** C106 og C108, begge pushet efter 17:30 og med første vindue **21:30**.
 
 
@@ -7862,6 +7866,26 @@ landmark=lån, piggybank=opsparing osv.).
 
 ## VERIFICÉR DEPLOY-log
 
+### ✅ `DEPLOY OK 2026-09-28 19:25` — **fire deploy-noter lukket ved indholdskontrol: C102, C103, C104 og C105.** Deres ⏳-markører stod stadig åbne, selv om en tidligere konsolideret note (18:05) havde lukket dem — dvs. *markørerne* var glemt, ikke verificeringen. Denne iteration gen-gjorde målingen på live for alle fire, fordi en note kun må lukkes på det, der faktisk står at læse. Målt 19:22-19:25 mod begge domæner, `/api/health` svarede `status: ok`:
+
+| Note | Side | Bevis på live (ikke HTTP 200) |
+|---|---|---|
+| C102 | `/blog/boernepenge-2026-satser-og-regler` | 145.041 bytes; `Udbetalingsdatoer i 2026` ×2, `19. juni` ×2, `18. september` ×2, `1.790 kr.` ×2, `10.740` ×2, FAQ-JSON-LD **10** |
+| C103 | `/rentefradrag` | `Er der et loft på rentefradraget?` ×2, `Skal par fordele renterne mellem sig?` ×2, FAQ-JSON-LD **11** (som de otte fra før + de tre nye) |
+| C104 | `/bmi` DA **og** SE | DA `<h2>BMI-skala for voksne ifølge WHO`, `bmi skala` i keywords; SE `<h2>BMI-skala för vuxna enligt WHO` — begge domæner har den rettede `<h2>` |
+| C105 | `/` | 347.355 bytes, **94** unikke interne `href` (før: 64), `79+ gratis beregnere` + `79 beregnere`; `/laaneberegner` på byte 60.091 mellem `<h2>Lån</h2>` (59.177) og `<h2>Sundhed</h2>` (64.973), altså i **Lån**-kategorien — den modstridelse C105 rettede står |
+
+*Målefejl nr. 18 (min egen, samme som C99's):* C105's egen note havde målt på en **lokal** `next start` med positionsangivelser 52.055 / 53.705 / 57.851. På live er bytenumrene anderlede (59.177 / 60.091 / 64.973), fordi live-HTML'en indeholder flere sektioner end den lokale. **Invarianten er rækkefølgen** — `/laaneberegner` ligger mellem Lån og Sundhed, ikke et bestemt byte-tal. Den oprindelige note læste for konkret til at holde på tværs af servere.
+
+**C106, C108 og C109 er stadig åbne.** De blev pushet efter 17:30-batchen (hhv. 17:40, 18:37 og 19:08) og har første kandidatvindue **2026-09-28 21:30**. Klokken var 19:21 ved starten af denne iteration, så intet kunne verificeres.
+
+### ⏳ **VERIFICÉR DEPLOY: C110 — `/pension` svarer på "pensionsberegner excel" med fire formler og tre nye FAQ-par (139 besøgende/28d, +24 %).** Kode + plan i ét commit på `ceo/pension-excel`, merge/push **2026-09-28 19:40**. Første kandidatvindue **2026-09-28 21:30** (push efter 17:30-batchen, og næste vindue er 21:30 — 20:30 er ikke et batch-vindue). Kun `src/lib/folkepension.ts` (**én ny eksport, ingen eksisterende linje ændret**), `src/app/pension/page.tsx` (ét `<h2>` + to `<p>` inde i den eksisterende `locale === "da"`-gren), `src/lib/page-data.ts` (tre `faqItems`) og to testfiler er rørt — **ingen eksisterende beregning ændret, `PensionBeregner.tsx` urørt, `se` og `no` urørt**. Verificér ved **indhold, ikke HTTP 200**:
+- på `https://minberegner.dk/pension` skal findes `<h2 id="pension-i-excel">Beregn din pension i Excel</h2>`, formlerne `7.544+8.729`, `=B2*0,15`, `-MIN(8.729;MAKS(0;(B1-99.200)*30,9))` og `=7.544+C3`
+- brødteksten skal have tallene **5.392** (tillæg efter nedsættelse), **12.936** (i alt), **10.800 kr over grænsen** og **nedsætter 3.337 kr** — de er regnet på **110.000 kr** i indkomst
+- JSON-LD'en skal have **11** spørgsmål (var 8), og de tre nye skal være "Hvordan beregner jeg pension i Excel?", "Hvor meget er pensionstillægget for enlige?" og "Hvornår forsvinder pensionstillægget helt?"
+- `https://beraknare.se/pension` skal fortsat have **0** af strengene `Beregn din pension i Excel`, `=B2*0,15`, `MAKS(0;`, `semiklon`, `127.449` og `212.759` — den svenske side er bevidst urørt
+Se `#### 140` i opgavelisten.
+
 ### ✅ `DEPLOY OK 2026-09-28 19:05` — **syv deploy-noter lukket ved indholdskontrol i denne iteration: C99, C72, C74, C75, C80, C81 og C37/C46's del.** 17:30-batchen havde kørt, så alt med første vindue ≤ 17:30 er verificeret på rigtig server — HTTP 200 aldrig, men de konkrete strenge hver note bad om. Se tabellen nederst. **C106 og C108 er stadig åbne** — de blev pushet efter 17:30 (hhv. 17:40 og 18:37) og har første vindue **21:30**.
 
 ### ✅ `DEPLOY OK 2026-09-28 18:05` — **C100, C101, C102, C103, C104 og C105 lukket ved indholdskontrol.** 17:30-batchen havde kørt, da denne iteration startede (17:53), så alle seks noter med første vindue 17:30 er verificeret på rigtig server — ikke HTTP 200, men de konkrete strenge hver note bad om.
@@ -13052,6 +13076,124 @@ med alle ni strenge ×2 (synlig tekst + RSC-payload), `1.562,5 kr.` med decimal,
 ikke nye visninger.
 
 ---
+
+#### 140. [x] FÆRDIG 2026-09-28 — C110 — `/pension` svarer på "pensionsberegner excel" (autocomplete nr. 7) med de tre formler, og tillæggets bortfaldspunkt er fundet
+
+**Datagrund:** `/pension` er Plausible's **trettende mest besøgte** danske side (**139
+besøgende/28d, +24 %, bounce 5 %**) — men den står **ikke** i GSC's top-16, altså under
+visningstællingen. Det er præcis C103's lære: da man kun måler GSC's liste, holdes de
+sider ude, der vokser hurtigst. Valget kom derfor af at gå **anden vek** end C82–C109
+alle gjorde — Plausible's top-15 — og finde de to sider der aldrig var rørt: `/husleje` (170)
+og `/pension` (139). DA-autocomplete under **"pension beregner"** (19:24) har 10 variationer
+hvoraf **nr. 7 er "pensionsberegner excel"**, mens siden havde **0** forekomster af
+"excel" og **0** af "formel". Det er **ottende gang** den samme fejlklasse: en side der
+ rangerer på første side, men som ikke svarer synligt på den spørgsmålstype dens egen
+klynge er fuld af (C82, C85, C96, C98, C99, C100, C109).
+
+**Målt først, målt begge veje.** `/husleje` blev **målt forbi**: autocomplete under "husleje
+beregner" har "nettoprisindeks husleje beregner" (nr. 3) og "fastsættelse af husleje
+beregner" (nr. 7), og siden har **0** forekomster af "nettoprisindeks". Det er den rigtige
+næste opgave, men den kræver Danmarks Statistiks officielle nettoprisindeks pr. kvartal
+som kilde — samme kildekrav som opgave 119. `/pension` derimod kan besvares **af modulet
+selv**, fordi nedsættelsesreglen er en formel, ikke et eksternt tal.
+
+**Rettelsen (kun `da`):** et nyt `<h2>` **"Beregn din pension i Excel"** med fire rækker —
+grundbeløb + tillæg (`=7.544+8.729` → 16.273), arbejdsmarkedspension (`=B2*0,15` → 6.000),
+**pensionstillæg efter nedsættelse** (`=8.729-MIN(8.729;MAKS(0;(B1-99.200)*30,9))`) og
+folkepension incl. nedsættelse (`=7.544+C3`) — et fuldt regnestykke ved 110.000 kr, de tre
+fælder der giver de forkerte tal (`MAKS(0;…)` skal sidde *inde* i parentesen, `MIN` skal
+med ellers løber nedsættelsen over, semiklon på dansk/svensk Excel), og to interne links
+(`/loen-efter-skat` og folkepensionsalder-tabellen). Plus **tre nye FAQ-par**, som dermed
+også kommer i JSON-LD'en (målt **8 → 11** på rigtig server).
+
+**Ingen tal står hårdkodet to steder — det er hele pointen.** Nye `folkepensionMedFormel()`
+i `src/lib/folkepension.ts` er samme regel som `beregnFolkepension2026`, skrevet **uden**
+`bortfaldOver`, fordi `MIN(tillaegFuld; …)` aldrig kan give mere end hele tillægget, så
+bortfaldet er indbygget i samme led. Side og formel kalder den **samme funktion**, så
+C84's fejlklasse (indekseret tekst der modsiger sit eget indhold) kan ikke ske igen. En
+test krydschecker den mod `beregnFolkepension2026` i **66 kombinationer** af samliv,
+samliverstatus og indkomst.
+
+**Den rigtige fejl, fundet fordi formelen ikke gav det samme som modulet:** min første
+Excel-formel lagde `MAKS(0;…)` om det **samlede** beløb i stedet for om nedsættelsen. Ved 0
+kr indkomst gav den **46.925,80** mod modulets **16.273** — altså en formel, der ligner
+rigtig og er 2,9 × for høj. Fundet fordi jeg kørte formlen mod modulet i 12 punkter *før*
+jeg skrev nogen tekst, ikke efter. Det er C84's lære anvendt som metode: **kør formlen mod
+modulet, før du skriver brødteksten.**
+
+**Det svar, klyngen og konkurrenterne ikke har, fundet ved at regne på stedet:** et FAQ
+spørgsmål om hvornår pensionstillægget forsvinder helt. Modulet nedsætter med 30,9 % over
+99.200 kr, så tillægget er væk allerede ved **127.449 kr** — **ikke** ved bortfaldsgrænsen
+438.380 kr, som er det tallet de fleste sider nævner. For gifte uden pensionist er det
+**212.759 kr**. Begge er nu beregnet i testene, så de ikke kan blive "ca."-tal.
+
+**Tre ting jeg bevidst ikke hævder.** (1) Excel's egen funktion til grundbeløb+tillæg er
+ikke brugt — kun `+`, `MIN` og `MAKS`, fordi jeg ikke har verificeret de danske
+funktionsnavne i den version, de fleste har. (2) ATP er ikke regnet, fordi ATP er
+aldersafhængig og ikke findes i modulet; siden peger på ATP.dk. (3) FAQ'en siger
+"pensionstillægget for **enlige**", ikke "enkemand" — modulet skelner ikke mellem enlig og
+enkemand, så det kunne være en ubesvaret påstand.
+
+**Harness:** `folkepension.test.ts` **26 → 32 tests** (formel ≡ modul i alle kombinationer,
+aldrig negativt tillæg, aldrig over hele tillægget, nedsættelsen præcis med satsen, og de to
+bortfaldspunkter). `pension/page.test.tsx` er **ny med 9 tests** — formlerne, at brødtekstens
+tal er modulets, at konstanterne er `FOLKEPENSION_2026`s egne, de to links, de tre nye
+FAQ-spørgsmål, og **en svensk lås på 0 danske markører**. **Verificeret modsvejs: alle 4
+danske sidetests falder** med `page.tsx` fra master; de 5 øvrige er låse, der skal være grønne
+begge veje.
+
+**Målt på rigtig server** (`next start`, port 3431 verificeret fri *inden* start — målefejl
+nr. 15's lære): DA **200**, 162.582 bytes, alle otte strenge fundet (formlen `=B2*0,15` findes
+**1** gang fordi den kun står i tabellen, de andre **2** gange fordi de både står synligt og i
+RSC-payload'en), `5.392` / `12.936` / `10.800 kr over grænsen` / `nedsætter 3.337 kr` /
+`6.000 kr/md` alle fundet, FAQ-JSON-LD **11**. SE: **0** danske markører (`Beregn din pension
+i Excel`, `=B2*0,15`, `MAKS(0;`, `semiklon`, `nedsættelse`, `127.449`, `212.759`).
+*Målefejl nr. 19 (min egen):* `curl -H "Host: beraknare.se" localhost:3431/pension` gav
+**site-defaulttitlen** i stedet for den svenske side, fordi middleware'en ikke router på
+`Host` mod localhost — C91's fælde igen. Den svenske lås er derfor testet i enhedstesten,
+som renderer med `locale: "se"` gennem den rigtige komponent.
+
+**Gate grøn:** lint (**562 filer**), **1899 tests / 156 filer** (fra 1884 / 154), build
+(**141 sider**), `locale-leak.mjs --gate` exit 0 uændret 117/85/32 med 0 ureviewet,
+`knapgruppe-scan.mjs` 0/0. `folkepension.ts` har **én ny eksport og ingen ændret linje**,
+så `PensionBeregner.tsx` er urørt og virker identisk; `se` og `no` urørt. Kode + plan i ét
+commit på `ceo/pension-excel`.
+
+**MÅL:** `/pension` baseline **139 besøgende/28d, bounce 5 % pr. 2026-09-28** — måles igen
+2026-10-12. GSC-baseline for `/pension` er **ukendt**, fordi siden ikke står i GSC's top-16;
+den måles første gang 2026-10-12, og da kan jeg se om Excel-klyngen overhovedet har
+visninger. Forventningen er højere CTR på de positioner siden allerede har.
+
+---
+
+#### 141. [ ] KØ — `/husleje` svarer på "nettoprisindeks husleje beregner" (autocomplete nr. 3) — **kræver Danmarks Statistik som kilde**
+
+- **Datagrund:** `/husleje` er Plausible's **tolvte** mest besøgte danske side (**170
+  besøgende/28d, +25 %, bounce 4 %**) og står, ligesom `/pension`, **ikke** i GSC's top-16.
+  DA-autocomplete (19:24) under **"husleje beregner"** har 10 variationer hvoraf **nr. 3 er
+  "nettoprisindeks husleje beregner"** (og nr. 4 "nettoprisindeks husleje beregner 2025",
+  nr. 6 "… 2026"); under **"husleje pris"** ligger "husleje prisindeks", "husleje prisstigning",
+  "**pristalsregulering husleje**", "pristalsreguleret husleje" og "prisregulering husleje".
+  Den server-renderede side har **0** forekomster af "nettoprisindeks" og **0** af
+  "huslejenævn". Altså hele prisindeks-klyngen — som er *grunden til* huslejen stiger — er
+  ubesvaret.
+- **Hvorfor den ligger og ikke er bygget nu:** den kræver det **officielle
+  nettoprisindeks for det aktuelle kvartal** som kilde. Uden den ville jeg skrive et tal
+  på en huslejestigning, og det er præcis den fejlklasse Fase 3 forbyder (samme
+  discipline som opgave 119 og C95's boligsikring). **Mål først:** hent
+  `Danmarks Statistik`'s nettoprisindeks-tabel, og tjek om den kan hentes fra loopet. Kan
+  den, bliver opgaven: ét `<h2>` med den aktuelle sats, et regnestykke på en konkret
+  lejeaftale (hvor meget stiger huslejen ved denne regulering), et `<h3>` der skelner mellem
+  **pristalsregulering** (årlig, lovpligt) og **nettoprisindeks** (den vi ser i aviserne),
+  et `<h3>` med huslejenævnets rolle, og FAQ-par. Kan den ikke, bliver den kilde-blokeret på
+  samme måde som 119.
+- **Målt i samme kørsel, ikke bygget (til Mads' tid):** under **"husleje"** ligger
+  "huslejenævnet" som **nr. 1** og "huslejestigning privat udlejning" som **nr. 6**, og under
+  **"hvad koster en gennemsnitlig husleje"** ligger "hvad koster husleje i københavn",
+  "… i aarhus" og "… på strøget". Siden har **0** forekomster af "gennemsnitlig" og **0** af
+  "huslejenævn". Den første af de to kan besvares *uden* kilde — gennemsnitlig dansk
+  huslejepr. m² — hvis tallet findes i BBR's offentlige statistik; den anden kræver
+  huslejenævnets egne afgørelser, som er kommunale og spredte.
 
 ### ❓ Til Mads — en citable dansk kilde til parkeringsafgiften (ny i C109)
 

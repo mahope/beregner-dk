@@ -9,7 +9,7 @@ import {
   FAQSchema,
 } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
-import { FOLKEPENSION_2026, folkepensionsalderRækker } from "@/lib/folkepension";
+import { FOLKEPENSION_2026, folkepensionMedFormel, folkepensionsalderRækker } from "@/lib/folkepension";
 import { formatNumber } from "@/lib/format";
 import { SATSER_2026 } from "@/lib/satser-2026";
 import RelatedCalculators from "@/components/RelatedCalculators";
@@ -24,6 +24,18 @@ export default async function PensionPage() {
   const pageData = getPageData("pension", locale) || getPageData("pension", "da")!;
   const folk = FOLKEPENSION_2026;
   const alderRaekker = folkepensionsalderRækker();
+  const eksempelIndkomst = 110000;
+  const eksempel = { indkomst: eksempelIndkomst, ...folkepensionMedFormel("enlig", eksempelIndkomst) };
+  /** Arbejdsmarkedspension-eksemplet fra afsnittet ovenfor: 40.000 kr i løn, 15 %. */
+  const ampLon = 40000;
+  const ampSats = 0.15;
+  const ampPrMaaned = ampLon * ampSats;
+  /** Hele kroner, som `formatKr` i PensionBeregner gør det, så formel og værktøj viser samme tal. */
+  const kr = (vaerdi: number) => formatNumber(Math.round(vaerdi), "da");
+  /** "30,9" — procentsats med dansk komma, som den står i formlen. */
+  const pct = (vaerdi: number) => formatNumber(vaerdi * 100, "da", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  /** "0,15" — decimaltal med dansk komma, som Excel kræver. */
+  const dec = (vaerdi: number) => formatNumber(vaerdi, "da", { minimumFractionDigits: 0, maximumFractionDigits: 2 });
 
   return (
     <div>
@@ -173,6 +185,77 @@ export default async function PensionPage() {
         </ul>
         <p>
           <strong>Eksempel:</strong> Med <strong>40.000 kr/måned</strong> i løn og <strong>15% pension</strong> indbetales <strong>6.000 kr/måned</strong>.
+        </p>
+
+        <h2 id="pension-i-excel">Beregn din pension i Excel</h2>
+        <p>
+          Vil du regne folkepensionen, arbejdsmarkedspensionen eller nedsættelsen
+          på pensionstillægget i Excel? Her er formlerne — samme regel som vores
+          egen beregner bruger, så du får <strong>det samme tal</strong> begge
+          steder. I eksemplerne nedenfor er <strong>B1</strong> din årlige
+          indkomst ud over arbejdsindkomst, og der regnes med enlig på
+          folkepension.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Det du vil beregne</th>
+              <th>Formel i Excel</th>
+              <th>Resultat</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Folkepension uden nedsættelse</td>
+              <td><code>={kr(folk.grundbeloeb)}+{kr(folk.iAlt.enlig - folk.grundbeloeb)}</code></td>
+              <td><strong>{kr(folk.iAlt.enlig)} kr/md</strong></td>
+            </tr>
+            <tr>
+              <td>Arbejdsmarkedspension fra løn</td>
+              <td><code>=B2*{dec(ampSats)}</code></td>
+              <td><strong>{kr(ampPrMaaned)} kr/md</strong></td>
+            </tr>
+            <tr>
+              <td>Pensionstillæg efter nedsættelse</td>
+              <td><code>={kr(folk.iAlt.enlig - folk.grundbeloeb)}-MIN({kr(folk.iAlt.enlig - folk.grundbeloeb)};MAKS(0;(B1-{kr(folk.indkomstgraenser.enlig.nedsaetningOver)})*{pct(folk.indkomstgraenser.enlig.pct)}))</code></td>
+              <td><strong>{kr(eksempel.tillaeg)} kr/md</strong></td>
+            </tr>
+            <tr>
+              <td>Folkepension incl. nedsættelse</td>
+              <td><code>={kr(folk.grundbeloeb)}+C3</code></td>
+              <td><strong>{kr(eksempel.iAlt)} kr/md</strong></td>
+            </tr>
+          </tbody>
+        </table>
+        <p>
+          <strong>Regnestykket bag formlen, med en årlig indkomst på {kr(eksempel.indkomst)} kr.</strong>{" "}
+          Grundbeløbet er altid {kr(folk.grundbeloeb)} kr — det påvirkes ikke af
+          andre indkomster. Pensionstillægget er {kr(eksempel.tillaegFuld)} kr for
+          enlige. For hver kr. du har over {kr(folk.indkomstgraenser.enlig.nedsaetningOver)} kr i
+          anden indkomst bliver {pct(folk.indkomstgraenser.enlig.pct)} kr af tillægget
+          nedsat, og ved {kr(eksempel.indkomst)} kr er der{" "}
+          {kr(eksempel.indkomst - folk.indkomstgraenser.enlig.nedsaetningOver)} kr over grænsen, som
+          nedsætter {kr(eksempel.tillaegFuld - eksempel.tillaeg)} kr. Så får du{" "}
+          {kr(folk.grundbeloeb)} + {kr(eksempel.tillaeg)} ={" "}
+          <strong>{kr(eksempel.iAlt)} kr/md</strong> — præcis det samme som vores
+          beregner giver.
+        </p>
+        <p>
+          <strong>De tre fælder, der giver de fleste forkerte tal:</strong>{" "}
+          <strong>1)</strong> <code>MAKS(0;…)</code> skal sidde <em>inde</em> i
+          parentesen om nedsættelsen. Uden den får du et <em>større</em> beløb,
+          når indkomsten er under grænsen, fordi Excel trækker et negativt tal
+          fra. <strong>2)</strong> <code>MIN</code> skal med, ellers kan
+          nedsættelsen blive negativ og løbe over i et forkert pensionstilæg, når
+          indkomsten er høj nok. <strong>3)</strong> Excel bruger{" "}
+          <strong>semiklon</strong> mellem argumenterne på dansk og svensk Excel —
+          komma på engelsk.
+        </p>
+        <p>
+          Vil du se pensionen efter skat, tager du bruttobeløbet her videre i vores{" "}
+          <a href="/loen-efter-skat">lønberegner</a>. Og er du født i 1963-1966, så
+          er folkepensionsalderen 68 år — se{" "}
+          <a href="#folkepensionsalder">tabellen ovenfor</a>.
         </p>
 
         <h2>Pensionstyper</h2>

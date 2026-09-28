@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   FOLKEPENSION_2026,
   beregnFolkepension2026,
+  folkepensionMedFormel,
   folkepensionsalder,
   folkepensionsalderForAlder,
   folkepensionsalderRækker,
@@ -25,6 +26,62 @@ describe("FOLKEPENSION_2026", () => {
     });
     expect(FOLKEPENSION_2026.indkomstgraenser.samlevendeUdenPensionist.pct).toBe(0.32);
     expect(FOLKEPENSION_2026.samleverAndelMedRegel).toBe(0.46);
+  });
+});
+
+describe("folkepensionMedFormel", () => {
+  it("giver præcis samme svar som beregnFolkepension2026 for enlige", () => {
+    for (const indkomst of [0, 50000, 99200, 110000, 127449, 150000, 438380, 600000]) {
+      expect(folkepensionMedFormel("enlig", indkomst).iAlt).toBeCloseTo(
+        beregnFolkepension2026({ samliv: "enlig", aarligIndkomst: indkomst, samleverErPensionist: false }).iAlt,
+        6,
+      );
+    }
+  });
+
+  it("følger den rigtige indkomstgrænse for hver samlivsform", () => {
+    for (const samleverErPensionist of [true, false]) {
+      for (const indkomst of [0, 198800, 212759, 250000, 600000]) {
+        expect(folkepensionMedFormel("samlevende", indkomst, samleverErPensionist).iAlt).toBeCloseTo(
+          beregnFolkepension2026({ samliv: "samlevende", aarligIndkomst: indkomst, samleverErPensionist }).iAlt,
+          6,
+        );
+      }
+    }
+  });
+
+  it("lader nedsættelsen aldrig blive negativ (MAKS(0;…) i Excel-formlen)", () => {
+    expect(folkepensionMedFormel("enlig", 0).tillaeg).toBe(8729);
+    expect(folkepensionMedFormel("enlig", 0).iAlt).toBe(16273);
+    expect(folkepensionMedFormel("enlig", -5000).tillaeg).toBe(8729);
+  });
+
+  it("lader aldrig tillægget overstige hele tillægget (MIN(…) i Excel-formlen)", () => {
+    const hoj = folkepensionMedFormel("enlig", 1000000);
+    expect(hoj.tillaeg).toBe(0);
+    expect(hoj.tillaeg).toBeGreaterThanOrEqual(0);
+    expect(hoj.iAlt).toBe(FOLKEPENSION_2026.grundbeloeb);
+  });
+
+  it("nedsætter tillægget præcis med satsen over grænsen", () => {
+    // 110.000 kr er 10.800 kr over grænsen på 99.200 kr, og 10.800 × 0,309 = 3.337,20 kr
+    const r = folkepensionMedFormel("enlig", 110000);
+    expect(FOLKEPENSION_2026.tillaeg.enlig - r.tillaeg).toBeCloseTo(3337.2, 6);
+    expect(r.tillaeg).toBeCloseTo(5391.8, 6);
+    expect(r.iAlt).toBeCloseTo(12935.8, 6);
+  });
+
+  it("finder de to beløb hvor pensionstillægget forsvinder helt", () => {
+    const g = FOLKEPENSION_2026.indkomstgraenser.enlig;
+    const sammen = g.nedsaetningOver + FOLKEPENSION_2026.tillaeg.enlig / g.pct;
+    expect(Math.round(sammen)).toBe(127449);
+    // lige under er der stadig et (meget lille) tillæg
+    expect(folkepensionMedFormel("enlig", Math.floor(sammen) - 1).tillaeg).toBeGreaterThan(0);
+    expect(folkepensionMedFormel("enlig", Math.ceil(sammen)).tillaeg).toBeLessThan(1);
+
+    const gu = FOLKEPENSION_2026.indkomstgraenser.samlevendeUdenPensionist;
+    const sammenUden = gu.nedsaetningOver + FOLKEPENSION_2026.tillaeg.samlevende / gu.pct;
+    expect(Math.round(sammenUden)).toBe(212759);
   });
 });
 
