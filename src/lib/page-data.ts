@@ -3,6 +3,7 @@ import { BARSEL_2026, SU_2026 } from "./satser-2026";
 import { SOLCELLE_LEVETID_AAR_MAX, SOLCELLE_LEVETID_AAR_MIN } from "./energi/solceller";
 import { BRAENDSTOF_EGENT_FORBRUG, BRAENDSTOF_EKSEMPEL_KM, BRAENDSTOF_FORUDSETNINGER, besparelseProcent, braendstofEksempelRækker, breakEvenKwhPris, elbilSammenligning, heleKroner, literPr100km, prisPrKm, procent1Decimals } from "./braendstof";
 import { HUSLEJE_EKSEMPEL, HUSLEJE_STANDARD } from "./husleje";
+import { estimerNettoMaaned } from "./barsel/netto";
 import { PROMILLE_EKSEAMPLER, formatPromille, formatTimer } from "./promille-eksempler";
 
 /**
@@ -1734,6 +1735,8 @@ const daPages: Record<string, PageData> = {
       { question: "Kan selvstændige få barselsdagpenge?", answer: "Selvstændige og ledige har andre regler end lønmodtagere. Se Min barsel eller spørg Udbetaling Danmark, hvilke betingelser der gælder for din situation." },
       { question: "Hvordan ansøger jeg om barselsdagpenge?", answer: `Får du løn under barsel, skal du som udgangspunkt søge senest ${BARSEL_2026.applicationDeadlineWeeks} uger efter, at lønnen stopper. Hvis mor ikke får løn og holder mindst ${BARSEL_2026.motherBeforeBirthWeeks} uger før fødslen, er fristen ${BARSEL_2026.applicationDeadlineWeeks} uger efter fødslen. Far/medmor skal søge senest ${BARSEL_2026.applicationDeadlineWeeks} uger efter første orlovsdag. En for sen ansøgning giver som udgangspunkt først ydelse fra den dag, Udbetaling Danmark modtager ansøgningen.` },
       { question: "Kan jeg arbejde deltid og stadig få barselsdagpenge?", answer: "Ja, du kan genoptage arbejdet delvist og få nedsat barselsdagpenge for de timer, du ikke arbejder. Det skal aftales med din arbejdsgiver." },
+      { question: "Hvor mange kroner får jeg i barselsdagpenge efter skat?", answer: `Ved den maksimale sats på ${BARSEL_2026.maxWeeklyRate.toLocaleString("da-DK")} kr. om ugen er ydelsen ${Math.round(BARSEL_2026.maxWeeklyRate * 52 / 12).toLocaleString("da-DK")} kr. om måneden før skat. Trækker du ca. 30 % skat fra, lander du på ca. ${Math.round(estimerNettoMaaned({ loen: 0, ydelse: BARSEL_2026.maxWeeklyRate * 52 / 12 }).netto).toLocaleString("da-DK")} kr. om måneden. Skatten afhænger af din kommuneskat, af om du er under 58 år, og af hvilken anden indkomst du har.` },
+      { question: "Er barselsdagpenge AM-bidragspligtig?", answer: `Nej. Barselsdagpenge er ikke AM-bidragspligtige, fordi det er en offentlig ydelse — det er kun løn, der bliver fratrukket 8 % AM-bidrag. Den er derimod skattepligtig som personlig indkomst, så du stadig betaler bundskat, kommuneskat og evt. mellemskat. Regnestykket på siden bruger ${BARSEL_2026.maxHourlyRate.toLocaleString("da-DK", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} kr. pr. time × ${BARSEL_2026.fullTimeHours} timer × 52 uger ÷ 12 måneder.` },
       ],
     },
     "barselsplanlaegger": {
