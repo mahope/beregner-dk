@@ -868,6 +868,8 @@ const daPages: Record<string, PageData> = {
       { question: "Internationale møder?", answer: "Find et tidspunkt der passer i alle tidszoner." },
       { question: "Hvad er klokken i Thailand, Tyrkiet, Canada og Spanien, når det er 12 i Danmark?", answer: "I dansk sommertid er det 17 i Bangkok, 13 i Istanbul og 06 i Toronto, mens Madrid følger Danmark og også viser 12. I vintertid er det 18, 14 og 06. Tabellen viser alle 21 byer for både dansk vinter- og sommertid." },
       { question: "Hvorfor er der forskel på tidsforskellen om sommeren?", answer: "Byer der skifter samtidig med Danmark, fx Madrid, har altid samme klokkeslæt. Byer der ikke bruger sommertid, fx Bangkok, ligger en time tidligere, når Danmark har somertid." },
+      { question: "Hvad er tidsforskellen til Japan, Thailand og Tyrkiet?", answer: "Japan er 7 timer frem, Thailand 6 timer frem og Tyrkiet 2 timer frem i dansk sommertid. I vintertid er det 8, 7 og 3 timer. Tabellen med de ti lande viser både vinter- og sommertid." },
+      { question: "Hvordan regner jeg tidsforskel ud i Excel?", answer: "Sæt tiderne i to celler og brug =B1-A1, eller =(B1-A1)*24 hvis cellerne ikke er formateret som Tid. Hvis sluttidspunktet er tidligere på døgnet end starttidspunktet, lægger du =B1-A1+(B1&lt;A1) til, så et skifte over midnat ikke giver et negativt svar." },
       ],
     },
     "rejsebudget": {
@@ -3336,6 +3338,10 @@ const sePages: Record<string, PageData> = {
       { question: "Sommartid i Sverige?", answer: "Sista söndagen i mars till sista söndagen i oktober. UTC+2 sommar, UTC+1 vinter." },
       { question: "Vad är UTC?", answer: "Coordinated Universal Time - den internationella tidsstandarden." },
       { question: "Internationella möten?", answer: "Hitta en tid som passar i alla tidszoner." },
+      { question: "Vad är klockan i Japan, Thailand, Turkiet och Spanien när det är 12 i Sverige?", answer: "I svensk sommartid är det 19 i Tokyo, 18 i Bangkok och 14 i Istanbul, medan Aten och Madrid följer Sverige och visar 12. I vintertid är det 20, 19 och 15. Tabellen visar förhållandet för vinter- och sommartid för alla 21 städer." },
+      { question: "Varför skiljer sig tidsskillnaden mellan sommar och vinter?", answer: "Städer som byter samtidigt med Sverige, till exempel Aten, Madrid och London, har samma klockslag hela året. Städer som inte använder sommartid, till exempel Tokyo, Bangkok och Shanghai, ligger en timme tidigare när Sverige har sommartid." },
+      { question: "Vad är tidsskillnaden till Japan, Thailand och Turkiet?", answer: "Japan är 7 timmar framåt, Thailand 6 timmar framåt och Turkiet 2 timmar framåt i svensk sommartid. I vintertid är det 8, 7 och 3 timmar. Tabellen med de tio länderna visar både vinter- och sommartid." },
+      { question: "Hur räknar jag ut tidsskillnaden i Excel?", answer: "Sätt tiderna i två celler och använd =B1-A1, eller =(B1-A1)*24 om cellerna inte är formaterade som Tid. Om måttidspunkten är tidigare på dygnet än starttidspunkten lägger du till =B1-A1+(B1<A1), så att ett skifte över midnat inte ger ett negativt svar." },
       ],
     },
     "rejsebudget": {

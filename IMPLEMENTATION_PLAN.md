@@ -1,5 +1,4 @@
-STATUS: KØ — **C120 er landet: beraknare.se `/tidsberegner` — domænets andenstørste side (59.270 visninger, CTR 0,2 %, pos. 8,1) — havde C51's hele svar-først-tabel som `da`-only, altså 0 fund på "8 t 15 min", "1 t 30 min" og "80,00". Samme fejlklasse som C119's `/kvadratmeter`, men 18× større og på en side der ligger på Googles første side.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den, 119 er kilde-blokeret), og de tre åbne noter (C115, C118, C119) har første vindue **2026-09-29 07:30** — det var 23:09, så intet kunne verificeres. Valget kom af at **måle paritet på de otte største sider i begge sprog** på rigtig server (live, begge domæner) i stedet for at gå på den svenske CTR-kandidatliste, som punkt 4 i C105's liste advarede for. **Målt først:** 6 sider × 2 domæner, ord / `<h2>` / FAQ — DA 5.146/9/10 på `/tidsberegner` mod SE **4.587/8/9**, og grep på de *live* sider gav "8 t 15 min" **DA 8 mod SE 0**, "1 t 30 min" **2 mod 0**, "80,00" **2 mod 0**, "Svar på de oftest søgte" **2 mod 0**. SE-autocomplete under "räkna ut timmar och minuter" har "räkna ut timmar från minuter" (nr. 7) og "räkna timmar till minuter" (nr. 10) — altså **begge retninger** i omvandlingen, som siden svarade på nul af; GSC's egne søgninger er "tidskalkylator" 313 v pos. 5, "räkna timmar" 167 v pos. 7, "räkna ut timmar och minuter" 130 v pos. 10, "räkna ut tid" 126 v pos. 10. **Rettelsen (kun `se`):** 1) `locale === "da"`-porten om svar-først-tabellen er **løftet** — den er nu begge sprog, men svaret formateres med `formatTidsvar`, så beraknare.se får **"8 h 15 min"** og ikke den danske "t" (C73's R4); kolonneoverskrifterne "Datum/Paus/Decimaltimmar" og "Samma dag" er svenske. 2) Nyt `<h2>` **"Räkna om minuter till timmar – och tillbaka"** med otte rækker (15/30/45/60/90/120/480/495 min) hvor timer og restminutter er **udregnet** (div/mod 60), plus den modsatte retning (7,5 × 60 = 450 min) og et link til `/fart`. 3) **To nye FAQ-par**, som dermed også kommer i JSON-LD'en: **9 → 11** på rigtig server. 4) SE's `<h1>` er nu spørgsmålsform som den danske ("Hur lång tid är det mellan två klockslag?") i stedet for "Tidskalkylator" — C81's lære, at brandet i *titlen* er det der bliver klippet væk, og `<title>` beholder "Tidskalkylator". **Harness: den gamle negative lås lå på den fejltype, den skulle have fanget.** `se får ikke den danske svar-først-tabel` krævede `not.toContain("Svar på de oftest søgte tidsrum")` — altså låste den **tilstanden før rettelsen** i stedet for en egenskab, så den ville have blokeret svar-rettelsen. Det er C94's negative SE-lås på "500 ÷ 15" og C119's på "3,14 × 3 × 3" i tredje forklædning. C38's hensigt — svensk læsere må ikke se dansk — er bevaret som **to reelle låse**: SE *skal* have sin egen tabel med alle syv rækker læst af `TIDS_EKSEEMPLER`, og SE må **ikke** have syv danske markører. **Verificeret modsvejs: 5 af 5 nye/ændrede tests falder** på master's `page.tsx` + `page-data.ts` (`git stash`). **Målefejl nr. 23 (min egen):** min danske-markør-liste indeholdt `"dagen efter)"` — men "dagen efter" er *korrekt svensk*, så låsen ville have forbudt den rigtige tekst. Fundet fordi testen faldt med hele den server-renderede HTML, ikke fordi den var grøn. Samme klasse som nr. 9-22. **Og en harness-fælde nr. 24:** en flerlinjet template-literal med et nestet objekt-argument *inde i* `expect(...).toContain(...)"` kastede `ReferenceError: minutter is not defined` under vitest, selv om `for (const minuter of …)` var korrekt — løst ved at trække `formatNumber`-kaldet ud i en `const`. Fundet fordi to tests faldt med en ReferenceError frem for med en tekstafvigelse. **Målt på rigtig server** (port 3571, fri verificeret *inden* start, C91/C117's lære): SE **4.587 → 5.413 ord**, **8 → 10 `<h2>`**, FAQ **9 → 11**, alle otte omvandlingsrækker + `495 ÷ 60 = 8,25` + `450 minuter` + `href="/fart"` i markupken og **0** på alle syv danske markører; DA uændret **9 `<h2>` / 5.146 ord / 10 spørgsmål** med sin egen tabel intakt; `/api/health` → `status: ok`. Gate grøn: lint (**573 filer**), **2.499 tests / 163 filer** (fra 2.494 / 163), build (**141 sider**), `locale-leak.mjs --gate` exit 0, `knapgruppe-scan.mjs` **0/0**. Kun `page.tsx`, to `faqItems` i `page-data.ts` og testfilen er rørt — **ingen beregningslogik ændret, den danske sproggren urørt**. Kode + plan i ét commit på `ceo/se-tidsberegner-svarforst`; se opgave 150. **MÅL:** beraknare.se `/tidsberegner` baseline **59.270 visninger / 123 klik / CTR 0,2 % / pos. 8,1** pr. 2026-08-29 → 2026-09-26 (søgninger: "tidskalkylator" 313 v pos. 5, "räkna timmar" 167 v pos. 7, "räkna ut timmar och minuter" 130 v pos. 10, "räkna ut tid" 126 v pos. 10) — måles igen **2026-10-12**.
-
+STATUS: KØ — **C121 er landet: beraknare.se `/tidszone` er domænets femtestørste side (3.298 visninger, CTR 0,4 %, pos. 7,7) og lå på *første* side med under 0,5 % CTR — altså trafikken er der, klikket mangler. Den svarede på nul af sin egen søgeklynge: SE-autocomplete under "räkna ut tidsskillnad" giver 2 af 2 med Excel, og siden havde 0 forekomster af "excel"; under "tidsskillnad" er 7 af 10 variationer *land par med Sverige* (japan, usa, thailand, spanien, grekland, australien, kina), mens siden kun havde *byer* — "Turkiet" stod 0 gange (den skrev Istanbul), "Spanien" 0 (Madrid), "Finland" 0.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den, 119 er kilde-blokeret), og de fem åbne noter (C114, C115, C118, C119, C120) har første vindue **2026-09-29 07:30** — det var 23:38, så intet kunne verificeres. Valget kom af at **måle paritet på de største sider i begge sprog** på rigtig server (live, 16 sider × 2 domæner) i stedet for at gå på kandidatlister, som C105's punkt 4 advarede for. **Målt først:** DA 3.817 ord / 5 `<h2>` / 6 FAQ mod **SE 3.345 / 4 / 4** på `/tidszone` — den største *første-sides*-asymmetri på beraknare.se; `/procent` (3.848 mod 4.522) og `/alder` (4.916 mod 5.193) er *foran* og lukket med C114/C101. **Rettelsen (begge sprog, fordi klyngen er målt i begge):** to nye `<h2>` pr. sprog — en **landetabel med ti lande** i vinter- og sommertid, og **Excel-afsnittet** med fire formler og de to fælder (klokkeslæt er en brøkdel af et døgn, så 06:00 står som 0,2500; en by på den anden side af jorden kan ligge både foran og bagud) — samt **fire nye FAQ-par pr. sprog** (SE 4 → **8**, DA 6 → **8**), fordi C84's to danske spørgsmål aldrig fik en svensk tvilling. **Ingen tal står hårdkodet to steder:** nyt `tidszone-eksempler.ts` udregner hver forskel som `zone.utcVinter − 1` / `zone.utcSommer − 2` af `TIDSZONER` — samme konstanter som bytabellen og `TidszoneBeregner` bruger — og landnavne og enhederne er oversat i samme modul, så `page.tsx` ikke får to sprog i én blok. **Den rigtige fejl, fundet fordi testen skrev et krav den ikke kendte:** min første sommersregel var "de to tal er lige", hvilket er **fejl som regel** — London er 1 time bagud om vinteren og 2 om sommeren, fordi *Danmark* flytter sig med; rigtig regel er "byen bruger selv sommertid". Uden testen havde tabellen løjet i **seks af ti** rækker. **Tre målefejl og to fælder i min egen rettelse, alle fundet fordi *testene faldt*:** (1) min sproglås `/[æøå]/` for svensk ville have forbudt "bakåt" og "när", som er korrekt svensk — rettet til `/[æø]/`, præcis `locale-leak.mjs`'s R4; (2) jeg skrev svensk "**framat**", som ikke er et ord; (3) React escaper `"` som `&quot;`, så `=DATEDIF(A1;B1;"h")` ikke kan findes i markupken uændret; (4) `<strong> två fällen.</strong>` med et forflyttet mellemrum; (5) **buildens typecheck så noget vitest ikke kunne:** begge sproggrene læste `locale === "se" ? … : …`, men inde i `locale === "da"`-grenen er `locale` typemasseret til `"da"`, så `next build` døde med *"types '"da"' and '"se"' have no overlap"*. Hver sproggren er sit eget sprog, så valget er nu direkte — samme lære som C100's `locale`-port. **Målt på rigtig server** (port 3611, fri verificeret inden start): SE **3.345 → 4.647 ord / 4 → 6 `<h2>` / 4 → 8 spørgsmål**, DA **3.817 → 4.821 / 5 → 7 / 6 → 8**, alle nye strenge i markupken på begge domæner, **0** på syv danske markører på beraknare.se og **0** på fem svenske på minberegner.dk, `/api/health` → ok. **Harness:** `tidszone-eksempler.test.ts` **ny med 13 tests** (alle ti byer findes i `TIDSZONER`, forskellen er zoneens egen offset minus Danmarks, New York −6 / Tokyo +8 / Japan 7 om sommeren, de seks byer med egen sommertid har samme forskel hele året, svenske landnavne, enheder pr. sprog, begge sprogs markørlåse, og to krydschecks mod `tidszoneRækker`); `page.test.tsx` **4 → 10** med **FAQ-paritet læst fra den anden sproggren** i stedet for et hardkodet antal, fordi et tal i en test er en ny målefejl næste gang et spørgsmål tilføjes. **Verificeret modsvejs: 6 af 6 nye sidetests falder** på master-koden. Gate grøn: lint (**575 filer**), **2.518 tests / 164 filer** (fra 2.499 / 163), build (**141 sider**), `locale-leak.mjs --gate` exit 0 med uændret 117/85/32 og 0 ureviewet, `knapgruppe-scan.mjs` 0/0. Kode + plan i ét commit på `ceo/se-tidszone-lande-excel`; se opgave 151. **MÅL:** beraknare.se `/tidszone` baseline **3.298 visninger / 12 klik / CTR 0,4 % / pos. 7,7** pr. 2026-08-29 → 2026-09-26 — måles igen **2026-10-12**.
 ---
 
 STATUS: KØ — **C119 er landet: beraknare.se `/kvadratmeter` lå på position 11,2 med 0,2 % CTR og 3.249 visninger — og svarede på nul regnestykker, fordi C83–C94's svar-rettelser var `da`-only. Den svenska tvilling var 1.428 ord tyndere end den danske (2.933 mod 4.361) og havde 3 `<h2>` mod 6.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den, 119 er kilde-blokeret), og de to åbne noter (C114, C115) har første vindue **2026-09-29 07:30** — det var 22:26, så intet kunne verificeres. Valget var punkt 4 i C105's kandidatliste, der lige nu var den eneste venstre slet ikke lå trafik på: beraknare.se er +157 % og dens største sider ligger på pos. 8-12, altså lige under C105's egen tærskel, **men forudsætningen — at de svenske tvillinger nu findes fra forsiden — blev leveret af C118 i går.** **Målt først, målt på rigtig server (live, begge domæner):** DA 132.663 bytes / 6 `<h2>` / 4.361 ord, SE 105.857 bytes / **3** `<h2>` / **2.933 ord** — altså *målt* forskel, ikke regnet. SE-autocomplete (`hl=se`, `gl=se`, 22:28) under **"räkna ut kvadratmeter"** giver 10 variationer hvoraf **fem er selve geometrien** — vägg, golv, tak, cirkel, triangel (+ gräsmatta, rum, "fyra olika sidor", tomt) — og under **"hur räknar man ut kvadratmeter"** giver 10 hvoraf **syv er spørgsmålsformuleringer** ("i ett rum", "på en vägg", "på en triangel", "på en cirkel", "i en lägenhet", "pris", "på ett tak"). **Rettelsen (kun `se`):** et nyt `<h2>` **"Så här räknar man ut kvadratmeter med siffror"** med de samme fire regneeksempler som C93 lagde på dansk — 5 × 4 = **20 m²**, 3,14 × 3 × 3 = **28,3 m²**, (6 × 4) / 2 = **12 m²**, ((4 + 6) / 2) × 3 = **15 m²** — plus diameter-halveringen, triangel-halveringen, pristallet (20 m² × 150 kr = **3 000 kr**) og 5-10 % til kapning, og **form-ordene fra autocomplete står i indledningen** ("golv, vägg, tak, en cirkel og en triangel"), fordi de er søgningerne og ikke en bivirkning. **To nye FAQ-par** ("Hur räknar man ut kvadratmeter?" og "Hur många m² är ett rum på 3 x 4 meter?"), som dermed også kommer i JSON-LD'en: **5 → 7** på rigtig server. **Ingen tal står hårdkodet to steder:** nyt modul `src/lib/areal-eksempler.ts` (π = 3,14, de fire arealer *udregnet* ikke skrevet, `PRIS_EKSEMPEL` med `pris: 20 * 150`) leverer alle fem tal til siden gennem `formatNumber`, så **den svenska og den danske sproggren ikke kan komme i mellemkrig om et facit** — det er C84's fejlklasse (indekseret tekst der modsiger sit eget indhold), og en test krydschecker nu at de fire `= X m²` står i **begge** markupker. **Harness: den gamle negative lås lå på den fejltype, han ville have fanget.** `den svenske side er urørt af danske regneeksempler` krævede `not.toContain("3,14 × 3 × 3")` på beraknare.se — altså låste den **tilstanden før rettelsen** i stedet for en egenskab, så den ville have blokeret svar-rettelsen. C94's negative SE-lås gjorde præcis det samme. Den er erstattet af to reelle låse: SE **skal** have den svenske overskrift og alle fire regnestykker, og SE må **ikke** have fire danske markører ("Sådan regner du", "længde × bredde", "pr. m²", "fliser") — målt på rigtig server til 0 hver. **Verificeret modsvejs: 3 af de 3 nye sidetests falder** med kun `page.tsx` + `page-data.ts` på master; `areal-eksempler.test.ts` er ny med 5 tests. **Én målefejl undgået ved at kende den:** mit første grep på `"3 000 kr"` gav **0** på den svenske side, fordi `Intl.NumberFormat("sv-SE")` skriver tusindtalsseparatoren som `U+00A0` (verificeret: `33 a0 30 30 30`) — præcis C111's fælde, så testen normaliserer `[\u00a0\u202f]` og låser det normaliserede resultat. **Målt på rigtig server** (port 3541, verificeret fri *inden* start, C117's lære): SE **2.933 → 3.769 ord**, **3 → 4 `<h2>`**, FAQ-spørgsmål **5 → 7**, alle fire regnestykker og form-ordene i markupken, **0** danske markører; DA uændret 4.361 ord / 6 `<h2>` / 8 spørgsmål; `/api/health` → `status: ok`. Gate grøn: lint (**573 filer**), **2.494 tests / 163 filer** (fra 2.485 / 162), build (**141 sider**), `locale-leak.mjs --gate` exit 0 med uændret 117/85/32 og 0 ureviewet, `knapgruppe-scan.mjs` 0/0. Kun `page.tsx`, `page-data.ts` (to `faqItems`), det nye modul + to testfiler er rørt — **ingen beregningslogik ændret, `da` urørt, `KvadratmeterBeregner.tsx` urørt**. Kode + plan i ét commit på `ceo/se-kvadratmeter-metode`; se opgave 149. **MÅL:** beraknare.se `/kvadratmeter` baseline **3.249 visninger / 6 klik / CTR 0,2 % / pos. 11,2 pr. 2026-08-29 → 2026-09-26** — måles igen **2026-10-12**. Forventningen er flere visninger *og* højere CTR, fordi de syv spørgsmålsformuleringer nu besvares synligt; hvis den bare flytter sig uden at klikke, er pos. 11,2 et rangeringsproblem og ikke et svarproblem, og så skal den måles om, ikke bygges videre på.
@@ -12322,6 +12321,42 @@ tekst på `/tidszone`), men Kopier-strengen med datoen kræver en browser.
    **C105 måles på `/`'s indgangsbesøg og bounce**, ikke på sidevisninger.
 
 
+### Næste kandidater efter C121
+
+0. **🔒 Opgave 97 er `BLOCKED`** (Mads' svar på ejerskabsspørgsmålet), 98
+   afhænger af den. **🔒 119 er kilde-blokeret.** Browser-noter: C52, C55, C56,
+   C57 og C60 ligger i `❓ Til Mads`. **⏳ Seks deploy-noter** (C114, C115,
+   C118, C119, C120, C121) har første vindue **2026-09-29 07:30**.
+1. **✅ Svensk paritet er målt på 16 sider × 2 domæner (C121).** Det der
+   stod tilbage var `/tidszone` (lukket) og de fem `da`-only-sider C83–C94
+   behandlede — `/braendstof` (DA 4.005 ord / 5 `<h2>` mod SE 2.993 / 3),
+   `/renteberegner` (4.128 / 8 mod 2.908 / 6) og `/kalorier` (3.982 / 7 mod
+   3.169 / 6) — som **ligger på pos. 12,9 / 24,1 / 18,8 i svensk GSC**, altså
+   for dybt til at en svar-rettelse flytter dem. **Byg dem kun når en måling
+   viser, at de er rykket over pos. 8.** `/kvadratmeter` (pos. 11,2 → målt i
+   C119) er undtagelsen, fordi den lå tæt nok på at svare-rettelsen kunne
+   tælle.
+2. **🆕 `/dato` er stadig det bedste ubearbejdede tal i dansk GSC:**
+   **131.920 visninger, 816 klik, CTR 0,6 %, pos. 5,7** — og GSC's egen
+   største søgning er **"hvor mange dage er der til 1 december" (1.063 v, pos.
+   5)**. C98/C90 har lagt Excel- og år-ud-svar på, men *konkret dato-spørgsmål*
+   er kun besvaret for de ni kuraterede `dage-til`-events. Mål først om
+   `DAGE_TIL_EVENTS` stadig dækker de datoer, dansk autocomplete spørger om
+   under "hvor mange dage er der til" — hvis den ikke gør det, er der **én
+   manglende dato** (som C112 fandt for midsommer), ikke en ny side.
+3. **🆕 `/tidszone` DA har nu to `<h2>` SE ikke har** — men kun fordi C121
+   lukkede dem begge, så den asymmetri er lukket. **Mål i stedet
+   `/dato`/`/nedtaelling`-klyngen**, fordi begge står på dansk pos. 5,7 med
+   132 k visninger og har allerede fået C98's Excel-svar; det der mangler er
+   det *konkrete dato-svar*, se punkt 2.
+4. **⏬ Nedprioriteret:** 22 filer / 35 ubundne labels (kun sider uden for
+   top-16). `label-a11y-scan.mjs` 22/35, `knapgruppe-scan.mjs` 0/0.
+5. **🔒 Uforandrede forbehold:** hreflang korrekt (`hrefLang` med stort L) —
+   grep efter `hreflang=` giver **0 fund** på grund af casingen, så en sådan
+   måling er vakuum-grøn; svenske slugs kræver Mads' go; `beregner.no` svarer
+   404 på beregnersider (C79), så norske rettelser er **uverificerbare**.
+6. **Mål 2026-10-12** (se Måleprotokol) for alle C82–C121's sider.
+
 ### Næste kandidater efter C103
 
 0. **🔒 Opgave 97 er `BLOCKED`,** 98 afhænger af den. **🔒 119 er kilde-blokeret.**
@@ -14123,3 +14158,135 @@ Ingen beregningslogik rørt, dansk sproggren urørt.
      spørgsmål, **9** `<h2>`, 5.146 ord og **0** på "Räkna om minuter till
      timmar".
   6. `https://minberegner.dk/api/health` skal svare `status: ok`.
+
+#### 151. [x] FÆRDIG 2026-09-28 — C121 — **beraknare.se `/tidszone` (3.298 v, pos. 7,7, CTR 0,4 %) svarer på tidsskillnads-klyngen: ti *lande* og Excel-formlerne**
+
+**Datagrund:** svensk GSC 2026-08-29 → 2026-09-26: `/tidszone` **3.298
+visninger, 12 klik, CTR 0,4 %, pos. 7,7** — femtestørste side på beraknare.se
+og den eneste i top-15 der lå på *første* side med CTR under 0,5 %, altså
+trafikken er der og klikket mangler.
+
+**Valget kom af at måle paritet på de største sider i begge sprog** (live,
+16 sider × 2 domæner, rigtige sitemap-URL'er) — C120's metode, fordi
+C105's punkt 4 advarede for at gå på kandidatlister i stedet for at måle.
+Målt: DA 3.817 ord / 5 `<h2>` / 6 FAQ mod **SE 3.345 / 4 / 4** på
+`/tidszone` — den største *første-sides*-asymmetri blandt alle beraknare.se's
+sider. `/procent` (3.848 mod 4.522) og `/alder` (4.916 mod 5.193) er *foran*,
+altså lukket med C114/C101.
+
+**Målt først, målt begge sprog.** SE-autocomplete under **"räkna ut
+tidsskillnad"** giver **2 af 2** med Excel — "räkna ut tidsskillnad i excel" er
+den *eneste* variation af spørgsmålet, og siden havde **0** forekomster af
+"excel" (grep på den *live* side, begge domæner: 0 mod 0). Under
+**"tidsskillnad"** er **7 af 10** variationer *land par med Sverige*
+(japan, usa, thailand, spanien, grekland, australien, kina) — mens siden kun
+havde **byer**: "tidsskillnad sverige japan" 0 fund, "Turkiet" 0 (den skrev
+Istanbul), "Finland" 0, "Spanien" 0 (den skrev Madrid). DA-autocomplete er
+samme billede: 10 af 10 under "tidsforskel" er land, "tidsforskel tyrkiet" og
+"tidsforskel japan danmark" iblandt. GSC's egne søgninger: "tidszoner" 725 v
+pos. 9, "tidsforskel" 87 v pos. 10, "tidszoner beregner" 103 v pos. 3.
+
+**Rettelsen (begge sprog, fordi klyngen er målt i begge).** Nyt `<h2>` **"Tidsforskel
+til de lande, folk spørger om"** / **"Tidsskillnad till de länder folk frågar
+om"** med **ti lande** (Storbritannien, USA, Grækenland, Tyrkiet, Spanien,
+Thailand, Japan, Kina, Australien, New Zealand) i to kolonner — vintertid og
+sommertid — og nyt `<h2>` **"Sådan regner du tidsforskel ud i Excel"** /
+**"Så räknar du ut tidsskillnad i Excel"** med fire formler (`=B1-A1`,
+`=(B1-A1)*24`, `=DATEDIF(A1;B1;"h")`, `=B1-A1+(B1<A1)`) og de to fælder
+(klokkeslæt er en brøkdel af et døgn, så 06:00 står som 0,2500; en by på den
+anden side af jorden kan ligge både foran og bagud). SE får **tre** nye
+`faqItems` (4 → **8**, dermed også i JSON-LD'en) — de to C84 lagde på dansk
+(landene-spørgsmålet og sommer-/vinter-spørgsmålet) **havde aldrig fået en
+svensk tvilling**, plus Excel-parret; DA får de samme to (6 → **8**).
+
+**Ingen tal står hårdkodet to steder:** nyt `src/lib/tidszone-eksempler.ts`
+udregner *hver* forskel som `zone.utcVinter − 1` og `zone.utcSommer − 2` af
+`TIDSZONER` — altså af samme modulkonstanter som bytabellen og
+`TidszoneBeregner` bruger, så den nye landetabel ikke kan modsige siden egne
+tabel (C84's fejlklasse). Landnavne (`landSe`) og enhederne ("timer frem" /
+"timmar framåt") er oversat i samme modul, så `page.tsx` ikke får to sprog i
+én blok — samme design som C101's `AlderSeSvar.tsx`.
+
+**Den rigtige fejl, fundet fordi testen skrev et krav den ikke kendte.** Min
+første `sommer`-regel var `sommerForskel === vinter`, altså "de to tal er
+ lige" — og den er **fejl som regel**: London er 1 time bagud om vinteren og
+2 timer bagud om sommeren, fordi *Danmark* flytter sig med. Rigtig regel er
+"byen bruger selv sommertid" (`brugerSommertid`), som findes i
+`tidszone-reference.ts` og er den samme definition `TidszoneBeregner` bruger.
+Uden testen ville tabellen sagt at Storbritannien, USA, Grækenland, Spanien,
+Australien og New Zealand skiftede forskel om sommeren — altså løjet i **seks
+af ti** rækker. Fundet fordi testen krævede `sommer === undefined` for
+Grækenland og fik **0**.
+
+**Målefejl nr. 25 og 26 (mine egne, samme klasse som nr. 9-24).** (1) Min
+sproglås på Excel-forklaringerne var `/[æøå]/` for svensk — men **"bakåt" og
+"när" er korrekt svensk**, så låsen ville have forbudt rigtig tekst. Rettet
+til `/[æø]/`, som er præcis `locale-leak.mjs`'s R4. (2) Jeg skrev først
+svensk "**framat**", som ikke er et ord; fundet fordi testen faldt på den
+konkrete streng. (3) Samme klasse: `<strong> två fällen.</strong>` med et
+forflyttet mellemrum efter tagget. **Og en harness-fælde nr. 27:** React
+escaper `"` som `&quot;`, så `=DATEDIF(A1;B1;"h")` kan ikke findes i markupken
+uændret — fundet fordi testen faldt med hele den server-renderede HTML i
+fejlmeddelelsen. **Og en typefejl kun builden så:** begge sproggrene læste
+`locale === "se" ? hvadSe : hvadDa`, men inde i `locale === "da"`-grenen er
+`locale` typemasseret til `"da"`, så `next build`s typecheck døde med
+*"types '"da"' and '"se"' have no overlap"*. Vitest så den ikke, fordi testen
+renderer begge grene. Hver sproggren er sit eget sprog, så valget er nu
+direkte — samme lære som C100's `locale`-port.
+
+**Målt på rigtig server** (port 3611, fri verificeret *inden* start):
+DA **3.817 → 4.821 ord**, **5 → 7 `<h2>`**, FAQ **6 → 8**; SE **3.345 → 4.647
+ord**, **4 → 6 `<h2>`**, FAQ **4 → 8**. Alle nye strenge i markupken på begge
+domæner (synlig tekst + RSC-payload), `href="/tidsberegner"` ×3, og **0** på
+syv danske markører på beraknare.se (inkl. "timer bagefter", "timer frem",
+"framat", "Tyrkiet", "Grækenland") og **0** på fem svenske på minberegner.dk
+(inkl. "framåt", "bakåt", "Turkiet", "Grekland"). `/api/health` → `status: ok`.
+
+**Harness:** `tidszone-eksempler.test.ts` **ny, 13 tests** — at alle ti byer
+findes i `TIDSZONER` (så ingen forskel kan opfindes), at vinter- og
+sommerforskellen er zoneens egne offset minus Danmarks, New York −6 / Tokyo +8
+og Japan 7 om sommeren, at de seks byer med egen sommertid har *samme*
+forskel hele året, at svensk har "Grekland"/"Turkiet" og ikke de danske, at
+enheden er "time/timer" i hvert sprog og den andens ikke, de to
+sprogs markørlåse på alle tekststrenge, og **to krydschecks mod
+`tidszoneRækker`**: en forskel på N timer flytter klokken N time, og
+12:00 mod New Yorks egen offset er 06:00. `page.test.tsx` **4 → 10** — de to
+nye `<h2>` og alle fire formler i begge sprog, svenske landnavne, at hver
+sproggren har sin egen enhed og ikke den andens, FAQ-paritet mellem `da` og
+`se` (tallet læst fra den *anden* sproggren, fordi et hardkodet antal er en ny
+målefejl næste gang et spørgsmål tilføjes), og at FAQ'ens Japan-tal er
+tabellens. **Verificeret modsvejs: 6 af 6 nye sidetests falder** på
+master-koden (`git stash` af `page.tsx` + `page-data.ts`).
+
+**Gate grøn:** lint (**575 filer**), **2.518 tests / 164 filer** (fra 2.499 /
+163), build (**141 sider**), `locale-leak.mjs --gate` exit 0 med uændret
+117/85/32 og **0** ureviewet, `knapgruppe-scan.mjs` **0/0**. Ingen
+beregningslogik ændret, `TidszoneBeregner` urørt, `no` urørt.
+
+- ⏳ **VERIFICÉR DEPLOY: C121 — beraknare.se `/tidszone` har to nye `<h2>`
+  ("Tidsskillnad till de länder folk frågar om" og "Så räknar du ut
+  tidsskillnad i Excel"), en landetabel med ti lande i to kolonner, fire
+  Excel-formler og fire nye FAQ-spørgsmål (4 → 8).** Kode + plan i ét commit på
+  `ceo/se-tidszone-lande-excel`, squashet til `master`. Første
+  kandidatvindue **2026-09-29 07:30** (23:55 er efter 21:30-batchen). Kun
+  `src/app/tidszone/page.tsx`, det nye `src/lib/tidszone-eksempler.ts`, fire
+  `faqItems` i `page-data.ts` og to testfiler er rørt — **ingen
+  beregningslogik ændret, `TidszoneBeregner` urørt, `no` urørt**. Verificér på
+  **https://beraknare.se/tidszone** ved **indhold, ikke HTTP 200**:
+  1. `<h2>Tidsskillnad till de länder folk frågar om</h2>` og
+     `<h2>Så räknar du ut tidsskillnad i Excel</h2>` skal begge findes, og
+     `<td class="py-2 pr-4">Turkiet</td>` skal give **2 fund** (synlig tekst +
+     RSC-payload).
+  2. `8 timmar framåt` og `6 timmar bakåt` skal give hver **2 fund**; `0` på
+     "timer bagefter", "timer frem", "framat", "Tyrkiet", "Grækenland" og
+     "Sådan regner du".
+  3. Formlerne: `=B1-A1`, `=(B1-A1)*24`, `=DATEDIF(A1;B1;&quot;h&quot;")` og
+     `=B1-A1+(B1&lt;A1)` — **HTML-escapet**, se målefejl 27 ovenfor.
+  4. FAQ-spørgsmål i JSON-LD'en: **8** (var 4). Tæl med
+     `grep -o '"@type":"Question"' | wc -l` — **ikke** `grep -c`, der tæller
+     linjer (målefejl fra C96).
+  5. Sideomfang: SE **6 `<h2>`** (var 4) og **4.647 ord** (var 3.345).
+  6. KONTROL: `https://minberegner.dk/tidszone` skal have **7 `<h2>`**,
+     **8 spørgsmål**, 4.821 ord, "Tyrkiet" og "Grækenland" i markupken og
+     **0** på "framåt", "bakåt", "Turkiet", "Grekland".
+  7. `https://minberegner.dk/api/health` skal svare `status: ok`.

@@ -8,6 +8,8 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import RelatedCalculators from "@/components/RelatedCalculators";
 import RelateredeArtikler from "@/components/RelateredeArtikler";
 import { TIDSZONER, tidszoneRækker } from "@/lib/tidszone-reference";
+import { excelEksempler, tidsskillnadRaekker } from "@/lib/tidszone-eksempler";
+import Link from "next/link";
 
 export async function generateMetadata() {
   return generatePageMetadata("tidszone");
@@ -161,6 +163,76 @@ export default async function TidszonePage() {
           <li>Overvej at rotere mødetider så byrden deles</li>
           <li>Brug kalenderinvitation med automatisk tidszone-konvertering</li>
         </ul>
+
+        <h2>Tidsforskel til de lande, folk spørger om</h2>
+        <p>
+          Tabellen ovenfor viser byer. Her er de samme forskelle som hele{" "}
+          <strong>lande</strong>, fordi &quot;tidsforskel Japan&quot;, &quot;tidsforskel
+          Thailand&quot; og &quot;tidsforskel Tyrkiet&quot; er land, ikke byer. For New
+          York, Athen, Istanbul, Madrid, Bangkok, Tokyo, Shanghai, Sydney og
+          Auckland er forskellen den samme som i bytabellen.
+        </p>
+        <table className="w-full text-left border-collapse my-4">
+          <thead>
+            <tr className="border-b">
+              <th className="py-2 pr-4">Land</th>
+              <th className="py-2 pr-4">Vintertid (kl. 12 CET)</th>
+              <th className="py-2">Sommertid (kl. 12 CEST)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {tidsskillnadRaekker("da").map((raekke) => (
+              <tr key={raekke.land} className="border-b last:border-0">
+                <td className="py-2 pr-4">{raekke.land}</td>
+                <td className="py-2 pr-4">{raekke.tekstVinter}</td>
+                <td className="py-2">
+                  {raekke.tekstSommer ?? "Samme som vintertid"}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p>
+          <strong>Grækenland og Spanien følger Danmark</strong>, så forskellen er
+          den samme hele året. <strong>Thailand, Japan og Kina bruger ikke
+          sommertid</strong>, så de ligger én time tidligere, når Danmark har
+          sommertid. Det er den fælde, der giver den forkerte aftale.
+        </p>
+
+        <h2>Sådan regner du tidsforskel ud i Excel</h2>
+        <p>
+          Hvis du har to klokkeslæt — et i Danmark og et i den anden by — er
+          forskellen én formel. Sæt dem i <code>A1</code> og <code>B1</code>.
+        </p>
+        <table className="w-full text-left border-collapse my-4">
+          <thead>
+            <tr className="border-b">
+              <th className="py-2 pr-4">Formel</th>
+              <th className="py-2">Hvad den gør</th>
+            </tr>
+          </thead>
+          <tbody>
+            {excelEksempler().map((eksempel) => (
+              <tr key={eksempel.formel} className="border-b last:border-0">
+                <td className="py-2 pr-4 font-mono">{eksempel.formel}</td>
+                <td className="py-2">
+                  {eksempel.hvadDa}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p>
+          <strong>To fælder.</strong> Klokkeslæt i Excel er en brøkdel af et
+          døgn, så 06:00 vises som 0,2500 — du skal gange med 24 for at få
+          timer. Og en by på den anden side af jorden kan ligge både foran og
+          bagud: New York er 6 timer <em>bagefter</em>, Tokyo er 7 timer{" "}
+          <em>frem</em>, selv om begge tal står som 12 minus 6 og 12 minus 9.{" "}
+          <Link href="/tidsberegner" className="underline">
+            Tidsberegneren
+          </Link>{" "}
+          tager sig af det sidste, hvis du vil se forskellen i hele døgn.
+        </p>
       </div>
       )}
 
@@ -195,6 +267,77 @@ export default async function TidszonePage() {
           <li>Överväg att rotera mötestider så att bördan delas</li>
           <li>Använd kalenderinbjudan med automatisk tidszonskonvertering</li>
         </ul>
+
+        <h2>Tidsskillnad till de länder folk frågar om</h2>
+        <p>
+          Tabellen ovan visar städer. Här är samma skillnader för hela{" "}
+          <strong>länder</strong>, eftersom &quot;tidsskillnad Japan&quot;,
+          &quot;tidsskillnad Thailand&quot; och &quot;tidsskillnad Turkiet&quot; är
+          länder, inte städer. För New York, Aten, Istanbul, Madrid, Bangkok,
+          Tokyo, Shanghai, Sydney och Auckland är skillnaden densamma som i
+          städstabellen.
+        </p>
+        <table className="w-full text-left border-collapse my-4">
+          <thead>
+            <tr className="border-b">
+              <th className="py-2 pr-4">Land</th>
+              <th className="py-2 pr-4">Vintertid (kl. 12 CET)</th>
+              <th className="py-2">Sommartid (kl. 12 CEST)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {tidsskillnadRaekker("se").map((raekke) => (
+              <tr key={raekke.land} className="border-b last:border-0">
+                <td className="py-2 pr-4">{raekke.land}</td>
+                <td className="py-2 pr-4">{raekke.tekstVinter}</td>
+                <td className="py-2">
+                  {raekke.tekstSommer ?? "Samma som vintertid"}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p>
+          <strong>Grekland och Spanien följer Sverige</strong>, så skillnaden är
+          densamma hela året. <strong>Thailand, Japan och Kina använder inte
+          sommartid</strong>, så de ligger en timme tidigare, när Sverige har
+          sommartid. Det är fällan som ger det felaktiga mötet.
+        </p>
+
+        <h2>Så räknar du ut tidsskillnad i Excel</h2>
+        <p>
+          Har du två klockslag — ett i Sverige och ett i den andra staden — är
+          skillnaden en formel. Lägg dem i <code>A1</code> och <code>B1</code>.
+        </p>
+        <table className="w-full text-left border-collapse my-4">
+          <thead>
+            <tr className="border-b">
+              <th className="py-2 pr-4">Formel</th>
+              <th className="py-2">Vad den gör</th>
+            </tr>
+          </thead>
+          <tbody>
+            {excelEksempler().map((eksempel) => (
+              <tr key={eksempel.formel} className="border-b last:border-0">
+                <td className="py-2 pr-4 font-mono">{eksempel.formel}</td>
+                <td className="py-2">
+                  {eksempel.hvadSe}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p>
+          <strong>Två fällor.</strong> Klockslag i Excel är en bråkdel av ett
+          dygn, så 06:00 visas som 0,2500 — du måste gånger med 24 för att få
+          timmar. Och en stad på andra sidan om jorden kan ligga både före och
+          efter: New York är 6 timmar <em>bakåt</em>, Tokyo är 7 timmar{" "}
+          <em>framåt</em>, även om båda talen skrivs som 12 minus 6 och 12
+          minus 9. <Link href="/tidsberegner" className="underline">
+            Tidskalkylatorn
+          </Link>{" "}
+          tar hand om det sista om du vill se skillnaden i hela dygn.
+        </p>
       </div>
       )}
 
