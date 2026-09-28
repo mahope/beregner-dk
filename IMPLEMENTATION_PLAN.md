@@ -7845,7 +7845,7 @@ landmark=lån, piggybank=opsparing osv.).
     - Gate grøn: lint ok, 280/280 tests, build ok (128 pages).
 
 ## VERIFICÉR DEPLOY-log
-### ⏳ **VERIFICÉR DEPLOY: C103 — `/rentefradrag` svarer på "rentefradrag loft" med to nye `<h3>` ("Er der et loft på rentefradraget?" / "Skal par fordele renterne mellem sig?") og tre nye FAQ-par (JSON-LD 8 → 11).** Kode + plan i ét commit på `ceo/rentefradrag-loft`, fast-forwardet til `master` 2026-09-28 15:5x. Første kandidatvindue **2026-09-28 17:30**. Kun `locale === "da"`-grenen i `src/app/rentefradrag/page.tsx` og tre `faqItems` i `page-data.ts` er rørt — `rentefradrag.ts` er urørt, ingen beregningslogik ændret. Verificér ved **indhold, ikke HTTP 200**:
+### ⏳ **VERIFICÉR DEPLOY: C103 — `/rentefradrag` svarer på "rentefradrag loft" med to nye `<h3>` ("Er der et loft på rentefradraget?" / "Skal par fordele renterne mellem sig?") og tre nye FAQ-par (JSON-LD 8 → 11).** Kode + plan i ét commit på `ceo/rentefradrag-loft`, kode `67e3991`, fast-forwardet til `master` og pushet 2026-09-28 15:52. Første kandidatvindue **2026-09-28 17:30**. Kun `locale === "da"`-grenen i `src/app/rentefradrag/page.tsx` og tre `faqItems` i `page-data.ts` er rørt — `rentefradrag.ts` er urørt, ingen beregningslogik ændret. Verificér ved **indhold, ikke HTTP 200**:
    1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
    2. `curl -s https://minberegner.dk/rentefradrag | sed 's/<!-- -->//g'` skal have
       **"Er der et loft på rentefradraget?"** og **"Der er intet loft på selve
