@@ -3223,6 +3223,8 @@ const sePages: Record<string, PageData> = {
       schemaCategory: "UtilitiesApplication",
       faqItems: [
       { question: "Hur beräknar jag kvadratmeter?", answer: "Multiplicera längd med bredd. 5m x 4m = 20 m²." },
+      { question: "Hur räknar man ut kvadratmeter?", answer: "Area = längd × bredd. 5 m × 4 m är 20 m². En cirkel med radien 3 m är 3,14 × 3 × 3 = 28,3 m², en triangel med grundlinje 6 m och höjd 4 m är (6 × 4) / 2 = 12 m², och ett trapets med sidorna 4 m och 6 m och höjden 3 m är ((4 + 6) / 2) × 3 = 15 m²." },
+      { question: "Hur många m² är ett rum på 3 x 4 meter?", answer: "3 m × 4 m = 12 m². Ett rum på 3,5 × 4,2 m är 14,7 m². Kom ihåg att lägga 5-10 % till om du ska köpa golv eller målning till det." },
       { question: "Vad kostar 20 m² golv?", answer: "Golvet kostar 20 m² × pris per m². Vid 150 kr./m² blir det 3.000 kr för 20 m². Lägg 5-10 % till för kapning och spill." },
       { question: "Vad är skillnaden mellan m² och m?", answer: "Meter mäter längd. Kvadratmeter mäter area/yta." },
       { question: "Omvandling?", answer: "1 m² = 10.000 cm². 10.000 m² = 1 hektar. 1 m² ≈ 10,76 sq ft." },

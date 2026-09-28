@@ -1,3 +1,7 @@
+STATUS: KØ — **C119 er landet: beraknare.se `/kvadratmeter` lå på position 11,2 med 0,2 % CTR og 3.249 visninger — og svarede på nul regnestykker, fordi C83–C94's svar-rettelser var `da`-only. Den svenska tvilling var 1.428 ord tyndere end den danske (2.933 mod 4.361) og havde 3 `<h2>` mod 6.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den, 119 er kilde-blokeret), og de to åbne noter (C114, C115) har første vindue **2026-09-29 07:30** — det var 22:26, så intet kunne verificeres. Valget var punkt 4 i C105's kandidatliste, der lige nu var den eneste venstre slet ikke lå trafik på: beraknare.se er +157 % og dens største sider ligger på pos. 8-12, altså lige under C105's egen tærskel, **men forudsætningen — at de svenske tvillinger nu findes fra forsiden — blev leveret af C118 i går.** **Målt først, målt på rigtig server (live, begge domæner):** DA 132.663 bytes / 6 `<h2>` / 4.361 ord, SE 105.857 bytes / **3** `<h2>` / **2.933 ord** — altså *målt* forskel, ikke regnet. SE-autocomplete (`hl=se`, `gl=se`, 22:28) under **"räkna ut kvadratmeter"** giver 10 variationer hvoraf **fem er selve geometrien** — vägg, golv, tak, cirkel, triangel (+ gräsmatta, rum, "fyra olika sidor", tomt) — og under **"hur räknar man ut kvadratmeter"** giver 10 hvoraf **syv er spørgsmålsformuleringer** ("i ett rum", "på en vägg", "på en triangel", "på en cirkel", "i en lägenhet", "pris", "på ett tak"). **Rettelsen (kun `se`):** et nyt `<h2>` **"Så här räknar man ut kvadratmeter med siffror"** med de samme fire regneeksempler som C93 lagde på dansk — 5 × 4 = **20 m²**, 3,14 × 3 × 3 = **28,3 m²**, (6 × 4) / 2 = **12 m²**, ((4 + 6) / 2) × 3 = **15 m²** — plus diameter-halveringen, triangel-halveringen, pristallet (20 m² × 150 kr = **3 000 kr**) og 5-10 % til kapning, og **form-ordene fra autocomplete står i indledningen** ("golv, vägg, tak, en cirkel og en triangel"), fordi de er søgningerne og ikke en bivirkning. **To nye FAQ-par** ("Hur räknar man ut kvadratmeter?" og "Hur många m² är ett rum på 3 x 4 meter?"), som dermed også kommer i JSON-LD'en: **5 → 7** på rigtig server. **Ingen tal står hårdkodet to steder:** nyt modul `src/lib/areal-eksempler.ts` (π = 3,14, de fire arealer *udregnet* ikke skrevet, `PRIS_EKSEMPEL` med `pris: 20 * 150`) leverer alle fem tal til siden gennem `formatNumber`, så **den svenska og den danske sproggren ikke kan komme i mellemkrig om et facit** — det er C84's fejlklasse (indekseret tekst der modsiger sit eget indhold), og en test krydschecker nu at de fire `= X m²` står i **begge** markupker. **Harness: den gamle negative lås lå på den fejltype, han ville have fanget.** `den svenske side er urørt af danske regneeksempler` krævede `not.toContain("3,14 × 3 × 3")` på beraknare.se — altså låste den **tilstanden før rettelsen** i stedet for en egenskab, så den ville have blokeret svar-rettelsen. C94's negative SE-lås gjorde præcis det samme. Den er erstattet af to reelle låse: SE **skal** have den svenske overskrift og alle fire regnestykker, og SE må **ikke** have fire danske markører ("Sådan regner du", "længde × bredde", "pr. m²", "fliser") — målt på rigtig server til 0 hver. **Verificeret modsvejs: 3 af de 3 nye sidetests falder** med kun `page.tsx` + `page-data.ts` på master; `areal-eksempler.test.ts` er ny med 5 tests. **Én målefejl undgået ved at kende den:** mit første grep på `"3 000 kr"` gav **0** på den svenske side, fordi `Intl.NumberFormat("sv-SE")` skriver tusindtalsseparatoren som `U+00A0` (verificeret: `33 a0 30 30 30`) — præcis C111's fælde, så testen normaliserer `[\u00a0\u202f]` og låser det normaliserede resultat. **Målt på rigtig server** (port 3541, verificeret fri *inden* start, C117's lære): SE **2.933 → 3.769 ord**, **3 → 4 `<h2>`**, FAQ-spørgsmål **5 → 7**, alle fire regnestykker og form-ordene i markupken, **0** danske markører; DA uændret 4.361 ord / 6 `<h2>` / 8 spørgsmål; `/api/health` → `status: ok`. Gate grøn: lint (**573 filer**), **2.494 tests / 163 filer** (fra 2.485 / 162), build (**141 sider**), `locale-leak.mjs --gate` exit 0 med uændret 117/85/32 og 0 ureviewet, `knapgruppe-scan.mjs` 0/0. Kun `page.tsx`, `page-data.ts` (to `faqItems`), det nye modul + to testfiler er rørt — **ingen beregningslogik ændret, `da` urørt, `KvadratmeterBeregner.tsx` urørt**. Kode + plan i ét commit på `ceo/se-kvadratmeter-metode`; se opgave 149. **MÅL:** beraknare.se `/kvadratmeter` baseline **3.249 visninger / 6 klik / CTR 0,2 % / pos. 11,2 pr. 2026-08-29 → 2026-09-26** — måles igen **2026-10-12**. Forventningen er flere visninger *og* højere CTR, fordi de syv spørgsmålsformuleringer nu besvares synligt; hvis den bare flytter sig uden at klikke, er pos. 11,2 et rangeringsproblem og ikke et svarproblem, og så skal den måles om, ikke bygges videre på.
+
+---
+
 STATUS: KØ — **C118 er landet: beraknare.se's forside viste 31 af de 53 kalkulatorer, sitets egen katalog har på svensk. 22 sider — blandt dem `/enhedspris` (1.260 visninger, pos. 6,1) — havde intet kort på domænets mest linkede side, og den gamle test passede alligevel, fordi den tog unionen af dansk og svensk.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den, 119 er kilde-blokeret), og de to åbne noter (C114, C115) har første vindue **2026-09-29 07:30** — det var 22:08, så intet kunne verificeres. Valget var punkt 2 i C105's kandidatliste, den eneste der var ren datatrafik. **Målt først:** `getHomeCalculators("se")` = **31**, `getCalculatorsByLocale("se")` = **53** → **22 manglende**; til sammenligning `da` 79/79 og `no` 28/51. **Planens egen kandidatliste var forkert på tre af fem sider, og det er fundet ved at tælle frem for at regne:** den skrev at `/bil`, `/braendstof` og `/moms` manglede forside-link på beraknare.se — alle tre stod *allerede* i `seCalculators`. Målt på den live side: `href="/moms"` ×4, `href="/bil"` ×3, `href="/braendstof"` ×3, `href="/vaegttab"` ×3, men `href="/enhedspris"` **×0**. Så det var `/enhedspris` (1.260 v, CTR 0,3 %, pos. 6,1 — den bedste position på hele det svenska domæne) og `/vaegttab` (1.265 v, pos. 8,3) der reelt manglede et kort; de andre tyve har nul målte visninger, så de er lagt til for **paritetens skyld, ikke for en dokumenteret trafikgevinst** — det er skrevet sådan, fordi kun de to har tal. **Harness: den gamle test var vakuum-grøn, og det er pointen.** `every calculator in the site catalog is linked from a homepage` byggede et sæt af `da` **og** `se` og krævede at hver katalogpost var i det — altså passede den på alle 22 svenske sider, fordi den *danske* forside linker dem. Den påstod "linket fra en forside" og kunne ikke tilskrive det til et domæne: samme fejltype som C94's negative SE-lås på "500 ÷ 15" og C117's BSD-`sed`, der meldte 0 fund på 206 sider. **Rettelsen er `home-data.test.ts`: paritet pr. domæne for `da` og `se` i begge retninger** (ingen katalogpost uden kort, intet kort uden katalogpost) — modsvejs verificeret ved at fjerne de 22 kort, hvilket får den til at liste alle 22. **Og en ny regel, fordi `page.tsx` har en stille dråb:** kortene grupperes på `category`, og rendereren looper `categoryOrder` — et kort med en kategori *uden for* listen tæller med i "N kalkylatorer" i metateksten og i søgningen, men bliver **aldrig vist**. Ny test kræver derfor `category ∈ categoryOrder` for alle tre locales, verificeret med en plantet fixture (`/brok` → `"Brøk"`, der falder). `no` er bevidst urørt — beregner.no har ingen trafik i snapshottet — men dens rest er låst som sit eget tal (23), så en senere rettelse skal flippe den bevidst. **Målt på rigtig server** (port 3530, verificeret fri *inden* start, C117's lære): `31` → **`53` kalkylatorer** i teksten, **35 → 57** unikke interne href, 208 KB → 264 KB, alle otte kategori-`<h2>` på svensk stadig til stede, de ti nye svenske titler (Jämförpris, Hastighetskalkylator, Bråkkalkylator, 1RM kalkylator, Lönekalkylator, Kroppsfettprocent, Ägglossning, Vikt på planeterna, Medelvärde, Ohms lag) **×3 hver** i markupken, **0** protocol-relative href (C115's klasse stadig lukket), `/api/health` → `status: ok`. Gate grøn: lint (**571 filer**), **2.485 tests / 162 filer** (fra 2.461 / 162), build (**141 sider**), `locale-leak.mjs --gate` exit 0. Kun `home-data.ts` og `home-data.test.ts` er rørt — ingen beregningslogik, ingen anden side, ingen `da`/`no`, ingen ny URL. Kode + plan i ét commit på `ceo/se-forside-katalog`; se opgave 148. **MÅL:** beraknare.se baseline **521 besøgende/28d, 645 sidevisninger, bounce 8 %, +157 %** pr. 2026-09-28; `/enhedspris` **1.260 v / 4 klik / CTR 0,3 % / pos. 6,1** og `/vaegttab` **1.265 v / 4 klik / CTR 0,3 % / pos. 8,3** (svensk GSC 2026-08-29 → 09-26) — måles igen **2026-10-12**. Forventningen er flere interne links til to sider der lå på position 6-8 med næsten intet CTR; de øvrige tyve er ikke målbare før de har visninger.
 
 ---
@@ -12287,6 +12291,15 @@ tekst på `/tidszone`), men Kopier-strengen med datoen kræver en browser.
    Byg dem **først** når punkt 2's måling har flyttet dem op — ellers er det samme
    sprog-asymmetri-arbejde som C85's "DA har Excel, SE har ikke", bare uden
    trafikgrund.
+   **✅ Den største er bygget (C119, 28/9): `/kvadratmeter`** — 3.249 v, pos.
+   11,2, CTR 0,2 %, svensk side 2.933 ord / 3 `<h2>` → 3.769 ord / 4 `<h2>` /
+   7 FAQ-spørgsmål. Punkt 2's forudsætning (SE-tvillingerne findes nu fra
+   forsiden) blev leveret af C118, så rækkefølgen holdt. **De fire øvrige er
+   `/renteberegner` (2.849 v, pos. 24,1), `/moms` (1.481 v, pos. 21,8),
+   `/braendstof` (1.677 v, pos. 12,9) og `/kalorier` (2.703 v, pos. 18,8)** —
+   samme måling igen (ordtælling på begge domæner + SE-autocomplete på
+   sidens egen klynge) før der skrives, fordi C118 viste at denne liste kan være
+   forkert, når den er skrevet frem for at talt.
 5. **🆕 `/dage-til/*` er sunde og udtømte (C103).** Alle 9 danske + 9 svenske er
    200 med korrekt canonical og tre hreflang, i begge sitemapmer og håndlinket fra
    `/dato` **og** `/nedtaelling` (alle ni — C92's antagelse om "kun to" var
@@ -13988,3 +14001,58 @@ et** forside-kort på dansk (de tre blev lagt til af C105) — de skal altså fi
 på minberegner.dk, mens de på beraknare.se kommer fra *denne* ændring. Kør
 `scripts/href-scan.mjs` fra opgave 147 bagefter: den skal give **0 fund på begge
 domæner**, altså ingen protocol-relative href.
+
+#### 149. [x] FÆRDIG 2026-09-28 — C119 — **beraknare.se `/kvadratmeter` svarer på "hur räknar man ut kvadratmeter" (7 af 10 SE-autocomplete-variationer) med de fire regneeksempler, form-ordene og to nye FAQ-par**
+
+- **Datagrund:** svensk GSC 2026-08-29 → 2026-09-26: `/kvadratmeter`
+  **3.249 visninger, 6 klik, CTR 0,2 %, pos. 11,2**. Det er den største
+  ubearbejdede svenska side af C83–C94's fem `da`-only rettelser.
+- **Målt først (live, begge domæner):** DA 132.663 bytes / 6 `<h2>` / 4.361 ord,
+  SE 105.857 bytes / **3 `<h2>`** / **2.933 ord** → 1.428 ord og tre `<h2>`
+  manglede. SE-autocomplete under "räkna ut kvadratmeter": 10 variationer hvoraf
+  **fem er geometrien** (vägg, golv, tak, cirkel, triangel); under "hur räknar
+  man ut kvadratmeter": 10 hvoraf syv er spørgsmål. Siden svarede på nul af dem.
+- **Rettelse (kun `se`):** nyt `<h2>` "Så här räknar man ut kvadratmeter med
+  siffror" med C93's fire regneeksempler (20 / 28,3 / 12 / 15 m²), diameter- og
+  triangel-halveringen, 20 m² × 150 kr = 3 000 kr, 5-10 % til kapning, og
+  **golv, vägg, tak, cirkel og triangel i indledningen** — de er søgningerne.
+  To nye `faqItems` (FAQ 5 → 7, dermed også i JSON-LD'en).
+- **Tal fra ét sted:** nyt `src/lib/areal-eksempler.ts` (π = 3,14; arealerne er
+  *udregnet*, `PRIS_EKSEMPEL.pris = 20 * 150`) + `formatNumber`, så DA og SE
+  ikke kan glide fra hinanden. En test krydschecker de fire `= X m²` i begge
+  markupker.
+- **Harness:** den gamle negative lås (`not.toContain("3,14 × 3 × 3")` på SE låst
+  *tilstanden før rettelsen*) er erstattet af to reelle låse: SE skal have
+  overskrift + fire regnestykker, SE må ikke have fire danske markører.
+  `page.test.tsx` 6 → 10, `areal-eksempler.test.ts` **ny** med 5 tests.
+  **Verificeret modsvejs: 3 af 3 nye sidetests falder** på master-koden.
+- **Målt på rigtig server** (port 3541, fri verificeret inden start): SE
+  **2.933 → 3.769 ord**, **3 → 4 `<h2>`**, FAQ **5 → 7 spørgsmål**, 0 danske
+  markører; DA uændret 4.361 ord / 6 `<h2>` / 8 spørgsmål; `/api/health` → ok.
+- **Gate grøn:** lint 573 filer, **2.494 tests / 163 filer** (fra 2.485 / 162),
+  build 141 sider, `locale-leak.mjs --gate` exit 0 (117/85/32, 0 ureviewet),
+  `knapgruppe-scan.mjs` 0/0. Ingen beregningslogik rørt, `da` urørt.
+- **MÅL:** `/kvadratmeter` SE baseline **3.249 v / 6 klik / CTR 0,2 % / pos. 11,2
+  pr. 2026-08-29 → 2026-09-26** — måles igen **2026-10-12**.
+
+- ⏳ **VERIFICÉR DEPLOY: C119 — beraknare.se `/kvadratmeter` har et nyt
+  `<h2>` "Så här räknar man ut kvadratmeter med siffror" med fire regneeksempler
+  (5 × 4 = 20 m², 3,14 × 3 × 3 = 28,3 m², (6 × 4) / 2 = 12 m²,
+  ((4 + 6) / 2) × 3 = 15 m²), pristallet 3 000 kr, form-ordene "golv, vägg, tak"
+  og to nye FAQ-spørgsmål.** Kode + plan i ét commit på
+  `ceo/se-kvadratmeter-metode`, squashet til `master`. Første kandidatvindue
+  **2026-09-29 07:30** (22:57 er efter 21:30-batchen). Kun `page.tsx`, to
+  `faqItems` i `page-data.ts`, det nye `areal-eksempler.ts` og to testfiler er
+  rørt — **den danske sproggren er urørt**, ingen beregningslogik ændret.
+  Verificér på **https://beraknare.se/kvadratmeter** ved **indhold, ikke HTTP
+  200**:
+  1. `<h2>Så här räknar man ut kvadratmeter med siffror</h2>` skal findes, og
+     `3,14 × 3 × 3` skal give **2 fund** (synlig tekst + RSC-payload).
+  2. `curl -s https://beraknare.se/kvadratmeter | sed 's/<!-- -->//g'` skal have
+     **0** fund på "Sådan regner du", "længde × bredde", "pr. m²" og "fliser".
+  3. FAQ-spørgsmål i JSON-LD'en: **7** (var 5). Tæl med
+     `grep -o '"@type":"Question"' | wc -l` — **ikke** `grep -c`, der tæller
+     linjer (målefejl fra C96).
+  4. KONTROL: `https://minberegner.dk/kvadratmeter` skal fortsat have **8**
+     spørgsmål, 6 `<h2>` og 4.361 ord.
+  5. `https://minberegner.dk/api/health` skal svare `status: ok`.

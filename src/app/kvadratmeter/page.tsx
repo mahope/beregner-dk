@@ -11,6 +11,8 @@ import RelatedCalculators from "@/components/RelatedCalculators";
 import RelateredeArtikler from "@/components/RelateredeArtikler";
 import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
+import { arealEksempel, PRIS_EKSEMPEL } from "@/lib/areal-eksempler";
+import { formatNumber } from "@/lib/format";
 
 export async function generateMetadata() {
   return generatePageMetadata("kvadratmeter");
@@ -49,6 +51,67 @@ export default async function KvadratmeterPage() {
 
       {/* BBR lookup: Danish register, Danish locale only */}
       {locale === "da" && <BoligOpslag />}
+
+      {/* Samma sak på svenska: "hur räknar man ut kvadratmeter" är svensk
+          autocomplete (10 variationer under "räkna ut kvadratmeter", hvoraf
+          vägg, golv, tak, cirkel och triangel själva formen), och
+          beraknare.se/kvadratmeter låg på pos. 11,2 med 0,2 % CTR. */}
+      {locale === "se" && (
+      <div className="prose max-w-none mb-8">
+        <h2>Så här räknar man ut kvadratmeter med siffror</h2>
+        <p>
+          Arean är alltid <strong>längd × bredd</strong> — det enda som ändras
+          är vilken figur som ligger under. Samma fyra räkneexempel med siffror
+          gäller för <strong>golv, vägg, tak, en cirkel och en triangel</strong>,
+          så här kan du efterpröva dem:
+        </p>
+        <ul>
+          <li>
+            <strong>Rektangel</strong> (ett rum, en platta, ett golv): längd ×
+            bredd. Ett rum på 5 m × 4 m är{" "}
+            <strong>
+              5 × 4 = {formatNumber(arealEksempel("rektangel").areal, locale, { maximumFractionDigits: 0 })} m²
+            </strong>
+            .
+          </li>
+          <li>
+            <strong>Cirkel</strong> (ett rundt bord, en brunn, en rund platta):
+            3,14 × radie × radie. En cirkel med radien 3 m är{" "}
+            <strong>
+              3,14 × 3 × 3 ={" "}
+              {formatNumber(arealEksempel("cirkel").areal, locale, { maximumFractionDigits: 1 })} m²
+            </strong>
+            . Mäter du i diameter halverar du den först, så en diameter på 6 m är
+            igen radien 3 m.
+          </li>
+          <li>
+            <strong>Triangel</strong>: (grundlinje × höjd) / 2. En grundlinje på
+            6 m med en höjd på 4 m är{" "}
+            <strong>
+              (6 × 4) / 2 ={" "}
+              {formatNumber(arealEksempel("trekant").areal, locale, { maximumFractionDigits: 0 })} m²
+            </strong>
+            . Den kan alltid delas i två rektanglar.
+          </li>
+          <li>
+            <strong>Trapets</strong> (fyra sidor, där två är parallella): ((de två
+            parallella sidorna) / 2) × höjd. Sidor på 4 m och 6 m med en höjd på
+            3 m är{" "}
+            <strong>
+              ((4 + 6) / 2) × 3 ={" "}
+              {formatNumber(arealEksempel("trapez").areal, locale, { maximumFractionDigits: 0 })} m²
+            </strong>
+            .
+          </li>
+        </ul>
+        <p>
+          Ska du köpa golv, plattor eller målning är det samma tal gånger med
+          priset per m². Som exempel: 20 m² till 150 kr/m² kostar{" "}
+          <strong>{formatNumber(PRIS_EKSEMPEL.pris, locale)} kr</strong>, och så
+          lägger du 5-10 % till för kapning och spill.
+        </p>
+      </div>
+      )}
 
       {/* Metoden med tal: "hvordan regner man kvadratmeter ud" (359 visninger,
           pos. 3 i dansk GSC) er sitets fjerdestørste søgning, og værktøjet
