@@ -8,6 +8,7 @@ import RelatedCalculators from "@/components/RelatedCalculators";
 import RelateredeArtikler from "@/components/RelateredeArtikler";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { ALDER_EKSEEMPLER, formatAlder, formatAlderRaekke, foedselsaarRaekker } from "@/lib/alder-eksempler";
+import AlderSeSvar from "@/components/AlderSeSvar";
 import { tilIsoDato } from "@/lib/lokal-dato";
 import { getIntlLocale } from "@/lib/format";
 
@@ -222,6 +223,13 @@ export default async function AlderPage() {
         </p>
       </div>
       )}
+
+      {/* Svensk CTR-pakke: fødselsårs-tabellen (som autocomplete spørger om
+          med "hur gammal är jag om jag är född"), Excel-formlerna — den danske
+          side havde 16 forekomster af "Excel", denne 0 — og et helt
+          personnummer-afsnit, fordi "räkna ut ålder från personnummer" er nr. 2
+          under "räkna ut ålder" i svensk autocomplete. Se AlderSeSvar. */}
+      {locale === "se" && <AlderSeSvar />}
 
       {/* Informativ tekst - SEO */}
       {locale === "da" && (

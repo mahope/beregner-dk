@@ -210,4 +210,99 @@ describe("alder page", () => {
     expect(spoergsmaal).toContain("Hvordan beregner jeg alder i Excel?");
     expect(spoergsmaal).toContain("Kan jeg beregne min alder ud fra CPR-nummeret?");
   });
+
+  // Svensk autocomplete (hl=se, gl=se, 2026-09-28) har "räkna ut ålder från
+  // personnummer" som nr. 2, "räkna ut ålder excel" som nr. 5 og "räkna ut
+  // ålder excel personnummer" som nr. 9 under "räkna ut ålder". GSC viser
+  // beraknare.se/alder på 3.197 visninger, CTR 0,3 %, pos. 7,7 — altså første
+  // side, men næsten ingen klik. Sådan så den ud, før denne rettelse: 0
+  // forekomster af "personnummer" og 0 af "Excel" på svensk, mod 16 Excel på
+  // dansk. Svensk CTR er derfor emnet, og da-grenen er urørt.
+  test("den svenska sidan svarer på personnummer-klyngen", async () => {
+    vi.mocked(getLocale).mockResolvedValue("se");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("se"));
+    const html = renderToStaticMarkup(await AlderPage());
+
+    expect(html).toContain("Räkna ut ålder från personnummer");
+    // Skatteverkets egna exempel, så tallene ikke er gætter.
+    expect(html).toContain("640823");
+    expect(html).toContain("23 augusti 1964");
+    expect(html).toContain("19900315");
+    expect(html).toContain("701063-2391");
+    expect(html).toContain("3 oktober 1970");
+    expect(html).toContain("skatteverket.se/privat/folkbokforing/personnummer/");
+    expect(html).toContain("skatteverket.se/privat/folkbokforing/samordningsnummer/");
+    // Bindestreken blir plustegn det år man fyller 100 — sagten må ikke glide
+    // tilbage til den gamle "60 år"-forklaringen, som ikke findes hos Skatteverket.
+    expect(html).toContain("plustecken");
+    expect(html).toMatch(/100 år|100/);
+    expect(html).not.toContain("60 år");
+  });
+
+  test("den svenska Excel-tabel har samma formler som den danske, med svensk IDAG()", async () => {
+    vi.mocked(getLocale).mockResolvedValue("se");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("se"));
+    const html = renderToStaticMarkup(await AlderPage());
+
+    expect(html).toContain("Så beräknar du ålder i Excel");
+    for (const formel of [
+      "=DATEDIF(A1;B1;&quot;Y&quot;)",
+      "=DATEDIF(A1;B1;&quot;M&quot;)",
+      "=DATEDIF(A1;B1;&quot;D&quot;)",
+      "DATEDIF(A1;B1;&quot;YM&quot;)",
+      "DATEDIF(A1;B1;&quot;YD&quot;)",
+      "=IDAG()",
+      "=DATUM(1900+VÄRDE(VÄNSTER(A1;2))",
+    ]) {
+      expect(html).toContain(formel);
+    }
+    // Tallene er sidens egne, regnet af modulet — ikke skrevet i hånden.
+    const rigtigt = beregnAlder({
+      foedselsdato: "1990-03-15",
+      beregningsdato: "2026-09-25",
+    })!;
+    expect(rigtigt.aar * 12 + rigtigt.maaneder).toBe(438);
+    expect(rigtigt.totalDage).toBe(13343);
+    expect(html).toContain("13.343");
+    expect(html).toContain("19900315");
+  });
+
+  test("fødselsårs-tabellen findes også på svensk, og året i overskriften er et år i tabellen", async () => {
+    vi.mocked(getLocale).mockResolvedValue("se");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("se"));
+    const html = renderToStaticMarkup(await AlderPage());
+    const raekker = foedselsaarRaekker(tilIsoDato(new Date()));
+
+    expect(html).toMatch(/<h2[^>]*>Hur gammal är jag om jag är född i \d{4}\?<\/h2>/);
+    const aarIHeadline = Number(html.match(/är jag om jag är född i (\d{4})\?/)?.[1]);
+    expect(raekker.map((r) => r.aar)).toContain(aarIHeadline);
+    expect(html).toContain("Dagar levda");
+    expect(html).toContain("Född år");
+  });
+
+  test("FAQ'en på svensk stiller de samme spørgsmål som brødteksten", () => {
+    const faq = getPageData("alder", "se")!.faqItems.map((item) => item.question);
+
+    expect(faq).toContain("Räkna ut ålder från personnummer?");
+    expect(faq).toContain("Hur beräknar man ålder i Excel?");
+    expect(faq).toContain("Varför står det två åldrar för varje födelseår?");
+  });
+
+  // Personnummer-FAQ'en siger 36 år, 6 månader og 10 dagar for 15. mars 1990.
+  // Det skal være det beregnAlder giver for de samme to datoer — ellers er
+  // svaret i FAQ'en og svaret i brødteksten ikke det samme svar.
+  test("personnummer-FAQ'ens alder er den beregnAlder giver", () => {
+    const faq = getPageData("alder", "se")!.faqItems;
+    const punkt = faq.find((item) => item.question === "Räkna ut ålder från personnummer?");
+    const rigtigt = beregnAlder({
+      foedselsdato: "1990-03-15",
+      beregningsdato: "2026-09-25",
+    })!;
+
+    expect(rigtigt.aar).toBe(36);
+    expect(punkt?.answer).toContain("36 år, 6 månader och 10 dagar");
+    expect(punkt?.answer).toContain("900315");
+    // Samordningsnumret: dagen er 60 højere, så 63 skal læses som 3.
+    expect(punkt?.answer).toContain("63 ska läsas som 3");
+  });
 });
