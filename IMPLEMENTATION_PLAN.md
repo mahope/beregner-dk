@@ -1,3 +1,7 @@
+STATUS: KØ — **C118 er landet: beraknare.se's forside viste 31 af de 53 kalkulatorer, sitets egen katalog har på svensk. 22 sider — blandt dem `/enhedspris` (1.260 visninger, pos. 6,1) — havde intet kort på domænets mest linkede side, og den gamle test passede alligevel, fordi den tog unionen af dansk og svensk.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den, 119 er kilde-blokeret), og de to åbne noter (C114, C115) har første vindue **2026-09-29 07:30** — det var 22:08, så intet kunne verificeres. Valget var punkt 2 i C105's kandidatliste, den eneste der var ren datatrafik. **Målt først:** `getHomeCalculators("se")` = **31**, `getCalculatorsByLocale("se")` = **53** → **22 manglende**; til sammenligning `da` 79/79 og `no` 28/51. **Planens egen kandidatliste var forkert på tre af fem sider, og det er fundet ved at tælle frem for at regne:** den skrev at `/bil`, `/braendstof` og `/moms` manglede forside-link på beraknare.se — alle tre stod *allerede* i `seCalculators`. Målt på den live side: `href="/moms"` ×4, `href="/bil"` ×3, `href="/braendstof"` ×3, `href="/vaegttab"` ×3, men `href="/enhedspris"` **×0**. Så det var `/enhedspris` (1.260 v, CTR 0,3 %, pos. 6,1 — den bedste position på hele det svenska domæne) og `/vaegttab` (1.265 v, pos. 8,3) der reelt manglede et kort; de andre tyve har nul målte visninger, så de er lagt til for **paritetens skyld, ikke for en dokumenteret trafikgevinst** — det er skrevet sådan, fordi kun de to har tal. **Harness: den gamle test var vakuum-grøn, og det er pointen.** `every calculator in the site catalog is linked from a homepage` byggede et sæt af `da` **og** `se` og krævede at hver katalogpost var i det — altså passede den på alle 22 svenske sider, fordi den *danske* forside linker dem. Den påstod "linket fra en forside" og kunne ikke tilskrive det til et domæne: samme fejltype som C94's negative SE-lås på "500 ÷ 15" og C117's BSD-`sed`, der meldte 0 fund på 206 sider. **Rettelsen er `home-data.test.ts`: paritet pr. domæne for `da` og `se` i begge retninger** (ingen katalogpost uden kort, intet kort uden katalogpost) — modsvejs verificeret ved at fjerne de 22 kort, hvilket får den til at liste alle 22. **Og en ny regel, fordi `page.tsx` har en stille dråb:** kortene grupperes på `category`, og rendereren looper `categoryOrder` — et kort med en kategori *uden for* listen tæller med i "N kalkylatorer" i metateksten og i søgningen, men bliver **aldrig vist**. Ny test kræver derfor `category ∈ categoryOrder` for alle tre locales, verificeret med en plantet fixture (`/brok` → `"Brøk"`, der falder). `no` er bevidst urørt — beregner.no har ingen trafik i snapshottet — men dens rest er låst som sit eget tal (23), så en senere rettelse skal flippe den bevidst. **Målt på rigtig server** (port 3530, verificeret fri *inden* start, C117's lære): `31` → **`53` kalkylatorer** i teksten, **35 → 57** unikke interne href, 208 KB → 264 KB, alle otte kategori-`<h2>` på svensk stadig til stede, de ti nye svenske titler (Jämförpris, Hastighetskalkylator, Bråkkalkylator, 1RM kalkylator, Lönekalkylator, Kroppsfettprocent, Ägglossning, Vikt på planeterna, Medelvärde, Ohms lag) **×3 hver** i markupken, **0** protocol-relative href (C115's klasse stadig lukket), `/api/health` → `status: ok`. Gate grøn: lint (**571 filer**), **2.485 tests / 162 filer** (fra 2.461 / 162), build (**141 sider**), `locale-leak.mjs --gate` exit 0. Kun `home-data.ts` og `home-data.test.ts` er rørt — ingen beregningslogik, ingen anden side, ingen `da`/`no`, ingen ny URL. Kode + plan i ét commit på `ceo/se-forside-katalog`; se opgave 148. **MÅL:** beraknare.se baseline **521 besøgende/28d, 645 sidevisninger, bounce 8 %, +157 %** pr. 2026-09-28; `/enhedspris` **1.260 v / 4 klik / CTR 0,3 % / pos. 6,1** og `/vaegttab` **1.265 v / 4 klik / CTR 0,3 % / pos. 8,3** (svensk GSC 2026-08-29 → 09-26) — måles igen **2026-10-12**. Forventningen er flere interne links til to sider der lå på position 6-8 med næsten intet CTR; de øvrige tyve er ikke målbare før de har visninger.
+
+---
+
 STATUS: KØ — **C115 er landet: forsidens 14 `dage-til`-links var `//dage-til//slug` — protocol-relative, altså de sendte alle besøgende ud til en vært ved navn `dage-til`. Fundet af *verificeringen*, ikke af en idé: C108's eget målegreb, som aldrig var kørt, gav 0 i stedet for 9.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den, 119 er kilde-blokeret), og **21:30-batchen havde kørt da iterationen startede (21:42) — altså syv noter med netop det som første vindue var pligter, ikke valg**, og de syv blev lukket ved indholdskontrol (C106, C108, C109, C110, C111, C112, C113: alle strenge fundet, ingen note lukket på HTTP 200 alene). **At C108's greb fandt fejlen, er pointen med hele månedens metode:** C82–C114 har lukket side efter side ved at køre *autocomplete* og *GSC*, men den sidste fejl sad i det greb en note skrev for to iterationer siden og aldrig kørte. **Årsagen er én skråstreg, og advarselen stod allerede i planen:** `getDageTilPrefix` returnerer prefixet *med* begge skråstreg (`"/dage-til/"`) til `routing.ts`'s sti-sammenligning, og `home-data.ts` skrev `` `/${prefix}/${slug}` ``. **C91 havde fundet præcis denne fejl i `routing.ts`, rettet den og skrevet advarslen ned — to iterationer senere gjorde en anden fil den samme fejl igen.** De tre andre brugere af prefixet (`dato/page.tsx`, `nedtaelling/page.tsx`, `sitemap.ts`) skriver `${prefix}${slug}` og har det rigtigt, så kun forsiden var ramt — målt på live: `/dage-til/juledagen` har 0 dobbeltslash. **Harness: den eksisterende test byggede sin egen forventning som `` `/${prefix}/${slug}` ``, altså den samme fejlkonstruktion som koden** — den var grøn, fordi den reproducerede præcis det den skulle fange. Det er C44's lære i en ny form: måleren ramte den rigtige kode og var alligevel grøn, fordi den genbyggede udtrykket i stedet for at kræve en kendt form. Forventningen er nu bogstavelig pr. sprog, og en ny test kræver at intet href starter med `//`. Begge nye tests er **verificeret modsvejs: de falder** med master-koden. Målt på rigtig server (port 3512, verificeret fri inden start): 14 → 0 dobbeltslash, 0 → 14 korrekte links på **begge** domæner. **Konklusionen der bør stå i næste iterations hoved:** de otte åbne noter var ikke bare pligter, de var den eneste måde denne fejl blev fundet — og den lå i det greb, vi selv havde skrevet. Se opgave 145, 146 og `VERIFICÉR DEPLOY: C115`. **Næste kandidat er derfor ikke et grep, men en måling af de værdier der faktisk når markupken:** `src/lib/href-form.test.ts` samler alle 466 interne href fra de centrale kataloger og kræver at hver enkelt er en gyldig sti — fordi C115's href var *beregnet* (`${prefix}${slug}`), ikke skrevet ud, så et kildefil-grep ville være grønt på præcis den fejl det skulle dække. Det er samme vakuum-grønne fælde som C94's negative lås. Den nye måler er modsvejs verificeret: **30 tests falder** når C115's ene linje genindføres. Den dækker kun katalogerne, ikke de 141 sider der skriver `<Link href>` direkte — det er målt i opgave 147: **`scripts/href-scan.mjs` kryber begge sitemapmer (206 sider) og finder `//`-klassen på præcis to af dem, de to forsider. Ingen af de 204 andre sider har ét.** Så C115 var ikke begyndelsen på en klasse, den var hele klassen — og de 204 rene sider er nu et *målt* tal i stedet for en antagelse. Undervejs faldt min egen regel for regel to gange på plantede fixtures, som de aldrig kunne være faldet på live, fordi de 204 rene sider aldrig har haft dem.
 
 ---
@@ -12262,15 +12266,15 @@ tekst på `/tidszone`), men Kopier-strengen med datoen kræver en browser.
    **måling, ikke flere kort**: `/` har bounce 40 % på 226 besøgende/28d. Find
    først ud af *hvilke* sider der forlader forsiden (kun `/` er målt; de 30 nye
    kort har ingen baseline), før der bygges mere oven på dem.
-2. **🆕 Det samme hul findes på svensk side.** `seCalculators` har **31** mod
-   `daCalculators`' **79** — altså **50** katalogsider uden forside-link på
-   beraknare.se, hvoraf `/bil` (1.702 v), `/braendstof` (1.677 v), `/moms` (1.481 v),
-   `/vaegttab` (1.265 v) og `/enhedspris` (1.260 v) alle har GSC-visninger. Målt
-   på pos. 6-31, altså en del for dyde til at en svar-rettelse flytter dem, men
-   **samme interne-links-mangel som C105 målte på dansk** — det er den billigste
-   af de tre, fordi den er ren datatrafik og ingen tekst skal skrives. Byg den
-   som *én* opgave: de fem svenske sider med visninger først, resten kun hvis
-   målingen holder.
+2. **✅ Lukket af C118 (28/9):** `seCalculators` har **53** mod
+   `getCalculatorsByLocale("se")`'s **53** — de 22 manglende kort er lagt til
+   med titel/beskrivelse ordret fra `calculator-list.ts`. Målt før rettelsen:
+   31 mod 53. **`no` er det eneste domæne med en rest** (28 mod 51) og ligger
+   låst som sit eget tal i `home-data.test.ts`; beregner.no har ingen trafik i
+   noget snapshot, så det er ikke opgjort. **Bemærk at denne punkts gamle
+   kandidatliste var forkert på tre af fem sider** — `/bil`, `/braendstof` og
+   `/moms` stod allerede i `seCalculators`; kun `/enhedspris` (1.260 v, pos. 6,1)
+   og `/vaegttab` (1.265 v, pos. 8,3) manglede reelt et kort. Se opgave 148.
 3. **🔒 `/procent` er lukket som CTR-kandidat (C103).** beraknare.se/procent er
    teknisk fejlfri og de to sproghalvdel er i paritet (7 `<h2>`, 7 spørgsmål,
    3.638 mod 3.848 ord) — 25.954 visninger → 2 klik er et **rangerings**problem på
@@ -13872,3 +13876,115 @@ den gang den fanger noget. **Kør den efter næste deploy:**
 `node scripts/href-scan.mjs` skal give **0 fund på begge domæner** — det er den
 første fysiske prøve på C115 og C116, og den kan ikke gå grøn på en gammel
 bygning, fordi den tæller i markupken.
+
+#### 148. [x] FÆRDIG 2026-09-28 — C118 — **beraknare.se får alle 53 katalogrummets kalkylatorer på forsiden; de 22 der manglede, og en test der ikke kunne se dem**
+
+C105's punkt 2 i kandidatlisten, som lå og ventede. Valgt fordi det var den
+eneste af de tre, der var *ren datatrafik* uden at skrive en eneste brødtekst.
+
+**Målt først, målt med tal og ikke med en liste.** `getHomeCalculators("se")` =
+**31**, `getCalculatorsByLocale("se")` = **53**. Til sammenligning `da` 79/79
+og `no` 28/51 — altså præcis samme asymmetri som C105 målte på dansk, bare på
+det andet domæne, og den var aldrig målt.
+
+**Planens egen kandidatliste var forkert på tre af de fem sider den navngav.**
+Den skrev at `/bil`, `/braendstof` og `/moms` manglede forside-link på
+beraknare.se. Alle tre stod allerede i `seCalculators`. Talt på den **live**
+side: `href="/moms"` ×4, `href="/bil"` ×3, `href="/braendstof"` ×3,
+`href="/vaegttab"` ×3, `href="/enhedspris"` **×0**. Så kun to af de fem
+manglede reelt et *katalogkort*, og den ene af dem — `/enhedspris` — lå på
+position 6,1 med 0,3 % CTR, den bedste position på hele det svenska domæne.
+Læren er C88's: forskellen på "linked fra et sted" og "linked fra det sted,
+jeg mente" er tre linjer `grep -o`, og listen i planen var skrevet uden den.
+
+**Rettelsen er 22 data-rækker i `seCalculators`.** Titel og beskrivelse er
+kopieret **ordret** fra `calculator-list.ts`' `se`-poster, så de to lister ikke
+kan glide fra hinanden; kategorien er den svenska oversættelse af den danske
+kategori i `categories.ts` (Økonomi→Ekonomi, Sundhed→Hälsa, Familie→Familj,
+Hverdag→Vardag, Matematik→Matematik) — samme regel som C105 brugte, fordi
+`categories.ts` kun findes på dansk. Ingen beregningslogik, ingen anden side,
+ingen ny URL, `da` og `no` urørte.
+
+**Harness, og det er den egentlige funddel.** Den gamle test hed
+`every calculator in the site catalog is linked from a homepage` og byggede
+`linked = new Set([...da, ...se])`. Den krævede altså at hver post i
+`categories.ts` lå i foreningen — og passede derfor på alle 22 svenske sider,
+fordi den *danske* forside linker dem. Den påstod en egenskab ved to domæner,
+som den ikke kunne tilskrive til noget af dem. Det er C94's negative SE-lås på
+"500 ÷ 15" i tredje forklædning, og C117's BSD-`sed` der meldte 0 fund på 206
+sider: en måler, der er grøn fordi den ikke kan se det den skulle dække.
+
+To nye regler:
+
+1. **Paritet pr. domæne, i begge retninger**, for `da` og `se`: ingen katalogpost
+   uden kort, intet kort uden katalogpost. Den gamle unionstest er væk, ikke
+   udvidet.
+2. **Hvert korts `category` skal være en nøgle i det lokale `categoryOrder`.**
+   Ikke en smukkere regel end paritet, men en *ny* fejlklasse: `page.tsx`
+   grupperer kortene på `category` og renderer kun de grupper `categoryOrder`
+   nævner, så et kort med en ukendt kategori tæller med i "N kalkylatorer" i
+   metateksten og i søgningen og bliver alligevel aldrig vist. Den fejl er
+   usynlig, fordi tallet stadig er rigtigt.
+
+**Verificeret modsvejs, begge:** paritetsreglen falder med de 22 kort fjernet
+og lister alle 22; kategorireglen falder med én plantet fixture (`/brok` →
+`"Brøk"`). Den anden regel var grøn for alle tre locales *inden* ændringen, så
+den låser en fejl der endnu ikke findes — hvilket er pointen med en port.
+
+**Målt på rigtig server** (`next start` på port 3530, porten verificeret fri
+*inden* start — C117's lære):
+
+| Måling | Før | Efter |
+|---|---|---|
+| "N kalkylatorer" i tekst (afledt af kortenes antal) | 31 | **53** |
+| unikke interne `href` på forsiden | 35 | **57** |
+| HTML-størrelse | 208 KB | 264 KB |
+| protocol-relative href (C115's klasse) | 0 | **0** |
+| kategori-`<h2>` på svensk | 8 | **8** |
+| nye titler i markupken | 0 | **10 af 10, ×3 hver** |
+
+`/api/health` → `status: ok`. De tre forekomster pr. titel er synlig tekst,
+RSC-payloaden og søgedataen — samme forventning som C94.
+
+**Gate grøn:** lint (**571 filer**), **2.485 tests / 162 filer** (fra
+2.461 / 162), build (**141 sider**), `locale-leak.mjs --gate` exit 0.
+
+**`no` er bevidst urørt og dens rest er låst som sit eget tal.** beregner.no har
+ingen trafik i noget snapshot, og en dansk oversættelse af 23 kort er ikke en
+opgave, der kan måles. Men `23` ligger nu i en test, så den kan ikke blive
+glemt ved en tilfældighed.
+
+**MÅL:** beraknare.se **521 besøgende/28d, 645 sidevisninger, bounce 8 %**
+pr. 2026-09-28 (28 dage mod forrige: +157 %); `/enhedspris` **1.260 v / 4 klik
+/ CTR 0,3 % / pos. 6,1** og `/vaegttab` **1.265 v / 4 klik / CTR 0,3 % /
+pos. 8,3** — svensk GSC 2026-08-29 → 2026-09-26. Måles igen **2026-10-12**.
+Forventningen er flere interne links til to sider på position 6-8 med næsten
+intet klik. De øvrige tyventog har nul målte visninger og kan derfor kun måles
+som *fravær* af skade, ikke som vækst.
+
+### ⏳ VERIFICÉR DEPLOY: C118 — beraknare.se har alle 53 kort på forsiden
+
+Kode + plan i ét squash-commit på `ceo/se-forside-katalog`. Første
+kandidatvindue **2026-09-29 07:30** (push efter 21:30-batchen). Kun
+`src/lib/home-data.ts` (22 nye rækker i `seCalculators`, ingen eksisterende
+linje ændret) og `src/lib/home-data.test.ts` er rørt — ingen beregningslogik,
+ingen anden side, `da` og `no` urørte, ingen ny URL, ingen sitemap-ændring.
+
+Verificér ved **indhold, ikke HTTP 200**:
+
+```bash
+curl -s https://beraknare.se/ -o /tmp/se.html
+grep -o '[0-9]\+ kalkylatorer' /tmp/se.html | sort -u   # skal være 53 (var 31)
+grep -o 'href="/[a-z0-9-]*"' /tmp/se.html | sort -u | wc -l   # skal være 57 (var 35)
+for h in enhedspris brok fart promille temperatur enheder del-regning 1rm; do
+  printf '%s %s\n' "$h" "$(grep -o "href=\"/$h\"" /tmp/se.html | wc -l)"
+done   # enhedspris skal gå 0 -> >=1; de syv andre skal være >=1
+grep -o 'href="//' /tmp/se.html | wc -l   # skal være 0 (C115/C116/C117)
+```
+
+Kontrol på dansk, uændret: `curl -s https://minberegner.dk/` skal stadig sige
+`79 kalkulatorer`, og `/brok`, `/fart` og `/promille` skal stadig have **mindst
+et** forside-kort på dansk (de tre blev lagt til af C105) — de skal altså findes
+på minberegner.dk, mens de på beraknare.se kommer fra *denne* ændring. Kør
+`scripts/href-scan.mjs` fra opgave 147 bagefter: den skal give **0 fund på begge
+domæner**, altså ingen protocol-relative href.

@@ -510,6 +510,34 @@ const seCalculators: HomeCalculator[] = [
   { title: "Solcellskalkylator", description: "Beräkna besparing och återbetalningstid för solceller", href: "/solceller", popular: false, category: "Bostad" },
   { title: "Bröllopsbudget", description: "Beräkna komplett bröllopsbudget", href: "/bryllup", popular: false, category: "Familj" },
   { title: "Bil Värdeminskning", description: "Beräkna värdeminskning och kostnader för din bil", href: "/bil", popular: false, category: "Vardag" },
+  // Tillagda 2026-09-28: de 22 som manglade, så att katalogen på beraknare.se
+  // har samma 53 kort som den svenska delen af calculator-list.ts. Titel og
+  // beskrivelse er kopieret ordret derfra, så de to lister ikke kan glide fra
+  // hinanden; kategorien er den svenska oversættelse af den danske
+  // kategori i categories.ts (Økonomi→Ekonomi, Sundhed→Hälsa, Familie→Familj,
+  // Hverdag→Vardag, Matematik→Matematik).
+  { title: "Lönekalkylator", description: "Omvandla timlön, månadslön och årslön", href: "/loen-konverter", popular: false, category: "Ekonomi" },
+  { title: "Hushållsbudget", description: "Räkna ut kvar att leva på", href: "/budget", popular: false, category: "Ekonomi" },
+  { title: "Avkastningskalkylator", description: "Beräkna ROI och årlig avkastning", href: "/afkast", popular: false, category: "Ekonomi" },
+  { title: "Sparmål", description: "Hur mycket ska du spara per månad?", href: "/sparemaal", popular: false, category: "Ekonomi" },
+  { title: "Löneökning", description: "Beräkna löneökning i procent", href: "/loenstigning", popular: false, category: "Ekonomi" },
+  { title: "Promillekalkylator", description: "Uppskatta din alkoholpromille", href: "/promille", popular: false, category: "Hälsa" },
+  { title: "Kroppsfettprosent", description: "Beräkna fettprocent (Navy-metoden)", href: "/kropsfedt", popular: false, category: "Hälsa" },
+  { title: "1RM kalkylator", description: "Uppskatta ditt maxlyft", href: "/1rm", popular: false, category: "Hälsa" },
+  { title: "Vattenbehov", description: "Hur mycket vatten ska du dricka?", href: "/vandbehov", popular: false, category: "Hälsa" },
+  { title: "Kaloriförbränning", description: "Förbrända kalorier vid motion", href: "/motion-kalorier", popular: false, category: "Hälsa" },
+  { title: "Proteinbehov", description: "Beräkna ditt dagliga proteinbehov", href: "/proteinbehov", popular: false, category: "Hälsa" },
+  { title: "Elbil vs. bensin", description: "Jämför elbil och bensinbil", href: "/elbil", popular: false, category: "Vardag" },
+  { title: "Jämförpris", description: "Hitta den billigaste varan per enhet", href: "/enhedspris", popular: false, category: "Vardag" },
+  { title: "Hastighetskalkylator", description: "Beräkna hastighet, sträcka och tid", href: "/fart", popular: false, category: "Vardag" },
+  { title: "Dela notan", description: "Fördela notan mellan flera", href: "/del-regning", popular: false, category: "Vardag" },
+  { title: "Ägglossning", description: "Hitta dina fertila dagar", href: "/aegloesning", popular: false, category: "Familj" },
+  { title: "Temperatur", description: "Omvandla °C, °F och Kelvin", href: "/temperatur", popular: false, category: "Matematik" },
+  { title: "Medelvärde", description: "Beräkna medelvärde och median", href: "/gennemsnit", popular: false, category: "Matematik" },
+  { title: "Enhetskalkylator", description: "Omvandla längd, vikt och volym", href: "/enheder", popular: false, category: "Matematik" },
+  { title: "Bråkkalkylator", description: "Förkorta bråk till decimal och procent", href: "/brok", popular: false, category: "Matematik" },
+  { title: "Ohms lag", description: "Beräkna spänning, ström och resistans", href: "/ohm", popular: false, category: "Matematik" },
+  { title: "Vikt på planeterna", description: "Hur mycket väger du på Mars?", href: "/planetvaegt", popular: false, category: "Matematik" },
 ];
 
 /* ------------------------------------------------------------------ */

@@ -5,7 +5,7 @@ import {
   getHomeCalculatorCount,
   getDageTilKort,
 } from "./home-data";
-import { isCalculatorAvailable } from "./calculator-list";
+import { getCalculatorsByLocale, isCalculatorAvailable } from "./calculator-list";
 import { beregnere } from "./categories";
 import {
   getDageTilAnswer,
@@ -191,15 +191,43 @@ describe("getHomeCalculators", () => {
     ]);
   });
 
-  test("every calculator in the site catalog is linked from a homepage", () => {
-    const linked = new Set([
-      ...getHomeCalculators("da").map((c) => c.href),
-      ...getHomeCalculators("se").map((c) => c.href),
-    ]);
-    const orphans = beregnere
-      .map((item) => item.href)
-      .filter((href) => !linked.has(href));
-    expect(orphans, "katalogsider uden link fra forside").toEqual([]);
+  test("every catalog page has a card on its own locale's homepage", () => {
+    // Den gamle test tog foreningen af da + se, altså passede den på de 22
+    // svenske sider, der manglede et kort, fordi den danske forside linker dem.
+    // Den påstod "linket fra en forside" og kunne ikke tilskrive det til et
+    // domæne — sæsonens vakuum-grønne måler. Nu er pariteten pr. domæne.
+    for (const locale of ["da", "se"] as const) {
+      const katalog = getCalculatorsByLocale(locale).map((c) => c.href);
+      const kort = new Set(getHomeCalculators(locale).map((c) => c.href));
+      const mangler = katalog.filter((href) => !kort.has(href));
+      expect(mangler, `${locale}-forsiden mangler kort til`).toEqual([]);
+      const ukendte = [...kort].filter((href) => !katalog.includes(href));
+      expect(ukendte, `${locale}-forsiden har kort uden katalogpost`).toEqual([]);
+    }
+  });
+
+  test("NO is still the locale with an incomplete homepage, by 23 cards", () => {
+    // Målt 2026-09-28: no har 28 kort mod 51 i katalogen. Skrevet som sit eget
+    // tal, så en senere rettelse skal flippe den her bevidst og ikke ved en
+    // tilfældighed.
+    const katalog = getCalculatorsByLocale("no").length;
+    const kort = getHomeCalculators("no").length;
+    expect(katalog - kort).toBe(23);
+  });
+
+  test("every card's category is a key in that locale's categoryOrder", () => {
+    // page.tsx grupperer kortene på `category` og renderer kun de grupper,
+    // categoryOrder nævner. Et kort med en kategori uden for listen tæller
+    // med i "N kalkylatorer" i metateksten og i søgningen, men bliver aldrig
+    // vist. Den fejl er usynlig, fordi tallet stadig er rigtigt.
+    for (const locale of ["da", "no", "se"] as const) {
+      const nøgler = getHomePageData(locale).categoryOrder.map((c) => c.key);
+      for (const card of getHomeCalculators(locale)) {
+        expect(nøgler, `${locale}${card.href} med kategorien "${card.category}"`).toContain(
+          card.category
+        );
+      }
+    }
   });
 
   test("every Danish first-page search page is linked from the Danish homepage", () => {
