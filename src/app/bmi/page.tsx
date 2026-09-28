@@ -78,10 +78,10 @@ export default async function BMIPage() {
           <strong>Formlen er:</strong> BMI = vægt (kg) / højde² (m)
         </p>
 
-        <h2>BMI kategorier for voksne ifølge WHO</h2>
+        <h2>BMI-skala for voksne ifølge WHO</h2>
         <p>
-          Verdenssundhedsorganisationen (WHO) har defineret følgende BMI
-          kategorier for voksne:
+          Verdenssundhedsorganisationen (WHO) har defineret følgende BMI-skala
+          for voksne:
         </p>
         <ul>
           <li>
@@ -170,9 +170,9 @@ export default async function BMIPage() {
           <strong>Formeln är:</strong> BMI = vikt (kg) / längd² (m)
         </p>
 
-        <h2>BMI-kategorier för vuxna enligt WHO</h2>
+        <h2>BMI-skala för vuxna enligt WHO</h2>
         <p>
-          Världshälsoorganisationen (WHO) har definierat följande BMI-kategorier
+          Världshälsoorganisationen (WHO) har definierat följande BMI-skala
           för vuxna:
         </p>
         <ul>
