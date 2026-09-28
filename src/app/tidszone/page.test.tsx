@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, test, vi } from "vitest";
 import { getDomainConfigByLocale } from "@/lib/domain-config";
 import { getCurrentDomainConfig, getLocale } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
+import { tidsskillnadRaekker } from "@/lib/tidszone-eksempler";
 import TidszonePage from "./page";
 
 vi.mock("@/components/TidszoneBeregner", () => ({
@@ -140,6 +141,57 @@ describe("tidszone svar-først-tabeller for lande og Excel", () => {
     expect(html).toContain("<td class=\"py-2 pr-4\">Turkiet</td>");
     expect(html).not.toContain("<td class=\"py-2 pr-4\">Grækenland</td>");
     expect(html).not.toContain("<td class=\"py-2 pr-4\">Tyrkiet</td>");
+  });
+
+  test("landetabellen viser Grønland, som dansk autocomplete spørger om først", async () => {
+    vi.mocked(getLocale).mockResolvedValue("da");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("da"));
+
+    const html = renderToStaticMarkup(await TidszonePage());
+
+    // "tidsforskel grønland" er nr. 1 og "tidszoner grønland" nr. 13 i
+    // dansk autocomplete, og Nuuk la allerede i bytabellen.
+    expect(html).toContain("<td class=\"py-2 pr-4\">Grønland</td>");
+    expect(html).toContain("<td class=\"py-2 pr-4\">4 timer bagefter</td>");
+    // Nuuk skifter paa EU's datoer, saa der er ingen særskilt sommervaerdi.
+    expect(html).toContain("Samme som vintertid");
+    // Canada er bevidst udeladt fra *landetabellen* — Toronto skifter paa
+    // nordamerikanske datoer, saa en konstant vaerdi ville vaere forkert i
+    // tre uger om aaret. Laesen ligger paa tabel-raekkerne, ikke paa hele
+    // siden: FAQ'en nævner Canada om Toronto, og den er mocked ud her, saa
+    // et negativt laes paa hele HTML'en ville vaere groent uanset koden.
+    const tabelRaekker = [...html.matchAll(/<td class="py-2 pr-4">([^<]+)<\/td>/g)].map(
+      (m) => m[1]
+    );
+    expect(tabelRaekker).toContain("Grønland");
+    expect(tabelRaekker).not.toContain("Canada");
+  });
+
+  test("sætningen om byerne og tabellen er bygget af samme liste, så de ikke kan glide fra hinanden", async () => {
+    for (const locale of ["da", "se"] as const) {
+      vi.mocked(getLocale).mockResolvedValue(locale);
+      vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale(locale));
+
+      const html = renderToStaticMarkup(await TidszonePage());
+      const raekker = tidsskillnadRaekker(locale);
+
+      // Den indledende sætning til landetabellen skal navngive præcis de
+      // byer, tabellen viser. Skrev den bynavne som tekst, kunne den ikke se
+      // et land, der kom til siden — og det er præcis det, der skete med
+      // Grønland, da det blev føjet til tabellen.
+      const overskrift = html.indexOf(
+        locale === "da"
+          ? "Tidsforskel til de lande"
+          : "Tidsskillnad till de länder"
+      );
+      expect(overskrift).toBeGreaterThan(-1);
+      const tabel = html.indexOf("<table", overskrift);
+      expect(tabel).toBeGreaterThan(overskrift);
+      const afsnit = html.slice(overskrift, tabel);
+      for (const raekke of raekker) {
+        expect(afsnit).toContain(raekke.by);
+      }
+    }
   });
 
   test("hver sproggren har præcis sin egen enhed, ikke den andens", async () => {

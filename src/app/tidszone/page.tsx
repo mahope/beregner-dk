@@ -8,8 +8,47 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import RelatedCalculators from "@/components/RelatedCalculators";
 import RelateredeArtikler from "@/components/RelateredeArtikler";
 import { TIDSZONER, tidszoneRækker } from "@/lib/tidszone-reference";
-import { excelEksempler, tidsskillnadRaekker } from "@/lib/tidszone-eksempler";
+import {
+  excelEksempler,
+  TIDSSKILLNADS_LANDE,
+  tidsskillnadRaekker,
+} from "@/lib/tidszone-eksempler";
 import Link from "next/link";
+
+/**
+ * Byerne bag landetabellen, som en kommasepareret liste med "og" til sidst.
+ *
+ * Sætningen skal kunne navngive præcis de byer, tabellen viser, så den er
+ * bygget af `tidsskillnadRaekker` — den samme liste tabellen renderer. Da stod
+ * navnene som tekst i JSX, og da et land kom i tabellen, kunne sætningen og
+ * tabellen ikke glide fra hinanden (C84's `metaDescription`-fund og C109's
+ * danske liste i samme fejlklasse).
+ */
+function byListe(spoergsprog: "da" | "se"): string {
+  const byer = tidsskillnadRaekker(spoergsprog).map((raekke) => raekke.by);
+  if (byer.length === 0) return "";
+  return `${byer.slice(0, -1).join(", ")} og ${byer[byer.length - 1]}`;
+}
+
+/**
+ * De lande i tabellen, der skifter sommertid på EU's datoer, altså dem
+ * Danmark og Sverige flytter UTC-offseten sammen med. Uddaget af
+ * `foelgerEu` og ikke skrevet i teksten: da Grønland kom i tabellen, skrev
+ * sætningen stadig "Grækenland og Spanien", altså om færre lande end
+ * tabellen viste.
+ *
+ * Det må ikke udledes af `skifterSammenMedDanmark` — den spørger, om en
+ * zone *har* sommertid, og USA og Australien har den, bare på andre datoer.
+ * Det ville have gjort sætningen til "USA og Australien følger Danmark",
+ * hvilket er forkert i de uger, hvor kun den ene side har sommartid.
+ */
+function landeFoelgerDanmark(spoergsprog: "da" | "se"): string {
+  const lande = TIDSSKILLNADS_LANDE.filter((l) => l.foelgerEu).map((l) =>
+    spoergsprog === "se" ? (l.landSe ?? l.landDa) : l.landDa
+  );
+  if (lande.length <= 1) return lande[0] ?? "";
+  return `${lande.slice(0, -1).join(", ")} og ${lande[lande.length - 1]}`;
+}
 
 export async function generateMetadata() {
   return generatePageMetadata("tidszone");
@@ -168,9 +207,9 @@ export default async function TidszonePage() {
         <p>
           Tabellen ovenfor viser byer. Her er de samme forskelle som hele{" "}
           <strong>lande</strong>, fordi &quot;tidsforskel Japan&quot;, &quot;tidsforskel
-          Thailand&quot; og &quot;tidsforskel Tyrkiet&quot; er land, ikke byer. For New
-          York, Athen, Istanbul, Madrid, Bangkok, Tokyo, Shanghai, Sydney og
-          Auckland er forskellen den samme som i bytabellen.
+          Thailand&quot;, &quot;tidsforskel Tyrkiet&quot; og &quot;tidsforskel
+          Grønland&quot; er land, ikke byer. For{" "}
+          {byListe("da")} er forskellen den samme som i bytabellen.
         </p>
         <table className="w-full text-left border-collapse my-4">
           <thead>
@@ -193,10 +232,11 @@ export default async function TidszonePage() {
           </tbody>
         </table>
         <p>
-          <strong>Grækenland og Spanien følger Danmark</strong>, så forskellen er
-          den samme hele året. <strong>Thailand, Japan og Kina bruger ikke
-          sommertid</strong>, så de ligger én time tidligere, når Danmark har
-          sommertid. Det er den fælde, der giver den forkerte aftale.
+          <strong>{landeFoelgerDanmark("da")} følger Danmark</strong>, så
+          forskellen er den samme hele året. <strong>Thailand, Japan og Kina
+          bruger ikke sommertid</strong>, så de ligger én time tidligere, når
+          Danmark har sommertid. Det er den fælde, der giver den forkerte
+          aftale.
         </p>
 
         <h2>Sådan regner du tidsforskel ud i Excel</h2>
@@ -271,10 +311,9 @@ export default async function TidszonePage() {
         <h2>Tidsskillnad till de länder folk frågar om</h2>
         <p>
           Tabellen ovan visar städer. Här är samma skillnader för hela{" "}
-          <strong>länder</strong>, eftersom &quot;tidsskillnad Japan&quot;,
+          <strong>länder</strong>, eftersom           &quot;tidsskillnad Japan&quot;,
           &quot;tidsskillnad Thailand&quot; och &quot;tidsskillnad Turkiet&quot; är
-          länder, inte städer. För New York, Aten, Istanbul, Madrid, Bangkok,
-          Tokyo, Shanghai, Sydney och Auckland är skillnaden densamma som i
+          länder, inte städer. För {byListe("se")} är skillnaden densamma som i
           städstabellen.
         </p>
         <table className="w-full text-left border-collapse my-4">
@@ -298,10 +337,10 @@ export default async function TidszonePage() {
           </tbody>
         </table>
         <p>
-          <strong>Grekland och Spanien följer Sverige</strong>, så skillnaden är
-          densamma hela året. <strong>Thailand, Japan och Kina använder inte
-          sommartid</strong>, så de ligger en timme tidigare, när Sverige har
-          sommartid. Det är fällan som ger det felaktiga mötet.
+          <strong>{landeFoelgerDanmark("se")} följer Sverige</strong>, så
+          skillnaden är densamma hela året. <strong>Thailand, Japan och Kina
+          använder inte sommartid</strong>, så de ligger en timme tidigare, när
+          Sverige har sommartid. Det är fällan som ger det felaktiga mötet.
         </p>
 
         <h2>Så räknar du ut tidsskillnad i Excel</h2>

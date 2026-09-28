@@ -1,3 +1,7 @@
+STATUS: KØ — **C155 er landet: `/tidszone` (24.209 visninger, CTR 0,4 %, pos. 7,5 — sitets fjerdestørste danske GSC-side) svarede på *nul af* sin egen søgeklynge: dansk autocomplete under "tidsforskel" har Grønland som nr. 1 og under "tidszoner" som nr. 13, og landetabellen havde hverken Grønland eller Nuuk — selv om `Nuuk` allerede lå i `TIDSZONER` med en kildeført IANA-begrundelse.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den, 119 er kilde-blokeret), og de syv åbne noter (C114, C115, C118–C123) har første vindue **2026-09-29 07:30** — det var 01:16, så intet kunne verificeres. Valget kom af at **måle paritet på de fem resterende svenske GSC-sider** videre: `/moms` og `/nedtaelling` og `/elberegner` var lukket i C123/C122/C154, og de tre sidste målinger viste `/bil` i paritet (3.248/6/4 mod 3.257/6/4) — så i stedet for lappe en svensk asymmetri gik målingen på **den fjerdestørste danske side, der lå på første side med under 0,5 % CTR**. **Målt først (DA-autocomplete 01:20):** "tidsforskel" → grønland, japan, kreta, thailand, bali danmark, japan danmark, tyrkiet, grækenland, new york, danmark usa, danmark grønland, danmark tyrkiet, grækenland, beregner, bali, kreta danmark; "tidszoner" → kort, usa, europa, verden, beregner, europa kort, rusland, australien, canada, i kina, danmark, usa kort, **grønland**, canada kort, frankrig. På den **live** side (4.420 ord, 8 `<h2>`) var `Grønland` **2 fund** (kun i bytabellen og i én sætning), og **"New Zealand", "Rusland" og "Europa" stod 0 gange**. **Rettelsen (begge sprog).** Ét nyt land i `TIDSSKILLNADS_LANDE`: **Grønland**, med byen Nuuk. Forskellen er **4 timer bagud hele året** — ikke en konstant gætning, men `brugerSommertid(America/Nuuk)` + de to danske offsets, altså samme modultil som bytabellen bruger (C84's krav). Grønland flyttede i marts 2023 fra UTC-4 til UTC-3 (WGT/WGST) på **EU's skiftedatoer**, så zone og Danmark flytter sig samtidig, og derfor udelades sommerværdien. Landetabellen går **10 → 11 rækker i begge sprog**. **To fejl fundet i min egen rettelse, begge fordi jeg rettelserne på *målingen* i stedet for på *koden* — og det er den samme klasse som målefejl 9-29, nu i min egen nye tekst.** (1) **Jeg ville også føje Canada til.** Autocomplete har "tidszoner canada" (nr. 9 og 14), og `Toronto` lå allerede i `TIDSZONER` — så det så ud til at være samme sag som Grønland. Det er det **ikke**: Toronto skifter sommertid på nordamerikanske datoer, ikke EU's, så forskellen er 6 timer bagud det meste af året men **5 i de to uger omkring forårsskiftet og den ene uge omkring efterårsskiftet**. `brugerSommertid` kan ikke se den forskel, så tabellen ville have vist "6 timer bagefter / Samme som vintertid" og været **forkert i tre uger om året**. Canada er derfor **bevidst udeladt**, med begrundelsen skrevet i koden. Rusland og Europa er udeladt af samme grund: Moskva ligger ikke i `TIDSZONER`, så en offset ville være gættet. (2) **Min egen sætning løj om fire lande.** Jeg lod den indledende sætning ("… følger Danmark") udlede af `sommer === undefined`, altså af *harzone sommertid* — og fik da "Storbritannien, USA, **Grønland**, Grækenland, Spanien, **Australien og New Zealand** følger Danmark". USA og Australien har ganske vist sommertid, men på andre datoer, så påstanden er falsk præcis i de overgangsperioder, siden selv advarer om to steder ovenfor. Fundet på **rigtig server**, ikke i en test: testen grønde, fordi den kun testede det, jeg havde ændret. Rettet ved et **eget felt `foelgerEu`** i stedet for at udlede det — forskellen mellem "har sommertid" og "skifter på EU's datoer" er nu eksplicit i typen. **Ingen tal står hårdkodet to steder:** den indledende sætning og "… følger Danmark"-sætningen er begge **genereret af `tidsskillnadRaekker`/`TIDSSKILLNADS_LANDE`** — de skrev bynavne som tekst i JSX, og da Grønland kom i tabellen, kunne sætningen ikke se det. Det er **C84's `metaDescription`-fund i en ny form**: her lå listen i markup, ikke i et meta-felt. **Målefejl nr. 30 (min egen):** min negative lås på "Canada" på hele HTML'en gav **4 fund** — ikke fordi Canada var i tabellen, men fordi `FAQ'en` nævner Canada om Toronto, og den er `vi.mock`'et væk i sidetesten, så låset ville være grønt uanset koden. Rettet til at læse **tabel-`<td>`-rækkerne** i stedet for hele siden. Samme vakuum-grønne fælde som C94's negative lås og C115's test, der genbyggede det udtryk den skulle fange. **Harness:** `tidszone-eksempler.test.ts` **13 → 16** (Grønland er 4 timer bagud med Nuuk's egne `utcVinter`/`utcSommer` læst af modulet, Canada udeladt både som land og som by, og `foelgerEu`-låsen der skelner fire EU-lande fra fire som-har-sommertid-uden-følger); `tidszone/page.test.tsx` **11 → 13** (landetabellen viser Grønland + "4 timer bagefter" + ingen Canada-*række*, og **sætningen mellem lande-overskriften og dens tabel skal navngive præcis de byer, tabellen renderer** — den lås er den der gør glide-fra-hinanden umulig). **Verificeret modsvejs: alle 5 nye tests falder** med master's to kildefiler. **Gate grøn:** lint (**579 filer**), **2.548 tests / 166 filer** (fra 2.543 / 166), build (**141 sider**). Målt på rigtig server (port 3721, verificeret fri *inden* start): DA "For London, New York, **Nuuk**, Athen, … og Auckland", "**Storbritannien, Grønland, Grækenland og Spanien** følger Danmark", Grønland-række + "4 timer bagefter" fundet; SE "För London, New York, **Nuuk**, …" og "Storbritannien, Grønland, **Grekland** och Spanien följer Sverige", **0** fund på "Danmark"/"Grækenland"/"Tyrkiet". Kode + plan i ét commit på `ceo/tidszone-land`. **MÅL:** `/tidszone` DA baseline **24.209 visninger / 106 klik / CTR 0,4 % / pos. 7,5** (søgninger: "tidszoner" 725 v pos. 9, "hvad er klokken i usa når den er 12 i danmark" 177 v pos. 6, "tidszoner beregner" 103 v pos. 3, "tidsforskel" 87 v pos. 10) pr. **2026-08-29 → 2026-09-26** — måles igen **2026-10-12**. Forventningen er nye lange haler på "tidsforskel grønland", ikke flere visninger på hovedtermen. **Næste kandidater:** `/renteberegner` SE (2.849 v, pos. 24,1 — C85 var kun `da`), `/braendstof` SE (1.677 v, pos. 12,9 — C94 var kun `da`), `/kalorier` SE (2.703 v, pos. 18,8 — C89 var kun `da`).
+
+---
+
 STATUS: KØ — **C154 er landet: beraknare.se `/elberegner` (11 besøgende/28d) havde 4 FAQ mod dansk 7 — en paritetsforskel på 3 spørgsmål, hvoraf to er søgeklynger svenske brugere spørger om.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den, 119 er kilde-blokeret), og de syv åbne noter (C114, C115, C118–C123) har første vindue **2026-09-29 07:30** — det var 00:55, så intet kunne verificeres. Valget kom af at **måle paritet på de resterende beraknare.se-sider** (live, begge domæner): `/elberegner` DA 3.276 ord / 7 FAQ mod SE 2.670 / 4 — en 606 ords forskel og 3 manglende FAQ-spørgsmål. De tre manglende var "Hvornår er strømmen billigst?", "Hvornår kommer morgendagens elpriser?" og "Hvor stor er elafgiften i 2026?" — alle tre er spørgsmål svenske brugere søger efter. **Rettelsen (kun `se`).** Tre nye FAQ-par i `page-data.ts`: "När är elen billigast?" (svaret om natten og midt på dagen, nättariffen högst 17-21), "När kommer morgondagens elpriser?" (spotpriserna publiceras runt kl. 13) og "Hur stor är elskatten i 2026?" (0,45 SEK/kWh). **Ingen tal står hårdkodet to steder:** svensk elskatt er en fast sats (0,45 SEK/kWh), ikke afhængig af dato eller prisområde. **Harness:** ny test i `page-data.test.ts` der låser at SE har 7 FAQ (samme som DA) og at de tre nye spørgsmål findes. **Gate grøn:** lint (579 filer), **2.543 tests / 166 filer** (fra 2.542 / 166 — 6 pre-existing MomsBeregner-fejl på master, uafhængig af denne ændring), build (141 sider). Kode + plan i ét commit på `ceo/elberegner-se-faq-paritet`. **MÅL:** `/elberegner` SE baseline **11 besøgende/28d pr. 2026-09-28** — måles igen 2026-10-12. Forventningen er højere CTR på de positioner siden allerede har, ikke nye visninger.
 
 ---
@@ -14458,3 +14462,63 @@ FAQ, 0 svenske markører); `/api/health` → `status: ok`.
   5. KONTROL: `https://minberegner.dk/moms` skal have **4 `<h2>`**, **11
      spørgsmål**, `=MOMS(A1;25;0;0)` og **0** på "baklänges"/"=A1*1,25".
   6. `https://minberegner.dk/api/health` skal svare `status: ok`.
+
+#### 155. [x] FÆRDIG 2026-09-29 — C155 — **`/tidszone` (24.209 v, 0,4 % CTR, pos. 7,5) svarer på "tidsforskel grønland" — dansk autocomplete nr. 1 — og sætningen om byerne kan ikke længere glide fra tabellen**
+
+**Datagrund:** dansk GSC 2026-08-29 → 2026-09-26: `/tidszone` **24.209
+visninger, 106 klik, CTR 0,4 %, pos. 7,5** — fjerdestørste danske side.
+DA-autocomplete (01:20): "tidsforskel grønland" er **nr. 1**, "tidszoner
+grønland" **nr. 13**. På den live side havde landetabellen hverken Grønland
+eller Nuuk, selv om `Nuuk` lå i `TIDSZONER`.
+
+**Rettelsen (begge sprog).** Ét nyt land, **Grønland** (byen Nuuk), som
+`Nuuk`'s egne `utcVinter`/`utcSommer` driver: **4 timer bagud hele året**.
+Landetabellen går 10 → 11 rækker.
+
+**Målt og bevidst ikke bygget:** Canada (Toronto lå i `TIDSZONER`, men
+skifter på nordamerikanske datoer, så en konstant værdi ville være forkert i
+tre uger om året), Rusland og Europa (Moskva mangler i `TIDSZONER`).
+
+**To fejl i min egen rettelse, fundet ved at måle på rigtig server:**
+1. Canada ville være forkert (se ovenfor) — udeladt med begrundelse i koden.
+2. Sætningen "… følger Danmark" udledt af "harzone sommertid" sagde
+   "USA og Australien følger Danmark", hvilket er **falsk** i
+   overgangsperioderne. Rettet med et eget felt `foelgerEu`.
+
+**Målefejl nr. 30 (min egen):** negativt lås på "Canada" på hele HTML'en gav
+4 fund fra `FAQ`ens Toronto-svar, som er mocket ud i testen — låset var
+grønt uanset koden. Rettet til at læse tabel-`<td>`-rækkerne.
+
+**Ingen tal hårdkodet to steder:** den indledende sætning og
+"følger Danmark"-sætningen er genereret af samme modul som tabellen. De skrev
+bynavne som tekst i JSX, så de kunne ikke se et nyt land — C84's
+`metaDescription`-fund i en ny form.
+
+**Harness:** `tidszone-eksempler.test.ts` **13 → 16**,
+`tidszone/page.test.tsx` **11 → 13** — bl.a. at sætningen mellem
+lande-overskriften og dens tabel navngiver præcis de byer, tabellen renderer.
+**Verificeret modsvejs: alle 5 nye tests falder** med master's to filer.
+
+**Gate grøn:** lint (579 filer), **2.548 tests / 166 filer** (fra 2.543 / 166),
+build (141 sider). Målt på rigtig server (port 3721): DA og SE har begge
+Nuuk i sætningen, korrekt EU-landeliste, ingen dansk lækage i SE.
+
+- ⏳ **VERIFICÉR DEPLOY: C155 — `/tidszone` har Grønland i landetabellen med
+  "4 timer bagefter" i begge sprog (10 → 11 rækker), og den indledende sætning
+  nævner Nuuk.** Kode + plan i ét commit på `ceo/tidszone-land`, squashet til
+  `master`. Første kandidatvindue **2026-09-29 07:30** (01:16 er efter
+  21:30-batchen). Kun `src/lib/tidszone-eksempler.ts`,
+  `src/app/tidszone/page.tsx` og to testfiler er rørt — **ingen
+  beregningslogik ændret, `tidszone-reference.ts` urørt, TIDSZONER urørt**.
+  Verificér på **https://minberegner.dk/tidszone** ved **indhold, ikke HTTP
+  200**:
+  1. `curl -s https://minberegner.dk/tidszone | grep -c '4 timer bagefter'`
+     skal være **≥ 1** (før fandtes landetabellen ingen sådan række).
+  2. Samme curl skal finde `<td class="py-2 pr-4">Grønland</td>` **1** gang, og
+     `Nuuk` i den indledende sætning (før stod den ni byer uden Nuuk).
+  3. "følger Danmark"-sætningen skal være **"Storbritannien, Grønland,
+     Grækenland og Spanien"** — hvis den siger "USA" eller "Australien" eller
+     "New Zealand", er `foelgerEu`-filtreringen brudt.
+  4. KONTROL: `https://beraknare.se/tidszone` skal have samme række, og
+     **0** fund på "Danmark", "Grækenland" og "Tyrkiet" (C73's R4).
+  5. `https://minberegner.dk/api/health` skal svare `status: ok`.

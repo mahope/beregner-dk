@@ -17,10 +17,26 @@ import {
 } from "./tidszone-reference";
 
 /**
- * De otte lande, svensk og dansk autocomplete spørger om: "tidsskillnad
+ * De lande, svensk og dansk autocomplete spørger om: "tidsskillnad
  * sverige japan/usa/thailand/spanien/grekland/australien" (SE) og
- * "tidsforskel thailand/japan/tyrkiet/grekland" (DA). Byen er den, TIDSZONER
- * bruger for landet, saå forskellen er den samme regel som bytabellen.
+ * "tidsforskel grønland/japan/thailand/tyrkiet/grekland/usa" (DA). Byen er
+ * den, TIDSZONER bruger for landet, så forskellen er den samme regel som
+ * bytabellen.
+ *
+ * Grønland står her, fordi dansk autocomplete har det øverst i begge
+ * klynger ("tidsforskel grønland" er nr. 1, "tidszoner grønland" nr. 13), og
+ * fordi Nuuk allerede lå i TIDSZONER — altså en kendt zone, der bare var
+ * udeladt fra landetabellen. Forskjellen er 4 timer bagud hele året, fordi
+ * America/Nuuk skiftede til EU's skifte datoer i 2023 (WGT/WGST), så zone og
+ * Danmark flytter sig samtidig.
+ *
+ * Canada er bevidst *ikke* opført, selv om "tidszoner canada" ligger i
+ * autocomplete. Toronto skifter sommertid på nordamerikanske datoer, ikke
+ * EU's, så forskellen er 6 timer bagud det meste af året men 5 i de to
+ * uger omkring forårsskiftet og den ene uge omkring efterårsskiftet. En
+ * konstant værdi ville være forkert i de uger, og `brugerSommertid` kan ikke
+ * se forskellen. Rusland og Europa mangler tilsvarende: Moskva ligger ikke i
+ * TIDSZONER, så en offset ville være gættet.
  */
 export interface TidsskillnadEksempel {
   /** Slag i TIDSZONER, forskellen beregnes fra. */
@@ -29,14 +45,30 @@ export interface TidsskillnadEksempel {
   landDa: string;
   /** Landet på svensk, når det afviger fra dansk. */
   landSe?: string;
+  /**
+   * Om landet skifter sommertid på **EU's datoer** (sidste søndag i marts til
+   * sidste søndag i oktober), så zone og Danmark flytter sig præcis samtidig.
+   *
+   * Det er *ikke* det samme som at bruge sommertid: USA, Canada,
+   * Australien og New Zealand har egen sommertid, men på andre datoer. For
+   * dem er forskellen den samme det meste af året og en time mindre i de to
+   * uger omkring forårsskiftet og den ene uge omkring efterårsskiftet — præcis
+   * den overgangsperiode, siden selv advarer om. Derfor må denne markering
+   * ikke udledes af `brugerSommertid`.
+   */
+  foelgerEu?: boolean;
 }
 
 export const TIDSSKILLNADS_LANDE: readonly TidsskillnadEksempel[] = [
-  { by: "London", landDa: "Storbritannien" },
+  // foelgerEu: kun lande, der skifter på sidste søndag i marts / oktober.
+  // Storbritannien og Grækenland og Spanien og Grønland gør det; USA,
+  // Canada, Australien og New Zealand har egen sommertid på andre datoer.
+  { by: "London", landDa: "Storbritannien", foelgerEu: true },
   { by: "New York", landDa: "USA" },
-  { by: "Athen", landDa: "Grækenland", landSe: "Grekland" },
+  { by: "Nuuk", landDa: "Grønland", foelgerEu: true },
+  { by: "Athen", landDa: "Grækenland", landSe: "Grekland", foelgerEu: true },
   { by: "Istanbul", landDa: "Tyrkiet", landSe: "Turkiet" },
-  { by: "Madrid", landDa: "Spanien" },
+  { by: "Madrid", landDa: "Spanien", foelgerEu: true },
   { by: "Bangkok", landDa: "Thailand" },
   { by: "Tokyo", landDa: "Japan" },
   { by: "Shanghai", landDa: "Kina" },
