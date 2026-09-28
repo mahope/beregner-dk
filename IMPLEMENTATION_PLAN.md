@@ -12514,7 +12514,7 @@ teksterne sige det samme.
   pr. 2026-08-29 → 2026-09-26** — måles igen 2026-10-11.
 - **Gate:** lint (558 filer), 1828 tests / 152 filer, build (141 sider).
 
-### ⏳ **VERIFICÉR DEPLOY: C101 — beraknare.se/alder har et Excel-afsnit og et personnummer-afsnit (3.197 v, CTR 0,3 %, pos. 7,7).** Kode + plan i ét commit på `ceo/alder-personnummer-se`, fast-forwardet til `master` 2026-09-28 15:45. Første kandidatvindue **2026-09-28 17:30**. Verificér ved **indhold, ikke HTTP 200**:
+### ⏳ **VERIFICÉR DEPLOY: C101 — beraknare.se/alder har et Excel-afsnit og et personnummer-afsnit (3.197 v, CTR 0,3 %, pos. 7,7).** Kode + plan i ét commit på `ceo/alder-personnummer-se`, fast-forwardet til `master` (merge-ref `aa41d9c`) 2026-09-28 14:45. Første kandidatvindue **2026-09-28 17:30**. Verificér ved **indhold, ikke HTTP 200**:
    1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
    2. `curl -s https://beraknare.se/alder | sed 's/<!-- -->//g'` skal finde **"Räkna ut ålder från personnummer"**, **"640823"**, **"701063-2391"**, **"19900315"**, **"Så beräknar du ålder i Excel"** og **"=IDAG()"**.
    3. Samme side skal **ikke** finde **"60 år"** (den gamle myndighedsfejl) og skal have **"100 år"**.
