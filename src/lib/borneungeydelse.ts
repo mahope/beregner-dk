@@ -4,7 +4,11 @@
  * Kilde: https://www.borger.dk/familie-og-boern/familieydelser-oversigt/boerne-ungeydelse
  * Nedsættelse: https://www.borger.dk/familie-og-boern/familieydelser-oversigt/boerne-ungeydelse/boerne-ungeydelse-nedsaettelse
  * Verificeret: 2026-09-25
+ * Udbetalingsreglen (20. i hver måned, hverdagen inden ved weekend/helligdag)
+ * er verificeret mod samme side 2026-09-28.
  */
+
+import { erArbejdsdag, foegArbejdsdage } from "./helligdage";
 
 export interface BoernSats {
   /** Aldersgruppe, som den står hos borger.dk. */
@@ -45,7 +49,13 @@ export const BOERNEUNGEYDELSE_2026 = {
     pct: 0.02,
   },
   udbetaling: {
-    boerneydelse: [20, 4, 7, 10] as const,
+    /**
+     * Børneydelsen udbetales den 20. i januar, april, juli og oktober.
+     * Dag og måneder er holdt adskilt, fordi den gamle form var
+     * `[20, 4, 7, 10]` — dag 20 og så kun tre måneder, altså uden januar.
+     * Udbetalingsmånederne er de fire, borger.dk angiver.
+     */
+    boerneydelse: { dag: 20, maaneder: [1, 4, 7, 10] },
     ungeydelseDag: 20,
   },
 } as const;
@@ -64,6 +74,72 @@ export function satsForAlder(alder: number): BoernSats | undefined {
 /** Hele årsbeløbet for en sats, beregnet af de officielle intervalbeløb. */
 export function aarligBelob(sats: BoernSats): number {
   return sats.hel * udbetalingerPrAar(sats.interval);
+}
+
+/**
+ * Hvad ét interval svarer til omregnet til måneden. For en kvartalssats er det
+ * årsbeløbet delt med 12, altså det samme som satsen delt med 4 ganget 3 —
+ * ikke satsen delt med 3, fordi kvartalet dækker tre måneder.
+ */
+export function maanedligOmregnet(sats: BoernSats): number {
+  return aarligBelob(sats) / 12;
+}
+
+export interface Udbetalingsdato {
+  /** Den nominelle udbetalingsdato, altid den 20. i måneden. */
+  dato: Date;
+  /** Månedens nummer, 1-12. */
+  maaned: number;
+  /** Udbetalingsdagens ugedag på dansk. */
+  ugedag: string;
+  /** Sand når den 20. er en weekend- eller helligdagsudbetaling. */
+  forskudt: boolean;
+  /** Dagen pengene faktisk står på konto, når `forskudt` er sand. */
+  betalingsdato: Date;
+}
+
+const UGEDAGE_DA = [
+  "søndag",
+  "mandag",
+  "tirsdag",
+  "onsdag",
+  "torsdag",
+  "fredag",
+  "lørdag",
+] as const;
+
+/**
+ * Udbetalingsdatoerne for et år, med den nominelle 20. og den dag pengene
+ * faktisk står på konto. Udbetaling Danmark flytter betalingen til hverdagen
+ * inden, når den 20. falder på en weekend eller en helligdag — det står sådan
+ * på borger.dk, og weekendfaldene er reelle (tre af tolv i 2026).
+ *
+ * Beregningen bruger `helligdage.ts`, så den ikke genopfinder kalenderen.
+ */
+export function udbetalingsdatoerAar(
+  aar: number,
+  interval: BoernSats["interval"]
+): Udbetalingsdato[] {
+  const maaneder =
+    interval === "kvartal"
+      ? [...BOERNEUNGEYDELSE_2026.udbetaling.boerneydelse.maaneder]
+      : Array.from({ length: 12 }, (_, i) => i + 1);
+  const dag =
+    interval === "kvartal"
+      ? BOERNEUNGEYDELSE_2026.udbetaling.boerneydelse.dag
+      : BOERNEUNGEYDELSE_2026.udbetaling.ungeydelseDag;
+
+  return maaneder.map((maaned) => {
+    const dato = new Date(aar, maaned - 1, dag);
+    const forskudt = !erArbejdsdag(dato, "da");
+    return {
+      dato,
+      maaned,
+      ugedag: UGEDAGE_DA[dato.getDay()],
+      forskudt,
+      betalingsdato: forskudt ? foegArbejdsdage(dato, -1, "da") : dato,
+    };
+  });
 }
 
 /**

@@ -4,8 +4,10 @@ import {
   BOERNEUNGEYDELSE_2026,
   aarligBelob,
   beregnAftrapning,
+  maanedligOmregnet,
   satsForAlder,
   udbetalingerPrAar,
+  udbetalingsdatoerAar,
 } from "./borneungeydelse";
 
 describe("BOERNE_SATSER_2026", () => {
@@ -98,5 +100,119 @@ describe("beregnAftrapning", () => {
   it("er 0 for negative og ugyldige indkomster", () => {
     expect(beregnAftrapning(-1)).toBe(0);
     expect(beregnAftrapning(Number.NaN)).toBe(0);
+  });
+});
+
+describe("maanedligOmregnet", () => {
+  it("deler årsbeløbet med 12, så en kvartalssats ikke forveksles med en månedssats", () => {
+    expect(maanedligOmregnet(BOERNE_SATSER_2026[0])).toBe(1790);
+    expect(maanedligOmregnet(BOERNE_SATSER_2026[1])).toBe(1416);
+    expect(maanedligOmregnet(BOERNE_SATSER_2026[2])).toBe(1114);
+  });
+
+  it("er præcis det officielle månedsbeløb for den månedsudbetalte sats", () => {
+    expect(maanedligOmregnet(BOERNE_SATSER_2026[3])).toBe(1114);
+  });
+
+  it("følger årsbeløbet, så en satsændring ikke kan glemme at gange med 4", () => {
+    // 5.370 / 3 er også 1.790, så en test på "delt med 3 mod 12" kan ikke
+    // skelne. Låsen er derfor, at tallet *defineres* som årsbeløbet delt med
+    // 12: ændres satsen, kan tallet ikke blive stående på det gamle.
+    for (const sats of BOERNE_SATSER_2026) {
+      expect(maanedligOmregnet(sats)).toBe(aarligBelob(sats) / 12);
+    }
+  });
+});
+
+describe("udbetalingsdatoerAar", () => {
+  // Lokal kalenderdato, ikke toISOString: `new Date(2026, 0, 20)` er 20. jan
+  // kl. 00.00 dansk tid, hvilket er 19. jan 23.00 UTC, så toISOString ville
+  // give dagen i minus én. Første forsøg på denne test fejlede af den grund.
+  const iso = (d: Date) =>
+    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+
+  it("giver de fire kvartalsdatoer i de måneder borger.dk angiver", () => {
+    const datoer = udbetalingsdatoerAar(2026, "kvartal");
+    expect(datoer.map((u) => iso(u.dato))).toEqual([
+      "2026-01-20",
+      "2026-04-20",
+      "2026-07-20",
+      "2026-10-20",
+    ]);
+  });
+
+  it("har alle fire kvartalsmåneder med, også januar", () => {
+    // `boerneydelse` stod som [20, 4, 7, 10], altså dagen og kun tre
+    // måneder. Strukturen er nu { dag, maaneder }, så en måned ikke kan
+    // forsvinde i dag-tallet igen.
+    expect(BOERNEUNGEYDELSE_2026.udbetaling.boerneydelse.dag).toBe(20);
+    expect(BOERNEUNGEYDELSE_2026.udbetaling.boerneydelse.maaneder).toEqual([
+      1, 4, 7, 10,
+    ]);
+  });
+
+  it("giver alle tolv månedsdatoer for ungeydelsen", () => {
+    const datoer = udbetalingsdatoerAar(2026, "maaned");
+    expect(datoer).toHaveLength(12);
+    expect(datoer.map((u) => u.maaned)).toEqual([
+      1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
+    ]);
+    for (const u of datoer) {
+      expect(u.dato.getDate()).toBe(20);
+    }
+  });
+
+  it("flytter de tre ungeudbetalinger der falder på en weekend i 2026", () => {
+    const forskudte = udbetalingsdatoerAar(2026, "maaned").filter((u) => u.forskudt);
+    expect(forskudte.map((u) => iso(u.dato))).toEqual([
+      "2026-06-20",
+      "2026-09-20",
+      "2026-12-20",
+    ]);
+    // 20. juni er en lørdag, de to andre søndage; pengene kommer hverdagen
+    // inden, altså om fredagen.
+    expect(forskudte.map((u) => iso(u.betalingsdato))).toEqual([
+      "2026-06-19",
+      "2026-09-18",
+      "2026-12-18",
+    ]);
+    expect(forskudte.map((u) => u.ugedag)).toEqual(["lørdag", "søndag", "søndag"]);
+  });
+
+  it("lader alle fire børneudbetalinger i 2026 stå", () => {
+    expect(udbetalingsdatoerAar(2026, "kvartal").filter((u) => u.forskudt)).toEqual([]);
+  });
+
+  it("flytter aldrig en betaling *frem* — den skal altid ligge inden den 20.", () => {
+    for (const interval of ["kvartal", "maaned"] as const) {
+      for (const u of udbetalingsdatoerAar(2026, interval)) {
+        expect(u.betalingsdato.getTime()).toBeLessThanOrEqual(u.dato.getTime());
+      }
+    }
+  });
+
+  it("flytter også en betaling der falder på en helligdag, ikke kun på weekend", () => {
+    // Påsken 2057 er 22. april, så skærtorsdag er 19. og langfredag 20.
+    // Den 20. er en fredag, men *hverdagen inden* er torsdag den 19. — som
+    // også er skærtorsdag, altså helligdag. Betalingen rykked derfor to dage
+    // tilbage til onsdag den 18. April. Min første test forventede den 19.
+    // og faldt; koden var rigtig, forventningen var ikke.
+    const apr20 = udbetalingsdatoerAar(2057, "kvartal").find((u) => u.maaned === 4);
+    expect(iso(apr20?.dato ?? new Date(0))).toBe("2057-04-20");
+    expect(apr20?.ugedag).toBe("fredag");
+    expect(apr20?.forskudt).toBe(true);
+    expect(iso(apr20?.betalingsdato ?? new Date(0))).toBe("2057-04-18");
+  });
+
+  it("regner et andet år forfra, så tallet ikke er hårdkodet til 2026", () => {
+    const forskudte2027 = udbetalingsdatoerAar(2027, "maaned")
+      .filter((u) => u.forskudt)
+      .map((u) => iso(u.dato));
+    expect(forskudte2027).toEqual([
+      "2027-02-20",
+      "2027-03-20",
+      "2027-06-20",
+      "2027-11-20",
+    ]);
   });
 });

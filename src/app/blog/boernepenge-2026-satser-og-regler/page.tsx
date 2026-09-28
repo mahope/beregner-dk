@@ -8,6 +8,8 @@ import {
   BOERNEUNGEYDELSE_2026,
   aarligBelob,
   beregnAftrapning,
+  maanedligOmregnet,
+  udbetalingsdatoerAar,
 } from "@/lib/borneungeydelse";
 import { BARNETILSKUD_2026, BARNETILSKUD_2026_KILDE, barnetilskudSats } from "@/lib/barnetilskud";
 
@@ -46,6 +48,21 @@ export async function generateMetadata(): Promise<Metadata> {
 
 const da = (beloeb: number) => formatNumber(beloeb, "da");
 
+const MAANEDER_DA = [
+  "januar",
+  "februar",
+  "marts",
+  "april",
+  "maj",
+  "juni",
+  "juli",
+  "august",
+  "september",
+  "oktober",
+  "november",
+  "december",
+] as const;
+
 const satsOversigt = BOERNE_SATSER_2026.map(
   (sats) => `${sats.alder}: ${da(sats.hel)} kr. pr. ${sats.intervalNavn}`,
 ).join(", ");
@@ -54,6 +71,17 @@ const satsAarligt = BOERNE_SATSER_2026.map(
   (sats) => `${sats.alder}: ${da(aarligBelob(sats))} kr./år`,
 ).join(", ");
 
+const AAR = 2026;
+const boerneudbetalinger = udbetalingsdatoerAar(AAR, "kvartal");
+const ungeudbetalinger = udbetalingsdatoerAar(AAR, "maaned");
+const forskudteUngeudbetalinger = ungeudbetalinger.filter((u) => u.forskudt);
+
+/** "20. januar" — den nominelle dato, som borger.dk selv bruger. */
+const datoTekst = (maaned: number) => `20. ${MAANEDER_DA[maaned - 1]}`;
+/** "19. juni" — den dag pengene faktisk står på konto. */
+const betalingsTekst = (u: (typeof ungeudbetalinger)[number]) =>
+  `${u.betalingsdato.getDate()}. ${MAANEDER_DA[u.betalingsdato.getMonth()]}`;
+
 const faqItems = [
   {
     question: "Hvor meget får man i børnepenge 2026?",
@@ -61,7 +89,23 @@ const faqItems = [
   },
   {
     question: "Hvornår udbetales børnepenge 2026?",
-    answer: "Børneydelsen (under 15 år) udbetales kvartalsvis forud den 20. i januar, april, juli og oktober. Ungeydelsen (15-17 år) udbetales månedligt den 20. direkte til den unge. Hvis udbetalingsdagen falder på en helligdag eller i en weekend, udbetales pengene hverdagen inden.",
+    answer: "Børneydelsen (under 15 år) udbetales kvartalsvis forud den 20. i januar, april, juli og oktober. Ungeydelsen (15-17 år) udbetales månedligt den 20. direkte til den unge. Hvis udbetalingsdagen falder på en helligdag eller i en weekend, udbetales pengene hverdagen inden. I 2026 betyder det for ungeydelsen, at den 20. juni, 20. september og 20. december flyttes til 19. juni, 18. september og 18. december.",
+  },
+  {
+    question: "Hvornår kommer børnepengen for et nyfødt barn?",
+    answer: "Du får børneydelse første gang i kvartalet efter, du er blevet forælder. Bliver du fx forælder den 31. marts, udbetales børneydelsen første gang den 20. april. Den betales forud for hele kvartalet, så børn født i samme kvartal udløser den samme udbetaling.",
+  },
+  {
+    question: "Hvad er børnepenge omregnet til pr. måned?",
+    answer: `En kvartalsudbetaling på ${da(5370)} kr. svarer til ${da(maanedligOmregnet(BOERNE_SATSER_2026[0]))} kr. om måneden, en på ${da(4248)} kr. til ${da(maanedligOmregnet(BOERNE_SATSER_2026[1]))} kr., og en på ${da(3342)} kr. til ${da(maanedligOmregnet(BOERNE_SATSER_2026[2]))} kr. Det er ikke officielle satser, men årsbeløbet delt med 12.`,
+  },
+  {
+    question: "Hvor meget får man i børnepenge med to børn?",
+    answer: `Beløbet lægges sammen barn for barn efter hvert barns alder. To børn på 0-2 år giver ${da(5370 * 2)} kr. pr. kvartal, altså ${da(aarligBelob(BOERNE_SATSER_2026[0]) * 2)} kr. om året. Et barn på 0-2 år og ét på 3-6 år giver ${da(5370 + 4248)} kr. pr. kvartal.`,
+  },
+  {
+    question: "Hvornår skifter børnepengen sats, når barnet bliver ældre?",
+    answer: "Satsen skifter i kvartalet efter at barnet fylder 3 år, 7 år og 15 år — ikke på fødselsdagen. Fylder barnet 15 år i maj, får du børneydelse i april for april og maj, og fra juni får den unge ungeydelse den 20. i hver måned. Ungeydelsen er 1.114 kr. pr. måned, altså 13.368 kr. om året.",
   },
   {
     question: "Kan børnepenge blive nedsat ved høj indkomst?",
@@ -121,6 +165,7 @@ export default function Boernepenge2026Page() {
             <tr>
               <th>Alder</th>
               <th>Pr. udbetaling</th>
+              <th>Omregnet pr. måned</th>
               <th>Halvdelen</th>
               <th>Årligt</th>
             </tr>
@@ -132,6 +177,7 @@ export default function Boernepenge2026Page() {
                 <td>
                   {da(sats.hel)} kr pr. {sats.intervalNavn}
                 </td>
+                <td>{da(maanedligOmregnet(sats))} kr</td>
                 <td>{da(sats.halv)} kr</td>
                 <td>{da(aarligBelob(sats))} kr</td>
               </tr>
@@ -144,7 +190,10 @@ export default function Boernepenge2026Page() {
             borger.dk
           </a>{" "}
           — verificeret {BOERNEUNGEYDELSE_2026.verifiedAt}. Halvdelen er det beløb, hver
-          forælder får, når I har fælles forældremyndighed.
+          forælder får, når I har fælles forældremyndighed. Kolonnen "omregnet pr.
+          måned" er ikke en officiel sats: for en kvartalsudbetaling er den
+          årsbeløbet delt med 12, altså det samme som kvartalsbeløbet delt med 4
+          ganget 3. Den er der, fordi det er den form de flest sammenligner i.
         </p>
 
         <h3>Børneydelse (0-14 år)</h3>
@@ -171,6 +220,130 @@ export default function Boernepenge2026Page() {
             <Link href="/boernepenge" className="text-blue-600 hover:underline font-medium">Gå til Børnepengeberegner →</Link>
           </p>
         </div>
+
+        <h2>Udbetalingsdatoer i 2026 — de præcise datoer</h2>
+        <p>
+          Børneydelsen udbetales <strong>kvartalsvis forud</strong>, altid den 20. i
+          januar, april, juli og oktober. Ungeydelsen udbetales <strong>månedligt
+          den 20.</strong> Falder den 20. på en weekend eller en helligdag, flyttes
+          betalingen til <strong>hverdagen inden</strong> — det er den regel, Udbetaling
+          Danmark selv angiver. Det er ikke en teoretisk mulighed: i 2026 falder
+          ungeydelsens 20. i juni, september og december på en weekend, så de tre
+          betalinger kommer henholdsvis <strong>19. juni</strong>,{" "}
+          <strong>18. september</strong> og <strong>18. december</strong>.
+        </p>
+        <h3>Børneydelse (under 15 år)</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Udbetalingsdato</th>
+              <th>Ugedag</th>
+              <th>Beløb ved 0-2 år</th>
+            </tr>
+          </thead>
+          <tbody>
+            {boerneudbetalinger.map((u) => (
+              <tr key={u.maaned}>
+                <td>{datoTekst(u.maaned)}</td>
+                <td>{u.ugedag}</td>
+                <td>
+                  {da(BOERNE_SATSER_2026[0].hel)} kr.{" "}
+                  {u.forskudt ? `faktisk ${betalingsTekst(u)}` : ""}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p>
+          Alle fire datoer er almindelige hverdage i 2026, så børneydelsen udbetales
+          på dem præcis som de står. Bemærk at den 20. januar dækker <em>kvartalet
+          januar–marts</em> — den betales forud, så en fødsel 31. marts giver første
+          udbetaling 20. april.
+        </p>
+
+        <h3>Ungeydelse (15-17 år) — alle tolv datoer</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Udbetalingsdato</th>
+              <th>Ugedag</th>
+              <th>Står på konto</th>
+            </tr>
+          </thead>
+          <tbody>
+            {ungeudbetalinger.map((u) => (
+              <tr key={u.maaned}>
+                <td>{datoTekst(u.maaned)}</td>
+                <td>{u.ugedag}</td>
+                <td>
+                  {betalingsTekst(u)}
+                  {u.forskudt ? " (forskudt)" : ""}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p>
+          {forskudteUngeudbetalinger.length === 12
+            ? "Alle tolv datoer er almindelige hverdage i 2026."
+            : `${forskudteUngeudbetalinger.length} af de tolv datoer er flyttet, fordi den 20. falder på en weekend: ${forskudteUngeudbetalinger
+                .map((u) => `20. ${MAANEDER_DA[u.maaned - 1]}`)
+                .join(", ")}.`}{" "}
+          Udbetalingsdatoerne er beregnet fra kalenderen, så de følger den danske
+          helligdagsliste — påske og grundlovsdag flytter også en udbetaling, hvis de
+          en gang falder på den 20.
+        </p>
+
+        <h2>Hvad betyder det for en familie med flere børn?</h2>
+        <p>
+          Børne- og ungeydelsen lægges sammen barn for barn, og beløbet afhænger
+          kun af hvert barns alder. Sådan ser det ud for en familie med to børn på
+          hver sin side af en satsgrænse:
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Børn</th>
+              <th>Pr. kvartal</th>
+              <th>Pr. år</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Ét barn, 0-2 år</td>
+              <td>{da(5370)} kr.</td>
+              <td>{da(aarligBelob(BOERNE_SATSER_2026[0]))} kr.</td>
+            </tr>
+            <tr>
+              <td>Tvillinger, 0-2 år</td>
+              <td>{da(5370 * 2)} kr.</td>
+              <td>{da(aarligBelob(BOERNE_SATSER_2026[0]) * 2)} kr.</td>
+            </tr>
+            <tr>
+              <td>Ét barn 0-2 år + ét barn 3-6 år</td>
+              <td>{da(5370 + 4248)} kr.</td>
+              <td>
+                {da(aarligBelob(BOERNE_SATSER_2026[0]) + aarligBelob(BOERNE_SATSER_2026[1]))} kr.
+              </td>
+            </tr>
+            <tr>
+              <td>Tvillinger 3-6 år + ét barn 7-14 år</td>
+              <td>{da(4248 * 2 + 3342)} kr.</td>
+              <td>{da(aarligBelob(BOERNE_SATSER_2026[1]) * 2 + aarligBelob(BOERNE_SATSER_2026[2]))} kr.</td>
+            </tr>
+            <tr>
+              <td>Tvillinger 15-17 år (ungeydelse, pr. måned)</td>
+              <td>{da(1114 * 2 * 3)} kr.</td>
+              <td>{da(aarligBelob(BOERNE_SATSER_2026[3]) * 2)} kr.</td>
+            </tr>
+          </tbody>
+        </table>
+        <p>
+          Satsen skifter i <strong>kvartalet efter</strong> barnet fylder 3 år, 7 år
+          og 15 år — ikke på fødselsdagen. Fylder et barn 15 år i maj, får du
+          børneydelse i april for april og maj, og fra juni får den unge ungeydelse
+          den 20. i hver måned.
+        </p>
 
         <h2>Aftrapning for høje indkomster</h2>
         <p>
