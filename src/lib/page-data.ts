@@ -2916,6 +2916,8 @@ const sePages: Record<string, PageData> = {
         { question: "Hur räknar jag dagar till ett datum?", answer: "Välj datumet, så räknar kalkylatorn automatiskt från dagens datum och visar antalet dagar — och hur många veckor och dagar det motsvarar." },
         { question: "Räknas dagens datum med?", answer: "Nej, beräkningen räknar antal hela dagar från idag till det valda datumet. Väljer du morgondagen visar den 1 dag." },
         { question: "Kan jag räkna dagar sedan ett datum?", answer: "Ja. Väljer du ett datum som redan passerat visar kalkylatorn hur många dagar som gått sedan dess." },
+        { question: "Hur räknar jag ut dagar kvar i Excel?", answer: "Sätt måldatumet i cell A1 och skriv =DATEDIF(IDAG();A1;\"d\"). Då står antalet dagar kvar i cellen bredvid. Semikolon används i svensk Excel, och DATEDIF är ett dolt namn som inte syns i funktionslistan." },
+        { question: "Hur får jag timmar, minuter och sekunder kvar i Excel?", answer: "DATEDIF räknar bara hela dagar. Multiplicera i stället A1−IDAG() med 24 för timmar, 1440 för minuter eller 86400 för sekunder — Excel lagrar ett datum som ett bråktal av ett dygn. Formatera cellen som Tal, annars visas ett datumformat." },
         { question: "Hur många dagar är det kvar till jul?", answer: "Juldagen är alltid 25 december, så antalet beror på när du läser sidan. Sidan \"Hur många dagar är det kvar till juldagen?\" räknar ut det åt dig varje dag." },
       ],
     },

@@ -3,6 +3,8 @@ import { generatePageMetadata } from "@/lib/page-helpers";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
 import { getDageTilEvents, getDageTilPrefix, isDageTilLocale } from "@/lib/dage-til";
+import { excelEksempel } from "@/lib/nedtaelling-eksempler";
+import { formatNumber } from "@/lib/format";
 import NedtaellingBeregner from "@/components/NedtaellingBeregner";
 import FAQ from "@/components/FAQ";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
@@ -24,6 +26,10 @@ export default async function NedtaellingPage() {
         question: event[locale].copy.question,
       }))
     : [];
+
+  const eksempel = excelEksempel();
+  const se = (n: number, maxDesimaler?: number) =>
+    formatNumber(n, "se", maxDesimaler === undefined ? undefined : { maximumFractionDigits: maxDesimaler });
 
   return (
     <div className="flex flex-col lg:flex-row gap-8">
@@ -169,6 +175,89 @@ export default async function NedtaellingPage() {
                 </tbody>
               </table>
             </div>
+          </div>
+        )}
+
+        {locale === "se" && (
+          <div className="prose dark:prose-invert max-w-none mb-8">
+            <h2>Så räknar du ut dagar kvar i Excel</h2>
+            <p>
+              Sätt måldatumet i cell A1 och använd{" "}
+              <code>=DATEDIF(IDAG();A1;&quot;d&quot;)</code>. Då står antalet dagar kvar i cellen
+              bredvid, och formeln räknar om sig själv varje dag. Semikolon används i svensk
+              Excel. <code>DATEDIF</code> är ett dolt namn — det står inte i funktionslistan, men
+              fungerar.
+            </p>
+            <p>
+              Från 29 september 2026 till julafton den 24 december 2026 kl. 09:30 är det{" "}
+              <strong>
+                {se(eksempel.dage)} dagar = {se(eksempel.helaVeckor)} hela veckor och{" "}
+                {eksempel.restDage} dagar
+              </strong>
+              . Samma uttryck med <code>=DATEDIF(A1;IDAG();&quot;d&quot;)</code> ger dagar{" "}
+              <strong>eftersom</strong> datumet passerat — <code>DATEDIF</code> kan bara räkna
+              framåt och ger felet <code>#NUM!</code> bakvänt. Kalkylatorn visar i stället hur
+              många dagar som gått sedan det datumet.
+            </p>
+            <h3>Timmar, minuter och sekunder kvar</h3>
+            <p>
+              Vill du ha timmar, minuter och sekunder i stället för hela dagar kan du inte gå
+              vidare från <code>DATEDIF</code> — den räknar bara hela dagar och kastar resten av
+              dagen bort. Excel lagrar ett datum som ett bråktal av ett dygn, så det är{" "}
+              <code>A1−IDAG()</code> du ska gå med. Från 29 september 2026 till 24 december
+              2026 kl. 09:30 ger det:
+            </p>
+            <div className="overflow-x-auto not-prose">
+              <table className="w-full text-left text-sm">
+                <thead>
+                  <tr>
+                    <th className="py-2 pr-4">Formel i B1</th>
+                    <th className="py-2 pr-4">Det den visar</th>
+                    <th className="py-2 pr-4">Timer</th>
+                    <th className="py-2">Minuter och sekunder</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td className="py-2 pr-4">=DATEDIF(IDAG();A1;&quot;d&quot;)</td>
+                    <td className="py-2 pr-4">Hela dagar</td>
+                    <td className="py-2 pr-4">{se(eksempel.dage)}</td>
+                    <td className="py-2">—</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 pr-4">=DATEDIF(IDAG();A1;&quot;d&quot;)*24</td>
+                    <td className="py-2 pr-4">Timmar, utan minuter och sekunder</td>
+                    <td className="py-2 pr-4">{se(eksempel.helaDagarTimmar)}</td>
+                    <td className="py-2">—</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 pr-4">=(A1−IDAG())*24</td>
+                    <td className="py-2 pr-4">Timmar, med minuter och sekunder</td>
+                    <td className="py-2 pr-4">{se(eksempel.timmerMedRest, 1)}</td>
+                    <td className="py-2">
+                      {se(eksempel.minuter)} min.{" "}
+                      {se(eksempel.sekunder)} sek.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 pr-4">=MOD(A1−IDAG();1)*1440</td>
+                    <td className="py-2 pr-4">Minuter i totalt</td>
+                    <td className="py-2 pr-4">
+                      {se(Math.floor(eksempel.minuter / 60))}
+                    </td>
+                    <td className="py-2">{se(eksempel.minuter)} min.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p>
+              <code>MOD(…;1)</code> är bara en tydligare skrivning av samma uttryck som raden
+              ovanför — den tar endast dagens bråktal. Du behöver den bara om du vill se den.{" "}
+              <strong>Cellen ska formateras som Tal</strong>, annars visar Excel ett datumformat,
+              eftersom det är ett tal från en datumformel. Ska du räkna dagar mellan två
+              valfria datum, arbetsdagar eller datum plus veckor:{" "}
+              <Link href="/dato">datokalkylatorn</Link>.
+            </p>
           </div>
         )}
 
