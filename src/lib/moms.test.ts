@@ -9,6 +9,7 @@ import {
   normalizeMomssats,
   opsummering,
   referenceRaekker,
+  fratraekRaekker,
   type MomsBeregningstype,
 } from "./moms";
 
@@ -126,6 +127,32 @@ describe("moms", () => {
       for (const r of referenceRaekker(6)) {
         expect(r.prisUdenMoms + r.momsBeloeb).toBeCloseTo(r.prisInklMoms, 9);
       }
+    });
+  });
+
+  describe("fratraekRaekker", () => {
+    test("er referenceRaekker modsat vej — samme beløb, taget fra", () => {
+      // 1.250 kr. i kassen er 1.000 kr. ekskl. moms: det er den rigtige
+      // retning, fordi det er prisen med moms, folk har.
+      expect(fratraekRaekker(25).map((r) => r.prisInklMoms)).toEqual([...MOMS_REFERENCE_BELOEB]);
+      expect(fratraekRaekker(25).map((r) => r.prisUdenMoms)).toEqual([100, 500, 1000, 5000, 10000].map((b) => b / 1.25));
+    });
+
+    test("hver række er beregnet af beregnMoms, så tabellen ikke kan lyve", () => {
+      for (const sats of MOMS_SATSER.se) {
+        expect(fratraekRaekker(sats)).toEqual(
+          MOMS_REFERENCE_BELOEB.map((beloeb) => beregnMoms(beloeb, "fratraekMoms", sats))
+        );
+      }
+    });
+
+    test("momsandelen er 20 % ved 25 % — aldrig 25 %", () => {
+      // Den fejl, afsnittet handler om. 499 / 1,25 = 399,20, altså 99,80 i
+      // moms: 99,80 / 499 = 20,0 %, ikke 25 %.
+      const r = beregnMoms(499, "fratraekMoms", 25);
+      expect(r.momsBeloeb / r.prisInklMoms).toBeCloseTo(0.2, 9);
+      expect(r.momsBeloeb).toBeCloseTo(99.8, 9);
+      expect(r.prisUdenMoms).toBeCloseTo(399.2, 9);
     });
   });
 

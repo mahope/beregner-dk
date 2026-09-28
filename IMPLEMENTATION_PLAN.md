@@ -1,4 +1,5 @@
-STATUS: KØ — **C108 er landet: de ni `/dage-til/*`-sider var ulænket fra forsiden — sitets mest linkede side og dens 459 indgangsbesøg — mens GSC's andenstørste søgeklynge er præcis "hvor mange dage er der til 1 december" (1.063 visninger, pos. 5).** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den, 119 er kilde-blokeret), C107 skrev ingen kandidatliste, og C106/C107's deploy-noter har første vindue **21:30** — det er 18:2x, så intet kunne verificeres. **Valget kom af at måle `curl https://minberegner.dk/` (347 KB) mod C107's egen åbne måling:** den gav **0** `href="/dage-til/…"`, og `DAGE_TIL_EVENTS`' ni begivenheder lå hverken i `categories.ts`, `calculator-list.ts` eller `home-data.ts` — altså kun linket fra `/dato` og `/nedtaelling`. Samme intern-links-klasse som C105 fandt på forside-katalogets 32 manglende poster. **Rettelsen:** et nyt forside-afsnit "Hvor mange dage er der til…" / "Hur många dagar är det till…" med ét kort pr. begivenhed fra den nye `getDageTilKort(locale, today)`. **Ingen tekst skrevet i hånden:** kortets titel er begivenhedens *egne* `copy.question` (som også er sidens `<h1>`), og beskrivelsen er `getDageTilAnswer`'s dage-tal + `formatTargetDate` pr. sprog — så en kodeændring flytter kortet automatisk, og tallet regnes pr. request og kan ikke stå på en gammel dato. `no` får ingen kort, fordi domænet ikke serverer sektionen. **Harness:** `home-data.test.ts` **+6 tests**, bl.a. at **titlen er sideens egen `<h1>`** pr. sprog og at **ét døgn senere er hvert tal præcis ét lavere** (låser mod hårdkodede tal). **Målt og bevidst ikke bygget:** `/husleje` (170 besøgende) svarer på **0 af 10** af sin egen "husleje stigning"-klynge, men den er lov-baseret (Lejeloven § 8, nettoprisindeks) og `lar.dk` svarer **HTTP 000** fra loopet mens `retsinformation.dk` er en tom JS-app — samme kilde-lås som opgave 119 og C95, så **ingen tal står på siden**. Se opgave 138. **MÅL:** `/` baseline **226 besøgende/28d, bounce 40 %, 459 indgangsbesøg pr. 2026-09-28** — forventningen er flere interne links til de ni sider, ikke nye visninger på forsiden; måles igen 2026-10-12.
+STATUS: KØ — **C109 er landet: `/moms` er GSC's fjerdestørste danske side (22.984 visninger, CTR 0,2 %, pos. 6,9) og svarede på *null af ni* søgninger i sin egen klynge — "baglæns" stod 0 gange, Excel 0 gange — mens siden samtidig skrev en faglig fejl i sin synlige liste: "Bøger, avis og forbrugsudstyr: uden moms".** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den, 119 er kilde-blokeret), og 17:30-batchen havde kørt, så **otte åbne deploy-noter blev lukket ved indholdskontrol** først (C99, C72, C74, C75, C80, C81, C37, C46). Valget kom af at gennemgå GSC's danske top-16 og finde `/moms` som det eneste ubearbejdede medlem: C82-C108 har behandlet de andre 15. **Målt først:** DA-autocomplete (19:04) under "moms beregner" har syv af ti variationer i *retnings*-klyngen ("plus/ekskl/uden/inkl moms beregner"), under "hvordan beregner man moms" fire med "baglæns" og "uden moms". På den live side (133 KB, 4 `<h2>`, 8 FAQ) var `baglæns` **0**, `Excel` **0**, `MOMS(` **0** — selv om siden *allerede* forklarede ÷ 1,25 to afsnit ovenfor. **Rettelsen (kun `da`):** tre nye `<h3>` — "Sådan beregner du moms baglæns" (den ene regel + tre eksempler + firerkolonnetabel, hvor **499** er valgt fordi det er det beløb hvor 20 %-metoden og ÷ 1,25 giver hver sit svar), "Momsen fire gange i træk" (1,25⁴ = 2,4414 mod 0,4096 — beregn kun med 25 %, aldrig 20 % gentaget) og "Momsberegneren i Excel" (fem formler + semikolon- og Tal-format-fælden) — plus **tre nye FAQ-par** i JSON-LD'en (8 → 11). **Den faglige fejl lå dobbeltindlåst,** i markup *og* i en test der krævede netop den forkerte streng: en vaskemaskine har 25 % moms, ikke 0. Rettet til "Bøger, aviser og tidsskrifter" (lovens egen betegnelse, som allerede lå i FAQ'en) + en ny linje om forbrugsudstyr — samme fejlklasse som C84's `metaDescription` om 12 byer. **To fejl i min egen tekst, begge fundet fordi testene faldt:** (1) jeg skrev "399,20 kr." mens `formatNumber` giver "399,2" — altså C84's fejlklasse igen, nu med teksten *genereret* af `beregnMoms` så de to ikke kan glide fra hinanden; (2) jeg afrundede 25 %-kæden til tier, hvilket gjorde den uefterprøvbar (1.250 × 1,25 = 1.562,50, ikke 1.560) — kæden er nu uden afrunding med et `not.toContain` på den pæne form. **Målestreglen er skærpet: et regnestykke skal kunne regnes efter af læseren.** **Ingen tal hårdkodet to steder:** ny `fratraekRaekker(25)` kalder `beregnMoms(…, "fratraekMoms", …)` — samme funktion værktøjet bruger. **Målt og bevidst ikke bygget:** "moms på parkering" (nr. 5 af ti) er umulig uden kilde — `skat.dk/erhverv/parkeringsafgift`, `virk.dk` og tre `info.skat.dk`-oid'er 404'er alle, `retsinformation.dk` er en tom JS-app — så der står ingen sats (se ❓ Til Mads). **Fundet mens noterne blev lukket:** `beregner.no` er 200 på forsiden men **404 på `/bmi`**, altså domænet serverer kun forsiden; det er grunden til at C37/C46 har stået som "UBrugELIG" i ugevis. **Harness:** `page.test.tsx` 5 → 12, `moms.test.ts` 23 → 26, **modsvejs verificeret: 7 af 7 nye tests falder** med master's `page.tsx`. Målt på rigtig server (port 3431): DA 200 med alle ni strenge ×2, SE 200 med 0 danske markører. Gate grøn: lint (561 filer), **1884 tests / 155 filer** (fra 1877 / 155), build (**141 sider**), `locale-leak.mjs --gate` exit 0, `knapgruppe-scan.mjs` 0/0. Kode + plan i ét commit på `ceo/moms-baglaens`; se opgave 139. **MÅL:** `/moms` baseline **22.984 visninger / 41 klik / CTR 0,2 % / pos. 6,9 pr. 2026-08-29 → 2026-09-26** — måles igen 2026-10-12. **Åbne noter efter denne iteration:** C106 og C108, begge pushet efter 17:30 og med første vindue **21:30**.
+
 
 ---
 
@@ -6920,7 +6921,7 @@ efter datagrund:
   navn, eller (c) en anden app med sit eget indhold? Svar (a) gør opgave 98
   (`TidszoneBeregner` mangler `no`) rigtig prioritet; svar (b) eller (c) gør den
   overflødig. **Jeg rører ikke domænet, DNS'en eller porten uden dit svar.**
-- ⏳ **VERIFICÉR DEPLOY: C72 — tolv ubundne `<label>` på syv beregnere, og fire fund ud over bindingerne.** `/brutto-netto` (2 felter + **periodenavngiven knapgruppe**, der havde intet navn), `/topskat` (2), `/opsparing` (2 — heraf var inflationskontrollen *indpakket* i `<label>`), `/budget` (2), `/bil` (1), `/nedtaelling` (1) og `/lon-efter-skat` (2). **Verificér indhold, ikke HTTP 200** — hele ændringen er `for`/`id` og `role="group"` i markup, som et HTTP 200 slet ikke afslører: ``curl -s https://minberegner.dk/brutto-netto | grep -c 'role="group"'` skal give mindst 1 (før: 0), og `<input id="brutto-netto-oensket"` skal findes. Samme grep på `/opsparing`, `/bil`, `/loen-efter-skat` og `/nedtaelling` på **https://beraknare.se** (sidernes markup er den samme; `/topskat` er daOnly og findes kun på minberegner.dk). Kode `8c737a4`, merge `c7179c2` 2026-09-27 07:35 CEST; første kandidatvindue **2026-09-27 12:30**.
+- ⚠️ **DELVIS, se tabel 2026-09-28 19:05 — C72 — tolv ubundne `<label>` på syv beregnere, og fire fund ud over bindingerne.** `/brutto-netto` (2 felter + **periodenavngiven knapgruppe**, der havde intet navn), `/topskat` (2), `/opsparing` (2 — heraf var inflationskontrollen *indpakket* i `<label>`), `/budget` (2), `/bil` (1), `/nedtaelling` (1) og `/lon-efter-skat` (2). **Verificér indhold, ikke HTTP 200** — hele ændringen er `for`/`id` og `role="group"` i markup, som et HTTP 200 slet ikke afslører: ``curl -s https://minberegner.dk/brutto-netto | grep -c 'role="group"'` skal give mindst 1 (før: 0), og `<input id="brutto-netto-oensket"` skal findes. Samme grep på `/opsparing`, `/bil`, `/loen-efter-skat` og `/nedtaelling` på **https://beraknare.se** (sidernes markup er den samme; `/topskat` er daOnly og findes kun på minberegner.dk). Kode `8c737a4`, merge `c7179c2` 2026-09-27 07:35 CEST; første kandidatvindue **2026-09-27 12:30**.
 - ✅ **LUKKET 2026-09-27 11:25 ved indhold, se C79 — C66 `/tidszone` skrev "Aten" på minberegner.dk, fordi
   de to tidszone-tabeller modsagde hinanden.** "Athen" er dansk, "Aten" er
   svensk, og dropdown'en + huskelisten på den danske side skrev den svenske
@@ -7293,7 +7294,7 @@ efter datagrund:
   skal have "färetagsleasing" i FAQ'en og **ikke** "värktiga" eller "földer" nogen
   steder. `/api/health` skal svare `status: ok`. De danske og norske sider skal
   være uændrede.
-- ⚠️ **ÅBEN, OG `beregner.no`-DELEN ER UBrugELIG — VERIFICÉR DEPLOY: C37 `/renteberegner` — fradragsværdien fra modulet.**
+- ✅ **DEPLOY OK 2026-09-28 19:05 (dansk del; `beregner.no` 404'er) — C37 `/renteberegner` — fradragsværdien fra modulet.**
   Kode `b98b90f`, merge `32b74ee` 2026-09-26 17:47 CEST. 17:30- og 21:30-vinduerne
   er begge *før* merge, så første kandidatvindue er **2026-09-27 12:30** (07:30 er
   før merge-tidspunktet på dagen, hvis batcheren tager fat før den er færdig).
@@ -7861,6 +7862,8 @@ landmark=lån, piggybank=opsparing osv.).
 
 ## VERIFICÉR DEPLOY-log
 
+### ✅ `DEPLOY OK 2026-09-28 19:05` — **syv deploy-noter lukket ved indholdskontrol i denne iteration: C99, C72, C74, C75, C80, C81 og C37/C46's del.** 17:30-batchen havde kørt, så alt med første vindue ≤ 17:30 er verificeret på rigtig server — HTTP 200 aldrig, men de konkrete strenge hver note bad om. Se tabellen nederst. **C106 og C108 er stadig åbne** — de blev pushet efter 17:30 (hhv. 17:40 og 18:37) og har første vindue **21:30**.
+
 ### ✅ `DEPLOY OK 2026-09-28 18:05` — **C100, C101, C102, C103, C104 og C105 lukket ved indholdskontrol.** 17:30-batchen havde kørt, da denne iteration startede (17:53), så alle seks noter med første vindue 17:30 er verificeret på rigtig server — ikke HTTP 200, men de konkrete strenge hver note bad om.
 ### ⏳ **VERIFICÉR DEPLOY: C108 — forsiden har et nyt afsnit med ét link-kort pr. dage-til-begivenhed (9 i `da`, 9 i `se`), og dage-tallet i hvert kort er dagens.** Kode + plan i ét commit på `ceo/dage-til-forside`, første kandidatvindue **2026-09-28 21:30** (17:30- og intet senere vindue var passeret da denne note blev skrevet). Kun `src/lib/home-data.ts` (ét valgfrit `sections.dageTil`-felt, to overskrifter, nye `getDageTilKort`), `src/app/page.tsx` (ét afsnit) og `src/lib/home-data.test.ts` (+6 tests) er rørt — **ingen beregningslogik, ingen begivenhedsdata, ingen sitemap- eller hreflang-ændring**. Verificér ved **indhold, ikke HTTP 200**: på `https://minberegner.dk/` skal `grep -o 'href="/dage-til/[^"]*"' | sort -u | wc -l` give **9** (før: **0**), `<h2>Hvor mange dage er der til…</h2>` skal findes, og et kort skal have dagens tal (pr. 28. september: juledagen **88 dage**) — altså ikke et hårdkodet tal; tallet skal nulstilles når dagen er nået. Samme greps på `https://beraknare.se/` skal give **9** `href="/dagar-till/…"` med `<h2>Hur många dagar är det till…</h2>`. `beregner.no` skal fortsat have **0**, fordi domænet ikke serverer sektionen. Se `###` C108 i opgavelisten.
 | Note | Målt på live | Før |
@@ -7872,6 +7875,28 @@ landmark=lån, piggybank=opsparing osv.).
 | **C104** | `/bmi` DA: `BMI-skala for voksne ifølge WHO` ×2, `følgende BMI-skala` ×2, kategoritabel uændret (`Undervægt` ×2, `Fedme klasse III` ×2), JSON-LD **6** uændret. SE: `BMI-skala för vuxna enligt WHO` ×2, `Fetma klass III` ×2 | 0 |
 | **C105** | forsiden: `Promilleberegner`/`Brøkberegner`/`Fartberegner`/`Nedtælling`/`Elbil vs. benzinbil`/`Befordringsfradrag`/`79+ gratis beregnere` alle ×2; `href="/laaneberegner"` på position 60.085 mellem `<h2>Lån</h2>` (59.177) og `<h2>Sundhed</h2>` (64.973); forsiden 264 KB → **347 KB** som målt lokalt før merge. `beraknare.se/` uændret: `Promilleberegner` **0**, `79+ gratis beregnere` **0** | 0 |
 | **C106** | stadig **ikke** live (`Hvor hurtigt løber jeg?` = 0) — korrekt, pushet 17:40 efter 17:30-batchen; første vindue **21:30** | — |
+
+### ✅ `DEPLOY OK 2026-09-28 19:05` — syv noter lukket i C109's iteration (17:30-vinduet var passeret)
+
+| Note | Målt på live | Før |
+|------|---------------|-----|
+| **C99** | `/fart`: `300 km ÷ 100 km/t` ×2, `100 km ÷ 2 timer` ×2, `50 km/t × 2 timer` ×2, `Fart og tempo er ikke det samme` ×2, `tid ud fra hastighed` ×2 | 0 |
+| **C72** | `<label>`/`for=` balanceret på alle otte sider: `/brutto-netto` 3/3, `/topskat` 3/3, `/budget` 8/8, `/nedtaelling` 1/1, beraknare.se `/lon-efter-skatt` 3/3. `/opsparing` 6/5 og `/bil` 7/6 har hver én ubundet — se fund nedenfor. `/brutto-netto` har `role="group"` ×1 (periodenavngiven knapgruppe, før 0) | 12 ubundne |
+| **C74** | `node scripts/knapgruppe-scan.mjs` → **0 filer / 0 uavngivne**; `node scripts/locale-leak.mjs --gate` → **exit 0**, 117/85/32 uændret | — |
+| **C75** | `/boliglaan` `role="group"` ×2 + `aria-label="Vælg visning"` ×1, `/opsparing` ×2 + ×1, `/timepris` ×1 + ×1, `/tidsberegner` ×1, `/del-regning` ×2 | hver én `role="group"` færre |
+| **C80** | `api/health` → `status: ok`; ingen `npm EBADENGINE` at se i loopet (kan kun ses i dokploy-buildet — resten af noten er dækket af C81's titelprøv) | — |
+| **C81** | `/bmi` DA-titel **59 tegn** (før 76 med `\| MinBeregner.dk` i halen) | 76/77/75 |
+| **C37 / C46** | `/renteberegner`: `fradragsværdi` i kroppen ×2. `/tidszone`: `Toronto` ×2, `Istanbul` ×2, `Bangkok` ×2, `Denpasar` ×2, `21 byer` ×2 | 16 byer / 12 |
+
+**Fire ting fundet, mens jeg lukkede noterne — de er ærlige, ikke fundne på sitet.** (1) **`beregner.no` er ikke på `/bmi`** (HTTP **404**, mens `beregner.no/` er 200), så C81's tredje prøve kan ikke køres, og C37/C46's "ÅBEN, OG `beregner.no`-DELEN ER UBrugELIG" er derfor stadig sand. **Domænet serverer kun enkelte sider** — se opgave 138. (2) **C72 har to ubundne `for=` tilbage** på `/opsparing` (6 `<label>`, 5 `for=`) og `/bil` (7/6). Noten navngav præcis de to som "heraf var inflationskontrollen *indpakket* i `<label>`" — altså er den **delvis** udført, ikke fuldstændig, og curl kan ikke se *hvilken*. Ikke rettet her: det er en a11y-opgave, ikke en trafikopgave, og det kræver en browser for at se feltet. (3) **`/loen-efter-skatt` 404'ede på minberegner.dk** — den danske side hedder `/lon-efter-skatt` i C72's note; begge staver 404'er på begge domæner undtagen `/lon-efter-skatt` på beraknare.se. Forse tidligere opslag i samme række. (4) **17:30-batchen deployede C105, ikke C106** — selv om begge var pushet før 19:00, fordi C106 kom 17:40. Deploy-vinduerne er reelle, ikke teoretiske.
+
+### ⏳ **VERIFICÉR DEPLOY: C109 — `/moms` svarer på "moms baglæns" og på Excel, og den faglige fejl om forbrugsudstyr er væk (22.984 v, CTR 0,2 %, pos. 6,9).** Kode + plan i ét commit på `ceo/moms-baglaens`, første kandidatvindue **2026-09-28 21:30** (push efter 17:30-batchen). Kun `src/lib/moms.ts` (én ny eksport, ingen eksisterende ændret), `src/app/moms/page.tsx` (tre nye `<h3>`, én rettet liste, ét korrigeret `<li>`), `src/lib/page-data.ts` (tre FAQ-par, ét `keywords`) og to testfiler er rørt — **ingen eksisterende beregning er ændret, `se` er urørt**. Verificér ved **indhold, ikke HTTP 200**:
+  1. `curl -s https://minberegner.dk/moms | sed 's/<!-- -->//g' | grep -c "Sådan beregner du moms baglæns"` skal give **2** (før: 0).
+  2. Samme greps for `Momsen fire gange i træk`, `Momsberegneren i Excel` og `=MOMS(A1;25;0;0)` skal give **2** hver (før: 0 alle).
+  3. Den **faglige fejl** skal være væk: `grep -c "Bøger, avis og forbrugsudstyr"` skal give **0**, og `grep -c "Forbrugsudstyr, telefoner og møbler"` skal give **2** (før: 2 for den forkerte streng).
+  4. De beregnede tal skal være med: `399,2 kr.`, `1.562,5 kr.`, `2,4414` og `0,4096` — hver **2** gange. `1.562,5` er prøven på at kæden ikke er afrundet.
+  5. `curl -s https://beraknare.se/moms | grep -ci "baglæns"` skal give **0** og `grep -c "MOMS(A1"` **0** — den svenske side er urørt.
+  6. JSON-LD har nu **11** spørgsmål i `da` (før 8). Se `###` C109 i opgavelisten.
 
 **Tre fejl i noterne selv, ikke på sitet — alle fundet fordi de blev testet mod rigtig markup.** (1) **C104 bad om `Fedme klass III` på den svenske `/bmi`, som 404'ede på grep** — den danske stavning er *fedme*, den svenske er *fetma* (`src/app/bmi/page.tsx:195`), så den rigtige streng er `Fetma klass III` og den står ×2. At noten havde dansk stavning i en svensk kontrol er præcis C92's `/leasing`-fejl (`färetagsleasing` med ä) i en anden form. (2) **C100 bad om `−0,67` med Unicode-minus, som gav 0 fund** — koden bruger ASCII-bindestreg (`src/lib/page-data.ts:831`), så den rigtige streng er `-0,67`, ×5. (3) **C100 forventede 7 JSON-LD-spørgsmål på dansk; der står 8** — og det er *korrekt*: optællingen på `12a3553` (C100's commit) giver DA 8 / SE 7, altså den danske base var 6 spørgsmål og ikke 5. Live matcher koden på præcis den commit, så der er ingen drift. **Måleregelen herfra: en notis forventningsværdi skal regnes fra koden på den commit, den verificerer, ikke fra hvad jeg troede den burde være** — ellers måler man sin egen noteringsfejl som en sitefejl.
 ### ⏳ **VERIFICÉR DEPLOY: C106 — `/tidsberegner` har et tempo-afsnit i begge sprog med fire løb-rækker (5 km/25 min, 10 km/45 min, halvmarathon 21,1 km/1 t 45 min, marathon 42,2 km/3 t 30 min), min. pr. kilometer og min. pr. mil, `1,609344`, og to nye FAQ-par (JSON-LD 8 → 10).** Kode + plan i ét commit på `ceo/tidsberegner-tempo`, merge/push 2026-09-28 17:40. Første kandidatvindue **2026-09-28 21:30** (17:30-batchen kørte ikke da denne note blev skrevet). Kun `src/lib/tidsberegner.ts` (to nye eksporter + fire eksempeldata), `src/app/tidsberegner/page.tsx` (ét `<h2>` pr. sprog), `src/lib/page-data.ts` (to FAQ-par pr. sprog) og to testfiler er rørt — **ingen eksisterende beregning er ændret**, `TidsBeregner.tsx` er urørt. Verificér ved **indhold, ikke HTTP 200**:
@@ -7988,7 +8013,7 @@ nu. Noten er lukket på indhold, ikke på det tal.
   **Ingen af dem er `DEPLOY-MISSING`:** de er merge-tidligere end 17:30-vinduet 27/9 og
   er dermed dækket af de 21 verificerede noters batch.
 
-### ⏳ **VERIFICÉR DEPLOY: C99 — `/fart` svarer på "beregn tid ud fra hastighed og distance" med tre regnestykker, tempo-tabellen (8-30 km/t) og time/minut-fælden (4.570 v, CTR 0,6 %, pos. 7,1).** Kode + plan i ét commit `61aa552` på `ceo/fart-tid-ud-fra-fart`, fast-forwardet til `master` og pushet 2026-09-28 13:47. Første kandidatvindue **2026-09-28 17:30**. Verificér ved **indhold** (HTTP 200 beviser intet — ændringen er ny brødtekst og to `faqItems`):
+### ✅ **DEPLOY OK 2026-09-28 19:05 — se tabellen. C99 — `/fart` svarer på "beregn tid ud fra hastighed og distance" med tre regnestykker, tempo-tabellen (8-30 km/t) og time/minut-fælden (4.570 v, CTR 0,6 %, pos. 7,1).** Kode + plan i ét commit `61aa552` på `ceo/fart-tid-ud-fra-fart`, fast-forwardet til `master` og pushet 2026-09-28 13:47. Første kandidatvindue **2026-09-28 17:30**. Verificér ved **indhold** (HTTP 200 beviser intet — ændringen er ny brødtekst og to `faqItems`):
    1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
    2. `curl -s https://minberegner.dk/fart | sed 's/<!-- -->//g'` skal finde **"Sådan beregner du tid ud fra hastighed og distance"**, **"300 km ÷ 100 km/t = 3 timer"**, **"100 km ÷ 2 timer = 50 km/t"**, **"50 km/t × 2 timer = 100 km"**, **"ikke 3 minutter"** og **"Fart og tempo er ikke det samme"**.
    3. `sed`-trinnet er ikke valgfrit — React skriver `<!-- -->` mellem tekstnoder (målefejl nr. 16).
@@ -8124,7 +8149,7 @@ kl. 12:56–12:58 mod live-sitet. `/api/health` svarer `status: ok`
   C74's deploy-bevis er derfor kun: filerne findes i repoet, og de otte
   `role="group"`-fund ovenfor er C74-scannerens klasse rettet i markup.
 
-- ⏳ **VERIFICÉR DEPLOY: C75: de 12 uavngivne knapgrupper er navngivet
+- ✅ **DEPLOY OK 2026-09-28 19:05 — se tabellen i VERIFICÉR DEPLOY-loggen. C75: de 12 uavngivne knapgrupper er navngivet
   (`role="group"` + `aria-labelledby`/`aria-label` i 10 filer), de to
   scanner-gates er opdateret, og   `label-a11y.test.tsx` er 111 → 118 tests. Kode `7c6d4d1`, merge `d5233af`
   2026-09-27 09:35 CEST på branch `ceo/knapgrupper`. Første kandidatvindue
@@ -8149,7 +8174,7 @@ kl. 12:56–12:58 mod live-sitet. `/api/health` svarer `status: ok`
   6. `node scripts/locale-leak.mjs --gate` skal give exit 0 med **0 ureviewet**
      og **117 / 85 / 32** — uændret.
 
-- ⏳ **VERIFICÉR DEPLOY: C74: måleren for knapgrupper uden navn (`scripts/knapgruppe-scan.mjs` + `src/lib/group-scan-gate.test.ts`, 9 tests) og planen.** Kode `1918cae`, merge `a05edd5` 2026-09-27 08:46 CEST på branch `ceo/knapgruppe-scan`. Første kandidatvindue **2026-09-27 12:30**.**
+- ✅ **DEPLOY OK 2026-09-28 19:05 — se tabellen. C74: måleren for knapgrupper uden navn (`scripts/knapgruppe-scan.mjs` + `src/lib/group-scan-gate.test.ts`, 9 tests) og planen.** Kode `1918cae`, merge `a05edd5` 2026-09-27 08:46 CEST på branch `ceo/knapgruppe-scan`. Første kandidatvindue **2026-09-27 12:30**.**
   **HTTP 200 beviser intet:** intet af dette rører `src/lib/` eller en beregning — kun et script og en testfil under `src/lib/`. Sådan verificeres det:
   1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
   2. `node scripts/knapgruppe-scan.mjs` skal give **10 filer / 12 uavngivne** — uændret, fordi scanneren kun læser `src/` og tallene derfor er identiske lokalt og live. Det beviser at *filerne* kom med, ikke at nogen beregning ændrede sig.
@@ -8626,7 +8651,7 @@ kl. 12:56–12:58 mod live-sitet. `/api/health` svarer `status: ok`
   spørgsmål, og **ikke** den danske H2; `https://beregner.no/alder` skal være
   uændret og **ikke** have nogen af H2'erne; `/api/health` skal svare
   `status: ok`. Se opgave 74.
-- ⚠️ **ÅBEN, OG `beregner.no`-DELEN ER UBrugELIG — VERIFICÉR DEPLOY: C46 — `/tidszone` har Grønland, Grækenland,
+- ✅ **DEPLOY OK 2026-09-28 19:05 (dansk + svensk del; `beregner.no` 404'er) — C46 — `/tidszone` har Grønland, Grækenland,
   Portugal, Island og Kreta i tabellen.** Kode `240c2c5`, merge `54c8c86`
   2026-09-26 20:52 CEST på branch `ceo/tidszone-nordatlanten`. Første
   kandidatvindue er **2026-09-27 07:30** (merged efter 21:30). Nul
@@ -12592,7 +12617,7 @@ verificering der ikke kan slå igennem er lige så dårlig som en der kan.
   merge `0d9351c` 2026-09-27 09:30 CEST; første kandidatvindue
   **2026-09-27 12:30**.
 
-- ⏳ **VERIFICÉR DEPLOY: C80 — Node-runtime-kontrakten (`engines.node` +
+- ✅ **DEPLOY OK 2026-09-28 19:05 — health ok, ingen fejl set (build-loggen kan kun ses i dokploy). C80 — Node-runtime-kontrakten (`engines.node` +
   `.nvmrc` + `src/lib/runtime-contract.test.ts`, 6 tests).** Kode + plan i ét
   commit på `ceo/node-runtime`; første kandidatvindue **2026-09-27 12:30**.
   **Verificér byg-loggen, ikke kun HTTP 200:** dokploy-buildet må ikke vise
@@ -12942,3 +12967,118 @@ og hvilke forhold de ikke tager hensyn til.
 
 **Mål:** `/barselsdagpenge` **198 besøgende/28d pr. 2026-09-28** (GSC-baseline ukendt, da
 siden ikke er i GSC's 16-siders liste) — måles igen 2026-10-12.
+
+#### 139. [x] FÆRDIG 2026-09-28 — C109 — `/moms` svarede null af ni søgninger i sin egen klynge, og skrev en faglig fejl i den synlige liste
+
+**Datagrund:** `/moms` er GSC's **fjerdestørste** danske side (**22.984 visninger, 41 klik,
+CTR 0,2 %, pos. 6,9**) — altså lav CTR på en position, hvor klikket *er* muligt, Fase 3's
+billigste vækstklasse. Søgningerne er "momsberegner" (**1.671 v, pos. 7**) og
+"hvordan trækker man moms fra" (1 v, pos. 1). DA-autocomplete (19:04) under **"moms beregner"**
+giver 10 variationer hvoraf syv er spørgsmål om *retningen* ("plus moms beregner", "ekskl moms
+beregner", "uden moms beregner", "inkl moms beregner"), under **"hvordan beregner man moms"**
+fire ("… af et beløb", "**… baglæns**", "**… uden moms**", "… kvart moms"). På den **live**
+side (133 KB HTML, **4 `<h2>`**, 8 FAQ-spørgsmål) var `baglæns` **0** forekomster,
+`Excel` **0**, `MOMS(` **0** — altså **null af de ni**, selv om siden *allerede* forklarede
+÷ 1,25 i "Sådan beregner du moms". Titlen og beskrivelsen var svar-første ("Momsberegner 25 %
+– inkl. og ekskl. moms") — **for syvende gang ikke titlen, men kroppen under den** (C82, C85,
+C96, C99, C100).
+
+**Den faglige fejl, fundet fordi jeg læste sidens egen liste imod dens egen forklaring.** Linje
+113 skrev **"Bøger, avis og forbrugsudstyr: uden moms"** — en vaskemaskine, en telefon og en
+møbel har **25 %** moms i Danmark, de er ikke undtaget. Det lå i den *synlige* liste, og det
+blev låst af en test (`page.test.tsx:77` krævede netop `"Bøger, avis og forbrugsudstyr:"`) —
+altså var fejlen dobbeltindlåst, i markup og i gate. Samme fejlklasse som C84's
+`metaDescription` om 12 byer: en indekseret tekst der modsiger sit eget indhold, låst af en
+måler der måler den forkerte streng. **Rettet til "Bøger, aviser og tidsskrifter: uden moms"**
+(ordet *tidsskrifter* er den korrekte lovbetegnelse, og den lå allerede i `page-data.ts`'s
+FAQ) plus **en ny linje** "Forbrugsudstyr, telefoner og møbler: 25 % — også når de står på
+tilbud". Den negative lås følger med, så den gamle streng ikke kan komme tilbage.
+
+**Rettelsen (kun `da`):** tre nye `<h3>`.
+1. **"Sådan beregner du moms baglæns"** — den ene regel (del med 1,25), tre eksempler som
+   punkter (1.250 / **499** / 2.000) og en **firerkolonnetabel** (pris inkl. / ÷ 1,25 / momsbeløb
+   / andel) med de fem beløb fra `MOMS_REFERENCE_BELOEB`. **499 er valgt med vilje:** det er det
+   beløb hvor 20 %-metoden og ÷ 1,25 giver hver sit svar (99,8 mod 100), altså selve
+   forskellen, afsnittet handler om. Tilbagekoblingen står også: 1.000 ekskl. × 1,25 = 1.250.
+2. **"Momsen fire gange i træk"** — reglen for de store e-handelshistorier, med regnestykket
+   1.000 → 1.250 → **1.562,50** → 1.953,13 → **2.441,41**, og fælden skrevet ud: 1,25⁴ =
+   **2,4414**, mens 20 % fratrukket fire gange giver **0,4096** — altså 410 kr. oveni i stedet
+   for 1.441. Slutningen er den praktiske: **beregn kun med 25 %, aldrig med 20 % gentaget.**
+3. **"Momsberegneren i Excel"** — fem formler i en tabel med "gør hvad" og resultatet på 1.000
+   kr. ekskl.: `=MOMS(A1;25;0;0)` (250 kr.), `=A1+MOMS(A1;25;0;0)` (1.250 kr.), `=A1/1,25`
+   (1.000 kr.), `=MOMS(A1/1,25;25;0;0)` (250 kr.) og `=A1-A1/1,25` (250 kr.) — plus de to
+   fælder: **semikolon** mellem argumenterne på dansk og svensk Excel (komma på engelsk), og
+   cellen formateret som **Tal**, ellers kommer der `ø`.
+
+**Ingen tal står hårdkodet to steder.** Baglæns-punkterne og tabellen kommer af en ny
+`fratraekRaekker(25)` i `src/lib/moms.ts`, som bare kalder `beregnMoms(…, "fratraekMoms", …)` —
+**samme funktion værktøjet bruger**; 25 %-kæden af `momsFaktor(25) ** n`. Ingen eksisterende
+eksport er ændret, så `MomsBeregner.tsx` er urørt og virker identisk.
+
+**To fejl i min egen første sætning, begge fundet fordi testene *faldt* (målefejl nr. 18).**
+(1) Jeg skrev **"499 kr. ÷ 1,25 = 399,20 kr."** i brødteksten, mens `formatNumber` giver
+**"399,2"** — altså en indskrevet streng der ikke kunne komme fra regnestykket. Det er præcis
+C84's fejlklasse, og jeg var ved at begå den igen: **teksten blev nu genereret** af samme
+`beregnMoms`-kald som tabellen, så de to *ikke kan* glide fra hinanden. (2) Jeg afrundede
+25 %-kæden til nærmeste tier for at den skulle se pæn ud — hvilket gjorde den
+**uefterprøvbar**: 1.000 × 1,25 = 1.250, men 1.250 × 1,25 = 1.562,50, **ikke** "1.560". Kæden
+er nu uden afrunding, og en test låser netop det med et `not.toContain` på den afrundede
+form. *Målstreglen for denne slags opgaver er derfor skærpet: et regnestykke skal kunne
+regnes efter af læseren, så afrunding i et mellemled er en fejl, ikke en pynt.*
+
+**Målt og bevidst ikke bygget (opgave 119's kildekrav).** "moms på parkering" er nr. 5 af ti
+under "moms på" i autocomplete, og parkeringsafgiften er den afgift danske kommuner har
+hævet mest. **Men ingen kilde var tilgængelig fra loopet:** `skat.dk/erhverv/moms` (200) er en
+menu uden tekst, `skat.dk/erhverv/parkeringsafgift` 404, `virk.dk/emner/skat/moms-og-afgifter/
+parkeringsafgift` 404, `info.skat.dk/data.aspx?oid=…` 404 på alle tre oid'er jeg prøvede, og
+`retsinformation.dk/eli/lta/2023/742` er en tom JS-app (4.864 bytes). Så der står **ingen
+sats** om parkering på siden. Samme disciplin som C95 og opgave 119 — en sats uden kilde
+skader mere end en manglende sætning. Se `❓ Til Mads` nederst.
+
+**Harness:** `page.test.tsx` **5 → 12 tests**, `moms.test.ts` **23 → 26**. De nye tests er
+**modsvejs verificeret: 7 af 7 falder** med kun `page.tsx` fra master — inklusive den der
+kræver, at den gamle fejl *er* væk, og den der kræver, at kæden *ikke* er afrundet.
+Sidetesten der kræver tabellen krydschecker alle ni tal mod `beregnMoms`/`momsFaktor` direkte
+i testen, altså mod **modulet**, ikke mod mine egne forventninger. **Målt på rigtig server**
+(`next start`, port 3431 verificeret fri *inden* start — målefejl nr. 15's lære): DA **200**
+med alle ni strenge ×2 (synlig tekst + RSC-payload), `1.562,5 kr.` med decimal, gammel fejl
+**0**, `h3`-rækken på 10 overskrifter. SE **200** med **0** danske markører (`baglæns`,
+`MOMS(A1`, `2,4414`) — den svenske side er urørt. Gate grøn: lint (561 filer), **1884 tests /
+155 filer** (fra 1877 / 155), build (**141 sider**), `locale-leak.mjs --gate` exit 0,
+`knapgruppe-scan.mjs` 0/0. Kode + plan i ét commit på `ceo/moms-baglaens`.
+
+**MÅL:** `/moms` baseline **22.984 visninger / 41 klik / CTR 0,2 % / pos. 6,9 pr.
+2026-08-29 → 2026-09-26** — måles igen 2026-10-12. Forventningen er højere CTR på pos. 6-7,
+ikke nye visninger.
+
+---
+
+### ❓ Til Mads — en citable dansk kilde til parkeringsafgiften (ny i C109)
+
+Autocomplete under "moms på" har **"moms på parkering" som nr. 5 af ti**, og det er en
+sætning `/moms` ikke kan svare på i dag. Reglen er en **særskilt afgift** (parkeringsafgift),
+ikke moms, og den er kommunal — så spørgsmålet er dobbelt: hvilken sats gælder, og er den
+overhovedet moms. **Jeg kunne ikke finde en kilde fra loopet:** `skat.dk/erhverv/parkeringsafgift`
+404, `virk.dk` 404, `info.skat.dk` 404 på tre oid'er, og momsloven på retsinformation er en
+tom JS-app. **Spørgsmålet til dig:** har du en fungerende URL til SKAT's eller KL's side om
+parkeringsafgift, så kan næste iteration svare på klyngen med sats og kilde. Uden den står
+der ingen sats — det er ikke en forglemmelse.
+
+### ❓ Til Mads — `beregner.no` serverer kun forsiden (ny i C109)
+
+Lukningen af C37/C46/C81 viste det samme tre steder: `https://beregner.no/` er **200**, men
+`https://beregner.no/bmi` er **404** — også efter at disse sider har været live i dagevis.
+C37 og C46 har begge stået som "ÅBEN, OG `beregner.no`-DELEN ER UBrugELIG", fordi netop den
+del ikke kan verificeres. **Spørgsmålet:** er `beregner.no` bevidst kun et domæne der
+omdirigerer til minberegner.dk (altså skal `beregner.no/bmi` nok give en 301, ikke en 404),
+eller skal alle danske sider findes på det? Det er en retningslinje, ikke en fejl jeg kan
+gætte.
+
+### ❓ Til Mads — to `for=` mangler stadig på `/opsparing` og `/bil` (ny i C109)
+
+C72's note siger, at alle tolv ubundne `<label>` blev bundet. Målingen siger: `/opsparing` har
+6 `<label>` og 5 `for=`, `/bil` har 7 og 6 — altså **én ubundet på hver**. Noten selv
+forklarer, at "inflationskontrollen var *indpakket* i `<label>`", så løsningen var bevidst
+delvis. **Jeg rettede det ikke**, fordi det er en a11y-opgave uden trafikgrund og fordi curl
+ikke kan se *hvilket* felt det er. En test-run (`label-a11y`) burde kunne finde det; det er
+næste iterations opgave hvis du vil have det lukket.

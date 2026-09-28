@@ -87,6 +87,18 @@ export function referenceRaekker(momssats: number): MomsResultat[] {
   return MOMS_REFERENCE_BELOEB.map((beloeb) => beregnMoms(beloeb, "tillaegMoms", momssats));
 }
 
+/**
+ * Rækkerne i "Sådan regner du moms baglæns", beregnet af `beregnMoms` i
+ * "fratraekMoms"-retningen — samme modul og samme regnestykke som vaerktøjet,
+ * saa tabellen ikke kan vise et tal regnestykket ikke ville give.
+ *
+ * Det er priser *med* moms i kassen, fordi det er den pris folk har: 1.250 kr.
+ * paa hylden er 1.000 kr. ekskl. moms, og det er 1.250 kr., der skal ÷ 1,25.
+ */
+export function fratraekRaekker(momssats: number): MomsResultat[] {
+  return MOMS_REFERENCE_BELOEB.map((beloeb) => beregnMoms(beloeb, "fratraekMoms", momssats));
+}
+
 interface OpsummeringTekst {
   net: string;
   moms: string;
