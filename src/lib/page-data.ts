@@ -827,6 +827,8 @@ const daPages: Record<string, PageData> = {
       { question: "Kan jeg trække en pause fra?", answer: "Ja. Angiv pausen i minutter under 'Fratræk pause', så trækkes den fra, før timer, minutter og decimaltimer vises." },
       { question: "Hvad er decimal timer?", answer: "1,5 timer = 1 time og 30 minutter. Bruges til timeregistrering. 08:30 til 16:45 er 8,25 timer." },
       { question: "Tid over midnat?", answer: "Ja, beregneren håndterer tid over midnat automatisk. 22:00 til 06:00 er 8 timer og 0 minutter." },
+      { question: "Hvordan beregner jeg tid mellem to klokkeslæt i Excel?", answer: "Sæt starttidspunktet i A1 og sluttidspunktet i B1 som rigtige klokkeslæt. =B1-A1 giver 08:30 til 16:45 som 8 timer og 15 minutter, =(B1-A1)*24 giver 8,25 decimaltimer, og =(B1-A1)*24*60 giver 495 minutter. Dansk Excel bruger semikolon som skilletegn." },
+      { question: "Hvorfor får jeg et negativt tal i Excel?", answer: "Fordi Excel trækker sluttiden fra starttiden uden at vide, at nattetimen slutter næste dag. 22:00 til 06:00 giver derfor -0,67 døgn. Brug =MOD(B1-A1;1)*24, så tager den de 24 timer med igen og viser 8 timer — præcis som beregneren gør." },
       ],
     },
     "tidszone": {
@@ -3270,6 +3272,8 @@ const sePages: Record<string, PageData> = {
       { question: "Hur beräknar jag arbetstid?", answer: "Ange starttid och sluttid och dra av lunchpaus. Då får du den timmar och minuter som faktiskt går på jobbet." },
       { question: "Vad är decimaltimmar?", answer: "1,5 timmar = 1 timme och 30 minuter. Används för tidrapportering." },
       { question: "Tid över midnatt?", answer: "Ja, kalkylatorn hanterar tid över midnatt automatiskt." },
+      { question: "Hur räknar jag ut timmar mellan två klockslag i Excel?", answer: "Sätt starttiden i A1 och sluttiden i B1 som riktiga klockslag. =B1-A1 ger 08:30 till 16:45 som 8 timmar och 15 minuter, =(B1-A1)*24 ger 8,25 decimaltimmar och =(B1-A1)*24*60 ger 495 minuter. Svensk Excel använder semikolon som avgränsare." },
+      { question: "Varför får jag ett negativt tal i Excel?", answer: "För att Excel drar sluttiden från starttiden utan att veta att nattpasset slutar följande dag. 22:00 till 06:00 ger därför -0,67 dygn. Använd =MOD(B1-A1;1)*24, så tar den med de 24 timmarna igen och visar 8 timmar — precis som kalkylatorn gör." },
       ],
     },
     "tidszone": {

@@ -61,6 +61,28 @@ function parseDato(value: string): number | null {
   return dato.getTime();
 }
 
+/**
+ * Den **rå** forskel mellem to klokkeslæt, i minutter, uden nogen
+ * normalisering: slut minus start, som Excel's `=B1-A1` gør på to celler
+ * med rigtige klokkeslæt.
+ *
+ * `beregnTidsinterval` retter bevidst et negativt resultat ved at lægge 24
+ * timer til (en nattevagt 22:00 → 06:00 *er* 8 timer), fordi det er det,
+ * værktøjet skal vise. Excel gør **ikke** det — det trækker sluttiden fra
+ * starttiden og ved ikke at dagen er en senere, så cellen står med -16
+ * timer. Det er den fælde Excel-afsnittet på /tidsberegner beskriver, og
+ * derfor skal den have sit eget kald frem for at låne `heleDoegn`, der er
+ * det *rettede* tal.
+ *
+ * Datoer og pauser indgår ikke: de står ikke i de to celler.
+ */
+export function beregnRaaTidsdifference(startTid: string, slutTid: string): number | null {
+  const startMinutter = parseKlokkeslaet(startTid);
+  const slutMinutter = parseKlokkeslaet(slutTid);
+  if (startMinutter === null || slutMinutter === null) return null;
+  return slutMinutter - startMinutter;
+}
+
 export function beregnTidsinterval(input: TidsintervalInput): TidsintervalResultat | null {
   const startMinutter = parseKlokkeslaet(input.startTid);
   const slutMinutter = parseKlokkeslaet(input.slutTid);

@@ -5,9 +5,14 @@ import { getPageData } from "@/lib/page-data";
 import { formatNumber } from "@/lib/format";
 import {
   TIDS_EKSEEMPLER,
+  TIDS_EKSEMPEL_DAG,
   TIDS_EKSEMPEL_FLERE_DAGE,
+  TIDS_EKSEMPEL_MIDNAT,
+  TIDS_EKSEMPEL_PAUSE,
   TIDS_UDEN_DATOER,
   formatTidsvar,
+  excelDifferens,
+  totalMinutter,
 } from "@/lib/tids-eksempler";
 import RelatedCalculators from "@/components/RelatedCalculators";
 import FAQ from "@/components/FAQ";
@@ -180,6 +185,63 @@ export default async function TidsberegnerPage() {
           ind, hvis intervallet går over en dag.
         </p>
 
+        <h2>Sådan beregner du tid mellem to klokkeslæt i Excel</h2>
+        <p>
+          Skriv starttidspunktet i <strong>A1</strong> og sluttidspunktet i{" "}
+          <strong>B1</strong> — begge som rigtige klokkeslæt, ikke som tekst.
+          Så er den korte formel <code>=B1-A1</code>, og med cellen formateret
+          som <strong>Tid</strong> viser den{" "}
+          <strong>
+            {TIDS_EKSEMPEL_DAG.slut} − {TIDS_EKSEMPEL_DAG.start} ={" "}
+            {formatTidsvar(TIDS_EKSEMPEL_DAG, "da")}
+          </strong>{" "}
+          (altså {totalMinutter(TIDS_EKSEMPEL_DAG)} minutter).
+        </p>
+        <p>
+          Til <strong>decimaltimer</strong> — den notation mange virksomheder
+          bruger — skal du gange med 24:{" "}
+          <code>=(B1-A1)*24</code> giver{" "}
+          <strong>{formatTimer(TIDS_EKSEMPEL_DAG.decimalTimer, "da")} timer</strong>{" "}
+          for præcis det samme par. Og til <strong>alle minutter i ét tal</strong>{" "}
+          (til en løntimesrapport) er det{" "}
+          <code>=(B1-A1)*24*60</code> ={" "}
+          <strong>{totalMinutter(TIDS_EKSEMPEL_DAG)}</strong>.
+        </p>
+        <p>
+          <strong>Den fælde, der giver et negativt tal:</strong> hvis
+          sluttidspunktet er tidligere end starttidspunktet — en nattevagt fra{" "}
+          {TIDS_EKSEMPEL_MIDNAT.start} til {TIDS_EKSEMPEL_MIDNAT.slut} — giver{" "}
+          <code>=B1-A1</code>{" "}
+          <strong>
+            {formatNumber(excelDifferens(TIDS_EKSEMPEL_MIDNAT), "da", { maximumFractionDigits: 2 })}
+          </strong>{" "}
+          døgn, altså minus 16 timer. Wrap formlen i{" "}
+          <code>=MOD(B1-A1;1)*24</code>, så den tager de 24 timer med igen, og
+          du får <strong>{formatTimer(TIDS_EKSEMPEL_MIDNAT.decimalTimer, "da")} timer</strong>{" "}
+          — præcis som værktøjet ovenfor.
+        </p>
+        <p>
+          <strong>Og en pause?</strong> Træk den fra i timer, ikke i klokkeslæt:{" "}
+          <code>=(B1-A1)*24-0,5</code> giver{" "}
+          <strong>{formatTimer(TIDS_EKSEMPEL_PAUSE.decimalTimer, "da")} timer</strong>{" "}
+          for {TIDS_EKSEMPEL_PAUSE.start} til {TIDS_EKSEMPEL_PAUSE.slut} med 30
+          minutters frokost. Dansk Excel bruger <strong>semikolon</strong> som
+          skilletegn, fordi komma er decimaltegn — samme som i{" "}
+          <a href="/dato">datoberegnerens</a> formler.
+        </p>
+        <p>
+          Er tallet hjemme i Excel{" "}
+          <strong>
+            {formatNumber(excelDifferens(TIDS_EKSEMPEL_DAG), "da", { maximumFractionDigits: 4 })}
+          </strong>{" "}
+          i stedet for{" "}
+          {formatTidsvar(TIDS_EKSEMPEL_DAG, "da")}, står cellen formateret som{" "}
+          <strong>Tal</strong>: Excel gemmer et klokkeslæt som en brøkdel af et
+          døgn, og {TIDS_EKSEMPEL_DAG.slut} − {TIDS_EKSEMPEL_DAG.start} er
+          netop {formatNumber(TIDS_EKSEMPEL_DAG.heleDoegn, "da", { maximumFractionDigits: 4 })}{" "}
+          af et døgn. Skift formateringen til Tid, eller gang med 24.
+        </p>
+
         <h2>Decimal timer vs. timer:minutter</h2>
         <p>
           Mange virksomheder bruger decimal timer til timeregistrering. Her er
@@ -251,6 +313,65 @@ export default async function TidsberegnerPage() {
           ett intervall inte kan gå bakåt. Är bara ett datum ifyllt används det
           andra som samma dag — så båda datum behöver alltså ifyllas om
           intervallet går över en dag.
+        </p>
+
+        <h2>Så räknar du ut timmar mellan två klockslag i Excel</h2>
+        <p>
+          Skriv starttiden i <strong>A1</strong> och sluttiden i{" "}
+          <strong>B1</strong> — båda som riktiga klockslag, inte som text. Då är
+          den korta formeln <code>=B1-A1</code>, och med cellen formaterad som{" "}
+          <strong>Tid</strong> visar den{" "}
+          <strong>
+            {TIDS_EKSEMPEL_DAG.slut} − {TIDS_EKSEMPEL_DAG.start} ={" "}
+            {formatTidsvar(TIDS_EKSEMPEL_DAG, "se")}
+          </strong>{" "}
+          (alltså {totalMinutter(TIDS_EKSEMPEL_DAG)} minuter).
+        </p>
+        <p>
+          För <strong>decimaltimmar</strong> — den notation många företag
+          använder — ska du multiplicera med 24:{" "}
+          <code>=(B1-A1)*24</code> ger{" "}
+          <strong>{formatTimer(TIDS_EKSEMPEL_DAG.decimalTimer, "se")} timmar</strong>{" "}
+          för exakt samma par. Och för <strong>alla minuter i ett tal</strong>{" "}
+          (till en lönerapport) är det{" "}
+          <code>=(B1-A1)*24*60</code> ={" "}
+          <strong>{totalMinutter(TIDS_EKSEMPEL_DAG)}</strong>.
+        </p>
+        <p>
+          <strong>Fällan som ger ett negativt tal:</strong> om sluttiden är
+          tidigare än starttiden — ett nattpass från{" "}
+          {TIDS_EKSEMPEL_MIDNAT.start} till {TIDS_EKSEMPEL_MIDNAT.slut} — ger{" "}
+          <code>=B1-A1</code>{" "}
+          <strong>
+            {formatNumber(excelDifferens(TIDS_EKSEMPEL_MIDNAT), "se", { maximumFractionDigits: 2 })}
+          </strong>{" "}
+          dygn, alltså minus 16 timmar. Lägg formeln i{" "}
+          <code>=MOD(B1-A1;1)*24</code>, så tar den med de 24 timmarna igen, och
+          du får{" "}
+          <strong>{formatTimer(TIDS_EKSEMPEL_MIDNAT.decimalTimer, "se")} timmar</strong>{" "}
+          — precis som verktyget ovan.
+        </p>
+        <p>
+          <strong>En rast?</strong> Dra av den i timmar, inte i klockslag:{" "}
+          <code>=(B1-A1)*24-0,5</code> ger{" "}
+          <strong>{formatTimer(TIDS_EKSEMPEL_PAUSE.decimalTimer, "se")} timmar</strong>{" "}
+          för {TIDS_EKSEMPEL_PAUSE.start} till {TIDS_EKSEMPEL_PAUSE.slut} med 30
+          minuters lunch. Svensk Excel använder <strong>semikolon</strong> som
+          avgränsare, eftersom komma är decimaltecken — samma som i{" "}
+          <a href="/dato">datokalkylatorns</a> formler.
+        </p>
+        <p>
+          Blir talet i Excel{" "}
+          <strong>
+            {formatNumber(excelDifferens(TIDS_EKSEMPEL_DAG), "se", { maximumFractionDigits: 4 })}
+          </strong>{" "}
+          i stället för{" "}
+          {formatTidsvar(TIDS_EKSEMPEL_DAG, "se")}, står cellen formaterad som{" "}
+          <strong>Tal</strong>: Excel lagrar ett klockslag som en bråkdel av ett
+          dygn, och {TIDS_EKSEMPEL_DAG.slut} − {TIDS_EKSEMPEL_DAG.start} är
+          precis{" "}
+          {formatNumber(TIDS_EKSEMPEL_DAG.heleDoegn, "se", { maximumFractionDigits: 4 })}{" "}
+          av ett dygn. Byt formateringen till Tid, eller multiplicera med 24.
         </p>
 
         <h2>Decimaltimmar vs. timmar:minuter</h2>

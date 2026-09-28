@@ -1,4 +1,4 @@
-import { beregnTidsinterval } from "./tidsberegner";
+import { beregnRaaTidsdifference, beregnTidsinterval } from "./tidsberegner";
 
 export interface TidsEksempel {
   start: string;
@@ -13,13 +13,19 @@ export interface TidsEksempel {
   svar: string;
   /** Tal, ikke streng: decimaltegnet formatteres på det domæne, siden viser på. */
   decimalTimer: number;
+  /**
+   * Hele døgn som decimaltal (0,34375 for 8 t 15 min). Det er præcis det tal
+   * Excel's `=B1-A1` giver, når cellen står som **Tal** i stedet for Tid —
+   * den fælde Excel-afsnittet på /tidsberegner beskriver.
+   */
+  heleDoegn: number;
   overMidnat: boolean;
   /** Hvorfor eksemplet er med, kort og konkret. */
   bemaerkning: string;
 }
 
 const raws: Array<
-  Omit<TidsEksempel, "svar" | "decimalTimer" | "overMidnat" | "timer" | "minutter">
+  Omit<TidsEksempel, "svar" | "decimalTimer" | "heleDoegn" | "overMidnat" | "timer" | "minutter">
 > = [
   {
     start: "08:30",
@@ -99,6 +105,7 @@ export const TIDS_EKSEEMPLER: TidsEksempel[] = raws.map((rå) => {
     minutter: resultat.minutter,
     svar: `${resultat.timer} t ${resultat.minutter} min`,
     decimalTimer: resultat.decimalTimer,
+    heleDoegn: resultat.heleDoegn,
     overMidnat: resultat.overMidnat,
   };
 });
@@ -140,6 +147,73 @@ export const TIDS_UDEN_DATOER: Record<"da" | "se", string> = (() => {
     se: `${resultat.timer} h ${resultat.minutter} min`,
   };
 })();
+
+/**
+ * De tre eksempler, brødteksten om Excel bruger. De er fundet i
+ * TIDS_EKSEEMPLER, så de er de *samme tal* som tabellen og værktøjet viser —
+ * en ny tekst kan derfor ikke lægge et tal ved siden af, logikken modsiger.
+ *
+ * Hver har sit eget formål: det første er det eksempel, metaDescription
+ * allerede lovede, det næste krydser midnat (hvor en naiv `=B1-A1` i Excel
+ * giver et negativt tal), og det tredje har den pause, som Excel-formlen
+ * trækker fra med det samme argument som værktøjet har.
+ */
+function findEksempel(start: string, slut: string, pause: number): TidsEksempel {
+  const fundet = TIDS_EKSEEMPLER.find(
+    (eksempel) =>
+      eksempel.start === start &&
+      eksempel.slut === slut &&
+      eksempel.pause === pause &&
+      eksempel.startDato === undefined
+  );
+  if (!fundet) {
+    throw new Error(
+      `TIDS_EKSEEMPLER skal indeholde eksemplet ${start}–${slut} med pause ${pause} — Excel-afsnittet på /tidsberegner bruger det`
+    );
+  }
+  return fundet;
+}
+
+/** 08:30–16:45 uden pause: 8 t 15 min = 8,25 decimaltimer. */
+export const TIDS_EKSEMPEL_DAG: TidsEksempel = findEksempel("08:30", "16:45", 0);
+
+/** 22:00–06:00: 8 t 0 min, og `overMidnat` er sand. */
+export const TIDS_EKSEMPEL_MIDNAT: TidsEksempel = findEksempel("22:00", "06:00", 0);
+
+/** 09:00–17:00 med 30 minutters pause: 7 t 30 min = 7,50 decimaltimer. */
+export const TIDS_EKSEMPEL_PAUSE: TidsEksempel = findEksempel("09:00", "17:00", 30);
+
+/**
+ * Hele intervallet i minutter — det tal Excel's `=B1-A1` giver, når cellerne
+ * er formateret som klokkeslæt og svaret formateres som `[t]:mm`.
+ * Beregnet af modulet, så det ikke er et håndskrevet tal ved siden af
+ * `decimalTimer`.
+ */
+export function totalMinutter(eksempel: Pick<TidsEksempel, "timer" | "minutter">): number {
+  return eksempel.timer * 60 + eksempel.minutter;
+}
+
+/**
+ * Præcis det tal Excel's `=B1-A1` giver i en celle formateret som **Tal**:
+ * en brøkdel af et døgn, **signeret**. Den er negativ for et interval der
+ * krydser midnat (22:00 → 06:00), fordi Excel trækker sluttiden fra
+ * starttiden uden at vide at dagen er en senere. Det er den fælde
+ * Excel-afsnittet på /tidsberegner beskriver, så tallet skal komme herfra
+ * og ikke fra brødteksten.
+ *
+ * Den er **brutto**: formlen kender ikke til en pause, fordi pausen ikke står
+ * i de to celler — den trækkes fra i et separat argument, præcis som
+ * `=(B1-A1)*24-0,5` gør på siden. Derfor regnes den uden `fratraekPause`.
+ */
+export function excelDifferens(eksempel: TidsEksempel): number {
+  const raat = beregnRaaTidsdifference(eksempel.start, eksempel.slut);
+  if (raat === null) {
+    throw new Error(
+      `Eksemplet ${eksempel.start}–${eksempel.slut} kan ikke parses — Excel-afsnittet på /tidsberegner bruger det`
+    );
+  }
+  return raat / (24 * 60);
+}
 
 /**
  * "65 t 0 min" på dansk og "65 h 0 min" på svensk — samme notationsform som
