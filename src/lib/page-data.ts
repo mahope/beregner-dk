@@ -1578,6 +1578,9 @@ const daPages: Record<string, PageData> = {
       { question: "Skal jeg gøre noget for at få rentefradrag?", answer: "Nej, banker og realkreditinstitutter indberetter automatisk dine renteudgifter til SKAT. Du skal dog kontrollere, at beløbene er korrekte i din forskudsopgørelse." },
       { question: "Hvad er negativ kapitalindkomst?", answer: "Negativ kapitalindkomst opstår, når dine renteudgifter er større end dine kapitalindtægter (f.eks. renteindtægter fra opsparing). Det er den negative kapitalindkomst, du får fradrag for." },
       { question: "Falder rentefradraget?", answer: "Nej. I 2026 er den høje fradragsværdi 33,6% for de første 50.000 kr. (100.000 kr. for par), og beløbet over grænsen har den lave værdi på 25,6%. Grænsen har været uændret i en årrække." },
+      { question: "Er der et loft på rentefradraget?", answer: "Nej. Du kan trække fra alle dine renteudgifter — der er intet loft på selve beløbet. Det, der er begrænset, er kun hvor stor en andel der giver den høje fradragsværdi på 33,6%: de første 50.000 kr. (100.000 kr. for par). Resten giver 25,6%." },
+      { question: "Hvad er rentefradraget værd i procent?", answer: "For en enlig med 80.000 kr. i renteudgifter er den effektive sats 30,6 %, fordi kun de første 50.000 kr. giver 33,6 %. Bliver renterne højere, falder den effektive sats yderligere." },
+      { question: "Skal par fordele rentefradraget mellem sig?", answer: "Som udgangspunkt nej. Den fælles grænse er dobbelt så stor som den enkelte, så et par med 80.000 kr. i renter får præcis samme besparelse, uanset om beløbet står på den ene eller deles i to lige dele. Fordeling hjælper først, når renterne er ujævnt fordelt." },
       ],
     },
     "boligstoette": {

@@ -11,9 +11,32 @@ import { getCurrentDomainConfig, getLocale } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
 import { generatePageMetadata } from "@/lib/page-helpers";
 import { RENTEFRADRAG_2026 } from "@/lib/satser-2026";
+import { beregnRentefradrag } from "@/lib/rentefradrag";
 
 const HOEJ_SATS_PCT = (RENTEFRADRAG_2026.highRate * 100).toLocaleString("da-DK");
 const LAV_SATS_PCT = (RENTEFRADRAG_2026.lowRate * 100).toLocaleString("da-DK");
+
+/** Beløbet der bruges i "loft"-afsnittet — over grænsen, så begge satser ses. */
+const LOFT_EKSEMPEL_BELOEB = 80_000;
+
+const formatSats = (sats: number) => `${sats.toFixed(1).replace(".", ",")} %`;
+
+const loftEksempel = beregnRentefradrag(LOFT_EKSEMPEL_BELOEB, "single");
+const loftEksempelPar = beregnRentefradrag(LOFT_EKSEMPEL_BELOEB, "couple");
+const hoejAndelEksempel = loftEksempel.hoejAndel * RENTEFRADRAG_2026.highRate;
+const lavAndelEksempel = loftEksempel.lavAndel * RENTEFRADRAG_2026.lowRate;
+
+/**
+ * Ujævn fordeling: 95.000 kr. hos den ene, 5.000 kr. hos den anden.
+ * Sammenlignes mod de samme 100.000 kr. som ét fælles beløb for et par.
+ */
+const ULIJ_HAEJ = 95_000;
+const ULIJ_LAV = 5_000;
+const uligBesparelseSamlet = beregnRentefradrag(ULIJ_HAEJ + ULIJ_LAV, "couple").besparelse;
+const uligBesparelseFordelt =
+  beregnRentefradrag(ULIJ_HAEJ, "single").besparelse +
+  beregnRentefradrag(ULIJ_LAV, "single").besparelse;
+
 import Link from "next/link";
 
 export async function generateMetadata() {
@@ -114,6 +137,81 @@ export default async function RentefradragPage() {
                 for beløbsgrænsen på {RENTEFRADRAG_2026.highRateLimitSingle.toLocaleString("da-DK")} kr. /{" "}
                 {RENTEFRADRAG_2026.highRateLimitCouple.toLocaleString("da-DK")} kr. Verificeret{" "}
                 {RENTEFRADRAG_2026.verifiedAt}.
+              </p>
+
+              <h3 className="text-xl font-semibold mt-6 mb-3">
+                Er der et loft på rentefradraget?
+              </h3>
+              <p>
+                Nej — og det er det svar, de fleste søger efter, fordi tallet{" "}
+                {RENTEFRADRAG_2026.highRateLimitSingle.toLocaleString("da-DK")} kr. ofte
+                forveksles med en grænse for, hvor meget du overhovedet kan trække fra.
+                <strong> Der er intet loft på selve renteudgifterne</strong>: du kan
+                indberette og trække fra alle de renter, du betaler. Det, der er begrænset,
+                er kun hvor stor en andel af beløbet der giver den høje
+                fradragsværdi på {HOEJ_SATS_PCT} %.
+              </p>
+              <p className="mt-3">
+                Forskellen er stor, fordi den lave sats er {LAV_SATS_PCT} % — så det er
+                ikke "alt eller intet", men en trinvis nedtrapning. En enlig med{" "}
+                {LOFT_EKSEMPEL_BELOEB.toLocaleString("da-DK")} kr. i renteudgifter får:
+              </p>
+              <ul className="list-disc pl-6 space-y-1 mt-2">
+                <li>
+                  {RENTEFRADRAG_2026.highRateLimitSingle.toLocaleString("da-DK")} kr. ×{" "}
+                  {HOEJ_SATS_PCT} % ={" "}
+                  {hoejAndelEksempel.toLocaleString("da-DK")} kr.
+                </li>
+                <li>
+                  {(LOFT_EKSEMPEL_BELOEB - RENTEFRADRAG_2026.highRateLimitSingle).toLocaleString("da-DK")} kr. ×{" "}
+                  {LAV_SATS_PCT} % = {lavAndelEksempel.toLocaleString("da-DK")} kr.
+                </li>
+                <li>
+                  <strong>
+                    I alt {loftEksempel.besparelse.toLocaleString("da-DK")} kr. — svarende
+                    til en effektiv sats på {formatSats(loftEksempel.effektivSats)}
+                  </strong>
+                </li>
+              </ul>
+              <p className="text-sm text-gray-700 mt-3">
+                Den effektive sats er altså <strong>lavere end {HOEJ_SATS_PCT} %</strong>{" "}
+                for alle, der kommer over grænsen. Grænsen er de{" "}
+                {RENTEFRADRAG_2026.highRateLimitSingle.toLocaleString("da-DK")} kr. hos en
+                enlig og {RENTEFRADRAG_2026.highRateLimitCouple.toLocaleString("da-DK")} kr. hos
+                et par, så det er den du skal holde øje med — ikke et loft.
+              </p>
+              <h3 className="text-xl font-semibold mt-6 mb-3">
+                Skal par fordele renterne mellem sig?
+              </h3>
+              <p>
+                Det er et godt råd, der ofte gives — men med <strong>præcis samme</strong>{" "}
+                fradragsværdi i de fleste tilfælde, fordi den fælles grænse er dobbelt så stor
+                som den enkelte. Et par med {LOFT_EKSEMPEL_BELOEB.toLocaleString("da-DK")} kr. i
+                renter får {loftEksempelPar.besparelse.toLocaleString("da-DK")} kr. i
+                besparelse, uanset om beløbet står på den ene eller deles i to halvdele.
+              </p>
+              <p className="mt-3">
+                Det bliver først en fordel at fordele, når renterne er{" "}
+                <strong>ujævnt fordelt</strong>, fordi den enkeltes lavere sats så kan bruges
+                på den andens høje sats. Fordel 95.000 kr. og 5.000 kr. i stedet for
+                100.000 kr. samlet, og besparelsen falder fra{" "}
+                {uligBesparelseSamlet.toLocaleString("da-DK")} kr. til{" "}
+                {uligBesparelseFordelt.toLocaleString("da-DK")} kr. — altså{" "}
+                {Math.abs(uligBesparelseFordelt - uligBesparelseSamlet).toLocaleString("da-DK")}{" "}
+                kr. mindre. Den høje sats skal bruges på den med flest renter.
+              </p>
+              <p className="text-sm text-gray-500 mt-3">
+                * Kilde:{" "}
+                <a
+                  href={RENTEFRADRAG_2026.ratesReference}
+                  className="underline hover:text-gray-700"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Borgerhåndbog, rentefradrag
+                </a>{" "}
+                — "Der er ikke et loft på selve renteudgiften, du kan indberette — kun på,
+                hvor stor en andel af beløbet der giver den høje fradragsværdi."
               </p>
 
               <h3 className="text-xl font-semibold mt-6 mb-3">Eksempel</h3>

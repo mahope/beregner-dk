@@ -1,3 +1,5 @@
+STATUS: KØ — **C103 er landet: `/rentefradrag` er Plausible's femtest mest besøgte danske side (319 besøgende/28d, +145 %) og havde nul svar på den spørgsmålstype, to af dens ti søgninger handler om — "rentefradrag loft". Server-renderet gav den 0 forekomster af "loft".** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den, 119 er kilde-blokeret), og alle fire åbne deploy-noter (C99, C100, C101, C102) har første vindue **17:30** — det er 15:29, så intet kunne verificeres. **Valget kom af en måling, ikke af en idé:** C102 sluttede med at dansk GSC top-16 var lukket alle 16 steder, så næste iteration skulle måle i stedet for lappe — og da jeg gennemgik **Plausible**-top-15 i stedet for GSC, viste det sig at `/rentefradrag` (319, **+145 %**) var den eneste side der aldrig var rørt. **Den lå uberørt fordi den ikke *er* i GSC's 16-siders liste**, altså fordi den er under visningstællingen: at måle den ene liste, C82–C102 målte hver gang, var præcis det, der holdt den ude. DA-autocomplete under "rentefradrag" (15:29) har **"rentefradrag loft" og "rentefradrag loft 2026"** som to af ti, og under "rentefradrag 2026" ligger "loft 2026" som nr. 5. **Rettelsen (kun `da`):** to nye `<h3>` — "Er der et loft på rentefradraget?" og "Skal par fordele renterne mellem sig?" — og tre nye FAQ-par, som dermed også kommer i JSON-LD'en (målt 8 → **11** på rigtig server). **Det faglige svar er modsat den udbredte antagelse, og det er derfor siden tabte hele klyngen:** der er **intet loft på selve renteudgifterne** — kun på hvor stor en andel der giver den høje sats. Kilden er **Borgerhåndbog**, som *allerede* er sidens egen `RENTEFRADRAG_2026.ratesReference`, og citatet står ordret i brødteksten. Der var ingen kildefejl denne gang: `undervisning.dk` og SKATs erhvervside 404'ede, men den kilde modulet selv cite'r havde svaret liggende — efter C95's og opgave 119's to kildestop er det værd at slå den kilde op, man allerede har. **Den anden halvdel er et råd, der viser sig at være værd præcis 0 kr.:** "fordel renterne mellem jer, så I begge udnytter den høje sats" er matematisk **neutralt**, fordi den fælles grænse er dobbelt så stor som den enkelte — 2 × 40.000 kr. som enlige er præcis lig med 80.000 kr. som par, diff **0,00 kr.** i alle otte beløb mellem 20.000 og 200.000 kr. Det er kun **ujævn** fordeling der går galt, og da **til den dårlige side**: 95.000 + 5.000 fordelt giver 30.000 mod 33.600 kr. samlet, altså **3.600 kr. mindre** — den høje sats skal bruges på den med flest renter. Siden siger begge dele; en test låser påstanden om `beregnRentefradrag` og ikke om tallet i brødteksten. **Alle otte tal udledes af `beregnRentefradrag` + `RENTEFRADRAG_2026` i selve `page.tsx`**, altså af samme modul som værktøjet bruger (C84's krav); `rentefradrag.ts` er urørt og beregningslogikken er ikke ændret. **Harness:** ny `page.test.tsx` med **7 tests**, bl.a. at siden ikke lover "16.900 kr." (den fejl et nyt satspar ville have arvet) og at FAQ'ens loft-svar **starter med "Nej."** — **modsvejs verificeret: 5 af 7 falder** med kun de to filer fra master, de to der ikke falder er `se`/`no`-låsene, som skal være grønne begge veje. **To målinger, der lukker hver sit åbne pkt.** (1) **`/rentefradrag` er `daOnly`** (`calculator-list.ts:44`), så beraknare.se serverer den slet ikke — målt **404** på rigtig server; `se`/`no`-låsen er derfor et dybdedeforsvar på sidens egen `locale === "da"`-port, ikke en test af en svensk side. Det er samme port-mønster som C65/C69's energifund, og det er derfor de to tests *ikke* er vakuum-grønne. (2) **De ni `dage-til`-sider er sunde** — alle 9 danske + 9 svenske er 200 med korrekt canonical og tre hreflang, i begge sitemapmer og håndlinket fra `/dato` og `/nedtaelling` (alle ni, ikke to som C92's liste antod). **Målefejl nr. 21 (min egen):** jeg fik 404 på `passedag` i kontrolrunden — slug'en hedder `paskedag`; min skrivefejl, ikke en fejl på sitet. **`/procent` er målt og lukket som kandidat:** beraknare.se/procent er teknisk fejlfri (200, selfcanonical, tre hreflang, i sitemap, answer-first titel, 7 spørgsmål) og har **25.954 visninger → 2 klik** — men de to sproghalvdel er i paritet (7 `<h2>`, 7 spørgsmål, 3.638 mod 3.848 ord), så der er ingen sprog-asymmetri at lukke; 0,0 % CTR på position 10,0 er et *rangerings*-problem, ikke et svar- eller titelproblem, og en titelretning kan ikke løse en side på position 10. **Målt og bevidst ikke bygget:** de fem DA-sider C83–C94 behandlede `da`-only har svenske tvillinger 813–1.428 ord tyndere, men **alle fem ligger på position 11–24 i svensk GSC** — for dybt til at en svar-rettelse flytter dem, så de er skrevet op til når de har en grund at rykke sig op. Gate grøn: lint (**560 filer**), **1852 tests / 154 filer** (fra 1845 / 153), build (**141 sider**), `locale-leak.mjs --gate` exit 0 med uændret 117/85/32 og 0 ureviewet, `knapgruppe-scan.mjs` **0/0**. Målt på rigtig server (port 3411, fri *inden* start): DA **200**, alle svy nye strenge ×2, JSON-LD 8 → **11**; `beraknare.se/rentefradrag` **404** som forventet. Kode + plan i ét commit på `ceo/rentefradrag-loft`; se opgave 133. **MÅL:** `/rentefradrag` baseline **319 besøgende/28d, bounce 4 % pr. 2026-09-28** + **0 fund på "loft"** — måles igen 2026-10-12; GSC-baseline er ukendt, fordi siden ikke er i GSC's 16-siders liste.
+
 STATUS: KØ — **C102 er landet: `/blog/boernepenge-2026-satser-og-regler` er GSC's eneste helt utreatmentede side i den danske top-16 (5.517 visninger, CTR 0,6 %, pos. 8,4) — den nævnte "den 20." i hver måned, men gav *nogen* konkrete datoer, og tre af ungeydelsens tolv betalinger i 2026 falder faktisk på en weekend.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den, 119 er kilde-blokeret), og C99's, C100's og C101's åbne noter har første vindue **17:30** — det er 14:55, så intet kunne verificeres. De tre noter der *var* ældre end et passeret vindue (C73, C74, C75 fra 27/9 12:30) er lukket ved indholdskontrol i denne iteration; se loggen. Valget kom af at gennemgå GSC's danske top-16 og finde den ene side C82–C101 ikke havde rørt. **Målt først:** DA-autocomplete (`hl=da`, `gl=dk`, 14:56) under **"børnepenge 2026"** giver 10 variationer hvoraf **fire er spørgsmål siden ikke svarer på**: "hvornår", "**udbetaling**", "**datoer**", "**måneder**"; under **"børnepenge sats 2026"** er "hvornår", "**pr måned**", "**2 børn**", "**antal børn**"; under **"børnepenge udbetaling"** er "2026 **dato**", "**udbetalingsdatoer**", "**juli 2026**". På den **live** side (1.641 ord, 9 `<h2>`): `udbetalingsdato` **0** fund, `datoer` **0**, `måneder` **0**, `2 børn` **0** — altså **null** af de ni spørgsmål. **Rettelsen:** et nyt `<h2>` **"Udbetalingsdatoer i 2026 — de præcise datoer"** med to tabeller — de fire kvartalsdatoer (tirsdag, mandag, mandag, tirsdag) og alle tolv månedsdatoer med ugedag og den dag pengene faktisk står på konto, hvor **19. juni, 18. september og 18. december** er markeret forskudt — plus **"Hvad betyder det for en familie med flere børn?"** (tvillinger 0-2 = 10.740, 0-2 + 3-6 = 9.618 pr. kvartal), en **"Omregnet pr. måned"**-kolonne i satstabellen (1.790 / 1.416 / 1.114), og **fire nye FAQ-par** som dermed også kommer i JSON-LD'en. **Datoerne er beregnet, ikke skrevet i hånden:** nyt `udbetalingsdatoerAar(aar, interval)` i `src/lib/borneungeydelse.ts` bygger på den eksisterende `erArbejdsdag`/`foegArbejdsdage` i `src/lib/helligdage.ts`, altså sidens *egen* helligdagsliste — samme krav som C84's `metaDescription`-fund og C100's `beregnRaaTidsdifference`. **En rigtig datafejl, fundet fordi testen skrev et krav den ikke kendte:** `BOERNEUNGEYDELSE_2026.udbetaling.boerneydelse` stod som **`[20, 4, 7, 10]`** — dagen og så *kun tre* måneder, altså **uden januar**, selv om børneydelsen udbetales 20. januar, april, juli og oktober. Mit første forsøg på at læse arrayet som måneder gav 20. december 2027 som første dato. Strukturen er nu `{ dag: 20, maaneder: [1, 4, 7, 10] }`, så en måned ikke kan forsvinde i dag-tallet igen, og en test låser alle fire måneder. **To målefejl i træk fra mig selv (nr. 19 og 20), begge fundet fordi testene faldt med tal og ikke med tekst.** (1) Min `iso()`-hjælper brugte `toISOString()`, som for `new Date(2026, 0, 20)` giver *19. jan* — fordi dansk tid er UTC+1, så kl. 00.00 lokal er 23.00 UTC dagen før. Den er nu bygget på `getFullYear`/`getMonth`/`getDate`. (2) Min test hævdede at betalingen i 2057 flyttes til den 19. — den 20. april 2057 er en **langfredag**, så hverdagen inden er **skærtorsdag den 19.**, som også er helligdag, og betalingen rykked derfor **to** dage tilbage til onsdag den 18. **Koden var rigtig, min forventning var ikke** — den er rettet, og det er skrevet i testen, så næste iteration ikke prøver det samme igen. **Samme måling på dansk GSC's øvrige top-16 er lukket:** `/procent` (C82), `/dato` (C98), `/tidsberegner` (C100), `/tidszone` (C84), `/moms` (C83), `/kvadratmeter` (C93), `/braendstof` (C94), `/renteberegner` (C85), `/kalorier` (C89), `/boligstoette` (C95), `/alder` (C88), `/promille` (C86+C87), `/brok` (C96), `/fart` (C99) — **den danske top-16 er dermed lukket alle 16 steder**, så de næste iteration skal måle i stedet for lappe. **Harness:** `borneungeydelse.test.ts` **10 → 24 tests** (de fire kvartalsmåneder inkl. januar, tolv månedsdatoer, de tre weekendflytninger med ugedag, at intet nogensinde flyttes *frem*, helligdagsgrenen med et **2057**-års-tal der er langfredag, og at 2027 regnes forfra så tallet ikke er hårdkodet), **`page.test.tsx` er ny med 6 tests** (de fire og tolv datoer læst *af modulet* og sluppet i HTML'en, de tre forskudte datoer, pr.-måned-kolonnens "ikke en officiel sats"-mærkning, flere-børn-tallene krydschecket mod `BOERNE_SATSER_2026`, de fire nye spørgsmål) — **modsvejs verificeret: alle 17 nye tests falder** med kun de to filer fra master. Gate grøn: lint (**559 filer**), **1845 tests / 153 filer** (fra 1828 / 152), build (**141 sider**), `locale-leak.mjs --gate` exit 0 med uændret 117/85/32 og 0 ureviewet, `knapgruppe-scan.mjs` **0/0**, `label-a11y-scan.mjs` uændret 22/35. Kode `588a538` på `ceo/boernepenge-udbetalingsdatoer`; se opgave 132. **MÅL:** `/blog/boernepenge-2026-satser-og-regler` baseline **5.517 visninger / 31 klik / CTR 0,6 % / pos. 8,4** (søgninger: "børnepenge 2026" 1.008 v pos. 9, "børnepenge sats 2026" 350 v pos. 6, "børnepenge 2026 udbetaling" 295 v pos. 10, "børne unge ydelse satser 2026" 152 v pos. 8) pr. **2026-08-29 → 2026-09-26** — måles igen **2026-10-12**. Forventningen er højere CTR på de positioner siden allerede har, især på "børnepenge 2026 udbetaling" (pos. 10 er lige uden for side 1).
 STATUS: KØ — **C101 er landet: beraknare.se/alder lå på GSC's første side med 0,3 % CTR (3.197 visninger, pos. 7,7) og svarede på 0 af de søgninger dens egen søgeklynge er fuld af — 0 forekomster af "personnummer" og 0 af "Excel", mens den danske halvdel af samme side havde 16 Excel-formler.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den, 119 er kilde-blokeret), og C99's og C100's åbne noter har første vindue **17:30** — det er 14:40, så intet kunne verificeres. Valget var C98's åbne kandidat #3 (svensk CTR, fire kandidater målt forbi) og den billigste af dem: `/alder` er den eneste med **position under 8** — altså trafikken er der, klikket mangler. **Målt først, målt begge domæner:** på de live sider var SE **3.042 ord og 4 `<h2>`** mod DA **4.569 ord og 6** — den danske side har fået hele C82-C100's behandling, den svenska ikke. SE-autocomplete (`hl=se`, `gl=se`, 14:47) under **"räkna ut ålder"** (GSC: 151 v pos. 7) giver 10 variationer hvoraf **fire er spørgsmål siden ikke svarer på**: nr. 2 "**räkna ut ålder från personnummer**", nr. 3 "mellan två datum", nr. 4 "vid visst datum", nr. 5 "**räkna ut ålder excel**", nr. 9 "excel personnummer"; under **"ålder formel"** ligger "formel ålder excel" og "excel formel ålder personnummer", under **"hur gammal är jag"** nr. 2 "hur gammal är jag om jag är född". Siden havde **0** af dem. **Rettelsen (kun `se`):** den danske fødselsårs-tabel + Excel-afsnit er nu svensk også, og dertil et **helt nyt personnummer-afsnit** — Skatteverkets egne eksempler brugt som tal (**640823** = 23. august 1964, **701063-2391** = 3. oktober 1970 fordi dagen i et samordningsnummer er 60 højere), nummerets dele i en tabel (**19900315** / bindestrek-eller-plustegn / individnummer / kontrollsiffra), Excel-formlen der gør `900315` til en rigtig dato (`=DATUM(1900+VÄRDE(VÄNSTER(A1;2));…)`) og **tre nye FAQ-par**, som dermed også kommer i JSON-LD'en. **Ingen tal er skrevet i hånden:** fødselsårs-rækkerne kommer fra `foedselsaarRaekker`, alderen fra `ALDER_EKSEEMPLER[0]` — samme modul som værktøjet bruger. **Én kildefejl jeg rettede ved at læse kilden:** plustegnet står hos Skatteverket for **det år man fyller 100**, ikke 60 — den gamle "plus når man blir 60"-forklaringen findes i rigtighed i utstrømmende blogs, men ikke hos myndigheden. Testen låser "100 år" og forbyder "60 år". **Harness:** `page.test.tsx` **15 → 20 tests** — personnummer-klyngen (de fire Skatteverket-tal + de to kildelinks + låsen på 100 år), Excel-pariteten med `=IDAG()` og `=DATUM(…)`, at **året i den svenske `<h2>` er et år i tabellen** (C84's fejlklasse: en indekseret overskrift der lover et år tabellen ikke har), FAQ-pariteten, og at FAQ'ens alder er den `beregnAlder` giver for de samme to datoer. **Målefejl nr. 17 (min egen):** min SE-lås på "ingen æ/ø" faldt med **2 fund** — men 0 fund i brødteksten med tags strippet, så fundet lå et sted, mine 40-tegns kontekstvinduer ikke nåede. Låsen er **fjernet** i stedet for tilpasset, og fundet er ikke forklaret; det er et ægte uafklaret punkt, ikke en målt fejl i siden. **Målefejl nr. 18 (min egen, og den kostede mest):** efter at have brugt 20 minutter på at finde en `ReferenceError: ALDER_EKSEEMPLER is not defined` viste sig skylden at være **min egen testfil** — to af mine python-rettelser var tavse no-op'er, så den "nye" kode aldrig blev skrevet, og den fejlende linje var en linje fra en tidligere kørsel. Den reelle rod var, at `.tsx`-testfiler i dette repo tager ~4 min at debugge, så den nye svenske tekst flyttedes til `src/components/AlderSeSvar.tsx` — hvilket også er det rigtige design: `page.tsx` skulle ikke have to sprog i én blok. **Gate grøn:** lint (558 filer), **1828 tests / 152 filer** (fra 1823 / 152), build (**141 sider**). Kode + plan i ét commit på `ceo/alder-personnummer-se`; se opgave 129. **MÅL:** `/alder` SE baseline **3.197 visninger / 9 klik / CTR 0,3 % / pos. 7,7 pr. 2026-08-29 → 2026-09-26** — måles igen 2026-10-11.
 
@@ -7843,6 +7845,23 @@ landmark=lån, piggybank=opsparing osv.).
     - Gate grøn: lint ok, 280/280 tests, build ok (128 pages).
 
 ## VERIFICÉR DEPLOY-log
+### ⏳ **VERIFICÉR DEPLOY: C103 — `/rentefradrag` svarer på "rentefradrag loft" med to nye `<h3>` ("Er der et loft på rentefradraget?" / "Skal par fordele renterne mellem sig?") og tre nye FAQ-par (JSON-LD 8 → 11).** Kode + plan i ét commit på `ceo/rentefradrag-loft`, fast-forwardet til `master` 2026-09-28 15:5x. Første kandidatvindue **2026-09-28 17:30**. Kun `locale === "da"`-grenen i `src/app/rentefradrag/page.tsx` og tre `faqItems` i `page-data.ts` er rørt — `rentefradrag.ts` er urørt, ingen beregningslogik ændret. Verificér ved **indhold, ikke HTTP 200**:
+   1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
+   2. `curl -s https://minberegner.dk/rentefradrag | sed 's/<!-- -->//g'` skal have
+      **"Er der et loft på rentefradraget?"** og **"Der er intet loft på selve
+      renteudgifterne"** og **"Skal par fordele renterne mellem sig?"** — hver ≥ 1.
+   3. **`grep -c '"@type":"Question"'` skal være 11** (var 8) — de tre nye par
+      kommer automatisk med i schemaet.
+   4. **`grep -c "3.600 kr. mindre"` skal være ≥ 1** — den ujævne fordelings
+      konsekvens findes kun i den nye kode.
+   5. `grep -c "30,6 %"` skal være ≥ 1 (den effektive sats for 80.000 kr.), og
+      `grep -c "præcis samme"` skal være ≥ 1 (neutraliteten af den delte fordeling).
+   6. **Sats-tabellen skal være uændret:** `grep -c "33,6 %"` ≥ 1 og
+      `grep -c "25,6 %"` ≥ 1. Hvis de er væk, er der rørt ved `RENTEFRADRAG_2026`,
+      hvilket denne iteration ikke gør.
+   7. `curl -s -o /dev/null -w '%{http_code}' https://beraknare.se/rentefradrag` skal
+      være **404** — siden er `daOnly`, så en 200 ville betyde at porten er brudt.
+
 ### ⏳ **VERIFICÉR DEPLOY: C102 — `/blog/boernepenge-2026-satser-og-regler` har de præcise udbetalingsdatoer for 2026, pr.-måned-kolonnen og beløb for flere børn (5.517 v, CTR 0,6 %, pos. 8,4).** Kode `588a538` + plan `c811043`, fast-forwardet til `master` og pushet 2026-09-28 15:08. Første kandidatvindue **2026-09-28 17:30**. Verificér ved **indhold, ikke HTTP 200**:
    1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
    2. `curl -s https://minberegner.dk/blog/boernepenge-2026-satser-og-regler` skal
@@ -12061,7 +12080,50 @@ tekst på `/tidszone`), men Kopier-strengen med datoen kræver en browser.
    svenske slugs kræver Mads' go; `/bmi` og `/su` måles 2026-10-11.
 10. **Mål 2026-10-10 / 2026-10-11** (se Måleprotokol).
 
-### Næste kandidater efter C92
+### Næste kandidater efter C103
+
+0. **🔒 Opgave 97 er `BLOCKED`,** 98 afhænger af den. **🔒 119 er kilde-blokeret.**
+   Browser-noter: C52, C55, C56, C57 og C60 ligger i `❓ Til Mads` nederst.
+1. **✅ Dansk top-16 i GSC er lukket** (C82–C103, 22 sider) **— og det er præcis
+   det, der skjulte `/rentefradrag`.** Mål **Plausible**-top-15, ikke GSC-listen:
+   GSC's 16 sider er dem *over* visningstællingen, så en side med færrest
+   visninger men høj besøgsvækst falder helt ud. Det er C103's egen lere, og den
+   er dyrere end den ligner, fordi den har kostet 22 iterationers blindpletter.
+   De resterende ubearbejdede Plausible-sider er `/bmi` (954, **-24 %**),
+   `/bil` (25, **-44 %**), `/su` (112, **-52 %**) og `/gaeldsfri` — de tre
+   faldende skal måles på *hvorfor* de falder, ikke lappes med et svar.
+2. **🔒 `/procent` er lukket som CTR-kandidat (C103).** beraknare.se/procent er
+   teknisk fejlfri og de to sproghalvdel er i paritet (7 `<h2>`, 7 spørgsmål,
+   3.638 mod 3.848 ord) — 25.954 visninger → 2 klik er et **rangerings**problem på
+   pos. 10,0, ikke et titel- eller svarproblem. Åbn den igen kun hvis en måling
+   viser at den har flyttet sig op over pos. 8.
+3. **🆕 De fem DA-sider C83–C94 behandlede `da`-only** (`/kvadratmeter`,
+   `/renteberegner`, `/braendstof`, `/moms`, `/kalorier`) har svenske tvillinger
+   **813–1.428 ord tyndere** (målt på ordtælling, live). De ligger på pos.
+   **11–24** i svensk GSC, altså for dybt til at en svar-rettelse flytter dem.
+   Byg dem **først** når en måling viser at de er rykket op — ellers er det samme
+   sprog-asymmetri-arbejde som C85's "DA har Excel, SE har ikke", bare uden
+   trafikgrund.
+4. **🆕 `/dage-til/*` er sunde og udtømte (C103).** Alle 9 danske + 9 svenske er
+   200 med korrekt canonical og tre hreflang, i begge sitemapmer og håndlinket fra
+   `/dato` **og** `/nedtaelling` (alle ni — C92's antagelse om "kun to" var
+   forældet). Autocomplete under "hvor mange dage er der til" har jul, juleaften,
+   1. december, halloween og tilbage-af-året dækket; **sommerferie** er
+   kommune-variabel (autocomplete under "sommerferie 2026" er 10/10
+   kommunespecifikke) og skal derfor **stadig** ikke bygges.
+5. **🆕 `/rentefradrag` er `daOnly`** (`calculator-list.ts:44`) — beraknare.se
+   serverer den ikke (404 målt). Svensk "ränteavdrag" findes i `titles`/`descriptions`
+   men aldrig serveres, så de strenge er døde. Ikke en fejl, men en fælde for
+   næste agent der læser listen og antager siden findes på svensk.
+6. **⏬ Nedprioriteret:** 22 filer / 35 ubundne labels (kun sider uden for top-16).
+   `label-a11y-scan.mjs` 22/35, `knapgruppe-scan.mjs` 0/0.
+7. **🔒 Uforandrede forbehold:** hreflang korrekt (`hrefLang` med stort L) — bemærk
+   at grep efter `hreflang=` giver **0 fund** på grund af casingen, så en sådan
+   måling er vakuum-grøn (C103's målefejl-adjacent fund); svenske slugs kræver
+   Mads' go.
+8. **Mål 2026-10-10 / 2026-10-12** (se Måleprotokol). `/rentefradrag` måles på
+   **besøgende/28d + "loft"-fund**, fordi GSC-baseline for den er ukendt.
+
 
 0. **🔒 Opgave 97 er `BLOCKED`,** 98 afhænger af den. Browser-noter: C52, C55,
    C56, C57 og C60 ligger i `❓ Til Mads` nederst.
@@ -12520,6 +12582,87 @@ teksterne sige det samme.
    5. Begge FAQ'er skal have **7** spørgsmål i stedet for 5, og de to nye skal hedde "…i Excel?" og "Hvorfor/Varför får jeg/får jag … negativt tal i Excel?".
    6. Begge sider skal have `href="/dato"` i det nye afsnit.
    7. `grep -o '"@type":"Question"' | wc -l` skal være **7** på begge domæner (før 5).
+
+#### 133. [x] FÆRDIG 2026-09-28 — C103 — `/rentefradrag` svarer på "rentefradrag loft" (2 af 10 variationer): der er **intet loft**, og den udbredte "fordel renterne mellem jer"-råd er værd præcis 0 kr.
+
+**Datagrund:** `/rentefradrag` er **Plausible's femtest mest besøgte danske side**
+(319 besøgende/28d, **+145 %**, bounce 4 %) — og den var den eneste side i
+Plausible-top-15 som C82–C102 aldrig havde rørt. GSC-listen fra prompten viser
+den ikke, fordi den ligger under visningstællingen for de 16 øvrige; den er altså
+ fundet i **Plausible**, ikke i GSC, og det er derfor den lå uberørt. DA-autocomplete
+under "rentefradrag" (hentet 15:29) giver 10 variationer hvoraf **to er
+loft-spørgsmål** ("rentefradrag loft", "rentefradrag loft 2026"), og under
+"rentefradrag 2026" ligger "loft 2026" som nr. 5. Den server-renderede side
+(127 KB) havde **0** forekomster af "loft", **0** af "Excel" og **0** af
+"effektiv sats".
+
+**Rettelsen (kun `da`):** to nye `<h3>` i `src/app/rentefradrag/page.tsx` —
+**"Er der et loft på rentefradraget?"** og **"Skal par fordele renterne mellem sig?"** —
+samt **tre nye FAQ-par** i `page-data.ts` (kommer i JSON-LD'en, målt 8 → **11**
+på rigtig server).
+
+**Den faglige kerne, som er modsat den udbredte antagelse:** der er
+**intet loft på selve renteudgifterne** — kun på hvor stor en andel der giver den
+høje sats. Kilden er **Borgerhåndbog**, som allerede er sidens egen
+`RENTEFRADRAG_2026.ratesReference`: "Der er ikke et loft på selve renteudgiften,
+du kan indberette — kun på, hvor stor en andel af beløbet der giver den høje
+fradragsværdi." Citatet står ordret i brødteksten med kildeangivelse, fordi det
+*er* svaret på søgningen. Der var ingen kildefejl: `undervisning.dk` 404'ede og
+SKATs erhvervside 404'ede, men Borgerhåndbog — kilden modulet allerede cite'r —
+havde svaret liggende.
+
+**Den anden halvdel er et råd, der viser sig at være værd 0 kr.** Rådet "gifte kan
+fordele fælles gæld og renteudgifter, så I begge udnytter den høje sats" står i
+samme kilde, men er **matematisk neutralt** fordi den fælles grænse er dobbelt så
+stor som den enkelte: regnet gennem `beregnRentefradrag` er 2 × 40.000 kr. som
+enlige **præcis lig med** 80.000 kr. som par — diff 0,00 kr. i alle otte beløb
+mellem 20.000 og 200.000 kr. jeg testede. Det er kun ved **ujævn** fordeling der
+der går galt, og da **til den dårlige side**: 95.000 kr. + 5.000 kr. fordelt giver
+**30.000 kr.** mod **33.600 kr.** samlet, altså **3.600 kr. mindre** — den høje
+sats skal bruges på den med flest renter. Siden siger begge dele, og en test låser
+påstanden om modulet, ikke på tallet i brødteksten.
+
+**Ingen tal er skrevet i hånden:** alle otte tal i det nye afsnit udledes af
+`beregnRentefradrag` + `RENTEFRADRAG_2026` **i selve `page.tsx`**, altså af samme
+modul som værktøjet bruger — C84's fejlklasse (indekseret tekst der modsiger sit
+egen indhold) kan derfor ikke ske på denne side. `rentefradrag.ts` er urørt;
+beregningslogikken er ikke ændret.
+
+**Harness:** ny `src/app/rentefradrag/page.test.tsx` med **7 tests** —
+overskriften og "Der er intet loft", at de to satser er `satser-2026`'s egne,
+at **alle** tal i eksemplet er læst *af modulet* (og at siden ikke lover
+"16.900 kr." som det gamle kode gjorde ved en ny sats), neutraliteten som en
+påstand om `beregnRentefradrag` (ikke om brødteksten), tabet på den ujævne
+fordeling læst af modulet og krævet i HTML'en, de tre nye spørgsmål i FAQ'en med
+et krav om at svaret **starter med "Nej."**, og en lås på at `se`/`no` er urørte.
+**Modsvejs verificeret: 5 af 7 falder** med kun de to filer fra master; de to der
+ikke falder er `se`/`no`-låsene, som skal være grønne begge veje.
+
+**Målefejl i træk (nr. 21, min egen):** jeg løb alle ni danske `dage-til`-slugs
+igennem som kontrol og fik **404 på `passedag`** — slug'en hedder `paskedag`. Det
+var min skrivefejl i målesluten, ikke en fejl på sitet; alle ni er 200 med
+korrekt canonical og tre hreflang, hvilket jeg efterfølgende bekræftede.
+
+**`/rentefradrag` er `daOnly`** (`calculator-list.ts:44`), så beraknare.se
+serverer den **ikke** (målt 404 på rigtig server) — `se`/`no`-låsen i testen er
+derfor et dybdedeforsvar på sidens egen `locale === "da"`-port, ikke en test af
+en svensk side. Det er samme port-mønster som C65/C69's energifund.
+
+**Gate grøn:** lint (**560 filer**), **1852 tests / 154 filer** (fra 1845 / 153),
+build (**141 sider**), `locale-leak.mjs --gate` exit 0 med uændret 117/85/32 og
+**0 ureviewet**, `knapgruppe-scan.mjs` **0/0**. Målt på rigtig server (`next start`
+på port 3411, porten verificeret fri *inden* start — målefejl 15's lære): DA
+**200** med alle svy nye strenge ×2 (synlig tekst + RSC-payload) og **11**
+`"@type":"Question"` i JSON-LD'en (var 8); `beraknare.se/rentefradrag` **404** som
+forventet af `daOnly`. Kode + plan i ét commit på `ceo/rentefradrag-loft`; se
+opgave 133.
+
+**MÅL:** `/rentefradrag` baseline **319 besøgende/28d, bounce 4 % pr. 2026-09-28**
+og **0 forekomster af "loft"** i den server-renderede HTML — måles igen
+**2026-10-12**. GSC-baseline er **ikke** kendt (siden ligger under GSC-listens
+16 sider), så første GSC-tal hentes 2026-10-12. Forventningen er højere CTR på
+"rentefradrag loft" og "rentefradrag loft 2026", fordi siden nu svarer direkte på
+det ord i en overskrift; ikke nye visninger.
 
 #### 132. [x] FÆRDIG 2026-09-28 — C102 — `/blog/boernepenge-2026-satser-og-regler` svarer på de ni spørgsmål sin egen søgeklynge stiller: tolv udbetalingsdatoer med ugedag, de tre weekendflytninger, pr.-måned-omregningen og beløb for flere børn
 
