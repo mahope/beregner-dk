@@ -5,6 +5,7 @@ import {
   getHomeCalculatorCount,
 } from "./home-data";
 import { isCalculatorAvailable } from "./calculator-list";
+import { beregnere } from "./categories";
 
 describe("getHomePageData", () => {
   test("returns data for all locales", () => {
@@ -153,6 +154,82 @@ describe("getHomeCalculators", () => {
     for (const locale of ["da", "no", "se"] as const) {
       const popular = getHomeCalculators(locale).filter((c) => c.popular);
       expect(popular.length, `${locale} popular count`).toBeGreaterThan(3);
+    }
+  });
+
+  test("the Danish popular row is the measured top pages, in traffic order", () => {
+    // Plausible 2026-09-28, 28 dage: /dato 1057, /bmi 954, /boligstoette 527,
+    // /kvadratmeter 375, /rentefradrag 319, /kalorier 293, /tidsberegner 288,
+    // /braendstof 267, /barselsdagpenge 198, /husleje 170, /renteberegner 148,
+    // /boernepenge 141, /pension 139 — plus /loen-efter-skat as brandværktøj.
+    expect(
+      getHomeCalculators("da")
+        .filter((c) => c.popular)
+        .map((c) => c.href),
+    ).toEqual([
+      "/dato",
+      "/bmi",
+      "/boligstoette",
+      "/kvadratmeter",
+      "/rentefradrag",
+      "/tidsberegner",
+      "/kalorier",
+      "/braendstof",
+      "/barselsdagpenge",
+      "/husleje",
+      "/renteberegner",
+      "/boernepenge",
+      "/pension",
+      "/loen-efter-skat",
+    ]);
+  });
+
+  test("every calculator in the site catalog is linked from a homepage", () => {
+    const linked = new Set([
+      ...getHomeCalculators("da").map((c) => c.href),
+      ...getHomeCalculators("se").map((c) => c.href),
+    ]);
+    const orphans = beregnere
+      .map((item) => item.href)
+      .filter((href) => !linked.has(href));
+    expect(orphans, "katalogsider uden link fra forside").toEqual([]);
+  });
+
+  test("every Danish first-page search page is linked from the Danish homepage", () => {
+    // Search Console 2026-08-29 → 2026-09-26: de danske sider med flest
+    // visninger ligger alle på position 5-9, men /promille, /brok og /fart
+    // havde pr. 2026-09-28 nul interne links fra forsiden.
+    const daHrefs = getHomeCalculators("da").map((c) => c.href);
+    for (const href of [
+      "/procent",
+      "/dato",
+      "/tidsberegner",
+      "/tidszone",
+      "/moms",
+      "/kvadratmeter",
+      "/braendstof",
+      "/renteberegner",
+      "/kalorier",
+      "/boligstoette",
+      "/alder",
+      "/promille",
+      "/brok",
+      "/fart",
+    ]) {
+      expect(daHrefs, `DA-forsiden linker ${href}`).toContain(href);
+    }
+  });
+
+  test("home catalog categories match the site catalog they are copied from", () => {
+    // Kun kategorien låses, ikke titlen: tre kort har bevidst en kortere titel på
+    // forsiden ("Rejsebudget" mod "Rejsebudget Beregner"), og det er ikke en
+    // fejl. Kategorien derimod styrer badge, farve og gruppering, så den skal
+    // ikke kunne afvige mellem forsiden og /kategori-siderne.
+    const siteKatalog = new Map(beregnere.map((item) => [item.href, item]));
+    for (const calc of getHomeCalculators("da")) {
+      const source = siteKatalog.get(calc.href);
+      if (!source) continue;
+      expect(calc.category, `${calc.href} category`).toBe(source.category);
     }
   });
 });

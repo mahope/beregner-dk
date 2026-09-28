@@ -1,3 +1,5 @@
+STATUS: KØ — **C105 er landet: sitets mest linkede side linkede slet ikke til tre beregnere, der ligger på Googles første side. `/promille` (4.968 visninger), `/brok` (4.913) og `/fart` (4.570) lå i `calculator-list.ts` og i `categories.ts`, men ikke i forside-katalogens 49 poster — altså nul interne links fra forsiden, der er sitets mest indgangsside (459 indgangsbesøg/28d, bounce 40 %).** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den, 119 er kilde-blokeret), C104 skrev ingen ny kandidatliste, og de fem åbne deploy-noter (C99–C104) har første vindue **17:30** — det var 16:43 ved starten, så intet kunne verificeres. **Valget kom af at læse forside-katalogens egen lister imod den centrale katalog** — Fase 3's "forsiden som hurtigere indgangspunkt"-spørgsmål, der har stået åbent siden den 23. september. **Målt først:** `categories.ts`'s `beregnere` har **81** poster, `daCalculators` havde **49**. De 32 manglende var præcis de **30** danske sider + de **to** svenske slugs (`/lon-efter-skatt`, `/bolan`), som korrekt kun findes i `seCalculators`. `/promille`, `/brok`, `/fart` og `/nedtaelling` (beraknare.se's fjerdemest side, 5.361 v) lå alle i den danske mangelgruppe. **Rettelsen:** alle 30 tilføjet med **titel, beskrivelse og kategori kopieret ordret fra `categories.ts`**, så de to lister ikke kan glide fra hinanden; forside-popular-rækken er samtidig opdateret fra **ni til fjorten** kort i **Plausible-rækkefølge** (de otte målte top + `/barselsdagpenge` 198 + `/husleje` 170 + `/renteberegner` 148 + `/boernepenge` 141 + `/pension` 139, som alle ligger *foran* `/loen-efter-skat`, der står der fordi den er brandværktøj). **En rigtig modstridelse fundet undervejs:** `/laaneberegner` stod som "Økonomi" på forsiden og "Lån" i den centrale katalog — altså samme værktøj i to kategorier på to sider af samme site. Rettet til "Lån", som er den kategori de øvrige låneberegnere ligger i. **Harness:** fire nye tests i `home-data.test.ts` — popular-rækken som **eksakt målt liste i trafikrækkefølge** (ikke `toContain`, så rækkefølgen også låses), **ingen katalogside uden forside-link** (unionen af da+se mod `categories.ts`), **de 14 danske førstesides-søgninger fra GSC skal alle være linket fra forsiden**, og kategorierne skal stemme med `categories.ts`. **Modsvejs verificeret: alle 4 falder** på master's `home-data.ts` (populær 7 mod 14, 27 katalogsider uden link, `/promille` mangler, `/laaneberegner` "Økonomi" mod "Lån"). **Målefejl undgået ved at slå efter:** jeg skrev først også en titel-lighedstest og fandt tre kort med bevidst kortere titel på forsiden ("Rejsebudget" mod "Rejsebudget Beregner") — det er ikke en fejl, så titlen er bevidst *ikke* låst (C81's lære, målefejl 11). Gate grøn: lint (**560 filer**), **1.856 tests / 154 filer** (fra 1852 / 154), build (**141 sider**), `locale-leak.mjs --gate` exit 0, `knapgruppe-scan.mjs` 0/0. Kode + plan i ét commit på `ceo/forside-katalog-og-popular`; se opgave 135. **MÅL:** `/` baseline **226 besøgende/28d, bounce 40 %, 459 indgangsbesøg pr. 2026-09-28** og `/promille` **4.968 v / CTR 1,4 % / pos. 7,9**, `/brok` **4.913 v / 0,6 % / 5,3**, `/fart` **4.570 v / 0,6 % / 7,1** — måles igen 2026-10-12. Forventningen er **flere interne links og(PageRank), ikke nye visninger**; bouncen på forsiden er den sekundære effekt.
+
 STATUS: KØ — **C104 er landet: `/bmi` og `/su` er begge teknisk sunde og indholdsmæssigt komplette, og faldene (-24 % og -52 %) er sæsonbestemt søgevolumen, ikke en sidefejl.** Køen havde ingen `I GANG`-opgave, så valget var kandidat #1 efter C103: måle *hvorfor* de faldende Plausible-sider falder. **Målt først:** `/bmi` (954, -24 %) er `index, follow`, korrekt canonical, tre hreflang, i sitemap, 782 ord, 6 `<h2>`, 6 FAQ-spørgsmål, og den svarer på 9 af 10 autocomplete-variationer — "bmi beregner med alder" og "… med alder og køn" besvares eksplicit ("Formlen justeres ikke for alder"), "bmi børn" linker til artiklen. `/su` (112, -52 %) har de korrekte 2026-satser live (7.426 / 1.154 / 3.202 / 4.764 / 3.692 / 15.297 / 20.749), 1.348 ord, og dækker udeboende/hjemmeboende/udland/børn/forsørør/handicap/klip. **Konklusionen: faldene er sæson.** SU søgninger topper ved semestart (august) og falder gennem efteråret; BMI er et januar-tema. Ingen sidefejl at rette. **Den ene reelle verbatim-luft:** "bmi skala" er en autocomplete-forespørgsel, men ordet "skala" forekommer **0** gange på `/bmi` — kategori-tabellen hedder "BMI kategorier for voksne ifølge WHO". **Rettelsen (da + se):** `<h2>` → "BMI-skala for voksne ifølge WHO" / "BMI-skala för vuxna enligt WHO", intro-sætningen siger nu "BMI-skala", og "bmi skala" er tilføjet `keywords` i begge sprog. Gate grøn: lint (560 filer), **1.852 tests / 154 filer**, build, `locale-leak.mjs --gate` exit 0, `knapgruppe-scan.mjs` 0/0. Kode + plan i ét commit på `ceo/bmi-skala-fald-diagnose`. **MÅL:** `/bmi` baseline 954 besøgende/28d 2026-09-28; `/su` baseline 112 — måles igen 2026-10-12.
 
 STATUS: KØ — **C103 er landet: `/rentefradrag` er Plausible's femtest mest besøgte danske side (319 besøgende/28d, +145 %) og havde nul svar på den spørgsmålstype, to af dens ti søgninger handler om — "rentefradrag loft". Server-renderet gav den 0 forekomster af "loft".** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den, 119 er kilde-blokeret), og alle fire åbne deploy-noter (C99, C100, C101, C102) har første vindue **17:30** — det er 15:29, så intet kunne verificeres. **Valget kom af en måling, ikke af en idé:** C102 sluttede med at dansk GSC top-16 var lukket alle 16 steder, så næste iteration skulle måle i stedet for lappe — og da jeg gennemgik **Plausible**-top-15 i stedet for GSC, viste det sig at `/rentefradrag` (319, **+145 %**) var den eneste side der aldrig var rørt. **Den lå uberørt fordi den ikke *er* i GSC's 16-siders liste**, altså fordi den er under visningstællingen: at måle den ene liste, C82–C102 målte hver gang, var præcis det, der holdt den ude. DA-autocomplete under "rentefradrag" (15:29) har **"rentefradrag loft" og "rentefradrag loft 2026"** som to af ti, og under "rentefradrag 2026" ligger "loft 2026" som nr. 5. **Rettelsen (kun `da`):** to nye `<h3>` — "Er der et loft på rentefradraget?" og "Skal par fordele renterne mellem sig?" — og tre nye FAQ-par, som dermed også kommer i JSON-LD'en (målt 8 → **11** på rigtig server). **Det faglige svar er modsat den udbredte antagelse, og det er derfor siden tabte hele klyngen:** der er **intet loft på selve renteudgifterne** — kun på hvor stor en andel der giver den høje sats. Kilden er **Borgerhåndbog**, som *allerede* er sidens egen `RENTEFRADRAG_2026.ratesReference`, og citatet står ordret i brødteksten. Der var ingen kildefejl denne gang: `undervisning.dk` og SKATs erhvervside 404'ede, men den kilde modulet selv cite'r havde svaret liggende — efter C95's og opgave 119's to kildestop er det værd at slå den kilde op, man allerede har. **Den anden halvdel er et råd, der viser sig at være værd præcis 0 kr.:** "fordel renterne mellem jer, så I begge udnytter den høje sats" er matematisk **neutralt**, fordi den fælles grænse er dobbelt så stor som den enkelte — 2 × 40.000 kr. som enlige er præcis lig med 80.000 kr. som par, diff **0,00 kr.** i alle otte beløb mellem 20.000 og 200.000 kr. Det er kun **ujævn** fordeling der går galt, og da **til den dårlige side**: 95.000 + 5.000 fordelt giver 30.000 mod 33.600 kr. samlet, altså **3.600 kr. mindre** — den høje sats skal bruges på den med flest renter. Siden siger begge dele; en test låser påstanden om `beregnRentefradrag` og ikke om tallet i brødteksten. **Alle otte tal udledes af `beregnRentefradrag` + `RENTEFRADRAG_2026` i selve `page.tsx`**, altså af samme modul som værktøjet bruger (C84's krav); `rentefradrag.ts` er urørt og beregningslogikken er ikke ændret. **Harness:** ny `page.test.tsx` med **7 tests**, bl.a. at siden ikke lover "16.900 kr." (den fejl et nyt satspar ville have arvet) og at FAQ'ens loft-svar **starter med "Nej."** — **modsvejs verificeret: 5 af 7 falder** med kun de to filer fra master, de to der ikke falder er `se`/`no`-låsene, som skal være grønne begge veje. **To målinger, der lukker hver sit åbne pkt.** (1) **`/rentefradrag` er `daOnly`** (`calculator-list.ts:44`), så beraknare.se serverer den slet ikke — målt **404** på rigtig server; `se`/`no`-låsen er derfor et dybdedeforsvar på sidens egen `locale === "da"`-port, ikke en test af en svensk side. Det er samme port-mønster som C65/C69's energifund, og det er derfor de to tests *ikke* er vakuum-grønne. (2) **De ni `dage-til`-sider er sunde** — alle 9 danske + 9 svenske er 200 med korrekt canonical og tre hreflang, i begge sitemapmer og håndlinket fra `/dato` og `/nedtaelling` (alle ni, ikke to som C92's liste antod). **Målefejl nr. 21 (min egen):** jeg fik 404 på `passedag` i kontrolrunden — slug'en hedder `paskedag`; min skrivefejl, ikke en fejl på sitet. **`/procent` er målt og lukket som kandidat:** beraknare.se/procent er teknisk fejlfri (200, selfcanonical, tre hreflang, i sitemap, answer-first titel, 7 spørgsmål) og har **25.954 visninger → 2 klik** — men de to sproghalvdel er i paritet (7 `<h2>`, 7 spørgsmål, 3.638 mod 3.848 ord), så der er ingen sprog-asymmetri at lukke; 0,0 % CTR på position 10,0 er et *rangerings*-problem, ikke et svar- eller titelproblem, og en titelretning kan ikke løse en side på position 10. **Målt og bevidst ikke bygget:** de fem DA-sider C83–C94 behandlede `da`-only har svenske tvillinger 813–1.428 ord tyndere, men **alle fem ligger på position 11–24 i svensk GSC** — for dybt til at en svar-rettelse flytter dem, så de er skrevet op til når de har en grund at rykke sig op. Gate grøn: lint (**560 filer**), **1852 tests / 154 filer** (fra 1845 / 153), build (**141 sider**), `locale-leak.mjs --gate` exit 0 med uændret 117/85/32 og 0 ureviewet, `knapgruppe-scan.mjs` **0/0**. Målt på rigtig server (port 3411, fri *inden* start): DA **200**, alle svy nye strenge ×2, JSON-LD 8 → **11**; `beraknare.se/rentefradrag` **404** som forventet. Kode + plan i ét commit på `ceo/rentefradrag-loft`; se opgave 133. **MÅL:** `/rentefradrag` baseline **319 besøgende/28d, bounce 4 % pr. 2026-09-28** + **0 fund på "loft"** — måles igen 2026-10-12; GSC-baseline er ukendt, fordi siden ikke er i GSC's 16-siders liste.
@@ -7847,6 +7849,13 @@ landmark=lån, piggybank=opsparing osv.).
     - Gate grøn: lint ok, 280/280 tests, build ok (128 pages).
 
 ## VERIFICÉR DEPLOY-log
+### ⏳ **VERIFICÉR DEPLOY: C105 — forside-kataloget har alle 30 manglende danske beregnere, popular-rækken er 14 kort, og `/laaneberegner` ligger i "Lån".** Kode + plan i ét commit på `ceo/forside-katalog-og-popular`, fast-forwardet til `master` og pushet 2026-09-28 17:40. Første kandidatvindue **2026-09-28 21:30** (17:30-vinduet var ikke kørt færdig, da denne note blev skrevet). Kun `daCalculators` + fire tests i `home-data.test.ts` er rørt — ingen beregningslogik, ingen anden side, ingen anden locale. Verificér ved **indhold, ikke HTTP 200**:
+    1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
+    2. `curl -s https://minberegner.dk/` skal finde **"Promilleberegner"**, **"Brøkberegner"**, **"Fartberegner"**, **"Nedtælling"**, **"Elbil vs. benzinbil"** og **"Befordringsfradrag"** — hver mindst 1 gang. Før: 0 fund på de fire første.
+    3. Tallet i heroen og i `meta description` skal være **79** (før 49): `curl -s https://minberegner.dk/ | grep -o '79+ gratis beregnere' | head -1`.
+    4. `/laaneberegner` skal stå under `<h2>Lån</h2>` i markupken (før: under Økonomi) — find positionen af `<h2>Lån</h2>` og af "Låneberegner" og kræv at den sidste ligger efter den første.
+    5. `curl -s https://beraknare.se/` skal være **uændret** — den svenska forside er ikke rørt, så de 30 nye kort må **ikke** stå der.
+
 ### ⏳ **VERIFICÉR DEPLOY: C104 — `/bmi` svarer på "bmi skala" med rettet `<h2>` ("BMI-skala for voksne ifølge WHO" / "BMI-skala för vuxna enligt WHO") og "bmi skala" i `keywords` i begge sprog.** Kode + plan i ét commit på `ceo/bmi-skala-fald-diagnose`, fast-forwardet til `master` og pushet 2026-09-28 16:35. Første kandidatvindue **2026-09-28 17:30**. Kun to `<h2>`-strenge og to `keywords`-array i `page-data.ts` er rørt — ingen beregningslogik, ingen FAQ, ingen anden side. Verificér ved **indhold, ikke HTTP 200**:
     1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
     2. `curl -s https://minberegner.dk/bmi | sed 's/<!-- -->//g'` skal have **"BMI-skala for voksne ifølge WHO"** og **"følgende BMI-skala"** — hver ≥ 1.
@@ -12089,6 +12098,56 @@ tekst på `/tidszone`), men Kopier-strengen med datoen kræver en browser.
    svenske slugs kræver Mads' go; `/bmi` og `/su` måles 2026-10-11.
 10. **Mål 2026-10-10 / 2026-10-11** (se Måleprotokol).
 
+### Næste kandidater efter C105
+
+0. **🔒 Opgave 97 er `BLOCKED`,** 98 afhænger af den. **🔒 119 er kilde-blokeret.**
+   Browser-noter: C52, C55, C56, C57 og C60 ligger i `❓ Til Mads` nederst.
+1. **✅ Dansk top-16 i GSC er lukket** (C82–C103) **og Plausible-top-15 er lukket**
+   (C103, C104). **Fase 3's "forsiden som indgangspunkt"-spørgsmål er lukket for
+   katalogens vedkommende (C105)** — alle 81 katalogsider har nu et forside-link,
+   og popular-rækken er 14 målte kort. Den næste forside-leverance er derfor
+   **måling, ikke flere kort**: `/` har bounce 40 % på 226 besøgende/28d. Find
+   først ud af *hvilke* sider der forlader forsiden (kun `/` er målt; de 30 nye
+   kort har ingen baseline), før der bygges mere oven på dem.
+2. **🆕 Det samme hul findes på svensk side.** `seCalculators` har **31** mod
+   `daCalculators`' **79** — altså **50** katalogsider uden forside-link på
+   beraknare.se, hvoraf `/bil` (1.702 v), `/braendstof` (1.677 v), `/moms` (1.481 v),
+   `/vaegttab` (1.265 v) og `/enhedspris` (1.260 v) alle har GSC-visninger. Målt
+   på pos. 6-31, altså en del for dyde til at en svar-rettelse flytter dem, men
+   **samme interne-links-mangel som C105 målte på dansk** — det er den billigste
+   af de tre, fordi den er ren datatrafik og ingen tekst skal skrives. Byg den
+   som *én* opgave: de fem svenske sider med visninger først, resten kun hvis
+   målingen holder.
+3. **🔒 `/procent` er lukket som CTR-kandidat (C103).** beraknare.se/procent er
+   teknisk fejlfri og de to sproghalvdel er i paritet (7 `<h2>`, 7 spørgsmål,
+   3.638 mod 3.848 ord) — 25.954 visninger → 2 klik er et **rangerings**problem på
+   pos. 10,0, ikke et titel- eller svarproblem. Åbn den igen kun hvis en måling
+   viser at den har flyttet sig op over pos. 8.
+4. **🆕 De fem DA-sider C83–C94 behandlede `da`-only** (`/kvadratmeter`,
+   `/renteberegner`, `/braendstof`, `/moms`, `/kalorier`) har svenske tvillinger
+   **813–1.428 ord tyndere** (målt på ordtælling, live). De ligger på pos.
+   **11–24** i svensk GSC, altså for dybt til at en svar-rettelse flytter dem.
+   Byg dem **først** når punkt 2's måling har flyttet dem op — ellers er det samme
+   sprog-asymmetri-arbejde som C85's "DA har Excel, SE har ikke", bare uden
+   trafikgrund.
+5. **🆕 `/dage-til/*` er sunde og udtømte (C103).** Alle 9 danske + 9 svenske er
+   200 med korrekt canonical og tre hreflang, i begge sitemapmer og håndlinket fra
+   `/dato` **og** `/nedtaelling` (alle ni — C92's antagelse om "kun to" var
+   forældet). Autocomplete under "hvor mange dage er der til" har jul, juleaften,
+   1. december, halloween og tilbage-af-året dækket; **sommerferie** er
+   kommune-variabel (autocomplete under "sommerferie 2026" er 10/10
+   kommunespecifikke) og skal derfor **stadig** ikke bygges.
+6. **⏬ Nedprioriteret:** 22 filer / 35 ubundne labels (kun sider uden for top-16).
+   `label-a11y-scan.mjs` 22/35, `knapgruppe-scan.mjs` 0/0.
+7. **🔒 Uforandrede forbehold:** hreflang korrekt (`hrefLang` med stort L) — bemærk
+   at grep efter `hreflang=` giver **0 fund** på grund af casingen, så en sådan
+   måling er vakuum-grøn (C103's målefejl-adjacent fund); svenske slugs kræver
+   Mads' go.
+8. **Mål 2026-10-10 / 2026-10-12** (se Måleprotokol). `/rentefradrag` måles på
+   **besøgende/28d + "loft"-fund**, fordi GSC-baseline for den er ukendt.
+   **C105 måles på `/`'s indgangsbesøg og bounce**, ikke på sidevisninger.
+
+
 ### Næste kandidater efter C103
 
 0. **🔒 Opgave 97 er `BLOCKED`,** 98 afhænger af den. **🔒 119 er kilde-blokeret.**
@@ -12672,6 +12731,39 @@ og **0 forekomster af "loft"** i den server-renderede HTML — måles igen
 16 sider), så første GSC-tal hentes 2026-10-12. Forventningen er højere CTR på
 "rentefradrag loft" og "rentefradrag loft 2026", fordi siden nu svarer direkte på
 det ord i en overskrift; ikke nye visninger.
+
+#### 135. [x] FÆRDIG 2026-09-28 — C105 — forside-katalogens 32 manglende poster: tre førstesides-søgninger havde nul interne links fra sitets mest linkede side
+
+**Datagrund:** `/promille` **4.968 visninger / CTR 1,4 % / pos. 7,9**, `/brok`
+**4.913 v / 0,6 % / 5,3**, `/fart` **4.570 v / 0,6 % / 7,1** (Search Console
+2026-08-29 → 2026-09-26) og `/nedtaelling` (beraknare.se's fjerdemest side,
+**5.361 v**) lå i `calculator-list.ts` og i `categories.ts`, men ikke i
+`daCalculators`. Forsiden er sitets mest indgangsside (**459** af 7.206
+indgangsbesøg/28d) og har **bounce 40 %** mod 2-7 % på beregnerne. Målt på den
+**live** forside (264 KB HTML, 157 `href`): `/promille`, `/brok`, `/fart` og
+`/nedtaelling` gav **0 fund hver især**.
+
+**Rettelsen:** 30 poster til `daCalculators` med titel, beskrivelse og kategori
+kopieret ordret fra `categories.ts`; popular-rækken 9 → 14 i Plausible-rækkefølge;
+`/laaneberegner`s kategori rettet "Økonomi" → "Lån" efter den centrale katalog.
+De to øvrige manglende (`/lon-efter-skatt`, `/bolan`) er svenske slugs og ligger
+allerede i `seCalculators` — de skal **ikke** på den danske forside.
+
+**Uden beregningslogik, uden ny side, uden anden fil end `home-data.ts` og dens
+test.** `no`-listen er urørt, fordi `beregner.no` ikke serveres fra dette repo
+(C68's bevis, opgave 97).
+
+**Harness:** `home-data.test.ts` 12 → **16** tests. De fire nye er skrevet så de
+falder på master's data (verificeret modsvejs, alle 4 røde) — bl.a. en der
+kræver popular-rækken som *eksakt* liste i trafikrækkefølge, så en ny iteration
+skal måle igen for at ændre den.
+
+**MÅL:** `/` baseline **226 besøgende/28d, bounce 40 %, 459 indgangsbesøg pr.
+2026-09-28**; `/promille` 4.968 v, `/brok` 4.913 v, `/fart` 4.570 v — måles
+2026-10-12.
+
+**Gate:** lint (560 filer), **1.856 tests / 154 filer**, build (141 sider),
+`locale-leak.mjs --gate` exit 0, `knapgruppe-scan.mjs` 0/0.
 
 #### 132. [x] FÆRDIG 2026-09-28 — C102 — `/blog/boernepenge-2026-satser-og-regler` svarer på de ni spørgsmål sin egen søgeklynge stiller: tolv udbetalingsdatoer med ugedag, de tre weekendflytninger, pr.-måned-omregningen og beløb for flere børn
 

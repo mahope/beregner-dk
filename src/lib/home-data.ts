@@ -139,8 +139,11 @@ const daPageData: HomePageData = {
 };
 
 const daCalculators: HomeCalculator[] = [
-  // Popular — de otte mest besøgte danske beregnere pr. 2026-09-25 (28 dage),
-  // efterfulgt af lønberegneren, som er sidens brandværktøj.
+  // Popular — de mest besøgte danske beregnere pr. Plausible 2026-09-28 (28 dage):
+  // /dato 1057, /bmi 954, /boligstoette 527, /kvadratmeter 375, /rentefradrag 319,
+  // /kalorier 293, /tidsberegner 288, /braendstof 267, /barselsdagpenge 198,
+  // /husleje 170, /renteberegner 148, /boernepenge 141 og /pension 139 — efterfulgt
+  // af lønberegneren, som er sidens brandværktøj.
   { title: "Datoberegner", description: "Beregn dage mellem datoer, arbejdsdage og alder", href: "/dato", popular: true, category: "Praktisk" },
   { title: "BMI Beregner for voksne", description: "Beregn BMI for voksne ud fra vægt og højde", href: "/bmi", popular: true, category: "Sundhed" },
   { title: "Boligstøtte", description: "Se standardmaksima og formuegrænser for boligstøtte", href: "/boligstoette", popular: true, category: "Bolig" },
@@ -149,26 +152,26 @@ const daCalculators: HomeCalculator[] = [
   { title: "Tidsberegner", description: "Beregn timer og minutter mellem tidspunkter", href: "/tidsberegner", popular: true, category: "Praktisk" },
   { title: "Kalorieberegner", description: "Beregn dit daglige kaloriebehov og makroer", href: "/kalorier", popular: true, category: "Sundhed" },
   { title: "Brændstofberegner", description: "Beregn pris for benzin, diesel eller el-bil", href: "/braendstof", popular: true, category: "Hverdag" },
+  { title: "Barselsdagpenge", description: "Beregn barselsdagpenge og se orlovsperioder", href: "/barselsdagpenge", popular: true, category: "Familie" },
+  { title: "Husleje Budget", description: "Find ud af hvad du har råd til i husleje", href: "/husleje", popular: true, category: "Bolig" },
+  { title: "Renteberegner", description: "Beregn ydelse, rente og tilbagebetaling på lån", href: "/renteberegner", popular: true, category: "Økonomi" },
+  { title: "Børnepenge", description: "Se hvad du kan få i børne- og ungeydelse 2026", href: "/boernepenge", popular: true, category: "Familie" },
+  { title: "Pensionsberegner", description: "Beregn din fremtidige pension og folkepension", href: "/pension", popular: true, category: "Økonomi" },
   { title: "Løn efter skat", description: "Se hvad du får udbetalt efter skat, AM-bidrag og pension", href: "/loen-efter-skat", popular: true, category: "Økonomi" },
   // Non-popular
-  { title: "Låneberegner", description: "Beregn ydelse, sammenlign lån og se afdragsplan", href: "/laaneberegner", popular: false, category: "Økonomi" },
+  { title: "Låneberegner", description: "Beregn ydelse, sammenlign lån og se afdragsplan", href: "/laaneberegner", popular: false, category: "Lån" },
   { title: "Momsberegner", description: "Tillæg eller fratræk 25% moms nemt og hurtigt", href: "/moms", popular: false, category: "Økonomi" },
   { title: "Valutaberegner", description: "Omregn mellem DKK, EUR, USD og andre valutaer", href: "/valuta", popular: false, category: "Økonomi" },
   { title: "Procentberegner", description: "Beregn procent af et tal, stigning, fald og mere", href: "/procent", popular: false, category: "Matematik" },
-  { title: "Renteberegner", description: "Beregn ydelse, rente og tilbagebetaling på lån", href: "/renteberegner", popular: false, category: "Økonomi" },
   { title: "Opsparingsberegner", description: "Beregn renters rente og se din opsparing vokse", href: "/opsparing", popular: false, category: "Økonomi" },
   { title: "Aldersberegner", description: "Beregn din præcise alder i år, måneder og dage", href: "/alder", popular: false, category: "Hverdag" },
   { title: "Timeprisberegner", description: "Find din timepris som freelancer eller selvstændig", href: "/timepris", popular: false, category: "Erhverv" },
   { title: "Elberegner", description: "Beregn dit elforbrug og se hvad dine apparater koster", href: "/elberegner", popular: false, category: "Hverdag" },
   { title: "Feriepenge", description: "Beregn hvor meget du har til gode i feriepenge", href: "/feriepenge", popular: false, category: "Økonomi" },
-  { title: "Børnepenge", description: "Se hvad du kan få i børne- og ungeydelse 2026", href: "/boernepenge", popular: false, category: "Familie" },
   { title: "SU Beregner", description: "Beregn din SU og fribeløb baseret på din situation", href: "/su", popular: false, category: "Uddannelse" },
   { title: "Dagpengeberegner", description: "Beregn hvad du kan få i dagpenge ved ledighed", href: "/dagpenge", popular: false, category: "Økonomi" },
-  { title: "Husleje Budget", description: "Find ud af hvad du har råd til i husleje", href: "/husleje", popular: false, category: "Bolig" },
   { title: "Tidszoneberegner", description: "Se hvad klokken er i andre lande", href: "/tidszone", popular: false, category: "Hverdag" },
-  { title: "Pensionsberegner", description: "Beregn din fremtidige pension og folkepension", href: "/pension", popular: false, category: "Økonomi" },
   { title: "Efterløn", description: "Beregn din efterløn og se hvornår du kan gå", href: "/efterloen", popular: false, category: "Økonomi" },
-  { title: "Barselsdagpenge", description: "Beregn barselsdagpenge og se orlovsperioder", href: "/barselsdagpenge", popular: false, category: "Familie" },
   { title: "Barselsplanlægger", description: "Planlæg barsel uge for uge med kalender og økonomi", href: "/barselsplanlaegger", popular: false, category: "Familie" },
   { title: "Terminsdato Beregner", description: "Beregn terminsdato og se graviditetsuge", href: "/termin", popular: false, category: "Familie" },
   { title: "Boliglån", description: "Beregn ydelse og omkostninger på dit boliglån", href: "/boliglaan", popular: false, category: "Bolig" },
@@ -191,6 +194,55 @@ const daCalculators: HomeCalculator[] = [
   { title: "Topskat Beregner", description: "Beregn om du betaler mellemskat eller topskat", href: "/topskat", popular: false, category: "Økonomi" },
   { title: "Brutto/Netto Beregner", description: "Find bruttoløn ud fra ønsket udbetaling", href: "/brutto-netto", popular: false, category: "Økonomi" },
   { title: "Bil Værdtab", description: "Beregn værdtab og omkostninger for din bil", href: "/bil", popular: false, category: "Hverdag" },
+  // Resten af sitets egen katalog (`categories.ts`), der pr. 2026-09-28 ikke var
+  // linked fra forsiden. /promille (4.968 visninger), /brok (4.913) og /fart
+  // (4.570) ligger alle på Google-sides første side, så de havde nul interne
+  // links fra sitets mest linkede side. Titler, beskrivelser og kategorier er
+  // kopieret ordret fra `categories.ts`, så de to lister ikke kan glide fra hinanden.
+
+  // Økonomi
+  { title: "Rådighedsbeløb", description: "Beregn dit månedlige rådighedsbeløb", href: "/budget", popular: false, category: "Økonomi" },
+  { title: "Lønberegner", description: "Omregn mellem timeløn, månedsløn og årsløn", href: "/loen-konverter", popular: false, category: "Økonomi" },
+  { title: "Afkastberegner", description: "Beregn ROI og årligt afkast (CAGR)", href: "/afkast", popular: false, category: "Økonomi" },
+  { title: "Sparemål", description: "Hvor meget skal du spare op om måneden?", href: "/sparemaal", popular: false, category: "Økonomi" },
+  { title: "Lønstigning", description: "Beregn lønstigning i procent og kroner", href: "/loenstigning", popular: false, category: "Økonomi" },
+  { title: "Befordringsfradrag", description: "Beregn dit kørselsfradrag 2026 og se skattebesparelsen", href: "/befordringsfradrag", popular: false, category: "Økonomi" },
+
+  // Bolig
+  { title: "Boligsalg Beregner", description: "Beregn nettoprovenu ved salg af bolig — alle omkostninger", href: "/boligsalg", popular: false, category: "Bolig" },
+
+  // Sundhed
+  { title: "Promilleberegner", description: "Anslå din alkoholpromille med Widmark-formlen", href: "/promille", popular: false, category: "Sundhed" },
+  { title: "Kropsfedtprocent", description: "Beregn din fedtprocent med U.S. Navy-metoden", href: "/kropsfedt", popular: false, category: "Sundhed" },
+  { title: "1RM beregner", description: "Anslå dit maksimale løft (one-rep max)", href: "/1rm", popular: false, category: "Sundhed" },
+  { title: "Vandbehov", description: "Beregn dit daglige væskebehov", href: "/vandbehov", popular: false, category: "Sundhed" },
+  { title: "Kalorieforbrænding", description: "Forbrændte kalorier ved løb, cykling m.m.", href: "/motion-kalorier", popular: false, category: "Sundhed" },
+  { title: "Proteinbehov", description: "Beregn dit daglige proteinbehov efter aktivitetsniveau", href: "/proteinbehov", popular: false, category: "Sundhed" },
+  { title: "Rygestop", description: "Se hvad du sparer på at holde op med at ryge", href: "/rygestop", popular: false, category: "Sundhed" },
+  { title: "Alkoholenheder", description: "Beregn antal genstande ud fra mængde og alkoholprocent", href: "/alkoholenheder", popular: false, category: "Sundhed" },
+
+  // Familie
+  { title: "Ægløsningsberegner", description: "Find dine frugtbare dage og din ægløsning", href: "/aegloesning", popular: false, category: "Familie" },
+
+  // Hverdag
+  { title: "Elbil vs. benzinbil", description: "Sammenlign driftsomkostninger for elbil og benzinbil", href: "/elbil", popular: false, category: "Hverdag" },
+  { title: "Enhedspris", description: "Find den billigste vare pr. kilo, liter eller stk", href: "/enhedspris", popular: false, category: "Hverdag" },
+  { title: "Rabatberegner", description: "Beregn pris efter rabat og se din besparelse", href: "/rabat", popular: false, category: "Hverdag" },
+  { title: "Fartberegner", description: "Beregn fart, distance og tid — plus tempo i min/km", href: "/fart", popular: false, category: "Hverdag" },
+  { title: "Del regningen", description: "Fordel regningen ligeligt mellem flere personer", href: "/del-regning", popular: false, category: "Hverdag" },
+  { title: "Nedtælling", description: "Tæl dage til en fødselsdag, ferie eller jul", href: "/nedtaelling", popular: false, category: "Hverdag" },
+  { title: "Flyttebudget Beregner", description: "Beregn dit samlede flyttebudget", href: "/flyttebudget", popular: false, category: "Hverdag" },
+
+  // Praktisk
+  { title: "Ugenummer", description: "Se ISO-ugenummer for enhver dato", href: "/ugenummer", popular: false, category: "Praktisk" },
+
+  // Matematik
+  { title: "Temperaturberegner", description: "Omregn mellem Celsius, Fahrenheit og Kelvin", href: "/temperatur", popular: false, category: "Matematik" },
+  { title: "Gennemsnitsberegner", description: "Beregn gennemsnit, sum og median af tal", href: "/gennemsnit", popular: false, category: "Matematik" },
+  { title: "Enhedsberegner", description: "Omregn længde, vægt og volumen mellem enheder", href: "/enheder", popular: false, category: "Matematik" },
+  { title: "Brøkberegner", description: "Forkort brøk og omregn til decimal og procent", href: "/brok", popular: false, category: "Matematik" },
+  { title: "Ohms lov", description: "Beregn spænding, strøm, modstand og effekt", href: "/ohm", popular: false, category: "Matematik" },
+  { title: "Vægt på planeterne", description: "Se din vægt på Månen, Mars og de andre planeter", href: "/planetvaegt", popular: false, category: "Matematik" },
 ];
 
 /* ------------------------------------------------------------------ */
