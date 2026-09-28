@@ -1,4 +1,4 @@
-STATUS: KØ — **C115 er landet: forsidens 14 `dage-til`-links var `//dage-til//slug` — protocol-relative, altså de sendte alle besøgende ud til en vært ved navn `dage-til`. Fundet af *verificeringen*, ikke af en idé: C108's eget målegreb, som aldrig var kørt, gav 0 i stedet for 9.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den, 119 er kilde-blokeret), og **21:30-batchen havde kørt da iterationen startede (21:42) — altså syv noter med netop det som første vindue var pligter, ikke valg**, og de syv blev lukket ved indholdskontrol (C106, C108, C109, C110, C111, C112, C113: alle strenge fundet, ingen note lukket på HTTP 200 alene). **At C108's greb fandt fejlen, er pointen med hele månedens metode:** C82–C114 har lukket side efter side ved at køre *autocomplete* og *GSC*, men den sidste fejl sad i det greb en note skrev for to iterationer siden og aldrig kørte. **Årsagen er én skråstreg, og advarselen stod allerede i planen:** `getDageTilPrefix` returnerer prefixet *med* begge skråstreg (`"/dage-til/"`) til `routing.ts`'s sti-sammenligning, og `home-data.ts` skrev `` `/${prefix}/${slug}` ``. **C91 havde fundet præcis denne fejl i `routing.ts`, rettet den og skrevet advarslen ned — to iterationer senere gjorde en anden fil den samme fejl igen.** De tre andre brugere af prefixet (`dato/page.tsx`, `nedtaelling/page.tsx`, `sitemap.ts`) skriver `${prefix}${slug}` og har det rigtigt, så kun forsiden var ramt — målt på live: `/dage-til/juledagen` har 0 dobbeltslash. **Harness: den eksisterende test byggede sin egen forventning som `` `/${prefix}/${slug}` ``, altså den samme fejlkonstruktion som koden** — den var grøn, fordi den reproducerede præcis det den skulle fange. Det er C44's lære i en ny form: måleren ramte den rigtige kode og var alligevel grøn, fordi den genbyggede udtrykket i stedet for at kræve en kendt form. Forventningen er nu bogstavelig pr. sprog, og en ny test kræver at intet href starter med `//`. Begge nye tests er **verificeret modsvejs: de falder** med master-koden. Målt på rigtig server (port 3512, verificeret fri inden start): 14 → 0 dobbeltslash, 0 → 14 korrekte links på **begge** domæner. **Konklusionen der bør stå i næste iterations hoved:** de otte åbne noter var ikke bare pligter, de var den eneste måde denne fejl blev fundet — og den lå i det greb, vi selv havde skrevet. Se opgave 145 og `VERIFICÉR DEPLOY: C115`. **Næste kandidat er derfor en måler, ikke en side:** `scripts/href-scan.mjs` der fejler på `href="//` i al kode under `src/`, samme form som `knapgruppe-scan.mjs` og `locale-leak.mjs` — fordi en fejl, der kan overleve en rettelse i to filer, ikke kan være afhængig af at nogen tilfældigvis kører en gammel notes greb.
+STATUS: KØ — **C115 er landet: forsidens 14 `dage-til`-links var `//dage-til//slug` — protocol-relative, altså de sendte alle besøgende ud til en vært ved navn `dage-til`. Fundet af *verificeringen*, ikke af en idé: C108's eget målegreb, som aldrig var kørt, gav 0 i stedet for 9.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den, 119 er kilde-blokeret), og **21:30-batchen havde kørt da iterationen startede (21:42) — altså syv noter med netop det som første vindue var pligter, ikke valg**, og de syv blev lukket ved indholdskontrol (C106, C108, C109, C110, C111, C112, C113: alle strenge fundet, ingen note lukket på HTTP 200 alene). **At C108's greb fandt fejlen, er pointen med hele månedens metode:** C82–C114 har lukket side efter side ved at køre *autocomplete* og *GSC*, men den sidste fejl sad i det greb en note skrev for to iterationer siden og aldrig kørte. **Årsagen er én skråstreg, og advarselen stod allerede i planen:** `getDageTilPrefix` returnerer prefixet *med* begge skråstreg (`"/dage-til/"`) til `routing.ts`'s sti-sammenligning, og `home-data.ts` skrev `` `/${prefix}/${slug}` ``. **C91 havde fundet præcis denne fejl i `routing.ts`, rettet den og skrevet advarslen ned — to iterationer senere gjorde en anden fil den samme fejl igen.** De tre andre brugere af prefixet (`dato/page.tsx`, `nedtaelling/page.tsx`, `sitemap.ts`) skriver `${prefix}${slug}` og har det rigtigt, så kun forsiden var ramt — målt på live: `/dage-til/juledagen` har 0 dobbeltslash. **Harness: den eksisterende test byggede sin egen forventning som `` `/${prefix}/${slug}` ``, altså den samme fejlkonstruktion som koden** — den var grøn, fordi den reproducerede præcis det den skulle fange. Det er C44's lære i en ny form: måleren ramte den rigtige kode og var alligevel grøn, fordi den genbyggede udtrykket i stedet for at kræve en kendt form. Forventningen er nu bogstavelig pr. sprog, og en ny test kræver at intet href starter med `//`. Begge nye tests er **verificeret modsvejs: de falder** med master-koden. Målt på rigtig server (port 3512, verificeret fri inden start): 14 → 0 dobbeltslash, 0 → 14 korrekte links på **begge** domæner. **Konklusionen der bør stå i næste iterations hoved:** de otte åbne noter var ikke bare pligter, de var den eneste måde denne fejl blev fundet — og den lå i det greb, vi selv havde skrevet. Se opgave 145, 146 og `VERIFICÉR DEPLOY: C115`. **Næste kandidat er derfor ikke et grep, men en måling af de værdier der faktisk når markupken:** `src/lib/href-form.test.ts` samler alle 466 interne href fra de centrale kataloger og kræver at hver enkelt er en gyldig sti — fordi C115's href var *beregnet* (`${prefix}${slug}`), ikke skrevet ud, så et kildefil-grep ville være grønt på præcis den fejl det skulle dække. Det er samme vakuum-grønne fælde som C94's negative lås. Den nye måler er modsvejs verificeret: **30 tests falder** når C115's ene linje genindføres. Den dækker kun katalogerne, ikke de 141 sider der skriver `<Link href>` direkte — den AST-udvidelse er skrevet ned som næste kandidat, så næste iteration ikke genopbygger den halvt.
 
 ---
 
@@ -13752,3 +13752,62 @@ samme to greps på `https://beraknare.se/` med `dagar-till` give **0** og **14**
 `<h2>Hvor mange dage er der til…</h2>` skal stå uændret, og dage-tallet i
 julekortet skal være dagens (88 pr. 28. september 2026, altså nulstilles når
 dagen er nået). `https://minberegner.dk/api/health` skal svare `status: ok`.
+
+#### 146. [x] FÆRDIG 2026-09-28 — C116 — **en måler over hele linkgrafen, så `//`-klassen ikke kan overleve en rettelse to gange**
+
+Samme iteration som C115 (se forrige STATUS); denne er anden opgave, fundet fordi
+C115's fund efterlod et spørgsmål: *hvad skal have fanget det?* Svaret er nedskrevet
+i opgave 145, og det er ikke det grep, jeg først troede.
+
+**Først en planlagt fejl, jeg nåede at begå.** Opgave 145 skrev næste kandidat som
+`scripts/href-scan.mjs` — et script der greber `href="//` i al kildekode under `src/`,
+samme form som `knapgruppe-scan.mjs` og `locale-leak.mjs`. **Men det ville ikke have
+fanget C115.** Den brudte href var `href={`/${prefix}/${slug}`}` — altså *beregnet*,
+ikke skrevet ud. Der står bogstaveligt intet `//` i `home-data.ts`; de to skråstreg
+opstår først, når prefix-strengen og slug-strengen sættes sammen ved kørsel. Et
+kildefil-grep er målrettet imod den fejl, der er *skrevet* forkert, og C115's var
+sammensat forkert. **At skrive et grep ville være en måler, der grønner præcis den
+fejl den skulle dække** — samme vakuum-grønne lås som C94's negative SE-lås på
+"500 ÷ 15", en streng der *fandtes* på den svenske side. Derfor er måleren i stedet
+en måling af **de værdier, der faktisk når markupken**.
+
+**Rettelsen er `src/lib/href-form.test.ts`, ny med 470 tests.** Den samler *alle*
+interne href fra de centrale kataloger — `categories.beregnere` (81),
+`home-data.getHomeCalculators` (3 locales), `getDageTilKort` (3 locales),
+`footer.getFooterCategories`, `getFooterBlogLinks` og `navigation.getNavigation`
+(3 locales) — i ét array på **466 href**, og kræver at hver enkelt af dem er en
+gyldig sti: `^\/[a-z0-9-]+(?:\/[a-z0-9-]+)*$`. Det dækker forside, header, footer og
+kategorisider i én påstand, fordi katalogerne er det ene sted alle sider henter
+interne links fra. Der er **fire** klasseregeler ud over selve formen: ingen `href`
+må starte med `//` (C115's præcise fejl), ingen må indeholde `//`, ingen må have
+afsluttende skråstreg (`/moms/` og `/moms` er to URL'er for Google), og ingen må
+være tomme eller `/`.
+
+**Den sjette test er den vigtigste, og den er ikke en regel.** `der er href at måle
+— ellers ville resten af filen være grøn uden at se noget` kræver `> 200` href. En
+gate som denne fejler ved *stilhed*: hvis et katalog ændrer form, returnerer
+opsamlingen ingenting, og alle 465 øvrige tests passerer vakuumt grønt. Det er den
+fejltype, der fik C82–C114 til at tro de målte det, de målte. Hver enkelt-href-test
+er desuden navngivet med **hvilken katalog og hvilket emne** den kommer fra, så et
+fund peger på den konkrete post i stedet for på et filnavn.
+
+**Verificeret modsvejs: 30 tests falder** når C115's ene linje genindføres i
+`home-data.ts` (28 `it.each`-tilfælde plus de to aggregerede regler), og **470 er
+grønne** med rettelsen. Det er den egenskab C108's test manglede helt.
+
+**Målt i samme kørsel, bevidst ikke bygget (til Mads' tid):** den nye måler dækker
+kun katalogerne. `<Link href>` skrevet direkte i de 141 `page.tsx`/`*Beregner.tsx`
+er ikke med, fordi de ikke kan samles fra ét sted, og en `grep` på dem ville lide
+af præcis den vakuum-grønne fare, C115-læren netop udpegede. Den vej — en
+AST-scanner over alle JSX-elementer med `href`-prop — er ærlig, men er en større
+opgave end den her fortjener i en iteration med to merges. Skrevet ned, så næste
+iteration ikke genopbygger den halvt.
+
+**Gate grøn:** lint (**570 filer**), **2.455 tests / 161 filer** (fra 1.985 / 160),
+build (**141 sider**). Ren tilføjelse — ingen eksisterende kode ændret, ingen ny URL,
+ingen beregningslogik.
+
+**MÅL:** ingen CTR-måling — dette er en harness-opgave, dens effekt er at den
+*næste** `//`-fejl fanges i en gate på under to sekunder i stedet for ved at nogen
+tilfældigvis kører en to iterationer gammel notes greb. Den måles i praksis: når
+den første gang fanger noget.
