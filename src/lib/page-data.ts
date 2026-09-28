@@ -498,6 +498,8 @@ const daPages: Record<string, PageData> = {
         { question: "Hvordan beregner jeg gennemsnitsfart?", answer: "Divider distancen med tiden. Eksempel: 100 km på 2 timer giver 50 km/t. Beregneren gør det automatisk — vælg 'Fart' og indtast distance og tid." },
         { question: "Hvordan omregner jeg fart til tempo (min/km)?", answer: "Del 60 med farten i km/t. Eksempel: 10 km/t = 60 / 10 = 6 min/km. Beregneren viser tempoet automatisk, hvilket er nyttigt til løb og cykling." },
         { question: "Hvad er formlen for fart, distance og tid?", answer: "Grundformlen er distance = fart × tid. Deraf følger fart = distance / tid og tid = distance / fart. Vælg blot, hvad du vil beregne." },
+        { question: "Hvordan beregner jeg tid ud fra hastighed og distance?", answer: "Del distancen med farten. 300 km ved 100 km/t er 300 / 100 = 3 timer, altså 180 minutter. Husk at svaret kommer i timer, fordi både distance og fart er pr. time." },
+        { question: "Er fart og tempo det samme?", answer: "Nej. Farten er i km/t, tempoet i min/km, og de omregnes med tempo = 60 delt i farten. 10 km/t er 6 min/km, 15 km/t er 4 min/km, og 20 km/t er 3 min/km." },
       ],
     },
     "gennemsnit": {

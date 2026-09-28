@@ -1,3 +1,5 @@
+STATUS: KØ — **C99 er landet: `/fart` — den eneste ut behandlede side i GSC's danske top-16 (4.570 visninger, CTR 0,6 % på pos. 7,1) — skrev formlen symbolsk og viste aldrig et regnestykke: 0 fund på "/÷" og 0 på "formel" i 110 KB HTML, og kun to generiske `<h2>`.** Den er GSC's næststørste søgning på siden ("beregn tid ud fra hastighed og distance", 72 v, pos. 8), og dansk autocomplete har "… og distance formel" og "… og distance bil" under præcis den sætning. Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den, 119 er kilde-blokeret), så valget kom fra at gennemgå GSC's danske top-16 og finde den ene side C82–C98 ikke havde rørt. **Rettelsen (kun `da`):** et nyt `<h2>` med de tre omvandringer af grundformlen som regnestykker — 300 km ÷ 100 km/t = **3 timer** (180 minutter), 100 km ÷ 2 timer = **50 km/t**, 50 km/t × 2 timer = **100 km** — plus fælden der driller mest (svaret er 3 *timer*, ikke 3 minutter, fordi begge størrelser er pr. time), et nyt `<h3>` "Fart og tempo er ikke det samme" med `tempo = 60 ÷ fart` og en tabel over 8/10/12/15/20/25/30 km/t (7,5 … 2,0 min/km — præcis de hastigheder autocomplete spørger om under "fart beregner løb" og "cykel"), et link videre til `/braendstof` og to nye FAQ-par, som dermed også kommer i JSON-LD'en. **Ingen tal står hårdkodet to steder:** tempoet og de tre regnestykker er afledt af `beregnFart` i selve `page.tsx` — samme krav som C84's metaDescription-fund og C94's `literPr100km()`-kobling. **Målt forresten:** dansk autocomplete under "beregn fart" og "fart beregner" ligger 6 af 10 på **fartbøde** — den klynge er *ikke* besvaret her, fordi den ville give forskrifter, siden ikke kan holde. `page.test.tsx` er nyt med 7 tests, **modsvejs verificeret: 5 af 7 falder**. Gate grøn: lint (557 filer), **1.809 tests / 152 filer** (fra 1.802 / 151), build (141 sider), `locale-leak.mjs --gate` exit 0, `knapgruppe-scan.mjs` 0/0. Kode + plan i ét commit på `ceo/fart-tid-ud-fra-fart`; se opgave 130. **MÅL:** `/fart` baseline **4.570 visninger / 26 klik / CTR 0,6 % / pos. 7,1 pr. 2026-08-29 → 2026-09-26** — måles igen 2026-10-12. **Denne iteration var også pligt: 21 deploy-noter lukket ved indholdskontrol** (se konsolideret note) — alle 18 af C82–C98, plus C76/C77/C81, hvoraf **0 decimal-punkter på 18 sider** og **alle 13 titler ≤ 60 tegn**; otte noter står åbne med en begrundelse, der siger hvorfor curl ikke kan lukke dem. **Målefejl nr. 17 (min egen):** `grep -c` på minificeret JSON-LD tæller linjer, ikke forekomster, så `/brok` så ud til at have 1 spørgsmål i stedet for 7 — fundet fordi C96's note siger 7.
+
 STATUS: KØ — **C98 er landet: `/dato` er GSC's næststørste danske side (131.419 visninger, CTR 0,6 %, pos. 5,8) *og* beraknare.se's største (92.832 visninger, CTR 0,1 %, pos. 8,3) — og begge sprog har 0 forekomster af "Excel", selv om 7 af 10 svenske og 3 af 7 danske autocomplete-variationer i sidens egen søgeklynge er Excel-spørgsmål.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den, 119 er kilde-blokeret), C97 skrev ingen ny kandidatliste, og alle åbne deploy-noter (C81, C82, C87, C88, C92, C93) har første vindue **17:30** — det var 16:15, så intet kunne verificeres. Valget blev fundet ved at måle køens svenske CTR-kandidater (`/tidszone` 3.256 v, `/leasing` 3.151 v, `/alder` 3.060 v, `/nedtaelling` 5.163 v) og se, at **den største svenska side slet ikke stod på listen**. **Målt først, målt begge sprog:** SE-autocomplete (`hl=se`, `gl=se`, 16:20) under **"dagar mellan två datum"** (GSC: 367 v pos. 8) giver 10 variationer hvoraf **syv indeholder "excel"** — "dagar mellan två datum excel", "antal dagar mellan två datum excel", "räkna dagar mellan två datum excel", "antalet dagar mellan två datum excel", "hur många dagar mellan två datum excel", "räkna antalet dagar mellan två datum excel" og "excel formel antal dagar mellan datum excel"; under **"dagar mellan datum"** (793 v pos. 8) 3 af 10, under **"antal dagar mellan datum"** (406 v pos. 9) 3 af 10, og under **"dagar mellan två datum formel"** **2 af 2**. DA-autocomplete under **"dage mellem datoer"** (450 v pos. 4) har "dage mellem datoer excel" som **nr. 2**, og under **"antal dage mellem to datoer"** (249 v pos. 5) har 3 af 7 excel. På de **live** sider: `grep -c -i excel` giver **0** på både `minberegner.dk/dato` og `beraknare.se/dato`, og `grep -ri excel src/app/dato/` giver **0**. Begge titler er allerede svar-først ("Beregn antal dage mellem to datoer", "Beräkna antal dagar mellan två datum") — altså **for tredje gang ikke titlen, men kroppen under den** (samme konklusion som C82 og C85). **Rettelsen:** ét nyt `<h2>` i hver sproggren — "Sådan tæller du dage mellem to datoer i Excel" / "Så räknar du ut dagar mellan två datum i Excel" — med `=B1-A1`, `=DATEDIF(A1;B1;"d"/"m"/"y")`, semiklon-noten i begge sprog, og at `DATEDIF` er et skjult navn. Plus **to nye FAQ-par i hvert sprog** i `page-data.ts`, som dermed også kommer i JSON-LD'en. **Tal regnet, ikke kopieret** (C82's metode, og den reddede mig fra en fejl): 1. jan 2026 → 1. jan 2027 = **365 dage** (`=B1-A1`) og 15. marts 2026 → 25. september 2026 = **194 dage** og **6 hele måneder** — de to sidste tal er desuden de samme som C88's alders-eksempel, altså sidens egne. **Målefejl undgået ved at regne:** min første hensigt var at bruge "1. januar 2026 → 31. december 2026 = 365 dage", som sidens Kopiér-tekst ifølge C55's åbne browsernote siger. `daysBetween` siger **364** (1. januar er dag 1, 31. december er dag 365, forskel 364). Jeg brugte derfor parret 1. jan 2026 → **1. jan 2027** i stedet. **Fundet, jeg ikke retter i denne iteration:** C55's note og `daysBetween` kan ikke begge være rigtige for 1. jan→31. dec 2026; det kan kun afgøres i en browser (Kopiér-knappen), og ligger derfor i `❓ Til Mads`. **Én påstand bevidst undladet:** jeg navngav ikke en lokalisert `NETWORKDAYS`-funktion, fordi dens danske og svenske navn er noget jeg ikke har verificeret — i stedet peger afsnittet på værktøjet til arbejdsdage. Samme disciplin som opgave 119 og C95. **Harness:** `dato/page.test.tsx` **8 → 11 tests**, ny `describe` der kræver overskriften, alle fire formler, begge tal og semiklon-sætningen i **bade** sprog, plus en test der kræver **præcis to** Excel-spørgsmål i hvert sprog og at de er forskellige. **Verificeret modsvejs: alle 3 nye tests falder** med kun `page.tsx` + `page-data.ts` på master. **Gate grøn:** lint (556 filer), **1802 tests / 151 filer** (fra 1798 / 151), build (**141 sider**), `locale-leak.mjs --gate` exit 0. Ingen beregningslogik, ingen `no`, ingen anden side rørt. Kode + plan i ét commit på `ceo/dato-excel`; se opgave 128. **MÅL:** `/dato` DA **131.419 visninger / 803 klik / CTR 0,6 % / pos. 5,8** og SE **92.832 visninger / 88 klik / CTR 0,1 % / pos. 8,3**, begge pr. **2026-08-28 → 2026-09-25** — måles igen 2026-10-11. Forventningen er højere CTR på de positioner siden allerede har, ikke nye visninger.
 
 STATUS: KØ — **C97 er landet: de ni `/dage-til/*`-titler var 61-67 tegn på begge domæner — altså den afkortningsfejl, C81 lukkede for 160 `page-data`-titler, men som lå lige uden for den gate.** Samme iteration som C96 (se den forrige STATUS); denne er den anden opgave, og den blev fundet fordi C96's `/brok`-arbede efterlod 20 minutter, så kandidatlisten blev læst igen. Køen havde ingen `I GANG`-opgave, og alle åbne deploy-noter har første vindue **17:30** — det er 16:09, så intet kunne verificeres. Valget var det punkt, fire iterationer (C91, C92, C93) havde skrevet op som "en designbeslutning for alle ni sider (hvad af de to mister vi?)" — og målingen viser, at det slet ikke var en designbeslutning, men en **hullet gate**. **Målt først, målt rigtigt:** min første curl-runde gav 5 af 16 sider site-defaulttitlen, fordi jeg brugte danske slugs på beraknare.se (C91's fælde: `curl` uden `-L` på en 301) og Halloween endnu ikke er deployet. Målt på de **rigtige** URL'er fra begge sitemapmer: alle 8 danske titler er **62-66 tegn** og alle 8 svenske **61-67** — f.eks. "Hvor mange dage er der til grundlovsdag? 251 dage | MinBeregner.dk" (**66**) og "Hur många dagar är det till nationaldagen? 252 dagar | Beräknare.se" (**67**). Googles grænse er ca. 60, så **afkortningen rammer alle ni sider i begge sprog, og den klipper `| MinBeregner.dk` væk.** **Hvorfor gaten ikke så det:** C81's test i `page-data.test.ts` læser `metaTitle` for de 160 slugs i tabellen — og `dage-til`-titlerne bygges af `buildDageTilMetadata` i `DageTilPage.tsx` og har **ingen** `page-data`-post. Samme blindhed som `title-collision.test.ts` havde med de ni sider, og som C44 allerede havde lappet *én* gang i den anden test. **Beslutningen, fire iterationer havde udskudt:** brandet i halen er præcis den del, der bliver klippet væk (C81's egen lære), og spørgsmålet plus dage-tallet er hele søgeintentionen — så **brandet ud, svaret bliver**. Titlen bliver nu `${spørgsmål} ${dage}` = 46-52 tegn i begge sprog, og **`og:site_name` sendes stadig**, så Facebook/LinkedIn beholder brandet. **Harness:** `src/app/dage-til-routes.test.tsx` **15 → 18 tests** med en ny `describe("dage-til titler")` der **kald den rigtige producer** (`buildDageTilMetadata(prefix, slug, I_DAG)`) for alle ni begge sprog og kræver ≤ 60 — altså ikke en genkopiering af den gamle regel, hvilket er C44's lære om at en måler skal ramme den kode der faktisk renderer. Plus to låse: at grundlovsdagstitlen stadig er spørgsmålet *og* dage-tallet (så den ikke bliver kortere ved at miste svaret) og at `og:site_name` er urørt. **Verificeret modsvejs: 3 af 4 falder** med kun `DageTilPage.tsx` på master ("expected 62 to be less than or equal to 60" / "61" og den lange skærforskel i grundlovsdagstitlen); den fjerde er `og:site_name`-låsen. Gate grøn: lint (556 filer), **1798 tests / 151 filer** (fra 1794 / 151), build (**141 sider**), `locale-leak.mjs --gate` exit 0. `dage-til.ts` urørt, ingen beregningslogik rørt. Kode + plan i ét commit på `ceo/dage-til-titler`; se opgave 127. **MÅL:** de ni `dage-til`-sider er **ikke** synlige i GSC-listen (baseline ukendt — de måles første gang 2026-10-11); `/dato` **131.419 visninger / 803 klik / CTR 0,6 % / pos. 5,8** og `/nedtaelling` (bær de ni i deres brødtekst) er de nærmeste baseline.
@@ -6896,7 +6898,7 @@ efter datagrund:
   (`TidszoneBeregner` mangler `no`) rigtig prioritet; svar (b) eller (c) gør den
   overflødig. **Jeg rører ikke domænet, DNS'en eller porten uden dit svar.**
 - ⏳ **VERIFICÉR DEPLOY: C72 — tolv ubundne `<label>` på syv beregnere, og fire fund ud over bindingerne.** `/brutto-netto` (2 felter + **periodenavngiven knapgruppe**, der havde intet navn), `/topskat` (2), `/opsparing` (2 — heraf var inflationskontrollen *indpakket* i `<label>`), `/budget` (2), `/bil` (1), `/nedtaelling` (1) og `/lon-efter-skat` (2). **Verificér indhold, ikke HTTP 200** — hele ændringen er `for`/`id` og `role="group"` i markup, som et HTTP 200 slet ikke afslører: ``curl -s https://minberegner.dk/brutto-netto | grep -c 'role="group"'` skal give mindst 1 (før: 0), og `<input id="brutto-netto-oensket"` skal findes. Samme grep på `/opsparing`, `/bil`, `/loen-efter-skat` og `/nedtaelling` på **https://beraknare.se** (sidernes markup er den samme; `/topskat` er daOnly og findes kun på minberegner.dk). Kode `8c737a4`, merge `c7179c2` 2026-09-27 07:35 CEST; første kandidatvindue **2026-09-27 12:30**.
-- ⏳ **VERIFICÉR DEPLOY: C66 `/tidszone` skrev "Aten" på minberegner.dk, fordi
+- ✅ **LUKKET 2026-09-27 11:25 ved indhold, se C79 — C66 `/tidszone` skrev "Aten" på minberegner.dk, fordi
   de to tidszone-tabeller modsagde hinanden.** "Athen" er dansk, "Aten" er
   svensk, og dropdown'en + huskelisten på den danske side skrev den svenske
   form, mens brødteksten på *samme side* sagde "13 i Athen". Nu er der én række
@@ -6920,7 +6922,7 @@ efter datagrund:
   streng på en dansk-only-side ikke er en fejl. **Ingen beslutning nødvendig**
   ud over det normale: det er rettelse af vores egen fejl, ikke en
   redaktionel ændring.
-- ⏳ **VERIFICÉR DEPLOY: C65 `/elberegner` — apparatnavne i dropdown'en var danske på beraknare.se og beregner.no.** "Køleskab (40W)", "Vaskemaskine (per vask)", "Hårtørrer", "Glødepære" stod i dropdown'en på begge ikke-danske domæner, fordi `STANDARD_APPARATER` lå i modulscope uden for `labels`. Nu `Kylskåp`/`Dammsugare`/`Hårtorkare`/`Glödlampa` på SE og `Kjøleskap`/`Hårtørker` på NO. **Verificér indhold, ikke HTTP 200** — hele fundet er i klient-renderede `<option>`-tekster: 1. Åbn **https://beraknare.se/elberegner** og ånk dropdown'en "Vælg standard…". Den skal vise **"Kylskåp (40W)", "Dammsugare (1400W)", "Diskmaskin (1800W)", "Torktumlare (3000W)", "Glödlampa (60W)"** — ikke "Køleskab" eller "Glødepære". 2. Vælg "Kylskåp", og se at **navnefeltet til højre også** siger Kylskåp (det er den anden halvdel af funktionen). 3. Samme på **https://minberegner.dk/elberegner**: der skal stadig stå **"Køleskab (40W)"** — den danske liste må ikke være bleven ændret. Kode + plan i ét commit på `ceo/locale-leak-runde1`; første kandidatvindue **2026-09-27 07:30** (kode `5576d71`, merge `a108316` 05:05 CEST). Se opgave 93.
+- ✅ **LUKKET 2026-09-27 11:25 ved indhold, se C79 — C65 `/elberegner` — apparatnavne i dropdown'en var danske på beraknare.se og beregner.no.** "Køleskab (40W)", "Vaskemaskine (per vask)", "Hårtørrer", "Glødepære" stod i dropdown'en på begge ikke-danske domæner, fordi `STANDARD_APPARATER` lå i modulscope uden for `labels`. Nu `Kylskåp`/`Dammsugare`/`Hårtorkare`/`Glödlampa` på SE og `Kjøleskap`/`Hårtørker` på NO. **Verificér indhold, ikke HTTP 200** — hele fundet er i klient-renderede `<option>`-tekster: 1. Åbn **https://beraknare.se/elberegner** og ånk dropdown'en "Vælg standard…". Den skal vise **"Kylskåp (40W)", "Dammsugare (1400W)", "Diskmaskin (1800W)", "Torktumlare (3000W)", "Glödlampa (60W)"** — ikke "Køleskab" eller "Glødepære". 2. Vælg "Kylskåp", og se at **navnefeltet til højre også** siger Kylskåp (det er den anden halvdel af funktionen). 3. Samme på **https://minberegner.dk/elberegner**: der skal stadig stå **"Køleskab (40W)"** — den danske liste må ikke være bleven ændret. Kode + plan i ét commit på `ceo/locale-leak-runde1`; første kandidatvindue **2026-09-27 07:30** (kode `5576d71`, merge `a108316` 05:05 CEST). Se opgave 93.
 - ⏳ **VERIFICÉR DEPLOY: C60 `/promille` — et tomt felt gav en grøn
   tilladelse til at køre bil, "præcis på grænsen" erstattede den falske
   "over grænsen", og den delte tekst har nu de fire input — kode + plan i ét
@@ -6956,7 +6958,7 @@ efter datagrund:
      gränsen på 0,2 ‰. …`** — svensk sætning, og 0,2-grænsen fordi den er
      svensk.
   7. `https://minberegner.dk/api/health` skal svare `status: ok`.
-- ⏳ **VERIFICÉR DEPLOY: C59 `/alder` — "Dage levet" tæller kalenderdage, og den
+- ✅ **LUKKET 2026-09-27 11:25 ved indhold, se C79 — C59 `/alder` — "Dage levet" tæller kalenderdage, og den
   delte tekst har begge datoer — kode + plan i ét commit på branch
   `ceo/alder-kopi`, kode `c849044`, merge `d1b0767` 2026-09-27 02:22
   CEST. Første kandidatvindue **2026-09-27 07:30**.** Verificér **indhold**;
@@ -7053,7 +7055,7 @@ efter datagrund:
      2026`**.
   9. `https://minberegner.dk/api/health` skal svare `status: ok`.
 
-- ⏳ **VERIFICÉR DEPLOY: C53 `/procent` — alle tal i siden største
+- ✅ **LUKKET 2026-09-27 11:25 ved indhold, se C79 — C53 `/procent` — alle tal i siden største
   resultatblok skal have komma og tusindtalsseparator — kode + plan i ét commit
   på branch `ceo/procent-talformat`, kode `5c9c844`, merge `dfc1874`
   2026-09-27 00:41 CEST.** Første kandidatvindue
@@ -7099,7 +7101,7 @@ efter datagrund:
      **`1 000,00 kr utan moms + 60,00 kr moms (6 %) = 1 060,00 kr inkl. moms`**
      efter samme klik.
   5. `https://minberegner.dk/api/health` skal svare `status: ok`.
-- ⏳ **VERIFICÉR DEPLOY: C51 `/tidsberegner` — de to datofelter er
+- ✅ **LUKKET 2026-09-27 11:25 ved indhold, se C79 — C51 `/tidsberegner` — de to datofelter er
   forklaret, og "dage" var ikke dage — kode `bef8d38`, merge `4452940`
   2026-09-26 23:37 CEST på branch `ceo/tidsberegner-flere-dage`.** Første
   kandidatvindue **2026-09-27 07:30**.
@@ -7119,7 +7121,7 @@ efter datagrund:
      datum"**, svenske labels, **"65 h 0 min"** og **"17 h 0 min"** (ikke "t"),
      og må **ikke** have den danske svar-først-tabel. `/api/health` skal svare
      `status: ok`.
-- ⏳ **VERIFICÉR DEPLOY: C50 `/dato` — standarddatoer i lokal tid, alderen fra
+- ✅ **LUKKET 2026-09-27 11:25 ved indhold, se C79 — C50 `/dato` — standarddatoer i lokal tid, alderen fra
   `alder.ts`, ingen "NaN" på tomme felter — kode + plan i ét commit på branch
   `ceo/dato-alder-lokaldato`, kode `a42d87e`, merge `4ec1da3` 2026-09-26 23:04
   CEST.** Første kandidatvindue **2026-09-27 07:30**. Verificér **indhold**,
@@ -7140,7 +7142,7 @@ efter datagrund:
      `/alder` med samme dato.
   5. `https://beraknare.se/dato` skal have de svenske labels ("Antal dagar",
      "Veckor", "Helgdagar") uændret, og `/api/health` skal svare `status: ok`.
-- ⏳ **VERIFICÉR DEPLOY: C49 `/tidszone` følger sommertiden — `fa51af7`, merge
+- ✅ **LUKKET 2026-09-27 11:25 ved indhold, se C79 — C49 `/tidszone` følger sommertiden — `fa51af7`, merge
   `20a69f1` 2026-09-26 22:47 CEST** på branch `ceo/tidszone-dato-tilstande`.
   Første kandidatvindue **2026-09-27 07:30**. Verificér **indhold**, HTTP 200
   beviser intet:
@@ -7835,33 +7837,77 @@ landmark=lån, piggybank=opsparing osv.).
     - Gate grøn: lint ok, 280/280 tests, build ok (128 pages).
 
 ## VERIFICÉR DEPLOY-log
+### ✅ **DEPLOY OK 2026-09-28 13:45 — 21 noter lukket ved indholdskontrol i C99 (ikke HTTP 200).** `curl` mod begge domæner 13:37-13:50; `/api/health` svarede `status: ok`.
 
-### ⏳ **VERIFICÉR DEPLOY: C97 — de ni `/dage-til/*`-titler er under Googles afkortningsgrænse i begge sprog (62-66 tegn DA, 61-67 SE → 46-52).** Kode `69ffb83`, merge `32d2c14` 2026-09-27 16:11 CEST på branch `ceo/dage-til-titler`. Første kandidatvindue **2026-09-27 17:30**. HTTP 200 beviser intet, det er `<title>` der ændrer sig:
+- **Målt:** `/dato` har Excel-formler i **begge** sprog (2 fund DA, 2 SE — C98);
+  `/dage-til/grundlovsdag` har titlen **"Hvor mange dage er der til grundlovsdag? 250 dage"**
+  (49 tegn, **0** fund på domænenavnet) og beraknare.se **"…? 251 dagar"** — dagens tal,
+  ikke et hårdkodet (C97); `/brok` har "Brøkregning: de fire regneregler" og **7**
+  `"@type":"Question"` i JSON-LD'en (før 4) (C96); `/boligstoette` har "Boligstøtte er
+  ikke boligsikring" (C95); `/braendstof` har "500 ÷ 15 = 33,3 l" og **0** på den gamle
+  fejl "5,5-8,3" (C94); `/kvadratmeter` har sit regneafsnit (C93); `beraknare.se/leasing`
+  skriver "fåretagsleasing" **med å** (C92); `/dato` har "Hvor mange dage er der tilbage
+  af 2026?" (C90) og `/dage-til/halloween` svarer **200** mens
+  `beraknare.se/dage-til/1-december` **301** → `/dagar-till/1-december` (C91);
+  `/kalorier` har "Hvor mange kalorier pr dag" (C89); `/alder` har fødselsårs-tabellen
+  (C88); `/promille` har udlands-grænserne (C87) og N-genstande-tabellen (C86);
+  `/renteberegner` har `YDELSE` (C85); `/tidszone` har Toronto (C84); `/moms` har det nye
+  afsnit, **8** spørgsmål og **0** på "Aviser og tidsskrifter (0% moms)" (C83);
+  `/procent` har Excel-afsnittet (C82).
+- **Decimal-klassen (C78, C76, C77) målt på 18 DA-sider:** **0** fund på `>N.NN<` og
+  `=N.NN ` — altså ingen punkter i den indekserede tekst. Alle tre lukket.
+- **Titel-længder (C81) målt på de 13 største DA-sider:** 37-57 tegn, **alle ≤ 60**
+  (længst `/moms` 57, `/alder` 56, `/tidsberegner` 55) — lukket.
+- **Ældre noter (C49, C50, C51, C53, C59, C65, C66)** var lukket ved indhold allerede i
+  C79 27/9 11:25; deres `⏳`-markører i loggen var forældede og er nu rettet, så næste
+  iteration ikke verificerer dem to gange.
+- **Målefejl nr. 17 (min egen, samme klasse som nr. 16):** `grep -c '"@type":"Question"'`
+  på `/brok` gav **1**, fordi JSON-LD'en er minificeret til én linje — `grep -c` tæller
+  *linjer*, ikke forekomster. Rettet til `grep -o … | wc -l` → **7**. Fundet fordi C96's
+  note siger "skal være 7", og 1 ≠ 7.
+- **Otte noter er stadig åbne, og de er åbne af en grund der ikke er min:** C52, C55,
+  C56 og C60 kræver Kopiér/knap-klik i en browser; C72 og C75 er accessibility-
+  konstruktioner, hvis rigtighed ligger i DOM'en (C79 målte dog 0 ubundne labels i den
+  server-renderede HTML); C74 er et *script* i repoet, ikke en side; **C80 er den eneste
+  kodeændring uden overhovedet curl-verificerbar form** — `engines.node` og `.nvmrc` er
+  build-time, så den kan kun verificeres ved at bygningen lykkes, hvilket den gjorde.
+  **Ingen af dem er `DEPLOY-MISSING`:** de er merge-tidligere end 17:30-vinduet 27/9 og
+  er dermed dækket af de 21 verificerede noters batch.
+
+### ⏳ **VERIFICÉR DEPLOY: C99 — `/fart` svarer på "beregn tid ud fra hastighed og distance" med tre regnestykker, tempo-tabellen (8-30 km/t) og time/minut-fælden (4.570 v, CTR 0,6 %, pos. 7,1).** Kode + plan i ét commit på `ceo/fart-tid-ud-fra-fart`, merge til `master` 2026-09-28 ca. 13:55. Første kandidatvindue **2026-09-28 17:30**. Verificér ved **indhold** (HTTP 200 beviser intet — ændringen er ny brødtekst og to `faqItems`):
+   1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
+   2. `curl -s https://minberegner.dk/fart | sed 's/<!-- -->//g'` skal finde **"Sådan beregner du tid ud fra hastighed og distance"**, **"300 km ÷ 100 km/t = 3 timer"**, **"100 km ÷ 2 timer = 50 km/t"**, **"50 km/t × 2 timer = 100 km"**, **"ikke 3 minutter"** og **"Fart og tempo er ikke det samme"**.
+   3. `sed`-trinnet er ikke valgfrit — React skriver `<!-- -->` mellem tekstnoder (målefejl nr. 16).
+   4. Tempo-tabellen skal have **7 rækker** med 7,5 / 6,0 / 5,0 / 4,0 / 3,0 / 2,4 / 2,0 min/km for 8 / 10 / 12 / 15 / 20 / 25 / 30 km/t, og `href="/braendstof"` skal findes.
+   5. `grep -o '"@type":"Question"' | wc -l` skal være **5** (før: 3) på `/fart`.
+   6. `https://beraknare.se/fart` skal være **uændret**: 0 fund på "Sådan beregner du" og "Fart og tempo er ikke det samme".
+
+### ✅ **DEPLOY OK 2026-09-28 13:45 — C97 — de ni `/dage-til/*`-titler er under Googles afkortningsgrænse i begge sprog (62-66 tegn DA, 61-67 SE → 46-52).** Kode `69ffb83`, merge `32d2c14` 2026-09-27 16:11 CEST på branch `ceo/dage-til-titler`. Første kandidatvindue **2026-09-27 17:30**. HTTP 200 beviser intet, det er `<title>` der ændrer sig:
    1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
    2. `curl -s https://minberegner.dk/dage-til/grundlovsdag` skal have **"Hvor mange dage er der til grundlovsdag?"** i `<title>` og **0** fund på **"MinBeregner.dk"** i `<title>` (resten af siden er urørt).
    3. Samme for `https://beraknare.se/dagar-till/nationaldagen` med **"Hur många dagar är det till nationaldagen?"** og 0 på "Beräknare.se" i `<title>`.
    4. Tallet skal følge dagen: `<title>` skal indeholde **251 dage** (DA) / **252 dagar** (SE) pr. 27. september — hvis der står et hårdkodet tal, er det forkert; C90's test låser pr. request.
    5. `<meta property="og:site_name">` skal stadig være **MinBerekner.dk** / **Beräknare.se** — brandet må kun forsvinde fra titlen.
 
-### ⏳ **VERIFICÉR DEPLOY: C96 — `/brok` dansk: de fire regneregler, formlen procent = brøk × 100 med tabel, og brøkdel af et tal (4.881 visninger, CTR 0,6 %, pos. 5,3).** Kode `54ae8e0`, merge `2551f2d` 2026-09-27 16:29 CEST på branch `ceo/brok-regneregler`. Verificér ved **indhold, ikke HTTP 200 alene** — hele ændringen er ny brødtekst og tre nye `faqItems`:
+### ✅ **DEPLOY OK 2026-09-28 13:45 — C96 — `/brok` dansk: de fire regneregler, formlen procent = brøk × 100 med tabel, og brøkdel af et tal (4.881 visninger, CTR 0,6 %, pos. 5,3).** Kode `54ae8e0`, merge `2551f2d` 2026-09-27 16:29 CEST på branch `ceo/brok-regneregler`. Verificér ved **indhold, ikke HTTP 200 alene** — hele ændringen er ny brødtekst og tre nye `faqItems`:
    1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
    2. `curl -s https://minberegner.dk/brok | sed 's/<!-- -->//g'` skal finde **"Brøkregning: de fire regneregler"**, **"3/6 + 2/6 = 5/6"**, **"1/2 × 2/3"**, **"1/2 ÷ 2/3"**, **"procent = brøk × 100"**, **"(3 × 200) ÷ 4"** og **"150 kr."**.
    3. Tabellen skal have 7 `<tr>`-rækker med **0,5 / 0,25 / 0,75 / 0,125 / 0,667 / 0,833 / 0,7** i decimal-kolonnen (Bemærk: `sed`-trinnet er ikke valgfrit — React skriver `<!-- -->` mellem tekstnoder, målefejl nr. 16).
    4. `grep -c '"@type":"Question"'` skal være **7** (før: 4), og de tre nye spørgsmål skal kunne læses i JSON-LD'en.
    5. `https://beraknare.se/brok` skal være **uændret** og have **0** på "Brøkregning", "regneregler" og "procent = brøk".
 
-### ⏳ **VERIFICÉR DEPLOY: C95 — `/boligstoette` siger at boligstøtte ikke er boligsikring (6.697 visninger, CTR 2,6 %, pos. 8,7).** Kode `68037d6`, merge `87956e5` 2026-09-27 15:52 CEST. Branch hed `ceo/renteberegner-metode` — den blev oprettet *før* målingen viste at `/renteberegner` allerede var gjort, og opgaven blev skiftet undervejs, så grenen fik ikke sit nye navn. Første kandidatvindue **2026-09-27 17:30**. Verificér ved **indhold, ikke HTTP 200 alene**:
+### ✅ **DEPLOY OK 2026-09-28 13:45 — C95 — `/boligstoette` siger at boligstøtte ikke er boligsikring (6.697 visninger, CTR 2,6 %, pos. 8,7).** Kode `68037d6`, merge `87956e5` 2026-09-27 15:52 CEST. Branch hed `ceo/renteberegner-metode` — den blev oprettet *før* målingen viste at `/renteberegner` allerede var gjort, og opgaven blev skiftet undervejs, så grenen fik ikke sit nye navn. Første kandidatvindue **2026-09-27 17:30**. Verificér ved **indhold, ikke HTTP 200 alene**:
    1. `curl -s https://minberegner.dk/boligstoette | sed 's/<!-- -->//g'` skal have **"Boligstøtte er ikke boligsikring"**, **"tilskud fra staten"**, **"obligatorisk opsparingsordning"** og **"Realkredit Danmark"**.
    2. Skal **ikke** have noget beløb, en sats eller en frist for boligsikring — de 350 boligsikring-visninger skal sendes videre til Realkredit Danmark, ikke besvares her. Tjek især at der ikke står en "20 %" eller et kronebeløb ved siden af ordet boligsikring.
    3. FAQ'en skal have spørgsmålet "Hvad er forskellen på boligstøtte og boligsikring?" — det skal også kunne ses i JSON-LD'en.
 
-### ⏳ **VERIFICÉR DEPLOY: C94 — `/braendstof` dansk: regnestykkerne for benzin, diesel og el, km/l ↔ l/100 km og tankfyld-metoden (16.764 visninger, CTR 1,1 %, pos. 6,0).** Kode `7a929de`, merge `51d66d9` 2026-09-27 15:47 CEST på branch `ceo/braendstof-metode`. Første kandidatvindue **2026-09-27 17:30**. Verificér ved **indhold, ikke HTTP 200 alene**:
+### ✅ **DEPLOY OK 2026-09-28 13:45 — C94 — `/braendstof` dansk: regnestykkerne for benzin, diesel og el, km/l ↔ l/100 km og tankfyld-metoden (16.764 visninger, CTR 1,1 %, pos. 6,0).** Kode `7a929de`, merge `51d66d9` 2026-09-27 15:47 CEST på branch `ceo/braendstof-metode`. Første kandidatvindue **2026-09-27 17:30**. Verificér ved **indhold, ikke HTTP 200 alene**:
    1. `curl -s https://minberegner.dk/braendstof | sed 's/<!-- -->//g'` skal have **"500 ÷ 15 = 33,3 l"**, **"500 ÷ 18 = 27,8 l"**, **"500 × 17 ÷ 100 = 85 kWh"**, **"356 kr."**, **"213 kr."**, **"380 ÷ 40"**, **"9,5 km/l"** og **"5,6-8,3 l/100km"**.
    2. Den gamle fejl skal være væk: **0** fund på **"5,5-8,3"**.
    3. `sed`-trinnet er ikke valgfrit — React skriver `<!-- -->` mellem tekstnoder, så et rå grep giver falske 0-tal (målefejl nr. 16).
    4. `curl -s https://beraknare.se/braendstof | sed 's/<!-- -->//g'` skal have **"Typisk förbrukning"** og **0** på "Sådan regner du", "Priserne er rundet" og "Om brændstofforbrug".
 
-### ⏳ **VERIFICÉR DEPLOY: C91 — Halloween som kurateret `dage-til`-dato (31. oktober) i da og se, PLUS en levende 404-rettelse på `/dage-til/1-december`.** Kode `b5a2e48`, merge `540a78e` 2026-09-27 14:48 CEST på branch `ceo/halloween-dage-til`. Første kandidatvindue **2026-09-27 17:30**. Verificér ved **indhold og statuskode, ikke HTTP 200 alene**:
+### ✅ **DEPLOY OK 2026-09-28 13:45 — C91 — Halloween som kurateret `dage-til`-dato (31. oktober) i da og se, PLUS en levende 404-rettelse på `/dage-til/1-december`.** Kode `b5a2e48`, merge `540a78e` 2026-09-27 14:48 CEST på branch `ceo/halloween-dage-til`. Første kandidatvindue **2026-09-27 17:30**. Verificér ved **indhold og statuskode, ikke HTTP 200 alene**:
 1. `curl -s -o /dev/null -w '%{http_code}' https://minberegner.dk/dage-til/halloween` skal være **200**, og `<title>` skal være **"Hvor mange dage er der til Halloween? 34 dage | MinBeregner.dk"** på 27. september — altså *dagens* tal, ikke et hårdkodet 34.
 2. Samme curl skal finde **3** `"@type":"Question"`, `<h1>Hvor mange dage er der til Halloween?</h1>`, og facts med "Alle helgenes dag er 1. november" og "ikke en dansk helligdag".
 3. `curl -s https://minberegner.dk/sitemap.xml | grep -c 'dage-til/halloween'` skal være **1** (sitemap bygges af samme liste, så den følger automatisk med).
@@ -7869,12 +7915,12 @@ landmark=lån, piggybank=opsparing osv.).
 5. `https://beraknare.se/dagar-till/halloween` skal være **200** med `<title>Hur många dagar är det till Halloween? 34 dagar | Beräknare.se</title>`, **0** danske markører ("Alle helgenes dag", "helligdag", "1. november"), og `https://minberegner.dk/dage-til/halloween` skal finde **0** svenske strenge.
 6. `https://minberegner.dk/api/health` skal svare `status: ok`.
 
-### ⏳ **VERIFICÉR DEPLOY: C90 — `/dato` svarer på "hvor mange dage er der tilbage af 2026?" i da og se (131.419 visninger, CTR 0,6 %, pos. 5,8).** Kode `7dd98e6`, merge `c7e56ea` 2026-09-27 14:23 CEST på branch `ceo/dato-dage-tilbage`. Første kandidatvindue **2026-09-27 17:30**. Verificér ved **indhold**: `/dato` på begge domæner skal have et `<h2>` med "tilbage af"/"kvar av" og **dagens** tal (95 dage på 27. september), altså ikke et hårdkodet 95; tallet skal nulstilles til 0 nytårsaften.
+### ✅ **DEPLOY OK 2026-09-28 13:45 — C90 — `/dato` svarer på "hvor mange dage er der tilbage af 2026?" i da og se (131.419 visninger, CTR 0,6 %, pos. 5,8).** Kode `7dd98e6`, merge `c7e56ea` 2026-09-27 14:23 CEST på branch `ceo/dato-dage-tilbage`. Første kandidatvindue **2026-09-27 17:30**. Verificér ved **indhold**: `/dato` på begge domæner skal have et `<h2>` med "tilbage af"/"kvar av" og **dagens** tal (95 dage på 27. september), altså ikke et hårdkodet 95; tallet skal nulstilles til 0 nytårsaften.
 
 
-### ⏳ **VERIFICÉR DEPLOY: C89 — `/kalorier` dansk: tabellen "hvor mange kalorier pr dag?" (12.477 visninger, CTR 1,0 %, pos. 8,2).** Kode `af84858`, merge `26b3421` 2026-09-27 14:19 CEST på branch `ceo/kalorier-pr-dag`. Første kandidatvindue **2026-09-27 17:30**. Verificér ved **indhold**: siden skal have `<h2>Hvor mange kalorier pr dag?</h2>`, fire `<td>`-rækker (60/70/80/90 kg), `<td>2.759 kcal</td>`, `href="/motion-kalorier"`, og FAQ'en skal have "Hvor mange kalorier skal jeg have?".
+### ✅ **DEPLOY OK 2026-09-28 13:45 — C89 — `/kalorier` dansk: tabellen "hvor mange kalorier pr dag?" (12.477 visninger, CTR 1,0 %, pos. 8,2).** Kode `af84858`, merge `26b3421` 2026-09-27 14:19 CEST på branch `ceo/kalorier-pr-dag`. Første kandidatvindue **2026-09-27 17:30**. Verificér ved **indhold**: siden skal have `<h2>Hvor mange kalorier pr dag?</h2>`, fire `<td>`-rækker (60/70/80/90 kg), `<td>2.759 kcal</td>`, `href="/motion-kalorier"`, og FAQ'en skal have "Hvor mange kalorier skal jeg have?".
 
-### ⏳ **VERIFICÉR DEPLOY: C83 — `/moms` dansk svarer på søgeklyngen (23.225 visninger, CTR 0,2 %, pos. 6,9).** Kode `ae51764`, merge `5659e28` 2026-09-27 13:03 CEST på branch `ceo/moms-da-svar`. Første kandidatvindue **2026-09-27 17:30**.
+### ✅ **DEPLOY OK 2026-09-28 13:45 — C83 — `/moms` dansk svarer på søgeklyngen (23.225 visninger, CTR 0,2 %, pos. 6,9).** Kode `ae51764`, merge `5659e28` 2026-09-27 13:03 CEST på branch `ceo/moms-da-svar`. Første kandidatvindue **2026-09-27 17:30**.
   **HTTP 200 beviser intet:** hele ændringen er ny brødtekst og fire nye
   `faqItems` i `page-data.ts` — sidens regnestykker er urørte. Sådan
   verificeres det:
@@ -7894,7 +7940,7 @@ landmark=lån, piggybank=opsparing osv.).
      sin klynge — de tre satser). Særlig kontrol: SE skal stadig sige
      "1 000 kr × 1,25 = 1 250 kr, × 1,12 = 1 120 kr eller × 1,06 = 1 060 kr".
 
-### ⏳ **VERIFICÉR DEPLOY: C86 — `/promille` dansk: tabellen over hvor mange promille N øl giver (4.513 visninger, CTR 1,5 %, pos. 7,9).** Kode + plan i ét commit på `ceo/promille-noel`. Første kandidatvindue **2026-09-27 17:30** (eller det næste vindue efter merge).
+### ✅ **DEPLOY OK 2026-09-28 13:45 — C86 — `/promille` dansk: tabellen over hvor mange promille N øl giver (4.513 visninger, CTR 1,5 %, pos. 7,9).** Kode + plan i ét commit på `ceo/promille-noel`. Første kandidatvindue **2026-09-27 17:30** (eller det næste vindue efter merge).
   **HTTP 200 beviser intet:** intet rører `PromilleBeregner` eller
   Widmark-formlen — kun ny brødtekst og ét `faqItem`.
   1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
@@ -7906,7 +7952,7 @@ landmark=lån, piggybank=opsparing osv.).
   4. **FAQSchema:** `grep -c '"@type":"Question"'` skal være **6** (før: 5).
   5. `https://beraknare.se/promille` skal være **uændret**.
 
-### ⏳ **VERIFICÉR DEPLOY: C85 — `/renteberegner` dansk: annuitetsformlen, Excel (`YDELSE`/`RENTENPERIODER`) og nominel mod effektiv (13.560 visninger, CTR 0,9 %, pos. 7,5).** Kode + plan i ét commit på `ceo/renteberegner-formel`. Første kandidatvindue **2026-09-27 17:30** (eller det næste vindue efter merge).
+### ✅ **DEPLOY OK 2026-09-28 13:45 — C85 — `/renteberegner` dansk: annuitetsformlen, Excel (`YDELSE`/`RENTENPERIODER`) og nominel mod effektiv (13.560 visninger, CTR 0,9 %, pos. 7,5).** Kode + plan i ét commit på `ceo/renteberegner-formel`. Første kandidatvindue **2026-09-27 17:30** (eller det næste vindue efter merge).
   **HTTP 200 beviser intet:** intet af dette rører `RenteBeregner` eller et
   regnestykke — kun ny brødtekst i `page.tsx` og to `faqItems`. Sådan
   verificeres det:
@@ -7923,7 +7969,7 @@ landmark=lån, piggybank=opsparing osv.).
   6. `https://beraknare.se/renteberegner` skal være **uændret** — SE har allerede
      "Nominell kontra effektiv ränta".
 
-### ⏳ **VERIFICÉR DEPLOY: C84 — `/tidszone`: 21 byer i tabellen (Toronto, Madrid, Istanbul, Bangkok, Denpasar) og metaDescription rettet fra "12 byer" til "21 byer" i begge sprog.** Kode `b9b4ca3`, merge `88fa49a` 2026-09-27 13:07 CEST på branch `ceo/tidszone-destinationer`. Første kandidatvindue **2026-09-27 17:30**.
+### ✅ **DEPLOY OK 2026-09-28 13:45 — C84 — `/tidszone`: 21 byer i tabellen (Toronto, Madrid, Istanbul, Bangkok, Denpasar) og metaDescription rettet fra "12 byer" til "21 byer" i begge sprog.** Kode `b9b4ca3`, merge `88fa49a` 2026-09-27 13:07 CEST på branch `ceo/tidszone-destinationer`. Første kandidatvindue **2026-09-27 17:30**.
   **HTTP 200 beviser intet:** rækkerne er statiske data og teksten ligger i
   metaattributten, som curl *kan* se. Sådan verificeres det:
   1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
@@ -11301,6 +11347,61 @@ tekst på `/tidszone`), men Kopier-strengen med datoen kræver en browser.
   låst den ene. Den rigtige måling er derfor mod *kilden*, som er hvad de to
   andre gater også gør.
 
+#### 130. [x] FÆRDIG 2026-09-28 — C99 — `/fart` svarer på "beregn tid ud fra hastighed og distance" med tre regnestykker, tempo-tabellen og time/minut-fælden
+
+- **Datagrund:** `/fart` er den **eneste ut behandlede side i GSC's danske top-16**
+  (4.570 v / 26 klik / **CTR 0,6 %** / pos. 7,1 — 2026-08-29 → 2026-09-26) efter at
+  C82–C98 har lukket de femten andre. Søgningerne er "fart beregner" (83 v, pos. 6),
+  **"beregn tid ud fra hastighed og distance" (72 v, pos. 8)**, "fartberegner" (26 v,
+  pos. 2) og "beregn fart" (25 v, pos. 1).
+- **Målt på den live side før rettelsen:** 110.501 bytes HTML, **0** fund på
+  **"÷"** og **0** på **"formel"**, og kun to generiske `<h2>` ("Beregn fart,
+  distance eller tid" / "Tempo til løb og cykling"). Den skrev altså
+  `distance = fart × tid` symbolsk og *aldrig et eneste tal med regnestykke* — samme
+  fejlklasse som C93 (`/kvadratmeter`) og C94 (`/braendstof`): siden er skrevet til
+  spørgsmålet "hvordan regner man … ud", men svaret lå kun i værktøjet.
+- **Autocomplete (DA, `hl=da`/`gl=dk`, hentet 13:38 i dag) under "beregn tid ud fra
+  hastighed":** "… **og distance**", "… og distance **bil**", "… og distance
+  **formel**", "**beregn distance ud fra hastighed og tid**". Under "beregn fart"
+  og "fart beregner" ligger klyngen derimod på **fartbøde** (6 af 10) — den skal
+  *ikke* besvares her, så rettelsen går efter beregner-spørgsmålet, ikke bøderne.
+- **Rettelse (kun `da`):** ét nyt `<h2>` **"Sådan beregner du tid ud fra
+  hastighed og distance"** med de tre omvandringer af grundformlen som
+  regnestykker — 300 km ÷ 100 km/t = **3 timer** (180 minutter), 100 km ÷ 2 timer =
+  **50 km/t**, 50 km/t × 2 timer = **100 km** — plus **fælden, der driller mest**:
+  svaret er 3 *timer*, ikke 3 minutter, fordi distance og fart begge er pr. time.
+  Ét nyt `<h3>` **"Fart og tempo er ikke det samme"** med `tempo = 60 ÷ fart` og en
+  tabel over 8/10/12/15/20/25/30 km/t → 7,5/6,0/5,0/4,0/3,0/2,4/2,0 min/km (de
+  to rækker er præcis de hastigheder, autocomplete spørger om under "fart beregner
+  løb" og "fart beregner cykel"), plus et link videre til `/braendstof` — hvad turen
+  koster. **To nye FAQ-par** i `page-data.ts` ("Hvordan beregner jeg tid ud fra
+  hastighed og distance?" og "Er fart og tempo det samme?"), som dermed også kommer
+  i JSON-LD'en.
+- **Ingen tal står hårdkodet to steder:** tempoet, de tre regnestykker og
+  distancen er **afledt af `beregnFart`** i selve `page.tsx` og formatteret med
+  `formatNumber("da")`, så brødteksten ikke kan modsige værktøjet ovenfor — samme
+  krav som C84's `metaDescription`-fund og C94's `literPr100km()`-kobling. Decimal
+  med komma, ikke punktum (C78's klasse).
+- **Harness:** `src/app/fart/page.test.tsx` er **nyt, 7 tests** — de tre
+  regnestykker med tal udledt af modulet, time/minut-fælden, alle syv tabelrækker,
+  en invariant-test (tempoet *falder* når farten *stiger*, og 10 km/t = 6 min/km),
+  brændstoflinket, de to nye spørgsmål i `page-data.ts` (som C85's fælde lærer:
+  `FAQ` er mocket væk) og et lås på at **den svenske side er urørt**. Modsvevs
+  verificeret: **5 af 7 falder** med den gamle kode.
+- **Gate grøn:** lint (**557 filer**), **1.809 tests / 152 filer**, build (**141
+  sider**), `locale-leak.mjs --gate` exit 0, `knapgruppe-scan.mjs` 0 filer / 0
+  uavngivne. Kode + plan i ét commit på `ceo/fart-tid-ud-fra-fart`.
+- **MÅL:** `/fart` baseline **4.570 visninger / 26 klik / CTR 0,6 % / pos. 7,1 pr.
+  2026-08-29 → 2026-09-26** — måles igen 2026-10-12.
+- **Næste kandidater, målt i denne iteration (ikke gæt):** (1) `/bil` fald 44 → 25
+  besøgende/28d *og* ligger på svensk pos. 30,5 med 1,7k v — men GSC's søgninger
+  der ("vad kostar min bil" pos. 67, "hur mycket kostar resan" pos. 63) peger på
+  **bensinpris-tabel**, altså samme `/braendstof`-klasse, så vurder om siden skal
+  have pris-tabel i stedet for flere formler. (2) `/su` er stadig i fald (232 → 112)
+  og har ingen CTR-opgave endnu, men O3 rørte den 24/9, så lad den stå til næste
+  måling. (3) Svensk CTR på `/tidszone` (3.298 v, pos. 7,7) og `/alder` (3.197 v,
+  pos. 7,7) — C84/C88 rettede kun dansk, så det er den samme asymmetri som C82's.
+
 #### 128. [x] FÆRDIG 2026-09-27 — C98 — `/dato` svarer på "antal dagar mellan två datum excel" (7 af 10 svenske variationer) og "antal dage mellem to datoer excel" med formlerne i begge sprog
 
 - **Datagrund:** `/dato` er GSC's næststørste danske side (**131.419 v /
@@ -12093,7 +12194,7 @@ verificering der ikke kan slå igennem er lige så dårlig som en der kan.
 > C60** (kræver en browser).
 
 
-### ⏳ **VERIFICÉR DEPLOY: C93 — `/kvadratmeter` dansk har nu fire regneeksempler med tal under beregneren ("Sådan regner du kvadratmeter ud med tal") og to nye FAQ-par, som også kommer i JSON-LD'en.** Kun den `locale === "da"`-gren i `src/app/kvadratmeter/page.tsx` og to linjer i `page-data.ts`'e danske blok er rørt — ingen beregningslogik, ingen `se`, ingen `no`. **Verificér indhold, ikke HTTP 200:**
+### ✅ **DEPLOY OK 2026-09-28 13:45 — C93 — `/kvadratmeter` dansk har nu fire regneeksempler med tal under beregneren ("Sådan regner du kvadratmeter ud med tal") og to nye FAQ-par, som også kommer i JSON-LD'en.** Kun den `locale === "da"`-gren i `src/app/kvadratmeter/page.tsx` og to linjer i `page-data.ts`'e danske blok er rørt — ingen beregningslogik, ingen `se`, ingen `no`. **Verificér indhold, ikke HTTP 200:**
   1. `curl -s https://minberegner.dk/kvadratmeter | grep -c 'Sådan regner du
      kvadratmeter ud med tal'` skal være **≥ 1** — før fandtes overskriften
      ikke.
@@ -12114,7 +12215,7 @@ verificering der ikke kan slå igennem er lige så dårlig som en der kan.
      `ceo/kvadratmeter-metode`; første kandidatvindue **2026-09-27 17:30**
      (denne merge sker efter 12:30-vinduet).
 
-- ⏳ **VERIFICÉR DEPLOY: C92 — stavemålen af fåretagsleasing, 12→21 byer i
+- ✅ **DEPLOY OK 2026-09-28 13:45 — C92 — stavemålen af fåretagsleasing, 12→21 byer i
   `ogDescription`, og tre svenske titler der svarer på søgningen.** Kun
   `src/lib/page-data.ts` er rørt — ingen beregningslogik, ingen dansk eller
   norsk tekst. **Verificér indhold, ikke HTTP 200:**
@@ -12139,7 +12240,7 @@ verificering der ikke kan slå igennem er lige så dårlig som en der kan.
      `8d06081`, merge `8bea16d` **2026-09-27 15:07 CEST** på
      `ceo/se-ctr-nedtaelling`; første kandidatvindue **2026-09-27 17:30**.
 
-- ⏳ **VERIFICÉR DEPLOY: C87 — `/promille` har nu svar på otte af de ti
+- ✅ **DEPLOY OK 2026-09-28 13:45 — C87 — `/promille` har nu svar på otte af de ti
   variationer under "promillegrænse" (Tyskland, Italien, Norge, Frankrig,
   Spanien, Grækenland, Polen, Storbritannien).** Kun `locale === "da"`-grenen
   er rørt; `se` og `no` er urørte. **Verificér indhold, ikke HTTP 200:**
@@ -12161,7 +12262,7 @@ verificering der ikke kan slå igennem er lige så dårlig som en der kan.
      `ceo/promillegraense-udlandet`; første kandidatvindue
      **2026-09-27 17:30**.
 
-- ⏳ **VERIFICÉR DEPLOY: C88 — `/alder` får en fødselsårs-tabel (22 år), et
+- ✅ **DEPLOY OK 2026-09-28 13:45 — C88 — `/alder` får en fødselsårs-tabel (22 år), et
   Excel-afsnit med DATEDIF, og FAQ'ens dage-tal er rettet fra 13.342 til
   13.343 i alle tre sprog.** Kun den nye sektion er `da`-kun; FAQ-rettelsen
   gælder da/se/no. **Verificér indhold, ikke HTTP 200:**
@@ -12188,7 +12289,7 @@ verificering der ikke kan slå igennem er lige så dårlig som en der kan.
      `ceo/alder-foedselsaar`; første kandidatvindue **2026-09-27 17:30**.
 
 
-- ⏳ **VERIFICÉR DEPLOY: C82 — `/procent` dansk: den forkerte skattepåstand er
+- ✅ **DEPLOY OK 2026-09-28 13:45 — C82 — `/procent` dansk: den forkerte skattepåstand er
   fjernet, Excel-afsnittet og to nye interne links er lagt på, og tre nye
   FAQ-par kommer i både synlig FAQ og JSON-LD.** Kun `locale === "da"`-grenen
   er rørt; `no` er urørt. **Verificér indhold, ikke HTTP 200:**
@@ -12206,7 +12307,7 @@ verificering der ikke kan slå igennem er lige så dårlig som en der kan.
      `0f8a52b`, merge `5925633` **2026-09-27 12:39 CEST** på
      `ceo/procent-da-svar`; første kandidatvindue **2026-09-27 17:30**.
 
-- ⏳ **VERIFICÉR DEPLOY: C78 — `/tidsberegner` skrev "8.25 timer" i den
+- ✅ **DEPLOY OK 2026-09-28 13:45 — C78 — `/tidsberegner` skrev "8.25 timer" i den
   server-renderede HTML på begge domæner, altså i den tekst Google
   indekserer.** Rettet ved at gøre `TidsintervalResultat`'s fire talfelter til
   `number` og formatere dem med `formatNumber` — 4 skærmsteder +
@@ -12222,7 +12323,7 @@ verificering der ikke kan slå igennem er lige så dårlig som en der kan.
      døgn. Kode + plan i ét commit på `ceo/decimal-komma-3`; første
      kandidatvindue **2026-09-27 12:30**.
 
-- ⏳ **VERIFICÉR DEPLOY: C77 — ni procenter skrev decimal med punktum i dansk
+- ✅ **DEPLOY OK 2026-09-28 13:50 — C77 — ni procenter skrev decimal med punktum i dansk
   og svensk tekst, og `/boliglaan`s fire rentespænd var danske på
   beraknare.se.** Rettet: `/arveafgift` (`effektivSats` — nåede Kopier **og**
   Del), `/boliglaan` (`belaaningsgrad` + `helpText`), `/elbil` (`payback`),
@@ -12239,7 +12340,7 @@ verificering der ikke kan slå igennem er lige så dårlig som en der kan.
      "9.1%". Kode + plan i ét commit på `ceo/decimal-komma-2`; første
      kandidatvindue **2026-09-27 12:30**.
 
-- ⏳ **VERIFICÉR DEPLOY: C76 — otte beregnersider skrev tal med punktum i
+- ✅ **DEPLOY OK 2026-09-28 13:50 — C76 — otte beregnersider skrev tal med punktum i
   dansk/svensk tekst.** `/kvadratmeter` (formelen for alle fire geometriske
   former), `/bil` (`prKm` — nåede Kopier **og** Del), `/billaan` (`apr`,
   `prisPrKm`), `/forbrugslaan` (`apr`, `samletAar`), `/boliglaan` (samlet
@@ -12258,7 +12359,7 @@ verificering der ikke kan slå igennem er lige så dårlig som en der kan.
   `npm EBADENGINE` (det ville betyde at `engines` og billedets Node er uenig),
   og `https://minberegner.dk/api/health` skal svare `status: ok`.
 
-- ⏳ **VERIFICÉR DEPLOY: C81 — 67 `metaTitle` var længere end Googles
+- ✅ **DEPLOY OK 2026-09-28 13:50 — C81 — 67 `metaTitle` var længere end Googles
   afkortningsgrænse (brand-navnet i halen), herunder `/bmi` 76/77/75 tegn.**
   Rettet ved at fjerne domænenavnet fra de for lange titler og håndtrimme de
   6 der stadig var for lange; `page-data.test.ts` har 2 nye tests der låser ≤ 60
@@ -12315,7 +12416,7 @@ kalorier skal jag ha om dagen" (pos. 1 på `/kalorier`).
 > Når de fem er skrevet her, kan næste iteration lukke dem med `DEPLOY OK` uden
 > at røre koden.
 
-### ⏳ **VERIFICÉR DEPLOY: C98 — `/dato` har nu et Excel-afsnit i begge sprog ("Sådan tæller du dage mellem to datoer i Excel" / "Så räknar du ut dagar mellan två datum i Excel") med `=B1-A1` og `=DATEDIF(...;"d"/"m"/"y")`, og to nye FAQ-par pr. sprog som også kommer i JSON-LD'en.** Kun `locale === "da"`- og `locale === "se"`-grenen i `src/app/dato/page.tsx` og to par i hver `page-data.ts`-blok er rørt — ingen beregningslogik, ingen `no`, ingen anden side. **Verificér indhold, ikke HTTP 200:**
+### ✅ **DEPLOY OK 2026-09-28 13:45 — C98 — `/dato` har nu et Excel-afsnit i begge sprog ("Sådan tæller du dage mellem to datoer i Excel" / "Så räknar du ut dagar mellan två datum i Excel") med `=B1-A1` og `=DATEDIF(...;"d"/"m"/"y")`, og to nye FAQ-par pr. sprog som også kommer i JSON-LD'en.** Kun `locale === "da"`- og `locale === "se"`-grenen i `src/app/dato/page.tsx` og to par i hver `page-data.ts`-blok er rørt — ingen beregningslogik, ingen `no`, ingen anden side. **Verificér indhold, ikke HTTP 200:**
   1. `curl -s https://minberegner.dk/dato | grep -c 'Sådan tæller du dage mellem to datoer i Excel'` skal være **1** — før fandtes overskriften ikke, og `grep -c -i excel` gav **0**.
   2. Samme curl skal finde `=B1-A1`, `DATEDIF(A1;B1;&quot;d&quot;)`, `=DATEDIF(A1;B1;&quot;m&quot;)`, `=DATEDIF(A1;B1;&quot;y&quot;)`, **365 dage**, **194 dage**, "6 hele måneder" og "Dansk Excel bruger".
   3. `curl -s https://beraknare.se/dato | grep -c 'Så räknar du ut dagar mellan två datum i Excel'` skal være **1**, og samme curl skal finde **365 dagar**, **194 dagar**, "6 hela månader" og "Svensk Excel använder".
