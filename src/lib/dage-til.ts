@@ -3,7 +3,7 @@ import { getIntlLocale } from "./format";
 
 const MS_PER_DAY = 86_400_000;
 
-export type DageTilKind = "fixed" | "easter" | "easterOffset";
+export type DageTilKind = "fixed" | "easter" | "easterOffset" | "midsummer";
 
 export interface DageTilAnchor {
   kind: DageTilKind;
@@ -563,6 +563,136 @@ export const DAGE_TIL_EVENTS: DageTilEvent[] = [
     },
   },
   {
+    id: "midsommarafton",
+    anchor: {
+      da: { kind: "midsummer", month: 6, day: 0, offsetDays: 0 },
+      se: { kind: "midsummer", month: 6, day: 0, offsetDays: 0 },
+    },
+    da: {
+      slug: "sankthansaftensdag",
+      copy: {
+        short: "sankthansaftensdag",
+        question: "Hvor mange dage er der til sankthansaftensdag?",
+        facts: [
+          "Sankthansaftensdagen er den fredag, der ligger mellem 19. og 25. juni — i 2026 er det 19. juni, i 2027 25. juni.",
+          "Sankthansdagen er dagen efter, altså en lørdag mellem 20. juni og 26. juni.",
+          "Sankthans er ikke en dansk helligdag, men den fejres overalt i landet med bål, sang og majstang.",
+        ],
+        faq: [
+          {
+            question: "Hvilken dato er sankthansaftensdag?",
+            answer:
+              "Det er den fredag, der ligger mellem 19. og 25. juni. Datoen er derfor fast hvert år, men den falder på forskellige kalenderdatoer: 19. juni 2026, 25. juni 2027 og 23. juni 2028.",
+          },
+          {
+            question: "Hvornår er sankthansdagen?",
+            answer:
+              "Sankthansdagen er dagen efter sankthansaftensdagen, altså en lørdag mellem 20. og 26. juni. Tallet på den side er derfor altid 1 dag større end her.",
+          },
+          {
+            question: "Er sankthans en helligdag?",
+            answer:
+              "Nej. Sankthans står ikke på Danmarks liste over helligdage, men det er en af årets mest markerede festdage, og mange arbejdspladser giver fri med løn.",
+          },
+        ],
+      },
+    },
+    se: {
+      slug: "midsommarafton",
+      copy: {
+        short: "midsommarafton",
+        question: "Hur många dagar är det till midsommarafton?",
+        facts: [
+          "Midsommarafton är den fredag som infaller mellan 19 och 25 juni — 19 juni 2026, 25 juni 2027 och 23 juni 2028.",
+          "Midsommardagen är dagen efter, alltså en lördag som infaller mellan 20 och 26 juni.",
+          "Midsommarafton räknas som en röd dag i den svenska kalendern, eftersom den är en av årets största högtider.",
+        ],
+        faq: [
+          {
+            question: "Vilket datum är midsommarafton?",
+            answer:
+              "Det är fredagen som infaller mellan 19 och 25 juni. Datumet är alltså bestämt varje år, men det hamnar på olika kalenderdatum: 19 juni 2026, 25 juni 2027 och 23 juni 2028.",
+          },
+          {
+            question: "När är midsommardagen?",
+            answer:
+              "Midsommardagen är dagen efter midsommarafton, alltså en lördag mellan 20 och 26 juni. Talet på den sidan är därför alltid 1 dag större än här.",
+          },
+          {
+            question: "Är midsommarafton en röd dag?",
+            answer:
+              "Ja, midsommarafton räknas som en röd dag och de flesta arbetsgivare ger ledigt med lön. Den är inte en laglig helgdag, men den behandlas som en.",
+          },
+        ],
+      },
+    },
+  },
+  {
+    id: "midsommardagen",
+    anchor: {
+      da: { kind: "midsummer", month: 6, day: 0, offsetDays: 1 },
+      se: { kind: "midsummer", month: 6, day: 0, offsetDays: 1 },
+    },
+    da: {
+      slug: "sankthansdag",
+      copy: {
+        short: "sankthansdag",
+        question: "Hvor mange dage er der til sankthansdag?",
+        facts: [
+          "Sankthansdagen er lørdagen efter sankthansaftensdagen, altså en lørdag mellem 20. juni og 26. juni.",
+          "I 2026 er det 20. juni, i 2027 26. juni og i 2028 24. juni.",
+          "Sankthansdagen er den dag, børnene klæder sig i sommerens gamle tøj på — og netop derfor ligger den altid en dag efter sankthansaftensdagen.",
+        ],
+        faq: [
+          {
+            question: "Hvad er forskellen på sankthansdag og sankthansaftensdag?",
+            answer:
+              "Sankthansaftensdagen er fredagen, og sankthansdagen er lørdagen efter. De to ligger derfor altid præcis 1 dag fra hinanden, så tallet her er 1 dag mindre end på sankthansaftenssiden.",
+          },
+          {
+            question: "Hvilken dato er sankthansdagen?",
+            answer:
+              "Det er lørdagen mellem 20. og 26. juni: 20. juni 2026, 26. juni 2027 og 24. juni 2028.",
+          },
+          {
+            question: "Er sankthansdag en helligdag?",
+            answer:
+              "Nej, den er ikke en helligdag. Den er en lørdag, som er weekend i sig selv — det særlige ved den er, at den markerer afslutningen på sankthansfejringen.",
+          },
+        ],
+      },
+    },
+    se: {
+      slug: "midsommardagen",
+      copy: {
+        short: "midsommardagen",
+        question: "Hur många dagar är det till midsommardagen?",
+        facts: [
+          "Midsommardagen är lördagen efter midsommarafton, alltså en lördag som infaller mellan 20 och 26 juni.",
+          "År 2026 är det 20 juni, 2027 26 juni och 2028 24 juni.",
+          "På midsommardagen dansar man runt granröset och sjunger sånger — och netop därför ligger den alltid en dag efter midsommarafton.",
+        ],
+        faq: [
+          {
+            question: "Vad är skillnaden mellan midsommardagen och midsommarafton?",
+            answer:
+              "Midsommarafton är fredagen och midsommardagen är lördagen efter. De två ligger därför alltid exakt 1 dag ifrån varandra, så talet här är 1 dag mindre än på midsommaraftonsidan.",
+          },
+          {
+            question: "Vilket datum är midsommardagen?",
+            answer:
+              "Det är lördagen mellan 20 och 26 juni: 20 juni 2026, 26 juni 2027 och 24 juni 2028.",
+          },
+          {
+            question: "Är midsommardagen en röd dag?",
+            answer:
+              "Nej, det är inte en röd dag. Det är en lördag, alltså en vanlig weekend — det speciella är att den markerar slutet på midsommarfirandet.",
+          },
+        ],
+      },
+    },
+  },
+  {
     id: "halloween",
     anchor: {
       da: { kind: "fixed", month: 10, day: 31, offsetDays: 0 },
@@ -668,9 +798,30 @@ export function easterSunday(year: number): Date {
   return new Date(Date.UTC(year, month - 1, day));
 }
 
+/**
+ * Midsommarafton for a year: the Friday that falls between 19 and 25 June
+ * inclusive. `offsetDays` shifts from that Friday, so 0 is midsommarafton
+ * (fredag) and 1 is midsommardagen (lørdag). The window is a law, not a
+ * convention — Swedish midsummer must be celebrated between those dates.
+ */
+export function midsommarafton(year: number, offsetDays = 0): Date {
+  for (let day = 19; day <= 25; day++) {
+    const candidate = new Date(Date.UTC(year, 5, day));
+    if (candidate.getUTCDay() === 5) {
+      return new Date(candidate.getTime() + offsetDays * MS_PER_DAY);
+    }
+  }
+  // Unreachable: the 19-25 June window is seven days long and therefore
+  // always contains exactly one Friday.
+  throw new Error(`Ingen fredag 19.-25. juni ${year}`);
+}
+
 function anchorInYear(anchor: DageTilAnchor, year: number): Date {
   if (anchor.kind === "fixed") {
     return new Date(Date.UTC(year, anchor.month - 1, anchor.day));
+  }
+  if (anchor.kind === "midsummer") {
+    return midsommarafton(year, anchor.offsetDays);
   }
   const easter = easterSunday(year);
   return new Date(easter.getTime() + anchor.offsetDays * MS_PER_DAY);

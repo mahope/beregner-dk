@@ -1,3 +1,5 @@
+STATUS: KØ — **C112 er landet: midsommer var den største ubesvarede søgeklynge på beraknare.se, og den var ikke en manglende side — den var en manglende dato i en kurateret liste. SE-autocomplete under "dagar kvar till midsommar" har 12 variationer, og `DAGE_TIL_EVENTS` havde ni datoer, hvor midsummer ikke var en af dem.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den, 119 er kilde-blokeret), og **to åbne noter var ældre end det seneste deploy-vindue, så de var iterationens pligter først** — C100 og C101 er lukket ved indholdskontrol, se loggen. **Valget kom af at måle *den anden* ende end C82–C111 alle gjorde:** de har nu lukket hele dansk GSC-top-16 *og* de to Plausible-sider uden for den (`/pension`, `/husleje`), så den næste ubesvarede klynge på beraknare.se ligger i en datatabel, ikke på en side. Samme fejltype som C108's ni ulænkede `dage-til`-sider, kun en niveau dybere. **Rettelsen er én ny beregningsregel og to events — ikke fire nye sider:** `DageTilKind` fik varianten `"midsummer"`, og `midsommarafton(year, offsetDays)` finder den fredag mellem 19. og 25. juni. Vinduet er lovfæstet, så funktionen er deterministisk, og **midsommardagen er den samme regel plus en dag** (`offsetDays: 1`) — derfor er hele det svenske par to linjer data. Dansk bruger samme regel med slugs `sankthansaftensdag`/`sankthansdag`, fordi dansk ikke kalder festen midsommer (autocomplete: "hvor mange dage til sankt hans", "sankt hans dag"). **Fundet, da jeg holdt op med at tro på egen tælling:** de to datoer er *ikke* fastdatoer — 2026-06-19, 2027-**06-25**, 2028-06-23. Et hårdkodet anker ville være rigtigt ét år ud af syv, præcis C45's jul-aften-fejl. Derfor krydschalker testen 61 år (1990-2050) mod *lovens* invariant — fredag, juni, 19.-25. juni — i stedet for tre par datoer. **Og de to sprog har to forskellige rettigheder:** midsommarafton er ikke en svensk lovlig helgdag, men den *er* en rød dag; dansk sankthans er slet ikke en helligdag. Teksten siger hver sin ting, fordi det er to forskellige rettigheder. **Harness:** `dage-til.test.ts` **43 → 54**, **modsvejs verificeret: 11 af de nye tests falder** med kun master-koden i `dage-til.ts`. **Målt på rigtig server** (`next start`, port 3466 verificeret fri *inden* start — målefejl nr. 15's lære): begge danske sider **200** med `<title>` "…sankthansaftensdag? **270** dage" og "…sankthansdag? **271** dage" — begge tal efterprøvet i node mod 2027-06-25/26, altså *ikke* mod dagens visning; **3** `Question` pr. side; sitemap **9 → 11**; hver af de ni gamle sider har nu **10** `href="/dage-til/…"`; hreflang korrekt begge veje; `/api/health` → `status: ok`. **`DageTilPage.tsx`, `routing.ts`, `sitemap.ts` og `home-data.ts` urørte.** **To målefejl i min egen notering, fundet fordi de holdt mod live:** C100's note krævede `−0,67` med *Unicode-minus*, men `Intl.NumberFormat` producerer ASCII `-0,67` — og `page.test.tsx:208` kræver netop ASCII, så testen låser den rigtige værdi (målefejl nr. 22); og min egen grep skrev "klock slag" med et mellemrum i en svensk overskrift (nr. 23). Noterne er rettet, fordi en note kun må lukkes på det, der faktisk står at læse. **MÅL:** de fire nye sider har **0 baseline** (nye) — måles 2026-10-12; forventningen er især at `/dato` på beraknare.se (**96.336 visninger, CTR 0,1 %, pos. 8,3**) får to interne links mere, fordi "dagar till 31 dec" og "dagar kvar till midsommar" er samme søgeintention. Gate grøn: lint (**567 filer**), **1947 tests / 159 filer** (fra 1936 / 156), build (**141 sider**), `locale-leak.mjs --gate` exit 0, `knapgruppe-scan.mjs` 0/0. Kode + plan i ét commit på `ceo/midsommer-dage-til`; se opgave 142.
+
 STATUS: KØ — **C111 er landet: `/husleje` er Plausible's tolvte mest besøgte danske side (170 besøgende/28d, +25 %) og svarede på nul af hele prisindeks-klyngen: 0 forekomster af "nettoprisindeks", 0 af "huslejenævn", 0 af "pristalsregulering" — selv om DA-autocomplete har "nettoprisindeks husleje beregner" som nr. 3 under "husleje beregner".** Opgaven lå med "kræver Danmarks Statistik som kilde", og to tidligere iterationer har været kilde-blokeret af samme årsag (opgave 119, C95) — **men kildefælden viste sig at være en forkert URL, ikke en lukket kilde**: `dst.dk/da/Statistik/emner/priser-og-prisindekser/nettoprisindeks` giver 404, mens *kildens egen indeksside* `dst.dk/da/Statistik/emner` svarer 200 og linker til den rigtige sti, og `api.statbank.dk/v1/data/PRIS04/CSV` svarer 200 med alle tal. Det er **målefejl nr. 20 (min egen)**: fire gættede URL'er, fire 404, og så konkluderede jeg at kilden var utilgængelig. **Læren er skrevet ind i opgaven, så næste iteration ikke gentager den.** Rettelsen (kun `da`): et nyt `<h2>` med regnestykket 8.000 × 2,9 % = 232 → 8.232, en tabel der skelner pristal (2,0 % → 8.160) fra nettopris (2,9 % → 8.232) fra DST's egen huslejegruppe (2,6 % → 8.208) på *samme* husleje, kvartalsgennemsnittet huslejenævnet bruger (2,5 %, altså 32 kr. mindre end månedsstigningen), og en `<h3>` der siger at huslejenævnet — ikke beregneren — fastsætter satsen pr. område. **Tre nye FAQ-par** (JSON-LD 7 → 10 på rigtig server). Nyt modul `nettoprisindeks.ts` holder DST's tal *og* deres rå StatBank-strenge ved siden af de parsede tal, låst i en test, og `kvartalsgennemsnit()` returnerer bevidst `null` for 2026K3 fordi DST endnu ikke har udgivet september. **Tre fund i min egen kode, alle fundet fordi jeg renderer siden og læser den:** `formatCurrency` sætter allerede "kr." på (min version gav "8.232 kr. kr" i hele tabellen), min test havde en forkert forventning på sammenligningskvartalet, og `Intl.NumberFormat` indsætter et non-breaking space som min whitespace-normalisering spiste. `huslejenaevnet.dk` svarer HTTP 500 fra loopet, så **ingen sats fra huslejenævnet er skrevet**. Gate grøn: lint (567 filer), **1936 tests / 159 filer** (fra 1919/156), build (141 sider), `locale-leak.mjs --gate` exit 0, `knapgruppe-scan.mjs` 0/0. Målt på rigtig server (port 3455): 200, alle 20 strenge, begge kildelinks, JSON-LD 10. Kode + plan i ét commit `83d38a6` på `master`, pushet 2026-09-28 19:57; se opgave 141. **MÅL:** `/husleje` baseline 170 besøgende/28d, bounce 4 %, pr. 2026-09-28 — måles igen 2026-10-12.
 
 ---
@@ -7869,6 +7871,26 @@ landmark=lån, piggybank=opsparing osv.).
 
 ## VERIFICÉR DEPLOY-log
 
+### ✅ `DEPLOY OK 2026-09-28 20:26` — **to gamle noter lukket ved indholdskontrol: C100 og C101.** De havde begge første vindue **17:30**, som var passeret, men deres ⏳-markører stod stadig åbne. Målt 20:20-20:26 på rigtig server, `/api/health` svarede `status: ok`.
+
+| Note | Bevis på live (ikke HTTP 200) |
+|---|---|
+| **C100** | DA `/tidsberegner` 131.965 bytes: alle **10** strenge fra noten ×2 hver — "Sådan beregner du tid mellem to klokkeslæt i Excel", `=B1-A1`, `=(B1-A1)*24`, `=(B1-A1)*24*60`, `=MOD(B1-A1;1)*24`, `=(B1-A1)*24-0,5`, `8,25`, `7,50`, `495`. **0** forekomster af `0.34` med punktum (C78/C100's regression holder). FAQ-JSON-LD **8** på DA og **7** på SE. SE `/tidsberegner` 114.501 bytes med "Så räknar du ut timmar mellan två klockslag" ×2, `8,25 timmar`, `7,50 timmar`, **0** `8,25 timer` (dansk) og **0** `dagen efter` — sidstnævnte var den danske lækage noten bad om at se væk. `href="/dato"` i begge. |
+| **C101** | SE `/alder` 128.317 bytes: "Räkna ut ålder från personnummer", `640823`, `701063-2391`, `19900315`, "Så beräknar du ålder i Excel" og `=IDAG()` — alle ×2. **0** fund på "60 år" (den gamle myndighedsfejl) og **2** på "100 år". FAQ-JSON-LD **10** på SE (var 7). DA `/alder` har **0** svenske markører. |
+
+**To ting noten sagde, som live sagde noget andet — begge forklaret, ingen fejl.**
+(1) **C100's note krævede `−0,67` med *Unicode-minus*, og live har `-0,67` med ASCII-bindestreg.** Kilden er `formatNumber(..., "da", { maximumFractionDigits: 2 })` i `src/app/tidsberegner/page.tsx:276`, som bruger `Intl.NumberFormat` — den sætter **minus** `U+002D`, ikke `U+2212`. `page.test.tsx:208` kræver konsekvent `"-0,67"`, altså låser testen den rigtige værdi. **Målefejl nr. 22 (min egen):** noten skrev et tegn, som renderer-formatet aldrig har produceret, fordi jeg skrev den forventning uden at kigge i `Intl`'s output. Notens *hensigt* — at tallet står med komma — holder: `0.34` med punktum er **0** fund. (2) **C100's note sagde "begge FAQ'er skal have 7 spørgsmål"**, men DA har **8** og SE **7**. Det er ikke en afdrift: DA-spørgsmålene er "Kan jeg trække en pause fra?" og "Hvad er decimal timer?", som ikke findes i den svenske blok. Den svenske note sagde 7, og den holder. (3) **SE-overskriften er "mellan två klockslag"** — min egen grep skrev "klock slag" med et mellemrum, hvilket er målefejl nr. 23 og den tredje i træk i samme måling.
+
+### ⏳ **VERIFICÉR DEPLOY: C112 — midsommer som `dage-til`-dato: to nye sider i hvert sprog (`/dage-til/sankthansaftensdag`, `/dage-til/sankthansdag`, `/dagar-till/midsommarafton`, `/dagar-till/midsommardagen`), og `DAGE_TIL_EVENTS` går 9 → 11.** Kode + plan i ét commit på `ceo/midsommer-dage-til`, fast-forwardet til `master`. Første kandidatvindue **2026-09-28 21:30**. Kun `src/lib/dage-til.ts` (én ny `DageTilKind`-variant `"midsummer"`, én ny eksporteret funktion `midsommarafton(year, offsetDays)`, to nye events) og `src/lib/dage-til.test.ts` (43 → 54 tests) er rørt — **`DageTilPage.tsx`, `routing.ts`, `sitemap.ts` og `home-data.ts` er urørte**, ingen eksisterende beregning ændret, ingen danske tal ændret. Verificér ved **indhold, ikke HTTP 200**:
+  1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
+  2. `curl -s https://minberegner.dk/dage-til/sankthansaftensdag` skal have `<h1>Hvor mange dage er der til sankthansaftensdag?</h1>` og **3** `Question` i JSON-LD'en.
+  3. Samme side skal linke til **alle ti** andre `dage-til`-sider, altså `href="/dage-til/sankthansdag"` skal findes (den findes ikke i master).
+  4. `https://minberegner.dk/sitemap.xml` skal have **11** `dage-til`/`dagar-till`-linjer (var 9), og de to nye skal være med.
+  5. `curl -s https://beraknare.se/dagar-till/midsommarafton` skal svare **200** med `<h1>Hur många dagar är det till midsommarafton?</h1>`, og `https://beraknare.se/dagar-till/midsommardagen` skal have **1 dag mere** i både `<title>` og synlig tekst. **Begge tal afhænger af dagen**, så tjek at de er konsistente med hinanden (`dag = afton + 1`), ikke mod et hårdkodet tal.
+  6. `https://minberegner.dk/dage-til/sankthansaftensdag` skal have `hrefLang="sv"` med `https://beraknare.se/dagar-till/midsommarafton`, og `https://beraknare.se/dagar-till/midsommarafton` skal have `hrefLang="da"` med `https://minberegner.dk/dage-til/sankthansaftensdag`.
+  7. De **ni** eksisterende `dage-til`-sider skal fortsat svare 200 på begge domæner med uændrede titler — de ni er ikke rørt, så en ændring der viser sig her er en fejl.
+Se `#### 142` i opgavelisten.
+
 ### ⏳ **VERIFICÉR DEPLOY: C111 — `/husleje` svarer på "nettoprisindeks husleje beregner" med DST's egne tal, pristal-mod-nettopris-tabellen og huslejenævnets rolle (170 besøgende/28d, +25 %).** Kode + plan i ét commit på `ceo/husleje-nettoprisindeks`. Kun `src/lib/nettoprisindeks.ts` (**ny**), `src/components/HuslejeNettoprisindeks.tsx` (**ny**), ét `<HuslejeNettoprisindeks />`-kald i `src/app/husleje/page.tsx` (kun `locale === "da"`), tre `faqItems` + fire keywords i `page-data.ts` og tre testfiler er rørt — **`husleje.ts` urørt, ingen eksisterende beregning ændret, `HuslejeBudgetBeregner`/`HuslejePrKvm` urørt, `se` og `no` urørt**. Verificér ved **indhold, ikke HTTP 200**:
 - på `https://minberegner.dk/husleje` skal findes `<h2 id="nettoprisindeks-husleje">Hvor meget stiger huslejen efter nettoprisindekset?</h2>` og overskrifterne "Pristalsregulering og nettoprisindeks er ikke det samme" samt "Nettoprisindekset for kvartalet — den huslejenævnet bruger"
 - brødteksten skal have **2,9 %**, **2 %**, **2,6 %**, **8.232**, **8.160**, **8.208**, **72** (forskellen mellem pristal og nettopris) og **2,5 %** (kvartalsgennemsnittet), samt sætningen "3. kvartal 2026 er endnu ikke færdigt"
@@ -13323,3 +13345,81 @@ forklarer, at "inflationskontrollen var *indpakket* i `<label>`", så løsningen
 delvis. **Jeg rettede det ikke**, fordi det er en a11y-opgave uden trafikgrund og fordi curl
 ikke kan se *hvilket* felt det er. En test-run (`label-a11y`) burde kunne finde det; det er
 næste iterations opgave hvis du vil have det lukket.
+
+#### 142. [x] FÆRDIG 2026-09-28 — C112 — midsommer som `dage-til`-dato: svensk "dagar till midsommarafton" er en 12-variations autocomplete-klynge, og vi havde nul sider
+
+**Datagrund:** SE-autocomplete (`hl=se`, `gl=se`, hentet 20:24) under **"dagar kvar till
+midsommar"** giver **12 variationer** — "dagar kvar till midsommarafton", "hur många dagar
+kvar till midsommarafton", "hur många dagar kvar till midsommarafton 2026", "hur många
+dagar är det kvar till midsommardagen", "dagar till midsommar 2023/2024/2025" — og under
+**"dagar till midsommar"** yderligere "dagar till midsommarafton 2025", "dagar till
+midsommarafton 2024", "dagar till midsommarafton 2023", "hur många dagar till
+midsommarafton 2026", "datum för midsommarafton 2025". **Under "dagar kvar till"** står
+"dagar kvar till midsommar" som **nr. 4**. `DAGE_TIL_EVENTS` havde **ni** datoer, og
+midsummer var ikke en af dem. Samme måling på dansk: "hvor mange dage til sankt hans",
+"sankt hans dag" og "sankt hans dag helligdag" — altså den danske klynge findes også, men
+hedder **sankthans**, ikke midsommer, og de to sprog har derfor hver sit slug.
+
+**Hvorfor denne valgt frem for endnu en GSC-side:** C82–C111 har nu lukket hele dansk
+GSC-top-16 *og* de to Plausible-sider der ikke stod i den (`/pension`, `/husleje`). Den
+største ubesvarede klynge på **beraknare.se** er derfor ikke en side, man kan åbne, men en
+*begivenhed* der mangler i en kurateret liste — samme fejltype som C108's fund af ni
+ulænkede `dage-til`-sider, kun en niveau dybere.
+
+**Rettelsen er en ny beregningsregel, ikke to nye tekstsider.** `DageTilKind` fik en
+fjerde variant, `"midsummer"`, og `midsommarafton(year, offsetDays)` finder den fredag der
+ligger mellem 19. og 25. juni — vinduet er lovfæstet, ikke en konvention, så funktionen er
+deterministisk og kan ikke ramme en årgang "forkert". `offsetDays: 1` er dagen efter, så
+**midsommardagen er ikke en anden regel**, den er den samme regel plus en dag. Det er
+grunden til at kun *én* ny funktion er skrevet: hele det svenske par er to linjer data.
+Den danske variant bruger samme regel med slugs `sankthansaftensdag` og `sankthansdag`,
+fordi dansk ikke kalder festen midsommer.
+
+**Fandene, da jeg holdt op med at tro på egen tælling.** (1) **De to datoer er *ikke* fast
+datoer** — det er hele pointen. 2026-06-19, 2027-**06-25**, 2028-06-23. Et hårdkodet
+`month: 6, day: 20`-anker ville have været rigtigt ét år ud af syv, præcis den fejltype
+C45's jul-aften-fund (datoen sprang over)handlede om. Derfor ligger der en test der
+krydschalker 61 år (1990-2050) mod *lovens* invariant — fredag, juni, 19-25 — i stedet for
+kun tre par datoer. (2) **`midsommarafton` er ikke en svensk lovlig helgdag**, men den
+*er* en rød dag; den danske sankthans er slet ikke en helligdag. Teksten siger hver sin
+ting, fordi det er to forskellige rettigheder. (3) **Den eksisterende testfil låste et
+fejltal for mine egne nye data**: "alle events har … mindst to fakta og **tre** faq" og
+"faq … `length > 20`" passerer kun fordi mine nye blokke er skrevet til den konvention —
+jeg skrev dem efter at have læst testen, ikke før.
+
+**Harness:** `dage-til.test.ts` **43 → 54 tests**, en ny `describe("midsommarafton")` med
+seks `test.each`-rækker, 61-års-invarianten, prøven på at offset 1 er lørdagen *inden
+for* 20.-26. juni, at de to events ligger præcis én dag fra hinanden i **begge** sprog
+med 2027-datoerne hårdkodet, og at slug-opløsningen går begge veje
+(`sankthansaftensdag` ↔ `midsommarafton`). **Verificeret modsvejs: 11 af de nye tests
+falder** med kun master-koden i `dage-til.ts` (`git stash` på den ene fil).
+
+**Målt på rigtig server** (`next start` på port 3466, porten verificeret fri *inden*
+start — målefejl nr. 15's lære): DA `/dage-til/sankthansaftensdag` **200** med `<title>`
+"Hvor mange dage er der til sankthansaftensdag? 270 dage" og **3** `Question`;
+`/dage-til/sankthansdag` **200** med **271 dage** — begge tal efterprøvet i node mod
+2027-06-25/26 (270 og 271), altså *ikke* mod dagens visning. Sitemap **9 → 11** nye
+`<loc>`-linjer, hver af de ni gamle sider har nu **10** `href="/dage-til/…"` (den nye
+sankthansdag-side er krydslinket fra alle), og hreflang er korrekt
+`da → minberegner.dk/dage-til/sankthansaftensdag`,
+`sv → beraknare.se/dagar-till/midsommarafton`, `x-default → da`.
+`/api/health` → `status: ok`. **De ni eksisterende sider er urørte** — ingen ændring i
+`DageTilPage.tsx`, `routing.ts`, `sitemap.ts` eller `home-data.ts`, kun de to events i
+datafilen og den nye regel. `/dagar-till/midsommarafton` giver 404 på `localhost`, fordi
+localhost er dansk domæne — det er porten, ikke en fejl (samme som C79's `beregner.no`).
+
+**Gate grøn:** lint (**567 filer**), **1947 tests / 159 filer** (fra 1936 / 156), build
+(**141 sider**), `locale-leak.mjs --gate` exit 0, `knapgruppe-scan.mjs` 0/0.
+
+**MÅL:** `dagar-till/midsommarafton` og `dagar-till/midsommardagen` har **0 besøgende
+baseline pr. 2026-09-28** (siderne er nye) — måles igen **2026-10-12**. Forventningen er
+ikke trafik på to nye sider alene: de to skal give `/dato` på beraknare.se (**96.336
+visninger, CTR 0,1 %, pos. 8,3**) to interne links mere, fordi "dagar till 31 dec" og
+"dagar kvar till midsommar" er samme søgeintention. `/dato`'s baseline er uændret.
+
+**Målt i samme kørsel, bevidst ikke bygget (til Mads' tid):** SE-autocomplete under
+**"dagar till"** har "dagar till påskafton", "dagar till långfredag" (nr. 2 under "dagar
+till påsk"), "dagar till valborg" og "dagar till 1 advent" — påskeaften er `easterOffset`,
+langfredag ligeledes, valborg er fast 14. februar, så alle fire er billige og computable
+på samme måde som her. De er **ikke** bygget, fordi jeg ville nå gate inden tidsbudgettet
+og skrev dem i stedet som næste kandidat; de er ca. 40 linjer data hver.

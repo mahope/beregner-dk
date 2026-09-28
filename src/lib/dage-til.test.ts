@@ -10,6 +10,7 @@ import {
   getDageTilSlugs,
   getNextAnchorDate,
   isDageTilLocale,
+  midsommarafton,
   resolveDageTilSlug,
 } from "./dage-til";
 
@@ -34,6 +35,78 @@ describe("easterSunday", () => {
     for (let year = 1990; year <= 2050; year++) {
       expect(easterSunday(year).getUTCDay()).toBe(0);
     }
+  });
+});
+
+describe("midsommarafton", () => {
+  test.each([
+    [2024, "2024-06-21"],
+    [2025, "2025-06-20"],
+    [2026, "2026-06-19"],
+    [2027, "2027-06-25"],
+    [2028, "2028-06-23"],
+    [2030, "2030-06-21"],
+  ])("midsommarafton i %i er %s", (year, expected) => {
+    expect(toISO(midsommarafton(year))).toBe(expected);
+  });
+
+  test("er altid en fredag mellem 19. og 25. juni", () => {
+    for (let year = 1990; year <= 2050; year++) {
+      const date = midsommarafton(year);
+      expect(date.getUTCDay()).toBe(5);
+      expect(date.getUTCMonth()).toBe(5);
+      expect(date.getUTCDate()).toBeGreaterThanOrEqual(19);
+      expect(date.getUTCDate()).toBeLessThanOrEqual(25);
+    }
+  });
+
+  test("offset 1 er lørdagen efter, altså midsommardagen", () => {
+    for (let year = 2024; year <= 2032; year++) {
+      const dag = midsommarafton(year, 1);
+      expect(dag.getUTCDay()).toBe(6);
+      expect(dag.getTime() - midsommarafton(year).getTime()).toBe(dayMs);
+      expect(dag.getUTCDate()).toBeGreaterThanOrEqual(20);
+      expect(dag.getUTCDate()).toBeLessThanOrEqual(26);
+    }
+  });
+
+  test("de to events ligger præcis én dag fra hinanden i begge sprog", () => {
+    const afton = DAGE_TIL_EVENTS.find((e) => e.id === "midsommarafton");
+    const dagen = DAGE_TIL_EVENTS.find((e) => e.id === "midsommardagen");
+    expect(afton).toBeDefined();
+    expect(dagen).toBeDefined();
+    for (const locale of ["da", "se"] as const) {
+      const fra = getNextAnchorDate(afton!.anchor[locale], iso("2027-01-15"));
+      const til = getNextAnchorDate(dagen!.anchor[locale], iso("2027-01-15"));
+      expect((til.getTime() - fra.getTime()) / dayMs).toBe(1);
+      expect(toISO(fra)).toBe("2027-06-25");
+      expect(toISO(til)).toBe("2027-06-26");
+    }
+  });
+
+  test("begge sprog har deres eget slug med sit eget spørgsmål", () => {
+    const afton = DAGE_TIL_EVENTS.find((e) => e.id === "midsommarafton");
+    const dagen = DAGE_TIL_EVENTS.find((e) => e.id === "midsommardagen");
+    expect(getDageTilSlugs("da")).toContain("sankthansaftensdag");
+    expect(getDageTilSlugs("da")).toContain("sankthansdag");
+    expect(getDageTilSlugs("se")).toContain("midsommarafton");
+    expect(getDageTilSlugs("se")).toContain("midsommardagen");
+    expect(getDageTilEventBySlug("midsommarafton", "se")?.id).toBe("midsommarafton");
+    expect(getDageTilEventBySlug("sankthansaftensdag", "da")?.id).toBe("midsommarafton");
+    for (const event of [afton!, dagen!]) {
+      for (const locale of ["da", "se"] as const) {
+        expect(event[locale].copy.question).toContain(event[locale].copy.short);
+      }
+    }
+  });
+
+  test("et dansk slug på beraknare.se løser til den svenske side, og omvendt", () => {
+    expect(resolveDageTilSlug("sankthansaftensdag", "se")?.localeSlug).toBe(
+      "midsommarafton"
+    );
+    expect(resolveDageTilSlug("midsommarafton", "da")?.localeSlug).toBe(
+      "sankthansaftensdag"
+    );
   });
 });
 
