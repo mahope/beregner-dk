@@ -7874,7 +7874,7 @@ landmark=lån, piggybank=opsparing osv.).
   **Ingen af dem er `DEPLOY-MISSING`:** de er merge-tidligere end 17:30-vinduet 27/9 og
   er dermed dækket af de 21 verificerede noters batch.
 
-### ⏳ **VERIFICÉR DEPLOY: C99 — `/fart` svarer på "beregn tid ud fra hastighed og distance" med tre regnestykker, tempo-tabellen (8-30 km/t) og time/minut-fælden (4.570 v, CTR 0,6 %, pos. 7,1).** Kode + plan i ét commit på `ceo/fart-tid-ud-fra-fart`, merge til `master` 2026-09-28 ca. 13:55. Første kandidatvindue **2026-09-28 17:30**. Verificér ved **indhold** (HTTP 200 beviser intet — ændringen er ny brødtekst og to `faqItems`):
+### ⏳ **VERIFICÉR DEPLOY: C99 — `/fart` svarer på "beregn tid ud fra hastighed og distance" med tre regnestykker, tempo-tabellen (8-30 km/t) og time/minut-fælden (4.570 v, CTR 0,6 %, pos. 7,1).** Kode + plan i ét commit `61aa552` på `ceo/fart-tid-ud-fra-fart`, fast-forwardet til `master` og pushet 2026-09-28 13:47. Første kandidatvindue **2026-09-28 17:30**. Verificér ved **indhold** (HTTP 200 beviser intet — ændringen er ny brødtekst og to `faqItems`):
    1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
    2. `curl -s https://minberegner.dk/fart | sed 's/<!-- -->//g'` skal finde **"Sådan beregner du tid ud fra hastighed og distance"**, **"300 km ÷ 100 km/t = 3 timer"**, **"100 km ÷ 2 timer = 50 km/t"**, **"50 km/t × 2 timer = 100 km"**, **"ikke 3 minutter"** og **"Fart og tempo er ikke det samme"**.
    3. `sed`-trinnet er ikke valgfrit — React skriver `<!-- -->` mellem tekstnoder (målefejl nr. 16).
