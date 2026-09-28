@@ -7849,11 +7849,11 @@ landmark=lån, piggybank=opsparing osv.).
     - Gate grøn: lint ok, 280/280 tests, build ok (128 pages).
 
 ## VERIFICÉR DEPLOY-log
-### ⏳ **VERIFICÉR DEPLOY: C105 — forside-kataloget har alle 30 manglende danske beregnere, popular-rækken er 14 kort, og `/laaneberegner` ligger i "Lån".** Kode + plan i ét commit på `ceo/forside-katalog-og-popular`, fast-forwardet til `master` og pushet 2026-09-28 17:40. Første kandidatvindue **2026-09-28 21:30** (17:30-vinduet var ikke kørt færdig, da denne note blev skrevet). Kun `daCalculators` + fire tests i `home-data.test.ts` er rørt — ingen beregningslogik, ingen anden side, ingen anden locale. Verificér ved **indhold, ikke HTTP 200**:
+### ⏳ **VERIFICÉR DEPLOY: C105 — forside-kataloget har alle 30 manglende danske beregnere, popular-rækken er 14 kort, og `/laaneberegner` ligger i "Lån".** Kode + plan i ét commit `4bd1ef1` på `ceo/forside-katalog-og-popular`, fast-forwardet til `master` og pushet **2026-09-28 16:53**. Første kandidatvindue **2026-09-28 17:30** (den batch var ikke kørt, da denne note blev skrevet). Kun `daCalculators` + fire tests i `home-data.test.ts` er rørt — ingen beregningslogik, ingen anden side, ingen anden locale. **Målt på rigtig server før merge** (`next start` på port 3423, porten verificeret fri inden start): forside-HTML 264 KB → 347 KB, **64 → 94** unikke interne `href`, popular-gitteret **præcis 14 kort i målt rækkefølge** (`/dato, /bmi, /boligstoette, /kvadratmeter, /rentefradrag, /tidsberegner, /kalorier, /braendstof, /barselsdagpenge, /husleje, /renteberegner, /boernepenge, /pension, /loen-efter-skat`), `/laaneberegner` på position 53.705 mellem `<h2>Lån</h2>` (52.055) og `<h2>Sundhed</h2>` (57.851), og tallene **"79+ gratis beregnere"** + **"79 beregnere"** ×2. Verificér på live ved **indhold, ikke HTTP 200**:
     1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
     2. `curl -s https://minberegner.dk/` skal finde **"Promilleberegner"**, **"Brøkberegner"**, **"Fartberegner"**, **"Nedtælling"**, **"Elbil vs. benzinbil"** og **"Befordringsfradrag"** — hver mindst 1 gang. Før: 0 fund på de fire første.
     3. Tallet i heroen og i `meta description` skal være **79** (før 49): `curl -s https://minberegner.dk/ | grep -o '79+ gratis beregnere' | head -1`.
-    4. `/laaneberegner` skal stå under `<h2>Lån</h2>` i markupken (før: under Økonomi) — find positionen af `<h2>Lån</h2>` og af "Låneberegner" og kræv at den sidste ligger efter den første.
+    4. `/laaneberegner` skal stå under `<h2>Lån</h2>` i markupken (før: under Økonomi) — find positionen af `<h2>Lån</h2>` og af "Låneberegner" og kræv at den sidste ligger mellem den første og `<h2>Sundhed</h2>`.
     5. `curl -s https://beraknare.se/` skal være **uændret** — den svenska forside er ikke rørt, så de 30 nye kort må **ikke** stå der.
 
 ### ⏳ **VERIFICÉR DEPLOY: C104 — `/bmi` svarer på "bmi skala" med rettet `<h2>` ("BMI-skala for voksne ifølge WHO" / "BMI-skala för vuxna enligt WHO") og "bmi skala" i `keywords` i begge sprog.** Kode + plan i ét commit på `ceo/bmi-skala-fald-diagnose`, fast-forwardet til `master` og pushet 2026-09-28 16:35. Første kandidatvindue **2026-09-28 17:30**. Kun to `<h2>`-strenge og to `keywords`-array i `page-data.ts` er rørt — ingen beregningslogik, ingen FAQ, ingen anden side. Verificér ved **indhold, ikke HTTP 200**:
@@ -12763,7 +12763,15 @@ skal måle igen for at ændre den.
 2026-10-12.
 
 **Gate:** lint (560 filer), **1.856 tests / 154 filer**, build (141 sider),
-`locale-leak.mjs --gate` exit 0, `knapgruppe-scan.mjs` 0/0.
+`locale-leak.mjs --gate` exit 0, `knapgruppe-scan.mjs` 0/0. Målt på rigtig server
+før merge: se VERIFICÉR DEPLOY-loggen for C105. Kode `4bd1ef1`.
+
+**Målefejl nr. 22 (min egen, under den lokale måling):** jeg målte "kort i
+popular-sektionen" som 79, fordi mit segment løb fra popular-`<h2>` til
+"Hvorfor bruge" — og hele katalogafsnittene ligger *inden* for det. Den rigtige
+grænse er det første kategori-`<h2>` (position 27.068), og så er tallet **14**.
+Samme klasse som C79's "vakuum-grøn"-grep: et snit, der slutter for sent, ser
+alle kort og finder ingen fejl.
 
 #### 132. [x] FÆRDIG 2026-09-28 — C102 — `/blog/boernepenge-2026-satser-og-regler` svarer på de ni spørgsmål sin egen søgeklynge stiller: tolv udbetalingsdatoer med ugedag, de tre weekendflytninger, pr.-måned-omregningen og beløb for flere børn
 
