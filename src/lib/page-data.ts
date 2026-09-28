@@ -3,6 +3,12 @@ import { BARSEL_2026, SU_2026 } from "./satser-2026";
 import { SOLCELLE_LEVETID_AAR_MAX, SOLCELLE_LEVETID_AAR_MIN } from "./energi/solceller";
 import { BRAENDSTOF_EGENT_FORBRUG, BRAENDSTOF_EKSEMPEL_KM, BRAENDSTOF_FORUDSETNINGER, besparelseProcent, braendstofEksempelRækker, breakEvenKwhPris, elbilSammenligning, heleKroner, literPr100km, prisPrKm, procent1Decimals } from "./braendstof";
 import { HUSLEJE_EKSEMPEL, HUSLEJE_STANDARD } from "./husleje";
+import {
+  NETTOPRISINDEKS_2026M08,
+  FORBRUGERPRISINDEKS_2026M08,
+  NETTOPRISINDELS_MAANED,
+  beregnHuslejestigning,
+} from "./nettoprisindeks";
 import { estimerNettoMaaned } from "./barsel/netto";
 import { PROMILLE_EKSEAMPLER, formatPromille, formatTimer } from "./promille-eksempler";
 
@@ -39,6 +45,12 @@ const kr = (value: number) => value.toLocaleString("da-DK");
 // HUSLEJE_STANDARD, som også er beregnerens starttilstand. Det er samme
 // regnestykke, og derfor kan siden og værktøjet ikke glide fra hinanden.
 const huslejeSvaer = `Tjener du ${kr(HUSLEJE_STANDARD.maanedligNettoLoen)} kr netto → max ca. ${kr(HUSLEJE_EKSEMPEL.maxBoligudgifter)} kr/md (30% reglen)`;
+
+// ─── /husleje — nettoprisindeks. FAQ'en lover beløb, så beløbene skrives fra
+// samme modul som siden bruger: en procent, der er kopieret ind i en sætning,
+// kan ikke holde, når Danmarks Statistik offentliggør en ny måned.
+const krH = (value: number) => value.toLocaleString("da-DK");
+const npiPct = (pct: number) => pct.toLocaleString("da-DK");
 
 // ─── /braendstof — de tal, FAQ'en lover, udledt af de samme forudsætninger som
 // sammenligningstabellen. Den gamle "50-70 %" holdt kun mod benzin (52,8 %)
@@ -1623,7 +1635,7 @@ const daPages: Record<string, PageData> = {
       description: `Hvad har du råd til i husleje? ${huslejeSvaer}. Beregn dit huslejebudget ud fra din indkomst og udgifter. Gratis beregner.`,
       metaTitle: "Husleje Budget Beregner - Hvad har du råd til?",
       metaDescription: `Hvad har du råd til i husleje? ${huslejeSvaer}. Beregn dit huslejebudget ud fra din indkomst og udgifter. Gratis beregner.`,
-      keywords: ["husleje beregner", "hvad har jeg råd til i husleje", "husleje budget", "30% reglen husleje", "bolig budget", "lejlighed budget", "hvad må husleje koste"],
+      keywords: ["husleje beregner", "hvad har jeg råd til i husleje", "husleje budget", "30% reglen husleje", "bolig budget", "lejlighed budget", "hvad må husleje koste", "nettoprisindeks husleje beregner", "nettoprisindeks", "pristalsregulering husleje", "hvad koster en gennemsnitlig husleje", "huslejestigning"],
       ogTitle: "Husleje Budget Beregner - Find din max husleje",
       ogDescription: "Beregn hvor meget du kan bruge på husleje. Baseret på din indkomst og udgifter.",
       category: "Bolig",
@@ -1640,6 +1652,9 @@ const daPages: Record<string, PageData> = {
       { question: "Er det bedre at leje eller købe?", answer: "Det afhænger af din situation. Leje giver fleksibilitet, køb opbygger formue. Som tommelfingerregel: Hvis du bliver 5+ år, kan køb ofte betale sig." },
       { question: "Hvad er typiske boligudgifter ud over husleje?", answer: "El (ca. 300-600 kr/md), internet (ca. 300 kr/md), indboforsikring (ca. 100-200 kr/md). Varme og vand er ofte a conto i huslejen." },
       { question: "Hvor kommer arealet fra?", answer: "I beregningen af husleje pr. m² kan du slå din adresse op, så henter vi boligens areal fra BBR (Bygnings- og Boligregistret) via Datafordeleren. For lejligheder bruges den konkrete lejligheds areal. Arealet i lejekontrakten kan afvige, så du kan altid rette tallet. Vi gemmer ikke adressen." },
+      { question: "Hvor meget stiger huslejen efter nettoprisindekset?", answer: `Nettoprisindekset steg ${npiPct(NETTOPRISINDEKS_2026M08.aarsVaeksningPct)} % i ${NETTOPRISINDELS_MAANED}, så en husleje på 8.000 kr stiger med ${krH(beregnHuslejestigning(8000, NETTOPRISINDEKS_2026M08.aarsVaeksningPct).stigning)} kr til ${krH(beregnHuslejestigning(8000, NETTOPRISINDEKS_2026M08.aarsVaeksningPct).efter)} kr om måneden. Nettoprisindekset er forbrugerprisindekset uden moms, told og afgifter — det er derfor tallet er lavere end forbrugerprisindeksets ${npiPct(FORBRUGERPRISINDEKS_2026M08.aarsVaeksningPct)} %. Kilde: Danmarks Statistik PRIS04 og PRIS01, offentliggjort 10. september 2026.` },
+      { question: "Hvad er forskellen på pristalsregulering og nettoprisindeks?", answer: `Pristalsregulering er den lovpligtige årlige justering, lejeaftalen typisk indeholder, og den følger forbrugerprisindekset, der indeholder moms og afgifter — ${npiPct(FORBRUGERPRISINDEKS_2026M08.aarsVaeksningPct)} % i ${NETTOPRISINDELS_MAANED}. Nettoprisindekset er samme prisudvikling uden de indirekte afgifter — ${npiPct(NETTOPRISINDEKS_2026M08.aarsVaeksningPct)} % — og det er huslejenævnets grundlag for de frivillige forhøjelser ud over pristallet. Står der blot "huslejen reguleres efter pristallet" i din lejeaftale, er det pristallet der gælder.` },
+      { question: "Hvem fastsætter huslejestigningen — huslejenævnet eller udlejeren?", answer: `Selve huslejestigningen aftales mellem dig og udlejeren, men huslejenævnet fastsætter den endelige sats for hvert område, og det er den sats der gælder. Beregneren her kan derfor ikke sige, hvad din husleje bliver næste år — den viser, hvad du har til rådighed i dag. Er din husleje steget mere end din aftale tillader, kan du gøre ind på det over for udlejeren.` },
       ],
     },
     "andelsbolig": {

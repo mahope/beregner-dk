@@ -1,3 +1,6 @@
+STATUS: KØ — **C111 er landet: `/husleje` er Plausible's tolvte mest besøgte danske side (170 besøgende/28d, +25 %) og svarede på nul af hele prisindeks-klyngen: 0 forekomster af "nettoprisindeks", 0 af "huslejenævn", 0 af "pristalsregulering" — selv om DA-autocomplete har "nettoprisindeks husleje beregner" som nr. 3 under "husleje beregner".** Opgaven lå med "kræver Danmarks Statistik som kilde", og to tidligere iterationer har været kilde-blokeret af samme årsag (opgave 119, C95) — **men kildefælden viste sig at være en forkert URL, ikke en lukket kilde**: `dst.dk/da/Statistik/emner/priser-og-prisindekser/nettoprisindeks` giver 404, mens *kildens egen indeksside* `dst.dk/da/Statistik/emner` svarer 200 og linker til den rigtige sti, og `api.statbank.dk/v1/data/PRIS04/CSV` svarer 200 med alle tal. Det er **målefejl nr. 20 (min egen)**: fire gættede URL'er, fire 404, og så konkluderede jeg at kilden var utilgængelig. **Læren er skrevet ind i opgaven, så næste iteration ikke gentager den.** Rettelsen (kun `da`): et nyt `<h2>` med regnestykket 8.000 × 2,9 % = 232 → 8.232, en tabel der skelner pristal (2,0 % → 8.160) fra nettopris (2,9 % → 8.232) fra DST's egen huslejegruppe (2,6 % → 8.208) på *samme* husleje, kvartalsgennemsnittet huslejenævnet bruger (2,5 %, altså 32 kr. mindre end månedsstigningen), og en `<h3>` der siger at huslejenævnet — ikke beregneren — fastsætter satsen pr. område. **Tre nye FAQ-par** (JSON-LD 7 → 10 på rigtig server). Nyt modul `nettoprisindeks.ts` holder DST's tal *og* deres rå StatBank-strenge ved siden af de parsede tal, låst i en test, og `kvartalsgennemsnit()` returnerer bevidst `null` for 2026K3 fordi DST endnu ikke har udgivet september. **Tre fund i min egen kode, alle fundet fordi jeg renderer siden og læser den:** `formatCurrency` sætter allerede "kr." på (min version gav "8.232 kr. kr" i hele tabellen), min test havde en forkert forventning på sammenligningskvartalet, og `Intl.NumberFormat` indsætter et non-breaking space som min whitespace-normalisering spiste. `huslejenaevnet.dk` svarer HTTP 500 fra loopet, så **ingen sats fra huslejenævnet er skrevet**. Gate grøn: lint (567 filer), **1936 tests / 159 filer** (fra 1919/156), build (141 sider), `locale-leak.mjs --gate` exit 0, `knapgruppe-scan.mjs` 0/0. Målt på rigtig server (port 3455): 200, alle 20 strenge, begge kildelinks, JSON-LD 10. Kode + plan i ét commit `83d38a6` på `master`, pushet 2026-09-28 19:57; se opgave 141. **MÅL:** `/husleje` baseline 170 besøgende/28d, bounce 4 %, pr. 2026-09-28 — måles igen 2026-10-12.
+
+---
 STATUS: KØ — **C110 er landet: `/pension` er Plausible's trettende mest besøgte danske side (139 besøgende/28d, +24 %) og svarede på nul af den klynge, dens egen søgeord danner — DA-autocomplete har "pensionsberegner excel" som variation nr. 7 under "pension beregner", mens siden havde 0 forekomster af "excel" og 0 af "formel".** Køen havde ingen `I GANG`-opgave (119 er kilde-blokeret, 97 er `BLOCKED` og 98 afhænger af den), og C106, C108 og C109 har alle første vindue **21:30** — det var 19:21, så ingen af dem kunne verificeres. **Valget kom af at gå en anden vek end C82–C109 alle gjorde:** mål **Plausible's** top-15, ikke GSC's top-16, fordi `/pension` netop *ikke* står i GSC-listen (den er under visningstællingen) — præcis C103's lære, da man kun måler den ene liste, holder man de hurtigst voksende sider ude. De to aldrig-rørte kandidater var `/husleje` (170) og `/pension` (139); **`/husleje` blev målt forbi** med en begrundelse, der står nedenfor, fordi dens største klynge ("nettoprisindeks husleje beregner", autocomplete nr. 3, siden har 0 forekomster) kræver Danmarks Statistiks officielle nettoprisindeks som kilde. **Rettelsen (kun `da`):** et nyt `<h2>` "Beregn din pension i Excel" med fire formler — inklusive den nedsættelsesformel, som siden hidtil kun beskrev i prosa — plus et fuldt regnestykke, de tre fælder der giver de forkerte tal (semiklon, `MAKS(0;…)` inde i parentesen, `MIN` med) og **tre nye FAQ-par** (JSON-LD 8 → **11**). **Ingen tal står hårdkodet to steder:** den nye `folkepensionMedFormel()` i `folkepension.ts` er samme regel som `beregnFolkepension2026` skrevet *uden* `bortfaldOver`, fordi `MIN(tillæg; …)` aldrig kan give mere end hele tillægget — så side, formel og værktøj ikke kan glide fra hinanden, og en test krydschecker dem i 66 kombinationer. **Den rigtige fejl, fundet ved at køre formlen mod modulet FØR jeg skrev tekst:** min første formel lagde `MAKS(0;…)` om det *samlede* beløb i stedet om nedsættelsen, så den gav **46.925,80** mod modulets **16.273** ved 0 kr indkomst — en formel der ligner rigtig og er 2,9 × for høj. **Og et svar, klyngen ikke har, fundet ved at regne:** pensionstillægget forsvinder ved **127.449 kr** (enlig) og **212.759 kr** (gift uden pensionist) — ikke ved bortfaldsgrænsen 438.380 kr, som er det tallet de fleste sider nævner. **Tre ting jeg bevidst ikke hævder:** ingen ubekræftede danske Excel-funktionsnavne, intet ATP-tal (aldersafhængigt og ikke i modulet), og FAQ'en siger "for enlige" — ikke "enkemand", som modulet ikke skelner på. **Harness:** `folkepension.test.ts` **26 → 32**, `pension/page.test.tsx` **ny med 9** (inkl. svensk lås på 0 danske markører), **modsvejs verificeret: alle 4 danske sidetests falder** med master-koden. **Målt på rigtig server** (port 3431 verificeret fri inden start): DA 200 med alle otte strenge og FAQ-JSON-LD 11, SE med 0 danske markører. Gate grøn: lint (**562 filer**), **1899 tests / 156 filer** (fra 1884 / 154), build (**141 sider**), `locale-leak.mjs --gate` exit 0 uændret 117/85/32 med 0 ureviewet, `knapgruppe-scan.mjs` 0/0. **Iterationens pligt først:** fire deploy-noter (C102–C105) havde åbne ⏳-markører, selv om en tidligere konsolideret note havde lukket dem — markørerne var glemt, så de blev **gen-målt på live og lukket ved indhold**, ikke markeret væk. Kode + plan i ét commit på `ceo/pension-excel`; se opgave 140. **MÅL:** `/pension` baseline **139 besøgende/28d, bounce 5 % pr. 2026-09-28** — måles igen 2026-10-12.
 
 ---
@@ -7866,6 +7869,15 @@ landmark=lån, piggybank=opsparing osv.).
 
 ## VERIFICÉR DEPLOY-log
 
+### ⏳ **VERIFICÉR DEPLOY: C111 — `/husleje` svarer på "nettoprisindeks husleje beregner" med DST's egne tal, pristal-mod-nettopris-tabellen og huslejenævnets rolle (170 besøgende/28d, +25 %).** Kode + plan i ét commit på `ceo/husleje-nettoprisindeks`. Kun `src/lib/nettoprisindeks.ts` (**ny**), `src/components/HuslejeNettoprisindeks.tsx` (**ny**), ét `<HuslejeNettoprisindeks />`-kald i `src/app/husleje/page.tsx` (kun `locale === "da"`), tre `faqItems` + fire keywords i `page-data.ts` og tre testfiler er rørt — **`husleje.ts` urørt, ingen eksisterende beregning ændret, `HuslejeBudgetBeregner`/`HuslejePrKvm` urørt, `se` og `no` urørt**. Verificér ved **indhold, ikke HTTP 200**:
+- på `https://minberegner.dk/husleje` skal findes `<h2 id="nettoprisindeks-husleje">Hvor meget stiger huslejen efter nettoprisindekset?</h2>` og overskrifterne "Pristalsregulering og nettoprisindeks er ikke det samme" samt "Nettoprisindekset for kvartalet — den huslejenævnet bruger"
+- brødteksten skal have **2,9 %**, **2 %**, **2,6 %**, **8.232**, **8.160**, **8.208**, **72** (forskellen mellem pristal og nettopris) og **2,5 %** (kvartalsgennemsnittet), samt sætningen "3. kvartal 2026 er endnu ikke færdigt"
+- JSON-LD'en skal have **10** spørgsmål (var 7), og de tre nye skal være "Hvor meget stiger huslejen efter nettoprisindekset?", "Hvad er forskellen på pristalsregulering og nettoprisindeks?" og "Hvem fastsætter huslejestigningen — huslejenævnet eller udlejeren?"
+- begge kildelinks skal være i HTML'en: `https://www.statistikbanken.dk/PRIS04` og `https://www.statistikbanken.dk/PRIS01`
+- `https://beraknare.se/husleje` skal fortsat have **0** af strengene `nettoprisindeks`, `nettoprisindeks-husleje` og `pristalsregulering` — den svenske side er bevidst urørt
+Se `#### 141` i opgavelisten.
+
+
 ### ✅ `DEPLOY OK 2026-09-28 19:25` — **fire deploy-noter lukket ved indholdskontrol: C102, C103, C104 og C105.** Deres ⏳-markører stod stadig åbne, selv om en tidligere konsolideret note (18:05) havde lukket dem — dvs. *markørerne* var glemt, ikke verificeringen. Denne iteration gen-gjorde målingen på live for alle fire, fordi en note kun må lukkes på det, der faktisk står at læse. Målt 19:22-19:25 mod begge domæner, `/api/health` svarede `status: ok`:
 
 | Note | Side | Bevis på live (ikke HTTP 200) |
@@ -13166,34 +13178,121 @@ visninger. Forventningen er højere CTR på de positioner siden allerede har.
 
 ---
 
-#### 141. [ ] KØ — `/husleje` svarer på "nettoprisindeks husleje beregner" (autocomplete nr. 3) — **kræver Danmarks Statistik som kilde**
+#### 141. [x] FÆRDIG 2026-09-28 — C111 — `/husleje` svarer på "nettoprisindeks husleje beregner" (autocomplete nr. 3) med DST's egne tal, pristal mod nettopris, kvartalsgennemsnittet og huslejenævnets rolle
 
-- **Datagrund:** `/husleje` er Plausible's **tolvte** mest besøgte danske side (**170
-  besøgende/28d, +25 %, bounce 4 %**) og står, ligesom `/pension`, **ikke** i GSC's top-16.
-  DA-autocomplete (19:24) under **"husleje beregner"** har 10 variationer hvoraf **nr. 3 er
-  "nettoprisindeks husleje beregner"** (og nr. 4 "nettoprisindeks husleje beregner 2025",
-  nr. 6 "… 2026"); under **"husleje pris"** ligger "husleje prisindeks", "husleje prisstigning",
-  "**pristalsregulering husleje**", "pristalsreguleret husleje" og "prisregulering husleje".
-  Den server-renderede side har **0** forekomster af "nettoprisindeks" og **0** af
-  "huslejenævn". Altså hele prisindeks-klyngen — som er *grunden til* huslejen stiger — er
-  ubesvaret.
-- **Hvorfor den ligger og ikke er bygget nu:** den kræver det **officielle
-  nettoprisindeks for det aktuelle kvartal** som kilde. Uden den ville jeg skrive et tal
-  på en huslejestigning, og det er præcis den fejlklasse Fase 3 forbyder (samme
-  discipline som opgave 119 og C95's boligsikring). **Mål først:** hent
-  `Danmarks Statistik`'s nettoprisindeks-tabel, og tjek om den kan hentes fra loopet. Kan
-  den, bliver opgaven: ét `<h2>` med den aktuelle sats, et regnestykke på en konkret
-  lejeaftale (hvor meget stiger huslejen ved denne regulering), et `<h3>` der skelner mellem
-  **pristalsregulering** (årlig, lovpligt) og **nettoprisindeks** (den vi ser i aviserne),
-  et `<h3>` med huslejenævnets rolle, og FAQ-par. Kan den ikke, bliver den kilde-blokeret på
-  samme måde som 119.
-- **Målt i samme kørsel, ikke bygget (til Mads' tid):** under **"husleje"** ligger
-  "huslejenævnet" som **nr. 1** og "huslejestigning privat udlejning" som **nr. 6**, og under
-  **"hvad koster en gennemsnitlig husleje"** ligger "hvad koster husleje i københavn",
-  "… i aarhus" og "… på strøget". Siden har **0** forekomster af "gennemsnitlig" og **0** af
-  "huslejenævn". Den første af de to kan besvares *uden* kilde — gennemsnitlig dansk
-  huslejepr. m² — hvis tallet findes i BBR's offentlige statistik; den anden kræver
-  huslejenævnets egne afgørelser, som er kommunale og spredte.
+**Datagrund:** `/husleje` er Plausible's **tolvte** mest besøgte danske side (**170
+besøgende/28d, +25 %, bounce 4 %**) og står, ligesom `/pension`, **ikke** i GSC's top-16.
+DA-autocomplete (19:24) under **"husleje beregner"** har 10 variationer hvoraf **nr. 3 er
+"nettoprisindeks husleje beregner"** (og nr. 4 "… 2025", nr. 6 "… 2026"); under **"husleje
+pris"** ligger "husleje prisindeks", "husleje prisstigning", "**pristalsregulering husleje**"
+og "prisregulering husleje". Den server-renderede side havde **0** forekomster af
+"nettoprisindeks", **0** af "huslejenævn" og **0** af "pristalsregulering" — hele
+prisindeks-klyngen, som er *grunden til* at huslejen stiger, var ubesvaret.
+
+**Kildefælden var ikke reel — den var en forkert URL.** Opgaven lå med "kræver Danmarks
+Statistik som kilde", og to tidligere iterationer har været **kilde-blokeret af samme
+årsag** (opgave 119, C95's boligsikring). Målingen viser at blokeringen lå i *den
+forespørgsel*, ikke i adgangen: `dst.dk/da/Statistik/emner/priser-og-prisindekser/
+nettoprisindeks` svarer **404**, `.../forbrugerpriser-og-prisindekser` **404**,
+`.../PRIS/PRIS111` **404**, `statistikbanken.dk/.../DataReader.aspx` **000**. Men
+`curl www.dst.dk/da/Statistik/emner` **200** og indeholder linken
+`/da/Statistik/emner/oekonomi/prisindeks/nettoprisindeks` — den rigtige sti. Og helt
+afgørende: **`api.statbank.dk/v1/data/PRIS04/CSV` svarer 200** med alle tal. Målefejl
+nr. 20 (min egen): jeg testede fire URL'er jeg havde gættet og konkluderede "kilden er
+utilgængelig" — den klassiske fejl, hvor en 404 på en gættet sti læses som en død kilde.
+**Læren: læs kildens egen indeksside, før du erklærer den lukket.**
+
+**Rettelsen (kun `da`):** et nyt `<h2>` **"Hvor meget stiger huslejen efter
+nettoprisindekset?"** med regnestykket **8.000 kr × 2,9 % = 232 kr → 8.232 kr**, en
+`<h3>` der skelner **pristalsregulering fra nettoprisindeks** i en *tre-rækkers tabel med
+samme husleje i alle tre*: nettopris 2,9 % → 8.232, forbrugerpris 2,0 % → 8.160, DST's
+egen "Faktisk husleje" 2,6 % → 8.208, og forskellen (**72 kr.**) gjort eksplicit til "ikke
+en fejl, men netop forskellen på de to indekser"; en `<h3>` med
+**kvartalsgennemsnittet** som huslejenævnet bruger (2. kvartal 2026 = 2,5 % over 2.
+kvartal 2025 → 200 kr., altså **32 kr. mindre** end månedsstigningen); og en `<h3>` der
+placerer **huslejenævnet** og siger, at siden ikke kan love en sats. Plus **tre nye
+FAQ-par**, som dermed også kommer i JSON-LD'en (målt **7 → 10** på rigtig server).
+
+**Ingen tal står hårdkodet to steder.** Nyt modul `src/lib/nettoprisindeks.ts` holder
+DST's publicerede tal *og* deres rå StatBank-strenge (`"2,90"`, `"103,50"`) ved siden af
+de parsede tal, så en redigering i den ene uden den anden er en ubevidst løgn — låst i en
+test. Alle beløb på siden og i FAQ'en kommer fra `beregnHuslejestigning(8000, pct)`.
+Samme krav som C84's `metaDescription`-fund, C94's `literPr100km()`-kobling og C110's
+`folkepensionMedFormel()`. **`kvartalsgennemsnit()` returnerer bevidst `null` for
+2026K3**, fordi DST endnu ikke har udgivet september 2026 (det sker 2026-10-08) — et
+to-måneders gennemsnit ville undervurdere stigningen, så siden viser det seneste *fulde*
+kvartal og siger det i teksten.
+
+**Den faglige skelnen, der er selve pointen:** nettoprisindekset er **2,9 %**, mens DST's
+egen gruppe "04.1.1 Faktisk husleje betalt af lejere for primær bolig" er **2,6 %**. Det er
+ikke en fejl, men to forskellige ting, og kun den første er det folk læser i aviserne.
+Siden viser dem begge og siger, at huslejegruppen ligger under hovedtallet. **Den anden
+modsætning** er pristal mod nettopris: pristalsreguleringen følger *forbrugerprisindekset*
+(2,0 %), som indeholder moms og afgifter, mens huslejenævnets frivillige forhøjelser
+følger nettoprisindekset (2,9 %). Siden siger eksplicit at man **ikke** kan regne huslejen
+herfra, fordi huslejenævnet fastsætter satsen pr. område.
+
+**Fund, der lå i vejen.** (1) **`formatCurrency` sætter allerede "kr." på** — min første
+version skrev `{kr(x)} kr` og gav "8.232 kr. kr" i **hele** tabellen. Fundet fordi testen
+læste den server-renderede tekst. C84's fejlklasse igen, nu med formateringen. (2) **Min
+egen test havde en forkert forventning** (skrev "1. kvartal 2025" som sammenligningskvartal;
+2. kvartal 2026 skal sammenlignes med 2. kvartal **2025**). Testen var skrevet efter en
+antagelse, ikke efter siden — samme fejltype som C100's. (3) **`Intl.NumberFormat` med
+currency indsætter et non-breaking space** mellem tal og "kr.", så testens
+whitespace-normalisering spiste den og ingen beløb kunne findes. Alle tre fund er ærlige
+målefejl i min egen kode, fundet fordi jeg renderer siden og læser den.
+
+**Kildeført:** DST's egne tabeller, hentet 2026-09-28 19:50 via
+`api.statbank.dk/v1/data/PRIS04/CSV` (`VAREGR=000005,04110&ENHED=100,300`) og
+`PRIS01/CSV` (`VAREGR=000000&ENHED=300`), begge opdateret **2026-09-10 08:00**. Siden
+linker begge tabeller og nævner datoen. **`huslejenaevnet.dk` svarer HTTP 500 fra loopet**
+(forsøgt på roden og to undersider), så **ingen sats fra huslejenævnet er skrevet** — kun
+DST's indeks og modulets egne regnestykker.
+
+**Harness:** `nettoprisindeks.test.ts` **ny med 20 tests** (de tre indeksers tal og deres
+rå strenge, kvartalsgennemsnittets tre måneder, `null` for det ufuldstændige kvartal,
+årsskifte i `fraKvartalTilKvartal`, `udregnNettoprisindeks` ≡ 2,5 % mod DST's 2,9 %, og
+`efter = foer + stigning` i 30 kombinationer). `HuslejeNettoprisindeks.test.tsx` **ny med
+10** (h2'en, regnestykket, tabellen med tre forskellige beløb, kvartalsafsnittet med
+"3. kvartal 2026 er endnu ikke færdigt", huslejenævnet, begge kildelinks, og en **svensk
+lås på 0** svenske markører). `husleje/page.test.tsx` **ny med 7** — bl.a. at blokken
+**ikke** renderes ved `locale: "se"`, og de tre FAQ-par læst fra `page-data` fordi `FAQ`
+er mocket væk (C85's fælde). **Verificeret modsvejs: 5 af 7** side-tests falder med kun
+master-koden i `page.tsx`/`page-data.ts`; de to der ikke falder er låse på urørt indhold.
+
+**Gate grøn:** lint (**567 filer**), **1936 tests / 159 filer** (fra 1919 / 156), build
+(**141 sider**), `locale-leak.mjs --gate` exit 0 med uændret 117/85/32, `knapgruppe-scan.mjs`
+0/0. **Målt på rigtig server** (`next start`, port 3455 verificeret fri *inden* start —
+målefejl nr. 15's lære): DA **200**, 152.832 bytes, alle 20 strenge fundet, begge
+StatBank-links, `id="nettoprisindeks-husleje"`, FAQ-JSON-LD **10** med de tre nye
+spørgsmål, `/api/health` → `status: ok`. Ingen svenske markører.
+
+**Kode:** ny `src/lib/nettoprisindeks.ts` (+ test), ny
+`src/components/HuslejeNettoprisindeks.tsx` (+ test), ny `src/app/husleje/page.test.tsx`,
+ét `<h2>`-blok i `src/app/husleje/page.tsx` (kun `locale === "da"`), tre `faqItems` +
+fire keywords i `page-data.ts`. **`husleje.ts` urørt** — ingen eksisterende beregning
+ændret, `HuslejeBudgetBeregner` og `HuslejePrKvm` urørt, `se` og `no` urørt.
+
+**MÅL:** `/husleje` baseline **170 besøgende/28d, bounce 4 %, +25 % pr. 2026-09-28** —
+måles igen **2026-10-12**. GSC-baseline for `/husleje` er **ukendt** (siden står ikke i
+GSC's top-16); den måles første gang 2026-10-12, og da kan jeg se om nettoprisindeks-
+klyngen overhovedet har visninger. Forventningen er højere CTR på de positioner siden
+allerede har, ikke nye visninger.
+
+**Målt i samme kørsel, stadig ikke bygget (til Mads' tid):** under **"husleje"** ligger
+"huslejenævnet" som **nr. 1** og "huslejestigning privat udlejning" som **nr. 6**; under
+**"hvad koster en gennemsnitlig husleje"** ligger "hvad koster husleje i københavn", "… i
+aarhus" og "… på strøget". Den første kan besvares *uden* ny kilde — gennemsnitlig dansk
+husleje pr. m² — hvis BBR's offentlige statistik kan hentes; de tre bynavne kræver
+kommunale huslejenævnsafgørelser. **Denne klynge er nu delvist besvaret**, fordi `<h3>`'et
+om huslejenævnet fortæller hvem der sætter satsen pr. område.
+
+**Opgradering af målemetoden, der gælder alle fremtidige kilder:** før en opgave markeres
+`kilde-blokeret`, skal kildens **egen indeks- eller oversigtsside** hentes og læses. To
+tidligere blokeringer (opgave 119, C95) kan have været forkerte af samme årsag som
+denne. Det er skrevet her, så næste iteration ikke gentager fejlen.
+
+---
 
 ### ❓ Til Mads — en citable dansk kilde til parkeringsafgiften (ny i C109)
 

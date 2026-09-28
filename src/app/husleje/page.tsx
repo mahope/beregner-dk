@@ -13,6 +13,7 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import RelatedCalculators from "@/components/RelatedCalculators";
 import { ForsikringAffiliate } from "@/components/AffiliateBox";
 import { HUSLEJE_EKSEMPEL, HUSLEJE_EKSEMPEL_FORBRUG, HUSLEJE_EKSEMPEL_MED_FORBRUG, HUSLEJE_STANDARD } from "@/lib/husleje";
+import HuslejeNettoprisindeks from "@/components/HuslejeNettoprisindeks";
 import { formatCurrency } from "@/lib/format";
 
 export async function generateMetadata() {
@@ -113,6 +114,8 @@ export default async function HuslejePage() {
     </p>
       </div>
       )}
+
+      {locale === "da" && <HuslejeNettoprisindeks />}
 
       {/* FAQ */}
       <div className="mb-8">
