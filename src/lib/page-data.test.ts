@@ -1018,4 +1018,18 @@ describe("/brok — svar på regneregel-klyngen", () => {
     const sporsmal = se.faqItems.map((f) => f.question).join(" ");
     expect(sporsmal).not.toMatch(/regnereglerne for brøker|brøkdel af et tal/);
   });
+
+  test("elberegner SE FAQ-paritet: 7 spørgsmål som dansk", () => {
+    const da = getPageData("elberegner", "da")!;
+    const se = getPageData("elberegner", "se")!;
+    expect(se.faqItems.length).toBe(da.faqItems.length);
+    expect(se.faqItems.length).toBe(7);
+    const seQuestions = se.faqItems.map((f) => f.question).join(" ");
+    expect(seQuestions).toMatch(/När är elen billigast/);
+    expect(seQuestions).toMatch(/När kommer morgondagens elpriser/);
+    expect(seQuestions).toMatch(/Hur stor är elskatten/);
+    const elskatt = se.faqItems.find((f) => f.question.includes("elskatten"));
+    expect(elskatt?.answer).toContain("0,45");
+    expect(elskatt?.answer).toContain("SEK");
+  });
 });

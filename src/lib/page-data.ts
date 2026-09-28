@@ -3670,6 +3670,9 @@ const sePages: Record<string, PageData> = {
       faqItems: [
       { question: "Beräkna elförbrukning?", answer: "Watt × timmar / 1000 = kWh. 100W × 10t / 1000 = 1 kWh." },
       { question: "Pris per kWh i Sverige?", answer: "Varierar mycket. Typiskt 0,50-2,50 SEK/kWh beroende på elområde och spotpris." },
+      { question: "När är elen billigast?", answer: "Som regel om natten och mitt på dagen, när det är mycket vind- och solkraft. Nättariffen är högst kl. 17-21, så kvällen är nästan alltid dyrast." },
+      { question: "När kommer morgondagens elpriser?", answer: "Spotpriserna för nästa dygn fastställs på elbörsen och publiceras normalt runt kl. 13. Därefter kan du se morgondagens timmar i grafen." },
+      { question: "Hur stor är elskatten i 2026?", answer: "Energiskatten på el är 0,45 SEK/kWh (2026). Det är en statlig skatt på elektricitet som ingår i elpriset." },
       { question: "Största elslukarna?", answer: "Torktumlare (3000W), ugn (2500W), vattenkokare (2000W)." },
       { question: "Spara el?", answer: "Stäng av standby, välj A+++-märkta apparater, LED-lampor." },
       ],
