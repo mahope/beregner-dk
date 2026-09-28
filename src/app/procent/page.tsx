@@ -11,6 +11,12 @@ import {
 } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Sidebar from "@/components/Sidebar";
+import { formatNumber } from "@/lib/format";
+import {
+  PROCENT_SKILLNAD_EKSEMPEL,
+  procentDifferens,
+  procentForskel,
+} from "@/lib/procent";
 
 export async function generateMetadata() {
   return generatePageMetadata("procent");
@@ -20,6 +26,17 @@ export default async function ProcentPage() {
   const locale = await getLocale();
   const domainConfig = await getCurrentDomainConfig();
   const pageData = getPageData("procent", locale) || getPageData("procent", "da")!;
+
+  // Tallene i skillnadsafsnittet regnes, ikke skrives i hånden. Intl bruger
+  // U+00A0 som tusindtalsseparator på svensk, mens resten af den svenske side
+  // bruger et almindeligt mellemrum, så tegnet normaliseres — ellers ville de
+  // samme tal stå med to forskellige separatorer på én side.
+  const [lonEksempel, belobEksempel] = PROCENT_SKILLNAD_EKSEMPEL;
+  const num = (vaerdi: number, decimaler = 0) =>
+    formatNumber(vaerdi, locale, {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: decimaler,
+    }).replace(/\u00a0/g, " ");
 
   return (
     <div className="flex flex-col lg:flex-row gap-8">
@@ -348,6 +365,87 @@ export default async function ProcentPage() {
             löneökning i procent
           </Link>{" "}
           du söker efter.
+        </p>
+
+        <h2>Skillnad i procent mellan två tal</h2>
+        <p>
+          Frågan "procent skillnad mellan två tal" har två svar, och vilket
+          du får beror på vilket tal som är heltalet. Det vanligaste är
+          procentuell förändring: hur mycket har det nya talet ändrats från det
+          gamla? Då är det den gamla summan som är heltalet. Frågar du i stället
+          hur stor skillnaden är mellan två tal oavsett riktning — om det ene
+          tallet är större eller mindre — så regner man på middelvärdet, och
+          svaret kallas procentdifferens.
+        </p>
+        <div className="overflow-x-auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Fråga</th>
+                <th>Formel</th>
+                <th>Exempel</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Hur mycket har värdet ändrats från Gammal till Ny?</td>
+                <td>
+                  <code>((Ny - Gammal) / Gammal) × 100</code>
+                </td>
+                <td>
+                  {num(belobEksempel.gammal)} till {num(belobEksempel.ny)} ={" "}
+                  {num(procentForskel(belobEksempel.ny, belobEksempel.gammal))}{" "}
+                  procent
+                </td>
+              </tr>
+              <tr>
+                <td>Hur stor är skillnaden mellan talen, oavsett riktning?</td>
+                <td>
+                  <code>(|A - B| / ((A + B) / 2)) × 100</code>
+                </td>
+                <td>
+                  {num(belobEksempel.gammal)} och {num(belobEksempel.ny)} ={" "}
+                  {num(
+                    procentDifferens(belobEksempel.gammal, belobEksempel.ny),
+                    1
+                  )}{" "}
+                  procent
+                </td>
+              </tr>
+              <tr>
+                <td>Samma sak i Excel, där A1 er det gamle tallet?</td>
+                <td>
+                  <code>=(B1-A1)/A1*100</code>
+                </td>
+                <td>
+                  A1 = {num(belobEksempel.gammal)}, B1 ={" "}
+                  {num(belobEksempel.ny)} ={" "}
+                  {num(procentForskel(belobEksempel.ny, belobEksempel.gammal))}{" "}
+                  procent
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p>
+          <strong>De to formlene gir aldri samme svar.</strong>{" "}
+          {num(lonEksempel.gammal)} kr, der stiger til {num(lonEksempel.ny)} kr,
+          er en stigning på{" "}
+          {num(procentForskel(lonEksempel.ny, lonEksempel.gammal))} procent i en
+          løn, fordi den gamle summen er heltallet. Den{" "}
+          {num(procentDifferens(lonEksempel.gammal, lonEksempel.ny), 1)}{" "}
+          procent store forskellen er det samme par tall, regnet på
+          middelverdien — bytter du om tallene, får du samme svar. Når du skal
+          vide om en løn stiger, er det den første formelen du skal bruge. Den
+          andre brukes når du vil sammenligne hvor store to beløp er i forhold
+          til hinanden, uten at retningen skal betyde noe.
+        </p>
+        <p>
+          En lønsprocent kan du se som kroner her:{" "}
+          <Link href="/loenstigning" className="text-blue-700 underline">
+            löneökning i procent
+          </Link>
+          .
         </p>
 
         <h2>Procenträkningens formler</h2>

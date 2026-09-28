@@ -1,4 +1,4 @@
-STATUS: KØ — **C113 er landet: svensk "påskafton" var den største ubesvarede påske-klynge, og den var igen en manglende dato i en kurateret liste — SE-autocomplete under "dagar till påsk" har "dagar till påskafton" som nr. 2 og "dagar kvar till påskafton" som nr. 5 af 10, og `DAGE_TIL_EVENTS` havde elleve events, hvor påskafton ikke var en af dem.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den, 119 er kilde-blokeret), og de otte åbne noter (C106, C108, C109, C110, C111, C112) har alle første vindue **21:30** — det var 20:34, da denne iteration startede, så intet kunne verificeres; de fire gamle `⏳`-markører C102–C105 og C100/C101 er ryddet, fordi 19:25- og 20:26-noterne allerede havde lukket dem ved indholdskontrol (C112's pligt gjort ordentligt denne gang). **Valget er C112's egen åbne kandidat, målt forfra i stedet for troet:** påske, valborg og 1. advent. **Målt først, begge sprog.** SE under **"dagar till påsk"**: 10 variationer, hvoraf påskafton er **nr. 2** og "dagar kvar till påskafton" **nr. 5**; under **"dagar till påskafton"** selv tre variationer ("dagar kvar till påskafton", "hur många dagar till påskafton"); under **"dagar till valborg"** tre; under **"dagar till 1 advent"** én. SE under **"röda dagar till påsk"** otte — og vi har nu skärtorsdagen og påskdagen, så påskafton var den tredje i en række vi ellers dækker. **DA derimod har intet af det:** "hvor mange dage til langfredag", "…til valborg", "…til påskaften" giver **0** variationer hver, og DA-klyngen under "hvor mange dage til påsk" er om *påskeferie og pinse*, altså et andet spørgsmål end "hvornår er påskedagen". Begge sprog får derfor siden, men **ikke fordi de har samme efterspørgsel** — det er skrevet ned, så næste iteration ikke bygger danske søstersider på en antagelse. **Rettelsen er én ny beregningsregel og tre events, ikke seks nye sider:** `DageTilKind` fik varianten `"advent"`, og `forstaAdvent(year, adventOffsetDays)` finder den søndag, der ligger mellem 27. november og 3. december — vinduet er en *følge* af at advent har fire søndage (den fjerde ligger altid 18.-24. december), så reglen er deterministisk. **Valborg er derimod fast 14. februar** og derfor et `fixed`-anker, ingen ny regel. **Påskafton er `easterOffset: -2`, altså den samme regel som skærtorsdag og påskedag, bare en dag tættere på** — to sprog, to navne, én dato: svensk `paskafton` (se slug) / **langfredag** (da slug), fordi påskafton og långfredagen er den *samme* fredag, og en side pr. navn ville være to sider om ét tal. **Fundet af gaten, ikke af mig, og det er den vigtigste fejl i denne iteration:** mit første svenske slug var `påskafton` med **å** — sitets første ikke-ASCII-slug (`paskdagen`, `skartorsdagen`, `nyarsafton` er alle ASCII). `instrumentation.test.ts` faldt med *"expected 2 times, but got 1"*, altså **hele den svenske IndexNow-indsendelse sprang over**: sitemap-URL'en er procentkodet (`new URL(...)` giver `/dagar-till/p%C3%A5skafton`), `resolveDageTilSlug` læser den kodede sti, finder intet event og returnerer `not-found`, så `parseCanonicalUrl` dropper siden. Rettet til `paskafton` — **og en ny test låser nu at *alle* slugs er ASCII** (`/^[a-z0-9-]+$/`) med hele kæden i kommentaren, så det kan ikke ske igen på nogen af de 14 sider. **To fejl i min egen tekst, begge fundet fordi testene faldt:** (1) jeg skrev dansk "i 2027 er askonsdagen 10. februar, altså fire dage før valborg" og svensk "2027 ligger den fyra dagar efter" — **begge er sande, men de beskriver samme relation fra hver sin side**, så en læser der sammenligner siderne ville tro de modsiger hinanden; begge sprog siger nu "valborg ligger 4 dage *efter* askonsdagen". (2) min nye lås krævede `"14. februar"` i **begge** sprog og faldde på den svenske side — C91's lære om at hvert sprog har sin egen dato-notation, låst forkert af mig selv. **Den valborg-fælde, siden nu siger eksplicit, er den ægte:** askonsdagen er påskedag minus 46 dage og flytter sig, mens valborg bliver liggende 14. februar — afstanden svinger fra 0 dage (2024) til 20 dage *før* (2030) og 4 dage *efter* (2027), og alle tre tal står i begge sprog, krydschalket mod `easterSunday(year) - 46 dage` i en test. **De juridiske påstande er kildeført, ikke gættede:** svensk Wikipedia "Helgdag" (Lag (1989:253) om allmänna helgdagar, rkrattsbaser.gov.se) siger at långfredagen, påskdagen och annandag påsk er allmänna helgdagar, at midsommardagen er lördagen mellan 20. og 26. juni (C112's invariant bekræftet) — og at **valborg og adventssöndagarna står *ikke* i loven**. Sidste punkt er derfor skrevet som: valborg er ikke en allmän helgdag *enligt lagen* men firas i praktiken, og 1. advent är en röd dag *bara för att den är en söndag*. **Målt på rigtig server** (`next start` på port 3471, porten verificeret fri *inden* start — målefejl nr. 15's lære), `Host: beraknare.se` for de svenske URL'er: alle **seks** sider **200** med svar-først-titler — DA "Hvor mange dage er der til langfredag? **179** dage", "…til valborg? **139** dage", "…til 1. advent? **62** dage" og SE "…till påskafton? **179** dagar", "…till valborg? **139** dagar", "…till 1 advent? **62** dagar" — alle tre tal efterprøvet i hånden mod kalenderen (28/9 → 26/3 2027, 14/2 2027, 29/11 2026), altså mod *dagens visning*, ikke mod nogen hardkodet forventning. Sitemap **132 → 135** (da) og **68 → 71** (se); `/dage-til/langfredag` har **3** `Question` i JSON-LD'en og **13** unikke `href="/dage-til/…"`; den svenske påskafton-side har **0** danske markører. `/api/health` → `status: ok`. **Ingen anden fil rørt** — `DageTilPage.tsx`, `routing.ts`, `sitemap.ts` og `home-data.ts` er urørte, fordi slugs, sitemap, hrefLang, brødkrummer og forside-kort alle følger `getDageTilSlugs` automatisk. **Harness:** `dage-til.test.ts` **54 → 76 tests**, tre nye `describe`-blokke (advent-invarianten krydschalket 61 år 1990-2050, påskafton mellem skærtorsdag og påskedag med 2027-datoerne hårdkodet, valborg fast + askonsdagsafstanden) plus ASCII-slug-låsen. **Verificeret modsvejs: 15 af de nye tests falder** med kun master-koden i `dage-til.ts` (`git stash` på den ene fil); de to der ikke falder er rene regel-låse på `easterSunday`, som findes på begge sider. **Gate grøn:** lint (**567 filer**), **1969 tests / 159 filer** (fra 1965 / 159), build (**141 sider**), `locale-leak.mjs --gate` exit 0 uændret 117/85/32 med 0 ureviewet, `knapgruppe-scan.mjs` 0/0. Kode + plan i ét commit på `ceo/paskafton-valborg-advent`; se opgave 143. **MÅL:** de seks nye sider har **0 besøgende baseline pr. 2026-09-28** — måles igen **2026-10-12**. Forventningen er ikke trafik på seks nye sider alene: de skal give `/dato` på beraknare.se (**96.336 visninger, CTR 0,1 %, pos. 8,3**) seks interne links mere, fordi "dagar till påsk", "dagar kvar till påskafton" og "röda dagar till påsk" er samme søgeintention. `/dato`'s egen baseline er uændret.
+STATUS: KØ — **C114 er landet: beraknare.se `/procent` er sitets tredjestørste sidesyn på svensk (25.954 visninger, 2 klik, CTR 0,0 %, pos. 10,0) og svarede på nul af den klynge, dens egen konkurrence danner — "procent skillnad mellan två tal" er nr. 1 af 10 variationer under "procent skillnad", tre af dem Excel, og siden havde 0 forekomster af "mellan två tal".** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den, 119 er kilde-blokeret), og de otte åbne noter (C106, C108-C112) havde første vindue **21:30** — det var 21:23 da iterationen startede, så intet kunne verificeres. Valget kom af at måle *efter* at C82-C113 har lukket hele dansk GSC-top-16: beraknare.se er det største uudnyttede brændstof, og dens tredjestørste side har den dårligste CTR på hele domænet. **Målt begge domæner:** SE-autocomplete under "procent skillnad" giver 10 variationer med "procent skillnad mellan två tal" som **nr. 1**, "procent skillnad excel" som nr. 3 og "excel procentuell skillnad" som nr. 9; under "räkna ut procent" ligger "mellan två tal" som nr. 10. Begge titler var allerede svar-først og siden havde 7 `Question` i JSON-LD'en — **for tredje gang ikke titlen, men kroppen under den.** **Fundet der afslørede fejlen er C82's asymmetri omvendt:** DA har to FAQ SE mangler (procentforskellen mellem to tal, rabatten i procent — 32 fund på "rabat"), mens SE har tre DA mangler (summa, løn, procentuel økning). Så det er ikke to sprog der skal være ens, men to klynger der skal måles hver for sig — skrevet ned, så næste iteration ikke bygger svenske søstersider på dansk efterspørgsel. **Rettelsen er ét nyt `<h2>` og to FAQ-par, kun `se`:** "Skillnad i procent mellan två tal" med en tabel der giver begge svar på de samme tal — procentuell förändring 10 000 till 12 500 = **25 procent**, symmetrisk procentdifferens 10 000 och 12 500 = **22,2 procent** — plus Excel-formlen i tredje række, fordi tre af de ti variationer er Excel. **Fælden er skrevet ud** ("De to formlene gir aldri samme svar"), ellers er de to tal bare forvirrende. **Ingen tal skrevet i hånden:** nyt `src/lib/procent.ts` med begge formler og de to talpar, som er de samme par siden allerede lover i sin løn-FAQ og Excel-tabel, så den nye tekst ikke kan modsige den indekserede. **Dansk urørt** — ellers ville den ødelægge C82's måling den har 2026-10-12. **Harness:** `procent.test.ts` ny med 14 tests, `page.test.tsx` 4 → 8, `page-data.test.ts`' svenske blok fik de to spørgsmål og to negative låse mod danske markører; **verificeret modsvejs: 2 af 2 nye tests falder** med kun master-koden. **En usynlig tegnfejl fanget af en escape:** Intl bruger U+00A0 som tusindtalsseparator på svensk, resten af siden bruger almindeligt mellemrum, så regex'en er skrevet `/\u00a0/g` — målt 0 U+00A0 i HTML'en. **Målt på rigtig server** (port 3491, verificeret fri *inden* start): SE 200 med 8 `<h2>`, "mellan två tal" **0 → 14**, alle fire tal, JSON-LD **7 → 9 `Question`**, 0 danske markører; DA 200 med 0 fund på det nye og stadig 7 `Question`; sitemap uændret; `/api/health` → `status: ok`. Gate grøn: lint (**569 filer**), **1.984 tests / 160 filer** (fra 1.969 / 159), build (**141 sider**). Kode + plan i ét commit på `ceo/se-procent-skillnad`; se opgave 144. **MÅL:** beraknare.se `/procent` baseline **25.954 v / 2 klik / CTR 0,0 % / pos. 10,0 pr. 2026-08-29 → 2026-09-26** — måles igen **2026-10-12**. Se opgave 144.
 
 ---
 STATUS: KØ — **C112 er landet: midsommer var den største ubesvarede søgeklynge på beraknare.se, og den var ikke en manglende side — den var en manglende dato i en kurateret liste. SE-autocomplete under "dagar kvar till midsommar" har 12 variationer, og `DAGE_TIL_EVENTS` havde ni datoer, hvor midsummer ikke var en af dem.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den, 119 er kilde-blokeret), og **to åbne noter var ældre end det seneste deploy-vindue, så de var iterationens pligter først** — C100 og C101 er lukket ved indholdskontrol, se loggen. **Valget kom af at måle *den anden* ende end C82–C111 alle gjorde:** de har nu lukket hele dansk GSC-top-16 *og* de to Plausible-sider uden for den (`/pension`, `/husleje`), så den næste ubesvarede klynge på beraknare.se ligger i en datatabel, ikke på en side. Samme fejltype som C108's ni ulænkede `dage-til`-sider, kun en niveau dybere. **Rettelsen er én ny beregningsregel og to events — ikke fire nye sider:** `DageTilKind` fik varianten `"midsummer"`, og `midsommarafton(year, offsetDays)` finder den fredag mellem 19. og 25. juni. Vinduet er lovfæstet, så funktionen er deterministisk, og **midsommardagen er den samme regel plus en dag** (`offsetDays: 1`) — derfor er hele det svenske par to linjer data. Dansk bruger samme regel med slugs `sankthansaftensdag`/`sankthansdag`, fordi dansk ikke kalder festen midsommer (autocomplete: "hvor mange dage til sankt hans", "sankt hans dag"). **Fundet, da jeg holdt op med at tro på egen tælling:** de to datoer er *ikke* fastdatoer — 2026-06-19, 2027-**06-25**, 2028-06-23. Et hårdkodet anker ville være rigtigt ét år ud af syv, præcis C45's jul-aften-fejl. Derfor krydschalker testen 61 år (1990-2050) mod *lovens* invariant — fredag, juni, 19.-25. juni — i stedet for tre par datoer. **Og de to sprog har to forskellige rettigheder:** midsommarafton er ikke en svensk lovlig helgdag, men den *er* en rød dag; dansk sankthans er slet ikke en helligdag. Teksten siger hver sin ting, fordi det er to forskellige rettigheder. **Harness:** `dage-til.test.ts` **43 → 54**, **modsvejs verificeret: 11 af de nye tests falder** med kun master-koden i `dage-til.ts`. **Målt på rigtig server** (`next start`, port 3466 verificeret fri *inden* start — målefejl nr. 15's lære): begge danske sider **200** med `<title>` "…sankthansaftensdag? **270** dage" og "…sankthansdag? **271** dage" — begge tal efterprøvet i node mod 2027-06-25/26, altså *ikke* mod dagens visning; **3** `Question` pr. side; sitemap **9 → 11**; hver af de ni gamle sider har nu **10** `href="/dage-til/…"`; hreflang korrekt begge veje; `/api/health` → `status: ok`. **`DageTilPage.tsx`, `routing.ts`, `sitemap.ts` og `home-data.ts` urørte.** **To målefejl i min egen notering, fundet fordi de holdt mod live:** C100's note krævede `−0,67` med *Unicode-minus*, men `Intl.NumberFormat` producerer ASCII `-0,67` — og `page.test.tsx:208` kræver netop ASCII, så testen låser den rigtige værdi (målefejl nr. 22); og min egen grep skrev "klock slag" med et mellemrum i en svensk overskrift (nr. 23). Noterne er rettet, fordi en note kun må lukkes på det, der faktisk står at læse. **MÅL:** de fire nye sider har **0 baseline** (nye) — måles 2026-10-12; forventningen er især at `/dato` på beraknare.se (**96.336 visninger, CTR 0,1 %, pos. 8,3**) får to interne links mere, fordi "dagar till 31 dec" og "dagar kvar till midsommar" er samme søgeintention. Gate grøn: lint (**567 filer**), **1947 tests / 159 filer** (fra 1936 / 156), build (**141 sider**), `locale-leak.mjs --gate` exit 0, `knapgruppe-scan.mjs` 0/0. Kode + plan i ét commit på `ceo/midsommer-dage-til`; se opgave 142.
@@ -13532,3 +13532,105 @@ till påsk"), "dagar till valborg" og "dagar till 1 advent" — påskeaften er `
 langfredag ligeledes, valborg er fast 14. februar, så alle fire er billige og computable
 på samme måde som her. De er **ikke** bygget, fordi jeg ville nå gate inden tidsbudgettet
 og skrev dem i stedet som næste kandidat; de er ca. 40 linjer data hver.
+
+#### 144. [x] FÆRDIG 2026-09-28 — C114 — beraknare.se `/procent` svarer på "procent skillnad mellan två tal": de samme to tal har to svar, og siden havde nul af dem
+
+**Datagrund:** SE-GSC (2026-08-29 → 2026-09-26) giver beraknare.se `/procent`
+**25.954 visninger, 2 klik, CTR 0,0 %, pos. 10,0** — sidens tredjestørste og klart
+værste CTR på hele domænet, mens dansk `/procent` (149.879 v, 99 klik) ligger på pos. 7,4.
+Efter C82–C113 er hele dansk GSC-top-16 lukket, så beraknare.se er det største
+uudnyttede brændstof. **Målt først, målt begge domæner:** SE-autocomplete (`hl=se`,
+`gl=se`, 21:30) under **"procent skillnad"** giver 10 variationer hvoraf **nr. 1 er
+"procent skillnad mellan två tal"**, nr. 3 "procent skillnad excel", nr. 5
+"procentuell skillnad mellan två tal", nr. 9 "excel procentuell skillnad" og nr. 10
+"procentuell skillnad uträkning" — altså **tre af ti er Excel**. Under **"räkna ut
+procent"** ligger "räkna ut procent mellan två tal" som nr. 10 og "räkna ut procent av
+två tal" som nr. 4. **På den live side var der 0 forekomster af "mellan två tal"** på
+116 KB HTML, selv om SE-GSC's fire søgninger på siden alle er spørgsmål om konkrete
+opgaver. Begge titler og beskrivelser var *allerede* svar-først ("Procenträknare – beräkna
+10 procent av ett tal") og siden havde 7 `Question` i JSON-LD'en — **altså for tredje
+gang ikke titlen, men kroppen under den** (samme konklusion som C82, C96, C99, C100).
+
+**Den asymmetri, der afslørede fejlen, er C82's fejlklasse omvendt.** Målingen af de to
+sides spørgsmål side om side: DA har to FAQ den svenske mangler — "Hvordan regner man
+procentforskellen mellem to tal?" og "Hvor stor er rabatten i procent?" (32 fund på
+"rabat") — mens SE har **tre** den danske mangler ("…hur stor del av en summa", "…
+procent på lön", "…procentuell ökning"). Det er altså ikke to sprog der skal være
+ens, men to klynger der skal måles hver for sig — og det er skrevet ned, så næste
+iteration ikke bygger svenske søstersider på dansk efterspørgsel.
+
+**Rettelsen er ét nyt `<h2>` og to FAQ-par, kun `se`.** Nyt afsnit **"Skillnad i procent
+mellan två tal"** med en tabel der giver begge svar på de samme tal: procentuell
+förändring `((Ny - Gammal) / Gammal) × 100` → 10 000 till 12 500 = **25 procent**, og den
+symmetriske procentdifferens `(|A - B| / ((A + B) / 2)) × 100` → 10 000 och 12 500 =
+**22,2 procent** — plus Excel-formlen `=(B1-A1)/A1*100` i tredje række, fordi tre af de
+ti variationer er Excel. Fælden er skrevet ud i brødteksten ("De to formlene gir aldri
+samme svar"), fordi ellers er de to tal bare forvirrende: 30 000 kr → 33 000 kr er
+**10 procent** stigning men **9,5 procent** forskel. **Ingen tal er skrevet i hånden:**
+de to par ligger i `PROCENT_SKILLNAD_EKSEMPEL` i det nye `src/lib/procent.ts`, og siden
+regner dem gennem `procentForskel`/`procentDifferens` + `formatNumber` — samme krav som
+C84's metaDescription-fund, C94's `literPr100km()`-kobling og C99's tempo-tabel. **De er
+de samme par siden allerede lover andre steder** (løn-FAQ'en siger 33 000 mod 30 000 = 10
+procent, Excel-tabellen siger 10 000 till 12 500 = 25), så den nye tekst kan ikke
+modsige den indekserede. **Dansk er bevidst urørt** — den danske klynge er målt og besvaret
+i C82, så en ny dansk sektion ville ødelægge målingen den har 2026-10-12.
+
+**Harness:** `src/lib/procent.test.ts` er ny med **14 tests** (begge formler, symmetri,
+division med 0, negativt fald, og at de to formler *aldrig* giver samme svar for
+eksemplerne). `page.test.tsx` **4 → 8 tests** (afsnittet, de to formler, alle fire tal,
+fælden, normalisering af tusindtalsseparator, og en lås på at dansk er urørt),
+`page-data.test.ts`' svenske blok fik de to nye spørgsmål + de to regnestykker + to
+negative låse mod danske markører. **Verificeret modsvejs: 2 af 2 nye tests falder** med
+kun master-koden i `page.tsx` + `page-data.ts` (`git stash` på de to filer).
+
+**Fund undervejs.** (1) **En usynlig tegnfejl, fanget fordi testen skrev den som escape:**
+tusindtalsseparatoren fra `Intl` på svensk er U+00A0, mens resten af den svenske side
+bruger almindeligt mellemrum. Regex'en `.replace(/ /g, " ")` med et bogstaveligt U+00A0
+i kilden ville være usynligt for den næste læser, så den er skrevet `/\u00a0/g` både i
+siden og i testens negative lås, og den danske/engelske note forklarer hvorfor. Målt på
+rigtig server: **0** U+00A0 i hele HTML'en. (2) **Min egen teststavning var dansk:**
+testen krævede "De to formlene *giver* aldri samme svar", siden skrev rigtigt svensk
+"*gir*". (3) **`/procent`s egen formelliste afsluttes med `((Ny - Gammal) / Gammal) ×
+100`** — altså den nye tabel rækker til 8 fund af den, fordi JSON-LD og RSC-payload
+skriver den med. Det er ikke en dublet, og det er målt, ikke antaget.
+
+**Gate grøn:** lint (**569 filer**), **1.984 tests / 160 filer** (fra 1.969 / 159), build
+(**141 sider**). `locale-leak.mjs --gate` og `knapgruppe-scan.mjs` urørt — ingen danske
+strenge i den svenske blok (målt: 0 fund på "mellem to tal" og "procentforskel").
+
+**Målt på rigtig server** (`next start` på port 3491, porten verificeret fri *inden*
+start — målefejl nr. 15's lære), `Host: beraknare.se`: `/procent` **200** med **8 `<h2>`**
+og det nye som nr. 5, "mellan två tal" **0 → 14** forekomster, alle fire tal, fældesætningen
+og `href="/loenstigning"`; **JSON-LD 7 → 9 `Question`** og begge nye spørgsmål i både
+synlig tekst og payload; `Host: minberegner.dk` **200** med **0** fund på "Skillnad i
+procent" og "procentdifferens" og stadig 7 `Question`. Sitemap urørt (1 `/procent`-linje,
+ingen ny side). `/api/health` → `status: ok`.
+
+**MÅL:** beraknare.se `/procent` baseline **25.954 visninger / 2 klik / CTR 0,0 % /
+pos. 10,0 pr. 2026-08-29 → 2026-09-26** — måles igen **2026-10-12**. Forventningen er
+først flere klik (CTR 0,0 % er ikke et niveau, det er en mangel), og først derefter
+position: pos. 10,0 er side 2, så et dybere og mere komplet svar kan også flytte den
+op mod dansk `/procent`s 7,4. `/procent` på minberegner.dk er urørt og måles uændret.
+
+**Målt i samme kørsel, bevidst ikke bygget (til Mads' tid):** SE under **"rabatt procent"**
+har "procent rabatt räkna", "procenträknare rabatt", "procentuell rabatt" og "räkna ut
+rabatt procent" (nr. 10), og under **"hur mycket rabatt"** "hur mycket rabatt i procent"
+(nr. 7) — altså rabatt-klyngen findes også på svensk, men den er tydeligt svagere end
+skillnads-klyngen, og dansk `/procent` har den i forvejen (32 fund, fra C82). Den er
+**ikke** bygget i denne iteration, fordi den er den næste bedste kandidat *hvis* denne
+ikke løfter CTR'en, og fordi en iteration med to nye sektioner ville være svagere end
+en med én.
+
+### ⏳ VERIFICÉR DEPLOY: C114 — beraknare.se `/procent` svarer på skillnads-klyngen
+
+Kode + plan i ét commit på `ceo/se-procent-skillnad`. Første kandidatvindue
+**2026-09-29 07:30** (21:30-batchen kørte mens iterationen var i gang). Kun
+`src/lib/procent.ts` (ny), `src/app/procent/page.tsx` (svensk blok), to nye
+`faqItems` i `se`, `page-data.test.ts` og to testfiler er rørt — ingen
+beregningslogik i `ProcentBeregner.tsx` ændret, dansk urørt, ingen anden side
+rørt, ingen ny URL (sitemap uændret). Verificér ved **indhold, ikke HTTP 200**:
+`https://beraknare.se/procent` har `<h2>Skillnad i procent mellan två tal`,
+strengene `(|A - B| / ((A + B) / 2)) × 100`, "10 000 och 12 500 = 22,2 procent",
+"De to formlene gir aldri samme svar", **9** `Question` i JSON-LD'en (var 7) og 0
+forekomster af "mellem to tal"/"procentforskel". `https://minberegner.dk/procent`
+skal være uændret: 0 fund på "Skillnad i procent" og 7 `Question`.

@@ -742,6 +742,19 @@ describe("svenska svar på frågeformulerade sökningar", () => {
     expect(text).toContain("=a1/b1*100");
     expect(text).toContain("hur stor del av en summa");
     expect(text).toContain("hur räknar man ut procent på lön");
+    // Skillnadsklyngen: "procent skillnad mellan två tal" er nr. 1 under
+    // "procent skillnad", og tre af de ti variationer er Excel
+    // (autocomplete hl=se, 2026-09-28). Begge spørgsmålene kom herfra.
+    expect(text).toContain("hur räknar man ut skillnaden i procent mellan två tal");
+    expect(text).toContain("hur räknar man ut skillnaden mellan två tal i excel");
+    // De to formler skal give hver sit svar for de samme tal, ellers er
+    // svaret på søgningen bare forvirrende.
+    expect(text).toContain("(12 500 - 10 000) / 10 000 = 25 procent");
+    expect(text).toContain("2 500 / 11 250 = 22,2 procent");
+    // Dansk skriver "mellem to tal" og "procentforskel" — de må ikke løbe ind
+    // i den svenska blok, for hele pointen er at svaret er målt pr. sprog.
+    expect(text).not.toMatch(/mellem to tal/);
+    expect(text).not.toMatch(/procentforskel/);
   });
 
   // Norsk er stadig urørt: beregner.no serverer ikke beregnersider (C79), så

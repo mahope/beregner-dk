@@ -21,6 +21,13 @@ vi.mock("@/lib/get-locale", () => ({
   getCurrentDomainConfig: vi.fn(),
 }));
 
+/** React skriver `<!-- -->` mellem to tekstnoder i én JSX-celle, så de fjernes før grep. */
+async function render(locale: "da" | "se" | "no") {
+  vi.mocked(getLocale).mockResolvedValue(locale);
+  vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale(locale));
+  return (await renderToStaticMarkup(await ProcentPage())).replaceAll("<!-- -->", "");
+}
+
 describe("procent page", () => {
   beforeEach(() => {
     vi.mocked(getLocale).mockResolvedValue("da");
@@ -106,5 +113,48 @@ describe("procent page", () => {
         expect(html).toContain(formel);
       }
     }
+  });
+
+  // SE /procent er beraknare.se's tredjestørste side (25.954 visninger, 2 klik,
+  // CTR 0,0 %, pos. 10,0) og svarede på nul af den klynge, dens egen
+  // sidekonkurrence danner: "procent skillnad mellan två tal" er nr. 1 under
+  // "procent skillnad" og "räkna ut procent mellan två tal" nr. 10 under
+  // "räkna ut procent" (autocomplete hl=se, 2026-09-28). Siden havde nul
+  // forekomster af "mellan två tal".
+  test("den svenska side svarar på skillnaden mellem to tall", async () => {
+    const html = await render("se");
+
+    expect(html).toContain("<h2>Skillnad i procent mellan två tal</h2>");
+    // De to formler, der giver hver sit svar for de samme to tall.
+    expect(html).toContain("((Ny - Gammal) / Gammal) × 100");
+    expect(html).toContain("(|A - B| / ((A + B) / 2)) × 100");
+    // Clusteren har tre Excel-varianter, så formlen skal stå i tabellen.
+    expect(html).toContain("=(B1-A1)/A1*100");
+    // Tallene er regnet, ikke skrevet i hånden: 25 % forskel mod 22,2 %
+    // differens for 10 000 -> 12 500, og 10 % mod 9,5 % for 30 000 -> 33 000.
+    expect(html).toContain("10 000 till 12 500 = 25 procent");
+    expect(html).toContain("10 000 och 12 500 = 22,2 procent");
+    expect(html).toContain("30 000 kr, der stiger til 33 000 kr");
+    expect(html).toContain("stigning på 10 procent i en");
+    expect(html).toContain("9,5 procent store forskellen");
+    // Og fælden skal være skrevet ud, ellers er de to tal bare forvirrende.
+    expect(html).toContain("De to formlene gir aldri samme svar");
+    expect(html).toContain('href="/loenstigning"');
+  });
+
+  // Samme tal må aldrig stå med to forskellige separatorer på én side:
+  // Intl bruger U+00A0 på svensk, resten af siden bruger almindeligt mellemrum.
+  test("den svenska side bruger almindeligt mellemrum i tallene", async () => {
+    const html = await render("se");
+    expect(html).toContain("10 000 till 12 500");
+    expect(html).not.toContain("\u00a0000");
+  });
+
+  // Dansk er bevidst urørt. Den danske klynge er målt (autocomplete hl=da) og
+  // besvaret i C82, så en ny dansk sektion ville ødelægge målingen af den.
+  test("den danske side er urørt af skillnadsafsnittet", async () => {
+    const html = await render("da");
+    expect(html).not.toContain("Skillnad i procent mellan två tal");
+    expect(html).not.toContain("procentdifferens");
   });
 });
