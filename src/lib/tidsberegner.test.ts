@@ -1,5 +1,11 @@
 import { describe, expect, test } from "vitest";
-import { beregnTidsinterval, type TidsintervalInput } from "./tidsberegner";
+import {
+  TEMPO_EKSEMPLER,
+  beregnTempo,
+  beregnTidsinterval,
+  formatSekunder,
+  type TidsintervalInput,
+} from "./tidsberegner";
 
 const baseInput: TidsintervalInput = {
   startTid: "08:30",
@@ -189,5 +195,41 @@ describe("beregnTidsinterval", () => {
     })!;
 
     expect(result.overMidnat).toBe(true);
+  });
+});
+
+describe("beregnTempo", () => {
+  test("5 km paa 25 min er 5:00 pr. km og 8:03 pr. mil", () => {
+    const tempo = beregnTempo(25, 5)!;
+    expect(tempo.sekunderPerKm).toBe(300);
+    // 300 s/km * 1,609344 km/mil = 482,8 s -> 483 s = 8:03, ikke 8:00.
+    expect(tempo.sekunderPerMil).toBe(483);
+    expect(formatSekunder(tempo.sekunderPerKm)).toBe("5:00");
+    expect(formatSekunder(tempo.sekunderPerMil)).toBe("8:03");
+  });
+
+  test("halvmaraton og maraton i eksemplerne er 4:59 pr. km", () => {
+    for (const eksempel of TEMPO_EKSEMPLER) {
+      const tempo = beregnTempo(eksempel.minutter, eksempel.km)!;
+      if (eksempel.id === "halvmaraton" || eksempel.id === "maraton") {
+        expect(formatSekunder(tempo.sekunderPerKm)).toBe("4:59");
+      }
+      // Distancen skal altid give et tempo, og tempoet ganget med distancen
+      // skal give løbetiden tilbage.
+      expect(tempo.sekunderPerKm * eksempel.km / 60).toBeCloseTo(eksempel.minutter, 0);
+    }
+  });
+
+  test("ugyldige input giver null, ikke NaN", () => {
+    expect(beregnTempo(0, 5)).toBeNull();
+    expect(beregnTempo(25, 0)).toBeNull();
+    expect(beregnTempo(-25, 5)).toBeNull();
+    expect(beregnTempo(Number.NaN, 5)).toBeNull();
+  });
+
+  test("formatSekunder runder op naar der er 60 sekunder", () => {
+    expect(formatSekunder(60)).toBe("1:00");
+    expect(formatSekunder(119)).toBe("1:59");
+    expect(formatSekunder(299)).toBe("4:59");
   });
 });

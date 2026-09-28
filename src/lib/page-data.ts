@@ -829,6 +829,8 @@ const daPages: Record<string, PageData> = {
       { question: "Tid over midnat?", answer: "Ja, beregneren håndterer tid over midnat automatisk. 22:00 til 06:00 er 8 timer og 0 minutter." },
       { question: "Hvordan beregner jeg tid mellem to klokkeslæt i Excel?", answer: "Sæt starttidspunktet i A1 og sluttidspunktet i B1 som rigtige klokkeslæt. =B1-A1 giver 08:30 til 16:45 som 8 timer og 15 minutter, =(B1-A1)*24 giver 8,25 decimaltimer, og =(B1-A1)*24*60 giver 495 minutter. Dansk Excel bruger semikolon som skilletegn." },
       { question: "Hvorfor får jeg et negativt tal i Excel?", answer: "Fordi Excel trækker sluttiden fra starttiden uden at vide, at nattetimen slutter næste dag. 22:00 til 06:00 giver derfor -0,67 døgn. Brug =MOD(B1-A1;1)*24, så tager den de 24 timer med igen og viser 8 timer — præcis som beregneren gør." },
+      { question: "Hvordan beregner jeg tempo i minutter pr. kilometer?", answer: "Del løbetiden i minutter med distancen i kilometer. 5 km på 25 minutter giver 25 ÷ 5 = 5:00 pr. kilometer, og en halvmarathon på 1 time og 45 minutter giver 4:59 pr. kilometer." },
+      { question: "Hvad er et godt tempo for et maraton?", answer: "Det afhænger af tiden: 3 timer og 30 minutter på 42,2 km er 4:59 pr. kilometer. Vil du i stedet finde distancen, deler du tiden med tempoet, så 2 timer ved 5:00 pr. kilometer bliver 24 km." },
       ],
     },
     "tidszone": {
@@ -3280,6 +3282,8 @@ const sePages: Record<string, PageData> = {
       { question: "Tid över midnatt?", answer: "Ja, kalkylatorn hanterar tid över midnatt automatiskt." },
       { question: "Hur räknar jag ut timmar mellan två klockslag i Excel?", answer: "Sätt starttiden i A1 och sluttiden i B1 som riktiga klockslag. =B1-A1 ger 08:30 till 16:45 som 8 timmar och 15 minuter, =(B1-A1)*24 ger 8,25 decimaltimmar och =(B1-A1)*24*60 ger 495 minuter. Svensk Excel använder semikolon som avgränsare." },
       { question: "Varför får jag ett negativt tal i Excel?", answer: "För att Excel drar sluttiden från starttiden utan att veta att nattpasset slutar följande dag. 22:00 till 06:00 ger därför -0,67 dygn. Använd =MOD(B1-A1;1)*24, så tar den med de 24 timmarna igen och visar 8 timmar — precis som kalkylatorn gör." },
+      { question: "Hur räknar man ut tempo i minuter per kilometer?", answer: "Dividera loptiden i minuter med distansen i kilometer. 5 km på 25 minuter ger 25 ÷ 5 = 5:00 per kilometer, och en halvmaraton på 1 timme och 45 minuter ger 4:59 per kilometer." },
+      { question: "Vad är ett bra tempo för ett maraton?", answer: "Tempot avgörs av tiden: 3 timmar och 30 minuter på 42,2 km är 4:59 per kilometer. För att hitta distansen i stället delar du tiden med tempot, så 2 timmar vid 5:00 per kilometer blir 24 km." },
       ],
     },
     "tidszone": {

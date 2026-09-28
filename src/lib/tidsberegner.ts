@@ -83,6 +83,54 @@ export function beregnRaaTidsdifference(startTid: string, slutTid: string): numb
   return slutMinutter - startMinutter;
 }
 
+export interface TempoResultat {
+  /** Sekunder pr. kilometer, afrundet til hele sekunder. */
+  sekunderPerKm: number;
+  /** Sekunder pr. engelsk mil (1,609344 km), afrundet til hele sekunder. */
+  sekunderPerMil: number;
+}
+
+const KM_PER_MIL = 1.609344;
+
+/**
+ * Tempo = tid delt med distancen. 25 minutter på 5 km er 5:00 pr. km.
+ * Tiden tages i minutter, så den kan læses direkte af TidsEksempler-totalMinutter.
+ */
+export function beregnTempo(
+  minutter: number,
+  km: number
+): TempoResultat | null {
+  if (!Number.isFinite(minutter) || !Number.isFinite(km)) return null;
+  if (minutter <= 0 || km <= 0) return null;
+  const sekunder = minutter * 60;
+  return {
+    sekunderPerKm: Math.round(sekunder / km),
+    sekunderPerMil: Math.round((sekunder / km) * KM_PER_MIL),
+  };
+}
+
+/** 300 → "5:00". Bruges til både tempo og de øvrige tidsstrenge. */
+export function formatSekunder(sekunder: number): string {
+  const heleMinutter = Math.floor(sekunder / 60);
+  const rest = Math.round(sekunder % 60);
+  if (rest === 60) return `${heleMinutter + 1}:00`;
+  return `${heleMinutter}:${String(rest).padStart(2, "0")}`;
+}
+
+export interface TempoEksempel {
+  /** Nøgle, ikke tekst: overskrifterne er sprogafhængige og bor på siden. */
+  id: "km5" | "km10" | "halvmaraton" | "maraton";
+  km: number;
+  minutter: number;
+}
+
+export const TEMPO_EKSEMPLER: TempoEksempel[] = [
+  { id: "km5", km: 5, minutter: 25 },
+  { id: "km10", km: 10, minutter: 45 },
+  { id: "halvmaraton", km: 21.1, minutter: 105 },
+  { id: "maraton", km: 42.2, minutter: 210 },
+];
+
 export function beregnTidsinterval(input: TidsintervalInput): TidsintervalResultat | null {
   const startMinutter = parseKlokkeslaet(input.startTid);
   const slutMinutter = parseKlokkeslaet(input.slutTid);

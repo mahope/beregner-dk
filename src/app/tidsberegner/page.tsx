@@ -15,12 +15,36 @@ import {
   totalMinutter,
 } from "@/lib/tids-eksempler";
 import RelatedCalculators from "@/components/RelatedCalculators";
+import {
+  TEMPO_EKSEMPLER,
+  beregnTempo,
+  formatSekunder,
+  type TempoEksempel,
+} from "@/lib/tidsberegner";
 import FAQ from "@/components/FAQ";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
 
-/** "2026-09-25" → "25. sep.". Datoerne læses i UTC, så de kan ikke glide en dag. */
-function formatDato(iso: string | undefined, locale: "da" | "se"): string {
+const TEMPO_RAEKKE = TEMPO_EKSEMPLER.map((eksempel) => ({
+  ...eksempel,
+  tempo: beregnTempo(eksempel.minutter, eksempel.km)!,
+}));
+
+const TEMPO_NAEVN_DA: Record<TempoEksempel["id"], string> = {
+  km5: "5 km",
+  km10: "10 km",
+  halvmaraton: "Halvmarathon (21,1 km)",
+  maraton: "Marathon (42,2 km)",
+};
+
+const TEMPO_NAEVN_SE: Record<TempoEksempel["id"], string> = {
+  km5: "5 km",
+  km10: "10 km",
+  halvmaraton: "Halvmarathon (21,1 km)",
+  maraton: "Maraton (42,2 km)",
+};
+
+/** "2026-09-25" → "25. sep.". Datoerne læses i UTC, så de kan ikke glide en dag. */function formatDato(iso: string | undefined, locale: "da" | "se"): string {
   if (!iso) return "";
   const dato = new Date(`${iso}T00:00:00Z`);
   if (Number.isNaN(dato.getTime())) return iso;
@@ -185,6 +209,44 @@ export default async function TidsberegnerPage() {
           ind, hvis intervallet går over en dag.
         </p>
 
+        <h2>Hvor hurtigt løber jeg? Tempo i minutter pr. kilometer</h2>
+        <p>
+          Tempoet er løbetiden delt med distancen:{" "}
+          <strong>5 km på 25 minutter er 5:00 pr. kilometer</strong>, altså
+          25 ÷ 5. Den samme fart er 8:03 pr. engelsk mil, fordi én mil er 1,609344
+          km. Sådan regner du: tag løbetiden i minutter, del den med
+          kilometerne, så har du tempoet — og du kan gange det med distancen for
+          at finde den samme fart over en længere tur.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Løb</th>
+              <th>Tid</th>
+              <th>Min. pr. km</th>
+              <th>Min. pr. mil</th>
+            </tr>
+          </thead>
+          <tbody>
+            {TEMPO_RAEKKE.map((raekke) => (
+              <tr key={raekke.id}>
+                <td>{TEMPO_NAEVN_DA[raekke.id]}</td>
+                <td>{raekke.minutter} min.</td>
+                <td>{formatSekunder(raekke.tempo.sekunderPerKm)}</td>
+                <td>{formatSekunder(raekke.tempo.sekunderPerMil)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p>
+          Har du en løbetid og vil vide, hvor langt du nåede, er det
+          modsatte regnestykke det samme:{" "}
+          <strong>tid ÷ tempo = distance</strong>. Et 5 km-løb på 25 minutter er
+          altså 5 km, og en halvmarathon på 1 time og 45 minutter er 21,1 km ved
+          4:58 pr. kilometer. Samme regel som værktøjet bruger ovenfor: et
+          interval er bare en tid delt med en distance.
+        </p>
+
         <h2>Sådan beregner du tid mellem to klokkeslæt i Excel</h2>
         <p>
           Skriv starttidspunktet i <strong>A1</strong> og sluttidspunktet i{" "}
@@ -313,6 +375,43 @@ export default async function TidsberegnerPage() {
           ett intervall inte kan gå bakåt. Är bara ett datum ifyllt används det
           andra som samma dag — så båda datum behöver alltså ifyllas om
           intervallet går över en dag.
+        </p>
+
+        <h2>Hur fort springer jag? Tempo i minuter per kilometer</h2>
+        <p>
+          Tempot är loptiden delad med distansen:{" "}
+          <strong>5 km på 25 minuter är 5:00 per kilometer</strong>, alltså
+          25 ÷ 5. Samma fart är 8:03 per engelsk mil, eftersom en mil är 1,609344
+          km. Så räknar du: ta loptiden i minuter, dela den med kilometrarna, så
+          har du tempot — och du kan multiplicera det med distansen för att
+          hitta samma fart över en längre tur.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Lopp</th>
+              <th>Tid</th>
+              <th>Min. per km</th>
+              <th>Min. per mil</th>
+            </tr>
+          </thead>
+          <tbody>
+            {TEMPO_RAEKKE.map((raekke) => (
+              <tr key={raekke.id}>
+                <td>{TEMPO_NAEVN_SE[raekke.id]}</td>
+                <td>{raekke.minutter} min.</td>
+                <td>{formatSekunder(raekke.tempo.sekunderPerKm)}</td>
+                <td>{formatSekunder(raekke.tempo.sekunderPerMil)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p>
+          Har du en loptid och vill veta hur långt du kom, är det motsatt
+          uttryck: <strong>tid ÷ tempo = distans</strong>. Ett 5 km-lopp på 25
+          minuter är alltså 5 km, och en halvmaraton på 1 timme och 45 minuter
+          är 21,1 km med 4:59 per kilometer. Samma regel som verktyget använder
+          ovan: ett intervall är bara en tid delad med en distans.
         </p>
 
         <h2>Så räknar du ut timmar mellan två klockslag i Excel</h2>

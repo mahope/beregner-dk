@@ -4,6 +4,7 @@ import { getDomainConfigByLocale } from "@/lib/domain-config";
 import { getCurrentDomainConfig, getLocale } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
 import { formatNumber } from "@/lib/format";
+import { TEMPO_EKSEMPLER, beregnTempo, formatSekunder } from "@/lib/tidsberegner";
 import {
   TIDS_EKSEMPEL_DAG,
   TIDS_EKSEMPEL_MIDNAT,
@@ -209,5 +210,48 @@ describe("Excel-svaret på /tidsberegner", () => {
     // Og de skal være de samme tal som modulet regner.
     expect(excelSvar).toContain(String(totalMinutter(TIDS_EKSEMPEL_DAG)));
     expect(negativtSvar).toContain("=MOD(B1-A1;1)*24");
+  });
+  test("tempo-afsnittet svarer paa laebetid i begge sprog, med tal fra modulet", async () => {
+    for (const locale of ["da", "se"] as const) {
+      vi.mocked(getLocale).mockResolvedValue(locale);
+      vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale(locale));
+
+      const html = renderToStaticMarkup(await TidsberegnerPage());
+
+      const overskrift =
+        locale === "da" ? "Hvor hurtigt løber jeg?" : "Hur fort springer jag?";
+      expect(html).toContain(overskrift);
+      // Regnestykket og de to omregninger, dansk notation.
+      expect(html).toContain("5:00");
+      expect(html).toContain("8:03");
+      expect(html).toContain("4:59");
+      // Rækkerne er de fire i modulet, og hver celle er regnet af beregnTempo.
+      for (const eksempel of TEMPO_EKSEMPLER) {
+        const tempo = beregnTempo(eksempel.minutter, eksempel.km)!;
+        expect(html).toContain(formatSekunder(tempo.sekunderPerKm));
+        expect(html).toContain(formatSekunder(tempo.sekunderPerMil));
+      }
+      // 1 engelsk mil er 1,609344 km — den fælde, der giver 8:03 og ikke 8:00.
+      expect(html).toContain("1,609344");
+    }
+  });
+
+  test("tempo-FAQ'en indeholder de samme tal som tempo-afsnittet", () => {
+    // Ellers kunne svaret i JSON-LD'en love 4:58 mens tabellen viser 4:59 —
+    // C84's fejlklasse.
+    for (const locale of ["da", "se"] as const) {
+      const faq = getPageData("tidsberegner", locale)!.faqItems;
+      const tempoSvar = faq.find((i) =>
+        i.question.includes("tempo")
+      )!.answer;
+      for (const eksempel of TEMPO_EKSEMPLER) {
+        const tempo = beregnTempo(eksempel.minutter, eksempel.km)!;
+        if (eksempel.id !== "km10" && eksempel.id !== "maraton") {
+          expect(tempoSvar).toContain(formatSekunder(tempo.sekunderPerKm));
+        }
+      }
+      expect(tempoSvar).toContain("5:00");
+      expect(tempoSvar).toContain("4:59");
+    }
   });
 });
