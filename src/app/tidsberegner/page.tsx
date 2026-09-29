@@ -13,6 +13,7 @@ import {
   formatTidsvar,
   excelDifferens,
   totalMinutter,
+  MINUTTER_TILL_TIMMAR,
 } from "@/lib/tids-eksempler";
 import RelatedCalculators from "@/components/RelatedCalculators";
 import {
@@ -43,19 +44,6 @@ const TEMPO_NAEVN_SE: Record<TempoEksempel["id"], string> = {
   halvmaraton: "Halvmarathon (21,1 km)",
   maraton: "Maraton (42,2 km)",
 };
-
-/**
- * Minuter → timmar, for den omvandlingsklynge SE-autocomplete har under
- * "räkna ut timmar och minuter" ("… från minuter", "… till minuter").
- * Timer og restminutter er **udregnet** (div/mod 60), altså samme to regler
- * som `beregnTidsinterval` bruger, så tabellen ikke kan modsige værktøjet.
- */
-const MINUTER_TILL_TIMMAR = [15, 30, 45, 60, 90, 120, 480, 495].map((minutter) => ({
-  minutter,
-  timer: Math.floor(minutter / 60),
-  restMinutter: minutter % 60,
-  decimalTimer: minutter / 60,
-}));
 
 /** "2026-09-25" → "25. sep.". Datoerne læses i UTC, så de kan ikke glide en dag. */function formatDato(iso: string | undefined, locale: "da" | "se"): string {
   if (!iso) return "";
@@ -353,6 +341,57 @@ export default async function TidsberegnerPage() {
           <li>1 time 15 min = 1,25 timer</li>
         </ul>
 
+        {/* DA-autocomplete under "minutter til timer" er 7 af 10 numeriske
+            variationer (300, 1000, 150, 2000, 120, 1500, 2500 minutter), og
+            under "time og minutter" ligger "1 time og 30 minutter" og
+            "1 time og 45 minutter". Den danske side havde kun decimal-listen
+            ovenfor, som er fire linjer — altså svarer den på ingen af dem.
+            Sektionen er C120's svenska "Räkna om minuter till timmar", og
+            alle tal regnes fra `MINUTTER_TILL_TIMMAR` i `tids-eksempler.ts`,
+            som div/mod 60 bruger — samme regel som værktøjet. */}
+        <h2>Omregn minutter til timer – og timer til minutter</h2>
+        <p>
+          Omregningen er altid <strong>minutter ÷ 60 = timer</strong>, og den
+          anden vej er <strong>timer × 60 = minutter</strong>. Decimaltimer er
+          samme sag med komma: 90 minutter er 1,50 timer, og 1,50 timer er 90
+          minutter igen.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Minutter</th>
+              <th>Timer og minutter</th>
+              <th>Decimaltimer</th>
+              <th>Divisionen</th>
+            </tr>
+          </thead>
+          <tbody>
+            {MINUTTER_TILL_TIMMAR.map((raekke) => (
+              <tr key={raekke.minutter}>
+                <td>{raekke.minutter}</td>
+                <td>
+                  {formatTidsvar(
+                    { timer: raekke.timer, minutter: raekke.restMinutter },
+                    "da"
+                  )}
+                </td>
+                <td>{formatTimer(raekke.decimalTimer, "da")}</td>
+                <td>
+                  {raekke.minutter} ÷ 60 = {formatTimer(raekke.decimalTimer, "da")}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p>
+          Den anden vej er <strong>timer × 60 = minutter</strong>: 7,5 timer
+          bliver 450 minutter, altså 7 timer og 30 minutter. Og 495 minutter er
+          08:30–16:45 ovenfor — det er samme par rækker som værktøjet regner.
+          Vil du vide hvor langt du kom under et løb, deler du tiden med
+          tempoet i stedet, og det står under{" "}
+          <a href="/fart">fartberegneren</a>.
+        </p>
+
         <h2>Tips til præcis timeregistrering</h2>
         <ul>
           <li>Husk altid at <strong>fratrække pauser</strong> fra din arbejdstid</li>
@@ -544,7 +583,7 @@ export default async function TidsberegnerPage() {
             </tr>
           </thead>
           <tbody>
-            {MINUTER_TILL_TIMMAR.map((række) => (
+            {MINUTTER_TILL_TIMMAR.map((række) => (
               <tr key={række.minutter}>
                 <td>{række.minutter}</td>
                 <td>

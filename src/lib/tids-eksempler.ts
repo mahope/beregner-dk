@@ -215,6 +215,35 @@ export function excelDifferens(eksempel: TidsEksempel): number {
   return raat / (24 * 60);
 }
 
+export interface MinutterRaekke {
+  minutter: number;
+  timer: number;
+  restMinutter: number;
+  decimalTimer: number;
+}
+
+/**
+ * Minutter → timer, timmar och decimaltimmar. Timer och restminutter är
+ * **udregnet** (div/mod 60), altså samma to regler som `beregnTidsinterval`
+ * bruger, så tabellen ikke kan modsige værktøjet.
+ *
+ * Rækkerne er valgt efter de to søgeklynger, der findes i hvert sprog:
+ * SE-autocomplete under "räkna ut timmar och minuter" har "räkna ut timmar
+ * från minuter" (nr. 7) och "räkna timmar till minuter" (nr. 10), mens
+ * DA-autocomplete under "minutter til timer" er **7 af 10 numeriske
+ * variationer** — 300, 1000, 150, 2000, 120, 1500 og 2500 minutter.
+ * 480 og 495 er de to tal værktøjet selv producerer (otte timer uden pause
+ * og 08:30–16:45), så de kan efterprøves mod `TIDS_EKSEMPLER`.
+ */
+export const MINUTTER_TILL_TIMMAR: MinutterRaekke[] = [
+  15, 30, 45, 60, 90, 120, 150, 300, 480, 495, 1000, 1500, 2000, 2500,
+].map((minutter) => ({
+  minutter,
+  timer: Math.floor(minutter / 60),
+  restMinutter: minutter % 60,
+  decimalTimer: minutter / 60,
+}));
+
 /**
  * "65 t 0 min" på dansk og "65 h 0 min" på svensk — samme notationsform som
  * TidsBeregner bruger på hvert domæne, så et tal læst på beraknare.se ikke

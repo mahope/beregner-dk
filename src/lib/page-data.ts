@@ -851,6 +851,9 @@ const daPages: Record<string, PageData> = {
       { question: "Hvorfor får jeg et negativt tal i Excel?", answer: "Fordi Excel trækker sluttiden fra starttiden uden at vide, at nattetimen slutter næste dag. 22:00 til 06:00 giver derfor -0,67 døgn. Brug =MOD(B1-A1;1)*24, så tager den de 24 timer med igen og viser 8 timer — præcis som beregneren gør." },
       { question: "Hvordan beregner jeg tempo i minutter pr. kilometer?", answer: "Del løbetiden i minutter med distancen i kilometer. 5 km på 25 minutter giver 25 ÷ 5 = 5:00 pr. kilometer, og en halvmarathon på 1 time og 45 minutter giver 4:59 pr. kilometer." },
       { question: "Hvad er et godt tempo for et maraton?", answer: "Det afhænger af tiden: 3 timer og 30 minutter på 42,2 km er 4:59 pr. kilometer. Vil du i stedet finde distancen, deler du tiden med tempoet, så 2 timer ved 5:00 pr. kilometer bliver 24 km." },
+      { question: "Hvordan regner man minutter om til timer?", answer: "Del minutter med 60. 90 minutter ÷ 60 = 1,50 timer, altså 1 time og 30 minutter. Den anden vej er timer × 60 = minutter, så 7,5 timer × 60 = 450 minutter." },
+      { question: "Hvad er 300 minutter i timer?", answer: "300 minutter ÷ 60 = 5,00 timer, altså 5 timer og 0 minutter. 1000 minutter er 16 timer og 40 minutter, og 1500 minutter er 25 timer." },
+      { question: "Hvad er 1 time og 30 minutter i decimaltimer?", answer: "1 time og 30 minutter er 90 minutter, og 90 ÷ 60 = 1,50 decimaltimer. Samme regel som værktøjet bruger: minutter ÷ 60 = timer." },
       ],
     },
     "tidszone": {

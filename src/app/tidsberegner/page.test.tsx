@@ -13,6 +13,7 @@ import {
   excelDifferens,
   formatTidsvar,
   totalMinutter,
+  MINUTTER_TILL_TIMMAR,
 } from "@/lib/tids-eksempler";
 import TidsberegnerPage from "./page";
 
@@ -354,39 +355,104 @@ describe("minuter ↔ timmar på beraknare.se", () => {
     }
   });
 
-  test("da får ikke den svenska omvandlingssektion", async () => {
+  test("da har den samme omvandlingssektion, fordi DA-autocomplete er 7 af 10 numeriske", async () => {
+    // C120 lagde sektionen kun i den svenska gren og låste med denne test, at
+    // dansk *ikke* skulle have den — altså låst tilstanden før rettelsen i
+    // stedet for en egenskab (C94's negative SE-lås, samme fejlklasse).
     vi.mocked(getLocale).mockResolvedValue("da");
     vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("da"));
 
     const html = renderToStaticMarkup(await TidsberegnerPage());
 
-    expect(html).not.toContain("Räkna om minuter till timmar");
-    expect(html).not.toContain("450 minuter");
-    // ...men har sin egen decimal-liste, som lå før denne sektion.
-    expect(html).toContain("15 min = 0,25 timer");
+    expect(html).toContain("Omregn minutter til timer");
+    expect(html).toContain("minutter ÷ 60 = timer");
+    expect(html).toContain("timer × 60 = minutter");
+    for (const minuter of MINUTTER_TILL_TIMMAR.map((r) => r.minutter)) {
+      const decimal = formatNumber(minuter / 60, "da", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
+      expect(html).toContain(minuter + " ÷ 60 = " + decimal);
+    }
+    expect(html).toContain("7,5 timer");
+    expect(html).toContain("450 minutter");
+    expect(html).toContain("8 t 15 min");
+    expect(html).toContain('href="/fart"');
   });
 
-  test("FAQ'en svarer på omvandlingen og på 08:30–16:45, så det kommer i JSON-LD'en", () => {
+  test("hvert sprog svarer på sin egen numeriske autocomplete-klynge", async () => {
+    // De tal, hvert sprog faktisk bliver spurgt om. Dansk: "300 minutter til
+    // timer" (nr. 4), "1000 minutter til timer" (nr. 5), "2500" (nr. 10).
+    // Svensk: de otte rækker C120 målte under "räkna ut timmar och minuter".
+    const daHtml = renderToStaticMarkup(await (async () => {
+      vi.mocked(getLocale).mockResolvedValue("da");
+      return TidsberegnerPage();
+    })());
+    for (const minutter of [300, 1000, 1500, 2000, 2500]) {
+      expect(daHtml).toContain(minutter + " ÷ 60 = ");
+    }
+
+    vi.mocked(getLocale).mockResolvedValue("se");
+    const seHtml = renderToStaticMarkup(await TidsberegnerPage());
+    for (const minutter of [90, 120, 480, 495]) {
+      expect(seHtml).toContain(minutter + " ÷ 60 = ");
+    }
+  });
+
+  test("omvandlingssektionen er i begge sprog, og hver sin notation", async () => {
+    // Paritet læst fra den anden sproggren i stedet for fra et hardkodet
+    // antal: et tal i en test er en ny målefejl, næste gang en række tilføjes.
+    vi.mocked(getLocale).mockResolvedValue("se");
+    const seHtml = renderToStaticMarkup(await TidsberegnerPage());
+    vi.mocked(getLocale).mockResolvedValue("da");
+    const daHtml = renderToStaticMarkup(await TidsberegnerPage());
+
+    for (const html of [seHtml, daHtml]) {
+      expect(html).toContain("÷ 60 = ");
+      expect(html).toContain('href="/fart"');
+    }
+    // Svensk må ikke få danske forkortelser i tabellen (C73's R4).
+    expect(seHtml).not.toContain("timer × 60 = minutter");
+    expect(daHtml).not.toContain("timmar × 60 = minuter");
+    // Og de to tabeller skal have præcis samme rækker.
+    const raekker = (html: string) =>
+      (html.match(/<td>(\d+)<\/td>/g) ?? []).map((t) => Number(t.replace(/\D/g, "")));
+    expect(raekker(daHtml)).toEqual(raekker(seHtml));
+  });
+
+  test("FAQ'en svarer på omvandlingen i begge sprog, så det kommer i JSON-LD'en", () => {
     // `FAQ` er mocket væk (C85's fælde), så påstanden ligger i page-data,
     // som er den tabel FAQSchema får.
-    const faq = getPageData("tidsberegner", "se")!.faqItems;
-    const spg = faq.map((i) => i.question);
-
-    expect(spg.some((q) => q.includes("minuter till timmar"))).toBe(true);
-    expect(spg.some((q) => q.includes("08:30 till 16:45"))).toBe(true);
-    expect(spg).toHaveLength(11);
+    const faqSe = getPageData("tidsberegner", "se")!.faqItems;
+    const spgSe = faqSe.map((i) => i.question);
+    expect(spgSe.some((q) => q.includes("minuter till timmar"))).toBe(true);
+    expect(spgSe.some((q) => q.includes("08:30 till 16:45"))).toBe(true);
 
     // Svarene skal bære de samme tal som tabellen på siden.
-    const omvandling = faq.find((i) => i.question.includes("minuter till timmar"))!.answer;
+    const omvandling = faqSe.find((i) => i.question.includes("minuter till timmar"))!.answer;
     expect(omvandling).toContain("90 minuter ÷ 60 = 1,50 timmar");
     expect(omvandling).toContain("7,5 timmar × 60 = 450 minuter");
-    const klockslag = faq.find((i) => i.question.includes("08:30 till 16:45"))!.answer;
+    const klockslag = faqSe.find((i) => i.question.includes("08:30 till 16:45"))!.answer;
     expect(klockslag).toContain("8 timmar och 15 minuter");
     expect(klockslag).toContain("8,25 decimaltimmar");
 
-    // Dansk er urørt: ingen af de to nye spørgsmål.
-    const daSpg = getPageData("tidsberegner", "da")!.faqItems.map((i) => i.question);
-    expect(daSpg).toHaveLength(10);
-    expect(daSpg.some((q) => q.includes("minuter til timer"))).toBe(false);
+    // Dansk har nu sin egen version af de samme tre spørgsmål.
+    const faqDa = getPageData("tidsberegner", "da")!.faqItems;
+    const spgDa = faqDa.map((i) => i.question);
+    expect(spgDa.some((q) => q.includes("minutter om til timer"))).toBe(true);
+    expect(spgDa.some((q) => q.includes("300 minutter i timer"))).toBe(true);
+    expect(spgDa.some((q) => q.includes("1 time og 30 minutter i decimaltimer"))).toBe(true);
+
+    // Og tallene i svarene er de samme som dem tabellen regner.
+    const daOmvandling = faqDa.find((i) => i.question.includes("minutter om til timer"))!.answer;
+    expect(daOmvandling).toContain("90 minutter ÷ 60 = 1,50 timer");
+    expect(daOmvandling).toContain("7,5 timer × 60 = 450 minutter");
+    const da300 = faqDa.find((i) => i.question.includes("300 minutter i timer"))!.answer;
+    expect(da300).toContain("300 minutter ÷ 60 = 5,00 timer");
+    for (const raekke of MINUTTER_TILL_TIMMAR) {
+      const timer = Math.floor(raekke.minutter / 60);
+      const rest = raekke.minutter % 60;
+      expect(timer * 60 + rest).toBe(raekke.minutter);
+    }
   });
 });
