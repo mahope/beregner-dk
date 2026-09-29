@@ -65,7 +65,7 @@ export const TIDSSKILLNADS_LANDE: readonly TidsskillnadEksempel[] = [
   // Canada, Australien og New Zealand har egen sommertid på andre datoer.
   { by: "London", landDa: "Storbritannien", foelgerEu: true },
   { by: "New York", landDa: "USA" },
-  { by: "Nuuk", landDa: "Grønland", foelgerEu: true },
+  { by: "Nuuk", landDa: "Grønland", landSe: "Grönland", foelgerEu: true },
   { by: "Athen", landDa: "Grækenland", landSe: "Grekland", foelgerEu: true },
   { by: "Istanbul", landDa: "Tyrkiet", landSe: "Turkiet" },
   { by: "Madrid", landDa: "Spanien", foelgerEu: true },

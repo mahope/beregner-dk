@@ -120,7 +120,7 @@ export default async function PromillePage() {
           </h2>
           <p className="text-gray-600 dark:text-gray-400 mb-4">
             {se
-              ? `Det finns två tal, och det kortare är det, der bestämmer om du får köra bil: du får köra när promillen är under ${graenseTekst}, men du är inte helt nykter før den är under 0 ‰. Kolumnen "${se ? "Under gränsen" : "Under grænsen"}" er derfor altid kortere end "${se ? "Helt nykter" : "Helt ædru"}".`
+              ? `Det finns två tal, och det kortare är det, der bestämmer om du får köra bil: du får köra när promillen är under ${graenseTekst}, men du är inte helt nykter före den är under 0 ‰. Kolumnen "${se ? "Under gränsen" : "Under grænsen"}" är derför alltid kortare än "${se ? "Helt nykter" : "Helt ædru"}".`
               : `Der er to tal, og det er det kortere, der bestemmer, om du må køre bil: du må køre, når promillen er under ${graenseTekst}, men du er ikke helt ædru, før den er under 0 ‰. Kolonnen "Under grænsen" er derfor altid kortere end "Helt ædru".`}
           </p>
           <div className="overflow-x-auto">

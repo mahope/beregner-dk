@@ -55,6 +55,44 @@ type Props = {
   officielleKurser?: NationalbankKurser | null;
 };
 
+/**
+ * Currency names, per locale. `navn` stays the Danish one because that is what
+ * the Danish calculator has always shown and it is the fallback everywhere.
+ *
+ * The Swedish and Norwegian names were missing entirely, so the currency
+ * `<select>` showed "Britiske Pund", "Svenske Kroner" and "Danske Kroner" on
+ * beraknare.se and beregner.no — a "locale leak" the port analysis did not see
+ * (C168), because these names are read through a helper at the display site and
+ * not at a `locale === "…"` ternary, which is the shape `locale-leak.mjs`
+ * judges. Verified on the built server, both leaks are visible text.
+ */
+const VALUTA_NAVN: Record<string, { se: string; no: string }> = {
+  DKK: { se: "Danska kronor", no: "Danske kroner" },
+  EUR: { se: "Euro", no: "Euro" },
+  USD: { se: "US-dollar", no: "US-dollar" },
+  GBP: { se: "Brittiska pund", no: "Pund sterling" },
+  SEK: { se: "Svenska kronor", no: "Svenska kronor" },
+  NOK: { se: "Norska kronor", no: "Norske kroner" },
+  CHF: { se: "Schweiziska franc", no: "Sveitsiske franc" },
+  JPY: { se: "Japanska yen", no: "Japansk yen" },
+  PLN: { se: "Polska złoty", no: "Polsk złoty" },
+  CZK: { se: "Tjeckiska kronor", no: "Tsjekkiske kroner" },
+  TRY: { se: "Turkiska lira", no: "Tyrkiske lira" },
+  AUD: { se: "Australiska dollar", no: "Australiske dollar" },
+  CAD: { se: "Kanadensiska dollar", no: "Kanadiske dollar" },
+  THB: { se: "Thailändska baht", no: "Thailandske baht" },
+};
+
+export type ValutaKode = keyof typeof VALUTA_METADATA;
+
+/** The currency name as the reader's locale spells it. */
+export function valutaNavn(code: string, locale: string): string {
+  if (locale === "se" || locale === "no") {
+    return VALUTA_NAVN[code]?.[locale] ?? VALUTA_METADATA[code]?.navn ?? code;
+  }
+  return VALUTA_METADATA[code]?.navn ?? code;
+}
+
 export default function ValutaBeregner({ officielleKurser = null }: Props) {
   const { locale } = useLocale();
   const brugNationalbanken = locale === "da" && officielleKurser !== null;
@@ -215,7 +253,7 @@ export default function ValutaBeregner({ officielleKurser = null }: Props) {
   };
 
   const getValutaSymbol = (code: string) => VALUTA_METADATA[code]?.symbol || code;
-  const getValutaNavn = (code: string) => VALUTA_METADATA[code]?.navn || code;
+  const getValutaNavn = (code: string) => valutaNavn(code, locale);
 
   const byttValutaer = () => {
     setFraValuta(tilValuta);

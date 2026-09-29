@@ -137,4 +137,29 @@ describe("promille page", () => {
     expect(html).not.toContain("Promillegrænsen i udlandet");
     expect(html).toContain("gränsen för rattfylleri vid <strong>0,2 ‰</strong>");
   });
+
+  test("den svenska to-tals-sætning er svensk, ikke dansk", async () => {
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("se"));
+    const html = renderToStaticMarkup(await PromillePage());
+
+    // C168 fandt denne på beraknare.se's server-renderede HTML: "før" (dansk
+    // og norsk for *før*) og "end" (dansk for *än*) stod i den svenska gren af
+    // en fælles template-literal. Begge har æ/ø? Nej — det er pointen: `før`
+    // har ø, så scanneren fandt den, mens `end` ikke har noget dansk tegn og
+    // derfor kræver denne lås. Kun `før` ville være fanget uden den.
+    expect(html).toContain("före den är under 0 ‰");
+    expect(html).toContain("kortare än");
+    expect(html).not.toContain("før");
+    expect(html).not.toContain("altid kortere end");
+    expect(html).not.toContain("er derfor");
+  });
+
+  test("dansk sætningen er uændret af rettelsen", async () => {
+    const html = renderToStaticMarkup(await PromillePage());
+
+    // Den danske gren skal stadig sige "før den er under" og "kortere end" —
+    // det er korrekt dansk. Låsen her er mod at rette den med den svenske.
+    expect(html).toContain("før den er under 0 ‰");
+    expect(html).toContain("kortere end");
+  });
 });

@@ -135,6 +135,13 @@ describe("tidszone-eksempler", () => {
     expect(lande).toContain("Turkiet");
     expect(lande).not.toContain("Grækenland");
     expect(lande).not.toContain("Tyrkiet");
+    // Grønland kom i tabellen med dansk autocomplete som datagrund (C155),
+    // men fik ikke sit `landSe`, så beraknare.se skrev "Grønland" med dansk
+    // ø. Fundet ved at kravle den *byggede* server (C168), ikke i kilden:
+    // port-analysen dømmer `landDa`-strengen ude, fordi den læses gennem
+    // `landSe ?? landDa` ved visningsstedet.
+    expect(lande).toContain("Grönland");
+    expect(lande).not.toContain("Grønland");
     // Storbritannien, Spanien, Japan, Thailand, Kina, Australien og
     // New Zealand hedder det samme på svenska.
     expect(lande).toContain("Storbritannien");

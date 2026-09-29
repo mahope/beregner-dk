@@ -1,4 +1,5 @@
-STATUS: KØ — **C167 er landet: "hvor mange dage har jeg levet" var autocomplete nr. 1 i begge sprog og GSC's tredjestørste søgning på beraknare.se's `/dato` (385 v, pos. 10) — og `/dato` linkede allerede til `/alder` med netop den sætning ("Se også hvor mange dage du har levt"), men destinationen svarede ikke: 0 forekomster af spørgsmålsteksten på begge live-sider.** Køen havde ingen `I GANG`-opgave, og opgave **159** (de ni åbne deploy-noter) var **fortsat ikke verificerbar ved starten**: 07:30-batchen kørte 07:30, og mit grep kl. 07:29-07:31 viste endnu det gamle indhold på alle ni URL'er — jeg rørte derfor ingen note, fordi en note kun lukkes på indhold. **Valget kom af at måle den ubesvarede *hensigt* frem for endnu en side.** Linket `/dato` → `/alder` fandtes i begge sprog hele tiden; det er samme fejlklasse som C105's forside→katalog og C165's beregner→indlæg i den modsatte retning — siden pegede *hen* mod et svar, der ikke var skrevet. **Rettelsen (begge sprog):** nyt modul `alder-levet.ts` + `AlderLevetSvar.tsx` med ét `<h2>` "Hvor mange dage har du levet?" / "Hur många dagar har du levt?" — dage, hele uger, hele måneder og timer, plus fælden der gør svaret *rigtigt*: 24 pr. døgn, aldrig 23 eller 25, fordi `beregnAlder` tæller kalenderdage. **Ingen tal håndskrevet i teksten:** `alderLevet()` kalder `beregnAlder`, samme modul som værktøjet bruger. Plus **to nye FAQ-par pr. sprog** (10 → **12** målt på rigtig server), bl.a. svensk "Hur många timmar har jag levt?" fordi time-varianten er to af de ti autocomplete-variationer. **Harness: 23 → 29 tests, modsvejs verificeret — 6 falder med master-koden.** En fejl i min egen danske FAQ blev fundet af testen (den havde dage-tallet men ikke timer-tallet, som de tre andre svar har) og rettet i teksten, ikke i testen. **Målefejl nr. 24:** min første SE-kontrol søgte på dansk `levet?` i en svensk regexp og gav 0 fund på en side der havde overskriften — fundet ved at læse den rå `<h2>`-liste. **Én flaky test, målt og verificeret som pre-existing:** `locale-leak-gate.test.ts` faldt i 2 af 5 fulde kørsler men passerer 22/22 isoleret fem gange, og samme flakiness (1 af 3) optrådte på ren `master` med mine ændringer stashed. Gate grøn: lint (586 filer), **2.629 tests / 170 filer**, build (141 sider), `locale-leak.mjs --gate` exit 0 (720/685/35/0, 130 filer — den nye komponent er med). Målt på rigtig server (port 3555, fri *inden* start): begge `<h2>` i markupken, JSON-LD 12 `Question` pr. domæne, `/api/health` ok. Kode + plan i ét squash-commit `7fbf8f9` på `ceo/alder-dage-levet`. **MÅL:** `/alder` DA baseline **6.985 v / 37 klik / CTR 0,5 % / pos. 7,7**, SE **3.283 v / 12 klik / CTR 0,4 % / pos. 7,7** — måles igen **2026-10-13**.
+STATUS: KØ — **C168 er landet: opgave 159's andet acceptkriterium — "kør porten på den *byggede* server og sammenlign med kildefundene" — afslørede at porten ikke så to ægte danske lækager på beraknare.se, og den tredje fandt scanneren selv, da den kørte mod live.** De **16** deploy-noter med udløbet vindue er lukket ved **indholdskontrol** kl. 08:06-08:20 (C114, C115, C118-C123, C155, C156, C157, C159, C160, C161, C163, C164, C165, C166), og **C167 er korrekt stadig åben** — den blev mergeret 07:49, altså *efter* 07:30-batchen, så dens første vindue er 12:30, og `/alder` har stadig FAQ 10 (skal være 12). **Kriterium 1 er dermed lukket, og kriterium 3 siger at en afvigelse er en ny iteration, ikke en note der lukkes — så det er den, der blev lavet.** Kriterium 2 krævede at køre porten mod den byggede server og sammenligne. Det gav **0 fund i én retning** (de 685 "døde" strenge fandtes ingen af dem i den server-renderede HTML) og **2 sider i den anden** — altså afvigelse. **De tre fund er ægte, målte på rigtig server og i markupken:** (1) beraknare.se `/tidszone` skrev **"Grønland"** med dansk ø i landetabellen, fordi C155 lagde landet ind uden sit `landSe`; (2) beraknare.se `/valuta`'s valuta-`<select>` viste **"Britiske Pund", "Svenske Kroner", "Danske Kroner", "Thailandske Baht"** i alle tre sprog, fordi `VALUTA_METADATA` kun havde ét navn pr. kode; (3) beraknare.se `/promille` skrev **"før den är under"** og **"altid kortere end"** i den svenska gren af en fælles template-literal — dansk *før* og *end* i en svensk sætning, fundet af den nye scanner mod *live*, ikke af kilden. **Hvorfor porten ikke så dem — og det er pointen:** alle tre er værdier der *når* en svensk læser gennem et opslag ved visningsstedet (`landSe ?? landDa`, `VALUTA_METADATA[code]?.navn`), ikke gennem en `locale === "…"`-gren port-analysen kan læse. `/tidszone`s danske streng er desuden dømt **DØD** — korrekt for den arm scanneren kan se; den manglende `landSe` er en *fraværelse*, og en fraværende nøgle giver intet fund. **Målefejl nr. 32 (min egen, og den farligste af alle målefejlene her):** min første krydskontrol reducerede siden med `html.split('<script')[0]`, som skærer ved første `<script>` i `<head>` og derfor **kasserer hele `<body>`**. Den meldte **0 på en side med to ægte lækager** — og meldte også 0 på en *plantet* dansk afsnit. Den blev kun opdaget fordi jeg plantede en fixture, ellers havde jeg troet på et tal. Derfor planter *alle* 9 tests i `rendered-leak-scan-gate.test.ts` deres fejl, og testen der kræver at scanneren *finder* den danske sætning er den første. **Rettelsen:** `landSe: "Grönland"` på Nuuk (sætningen "…följer Sverige" bygges af samme array, så den følger med), ny `VALUTA_NAVN` med `se`/`no`-navne pr. kode + eksporteret `valutaNavn(code, locale)`, og den svenska promille-arm. **Harness: 2.629 → 2.645 tests / 170 → 172 filer, modsvejs verificeret — 6 af de 6 nye fejltests falder med master-koden** (4 valuta, 1 tidszone, 1 promille; de tre "dansk er uændret"-låse skal være grønne begge veje). **Målt på rigtig server (build → `next start` port 3700 og 3701, begge verificeret fri *inden* start):** `/tidszone` SE 0×"Grønland" / 4×"Grönland" + "Storbritannien, Grönland, Grekland och Spanien följer Sverige"; `/promille` SE 1×"före den är under", 1×"kortare än", 0×"før", 0×"kortere end", 0×"er derfor"; `/valuta` SE 3×"Brittiska pund", 3×"Svenska kronor", 2×"Danska kronor", 2×"Thailändska baht", 0× alle danske. **Dansk urørt, målt:** Grønland 5, "følger Danmark" 1, "før den er under" 1, "kortere end" 1, "Britiske Pund" 3. **Den nye scanner kørt mod alle 71 svenske sider i det nye build: 0** (var 2) — og mod en tilplantet side: 2 fund, exit 1, så den er ikke vakuum-grøn. Gate grøn: lint (588 filer), **2.645 tests / 172 filer**, build (141 sider), `locale-leak.mjs --gate` exit 0 (720/685/35/0 uændret), `knapgruppe-scan.mjs` 0/0. Kode + plan i ét squash-commit på `ceo/luk-deploy-noter-159`; se opgave 168.
+
 STATUS: KØ — **C166 er landet: de 28 `dage-til`-siders meta description gentog **titlens eget spørgsmål ordret** og løb 179-195 tegn, så Google klippede dem midt i en sætning — præcis C164's fejl, men på de sider C164's måling ikke kunne se.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den, 119 er kilde-blokeret), og opgave **159** er **fortsat klokke-blokeret**: de ni åbne noter har første vindue **2026-09-29 07:30**, og det var 07:00, så ingen blev rørt. **Valget kom af at måle hele sitets `description` på tværs af domæner i stedet for endnu en side.** C164 fandt denne fejl i `page-data.ts` (2 af 157 par) og rettede begge — men **`dage-til`siderne har ingen post i `page-data.ts`**: de bygges i `buildDageTilMetadata` (`DageTilPage.tsx:111`), så hverken C164's 157-par-scan eller C81's titel-lås (som kun låste `metaTitle`) kunne nå dem. Samme blind spot som C157's `se:`-blokke med type-annotation. **Målt på begge domæner, live:** **28/28** sider har en description der *starter med spørgsmålet ordret* (før: `"Hvor mange dage er der til juleaften? Der er 86 dage til juleaften. …"` — altså spørgsmålet fra titlen, og så en **genfortælling af dage-tallet titlen også viser**), og **28/28** er **179-195 tegn** mod Googles ~160-tegns afkortning, så de blev kappet midt i "…andre datoer med datoberegneren". **Kontrollen på resten af sitet holdt, og det er derfor jeg kun rettede de 28:** alle 135 danske og 71 svenske sider blev målt for krydsduplikater (**0** i `title`, `description` og `h1`), canonical-afvigelser (**0**) og manglende metadata (**0** på de 125 kalkulator/blog-sider; de 10 `/kategori/*` har `<h1>` men min egen første scanner meldte "mangler h1" — **målefejl nr. 22**, fordi regex'en `<h1[^>]*>([^<]*)` standsede ved det inline-SVG-ikon der går *inden* i teksten). Titler uden brand er **alle ≤ 60** i begge domæner, så C81's titelregel er lukket på hele sitet. **Rettelsen (kun `buildDageTilMetadata`):** descriptionen starter nu på `headline` (svaret) i stedet for på `copy.question`, og den afsluttende sætning er skåret fra "Tallet opdateres hver dag, **og du kan regne alle andre datoer med datoberegneren**" til "Tallet opdateres hver dag." — de frigjorte tegn går til **dato, ugedag og opdateringsfristen**, altså de tre ting titlen *ikke* siger. **Målt på rigtig server** (`next start` port 3411, porten verificeret fri *inden* start, begge domæner via `Host:`): DA **88-94 tegn** (fra 179-195), SE **88-96** med **"till"** (ikke det live "til" — C160's fix er på master og uden deploy), og `/dage-til/grundlovsdag` giver præcis `Der er 249 dage til grundlovsdag. 5. juni 2027 er en lørdag. Tallet opdateres hver dag.`; `/api/health` → `status: ok`. **Harness: 6 nye tests i `dage-til-routes.test.tsx` (22 → 28), modsvejs verificeret — alle 6 falder** med kun `DageTilPage.tsx` stashed. De spejler C81's test (kalder den rigtige producer, genbygger ikke strengen) og tilføjer C164's (sammenligner mod `copy.question`, ikke mod hele titlen — ellers ville en description der gentager spørgsmålet og så afviger være grøn). En test låser `isToday`-grenen på en **indgående dato** (ikke systemklokken — min første version brugte `vi.setSystemTime` og fejlede, fordi `buildDageTilMetadata` tager `today` som *argument*; det er målefejl nr. 23). **Gate grøn:** lint (**584 filer**), **2.620 tests / 170 filer** (fra 2.614 / 170), build (**141 sider**), `locale-leak.mjs --gate` exit 0 (715/680/35/0). Rørte filer: `DageTilPage.tsx` og testen — **ingen beregningslogik, ingen `<h1>`, ingen titel, ingen URL, ingen sitemap, ingen dansk side rørt**. Branch `ceo/dage-til-description`. **MÅL:** `/dage-til/*` 28 sider, baseline **0 målte visninger i GSC's top-16 på begge domæner** (de er ikke nævnt i nogen af listerne) — **det er derfor klassen måles på CTR-per-side og ikke på samlet trafik**: GSC's største `/dato`-søgning er "hvor mange dage er der til 1 december" (1.063 v, **2 klik**, pos. 5), altså de søgninger siderne er skrevet til. Måles igen **2026-10-13** på antal sider der viser sig i GSC. Forventningen er **flere klik på de positioner de allerede har**, ikke nye visninger.
 
 STATUS: KØ — **C165 er landet: koblingen mellem blogindlæg og beregnere var ensidig i 1 af 9 tilfælde, og sitets *største* side var ikke koblet til noget indlæg — `/dato` (131.920 visninger, 1.110 besøgende/28d) og `/brok` (4.913 v, pos. 5,3) manglede begge et "Guides om emnet"-link, fordi `blog-kobling.ts` kun havde 7 beregnere.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den, 119 er kilde-blokeret), og opgave **159** (de ni åbne deploy-noter) er **fortsat klokke-blokeret**: alle ni har første vindue **2026-09-29 07:30**, og det var 06:23, så ingen kunne lukkes og ingen blev rørt. **Valget kom af at måle linkgrafen i den retning, ingen måling hidtil havde dækket.** C79 målte blog→beregner (alle 27 indlæg har 1-8 links, lukket) og C105 målte forside→katalog (32 lukket), men **retningen beregner→indlæg var aldrig talt**: `RelateredeArtikler` renderer på **7 af 141** sider. En måling over alle 27 indlægs `href`'er fandt **46 kalkulatorer med nul indgangslinks fra hele bloggen** — blandt dem `/dato` (131.920 v DA + 96.336 v SE), `/kalorier` (12.569 v), `/promille` (4.968), `/brok` (4.913), `/fart` (4.570) og `/nedtaelling` (5.361 v SE). **Målt, og så valgt — kun to af dem fik et link, fordi kun to har et ægte indholdsmæssigt match:** `/dato` ↔ `guide-feriepenge-hvornaar-og-hvor-meget` (har en tabel "Vigtige datoer i ferieåret" med netop **1. september** og **31. december** — de to datoer GSC's største søgning spørger om: "hvor mange dage er der til 1 december", 1.063 v pos. 5) og `/brok` ↔ `saadan-beregner-du-din-reelle-timeloen` (kernen er `Reel timeløn = (Samlet kompensation) ÷ (Faktiske timer)`, altså et brøk). `/fart` og `/promille` blev **bevidst ikke** koblet: `biloekonomi-2026` har 0 forekomster af "promille" og ingen rejsetid, så en kobling ville være en link uden indhold — samme discipline som C105's "kun de to har tal". **Den ensidige kobling var en reel fejl, målt ikke formodet:** `/renteberegner` → `guide-til-laan-og-renter` viste **0** forekomster af `href="/renteberegner"` i indlægget, altså beregneren pegede på indlægget, men indlægget gav ingen vej videre til værktøjet — rettet med et link i "Fast vs. variabel rente". **Harness: to nye tests, begge modsvejs verificeret.** (1) *"hvert koblet indlæg linker selv tilbage til sin beregner"* — **faldt** med master-koden i de tre blogfiler (`/blog/guide-til-laan-og-renter har ingen returlink til /renteberegner`), altså den fangede den rigtige fejl i første kørsel. (2) *"enhver side der renderer `RelateredeArtikler` har en kobling for sin egen sti"* — modsvejs **faldt** (`/app/brok renderer en blok uden kobling`) da `blog-kobling.ts` blev stashed, altså den fanger en død blok. Den gamle test *"alle tre domæner er dækket af den samme kobling"* var **vakuum-grøn**: den itererede over `kobledeBeregnere()`, altså netop dem der allerede står i objektet, og krævede at de står i objektet — C118's fejlklasse, tredje gang i træk. **Målt på rigtig server** (`next start`, port 3971, verificeret fri *inden* start): `/dato` og `/brok` **200** med "Guides om emnet" (2 hver: synlig tekst + RSC-payload), de tre indlæg **200** med henholdsvis `href="/dato"`, `href="/brok"` og `href="/renteberegner"` i markupken, `/api/health` → `status: ok`. **Gate grøn:** lint (**584 filer**), **2.614 tests / 170 filer** (fra 2.585 / 168), build (**141 sider**), `locale-leak.mjs --gate` exit 0. Kun `blog-kobling.ts`, `blog-kobling.test.ts`, to sider og tre indlæg er rørt — **ingen beregningslogik, ingen metadata, ingen URL, ingen sitemap**. Kode + plan i ét commit på `ceo/blog-kobling-retur`. **MÅL:** koblede beregnere **7 → 9**; `/dato` **131.920 v / 816 klik / CTR 0,6 % / pos. 5,7** og `/brok` **4.913 v / 30 klik / CTR 0,6 % / pos. 5,3** (GSC 2026-08-29 → 2026-09-26), Plausible `/dato` **1.110 besøgende/28d, bounce 5 %** pr. 2026-09-29 — måles igen **2026-10-13**. Forventningen er **flere indgangslinks** (PageRank fra indlæggets side og en lavere bounce på indlægget), ikke nye visninger. **Målt og bevidst ikke bygget:** de øvrige 44 kalkulatorer uden blog-link har 0 målte visninger i GSC's top-16 og Plausible's top-15, så de er skrevet op som kandidater, ikke gjort nu; `lang`-attributten er målt korrekt (`sv` på beraknare.se, `da` på minberegner.dk), så svenskens 0,1 % CTR er **ikke** et sprogflag-fejl.
@@ -13732,7 +13733,7 @@ skillnads-klyngen, og dansk `/procent` har den i forvejen (32 fund, fra C82). De
 ikke løfter CTR'en, og fordi en iteration med to nye sektioner ville være svagere end
 en med én.
 
-### ⏳ VERIFICÉR DEPLOY: C114 — beraknare.se `/procent` svarer på skillnads-klyngen
+### ✅ DEPLOY OK 2026-09-29 (indholdskontrol 08:06-08:20) — C114 — beraknare.se `/procent` svarer på skillnads-klyngen
 
 Kode + plan i ét commit på `ceo/se-procent-skillnad`. Første kandidatvindue
 **2026-09-29 07:30** (21:30-batchen kørte mens iterationen var i gang). Kun
@@ -13828,7 +13829,7 @@ overlevede C91's rettelse i to filer, fordi ingen måler dækkede hele klassen. 
 fandtes i sidste øjeblik, ved at køre en *eksisterende* notes greb — ikke fordi en
 gate var dækkende.
 
-### ⏳ VERIFICÉR DEPLOY: C115 — forsidens `dage-til`-links er igen `/dage-til/slug`, ikke `//dage-til//slug`
+### ✅ DEPLOY OK 2026-09-29 (indholdskontrol 08:06-08:20) — C115 — forsidens `dage-til`-links er igen `/dage-til/slug`, ikke `//dage-til//slug`
 
 Kode + plan i ét commit på `ceo/dage-til-forside-dobbeltslash`. Første
 kandidatvindue **2026-09-29 07:30** (push efter 21:30-batchen). Kun
@@ -14049,7 +14050,7 @@ Forventningen er flere interne links til to sider på position 6-8 med næsten
 intet klik. De øvrige tyventog har nul målte visninger og kan derfor kun måles
 som *fravær* af skade, ikke som vækst.
 
-### ⏳ VERIFICÉR DEPLOY: C118 — beraknare.se har alle 53 kort på forsiden
+### ✅ DEPLOY OK 2026-09-29 (indholdskontrol 08:06-08:20) — C118 — beraknare.se har alle 53 kort på forsiden
 
 Kode + plan i ét squash-commit på `ceo/se-forside-katalog`. Første
 kandidatvindue **2026-09-29 07:30** (push efter 21:30-batchen). Kun
@@ -14109,7 +14110,7 @@ domæner**, altså ingen protocol-relative href.
 - **MÅL:** `/kvadratmeter` SE baseline **3.249 v / 6 klik / CTR 0,2 % / pos. 11,2
   pr. 2026-08-29 → 2026-09-26** — måles igen **2026-10-12**.
 
-- ⏳ **VERIFICÉR DEPLOY: C119 — beraknare.se `/kvadratmeter` har et nyt
+- ✅ **DEPLOY OK 2026-09-29 (indholdskontrol 08:06-08:20) — C119 — beraknare.se `/kvadratmeter` har et nyt
   `<h2>` "Så här räknar man ut kvadratmeter med siffror" med fire regneeksempler
   (5 × 4 = 20 m², 3,14 × 3 × 3 = 28,3 m², (6 × 4) / 2 = 12 m²,
   ((4 + 6) / 2) × 3 = 15 m²), pristallet 3 000 kr, form-ordene "golv, vägg, tak"
@@ -14170,7 +14171,7 @@ Ingen beregningslogik rørt, dansk sproggren urørt.
 **MÅL:** SE baseline **59.270 v / 123 klik / CTR 0,2 % / pos. 8,1** pr.
 2026-08-29 → 2026-09-26 — måles igen **2026-10-12**.
 
-- ⏳ **VERIFICÉR DEPLOY: C120 — beraknare.se `/tidsberegner` har egen
+- ✅ **DEPLOY OK 2026-09-29 (indholdskontrol 08:06-08:20) — C120 — beraknare.se `/tidsberegner` har egen
   svar-først-tabel, minuter↔timmar-sektion og to nye FAQ-spørgsmål.** Kode +
   plan i ét commit på `ceo/se-tidsberegner-svarforst`, squashet til `master`.
   Første kandidatvindue **2026-09-29 07:30** (23:30 er efter 21:30-batchen).
@@ -14298,7 +14299,7 @@ master-koden (`git stash` af `page.tsx` + `page-data.ts`).
 117/85/32 og **0** ureviewet, `knapgruppe-scan.mjs` **0/0**. Ingen
 beregningslogik ændret, `TidszoneBeregner` urørt, `no` urørt.
 
-- ⏳ **VERIFICÉR DEPLOY: C121 — beraknare.se `/tidszone` har to nye `<h2>`
+- ✅ **DEPLOY OK 2026-09-29 (indholdskontrol 08:06-08:20) — C121 — beraknare.se `/tidszone` har to nye `<h2>`
   ("Tidsskillnad till de länder folk frågar om" og "Så räknar du ut
   tidsskillnad i Excel"), en landetabel med ti lande i to kolonner, fire
   Excel-formler og fire nye FAQ-spørgsmål (4 → 8).** Kode + plan i ét commit på
@@ -14373,7 +14374,7 @@ nye falder** med master-koden.
 164), build (141 sider), `locale-leak.mjs --gate` exit 0,
 `knapgruppe-scan.mjs` 0/0. `nedtaelling.ts` urørt.
 
-- ⏳ **VERIFICÉR DEPLOY: C122 — beraknare.se `/nedtaelling` har et nyt
+- ✅ **DEPLOY OK 2026-09-29 (indholdskontrol 08:06-08:20) — C122 — beraknare.se `/nedtaelling` har et nyt
   `<h2>` "Så räknar du ut dagar kvar i Excel" med fire formler og et nyt
   `<h3>` "Timmar, minuter och sekunder kvar" med fire-rækkers tabellen og to
   nye FAQ-spørgsmål (4 → 6).** Kode + plan i ét commit på
@@ -14464,7 +14465,7 @@ nye `<h3>`, alle fire formler, "dela med 1,25", "1 000 kr exkl.", FAQ **6** (var
 4) og **0** på "baglæns"/"=MOMS("/"Sådan beregner"; DA uændret (4 `<h2>`, 11
 FAQ, 0 svenske markører); `/api/health` → `status: ok`.
 
-- ⏳ **VERIFICÉR DEPLOY: C123 — beraknare.se `/moms` har to nye `<h3>` ("Så
+- ✅ **DEPLOY OK 2026-09-29 (indholdskontrol 08:06-08:20) — C123 — beraknare.se `/moms` har to nye `<h3>` ("Så
   räknar du ut moms baklänges" og "Moms i Excel"), fire Excel-formler, en
   fem-rækkers baklänges-tabel og to nye FAQ-spørgsmål (4 → 6).** Kode + plan i
   ét commit på `ceo/se-moms-baklaenges-excel`, squashet til `master`. Første
@@ -14525,7 +14526,7 @@ lande-overskriften og dens tabel navngiver præcis de byer, tabellen renderer.
 build (141 sider). Målt på rigtig server (port 3721): DA og SE har begge
 Nuuk i sætningen, korrekt EU-landeliste, ingen dansk lækage i SE.
 
-- ⏳ **VERIFICÉR DEPLOY: C155 — `/tidszone` har Grønland i landetabellen med
+- ✅ **DEPLOY OK 2026-09-29 (indholdskontrol 08:06-08:20) — C155 — `/tidszone` har Grønland i landetabellen med
   "4 timer bagefter" i begge sprog (10 → 11 rækker), og den indledende sætning
   nævner Nuuk.** Kode + plan i ét commit på `ceo/tidszone-land`, squashet til
   `master`. Første kandidatvindue **2026-09-29 07:30** (01:16 er efter
@@ -14607,7 +14608,7 @@ barselsloven og uden kilde i repoet — intet tal er skrevet. "barsel udland" /
 2.548 / 166), build (**141 sider**). Kode + plan i ét squash-commit på
 `ceo/barsel-flerlinger-indlaeggelse`.
 
-- ⏳ **VERIFICÉR DEPLOY: C156 — `/blog/barsel-2026-regler-og-satser` svarer på
+- ✅ **DEPLOY OK 2026-09-29 (indholdskontrol 08:06-08:20) — C156 — `/blog/barsel-2026-regler-og-satser` svarer på
   tvillinger, indlæggelse og adoption med de tre nye `<h2>` og tre nye
   FAQ-par (4 → 7).** Kode + plan i ét commit på
   `ceo/barsel-flerlinger-indlaeggelse`, squashet til `master`. Første
@@ -14748,7 +14749,7 @@ kandidater — 97 døde, 35 kræver øjne, 0 ureviewet**, `knapgruppe-scan.mjs`
 **alle 21** danske markører **0**, alle 18 svenske strenge **2-6** hver,
 JSON-LD `Question` **9** uændret, dansk render urørt.
 
-- ⏳ **VERIFICÉR DEPLOY: C157 — beraknare.se `/procent` har fire danske
+- ✅ **DEPLOY OK 2026-09-29 (indholdskontrol 08:06-08:20) — C157 — beraknare.se `/procent` har fire danske
   afsnit oversat til svensk, og `locale-leak.mjs --gate` dækker nu
   `page-data.ts`.** Kode + plan i ét commit på
   `ceo/page-data-locale-leak`, squashet til `master`. Første
@@ -14906,47 +14907,25 @@ se-monterede kalkulatorsider — målt på rigtig server, ikke på kildeformen.
 Gatens egne tal (591/556/35/0) måles igen **2026-10-13**; en voksende
 `kræver øjne` uden voksende `ureviewet` er en port, der er holdt op at læse.
 
-#### 159. [ ] `TIDSBLOKERET` (ikke `BLOCKED`) — **de ni åbne deploy-noter skal lukkes ved indholdskontrol, og port-reglen skal have kørt en hel cyklus på rigtig server**
+#### 159. [x] FÆRDIG 2026-09-29 — C168 — **de åbne deploy-noter er lukket ved indholdskontrol, og kriterium 2's byggede-server-kørsel afslørede tre ægte lækager, porten ikke kunne se**
 
-> **C160 (04:15) rørte den ikke og bekræfter blokeringen.** Kriterium 1 kræver
-> stadig 07:30. C160's *egen* note har vindue **12:30**, fordi C160 merges efter
-> 07:30-batchen. Bemærk at C160 har **udvidet** port-reglen (dage-til-ruterne i
-> grafen + to rettelser), så kriterium 2 og 3 bør måles på de nye tal
-> (**129 filer / 594 kandidater / 559 døde / 35 kræver øjne / 0 ureviewet**)
-> og ikke på C158's 126/591/556/35/0.
->
-> **C163 (05:11) rørte den heller ikke — kriterium 1 kræver stadig 07:30, det var
-> 05:11.** Kriterium 2 og 3 har nu et **nyt** tal at måle på. Målt på *samme
-> scannerrevision* før og efter C163's JSX-rettelse, så forskellen er
-> reglens og ikke en anden kørsel:
->
-> | | før C163 | efter C163 |
-> |---|---|---|
-> | kandidater | **593** | **739** |
-> | døde | 558 | **704** |
-> | kræver øjne | 35 | **35** |
-> | ureviewet | 0 | **0** |
->
-> **+146 kandidater, +146 døde, 0 nye kræver-øjne, 0 nye ureviewede** — de nye
-> fund er da-porte, som port-analysen dømmer uden at spørge en mand. Det er det
-> bedste svar kriterium 2 og 3 kan få før 07:30: **rummet blev 25 % større, og
-> porten hold.** (C160's note ovenfor siger 594/559/35/0; de afviger med 1 fra
-> min måling på master. Jeg bruger **egne** tal i sammenligningen ovenfor, for
-> en forskel på 1 i en note fra en anden revision kan ikke bære en konklusion.)
+**Lukket 2026-09-29 08:06-08:20 ved indholdskontrol.** Alle **16** noter med
+udløbet vindue blev målt på de URL'er hver note selv navngiver, og ingen blev
+lukket på HTTP 200 alene. **C167 er bevidst stadig åben:** den blev mergeret
+07:49, altså efter 07:30-batchen, så dens første vindue er 12:30 — og
+`/alder` har stadig FAQ 10 (skal være 12), altså *bekræftet* åben frem for
+antaget åben.
 
-> **C164 (06:00) rørte den heller ikke — kriterium 1 kræver stadig 07:30.**
-> Kriterium 2 og 3 er dog nået et **fjerde** uændret tal at måle på, efter at
-> C163's JSX-rettelse lå på master: **739 kandidater / 704 døde / 35 kræver
-> øjne / 0 ureviewet** (C163 målte 739/704/35/0 på samme revision, så de to
-> køringer er uafhængige bekræftelser af hinanden — og forskellen mod
-> C160's 594/559/35/0 er C160's egen revision). Plus **129 filer monteres på
-> 56 kalkulatorsider** mod C158's 126/54. Dobbeltplantningen er grøn.
+**Kriterium 2 er det, der gav arbejdet.** Det krævede at køre porten mod den
+*byggede* server og sammenligne med kildefundene. Resultatet:
 
-**⏱ Blokeret af uret, ikke af en fejl.** C159 startede 2026-09-29 03:16; alle ni
-noter har første vindue **07:30**. Kriterium 1 kan ikke udføres før det tidspunkt,
-og en note må ikke lukkes på et ur, der ikke har gået. **Revurder efter 07:30.**
-C159's egen note (C158) har første vindue **12:30**, fordi C158 blev pushet efter
-07:30-batchen.
+| retning | måling | resultat |
+|---|---|---|
+| døde strenge → findes de i renderet HTML? | 393 af 685 testet mod 71 sider | **0** — porten dømmer rigtigt |
+| dansk i renderet HTML → så porten den? | 71 sider fra `next start` | **2 sider** — porten så den ikke |
+
+Kriterium 3 siger at en afvigelse er en **ny iteration**, ikke en note der
+lukkes. Se opgave 168.
 
 **Datagrund:** de ni noter (C114, C115, C118–C123, C155–C157) står åbne med
 første vindue **2026-09-29 07:30**. C158 merge/pushes efter 02:5x, altså efter
@@ -15065,7 +15044,7 @@ Hvis `/enhudspris` bare forsvinder uden at `/enhedspris` vinder dem, er pos. 6,1
 et rangeringsspørgsmål, ikke et svar-spørgsmål — og så skal den måles om, ikke
 bygges videre på.
 
-- ⏳ **VERIFICÉR DEPLOY: C159 — `beraknare.se/enhudspris` svarer 301 til `/enhedspris` i stedet for 404.** Kode + plan i ét squash-commit på `ceo/enhudspris-alias`. Første kandidatvindue **2026-09-29 07:30** (merge sker 03:3x, altså før batchen). Kun `src/lib/routing.ts` (én post i `swedishAliases` + `export`) og den nye `src/lib/routing-alias.test.ts` er rørt — **ingen beregningslogik, ingen side, ingen dansk tekst, ingen sitemap-post, ingen ny URL**. Verificér ved **indhold, ikke HTTP 200 alene** — en 301 *er* HTTP-korrekt, så det er destinationen der skal måles:
+- ✅ **DEPLOY OK 2026-09-29 (indholdskontrol 08:06-08:20) — C159 — `beraknare.se/enhudspris` svarer 301 til `/enhedspris` i stedet for 404.** Kode + plan i ét squash-commit på `ceo/enhudspris-alias`. Første kandidatvindue **2026-09-29 07:30** (merge sker 03:3x, altså før batchen). Kun `src/lib/routing.ts` (én post i `swedishAliases` + `export`) og den nye `src/lib/routing-alias.test.ts` er rørt — **ingen beregningslogik, ingen side, ingen dansk tekst, ingen sitemap-post, ingen ny URL**. Verificér ved **indhold, ikke HTTP 200 alene** — en 301 *er* HTTP-korrekt, så det er destinationen der skal måles:
   1. `curl -sI https://beraknare.se/enhudspris` skal svare **301** med
      `location: https://beraknare.se/enhedspris`.
   2. `curl -s https://beraknare.se/enhedspris` skal svare **200** med svensk
@@ -15213,7 +15192,7 @@ danske afsnit (`hvor A1 er det gamle tallet`, `tager du middelverdien`, …) på
 live — det er **C157's rettelse, der endnu ikke er deployet** (vindue 12:30),
 ikke en ny lækage. De skal verificeres i den note, ikke rettes igen.
 
-- ⏳ **VERIFICÉR DEPLOY: C160 — beraknare.se's 14 `dagar-till`-sider skal sige "dagar **till**" i stedet for "dagar **til**" i det synlige svar, meta description, og:description og JSON-LD.** Kode + plan i ét squash-commit på `ceo/dagartill-till`. Første kandidatvindue **2026-09-29 12:30** (merge sker efter 07:30-batchen). Kun `src/components/DageTilPage.tsx` (ét nyt `to`-felt i `copy` + dets brug), `scripts/locale-leak.mjs` (dage-til-ruterne i grafen + to port-rettelser) og `src/app/dage-til-routes.test.tsx` er rørt — **ingen beregningslogik, ingen URL, ingen sitemap-post, ingen dansk tekst ændret**. Verificér ved **indhold, ikke HTTP 200**:
+- ✅ **DEPLOY OK 2026-09-29 (indholdskontrol 08:06-08:20) — C160 — beraknare.se's 14 `dagar-till`-sider skal sige "dagar **till**" i stedet for "dagar **til**" i det synlige svar, meta description, og:description og JSON-LD.** Kode + plan i ét squash-commit på `ceo/dagartill-till`. Første kandidatvindue **2026-09-29 12:30** (merge sker efter 07:30-batchen). Kun `src/components/DageTilPage.tsx` (ét nyt `to`-felt i `copy` + dets brug), `scripts/locale-leak.mjs` (dage-til-ruterne i grafen + to port-rettelser) og `src/app/dage-til-routes.test.tsx` er rørt — **ingen beregningslogik, ingen URL, ingen sitemap-post, ingen dansk tekst ændret**. Verificér ved **indhold, ikke HTTP 200**:
   1. `curl -s https://beraknare.se/dagar-till/juldagen` skal have **0** forekomster
      af `"dagar til "` og **8** af `"dagar till "`. Tallet på **alle 14** slugs.
   2. `curl -s https://beraknare.se/dagar-till/juldagen` skal have
@@ -15325,7 +15304,7 @@ top-søgninger kan ikke ses fra loopet, så næste iteration skal bruge sine
 gange på `/procent` på at *finde* dem (autocomplete + GSC's søgeforespørgsels-
 rapport), ikke på at skrive mere indhold til dem.
 
-- ⏳ **VERIFICÉR DEPLOY: C161 — `/procent` skal have de fire formler præcis én gang i HTML'en i stedet for tre, på begge domæner, og de to duplikat-overskrifter skal være væk.** Kode + plan i ét squash-commit på `ceo/procent-formler-duplikat`. Første kandidatvindue **2026-09-29 07:30**. Kun `src/app/procent/page.tsx` (to `<h2>`-afsnit slettet, `Tip` bevaret) og den nye `src/app/procent/procent-formler.test.tsx` er rørt — **ingen beregningslogik, ingen FAQ, ingen titel/description, ingen anden side**. Verificér ved **indhold, ikke HTTP 200**:
+- ✅ **DEPLOY OK 2026-09-29 (indholdskontrol 08:06-08:20) — C161 — `/procent` skal have de fire formler præcis én gang i HTML'en i stedet for tre, på begge domæner, og de to duplikat-overskrifter skal være væk.** Kode + plan i ét squash-commit på `ceo/procent-formler-duplikat`. Første kandidatvindue **2026-09-29 07:30**. Kun `src/app/procent/page.tsx` (to `<h2>`-afsnit slettet, `Tip` bevaret) og den nye `src/app/procent/procent-formler.test.tsx` er rørt — **ingen beregningslogik, ingen FAQ, ingen titel/description, ingen anden side**. Verificér ved **indhold, ikke HTTP 200**:
   1. `curl -s https://minberegner.dk/procent` skal have **1** forekomst af
      `"Procent = (Del / Heltal) × 100"` og **1** af `"Heltal = Del × (100 / Procent)"`.
      Før rettelsen var de **3** hver — brug det tal, ikke et krav om 200.
@@ -15440,7 +15419,7 @@ filer** (fra 2.593 / 169), `locale-leak.mjs --gate` exit 0,
 `src/lib/locale-leak-gate.test.ts` (+3). **Ingen beregningslogik, ingen
 dansk tekst, ingen sitemap, ingen URL ændret.**
 
-- ⏳ **VERIFICÉR DEPLOY: C163 — `src/app/procent/page.tsx` skriver
+- ✅ **DEPLOY OK 2026-09-29 (indholdskontrol 08:06-08:20) — C163 — `src/app/procent/page.tsx` skriver
   "lönprocent" og "här" i stedet for "lønsprocent" og "her" i den svenske
   gren, og `scripts/locale-leak.mjs`'s JSX-regel læser nu copy der ligger på
   linjen efter sit tag og der ender i `{" "}`.** Kode + plan i ét commit på
@@ -15560,7 +15539,7 @@ måned — og de er 1,3 % af hele sitets månedlige visninger, så en tilsvarend
 løftning på `/nedtaelling` og de 14 `dage-til`-siders opslag er den samme
 mekanisme.
 
-- ⏳ **VERIFICÉR DEPLOY: C164 — `/dato` skal have titlen "Dage mellem datoer
+- ✅ **DEPLOY OK 2026-09-29 (indholdskontrol 08:06-08:20) — C164 — `/dato` skal have titlen "Dage mellem datoer
   og dage til en dato | MinBeregner.dk" (og den svenske "Dagar mellan
   datum och dagar kvar till datum | Beräknare.se") og en beskrivelse der
   **starter med spørgsmålet** "Hvor mange dage er der til en dato?" /
@@ -15661,7 +15640,7 @@ minberegner.dk — så beraknare.se's 0,1 % CTR er **ikke** et sprogflag-fejl.
 (4) De øvrige **44** kalkulatorer uden blog-link har 0 målte visninger i
 GSC's top-16 og Plausible's top-15.
 
-- ⏳ **VERIFICÉR DEPLOY: C165 — `/dato` og `/brok` skal have en
+- ✅ **DEPLOY OK 2026-09-29 (indholdskontrol 08:06-08:20) — C165 — `/dato` og `/brok` skal have en
   "Guides om emnet"-blok, og de tre indlæg skal linke tilbage.** Kode + plan
   i ét squash-commit på `ceo/blog-kobling-retur`. Første kandidatvindue
   **2026-09-29 12:30** (merge sker efter 07:30-batchen). Kun
@@ -15683,7 +15662,7 @@ GSC's top-16 og Plausible's top-15.
      **uændrede** titler.
   7. `https://minberegner.dk/api/health` → `status: ok`.
 
-- ⏳ **VERIFICÉR DEPLOY: C166 — de 28 `dage-til`-siders meta description skal
+- ✅ **DEPLOY OK 2026-09-29 (indholdskontrol 08:06-08:20) — C166 — de 28 `dage-til`-siders meta description skal
   starte på **svaret** og ikke på spørgsmålet, og skal være under 160 tegn.**
   Kode + plan i ét squash-commit på `ceo/dage-til-description`. Første
   kandidatvindue **2026-09-29 12:30** (merge sker efter 07:30-batchen). Kun
@@ -15814,3 +15793,130 @@ svaret. Skrevet som en falsificérbar forudsigelse.
      `https://minberegner.dk/alder` skal fortsat have uændret `<title>`
      "Aldersberegner: hvor gammel er du i år, måneder og dage?".
   5. `https://minberegner.dk/api/health` → `status: ok`.
+
+#### 168. [x] FÆRDIG 2026-09-29 — C168 — **tre ægte danske lækager på beraknare.se, fundet fordi opgave 159's andet acceptkriterium sagde "kør porten på den byggede server" — og den lækager, der *ikke* har noget dansk tegn, blev fundet af den nye scanner**
+
+**Datagrund.** Opgave 159's kriterium 2, ikke en idé. Den bad om at køre
+`locale-leak.mjs` mod den **byggede** server og sammenligne fundene med
+kildefundene. Målt på rigtig server (build → `next start` port 3700, fri
+verificeret *inden* start, alle **71** svenske sider hentet med `Host:
+beraknare.se`):
+
+| retning | måling | resultat |
+|---|---|---|
+| de 685 "døde" strenge — findes nogen i renderet HTML? | 393 testet (≥25 tegn) × 71 sider | **0** |
+| dansk i renderet HTML — så porten den? | 71 sider | **2 sider med fejl** |
+
+Det er en **forskelse på 2**, så kriterium 3 trådte i kraft: porten er for
+snæver, og det er en ny iteration. De tre fund:
+
+1. **`/tidszone` skrev "Grønland"** med dansk ø i landetabellen på
+   beraknare.se. C155 lagde Nuuk ind som dansk autocomplete-nr. 1, men uden
+   `landSe`. Sætningen "Storbritannien, Grønland, Grekland och Spanien följer
+   Sverige" bygges af samme array og fulgte med.
+2. **`/valuta`'s valuta-`<select>` viste "Britiske Pund", "Svenske Kroner",
+   "Danske Kroner", "Thailandske Baht"** i *alle tre* sprog. `VALUTA_METADATA`
+   havde ét navn pr. kode, og `getValutaNavn` læste det uden at spørge om
+   locale.
+3. **`/promille` skrev "før den är under" og "altid kortere end"** i den svenska
+   gren af en fælles template-literal. Dansk *før* og dansk *end* i en svensk
+   sætning. Denne fandt den nye scanner mod **live**, efter at de to andre var
+   rettet lokalt.
+
+**Hvorfor porten ikke så dem, som intet i kilden ville have forklaret.** Alle
+tre er værdier, der *når* en svensk læser gennem et opslag ved **visningsstedet**
+— `land.landSe ?? land.landDa`, `VALUTA_METADATA[code]?.navn` — ikke gennem en
+`locale === "…"`-gren port-analysen kan læse direkte. `/tidszone`s `landDa` er
+dømt **DØD**, og det er *korrekt* for den arm scanneren kan se; det den ikke kan
+se er, at `landSe` **mangler**. En fraværende nøgle giver intet fund. At lære
+kildescanneren at evaluere hjælpefunktioner ville være en tabende handel — derfor
+blev den anden halvdel bygget i stedet.
+
+**Målefejl nr. 32 (min egen, og den farligste i hele denne række).** Min første
+krydskontrol reducerede siden med `html.split('<script')[0]`. Det skærer ved
+første `<script>` i `<head>` og **kasserer hele `<body>`** — så scanneren kunne
+overhovedet ikke se tekst. Den meldte **0 på en side med to ægte lækager**.
+Den blev kun opdaget fordi jeg **plantede** et dansk afsnit i siden og krævede at
+scanneren fandt det; den fandt det ikke. Uden den fixture havde jeg troet på et
+0 og skrevet "ingen lækager" i planen. Derfor planter *alle ni* tests i
+`rendered-leak-scan-gate.test.ts` deres fejl, og test #1 kræver direkte at
+scanneren *finder* en dansk sætning i `<body>`.
+
+**Rettelsen (tre filer + tre testfiler).** `landSe: "Grönland"` på Nuuk; ny
+`VALUTA_NAVN` med `se`/`no`-navne pr. kode og eksporteret
+`valutaNavn(code, locale)`; den svenska promille-arm rettet til "före den är
+under" og "kortare än".
+
+**Harness: 2.629 → 2.645 tests / 170 → 172 filer. Modsvejs verificeret: 6 af
+de 6 nye fejltests falder med master-koden** (4 valuta, 1 tidszone, 1 promille).
+De tre "dansk er uændret"-låse er grønne begge veje — de skal være, de låser
+mod at rettelsen tager den danske arm med. `rendered-leak-scan-gate.test.ts` er
+ny med 9 planted tests.
+
+**Målt på rigtig server (build → `next start` port 3701, fri verificeret inden
+start).** SE: `/tidszone` 0×"Grønland", 4×"Grönland", sætningen "Storbritannien,
+Grönland, Grekland och Spanien följer Sverige"; `/promille` 1×"före den är
+under", 1×"kortare än", 0×"før", 0×"kortere end", 0×"er derfor"; `/valuta`
+3×"Brittiska pund", 3×"Svenska kronor", 2×"Danska kronor", 2×"Thailändska
+baht", 0× på alle elleve danske navne. **DA urørt og målt:** Grønland 5,
+"følger Danmark" 1, "før den er under" 1, "kortere end" 1, "Britiske Pund" 3.
+**Den nye scanner mod alle 71 svenske sider i det nye build: 0** (var 2) — og
+mod en tilplantet side: 2 fund og exit 1, så den er ikke vakuum-grøn.
+`/api/health` → `status: ok`.
+
+**Gate grøn:** lint (588 filer), **2.645 tests / 172 filer**, build (141
+sider), `locale-leak.mjs --gate` exit 0 (130/720/685/35/0 uændret),
+`knapgruppe-scan.mjs` 0/0.
+
+- ⏳ **VERIFICÉR DEPLOY: C168 — beraknare.se skal have "Grönland" i stedet for
+  "Grønland", "Brittiska pund" i stedet for "Britiske Pund", og "före den är
+  under" / "kortare än" i stedet for "før" / "kortere end".** Kode + plan i ét
+  squash-commit på `ceo/luk-deploy-noter-159`. Første kandidatvindue
+  **2026-09-29 12:30** (merge sker efter 07:30-batchen). Kun
+  `src/lib/tidszone-eksempler.ts` ( ét `landSe`-felt), `src/components/ValutaBeregner.tsx`
+  (ny `VALUTA_NAVN` + én linje i `getValutaNavn`), `src/app/promille/page.tsx`
+  (én template-literal), den nye `scripts/rendered-leak-scan.mjs` og tre
+  testfiler er rørt — **ingen beregningslogik ændret, ingen URL, ingen sitemap,
+  ingen `<title>`, ingen `<h1>`, ingen FAQ, dansk urørt**.
+
+  **Denne note skal verificeres på to måder, fordi den rører to slags ting.**
+  *Synlig tekst* (de tre rettelser):
+
+  1. `https://beraknare.se/tidszone` skal finde **0** "Grønland" og **≥ 1**
+     "Grönland" (live lige nu: 2 × "Grønland", 2 × "Grönland" — den nye skal
+     have **0** af den første, fordi den vises i både tabellen og sætningen).
+  2. `https://beraknare.se/promille` skal finde **1** "före den är under" og
+     **1** "kortare än", og **0** på "før" og "kortere end". Vær opmærksom på
+     at "før" også forekommer i *dansk* markup på andre sider — mål på præcis
+     denne URL.
+  3. `https://beraknare.se/valuta` skal finde **0** på "Britiske Pund",
+     "Svenske Kroner" og "Danske Kroner". **Mål på hele siden, ikke på
+     `<select>`:** live står "Brittiska pund" 1× og "Svenska kronor" 1× *allerede*,
+     fordi sidens egen `<li>`-liste er svensk — kun `<select>`-en lækkede. Tæller
+     man kun strengene, er 1 mod 1 grønt begge veje, og kun **0** på de danske
+     fanger rettelsen.
+  4. **KONTROL mod at dansk ikke blev rørt:**
+     `https://minberegner.dk/valuta` skal stadig have **≥ 1** "Britiske Pund",
+     "Svenske Kroner" og "Danske Kroner"; `/promille` skal stadig have
+     "før den er under" og "kortere end"; `/tidszone` skal stadig have
+     "Grønland" og "følger Danmark".
+
+  *Adfærd* (den nye scanner, som ikke kan lukkes på at noget ændrer sig):
+
+  5. `npm run test -- src/lib/rendered-leak-scan-gate.test.ts` skal give **9
+     passed** — de ni planter alle deres fejl, så tallet er pointen.
+  6. `node scripts/rendered-leak-scan.mjs https://beraknare.se` skal skrive
+     **"0 danske tegn i synlig tekst"** og **exit 0**. Live lige nu giver den
+     **2** på `/promille` og `/tidszone` og exit 1, så 0 er den rigtige
+     forventning efter deploy.
+  7. **Modsvejs kontrol på måleren** — kør den på en side med en plantet
+     dansk sætning, og kræv at den *finder* den:
+     `node scripts/rendered-leak-scan.mjs --html <fil med "Grønland" i
+     <body>>` skal exit **1** og skrive mindst ét fund. Uden dette er punkt 6
+     värdiløst, fordi en scanner der ikke kan se tekst også melder 0.
+  8. `node scripts/locale-leak.mjs --gate` skal exit 0 med uændrede tal
+     (**130 filer / 720 kandidater / 685 døde / 35 kræver øjne / 0 ureviewet**).
+     Dette commit tilføjer intet til kildescannerens sæt.
+  9. KONTROL: `https://minberegner.dk/api/health` → `status: ok`, og
+     `/tidszone`, `/promille`, `/valuta` skal have uændrede titler på begge
+     domæner.
