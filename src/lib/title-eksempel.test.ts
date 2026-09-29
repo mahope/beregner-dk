@@ -17,10 +17,11 @@
  * regnestykke, brugeren kan regne efter og se resultatet af.
  *
  * Testen læser `metaTitle` — altså den tekst der havner i `<head>` — og kræver
- * at de fire dækkende sider indeholder et tegn på et udregnet eksempel
+ * at de syv dækkende sider indeholder et tegn på et udregnet eksempel
  * (`=` eller `→` mellem to tal). Den fejler på den gamle kode, fordi ingen af
- * de fire titler har en værdi: de er "Procentberegner – beregn 10 procent af
- * et tal", "Dage mellem datoer og dage til en dato" og således videre.
+ * de syv titler har en værdi: de er "Procentberegner – beregn 10 procent af
+ * et tal", "Dage mellem datoer og dage til en dato", "BMI Beregner for voksne
+ * - Beregn dit Body Mass Index gratis" og således videre.
  *
  * Samme test verificerer de konkrete tal mod repoets egne beregningsfunktioner.
  * Et tal i en titel er en påstand om, hvad værktøjet gør (punkt 11 i
@@ -28,6 +29,7 @@
  * runde figur.
  */
 import { describe, expect, test } from "vitest";
+import { beregnBmr, beregnTdee } from "@/lib/makroer";
 import { beregnMoms } from "@/lib/moms";
 import { getPageData } from "@/lib/page-data";
 import { beregnTidsinterval } from "@/lib/tidsberegner";
@@ -36,7 +38,15 @@ import { beregnTidsinterval } from "@/lib/tidsberegner";
  * Sider der skal have et regnestykke i titlen. Listen er begrundet i GSC:
  * en visning, der ikke klikkes, er en visning der koster penge.
  */
-const SKAL_HAEVE_EKSEMPEL = ["procent", "tidsberegner", "moms", "dato"] as const;
+const SKAL_HAEVE_EKSEMPEL = [
+  "procent",
+  "tidsberegner",
+  "moms",
+  "dato",
+  "bmi",
+  "fart",
+  "kalorier",
+] as const;
 
 /**
  * En titel skal have et tal og et mellemled, så læseren kan regne efter.
@@ -101,5 +111,34 @@ describe("tallene i titlerne er rigtige", () => {
     expect((til.getTime() - fra.getTime()) / 86_400_000).toBe(365);
     const titel = getPageData("dato", "da")!.metaTitle;
     expect(titel).toMatch(/365/);
+  });
+
+  test("bmi: 75 kg og 1,75 m er BMI 24,5", () => {
+    expect(75 / 1.75 ** 2).toBeCloseTo(24.4898, 3);
+    for (const locale of ["da", "se"] as const) {
+      const titel = getPageData("bmi", locale)!.metaTitle;
+      expect(titel, locale).toMatch(/75/);
+      expect(titel, locale).toMatch(/1,75²/);
+      expect(titel, locale).toMatch(/24,5/);
+    }
+  });
+
+  test("fart: 100 km/t i 2 timer er 200 km", () => {
+    expect(100 * 2).toBe(200);
+    for (const locale of ["da", "se"] as const) {
+      const titel = getPageData("fart", locale)!.metaTitle;
+      expect(titel, locale).toMatch(/100/);
+      expect(titel, locale).toMatch(/2 (?:timer|timmar)/);
+      expect(titel, locale).toMatch(/200 km/);
+    }
+  });
+
+  test("kalorier: mand 80 kg, 180 cm, 30 år har TDEE 2.759 kcal", () => {
+    const bmr = beregnBmr("mand", 80, 180, 30);
+    expect(bmr).toBe(1780);
+    expect(beregnTdee(bmr, "moderat")).toBe(2759);
+    // Dansk bruger punktum som tusindelstegn, svensk et mellemrum.
+    expect(getPageData("kalorier", "da")!.metaTitle).toMatch(/2\.759/);
+    expect(getPageData("kalorier", "se")!.metaTitle).toMatch(/2 759/);
   });
 });

@@ -110,13 +110,13 @@ describe("getPageData", () => {
   test.each([
     {
       locale: "da" as const,
-      title: "Hvor mange kalorier om dagen? | Kalorieberegner",
+      title: "Kalorieberegner: mand 80 kg, 180 cm = 2.759 kcal/dag",
       question: "Hvor mange kalorier skal du have om dagen?",
       diet: "2.259",
     },
     {
       locale: "se" as const,
-      title: "Hur många kalorier per dag? | Kalorikalkylator",
+      title: "Kalorikalkylator: man 80 kg, 180 cm = 2 759 kcal/dag",
       question: "Hur många kalorier behöver du per dag?",
       diet: "2.259",
     },

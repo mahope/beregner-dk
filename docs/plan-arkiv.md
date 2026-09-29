@@ -18646,3 +18646,54 @@ Kun noter med et *uafviklet* vindue står her. Alt lukket er i `docs/plan-arkiv.
 - **MÅL:** de svy sider har ingen CTR-baseline i GSC-uddraget; kun
   `/rentefradrag` (331 Plausible-besøgende/28d) er med der. Mål snippet-andelen
   for `/` (222 besøgende/28d, bounce 37 %) 14 dage efter deploy.
+
+
+---
+
+## C195 (2026-09-29) — otte side-titler regner et eksempel
+
+#### 181. [x] 2026-09-29 — C195 — **otte side-titler regner nu et eksempel i stedet for at navngive en kategori**
+
+- **Datagrund:** GSC's egne tal (28 dage) deler sitet i to grupper efter
+  titelform. Eksempel-titler (`/kvadratmeter` "5 x 4 m = 20 m²", `/braendstof`
+  "500 km benzin koster 450 kr.", `/renteberegner`, `/promille`, `/brok`) har
+  **median 0,9 % CTR på 67.643 visninger**. Kategorititler (`/procent`,
+  `/dato`, `/tidsberegner`, `/moms`, `/boligstoette`) har **median 0,3 % på
+  385.817 visninger** — fire gange så mange visninger, halvt så mange klik.
+  `/procent` er det tydeligste: **150.148 visninger, 98 klik, 0,1 %, pos. 7,4.**
+  Ved medianen for eksempel-titler ville de fire alene give ~3.400 klik.
+- **Hvorfor det ikke var en skønsmalssag:** planen havde tidligere konkluderet
+  at `/procent` "kan ikke diagnosticeres i en agent-iteration", fordi de tre
+  viste GSC-søgninger kun er 0,24 % af visningerne. Det er rigtigt for den
+  *konkrete søgning*, men det overså et mønster i **sidernes egne data**: det
+  kræver ingen query-eksport at se, at de sider der allerede regner et eksempel
+  konverterer tre gange bedre. Det er den her retning bygger på.
+- **Rettet:** `procent`, `dato`, `tidsberegner` og `moms` i **da og se** — otte
+  `metaTitle` + otte `ogTitle`. Hvert tal er verificeret mod repoets egne
+  beregningsfunktioner, ikke regnet i hovedet: `beregnTidsinterval("08:30",
+  "16:45")` → 8 t 15 min, `beregnMoms(1000, "tillaegMoms", 25)` → 1.250 kr,
+  10 % af 250 → 25, 1 år → 365 dage.
+- **Fund undervejs:** 1. **En copy-paste slettede et svensk keyword**
+  (`"procentuell ökning"`) — fanget i min egen diff-review og rettet, så
+  diffen er rent `metaTitle`/`ogTitle`. 2. **C164's binding blev brudt og
+  rettet:** `page-data.test.ts` kræver at `/dato`'s titel stadig nævner
+  *begge* hensigter, fordi countdown-søgerne er de næststørste på siden. Den
+  første nye titel ("Dage mellem datoer: 1. jan. 2026 → 1. jan. 2027 = 365
+  dage") droppede "dage til en dato" og faldt i den eksisterende test. Den
+  endelige titel bevarer begge hensigter *og* regner et eksempel. 3. Den
+  svenske titel måtte ikke over 60 tegn, så den blev "Beräkna dagar mellan
+  datum och dagar kvar till datum = 365".
+- **Ny test `src/lib/title-eksempel.test.ts` (12 tests):** kræver et tal og et
+  `=` i hver af de otte titler, og verificerer de fire konkrete regnestykker
+  mod beregningsfunktionerne. Den fejlede med de otte fund ovenfor og er grøn
+  efter rettelsen. De eksisterende "answer-first"-tests i `page-data.test.ts`
+  og `page-helpers.test.ts` blev opdateret til de nye titler i stedet for
+  slettet — de dækker description, `og:` og schema-description, som er
+  urørte.
+- **MÅL:** `/procent` baseline **98 klik/28d** · `/dato` **822** ·
+  `/tidsberegner` **195** · `/moms` **41** (GSC 2026-08-30 → 2026-09-27).
+  Mål igen 14 dage efter `DEPLOY OK`. Forventning ved median 0,9 %: de fire
+  giver ~3.400 klik mod 1.156 nu. **Dette er en forventning, ikke en
+  garanti** — en titelændring kan også sænke CTR'en, og GSC's
+  gennemsnitsposition kan flytte sig, så effekten skal måles i klik og ikke i
+ CTR alene.

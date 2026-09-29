@@ -1,23 +1,19 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — **C190, C191, C192, C193, C194 og CEO-punkt 0 er alle lukket på
-indhold** (målt 2026-09-29 22:05 mod produktion, ikke på HTTP-status). Se
-`docs/plan-arkiv.md`. Kort: valborg siger 30. april, sankthans 23./24. juni,
-svensk påskafton 27. marts, `/husleje` har Lejeloven § 5, alle 16 sider i
-C193 har description ≤ 160, C194s syv har 115–158, SE-promille har 8 `Question`,
-SE-renteberegner har Excel-tabellen med `=200000*4/100`, og `/dato` + `/nedtaelling`
-viser dagens dagstal.
+STATUS: KØ — **C190–C195 og CEO-punkt 0 er lukket på indhold** (målt 2026-09-29
+22:05 mod produktion, ikke på HTTP-status). Se `docs/plan-arkiv.md`.
 
-STATUS: **Denne iteration: otte side-titler er skrevet om til at regne et
-eksempel** (procent, dato, tidsberegner, moms — i da og se), branch
-`ceo/eksempel-titler`. Datagrund: GSC's egne tal deler sitet i eksempel-titler
-(median 0,9 %, 67.643 visninger) og kategorititler (median 0,3 %, 385.817
-visninger). `/procent` har 150.148 visninger og 98 klik. **MÅL (baseline
-2026-09-29):** `/procent` 98 klik/28d, `/dato` 822, `/tidsberegner` 195,
-`/moms` 41 — mål igen 14 dage efter deploy.
+STATUS: **Denne iteration (C196): `/bmi`, `/fart` og `/kalorier` regner nu et
+eksempel i titlen** i da og se, branch `ceo/eksempel-titler-fall`. Det er de tre
+sidste sider i GSC's top-15 med en ren kategorititel, og to af dem er de sider
+planen havde markeret som faldende. **MÅL (baseline 2026-09-29):** `/bmi` 938
+besøgende/28d, `/fart` 4.645 visninger/28d @ 0,6 %, `/kalorier` 12.631
+visninger @ 1,0 % — mål igen 14 dage efter deploy.
 
-STATUS: KØ — `/bmi` (938 besøgende/28d, −26 %) og `/su` (220 → 116) falder
-stadig; ingen ny måling siden 23/9. Ingen diagnose endnu.
+STATUS: KØ — `/su` (220 → 116 besøgende/28d, −47 %) er **stadig uden diagnose**
+og er bevidst ikke rørt i C196: dens titel skal regne et beløb, og kun ét af de
+to tal (ude-boende 7.426 kr. før skat) er citerbart fra `satser-2026.ts` uden
+at gætte efter-skattedelen. Se opgave 183.
 
 ## Kvalitetsgate (repoets egne scripts fra package.json)
 
@@ -33,29 +29,34 @@ Alle fire var grønne før merge 2026-09-29 22:45.
 
 ## Åbne VERIFICÉR DEPLOY-noter
 
-Én note. HTTP 200 beviser intet: intet her rører en URL, kun otte `<title>`- og
+To noter. HTTP 200 beviser intet: ingen rører en URL, kun `<title>`- og
 `og:title`-strenge.
 
-- ⏳ **VERIFICÉR DEPLOY: otte titler med et udregnet eksempel.** Kode + plan i ét
-  squash-commit på `ceo/eksempel-titler`. Første kandidatvindue **2026-09-30
-  07:30**. Rørte filer: `src/lib/page-data.ts` (**16 strenge**, kun `metaTitle`
-  og `ogTitle` — `git diff` verificerer at intet andet er rørt),
-  `src/lib/page-data.test.ts`, `src/lib/page-helpers.test.ts` (følger de nye
-  titler) og `src/lib/title-eksempel.test.ts` (**ny**, 12 tests). **Ingen
-  `<h1>`, ingen beregningslogik, ingen ny URL, ingen sitemap, ingen dansk
-  `<title>` uden for de fire.** Verificér ved **indhold**:
+- ⏳ **VERIFICÉR DEPLOY: seks titler med et udregnet eksempel (`/bmi`, `/fart`,
+  `/kalorier`).** Kode + plan i ét squash-commit på `ceo/eksempel-titler-fall`.
+  Første kandidatvindue **2026-09-30 07:30**. Rørte filer: `src/lib/page-data.ts`
+  (**12 strenge**, kun `metaTitle` og `ogTitle` — `git diff` verificerer at
+  intet andet er rørt), `src/lib/title-eksempel.test.ts` (+3 sider, +3
+  talverificeringer) og `src/lib/page-data.test.ts` (to låste titler
+  opdateret). Ingen `<h1>`, ingen beregningslogik, ingen ny URL, ingen
+  sitemap. Verificér ved **indhold**:
   1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
-  2. `<title>` på dansk skal være: `/procent` "Procentberegner: 10 % af 250 kr. =
-     25 kr." · `/dato` "Beregn dage mellem datoer og dage til en dato = 365
-     dage" · `/tidsberegner` "Tidsberegner: 08:30 til 16:45 = 8 t 15 min." ·
-     `/moms` "Momsberegner: 1.000 kr. ekskl. moms = 1.250 kr."
-  3. Samme på beraknare.se: "Procenträknare: 10 % av 250 kr = 25 kr" ·
-     "Beräkna dagar mellan datum och dagar kvar till datum = 365" ·
-     "Tidskalkylator: 08:30 till 16:45 = 8 t 15 min" · "Momskalkylator:
-     1 000 kr. exkl. moms = 1 250 kr."
-  4. **Kontrol:** `/procent` 115, `/dato` 118, `/tidsberegner` 141, `/moms` 128
-     skal være uændrede i `meta description`, og **0** sider i begge
-     sitemapmer må have en description over 160.
+  2. `<title>` på dansk: `/bmi` "BMI-beregner for voksne: 75 kg / 1,75² = 24,5" ·
+     `/fart` "Fartberegner: 100 km/t i 2 timer = 200 km" · `/kalorier`
+     "Kalorieberegner: mand 80 kg, 180 cm = 2.759 kcal/dag".
+  3. Samme på beraknare.se: "BMI-kalkylator för vuxna: 75 kg / 1,75² = 24,5" ·
+     "Hastighetsberäknare: 100 km/h i 2 timmar = 200 km" · "Kalorikalkylator:
+     man 80 kg, 180 cm = 2 759 kcal/dag".
+  4. **Kontrol:** de tre `meta description` skal være byte-for-byte uændrede,
+     og de tre `<h1>` skal stadig være "BMI Beregner for voksne",
+     "Fartberegner - beregn fart, distance og tid" og "Kalorieberegner".
+  **Målt på rigtig server før merge** (`next start` :3987, porten verificeret
+  fri *inden* start): alle seks titler er korrekte i begge sprog, de tre
+  beskrivelser og de tre `<h1>` er uændrede. **Gate grøn:** lint (**616
+  filer**), **3001 tests / 189 filer**, build (**142 sider**), `locale-leak.mjs
+  --gate` exit 0. De ni nye titeltests **fejler mod master's `page-data.ts`**
+  (verificeret med `git stash`), så de låser den gamle fejl fast.
+
 
 ## Åbne opgaver
 
@@ -198,51 +199,68 @@ Alle fire var grønne før merge 2026-09-29 22:45.
 - **Note:** de er **gamle** (to dage, ~14 deploy-vinduer). Hvis koden siden er
   rørt igen på de tre sider, skal noterne skrives om mod den nuværende kode
   før de verificeres — ellers verificerer man en gammel kravspecifikation.
-#### 181. [x] 2026-09-29 — C195 — **otte side-titler regner nu et eksempel i stedet for at navngive en kategori**
+#### 182. [x] 2026-09-29 — C196 — **`/bmi`, `/fart` og `/kalorier` regner et eksempel i titlen i da og se**
 
-- **Datagrund:** GSC's egne tal (28 dage) deler sitet i to grupper efter
-  titelform. Eksempel-titler (`/kvadratmeter` "5 x 4 m = 20 m²", `/braendstof`
-  "500 km benzin koster 450 kr.", `/renteberegner`, `/promille`, `/brok`) har
-  **median 0,9 % CTR på 67.643 visninger**. Kategorititler (`/procent`,
-  `/dato`, `/tidsberegner`, `/moms`, `/boligstoette`) har **median 0,3 % på
-  385.817 visninger** — fire gange så mange visninger, halvt så mange klik.
-  `/procent` er det tydeligste: **150.148 visninger, 98 klik, 0,1 %, pos. 7,4.**
-  Ved medianen for eksempel-titler ville de fire alene give ~3.400 klik.
-- **Hvorfor det ikke var en skønsmalssag:** planen havde tidligere konkluderet
-  at `/procent` "kan ikke diagnosticeres i en agent-iteration", fordi de tre
-  viste GSC-søgninger kun er 0,24 % af visningerne. Det er rigtigt for den
-  *konkrete søgning*, men det overså et mønster i **sidernes egne data**: det
-  kræver ingen query-eksport at se, at de sider der allerede regner et eksempel
-  konverterer tre gange bedre. Det er den her retning bygger på.
-- **Rettet:** `procent`, `dato`, `tidsberegner` og `moms` i **da og se** — otte
-  `metaTitle` + otte `ogTitle`. Hvert tal er verificeret mod repoets egne
-  beregningsfunktioner, ikke regnet i hovedet: `beregnTidsinterval("08:30",
-  "16:45")` → 8 t 15 min, `beregnMoms(1000, "tillaegMoms", 25)` → 1.250 kr,
-  10 % af 250 → 25, 1 år → 365 dage.
-- **Fund undervejs:** 1. **En copy-paste slettede et svensk keyword**
-  (`"procentuell ökning"`) — fanget i min egen diff-review og rettet, så
-  diffen er rent `metaTitle`/`ogTitle`. 2. **C164's binding blev brudt og
-  rettet:** `page-data.test.ts` kræver at `/dato`'s titel stadig nævner
-  *begge* hensigter, fordi countdown-søgerne er de næststørste på siden. Den
-  første nye titel ("Dage mellem datoer: 1. jan. 2026 → 1. jan. 2027 = 365
-  dage") droppede "dage til en dato" og faldt i den eksisterende test. Den
-  endelige titel bevarer begge hensigter *og* regner et eksempel. 3. Den
-  svenske titel måtte ikke over 60 tegn, så den blev "Beräkna dagar mellan
-  datum och dagar kvar till datum = 365".
-- **Ny test `src/lib/title-eksempel.test.ts` (12 tests):** kræver et tal og et
-  `=` i hver af de otte titler, og verificerer de fire konkrete regnestykker
-  mod beregningsfunktionerne. Den fejlede med de otte fund ovenfor og er grøn
-  efter rettelsen. De eksisterende "answer-first"-tests i `page-data.test.ts`
-  og `page-helpers.test.ts` blev opdateret til de nye titler i stedet for
-  slettet — de dækker description, `og:` og schema-description, som er
-  urørte.
-- **MÅL:** `/procent` baseline **98 klik/28d** · `/dato` **822** ·
-  `/tidsberegner` **195** · `/moms` **41** (GSC 2026-08-30 → 2026-09-27).
-  Mål igen 14 dage efter `DEPLOY OK`. Forventning ved median 0,9 %: de fire
-  giver ~3.400 klik mod 1.156 nu. **Dette er en forventning, ikke en
-  garanti** — en titelændring kan også sænke CTR'en, og GSC's
-  gennemsnitsposition kan flytte sig, så effekten skal måles i klik og ikke i
- CTR alene.
+- **Datagrund:** efter C195 er disse de tre sidste sider i GSC's top-15 med en
+  ren kategorititel. `/bmi` (938 besøgende/28d, −26 %), `/fart` (4.645
+  visninger, 0,6 %, pos. 7,1) og `/kalorier` (12.631 visninger, 1,0 %, pos. 8,1).
+  `/fart` er den **eneste** af de 15, der stadig skrev "Fartberegner - Beregn
+  hastighed, distance og tid". De andre er spørgsmålstitler, som GSC's egen
+  tabel placerer på 0,5 % — bedre end kategori, dårligere end eksempel.
+- **Tal verificeret mod repoets egne funktioner, ikke i hovedet:**
+  `75 / 1.75**2 = 24,4898` (BMI 24,5 — samme eksempel som siden allerede havde
+  i sin `metaDescription`), `100 km/t × 2 timer = 200 km`, og
+  `beregnBmr("mand", 80, 180, 30) = 1780` →
+  `beregnTdee(1780, "moderat") = 2759` (Mifflin-St Jeor).
+- **Hvorfor kun disse tre:** `/tidszone` (24.117 visninger, 0,4 %) er det største
+  eksempel-lignende emne, der **ikke** kan få et eksempel. Ethvert
+  Danmark-forankret klokketidspunkt er forkert halvdelen af året, fordi
+  Danmark har sommertid og det meste af verden ikke har. Ikke en
+  skrivefejl — en structural begrænsning, og derfor skrevet i planen så næste
+  iteration ikke prøver igen. `/alder` (6.985 visninger, 0,5 %) har samme
+  problem: alderen afhænger af dagens dato.
+- **Fund undervejs:** svensk `/fart` hedder i `title` "Hastighetskalkylator",
+  og testen *"metaTitle indeholder sidens eget hovedord"* (C194) faldt, da
+  skrev "Fartberäknare". Løst ved "Hastighetsberäknare", ikke ved at slå
+  testen fra. `/kalorier`'s answer-first-test låste de to gamle titler
+  med `toBe` — opdateret, ikke slettet, så `description`, `og:` og
+  schema-description stadig er dækket.
+- **Test:** `title-eksempel.test.ts` dækker nu syv sider og verificerer de tre
+  nye regnestykker. **De ni nye tests fejler mod master's `page-data.ts`**
+  (verificeret med `git stash push`), så de kan ikke passes ved en fejl.
+- **MÅL:** `/bmi` baseline **938 besøgende/28d** · `/fart` **28 klik/28d**
+  (4.645 visninger) · `/kalorier` **132 klik/28d** (12.631 visninger). Mål igen
+  14 dage efter `DEPLOY OK`. `/bmi` er kun ca. 4.920 GSC-visninger trods 938
+  besøgende, så **mindst halvdelen af `/bmi`s trafik er ikke fra Google** —
+  titelændringen kan derfor ikke alene forklare faldet, og det er grunden til at
+  opgave 183 findes.
+
+#### 183. [ ] 2026-09-29 — Kø — **diagnosér `/bmi`s og `/su`s fald, og find ud af hvor stor en del der er overhovedet Googles**
+
+- **Datagrund:** Plausible 28 dage: `/bmi` 1.271 → 938 (−26 %), `/su` 220 →
+  116 (−47 %). Samtidig voksede sitet **+42 %**, så faldet er relativt værre end
+  26 %. Til sammenligning: `/dato` 1.110 (+77 %), `/boligstoette` 535 (+86 %),
+  `/kvadratmeter` 388 (+94 %), `/rentefradrag` 331 (+145 %).
+- **Den måling, der låser diagnosen:** GSC's top-15 over *visninger* ender på
+  `/brok` med 4.920. **Hverken `/bmi` eller `/su` står på listen**, så begge
+  har **under 4.920 Google-visninger** pr. 28 dage — mens `/bmi` har 938
+  Plausible-besøgende. Det kan ikke være en ren CTR-fejl: en visning der ikke
+  klikkes, ville give en *høj* CTR på den lille visningsmængde. Enten kommer
+  `/bmi`s trafik i overvejende grad fra Bing/DuckDuckGo/Yahoo/direkte
+  (Plausible: Bing 1.308, DDG 371, Yahoo 281, Direct 1.041 mod Google 4.089),
+  eller GSC's eksport er ældre end Plausible's 28 dage.
+- **Hvorfor det ikke er løst i C196:** en diagnose uden tal er gætteri, og en
+  titelændring er ikke en diagnose. Det kræver ét svar fra Mads eller en
+  Plausible-udtræk: **hvilke kilder kommer `/bmi` og `/su` fra, delt på
+ søgemaskiner?** Uden det kan ingen af os vide om faldet er ranking, sæson
+  (bmi-søgninger topper i januar) eller noget tredje.
+- **Acceptkriterier:** (1) kildefordelingen for `/bmi` og `/su` står i planen,
+  (2) faldet er klassificeret som ranking / sæson / CTR med et tal til hver
+  mulighed, (3) hvis det er ranking, navngives konkurrenten der har taget
+  pladsen. **Ingen ny kode før diagnosen står** — en tredje titelændring på
+  samme side uden en diagnose er prøvet to gange.
+- **MÅL:** `/bmi` 938 besøgende/28d, `/su` 116 (Plausible 2026-09-29).
+
 
 ## ❓ Til Mads
 
@@ -260,9 +278,15 @@ Alle fire var grønne før merge 2026-09-29 22:45.
   dansk næringsindholdstabel, så kan `/kalorier` få pr. 100 g **og** pr. portion.
   Uden det bliver madvare-klyngen (9 af 10 danske autocomplete-træffere under
   "kalorier") liggende, selv om `/kalorier` har 289 besøgende/28d og +50 %.
+- ❓ **Hvilke søgemaskiner kommer `/bmi` og `/su`s trafik fra?** (opgave 183.)
+  Eneste måde til at diagnosticere de to sides fald. `/bmi` har 938 besøgende/28d
+  men under 4.920 Google-visninger, så mindst halvdelen er ikke Googles — et
+  skærmbillede af Plausible's kilder filtreret på de to sider (eller et
+  råudtræk) låser diagnosen. Uden det bliver faldet uforklarligt, og C196's
+  titelændring kan heller ikke måles.
 - ❓ **21:30-batchen 2026-09-29 kørte og lagde alt efter `c6c0079` live** — alle
   seks åbne noter er lukket på indhold (se `docs/plan-arkiv.md`). Ingen
-  `DEPLOY-MISSING`. Kun C194/C195 venter på 2026-09-30 07:30.
+  `DEPLOY-MISSING`. Kun C194/C195/C196 venter på 2026-09-30 07:30.
 - ❓ **Nedetid 29/9:** en fuld site-scanning kørte mens produktion svarede 521 på alle
   domæner, og skanningen skrev "ingen fejl" for alle 206 sider. Ingen kode fejl — men
   en måling af et nedbrudt site giver et troværdigt tal om ingenting.
