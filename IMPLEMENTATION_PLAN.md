@@ -1,4 +1,4 @@
-STATUS: KØ — **C186 er landet: ni danske sider rendrede den samme `<h2>` to gange i træk, fordi `<FAQ>` og `<RelatedCalculators>` selv renderer en overskrift, og ni `page.tsx` skrev deres egen lige oven over. `/rentefradrag` (331 besøgende/28d, +145 % — sitets femtest mest besøgte) serverede "Ofte stillede spørgsmål" to gange og "Relaterede beregnere" to gange; `/barselsdagpenge` (212) gjorde begge dele; `/barselsplanlaegger` gjorde det for "Relaterede beregnere"; og `/dagpenge`, `/pension`, `/arveafgift`, `/boligstoette` og `/ejendomsvaerdiskat` satte en side-specifik variant ("… om dagpenge") umiddelbart før komponentens generiske.** Køen havde ingen `I GANG`-løs opgave (98 afhænger af den `BLOCKED`-mærkede 97, 119 er kilde-blokeret, 179 kræver en rigtig browser), og de otte åbne deploy-noter har alle første vindue **2026-09-29 17:30** — det var 15:52, så ingen blev rørt. Valget kom af at måle **en klasse, ingen af C82–C185 havde målt**: de har lukket titler, descriptions, JSON-LD, hreflang, canonical, sprogfejl, interne links, `og:image` og hele overskrifts-*niveauet* (C179) — men aldrig om det samme afsnit har **to** overskrifter.
+STATUS: KØ — **C187 er landet: `/tidsberegner` — sitets tredjestørste danske side (73.117 visninger) og beraknare.se's næststørste (60.399) — svarede på nul af sin egen "læg sammen"-klynge.** Køen havde ingen `I GANG`-opgave (98 afhænger af den `BLOCKED`-mærkede 97, 119 er kilde-blokeret, 179 kræver en rigtig browser), og de otte åbne deploy-noter har alle første vindue **2026-09-29 17:30** — det var 16:20, så ingen blev rørt. Se opgave 187.
 
 **Målt først, målt på alle 207 URL'er i begge sitemapmer.** En `<h2>`-tæller på den server-renderede HTML fandt **4 danske sider med ordret ens dobbelt-Overskrift** — `/efterloen`, `/rentefradrag`, `/barselsdagpenge` (to par hver) og `/barselsplanlaegger` (ét par) — og **0 på beraknare.se's 71 sider**, fordi `/blog` og `/kategori` er dansk-only og ingen svensk side bruger komponenterne på den måde. En *udvidet* måling (nabo-`<h2>` med ordmæssigt overlappende indhold) fandt **12 danske sider / 17 par**, og de otte ekstra var de samme fejl i en mildere form: "Ofte stillede spørgsmål om dagpenge" → "Ofte stillede spørgsmål". De fire *ikke*-fejl i den udvidede måling er korrekte og bevidst urørte: `/tidszone`s to New-York-afsnit ("Når det er 12 i Danmark…" / "… 21 i Danmark…") er to forskellige spørgsmål, og `/pension`s "Folkepension 2026" → "Hvornår kan du gå på folkepension?" er to forskellige spørgsmål.
 
@@ -11,6 +11,87 @@ STATUS: KØ — **C186 er landet: ni danske sider rendrede den samme `<h2>` to g
 **Gate grøn:** lint (**601 filer**), **2.847 tests / 181 filer** (fra 2.841/180), build (**142 sider**), `locale-leak.mjs --gate` **exit 0**, `knapgruppe-scan.mjs` 0/0, `href-scan.mjs` 0 protocol-relative href på begge domæner (136 + 71 sider). Målt på rigtig bygget server (`next start` :4107, porten verificeret fri *inden* start, C117's lære), alle 136 danske sider: **1.001 `<h2>`, 0 dubletter**; de ni rettede sider hver **præcis én** "Ofte stillede spørgsmål" og **én** "Relaterede beregnere"; `/procent`, `/su`, `/bmi`, `/dato`, `/tidszone` urørte som kontrol; `/api/health` → `status: ok`. Rørte filer: ni `page.tsx` (én `<h2>` eller to slettet pr. side, fem `title`-attributter tilføjet) + 1 ny testfil — **ingen beregningslogik, ingen ny URL, ingen sitemap, ingen `<title>`, ingen `<meta description>`, ingen synlig brødtekst ændret, ingen `className`**. Kode + plan i ét squash-commit på `ceo/dublet-h2`; se opgave 186.
 
 **MÅL:** overskriftsdobbelter har ingen CTR-baseline i GSC — det er ikke et søgefelt. Den målbare del er et **kvalitetsmål**: *0 sider må have to ens `<h2>` i træk* — nået og målt på den byggede server (12 danske sider / 17 par → **0 af 136**). Trafiknærmeste uændrede baseliner: `/rentefradrag` **331 besøgende/28d, bounce 4 %** (GSC-baseline ukendt, siden ligger under visningstællingen) og `/barselsdagpenge` **212 besøgende/28d, bounce 2 %**, begge pr. **2026-09-29**; DA-GSC `/procent` **150.148 v / 98 klik / 0,1 % / pos. 7,4** som kontrol. Genmåling **2026-10-13**.
+
+#### 187. [x] FÆRDIG 2026-09-29 — C187 — **`/tidsberegner` (73.117 v DA / 60.399 v SE) svarede på nul af sin egen "læg sammen"-klynge: DA-autocomplete har fire variationer om at lægge timer sammen, SE har "addera timmar och minuter" som nr. 5, og begge sider havde 0 forekomster**
+
+- **Datagrund:** GSC 2026-08-30 → 09-27 — `/tidsberegner` DA **73.117 visninger /
+  195 klik / CTR 0,3 % / pos. 7,0** (sitets tredjestørste danske side) og SE
+  **60.399 v / 127 klik / CTR 0,2 % / pos. 8,1** (beraknare.se's næststørste).
+  DA-autocomplete (`hl=da`, `gl=dk`) under **"timer og minutter"** giver 10
+  variationer hvoraf **fire** handler om at lægge sammen: "læg timer og
+  minutter sammen" (nr. 4), "regn timer og minutter sammen" (nr. 7), "plus
+  timer og minutter" (nr. 8) og "beregn timer og minutter i excel" — under
+  "timer og minutter i excel" ligger "summera timer og minutter i excel" og
+  "konverter timer og minutter til decimaltal i excel". SE-autocomplete under
+  **"timmar och minuter"** har "addera timmar och minuter" (nr. 5) og
+  "summera timmar och minuter i excel" (nr. 6).
+- **Målt på begge live sider før rettelsen:** "læg timer" **0**, "regn timer"
+  **0**, "beregn timer" **0**, "plus timer" **0** på minberegner.dk; "addera"
+  **0**, "summera" **0**, "plus timer" **0** på beraknare.se. Siderne svarede
+  på *omregning* (C120's minutter→timer-tabel) men ikke på *sammenlægning*.
+- **Rettelsen (begge sprog, fordi klyngen er målt i begge):** ét nyt `<h2>` pr.
+  sprog — "Sådan lægger du to tidsrum sammen" / "Så här lägger du ihop två
+  tidsintervall" — med en tabel på **tre rækker** (to dage à 30 min pause,
+  dagens to vagter uden pause, og en pause på 90 minutter), kolonnerne
+  første/andre tidsrum, i alt, decimaltimer og hele døgn, de to Excel-formler,
+  og de to fælder: en pause på 90 minutter er **mere end én time** og skal
+  trækkes fra *før* summeringen, og de to rum i anden række støder op ad
+  hinanden så 16:45 er begge steders sluttid/starttid. **Fire nye FAQ-par**
+  (DA 13 → **15**, SE 11 → **13**, dermed også i JSON-LD'en).
+- **Ingen tal står hårdkodet to steder:** nyt `src/lib/tids-summer.ts` går
+  hver række gennem `beregnTidsinterval` — samme modul `TidsBeregner` selv
+  bruger — og summerer med de samme to regler modulet bruger (div/mod 60). Et
+  tal i tabellen kan derfor ikke glide fra værktøjet. **Og de to Excel-formler
+  er krydschecket mod modulet i testen**, hver med sine egne celler: 13,50
+  på rækken uden pause, 15,00 og 14,50 på de to med pause.
+- **Harness:** `tids-summer.test.ts` **ny med 18 tests** (de tre summer,
+  krydscheck mod `beregnTidsinterval`, div/mod-60-invarianten, pausen over én
+  time, at 16:45 ikke tælles to gange, `null` på ugyldigt klokkeslæg, formlernes
+  tegn og celler, og at den svenske enhed ikke har æ/ø). `page.test.tsx`
+  20 → **28**, **modsvejs verificeret: 6 af 8 nye falder** med master's
+  `page.tsx` + `page-data.ts` (de to der ikke falder er sproglåse, der skal
+  være grønne begge veje). Begge sprog læses fra *modulet* i testen, så en
+  række der springer over på siden ikke kan gemme sig i en længde-tælling.
+- **To målefejl i mit eget arbejde, begge fundet fordi porten blev rød:** (1)
+  Min første `.map((raekke) => { … })` **inde i JSX** fik
+  `locale-leak.mjs`' port-analyse til at miste `{locale === "da" && (` og
+  rapportere seks danske strenge som synlige på beraknare.se. Rækkerne flyttede
+  ud i en `sumRækker()` uden for JSX. (2) Samme årsag en anden gang: mine
+  **egne doc-kommentarer** citerede en *åben* klamme, og scanneren tæller
+  hver `{` i rå kilde — også i kommentarer. Filen fik dermed netto +3
+  ubalancerede klammer, og så fandt port-søgningen overhovedet ingen port.
+  Kommentarerne er skrevet uden klammer.
+- **Den rigtige fejl, funden fordi porten stadig var rød efter begge
+  rettelser:** `locale-leak.mjs`' port-vindue var **12.000 tegn**. Min nye
+  danske blok gjorde blokken 2.000 tegn længere, så porten lå *uden for*
+  vinduet fra de to sidste afsnit, og `portVerdict` svarede "ingen port" på
+  dem — to korrekte danske strenge rapporteret som synlige på beraknare.se.
+  Fejlen peger i den sikre retning (kandidat, ikke DØD), men den gør
+  port-analysen ubrugelig på præcis de filer der vokser mest. Vinduet er
+  hævet til 60.000 med begrundelsen i koden; det er en *hastigheds*-grænse,
+  ikke en korrekthedgrænse. Efter rettelsen: **740 kandidater / 705 døde /
+  35 kræver øjne / 0 ureviewet** — "kræver øjne" er uændret fra master.
+- **Gate grøn:** lint (**603 filer**), **2.873 tests / 182 filer** (fra
+  2.851/182), build (**142 sider**), `locale-leak.mjs --gate` exit 0,
+  `knapgruppe-scan.mjs` 0/0. Målt på rigtig bygget server (`next start`
+  :4177, porten verificeret fri *inden* start, C117's lære) med begge
+  `Host:`-headere: DA **1.234 → 1.794 ord / 9 → 11 `<h2>` / 10 → 15
+  `Question`**, SE **1.378 → 1.707 / 10 → 11 / 11 → 13**, alle otte måle-
+  strenge fundet på begge domæner, **0** danske markører på beraknare.se og
+  **0** svenske på minberegner.dk (undtagen `Beräknare.se` i `hrefLang`-
+  og `og:image:alt`, som er korrekt søsterdomænenavn), `/api/health` →
+  `status: ok`.
+- **Rørte filer:** `tidsberegner/page.tsx` (to nye `<h2>` + `sumRækker()`),
+  `page-data.ts` (fire FAQ-par), nyt modul + to testfiler,
+  `scripts/locale-leak.mjs` (port-vinduet) — **ingen beregningslogik ændret,
+  `TidsBeregner.tsx` urørt, ingen URL, ingen sitemap, ingen `<title>`, ingen
+  `<meta description>`**.
+- **MÅL:** `/tidsberegner` DA baseline **73.117 visninger / 195 klik /
+  CTR 0,3 % / pos. 7,0** og SE **60.399 v / 127 klik / CTR 0,2 % / pos. 8,1**
+  (GSC 2026-08-30 → 2026-09-27) — måles igen **2026-10-13**. Forventningen er
+  ærlig: "lægge sammen"-klyngen er *autocomplete*, ikke GSC's egne søgninger
+  for siden, så der loves ingen ny CTR. Det der kan læses af rettelsen er at
+  siden nu svarer på sitets tredjestørste sides næsten tabte spørgsmålstype.
 
 #### 186. [x] FÆRDIG 2026-09-29 — C186 — **ni danske sider rendrede den samme `<h2>` to gange i træk: `<FAQ>` og `<RelatedCalculators>` har selv en overskrift, og ni `page.tsx` skrev deres egen lige oven over**
 
@@ -17092,6 +17173,8 @@ er værst. Se `❓ Til Mads`.
   6. `npm run test -- src/app/tidsberegner/page.test.tsx` skal give
      **20 passed**, og `node scripts/locale-leak.mjs --gate` exit 0 med 0
      ureviewet.
+
+### ⏳ VERIFICÉR DEPLOY: C187 — `/tidsberegner` på begge domæner: ét nyt `<h2>` pr. sprog ("Sådan lægger du to tidsrum sammen" / "Så här lägger du ihop två tidsintervall") med en tre-rækkers summationstabel, de to Excel-formler og fire nye FAQ-par. `tids-summer.ts` går hver række gennem `beregnTidsinterval`. Kode + plan i ét squash-commit på `ceo/se-dato-levt`. Første kandidatvindue **2026-09-29 17:30**. Rørte filer: `tidsberegner/page.tsx`, `page-data.ts`, nyt modul + to testfiler, `scripts/locale-leak.mjs` (port-vindue 12.000 → 60.000) — **ingen beregningslogik ændret**. Verificér ved **indhold, ikke HTTP 200**:
 
 ### VERIFICÉR DEPLOY-log — nyeste først
 - `VERIFICÉR DEPLOY: overskriftsniveau på alle sider (49 brud → 0 af 207) ceo/heading-outline 2026-09-29 13:5x`

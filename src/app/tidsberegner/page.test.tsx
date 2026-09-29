@@ -15,6 +15,12 @@ import {
   totalMinutter,
   MINUTTER_TILL_TIMMAR,
 } from "@/lib/tids-eksempler";
+import {
+  TIDS_SUMMER,
+  summerTidsrum,
+  EXCEL_SUM_FORMEL,
+  EXCEL_SUM_MED_PAUSE,
+} from "@/lib/tids-summer";
 import TidsberegnerPage from "./page";
 
 vi.mock("@/components/TidsBeregner", () => ({
@@ -454,5 +460,119 @@ describe("minuter ↔ timmar på beraknare.se", () => {
       const rest = raekke.minutter % 60;
       expect(timer * 60 + rest).toBe(raekke.minutter);
     }
+  });
+});
+
+describe("lægge to tidsrum sammen på /tidsberegner", () => {
+  // C187: målt på den server-renderede HTML før rettelsen — begge domæner
+  // havde 0 forekomster af "læg timer", "regn timer", "addera" og "summera",
+  // selv om DA-autocomplete under "timer og minutter" har fire variationer
+  // om at lægge sammen, og SE-autocomplete under "timmar och minuter" har
+  // "addera timmar och minuter" (nr. 5) og "summera timmar och minuter i
+  // excel" (nr. 6).
+  async function html(locale: "da" | "se") {
+    vi.mocked(getLocale).mockResolvedValue(locale);
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale(locale));
+    return renderToStaticMarkup(await TidsberegnerPage());
+  }
+
+  test("dansk svarer på 'lægge to tidsrum sammen' med en overskrift og en tabel", async () => {
+    const markup = await html("da");
+    expect(markup).toContain("Sådan lægger du to tidsrum sammen");
+    expect(markup).toContain("I alt");
+    expect(markup).toContain("Hele døgn");
+  });
+
+  test("svensk svarer på 'addera timmar och minuter' på samme måde", async () => {
+    const markup = await html("se");
+    expect(markup).toContain("Så här lägger du ihop två tidsintervall");
+    expect(markup).toContain("Totalt");
+    expect(markup).toContain("Hela dygn");
+  });
+
+  test("begge sprog har præcis de tre rækker modulet regner", async () => {
+    for (const locale of ["da", "se"] as const) {
+      const markup = await html(locale);
+      for (const raekke of TIDS_SUMMER) {
+        const sum = summerTidsrum(raekke)!;
+        // Rækken læses fra modulet, så en række der springer over på siden
+        // ikke kan gemme sig i en længde-tælling (C182's lære).
+        expect(markup).toContain(
+          `${raekke.forsteStart}–${raekke.forsteSlut}`
+        );
+        expect(markup).toContain(formatTidsvar(sum, locale));
+        expect(
+          formatNumber(sum.decimalTimer, locale, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })
+        ).toMatch(/^\d+,\d{2}$/);
+      }
+      // Og ingen række må have to timer-celler, der ligner ens — det ville
+      // være en dublet af slagsen C186 lukkede.
+      expect(markup.split("− 90 min").length - 1).toBe(1);
+    }
+  });
+
+  test("de to Excel-formler står i markupken, HTML-escapet", async () => {
+    for (const locale of ["da", "se"] as const) {
+      const markup = await html(locale);
+      // React escaper "=" er ikke noget, men "<" ville være det; formlerne
+      // læses derfor på den escapede form (målefejl 27's lære).
+      expect(markup).toContain(EXCEL_SUM_FORMEL);
+      expect(markup).toContain(EXCEL_SUM_MED_PAUSE);
+    }
+  });
+
+  test("fælden med pausen over én time står i begge sprog", async () => {
+    const da = await html("da");
+    expect(da).toContain("mere end én time");
+    expect(da).toContain("før");
+    const se = await html("se");
+    expect(se).toContain("mer än en timme");
+    expect(se).toContain("innan");
+  });
+
+  test("sproglås: beraknare.se må ikke have danske markører fra den nye blok", async () => {
+    const markup = await html("se");
+    for (const daRoe of ["lægger", "tidsrum", "før", "døgn", "fælde"]) {
+      expect(markup).not.toContain(`>${daRoe}`);
+      expect(markup).not.toContain(` ${daRoe} `);
+    }
+  });
+
+  test("FAQ'en får de to nye spørgsmål i begge sprog (læst fra page-data, FAQ er mocket væk)", () => {
+    // FAQ er mocket væk i denne fil, så en synlig-tekst-test ville være
+    // grøn på den gamle kode — C85's fælde. Læs derfra den tabel `FAQ`
+    // faktisk får.
+    const spgDa = getPageData("tidsberegner", "da")!.faqItems.map((i) => i.question);
+    const spgSe = getPageData("tidsberegner", "se")!.faqItems.map((i) => i.question);
+    expect(spgDa.some((q) => q.includes("lægger jeg to tidsrum sammen"))).toBe(true);
+    expect(spgDa.some((q) => q.includes("forkert når jeg har en pause"))).toBe(true);
+    expect(spgSe.some((q) => q.includes("lägger jag ihop två tidsintervall"))).toBe(true);
+    expect(spgSe.some((q) => q.includes("summan fel när jag har en paus"))).toBe(true);
+
+    // Og svaret indeholder præcis de tal modulet regner, så brødteksten og
+    // tabellen ikke kan glide fra hinanden.
+    const daSvar = getPageData("tidsberegner", "da")!.faqItems.find((i) =>
+      i.question.includes("lægger jeg to tidsrum sammen")
+    )!.answer;
+    const toVagter = summerTidsrum(TIDS_SUMMER.find((r) => r.id === "to_vagter")!)!;
+    expect(daSvar).toContain("810 ÷ 60 = 13,50 timer");
+    expect(daSvar).toContain(EXCEL_SUM_FORMEL);
+    // FAQ'en skriver den lange form ("13 timer og 30 minutter") og tabellen
+    // den korte ("13 t 30 min"). Begge skal være de SAMME time og det SAMME
+    // minut — hvis en af dem senere skriver et andet tal, skal testen falde.
+    // Derfor låses kun time- og minuttallet, ikke notationsformen.
+    expect(toVagter.timer).toBe(13);
+    expect(toVagter.minutter).toBe(30);
+    expect(daSvar).toContain("13 timer og 30 minutter");
+  });
+
+  test("de to nye spørgsmål er kun i det sprog de er skrevet i", () => {
+    const spgDa = getPageData("tidsberegner", "da")!.faqItems.map((i) => i.question);
+    const spgSe = getPageData("tidsberegner", "se")!.faqItems.map((i) => i.question);
+    expect(spgSe.some((q) => q.includes("tidsrum sammen"))).toBe(false);
+    expect(spgDa.some((q) => q.includes("tidsintervall"))).toBe(false);
   });
 });

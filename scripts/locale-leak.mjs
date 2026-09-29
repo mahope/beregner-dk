@@ -1283,7 +1283,18 @@ function portVerdict(src, index) {
     // Nearest enclosing `{` that has not been closed yet.
     let depth = 0;
     let open = -1;
-    for (let j = from - 1; j >= 0 && j > from - 12000; j--) {
+    // The window is a "don't walk the whole file" guard, not a correctness
+    // limit — and at 12 000 tegn var den for lille. /tidsberegner's danske
+    // blok blev 2 000 tegn længere, så porten `{locale === "da" && (` lå
+    // *uden for* vinduet fra de to sidste afsnit, og portVerdict svarede
+    // "ingen port" på dem. Begge er korrekte danske, og begge blev
+    // rapporteret som synlige på beraknare.se. Fejlen peger i den sikre
+    // retning (kandidat, ikke DØD), men den gør port-analysen ubrugelig på
+    // præcis de filer, der vokser mest — og det er dem, porten er skrevet
+    // for. 60 000 dækker hele filen på de længste sider og koster det
+    // samme: brydningen er lineær i vinduet, ikke i hele filen.
+    const PORT_VINDUE = 60000;
+    for (let j = from - 1; j >= 0 && j > from - PORT_VINDUE; j--) {
       const c = src[j];
       if (c === "}") depth++;
       else if (c === "{") {

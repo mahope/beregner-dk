@@ -15,6 +15,11 @@ import {
   totalMinutter,
   MINUTTER_TILL_TIMMAR,
 } from "@/lib/tids-eksempler";
+import {
+  TIDS_SUMMER,
+  summerTidsrum,
+  formatDoegn,
+} from "@/lib/tids-summer";
 import RelatedCalculators from "@/components/RelatedCalculators";
 import {
   TEMPO_EKSEMPLER,
@@ -25,6 +30,62 @@ import {
 import FAQ from "@/components/FAQ";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
+
+/**
+ * De to sumelformler står som **tekst** i JSX, ikke som en klamme om
+ * konstanten.
+ *
+ * Samme fil skriver allerede `=(B1-A1)*24` og `=MOD(B1-A1;1)*24` som
+ * bogstavelige strenge, så det er husets egen form. Grunden er ikke smag:
+ * `locale-leak.mjs`' port-analyse tæller *hver* klamme i rå kilde — også i
+ * kommentarer — så hver klamme om en konstant i den danske blok får
+ * scanneren til at pege på den frem for på porten, og de to sidste danske
+ * afsnit blev rapporteret som synlige på beraknare.se. To falske fund i en
+ * port, der ellers er korrekt. Konstanterne er derfor stadig **testets**
+ * kilde til sandheden: `page.test.tsx` kræver at markupken indeholder dem
+ * tegn for tegn, så siden og modulet ikke kan glide fra hinanden.
+ *
+ * Samme regel gælder alle klammer i kommentarerne nedenfor: en kommentar der
+ * *citerer* en åben klamme uden den lukkende gør hele filens port-analyse
+ * ubrugelig, fordi scanneren ikke ved, at den læser kommentar. Derfor står
+ * der ingen klammer i dem.
+ */
+
+/**
+ * Rækkerne i summerings-tabellen, bygget uden for JSX.
+ *
+ * Først blev rækkerne lavet med en pilefunktion, der **åbner en klamme**
+ * direkte i JSX. Det fik port-analysen til at miste den danske port og
+ * rapportere den nye blok som værende synlig på beraknare.se. Derfor bygges
+ * rækkerne her, og JSX'en får kun ét kald. Samme fejltype som C120's
+ * `locale`-port, bare i scanneren og ikke i koden.
+ */
+function sumRækker(locale: "da" | "se") {
+  return TIDS_SUMMER.map((raekke) => {
+    const sum = summerTidsrum(raekke);
+    if (!sum) return null;
+    return (
+      <tr key={raekke.id}>
+        <td>
+          {raekke.forsteStart}–{raekke.forsteSlut}
+          {raekke.pauseForste > 0 && ` − ${raekke.pauseForste} min`}
+        </td>
+        <td>
+          {raekke.andenStart}–{raekke.andenSlut}
+          {raekke.pauseAnden > 0 && ` − ${raekke.pauseAnden} min`}
+        </td>
+        <td>{formatTidsvar(sum, locale)}</td>
+        <td>
+          {formatNumber(sum.decimalTimer, locale, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })}
+        </td>
+        <td>{formatDoegn(sum.heleDoegn, locale)}</td>
+      </tr>
+    );
+  });
+}
 
 const TEMPO_RAEKKE = TEMPO_EKSEMPLER.map((eksempel) => ({
   ...eksempel,
@@ -392,6 +453,55 @@ export default async function TidsberegnerPage() {
           <a href="/fart">fartberegneren</a>.
         </p>
 
+        {/* C187: DA-autocomplete under "timer og minutter" har fire
+            variationer om at lægge sammen — "læg timer og minutter
+            sammen" (nr. 4), "regn timer og minutter sammen" (nr. 7) og
+            "plus timer og minutter" (nr. 8) — og SE under "timmar och
+            minuter" har "addera timmar och minuter" (nr. 5) og "summera
+            timmar och minuter i excel" (nr. 6). Begge sproggrene havde 0
+            forekomster af "læg timer"/"addera"/"summera" i den
+            server-renderede HTML. Alle tal går gennem `summerTidsrum`, som
+            kalder `beregnTidsinterval` — altså samme modul værktøjet bruger,
+            så tabellen ikke kan modsige det (C84's fejlklasse). */}
+        <h2>Sådan lægger du to tidsrum sammen</h2>
+        <p>
+          Reglerne er simple: du lægger minutterne sammen og deler med 60
+          igen. <strong>8 timer og 15 minutter + 5 timer og 15 minutter er
+          13 timer og 30 minutter</strong>, fordi 495 + 315 = 810 minutter, og
+          810 ÷ 60 = 13,50. Værktøjet ovenfor tager ét tidsrum ad gangen, så
+          summerer du to dage ved at sætte den første sluttid ind som den
+          andens starttid.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Første tidsrum</th>
+              <th>Andet tidsrum</th>
+              <th>I alt</th>
+              <th>Decimaltimer</th>
+              <th>Hele døgn</th>
+            </tr>
+          </thead>
+          <tbody>
+            {sumRækker("da")}
+          </tbody>
+        </table>
+        <p>
+          Den tredje række er den fælde, der tager flest: en pause på 90
+          minutter er <strong>mere end én time</strong>, så den skal trækkes
+          fra <em>før</em> du lægger sammen — ellers får du et negativt tal.
+          Og de to rum i anden række støder op ad hinanden, så 16:45 er både
+          den første sluttid og den anden starttid. Tæller du den med to
+          gange, får du 13 timer og 45 minutter i stedet for 13 og 30.
+        </p>
+        <p>
+          I Excel gør du det samme med{" "}
+          <code>=(B1-A1)*24+(D1-C1)*24</code>, hvor A1 og B1 er det første
+          tidsrum og C1 og D1 det andet. Har du pauser, skal de trækkes fra i
+          timer, fordi <code>=(B1-A1)*24</code> ikke kender en frokostpause:{" "}
+          <code>=(B1-A1)*24+(D1-C1)*24-E1-E2</code>, hvor E1 og E2 er pauserne.
+        </p>
+
         <h2>Tips til præcis timeregistrering</h2>
         <ul>
           <li>Husk altid at <strong>fratrække pauser</strong> fra din arbejdstid</li>
@@ -607,6 +717,52 @@ export default async function TidsberegnerPage() {
           verktyget räknar. Vill du veta hur långt du kommit under ett lopp
           delar du tiden med tempot i stället, och det står under{" "}
           <a href="/fart">fartberäknaren</a>.
+        </p>
+
+        {/* C187: SE-autocomplete under "timmar och minuter" har "addera
+            timmar och minuter" (nr. 5) och "summera timmar och minuter i
+            excel" (nr. 6), och DA har fire variationer i samma klynge. Begge
+            sproggrene havde 0 forekomster av orden i den
+            server-renderade HTML. Samma modell som den danska tabellen —
+            `summerTidsrum` kaller `beregnTidsinterval`, så talen inte kan
+            glida ifrån verktyget. */}
+        <h2>Så här lägger du ihop två tidsintervall</h2>
+        <p>
+          Reglerna är enkla: lägg ihop minuterna och dela med 60 igen.{" "}
+          <strong>8 timmar och 15 minuter + 5 timmar och 15 minuter blir 13
+          timmar och 30 minuter</strong>, eftersom 495 + 315 = 810 minuter,
+          och 810 ÷ 60 = 13,50. Verktyget ovan tar ett tidsintervall i taget,
+          så du summerar två dagar genom att sätta in den första
+          sluttiden som den andra starttiden.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Första tidsintervallet</th>
+              <th>Andra tidsintervallet</th>
+              <th>Totalt</th>
+              <th>Decimaltimmar</th>
+              <th>Hela dygn</th>
+            </tr>
+          </thead>
+          <tbody>
+            {sumRækker("se")}
+          </tbody>
+        </table>
+        <p>
+          Den tredje raden är fällan som tar flest: en paus på 90 minuter är{" "}
+          <strong>mer än en timme</strong>, så den måste dras av{" "}
+          <em>innan</em> du lägger ihop — annars får du ett negativt tal. Och
+          de två intervallen i andra raden möts, så 16:45 är både den första
+          sluttiden och den andra starttiden. Räknar du den två går får du
+          13 timmar och 45 minuter i stället för 13 och 30.
+        </p>
+        <p>
+          I Excel gör du samma sak med <code>=(B1-A1)*24+(D1-C1)*24</code>, där A1
+          och B1 är det första tidsintervallet och C1 och D1 det andra. Har
+          du pauser måste de dras av i timmar, eftersom{" "}
+          <code>=(B1-A1)*24</code> inte känner en lunchpaus:{" "}
+          <code>=(B1-A1)*24+(D1-C1)*24-E1-E2</code>, där E1 och E2 är pauserna.
         </p>
 
         <h2>Tips för exakt tidsregistrering</h2>

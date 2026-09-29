@@ -882,6 +882,8 @@ const daPages: Record<string, PageData> = {
       { question: "Hvordan regner man minutter om til timer?", answer: "Del minutter med 60. 90 minutter ÷ 60 = 1,50 timer, altså 1 time og 30 minutter. Den anden vej er timer × 60 = minutter, så 7,5 timer × 60 = 450 minutter." },
       { question: "Hvad er 300 minutter i timer?", answer: "300 minutter ÷ 60 = 5,00 timer, altså 5 timer og 0 minutter. 1000 minutter er 16 timer og 40 minutter, og 1500 minutter er 25 timer." },
       { question: "Hvad er 1 time og 30 minutter i decimaltimer?", answer: "1 time og 30 minutter er 90 minutter, og 90 ÷ 60 = 1,50 decimaltimer. Samme regel som værktøjet bruger: minutter ÷ 60 = timer." },
+      { question: "Hvordan lægger jeg to tidsrum sammen?", answer: "Læg minutterne sammen og del med 60 igen. 8 timer og 15 minutter + 5 timer og 15 minutter er 495 + 315 = 810 minutter, og 810 ÷ 60 = 13,50 timer, altså 13 timer og 30 minutter. I Excel er det =(B1-A1)*24+(D1-C1)*24, og en pause trækkes fra i timer med -(E1+E2), fordi =(B1-A1)*24 ikke kender en frokostpause." },
+      { question: "Hvorfor bliver summen forkert når jeg har en pause?", answer: "En pause skal trækkes fra FØR de to tidsrum lægges sammen. En pause på 90 minutter er mere end én time, så 09:00-17:00 med 90 minutters pause er 390 minutter — ikke 480. Trækker du den fra efter summeringen får du enten et negativt tal eller dobbelt så mange minutter." },
       ],
     },
     "tidszone": {
@@ -3371,6 +3373,8 @@ const sePages: Record<string, PageData> = {
       { question: "Vad är ett bra tempo för ett maraton?", answer: "Tempot avgörs av tiden: 3 timmar och 30 minuter på 42,2 km är 4:59 per kilometer. För att hitta distansen i stället delar du tiden med tempot, så 2 timmar vid 5:00 per kilometer blir 24 km." },
       { question: "Hur räknar jag om minuter till timmar?", answer: "Dividera minuterna med 60. 90 minuter ÷ 60 = 1,50 timmar, alltså 1 timme och 30 minuter. Åt andra hållet gäller timmar × 60 = minuter, så 7,5 timmar × 60 = 450 minuter." },
       { question: "Vad är 08:30 till 16:45 i timmar och minuter?", answer: "Det är 8 timmar och 15 minuter, alltså 8,25 decimaltimmar. Räkna ut det direkt i tabellen över vanliga tidsintervall ovanför, eller skriv in klockslagen i kalkylatorn." },
+      { question: "Hur lägger jag ihop två tidsintervall?", answer: "Lägg ihop minuterna och dela med 60 igen. 8 timmar och 15 minuter + 5 timmar och 15 minuter är 495 + 315 = 810 minuter, och 810 ÷ 60 = 13,50 timmar, alltså 13 timmar och 30 minuter. I Excel är det =(B1-A1)*24+(D1-C1)*24, och en paus dras av i timmar med -(E1+E2), eftersom =(B1-A1)*24 inte känner en lunchpaus." },
+      { question: "Varför blir summan fel när jag har en paus?", answer: "En paus måste dras av FÖR de två tidsintervallen läggs ihop. En paus på 90 minuter är mer än en timme, så 09:00-17:00 med 90 minuters paus är 390 minuter — inte 480. Drar du av den efter summeringen får du antingen ett negativt tal eller dubbelt så många minuter." },
       ],
     },
     "tidszone": {
