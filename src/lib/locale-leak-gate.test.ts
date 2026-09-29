@@ -30,6 +30,23 @@ function scan(args: string[] = []) {
   };
 }
 
+/**
+ * Inserts an entry *inside* the `sePages` object literal, not at module scope.
+ *
+ * The first version of these three tests appended a `const PLANTET_SE = {…}` at
+ * the end of the file, and all three plants stayed green — correctly. R4 only
+ * looks inside the Swedish block, and a module-scope object beside it is not
+ * Swedish copy. So the plant has to be placed where a real leak would be: a
+ * `faqItems` answer in `sePages`, which is exactly where the two live bugs
+ * were. A plant that does not go red is a plant in the wrong place, and it is
+ * the same measurement error as planting a leak in a `daOnly` component.
+ */
+function plantInSePages(src: string, entry: string): string {
+  const anchor = /const sePages: Record<string, PageData> = \{/;
+  if (!anchor.test(src)) throw new Error("sePages-anker ikke fundet i page-data.ts");
+  return src.replace(anchor, (m) => `${m}\n    ${entry}`);
+}
+
 describe("locale-leak scanner", () => {
   it("fails the gate: every candidate a human has not judged is known", () => {
     // The load-bearing assertion. If someone pastes a Danish string into a
@@ -202,6 +219,91 @@ describe("locale-leak scanner", () => {
       // `ø` i den norske blok er det samme argument: norsk skriver ø, så det må
       // ikke give en ny vurdering hverken.
       expect(JSON.stringify(scan().unreviewed)).not.toContain("lønn");
+    } finally {
+      writeFileSync(target, original);
+    }
+  });
+
+  it("scans page-data.ts, and flags Danish in its Swedish block", () => {
+    // The blind spot that let two Danish answers live on beraknare.se's
+    // third-largest page. Two independent reasons, and the test has to cover
+    // both, because either one alone is enough to make the scan blind again:
+    //   1. `page-data.ts` is imported as `@/lib/page-data`, and the walk only
+    //      follows `@/components/*` — so the file was never in the scan set.
+    //   2. It declares `const sePages: Record<string, PageData> = {`, not
+    //      `se: {`, so R4's block key matched nothing even once it was scanned.
+    // The plant is ASCII Danish, which is the harder half: it has no æ or ø,
+    // so R4's letter test cannot see it and only R5's word list can.
+    const target = resolve(ROOT, "src", "lib", "page-data.ts");
+    const original = readFileSync(target);
+    try {
+      writeFileSync(
+        target,
+        plantInSePages(
+          original.toString("utf8"),
+          '  procent: { slug: "plantet", faqItems: [{ question: "Q", answer: "hvor A1 er det gamle tallet og B1 er det nye" }], },'
+        )
+      );
+      const failing = () =>
+        execFileSync("node", [SCRIPT, "--gate"], { cwd: ROOT, stdio: "pipe" });
+      expect(failing).toThrow();
+      expect(JSON.stringify(scan().unreviewed)).toContain("hvor A1 er det gamle tallet");
+    } finally {
+      writeFileSync(target, original);
+    }
+  });
+
+  it("does not flag a Danish identifier inside a ${…} interpolation", () => {
+    // The safety property of R5, using the *real* `/bil` answer verbatim:
+    // `Med kalkylatorns standardvärden på ${elbilSe.forudsætninger.kmPrAar}`.
+    // The reader sees "Med kalkylatorns standardvärden på 15.000 km per år" —
+    // every visible word is Swedish. The `æ` is in an object key, and what
+    // renders there is a number. Testing the raw literal would report a
+    // template for the spelling of a variable, which is how a rule that
+    // over-reports gets ignored. The hole must be blanked first.
+    //
+    // The first version of this plant wrote "standardværden" in the literal
+    // text, which is genuinely Danish — so the scanner was right to flag it and
+    // the test was wrong. A safety test has to isolate the one property it
+    // names, or it stops testing that property.
+    const target = resolve(ROOT, "src", "lib", "page-data.ts");
+    const original = readFileSync(target);
+    try {
+      writeFileSync(
+        target,
+        plantInSePages(
+          original.toString("utf8"),
+          '  plantet: { slug: "plantet", faqItems: [{ question: "Q", answer: `Med kalkylatorns standardvärden på ${elbilSe.forudsætninger.kmPrAar} km per år är besparingen ca.` }], },'
+        )
+      );
+      expect(() =>
+        execFileSync("node", [SCRIPT, "--gate"], { cwd: ROOT, stdio: "pipe" })
+      ).not.toThrow();
+    } finally {
+      writeFileSync(target, original);
+    }
+  });
+
+  it("flags a long Danish answer in the Swedish block, not just a short one", () => {
+    // The 200-char ceiling R4 inherited from `scanStrings` (where it skips
+    // minified bundles) dropped exactly the two real leaks: 308 and 236
+    // characters. A cap that skips the longest strings skips the ones with the
+    // most prose in them, which is the opposite of what a length cap is for.
+    const target = resolve(ROOT, "src", "lib", "page-data.ts");
+    const original = readFileSync(target);
+    try {
+      const long = "hvor ".repeat(60);
+      writeFileSync(
+        target,
+        plantInSePages(
+          original.toString("utf8"),
+          `  plantet: { slug: "plantet", faqItems: [{ question: "Q", answer: "${long}" }], },`
+        )
+      );
+      const failing = () =>
+        execFileSync("node", [SCRIPT, "--gate"], { cwd: ROOT, stdio: "pipe" });
+      expect(failing).toThrow();
+      expect(JSON.stringify(scan().unreviewed)).toContain("hvor hvor");
     } finally {
       writeFileSync(target, original);
     }

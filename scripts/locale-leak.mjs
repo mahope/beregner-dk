@@ -150,6 +150,13 @@ const REVIEWED = [
       "Delt tekst der blander ${l.underskudPaa}-interpolation med dansk kode rundt om. Ikke en ren dansk streng, så den kræver en oversættelses-klynge. Se opgave 99.",
   },
   {
+    file: "src/lib/page-data.ts",
+    key: "huslejeSvaer",
+    verdict: "DØD",
+    reason:
+      "Dansk hjælpekonstant på modulniveau, kun interpoleret i `daPages` (:1637 description, :1639 metaDescription) — to referencer, begge i den danske blok, ingen i `noPages` eller `sePages`. En dansk streng oven for en tabel den aldrig bruges i kan ikke vises på beraknare.se. Samme døde-klasse som `StructuredData.tsx`'e default, men fundet fordi page-data.ts først nu er i scanningssættet (C157).",
+  },
+  {
     file: "src/components/StructuredData.tsx",
     key: "description",
     string:
@@ -213,9 +220,31 @@ function braceRange(src, open) {
 }
 
 /** Brace-matched ranges of every `da:` / `se:` / `no:` object literal. */
+/**
+ * The key part of a locale-object opener, shared by both rules below.
+ *
+ * Two real shapes exist in the repo and both have to match, or the rules are
+ * written against a shape no file has:
+ *   - a bare labels entry:            `se: {`
+ *   - a typed declaration:            `const sePages: Record<string, PageData> = {`
+ *
+ * The typed form is `key: Type = {` — one colon, then `=` — not `key: Type: {`.
+ * The annotation is bounded to identifier/generic characters and must be
+ * followed by `=`, so an `if` or a following statement cannot be swallowed, and
+ * the bare `key: {` colon is a *separate* optional group. Letting the
+ * annotation group absorb that colon instead loses every `da: {` in
+ * `src/components/` — 255 strings in components that were green a moment
+ * earlier.
+ */
+const TYPE_ANNOTATION = `(?::\\s*[A-Za-z_$][\\w$<>\\[\\],\\s.]*\\s*=\\s*)?`;
+const BARE_KEY_COLON = `(?:\\s*:\\s*)?`;
+const LOCALE_KEY_PATTERN =
+  `(?:${LOCALE_KEYS.join("|")})(?:Pages)?\\s*${TYPE_ANNOTATION}${BARE_KEY_COLON}\\{`;
+
+/** `const sePages: Record<string, PageData> = {` or a bare `se: {`. */
 function localeObjectRanges(src) {
   const ranges = [];
-  const keyRe = new RegExp(`(^|[\\s,{])(${LOCALE_KEYS.join("|")})\\s*:\\s*\\{`, "g");
+  const keyRe = new RegExp(`(^|[\\s,{])${LOCALE_KEY_PATTERN}`, "g");
   let m;
   while ((m = keyRe.exec(src)) !== null) {
     const range = braceRange(src, src.indexOf("{", m.index));
@@ -224,7 +253,10 @@ function localeObjectRanges(src) {
     keyRe.lastIndex = range[1];
   }
   // `da: "…"`, `se: "…"` — a bare string on a locale key, no braces.
-  const bareRe = new RegExp(`(^|[\\s,{])(${LOCALE_KEYS.join("|")})\\s*:\\s*"`, "g");
+  const bareRe = new RegExp(
+    `(^|[\\s,{])(${LOCALE_KEYS.join("|")})\\s*:\\s*"`,
+    "g"
+  );
   while ((m = bareRe.exec(src)) !== null) {
     const from = src.indexOf('"', m.index);
     ranges.push([from, src.indexOf('"', from + 1)]);
@@ -252,14 +284,27 @@ function inRanges(ranges, offset) {
  * because C65-C72 have each found a measurement that was blind in exactly one
  * predictable place.
  *
+ * The block key is `se: {` **or** `sePages: … = {`, with or without a type
+ * annotation on the key — see `LOCALE_KEY_PATTERN`, which both rules share.
+ * `page-data.ts` — the single biggest store of translated copy on the site,
+ * ~1.200 lines of it — keeps one object per locale (`daPages` / `noPages` /
+ * `sePages`), not one nested `da:/se:/no:` object, so the narrow key matched
+ * nothing there. That is the same blind spot as C115's `//`-hrefs and C116's
+ * union test: a rettelse that covered the shape it was written against, not
+ * the shape in the file.
+ *
  * Deliberately NOT applied to `no:`. Norwegian writes `æ` and `ø` itself, so
  * the same test would be wrong there — C68's lesson about `ø` as a Danish
  * marker. And a nested locale object *inside* the `se` block (a `da:` fallback
  * for a value only Swedish needs) is skipped: it is not Swedish copy.
  */
+/** `const sePages: Record<string, PageData> = {` or a bare `se: {`. */
+const SE_BLOCK_KEY_PATTERN =
+  `se(?:Pages)?\\s*${TYPE_ANNOTATION}${BARE_KEY_COLON}\\{`;
+
 function seBlockDanishStrings(src) {
   const found = [];
-  const keyRe = /(^|[\s,{])se\s*:\s*\{/g;
+  const keyRe = new RegExp(`(^|[\\s,{])${SE_BLOCK_KEY_PATTERN}`, "g");
   let m;
   while ((m = keyRe.exec(src)) !== null) {
     const range = braceRange(src, src.indexOf("{", m.index));
@@ -284,7 +329,26 @@ function seBlockDanishStrings(src) {
       const abs = open + s.index;
       if (inRanges(nested, abs)) continue;
       const value = unescapeUnicode(s[0].slice(1, -1));
-      if (value.length < 2 || value.length > 200) continue;
+      // The 200-char ceiling is inherited from `scanStrings`, where it exists
+      // to skip minified bundles. It does not belong here: in a *data* file a
+      // long value is the normal case, not a smell — the two Swedish `/procent`
+      // answers are 308 and 236 characters. A cap that silently drops the
+      // longest strings is a cap that drops the ones with the most prose in
+      // them, so the ceiling is raised rather than inherited.
+      if (value.length < 2 || value.length > 2000) continue;
+      // A `${…}` interpolation is an expression, not copy: `${elbilSe
+      // .forudsætninger.kmPrAar}` renders a number, and the `æ` in it is a
+      // Danish *identifier*. Testing the raw literal therefore reports a
+      // template literal for the spelling of an object key. Only the literal
+      // text around the holes is ever shown to a reader, so that is what is
+      // tested. Braces are nested (`${a ? b : c}`), hence the loop.
+      let literal = value;
+      let prev;
+      do {
+        prev = literal;
+        literal = literal.replace(/\$\{[^{}]*\}/g, " ");
+      } while (literal !== prev);
+      if (literal.trim().length < 2) continue;
       // The quote itself is not in the window: `abs` points *at* the opening
       // quote, so the key is whatever sits directly before it. That is also why
       // the key showed as `?` in the gate test's plant before this was fixed.
@@ -295,7 +359,7 @@ function seBlockDanishStrings(src) {
       // (`da: { … }`) is covered by `nested` above; this covers the bare one,
       // and the gate test's plant caught exactly the gap.
       if (key === "da" || key === "no") continue;
-      if (!DA_CHARS.test(value)) continue;
+      if (!isDanish(literal, WEAK)) continue;
       found.push({ offset: abs, string: value, key });
     }
     keyRe.lastIndex = end;
@@ -319,8 +383,50 @@ function unescapeUnicode(value) {
   );
 }
 
+/**
+ * R5 — Danish words that are pure ASCII, so `DA_CHARS` can never see them.
+ *
+ * The whole `æ`/`ø` argument for R4 rests on Swedish not writing those two
+ * letters. That is true, and it is also the *only* thing R4 looks at — so a
+ * Danish sentence written in the ASCII subset that Swedish and Danish share
+ * ("hvor A1 er det gamle tallet", "tager du middelverdien") is invisible. It
+ * is not hypothetical: beraknare.se's `/procent` served exactly that, in the
+ * middle of an otherwise fully Swedish page, for one deploy.
+ *
+ * Why a word list and not the character test: Swedish and Danish share
+ * "koster"? no — but they do share "formel", "procent", "tabell", "vikt". So
+ * the list is restricted to words whose Swedish form is a *different* word, not
+ * a different spelling: Swedish writes `där/inte/utan/mellan/kvar/månader/
+ * räknar/medelvärdet`, Danish writes `hvor/ikke/uden/mellem/tilbage/
+ * måneder/regner/middelverdien`. A near-spelling is excluded on purpose,
+ * because "gör" vs "gør" would fire on correct Swedish.
+ *
+ * Verified by measurement, not by taste: across the 1.192 lines of `sePages`
+ * this list fires on exactly the two real leaks and nothing else. `noPages` is
+ * excluded because Norwegian legitimately writes `hvor`, `ikke`, `koster`,
+ * `ferie` and `rente` — C68's lesson, one locale over.
+ */
+const DA_ASCII_WORDS = [
+  "hvor mange", "hvorfor", "hvornår", "hvordan", "hvor", "måneder", "tilbage",
+  "regner", "tager", "tallet", "regnestykke", "udfyld", "kræver", "beløb",
+  "vægten", "målvægt", "udlejer", "udleje", "udover", "udtrykket", "udbetales",
+  "udbetaling", "indtast", "boligstøtte", "boliglån", "sparepenge", "barselsdagpenge",
+  "dagpenge", "hæfter", "gæld", "betaler", "koster", "sparer", "tjener", "renter",
+  "årsværk", "ferie",
+];
+const DA_ASCII_RE = new RegExp(
+  `(?<![\\w-])(${DA_ASCII_WORDS.join("|")})(?![\\w-])`,
+  "i"
+);
+
+/**
+ * R4 + R5 together: a Danish value inside the Swedish block. `æ`/`ø` is the
+ * strong test; the ASCII word list is what catches Danish that Swedish can
+ * spell identically.
+ */
 function isDanish(value, weak) {
   if (DA_CHARS.test(value) || DA_WORDS.test(value)) return true;
+  if (DA_ASCII_RE.test(value)) return true;
   return weak && DA_WEAK_CHAR.test(value);
 }
 
@@ -734,12 +840,34 @@ function verdict(finding, file) {
 let graph = null;
 let mountCache = null;
 
+/**
+ * Files that are mounted on the Swedish domain by construction, not by an
+ * import edge the walker can follow.
+ *
+ * The walk follows `@/components/*` imports from a page. `page-data.ts` is
+ * imported as `@/lib/page-data`, so it never entered the set — and it is the
+ * single largest store of translated copy on the site (every `title`,
+ * `description`, `metaDescription`, `keywords` and all 9 `faqItems` per page,
+ * ~1.200 lines of Swedish in it). R4 has therefore never run on the file that
+ * most needs it, which is why two Danish answers survived on beraknare.se's
+ * third-largest page.
+ *
+ * The rule is "mounted on the Swedish domain", and this file is mounted on
+ * *every* page including the homepage: `getPageData(slug, locale)` picks
+ * `sePages[slug]` on beraknare.se. So it belongs in the set unconditionally,
+ * not behind a per-page check.
+ */
+const ALWAYS_SE_MOUNTED = [join(SRC, "lib", "page-data.ts")];
+
 function seMountedFiles() {
   if (!mountCache) {
     const set = new Set();
     for (const [, page] of graph) {
       if (!page.seMounted) continue;
       for (const c of page.components) set.add(c);
+    }
+    for (const file of ALWAYS_SE_MOUNTED) {
+      if (statSync(file, { throwIfNoEntry: false })) set.add(file);
     }
     mountCache = set;
   }

@@ -134,12 +134,33 @@ describe("procent page", () => {
     // differens for 10 000 -> 12 500, og 10 % mod 9,5 % for 30 000 -> 33 000.
     expect(html).toContain("10 000 till 12 500 = 25 procent");
     expect(html).toContain("10 000 och 12 500 = 22,2 procent");
-    expect(html).toContain("30 000 kr, der stiger til 33 000 kr");
-    expect(html).toContain("stigning på 10 procent i en");
-    expect(html).toContain("9,5 procent store forskellen");
+    expect(html).toContain("30 000 kr, som stiger till 33 000 kr");
+    expect(html).toContain("ökning på 10 procent i en");
+    expect(html).toContain("9,5 procent stora skillnaden");
     // Og fælden skal være skrevet ud, ellers er de to tal bare forvirrende.
-    expect(html).toContain("De to formlene gir aldri samme svar");
+    expect(html).toContain("De två formlerna ger aldrig samma svar");
     expect(html).toContain('href="/loenstigning"');
+  });
+
+  // De tre ovenstående forventninger lå på den *danske* tekst i den svenske
+  // blok, så de var grønne med netop den fejl de skulle have fanget. Det er
+  // C84's og C115's fejlklasse: en test der genskaber den kode, den skal
+  // modsige, beviser intet. Derfor låses den danske tekst nu negativt, så den
+  // ikke kan komme tilbage ved at nogen kopierer en dansk sætning ind.
+  test("den svenska side har ingen dansk tekst i skillnadsafsnittet", async () => {
+    const html = await render("se");
+    for (const dansk of [
+      "der stiger til",
+      "er en stigning på",
+      "den gamle summen",
+      "procent store forskellen",
+      "regnet på",
+      "De to formlene gir",
+      "er det gamle tallet",
+      "hvor A1",
+    ]) {
+      expect(html).not.toContain(dansk);
+    }
   });
 
   // Samme tal må aldrig stå med to forskellige separatorer på én side:

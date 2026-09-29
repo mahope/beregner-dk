@@ -3206,8 +3206,8 @@ const sePages: Record<string, PageData> = {
       { question: "Hur beräknar jag procentuell ökning?", answer: "((Ny - Gammal) / Gammal) × 100. Från 100 till 125 = 25% ökning." },
       { question: "Vad är procentenheter vs procent?", answer: "Procentenheter är absolut förändring, procent är relativ. Räntan från 2% till 3% = 1 procentenhet men 50% ökning." },
       { question: "Hur lägger jag till procent?", answer: "Multiplicera med (1 + procent/100). Lägg 20% till 150: 150 × 1,20 = 180." },
-      { question: "Hur räknar man ut skillnaden i procent mellan två tal?", answer: "Det beror på vilket tal som är heltalet. För procentuell förändring är det den gamla summan: 10 000 till 12 500 ger (12 500 - 10 000) / 10 000 = 25 procent. För procentdifferens, som er ligegyldig ved hvilken retning du regner i, tager du middelverdien: 2 500 / 11 250 = 22,2 procent for de samme to tallene." },
-      { question: "Hur räknar man ut skillnaden mellan två tal i Excel?", answer: "Skriv =(B1-A1)/A1*100, hvor A1 er det gamle tallet og B1 det nye. 10 000 i A1 og 12 500 i B1 gir 25 procent. Vil du ha den symmetriske forskellen i stedet, skriv du =ABS(A1-B1)/((A1+B1)/2)*100, som gir 22,2 procent for de samme tallene." },
+      { question: "Hur räknar man ut skillnaden i procent mellan två tal?", answer: "Det beror på vilket tal som är heltalet. För procentuell förändring är det den gamla summan: 10 000 till 12 500 ger (12 500 - 10 000) / 10 000 = 25 procent. För procentdifferens, som är lika oberoende av vilken riktning du räknar i, tar du medelvärdet: 2 500 / 11 250 = 22,2 procent för samma två tal." },
+      { question: "Hur räknar man ut skillnaden mellan två tal i Excel?", answer: "Skriv =(B1-A1)/A1*100, där A1 är det gamla talet och B1 det nya. 10 000 i A1 och 12 500 i B1 ger 25 procent. Vill du ha den symmetriska skillnaden i stället, skriver du =ABS(A1-B1)/((A1+B1)/2)*100, som ger 22,2 procent för samma tal." },
       ],
     },
     "kvadratmeter": {

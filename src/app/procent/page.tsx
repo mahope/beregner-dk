@@ -413,7 +413,7 @@ export default async function ProcentPage() {
                 </td>
               </tr>
               <tr>
-                <td>Samma sak i Excel, där A1 er det gamle tallet?</td>
+                <td>Samma sak i Excel, där A1 är det gamla talet?</td>
                 <td>
                   <code>=(B1-A1)/A1*100</code>
                 </td>
@@ -428,17 +428,17 @@ export default async function ProcentPage() {
           </table>
         </div>
         <p>
-          <strong>De to formlene gir aldri samme svar.</strong>{" "}
-          {num(lonEksempel.gammal)} kr, der stiger til {num(lonEksempel.ny)} kr,
-          er en stigning på{" "}
+          <strong>De två formlerna ger aldrig samma svar.</strong>{" "}
+          {num(lonEksempel.gammal)} kr, som stiger till {num(lonEksempel.ny)} kr,
+          är en ökning på{" "}
           {num(procentForskel(lonEksempel.ny, lonEksempel.gammal))} procent i en
-          løn, fordi den gamle summen er heltallet. Den{" "}
+          lön, eftersom den gamla summan är heltalet. Den{" "}
           {num(procentDifferens(lonEksempel.gammal, lonEksempel.ny), 1)}{" "}
-          procent store forskellen er det samme par tall, regnet på
-          middelverdien — bytter du om tallene, får du samme svar. Når du skal
-          vide om en løn stiger, er det den første formelen du skal bruge. Den
-          andre brukes når du vil sammenligne hvor store to beløp er i forhold
-          til hinanden, uten at retningen skal betyde noe.
+          procent stora skillnaden är samma par tal, räknat på
+          medelvärdet — byter du om talen får du samma svar. När du ska
+          veta om en lön stiger är det den första formeln du ska använda. Den
+          andra används när du vill jämföra hur stora två belopp är i förhållande
+          till varandra, utan att riktningen ska betyda något.
         </p>
         <p>
           En lønsprocent kan du se som kroner her:{" "}

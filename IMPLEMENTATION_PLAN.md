@@ -1,4 +1,5 @@
-STATUS: KØ — **C156 er landet: sitets dårligst-bouncede artikel uden for forsiden — `/blog/barsel-2026-regler-og-satser`, 184 besøgende/28d på **85 % bounce** — svarede på *nul af* de tre situationer, der gør barsel anderledes end standardmodellen. Målt på den live side: `tvilling` **0**, `flerling` **0**, `indlæggelse` **0**, `adoption` **0**, `funktionær` **0** forekomster i 103 KB HTML og 3.848 ord.** Køen var tom (155 opgaver færdige, 98 afhænger af den `BLOCKED`-mærkede 97, 119 er kilde-blokeret), og de **ni** åbne deploy-noter (C114, C115, C118–C123, C155) har alle første vindue **2026-09-29 07:30** — det var 01:51, så intet kunne verificeres, og ingen blev rørt. Missionen har selv navngnet siden ("Blogindlæg har høj bounce … 85 %"), men C107 behandlede `/barselsdagpenge`-**siden**, ikke bloggen, så den lå urørt. **Målt først:** DA-autocomplete (01:53) under **"barsel 2026"** har "barsel **tvillinger** 2026" som **nr. 3** og "barsel fordeling 2026" som nr. 9; under **"barsel regler"** ligger "barselsregler **tvillinger**" som **nr. 5** og "barselsregler funktionærloven" som nr. 10; under **"barselsorlov**" ligger "barselsorlov **tvillinger**" som nr. 10. "barsel **indlæggelse**" har **ti** variationer, halvtallet om far/mor. Så det er tre ubesvarede klynger på én side, ikke én. **Og reglerne lå allerede i repoet:** `src/lib/barsel/regler.ts` cite'r § 14 a, § 14 og § 8/§ 21 med tal, og `docs/barsel/regler-2026.md` § 3.7–3.9 har dem udfoldet med lovhenvisninger — artiklen og motoren var bare ikke forbundet. **Rettelsen er tre nye afsnit + tre nye FAQ-par (4 → 7), kun `da`:** "Tvillinger og flerlinger: 13 ekstra uger hver" med tabellen 24 mod 24+13=37 og regnestykket **5.085 × 13 = 66.105 kr.**, "Når barnet er indlagt: op til 52 ugers forlængelse" med 46-uge-vinduet og **begge** loftgrænser, og "Adoption: 24 uger pr. adoptant" med den femrækkede tabel og eneadoptantens 46. **Ingen tal skrevet i hånden:** nyt `src/lib/barsel/special.ts` med `flerling()`, `adoption()` og `indlaeggelse()`, der alle læser af `REGLER`/`BARSEL_2026` — altså samme konstanter motoren bruger, så artiklen ikke kan glide fra planlæggeren (C84's krav). To **nye** lovkonstanter er lagt ind i `regler.ts` med §-citation: `indlaeggelseVindueUger: 46` (§ 14 stk. 2) og `flerlingFristUger: 52` (§ 14 a stk. 6) — de lå i dokumentationen men ikke i koden. **To fejl i min egen kode, begge fundet fordi jeg renderer siden og læser den synlige tekst, ikke fordi testene faldt.** (1) `ekstraUger()` delte input med 7, altså behandlede *uger* som *dage* — så 60 uger indlæggelse gav 9 i stedet for 52. Feltet er uger, præcis som `BarselsPlan.indlaeggelsesUger` og `indlaeggelsesUgerTilladt` bruger det; konverteringen er fjernet. (2) Brødteksten skrev `5085 kr.` uden tusindtalsseparator og `2026-01-01` råt for en dansk læser — **og min test låste den første fejl fast**, fordi den genbyggede `{BARSEL_2026.maxWeeklyRate}` præcis som koden gjorde. Samme vakuum-grønne fælde som C115's `//dage-til//` og C118's unionstest. Rettet til `maxWeeklyRate`/`formatDato`, og begge tests har nu et **negativt** krav (`not.toContain("5085 kr. × ")` og `not.toContain("2026-01-01")`), så fejlen ikke kan komme tilbage. Modulet leverer `nyRegelDato` = "1. januar 2026" ved siden af ISO-datoen, præcis som C84's "12 byer"-fund. **Harness:** `special.test.ts` **ny med 18** (krydsmod lovens *invarianter*, ikke tre dato-par: at 13 ikke kan ganges med antal børn, at adoptionens 6+18=24 er præcis `afterBirthWeeks`, at skæringsdatoen er eksakt 1/1-2026 så 31.12.2025 → 13 og 1.1.2026 → 52, og at negative uger giver 0), `page.test.tsx` **ny med 10** — **modsvejs verificeret: 9 af 10 falder** med master's `page.tsx`; den tiende er "de eksisterende satser er urørte", som skal være grøn begge veje. Målt på rigtig server (`next start`, port 3799 verificeret fri *inden* start — målefejl nr. 15's lære): **200**, 103.221 → 118.059 bytes, 11 → 15 `<h2>`, 3.848 → 5.384 ord, `Tvillinger og flerlinger` ×2, `13 ekstra uger` ×4, `uanset antallet af børn` ×4, `31. december 2025` og `1. januar 2026` ×2, `52 uger pr. forælder` ×4, `13 uger i alt` ×4, `LBK nr. 206` ×2, JSON-LD `Question` **4 → 7**, canonical + titel uændret, `/api/health` → `status: ok`. **Målt og bevidst ikke bygget:** "barselsregler **funktionærloven**" (autocomplete nr. 10, 10 variationer under "barsel funktionær") er en **anden lov** end barselsloven og uden kilde i repoet, så der står intet tal om den — se ❓ Til Mads. "barsel udland"/"barselsorlov sverige" er EU-regler, også uden kilde. **MÅL:** `/blog/barsel-2026-regler-og-satser` baseline **184 besøgende/28d, bounce 85 % pr. 2026-09-28** — måles igen **2026-10-12**; forventningen er først en **bounce-fald** (den får nu svar på det den søger efter) og derefter CTR på "barsel tvillinger 2026" og "barselsregler tvillinger". Gate grøn: lint (**582 filer**), **2.576 tests / 168 filer** (fra 2.548 / 166), build (**141 sider**). Kode + plan i ét commit på `ceo/barsel-flerlinger-indlaeggelse`; se opgave 156.
+STATUS: KØ — **C157 er landet: beraknare.se's tredjestørste side `/procent` (25.954 visninger, 2 klik, CTR 0,0 %, pos. 10,0) serverede **fire** danske afsnit midt i en ellers svensk side — og måleren der skulle have fanget dem, kunne ikke se filen de lå i.** Køen var tom (156 opgaver færdige, 98 afhænger af den `BLOCKED`-mærkede 97, 119 er kilde-blokeret), og de ni åbne deploy-noter (C114, C115, C118–C123, C155) har alle første vindue **2026-09-29 07:30** — det var 02:19, så intet kunne verificeres, og ingen blev rørt. **Valget kom ikke af en trafikmåling, men af at læse de åbne noter:** C114 (commit `db45e15`, "Svar på skillnaden mellem to tal i procent på svensk") lagde to FAQ-svar i `sePages` med `{ question: "Hur räknar man ut…", answer: "…hvor A1 er det gamle tallet…" }` — spørgsmålet svensk, svaret dansk. Mål på live bekræftede det: `hvor A1` **3**, `ligegyldig ved` **3**, `tager du middelverdien` **3** forekomster i HTML'en på `https://beraknare.se/procent`. **Og de to ting der gjorde at måleren var blind, er hver for sig en blind spot der var målt forud.** `scripts/locale-leak.mjs` har siden C73 haft regel R4 — "dansk streng i `se:`-blokken" — med det argument at *svensk aldrig skriver æ eller ø*, så reglen er fejlfri ved konstruktion. Men: (1) **`page-data.ts` var aldrig i scanningssættet.** `seMountedFiles()` følger kun `@/components/*`-importer fra en side, og siden importerer `page-data.ts` som `@/lib/page-data` — så det største oversættelsesarkiv på sitet (hver sides `title`, `description`, `metaDescription`, `keywords` og alle 9 `faqItems`, **1.192 linjer svensk**) var uden for rækkevidde. (2) **R4's bloknøgle var `se: {`, og `page-data.ts` skriver `const sePages: Record<string, PageData> = {`** — én type-annotation mellem nøgle og klamme, så mønstret matchede nul. (3) **R4 testede kun `DA_CHARS` = `[æø]`**, og de to lækager er ren ASCII: "hvor A1 er det gamle tallet", "tager du middelverdien". Alle tre er samme fejltype som C115's `//dage-til//` og C116's unionstest — en regel skrevet mod den form den blev skrevet i, ikke mod den form filen har. **Rettelsen er derfor to dele, og den målte del voks undervejs.** Først teksten: de to FAQ-svar i `sePages` (308 og 236 tegn) er oversat til svensk. **Så viste `next start` + `Host: beraknare.se` to lækager mere, som hverken R4 eller min ordliste havde fundet**, fordi de ligger i `src/app/procent/page.tsx` og ikke i datafilen: en tabel-overskrift "Samma sak i Excel, där A1 **er det gamle tallet**?" og **hele det afsluttende stykke** — "De to formlene gir aldri samme svar … der stiger til … er en stigning på … den gamle summen … procent store forskellen … regnet på … bytter du om tallene … sammenligne hvor store to beløp …" — dansk fra første til sidste ord i den svenske blok. Samme fejl som `page-data.ts`, altså samme oprindelse: en dansk sætning kopieret ind i det svenske afsnit. **Harness — tre huller, hvert med sin egen test.** **R6:** `seMountedFiles()` har nu `ALWAYS_SE_MOUNTED = [src/lib/page-data.ts]`, fordi filen monteres på *alle* sider inkl. forsiden (`getPageData(slug, locale)` vælger `sePages[slug]` på beraknare.se) — ikke bag et per-side-flag. **R5 (ny):** `DA_ASCII_WORDS` — 37 danske ord der er rene ASCII, kun valgt når den svenske form er et *andet ord* (svensk `där/inte/utan/mellan/kvar/månader/räknar/medelvärdet`, dansk `hvor/ikke/uden/mellem/tilbage/måneder/regner/middelverdien`), aldrig en anden stavning (`gör` mod `gør` ville give falsk rødt på korrekt svensk). **Delvist interpoleret:** `${elbilSe.forudsætninger.kmPrAar}` gav 2 falske fund, fordi `æ` i `forudsætninger` er en *variabel* og der rendres et tal — så `${…}`-huller blaneres før testen. **Længdegrænsen løftet 200 → 2.000:** de to rigtige lækager er 308 og 236 tegn, så den arvede 200-tegns-loft fra `scanStrings` (der findes for at springe minificerede bundles over) sprang netop de længste strenge over. **Modsvejs verificeret, tre gange:** med C114's danske tekst tilbage giver `--gate` **exit 1** på præcis `page-data.ts:3209` og `:3210`; med fixen **exit 0**. De tre nye gate-tests er hver især plantet *inde i* `sePages` — min første version appendede et modulobjekt på filens slutter, og alle tre planter var **grønne**, korrekt, fordi R4 kun kigger i den svenske blok. Samme målefejl som at plante en lækage i en `daOnly`-komponent. **Og en af mine egne sikkerhedstests var forkert:** den skrev "standardværden" i plantens brødtekst, hvilket *er* dansk, så scanneren havde ret til at melde den; planten bruger nu `/bil`'s rigtige sætning, "Med kalkylatorns standardvärden på ${…}", hvor hvert synligt ord er svensk. **En vakuum-grøn test låste fejlen fast, igen.** `procent/page.test.tsx:141` krævede `"De to formlene gir aldri samme svar"` på den **svenske** render — altså den danske sætning, som testen skulle have modsagt. C84's og C115's fejlklasse for tredje gang i træk. Nu kræver testen den svenske form, og en ny test låser otte danske strenge **negativt**. **Modsvejs verificeret: begge procent-tests falder** med master's `page.tsx`. **Målt på rigtig server** (`next start`, port 3923 verificeret fri *inden* start — målefejl nr. 15's lære), `Host: beraknare.se`: titel uændret "Procenträknare – beräkna 10 procent av ett tal", **alle 21** danske markører **0**, alle 18 svenske strenge **2-6** hver (`där A1 är det gamla talet` ×5, `De två formlerna ger` ×2, `räknat på medelvärdet` ×2, …), JSON-LD `Question` **9** uændret, dansk render urørt, `/api/health` → `status: ok`. **MÅlt og bevidst ikke bygget:** en heltalsskala over `src/app/*/page.tsx` gav **726** danske-markør-fund på **143** sider, men de er næsten alle korrekt dansk i `locale === "da"`-grene eller `daOnly`-blog (C119's måling viste `/blog` og `/kategori` er `danishOnlySections` i `routing.ts:29`). Scannet `page-data.ts` alene med R5's ordliste: **2 fund, begge de rigtige lækager, nul falske positive på 1.192 linjer** — det er den måling, ordlisten er kalibreret på. Se ❓ Til Mads for side-scope. **Gate grøn:** lint (**582 filer**), **2.580 tests / 168 filer** (fra 2.576 / 168), build (**141 sider**), `locale-leak.mjs --gate` exit 0 med **132 kandidater — 97 døde, 35 kræver øjne, 0 ureviewet** (uændret i alt andet end de to rettede), `knapgruppe-scan.mjs` 0/0. Kode + plan i ét squash-commit på `ceo/page-data-locale-leak`; se opgave 157.
+
 
 
 ---
@@ -14622,7 +14623,169 @@ kilde ville jeg skrive et ugernummer om løn, ferie og opsparing for en
 funktionær, hvilket er værre end at svare intet. Samme grund for
 "barsel udland" og "barselsorlov sverige" (EU-regler).
 
+**Nyt i C157 — er `src/app/*/page.tsx` dansk-til-svensk dækket?**
+Nej, og det er bevidst ikke gjort i denne iteration. R5/R6 dækker
+`page-data.ts`, fordi målingen dér var **2 fund, begge rigtige lækager, nul
+falske positive på 1.192 linjer svensk**. En heltalsskala over
+`src/app/*/page.tsx` giver derimod **726** danske-markør-fund på **143**
+sider — men de er næsten alle korrekt dansk i `locale === "da"`-grene, i
+JSX-kommentarer, eller på `/blog` og `/kategori`, som `routing.ts:29`
+(`danishOnlySections`) gør til dansk-only. En gate med 726 fund er en gate
+ingen læser, og C65-C72's erfaring er at netop sådan en regel bliver slået
+fra.
+
+**Hvad der skal til:** en måling der skelner mellem "dansk i en `da`-gren" og
+"dansk i den synlige svenskegren" på siderne — altså den samme
+dispatcher-/port-analyse som `localeObjectRanges` + R3 allerede gør for
+`src/components/`, men på JSX. Det er en reel regel-udvikling, ikke en
+copy-rettelse, og den tager længere end en iteration. **Prioriteret som
+opgave 158.**
+
 **Hvad der skal til for at lukke den:** en kildeliste til
 funktionærloven § 12 (funktionæroverenskomstens orlov) — borger.dk,
 retsinformation.dk og en faglig oversigt over forskellene mod
 barselsloven. Er den kilde til stede, er det én iteration.
+
+#### 157. [x] FÆRDIG 2026-09-29 — C157 — **beraknare.se `/procent` serverede fire danske afsnit midt i en svensk side, og `locale-leak.mjs` kunne ikke se filen de lå i**
+
+**Datagrund:** svensk GSC 2026-08-29 → 2026-09-26: `/procent` **25.954
+visninger, 2 klik, CTR 0,0 %, pos. 10,0** — beraknare.se's tredjestørste
+side. Valget kom ikke af en trafikmåling men af at læse de åbne noter: C114
+(commit `db45e15`) lagde to FAQ-**svar** i `sePages` med dansk brødtekst under
+svenske spørgsmål. Målt på live: `hvor A1` **3**, `ligegyldig ved` **3**,
+`tager du middelverdien` **3**.
+
+**De tre huller i måleren, hver for sig tilstrækkelig til at blinde den.**
+C73's R4 — "dansk streng i `se:`-blokken" — er bygget på at *svensk aldrig
+skriver æ eller ø*, altså fejlfri ved konstruktion. Men:
+
+1. **Filen var aldrig i scanningssættet.** `seMountedFiles()` følger kun
+   `@/components/*`-importer fra en side; `page-data.ts` importeres som
+   `@/lib/page-data`. Det største oversættelsesarkiv på sitet lå uden for
+   rækkevidde — hver sides `title`, `description`, `metaDescription`,
+   `keywords` og alle 9 `faqItems`.
+2. **Bloknøglen var `se: {`.** `page-data.ts` skriver
+   `const sePages: Record<string, PageData> = {` — én type-annotation mellem
+   nøgle og klamme, så mønstret matchede nul. Samme for
+   `localeObjectRanges`, som lod alle 3.782 linjer `daPages` se ud som
+   uoversat dansk.
+3. **R4 testede kun `DA_CHARS` = `[æø]`.** De to lækager er ren ASCII:
+   "hvor A1 er det gamle tallet", "tager du middelverdien".
+
+Alle tre er samme fejltype som C115's `//dage-til//` og C116's unionstest: en
+regel skrevet mod den form den blev skrevet i, ikke mod den form filen har.
+
+**Rettelsen.** (a) De to FAQ-svar i `sePages` (308 og 236 tegn) er oversat til
+svensk. (b) To lækager mere i `src/app/procent/page.tsx`, fundet ved at rendere
+siden med `Host: beraknare.se` og læse den synlige tekst: tabel-overskriften
+"Samma sak i Excel, där A1 er det gamle tallet?" og hele det afsluttende stykke
+("De to formlene gir aldri samme svar … procent store forskellen … regnet på …")
+dansk fra første til sidste ord.
+
+**Harness — tre huller, hvert med sin egen test.**
+- **R6:** `ALWAYS_SE_MOUNTED = [src/lib/page-data.ts]` i `seMountedFiles()`.
+  Filen monteres på *alle* sider inkl. forsiden, så den hører hjemme i sættet
+  ubetinget, ikke bag et per-side-flag.
+- **R5 (ny):** `DA_ASCII_WORDS` — 37 danske ord i ren ASCII, kun valgt når den
+  svenske form er et *andet ord* (`där/inte/utan/mellan/kvar/månader/räknar/
+  medelvärdet`), aldrig en anden stavning: `gör` mod `gør` ville give rødt på
+  korrekt svensk.
+- **Interpolation:** `${elbilSe.forudsætninger.kmPrAar}` gav 2 falske fund —
+  `æ` i `forudsætninger` er en *variabel*, og der rendres et tal. `${…}`-huller
+  blaneres (løkket, fordi klammer kan være nestede) før testen.
+- **Længde:** 200 → 2.000 tegn. Loftet er arvet fra `scanStrings`, hvor det
+  springer minificerede bundles over; i en *datafil* er en lang værdi det
+  normale, ikke et lugt. De to rigtige lækager er netop dem, loftet sprang
+  over.
+
+**Tre målefejl i træk, alle fundet fordi jeg troede på egen måling.**
+1. **Mine tre planter var grønne.** Jeg appendede et modulobjekt på filens
+   slutter; R4 kigger kun i den svenske blok, så det er korrekt, at intet
+   brød. Planterne skal *inde i* `sePages` — samme fejl som at plante en
+   lækage i en `daOnly`-komponent.
+2. **En sikkerhedstest var forkert.** Den skrev "standardværden" i plantens
+   brødtekst, hvilket *er* dansk, så scanneren havde ret til at melde den.
+   Planten bruger nu `/bil`'s rigtige sætning — "Med kalkylatorns
+   standardvärden på ${…}" — hvor hvert synligt ord er svensk. En
+   sikkerhedstest skal isolere den ene egenskab den navngiver.
+3. **Patternet forsvandt to gange undervejs.** Først skrev jeg
+   `sePages: {` og fik 0 match, fordi deklarationen er `sePages: Record<…> = {`
+   — én kolon og så `=`. Da jeg så rettede det, tabte jeg kolonet på den
+   blotte `da: {`-form og fik **255** nye fund i komponenter der var grønne
+   øjeblikket før. Begge formerne skal matche, eller reglen er skrevet mod en
+   form ingen fil har.
+
+**Vakuum-grøn test låste fejlen fast, for tredje gang i træk.**
+`procent/page.test.tsx:141` krævede `"De to formlene gir aldri samme svar"` på
+den **svenske** render — den danske sætning, testen skulle have modsagt. Nu
+kræver den svenske form, og en ny test låser otte danske strenge negativt.
+**Modsvejs verificeret: begge procent-tests falder** med master's `page.tsx`.
+
+**Gate grøn:** lint (**582 filer**), **2.580 tests / 168 filer** (fra 2.576 /
+168), build (**141 sider**), `locale-leak.mjs --gate` exit 0 med **132
+kandidater — 97 døde, 35 kræver øjne, 0 ureviewet**, `knapgruppe-scan.mjs`
+0/0. Målt på rigtig server (port 3923, fri *inden* start): titel uændret,
+**alle 21** danske markører **0**, alle 18 svenske strenge **2-6** hver,
+JSON-LD `Question` **9** uændret, dansk render urørt.
+
+- ⏳ **VERIFICÉR DEPLOY: C157 — beraknare.se `/procent` har fire danske
+  afsnit oversat til svensk, og `locale-leak.mjs --gate` dækker nu
+  `page-data.ts`.** Kode + plan i ét commit på
+  `ceo/page-data-locale-leak`, squashet til `master`. Første
+  kandidatvindue **2026-09-29 12:30** (push 02:5x er efter 07:30-batchen).
+  Kun `src/lib/page-data.ts` (to `sePages`-FAQ-svar), `src/app/procent/page.tsx`
+  (en tabel-overskrift + ét afsnit), to testfiler og `scripts/locale-leak.mjs`
+  er rørt — **ingen beregningslogik ændret, ingen dansk side rørt, ingen ny
+  URL, sitemap uændret, ingen anden side rørt**. Verificér på
+  **https://beraknare.se/procent** ved **indhold, ikke HTTP 200**:
+  1. `curl -s https://beraknare.se/procent` skal finde **0** forekomster af
+     `hvor A1`, `er det gamle tallet`, `og B1 er det nye`, `skriv du =`,
+     `i stedet, skriv`, `som gir`, `ligegyldig ved`, `tager du middelverdien`,
+     `for de samme`, `De to formlene gir`, `der stiger til`,
+     `er en stigning på`, `den gamle summen`, `procent store forskellen`,
+     `regnet på`, `bytter du om tallene`, `er det den første formelen`,
+     `sammenligne hvor store to beløp`, `utan at retningen`, `hvor store to`.
+     Før stod hver af dem 2-3 gange.
+  2. Samme curl skal finde `där A1 är det gamla talet`, `och B1 det nya`,
+     `skriver du`, `i stället`, `som ger`, `tar du medelvärdet`, `för samma två
+     tal`, `De två formlerna ger aldrig samma svar`, `som stiger till`,
+     `är en ökning på`, `den gamla summan är heltalet`, `räknat på medelvärdet`
+     og `till varandra, utan att riktningen ska betyda något`.
+  3. `<title>` skal være uændret **"Procenträknare – beräkna 10 procent av ett
+     tal"**, og JSON-LD skal have **9** `Question` (uændret).
+  4. KONTROL: `https://minberegner.dk/procent` skal være uændret 200 med
+     `<title>` "Procentberegner – beregn 10 procent af et tal".
+  5. `https://minberegner.dk/api/health` skal svare `status: ok`.
+  6. Harness, kørt lokalt før merge: `node scripts/locale-leak.mjs --gate`
+     skal exit 0 med **0 ureviewet**.
+
+#### 158. [ ] Kø — **`src/app/*/page.tsx`: skeln mellem dansk i en `da`-gren og dansk i den synlige svenskegren (JSX-port-analyse)**
+
+**Datagrund:** C157's heltalsskala over `src/app/*/page.tsx` gav **726**
+danske-markør-fund på **143** sider, hvorimod R5's ordliste på `page-data.ts`
+gav **2 fund, begge rigtige lækager, nul falske positive på 1.192 linjer**.
+Forskellen er ikke ordlisten — den er porten.
+
+**Hvorfor det er en opgave og ikke en copy-rettelse.** Størstedelen af de 726
+er korrekt dansk i `locale === "da" && (…)`-grene, i danske JSX-kommentarer
+eller på `/blog` og `/kategori`, som `routing.ts:29`
+(`danishOnlySections = ["/blog", "/kategori"]`) gør dansk-only. Uden en port
+er fundene ubrugelige, og en regel med 726 fund er en regel ingen læser.
+
+**Acceptkriterier:**
+1. Samme port-analyse som `localeObjectRanges` + R3: `guardedAt()`-logikken fra
+   `scripts/locale-leak.mjs` genbruges på JSX, så `locale === "da" && …`,
+   `{locale === "se" ? … : …}` og `erDa`-vilkår giver hver sit svar.
+2. Nye fund skal lig i den **synlige** svenskegren. Målt på `Host:
+   beraknare.se` med `next start`, ikke på kildeformen alene.
+3. Rækkevidde: kun de **se-monterede** kalkulatorsider, ikke `/blog`,
+   `/kategori`, `/embed`, `/api` eller `daOnly`-sider.
+4. `node scripts/locale-leak.mjs --gate` exit 0 med **0 ureviewet**, og hvert
+   `REVIEWED`-entry med en begrundelse.
+5. En test pr. regel i `locale-leak-gate.test.ts`, plantet i en `da`-gren (skal
+   være grøn) og i den synlige svenskegren (skal være rød) — samme
+   dobbeltplant som C157's tre.
+
+**MÅL:** baseline er de **726** fund; efter reglen skal tallet på rigtig
+server-renderede svenske sider være **0** resterende danske strenge i den
+synlige tekst. Måles igen 2026-10-13.
