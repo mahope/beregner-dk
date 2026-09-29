@@ -9,6 +9,7 @@ import {
   kmPrLiter,
   literPr100km,
   besparelseProcent,
+  braendstofForudsætninger,
   breakEvenKwhPris,
   elbilForudsætninger,
   elbilSammenligning,
@@ -109,22 +110,47 @@ describe("/braendstof FAQ", () => {
     }
   });
 
-  it("nævner de to faktiske besparelsesgrader, der er udledt af forudsætningerne", () => {
-    const forventetBenzin = medKomma(besparelseProcent("benzin"));
-    const forventetDiesel = medKomma(besparelseProcent("diesel"));
+  // De to var skrevet med besparelseProcent("benzin"), altså de førte de danske
+  // forudsætninger ind i den svenska og norske svara — og låste netop den fejl, denne
+  // opgave lukker: på beraknare.se er diesel dyrere end bensin pr. liter, så de to
+  // procentstal er ikke de danske. Graden læses derfor fra det sprog, der spørges.
+  function sparelseGrader(locale: string) {
+    const F = braendstofForudsætninger(locale);
+    const elPris = (F.el.kwhPris / 100) * F.el.kwhPer100km;
+    const grad = (type: "benzin" | "diesel") => {
+      const anden = F[type].literPris / F[type].kmPerLiter;
+      return medKomma(((anden - elPris) / anden) * 100);
+    };
+    return { benzin: grad("benzin"), diesel: grad("diesel") };
+  }
+
+  it("nævner de to faktiske besparelsesgrader for det sprog, der spørges", () => {
     for (const locale of locales) {
       const svar = elSvar(locale);
-      expect(svar).toContain(`${forventetBenzin} %`);
-      expect(svar).toContain(`${forventetDiesel} %`);
+      const { benzin, diesel } = sparelseGrader(locale);
+      expect(svar).toContain(`${benzin} %`);
+      expect(svar).toContain(`${diesel} %`);
     }
   });
 
-  it("er tydelig om, at besparelsen er lavere mod diesel end mod benzin", () => {
+  it("laeser de to procenttal i den rigtige rækkefølge", () => {
     for (const locale of locales) {
+      const svar = elSvar(locale);
+      const { benzin, diesel } = sparelseGrader(locale);
+      const benzinPct = svar.indexOf(`${benzin} %`);
+      const dieselPct = svar.indexOf(`${diesel} %`);
+      expect(benzinPct).toBeGreaterThanOrEqual(0);
+      expect(dieselPct).toBeGreaterThan(benzinPct);
+    }
+  });
+
+  it("dansk og norsk: besparelsen er lavere mod diesel end mod benzin", () => {
+    // I Sverige er rækkefølgen omvendt, fordi diesel kostar mere pr. liter end bensin.
+    // Derfor må testen være hård på de to sprog, hvor den gælder.
+    for (const locale of ["da", "no"]) {
       const svar = elSvar(locale);
       const benzinPct = svar.indexOf(`${medKomma(besparelseProcent("benzin"))} %`);
       const dieselPct = svar.indexOf(`${medKomma(besparelseProcent("diesel"))} %`);
-      expect(benzinPct).toBeGreaterThanOrEqual(0);
       expect(dieselPct).toBeGreaterThan(benzinPct);
     }
   });

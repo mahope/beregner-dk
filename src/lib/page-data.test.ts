@@ -200,10 +200,10 @@ describe("getPageData", () => {
     },
     {
       locale: "se" as const,
-      title: "Bränslekalkylator: 500 km bensin kostar 450 kr",
+      title: "Bränslekalkylator: 500 km bensin kostar 585 kr.",
       fuel: "bensin",
-      cost: "450 kr",
-      perKm: "0,90 kr. per km",
+      cost: "585 kr",
+      perKm: "1,2 kr. per km",
     },
     {
       locale: "no" as const,

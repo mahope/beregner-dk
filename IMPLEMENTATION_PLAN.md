@@ -1,3 +1,48 @@
+STATUS: KØ — **C184 er landet, og fundet var værre end en sprog-asymmetri: beraknare.se's `/braendstof` viste danske kroner, og de tal var ikke bare forkerte — de var modsatte. Sverige har diesel dyrere pr. liter end benzin (22,81 mod 17,57 SEK/l, GlobalPetrolPrices 2026-09-21), mens sitets egen model sætter diesel billigere (12,80 mod 13,50 kr.). Sidens svar på "hvorfor er diesel dyrere" pegede derfor modsat vejen i Sverige.** Køen havde ingen `I GANG`-opgave (98 afhænger af den `BLOCKED`-mærkede 97, 119 er kilde-blokeret, 179 kræver en rigtig browser), og de otte åbne deploy-noter har alle første vindue **2026-09-29 17:30** — det var 15:00, så ingen kunne lukkes. Valget kom fra C183's egen målte kandidatliste, hvor `/braendstof` SE var den største asymmetri. **Målt først, målt på live:** DA **1.129 ord / 6 `<h2>` / 9 FAQ** mod SE **492 / 3 / 5** — altså 637 ord og 4 spørgsmål, de tre manglende `<h2>` var C94's regnestykketabel, C173's diesel-afsnit og "find dit eget forbrug", alle `da`-only.
+
+**Tre svenske søgeklynger, målt i SE-autocomplete.** "varför är diesel dyrare" giver **10/10** variationer i det samme spørgsmål — blandt dem "**i sverige**" (nr. 7), "**2026**" (nr. 6) og "just nu" (nr. 8) — og "diesel dyrare än bensin" har 10 variationer hvor **nr. 2 er "diesel billigare än bensin"**, altså begge retninger. "räkna ut bränslekostnad" har 10 variationer hvor **nr. 4 er "…per mil"**, en enhed den svenska side slet ikke brugte. "bränsleförbrukning" har "kalkylator" (nr. 2) og "räkna" (nr. 9) som svar-søgninger. Den danske side havde **0** af alle tre.
+
+**Rettelsen er en kilderettelse først og en svar-rettelse bagefter.** Nyt `BRAENDSTOF_FORUDSETNINGER_SE` (17,57 / 22,81 / 2,00) med kilden i koden, `braendstofForudsætninger(locale)`, og `prisPrKm` / `braendstofEksempelRækker` får et locale-argument med **`"da"` som default**, så alle 2.829 øvrige tests og hele den danske side er uændrede byte-for-byte. `BraendstofBeregner` flytter `const F` ind i komponenten og læser samme sæt, så **værktøjet og brødteksten ikke kan glide fra hinanden** — ellers havde siden vist 17,57 i tabellen over et værktøj der stod på 13,50. El-prisen er **2,00 SEK/kWh fra `ELBIL_FORUDSETNINGER.se`**, ikke fra GlobalPetrolPrices, så `/braendstof` og `/elbil` ikke kan komme i mellemkrig.
+
+**Tre nye `<h2>` kun i `se`-grenen:** "Så räknar du ut bränslekostnaden med siffror" (500-km-tabel med pr. mil, svarer på "räkna ut bränslekostnad"), "**Varför är diesel dyrare än bensin?**" (per liter *og* per kilometer, med 21-september-målingen og 29,8 %, og den ærlige linje at tallene ændrer sig hver uge), "Så hittar du din egen förbrukning" med km/l ↔ l/100 km ↔ l/mil. **Fem nye FAQ-par** (SE **5 → 8**, dermed også i JSON-LD'en), og **svensk `metaTitle`/`description`/`metaDescription`/`ogDescription`/`schemaDescription` skrev "450 kr." og "0,90 kr. per km"** — C84's klasse: metadata der løj om sit eget indhold — de læser nu samme tal som siden.
+
+**To tests lå fejlen fast, og det er fundet fordi de faldte.** `braendstof.test.ts`' "nævner de to faktiske besparelsesgrader" krævede at *alle tre* sprog svarede med `besparelseProcent("benzin")` — altså de danske tal — og "besparelsen er lavere mod diesel end mod benzin" låste en **rækkefølge** der er modsat i Sverige. Begge var vakuum-grønne i fire iterationer, fordi de læste modulet og kravde at svaret indeholdt det modulet sagde. Nu læser de det sprog, der spørges, og rækkefølgetesten er hård på `da`/`no` med en kommentar om hvorfor den ikke kan gælde for `se`. `page.test.tsx` låste "450 kr." i markupken — samme fejltype, fundet fordi den faldte med tal.
+
+**Tre fejl i mit eget arbejde, alle fundet fordi gaten eller en test sagde det.** (1) **Målefejl nr. 42 (min egen):** min første patch ramte den **norske** `faqItems`-blok, fordi den svenske og den norske deler fire af fem spørgsmålstekster ordret ("Beregn drivstoffutgifter?"/"Beräkna bränslekostnader?" ligger i hver sin, men "Hva koster 500 km med bensin?"-familien ligner). Fundet fordi `page-data.test.ts` sagde **"has answer-first fuel metadata for 'no'"** og **braendstof.test.ts** fejlede på de *norske* besparelsesgrader — altså fordi de gamle tests var hårde på fejlen, ikke fordi jeg læste rigtigt. (2) Jeg skrev **dansk ind i den svenska blok** i første udkast ("Pr. kilometer er det danska svaret ikke lenger", "tripodometer", "Diesel koster alltså") — `locale-leak.mjs --gate` fangede "Diesel koster altså", og resten faldt da jeg læste den igennem. (3) Samme klasse: den nye svenska tabel havde dansk-række-headings (**Forbrug**, **Pris for 500 km**, **Pris pr. km**) som scanneren **ikke** kunne se, fordi de er i `page.tsx` og ikke i en `se:`-tabel — de er rettet til Förbrukning / Pris för / Pris per, fundet fordi jeg læste den *rendrede* HTML fra en faldet test.
+
+**Gate grøn:** lint (**600 filer**), **2.829 tests / 180 filer** (fra 2.828/180), build (**142 sider**), `locale-leak.mjs --gate` **exit 0** med 0 ureviewet, `knapgruppe-scan.mjs` 0/0. Rørte filer: `src/lib/braendstof.ts` (+ `BRAENDSTOF_FORUDSETNINGER_SE`, `braendstofForudsætninger`, `MIL_KM`, `prisPrMil`, `literPrMil`), `src/lib/page-data.ts` (svensk `se`-blok + konstanter), `src/app/braendstof/page.tsx` (tre nye `<h2>` **kun i `se`**), `src/components/BraendstofBeregner.tsx` (to linjer), to testfiler — **ingen beregningslogik ændret, den danske side urørt, ingen ny URL, ingen sitemap**. Kode + plan i ét squash-commit på `ceo/braendstof-se-priser`; se opgave 184.
+
+#### 184. [x] FÆRDIG 2026-09-29 — C184 — **beraknare.se `/braendstof` (1.706 v, CTR 0,2 %, pos 12,7) viste danske kroner, og tallene var modsatte: Sverige har diesel dyrere pr. liter end benzin, sitets model har det omvendt**
+
+- **Datagrund:** GSC 2026-08-30 → 09-27: SE `/braendstof` **1.706 visninger, 4 klik,
+  CTR 0,2 %, pos. 12,7**. C183 målte pariteten: SE **492 ord / 3 `<h2>` / 5 FAQ** mod DA
+  **1.129 / 6 / 9**. SE-autocomplete (`hl=se`, `gl=se`) under **"varför är diesel dyrare"**
+  → 10/10 variationer i samme spørgsmål; **"diesel dyrare än bensin"** → 10 variationer med
+  "**diesel billigare än bensin**" som nr. 2. **"räkna ut bränslekostnad"** → 10 variationer
+  med "**räkna ut bränslekostnad per mil**" som nr. 4.
+- **Målt, ikke antaget, at tallene var modsatte:** GlobalPetrolPrices 2026-09-21,
+  Sverige **diesel 22,81 SEK/l, benzin 17,57 SEK/l** — diesel **29,8 %** dyrere pr. liter.
+  `BRAENDSTOF_FORUDSETNINGER` satte diesel på 12,80 mod benzins 13,50. Den danske sides
+  konklusion ("pr. km er det næsten altid benzin, der er dyrest") er altså **modsat** i
+  Sverige, og den svenska side serverede den.
+- **Rettelsen:** nyt `BRAENDSTOF_FORUDSETNINGER_SE` med kilden i koden;
+  `braendstofForudsætninger(locale)`; `prisPrKm(type, locale="da")` og
+  `braendstofEksempelRækker(km, locale="da")` — **default er dansk**, så dansk side og
+  2.829 tests er uændrede. `BraendstofBeregner` læser samme sæt (`const F` flyttet ind i
+  komponenten), el-prisen er `ELBIL_FORUDSETNINGER.se`'s 2,00 SEK/kWh. Tre nye `<h2>` kun i
+  `se`: regnestykketabel med pr. mil, "**Varför är diesel dyrare än bensin?**" (per liter
+  *og* per kilometer), "Så hittar du din egen förbrukning" (km/l ↔ l/100 km ↔ l/mil).
+  SE-FAQ **5 → 8**. Svensk `metaTitle`/`description`/`metaDescription`/`ogDescription`/
+  `schemaDescription` skrev "450 kr."/"0,90 kr. per km" og læser nu de samme tal som siden.
+- **To tests lå fejlen fast** (se STATUS). **Tre fejl i mit eget arbejde** (se STATUS),
+  bl.a. at min første patch ramte den norske blok.
+- **MÅL:** beraknare.se `/braendstof` baseline **1.706 visninger / 4 klik / CTR 0,2 % /
+  pos. 12,7** (GSC 2026-08-30 → 2026-09-27) og Plausible **9 besøgende/28d, bounce 11 %**
+  — måles igen **2026-10-13**. DA-kontrol: **17.024 v / 183 klik / CTR 1,1 % / pos. 5,9**,
+  urørt. **Forventningen er ærlig:** pos. 12,7 er dybt, så dette er en indholdsmæssig
+  rettelse, ikke en CTR-rettelse. Hvis siden bare flytter sig til 15-20 uden at klikke, er
+  opgaven rigtigvis ikke færdig — det afgør 14-dages målingen.
+
 STATUS: KØ — **C183 er landet: beraknare.se `/renteberegner` lå på GSC's **23,5** med 2.871 visninger og 0,1 % CTR, mens dens danske tvilling — samme værktøj, samme sidefil, samme repo — lå på 7,4 med 13.416 visninger. Forskellen var ikke titlen og ikke søgningen: den svenska side havde 0 forekomster af "formel" mod dansk 10, fordi C85 kun lagde sit svar i den danske gren.** Køen havde ingen `I GANG`-løs opgave (98 afhænger af den `BLOCKED`-mærkede 97, 119 er kilde-blokeret, 179 kræver en rigtig browser), så valget kom fra C123's *afmålte* kandidatliste. **To noter med et passeret vindue var pligter først:** 12:30-batchen havde kørt da iterationen startede (14:37), så C175 (28 blog-/kategorititler) og C176 (beregnerantallet 33+ → 79/53/28) blev lukket ved indholdskontrol — målt på live, ikke på HTTP 200: manifestet siger "79+ gratis beregnere"/"53+ gratis kalkylatorer", `33+` giver 0 forekomster, `/om` har `<h2>Vores 79+ beregnere</h2>`, og de fire titler er 21/58/57/60 tegn med `og:site_name` stadig til stede.
 
 **Målt først, målt begge sprog.** SE-autocomplete (`hl=se`, `gl=se`) under **"effektiv ränta"** har **nr. 2 "effektiv ränta formel"** og "beräkna effektiv ränta formel" som egen variation; under **"annuitetslån formel"** er **nr. 2 "annuitetslån formel bevis"** og **nr. 3 "annuitetslån formel excel"**. På de to **live** sider: `formel` **0** i SE mod **10** i DA, `månadsränta` **0**, `PMT` **0**. Svensk side **6 `<h2>` / 4 FAQ / 5.042 ord** mod dansk **8 / 6 / 6.485**.
@@ -16,7 +61,7 @@ STATUS: KØ — **C183 er landet: beraknare.se `/renteberegner` lå på GSC's **
 
 **MÅL:** `/renteberegner` **SE baseline 2.871 visninger / 3 klik / CTR 0,1 % / pos. 23,5** (GSC 2026-08-30 → 2026-09-27) — måles igen **2026-10-13**. DA-kontrol urørt: **13.416 v / 114 klik / CTR 0,8 % / pos. 7,4**. **Forventningen er ærlig:** pos. 23,5 er dybt, så dette er ikke en CTR-rettelse men en **indholdsmæssig** — siden lå på side 2-3 *og* manglede svaret. Flytter den sig kun til 15-20, er opgaven rigtigvis ikke færdig.
 
-**Næste kandidater, målt i denne iteration (ikke gæt):** `/braendstof` SE (**1.706 v, pos 12,7**) — DA 7.743 ord / 6 `<h2>` / 9 FAQ mod SE **5.523 / 3 / 5**, den største sprog-asymmetri af de tre; og `/kalorier` SE (**2.728 v, pos 17,8**) — DA 7/7 mod SE **6/4**. Begge er C94- og C89-klassens `da`-only-rettelser, samme fejlklasse som denne.
+**Næste kandidater, målt i denne iteration (ikke gæt):** ~~`/braendstof` SE~~ (**LUKKET i C184** — 1.706 v, pos 12,7; målt DA 7.743 ord / 6 `<h2>` / 9 FAQ mod SE **5.523 / 3 / 5**, den største sprog-asymmetri af de tre; og `/kalorier` SE (**2.728 v, pos 17,8**) — DA 7/7 mod SE **6/4**. Begge er C94- og C89-klassens `da`-only-rettelser, samme fejlklasse som denne.
 STATUS: KØ — **C182 er landet: `/dato` — GSC's største danske side (132.313 visninger, 822 klik, 0,6 % CTR, pos. 5,7) og beraknare.se's næststørste (99.136 visninger, 0,1 % CTR, pos. 8,2) — svarede på *null* af sin egen største måned-klynge. "antal dage i en måned" er dansk autocompletes nr. 1 under både "antal dage i en måned" og "hvor mange dage i en måned", og svensk autocomplete spørger det samme med "antal dagar i en månad" og "hur många arbetsdagar i en månad" — og begge sider havde 0 forekomster af "i en måned"/"i en månad".** Køen havde ingen `I GANG`-løs opgave (97 er `BLOCKED`, 98 afhænger af den, 119 er kilde-blokeret, 179 kræver en rigtig browser), og de fem åbne deploy-noter (C173, C174, C175, C177, C178) har første vindue **2026-09-29 17:30** — det var 14:14, så ingen blev rørt.
 
 **Valget kom af at måle *måneden* i en side, der allerede svarede på *året*.** C82–C181 har lukket hele dansk GSC-top-16 én ad gang, og de fleste sluttede med at *titlen ikke var problemet* — så valget var at lede efter en spørgsmålstype ingen af dem havde spurgt til. `/dato` har hele tiden haft en sektion "Nyttige datofakta" med "1 år = 365 dage" og "1 måned = ca. 30,44 dage i gennemsnit" — altså et gennemsnit skrevet som en brøkstreg i en bullet, uden at svare på det spørgsmål, klyngen faktisk stiller. **Målt først, begge domæner, live (14:15-14:20).** DA-autocomplete (`hl=da`, `gl=dk`) under **"antal dage i en måned"** → **nr. 1 "antal dage i en måned"**, **nr. 2 "antal dage i måned excel"**, **nr. 3-5 "antal dage pr måned gennemsnit / 2025 / 2026"**; under **"hvor mange dage i en måned"** → nr. 1 samme spørgsmål og **nr. 2 "hvor mange dage er der i en måned uden weekender"**. SE-autocomplete under **"antal dagar i en månad"** → **nr. 1 "antal dagar i en månad excel"**, **"antal arbetsdagar i en månad"** og **"antal dagar i månaden 2026"**; under **"hur många dagar i en månad"** → **nr. 2 "hur många arbetsdagar i en månad"**. På de to **live** sider: "i en måned" **0**, "i en månad" **0**, "måneds" **0**, "månads" **0**, og "dage i et år" / "dagar i ett år" **0** hver. **Klyngen er altså målt i begge sprog, så rettelsen er begge sprog** — samme disciplin som C114, C119, C181.
@@ -17427,6 +17472,33 @@ er værst. Se `❓ Til Mads`.
 
 
 ### VERIFICÉR DEPLOY-log — nyeste først
+- `VERIFICÉR DEPLOY: beraknare.se /braendstof får svenska priser og svar på diesel-frågan (450 → 585 kr., 3 → 6 h2, 5 → 8 FAQ) ceo/braendstof-se-priser 2026-09-29 16:2x`
+  — merge sker ca. 16:2x, før 17:30-vinduet er nået, så første vindue er
+  **2026-09-29 17:30**. Verificér **indhold, ikke HTTP 200**. Mål:
+  1. `curl -s -H "Host: beraknare.se" https://beraknare.se/braendstof` skal have
+     `<h2>Så räknar du ut bränslekostnaden med siffror</h2>` og **tre** nye
+     `<h2>`-blokke i alt (var 1 fra siden), med **"500 km"**, **"17,57 kr."**,
+     **"22,81 kr."**, **"29,8 %"**, **"11,70 kr."** og **"12,70 kr."** i markupken.
+     Før: 0 af alle disse (siden havde 13,50/12,80 og ingen `<h2>` om præmien).
+  2. `<h2>Varför är diesel dyrare än bensin?</h2>` + `<h2>Så hittar du din egen
+     förbrukning</h2>` + `<h3>km/l, liter per 100 km eller liter per mil?</h3>`
+     skal alle findes. **MÅLFEJLEN I DENNE NOTE:** `<title>` har **punktum efter
+     "kr"** ("kostar 585 kr."), mens `description` og brødteksten har **"585 kr."**
+     med punktum — begge skal findes; søg på `585 kr` uden punktum.
+  3. `grep -o '"@type":"Question"'` skal give **8** på beraknare.se (var 5).
+  4. **KONTROL:** `https://minberegner.dk/braendstof` skal være **uændret** — samme
+     `<title>` med "450 kr." og "0,90 kr. per km", 6 `<h2>`, 9 FAQ og 0 fund på
+     "17,57"/"22,81". Dansk er default-argumentet i tre funktioner; en dansk
+     ændring her er en fejl, ikke en forbedring.
+  5. **KONTROL:** `https://beraknare.se/braendstof` skal have **0** fund på
+     "Diesel koster", "Forbrug", "Pris for" og "Pris pr." — de var danske og er
+     nu Förbrukning / Pris för / Pris per.
+  6. `npm run test -- src/lib/braendstof.test.ts` skal give **grønt** med de tre
+     nye/omskrevne procent-tests, `src/lib/page-data.test.ts` og
+     `src/app/braendstof/page.test.tsx` skal være grønne, og
+     `node scripts/locale-leak.mjs --gate` skal exit 0 med **0 ureviewet**.
+  7. `/api/health` skal svare `status: ok` på begge domæner.
+
 - `VERIFICÉR DEPLOY: beraknare.se /renteberegner svarer på formlen og effektiv ränta (0 formler → 1 formel + effektiv-beregning, 4 → 6 FAQ) ceo/renteberegner-se-formel 2026-09-29 15:0x`
   — merge sker ca. 15:0x, før 17:30-vinduet er nået, så første vindue er
   **2026-09-29 17:30**. Verificér **indhold, ikke HTTP 200**. Mål:
@@ -17687,3 +17759,31 @@ er værst. Se `❓ Til Mads`.
    href på én side er mange, og en besøgende, der skal lede efter sin beregner,
    finder den måske slet ikke. Kræver en beslutning om hvor meget der skal være
    på forsiden — ikke en måling mere.
+
+### ❓ Til Mads — ny i C184
+
+1. **De svenska brændstofspriser er en måling, ikke en konstant, og de står nu i koden.**
+   `BRAENDSTOF_FORUDSETNINGER_SE` er GlobalPetrolPrices 2026-09-21 (diesel 22,81,
+   benzin 17,57 SEK/l) og bliver forældet om et par måneder. **Spørgsmål:** skal
+   `/braendstof` og `/elbil` på beraknare.se hente et live pris (krpriser, drivstoff
+   eller et andet åbent API), eller skal modelprisen opdateres manuelt som nu? Et
+   live-pris-kald er en ny udgående afhængighed, så det gør jeg ikke uden dit go.
+2. **Samme spørgsmål for `/elbil`:** `ELBIL_FORUDSETNINGER.se` bruger 19 kr./l benzin,
+   altså **ikke** de 17,57 C184 målte. Jeg har bevidst **ikke** rørt `/elbil` i denne
+   iteration, fordi dens `/braendstof`-krydsreference-test
+   ("de to sammenligninger peger samme vej") er skrevet på de nuværende tal. Både
+   værktøjet og dens side skal læse ét sæt — næste iteration gør det, når du
+   har svaret på punkt 1.
+3. **Dansk `/braendstof` har samme kildeproblem den anden vej rundt:** 13,50/12,80 kr.
+   er danske modelpriser uden kilde, mens Sverige nu har en. Ikke et brud, men
+   asymmetrien er værd at lukke fra den anden side.
+
+### Næste kandidater, målt i C184
+
+1. **`/kalorier` SE** (**2.728 v, pos 17,8**) — C183's andet kandidat, samme
+   målemetode: DA 7 `<h2>` / 7 FAQ mod SE **6 / 4**. Mindre asymmetri end
+   `/braendstof` havde, men flere visninger.
+2. **De øvrige `da`-only-rettelser** er ikke lukket for `/bil` SE (**1.700 v,
+   pos 29,6** — dyb, men 63-66 i søgningerne) og resten af `/tidsberegner`.
+3. **Forsidens 37 % bounce** (C183's ❓ 2) kræver en beslutning om hvor mange
+   beregnere der skal være på forsiden — ikke en måling mere.

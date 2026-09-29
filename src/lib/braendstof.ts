@@ -13,13 +13,40 @@ export const BRAENDSTOF_FORUDSETNINGER = {
   el: { kwhPris: 2.5, kwhPer100km: 17 },
 } as const;
 
-/** Price per km for one fuel type, in DKK. */
-export function prisPrKm(type: BraendstofType): number {
+/**
+ * The Swedish set, in SEK. It exists because the Danish numbers are wrong in
+ * Sweden in a way that flips the site's own conclusion: Danish diesel is
+ * *cheaper* per litre than petrol (12,80 mod 13,50), while Swedish diesel was
+ * measured at 22,81 SEK/l mod 17,57 SEK/l for petrol — about 30 % dearer
+ * (GlobalPetrolPrices, 21-Sep-2026). Serving the Danish set on beraknare.se
+ * therefore told Swedish visitors that diesel is the cheap option, and the
+ * page's own "diesel vs. bensin" answer came out backwards.
+ *
+ * The el price is not from that source: it is the same 2 SEK/kWh that
+ * ELBIL_FORUDSETNINGER.se has used since the /elbil tool was built, kept so
+ * the two tools cannot drift apart.
+ */
+export const BRAENDSTOF_FORUDSETNINGER_SE = {
+  benzin: { literPris: 17.57, kmPerLiter: 15 },
+  diesel: { literPris: 22.81, kmPerLiter: 18 },
+  el: { kwhPris: 2, kwhPer100km: 17 },
+} as const;
+
+export type BraendstofLocale = "da" | "se";
+
+/** The assumptions for a site: Danish kroner on minberegner.dk, kronor on beraknare.se. */
+export function braendstofForudsætninger(locale: string) {
+  return locale === "se" ? BRAENDSTOF_FORUDSETNINGER_SE : BRAENDSTOF_FORUDSETNINGER;
+}
+
+/** Price per km for one fuel type, in the site's local currency. */
+export function prisPrKm(type: BraendstofType, locale: string = "da"): number {
+  const F = braendstofForudsætninger(locale);
   if (type === "el") {
-    const { kwhPris, kwhPer100km } = BRAENDSTOF_FORUDSETNINGER.el;
-    return (kwhPer100km / 100) * kwhPris;
+    const { kwhPris, kwhPer100km } = F.el;
+    return (kwhPris / 100) * kwhPer100km;
   }
-  const { literPris, kmPerLiter } = BRAENDSTOF_FORUDSETNINGER[type];
+  const { literPris, kmPerLiter } = F[type];
   return literPris / kmPerLiter;
 }
 
@@ -72,6 +99,19 @@ export function heleKroner(value: number): number {
   return Math.round(value);
 }
 
+/** A Swedish mil is 10 km, and "kr per mil" is how Swedish drivers count cost. */
+export const MIL_KM = 10;
+
+/** Price per mil: price per km × 10. "räkna ut bränslekostnad per mil" is a real query. */
+export function prisPrMil(type: BraendstofType, locale: string = "da"): number {
+  return procent1Decimals(prisPrKm(type, locale) * MIL_KM);
+}
+
+/** Litres per mil from km per litre: 15 km/l -> 0,7 l/mil (0,67 rounded twice). */
+export function literPrMil(kmPerLiter: number): number {
+  return procent1Decimals(literPr100km(kmPerLiter) / MIL_KM);
+}
+
 export type BraendstofEksempelRække = {
   type: BraendstofType;
   /** "liter" or "kWh" — the unit the arithmetic above is in. */
@@ -95,10 +135,10 @@ export type BraendstofEksempelRække = {
  * the printed arithmetic is one the reader can check by hand — and the first
  * row is the same 450 kr. the title and description have always promised.
  */
-export function braendstofEksempelRækker(km: number = BRAENDSTOF_EKSEMPEL_KM): BraendstofEksempelRække[] {
-  const benzin = BRAENDSTOF_FORUDSETNINGER.benzin;
-  const diesel = BRAENDSTOF_FORUDSETNINGER.diesel;
-  const el = BRAENDSTOF_FORUDSETNINGER.el;
+export function braendstofEksempelRækker(km: number = BRAENDSTOF_EKSEMPEL_KM, locale: string = "da"): BraendstofEksempelRække[] {
+  const benzin = braendstofForudsætninger(locale).benzin;
+  const diesel = braendstofForudsætninger(locale).diesel;
+  const el = braendstofForudsætninger(locale).el;
   const maengde = (kmPerLiter: number) => procent1Decimals(km / kmPerLiter);
 
   const benzinM = maengde(benzin.kmPerLiter);
@@ -114,7 +154,7 @@ export function braendstofEksempelRækker(km: number = BRAENDSTOF_EKSEMPEL_KM): 
       maengde: benzinM,
       enhedPris: benzin.literPris,
       pris: heleKroner(benzinM * benzin.literPris),
-      prisPrKm: prisPrKm("benzin"),
+      prisPrKm: prisPrKm("benzin", locale),
       literPr100km: literPr100km(benzin.kmPerLiter),
     },
     {
@@ -125,7 +165,7 @@ export function braendstofEksempelRækker(km: number = BRAENDSTOF_EKSEMPEL_KM): 
       maengde: dieselM,
       enhedPris: diesel.literPris,
       pris: heleKroner(dieselM * diesel.literPris),
-      prisPrKm: prisPrKm("diesel"),
+      prisPrKm: prisPrKm("diesel", locale),
       literPr100km: literPr100km(diesel.kmPerLiter),
     },
     {
@@ -136,7 +176,7 @@ export function braendstofEksempelRækker(km: number = BRAENDSTOF_EKSEMPEL_KM): 
       maengde: elM,
       enhedPris: el.kwhPris,
       pris: heleKroner(elM * el.kwhPris),
-      prisPrKm: prisPrKm("el"),
+      prisPrKm: prisPrKm("el", locale),
       literPr100km: null,
     },
   ];

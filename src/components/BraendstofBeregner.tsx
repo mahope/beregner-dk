@@ -8,12 +8,12 @@ import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { useLocale } from '@/components/LocaleProvider';
 import { formatCurrency, formatNumber as formatNum } from '@/lib/format';
-import { BRAENDSTOF_FORUDSETNINGER, prisPrKm } from '@/lib/braendstof';
-
-const F = BRAENDSTOF_FORUDSETNINGER;
+import { braendstofForudsætninger, prisPrKm } from '@/lib/braendstof';
 
 export default function BraendstofBeregner() {
   const { locale } = useLocale();
+  /** Swedish visitors get the SEK set; everyone else the Danish one. */
+  const F = braendstofForudsætninger(locale);
 
   const labels = {
     da: {
@@ -539,9 +539,9 @@ export default function BraendstofBeregner() {
             </thead>
             <tbody>
               {[50, 100, 200, 500, 1000].map((km) => {
-                const benzinPris = km * prisPrKm("benzin");
-                const dieselPris = km * prisPrKm("diesel");
-                const elPris = km * prisPrKm("el");
+                const benzinPris = km * prisPrKm("benzin", locale);
+                const dieselPris = km * prisPrKm("diesel", locale);
+                const elPris = km * prisPrKm("el", locale);
                 return (
                   <tr key={km} className="border-b last:border-b-0 dark:border-gray-700">
                     <td className="py-2 font-medium">{km} km</td>

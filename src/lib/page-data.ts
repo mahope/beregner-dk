@@ -1,7 +1,7 @@
 import type { Locale } from "./i18n";
 import { BARSEL_2026, SU_2026 } from "./satser-2026";
 import { SOLCELLE_LEVETID_AAR_MAX, SOLCELLE_LEVETID_AAR_MIN } from "./energi/solceller";
-import { BRAENDSTOF_EGENT_FORBRUG, BRAENDSTOF_EKSEMPEL_KM, BRAENDSTOF_FORUDSETNINGER, besparelseProcent, braendstofEksempelRækker, breakEvenKwhPris, elbilSammenligning, heleKroner, literPr100km, prisPrKm, procent1Decimals } from "./braendstof";
+import { BRAENDSTOF_EGENT_FORBRUG, BRAENDSTOF_EKSEMPEL_KM, BRAENDSTOF_FORUDSETNINGER, BRAENDSTOF_FORUDSETNINGER_SE, besparelseProcent, braendstofEksempelRækker, breakEvenKwhPris, elbilSammenligning, heleKroner, literPr100km, prisPrKm, prisPrMil, procent1Decimals } from "./braendstof";
 import { HUSLEJE_EKSEMPEL, HUSLEJE_STANDARD } from "./husleje";
 import {
   NETTOPRISINDEKS_2026M08,
@@ -82,6 +82,30 @@ const braendstofBenzinHoejPr100 = kommatal(literPr100km(12));
 const braendstofEgetKmPrLiter = kommatal(
   BRAENDSTOF_EGENT_FORBRUG.km / BRAENDSTOF_EGENT_FORBRUG.liter,
 );
+
+// ─── /braendstof på beraknare.se: samme formler, svenska kronor. Uden dem skrev den svenska
+// siden "450 kr." oven på et regnestykke der siger 585 kr. Sæt: BRAENDSTOF_FORUDSETNINGER_SE.
+const bfSe = braendstofEksempelRækker(BRAENDSTOF_EKSEMPEL_KM, "se");
+const bfSeBenzin = bfSe[0];
+const bfSeDiesel = bfSe[1];
+const bfSeEl = bfSe[2];
+const bfSePrisPrMil = (type: "benzin" | "diesel" | "el") => kommatal(prisPrMil(type, "se"));
+const bfSeBesparelse = (type: "benzin" | "diesel") => {
+  const anden = type === "benzin" ? bfSeBenzin.prisPrKm : bfSeDiesel.prisPrKm;
+  return kommatal(((anden - bfSeEl.prisPrKm) / anden) * 100);
+};
+const bfSeDieselDyrare = heleKroner(bfSeDiesel.pris - bfSeBenzin.pris);
+const bfSeBensinPris = BRAENDSTOF_FORUDSETNINGER_SE.benzin.literPris.toFixed(2).replace(".", ",");
+const bfSeDieselPris = BRAENDSTOF_FORUDSETNINGER_SE.diesel.literPris.toFixed(2).replace(".", ",");
+const bfSeElPris = BRAENDSTOF_FORUDSETNINGER_SE.el.kwhPris.toFixed(2).replace(".", ",");
+const bfSeLiterprisDiff = kommatal(
+  (BRAENDSTOF_FORUDSETNINGER_SE.diesel.literPris / BRAENDSTOF_FORUDSETNINGER_SE.benzin.literPris - 1) * 100,
+);
+const bfSeForbrukningP100 = kommatal(literPr100km(BRAENDSTOF_FORUDSETNINGER_SE.benzin.kmPerLiter));
+/** Hele kroner, uden komma: 585.08 -> "585". */
+function helekr(value: number) {
+  return String(heleKroner(value));
+}
 /** Et tal med dansk komma: 33.333 -> "33,3". */
 function kommatal(value: number) {
   return procent1Decimals(value).toFixed(1).replace(".", ",");
@@ -3443,24 +3467,27 @@ const sePages: Record<string, PageData> = {
     "braendstof": {
       slug: "braendstof",
       title: "Bränslekalkylator",
-      description: "500 km bensin kostar 450 kr. Vid 15 km/l använder du 33,3 liter, och 33,3 l × 13,50 kr. = 450 kr. — 0,90 kr. per km. Beräkna pris, förbrukning och årlig kostnad för bensin, diesel och el.",
-      metaTitle: "Bränslekalkylator: 500 km bensin kostar 450 kr",
-      metaDescription: "500 km bensin kostar 450 kr. vid 15 km/l och 13,50 kr./l — 0,90 kr. per km. Beräkna pris, förbrukning och årlig kostnad för bensin, diesel och el.",
+      description: `500 km bensin kostar ${helekr(bfSeBenzin.pris)} kr. Vid 15 km/l använder du ${kommatal(bfSeBenzin.maengde)} liter, och ${kommatal(bfSeBenzin.maengde)} l × ${bfSeBensinPris} kr. = ${helekr(bfSeBenzin.pris)} kr. — ${kommatal(bfSeBenzin.prisPrKm)} kr. per km. Beräkna pris, förbrukning och årlig kostnad för bensin, diesel och el.`,
+      metaTitle: "Bränslekalkylator: 500 km bensin kostar 585 kr.",
+      metaDescription: `500 km bensin kostar ${helekr(bfSeBenzin.pris)} kr. vid 15 km/l och ${bfSeBensinPris} kr./l — ${kommatal(bfSeBenzin.prisPrKm)} kr. per km. Beräkna pris, förbrukning och årlig kostnad.`,
       keywords: ["bränslekalkylator", "bensin kalkylator", "diesel kalkylator", "elbil kalkylator", "pris per km", "bränsleförbrukning"],
-      ogTitle: "Bränslekalkylator: 500 km bensin kostar 450 kr",
-      ogDescription: "500 km bensin kostar 450 kr. — 0,90 kr. per km. Beräkna pris, förbrukning och årlig kostnad för bensin, diesel och el.",
+      ogTitle: "Bränslekalkylator: 500 km bensin kostar 585 kr.",
+      ogDescription: `500 km bensin kostar ${helekr(bfSeBenzin.pris)} kr. — ${kommatal(bfSeBenzin.prisPrKm)} kr. per km. Beräkna pris, förbrukning och årlig kostnad för bensin, diesel och el.`,
       category: "Vardag",
       breadcrumbCategory: "Vardag",
       breadcrumbCategoryHref: "/kategori/hverdag",
       schemaName: "Bränslekalkylator",
-      schemaDescription: "Beräkna pris för bensin, diesel och el: 500 km bensin kostar 450 kr. vid 15 km/l och 13,50 kr./l.",
+      schemaDescription: `Beräkna pris för bensin, diesel och el: 500 km bensin kostar ${helekr(bfSeBenzin.pris)} kr. vid 15 km/l och ${bfSeBensinPris} kr./l.`,
       schemaCategory: "UtilitiesApplication",
       faqItems: [
-      { question: "Vad kostar 500 km med bensin?", answer: "Vid 15 km/l använder resan 500 ÷ 15 = 33,3 liter. 33,3 l × 13,50 kr. = 450 kr., alltså 0,90 kr. per km eller 90 kr. per 100 km." },
-      { question: "Beräkna bränslekostnader?", answer: "Distans / km/l × literpris. 200 km / 15 km/l × 18 SEK/l = 240 SEK." },
-      { question: "Normal km/liter?", answer: "Bensin: 12-18 km/l. Diesel: 15-22 km/l." },
-      { question: "Är elbilar billigare?", answer: `Ja, om man bara räknar drivmedlet: ${pct(elModBenzinPct)} % billigare per km än bensin (${krPrKm(elPris, 2)} mot ${krPrKm(benzinPris, 2)}). Mot diesel är besparingen ${pct(elModDieselPct)} %, eftersom diesel redan kostar mindre per km (${krPrKm(dieselPris, 2)}). Beräkningen använder 13,50 kr/l bensin, 12,80 kr/l diesel och 2,50 kr/kWh el. Offentlig laddning på 3-6 kr/kWh gör el dyrare än diesel över ${pct(elModDieselBreakEven)} kr/kWh.` },
-      { question: "Vad påverkar förbrukningen?", answer: "Körstil, hastighet, väder, däcktryck, AC." },
+      { question: "Vad kostar 500 km med bensin?", answer: `Vid 15 km/l använder resan ${braendstofEksempelKm} ÷ 15 = ${kommatal(bfSeBenzin.maengde)} liter. ${kommatal(bfSeBenzin.maengde)} l × ${bfSeBensinPris} kr. = ${helekr(bfSeBenzin.pris)} kr., alltså ${kommatal(bfSeBenzin.prisPrKm)} kr. per km och ${bfSePrisPrMil("benzin")} kr. per mil.` },
+      { question: "Varför är diesel dyrare än bensin?", answer: `I Sverige är diesel dyrare både per liter och per kilometer, mätt 21 september 2026: bensin ${bfSeBensinPris} kr./l och diesel ${bfSeDieselPris} kr./l, alltså ${bfSeLiterprisDiff} % dyrare pr. liter (GlobalPetrolPrices). Dieseln kör ${BRAENDSTOF_FORUDSETNINGER_SE.diesel.kmPerLiter} km/l mot bensins ${BRAENDSTOF_FORUDSETNINGER_SE.benzin.kmPerLiter} km/l, men den större literprisen går inte helt vägs. ${braendstofEksempelKm} km kostar ${helekr(bfSeBenzin.pris)} kr. med bensin och ${helekr(bfSeDiesel.pris)} kr. med diesel, så ${bfSeDieselDyrare} kr. mer för diesel.` },
+      { question: "Hur räknar man ut bränslekostnad?", answer: `Sträckan delad med förbrukningen ger mängden, och mängden gånger med literpriset ger kostnaden. ${braendstofEksempelKm} ÷ 15 = ${kommatal(bfSeBenzin.maengde)} liter, och ${kommatal(bfSeBenzin.maengde)} l × ${bfSeBensinPris} kr. = ${helekr(bfSeBenzin.pris)} kr.` },
+      { question: "Vad kostar bränslet per mil?", answer: `En mil är 10 km, så priset per mil är priset per km × 10. Med sidans förutsättningar: bensin ${bfSePrisPrMil("benzin")} kr. per mil, diesel ${bfSePrisPrMil("diesel")} kr. per mil och el ${bfSePrisPrMil("el")} kr. per mil. Tankinstrumentet visar liter per 100 km, så ${BRAENDSTOF_FORUDSETNINGER_SE.benzin.kmPerLiter} km/l blir ${bfSeForbrukningP100} l/100 km och ${kommatal(Number(bfSeForbrukningP100) / 10)} l/mil.` },
+      { question: "Hur hittar jag min egen förbrukning?", answer: `Liter som fylls på delat med kilometer som körts ger ditt km/l. Fyra påfyllningar på ${BRAENDSTOF_EGENT_FORBRUG.liter} liter över ${BRAENDSTOF_EGENT_FORBRUG.km} km ger ${BRAENDSTOF_EGENT_FORBRUG.km} ÷ ${BRAENDSTOF_EGENT_FORBRUG.liter} = ${kommatal(BRAENDSTOF_EGENT_FORBRUG.km / BRAENDSTOF_EGENT_FORBRUG.liter)} km/l, alltså ${kommatal((BRAENDSTOF_EGENT_FORBRUG.liter / BRAENDSTOF_EGENT_FORBRUG.km) * 100)} liter per 100 km. Kör gärna 300-400 km på fyra fulla tankar så att du inte missar av en felavläsning på en enda påfyllning.` },
+      { question: "Normal km/liter?", answer: `Bensin: 12-18 km/l (${kommatal(literPr100km(18))}-${kommatal(literPr100km(12))} l/100 km). Diesel: 15-22 km/l. El: 15-20 kWh/100 km.` },
+      { question: "Är elbilar billigare?", answer: `Ja, om man bara räknar drivmedlet: ${bfSeBesparelse("benzin")} % billigare per km än bensin (${kommatal(bfSeBenzin.prisPrKm)} mot ${kommatal(bfSeEl.prisPrKm)} kr.) och ${bfSeBesparelse("diesel")} % billigare än diesel. Beräkningen använder ${bfSeBensinPris} kr./l bensin, ${bfSeDieselPris} kr./l diesel och ${bfSeElPris} kr./kWh el. Offentlig laddning på 3-6 kr./kWh gör el dyrare än bensin över ${kommatal(bfSeBenzin.prisPrKm / (BRAENDSTOF_FORUDSETNINGER_SE.el.kwhPer100km / 100))} kr./kWh.` },
+      { question: "Vad påverkar förbrukningen?", answer: "Körstil, hastighet, väder, däcktryck och luftkonditionering. Ett typiskt bensinbil kör 12-18 km/l, och fel däcktryck ensamt kan flytta förbrukningen med flera procent." },
       ],
     },
     "bil": {
