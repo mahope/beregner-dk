@@ -112,6 +112,87 @@ export default async function ProcentPage() {
           </li>
         </ul>
 
+        <h2>Sådan beregner du procentforskellen mellem to tal</h2>
+        <p>
+          Spørgsmålet "procent forskel mellem to tal" har to svar, og
+          hvilket du får afhænger af, hvilket tal der er heltalet. Det
+          almindelige er procentvis ændring: hvor meget har det nye tal ændret
+          sig fra det gamle? Så er det den gamle sum, der er heltalet. Spørger
+          du i stedet, hvor stor forskellen er mellem to tal uanset
+          retningen — altså om det ene tal er større eller mindre — så regner
+          du på middelværdien, og svaret hedder procentdifferens.
+        </p>
+        <div className="overflow-x-auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Spørgsmål</th>
+                <th>Formel</th>
+                <th>Eksempel</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Hvor meget har værdien ændret sig fra Gammel til Ny?</td>
+                <td>
+                  <code>((Ny - Gammel) / Gammel) × 100</code>
+                </td>
+                <td>
+                  {num(belobEksempel.gammal)} til {num(belobEksempel.ny)} ={" "}
+                  {num(procentForskel(belobEksempel.ny, belobEksempel.gammal))}{" "}
+                  procent
+                </td>
+              </tr>
+              <tr>
+                <td>Hvor stor er forskellen på talene, uanset retning?</td>
+                <td>
+                  <code>(|A - B| / ((A + B) / 2)) × 100</code>
+                </td>
+                <td>
+                  {num(belobEksempel.gammal)} og {num(belobEksempel.ny)} ={" "}
+                  {num(
+                    procentDifferens(belobEksempel.gammal, belobEksempel.ny),
+                    1,
+                  )}{" "}
+                  procent
+                </td>
+              </tr>
+              <tr>
+                <td>Samme sag i Excel, når A1 er det gamle tal?</td>
+                <td>
+                  <code>=(B1-A1)/A1*100</code>
+                </td>
+                <td>
+                  A1 = {num(belobEksempel.gammal)}, B1 ={" "}
+                  {num(belobEksempel.ny)} ={" "}
+                  {num(procentForskel(belobEksempel.ny, belobEksempel.gammal))}{" "}
+                  procent
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p>
+          <strong>De to formler giver aldrig samme svar.</strong>{" "}
+          {num(lonEksempel.gammal)} kr, der stiger til {num(lonEksempel.ny)} kr,
+          er en stigning på{" "}
+          {num(procentForskel(lonEksempel.ny, lonEksempel.gammal))} procent i en
+          løn, fordi den gamle sum er heltalet. Den{" "}
+          {num(procentDifferens(lonEksempel.gammal, lonEksempel.ny), 1)} procent
+          store forskel er det samme par tal regnet på middelværdien — bytter du
+          om talene får du samme svar. Når du skal vide, om en løn stiger, er
+          det den første formel du skal bruge. Den anden bruges, når du vil
+          sammenligne, hvor store to beløb er i forhold til hinanden, uden at
+          retningen skal betyde noget.
+        </p>
+        <p>
+          En lønprocent kan du se i kroner her:{" "}
+          <Link href="/loenstigning" className="text-blue-700 underline">
+            lønstigning i procent
+          </Link>
+          .
+        </p>
+
         <h2>Hurtige procent-tricks</h2>
         <div className="overflow-x-auto">
           <table>

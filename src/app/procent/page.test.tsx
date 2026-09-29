@@ -171,11 +171,51 @@ describe("procent page", () => {
     expect(html).not.toContain("\u00a0000");
   });
 
-  // Dansk er bevidst urørt. Den danske klynge er målt (autocomplete hl=da) og
-  // besvaret i C82, så en ny dansk sektion ville ødelægge målingen af den.
-  test("den danske side er urørt af skillnadsafsnittet", async () => {
+  // Den danske side fik sin egen svar-sektion i C170. Den gamle lås her krævede
+  // "procentdifferens" på den danske side, altså låste den *tilstanden før
+  // rettelsen* i stedet for en egenskab — C94's fejlklasse. Den er skrevet om
+  // til de to ting, der faktisk skal gælde: dansk har sin egen overskrift, og
+  // den svenske lækker ikke ind i den.
+  test("den danske side svarer på procentforskel mellem to tal", async () => {
+    const html = await render("da");
+
+    expect(html).toContain("<h2>Sådan beregner du procentforskellen mellem to tal</h2>");
+    // De to formler, der giver hver sit svar for de samme to tal.
+    expect(html).toContain("((Ny - Gammel) / Gammel) × 100");
+    expect(html).toContain("(|A - B| / ((A + B) / 2)) × 100");
+    expect(html).toContain("=(B1-A1)/A1*100");
+    // Tallene er regnet af procentForskel/procentDifferens, ikke skrevet i
+    // hånden: 25 % mod 22,2 % for 10.000 -> 12.500 og 10 % mod 9,5 % for
+    // 30.000 -> 33.000. Dansk tusindtalsseparator er punktum, ikke mellemrum.
+    expect(html).toContain("10.000 til 12.500 = 25 procent");
+    expect(html).toContain("10.000 og 12.500 = 22,2 procent");
+    expect(html).toContain("30.000 kr, der stiger til 33.000 kr");
+    expect(html).toContain("stigning på 10 procent i en");
+    expect(html).toContain("9,5 procent store forskel");
+    // Fælden skal stå, ellers er de to tal bare forvirrende.
+    expect(html).toContain("De to formler giver aldrig samme svar");
+    expect(html).toContain('href="/loenstigning"');
+  });
+
+  test("den danske side har ingen svensk tekst i skillnadsafsnittet", async () => {
     const html = await render("da");
     expect(html).not.toContain("Skillnad i procent mellan två tal");
-    expect(html).not.toContain("procentdifferens");
+    expect(html).not.toContain("De två formlerna ger aldrig samma svar");
+    // "procentdifferens" staves ens på dansk og svensk, så den låses ikke —
+    // det gjorde den gamle test, som så lå den danske sætning være ulovlig.
+    expect(html).not.toContain("mellanvärde");
+    expect(html).not.toContain("Den två formlerna");
+  });
+
+  // Svensk skal have præcis sin egen overskrift. Låsen tæller forekomster, så
+  // en dansk sætning der bliver kopieret ind i den svenske gren fanges her.
+  test("hvert sprog har præcis sin egen skillnads-overskrift", async () => {
+    const da = await render("da");
+    const se = await render("se");
+
+    expect(da.match(/Sådan beregner du procentforskellen mellem to tal/g)).toHaveLength(1);
+    expect(da).not.toContain("Skillnad i procent mellan två tal");
+    expect(se.match(/Skillnad i procent mellan två tal/g)).toHaveLength(1);
+    expect(se).not.toContain("procentforskellen mellem to tal");
   });
 });

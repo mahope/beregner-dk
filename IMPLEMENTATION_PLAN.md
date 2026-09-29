@@ -1,4 +1,4 @@
-STATUS: KØ — **C169 er landet: sommerferien var GSC's næststørste `/dato`-søgnings næste spørgsmål, og vi havde nul sider — ikke fordi spørgsmålet var umuligt, men fordi kildens egen docblock erklærede det for "municipality specific" og udelod det.** Fire af de fem variationer under "dage til sommerferie" (DA-autocomplete 08:33) var ubesvarede, og docblocken havde *delvis* ret: ferier afgøres kommunalt, bortset fra sommerferiens **begyndelsestidspunkt, der er fastsat som sidste lørdag i juni** i folkeskoleloven af 2024 (hentet fra Lex 2026-09-29, fordi uden kilden var opgaven ikke bygbar). Nedtællingen alle søger efter går til *starten* — så der er ét nationalt svar, og det er 2026-06-27 / 2027-06-26 / 2028-06-24. **Det svenska `sommarlov` har derimod ingen national dato** (hver kommun fastsætger den), så eventet fik **kun en `da`-arm**, hvilket krævede at `DageTilEvent.se` blev optional gennem hele kæden — `resolveDageTilSlug` må ikke længre 301'e sommerferiens danske slug til en svensk side der ikke finder (den giver 403/noindex), og `DageTilPage` sætter ikke `hreflang="sv"` uden en svensk side. **To fejl i min egen måling, fundet fordi mine tests faldt:** min invariant "dagen efter den sidste lørdag ligger i juli" er kun sand når lørdagen er den 30. (koden var rigtig, testen tog fejl), og jeg regnede 271 dage mod nods 270. **To gamle tests låste den gamle *ikke*-egenskab — samme antal sider i begge sprog — og det var rigtigt, de faldt:** de er skrevet om til "da har alle 15, se har præcis de 14 med et svensk dato, forskellen er `["sommerferien"]`". **En rigtig fejl i min egen kode, fundet af fire gamle tests:** min første `resolveDageTilSlug` slog alle krydssprogs-redirects ihjel, fordi "juldagen" er det *svenske* slug for juledagen. Målt på rigtig server (port 3722, fri verificeret inden start): `/dage-til/sommerferien` 200 med titlen "…? **270** dage", canonical korrekt, 4 `Question`, `hrefLang` = `da` + `x-default` **uden `sv`**, sitemap 14 → 15, link fra `/`, `/dato` og `/nedtaelling`, **beraknare.se 403 på slaget og 0 forekomster på forsiden**. Gate grøn: lint (588 filer), **2.663 tests / 172 filer** (fra 2.645 / 172), build (141 sider). Efterårs- og vinterferie er **ikke** bygget: de er kommunale uden lovfast start. Se opgave 169.
+STATUS: KØ — **C170 er landet: `/procent` er GSC's største danske side (150.148 visninger = 25 % af alle visninger) og svarede på nul af sin egen DA-klynge — "procent forskel mellem to tal" er 10 af 10 DA-autocomplete-variationer, og siden havde 0 forekomster af "mellem to tal".** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den, 119 er kilde-blokeret), og de tre åbne deploy-noter (C167, C168, C169) har alle første vindue **2026-09-29 12:30** — det var 09:01, så ingen blev rørt. **Valget kom af at læse den sprog-asymmetri, C114 selv havde lavet:** C114 lagde "Skillnad i procent mellan två tal" på beraknare.se, fordi "procent skillnad mellan två tal" var nr. 1 af 10 — og dansk har præcis samme klynge med præcis samme to svar, som aldrig blev lagt på den danske side. Begge sprog deler `procentForskel` og `procentDifferens`; kun teksten manglede. `/procent` har været C82, C161 og C163's genstand, så antagelsen var at siden var lukket — den var lukket for *dubletter*, ikke for *svar*. **C161's egen regressionstest fangede det nye afsnit med det samme den var skrevet til at fange** ("expected 2 to be 1"), og den undtagelse, svensken allerede havde med en begrundelse, gælder nu dansk også — men ikke uden en ny test der kræver præcis én skillnads-overskrift pr. sprog, så undtagelsen ikke kan blive en dublet. **Målefejl i træk:** min negative lås på "procentdifferens" faldt selv med korrekt dansk, fordi ordet staves ens på begge sprog; låsen lå mod en stavningsforskel, der ikke findes. Se opgave 170.**C169 er landet: sommerferien var GSC's næststørste `/dato`-søgnings næste spørgsmål, og vi havde nul sider — ikke fordi spørgsmålet var umuligt, men fordi kildens egen docblock erklærede det for "municipality specific" og udelod det.** Fire af de fem variationer under "dage til sommerferie" (DA-autocomplete 08:33) var ubesvarede, og docblocken havde *delvis* ret: ferier afgøres kommunalt, bortset fra sommerferiens **begyndelsestidspunkt, der er fastsat som sidste lørdag i juni** i folkeskoleloven af 2024 (hentet fra Lex 2026-09-29, fordi uden kilden var opgaven ikke bygbar). Nedtællingen alle søger efter går til *starten* — så der er ét nationalt svar, og det er 2026-06-27 / 2027-06-26 / 2028-06-24. **Det svenska `sommarlov` har derimod ingen national dato** (hver kommun fastsætger den), så eventet fik **kun en `da`-arm**, hvilket krævede at `DageTilEvent.se` blev optional gennem hele kæden — `resolveDageTilSlug` må ikke længre 301'e sommerferiens danske slug til en svensk side der ikke finder (den giver 403/noindex), og `DageTilPage` sætter ikke `hreflang="sv"` uden en svensk side. **To fejl i min egen måling, fundet fordi mine tests faldt:** min invariant "dagen efter den sidste lørdag ligger i juli" er kun sand når lørdagen er den 30. (koden var rigtig, testen tog fejl), og jeg regnede 271 dage mod nods 270. **To gamle tests låste den gamle *ikke*-egenskab — samme antal sider i begge sprog — og det var rigtigt, de faldt:** de er skrevet om til "da har alle 15, se har præcis de 14 med et svensk dato, forskellen er `["sommerferien"]`". **En rigtig fejl i min egen kode, fundet af fire gamle tests:** min første `resolveDageTilSlug` slog alle krydssprogs-redirects ihjel, fordi "juldagen" er det *svenske* slug for juledagen. Målt på rigtig server (port 3722, fri verificeret inden start): `/dage-til/sommerferien` 200 med titlen "…? **270** dage", canonical korrekt, 4 `Question`, `hrefLang` = `da` + `x-default` **uden `sv`**, sitemap 14 → 15, link fra `/`, `/dato` og `/nedtaelling`, **beraknare.se 403 på slaget og 0 forekomster på forsiden**. Gate grøn: lint (588 filer), **2.663 tests / 172 filer** (fra 2.645 / 172), build (141 sider). Efterårs- og vinterferie er **ikke** bygget: de er kommunale uden lovfast start. Se opgave 169.
 
 STATUS: KØ — **C168 er landet: opgave 159's andet acceptkriterium — "kør porten på den *byggede* server og sammenlign med kildefundene" — afslørede at porten ikke så to ægte danske lækager på beraknare.se, og den tredje fandt scanneren selv, da den kørte mod live.** De **16** deploy-noter med udløbet vindue er lukket ved **indholdskontrol** kl. 08:06-08:20 (C114, C115, C118-C123, C155, C156, C157, C159, C160, C161, C163, C164, C165, C166), og **C167 er korrekt stadig åben** — den blev mergeret 07:49, altså *efter* 07:30-batchen, så dens første vindue er 12:30, og `/alder` har stadig FAQ 10 (skal være 12). **Kriterium 1 er dermed lukket, og kriterium 3 siger at en afvigelse er en ny iteration, ikke en note der lukkes — så det er den, der blev lavet.** Kriterium 2 krævede at køre porten mod den byggede server og sammenligne. Det gav **0 fund i én retning** (de 685 "døde" strenge fandtes ingen af dem i den server-renderede HTML) og **2 sider i den anden** — altså afvigelse. **De tre fund er ægte, målte på rigtig server og i markupken:** (1) beraknare.se `/tidszone` skrev **"Grønland"** med dansk ø i landetabellen, fordi C155 lagde landet ind uden sit `landSe`; (2) beraknare.se `/valuta`'s valuta-`<select>` viste **"Britiske Pund", "Svenske Kroner", "Danske Kroner", "Thailandske Baht"** i alle tre sprog, fordi `VALUTA_METADATA` kun havde ét navn pr. kode; (3) beraknare.se `/promille` skrev **"før den är under"** og **"altid kortere end"** i den svenska gren af en fælles template-literal — dansk *før* og *end* i en svensk sætning, fundet af den nye scanner mod *live*, ikke af kilden. **Hvorfor porten ikke så dem — og det er pointen:** alle tre er værdier der *når* en svensk læser gennem et opslag ved visningsstedet (`landSe ?? landDa`, `VALUTA_METADATA[code]?.navn`), ikke gennem en `locale === "…"`-gren port-analysen kan læse. `/tidszone`s danske streng er desuden dømt **DØD** — korrekt for den arm scanneren kan se; den manglende `landSe` er en *fraværelse*, og en fraværende nøgle giver intet fund. **Målefejl nr. 32 (min egen, og den farligste af alle målefejlene her):** min første krydskontrol reducerede siden med `html.split('<script')[0]`, som skærer ved første `<script>` i `<head>` og derfor **kasserer hele `<body>`**. Den meldte **0 på en side med to ægte lækager** — og meldte også 0 på en *plantet* dansk afsnit. Den blev kun opdaget fordi jeg plantede en fixture, ellers havde jeg troet på et tal. Derfor planter *alle* 9 tests i `rendered-leak-scan-gate.test.ts` deres fejl, og testen der kræver at scanneren *finder* den danske sætning er den første. **Rettelsen:** `landSe: "Grönland"` på Nuuk (sætningen "…följer Sverige" bygges af samme array, så den følger med), ny `VALUTA_NAVN` med `se`/`no`-navne pr. kode + eksporteret `valutaNavn(code, locale)`, og den svenska promille-arm. **Harness: 2.629 → 2.645 tests / 170 → 172 filer, modsvejs verificeret — 6 af de 6 nye fejltests falder med master-koden** (4 valuta, 1 tidszone, 1 promille; de tre "dansk er uændret"-låse skal være grønne begge veje). **Målt på rigtig server (build → `next start` port 3700 og 3701, begge verificeret fri *inden* start):** `/tidszone` SE 0×"Grønland" / 4×"Grönland" + "Storbritannien, Grönland, Grekland och Spanien följer Sverige"; `/promille` SE 1×"före den är under", 1×"kortare än", 0×"før", 0×"kortere end", 0×"er derfor"; `/valuta` SE 3×"Brittiska pund", 3×"Svenska kronor", 2×"Danska kronor", 2×"Thailändska baht", 0× alle danske. **Dansk urørt, målt:** Grønland 5, "følger Danmark" 1, "før den er under" 1, "kortere end" 1, "Britiske Pund" 3. **Den nye scanner kørt mod alle 71 svenske sider i det nye build: 0** (var 2) — og mod en tilplantet side: 2 fund, exit 1, så den er ikke vakuum-grøn. Gate grøn: lint (588 filer), **2.645 tests / 172 filer**, build (141 sider), `locale-leak.mjs --gate` exit 0 (720/685/35/0 uændret), `knapgruppe-scan.mjs` 0/0. Kode + plan i ét squash-commit på `ceo/luk-deploy-noter-159`; se opgave 168.
 
@@ -7730,6 +7730,105 @@ efter datagrund:
 - **MÅL:** se blokken øverst. Forventningen er visninger på en klynge, der
   før gik til konkurrenterne, plus at `/dato` får **15** interne
   nedtællings-links på dansk — ikke højere CTR på `/dato` i sig selv.
+
+#### 170. [x] FÆRDIG 2026-09-29 — C170 — **`/procent` — sitets største side i Google (150.148 visninger, 25 % af alle visninger) — svarede på nul af sin egen sprog-klynge, fordi C114's svar-sektion kun blev lagt på den svenska tvilling**
+
+**Datagrund.** GSC 2026-08-30 → 09-27: `/procent` **150.148 visninger / 98
+klik / CTR 0,1 % / pos. 7,4** på minberegner.dk og **26.433 v / 2 klik /
+pos. 9,9** på beraknare.se. DA-autocomplete (`hl=da`, `gl=dk`, 09:07) under
+**"procent forskel"** giver **10 af 10** variationer, og **otte af dem** er
+spørgsmålsformuleringer: "procent forskel mellem to tal", "… på to tal",
+"… mellem 2 tal", "… mellem to tal beregner", "… mellem to tal formel" (+ Excel,
+formel, beregning). Under **"beregn procent"** ligger "beregn procentvis
+forskel". På den **live** danske side (125.806 bytes) var **"forskel mellem to
+tal" 0 forekomster** og **"procent forskel" 0** — hele klyngen gik til
+konkurrenterne.
+
+**Fundet der ændrede konklusionen.** `/procent` har været C82, C161 og C163's
+genstand, så antagelsen var at siden var lukket. Den var lukket for
+*dubletter*, ikke for *svar*. C114 lagde "Skillnad i procent mellan två tal"
+på beraknare.se fordi "procent skillnad mellan två tal" var nr. 1 af 10 under
+"procent skillnad" — og **dansk har præcis den samme klynge med præcis samme
+to svar, som aldrig blev lagt på den danske side**. Begge sprog deler
+`procentForskel` og `procentDifferens` i `src/lib/procent.ts`; kun teksten
+manglede.
+
+**Rettelsen (kun `da`).** Ét nyt `<h2>` "Sådan beregner du procentforskellen
+mellem to tal" med de to formler der skal holdes op imod hinanden
+(`((Ny - Gammel) / Gammel) × 100` mod `(|A - B| / ((A + B) / 2)) × 100`),
+Excel-rækken, og fælden skrevet ud: de to giver **aldrig** samme svar
+(30.000 → 33.000 = 10 % stigning mod 9,5 % forskel; 10.000 → 12.500 = 25 %
+mod 22,2 %). **Ingen tal står håndkodet to steder:** de otte tal kommer af
+`procentForskel`/`procentDifferens` på `PROCENT_SKILLNAD_EKSEMPEL` — samme
+modul som C114's svenske blok bruger, så de to sprog ikke kan komme i
+mellemkrig om et facit (C84's fejlklasse). Dansk tusindtalsseparator er
+punktum, så forventningerne er skrevet med punktum og ikke med svensk
+mellemrum.
+
+**Harness: 2.659 → 2.667 tests.** `page.test.tsx` **9 → 11**: den danske
+svar-sektion (overskrift, begge formler, alle otte tal, fælden,
+`href="/loenstigning"`), en negativ lås på svensk tekst i den danske gren, og
+en test der kræver **præcis én** skillnads-overskrift pr. sprog. **Modsvejs
+verificeret: 2 af 2 nye danske tests falder** med kun `page.tsx` på master.
+
+**Den gamle test låste tilstanden *før* rettelsen — C94's fejlklasse, i en
+ny form.** `procent-formler.test.tsx`'s "den danske side er urørt af
+skillnadsafsnittet" krævede `not.toContain("procentdifferens")` på dansk, altså
+at dansk *ikke* måtte have svaret. Og da den nye blok lagde
+`((Ny - Gammel) / Gammel) × 100` ind for anden gang, faldde
+`procent-formler.test.tsx` med *"expected 2 to be 1"* — altså **C161's
+egen regressionstest fangede præcis det den var skrevet til at fange**. Den
+undtagelse, svensken allerede havde med en begrundelse ("et andet afsnit med
+et andet formål, ikke en dublet af referenceboksen"), gælder nu dansk også,
+så reglen er skrevet om til 2 i begge sprog — **og en ny test kræver
+præcis én skillnads-overskrift pr. sprog**, så undtagelsen ikke kan blive en
+dublet af den slettede `<h2>`. Modsvejs: **2 af 2 falder** på master.
+
+**Målefejl i træk (min egen).** Min negative lås på "procentdifferens" faldde
+selv med den nye danske tekst, fordi ordet staves **ens** på dansk og svensk —
+altså var den lås skrevet mod en stavningsforskel, der ikke findes. Den er
+fjernet og erstattet af låse på "mellanvärde" og den svenske fældesætning,
+der faktisk kun findes på svensk.
+
+**Gate grøn:** lint (**588 filer**), **2.667 tests / 172 filer** (fra 2.659 /
+172), build (**141 sider**), `locale-leak.mjs --gate` exit 0 (727 / 692 / 35 /
+0), `knapgruppe-scan.mjs` 0/0. Den kendte flakiness i
+`locale-leak-gate.test.ts` (C167's måling: 2 af 5 kørsler) faldt ikke i de to
+fulde kørsler.
+
+**Målt på rigtig server** (`next start` port 3788, porten verificeret fri
+*inden* start — målefejl 15's lære), begge domæner via `Host:`: DA 130.375
+bytes med det nye `<h2>` som tredje overskrift, **"mellem to tal" 0 → 10**,
+`10.000 til 12.500 = 25 procent`, `10.000 og 12.500 = 22,2 procent` og
+`9,5 procent store forskel` hver **1**, `<title>` uændret. SE 122.371 bytes
+**uændret** — 0 "mellem to tal", 14 "mellan två tal", egen `<title>`.
+`/api/health` → `status: ok`. Kun `page.tsx` og to testfiler er rørt — ingen
+beregningslogik, ingen metadata, ingen URL, ingen sitemap.
+
+**MÅL:** `/procent` DA baseline **150.148 visninger / 98 klik / CTR 0,1 % /
+pos. 7,4** (GSC 2026-08-30 → 2026-09-27) — måles igen **2026-10-13**.
+Klyngen alene: de otte "mellem to tal"-variationer i DA-autocomplete.
+**Forventningen er ærlig:** `/procent` ligger på pos. 7,4 med 0,1 % CTR, og
+C103 konkluderede allerede at det er et *rangerings*-problem. Denne rettelse
+kan altså ikke løfte siden i sig selv — den kan kun gøre at **de søgninger,
+den allerede fanger**, besvares synligt. Hvis CTR'en er uændret efter 14
+dage, er hypotesen "den ubesvarede klynge forklarede den lave CTR"
+**modbevist**, og næste skridt er flere links til siden, ikke dybere svar.
+
+**Målt og bevidst ikke bygget.** (1) **"procentpoint"** — ordet står 7 gange
+på siden og har egen FAQ, så klyngen er besvaret. (2) **"beregn procentvis
+stigning/fald"** — begge ord står på siden (`procentvis stigning` 10, `fald`
+16), og værktøjets fjerde tilstand *er* procentvis ændring. (3) **Skolestart som
+`dage-til`-dato** — DA-autocomplete har "hvor mange dage til skolestart", men de
+følgende variationer er "skolestart 2027 aarhus", "… ringsted", "… københavns
+kommune": kommunale datoer uden nationalt svar, samme grund som C169 havde til
+at lade efterårs- og vinterferie ligge. (4) **`/barselsdagpenge`s
+"udbetaling"-klynge** (3 af 10 DA-autocomplete under "barselsdagpenge", 0
+forekomster på siden og på bloggen) er den næste ægte danske klynge, men den
+kan ikke bygges i denne iteration: `udbetalingdanmark.dk` svarer HTTP 000,
+`virk.dk/ydelser/dagpenge` 404 og `borger.dk`'s dagpenge-sider 404 fra loopet,
+så der står ingen kilde til udbetalingsdatoerne. Samme kilde-fælde som opgave
+119 og C95 — skrevet op, ikke gættet.
 
 ## Morgenrapport 2026-08-24 06:45
 - ✅ Boligsalgsberegner (`/boligsalg`): logik+tests+UI+SEO-side+registrering — commit 00dbf4b
@@ -16061,3 +16160,38 @@ sider), `locale-leak.mjs --gate` exit 0 (130/720/685/35/0 uændret),
   9. KONTROL: `https://minberegner.dk/api/health` → `status: ok`, og
      `/tidszone`, `/promille`, `/valuta` skal have uændrede titler på begge
      domæner.
+
+- ⏳ **VERIFICÉR DEPLOY: C170 — den danske `/procent` skal have et nyt `<h2>`
+  "Sådan beregner du procentforskellen mellem to tal" med de to formler, der
+  skal holdes op imod hinanden.** Kode + plan i ét squash-commit på
+  `ceo/procent-forskel-da`. Første kandidatvindue **2026-09-29 12:30** (merge
+  sker efter 07:30-batchen). Kun `src/app/procent/page.tsx` (ét `<h2>` + ét
+  `<p>` + én tabel + ét `<p>` i den `locale === "da"`-gren) og to testfiler er
+  rørt — **ingen beregningslogik ændret, `procent.ts` urørt, `se` urørt, ingen
+  metadata, ingen URL, ingen sitemap, `<title>` uændret**.
+
+  1. `https://minberegner.dk/procent` skal have `<h2>Sådan beregner du
+     procentforskellen mellem to tal</h2>`, og **`"mellem to tal"` skal have
+     mindst 5 forekomster** (før: **0**).
+  2. Samme side skal finde `((Ny - Gammel) / Gammel) × 100`,
+     `(|A - B| / ((A + B) / 2)) × 100`, `=(B1-A1)/A1*100`,
+     `10.000 til 12.500 = 25 procent`, `10.000 og 12.500 = 22,2 procent`,
+     `30.000 kr, der stiger til 33.000 kr` og `9,5 procent store forskel`.
+     **Merkedes:** dansk tusindtalsseparator er **punktum** (`10.000`), ikke
+     mellemrum som på den svenske side.
+  3. **KONTROL mod at den danske rettelse ikke ødelægger C161's
+     regressionstest:** `npm run test -- src/app/procent` skal give **21
+     passed**. `procent-formler.test.tsx` kræver nu 2 forekomster af
+     ændringsformlen i **begge** sprog — hvis den står 3, er den danske blok
+     en dublet af den slettede `<h2>`, og det er præcis den fejl C161 fjernede.
+  4. **KONTROL mod at svensk ikke blev rørt:**
+     `https://beraknare.se/procent` skal fortsat have **0** forekomster af
+     `"mellem to tal"` og **mindst 10** af `"mellan två tal"`, og dens
+     `<title>` skal fortsat være "Procenträknare – beräkna 10 procent av ett
+     tal".
+  5. `https://minberegner.dk/procent` skal have **uændret** `<title>`
+     "Procentberegner – beregn 10 procent af et tal" og uændret antal `<h2>`
+     før den nye (6 → 7).
+  6. `https://minberegner.dk/api/health` → `status: ok`.
+
+  Se `#### 170`.

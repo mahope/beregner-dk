@@ -63,10 +63,12 @@ describe("procent: formlerne har én ejer", () => {
   // som afsnittet "Procentregningens formler" nederst i brødteksten — to
   // afsnit med præcis de samme fire linjer i samme dokument.
   //
-  // Den svenske ændringsformel må stå to gange: C114's "Skillnad i procent
-  // mellan två tal" bruger den bevidst som den ene af to formler, der skal
-  // holdes op imod hinanden. Det er et andet afsnit med et andet formål, ikke
-  // en dublet af referenceboksen, så den tælles med sine to.
+  // Ændringsformlen må stå to gange i begge sprog: "Skillnad i procent mellan
+  // två tal" (C114) og dens danske tvilling "Sådan beregner du
+  // procentforskellen mellem to tal" (C170) bruger den bevidst som den ene af
+  // to formler, der skal holdes op imod hinanden. Det er et andet afsnit med et
+  // andet formål, ikke en dublet af referenceboksen, så den tælles med sine to.
+  // De tre øvrige formler har ingen sådan grund og skal stadig stå én gang.
   test.each(["da", "se"] as const)(
     "formlerne står kun i referenceboksen på %s",
     async (locale) => {
@@ -75,11 +77,25 @@ describe("procent: formlerne har én ejer", () => {
       for (const formel of [FORMEL_PROCENT, FORMEL_DEL, FORMEL_HELTAL]) {
         expect(forekomster(html, formel), formel).toBe(1);
       }
-      const forventet = locale === "se" ? 2 : 1;
       expect(
         forekomster(html, FORMEL_AENDRING[locale]),
         FORMEL_AENDRING[locale],
-      ).toBe(forventet);
+      ).toBe(2);
+    },
+  );
+
+  // Undtagelsen må ikke blive en blank check: skillnadsafsnittet skal findes
+  // præcis én gang i begge sprog, ellers kan "to forekomster" opfyldes af den
+  // dublet C161 slettede — to afsnit om præcis det samme.
+  test.each([
+    ["da", "<h2>Sådan beregner du procentforskellen mellem to tal</h2>"],
+    ["se", "<h2>Skillnad i procent mellan två tal</h2>"],
+  ] as const)(
+    "skillnadsafsnittet findes præcis én gang på %s",
+    async (locale, overskrift) => {
+      const html = await render(locale);
+
+      expect(forekomster(html, overskrift), overskrift).toBe(1);
     },
   );
 
