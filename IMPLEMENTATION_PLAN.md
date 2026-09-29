@@ -15703,3 +15703,113 @@ GSC's top-16 og Plausible's top-15.
      det till julafton? 86 dagar"), og den **synlige** `<h1>` og det synlige
      svar skal være uændrede.
   5. `https://minberegner.dk/api/health` → `status: ok`.
+
+#### 166. [x] FÆRDIG 2026-09-29 — C167 — **`/alder` svarer på "hvor mange dage har jeg levet" — autocomplete nr. 1 i begge sprog og GSC's nr. 3 på beraknare.se's `/dato` — som `/dato` linkede til, men ingen af de to sider svarede på**
+
+**Datagrund.** DA-autocomplete (`hl=da`, `gl=dk`, 07:31) under **"hvor mange
+dage har jeg levet"** giver `hvor mange dage har jeg levet` + `hvor mange dage har
+du levet`; under **"hvor mange dage har jeg"** ligger `hvor mange dage har jeg
+været i live` som **nr. 2**; under **"hvor gammel er jeg"** er `hvor gammel er
+jeg i dage` **nr. 7**. SE-autocomplete under **"hur många dagar har jag levt"**
+giver **ti** variationer, hvoraf **fire** er spørgsmål om barn (`hur många dagar
+har man levt om man är 10/12/13/14 år`) og **to** er time-varianten (`hur många
+timmar har jag levt`, `hur många dagar är jag idag`). GSC har den som **nr. 3**
+blandt beraknare.se's `/dato`-søgninger: **385 visninger, pos. 10**.
+
+**Målt først, på begge live-sider.** DA `/alder` 1.113 ord / 6 `<h2>` / 10 FAQ:
+`hvor mange dage har jeg levet` **0**, `hvor mange dage har du levet` **0**,
+`været i live` **0**. SE `/alder` 1.326 ord / 6 `<h2>` / 10 FAQ:
+`hur många dagar har jag levt` **0**, `hur många timmar har jag levt` **0**.
+**Altså nul af hele klyngen i begge sprog.**
+
+**Fundet der gjorde valget billigt — og som er værd at huske:** `/dato` har
+allerede broen. Begge sprog har et "4. Alder"-afsnit der siger *"Se også hvor
+mange dage du har levt"* / *"Se också hur många dagar du har levt"* med et link
+til `/alder` (`href="/alder"` **3** på DA, **2** på SE, målt på rigtig server).
+**Linket var der; destinationen svarede ikke.** Det er derfor klyngen ikke er
+et nyt emne, men en eksisterende hensigt der aldrig blev besvaret — samme
+fejlklasse som C105's forside→katalog og C165's beregner→indlæg, bare i den
+modsatte retning: her pegede siden *hen* mod svaret.
+
+**Rettelsen (begge sprog, fordi klyngen er målt i begge).** Nyt modul
+`src/lib/alder-levet.ts` + ny komponent `AlderLevetSvar.tsx` med ét `<h2>`
+**"Hvor mange dage har du levet?"** / **"Hur många dagar har du levt?"**:
+dage-tallet, det samme tal som hele uger og hele måneder, timerne, og den
+fælde der gør svaret *rigtigt*: **24 pr. døgn, aldrig 23 eller 25, selv om uret
+stilles** — `beregnAlder` tæller `heleDageMellem` (kalenderdage), så det døgn
+hvor Danmark går frem stadig er 1 dag. **Ingen tal står håndskrevet i
+teksten:** `alderLevet(referenceIso)` kalder `beregnAlder`, samme modul som
+værktøjet bruger, og `formatDageTal` bruger `Intl` med sprogets egen
+separator. Plus **to nye FAQ-par pr. sprog** (10 → **12** målt på rigtig
+server), som dermed også kommer i JSON-LD'en: DA "Hvor mange dager har jeg
+levet?" + "Hvor mange dager har jeg været i live?", SE "Hur många dagar har
+jag levt?" + "**Hur många timmar har jag levt?**" — den sidste fordi time-
+varianten er **to** af de ti svenske variationer. `keywords` fik klyngens
+egne søgninger i alle tre sprog.
+
+**Harness: `page.test.tsx` 23 → 29 tests, modsvejs verificeret — 6 falder med
+master-koden i `page.tsx` + `page-data.ts`.** De dækker h2'en i begge sprog,
+at brødtekstens tal er `alderLevet`s, at FAQ'en siger præcis `beregnAlder`s
+tal, og at `no` **ikke** får blokken. **En fejl i min egen FAQ, fundet fordi
+testen faldt:** den danske "været i live"-svare havde dage-tallet men ikke
+timer-tallet, som de tre andre svar har — samme fejlklasse som C84's 13.342
+og C110's `MAKS(0;…)`, og den er fanget fordi tallene er håndskrevet i
+`page-data.ts` og derfor kan afvige fra modulet. Rettet i teksten, ikke i
+testen.
+
+**Målefejl nr. 24 (min egen, samme klasse som 9-23):** min første
+h2-kontrol på SE søgte på `levet?`, fordi jeg havde skrevet dansk `levet` i en
+svensk regexp — den gav 0 fund på en side der *havde* overskriften. Fundet
+fordi jeg læste den rå `<h2>`-liste i stedet for at tro mit eget grep; den
+rigtige svenske stavning er `levt?`.
+
+**Gate grøn:** lint (**586 filer**), **2.629 tests / 170 filer**, build (**141
+sider**), `locale-leak.mjs --gate` exit 0 med **720 kandidater / 685 døde / 35
+kræver øjne / 0 ureviewet** og **130 filer monteres** (fra 129 — den nye
+komponent er med, og dens svenske blok er æ/ø-fri så C73's R4 giver intet
+fund). **Én flaky test, målt, ikke min:** `locale-leak-gate.test.ts` faldt i
+2 af 5 fulde kørsler (1, så 2, så 0), mens den passerer 22/22 isoleret fem
+gange — den skriver til `MomsBeregner.tsx` på disk og kører scanneren, så en
+parallel testfil kan se mutationen. **Verificeret som pre-existing:** samme
+flakiness (1 fejl ud af 3 kørsler) på ren `master` med alle mine ændringer
+stashed. Ikke rettet her.
+
+**Målt på rigtig server** (`next start` port 3555, porten verificeret fri
+*inden* start — målefejl 15's lære), begge domæner: DA `<h2>Hvor mange dage
+har du levet?</h2>`, SE `<h2>Hur många dagar har du levt?</h2>`, `13.347 dage`
+og `320.328 timer` i den synlige blok (dagens tal, ikke de håndskrevne
+13.343/320.232 fra FAQ'en), `href="/dato"` **3** i den nye blok, JSON-LD
+**12** `Question` på begge domæner (var 10), `/api/health` `status: ok`.
+
+**MÅL:** `/alder` DA baseline **6.985 visninger / 37 klik / CTR 0,5 % / pos.
+7,7** og SE **3.283 visninger / 12 klik / CTR 0,4 % / pos. 7,7** (GSC
+2026-08-30 → 2026-09-27) — måles igen **2026-10-13**. Klyngen alene:
+**385 v** på beraknare.se's `/dato` + de 13 autocomplete-variationer i de to
+sprog. **Forventningen er ærlig:** `/alder` er på første side med 0,4-0,5 %
+CTR, så det er klik på eksisterende visninger, ikke nye. Hvis CTR'en er
+uændret efter 14 dage, er hypotesen "den ubesvarede klynge forklarede den lave
+CTR" **modbevist**, og `/dato` behøver et link til en *ny* side, ikke en dybere
+svaret. Skrevet som en falsificérbar forudsigelse.
+
+- ⏳ **VERIFICÉR DEPLOY: C167 — `/alder` skal have et nyt `<h2>` "Hvor mange
+  dage har du levet?" / "Hur många dagar har du levt?" med dage-, uge-,
+  måneds- og timmetal, og FAQ'en skal have to nye spørgsmål pr. sprog.** Kode
+  + plan i ét squash-commit på `ceo/alder-dage-levet`. Første
+  kandidatvindue **2026-09-29 12:30** (merge sker efter 07:30-batchen). Kun
+  `src/lib/alder-levet.ts` (ny), `src/components/AlderLevetSvar.tsx` (ny),
+  `src/app/alder/page.tsx` (én import + ét kald), `src/lib/page-data.ts` (to
+  `faqItems` pr. sprog + `keywords`) og `page.test.tsx` er rørt — **ingen
+  beregningslogik ændret, `alder.ts` urørt, `AlderBeregner` urørt, ingen URL,
+  ingen sitemap, ingen `<title>`, ingen `<h1>`, `no` urørt**. Verificér ved
+  **indhold, ikke HTTP 200**:
+  1. `https://minberegner.dk/alder` — skal have `<h2>Hvor mange dage har du
+     levet?</h2>`, og `24 pr. døgn` skal stå i blokken.
+  2. `https://beraknare.se/alder` — skal have `<h2>Hur många dagar har du
+     levt?</h2>` og `24 per dygn`.
+  3. Begge: JSON-LD skal have **12** `Question` (var 10), og
+     `grep -o '"@type":"Question"' | wc -l` — **ikke** `grep -c`.
+  4. KONTROL: `https://minberegner.dk/dato` skal fortsat have sit
+     "Se også hvor mange dage du har levet"-link til `/alder` uændret, og
+     `https://minberegner.dk/alder` skal fortsat have uændret `<title>`
+     "Aldersberegner: hvor gammel er du i år, måneder og dage?".
+  5. `https://minberegner.dk/api/health` → `status: ok`.

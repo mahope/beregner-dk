@@ -9,6 +9,7 @@ import RelateredeArtikler from "@/components/RelateredeArtikler";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { ALDER_EKSEEMPLER, formatAlder, formatAlderRaekke, foedselsaarRaekker } from "@/lib/alder-eksempler";
 import AlderSeSvar from "@/components/AlderSeSvar";
+import AlderLevetSvar from "@/components/AlderLevetSvar";
 import { tilIsoDato } from "@/lib/lokal-dato";
 import { getIntlLocale } from "@/lib/format";
 
@@ -230,6 +231,14 @@ export default async function AlderPage() {
           personnummer-afsnit, fordi "räkna ut ålder från personnummer" er nr. 2
           under "räkna ut ålder" i svensk autocomplete. Se AlderSeSvar. */}
       {locale === "se" && <AlderSeSvar />}
+
+      {/* "Hvor mange dage har du levet?" — eget afsnit i begge sprog, fordi
+          hele klyngen er ubesvaret: "hvor mange dage har jeg levet" er
+          autocomplete nr. 1 på dansk, "hur många dagar har jag levt" har ti
+          svenske variationer (fire af dem "om man är 10/12/13/14 år"), og
+          GSC har den som nr. 3 på beraknare.se's /dato med 385 visninger.
+          Målt på begge live-sider: 0 forekomster af spørgsmålsteksten. */}
+      <AlderLevetSvar locale={locale} />
 
       {/* Informativ tekst - SEO */}
       {locale === "da" && (

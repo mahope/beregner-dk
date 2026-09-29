@@ -11,6 +11,7 @@ import {
   foedselsaarRaekker,
 } from "@/lib/alder-eksempler";
 import { beregnAlder } from "@/lib/alder";
+import { LEVET_FOEDSELSDATO, alderLevet, formatDageTal } from "@/lib/alder-levet";
 import { tilIsoDato } from "@/lib/lokal-dato";
 import { getPageData } from "@/lib/page-data";
 import AlderPage from "./page";
@@ -304,5 +305,88 @@ describe("alder page", () => {
     expect(punkt?.answer).toContain("900315");
     // Samordningsnumret: dagen er 60 højere, så 63 skal læses som 3.
     expect(punkt?.answer).toContain("63 ska läsas som 3");
+  });
+
+  // "Hvor mange dage har jeg levet" / "hur många dagar har jag levt" stod som
+  // autocomplete nr. 1 i begge sprog med 0 forekomster på begge live-sider,
+  // selv om værktøjet viser "Dage levet" i sin egen resultattabel. GSC har
+  // den som nr. 3 blandt beraknare.se's /dato-søgninger (385 v, pos. 10).
+  test.each([
+    { locale: "da" as const, overskrift: "Hvor mange dage har du levet?" },
+    { locale: "se" as const, overskrift: "Hur många dagar har du levt?" },
+  ])("svarer på 'hvor mange dage har du levet' i $locale", async ({ locale, overskrift }) => {
+    vi.mocked(getLocale).mockResolvedValue(locale);
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale(locale));
+    const html = renderToStaticMarkup(await AlderPage());
+    const levet = alderLevet(tilIsoDato(new Date()));
+
+    expect(html).toContain(`<h2>${overskrift}</h2>`);
+    // Tallene skriver sig selv fra beregnAlder, så brødteksten kan ikke love
+    // et tal logikken modsiger — C84's og C87's lære.
+    expect(html).toContain(formatDageTal(levet.totalDage, locale));
+    expect(html).toContain(formatDageTal(levet.totalUger, locale));
+    expect(html).toContain(formatDageTal(levet.totalTimer, locale));
+    // Kalenderdage, ikke timer: et døgn med uret stillet er stadig 1 dag.
+    expect(html).toContain("24");
+    expect(html).toContain('href="/dato"');
+  });
+
+  // Modulet skal ikke kunne svare med et tal, der ikke stemmer med
+  // `beregnAlder`. Uden denne lås kunne en ny tekstlove et forkert dage-tal.
+  test("alderLevet er præcis beregnAlder for de samme to datoer", () => {
+    const rigtigt = beregnAlder({
+      foedselsdato: LEVET_FOEDSELSDATO,
+      beregningsdato: "2026-09-25",
+    })!;
+    const levet = alderLevet("2026-09-25");
+
+    expect(levet.totalDage).toBe(rigtigt.totalDage);
+    expect(levet.totalUger).toBe(rigtigt.totalUger);
+    expect(levet.totalMaaneder).toBe(rigtigt.totalMaaneder);
+    expect(levet.totalTimer).toBe(rigtigt.totalTimer);
+    expect(levet.totalMinutter).toBe(rigtigt.totalMinutter);
+    // De fire konstanter, der står håndskrevet i FAQ'en.
+    expect(levet.totalDage).toBe(13343);
+    expect(levet.totalUger).toBe(1906);
+    expect(levet.totalMaaneder).toBe(438);
+    expect(levet.totalTimer).toBe(320232);
+  });
+
+  // En fødselsdato efter beregningsdatoen kan ikke give en levetid. Modulet
+  // kaster i stedet for at returnere null, så en framtidsdato ikke kan give
+  // en læser et negativt antal dage.
+  test("alderLevet kaster på en fødselsdato efter reference-datoen", () => {
+    expect(() => alderLevet("1990-03-14")).toThrow(/kan ikke beregnes/);
+  });
+
+  // FAQ'en ligger i page-data og kommer derfor i JSON-LD'en. Den skal sige
+  // præcis det brødteksten siger, ellers svarer de to overflader på
+  // spørgsmålet med to forskellige tal (C84's fejlklasse).
+  test.each([
+    { locale: "da" as const, sporgsmaal: "Hvor mange dager har jeg levet?" },
+    { locale: "da" as const, sporgsmaal: "Hvor mange dager har jeg været i live?" },
+    { locale: "se" as const, sporgsmaal: "Hur många dagar har jag levt?" },
+    { locale: "se" as const, sporgsmaal: "Hur många timmar har jag levt?" },
+  ])("FAQ'en i $locale stiller '$sporgsmaal'", ({ locale, sporgsmaal }) => {
+    const faq = getPageData("alder", locale)!.faqItems;
+    const punkt = faq.find((item) => item.question === sporgsmaal);
+
+    expect(punkt, `${sporgsmaal} mangler i ${locale}`).toBeDefined();
+    // Dage-levet-tallet i FAQ'en er det beregnAlder giver for de samme datoer.
+    expect(punkt?.answer).toContain("13.343");
+    expect(punkt?.answer).toContain("320.232");
+    expect(punkt?.answer).not.toContain("13.342");
+  });
+
+  // `no`-sproget serverer ikke (domænet er hidden, jf. C79), så den nye blok
+  // skal ikke tilføje tekst til en side ingen ser — og den må ikke have en
+  // halv dansk halv svensk overskrift.
+  test("den nye blok findes ikke på norsk", async () => {
+    vi.mocked(getLocale).mockResolvedValue("no");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("no"));
+    const html = renderToStaticMarkup(await AlderPage());
+
+    expect(html).not.toContain("Hvor mange dage har du levet?");
+    expect(html).not.toContain("Hur många dagar har du levt?");
   });
 });
