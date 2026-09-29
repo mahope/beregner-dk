@@ -4,6 +4,7 @@ import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { BOLIGSTOETTE_2026 } from "@/lib/satser-2026";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { OG_IMAGE } from "@/lib/page-helpers";
 
 const kr = (value: number) => value.toLocaleString("da-DK");
 const tenPercent = formatNumber(BOLIGSTOETTE_2026.wealth.considerationRates.tenPercent * 100, "da");
@@ -32,6 +33,7 @@ export async function generateMetadata(): Promise<Metadata> {
       "boligstøtte formue",
     ],
     openGraph: {
+      images: OG_IMAGE,
       title: "Boligstøtte 2026: Maksima, formue og beregning",
       description: "Officielle nøgletal og en tydelig næste handling, når du vil screen din boligstøtte.",
       url: `${baseUrl}/blog/boligstoette-2026-nye-regler`,

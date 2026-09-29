@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
+import { OG_IMAGE } from "@/lib/page-helpers";
 
 export async function generateMetadata(): Promise<Metadata> {
   const dc = await getCurrentDomainConfig();
@@ -22,6 +23,7 @@ export async function generateMetadata(): Promise<Metadata> {
       "leasingguide",
     ],
     openGraph: {
+      images: OG_IMAGE,
       title: "Leasing af bil 2026: Pris, fordele, ulemper og guide",
       description: "Komplet guide til leasing i 2026: Sammenlign med billån, se typiske priser, og find ud af om leasing er billigst for dig.",
       url: `${baseUrl}/blog/leasing-af-bil-2026-pris-og-guide`,

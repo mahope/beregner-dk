@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
+import { OG_IMAGE } from "@/lib/page-helpers";
 
 export async function generateMetadata(): Promise<Metadata> {
   const dc = await getCurrentDomainConfig();
@@ -20,6 +21,7 @@ export async function generateMetadata(): Promise<Metadata> {
       "timepris guide",
     ],
     openGraph: {
+      images: OG_IMAGE,
       title: "Sådan finder du din timepris som freelancer",
       description: "Trin-for-trin guide til at sætte den rigtige timepris som freelancer.",
       url: `${baseUrl}/blog/saadan-finder-du-din-timepris-som-freelancer`,

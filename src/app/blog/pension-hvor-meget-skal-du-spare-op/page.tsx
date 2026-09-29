@@ -5,6 +5,7 @@ import { InlineAd } from "@/components/ads/AdBanner";
 import { formatNumber } from "@/lib/format";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { SATSER_2026 } from "@/lib/satser-2026";
+import { OG_IMAGE } from "@/lib/page-helpers";
 
 /**
  * Loftene for ratepension og aldersopsparing leses fra SATSER_2026, saa denne
@@ -37,6 +38,7 @@ export async function generateMetadata(): Promise<Metadata> {
       "aldersopsparing",
     ],
     openGraph: {
+      images: OG_IMAGE,
       title: "Pension: Hvor Meget Skal Du Spare Op?",
       description: "Komplet guide til pensionsopsparing i 2026: Tommelfingerregler, beregninger og de tre pensionssøjler.",
       url: `${baseUrl}/blog/pension-hvor-meget-skal-du-spare-op`,

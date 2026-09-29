@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
+import { OG_IMAGE } from "@/lib/page-helpers";
 
 export async function generateMetadata(): Promise<Metadata> {
   const dc = await getCurrentDomainConfig();
@@ -22,6 +23,7 @@ export async function generateMetadata(): Promise<Metadata> {
       "boliglån afdrag",
     ],
     openGraph: {
+      images: OG_IMAGE,
       title: "Boliglån 2026: Renter, afdrag og hvad du har råd til",
       description: "Alt om boliglån i 2026 — renter, låntyper og beregning.",
       url: `${baseUrl}/blog/boliglaan-2026-renter-og-afdrag`,

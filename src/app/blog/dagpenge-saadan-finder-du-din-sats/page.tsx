@@ -4,6 +4,7 @@ import { FAQSchema } from "@/components/StructuredData";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { formatNumber } from "@/lib/format";
 import { DAGPENGE_2026, SATSER_2026 } from "@/lib/satser-2026";
+import { OG_IMAGE } from "@/lib/page-helpers";
 
 const kr = (belob: number) => `${formatNumber(belob, "da")} kr`;
 
@@ -58,6 +59,7 @@ export async function generateMetadata(): Promise<Metadata> {
       "a-kasse dagpenge",
     ],
     openGraph: {
+      images: OG_IMAGE,
       title: "Dagpenge 2026: Max sats er 22.041 kr. pr. måned",
       description: `Max dagpenge 2026 er ${MAX} pr. måned. Dimittend, krav, periode og to regneeksempler.`,
       url: `${baseUrl}/blog/dagpenge-saadan-finder-du-din-sats`,

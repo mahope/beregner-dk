@@ -4,6 +4,7 @@ import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { RENTEFRADRAG_2026, SATSER_2026, SKATTEFRADRAG_2026 } from "@/lib/satser-2026";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { OG_IMAGE } from "@/lib/page-helpers";
 
 const kr = (amount: number) => `${formatNumber(amount, "da")} kr`;
 const krPerKm = (amount: number) =>
@@ -28,6 +29,7 @@ export async function generateMetadata(): Promise<Metadata> {
       "fagforening fradrag",
     ],
     openGraph: {
+      images: OG_IMAGE,
       title: "Fradrag 2026: Komplet guide til skattefradrag i Danmark",
       description: "Alle skattefradrag i 2026 — rentefradrag, kørsel, håndværker og mere.",
       url: `${baseUrl}/blog/fradrag-2026-komplet-guide`,

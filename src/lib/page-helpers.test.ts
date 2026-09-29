@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { getDomainConfigByLocale } from "./domain-config";
-import { buildPageMetadata } from "./page-helpers";
+import { buildPageMetadata, OG_IMAGE_URL } from "./page-helpers";
 
 describe("buildPageMetadata", () => {
   test.each(["tidsberegner", "moms", "dato", "nedtaelling", "leasing"])(
@@ -23,6 +23,19 @@ describe("buildPageMetadata", () => {
           siteName: config.siteName,
           locale: config.ogLocale,
         });
+        // A link shared from the site must render a preview. Every page that
+        // declares its own `openGraph` overrides the layout's, so the image has
+        // to be named here too — measured: 0 of 206 pages emitted og:image.
+        expect(metadata.openGraph?.images).toEqual([
+          {
+            url: OG_IMAGE_URL,
+            width: 1200,
+            height: 630,
+            alt: "MinBeregner.dk / Beräknare.se",
+          },
+        ]);
+        expect(metadata.twitter?.card).toBe("summary_large_image");
+        expect(metadata.twitter?.images).toEqual(metadata.openGraph?.images);
       }
     }
   );

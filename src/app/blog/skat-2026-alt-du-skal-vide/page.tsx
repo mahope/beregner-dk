@@ -4,6 +4,7 @@ import { FAQSchema } from "@/components/StructuredData";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { formatNumber } from "@/lib/format";
 import { SATSER_2026, SKATTEFRADRAG_2026 } from "@/lib/satser-2026";
+import { OG_IMAGE } from "@/lib/page-helpers";
 
 /**
  * Alle tal i artiklen læses fra SATSER_2026/SKATTEFRADRAG_2026, så de ikke kan
@@ -59,6 +60,7 @@ export async function generateMetadata(): Promise<Metadata> {
       "beskæftigelsesfradrag 2026",
     ],
     openGraph: {
+      images: OG_IMAGE,
       title,
       description,
       url: `${baseUrl}/blog/skat-2026-alt-du-skal-vide`,

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
+import { OG_IMAGE } from "@/lib/page-helpers";
 
 export async function generateMetadata(): Promise<Metadata> {
   const dc = await getCurrentDomainConfig();
@@ -20,6 +21,7 @@ export async function generateMetadata(): Promise<Metadata> {
       "husleje nettoløn",
     ],
     openGraph: {
+      images: OG_IMAGE,
       title: "30% reglen: Hvor meget bør du bruge på husleje?",
       description: "Forstå 30% reglen og lær at budgettere din bolig korrekt.",
       url: `${baseUrl}/blog/30-procent-reglen-husleje`,

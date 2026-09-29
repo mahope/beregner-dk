@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
+import { OG_IMAGE } from "@/lib/page-helpers";
 
 export async function generateMetadata(): Promise<Metadata> {
   const dc = await getCurrentDomainConfig();
@@ -23,6 +24,7 @@ export async function generateMetadata(): Promise<Metadata> {
       "nettoprovenu boligsalg",
     ],
     openGraph: {
+      images: OG_IMAGE,
       title: "Boligsalg 2026: Guide til omkostninger og salgsprovenu",
       description: "Komplet guide til omkostninger ved boligsalg. Beregn dit nettoprovenu — få overblik over mæglerhonorar, rapporter, istandsættelse og alle salgsomkostninger.",
       url: `${baseUrl}/blog/boligsalg-2026-guide-til-omkostninger-og-provenu`,

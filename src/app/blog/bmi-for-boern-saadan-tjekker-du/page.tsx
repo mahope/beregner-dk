@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
+import { OG_IMAGE } from "@/lib/page-helpers";
 
 export async function generateMetadata(): Promise<Metadata> {
   const dc = await getCurrentDomainConfig();
@@ -24,6 +25,7 @@ export async function generateMetadata(): Promise<Metadata> {
       "vækstkurve",
     ],
     openGraph: {
+      images: OG_IMAGE,
       title: "BMI for Børn - Sådan Tjekker Du (Komplet Guide)",
       description: "BMI for børn beregnes med percentiler, ikke faste grænser. Se hvordan du tjekker dit barns vægt korrekt.",
       url: `${baseUrl}/blog/bmi-for-boern-saadan-tjekker-du`,

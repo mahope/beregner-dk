@@ -3,6 +3,7 @@ import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { SU_2026 } from "@/lib/satser-2026";
+import { OG_IMAGE } from "@/lib/page-helpers";
 
 export async function generateMetadata(): Promise<Metadata> {
   const dc = await getCurrentDomainConfig();
@@ -23,6 +24,7 @@ export async function generateMetadata(): Promise<Metadata> {
       "studerende økonomi",
     ],
     openGraph: {
+      images: OG_IMAGE,
       title: "SU 2026: 7.426 kr. pr. måned udeboende",
       description:
         "SU 2026: udeboende 7.426 kr. pr. måned, hjemmeboende 1.154-3.202 kr., fribeløb fra 15.297 kr. og SU-lån op til 3.799 kr.",

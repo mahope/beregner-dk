@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { getHomeCalculatorCount } from "@/lib/home-data";
+import { OG_IMAGE } from "@/lib/page-helpers";
 
 export async function generateMetadata(): Promise<Metadata> {
   const dc = await getCurrentDomainConfig();
@@ -20,6 +21,7 @@ export async function generateMetadata(): Promise<Metadata> {
       "lån guide",
     ],
     openGraph: {
+      images: OG_IMAGE,
     title: "Blog - Guides og tips",
       description: "Guides og tips om økonomi og beregninger.",
       url: `${baseUrl}/blog`,

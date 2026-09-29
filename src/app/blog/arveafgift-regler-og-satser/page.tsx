@@ -3,6 +3,7 @@ import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { SATSER_2026 } from "@/lib/satser-2026";
+import { OG_IMAGE } from "@/lib/page-helpers";
 
 const BUNDFRADRAG = SATSER_2026.arveBundfradrag;
 const BOAFGIFT_PCT = Math.round(SATSER_2026.boafgift * 100);
@@ -34,6 +35,7 @@ export async function generateMetadata(): Promise<Metadata> {
       "boafgift beregning",
     ],
     openGraph: {
+      images: OG_IMAGE,
       title: "Arveafgift 2026: 1 mio. kr. til børn koster 91.155 kr.",
       description:
         "Arveafgift 2026: 91.155 kr for et barn der arver 1 mio. kr. Bundfradrag, satser og to regneeksempler.",

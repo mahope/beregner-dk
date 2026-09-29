@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
+import { OG_IMAGE } from "@/lib/page-helpers";
 
 export async function generateMetadata(): Promise<Metadata> {
   const dc = await getCurrentDomainConfig();
@@ -22,6 +23,7 @@ export async function generateMetadata(): Promise<Metadata> {
       "privatøkonomi",
     ],
     openGraph: {
+      images: OG_IMAGE,
       title: "Månedsbudget 2026 - Komplet guide til privatøkonomi",
       description: "Lær at lave et budget der holder: Faste/variable udgifter, tommelfingerregler og gratis budgetberegner.",
       url: `${baseUrl}/blog/maanedsbudget-2026-komplet-guide`,

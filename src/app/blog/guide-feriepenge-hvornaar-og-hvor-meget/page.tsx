@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
+import { OG_IMAGE } from "@/lib/page-helpers";
 
 export async function generateMetadata(): Promise<Metadata> {
   const dc = await getCurrentDomainConfig();
@@ -24,6 +25,7 @@ export async function generateMetadata(): Promise<Metadata> {
       "feriefridage",
     ],
     openGraph: {
+      images: OG_IMAGE,
       title: "Guide: Feriepenge - Hvornår og Hvor Meget?",
       description: "Alt du skal vide om feriepenge i 2026: beregning, udbetaling og dine rettigheder.",
       url: `${baseUrl}/blog/guide-feriepenge-hvornaar-og-hvor-meget`,

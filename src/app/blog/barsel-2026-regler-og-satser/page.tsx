@@ -3,6 +3,7 @@ import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
 import { BARSEL_2026 } from "@/lib/satser-2026";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
+import { OG_IMAGE } from "@/lib/page-helpers";
 import {
   adoption,
   flerling,
@@ -43,6 +44,7 @@ export async function generateMetadata(): Promise<Metadata> {
       "barsel adoption",
     ],
     openGraph: {
+      images: OG_IMAGE,
       title: "Barsel 2026: Sats, orlov og overdragelse",
       description: `Det korte svar: ${maxWeeklyRate} kr. pr. uge før skat ved ${BARSEL_2026.fullTimeHours} timer i 2026. Se også reglerne for orlov og overdragelse.`,
       url: `${baseUrl}/blog/barsel-2026-regler-og-satser`,

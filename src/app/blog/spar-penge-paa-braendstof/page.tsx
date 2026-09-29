@@ -3,6 +3,7 @@ import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { elbilSammenligning } from "@/lib/braendstof";
+import { OG_IMAGE } from "@/lib/page-helpers";
 
 const elbil = elbilSammenligning("da");
 const f2 = (value: number) => value.toFixed(2).replace(".", ",");
@@ -27,6 +28,7 @@ export async function generateMetadata(): Promise<Metadata> {
       "km/l forbedring",
     ],
     openGraph: {
+      images: OG_IMAGE,
       title: "Spar penge på brændstof: Tips til billigere kørsel",
       description:
         "Praktiske tips til at reducere dit brændstofforbrug og spare penge på benzin, diesel eller el.",

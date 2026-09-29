@@ -3,7 +3,6 @@ import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { getTranslations } from "@/lib/i18n";
 
 export const alt = "MinBeregner.dk / Beräknare.se";
-export const dynamic = "force-dynamic";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 

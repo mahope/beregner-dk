@@ -19,6 +19,7 @@ import {
 } from "@/lib/dage-til";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { getDomainConfigByLocale } from "@/lib/domain-config";
+import { OG_IMAGE } from "@/lib/page-helpers";
 
 const units: Record<DageTilLocale, { day: string; days: string; week: string; weeks: string }> = {
   da: { day: "dag", days: "dage", week: "uge", weeks: "uger" },
@@ -175,6 +176,13 @@ export async function buildDageTilMetadata(
       type: "website",
       siteName,
       locale: ogLocale,
+      images: OG_IMAGE,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: titleText,
+      description: `${headline}. ${target} (${targetIso}).`,
+      images: OG_IMAGE,
     },
     alternates: { canonical, languages },
   };

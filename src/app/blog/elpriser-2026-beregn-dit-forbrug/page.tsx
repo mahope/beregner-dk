@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
+import { OG_IMAGE } from "@/lib/page-helpers";
 
 export async function generateMetadata(): Promise<Metadata> {
   const dc = await getCurrentDomainConfig();
@@ -22,6 +23,7 @@ export async function generateMetadata(): Promise<Metadata> {
       "kWh pris 2026",
     ],
     openGraph: {
+      images: OG_IMAGE,
       title: "Elpriser 2026: Sådan beregner du dit elforbrug",
       description: "Alt om elpriser i 2026 — priser, forbrug og sparetips.",
       url: `${baseUrl}/blog/elpriser-2026-beregn-dit-forbrug`,

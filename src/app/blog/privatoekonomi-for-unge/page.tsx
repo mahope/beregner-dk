@@ -3,6 +3,7 @@ import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { SU_2026 } from "@/lib/satser-2026";
+import { OG_IMAGE } from "@/lib/page-helpers";
 
 const kr = (value: number) => value.toLocaleString("da-DK");
 
@@ -24,6 +25,7 @@ export async function generateMetadata(): Promise<Metadata> {
       "skat studerende",
     ],
     openGraph: {
+      images: OG_IMAGE,
       title: "Privatøkonomi for unge: 5 beregnere du skal kende",
       description: "5 gratis beregnere der hjælper unge med privatøkonomien.",
       url: `${baseUrl}/blog/privatoekonomi-for-unge`,

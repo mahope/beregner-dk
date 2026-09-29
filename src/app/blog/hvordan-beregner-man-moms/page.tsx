@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
+import { OG_IMAGE } from "@/lib/page-helpers";
 
 export async function generateMetadata(): Promise<Metadata> {
   const dc = await getCurrentDomainConfig();
@@ -21,6 +22,7 @@ export async function generateMetadata(): Promise<Metadata> {
       "momsberegning",
     ],
     openGraph: {
+      images: OG_IMAGE,
       title: "Hvordan beregner man moms? En komplet guide",
       description: "Lær alt om dansk moms: Tillæg, fratræk og beregn 25% moms korrekt.",
       url: `${baseUrl}/blog/hvordan-beregner-man-moms`,

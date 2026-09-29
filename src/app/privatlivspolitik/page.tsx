@@ -1,6 +1,7 @@
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { getCurrentDomainConfig, getLocale } from "@/lib/get-locale";
 import type { Metadata } from "next";
+import { OG_IMAGE } from "@/lib/page-helpers";
 
 export async function generateMetadata(): Promise<Metadata> {
   const dc = await getCurrentDomainConfig();
@@ -14,6 +15,7 @@ export async function generateMetadata(): Promise<Metadata> {
     title,
     description: desc,
     openGraph: {
+      images: OG_IMAGE,
       title: `${title} - ${dc.siteName}`,
       description: desc,
       url: `${dc.baseUrl}/privatlivspolitik`,

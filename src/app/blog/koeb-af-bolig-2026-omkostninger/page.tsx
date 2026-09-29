@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
+import { OG_IMAGE } from "@/lib/page-helpers";
 
 export async function generateMetadata(): Promise<Metadata> {
   const dc = await getCurrentDomainConfig();
@@ -21,6 +22,7 @@ export async function generateMetadata(): Promise<Metadata> {
       "købers omkostninger",
     ],
     openGraph: {
+      images: OG_IMAGE,
       title: "Køb af bolig 2026: Alle omkostninger du skal kende",
       description: "Alle omkostninger ved boligkøb i 2026 — fra udbetaling til tinglysning.",
       url: `${baseUrl}/blog/koeb-af-bolig-2026-omkostninger`,

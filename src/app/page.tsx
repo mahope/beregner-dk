@@ -11,6 +11,7 @@ import { getDageTilKort, getHomePageData, getHomeCalculators } from "@/lib/home-
 import { getSearchContent } from "@/lib/search-content";
 import { HomeContent } from "@/components/HomeContent";
 import CountryFlag from "@/components/CountryFlag";
+import { OG_IMAGE } from "@/lib/page-helpers";
 
 export async function generateMetadata(): Promise<Metadata> {
   const domainConfig = await getCurrentDomainConfig();
@@ -28,6 +29,7 @@ export async function generateMetadata(): Promise<Metadata> {
     description: data.meta.description,
     keywords: data.meta.keywords,
     openGraph: {
+      images: OG_IMAGE,
       title: data.meta.ogTitle,
       description: data.meta.ogDescription,
       url: baseUrl,

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { elbilSammenligning } from "@/lib/braendstof";
+import { OG_IMAGE } from "@/lib/page-helpers";
 
 /** Eksemplet i artiklen skal regne lige som /elbil gør, så tal, der ikke kan glide fra hinanden. */
 const elbil = elbilSammenligning("da");
@@ -28,6 +29,7 @@ export async function generateMetadata(): Promise<Metadata> {
       "billån 2026",
     ],
     openGraph: {
+      images: OG_IMAGE,
       title: "Biløkonomi 2026: Hvad koster det at eje bil?",
       description: "Komplet guide til biløkonomi: Afgifter, brændstof, forsikring, værditab og finansiering. Se de samlede ejeromkostninger.",
       url: `${baseUrl}/blog/biloekonomi-2026-hvad-koster-det-at-eje-bil`,

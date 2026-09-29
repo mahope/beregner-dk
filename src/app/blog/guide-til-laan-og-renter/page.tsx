@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
+import { OG_IMAGE } from "@/lib/page-helpers";
 
 export async function generateMetadata(): Promise<Metadata> {
   const dc = await getCurrentDomainConfig();
@@ -23,6 +24,7 @@ export async function generateMetadata(): Promise<Metadata> {
       "låneberegner",
     ],
     openGraph: {
+      images: OG_IMAGE,
       title: "Guide til lån og renter: Forstå hvad du betaler",
       description:
         "Lær alt om lån, renter og ÅOP. Forstå forskellen på lånetyper og find det billigste lån.",

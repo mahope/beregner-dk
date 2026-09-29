@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
+import { OG_IMAGE } from "@/lib/page-helpers";
 
 const SLUG = "kvadratmeter-saadan-regner-du-ud";
 
@@ -22,6 +23,7 @@ export async function generateMetadata(): Promise<Metadata> {
       "m2 beregner",
     ],
     openGraph: {
+      images: OG_IMAGE,
       title: "Hvordan regner man kvadratmeter ud? Guide med eksempler",
       description:
         "Areal = længde × bredde. Sådan regner du kvadratmeter ud på vægge, gulv og i rum.",

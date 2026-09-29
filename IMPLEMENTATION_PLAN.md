@@ -1,3 +1,17 @@
+STATUS: KØ — **C177 er landet: `opengraph-image.tsx` har genereret et 93 KB PNG og serveret det med 200 siden den blev skrevet, men **0 af 206 sider** sendte en eneste `og:image` — så ethvert link delt fra sitet (Facebook, WhatsApp, Messenger, LinkedIn, SMS) har rendret som en blå URL uden forhåndsvisning. Billedet var ikke bare uden billede; det var *framtvingende* ubrugeligt, fordi den manglende `<meta>` får Facebook og WhatsApp til at vise en tom boks.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den, 119 er kilde-blokeret), og de ni åbne deploy-noter (C167–C176) har alle første vindue **2026-09-29 12:30** — det var 12:10 ved starten, så ingen blev rørt. **Valget kom af at måle de ting ingen af C82–C176 havde målt.** De har lukket titler (C175), descriptions (C164, C166, C176), JSON-LD, hreflang, canonical, sprogfejl og interne links — men aldrig *social metadata på tværs af domænet*. Scanningen af alle 206 sider i begge sitemapmer fandt **én fejlklasse og ingen andet**: `og:image` **0/206** (og `twitter:image` 0/206). **Målefejl nr. 34 (min egen, samme slags som C176's 521):** min første verifikationsscript brugte `fetch` med `headers: {host}` — og undici **forbyder** at sætte `Host` i Node, så de 14 svenske `/dagar-till/*`-sider svarede **404** i min måling. De er 200 på live og 200 med `curl -H "Host: …"`. Det er målt, ikke antaget: efter at skiftede til `curl` faldt tallet fra 192/206 til **207/207**. Uden genmålingen havde jeg rapporteret en fejl, der ikke findes.
+
+**Årsagen er to lag, og kun det første er tilstrækkeligt at forklare.** (1) `opengraph-image.tsx` eksporterede `dynamic = "force-dynamic"`. Fil-konventionen (`discover.js:104` → `mergeStaticMetadata` i `resolve-metadata.js:117`) opsamler statiske billeder ved *build*-tid og skriver dem i layoutets `openGraph.images`; `force-dynamic` fik route'en til at springe den sti over. Beviset er at fjerne den linje alene fik `/` til at servere `opengraph-image?7a961a05217a97a7` — **hash-query'en er fil-konventionens egen**, så det var den der producerede tagget. `apple-icon.tsx` har aldrig haft den linje, og den har hele tiden virket. (2) Men det viser sig *kun* at være halv rettelsen: **33 sider skriver deres egen `openGraph`-literal** (27 blogindlæg + `/blog`, `/om`, `/privatlivspolitik`, `/kategori/[slug]`, …), og Next erstatter layoutets objekt **helt** — de kan ikke arve billedet, de skal navngive det selv. Målt efter lag 1: 14 `dage-til`-sider + 33 egne `openGraph` = **47 sider stadig uden**, præcis de to forventede tal. Det er C175's fejlklasse igen: **en regel, der kun gælder for den gruppe den blev skrevet for.**
+
+**Rettelsen er to dele, og den er bevidst eksplicit frem for at jage Next-internt.** (1) `export const dynamic = "force-dynamic"` væk fra `opengraph-image.tsx` — billedet *er* per-request (det læser domænet og `getTranslations`), så `force-dynamic` var hverken nødvendigt eller korrekt her. (2) `OG_IMAGE` og `OG_IMAGE_URL` i `page-helpers.ts`, spredt i **alle 35** steder der sætter `openGraph` (layout, `page-helpers`, `DageTilPage`, de 33 sider). Bevis for at dette ikke er overflødigt: efter kun lag 1 var `/blog` stadig `og=0`. Én kilde, ét sted at ændre URL'en.
+
+**Målefejl nr. 35 (min egen, fundet af porten):** mit indsættelsesscript valgte *sidste* `import `-linje som indsættelsespunkt, og `barsel-2026-regler-og-satser/page.tsx` har en `import {` der fortsætter på næste linje — så importen landede *inde i* den og brød filen. `npm run lint` fangede det med to fejl (`noCommaOperator` + `noUselessLoneBlockStatements`) og **én testfil (`title-suffix.test.ts`) faldt med**, fordi blogindlægget ikke længere parserede. Helt filen, kun fordi porten så den; en ren tekst-substitution ville have skrevet den ugyldige kode og fortsat.
+
+**Harness: 4 nye tests i `og-image.test.ts`, alle modsvejs verificeret** (7 fejl med master's kode, én ad gangen). De fire dækker hvert lag *og* de tre blind spots: (a) layoutets egen `generateMetadata`, (b) `buildPageMetadata` på tværs af da/se, (c) **en klasse-scan over alle 34 `page.tsx` med egen `openGraph`** — den finder enhver fremtidig side der glemmer billedet, og den fejlede korrekt på `blog/page.tsx` + `om/page.tsx` da jeg stashede dem, (d) `buildDageTilMetadata`, den 28-siders blind spot fra C166 hvor metadata bygges i en komponent og derfor ikke kan scannes fra `page.tsx`. Sidste test er den der gør (d) permanent.
+
+**Målt på rigtig server** (`next start` :3999, port fri checket før start), **alle 207 URL'er i begge sitemapmer**: **207/207** har `og:image` + `twitter:image` (før 0/207). `/api/health` grøn. Gate grøn: lint (**594 filer**), **2.725 tests / 176 filer** (fra 2.720/176), build (**142 sider**), `locale-leak.mjs --gate` exit 0, `knapgruppe-scan.mjs` 0/0, `href-scan.mjs` 0 på 71 + 135 sider. Rørte filer: `opengraph-image.tsx` (én linje væk), `page-helpers.ts` (+2 eksporter), `layout.tsx`, `DageTilPage.tsx`, 33 `page.tsx` (én linje hver) + 1 ny testfil — **ingen beregningslogik, ingen URL, ingen sitemap, ingen `<title>`, ingen `<meta description>`, ingen anden tekst rørt**. Kode + plan i ét squash-commit på `ceo/og-image`; se opgave 177.
+
+**MÅL:** `og:image` har ingen CTR-baseline i GSC (det er ikke et søgefelt), så den målbare del er et **kvalitetsmål**: *0 sider må mangle et socialt forhåndsvisningsbillede* — nået og målt på den byggede server (0 → 207/207). Den indirekte effekt (flere klik fra delinger) kan ikke måles før næste Plausible-snapshot med `ad_clicked` og outbound-events. Trafiknærmeste GSC-baseline uændret: `/procent` (150.148 v / 98 klik / 0,1 % / pos. 7,4), `/dato` (132.313 / 822 / 0,6 % / 5,7). Genmåling **2026-10-13**.
+
 STATUS: KØ — **C175 er landet: 28 af sitets 136 danske sider serverede en `<title>` på 61-73 tegn, fordi blog- og kategorisiderne skriver `title: "…"` som en streng — og layoutets template (`src/app/layout.tsx:33`, `%s | ${siteName}`) hænger `| MinBeregner.dk` på de 18 tegn bagefter. Det er afkortningsfejlen C81 lukkede for 160 titler i `page-data.ts`, men de to sidetyper har ingen `page-data`-post, så hverken hans test eller `metadata-titles.test.ts` (som låser *dobbelt* suffiks, ikke længde) kunne se dem.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den, 119 er kilde-blokeret), og de syv åbne deploy-noter (C167–C173) har alle første vindue **2026-09-29 12:30** — det var 11:28 ved starten, så ingen blev rørt. **Valget kom af at måle en klasse i stedet for endnu en side:** efter at C82–C174 har lukket hele dansk GSC-top-16 *én ad gang*, målte denne iteration **alle 135 URL'er i det danske sitemap mod live** i stedet for at vælge næste kandidat. Fundet var det samme forløb tre gange nu (C97's `dage-til`, C166's `buildDageTilMetadata`, nu hele blog- og kategoriklassen): **en håndhævet regel med et hul, fordi den kun blev skrevet ned for de sider der allerede var i tabellen.** Målingen er skarp: **28 titler 61-73 tegn** (20 blog + 8 kategori), længst `/kategori/sundhed` og `/blog/pension-hvor-meget-skal-du-spare-op` på 73. Kontrollen er lige så vigtig: **beraknare.se's 71 sider har 0 over 60**, fordi `/blog` og `/kategori` er dansk-only per `routing.ts` — så det er *ikke* et domæneproblem, det er en sideklasse. **Årsagen er én linje, ikke 28 forfatterfejl:** de 160 `page-data`-titler bruger `title: { absolute: … }` (`page-helpers.ts:38`) og slipper fri; blog (27 filer) og kategori (1) skrev `title: "…"` og fik +18 tegn uden at vide det. **Rettelsen er `title: { absolute: … }` i præcis de 28 filer** — samme mønster kalkulatortitlerne bruger, samme beslutning C97 traf for de ni `dage-til`-sider: brandet ud af `<title>`, svaret bliver. `openGraph.siteName` er urørt. **To fejl i min egen arbejdsgang, begge fundet fordi jeg lod måleren køre:** (1) min perl-rettelse ramte 28 linjer i `src/app/blog/page.tsx`, hvor **27 var `blogPosts`-arrayens kort-data** og ikke metadata — rullet tilbage og gjort pr. fil; (2) den nye test fandt `/blog/skat-2026-alt-du-skal-vide`, der skriver **`title,`** som shorthand på en variabel, hvilken hverken regex eller 4-mellemrums-match kan nå — samme blind spot som C163's JSX-regel, fundet af testen og ikke af mig. **Tre eksisterende tests faldt og blev rettet modsvært:** de assertede `meta.title` som streng, altså den gamle form; de læser nu `.absolute` og **kræver den uændrede titelstreng**, og `boligstoette`-testen fik tillige et krav på `openGraph.siteName`, så brandet ikke kan forsvinde fra delingerne mens titlen forkortes. **Harness: 3 nye tests i `title-suffix.test.ts` (6 → 9), modsvejs verificeret — de kalder den rigtige producer** (`kategoriMetadata({params})` og `generateMetadata()` på alle 26 artikler) **og måler den template-løste titel**, altså `absolute` hvis den er der ellers `title + " | " + siteName`; det er C44's lære, at måleren skal ramme koden der renderer, ikke genskabe udtrykket. Kørsel mod master's kode: **begge længde-tests falder med præcis de 28 sider.** Gate grøn: lint (593 filer), **2.715 tests / 175 filer** (fra 2.712/175), build (141 sider), `locale-leak.mjs --gate` exit 0 med uændret 734/699/35 og 0 ureviewet, `knapgruppe-scan.mjs` 0/0, `href-scan.mjs` 0. **Målt på bygget server (port 3912, fri verificeret inden start), begge domæner:** dansk **136/136 sider 200 og 0 titler > 60** (før 28), 136/136 med `og:site_name`, `/blog` 21, `/procent` 45 og `/dato` 55 uændrede; svensk 136/136 og 0 over 60; `/api/health` `status: ok`. **MÅL:** de 28 sider har ingen samlet GSC-baseline; nærmeste er `/blog/boernepenge-2026-satser-og-regler` (5.728 v / 0,6 % CTR / pos. 8,4) og de 10 `/kategori/*` (sitemap-prioritet 0,7, ikke i GSC-top-15). Kvalitetsmålet — 0 danske titler over 60 — er nået og målt; CTR-genmåling 2026-10-13. **Målt og bevidst ikke bygget:** GSC's 48 største danske søgninger er scannet mod den **server-renderede tekst** pr. side: 44 af 48 har alle nøgleord i kroppen, og de 4 undtagelser er ikke huller ("benzinberegner" = "benzin beregner"). Se opgave 175.
 
 STATUS: KØ — **C172 er landet: `/tidszone` er fjerdestørste danske side (24.209 visninger, 0,4 % CTR, pos. 7,5) og svarede på nul af den *anden* halvdel af sin egen søgeklynge: otte af de ti største DA- og SE-autocomplete-variationer under "hvad er klokken i usa" / "klokken i usa" er *stater* — Florida, Texas, Californien, Washington, Georgia, Arizona, Colorado, Minnesota — og de stod 0 gange hver på begge domæner, mens New York stod 26.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den, 119 er kilde-blokeret), og de fem åbne deploy-noter (C167–C171) har alle første vindue **2026-09-29 12:30** — det var 09:59, så ingen blev rørt. **Valget kom af at måle linket indhold og se en dyb asymmetri.** Jeg kørte inlinks over begge sitemapmer (206 sider): `/dato`, `/tidszone`, `/procent` har 71 interne links på SE og 135 på DA, så hele sidens styrke ligger i footer og header, og de stater, klyngen spørger efter, findes **ikke på nogen som helst dansk side** — de var hverken et linkproblem eller et titelproblem. Samme konklusion som C82, C96, C99, C100, C170 og C171: **ikke titlen, men kroppen under den.** **Målt først, begge domæner, live.** DA-autocomplete (`hl=da`, `gl=dk`, 10:10) under **"klokken i usa"** → "… california" (nr. 3), "… florida" (nr. 5), "… miami" (nr. 6), "… boston" (nr. 9); under **"hvad er klokken i usa"** → "… miami" (nr. 6); under **"klokken i usa nu"** → "hvad er klokken i atlanta usa nu" (nr. 3), "… boston usa nu" (nr. 4), "… colorado usa nu" (nr. 5). SE-autocomplete under **"klokken i usa"** → "… florida usa" (nr. 4), "… texas usa" (nr. 7), "… georgia usa" (nr. 8), "… arizona usa" (nr. 9), "… atlanta usa" (nr. 10). På de to **live** sider var `Florida`, `Texas`, `Californien`, `Washington`, `Miami`, `Dallas`, `Minnesota`, `Georgia`, `Arizona`, `Colorado` **0** forekomster hver. **Rettelsen (begge sprog, fordi klyngen er målt i begge).** Nyt modul `src/lib/tidszone-usa-stater.ts` med ni stater, der hver *peger på* en by i `TIDSZONER` — **ingen offset står i filen**: Florida→Miami, Californien→Los Angeles, Texas→Chicago, Washington→Los Angeles, Georgia→New York, Arizona→Phoenix, Colorado→Denver, Minnesota→Chicago, Massachusetts→Boston — og `usaStatRaekker()` regner hver celle gennem `klokkeslaetVed`, samme regel som værktøjet. Det er C155's regel om Canada anvendt på hele tabellen: en håndskrevet offset kunne glide fra `TidszoneBeregneren`, en reference kan ikke. For at overholde det krævede fire nye byer i `TIDSZONER` — **Miami og Boston** (Eastern, `America/New_York`), **Denver** (Mountain, `America/Denver`) og **Phoenix** (fast UTC-7, `America/Phoenix`) — hver med kildekommentar; **C84's by-tal-lås** i `metaDescription`/`ogDescription`/FAQ gik derfor 21 → **25** i begge sprog, og den test der låser den færtes automatisk grøn. Ét nyt `<h2>` pr. sprog med tabellen **stat / samme zone som / vinter / sommer** + **to nye FAQ-par pr. sprog** (JSON-LD 9 → **11** på rigtig server). **Arizona-undtagelsen er hele pointen med to kolonner, og min egen tekst havde den bagvendt — fundet fordi testen forventede noget forkert.** Jeg skrev "Phoenix er 05 både vinter og sommer, Denver går fra 05 til 04". `klokkeslaetVed` siger **Phoenix 04 vinter / 03 sommer, Denver 04 hele året**: Phoenix er fast UTC-7, så når Danmark går på sommertid, flytter Denver sig *med* mens Phoenix står fast. Det er C171's fejlklasse modsat, og tre steder (å€é-linje i begge sprog + modulens docblock) var rettet på **kilden** i stedet for i testen. **Harness: 2.689 → 2.705 tests / 173 → 174 filer. Modsvært verificeret: alle 15 nye tests falder med master-koden** (9 i `tidszone-usa-stater.test.ts`, 6 i `page.test.tsx`), målt ved at stille de tre kildefiler tilbage. De nye tests læser cellerne fra **tabellens `<tr>`-rækker**, ikke fra hele HTML'en — C155's målefejl 30, fordi ellers kan by-tallene fra time-tabellen ikke adskilles fra stat-tallene. **To målefejl i mit eget greb, begge i samme testfil.** (1) Jeg skrev `"Phoenix er 04 vinter og 03 sommer"` i en assertion, men JSX bryder teksten på nye linjer; fikseret ved at læse markupken, fjerne `<!-- -->` og skelne på mellemrum — den samme fejl som C94's nr. 16. (2) Min første norske konsekvens-fejl var at skrive `seSætning(uddrag)` i en heredoc; shellen ædte `æ`/`ø`/`å`, så testen **faldt** på ReferenceError frem for på indhold. Samme fejlklasse som C163's `lønsprocent`. **Flaky test, målt og verificeret pre-existing:** `locale-leak-gate.test.ts` faldt i første fulde kørsel med `1 ureviewet danske streng: src/components/MomsBeregner.tsx:383 "Vaskemaskine (per vask)"` — det er **planten fra C73's egen test**, som ligger på disk (`git diff` viste den), ikke min ændring. Efter `git checkout` på filen: **2.705/2.705 grøn**. Samme kendte flakiness som C167 og C171 åbenborer. **Gate grøn:** lint (**592 filer**), **2.705 tests / 174 filer**, build (**141 sider**), `locale-leak.mjs --gate` exit 0 (uændret), `knapgruppe-scan.mjs` 0/0. **Målt på rigtig server** (`next start` port 3911, porten verificeret fri *inden* start), begge domæner: nyt `<h2>` **1** gang, **9** `<tr>` pr. sprog med Florida 06/06, Kalifornien 03/03, Texas 05/05, Arizona **04/03**, Colorado 04/04, JSON-LD **11** `Question` (var 9), `25 byer`/`25 städer` i beskrivelsen, dansk **0** på "Kalifornien"/"Delstat"/"sommar", svensk **0** på "Californien", `/dato`s `<title>` uændret, `/api/health` → `status: ok`. **MÅL:** `/tidszone` DA baseline **24.209 visninger / 105 klik / CTR 0,4 % / pos. 7,5** — måles igen **2026-10-13**. Klyngen alene: de otte stat-søgninger i autocomplete + de fire tidspunkter fra C171. **Forventningen er ærlig:** 0,4 % CTR på pos. 7,5 er klik på eksisterende visninger, ikke nye. Hvis CTR'en er uændret efter 14 dage, er hypotesen "den ubesvarede USA-klynge forklarede den lave CTR" **modbevist** — og så er sidens problem ranking, ikke indhold. Skrevet som falsificérbar forudsigelse, ligesom C167's.
@@ -16837,6 +16851,143 @@ er værst. Se `❓ Til Mads`.
 
 
 ### VERIFICÉR DEPLOY-log — nyeste først
+- `VERIFICÉR DEPLOY: site-beskrivelsens beregnerantal (33+ → 79/53/28) ceo/site-tal-79 2026-09-29 12:20`
+  — merge sker ca. 12:2x, før 12:30-vinduet, så første vindue er **2026-09-29 12:30**.
+  Verificér **indhold**, ikke HTTP 200 — en 200 beviser intet, og siden har netop
+  serveret 5xx på tværs af domæner. Mål:
+  1. `curl -s https://minberegner.dk/manifest.webmanifest` → `description` skal sige
+     **"79+ gratis beregnere"** (før: 33+). Samme på `beraknare.se` (**53+**) og
+     `beregner.no` (**28+**).
+  2. `curl -s https://minberegner.dk/ | grep -o '"@type":"Organization".*'` →
+     JSON-LD `description` skal sige **79+**. Tæll på **hele** domænet:
+     `grep -c "33+" ` på HTML'en skal være **0**.
+  3. `https://minberegner.dk/om` skal have `<h2>Vores 79+ beregnere</h2>` — mål
+     **efter** `sed 's/<!-- -->//g'`, ellers giver React' `<!-- -->` mellem
+     tekstnoder et falsk 0.
+  4. `https://minberegner.dk/blog` skal sige "Vi har 79+ gratis beregnere".
+  5. **KONTROL:** `/procent`, `/blog` og `/privatlivspolitik` har hver sin *egen*
+     `description` og skal være **uændrede** — de arver ikke layoutens standard.
+     En diff der rører dem, er en fejl.
+  6. `npm run test -- src/lib/i18n.test.ts` skal give **18 passed**.
+  7. `node scripts/locale-leak.mjs --gate` skal exit 0 med 0 ureviewet, og
+     `https://minberegner.dk/api/health` skal svare `status: ok`.
+
+- `VERIFICÉR DEPLOY: 28 blog-/kategorititler (61-73 → ≤60 tegn) ceo/blog-kategori-titler 2026-09-29 11:56`
+  — push 11:56, før 12:30-vinduet, så første vindue er **2026-09-29 12:30**.
+  Verificér **indhold**, ikke HTTP 200: hent `/blog` og mindst tre af de otte
+  `/kategori/*` (sundhed, oekonomi, laan) og kræv `<title>` ≤ 60 tegn **og**
+  `property="og:site_name" content="MinBeregner.dk"` stadig til stede. Målet på
+  den udbyggede kode var 136/136 sider med 0 titler over 60.
+
+---
+
+#### 177. [x] FÆRDIG 2026-09-29 — C177 — **`opengraph-image.tsx` har serveret et 93 KB PNG med 200 siden den blev skrevet, men 0 af 206 sider sendte en `og:image` — ethvert link delt fra sitet rendret uden forhåndsvisning**
+
+- **Iteration start:** 2026-09-29 12:10. Køen havde ingen `I GANG`-opgave (97 er
+  `BLOCKED`, 98 afhænger af den, 119 er kilde-blokeret). De ni åbne deploy-noter
+  (C167–C176) har alle første vindue **2026-09-29 12:30** — det var 12:10, så ingen
+  kunne lukkes, og ingen blev rørt.
+- **Datagrund:** målt på **alle 206 sider i begge sitemapmer**, live. C82–C176 har
+  lukket titler, descriptions, JSON-LD, hreflang, canonical og sprogfejl — men
+  aldrig social metadata på tværs af domænet. Fundet er én klasse: `og:image`
+  **0/206**, `twitter:image` **0/206**.
+- **Årsag 1 — én linje:** `opengraph-image.tsx` eksporterede
+  `dynamic = "force-dynamic"`. `discover.js:104` opsamler fil-konventionens
+  billeder ved build-tid; `force-dynamic` fik route'en uden om den sti. Bevis:
+  at fjerne den linje alene fik `/` til at servere `opengraph-image?7a961a05…`,
+  og **hash-query'en er fil-konventionens egen signatur**. `apple-icon.tsx` har
+  aldrig haft linjen og har hele tiden virket. Billedet er faktisk per-request
+  (det læser domænet og `getTranslations`), så `force-dynamic` var forkert her.
+- **Årsag 2 — og den viser sig at være den større:** **33 sider skriver deres egen
+  `openGraph`-literal**, og Next erstatter layoutets objekt **helt** — de kan ikke
+  arve billedet. Målt efter årsag 1: 14 `dage-til` + 33 egne `openGraph` =
+  **47 sider stadig uden**, præcis de to forventede tal. C175's fejlklasse igen:
+  en regel, der kun gælder for den gruppe den blev skrevet for.
+- **Rettelsen er eksplicit i alle 35 steder** der sætter `openGraph`: layout,
+  `page-helpers`, `DageTilPage` og de 33 sider læser `OG_IMAGE` fra ét sted.
+  Bevis for at lag 2 ikke er overflødigt: efter kun lag 1 var `/blog` stadig
+  `og=0`.
+- **Målefejl nr. 34 (min egen):** mit første verifikationsscript brugte `fetch` med
+  `headers: { host }` — undici **forbyder** at sætte `Host` i Node, så 14 svenske
+  `/dagar-till/*` svarede 404. De er 200 på live. Efter skift til `curl -H`:
+  **207/207**. Uden genmålingen havde jeg rapporteret en fejl, der ikke findes.
+- **Målefejl nr. 35 (min egen):** indsættelsesscriptet valgte sidste `import `-linje,
+  og `barsel-2026-regler-og-satser/page.tsx` har en `import {` der fortsætter på
+  næste linje — importen landede *inde i* den. Lint fangede det med to fejl, og
+  `title-suffix.test.ts` faldt med, fordi filen ikke længere parserede.
+- **Harness: 4 nye tests i `og-image.test.ts`, modsvejs verificeret (7 fejl med
+  master's kode).** De dækker hvert lag og alle tre blind spots: layoutets egen
+  `generateMetadata`; `buildPageMetadata` da/se; **en klasse-scan over alle 34
+  `page.tsx` med egen `openGraph`** (fejlede korrekt på `blog/page.tsx` + `om/page.tsx`
+  da de var stashede); og `buildDageTilMetadata` — den 28-siders blind spot fra
+  C166, hvor metadata bygges i en komponent og derfor ikke kan scannes fra `page.tsx`.
+- **Målt på rigtig server** (`next start` :3999, port fri *inden* start), alle 207
+  URL'er i begge sitemapmer: **207/207** med `og:image` + `twitter:image`
+  (før 0/207). `/api/health` grøn.
+- **Gate grøn:** lint (**594 filer**), **2.725 tests / 176 filer** (fra 2.720/176),
+  build (**142 sider**), `locale-leak.mjs --gate` exit 0, `knapgruppe-scan.mjs` 0/0,
+  `href-scan.mjs` 0 på 71 + 135 sider. Rørte filer: `opengraph-image.tsx` (én linje
+  væk), `page-helpers.ts` (+2 eksporter), `layout.tsx`, `DageTilPage.tsx`, 33
+  `page.tsx` (én linje hver) + 1 ny testfil — **ingen beregningslogik, ingen URL,
+  ingen sitemap, ingen `<title>`, ingen `<meta description>`, ingen anden tekst**.
+  Kode + plan i ét squash-commit på `ceo/og-image`; se opgave 177.
+- **MÅL:** `og:image` har ingen CTR-baseline i GSC (det er ikke et søgefelt), så
+  den målbare del er et **kvalitetsmål**: *0 sider må mangle et socialt
+  forhåndsvisningsbillede* — nået og målt (0 → 207/207). Den indirekte effekt
+  (flere klik fra delinger) kan ikke måles før et Plausible-snapshot med
+  outbound-events. Nærmeste GSC-baseline uændret: `/procent` (150.148 v / 98 klik /
+  0,1 % / pos. 7,4), `/dato` (132.313 / 822 / 0,6 % / 5,7). Genmåling **2026-10-13**.
+- **Acceptkriterier:**
+  1. Alle 206+ sider i begge sitemapmer har `og:image` **og** `twitter:image`.
+     **Nået: 207/207 målt på bygget server.**
+  2. Billedet er 1200×630, PNG, med alt-tekst. **Nået (verificeret i markup).**
+  3. URL'en findes ét sted, så layout og sidespecifik metadata ikke kan glide
+     fra hinanden. **Nået: `OG_IMAGE_URL` i `page-helpers.ts`.**
+  4. Ny klasse-scan fanger enhver fremtidig side med egen `openGraph` uden
+     billede. **Nået, modsvejs verificeret.**
+  5. `buildDageTilMetadata`-siderne er dækket. **Nået, modsvejs verificeret.**
+  6. `npm run lint`, `npm run test`, `npm run build` grønne. **Nået.**
+  7. `node scripts/locale-leak.mjs --gate` exit 0 med 0 ureviewet. **Nået.**
+
+### ❓ Til Mads — ny i C177
+
+1. **Delinger har aldrig haft en forhåndsvisning.** Billedet blev genereret, men
+   aldrig linket — så det er ikke en ny funktion, det er en rettelse af en
+   funktion der aldrig virkede. Facebook (47 besøgende/28d) og Direct/None
+   (1.041) er de kanaler, der først har glædet sig af det; tallet forventes
+   fortsat at være **lille** — dette er ikke en trafikmotor.
+2. **Årsagen er delvis Next-intern, og det er ikke rettet i dybet.** Lag 1 er
+   rettet ved at fjerne `force-dynamic`. Lag 2 (33 sider med egen `openGraph`)
+   er rettet eksplicit, fordi Next erstatter layoutets objekt helt i stedet for
+   at merge'e. En dybere rettelse — en `openGraph`-helper alle sider kalder — ville
+   være renere, men rører 35 filer af samme årsag som denne. **Skrevet ned, så
+   næste iteration ved behov kan samle det.**
+3. **Dage-til-siderne på svensk er ikke verificeret på en dansk-maskine.** De
+   kræver `Host: beraknare.se`; målingen i denne iteration brugte `curl -H` efter
+   at `fetch` viste 14 falske 404 (målefejl 34). Det er et *måleproblem*, ikke et
+   sider-problem — alle 14 er 200 på live.
+
+
+### VERIFICÉR DEPLOY-log — nyeste først
+- `VERIFICÉR DEPLOY: social forhåndsvisning på alle sider (og:image 0 → 207/207) ceo/og-image 2026-09-29 12:4x`
+  — merge sker ca. 12:45, før 12:30-vinduet er nået, så første vindue er
+  **2026-09-29 17:30**. Verificér **indhold**, ikke HTTP 200 — `/opengraph-image`
+  svarede 200 hele tiden, også da ingen sider linkede det, så et 200 på den route
+  beviser intet. Mål:
+  1. `curl -s https://minberegner.dk/procent | grep -o 'property="og:image"[^>]*>'`
+     skal finde **én** tag med `content="https://minberegner.dk/opengraph-image"`.
+     Før: **0**.
+  2. Samme på `https://beraknare.se/dato` (skal pege på `beraknare.se`), på
+     `https://minberegner.dk/blog` og på `https://minberegner.dk/dage-til/juledagen`
+     — de fire dækker de tre forskellige ejerskab af `openGraph` (layout, egen
+     literal, `DageTilPage`).
+  3. `grep -c 'name="twitter:image"'` skal være **≥1** på hver af dem.
+  4. **KONTROL:** `/api/health` skal svare `status: ok`, og `<title>` +
+     `<meta description>` på `/procent` skal være **uændrede** — denne diff rørte
+     ingen tekster, så en ændring i dem er en fejl.
+  5. `npm run test -- src/app/og-image.test.ts` skal give **4 passed**.
+  6. `node scripts/locale-leak.mjs --gate` skal exit 0 med 0 ureviewet.
+
 - `VERIFICÉR DEPLOY: site-beskrivelsens beregnerantal (33+ → 79/53/28) ceo/site-tal-79 2026-09-29 12:20`
   — merge sker ca. 12:2x, før 12:30-vinduet, så første vindue er **2026-09-29 12:30**.
   Verificér **indhold**, ikke HTTP 200 — en 200 beviser intet, og siden har netop

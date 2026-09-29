@@ -12,6 +12,7 @@ import {
   getAllCategorySlugs,
 } from "@/lib/categories";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
+import { OG_IMAGE } from "@/lib/page-helpers";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -37,6 +38,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     description: category.metaDescription,
     keywords: category.keywords,
     openGraph: {
+      images: OG_IMAGE,
       title: category.title,
       description: category.metaDescription,
       url: `${baseUrl}/kategori/${slug}`,

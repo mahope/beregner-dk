@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
+import { OG_IMAGE } from "@/lib/page-helpers";
 
 const SLUG = "hvad-er-klokken-i-usa-naar-den-er-12-i-danmark";
 
@@ -22,6 +23,7 @@ export async function generateMetadata(): Promise<Metadata> {
       "forskel på tid danmark usa",
     ],
     openGraph: {
+      images: OG_IMAGE,
       title: "Hvad er klokken i USA? Tidsforskel for 16 byer",
       description:
         "Hele tabellen: 06 i New York, 05 i Chicago, 04 i Denver og 03 i Los Angeles — plus tidsforskelen til resten af verden.",

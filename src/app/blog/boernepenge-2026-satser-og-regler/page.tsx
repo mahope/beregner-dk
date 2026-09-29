@@ -12,6 +12,7 @@ import {
   udbetalingsdatoerAar,
 } from "@/lib/borneungeydelse";
 import { BARNETILSKUD_2026, BARNETILSKUD_2026_KILDE, barnetilskudSats } from "@/lib/barnetilskud";
+import { OG_IMAGE } from "@/lib/page-helpers";
 
 export async function generateMetadata(): Promise<Metadata> {
   const dc = await getCurrentDomainConfig();
@@ -32,6 +33,7 @@ export async function generateMetadata(): Promise<Metadata> {
       "børnepenge aftrapning",
     ],
     openGraph: {
+      images: OG_IMAGE,
       title: "Børnepenge 2026: 5.370 kr./kvartal (0-2 år)",
       description:
         "Børnepenge 2026: 5.370 kr./kvartal (0-2 år), 4.248 (3-6 år), 3.342 (7-14 år) og 1.114 kr./måned (15-17 år). Sådan deles ydelsen mellem jer.",
