@@ -1,3 +1,31 @@
+STATUS: KØ — **C195 er landet: `/moms` er GSC's femtestørste danske side (22.824 visninger, 41 klik, CTR 0,2 %, pos. 6,9) og svarede på nul af sin egen søgeklynge: 8 af 10 danske autocomplete-variationer under "moms procent" er *landespecifikke* — "moms procent danmark", "moms procent i holland", "moms procent finland", "moms procent i tyskland", "moms procent i italien", "moms procent norge", "moms procent sverige" — mens siden navngav **kun** Luxembourg og Ungarn i én forbiflugdssætning og havde `Holland` **0**, `Finland` **0**, `Italien` **0**, `Norge` **0** og `Polen` **0** forekomster. Der var ingen tabel overhovedet.**
+
+Køen havde ingen `I GANG`-opgave (98 afhænger af den `BLOCKED`-mærkede 97, 119 er kilde-blokeret, 179 kræver en rigtig browser), og de otte åbne deploy-noter har alle første vindue **21:30** — det var 20:00 ved starten, så ingen blev rørt.
+
+**Valget kom af at måle DA/SE-pariteten på tværs af alle 51 delte stier, ikke af endnu en side i GSC-top-16.** `/moms` faldt ud som den **største** asymmetri på hele fladen: **455 ord** (1.409 DA mod 954 SE), **4 mod 3 tabeller** og **6 mod 5 `<h2>`**. C183, C184, C185, C190 og C192 har lukket fire andre enkeltstående sprog-asymmetrier, og hver gang ved at læse den ene sides overskriftsliste. Målingen denne gang gik over hele fladen og fandt den sjette. **Samme kørsel målte hreflang på alle 51 delte stier: 0 fejl** (alle har `da`, `sv` og `x-default`, og ingen sti afviger) — den klassen er lukket med et tal, så næste iteration ikke bruger en cyklus på den.
+
+**Først en måling, der viste at "de otte sørgsmål" ikke var hele svaret.** DA-autocomplete (`hl=da`, `gl=dk`, 20:0x) under **"moms procent"** gav 10 variationer hvoraf **syv** er landespecifikke (Danmark, Holland, Finland, Tyskland, Italien, Norge, Sverige) og resten er "moms procentsatser" og "moms procent mat". SE-autocomplete (`hl=sv`, `gl=se`) spørger det samme: "moms procent sverige", "finland", "i holland" — plus **"moms 6 procent"**, **"moms 25 procent"** og **"moms 12 procent"** som nr. 8-10, altså de tre svenske satser som rene tal. Klyngen er altså målt i **begge** sprog, så rettelsen går i begge.
+
+**Rettelsen er ét nyt modul, én tabel pr. sprog og otte nye FAQ-par, og der står ingen pris to steder.** `src/lib/moms-eu.ts` (**ny**) har **alle 27 EU-medlemsstater plus Norge** — Norge står med, fordi det er det nærmeste norske spørgsmål, og er **markeret som ikke-EU** i markupken, brødteksten og i sit eget svar. **Kilde:** Your Europe, "VAT rules and rates" (europa.eu, hentet 2026-09-29), tabellen "VAT rates applied in EU member countries"; Norge fra Skatteetaten, "Value added tax" (2026: 25 % normal, 15 % fødevarer, 12 % persontransport/hotel). Modulet har **kun satser** — ingen summerede priser. Hver celle går gennem `beregnMoms`, samme modul som værktøjet bruger, så en celle ikke kan vise en pris regnestykket ikke ville give. Det er C84's, C86's og C192's lære anvendt på en hel tabel.
+
+**To tal der hang på to lande er nu fundet af tabellen.** Brødteksten skrev "varierer fra 17% (Luxembourg) til 27% (Ungarn)" i begge sprog, **håndskrevet ved siden af en tabel der ikke fandtes** — så en satsændring i Luxembourg eller Ungarn ville have gjort de to tal forkerte uden at nogen opdagede det. `momsSatsUdenraekke()` finder nu laveste og højeste sats af `MOMS_LANDE` i stedet, og **en test kræver at brødteksten og tabellen er samme sætning** (find Luxembourg 17 / Ungarn 27, find 117 kr. og 127 kr.). Det er C193's fejlklasse i en ny form: et tal i indekseret tekst der ikke er afledt af kilden.
+
+**Tre fejl i mit eget arbejde — to af dem er den alvorligste slags, fordi de er *falske oplysninger i brødteksten*.**
+
+1. **En rigtig fagfejl, fundet fordi en test forventede noget forkert.** Min afsluttende sætning læv "**Danmark, Sverige og Norge er de eneste af landene her med 25 % som eneste sats**". Det er **forkert på to måder**: Kroatien har også 25 % standard (med 5 % reduceret), og Norge har **ikke** 25 % som eneste sats — Skatteetaten siger 12 % på persontransport, hotel og lignende, hvilket jeg selv havde hentet og skrevet i modulet. En dansk læser ville have fået at vide, at Norge kun har én sats, og det er det modsatte. Rettet på **kilden**: den nye sætning er "Danmark er det eneste land i tabellen helt uden reduceret sats", som er sandt, og de tre landes øvrige satser står nu som data. Samme fejltype som C171's Phoenix, bare skrevet af mig.
+2. **En generisk påstand om reducerede satser, som var rigtig for to lande og forkert for de andre 26.** Mit FAQ-svar skrev "reduceret 7 % **på varer som bøger og fødevarer**" for Tyskland — Tysklands 7 % gælder bøger, aviser og *ikke* fødevarer. Mønstret var genereret, så det ville have sagt det samme for Polens 5 %, Irlands 9 % og Spaniens 10 %, hvor det heller ikke passer. Nu siger teksten kun **"en reduceret sats på X %"**, fordi EU's egen tabel netop *kun* oplyser satsen og ikke hvilke varer den dækker. Docblocken på feltet siger det samme.
+3. **Målefejl nr. 44 (min egen):** min første rækketælling greb `<tr` i et `sed`-uddrag med intervallet `/Momssatsen i EU/,/Moms i EU og/p` — men **"Moms i EU" er et præfiks i "Momssatsen i EU"**, så start- og stopmønster lå i samme linje og uddraget gav 1. Det så ud som om tabellen kun havde én række. Tallet **28** er rigtigt i begge sprog, målt ved at tælle `<th scope="row">` **inde i den tabel** der indeholder både "100 kr" og "Norge" — C155's målefejl 30 anvendt på en ny måle.
+
+**En fejl i scannerens egen optælling, som min tilføjelse blot afdækede.** `locale-leak-gate.test.ts` kræver `candidates === dead + needsEyes`, og min nye danske FAQ-række fik den til at sige 743 mod 744. Årsagen er ikke min kode: `REVIEWED`-posten for `page-data.ts` har kun `key`, ikke `string`, så den matcher **alle** fund i filen — og dens begrundelse ("danske strenge i `daPages` kan ikke vises på beraknare.se") er præcis dødsværdet. Før denne iteration stod **intet** `DØD`-fund i den fil, så overlapet var usynligt; da en ny dansk streng kom, blev den både "gennemgået" og "død" og talt i begge kurve. Rettet i scanneren: **`needsEyes` er nu `verdict !== "DØD" && (reviewed || KRÆVER ØJNE)`** — "kræver øjne" betyder et fund der *endnu ikke er afgjort*, og et fund der allerede er dømt død kræver ingen øjne, uanset om en human har begrundet det. Gate og test grønne med uændret `unreviewed` **0**. Fundet fordi tallene ikke hang sammen, ikke fordi en fejl blev rapporteret.
+
+**Harness: `moms-eu.test.ts` (**ny**, **19 tests**) + `moms/page.test.tsx` **26 → 36**. Modul-testen dækker *fuldstændighed* (en eksplicit liste på alle 27 ISO-koder, så en landefejl ikke bare ser ud som "et land der ikke kom med"), de to lande der hedder forskelligt på de to sprog, at hver 100-kr-celle er `=== beregnMoms(...)` i begge retninger, at `momsLand("XX")` **kaster** i stedet for at give en tom streng, og at Norge-svaret siger "ikke medlem af EU" mens Tysklands ikke gør. Sidetesten læser **rækkerne i markupken** — den danske række skal have `25 %`, `Ingen` og **ikke** `0 %`, fordi 0 % på bøger er en undtagelse fra momsloven og ikke en reduceret sats — og **forankret i `pr-3">Danmark<`**, ikke i `">Danmark"`, fordi FAQ'en også siger Danmark og en løs grep tager den først. Den svenske halvdel kræver samme antal rækker, svensk notation (**1 125 kr** ikke **1.125 kr.**) og **forbyder** de danske landnavne som række-overskrift. **Modsvært verificeret: 10 af de nye tests falder** med master's `page.tsx` + `page-data.ts` stashed, og de 19 modul-tests er grønne mod begge kodestande.
+
+**Gate grøn:** lint (**614 filer**), **2.974 tests / 187 filer** (fra 2.945/186 — 29 nye), build (**142 sider**, de 7 kendte CSS-advarsler uændrede), `locale-leak.mjs --gate` **exit 0** (**743 kandidater / 709 døde / 34 kræver øjne / 0 ureviewet**), `knapgruppe-scan.mjs` **0/0**. Målt på rigtig bygget server (`next start` :4811, porten verificeret fri *inden* start, C117's lære) med `curl -H "Host: …"`: begge domæner 200, **28 `scope="row"`-rækker i hver tabel** (første Østrig/Österrike, sidste "Norge (ikke EU)"/"Norge (inte EU)"), DA `Holland` **12** / SE `Nederländerna` **8**, `127 kr.` i DA-tabellen, `119 kr` i SE, DA `Question` **11 → 16** og SE **6 → 11**, **0** danske markører på beraknare.se (`Østrig` 0, `Grækenland` 0) og **0** svenske på minberegner.dk (`Nederländerna` 0, `Österrike` 0). **Kontroller:** `/procent` 45 tegn, `/dato` og `/tidsberegner` uændrede titler, `/moms`s egen `<title>`, `<meta description>` og **`<h1>` urørte** i begge sprog, `/api/health` `status: ok`. Rørte filer: `moms-eu.ts` (**ny**), `moms-eu.test.ts` (**ny**), `moms/page.tsx` (**+116**, én tabel pr. sprog + to afsnit), `page-data.ts` (**+28**, otte FAQ-par + formatter + to imports), `moms/page.test.tsx` (**+158**), `scripts/locale-leak.mjs` (**+17/-4**, optællingen) — **ingen beregningslogik ændret, `moms.ts` urørt, ingen ny URL, ingen sitemap, ingen `<title>`, ingen `<meta description>`, ingen `<h1>`**.
+
+**MÅL:** `/moms` DA baseline **22.824 visninger / 41 klik / CTR 0,2 % / pos. 6,9** (GSC 2026-08-30 → 09-27; søgninger "momsberegner" **1.660 v / 13k / pos. 7**, "hvordan trækker man moms fra" 1 v / pos. 1). SE baseline **1.486 v / 2 klik / 0,1 % / pos. 21,1**. Plausible har ingen egen `/moms`-linje i top-15 på nogen af domænerne, så **GSC er den eneste baseline**. Genmåles **2026-10-13**. **Forventningen er ærlig:** pos. 6,9 med 0,2 % CTR er et *ranking*-problem før det er et indholdsproblem, og otte landespecifikke autocomplete-variationer er ikke det samme som 22.824 visninger. Det der *kan* læses af rettelsen er, at siden nu svarer på sin egen klynge **og** at brødtekstens tal ikke længere kan glide fra tabellen. Hvis CTR'en efter 14 dage er uændret under 0,2 %, er hypotesen "den ubesvarede landeklynge forklarede den lave CTR" **modbevist** — og så er sidens problem positionen, som C172's og C194's konklusioner også peger på.
+
+**Målt og bevidst ikke bygget:** "moms på engelsk" er DA-autocomplete nr. 7 under "moms" og SE nr. 1-10 under "moms på engelska" ("vad heter moms på engelska", "ex moms på engelska"), men det er et **oversættelsesspørgsmål**, ikke et beregningsspørgsmål — en momsberegner der svarer på det ville være en side om engelsk, ikke om moms. Tilsvarende ligger "momsindberetning", "momsfrister 2026" og "momsnummer" (DA nr. 2, 3 og 8) i virksomhedsregistreringen, som siden dækker i to afsnit men ikke i en tabel; de er **registreret, ikke bygget**, fordi en frist-tabel kræver en SKAT-kilde, loopet ikke har. Skrevet ned, så næste iteration ikke jagter dem uden kilde.
+
 STATUS: KØ — **C194 er landet: `/tidszone` er sitets fjerdestørste danske side (24.117 visninger) og dens titel indeholdt nul forekomster af ordet "tidszone" — den skrev "Hvad er klokken i USA, når den er 12 i Danmark?", altså ét lokalt by-spørgsmål, imens sidens *største* søgning er hovedordet selv ("tidszoner", 713 v, pos. 9). Samme fejl som C84's "12 byer", men i titlen i stedet for i beskrivelsen: C79/C81/C172/C180 har alle lagt et svar-først spørgsmål i `<title>`, og på ingen af de andre sider lå det og således hovedordet væk.**
 
 Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den, 119 er kilde-blokeret, 179 kræver en rigtig browser), og de otte åbne noter med vindue **17:30** var pligter — de er alle lukket ved indholdskontrol nedenfor.
@@ -113,6 +141,89 @@ Køen havde ingen `I GANG`-opgave (98 afhænger af den `BLOCKED`-mærkede 97, 11
 **Gate grøn:** lint (**612 filer**), **2.943 tests / 186 filer** (fra 2.940/186), build (**142 sider**), `locale-leak.mjs --gate` **exit 0**, `knapgruppe-scan.mjs` **0/0**. Målt på rigtig bygget server (`next start` :4701, porten verificeret fri *inden* start) med begge `Host:`-headere: **alle 22 sider** serverer den nye beskrivelse under 160 (129-159), `/api/health` `status: ok` på begge domæner, og kontrolsiderne `/procent` (115), `/dato` (118), `/tidsberegner` (141), `/moms` (128), `/boligstoette` (111) og `/alder` (142) er uændrede. Rørte filer: `page-data.ts` (**22 `metaDescription`-strenge**, verificeret med `git diff` at ingen anden linje er rørt) og `page-data.test.ts` (**+34**) — **ingen `<title>`, ingen `<h1>`, ingen FAQ, ingen beregningslogik, ingen URL, ingen sitemap**.
 
 **MÅL:** `/befordringsfradrag` DA, `/rentefradrag` **331 besøgende/28d (+145 %, bounce 4 %)**, `/boligsalg`, `/ejendomsvaerdiskat`, `/boernepenge` **136 besøgende/28d (+116 %, bounce 1 %)**, `/pension` **146 (+28 %)**, `/loen-efter-skat`, `/efterloen`, `/elbil`, `/sparemaal`, `/husleje` **168 (+21 %)**, `/barselsdagpenge` **212 (+56 %)**, `/barselsplanlaegger` samt de ni svenske — alle pr. **2026-09-29**; `/rentefradrag` og `/boernepenge` har ingen GSC-linje, så **Plausible er deres eneste baseline**. Genmåles **2026-10-13**. **Forventningen er ærlig og lille:** en kortere snippet er ikke nye visninger, og de 22 sider var ikke de med dårligst CTR — `/befordringsfradrag` er ikke i GSC's top-16. Det der *kan* læses af rettelsen er, at **den konkrete regel** på `/rentefradrag` (33,6 %, 50.000 kr, 16.800 kr) og `/befordringsfradrag` (3,17/1,59 kr./km) nu ligger i den del af strengen, der vises, i stedet for i den der klippes væk. Hvis `/rentefradrag`s CTR efter 14 dage er uændret, er hypotesen "afkortningen skjulte svaret" **modbevist**.
+
+#### 195. [x] FÆRDIG 2026-09-29 — C195 — **`/moms` (22.824 v, CTR 0,2 %, pos. 6,9) svarede på nul af sin egen klynge: 8 af 10 DA-autocomplete-variationer under "moms procent" er landespecifikke, mens siden havde 0 forekomster af Holland, Finland, Italien, Norge og Polen — og de to tal i brødteksten, "17 % Luxembourg" og "27 % Ungarn", stod håndskrevet ved siden af en tabel der ikke fandtes**
+
+- **Datagrund:** GSC 2026-08-30 → 09-27. `/moms` DA **22.824 visninger / 41
+  klik / CTR 0,2 % / pos. 6,9** (GSC's nr. 5), SE **1.486 v / 2 klik / 0,1 % /
+  pos. 21,1**. DA-søgningerne: "momsberegner" **1.660 v / 13k / pos. 7**,
+  "hvordan trækker man moms fra" 1 v / pos. 1. Valgt ved **DA/SE-paritet målt på
+  alle 51 delte stier**: `/moms` er den største asymmetri på fladen (**455 ord**,
+  1.409 mod 954; 4 mod 3 tabeller; 6 mod 5 `<h2>`). Samme kørsel målte **hreflang
+  på de samme 51 stier: 0 fejl** — klassen er lukket med et tal.
+- **Målt på den server-renderede side før rettelsen:** `Holland` **0**, `Finland`
+  **0**, `Italien` **0**, `Norge` **0**, `Polen` **0**, `Østrig` **0**;
+  `Luxembourg` og `Ungarn` stod **2** gange hver i én forbiflugdssætning, og
+  brødteksten sagde "varierer fra 17% (Luxembourg) til 27% (Ungarn)" i **begge**
+  sprog. DA-autocomplete (`hl=da`, `gl=dk`, 20:0x) under **"moms procent"** →
+  10 variationer hvoraf **syv er landespecifikke**; SE-autocomplete (`hl=sv`,
+  `gl=se`) spørger det samme plus **"moms 6/12/25 procent"** som nr. 8-10.
+- **Rettelsen:** `src/lib/moms-eu.ts` (**ny**) med **alle 27 EU-lande plus
+  Norge**, markeret som ikke-EU. **Kilde:** Your Europe / europa.eu
+  "VAT rules and rates" (hentet 2026-09-29) og Skatteetaten "Value added tax"
+  (2026) for Norge. Modulet har **kun satser** — hver pris går gennem
+  `beregnMoms`, samme regnestykke som værktøjet. Én `<h3>` + **28-rækkers
+  tabel** pr. sprog, og **otte nye FAQ-par** pr. sprog (DA 11 → **16**, SE 6 →
+  **11**), som dermed også kommer i JSON-LD'en.
+- **Ingen tal står hårdkodet to steder:** `momsSatsUdenraekke()` **finder**
+  laveste og højeste sats af tabellen, så brødtekstens "17 %"/"27 %" er afledt;
+  `landSvarSprogholdig()` **læser** landets sats og pris, så de otte nye svar er
+  tabellens tal. En test kræver at brødteksten og tabellen er samme sætning.
+- **Tre fejl i mit eget arbejde, hvoraf den første er en rigtig fagfejl.**
+  1. Min afsluttende sætning læv at Danmark, Sverige og Norge var de eneste med
+     25 % som eneste sats. **Kroatien har også 25 %**, og **Norge har 12 %** på
+     persontransport/hotel — altså modsat af hvad jeg skrev, i en tekst der er
+     faguplysning. Rettet på kilden; de tre landes øvrige satser er nu data.
+  2. Mit FAQ-svar skrev "reduceret 7 % **på varer som bøger og fødevarer**" for
+     Tyskland, hvor 7 % kun gælder bøger og aviser. Mønstret var genereret, så
+     det ville have sagt det samme for 26 andre lande. Nu siger teksten kun
+     **"en reduceret sats på X %"**, fordi EU's tabel kun oplyser satsen.
+  3. **Målefejl nr. 44:** min rækketælling greb `<tr` i et `sed`-uddrag med
+     `/Momssatsen i EU/,/Moms i EU og/p` — men "Moms i EU" er et præfiks i
+     "Momssatsen i EU", så mønsterne lå i samme linje og uddraget gav **1**.
+     Rigtige tal: **28** i begge sprog, målt på `<th scope="row">` **inde i den
+     tabel** der indeholder både "100 kr" og "Norge".
+- **Scanner-fejl, som min tilføjelse blot afdækede:** `locale-leak-gate.test.ts`
+  kræver `candidates === dead + needsEyes` og fik **743 mod 744**. Ikke min kode:
+  `REVIEWED`-posten for `page-data.ts` har kun `key`, ikke `string`, så den
+  matcher **alle** fund i filen — og dens begrundelse er præcis dødsværdet.
+  Før C195 stod **intet** `DØD`-fund i den fil, så overlapet var usynligt; da en
+  ny dansk streng kom, blev den både "gennemgået" og "død". Rettet i scanneren:
+  `needsEyes` er nu `verdict !== "DØD" && (reviewed || KRÆVER ØJNE)` — "kræver
+  øjne" er et fund der *endnu ikke er afgjort*. `unreviewed` **0** uændret.
+- **Harness:** `moms-eu.test.ts` (**ny, 19 tests**) — inkl. en **eksplicit liste
+  på alle 27 ISO-koder**, så en landefejl ikke bare ser ud som "et land der ikke
+  kom med", `momsLand("XX")` som **kaster**, og hver 100-kr-celle `===`
+  `beregnMoms(...)` i begge retninger. `moms/page.test.tsx` **26 → 36** — læser
+  **rækkerne i markupken**, forankret i `pr-3">Danmark<` (FAQ'en siger også
+  Danmark, så en løs `">Danmark"` tager den først), kræver at Danmarks række
+  har `Ingen` og **ikke** `0 %` (0 % på bøger er en undtagelse fra momsloven),
+  og på beraknare.se samme rækkeantal, **svensk notation** og **forbud mod de
+  danske landnavne som overskrift**. **Modsvært verificeret: 10 af de nye tests
+  falder** med master's `page.tsx` + `page-data.ts` stashed.
+- **Gate grøn:** lint (**614 filer**), **2.974 tests / 187 filer** (fra
+  2.945/186), build (**142 sider**), `locale-leak.mjs --gate` exit 0 (**743 / 709
+  døde / 34 kræver øjne / 0 ureviewet**), `knapgruppe-scan.mjs` **0/0**. Målt på
+  `next start` :4811 (port fri *inden* start) med `curl -H "Host: …"`: begge
+  domæner 200, **28 `scope="row"`-rækker** hver, DA `Holland` **12** / SE
+  `Nederländerna` **8**, `127 kr.` DA / `119 kr` SE, DA `Question` 11 → **16**,
+  SE 6 → **11**, **0** danske markører på SE og **0** svenske på DA.
+  `/moms`s `<title>`, `<meta description>` og `<h1>` **urørte** i begge sprog;
+  `/procent`, `/dato` og `/tidsberegner` uændrede. `/api/health` `status: ok`.
+- **Rørte filer:** `moms-eu.ts` (ny), `moms-eu.test.ts` (ny), `moms/page.tsx`
+  (+116), `page-data.ts` (+28), `moms/page.test.tsx` (+158),
+  `scripts/locale-leak.mjs` (+17/−4) — **ingen beregningslogik ændret, `moms.ts`
+  urørt, ingen ny URL, ingen sitemap, ingen `<title>`, ingen `<h1>`**.
+- **MÅL:** `/moms` DA baseline **22.824 v / 41 klik / CTR 0,2 % / pos. 6,9**,
+  SE **1.486 v / 2 klik / 0,1 % / pos. 21,1** — genmåles **2026-10-13**.
+  Forventningen er ærlig: pos. 6,9 er et ranking-problem før det er et
+  indholdsproblem, og otte autocomplete-variationer er ikke 22.824 visninger.
+  Uændret CTR efter 14 dage modbeviser hypotesen, og så er siden et
+  positionsspørgsmål — samme konklusion som C172 og C194.
+- **Målt og bevidst ikke bygget:** "moms på engelsk" (DA nr. 7, SE nr. 1-10) er
+  et *oversættelsesspørgsmål*; "momsindberetning" / "momsfrister 2026" /
+  "momsnummer" er virksomhedsregistrering, som kræver en SKAT-kilde loopet ikke
+  har. Registreret, ikke bygget.
 
 #### 194. [x] FÆRDIG 2026-09-29 — C194 — **`/tidszone` (24.117 v, CTR 0,4 %, pos. 7,5) skrev nul forekomster af sit eget hovedord i titlen: "Hvad er klokken i USA, når den er 12 i Danmark?" imens sidens største søgning er "tidszoner" (713 v, pos. 9) — og C79/C81/C172/C180 har lagt svar-først i `<title>` på alle andre sider uden at miste hovedordet**
 
@@ -17661,6 +17772,65 @@ er værst. Se `❓ Til Mads`.
 **C189 og C190 står åbne** — de blev pushet efter 17:30 (hhv. 17:26, med vindue 21:30 fordi noten var skrevet kl. 17:06 før vinduet, og 17:29 mens 17:30-batchen kørte), så de har **første kandidatvindue 2026-09-29 21:30**.
 
 ### VERIFICÉR DEPLOY-log — nyeste først
+- `VERIFICÉR DEPLOY: /moms får EU-sats-tabel med 28 lande i begge sprog (Holland/Finland/Italien/Norge 0 → 12/2/2/1, FAQ DA 11 → 16 og SE 6 → 11) ceo/moms-eu-satser 2026-09-29 20:3x`
+  — merge sker ca. 20:3x. 17:30-batchen kørte længe før, så første
+  **kandidatvindue er 2026-09-29 21:30**. Kun `moms-eu.ts` (**ny**),
+  `moms/page.tsx` (+116), `page-data.ts` (+28) og to testfiler er rørt —
+  **ingen beregningslogik ændret, `moms.ts` urørt, ingen ny URL, ingen sitemap,
+  ingen `<title>`, ingen `<meta description>`, ingen `<h1>`**. **HTTP 200
+  beviser intet:** hele ændringen er en ny tabel og otte nye FAQ-svar, og siden
+  svarede 200 hele tiden, også da den ikke svarede. Mål på rigtig server
+  (`next start`, porten verificeret fri *inden* start) med `curl -H "Host: …"`,
+  **ikke** Node `fetch` (målefejl 38):
+
+  1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
+  2. Begge domæner skal have **28** rækker i EU-tabellen. Tæl **inde i tabellen**,
+     der indeholder både "100 kr" og "Norge" — **ikke** med
+     `sed -n '/Momssatsen i EU/,/Moms i EU/p'`, fordi **"Moms i EU" er et præfiks
+     i "Momssatsen i EU"** og det interval så giver 1 (målefejl 44):
+     ```
+     curl -s https://minberegner.dk/moms | sed 's/<!-- -->//g' \
+       | grep -o 'scope="row"' | wc -l   # skal give 28
+     ```
+  3. Første og sidste række skal være dansk `Østrig` … `Norge (ikke EU)` og
+     svensk `Österrike` … `Norge (inte EU)`. Landene der hedder forskelligt skal
+     stå med **Nederländerna** (ikke Holland), **Österrike** (ikke Østrig) og
+     **Grekland** (ikke Grækenland) på beraknare.se.
+  4. **Krydscheck mod tabellen, pr. domæne:** DA skal have `Holland` **12**
+     forekomster, `Finland` **2**, `Italien` **2**, `127 kr.` i tabellen, og
+     `Tyskland` **19 %** + `119 kr.` i sit FAQ-svar. SE skal have
+     `Nederländerna` **8**, `Grekland` **2**, `119 kr` (svensk notation) og
+     `Momssatsen i Tyskland är 19 %`.
+  5. Brødteksten skal begge steder sige **"17 % (Luxembourg)"** /
+     **"27 % (Ungarn)"** (DA) og **"17 % (Luxemburg)"** / **"27 % (Ungern)"**
+     (SE) — tallene er nu fundet af tabellen, ikke skrevet i hånden. Tabellens
+     yderste priser skal være **117 kr.** (LU) og **127 kr.** (HU).
+  6. `grep -o '"@type":"Question"' | wc -l` skal være **16** på
+     `minberegner.dk/moms` (fra 11) og **11** på `beraknare.se/moms` (fra 6).
+  7. **Danmarks række skal sige `Ingen` i reduceret-kolonnen og *ikke* `0 %`** —
+     0 % på bøger er en undtagelse fra momsloven, ikke en reduceret sats.
+  8. **Sproglækage:** beraknare.se skal have **0** `Østrig` og **0**
+     `Grækenland`; minberegner.dk skal have **0** `Nederländerna` og **0**
+     `Österrike`.
+  9. **KONTROL:** `/moms`s `<title>` skal være uændret i begge sprog
+     ("Momsberegner 25 % – inkl. og ekskl. moms | MinBeregner.dk" /
+     "Momskalkylator – inkl. och exkl. moms | Beräknare.se"), det samme for
+     `<meta description>` og **`<h1>`** ("Momsberegner" / "Momskalkylator"), og
+     `/procent`, `/dato` og `/tidsberegner` skal være uændrede.
+  10. `npm run test -- src/lib/moms-eu.test.ts src/app/moms/page.test.tsx`
+      skal give **55 passed** (19 + 36), `npm run test` **2.974 / 187**,
+      `npm run lint` **614 filer**, `npm run build` **142 sider**,
+      `node scripts/locale-leak.mjs --gate` exit 0 med **743 kandidater /
+      709 døde / 34 kræver øjne / 0 ureviewet**, og
+      `node scripts/knapgruppe-scan.mjs` **0/0**.
+  11. **Scannerens optælling er også en del af denne diff.** `locale-leak.mjs`
+      har ændret `needsEyes` til `verdict !== "DØD" && (reviewed || KRÆVER ØJNE)`.
+      Er tallene på live uændrede ved 743/709/35/0, er den gamle optælling
+      stadig i drift; forvent **743 / 709 / 34 / 0**. `npm run test` skal være
+      grøn — ellers falder `locale-leak-gate.test.ts` på
+      `expected 743 to be 744`.
+
+
 ### ✅ `DEPLOY OK 2026-09-29 19:35` — otte noter lukket ved indholdskontrol (C177, C178, C180, C182, C183, C184, C185).** 17:30-batchen havde kørt da iterationen startede (19:30), så alle otte var pligter. Målt på **live** mod begge domæner, `/api/health` svarede `status: ok` (timestamp 17:31 UTC = 19:31 CEST), `beregner.no/api/health` **404** som opgave 178 forudsiger. Ingen note er lukket på en HTTP 200 alene.
   - **C185** `beraknare.se/kalorier`: `<h2>Hur många kalorier per dag?</h2>` **2** og `<h2>Kaloribehov efter ålder</h2>` **2**, **to** tabeller (var 0), **8** `Question` (var 4), "65 år" i markupken. Kontrol: DA `/kalorier` **1** tabel, **7** FAQ, **0** fund på "Kaloribehov efter ålder".
   - **C184** `beraknare.se/braendstof`: alle fire nye overskrifter fundet (hver **2**), "500 km" **29**, "17,57" **25**, "22,81" **13**, "29,8 %" **4**, "11,70" **4**, "12,70" **4**, **8** `Question` (var 5), **0** "Diesel koster". Kontrol: DA uændret — titel "Brændstofberegner: 500 km benzin koster 450 kr.", 7 `<h2>`, 9 FAQ, **0** fund på 17,57/22,81.

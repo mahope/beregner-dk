@@ -4,6 +4,7 @@ import { getDomainConfigByLocale } from "@/lib/domain-config";
 import { getCurrentDomainConfig, getLocale } from "@/lib/get-locale";
 import { formatNumber } from "@/lib/format";
 import { beregnMoms, momsFaktor } from "@/lib/moms";
+import { momsSatsUdenraekke, udenlandRaeekker } from "@/lib/moms-eu";
 import MomsPage from "./page";
 
 vi.mock("@/components/MomsBeregner", () => ({
@@ -261,5 +262,162 @@ describe("moms page", () => {
     // "baglæns" er dansk — svensk är "baklänges". MOMS() er dansk Excel.
     expect(html).not.toContain("baglæns");
     expect(html).not.toContain("=MOMS(");
+  });
+});
+
+describe("moms: EU-sats-tabellen (landene dansk og svensk autocomplete spørger om)", () => {
+  beforeEach(() => {
+    vi.mocked(getLocale).mockResolvedValue("da");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("da"));
+  });
+
+  // Otte af ti danske variationer under "moms procent" er landespecifikke, og
+  // før denne tabel var Holland, Finland, Italien og Norge 0 gange på siden.
+  // Derfor læses forventningerne af modulet — en sats i tabellen skal give
+  // præcis den pris, beregnMoms ville give.
+  const tabelRaekker = udenlandRaeekker();
+
+  test("tabellen har én række pr. land, og antallet afspejler modulet", async () => {
+    const html = renderToStaticMarkup(await MomsPage());
+
+    const raekker = [...html.matchAll(/<tr[^>]*>/g)];
+    // +1 for header-rækken, og de to andre tabeller på siden har hver deres.
+    const egne = html.split("<h3>Momssatsen i EU")[1]?.split("<h3>")[0] ?? "";
+    const egneRaekker = [...egne.matchAll(/<tr[^>]*>/g)].length - 1;
+    expect(egneRaekker).toBe(tabelRaekker.length);
+    expect(raekker.length).toBeGreaterThan(egneRaekker);
+  });
+
+  test("hver landerække viser satsen og 100-kr-prisen, som modulet regner dem", async () => {
+    const html = renderToStaticMarkup(await MomsPage());
+
+    for (const { land, prisInklMoms100 } of tabelRaekker) {
+      const sats = formatNumber(land.standard, "da", { maximumFractionDigits: 1 });
+      const pris = formatNumber(prisInklMoms100, "da", { maximumFractionDigits: 2 });
+      const række = html.split(`<th scope="row" class="text-left font-normal py-1.5 pr-3">${land.navn.da}`)[1]
+        ?.split("</tr>")[0] ?? "";
+      expect(række, `mangler række for ${land.navn.da}`).not.toBe("");
+      expect(række).toContain(`${sats} %`);
+      expect(række).toContain(`${pris} kr.`);
+    }
+  });
+
+  test("de otte målte danske lande står i tabellen med deres eget navn", async () => {
+    const html = renderToStaticMarkup(await MomsPage());
+
+    for (const kode of ["NL", "FI", "DE", "IT", "NO", "SE", "FR", "PL"]) {
+      const land = tabelRaekker.find((r) => r.land.kode === kode)!;
+      expect(html, `mangler ${kode}`).toContain(`>${land.land.navn.da}`);
+    }
+    // Norge er markeret som ikke-EU, fordi det er det det er.
+    expect(html).toContain("Norge (ikke EU)");
+  });
+
+  test("brødtekstens 17 % og 27 % er de samme tal som tabellen finder", async () => {
+    const html = renderToStaticMarkup(await MomsPage());
+    const { lavest, hoejest } = momsSatsUdenraekke();
+
+    // Før stod "17% (Luxembourg) til 27% (Ungarn)" håndskrevet i brødteksten,
+    // ved siden af en tabel der ikke fandtes. Nu er begge tal fundet af tabellen.
+    expect(html).toContain("17 % (Luxembourg)");
+    expect(html).toContain("27 % (Ungarn)");
+    expect(lavest.navn.da).toBe("Luxembourg");
+    expect(hoejest.navn.da).toBe("Ungarn");
+    // Og de to priser, brødteksten nævner, er tabellens celler.
+    expect(html).toContain("117 kr.");
+    expect(html).toContain("127 kr.");
+  });
+
+  test("Danmark står med 0 % på bøger som undtagelse, ikke som reduceret sats", async () => {
+    const html = renderToStaticMarkup(await MomsPage());
+    // Forankret i rækkens <th scope="row">, ikke i ">Danmark" — FAQ'en siger
+    // også "Danmark", og en løs grep ville tage den først.
+    const række = html.split('pr-3">Danmark<')[1]?.split("</tr>")[0] ?? "";
+
+    expect(række).toContain("25 %");
+    expect(række).toContain("Ingen");
+    // Fælden: 0 % er en undtagelse fra momsloven, ikke en lavere sats, så den
+    // må ikke stå i reduceret-kolonnen.
+    expect(række).not.toContain("0 %");
+  });
+
+  test("de nye spørgsmål står i den danske FAQ og dermed i JSON-LD", async () => {
+    const html = renderToStaticMarkup(await MomsPage());
+
+    for (const spg of [
+      "Hvad er momssatsen i Tyskland?",
+      "Hvad er momssatsen i Holland?",
+      "Hvad er momssatsen i Norge?",
+      "Hvilken momssats har EU's laveste og højeste land?",
+      "Hvad er momssatsen i Sverige?",
+    ]) {
+      expect(html).toContain(spg);
+    }
+    // Og svarene er skrevet i sit eget sprog, ikke bare spørgsmålene.
+    expect(html).toContain("Momssatsen i Tyskland er 19 %");
+    expect(html).toContain("Momssatsen i Holland er 21 %");
+    expect(html).toContain("ikke medlem af EU");
+  });
+});
+
+describe("moms: EU-tabellen på beraknare.se har sit eget sprog", () => {
+  beforeEach(() => {
+    vi.mocked(getLocale).mockResolvedValue("se");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("se"));
+  });
+
+  test("har samme antal rækker som den danske — ellers er tabellen halv", async () => {
+    const html = renderToStaticMarkup(await MomsPage());
+    const egne = html.split("<h3>Momssatsen i EU")[1]?.split("<h3>")[0] ?? "";
+    const egneRaekker = [...egne.matchAll(/<tr[^>]*>/g)].length - 1;
+    expect(egneRaekker).toBe(udenlandRaeekker().length);
+  });
+
+  test("bruger svenska landnavn, og de tre der hedder forskelligt er rigtige", async () => {
+    const html = renderToStaticMarkup(await MomsPage());
+
+    for (const kode of ["NL", "AT", "EL", "LU", "HU"]) {
+      const land = udenlandRaeekker().find((r) => r.land.kode === kode)!.land;
+      expect(html, `mangler ${land.navn.se}`).toContain(`>${land.navn.se}`);
+    }
+    expect(html).toContain("Nederländerna");
+    expect(html).toContain("Österrike");
+    expect(html).toContain("Grekland");
+    // De danske navne skal ikke stå som række-overskrift på beraknare.se.
+    expect(html).not.toContain(">Holland");
+    expect(html).toContain("Norge (inte EU)");
+  });
+
+  test("har svensk notation i priserne — 1.125 er dansk, 1 125 er svensk", async () => {
+    const html = renderToStaticMarkup(await MomsPage());
+    const tysk = udenlandRaeekker().find((r) => r.land.kode === "DE")!;
+
+    expect(html).toContain(
+      `${formatNumber(tysk.prisInklMoms100, "se", { maximumFractionDigits: 2 })} kr`
+    );
+    // Negativ lås mod den danske notation på den svenske side.
+    expect(html).not.toContain(
+      `${formatNumber(tysk.prisInklMoms100, "da", { maximumFractionDigits: 2 })} kr.`
+    );
+  });
+
+  test("svarer på de målte svenska søgninger i svensk", async () => {
+    const html = renderToStaticMarkup(await MomsPage());
+
+    for (const spg of [
+      "Vad är momssatsen i Tyskland?",
+      "Vad är momssatsen i Holland?",
+      "Vad är momssatsen i Norge?",
+      "Vilket EU-land har lägst och högst momssats?",
+      "Hur mycket moms är det på mat i Sverige?",
+    ]) {
+      expect(html).toContain(spg);
+    }
+    expect(html).toContain("Momssatsen i Tyskland är 19 %");
+    // "Holland" er det ord søgeren skriver; svaret bruger landets eget navn fra
+    // modulet. Hvis svaret sagde "Nederländerna" i spørgsmålsteksten ville det
+    // være dansk, men i svaret er det det korrekte svenske navn.
+    expect(html).toContain("Vad är momssatsen i Holland?");
+    expect(html).toContain("Momssatsen i Nederländerna är 21 %");
   });
 });

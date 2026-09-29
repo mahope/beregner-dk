@@ -1541,8 +1541,23 @@ function run() {
   candidatesFromPages = all.filter((f) => sePages.has(join(ROOT, f.file))).length;
 
   const unreviewed = all.filter((f) => !f.reviewed && f.verdict === "KRÆVER ØJNE");
-  const needsEyes = all.filter((f) => f.reviewed || f.verdict === "KRÆVER ØJNE");
   const dead = all.filter((f) => f.verdict === "DØD");
+  // `dead` og `needsEyes` skal være disjunkte, ellers tælles en fund begge
+  // steder, og summeringen `candidates === dead + needsEyes` holder ikke.
+  //
+  // Fundet 2026-09-29: `page-data.ts`'s REVIEWED-post har kun `key`, ikke
+  // `string`, så den matcher *alle* fund i filen — dens begrundelse ("danske
+  // strenge i da:-blokken kan ikke vises på beraknare.se") er altså netop
+  // dødsværdet. Før C195 stod ingen `DØD`-fund i den fil, så overlap var
+  // usynligt; da en ny dansk FAQ-række kom, blev den både "død" og
+  // "gennemgået", og 743 kandidater meldte 744 i summen.
+  //
+  // "Kræver øjne" betyder præcis: et fund der endnu ikke er afgjort. Et fund
+  // der allerede er dømt DØD — uanset om en human har begrundet det — kræver
+  // ingen øjne mere. Derfor tages døde fund herfra.
+  const needsEyes = all.filter(
+    (f) => f.verdict !== "DØD" && (f.reviewed || f.verdict === "KRÆVER ØJNE")
+  );
 
   if (JSON_OUT) {
     console.log(

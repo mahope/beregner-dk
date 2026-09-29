@@ -15,6 +15,7 @@ import { SelvstaendigAffiliate } from "@/components/AffiliateBox";
 import { formatNumber } from "@/lib/format";
 import { beregnMoms, DEFAULT_MOMS_SATS, fratraekRaekker, momsFaktor } from "@/lib/moms";
 import { baklaengesEksempler, baklaengesTabel, krSe } from "@/lib/moms-eksempler";
+import { MOMS_LANDE, momsSatsUdenraekke, udenlandRaeekker } from "@/lib/moms-eu";
 
 export async function generateMetadata() {
   return generatePageMetadata("moms");
@@ -46,6 +47,21 @@ export default async function MomsPage() {
       ).join(" "),
     };
   });
+
+  // EU-tabellen. `udenlandRaeekker` regner hver pris gennem `beregnMoms`, saa
+  // ingen celle i tabellen kan vise et tal vaerktøjet ikke ville give, og
+  // `momsSatsUdenraekke` finder laveste og hoejeste sats af de samme lande,
+  // saa brødteksten ikke kan modsige tabellen.
+  const udenland = udenlandRaeekker();
+  const satsUdenraekke = momsSatsUdenraekke();
+  const procentDa = (tal: number) =>
+    formatNumber(tal, "da", { maximumFractionDigits: 1 });
+  const procentSe = (tal: number) =>
+    formatNumber(tal, "se", { maximumFractionDigits: 1 });
+  const krDa = (tal: number) =>
+    `${formatNumber(tal, "da", { maximumFractionDigits: 2 })} kr.`;
+  const krSeLang = (tal: number) =>
+    `${formatNumber(tal, "se", { maximumFractionDigits: 2 })} kr`;
 
   return (
     <div className="flex flex-col lg:flex-row gap-8">
@@ -284,10 +300,56 @@ export default async function MomsPage() {
           <li><strong>Over 50 mio. kr/år:</strong> Afregning hver måned</li>
         </ul>
 
+        <h3>Momssatsen i EU&apos;s medlemslande</h3>
+        <p>
+          EU-momssatserne varierer fra {procentDa(satsUdenraekke.lavest.standard)} % (
+          {satsUdenraekke.lavest.navn.da}) til {procentDa(satsUdenraekke.hoejest.standard)} % (
+          {satsUdenraekke.hoejest.navn.da}). Danmarks 25 % ligger i den høje ende. Norge er ikke
+          medlem af EU, men står med, fordi det er det nærmeste norske spørgsmål og det er med 25 %
+          på normal sats.
+        </p>
+        <p>
+          Kolonnen &ldquo;100 kr. ekskl. moms&rdquo; viser, hvad 100 kr. uden moms koster med moms i
+          hvert land, regnet med landets egen sats. Den danske række er den, dit eget køb
+          gennemgår: 100 kr. ekskl. moms bliver 125 kr. inkl. moms.
+        </p>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm border-collapse">
+            <thead>
+              <tr className="border-b">
+                <th scope="col" className="text-left py-2 pr-3">Land</th>
+                <th scope="col" className="text-left py-2 pr-3">Standard</th>
+                <th scope="col" className="text-left py-2 pr-3">Reduceret</th>
+                <th scope="col" className="text-left py-2 pr-3">100 kr. ekskl. moms</th>
+              </tr>
+            </thead>
+            <tbody>
+              {udenland.map(({ land, prisInklMoms100 }) => (
+                <tr key={land.kode} className="border-b last:border-b-0">
+                  <th scope="row" className="text-left font-normal py-1.5 pr-3">
+                    {land.navn.da}
+                    {land.ikkeEu ? " (ikke EU)" : ""}
+                  </th>
+                  <td className="py-1.5 pr-3">{procentDa(land.standard)} %</td>
+                  <td className="py-1.5 pr-3">
+                    {land.reduceret === null ? "Ingen" : `${procentDa(land.reduceret)} %`}
+                  </td>
+                  <td className="py-1.5 pr-3">{krDa(prisInklMoms100)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p>
+          Danmark er det eneste land i tabellen helt uden reduceret sats. Sverige har 12 % på mad,
+          restaurang og hotell og 6 % på bøger, kollektivtrafik og kultur, mens Norge har 15 % på
+          fødevarer og 12 % på persontransport og indkvartering. Bøger, aviser og tidsskrifter er
+          0 % i Danmark — det er en undtagelse fra momsloven, ikke en reduceret sats.
+        </p>
+
         <h3>Moms i EU og ved handel med udlandet</h3>
         <p>
-          EU-momssatserne varierer fra 17% (Luxembourg) til 27% (Ungarn). Danmarks 25% ligger i den
-          høje ende. Ved køb af varer fra udlandet gælder:
+          Ved køb af varer fra udlandet gælder:
         </p>
         <ul>
           <li><strong>Inden for EU:</strong> Privatpersoner betaler normalt momsen i sælgerlandet. Virksomheder kan bruge reverse charge</li>
@@ -451,10 +513,56 @@ export default async function MomsPage() {
           <li><strong>Över 40 miljoner kr/år:</strong> redovisning varje månad</li>
         </ul>
 
+        <h3>Momssatsen i EU:s medlemsländer</h3>
+        <p>
+          Momssatserna i EU varierar från {procentSe(satsUdenraekke.lavest.standard)} % (
+          {satsUdenraekke.lavest.navn.se}) till {procentSe(satsUdenraekke.hoejest.standard)} % (
+          {satsUdenraekke.hoejest.navn.se}). Sveriges 25 % ligger i den höga delen. Norge ingår inte
+          i EU men finns med, eftersom det är det närmaste norska frågan och Norge har 25 % som
+          normal sats.
+        </p>
+        <p>
+          Kolonnen &ldquo;100 kr. exkl. moms&rdquo; visar vad 100 kr. utan moms kostar med moms i
+          respektive land, räknat med landets egen sats. Den svenska raden är den som ditt eget
+          köp går igenom: 100 kr. exkl. moms blir 125 kr. inkl. moms.
+        </p>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm border-collapse">
+            <thead>
+              <tr className="border-b">
+                <th scope="col" className="text-left py-2 pr-3">Land</th>
+                <th scope="col" className="text-left py-2 pr-3">Standard</th>
+                <th scope="col" className="text-left py-2 pr-3">Reducerad</th>
+                <th scope="col" className="text-left py-2 pr-3">100 kr. exkl. moms</th>
+              </tr>
+            </thead>
+            <tbody>
+              {udenland.map(({ land, prisInklMoms100 }) => (
+                <tr key={land.kode} className="border-b last:border-b-0">
+                  <th scope="row" className="text-left font-normal py-1.5 pr-3">
+                    {land.navn.se}
+                    {land.ikkeEu ? " (inte EU)" : ""}
+                  </th>
+                  <td className="py-1.5 pr-3">{procentSe(land.standard)} %</td>
+                  <td className="py-1.5 pr-3">
+                    {land.reduceret === null ? "Ingen" : `${procentSe(land.reduceret)} %`}
+                  </td>
+                  <td className="py-1.5 pr-3">{krSeLang(prisInklMoms100)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p>
+          Danmark är det enda landet i tabellen helt utan reducerad sats. Sverige har 12 % på mat,
+          restaurang och hotell och 6 % på böcker, kollektivtrafik och kultur, medan Norge har 15 %
+          på livsmedel och 12 % på persontransport och boende. Böcker, tidningar och tidskrifter är
+          0 % i Danmark — det är ett undantag från momslagen, inte en reducerad sats.
+        </p>
+
         <h3>Moms i EU och vid handel med utlandet</h3>
         <p>
-          Momssatserna i EU varierar från 17% (Luxemburg) till 27% (Ungern). Sveriges 25% ligger i den
-          höga delen. Vid köp av varor från utlandet gäller:
+          Vid köp av varor från utlandet gäller:
         </p>
         <ul>
           <li><strong>Inom EU:</strong> Privatpersoner betalar normalt momsen i säljarlandet. Företag kan använda omvänd skattskyldighet</li>

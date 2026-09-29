@@ -9,6 +9,8 @@ import {
   NETTOPRISINDELS_MAANED,
   beregnHuslejestigning,
 } from "./nettoprisindeks";
+import { landSvarSprogholdig, satsUdenraekkeSvar } from "./moms-eu";
+import { formatNumber } from "./format";
 import { estimerNettoMaaned } from "./barsel/netto";
 import { PROMILLE_EKSEAMPLER, formatPromille, formatTimer } from "./promille-eksempler";
 import {
@@ -16,6 +18,22 @@ import {
   formatPromilleTabel,
   vaegtNogle,
 } from "./promille-genstande";
+
+/**
+ * Formateringen i de to momssvar, der laeser et tal ud af `MOMS_LANDE`. Den er
+ * laest her og ikke i svaret, fordi ellers ville hvert sprog skrive sit eget
+ * talformat ved siden af tabellens.
+ */
+const MOMS_FAQ_FORMAT = {
+  da: {
+    procent: (tal: number) => formatNumber(tal, "da", { maximumFractionDigits: 1 }),
+    pris: (tal: number) => `${formatNumber(tal, "da", { maximumFractionDigits: 2 })} kr.`,
+  },
+  se: {
+    procent: (tal: number) => formatNumber(tal, "se", { maximumFractionDigits: 1 }),
+    pris: (tal: number) => `${formatNumber(tal, "se", { maximumFractionDigits: 2 })} kr`,
+  },
+} as const;
 
 /**
  * FAQ-svarene om "hvornår må jeg køre bil igen" har to forskellige tal: tiden
@@ -1366,6 +1384,11 @@ const daPages: Record<string, PageData> = {
       { question: "Hvordan beregner man moms baglæns?", answer: "Del prisen med 1,25: 1.250 kr. inkl. moms ÷ 1,25 = 1.000 kr. ekskl. moms, og momsen var de 250 kr. Forskellen er den hurtigere vej, fordi momsen er 20 % af prisen med moms (1.250 × 0,20 = 250), men den giver et rundt tal på 499 kr. — 499 ÷ 1,25 = 399,20 kr. ekskl. moms." },
       { question: "Hvordan bruger man MOMS-funktionen i Excel?", answer: "Skriv =MOMS(A1;25;0;0) på et beløb uden moms — på 1.000 kr. giver den 250 kr. Prisen med moms er =A1+MOMS(A1;25;0;0), altså 1.250 kr. Til prisen baglæns kan du bruge =A1/1,25, og momsen i en pris med moms er =A1-A1/1,25. På dansk og svensk Excel bruger formler semikolon mellem argumenterne, på engelsk Excel bruges komma." },
       { question: "Hvorfor er der kun én momssats, når nogle lande har flere?", answer: "Danmark har kun satsen på 25 % og derfor ingen reducerede satser. Når en dansk pris er mindst 25 % dyrere end den udenlandske, må virksomheden opkræve dansk moms af forskellen. Den skal beregnes med 25 %, ikke med 20 % gentaget: 1,25 i fjerde potens er 2,4414, mens 20 % fratrukket fire gange kun giver 0,4096." },
+      { question: "Hvad er momssatsen i Tyskland?", answer: landSvarSprogholdig("DE", "da", MOMS_FAQ_FORMAT.da) },
+      { question: "Hvad er momssatsen i Holland?", answer: landSvarSprogholdig("NL", "da", MOMS_FAQ_FORMAT.da) },
+      { question: "Hvilken momssats har EU's laveste og højeste land?", answer: satsUdenraekkeSvar("da", MOMS_FAQ_FORMAT.da) },
+      { question: "Hvad er momssatsen i Norge?", answer: landSvarSprogholdig("NO", "da", MOMS_FAQ_FORMAT.da) },
+      { question: "Hvad er momssatsen i Sverige?", answer: "Sverige har tre satser: 25 % standard, 12 % på mat, restaurang og hotell samt 6 % på bøger, kollektivtrafik og kultur. 100 kr. ekskl. moms koster 125 kr. inkl. moms på standard-satsen, 112 kr. ved 12 % og 106 kr. ved 6 %. Danmark har derimod kun 25 % og 0 % på bøger, aviser og tidsskrifter." },
     ],
 
     },
@@ -3854,6 +3877,11 @@ const sePages: Record<string, PageData> = {
       { question: "När kan företag dra av moms?", answer: "Momsregistrerade företag kan dra av ingående moms och rapporterar till Skatteverket." },
       { question: "Hur räknar man ut moms baklänges?", answer: "Del priset med 1,25: 1 250 kr inkl. moms ÷ 1,25 = 1 000 kr exkl. moms, och momsen var 250 kr. Kortvägen är att ta 20 % av priset (1 250 × 0,20 = 250), men den ger ett runt tal på 499 kr — 499 ÷ 1,25 = 399,20 kr exkl. moms." },
       { question: "Hur beräknar man moms i Excel?", answer: "Svensk Excel har ingen inbyggd momsfunktion, så du skriver formeln själv: =A1*1,25 lägger till moms, =A1/1,25 räknar baklänges och =A1*0,20 ger momsandelen. Använd semikolon som argumentavskiljare i svensk Excel och se till att cellen är formaterad som Tal, inte text." },
+      { question: "Vad är momssatsen i Tyskland?", answer: landSvarSprogholdig("DE", "se", MOMS_FAQ_FORMAT.se) },
+      { question: "Vad är momssatsen i Holland?", answer: landSvarSprogholdig("NL", "se", MOMS_FAQ_FORMAT.se) },
+      { question: "Vilket EU-land har lägst och högst momssats?", answer: satsUdenraekkeSvar("se", MOMS_FAQ_FORMAT.se) },
+      { question: "Vad är momssatsen i Norge?", answer: landSvarSprogholdig("NO", "se", MOMS_FAQ_FORMAT.se) },
+      { question: "Hur mycket moms är det på mat i Sverige?", answer: "På mat, restaurang och hotell är satsen 12 %, så 100 kr. exkl. moms kostar 112 kr. inkl. moms. Böcker, kollektivtrafik och kultur har 6 % (100 kr. blir 106 kr.). Standardvaror har 25 % (100 kr. blir 125 kr.). I Danmark finns ingen reducerad sats, så mat där är 25 %." },
       ],
     },
   };
