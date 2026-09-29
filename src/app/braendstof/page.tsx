@@ -37,6 +37,8 @@ export default async function BraendstofPage() {
   const drivmiddelNavn: Record<string, string> = { benzin: "Benzin", diesel: "Diesel", el: "El" };
   const braendstofKm = BRAENDSTOF_EKSEMPEL_KM;
   const eksempelRækker = braendstofEksempelRækker();
+  const benzinRække = eksempelRækker.find((r) => r.type === "benzin")!;
+  const dieselRække = eksempelRækker.find((r) => r.type === "diesel")!;
   const egentForbrug = BRAENDSTOF_EGENT_FORBRUG;
   const egentForbrugKmPrLiter = egentForbrug.km / egentForbrug.liter;
   const egentForbrugLiterPr100km = literPr100km(egentForbrugKmPrLiter);
@@ -175,6 +177,67 @@ export default async function BraendstofPage() {
           <li><strong>Diesel:</strong> Bedre for lange afstande, højere afgifter</li>
           <li><strong>El:</strong> Lavest km-pris, men højere indkøbspris og behov for ladeinfrastruktur</li>
         </ul>
+
+        <h2>Hvorfor er diesel dyrere end benzin?</h2>
+        <p>
+          Spørgsmålet kan betyde to forskellige ting, og svaret er modsat for dem:
+          <strong> prisen pr. liter</strong> og <strong>prisen pr. kilometer</strong>.
+        </p>
+        <p>
+          <strong>Pr. liter</strong> ligger diesel højere, fordi de to brændsler
+          afgiftsbeskattes forskelligt: energi- og CO2-afgiften er højere pr.
+          liter for diesel end for benzin. Derfor følger de to pumperpriser heller
+          ikke hinanden 1:1, og diesel har i de fleste af de seneste år ligget
+          tæt på benzin — nogle dage billigere, andre dage dyrere.
+        </p>
+        <p>
+          <strong>Pr. kilometer</strong> er det derimod næsten altid benzin,
+          der er dyrest, fordi en dieselbil kører længere på literen: 15-22 km/l
+          mod benzins 12-18 km/l. Forskellen i literpris bliver mere end
+          udlignet af det lavere forbrug. De samme 500 km, regnet på de
+          forudsætninger beregneren selv bruger:
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>{braendstofKm} km</th>
+              <th>Benzin</th>
+              <th>Diesel</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Forbrug</td>
+              <td>{tal(benzinRække.forbrug)} {benzinRække.forbrugsEnhed}</td>
+              <td>{tal(dieselRække.forbrug)} {dieselRække.forbrugsEnhed}</td>
+            </tr>
+            <tr>
+              <td>Literpris</td>
+              <td>{kr(benzinRække.enhedPris)} kr./l</td>
+              <td>{kr(dieselRække.enhedPris)} kr./l</td>
+            </tr>
+            <tr>
+              <td>Pris for {braendstofKm} km</td>
+              <td>{heleKroner(benzinRække.pris)} kr.</td>
+              <td>{heleKroner(dieselRække.pris)} kr.</td>
+            </tr>
+            <tr>
+              <td>Pris pr. km</td>
+              <td>{kr(benzinRække.prisPrKm)} kr.</td>
+              <td>{kr(dieselRække.prisPrKm)} kr.</td>
+            </tr>
+          </tbody>
+        </table>
+        <p>
+          Diesel koster altså {heleKroner(benzinRække.pris - dieselRække.pris)}{" "}
+          kr. mindre for de {braendstofKm} km — {tal(dieselRække.maengde)} l
+          mod benzins {tal(benzinRække.maengde)} l. Beregningen bruger faste
+          modelpriser på {kr(benzinRække.enhedPris)} kr./l for benzin og{" "}
+          {kr(dieselRække.enhedPris)} kr./l for diesel, så skriv dagens pris fra
+          pumperen ind i værktøjet ovenfor, hvis den afviger. Er forskellen mellem
+          de to literpriser stor, eller kører bilen langt på motorvejen, så kan
+          rækkefølgen tippe.
+        </p>
       </div>
       )}
 

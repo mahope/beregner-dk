@@ -71,6 +71,11 @@ const braendstofEksempel = braendstofEksempelRækker();
 const braendstofEksempelKm = BRAENDSTOF_EKSEMPEL_KM;
 const braendstofEksempelBenzin = kommatal(braendstofEksempel[0].maengde);
 const braendstofEksempelBenzinPris = heleKroner(braendstofEksempel[0].pris);
+const braendstofEksempelDiesel = kommatal(braendstofEksempel[1].maengde);
+const braendstofEksempelDieselPris = heleKroner(braendstofEksempel[1].pris);
+const braendstofDieselBilligere = heleKroner(
+  braendstofEksempel[0].pris - braendstofEksempel[1].pris,
+);
 const braendstofBenzinPr100 = kommatal(literPr100km(BRAENDSTOF_FORUDSETNINGER.benzin.kmPerLiter));
 const braendstofBenzinLavPr100 = kommatal(literPr100km(18));
 const braendstofBenzinHoejPr100 = kommatal(literPr100km(12));
@@ -966,6 +971,8 @@ const daPages: Record<string, PageData> = {
       { question: "Hvor meget benzin bruger en bil?", answer: `Et typisk dansk benzinbil kører 12-18 km/l, altså ${braendstofBenzinLavPr100}-${braendstofBenzinHoejPr100} l/100 km på tankinstrumentet. Find dit eget med fire fulde tankfyld: liter påfyldt delt med km kørt er dit km/l — 40 liter over 380 km er 380 ÷ 40 = ${braendstofEgetKmPrLiter} km/l.` },
       { question: "Er el-biler billigere?", answer: `Ja, når du regner på brændstoffet alene: ${pct(elModBenzinPct)} % billigere pr. km end benzin (${krPrKm(elPris, 2)} mod ${krPrKm(benzinPris, 2)}). Mod diesel er besparelsen ${pct(elModDieselPct)} %, fordi diesel i forvejen er billigere pr. km (${krPrKm(dieselPris, 2)}). Beregningen bruger 13,50 kr./l benzin, 12,80 kr./l diesel og 2,50 kr./kWh el — altså billig el. Ved offentlig opladning til 3-6 kr./kWh bliver el dyrere end diesel over ${pct(elModDieselBreakEven)} kr./kWh.` },
       { question: "Hvad påvirker forbruget?", answer: "Kørestil, hastighed, vejr, dæktryk, aircondition." },
+      { question: "Hvorfor er diesel dyrere end benzin?", answer: `Fordi spørgsmålet kan betyde to ting. Pr. liter ligger diesel højere, da energi- og CO2-afgiften er højere pr. liter for diesel end for benzin. Pr. kilometer er det næsten altid benzin, der er dyrest, fordi diesel kører 15-22 km/l mod benzins 12-18 km/l, så det lavere forbrug mere end udligner forskellen. ${braendstofEksempelKm} km med forudsætningerne i værktøjet: benzin ${braendstofEksempelBenzin} l × 13,50 kr. = ${braendstofEksempelBenzinPris} kr. (${krPrKm(benzinPris, 2)}), diesel ${braendstofEksempelDiesel} l × 12,80 kr. = ${braendstofEksempelDieselPris} kr. (${krPrKm(dieselPris, 2)}) — altså ${braendstofDieselBilligere} kr. mindre for diesel.` },
+      { question: "Hvad koster diesel pr. kilometer?", answer: `Med 18 km/l og 12,80 kr./l er det 12,80 ÷ 18 = ${krPrKm(dieselPris, 2)}, mens benzin med 15 km/l og 13,50 kr./l er 13,50 ÷ 15 = ${krPrKm(benzinPris, 2)}. Priserne er modelpriser, så skriv dagens pris fra pumperen og dit eget forbrug ind i værktøjet.` },
       ],
     },
     "bil": {

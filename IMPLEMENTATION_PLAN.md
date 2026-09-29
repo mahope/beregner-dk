@@ -16377,3 +16377,107 @@ sider), `locale-leak.mjs --gate` exit 0 (130/720/685/35/0 uændret),
   6. `https://minberegner.dk/api/health` → `status: ok`.
 
   Se `#### 170`.
+#### 173. [x] FÆRDIG 2026-09-29 — C173 — **`/braendstof` (17.024 v, pos. 5,9) lå på nummer ét for "hvorfor er diesel dyrere end benzin" og svarede aldrig på hvorfor — den svarede på *om* det var dyrt**
+
+**Datagrund.** GSC 2026-08-30 → 2026-09-27: `/braendstof` **17.024
+visninger / 183 klik / CTR 1,1 % / pos. 5,9** — syvendestørste danske side. Dens
+egen søgning **"hvorfor er diesel dyrere end benzin"** står på **position 1**
+med 48 visninger pr. 1.000. **Nummer ét i Google og næsten ingen klik** er
+det dyreste signal, der findes: rækken er der, svaret er ikke. DA-autocomplete
+(`hl=da`, `gl=dk`, 10:38) under samme spørgsmål giver **ti** variationer, hvoraf
+seks er det samme spørgsmål med en tilføjelse: "… 2026", "… lige nu", "… i
+danmark", "… blevet dyrere end benzin", "… så meget dyrere end benzin", "er
+diesel dyrere end benzin", "hvor er diesel dyrere end benzin", "diesel dyrere
+end benzin". Samme klyngeform som C171's tidszone-fund.
+
+**Fundet der afgorde valget.** Siden svarede på *pr. km*-siden af spørgsmålet —
+allerede før denne opgave stod der "benzin er dyrere pr. km end diesel, selv om
+benzin ofte står billigere pr. liter" — men **aldrig på hvorfor**. Dens egen
+sammenligningsliste sagde kun "Diesel: Bedre for lange afstande, højere afgifter",
+hvilket er resten af svaret uden årsagen. Mekanismen — at energi- og
+CO2-afgiften ligger højere pr. liter for diesel — stod ingen steder på siden.
+For tredje gang i træk (jf. C171) ikke titlen, men det under den.
+
+**Rettelsen (dansk).** Ét nyt `<h2>` **"Hvorfor er diesel dyrere end benzin?"**
+i den `locale === "da"`-gren med tre dele: (1) spørgsmålet kan betyde pr. liter
+*eller* pr. kilometer, og svaret er modsat; (2) pr. liter: de to brændsler
+afgiftsbeskattes forskelligt, derfor følger pumperpriserne ikke hinanden 1:1;
+(3) pr. kilometer: benzin er næsten altid dyrest, fordi diesel kører 15-22 km/l
+mod benzins 12-18 km/l. Under det en **500 km-tabel** med benzin 15 km/l og
+13,50 kr./l → 33,3 l → **450 kr.** → **0,90 kr./km** mod diesel 18 km/l og
+12,80 kr./l → 27,8 l → **356 kr.** → **0,71 kr./km**, altså 94 kr. mindre for
+dieselen, og en tydelig note om at priserne er modelleret. **To nye FAQ-par**
+(+"Hvorfor er diesel dyrere end benzin?" og "Hvad koster diesel pr. kilometer?"),
+så JSON-LD går **7 → 9**. Alle tal læses fra `braendstofEksempelRækker()` —
+samme funktion som den eksisterende tabel — så de kan ikke glide fra brødteksten.
+
+**Faglig usikkerhed, markeret.** Skat.dk's energiavgiftsider 404'ede **to
+gange** fra loopet i denne iteration (10:33), så siden **ikke** påstår en
+bestemt afgiftsrate. Den siger kun *retningen* ("energi- og CO2-afgiften er
+højere pr. liter for diesel end for benzin"), som er den strukturelle
+forholdsgrund, og den siger eksplicit, at literpriserne er faste
+modelpriser, så læseren kan indtaste dagens pumperpris. Samme kilde-fælde som
+opgave 119 og C95 — skrevet op, ikke gættet. Dette er derfor et **svar på
+spørgsmålet**, ikke en ny afgiftstabel.
+
+**Kontrollet at svensk ikke blev rørt:** den nye tests svenske arm kræver
+**0** forekomster af "dyrere end benzin", "dyrere än bensin" og "CO2-afgiften"
+— det er testens *negative*. Havde `<h2>` ligget i det delte afsnit i stedet for
+i den danske gren, ville den være rød. Det er desuden samme negative som C163
+fandt ved at lægge sin svar-sektion i den forkerte arm.
+
+**MÅL:** `/braendstof` dansk baseline **17.024 visninger / 183 klik / CTR 1,1 %
+/ pos. 5,9** (GSC 2026-08-30 → 2026-09-27) — måles igen **2026-10-13**.
+Klyngen alene: "hvorfor er diesel dyrere end benzin" og de ni variationer.
+**Forventningen er ærlig:** siden ligger på pos. 5,9 med 1,1 % CTR, og den
+lavine CTR er et rangeringsproblem, ikke et svarproblem. Rettelsen kan derfor
+kun gøre at *den ene søgning den allerede er nummer ét for* bliver klikket —
+hvis CTR'en er uændret efter 14 dage, er hypotesen "ubesvaret klynge giver
+position uden klik" **modbevist** for denne side, og næste skridt er flere
+interne links til `/braendstof`, ikke dybere svar.
+
+**Rækkevidde, målt ikke antaget:** `src/app/braendstof/page.tsx` (ét `<h2>` +
+to `<p>` + én tabel + ét `<p>` i den `locale === "da"`-gren og to række-opslag
+øverst), `src/lib/page-data.ts` (tre nye konstanter + to `faqItems` i den
+danske blok) og **én ny testfil**. `src/lib/braendstof.ts` er **urørt** — ingen
+eksisterende beregning, konstant eller eksport er ændret. `se` og `no` urørte,
+ingen `<title>`, ingen `metaDescription`, ingen URL, ingen sitemap.
+
+**Harness: 2.710 tests / 175 filer (fra 2.705 / 174), de 5 nye i
+`braendstof-diesel.test.tsx`.** Gate grøn: lint (593 filer), **2.710 tests /
+175 filer**, `npm run build` (grøn), `locale-leak.mjs --gate` exit 0 (130
+filer / 734 kandidater / 699 døde / 35 kræver øjne / **0 ureviewet**).
+
+- ⏳ **VERIFICÉR DEPLOY: C173 — `/braendstof` skal have et nyt `<h2>` "Hvorfor
+  er diesel dyrere end benzin?" med pr. liter/pr. km-splittet og en 500
+  km-tabel (450 kr./0,90 kr. pr. km mod 356 kr./0,71 kr. pr. km), og to nye
+  FAQ-par.** Kode + plan i ét squash-commit på `ceo/braendstof-diesel`.
+  Første kandidatvindue **2026-09-29 12:30** (merge sker efter 07:30-batchen).
+  Kun `src/app/braendstof/page.tsx`, `src/lib/page-data.ts` og den nye
+  `src/app/braendstof/braendstof-diesel.test.tsx` er rørt — **ingen
+  beregningslogik, `braendstof.ts` urørt, ingen titel/description, ingen URL,
+  ingen sitemap, `se` og `no` urørte**. Verificér ved **indhold, ikke HTTP
+  200** (17.024 v, CTR 1,1 %, pos. 5,9):
+  1. `https://minberegner.dk/braendstof` skal have
+     `<h2>Hvorfor er diesel dyrere end benzin?</h2>` **præcis 1** gang, og
+     "dyrere end benzin" skal have mindst **3** forekomster (overskrift + 2
+     FAQ).
+  2. Samme side skal finde `33,3` (benzinliter), `450` (benzinkroner),
+     `27,8` (dieselliter), `356` (dieselkroner), `0,90`, `0,71` og `94` —
+     alle med **komma**, dansk tusindtalsseparator er punktum. Tælles på hele
+     siden, ikke kun i tabellen.
+  3. JSON-LD skal have **9** `"@type":"Question"` (var 7). Et `<script>` med
+     7 betyder at FAQ'en ikke kom med.
+  4. **KONTROL mod at dansk ikke lækkede:** `https://beraknare.se/braendstof`
+     skal finde **0** "dyrere end benzin", **0** "dyrere än bensin" og **0**
+     "CO2-afgiften", og skal stadig have "Bensin vs. diesel vs. el".
+  5. `https://beraknare.no/braendstof` skal finde **0** "dyrere end benzin"
+     (norsk arm urørt).
+  6. **KONTROL mod at siden ellers er uændret:** `<title>` skal fortsat være
+     "Brændstofberegner: 500 km benzin koster 450 kr." på begge domæner, og
+     `/braendstof` skal have **uændret** antal FAQ-par i den svenske blok (7).
+  7. `npm run test -- src/app/braendstof` skal give **13 passed** (8 fra
+     `page.test.tsx` + 5 fra `braendstof-diesel.test.tsx`) — tjek især den
+     svenske arm, den er testens negative.
+  8. `node scripts/locale-leak.mjs --gate` skal exit 0 med **0 ureviewet**.
+  9. `https://minberegner.dk/api/health` → `status: ok`.
