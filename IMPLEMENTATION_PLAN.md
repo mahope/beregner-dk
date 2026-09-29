@@ -1,4 +1,5 @@
-STATUS: KØ — **C155 er landet: `/tidszone` (24.209 visninger, CTR 0,4 %, pos. 7,5 — sitets fjerdestørste danske GSC-side) svarede på *nul af* sin egen søgeklynge: dansk autocomplete under "tidsforskel" har Grønland som nr. 1 og under "tidszoner" som nr. 13, og landetabellen havde hverken Grønland eller Nuuk — selv om `Nuuk` allerede lå i `TIDSZONER` med en kildeført IANA-begrundelse.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den, 119 er kilde-blokeret), og de syv åbne noter (C114, C115, C118–C123) har første vindue **2026-09-29 07:30** — det var 01:16, så intet kunne verificeres. Valget kom af at **måle paritet på de fem resterende svenske GSC-sider** videre: `/moms` og `/nedtaelling` og `/elberegner` var lukket i C123/C122/C154, og de tre sidste målinger viste `/bil` i paritet (3.248/6/4 mod 3.257/6/4) — så i stedet for lappe en svensk asymmetri gik målingen på **den fjerdestørste danske side, der lå på første side med under 0,5 % CTR**. **Målt først (DA-autocomplete 01:20):** "tidsforskel" → grønland, japan, kreta, thailand, bali danmark, japan danmark, tyrkiet, grækenland, new york, danmark usa, danmark grønland, danmark tyrkiet, grækenland, beregner, bali, kreta danmark; "tidszoner" → kort, usa, europa, verden, beregner, europa kort, rusland, australien, canada, i kina, danmark, usa kort, **grønland**, canada kort, frankrig. På den **live** side (4.420 ord, 8 `<h2>`) var `Grønland` **2 fund** (kun i bytabellen og i én sætning), og **"New Zealand", "Rusland" og "Europa" stod 0 gange**. **Rettelsen (begge sprog).** Ét nyt land i `TIDSSKILLNADS_LANDE`: **Grønland**, med byen Nuuk. Forskellen er **4 timer bagud hele året** — ikke en konstant gætning, men `brugerSommertid(America/Nuuk)` + de to danske offsets, altså samme modultil som bytabellen bruger (C84's krav). Grønland flyttede i marts 2023 fra UTC-4 til UTC-3 (WGT/WGST) på **EU's skiftedatoer**, så zone og Danmark flytter sig samtidig, og derfor udelades sommerværdien. Landetabellen går **10 → 11 rækker i begge sprog**. **To fejl fundet i min egen rettelse, begge fordi jeg rettelserne på *målingen* i stedet for på *koden* — og det er den samme klasse som målefejl 9-29, nu i min egen nye tekst.** (1) **Jeg ville også føje Canada til.** Autocomplete har "tidszoner canada" (nr. 9 og 14), og `Toronto` lå allerede i `TIDSZONER` — så det så ud til at være samme sag som Grønland. Det er det **ikke**: Toronto skifter sommertid på nordamerikanske datoer, ikke EU's, så forskellen er 6 timer bagud det meste af året men **5 i de to uger omkring forårsskiftet og den ene uge omkring efterårsskiftet**. `brugerSommertid` kan ikke se den forskel, så tabellen ville have vist "6 timer bagefter / Samme som vintertid" og været **forkert i tre uger om året**. Canada er derfor **bevidst udeladt**, med begrundelsen skrevet i koden. Rusland og Europa er udeladt af samme grund: Moskva ligger ikke i `TIDSZONER`, så en offset ville være gættet. (2) **Min egen sætning løj om fire lande.** Jeg lod den indledende sætning ("… følger Danmark") udlede af `sommer === undefined`, altså af *harzone sommertid* — og fik da "Storbritannien, USA, **Grønland**, Grækenland, Spanien, **Australien og New Zealand** følger Danmark". USA og Australien har ganske vist sommertid, men på andre datoer, så påstanden er falsk præcis i de overgangsperioder, siden selv advarer om to steder ovenfor. Fundet på **rigtig server**, ikke i en test: testen grønde, fordi den kun testede det, jeg havde ændret. Rettet ved et **eget felt `foelgerEu`** i stedet for at udlede det — forskellen mellem "har sommertid" og "skifter på EU's datoer" er nu eksplicit i typen. **Ingen tal står hårdkodet to steder:** den indledende sætning og "… følger Danmark"-sætningen er begge **genereret af `tidsskillnadRaekker`/`TIDSSKILLNADS_LANDE`** — de skrev bynavne som tekst i JSX, og da Grønland kom i tabellen, kunne sætningen ikke se det. Det er **C84's `metaDescription`-fund i en ny form**: her lå listen i markup, ikke i et meta-felt. **Målefejl nr. 30 (min egen):** min negative lås på "Canada" på hele HTML'en gav **4 fund** — ikke fordi Canada var i tabellen, men fordi `FAQ'en` nævner Canada om Toronto, og den er `vi.mock`'et væk i sidetesten, så låset ville være grønt uanset koden. Rettet til at læse **tabel-`<td>`-rækkerne** i stedet for hele siden. Samme vakuum-grønne fælde som C94's negative lås og C115's test, der genbyggede det udtryk den skulle fange. **Harness:** `tidszone-eksempler.test.ts` **13 → 16** (Grønland er 4 timer bagud med Nuuk's egne `utcVinter`/`utcSommer` læst af modulet, Canada udeladt både som land og som by, og `foelgerEu`-låsen der skelner fire EU-lande fra fire som-har-sommertid-uden-følger); `tidszone/page.test.tsx` **11 → 13** (landetabellen viser Grønland + "4 timer bagefter" + ingen Canada-*række*, og **sætningen mellem lande-overskriften og dens tabel skal navngive præcis de byer, tabellen renderer** — den lås er den der gør glide-fra-hinanden umulig). **Verificeret modsvejs: alle 5 nye tests falder** med master's to kildefiler. **Gate grøn:** lint (**579 filer**), **2.548 tests / 166 filer** (fra 2.543 / 166), build (**141 sider**). Målt på rigtig server (port 3721, verificeret fri *inden* start): DA "For London, New York, **Nuuk**, Athen, … og Auckland", "**Storbritannien, Grønland, Grækenland og Spanien** følger Danmark", Grønland-række + "4 timer bagefter" fundet; SE "För London, New York, **Nuuk**, …" og "Storbritannien, Grønland, **Grekland** och Spanien följer Sverige", **0** fund på "Danmark"/"Grækenland"/"Tyrkiet". Kode + plan i ét commit på `ceo/tidszone-land`. **MÅL:** `/tidszone` DA baseline **24.209 visninger / 106 klik / CTR 0,4 % / pos. 7,5** (søgninger: "tidszoner" 725 v pos. 9, "hvad er klokken i usa når den er 12 i danmark" 177 v pos. 6, "tidszoner beregner" 103 v pos. 3, "tidsforskel" 87 v pos. 10) pr. **2026-08-29 → 2026-09-26** — måles igen **2026-10-12**. Forventningen er nye lange haler på "tidsforskel grønland", ikke flere visninger på hovedtermen. **Næste kandidater:** `/renteberegner` SE (2.849 v, pos. 24,1 — C85 var kun `da`), `/braendstof` SE (1.677 v, pos. 12,9 — C94 var kun `da`), `/kalorier` SE (2.703 v, pos. 18,8 — C89 var kun `da`).
+STATUS: KØ — **C156 er landet: sitets dårligst-bouncede artikel uden for forsiden — `/blog/barsel-2026-regler-og-satser`, 184 besøgende/28d på **85 % bounce** — svarede på *nul af* de tre situationer, der gør barsel anderledes end standardmodellen. Målt på den live side: `tvilling` **0**, `flerling` **0**, `indlæggelse` **0**, `adoption` **0**, `funktionær` **0** forekomster i 103 KB HTML og 3.848 ord.** Køen var tom (155 opgaver færdige, 98 afhænger af den `BLOCKED`-mærkede 97, 119 er kilde-blokeret), og de **ni** åbne deploy-noter (C114, C115, C118–C123, C155) har alle første vindue **2026-09-29 07:30** — det var 01:51, så intet kunne verificeres, og ingen blev rørt. Missionen har selv navngnet siden ("Blogindlæg har høj bounce … 85 %"), men C107 behandlede `/barselsdagpenge`-**siden**, ikke bloggen, så den lå urørt. **Målt først:** DA-autocomplete (01:53) under **"barsel 2026"** har "barsel **tvillinger** 2026" som **nr. 3** og "barsel fordeling 2026" som nr. 9; under **"barsel regler"** ligger "barselsregler **tvillinger**" som **nr. 5** og "barselsregler funktionærloven" som nr. 10; under **"barselsorlov**" ligger "barselsorlov **tvillinger**" som nr. 10. "barsel **indlæggelse**" har **ti** variationer, halvtallet om far/mor. Så det er tre ubesvarede klynger på én side, ikke én. **Og reglerne lå allerede i repoet:** `src/lib/barsel/regler.ts` cite'r § 14 a, § 14 og § 8/§ 21 med tal, og `docs/barsel/regler-2026.md` § 3.7–3.9 har dem udfoldet med lovhenvisninger — artiklen og motoren var bare ikke forbundet. **Rettelsen er tre nye afsnit + tre nye FAQ-par (4 → 7), kun `da`:** "Tvillinger og flerlinger: 13 ekstra uger hver" med tabellen 24 mod 24+13=37 og regnestykket **5.085 × 13 = 66.105 kr.**, "Når barnet er indlagt: op til 52 ugers forlængelse" med 46-uge-vinduet og **begge** loftgrænser, og "Adoption: 24 uger pr. adoptant" med den femrækkede tabel og eneadoptantens 46. **Ingen tal skrevet i hånden:** nyt `src/lib/barsel/special.ts` med `flerling()`, `adoption()` og `indlaeggelse()`, der alle læser af `REGLER`/`BARSEL_2026` — altså samme konstanter motoren bruger, så artiklen ikke kan glide fra planlæggeren (C84's krav). To **nye** lovkonstanter er lagt ind i `regler.ts` med §-citation: `indlaeggelseVindueUger: 46` (§ 14 stk. 2) og `flerlingFristUger: 52` (§ 14 a stk. 6) — de lå i dokumentationen men ikke i koden. **To fejl i min egen kode, begge fundet fordi jeg renderer siden og læser den synlige tekst, ikke fordi testene faldt.** (1) `ekstraUger()` delte input med 7, altså behandlede *uger* som *dage* — så 60 uger indlæggelse gav 9 i stedet for 52. Feltet er uger, præcis som `BarselsPlan.indlaeggelsesUger` og `indlaeggelsesUgerTilladt` bruger det; konverteringen er fjernet. (2) Brødteksten skrev `5085 kr.` uden tusindtalsseparator og `2026-01-01` råt for en dansk læser — **og min test låste den første fejl fast**, fordi den genbyggede `{BARSEL_2026.maxWeeklyRate}` præcis som koden gjorde. Samme vakuum-grønne fælde som C115's `//dage-til//` og C118's unionstest. Rettet til `maxWeeklyRate`/`formatDato`, og begge tests har nu et **negativt** krav (`not.toContain("5085 kr. × ")` og `not.toContain("2026-01-01")`), så fejlen ikke kan komme tilbage. Modulet leverer `nyRegelDato` = "1. januar 2026" ved siden af ISO-datoen, præcis som C84's "12 byer"-fund. **Harness:** `special.test.ts` **ny med 18** (krydsmod lovens *invarianter*, ikke tre dato-par: at 13 ikke kan ganges med antal børn, at adoptionens 6+18=24 er præcis `afterBirthWeeks`, at skæringsdatoen er eksakt 1/1-2026 så 31.12.2025 → 13 og 1.1.2026 → 52, og at negative uger giver 0), `page.test.tsx` **ny med 10** — **modsvejs verificeret: 9 af 10 falder** med master's `page.tsx`; den tiende er "de eksisterende satser er urørte", som skal være grøn begge veje. Målt på rigtig server (`next start`, port 3799 verificeret fri *inden* start — målefejl nr. 15's lære): **200**, 103.221 → 118.059 bytes, 11 → 15 `<h2>`, 3.848 → 5.384 ord, `Tvillinger og flerlinger` ×2, `13 ekstra uger` ×4, `uanset antallet af børn` ×4, `31. december 2025` og `1. januar 2026` ×2, `52 uger pr. forælder` ×4, `13 uger i alt` ×4, `LBK nr. 206` ×2, JSON-LD `Question` **4 → 7**, canonical + titel uændret, `/api/health` → `status: ok`. **Målt og bevidst ikke bygget:** "barselsregler **funktionærloven**" (autocomplete nr. 10, 10 variationer under "barsel funktionær") er en **anden lov** end barselsloven og uden kilde i repoet, så der står intet tal om den — se ❓ Til Mads. "barsel udland"/"barselsorlov sverige" er EU-regler, også uden kilde. **MÅL:** `/blog/barsel-2026-regler-og-satser` baseline **184 besøgende/28d, bounce 85 % pr. 2026-09-28** — måles igen **2026-10-12**; forventningen er først en **bounce-fald** (den får nu svar på det den søger efter) og derefter CTR på "barsel tvillinger 2026" og "barselsregler tvillinger". Gate grøn: lint (**582 filer**), **2.576 tests / 168 filer** (fra 2.548 / 166), build (**141 sider**). Kode + plan i ét commit på `ceo/barsel-flerlinger-indlaeggelse`; se opgave 156.
+
 
 ---
 
@@ -14522,3 +14523,106 @@ Nuuk i sætningen, korrekt EU-landeliste, ingen dansk lækage i SE.
   4. KONTROL: `https://beraknare.se/tidszone` skal have samme række, og
      **0** fund på "Danmark", "Grækenland" og "Tyrkiet" (C73's R4).
   5. `https://minberegner.dk/api/health` skal svare `status: ok`.
+
+#### 156. [x] FÆRDIG 2026-09-29 — C156 — **`/blog/barsel-2026-regler-og-satser` (184 besøgende/28d, 85 % bounce) svarer på de tre situationer, der gør barsel anderledes: tvillinger, indlæggelse og adoption**
+
+**Datagrund:** Plausible 28d til 2026-09-28: **184 besøgende, bounce 85 %** —
+sitets dårligst-bouncede artikel uden for forsiden (37 %), og den eneste blog
+der er nævnt i Fase 3's målinger endnu ikke var en opgave. DA-autocomplete
+(2026-09-29 01:53): "barsel **tvillinger** 2026" nr. 3 under "barsel 2026",
+"barselsregler **tvillinger**" nr. 5 under "barsel regler", "barselsorlov
+**tvillinger**" nr. 10, "barsel **indlæggelse**" med 10 variationer.
+
+**Målt på den live side (før):** `tvilling` 0, `flerling` 0, `indlæggelse` 0,
+`adoption` 0, `funktionær` 0 forekomster i 103.221 bytes / 3.848 ord / 11 `<h2>`
+/ 4 FAQ-spørgsmål.
+
+**Rettelsen (kun `da`).** Tre nye `<h2>` + tre nye FAQ-par (**4 → 7**):
+
+| Afsnit | Kernen |
+|---|---|
+| Tvillinger og flerlinger: 13 ekstra uger hver | 13 uanset antal børn; 24 → 37; 5.085 × 13 = 66.105 kr.; 52-uge-frist; 13 til en nærtstående |
+| Når barnet er indlagt: op til 52 ugers forlængelse | 46-uge-vinduet; 52 uger fra 1. januar 2026, 13 uger før |
+| Adoption: 24 uger pr. adoptant | 4/1 uge før; 6 (4 overdragelige) + 18; eneadoptant 46 |
+
+**Ingen tal hårdkodet to steder:** nyt `src/lib/barsel/special.ts` læser alle tal
+af `REGLER`/`BARSEL_2026` — samme konstanter `src/lib/barsel/regler.ts` bruger
+i `rettigheder()`. To nye lovkonstanter lagt ind med §-citation:
+`indlaeggelseVindueUger: 46` (§ 14 stk. 2) og `flerlingFristUger: 52`
+(§ 14 a stk. 6) — de stod i `docs/barsel/regler-2026.md` men ikke i koden.
+
+**To fejl i min egen kode, fundet ved at læse den synlige tekst:**
+
+1. `ekstraUger()` delte input med 7 og behandlede dermed **uger som dage** —
+   60 uger indlæggelse gav 9 i stedet for 52. Konverteringen er fjernet; feltet
+   er uger, som `BarselsPlan.indlaeggelsesUger` og `indlaeggelsesUgerTilladt`.
+2. Brødteksten skrev `5085 kr.` og `2026-01-01` råt — **og min test låste fejl 1
+   fast**, fordi den genbyggede udtrykket præcis som koden. Vakuum-grøn samme
+   klasse som C115's `//dage-til//` og C118's unionstest. Rettet til
+   `maxWeeklyRate` og `formatDato`; modulets `nyRegelDato` leverer
+   "1. januar 2026" ved siden af ISO-datoen (C84's "12 byer"-fund). Begge
+   tests har nu et negativt krav mod den råe form.
+
+**Harness:** `special.test.ts` ny med **18** tests, krydsmod lovens
+invarianter (13 kan ikke ganges med antal børn; adoptionens 6+18 = 24 =
+`afterBirthWeeks`; skæringsdatoen eksakt 1/1-2026 så 31.12.2025 → 13 og
+1.1.2026 → 52; negative uger → 0). `page.test.tsx` ny med **10** —
+**modsvevs verificeret: 9 af 10 falder** med master's `page.tsx`; den tiende
+er "de eksisterende satser er urørte", korrekt grøn begge veje.
+
+**Målt på rigtig server** (`next start`, port 3799 verificeret fri *inden*
+start): 200, 103.221 → 118.059 bytes, 11 → 15 `<h2>`, 3.848 → 5.384 ord,
+`13 ekstra uger` ×4, `uanset antallet af børn` ×4, `52 uger pr. forælder` ×4,
+`13 uger i alt` ×4, `31. december 2025` ×2, `1. januar 2026` ×2,
+`LBK nr. 206` ×2, JSON-LD `Question` **4 → 7**, canonical/titel uændret,
+`/api/health` → `status: ok`.
+
+**Målt og bevidst ikke bygget:** "barselsregler funktionærloven" (autocomplete
+nr. 10, 10 variationer under "barsel funktionær") er en anden lov end
+barselsloven og uden kilde i repoet — intet tal er skrevet. "barsel udland" /
+"barselsorlov sverige" er EU-regler, samme grund.
+
+**Gate grøn:** lint (**582 filer**), **2.576 tests / 168 filer** (fra
+2.548 / 166), build (**141 sider**). Kode + plan i ét squash-commit på
+`ceo/barsel-flerlinger-indlaeggelse`.
+
+- ⏳ **VERIFICÉR DEPLOY: C156 — `/blog/barsel-2026-regler-og-satser` svarer på
+  tvillinger, indlæggelse og adoption med de tre nye `<h2>` og tre nye
+  FAQ-par (4 → 7).** Kode + plan i ét commit på
+  `ceo/barsel-flerlinger-indlaeggelse`, squashet til `master`. Første
+  kandidatvindue **2026-09-29 12:30**. Kun `src/app/blog/barsel-2026-regler-og-satser/page.tsx`,
+  det nye `src/lib/barsel/special.ts`, to nye konstanter i `src/lib/barsel/regler.ts`
+  og to nye testfiler er rørt — **ingen beregningslogik ændret, `motor.ts` urørt,
+  `satser-2026.ts` urørt, ingen anden side rørt, ingen ny URL, sitemap uændret**.
+  Verificér på **https://minberegner.dk/blog/barsel-2026-regler-og-satser** ved
+  **indhold, ikke HTTP 200**:
+  1. `curl -s <URL> | grep -c 'Tvillinger og flerlinger'` skal være ≥ 1 (var **0**
+     forekomster på "tvilling" overhovedet).
+  2. Samme curl skal finde `5.085 kr. × 13 uger = 66.105 kr.`, `uanset antallet af
+     børn`, `inden for de første 46 uger` og `52 uger pr. forælder` (var alle 0).
+  3. `31. december 2025` og `1. januar 2026` skal begge stå, og `2026-01-01` skal
+     give **0** fund — det er den råe ISO-form, målefejl nr. 31.
+  4. JSON-LD skal have **7** `Question` (var 4).
+  5. KONTROL: `https://minberegner.dk/barselsdagpenge` og `/barselsplanlaegger`
+     skal være uændrede 200, og `https://minberegner.dk/api/health` skal svare
+     `status: ok`.
+
+### ❓ Til Mads — en kilde til funktionær-barsel (ny i C156)
+
+`/blog/barsel-2026-regler-og-satser` (184 besøgende/28d) svarer nu på tvillinger,
+indlæggelse og adoption. Den fjerde store autocomplete-klynge på samme side er
+**ikke** besvaret: "barselsregler funktionærloven" er **nr. 10** under "barsel
+regler", og "barsel funktionær" har **ti** variationer ("funktionærloven mor",
+"funktionæroverenskomst", "funktionærloven løn mand", …).
+
+**Hvorfor jeg ikke har bygget den:** funktionærers orlov står i
+**funktionærloven**, ikke i barselsloven, og repoet har ingen kilde til den —
+`src/lib/barsel/regler.ts` cite'r kun LBK 206/2026. Uden en verificeret
+kilde ville jeg skrive et ugernummer om løn, ferie og opsparing for en
+funktionær, hvilket er værre end at svare intet. Samme grund for
+"barsel udland" og "barselsorlov sverige" (EU-regler).
+
+**Hvad der skal til for at lukke den:** en kildeliste til
+funktionærloven § 12 (funktionæroverenskomstens orlov) — borger.dk,
+retsinformation.dk og en faglig oversigt over forskellene mod
+barselsloven. Er den kilde til stede, er det én iteration.

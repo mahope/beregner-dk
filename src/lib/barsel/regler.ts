@@ -45,6 +45,10 @@ export const REGLER = {
   indlaeggelseMaksUger: 52,
   indlaeggelseMaksUgerFoer2026: 13,
   indlaeggelseNyRegelFra: "2026-01-01",
+  // § 14, stk. 2: the hospitalisation must happen within the first 46 weeks
+  indlaeggelseVindueUger: 46,
+  // § 14 a, stk. 6: flerlingeorlov must be taken within 1 year of the birth
+  flerlingFristUger: 52,
   // § 21, stk. 1: benefit weeks must be used within 1 year
   fristUger: 52,
   // § 21 d: weeks beyond 52 may be used until 16 months after birth

@@ -3,12 +3,23 @@ import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
 import { BARSEL_2026 } from "@/lib/satser-2026";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
+import {
+  adoption,
+  flerling,
+  flerlingUgevaerdi,
+  indlaeggelse,
+} from "@/lib/barsel/special";
 
 const maxWeeklyRate = BARSEL_2026.maxWeeklyRate.toLocaleString("da-DK");
 const maxHourlyRate = BARSEL_2026.maxHourlyRate.toLocaleString("da-DK", {
   minimumFractionDigits: 2,
   maximumFractionDigits: 2,
 });
+
+const f = flerling();
+const a = adoption();
+const ind = indlaeggelse();
+const flerlingPris = flerlingUgevaerdi().toLocaleString("da-DK");
 
 export async function generateMetadata(): Promise<Metadata> {
   const dc = await getCurrentDomainConfig();
@@ -25,6 +36,11 @@ export async function generateMetadata(): Promise<Metadata> {
       "barsel far 2026",
       "barsel mor 2026",
       "barselsdagpenge sats",
+      "barsel tvillinger 2026",
+      "barselsregler tvillinger",
+      "barsel flerlinger",
+      "barsel indlæggelse",
+      "barsel adoption",
     ],
     openGraph: {
       title: "Barsel 2026: Sats, orlov og overdragelse",
@@ -56,6 +72,18 @@ const faqItems = [
   {
     question: "Hvornår skal jeg søge om barselsdagpenge?",
     answer: `Hvis du får løn under barsel, skal du som udgangspunkt søge senest ${BARSEL_2026.applicationDeadlineWeeks} uger efter, at lønnen stopper. Hvis mor ikke får løn og holder mindst ${BARSEL_2026.motherBeforeBirthWeeks} uger før fødslen, er fristen ${BARSEL_2026.applicationDeadlineWeeks} uger efter fødslen. Far/medmor skal søge senest ${BARSEL_2026.applicationDeadlineWeeks} uger efter første orlovsdag. En for sen ansøgning giver som udgangspunkt først ydelse fra den dag, Udbetaling Danmark modtager ansøgningen.`,
+  },
+  {
+    question: "Hvor mange uger får man ved tvillinger?",
+    answer: `Hver forælder får ${f.ekstraUgerPrForaelder} ekstra uger med barselsdagpenge, så I har ${f.totalUgerPrForaelder} uger hver i stedet for ${BARSEL_2026.afterBirthWeeks}. Det er ${f.ekstraUgerPrForaelder} uanset antallet af børn — tre børn giver ikke 3 gange ${f.ekstraUgerPrForaelder} uger. Ugerne er ikke øremærkede og skal holdes inden for det første år.`,
+  },
+  {
+    question: "Hvad hvis barnet er indlagt på hospitalet?",
+    answer: `Så forlænges fraværsperioden, hvis indlæggelsen sker inden for de første ${ind.vindueUger} uger. For børn født fra ${ind.nyRegelDato} er der højst ${ind.maksUger} uger pr. forælder (12 måneder). Før ${ind.nyRegelDato} var loftet ${ind.maksUgerFoer2026} uger i alt (3 måneder). Reglen afgøres efter fødselsdatoen, ikke efter hvornår du søger.`,
+  },
+  {
+    question: "Hvor mange uger får man ved adoption?",
+    answer: `Hver adoptant får ${a.totalUgerPrAdoptant} uger: ${a.tidligeUger} uger i de første 10 uger efter modtagelsen (hvoraf op til ${a.tidligeOverdragelige} kan overdrages til den anden adoptant) og ${a.efterUge10} uger efter uge 10. Det er de samme ${a.totalUgerPrAdoptant} uger som en fødsel giver. En eneadoptant får ${a.totalUgerEnadoptant} uger.`,
   },
 ];
 
@@ -201,6 +229,116 @@ export default function BarselGuidePage() {
         </ul>
         <p>Selvstændige, ledige og studerende har separate regler. Se <a href="https://barselsdagpenge.dk" className="underline">Min barsel</a> for den officielle ansøgning.</p>
 
+        <h2>Tvillinger og flerlinger: {f.ekstraUgerPrForaelder} ekstra uger hver</h2>
+        <p>
+          Får I to eller flere børn ved samme fødsel, får <strong>hver forælder {f.ekstraUgerPrForaelder} ekstra uger</strong> med barselsdagpenge. I alt bliver det {f.totalUgerPrForaelder} uger pr. forælder i stedet for {BARSEL_2026.afterBirthWeeks}.
+        </p>
+        <div className="overflow-x-auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Situation</th>
+                <th>Uger pr. forælder</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Ét barn</td>
+                <td>{BARSEL_2026.afterBirthWeeks} uger</td>
+              </tr>
+              <tr>
+                <td>Tvillinger, trillinger eller flere</td>
+                <td>{BARSEL_2026.afterBirthWeeks} + {f.ekstraUgerPrForaelder} = <strong>{f.totalUgerPrForaelder} uger</strong></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p>
+          <strong>Regnestykket:</strong> {maxWeeklyRate} kr. × {f.ekstraUgerPrForaelder} uger = {flerlingPris} kr. før skat, hvis I begge er på den maksimale sats.
+        </p>
+        <p>
+          Der er tre ting, der ofte misforstås ved flerlinger:
+        </p>
+        <ul>
+          <li>
+            <strong>Det er {f.ekstraUgerPrForaelder} uanset hvor mange børn.</strong> Tre børn giver præcis det samme ekstra som to — ikke 3 × {f.ekstraUgerPrForaelder}.
+          </li>
+          <li>
+            <strong>Ugerne er ikke øremærkede.</strong> De kan bruges frit af den forælder, der tager dem, og skal holdes inden for det første år ({f.fristUger} uger).
+          </li>
+          <li>
+            <strong>En soloforælder kan give dem videre.</strong> Er du alene med børnene, kan du tildele en nærtstående eller social forælder op til {f.tilNaertstaaendeMaks} af ugerne.
+          </li>
+        </ul>
+
+        <h2>Når barnet er indlagt: op til {ind.maksUger} ugers forlængelse</h2>
+        <p>
+          Bliver barnet indlagt på hospital — eller i tidligt hjemmeophold — kan fraværsperioden forlænges. Det gælder både hvis I ikke genoptager arbejdet, og hvis I gør det: så udsættes den resterende orlov til efter udskrivningen.
+        </p>
+        <ul>
+          <li>
+            <strong>Indlæggelsen skal ske inden for de første {ind.vindueUger} uger</strong> efter fødslen, ellers giver det ikke længere tid.
+          </li>
+          <li>
+            <strong>Børn født fra {ind.nyRegelDato}: højst {ind.maksUger} uger pr. forælder</strong> — svarende til 12 måneder.
+          </li>
+          <li>
+            <strong>Før {ind.nyRegelDato}: højst {ind.maksUgerFoer2026} uger i alt</strong> (3 måneder). Det er den gamle regel, som mange tekster stadig skriver.
+          </li>
+          <li>Genoptager I arbejdet, skal barnet udskrives inden {ind.udskrivningSenestUger} uger.</li>
+        </ul>
+        <p>
+          Reglen skelner altså på <strong>fødselsdatoen</strong>, ikke på hvornår I søger. Et barn født 31. december 2025 følger de gamle 3 måneder, mens et barn født 1. januar 2026 får de fulde 12 måneder.
+        </p>
+
+        <h2>Adoption: {a.totalUgerPrAdoptant} uger pr. adoptant</h2>
+        <p>
+          Bliver I adoptant, har I de samme {a.totalUgerPrAdoptant} uger som forældre efter en fødsel — men de ligger anderledes i forhold til barnets ankomst.
+        </p>
+        <div className="overflow-x-auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Periode</th>
+                <th>Uger pr. adoptant</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Før modtagelse, adoption fra udlandet</td>
+                <td>{a.ugerFoerModtagelseUdland} uger</td>
+              </tr>
+              <tr>
+                <td>Før modtagelse, adoption i Danmark</td>
+                <td>{a.ugerFoerModtagelseDanmark} uge</td>
+              </tr>
+              <tr>
+                <td>Første 10 uger efter modtagelse</td>
+                <td>{a.tidligeUger} uger, hvoraf op til {a.tidligeOverdragelige} kan overdrages</td>
+              </tr>
+              <tr>
+                <td>Efter uge 10</td>
+                <td>{a.efterUge10} uger</td>
+              </tr>
+              <tr>
+                <td><strong>I alt</strong></td>
+                <td>{a.tidligeUger} + {a.efterUge10} = <strong>{a.totalUgerPrAdoptant} uger</strong></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p>
+          <strong>En eneadoptant får {a.totalUgerEnadoptant} uger.</strong> Det er de {a.tidligeUger} + {a.efterUge10} uger plus de 22 ekstra uger, der gælder for en forælder alene med barnet. Ud af de {a.efterUge10} uger efter uge 10 er {a.oeremaerketUger} øremærkede, hvis du er lønmodtager.
+        </p>
+        <p>
+          Børnene skal være under 1 år ved modtagelsen. Er I to adoptanter, kan op til {a.tidligeOverdragelige} af de {a.tidligeUger} tidlige uger overdrages til den anden — de resterende {a.tidligeUger - a.tidligeOverdragelige} er ikke overdragelige.
+        </p>
+        <p>
+          Kilde til alle tre afsnit: <a href={f.kilde} className="underline">Barselsloven, LBK nr. 206 af 22. januar 2026</a> — § 14 a om flerlinger, § 14 om indlæggelse og § 8 og § 21 om adoption.
+        </p>
+
+        <h2>Sådan lægger I planen</h2>
+
         <h2>Vigtige frister</h2>
         <ul>
           <li>Hvis du får løn under barsel: søg senest {BARSEL_2026.applicationDeadlineWeeks} uger efter, at lønnen stopper.</li>
@@ -222,7 +360,7 @@ export default function BarselGuidePage() {
 
         <h2>Planlægning af barsel</h2>
         <ul>
-          <li><strong>Planlæg tidligt:</strong> Lav en barselsplan med din partner og arbejdsgiver – fx i vores <Link href="/barselsplanlaegger" className="text-blue-600 hover:underline">barselsplanlægger</Link>, der viser uger, frister og økonomi.</li>
+          <li><strong>Planlæg tidligt:</strong> Lav en barselsplan med din partner og arbejdsgiver – fx i vores <Link href="/barselsplanlaegger" className="text-blue-600 hover:underline">barselsplanlægger</Link>, der viser uger, frister og økonomi. Den kan også regne på flerlinger, indlæggelse og adoption.</li>
           <li><strong>Tjek overenskomsten:</strong> Den aftaler, om du har løn under barsel.</li>
           <li><strong>Fordel øremærket orlov:</strong> Reserver de {BARSEL_2026.earmarkedWeeks} uger til den rigtige forælder.</li>
           <li><strong>Beregn økonomien:</strong> Brug vores <Link href="/barselsdagpenge" className="text-blue-600 hover:underline">barselsdagpenge-beregner</Link> som et vejledende estimat.</li>
