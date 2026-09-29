@@ -676,6 +676,40 @@ describe("metadata snippets do not waste the SERP (C164)", () => {
   }
 });
 
+describe("snippet descriptions fit the SERP (C193)", () => {
+  // C193 measured every page in both sitemaps and found 22 metaDescription
+  // strings over the 160-character limit the rest of this file already used —
+  // the longest was 202. The rule existed, but it only ran inside
+  // hand-picked `describe` blocks (about 20 slugs), so the other 100+ pages
+  // were never checked. Google truncates the description at roughly this
+  // length, so on those 22 pages the tail of the answer was cut in the
+  // snippet.
+  //
+  // This test is the general form: it runs over every slug in every locale,
+  // so the next page that is added cannot silently bring the class back.
+  // It also locks its own scope, because 0 offenders is also what a check
+  // that reads nothing would report.
+  for (const locale of ["da", "no", "se"] as const) {
+    test(`${locale}: every metaDescription fits in 160 characters`, () => {
+      const offenders: string[] = [];
+
+      for (const slug of getAvailableSlugs(locale)) {
+        const data = getPageData(slug, locale);
+        if (!data) continue;
+
+        if (data.metaDescription.length > 160) {
+          offenders.push(`${slug} (${data.metaDescription.length})`);
+        }
+      }
+
+      expect(getAvailableSlugs(locale).length).toBeGreaterThan(25);
+      expect(offenders, `description too long: ${offenders.join(", ")}`).toEqual(
+        []
+      );
+    });
+  }
+});
+
 describe("getAvailableSlugs", () => {
   test("DA has the most slugs (all calculators)", () => {
     const da = getAvailableSlugs("da");

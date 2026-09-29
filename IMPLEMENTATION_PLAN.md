@@ -76,6 +76,69 @@ STATUS: KØ — **C190 er landet: beraknare.se `/renteberegner` — sidens tredj
 
 **MÅL:** `/renteberegner` SE baseline **2.871 visninger / 3 klik / CTR 0,1 % / pos. 23,5** (GSC 2026-08-30 → 09-27); DA uændret **13.416 v / 114 klik / CTR 0,8 % / pos. 7,4**. Plausible: SE `/renteberegner` har ikke sin egen linje i top-15, så **GSC er den eneste baseline for denne side**. Genmåles **2026-10-13**. **Forventningen er ærlig:** en position på 23,5 med 2.871 visninger er et *ranking*-problem før det er et indholdsproblem, og den her rettelse kan højst flytte siden op et par pladser på de søgninger den nu svarer på. Det der *kan* læses af rettelsen er, at beraknare.se nu svarer på sin egen største söklingn i stedet for at være tavs om den. Hvis CTR'en efter 14 dage er uændret under 0,2 %, er hypotesen "indholdet forklarede den lave CTR" **modbevist**, og næste spørgsmål er hvorfor `/renteberegner` står så langt nede i Sverige når `/laaneberegner` (samme værktøj) ikke gør det.
 
+STATUS: KØ — **C193 er landet: 22 `metaDescription`s brød repoets *egen* 160-tegns-regel, den længste med 202 — og reglen blev aldrig håndhævet, fordi den kun kørte inde i ~20 håndplukkede `describe`-blokke. `/befordringsfradrag` (202), `/rentefradrag` (189), `/boligsalg` (189), `/ejendomsvaerdiskat` (188) og `/boernepenge` (182) havde alle svaret i den halvdel af teksten, Google klipper væk.**
+
+Køen havde ingen `I GANG`-opgave (98 afhænger af den `BLOCKED`-mærkede 97, 119 er kilde-blokeret, 179 kræver en rigtig browser), og de tre åbne deploy-noter (C189, C190, C192) har første vindue **21:30** — det var 18:56 ved starten, så ingen blev rørt.
+
+**Først blev fire hele klasser målt og lukket med et tal, så næste iteration ikke bruger en cyklus på dem.** (1) **Titler over 60 tegn: 0** af 83 danske og 0 af 56 svenske sider. (2) **Strukturel metadata: 0 fund** på 139 sider — pr. side præcis ét `<h1>`, ét `description`, ét `canonical`, ét `og:title`, ét `og:description`, ét `twitter:card`. (3) **FAQ-spørgsmål i JSON-LD men ikke i den server-renderede tekst: 0** på 139 sider. (4) **Bytal der afviger fra `TIDSZONER.length`: 0** — kun 25, i både `description` og `ogDescription` på begge domæner, altså C84's og C188's afdrift er lukket som klasse. **Query-dækning** blev også målt for første gang: **42/53** af beraknare.se's GSC-søgninger findes ordmæssigt i den server-renderede tekst (DA 38/68), og de 11 undtagelser er enten sider på position 51-66 (`/bil`) eller rene formuléringsvarianter. Klassen er lukket.
+
+**Så kom fundet, og det er en *regel der ikke blev håndhævet*, ikke en manglende regel.** `page-data.test.ts` har brugt `toBeLessThanOrEqual(160)` på `metaDescription` siden C81 — men kun inde i håndplukkede `describe`-blokke for omkring 20 slugs. De øvrige 100+ sider blev aldrig læst af den regel. En måling over `getAvailableSlugs()` i alle tre locales fandt **22 brud**: 13 danske (161-202 tegn) og 9 svenske (161-167). Den længste, `/befordringsfradrag` på **202 tegn**, mister 42 tegn — næsten en hel sætning — i snippet'en. `/rentefradrag` (**189**) og `/boligsalg` (**189**) er GSC-sider, `/boernepenge` (**182**) er +116 % i Plausible, `/pension` (**178**) og `/loen-efter-skat` (**177**) er brandværktøjer.
+
+**Rettelsen er at skrive om 22 strenge, ikke at slette. Tal og svar er bevaret; det er *"Gratis beregner."* og *"Perfekt för löneförhandling."* der er væk, og de lå altid i den klippede hale.** `/befordringsfradrag` går fra "Gratis befordringsfradrag beregner for 2026. Beregn dit kørselsfradrag mellem hjem og arbejde. 3,17 kr./km for 25-120 km, 1,59 kr./km over 120 km. Se skattebesparelse. Opdateret med skat.dk 2026-satser." til "Gratis befordringsfradrag 2026: **3,17 kr./km for 25-120 km, 1,59 kr./km over 120 km**. Beregn kørselsfradraget og skattebesparelsen." — satsen er den samme, den flytter bare *frem* i strengen, fordi den var den eneste konkrete oplysning siden havde. **`/husleje` og `/barselsdagpenge` er template-literals, ikke strengliteraler** (henholdsvis `${huslejeSvaer}` og `${BARSEL_2026.maxWeeklyRate}`), så de behøver ingen tallæsning — tallene er fortsat data-afledte.
+
+**Harness: den nye regel er den almindelige form af fundet, ikke 22 håndskrevne forventninger.** Én test pr. locale kører over *alle* slugs i `getAvailableSlugs()` og kræver ≤ 160, så næste side der tilføjes ikke kan bringe klassen tilbage. **Modsvejs verificeret: `da` og `se` falder** med master's `page-data.ts` og navngiver præcis de 22 brud med deres længder; `no` er grøn begge veje fordi den ikke har nogen. Testen låser sit eget omfang (**> 25 slugs pr. locale**), fordi 0 fund ellers også er det resultat en måler der ikke læser noget ville give — målefejl 33's lære. Min første version af den lås krævede 50 og faldt på `no`'s 28 slugs; rettet til den rigtige tærskel pr. locale.
+
+**To målefejl i træk, begge fundet fordi resultaterne var for gode.** (1) Min første query-dækningsmåler brugte *substring* på normaliseret tekst og meldte `/tidszone` og `/kalorier` for "ikke besvaret" — men rå-HTML'en havde strengene. Årsagen var, at jeg skrev søgningerne med tegnsætning, søgeren ikke skriver ("Hvad er klokken i USA, **når** den er 12 i Danmark" med komma), og at sammensætninger ("benzin**beregner**" mod "benzin beregner") ikke kan findes som substring. Rettet til en **ordmæssig** metode, hvor spørgsmålet er besvaret hvis alle indholdsbord findes — samme fejlklasse som C74's regex, der klippede slugs ved et cifte. (2) Min første patch-script Matchede `metaDescription` på **første `slug:`-nøgle efter sidste ændring**, så seks strenge lå i den norske blok i stedet for den danske, og to var slet ikke strengliteraler. Fundet fordi otte af fjortogentrenten meldte "(2 forekomster)" og "(0 forekomster)" — jeg troede det var duplikater, indtil jeg læste at `/husleje` er en template-literal. Skrevet om til eksakt gammel→ny-streng-par, som fejler højtlydt i stedet for at ramme forkert.
+
+**Gate grøn:** lint (**612 filer**), **2.943 tests / 186 filer** (fra 2.940/186), build (**142 sider**), `locale-leak.mjs --gate` **exit 0**, `knapgruppe-scan.mjs` **0/0**. Målt på rigtig bygget server (`next start` :4701, porten verificeret fri *inden* start) med begge `Host:`-headere: **alle 22 sider** serverer den nye beskrivelse under 160 (129-159), `/api/health` `status: ok` på begge domæner, og kontrolsiderne `/procent` (115), `/dato` (118), `/tidsberegner` (141), `/moms` (128), `/boligstoette` (111) og `/alder` (142) er uændrede. Rørte filer: `page-data.ts` (**22 `metaDescription`-strenge**, verificeret med `git diff` at ingen anden linje er rørt) og `page-data.test.ts` (**+34**) — **ingen `<title>`, ingen `<h1>`, ingen FAQ, ingen beregningslogik, ingen URL, ingen sitemap**.
+
+**MÅL:** `/befordringsfradrag` DA, `/rentefradrag` **331 besøgende/28d (+145 %, bounce 4 %)**, `/boligsalg`, `/ejendomsvaerdiskat`, `/boernepenge` **136 besøgende/28d (+116 %, bounce 1 %)**, `/pension` **146 (+28 %)**, `/loen-efter-skat`, `/efterloen`, `/elbil`, `/sparemaal`, `/husleje` **168 (+21 %)**, `/barselsdagpenge` **212 (+56 %)**, `/barselsplanlaegger` samt de ni svenske — alle pr. **2026-09-29**; `/rentefradrag` og `/boernepenge` har ingen GSC-linje, så **Plausible er deres eneste baseline**. Genmåles **2026-10-13**. **Forventningen er ærlig og lille:** en kortere snippet er ikke nye visninger, og de 22 sider var ikke de med dårligst CTR — `/befordringsfradrag` er ikke i GSC's top-16. Det der *kan* læses af rettelsen er, at **den konkrete regel** på `/rentefradrag` (33,6 %, 50.000 kr, 16.800 kr) og `/befordringsfradrag` (3,17/1,59 kr./km) nu ligger i den del af strengen, der vises, i stedet for i den der klippes væk. Hvis `/rentefradrag`s CTR efter 14 dage er uændret, er hypotesen "afkortningen skjulte svaret" **modbevist**.
+
+#### 193. [x] FÆRDIG 2026-09-29 — C193 — **22 `metaDescription`s brød repoets egen 160-tegns-regel (længste 202), fordi reglen kun kørte i ~20 håndplukkede testblokke; titler, struktur, FAQ-dækning og bytal er målt hele vejen og lukket med tal**
+
+- **Datagrund:** måling over alle sider i begge sitemapmer 2026-09-29 19:05-19:15. 22 brud på
+  `getAvailableSlugs()` i alle tre locales — 13 `da` (161-202 tegn), 9 `se` (161-167), 0 `no`.
+  Længst: `/befordringsfradrag` **202**, `/rentefradrag` **189**, `/boligsalg` **189**,
+  `/ejendomsvaerdiskat` **188**, `/boernepenge` **182**, `/pension` **178**, `/loen-efter-skat` **177**,
+  `/barselsplanlaegger` 172, `/barselsdagpenge` 171, `/afkast` 167, `/husleje` 167, `/efterloen` 166,
+  `/1rm` 165, `/motion-kalorier` 165, `/sparemaal` 165/162, `/elbil` 163/164, `/fart` 164,
+  `/loenstigning` 162, `/enheder` 161, `/bolan` 161.
+- **Årsagen er ikke en manglende regel:** `page-data.test.ts` har brugt `toBeLessThanOrEqual(160)`
+  på `metaDescription` siden C81, men kun i håndplukkede `describe`-blokke for ~20 slugs.
+- **Rettelsen:** 22 strenge skrevet om. Tal bevaret og i flere tilfælde flyttet *frem*, så den
+  konkrete oplysning ligger i den synlige del. `/befordringsfradrag` 202 → **129**,
+  `/rentefradrag` 189 → **148**, `/boligsalg` 189 → **156**. Kun "Gratis beregner." /
+  "Perfekt för löneförhandling." er væk. `/husleje` og `/barselsdagpenge` er template-literals
+  (`${huslejeSvaer}`, `${BARSEL_2026.maxWeeklyRate}`), så tallene er fortsat data-afledte.
+- **Harness:** ny `describe("snippet descriptions fit the SERP (C193)")` med **én test pr. locale**
+  over *alle* slugs. **Modsvejs verificeret: `da` og `se` falder** med master's `page-data.ts`
+  og navngiver præcis de 22 brud med længderne; `no` er grøn begge veje. Låser sit eget omfang
+  (> 25 slugs pr. locale), fordi 0 fund ellers også er resultatet af en måler der ikke læser noget.
+- **Fire klasser målt og lukket med tal:** titler > 60 tegn **0/139**; strukturel metadata
+  (h1/description/canonical/og:title/og:description/twitter:card) **0 fund på 139 sider**;
+  FAQ-spørgsmål i JSON-LD men ikke server-renderet **0/139**; bytal ≠ `TIDSZONER.length` **0**.
+  **Query-dækning målt for første gang:** DA **38/68**, SE **42/53** af GSC's egne søginger
+  ordmæssigt i den server-renderede tekst; resten er position 51-66 eller formuléringsvarianter.
+- **To målefejl i mit eget arbejde:** (1) min første query-måler brugte *substring* og skrev
+  søgningerne med tegnsætning, søgeren ikke skriver, så `/tidszone` og `/kalorier` meldte
+  "ubesvaret" selv om rå-HTML'en havde strengene — rettet til ordmæssig match;
+  (2) min patch-script ramte `metaDescription` på første `slug:`-nøgle, så seks strenge lå i den
+  **norske** blok, og to var slet ikke strengliteraler — fundet fordi otte af fjortogentrenten
+  meldte "(2 forekomster)"/"(0 forekomster)", samme fejlklasse som `page-data.ts`'s tre
+  locale-blokke i C80/C190. Skrevet om til eksakt gammel→ny-par.
+- **Gate grøn:** lint (**612 filer**), **2.943 tests / 186 filer** (fra 2.940/186), build
+  (**142 sider**), `locale-leak.mjs --gate` exit 0, `knapgruppe-scan.mjs` 0/0. Målt på `next start`
+  :4701 (port fri *inden* start): alle 22 sider under 160 (129-159), `/api/health` `status: ok`
+  begge domæner, kontroller `/procent` 115, `/dato` 118, `/tidsberegner` 141, `/moms` 128,
+  `/boligstoette` 111, `/alder` 142 uændrede. Rørte filer: `page-data.ts` (22 `metaDescription`-
+  strenge, `git diff` verificerer at ingen anden linje er rørt) + `page-data.test.ts` (+34).
+- **MÅL:** `/rentefradrag` **331 besøgende/28d (+145 %)**, `/barselsdagpenge` **212 (+56 %)**,
+  `/husleje` **168 (+21 %)**, `/pension` **146 (+28 %)**, `/boernepenge` **136 (+116 %)**,
+  `/elbil`, `/sparemaal`, `/efterloen`, `/loen-efter-skat`, `/boligsalg`, `/ejendomsvaerdiskat`,
+  `/befordringsfradrag`, `/barselsplanlaegger` + de ni svenske, pr. **2026-09-29**. Genmåles
+  **2026-10-13**. Forventningen er lille: ingen nye visninger, og de 22 sider er ikke de med
+  dårligst CTR. Hvis `/rentefradrag`s CTR er uændret efter 14 dage, er hypotesen modbevist.
+
 #### 192. [x] FÆRDIG 2026-09-29 — C192 — **beraknare.se `/promille` (1.379 v, CTR 0,1 %, pos 12,7-klassen) svarede på nul af sin egen største søgeklynge: "promille efter N öl" er 10/10 svenske autocomplete-variationer, og siden havde 0 tabeller mod dansk 3 — det var sitets *største* DA/SE-asymmetri, målt på tværs af alle 55 delte stier**
 
 - **Datagrund:** paritet målt på **alle 55 delte stier** i begge sitemapmer (ord, `<h2>`, `<table>`, `Question`, interne links) med rigtig browser-User-Agent mod begge domæner. `/promille` er den **største asymmetri på hele sitet**: DA **1.391 ord / 3 tabeller / 9 FAQ** mod SE **625 ord / 1 tabel / 5 FAQ** (608 ord og 2 tabeller mere end næste største, `/brok` 492 og `/moms` 486). GSC DA `/promille` **5.409 v / 80 klik / CTR 1,5 % / pos 7,9** — første side. SE-autocomplete (`hl=se`, `gl=se`, 29. september 2026) under **"promille efter"** → **10/10** variationer i præcis samme spørgsmål ("promille efter 1 øl", "efter 2 øl", "efter 3 øl", "efter ett glas vin", "efter en flaska vin" …); under **"hur många promille"** → "hur många promille är en öl", "hur många promille är ett glas vin", "hur många promille är farligt", "hur många promille är dödligt".
@@ -8863,6 +8926,13 @@ landmark=lån, piggybank=opsparing osv.).
 
 ## VERIFICÉR DEPLOY-log
 
+- ⏳ **VERIFICÉR DEPLOY: C193 — de 22 `metaDescription`s der brød repoets egen 160-tegns-regel skal alle være under 160 i den server-renderede HTML, på begge domæner. Den længste var `/befordringsfradrag` med 202 tegn (skal være 129).** Kode + plan i ét squash-commit på `ceo/moms-se-paritet` (grenen hedder efter den opgave, der *ikke* blev valgt — opgaven kom ud af en måling af hele sitet). Første kandidatvindue **2026-09-29 21:30** (17:30-batchen kørte før merge). Kun `src/lib/page-data.ts` (**22 `metaDescription`-strenge**, `git diff` verificerer at ingen anden linje er rørt) og `src/lib/page-data.test.ts` (**+34**) — **ingen `<title>`, ingen `<h1>`, ingen FAQ, ingen beregningslogik, ingen ny URL, ingen sitemap**. **HTTP 200 beviser intet:** intet her rører beregningerne, kun 22 indekserede tekststrenge. Verificér ved **indhold, ikke status**:
+  1. `curl -s -H "Host: minberegner.dk" https://minberegner.dk/befordringsfradrag | grep -o '<meta name="description" content="[^"]*"'` skal være **129** tegn og indeholde `3,17 kr./km for 25-120 km` **og** `1,59 kr./km over 120 km` — de to satser lå i den afkortede hale før og skal stadig være der.
+  2. Samme kommando på `/rentefradrag` skal være **148** tegn med `33,6 % på de første 50.000 kr.` og `16.800 kr i skat`; `/boligsalg` **156**; `/ejendomsvaerdiskat` **154** med `5,1 ‰ / 14 ‰`; `/boernepenge` **151** med alle fire sats-grupper.
+  3. `/husleje` skal være **146** og `/barselsdagpenge` **147** — de to er template-literals, så tjek at `25.000 kr netto` hhv. `5.085 kr./uge` stadig står i markupken (tallene er data-afledte, ikke håndskrevet).
+  4. På beraknare.se: `/elbil` **148**, `/motion-kalorier` **150**, `/1rm` **159**, `/loenstigning` **133**, `/sparemaal` **141**, `/enheder` **148**, `/fart` **137**, `/afkast` **156**, `/bolan` **136**.
+  5. **Kontrol:** `/procent` 115, `/dato` 118, `/tidsberegner` 141, `/moms` 128, `/boligstoette` 111, `/alder` 142 skal være uændrede, og **0** sider i begge sitemapmer må have en `description` over 160.
+  6. `curl -s https://minberegner.dk/api/health` skal svare `status: ok` på begge domæner.
 - ⏳ **VERIFICÉR DEPLOY: C192 — beraknare.se `/promille` skal have **tre** tabeller (dansk 3 / svensk 1 → **3/3**), **1.294 ord** (var 625), **9 `<h2>`** (var 8), og FAQ-JSON-LD'en skal have **8** `Question` (var 5). De tre nye svenska `<h2>` er "Hur många promille är N öl?", "Promillegränsen utomlands" og den eksisterende "Promillegränsen i Sverige".** Kode + plan i ét squash-commit på `ceo/promille-se-paritet`. Første kandidatvindue **2026-09-29 21:30** (17:30-batchen kørte før merge). Kun `src/lib/promille-genstande.ts` (**ny**), `promille-genstande.test.ts` (**ny**), `promille/page.tsx` (**+144**, kun `se`-grenen), `page-data.ts` (**+23**, kun `se`-`faqItems`) og `page.test.tsx` — **`promille.ts` urørt, ingen beregningslogik ændret, ingen ny URL, ingen sitemap, intet `<title>` eller `<meta description>` ændret, ingen dansk side rørt**. **HTTP 200 beviser intet:** intet her rører `src/lib/promille.ts`'s beregning, kun fire nye blokke i den svenska gren. Verificér ved **indhold, ikke status**:
   1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
   2. `curl -s -H "Host: beraknare.se" https://beraknare.se/promille | sed 's/<!-- -->//g' | grep -o '<h2>Hur många promille är N öl?</h2>' | wc -l` skal være **1** (før: **0**), og `<h2>Promillegränsen utomlands</h2>` **1** (før: **0**).
