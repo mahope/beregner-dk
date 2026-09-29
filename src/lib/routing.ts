@@ -12,12 +12,16 @@ export type RouteDecision =
   | { type: "not-found" }
   | { type: "redirect"; destination: string; status: 301 | 308 };
 
-const swedishAliases: Record<string, string> = {
+export const swedishAliases: Record<string, string> = {
   "/loen-efter-skat": "/lon-efter-skatt",
   "/tidskalkylator": "/tidsberegner",
   "/datumkalkylator": "/dato",
   "/nedrakning": "/nedtaelling",
   "/leasingkalkylator": "/leasing",
+  // Google indexes beraknare.se/enhudspris (the Swedish spelling) and ranks it
+  // on the first page, but the page has only ever been served at the Danish
+  // slug, so every one of those impressions landed on a 404.
+  "/enhudspris": "/enhedspris",
 };
 
 const danishOnlySections = ["/blog", "/kategori"] as const;

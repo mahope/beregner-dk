@@ -1,3 +1,7 @@
+STATUS: KØ — **C159 er landet: beraknare.se's bedst rangerede side var en 404. `/enhudspris` står i svensk GSC med 1.260 visninger, 4 klik, CTR 0,3 % og position 6,1 — den bedste position på hele domænet — og siden har aldrig eksisteret der.** Køen havde én `I GANG`-løs opgave, **159 (de ni åbne deploy-noter)**, og den er **klokke-blokeret, ikke fejl-blokeret**: alle ni noter har første vindue **2026-09-29 07:30**, og det var 03:16, så ingen af dem kan lukkes endnu. Den blev derfor ladt ligge og mærket `TIDSBLOKERET` i stedet for `BLOCKED`, fordi en note der lukkes på et ur de ikke har gået, er en note der ikke er verificeret. **Valget kom af at gå ned ad de to lister fase 3 gav, i stedet for op ad dem:** de svenske GSC-siders CTR er lukket alle 16 steder (C114–C123, C154), og de danske alle 16 (C82–C102) — men *selve listen* var aldrig blevet kørt igennem som helhed. GSC's svenske top-16 har 15 URL'er der svarer 200 og **én der svarer 404**, og den ene er den mest rangerede af dem alle. Samme måling på den danske top-16: **alle 16 svarer 200**, så det er ikke en klasse, det er ét fund — og det er derfor fundet er værd at skrive ned som sit eget. **Årsagen er ikke en fejl i nogen side, men en mangel i en liste:** `swedishAliases` i `routing.ts:15-21` er koden, der sender en svensk stavning af en slug videre i stedet for ud i 404, og den havde fem poster (`/tidskalkylator`, `/datumkalkylator`, `/nedrakning`, `/leasingkalkylator`, `/loen-efter-skat`) — men ikke `/enhudspris`, som er den svenske stavning af den danske slug `/enhedspris` (titlen på beraknare.se er "Jämförpris", `calculator-list.ts:89`). **Rettelsen er én linje**, og den er målt på rigtig server før merge: `Host: beraknare.se` giver nu **301 → `https://beraknare.se/enhedspris`**, der svarer 200 med `<title>` "Jämförpris: 35 kr för 2 kg = 17,50 kr per kg", mens de fem gamle alias alle stadig 301'er uændret, og `/api/health` svarer `status: ok`. **Ingen intern link, ingen sitemap-post, ingen beregningslogik:** slug'en findes 0 gange i `src/`, forside og sitemap peger alle på `/enhedspris` — altså var de 1.260 visninger Googles *egen* indeksering af en URL vi aldrig har serveret, hvilket er præcis den fejltype der ikke kan findes ved at læse linkgrafen. **Harness — tre egenskaber, hver modsvejs verificeret, fordi de ellers er vakuum-grønne.** Ny `routing-alias.test.ts` med 6 tests, som læser det **eksporterede** `swedishAliases` frem for en genkopiering af det (C44's lære: en måler skal ramme den kode der faktisk renderer): *målet bag hvert alias er en beregner der faktisk serveres på beraknare.se* (fanger et alias der peger på en dansk-only eller slet ikke eksisterende side), *intet alias skygger en rigtig svensk side* (et alias der skjuler den side det burde sende videre til) og *alias er ude af sitemap* (én kanonisk URL). **Modsvejs tre gange, fordi antallet af røde tests alene ikke beviser noget:** (1) med **kun** `/enhudspris`-linjen fjernet falder **præcis 1 af 6** med en rigtig assertion på `getRouteDecision`; (2) med et plantet alias på en slagtende target (`/findesikke` → `/findesikkere`) rødheds-egenskaben; (3) med et plantet alias hvis nøgle *er* en rigtig side (`/tidsberegner` → `/dato`) rødheds skygge- **og** sitemap-egenskaberne. **En målefejl i træk fra mig selv, nr. 24, og den er samme klasse som nr. 9-17:** min første `<h2>`-tælling på `/enhudspris` gav **1**, hvilket så ud som en side uden indhold — men jeg havde talt på **404-URL'en**, hvis krop er chrome plus skjulte-headings. Den rigtige side har **4**. Den måling reddede faktisk opgaven, fordi en side med ét `<h2>` ville have været en anden (og dyrere) opgave end en 404. **Målt og bevidst ikke bygget:** `/enhudspris` 404'er også på `minberegner.dk`, men der er **ingen målt dansk efterspørgsel** efter den stavning — GSC's danske top-16 kender den ikke — så den danske halvdel er bevidst urørt og låst med en test, der siger at dansk *skal* give `allow`. Det er en beslutning, ikke en forglemmelse, og næste iteration skal derfor ikke "fikse" den uden tal. **Målt og bevidst ikke bygget (nr. 2):** DA-autocomplete under "hvor mange dage er der til" har **sommerferie** (nr. 4) og **efterårsferien** (nr. 9), og begge er ubesvarede `dage-til`-kandidater. De er **ikke bygget**, fordi feriestarten er **kommunespecifik** — `dage-til.ts:44-51` siger det eksplicit som bevidst udeladelse — og alle kilder 404'er i denne iteration (`uvm.dk/folkeskole/ferier`, `undervisning.dk`, `borger.dk/…/ferier-i-folkeskolen` giver 404, `retsinformation.dk` er en tom JS-app). Samme kilde-blokering som opgave 119; se ❓ Til Mads. Gate grøn: lint (**583 filer**), **2.591 tests / 169 filer** (fra 2.585 / 168 — de 6 nye), build (**141 sider**), `locale-leak.mjs --gate` exit 0 med **uændret 591/556/35/0**, `knapgruppe-scan.mjs` **0/0**. Kode + plan i ét squash-commit på `ceo/enhudspris-alias`; se opgave 160. **MÅL:** beraknare.se `/enhudspris` baseline **1.260 visninger / 4 klik / CTR 0,3 % / pos. 6,1 pr. 2026-08-29 → 2026-09-26** — måles igen **2026-10-12**; forventningen er at de 1.260 måles på `/enhedspris` (1.265 v / pos. 8,3) i stedet for på en 404, altså **konsolidering først og CTR bagefter** — hvis `/enhedspris` bare flytter sig uden at samle klik, er pos. 6,1 et rangeringsspørgsmål og ikke et svar-spørgsmål.
+
+---
+
 STATUS: KØ — **C158 er landet: opgave 158 er løst, og de 726 danske fund C157 målte på 143 sider og ikke kunne bruge, er nu delt i tre klasser af en port-analyse der læser koden og ikke filnavnet.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den, 119 er kilde-blokeret), og de ni åbne deploy-noter (C114, C115, C118–C123, C155–C157) har alle første vindue **2026-09-29 07:30** — det var 02:46, så intet kunne verificeres, og ingen blev rørt. **Valget kom af at gøre målingen brugbar, ikke af at finde en ny lækage:** C157 fandt fire danske afsnit på beraknare.se's tredjestørste side og skrev i sin egen afslutning, at de 726 fund på `src/app/*/page.tsx` var ubrugelige uden en port — fordi størstedelen er korrekt dansk i en `locale === "da"`-gren, og en regel med 726 fund er en regel ingen læser. **Rækkevidden er målt, ikke antaget: kun 54 af de 143 sider er se-monterede** — `/blog` og `/kategori` er dansk-only på svensk og norsk ifølge `routing.ts:23`, og den liste læses *fra kilden* i scanneren i stedet for at blive kopieret, fordi C118's håndskrevne forside-liste er præcis den fejltype. **De fire port-former er alle fire fundet ved at læse siderne, ikke ved at gætte:** `{locale === "da" && …}`, `{locale === "se" ? <SE/> : <DA/>}` (her afgør *armen*), `{locale === "da" ? … : …}` (den anden arm er ikke da-only) og `{locale === "da" || locale === "se"}` (synlig på se, må ikke filtreres) — plus to alias-former (`{se ? … : …}` på `/promille`, `{daSe === "se" ? … : …}` på `/tidsberegner`) hvis deklaration læses fra filen. **Resultatet på de 54 sider: 481 fund, 450 i en da-port, 31 kandidater — og alle 31 er 0 på den rigtige server**, målt på `https://beraknare.se/{alder,dato,nedtaelling,promille,tidsberegner}`, ikke på kildeformen. **Syv fejl i min egen regel, og hver af dem blev fundet fordi en plant blev rød eller en måling blev grøn på den forkerte måde** — det er pointen med port-analyse frem for et greb: (1) `topLevelTernary` krævede et værdi-tegn umiddelbart før `?`, men JSX ternaries står på tre linjer, så den matchede **0 af de 24** den var skrevet for og **24 danske strenge blev rapporteret som lækager**; (2) `&&`-reglen læst først, så den kendte ikke armen, og **14 danske alternativ-arme** blev meldt synlige på beraknare.se; (3) betingelsen blev læst i *hele* teksten mellem klammerne, som er al JSX imellem — på `/procent` fandt den en `locale === "da" &&` tyve linjer oppe og **slap en dansk lækage plantet midt i svensk prosa igennem**; (4) `topLevelTernary` læste en `&&`-blok som ternary og gjorde på `/brok` en `da`-only blok til "synlig på svensk", altså præcis det svar reglen aldrig må give; (5) `tableReads` talte tabellens egen navn med, fordi 40-tegns-vinduet omkring navnet ikke dækker `PROMILLEGRAENSER_UDLAND`'s 62-tegners typeannotation, så P2 var falsk for *alle* tabeller — en regel der strukturelt altid er falsk ser ud til at være testet; (6) alias-tuplen `[op, true, false]` blev læst 1-indiceret, så alle aliasser resolve'de til `undefined` og `portCondition` returnerede null **lydløst**, fordi "kan ikke løse" er præcis hvad den returnerer når filen ikke er som ventet — og de to sider med alias var dermed også de eneste to reglen forblev blind for. **Den syvende fejl lå i selve værktøjet:** `stripNoise` tømmer `className={…}`, altså ødelægger den klammeparring porten lever af, så løsningen er at læse to visninger af samme fil og blande dem på indeks — `stripNoise` til at *finde* strengene, rå kilde til at *parre* dem, hvilket holder fordi alle erstatninger er længdebevarende. **Harness: `locale-leak-gate.test.ts` 14 → 19 tests, dobbeltplantet pr. regel** — hver port-form i begge retninger i samme kørsel, så dansk i den *synlige svenske gren* på `/procent` gør gaten rød mens den *samme streng i en `da`-gren* holder den grøn; **modsvejs verificeret: 6 af 19 falder** med P1 og P2 slået fra, og det er netop sikkerhedsegenskaberne der skal fejle. **Tal ændrede sig kun fordi scanningssættet gjorde det:** 132 → **591** kandidater, døde 97 → **556**, kræver øjne **35 uændret**, **0** ureviewet uændret. Gate grøn: lint (**582 filer**), **2.585 tests / 168 filer** (fra 2.580 / 168), build (**141 sider**), `locale-leak.mjs --gate` exit 0 med 0 ureviewet, `knapgruppe-scan.mjs` 0/0. Kode + plan i ét commit på `ceo/page-portscan`, squashet til `master`. **MÅL:** de 54 se-monterede kalkulatorsider har **0** resterende danske strenge i den synlige tekst, målt på rigtig server; gatens 591/556/35/0 måles igen 2026-10-13.
 
 ---
@@ -14890,7 +14894,13 @@ se-monterede kalkulatorsider — målt på rigtig server, ikke på kildeformen.
 Gatens egne tal (591/556/35/0) måles igen **2026-10-13**; en voksende
 `kræver øjne` uden voksende `ureviewet` er en port, der er holdt op at læse.
 
-#### 159. [ ] Kø — **de ni åbne deploy-noter skal lukkes ved indholdskontrol, og port-reglen skal have kørt en hel cyklus på rigtig server**
+#### 159. [ ] `TIDSBLOKERET` (ikke `BLOCKED`) — **de ni åbne deploy-noter skal lukkes ved indholdskontrol, og port-reglen skal have kørt en hel cyklus på rigtig server**
+
+**⏱ Blokeret af uret, ikke af en fejl.** C159 startede 2026-09-29 03:16; alle ni
+noter har første vindue **07:30**. Kriterium 1 kan ikke udføres før det tidspunkt,
+og en note må ikke lukkes på et ur, der ikke har gået. **Revurder efter 07:30.**
+C159's egen note (C158) har første vindue **12:30**, fordi C158 blev pushet efter
+07:30-batchen.
 
 **Datagrund:** de ni noter (C114, C115, C118–C123, C155–C157) står åbne med
 første vindue **2026-09-29 07:30**. C158 merge/pushes efter 02:5x, altså efter
@@ -14931,3 +14941,93 @@ den batch, så C158's egen note får første vindue **12:30**.
      `https://minberegner.dk/procent` skal være **uændret** (200, samme
      `<title>` "Procentberegner – beregn 10 procent af et tal", JSON-LD 9
      `Question`) — dette commit rører ingen synlig tekst på nogen side.
+
+#### 160. [x] FÆRDIG 2026-09-29 — C159 — **beraknare.se `/enhudspris`: Go ogles bedst rangerede side (1.260 v, pos. 6,1) var en 404. Ét linjes alias, fordi `swedishAliases` havde fem poster og ikke denne**
+
+**Datagrund:** svensk GSC (2026-08-29 → 2026-09-26) — `/enhudspris`
+**1.260 visninger, 4 klik, CTR 0,3 %, pos. 6,1** — den bedste position på hele
+domænet. Søgningerne er "räkna ut kilopris" (133 v, pos. 7), "jämförpris" (67 v,
+pos. 6), "kilopris" (50 v, pos. 10), "räkna ut kg pris" (27 v, pos. 8). Samlet er
+det **1.260 visninger der ikke kan klikkes**, fordi siden ikke findes.
+
+**Målt først, målt hele listen og ikke et udvalg.** Alle **15** øvrige URL'er i
+svensk GSC-top-16 svarer 200 på rigtig server, og `/enhedspris` svarer også 200.
+Alle **16** danske GSC-top-16 svarer 200. Så det er **ét fund, ikke en klasse** —
+hvilket er grunden til at det er skrevet op som sit eget og ikke som "endnu en
+404-regel". Slug'en står **0 gange i `src/`**, forside og sitemap peger på
+`/enhedspris` (verificeret på begge domæner), og der er **0 interne links** til
+`/enhudspris` — altså Googles egen indeksering af en URL vi aldrig har serveret.
+Den kan derfor **ikke** findes ved at læse linkgrafen; den findes ved at køre
+statuskoderne på GSC's egen liste.
+
+**Årsag:** `swedishAliases` (`routing.ts:15-21`) er den kode, der sender en
+svensk stavning af en slug videre i stedet for ud i 404. Den havde fem poster —
+`/tidskalkylator`→`/tidsberegner`, `/datumkalkylator`→`/dato`,
+`/nedrakning`→`/nedtaelling`, `/leasingkalkylator`→`/leasing`,
+`/loen-efter-skat`→`/lon-efter-skatt` — men ikke `/enhudspris`, den svenske
+stavning af den danske slug `/enhedspris` (svensk titel "Jämförpris",
+`calculator-list.ts:89`).
+
+**Rettelsen:** én post i kortet. Ingen beregningslogik, ingen side, ingen dansk
+tekst, ingen sitemap-post, ingen ny URL.
+
+**Harness:** ny `routing-alias.test.ts` (6 tests) læser det **eksporterede**
+`swedishAliases` frem for en genkopiering af listen — C44's lære, at en måler
+skal ramme den kode der faktisk renderer. Tre strukturelle egenskaber ud over
+fixen: målet bag hvert alias er en beregner der faktisk serveres på beraknare.se,
+intet alias skygger en rigtig svensk side, og alias er ude af sitemap.
+**Modsvejs verificeret tre gange** (antallet af røde tests alene beviser intet):
+(1) kun `/enhudspris`-linjen fjernet → **præcis 1 af 6** falder med rigtig
+assertion på `getRouteDecision`; (2) plantet alias på slagtende target
+(`/findesikke`→`/findesikkere`) → mål-reglen rød; (3) plantet alias hvis nøgle er
+en rigtig side (`/tidsberegner`→`/dato`) → skygge- **og** sitemap-reglen rød.
+
+**Målt på rigtig server før merge** (`next start` port 3931, porten verificeret
+fri *inden* start): `Host: beraknare.se` → **301 `https://beraknare.se/enhedspris`**,
+der svarer **200** med `<title>` "Jämförpris: 35 kr för 2 kg = 17,50 kr per kg";
+de fem gamle alias 301'er alle stadig uændret; `Host: minberegner.dk` →
+**404 uændret**; `/api/health` → `status: ok`.
+
+**Målefejl nr. 24 (min egen), samme klasse som nr. 9-17:** min første
+`<h2>`-tælling på `/enhudspris` gav **1**, som så ud som en indholdsløs side. Jeg
+havde talt på **404-URL'ens krop** (chrome + skjulte headings). Den rigtige side
+har **4**. Målingen reddede opgaven: en side med ét `<h2>` ville have været en
+anden og dyrere opgave end en 404.
+
+**Målt og bevidst ikke bygget:** `/enhudspris` 404'er også på minberegner.dk, men
+dansk GSC kender ikke den stavning, så den danske halvdel er bevidst urørt og
+låst med en test der kræver `allow`. Beslutning, ikke forglemmelse.
+
+**Målt og bevidst ikke bygget (nr. 2):** DA-autocomplete under "hvor mange dage
+er der til" har **sommerferie** (nr. 4) og **efterårsferien** (nr. 9) ubesvarede.
+Feriestarten er **kommunespecifik** — `dage-til.ts:44-51` siger det eksplicit som
+bevidst udeladelse — og alle kilder 404'er i denne iteration (`uvm.dk/folkeskole/ferier`,
+`undervisning.dk/…/sommerferie`, `borger.dk/…/ferier-i-folkeskolen` → 404;
+`retsinformation.dk/eli/lta/2024/1312` er en tom JS-app). Samme kilde-blokering som
+opgave 119; se ❓ Til Mads.
+
+**Gate grøn:** lint (**583 filer**), **2.591 tests / 169 filer** (fra 2.585 / 168
+— de 6 nye), build (**141 sider**), `locale-leak.mjs --gate` exit 0 med **uændret
+591/556/35/0**, `knapgruppe-scan.mjs` **0/0**. Kun `routing.ts` (1 linje +
+`export`) og den nye testfil er rørt.
+
+**MÅL:** beraknare.se `/enhudspris` baseline **1.260 v / 4 klik / CTR 0,3 % /
+pos. 6,1** og `/enhedspris` **1.265 v / 4 klik / CTR 0,3 % / pos. 8,3**
+(pr. 2026-08-29 → 2026-09-26) — måles igen **2026-10-12**. Forventningen er
+**konsolidering først**: de 1.260 måles på `/enhedspris` i stedet for på en 404.
+Hvis `/enhudspris` bare forsvinder uden at `/enhedspris` vinder dem, er pos. 6,1
+et rangeringsspørgsmål, ikke et svar-spørgsmål — og så skal den måles om, ikke
+bygges videre på.
+
+- ⏳ **VERIFICÉR DEPLOY: C159 — `beraknare.se/enhudspris` svarer 301 til `/enhedspris` i stedet for 404.** Kode + plan i ét squash-commit på `ceo/enhudspris-alias`. Første kandidatvindue **2026-09-29 07:30** (merge sker 03:3x, altså før batchen). Kun `src/lib/routing.ts` (én post i `swedishAliases` + `export`) og den nye `src/lib/routing-alias.test.ts` er rørt — **ingen beregningslogik, ingen side, ingen dansk tekst, ingen sitemap-post, ingen ny URL**. Verificér ved **indhold, ikke HTTP 200 alene** — en 301 *er* HTTP-korrekt, så det er destinationen der skal måles:
+  1. `curl -sI https://beraknare.se/enhudspris` skal svare **301** med
+     `location: https://beraknare.se/enhedspris`.
+  2. `curl -s https://beraknare.se/enhedspris` skal svare **200** med svensk
+     `<title>` (indeholder "Jämförpris") og **0** danske markører.
+  3. KONTROL: de fem gamle alias skal stadig 301'e uændret
+     (`/tidskalkylator`, `/datumkalkylator`, `/nedrakning`,
+     `/leasingkalkylator`, `/loen-efter-skat`).
+  4. KONTROL: `https://minberegner.dk/enhudspris` skal **stadig 404** — den
+     danske halvdel er bevidst urørt.
+  5. KONTROL: `https://minberegner.dk/api/health` skal svare `status: ok`, og
+     `https://beraknare.se/enhedspris` skal have **4** `<h2>`.
