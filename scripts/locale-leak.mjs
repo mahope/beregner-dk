@@ -450,15 +450,59 @@ function componentImports(src) {
   return { names, files };
 }
 
-/** Offsets where a module-scope table is read, excluding its own declaration. */
+/** Matching `]` or `}` for the `[`/`{` at `open`, or -1. */
+function bracketRange(src, open) {
+  const pairs = { "[": "]", "{": "}" };
+  const close = pairs[src[open]];
+  if (!close) return -1;
+  let depth = 0;
+  for (let i = open; i < src.length; i++) {
+    const c = src[i];
+    if (c === "[" || c === "{") depth++;
+    else if (c === "]" || c === "}") {
+      depth--;
+      if (depth === 0) return i;
+    }
+  }
+  return -1;
+}
+
+/**
+ * Offsets where a module-scope table is *read*, excluding its own declaration.
+ *
+ * The declaration is excluded as a whole value, not as a fixed-width window
+ * around the name. The old 40-character window looked sufficient until
+ * `PROMILLEGRAENSER_UDLAND` turned up with a 62-character type annotation
+ * before its `=`: the name then counted as a read of itself, every table
+ * looked like it had one ungated read, and P2 — "every read sits behind a
+ * da-port" — was false for *every* table in the repo. A rule that is
+ * structurally always false is worse than no rule, because it looks tested.
+ */
 function tableReads(src, table) {
   const declRe = new RegExp(`(?:^|\\n)\\s*(?:export\\s+)?const\\s+${table}\\b`, "g");
-  const decls = new Set();
+  const declRanges = [];
   let d;
-  while ((d = declRe.exec(src)) !== null) decls.add(d.index);
+  while ((d = declRe.exec(src)) !== null) {
+    const eq = src.indexOf("=", d.index);
+    // The value starts at the first `[` or `{` after the `=`; if there is none
+    // (a scalar), the declaration is the name plus its initializer.
+    let valueStart = eq === -1 ? -1 : -1;
+    if (eq !== -1) {
+      for (let i = eq; i < src.length && i < eq + 400; i++) {
+        if (src[i] === "[" || src[i] === "{") {
+          valueStart = i;
+          break;
+        }
+        if (src[i] === ";") break;
+      }
+    }
+    const valueEnd = valueStart === -1 ? eq : bracketRange(src, valueStart);
+    declRanges.push([d.index, valueEnd === -1 ? d.index + table.length : Math.max(valueEnd, d.index)]);
+    declRe.lastIndex = Math.max(declRe.lastIndex, declRanges[declRanges.length - 1][1]);
+  }
   return [...src.matchAll(new RegExp(`\\b${table}\\b`, "g"))]
     .map((x) => x.index)
-    .filter((i) => ![...decls].some((d2) => i >= d2 && i < d2 + 40));
+    .filter((i) => !declRanges.some(([a, b]) => i >= a && i <= b));
 }
 
 /**
@@ -491,11 +535,30 @@ function affiliateRanges(src) {
 }
 
 /**
+ * The file as it is on disk, for the *structural* passes.
+ *
+ * `stripNoise` blanks `className={…}`, `style={…}` and every other attribute
+ * value, which is right for finding copy and wrong for pairing braces: a
+ * blanked attribute unbalances the block it sits in, so walking backwards from
+ * a string lands on the wrong `{` or none at all. On `/brok` that made the
+ * port analysis report the `locale === "da"` prose block as having no port,
+ * because the walk stopped two blocks early and the head it read was the
+ * function body's `{`.
+ *
+ * Every `stripNoise` replacement is length-preserving (comments become spaces,
+ * attribute values become spaces), so an offset into the stripped source is
+ * the same offset into the raw one. The two can be mixed by index and not by
+ * content: `stripNoise` to *find* the strings, the raw source to *pair* them.
+ */
+function structural(file) {
+  return read(file) || "";
+}
+
+/**
  * Brace-matched body range of every top-level `function X(…) {}` in a file.
  * Only declarations at column 0 count: a nested function is part of its
  * parent's branch, not a branch of its own.
- */
-function topLevelFunctions(src) {
+ */function topLevelFunctions(src) {
   const out = [];
   const re = /(^|\n)(?:export\s+)?function\s+([A-Za-z0-9_$]+)\s*\(([^)]*)\)\s*\{/g;
   let m;
@@ -725,7 +788,12 @@ function classify(src, raw, offset, value) {
  * decidable.
  */
 function verdict(finding, file) {
+  // Two views of the same file, mixed by index. `src` has comments and attribute
+  // values blanked, which is what the copy rules want; `raw` has its braces
+  // intact, which is what the port analysis needs. Offsets are identical
+  // because every `stripNoise` replacement is length-preserving.
   const src = stripNoise(read(file) || "");
+  const raw = structural(file);
   const { key, table, jsx } = finding;
 
   // R1 — the page that mounts this component is daOnly, so a Swedish reader
@@ -828,10 +896,35 @@ function verdict(finding, file) {
     return { verdict: "DØD", reason: "defaultværdi i signaturen, bruges kun når proppen mangler" };
   }
 
+  // P1 — the port: no Swedish reader can reach this string, so it is not a leak
+  // however Danish it looks. Placed after the component rules because those
+  // rules carry better reasons when both apply (R1 names the daOnly page,
+  // P1 only says "a da-port"), and before the fallback because a page's own JSX
+  // has no import edge and no dispatcher for the earlier rules to find.
+  const port = portVerdict(raw, finding.offset);
+  if (port.verdict === PORT_DA) {
+    return {
+      verdict: "DØD",
+      reason: `da-port: strengen ligger i en ${port.shape}-gren, som kun danske læsere ser`,
+    };
+  }
+
+  // P2 — module-scope table that is only ever read inside a da-port.
+  if (table && !jsx && tableReadsAreDanishOnly(raw, table)) {
+    return {
+      verdict: "DØD",
+      reason: `tabellen ${table} læses kun inde i en da-gren, så rækkerne vises aldrig på beraknare.se`,
+    };
+  }
+
   const where = jsx ? "JSX-tekst/attribut" : `tabel ${table || "?"}`;
+  const suffix =
+    port.verdict === PORT_SE
+      ? " — den ligger i den synlige svenskegren, så følg den hele vej til displayen"
+      : " — følg displayen og se om den læses gennem et locale-nøgle";
   return {
     verdict: "KRÆVER ØJNE",
-    reason: `dansk streng i ${where} uden for da/se/no — følg displayen og se om den læses gennem et locale-nøgle`,
+    reason: `dansk streng i ${where} uden for da/se/no${suffix}`,
   };
 }
 
@@ -840,6 +933,316 @@ function verdict(finding, file) {
 let graph = null;
 let mountCache = null;
 
+/**
+ * Sections `routing.ts` answers with `not-found` on a Swedish or Norwegian
+ * domain. Read from the source rather than written out here, because a
+ * hand-copied list is a list that goes stale exactly when someone adds a
+ * section — the same failure class as C118's hand-written homepage list.
+ */
+function danishOnlySections() {
+  const src = read(join(SRC, "lib", "routing.ts")) || "";
+  const m = /danishOnlySections\s*=\s*\[([^\]]*)\]/.exec(src);
+  if (!m) return [];
+  return [...m[1].matchAll(/"([^"]+)"/g)].map((x) => x[1]);
+}
+
+/**
+ * P1 — the port analysis, and the reason the page files were unscanned.
+ *
+ * C157 measured 726 Danish strings on 143 page files and could not act on a
+ * single one, because most of them are correct Danish in a `locale === "da"`
+ * branch and there was no way to tell them from a leak. The component rules
+ * above never applied either: `guardedAt` only knows `{locale === "da" && …}`,
+ * and the pages use three further shapes.
+ *
+ * A port is a boolean, not a container: walk outwards from the string, one
+ * enclosing `{…}` at a time, and resolve each level to *which locales can see
+ * this text*. Four shapes exist in the repo and all four must be decidable:
+ *
+ *   {locale === "da" && (…)}            only da
+ *   {locale === "se" ? <SE/> : <DA/>}   arm decides, so the offset matters
+ *   {locale === "da" ? "…" : "…"}       the alternate arm is *not* da
+ *   {locale === "da" || locale === "se"} visible on se — must not be excluded
+ *
+ * The ternary is why the naive version is wrong in the dangerous direction: the
+ * first port scan in this iteration reported 24 strings from the *else* arm of
+ * `locale === "se" ? … : …` as leaks, including every `<h2>` on `/alder`'s
+ * answer-first block. All 24 were correct Danish, and the Swedish text sits
+ * directly beside them in the same expression.
+ *
+ * Anything the walk cannot resolve returns "OK" — a candidate, not a verdict.
+ * An unresolved port must never be read as "Danish only", or the gate reports
+ * noise nobody will read, which is how a scanner stops being run at all (C65).
+ */
+const PORT_DA = "DA";
+const PORT_SE = "SE";
+const PORT_UNKNOWN = "OK";
+
+/**
+ * The locale visibility a port condition declares, or null if the expression
+ * does not open with a locale test.
+ *
+ * The condition is the *leading segment* — everything up to the first `&&` or
+ * `?`. Testing the whole expression instead is the bug this function exists to
+ * prevent: what follows the `{` is not only the condition, it is every line of
+ * JSX between the enclosing brace and the string, and a `locale === "da" &&`
+ * twenty lines up is not a guard on this string. That version passed a Danish
+ * leak planted in the middle of `/procent`'s Swedish prose.
+ *
+ * Each `||`-term must be a complete `locale` comparison. A partial match like
+ * `locale === "da" || isAdmin` is refused rather than guessed, because a
+ * half-read condition either hides a leak or invents one.
+ */
+function portCondition(before, src) {
+  const stop = before.search(/&&|\?/);
+  if (stop === -1) return null;
+  const cond = before
+    .slice(0, stop)
+    .trim()
+    .replace(/^\(+/, "")
+    .replace(/\)+$/, "")
+    .trim();
+  if (cond.length === 0 || cond.length > 200) return null;
+  const flags = [];
+  for (const term of cond.split("||").map((t) => t.trim())) {
+    // `locale === "da"` is the plain form. The other two spellings in the repo
+    // route through a local alias, and the *term* is the whole comparison
+    // (`se ? …`, `daSe === "se" ? …`), so the alias name is extracted here and
+    // its declaration read from the file. Guessing the alias instead is what
+    // made this rule's first version resolve the wrong arm on `/tidsberegner`.
+    const direct = /^locale\s*(===|!==)\s*"(da|se|no)"$/.exec(term);
+    if (direct) {
+      flags.push(direct[1] === "===" ? direct[2] : `!${direct[2]}`);
+      continue;
+    }
+    const withValue = /^([A-Za-z_$][\w$]*)\s*(===|!==)\s*"(da|se|no)"$/.exec(term);
+    const bareName = withValue ? null : /^([A-Za-z_$][\w$]*)$/.exec(term);
+    if (!withValue && !bareName) return null;
+    const name = withValue ? withValue[1] : bareName[1];
+    const decl = aliasFlags(src, name);
+    if (!decl) return null;
+    // A bare name is used as a boolean — it is true on its true-locale. A
+    // compared name is true only on the branch it was compared against. The
+    // two are distinguished by the match, not by counting capture groups: a
+    // `RegExp` result's length is an implementation detail, and reading it that
+    // way made the bare form fall through to the `===` path with no operator
+    // and re-report `/promille`'s `se ? … : …` twice.
+    const compared = withValue ? withValue[3] : null;
+    const op = withValue ? withValue[2] : "===";
+    const onTrue = aliasTrueLocale(decl);
+    const onFalse = aliasFalseLocale(decl);
+    let hit;
+    if (compared === null) hit = onTrue;
+    else if (compared === onTrue) hit = true;
+    else if (compared === onFalse) hit = false;
+    else return null;
+    if (!hit) return null;
+    const locale = hit ? onTrue : onFalse;
+    if (!locale) return null;
+    flags.push(op === "!==" ? `!${locale}` : locale);
+  }
+  // A condition that is *not* the whole head of the expression is not a
+  // condition — `locale === "da" && (` ends at `&&`, and the rest is JSX. The
+  // ternary path needs this to be false: `topLevelTernary` will happily find a
+  // `?` fifty lines down inside nested JSX, and reading that as the arm of this
+  // expression inverts the verdict. On `/brok` it turned a `da`-only block into
+  // "visible on Swedish", which is the one answer this rule must never give.
+  const rest = before.slice(stop).trimStart();
+  return { flags, terminatedBy: before[stop], consumed: stop, rest };
+}
+
+/**
+ * Resolve a non-`locale` port name from its own declaration, e.g. `se` in
+ * `const se = locale === "se";`.
+ *
+ * Four real shapes, all read out of the pages rather than guessed:
+ *   const se = locale === "se";                 → true on that locale
+ *   const erDa = locale !== "da";               → true everywhere but da
+ *   const daSe = locale === "se" ? "se" : "da"; → a locale *string*, so it is
+ *                                               compared with `===` against one
+ *                                               of the two branches, and the
+ *                                               other branch is the complement
+ * A name with no such declaration returns null, so an unrecognised alias makes
+ * the branch "unknown" — a candidate to look at — instead of silently Danish.
+ *
+ * The string-alias case is the one the first version got wrong in the unsafe
+ * direction: it returned only the locale named in the *true* branch, so
+ * `daSe === "da"` was read as "true on da" when the declaration says the
+ * opposite. `/tidsberegner`'s answer-first heading was the one remaining
+ * finding, and it was the alternate arm of exactly that expression.
+ *
+ * The tuple is always `[op, trueLocale, falseLocale]`, with `null` for a branch
+ * the alias cannot take. A plain boolean alias has no false branch:
+ * `const se = locale === "se"` is false on *both* da and no, and saying
+ * `false = "da"` would let `se ? … : …` be read as Danish-only — the one
+ * direction that hides a leak. It is `null`, so the comparison is refused and
+ * the string stays a candidate.
+ */
+function aliasFlags(src, name) {
+  // Only a bare identifier can be an alias. Without this, a term that is a
+  // chunk of JSX is interpolated into the pattern and the regex is built from
+  // file content — which then throws on the first `[` in someone's copy.
+  if (!/^[A-Za-z_$][\w$]*$/.test(name)) return null;
+  const plain = new RegExp(
+    `const\\s+${name}\\s*=\\s*locale\\s*(===|!==)\\s*"(da|se|no)"\\s*;`
+  ).exec(src);
+  if (plain) return [plain[1], plain[2], null];
+  const str = new RegExp(
+    `const\\s+${name}\\s*=\\s*locale\\s*===?\\s*"(da|se|no)"\\s*\\?\\s*"(da|se|no)"\\s*:\\s*"(da|se|no)"`
+  ).exec(src);
+  if (str) return ["===", str[2], str[3]];
+  return null;
+}
+
+/**
+ * The locale a term is true on, or null. Negations invert.
+ *
+ * Destructured, never indexed. The tuple is 0-indexed and the first version
+ * read `m[1]` as the operator and `m[2]` as the locale, so every alias
+ * resolved to `undefined` and `portCondition` returned null for all of them —
+ * silently, because "cannot resolve" is exactly what the function returns when
+ * the file is not what it expects. `/promille` and `/tidsberegner` were the two
+ * pages with an alias, so they were also the only two the rule stayed blind to.
+ */
+function aliasTrueLocale(tuple) {
+  const [op, onTrue] = tuple;
+  return op === "!==" ? null : onTrue;
+}
+
+/** The locale a term is false on, or null when the alias has only one branch. */
+function aliasFalseLocale(tuple) {
+  const [op, , onFalse] = tuple;
+  return op === "!==" ? tuple[1] : onFalse ?? null;
+}
+
+/** Does the flag set let `wanted` through? `!da` opens the branch to se and no. */
+function portAllows(flags, wanted) {
+  for (const f of flags) {
+    if (f === wanted) return true;
+    if (f.startsWith("!") && f.slice(1) !== wanted) return true;
+  }
+  return false;
+}
+
+/** `locale === "da" || locale === "se"` for the verdict text. */
+function describeFlags(flags) {
+  return flags.map((f) => (f.startsWith("!") ? `locale !== "${f.slice(1)}"` : `locale === "${f}"`)).join(" || ");
+}
+
+/**
+ * The `?` and `:` of the top-level ternary in `src[open..close]`, or null.
+ *
+ * The `?` is accepted whatever whitespace precedes it — JSX ternaries are
+ * formatted across three lines (`{locale === "se"\n  ? "…"\n  : "…"}`) and the
+ * first version of this function demanded a value character immediately before
+ * the `?`. That matched zero of the 24 ternaries it was written for, and the
+ * gate then reported every Danish *else*-arm as a leak. The two guards that
+ * remain are the ones that actually exclude a ternary: `?.` is optional
+ * chaining, and an *earlier* `?` on the same level has already been taken.
+ */
+function topLevelTernary(src, open, close) {
+  let depth = 0;
+  let q = -1;
+  let colon = -1;
+  for (let i = open + 1; i < close; i++) {
+    const c = src[i];
+    if (c === "{" || c === "[" || c === "(") depth++;
+    else if (c === "}" || c === "]" || c === ")") depth--;
+    else if (depth === 0) {
+      if (c === "?" && q === -1 && src[i + 1] !== ".") q = i;
+      else if (c === ":" && q !== -1 && colon === -1) colon = i;
+    }
+  }
+  return q !== -1 && colon !== -1 ? { q, colon } : null;
+}
+
+/**
+ * Which locales can see the text at `offset`, resolved through every enclosing
+ * `{…}` port. Returns `{ verdict, shape }`; `shape` is the source form that
+ * decided it, so a rejected candidate says *which* branch hid it.
+ *
+ * `PORT_UNKNOWN` is the honest default: an unresolvable port is a candidate to
+ * look at, never a silent pass. A gate that guesses "fine" is how C65's scanner
+ * stopped being trustworthy.
+ */
+function portVerdict(src, index) {
+  let from = index;
+  for (let guard = 0; guard < 60; guard++) {
+    // Nearest enclosing `{` that has not been closed yet.
+    let depth = 0;
+    let open = -1;
+    for (let j = from - 1; j >= 0 && j > from - 12000; j--) {
+      const c = src[j];
+      if (c === "}") depth++;
+      else if (c === "{") {
+        if (depth === 0) {
+          open = j;
+          break;
+        }
+        depth--;
+      }
+    }
+    if (open === -1) return { verdict: PORT_UNKNOWN, shape: "ingen port" };
+    const range = braceRange(src, open);
+    if (!range) return { verdict: PORT_UNKNOWN, shape: "ubalanceret blok" };
+
+    // A ternary is resolved *before* the `&&` form, because both open with a
+    // locale test and only the ternary's arm says which side of the `:` the
+    // string is on. Reading the `&&` form first is what made
+    // `{locale === "se" ? "Datum …" : "Datoer …"}` report its *Danish* arm as
+    // visible on the Swedish domain: the condition is true for Swedish, and
+    // the arm was never consulted. The first version of this rule did exactly
+    // that on 14 strings across four pages.
+    const t = topLevelTernary(src, open, range[1]);
+    if (t && index > t.q) {
+      // The head of the expression, up to the `?`. If it terminates on `&&`
+      // this is an `&&` block with a stray `?` further down, not a ternary —
+      // see `portCondition`'s `consumed`. Reading its arm would invert the
+      // verdict, which is how a `da`-only block on `/brok` was reported as
+      // visible on the Swedish domain.
+      const head = portCondition(src.slice(open + 1, t.q + 1), src);
+      if (head && head.terminatedBy === "?") {
+        const tFlags = head.flags;
+        // The consequent renders when the condition holds; the alternate is
+        // every locale the condition excludes, so its flags are the complement.
+        const inConsequent = index < t.colon;
+        const armFlags = inConsequent
+          ? tFlags
+          : tFlags.map((f) => (f.startsWith("!") ? f.slice(1) : `!${f}`));
+        return {
+          verdict: portAllows(armFlags, "se") ? PORT_SE : PORT_DA,
+          shape: `${describeFlags(tFlags)} ? ${inConsequent ? "den betingede arm" : "den anden arm"}`,
+        };
+      }
+    }
+
+    const head = portCondition(src.slice(open + 1, from), src);
+    if (head) {
+      return {
+        verdict: portAllows(head.flags, "se") ? PORT_SE : PORT_DA,
+        shape: `${describeFlags(head.flags)} …`,
+      };
+    }
+    from = open;
+  }
+  return { verdict: PORT_UNKNOWN, shape: "for dyb port" };
+}
+
+/**
+ * P2 — a module-scope table in a page file whose every read sits behind a
+ * `da`-port. `/promille` and `/fart` keep their country rows and tempo labels
+ * at module scope and render them inside a Danish-only block, so the strings
+ * are correctly Danish and correctly invisible on beraknare.se.
+ *
+ * This is the page-file form of the component rules' affiliate-box reasoning
+ * ("the table is only ever passed to something that returns null"), written
+ * against `portVerdict` so the two halves cannot drift apart.
+ */
+function tableReadsAreDanishOnly(src, table) {
+  const reads = tableReads(src, table);
+  if (reads.length === 0) return false;
+  return reads.every((i) => portVerdict(src, i).verdict === PORT_DA);
+}
 /**
  * Files that are mounted on the Swedish domain by construction, not by an
  * import edge the walker can follow.
@@ -869,9 +1272,35 @@ function seMountedFiles() {
     for (const file of ALWAYS_SE_MOUNTED) {
       if (statSync(file, { throwIfNoEntry: false })) set.add(file);
     }
+    // The page files themselves, not just what they mount. A page's own JSX is
+    // where the prose lives — every `<h2>`, `<p>` and FAQ answer on 54 pages —
+    // and C157 measured 726 Danish strings in them with no way to judge any.
+    for (const file of seMountedPageFiles()) set.add(file);
     mountCache = set;
   }
   return mountCache;
+}
+
+/**
+ * `src/app/**\/page.tsx` for the pages that actually serve a Swedish domain.
+ *
+ * Three exclusions, each measured rather than assumed:
+ *  - `daOnly` pages (from `calculator-list.ts`) do not exist on beraknare.se.
+ *    C65's most expensive mistake was judging that from a filename.
+ *  - `/blog` and `/kategori` are answered with `not-found` on se and no by
+ *    `routing.ts`, read from the source so the list cannot go stale.
+ *  - `/embed`, `/api` and the rest are not calculator pages and are not in
+ *    `calculator-list.ts` at all, so they never enter the graph.
+ */
+function seMountedPageFiles() {
+  const out = new Set();
+  const danishOnly = danishOnlySections();
+  for (const [page, info] of graph) {
+    if (!info.seMounted) continue;
+    if (danishOnly.some((s) => info.href === s || info.href.startsWith(`${s}/`))) continue;
+    out.add(page);
+  }
+  return out;
 }
 
 function isSeMounted(file) {
@@ -926,6 +1355,12 @@ function rel(file) {
 function run() {
   graph = buildMountGraph();
   const seFiles = [...seMountedFiles()].sort();
+  const sePages = seMountedPageFiles();
+  // Page files vs mounted components. A test that asserts a total can be
+  // satisfied by the components alone while the pages silently drop out — the
+  // same vakuum-grøn failure as C118's union test and C115's rebuilt
+  // expectation, so the two are counted separately.
+  let candidatesFromPages = 0;
 
   const all = [];
   for (const file of seFiles) {
@@ -952,6 +1387,7 @@ function run() {
     // R4 — Danish copy inside the `se:` block. Verdict is fixed: there is no
     // port, dispatcher or dead table that makes `æ` correct in Swedish text.
     for (const f of seBlockDanishStrings(stripNoise(raw))) {
+      if (sePages.has(file)) candidatesFromPages++;
       const reviewed = REVIEWED.find(
         (r) =>
           r.file === rel(file) &&
@@ -979,6 +1415,8 @@ function run() {
     byFile.get(f.file).push(f);
   }
 
+  candidatesFromPages = all.filter((f) => sePages.has(join(ROOT, f.file))).length;
+
   const unreviewed = all.filter((f) => !f.reviewed && f.verdict === "KRÆVER ØJNE");
   const needsEyes = all.filter((f) => f.reviewed || f.verdict === "KRÆVER ØJNE");
   const dead = all.filter((f) => f.verdict === "DØD");
@@ -988,6 +1426,8 @@ function run() {
       JSON.stringify(
         {
           seMountedComponents: seFiles.length,
+          scannedPages: sePages.size,
+          candidatesFromPages,
           candidates: all.length,
           needsEyes: needsEyes.length,
           dead: dead.length,
@@ -1001,7 +1441,8 @@ function run() {
     );
   } else {
     console.log(
-      `Locale-leak: ${seFiles.length} komponenter monteres på beraknare.se/beregner.no\n` +
+      `Locale-leak: ${seFiles.length} filer monteres på beraknare.se/beregner.no ` +
+        `(${sePages.size} kalkulatorsider, resten komponenter)\n` +
         `${all.length} kandidater — ${dead.length} døde, ${needsEyes.length} kræver øjne ` +
         `(${unreviewed.length} ureviewet)\n`
     );

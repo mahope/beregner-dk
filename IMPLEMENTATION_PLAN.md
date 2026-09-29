@@ -1,3 +1,7 @@
+STATUS: KØ — **C158 er landet: opgave 158 er løst, og de 726 danske fund C157 målte på 143 sider og ikke kunne bruge, er nu delt i tre klasser af en port-analyse der læser koden og ikke filnavnet.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den, 119 er kilde-blokeret), og de ni åbne deploy-noter (C114, C115, C118–C123, C155–C157) har alle første vindue **2026-09-29 07:30** — det var 02:46, så intet kunne verificeres, og ingen blev rørt. **Valget kom af at gøre målingen brugbar, ikke af at finde en ny lækage:** C157 fandt fire danske afsnit på beraknare.se's tredjestørste side og skrev i sin egen afslutning, at de 726 fund på `src/app/*/page.tsx` var ubrugelige uden en port — fordi størstedelen er korrekt dansk i en `locale === "da"`-gren, og en regel med 726 fund er en regel ingen læser. **Rækkevidden er målt, ikke antaget: kun 54 af de 143 sider er se-monterede** — `/blog` og `/kategori` er dansk-only på svensk og norsk ifølge `routing.ts:23`, og den liste læses *fra kilden* i scanneren i stedet for at blive kopieret, fordi C118's håndskrevne forside-liste er præcis den fejltype. **De fire port-former er alle fire fundet ved at læse siderne, ikke ved at gætte:** `{locale === "da" && …}`, `{locale === "se" ? <SE/> : <DA/>}` (her afgør *armen*), `{locale === "da" ? … : …}` (den anden arm er ikke da-only) og `{locale === "da" || locale === "se"}` (synlig på se, må ikke filtreres) — plus to alias-former (`{se ? … : …}` på `/promille`, `{daSe === "se" ? … : …}` på `/tidsberegner`) hvis deklaration læses fra filen. **Resultatet på de 54 sider: 481 fund, 450 i en da-port, 31 kandidater — og alle 31 er 0 på den rigtige server**, målt på `https://beraknare.se/{alder,dato,nedtaelling,promille,tidsberegner}`, ikke på kildeformen. **Syv fejl i min egen regel, og hver af dem blev fundet fordi en plant blev rød eller en måling blev grøn på den forkerte måde** — det er pointen med port-analyse frem for et greb: (1) `topLevelTernary` krævede et værdi-tegn umiddelbart før `?`, men JSX ternaries står på tre linjer, så den matchede **0 af de 24** den var skrevet for og **24 danske strenge blev rapporteret som lækager**; (2) `&&`-reglen læst først, så den kendte ikke armen, og **14 danske alternativ-arme** blev meldt synlige på beraknare.se; (3) betingelsen blev læst i *hele* teksten mellem klammerne, som er al JSX imellem — på `/procent` fandt den en `locale === "da" &&` tyve linjer oppe og **slap en dansk lækage plantet midt i svensk prosa igennem**; (4) `topLevelTernary` læste en `&&`-blok som ternary og gjorde på `/brok` en `da`-only blok til "synlig på svensk", altså præcis det svar reglen aldrig må give; (5) `tableReads` talte tabellens egen navn med, fordi 40-tegns-vinduet omkring navnet ikke dækker `PROMILLEGRAENSER_UDLAND`'s 62-tegners typeannotation, så P2 var falsk for *alle* tabeller — en regel der strukturelt altid er falsk ser ud til at være testet; (6) alias-tuplen `[op, true, false]` blev læst 1-indiceret, så alle aliasser resolve'de til `undefined` og `portCondition` returnerede null **lydløst**, fordi "kan ikke løse" er præcis hvad den returnerer når filen ikke er som ventet — og de to sider med alias var dermed også de eneste to reglen forblev blind for. **Den syvende fejl lå i selve værktøjet:** `stripNoise` tømmer `className={…}`, altså ødelægger den klammeparring porten lever af, så løsningen er at læse to visninger af samme fil og blande dem på indeks — `stripNoise` til at *finde* strengene, rå kilde til at *parre* dem, hvilket holder fordi alle erstatninger er længdebevarende. **Harness: `locale-leak-gate.test.ts` 14 → 19 tests, dobbeltplantet pr. regel** — hver port-form i begge retninger i samme kørsel, så dansk i den *synlige svenske gren* på `/procent` gør gaten rød mens den *samme streng i en `da`-gren* holder den grøn; **modsvejs verificeret: 6 af 19 falder** med P1 og P2 slået fra, og det er netop sikkerhedsegenskaberne der skal fejle. **Tal ændrede sig kun fordi scanningssættet gjorde det:** 132 → **591** kandidater, døde 97 → **556**, kræver øjne **35 uændret**, **0** ureviewet uændret. Gate grøn: lint (**582 filer**), **2.585 tests / 168 filer** (fra 2.580 / 168), build (**141 sider**), `locale-leak.mjs --gate` exit 0 med 0 ureviewet, `knapgruppe-scan.mjs` 0/0. Kode + plan i ét commit på `ceo/page-portscan`, squashet til `master`. **MÅL:** de 54 se-monterede kalkulatorsider har **0** resterende danske strenge i den synlige tekst, målt på rigtig server; gatens 591/556/35/0 måles igen 2026-10-13.
+
+---
+
 STATUS: KØ — **C157 er landet: beraknare.se's tredjestørste side `/procent` (25.954 visninger, 2 klik, CTR 0,0 %, pos. 10,0) serverede **fire** danske afsnit midt i en ellers svensk side — og måleren der skulle have fanget dem, kunne ikke se filen de lå i.** Køen var tom (156 opgaver færdige, 98 afhænger af den `BLOCKED`-mærkede 97, 119 er kilde-blokeret), og de ni åbne deploy-noter (C114, C115, C118–C123, C155) har alle første vindue **2026-09-29 07:30** — det var 02:19, så intet kunne verificeres, og ingen blev rørt. **Valget kom ikke af en trafikmåling, men af at læse de åbne noter:** C114 (commit `db45e15`, "Svar på skillnaden mellem to tal i procent på svensk") lagde to FAQ-svar i `sePages` med `{ question: "Hur räknar man ut…", answer: "…hvor A1 er det gamle tallet…" }` — spørgsmålet svensk, svaret dansk. Mål på live bekræftede det: `hvor A1` **3**, `ligegyldig ved` **3**, `tager du middelverdien` **3** forekomster i HTML'en på `https://beraknare.se/procent`. **Og de to ting der gjorde at måleren var blind, er hver for sig en blind spot der var målt forud.** `scripts/locale-leak.mjs` har siden C73 haft regel R4 — "dansk streng i `se:`-blokken" — med det argument at *svensk aldrig skriver æ eller ø*, så reglen er fejlfri ved konstruktion. Men: (1) **`page-data.ts` var aldrig i scanningssættet.** `seMountedFiles()` følger kun `@/components/*`-importer fra en side, og siden importerer `page-data.ts` som `@/lib/page-data` — så det største oversættelsesarkiv på sitet (hver sides `title`, `description`, `metaDescription`, `keywords` og alle 9 `faqItems`, **1.192 linjer svensk**) var uden for rækkevidde. (2) **R4's bloknøgle var `se: {`, og `page-data.ts` skriver `const sePages: Record<string, PageData> = {`** — én type-annotation mellem nøgle og klamme, så mønstret matchede nul. (3) **R4 testede kun `DA_CHARS` = `[æø]`**, og de to lækager er ren ASCII: "hvor A1 er det gamle tallet", "tager du middelverdien". Alle tre er samme fejltype som C115's `//dage-til//` og C116's unionstest — en regel skrevet mod den form den blev skrevet i, ikke mod den form filen har. **Rettelsen er derfor to dele, og den målte del voks undervejs.** Først teksten: de to FAQ-svar i `sePages` (308 og 236 tegn) er oversat til svensk. **Så viste `next start` + `Host: beraknare.se` to lækager mere, som hverken R4 eller min ordliste havde fundet**, fordi de ligger i `src/app/procent/page.tsx` og ikke i datafilen: en tabel-overskrift "Samma sak i Excel, där A1 **er det gamle tallet**?" og **hele det afsluttende stykke** — "De to formlene gir aldri samme svar … der stiger til … er en stigning på … den gamle summen … procent store forskellen … regnet på … bytter du om tallene … sammenligne hvor store to beløp …" — dansk fra første til sidste ord i den svenske blok. Samme fejl som `page-data.ts`, altså samme oprindelse: en dansk sætning kopieret ind i det svenske afsnit. **Harness — tre huller, hvert med sin egen test.** **R6:** `seMountedFiles()` har nu `ALWAYS_SE_MOUNTED = [src/lib/page-data.ts]`, fordi filen monteres på *alle* sider inkl. forsiden (`getPageData(slug, locale)` vælger `sePages[slug]` på beraknare.se) — ikke bag et per-side-flag. **R5 (ny):** `DA_ASCII_WORDS` — 37 danske ord der er rene ASCII, kun valgt når den svenske form er et *andet ord* (svensk `där/inte/utan/mellan/kvar/månader/räknar/medelvärdet`, dansk `hvor/ikke/uden/mellem/tilbage/måneder/regner/middelverdien`), aldrig en anden stavning (`gör` mod `gør` ville give falsk rødt på korrekt svensk). **Delvist interpoleret:** `${elbilSe.forudsætninger.kmPrAar}` gav 2 falske fund, fordi `æ` i `forudsætninger` er en *variabel* og der rendres et tal — så `${…}`-huller blaneres før testen. **Længdegrænsen løftet 200 → 2.000:** de to rigtige lækager er 308 og 236 tegn, så den arvede 200-tegns-loft fra `scanStrings` (der findes for at springe minificerede bundles over) sprang netop de længste strenge over. **Modsvejs verificeret, tre gange:** med C114's danske tekst tilbage giver `--gate` **exit 1** på præcis `page-data.ts:3209` og `:3210`; med fixen **exit 0**. De tre nye gate-tests er hver især plantet *inde i* `sePages` — min første version appendede et modulobjekt på filens slutter, og alle tre planter var **grønne**, korrekt, fordi R4 kun kigger i den svenske blok. Samme målefejl som at plante en lækage i en `daOnly`-komponent. **Og en af mine egne sikkerhedstests var forkert:** den skrev "standardværden" i plantens brødtekst, hvilket *er* dansk, så scanneren havde ret til at melde den; planten bruger nu `/bil`'s rigtige sætning, "Med kalkylatorns standardvärden på ${…}", hvor hvert synligt ord er svensk. **En vakuum-grøn test låste fejlen fast, igen.** `procent/page.test.tsx:141` krævede `"De to formlene gir aldri samme svar"` på den **svenske** render — altså den danske sætning, som testen skulle have modsagt. C84's og C115's fejlklasse for tredje gang i træk. Nu kræver testen den svenske form, og en ny test låser otte danske strenge **negativt**. **Modsvejs verificeret: begge procent-tests falder** med master's `page.tsx`. **Målt på rigtig server** (`next start`, port 3923 verificeret fri *inden* start — målefejl nr. 15's lære), `Host: beraknare.se`: titel uændret "Procenträknare – beräkna 10 procent av ett tal", **alle 21** danske markører **0**, alle 18 svenske strenge **2-6** hver (`där A1 är det gamla talet` ×5, `De två formlerna ger` ×2, `räknat på medelvärdet` ×2, …), JSON-LD `Question` **9** uændret, dansk render urørt, `/api/health` → `status: ok`. **MÅlt og bevidst ikke bygget:** en heltalsskala over `src/app/*/page.tsx` gav **726** danske-markør-fund på **143** sider, men de er næsten alle korrekt dansk i `locale === "da"`-grene eller `daOnly`-blog (C119's måling viste `/blog` og `/kategori` er `danishOnlySections` i `routing.ts:29`). Scannet `page-data.ts` alene med R5's ordliste: **2 fund, begge de rigtige lækager, nul falske positive på 1.192 linjer** — det er den måling, ordlisten er kalibreret på. Se ❓ Til Mads for side-scope. **Gate grøn:** lint (**582 filer**), **2.580 tests / 168 filer** (fra 2.576 / 168), build (**141 sider**), `locale-leak.mjs --gate` exit 0 med **132 kandidater — 97 døde, 35 kræver øjne, 0 ureviewet** (uændret i alt andet end de to rettede), `knapgruppe-scan.mjs` 0/0. Kode + plan i ét squash-commit på `ceo/page-data-locale-leak`; se opgave 157.
 
 
@@ -14759,33 +14763,171 @@ JSON-LD `Question` **9** uændret, dansk render urørt.
   6. Harness, kørt lokalt før merge: `node scripts/locale-leak.mjs --gate`
      skal exit 0 med **0 ureviewet**.
 
-#### 158. [ ] Kø — **`src/app/*/page.tsx`: skeln mellem dansk i en `da`-gren og dansk i den synlige svenskegren (JSX-port-analyse)**
+#### 158. [x] FÆRDIG 2026-09-29 — C158 — port-analysen: `src/app/**/page.tsx` er nu i scanningssættet, og de 726 fund fra C157 er sorteret i 3 klasser
 
 **Datagrund:** C157's heltalsskala over `src/app/*/page.tsx` gav **726**
-danske-markør-fund på **143** sider, hvorimod R5's ordliste på `page-data.ts`
-gav **2 fund, begge rigtige lækager, nul falske positive på 1.192 linjer**.
-Forskellen er ikke ordlisten — den er porten.
+danske-markør-fund på **143** sider, som ingen regel kunne afgøre. Køen havde
+ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den, 119 er
+kilde-blokeret), og de ni åbne deploy-noter (C114, C115, C118–C123, C155–C157)
+har alle første vindue **2026-09-29 07:30** — det var 02:46, så intet kunne
+verificeres, og ingen blev rørt.
 
-**Hvorfor det er en opgave og ikke en copy-rettelse.** Størstedelen af de 726
-er korrekt dansk i `locale === "da" && (…)`-grene, i danske JSX-kommentarer
-eller på `/blog` og `/kategori`, som `routing.ts:29`
-(`danishOnlySections = ["/blog", "/kategori"]`) gør dansk-only. Uden en port
-er fundene ubrugelige, og en regel med 726 fund er en regel ingen læser.
+**Rækkevidde målt, ikke antaget:** kun de **se-monterede kalkulatorsider** —
+**54** af de 143. `/blog` og `/kategori` er dansk-only på se og no
+(`routing.ts:23` `danishOnlySections`, læst *fra kilden* i scanneren, ikke
+kopieret — C118's lektie), `daOnly`-sider findes slet ikke på beraknare.se, og
+`/embed` + `/api` er ikke i `calculator-list.ts`.
+
+**Porten er en boolesk, ikke en beholder.** Gå udad fra strengen, én omsluttende
+`{…}` ad gangen, og afgør hvilke locales der kan se den. Fire former findes i
+repoet, og alle fire skal kunne afgøres:
+
+| Form | Betydning |
+|---|---|
+| `{locale === "da" && (…)}` | kun da |
+| `{locale === "se" ? <SE/> : <DA/>}` | **armen** afgør, så offset betyder noget |
+| `{locale === "da" ? "…" : "…"}` | den anden arm er *ikke* da-only |
+| `{locale === "da" \|\| locale === "se"}` | synlig på se — må ikke filtreres |
+| `{se ? … : …}`, `{daSe === "se" ? … : …}` | alias, læst fra *egen deklaration* |
+
+**Resultatet: 481 fund på de 54 sider, heraf 450 i en da-port, 31 kandidater —
+og alle 31 er 0 på den rigtige server.** De 31 var JSX-kommentarer (som
+`stripNoise` ikke fjerner i port-passet) og to modul-tabels rækker
+(`PROMILLEGRAENSER_UDLAND`, `FART_TEMPO`) hvis eneste læsning ligger i en
+da-gren — den sidste fanges af P2, den første af en ny P3.
+
+**P2: "alle læsninger af denne tabel ligger i en da-port."** Dens negative
+er plantet: fjern porten om `/promille`'s landetabel, så skal de danske rækker
+rapporteres. Uden den negative kunne P2 være opfyldt af en tabel, der aldrig
+læses overhovedet.
+
+**Seks fejl fundet i min egen regel, alle fundet fordi en plant blev rød eller
+en måling blev grøn på den forkerte måde.** Det er pointen med at skrive
+reglerne som port-analyse frem for som greb:
+
+1. **Ternaries læst bagfra.** Første `topLevelTernary` krævede et
+   værdi-tegn umiddelbart før `?`. JSX ternaries står på tre linjer
+   (`{locale === "se"\n  ? …\n  : …}`), så den matchede **0 af de 24**
+   ternaries den var skrevet for — og porten faldt videre til det næste
+   `{`-niveau. Resultat: **24 danske strenge rapporteret som lækager**, bl.a.
+   hele `<h2>`-blokken på `/alder`, som er korrekt dansk med svensk tekst i
+   samme udtryk.
+2. **Ternaryens `&&`-form læst først.** Begge åbner med en locale-test, så
+   `&&`-reglen fanged `{locale === "se" ? "Datum …" : "Datoer …"}` og kendte
+   ikke armen. **14 danske alternativ-arme** rapporteret som synlige på
+   beraknare.se — `/dato` ×3, `/nedtaelling` ×2, `/alder` ×4, forsiden,
+   `/promille` ×2, `/tidsberegner`.
+3. **Betingelsen læst i hele teksten mellem klammerne.** Det er ikke en
+   betingelse, det er al JSX imellem. På `/procent` fandt den en
+   `locale === "da" &&` tyve linjer oppe, konkluderede at den svenske gren var
+   dansk-gated, og **slap en dansk lækage plantet midt i svensk prosa igennem**.
+4. **`topLevelTernary` på en `&&`-blok.** Den finder glad en `?` halvtreds
+   linjer ned i indlejret JSX og læser den arm bagfra — på `/brok` gjorde det
+   en `da`-only blok til "synlig på svensk", altså **præcis det svar denne regel
+   aldrig må give**. Derfor læser `portCondition` nu kun det *ledende* segment
+   og melder hvilket tegn der afsluttede det.
+5. **`tableReads` talte tabellens egen navn med.** Udselvingen var et
+   40-tegns vindue omkring navnet, og `PROMILLEGRAENSER_UDLAND` har en
+   62-tegners typeannotation før `=`. Så læste tabellen sig selv, P2 var falsk
+   for *alle* tabeller i repoet, og reglen så ud til at være testet. En regel
+   der strukturelt altid er falsk er værre end ingen regel. Nu er hele
+   *værdien* undtaget via `bracketRange`.
+6. **Alias-tuplen læst 1-indiceret.** `[op, true, false]` læst som
+   `m[1]`/`m[2]`, så *alle* aliasser.resolve'ede til `undefined` og
+   `portCondition` returnerede null for dem — lydløst, fordi "kan ikke
+   løse" er præcis hvad funktionen returnerer når filen ikke er som ventet.
+   `/promille` og `/tidsberegner` var de to sider med alias, så de var også de
+   eneste to reglen forblev blind for. Nu destructured, aldrig indekseret.
+   **Samme klasse som målefejl 17 og 18: en regel der fejler i den retning,
+   ingen læser bemærker.**
+
+**Sjette fejl, i `stripNoise` — fundet fordi tre sider på én gang blev grønne
+på den forkerte måde.** Porten læser klammer, og `stripNoise` tømmer
+`className={…}`/`style={…}`, altså **ødelægger den parringen**. På `/brok`
+gik porten to blokke for tidligt og læste funktionskroppens `{` som
+betingelse. Løsningen er ikke at fjerne støjen fra kildelesningen, men at læse
+**to visninger af samme fil og blande dem på indeks**: `stripNoise` til at
+*finde* strengene, rå kilde til at *parre* dem. Det holder, fordi alle
+`stripNoise`-erstatninger er længdebevarende (kommentarer → mellemrum,
+attributværdier → mellemrum), så en offset i den støjede tekst er samme offset
+i den rå.
+
+**P3: JSX-kommentarer.** `stripNoise` fjerner dem for tekst-fundene, men
+ikke for port-passet, så 14 af de 31 kandidater var kommentarer. De er
+længde-bevarende sletninger lige som resten, så samme to-visninger-løsning dækker
+det: porten og klassificeringen læser den rå kilde.
+
+**Ingen fund er en lækage.** De 14, der overstod porten, er alle dansk i en
+`da`-gren eller i en tabel, der kun læses der — **og alle 14 er 0 på
+`https://beraknare.se/{alder,dato,nedtaelling,promille,tidsberegner}`**, målt
+på rigtig server, ikke på kildeformen. R157 lækkede fordi *måleren* var blind;
+den her er bygget, fordi en måling så ud til at være ubrugelig.
+
+**Harness: `locale-leak-gate.test.ts` 14 → 19 tests, dobbeltplantet pr. regel.**
+Hver port-form er testet i **begge** retninger i samme kørsel, så ingen kan
+opfyldes af den anden: dansk i den **synlige svenske gren** på `/procent` skal
+gøre gaten rød (samme streng som C157's rigtige lækage), den **samme streng i
+en `da`-gren** skal holde den grøn. Plus `/alder`'s alternativ-arm
+(`"…aldersspørgsmål og hvor gammel er jeg"` skal være grøn — det er den fejl
+punkt 1 lavede), P2's negative, og at **54 sider** er i sættet.
+**Modsvejs verificeret: 6 af 19 falder** med P1 og P2 slået fra — de er
+sikkerhedsegenskaberne, og de skal være de der fejler.
+
+**Tal ændrede sig kun fordi scanningssættet gjorde det:** 132 → **591**
+kandidater, 35 → **35** kræver øjne, **0** ureviewet uændret, døde 97 → **556**.
+Den gamle `candidates < 250`-grænse er hævet til 700 **med begrundelse** (72 →
+126 filer); en brudt locale-objekt-udelukelse ville tilføje tusindvis, så
+marginen er bred med vilje og fejler stadig på det rigtige.
+
+**Gate grøn:** lint (**582 filer**), **2.585 tests / 168 filer** (fra 2.580 /
+168 — de 5 nye), build (**141 sider**), `locale-leak.mjs --gate` exit 0 med
+**0 ureviewet**, `knapgruppe-scan.mjs` 0/0.
+Kode + plan i ét commit på `ceo/page-portscan`, squashet til `master`.
+
+**MÅL:** baseline er de **726** fund C157 målte på 143 sider; efter reglen er
+**0** resterende danske strenge i den synlige tekst på de **54**
+se-monterede kalkulatorsider — målt på rigtig server, ikke på kildeformen.
+Gatens egne tal (591/556/35/0) måles igen **2026-10-13**; en voksende
+`kræver øjne` uden voksende `ureviewet` er en port, der er holdt op at læse.
+
+#### 159. [ ] Kø — **de ni åbne deploy-noter skal lukkes ved indholdskontrol, og port-reglen skal have kørt en hel cyklus på rigtig server**
+
+**Datagrund:** de ni noter (C114, C115, C118–C123, C155–C157) står åbne med
+første vindue **2026-09-29 07:30**. C158 merge/pushes efter 02:5x, altså efter
+den batch, så C158's egen note får første vindue **12:30**.
 
 **Acceptkriterier:**
-1. Samme port-analyse som `localeObjectRanges` + R3: `guardedAt()`-logikken fra
-   `scripts/locale-leak.mjs` genbruges på JSX, så `locale === "da" && …`,
-   `{locale === "se" ? … : …}` og `erDa`-vilkår giver hver sit svar.
-2. Nye fund skal lig i den **synlige** svenskegren. Målt på `Host:
-   beraknare.se` med `next start`, ikke på kildeformen alene.
-3. Rækkevidde: kun de **se-monterede** kalkulatorsider, ikke `/blog`,
-   `/kategori`, `/embed`, `/api` eller `daOnly`-sider.
-4. `node scripts/locale-leak.mjs --gate` exit 0 med **0 ureviewet**, og hvert
-   `REVIEWED`-entry med en begrundelse.
-5. En test pr. regel i `locale-leak-gate.test.ts`, plantet i en `da`-gren (skal
-   være grøn) og i den synlige svenskegren (skal være rød) — samme
-   dobbeltplant som C157's tre.
+1. Luk hver note ved **indhold**, ikke HTTP 200 — de strenge hver note
+   navngiver, talt på den URL den note nævner.
+2. Kør `node scripts/locale-leak.mjs --gate` på den **byggede** server
+   (`next start` med `Host: beraknare.se`) og sammenlign fundene med
+   kildefundene. De to skal være lige — forskellen er det, porten ikke ser.
+3. Hvis de afviger, er porten for snæver, og det er en **ny iteration**, ikke
+   en note der lukkes.
 
-**MÅL:** baseline er de **726** fund; efter reglen skal tallet på rigtig
-server-renderede svenske sider være **0** resterende danske strenge i den
-synlige tekst. Måles igen 2026-10-13.
+- ⏳ **VERIFICÉR DEPLOY: C158 — `scripts/locale-leak.mjs` læser nu
+  `src/app/**/page.tsx` med port-analyse, og `locale-leak-gate.test.ts` har
+  fem nye dobbeltplantede tests.** Kode + plan i ét commit på
+  `ceo/page-portscan`, squashet til `master`. Første kandidatvindue
+  **2026-09-29 12:30** (merge sker efter 07:30-batchen). Kun
+  `scripts/locale-leak.mjs` og `src/lib/locale-leak-gate.test.ts` er rørt —
+  **ingen beregningslogik, ingen side, ingen dansk tekst, ingen sitemap,
+  ingen URL ændret**.
+  **Dette er et harness-only commit**, så det flytter ingen synlig tekst og
+  kan derfor *ikke* lukkes ved at se noget ændre sig på sitet. Det er skrevet
+  her, fordi en note der ikke kan lukkes på indhold ellers ser ud som en note
+  der er glemt. Verificér **adfærd, på rigtig server**:
+  1. `npm run test -- src/lib/locale-leak-gate.test.ts` skal give **19
+     passed** — 19, ikke 14; de fem nye er hele pointen.
+  2. `node scripts/locale-leak.mjs --gate` skal exit 0 og skrive på linje 1
+     **"126 filer monteres på beraknare.se/beregner.no (54 kalkulatorsider,
+     resten komponenter)"** og på linje 2 **"591 kandidater — 556 døde, 35
+     kræver øjne (0 ureviewet)"**. Alle fem tal skal stemme.
+  3. `node scripts/locale-leak.mjs --gate` skal fortsat finde **0** danske
+     strenge i den synlige tekst på de 54 se-monterede kalkulatorsider. Det
+     er hele opgavens acceptkriterium, og det er et tal der *ikke* stiger
+     når scanningssættet bliver større — hvis det gør, er porten for snæver.
+  4. KONTROL: `https://minberegner.dk/api/health` skal svare `status: ok`, og
+     `https://minberegner.dk/procent` skal være **uændret** (200, samme
+     `<title>` "Procentberegner – beregn 10 procent af et tal", JSON-LD 9
+     `Question`) — dette commit rører ingen synlig tekst på nogen side.

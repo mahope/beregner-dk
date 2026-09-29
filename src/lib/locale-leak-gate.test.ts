@@ -81,8 +81,14 @@ describe("locale-leak scanner", () => {
   it("does not report Danish copy that lives in a da:/se:/no: object", () => {
     // If the locale-object exclusion broke, every labels table on the site
     // would light up — and the candidate count would jump by hundreds.
+    //
+    // The bound was 250 when only the 72 components were scanned. It is now 700
+    // for 126 files, and that is the point of writing it as a number: the
+    // number moved because the scan set grew, not because the rule loosened. A
+    // broken exclusion adds every locale object on the site — thousands — so
+    // the bound has a wide margin on purpose and still fails on the real thing.
     const result = scan();
-    expect(result.candidates).toBeLessThan(250);
+    expect(result.candidates).toBeLessThan(700);
   });
 
   it("flags a module-scope Danish string in an SE-mounted component", () => {
@@ -304,6 +310,138 @@ describe("locale-leak scanner", () => {
         execFileSync("node", [SCRIPT, "--gate"], { cwd: ROOT, stdio: "pipe" });
       expect(failing).toThrow();
       expect(JSON.stringify(scan().unreviewed)).toContain("hvor hvor");
+    } finally {
+      writeFileSync(target, original);
+    }
+  });
+
+  // ------------------------------------------------------------------ P1/P2
+  //
+  // The port analysis is the rule that makes `src/app/**` scannable at all, and
+  // it is the one rule that can be *too* eager: a port analysis that resolves
+  // wrongly reports correct Danish as a leak, and 24 such finds on one page is
+  // how a gate gets ignored. So every port shape is tested in both directions —
+  // planted in a Danish branch (must stay green) and in the visible Swedish
+  // branch (must go red) — in the same run, so neither can be satisfied by the
+  // other.
+
+  /**
+   * Plants inside a `{locale === "se" && (…)}` block, the arm a Swedish reader
+   * actually sees. `src/app/procent/page.tsx` is the host because C157 found a
+   * real Danish block in its Swedish half, so the shape is the one the bug had,
+   * not an invented one.
+   */
+  function plantInSeBranch(src: string, danish: string): string {
+    const re = /\{locale === "se" && \(\n/;
+    const m = re.exec(src);
+    if (!m) throw new Error("se-gren ikke fundet");
+    return `${src.slice(0, m.index + m[0].length)}<p>${danish}</p>\n${src.slice(m.index + m[0].length)}`;
+  }
+
+  /** Plants inside a `{locale === "da" && (…)}` block, which no SE reader sees. */
+  function plantInDaBranch(src: string, danish: string): string {
+    const re = /\{locale === "da" && \(\n/;
+    const m = re.exec(src);
+    if (!m) throw new Error("da-gren ikke fundet");
+    return `${src.slice(0, m.index + m[0].length)}<p>${danish}</p>\n${src.slice(m.index + m[0].length)}`;
+  }
+
+  it("scans the calculator page files, not just the components they mount", () => {
+    // C157 measured 726 Danish strings on 143 page files and could not act on
+    // any of them. If the pages drop out of the scan set, the number of scanned
+    // files goes back to the 72 components alone and the prose on 54 pages is
+    // invisible again. C118's lesson: a test that asserts a property, not a
+    // name, is what catches the set shrinking.
+    const result = scan();
+    expect(result.scannedPages).toBeGreaterThan(40);
+    // The pages are the files that carry the answer-first `<h2>`s, so at least
+    // one Danish string on a page file must reach the verdict layer.
+    expect(result.candidatesFromPages).toBeGreaterThan(0);
+  });
+
+  it("flags Danish in the visible Swedish branch of a page", () => {
+    const target = resolve(ROOT, "src", "app", "procent", "page.tsx");
+    const original = readFileSync(target);
+    try {
+      writeFileSync(
+        target,
+        plantInSeBranch(original.toString("utf8"), "hvor A1 er det gamle tallet")
+      );
+      const failing = () =>
+        execFileSync("node", [SCRIPT, "--gate"], { cwd: ROOT, stdio: "pipe" });
+      expect(failing).toThrow();
+      expect(JSON.stringify(scan().unreviewed)).toContain("hvor A1 er det gamle tallet");
+    } finally {
+      writeFileSync(target, original);
+    }
+  });
+
+  it("does not flag the same string in a da: branch of the same page", () => {
+    // The safety property, and the half that would break silently. If the port
+    // walk cannot see a `{locale === "da" && (…)}` wrapper, every page's Danish
+    // answer-first block becomes a finding and the gate is noise. Both halves
+    // run against the same host file, so the difference is the port alone.
+    const target = resolve(ROOT, "src", "app", "procent", "page.tsx");
+    const original = readFileSync(target);
+    try {
+      writeFileSync(
+        target,
+        plantInDaBranch(original.toString("utf8"), "hvor A1 er det gamle tallet")
+      );
+      expect(() =>
+        execFileSync("node", [SCRIPT, "--gate"], { cwd: ROOT, stdio: "pipe" })
+      ).not.toThrow();
+      expect(JSON.stringify(scan().unreviewed)).not.toContain("hvor A1 er det gamle tallet");
+    } finally {
+      writeFileSync(target, original);
+    }
+  });
+
+  it("reads the else-arm of a locale ternary as Danish, not as Swedish", () => {
+    // The bug this rule was written after, on a real page. `/alder`'s
+    // answer-first block is `{locale === "se" ? "Svar på de vanligaste
+    // åldersfrågorna" : "Svar på de oftest stillede aldersspørgsmål"}` — the
+    // Danish half is the *alternate* arm, with Swedish text in the same
+    // expression. The first version of `topLevelTernary` demanded a value
+    // character immediately before the `?`, matched zero of the 24 ternaries it
+    // was written for, and reported every one of them as a leak. Locked by
+    // planting a Danish string in that exact alternate arm.
+    const target = resolve(ROOT, "src", "app", "alder", "page.tsx");
+    const original = readFileSync(target);
+    try {
+      const src = original.toString("utf8");
+      const anchor = /(:\s*)"Svar på de oftest stillede aldersspørgsmål"/;
+      expect(anchor.test(src)).toBe(true);
+      writeFileSync(
+        target,
+        src.replace(anchor, '$1"Svar på de oftest stillede aldersspørgsmål og hvor gammel er jeg"')
+      );
+      expect(() =>
+        execFileSync("node", [SCRIPT, "--gate"], { cwd: ROOT, stdio: "pipe" })
+      ).not.toThrow();
+      expect(JSON.stringify(scan().unreviewed)).not.toContain("hvor gammel er jeg");
+    } finally {
+      writeFileSync(target, original);
+    }
+  });
+
+  it("does not excuse a table that is read outside a da-port", () => {
+    // P2 ("every read of this table sits behind a da-port") is a real rule, so
+    // it needs its negative too: move the one read of `/promille`'s country
+    // table out of the Danish block, and the Danish rows in it must be
+    // reported. Without this, P2 could be satisfied by a table that is simply
+    // never read at all.
+    const target = resolve(ROOT, "src", "app", "promille", "page.tsx");
+    const original = readFileSync(target);
+    try {
+      const src = original.toString("utf8");
+      // Un-gate the read: the `{locale === "da" && (` above it becomes a plain
+      // fragment, which is the state a real leak would be in.
+      writeFileSync(target, src.replace(/\{locale === "da" && \(\n/, "{\n"));
+      const failing = () =>
+        execFileSync("node", [SCRIPT, "--gate"], { cwd: ROOT, stdio: "pipe" });
+      expect(failing).toThrow();
+      expect(JSON.stringify(scan().unreviewed)).toContain("Østrig");
     } finally {
       writeFileSync(target, original);
     }
