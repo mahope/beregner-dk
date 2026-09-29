@@ -525,7 +525,7 @@ export default function BraendstofBeregner() {
       {/* Sammenligningstabel */}
       <div className="bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg overflow-hidden">
         <div className="p-4 bg-gray-50 dark:bg-gray-900/50 border-b dark:border-gray-700">
-          <h3 className="font-medium dark:text-white">{l.compareTitle}</h3>
+          <h2 className="font-medium dark:text-white">{l.compareTitle}</h2>
         </div>
         <div className="p-4 overflow-x-auto">
           <table className="w-full text-sm dark:text-gray-200">

@@ -613,7 +613,7 @@ export default function BoliglaanBeregner() {
 
           {/* Boligomkostninger */}
           <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-            <h3 className="font-medium mb-3 dark:text-white">{l.otherCostsTitle}</h3>
+            <h2 className="font-medium mb-3 dark:text-white">{l.otherCostsTitle}</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <InputField
                 label={l.propertyTax}
@@ -721,7 +721,7 @@ export default function BoliglaanBeregner() {
                 {/* Afdrag vs rente fordeling (visuelt) */}
                 {laanType !== "afdragsfrit" && resultat.amortisering.length > 0 && (
                   <div className="mt-6">
-                    <h4 className="text-sm font-medium mb-3 dark:text-gray-200">{l.amortVsInterest}</h4>
+                    <h3 className="text-sm font-medium mb-3 dark:text-gray-200">{l.amortVsInterest}</h3>
                     <div className="space-y-1.5">
                       {resultat.amortisering
                         .filter((_, i) => i % Math.max(1, Math.floor(resultat.amortisering.length / 10)) === 0 || i === resultat.amortisering.length - 1)
@@ -932,7 +932,7 @@ export default function BoliglaanBeregner() {
 
       {/* Aktuelle renter */}
       <div className="p-4 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
-        <h3 className="font-medium mb-3 text-blue-800 dark:text-blue-200">{l.ratesTitle}</h3>
+        <h2 className="font-medium mb-3 text-blue-800 dark:text-blue-200">{l.ratesTitle}</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
           <div>
             <span className="text-blue-600 dark:text-blue-400 font-medium">{l.fixed4}</span>

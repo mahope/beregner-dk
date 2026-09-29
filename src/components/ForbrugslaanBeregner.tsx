@@ -382,9 +382,9 @@ export default function ForbrugslaanBeregner() {
 
       {/* Tips sektion */}
       <div className="p-4 bg-yellow-50 dark:bg-yellow-900/30 rounded-lg">
-        <h3 className="font-medium mb-3 text-yellow-800 dark:text-yellow-200">
+        <h2 className="font-medium mb-3 text-yellow-800 dark:text-yellow-200">
           {l.tipsTitle}
-        </h3>
+        </h2>
         <ul className="text-sm text-yellow-700 dark:text-yellow-300 space-y-2">
           <li>
             • <strong>{l.tip1Title}</strong> - {l.tip1}
@@ -424,9 +424,9 @@ export default function ForbrugslaanBeregner() {
 
       {/* Ydelsestabel */}
       <div className="overflow-x-auto">
-        <h3 className="font-medium mb-3 text-gray-900 dark:text-gray-100">
+        <h2 className="font-medium mb-3 text-gray-900 dark:text-gray-100">
           {l.tableTitle}
-        </h3>
+        </h2>
         <table className="w-full text-sm">
           <thead>
             <tr className="bg-gray-100 dark:bg-gray-800">

@@ -244,9 +244,9 @@ export default function RentefradragBeregner() {
         <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-6">
           {result.totalInterestExpense > 0 ? (
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                 Dit rentefradrag
-              </h3>
+              </h2>
 
               <div className="bg-white dark:bg-gray-700 rounded-lg p-4 shadow-sm">
                 <div className="text-sm text-gray-500 dark:text-gray-400">Samlede renteudgifter</div>
@@ -335,7 +335,7 @@ export default function RentefradragBeregner() {
       {/* Info boxes */}
       <div className="grid md:grid-cols-2 gap-4 mt-6">
         <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
-          <h4 className="font-semibold text-blue-800 dark:text-blue-300 mb-2 flex items-center gap-2"><Lightbulb className="h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden="true" focusable="false" />Bundfradrag 2026</h4>
+          <h2 className="font-semibold text-blue-800 dark:text-blue-300 mb-2 flex items-center gap-2"><Lightbulb className="h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden="true" focusable="false" />Bundfradrag 2026</h2>
           <p className="text-sm text-blue-700 dark:text-blue-400">
             De første {RENTEFRADRAG_2026.highRateLimitSingle.toLocaleString('da-DK')} kr. i renteudgifter
             (enlig) eller {RENTEFRADRAG_2026.highRateLimitCouple.toLocaleString('da-DK')} kr. (par) giver
@@ -345,7 +345,7 @@ export default function RentefradragBeregner() {
           </p>
         </div>
         <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
-          <h4 className="font-semibold text-green-800 dark:text-green-300 mb-2 flex items-center gap-2"><CircleCheck className="h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden="true" focusable="false" />Automatisk indberetning</h4>
+          <h2 className="font-semibold text-green-800 dark:text-green-300 mb-2 flex items-center gap-2"><CircleCheck className="h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden="true" focusable="false" />Automatisk indberetning</h2>
           <p className="text-sm text-green-700 dark:text-green-400">
             Din bank indberetter automatisk dine renteudgifter til SKAT. 
             Tjek at tallene stemmer i din forskudsopgørelse.

@@ -114,14 +114,14 @@ describe("procent: formlerne har én ejer", () => {
   // siden. Uden denne test kan "én forekomst" opfyldes ved at slette dem
   // begge steder, og læseren taber det han kan slå op.
   test.each([
-    ["da", ">Hurtig reference</h3>"],
-    ["se", ">Snabbreferens</h3>"],
+    ["da", ">Hurtig reference</h2>"],
+    ["se", ">Snabbreferens</h2>"],
   ] as const)(
     "værktøjets egen Formler-boks er stadig den, der står på %s",
     async (locale, hurtigReference) => {
       const html = await render(locale);
 
-      expect(html).toContain(">Formler</h3>");
+      expect(html).toContain(">Formler</h2>");
       // Hurtig reference står side om side med Formler-boksen og er ikke
       // duplikeret nogen andet sted.
       expect(html).toContain("10% = 1/10");

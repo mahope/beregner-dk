@@ -550,7 +550,7 @@ export default function KvadratmeterBeregner() {
 
       {/* Prisberegning */}
       <div className="bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg p-6">
-        <h3 className="font-medium mb-4 dark:text-white">{l.beregnPris}</h3>
+        <h2 className="font-medium mb-4 dark:text-white">{l.beregnPris}</h2>
         <div className="flex flex-col md:flex-row gap-4 items-end">
           <div className="flex-1">
             <label htmlFor="kvadratmeter-pris-m2" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.prisPrM2}</label>
@@ -579,7 +579,7 @@ export default function KvadratmeterBeregner() {
 
       {/* Materialeberegning */}
       <div className="bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg p-6">
-        <h3 className="font-medium mb-1 dark:text-white">{l.materialer}</h3>
+        <h2 className="font-medium mb-1 dark:text-white">{l.materialer}</h2>
         <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">{l.spildKilde}</p>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
@@ -706,7 +706,7 @@ export default function KvadratmeterBeregner() {
       {/* Omregningsliste */}
       <div className="bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg overflow-hidden">
         <div className="p-4 bg-gray-50 dark:bg-gray-900/50 border-b dark:border-gray-700">
-          <h3 className="font-medium dark:text-white">{l.omregnAreal}</h3>
+          <h2 className="font-medium dark:text-white">{l.omregnAreal}</h2>
         </div>
         <div className="p-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
@@ -746,19 +746,19 @@ export default function KvadratmeterBeregner() {
         </summary>
         <div className="p-4 pt-0 space-y-4 text-sm dark:text-gray-300">
           <div>
-            <h4 className="font-medium mb-1 dark:text-white">{l.rektangelFormel}</h4>
+            <h3 className="font-medium mb-1 dark:text-white">{l.rektangelFormel}</h3>
             <code className="block bg-white dark:bg-gray-700 p-2 rounded border dark:border-gray-600 dark:text-gray-200">{l.rektangelFormula}</code>
           </div>
           <div>
-            <h4 className="font-medium mb-1 dark:text-white">{l.cirkelFormel}</h4>
+            <h3 className="font-medium mb-1 dark:text-white">{l.cirkelFormel}</h3>
             <code className="block bg-white dark:bg-gray-700 p-2 rounded border dark:border-gray-600 dark:text-gray-200">{l.cirkelFormula}</code>
           </div>
           <div>
-            <h4 className="font-medium mb-1 dark:text-white">{l.trekantFormel}</h4>
+            <h3 className="font-medium mb-1 dark:text-white">{l.trekantFormel}</h3>
             <code className="block bg-white dark:bg-gray-700 p-2 rounded border dark:border-gray-600 dark:text-gray-200">{l.trekantFormula}</code>
           </div>
           <div>
-            <h4 className="font-medium mb-1 dark:text-white">{l.trapezFormel}</h4>
+            <h3 className="font-medium mb-1 dark:text-white">{l.trapezFormel}</h3>
             <code className="block bg-white dark:bg-gray-700 p-2 rounded border dark:border-gray-600 dark:text-gray-200">{l.trapezFormula}</code>
           </div>
         </div>

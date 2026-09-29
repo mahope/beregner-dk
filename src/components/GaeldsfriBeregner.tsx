@@ -361,7 +361,7 @@ export default function GaeldsfriBeregner() {
       {/* Results */}
       {result ? (
         <div className="bg-gradient-to-br from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 rounded-xl p-6 animate-fade-in space-y-4">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{l.dinGaeldsafvikling}</h3>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{l.dinGaeldsafvikling}</h2>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <div className="bg-white dark:bg-gray-700 rounded-lg p-3 shadow-sm text-center">
@@ -433,13 +433,13 @@ export default function GaeldsfriBeregner() {
       {/* Info */}
       <div className="grid md:grid-cols-2 gap-4 mt-6">
         <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
-          <h4 className="font-semibold text-blue-800 dark:text-blue-300 mb-2">{l.lavineMetoden}</h4>
+          <h2 className="font-semibold text-blue-800 dark:text-blue-300 mb-2">{l.lavineMetoden}</h2>
           <p className="text-sm text-blue-700 dark:text-blue-400">
             {l.lavineDesc}
           </p>
         </div>
         <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4">
-          <h4 className="font-semibold text-purple-800 dark:text-purple-300 mb-2">{l.sneboldMetoden}</h4>
+          <h2 className="font-semibold text-purple-800 dark:text-purple-300 mb-2">{l.sneboldMetoden}</h2>
           <p className="text-sm text-purple-700 dark:text-purple-400">
             {l.sneboldDesc}
           </p>

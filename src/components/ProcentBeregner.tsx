@@ -387,7 +387,7 @@ export default function ProcentBeregner() {
       {/* Quick reference */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
-          <h3 className="font-medium mb-2 dark:text-gray-100">{l.quickReference}</h3>
+          <h2 className="font-medium mb-2 dark:text-gray-100">{l.quickReference}</h2>
           <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
             <li>10% = 1/10</li>
             <li>25% = 1/4</li>
@@ -397,7 +397,7 @@ export default function ProcentBeregner() {
           </ul>
         </div>
         <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
-          <h3 className="font-medium mb-2 dark:text-gray-100">{l.formulas}</h3>
+          <h2 className="font-medium mb-2 dark:text-gray-100">{l.formulas}</h2>
           <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
             <li>{l.formulaProcent}</li>
             <li>{l.formulaDel}</li>

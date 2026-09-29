@@ -349,9 +349,9 @@ export default function BarselBeregner() {
         <div role="status" aria-live="polite" aria-atomic="true" className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-6">
           {result ? (
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                 {l.estimatedBenefits}
-              </h3>
+              </h2>
 
               <div className="bg-white dark:bg-gray-700 rounded-lg p-4 shadow-sm">
                 <div className="text-sm text-gray-500 dark:text-gray-400">{l.weeklyRateBeforeTax}</div>
@@ -436,13 +436,13 @@ export default function BarselBeregner() {
       {/* Info boxes */}
       <div className="grid md:grid-cols-2 gap-4 mt-6">
         <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
-          <h4 className="font-semibold text-blue-800 dark:text-blue-300 mb-2">
+          <h2 className="font-semibold text-blue-800 dark:text-blue-300 mb-2">
             {parent === 'mor' ? (
               <span className="inline-flex items-center gap-2"><User className="h-4 w-4" strokeWidth={1.75} aria-hidden="true" focusable="false" />{l.motherLeave}</span>
             ) : (
               <span className="inline-flex items-center gap-2"><UserRound className="h-4 w-4" strokeWidth={1.75} aria-hidden="true" focusable="false" />{l.fatherLeave}</span>
             )}
-          </h4>
+          </h2>
           <ul className="text-sm text-blue-700 dark:text-blue-400 space-y-1">
             {parent === 'mor' ? (
               <>
@@ -461,7 +461,7 @@ export default function BarselBeregner() {
           </ul>
         </div>
         <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
-          <h4 className="font-semibold text-green-800 dark:text-green-300 mb-2 flex items-center gap-2"><Lightbulb className="h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden="true" focusable="false" />{l.tip}</h4>
+          <h2 className="font-semibold text-green-800 dark:text-green-300 mb-2 flex items-center gap-2"><Lightbulb className="h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden="true" focusable="false" />{l.tip}</h2>
           <p className="text-sm text-green-700 dark:text-green-400">
             {l.tipText}
           </p>

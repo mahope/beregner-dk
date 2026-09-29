@@ -446,9 +446,9 @@ export default function RenteBeregner() {
 
           {/* Låntype forklaring */}
           <div className="p-4 bg-blue-50 rounded-lg dark:bg-blue-900/20">
-            <h3 className="font-medium mb-2 dark:text-white">
+            <h2 className="font-medium mb-2 dark:text-white">
               {type === "annuitet" ? l.aboutAnnuitet : l.aboutSerielaan}
-            </h3>
+            </h2>
             <p className="text-sm text-gray-600 dark:text-gray-400">
               {type === "annuitet" ? l.annuitetDesc : l.serielaanDesc}
             </p>

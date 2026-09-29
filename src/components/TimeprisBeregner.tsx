@@ -508,7 +508,7 @@ export default function TimeprisBeregner() {
 
           {/* Visuel breakdown */}
           <div className="p-4 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg">
-            <h4 className="text-sm font-medium mb-3 dark:text-gray-200">{l.omsaetningFordeling}</h4>
+            <h3 className="text-sm font-medium mb-3 dark:text-gray-200">{l.omsaetningFordeling}</h3>
             <div className="flex h-8 rounded-full overflow-hidden mb-3">
               <div className="bg-green-500" style={{ width: `${beregningFraTimepris.nettoPct}%` }} title={l.netto} />
               <div className="bg-red-400" style={{ width: `${beregningFraTimepris.skatPct}%` }} title={l.skat} />
@@ -567,7 +567,7 @@ export default function TimeprisBeregner() {
 
       {/* Tips */}
       <div className="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-        <h3 className="font-medium text-blue-800 dark:text-blue-200 mb-2">{l.tipsTitle}</h3>
+        <h2 className="font-medium text-blue-800 dark:text-blue-200 mb-2">{l.tipsTitle}</h2>
         <ul className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
           <li>{l.tip1}</li>
           <li>{l.tip2}</li>
@@ -580,12 +580,12 @@ export default function TimeprisBeregner() {
       {/* Typiske timepriser */}
       <div className="bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg overflow-hidden">
         <div className="p-4 bg-gray-50 dark:bg-gray-700 border-b dark:border-gray-600">
-          <h3 className="font-medium dark:text-white">{l.typiskePriser}</h3>
+          <h2 className="font-medium dark:text-white">{l.typiskePriser}</h2>
         </div>
         <div className="p-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div>
-              <h4 className="font-medium mb-2 dark:text-gray-200">{l.itUdvikling}</h4>
+              <h3 className="font-medium mb-2 dark:text-gray-200">{l.itUdvikling}</h3>
               <ul className="space-y-1 text-gray-600 dark:text-gray-400">
                 <li>{l.juniorUdvikler}</li>
                 <li>{l.seniorUdvikler}</li>
@@ -593,7 +593,7 @@ export default function TimeprisBeregner() {
               </ul>
             </div>
             <div>
-              <h4 className="font-medium mb-2 dark:text-gray-200">{l.kreativMarketing}</h4>
+              <h3 className="font-medium mb-2 dark:text-gray-200">{l.kreativMarketing}</h3>
               <ul className="space-y-1 text-gray-600 dark:text-gray-400">
                 <li>{l.grafiskDesigner}</li>
                 <li>{l.tekstforfatter}</li>
@@ -601,7 +601,7 @@ export default function TimeprisBeregner() {
               </ul>
             </div>
             <div>
-              <h4 className="font-medium mb-2 dark:text-gray-200">{l.raadgivning}</h4>
+              <h3 className="font-medium mb-2 dark:text-gray-200">{l.raadgivning}</h3>
               <ul className="space-y-1 text-gray-600 dark:text-gray-400">
                 <li>{l.konsulent}</li>
                 <li>{l.advokat}</li>
@@ -609,7 +609,7 @@ export default function TimeprisBeregner() {
               </ul>
             </div>
             <div>
-              <h4 className="font-medium mb-2 dark:text-gray-200">{l.haandvaerkService}</h4>
+              <h3 className="font-medium mb-2 dark:text-gray-200">{l.haandvaerkService}</h3>
               <ul className="space-y-1 text-gray-600 dark:text-gray-400">
                 <li>{l.haandvaerker}</li>
                 <li>{l.fotograf}</li>

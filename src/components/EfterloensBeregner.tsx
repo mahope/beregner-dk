@@ -272,9 +272,9 @@ export default function EfterloensBeregner() {
         <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-xl p-6">
           {result.eligible ? (
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                 Din efterløn
-              </h3>
+              </h2>
 
               <div className="bg-white dark:bg-gray-700 rounded-lg p-4 shadow-sm">
                 <div className="text-sm text-gray-500 dark:text-gray-400">Efterlønsalder</div>
@@ -374,14 +374,14 @@ export default function EfterloensBeregner() {
       {/* Info boxes */}
       <div className="grid md:grid-cols-2 gap-4 mt-6">
         <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
-          <h4 className="font-semibold text-blue-800 dark:text-blue-300 mb-2 flex items-center gap-2"><Lightbulb className="h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden="true" focusable="false" />2-års reglen</h4>
+          <h3 className="font-semibold text-blue-800 dark:text-blue-300 mb-2 flex items-center gap-2"><Lightbulb className="h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden="true" focusable="false" />2-års reglen</h3>
           <p className="text-sm text-blue-700 dark:text-blue-400">
             Udskyder du efterlønnen i mindst 2 år efter efterlønsalderen, 
             får du fuld dagpengesats (100%) i stedet for 91%.
           </p>
         </div>
         <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
-          <h4 className="font-semibold text-green-800 dark:text-green-300 mb-2 flex items-center gap-2"><Trophy className="h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden="true" focusable="false" />Præmieordningen</h4>
+          <h3 className="font-semibold text-green-800 dark:text-green-300 mb-2 flex items-center gap-2"><Trophy className="h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden="true" focusable="false" />Præmieordningen</h3>
           <p className="text-sm text-green-700 dark:text-green-400">
             Som udgangspunkt udløser 481 arbejdstimer én skattefri præmieportion på
             15.870 kr. for fuldtidsforsikrede (10.580 kr. for deltidsforsikrede), og

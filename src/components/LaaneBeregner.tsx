@@ -382,7 +382,7 @@ export default function LaaneBeregner() {
 
         {laaneType === "sammenlign" && (
           <div className="mt-4 pt-4 border-t dark:border-gray-700">
-            <h4 className="font-medium mb-3 dark:text-white">{l.loan2Title}</h4>
+            <h3 className="font-medium mb-3 dark:text-white">{l.loan2Title}</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label htmlFor="laane-annualrate-2" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.annualRate}</label>
@@ -492,7 +492,7 @@ export default function LaaneBeregner() {
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="p-6 bg-white border-2 border-blue-500 rounded-xl dark:bg-gray-800">
-              <h4 className="font-medium text-blue-600 mb-4 dark:text-blue-400">{l.loan1Label}: {renteSats}% i {loebetidAar} {l.termUnit}</h4>
+              <h3 className="font-medium text-blue-600 mb-4 dark:text-blue-400">{l.loan1Label}: {renteSats}% i {loebetidAar} {l.termUnit}</h3>
               <div className="space-y-2 dark:text-gray-300">
                 <div className="flex justify-between">
                   <span>{l.monthlyPayment}</span>
@@ -509,7 +509,7 @@ export default function LaaneBeregner() {
               </div>
             </div>
             <div className="p-6 bg-white border-2 border-green-500 rounded-xl dark:bg-gray-800">
-              <h4 className="font-medium text-green-600 mb-4 dark:text-green-400">{l.loan2Label}: {rente2}% i {loebetid2} {l.termUnit}</h4>
+              <h3 className="font-medium text-green-600 mb-4 dark:text-green-400">{l.loan2Label}: {rente2}% i {loebetid2} {l.termUnit}</h3>
               <div className="space-y-2 dark:text-gray-300">
                 <div className="flex justify-between">
                   <span>{l.monthlyPayment}</span>
@@ -542,7 +542,7 @@ export default function LaaneBeregner() {
       {laaneType === "annuitet" && (
         <div className="bg-white border rounded-lg overflow-hidden dark:bg-gray-800 dark:border-gray-700">
           <div className="p-4 bg-gray-50 border-b dark:bg-gray-900/50 dark:border-gray-700">
-            <h3 className="font-medium dark:text-white">{l.amortTitle}</h3>
+            <h2 className="font-medium dark:text-white">{l.amortTitle}</h2>
           </div>
           <div className="p-4 overflow-x-auto">
             <table className="w-full text-sm dark:text-gray-300">
@@ -583,7 +583,7 @@ export default function LaaneBeregner() {
 
       {/* Info */}
       <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 dark:bg-yellow-900/20 dark:border-yellow-700">
-        <h3 className="font-medium text-yellow-800 mb-2 dark:text-yellow-300">{l.importantTitle}</h3>
+        <h2 className="font-medium text-yellow-800 mb-2 dark:text-yellow-300">{l.importantTitle}</h2>
         <ul className="text-sm text-yellow-700 space-y-1 dark:text-yellow-400">
           {l.importantItems.map((item, i) => (
             <li key={i}>{item}</li>

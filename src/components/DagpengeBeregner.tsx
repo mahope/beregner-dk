@@ -278,9 +278,9 @@ export default function DagpengeBeregner() {
         >
         {resultat && (
           <div className="mt-8 p-6 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-xl">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
               {l.estimatedBenefits}
-            </h3>
+            </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="bg-white dark:bg-gray-700 p-4 rounded-lg shadow-sm">
@@ -344,7 +344,7 @@ export default function DagpengeBeregner() {
 
         {/* Info boks */}
         <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg text-sm text-gray-600 dark:text-gray-300">
-          <h4 className="font-semibold text-gray-800 dark:text-white mb-2">{l.infoTitle}</h4>
+          <h2 className="font-semibold text-gray-800 dark:text-white mb-2">{l.infoTitle}</h2>
           <ul className="space-y-1 list-disc list-inside">
             <li>{l.info1}</li>
             <li>{l.info2} {fmtNum(SATSER_2026.maxDagpenge)} kr/md</li>

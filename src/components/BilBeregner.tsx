@@ -494,7 +494,7 @@ export default function BilBeregner() {
 
       {/* Tips */}
       <div className="p-4 bg-green-50 dark:bg-green-900/30 rounded-lg">
-        <h3 className="font-medium mb-3 text-green-800 dark:text-green-200">{l.tipsTitle}</h3>
+        <h2 className="font-medium mb-3 text-green-800 dark:text-green-200">{l.tipsTitle}</h2>
         <ul className="text-sm text-green-700 dark:text-green-300 space-y-2">
           <li>&#8226; <strong>{l.tipForsikring}</strong>{l.tipForsikringText}</li>
           <li>&#8226; <strong>{l.tipKoer}</strong>{l.tipKoerText}</li>

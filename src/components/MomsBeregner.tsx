@@ -315,7 +315,7 @@ export default function MomsBeregner() {
       {/* Hurtig reference tabel */}
       <div className={`bg-white border rounded-lg overflow-hidden ${urlStateKontrolleret ? "" : "hidden"}`}>
         <div className="p-4 bg-gray-50 border-b">
-          <h3 className="font-medium">{l.hurtigReference}</h3>
+          <h2 className="font-medium">{l.hurtigReference}</h2>
         </div>
         <div className="p-4">
           <table className="w-full text-sm">
@@ -341,7 +341,7 @@ export default function MomsBeregner() {
 
       {/* Info boks */}
       <div className={`bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 ${urlStateKontrolleret ? "" : "hidden"}`}>
-        <h3 className="font-medium text-blue-800 dark:text-blue-200 mb-2 flex items-center gap-2"><Lightbulb className="h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden="true" focusable="false" />{l.infoTitle}</h3>
+        <h2 className="font-medium text-blue-800 dark:text-blue-200 mb-2 flex items-center gap-2"><Lightbulb className="h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden="true" focusable="false" />{l.infoTitle}</h2>
         <ul className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
           <li>• {l.info1a}<strong>{l.info1b(rateCopy.rate)}</strong></li>
           <li>• {l.info2(rateCopy.factor)}</li>
@@ -357,19 +357,19 @@ export default function MomsBeregner() {
         </summary>
         <div className="p-4 pt-0 space-y-4 text-sm dark:text-gray-300">
           <div>
-            <h4 className="font-medium mb-1 dark:text-gray-200">{l.formTillaegTitle(rateCopy.rate)}</h4>
+            <h3 className="font-medium mb-1 dark:text-gray-200">{l.formTillaegTitle(rateCopy.rate)}</h3>
             <code className="block bg-white dark:bg-gray-700 p-2 rounded border dark:border-gray-600 dark:text-gray-200">
               {l.formTillaeg(rateCopy.factor)}
             </code>
           </div>
           <div>
-            <h4 className="font-medium mb-1 dark:text-gray-200">{l.formFratraekTitle}</h4>
+            <h3 className="font-medium mb-1 dark:text-gray-200">{l.formFratraekTitle}</h3>
             <code className="block bg-white dark:bg-gray-700 p-2 rounded border dark:border-gray-600 dark:text-gray-200">
               {l.formFratraek(rateCopy.factor)}
             </code>
           </div>
           <div>
-            <h4 className="font-medium mb-1 dark:text-gray-200">{l.formFindTitle}</h4>
+            <h3 className="font-medium mb-1 dark:text-gray-200">{l.formFindTitle}</h3>
             <code className="block bg-white dark:bg-gray-700 p-2 rounded border dark:border-gray-600 dark:text-gray-200">
               {l.formFind(rateCopy.factor)}
             </code>

@@ -813,7 +813,7 @@ export default function BoligstoetteBeregner() {
         )}
 
         <div className="mt-6 rounded-lg bg-gray-50 p-4 text-sm text-gray-700">
-          <h3 className="mb-2 font-semibold text-gray-900">Sådan tolker du resultatet</h3>
+          <h2 className="mb-2 font-semibold text-gray-900">Sådan tolker du resultatet</h2>
           <ul className="list-inside list-disc space-y-1">
             <li>Resultatet er et vejledende standardinterval, ikke en beregning af din ret til boligstøtte.</li>
             <li>Den officielle beregning bruger blandt andet husstandsindkomst, formue, husleje, beboere og areal.</li>

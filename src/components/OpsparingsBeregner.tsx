@@ -96,7 +96,7 @@ function VaekstGraf({ aarligData }: { aarligData: AarData[] }) {
 
   return (
     <div className="mt-6">
-      <h4 className="text-sm font-medium mb-3 dark:text-gray-200">{gl.growth}</h4>
+      <h2 className="text-sm font-medium mb-3 dark:text-gray-200">{gl.growth}</h2>
       <div className="flex items-end gap-1 h-40">
         {data.map((d) => {
           const totalHeight = (d.saldo / maxSaldo) * 100;
@@ -521,7 +521,7 @@ export default function OpsparingsBeregner({ dstInflation = null }: { dstInflati
 
                 {scenarier && scenarier.length > 1 && (
                   <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                    <h4 className="text-sm font-medium mb-3 dark:text-gray-200">{l.compareReturns}</h4>
+                    <h2 className="text-sm font-medium mb-3 dark:text-gray-200">{l.compareReturns}</h2>
                     <div className="grid grid-cols-3 gap-3 text-center">
                       {scenarier.map((s, i) => (
                         <div
@@ -580,7 +580,7 @@ export default function OpsparingsBeregner({ dstInflation = null }: { dstInflati
                 </details>
 
                 <div className="p-4 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
-                  <h3 className="font-medium mb-2 dark:text-blue-200">{l.compoundTitle}</h3>
+                  <h2 className="font-medium mb-2 dark:text-blue-200">{l.compoundTitle}</h2>
                   <p className="text-sm text-gray-600 dark:text-gray-300">
                     {l.compoundDesc(periode, formatKr(beregning.samletRente), formatKr(beregning.samletIndskud))}
                   </p>

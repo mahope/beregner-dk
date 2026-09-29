@@ -272,7 +272,7 @@ export default function LeasingBeregner() {
             <div className="space-y-4 animate-fade-in">
               {visning === 'leasing' ? (
                 <>
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{l.leasingberegning}</h3>
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{l.leasingberegning}</h2>
                   <div className="bg-white dark:bg-gray-700 rounded-lg p-4 shadow-sm">
                     <div className="text-sm text-gray-500 dark:text-gray-400">{l.maanedligLeasingydelse}</div>
                     <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">{formatKr(result.maanedligYdelse)} kr.</div>
@@ -295,7 +295,7 @@ export default function LeasingBeregner() {
                 </>
               ) : (
                 <>
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{l.leasingVsLaan}</h3>
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{l.leasingVsLaan}</h2>
                   <div className="space-y-3">
                     <div className="bg-white dark:bg-gray-700 rounded-lg p-4 shadow-sm border-l-4 border-blue-500">
                       <div className="text-sm font-medium text-blue-600 dark:text-blue-400">{l.leasing}</div>
@@ -343,13 +343,13 @@ export default function LeasingBeregner() {
       {/* Info boxes */}
       <div className="grid md:grid-cols-2 gap-4 mt-6">
         <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
-          <h4 className="font-semibold text-blue-800 dark:text-blue-300 mb-2">{l.privatLeasing}</h4>
+          <h3 className="font-semibold text-blue-800 dark:text-blue-300 mb-2">{l.privatLeasing}</h3>
           <p className="text-sm text-blue-700 dark:text-blue-400">
             {l.privatLeasingDesc}
           </p>
         </div>
         <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
-          <h4 className="font-semibold text-green-800 dark:text-green-300 mb-2">{l.erhvervsleasing}</h4>
+          <h3 className="font-semibold text-green-800 dark:text-green-300 mb-2">{l.erhvervsleasing}</h3>
           <p className="text-sm text-green-700 dark:text-green-400">
             {l.erhvervsleasingDesc}
           </p>

@@ -280,7 +280,7 @@ export default function BruttoNettoBeregner() {
         <div className="bg-gradient-to-br from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 rounded-xl p-6">
           {result ? (
             <div className="space-y-4 animate-fade-in">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{l.youNeedToEarn}</h3>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{l.youNeedToEarn}</h2>
 
               <div className="bg-white dark:bg-gray-700 rounded-lg p-4 shadow-sm text-center">
                 <div className="text-sm text-gray-500 dark:text-gray-400">{l.requiredGross}</div>
@@ -346,13 +346,13 @@ export default function BruttoNettoBeregner() {
       {/* Info */}
       <div className="grid md:grid-cols-2 gap-4 mt-6">
         <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
-          <h4 className="font-semibold text-blue-800 dark:text-blue-300 mb-2">{l.forNegotiation}</h4>
+          <h3 className="font-semibold text-blue-800 dark:text-blue-300 mb-2">{l.forNegotiation}</h3>
           <p className="text-sm text-blue-700 dark:text-blue-400">
             {l.forNegotiationDesc}
           </p>
         </div>
         <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
-          <h4 className="font-semibold text-green-800 dark:text-green-300 mb-2">{l.reverseCalc}</h4>
+          <h3 className="font-semibold text-green-800 dark:text-green-300 mb-2">{l.reverseCalc}</h3>
           <p className="text-sm text-green-700 dark:text-green-400">
             {l.reverseCalcDesc} <a href="/loen-efter-skat" className="underline">{l.reverseCalcLink}</a> {l.reverseCalcSuffix}
           </p>

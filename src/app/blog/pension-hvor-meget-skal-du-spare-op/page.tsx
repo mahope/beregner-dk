@@ -220,7 +220,7 @@ export default function PensionGuidePage() {
         </p>
 
         <div className="bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800 p-4 rounded-lg not-prose my-6">
-          <h4 className="font-bold mb-2 text-gray-900 dark:text-white">Eksempel: Hvad har du brug for?</h4>
+          <h3 className="font-bold mb-2 text-gray-900 dark:text-white">Eksempel: Hvad har du brug for?</h3>
           <table className="w-full text-sm">
             <tbody className="text-gray-700 dark:text-gray-300">
               <tr className="border-b border-yellow-200 dark:border-yellow-700">

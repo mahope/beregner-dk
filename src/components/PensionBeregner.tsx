@@ -383,7 +383,7 @@ export default function PensionBeregner() {
 
             {/* Folkepension + opsparing */}
             <div className="mb-6">
-              <h4 className="text-sm font-medium mb-3 dark:text-gray-200">Hvor kommer pensionen fra</h4>
+              <h2 className="text-sm font-medium mb-3 dark:text-gray-200">Hvor kommer pensionen fra</h2>
               <div className="grid grid-cols-2 gap-3">
                 <div className="text-center">
                   <div className="relative mx-auto w-16 bg-gray-100 dark:bg-gray-700 rounded-t-lg overflow-hidden" style={{ height: "120px" }}>
@@ -506,7 +506,7 @@ export default function PensionBeregner() {
             {/* Pensionsformue graf */}
             {resultat.aarligData.length > 0 && (
               <div className="mt-6">
-                <h4 className="text-sm font-medium mb-3 dark:text-gray-200">Pensionsformue over tid</h4>
+                <h2 className="text-sm font-medium mb-3 dark:text-gray-200">Pensionsformue over tid</h2>
                 <div className="flex items-end gap-1 h-36">
                   {resultat.aarligData
                     .filter((_, i) => i % Math.max(1, Math.floor(resultat.aarligData.length / 15)) === 0 || i === resultat.aarligData.length - 1)
@@ -555,7 +555,7 @@ export default function PensionBeregner() {
       {/* Ekstra info */}
       {resultat && !isLoading && (
         <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
-          <h3 className="font-medium mb-2 text-green-800 dark:text-green-300">Vidste du?</h3>
+          <h2 className="font-medium mb-2 text-green-800 dark:text-green-300">Vidste du?</h2>
           <p className="text-green-700 dark:text-green-400">
             Hvis du øger din månedlige indbetaling med <strong>500 kr</strong>,
             vil din opsparing vokse med yderligere <strong>{formatKr(resultat.ekstraPr500)}</strong> til pension.
@@ -565,7 +565,7 @@ export default function PensionBeregner() {
 
       {/* Aldersbaseret anbefaling */}
       <div className="p-4 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
-        <h3 className="font-medium mb-3 text-blue-800 dark:text-blue-200">Tommelfingerregel: Opsparing efter alder</h3>
+        <h2 className="font-medium mb-3 text-blue-800 dark:text-blue-200">Tommelfingerregel: Opsparing efter alder</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
           <div>
             <span className="text-blue-600 dark:text-blue-400 font-medium">30 år</span>

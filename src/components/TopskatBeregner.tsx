@@ -291,13 +291,13 @@ export default function TopskatBeregner() {
       {/* Info */}
       <div className="grid md:grid-cols-2 gap-4 mt-6">
         <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
-          <h4 className="font-semibold text-blue-800 dark:text-blue-300 mb-2">Ny skattemodel 2026</h4>
+          <h2 className="font-semibold text-blue-800 dark:text-blue-300 mb-2">Ny skattemodel 2026</h2>
           <p className="text-sm text-blue-700 dark:text-blue-400">
             I 2026 er den gamle topskat erstattet af tre trin: mellemskat (7,5% over {formatKr(MELLEMSKAT_GRAENSE)} kr.), topskat (7,5% over {formatKr(TOPSKAT_GRAENSE)} kr.) og top-topskat (5% over {formatKr(TOP_TOPSKAT_GRAENSE)} kr.).
           </p>
         </div>
         <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
-          <h4 className="font-semibold text-green-800 dark:text-green-300 mb-2">Skatteloft</h4>
+          <h2 className="font-semibold text-green-800 dark:text-green-300 mb-2">Skatteloft</h2>
           <p className="text-sm text-green-700 dark:text-green-400">
             Der er et skatteloft på ca. 52,07% (ekskl. AM-bidrag og kirkeskat). Det sikrer at din samlede marginalskat aldrig overstiger dette niveau.
           </p>

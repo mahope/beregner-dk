@@ -263,7 +263,7 @@ export default function HuslejeBudgetBeregner() {
     <div className="space-y-8">
       {/* Indkomst */}
       <div>
-        <h3 className="text-lg font-medium mb-4 dark:text-white flex items-center gap-2"><Wallet className="h-5 w-5 shrink-0" strokeWidth={1.75} aria-hidden="true" focusable="false" />{l.dinIndkomst}</h3>
+        <h2 className="text-lg font-medium mb-4 dark:text-white flex items-center gap-2"><Wallet className="h-5 w-5 shrink-0" strokeWidth={1.75} aria-hidden="true" focusable="false" />{l.dinIndkomst}</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label htmlFor="huslejebudget-dinnettoloen" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.dinNettoLoen}</label>
@@ -313,7 +313,7 @@ export default function HuslejeBudgetBeregner() {
 
       {/* Faste udgifter */}
       <div>
-        <h3 className="text-lg font-medium mb-4 dark:text-white flex items-center gap-2"><ClipboardList className="h-5 w-5 shrink-0" strokeWidth={1.75} aria-hidden="true" focusable="false" />{l.fasteUdgifter}</h3>
+        <h2 className="text-lg font-medium mb-4 dark:text-white flex items-center gap-2"><ClipboardList className="h-5 w-5 shrink-0" strokeWidth={1.75} aria-hidden="true" focusable="false" />{l.fasteUdgifter}</h2>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           <div>
             <label htmlFor="huslejebudget-maddagligvarer" className="block text-sm font-medium mb-2 dark:text-gray-200">{l.madDagligvarer}</label>
@@ -451,7 +451,7 @@ export default function HuslejeBudgetBeregner() {
       {/* Budget oversigt */}
       <div className="bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg overflow-hidden">
         <div className="p-4 bg-gray-50 dark:bg-gray-900/50 border-b dark:border-gray-700">
-          <h3 className="font-medium dark:text-white">{l.ditBudget}</h3>
+          <h2 className="font-medium dark:text-white">{l.ditBudget}</h2>
         </div>
         <div className="p-4">
           <div className="space-y-3">
@@ -512,7 +512,7 @@ export default function HuslejeBudgetBeregner() {
 
       {/* Tips */}
       <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-        <h3 className="font-medium text-blue-800 dark:text-blue-300 mb-2 flex items-center gap-2"><Lightbulb className="h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden="true" focusable="false" />{l.tipsTitle}</h3>
+        <h2 className="font-medium text-blue-800 dark:text-blue-300 mb-2 flex items-center gap-2"><Lightbulb className="h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden="true" focusable="false" />{l.tipsTitle}</h2>
         <ul className="text-sm text-blue-700 dark:text-blue-400 space-y-1">
           <li>• <strong>{l.regel30}:</strong> {l.tip30}</li>
           <li>• <strong>{locale === "se" ? "Inkludera allt" : locale === "no" ? "Inkluder alt" : "Inkluder alt"}:</strong> {l.tipInkluder}</li>

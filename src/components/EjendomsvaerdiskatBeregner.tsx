@@ -383,14 +383,14 @@ export default function EjendomsvaerdiskatBeregner() {
 
       {/* Info */}
       <div className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
-        <h3 className="font-medium mb-3 text-gray-800 dark:text-gray-200">
+        <h2 className="font-medium mb-3 text-gray-800 dark:text-gray-200">
           Om det nye ejendomsskattesystem (2024+)
-        </h3>
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600 dark:text-gray-400">
           <div>
-            <h4 className="font-medium text-gray-700 dark:text-gray-300">
+            <h3 className="font-medium text-gray-700 dark:text-gray-300">
               Ejendomsværdiskat
-            </h4>
+            </h3>
             <ul className="mt-2 space-y-1">
               <li>
                 - Beregnes af 80% af ejendomsværdien (forsigtighedsfradrag)
@@ -403,9 +403,9 @@ export default function EjendomsvaerdiskatBeregner() {
             </ul>
           </div>
           <div>
-            <h4 className="font-medium text-gray-700 dark:text-gray-300">
+            <h3 className="font-medium text-gray-700 dark:text-gray-300">
               Grundskyld
-            </h4>
+            </h3>
             <ul className="mt-2 space-y-1">
               <li>- Beregnes af 80% af grundværdien</li>
               <li>- Satsen (promille) varierer efter kommune</li>

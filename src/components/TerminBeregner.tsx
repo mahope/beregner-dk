@@ -284,7 +284,7 @@ export default function TerminBeregner() {
       {/* Uge-for-uge milepæle */}
       {result && (
         <div className="mt-8">
-          <h3 className="text-lg font-semibold mb-4 dark:text-white">{l.milestonesTitle}</h3>
+          <h2 className="text-lg font-semibold mb-4 dark:text-white">{l.milestonesTitle}</h2>
           <div className="space-y-2">
             {ugerMilepaleForLocale.map((uge) => {
               const erPasseret = result.ugerGaaet >= uge;
@@ -329,13 +329,13 @@ export default function TerminBeregner() {
       {/* Info */}
       <div className="grid md:grid-cols-2 gap-4 mt-6">
         <div className="bg-pink-50 dark:bg-pink-900/20 rounded-lg p-4">
-          <h4 className="font-semibold text-pink-800 dark:text-pink-300 mb-2">{l.info1Title}</h4>
+          <h2 className="font-semibold text-pink-800 dark:text-pink-300 mb-2">{l.info1Title}</h2>
           <p className="text-sm text-pink-700 dark:text-pink-400">
             {l.info1Desc}
           </p>
         </div>
         <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4">
-          <h4 className="font-semibold text-purple-800 dark:text-purple-300 mb-2">{l.info2Title}</h4>
+          <h2 className="font-semibold text-purple-800 dark:text-purple-300 mb-2">{l.info2Title}</h2>
           <p className="text-sm text-purple-700 dark:text-purple-400">
             {l.info2Desc}
           </p>

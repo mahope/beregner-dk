@@ -665,7 +665,7 @@ export default function BMIBeregner() {
 
       {/* Talje-hofte ratio */}
       <div className="p-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm border dark:border-gray-700">
-        <h3 className="font-semibold text-lg mb-1 dark:text-white">{l.whrTitle}</h3>
+        <h2 className="font-semibold text-lg mb-1 dark:text-white">{l.whrTitle}</h2>
         <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
           {l.whrDesc}
         </p>
@@ -713,7 +713,7 @@ export default function BMIBeregner() {
 
       {/* BMI kategorier tabel */}
       <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-        <h3 className="font-medium mb-3 dark:text-white">{l.catTableTitle}</h3>
+        <h2 className="font-medium mb-3 dark:text-white">{l.catTableTitle}</h2>
         <div className="space-y-2 text-sm dark:text-gray-300">
           <div className="flex justify-between">
             <span className="text-blue-600 dark:text-blue-400">Under 18,5</span>
@@ -744,7 +744,7 @@ export default function BMIBeregner() {
 
       {/* WHO info */}
       <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-        <h3 className="font-medium mb-2 dark:text-white">{l.whoTitle}</h3>
+        <h2 className="font-medium mb-2 dark:text-white">{l.whoTitle}</h2>
         <p className="text-sm text-gray-600 dark:text-gray-300">
           {l.whoDesc}
         </p>

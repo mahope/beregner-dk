@@ -188,9 +188,9 @@ export default function AktieskatBeregner() {
         <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-6">
           {result ? (
             <div className="space-y-4 animate-fade-in">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                 Aktieskat af {formatKr(result.nettoGevinst)} kr.
-              </h3>
+              </h2>
 
               {(depotType === 'frit' || depotType === 'begge') && (
                 <div className="bg-white dark:bg-gray-700 rounded-lg p-4 shadow-sm">
@@ -267,13 +267,13 @@ export default function AktieskatBeregner() {
       {/* Info boxes */}
       <div className="grid md:grid-cols-2 gap-4 mt-6">
         <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
-          <h4 className="font-semibold text-blue-800 dark:text-blue-300 mb-2">Frit depot vs. ASK</h4>
+          <h2 className="font-semibold text-blue-800 dark:text-blue-300 mb-2">Frit depot vs. ASK</h2>
           <p className="text-sm text-blue-700 dark:text-blue-400">
             I et frit depot beskattes du 27/42% ved realisering. I en aktiesparekonto (ASK) beskattes du kun 17%, men der er lagerbeskatning og max indskud på {formatKr(ASK_MAX_DEPOSIT)} kr.
           </p>
         </div>
         <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
-          <h4 className="font-semibold text-green-800 dark:text-green-300 mb-2">Tab kan modregnes</h4>
+          <h2 className="font-semibold text-green-800 dark:text-green-300 mb-2">Tab kan modregnes</h2>
           <p className="text-sm text-green-700 dark:text-green-400">
             Tab på aktier kan modregnes i gevinster. Ubrugte tab kan fremføres til kommende år. Tab i frit depot kan kun modregnes i frit depot.
           </p>

@@ -254,7 +254,7 @@ export default function ElbilBenzinBeregner({ elprisData = null, nu }: Props = {
 
       {live && (
         <div className="mt-6 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-4 md:p-5">
-          <h3 className="font-semibold text-green-900 dark:text-green-200 mb-1">Billigste 4 sammenhængende timer at lade i nat</h3>
+          <h2 className="font-semibold text-green-900 dark:text-green-200 mb-1">Billigste 4 sammenhængende timer at lade i nat</h2>
           {ladeVindue ? (
             <>
               <p className="text-2xl font-bold text-green-800 dark:text-green-300">

@@ -41,7 +41,7 @@ export default function ElprisGraf({ dage, idag, nuTime, antalBilligste = 4 }: P
   return (
     <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
       <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
-        <h3 className="font-medium dark:text-white">Elpris time for time</h3>
+        <h2 className="font-medium dark:text-white">Elpris time for time</h2>
         <div className="flex gap-2" role="group" aria-label="Vælg dag">
           <button type="button" className={fane(!visMorgen || !iMorgen)} aria-pressed={!visMorgen || !iMorgen} onClick={() => setVisMorgen(false)}>
             I dag

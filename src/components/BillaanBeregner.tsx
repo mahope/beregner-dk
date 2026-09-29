@@ -407,9 +407,9 @@ export default function BillaanBeregner() {
 
       {/* Tips sektion */}
       <div className="p-4 bg-green-50 dark:bg-green-900/30 rounded-lg">
-        <h3 className="font-medium mb-3 text-green-800 dark:text-green-200">
+        <h2 className="font-medium mb-3 text-green-800 dark:text-green-200">
           {l.tipsTitle}
-        </h3>
+        </h2>
         <ul className="text-sm text-green-700 dark:text-green-300 space-y-2">
           <li>
             • <strong>{l.tip1Title}</strong> - {l.tip1}
@@ -449,9 +449,9 @@ export default function BillaanBeregner() {
 
       {/* Ydelsestabel */}
       <div className="overflow-x-auto">
-        <h3 className="font-medium mb-3 text-gray-900 dark:text-gray-100">
+        <h2 className="font-medium mb-3 text-gray-900 dark:text-gray-100">
           {l.tableTitle}
-        </h3>
+        </h2>
         <table className="w-full text-sm">
           <thead>
             <tr className="bg-gray-100 dark:bg-gray-800">

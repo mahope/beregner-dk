@@ -389,7 +389,7 @@ export default function ValutaBeregner({ officielleKurser = null }: Props) {
       {/* Popul\u00e6re omregninger */}
       <div className="bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg overflow-hidden">
         <div className="p-4 bg-gray-50 dark:bg-gray-700 border-b dark:border-gray-600">
-          <h3 className="font-medium dark:text-white">{l.populaereOmregninger} {fraValuta}</h3>
+          <h2 className="font-medium dark:text-white">{l.populaereOmregninger} {fraValuta}</h2>
         </div>
         <div className="p-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -411,7 +411,7 @@ export default function ValutaBeregner({ officielleKurser = null }: Props) {
       {/* Kursliste */}
       <div className="bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg overflow-hidden">
         <div className="p-4 bg-gray-50 dark:bg-gray-700 border-b dark:border-gray-600">
-          <h3 className="font-medium dark:text-white">{l.valutakurser}</h3>
+          <h2 className="font-medium dark:text-white">{l.valutakurser}</h2>
         </div>
         <div className="p-4">
           <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm">
@@ -434,7 +434,7 @@ export default function ValutaBeregner({ officielleKurser = null }: Props) {
 
       {/* Info boks */}
       <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
-        <h3 className="font-medium text-yellow-800 dark:text-yellow-300 mb-2">{l.bemaerkOmKurser}</h3>
+        <h2 className="font-medium text-yellow-800 dark:text-yellow-300 mb-2">{l.bemaerkOmKurser}</h2>
         <p className="text-sm text-yellow-700 dark:text-yellow-400">
           {isLive ? (brugNationalbanken && "nbInfo" in l ? l.nbInfo : l.liveInfo) : l.fallbackInfo}
           {l.vekslingInfo}

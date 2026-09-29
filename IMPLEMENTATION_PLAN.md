@@ -1,4 +1,24 @@
-STATUS: KØ — **`beregner.no` er ikke dette repo. Domænet serverer en separat Lovable/TanStack-app: 0 `__next`-markører mod TanStacks `__TSR__`, `/api/health` 404, vores norske slugs 404 modsitemapets `/kalkulator/*`, og et `og:image` på et `lovable.app`-preview. Så `/manifest.webmanifest`'s 404 er en *deploy-fakta*, ikke en kodefejl — og acceptkriterium 1 i opgaven siger udtrykkeligt, at man så skal skrive det og stoppe. Det er gjort, og målt på bygget server først: alle tre domæner giver 200 med hvert sit eget korrekte antal. Ruten havde imidlertig nul tests, og fordi den læser `x-hostname` ved request-tid er netop sådanne fejl usynlige på det domæne, man tilfældigvis tester — så de er skrevet nu (5 tests, modsvejs verificeret på tre plantede fejlklasser, den tredje præcis den betingelse der kunne have lavet 404'en i koden). Køen var tom (178 var øverst ufærdig; 179 kræver interaktiv browser-verifikation, `curl` kan ikke sætte et felt).**
+STATUS: KØ — **C179 er landet: 50 af sitets 207 sider (24 %) havde en brudt overskriftsstruktur — `<h1>` → `<h3>` eller `<h1>` → `<h4>`, altså et spring på to til tre niveauer. Køen var tom (178 var øverst ufærdig; 179 kræver interaktiv browser-verifikation, `curl` kan ikke sætte et felt), og de to åbne deploy-noter (C177, C178) har begge første vindue **2026-09-29 17:30** — det var 13:18, så ingen blev rørt. Valget kom af at måle en klasse, ingen af C82–C178 havde målt: de har lukket titler, descriptions, JSON-LD, hreflang, canonical, sprogfejl, interne links og social metadata — men aldrig *selve dokumentets struktur*. Overskriftsniveauet er den egenskab, en skærmlæser navigerer efter, og den var brudt på en fjerdedel af sitet.**
+
+**Årsagen var ikke 50 sider. Den var 31 komponenter, og de lå alle i den samme fejltype som C94's negative SE-lås: en regel, der blev skrevet for den gruppe den var skrevet for.** Værktøjerne skrev deres interne struktur som `h3`/`h4`, fordi de var bygget til at sidde *inde i* et `h2`-afsnit. Men `<MomsBeregner />` er monteret som sidens første element efter `h1` og *før* sidens første `h2` — altså som **søskende** til afsnittene, ikke som et barn af et. Beviset er målt, ikke læst: `h1` → `h3` på `/moms` (117 KB HTML), `h1` → `h4` på `/gaeldsfri`, `/termin`, `/dagpenge`, `/pension`, `/topskat`, `/aktieskat`, `/rentefradrag` og `/barselsdagpenge`. `/tidszone` (24.117 v) og `/tidsberegner` (73.117 v) var **ikke** i klassen — deres `h3` kommer efter et `h2` — hvilket er kontrol på at måleren ikke bare ramte alt.
+
+**Rettelsen er skrivefejl i 31 filer, og det er hele pointen.** Hvert værktøj skiftes ét niveau op, så dets laveste overskrift bliver `h2` og indlejrede bliver `h3`. Beviset for at det er rent semantik og ikke styling: `globals.css:106` sætter `line-height: 1.25` på `h1`–`h6` **samlet**, og ingen af de 31 komponenter bruger `prose`-klassen (hvor `globals.css:223-240` ville have gjort niveauerne visuelt forskellige). Alle 108 ændrede linjer er efterprøvet maskinelt: stripper man `h[1-6]` fra begge sider af diff'en, er de **identiske** — altså er hvert eneste `className` og hver eneste tegnstreng uændret. Det er en accessibility-rettelse, ikke en designændring, og den kan derfor ikke have rørt en enkelt pixel.
+
+**Harness: ny `src/components/heading-outline.test.tsx` med 61 tests, modsvejs verificeret.** Den renderer hvert af de 29 værktøjer i en `<h1>`-kontekst og kræver to ting hver for sig: intet spring *ned* mellem niveauer, og præcis ét `h1`. Den renderer, fordi et grep i `src/` ikke kan se *hvor i siden* komponenten monteres — præcis det blind spot, der lod klassen ligge i 24 % af sitet. Den har en lås i hver retning, fordi de er modsat lige gyldige: spring *ned* er fejl (spring 3 i `TopskatBeregner` var den værste i klassen), spring *op* er **ikke** fejl — ellers ville rettelsen bare have flyttet problemet. Beviset for at den ikke er vakuum-grøn: jeg muterede `MomsBeregner.tsx` tilbage til det oprindelige `h3` (én linje), og den faldede med præcis `h1 → h3 (spring 2)`.
+
+**Testen fandt syv fejl, mine egne, som kilde-grebet ikke kunne se.** Seks værktøjer (`AktieskatBeregner`, `BarselBeregner`, `DagpengeBeregner`, `GaeldsfriBeregner`, `RentefradragBeregner`, `TerminBeregner`) skrev deres **ubetingede** infobokse som `h3`, mens det eneste `h2` lå inde i en `{result ? … }`-blok, der ikke renderer i starttilstanden — så i den tilstand, Google og de fleste læsere ser, stod `h1` → `h3`. Og `PensionBeregner`'s resultatblok **starter med en `<p>`, ikke en overskrift**, så de to underafsnit i den havde intet over sig. Det er samme fejltype som C166's `dage-til`-blindspot: en regel der kun så den kode, den var skrevet for. **Et rent kilde-greb ville have kaldt alle syv korrekte** — de har jo h3 under h2 i kilden.
+
+**Målt på rigtig server** (`next start` :3989, porten verificeret fri *inden* start, C117's lære), **alle 207 URL'er i begge sitemapmer**: **207/207 rene, 0 fejl** (136 danske + 71 svenske) mod **49 brud** før (32 DA + 18 SE, én dobbelt-talt da `/procent` findes på begge). `/api/health` → `status: ok`. **Målefejl nr. 38 (min egen, tredje udgave af C176's fælde):** min første server-måling på beraknare.se meldte **14 stk. 404** på de svenske `/dagar-till/*`-sider. Det er ikke fejl: Node's `fetch` **forbyder** at sætte `Host`-headeren, så domæneroutingen aldrig sker, og danske slugs svarer 404 på en svensk rute. Med `curl -H "Host: beraknare.se"` er de **71/71** i 200. Uden genmålingen havde jeg rapporteret 14 fejl, der ikke findes.
+
+**To ting jeg bevidst *ikke* har gjort.** For det første er `Sidebar`, `AffiliateBox`, `Footer`, `NewsletterSignup`, `ui/Card` og de fire `barsel/*`-paneler **urørte**: de har h3/h4 som laveste niveau, men de ligger inde i en side der har et `h2` over dem, eller i et layout uden for `<main>`, så de er korrekte — en test der låser "minimumsniveau 2" på hele `src/components/` ville flagge dem som fejl. Det er grunden til at testen renderer det enkelte værktøj i en `<h1>`-kontekst i stedet for at scanne kilden. For det anden er `h2 → h3` **inde i** et værktøj (Kvadratmeters fire formeloverskrifter) bevaret som `h3` — de har et `h2` over sig i samme komponent, så de er korrekte, og en lås der krævede fladt struktur ville have slettet dem.
+
+**Gate grøn:** lint (**596 filer**), **2.791 tests / 178 filer** (fra 2.730/177), build (**142 sider**), `locale-leak.mjs --gate` exit 0, `knapgruppe-scan.mjs` 0/0, `href-scan.mjs` 0 protocol-relative href, `rendered-leak-scan.mjs` mod live exit 0. Rørte filer: 31 komponenter + 1 blogside (`pension-hvor-meget-skal-du-spare-op`, ét `h4` → `h3` under et `h2` uden mellemliggende `h3`) + `procent-formler.test.tsx` (to assertions der læser tagget) + 1 ny testfil — **ingen beregningslogik, ingen URL, ingen sitemap, ingen `<title>`, ingen `<meta description>`, ingen synlig tekst, ingen `className`**. Kode + plan i ét squash-commit på `ceo/heading-outline`; se opgave 180.
+
+**MÅL:** overskriftsniveau har ingen CTR-baseline i GSC — det er ikke et søgefelt, og en brudt struktur er ikke noget Google straffer direkte. Den målbare del er derfor et **kvalitetsmål**: *0 sider må springe et overskriftsniveau, og hver side skal have præcis ét `h1`* — nået og målt på den byggede server (49 brud → **0 af 207**). Den indirekte effekt (bedre skærmlæser-navigation, og en smallere chance for at Googles egen outline-parser læser afsnittene i den rækkefølge, de er skrevet i) kan ikke måles før **2026-10-13** mod GSC-visninger pr. side. Trafiknærmeste uændrede baseliner: `/procent` **150.148 v / 98 klik / 0,1 % / pos. 7,4** og `/dato` (132.313 / 822 / 0,6 % / 5,7).
+
+---
+
+STATUS: KØ (forrige iteration) — **`beregner.no` er ikke dette repo. Domænet serverer en separat Lovable/TanStack-app: 0 `__next`-markører mod TanStacks `__TSR__`, `/api/health` 404, vores norske slugs 404 modsitemapets `/kalkulator/*`, og et `og:image` på et `lovable.app`-preview. Så `/manifest.webmanifest`'s 404 er en *deploy-fakta*, ikke en kodefejl — og acceptkriterium 1 i opgaven siger udtrykkeligt, at man så skal skrive det og stoppe. Det er gjort, og målt på bygget server først: alle tre domæner giver 200 med hvert sit eget korrekte antal. Ruten havde imidlertig nul tests, og fordi den læser `x-hostname` ved request-tid er netop sådanne fejl usynlige på det domæne, man tilfældigvis tester — så de er skrevet nu (5 tests, modsvejs verificeret på tre plantede fejlklasser, den tredje præcis den betingelse der kunne have lavet 404'en i koden). Køen var tom (178 var øverst ufærdig; 179 kræver interaktiv browser-verifikation, `curl` kan ikke sætte et felt).**
 
 **Tre ting denne iteration *ikke* gjorde, som er værd at sige.** Den rettede ingen kode, fordi der ikke var noget at rette — en manifest-test der "fixer" en 404 på et domæne vi ikke deployer, ville være vakuum-grøn. Den lukkede ikke C179's tre noter, fordi de kræver at *sætte felter i en browser*; at lukke dem på en teksttælling i HTML'en ville være præcis den fejl C158's portanalyse lavede i modsat retning. Og den skrev ingen ny tekst, ingen ny URL og ingen ny dependency — den eneste rørte fil er en ny testfil.
 
@@ -16883,6 +16903,31 @@ er værst. Se `❓ Til Mads`.
 
 
 ### VERIFICÉR DEPLOY-log — nyeste først
+- `VERIFICÉR DEPLOY: overskriftsniveau på alle sider (49 brud → 0 af 207) ceo/heading-outline 2026-09-29 13:5x`
+  — merge sker ca. 13:55, før 17:30-vinduet, så første vindue er
+  **2026-09-29 17:30**. Rettelsen er en skrivefejl i overskriftstags, så en
+  måling på *indhold* er den eneste der siger noget: verificér at **teksten er
+  den samme** og at **springene er væk**. Mål:
+  1. Kør overskrifts-scannen fra opgave 180 mod **live** — forvent
+     **0 spring og 1 `h1` pr. side på alle 207 sider**. Før: 49 brud. Hvis
+     nogen side stadig springer, er den ikke deployet.
+  2. **KONTROL mod at rettelsen ikke har slettet tekst:** på `/moms` skal
+     "Hurtig reference" stå **1** gang og "Læg moms til" **4** gange i `<main>`
+     (før: 1 og 4). På `/procent` skal "Formler" stå **1** gang — C161's
+     dedupe-lås må ikke være brudt af en tag-ændring.
+  3. **KONTROL mod at intet visuelt flyttede sig:** `globals.css:106` sætter
+     `line-height: 1.25` på `h1`–`h6` samlet, så niveauet har ingen styling.
+     Tjek at `<h2 class="font-medium">Hurtig reference</h2>` står i markupken
+     med sit uændrede `class` — springer klassen væk, er der rørt noget der
+     ikke skulle.
+  4. `npm run test -- src/components/heading-outline.test.tsx` skal give
+     **61 passed**, og `node scripts/locale-leak.mjs --gate` exit 0 med
+     **0 ureviewet**.
+  5. `/api/health` skal svare `status: ok` på begge domæner.
+  6. **Målefælden i denne note:** brug `curl -H "Host: beraknare.se"`, **ikke**
+     Node's `fetch` — den forbyder `Host`-headeren og giver 14 falske 404 på
+     de svenske `/dagar-till/*`-sider (målefejl nr. 38).
+
 - `VERIFICÉR DEPLOY: site-beskrivelsens beregnerantal (33+ → 79/53/28) ceo/site-tal-79 2026-09-29 12:20`
   — merge sker ca. 12:2x, før 12:30-vinduet, så første vindue er **2026-09-29 12:30**.
   Verificér **indhold**, ikke HTTP 200 — en 200 beviser intet, og siden har netop
@@ -17076,6 +17121,50 @@ er værst. Se `❓ Til Mads`.
      verificeret på 3 plantede fejlklasser.**
   4. `lint` / `test` / `build` / `locale-leak --gate` grønne. **Nået.**
 
+#### 180. [x] FÆRDIG 2026-09-29 — C180 — **overskriftsniveauet var brudt på 50 af 207 sider (24 %): `<h1>` → `<h3>`/`<h4>`, fordi værktøjerne er monteret som søskende til sidens afsnit, men skrevet som børn af et. Én skrivefejl i 31 komponenter, ingen tekst og ingen styling rørt.**
+
+- **Iteration start:** 2026-09-29 13:18. Køen var tom (178 var øverst ufærdig;
+  179 er `ÅBEN` men kræver interaktiv browser-verifikation). De to åbne
+  deploy-noter (C177, C178) har begge første vindue **2026-09-29 17:30**.
+- **Datagrund:** målt på **alle 207 sider i begge sitemapmer**, live først:
+  **49 brud** (32 DA + 18 SE). `/moms` `h1`→`h3`; `/gaeldsfri`, `/termin`,
+  `/dagpenge`, `/pension`, `/topskat`, `/aktieskat`, `/rentefradrag` og
+  `/barselsdagpenge` `h1`→`h4`. **Kontrol:** `/tidszone` (24.117 v) og
+  `/tidsberegner` (73.117 v) var ikke i klassen — deres `h3` kommer efter et
+  `h2`.
+- **Årsag:** 31 komponenter. Værktøjerne skrev `h3`/`h4` som om de sad *inde i*
+  et `h2`-afsnit, men `<XxxBeregner />` monteres som sidens første element
+  efter `h1` og før første `h2` — søskende, ikke barn. Samme fejltype som
+  C94's negative SE-lås.
+- **Rettelse:** hvert værktøj skiftes ét niveau op. Bevis for at det er rent
+  semantik: `globals.css:106` sætter `line-height: 1.25` på `h1`–`h6` samlet,
+  og ingen af de 31 bruger `prose` (`globals.css:223-240`). Alle 108 linjer er
+  maskinelt efterprøvet — stripper man `h[1-6]` fra begge sider af diff'en, er
+  de **identiske**.
+- **Harness:** ny `heading-outline.test.tsx`, **61 tests**. Renderer hvert
+  værktøj i en `<h1>`-kontekst (et grep kan ikke se hvor det monteres) og
+  kræver intet spring *ned* + præcis ét `h1`. Lås i begge retninger, da spring
+  *op* er legitimt. **Modsvejs verificeret:** `MomsBeregner` muteret tilbage
+  til `h3` (én linje) → `h1 → h3 (spring 2)`.
+- **Testen fandt 7 fejl, kilde-grebet ikke kunne se:** 6 værktøjer har
+  ubetingede `h3`-infobokse mens deres eneste `h2` lå i en `{result ? … }`
+  -blok; `PensionBeregner`s resultatblok starter med en `<p>`, ikke en
+  overskrift.
+- **Målt på rigtig server** (`next start` :3989): **207/207 rene, 0 fejl**
+  (136 DA + 71 SE), `/api/health` → `status: ok`.
+- **Målefejl nr. 38:** første SE-måling meldte 14 × 404 — Node's `fetch`
+  forbyder `Host`-headeren, så domæneroutingen aldrig sker. Med `curl -H` er
+  de 71/71 i 200. Tredje udgave af C176's fælde.
+- **Bevist urørt:** `Sidebar`, `AffiliateBox`, `Footer`, `NewsletterSignup`,
+  `ui/Card` og `barsel/*` ligger under et `h2` (eller uden for `<main>`) — de er
+  korrekte. `h2`→`h3` *inde i* Kvadratmeter er bevaret.
+- **Gate:** lint 596 filer, **2.791 tests / 178 filer** (fra 2.730/177), build
+  142 sider, `locale-leak.mjs --gate` exit 0, `knapgruppe-scan.mjs` 0/0,
+  `href-scan.mjs` 0, `rendered-leak-scan.mjs` exit 0.
+- **MÅL:** kvalitetsmål, ikke CTR — *0 spring, 1 `h1` pr. side*, nået (49 → 0
+  af 207). GSC-genmåling **2026-10-13**; `/procent` 150.148 v / 0,1 % / pos. 7,4
+  og `/dato` 132.313 / 0,6 % / 5,7 er de nærmeste uændrede baseliner.
+
 #### 179. [ ] ÅBEN — **C55, C56 og C60 er deploy-noter, der kræver interaktivitet, og har stået åbne siden 2026-09-27 07:30**
 
 - **Datagrund:** planen. Alle tre noter er skrevet på at man *sætter felter* og
@@ -17151,6 +17240,15 @@ er værst. Se `❓ Til Mads`.
 
 
 ### VERIFICÉR DEPLOY-log — nyeste først
+- `VERIFICÉR DEPLOY: overskriftsniveau på alle sider (49 brud → 0 af 207) ceo/heading-outline 2026-09-29 13:5x`
+  — merge ca. 13:55, første vindue **2026-09-29 17:30**. Se den fulde note
+  med alle seks kriterier ovenfor i loggen ved opgave 180; de vigtigste:
+  overskrifts-scannen mod live skal give **0 spring / 1 `h1` pr. side på alle
+  207 sider** (før 49), "Hurtig reference" skal stadig stå 1 gang og "Læg
+  moms til" 4 gange på `/moms`, `npm run test -- src/components/heading-outline.test.tsx`
+  skal give **61 passed**, og mål på beraknare.se med **`curl -H "Host: …"`**
+  (ikke Node `fetch` — målefejl nr. 38).
+
 - `VERIFICÉR DEPLOY: manifest-ruten får en test pr. domæne (0 tests → 5) ceo/no-manifest 2026-09-29 13:1x`
   — merge sker ca. 13:15, før 17:30-vinduet er nået, så første vindue er
   **2026-09-29 17:30**. **Denne note har en vigtig forbehold, som er hele

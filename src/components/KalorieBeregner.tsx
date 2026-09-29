@@ -396,7 +396,7 @@ export default function KalorieBeregner() {
 
         {/* Makrofordeling med visuel bar */}
         <div className="border-t dark:border-gray-600 pt-6">
-          <h3 className="font-semibold mb-4 text-center dark:text-white">{l.makrofordeling}</h3>
+          <h2 className="font-semibold mb-4 text-center dark:text-white">{l.makrofordeling}</h2>
 
           {/* Visuel bar */}
           <div className="flex h-6 rounded-full overflow-hidden mb-4">
@@ -440,7 +440,7 @@ export default function KalorieBeregner() {
 
       {/* Info */}
       <div className="p-4 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
-        <h3 className="font-medium mb-2 text-blue-800 dark:text-blue-200">{l.hvadBetyder}</h3>
+        <h2 className="font-medium mb-2 text-blue-800 dark:text-blue-200">{l.hvadBetyder}</h2>
         <ul className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
           <li><strong>BMR:</strong> {l.infoBmr}</li>
           <li><strong>TDEE:</strong> {l.infoTdee}</li>
