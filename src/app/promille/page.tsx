@@ -14,7 +14,14 @@ import {
   formatPromille,
   formatTimer,
 } from "@/lib/promille-eksempler";
-import { graenseForLocale, PROMILLEGRANSE_UDLAND } from "@/lib/promille";
+import { graenseForLocale, PROMILLEGRANSE, PROMILLEGRANSE_UDLAND, GRAM_PR_GENSTAND } from "@/lib/promille";
+import {
+  PROMILLE_GENSTANDE_RAEKKER,
+  PROMILLE_VAEGTE,
+  formatPromilleTabel,
+  genstandeTilGraense,
+  vaegtNogle,
+} from "@/lib/promille-genstande";
 
 /**
  * Rækkeorden følger grænsen: de strengste først, fordi det er dem, danske
@@ -62,7 +69,56 @@ const PROMILLEGRAENSER_UDLAND: { land: string; nokkel: string; saerregel: string
   {
     land: "Storbritannien",
     nokkel: "storbritannien",
-    saerregel: "0,5 ‰ i Skotland — ellers er det 0,8 ‰",
+    saerregel: "0,5 ‰ i Skotland — ellers är det 0,8 ‰",
+  },
+];
+
+/**
+ * Samma tabell til beraknare.se. Rækkeorden er Sveriges egen grænse først,
+ * fordi det er den svenske læser spørger om, og Danmark kommer med, fordi
+ * grænsen der er mere end dobbelt så høj. `nokkel` er de samme nøgler som
+ * PROMILLEGRANSE_UDLAND, så tallene ikke kan skrives to steder.
+ */
+const PROMILLEGRAENSER_UDLAND_SE: { land: string; nokkel: string; saerregel: string }[] = [
+  {
+    land: "Sverige",
+    nokkel: "sverige",
+    saerregel: "Ingen särregel — gränsen är densamma för alla förare",
+  },
+  { land: "Norge", nokkel: "norge", saerregel: "Ingen särregel" },
+  { land: "Polen", nokkel: "polen", saerregel: "Ingen särregel" },
+  { land: "Danmark", nokkel: "danmark", saerregel: "Ingen särregel" },
+  {
+    land: "Tyskland",
+    nokkel: "tyskland",
+    saerregel: "0,0 ‰ under 21 år och de första 2 åren med körkort, och 0,3 ‰ om du samtidigt begår ett annat trafikbrott",
+  },
+  {
+    land: "Frankrike",
+    nokkel: "frankrig",
+    saerregel: "0,2 ‰ de första 3 åren med körkort och för bussförare",
+  },
+  {
+    land: "Spanien",
+    nokkel: "spanien",
+    saerregel: "0,3 ‰ de första 2 åren och för tungtransport, 0,0 ‰ under 18 år",
+  },
+  {
+    land: "Italien",
+    nokkel: "italien",
+    saerregel: "0,0 ‰ de första 3 åren med körkort och för yrkestrafik",
+  },
+  {
+    land: "Grekland",
+    nokkel: "graekenland",
+    saerregel: "0,2 ‰ de första 2 åren, för motorcykel och för yrkestrafik",
+  },
+  { land: "Nederländerna", nokkel: "holland", saerregel: "0,2 ‰ de första 5 åren med körkort" },
+  { land: "Österrike", nokkel: "oestrig", saerregel: "0,1 ‰ de första 2 åren med körkort" },
+  {
+    land: "Storbritannien",
+    nokkel: "storbritannien",
+    saerregel: "0,5 ‰ i Skottland — annars är det 0,8 ‰",
   },
 ];
 
@@ -318,12 +374,96 @@ export default async function PromillePage() {
               (33 cl), ett litet glas vin (12 cl) eller en snaps sprit (4 cl). En starköl eller ett
               stort glas vin kan lätt vara 1,5–2 standardglas.
             </p>
+            <h2>Hur många promille är N öl?</h2>
+            <p>
+              Det är det mest sökta frågan om promille, och svaret beror på kroppsvikten.
+              Regnestycket är <strong>promille = gram alkohol &divide; (kroppsvikt &times;
+              fördelningsfaktor)</strong>, och en vanlig öl på 33 cl är ca{" "}
+              <strong>{GRAM_PR_GENSTAND} gram</strong> — alltså ett standardglas. Tabellen räknar
+              med fulla standardglas, alltså utan alkohol i kroppen från början av kvällen:
+            </p>
+            <div className="overflow-x-auto">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Standardglas</th>
+                    {PROMILLE_VAEGTE.map(({ vaegtKg, koen }) => (
+                      <th key={`${vaegtKg}-${koen}`}>
+                        {vaegtKg} kg ({koen === "mand" ? "man" : "kvinna"})
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {PROMILLE_GENSTANDE_RAEKKER.map((raekke) => (
+                    <tr key={raekke.genstande}>
+                      <td>
+                        {raekke.genstande} öl / {raekke.genstande} glas vin
+                      </td>
+                      {PROMILLE_VAEGTE.map(({ vaegtKg, koen }) => (
+                        <td key={`${vaegtKg}-${koen}`}>
+                          {formatPromilleTabel(
+                            raekke.promille[vaegtNogle(vaegtKg, koen)]
+                          )}{" "}
+                          ‰
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <p>
+              Så ser du var gränsen på 0,2 ‰ går: den nås efter{" "}
+              <strong>{genstandeTilGraense(80, "mand", PROMILLEGRANSE.se)} öl</strong> för en 80
+              kg man, <strong>{genstandeTilGraense(70, "mand", PROMILLEGRANSE.se)} öl</strong> för
+              en 70 kg man och <strong>{genstandeTilGraense(60, "kvinde", PROMILLEGRANSE.se)} öl</strong>{" "}
+              för en 60 kg kvinna. Den svenska gränsen är alltså låg: ett enda standardglas kan
+              räcka för att nå den. Och kroppen bryter ner alkohol med tiden — efter en timme till är
+              det ungefär 0,15 ‰ mindre. Fyll i dina egna siffror i promillekalkylatorn ovan för en
+              exakt uppskattning.
+            </p>
             <h2>Promillegränsen i Sverige</h2>
             <p>
               I Sverige går gränsen för rattfylleri vid <strong>0,2 ‰</strong> — betydligt lägre än i
               Danmark. Vid 1,0 ‰ räknas det som grovt rattfylleri. Kom ihåg att alkohol förbränns
               långsamt, så du kan vara kvar över gränsen morgonen efter. Kalkylatorn är endast en{" "}
               <strong>uppskattning</strong> — kör aldrig om du är osäker.
+            </p>
+            <h2>Promillegränsen utomlands</h2>
+            <p>
+              Ska du köra bil i utlandet är gränsen <strong>inte</strong> 0,2 ‰ överallt. I Danmark
+              ligger den på 0,5 ‰ — alltså mer än dubbelt så hög — medan Norge och Polen har samma
+              0,2 ‰ som Sverige och Storbritannien ligger på 0,8 ‰. Tabellens siffror kommer från
+              WHO:s landsöversikt över promillegränser (hämtad 27 september 2026) och är
+              vägledande, eftersom reglerna ändras — kontrollera alltid det aktuella landets regler
+              innan du kör.
+            </p>
+            <div className="overflow-x-auto">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Land</th>
+                    <th>Gräns</th>
+                    <th>Strängare regel för nya och yrkesförare</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {PROMILLEGRAENSER_UDLAND_SE.map((land) => (
+                    <tr key={land.nokkel}>
+                      <td>{land.land}</td>
+                      <td>{`${String(PROMILLEGRANSE_UDLAND[land.nokkel]).replace(".", ",")} ‰`}</td>
+                      <td>{land.saerregel}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <p>
+              Det viktigaste att ta med är det: <strong>2 öl på 80 kg är 0,44 ‰</strong> — det är
+              <strong> över</strong> den svenska gränsen på 0,2 ‰ men <strong>under</strong> den
+              danske på 0,5 ‰. Samma kropp, samma kväll, två olika länder. Just därför är det värt
+              att veta den danska gränsen innan semesterresan.
             </p>
             <h2>Två olika tal: under gränsen och helt nykter</h2>
             <p>

@@ -11,6 +11,11 @@ import {
 } from "./nettoprisindeks";
 import { estimerNettoMaaned } from "./barsel/netto";
 import { PROMILLE_EKSEAMPLER, formatPromille, formatTimer } from "./promille-eksempler";
+import {
+  PROMILLE_GENSTANDE_RAEKKER,
+  formatPromilleTabel,
+  vaegtNogle,
+} from "./promille-genstande";
 
 /**
  * FAQ-svarene om "hvornår må jeg køre bil igen" har to forskellige tal: tiden
@@ -20,6 +25,21 @@ import { PROMILLE_EKSEAMPLER, formatPromille, formatTimer } from "./promille-eks
  */
 const PROMILLE_4_OEL = PROMILLE_EKSEAMPLER[0];
 const PROMILLE_4_OEL_ER = `${formatPromille(PROMILLE_4_OEL.promille)} ‰`;
+
+/**
+ * De svenske svar på "hur många promille är N öl" og "promillegränsen i
+ * Danmark" — de to spørgsmål svensk autocomplete faktisk har (10/10
+ * variationer under "promille efter"), og som `/promille` på beraknare.se
+ * ikke svarade på. Tallene læses fra `promille-genstande`, som regner dem med
+ * `beregnPromille` — samme modul som værktøjet — så FAQ'en og tabellen på
+ * siden ikke kan komme i strid med hinanden eller med beregneren.
+ */
+const PROMILE_RAEKKE = (genstande: number) =>
+  PROMILLE_GENSTANDE_RAEKKER.find((r) => r.genstande === genstande)!;
+const PROMILE_80_MAND = (genstande: number) =>
+  formatPromilleTabel(PROMILE_RAEKKE(genstande).promille[vaegtNogle(80, "mand")]);
+const PROMILE_60_KVINDE = (genstande: number) =>
+  formatPromilleTabel(PROMILE_RAEKKE(genstande).promille[vaegtNogle(60, "kvinde")]);
 
 export type PageData = {
   slug: string;
@@ -2875,6 +2895,9 @@ const sePages: Record<string, PageData> = {
         { question: "Hur beräknas promille?", answer: "Kalkylatorn använder Widmarks formel: promille = gram alkohol / (kroppsvikt × fördelningsfaktor) − 0,15 × timmar. Fördelningsfaktorn är cirka 0,68 för män och 0,55 för kvinnor. Kroppen bryter ner ungefär 0,15 ‰ per timme." },
         { question: "Vad är promillegränsen i Sverige?", answer: "Gränsen för rattfylleri är 0,2 ‰. Vid 1,0 ‰ räknas det som grovt rattfylleri. Gränsen är betydligt lägre än i Danmark (0,5 ‰)." },
         { question: "Hur mycket är ett standardglas?", answer: "Ett standardglas motsvarar 12 gram ren alkohol — ungefär en vanlig öl (33 cl), ett litet glas vin (12 cl) eller en snaps sprit (4 cl)." },
+        { question: "Hur många promille är 2 öl?", answer: `En vanlig öl på 33 cl är ca 12 gram alkohol, alltså ett standardglas. Två öl ger därför ca ${PROMILE_80_MAND(2)} promille hos en man på 80 kg och ${PROMILE_60_KVINDE(2)} hos en kvinna på 60 kg. Den svenska gränsen på 0,2 promille nås alltså efter två öl — och efter ytterligare en timme är det ungefär 0,15 promille mindre.` },
+        { question: "Hur många promille är farligt?", answer: `Promillen stiger kraftigt för varje standardglas: 4 öl på 80 kg är ${formatPromille(PROMILLE_4_OEL.promille)} promille, och 6 öl på 70 kg er over 2,0 — den gräns där man som utgångspunkt förlorar körkortet. Det är inte promillet i sig som är farligt, utan vad du gör med bilen. Från 0,2 promille är det dessutom enligt svensk lag redan rattfylleri, oavsett om du känner dig "lagom" eller inte.` },
+        { question: "Vad är promillegränsen i Danmark?", answer: "I Danmark går gränsen vid 0,5 promille — altså mer än dubbelt så hög som den svenska på 0,2. Det betyder att 2 öl till en man på 80 kg, som ger 0,44 promille, är lovligt i Danmark men rattonyktert i Sverige. Polen har också 0,2 promille, medan Storbritannien ligger på 0,8 (0,5 i Skottland)." },
         { question: "Är beräkningen exakt?", answer: "Nej, det är en uppskattning. Mat, ämnesomsättning, medicin och hälsa påverkar den faktiska promillen. Kör aldrig bil om du är osäker." },
         { question: "När kan jag köra bil igen?", answer: `4 öl på 80 kg = ${PROMILLE_4_OEL_ER}. Det finns två olika tal, och det är det kortare som avgör: du får köra bil när promillen är under 0,2 ‰, och det tar ${formatTimer(PROMILLE_4_OEL.timerTilGraenseSe, "se")}. Helt nykter är du först efter ${formatTimer(PROMILLE_4_OEL.timerTilNul, "se")}, eftersom kroppen bara bryter ner ungefär 0,15 ‰ per timme. Tolv glas är alltså fullt lagliga kvar vid tre på natten och du är fortfarande berusad på morgonen. Morgonen efter är den farligaste, eftersom promillen ofta är högre än man tror.` },
       ],

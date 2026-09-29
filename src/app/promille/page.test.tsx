@@ -126,15 +126,123 @@ describe("promille page", () => {
     expect(html).toContain("WHO");
   });
 
+  test("hver celle i den svenska tabel har tal OG enhed i én klynge", async () => {
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("se"));
+    const html = renderToStaticMarkup(await PromillePage());
+
+    // React skriver `{" "}` som et kommentar-markørlag mellem tal og enhed,
+    // altså `1,45<!-- --> ‰`. Det er normalt og hele sitet gør det — men
+    // C78's fejl (8.25 i den indekserede tekst) var præcis den klasse, hvor
+    // tallet og enheden bliver hængt fra hinanden. Låsen kræver derfor at
+    // hver celle er ét tal umiddelbart efterfulgt af "‰", så en senere
+    // refaktor ikke kan efterlade et tal uden enhed.
+    const celler = html.match(/<td>[^<]*<\/td>/g) ?? [];
+    const medPromille = celler.filter((c) => /[0-9],[0-9]{2}/.test(c));
+    expect(medPromille.length).toBeGreaterThanOrEqual(15);
+    for (const celle of medPromille) {
+      expect(celle).toMatch(/^<td>[0-9],[0-9]{2} ‰<\/td>$/);
+    }
+  });
+
+  test("den danske side er uændret: samme tabel, samme tal, samme sætning", async () => {
+    const html = renderToStaticMarkup(await PromillePage());
+
+    // Rettelsen lagde et nyt modul bag tabellen, så den danske side skal
+    // stadig vise præcis de tal den viste før — ellers har en "ren" SE-rettelse
+    // flyttet tal i den danske brødtekst.
+    for (const celle of [
+      "<td>0,22 ‰</td>",
+      "<td>0,44 ‰</td>",
+      "<td>0,66 ‰</td>",
+      "<td>0,88 ‰</td>",
+      "<td>1,32 ‰</td>",
+      "<td>0,73 ‰</td>",
+      "<td>1,09 ‰</td>",
+      "<td>1,45 ‰</td>",
+      "<td>2,18 ‰</td>",
+    ]) {
+      expect(html).toContain(celle);
+    }
+    expect(html).toContain("Hvor mange promille er N øl?");
+    expect(html).toContain("mellem to og tre øl");
+  });
   test("de danske og svenske grænser er uændrede af udlandstabellen", async () => {
     vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("se"));
     const html = renderToStaticMarkup(await PromillePage());
 
-    // Udlandstabellen er dansk, fordi målingen kun var dansk. Den må derfor
-    // ikke lække til beraknare.se, og den svenske side skal stadig svare med
-    // Sveriges egen grænse.
-    expect(html).not.toContain("Promillegrænsen i udlandet");
+    // Sveriges egen grænse skal stadig være den, siden svarer med, også når
+    // den svenske udlandstabel er lagt ind. Før denne iteration lå låsen på
+    // at beraknare.se slet ikke havde en landtabel — den sætning holdt, fordi
+    // C87's måling kun var dansk, ikke fordi en svensk tabel ville være forkert.
     expect(html).toContain("gränsen för rattfylleri vid <strong>0,2 ‰</strong>");
+    // Og den danske overskrift må ikke stå på den svenska side.
+    expect(html).not.toContain("Promillegrænsen i udlandet");
+    expect(html).toContain("Promillegränsen utomlands");
+  });
+
+  test("beraknare.se svarer på 'hur många promille är N öl' med samme tabel som Danmark", async () => {
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("se"));
+    const html = renderToStaticMarkup(await PromillePage());
+
+    // Svensk autocomplete under "promille efter" (hl=se, gl=se, 29. september
+    // 2026) giver 10/10 variationer i præcis det her spørgsmål: "promille efter
+    // 1 øl", "efter 2 øl", "efter 3 øl", "efter ett glas vin" … Siden havde
+    // nul tabeller og nul forekomster af spørgsmålet.
+    expect(html).toContain("Hur många promille är N öl?");
+    // Tallene er de samme rækker som den danske side viser — de kommer fra
+    // PROMILLE_GENSTANDE_RAEKKER, så de to sider ikke kan glide fra hinanden.
+    for (const promille of ["0,22", "0,44", "0,66", "0,88", "1,32", "1,45", "2,18"]) {
+      expect(html).toContain(`${promille} ‰`);
+    }
+    // Og grænsen skal være-sat ind i antal øl, ikke hårdkodet: 80 kg man
+    // når 0,2 ‰ efter to øl, og 60 kg kvinde efter det samme.
+    expect(html).toContain("gränsen på 0,2 ‰ går");
+  });
+
+  test("den svenska landtabel bruger svenska landnavne og Sveriges egen rækkefølge", async () => {
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("se"));
+    const html = renderToStaticMarkup(await PromillePage());
+
+    expect(html).toContain("<td>Sverige</td>");
+    // Holland hedder inte "Holland" på svenska, och Österrike heter Österrike.
+    // En dansk läsare får "Holland" — det är hela poängen med låsen.
+    expect(html).toContain("<td>Nederländerna</td>");
+    expect(html).toContain("<td>Österrike</td>");
+    expect(html).not.toContain("<td>Holland</td>");
+    // Danmark står med, fordi 0,5 ‰ er det en svensk læser helst skal kende
+    // til semesterresen.
+    expect(html).toContain("<td>Danmark</td>");
+  });
+
+  test("den svenska side siger det ærlige om 2 øl: over svensk, under dansk", async () => {
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("se"));
+    const html = renderToStaticMarkup(await PromillePage());
+
+    // 0,44 ‰ er over Sveriges 0,2 men under Danmarks 0,5. Skrives der
+    // "under den svenska gränsen", får en svensk läsere besked om at han
+    // må köra — det er den farligste fejl siden kan lave.
+    expect(html).toContain("2 öl på 80 kg är 0,44 ‰");
+    expect(html).toContain("över</strong> den svenska gränsen på 0,2 ‰");
+    expect(html).toContain("under</strong> den");
+    expect(html).not.toContain("under den svenska gränsen");
+  });
+
+  test("den svenska side har de svenska landnavne og ingen danske", async () => {
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("se"));
+    const html = renderToStaticMarkup(await PromillePage());
+
+    // Samme fejlklasse som C168: et dansk landnavn i en svensk tabel er en
+    // lækage, men den har intet dansk tegn, så scanneren kan ikke finde den.
+    // Kun tre land hedder forskeligt — Danmark, Tyskland, Storbritannien,
+    // Sverige, Norge, Polen, Italien, Frankrike og Spanien hedder det samme
+    // på begge sprog, og det er korrekt.
+    for (const dansk of ["Holland", "Østrig", "Grækenland"]) {
+      expect(html).not.toContain(dansk);
+    }
+    // Og de danske ord fra den danske tabel må ikke finde vej til beraknare.se.
+    for (const dansk of ["Ingen særregel", "nye og professionelle", "Udenlandet", "hæld"]) {
+      expect(html).not.toContain(dansk);
+    }
   });
 
   test("den svenska to-tals-sætning er svensk, ikke dansk", async () => {
