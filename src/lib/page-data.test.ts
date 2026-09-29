@@ -110,7 +110,7 @@ describe("getPageData", () => {
   test.each([
     {
       locale: "da" as const,
-      title: "Kalorieberegner: mand 80 kg, 180 cm = 2.759 kcal/dag",
+      title: "Kalorieberegner: 80 kg, 180 cm, 30 år, moderat = 2.759 kcal",
       question: "Hvor mange kalorier skal du have om dagen?",
       diet: "2.259",
     },
@@ -457,7 +457,7 @@ describe("getPageData", () => {
   test.each([
     {
       locale: "da" as const,
-      title: "Beregn dage mellem datoer og dage til en dato = 365 dage",
+      title: "Beregn dage til en dato: 1. jan. 2026→2027 = 365",
       heading: "Beregn antal dage mellem to datoer",
       intent: "antal dage mellem to datoer",
       answer: "Vælg en startdato og en slutdato",
@@ -466,7 +466,7 @@ describe("getPageData", () => {
     },
     {
       locale: "se" as const,
-      title: "Beräkna dagar mellan datum och dagar kvar till datum = 365",
+      title: "Beräkna dagar kvar till datum: 1 jan. 2026→2027 = 365",
       heading: "Beräkna antal dagar mellan två datum",
       intent: "antal dagar mellan två datum",
       answer: "Välj ett startdatum och ett slutdatum",
@@ -500,7 +500,7 @@ describe("getPageData", () => {
       // om noget andet. Beskrivelsen SKAL desuden begynde med spørgsmålet
       // og ikke gentage titlen: de to var ens, hvilket koster halve
       // snippet-pladsen på det samme "se mere"-link.
-      expect(data.metaTitle).toMatch(/dage til en dato|dagar kvar till datum/);
+      expect(data.metaTitle).toMatch(/dage til en dato|kvar till datum/);
       expect(data.metaDescription.startsWith(countdown)).toBe(true);
       expect(data.metaDescription).not.toBe(data.metaTitle);
     }
@@ -537,13 +537,13 @@ describe("getPageData", () => {
   test.each([
     {
       locale: "da" as const,
-      title: "Momsberegner: 1.000 kr. ekskl. moms = 1.250 kr.",
+      title: "Momsberegner: 1.000 kr. ekskl. moms + 25 % = 1.250 kr.",
       answer: "1.000 kr. og få 1.250 kr.",
       schema: "Gratis momsberegner. Beregn dansk moms på 25 % med priser inkl. og ekskl. moms.",
     },
     {
       locale: "se" as const,
-      title: "Momskalkylator: 1 000 kr. exkl. moms = 1 250 kr.",
+      title: "Momskalkylator: 1 000 kr. exkl. moms + 25 % = 1 250 kr.",
       answer: "1 000 kr. och få 1 250 kr.",
       schema: "Gratis momskalkylator. Beräkna svensk moms på 25 %, 12 % och 6 % med priser inkl. och exkl. moms.",
     },

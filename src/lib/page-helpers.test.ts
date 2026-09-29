@@ -77,13 +77,13 @@ describe("buildPageMetadata", () => {
     {
       slug: "moms" as const,
       locale: "da" as const,
-      title: "Momsberegner: 1.000 kr. ekskl. moms = 1.250 kr.",
+      title: "Momsberegner: 1.000 kr. ekskl. moms + 25 % = 1.250 kr.",
       description: "Beregn dansk moms på 25 %. Læg moms til 1.000 kr. og få 1.250 kr. Træk også moms fra en pris inkl. moms, eller find momsandelen.",
     },
     {
       slug: "moms" as const,
       locale: "se" as const,
-      title: "Momskalkylator: 1 000 kr. exkl. moms = 1 250 kr.",
+      title: "Momskalkylator: 1 000 kr. exkl. moms + 25 % = 1 250 kr.",
       description: "Beräkna svensk moms på 25 %, 12 % eller 6 %. Lägg till 1 000 kr. och få 1 250 kr. Dra av moms eller hitta momsandelen.",
     },
   ])("builds answer-first metadata for $slug in $locale", ({ slug, locale, title, description }) => {

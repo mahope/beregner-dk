@@ -1,10 +1,10 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — **CEO-kø punkt 0 (review-fund 29/9) er allerede lukket** i commit
-`aca17e5` (2026-09-29 20:44): alle 8 forkerte tal (valborg, påskafton, sankthans,
-påskeaften-FAQ, husleje, toUtcMidnight, svensk promille, dato-er) er rettet i
-master og verificeret live. **Den danske titelrække er tømt** (C195/C196), og
-fire blogartikler får en næste handling (C198). **Største åbne flade:**
+STATUS: KØ — **Review-fund 30/9 (4 stk) rettet** i commit på
+`ceo/review-fund-30-9`: dimittend-intervallet i dagpenge-beskrivelsen står
+lav–høj igen, CI kører Node 22 + `npm test`, `/dato`-titlen lover en konkret
+periode (1. jan. 2026→2027 = 365) frem for et ubetinget tal, og `/kalorier` +
+`/moms` titler nævner nu alder/aktivitet og sats. **Største åbne flade:**
 beraknare.se — 537 besøgende/28d mod 160.000+ visninger på 0,1–0,2 % CTR med
 danske URL-slugs. Forsning gjort (opgave 185), migrationsopgave skrevet (187).
 
