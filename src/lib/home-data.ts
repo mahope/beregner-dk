@@ -67,7 +67,7 @@ const daPageData: HomePageData = {
   meta: {
     title: "MinBeregner.dk - Gratis online beregnere til danskere",
     description:
-      "Danmarks samling af gratis online beregnere. Beregn løn efter skat, moms, lån, pension, feriepenge, BMI for voksne og meget mere. {count} beregnere med 2026-satser — helt gratis og uden login.",
+      "Danmarks samling af gratis beregnere. Beregn løn efter skat, moms, lån, pension, feriepenge og BMI. {count} beregnere med 2026-satser — gratis og uden login.",
     keywords: [
       "beregner",
       "online beregner",
@@ -393,7 +393,7 @@ const sePageData: HomePageData = {
   meta: {
     title: "Beräknare.se - Gratis online kalkylatorer för Sverige",
     description:
-      "Sveriges samling av gratis online kalkylatorer. Beräkna moms, lån, räntor, BMI för vuxna och mycket mer. {count} kalkylatorer med 2026-satser — helt gratis och utan inloggning.",
+      "Sveriges samling av gratis online kalkylatorer. Beräkna moms, lån, räntor, pension och BMI. {count} kalkylatorer med 2026-satser — gratis och utan inloggning.",
     keywords: [
       "kalkylator",
       "online kalkylator",

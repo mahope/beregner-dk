@@ -42,7 +42,7 @@ const MAKS_MARGINALSKAT =
   MAKS_STATSSKAT + SATSER_2026.kommuneskatSnit + SATSER_2026.kirkeskatSnit;
 
 const ARTIKEL_TITEL = `Skat 2026: personfradrag ${da(SATSER_2026.personfradrag)} kr, bundskat ${pct(SATSER_2026.bundskat)} %`;
-const ARTIKEL_BESKRIVELSE = `De vigtigste skattesatser for 2026: AM-bidrag ${pct(SATSER_2026.amBidrag)} %, personfradrag ${da(SATSER_2026.personfradrag)} kr, bundskat ${pct(SATSER_2026.bundskat)} %, topskat fra ${da(SATSER_2026.topskatGraense)} kr og beskæftigelsesfradrag ${pct(SATSER_2026.beskaeftigelsesfradragPct)} %. Med regneeksempel på 40.000 kr i løn.`;
+const ARTIKEL_BESKRIVELSE = `Skattesatser 2026: AM-bidrag ${pct(SATSER_2026.amBidrag)} %, personfradrag ${da(SATSER_2026.personfradrag)} kr, bundskat ${pct(SATSER_2026.bundskat)} %, topskat fra ${da(SATSER_2026.topskatGraense)} kr og beskæftigelsesfradrag ${pct(SATSER_2026.beskaeftigelsesfradragPct)} %. Med regneeksempel.`;
 
 export async function generateMetadata(): Promise<Metadata> {
   const dc = await getCurrentDomainConfig();

@@ -18,7 +18,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: { absolute: "Biløkonomi 2026: Hvad koster det at eje bil?" },
     description:
-      "Komplet guide til biløkonomi i 2026: Registreringsafgift, grøn ejerafgift, forsikring, brændstof, værditab og finansiering. Få det fulde overblik over, hvad din bil koster om året.",
+      "Biløkonomi 2026: Registreringsafgift, forsikring, brændstof, værditab og finansiering. Se hvad det koster at eje bil om året.",
     keywords: [
       "biløkonomi",
       "hvad koster det at eje bil",

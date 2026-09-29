@@ -49,7 +49,9 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return {
     title: { absolute: "Dagpenge 2026: Max sats er 22.041 kr. pr. måned" },
-    description: `Dagpenge 2026: max sats ${MAX} pr. måned for fuldtidsforsikrede og ${DELTID} for deltidsforsikrede. Dimittendsats ${DIMITTEND_UDEN}–${DIMITTEND_MED}. Se krav, periode og regneeksempler.`,
+    // intervalet står lav–høj: 15.759 kr med forsørgelsespligt og 18.074 kr
+    // uden. Det stod omvendt, så siden sagde "18.074 kr–15.759 kr".
+    description: `Dagpenge 2026: max sats ${MAX} for fuldtidsforsikrede og ${DELTID} for deltidsforsikrede. Dimittendsats ${DIMITTEND_MED}–${DIMITTEND_UDEN}. Se krav, periode og eksempler.`,
     keywords: [
       "dagpenge 2026",
       "dagpengesats 2026",

@@ -12,7 +12,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: { absolute: "Boligsalg 2026: Guide til omkostninger og salgsprovenu" },
     description:
-      "Komplet guide til boligsalg i 2026: Hvad koster en ejendomsmægler? Hvor meget koster energimærke, tilstandsrapport og ejerskifteforsikring? Beregn dit nettoprovenu med vores gratis boligsalgsberegner.",
+      "Boligsalg 2026: Hvad koster mægler, energimærke, tilstandsrapport og ejerskifteforsikring? Beregn dit nettoprovenu.",
     keywords: [
       "boligsalg 2026",
       "omkostninger ved salg af bolig",

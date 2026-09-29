@@ -14,6 +14,10 @@ stadig under bygning da målingen blev taget. Der er altså **ét ubrugt vindue 
 (21:30) og **ingen `DEPLOY-MISSING`** — skriv den ikke, før et vindue er gået uden at
 ændringen er live. Genkør C190/C191/C192/C193 og CEO-punkt 0 efter næste batch.
 
+STATUS: KØ — **produktion serverer stadig `c6c0079` (målt 21:26: `valborg` har 17× "14.
+februar").** 21:30-batchen var ikke kørt da denne iteration målte, så der er
+**ét ubrugt vindue tilbage** til C190–C193 og CEO-punkt 0.
+
 STATUS: KØ — **køen er tømt for opgaver, der kan udføres af en agent.** 97 er `BLOCKED`
 på Mads' svar, 98 afhænger af 97, 179 kræver en rigtig browser, og **119 er nu også
 `BLOCKED`: Sundhedsstyrelsen svarer HTTP 429 på alle sider** (anden kildejerngang efter
@@ -46,6 +50,33 @@ node scripts/locale-leak.mjs --gate       # exit 0, 0 ureviewet
 ## Åbne VERIFICÉR DEPLOY-noter
 
 Kun noter med et *uafviklet* vindue står her. Alt lukket er i `docs/plan-arkiv.md`.
+
+- ⏳ **VERIFICÉR DEPLOY: C194 — ingen `meta description` over 160 tegn.** Kode +
+  plan i ét squash-commit på `ceo/meta-160`. Første kandidatvindue
+  **2026-09-30 07:30** (21:30-batchen kørte før merge). Rørte filer:
+  `src/app/meta-description.test.ts` (**ny**), `home-data.ts` (2 strenge),
+  fem blogindlægs `page.tsx` (1 streng hver) — **ingen `<title>`, ingen `<h1>`,
+  ingen beregningslogik, ingen ny URL, ingen sitemap**. **HTTP 200 beviser
+  intet:** intet her rører en URL, kun syv indekserede tekststrenge. Verificér
+  ved **indhold**:
+  1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
+  2. For hver af de syv URL'er: `curl -s <url> | grep -o '<meta name="description" content="[^"]*"'`
+     skal give **≤ 160** tegn. Længderne på den nye kode er `/` **152**,
+     `/blog/biloekonomi-2026-hvad-koster-det-at-eje-bil` **125**,
+     `/blog/boligsalg-2026-guide-til-omkostninger-og-provenu` **115**,
+     `/blog/dagpenge-saadan-finder-du-din-sats` **158**,
+     `/blog/maanedsbudget-2026-komplet-guide` **150**,
+     `/blog/skat-2026-alt-du-skal-vide` **152** (og på beraknare.se forsidens
+     svenske udgave).
+  3. Tallet skal stadig være med: **79 beregnere** på `/`,
+     `22.041 kr` + `14.694 kr` på dagpenge, `8 %` / `54.100 kr` / `12,01 %` /
+     `777.900 kr` / `12,75 %` på skat.
+  4. **Nyt fund undervejs:** `/blog/dagpenge-saadan-finder-du-din-sats` skal
+     sige **`Dimittendsats 15.759 kr–18.074 kr`** (lav–høj). Før stod der
+     "18.074 kr–15.759 kr".
+  5. **Kontrol:** `/procent` 115, `/dato` 118, `/befordringsfradrag` 129 og
+     `/tidsberegner` 141 skal være uændrede, og 0 sider i begge sitemapmer må
+     have en description over 160.
 
 - ⏳ **VERIFICÉR DEPLOY: C60 `/promille` — et tomt felt gav en grøn
   tilladelse til at køre bil, "præcis på grænsen" erstattede den falske
@@ -300,42 +331,39 @@ Kun det der endnu ikke er gjort. CEO-køen er i prompten og har forrang.
   en kildefil. **C92's tabel er ikke en invitationsliste til at prøve de samme
   kilder igen.**
 
-#### 180. [ ] 2026-09-29 — 24 sider har en `meta description` over 160 tegn (C193 fiksede kun 22 andre)
+#### 180. [x] 2026-09-29 — C194 — **ingen `meta description` er længere over 160 tegn, og en test holder hele sitet under reglen**
 
-- **Datagrund:** målt på produktion 2026-09-29 21:35, hele sitemapmen plus `/`.
-  Over 160 tegn: `/befordringsfradrag` **203**, `/blog/boligsalg-2026-guide-til-omkostninger-og-provenu` **202**,
-  `/rentefradrag` **195**, `/boligsalg` **195**, `/ejendomsvaerdiskat` **193**,
-  `/blog/skat-2026-alt-du-skal-vide` **191**, `/` **191**,
-  `/boernepenge` **188**, `/blog/biloekonomi-2026-hvad-koster-det-at-eje-bil` **186**,
-  `/loen-efter-skatt` **180**, `/pension` **180**, `/barselsdagpenge` **174**,
-  `/blog/dagpenge-saadan-finder-du-din-sats` **176**, `/efterloen` **172**,
-  `/husleje` **170**, `/sparemaal` **169**, `/elbil` **166**, `/loenstigning` **166**,
-  `/aegloesning` **166**, `/motion-kalorier` **165**,
-  `/blog/maanedsbudget-2026-komplet-guide` **165**, `/dagpenge` **164**,
-  `/flyttebudget` **162**. 24 i alt.
-- **Hvorfor det er en egen opgave:** C193 rørte **22 `metaDescription`-strenge i
-  `src/lib/page-data.ts`**, og de er stadig ikke live (se deploy-status ovenfor).
-  Disse 24 er en **anden pulje** — forside, blogindlægs egne `metadata`, og sider
-  hvis description står i `page.tsx`. De holdt aldrig repoets egen
-  160-tegns-regel, og ingen test fanger dem.
-- **⚠️ Målt på den gamle kode — genmål efter deploy af C193.** `/befordringsfradrag`
-  står til 203 nu og skal være 129, så listen er et **gulv**, ikke det endelige tal.
-- **Acceptkriterier:** (1) en test der fejler på >160 tegn for **alle** sider i
-  sitemapmen på begge domæner, så det ikke kan ske igen; (2) de kortere
-  descriptioner beholder deres data-afledte tal (`3,17 kr./km` på
-  `/befordringsfradrag`, `25.000 kr netto` på `/husleje`) og de **genereres fra
-  samme kilde som brødteksten**, ikke skrives i hånden; (3) ingen `<h1>`, ingen
-  `<title>`, ingen beregningslogik, ingen ny URL, ingen sitemap-ændring;
-  (4) gaten grøn.
-- **MÅL:** de 24 sider har ingen CTR-baseline i GSC-uddraget (kun `/rentefradrag`
-  er med, 331 Plausible-besøgende/28d). Skriv baseline pr. side, før der ændres
-  title/description, og mål igen om 14 dage.
-- **Acceptkriterier:** (1) en citable dansk eller nordisk tabel er hentet og
-  kilden er nævnt *på siden*; (2) pr. 100 g **og** pr. typisk portion, fordi
-  klyngen spørger begge dele ("kalorier i 2 gulerødder"); (3) rå og tilberedt
-  er skelnet, når det betyder noget; (4) hver række i et modul med egen test,
-  så tallene ikke kan stå i strengen og afvige fra tabellen; (5) ét afsnit,
-  ikke en hel underside, og et link videre til `/kalorier` og `/proteinbehov`.
+- **Målt på den nye kode (ikke produktion):** de 24 fra C193's liste var kun
+  **8** stadig over 160 i koden. C193 rettede 22 strenge i `page-data.ts`, så de
+  16 øvrige var forside + blogindlæg, hvis description ligger i `page.tsx`:
+  `/` da **187** / se **171**, `/blog/biloekonomi…` **180**,
+  `/blog/boligsalg…` **200**, `/blog/dagpenge-saadan…` **173**,
+  `/blog/skat-2026-alt-du-skal-vide` **188**, `/blog/maanedsbudget…` **161**.
+  De otte andre på listen lå under 160 efter C193 og var ikke en fejl mere.
+- **Rettet:** alle svy kortere tekster, **hvert tal bevaret og fortsat
+  data-afledt** (`{count}` på forsiden, `${MAX}`/`${DELTID}`/`${DIMITTEND_*}`
+  på dagpenge, satserne fra `SATSER_2026` på skat). **Fund undervejs:**
+  dagpenge-indlæggets description skrev dimittend-intervallet som
+  "18.074 kr–15.759 kr" — **høj–lav**; det står nu "15.759 kr–18.074 kr", som
+  resten af siden har hele tiden sagt. Ingen `<title>`, ingen `<h1>`, ingen
+  beregningslogik, ingen ny URL, ingen sitemap-ændring.
+- **Ny test `src/app/meta-description.test.ts` (4 tests):** den kalder hver
+  sides `generateMetadata()` — altså den tekst der lander i `<head>` — for alle
+  120 `page.tsx` under `src/app` på dansk, alle slugs i `getAvailableSlugs` på
+  begge domæner, forsiden i begge sprog og begge `dage-til`-ruter på svensk.
+  Sider der *skal* mangle description står i en navngiven liste, så en ny side
+  ikke kan springe reglen over ved at glemme den. Den fejlede med de otte fund
+  over og er grøn efter rettelsen. `import.meta.glob` bruges frem for
+  `readdirSync`, fordi `[dato]`/`[slug]` ellers bliver læst som glob-mønstre.
+- **Verificeret på rigtig server før merge** (`next start` :3987): alle **136**
+  sider i sitemapmen har nu en description ≤ 160 — målt på den renderede HTML,
+  ikke på status. `/` 152, de fem blogindlæg 115–158, `/befordringsfradrag` 129
+  (C193's tal), `/procent` 115 og `/dato` 118 uændrede som kontrol.
+  Gate grøn: lint (**615 filer**), **2980 tests / 188 filer**, build (**142
+  sider**), `locale-leak.mjs --gate` exit 0.
+- **MÅL:** de svy sider har ingen CTR-baseline i GSC-uddraget; kun
+  `/rentefradrag` (331 Plausible-besøgende/28d) er med der. Mål snippet-andelen
+  for `/` (222 besøgende/28d, bounce 37 %) 14 dage efter deploy.
 
 #### 179. [ ] ÅBEN — **C55, C56 og C60 er deploy-noter, der kræver interaktivitet, og har stået åbne siden 2026-09-27 07:30**
 

@@ -12,7 +12,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: { absolute: "Månedsbudget 2026 - Komplet guide til privatøkonomi" },
     description:
-      "Komplet guide til at lave et månedsbudget i 2026: Faste og variable udgifter, 50/30/20-reglen, tommelfingerregler for bolig og opsparing. Få styr på din økonomi.",
+      "Komplet guide til månedsbudget i 2026: Faste og variable udgifter, 50/30/20-reglen, tommelfingerregler for bolig og opsparing. Få styr på din økonomi.",
     keywords: [
       "månedsbudget 2026",
       "privatøkonomi budget",
