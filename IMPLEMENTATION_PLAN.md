@@ -1,3 +1,5 @@
+STATUS: KØ — **C174 er landet: `/kalorier` (12.631 visninger, GSC's ottendestørste danske side) viste læseren præcis de fem links `/bmi` viser — rækken var en copy-paste af `/bmi`'s, så den sendte 0 af 12 interne links til nogen af de seks kalorieværktøjer, der alle pegede på den.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den, 119 er kilde-blokeret), og de syv åbne deploy-noter (C167–C173) har alle første vindue **2026-09-29 12:30** — det var 11:10, så ingen blev rørt. **Valget kom af at måle en retning, ingen måling hidtil havde dækket:** C165 målte beregner→indlæg, og C105 målte forside→katalog, men **kalkulator→kalkulator var aldrig talt.** Scriptet over `relatedMap`'s 81 rækker giver **419 par, hvoraf 249 er ensidige**. Rækkerne er 5-6 lange og `/procent` har 26 indgående links, så *gensidighed er umulig som regel* — min første testformulering krævede netop det og faldt på 27 sider, fundet fordi jeg lod den køre frem for at justere tælleren. **Den målbare regel er i stedet dubletter:** kun **én klasse af to**, og da `/kalorier`-rækken blev læst, var den `/bmi`-rækken **med de to første elementer byttet om**. Den indeholdt `/procent`, `/alder`, `/dato` og `/tidsberegner` — intet med kalorier at gøre — og **0** af `/motion-kalorier`, `/vaegttab`, `/proteinbehov`, `/1rm`, `/kropsfedt`, `/vandbehov`, som alle seks erklærer `/kalorier` i deres egen række. **Rettelsen:** `/kalorier` peger nu på den faktiske kalorieklynge (alle seks målt 200 på begge domæner), og den anden dublet `/planetvaegt` ≡ `/brok` er adskilt ved at give `/planetvaegt` `/ohm` — `/brok` er **urørt**, fordi den *er* matematik, og det er den svagere side der skal adskilles. **To nye tests, modsvejs verificeret: begge falder med master's `calculator-list.ts` og er grønne med rettelsen** — én generel (ingen to sider må vise læseren det samme sæt, så en tredje copy-paste ikke kan slippe forbi) og én specifik (de seks kalorieværktøjer skal være med, så en senere oprydning ikke kan bytte rækken til noget andet gyldigt). Målt på rigtig server (`next start` port 3911, fri *inden* start, begge `Host`-headere): DA 200, de tilføjede links 1→2, de fire fjernede **2→1** (kun brødteksten), SE 200 med samme seks, begge `<title>` uændrede, 0 danske markører på beraknare.se, `status: ok`. Gate grøn: lint (593 filer), **2.712 tests / 175 filer** (fra 2.710/175), build (141 sider), `locale-leak.mjs --gate` exit 0, `knapgruppe-scan.mjs` 0/0, `href-scan.mjs` 0. **Målt og bevidst ikke bygget:** DA-autocomplete under "kalorier" er **10 af 10 "kalorier i &lt;fødevarer&gt;"**, og banan, vandmelon, jordbær, avocado, kartofler, vindruer, havregryn stod **0 gange hver** på siden — en ægte ubesvaret klynge, der **kræver Fødevarestyrelsens fødevaredatabase**, og `frbs.food.dtu.dk` svarer `000` fra loopet (fire gange curl, to gange webfetch). Open Food Facts er reachable men er mærkevarer, ikke en fødevaretabel, så kcal-tal fra hukommelsen ville være opgave 119's kildefælde på en *sundheds*side. Skrevet op under `❓ Til Mads`. **MÅL:** `/kalorier` baseline **12.631 v / 132 klik / CTR 1,0 % / pos. 8,1** (GSC 2026-08-30→09-27) og **289 besøgende/28d** (Plausible 2026-09-29) — måles igen 2026-10-13. Forventningen er flere interne klick og linkværd mod kalorieværktøjerne, **ikke** nye visninger. Se opgave 174.
+
 STATUS: KØ — **C172 er landet: `/tidszone` er fjerdestørste danske side (24.209 visninger, 0,4 % CTR, pos. 7,5) og svarede på nul af den *anden* halvdel af sin egen søgeklynge: otte af de ti største DA- og SE-autocomplete-variationer under "hvad er klokken i usa" / "klokken i usa" er *stater* — Florida, Texas, Californien, Washington, Georgia, Arizona, Colorado, Minnesota — og de stod 0 gange hver på begge domæner, mens New York stod 26.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den, 119 er kilde-blokeret), og de fem åbne deploy-noter (C167–C171) har alle første vindue **2026-09-29 12:30** — det var 09:59, så ingen blev rørt. **Valget kom af at måle linket indhold og se en dyb asymmetri.** Jeg kørte inlinks over begge sitemapmer (206 sider): `/dato`, `/tidszone`, `/procent` har 71 interne links på SE og 135 på DA, så hele sidens styrke ligger i footer og header, og de stater, klyngen spørger efter, findes **ikke på nogen som helst dansk side** — de var hverken et linkproblem eller et titelproblem. Samme konklusion som C82, C96, C99, C100, C170 og C171: **ikke titlen, men kroppen under den.** **Målt først, begge domæner, live.** DA-autocomplete (`hl=da`, `gl=dk`, 10:10) under **"klokken i usa"** → "… california" (nr. 3), "… florida" (nr. 5), "… miami" (nr. 6), "… boston" (nr. 9); under **"hvad er klokken i usa"** → "… miami" (nr. 6); under **"klokken i usa nu"** → "hvad er klokken i atlanta usa nu" (nr. 3), "… boston usa nu" (nr. 4), "… colorado usa nu" (nr. 5). SE-autocomplete under **"klokken i usa"** → "… florida usa" (nr. 4), "… texas usa" (nr. 7), "… georgia usa" (nr. 8), "… arizona usa" (nr. 9), "… atlanta usa" (nr. 10). På de to **live** sider var `Florida`, `Texas`, `Californien`, `Washington`, `Miami`, `Dallas`, `Minnesota`, `Georgia`, `Arizona`, `Colorado` **0** forekomster hver. **Rettelsen (begge sprog, fordi klyngen er målt i begge).** Nyt modul `src/lib/tidszone-usa-stater.ts` med ni stater, der hver *peger på* en by i `TIDSZONER` — **ingen offset står i filen**: Florida→Miami, Californien→Los Angeles, Texas→Chicago, Washington→Los Angeles, Georgia→New York, Arizona→Phoenix, Colorado→Denver, Minnesota→Chicago, Massachusetts→Boston — og `usaStatRaekker()` regner hver celle gennem `klokkeslaetVed`, samme regel som værktøjet. Det er C155's regel om Canada anvendt på hele tabellen: en håndskrevet offset kunne glide fra `TidszoneBeregneren`, en reference kan ikke. For at overholde det krævede fire nye byer i `TIDSZONER` — **Miami og Boston** (Eastern, `America/New_York`), **Denver** (Mountain, `America/Denver`) og **Phoenix** (fast UTC-7, `America/Phoenix`) — hver med kildekommentar; **C84's by-tal-lås** i `metaDescription`/`ogDescription`/FAQ gik derfor 21 → **25** i begge sprog, og den test der låser den færtes automatisk grøn. Ét nyt `<h2>` pr. sprog med tabellen **stat / samme zone som / vinter / sommer** + **to nye FAQ-par pr. sprog** (JSON-LD 9 → **11** på rigtig server). **Arizona-undtagelsen er hele pointen med to kolonner, og min egen tekst havde den bagvendt — fundet fordi testen forventede noget forkert.** Jeg skrev "Phoenix er 05 både vinter og sommer, Denver går fra 05 til 04". `klokkeslaetVed` siger **Phoenix 04 vinter / 03 sommer, Denver 04 hele året**: Phoenix er fast UTC-7, så når Danmark går på sommertid, flytter Denver sig *med* mens Phoenix står fast. Det er C171's fejlklasse modsat, og tre steder (å€é-linje i begge sprog + modulens docblock) var rettet på **kilden** i stedet for i testen. **Harness: 2.689 → 2.705 tests / 173 → 174 filer. Modsvært verificeret: alle 15 nye tests falder med master-koden** (9 i `tidszone-usa-stater.test.ts`, 6 i `page.test.tsx`), målt ved at stille de tre kildefiler tilbage. De nye tests læser cellerne fra **tabellens `<tr>`-rækker**, ikke fra hele HTML'en — C155's målefejl 30, fordi ellers kan by-tallene fra time-tabellen ikke adskilles fra stat-tallene. **To målefejl i mit eget greb, begge i samme testfil.** (1) Jeg skrev `"Phoenix er 04 vinter og 03 sommer"` i en assertion, men JSX bryder teksten på nye linjer; fikseret ved at læse markupken, fjerne `<!-- -->` og skelne på mellemrum — den samme fejl som C94's nr. 16. (2) Min første norske konsekvens-fejl var at skrive `seSætning(uddrag)` i en heredoc; shellen ædte `æ`/`ø`/`å`, så testen **faldt** på ReferenceError frem for på indhold. Samme fejlklasse som C163's `lønsprocent`. **Flaky test, målt og verificeret pre-existing:** `locale-leak-gate.test.ts` faldt i første fulde kørsel med `1 ureviewet danske streng: src/components/MomsBeregner.tsx:383 "Vaskemaskine (per vask)"` — det er **planten fra C73's egen test**, som ligger på disk (`git diff` viste den), ikke min ændring. Efter `git checkout` på filen: **2.705/2.705 grøn**. Samme kendte flakiness som C167 og C171 åbenborer. **Gate grøn:** lint (**592 filer**), **2.705 tests / 174 filer**, build (**141 sider**), `locale-leak.mjs --gate` exit 0 (uændret), `knapgruppe-scan.mjs` 0/0. **Målt på rigtig server** (`next start` port 3911, porten verificeret fri *inden* start), begge domæner: nyt `<h2>` **1** gang, **9** `<tr>` pr. sprog med Florida 06/06, Kalifornien 03/03, Texas 05/05, Arizona **04/03**, Colorado 04/04, JSON-LD **11** `Question` (var 9), `25 byer`/`25 städer` i beskrivelsen, dansk **0** på "Kalifornien"/"Delstat"/"sommar", svensk **0** på "Californien", `/dato`s `<title>` uændret, `/api/health` → `status: ok`. **MÅL:** `/tidszone` DA baseline **24.209 visninger / 105 klik / CTR 0,4 % / pos. 7,5** — måles igen **2026-10-13**. Klyngen alene: de otte stat-søgninger i autocomplete + de fire tidspunkter fra C171. **Forventningen er ærlig:** 0,4 % CTR på pos. 7,5 er klik på eksisterende visninger, ikke nye. Hvis CTR'en er uændret efter 14 dage, er hypotesen "den ubesvarede USA-klynge forklarede den lave CTR" **modbevist** — og så er sidens problem ranking, ikke indhold. Skrevet som falsificérbar forudsigelse, ligesom C167's.
 
 STATUS: KØ — **C170 er landet: `/procent` er GSC's største danske side (150.148 visninger = 25 % af alle visninger) og svarede på nul af sin egen DA-klynge — "procent forskel mellem to tal" er 10 af 10 DA-autocomplete-variationer, og siden havde 0 forekomster af "mellem to tal".** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den, 119 er kilde-blokeret), og de tre åbne deploy-noter (C167, C168, C169) har alle første vindue **2026-09-29 12:30** — det var 09:01, så ingen blev rørt. **Valget kom af at læse den sprog-asymmetri, C114 selv havde lavet:** C114 lagde "Skillnad i procent mellan två tal" på beraknare.se, fordi "procent skillnad mellan två tal" var nr. 1 af 10 — og dansk har præcis samme klynge med præcis samme to svar, som aldrig blev lagt på den danske side. Begge sprog deler `procentForskel` og `procentDifferens`; kun teksten manglede. `/procent` har været C82, C161 og C163's genstand, så antagelsen var at siden var lukket — den var lukket for *dubletter*, ikke for *svar*. **C161's egen regressionstest fangede det nye afsnit med det samme den var skrevet til at fange** ("expected 2 to be 1"), og den undtagelse, svensken allerede havde med en begrundelse, gælder nu dansk også — men ikke uden en ny test der kræver præcis én skillnads-overskrift pr. sprog, så undtagelsen ikke kan blive en dublet. **Målefejl i træk:** min negative lås på "procentdifferens" faldt selv med korrekt dansk, fordi ordet staves ens på begge sprog; låsen lå mod en stavningsforskel, der ikke findes. Se opgave 170.**C169 er landet: sommerferien var GSC's næststørste `/dato`-søgnings næste spørgsmål, og vi havde nul sider — ikke fordi spørgsmålet var umuligt, men fordi kildens egen docblock erklærede det for "municipality specific" og udelod det.** Fire af de fem variationer under "dage til sommerferie" (DA-autocomplete 08:33) var ubesvarede, og docblocken havde *delvis* ret: ferier afgøres kommunalt, bortset fra sommerferiens **begyndelsestidspunkt, der er fastsat som sidste lørdag i juni** i folkeskoleloven af 2024 (hentet fra Lex 2026-09-29, fordi uden kilden var opgaven ikke bygbar). Nedtællingen alle søger efter går til *starten* — så der er ét nationalt svar, og det er 2026-06-27 / 2027-06-26 / 2028-06-24. **Det svenska `sommarlov` har derimod ingen national dato** (hver kommun fastsætger den), så eventet fik **kun en `da`-arm**, hvilket krævede at `DageTilEvent.se` blev optional gennem hele kæden — `resolveDageTilSlug` må ikke længre 301'e sommerferiens danske slug til en svensk side der ikke finder (den giver 403/noindex), og `DageTilPage` sætter ikke `hreflang="sv"` uden en svensk side. **To fejl i min egen måling, fundet fordi mine tests faldt:** min invariant "dagen efter den sidste lørdag ligger i juli" er kun sand når lørdagen er den 30. (koden var rigtig, testen tog fejl), og jeg regnede 271 dage mod nods 270. **To gamle tests låste den gamle *ikke*-egenskab — samme antal sider i begge sprog — og det var rigtigt, de faldt:** de er skrevet om til "da har alle 15, se har præcis de 14 med et svensk dato, forskellen er `["sommerferien"]`". **En rigtig fejl i min egen kode, fundet af fire gamle tests:** min første `resolveDageTilSlug` slog alle krydssprogs-redirects ihjel, fordi "juldagen" er det *svenske* slug for juledagen. Målt på rigtig server (port 3722, fri verificeret inden start): `/dage-til/sommerferien` 200 med titlen "…? **270** dage", canonical korrekt, 4 `Question`, `hrefLang` = `da` + `x-default` **uden `sv`**, sitemap 14 → 15, link fra `/`, `/dato` og `/nedtaelling`, **beraknare.se 403 på slaget og 0 forekomster på forsiden**. Gate grøn: lint (588 filer), **2.663 tests / 172 filer** (fra 2.645 / 172), build (141 sider). Efterårs- og vinterferie er **ikke** bygget: de er kommunale uden lovfast start. Se opgave 169.
@@ -16481,3 +16483,147 @@ filer / 734 kandidater / 699 døde / 35 kræver øjne / **0 ureviewet**).
      svenske arm, den er testens negative.
   8. `node scripts/locale-leak.mjs --gate` skal exit 0 med **0 ureviewet**.
   9. `https://minberegner.dk/api/health` → `status: ok`.
+
+---
+
+#### 174. [x] FÆRDIG 2026-09-29 — C174 — **`/kalorier` (12.631 visninger, GSC's ottendestørste danske side) viste læseren præcis de fem links `/bmi` viser — dens egen række var en copy-paste af `/bmi`'s, så den sendte ingen læser til nogen af de seks kalorieværktøjer, der alle pegede på den**
+
+**Datagrund.** GSC 2026-08-30 → 2026-09-27: `/kalorier` **12.631
+visninger / 132 klik / CTR 1,0 % / pos. 8,1** — ottendestørste danske side,
+og **289 besøgende/28d, bounce 4 %** i Plausible. Køen havde ingen `I GANG`
+(97 er `BLOCKED`, 98 afhænger af den, 119 er kilde-blokeret), og de **syv**
+åbne deploy-noter (C167–C173) har alle første vindue **2026-09-29 12:30** —
+det var 11:10, så ingen kunne verificeres, og ingen blev rørt.
+
+**Målt først — og målingen, ikke ideen, valgte opgaven.** C165 målte
+retningen beregner→indlæg. **Denne iteration målte retningen
+kalkulator→kalkulator, som ingen måling hidtil havde dækket.** Et script
+over `relatedMap`'s 81 rækker giver **419 par, hvoraf 249 er
+ensidige** (A peger på B, men B ikke tilbage på A).rows er 5-6 lange
+(67 sider har 5, 14 har 6), så *gensidighed er ikke en mulig regel*:
+`/procent` har 26 indgående links og 6 pladser. **Den første testformulering
+krævede præcis det umulige og faldt på 27 sider** — fundet fordi jeg lod
+den køre frem for at justere tælleren. Det er samme fejltype som C115's
+`//dage-til//slug`.
+
+**Det fund, der afgorde valget, var en *dublet* målt på rækkerne.** Kun **én
+klasse af to**: `/kalorier` og `/brok` havde ens rækker, og da
+`/kalorier`-rækken blev læst, var den **(`/bmi`-rækken med de to første
+elementer byttet om** — altså en copy-paste, ikke en redaktion. Rækken var
+`/bmi`, `/procent`, `/alder`, `/dato`, `/tidsberegner`: **intet i den har med
+kalorier at gøre**. Målt på rigtig server gav den **0 links** til
+`/motion-kalorier`, `/vaegttab`, `/proteinbehov`, `/1rm`, `/kropsfedt` og
+`/vandbehov` — **seks sider der alle erklærer `/kalorier` i deres egen række**
+og fik ingenting tilbage. De var målt på forhånd: 12 af sidens 15 interne
+links kom fra netop det `/kalorier` burde have peget videre på.
+
+**Rettelsen (kun `relatedMap`, ingen beregningslogik).** `/kalorier` →
+`/motion-kalorier`, `/vaegttab`, `/proteinbehov`, `/1rm`, `/kropsfedt`,
+`/vandbehov` — den faktiske kalorieklynge, alle seks 200 på begge domæner.
+Den anden dublet, `/planetvaegt` ≡ `/brok`, er rettet samme sted: rækken er
+nu `/enheder`, `/temperatur`, `/ohm`, `/procent`, `/gennemsnit`, fordi
+`/planetvaegt` er fysik (vægt på Mars) og `/kvadratmeter` var det eneste
+ematik-element, der ikke passerede. `/brok` er urørt — den beholder sin
+matematik-række, fordi den *er* matematik, og det er `/planetvaegt` der skal
+adskilles, ikke den stærkere side.
+
+**Harness: to nye tests, modsvejs verificeret — begge FALDER med master's
+`calculator-list.ts` og er grønne med rettelsen.** (1) *"no two pages show
+the reader the same set of related calculators"* — grupperer alle 81 rækker
+på en sorteret signatur og kræver at ingen to er ens. Det er den regel, der
+ville have fanget begge dubletter, og den er generel, så en tredje
+copy-paste ikke kan slippe forbi. (2) *"/kalorier points at the calorie
+cluster, not at a copy of /bmi's row"* — kræver at rækken **ikke** er
+sortéringsmæssigt lig med `/bmi`'s, og at alle seks kalorieværktøjer er med.
+Begrundelsen for at skrive to tests og ikke én: den generelle fanger
+klassen fremover, den specifikke låser *hvilken* klynge `/kalorier` skal
+pege på, så en senere "oprydning" ikke kan bytte den til noget andet gyldigt.
+
+**Målt på rigtig server før merge** (`next start` på port 3911, porten
+verificeret fri *inden* start, begge `Host`-headere): DA **200** med
+`/motion-kalorier` 2, `/vaegttab` 3, `/proteinbehov` 1, `/1rm` 1,
+`/kropsfedt` 1, `/vandbehov` 1 — de tilføjede links går 1→2 (brødtekst +
+relaterede) og de fire fjernede `/procent`, `/alder`, `/dato`,
+`/tidsberegner` går **2→1**, altså kun brødteksten, præcis som forventet.
+SE **200** med samme seks links. `/planetvaegt` **200** og `/brok` **200**,
+hvor `/planetvaegt` nu har `/ohm` 1 og `/brok` bevarer sit sæt. **Begge
+`<title>` uændrede** ("Hvor mange kalorier om dagen? | Kalorieberegner" /
+"Hur många kalorier per dag? | Kalorikalkylator"), **0 danske markører på
+beraknare.se**, `/api/health` → `status: ok`.
+
+**Gate grøn:** lint (**593 filer**), **2.712 tests / 175 filer** (fra 2.710 /
+175), `npm run build` (**141 sider**), `locale-leak.mjs --gate` exit 0,
+`knapgruppe-scan.mjs` 0/0, `href-scan.mjs` 0 på 71 + 135 sider. Rækkevidde:
+`src/lib/calculator-list.ts` (**to rækker**) og `src/lib/calculator-list.test.ts`
+(**to tests**). Ingen beregning, ingen side, ingen titel, ingen URL, ingen
+sitemap, ingen anden locale rørt.
+
+**MÅL:** `/kalorier` dansk baseline **12.631 visninger / 132 klik / CTR 1,0 %
+/ pos. 8,1** (GSC 2026-08-30 → 2026-09-27) og **289 besøgende/28d, bounce
+4 %** (Plausible 2026-09-29) — måles igen **2026-10-13**. **Forventningen er
+ærlig:** rækker er navigations- og PageRank-leverancer, ikke svar, så den
+forventede effekt er **flere interne klick og mere linkværd mod
+kalorieværktøjerne**, ikke nye visninger. Den målbare del er
+`RelatedCalculators`-blokkens href-sæt på `/kalorier` (6 → de 6 kalorier-
+værktøjer), som kan tælles på live uden analytics.
+
+**Klynge der blev målt og bevidst IKKE bygget — skrevet ned, så næste
+iteration ikke genfinder den.** DA-autocomplete under **"kalorier"** giver
+**10 af 10 "kalorier i &lt;fødevarer&gt;"**: æg, banan, vandmelon, jordbær,
+avocado, kirsebær, kartofler, vindruer, havregryn. På den live side var
+`banan`, `vandmelon`, `jordbær`, `avocado`, `kartofler`, `vindruer` og
+`havregryn` **0 forekomster hver**. Det er en *ægte* ubesvaret klynge, og
+den blev **ikke** bygget, fordi den kræver en citable fødevaredatabase:
+**Fødevarestyrelsens `frbs.food.dtu.dk` svarer `000` (transport error) fra
+loopet** — verificeret fire gange med `curl` og to gange med `webfetch`, på
+både `/en/food/`, `/subsite/food/` og http-varianten. Open Food Facts er
+reachable (200), men dens resultater er **mærkevarer** ("Avocado Oil
+Spray" 5 kcal/100 g, "Lightly sea salted crisps" 519), altså ikke en
+fødevaretabel. At skrive kcal-tal fra hukommelsen ville være præcis
+opgave 119's og C95's kildefælde på en *sundheds*side, hvor et forkert tal
+er værst. Se `❓ Til Mads`.
+
+### ❓ Til Mads — ny i C174
+
+1. **Er der en dansk fødevaredatabase, der kan hentes fra en maskine?** Hvis
+   `frbs.food.dtu.dk` (Fødevarestyrelsens Fødevaredatabasen) eller et
+   StatBank-endpoint kan nås, er **"kalorier i X" den største ubesvarede
+   klynge på `/kalorier`** — 10 af 10 danske autocomplete-variationer under
+   sitets egen hovedterm, og siden svarer på nul af dem. Det kriver en
+   tabel med pr. 100 g **og** pr. typisk størrelse (1 æg, 1 banan, 1
+   appelsin), fordi "kalorier i 1 vandmelon" og "kalorier i 100 g
+   vandmelon" er to forskellige søgninger. **Jeg bygger det ikke uden
+   kilden** — kun en internetadresse, der svarer.
+2. **De 249 ensidige par i `relatedMap` er målt, ikke rettet.** De kan ikke
+   alle rettes automatisk, fordi rækkerne er 5-6 lange og de store hubs har
+   20-29 indgående links. Den nye test låser *dubletter*; en reel
+   gensidighedsrunde ville kræve et valg pr. side, og det er et
+   redaktionsspørgsmål, ikke en måling.
+
+- ⏳ **VERIFICÉR DEPLOY: C174 — `/kalorier`'s relaterede-beregner-blok skal
+  have `/motion-kalorier`, `/vaegttab`, `/proteinbehov`, `/1rm`,
+  `/kropsfedt` og `/vandbehov` (i den rækkefølge), og `/planetvaegt`'s skal
+  have `/ohm`.** Kode + plan i ét squash-commit på `ceo/kalorier-relaterede`.
+  Første kandidatvindue **2026-09-29 12:30** (merge sker efter 07:30- og
+  12:30-vinduet er kontrolleret). Kun `src/lib/calculator-list.ts` (to rækker)
+  og `src/lib/calculator-list.test.ts` (to tests) er rørt — **ingen
+  beregningslogik, ingen side, ingen titel, ingen URL, ingen sitemap, ingen
+  anden locale**. Verificér ved **indhold, ikke HTTP 200**:
+  1. `https://minberegner.dk/kalorier` — i `<h2>`-blokken "Relaterede
+     beregnere" skal de seks hrefs være `/motion-kalorier`, `/vaegttab`,
+     `/proteinbehov`, `/1rm`, `/kropsfedt`, `/vandbehov` i den rækkefølge.
+     Mål på hele siden: `/motion-kalorier` skal give **2** (brødtekst +
+     relaterede), `/vaegttab` **3**, og `/procent`, `/alder`, `/dato`,
+     `/tidsberegner` skal give **1** hver (kun brødteksten).
+  2. `https://beraknare.se/kalorier` skal have de **samme seks hrefs**.
+  3. `/planetvaegt` skal pege på `/ohm`; `/brok` skal **fortsat** pege på
+     `/kvadratmeter` og **ikke** på `/ohm` — det er den negative, der
+     viser at kun den svage side blev adskilt.
+  4. **KONTROL mod at intet ellers rørte sig:** begge domæners `<title>` på
+     `/kalorier` skal være uændrede ("Hvor mange kalorier om dagen? |
+     Kalorieberegner" / "Hur många kalorier per dag? | Kalorikalkylator"),
+     `/brok` og `/planetvaegt` skal være 200.
+  5. `npm run test -- src/lib/calculator-list.test.ts` skal give **22
+     passed**.
+  6. `node scripts/locale-leak.mjs --gate` skal exit 0 med **0 ureviewet**.
+  7. `https://minberegner.dk/api/health` → `status: ok`.

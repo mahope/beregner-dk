@@ -122,6 +122,61 @@ describe("editorial inbound links", () => {
       expect(RELATED_CALCULATORS[page], `${page} -> ${href}`).toContain(href);
     }
   });
+
+  // A page can hold a row of five links, be in Google's top 15, and still send
+  // every one of them to the wrong cluster — while the pages that genuinely
+  // belong next to it point at it and get nothing back. `/kalorier` (12.631
+  // impressions) was the case: its row was `/bmi`'s row with the first two
+  // entries swapped, so it linked to `/procent`, `/alder`, `/dato` and
+  // `/tidsberegner` and to none of `/motion-kalorier`, `/vaegttab`,
+  // `/proteinbehov`, `/1rm`, `/kropsfedt` or `/vandbehov` — six pages that all
+  // declared `/kalorier` themselves. Nothing about the row was invalid, so the
+  // existing guards (real targets, no self-link, no repeats, grid cap) all
+  // passed on it: the row was valid, it was just a copy of a neighbour's.
+  //
+  // Reciprocity is deliberately NOT the rule. Rows are capped at six and the
+  // big hubs legitimately have 20-29 inbound links, so "link back to everyone"
+  // is unsatisfiable by construction. What is satisfiable — and what the
+  // copy-paste actually broke — is that no two pages hand the reader the same
+  // five links, because a duplicated row means one of the two was never
+  // chosen on its own merits.
+  test("no two pages show the reader the same set of related calculators", () => {
+    const signature = (links: string[]) => [...links].sort().join("|");
+    const owner = new Map<string, string>();
+    const collisions: string[] = [];
+
+    for (const [page, links] of Object.entries(RELATED_CALCULATORS)) {
+      const sig = signature(links);
+      const previous = owner.get(sig);
+      if (previous) collisions.push(`${page} and ${previous} share: ${sig.replace(/\|/g, ", ")}`);
+      else owner.set(sig, page);
+    }
+
+    expect(collisions, `duplicated related-calculator rows: ${collisions.join(" | ")}`).toEqual([]);
+  });
+
+  // The specific case: a page must not be a neighbour of a page that has no
+  // content relationship to it. `/kalorier` and `/bmi` are both body-composition
+  // tools, but they are not each other's five closest neighbours — the calorie
+  // cluster is `/motion-kalorier`, `/vaegttab`, `/proteinbehov`, `/1rm`,
+  // `/kropsfedt` and `/vandbehov`, and every one of those already pointed at
+  // `/kalorier`.
+  test("/kalorier points at the calorie cluster, not at a copy of /bmi's row", () => {
+    const kalorier = RELATED_CALCULATORS["/kalorier"];
+    const bmi = RELATED_CALCULATORS["/bmi"];
+
+    expect([...kalorier].sort()).not.toEqual([...bmi].sort());
+    for (const sibling of [
+      "/motion-kalorier",
+      "/vaegttab",
+      "/proteinbehov",
+      "/1rm",
+      "/kropsfedt",
+      "/vandbehov",
+    ]) {
+      expect(kalorier, `/kalorier dropped ${sibling}`).toContain(sibling);
+    }
+  });
 });
 
 
