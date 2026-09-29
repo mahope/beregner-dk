@@ -1,5 +1,6 @@
 import { FAQSchema } from "@/components/StructuredData";
 import BlogArticleSchema from "@/components/BlogArticleSchema";
+import { NaesteSkridt } from "@/components/BlogNaesteSkridt";
 import { formatNumber } from "@/lib/format";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { RENTEFRADRAG_2026, SATSER_2026, SKATTEFRADRAG_2026 } from "@/lib/satser-2026";
@@ -326,6 +327,12 @@ export default function FradragGuidePage() {
           </div>
         ))}
       </article>
+
+      <NaesteSkridt
+        href="/rentefradrag"
+        handling="Beregn dit rentefradrag"
+        beskrivelse="Se hvor mange renter du kan trække fra på dit lån i 2026, og hvad fradraget er værd."
+      />
 
       <div className="mt-12 pt-8 border-t">
         <h2 className="text-xl font-bold mb-4">Relaterede artikler</h2>

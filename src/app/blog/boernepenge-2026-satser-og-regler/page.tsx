@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
 import BlogArticleSchema from "@/components/BlogArticleSchema";
+import { NaesteSkridt } from "@/components/BlogNaesteSkridt";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { formatNumber } from "@/lib/format";
 import {
@@ -549,6 +550,12 @@ export default function Boernepenge2026Page() {
           </div>
         ))}
       </article>
+
+      <NaesteSkridt
+        href="/boernepenge"
+        handling="Beregn børnepengen"
+        beskrivelse="Se hvad du får i børne- og ungeydelse i 2026. Satsen afhænger af alderen på hvert barn."
+      />
 
       <div className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700">
         <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Relaterede beregnere</h2>

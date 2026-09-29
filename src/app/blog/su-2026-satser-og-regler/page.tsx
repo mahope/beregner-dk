@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
 import BlogArticleSchema from "@/components/BlogArticleSchema";
+import { NaesteSkridt } from "@/components/BlogNaesteSkridt";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { SU_2026 } from "@/lib/satser-2026";
 import { OG_IMAGE } from "@/lib/page-helpers";
@@ -417,6 +418,12 @@ export default function SU2026GuidePage() {
           </div>
         ))}
       </article>
+
+      <NaesteSkridt
+        href="/su"
+        handling="Beregn din SU"
+        beskrivelse="Se hvilken SU du får pr. måned, når vi regner på din indkomst og din bolig."
+      />
 
       <div className="mt-12 pt-8 border-t">
         <h2 className="text-xl font-bold mb-4">Relaterede artikler</h2>

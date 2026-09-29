@@ -35,8 +35,22 @@ Alle fire var grønne før merge 2026-09-29 22:45.
 
 ## Åbne VERIFICÉR DEPLOY-noter
 
-To noter. HTTP 200 beviser intet: ingen rører en URL, kun `<title>`- og
-`og:title`-strenge.
+Tre noter. HTTP 200 beviser intet: ingen rører en URL, kun `<title>`- og
+`og:title`-strenge — og den tredje rører artiklernes **slutning**.
+
+- ⏳ **VERIFICÉR DEPLOY: fire blogartikler skal slutte med "Regn det ud" og en
+  beregnerknap.** Kode + plan i ét squash-commit på `ceo/blog-naste-handling`.
+  Første kandidatvindue **2026-09-30 07:30**. Rørte filer: ny
+  `src/components/BlogNaesteSkridt.tsx`, dens test, og fire artikler
+  (`barsel-2026-regler-og-satser`, `boernepenge-2026-satser-og-regler`,
+  `fradrag-2026-komplet-guide`, `su-2026-satser-og-regler`) — kun import +
+  ét element efter `</article>`. Ingen `<h1>`, ingen beregningslogik, ingen ny
+  URL, ingen sitemap. Verificér ved **indhold**: på hver af de fire artikler skal
+  det være **sidste element før "Relaterede artikler"** (hhv. "Relaterede
+  beregnere" på børnepengestykket) — en boks med overskriften "Regn det ud" og
+  knappen "Beregn din barselsdagpenge" / "Beregn børnepengen" / "Beregn dit
+  rentefradrag" / "Beregn din SU". **Kontrol:** artiklernes `<title>` og
+  `<h1>` skal være uændrede, og de fire beregnere skal stadig svare 200.
 
 - ⏳ **VERIFICÉR DEPLOY: seks titler med et udregnet eksempel (`/bmi`, `/fart`,
   `/kalorier`).** Kode + plan i ét squash-commit på `ceo/eksempel-titler-fall`.
@@ -314,6 +328,32 @@ To noter. HTTP 200 beviser intet: ingen rører en URL, kun `<title>`- og
   `src/`** uden at migrationsopgaven er skrevet op og godkendt. Gaten grøn.
 - **MÅL:** beraknare.se 537 besøgende/28d; `/dato` 95 klik, `/tidsberegner` 127
   klik, `/procent` 2 klik (GSC 2026-08-30 → 2026-09-27). Genmål 2026-10-13.
+
+
+#### 186. [x] 2026-09-30 — C198 — **fire blogartikler slutter med en næste handling, ikke med flere artikler**
+
+- **Datagrund:** Plausible 28 dage: `/blog/barsel-2026-regler-og-satser` 184
+  besøgende og **85 % bounce**; `/blog/fradrag-2026-komplet-guide` 53 → 43.
+  GSC: `/blog/boernepenge-2026-satser-og-regler` 5.728 visninger, 0,6 % CTR,
+  pos. 8,4 — sitets mest søgte artikel. CEO-prompten navngiver præcis denne
+  lækage: artiklerne skal føre videre til den relevante beregner.
+- **Årsagen:** alle fire artikler linkede til deres beregner i løbende tekst, men
+  sluttede på **"Relaterede artikler"**. Det sidste klik var endnu en artikel, så
+  læseren nåede aldrig værktøjet. Ny `NaesteSkridt` (én primær handling, 44 px
+  trykflade, `<a>` ikke knap) indsættes mellem `</article>` og relaterede blokke.
+- **Fund undervejs:** `/blog/boernepenge-2026-satser-og-regler` sluttede
+  allerede på "Relaterede beregnere" — fem ligeværdige kort uden hierarki. Der
+  var altså ikke manglende links, men manglende *fokus*; samme komponent løser
+  det. De øvrige 25 artikler er bevidst urørt: de er under 43 besøgende/28d, og
+  opgaven skal måles før den rulles ud.
+- **Verificeret:** 7 nye tests i `BlogNaesteSkridt.test.tsx` (semantik, trykflade,
+  og at CTA'en ligger **efter** `</article>` og **før** relaterede artikler).
+  De fire sidetests kan ikke passes mod master, da `Regn det ud` ikke findes
+  der. Gate grøn: lint (**618 filer**), **3008 tests / 190 filer** (fra 3001 /
+  189), build (**142 sider**), `locale-leak.mjs --gate` exit 0.
+- **MÅL:** `/blog/barsel-2026-regler-og-satser` baseline **85 % bounce / 184
+  besøgende pr. 28d**; `/blog/boernepenge-2026-satser-og-regler` **35 klik /
+  28d** (5.728 visninger). Genmål 2026-10-14.
 
 
 ## ❓ Til Mads
