@@ -11,6 +11,8 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import Link from "next/link";
 import { dageTilbageIAaret, getDageTilEvents, getDageTilPrefix, isDageTilLocale, dageTilArm,
 } from "@/lib/dage-til";
+import { maanedEksempel } from "@/lib/dato-eksempler";
+import { formatNumber } from "@/lib/format";
 
 export async function generateMetadata() {
   return generatePageMetadata("dato");
@@ -36,6 +38,14 @@ export default async function DatoPage() {
   // "tilbage af", så taleren faldt hele vejen. Tallet regnes fra dagens dato,
   // altså er den samme server-renderede side svar på dagens spørgsmål.
   const tilbage = dageTilbageIAaret(new Date());
+  // "antal dage i en måned" er dansk autocompletes nr. 1 under både "antal dage
+  // i en måned" (nr. 2 er Excel) og "hvor mange dage i en måned" (nr. 2 er
+  // "uden weekender"), og svensk autocomplete spørger det samme med "antal
+  // dagar i en månad" og "hur många arbetsdagar i en månad". Siden svarede på
+  // året ("1 år = 365 dage") men aldrig på måneden: 0 forekomster af "i en
+  // måned" i begge sprog. Eksemplet følger det kalenderår siden ligger i, så
+  // skudårsflaget kan ikke blive stående fra et tidligere år.
+  const maaned = maanedEksempel(tilbage.year, 2, locale === "se" ? "se" : "da");
 
   return (
     <div>
@@ -142,15 +152,96 @@ export default async function DatoPage() {
           spørgsmål med forskellige tal.
         </p>
 
+        <h2>Hvor mange dage er der i en måned?</h2>
+        <p>
+          En måned har <strong>28 til 31 dage</strong> — den korteste er februar
+          med 28 dage (29 i skudår), og den længste er de syv måneder med 31
+          dage. I gennemsnit er en måned{" "}
+          <strong>{formatNumber(maaned.gennemsnit, "da", { maximumFractionDigits: 2 })} dage</strong>,
+          fordi et gregorianisk år gennemsnitligt har 365,2425 dage fordelt på 12
+          måneder. Det gennemsnit er altså et regnestykke, ikke en virkelig
+          måned.
+        </p>
+        <p>
+          Her er alle tolv måneder i {maaned.year}, med dage, arbejdsdage og
+          weekenddage. Tallene er de samme som værktøjet ovenfor regner, så du
+          kan efterprøve hver enkelt række.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Måned</th>
+              <th>Dage</th>
+              <th>Arbejdsdage</th>
+              <th>Weekenddage</th>
+            </tr>
+          </thead>
+          <tbody>
+            {maaned.raekker.map((r) => (
+              <tr key={r.month}>
+                <th scope="row">
+                  {r.name}
+                  {r.skudaar ? " (skudår)" : ""}
+                </th>
+                <td>{r.dage}</td>
+                <td>{r.arbejdsdage}</td>
+                <td>{r.weekenddage}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p>
+          Vil du have antallet uden weekender, står det i kolonnen{" "}
+          <strong>Arbejdsdage</strong> — den tæller mandag til fredag og springer
+          helligdagene over. Hele året giver de tolv rækker{" "}
+          <strong>{formatNumber(maaned.aarArbejdsdage, "da")} arbejdsdage</strong>{" "}
+          i {maaned.year}.
+        </p>
+
+        <h3>Sådan tæller du dage i en måned i Excel</h3>
+        <p>
+          Sæt den <strong>første dag i måneden i A1</strong> og den første dag i
+          næste måned i <strong>B1</strong>, så giver{" "}
+          <code>=B1-A1</code> månedens længde direkte. Med A1 ={" "}
+          <code>{maaned.start}</code> og B1 = <code>{maaned.sluttOgKoeb}</code> er
+          svaret <strong>{maaned.formelResultat} dage</strong> — samme tal som
+          formlen i tabellen ovenfor.
+        </p>
+        <p>
+          <code>=DATEDIF(A1;B1;&quot;d&quot;)</code> giver præcis det samme tal.
+          Fælden er, at du ikke må skrive månedens <em>sidste</em> dag: giver du
+          B1 = 28. februar, får du 27, fordi Excel tæller forskellen i hele
+          døgn. Skriv dagen <em>efter</em> månedens sidste dag, så slipper du
+          også for at skulle vide om året er et skudår.
+        </p>
+
+        <h2>Hvor mange dage er der i et år?</h2>
+        <p>
+          Et år har <strong>{formatNumber(maaned.aarDage, "da")} dage</strong> —{" "}
+          {maaned.aarDage === 366
+            ? `${maaned.year} er et skudår, fordi det er deleligt med 4.`
+            : "366 dage, hvis året er et skudår."}{" "}
+          Det svarer til {formatNumber(maaned.aarDage / 7, "da", { maximumFractionDigits: 1 })}{" "}
+          uger, så et kalenderår er altid lidt mere end 52 uger. Den
+          gennemsnitlige arbejdsuge er 5 dage, hvilket giver omkring 260
+          hverdage om året.
+        </p>
+
         <h2>Nyttige datofakta</h2>
         <ul>
-          <li>1 år = 365 dage (366 i skudår)</li>
-          <li>1 måned = ca. 30,44 dage i gennemsnit</li>
+          <li>
+            1 år = {formatNumber(maaned.aarDage, "da")} dage (366 i skudår)
+          </li>
+          <li>
+            1 måned = ca.{" "}
+            {formatNumber(maaned.gennemsnit, "da", { maximumFractionDigits: 2 })} dage
+            i gennemsnit
+          </li>
           <li>1 uge = 7 dage</li>
           <li>1 arbejdsuge = typisk 5 dage</li>
           <li>1 år &asymp; 52 uger</li>
           <li>1 år &asymp; 260 hverdage (uden helligdage)</li>
-          <li>2026 har 253 arbejdsdage</li>
+          <li>{maaned.year} har {formatNumber(maaned.aarArbejdsdage, "da")} arbejdsdage</li>
         </ul>
 
         <h2>Skudår</h2>
@@ -266,10 +357,95 @@ export default async function DatoPage() {
           olika siffror.
         </p>
 
+        <h2>Hur många dagar är det i en månad?</h2>
+        <p>
+          En månad har <strong>28 till 31 dagar</strong> — den kortaste är februari
+          med 28 dagar (29 under skottår), och den längsta är de sju månader som
+          har 31 dagar. I genomsnitt är en månad{" "}
+          <strong>
+            {formatNumber(maaned.gennemsnit, "se", { maximumFractionDigits: 2 })} dagar
+          </strong>
+          , eftersom ett gregoriskt år i genomsnitt har 365,2425 dagar fördelade
+          på 12 månader. Genomsnittet är alltså en uträkning, inte en verklig
+          månad.
+        </p>
+        <p>
+          Här är alla tolv månader i {maaned.year}, med dagar,
+          arbetsdagar och veckoslut. Talen är desamma som verktyget ovan
+          räknar, så du kan kontrollera varje rad.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Månad</th>
+              <th>Dagar</th>
+              <th>Arbetsdagar</th>
+              <th>Veckoslut</th>
+            </tr>
+          </thead>
+          <tbody>
+            {maaned.raekker.map((r) => (
+              <tr key={r.month}>
+                <th scope="row">
+                  {r.name}
+                  {r.skudaar ? " (skottår)" : ""}
+                </th>
+                <td>{r.dage}</td>
+                <td>{r.arbejdsdage}</td>
+                <td>{r.weekenddage}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p>
+          Vill du ha antalet utan veckoslut står det i kolumnen{" "}
+          <strong>Arbetsdagar</strong> — den räknar måndag till fredag och hoppar
+          över helgdagerna. Hela året ger de tolv raderna{" "}
+          <strong>
+            {formatNumber(maaned.aarArbejdsdage, "se")} arbetsdagar
+          </strong>{" "}
+          i {maaned.year}.
+        </p>
+
+        <h3>Så räknar du ut dagar i en månad i Excel</h3>
+        <p>
+          Sätt månadens <strong>första dag i A1</strong> och första dagen i
+          nästa månad i <strong>B1</strong>, så ger <code>=B1-A1</code> månadens
+          längd direkt. Med A1 = <code>{maaned.start}</code> och B1 ={" "}
+          <code>{maaned.sluttOgKoeb}</code> blir svaret{" "}
+          <strong>{maaned.formelResultat} dagar</strong> — samma tal som i
+          tabellen ovan.
+        </p>
+        <p>
+          <code>=DATEDIF(A1;B1;&quot;d&quot;)</code> ger exakt samma tal. Fällan är
+          att du inte får skriva månadens <em>sista</em> dag: sätter du B1 = 28
+          februari får du 27, eftersom Excel räknar skillnaden i hela dygn. Skriv
+          dagen <em>efter</em> månadens sista dag, så slipper du också behöva
+          veta om året är ett skottår.
+        </p>
+
+        <h2>Hur många dagar är det i ett år?</h2>
+        <p>
+          Ett år har <strong>{formatNumber(maaned.aarDage, "se")} dagar</strong> —{" "}
+          {maaned.aarDage === 366
+            ? `${maaned.year} är ett skottår, eftersom det är delbart med 4.`
+            : "366 dagar om året är ett skottår."}{" "}
+          Det motsvarar{" "}
+          {formatNumber(maaned.aarDage / 7, "se", { maximumFractionDigits: 1 })} veckor,
+          så ett kalenderår alltid är något mer än 52 veckor. Den genomsnittliga
+          arbetsveckan är 5 dagar, vilket blir omkring 260 vardagar per år.
+        </p>
+
         <h2>Nyttiga datumfakta</h2>
         <ul>
-          <li>1 år = 365 dagar (366 under skottår)</li>
-          <li>1 månad = ca 30,44 dagar i genomsnitt</li>
+          <li>
+            1 år = {formatNumber(maaned.aarDage, "se")} dagar (366 under skottår)
+          </li>
+          <li>
+            1 månad = ca{" "}
+            {formatNumber(maaned.gennemsnit, "se", { maximumFractionDigits: 2 })} dagar
+            i genomsnitt
+          </li>
           <li>1 vecka = 7 dagar</li>
           <li>1 arbetsvecka = vanligtvis 5 dagar</li>
           <li>1 år &asymp; 52 veckor</li>

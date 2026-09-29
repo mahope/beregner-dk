@@ -1,3 +1,25 @@
+STATUS: KØ — **C182 er landet: `/dato` — GSC's største danske side (132.313 visninger, 822 klik, 0,6 % CTR, pos. 5,7) og beraknare.se's næststørste (99.136 visninger, 0,1 % CTR, pos. 8,2) — svarede på *null* af sin egen største måned-klynge. "antal dage i en måned" er dansk autocompletes nr. 1 under både "antal dage i en måned" og "hvor mange dage i en måned", og svensk autocomplete spørger det samme med "antal dagar i en månad" og "hur många arbetsdagar i en månad" — og begge sider havde 0 forekomster af "i en måned"/"i en månad".** Køen havde ingen `I GANG`-løs opgave (97 er `BLOCKED`, 98 afhænger af den, 119 er kilde-blokeret, 179 kræver en rigtig browser), og de fem åbne deploy-noter (C173, C174, C175, C177, C178) har første vindue **2026-09-29 17:30** — det var 14:14, så ingen blev rørt.
+
+**Valget kom af at måle *måneden* i en side, der allerede svarede på *året*.** C82–C181 har lukket hele dansk GSC-top-16 én ad gang, og de fleste sluttede med at *titlen ikke var problemet* — så valget var at lede efter en spørgsmålstype ingen af dem havde spurgt til. `/dato` har hele tiden haft en sektion "Nyttige datofakta" med "1 år = 365 dage" og "1 måned = ca. 30,44 dage i gennemsnit" — altså et gennemsnit skrevet som en brøkstreg i en bullet, uden at svare på det spørgsmål, klyngen faktisk stiller. **Målt først, begge domæner, live (14:15-14:20).** DA-autocomplete (`hl=da`, `gl=dk`) under **"antal dage i en måned"** → **nr. 1 "antal dage i en måned"**, **nr. 2 "antal dage i måned excel"**, **nr. 3-5 "antal dage pr måned gennemsnit / 2025 / 2026"**; under **"hvor mange dage i en måned"** → nr. 1 samme spørgsmål og **nr. 2 "hvor mange dage er der i en måned uden weekender"**. SE-autocomplete under **"antal dagar i en månad"** → **nr. 1 "antal dagar i en månad excel"**, **"antal arbetsdagar i en månad"** og **"antal dagar i månaden 2026"**; under **"hur många dagar i en månad"** → **nr. 2 "hur många arbetsdagar i en månad"**. På de to **live** sider: "i en måned" **0**, "i en månad" **0**, "måneds" **0**, "månads" **0**, og "dage i et år" / "dagar i ett år" **0** hver. **Klyngen er altså målt i begge sprog, så rettelsen er begge sprog** — samme disciplin som C114, C119, C181.
+
+**Rettelsen er to nye `<h2>` + en `<h3>` pr. sprog og fire nye FAQ-par pr. sprog (JSON-LD DA 7 → 11, SE 10 → 14).** `<h2>` **"Hvor mange dage er der i en måned?"** med en **12-rækkers tabel** (måned, dage, arbejdsdage, weekenddage), gennemsnittet 30,44 med regnestykket 365,2425 ÷ 12 og den advarsel at det "er et regnestykke, ikke en virkelig måned"; `<h3>` **"Sådan tæller du dage i en måned i Excel"** med A1 = månedens første dag og B1 = dagen *efter* månedens sidste dag (`2026-02-01` → `2026-03-01` = **28 dage**), og den fælde der får folk til at skrive den *sidste* dag og få **27**; `<h2>` **"Hvor mange dage er der i et år?"** med 365/366 og **52,1 uger**, der bekræfter "1 år ≈ 52 uger" i stedet for at modsige den.
+
+**Ingen tal står hårdkodet to steder.** Nyt `src/lib/dato-eksempler.ts` regner hver månedslængde som `daysBetween` mellem første og første dag i næste måned, og arbejdsdagene med **`taellArbejdsdage` fra `helligdage.ts` — samme funktion `DatoBeregner` selv bruger**. Beviset for at det virker er det, der ikke kan være en tilfældighed: **de tolv rækker summerer til 253 arbejdsdage i dansk og 252 i svensk** — hele årets egne tal — og de tolv længder summerer til 365. De to lande afviger med netop én, fordi de har hver sin helligdag i 2026. Det er samme krav som C121's Excel-tabel og C119's arealeksempler: siden kan ikke glide fra sit eget værktøj.
+
+**To ting bevidst *ikke* gjort.** For det første bruges **kun de to Excel-formler, repoet allerede har verificeret** (`=B1-A1` og `=DATEDIF` fra C98) — de danske og svenske navne på `NETWORKDAYS` kunne ikke efterprøves i løbet af iterationen, og en formel i indekseret tekst må ikke være utestet. For det anden er `<h1>`, titlen og beskrivelsen **urørte**: C164's svar-først-metadata er målt til 2026-10-13, og en ny `<h2>` er ikke grund til at røre dem.
+
+**Harness: 15 nye tests i `dato-eksempler.test.ts` + 5 nye i `page.test.tsx` (7 → 17), modsvevs verificeret: 6 af de 7 nye falder** med master's `page.tsx` + `page-data.ts` (stashed); den syvende er et negativt sprog-lås, der skal være grønt begge veje. Den stærkeste nye test læser **hele den renderede tabelrække** (`<th scope="row">` + de tre tal) og sammenligner den med modulet, så en række der springer en måned over ikke kan gemme sig i en længde-tælling; den anden kræver at de tolv rækkers sum **er** det tal, siden selv skriver i "Nyttige datofakta" — så tabellen og bullets ikke kan glide fra hinanden.
+
+**Fire fejl i min eget arbejde, alle fundet fordi et kørende sæde var rødt.** (1) **Rigtig fejl i koden, fanget af testen:** jeg skrev året med `formatNumber(2026)`, som giver **"2 026"** med tusindtalsseparator — et år må aldrig formateres som et tal. Rettet til template-literals i begge sprog. (2) Mit gennemsnit-lås skrev `expect(dage).not.toContain(30)`, altså "ingen måned har 30 dage" — **fire måneder har 30 dage**; låsen var min egen fejltagelse, ikke koden, og er erstattet af en der spørger om det rigtige: at ingen måned har *præcis gennemsnittet*, og at fire har 30 og syv har 31. (3) Samme fejltype med `Math.round(30,436875) = 30` i den nye løsning — den ville have krævet, at de fire 30-dages måneder forsvandt. (4) **Målefejl nr. 40 (min egen, C94's målefejl 16 i en ny form):** min første måling greb `<table>` i den tag-strippede tekst, hvor alle tags er væk, og rapporterede **0 tabeller** på en side med en tabel. Rettet ved at tælle i den rå HTML.
+
+**To fejl i mine egne tests, begge fundet fordi de var grønne mod den forkerte ting.** (a) Den negative sprogtest krævede `not.toContain("februar")` på den svenska side — **"februar" er en delstreng i "februari"**, altså C121's "bakåt"/"när"-fælde; låsen læser nu `>februar</th>`, altså cellen. (b) To af mine tests hårdkodede en dansk ordliste og en `"dage"`-streng, hvilket gjorde den svenska arm urørtest: den krævede "marts" på beraknare.se, hvor staven hedder "mars". **Månedsnavnene og ordene læses nu fra modulet**, og den negative test springer de otte navne over, der hedder det samme på begge sprog.
+
+**Gate grøn:** lint (**598 filer**), **2.814 tests / 179 filer** (fra 2.791/178), build (**142 sider**), `locale-leak.mjs --gate` exit 0, `knapgruppe-scan.mjs` 0/0, `href-scan.mjs` 0 protocol-relative href, `rendered-leak-scan.mjs` mod live exit 0 (71 sider, 0 danske tegn). Målt på rigtig bygget server (`next start` :4021, porten verificeret fri *inden* start, C117's lære), begge domæner med `curl -H "Host: …"` (målefejl 34/38): **12 tabelrækker på begge**, **0** rækker med skudårs-mærke (2026 er ikke skudår), `2026-02-01` + `2026-03-01` + "28 dage" i markupken begge steder, DA **1.026 → 1.392 ord / 9 → 11 `<h2>` / 7 → 11 `Question`**, SE **932 → 1.291 / 8 → 10 / 10 → 14**, "i en måned" **0 → 5** og "i en månad" **0 → 5**, **0** på det andet sprog, `/api/health` → `status: ok`. **Kontrol:** `/procent`s titel og beskrivelse er tegn for tegn uændrede. Rørte filer: `dato/page.tsx` (to nye sektioner pr. sprog), `page-data.ts` (fire FAQ-par pr. sprog), det nye modul + to testfiler — **ingen beregningslogik ændret, ingen URL, ingen sitemap, ingen `<title>`, ingen `<h1>`, ingen `className`**. Kode + plan i ét squash-commit på `ceo/dato-mand-dage`; se opgave 182.
+
+**MÅL:** `/dato` DA baseline **132.313 visninger / 822 klik / CTR 0,6 % / pos. 5,7** (GSC 2026-08-30 → 09-27), Plausible **1.110 besøgende/28d, bounce 5 %** pr. 2026-09-29; SE baseline **99.136 visninger / 95 klik / CTR 0,1 % / pos. 8,2** — måles igen **2026-10-13**. **Forventningen er begrænset og ærlig:** månedslængden er et lille hjørne af 132.313 visninger, så der loves ingen ny CTR. Det der kan læses af rettelsen, er at siden nu svarer på sitets mest søgte *måned*-spørgsmål i begge sprog, hvor den før svarede på det tilsvarende *års*-spørgsmål.
+
+---
+
 STATUS: KØ — **C181 er landet: `/tidsberegner` — GSC's tredjestørste danske side (73.117 visninger, 195 klik, **CTR 0,3 %**, pos. 7,0) — svarede på nul af sin egen omvandlingsklynge, fordi C120's sektion kun blev lagt i den *svenska* gren, og en test låste med vilje, at dansk *ikke* skulle have den.** Køen havde ingen `I GANG`-løs opgave (97 er `BLOCKED`, 98 afhænger af den, 119 er kilde-blokeret, 179 kræver en rigtig browser), og de fire åbne deploy-noter (C173, C174, C175, C177, C178) har første vindue **2026-09-29 17:30** — det var 13:55, så ingen blev rørt. **Valget kom af at måle de to sprogs *afsnit* mod hinanden i stedet for titler igen:** fem af de seneste iterationer (C82, C161, C164, C170) sluttede alle med at *titlen ikke var problemet*. `/tidsberegner` har da svar-først title og description, så næste måling måtte være kroppen — og den fandt en sprog-asymmetri der lignede C114's og C119's nøjagtig. **Målt først, målt begge sprog (DA-autocomplete `hl=da&gl=dk` 14:0x):** under **"minutter til timer"** er **7 af 10 variationer rene tal** — "300 minutter til timer" (nr. 4), "1000 minutter til timer" (nr. 5), "150" (nr. 6), "2000" (nr. 7), "120" (nr. 8), "1500" (nr. 9), "2500" (nr. 10) — og under **"time og minutter"** ligger "1 time og 30 minutter", "1 time og 45 minutter" og "1 time og 40 minutter i decimaltal". Den danske side havde **en fire-linjes uliste** (15/30/45 min og 1 time 15 min) og **tabellen fandtes 0 gange**; den svenska tvilling har C120's hele sektion "Räkna om minuter till timmar – och tillbaka" med tabellen. Altså: **sproget med den svagere CTR-klynge manglede svaret, og det andet sprog havde det.** Samme fejlklasse som C114 (`/procent`), C119 (`/kvadratmeter`), C122 (`/nedtaelling`) og C123 (`/moms`) — de fire andre tilfælde hvor C82–C94's svar-rettelser var `da`-only. **Målte tal før rettelsen:** DA 1.243 ord / 8 `<h2>` / 10 FAQ mod SE 1.387 ord / **10** `<h2>` / 11 FAQ. **Rettelsen (kun `da`):** et nyt `<h2>` **"Omregn minutter til timer – og timer til minutter"** med regnestykket begge veje, en fjerdels **14-rækkers** tabel (Minutter / Timer og minutter / Decimaltimer / Divisionen) der dækker alle *syv* af de målte DA-tal plus de otte C120 målte på svensk, og brødteksten med den modsatte regel (7,5 timer × 60 = 450 minutter) og et link videre til `/fart`. **Ingen tal står hårdkodet to steder:** rækkerne er **flyttet ud af `page.tsx` til `MINUTTER_TILL_TIMMAR` i `src/lib/tids-eksempler.ts`**, så de to domæner nu deler *én* kilde i stedet for hver sin konstant, og de regnes stadig med div/mod 60 — samme to regler som `beregnTidsinterval` bruger. Rækkerne 480 og 495 er de tal værktøjet selv producerer. **Tre nye FAQ-par** i `page-data.ts` (som dermed også kommer i JSON-LD'en): "Hvordan regner man minutter om til timer?", "Hvad er 300 minutter i timer?" (giver 5,00 / 16,40 / 25,00 — de tre tal DA-autocomplete spørger om) og "Hvad er 1 time og 30 minutter i decimaltimer?" (**1,50**, fordi det er nr. 1 under "time og minutter"). **Målt på rigtig server** (`next start` :3919, porten verificeret fri *inden* start — målefejl 15's lære), begge domæner: DA **13 `Question`** (fra 10), SE **11 uændret**, **14 rækker i begge** tabeller, `300 ÷ 60 = 5,00` / `1000 ÷ 60 = 16,67` / `2500 ÷ 60 = 41,67` / `495 ÷ 60 = 8,25` hver **1** i markupken, `450 minutter` og `8 t 15 min` **2** hver, **0** danske markører på beraknare.se og **0** svenske på minberegner.dk, `/procent`s titel **uændret** (kontrol), `/api/health` → `status: ok`. **Målefejl nr. 39 (min egen, og den første i den her opgave):** min første måling greb `"300 ÷ 60 = 5,00"` i den rå HTML og fandt **0 på begge domæner** — hvilket så ud som om tabellen ikke blev renderet. React skriver `<!-- -->` mellem to tekstnoder i samme celle, så de fire tal stod som `300<!-- --> ÷ 60<!-- --> = 5,00`. Efter `sed 's/<!-- -->//g'` gav samme greb 1. Det er C94's målefejl 16 i en ny form, og det er fundet fordi jeg **holdt op med at tro på nul** og spurgte serveren i stedet for at rette koden. **Harness: 4 nye tests, modsvejs verificeret — alle 4 falder** med master's `page.tsx` + `page-data.ts` (stashed), heraf en der kræver den danske sektion, en der kræver hvert sprog svarer på *sin egen* målte numeriske klynge, en der læser pariteten **i begge retninger** (og tjekker at de to tabeller har præcis samme rækker, så en ny række kun i det ene sprog er en fejl), og en der læser FAQ'en i `page-data.ts` — fordi `FAQ` er mocket væk i filen (C85's fælde). **C120's egen test lå fejlen fast, og det er hele pointen:** den hed `da får ikke den svenska omvandlingssektion` og krævede `not.toContain("Räkna om minuter till timmar")` — altså låst *tilstanden før rettelsen* i stedet for en egenskab, så den ville have blokeret svar-rettelsen. Det er C94's negative SE-lås, C157's vakuum-grønne procent-test og C119's negative lås for tredje gang i træk. Den er erstattet af **en egenskab pr. sprog** (skal have sektionen, skal have sin egen notation, må ikke have den andens), fordi "dansk skal ikke have den svenska sektion" ikke længere er en sandhed, det er bare en tilstand. **Gate grøn:** lint (**596 filer**), **2.793 tests / 178 filer** (fra 2.791 / 178), build (**142 sider**), `locale-leak.mjs --gate` exit 0, `knapgruppe-scan.mjs` **0/0**. Rørte filer: `tids-eksempler.ts` (+29, flytning + udvidelse), `page.tsx` (+67/-32, dansk sektion + begge grene på den delte konstant), `page-data.ts` (+3 FAQ-par) og testen (+102/-32) — **ingen beregningslogik ændret, ingen URL, ingen sitemap, ingen `<h1>`, ingen titel, `se` urørt**. Kode + plan i ét squash-commit på `ceo/tidsberegner-minutter-til-timer`; se opgave 181. **MÅL:** `/tidsberegner` DA baseline **73.117 visninger / 195 klik / CTR 0,3 % / pos. 7,0** (GSC 2026-08-30 → 2026-09-27; søgninger "tidsberegner" 958 v/27k pos. 4, "hvor lang tid" 821 v/1k pos. 6, "time beregner" 111 v/1k pos. 8, "tid beregner" 103 v/1k pos. 8), Plausible **294 besøgende/28d, bounce 7 %** pr. 2026-09-29 — måles igen **2026-10-13**. **Forventningen er begrænset og ærlig:** de syv tal-søgninger er en lille del af de 73.117 visninger (GSC's fire top-søgninger er tilsammen ~2.000 v), så jeg lover ikke en ny CTR. Det der kan læses af rettelsen er at siden nu svarer på sin *egen* klynge i sit eget sprog. Hvis CTR'en er uændret efter 14 dage, er hypotesen "den manglende omvandling forklarede den lave CTR" **modbevist**, og næste spørgsmål er ikke mere indhold men søgemassen. **Målt og bevidst ikke bygget:** "hvor lang tid" (821 v pos. 6) er GSC's næststørste søgning på siden, men dansk autocomplete under den er **10 af 10 madlavning** (blødkogt æg, kartofler, majskolber, kyllingelår, lasagne) — altså en helt anden søgeintention end en klokkeslæt-beregner. Den søgning er ikke en klynge, vi kan vinde uden at blive en madside, og den er derfor **ikke** bygget. Skrevet ned, så næste iteration ikke jagter den.
 
 STATUS: KØ — **C179 er landet: 50 af sitets 207 sider (24 %) havde en brudt overskriftsstruktur — `<h1>` → `<h3>` eller `<h1>` → `<h4>`, altså et spring på to til tre niveauer. Køen var tom (178 var øverst ufærdig; 179 kræver interaktiv browser-verifikation, `curl` kan ikke sætte et felt), og de to åbne deploy-noter (C177, C178) har begge første vindue **2026-09-29 17:30** — det var 13:18, så ingen blev rørt. Valget kom af at måle en klasse, ingen af C82–C178 havde målt: de har lukket titler, descriptions, JSON-LD, hreflang, canonical, sprogfejl, interne links og social metadata — men aldrig *selve dokumentets struktur*. Overskriftsniveauet er den egenskab, en skærmlæser navigerer efter, og den var brudt på en fjerdedel af sitet.**
@@ -17284,6 +17306,58 @@ er værst. Se `❓ Til Mads`.
   rørt igen på de tre sider, skal noterne skrives om mod den nuværende kode
   før de verificeres — ellers verificerer man en gammel kravspecifikation.
 
+#### 182. [x] FÆRDIG 2026-09-29 — C182 — **`/dato` (132.313 v DA / 99.136 v SE) svarede på nul af sin egen måned-klynge: "antal dage i en måned" er dansk autocompletes nr. 1, og siden havde 0 forekomster — den svarede på *året* ("1 år = 365 dage") og skrev måneden som ét gennemsnitstal**
+
+- **Datagrund:** DA-autocomplete (`hl=da`, `gl=dk`, 14:17) under **"antal dage i en
+  måned"** → nr. 1 "antal dage i en måned", **nr. 2 "antal dage i måned excel"**,
+  nr. 3-5 "antal dage pr måned gennemsnit / 2025 / 2026"; under **"hvor mange
+  dage i en måned"** → nr. 2 **"hvor mange dage er der i en måned uden
+  weekender"**. SE-autocomplete under **"antal dagar i en månad"** → **nr. 1
+  "antal dagar i en månad excel"** + "antal arbetsdagar i en månad"; under **"hur
+  många dagar i en månad"** → **nr. 2 "hur många arbetsdagar i en månad"**.
+  Målt på de to **live** sider: "i en måned" **0**, "i en månad" **0**.
+- **Rettelsen (begge sprog, fordi klyngen er målt i begge):** `<h2>` "Hvor mange
+  dage er der i en måned?" med 12-rækkers tabel (dage, arbejdsdage, weekenddage),
+  `<h3>` "Sådan tæller du dage i en måned i Excel" (A1 = første dag, B1 = dagen
+  *efter* månedens sidste dag, plus fælden der giver 27), og `<h2>` "Hvor mange
+  dage er der i et år?" (365/366, 52,1 uger). Fire nye FAQ-par pr. sprog, så
+  JSON-LD går DA **7 → 11** og SE **10 → 14**.
+- **Ingen tal hårdkodet to steder:** `src/lib/dato-eksempler.ts` regner
+  månedslængden med `daysBetween` og arbejdsdagene med **`taellArbejdsdage` fra
+  `helligdage.ts`** — samme funktion `DatoBeregner` bruger. **Kontrollen der
+  viser det:** de tolv rækker summerer til **253** arbejdsdage i dansk og **252**
+  i svensk, som er hele årets tal; de tolv længder summerer til 365.
+- **Acceptkriterier:**
+  1. Begge `/dato`-sider har månedens længde, arbejdsdage og årstal i den
+     server-renderede HTML — målt på bygget server, ikke i kilden. **PASS**
+     (12 rækker hver, `2026-02-01` + `2026-03-01` + "28 dage" i markupken begge
+     steder, 0 rækker med skudårs-mærke i 2026).
+  2. Hvert sprog svarer på **sin egen** målte klynge, og det andet sprog har 0
+     forekomster. **PASS** ("i en måned" 0 → 5 DA, "i en månad" 0 → 5 SE, 0 mod).
+  3. De tolv rækker summerer til de tal, siden selv skriver i "Nyttige
+     datofakta". **PASS** (253/252 målt i markupken).
+  4. `dage-til.ts` urørt, ingen URL, ingen sitemap, `<title>`/`<h1>` uændrede,
+     kontrol på `/procent` uændret. **PASS.**
+  5. Lint, tests og build grønne. **PASS** — se målingerne ovenfor.
+- **Målefejl nr. 40 (min egen):** min første måling greb `<table>` i den
+  tag-strippede tekst, hvor alle tags er væk, og meldte **0 tabeller** på en
+  side med en tabel. C94's målefejl 16 i en ny form — fundet fordi 0 blev
+  krydschekket mod den rå HTML i stedet for at rettes i koden.
+- **Fejl i min egen kode, fanget af testen:** `formatNumber(2026)` giver
+  **"2 026"** med tusindtalsseparator. Et år må aldrig formateres som et tal —
+  erstattet af template-literals i begge sproggrene.
+- **Harness:** 15 nye tests i `dato-eksempler.test.ts`, 5 nye i `page.test.tsx`
+  (7 → 17), **modsvevs verificeret: 6 af 7 falder** med master's kode. Den
+  stærkeste læser hele den renderede tabelrække og sammenligner med modulet.
+  To af mine tests var grønne mod den forkerte ting: en negativ lås på
+  "februar" (en delstreng i "februari" — C121's fælde) og to tests med en
+  hårdkodet dansk ordliste, som gjorde den svenska arm urørtest.
+- **Målt og bevidst ikke brugt:** de danske og svenske navne på Excel'
+  `NETWORKDAYS` kunne ikke efterprøves i løbet af iterationen, så kun de to
+  formler C98 allerede har verificeret (`=B1-A1`, `=DATEDIF`) bruges. En formel
+  i indekseret tekst må ikke være utestet.
+- **Kilde:** branch `ceo/dato-mand-dage`; se C182-STATUS.
+
 ### ❓ Til Mads — ny i C178: `beregner.no` er et andet website
 
 1. **`beregner.no` kører ikke denne kode.** Fire uafhængige målinger, alle
@@ -17334,6 +17408,28 @@ er værst. Se `❓ Til Mads`.
 
 
 ### VERIFICÉR DEPLOY-log — nyeste først
+- `VERIFICÉR DEPLOY: /dato svarer på månedens længde (0 → 12-rækkers tabel) ceo/dato-mand-dage 2026-09-29 14:3x`
+  — merge/push ca. 14:35, før 17:30-vinduet er nået, så første vindue er
+  **2026-09-29 17:30**. Verificér **indhold, ikke HTTP 200**. Mål:
+  1. `curl -s -H "Host: minberegner.dk" https://minberegner.dk/dato` skal have
+     **12** `grep -o '<th scope="row">'` og **én** `<table>`, og
+     `<h2>Hvor mange dage er der i en måned?</h2>` +
+     `<h3>Sådan tæller du dage i en måned i Excel</h3>` +
+     `<h2>Hvor mange dage er der i et år?</h2>`. Før: 0 af alle tre.
+  2. Samme på `https://beraknare.se/dato` med svenske overskrifter
+     ("Hur många dagar är det i en månad?" / "… i ett år?") og kolonnerne
+     **Arbetsdagar** + **Veckoslut**. Mål med `curl -H "Host: …"` (målefejl 34).
+  3. **KONTROL:** `grep -c 'skudår)\|skottår)'` på en tabelrække skal være **0**
+     på begge domæner i 2026, fordi 2026 ikke er skudår. Giver den 1, er
+     skudårsflaget sat forkert.
+  4. `grep -o '"@type":"Question"'` skal give **11** på minberegner.dk og **14**
+     på beraknare.se (var 7 og 10).
+  5. **KONTROL:** `https://minberegner.dk/procent` skal have **uændret** `<title>`
+     og `<meta description>`, og `/api/health` skal svare `status: ok` på begge.
+  6. `npm run test -- src/lib/dato-eksempler.test.ts` skal give **15 passed**,
+     `npm run test -- src/app/dato/page.test.tsx` skal give **17 passed**.
+  7. `node scripts/locale-leak.mjs --gate` skal exit 0 med 0 ureviewet.
+
 - `VERIFICÉR DEPLOY: overskriftsniveau på alle sider (49 brud → 0 af 207) ceo/heading-outline 2026-09-29 13:5x`
   — merge ca. 13:55, første vindue **2026-09-29 17:30**. Se den fulde note
   med alle seks kriterier ovenfor i loggen ved opgave 180; de vigtigste:

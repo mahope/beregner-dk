@@ -4,6 +4,7 @@ import { getDomainConfigByLocale } from "@/lib/domain-config";
 import { getCurrentDomainConfig, getLocale } from "@/lib/get-locale";
 import { getDageTilSlugs } from "@/lib/dage-til";
 import { getPageData } from "@/lib/page-data";
+import { maanederITaar } from "@/lib/dato-eksempler";
 import DatoPage from "./page";
 
 vi.mock("next/dynamic", () => ({
@@ -186,12 +187,172 @@ describe("dato page — antal dagar mellan datum i Excel", () => {
       const faq = getPageData("dato", locale)!.faqItems;
       const excel = faq.filter((item) => item.question.includes("Excel"));
 
-      expect(excel).toHaveLength(2);
+      // C98 lagde to (dage mellem datoer), C182 lagde den tredje (én måned).
+      // Tællingen læses som "de to fra C98 er stadig der", så den ikke låser
+      // det nye antal fast, men heller ikke kan miste et gammelt.
+      expect(excel).toHaveLength(3);
       expect(excel[0].question).not.toBe(excel[1].question);
       for (const item of excel) {
         expect(item.answer).toContain("=B1-A1");
         expect(item.answer).toContain("DATEDIF");
       }
+      // De to fra C98 er stadig de to fra C98: den ene sp\u00f8rger p\u00e5 "to
+      // datoer", den anden p\u00e5 "datum". Begge findes i begge sprog.
+      expect(excel[0].question).toMatch(/i Excel\?$/);
+      expect(excel[1].question).toMatch(/^Kan Excel/);
+    }
+  });
+  // Autocomplete 2026-09-29 14:2x. "antal dage i en m\u00e5ned" er nr. 1 under
+  // "antal dage i en m\u00e5ned" (nr. 2 er Excel, nr. 3-5 er "pr m\u00e5ned
+  // 2026"), og nr. 1 under "hvor mange dage i en m\u00e5ned" (nr. 2 er "uden
+  // weekender"). Svensk sp\u00f8rger det samme: "antal dagar i en m\u00e5nad
+  // excel" og "hur m\u00e5nga arbetsdagar i en m\u00e5nad". /dato svarede p\u00e5
+  // \u00e5ret ("1 \u00e5r = 365 dage") men aldrig p\u00e5 m\u00e5neden: 0
+  // forekomster af "i en m\u00e5ned"/"i en m\u00e5nad" p\u00e5 begge dom\u00e6ner.
+  test.each([
+    {
+      locale: "da" as const,
+      monthHeading: "Hvor mange dage er der i en m\u00e5ned?",
+      yearHeading: "Hvor mange dage er der i et \u00e5r?",
+      excelHeading: "S\u00e5dan t\u00e6ller du dage i en m\u00e5ned i Excel",
+      name: "januar",
+      otherName: "januari",
+      arbejdsdageKolonne: "Arbejdsdage",
+      ugeKolonne: "Weekenddage",
+      start: "2026-02-01",
+      next: "2026-03-01",
+      result: "<strong>28 dage</strong>",
+      yearDays: "<strong>365 dage</strong>",
+      faeld: "28. februar, f\u00e5r du 27",
+    },
+    {
+      locale: "se" as const,
+      monthHeading: "Hur m\u00e5nga dagar \u00e4r det i en m\u00e5nad?",
+      yearHeading: "Hur m\u00e5nga dagar \u00e4r det i ett \u00e5r?",
+      excelHeading: "S\u00e5 r\u00e4knar du ut dagar i en m\u00e5nad i Excel",
+      name: "januari",
+      otherName: "januar",
+      arbejdsdageKolonne: "Arbetsdagar",
+      ugeKolonne: "Veckoslut",
+      start: "2026-02-01",
+      next: "2026-03-01",
+      result: "<strong>28 dagar</strong>",
+      yearDays: "<strong>365 dagar</strong>",
+      faeld: "28 februari f\u00e5r du 27",
+    },
+  ])(
+    "$locale svarer p\u00e5 m\u00e5nedens l\u00e6ngde, arbejdsdage og \u00e5rstal",
+    async (t) => {
+      vi.mocked(getLocale).mockResolvedValue(t.locale);
+      vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale(t.locale));
+
+      const html = renderToStaticMarkup(await DatoPage());
+
+      expect(html).toContain(`<h2>${t.monthHeading}</h2>`);
+      expect(html).toContain(`<h2>${t.yearHeading}</h2>`);
+      expect(html).toContain(`<h3>${t.excelHeading}</h3>`);
+      // Alle tolv m\u00e5neder i eget sprog, l\u00e6st fra modulet s\u00e5 en navneliste i
+      // testen ikke kan komme i mellemkrig med \u00e5rsagen \u2014 "marts" er dansk og
+      // "mars" er svensk, og de to ligger i hver sin celle.
+      for (const r of maanederITaar(2026, t.locale)) {
+        expect(html).toContain(`<th scope="row">${r.name}</th>`);
+      }
+      // Og det andet sprog m\u00e5 ikke l\u00e6gge ind. Ord-gr\u00e6nser, fordi
+      // "februari" indeholder "februar" \u2014 det er C121's "bak\u00e5t"/"n\u00e4r"-f\u00e6lde.
+      // Kun de navne der faktisk er forskellige. "april", "maj", "juni", "juli",
+      // "september" og "oktober" hedder det samme p\u00e5 begge sprog, s\u00e5 en
+      // l\u00e5s over hele listen ville kr\u00e6ve, at de forsvandt.
+      const andet = maanederITaar(2026, t.locale === "da" ? "se" : "da");
+      const egen = new Set(maanederITaar(2026, t.locale).map((r) => r.name));
+      const forskellige = andet.filter((r) => !egen.has(r.name));
+      expect(forskellige.length).toBeGreaterThan(0);
+      for (const r of forskellige) {
+        expect(html).not.toContain(`>${r.name}</th>`);
+      }
+      // Det er den kolonne, der besvarer "antal dage i en m\u00e5ned uden weekender".
+      expect(html).toContain(`<th>${t.arbejdsdageKolonne}</th>`);
+      expect(html).toContain(`<th>${t.ugeKolonne}</th>`);
+      // Regnestykket: dagen *efter* m\u00e5nedens sidste dag, med f\u00e6lden skrevet ud.
+      expect(html).toContain(`<code>${t.start}</code>`);
+      expect(html).toContain(`<code>${t.next}</code>`);
+      expect(html).toContain(t.result);
+      expect(html).toContain(t.yearDays);
+      // F\u00e6lden m\u00e5 v\u00e6re skrevet ud, ellers er formlen et r\u00e5d.
+      // JSX folder linjeskiftet i et tekstnode til ét mellemrum, s\u00e5 l\u00e6ses den
+      // som den lyder i markupken og ikke som den staar i kilden.
+      expect(html).toContain(t.faeld);
+    }
+  );
+
+  test("de tolv m\u00e5neder summerer til de tal, siden selv skriver i \u00e5rs-tallene", async () => {
+    // Tabellen og de to sidste bullets i "Nyttige datofakta" kommer fra samme
+    // kald, s\u00e5 et br\u00fdt tal kan ikke ligge i den ene og ikke i den anden.
+    for (const locale of ["da", "se"] as const) {
+      vi.mocked(getLocale).mockResolvedValue(locale);
+      vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale(locale));
+      const html = renderToStaticMarkup(await DatoPage());
+      const raekker = maanederITaar(2026, locale);
+      const sumDage = raekker.reduce((s, r) => s + r.dage, 0);
+      const sumArbejdsdage = raekker.reduce((s, r) => s + r.arbejdsdage, 0);
+
+      // "dage" p\u00e5 dansk og "dagar" p\u00e5 svensk \u2014 l\u00e6ses fra modulet, fordi
+      // en h\u00e5ndskrevet ordliste i testen er en m\u00e5lefejl, der gemmer sig i
+      // den svenska arm.
+      const dageOrd = locale === "da" ? "dage" : "dagar";
+      expect(sumDage).toBe(365);
+      expect(html).toContain(`<strong>${sumDage} ${dageOrd}</strong>`);
+      // 253 dansk, 252 svensk \u2014 fordi de to lande har hver sin helligdag i 2026.
+      expect(sumArbejdsdage).toBe(locale === "da" ? 253 : 252);
+      expect(html).toContain(
+        locale === "da" ? `${sumArbejdsdage} arbejdsdage` : `${sumArbejdsdage} arbetsdagar`
+      );
+      // Gennemsnittet m\u00e5 skrives med \u00e5, fordi det er et br\u00f8kt tal, ikke en m\u00e5ned.
+      expect(html).toContain(`30,44 ${dageOrd}`);
+    }
+  });
+
+  test("hver m\u00e5ned har pr\u00e6cis de tal, eksempelmodulet regner", async () => {
+    // Renderer tabellen r\u00e5 og l\u00e6ser den d\u00e5, s\u00e5 en r\u00e6kke der springer
+    // en m\u00e5ned over ikke kan gemme sig i en l\u00e6ngde-t\u00e6lling.
+    for (const locale of ["da", "se"] as const) {
+      vi.mocked(getLocale).mockResolvedValue(locale);
+      vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale(locale));
+      const html = renderToStaticMarkup(await DatoPage());
+      const raekker = maanederITaar(2026, locale);
+      const forventet = raekker
+        .map((r) => `<th scope="row">${r.name}</th><td>${r.dage}</td><td>${r.arbejdsdage}</td><td>${r.weekenddage}</td>`)
+        .join("</tr><tr>");
+      expect(html).toContain(forventet);
+    }
+  });
+
+  test("begge sprog har de fire nye sp\u00f8rgsm\u00e5l i FAQ'en, som ogs\u00e5 g\u00e5r i JSON-LD", async () => {
+    for (const locale of ["da", "se"] as const) {
+      const faq = getPageData("dato", locale)!.faqItems;
+      const maaned = faq.filter((i) => /en m\u00e5ned|en m\u00e5nad/.test(i.question));
+      expect(maaned.length).toBeGreaterThanOrEqual(2);
+      for (const item of maaned) expect(item.answer).toMatch(/30,44|28|31/);
+      const aar = faq.filter((i) => /et \u00e5r|ett \u00e5r/.test(i.question));
+      expect(aar).toHaveLength(1);
+      expect(aar[0].answer).toContain("365");
+      expect(aar[0].answer).toContain("366");
+      const excel = faq.filter((i) => /Excel/.test(i.question));
+      // To fra C98 plus den nye m\u00e5ned-formel.
+      expect(excel).toHaveLength(3);
+      const maanedExcel = excel.filter((i) => /m\u00e5ned|m\u00e5nad/.test(i.question));
+      expect(maanedExcel).toHaveLength(1);
+      expect(maanedExcel[0].answer).toContain("=B1-A1");
+    }
+  });
+
+  test("de svenske m\u00e5nedsnavne l\u00e6gger ikke ind i den danske side", async () => {
+    // "februar" er en delstreng i "februari", s\u00e5 l\u00e5set m\u00e5 l\u00e6se p\u00e5
+    // cellen (">februar</th>") og ikke p\u00e5 hele HTML'en.
+    for (const [locale, fejl] of [["da", "februari"], ["se", "februar"]] as const) {
+      vi.mocked(getLocale).mockResolvedValue(locale);
+      vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale(locale));
+      const html = renderToStaticMarkup(await DatoPage());
+      expect(html).not.toContain(`>${fejl}</th>`);
     }
   });
 });
