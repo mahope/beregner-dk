@@ -1,25 +1,12 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — **C190–C196 og CEO-punkt 0 er lukket på indhold** (målt 2026-09-29
-22:05 mod produktion, ikke på HTTP-status). Se `docs/plan-arkiv.md`.
-
-STATUS: KØ — **den danske titelrække er tømt.** Alle 15 sider i GSC's
-visningstop-15 har nu en eksempel- eller spørgsmålstitel, canonical + hreflang er
-korrekte på begge domæner, og `/dato` svarer selv på GSC's to største
-søgninger (1.131 + 1.013 visninger, pos. 5) og linker videre til
-`/dage-til/1-december` og `/dage-til/juleaften`. `/dage-til`-ruten findes, og
-IndexNow (I1) er i koden. **Verdens største uberørte flade er nu beraknare.se:**
-537 besøgende/28d (+144 %) mod 160.000+ visninger på 0,1–0,2 % CTR — se opgave
-185.
-
-STATUS: KØ — **`/su` (220 → 116 besøgende/28d, −47 %) er stadig uden diagnose**
-og er bevidst ikke rørt: dens titel skal regne et beløb, og kun ét af de to tal
-(ude-boende 7.426 kr. før skat) er citerbart fra `satser-2026.ts` uden at gætte
-efter-skattedelen. Se opgave 183.
-
-STATUS: KØ — **dagens iteration (C197) lukkede repoets eneste
-sikkerhedsfund**: `undici` 7.29.0 → 7.30.0 bag `jsdom`. Dev-only, så
-`npm audit --production` var allerede 0; `npm audit` gik 1 høj → 0.
+STATUS: KØ — **CEO-kø punkt 0 (review-fund 29/9) er allerede lukket** i commit
+`aca17e5` (2026-09-29 20:44): alle 8 forkerte tal (valborg, påskafton, sankthans,
+påskeaften-FAQ, husleje, toUtcMidnight, svensk promille, dato-er) er rettet i
+master og verificeret live. **Den danske titelrække er tømt** (C195/C196), og
+fire blogartikler får en næste handling (C198). **Største åbne flade:**
+beraknare.se — 537 besøgende/28d mod 160.000+ visninger på 0,1–0,2 % CTR med
+danske URL-slugs. Forsning gjort (opgave 185), migrationsopgave skrevet (187).
 
 ## Kvalitetsgate (repoets egne scripts fra package.json)
 
@@ -219,42 +206,6 @@ Tre noter. HTTP 200 beviser intet: ingen rører en URL, kun `<title>`- og
 - **Note:** de er **gamle** (to dage, ~14 deploy-vinduer). Hvis koden siden er
   rørt igen på de tre sider, skal noterne skrives om mod den nuværende kode
   før de verificeres — ellers verificerer man en gammel kravspecifikation.
-#### 182. [x] 2026-09-29 — C196 — **`/bmi`, `/fart` og `/kalorier` regner et eksempel i titlen i da og se**
-
-- **Datagrund:** efter C195 er disse de tre sidste sider i GSC's top-15 med en
-  ren kategorititel. `/bmi` (938 besøgende/28d, −26 %), `/fart` (4.645
-  visninger, 0,6 %, pos. 7,1) og `/kalorier` (12.631 visninger, 1,0 %, pos. 8,1).
-  `/fart` er den **eneste** af de 15, der stadig skrev "Fartberegner - Beregn
-  hastighed, distance og tid". De andre er spørgsmålstitler, som GSC's egen
-  tabel placerer på 0,5 % — bedre end kategori, dårligere end eksempel.
-- **Tal verificeret mod repoets egne funktioner, ikke i hovedet:**
-  `75 / 1.75**2 = 24,4898` (BMI 24,5 — samme eksempel som siden allerede havde
-  i sin `metaDescription`), `100 km/t × 2 timer = 200 km`, og
-  `beregnBmr("mand", 80, 180, 30) = 1780` →
-  `beregnTdee(1780, "moderat") = 2759` (Mifflin-St Jeor).
-- **Hvorfor kun disse tre:** `/tidszone` (24.117 visninger, 0,4 %) er det største
-  eksempel-lignende emne, der **ikke** kan få et eksempel. Ethvert
-  Danmark-forankret klokketidspunkt er forkert halvdelen af året, fordi
-  Danmark har sommertid og det meste af verden ikke har. Ikke en
-  skrivefejl — en structural begrænsning, og derfor skrevet i planen så næste
-  iteration ikke prøver igen. `/alder` (6.985 visninger, 0,5 %) har samme
-  problem: alderen afhænger af dagens dato.
-- **Fund undervejs:** svensk `/fart` hedder i `title` "Hastighetskalkylator",
-  og testen *"metaTitle indeholder sidens eget hovedord"* (C194) faldt, da
-  skrev "Fartberäknare". Løst ved "Hastighetsberäknare", ikke ved at slå
-  testen fra. `/kalorier`'s answer-first-test låste de to gamle titler
-  med `toBe` — opdateret, ikke slettet, så `description`, `og:` og
-  schema-description stadig er dækket.
-- **Test:** `title-eksempel.test.ts` dækker nu syv sider og verificerer de tre
-  nye regnestykker. **De ni nye tests fejler mod master's `page-data.ts`**
-  (verificeret med `git stash push`), så de kan ikke passes ved en fejl.
-- **MÅL:** `/bmi` baseline **938 besøgende/28d** · `/fart` **28 klik/28d**
-  (4.645 visninger) · `/kalorier` **132 klik/28d** (12.631 visninger). Mål igen
-  14 dage efter `DEPLOY OK`. `/bmi` er kun ca. 4.920 GSC-visninger trods 938
-  besøgende, så **mindst halvdelen af `/bmi`s trafik er ikke fra Google** —
-  titelændringen kan derfor ikke alene forklare faldet, og det er grunden til at
-  opgave 183 findes.
-
 #### 183. [ ] 2026-09-29 — Kø — **diagnosér `/bmi`s og `/su`s fald, og find ud af hvor stor en del der er overhovedet Googles**
 
 - **Datagrund:** Plausible 28 dage: `/bmi` 1.271 → 938 (−26 %), `/su` 220 →
@@ -282,27 +233,6 @@ Tre noter. HTTP 200 beviser intet: ingen rører en URL, kun `<title>`- og
 - **MÅL:** `/bmi` 938 besøgende/28d, `/su` 116 (Plausible 2026-09-29).
 
 
-#### 184. [x] 2026-09-29 — C197 — **undici 7.29.0 → 7.30.0: repoets eneste sikkerhedsfund lukket**
-
-- **Datagrund:** `~/.local/oxloop/AFHAENGIGHEDER.md` placerer `beregner-dk` som
-  **prioritet 1** med "kritiske sårbarheder". `npm audit` gav 1 høj
-  (10 advisories, alle `undici 7.0.0 - 7.29.0`), transitivt via `jsdom@28.1.0`
-  → `undici@^7.21.0`. `7.30.0` er patch og opfylder jsdom's range, så rettelsen
-  er **én lockfile-linje** — ingen `package.json`-ændring, ingen major.
-- **⚠️ AFHAENGIGHEDER.md er STAL for dette repo.** Dens "mangler
-  engines-erklæring: NEJ" er forkert: `package.json` har
-  `engines.node = ">=22 <23"`, `.nvmrc` er `22`, og `Dockerfile` bruger
-  `node:22-alpine`. Runtime-kravet er altså erklæret — jordemoderstudy-fejlen fra
-  23/8 kan ikke ramme her. Resten af filens rækker er ikke verificeret i denne
-  iteration, så **kun denne rettelse er dokumenteret**; se `❓ Til Mads`.
-- **Reelt omfang:** dev-only (`undici` er `"dev": true` i lockfilen), så
-  `npm audit --production` var 0 før og efter. Fundet var altså ikke en
-  produktionsrisiko — det var det eneste kendte advisory, og det er nu væk.
-- **Ingen VERIFICÉR DEPLOY-note:** ændringerne har ingen runtime-effekt
-  (`undici` indgår ikke i `next build`), så intet på det live site kan ændre sig.
-- **Gate grøn:** lint (**616 filer**), **3001 tests / 189 filer**, build
-  (**142 sider**), `locale-leak.mjs --gate` exit 0.
-
 #### 185. [ ] 2026-09-29 — Kø — **undersøg de danske URL-slugs på beraknare.se før nogen migrerer dem**
 
 - **Datagrund:** beraknare.se har **537 besøgende/28d (+144 %)** og **~160.000
@@ -328,44 +258,34 @@ Tre noter. HTTP 200 beviser intet: ingen rører en URL, kun `<title>`- og
   `src/`** uden at migrationsopgaven er skrevet op og godkendt. Gaten grøn.
 - **MÅL:** beraknare.se 537 besøgende/28d; `/dato` 95 klik, `/tidsberegner` 127
   klik, `/procent` 2 klik (GSC 2026-08-30 → 2026-09-27). Genmål 2026-10-13.
+- **Forskning gjort (C199):** alle svenske konkurrenter bruger svenske slugs —
+  `kalkylverket.se/dagar-mellan-datum`, `kalkylator.info/tidskalkylator`,
+  `timraknare.com/tidskalkylator`, `omnicalculator.com/sv`, `mathda.com/tools/sv`.
+  beraknare.se bruger danske slugs på alle 82 sider med svenske titler. Svenske
+  brugere søger "dagar mellan datum" og ser URL'en `/dato` — mismatch der
+  forklarer den lave CTR. **Konklusion: slugs er sandsynligvis årsagen.**
+- **Prisliste for fuld migrering:** 82 sider skal få svenske slugs med 301.
+  Berøret: `calculator-list.ts` (tilføj `seHref`), `routing.ts`, `sitemap.ts`,
+  `middleware.ts`, `page-data.ts`, `internal-links.test.ts`, IndexNow. Estimeret
+  2–3 iterationer. Se opgave 187.
 
+#### 187. [ ] 2026-09-30 — Kø — **migrér beraknare.se til svenske URL-slugs med 301**
 
-#### 186. [x] 2026-09-30 — C198 — **fire blogartikler slutter med en næste handling, ikke med flere artikler**
-
-- **Datagrund:** Plausible 28 dage: `/blog/barsel-2026-regler-og-satser` 184
-  besøgende og **85 % bounce**; `/blog/fradrag-2026-komplet-guide` 53 → 43.
-  GSC: `/blog/boernepenge-2026-satser-og-regler` 5.728 visninger, 0,6 % CTR,
-  pos. 8,4 — sitets mest søgte artikel. CEO-prompten navngiver præcis denne
-  lækage: artiklerne skal føre videre til den relevante beregner.
-- **Årsagen:** alle fire artikler linkede til deres beregner i løbende tekst, men
-  sluttede på **"Relaterede artikler"**. Det sidste klik var endnu en artikel, så
-  læseren nåede aldrig værktøjet. Ny `NaesteSkridt` (én primær handling, 44 px
-  trykflade, `<a>` ikke knap) indsættes mellem `</article>` og relaterede blokke.
-- **Fund undervejs:** `/blog/boernepenge-2026-satser-og-regler` sluttede
-  allerede på "Relaterede beregnere" — fem ligeværdige kort uden hierarki. Der
-  var altså ikke manglende links, men manglende *fokus*; samme komponent løser
-  det. De øvrige 25 artikler er bevidst urørt: de er under 43 besøgende/28d, og
-  opgaven skal måles før den rulles ud.
-- **Verificeret:** 7 nye tests i `BlogNaesteSkridt.test.tsx` (semantik, trykflade,
-  og at CTA'en ligger **efter** `</article>` og **før** relaterede artikler).
-  De fire sidetests kan ikke passes mod master, da `Regn det ud` ikke findes
-  der. Gate grøn: lint (**618 filer**), **3008 tests / 190 filer** (fra 3001 /
-  189), build (**142 sider**), `locale-leak.mjs --gate` exit 0.
-- **MÅL:** `/blog/barsel-2026-regler-og-satser` baseline **85 % bounce / 184
-  besøgende pr. 28d**; `/blog/boernepenge-2026-satser-og-regler` **35 klik /
-  28d** (5.728 visninger). Genmål 2026-10-14.
-
+- **Datagrund:** opgave 185. 82 sider har danske slugs (`/dato`, `/tidsberegner`,
+  `/nedtaelling`, `/renteberegner`, `/kalorier`, `/braendstof`, `/alder`,
+  `/tidszone`, `/enhedspris`, `/vaegttab`) men svenske titler. 160.000+
+  GSC-visninger på 0,1–0,2 % CTR. Alle svenske konkurrenter bruger svenske slugs.
+- **Hvorfor nu:** C195/C196 har sat svenske titler, men URL'en er stadig dansk.
+  Svenske brugere søger "dagar mellan datum" og ser `/dato` — mismatch der
+  koster klik. Migreringen er den største enkeltstående vækstmulighed på beraknare.se.
+- **Acceptkriterier:** (1) 82 sider får svenske slugs med 301 fra gamle danske
+  URLs, (2) sitemap og IndexNow sender nye URLs, (3) gamle URLs returnerer 301,
+  (4) gaten grøn, (5) ingen trafiktab målt før vs. efter 14 dage.
+- **MÅL:** beraknare.se 537 besøgende/28d; `/dato` 95 klik, `/tidsberegner` 127
+  klik, `/procent` 2 klik (GSC 2026-08-30 → 2026-09-27). Genmål 2026-10-13.
 
 ## ❓ Til Mads
 
-- ❓ **Tre deploy-noter kan ikke lukkes uden en browser** (C55 `/dato`, C56 `/tidszone`,
-  C60 `/promille`) — de kræver Kopier eller et knap-klik. Kliksekvenserne står ordret i
-  notesektionen ovenfor. ~10 minutter for et menneske; ellers står de åbne for evigt.
-- ❓ **Hvad er `beregner.no`?** (opgave 97, `BLOCKED`.) Forsiden er en 12,7 KB norsk side
-  uden ét `/_next/static`-chunk, og 404'en bruger en Tailwind-klasse (`text-foreground`)
-  der står i nul filer i repoet — domænet peger på en **anden udgivelse**. Skal `no`
-  lanceres fra dette repo, eller er navnet reserveret? Svaret afgør, om opgave 98 er
-  reel eller overflødig.
 - ❓ **Kilde til madvaretabellen (opgave 119, `BLOCKED`).** `sst.dk` svarer HTTP 429
   for både browser og curl, og de fire andre danske kilder døde i C92. Enten en
   PDF af *De officielle kostanbefalinger* lagt i repoet, eller en API-nøgle til en

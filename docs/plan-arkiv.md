@@ -18733,3 +18733,52 @@ Kun noter med et *uafviklet* vindue står her. Alt lukket er i `docs/plan-arkiv.
   CTA — siden har et "Det korte svar"-kort med beregnerlink over folden, så
   bounce'en ligner informationsadfærd, ikke tab. Den største uberørte flade er
   beraknare.se's danske URL-slugs → opgave 185.
+
+---
+
+## C196 — `/bmi`, `/fart` og `/kalorier` regner et eksempel i titlen (opgave 182)
+
+- **Datagrund:** efter C195 var disse de tre sidste sider i GSC's top-15 med en ren
+  kategorititel. `/bmi` (938 besøgende/28d, −26 %), `/fart` (4.645 visninger, 0,6 %,
+  pos. 7,1) og `/kalorier` (12.631 visninger, 1,0 %, pos. 8,1).
+- **Tal verificeret:** `75 / 1.75**2 = 24,4898` (BMI 24,5), `100 km/t × 2 timer =
+  200 km`, `beregnBmr("mand", 80, 180, 30) = 1780` → `beregnTdee(1780, "moderat")
+  = 2759` (Mifflin-St Jeor).
+- **Fund undervejs:** svensk `/fart` hedder "Hastighetskalkylator" i `title`, og
+  testen "metaTitle indeholder sidens eget hovedord" faldt. Løst ved
+  "Hastighetsberäknare". `/kalorier`'s answer-first-test låste de to gamle titler
+  med `toBe` — opdateret, ikke slettet.
+- **Test:** `title-eksempel.test.ts` dækker nu syv sider. De ni nye tests fejler
+  mod master's `page-data.ts` (verificeret med `git stash`).
+- **MÅL:** `/bmi` 938 besøgende/28d · `/fart` 28 klik/28d · `/kalorier` 132
+  klik/28d. Genmål 14 dage efter `DEPLOY OK`.
+
+## C197 — undici 7.29.0 → 7.30.0 (opgave 184)
+
+- **Datagrund:** `npm audit` gav 1 høj (10 advisories, alle `undici 7.0.0 -
+  7.29.0`), transitivt via `jsdom@28.1.0` → `undici@^7.21.0`. `7.30.0` er patch
+  og opfylder jsdom's range.
+- **Reelt omfang:** dev-only (`undici` er `"dev": true`), så `npm audit
+  --production` var 0 før og efter. Ingen runtime-effekt.
+- **AFHAENGIGHEDER.md er STAL:** `package.json` har `engines.node = ">=22 <23"`,
+  `.nvmrc` er 22, `Dockerfile` på `node:22-alpine`. Runtime-kravet er erklæret.
+- **Gate grøn:** lint (616 filer), 3001 tests / 189 filer, build (142 sider),
+  `locale-leak.mjs --gate` exit 0.
+
+## C198 — fire blogartikler slutter med en næste handling (opgave 186)
+
+- **Datagrund:** `/blog/barsel-2026-regler-og-satser` 184 besøgende og 85 % bounce;
+  `/blog/fradrag-2026-komplet-guide` 53 → 43. GSC: `/blog/boernepenge-2026-satser-og-regler`
+  5.728 visninger, 0,6 % CTR, pos. 8,4.
+- **Årsagen:** alle fire artikler linkede til deres beregner i løbende tekst, men
+  sluttede på "Relaterede artikler". Det sidste klik var endnu en artikel.
+- **Løsning:** ny `NaesteSkridt` (én primær handling, 44 px trykflade, `<a>` ikke
+  knap) indsættes mellem `</article>` og relaterede blokke.
+- **Fund undervejs:** `/blog/boernepenge-2026-satser-og-regler` sluttede allerede
+  på "Relaterede beregnere" — fem ligeværdige kort uden hierarki. Der var altså
+  ikke manglende links, men manglende *fokus*.
+- **Verificeret:** 7 nye tests i `BlogNaesteSkridt.test.tsx`. De fire sidetests kan
+  ikke passes mod master. Gate grøn: lint (618 filer), 3008 tests / 190 filer,
+  build (142 sider), `locale-leak.mjs --gate` exit 0.
+- **MÅL:** `/blog/barsel-2026-regler-og-satser` 85 % bounce / 184 besøgende pr. 28d;
+  `/blog/boernepenge-2026-satser-og-regler` 35 klik / 28d. Genmål 2026-10-14.
