@@ -3,6 +3,8 @@ import { beforeEach, describe, expect, test, vi } from "vitest";
 import { getDomainConfigByLocale } from "@/lib/domain-config";
 import { getCurrentDomainConfig, getLocale } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
+import { kaloriePrAlderRaekker, kaloriePrDagRaekker } from "@/lib/makroer";
+import { formatNumber } from "@/lib/format";
 import KalorierPage from "./page";
 
 vi.mock("@/components/KalorieBeregner", () => ({
@@ -79,5 +81,103 @@ describe("kalorier page", () => {
     // De nye svar skal ikke tale om BMR og TDEE, men svare paa spoergsmaalet
     const svar = data.faqItems.find((f) => f.question === "Hvor mange kalorier skal jeg have?")!;
     expect(svar.answer).toContain("2.502 kcal");
+  });
+});
+
+/**
+ * Den svenska sidan manglede hele svaret paa sin egen sokeklynge: "kaloribehov
+ * per dag" (autocomplete nr. 2, GSC 24 visninger paa pos 43) og "kaloribehov
+ * kvinna NN ar", hvor 7 af 10 variationer under "kaloribehov kvinna" ar en
+ * alder. Den danska halvdel har vaegttabellen, den svenska havde 0 tabeller.
+ */
+describe("kalorier side - det svenska svaret paa kaloribehovet", () => {
+  // Samme formattering som siden bruger - ellers slaar testen paa tusindtalsseparatoren
+  const dec = (vaerdi: number) => formatNumber(vaerdi, "se", { maximumFractionDigits: 1 });
+
+  beforeEach(() => {
+    vi.mocked(getLocale).mockResolvedValue("se");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("se"));
+  });
+
+  test("tabeller svarar paa 'kaloribehov per dag' med vaerktojets egne tal", async () => {
+    const html = renderToStaticMarkup(await KalorierPage());
+
+    expect(html).toContain("<h2>Hur många kalorier per dag?</h2>");
+    for (const raekke of kaloriePrDagRaekker()) {
+      expect(html).toContain(`<td>${dec(raekke.vaegtKg)} kg</td>`);
+      expect(html).toContain(`<td>${dec(raekke.kvinde)} kcal</td>`);
+    }
+    // 80 kg-raden er de tal sidan redan loeverar i sin egen text och FAQ.
+    // Svenskt talformat har mellanslag i stedet for punktum, saa tallene laeses
+    // fra modulet gennem samma formatter - ellers slaar testen paa notationen.
+    const vaegt80 = kaloriePrDagRaekker([80])[0];
+    expect(html).toContain(`<td>${dec(vaegt80.mand)} kcal</td>`);
+    expect(html).toContain(`<td>${dec(vaegt80.kvinde)} kcal</td>`);
+    expect(html).toContain(`<td>${dec(vaegt80.tabMand)} kcal</td>`);
+    // Og de er de samme tal som den danske side og FAQ'en lover
+    expect(getPageData("kalorier", "se")!.description).toContain("TDEE 2.759 kcal");
+    const behovSvar = getPageData("kalorier", "se")!.faqItems.find(
+      (f) => f.question === "Hur många kalorier behöver jag?",
+    )!;
+    expect(behovSvar.answer).toContain("2.502 kcal");
+    expect(html).toContain('href="/vaegttab"');
+    expect(html).toContain('href="/motion-kalorier"');
+  });
+
+  test("tabellen efter alder svarar paa de aldrar søgningen spørger om", async () => {
+    const html = renderToStaticMarkup(await KalorierPage());
+
+    expect(html).toContain("<h2>Kaloribehov efter ålder</h2>");
+    for (const alder of [40, 50, 60, 65, 70, 80]) {
+      expect(html).toContain(`<td>${alder} år</td>`);
+    }
+    for (const raekke of kaloriePrAlderRaekker()) {
+      expect(html).toContain(`<td>${dec(raekke.kvinde)} kcal</td>`);
+    }
+  });
+
+  test("kryssjekker alderstabellen mod vaegttabellen, saa de ikke kan glide fra hinanden", async () => {
+    const html = renderToStaticMarkup(await KalorierPage());
+    const trediveAar = kaloriePrAlderRaekker([30])[0];
+    const vaegt80 = kaloriePrDagRaekker([80])[0];
+
+    // Begge tabeller er 80 kg / 180 cm, saa 30 aar skal give de samme tal i begge
+    expect(html).toContain(`<td>${dec(trediveAar.mand)} kcal</td>`);
+    expect(html).toContain(`<td>${dec(trediveAar.kvinde)} kcal</td>`);
+    expect(vaegt80.mand).toBe(trediveAar.mand);
+  });
+
+  test("svarar paa kaloribehov for barn uden at finde paa et tal", async () => {
+    const html = renderToStaticMarkup(await KalorierPage());
+
+    expect(html).toContain("Kaloribehovet för barn räknas inte ut med den här formeln");
+    expect(html).toContain("Formeln är validerad för vuxna");
+    // Barn har intet værktøj her - og det skal ikke faa et opfundet tal
+    expect(html).not.toMatch(/barn[^.]{0,80}?\d+\s*kcal/);
+  });
+
+  test("de nye spoersmaal staar i page-data, saa de ogsaa kommer i JSON-LD", () => {
+    const data = getPageData("kalorier", "se")!;
+    const questions = data.faqItems.map((f) => f.question);
+
+    expect(questions).toContain("Hur många kalorier behöver jag?");
+    expect(questions).toContain("Hur många kalorier behöver jag för att gå ner 1 kg?");
+    expect(questions).toContain("Gäller kaloribehovet även barn?");
+    expect(questions).toContain("Är kalorikalkylatorn gratis?");
+    // Svaret skal bruge de tal tabellen viser, ikke et andet rundet tal
+    const svar = data.faqItems.find((f) => f.question === "Hur många kalorier behöver jag?")!;
+    expect(svar.answer).toContain("2.502 kcal");
+    expect(svar.answer).toContain("2.759 kcal");
+  });
+
+  test("den danska side er urort af de svenska tabeller", async () => {
+    vi.mocked(getLocale).mockResolvedValue("da");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("da"));
+
+    const html = renderToStaticMarkup(await KalorierPage());
+
+    expect(html).toContain("<h2>Hvor mange kalorier pr dag?</h2>");
+    expect(html).not.toContain("<h2>Kaloribehov efter ålder</h2>");
+    expect(html).not.toContain("Kaloribehovet för barn");
   });
 });

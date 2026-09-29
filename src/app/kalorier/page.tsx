@@ -6,7 +6,7 @@ import FAQ from "@/components/FAQ";
 import RelatedCalculators from "@/components/RelatedCalculators";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
-import { PROTEIN_G_PER_KG, kaloriePrDagRaekker, type KalorieMaal } from "@/lib/makroer";
+import { PROTEIN_G_PER_KG, kaloriePrAlderRaekker, kaloriePrDagRaekker, type KalorieMaal } from "@/lib/makroer";
 import { formatNumber } from "@/lib/format";
 
 export async function generateMetadata() {
@@ -187,6 +187,94 @@ export default async function KalorierPage() {
 
       {locale === "se" && (
       <div className="mt-12 prose max-w-none">
+        <h2>Hur många kalorier per dag?</h2>
+        <p>
+          Det är det talet de flesta söker på, och det beror på{" "}
+          <strong>vikt, längd, ålder, kön och hur aktiv du är</strong> — alltså
+          alla fem fälten i verktyget ovan. Här är talen för en man och en
+          kvinna på <strong>180 cm och 30 år</strong> med{" "}
+          <strong>måttlig aktivitet</strong> (tränar 1-3 gånger i veckan), vilket
+          är den aktivitet de flesta ligger på.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Vikt</th>
+              <th>Man, kcal per dag</th>
+              <th>Kvinna, kcal per dag</th>
+              <th>Man, viktnedgång</th>
+              <th>Kvinna, viktnedgång</th>
+            </tr>
+          </thead>
+          <tbody>
+            {kaloriePrDagRaekker().map((raekke) => (
+              <tr key={raekke.vaegtKg}>
+                <td>{dec(raekke.vaegtKg)} kg</td>
+                <td>{dec(raekke.mand)} kcal</td>
+                <td>{dec(raekke.kvinde)} kcal</td>
+                <td>{dec(raekke.tabMand)} kcal</td>
+                <td>{dec(raekke.tabKvinde)} kcal</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p>
+          Spalten <strong>viktnedgång</strong> ligger 500 kcal under dagsförbrukningen,
+          så talet <strong>2.259 kcal</strong> för en man på 80 kg är både det
+          verktyget visar och det som <a href="/vaegttab">/vaegttab</a> räknar
+          fram till 0,5 kg viktnedgång per vecka. Är du liten och inaktiv går 500
+          kcal inte att dra av utan att komma under ditt basalomsättning — då
+          lägger verktyget in ett mindre underskott i stället.
+        </p>
+        <p>
+          Blir talen högre eller lägre än du väntat dig är det
+          aktivitetsnivån som är fel, inte din vikt. Svarar du{" "}
+          <a href="/motion-kalorier">stillsittande</a> men tränar tre gånger i
+          veckan är du inte stillsittande.
+        </p>
+
+        <h2>Kaloribehov efter ålder</h2>
+        <p>
+          Åldern påverkar behovet, och det är den sista termen i formeln: varje år
+          du blir äldre räknar Mifflin-St Jeor av <strong>5 kcal</strong> från
+          ditt basalomsättning, för män och kvinnor lika. Det låter lite, men
+          tio år blir 50 kcal i BMR — och vid måttlig aktivitet{" "}
+          <strong>77 kcal i dagsförbrukningen</strong>. Här är samma person på
+          80 kg och 180 cm, bara äldre:
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Ålder</th>
+              <th>Man, kcal per dag</th>
+              <th>Kvinna, kcal per dag</th>
+              <th>Kvinna, viktnedgång</th>
+            </tr>
+          </thead>
+          <tbody>
+            {kaloriePrAlderRaekker().map((raekke) => (
+              <tr key={raekke.alder}>
+                <td>{raekke.alder} år</td>
+                <td>{dec(raekke.mand)} kcal</td>
+                <td>{dec(raekke.kvinde)} kcal</td>
+                <td>{dec(raekke.tabKvinde)} kcal</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p>
+          Rad 30 år är den samma som 80 kg-raden i tabellen ovan — samma
+          person, olika ingång. Ligger du under 30 eller över 80 år skriver du
+          ditt eget ålderstal i verktyget; raderna är bara beräkningarna för de
+          ålderstal som faktiskt sätts i fråga.
+        </p>
+        <p>
+          <strong>Kaloribehovet för barn räknas inte ut med den här formeln.</strong>
+          Formeln är validerad för vuxna, och barn har ett helt annat behov per
+          kilo — där ska du använda en tabell för barn eller fråga en
+          barnläkare. Verktyget räknar alltså bara ut vuxnas behov.
+        </p>
+
         <h2>Förstå ditt kaloriebehov</h2>
         <p>
           Ditt <strong>kaloriebehov</strong> beror på flera faktorer: ålder, kön, vikt, längd

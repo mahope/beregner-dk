@@ -3201,6 +3201,10 @@ const sePages: Record<string, PageData> = {
       { question: "Hur många kalorier för att gå ner i vikt?", answer: "Ät ca 500 kcal under din TDEE, det ger ca 0,5 kg minskning per vecka. Man, 80 kg, 180 cm och 30 år med måttlig aktivitet: ca 2.259 kcal per dag." },
       { question: "Hur mycket protein behöver jag?", answer: "Underhåll: 0,8-1,2g/kg. Viktminskning: 1,2-1,6g/kg. Muskeluppbyggnad: 1,6-2,2g/kg." },
       { question: "Är kalkylatorn korrekt?", answer: "Använder Mifflin-St Jeor-formeln. Individuella variationer kan vara 10-15%." },
+      { question: "Hur många kalorier behöver jag?", answer: "En man på 80 kg, 180 cm och 30 år med måttlig aktivitet har ett dagligt behov på 2.759 kcal. En kvinna med samma mått har 2.502 kcal. Skriv dina egna tal i verktyget för det exakta värdet." },
+      { question: "Hur många kalorier behöver jag för att gå ner 1 kg?", answer: "Det går åt cirka 7.700 kcal per kilo fett, så 1 kg kräver ett underskott på 7.700 kcal som fördelas över en vecka. Det motsvarar 500 kcal per dag." },
+      { question: "Gäller kaloribehovet även barn?", answer: "Nej. Formeln är validerad för vuxna, och barn har ett helt annat behov per kilo. Använd en tabell för barn eller fråga en barnläkare. Kalorikalkylatorn räknar bara ut vuxnas behov." },
+      { question: "Är kalorikalkylatorn gratis?", answer: "Ja. Verktyget är en gratis webbplats — du behöver inte skapa ett konto, och det fungerar direkt i webbläsaren på dator och telefon." },
       ],
     },
     "vaegttab": {

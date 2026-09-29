@@ -11,8 +11,11 @@ import {
   beregnTdee,
   kalorierForMaal,
   kaloriePrDagRaekker,
+  kaloriePrAlderRaekker,
   PR_DAG_FORUDSETNINGER,
   PR_DAG_VAEGTE,
+  PR_ALDER_ALDERE,
+  PR_ALDER_FORUDSETNINGER,
   type KalorieMaal,
 } from "./makroer";
 
@@ -171,5 +174,63 @@ describe("BMR, TDEE og kalorier pr dag", () => {
       aktivitet: "moderat",
     });
     expect(kaloriePrDagRaekker()).toHaveLength(PR_DAG_VAEGTE.length);
+  });
+});
+
+describe("kaloriePrAlderRaekker", () => {
+  it("dækker præcis de aldre søgningen spørger om", () => {
+    // Svensk autocomplete under "kaloribehov kvinna" er 10/10 det samme
+    // spørgsmål, og syv af dem er en alder: 40, 50, 55, 60, 65, 70 og 80 år.
+    for (const alder of [40, 50, 60, 65, 70, 80]) {
+      expect(PR_ALDER_ALDERE).toContain(alder);
+    }
+    expect(kaloriePrAlderRaekker()).toHaveLength(PR_ALDER_ALDERE.length);
+  });
+
+  it("giver hver raekke vaerktøjets eget tal for den alder", () => {
+    for (const raekke of kaloriePrAlderRaekker()) {
+      const bmr = beregnBmr("kvinde", PR_ALDER_FORUDSETNINGER.vaegtKg, PR_ALDER_FORUDSETNINGER.hoejdeCm, raekke.alder);
+      const tdee = beregnTdee(bmr, PR_ALDER_FORUDSETNINGER.aktivitet);
+      expect(raekke.kvinde).toBe(kalorierForMaal(bmr, tdee, "vedligehold"));
+      expect(raekke.tabKvinde).toBe(kalorierForMaal(bmr, tdee, "tab"));
+    }
+  });
+
+  it("giver 80 kg 30 år de tal siderne allerede skriver i egen tekst", () => {
+    const trediveAar = kaloriePrAlderRaekker([30])[0];
+    // 2.759 og 2.502 staar i kalorier/side og i FAQ'en paa begge domaener
+    expect(trediveAar.mand).toBe(2759);
+    expect(trediveAar.kvinde).toBe(2502);
+  });
+
+  it("falder 50 kcal i BMR pr. aarti, altsaa 78 kcal i TDEE pr. aartia", () => {
+    const raekker = kaloriePrAlderRaekker();
+    for (let i = 1; i < raekker.length; i++) {
+      const foer = raekker[i - 1];
+      const nu = raekker[i];
+      // Aldersspringet er 5 eller 10 aar; kravet er den samme rate hver gang.
+      const spring = nu.alder - foer.alder;
+      const bmrFald = (beregnBmr("kvinde", PR_ALDER_FORUDSETNINGER.vaegtKg, PR_ALDER_FORUDSETNINGER.hoejdeCm, foer.alder)
+        - beregnBmr("kvinde", PR_ALDER_FORUDSETNINGER.vaegtKg, PR_ALDER_FORUDSETNINGER.hoejdeCm, nu.alder));
+      expect(bmrFald).toBe(5 * spring);
+      expect(foer.kvinde).toBeGreaterThan(nu.kvinde);
+      expect(foer.tabKvinde).toBeGreaterThan(nu.tabKvinde);
+    }
+  });
+
+  it("krydssjekker den 30-aarige raekke mod vaegttabellen, saa de to tabeller ikke kan glide fra hinanden", () => {
+    const vaegt80 = kaloriePrDagRaekker([80])[0];
+    const trediveAar = kaloriePrAlderRaekker([30])[0];
+    // Begge tabeller bruger 80 kg og 180 cm, saa 30 aar skal give de samme tal.
+    expect(PR_DAG_FORUDSETNINGER.hoejdeCm).toBe(PR_ALDER_FORUDSETNINGER.hoejdeCm);
+    expect(trediveAar.mand).toBe(vaegt80.mand);
+    expect(trediveAar.kvinde).toBe(vaegt80.kvinde);
+    expect(trediveAar.tabKvinde).toBe(vaegt80.tabKvinde);
+  });
+
+  it("giver en mand altid mere end en kvinne i samme alder", () => {
+    for (const raekke of kaloriePrAlderRaekker()) {
+      expect(raekke.kvinde).toBeLessThan(raekke.mand);
+    }
   });
 });

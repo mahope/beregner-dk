@@ -1,3 +1,37 @@
+STATUS: KØ — **C185 er landet: beraknare.se `/kalorier` (2.728 visninger, CTR 0,3 %, pos 17,8) havde nul tabeller mod den danske søster én, fordi C89 kun lagde "kalorier pr dag"-tabellen i den *danske* gren — og dens egen søgeklynge er den mest entydige i hele køen: svensk autocomplete under "kaloribehov" giver 10/10 variationer i det samme spørgsmål, og under "kaloribehov kvinna" er 7 af de 10 en alder.** Køen havde ingen `I GANG`-løs opgave (98 afhænger af den `BLOCKED`-mærkede 97, 119 er kilde-blokeret, 179 kræver en rigtig browser), og de otte åbne deploy-noter har alle første vindue **2026-09-29 17:30** — det var 15:34, så ingen blev rørt. Valget kom fra C184's *afmålte* kandidatliste, hvor `/kalorier` SE var det eneste ubearbejdede punkt.
+
+**Målt først, målt begge domæner (live, `curl -H "Host: …"`).** SE **6 `<h2>` / 4 FAQ / 0 `<table>`** mod DA **7 / 7 / 1**. "kaloribehov" 4 mod 9 forekomster, "65 år" **0** begge steder. SE-autocomplete (`hl=se`, `gl=se`) under **"kaloribehov"** → 10 variationer i samme spørgsmål, blandt dem "**kaloribehov per dag**" (nr. 2), "kaloribehov kalkulator" (nr. 4) og "**kaloribehov kvinna**" (nr. 8); under **"kaloribehov kvinna"** → 10 variationer hvor **syv er en alder** — 65, 70, 60, 50, 40, 55 og 80 år. GSC bekræfter klyngen: "kaloribehov kvinna" **26 v pos. 42** og "kaloribehov per dag" **24 v pos. 43**.
+
+**Rettelsen er to nye `<h2>` kun i `se`-grenen, og ingen tal står hårdkodet to steder.** "**Hur många kalorier per dag?**" med den danske sides vægttabel — bogstaveligt samme `kaloriePrDagRaekker()`-kald, så de to sprog arver *én* kilde i stedet for hver sin. Og "**Kaloribehov efter ålder**" med en ny `kaloriePrAlderRaekker(aldre)` i `src/lib/makroer.ts`: syv rækker (30, 40, 50, 60, 65, 70, 80) på 80 kg og 180 cm, bygget på `beregnBmr` / `beregnTdee` / `kalorierForMaal` — altså **værktøjets egne funktioner**. Aldersreglen står som tekst, fordi den er ærlig og efterprøvelig: Mifflin-St Jeor trækker **5 kcal pr. år fra BMR for mænd og kvinder lige**, så ti år er 50 kcal i BMR og **77 kcal i TDEE** ved moderat aktivitet. **De to tabeller krydschekkes mod hinanden:** 30-års-rækken er pr. definition 80 kg-rækken i vægttabellen, og en test kræver ligheden — så de to kan ikke glide fra hinanden, hverken mod værktøjet eller mod hinanden.
+
+**Fire nye FAQ-par i `se` (4 → 8), som dermed også kommer i JSON-LD'en.** "Hur många kalorier behöver jag?" svarer med **2.759 / 2.502 kcal** — de tal svensk `description` og dansk FAQ *allerede* lover, altså C84's fejlklasse (indekseret tekst der modsiger sit eget indhold) kan ikke opstå her. "Hur många kalorier behöver jag för att gå ner 1 kg?" (7.700 kcal pr. kilo). "**Gäller kaloribehovet även barn?**" — svarer på "kaloribehov barn" (autocomplete nr. 5) ærligt: formlen er valideret for voksna, og siden **finder ikke på et børnetal**. Og "Är kalorikalkylatorn gratis?". Børneafsnittet står også i brødteksten, fordi et FAQ-svar alene er et svagt svar på en hel spørgsmålstype.
+
+**To fejl i mit eget arbejde, begge fundet før gaten.** (1) **Samme fejlklasse som C184's målefejl 42 og C94's negative SE-lås:** min første svenska udkast skrev *dansk* ind i den svenska blok — "der skal du bruge en børnevenlig tabell eller en børneklæge" — altså en blanding af to sprog i én sætning. Fundet ved at læse den igennem, ikke af gaten. (2) Samme klasse som C183's fejl 2 (antagelse i stedet for at læse koden): mine tre nye tests hårdkodede `<td>2759 kcal</td>`, mens `formatNumber` med `sv-SE` skriver **2 759** med tusindtalsmellemrum. **Testene faldt af notationsårsager, ikke indholdsmæssige** — præcis den falske-fælde-klasse de må kunne haveProduceret, så de læser nu samme `formatNumber` som siden bruger, og låser *derudover* at `description` lover "TDEE 2.759 kcal" og FAQ'en "2.502 kcal".
+
+**Harness: 6 nye tests i `makroer.test.ts` (18 → 24) og 6 nye i `page.test.tsx` (4 → 10), modsvejs verificeret: 5 af de 6 nye sidetests falder** med master's `page.tsx` + `page-data.ts` (stashed); den sjette er en negativ dansk-lås, der skal være grøn begge veje. Modultestene kræver at hver række *er* `kalorierForMaal(bmr, tdee)`, at 30-års-rækken giver de tal siderne skriver i egen tekst (**2.759** og **2.502**), at BMR-faldet er præcis **5 kcal pr. år** uanset spring, og at 80-kg-rækken i den nye alderstabel er identisk med den gamle.
+
+**Gate grøn:** lint (**600 filer**), **2.841 tests / 180 filer** (fra 2.829/180), build (**142 sider**), `locale-leak.mjs --gate` **exit 0**, `knapgruppe-scan.mjs` 0/0. Rørte filer: `src/lib/makroer.ts` (+`PR_ALDER_ALDERE`, `PR_ALDER_FORUDSETNINGER`, `kaloriePrAlderRaekker`), `src/app/kalorier/page.tsx` (to nye `<h2>` **kun i `se`**), `src/lib/page-data.ts` (fire `faqItems` **kun i `se`-tabellen**), to testfiler — **ingen beregningslogik ændret, den danske side urørt, ingen ny URL, ingen sitemap, ingen `<title>`**.
+
+**MÅL:** beraknare.se `/kalorier` baseline **2.728 visninger / 4 klik / CTR 0,3 % / pos. 17,8** (GSC 2026-08-30 → 09-27) og Plausible **12 besøgende/28d** — måles igen **2026-10-13**. DA-kontrol urørt: **12.631 v / 132 klik / CTR 1,0 % / pos. 8,1**, 289 besøgende/28d. **Forventningen er ærlig:** pos. 17,8 er dybt, så dette er en indholdsmæssig rettelse, ikke en CTR-rettelse. Flytter siden sig kun til 20-25 uden at klikke, er opgaven rigtigvis ikke færdig — det afgør 14-dages målingen.
+
+#### 185. [x] FÆRDIG 2026-09-29 — C185 — **beraknare.se `/kalorier` (2.728 v, CTR 0,3 %, pos 17,8) havde 0 tabeller mod dansk 1, fordi C89 kun lagde svaret i den danske gren — mens "kaloribehov kvinna NN år" er 7 af 10 svenske autocomplete-variationer**
+
+- **Datagrund:** GSC 2026-08-30 → 09-27: SE `/kalorier` **2.728 visninger, 4 klik,
+  CTR 0,3 %, pos. 17,8** (DA 12.631 / 132 / 1,0 % / 8,1). Live paritet: SE **6 `<h2>` /
+  4 FAQ / 0 `<table>`** mod DA **7 / 7 / 1**. SE-autocomplete under "kaloribehov" → 10/10
+  variationer i samme spørgsmål ("kaloribehov per dag" nr. 2, "kaloribehov kvinna" nr. 8);
+  under "kaloribehov kvinna" → 10 hvor **syv har en alder** (65, 70, 60, 50, 40, 55, 80 år).
+  GSC: "kaloribehov kvinna" 26 v pos. 42, "kaloribehov per dag" 24 v pos. 43.
+- **Rettelsen (kun `se`):** to nye `<h2>` — "Hur många kalorier per dag?" (samme
+  `kaloriePrDagRaekker()` som dansk) og "Kaloribehov efter ålder" (ny
+  `kaloriePrAlderRaekker()` i `makroer.ts`, 30→80 år, bygget på værktøjets egne
+  `beregnBmr`/`beregnTdee`/`kalorierForMaal`), alderens regel som tekst (−5 kcal pr. år,
+  50 kcal pr. tiår, 77 kcal i TDEE), et ærligt børneafsnit, og **fire nye FAQ-par**
+  (SE 4 → 8, dermed også i JSON-LD'en).
+- **Ingen tal to steder:** 30-års-rækken *er* 80-kg-rækken i vægttabellen, og en test
+  kræver ligheden; FAQ'en svarer med de tal `description` allerede lover (2.759/2.502).
+- **Mål:** SE 2.728 v / 4 klik / CTR 0,3 % / pos 17,8 → måles 2026-10-13.
+
 STATUS: KØ — **C184 er landet, og fundet var værre end en sprog-asymmetri: beraknare.se's `/braendstof` viste danske kroner, og de tal var ikke bare forkerte — de var modsatte. Sverige har diesel dyrere pr. liter end benzin (22,81 mod 17,57 SEK/l, GlobalPetrolPrices 2026-09-21), mens sitets egen model sætter diesel billigere (12,80 mod 13,50 kr.). Sidens svar på "hvorfor er diesel dyrere" pegede derfor modsat vejen i Sverige.** Køen havde ingen `I GANG`-opgave (98 afhænger af den `BLOCKED`-mærkede 97, 119 er kilde-blokeret, 179 kræver en rigtig browser), og de otte åbne deploy-noter har alle første vindue **2026-09-29 17:30** — det var 15:00, så ingen kunne lukkes. Valget kom fra C183's egen målte kandidatliste, hvor `/braendstof` SE var den største asymmetri. **Målt først, målt på live:** DA **1.129 ord / 6 `<h2>` / 9 FAQ** mod SE **492 / 3 / 5** — altså 637 ord og 4 spørgsmål, de tre manglende `<h2>` var C94's regnestykketabel, C173's diesel-afsnit og "find dit eget forbrug", alle `da`-only.
 
 **Tre svenske søgeklynger, målt i SE-autocomplete.** "varför är diesel dyrare" giver **10/10** variationer i det samme spørgsmål — blandt dem "**i sverige**" (nr. 7), "**2026**" (nr. 6) og "just nu" (nr. 8) — og "diesel dyrare än bensin" har 10 variationer hvor **nr. 2 er "diesel billigare än bensin"**, altså begge retninger. "räkna ut bränslekostnad" har 10 variationer hvor **nr. 4 er "…per mil"**, en enhed den svenska side slet ikke brugte. "bränsleförbrukning" har "kalkylator" (nr. 2) og "räkna" (nr. 9) som svar-søgninger. Den danske side havde **0** af alle tre.
@@ -17472,6 +17506,28 @@ er værst. Se `❓ Til Mads`.
 
 
 ### VERIFICÉR DEPLOY-log — nyeste først
+- `VERIFICÉR DEPLOY: beraknare.se /kalorier svarar på kaloribehov (0 → 2 tabeller, 4 → 8 FAQ) ceo/kalorier-se-kaloriebehov 2026-09-29 16:3x`
+  — merge sker ca. 16:3x, før 17:30-vinduet er nået, så første vindue er
+  **2026-09-29 17:30**. Verificér **indhold, ikke HTTP 200**. Mål:
+  1. `curl -s -H "Host: beraknare.se" https://beraknare.se/kalorier` skal have
+     **to** nye `<h2>`: "Hur många kalorier per dag?" og "Kaloribehov efter ålder",
+     og **2 tabeller i alt** (var 0). Begge tabeller skal stå i markupken med
+     **syv** aldersrækker: `<td>30 år</td>` … `<td>80 år</td>` inkl. **65 år**.
+  2. Alle tolv alderstal skal findes som "2 759", "2 502", "2 259", "2 192",
+     "2 114" — **svenskt mellemrum i tusindtalsseparatoren, ikke punktum**
+     (dette er målefejl 43 i modsat retning: at søge på "2.759" giver 0).
+  3. `grep -o '"@type":"Question"'` skal give **8** på beraknare.se (var 4), og
+     spørgsmålene "Hur många kalorier behöver jag?" og "Gäller kaloribehovet
+     även barn?" skal findes i markupken.
+  4. **KONTROL:** `https://minberegner.dk/kalorier` skal være **uændret** —
+     stadig **én** tabel, 7 `<h2>`, 7 FAQ, 0 fund på "Kaloribehov efter ålder"
+     og 0 på "Kaloribehovet för barn". Den svenska alderstabel må ikke lække
+     ind i den danske gren.
+  5. `npm run test -- src/lib/makroer.test.ts src/app/kalorier/page.test.tsx`
+     skal være grønt (24 + 10), og `node scripts/locale-leak.mjs --gate` exit 0.
+  6. `/api/health` skal svare `status: ok` på begge domæner.
+
+
 - `VERIFICÉR DEPLOY: beraknare.se /braendstof får svenska priser og svar på diesel-frågan (450 → 585 kr., 3 → 6 h2, 5 → 8 FAQ) ceo/braendstof-se-priser 2026-09-29 16:2x`
   — merge sker ca. 16:2x, før 17:30-vinduet er nået, så første vindue er
   **2026-09-29 17:30**. Verificér **indhold, ikke HTTP 200**. Mål:

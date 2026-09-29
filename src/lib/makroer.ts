@@ -119,6 +119,52 @@ export function kaloriePrDagRaekker(
   });
 }
 
+/**
+ * The ages the "kaloriebehov pr. alder" table covers — the ages search
+ * actually asks for ("kaloribehov kvinna 65 år", "… 70 år", "… 50 år").
+ * Weight and height are held at the same 80 kg / 180 cm the weight table
+ * uses, so the two tables meet in one row: 30 years in both.
+ */
+export const PR_ALDER_ALDERE = [30, 40, 50, 60, 65, 70, 80];
+
+export const PR_ALDER_FORUDSETNINGER = {
+  vaegtKg: 80,
+  hoejdeCm: 180,
+  aktivitet: "moderat" as AktivitetsNiveau,
+};
+
+export interface KaloriePrAlderRaekke {
+  alder: number;
+  mand: number;
+  kvinde: number;
+  tabKvinde: number;
+}
+
+/**
+ * The age table answers the "kaloribehov kvinna NN år" cluster, where every
+ * row is the tool's own output for the stated weight, height and activity —
+ * the same way `kaloriePrDagRaekker` works, so neither table is a second
+ * truth. Age only enters Mifflin-St Jeor through -5 kcal per year, for both
+ * sexes, so the rows fall by 50 kcal of BMR per decade.
+ */
+export function kaloriePrAlderRaekker(
+  aldre: number[] = PR_ALDER_ALDERE,
+): KaloriePrAlderRaekke[] {
+  const { vaegtKg, hoejdeCm, aktivitet } = PR_ALDER_FORUDSETNINGER;
+  return aldre.map((alder) => {
+    const mandBmr = beregnBmr("mand", vaegtKg, hoejdeCm, alder);
+    const kvindeBmr = beregnBmr("kvinde", vaegtKg, hoejdeCm, alder);
+    const mandTdee = beregnTdee(mandBmr, aktivitet);
+    const kvindeTdee = beregnTdee(kvindeBmr, aktivitet);
+    return {
+      alder,
+      mand: kalorierForMaal(mandBmr, mandTdee, "vedligehold"),
+      kvinde: kalorierForMaal(kvindeBmr, kvindeTdee, "vedligehold"),
+      tabKvinde: kalorierForMaal(kvindeBmr, kvindeTdee, "tab"),
+    };
+  });
+}
+
 export const PROTEIN_G_PER_KG: Record<
   KalorieMaal,
   { min: number; max: number }
