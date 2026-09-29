@@ -85,7 +85,7 @@ export interface Aarstal {
   dage: number;
   /** Working days in the whole year, holidays included in the exclusion. */
   arbejdsdage: number;
-  /** 12 for an ordinary year, 13 in a leap year. */
+  /** Months in the year — always 12, also in a leap year. */
   maneder: number;
   skudaar: boolean;
 }
@@ -98,7 +98,9 @@ export function aarstal(year: number, locale: HelligdagLocale): Aarstal {
     year,
     dage: daysBetween(foerste, sidste) + 1,
     arbejdsdage: taellArbejdsdage(foerste, sidste, locale),
-    maneder: erSkudaar(year) ? 13 : 12,
+    // Et år har altid 12 måneder. Et skudår har 366 *dage*, men den 29. februar
+    // er en dag inde i februar, ikke en trettende måned.
+    maneder: 12,
     skudaar: erSkudaar(year),
   };
 }

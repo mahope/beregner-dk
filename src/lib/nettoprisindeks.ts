@@ -5,12 +5,16 @@
  * confusion is the single most common question on /husleje ("nettoprisindeks
  * husleje beregner" is autocomplete nr. 3 under "husleje beregner"):
  *
- * - **Forbrugerprisindekset (CPI)** includes indirect taxes (moms, told, excise),
- *   so it also moves when the tax rate changes. `pristalsregulering` — the yearly
- *   rent adjustment a lease contract *must* follow — is based on this one.
- * - **Nettoprisindekset (NPI)** excludes indirect taxes. It is the figure the
- *   press quotes when it reports that "huslejen stiger X procent", and it is
- *   what `huslejenævnet` uses for the *frivillige* annual rent increases.
+ * - **Nettoprisindekset (NPI)** excludes indirect taxes, and it is the index
+ *   the yearly rent regulation of existing leases follows: lejeloven § 5
+ *   regulates the rent by the nettoprisindeks for the half-year before 1
+ *   January. It is also the figure the press quotes when it reports that
+ *   "huslejen stiger X procent".
+ * - **Forbrugerprisindekset (CPI)** includes indirect taxes (moms, told,
+ *   excise), so it also moves when a tax rate changes. It is *not* the basis
+ *   of the rent regulation — it is shown here because it is what the press
+ *   and lease contracts mean when they say "pristallet", and because the gap
+ *   between the two is what a renter asks about.
  *
  * Both are published monthly by Danmarks Statistik. Values here are the ones
  * DST published 2026-09-10 for August 2026 (index base 2025 = 100), fetched
@@ -47,7 +51,7 @@ export interface PrisindeksSnapshot {
   raav: { indeks: string; aarsVaeksning: string };
 }
 
-/** Forbrugerprisindekset, August 2026: 2.0 % — the pristalsregulering basis. */
+/** Forbrugerprisindekset, August 2026: 2.0 % — indirekte afgifter inkluderet. */
 export const FORBRUGERPRISINDEKS_2026M08: PrisindeksSnapshot = {
   indeks: 102.58,
   aarsVaeksningPct: 2.0,

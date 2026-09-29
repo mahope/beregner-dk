@@ -15,11 +15,10 @@ import { formatCurrency } from "@/lib/format";
  * The nettoprisindeks block on /husleje.
  *
  * Danish rent has two price indices and they are not interchangeable:
- * pristalsregulering follows *forbrugerprisindekset* (which includes indirect
- * taxes, so it also moves when a tax rate changes), while the figure quoted in
- * the news — and used by huslejenævnet for voluntary increases — is
- * *nettoprisindekset*, which excludes them. Confusing the two is the most
- * common question on the page, so both are shown side by side.
+ * pristalsregulering follows *nettoprisindekset* (lejeloven § 5), which
+ * excludes indirect taxes, while *forbrugerprisindekset* includes them. Both
+ * are published side by side here, because confusing the two is the most
+ * common question on the page.
  *
  * Every number below comes from `@/lib/nettoprisindeks`, which holds Danmarks
  * Statistik's published figures plus the derivation for the quarterly one, so
@@ -107,7 +106,7 @@ export default function HuslejeNettoprisindeks() {
           <tr>
             <td className="border border-gray-300 px-3 py-2 font-medium">Forbrugerprisindeks</td>
             <td className="border border-gray-300 px-3 py-2">
-              Indekset <em>med</em> indirekte afgifter. Det er pristalsreguleringens grundlag.
+              Indekset <em>med</em> indirekte afgifter. Det er ikke huslejereguleringens grundlag.
             </td>
             <td className="border border-gray-300 px-3 py-2 text-right">
               {pristalPct.toLocaleString("da-DK")} %
@@ -138,20 +137,21 @@ export default function HuslejeNettoprisindeks() {
         {kr(eksempelHusleje)} — ikke en fejl, men netop forskellen på de to indekser.
       </p>
 
-      <h3>Nettoprisindekset for kvartalet — den huslejenævnet bruger</h3>
+      <h3>Nettoprisindekset for kvartalet</h3>
       {senesteKvartal && kvartalPct !== null ? (
         <>
           <p>
-            Huslejenævnet ser på <strong>kvartalsgennemsnittet</strong> af nettoprisindekset, ikke på
-            én måned. Det seneste fulde kvartal er <strong>{kvartalTekst(senesteKvartal)}</strong>,
+            Nettoprisindekset varierer måned for måned, så det kan være nyttigt at se et helt
+            kvartal samlet. Det seneste fulde kvartal er <strong>{kvartalTekst(senesteKvartal)}</strong>,
             som ligger {kvartalPct.toLocaleString("da-DK", { maximumFractionDigits: 1 })} % over{" "}
             {kvartalTekst(senesteKvartal.replace(/^(\d{4})/, (a) => `${Number(a) - 1}`))}. På{" "}
-            {kr(eksempelHusleje)} bliver det {kr(beregnHuslejestigning(eksempelHusleje, kvartalPct).stigning)} mere om måneden end ved månedsstigningen.
+            {kr(eksempelHusleje)} bliver det {kr(beregnHuslejestigning(eksempelHusleje, kvartalPct).stigning)} mere om måneden.
           </p>
           <p className="text-sm text-gray-600 dark:text-gray-400">
             3. kvartal 2026 er endnu ikke færdigt — DST udgiver september i oktober — så kvartalsgennemsnittet
             først kan regnes, når alle tre måneder er publiceret. Derfor viser siden det seneste
-            <em> fulde</em> kvartal og ikke det igangværende.
+            <em> fulde</em> kvartal og ikke det igangværende. Kvartalstallet er en hjælp til at
+            vurdere størrelsesordenen — det er ikke den sats, din husleje automatisk reguleres til.
           </p>
         </>
       ) : (
@@ -161,17 +161,21 @@ export default function HuslejeNettoprisindeks() {
         </p>
       )}
 
-      <h3>Huslejenævnet og pristallet</h3>
+      <h3>Hvad afgør hvilken sats der gælder</h3>
       <p>
-        En huslejestigning skal som udgangspunkt aftales med udlejeren, og det er{" "}
-        <strong>huslejenævnet</strong> — ikke en beregner — der fastsætter den endelige sats for dit
-        område. To ting er derfor værd at skelne: <strong>pristalsregulering</strong> er den
-        lovpligtige årlige justering, din lejeaftale typisk indeholder, og den følger
-        forbrugerprisindekset. <strong>Huslejenævnets vedtagelser</strong> er de frivillige
-        forhøjelser ud over pristallet, som hvert år aftales med de store udlejere og som følger
-        nettoprisindekset. Har du stået i en lejeaftale, der blot siger at huslejen reguleres efter
-        pristallet, så er det pristallet — {pristalPct.toLocaleString("da-DK")} % — der gælder, ikke{" "}
-        {maanedsPct.toLocaleString("da-DK")} %.
+        Huslejestigningen er ikke et fast tal for hele landet, og den er heller ikke en beregning,
+        du selv kan få serveret en ferdig sats af. <strong>Lejeloven § 5</strong> regulerer den
+        eksisterende husleje efter <strong>nettoprisindekset</strong> — altså tallet uden moms, told
+        og afgifter. Er din lejeaftale stiftet efter 1992, og står der blot at huslejen reguleres
+        en gang årligt, er det nettoprisindekset, der styrer: {maanedsPct.toLocaleString("da-DK")} % i{" "}
+        {NETTOPRISINDELS_MAANED}.
+      </p>
+      <p>
+        Det er altså <em>ikke</em> huslejenævnet, der fastsætter en sats pr. område. I de
+        kommuner der har indført huslejenævnsvedtægt, skal udlejeren indberette den påtænkte
+        forhøjelse til nævnet, som vurderer om den er urimelig over for lejere i eksisterende
+        lejemål. I de øvrige kommuner er det alene lejeaftalen, der afgør, hvor meget huslejen
+        må stige.
       </p>
       <p>
         Er din husleje steget mere end det, din aftale tillader, er det en forskel du kan gøre ind på.
@@ -199,8 +203,7 @@ export default function HuslejeNettoprisindeks() {
           {NETTOPRISINDELS_KILDE.forbrugerprisindeks}
         </a>{" "}
         (forbrugerprisindeks), begge offentliggjort 10. september 2026. Tal for {NETTOPRISINDELS_MAANED}.
-        Den konkrete sats for din by fastsætter huslejenævnet — læs med andre ord det, der står i din
-        huslejestigning.
+        Den sats din husleje faktisk reguleres til, står i din huslejestigning.
       </p>
     </div>
   );

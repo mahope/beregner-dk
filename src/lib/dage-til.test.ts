@@ -82,9 +82,13 @@ describe("midsommarafton", () => {
       const fra = getNextAnchorDate(afton!.anchor[locale], iso("2027-01-15"));
       const til = getNextAnchorDate(dagen!.anchor[locale], iso("2027-01-15"));
       expect((til.getTime() - fra.getTime()) / dayMs).toBe(1);
-      expect(toISO(fra)).toBe("2027-06-25");
-      expect(toISO(til)).toBe("2027-06-26");
     }
+    // Dansk sankthans er fast 23./24. juni; svensk midsummer er fredagen mellem
+    // 19. og 25. juni. I 2027 er de to sprog derfor på hver sin dato.
+    expect(toISO(getNextAnchorDate(afton!.anchor.da, iso("2027-01-15")))).toBe("2027-06-23");
+    expect(toISO(getNextAnchorDate(dagen!.anchor.da, iso("2027-01-15")))).toBe("2027-06-24");
+    expect(toISO(getNextAnchorDate(afton!.anchor.se, iso("2027-01-15")))).toBe("2027-06-25");
+    expect(toISO(getNextAnchorDate(dagen!.anchor.se, iso("2027-01-15")))).toBe("2027-06-26");
   });
 
   test("begge sprog har deres eget slug med sit eget spørgsmål", () => {
@@ -197,22 +201,25 @@ describe("påskafton", () => {
     expect(paskafton).toBeDefined();
     expect(skaertorsdag).toBeDefined();
     expect(paskedag).toBeDefined();
+    const iDag = iso("2027-01-15");
     for (const locale of ["da", "se"] as const) {
-      const iDag = iso("2027-01-15");
       const torsdag = getNextAnchorDate(skaertorsdag!.anchor[locale], iDag);
       const fredag = getNextAnchorDate(paskafton!.anchor[locale], iDag);
       const sondag = getNextAnchorDate(paskedag!.anchor[locale], iDag);
-      expect((fredag.getTime() - torsdag.getTime()) / dayMs).toBe(1);
-      expect((sondag.getTime() - fredag.getTime()) / dayMs).toBe(2);
-      expect(toISO(fredag)).toBe("2027-03-26");
+      expect(sondag.getTime() - fredag.getTime()).toBeLessThanOrEqual(2 * dayMs);
+      expect(fredag.getTime()).toBeGreaterThan(torsdag.getTime());
     }
+    // Dansk langfredag er påskedag minus 2 dage, svensk påskafton minus 1.
+    expect(toISO(getNextAnchorDate(paskafton!.anchor.da, iDag))).toBe("2027-03-26");
+    expect(toISO(getNextAnchorDate(paskafton!.anchor.se, iDag))).toBe("2027-03-27");
   });
 
-  test("begge sprog har deres eget slug, og de to navne er den samme dato", () => {
+  test("begge sprog har deres eget slug, og de to navne er hver sin dato", () => {
     const paskafton = DAGE_TIL_EVENTS.find((e) => e.id === "paskafton");
     expect(getDageTilSlugs("da")).toContain("langfredag");
     expect(getDageTilSlugs("se")).toContain("paskafton");
-    // Svensk kalder dagen påskafton, dansk langfredag — men det er én dato.
+    // Svensk påskafton er lørdagen, dansk langfredag er fredagen dagen før —
+    // de er to forskellige datoer, så hvert sprog har sit eget slug.
     expect(paskafton!.da.slug).toBe("langfredag");
     expect(paskafton!.se.slug).toBe("paskafton");
     expect(resolveDageTilSlug("langfredag", "se")?.localeSlug).toBe("paskafton");
@@ -224,43 +231,52 @@ describe("påskafton", () => {
     }
   });
 
-  test("begge sprog kalder den anden, så læseren ikke tror de er to dage", () => {
+  test("begge sprog kalder den anden, så læseren ikke tror de er samme dag", () => {
     const paskafton = DAGE_TIL_EVENTS.find((e) => e.id === "paskafton");
-    expect(paskafton!.se.copy.facts.join(" ")).toContain("långfredagen");
-    expect(paskafton!.da.copy.facts.join(" ")).toContain("Påskeaften");
+    expect(paskafton!.se.copy.facts.join(" ")).toContain("Långfredagen");
+    expect(paskafton!.se.copy.facts.join(" ")).toContain("1 dag före");
   });
 });
 
 describe("valborg", () => {
-  test("er fast 14. februar i begge sprog", () => {
+  test("er fast 30. april i begge sprog", () => {
     const valborg = DAGE_TIL_EVENTS.find((e) => e.id === "valborg");
     expect(valborg).toBeDefined();
     for (const locale of ["da", "se"] as const) {
       expect(valborg!.anchor[locale]).toEqual({
         kind: "fixed",
-        month: 2,
-        day: 14,
+        month: 4,
+        day: 30,
         offsetDays: 0,
       });
       expect(toISO(getNextAnchorDate(valborg!.anchor[locale], iso("2026-09-25")))).toBe(
-        "2027-02-14"
+        "2027-04-30"
       );
-      expect(toISO(getNextAnchorDate(valborg!.anchor[locale], iso("2026-02-13")))).toBe(
-        "2026-02-14"
+      expect(toISO(getNextAnchorDate(valborg!.anchor[locale], iso("2026-04-29")))).toBe(
+        "2026-04-30"
       );
     }
     expect(getDageTilSlugs("da")).toContain("valborg");
     expect(getDageTilSlugs("se")).toContain("valborg");
   });
 
-  test("er ikke altid dagen før askonsdagen — den påstand, siden advarer om", () => {
-    // Askonsdagen er påskedag minus 46 dage; valborg ligger fast 14. februar.
+  test("ligger altid EFTER askonsdagen, aldrig før", () => {
+    // Askonsdagen er påskedag minus 46 dage; valborg ligger fast 30. april.
     const afstand = (year: number) =>
-      (Date.UTC(year, 1, 14) - (easterSunday(year).getTime() - 46 * dayMs)) / dayMs;
-    expect(afstand(2024)).toBe(0);
-    expect(afstand(2027)).toBe(4);
-    expect(afstand(2030)).toBe(-20);
-    // Begge sprog skal sige de samme tre tal, ellers kan den ene sprogside
+      (Date.UTC(year, 3, 30) - (easterSunday(year).getTime() - 46 * dayMs)) / dayMs;
+    // Det tætte år er 2038 (51 dage), det vide 2035 (82 dage). Begge er
+    // positive — valborg kan aldrig ligge før askonsdagen.
+    let min = Infinity;
+    let max = -Infinity;
+    for (let year = 2024; year <= 2045; year++) {
+      expect(afstand(year)).toBeGreaterThan(0);
+      min = Math.min(min, afstand(year));
+      max = Math.max(max, afstand(year));
+    }
+    expect(min).toBe(51);
+    expect(max).toBe(82);
+    expect(afstand(2027)).toBe(79);
+    // Begge sprog skal sige de samme tal, ellers kan den ene sprogside
     // modsige den anden (C84's fejlklasse).
     const valborg = DAGE_TIL_EVENTS.find((e) => e.id === "valborg")!;
     for (const locale of ["da", "se"] as const) {
@@ -268,13 +284,11 @@ describe("valborg", () => {
         ...valborg[locale].copy.facts,
         ...valborg[locale].copy.faq.map((f) => `${f.question} ${f.answer}`),
       ].join(" ");
-      expect(tekst).toMatch(/4 dage før|4 dagar före/);
-      expect(tekst).toMatch(/4 dage efter|4 dagar efter/);
-      expect(tekst).toMatch(/20 dage før|20 dagar före/);
-      // Hvert sprog sin dato-notering: dansk "14. februar", svensk "14 februari".
-      expect(tekst).toContain(
-        locale === "da" ? "14. februar" : "14 februari"
-      );
+      expect(tekst).toContain(locale === "da" ? "30. april" : "30 april");
+      expect(tekst).toMatch(/51-82 dage|51-82 dagar/);
+      expect(tekst).toMatch(/79 dage efter|79 dagar efter/);
+      // Den gamle fejltagelse låste fast: 14. februar må ikke komme tilbage.
+      expect(tekst).not.toMatch(/14\. februar|14 februari/);
     }
   });
 });
@@ -292,9 +306,19 @@ describe("daysBetween", () => {
 
   test("ignorerer kloktidspunktet på dagen", () => {
     const morning = new Date("2026-09-25T06:00:00.000Z");
-    const evening = new Date("2026-09-25T23:59:00.000Z");
+    const evening = new Date("2026-09-25T20:00:00.000Z");
     expect(daysBetween(morning, iso("2026-09-27"))).toBe(2);
     expect(daysBetween(evening, iso("2026-09-27"))).toBe(2);
+  });
+
+  test("tæller dagen i København, så 00:30 ikke er i går", () => {
+    // 00:30 dansk tid 26. september er 22:30 UTC 25. september. En UTC-tælling
+    // ville svare 2, fordi den læser 25. september.
+    const halvToOmMorgen = new Date("2026-09-25T22:30:00.000Z");
+    expect(daysBetween(halvToOmMorgen, iso("2026-09-27"))).toBe(1);
+    // Samme øjeblik som dansk aften 25. september (23:00 UTC) giver 2 dage.
+    const danskAften = new Date("2026-09-25T21:00:00.000Z");
+    expect(daysBetween(danskAften, iso("2026-09-27"))).toBe(2);
   });
 });
 
@@ -365,8 +389,10 @@ describe("getDageTilAnswer", () => {
   });
 
   test("beregner på tværs af DST-skift", () => {
+    // 01:30 dansk tid 25. oktober er 23:30 UTC 24. oktober. Tællingen skal
+    // læse kalenderdagen i København, ellers vinder den gamle for ved.
     const answer = getDageTilAnswer(DAGE_TIL_EVENTS[0], "da", new Date("2026-10-24T23:30:00.000Z"));
-    expect(answer.days).toBe(62);
+    expect(answer.days).toBe(61);
   });
 });
 
@@ -569,7 +595,7 @@ describe("dageTilbageIAaret", () => {
   });
 
   test("står på 0 nytårsaften, fordi det sidste døgn er 31. december", () => {
-    const svar = dageTilbageIAaret(new Date("2026-12-31T23:59:00Z"));
+    const svar = dageTilbageIAaret(new Date("2026-12-31T20:00:00Z"));
     expect(svar.dage).toBe(0);
     expect(svar.uger).toBe(0);
   });
@@ -588,9 +614,17 @@ describe("dageTilbageIAaret", () => {
   });
 
   test("tager ikke hensyn til klokkeslættet i døgnet", () => {
-    const morgen = dageTilbageIAaret(new Date("2026-09-27T00:01:00Z"));
-    const aftenaar = dageTilbageIAaret(new Date("2026-09-27T23:59:00Z"));
+    const morgen = dageTilbageIAaret(new Date("2026-09-27T04:00:00Z"));
+    const aftenaar = dageTilbageIAaret(new Date("2026-09-27T20:00:00Z"));
     expect(morgen.dage).toBe(aftenaar.dage);
+  });
+
+  test("tæller kalenderdagen i København, så nytårsaften kl. 00:30 er stadig nytårsaften", () => {
+    // 00:30 dansk tid 1. januar er 23:30 UTC 31. december. En UTC-tælling
+    // ville svare "95 dage tilbage i 2026" midt i nytårsaften.
+    const svar = dageTilbageIAaret(new Date("2026-12-31T23:30:00Z"));
+    expect(svar.year).toBe(2027);
+    expect(svar.dage).toBe(364);
   });
 });
 

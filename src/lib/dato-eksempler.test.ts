@@ -105,6 +105,10 @@ describe("dato-eksempler", () => {
     expect(aarstal(2028, "da").dage).toBe(366);
     expect(aarstal(2028, "da").skudaar).toBe(true);
     expect(aarstal(2026, "da").maneder).toBe(12);
+    // Skudåret har 366 dage, men stadig 12 måneder — 29. februar ligger inde i
+    // februar. En "13. måned" er den fejl, der lå i modulet.
+    expect(aarstal(2028, "da").maneder).toBe(12);
+    expect(aarstal(2028, "da").maneder).not.toBe(13);
   });
 
   test("et år er lidt mere end 52 uger", () => {

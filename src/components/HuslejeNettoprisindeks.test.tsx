@@ -93,10 +93,17 @@ describe("HuslejeNettoprisindeks — indhold", () => {
   });
 
   it("skelner huslejenævnet fra lejeaftalen, så siden ikke lover en sats", () => {
+    // Huslejenævnet indberettes en forhøjelse til; det fastsætter ikke en sats
+    // pr. område. Det var den gamle påstand, og den er fjernet.
     expect(tekst).toContain("huslejenævnet");
-    expect(tekst).toContain("Huslejenævnet");
-    expect(tekst).toContain("pristalsregulering");
-    expect(tekst).toContain("reguleres efter pristallet");
+    expect(tekst).toContain("huslejenævnsvedtægt");
+    expect(tekst).toContain("ikke huslejenævnet, der fastsætter en sats");
+    expect(tekst).not.toContain("fastsætter den endelige sats");
+    // Reguleringen følger nettoprisindekset (lejeloven § 5), ikke
+    // forbrugerprisindekset.
+    expect(tekst).toContain("Lejeloven § 5");
+    expect(tekst).toContain("nettoprisindekset");
+    expect(tekst).not.toContain("pristalsreguleringens grundlag");
   });
 
   it("citerer begge StatBank-tabeller med dato", () => {

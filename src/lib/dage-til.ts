@@ -588,7 +588,7 @@ export const DAGE_TIL_EVENTS: DageTilEvent[] = [
   {
     id: "midsommarafton",
     anchor: {
-      da: { kind: "midsummer", month: 6, day: 0, offsetDays: 0 },
+      da: { kind: "fixed", month: 6, day: 23, offsetDays: 0 },
       se: { kind: "midsummer", month: 6, day: 0, offsetDays: 0 },
     },
     da: {
@@ -597,25 +597,25 @@ export const DAGE_TIL_EVENTS: DageTilEvent[] = [
         short: "sankthansaftensdag",
         question: "Hvor mange dage er der til sankthansaftensdag?",
         facts: [
-          "Sankthansaftensdagen er den fredag, der ligger mellem 19. og 25. juni — i 2026 er det 19. juni, i 2027 25. juni.",
-          "Sankthansdagen er dagen efter, altså en lørdag mellem 20. juni og 26. juni.",
+          "Sankthansaftensdagen er 23. juni, og datoen er fast hvert år — den flytter sig aldrig, uanset hvilken ugedag den falder på.",
+          "Den fejres om aftenen, og det er derfor den hedder *aftens*dagen: bålet brændes den 23. juni.",
           "Sankthans er ikke en dansk helligdag, men den fejres overalt i landet med bål, sang og majstang.",
         ],
         faq: [
           {
             question: "Hvilken dato er sankthansaftensdag?",
             answer:
-              "Det er den fredag, der ligger mellem 19. og 25. juni. Datoen er derfor fast hvert år, men den falder på forskellige kalenderdatoer: 19. juni 2026, 25. juni 2027 og 23. juni 2028.",
+              "Sankthansaftensdagen er altid 23. juni. Det er en fast dato, ikke en regel om en ugedag, så du kan regne den ud uden at slå den op.",
           },
           {
             question: "Hvornår er sankthansdagen?",
             answer:
-              "Sankthansdagen er dagen efter sankthansaftensdagen, altså en lørdag mellem 20. og 26. juni. Tallet på den side er derfor altid 1 dag større end her.",
+              "Sankthansdagen er dagen efter sankthansaftensdagen, altså 24. juni. Tallet på den side er derfor altid 1 dag mindre end her.",
           },
           {
             question: "Er sankthans en helligdag?",
             answer:
-              "Nej. Sankthans står ikke på Danmarks liste over helligdage, men det er en af årets mest markerede festdage, og mange arbejdspladser giver fri med løn.",
+              "Nej. Sankthans står ikke på Danmarks liste over helligdage, så det er en almindelig aften på en almindelig hverdag.",
           },
         ],
       },
@@ -653,7 +653,7 @@ export const DAGE_TIL_EVENTS: DageTilEvent[] = [
   {
     id: "midsommardagen",
     anchor: {
-      da: { kind: "midsummer", month: 6, day: 0, offsetDays: 1 },
+      da: { kind: "fixed", month: 6, day: 24, offsetDays: 0 },
       se: { kind: "midsummer", month: 6, day: 0, offsetDays: 1 },
     },
     da: {
@@ -662,25 +662,25 @@ export const DAGE_TIL_EVENTS: DageTilEvent[] = [
         short: "sankthansdag",
         question: "Hvor mange dage er der til sankthansdag?",
         facts: [
-          "Sankthansdagen er lørdagen efter sankthansaftensdagen, altså en lørdag mellem 20. juni og 26. juni.",
-          "I 2026 er det 20. juni, i 2027 26. juni og i 2028 24. juni.",
-          "Sankthansdagen er den dag, børnene klæder sig i sommerens gamle tøj på — og netop derfor ligger den altid en dag efter sankthansaftensdagen.",
+          "Sankthansdagen er 24. juni, altså dagen efter sankthansaftensdagen den 23. juni.",
+          "Datoen er fast hvert år — den flytter sig aldrig, uanset hvilken ugedag den falder på.",
+          "Sankthansdagen er den dag, børnene klæder sig i sommerens gamle tøj på — og netop derfor ligger den altid 1 dag efter sankthansaftensdagen.",
         ],
         faq: [
           {
             question: "Hvad er forskellen på sankthansdag og sankthansaftensdag?",
             answer:
-              "Sankthansaftensdagen er fredagen, og sankthansdagen er lørdagen efter. De to ligger derfor altid præcis 1 dag fra hinanden, så tallet her er 1 dag mindre end på sankthansaftenssiden.",
+              "Sankthansaftensdagen er 23. juni, og sankthansdagen er 24. juni. De to ligger derfor altid præcis 1 dag fra hinanden, så tallet her er 1 dag mindre end på sankthansaftenssiden.",
           },
           {
             question: "Hvilken dato er sankthansdagen?",
             answer:
-              "Det er lørdagen mellem 20. og 26. juni: 20. juni 2026, 26. juni 2027 og 24. juni 2028.",
+              "Sankthansdagen er altid 24. juni. Det er en fast dato, ikke en regel om en ugedag.",
           },
           {
             question: "Er sankthansdag en helligdag?",
             answer:
-              "Nej, den er ikke en helligdag. Den er en lørdag, som er weekend i sig selv — det særlige ved den er, at den markerer afslutningen på sankthansfejringen.",
+              "Nej, den er ikke en helligdag. Den markerer afslutningen på sankthansfejringen, men den står ikke på Danmarks liste over helligdage.",
           },
         ],
       },
@@ -786,7 +786,7 @@ export const DAGE_TIL_EVENTS: DageTilEvent[] = [
     id: "paskafton",
     anchor: {
       da: { kind: "easterOffset", month: 0, day: 0, offsetDays: -2 },
-      se: { kind: "easterOffset", month: 0, day: 0, offsetDays: -2 },
+      se: { kind: "easterOffset", month: 0, day: 0, offsetDays: -1 },
     },
     da: {
       slug: "langfredag",
@@ -796,14 +796,13 @@ export const DAGE_TIL_EVENTS: DageTilEvent[] = [
         facts: [
           "Langfredag er 2 dage før påskedag og altid en fredag, så datoen flytter sig med påsken.",
           "Langfredag, påskedag og 2. påskedag er alle danske helligdage — det gør langfredag til den eneste helligdag i påskeugen, der ikke er en søndag.",
-          "Påskeaften og langfredag er den samme dag: påskeaften er det religiøse navn, langfredag det navn, danskerne bruger.",
           "I 2026 er langfredag 3. april, i 2027 26. marts og i 2028 14. april.",
         ],
         faq: [
           {
-            question: "Er påskeaften det samme som langfredag?",
+            question: "Hvad er forskellen på påskeaften og langfredag?",
             answer:
-              "Ja. Påskeaften er det religiøse navn for den fredag, der ligger umiddelbart før påskedagen, og i hverdagssproget hedder den langfredag. Derfor står de to navne altid på samme dato.",
+              "De er to forskellige dage. Påskeaften er torsdag — påskedag minus 3 dage — og langfredag er fredagen efter, altså påskedag minus 2 dage. Langfredag er en helligdag, påskeaften er det ikke.",
           },
           {
             question: "Tæller dagen i dag med?",
@@ -824,26 +823,26 @@ export const DAGE_TIL_EVENTS: DageTilEvent[] = [
         short: "påskafton",
         question: "Hur många dagar är det till påskafton?",
         facts: [
-          "Påskafton är dagen innan påskdagen och alltid en fredag — samma dag som långfredagen.",
-          "Långfredagen, påskdagen och annandag påsk är alla allmänna helgdagar enligt lag (1989:253) om allmänna helgdagar.",
-          "I 2026 är påskafton 3 april, 2027 26 mars och 2028 14 april.",
+          "Påskafton är dagen innan påskdagen och alltid en lördag — den ligger alltså 1 dag före påskdagen, inte 2.",
+          "Långfredagen är dagen innan påskafton och är en allmän helgdag enligt lag (1989:253) om allmänna helgdagar, men påskafton är inte det.",
+          "I 2026 är påskafton 4 april, 2027 27 mars och 2028 15 april.",
           "Påsklovet slutar ofta på påskafton, men det bestäms av din kommun. Påskafton är fast, påsklovet är det inte.",
         ],
         faq: [
           {
             question: "Är påskafton samma sak som långfredagen?",
             answer:
-              "Ja. Det är två namn för samma fredag: långfredagen är det juridiska namnet i lagen om allmänna helgdagar, och påskafton är det vanliga namnet. Därför hamnar de alltid på samma datum.",
+              "Nej. Långfredagen är fredagen och påskafton är lördagen dagen efter, altså dagen innan påskdagen. De ligger derför alltid 1 dag från varandra.",
           },
           {
             question: "Räknas dagen i dag med?",
             answer:
-              "Nej. Talet är skillnaden mellan dagens datum och påskafton, så väljer du torsdagen innan står det 1 dag kvar.",
+              "Nej. Talet är skillnaden mellan dagens datum och påskafton, så väljer du fredagen innan står det 2 dagar kvar.",
           },
           {
             question: "När är påskafton nästa gång?",
             answer:
-              "Påskafton är alltid 2 dagar före påskdagen, så du kan räkna ut den utan att slå upp något. 2027 infaller påskdagen 28 mars, så påskafton är 26 mars.",
+              "Påskafton är alltid 1 dag före påskdagen, så du kan räkna ut den utan att slå upp något. 2027 infaller påskdagen 28 mars, så påskafton är 27 mars.",
           },
         ],
       },
@@ -852,8 +851,8 @@ export const DAGE_TIL_EVENTS: DageTilEvent[] = [
   {
     id: "valborg",
     anchor: {
-      da: { kind: "fixed", month: 2, day: 14, offsetDays: 0 },
-      se: { kind: "fixed", month: 2, day: 14, offsetDays: 0 },
+      da: { kind: "fixed", month: 4, day: 30, offsetDays: 0 },
+      se: { kind: "fixed", month: 4, day: 30, offsetDays: 0 },
     },
     da: {
       slug: "valborg",
@@ -861,15 +860,15 @@ export const DAGE_TIL_EVENTS: DageTilEvent[] = [
         short: "valborg",
         question: "Hvor mange dage er der til valborg?",
         facts: [
-          "Valborgsmässoaften er 14. februar, og datoen er fast — den flytter sig aldrig, uanset hvilken ugedag den falder på.",
+          "Valborgsmässoaften er 30. april, og datoen er fast — den flytter sig aldrig, uanset hvilken ugedag den falder på.",
           "Valborg er ikke en helligdag, men den er den største danske forårsfest sammen med påske.",
-          "Den er heller ikke altid dagen før askonsdagen: askonsdagen er påskedag minus 46 dage og flytter sig, mens valborg bliver liggende 14. februar. I 2026 ligger valborg 4 dage før askonsdagen, i 2027 ligger det 4 dage efter den, og i 2030 ligger det 20 dage før.",
+          "Den ligger bagefter askonsdagen og aldrig før: askonsdagen er påskedag minus 46 dage og flytter sig med påsken, mens valborg bliver liggende 30. april. Afstanden er derfor 51-82 dage.",
         ],
         faq: [
           {
             question: "Hvilken dag i året er valborg?",
             answer:
-              "Valborg er altid 14. februar. Den kan både være en mandag og en søndag, men datoen flytter sig aldrig.",
+              "Valborg er altid 30. april. Den kan både være en mandag og en søndag, men datoen flytter sig aldrig.",
           },
           {
             question: "Er valborg en helligdag?",
@@ -879,7 +878,7 @@ export const DAGE_TIL_EVENTS: DageTilEvent[] = [
           {
             question: "Er valborg dagen før askonsdagen?",
             answer:
-              "Ikke altid. Askonsdagen er påskedag minus 46 dage, så den flytter sig, mens valborg bliver liggende 14. februar. I 2027 er askonsdagen 10. februar, altså ligger valborg 4 dage efter den.",
+              "Nej — valborg ligger altid efter askonsdagen. Askonsdagen er påskedag minus 46 dage og kan falde så tidligt som i februar, mens valborg altid er 30. april. I 2027 er askonsdagen 10. februar, altså ligger valborg 79 dage efter den.",
           },
         ],
       },
@@ -890,15 +889,15 @@ export const DAGE_TIL_EVENTS: DageTilEvent[] = [
         short: "valborg",
         question: "Hur många dagar är det till valborg?",
         facts: [
-          "Valborgsmässoafton är 14 februari — alltid samma datum, oavsett vilken veckodag det infaller på.",
+          "Valborgsmässoafton är 30 april — alltid samma datum, oavsett vilken veckodag det infaller på.",
           "Valborg är inte en allmän helgdag enligt lag (1989:253) om allmänna helgdagar, men den firas som en röd dag av de flesta arbetsgivare.",
-          "Den är inte heller alltid dagen före askonsdagen: askonsdagen är påskdagen minus 46 dagar och flyttar sig, medan valborg ligger kvar 14 februari. 2026 ligger valborg 4 dagar före askonsdagen, 2027 ligger det 4 dagar efter den och 2030 ligger det 20 dagar före.",
+          "Den ligger alltid efter askonsdagen, aldrig före: askonsdagen är påskdagen minus 46 dagar och flyttar sig, medan valborg ligger kvar 30 april. Avståndet är därför 51-82 dagar.",
         ],
         faq: [
           {
             question: "Vilken dag på året är valborg?",
             answer:
-              "Valborg är alltid 14 februari. Den kan vara både en måndag och en söndag, men datumet flyttar sig aldrig.",
+              "Valborg är alltid 30 april. Den kan vara både en måndag och en söndag, men datumet flyttar sig aldrig.",
           },
           {
             question: "Är valborg en röd dag?",
@@ -908,7 +907,7 @@ export const DAGE_TIL_EVENTS: DageTilEvent[] = [
           {
             question: "Är valborg dagen före askonsdagen?",
             answer:
-              "Inte alltid. Askonsdagen är påskdagen minus 46 dagar, så den flyttar sig, medan valborg ligger kvar 14 februari. 2027 är askonsdagen 10 februari, alltså ligger valborg 4 dagar efter den.",
+              "Nej — valborg ligger alltid efter askonsdagen. Askonsdagen är påskdagen minus 46 dagar och kan infalla så tidigt som i februari, medan valborg alltid är 30 april. 2027 är askonsdagen 10 februari, alltså ligger valborg 79 dagar efter den.",
           },
         ],
       },
@@ -926,7 +925,7 @@ export const DAGE_TIL_EVENTS: DageTilEvent[] = [
         short: "1. advent",
         question: "Hvor mange dage er der til 1. advent?",
         facts: [
-          "1. advent er altid den første søndag i december, og den ligger altid mellem 27. november og 3. december.",
+          "1. advent er altid den første søndag i advent, og den ligger altid mellem 27. november og 3. december.",
           "Advent har fire søndage, og den fjerde ligger altid mellem 18. og 24. december — altså tæt på juledagen.",
           "I 2026 er 1. advent 29. november, i 2027 28. november og i 2028 3. december.",
           "1. advent er ikke en helligdag, men den er en søndag, så for de fleste er det en fridag.",
@@ -1031,9 +1030,38 @@ export function isDageTilLocale(locale: Locale): locale is DageTilLocale {
   return locale === "da" || locale === "se";
 }
 
+/**
+ * The timezone the countdown is read in. Denmark and Sweden share CET/CEST,
+ * so one zone covers both `dage-til` locales; the Swedish name is not needed
+ * for a result, only for reading the same offset rules.
+ */
+const DAGE_TIL_TIMEZONE = "Europe/Copenhagen";
+
+/**
+ * Midnight UTC of the *calendar day* the instant falls on in
+ * {@link DAGE_TIL_TIMEZONE}.
+ *
+ * Every anchor in this module is stored as a UTC midnight, so a UTC reading
+ * is right for the target. It is wrong for `today`: at 00:30 local time the
+ * instant is 22:30 UTC the *previous* day in summer and 23:30 UTC the
+ * previous day in winter, so a UTC reading makes every countdown one day too
+ * high for the first two hours of every day. That window is exactly when
+ * people open "how many days until Christmas".
+ *
+ * UTC midnights are unaffected: 00:00Z is 01:00 or 02:00 in Copenhagen, so a
+ * stored anchor keeps the calendar day it was built with.
+ */
 function toUtcMidnight(date: Date): Date {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: DAGE_TIL_TIMEZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(date);
+  const vaerdi = (type: "year" | "month" | "day") =>
+    Number(parts.find((part) => part.type === type)?.value);
   return new Date(
-    Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate())
+    Date.UTC(vaerdi("year"), vaerdi("month") - 1, vaerdi("day"))
   );
 }
 

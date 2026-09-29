@@ -21,8 +21,9 @@ describe("nettoprisindeks — data from Danmarks Statistik", () => {
   });
 
   it("keeps each index's own published figure, so the page cannot mix them up", () => {
-    // Forbrugerprisindekset (PRIS01) indeholder indirekte afgifter og bruges til
-    // pristalsregulering. Nettoprisindekset (PRIS04) gør ikke.
+    // Lejeloven § 5 regulerer huslejen efter NETTOPRISINDEKSET (PRIS04).
+    // Forbrugerprisindekset (PRIS01) indeholder de indirekte afgifter og er
+    // ikke huslejereguleringens grundlag.
     expect(FORBRUGERPRISINDEKS_2026M08.aarsVaeksningPct).toBe(2.0);
     expect(NETTOPRISINDEKS_2026M08.aarsVaeksningPct).toBe(2.9);
     // DST's egen huslejegruppe ligger UNDER nettoprisindeksets hovedtal. Havde
