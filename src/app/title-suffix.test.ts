@@ -1,3 +1,5 @@
+import { readdirSync } from "node:fs";
+import { join } from "node:path";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import { getDomainConfigByLocale, getAllDomainConfigs } from "@/lib/domain-config";
 import { getAllCategorySlugs } from "@/lib/categories";
@@ -61,5 +63,83 @@ describe("sidetitler får domænenavnet præcis én gang", () => {
     const title = titleOf(await cookiepolitikMetadata());
     expect(title.length).toBeGreaterThan(0);
     expect(title).not.toContain(config.siteName);
+  });
+});
+
+// Layoutets template er `%s | <siteName>`, så en metadata-titel der *ikke*
+// bruger `absolute` får domænenavnet hæftet på. Titlen Google ser er derfor
+// `title + " | MinBeregner.dk"` (18 tegn) og ikke længden af det, siden
+// skriver. De 160 `page-data`-titler bruger `absolute`
+// (`src/lib/page-helpers.ts:38`) og er låst af `page-data.test.ts` — blog og
+// kategori gjorde ikke, og alle 28 af dem landede i 61-73 tegn.
+//
+// Målingen skal derfor tage den *renderede* titel, altså den template-løste,
+// og det er derfor denne test kalder den rigtige producer frem for at genskabe
+// udtrykket (C44's lære).
+function renderedTitle(metadata: { title?: unknown }, siteName: string): string {
+  const title = metadata.title;
+  if (title && typeof title === "object" && "absolute" in title) {
+    return String((title as { absolute: string }).absolute);
+  }
+  const own = titleOf(metadata);
+  return own ? `${own} | ${siteName}` : "";
+}
+
+const GOOGLE_TITLE_LIMIT = 60;
+
+describe("renderede sidetitler overlever Googles afkortning", () => {
+  beforeEach(() => {
+    vi.mocked(getLocale).mockResolvedValue("da");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("da"));
+  });
+
+  test("de ti kategorisider er ≤ 60 tegn i den renderede titel", async () => {
+    const config = getDomainConfigByLocale("da");
+    const offenders: string[] = [];
+
+    for (const slug of getAllCategorySlugs()) {
+      const metadata = await kategoriMetadata({ params: Promise.resolve({ slug }) });
+      const rendered = renderedTitle(metadata, config.siteName);
+      expect(rendered.length, slug).toBeGreaterThan(0);
+      if (rendered.length > GOOGLE_TITLE_LIMIT) {
+        offenders.push(`${slug}: ${rendered.length} tegn — "${rendered}"`);
+      }
+    }
+
+    expect(offenders).toEqual([]);
+  });
+
+  test("alle blogindlæg er ≤ 60 tegn i den renderede titel", async () => {
+    const config = getDomainConfigByLocale("da");
+    const blogDir = join(process.cwd(), "src", "app", "blog");
+    const slugs = readdirSync(blogDir, { withFileTypes: true })
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => entry.name);
+    expect(slugs.length).toBeGreaterThan(20);
+
+    const offenders: string[] = [];
+    for (const slug of slugs) {
+      const module = await import(`./blog/${slug}/page.tsx`);
+      const rendered = renderedTitle(await module.generateMetadata(), config.siteName);
+      expect(rendered.length, slug).toBeGreaterThan(0);
+      if (rendered.length > GOOGLE_TITLE_LIMIT) {
+        offenders.push(`${slug}: ${rendered.length} tegn — "${rendered}"`);
+      }
+    }
+
+    expect(offenders).toEqual([]);
+  });
+
+  // `openGraph.title` går ikke gennem layoutets template, så brandet skal
+  // stadig sendes med til Facebook og LinkedIn. Uden `siteName` i
+  // `openGraph` forsvinder brandet fra delingerne, selv om `<title>` er
+  // kort nok.
+  test("kategorisiderne sender stadig brandet med i openGraph", async () => {
+    const config = getDomainConfigByLocale("da");
+    const metadata = await kategoriMetadata({
+      params: Promise.resolve({ slug: getAllCategorySlugs()[0] }),
+    });
+    const openGraph = (metadata as { openGraph?: { siteName?: string } }).openGraph;
+    expect(openGraph?.siteName).toBe(config.siteName);
   });
 });

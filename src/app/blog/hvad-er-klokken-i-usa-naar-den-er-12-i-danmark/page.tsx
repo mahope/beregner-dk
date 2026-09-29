@@ -10,7 +10,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const baseUrl = dc.baseUrl;
 
   return {
-    title: "Hvad er klokken i USA? Tidsforskel for 16 byer",
+    title: { absolute: "Hvad er klokken i USA? Tidsforskel for 16 byer" },
     description:
       "Når det er 12 i Danmark, er det 06 i New York, 05 i Chicago, 04 i Denver og 03 i Los Angeles. Se hele tabellen for USA og resten af verden — med sommertid.",
     keywords: [

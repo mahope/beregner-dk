@@ -13,7 +13,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const baseUrl = dc.baseUrl;
 
   return {
-    title: "Spar penge på brændstof: Tips til billigere kørsel",
+    title: { absolute: "Spar penge på brændstof: Tips til billigere kørsel" },
     description:
       "Praktiske tips til at spare på benzin, diesel og el. Kør 10-20% billigere med køreteknik, ruteplanlægning og vedligeholdelse. Priser 2026.",
     keywords: [

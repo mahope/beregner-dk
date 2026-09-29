@@ -7,7 +7,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const baseUrl = dc.baseUrl;
 
   return {
-      title: "Blog - Guides og tips",
+      title: { absolute: "Blog - Guides og tips" },
     description:
       "Læs vores guides om økonomi, beregninger og privatøkonomi. Lær hvordan du beregner moms, finder den rigtige husleje, og meget mere.",
     keywords: [

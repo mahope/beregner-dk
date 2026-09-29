@@ -52,6 +52,12 @@ describe("boligstøtte 2026 article", () => {
 
   test("bruger én gang site-navnet i metadata", async () => {
     const metadata = await generateMetadata();
-    expect(metadata.title).toBe("Boligstøtte 2026: Maksima, formue og beregning");
+    // `absolute` holder domænenavnet ude af `<title>` — layoutets template
+    // ville ellers hænge " | MinBeregner.dk" på og løbe over Googles
+    // afkortning. `title-suffix.test.ts` låser den regel for alle 27 indlæg.
+    expect((metadata.title as { absolute: string }).absolute).toBe(
+      "Boligstøtte 2026: Maksima, formue og beregning"
+    );
+    expect(metadata.openGraph?.siteName).toBe("MinBeregner.dk");
   });
 });

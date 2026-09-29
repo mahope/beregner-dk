@@ -17,7 +17,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const baseUrl = dc.baseUrl;
 
   return {
-    title: "Boligstøtte 2026: Maksima, formue og beregning",
+    title: { absolute: "Boligstøtte 2026: Maksima, formue og beregning" },
     description:
        "Se boligstøtte-standardmaksima for 2026, formuegrænser og hvilke oplysninger Udbetaling Danmark bruger. Se standardintervallet og fortsæt hos myndigheden.",
     keywords: [

@@ -46,7 +46,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const description = `De vigtigste skattesatser for 2026: AM-bidrag ${pct(SATSER_2026.amBidrag)} %, personfradrag ${da(SATSER_2026.personfradrag)} kr, bundskat ${pct(SATSER_2026.bundskat)} %, topskat fra ${da(SATSER_2026.topskatGraense)} kr og beskæftigelsesfradrag ${pct(SATSER_2026.beskaeftigelsesfradragPct)} %. Med regneeksempel på 40.000 kr i løn.`;
 
   return {
-    title,
+    title: { absolute: title },
     description,
     keywords: [
       "skat 2026",

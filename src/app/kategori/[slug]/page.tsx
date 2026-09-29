@@ -29,7 +29,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const baseUrl = domainConfig.baseUrl;
 
   return {
-    title: category.title,
+    // `absolute` keeps the layout template from appending `| MinBeregner.dk`.
+    // Without it eight of the ten category titles rendered at 62-73 characters
+    // and Google clipped the tail, which is the part carrying no search
+    // intent. Same rule the 160 `page-data` titles use (page-helpers.ts:38).
+    title: { absolute: category.title },
     description: category.metaDescription,
     keywords: category.keywords,
     openGraph: {

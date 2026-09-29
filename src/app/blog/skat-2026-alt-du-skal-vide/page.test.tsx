@@ -22,7 +22,9 @@ describe("skat-2026 artiklen", () => {
   test("titlen og H1 er svar-først med konkrete 2026-tal", async () => {
     const meta = await generateMetadata();
 
-    expect(meta.title).toBe("Skat 2026: personfradrag 54.100 kr, bundskat 12,01 %");
+    expect((meta.title as { absolute: string }).absolute).toBe(
+      "Skat 2026: personfradrag 54.100 kr, bundskat 12,01 %"
+    );
     expect(html()).toContain(
       "Skat 2026: personfradrag 54.100 kr, bundskat 12,01 %",
     );

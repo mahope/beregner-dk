@@ -10,7 +10,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const baseUrl = dc.baseUrl;
 
   return {
-    title: "Hvordan regner man kvadratmeter ud? Guide med eksempler",
+    title: { absolute: "Hvordan regner man kvadratmeter ud? Guide med eksempler" },
     description:
       "Areal = længde × bredde. Sådan regner du kvadratmeter ud på vægge, gulv og i rum — med eksempler, materialespild og BBR-areal.",
     keywords: [

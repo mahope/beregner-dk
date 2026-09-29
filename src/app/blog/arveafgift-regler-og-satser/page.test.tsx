@@ -22,7 +22,9 @@ describe("arveafgift-regler-og-satser artiklen", () => {
   test("titlen og H1 er svar-først med et konkret 2026-tal", async () => {
     const meta = await generateMetadata();
 
-    expect(meta.title).toBe("Arveafgift 2026: 1 mio. kr. til børn koster 91.155 kr.");
+    expect((meta.title as { absolute: string }).absolute).toBe(
+      "Arveafgift 2026: 1 mio. kr. til børn koster 91.155 kr."
+    );
     expect(html()).toContain("Arveafgift 2026: 1 mio. kr. til børn koster 91.155 kr.");
   });
 

@@ -9,7 +9,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const baseUrl = dc.baseUrl;
 
   return {
-    title: "SU 2026: 7.426 kr. pr. måned udeboende",
+    title: { absolute: "SU 2026: 7.426 kr. pr. måned udeboende" },
     description:
       "SU 2026: udeboende får 7.426 kr. pr. måned, hjemmeboende 1.154-3.202 kr. Fribeløb fra 15.297 kr., SU-lån op til 3.799 kr. Alle tal fra su.dk.",
     keywords: [

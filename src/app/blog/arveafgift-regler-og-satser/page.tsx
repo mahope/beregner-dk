@@ -20,7 +20,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const baseUrl = dc.baseUrl;
 
   return {
-    title: "Arveafgift 2026: 1 mio. kr. til børn koster 91.155 kr.",
+    title: { absolute: "Arveafgift 2026: 1 mio. kr. til børn koster 91.155 kr." },
     description:
       "Arveafgift (boafgift) 2026: Et barn arver 1 mio. kr. og betaler 91.155 kr. Se bundfradrag på 392.300 kr, 15 % for nære arvinger og 36,25 % for søskende.",
     keywords: [
