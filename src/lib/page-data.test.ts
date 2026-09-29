@@ -457,37 +457,54 @@ describe("getPageData", () => {
   test.each([
     {
       locale: "da" as const,
-      title: "Beregn antal dage mellem to datoer | MinBeregner.dk",
+      title: "Dage mellem datoer og dage til en dato | MinBeregner.dk",
       heading: "Beregn antal dage mellem to datoer",
       intent: "antal dage mellem to datoer",
       answer: "Vælg en startdato og en slutdato",
       months: "ca. måneder",
+      countdown: "Hvor mange dage er der til en dato?",
     },
     {
       locale: "se" as const,
-      title: "Beräkna antal dagar mellan två datum | Beräknare.se",
+      title: "Dagar mellan datum och dagar kvar till datum | Beräknare.se",
       heading: "Beräkna antal dagar mellan två datum",
       intent: "antal dagar mellan två datum",
       answer: "Välj ett startdatum och ett slutdatum",
       months: "ungefärligt antal månader",
+      countdown: "Hur många dagar är det kvar till ett datum?",
     },
-  ])("has answer-first date metadata for $locale", ({ locale, title, heading, intent, answer, months }) => {
-    const data = getPageData("dato", locale)!;
+  ])(
+    "has answer-first date metadata for $locale",
+    ({ locale, title, heading, intent, answer, months, countdown }) => {
+      const data = getPageData("dato", locale)!;
 
-    expect(data.title).toBe(heading);
-    expect(data.metaTitle).toBe(title);
-    expect(data.metaTitle.length).toBeLessThanOrEqual(60);
-    expect(data.description).toContain(answer);
-    expect(data.description).toContain(months);
-    expect(data.metaDescription).toContain(intent);
-    expect(data.metaDescription).toContain(months);
-    expect(data.metaDescription.length).toBeLessThanOrEqual(160);
-    expect(data.ogTitle).toBe(title);
-    expect(data.ogDescription).toContain(intent);
-    expect(data.ogDescription).toContain(months);
-    expect(data.schemaDescription).toContain(intent);
-    expect(data.schemaDescription).toContain(months);
-  });
+      expect(data.title).toBe(heading);
+      expect(data.metaTitle).toBe(title);
+      expect(data.metaTitle.length).toBeLessThanOrEqual(60);
+      expect(data.description).toContain(answer);
+      expect(data.description).toContain(months);
+      expect(data.metaDescription).toContain(intent);
+      expect(data.metaDescription).toContain(months);
+      expect(data.metaDescription.length).toBeLessThanOrEqual(160);
+      expect(data.ogTitle).toBe(title);
+      expect(data.ogDescription).toContain(intent);
+      expect(data.ogDescription).toContain(months);
+      expect(data.schemaDescription).toContain(intent);
+      expect(data.schemaDescription).toContain(months);
+
+      // C164: the title must name BOTH intents the page serves. "hvor mange
+      // dage er der til 1 december" (1.063 visninger, 2 klik, pos. 5) og
+      // "hvor mange dage er der tilbage af 2026" (231, pos. 5) er de to
+      // næststørste søgninger på /dato — men den gamle titel lovede kun
+      // "antal dage mellem to datoer", så countdown-søgeren fik et snippet
+      // om noget andet. Beskrivelsen SKAL desuden begynde med spørgsmålet
+      // og ikke gentage titlen: de to var ens, hvilket koster halve
+      // snippet-pladsen på det samme "se mere"-link.
+      expect(data.metaTitle).toMatch(/dage til en dato|dagar kvar till datum/);
+      expect(data.metaDescription.startsWith(countdown)).toBe(true);
+      expect(data.metaDescription).not.toBe(data.metaTitle);
+    }
+  );
 
   test.each([
     {
@@ -574,6 +591,89 @@ describe("getPageData", () => {
       }
     }
   });
+});
+
+describe("metadata snippets do not waste the SERP (C164)", () => {
+  // C164 measured the class across all 157 metaTitle/metaDescription pairs:
+  // on /dato (the site's #1 Plausible page, 1.110 besøgende/28d, and its
+  // #2 GSC side with 131.920 visninger) the description's first sentence was
+  // a verbatim copy of the title. Google shows them as one block, so half the
+  // description repeated the blue link the searcher had just read — and the
+  // query the page actually ranks for ("hvor mange dage er der til 1
+  // december", 1.063 visninger, pos. 5) was not in either string.
+  //
+  // These two rules are the general form of that finding. They run over every
+  // slug in every locale, so the fix cannot silently come back on the next
+  // page that is added.
+  const stripBrand = (s: string) =>
+    s.replace(/\s*\|\s*(MinBeregner\.dk|Beräknare\.se)\s*$/, "").trim();
+
+  for (const locale of ["da", "no", "se"] as const) {
+    test(`${locale}: no description repeats its own title`, () => {
+      const offenders: string[] = [];
+
+      for (const slug of getAvailableSlugs(locale)) {
+        const data = getPageData(slug, locale);
+        if (!data) continue;
+
+        const title = stripBrand(data.metaTitle).toLowerCase();
+        const firstSentence = data.metaDescription
+          .split(/\.\s|\?/)[0]
+          .replace(/[.,:;?!]$/, "")
+          .trim()
+          .toLowerCase();
+
+        if (title && firstSentence === title) offenders.push(slug);
+      }
+
+      expect(offenders, `description echoes title on: ${offenders.join(", ")}`)
+        .toEqual([]);
+    });
+
+    test(`${locale}: no description repeats a whole sentence`, () => {
+      const offenders: string[] = [];
+
+      for (const slug of getAvailableSlugs(locale)) {
+        const data = getPageData(slug, locale);
+        if (!data) continue;
+
+        // A sentence that appears twice in ONE indexed string.
+        // /dato in `no` had "Gratis datokalkulator. … Gratis datokalkulator."
+        // Both fields are checked, because they do not always agree.
+        //
+        // The unit is the SENTENCE, not a word-shingle. A shingle rule was
+        // tried first and flagged /procent and /rentefradrag, whose
+        // descriptions deliberately restate the number from the rule in the
+        // worked example ("33,6 % på de første 50.000 kr. renter. Eksempel:
+        // 50.000 kr renter = 16.800 kr."). That repetition is the answer-first
+        // pattern C82 built on purpose and its own tests lock it — flagging it
+        // would train the next iteration to delete good copy.
+        for (const [field, text] of [
+          ["metaDescription", data.metaDescription],
+          ["ogDescription", data.ogDescription],
+        ] as const) {
+          const sentences = text
+            .split(/(?<=[.!?])\s+/)
+            .map((s) => s.trim().toLowerCase())
+            .filter((s) => s.replace(/[^a-zæøå]/gi, "").length >= 8);
+
+          const seen = new Set<string>();
+          for (const sentence of sentences) {
+            if (seen.has(sentence)) {
+              offenders.push(`${slug} ${field} ("${sentence.slice(0, 40)}")`);
+              break;
+            }
+            seen.add(sentence);
+          }
+        }
+      }
+
+      expect(
+        offenders,
+        `repeated sentence in description: ${offenders.join(", ")}`
+      ).toEqual([]);
+    });
+  }
 });
 
 describe("getAvailableSlugs", () => {

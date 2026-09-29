@@ -1,3 +1,5 @@
+STATUS: KØ — **C164 er landet: `/dato` er sitets største side i Plausible (1.110 besøgende/28d, +77 %, 1.024 indgangsbesøg) og nummer to i GSC (131.920 visninger, CTR 0,6 %, pos. 5,7) — og dens `<meta description>` gentog titlen ordret, så halve snippet'en lå i det samme "se mere"-link. Titlen lovede desuden kun "antal dage mellem to datoer", mens dens to næststørste søgninger er nedtællings-spørgsmål: "hvor mange dage er der til 1 december" (1.063 v, 2 klik, pos. 5) og "hvor mange dage er der tilbage af 2026" (231 v, 2 klik, pos. 5).** Køen havde én `I GANG`-løs opgave, **159 (de ni åbne deploy-noter)**, og den er **fortsat klokke-blokeret**: alle ni har første vindue **2026-09-29 07:30**, og det var 06:00, så ingen kunne lukkes og ingen blev rørt. **Valget kom af at måle hele klassen i stedet for endnu en side:** C82–C163 har lukket dansk GSC top-16 én ad gangen, så næste iteration målte *snippet'en* på tværs af alle **157** `metaTitle`/`metaDescription`-par i `page-data.ts`. Resultatet var **2 af 157**, og de var begge `/dato` (da og se) — plus én tredje fejl, som kun en anden måling kunne finde: `no`-udgaven læste "Gratis datokalkulator. … **Gratis datokalkulator.**", altså samme sætning to gange i én indekseret streng. **Målt på rigtig server** (`next start` :3411, port fri checket før start): titel og beskrivelse var tegn for tegn ens bort fra brandnavnet. Det er ikke kosmetik — Google viser dem som én blok, så de første ord i beskrivelsen er præcis dem søgeren lige har læst i det blå link, og den plads der stod til at svare på "hvor mange dage er der til 1 december", holdt i stedet op med "Beregn antal dage mellem to datoer". **Rettelsen (kun `da` + `se`; `no` fik dupikatet væk):** titlen navngiver nu begge intenter siden faktisk serverer — "Dage mellem datoer og dage til en dato | MinBeregner.dk" (55 tegn) / "Dagar mellan datum och dagar kvar till datum | Beräknare.se" (59) — og beskrivelserne **starter med spørgsmålet** og rummer begge svar. `<h1>` er **urørt**: overskriften på skærmen skal beskrive værktøjet, titlen skal fange søgningen. Ingen nye tal i metadata, fordi et hardkodet dage-tal ville gå i forældelse hver dag. **Harness: de nye regler er den almindelige form af fundet**, ikke håndskrevne forventninger — to guards kører over alle tre sprog × alle slugs (ingen beskrivelse må gentage sin egen titel; ingen må gentage en hel sætning, i både `metaDescription` og `ogDescription`). `page-data.test.ts` **2.607 → 2.612 tests**, **verificeret modsvejs: alle 5 falder** med den gamle kode, og de to `dato`-tests falder *fordi* de låste den forkerte påstand. **To målefejl i træk, begge fundet fordi testene ikke var grønne først:** min første gentagelses-regel var et 2-4-ords shingle, som flaget `/procent` og `/rentefradrag` — de gentager *med vilje* tallet fra reglen i regnestykket, og det er svar-først-mønsteret C82 byggede med vilje og egne tests låser; en regel der straffer god kopi ville træne næste iteration til at slette den, så reglen er snævret til hele sætninger. Og shingle-løkken havde en rigtig logisk fejl: den tjekkede kun forrige `n`-pass' `seen`-sæt, så en gentagelse **på samme længde** blev aldrig gensået — fundet fordi `no`-guarden ikke falde på den gamle kode som den skulle. **Tredje målefejl:** `rg -rn` er ripgreps *replace*-flag, ikke "recursive", så det skrev `n` ind i stedet for matchene og lod mig se en `metaTitle: "n | MinBeregner.dk"` på en side der ikke findes. Gate grøn: lint (584 filer), **2.612 tests / 170 filer** (fra 2.607 / 170), build (141 sider), `locale-leak.mjs --gate` exit 0 med **uændrede 739 kandidater / 704 døde / 35 kræver øjne / 0 ureviewet** (metadata kan ikke lække sprog, og tallet bekræfter det). Verificeret på rigtig server: begge domæner serverer den nye titel og beskrivelse, `<h1>` uændret, `/api/health` `status: ok`. Kode + plan i ét commit på `ceo/dato-dage-til-titel`; se opgave 164. **MÅL:** `/dato` baseline **131.920 visninger / 816 klik / CTR 0,6 % / pos. 5,7 pr. 2026-08-29 → 2026-09-26**, nedtællings-klyngen alene **1.294 v / 4 klik**; Plausible **1.110 besøgende/28d, bounce 5 %** pr. 2026-09-29 — måles igen **2026-10-13**.
+
 STATUS: KØ — **C163 er landet: beraknare.se `/procent` skrev norsk på svensk — `lønsprocent` og dansk `her` — og port-analysen havde set den fire hele iterationer, fordi scannerens JSX-regel var `>([^<>{}…]{2,200})<`: den krævede copy på *samme linje* som sit tag, mens JSX lægger den første brødet tekst på linjen *efter* `<p>`, og den endte i `{" "}`, hvilket tegnklassen ekskluderede. Begge udelukkelser var skrevet til at fange interpolationer og nye linjer, og de fik Prettiers almindelige sætning som følge. Måleren var altså den egentlige opgave, ikke copyen — opgaven lovede en én-linjers rettelse, og blev i stedet en måler.** Køen havde én `I GANG`-løs opgave, **159 (de ni åbne deploy-noter)**, og den er **fortsat klokke-blokeret**: alle ni har første vindue **2026-09-29 07:30**, og det var 05:11, så ingen kunne lukkes og ingen blev rørt. **Målt først, som opgaven selv bad om:** gaten ramte den ikke — `/procent` stod med 8 fund, alle døde (otte da-porte), og `lønsprocent` var ikke blandt dem. Rettelsen er at forankre reglen i sit eget tag (lookbehind på `[\w$]`, så en TypeScript-generic som `useState<string>('4.5')` ikke kan læses som copy — det var min egen målefejl nr. 21, fundet fordi mit første greb meldte LeasingBeregner som et falsk fund). **Efter reglen: 740 kandidater, 704 døde, 36 kræver øjne, og præcis 1 ureviewet — `lønsprocent` selv.** Den synlige rettelse er én linje kun i `se`: "lønprocent … kronor här". **Målt på rigtig server** (`next start` port 3411, verificeret fri inden start, begge domæner): beraknare.se **0** fund på `lønsprocent` og `som kroner her`, **2** på den nye streng; minberegner.dk **0** på den nye streng, `/api/health` `status: ok` begge steder, og C161's dedupe holder (**1** `>Formler</h3>`). **Harness: de 20 gamle tests var grønne gennem fire iterationer, fordi alle plantene skrev `<p>tekst</p>` på én linje — præcis den form den brudte regel kunne se.** Tre nye tests, modsvejs verificeret: den første (Prettiers rigtige form: `<p>` / copy / `{" "}` / `<Link>`) **falder mod den gamle regel**; den anden låser præcis min falske-positive-klasse; den tredje læser værtfilen selv, ikke en plant. **Én ærlig bivirkning:** den hånddrejede turvidde `< 700` faldt (593 → 739) og bæres nu af et **forhold** — `dead/candidates > 0,9` (i dag 0,95) — fordi en turvidde der skal skrives om hver gang måleren bliver skarpere, ikke er en værdi. Gate grøn: build (141 sider), lint (**584 filer**), **2.606 tests / 170 filer** (fra 2.593 / 169), `locale-leak.mjs --gate` exit 0, `knapgruppe-scan.mjs` 0/0, `label-a11y-scan.mjs` uændret 22/35. Kode + plan i ét commit på `ceo/procent-se-lakage`; se opgave 163. **MÅL:** beraknare.se `/procent` SE baseline **25.954 v / 2 klik / CTR 0,0 % / pos. 10,0 pr. 2026-08-29 → 2026-09-26** — måles igen 2026-10-13.
 STATUS: KØ — **C161 er landet: `/procent` — sitets største side i Google (149.879 visninger, 25 % af alle visninger) — skrev de samme fire formler to gange i ét og samme dokument, i to afsnit med to overskrifter om præcis det samme, i begge sprog.** Køen havde én `I GANG`-løs opgave, **159 (de ni åbne deploy-noter)**, og den er **fortsat klokke-blokeret**: alle ni har første vindue **2026-09-29 07:30**, og det var 04:45, så ingen kunne lukkes og ingen blev rørt. **Valget kom af at læse sitets største side som helhed i stedet for endnu en søgning.** C160's konklusion var at linkgrafen og søgeklyngerne er lukket, så næste iteration gik efter den ene side hvor tallene er mest ekstreme: `/procent` har **0,1 % CTR på pos. 7,4**, mens `/dato` på næsten samme position har **0,6 %** — altså 5-10× lavere end enhver anden side i GSC's top-16. De tre største søgninger på siden er "procentberegner" (248 v, pos 8), en rabatopgave (59 v, pos 6) og "10 procent af" (52 v, pos 6) — tilsammen ~360 visninger mod **149.879 i alt**, altså en massiv hale af lange søgninger, som en fast "procent"-sides lillebror. **Titlen og beskrivelsen er allerede svar-først** ("Procentberegner – beregn 10 procent af et tal" / "10 procent af et tal er tallet × 0,10") — for fjerde gang ikke titlen, men kroppen under den, samme konklusion som C82, C96, C99 og C100. **Målt først, målt på rigtig server:** i live-HTML'en stod **hver af de fire formler 3 gange** på begge domæner — `Procent = (Del / Heltal) × 100`, `Del = (Procent / 100) × Heltal`, `Heltal = Del × (100 / Procent)` og `((Ny - Gammel) / Gammel) × 100` — fordi **to filer ejede dem hver**: `ProcentBeregner.tsx:46-51` som boksen `<h3>Formler</h3>` under værktøjet, og `page.tsx:203` (da) og `page.tsx:450` (se) som afsnittet `<h2>Procentregningens formler</h2>` nederst i brødteksten. Tallet 3 = synlig tekst + client-komponentens SSR + sidens egen kopi i RSC-flight-payloaden. **Rettelsen er sletning, ikke tilføjelse:** de to `<h2>`-afsnit er væk, `Tip`-boksen (50 % af 40 = 40 % af 50) er den eneste tekst i dem der ikke var en dublet, og den er **beholdt i begge sprog**. Værktøjets boks er bevidst bevaret: den står lige under de fire beregningstilstande, så den er den, en læser bruger. Målt efter rettelsen på `next start` (port 3911, porten verificeret fri *inden* start) med begge `Host`-headere: **1 forekomst pr. formel**, 0 duplikat-overskrifter, da 126.046 bytes mod 127.029 før, se 123.487. **Harness:** ny `procent-formler.test.tsx` med 8 tests, **modsvejs verificeret: 4 af 8 falder** med den gamle `page.tsx` (begge sprog i begge tests), og de 4 der ikke falder er låse på Formler-boksen og Tip-boksen, som skal være grønne begge veje. **Måleren var vakuum-grøn i sit første udkast, og det er fundet fordi den tællede en streng der ikke findes:** sidefilens egen `page.test.tsx` mockerer `ProcentBeregner`, så en optælling i den fil ville have set **0** forekomster i stedet for 2 — C158's lære. Den nye fil mockerer den derfor **ikke** og pakker siden i `LocaleProvider`, så den renderer den rigtige producent. **To fejl i min egen test, begge fundet fordi de faldt:** (1) jeg skrev den fjerde formel som én delt streng, men de to sprog bruger hver sin adjektivform — dansk `Gammel`, svensk `Gammal` — så den svenske søgning gav **0** og ville have været grøn af fejltagelse; (2) jeg krævede "Hurtig reference" på begge sprog, men den svenske labels-tabel siger "Snabbreferens". **Og en ægte undtagelse blev fundet, fordi tallet ikke var 1 overalt:** C114's "Skillnad i procent mellan två tal" bruger `((Ny - Gammal) / Gammal) × 100` bevidst som den ene af to formler der skal holdes op imod hinanden, så på beraknare.se er den **2 gange efter rettelsen** — et andet afsnit med et andet formål, ikke en dublet af referenceboksen. Låsen er derfor pr. sprog og skrevet med begrundelsen i kilden. **Gate grøn:** lint (**584 filer**), **2.603 tests / 170 filer** (fra 2.595 / 169 — de 8 nye, og de 6 pre-existing `MomsBeregner`-fejl fra C160's noter er væk), build (**141 sider**), `locale-leak.mjs --gate` **exit 0** med **593 kandidater — 558 døde, 35 kræver øjne, 0 ureviewet** (fra 594/559/35/0) og sættet uændret **129 filer**, `knapgruppe-scan.mjs` **0/0**. Scannerens delta er **forhåndskontrolleret mod `git stash`** — målefejl 15's lære — så de −1/−1 er rettelsen og ikke en tilfældighed. **En tallene i opgave 159's egen note er forældede, målt her:** noten siger "54 kalkulatorsider", og `locale-leak.mjs` siger **56** både med og uden min rettelse. Ingen jævnføring, ingen handling — skrevet ned så næste iteration ikke jagter en forskel der ikke findes. Kode + plan i ét squash-commit på `ceo/procent-formler-duplikat`; se opgave 162. **MÅL:** `/procent` DA baseline **149.879 visninger / 99 klik / CTR 0,1 % / pos. 7,4** og SE **25.954 v / 2 klik / CTR 0,0 % / pos. 10,0**, begge pr. **2026-08-29 → 2026-09-26** — måles igen **2026-10-13**. **Forventningen er ærlig og lille:** en dublet er en kvalitetsfejl, ikke en trafikfejl, så jeg lover ikke flere klik. Det der *kan* læses af rettelsen, er at siden nu svarer ét sted på fire af sitets mest søgte formelspørgsmål. Hvis `/procent`s CTR forbliver under 0,2 % efter 14 dage, er hypotesen "dubleten forklærede den lave CTR" **modbevist**, og så er næste spørgsmål ikke mere indhold men søgemassen — de 149.520 visninger uden for de tre top-søgninger, som jeg ikke kan se fra loopet. Det er skrevet som en falsificérbar forudsigelse, ikke som en plan.
 
@@ -14927,6 +14929,14 @@ Gatens egne tal (591/556/35/0) måles igen **2026-10-13**; en voksende
 > min måling på master. Jeg bruger **egne** tal i sammenligningen ovenfor, for
 > en forskel på 1 i en note fra en anden revision kan ikke bære en konklusion.)
 
+> **C164 (06:00) rørte den heller ikke — kriterium 1 kræver stadig 07:30.**
+> Kriterium 2 og 3 er dog nået et **fjerde** uændret tal at måle på, efter at
+> C163's JSX-rettelse lå på master: **739 kandidater / 704 døde / 35 kræver
+> øjne / 0 ureviewet** (C163 målte 739/704/35/0 på samme revision, så de to
+> køringer er uafhængige bekræftelser af hinanden — og forskellen mod
+> C160's 594/559/35/0 er C160's egen revision). Plus **129 filer monteres på
+> 56 kalkulatorsider** mod C158's 126/54. Dobbeltplantningen er grøn.
+
 **⏱ Blokeret af uret, ikke af en fejl.** C159 startede 2026-09-29 03:16; alle ni
 noter har første vindue **07:30**. Kriterium 1 kan ikke udføres før det tidspunkt,
 og en note må ikke lukkes på et ur, der ikke har gået. **Revurder efter 07:30.**
@@ -15450,3 +15460,129 @@ dansk tekst, ingen sitemap, ingen URL ændret.**
      `/dato`, `/moms`, `/tidsberegner` skal have uændrede titler på begge
      domæner.
 
+
+#### 164. [x] FÆRDIG 2026-09-29 — C164 — **`/dato` er sitets største side i Plausible (1.110 besøgende/28d, +77 %) og nummer to i GSC (131.920 visninger) — og dens beskrivelse gentog titlen ordret, så halve snippet'en lå i det samme "se mere"-link. Titlen lovede desuden kun "antal dage mellem to datoer", mens dens to næststørste søgninger er nedtællings-spørgsmål.**
+
+**Datagrund:** GSC 2026-08-29 → 2026-09-26 for `/dato`: 131.920 visninger,
+816 klik, **CTR 0,6 %**, pos. 5,7. De fire største søgninger er "hvor mange
+dage er der til 1 december" (**1.063 v, 2 klik, pos. 5**), "dage mellem
+datoer" (454 v, pos. 4), "antal dage mellem to datoer" (249 v, pos. 5) og
+"hvor mange dage er der tilbage af 2026" (**231 v, 2 klik, pos. 5**). Plausible
+2026-09-29: 1.110 besøgende/28d, bounce 5 %, `indgangssider` 1.024 — altså
+**første-sides-placering, og den er den største enkeltvis udnyttede CTR-*
+mulighed på sitet, fordi alle øvrige top-16 sider er lukket af C82–C163.**
+
+**Målt først, målt på rigtig server.** Jeg greb først *alle* 157
+`metaTitle`/`metaDescription`-par i `page-data.ts` og testede to ting, jeg
+ikke vidste var sande endnu: (1) hvor mange beskrivelser **gentog deres egen
+titel som første sætning** — **2**, begge `/dato` (da og se); (2) hvor mange
+beskrivelser **gentog en hel sætning inde i sig selv** — `no`-udgaven af
+`/dato` læste *"Gratis datokalkulator. Beregn antall dager mellom to datoer,
+legg til dager, beregn arbeidsdager. **Gratis datokalkulator.**"*. På den
+rigtige server (`next start` :3411, begge domæner) bekræftede det: `/dato`'s
+`<title>` og `<meta description>` var tegn for tegn ens bort fra brandnavnet.
+Det er **ikke** en kosmetisk fejl: Google viser titel og beskrivelse som én
+blok, så de første ord i beskrivelsen er præcis de ord søgeren lige har læst
+i det blå link — og den plads, der stod tilbage til at svare på
+**"hvor mange dage er der til 1 december"**, holdt i stedet op med "Beregn
+antal dage mellem to datoer."
+
+**Rettelsen (kun `da` og `se`; `no` er rettet på dupikat-sætningen).**
+Titlen navngiver nu **begge** intenter siden faktisk serverer — den tæller
+både mellem to datoer *og* dage til en dato, og den har allerede et synligt
+afsnit "Datoer folk oftest tæller ned til" med 14 links plus et `<h2>` "Hvor
+mange dage er der tilbage af {år}?". DA: *"Dage mellem datoer og dage til en
+dato | MinBeregner.dk"* (55 tegn), SE: *"Dagar mellan datum och dagar kvar
+till datum | Beräknare.se"* (59 tegn). Begge beskrivelser **starter med
+spørgsmålet** i stedet for at gentage titlen og rummer begge svar:
+"Hvor mange dage er der til en dato? Tæll antal dage mellem to datoer, ca.
+måneder, arbejdsdage, helligdage og heluger." (118) / "Hur många dagar är
+det kvar till ett datum? Räkna antal dagar mellan två datum, ungefärligt
+antal månader, arbetsdagar och helgdagar." (133). `keywords` fik de to
+nedtællings-fraselser i begge sprog. **`<h1>` er urørt** — det er stadig
+"Beregn antal dage mellem to datoer", fordi overskriften på skærmen skal
+beskrive værktøjet, mens titlen skal fange søgningen; de er to forskellige
+opgaver, og det er derfor kun metadata er rørt.
+
+**Harness: de nye regler er skrevet som den *almindelige* form af fundet**,
+så klassen ikke kan komme tilbage på den næste side der bliver lagt til —
+en `describe`-blok kører over **alle tre sprog × alle slugs**: (1) ingen
+beskrivelse må gentage sin egen titel som første sætning (brand-suffikset
+strippes først, ellers kunne " | MinBeregner.dk" skjule et fund); (2) ingen
+beskrivelse må gentage en hel sætning — i både `metaDescription` **og**
+`ogDescription`, fordi de to ikke altid er ens, og en regel der kun læser
+den ene fanger halvdelen. `page-data.test.ts` er **2.607 → 2.612 tests**.
+**Verificeret modsvevs: alle 5 falder** med den gamle kode (de to
+`dato`-tests plus de tre nye guards — `da` og `se` fanger `/dato` *ved slug*,
+ikke ved den håndskrevne forventning).
+
+**To målefejl i træk fra mig selv, begge fundet fordi testene ikke var
+grønne først — det er pointen med at skrive reglen.** (1) Min første
+gentagelses-regel var et **2-4-ords shingle**, og den flaggede `/procent` og
+`/rentefradrag` — hvilket er **fejl fundet på den forkerte måde**: de to
+gentager med vilje tallet fra reglen i regnestykket ("33,6 % på de første
+50.000 kr. renter. Eksempel: 50.000 kr renter = 16.800 kr."), og det er
+*svar-først*-mønsteret C82 byggede med vilje, som egne tests låser. En regel
+der straffer god kopi træner næste iteration til at slette den. Reglen er
+derfor snævret til **hele sætninger**, som er den faktiske fejltype. (2) Min
+shingle-løkke havde en rigtig logisk fejl: den tjekkede kun det forrige
+`n`-pass' `seen`-sæt, så en gentagelse **på samme længde** blev samlet i
+`phrases` og aldrig gensået — `gratis datokalkulator` stod i `no`-beskrivelsen
+to gange og blev ikke fundet. Fundet fordi `no`-guarden ikke faldte på den
+gamle kode, som den skulle. (3) En tredje målefejl fra et grep: `rg -rn` er
+ripgreps **replace**-flag, ikke "recursive", så den skrev `n` ind i stedet
+for matchene og lod mig se en `metaTitle: "n | MinBeregner.dk"` på en side,
+der ikke findes. Ingen kode var rørt, så det fangedes ved at læse det
+`grep` skrev.
+
+**Gate grøn:** lint (584 filer), **2.612 tests / 170 filer** (fra 2.607 /
+170), build (141 sider), `locale-leak.mjs --gate` exit 0 med uændrede
+**739 kandidater / 704 døde / 35 kræver øjne / 0 ureviewet** (metadata-ændringer
+kan ikke lække sprog, og tallet bekræfter det). **Verificeret på rigtig
+server** (`next start` :3411, fri port checket før start): begge domæner
+serverer den nye titel og beskrivelse, `<h1>` er uændret, `/api/health`
+svarer `status: ok`. Kode + plan i ét commit på `ceo/dato-dage-til-titel`.
+
+**MÅL:** `/dato` baseline **131.920 visninger / 816 klik / CTR 0,6 % / pos.
+5,7 pr. 2026-08-29 → 2026-09-26**; nedtællings-klyngen alene
+("hvor mange dage er der til …" + "…tilbage af 2026") = **1.294 visninger /
+4 klik**. Plausible: **1.110 besøgende/28d, bounce 5 %, 1.024 indgangsbesøg**
+pr. 2026-09-29. Måles igen **2026-10-13**.
+**Forventning:** de to nedtællings-søgninger er de eneste på siden med
+~0,3 % CTR på pos. 5, og de er de eneste som ikke stod i snippet'en. De er
+1,0 % af sidens visninger, så selv en CTR på 2 % her er ~16 ekstra klik pr.
+måned — og de er 1,3 % af hele sitets månedlige visninger, så en tilsvarende
+løftning på `/nedtaelling` og de 14 `dage-til`-siders opslag er den samme
+mekanisme.
+
+- ⏳ **VERIFICÉR DEPLOY: C164 — `/dato` skal have titlen "Dage mellem datoer
+  og dage til en dato | MinBeregner.dk" (og den svenske "Dagar mellan
+  datum och dagar kvar till datum | Beräknare.se") og en beskrivelse der
+  **starter med spørgsmålet** "Hvor mange dage er der til en dato?" /
+  "Hur många dagar är det kvar till ett datum?" — på begge domæner, med
+  `<h1>` uændret.** Kode + plan i ét squash-commit på
+  `ceo/dato-dage-til-titel`. Første kandidatvindue **2026-09-29 12:30**
+  (merge sker efter 07:30-batchen). Kun `src/lib/page-data.ts` (6 metadata-
+  strenge i `da` + 6 i `se` + 1 dupikat-streng i `no` + 4 keywords) og
+  `src/lib/page-data.test.ts` er rørt — **ingen beregningslogik, ingen side,
+  ingen `<h1>`, ingen dansk brødtekst, ingen URL, ingen sitemap, ingen
+  dansk tekst i brødteksten ændret**. Verificér ved **indhold, ikke HTTP
+  200**:
+  1. `https://minberegner.dk/dato` — `<title>` skal være **"Dage mellem
+     datoer og dage til en dato | MinBeregner.dk"** (55 tegn) og
+     `<meta name="description">` skal **begynde** med "Hvor mange dage er
+     der til en dato?" (før: "Beregn antal dage mellem to datoer." — altså
+     tegn for tegn titlen).
+  2. `https://beraknare.se/dato` — tilsvarende **"Dagar mellan datum och
+     dagar kvar till datum | Beräknare.se"** og "Hur många dagar är det
+     kvar till ett datum?".
+  3. **`<h1>` skal stadig være "Beregn antal dage mellem to datoer"** (da) /
+     "Beräkna antal dagar mellan två datum" (se). Hvis `<h1>` er ændret,
+     er der rørt for meget.
+  4. **NØGLEKONTROL:** beskrivelsen må **ikke** lægge et dage-tal i sig. Den
+     nye tekst har ingen, fordi et hardkodet "63 dage" ville gå i forældelse
+     hver dag; det præcise tal står i `<h2>` "Hvor mange dage er der tilbage
+     af {år}?" og på `/dage-til/*`, som genberegnes pr. request.
+  5. KONTROL: `https://minberegner.dk/api/health` → `status: ok`, og
+     `/dato`, `/moms`, `/tidsberegner`, `/procent` skal have **uændrede**
+     titler på begge domæner.
