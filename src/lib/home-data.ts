@@ -5,6 +5,7 @@ import {
   getDageTilAnswer,
   getDageTilEvents,
   getDageTilPrefix,
+  dageTilArm,
   type DageTilLocale,
 } from "./dage-til";
 import type { Locale } from "./i18n";
@@ -631,7 +632,7 @@ export function getDageTilKort(
     const dato = `${formatTargetDate(answer.targetDate, sprog)} ${formatTargetYear(answer.targetDate)}`;
 
     return {
-      title: event[sprog].copy.question,
+      title: dageTilArm(event, sprog).copy.question,
       description: answer.isToday
         ? `${ord.dag} … ${dato} — det er ${ord.idag}.`
         : `${answer.days} ${ord.dag} ${ord.til} ${dato}.`,
@@ -639,7 +640,7 @@ export function getDageTilKort(
       // `/${prefix}/${slug}` produced "//dage-til//juledagen", and a leading
       // "//" is a protocol-relative URL — the browser resolved every card to a
       // host named "dage-til" instead of this site.
-      href: `${prefix}${event[sprog].slug}`,
+      href: `${prefix}${dageTilArm(event, sprog).slug}`,
       popular: false,
       category: "",
     };

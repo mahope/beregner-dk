@@ -8,11 +8,13 @@ import {
   forstaAdvent,
   getDageTilAnswer,
   getDageTilEventBySlug,
+  getDageTilEvents,
   getDageTilSlugs,
   getNextAnchorDate,
   isDageTilLocale,
   midsommarafton,
   resolveDageTilSlug,
+  sommerferieStart,
 } from "./dage-til";
 
 const iso = (value: string) => new Date(`${value}T00:00:00.000Z`);
@@ -416,14 +418,30 @@ describe("slug-opløsning", () => {
     expect(getDageTilEventBySlug("juledagen", "no")).toBeUndefined();
   });
 
-  test("alle events har unikke slugs pr. locale og samme antal sider i begge sprog", () => {
+  test("alle events har unikke slugs pr. locale", () => {
     const da = getDageTilSlugs("da");
     const se = getDageTilSlugs("se");
-    expect(da).toHaveLength(se.length);
     expect(new Set(da).size).toBe(da.length);
     expect(new Set(se).size).toBe(se.length);
     expect(da).toContain("1-december");
     expect(se).toContain("1-december");
+  });
+
+  // Var før C169 en hård påstand om lige mange sider i begge sprog. Den holdt,
+  // fordi alle events havde begge arme. Sommerferien bryder den med vilje,
+  // fordi det svenska sommarlovet ikke har noget nationalt dato at tælle til —
+  // så pariteten skal låses som *retningen der holder*, ikke som et tal.
+  test("svensk mangler præcis de events der ikke har et svensk dato", () => {
+    const da = getDageTilSlugs("da");
+    const se = getDageTilSlugs("se");
+    const kunDansk = DAGE_TIL_EVENTS.filter((e) => !e.se);
+    expect(da).toHaveLength(DAGE_TIL_EVENTS.length);
+    expect(se).toHaveLength(DAGE_TIL_EVENTS.length - kunDansk.length);
+    expect(kunDansk.map((e) => e.da.slug)).toEqual(["sommerferien"]);
+    // Slugs er ikke et sæt, der indeholder hinanden: dansk siger "juleaften",
+    // svensk siger "julafton". Det er derfor kun antallet kan sammenlignes.
+    expect(da).toContain("juleaften");
+    expect(se).toContain("julafton");
   });
 
   test("alle slugs er ASCII, fordi sitemap-URL'en er procentkodet", () => {
@@ -439,13 +457,16 @@ describe("slug-opløsning", () => {
     }
   });
 
-  test("alle events har spørgsmål og mindst to fakta i begge sprog", () => {
+  test("alle events har spørgsmål og mindst to fakta i hvert sprog de har", () => {
     for (const event of DAGE_TIL_EVENTS) {
       for (const locale of ["da", "se"] as const) {
-        expect(event[locale].copy.question).toContain("?");
-        expect(event[locale].copy.facts.length).toBeGreaterThanOrEqual(2);
-        expect(event[locale].copy.faq.length).toBeGreaterThanOrEqual(3);
-        expect(event[locale].copy.faq.every((item) => item.answer.length > 20)).toBe(true);
+        // `se` is optional: sommerferien has no Swedish date to count down to.
+        const arm = event[locale];
+        if (!arm) continue;
+        expect(arm.copy.question).toContain("?");
+        expect(arm.copy.facts.length).toBeGreaterThanOrEqual(2);
+        expect(arm.copy.faq.length).toBeGreaterThanOrEqual(3);
+        expect(arm.copy.faq.every((item) => item.answer.length > 20)).toBe(true);
       }
     }
   });
@@ -570,5 +591,108 @@ describe("dageTilbageIAaret", () => {
     const morgen = dageTilbageIAaret(new Date("2026-09-27T00:01:00Z"));
     const aftenaar = dageTilbageIAaret(new Date("2026-09-27T23:59:00Z"));
     expect(morgen.dage).toBe(aftenaar.dage);
+  });
+});
+
+describe("sommerferieStart", () => {
+  test.each([
+    [2024, "2024-06-29"],
+    [2025, "2025-06-28"],
+    [2026, "2026-06-27"],
+    [2027, "2027-06-26"],
+    [2028, "2028-06-24"],
+    [2030, "2030-06-29"],
+  ])("sommerferien begynder %i den %s", (year, expected) => {
+    expect(toISO(sommerferieStart(year))).toBe(expected);
+  });
+
+  // The three hard-coded years above would also pass a wrong rule that
+  // happened to agree three times, so the invariant is checked over 61 years
+  // instead: it must be a Saturday in June, and no later Saturday exists in
+  // that month.
+  test("er altid den SIDSTE lørdag i juni, 1990-2050", () => {
+    for (let year = 1990; year <= 2050; year++) {
+      const date = sommerferieStart(year);
+      expect(date.getUTCDay()).toBe(6);
+      expect(date.getUTCMonth()).toBe(5);
+      // No later Saturday may exist in June — that is what makes it *sidste*.
+      for (let day = date.getUTCDate() + 1; day <= 30; day++) {
+        expect(new Date(Date.UTC(year, 5, day)).getUTCDay()).not.toBe(6);
+      }
+    }
+  });
+});
+
+describe("sommerferien som dansk dato", () => {
+  const sommerferien = DAGE_TIL_EVENTS.find((e) => e.id === "sommerferien");
+
+  test("findes i listen", () => {
+    expect(sommerferien).toBeDefined();
+  });
+
+  test("har et dansk slug og en dansk spørgsmål", () => {
+    expect(sommerferien?.da.slug).toBe("sommerferien");
+    expect(sommerferien?.da.copy.question).toBe(
+      "Hvor mange dage er der til sommerferie?"
+    );
+  });
+
+  // Det svenska sommarlovet fastsättes av varje kommun och har inget
+  // nationellt datum, så en svensk sida skulle få gissa det tal den räknar
+  // ner till. Sådan skal den side findes.
+  test("har INGEN svensk udgave", () => {
+    expect(sommerferien?.se).toBeUndefined();
+    expect(sommerferien?.anchor.se).toBeUndefined();
+    expect(getDageTilEvents("se").some((e) => e.id === "sommerferien")).toBe(false);
+    expect(getDageTilSlugs("se")).not.toContain("sommerferien");
+  });
+
+  // The previous slug resolver matched `candidate.se.slug`, which would have
+  // thrown or matched the Danish slug on the Swedish domain — a dead
+  // cross-language redirect for a page that does not exist.
+  test("løser ikke det danske slug på beraknare.se", () => {
+    expect(resolveDageTilSlug("sommerferien", "se")).toBeUndefined();
+    expect(resolveDageTilSlug("sommerferien", "da")?.isOwnLocale).toBe(true);
+  });
+
+  test("tæller til den sidste lørdag i juni", () => {
+    // 29. september 2026 → 26. juni 2027 = 270 dage (talt i node, ikke i hovedet).
+    const svar = getDageTilAnswer(sommerferien!, "da", iso("2026-09-29"));
+    expect(toISO(svar.targetDate)).toBe("2027-06-26");
+    expect(svar.days).toBe(270);
+    expect(svar.weeks).toBe(38);
+    expect(svar.daysLeft).toBe(4);
+  });
+
+  // Sidens svar er altid det *næste* start, som alle de andre dage-til-sider
+  // gør: spørger man midt i ferien, er næste start et år fremme. Låst, fordi
+  // det er en fælde at "rette" det uden at tænke over, hvad de 28 andre sider
+  // gør.
+  test("midt i ferien tæller den til næste års start", () => {
+    const svar = getDageTilAnswer(sommerferien!, "da", iso("2027-07-01"));
+    expect(toISO(svar.targetDate)).toBe("2028-06-24");
+    expect(svar.days).toBe(359);
+    expect(svar.isToday).toBe(false);
+  });
+
+  test("på selve startdagen er svaret 0 dage", () => {
+    const svar = getDageTilAnswer(sommerferien!, "da", iso("2027-06-26"));
+    expect(svar.days).toBe(0);
+    expect(svar.isToday).toBe(true);
+  });
+});
+
+describe("events uden svensk udgave", () => {
+  test("hvert event har altid en dansk udgave", () => {
+    for (const event of DAGE_TIL_EVENTS) {
+      expect(event.da).toBeDefined();
+      expect(event.anchor.da).toBeDefined();
+    }
+  });
+
+  test("et event med svensk slug har også et svensk anker", () => {
+    for (const event of DAGE_TIL_EVENTS) {
+      if (event.se) expect(event.anchor.se).toBeDefined();
+    }
   });
 });

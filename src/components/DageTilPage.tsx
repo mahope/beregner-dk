@@ -15,6 +15,7 @@ import {
   resolveDageTilSlug,
   type DageTilEvent,
   type DageTilLocale,
+  dageTilArm,
 } from "@/lib/dage-til";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { getDomainConfigByLocale } from "@/lib/domain-config";
@@ -85,7 +86,7 @@ function getAnswerText(
   const weekday = copy[locale].weekday(answer.targetDate.getUTCDay());
   if (answer.isToday) {
     return {
-      headline: `${copy[locale].today} ${event[locale].copy.short} — 0 ${u.days}`,
+      headline: `${copy[locale].today} ${dageTilArm(event, locale).copy.short} — 0 ${u.days}`,
       equivalent: locale === "da" ? "Der er 0 dage tilbage." : "Det finns 0 dagar kvar.",
       target: `${target} ${formatTargetYear(answer.targetDate)} er en ${weekday}`,
       targetIso: answer.targetDate.toISOString().slice(0, 10),
@@ -94,7 +95,7 @@ function getAnswerText(
   return {
     headline: `${copy[locale].answerPrefix} ${count(answer.days, u.day, u.days)} ${
       copy[locale].to
-    } ${event[locale].copy.short}`,
+    } ${dageTilArm(event, locale).copy.short}`,
     equivalent:
       answer.daysLeft === 0
         ? `${copy[locale].equivalent} ${count(answer.weeks, u.week, u.weeks)}.`
@@ -121,7 +122,7 @@ export async function buildDageTilMetadata(
   }
   const dageLocale: DageTilLocale = locale;
   const event = getDageTilEvents(dageLocale).find(
-    (candidate) => candidate[dageLocale].slug === slug
+    (candidate) => candidate[dageLocale]?.slug === slug
   );
   if (!event) {
     return { robots: { index: false, follow: false } };
@@ -134,8 +135,12 @@ export async function buildDageTilMetadata(
   const languages: Record<string, string> = {};
   languages[getDomainConfigByLocale("da").hreflangCode] =
     `${getDomainConfigByLocale("da").baseUrl}/dage-til/${event.da.slug}`;
-  languages[getDomainConfigByLocale("se").hreflangCode] =
-    `${getDomainConfigByLocale("se").baseUrl}/dagar-till/${event.se.slug}`;
+  // Sommerferien has no Swedish date, so there is no Swedish page to point
+  // at; hreflang to a 404 would be worse than no hreflang at all.
+  if (event.se) {
+    languages[getDomainConfigByLocale("se").hreflangCode] =
+      `${getDomainConfigByLocale("se").baseUrl}/dagar-till/${event.se.slug}`;
+  }
   languages["x-default"] = languages.da;
 
   // The title carries the question and the answer, and *not* the site name:
@@ -145,7 +150,7 @@ export async function buildDageTilMetadata(
   // title; these nine are the exception because their question alone is the
   // whole lift. C81 locked this for the 160 `page-data` titles, and this is
   // the same rule applied to the nine the gate could not see.
-  const titleText = `${event[dageLocale].copy.question} ${count(days, u.day, u.days)}`;
+  const titleText = `${dageTilArm(event, dageLocale).copy.question} ${count(days, u.day, u.days)}`;
 
   // The description used to open with the event's own question — the exact
   // words the title already carries — so the first ~38 characters of the
@@ -204,7 +209,7 @@ export async function DageTilRoute({
   const today = new Date();
   const c = copy[dageLocale];
   const u = units[dageLocale];
-  const eventCopy = event[dageLocale].copy;
+  const eventCopy = dageTilArm(event, dageLocale).copy;
   const answer = getDageTilAnswer(event, dageLocale, today);
   const { headline, equivalent, target, targetIso } = getAnswerText(
     event,
@@ -267,12 +272,12 @@ export async function DageTilRoute({
         <p className="text-gray-600 dark:text-gray-400 mb-4">{c.ctaBody}</p>
         <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-4">
           {others.map((other) => {
-            const otherCopy = other[dageLocale].copy;
+            const otherCopy = dageTilArm(other, dageLocale).copy;
             const otherAnswer = getDageTilAnswer(other, dageLocale, today);
             return (
               <li key={other.id}>
                 <Link
-                  href={`${prefix}${other[dageLocale].slug}`}
+                  href={`${prefix}${dageTilArm(other, dageLocale).slug}`}
                   className="flex items-center justify-between gap-3 rounded-lg border border-gray-200 dark:border-gray-700 px-3 py-2 text-sm hover:border-blue-300 dark:hover:border-blue-600"
                 >
                   <span className="font-medium text-gray-800 dark:text-gray-100">

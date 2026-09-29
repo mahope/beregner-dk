@@ -2,7 +2,8 @@ import Link from "next/link";
 import { generatePageMetadata } from "@/lib/page-helpers";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
-import { getDageTilEvents, getDageTilPrefix, isDageTilLocale } from "@/lib/dage-til";
+import { getDageTilEvents, getDageTilPrefix, isDageTilLocale, dageTilArm,
+} from "@/lib/dage-til";
 import { excelEksempel } from "@/lib/nedtaelling-eksempler";
 import { formatNumber } from "@/lib/format";
 import NedtaellingBeregner from "@/components/NedtaellingBeregner";
@@ -22,8 +23,8 @@ export default async function NedtaellingPage() {
   const pageData = getPageData("nedtaelling", locale) || getPageData("nedtaelling", "da")!;
   const dageTilLinks = isDageTilLocale(locale)
     ? getDageTilEvents(locale).map((event) => ({
-        href: `${getDageTilPrefix(locale)}${event[locale].slug}`,
-        question: event[locale].copy.question,
+        href: `${getDageTilPrefix(locale)}${dageTilArm(event, locale).slug}`,
+        question: dageTilArm(event, locale).copy.question,
       }))
     : [];
 

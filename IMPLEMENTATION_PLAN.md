@@ -1,3 +1,5 @@
+STATUS: KØ — **C169 er landet: sommerferien var GSC's næststørste `/dato`-søgnings næste spørgsmål, og vi havde nul sider — ikke fordi spørgsmålet var umuligt, men fordi kildens egen docblock erklærede det for "municipality specific" og udelod det.** Fire af de fem variationer under "dage til sommerferie" (DA-autocomplete 08:33) var ubesvarede, og docblocken havde *delvis* ret: ferier afgøres kommunalt, bortset fra sommerferiens **begyndelsestidspunkt, der er fastsat som sidste lørdag i juni** i folkeskoleloven af 2024 (hentet fra Lex 2026-09-29, fordi uden kilden var opgaven ikke bygbar). Nedtællingen alle søger efter går til *starten* — så der er ét nationalt svar, og det er 2026-06-27 / 2027-06-26 / 2028-06-24. **Det svenska `sommarlov` har derimod ingen national dato** (hver kommun fastsætger den), så eventet fik **kun en `da`-arm**, hvilket krævede at `DageTilEvent.se` blev optional gennem hele kæden — `resolveDageTilSlug` må ikke længre 301'e sommerferiens danske slug til en svensk side der ikke finder (den giver 403/noindex), og `DageTilPage` sætter ikke `hreflang="sv"` uden en svensk side. **To fejl i min egen måling, fundet fordi mine tests faldt:** min invariant "dagen efter den sidste lørdag ligger i juli" er kun sand når lørdagen er den 30. (koden var rigtig, testen tog fejl), og jeg regnede 271 dage mod nods 270. **To gamle tests låste den gamle *ikke*-egenskab — samme antal sider i begge sprog — og det var rigtigt, de faldt:** de er skrevet om til "da har alle 15, se har præcis de 14 med et svensk dato, forskellen er `["sommerferien"]`". **En rigtig fejl i min egen kode, fundet af fire gamle tests:** min første `resolveDageTilSlug` slog alle krydssprogs-redirects ihjel, fordi "juldagen" er det *svenske* slug for juledagen. Målt på rigtig server (port 3722, fri verificeret inden start): `/dage-til/sommerferien` 200 med titlen "…? **270** dage", canonical korrekt, 4 `Question`, `hrefLang` = `da` + `x-default` **uden `sv`**, sitemap 14 → 15, link fra `/`, `/dato` og `/nedtaelling`, **beraknare.se 403 på slaget og 0 forekomster på forsiden**. Gate grøn: lint (588 filer), **2.663 tests / 172 filer** (fra 2.645 / 172), build (141 sider). Efterårs- og vinterferie er **ikke** bygget: de er kommunale uden lovfast start. Se opgave 169.
+
 STATUS: KØ — **C168 er landet: opgave 159's andet acceptkriterium — "kør porten på den *byggede* server og sammenlign med kildefundene" — afslørede at porten ikke så to ægte danske lækager på beraknare.se, og den tredje fandt scanneren selv, da den kørte mod live.** De **16** deploy-noter med udløbet vindue er lukket ved **indholdskontrol** kl. 08:06-08:20 (C114, C115, C118-C123, C155, C156, C157, C159, C160, C161, C163, C164, C165, C166), og **C167 er korrekt stadig åben** — den blev mergeret 07:49, altså *efter* 07:30-batchen, så dens første vindue er 12:30, og `/alder` har stadig FAQ 10 (skal være 12). **Kriterium 1 er dermed lukket, og kriterium 3 siger at en afvigelse er en ny iteration, ikke en note der lukkes — så det er den, der blev lavet.** Kriterium 2 krævede at køre porten mod den byggede server og sammenligne. Det gav **0 fund i én retning** (de 685 "døde" strenge fandtes ingen af dem i den server-renderede HTML) og **2 sider i den anden** — altså afvigelse. **De tre fund er ægte, målte på rigtig server og i markupken:** (1) beraknare.se `/tidszone` skrev **"Grønland"** med dansk ø i landetabellen, fordi C155 lagde landet ind uden sit `landSe`; (2) beraknare.se `/valuta`'s valuta-`<select>` viste **"Britiske Pund", "Svenske Kroner", "Danske Kroner", "Thailandske Baht"** i alle tre sprog, fordi `VALUTA_METADATA` kun havde ét navn pr. kode; (3) beraknare.se `/promille` skrev **"før den är under"** og **"altid kortere end"** i den svenska gren af en fælles template-literal — dansk *før* og *end* i en svensk sætning, fundet af den nye scanner mod *live*, ikke af kilden. **Hvorfor porten ikke så dem — og det er pointen:** alle tre er værdier der *når* en svensk læser gennem et opslag ved visningsstedet (`landSe ?? landDa`, `VALUTA_METADATA[code]?.navn`), ikke gennem en `locale === "…"`-gren port-analysen kan læse. `/tidszone`s danske streng er desuden dømt **DØD** — korrekt for den arm scanneren kan se; den manglende `landSe` er en *fraværelse*, og en fraværende nøgle giver intet fund. **Målefejl nr. 32 (min egen, og den farligste af alle målefejlene her):** min første krydskontrol reducerede siden med `html.split('<script')[0]`, som skærer ved første `<script>` i `<head>` og derfor **kasserer hele `<body>`**. Den meldte **0 på en side med to ægte lækager** — og meldte også 0 på en *plantet* dansk afsnit. Den blev kun opdaget fordi jeg plantede en fixture, ellers havde jeg troet på et tal. Derfor planter *alle* 9 tests i `rendered-leak-scan-gate.test.ts` deres fejl, og testen der kræver at scanneren *finder* den danske sætning er den første. **Rettelsen:** `landSe: "Grönland"` på Nuuk (sætningen "…följer Sverige" bygges af samme array, så den følger med), ny `VALUTA_NAVN` med `se`/`no`-navne pr. kode + eksporteret `valutaNavn(code, locale)`, og den svenska promille-arm. **Harness: 2.629 → 2.645 tests / 170 → 172 filer, modsvejs verificeret — 6 af de 6 nye fejltests falder med master-koden** (4 valuta, 1 tidszone, 1 promille; de tre "dansk er uændret"-låse skal være grønne begge veje). **Målt på rigtig server (build → `next start` port 3700 og 3701, begge verificeret fri *inden* start):** `/tidszone` SE 0×"Grønland" / 4×"Grönland" + "Storbritannien, Grönland, Grekland och Spanien följer Sverige"; `/promille` SE 1×"före den är under", 1×"kortare än", 0×"før", 0×"kortere end", 0×"er derfor"; `/valuta` SE 3×"Brittiska pund", 3×"Svenska kronor", 2×"Danska kronor", 2×"Thailändska baht", 0× alle danske. **Dansk urørt, målt:** Grønland 5, "følger Danmark" 1, "før den er under" 1, "kortere end" 1, "Britiske Pund" 3. **Den nye scanner kørt mod alle 71 svenske sider i det nye build: 0** (var 2) — og mod en tilplantet side: 2 fund, exit 1, så den er ikke vakuum-grøn. Gate grøn: lint (588 filer), **2.645 tests / 172 filer**, build (141 sider), `locale-leak.mjs --gate` exit 0 (720/685/35/0 uændret), `knapgruppe-scan.mjs` 0/0. Kode + plan i ét squash-commit på `ceo/luk-deploy-noter-159`; se opgave 168.
 
 STATUS: KØ — **C166 er landet: de 28 `dage-til`-siders meta description gentog **titlens eget spørgsmål ordret** og løb 179-195 tegn, så Google klippede dem midt i en sætning — præcis C164's fejl, men på de sider C164's måling ikke kunne se.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den, 119 er kilde-blokeret), og opgave **159** er **fortsat klokke-blokeret**: de ni åbne noter har første vindue **2026-09-29 07:30**, og det var 07:00, så ingen blev rørt. **Valget kom af at måle hele sitets `description` på tværs af domæner i stedet for endnu en side.** C164 fandt denne fejl i `page-data.ts` (2 af 157 par) og rettede begge — men **`dage-til`siderne har ingen post i `page-data.ts`**: de bygges i `buildDageTilMetadata` (`DageTilPage.tsx:111`), så hverken C164's 157-par-scan eller C81's titel-lås (som kun låste `metaTitle`) kunne nå dem. Samme blind spot som C157's `se:`-blokke med type-annotation. **Målt på begge domæner, live:** **28/28** sider har en description der *starter med spørgsmålet ordret* (før: `"Hvor mange dage er der til juleaften? Der er 86 dage til juleaften. …"` — altså spørgsmålet fra titlen, og så en **genfortælling af dage-tallet titlen også viser**), og **28/28** er **179-195 tegn** mod Googles ~160-tegns afkortning, så de blev kappet midt i "…andre datoer med datoberegneren". **Kontrollen på resten af sitet holdt, og det er derfor jeg kun rettede de 28:** alle 135 danske og 71 svenske sider blev målt for krydsduplikater (**0** i `title`, `description` og `h1`), canonical-afvigelser (**0**) og manglende metadata (**0** på de 125 kalkulator/blog-sider; de 10 `/kategori/*` har `<h1>` men min egen første scanner meldte "mangler h1" — **målefejl nr. 22**, fordi regex'en `<h1[^>]*>([^<]*)` standsede ved det inline-SVG-ikon der går *inden* i teksten). Titler uden brand er **alle ≤ 60** i begge domæner, så C81's titelregel er lukket på hele sitet. **Rettelsen (kun `buildDageTilMetadata`):** descriptionen starter nu på `headline` (svaret) i stedet for på `copy.question`, og den afsluttende sætning er skåret fra "Tallet opdateres hver dag, **og du kan regne alle andre datoer med datoberegneren**" til "Tallet opdateres hver dag." — de frigjorte tegn går til **dato, ugedag og opdateringsfristen**, altså de tre ting titlen *ikke* siger. **Målt på rigtig server** (`next start` port 3411, porten verificeret fri *inden* start, begge domæner via `Host:`): DA **88-94 tegn** (fra 179-195), SE **88-96** med **"till"** (ikke det live "til" — C160's fix er på master og uden deploy), og `/dage-til/grundlovsdag` giver præcis `Der er 249 dage til grundlovsdag. 5. juni 2027 er en lørdag. Tallet opdateres hver dag.`; `/api/health` → `status: ok`. **Harness: 6 nye tests i `dage-til-routes.test.tsx` (22 → 28), modsvejs verificeret — alle 6 falder** med kun `DageTilPage.tsx` stashed. De spejler C81's test (kalder den rigtige producer, genbygger ikke strengen) og tilføjer C164's (sammenligner mod `copy.question`, ikke mod hele titlen — ellers ville en description der gentager spørgsmålet og så afviger være grøn). En test låser `isToday`-grenen på en **indgående dato** (ikke systemklokken — min første version brugte `vi.setSystemTime` og fejlede, fordi `buildDageTilMetadata` tager `today` som *argument*; det er målefejl nr. 23). **Gate grøn:** lint (**584 filer**), **2.620 tests / 170 filer** (fra 2.614 / 170), build (**141 sider**), `locale-leak.mjs --gate` exit 0 (715/680/35/0). Rørte filer: `DageTilPage.tsx` og testen — **ingen beregningslogik, ingen `<h1>`, ingen titel, ingen URL, ingen sitemap, ingen dansk side rørt**. Branch `ceo/dage-til-description`. **MÅL:** `/dage-til/*` 28 sider, baseline **0 målte visninger i GSC's top-16 på begge domæner** (de er ikke nævnt i nogen af listerne) — **det er derfor klassen måles på CTR-per-side og ikke på samlet trafik**: GSC's største `/dato`-søgning er "hvor mange dage er der til 1 december" (1.063 v, **2 klik**, pos. 5), altså de søgninger siderne er skrevet til. Måles igen **2026-10-13** på antal sider der viser sig i GSC. Forventningen er **flere klik på de positioner de allerede har**, ikke nye visninger.
@@ -7629,6 +7631,105 @@ efter datagrund:
   `/loen-efter-skat`, `/lon-efter-skatt`, `/ugenummer`, `/flyttebudget`, `/boligsalg`.
 
 ---
+
+#### 169. [x] FÆRDIG 2026-09-29 — C169 — **sommerferien som `dage-til`-dato: GSC's næststørste søgning på `/dato` ("hvor mange dage er der til …", 1.131 v pos. 5) danner hele sommerferie-klyngen, og vi havde nul sider — fordi kildens egen docblock sagde, at datoen var "municipality specific" og derfor bevidst udeladt**
+
+- **MÅL:** `/dato` DA baseline **131.920 visninger / 822 klik / CTR 0,6 % / pos. 5,7**,
+  `/dage-til/sommerferien` **0 baseline** (ny side), DA-autocomplete under
+  "hvor mange dage er der til" (2026-09-29 08:33) — måles igen **2026-10-13**.
+  Klyngen: "dage til sommerferie", "dage tilbage til sommerferie", "dage til
+  sommerferie 2026", "hvor mange dage til sommerferie 2026" (4 af 5 under
+  "dage til sommerferie"), samt "dage til efterårsferie" (2) og "dage til
+  vinterferie" (2) — **ingen af dem besvaret**.
+
+- **Datagrund:** GSC `/dato` 131.920 v mod 128.000 i promptens snapshot, og
+  "hvor mange dage er der til 1 december" 1.131 v pos. 5 / "… den 24 december"
+  1.013 v pos. 5. To af GSC's fire største `/dato`-søgninger er
+  nedtællings-spørgsmål, og sommerferien var den eneste af de ti
+  autocomplete-variationer uden en side.
+
+- **Fundet der ændrede konklusionen.** `dage-til.ts`'s docblock skrev at
+  sommerferien var "deliberately left out rather than guessed", fordi den er
+  "municipality specific". **Det er kun *slutdatoen*.** Ferier afgøres
+  kommunalt, bortset fra sommerferiens **begyndelsestidspunkt, der er fastsat
+  som sidste lørdag i juni** i folkeskoleloven af 2024 (Lex, opslag
+  2026-09-29). Nedtællingen alle søger efter går til *starten*, så der er ét
+  nationalt svar. Uden den kilde var opgaven ikke bygbar, så den blev hentet
+  først — ikke regnet.
+
+- **Rettelsen er én regel og én side, dansk kun.** Ny `DageTilKind`
+  `"summerferie"` + `sommerferieStart(year)`: sidste lørdag i juni, fundet
+  ved at scanne 30→24. juni. 2026-06-27, 2027-06-26, 2028-06-24.
+
+- **Det svenska `sommarlov` har INGEN national dato** — hver kommun fastsætter
+  den, så en svensk side ville tælle ned til et tal, ingen ved. Derfor fik
+  eventet **kun en `da`-arm**, og det krævede at `DageTilEvent.se` blev
+  optional: `getDageTilEvents`/`getDageTilSlugs`/`getDageTilEventBySlug`
+  filtrerer nu på den arm der findes, `resolveDageTilSlug` returnerer
+  `undefined` for sommerferiens danske slug på beraknare.se (før hed det 301
+  til en side der ikke findes), og `DageTilPage` sætter **ikke** `hreflang="sv"`
+  når der ikke er en svensk side. Ny `dageTilArm(event, locale)` giver
+  TypeScript armen de steder, der læser `event[locale]` på 8 call sites i
+  fire filer.
+
+- **Harness: 2.645 → 2.663 tests / 172 filer (+18). Modsvejs verificeret:**
+  `sommerferieStart` fejler uden funktionen, "har INGEN svensk udgave" og
+  "løser ikke det danske slug på beraknare.se" fejler med master-koden.
+  `sommerferieStart` chalkes **61 år (1990-2050)** mod lovens invariant — er
+  lørdag i juni og *ingen senere lørdag findes frem til den 30.* — fordi tre
+  hårdkodede datoer kunne være rigtige ved et tilfælde (C45's fejlklasse).
+
+- **To fejl i min egen måling, fundet fordi *mine egne tests* faldt.**
+  (1) **Min invariant var den forkerte:** jeg skrev at dagen efter den sidste
+  lørdag *skal* ligge i juli, hvilket kun holder når lørdagen er den 30.
+  Vitest sagde "expected 5 to be 6" på en side, hvor koden var rigtig — samme
+  fejltype som C94's negative lås. Rettet til at skanne 30. juni baglæns.
+  (2) **Jeg regnede 271 dage, node siger 270** (29. september 2026 → 26. juni
+  2027). Dagen er nu regnet i node og låst, ikke i hovedet.
+
+- **To eksisterende tests låste den gamle *ikke*-egenskab, og det var
+  rigtigt at de faldt.** "alle events har unikke slugs pr. locale og **samme
+  antal sider i begge sprog**" krævede paritet, og "… og mindst to fakta **i
+  begge sprog**" gjorde det samme. De er ikke svækket — de er skrevet om til
+  den egenskab der nu gælder: `da` har **alle** events (15), `se` har præcis
+  dem med et svensk dato (14), og forskellen er `["sommerferien"]` — låst som
+  liste, så den næste `da`-only dato er en bevidst beslutning.
+  **Først forsøgte jeg "dansk slugs er en overmængde af svenske", og den er
+  falsk:** dansk siger *juleaften*, svensk *julafton*. Kun antallet kan
+  sammenlignes.
+
+- **Målt på rigtig server** (`next build` → `next start` port 3722, porten
+  verificeret fri *inden* start — C117's lære): `/dage-til/sommerferien` **200**
+  med `<title>` "Hvor mange dage er der til sommerferie? **270** dage",
+  canonical `https://minberegner.dk/dage-til/sommerferien`, **4** `Question` i
+  JSON-LD, "sidste lørdag i juni" **9** gange. `hrefLang` (stort L — grep på
+  `hreflang=` giver 0 fund og er vakuum-grøn, målefejl 18 igen) er `da` +
+  `x-default` **og ingen `sv`**, mens `/dage-til/sankthansaftensdag` stadig har
+  alle tre. Sitemap **14 → 15** dage-til-sider, 136 i alt. Link fra `/`,
+  `/dato` og `/nedtaelling` — 1 hver. **beraknare.se `/dage-til/sommerferien`
+  → 403** (noindex), og **`beraknare.se` forside har 0** forekomster af
+  "sommerferien". Kryds-sprogets 301'er er urørte og målt begge veje:
+  `beraknare.se/dage-til/sankthansaftensdag` → 301 `/dagar-till/midsommarafton`,
+  `minberegner.dk/dagar-till/midsommarafton` → 301 `/dage-til/sankthansaftensdag`.
+
+- **Én fejl i min egen kode, fundet fordi en gammel test faldt.** Første
+  `resolveDageTilSlug`-skrivning lod kun `da`-slugen matche på `da`-domænet
+  og slog derved **alle krydssprogs-redirects ihjel** — "juldagen" er det
+  *svenske* slug for juledagen, så fire gamle tests faldt. Rettelsen er
+  igen den oprindelige match plus én ny linje: match `da.slug === slug ||
+  se?.slug === slug`, og returnér `undefined` når den bedste locale mangler.
+
+- **Bevidst ikke bygget:** efterårs- og vinterferie. De er **kommunale** uden
+  lovfast start — modsat sommerferien er der intet at regne på, og en side med
+  et gættet tal er værre end ingen side.
+
+- **Gate grøn:** lint (**588 filer**), **2.663 tests / 172 filer**, build
+  (**141 sider** + typecheck, 0 non-test tsc-fejl mod master' 0). Kode + plan
+  i ét squash-commit på `ceo/sommerferie-dage-til`.
+
+- **MÅL:** se blokken øverst. Forventningen er visninger på en klynge, der
+  før gik til konkurrenterne, plus at `/dato` får **15** interne
+  nedtællings-links på dansk — ikke højere CTR på `/dato` i sig selv.
 
 ## Morgenrapport 2026-08-24 06:45
 - ✅ Boligsalgsberegner (`/boligsalg`): logik+tests+UI+SEO-side+registrering — commit 00dbf4b
@@ -15867,6 +15968,46 @@ mod en tilplantet side: 2 fund og exit 1, så den er ikke vakuum-grøn.
 **Gate grøn:** lint (588 filer), **2.645 tests / 172 filer**, build (141
 sider), `locale-leak.mjs --gate` exit 0 (130/720/685/35/0 uændret),
 `knapgruppe-scan.mjs` 0/0.
+
+- ⏳ **VERIFICÉR DEPLOY: C169 — `/dage-til/sommerferien` skal være live på
+  minberegner.dk, og beraknare.se skal *ikke* have den.** Kode + plan i ét
+  squash-commit på `ceo/sommerferie-dage-til`. Første kandidatvindue
+  **2026-09-29 12:30**. Kun `src/lib/dage-til.ts` (ny `sommerferie`-regel +
+  ét event + optional `se`), `DageTilPage.tsx`, `dato/page.tsx`,
+  `nedtaelling/page.tsx`, `home-data.ts` og testfilen er rørt — **ingen
+  beregningslogik ændret, ingen eksisterende side ændret, ingen dansk tekst
+  ændret, ingen svensk side ændret**.
+
+  1. `https://minberegner.dk/dage-til/sommerferien` skal være **200** med
+     `<title>` der indeholder "Hvor mange dage er der til sommerferie?" og et
+     dage-tal. Tallet afhænger af dags dato — **kræv at det er det samme tal
+     som `node -e "console.log(Math.round((Date.UTC(2027,5,26)-Date.UTC(2026,8,29))/864e5))"`**
+     giver, *kun* hvis du måler pr. 29. september 2026. Ellers: kontrollér at
+     datoen i teksten er den **sidste lørdag i juni** for året.
+  2. Siden skal have canonical
+     `https://minberegner.dk/dage-til/sommerferien` og **4** `"@type":"Question"`
+     i JSON-LD'en.
+  3. **KONTROL mod at hreflang ikke peger på en død side:** siden skal have
+     `hrefLang="da"` og `hrefLang="x-default"` og **ikke** `hrefLang="sv"`.
+     Mærk størrelsen på L i `hrefLang` — grep på `hreflang=` giver 0 fund og
+     er vakuum-grøn (målefejl 18).
+  4. `/dage-til/sankthansaftensdag` skal stadig have **alle tre** hreflang,
+     og `https://beraknare.se/dage-til/sankthansaftensdag` skal stadig
+     **301** til `https://beraknare.se/dagar-till/midsommarafton` — krydssprogs-
+     redirecten var den, min første `resolveDageTilSlug` slog ihjel.
+  5. `https://beraknare.se/dage-til/sommerferien` skal **ikke** være en
+     dansk eller svensk side. Mål indhold, ikke kun status: den skal have
+     0 forekomster af "sommerferie" i det synlige brødtekst.
+  6. `https://beraknare.se/` skal stadig have **0** forekomster af
+     "sommerferien" — den svenske forside må ikke få et kort, der leder til
+     en side der ikke findes.
+  7. `https://minberegner.dk/sitemap.xml` skal have **15** `dage-til`-URL'er,
+     hvoraf én er `/dage-til/sommerferien`.
+  8. `/`, `/dato` og `/nedtaelling` skal hver have mindst ét
+     `href="/dage-til/sommerferien"`.
+  9. `npm run test -- src/lib/dage-til.test.ts` skal give **93 passed** — de
+     18 nye tests inkl. den 61-årige lovchkalkering af "sidste lørdag i juni".
+  10. `https://minberegner.dk/api/health` → `status: ok`.
 
 - ⏳ **VERIFICÉR DEPLOY: C168 — beraknare.se skal have "Grönland" i stedet for
   "Grønland", "Brittiska pund" i stedet for "Britiske Pund", og "före den är

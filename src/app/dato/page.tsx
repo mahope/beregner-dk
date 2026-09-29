@@ -9,7 +9,8 @@ import RelateredeArtikler from "@/components/RelateredeArtikler";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Link from "next/link";
-import { dageTilbageIAaret, getDageTilEvents, getDageTilPrefix, isDageTilLocale } from "@/lib/dage-til";
+import { dageTilbageIAaret, getDageTilEvents, getDageTilPrefix, isDageTilLocale, dageTilArm,
+} from "@/lib/dage-til";
 
 export async function generateMetadata() {
   return generatePageMetadata("dato");
@@ -25,8 +26,8 @@ export default async function DatoPage() {
   // `/dato` linkede til ingen af dem: hele kæden lå kun den anden vej.
   const dageTilLinks = isDageTilLocale(locale)
     ? getDageTilEvents(locale).map((event) => ({
-        href: `${getDageTilPrefix(locale)}${event[locale].slug}`,
-        question: event[locale].copy.question,
+        href: `${getDageTilPrefix(locale)}${dageTilArm(event, locale).slug}`,
+        question: dageTilArm(event, locale).copy.question,
       }))
     : [];
   // "hvor mange dage er der tilbage af 2026?" (227 visninger, pos. 5 i dansk

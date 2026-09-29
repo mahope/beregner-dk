@@ -8,7 +8,8 @@ export type DageTilKind =
   | "easter"
   | "easterOffset"
   | "midsummer"
-  | "advent";
+  | "advent"
+  | "summerferie";
 
 export interface DageTilAnchor {
   kind: DageTilKind;
@@ -33,6 +34,11 @@ export interface DageTilCopy {
   faq: { question: string; answer: string }[];
 }
 
+export interface DageTilLocaleArm {
+  slug: string;
+  copy: DageTilCopy;
+}
+
 export interface DageTilEvent {
   id: string;
   /**
@@ -40,16 +46,23 @@ export interface DageTilEvent {
    * Grundlovsdag (5 June) and Sveriges nationaldag (6 June) are not — they
    * are separate questions rather than translations of each other.
    */
-  anchor: Record<DageTilLocale, DageTilAnchor>;
-  da: { slug: string; copy: DageTilCopy };
-  se: { slug: string; copy: DageTilCopy };
+  anchor: { da: DageTilAnchor; se?: DageTilAnchor };
+  da: DageTilLocaleArm;
+  /**
+   * Absent when the date has no answer in that country. Summerferien is the
+   * only one: the Danish start is fixed by law, but the Swedish sommarlov is
+   * set by each kommun and has no national date, so a Swedish page would have
+   * to invent the number it counts down to. `da` is required because
+   * minberegner.dk is the primary domain.
+   */
+  se?: DageTilLocaleArm;
 }
 
 /**
  * Curated list of Danish/Swedish dates that people actually search for as
- * "how many days until X". Only fixed or computable anchors — a variable
- * anchor such as "sommerferie" (municipality specific) is deliberately left
- * out rather than guessed.
+ * "how many days until X". Only fixed or computable anchors. A date that is
+ * *only* a municipal decision is deliberately left out rather than guessed:
+ * the Swedish sommarlov has no national date at all, so it has no `se` arm.
  */
 export const DAGE_TIL_EVENTS: DageTilEvent[] = [
   {
@@ -968,6 +981,46 @@ export const DAGE_TIL_EVENTS: DageTilEvent[] = [
       },
     },
   },
+  {
+    id: "sommerferien",
+    anchor: {
+      da: { kind: "summerferie", month: 6, day: 0, offsetDays: 0 },
+    },
+    da: {
+      slug: "sommerferien",
+      copy: {
+        short: "sommerferien",
+        question: "Hvor mange dage er der til sommerferie?",
+        facts: [
+          "Sommerferien begynder altid den sidste lørdag i juni. I 2026 er det 27. juni, i 2027 26. juni og i 2028 24. juni.",
+          "Startdatoen er fastlagt i folkeskoleloven, mens **slutdatoen** er kommunal — de fleste holder i tre til fem uger.",
+          "Er din kommune ikke færdig med undervisningen, når loven siger, kan den flytte starten, så tjek altid din egen kommunes ferieplan.",
+        ],
+        faq: [
+          {
+            question: "Hvornår begynder sommerferien i 2026?",
+            answer:
+              "Lovens dato er den **sidste lørdag i juni**. I 2026 er det 27. juni 2026, i 2027 26. juni og i 2028 24. juni.",
+          },
+          {
+            question: "Hvornår slutter sommerferien?",
+            answer:
+              "Det er ikke fastlagt i loven. Hver kommune fastsætter slutdatoen, og den ligger typisk tre til fem uger efter starten, så en klasse kan have fri, når en anden har undervisning.",
+          },
+          {
+            question: "Kan sommerferien begynde senere end 27. juni?",
+            answer:
+              "Kun hvis din kommune beslutter det. Folkeskoleloven fastlægger starten til den sidste lørdag i juni, og det er den dato, alle børn har fri fra, medmindre kommunen har besluttet andet.",
+          },
+          {
+            question: "Hvornår starter sommerferien, når loven siger den er begyndt?",
+            answer:
+              "Så har klassen fri, selv om en anden kommune en anden dag. Ferieplanlægningen er kommunal, så det er din egen kommunes dato, der gælder for dit barn.",
+          },
+        ],
+      },
+    },
+  },
 ];
 
 /** Locales that have a real dage-til landing page. */
@@ -1026,6 +1079,29 @@ export function midsommarafton(year: number, offsetDays = 0): Date {
 }
 
 /**
+ * First day of the Danish summer holiday for a year: the last Saturday in
+ * June. Danish school holidays are otherwise decided by each municipality,
+ * but this one start is fixed by the Folkeskoleloven (2024), so the countdown
+ * people actually search for — "hvor mange dage er der til sommerferie" — has
+ * one national answer. Only the *end* varies (three to five weeks), so this
+ * is a start date and nothing more.
+ *
+ * The Swedish sommarlov has no equivalent national date; each kommun sets it,
+ * so there is deliberately no `se` arm for it.
+ */
+export function sommerferieStart(year: number): Date {
+  // June has 30 days, so the last Saturday is the latest Saturday that falls
+  // on or before the 30th.
+  for (let day = 30; day >= 24; day--) {
+    const candidate = new Date(Date.UTC(year, 5, day));
+    if (candidate.getUTCDay() === 6) return candidate;
+  }
+  // Unreachable: the 24-30 June window is seven days long and therefore always
+  // contains exactly one Saturday.
+  throw new Error(`Ingen lørdag 24.-30. juni ${year}`);
+}
+
+/**
  * 1. advent for a year: the Sunday that falls between 27 November and
  * 3 December inclusive, because advent always has four Sundays and the
  * fourth always lands in the week of 18-24 December. The window is a
@@ -1051,6 +1127,9 @@ function anchorInYear(anchor: DageTilAnchor, year: number): Date {
   }
   if (anchor.kind === "midsummer") {
     return midsommarafton(year, anchor.offsetDays);
+  }
+  if (anchor.kind === "summerferie") {
+    return sommerferieStart(year);
   }
   if (anchor.kind === "advent") {
     return forstaAdvent(year, anchor.adventOffsetDays ?? 0);
@@ -1115,12 +1194,32 @@ export interface DageTilAnswer {
   isToday: boolean;
 }
 
+/**
+ * The locale arm of an event, or an error if it has none. Every caller reaches
+ * the arm through `getDageTilEvents(locale)`, which filters the events down to
+ * the ones that do, so a missing arm means a list was built by hand.
+ */
+export function dageTilArm(
+  event: DageTilEvent,
+  locale: DageTilLocale
+): DageTilLocaleArm {
+  const arm = event[locale];
+  if (!arm) {
+    throw new Error(`Datoen "${event.id}" har ingen ${locale}-udgave`);
+  }
+  return arm;
+}
+
 export function getDageTilAnswer(
   event: DageTilEvent,
   locale: DageTilLocale,
   today: Date
 ): DageTilAnswer {
-  const targetDate = getNextAnchorDate(event.anchor[locale], today);
+  const anchor = event.anchor[locale];
+  if (!anchor) {
+    throw new Error(`Datoen "${event.id}" har ingen ${locale}-udgave`);
+  }
+  const targetDate = getNextAnchorDate(anchor, today);
   const days = daysBetween(today, targetDate);
   return {
     days,
@@ -1145,13 +1244,21 @@ export function formatTargetYear(date: Date): string {
   return String(date.getUTCFullYear());
 }
 
+/**
+ * Events that actually have a page in this locale. Sommerferien has no
+ * Swedish arm, so it must never reach a beraknare.se list.
+ */
 export function getDageTilEvents(locale: Locale): DageTilEvent[] {
-  return isDageTilLocale(locale) ? DAGE_TIL_EVENTS : [];
+  if (!isDageTilLocale(locale)) return [];
+  return DAGE_TIL_EVENTS.filter((event) => event[locale] !== undefined);
 }
 
 export function getDageTilSlugs(locale: Locale): string[] {
   if (!isDageTilLocale(locale)) return [];
-  return DAGE_TIL_EVENTS.map((event) => event[locale].slug);
+  return DAGE_TIL_EVENTS.flatMap((event) => {
+    const arm = event[locale];
+    return arm ? [arm.slug] : [];
+  });
 }
 
 /** The event for a slug, or undefined if the slug is not one of ours. */
@@ -1160,7 +1267,7 @@ export function getDageTilEventBySlug(
   locale: Locale
 ): DageTilEvent | undefined {
   if (!isDageTilLocale(locale)) return undefined;
-  return DAGE_TIL_EVENTS.find((event) => event[locale].slug === slug);
+  return DAGE_TIL_EVENTS.find((event) => event[locale]?.slug === slug);
 }
 
 export interface DageTilSlugResolution {
@@ -1182,12 +1289,16 @@ export function resolveDageTilSlug(
   locale: Locale
 ): DageTilSlugResolution | undefined {
   if (!isDageTilLocale(locale)) return undefined;
+  // Either language's slug matches, because resolving across languages is the
+  // whole point — that is what makes the caller 301 to the locale's own slug.
   const event = DAGE_TIL_EVENTS.find(
-    (candidate) =>
-      candidate.da.slug === slug || candidate.se.slug === slug
+    (candidate) => candidate.da.slug === slug || candidate.se?.slug === slug
   );
   if (!event) return undefined;
-  const localeSlug = event[locale].slug;
+  // Sommerferien has no Swedish arm, so on beraknare.se its slug resolves to
+  // nothing rather than to a 301 towards a page that does not exist.
+  const localeSlug = event[locale]?.slug;
+  if (!localeSlug) return undefined;
   return { event, localeSlug, isOwnLocale: localeSlug === slug };
 }
 
