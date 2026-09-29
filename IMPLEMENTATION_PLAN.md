@@ -1,3 +1,38 @@
+STATUS: KØ — **C191 er landet: `/dato` og `/nedtaelling` linkede til de 15 dage-til-sider med spørgsmålsteksten alene — og GSC's to største søgninger på `/dato` er netop "hvor mange dage er der til 1 december" (1.131 visninger, pos. 5) og "hvor mange dage er der til den 24 december" (1.013, pos. 5). Siden der rangerede havde hverken antallet eller datoen stående: hele svaret lå på undersiden.**
+
+Køen havde ingen `I GANG`-opgave (179 kræver en rigtig browser, resten er færdige), så valget kom fra en måling af pariteten på tværs af begge domæner.
+
+**Først blev tre deploy-noter lukket ved indholdskontrol, ikke HTTP 200.** C186 (ni danske sider med dublet-`<h2>`), C187 (`/tidsberegner`'s lægge-sammen-sektion) og C188 (blogindlægget om klokken i USA, "16 byer" → 25) havde alle vinduet **17:30** passeret ved starten kl. 17:52. Målt på live: C186's ni sider har hver **1** "Ofte stillede spørgsmål" og **1** "Relaterede beregnere" (var 2 og 2), de fem side-specifikke overskrifter står stadig i `<FAQ title=…>`, `Question`-tallene er uændrede (11/10/6/11) og kontrol-siderne `/procent`, `/su`, `/bmi`, `/dato`, `/tidszone` har uændrede `<h2>`-tal (9/8/10/11/9). C187: begge sprog har det nye `<h2>`, DA **15** `Question` / SE **13**, summeringstabellen med 3 rækker er på begge, og ingen danske markører på beraknare.se. C188: "25 byer" **5** gange mod "16 byer" **0**, verdens-tabellen har **26 `<tr>`** (25 datarækker), Nuuk siger **4 timer bagud** (var 3 — en faktuel fejl) og Phoenix 8/9 mens Denver er 8/8. `/api/health` svarede `status: ok`. C189 og C190 har vindue **21:30** og står åbne.
+
+**Så kom målingen der valgte opgaven.** En paritetstabel over **15 delte stier på begge domæner** (ord, `<h2>`, `Question`, tabeller) viste, at de `da`-only-rettelser fra C83–C89 er lukket overalt undtagen to steder — `/moms` SE (1.235 mod 1.721 ord, 6 mod 11 FAQ) og `/brok` SE (370 mod 862 ord). Men `/dato` så *ikke* asymmetrisk ud, og det var netop det, der gjorde den interessant.
+
+**Den rigtige fejl, fundet fordi pariteten så ens ud: listerne på begge sider svarede på intet.** GSC (2026-08-30 → 09-27) giver `/dato` **132.313 visninger / 822 klik / CTR 0,6 % / pos. 5,7** (DA) og **99.136 v / 95 klik / 0,1 % / pos. 8,2** (SE) — til sammen sitets største og tredjestørste side. De to største danske søgninger er nedtællings-spørgsmål om en *konkret dato*, og den server-renderede `/dato` havde **0** forekomster af "hvor mange dage er der til 1 december" og **0** af "hvor mange dage er der til den 24 december". Afsnittet "Datoer folk oftest tæller ned til" listede de 15 spørgsmål som **rene links** — spørgsmålsteksten uden et eneste tal. Sådan så den ud:
+
+> Hvor mange dage er der til juledagen? Hvor mange dage er der til juleaften? Hvor mange dage er der til nytårsaften? …
+
+**Svarene lå på undersiderne** (`/dage-til/1-december` siger "Der er 63 dage"), altså den klassiske fejl: siden der *rangerer på spørgsmålet* sender brugeren videre for at få svaret. GSC's egen effekt er målt i tallene — 1.131 visninger, **2 klik**.
+
+**Rettelsen er ét tal pr. række, i begge sprog, på begke lister.** Hver række bærer nu dagens antal, datoen i sidens egen notationsform og den præcise uge-og-dag-form:
+
+> *Hvor mange dage er der til 1. december?* **1. december: 63 dage (9 uger).**
+
+**Ingen tal står hårdkodet to steder.** `getDageTilAnswer` — samme funktion `/dage-til/*` selv bruger til sit `<h1>` og sit `metaDescription` — regner hver række, så listen og undersiden ikke kan svare forskelligt på det samme spørgsmål. Det er C84's og C87's fejlklasse undgået *inden* den opstod. Siden er dynamisk (`getLocale()` læser `headers()`), så tallet regnes pr. request og kan ikke stå med gårsdags svar.
+
+**Rettelsen er bevidst kun på de to lister.** Titler, beskrivelser, FAQ, JSON-LD, sitemap, beregningslogik og `dage-til.ts` er urørte — listen er det ene sted, hvor siden nævner de 15 datoer uden at svare.
+
+**Tre ting fundet undervejs, alle ærlige.**
+1. **Min første JSX-udkast havde ternary-støj på to steder** (`link.target === "1 december" ? "är" : "är"` og `{locale === "se" ? "helligdag" : "helligdag"}`) — vestres to sider af en ternær, der var ens. Skrevet væk, fordi en læser skulle have stoppet ved den.
+2. **Biome fangede en regex, jeg ville have kørt med:** `/…[^]*?1 december 63 dagar/` er et *negativt tomt* tegnsæt, som matcher alt. Erstattet med `[\s\S]*?`. Fundet fordi `npm run lint` var en del af gaten — ikke ved at testen faldt, fordi den ville have været grøn.
+3. **Målefejl nr. 40 (min egen):** den første `npm run test` efter en kørsel, jeg havde startet *sammen med* `npm run lint` i parallel, meldte 1 fejl i `locale-leak-gate.test.ts`. Kørte jeg igen tre gange i træk: 185/185 filer og 2.924/2.924 tests, alle grønne, og `locale-leak-gate.test.ts` alene 3× 22/22. Fejlen kom fra de to ugyldige regexer, der lå i filerne mens linet kørte — altså min egen fejl, ikke flaky.
+
+**Harness:** `dato/page.test.tsx` **11 → 16 tests**, `nedtaelling/page.test.tsx` **9 → 14** — fem nye pr. fil. Den vigtigste kræver at **alle 15 rækker** bærer spørgsmål, dato *og* tal, ved at regex'e hver enkelt række mod `getDageTilAnswer`'s eget svar; den næste låser at listens tal er undersidens tal (63 dage / 9 uger pr. 29. september 2026); en tredje flytter systemklokken et dage og kræver 63 → 62, så en hårdkodet værdi ikke kan overleve; en fjerde kræver `dagar`/`veckor` på den svenska liste og **forbyder** en dansk enhed (`/\d+ dage(?![a-zåäö])/`) — det er den egentlige lækage-fælde; den femte er en negativ lås på at `no` hverken får rækker eller tal. **Modsvært verificeret: 4 af 5 nye tests falder** på begge filer med kun den gamle `page.tsx` på master (den femte er en lås og skal være grøn begge veje).
+
+**Gate grøn:** lint (**610 filer**), **2.924 tests / 185 filer** (fra 2.913/185), build (**142 sider**), `locale-leak.mjs --gate` **exit 0** (uændrede 740 kandidater / 705 døde / 35 kræver øjne), `knapgruppe-scan.mjs` **0/0**. Målt på rigtig bygget server (`next start` :4521, porten verificeret fri *inden* start, C117's lære) med begge `Host:`-headere: **alle fire sider 200** med de 15 tal, **krydscheck mod undersidernes eget svar** på 1. december / juleaften / juledagen / Halloween — DA "Der er 63/86/87/32 dage" og SE "Det finns 63/86/87/32 dagar", altså **identiske tal på liste og underside i begge sprog** — og **0** `æ`/`ø` samt **0** danske `dage`-strenge på de to svenske sider. Kontrol: `/procent` og `/tidsberegner` har 0 forekomster af den nye indgang.
+
+**Rørte filer:** `dato/page.tsx` (**+38** i listen), `nedtaelling/page.tsx` (**+35** i listen) og de to testfiler — **ingen beregningslogik, ingen ny URL, ingen sitemap, ingen `<title>`, ingen `<meta description>`, ingen FAQ, `dage-til.ts` urørt, `DageTilPage.tsx` urørt**.
+
+**MÅL:** `/dato` DA baseline **132.313 visninger / 822 klik / CTR 0,6 % / pos. 5,7** og SE **99.136 v / 95 klik / CTR 0,1 % / pos. 8,2** (GSC 2026-08-30 → 09-27); Plausible DA 1.110 besøgende/28d (+77 %, bounce 5 %) og SE 130 (+519 %, bounce 4 %) pr. 2026-09-29. `/nedtaelling` SE baseline **5.537 v / 12 klik / 0,2 % / pos. 9,3**. Genmåles **2026-10-13**. **Forventningen er ærlig:** rettelsen giver ikke flere visninger — de er allerede der. Den kan højst flytte de 1.131 + 1.013 visninger fra "jeg må klikke videre for at få svaret" til "svaret står der", altså CTR. Hvis CTR'en på `/dato` DA efter 14 dage er uændret under 0,6 %, er hypotesen **modbevist**, og næste spørgsmål er da om de to søgninger overhovedet kan give mere, når siden både svarer *og* har undersiden.
+
 STATUS: KØ — **C190 er landet: beraknare.se `/renteberegner` — sidens tredjestørste i svensk GSC (2.871 visninger, CTR 0,1 %, pos. 23,5) — havde nul forekomster af Excel, selv om dansk fik hele afsnittet i C85, og "annuitetslån excel formel", "lån excel mal" og "ränta på ränta excel" er størstedelen af den svenska söklingn om ränteberäkning.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den, 119 er kilde-blokeret, 179 kræver en rigtig browser), og de tre åbne deploy-noter (C186, C188, C189) har første vindue **17:30** / **21:30** — det var 17:29 ved starten, så ingen blev rørt. Se opgave 190.
 
 **Først blev en hel klasse målt og lukket med et negativt svar — forældede årstal i den synlige tekst.** GSC's danske søgninger er præget af "…2026" ("børnepenge 2026" 1.015 v, "børnepenge sats 2026" 359 v, "ränteavdrag 2026" på svensk), altså satser der ændrer sig år for år, så spørgsmålet var om nogen sider løb om på 2023/2024/2025 i den tekst Google indekserer. Alle **136 danske og 71 svenske sider** blev skrabet, efter at `<script>`/`<style>` var fjernet og alle entities opløst. **26 fund på dansk, 2 på svensk — og alle 28 er korrekte**, hver især læst i sin sammenhæng: boligskattesystemet "fra 2024", forældreindkomst fra 2024 i SU for 2026, "2. kvartal 2025" som forrige sammenligningskvartal i huslejenettoprisindekset, "opdateret august 2025" som kilde-dato på Boligejer.dk, 2024 som skudårs-eksempel og "Store bededag blev afskaffet 2024". **Klassen er altså hel, og lukket med et målt tal** — ikke med en liste af ting der måske er forældede.
@@ -19,6 +54,60 @@ STATUS: KØ — **C190 er landet: beraknare.se `/renteberegner` — sidens tredj
 **Gate grøn:** lint (**610 filer**), **2.914 tests / 185 filer** (fra 2.913/185 — de 16 nye og den eksisterende tælletest rettet 6 → 7), build (**142 sider**, de 7 kendte CSS-advarsler uændrede), `locale-leak.mjs --gate` **exit 0**, `knapgruppe-scan.mjs` **0/0**. **Modsvært verificeret: 2 af 16** nye tests falder med master-koden (monteringslåsen og Excel-FAQ'en), og den tredje — formel-evalueringen — falder med min egen gamle formel. Målt på rigtig bygget server (`next start` :4411 og :4412, portene verificeret fri *inden* start, C117's lære) med `curl -H "Host: beraknare.se"`: **200**, `<h2>Samma tal i Excel</h2>` **1** gang, JSON-LD **7** `Question` (var 6), de tre formler `=BETALNING(4/12;240;-200000)`, `=BETALNING(4/12;240;-200000)*240-200000` og `=200000*4/100` med svarene **1 211,96 kr**, **90 870,56 kr** og **8 000 kr**, **0** æ/ø på hele siden. **Kontrol:** minberegner.dk har **7** `YDELSE`, **6** `Question` og **0** "Samma tal i Excel" — den danske side er urørt. Rørte filer: `renteberegner/page.tsx` (**+38** i den svenska gren), `page-data.ts` (**ét** FAQ-par), `rente-excel.ts` (**ny**), `rente-excel.test.ts` (**ny, 16 tests**), `renteberegner/page.test.tsx` (tælletest 6 → 7) — **ingen beregningslogik, ingen ny URL, ingen sitemap, ingen `<title>`, ingen `<meta description>`, ingen dansk side rørt**. Kode + plan i ét squash-commit på `ceo/renteberegner-se-excel`; se opgave 190.
 
 **MÅL:** `/renteberegner` SE baseline **2.871 visninger / 3 klik / CTR 0,1 % / pos. 23,5** (GSC 2026-08-30 → 09-27); DA uændret **13.416 v / 114 klik / CTR 0,8 % / pos. 7,4**. Plausible: SE `/renteberegner` har ikke sin egen linje i top-15, så **GSC er den eneste baseline for denne side**. Genmåles **2026-10-13**. **Forventningen er ærlig:** en position på 23,5 med 2.871 visninger er et *ranking*-problem før det er et indholdsproblem, og den her rettelse kan højst flytte siden op et par pladser på de søgninger den nu svarer på. Det der *kan* læses af rettelsen er, at beraknare.se nu svarer på sin egen største söklingn i stedet for at være tavs om den. Hvis CTR'en efter 14 dage er uændret under 0,2 %, er hypotesen "indholdet forklarede den lave CTR" **modbevist**, og næste spørgsmål er hvorfor `/renteberegner` står så langt nede i Sverige når `/laaneberegner` (samme værktøj) ikke gør det.
+
+#### 191. [x] FÆRDIG 2026-09-29 — C191 — **`/dato` (132.313 v DA / 99.136 v SE) og `/nedtaelling` linkede til de 15 dage-til-sider med spørgsmålsteksten alene, mens GSC's to største søgninger på `/dato` netop er "hvor mange dage er der til 1 december" (1.131 v, pos. 5) og "…til den 24 december" (1.013, pos. 5) — siden der rangerede havde 0 forekomster af nogen af dem**
+
+- **Datagrund:** GSC 2026-08-30 → 09-27. `/dato` DA **132.313 visninger / 822
+  klik / CTR 0,6 % / pos. 5,7** (GSC's nr. 2) og SE **99.136 v / 95 klik /
+  0,1 % / pos. 8,2** — til sammen sitets største og tredjestørste side.
+  Søgningerne er **spørgsmål om en konkret dato**, ikke om værktøjet:
+  "hvor mange dage er der til 1 december" **1.131 v**, "hvor mange dage er der
+  til den 24 december" **1.013 v**, "dage mellem datoer" 450 v, "antal dage
+  mellem to datoer" 248 v. SE: "dagar mellan datum" 850 v, "antal dagar mellan
+  datum" 425 v, "hur många dagar har jag levt" 385 v.
+  `/nedtaelling` SE **5.537 v / 12 klik / 0,2 % / pos. 9,3**, søgningerne
+  "nedräkning dagar" (183 v) og "hur många dagar är det kvar till
+  1 november" (19 v).
+- **Målt på de server-renderede sider før rettelsen:** `/dato` havde **0**
+  "hvor mange dage er der til 1 december" og **0** "hvor mange dage er der
+  til den 24 december". Afsnittet "Datoer folk oftest tæller ned til" /
+  "Datum folk oftast räknar ner till" liste 15 spørgsmål som **rene links**:
+  *Hvor mange dage er der til juledagen? Hvor mange dage er der til
+  juleaften? …* — intet tal, ingen dato. Svarerne lå på undersiderne
+  (`/dage-til/1-december` → "Der er 63 dage").
+  **Derfor:** siden der rangerer på spørgsmålet sender brugeren videre for at
+  få svaret. GSC's egen effekt er målt: 1.131 visninger, **2 klik**.
+- **Rettelsen:** hver række bærer dagens antal, datoen i sidens egen
+  notationsform og den præcise uge-og-dag-form —
+  *Hvor mange dage er der til 1. december?* **1. december: 63 dage (9 uger).**
+  Begge sprog, begge lister (`/dato` og `/nedtaelling`).
+- **Ingen tal hårdkodet to steder:** `getDageTilAnswer` — samme funktion
+  `/dage-til/*` bruger til sit `<h1>` og `metaDescription` — regner hver
+  række, så liste og underside ikke kan svare forskelligt.
+- **Harness:** `dato/page.test.tsx` **11 → 16**, `nedtaelling/page.test.tsx`
+  **9 → 14**. Alle 15 rækker regex'es mod modulets eget svar; listens tal
+  låst til undersidens (63 dage / 9 uger pr. 29/9); systemklokken flyttet ét
+  dage kræver 63 → 62; svensk kræver `dagar`/`veckor` og **forbyder** dansk
+  enhed; `no` er en negativ lås. **Modsvært verificeret: 4 af 5 falder**
+  på begge filer med gammel `page.tsx`.
+- **Gate grøn:** lint (610 filer), **2.924 tests / 185 filer** (fra
+  2.913/185), build (**142 sider**), `locale-leak.mjs --gate` exit 0,
+  `knapgruppe-scan.mjs` 0/0. Målt på rigtig server (`next start` :4521,
+  porten verificeret fri *inden* start): alle fire sider **200** med de 15
+  tal, **krydscheck mod undersiderne** (1. december / juleaften / juledagen /
+  Halloween → 63/86/87/32 i begge sprog, identisk tal på liste og underside),
+  **0** `æ`/`ø` og **0** danske `dage`-strenge på de svenske sider.
+  `/procent` og `/tidsberegner` urørte.
+- **Rørte filer:** `dato/page.tsx` (+38), `nedtaelling/page.tsx` (+35) og to
+  testfiler — **ingen beregningslogik, ingen ny URL, ingen sitemap, ingen
+  `<title>`, ingen `<meta description>`, `dage-til.ts` og `DageTilPage.tsx`
+  urørte**.
+- **MÅL:** `/dato` DA **132.313 v / 822 klik / CTR 0,6 % / pos. 5,7**, SE
+  **99.136 v / 95 klik / CTR 0,1 % / pos. 8,2**; `/nedtaelling` SE
+  **5.537 v / 12 klik / 0,2 % / pos. 9,3** (GSC 2026-08-30 → 09-27).
+  Genmåles **2026-10-13**. **Forventningen er ærlig:** ingen nye visninger —
+  de er der allerede. Højst CTR. Uændret CTR efter 14 dage modbeviser
+  hypotesen.
 
 #### 190. [x] FÆRDIG 2026-09-29 — C190 — **beraknare.se `/renteberegner` (2.871 v, CTR 0,1 %, pos. 23,5) svarede på nul af sin egen Excel-klynge — svensk autocomplete har "annuitetslån excel formel", "lån excel mal" og "ränta på ränta excel mall", og siden havde 0 forekomster af Excel mod dansk 15**
 
@@ -8755,7 +8844,7 @@ landmark=lån, piggybank=opsparing osv.).
   4. `/blog` skal have **27** `<time` og **0** `20[0-9][0-9]-[0-9][0-9]-[0-9][0-9]` i den **synlige** tekst (før: 54 ISO-strenge i markup'en).
   5. **Kontrol:** `https://beraknare.se/blog/skat-2026-alt-du-skal-vide` skal fortsat svare **404** (bloggen er dansk-only). `/dato` skal have 11 `<h2>`, `/tidszone` 11 "25 byer" — urørte.
 
-- ⏳ **VERIFICÉR DEPLOY: C188 — blogindlægget `/blog/hvad-er-klokken-i-usa-naar-den-er-12-i-danmark` skal have titel, `og:title` og `<h1>` med "Tidsforskel for **25** byer", verdens-tabellen skal have præcis **25** datarækker (26 `<tr>` med header), og "16 byer" skal stå **0** gange.** Kode + plan i ét squash-commit på `ceo/tidszone-blog-25-byer`, merge/push **2026-09-29 16:58 CEST**. Første kandidatvindue **2026-09-29 17:30**. Kun bloggens `page.tsx` (96 håndskrevne `<tr>`-linjer → ét `.map()`), **to nye filer** (`tidszone-blog-lander.ts` + test), `blog-kobling.ts` (én streng) og **São Paulo-stavemåden i den delte kilde** (`tidszone-reference.ts` + 2 testreferencer + `tidszone/page.tsx`) er rørt — **ingen beregningslogik, ingen ny URL, ingen sitemap, ingen `<meta description>`**. Verificér ved **indhold, ikke HTTP 200**:
+- ✅ **DEPLOY OK 2026-09-29 17:53 — se konsolideret note ovenfor. C188 — blogindlægget `/blog/hvad-er-klokken-i-usa-naar-den-er-12-i-danmark` skal have titel, `og:title` og `<h1>` med "Tidsforskel for **25** byer", verdens-tabellen skal have præcis **25** datarækker (26 `<tr>` med header), og "16 byer" skal stå **0** gange.** Kode + plan i ét squash-commit på `ceo/tidszone-blog-25-byer`, merge/push **2026-09-29 16:58 CEST**. Første kandidatvindue **2026-09-29 17:30**. Kun bloggens `page.tsx` (96 håndskrevne `<tr>`-linjer → ét `.map()`), **to nye filer** (`tidszone-blog-lander.ts` + test), `blog-kobling.ts` (én streng) og **São Paulo-stavemåden i den delte kilde** (`tidszone-reference.ts` + 2 testreferencer + `tidszone/page.tsx`) er rørt — **ingen beregningslogik, ingen ny URL, ingen sitemap, ingen `<meta description>`**. Verificér ved **indhold, ikke HTTP 200**:
   - `curl -s https://minberegner.dk/blog/hvad-er-klokken-i-usa-naar-den-er-12-i-danmark | sed 's/<!-- -->//g'` skal give **0** for "16 byer" og **≥ 1** for "Tidsforskel for 25 byer" (før: 6 hhv. 0).
   - Antallet af datarækker i verdens-tabellen skal være **25** (før: **16**). Tæl `<tr>` i tabellen mellem `<h2>Tidsforskelen til resten af verden` og den følgende `</table>`; **26** inkl. header.
   - **Nuuk** skal sige **4 timer bagud** i tabellen — den stod **3 timer bagud**, hvilket var en faktuel fejl (Grønland ligger 4 timer bagud Danmark; den gamle tabel trak WGT = UTC−3 uden Danmarks UTC+1 fra). Se `grep -A2 '>Nuuk<'`.
@@ -8764,7 +8853,7 @@ landmark=lån, piggybank=opsparing osv.).
   - **Kontrol:** `https://minberegner.dk/tidszone` skal stadig have **≥ 2** "25 byer" og **0** "Sao Paulo" (tilde-stavemåden), og `https://beraknare.se/blog/hvad-er-klokken-i-usa-naar-den-er-12-i-danmark` skal fortsat svare **404** (bloggen er dansk-only, `danishOnlySections` i `routing.ts`).
 
 
-- ⏳ **VERIFICÉR DEPLOY: C186 — de ni danske sider skal have *én* "Ofte stillede
+- ✅ **DEPLOY OK 2026-09-29 17:53 — se konsolideret note ovenfor. C186 — de ni danske sider skal have *én* "Ofte stillede
   spørgsmål" og *én* "Relaterede beregnere" i markupken, og ingen dublet-`<h2>`
   skal findes på nogen af de 136 danske sider.** Kode + plan i ét squash-commit på
   `ceo/dublet-h2`. Første kandidatvindue **2026-09-29 17:30**. Kun ni `page.tsx`
@@ -17354,7 +17443,35 @@ er værst. Se `❓ Til Mads`.
      **20 passed**, og `node scripts/locale-leak.mjs --gate` exit 0 med 0
      ureviewet.
 
-### ⏳ VERIFICÉR DEPLOY: C187 — `/tidsberegner` på begge domæner: ét nyt `<h2>` pr. sprog ("Sådan lægger du to tidsrum sammen" / "Så här lägger du ihop två tidsintervall") med en tre-rækkers summationstabel, de to Excel-formler og fire nye FAQ-par. `tids-summer.ts` går hver række gennem `beregnTidsinterval`. Kode + plan i ét squash-commit på `ceo/se-dato-levt`. Første kandidatvindue **2026-09-29 17:30**. Rørte filer: `tidsberegner/page.tsx`, `page-data.ts`, nyt modul + to testfiler, `scripts/locale-leak.mjs` (port-vindue 12.000 → 60.000) — **ingen beregningslogik ændret**. Verificér ved **indhold, ikke HTTP 200**:
+- ⏳ **VERIFICÉR DEPLOY: C191 — `/dato` og `/nedtaelling` skal på begge domæner have dagens antal i dage-til-listen, ikke kun spørgsmålsteksten. `/dato` er GSC's nr. 2 (DA 132.313 v / 822 klik / CTR 0,6 % / pos. 5,7) og nr. 3 (SE 99.136 v / 95 klik / 0,1 % / pos. 8,2), og de to største danske søgninger er "hvor mange dage er der til 1 december" (1.131 v, pos. 5) og "…til den 24 december" (1.013, pos. 5).** Kode + plan i ét squash-commit på `ceo/dato-dage-til-tal`. Første kandidatvindue **2026-09-29 21:30** (push efter 17:30-batchen). Kun `dato/page.tsx` (**+38** i listen) og `nedtaelling/page.tsx` (**+35**) + to testfiler er rørt — **ingen beregningslogik, ingen ny URL, ingen sitemap, ingen `<title>`, ingen `<meta description>`, ingen FAQ, `dage-til.ts` og `DageTilPage.tsx` urørte**. **HTTP 200 beviser intet:** hele ændringen er nye tal i to lister, og siden svarede 200 hele tiden, også da den ikke svarede. Verificér ved **indhold, ikke status**:
+  1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
+  2. `curl -s https://minberegner.dk/dato | sed 's/<!-- -->//g' | grep -c "Tallet nedenfor er dagens antal dage"` skal være **1** (før: 0), og det samme på `/nedtaelling`.
+  3. Rækken for 1. december skal vælge: `Hvor mange dage er der til 1. december?</a> 1. december: <strong>63 dage</strong> (9 uger).` — **altså dagens tal, ikke et hårdkodet 63.** Pr. 30. september 2026 forventes **62 dage**, og det skal nulstilles når datoen er nået.
+  4. **Krydscheck mod undersiden:** `curl -s https://minberegner.dk/dage-til/1-december` skal sige `Der er 63 dage` — samme tal som listen på `/dato` og `/nedtaelling`. Samme for `juleaften` (86), `juledagen` (87) og `halloween` (32).
+  5. Svensk: `curl -s -H "Host: beraknare.se" https://beraknare.se/dato | sed 's/<!-- -->//g'` skal have `Talet nedan är dagens antal dagar` og `1 december 63 dagar (9 veckor)`. **Kontrol:** samme side skal have **0** `æ`, **0** `ø` og **0** forekomster af `dage` (den danske enhed) — brug `grep -oE '[0-9]+ dage[^a-zåäö]' | wc -l` → **0**.
+  6. `/dato` og `/nedtaelling` skal fortsat have hver sit `Question`-antal uændret (DA 15 / 13 på `/dato`), og `<h2>`-tallet uændret (DA 11 / 10) — rettelsen rører kun listen.
+
+### ✅ `DEPLOY OK 2026-09-29 17:53` — se konsolideret note ovenfor. Oprindelig note: C187 — `/tidsberegner` på begge domæner: ét nyt `<h2>` pr. sprog ("Sådan lægger du to tidsrum sammen" / "Så här lägger du ihop två tidsintervall") med en tre-rækkers summationstabel, de to Excel-formler og fire nye FAQ-par. `tids-summer.ts` går hver række gennem `beregnTidsinterval`. Kode + plan i ét squash-commit på `ceo/se-dato-levt`. Første kandidatvindue **2026-09-29 17:30**. Rørte filer: `tidsberegner/page.tsx`, `page-data.ts`, nyt modul + to testfiler, `scripts/locale-leak.mjs` (port-vindue 12.000 → 60.000) — **ingen beregningslogik ændret**. Verificér ved **indhold, ikke HTTP 200**:
+
+### ✅ `DEPLOY OK 2026-09-29 17:53` — **tre noter lukket ved indholdskontrol: C186, C187 og C188.** Dettes 17:30-vindue var passeret ved starten af iterationen (17:52), så intet blev rørt. Målt på **live** mod begge domæner; `/api/health` svarede `status: ok` (timestamp 15:52 UTC = 17:52 CEST). HTTP 200 beviser intet — intet af de tre rører `src/lib/`'s beregninger, kun overskrifter, ét nyt afsnit og ét nyt modul med data.
+
+| Note | Verificeret ved indhold | Resultat |
+|------|------------------------|----------|
+| **C186** | ni danske sider: `>Ofte stillede spørgsmål<` = **1** (var 2) og `>Relaterede beregnere<` = **1** (var 2) på `/rentefradrag`, `/barselsdagpenge`, `/barselsplanlaegger`, `/dagpenge`, `/pension`, `/arveafgift`, `/boligstoette`, `/ejendomsvaerdiskat` | ✅ 8/8 sider; kontrol `/procent` `/su` `/bmi` `/dato` `/tidszone` har uændrede `<h2>`-tal **9 / 8 / 10 / 11 / 9** |
+| | de fem side-specifikke overskrifter står i `<FAQ title=…>`: "…om dagpenge", "…om pension", "…om arveafgift", "…om boligstøtte", "…om ejendomsskat" | ✅ 1 hver, ingen mistet ordlyd |
+| | `Question` uændret: `/rentefradrag` 11, `/barselsdagpenge` 10, `/dagpenge` 6, `/pension` 11 | ✅ intet indhold gik tabt |
+| **C187** | `<h2>Sådan lægger du to tidsrum sammen</h2>` **1** (DA) og `<h2>Så här lägger du ihop två tidsintervall</h2>` **1** (SE) | ✅ begge domæner |
+| | JSON-LD `Question`: DA **15** (fra 10), SE **13** (fra 11) | ✅ som forventet |
+| | summeringstabellen: 3 rækker med `810 ÷ 60 = 13,50` og Excel-formlen `=(B1-A1)*24+(D1-C1)*24` | ✅ på begge domæner |
+| | kontrol: **0** danske markører på beraknare.se, **0** svenske på minberegner.dk | ✅ |
+| **C188** | "Tidsforskel for **25** byer" **5** gange (var 0), "**16 byer**" **0** gange (var 6) | ✅ titel, `og:title` og `<h1>` er rettet |
+| | verdens-tabellen: **26 `<tr>`** = 25 datarækker + header (var 17) | ✅ de ni nye byer er der |
+| | Nuuk siger **4 timer bagud** (var 3 — en faktuel fejl, rettet) | ✅ |
+| | Phoenix **8 timer bagud** i vintertid / **9** i sommertid, mens Denver er **8 / 8** | ✅ Arizona-undtagelsen holder |
+| | de ni nye byer: Toronto, Lissabon, Reykjavik, Athen, Heraklion, Miami, Boston, Phoenix, Istanbul | ✅ alle i tabellen |
+| | kontrol: `/tidszone` har **11** "25 byer" og **0** "Sao Paulo" (tilde-stavemåden); `beraknare.se` + blogslugen = **404** | ✅ |
+
+**C189 og C190 står åbne** — de blev pushet efter 17:30 (hhv. 17:26, med vindue 21:30 fordi noten var skrevet kl. 17:06 før vinduet, og 17:29 mens 17:30-batchen kørte), så de har **første kandidatvindue 2026-09-29 21:30**.
 
 ### VERIFICÉR DEPLOY-log — nyeste først
 - `VERIFICÉR DEPLOY: overskriftsniveau på alle sider (49 brud → 0 af 207) ceo/heading-outline 2026-09-29 13:5x`

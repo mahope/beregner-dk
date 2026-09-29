@@ -1,7 +1,7 @@
 import { renderToStaticMarkup } from "react-dom/server";
-import { beforeEach, describe, expect, test, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { getDomainConfigByLocale } from "@/lib/domain-config";
-import { getDageTilSlugs } from "@/lib/dage-til";
+import { getDageTilSlugs, getDageTilEvents, getDageTilAnswer, dageTilArm, formatTargetDate } from "@/lib/dage-til";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { excelEksempel } from "@/lib/nedtaelling-eksempler";
 import { getPageData } from "@/lib/page-data";
@@ -140,5 +140,70 @@ describe("nedtaelling page", () => {
     expect(se.faqItems.some((f) => f.question.includes("Excel"))).toBe(true);
     expect(se.faqItems.some((f) => f.answer.includes("86400"))).toBe(true);
     expect(da.faqItems.some((f) => f.question.includes("Excel"))).toBe(false);
+  });
+});
+
+// Samme mønster som på `/dato`: listen linkede til de 15 datoer med
+// spørgsmålsteksten alene. Svensk GSC har "nedrækning dagar" (183
+// visninger, pos. 9) og "hur många dagar är det kvar till 1 november"
+// (19, pos. 5) — begge spørger efter et tal.
+describe("nedtaelling page — dage-til-listen svarer selv", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-09-29T12:00:00Z"));
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  test("hver række i listen bærer dagens antal og datoen", async () => {
+    const html = await render("da");
+
+    expect(html).toContain("Tallet nedenfor er dagens antal dage");
+    for (const event of getDageTilEvents("da")) {
+      const answer = getDageTilAnswer(event, "da", new Date());
+      const target = formatTargetDate(answer.targetDate, "da");
+      const li = new RegExp(
+        `href="/dage-til/${dageTilArm(event, "da").slug}".*?${target}.*?${answer.days} dage`,
+        "s",
+      );
+      expect(html, event.id).toMatch(li);
+    }
+  });
+
+  test("listens tal er de samme som undersidens eget svar", async () => {
+    const december = getDageTilEvents("da").find((e) => dageTilArm(e, "da").slug === "1-december")!;
+    expect(getDageTilAnswer(december, "da", new Date()).days).toBe(63);
+
+    const html = await render("da");
+
+    expect(html).toContain("<strong>63 dage</strong>");
+    expect(html).toContain("9 uger");
+  });
+
+  test("antallet følger dagen, så listen kan ikke stå med gårsdags svar", async () => {
+    const foer = await render("da");
+    vi.setSystemTime(new Date("2026-09-30T12:00:00Z"));
+    const senere = await render("da");
+
+    expect(foer).toContain("<strong>63 dage</strong>");
+    expect(senere).toContain("<strong>62 dage</strong>");
+    expect(senere).not.toContain("<strong>63 dage</strong>");
+  });
+
+  test("se skriver dagar och veckor — aldrig dage", async () => {
+    const html = await render("se");
+
+    expect(html).toContain("Talet nedan är dagens antal dagar");
+    expect(html).toMatch(/href="\/dagar-till\/1-december"[\s\S]*?1 december 63 dagar/);
+    expect(html).toContain("9 veckor");
+    expect(html).not.toMatch(/\d+ dage(?![a-zåäö])/);
+  });
+
+  test("norsk domaene faar ingen dage-til-rækker og ingen talsvar", async () => {
+    const html = await render("no");
+
+    expect(html).not.toContain("/dage-til/");
+    expect(html).not.toContain("Tallet nedenfor er dagens antal dage");
   });
 });

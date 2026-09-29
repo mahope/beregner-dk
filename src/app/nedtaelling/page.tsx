@@ -2,7 +2,7 @@ import Link from "next/link";
 import { generatePageMetadata } from "@/lib/page-helpers";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
-import { getDageTilEvents, getDageTilPrefix, isDageTilLocale, dageTilArm,
+import { getDageTilEvents, getDageTilPrefix, isDageTilLocale, dageTilArm, getDageTilAnswer, formatTargetDate,
 } from "@/lib/dage-til";
 import { excelEksempel } from "@/lib/nedtaelling-eksempler";
 import { formatNumber } from "@/lib/format";
@@ -21,11 +21,22 @@ export default async function NedtaellingPage() {
   const domainConfig = await getCurrentDomainConfig();
   const locale = domainConfig.locale;
   const pageData = getPageData("nedtaelling", locale) || getPageData("nedtaelling", "da")!;
+  // Samme liste som på `/dato`, og samme grund: den linkede til de 15 datoer
+  // uden at svare. GSC's "nedrækning dagar" (183 visninger, pos. 9) og
+  // "hur många dagar är det kvar till 1 november" (19, pos. 5) er spørgsmål
+  // om et tal, så tallet står på siden der rangerer — ikke kun på undersiden.
   const dageTilLinks = isDageTilLocale(locale)
-    ? getDageTilEvents(locale).map((event) => ({
-        href: `${getDageTilPrefix(locale)}${dageTilArm(event, locale).slug}`,
-        question: dageTilArm(event, locale).copy.question,
-      }))
+    ? getDageTilEvents(locale).map((event) => {
+        const answer = getDageTilAnswer(event, locale, new Date());
+        return {
+          href: `${getDageTilPrefix(locale)}${dageTilArm(event, locale).slug}`,
+          question: dageTilArm(event, locale).copy.question,
+          days: answer.days,
+          target: formatTargetDate(answer.targetDate, locale),
+          weeks: answer.weeks,
+          daysLeft: answer.daysLeft,
+        };
+      })
     : [];
 
   const eksempel = excelEksempel();
@@ -274,10 +285,28 @@ export default async function NedtaellingPage() {
                 ? "Vill du veta exakt hur många dagar som är kvar till ett bestämt datum? Sidan för varje datum räknar om sig själv varje dag, så talet er alltid aktuellt."
                 : "Vil du se det præcise antal dage til en bestemt dato? Siden for hver dato tæller sig selv frem hver dag, så tallet er altid aktuelt."}
             </p>
+            <p>
+              {locale === "se"
+                ? "Talet nedan är dagens antal dagar, och räknas om varje dag."
+                : "Tallet nedenfor er dagens antal dage, og det genberegnes hver dag."}
+            </p>
             <ul>
               {dageTilLinks.map((link) => (
                 <li key={link.href}>
-                  <Link href={link.href}>{link.question}</Link>
+                  <Link href={link.href}>{link.question}</Link>{" "}
+                  {locale === "se" ? (
+                    <>
+                      {link.target} {formatNumber(link.days, "se")}{" "}
+                      {link.days === 1 ? "dag" : "dagar"}
+                      {link.days === 0 ? " — det är dagen i dag." : ` (${formatNumber(link.weeks, "se")} ${link.weeks === 1 ? "vecka" : "veckor"}${link.daysLeft === 0 ? "" : ` och ${formatNumber(link.daysLeft, "se")} dagar`}).`}
+                    </>
+                  ) : (
+                    <>
+                      {link.target}:{" "}
+                      <strong>{formatNumber(link.days, "da")} dage</strong>
+                      {link.days === 0 ? " — det er dagen i dag." : ` (${formatNumber(link.weeks, "da")} ${link.weeks === 1 ? "uge" : "uger"}${link.daysLeft === 0 ? "" : ` og ${formatNumber(link.daysLeft, "da")} dage`}).`}
+                    </>
+                  )}
                 </li>
               ))}
             </ul>

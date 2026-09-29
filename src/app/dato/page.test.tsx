@@ -2,7 +2,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { getDomainConfigByLocale } from "@/lib/domain-config";
 import { getCurrentDomainConfig, getLocale } from "@/lib/get-locale";
-import { getDageTilSlugs } from "@/lib/dage-til";
+import { getDageTilSlugs, getDageTilEvents, getDageTilAnswer, dageTilArm, formatTargetDate } from "@/lib/dage-til";
 import { getPageData } from "@/lib/page-data";
 import { maanederITaar } from "@/lib/dato-eksempler";
 import DatoPage from "./page";
@@ -353,5 +353,92 @@ describe("dato page — antal dagar mellan datum i Excel", () => {
       const html = renderToStaticMarkup(await DatoPage());
       expect(html).not.toContain(`>${fejl}</th>`);
     }
+  });
+});
+
+// GSC's to største søgninger på `/dato` (2026-08-30 → 09-27) er "hvor mange
+// dage er der til 1 december" (1.131 visninger, pos. 5) og "hvor mange dage
+// er der til den 24 december" (1.013, pos. 5). Listen linkede til de 15
+// dage-til-sider med spørgsmålsteksten alene — hverken antallet eller datoen
+// stod på siden der rangerede, så hele svaret lå på undersiden.
+describe("dato page — dage-til-listen svarer selv", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-09-29T12:00:00Z"));
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  test("hver række i listen bærer dagens antal og datoen", async () => {
+    vi.mocked(getLocale).mockResolvedValue("da");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("da"));
+
+    const html = renderToStaticMarkup(await DatoPage());
+
+    expect(html).toContain("Tallet nedenfor er dagens antal dage");
+    for (const event of getDageTilEvents("da")) {
+      const answer = getDageTilAnswer(event, "da", new Date());
+      const target = formatTargetDate(answer.targetDate, "da");
+      const li = new RegExp(
+        `href="/dage-til/${dageTilArm(event, "da").slug}".*?${target}.*?${answer.days} dage`,
+        "s",
+      );
+      expect(html, event.id).toMatch(li);
+    }
+  });
+
+  // Tallene i listen skal være de samme som på undersiderne, ellers ville de
+  // to sider svare forskelligt på det samme spørgsmål. `getDageTilAnswer` er
+  // den funktion begge læser, så det er ikke et krav om identisk markup men
+  // om ét tal: 63 dage til 1. december den 29. september 2026.
+  test("listens tal er de samme som /dage-til-sidens eget svar", async () => {
+    vi.mocked(getLocale).mockResolvedValue("da");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("da"));
+
+    const today = new Date();
+    const december = getDageTilEvents("da").find((e) => dageTilArm(e, "da").slug === "1-december")!;
+    const answer = getDageTilAnswer(december, "da", today);
+    expect(answer.days).toBe(63);
+
+    const html = renderToStaticMarkup(await DatoPage());
+    expect(html).toContain("<strong>63 dage</strong>");
+    expect(html).toContain("9 uger");
+  });
+
+  test("antal og uger følger dagen, så listen kan ikke stå med gårsdags svar", async () => {
+    vi.mocked(getLocale).mockResolvedValue("da");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("da"));
+
+    const foer = renderToStaticMarkup(await DatoPage());
+    vi.setSystemTime(new Date("2026-09-30T12:00:00Z"));
+    const senere = renderToStaticMarkup(await DatoPage());
+
+    expect(foer).toContain("<strong>63 dage</strong>");
+    expect(senere).toContain("<strong>62 dage</strong>");
+    expect(senere).not.toContain("<strong>63 dage</strong>");
+  });
+
+  test("se skriver dagar, dagar kvar och veckor — aldrig dage", async () => {
+    vi.mocked(getLocale).mockResolvedValue("se");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("se"));
+
+    const html = renderToStaticMarkup(await DatoPage());
+
+    expect(html).toContain("Talet nedan är dagens antal dagar");
+    expect(html).toMatch(/href="\/dagar-till\/1-december"[\s\S]*?1 december 63 dagar/);
+    expect(html).toContain("9 veckor");
+    // Dansk enhed på den svenska lista vilde være en lækage.
+    expect(html).not.toMatch(/\d+ dage(?![a-zåäö])/);
+  });
+
+  test("no faar ingen dage-til-rækker og ingen talsvar", async () => {
+    vi.mocked(getLocale).mockResolvedValue("no");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("no"));
+
+    const html = renderToStaticMarkup(await DatoPage());
+
+    expect(html).not.toContain("/dage-til/");
+    expect(html).not.toContain("Tallet nedenfor er dagens antal dage");
   });
 });

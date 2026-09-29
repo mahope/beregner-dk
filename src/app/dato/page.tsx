@@ -9,7 +9,7 @@ import RelateredeArtikler from "@/components/RelateredeArtikler";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Link from "next/link";
-import { dageTilbageIAaret, getDageTilEvents, getDageTilPrefix, isDageTilLocale, dageTilArm,
+import { dageTilbageIAaret, getDageTilEvents, getDageTilPrefix, isDageTilLocale, dageTilArm, getDageTilAnswer, formatTargetDate,
 } from "@/lib/dage-til";
 import { maanedEksempel } from "@/lib/dato-eksempler";
 import { formatNumber } from "@/lib/format";
@@ -26,11 +26,25 @@ export default async function DatoPage() {
   // (996 visninger, pos. 5) og "hvor mange dage er der tilbage af 2026" (223, pos. 5)
   // som to af sidens fire søgninger. `/dage-til/*`-siderne svarer på begge, men
   // `/dato` linkede til ingen af dem: hele kæden lå kun den anden vej.
+  // Listen linkede til de 15 dage-til-sider uden at svare selv. GSC's to
+  // største søgninger på siden er "hvor mange dage er der til 1 december"
+  // (1.131 visninger, pos. 5) og "hvor mange dage er der til den 24 december"
+  // (1.013, pos. 5) — begge beskriver den side, der *linker*, men som hverken
+  // har tallet eller datoen stående. Derfor får hver række dagens antal fra
+  // `getDageTilAnswer` — samme funktion som `/dage-til/*` selv bruger, så et
+  // tal i listen kan ikke glide fra sit eget regnestykke.
   const dageTilLinks = isDageTilLocale(locale)
-    ? getDageTilEvents(locale).map((event) => ({
-        href: `${getDageTilPrefix(locale)}${dageTilArm(event, locale).slug}`,
-        question: dageTilArm(event, locale).copy.question,
-      }))
+    ? getDageTilEvents(locale).map((event) => {
+        const answer = getDageTilAnswer(event, locale, new Date());
+        return {
+          href: `${getDageTilPrefix(locale)}${dageTilArm(event, locale).slug}`,
+          question: dageTilArm(event, locale).copy.question,
+          days: answer.days,
+          target: formatTargetDate(answer.targetDate, locale),
+          weeks: answer.weeks,
+          daysLeft: answer.daysLeft,
+        };
+      })
     : [];
   // "hvor mange dage er der tilbage af 2026?" (227 visninger, pos. 5 i dansk
   // GSC) og "dagar till 31 dec" (367 visninger i svensk) er to søgninger om
@@ -489,10 +503,28 @@ export default async function DatoPage() {
             ? "Vill du veta exakt hur många dagar som är kvar till ett bestämt datum? Sidan för varje datum räknar om sig själv varje dag, så talet är alltid aktuellt."
             : "Vil du se det præcise antal dage til en bestemt dato? Siden for hver dato tæller sig selv frem hver dag, så tallet er altid aktuelt."}
         </p>
+        <p>
+          {locale === "se"
+            ? "Talet nedan är dagens antal dagar, och räknas om varje dag."
+            : "Tallet nedenfor er dagens antal dage, og det genberegnes hver dag."}
+        </p>
         <ul>
           {dageTilLinks.map((link) => (
             <li key={link.href}>
-              <Link href={link.href}>{link.question}</Link>
+              <Link href={link.href}>{link.question}</Link>{" "}
+              {locale === "se" ? (
+                <>
+                  {link.target} {formatNumber(link.days, "se")}{" "}
+                  {link.days === 1 ? "dag" : "dagar"}
+                  {link.days === 0 ? " — det är dagen i dag." : ` (${formatNumber(link.weeks, "se")} ${link.weeks === 1 ? "vecka" : "veckor"}${link.daysLeft === 0 ? "" : ` och ${formatNumber(link.daysLeft, "se")} dagar`}).`}
+                </>
+              ) : (
+                <>
+                  {link.target}:{" "}
+                  <strong>{formatNumber(link.days, "da")} dage</strong>
+                  {link.days === 0 ? " — det er dagen i dag." : ` (${formatNumber(link.weeks, "da")} ${link.weeks === 1 ? "uge" : "uger"}${link.daysLeft === 0 ? "" : ` og ${formatNumber(link.daysLeft, "da")} dage`}).`}
+                </>
+              )}
             </li>
           ))}
         </ul>
