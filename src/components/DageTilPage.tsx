@@ -147,12 +147,21 @@ export async function buildDageTilMetadata(
   // the same rule applied to the nine the gate could not see.
   const titleText = `${event[dageLocale].copy.question} ${count(days, u.day, u.days)}`;
 
+  // The description used to open with the event's own question — the exact
+  // words the title already carries — so the first ~38 characters of the
+  // snippet repeated the blue link verbatim (C164's finding, on the pages its
+  // `page-data.ts` scan could not reach because these are built here).
+  // What is left of the snippet then held a restatement of the day count that
+  // the title also shows, and Google clipped the tail mid-word: all 28 were
+  // 179-195 characters. Starting at the answer gives every remaining character
+  // to the date, the weekday and the freshness — the three things the title
+  // does not say — and lands under Google's ~160-character cut.
   return {
     title: { absolute: titleText },
-    description: `${event[dageLocale].copy.question} ${headline}. ${target}. ${
+    description: `${headline}. ${target}. ${
       dageLocale === "da"
-        ? "Tallet opdateres hver dag, og du kan regne alle andre datoer med datoberegneren."
-        : "Talet uppdateras varje dag, och du kan räkna alla andra datum med datumräknaren."
+        ? "Tallet opdateres hver dag."
+        : "Talet uppdateras varje dag."
     }`,
     openGraph: {
       title: titleText,

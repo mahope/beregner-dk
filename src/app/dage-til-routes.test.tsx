@@ -324,3 +324,79 @@ describe("dage-til titler", () => {
     expect(metadata.openGraph?.siteName).toBe("Beräknare.se");
   });
 });
+
+// The title test above covers the blue link. This covers the grey line under
+// it, and the two failed for the same reason: `buildDageTilMetadata` produces
+// both, so `page-data.ts` — where C164 found and fixed the identical
+// description-repeats-title bug in two other pages — never saw these 28.
+// Measured on the live site before the fix: all 28 descriptions opened with
+// the title's own question, word for word, and ran 179-195 characters, so
+// Google clipped them mid-word.
+describe("dage-til meta descriptions", () => {
+  const I_DAG = new Date("2026-09-27T12:00:00.000Z");
+
+  async function metadataFor(
+    locale: "da" | "se",
+    slug: string,
+    today: Date = I_DAG
+  ) {
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale(locale));
+    return buildDageTilMetadata(getDageTilPrefix(locale), slug, today);
+  }
+
+  for (const locale of ["da", "se"] as const) {
+    test(`ingen ${locale} description gentager titlens spørgsmål`, async () => {
+      const events = getDageTilEvents(locale);
+      expect(events.length).toBeGreaterThan(5);
+      for (const event of events) {
+        const slug = event[locale].slug;
+        const metadata = await metadataFor(locale, slug);
+        const title = (metadata.title as { absolute?: string }).absolute ?? "";
+        const description = String(metadata.description);
+        // Compare against the question itself, not against the whole title:
+        // the title adds the day count, so a `startsWith(title)` check would
+        // pass on a description that repeated the question and then diverged —
+        // which is exactly the bug.
+        expect(description, `${locale}/${slug}`).not.toContain(
+          event[locale].copy.question
+        );
+        expect(title.length, `${locale}/${slug}`).toBeLessThanOrEqual(60);
+      }
+    });
+
+    test(`alle ${locale} descriptioner er under Googles afkortningsgrænse`, async () => {
+      for (const event of getDageTilEvents(locale)) {
+        const slug = event[locale].slug;
+        const description = String((await metadataFor(locale, slug)).description);
+        expect(description.length, `${locale}/${slug}: "${description}"`)
+          .toBeLessThanOrEqual(160);
+      }
+    });
+  }
+
+  test("descriptionen bærer stadig svaret, datoen og ugedagen", async () => {
+    // The point of the fix is that the freed characters go to what the title
+    // does not say. Without this, "under 160" could be met by deleting the
+    // answer — the same failure C164's own test was written to prevent.
+    const grundlovsdag = getDageTilEvents("da").find(
+      (e) => e.da.slug === "grundlovsdag"
+    )!;
+    const description = String((await metadataFor("da", "grundlovsdag")).description);
+    expect(description).toBe(
+      "Der er 251 dage til grundlovsdag. 5. juni 2027 er en lørdag. Tallet opdateres hver dag."
+    );
+  });
+
+  test("dagens svar giver en description uden '0 dage'", async () => {
+    // The isToday branch builds a different headline; it must still be a
+    // complete sentence rather than an empty or doubled one. The reference
+    // date is an argument, not the clock — the producer is given "today" so a
+    // test cannot pass on whatever day it happens to run.
+    const juleaften = await metadataFor("da", "juleaften", new Date("2026-12-24T09:00:00.000Z"));
+    const description = String(juleaften.description);
+    expect(description).toBe(
+      "Det er juleaften — 0 dage. 24. december 2026 er en torsdag. Tallet opdateres hver dag."
+    );
+    expect(description.length).toBeLessThanOrEqual(160);
+  });
+});
