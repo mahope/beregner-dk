@@ -51,13 +51,13 @@ describe("getPageData", () => {
   test.each([
     {
       locale: "da" as const,
-      title: "Procentberegner – beregn 10 procent af et tal",
+      title: "Procentberegner: 10 % af 250 kr. = 25 kr.",
       intent: "10 procent af",
       answer: "10 procent af 250 er 25",
     },
     {
       locale: "se" as const,
-      title: "Procenträknare – beräkna 10 procent av ett tal",
+      title: "Procenträknare: 10 % av 250 kr = 25 kr",
       intent: "10 procent av",
       answer: "10 procent av 250 är 25",
     },
@@ -457,7 +457,7 @@ describe("getPageData", () => {
   test.each([
     {
       locale: "da" as const,
-      title: "Dage mellem datoer og dage til en dato | MinBeregner.dk",
+      title: "Beregn dage mellem datoer og dage til en dato = 365 dage",
       heading: "Beregn antal dage mellem to datoer",
       intent: "antal dage mellem to datoer",
       answer: "Vælg en startdato og en slutdato",
@@ -466,7 +466,7 @@ describe("getPageData", () => {
     },
     {
       locale: "se" as const,
-      title: "Dagar mellan datum och dagar kvar till datum | Beräknare.se",
+      title: "Beräkna dagar mellan datum och dagar kvar till datum = 365",
       heading: "Beräkna antal dagar mellan två datum",
       intent: "antal dagar mellan två datum",
       answer: "Välj ett startdatum och ett slutdatum",
@@ -509,14 +509,14 @@ describe("getPageData", () => {
   test.each([
     {
       locale: "da" as const,
-      title: "Tidsberegner – timer mellem klokkeslæt | MinBeregner.dk",
+      title: "Tidsberegner: 08:30 til 16:45 = 8 t 15 min.",
       intent: "mellem to klokkeslæt",
       example: "08:30 til 16:45 er 8 timer og 15 minutter",
       schema: "Gratis tidsberegner. Beregn tidsrum mellem to klokkeslæt og se resultatet i timer, minutter og decimaltimer.",
     },
     {
       locale: "se" as const,
-      title: "Tidskalkylator – timmar mellan klockslag | Beräknare.se",
+      title: "Tidskalkylator: 08:30 till 16:45 = 8 t 15 min",
       intent: "mellan två klockslag",
       example: "08:30 till 16:45 är 8 timmar och 15 minuter",
       schema: "Gratis tidskalkylator. Beräkna tidsintervall mellan två klockslag och se resultatet i timmar, minuter och decimaltimmar.",
@@ -537,13 +537,13 @@ describe("getPageData", () => {
   test.each([
     {
       locale: "da" as const,
-      title: "Momsberegner 25 % – inkl. og ekskl. moms | MinBeregner.dk",
+      title: "Momsberegner: 1.000 kr. ekskl. moms = 1.250 kr.",
       answer: "1.000 kr. og få 1.250 kr.",
       schema: "Gratis momsberegner. Beregn dansk moms på 25 % med priser inkl. og ekskl. moms.",
     },
     {
       locale: "se" as const,
-      title: "Momskalkylator – inkl. och exkl. moms | Beräknare.se",
+      title: "Momskalkylator: 1 000 kr. exkl. moms = 1 250 kr.",
       answer: "1 000 kr. och få 1 250 kr.",
       schema: "Gratis momskalkylator. Beräkna svensk moms på 25 %, 12 % och 6 % med priser inkl. och exkl. moms.",
     },

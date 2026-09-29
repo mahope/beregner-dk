@@ -18446,3 +18446,203 @@ sitets største CTR-lever, men de tre GSC-søgninger der viser, er kun 0,24 % af
 visningerne. Autocomplete og en tekstanalyse af siden viser, at de synlige hensigter
 allerede er dækket (procentpoint ×10, rabat ×32, stigning ×38, Excel-formlen som `<h2>`).
 En titel-retuning uden query-data ville være en utestet gæt.
+
+
+## Verificerede deploy-noter (2026-09-29 22:40)
+
+## Åbne VERIFICÉR DEPLOY-noter
+
+Kun noter med et *uafviklet* vindue står her. Alt lukket er i `docs/plan-arkiv.md`.
+
+- ⏳ **VERIFICÉR DEPLOY: C194 — ingen `meta description` over 160 tegn.** Kode +
+  plan i ét squash-commit på `ceo/meta-160`. Første kandidatvindue
+  **2026-09-30 07:30** (21:30-batchen kørte før merge). Rørte filer:
+  `src/app/meta-description.test.ts` (**ny**), `home-data.ts` (2 strenge),
+  fem blogindlægs `page.tsx` (1 streng hver) — **ingen `<title>`, ingen `<h1>`,
+  ingen beregningslogik, ingen ny URL, ingen sitemap**. **HTTP 200 beviser
+  intet:** intet her rører en URL, kun syv indekserede tekststrenge. Verificér
+  ved **indhold**:
+  1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
+  2. For hver af de syv URL'er: `curl -s <url> | grep -o '<meta name="description" content="[^"]*"'`
+     skal give **≤ 160** tegn. Længderne på den nye kode er `/` **152**,
+     `/blog/biloekonomi-2026-hvad-koster-det-at-eje-bil` **125**,
+     `/blog/boligsalg-2026-guide-til-omkostninger-og-provenu` **115**,
+     `/blog/dagpenge-saadan-finder-du-din-sats` **158**,
+     `/blog/maanedsbudget-2026-komplet-guide` **150**,
+     `/blog/skat-2026-alt-du-skal-vide` **152** (og på beraknare.se forsidens
+     svenske udgave).
+  3. Tallet skal stadig være med: **79 beregnere** på `/`,
+     `22.041 kr` + `14.694 kr` på dagpenge, `8 %` / `54.100 kr` / `12,01 %` /
+     `777.900 kr` / `12,75 %` på skat.
+  4. **Nyt fund undervejs:** `/blog/dagpenge-saadan-finder-du-din-sats` skal
+     sige **`Dimittendsats 15.759 kr–18.074 kr`** (lav–høj). Før stod der
+     "18.074 kr–15.759 kr".
+  5. **Kontrol:** `/procent` 115, `/dato` 118, `/befordringsfradrag` 129 og
+     `/tidsberegner` 141 skal være uændrede, og 0 sider i begge sitemapmer må
+     have en description over 160.
+
+- ⏳ **VERIFICÉR DEPLOY: C60 `/promille` — et tomt felt gav en grøn
+  tilladelse til at køre bil, "præcis på grænsen" erstattede den falske
+  "over grænsen", og den delte tekst har nu de fire input — kode + plan i ét
+  commit på branch `ceo/promille-audit`, kode `137936a`, merge `aded200`
+  2026-09-27 02:46 CEST. Første kandidatvindue **2026-09-27 07:30**.**
+  Verificér **indhold og interaktivitet**; HTTP 200 beviser intet, hele fundet
+  er i klient-renderede kort og i strengen på Kopier/Del:
+  1. Åbn `/promille`, **markér feltet "Antal genstande" og slet det** (eller
+     sæt kropsvægt til 0). Kortet må **ikke** blive grønt med "Du er under
+     grænsen på 0,5 ‰" — det skal sige "Indtast antal genstande og kropsvægt —
+     uden dem kan promillen ikke beregnes.", og der må ikke stå "0,00 ‰" eller
+     nogen ‰-tegn. Før stod der et grønt "under grænsen"-kort, altså en
+     tilladelse til at køre bil fra et felt brugeren ikke havde tastet færdig.
+  2. Sæt **1 genstand, 44 kg, Kvinde, 0 timer**. Promillen skal være
+     **0,50 ‰** og kortet skal sige **"Du er præcis på grænsen (0,5 ‰) — kør
+     ikke bil"** i ravn. Før sagde det "Du er over grænsen på 0,5 ‰ — kør ikke
+     bil", altså noget sidens egen brødtekst ("ulovligt at køre bil med en
+     promille over 0,5 ‰") modsiger. Flisen "Under grænsen om 0,5 ‰" skal stå
+     **—**, ikke "0 timer".
+  3. Sæt **4 genstande, 80 kg, Mand, 0 timer** og klik **Kopiér**. Klipbordet
+     skal give
+     **`4 genstande, 80 kg, Mand, 0 timer siden: 0,88 ‰. Du er under grænsen på 0,5 ‰. Du er allerede under grænsen — helt ædru om 5,9 time.`**
+     Før stod der kun "Din anslåede promille: 0,88 ‰" — ét tal uden de fire
+     tal, det afhænger af.
+  4. Åbn **Del beregning** i samme opsætning. Twitter-linkets tekst skal være
+     præcis **`Promilleberegner: 4 genstande, 80 kg, Mand, 0 timer siden: 0,88
+     ‰. …`** — altså Kopier-strengen bag præfikset, ikke en anden sætning.
+  5. Sæt **6 genstande, 70 kg, Mand, 0 timer**: kortet skal stadig sige **"Du
+     er over grænsen på 0,5 ‰ — kør ikke bil"**, og flisen skal vise den
+     positive tid til grænsen. Den nye tilstand må ikke have sluget den gamle.
+  6. `https://beraknare.se/promille` med 3 standardglas, 75 kg, 2 timmar skal
+     give **`3 standardglas, 75 kg, Man, 2 timmar sedan: 0,41 ‰. Du är över
+     gränsen på 0,2 ‰. …`** — svensk sætning, og 0,2-grænsen fordi den er
+     svensk.
+
+- ⏳ **VERIFICÉR DEPLOY: C56 `/tidszone` — brudtal med komma, og en delt tekst
+  der siger hvilken dato den gælder — kode + plan i ét commit på branch
+  `ceo/tidszone-kopi`, kode `8d77558`, merge `67d4cb1` 2026-09-27 01:29 CEST.
+  Første kandidatvindue **2026-09-27 07:30**.** Verificér
+  **indhold**; HTTP 200 beviser intet, hele fundet er i klient-renderede tal og
+  i strengen på Kopier/Del:
+  1. Åbn `/tidszone`, sæt **Til tidszone = Indien (IST)**. Tidsforskellen skal
+     stå som **"+3,5 timer"** og sætningen som **"Mumbai er 3,5 timer foran
+     København"**, huskelisten som **"+3,5t (+4,5t om vinteren)"**. Før stod der
+     `3.5` med punktum på alle tre steder. Det er det tydeligste af fundene.
+  2. Klik **Kopiér** med **Til tidszone = Japan (JST)**. Klipbordet skal give
+     `12:00 i København = 19:00 i Tokyo. Tokyo er 7 timer foran København.
+     Gælder 1. juli 2026 — forskellen følger sommertiden.` Før stod der kun
+     `12:00 i København = 19:00 i Tokyo` — uden dato, altså en påstand der var
+     forkert i vinterhalvåret.
+  3. Samme på `beraknare.se/tidszone`: `Mumbai är 3,5 timmar före Stockholm` og
+     svensk delt tekst med "Gäller … — skillnaden följer sommartiden.".
+
+- ⏳ **VERIFICÉR DEPLOY: C55 `/dato` — "antal dage" tæller ikke længere et
+  sommertidsskifte som en dag, og Kopier/Del giver datoerne med — kode + plan
+  i ét commit på branch `ceo/dato-tekst`, kode `fb89220`, merge `122535d`
+  2026-09-27 01:11 CEST. Første kandidatvindue **2026-09-27 07:30**.** Verificér **indhold og beregning**; HTTP 200
+  beviser intet, hele fundet er i klient-renderede tal og tekst:
+  1. Åbn `/dato`, vælg **Dage mellem**, sæt **Fra dato = 25. oktober 2026**
+     og **Til dato = 26. oktober 2026**. **Antal dage** skal være **1**.
+     Før rettelsen stod der 2, fordi de 25 timer mellem de to midnat blev
+     rullet op til 2 dage. Det er det tydeligste af alle fundene.
+  2. Sæt **Fra = 28. september 2026** og **Til = 29. december 2026**:
+     **92** dage, ikke 93.
+  3. Vælg **Arbejdsdage**, sæt **Udgangsdato = 5. januar 2026** og
+     **Antal = 30**. Overskriften skal læse **"30 arbejdsdage fra 5. januar
+     2026"** og må **ikke** sige "fra nu" nogen steder i HTML'en.
+  4. I samme tilstand: klik **Kopiér** og sæt klipbordet ind i et felt.
+     Det skal give **`30 arbejdsdage fra 5. januar 2026`**. Før stod der
+     "30 arbejdsdage".
+  5. Vælg **Tilføj dage** med Udgangsdato 27. september 2026 og **Antal =
+     ‑30**: kopier skal give **`30 dage før 27. september 2026`**, aldrig
+     "‑30 dage tilføjet".
+  6. Vælg **Dage mellem** med 28. og 29. september 2026: kopier skal give
+     **`1 dag mellem 28. september 2026 og 29. september 2026`** — entalform,
+     "1 dage" er en fejl.
+  7. Samme med **Antal = 1000**: kopier skal give **`1.000 dage fra 27.
+     september 2026`** med punktum som tusindtalsseparator.
+  8. På `https://beraknare.se/dato` skal samme test med 2. november og 1.
+     december 2026 give **`29 dagar mellan 2 november 2026 och 1 december
+     2026`**.
+  9. `https://minberegner.dk/api/health` skal svare `status: ok`.
+
+- ⏳ **VERIFICÉR DEPLOY: C193 — de 22 `metaDescription`s der brød repoets egen 160-tegns-regel skal alle være under 160 i den server-renderede HTML, på begge domæner. Den længste var `/befordringsfradrag` med 202 tegn (skal være 129).** Kode + plan i ét squash-commit på `ceo/moms-se-paritet` (grenen hedder efter den opgave, der *ikke* blev valgt — opgaven kom ud af en måling af hele sitet). Første kandidatvindue **2026-09-29 21:30** (17:30-batchen kørte før merge). Kun `src/lib/page-data.ts` (**22 `metaDescription`-strenge**, `git diff` verificerer at ingen anden linje er rørt) og `src/lib/page-data.test.ts` (**+34**) — **ingen `<title>`, ingen `<h1>`, ingen FAQ, ingen beregningslogik, ingen ny URL, ingen sitemap**. **HTTP 200 beviser intet:** intet her rører beregningerne, kun 22 indekserede tekststrenge. Verificér ved **indhold, ikke status**:
+  1. `curl -s -H "Host: minberegner.dk" https://minberegner.dk/befordringsfradrag | grep -o '<meta name="description" content="[^"]*"'` skal være **129** tegn og indeholde `3,17 kr./km for 25-120 km` **og** `1,59 kr./km over 120 km` — de to satser lå i den afkortede hale før og skal stadig være der.
+  2. Samme kommando på `/rentefradrag` skal være **148** tegn med `33,6 % på de første 50.000 kr.` og `16.800 kr i skat`; `/boligsalg` **156**; `/ejendomsvaerdiskat` **154** med `5,1 ‰ / 14 ‰`; `/boernepenge` **151** med alle fire sats-grupper.
+  3. `/husleje` skal være **146** og `/barselsdagpenge` **147** — de to er template-literals, så tjek at `25.000 kr netto` hhv. `5.085 kr./uge` stadig står i markupken (tallene er data-afledte, ikke håndskrevet).
+  4. På beraknare.se: `/elbil` **148**, `/motion-kalorier` **150**, `/1rm` **159**, `/loenstigning` **133**, `/sparemaal` **141**, `/enheder` **148**, `/fart` **137**, `/afkast` **156**, `/bolan` **136**.
+  5. **Kontrol:** `/procent` 115, `/dato` 118, `/tidsberegner` 141, `/moms` 128, `/boligstoette` 111, `/alder` 142 skal være uændrede, og **0** sider i begge sitemapmer må have en `description` over 160.
+
+- ⏳ **VERIFICÉR DEPLOY: C192 — beraknare.se `/promille` skal have **tre** tabeller (dansk 3 / svensk 1 → **3/3**), **1.294 ord** (var 625), **9 `<h2>`** (var 8), og FAQ-JSON-LD'en skal have **8** `Question` (var 5). De tre nye svenska `<h2>` er "Hur många promille är N öl?", "Promillegränsen utomlands" og den eksisterende "Promillegränsen i Sverige".** Kode + plan i ét squash-commit på `ceo/promille-se-paritet`. Første kandidatvindue **2026-09-29 21:30** (17:30-batchen kørte før merge). Kun `src/lib/promille-genstande.ts` (**ny**), `promille-genstande.test.ts` (**ny**), `promille/page.tsx` (**+144**, kun `se`-grenen), `page-data.ts` (**+23**, kun `se`-`faqItems`) og `page.test.tsx` — **`promille.ts` urørt, ingen beregningslogik ændret, ingen ny URL, ingen sitemap, intet `<title>` eller `<meta description>` ændret, ingen dansk side rørt**. **HTTP 200 beviser intet:** intet her rører `src/lib/promille.ts`'s beregning, kun fire nye blokke i den svenska gren. Verificér ved **indhold, ikke status**:
+  1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
+  2. `curl -s -H "Host: beraknare.se" https://beraknare.se/promille | sed 's/<!-- -->//g' | grep -o '<h2>Hur många promille är N öl?</h2>' | wc -l` skal være **1** (før: **0**), og `<h2>Promillegränsen utomlands</h2>` **1** (før: **0**).
+  3. Den nye N-øl-tabel skal have **5 datarækker × 3 kolonner** med præcis `0,22/0,25/0,36`, `0,44/0,50/0,73`, `0,66/0,76/1,09`, `0,88/1,01/1,45`, `1,32/1,51/2,18` — alle med `‰` i samme celle. Tjek med `grep -oE '[0-9]+,[0-9]{2} ‰' | sort -u`.
+  4. Landetabellen skal have **12 `<tr>`** med svenska namn: `Sverige`, `Norge`, `Polen`, `Danmark`, `Tyskland`, `Frankrike`, `Spanien`, `Italien`, `Grekland`, `Nederländerna`, `Österrike`, `Storbritannien`. **`Nederländerna` og `Österrike` må være med** — de danske `Holland`/`Østrig`/`Grækenland` skal have **0** forekomster.
+  5. Konklusionen skal sige `2 öl på 80 kg är 0,44 ‰` og `över` den svenska gränsen på 0,2 ‰ — **og `under den svenska gränsen` skal have 0 forekomster** (det er den fejl, der ville fortalt en svensk læser at han må køre).
+  6. FAQ-JSON-LD: `grep -o '"@type":"Question"' | wc -l` skal være **8** på beraknare.se (var 5) og **uændret 9** på minberegner.dk.
+  7. **Kontrol:** `curl -s https://minberegner.dk/promille` skal have uændret **3** tabeller, **9** `Question` og de oprindelige celler `0,22 ‰`…`2,18 ‰`.
+
+- ⏳ **VERIFICÉR DEPLOY: C190 — beraknare.se `/renteberegner` skal have ét nyt `<h2>Samma tal i Excel</h2>` med tabellen på **tre** rækker, formlerne skal være skrevet i **svensk Excel** (`BETALNING`, semikolon mellem argumenterne, `=200000*4/100` som tredje række — den stod i mit eget udkast som `=200000*4/12`, hvilket gav 66.666,67 i stedet for 8.000), svarene skal være **1 211,96 kr**, **90 870,56 kr** og **8 000 kr**, FAQ-JSON-LD'en skal have **7** `Question` (var 6), og der skal stå **0** `æ`/`ø` på siden.** Kode + plan i ét squash-commit på `ceo/renteberegner-se-excel`. Første kandidatvindue **2026-09-29 21:30** (17:30-batchen kørte mens iterationen var i gang). Kun `renteberegner/page.tsx` (+38 linjer i den **svenska** gren), `page-data.ts` (ét FAQ-par), to nye filer (`rente-excel.ts` + test) og `renteberegner/page.test.tsx` (tælletest 6 → 7) — **ingen beregningslogik, ingen ny URL, ingen sitemap, ingen `<title>`, ingen `<meta description>`, ingen dansk side rørt**. **HTTP 200 beviser intet:** intet her rører `src/lib/`'s beregninger, kun ét nyt afsnit og ét FAQ-par. Verificér ved **indhold, ikke status**:
+  1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
+  2. `curl -s -H "Host: beraknare.se" https://beraknare.se/renteberegner | sed 's/<!-- -->//g' | grep -o '<h2>Samma tal i Excel</h2>' | wc -l` skal være **1** (før: 0).
+  3. Alle **tre** formler skal findes i markupken: `=BETALNING(4/12;240;-200000)`, `=BETALNING(4/12;240;-200000)*240-200000` og **`=200000*4/100`** — den tredje skal **ikke** være `=200000*4/12`.
+  4. Svarene i de tre rækker skal være **1 211,96 kr**, **90 870,56 kr** og **8 000 kr**.
+  5. `grep -o '"@type":"Question"' | wc -l` skal være **7** (var 6) på beraknare.se.
+  6. `grep -oE '[æø]' | wc -l` skal være **0** på beraknare.se.
+  7. **Kontrol:** `https://minberegner.dk/renteberegner` skal have **7** `YDELSE`, **6** `Question` og **0** "Samma tal i Excel" — den danske side skal være urørt. `/laaneberegner` (svensk søskendeside) skal være urørt.
+
+- ✅ **C189 — `DEPLOY OK 2026-09-29`**, lukket på indhold: alle 27 artikler har
+  præcis én `BlogPosting`, de tre opregnede `datePublished`/`dateModified` er rigtige,
+  `/blog` har 27 `<time>` og **0** ISO-datoer i den synlige tekst (de 54 i markup'en
+  ligger i `<script>`), og kontrollerne holder (SE-blog 404, `/dato` 11 `<h2>`, `/tidszone`
+  11 "25 byer"). Noten er flyttet til `docs/plan-arkiv.md`.
+
+- ⏳ **VERIFICÉR DEPLOY: C191 — `/dato` og `/nedtaelling` skal på begge domæner have dagens antal i dage-til-listen, ikke kun spørgsmålsteksten. `/dato` er GSC's nr. 2 (DA 132.313 v / 822 klik / CTR 0,6 % / pos. 5,7) og nr. 3 (SE 99.136 v / 95 klik / 0,1 % / pos. 8,2), og de to største danske søgninger er "hvor mange dage er der til 1 december" (1.131 v, pos. 5) og "…til den 24 december" (1.013, pos. 5).** Kode + plan i ét squash-commit på `ceo/dato-dage-til-tal`, merge/push **2026-09-29 18:07 CEST** (`38e9599`). Første kandidatvindue **2026-09-29 21:30** (push efter 17:30-batchen). Kun `dato/page.tsx` (**+38** i listen) og `nedtaelling/page.tsx` (**+35**) + to testfiler er rørt — **ingen beregningslogik, ingen ny URL, ingen sitemap, ingen `<title>`, ingen `<meta description>`, ingen FAQ, `dage-til.ts` og `DageTilPage.tsx` urørte**. **HTTP 200 beviser intet:** hele ændringen er nye tal i to lister, og siden svarede 200 hele tiden, også da den ikke svarede. Verificér ved **indhold, ikke status**:
+  1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
+  2. `curl -s https://minberegner.dk/dato | sed 's/<!-- -->//g' | grep -c "Tallet nedenfor er dagens antal dage"` skal være **1** (før: 0), og det samme på `/nedtaelling`.
+  3. Rækken for 1. december skal vælge: `Hvor mange dage er der til 1. december?</a> 1. december: <strong>63 dage</strong> (9 uger).` — **altså dagens tal, ikke et hårdkodet 63.** Pr. 30. september 2026 forventes **62 dage**, og det skal nulstilles når datoen er nået.
+  4. **Krydscheck mod undersiden:** `curl -s https://minberegner.dk/dage-til/1-december` skal sige `Der er 63 dage` — samme tal som listen på `/dato` og `/nedtaelling`. Samme for `juleaften` (86), `juledagen` (87) og `halloween` (32).
+  5. Svensk: `curl -s -H "Host: beraknare.se" https://beraknare.se/dato | sed 's/<!-- -->//g'` skal have `Talet nedan är dagens antal dagar` og `1 december 63 dagar (9 veckor)`. **Kontrol:** samme side skal have **0** `æ`, **0** `ø` og **0** forekomster af `dage` (den danske enhed) — brug `grep -oE '[0-9]+ dage[^a-zåäö]' | wc -l` → **0**.
+  6. `/dato` og `/nedtaelling` skal fortsat have hver sit `Question`-antal uændret (DA 15 / 13 på `/dato`), og `<h2>`-tallet uændret (DA 11 / 10) — rettelsen rører kun listen.
+
+- ⏳ **VERIFICÉR DEPLOY: CEO-punkt 0 — otte forkerte/opfundne fakta rettet, plus planen skåret fra 1,7 MB til 29 KB.** Kode + plan i ét squash-commit på `ceo/dage-til-fakta`, merge/push **2026-09-29 20:50 CEST**. Første kandidatvindue **2026-09-30 07:30** (21:30-batchen kører kl. 21:30, planen var skrevet før det). Rørte filer: `src/lib/dage-til.ts` (valborg 14. februar → **30. april** med ny askonsdags-afstand 51-79 dage; svensk påskafton `offsetDays: -2` → **`-1`**; dansk sankthans fra svensk `midsummer`-logik → **fast 23./24. juni**; dansk påskeaften-FAQ slettet og erstattet; "fri med løn" fjernet; `toUtcMidnight` læser nu kalenderdagen i `Europe/Copenhagen`), `src/lib/dage-til.test.ts` (**93 → 95**), `src/lib/nettoprisindeks.ts` + `.test.ts` (lejeloven § 5), `src/components/HuslejeNettoprisindeks.tsx` + `.test.tsx`, `src/lib/page-data.ts` (to husleje-FAQ'er + én svensk promille-FAQ), `src/lib/dato-eksempler.ts` + `.test.ts` (`maneder: 12` altid), `IMPLEMENTATION_PLAN.md` og `docs/plan-arkiv.md` (**ny**, 1,6 MB append-only historik). **HTTP 200 beviser intet:** intet her rører en URL, og hele virkningen er ny eller ændret brødtekst, fem data-ankre og én tidszone. Verificér ved **indhold**:
+   1. `https://minberegner.dk/dage-til/valborg` skal sige **"Valborgsmässoaften er 30. april"** og **0** forekomster på "14. februar". Titlen skal vise dage-tallet til 30. april 2027, ikke til februar.
+   2. `https://minberegner.dk/dage-til/sankthansaftensdag` skal sige **23. juni** og **0** forekomster på "19. juni" / "mellem 19. og 25. juni"; `/dage-til/sankthansdag` skal sige **24. juni**.
+   3. `https://beraknare.se/dagar-till/paskafton` skal have titlen på **27 mars 2027** (ikke 26. marts) og FAQ'en "Är påskafton samma sak som långfredagen?" skal svare **Nej**. `https://minberegner.dk/dage-til/langfredag` skal have **0** forekomster på "Er påskeaften det samme som langfredag".
+   4. `https://minberegner.dk/husleje` skal have **0** forekomster på "fastsætter den endelige sats", **2** på "Lejeloven § 5" og **>=1** på "huslejenævnsvedtægt".
+   5. `https://beraknare.se/promille` skal have **0** forekomster på "er over 2,0" og **>=1** på "6 öl på 70 kg ger 1,51 promille", og FAQ-JSON-LD'en skal have **0** `æ`/`ø`.
+   6. **Nedtællingerne kl. 00-02:** tjek `/dage-til/1-december` mellem 00:00 og 01:59 dansk tid — den skal tæle til 1. december **2026** og ikke til den 30. november. (Kan kun måles i det vindue; uden for det er den gamle og den nye kode ens.)
+   7. `/api/health` skal svare `status: ok` på begge domæner.
+   **Målt på rigtig server før merge** (`next start` :3981, porten verificeret fri *inden* start): punkt 1-5 er alle bekræftet med de ovenstående greb, `/api/health` svarede `status: ok`, og `/dato`'s titel var uændret som kontrol. **Gate grøn:** lint (**614 filer**), **2976 tests / 187 filer**, build (**142 sider**), `locale-leak.mjs --gate` exit 0.
+
+#### 180. [x] 2026-09-29 — C194 — **ingen `meta description` er længere over 160 tegn, og en test holder hele sitet under reglen**
+
+- **Målt på den nye kode (ikke produktion):** de 24 fra C193's liste var kun
+  **8** stadig over 160 i koden. C193 rettede 22 strenge i `page-data.ts`, så de
+  16 øvrige var forside + blogindlæg, hvis description ligger i `page.tsx`:
+  `/` da **187** / se **171**, `/blog/biloekonomi…` **180**,
+  `/blog/boligsalg…` **200**, `/blog/dagpenge-saadan…` **173**,
+  `/blog/skat-2026-alt-du-skal-vide` **188**, `/blog/maanedsbudget…` **161**.
+  De otte andre på listen lå under 160 efter C193 og var ikke en fejl mere.
+- **Rettet:** alle svy kortere tekster, **hvert tal bevaret og fortsat
+  data-afledt** (`{count}` på forsiden, `${MAX}`/`${DELTID}`/`${DIMITTEND_*}`
+  på dagpenge, satserne fra `SATSER_2026` på skat). **Fund undervejs:**
+  dagpenge-indlæggets description skrev dimittend-intervallet som
+  "18.074 kr–15.759 kr" — **høj–lav**; det står nu "15.759 kr–18.074 kr", som
+  resten af siden har hele tiden sagt. Ingen `<title>`, ingen `<h1>`, ingen
+  beregningslogik, ingen ny URL, ingen sitemap-ændring.
+- **Ny test `src/app/meta-description.test.ts` (4 tests):** den kalder hver
+  sides `generateMetadata()` — altså den tekst der lander i `<head>` — for alle
+  120 `page.tsx` under `src/app` på dansk, alle slugs i `getAvailableSlugs` på
+  begge domæner, forsiden i begge sprog og begge `dage-til`-ruter på svensk.
+  Sider der *skal* mangle description står i en navngiven liste, så en ny side
+  ikke kan springe reglen over ved at glemme den. Den fejlede med de otte fund
+  over og er grøn efter rettelsen. `import.meta.glob` bruges frem for
+  `readdirSync`, fordi `[dato]`/`[slug]` ellers bliver læst som glob-mønstre.
+- **Verificeret på rigtig server før merge** (`next start` :3987): alle **136**
+  sider i sitemapmen har nu en description ≤ 160 — målt på den renderede HTML,
+  ikke på status. `/` 152, de fem blogindlæg 115–158, `/befordringsfradrag` 129
+  (C193's tal), `/procent` 115 og `/dato` 118 uændrede som kontrol.
+  Gate grøn: lint (**615 filer**), **2980 tests / 188 filer**, build (**142
+  sider**), `locale-leak.mjs --gate` exit 0.
+- **MÅL:** de svy sider har ingen CTR-baseline i GSC-uddraget; kun
+  `/rentefradrag` (331 Plausible-besøgende/28d) er med der. Mål snippet-andelen
+  for `/` (222 besøgende/28d, bounce 37 %) 14 dage efter deploy.
