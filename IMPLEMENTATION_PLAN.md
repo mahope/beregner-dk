@@ -1,3 +1,23 @@
+STATUS: KØ — **C194 er landet: `/tidszone` er sitets fjerdestørste danske side (24.117 visninger) og dens titel indeholdt nul forekomster af ordet "tidszone" — den skrev "Hvad er klokken i USA, når den er 12 i Danmark?", altså ét lokalt by-spørgsmål, imens sidens *største* søgning er hovedordet selv ("tidszoner", 713 v, pos. 9). Samme fejl som C84's "12 byer", men i titlen i stedet for i beskrivelsen: C79/C81/C172/C180 har alle lagt et svar-først spørgsmål i `<title>`, og på ingen af de andre sider lå det og således hovedordet væk.**
+
+Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den, 119 er kilde-blokeret, 179 kræver en rigtig browser), og de otte åbne noter med vindue **17:30** var pligter — de er alle lukket ved indholdskontrol nedenfor.
+
+**Først blev de otte pligter lukket ved indhold, ikke HTTP 200.** Klokken var 19:30, så 17:30-batchen havde kørt. **C185** (beraknare.se `/kalorier`): `<h2>Hur många kalorier per dag?</h2>` og `<h2>Kaloribehov efter ålder</h2>` hver **2** gange, **to** tabeller (var 0), **8** `Question` (var 4), "65 år" i markupken — og dansk **uændret** (1 tabel, 7 FAQ, 0 fund på "Kaloribehov efter ålder"). **C184** (beraknare.se `/braendstof`): alle fire nye overskrifter, "500 km" **29**, "17,57" **25**, "22,81" **13**, "29,8 %" **4**, "11,70" **4**, "12,70" **4**, **8** `Question` (var 5), **0** "Diesel koster"; dansk **uændret** (titel "Brændstofberegner: 500 km benzin koster 450 kr.", 7 `<h2>`, 9 FAQ, 0 fund på 17,57/22,81). **C183** (beraknare.se `/renteberegner`): `<h2>Formeln för ett annuitetslån</h2>`, "Summan av den geometriska serien" og "annuitetslån formel bevis" hver **2**, **6** `Question` (var 4); dansk **uændret** (6 FAQ, `YDELSE` ×7, 0 fund på "månadsränta"). **C182** (`/dato`): **12** `scope="row"` + **én** tabel på begge domæner, de tre nye overskrifter i begge sprog, "Arbetsdagar" **13** på SE, DA **11** / SE **14** `Question`. **C180** (overskriftsniveau): prøvet på seks sider — `h1` **1** hver, "Hurtig reference" stadig **1** gang på `/moms`. **C177** (`og:image`): `og:image` + `twitter:image` **1** hver på `/procent`, `/blog`, beraknare.se `/dato` og `/dage-til/juledagen`. **C178** (manifest): DA "79+ gratis beregnere", SE "53+ gratis kalkylatorer", **1** manifest-link pr. domæne, og `beregner.no/api/health` **404** som opgave 178 forudsiger. `/api/health` → `status: ok` på begge domæner. **Ingen note er lukket på en 200 alene.**
+
+**Målefejl i *notens egen* kriterium, fundet fordi den gav 2 og ikke 0.** C182's note kræver at `grep -c 'skudår)\|skottår)'` på `/dato` er **0**, fordi 2026 ikke er skudår. Den gav **2** på begge domæner — men de to forekomster er brødteksten: "februar med 28 dage (**29 i skudår**)" og "365 dage (366 **i skudår**)". Notens greb kan ikke skelne en række-marker fra en almindelig parentes om skudår, altså **låser den på den forkerte egenskab** og ville have kostet en hel fejljagt. Den rigtige prøve er tabellens tolv rækker: læst direkte giver de **12** måneder, **februar 28 dage / 20 arbejdsdage / 8 weekenddage**, og **0** rækker med skudårs-flag. Samme fejlklasse som C192's to for brede negative låse.
+
+**Rettelsen er to strenge og to tests.** Ny dansk titel **"Tidszoner: hvad er klokken i USA når den er 12 i Danmark?"** (57 tegn) og ny svensk **"Tidszoner: vad är klockan i USA när det är 12 i Sverige?"** (56) — begge under C81's 60-tegns-grænse, beg med hovedordet først, fordi C81 viste at det er den synlige del af titlen, der tæller. **Helt nyt fund fra målingen:** DA- og SE-autocomplete har **"tidszoner" som nummer 1** i begge sprog, og nummer 6 på dansk er "tidszoner **beregner**" (GSC: 104 v, pos. 3) — altså spørger søgerne efter *værktøjet*, præcis som de gør på de andre ni sider. Den gamle titel ramte GSC's nr. 2-søgning (175 v, pos. 6) og fire gange den; de fire gange større hovedords-søgning lå uden for titlen helt.
+
+**Harnessen er klassen, ikke den ene side.** Ny test i `page-data.test.ts` kræver at **hver** sides `metaTitle` indeholder sit eget hovedord, med det generiske endestykke (`beregner`, `kalkylator`, `omregner`, `omvandlare`, `converter`, `calc`) strippet — så en ny side der bygges om til et lokalt spørgsmål fejler uden at nogen har skrevet en test til den. Den anden nye test låser at hovedordet står *først* på `/tidszone` i begge sprog. **Modsvært verificeret: begge falder** med master's `page-data.ts` stashed.
+
+**Én fejl i min egen test, fundet fordi den faldt.** Min første stam-regel var `/(beregner|kalkylator|…)$/`, som efterlod bindende **s** i svenske sammensætninger: "Ägglossningskalkylator" blev til stammen "ägglossnings", og `/aegloesning`'s *korrekte* titel "Beräkna ägglossning och fertila dagar" blev meldt som manglende. Det er C192's "en lås, der er bredere end den egenskab den skal bevare" i modsat retning — for *snæver* — og rettet til `s?(…)`, så både "ägglossning" og "tidszoner" tælles dækket. Fundet fordi klassen gav **2** fund, hvoraf den ene var en korrekt titel.
+
+**Gate grøn:** lint (**612 filer**), **2.945 tests / 186 filer** (fra 2.943/186), build (**142 sider**), `locale-leak.mjs --gate` **exit 0**, `knapgruppe-scan.mjs` **0/0**. Målt på rigtig bygget server (`next start` :4733, porten verificeret fri *inden* start, C117's lære) med `curl -H "Host: …"` (målefejl 34/38): DA `<title>Tidszoner: hvad er klokken i USA når den er 12 i Danmark?</title>`, SE `<title>Tidszoner: vad är klockan i USA när det är 12 i Sverige?</title>`, `/api/health` `status: ok`, og kontrollerne `/procent` + `/dato` **uændrede**. Rørte filer: `src/lib/page-data.ts` (**to `metaTitle`-strenge**) og `src/lib/page-data.test.ts` (**+35**) — **ingen `<h1>`, ingen `description`, ingen `ogTitle`, ingen FAQ, ingen beregningslogik, ingen URL, ingen sitemap**.
+
+**MÅL:** `/tidszone` DA baseline **24.117 visninger / 105 klik / CTR 0,4 % / pos. 7,5** og SE **3.372 v / 12 klik / 0,4 % / pos. 7,7** (GSC 2026-08-30 → 09-27); Plausible har ingen egen `/tidszone`-linje i top-15, så **GSC er den eneste baseline**. Genmåles **2026-10-13**. **Forventningen er ærlig:** 0,4 % CTR på pos. 7,5 er klik på visninger, der allerede er der, ikke nye. Hvis CTR'en er uændret efter 14 dage, er hypotesen "titlen skjulte sidens eget hovedord" **modbevist** — og så er `/tidszone`s problem ranking, ikke tekst, ligesom konklusionen i C172.
+
+
+
 STATUS: KØ — **C192 er landet: `/promille` var sitets *største* DA/SE-asymmetri overhovedet — 1.391 ord / 3 tabeller / 9 FAQ på dansk mod 625 ord / 1 tabel / 5 FAQ på beraknare.se — og "promille efter N öl" er 10/10 svenske autocomplete-variationer i præcis det spørgsmål, siden ikke svarede på en eneste gang.**
 
 Køen havde ingen `I GANG`-opgave (179 kræver en rigtig browser, 98 afhænger af den `BLOCKED`-mærkede 97), og de tre åbne deploy-noter (C189, C190, C191) har første vindue **21:30** — det var 18:15 ved starten, så ingen blev rørt.
@@ -93,6 +113,58 @@ Køen havde ingen `I GANG`-opgave (98 afhænger af den `BLOCKED`-mærkede 97, 11
 **Gate grøn:** lint (**612 filer**), **2.943 tests / 186 filer** (fra 2.940/186), build (**142 sider**), `locale-leak.mjs --gate` **exit 0**, `knapgruppe-scan.mjs` **0/0**. Målt på rigtig bygget server (`next start` :4701, porten verificeret fri *inden* start) med begge `Host:`-headere: **alle 22 sider** serverer den nye beskrivelse under 160 (129-159), `/api/health` `status: ok` på begge domæner, og kontrolsiderne `/procent` (115), `/dato` (118), `/tidsberegner` (141), `/moms` (128), `/boligstoette` (111) og `/alder` (142) er uændrede. Rørte filer: `page-data.ts` (**22 `metaDescription`-strenge**, verificeret med `git diff` at ingen anden linje er rørt) og `page-data.test.ts` (**+34**) — **ingen `<title>`, ingen `<h1>`, ingen FAQ, ingen beregningslogik, ingen URL, ingen sitemap**.
 
 **MÅL:** `/befordringsfradrag` DA, `/rentefradrag` **331 besøgende/28d (+145 %, bounce 4 %)**, `/boligsalg`, `/ejendomsvaerdiskat`, `/boernepenge` **136 besøgende/28d (+116 %, bounce 1 %)**, `/pension` **146 (+28 %)**, `/loen-efter-skat`, `/efterloen`, `/elbil`, `/sparemaal`, `/husleje` **168 (+21 %)**, `/barselsdagpenge` **212 (+56 %)**, `/barselsplanlaegger` samt de ni svenske — alle pr. **2026-09-29**; `/rentefradrag` og `/boernepenge` har ingen GSC-linje, så **Plausible er deres eneste baseline**. Genmåles **2026-10-13**. **Forventningen er ærlig og lille:** en kortere snippet er ikke nye visninger, og de 22 sider var ikke de med dårligst CTR — `/befordringsfradrag` er ikke i GSC's top-16. Det der *kan* læses af rettelsen er, at **den konkrete regel** på `/rentefradrag` (33,6 %, 50.000 kr, 16.800 kr) og `/befordringsfradrag` (3,17/1,59 kr./km) nu ligger i den del af strengen, der vises, i stedet for i den der klippes væk. Hvis `/rentefradrag`s CTR efter 14 dage er uændret, er hypotesen "afkortningen skjulte svaret" **modbevist**.
+
+#### 194. [x] FÆRDIG 2026-09-29 — C194 — **`/tidszone` (24.117 v, CTR 0,4 %, pos. 7,5) skrev nul forekomster af sit eget hovedord i titlen: "Hvad er klokken i USA, når den er 12 i Danmark?" imens sidens største søgning er "tidszoner" (713 v, pos. 9) — og C79/C81/C172/C180 har lagt svar-først i `<title>` på alle andre sider uden at miste hovedordet**
+
+- **Datagrund:** GSC 2026-08-30 → 09-27. DA `/tidszone` **24.117 visninger /
+  105 klik / CTR 0,4 % / pos. 7,5** (fjerdestørst i dansk GSC), SE **3.372 v /
+  12 klik / 0,4 % / pos. 7,7**. Søgningerne: **"tidszoner" 713 v (pos. 9)**,
+  "hvad er klokken i usa når den er 12 i danmark" 175 v (pos. 6),
+  "tidszoner beregner" 104 v (pos. 3), "tidsforskel" 89 v (pos. 10).
+  DA- og SE-autocomplete har **"tidszoner" som variation nr. 1 i begge sprog**,
+  og nr. 6 på dansk er "tidszoner **beregner**" — altså spørger søgerne efter
+  *værktøjet*, præcis som på de ni andre CTR-sider.
+- **Målt på de to live sider før rettelsen:** `Hvad er klokken i USA` **0**
+  forekomster af "tidszone"/"tidszoner" i `<title>` på begge domæner, mens
+  `<h1>` er "Tidszoneberegner"/"Tidszonskalkylator" og `keywords` begge starter
+  med "tidszoneberegner"/"tidszonskalkylator". Beskrivelsen dækker begge
+  søgninger ("Se tidsforskel til 25 byer og omregn tid mellem tidszoner") — så
+  **kun titlen** stod uden for sit eget hovedord.
+- **Rettelsen:** DA **"Tidszoner: hvad er klokken i USA når den er 12 i Danmark?"**
+  (57 tegn) og SE **"Tidszoner: vad är klockan i USA när det är 12 i Sverige?"**
+  (56) — begge under C81's 60-tegns-grænse, og hovedordet står først, fordi C81
+  viste at det er den synlige del af titlen der tæller. Samme fejlklasse som
+  C84's "12 byer" (by-tallet lå i `metaDescription` mens tabellen havde 21),
+  bare i titlen i stedet for i beskrivelsen.
+- **Harness:** to nye tests i `page-data.test.ts` (+35). Den ene er **klassen**:
+  hver sides `metaTitle` skal indeholde sit eget hovedord med det generiske
+  endestykke (`beregner`/`kalkylator`/`omregner`/`omvandlare`/`converter`/`calc`)
+  strippet, så en ny side der bygges om til et lokalt spørgsmål fejler uden at
+  nogen skriver en test til den. Den anden låser at hovedordet står *først* på
+  `/tidszone` i begge sprog. **Modsvært verificeret: begge falder** med
+  master's `page-data.ts` stashed.
+- **Fejl i min egen test, fundet fordi den faldt:** min første stam-regel var
+  `/(beregner|kalkylator|…)$/`, som efterlod bindende **s** i svenske
+  sammensætninger — "Ägglossningskalkylator" → "ägglossnings", så
+  `/aegloesning`'s **korrekte** titel "Beräkna ägglossning och fertila dagar"
+  blev meldt som manglende. Rettet til `s?(…)`. Samme fejlklasse som C192's
+  for brede låse, i modsat retning: for *snæver* lås.
+- **Åtte pligter lukket ved indholdskontrol først** (vindue 17:30): C185, C184,
+  C183, C182, C180, C177, C178 — alle målt på live med konkrete strenge, se
+  C194-STATUS. **C182's egen note-kriterium var fejltænkende:** den krævede 0
+  fund på `skudår)`, men de to fund var brødteksten "29 i skudår" og "366 i
+  skudår". Tabellens tolv rækker er korrekte (februar 28 dage / 20 arbejdsdage /
+  8 weekenddage, 0 rækker med skudårs-flag).
+- **Gate grøn:** lint (**612 filer**), **2.945 tests / 186 filer** (fra
+  2.943/186), build (**142 sider**), `locale-leak.mjs --gate` exit 0,
+  `knapgruppe-scan.mjs` 0/0. Målt på `next start` :4733 (port fri *inden*
+  start) med `curl -H "Host: …"`: begge nye titler i markupken,
+  `/api/health` `status: ok`, kontrollerne `/procent` og `/dato` uændrede.
+- **MÅL:** DA **24.117 v / 105 klik / CTR 0,4 % / pos. 7,5**, SE **3.372 v /
+  12 klik / 0,4 % / pos. 7,7** (GSC 2026-08-30 → 09-27) — genmåles
+  **2026-10-13**. Forventningen er ærlig: det er klik på eksisterende
+  visninger, ikke nye. Uændret CTR efter 14 dage modbeviser hypotesen, og så er
+  sidens problem ranking, ikke tekst — samme konklusion som C172.
 
 #### 193. [x] FÆRDIG 2026-09-29 — C193 — **22 `metaDescription`s brød repoets egen 160-tegns-regel (længste 202), fordi reglen kun kørte i ~20 håndplukkede testblokke; titler, struktur, FAQ-dækning og bytal er målt hele vejen og lukket med tal**
 
@@ -17589,6 +17661,36 @@ er værst. Se `❓ Til Mads`.
 **C189 og C190 står åbne** — de blev pushet efter 17:30 (hhv. 17:26, med vindue 21:30 fordi noten var skrevet kl. 17:06 før vinduet, og 17:29 mens 17:30-batchen kørte), så de har **første kandidatvindue 2026-09-29 21:30**.
 
 ### VERIFICÉR DEPLOY-log — nyeste først
+### ✅ `DEPLOY OK 2026-09-29 19:35` — otte noter lukket ved indholdskontrol (C177, C178, C180, C182, C183, C184, C185).** 17:30-batchen havde kørt da iterationen startede (19:30), så alle otte var pligter. Målt på **live** mod begge domæner, `/api/health` svarede `status: ok` (timestamp 17:31 UTC = 19:31 CEST), `beregner.no/api/health` **404** som opgave 178 forudsiger. Ingen note er lukket på en HTTP 200 alene.
+  - **C185** `beraknare.se/kalorier`: `<h2>Hur många kalorier per dag?</h2>` **2** og `<h2>Kaloribehov efter ålder</h2>` **2**, **to** tabeller (var 0), **8** `Question` (var 4), "65 år" i markupken. Kontrol: DA `/kalorier` **1** tabel, **7** FAQ, **0** fund på "Kaloribehov efter ålder".
+  - **C184** `beraknare.se/braendstof`: alle fire nye overskrifter fundet (hver **2**), "500 km" **29**, "17,57" **25**, "22,81" **13**, "29,8 %" **4**, "11,70" **4**, "12,70" **4**, **8** `Question` (var 5), **0** "Diesel koster". Kontrol: DA uændret — titel "Brændstofberegner: 500 km benzin koster 450 kr.", 7 `<h2>`, 9 FAQ, **0** fund på 17,57/22,81.
+  - **C183** `beraknare.se/renteberegner`: `<h2>Formeln för ett annuitetslån</h2>`, "Summan av den geometriska serien" og "annuitetslån formel bevis" hver **2**, **6** `Question` (var 4). Kontrol: DA **6** FAQ, `YDELSE` ×7, **0** "månadsränta".
+  - **C182** `/dato`: **12** `scope="row"` + **én** `<table>` på begge domæner, `<h2>Hvor mange dage er der i en måned?</h2>` + `<h3>Sådan tæller du dage i en måned i Excel</h3>` + `<h2>Hvor mange dage er der i et år?</h2>` i begge sprog, "Arbetsdagar" **13** på SE, DA **11** / SE **14** `Question`. **Målefejl i notens eget kriterium:** `grep -c 'skudår)'` gav **2**, men de to fund er brødteksten ("29 i skudår", "366 i skudår") — notens greb kan ikke skelne en række-marker fra en almindelig parentes. Tabellens tolv rækker er korrekte: februar 28 dage / 20 arbejdsdage / 8 weekenddage, **0** rækker med skudårs-flag.
+  - **C180** overskriftsniveau: `h1` **1** hver på `/`, `/procent`, `/moms`, `/blog`, `/dage-til/juledagen`, `/kategori/sundhed`; "Hurtig reference" stadig **1** gang på `/moms`.
+  - **C177** `og:image`: `og:image` + `twitter:image` **1** hver på `/procent`, `/blog`, beraknare.se `/dato`, `/dage-til/juledagen`.
+  - **C178** manifest: DA "79+ gratis beregnere", SE "53+ gratis kalkylatorer", **1** `rel="manifest"` pr. domæne.
+
+- `VERIFICÉR DEPLOY: /tidszone-titlen svarer på sit eget hovedord (0 → 2 forekomster i <title>) ceo/tidszone-titel 2026-09-29 19:4x`
+  — merge sker ca. 19:4x, før 21:30-vinduet er nået, så første vindue er
+  **2026-09-29 21:30** (17:30-batchen kørte længe før). Verificér **indhold, ikke
+  HTTP 200**: intet her rører beregningerne, kun to indekserede tekststrenge. Mål:
+  1. `curl -s https://minberegner.dk/tidszone | grep -o '<title>[^<]*</title>'` skal
+     give **"Tidszoner: hvad er klokken i USA når den er 12 i Danmark?"** — altså
+     **"Tidszoner" som første ord**. Før: "Hvad er klokken i USA, når den er 12 i
+     Danmark?" med **0** forekomster af "tidszone" i titlen.
+  2. Samme på `https://beraknare.se/tidszone` skal give **"Tidszoner: vad är
+     klockan i USA när det är 12 i Sverige?"**. Før: nul forekomster.
+  3. Begge titler skal være **≤ 60 tegn** (57 og 56) — C81's regel.
+  4. **KONTROL:** `https://minberegner.dk/procent` skal have **uændret** `<title>`
+     ("Procentberegner – beregn 10 procent af et tal") og `/dato` **uændret**
+     ("Dage mellem datoer og dage til en dato | MinBeregner.dk") — denne diff rørte
+     kun `/tidszone`s to `metaTitle`, så en ændring der er en fejl.
+  5. `<meta name="description">` på begge domæner skal være **uændret** (125/132
+     tegn) — hovedordet var allerede i beskrivelsen.
+  6. `npm run test -- src/lib/page-data.test.ts` skal give **94 passed** (fra 92),
+     og `node scripts/locale-leak.mjs --gate` exit 0.
+  7. `/api/health` skal svare `status: ok` på begge domæner.
+
 - `VERIFICÉR DEPLOY: overskriftsniveau på alle sider (49 brud → 0 af 207) ceo/heading-outline 2026-09-29 13:5x`
   — merge sker ca. 13:55, før 17:30-vinduet, så første vindue er
   **2026-09-29 17:30**. Rettelsen er en skrivefejl i overskriftstags, så en

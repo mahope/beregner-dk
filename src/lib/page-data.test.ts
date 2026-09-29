@@ -1092,6 +1092,43 @@ describe("svensk CTR på tid- og dato-siderne", () => {
     }
   });
 
+  // C194: /tidszone (24.117 visninger DA, CTR 0,4 %, pos. 7,5) skrev i titlen
+  // "Hvad er klokken i USA, når den er 12 i Danmark?" — altså nul forekomster af
+  // "tidszone". GSC's største søgning på siden er netop "tidszoner" (713 v,
+  // pos. 9) og nummer fire er "tidsforskel" (89 v, pos. 10). Siden svarer på
+  // begge i beskrivelsen, men titlen — det eneste felt Google afkorter ved
+  // ~60 tegn — lovede en enkelt by-spørgsmål.
+  // Harnessen er klassen, ikke den ene side: hver sides metaTitle skal indeholde
+  // sit eget hovedord, så næste side der bygges om til et lokalt spørgsmål
+  // fejler uden at nogen har skrevet en test til den. Modsvejs verificeret:
+  // testen falder med master's page-data.ts i da og se.
+  test("metaTitle indeholder sidens eget hovedord", () => {
+    const generiske = /s?(beregner|kalkylator|omregner|omvandlare|converter|calc)$/;
+    for (const locale of ["da", "se", "no"] as const) {
+      const mangler: string[] = [];
+      for (const slug of getAvailableSlugs(locale)) {
+        const data = getPageData(slug, locale);
+        if (!data) continue;
+        const stam = data.title.toLowerCase().split(/[\s:–—-]/)[0].replace(generiske, "");
+        if (stam.length < 4) continue;
+        if (!data.metaTitle.toLowerCase().includes(stam)) {
+          mangler.push(`${locale}/${slug} "${data.title}" → "${data.metaTitle}"`);
+        }
+      }
+      expect(mangler, `${locale}: titler uden eget hovedord:\n${mangler.join("\n")}`).toEqual([]);
+    }
+  });
+
+  // Samme fejl som over, låst på den side der fejlede: hovedordet skal stå
+  // *først*, fordi C81 viste at det er den synlige del af titlen, der tæller.
+  test("/tidszone starter titlen med sit eget hovedord i begge sprog", () => {
+    for (const locale of ["da", "se"] as const) {
+      const data = getPageData("tidszone", locale);
+      if (!data) continue;
+      expect(data.metaTitle.toLowerCase(), locale).toMatch(/^tidszoner/);
+    }
+  });
+
   // "nedräkning dagar" er GSC's største søgning på /nedtaelling (170 v, pos. 9).
   // Den gamle titel skrev "Nedräkning - hur många dagar", så de to ord i hoved-
   // ordet stod splittet af en tankestreger — Google læser dem som to ord.
