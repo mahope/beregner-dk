@@ -103,6 +103,14 @@ export default function ReelTimeloenPage() {
         <p>
           Lyder simpelt, men djævelen er i detaljerne. Lad os gennemgå begge sider.
         </p>
+        <p>
+          Formlen er altså et brøk — løn delt i timer. Vil du se den som brøk, eller
+          regne på hvor stor en del af din løn der går til hver post, kan du bruge{" "}
+          <Link href="/brok" className="font-medium text-blue-600 dark:text-blue-400 hover:underline">
+            brøkberegneren
+          </Link>
+          .
+        </p>
 
         <h2>Del 1: Beregn din samlede kompensation</h2>
         <p>

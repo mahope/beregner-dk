@@ -222,6 +222,13 @@ export default function FeriepengeGuidePage() {
         </div>
 
         <h2>Vigtige datoer i ferieåret</h2>
+        <p>
+          Vil du vide hvor mange dage der er tilbage til en af dem, kan du tælle det med{" "}
+          <Link href="/dato" className="font-medium text-blue-600 dark:text-blue-400 hover:underline">
+            datoberegneren
+          </Link>
+          .
+        </p>
         <div className="not-prose my-6 overflow-x-auto">
           <table className="w-full text-sm">
             <thead>

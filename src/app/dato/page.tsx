@@ -5,6 +5,7 @@ import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
 import FAQ from "@/components/FAQ";
 import RelatedCalculators from "@/components/RelatedCalculators";
+import RelateredeArtikler from "@/components/RelateredeArtikler";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Link from "next/link";
@@ -337,6 +338,9 @@ export default async function DatoPage() {
       <FAQ items={pageData.faqItems} />
 
       <RelatedCalculators current="/dato" />
+
+      {/* Returlink til indlægget om emnet (kun danske domæner) */}
+      <RelateredeArtikler current="/dato" locale={locale} />
     </div>
   );
 }

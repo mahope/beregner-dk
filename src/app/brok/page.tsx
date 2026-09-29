@@ -8,6 +8,7 @@ import FAQ from "@/components/FAQ";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import RelatedCalculators from "@/components/RelatedCalculators";
+import RelateredeArtikler from "@/components/RelateredeArtikler";
 import Sidebar from "@/components/Sidebar";
 
 /**
@@ -183,6 +184,9 @@ export default async function BrokPage() {
         </div>
 
         <RelatedCalculators current="/brok" />
+
+        {/* Returlink til indlægget om emnet (kun danske domæner) */}
+        <RelateredeArtikler current="/brok" locale={locale} />
       </div>
       <Sidebar currentHref="/brok" adSlotId="brok-sidebar" />
     </div>

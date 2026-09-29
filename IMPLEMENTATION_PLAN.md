@@ -1,3 +1,5 @@
+STATUS: KØ — **C165 er landet: koblingen mellem blogindlæg og beregnere var ensidig i 1 af 9 tilfælde, og sitets *største* side var ikke koblet til noget indlæg — `/dato` (131.920 visninger, 1.110 besøgende/28d) og `/brok` (4.913 v, pos. 5,3) manglede begge et "Guides om emnet"-link, fordi `blog-kobling.ts` kun havde 7 beregnere.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den, 119 er kilde-blokeret), og opgave **159** (de ni åbne deploy-noter) er **fortsat klokke-blokeret**: alle ni har første vindue **2026-09-29 07:30**, og det var 06:23, så ingen kunne lukkes og ingen blev rørt. **Valget kom af at måle linkgrafen i den retning, ingen måling hidtil havde dækket.** C79 målte blog→beregner (alle 27 indlæg har 1-8 links, lukket) og C105 målte forside→katalog (32 lukket), men **retningen beregner→indlæg var aldrig talt**: `RelateredeArtikler` renderer på **7 af 141** sider. En måling over alle 27 indlægs `href`'er fandt **46 kalkulatorer med nul indgangslinks fra hele bloggen** — blandt dem `/dato` (131.920 v DA + 96.336 v SE), `/kalorier` (12.569 v), `/promille` (4.968), `/brok` (4.913), `/fart` (4.570) og `/nedtaelling` (5.361 v SE). **Målt, og så valgt — kun to af dem fik et link, fordi kun to har et ægte indholdsmæssigt match:** `/dato` ↔ `guide-feriepenge-hvornaar-og-hvor-meget` (har en tabel "Vigtige datoer i ferieåret" med netop **1. september** og **31. december** — de to datoer GSC's største søgning spørger om: "hvor mange dage er der til 1 december", 1.063 v pos. 5) og `/brok` ↔ `saadan-beregner-du-din-reelle-timeloen` (kernen er `Reel timeløn = (Samlet kompensation) ÷ (Faktiske timer)`, altså et brøk). `/fart` og `/promille` blev **bevidst ikke** koblet: `biloekonomi-2026` har 0 forekomster af "promille" og ingen rejsetid, så en kobling ville være en link uden indhold — samme discipline som C105's "kun de to har tal". **Den ensidige kobling var en reel fejl, målt ikke formodet:** `/renteberegner` → `guide-til-laan-og-renter` viste **0** forekomster af `href="/renteberegner"` i indlægget, altså beregneren pegede på indlægget, men indlægget gav ingen vej videre til værktøjet — rettet med et link i "Fast vs. variabel rente". **Harness: to nye tests, begge modsvejs verificeret.** (1) *"hvert koblet indlæg linker selv tilbage til sin beregner"* — **faldt** med master-koden i de tre blogfiler (`/blog/guide-til-laan-og-renter har ingen returlink til /renteberegner`), altså den fangede den rigtige fejl i første kørsel. (2) *"enhver side der renderer `RelateredeArtikler` har en kobling for sin egen sti"* — modsvejs **faldt** (`/app/brok renderer en blok uden kobling`) da `blog-kobling.ts` blev stashed, altså den fanger en død blok. Den gamle test *"alle tre domæner er dækket af den samme kobling"* var **vakuum-grøn**: den itererede over `kobledeBeregnere()`, altså netop dem der allerede står i objektet, og krævede at de står i objektet — C118's fejlklasse, tredje gang i træk. **Målt på rigtig server** (`next start`, port 3971, verificeret fri *inden* start): `/dato` og `/brok` **200** med "Guides om emnet" (2 hver: synlig tekst + RSC-payload), de tre indlæg **200** med henholdsvis `href="/dato"`, `href="/brok"` og `href="/renteberegner"` i markupken, `/api/health` → `status: ok`. **Gate grøn:** lint (**584 filer**), **2.614 tests / 170 filer** (fra 2.585 / 168), build (**141 sider**), `locale-leak.mjs --gate` exit 0. Kun `blog-kobling.ts`, `blog-kobling.test.ts`, to sider og tre indlæg er rørt — **ingen beregningslogik, ingen metadata, ingen URL, ingen sitemap**. Kode + plan i ét commit på `ceo/blog-kobling-retur`. **MÅL:** koblede beregnere **7 → 9**; `/dato` **131.920 v / 816 klik / CTR 0,6 % / pos. 5,7** og `/brok` **4.913 v / 30 klik / CTR 0,6 % / pos. 5,3** (GSC 2026-08-29 → 2026-09-26), Plausible `/dato` **1.110 besøgende/28d, bounce 5 %** pr. 2026-09-29 — måles igen **2026-10-13**. Forventningen er **flere indgangslinks** (PageRank fra indlæggets side og en lavere bounce på indlægget), ikke nye visninger. **Målt og bevidst ikke bygget:** de øvrige 44 kalkulatorer uden blog-link har 0 målte visninger i GSC's top-16 og Plausible's top-15, så de er skrevet op som kandidater, ikke gjort nu; `lang`-attributten er målt korrekt (`sv` på beraknare.se, `da` på minberegner.dk), så svenskens 0,1 % CTR er **ikke** et sprogflag-fejl.
+
 STATUS: KØ — **C164 er landet: `/dato` er sitets største side i Plausible (1.110 besøgende/28d, +77 %, 1.024 indgangsbesøg) og nummer to i GSC (131.920 visninger, CTR 0,6 %, pos. 5,7) — og dens `<meta description>` gentog titlen ordret, så halve snippet'en lå i det samme "se mere"-link. Titlen lovede desuden kun "antal dage mellem to datoer", mens dens to næststørste søgninger er nedtællings-spørgsmål: "hvor mange dage er der til 1 december" (1.063 v, 2 klik, pos. 5) og "hvor mange dage er der tilbage af 2026" (231 v, 2 klik, pos. 5).** Køen havde én `I GANG`-løs opgave, **159 (de ni åbne deploy-noter)**, og den er **fortsat klokke-blokeret**: alle ni har første vindue **2026-09-29 07:30**, og det var 06:00, så ingen kunne lukkes og ingen blev rørt. **Valget kom af at måle hele klassen i stedet for endnu en side:** C82–C163 har lukket dansk GSC top-16 én ad gangen, så næste iteration målte *snippet'en* på tværs af alle **157** `metaTitle`/`metaDescription`-par i `page-data.ts`. Resultatet var **2 af 157**, og de var begge `/dato` (da og se) — plus én tredje fejl, som kun en anden måling kunne finde: `no`-udgaven læste "Gratis datokalkulator. … **Gratis datokalkulator.**", altså samme sætning to gange i én indekseret streng. **Målt på rigtig server** (`next start` :3411, port fri checket før start): titel og beskrivelse var tegn for tegn ens bort fra brandnavnet. Det er ikke kosmetik — Google viser dem som én blok, så de første ord i beskrivelsen er præcis dem søgeren lige har læst i det blå link, og den plads der stod til at svare på "hvor mange dage er der til 1 december", holdt i stedet op med "Beregn antal dage mellem to datoer". **Rettelsen (kun `da` + `se`; `no` fik dupikatet væk):** titlen navngiver nu begge intenter siden faktisk serverer — "Dage mellem datoer og dage til en dato | MinBeregner.dk" (55 tegn) / "Dagar mellan datum och dagar kvar till datum | Beräknare.se" (59) — og beskrivelserne **starter med spørgsmålet** og rummer begge svar. `<h1>` er **urørt**: overskriften på skærmen skal beskrive værktøjet, titlen skal fange søgningen. Ingen nye tal i metadata, fordi et hardkodet dage-tal ville gå i forældelse hver dag. **Harness: de nye regler er den almindelige form af fundet**, ikke håndskrevne forventninger — to guards kører over alle tre sprog × alle slugs (ingen beskrivelse må gentage sin egen titel; ingen må gentage en hel sætning, i både `metaDescription` og `ogDescription`). `page-data.test.ts` **2.607 → 2.612 tests**, **verificeret modsvejs: alle 5 falder** med den gamle kode, og de to `dato`-tests falder *fordi* de låste den forkerte påstand. **To målefejl i træk, begge fundet fordi testene ikke var grønne først:** min første gentagelses-regel var et 2-4-ords shingle, som flaget `/procent` og `/rentefradrag` — de gentager *med vilje* tallet fra reglen i regnestykket, og det er svar-først-mønsteret C82 byggede med vilje og egne tests låser; en regel der straffer god kopi ville træne næste iteration til at slette den, så reglen er snævret til hele sætninger. Og shingle-løkken havde en rigtig logisk fejl: den tjekkede kun forrige `n`-pass' `seen`-sæt, så en gentagelse **på samme længde** blev aldrig gensået — fundet fordi `no`-guarden ikke falde på den gamle kode som den skulle. **Tredje målefejl:** `rg -rn` er ripgreps *replace*-flag, ikke "recursive", så det skrev `n` ind i stedet for matchene og lod mig se en `metaTitle: "n | MinBeregner.dk"` på en side der ikke findes. Gate grøn: lint (584 filer), **2.612 tests / 170 filer** (fra 2.607 / 170), build (141 sider), `locale-leak.mjs --gate` exit 0 med **uændrede 739 kandidater / 704 døde / 35 kræver øjne / 0 ureviewet** (metadata kan ikke lække sprog, og tallet bekræfter det). Verificeret på rigtig server: begge domæner serverer den nye titel og beskrivelse, `<h1>` uændret, `/api/health` `status: ok`. Kode + plan i ét commit på `ceo/dato-dage-til-titel`; se opgave 164. **MÅL:** `/dato` baseline **131.920 visninger / 816 klik / CTR 0,6 % / pos. 5,7 pr. 2026-08-29 → 2026-09-26**, nedtællings-klyngen alene **1.294 v / 4 klik**; Plausible **1.110 besøgende/28d, bounce 5 %** pr. 2026-09-29 — måles igen **2026-10-13**.
 
 STATUS: KØ — **C163 er landet: beraknare.se `/procent` skrev norsk på svensk — `lønsprocent` og dansk `her` — og port-analysen havde set den fire hele iterationer, fordi scannerens JSX-regel var `>([^<>{}…]{2,200})<`: den krævede copy på *samme linje* som sit tag, mens JSX lægger den første brødet tekst på linjen *efter* `<p>`, og den endte i `{" "}`, hvilket tegnklassen ekskluderede. Begge udelukkelser var skrevet til at fange interpolationer og nye linjer, og de fik Prettiers almindelige sætning som følge. Måleren var altså den egentlige opgave, ikke copyen — opgaven lovede en én-linjers rettelse, og blev i stedet en måler.** Køen havde én `I GANG`-løs opgave, **159 (de ni åbne deploy-noter)**, og den er **fortsat klokke-blokeret**: alle ni har første vindue **2026-09-29 07:30**, og det var 05:11, så ingen kunne lukkes og ingen blev rørt. **Målt først, som opgaven selv bad om:** gaten ramte den ikke — `/procent` stod med 8 fund, alle døde (otte da-porte), og `lønsprocent` var ikke blandt dem. Rettelsen er at forankre reglen i sit eget tag (lookbehind på `[\w$]`, så en TypeScript-generic som `useState<string>('4.5')` ikke kan læses som copy — det var min egen målefejl nr. 21, fundet fordi mit første greb meldte LeasingBeregner som et falsk fund). **Efter reglen: 740 kandidater, 704 døde, 36 kræver øjne, og præcis 1 ureviewet — `lønsprocent` selv.** Den synlige rettelse er én linje kun i `se`: "lønprocent … kronor här". **Målt på rigtig server** (`next start` port 3411, verificeret fri inden start, begge domæner): beraknare.se **0** fund på `lønsprocent` og `som kroner her`, **2** på den nye streng; minberegner.dk **0** på den nye streng, `/api/health` `status: ok` begge steder, og C161's dedupe holder (**1** `>Formler</h3>`). **Harness: de 20 gamle tests var grønne gennem fire iterationer, fordi alle plantene skrev `<p>tekst</p>` på én linje — præcis den form den brudte regel kunne se.** Tre nye tests, modsvejs verificeret: den første (Prettiers rigtige form: `<p>` / copy / `{" "}` / `<Link>`) **falder mod den gamle regel**; den anden låser præcis min falske-positive-klasse; den tredje læser værtfilen selv, ikke en plant. **Én ærlig bivirkning:** den hånddrejede turvidde `< 700` faldt (593 → 739) og bæres nu af et **forhold** — `dead/candidates > 0,9` (i dag 0,95) — fordi en turvidde der skal skrives om hver gang måleren bliver skarpere, ikke er en værdi. Gate grøn: build (141 sider), lint (**584 filer**), **2.606 tests / 170 filer** (fra 2.593 / 169), `locale-leak.mjs --gate` exit 0, `knapgruppe-scan.mjs` 0/0, `label-a11y-scan.mjs` uændret 22/35. Kode + plan i ét commit på `ceo/procent-se-lakage`; se opgave 163. **MÅL:** beraknare.se `/procent` SE baseline **25.954 v / 2 klik / CTR 0,0 % / pos. 10,0 pr. 2026-08-29 → 2026-09-26** — måles igen 2026-10-13.
@@ -15586,3 +15588,94 @@ mekanisme.
   5. KONTROL: `https://minberegner.dk/api/health` → `status: ok`, og
      `/dato`, `/moms`, `/tidsberegner`, `/procent` skal have **uændrede**
      titler på begge domæner.
+
+#### 165. [x] FÆRDIG 2026-09-29 — C165 — **retningen beregner→indlæg var aldrig talt: 1 af 9 koblinger var ensidige, og `/dato` (131.920 v) + `/brok` (4.913 v) var ikke koblet til noget indlæg**
+
+**Datagrund.** `RelateredeArtikler` renderer på **7 af 141** sider (målt ved
+`rg -l RelateredeArtikler src/app/*/page.tsx`). En måling over alle 27
+`src/app/blog/*/page.tsx` fandt **46 kalkulatorer med 0 indgangslinks fra
+bloggen**. Blandt dem, med GSC 2026-08-29→09-26: `/dato` **131.920 v /
+816 klik / CTR 0,6 % / pos. 5,7** (og **96.336 v** på beraknare.se),
+`/kalorier` **12.569 v / pos. 8,2**, `/promille` **4.968 v**,
+`/brok` **4.913 v / CTR 0,6 % / pos. 5,3**, `/fart` **4.570 v**,
+`/nedtaelling` **5.361 v** (SE). Plausible: `/dato` **1.110 besøgende/28d,
+bounce 5 %**, `/brok` ikke i top-15.
+
+**Rettelsen — kun to koblinger, fordi kun to har et ægte match:**
+
+| Beregner | Målt grundlag | Indlæg | Hvorfor det ikke er en vilkårlig krydsreference |
+|---|---|---|---|
+| `/dato` | 131.920 v | `guide-feriepenge-hvornaar-og-hvor-meget` | indlægget har tabellen "Vigtige datoer i ferieåret" med **1. september** og **31. december** — de to datoer GSC's største søgning spørger om |
+| `/brok` | 4.913 v, pos. 5,3 | `saadan-beregner-du-din-reelle-timeloen` | kernen er `Reel timeløn = (Samlet kompensation) ÷ (Faktiske timer)`, altså et brøk |
+
+**Bevidst ikke koblet:** `/fart` og `/promille` mangler stadig blog-link.
+`biloekonomi-2026-hvad-koster-det-at-eje-bil` har **0** forekomster af
+"promille" og ingen rejsetid, så en kobling ville være et link uden indhold.
+Samme disciplin som C105 ("kun de to har tal").
+
+**Den ensidige kobling, målt ikke formodet:** `/renteberegner` →
+`guide-til-laan-og-renter` havde **0** forekomster af
+`href="/renteberegner"` i indlægget. Rettet med et link i
+"Fast vs. variabel rente"-afsnittet.
+
+**Harness — to nye tests, begge modsvejs verificeret:**
+
+1. `hvert koblet indlæg linker selv tilbage til sin beregner` — **faldt**
+   med master-koden i de tre blogfiler:
+   `/blog/guide-til-laan-og-renter har ingen returlink til /renteberegner`.
+2. `enhver side der renderer RelateredeArtikler har en kobling for sin egen
+   sti` — **faldt** med `blog-kobling.ts` stashed:
+   `/app/brok renderer en blok uden kobling i blog-kobling.ts`.
+
+Den erstattede test `alle tre domæner er dækket af den samme kobling` var
+**vakuum-grøn**: den itererede `kobledeBeregnere()` — altså dem der allerede
+står i objektet — og krævede at de står i objektet. C118's fejlklasse,
+tredje gang i træk (jf. C94's negative SE-lås, C115's genbyggede forventning).
+
+**Målt på rigtig server** (`next start` port 3971, porten verificeret fri
+*inden* start): `/dato` og `/brok` **200** med "Guides om emnet" (2 hver:
+synlig tekst + RSC-payload), de tre indlæg **200** med henholdsvis
+`href="/dato"`, `href="/brok"` og `href="/renteberegner"` i markupken,
+`/api/health` → `status: ok`.
+
+**Gate grøn:** lint (**584 filer**), **2.614 tests / 170 filer** (fra
+2.585 / 168), build (**141 sider**), `locale-leak.mjs --gate` exit 0.
+Rørte filer: `src/lib/blog-kobling.ts`, `src/lib/blog-kobling.test.ts`,
+`src/app/dato/page.tsx`, `src/app/brok/page.tsx` og tre blogindlæg —
+**ingen beregningslogik, ingen metadata, ingen URL, ingen sitemap**.
+
+**MÅL:** koblede beregnere **7 → 9**; `/dato` **131.920 v / 816 klik /
+CTR 0,6 % / pos. 5,7** og `/brok` **4.913 v / 30 klik / CTR 0,6 % / pos. 5,3**
+(GSC 2026-08-29 → 2026-09-26); Plausible `/dato` **1.110 besøgende/28d,
+bounce 5 %** pr. 2026-09-29 — måles igen **2026-10-13**. Forventningen er
+flere indgangslinks og en lavere bounce på indlægget, ikke nye visninger.
+
+**Målt og lukket som kandidater (skriv ned så de ikke måles igen):**
+(1) `lang`-attributten er korrekt — `sv` på beraknare.se, `da` på
+minberegner.dk — så beraknare.se's 0,1 % CTR er **ikke** et sprogflag-fejl.
+(2) Blog→beregner er lukket: alle 27 indlæg har 1-8 links (C79).
+(3) Forside→katalog er lukket: 79/79 dansk, 53/53 svensk (C105, C118).
+(4) De øvrige **44** kalkulatorer uden blog-link har 0 målte visninger i
+GSC's top-16 og Plausible's top-15.
+
+- ⏳ **VERIFICÉR DEPLOY: C165 — `/dato` og `/brok` skal have en
+  "Guides om emnet"-blok, og de tre indlæg skal linke tilbage.** Kode + plan
+  i ét squash-commit på `ceo/blog-kobling-retur`. Første kandidatvindue
+  **2026-09-29 12:30** (merge sker efter 07:30-batchen). Kun
+  `blog-kobling.ts`, `blog-kobling.test.ts`, `dato/page.tsx`, `brok/page.tsx`
+  og tre blogindlæg er rørt — **ingen beregningslogik, ingen metadata, ingen
+  URL, ingen sitemap, ingen `<h1>`**. Verificér ved **indhold, ikke HTTP 200**:
+  1. `https://minberegner.dk/dato` — skal indeholde **"Guides om emnet"** og
+     `href="/blog/guide-feriepenge-hvornaar-og-hvor-meget"`.
+  2. `https://minberegner.dk/brok` — skal indeholde **"Guides om emnet"** og
+     `href="/blog/saadan-beregner-du-din-reelle-timeloen"`.
+  3. `https://minberegner.dk/blog/guide-feriepenge-hvornaar-og-hvor-meget` —
+     skal have `href="/dato"`.
+  4. `https://minberegner.dk/blog/saadan-beregner-du-din-reelle-timeloen` —
+     skal have `href="/brok"`.
+  5. `https://minberegner.dk/blog/guide-til-laan-og-renter` — skal have
+     `href="/renteberegner"`.
+  6. NØGLEKONTROL: `https://beraknare.se/dato` og `https://beraknare.se/brok`
+     skal have **0** "Guides om emnet" (blokken er dansk-only pr. design) og
+     **uændrede** titler.
+  7. `https://minberegner.dk/api/health` → `status: ok`.

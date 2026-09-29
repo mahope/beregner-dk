@@ -162,6 +162,11 @@ export default function LaanOgRenterGuidePage() {
         <h2>Fast vs. variabel rente</h2>
         <p>
           Et af de vigtigste valg ved låntagning er, om du vælger fast eller variabel rente.
+          Vil du se hvad en renteændring gør ved din månedlige ydelse, kan du regne på det med{" "}
+          <Link href="/renteberegner" className="font-medium text-blue-600 dark:text-blue-400 hover:underline">
+            renteberegneren
+          </Link>
+          .
         </p>
 
         <h3>Fast rente</h3>

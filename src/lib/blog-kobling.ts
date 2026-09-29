@@ -9,6 +9,12 @@
  * Kun beregnere med dokumenteret trafik er koblet. Ifølge Search Console
  * 2026-08-27→09-24 har de valgte sider 23.426, 16.580, 13.623, 4.556 og 6.013
  * visninger pr. 28 dage, altså nok indgangslinks til at måle effekten på indlæggene.
+ * `/dato` (131.920) og `/brok` (4.913) er koblet efter GSC 2026-08-29→09-26.
+ *
+ * Koblingen skal være gensidig: indlægget skal selv linke tilbage til den
+ * beregner, det er koblet til. Det låser `blog-kobling.test.ts`, fordi en
+ * kobling uden returlink er halv sand — beregneren peger på indlægget, men
+ * indlægget giver ikke videre til værktøjet.
  */
 export interface ArtikelKobling {
   /** Slug under `src/app/blog/`. */
@@ -87,6 +93,22 @@ export const BEREGNER_ARTIKLER: Record<string, ArtikelKobling[]> = {
       titel: "Hvad er klokken i USA, når den er 12 i Danmark?",
       beskrivelse:
         "Alle amerikanske tidszoner med klokkeslæt ved 12, 14, 16 og 21 dansk tid, tidsforskelen til 16 byer og de præcise sommertidsdatoer i 2026.",
+    },
+  ],
+  "/dato": [
+    {
+      slug: "guide-feriepenge-hvornaar-og-hvor-meget",
+      titel: "Hvornår får man feriepenge?",
+      beskrivelse:
+        "De fire datoer der styrer ferieåret — 1. september, 31. august og 31. december — og hvornår ferietillægget udbetales.",
+    },
+  ],
+  "/brok": [
+    {
+      slug: "saadan-beregner-du-din-reelle-timeloen",
+      titel: "Sådan beregner du din reelle timeløn",
+      beskrivelse:
+        "Løn delt i timer er et brøk: hvad pension, frokost og skjulte timer gør ved det tal, du faktisk tjener pr. time.",
     },
   ],
 };
