@@ -1,5 +1,6 @@
 import { describe, test, expect } from "vitest";
-import { getTranslations, t } from "./i18n";
+import { getSiteTranslations, getTranslations, t } from "./i18n";
+import { getHomeCalculatorCount } from "./home-data";
 
 describe("getTranslations", () => {
   test("returns DA translations by default", () => {
@@ -86,5 +87,60 @@ describe("t", () => {
 
   test("returns path for non-string leaf", () => {
     expect(t("da", "nav.categories")).toBe("nav.categories");
+  });
+});
+
+describe("site description count", () => {
+  // `site.description` is the layout metadata description, the `description`
+  // in both JSON-LD blocks, the web manifest description and the homepage
+  // default — i.e. it ships on every page of every domain. It once read
+  // "33+ gratis beregnere" while the Danish catalog held 79, so these tests
+  // derive the number from the catalog instead of hardcoding it.
+  test("states the real Danish calculator count, not a stale one", () => {
+    const count = getHomeCalculatorCount("da");
+    expect(getSiteTranslations("da").site.description).toBe(
+      `${count}+ gratis beregnere til økonomi, bolig, skat, sundhed og hverdag.`,
+    );
+  });
+
+  test("uses each locale's own count and its own wording", () => {
+    expect(getSiteTranslations("se").site.description).toBe(
+      `${getHomeCalculatorCount("se")}+ gratis kalkylatorer för ekonomi, bostad, skatt, hälsa och vardag.`,
+    );
+    expect(getSiteTranslations("no").site.description).toBe(
+      `${getHomeCalculatorCount("no")}+ gratis kalkulatorer for økonomi, bolig, skatt, helse og hverdag.`,
+    );
+  });
+
+  test("leaves no unresolved placeholder in any locale", () => {
+    for (const locale of ["da", "se", "no"] as const) {
+      expect(getSiteTranslations(locale).site.description, locale).not.toContain(
+        "{count}",
+      );
+    }
+  });
+
+  test("never undercounts the catalog", () => {
+    // Guards the exact regression: a count below the real number is a false
+    // claim in indexed text. Overcounting is not tested — the "+" is honest.
+    for (const locale of ["da", "se", "no"] as const) {
+      const stated = Number(
+        getSiteTranslations(locale).site.description.match(/(\d+)\+/)?.[1],
+      );
+      expect(stated, locale).toBeGreaterThanOrEqual(
+        getHomeCalculatorCount(locale),
+      );
+    }
+  });
+
+  test("passes every other key through untouched", () => {
+    for (const locale of ["da", "se", "no"] as const) {
+      expect(getSiteTranslations(locale).site.name).toBe(
+        getTranslations(locale).site.name,
+      );
+      expect(getSiteTranslations(locale).nav).toEqual(
+        getTranslations(locale).nav,
+      );
+    }
   });
 });

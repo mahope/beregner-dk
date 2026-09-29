@@ -2,6 +2,21 @@ STATUS: KØ — **C175 er landet: 28 af sitets 136 danske sider serverede en `<t
 
 STATUS: KØ — **C172 er landet: `/tidszone` er fjerdestørste danske side (24.209 visninger, 0,4 % CTR, pos. 7,5) og svarede på nul af den *anden* halvdel af sin egen søgeklynge: otte af de ti største DA- og SE-autocomplete-variationer under "hvad er klokken i usa" / "klokken i usa" er *stater* — Florida, Texas, Californien, Washington, Georgia, Arizona, Colorado, Minnesota — og de stod 0 gange hver på begge domæner, mens New York stod 26.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den, 119 er kilde-blokeret), og de fem åbne deploy-noter (C167–C171) har alle første vindue **2026-09-29 12:30** — det var 09:59, så ingen blev rørt. **Valget kom af at måle linket indhold og se en dyb asymmetri.** Jeg kørte inlinks over begge sitemapmer (206 sider): `/dato`, `/tidszone`, `/procent` har 71 interne links på SE og 135 på DA, så hele sidens styrke ligger i footer og header, og de stater, klyngen spørger efter, findes **ikke på nogen som helst dansk side** — de var hverken et linkproblem eller et titelproblem. Samme konklusion som C82, C96, C99, C100, C170 og C171: **ikke titlen, men kroppen under den.** **Målt først, begge domæner, live.** DA-autocomplete (`hl=da`, `gl=dk`, 10:10) under **"klokken i usa"** → "… california" (nr. 3), "… florida" (nr. 5), "… miami" (nr. 6), "… boston" (nr. 9); under **"hvad er klokken i usa"** → "… miami" (nr. 6); under **"klokken i usa nu"** → "hvad er klokken i atlanta usa nu" (nr. 3), "… boston usa nu" (nr. 4), "… colorado usa nu" (nr. 5). SE-autocomplete under **"klokken i usa"** → "… florida usa" (nr. 4), "… texas usa" (nr. 7), "… georgia usa" (nr. 8), "… arizona usa" (nr. 9), "… atlanta usa" (nr. 10). På de to **live** sider var `Florida`, `Texas`, `Californien`, `Washington`, `Miami`, `Dallas`, `Minnesota`, `Georgia`, `Arizona`, `Colorado` **0** forekomster hver. **Rettelsen (begge sprog, fordi klyngen er målt i begge).** Nyt modul `src/lib/tidszone-usa-stater.ts` med ni stater, der hver *peger på* en by i `TIDSZONER` — **ingen offset står i filen**: Florida→Miami, Californien→Los Angeles, Texas→Chicago, Washington→Los Angeles, Georgia→New York, Arizona→Phoenix, Colorado→Denver, Minnesota→Chicago, Massachusetts→Boston — og `usaStatRaekker()` regner hver celle gennem `klokkeslaetVed`, samme regel som værktøjet. Det er C155's regel om Canada anvendt på hele tabellen: en håndskrevet offset kunne glide fra `TidszoneBeregneren`, en reference kan ikke. For at overholde det krævede fire nye byer i `TIDSZONER` — **Miami og Boston** (Eastern, `America/New_York`), **Denver** (Mountain, `America/Denver`) og **Phoenix** (fast UTC-7, `America/Phoenix`) — hver med kildekommentar; **C84's by-tal-lås** i `metaDescription`/`ogDescription`/FAQ gik derfor 21 → **25** i begge sprog, og den test der låser den færtes automatisk grøn. Ét nyt `<h2>` pr. sprog med tabellen **stat / samme zone som / vinter / sommer** + **to nye FAQ-par pr. sprog** (JSON-LD 9 → **11** på rigtig server). **Arizona-undtagelsen er hele pointen med to kolonner, og min egen tekst havde den bagvendt — fundet fordi testen forventede noget forkert.** Jeg skrev "Phoenix er 05 både vinter og sommer, Denver går fra 05 til 04". `klokkeslaetVed` siger **Phoenix 04 vinter / 03 sommer, Denver 04 hele året**: Phoenix er fast UTC-7, så når Danmark går på sommertid, flytter Denver sig *med* mens Phoenix står fast. Det er C171's fejlklasse modsat, og tre steder (å€é-linje i begge sprog + modulens docblock) var rettet på **kilden** i stedet for i testen. **Harness: 2.689 → 2.705 tests / 173 → 174 filer. Modsvært verificeret: alle 15 nye tests falder med master-koden** (9 i `tidszone-usa-stater.test.ts`, 6 i `page.test.tsx`), målt ved at stille de tre kildefiler tilbage. De nye tests læser cellerne fra **tabellens `<tr>`-rækker**, ikke fra hele HTML'en — C155's målefejl 30, fordi ellers kan by-tallene fra time-tabellen ikke adskilles fra stat-tallene. **To målefejl i mit eget greb, begge i samme testfil.** (1) Jeg skrev `"Phoenix er 04 vinter og 03 sommer"` i en assertion, men JSX bryder teksten på nye linjer; fikseret ved at læse markupken, fjerne `<!-- -->` og skelne på mellemrum — den samme fejl som C94's nr. 16. (2) Min første norske konsekvens-fejl var at skrive `seSætning(uddrag)` i en heredoc; shellen ædte `æ`/`ø`/`å`, så testen **faldt** på ReferenceError frem for på indhold. Samme fejlklasse som C163's `lønsprocent`. **Flaky test, målt og verificeret pre-existing:** `locale-leak-gate.test.ts` faldt i første fulde kørsel med `1 ureviewet danske streng: src/components/MomsBeregner.tsx:383 "Vaskemaskine (per vask)"` — det er **planten fra C73's egen test**, som ligger på disk (`git diff` viste den), ikke min ændring. Efter `git checkout` på filen: **2.705/2.705 grøn**. Samme kendte flakiness som C167 og C171 åbenborer. **Gate grøn:** lint (**592 filer**), **2.705 tests / 174 filer**, build (**141 sider**), `locale-leak.mjs --gate` exit 0 (uændret), `knapgruppe-scan.mjs` 0/0. **Målt på rigtig server** (`next start` port 3911, porten verificeret fri *inden* start), begge domæner: nyt `<h2>` **1** gang, **9** `<tr>` pr. sprog med Florida 06/06, Kalifornien 03/03, Texas 05/05, Arizona **04/03**, Colorado 04/04, JSON-LD **11** `Question` (var 9), `25 byer`/`25 städer` i beskrivelsen, dansk **0** på "Kalifornien"/"Delstat"/"sommar", svensk **0** på "Californien", `/dato`s `<title>` uændret, `/api/health` → `status: ok`. **MÅL:** `/tidszone` DA baseline **24.209 visninger / 105 klik / CTR 0,4 % / pos. 7,5** — måles igen **2026-10-13**. Klyngen alene: de otte stat-søgninger i autocomplete + de fire tidspunkter fra C171. **Forventningen er ærlig:** 0,4 % CTR på pos. 7,5 er klik på eksisterende visninger, ikke nye. Hvis CTR'en er uændret efter 14 dage, er hypotesen "den ubesvarede USA-klynge forklarede den lave CTR" **modbevist** — og så er sidens problem ranking, ikke indhold. Skrevet som falsificérbar forudsigelse, ligesom C167's.
 
+STATUS: KØ — **C176 er landet: `site.description` lovede "33+ gratis beregnere" i alle tre locales, mens den danske katalog har 79, den svenske 53 og den norske 28 — og den beskrivelse sendes som `<meta description>`, i **begge** JSON-LD-blokke og i webmanifestet, altså på sitets *alle* 206 sider.** Det er C84's fejlklasse (indekseret tekst der modsiger sit eget indhold) i dens bredeste form: ikke én side, men hele domænet. Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den, 119 er kilde-blokeret), og de otte åbne deploy-noter (C167–C174) har alle første vindue **2026-09-29 12:30** — det var 12:00, så ingen blev rørt. **Valget kom af at måle en klasse, ingen af C82–C175 havde målt: JSON-LD'en på alle 206 sider i begge sitemapmer.** Scanningen fandt én fejlklasse i `OrganizationSchema` (`logo` som nøgne streng, mens `WebSiteSchema` sender den som `ImageObject` — samme site, to faconer) og én reel, som ikke var i JSON-LD'en men lå i den streng JSON-LD'en citerer. **Målefejl nr. 33 (min egen, og den farligste af de tre domænetjek):** min første metadata-scan kørte lige efter en Cloudflare-521, fordi **produktion samlet var nede** — `521` på minberegner.dk, beraknare.se **og** jordemoderstudy.dk (et andet projekt), mens `example.com` svarede 200. Mit script fangede det ikke: det skrev **"NO DESC 206 af 206"** og **"DESC >160: 0"**, altså et grønt resultat for en fejl, der gjaldt alle 206 sider. Jeg troede det ikke, fordi et site ikke kan mangle `<meta description>` på *hver* side, og genmålte med en rigtig browser-User-Agent — som stadig gav 521. **Forskellen på de to kørsler var altså ikke måleren, men tidspunktet.** Konklusionen er skrevet ned, fordi den er generaliserbar: *en skanning af et site, der svarer 5xx, producerer et troværdigt tal om ingenting* — og præcis som C168's `html.split('<script')[0]` så **0 på en side med to ægte lækager**, sådan så denne scanner **"ingen har en fejl" på et nedbrudt site**. Kun fordi jeg genmålte **den samme adresse med den samme kode to gange med et minut imellem** og tallet ændrede sig fra 33 til 0, blev det opdaget. **Alle fund er fra den kørsel, der lykkedes (12:00), ikke fra den der fejlede.** Se `❓ Til Mads` punkt 3 om nedetiden.
+
+**Årsagen er ét arkiv, ikke 206 forfatterfejl.** `locales/{da,se,no}/common.json:5` er statisk JSON, importeret af `i18n.ts` — så tallet kunne ikke gå i stykker, det kunne bare **forblive gammelt**. Det er det modsatte af C97's `dage-til` (hvor koden *dannede* titlen) og C175's blog/kategori (hvor 28 sider skrev den samme fejl); her er fejlen ét tegn i én fil, som rammer hele sitet. **Målt først, målt rigtigt:** `getCalculatorsByLocale` giver **da 79 / se 53 / no 51**, mens `getHomeCalculatorCount` (forsidens egen, synlige katalog) giver **da 79 / se 53 / no 28** — de to tal for `no` afviger, fordi `no`-forsiden kun viser de 28, domænet faktisk serverer. **Jeg brugte 28, ikke 51, fordi det er det læseren kan tælle efter** — samme regel som C105's "79+ gratis beregnere", der allerede lå på forsiden. Det er derfor rettingen læser fra `getHomeCalculatorCount` og ikke fra `getCalculatorsByLocale`.
+
+**Rettelsen er ét mønster, der allerede fandtes i repoet — bare ikke her.** `home-data.ts` har længe brugt `"{count}"` + `replaceAll` til præcis denne udfordring (C105's måling: "79+ gratis beregnere" stod på forsiden, fordi *den* streng var født med placeholder). `site.description` var den eneste, der havde tallet hårdkodet. Ny `getSiteTranslations(locale)` i `i18n.ts` fylder `{count}` fra `getHomeCalculatorCount` — **samme kilde som forsiden, så de to kan ikke glide fra hinanden** — og læser sig ellers som en drop-in for `getTranslations`. Importen er cyklisk i typeform (`calculator-list.ts:1` gør `import type { Locale } from "./i18n"`), men kun som type, så der er ingen runtime-cyklus; `home-data.ts` trækker desuden `getLocale` fra en anden fil. `layout.tsx` (4 steder: metadata, `openGraph`, `twitter` og de to JSON-LD-blokke) og `manifest.ts` bruger nu den nye funktion, og `/om`s `<h2>` + `/blog`s afsnit læser samme tæller i stedet for et bogstav.
+
+**Harness: 5 nye tests i `i18n.test.ts` (13 → 18), modsvejs verificeret — 3 af de 5 falder med master's data.** Beviset er selve fejlen i outputtet: `expected '33+ gratis beregnere til øk…' to be '79+ gratis beregnere til øk…'` og `expected da: 33 to be greater than or equal to 79`. De to der ikke falder er låse (ingen `dk`-sprogslækage, andre nøgler urørte) og skal være grønne begge veje — samme skelnen som C85/C96. Den fjerde test er den vigtigste: den læser **det tal, strengen selv hævder**, og kræver at det **aldrig underrapporterer** katalogens størrelse. Den er bevidst ensidig — overdrivelse er ikke testet, fordi `+` gør den ærlig; **en underrapportering er derimod en løgn i indekseret tekst**, og det er præcis klassen her.
+
+**Målt på rigtig server** (`next start` :3971, porten verificeret fri *inden* start — målefejl nr. 15's lære), alle tre domæner: **JSON-LD `Organization.description` = "79+ …"** (minberegner.dk) og **"53+ …"** (beraknare.se); **webmanifestet** = "79+ …" / "53+ …" / "28+ …"; `/om` serverer `<h2>Vores 79+ beregnere</h2>` og `/blog` "Vi har 79+ gratis beregnere …" — begge målt **efter `sed 's/<!-- -->//g'`**, fordi React skriver et kommentar-mellemrum mellem to tekstnoder i en JSX-celle, så rå-HTML'en siger `Vores <!-- -->79+<!-- --> beregnere` (C94's målefejl 16 i en ny form). **0 forekomster af `33+` i hele `src/` og `locales/`** undtagen den ene forklarende kommentar i testen. **Kontrollen der viser at kun denne linje er rørt:** `/procent`, `/blog` og `/privatlivspolitik` har hver sin *egen* `description` i `page-data.ts`/`generateMetadata` og er uændrede — de arver ikke layoutets standard, så de viste hverken 33 før eller 79 nu. Det er grunden til at forsiden også viste `MISSING` i min måling: den har egen tekst. **Gate grøn:** lint (**593 filer**), **2.720 tests / 175 filer** (fra 2.715/175), build (**141 sider**), `locale-leak.mjs --gate` exit 0, `knapgruppe-scan.mjs` 0/0, `href-scan.mjs` 0 på 71 + 135 sider. Rørte filer: `i18n.ts` (+12), `i18n.test.ts` (+5 tests), `layout.tsx`, `manifest.ts`, `om/page.tsx`, `blog/page.tsx` og de tre `common.json` — **ingen beregningslogik, ingen URL, ingen sitemap, ingen `<title>`, ingen anden side rørt**. Kode + plan i ét commit på `ceo/site-tal-79`; se opgave 176.
+
+**MÅL:** de 206 sider har ingen samlet CTR-baseline, fordi beskrivelsen er layoutens *standard* og de fleste sider overskriver den. Den målbare del er derfor **ikke trafikmen en kvalitetsmål**: *0 sider må påstå et lavere beregnerantal end de faktisk serverer*, nået og målt på den byggede server. Den nærmeste GSC-baseline er `/procent` (**150.148 visninger / 98 klik / CTR 0,1 % / pos. 7,4**) og `/dato` (132.313 / 822 / 0,6 % / 5,7), hvis beskrivelserne nogensinde ændrer sig igen. CTR-genmåling **2026-10-13**.
+
+**Målt og bevidst ikke rettet — én reel JSON-LD-fejl, målt på de 206 sider.** `OrganizationSchema` sender `logo` som en **nøgne streng** (`"https://minberegner.dk/icon.svg"`), mens `WebSiteSchema` på **samme side** sender den som `{"@type":"ImageObject","url":…}`. Google dokumenterer begge former for `logo`, så det er ikke en fejl, men det er inkonsistens på **alle 206 sider** med to faconer af det samme felt. Den er **registreret, ikke rettet**: `ImageObject` er den rigtige form, men rettelsen rører et felt alle 206 sider deler, og det er en type-ændring der kræver sin egen måling — ikke noget der skal rides ind i en tekst-rettelse. Se `❓ Til Mads`.
+
+**Målt og bevidst ikke bygget:** de øvrige JSON-LD-klasser er sunde på alle 206 sider — **0** parse-fejl, **0** manglende `@context`, **0** tomme `FAQPage`, **0** `BreadcrumbList` med forkert `position` eller tomt `name`. Typekombinationerne er sunde pr. sidetype: 132 kalkulatorer har `BreadcrumbList+FAQPage+Organization+WebApplication+WebSite`, 28 blogindlæg har `WebPage` i stedet for `WebApplication`, de 10 `/kategori/*` har `CollectionPage`. Ingen af dem er en fejl — de er korrekt for sidetyperne.
 STATUS: KØ — **C170 er landet: `/procent` er GSC's største danske side (150.148 visninger = 25 % af alle visninger) og svarede på nul af sin egen DA-klynge — "procent forskel mellem to tal" er 10 af 10 DA-autocomplete-variationer, og siden havde 0 forekomster af "mellem to tal".** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den, 119 er kilde-blokeret), og de tre åbne deploy-noter (C167, C168, C169) har alle første vindue **2026-09-29 12:30** — det var 09:01, så ingen blev rørt. **Valget kom af at læse den sprog-asymmetri, C114 selv havde lavet:** C114 lagde "Skillnad i procent mellan två tal" på beraknare.se, fordi "procent skillnad mellan två tal" var nr. 1 af 10 — og dansk har præcis samme klynge med præcis samme to svar, som aldrig blev lagt på den danske side. Begge sprog deler `procentForskel` og `procentDifferens`; kun teksten manglede. `/procent` har været C82, C161 og C163's genstand, så antagelsen var at siden var lukket — den var lukket for *dubletter*, ikke for *svar*. **C161's egen regressionstest fangede det nye afsnit med det samme den var skrevet til at fange** ("expected 2 to be 1"), og den undtagelse, svensken allerede havde med en begrundelse, gælder nu dansk også — men ikke uden en ny test der kræver præcis én skillnads-overskrift pr. sprog, så undtagelsen ikke kan blive en dublet. **Målefejl i træk:** min negative lås på "procentdifferens" faldt selv med korrekt dansk, fordi ordet staves ens på begge sprog; låsen lå mod en stavningsforskel, der ikke findes. Se opgave 170.**C169 er landet: sommerferien var GSC's næststørste `/dato`-søgnings næste spørgsmål, og vi havde nul sider — ikke fordi spørgsmålet var umuligt, men fordi kildens egen docblock erklærede det for "municipality specific" og udelod det.** Fire af de fem variationer under "dage til sommerferie" (DA-autocomplete 08:33) var ubesvarede, og docblocken havde *delvis* ret: ferier afgøres kommunalt, bortset fra sommerferiens **begyndelsestidspunkt, der er fastsat som sidste lørdag i juni** i folkeskoleloven af 2024 (hentet fra Lex 2026-09-29, fordi uden kilden var opgaven ikke bygbar). Nedtællingen alle søger efter går til *starten* — så der er ét nationalt svar, og det er 2026-06-27 / 2027-06-26 / 2028-06-24. **Det svenska `sommarlov` har derimod ingen national dato** (hver kommun fastsætger den), så eventet fik **kun en `da`-arm**, hvilket krævede at `DageTilEvent.se` blev optional gennem hele kæden — `resolveDageTilSlug` må ikke længre 301'e sommerferiens danske slug til en svensk side der ikke finder (den giver 403/noindex), og `DageTilPage` sætter ikke `hreflang="sv"` uden en svensk side. **To fejl i min egen måling, fundet fordi mine tests faldt:** min invariant "dagen efter den sidste lørdag ligger i juli" er kun sand når lørdagen er den 30. (koden var rigtig, testen tog fejl), og jeg regnede 271 dage mod nods 270. **To gamle tests låste den gamle *ikke*-egenskab — samme antal sider i begge sprog — og det var rigtigt, de faldt:** de er skrevet om til "da har alle 15, se har præcis de 14 med et svensk dato, forskellen er `["sommerferien"]`". **En rigtig fejl i min egen kode, fundet af fire gamle tests:** min første `resolveDageTilSlug` slog alle krydssprogs-redirects ihjel, fordi "juldagen" er det *svenske* slug for juledagen. Målt på rigtig server (port 3722, fri verificeret inden start): `/dage-til/sommerferien` 200 med titlen "…? **270** dage", canonical korrekt, 4 `Question`, `hrefLang` = `da` + `x-default` **uden `sv`**, sitemap 14 → 15, link fra `/`, `/dato` og `/nedtaelling`, **beraknare.se 403 på slaget og 0 forekomster på forsiden**. Gate grøn: lint (588 filer), **2.663 tests / 172 filer** (fra 2.645 / 172), build (141 sider). Efterårs- og vinterferie er **ikke** bygget: de er kommunale uden lovfast start. Se opgave 169.
 
 STATUS: KØ — **C168 er landet: opgave 159's andet acceptkriterium — "kør porten på den *byggede* server og sammenlign med kildefundene" — afslørede at porten ikke så to ægte danske lækager på beraknare.se, og den tredje fandt scanneren selv, da den kørte mod live.** De **16** deploy-noter med udløbet vindue er lukket ved **indholdskontrol** kl. 08:06-08:20 (C114, C115, C118-C123, C155, C156, C157, C159, C160, C161, C163, C164, C165, C166), og **C167 er korrekt stadig åben** — den blev mergeret 07:49, altså *efter* 07:30-batchen, så dens første vindue er 12:30, og `/alder` har stadig FAQ 10 (skal være 12). **Kriterium 1 er dermed lukket, og kriterium 3 siger at en afvigelse er en ny iteration, ikke en note der lukkes — så det er den, der blev lavet.** Kriterium 2 krævede at køre porten mod den byggede server og sammenligne. Det gav **0 fund i én retning** (de 685 "døde" strenge fandtes ingen af dem i den server-renderede HTML) og **2 sider i den anden** — altså afvigelse. **De tre fund er ægte, målte på rigtig server og i markupken:** (1) beraknare.se `/tidszone` skrev **"Grønland"** med dansk ø i landetabellen, fordi C155 lagde landet ind uden sit `landSe`; (2) beraknare.se `/valuta`'s valuta-`<select>` viste **"Britiske Pund", "Svenske Kroner", "Danske Kroner", "Thailandske Baht"** i alle tre sprog, fordi `VALUTA_METADATA` kun havde ét navn pr. kode; (3) beraknare.se `/promille` skrev **"før den är under"** og **"altid kortere end"** i den svenska gren af en fælles template-literal — dansk *før* og *end* i en svensk sætning, fundet af den nye scanner mod *live*, ikke af kilden. **Hvorfor porten ikke så dem — og det er pointen:** alle tre er værdier der *når* en svensk læser gennem et opslag ved visningsstedet (`landSe ?? landDa`, `VALUTA_METADATA[code]?.navn`), ikke gennem en `locale === "…"`-gren port-analysen kan læse. `/tidszone`s danske streng er desuden dømt **DØD** — korrekt for den arm scanneren kan se; den manglende `landSe` er en *fraværelse*, og en fraværende nøgle giver intet fund. **Målefejl nr. 32 (min egen, og den farligste af alle målefejlene her):** min første krydskontrol reducerede siden med `html.split('<script')[0]`, som skærer ved første `<script>` i `<head>` og derfor **kasserer hele `<body>`**. Den meldte **0 på en side med to ægte lækager** — og meldte også 0 på en *plantet* dansk afsnit. Den blev kun opdaget fordi jeg plantede en fixture, ellers havde jeg troet på et tal. Derfor planter *alle* 9 tests i `rendered-leak-scan-gate.test.ts` deres fejl, og testen der kræver at scanneren *finder* den danske sætning er den første. **Rettelsen:** `landSe: "Grönland"` på Nuuk (sætningen "…följer Sverige" bygges af samme array, så den følger med), ny `VALUTA_NAVN` med `se`/`no`-navne pr. kode + eksporteret `valutaNavn(code, locale)`, og den svenska promille-arm. **Harness: 2.629 → 2.645 tests / 170 → 172 filer, modsvejs verificeret — 6 af de 6 nye fejltests falder med master-koden** (4 valuta, 1 tidszone, 1 promille; de tre "dansk er uændret"-låse skal være grønne begge veje). **Målt på rigtig server (build → `next start` port 3700 og 3701, begge verificeret fri *inden* start):** `/tidszone` SE 0×"Grønland" / 4×"Grönland" + "Storbritannien, Grönland, Grekland och Spanien följer Sverige"; `/promille` SE 1×"före den är under", 1×"kortare än", 0×"før", 0×"kortere end", 0×"er derfor"; `/valuta` SE 3×"Brittiska pund", 3×"Svenska kronor", 2×"Danska kronor", 2×"Thailändska baht", 0× alle danske. **Dansk urørt, målt:** Grønland 5, "følger Danmark" 1, "før den er under" 1, "kortere end" 1, "Britiske Pund" 3. **Den nye scanner kørt mod alle 71 svenske sider i det nye build: 0** (var 2) — og mod en tilplantet side: 2 fund, exit 1, så den er ikke vakuum-grøn. Gate grøn: lint (588 filer), **2.645 tests / 172 filer**, build (141 sider), `locale-leak.mjs --gate` exit 0 (720/685/35/0 uændret), `knapgruppe-scan.mjs` 0/0. Kode + plan i ét squash-commit på `ceo/luk-deploy-noter-159`; se opgave 168.
@@ -16712,7 +16727,136 @@ er værst. Se `❓ Til Mads`.
 
 ---
 
+#### 176. [x] FÆRDIG 2026-09-29 — C176 — **`site.description` lovede "33+ gratis beregnere" i alle tre locales, mens katalogen har 79/53/28 — og strengen sendes på alle 206 sider, i metadata, i begge JSON-LD-blokke og i webmanifestet. Hele domænet har altså længe været fejlinformeret i sin egen indekserede tekst.**
+
+- **Iteration start:** 2026-09-29 12:00. Køen havde ingen `I GANG`-opgave (97 er
+  `BLOCKED`, 98 afhænger af den, 119 er kilde-blokeret). De otte åbne deploy-noter
+  (C167–C174) har alle første vindue **2026-09-29 12:30** — det var 12:00, så ingen
+  kunne lukkes, og ingen blev rørt.
+- **Datagrund:** målt på **alle 206 sider i begge sitemapmer**, live. Fundet er ikke
+  en trafikfejl men en **påstandsfejl**: den danske beskrivelse siger 33, katalogen
+  har 79 — altså **under halvdelen**. C84's fejlklasse (indekseret tekst der
+  modsiger sit eget indhold), men i sin bredeste form: ikke én side, hele domænet.
+- **Målefejl nr. 33 (min egen, generaliserbar — skrevet ned fordi den kan ramme
+  enhver måling):** min første metadata-scan løb mens **produktion samlet var nede**
+  — HTTP **521** på minberegner.dk, beraknare.se *og* jordemoderstudy.dk (et andet
+  Mads-projekt), mens `example.com` svarede 200. Scanneren fangede det ikke og skrev
+  **"NO DESC 206 af 206"** og **"DESC >160: 0"** — altså et grønt, troværdigt tal
+  om *ingenting*. Jeg troede det ikke, fordi intet site kan mangle `<meta
+  description>` på hver eneste side, og genmålte med browser-User-Agent (stadig 521).
+  **Forskellen på de to kørseller var ikke måleren, men tidspunktet.** Præcis som
+  C168's `html.split('<script')[0]` så 0 på en side med to ægte lækager, sådan så
+  denne scanner "ingen har en fejl" på et nedbrudt site. **Læren: en skanning af et
+  site, der svarer 5xx, producerer et troværdigt tal om ingenting** — en måler skal
+  altid kontrollere, at den læser noget, før dens 0-tal må troes på. Alle fund her
+  kommer fra kørslen kl. 12:00, som lykkedes.
+- **Årsagen er ét arkiv, ikke 206 forfatterfejl:** `locales/{da,se,no}/common.json:5`
+  er statisk JSON. Tallet *kunne* ikke gå i stykker — det forblev bare gammelt.
+  Modsat C97's `dage-til` (koden dannede titlen) og C175's 28 blog-/kategorisider
+  (28 forfattere, samme fejl): her er der én fejl i én fil, som rammer alt.
+- **Hvilket tal er det rigtige?** `getCalculatorsByLocale` giver da 79 / se 53 /
+  **no 51**, mens `getHomeCalculatorCount` (forsidens synlige katalog) giver
+  da 79 / se 53 / **no 28**. De to `no`-tal afviger, fordi `no`-forsiden kun viser
+  de 28 domænet faktisk serverer. **Jeg brugte 28, ikke 51** — fordi 28 er det
+  læseren kan tælle efter, samme regel som C105's "79+ gratis beregnere", der
+  allerede lå på forsiden. Derfor læser retningen fra `getHomeCalculatorCount`.
+- **Rettelsen er et mønster, der allerede fandtes i repoet — bare ikke her.**
+  `home-data.ts` har længe brugt `"{count}"` + `replaceAll` til præcis denne
+  udfordring; `site.description` var den eneste med tallet hårdkodet. Ny
+  `getSiteTranslations(locale)` i `i18n.ts` fylder `{count}` fra
+  `getHomeCalculatorCount` — **samme kilde som forsiden, så de to ikke kan glide
+  fra hinanden** — og læser sig ellers som en drop-in for `getTranslations`.
+  `layout.tsx` (metadata, `openGraph`, `twitter` + de to JSON-LD-blokke) og
+  `manifest.ts` bruger den nu; `/om`s `<h2>` og `/blog`s afsnit læser samme tæller.
+  Importen er cyklisk i *typeform* (`calculator-list.ts:1` gør
+  `import type { Locale } from "./i18n"`), men kun som type — ingen runtime-cyklus.
+- **Harness: 5 nye tests i `i18n.test.ts` (13 → 18), modsvejs verificeret — 3 af 5
+  falder med master's data.** Beviset er fejlen i outputtet:
+  `expected '33+ gratis beregnere til øk…' to be '79+ gratis beregnere til øk…'` og
+  `expected da: 33 to be greater than or equal to 79`. De to der ikke falder er
+  låse (ingen sprogslækage; andre nøgler urørte) og skal være grønne begge veje —
+  samme skelnen som C85/C96. Den fjerde er den vigtigste: den læser **det tal
+  strengen selv hævder** og kræver, at det **aldrig underrapporterer** katalogens
+  størrelse. Den er bevidst ensidig — overdrivelse er ikke testet, fordi `+` gør
+  den ærlig, mens **en underrapportering er en løgn i indekseret tekst**.
+- **Målt på rigtig server** (`next start` :3971, porten verificeret fri *inden*
+  start — målefejl 15's lære): JSON-LD `Organization.description` = "79+ …"
+  (minberegner.dk) / "53+ …" (beraknare.se); webmanifest = "79+ / 53+ / 28+";
+  `/om` → `<h2>Vores 79+ beregnere</h2>`; `/blog` → "Vi har 79+ gratis beregnere …" —
+  de to sidste **efter `sed 's/<!-- -->//g'`**, fordi React skriver et
+  kommentar-mellemrum mellem to tekstnoder i en JSX-celle, så rå-HTML'en siger
+  `Vores <!-- -->79+<!-- --> beregnere` (C94's målefejl 16 i en ny form). **0
+  forekomster af `33+`** i hele `src/` + `locales/` undtagen den ene forklarende
+  kommentar i testen.
+- **Kontrol der viser at kun denne linje er rørt:** `/procent`, `/blog` og
+  `/privatlivspolitik` har hver sin *egen* `description` og er uændrede — de arver
+  ikke layoutens standard. Det er også grunden til at forsiden viste `MISSING` i min
+  måling: den har egen tekst. Bevis på at måleren ikke er vakuum-grøn.
+- **Gate grøn:** lint (**593 filer**), **2.720 tests / 175 filer** (fra 2.715/175),
+  build (**141 sider**), `locale-leak.mjs --gate` exit 0, `knapgruppe-scan.mjs` 0/0,
+  `href-scan.mjs` 0 på 71 + 135 sider.
+- **MÅL:** de 206 sider har ingen samlet CTR-baseline, fordi beskrivelsen er
+  layoutens *standard*, og de fleste sider overskriver den. Den målbare del er derfor
+  et **kvalitetsmål, ikke et trafikmål**: *0 sider må påstå et lavere beregnerantal end
+  de faktisk serverer* — nået og målt på den byggede server. Nærmeste GSC-baseline:
+  `/procent` (150.148 v / 98 klik / CTR 0,1 % / pos. 7,4) og `/dato` (132.313 / 822 /
+  0,6 % / 5,7), hvis beskrivelserne nogensinde ændrer sig igen. CTR-genmåling
+  **2026-10-13**.
+- **Acceptkriterier:**
+  1. `site.description` i alle tre locales er udfyldt fra det rigtige katalogtal.
+     **Nået: 79 / 53 / 28 målt på bygget server.**
+  2. 0 forekomster af `33+` i `src/` og `locales/`. **Nået.**
+  3. Ny test låser at beskrivelsen aldrig underrapporterer katalogen. **Nået.**
+  4. Nye tests modsvejs verificeret: falder med master's kode. **Nået (3 af 5).**
+  5. `npm run lint`, `npm run test`, `npm run build` grønne. **Nået.**
+  6. Ingen beregningslogik, URL, sitemap eller `<title>` rørt. **Nået.**
+
+### ❓ Til Mads — ny i C176
+
+1. **`OrganizationSchema.logo` er en nøgne streng på alle 206 sider**, mens
+   `WebSiteSchema` på *samme side* sender den som `ImageObject` — to faconer af
+   det samme felt. Google dokumenterer begge, så det er ikke en fejl, kun en
+   inkonsistens. Den er **registreret, ikke rettet**: `ImageObject` er den rigtige
+   form, men det er et felt alle 206 sider deler, og en type-ændring skal have sin
+   egen måling — ikke rides ind i en tekst-rettelse.
+2. **`getCalculatorsByLocale("no")` = 51, mens `getHomeCalculatorCount("no")` = 28.**
+   Forsiden viser kun de 28, `no`-domænet faktisk serverer. Begge tal er rigtige i
+   hver sin sammenhæng, men forskellen er uforklaret i koden — hvis nye
+   norsk-tilgængelige beregnere skal med på forsiden, er det her det afgøres.
+3. **Produktionen var nede (HTTP 521) i begge denne iterationens første minutter,
+   kl. 12:01-12:07, på tværs af to domæner og to projekter** (`minberegner.dk`,
+   `beraknare.se` **og** `jordemoderstudy.dk` svarede alle 521, mens `example.com`
+   svarede 200). **Målt: `/api/health` svarede 200 igen kl. 12:09, ca. 8 minutter
+   efter første 521** — altså en infra-udfald, ikke en udrulning af min kode. Jeg
+   har **kun læst**: ikke rørt Dokploy, ikke trigget deploy, ikke restartet noget,
+   fordi det er uden for loopets beføjelse. **Dette er derfor ikke en
+   `DEPLOY-MISSING`:** ingen af de otte åbne noter har et passeret vindue endnu, og
+   de otte er mergeet *før* nedetiden. **Hvis den går ned igen, er det et
+   infra-spørgsmål og ikke et kode-spørgsmål** — og en fremtidig måling SKAL tjekke
+   for 5xx, før den tæller 0-fund (se målefejl 33).
+
+
 ### VERIFICÉR DEPLOY-log — nyeste først
+- `VERIFICÉR DEPLOY: site-beskrivelsens beregnerantal (33+ → 79/53/28) ceo/site-tal-79 2026-09-29 12:20`
+  — merge sker ca. 12:2x, før 12:30-vinduet, så første vindue er **2026-09-29 12:30**.
+  Verificér **indhold**, ikke HTTP 200 — en 200 beviser intet, og siden har netop
+  serveret 5xx på tværs af domæner. Mål:
+  1. `curl -s https://minberegner.dk/manifest.webmanifest` → `description` skal sige
+     **"79+ gratis beregnere"** (før: 33+). Samme på `beraknare.se` (**53+**) og
+     `beregner.no` (**28+**).
+  2. `curl -s https://minberegner.dk/ | grep -o '"@type":"Organization".*'` →
+     JSON-LD `description` skal sige **79+**. Tæll på **hele** domænet:
+     `grep -c "33+" ` på HTML'en skal være **0**.
+  3. `https://minberegner.dk/om` skal have `<h2>Vores 79+ beregnere</h2>` — mål
+     **efter** `sed 's/<!-- -->//g'`, ellers giver React' `<!-- -->` mellem
+     tekstnoder et falsk 0.
+  4. `https://minberegner.dk/blog` skal sige "Vi har 79+ gratis beregnere".
+  5. **KONTROL:** `/procent`, `/blog` og `/privatlivspolitik` har hver sin *egen*
+     `description` og skal være **uændrede** — de arver ikke layoutens standard.
+     En diff der rører dem, er en fejl.
+  6. `npm run test -- src/lib/i18n.test.ts` skal give **18 passed**.
+  7. `node scripts/locale-leak.mjs --gate` skal exit 0 med 0 ureviewet, og
+     `https://minberegner.dk/api/health` skal svare `status: ok`.
 
 - `VERIFICÉR DEPLOY: 28 blog-/kategorititler (61-73 → ≤60 tegn) ceo/blog-kategori-titler 2026-09-29 11:56`
   — push 11:56, før 12:30-vinduet, så første vindue er **2026-09-29 12:30**.

@@ -13,7 +13,7 @@ import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
 import BeregnerAssistent from "@/components/BeregnerAssistent";
 import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
 import { calculationStatePrivacyScript } from "@/lib/calculation-state-privacy";
-import { getTranslations } from "@/lib/i18n";
+import { getSiteTranslations } from "@/lib/i18n";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -23,7 +23,7 @@ const inter = Inter({
 
 export async function generateMetadata(): Promise<Metadata> {
   const domainConfig = await getCurrentDomainConfig();
-  const t = getTranslations(domainConfig.locale);
+  const t = getSiteTranslations(domainConfig.locale);
   const baseUrl = domainConfig.baseUrl;
 
   return {
@@ -109,12 +109,12 @@ export default async function RootLayout({
         <OrganizationSchema
           name={domainConfig.siteName}
           url={domainConfig.baseUrl}
-          description={getTranslations(locale).site.description}
+          description={getSiteTranslations(locale).site.description}
         />
         <WebSiteSchema
           name={domainConfig.siteName}
           url={domainConfig.baseUrl}
-          description={getTranslations(locale).site.description}
+          description={getSiteTranslations(locale).site.description}
         />
       </head>
       <body

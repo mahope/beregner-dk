@@ -1,5 +1,6 @@
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { getCurrentDomainConfig, getLocale } from "@/lib/get-locale";
+import { getHomeCalculatorCount } from "@/lib/home-data";
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -55,7 +56,7 @@ function DaContent() {
           <li><strong>Opdateret</strong> - med de nyeste danske satser og regler</li>
         </ul>
 
-        <h2>Vores 33+ beregnere</h2>
+        <h2>Vores {getHomeCalculatorCount("da")}+ beregnere</h2>
         <p>Vi tilbyder i øjeblikket beregnere inden for følgende kategorier:</p>
 
         <h3>Økonomi og skat</h3>

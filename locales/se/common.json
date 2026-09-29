@@ -2,7 +2,7 @@
   "site": {
     "name": "Beräknare.se",
     "tagline": "Gratis Kalkylatorer Online",
-    "description": "33+ gratis kalkylatorer för ekonomi, bostad, skatt, hälsa och vardag.",
+    "description": "{count}+ gratis kalkylatorer för ekonomi, bostad, skatt, hälsa och vardag.",
     "ogTagline": "Gratis online kalkylatorer för svenskar",
     "ogFree": "100% gratis",
     "ogPrivate": "Privat & säkert",

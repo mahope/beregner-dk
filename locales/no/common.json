@@ -2,7 +2,7 @@
   "site": {
     "name": "Beregner.no",
     "tagline": "Gratis Kalkulatorer på Nett",
-    "description": "33+ gratis kalkulatorer for økonomi, bolig, skatt, helse og hverdag.",
+    "description": "{count}+ gratis kalkulatorer for økonomi, bolig, skatt, helse og hverdag.",
     "ogTagline": "Gratis online kalkulatorer for nordmenn",
     "ogFree": "100% gratis",
     "ogPrivate": "Privat & sikker",

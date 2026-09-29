@@ -2,7 +2,7 @@
   "site": {
     "name": "MinBeregner.dk",
     "tagline": "Gratis Online Beregnere",
-    "description": "33+ gratis beregnere til økonomi, bolig, skat, sundhed og hverdag.",
+    "description": "{count}+ gratis beregnere til økonomi, bolig, skat, sundhed og hverdag.",
     "ogTagline": "Gratis online beregnere til danskere",
     "ogFree": "100% gratis",
     "ogPrivate": "Privat & sikkert",
