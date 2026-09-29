@@ -18409,3 +18409,40 @@ er værst. Se `❓ Til Mads`.
    pos 29,6** — dyb, men 63-66 i søgningerne) og resten af `/tidsberegner`.
 3. **Forsidens 37 % bounce** (C183's ❓ 2) kræver en beslutning om hvor mange
    beregnere der skal være på forsiden — ikke en måling mere.
+
+---
+
+## 2026-09-29 21:40 — C189 lukket på indhold (DEPLOY OK) + produktion målt til c6c0079
+
+**VERIFICÉR DEPLOY: C189 — lukket `DEPLOY OK 2026-09-29`.** Alle 27 blogartikler har
+præcis én `BlogPosting`; `/blog/skat-2026-alt-du-skal-vide` har `datePublished`
+2026-02-17 + `dateModified` 2026-09-26; `/blog/su-2026-satser-og-regler` 2026-09-24 /
+2026-09-26; `/blog/maanedsbudget-2026-komplet-guide` 2026-08-23 og ingen `dateModified`.
+`/blog` har 27 `<time>` og **0** ISO-datoer i den synlige tekst — de 54 ISO-strenge der
+ stadig ligger i markup'en, ligger i `<script>` (RSC-payloaden), ikke i tekst.
+Kontroller: `beraknare.se/blog/skat-2026-alt-du-skal-vide` → 404, `/dato` 11 `<h2>`,
+`/tidszone` 11 "25 byer", `/api/health` → `status: ok` på begge domæner.
+Målt med cache-bustende query-streng og på indhold, ikke på HTTP-status.
+
+**Deploy-tilstand målt samme aften.** Produktion serverer præcis `c6c0079` (C189).
+Målt ikke live kl. 21:40: C191 (`/dato` mangler "Tallet nedenfor er dagens antal dage"),
+C192 (beraknare.se mangler "Hur många promille är N öl?"), C193 (`/befordringsfradrag`
+203 tegn, ikke 129), C190 (beraknare.se mangler "Samma tal i Excel"), CEO-punkt 0
+(`/dage-til/valborg` har 20 × "14. februar", `/husleje` 5 × "fastsætter den endelige
+sats" og 0 × "Lejeloven § 5", beraknare.se/promille 0 × "1,51 promille").
+17:30-batchen kørte og tog `c6c0079` med; 21:30-batchen var under bygning da målingen
+blev taget. **Ingen `DEPLOY-MISSING` — ét vindue (21:30) var endnu ikke brugt op.**
+
+**Ny måling → opgave 180.** 24 sider har en `meta description` over 160 tegn;
+C193 fiksede kun 22 andre strenge i `src/lib/page-data.ts`.
+
+**Kildejerngang nr. 3 på opgave 119.** `sst.dk` svarer HTTP 429 på
+`/forbruger/kost-og-motion/tallerkenmodellen` og
+`/viden-og-raadgivning/kost-og-motion/kostanbefalinger` (curl og webfetch),
+`…/maaltider` er 404. Opgaven er `BLOCKED`; tallene må ikke gættes.
+
+**Ikke gjort, og hvorfor.** `/procent` (150.148 visninger, 0,1 % CTR, pos. 7,4) er
+sitets største CTR-lever, men de tre GSC-søgninger der viser, er kun 0,24 % af
+visningerne. Autocomplete og en tekstanalyse af siden viser, at de synlige hensigter
+allerede er dækket (procentpoint ×10, rabat ×32, stigning ×38, Excel-formlen som `<h2>`).
+En titel-retuning uden query-data ville være en utestet gæt.

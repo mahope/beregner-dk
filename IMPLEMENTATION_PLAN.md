@@ -1,24 +1,34 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — **CEO-køens punkt 0 (review-fund 29/9) er landet: otte forkerte eller opfundne
-fakta er rettet, de ligger i Google lige nu.** Valborg stod som fast 14. februar (den er
-30. april), svensk påskafton lå på langfredagens dato (den er lørdag, påskedag minus 1),
-dansk sankthans brugte svensk midsummer-logik (den er fast 23./24. juni), den danske
-påskeaften-FAQ sagde "ja, samme som langfredag" (den er slettet og erstattet med den
-modsatte sandhed), `/husleje` sagde at huslejenævnet fastsætter en sats pr. område og at
-pristalsreguleringen følger forbrugerprisindekset (lejeloven § 5 følger nettoprisindekset),
-`toUtcMidnight` læste dagens dato i UTC så alle nedtællinger var én dag forkerte kl. 00-02,
-den svenske promille-FAQ skrev "6 öl på 70 kg er over 2,0" i **danske ord** (tallet er nu
-genereret fra sidens egen formel: 1,51), og `aarstal()` returnerede 13 måneder i skudår.
-Køen havde ingen `I GANG`-opgave. **Planen er samtidig skåret fra 1,7 MB til under 40 KB**;
-alt historisk er flyttet til `docs/plan-arkiv.md` (append-only) i samme commit.
+STATUS: DEPLOY MÅLT 2026-09-29 21:40 — **produktion serverer præcis `c6c0079` (C189), og
+kun det.** Beviset erholdt på indhold, ikke på status: alle 27 blogartikler har præcis
+én `BlogPosting` og de tre opregnede `datePublished`/`dateModified` er rigtige → **C189
+er lukket `DEPLOY OK 2026-09-29`**. Alt efter `c6c0079` — `38e9599` (C191), `7dc526d`
+(C192), `416dc57` (C193), `623352e`, `f47a087` og `aca17e5` (CEO-punkt 0) — er **målt
+ikke live** kl. 21:40: `/dage-til/valborg` har stadig 20 forekomster af "14. februar",
+`/husleje` har 5 af "fastsætter den endelige sats" og 0 af "Lejeloven § 5", `/dato`
+mangler "Tallet nedenfor er dagens antal dage", og beraknare.se mangler både
+"Samma tal i Excel" og "Hur många promille är N öl?".
+**Det er ikke en fejl:** 17:30-batchen kørte og tog `c6c0079` med, og 21:30-batchen var
+stadig under bygning da målingen blev taget. Der er altså **ét ubrugt vindue tilbage**
+(21:30) og **ingen `DEPLOY-MISSING`** — skriv den ikke, før et vindue er gået uden at
+ændringen er live. Genkør C190/C191/C192/C193 og CEO-punkt 0 efter næste batch.
 
-STATUS: KØ — otte åbne deploy-noter: **C189, C190, C191, C192, C193** har første
-kandidatvindue **2026-09-29 21:30** og må ikke røres før da. **C55, C56 og C60** kræver
-en rigtig browser (Kopiér/knap-klik) og kan ikke lukkes af en agent.
+STATUS: KØ — **køen er tømt for opgaver, der kan udføres af en agent.** 97 er `BLOCKED`
+på Mads' svar, 98 afhænger af 97, 179 kræver en rigtig browser, og **119 er nu også
+`BLOCKED`: Sundhedsstyrelsen svarer HTTP 429 på alle sider** (anden kildejerngang efter
+C92), så de officielle portionsværdier kan ikke citeres — og de må ikke gættes.
+Ny måling i denne iteration: **24 sider har stadig en `meta description` over 160
+tegn** (opgave 180), heraf `/befordringsfradrag` **203** og fire blogindlæg over 176.
 
 STATUS: KØ — `/bmi` (938 besøgende/28d, −26 %) og `/su` (220 → 116) falder stadig; ingen
 ny måling siden 23/9.
+
+STATUS: KØ — `/procent` er sitets største enkeltstående CTR-lever (150.148 visninger,
+98 klik, 0,1 %, pos. 7,4) og **kan ikke diagnosticeres i en agent-iteration**: de tre
+GSC-søgninger der vises er kun 0,24 % af visningerne, resten er et uvidst langhaldssøg.
+Målingen viser, at siden *allerede* dækker de synlige hensigter (procentpoint ×10,
+rabat ×32, stigning ×38), så en titel-retuning uden query-data ville være vakuum-grønt.
 
 ## Kvalitetsgate (repoets egne scripts fra package.json)
 
@@ -145,13 +155,11 @@ Kun noter med et *uafviklet* vindue står her. Alt lukket er i `docs/plan-arkiv.
   6. `grep -oE '[æø]' | wc -l` skal være **0** på beraknare.se.
   7. **Kontrol:** `https://minberegner.dk/renteberegner` skal have **7** `YDELSE`, **6** `Question` og **0** "Samma tal i Excel" — den danske side skal være urørt. `/laaneberegner` (svensk søskendeside) skal være urørt.
 
-- ⏳ **VERIFICÉR DEPLOY: C189 — alle 27 blogartikler skal sende præcis **én** `BlogPosting` med `datePublished`, og de fire med en "Opdateret"-byline skal også sende `dateModified`. `/blog` skal vise danske datoer i 27 `<time>`-elementer og **0** rå ISO-datoer i sin synlige tekst.** Kode + plan i ét squash-commit på `ceo/blogg-artikel-schema`, merge/push **2026-09-29 17:26 CEST**, kode `c6c0079`. Første kandidatvindue **2026-09-29 21:30** (17:30-batchen kørte mens iterationen var i gang — planen blev skrevet kl. 17:06, før vinduet). 27 `page.tsx` (ét element + én import pr. artikel), `/blog/page.tsx` (27 `date`/`readTime` fjernet), to nye filer (`blog-artikler.ts`, `BlogArticleSchema.tsx`) + test, `ArticleSchema` i `StructuredData.tsx`, 29 mock-filer — **ingen beregningslogik, ingen ny URL, ingen sitemap, ingen `<title>`, ingen `<meta description>`, ingen synlig brødtekst ændret**. **HTTP 200 beviser intet:** intet her rører `src/lib/`'s beregninger, kun metadata og én synlig dato-streng. Verificér ved **indhold, ikke status**:
-  1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
-  2. Tæl `BlogPosting` på **alle 27** artikler — skal være præcis **1** hver (før: **0**):
-     `for s in $(curl -s https://minberegner.dk/sitemap.xml | grep -o '/blog/[a-z0-9-]*' ); do echo -n "$s "; curl -s "https://minberegner.dk$s" | grep -o '"@type":"BlogPosting"' | wc -l; done`
-  3. `/blog/sk at-2026-alt-du-skal-vide` *(uden mellemrum)* skal have `datePublished` **2026-02-17** *og* `dateModified` **2026-09-26**; `/blog/su-2026-satser-og-regler` **2026-09-24** / **2026-09-26**; `/blog/maanedsbudget-2026-komplet-guide` **2026-08-23** og **ingen** `dateModified` (datoen var 24. august på `/blog` og 23. august på indlægget — de to sagde aldrig det samme).
-  4. `/blog` skal have **27** `<time` og **0** `20[0-9][0-9]-[0-9][0-9]-[0-9][0-9]` i den **synlige** tekst (før: 54 ISO-strenge i markup'en).
-  5. **Kontrol:** `https://beraknare.se/blog/skat-2026-alt-du-skal-vide` skal fortsat svare **404** (bloggen er dansk-only). `/dato` skal have 11 `<h2>`, `/tidszone` 11 "25 byer" — urørte.
+- ✅ **C189 — `DEPLOY OK 2026-09-29`**, lukket på indhold: alle 27 artikler har
+  præcis én `BlogPosting`, de tre opregnede `datePublished`/`dateModified` er rigtige,
+  `/blog` har 27 `<time>` og **0** ISO-datoer i den synlige tekst (de 54 i markup'en
+  ligger i `<script>`), og kontrollerne holder (SE-blog 404, `/dato` 11 `<h2>`, `/tidszone`
+  11 "25 byer"). Noten er flyttet til `docs/plan-arkiv.md`.
 
 - ⏳ **VERIFICÉR DEPLOY: C191 — `/dato` og `/nedtaelling` skal på begge domæner have dagens antal i dage-til-listen, ikke kun spørgsmålsteksten. `/dato` er GSC's nr. 2 (DA 132.313 v / 822 klik / CTR 0,6 % / pos. 5,7) og nr. 3 (SE 99.136 v / 95 klik / 0,1 % / pos. 8,2), og de to største danske søgninger er "hvor mange dage er der til 1 december" (1.131 v, pos. 5) og "…til den 24 december" (1.013, pos. 5).** Kode + plan i ét squash-commit på `ceo/dato-dage-til-tal`, merge/push **2026-09-29 18:07 CEST** (`38e9599`). Første kandidatvindue **2026-09-29 21:30** (push efter 17:30-batchen). Kun `dato/page.tsx` (**+38** i listen) og `nedtaelling/page.tsx` (**+35**) + to testfiler er rørt — **ingen beregningslogik, ingen ny URL, ingen sitemap, ingen `<title>`, ingen `<meta description>`, ingen FAQ, `dage-til.ts` og `DageTilPage.tsx` urørte**. **HTTP 200 beviser intet:** hele ændringen er nye tal i to lister, og siden svarede 200 hele tiden, også da den ikke svarede. Verificér ved **indhold, ikke status**:
   1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
@@ -250,7 +258,7 @@ Kun det der endnu ikke er gjort. CEO-køen er i prompten og har forrang.
   14 dage efter en eventuel lancering.
 
 
-#### 119. [ ] Kø — madvare-klyngen på "kalorier" (kræver en kilde, før den bygges)
+#### 119. [BLOCKED: anden kildejerngang — Sundhedsstyrelsen svarer HTTP 429 på alle sider, så de officielle portionsværdier kan ikke citeres, og de må ikke gættes] 2026-09-29 — Kø — madvare-klyngen på "kalorier" (kræver en kilde, før den bygges)
 
 - **Datagrund:** DA-autocomplete under "kalorier" → **9 af 10** er madvarer
   (æg, banan, vandmelon, jordbær, avocado, kirsebær, kartofler, vindruer,
@@ -283,6 +291,45 @@ Kun det der endnu ikke er gjort. CEO-køen er i prompten og har forrang.
   `Mål hver dag` → tallerkken og 400/600 kcal) — citable, danske, og de
   svarrer på "hvor mange kalorier skal jeg have om dagen", som er GSC's
   søgning på `/kalorier` (1 v, pos. 1).
+- **⚠️ Kildejerngang nr. 3 (2026-09-29 21:35) — både (a) og (b) er lukket i denne
+  iteration.** Både `webfetch` og `curl` på `sst.dk` giver **HTTP 429** (rate
+  limited) på `/forbruger/kost-og-motion/tallerkenmodellen` og
+  `/viden-og-raadgivning/kost-og-motion/kostanbefalinger`; `…/maaltider` er 404.
+  Uden kilden kan hverken tallerkenmodellens andele eller 400/600 kcal skrives
+  ned som fakta, så opgaven er `BLOCKED` indtil Mads enten giver adgang eller
+  en kildefil. **C92's tabel er ikke en invitationsliste til at prøve de samme
+  kilder igen.**
+
+#### 180. [ ] 2026-09-29 — 24 sider har en `meta description` over 160 tegn (C193 fiksede kun 22 andre)
+
+- **Datagrund:** målt på produktion 2026-09-29 21:35, hele sitemapmen plus `/`.
+  Over 160 tegn: `/befordringsfradrag` **203**, `/blog/boligsalg-2026-guide-til-omkostninger-og-provenu` **202**,
+  `/rentefradrag` **195**, `/boligsalg` **195**, `/ejendomsvaerdiskat` **193**,
+  `/blog/skat-2026-alt-du-skal-vide` **191**, `/` **191**,
+  `/boernepenge` **188**, `/blog/biloekonomi-2026-hvad-koster-det-at-eje-bil` **186**,
+  `/loen-efter-skatt` **180**, `/pension` **180**, `/barselsdagpenge` **174**,
+  `/blog/dagpenge-saadan-finder-du-din-sats` **176**, `/efterloen` **172**,
+  `/husleje` **170**, `/sparemaal` **169**, `/elbil` **166**, `/loenstigning` **166**,
+  `/aegloesning` **166**, `/motion-kalorier` **165**,
+  `/blog/maanedsbudget-2026-komplet-guide` **165**, `/dagpenge` **164**,
+  `/flyttebudget` **162**. 24 i alt.
+- **Hvorfor det er en egen opgave:** C193 rørte **22 `metaDescription`-strenge i
+  `src/lib/page-data.ts`**, og de er stadig ikke live (se deploy-status ovenfor).
+  Disse 24 er en **anden pulje** — forside, blogindlægs egne `metadata`, og sider
+  hvis description står i `page.tsx`. De holdt aldrig repoets egen
+  160-tegns-regel, og ingen test fanger dem.
+- **⚠️ Målt på den gamle kode — genmål efter deploy af C193.** `/befordringsfradrag`
+  står til 203 nu og skal være 129, så listen er et **gulv**, ikke det endelige tal.
+- **Acceptkriterier:** (1) en test der fejler på >160 tegn for **alle** sider i
+  sitemapmen på begge domæner, så det ikke kan ske igen; (2) de kortere
+  descriptioner beholder deres data-afledte tal (`3,17 kr./km` på
+  `/befordringsfradrag`, `25.000 kr netto` på `/husleje`) og de **genereres fra
+  samme kilde som brødteksten**, ikke skrives i hånden; (3) ingen `<h1>`, ingen
+  `<title>`, ingen beregningslogik, ingen ny URL, ingen sitemap-ændring;
+  (4) gaten grøn.
+- **MÅL:** de 24 sider har ingen CTR-baseline i GSC-uddraget (kun `/rentefradrag`
+  er med, 331 Plausible-besøgende/28d). Skriv baseline pr. side, før der ændres
+  title/description, og mål igen om 14 dage.
 - **Acceptkriterier:** (1) en citable dansk eller nordisk tabel er hentet og
   kilden er nævnt *på siden*; (2) pr. 100 g **og** pr. typisk portion, fordi
   klyngen spørger begge dele ("kalorier i 2 gulerødder"); (3) rå og tilberedt
@@ -324,6 +371,16 @@ Kun det der endnu ikke er gjort. CEO-køen er i prompten og har forrang.
   der står i nul filer i repoet — domænet peger på en **anden udgivelse**. Skal `no`
   lanceres fra dette repo, eller er navnet reserveret? Svaret afgør, om opgave 98 er
   reel eller overflødig.
+- ❓ **Kilde til madvaretabellen (opgave 119, `BLOCKED`).** `sst.dk` svarer HTTP 429
+  for både browser og curl, og de fire andre danske kilder døde i C92. Enten en
+  PDF af *De officielle kostanbefalinger* lagt i repoet, eller en API-nøgle til en
+  dansk næringsindholdstabel, så kan `/kalorier` få pr. 100 g **og** pr. portion.
+  Uden det bliver madvare-klyngen (9 af 10 danske autocomplete-træffere under
+  "kalorier") liggende, selv om `/kalorier` har 289 besøgende/28d og +50 %.
+- ❓ **Deploy-batches kører som forventet — ingen fejl at melde.** 17:30-batchen
+  2026-09-29 lagde `c6c0079` live, målt på indhold kl. 21:40. Alt efter den venter
+  på 21:30-batchen. Hvis næste iteration også ser `c6c0079`, er der gået et
+  vindue tabt, og det skal skrives som `DEPLOY-MISSING`.
 - ❓ **Nedetid 29/9:** en fuld site-scanning kørte mens produktion svarede 521 på alle
   domæner, og skanningen skrev "ingen fejl" for alle 206 sider. Ingen kode fejl — men
   en måling af et nedbrudt site giver et troværdigt tal om ingenting.
