@@ -1,19 +1,25 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — **C190–C195 og CEO-punkt 0 er lukket på indhold** (målt 2026-09-29
+STATUS: KØ — **C190–C196 og CEO-punkt 0 er lukket på indhold** (målt 2026-09-29
 22:05 mod produktion, ikke på HTTP-status). Se `docs/plan-arkiv.md`.
 
-STATUS: **Denne iteration (C196): `/bmi`, `/fart` og `/kalorier` regner nu et
-eksempel i titlen** i da og se, branch `ceo/eksempel-titler-fall`. Det er de tre
-sidste sider i GSC's top-15 med en ren kategorititel, og to af dem er de sider
-planen havde markeret som faldende. **MÅL (baseline 2026-09-29):** `/bmi` 938
-besøgende/28d, `/fart` 4.645 visninger/28d @ 0,6 %, `/kalorier` 12.631
-visninger @ 1,0 % — mål igen 14 dage efter deploy.
+STATUS: KØ — **den danske titelrække er tømt.** Alle 15 sider i GSC's
+visningstop-15 har nu en eksempel- eller spørgsmålstitel, canonical + hreflang er
+korrekte på begge domæner, og `/dato` svarer selv på GSC's to største
+søgninger (1.131 + 1.013 visninger, pos. 5) og linker videre til
+`/dage-til/1-december` og `/dage-til/juleaften`. `/dage-til`-ruten findes, og
+IndexNow (I1) er i koden. **Verdens største uberørte flade er nu beraknare.se:**
+537 besøgende/28d (+144 %) mod 160.000+ visninger på 0,1–0,2 % CTR — se opgave
+185.
 
-STATUS: KØ — `/su` (220 → 116 besøgende/28d, −47 %) er **stadig uden diagnose**
-og er bevidst ikke rørt i C196: dens titel skal regne et beløb, og kun ét af de
-to tal (ude-boende 7.426 kr. før skat) er citerbart fra `satser-2026.ts` uden
-at gætte efter-skattedelen. Se opgave 183.
+STATUS: KØ — **`/su` (220 → 116 besøgende/28d, −47 %) er stadig uden diagnose**
+og er bevidst ikke rørt: dens titel skal regne et beløb, og kun ét af de to tal
+(ude-boende 7.426 kr. før skat) er citerbart fra `satser-2026.ts` uden at gætte
+efter-skattedelen. Se opgave 183.
+
+STATUS: KØ — **dagens iteration (C197) lukkede repoets eneste
+sikkerhedsfund**: `undici` 7.29.0 → 7.30.0 bag `jsdom`. Dev-only, så
+`npm audit --production` var allerede 0; `npm audit` gik 1 høj → 0.
 
 ## Kvalitetsgate (repoets egne scripts fra package.json)
 
@@ -262,6 +268,54 @@ To noter. HTTP 200 beviser intet: ingen rører en URL, kun `<title>`- og
 - **MÅL:** `/bmi` 938 besøgende/28d, `/su` 116 (Plausible 2026-09-29).
 
 
+#### 184. [x] 2026-09-29 — C197 — **undici 7.29.0 → 7.30.0: repoets eneste sikkerhedsfund lukket**
+
+- **Datagrund:** `~/.local/oxloop/AFHAENGIGHEDER.md` placerer `beregner-dk` som
+  **prioritet 1** med "kritiske sårbarheder". `npm audit` gav 1 høj
+  (10 advisories, alle `undici 7.0.0 - 7.29.0`), transitivt via `jsdom@28.1.0`
+  → `undici@^7.21.0`. `7.30.0` er patch og opfylder jsdom's range, så rettelsen
+  er **én lockfile-linje** — ingen `package.json`-ændring, ingen major.
+- **⚠️ AFHAENGIGHEDER.md er STAL for dette repo.** Dens "mangler
+  engines-erklæring: NEJ" er forkert: `package.json` har
+  `engines.node = ">=22 <23"`, `.nvmrc` er `22`, og `Dockerfile` bruger
+  `node:22-alpine`. Runtime-kravet er altså erklæret — jordemoderstudy-fejlen fra
+  23/8 kan ikke ramme her. Resten af filens rækker er ikke verificeret i denne
+  iteration, så **kun denne rettelse er dokumenteret**; se `❓ Til Mads`.
+- **Reelt omfang:** dev-only (`undici` er `"dev": true` i lockfilen), så
+  `npm audit --production` var 0 før og efter. Fundet var altså ikke en
+  produktionsrisiko — det var det eneste kendte advisory, og det er nu væk.
+- **Ingen VERIFICÉR DEPLOY-note:** ændringerne har ingen runtime-effekt
+  (`undici` indgår ikke i `next build`), så intet på det live site kan ændre sig.
+- **Gate grøn:** lint (**616 filer**), **3001 tests / 189 filer**, build
+  (**142 sider**), `locale-leak.mjs --gate` exit 0.
+
+#### 185. [ ] 2026-09-29 — Kø — **undersøg de danske URL-slugs på beraknare.se før nogen migrerer dem**
+
+- **Datagrund:** beraknare.se har **537 besøgende/28d (+144 %)** og **~160.000
+  GSC-visninger på 0,1–0,2 % CTR**: `/dato` 99.136 v / 95 k / pos. 8,2,
+  `/tidsberegner` 60.399 v / 127 k / pos. 8,1, `/procent` 26.433 v / **2 k** /
+  pos. 9,9. `/procent` har sitets **dårligste CTR på nogen side**. Svenske
+  søgninger rammer allerede siden: "dagar mellan datum" 850 v pos. 8, "antal
+  dagar mellan datum" 425 v pos. 9 — på URL'en `beraknare.se/dato`.
+- **Spørgsmålet, der skal besvares først:** er de danske slugs *årsagen*, eller
+  er de en følge? C195/C196 har allerede sat svenske eksempeltitler på samme
+  sider, og de afventer deploy. **Hvis CTR'en ikke rører sig efter titlerne, er
+  sluggen den næste hypotese; hvis den gør, er den ikke.** At migrate 100+
+  URL'er uden denne kontrol kan tage den trafik, der holder siderne synlige.
+- **Scope denne iteration:** research, ikke migration. (1) Hvad ranker på de
+  samme svenske søgninger, og med hvilke slugs? (2) Ét rentesprog: en
+  representative side, svensk slug + 301, målt på staging mod den nuværende
+  — **kun hvis** (1) viser at slugs betyder noget. (3) Skriv ned hvilke
+  berørede filer en fuld migrering ville kræve (`calculator-list.ts`,
+  `sitemap.ts`, `page-helpers.ts`, `routing.ts`, IndexNow-konfiguration,
+  `internal-links.test.ts`) så prisen er synlig *inden* beslutningen.
+- **Acceptkriterier:** et svar på "er slugs årsagen — ja/nej/uklart" med tal fra
+  konkurrenterne, en prisliste for en fuld migrering, og **ingen skriveændring i
+  `src/`** uden at migrationsopgaven er skrevet op og godkendt. Gaten grøn.
+- **MÅL:** beraknare.se 537 besøgende/28d; `/dato` 95 klik, `/tidsberegner` 127
+  klik, `/procent` 2 klik (GSC 2026-08-30 → 2026-09-27). Genmål 2026-10-13.
+
+
 ## ❓ Til Mads
 
 - ❓ **Tre deploy-noter kan ikke lukkes uden en browser** (C55 `/dato`, C56 `/tidszone`,
@@ -284,6 +338,13 @@ To noter. HTTP 200 beviser intet: ingen rører en URL, kun `<title>`- og
   skærmbillede af Plausible's kilder filtreret på de to sider (eller et
   råudtræk) låser diagnosen. Uden det bliver faldet uforklarligt, og C196's
   titelændring kan heller ikke måles.
+- ❓ **`AFHAENGIGHEDER.md`'s række for `beregner-dk` er delvis forældet.** Den
+  siger "kritiske sårbarheder" og "mangler engines-erklæring". Sikkerhedsdelen er
+  nu lukket (C197, `npm audit` 1 høj → 0), og runtime-kravet *er* erklæret:
+  `engines.node ">=22 <23"`, `.nvmrc` = 22, `Dockerfile` på `node:22-alpine`.
+  Jeg har kun verificeret denne ene række og ikke rørt filen, fordi den er fælles
+  for otte projekter — en opdatering skal laves med vilje, ikke ved en
+  sideeffekt.
 - ❓ **21:30-batchen 2026-09-29 kørte og lagde alt efter `c6c0079` live** — alle
   seks åbne noter er lukket på indhold (se `docs/plan-arkiv.md`). Ingen
   `DEPLOY-MISSING`. Kun C194/C195/C196 venter på 2026-09-30 07:30.

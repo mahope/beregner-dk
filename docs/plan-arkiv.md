@@ -18697,3 +18697,39 @@ Kun noter med et *uafviklet* vindue står her. Alt lukket er i `docs/plan-arkiv.
   garanti** — en titelændring kan også sænke CTR'en, og GSC's
   gennemsnitsposition kan flytte sig, så effekten skal måles i klik og ikke i
  CTR alene.
+
+---
+
+## C197 (2026-09-29) — undici sikkerhedsfund lukket
+
+#### 184. [x] 2026-09-29 — C197 — **undici 7.29.0 → 7.30.0: repoets eneste sikkerhedsfund lukket**
+
+- **Datagrund:** `~/.local/oxloop/AFHAENGIGHEDER.md` placerer `beregner-dk` som
+  **prioritet 1** med "kritiske sårbarheder". `npm audit` gav 1 høj (10 advisories,
+  alle `undici 7.0.0 - 7.29.0`), transitivt via `jsdom@28.1.0` → `undici@^7.21.0`.
+  `7.30.0` er en patch og opfylder jsdom's range, så rettelsen er **én
+  lockfile-linje**: ingen `package.json`-ændring, ingen major, ingen kodeændring.
+  `npm audit` gik 1 høj → 0.
+- **⚠️ AFHAENGIGHEDER.md er STAL for dette repo.** Dens "mangler
+  engines-erklæring: NEJ" er forkert: `package.json` har `engines.node =
+  ">=22 <23"`, `.nvmrc` er `22`, `Dockerfile` bruger `node:22-alpine`.
+  Runtime-kravet er erklæret — jordemoderstudy-fejlen fra 23/8 kan ikke ramme her.
+  Kun denne ene række er verificeret; filen er fælles for otte projekter og er
+  derfor ikke rørt ved en sideeffekt (se `❓ Til Mads`).
+- **Reelt omfang:** dev-only (`undici` er `"dev": true`), så `npm audit
+  --production` var 0 før og efter. Fundet var altså ikke en produktionsrisiko —
+  bare det eneste kendte advisory.
+- **Ingen VERIFICÉR DEPLOY-note:** `undici` indgår ikke i `next build`, så intet
+  på det live site kan ændre sig. Efter min egen diff-review: `git diff` rører
+  kun `package-lock.json` (undici 7.29.0 → 7.30.0 + npm's normalisering af
+  rodens `engines`) og `IMPLEMENTATION_PLAN.md`. **Ingen `src/`-fil.**
+- **Gate grøn:** lint (**616 filer**), **3001 tests / 189 filer**, build
+  (**142 sider**), `locale-leak.mjs --gate` exit 0.
+- **Målinger undervejs der lukkede andre opgaver som kandidater** (ikke
+  handlet på, kun verificeret): canonical + hreflang er korrekte på begge
+  domæner; `/dato` svarer selv på GSC's to største søgninger (1.131 + 1.013 v,
+  pos. 5) og linker videre til `/dage-til/1-december` + `/dage-til/juleaften`;
+  `/blog/barsel-2026-regler-og-satser`'s 85 % bounce er **ikke** en manglende
+  CTA — siden har et "Det korte svar"-kort med beregnerlink over folden, så
+  bounce'en ligner informationsadfærd, ikke tab. Den største uberørte flade er
+  beraknare.se's danske URL-slugs → opgave 185.
