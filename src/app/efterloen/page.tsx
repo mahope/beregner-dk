@@ -113,16 +113,10 @@ export default async function EfterloenPage() {
           )}
 
           <section className="mb-12">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">
-              Ofte stillede spørgsmål
-            </h2>
             <FAQ items={pageData.faqItems} />
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">
-              Relaterede beregnere
-            </h2>
             <RelatedCalculators current="/efterloen" />
           </section>
         </article>

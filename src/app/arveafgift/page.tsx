@@ -171,10 +171,7 @@ export default async function ArveafgiftPage() {
       </section>
 
       <section className="mt-12">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">
-          Ofte stillede spørgsmål om arveafgift
-        </h2>
-        <FAQ items={pageData.faqItems} />
+        <FAQ items={pageData.faqItems} title="Ofte stillede spørgsmål om arveafgift" />
       </section>
 
       <section className="mt-12">

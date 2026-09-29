@@ -143,7 +143,6 @@ export default async function BarselsplanlaeggerPage() {
           </section>
 
           <section>
-            <h2 className="mb-6 text-2xl font-bold text-gray-900 dark:text-white">Relaterede beregnere</h2>
             <RelatedCalculators current="/barselsplanlaegger" />
           </section>
         </div>

@@ -1,18 +1,34 @@
-STATUS: KØ — **C185 er landet: beraknare.se `/kalorier` (2.728 visninger, CTR 0,3 %, pos 17,8) havde nul tabeller mod den danske søster én, fordi C89 kun lagde "kalorier pr dag"-tabellen i den *danske* gren — og dens egen søgeklynge er den mest entydige i hele køen: svensk autocomplete under "kaloribehov" giver 10/10 variationer i det samme spørgsmål, og under "kaloribehov kvinna" er 7 af de 10 en alder.** Køen havde ingen `I GANG`-løs opgave (98 afhænger af den `BLOCKED`-mærkede 97, 119 er kilde-blokeret, 179 kræver en rigtig browser), og de otte åbne deploy-noter har alle første vindue **2026-09-29 17:30** — det var 15:34, så ingen blev rørt. Valget kom fra C184's *afmålte* kandidatliste, hvor `/kalorier` SE var det eneste ubearbejdede punkt.
+STATUS: KØ — **C186 er landet: ni danske sider rendrede den samme `<h2>` to gange i træk, fordi `<FAQ>` og `<RelatedCalculators>` selv renderer en overskrift, og ni `page.tsx` skrev deres egen lige oven over. `/rentefradrag` (331 besøgende/28d, +145 % — sitets femtest mest besøgte) serverede "Ofte stillede spørgsmål" to gange og "Relaterede beregnere" to gange; `/barselsdagpenge` (212) gjorde begge dele; `/barselsplanlaegger` gjorde det for "Relaterede beregnere"; og `/dagpenge`, `/pension`, `/arveafgift`, `/boligstoette` og `/ejendomsvaerdiskat` satte en side-specifik variant ("… om dagpenge") umiddelbart før komponentens generiske.** Køen havde ingen `I GANG`-løs opgave (98 afhænger af den `BLOCKED`-mærkede 97, 119 er kilde-blokeret, 179 kræver en rigtig browser), og de otte åbne deploy-noter har alle første vindue **2026-09-29 17:30** — det var 15:52, så ingen blev rørt. Valget kom af at måle **en klasse, ingen af C82–C185 havde målt**: de har lukket titler, descriptions, JSON-LD, hreflang, canonical, sprogfejl, interne links, `og:image` og hele overskrifts-*niveauet* (C179) — men aldrig om det samme afsnit har **to** overskrifter.
 
-**Målt først, målt begge domæner (live, `curl -H "Host: …"`).** SE **6 `<h2>` / 4 FAQ / 0 `<table>`** mod DA **7 / 7 / 1**. "kaloribehov" 4 mod 9 forekomster, "65 år" **0** begge steder. SE-autocomplete (`hl=se`, `gl=se`) under **"kaloribehov"** → 10 variationer i samme spørgsmål, blandt dem "**kaloribehov per dag**" (nr. 2), "kaloribehov kalkulator" (nr. 4) og "**kaloribehov kvinna**" (nr. 8); under **"kaloribehov kvinna"** → 10 variationer hvor **syv er en alder** — 65, 70, 60, 50, 40, 55 og 80 år. GSC bekræfter klyngen: "kaloribehov kvinna" **26 v pos. 42** og "kaloribehov per dag" **24 v pos. 43**.
+**Målt først, målt på alle 207 URL'er i begge sitemapmer.** En `<h2>`-tæller på den server-renderede HTML fandt **4 danske sider med ordret ens dobbelt-Overskrift** — `/efterloen`, `/rentefradrag`, `/barselsdagpenge` (to par hver) og `/barselsplanlaegger` (ét par) — og **0 på beraknare.se's 71 sider**, fordi `/blog` og `/kategori` er dansk-only og ingen svensk side bruger komponenterne på den måde. En *udvidet* måling (nabo-`<h2>` med ordmæssigt overlappende indhold) fandt **12 danske sider / 17 par**, og de otte ekstra var de samme fejl i en mildere form: "Ofte stillede spørgsmål om dagpenge" → "Ofte stillede spørgsmål". De fire *ikke*-fejl i den udvidede måling er korrekte og bevidst urørte: `/tidszone`s to New-York-afsnit ("Når det er 12 i Danmark…" / "… 21 i Danmark…") er to forskellige spørgsmål, og `/pension`s "Folkepension 2026" → "Hvornår kan du gå på folkepension?" er to forskellige spørgsmål.
 
-**Rettelsen er to nye `<h2>` kun i `se`-grenen, og ingen tal står hårdkodet to steder.** "**Hur många kalorier per dag?**" med den danske sides vægttabel — bogstaveligt samme `kaloriePrDagRaekker()`-kald, så de to sprog arver *én* kilde i stedet for hver sin. Og "**Kaloribehov efter ålder**" med en ny `kaloriePrAlderRaekker(aldre)` i `src/lib/makroer.ts`: syv rækker (30, 40, 50, 60, 65, 70, 80) på 80 kg og 180 cm, bygget på `beregnBmr` / `beregnTdee` / `kalorierForMaal` — altså **værktøjets egne funktioner**. Aldersreglen står som tekst, fordi den er ærlig og efterprøvelig: Mifflin-St Jeor trækker **5 kcal pr. år fra BMR for mænd og kvinder lige**, så ti år er 50 kcal i BMR og **77 kcal i TDEE** ved moderat aktivitet. **De to tabeller krydschekkes mod hinanden:** 30-års-rækken er pr. definition 80 kg-rækken i vægttabellen, og en test kræver ligheden — så de to kan ikke glide fra hinanden, hverken mod værktøjet eller mod hinanden.
+**Rettelsen er ni filer og nul beregningslogik.** `FAQ` har allerede en `title`-prop — `barselsplanlaegger` brugte den korrekt hele vejen igennem, og de otte øvrige skrev i stedet en `<h2>` ved siden af. De **fem** side-specifikke overskrifter ligger nu i `title` (ordlyden er uændret, bare flyttet til det sted komponenten læser den fra), og de **fire** med den dobbelte generiske taber `<h2>` helt, fordi `<FAQ>` og `<RelatedCalculators>` selv renderer den. Beviset for at intet indhold forsvandt: **FAQ-JSON-LD'en er uændret** på alle fire kontrollerede sider (`/rentefradrag` 11→11, `/barselsdagpenge` 10→10, `/dagpenge` 6→6, `/pension` 11→11), altså er det kun *overskriften* der gik, ikke et eneste spørgsmål.
 
-**Fire nye FAQ-par i `se` (4 → 8), som dermed også kommer i JSON-LD'en.** "Hur många kalorier behöver jag?" svarer med **2.759 / 2.502 kcal** — de tal svensk `description` og dansk FAQ *allerede* lover, altså C84's fejlklasse (indekseret tekst der modsiger sit eget indhold) kan ikke opstå her. "Hur många kalorier behöver jag för att gå ner 1 kg?" (7.700 kcal pr. kilo). "**Gäller kaloribehovet även barn?**" — svarer på "kaloribehov barn" (autocomplete nr. 5) ærligt: formlen er valideret for voksna, og siden **finder ikke på et børnetal**. Og "Är kalorikalkylatorn gratis?". Børneafsnittet står også i brødteksten, fordi et FAQ-svar alene er et svagt svar på en hel spørgsmålstype.
+**Harness: ny `src/app/dublet-overskrift.test.tsx` med 6 tests, modsvejs verificeret: 4 af de 6 falder** med de ni sider fra master (de to der ikke falder er låse, der skal være grønne begge veje). Den har to dele, fordi ét grep ikke kan dække fejlen: en **klasse-scan over alle 121 `page.tsx`** der kræver at ingen side skriver sin egen `<h2>` umiddelbart før `<FAQ>` eller `<RelatedCalculators>` — det er den, der fanger en *ny* side, der gentager fejlen — og to **renderede** sider, hvor `FAQ` og `RelatedCalculators` *ikke* mockes, så markupken kan aflæses. Scanen låser sit eget omfang (**≥ 121 filer**), fordi 0 fund ellers også er det resultat en måler der ikke læser noget ville give (C176's og målefejl 33's lære). Den kræver desuden at hver af de ni sider stadig *har* et `<FAQ>`-kald, så klassen ikke kan blive grøn ved at indholdet forsvinder i stedet for at blive dobbelt (C94's lære).
 
-**To fejl i mit eget arbejde, begge fundet før gaten.** (1) **Samme fejlklasse som C184's målefejl 42 og C94's negative SE-lås:** min første svenska udkast skrev *dansk* ind i den svenska blok — "der skal du bruge en børnevenlig tabell eller en børneklæge" — altså en blanding af to sprog i én sætning. Fundet ved at læse den igennem, ikke af gaten. (2) Samme klasse som C183's fejl 2 (antagelse i stedet for at læse koden): mine tre nye tests hårdkodede `<td>2759 kcal</td>`, mens `formatNumber` med `sv-SE` skriver **2 759** med tusindtalsmellemrum. **Testene faldt af notationsårsager, ikke indholdsmæssige** — præcis den falske-fælde-klasse de må kunne haveProduceret, så de læser nu samme `formatNumber` som siden bruger, og låser *derudover* at `description` lover "TDEE 2.759 kcal" og FAQ'en "2.502 kcal".
+**Én fejl i mit eget arbejde, fundet af den byggede server.** Min første udlæsning af den server-renderede markup rapporterede **alle** `<h2>` som "dubletter" på 13 sider — min tællers `seen.get(h,0) or seen.setdefault(h,1)` er sand for *enhver* nøgle, også en ny, fordi `setdefault` returnerer 1. Rettet til to separate tællinger; den rigtige måling er **0 dubletter på alle 136 danske sider**. Samme målefejl som C182's nr. 40, i en ny form.
 
-**Harness: 6 nye tests i `makroer.test.ts` (18 → 24) og 6 nye i `page.test.tsx` (4 → 10), modsvejs verificeret: 5 af de 6 nye sidetests falder** med master's `page.tsx` + `page-data.ts` (stashed); den sjette er en negativ dansk-lås, der skal være grøn begge veje. Modultestene kræver at hver række *er* `kalorierForMaal(bmr, tdee)`, at 30-års-rækken giver de tal siderne skriver i egen tekst (**2.759** og **2.502**), at BMR-faldet er præcis **5 kcal pr. år** uanset spring, og at 80-kg-rækken i den nye alderstabel er identisk med den gamle.
+**Gate grøn:** lint (**601 filer**), **2.847 tests / 181 filer** (fra 2.841/180), build (**142 sider**), `locale-leak.mjs --gate` **exit 0**, `knapgruppe-scan.mjs` 0/0, `href-scan.mjs` 0 protocol-relative href på begge domæner (136 + 71 sider). Målt på rigtig bygget server (`next start` :4107, porten verificeret fri *inden* start, C117's lære), alle 136 danske sider: **1.001 `<h2>`, 0 dubletter**; de ni rettede sider hver **præcis én** "Ofte stillede spørgsmål" og **én** "Relaterede beregnere"; `/procent`, `/su`, `/bmi`, `/dato`, `/tidszone` urørte som kontrol; `/api/health` → `status: ok`. Rørte filer: ni `page.tsx` (én `<h2>` eller to slettet pr. side, fem `title`-attributter tilføjet) + 1 ny testfil — **ingen beregningslogik, ingen ny URL, ingen sitemap, ingen `<title>`, ingen `<meta description>`, ingen synlig brødtekst ændret, ingen `className`**. Kode + plan i ét squash-commit på `ceo/dublet-h2`; se opgave 186.
 
-**Gate grøn:** lint (**600 filer**), **2.841 tests / 180 filer** (fra 2.829/180), build (**142 sider**), `locale-leak.mjs --gate` **exit 0**, `knapgruppe-scan.mjs` 0/0. Rørte filer: `src/lib/makroer.ts` (+`PR_ALDER_ALDERE`, `PR_ALDER_FORUDSETNINGER`, `kaloriePrAlderRaekker`), `src/app/kalorier/page.tsx` (to nye `<h2>` **kun i `se`**), `src/lib/page-data.ts` (fire `faqItems` **kun i `se`-tabellen**), to testfiler — **ingen beregningslogik ændret, den danske side urørt, ingen ny URL, ingen sitemap, ingen `<title>`**.
+**MÅL:** overskriftsdobbelter har ingen CTR-baseline i GSC — det er ikke et søgefelt. Den målbare del er et **kvalitetsmål**: *0 sider må have to ens `<h2>` i træk* — nået og målt på den byggede server (12 danske sider / 17 par → **0 af 136**). Trafiknærmeste uændrede baseliner: `/rentefradrag` **331 besøgende/28d, bounce 4 %** (GSC-baseline ukendt, siden ligger under visningstællingen) og `/barselsdagpenge` **212 besøgende/28d, bounce 2 %**, begge pr. **2026-09-29**; DA-GSC `/procent` **150.148 v / 98 klik / 0,1 % / pos. 7,4** som kontrol. Genmåling **2026-10-13**.
 
-**MÅL:** beraknare.se `/kalorier` baseline **2.728 visninger / 4 klik / CTR 0,3 % / pos. 17,8** (GSC 2026-08-30 → 09-27) og Plausible **12 besøgende/28d** — måles igen **2026-10-13**. DA-kontrol urørt: **12.631 v / 132 klik / CTR 1,0 % / pos. 8,1**, 289 besøgende/28d. **Forventningen er ærlig:** pos. 17,8 er dybt, så dette er en indholdsmæssig rettelse, ikke en CTR-rettelse. Flytter siden sig kun til 20-25 uden at klikke, er opgaven rigtigvis ikke færdig — det afgør 14-dages målingen.
+#### 186. [x] FÆRDIG 2026-09-29 — C186 — **ni danske sider rendrede den samme `<h2>` to gange i træk: `<FAQ>` og `<RelatedCalculators>` har selv en overskrift, og ni `page.tsx` skrev deres egen lige oven over**
+
+- **Datagrund:** `<h2>`-tæller på alle **207 URL'er** i begge sitemapmer: **4 danske sider
+  med ordret ens dobbelt-Overskrift** (`/efterloen`, `/rentefradrag`, `/barselsdagpenge` —
+  to par hver, `/barselsplanlaegger` — ét par), **0 på beraknare.se's 71 sider**. Udvidet
+  måling (nabo-`<h2>` med overlappende ord) → **12 sider / 17 par**, de otte ekstra var
+  "Ofte stillede spørgsmål om X" → "Ofte stillede spørgsmål".
+  Trafik: `/rentefradrag` **331 besøgende/28d (+145 %)**, `/barselsdagpenge` **212 (+56 %)**.
+- **Rettelsen:** de **fem** side-specifikke overskrifter ligger nu i `FAQ`s `title`-prop
+  (ordlyden uændret); de **fire** med dobbelt generisk taber `<h2>`, fordi komponenten
+  selv renderer den. **FAQ-JSON-LD uændret** på alle fire kontrollerede sider
+  (11/10/6/11 → 11/10/6/11), så intet spørgsmål gik tabt.
+- **Harness:** ny `src/app/dublet-overskrift.test.tsx` med 6 tests, **modsvejs verificeret:
+  4 af 6 falder** med master-koden. Klasse-scan over alle 121 `page.tsx` + to renderede
+  sider uden mock af `FAQ`/`RelatedCalculators`; scanen låser sit eget omfang.
+- **Mål:** kvalitetsmål — 0 sider med to ens `<h2>` i træk (17 par → **0 af 136**), målt på
+  den byggede server. Genmåling 2026-10-13.
 
 #### 185. [x] FÆRDIG 2026-09-29 — C185 — **beraknare.se `/kalorier` (2.728 v, CTR 0,3 %, pos 17,8) havde 0 tabeller mod dansk 1, fordi C89 kun lagde svaret i den danske gren — mens "kaloribehov kvinna NN år" er 7 af 10 svenske autocomplete-variationer**
 
@@ -8486,6 +8502,32 @@ landmark=lån, piggybank=opsparing osv.).
     - Gate grøn: lint ok, 280/280 tests, build ok (128 pages).
 
 ## VERIFICÉR DEPLOY-log
+
+- ⏳ **VERIFICÉR DEPLOY: C186 — de ni danske sider skal have *én* "Ofte stillede
+  spørgsmål" og *én* "Relaterede beregnere" i markupken, og ingen dublet-`<h2>`
+  skal findes på nogen af de 136 danske sider.** Kode + plan i ét squash-commit på
+  `ceo/dublet-h2`. Første kandidatvindue **2026-09-29 17:30**. Kun ni `page.tsx`
+  er rørt (én eller to `<h2>` slettet pr. side, fem `title`-attributter tilføjet på
+  `<FAQ>`) + 1 ny testfil — **ingen beregningslogik, ingen ny URL, ingen sitemap,
+  ingen `<title>`, ingen `<meta description>`, ingen synlig brødtekst ændret.**
+  **HTTP 200 beviser intet:** intet her rører `src/lib/` eller en beregning — kun
+  ni overskrift-elementer. Sådan verificeres det, og det er **indhold, ikke status**:
+  1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
+  2. `curl -s https://minberegner.dk/rentefradrag | grep -o '>Ofte stillede
+     spørgsmål<' | wc -l` skal være **1** (før: **2**), og
+     `grep -o '>Relaterede beregnere<' | wc -l` skal være **1** (før: **2**).
+  3. Samme to greb på `https://minberegner.dk/barselsdagpenge` (før: 2 og 2) og på
+     `https://minberegner.dk/barselsplanlaegger` (`Relaterede beregnere` før: 2).
+  4. **De fem side-specifikke overskrifter skal stadig stå**, nu i `<FAQ title=…>`:
+     "Ofte stillede spørgsmål om dagpenge" på `/dagpenge`, "… om pension" på
+     `/pension`, "… om arveafgift" på `/arveafgift`, "… om boligstøtte" på
+     `/boligstoette`, "… om ejendomsskat" på `/ejendomsvaerdiskat` — hver **1**,
+     ikke 0. Rettelsen må ikke have mistet siden egen ordlyd.
+  5. **Kontrol på at intet indhold gik tabt:** `grep -o '"@type":"Question"' |
+     wc -l` skal være **11** på `/rentefradrag`, **10** på `/barselsdagpenge`,
+     **6** på `/dagpenge`, **11** på `/pension` — uændret.
+  6. **Kontrol på at kun de ni sider er rørt:** `/procent`, `/su`, `/bmi`, `/dato`
+     og `/tidszone` skal have uændret antal `<h2>` (henholdsvis 9, 8, 10, 11, 9).
 
 - ✅ **DEPLOY OK 2026-09-29 12:5x — lukket ved indholdskontrol** (konsolideret note nedenfor). C171 — `/tidszone` skal have et nyt `<h2>` med tabellen
   for kl. 21, 14 og 16 i USA, i begge sprog, og FAQ'en skal have et nyt

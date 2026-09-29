@@ -324,10 +324,7 @@ export default async function PensionPage() {
       )}
 
       <section className="mt-12">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">
-          Ofte stillede spørgsmål om pension
-        </h2>
-        <FAQ items={pageData.faqItems} />
+        <FAQ items={pageData.faqItems} title="Ofte stillede spørgsmål om pension" />
       </section>
 
       <section className="mt-12">

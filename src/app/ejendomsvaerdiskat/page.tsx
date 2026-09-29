@@ -155,10 +155,7 @@ export default async function EjendomsvaerdiskatPage() {
       )}
 
       <section className="mt-12">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-          Ofte stillede spørgsmål om ejendomsskat
-        </h2>
-        <FAQ items={pageData.faqItems} />
+        <FAQ items={pageData.faqItems} title="Ofte stillede spørgsmål om ejendomsskat" />
       </section>
 
       <section className="mt-12">
