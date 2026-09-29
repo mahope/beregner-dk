@@ -4,6 +4,7 @@ import { getDomainConfigByLocale } from "@/lib/domain-config";
 import { getCurrentDomainConfig, getLocale } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
 import { tidsskillnadRaekker } from "@/lib/tidszone-eksempler";
+import { usaTimerRaekker } from "@/lib/tidszone-usa-timer";
 import TidszonePage from "./page";
 
 vi.mock("@/components/TidszoneBeregner", () => ({
@@ -242,8 +243,7 @@ describe("tidszone svar-først-tabeller for lande og Excel", () => {
     }
   });
 
-  test("svarene i faq'en er de samme tal som tabellen på siden", () => {
-    for (const locale of ["da", "se"] as const) {
+  test("svarene i faq'en er de samme tal som tabellen på siden", () => {    for (const locale of ["da", "se"] as const) {
       const faq = getPageData("tidszone", locale)!.faqItems;
       const svar = faq.find((f) => /Japan/.test(f.question) && /(forskel|skillnad)/.test(f.question))!.answer;
       // Japan: 7 timer frem i dansk/svensk sommertid, 8 om vinteren.
@@ -261,6 +261,116 @@ describe("tidszone svar-først-tabeller for lande og Excel", () => {
       } else {
         expect(svar).toContain("I vintertid er det 8, 7 og 3 timer");
       }
+    }
+  });
+});
+
+describe("tidszone svarer på de andre klokkeslæt end kl. 12", () => {
+  beforeEach(() => {
+    vi.mocked(getLocale).mockResolvedValue("da");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("da"));
+  });
+
+  test.each([
+    {
+      locale: "da" as const,
+      overskrift: "Når det er 21 i Danmark, er det 15 i New York",
+      kolonne: "Når det er i Danmark",
+      række21: ["<td>15:00</td>", "<td>14:00</td>", "<td>12:00</td>"],
+      række14: ["<td>08:00</td>", "<td>07:00</td>", "<td>05:00</td>"],
+      række16: ["<td>10:00</td>", "<td>09:00</td>", "<td>07:00</td>"],
+      forklaring: "anden søndag i marts",
+    },
+    {
+      locale: "se" as const,
+      overskrift: "När det är 21 i Sverige är det 15 i New York",
+      kolonne: "När det är i Sverige",
+      række21: ["<td>15:00</td>", "<td>14:00</td>", "<td>12:00</td>"],
+      række14: ["<td>08:00</td>", "<td>07:00</td>", "<td>05:00</td>"],
+      række16: ["<td>10:00</td>", "<td>09:00</td>", "<td>07:00</td>"],
+      forklaring: "andra söndagen i mars",
+    },
+  ])(
+    "$locale tabellen svarer på kl. 21, 14 og 16, som autocomplete spørger om",
+    async ({ locale, overskrift, kolonne, række21, række14, række16, forklaring }) => {
+      vi.mocked(getLocale).mockResolvedValue(locale);
+      vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale(locale));
+
+      const html = renderToStaticMarkup(await TidszonePage());
+
+      expect(html).toContain(`>${overskrift}<`);
+      expect(html).toContain(kolonne);
+      expect(html).toContain("<th>New York</th>");
+      expect(html).toContain("<th>Chicago</th>");
+      expect(html).toContain("<th>Los Angeles</th>");
+      for (const celle of [...række21, ...række14, ...række16]) {
+        expect(html).toContain(celle);
+      }
+      // Fælden der gør svaret rigtigt hele året: USA skifter paa samme
+      // datoer som Danmark, saa forskellen er konstant. Uden den note
+      // ville tabellen se ud til at have vinter- og sommer-forskelle.
+      expect(html).toContain(forklaring);
+    }
+  );
+
+  test("tabellens celler er modulets tal, ikke tal skrevet i JSX", async () => {
+    vi.mocked(getLocale).mockResolvedValue("da");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("da"));
+
+    const html = renderToStaticMarkup(await TidszonePage());
+    const overskrift = html.indexOf("Når det er 21 i Danmark");
+    expect(overskrift).toBeGreaterThan(-1);
+    const tabelSlut = html.indexOf("</table>", overskrift);
+    const blok = html.slice(overskrift, tabelSlut);
+
+    for (const raekke of usaTimerRaekker()) {
+      for (const vaerdi of raekke.klokkeslaet) {
+        expect(blok).toContain(`<td>${vaerdi}</td>`);
+      }
+    }
+  });
+
+  test("kl. 12-tabellen og time-tabellen er én tabel, ikke to sider", async () => {
+    // Siden svarede allerede paa kl. 12. Hvis time-tabellen gav et andet
+    // svar paa det samme klokkeslaet, vilde den modsige den.
+    vi.mocked(getLocale).mockResolvedValue("da");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("da"));
+
+    const html = renderToStaticMarkup(await TidszonePage());
+    const gammel = html.indexOf("Vintertid (kl. 12 CET)");
+    const ny = html.indexOf("Når det er 21 i Danmark");
+    expect(gammel).toBeGreaterThan(-1);
+    expect(ny).toBeGreaterThan(gammel);
+    expect(html.slice(gammel, ny)).toContain("<td>06:00</td>");
+    expect(html.slice(ny)).toContain("<td>06:00</td>");
+  });
+
+  test("time-tabellen findes i begge sprog og ingen i no", async () => {
+    vi.mocked(getLocale).mockResolvedValue("se");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("se"));
+    const se = renderToStaticMarkup(await TidszonePage());
+    expect(se).toContain("När det är 21 i Sverige är det 15 i New York");
+
+    vi.mocked(getLocale).mockResolvedValue("da");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("da"));
+    const da = renderToStaticMarkup(await TidszonePage());
+    expect(da).toContain("Når det er 21 i Danmark, er det 15 i New York");
+    expect(da).not.toContain("När det är 21 i Sverige");
+  });
+
+  test("faq'en svarer paa kl. 21 med de samme tal som tabellen", () => {
+    for (const locale of ["da", "se"] as const) {
+      const faq = getPageData("tidszone", locale)!.faqItems;
+      const spg = faq.filter((f) => /21/.test(f.question) && /(Danmark|Sverige)/.test(f.question));
+      // C120's laere: et hardkodet antal naar et spaergsmaal fojes til.
+      expect(spg.length).toBe(1);
+      const svar = spg[0].answer;
+      for (const vaerdi of ["15", "14", "12"]) {
+        expect(svar).toContain(vaerdi);
+      }
+      // Paritet mellem sprogene laases mod den anden gren, ikke mod et tal.
+      const andet = getPageData("tidszone", locale === "da" ? "se" : "da")!.faqItems;
+      expect(faq.length).toBe(andet.length);
     }
   });
 });

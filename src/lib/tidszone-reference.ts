@@ -65,7 +65,7 @@ export const TIDSZONER: readonly TidszoneInfo[] = [
 export const DANSK_UTC_VINTER = 1;
 export const DANSK_UTC_SOMMER = 2;
 
-function formaterKlokkeslaet(timer: number): string {
+export function formaterKlokkeslaet(timer: number): string {
   const totalMinutter = ((Math.round(timer * 60) % 1440) + 1440) % 1440;
   const timerDel = Math.floor(totalMinutter / 60);
   const minutterDel = totalMinutter % 60;
@@ -102,4 +102,25 @@ export function tidszoneRækker(
       12 - DANSK_UTC_SOMMER + (zone.utcSommer ?? zone.utcVinter)
     ),
   }));
+}
+
+/**
+ * Klokkeslaet i byen, naar det er et vilkaarligt klokkeslaet i Danmark/Sverige.
+ *
+ * Samme regel som `tidszoneRaekker`, men med timeargumentet i stedet for den
+ * faste 12. Det er den, der gør tabellen kunne svare paa "hvad er klokken i
+ * usa **naar den er 21** i danmark" - den stoerste ubesvarede del af sidens
+ * egen soegeklynge, fordi kl. 12-tabellen kun svarer paa eet af timepunkterne.
+ *
+ * `danskSommerstid` styrer hvilken dansk offset der bruges, saa samme kald
+ * giver vinter- og sommer-tallet uden to formler.
+ */
+export function klokkeslaetVed(
+  danskTime: number,
+  zone: TidszoneInfo,
+  danskSommerstid: boolean
+): string {
+  const danskUtc = danskSommerstid ? DANSK_UTC_SOMMER : DANSK_UTC_VINTER;
+  const zoneUtc = danskSommerstid ? (zone.utcSommer ?? zone.utcVinter) : zone.utcVinter;
+  return formaterKlokkeslaet(danskTime - danskUtc + zoneUtc);
 }

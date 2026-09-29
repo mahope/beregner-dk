@@ -1,3 +1,5 @@
+STATUS: KØ — **C171 er landet: `/tidszone` er fjerdestørste danske side (24.209 visninger, 0,4 % CTR, pos. 7,5) og svarede på præcis ét af de fire klokkeslæt, dens egen søgeklynge spørger om — 6 af 10 DA-autocomplete-variationer under "hvad er klokken i usa" er det samme spørgsmål med et andet tidspunkt, og kl. 12-tabellen dækkede kun nummer 3.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den, 119 er kilde-blokeret), og de fire åbne deploy-noter (C167, C168, C169, C170) har alle første vindue **2026-09-29 12:30** — det var 09:25, så ingen blev rørt. **Valget kom af at læse sidens egen titel mod dens egen søgeklynge:** `<title>` er "Hvad er klokken i USA, når den er 12 i Danmark?", altså *én* time, mens klyngen spørger om 12, 14, 16 og 21. For tredje gang i træk ikke titlen, men det der ligger under den — samme konklusion som C82, C96, C99, C100 og C170. **Målt først, på rigtig server.** Live (125 KB) havde `når den er 21` **0** forekomster, `når den er 14` **0**, `når den er 16` **0** — hele tre fjerdedele af klyngen gik til konkurrenterne, på en side der allerede svarer perfekt på den fjerdedel. **Rettelsen (begge sprog, fordi SE-autocomplete har samme ti variationer med byer i stedet for timepunkter):** ét nyt `<h2>` med tabellen **kl. 12/14/16/21 × New York, Chicago, Los Angeles** — New York 06/08/10/15, Chicago 05/07/09/14, Los Angeles 03/05/07/12 — plus **to nye FAQ-par** (JSON-LD 8 → **9** på rigtig server) og de fire klyngesøgninger i `keywords`. **To fund i min egen arbejde, begge fordi jeg skrev en test der forventede noget forkert.** (1) Min første tabel havde en vinter- **og** en sommerkolonne, fordi jeg antog at USA skifter på andre datoer end Danmark. Testen faldt med *"expected ['06:00'…] to not deeply equal ['06:00'…]"* — USA har skiftet på EU's datoer siden 2007, så forskellen er konstant hele året, og kolonnen var en dublet. Den er fjernet, og en test låser nu at sommer- og vinter-værdien er ens, så hvis USA en gang skifter på andre datoer, *skal* tabellen få to kolonner igen. (2) Mine egen forventede tal for Chicago var **1 time forkerte** (04/06/08/13 i stedet for 05/07/09/14) og forskellen til New York 2 i stedet for 1 — jeg regnede på, at Chicago lå i samme zone som New York. Fandet af testen, ikke af øjet. **Ingen tal står håndskrevet to steder:** nyt `tidszone-usa-timer.ts` regner hver celle gennem `klokkeslaetVed`, som er samme regel som kl. 12-tabellen og `TidszoneBeregneren`, og `TIDSPUNKTER` er **autocomplete's egne fire timepunkter** ikke et udvalg. **Og en krydscheck mod et allerede skrevet svar:** blogindlægget `hvad-er-klokken-i-usa-naar-den-er-12-i-danmark` har *allerede* en tabel med kl. 14, 16 og 21 — med tal skrevet i hånden i JSX. Testen læser den og kræver at byernes tal er ens, så de to tabeller ikke kan glide fra hinanden. **Modsvært verificeret: den faldt** (['08:00', '10:00', '14:00'] mod ['08:00', '10:00', '15:00']) da jeg rettede ét tal i bloggen — altså ikke en vakuum-grøn lås. **Målt og bevidst ikke bygget:** **Miami** (autocomplete nr. 6 DA, nr. 3 og 10 SE) og **Denver**/bloggens øvrige regioner er *ikke* bygget, fordi de ikke findes i `TIDSZONER` — en håndskrevet offset i denne fil ville være et gæt, der kunne glide fra værktøjet. Samme regel som C155's beslutning om Canada. **Harness:** nyt modul med **16 tests** (14 af dem faller med master-koden, modsvært verificeret) + `page.test.tsx` **13 → 19**. **Gate grøn:** lint (**590 filer**), **2.689 tests / 173 filer** (fra 2.667 / 172) — grøn i tre fulde kørsler; den ene fejl i den første kørsel er den kendte `locale-leak-gate`-flakiness fra C167, som **master** også har — `locale-leak.mjs --gate` exit 0, `knapgruppe-scan.mjs` 0/0. **Målt på rigtig server** (`next start` port 3822, porten verificeret fri *inden* start): begge domæner har det nye `<h2>`, alle tolv celler, `anden søndag i marts` / `andra söndagen i mars`, JSON-LD **9**, `<title>` uændret på begge, `/api/health` → `status: ok`. **MÅL:** `/tidszone` DA baseline **24.209 visninger / 105 klik / CTR 0,4 % / pos. 7,5** (GSC 2026-08-30 → 2026-09-27) — måles igen **2026-10-13**. Klyngen alene: de tre ubesvarede timepunkter (nr. 5, 7 og 8 af ti) plus GSC's målte 12-variant på 175 visninger. **Forventningen er ærlig:** 0,4 % CTR på pos. 7,5 er klik på eksisterende visninger, ikke nye. Hvis CTR'en er uændret efter 14 dage, er hypotesen "den ubesvarede time-klynge forklarede den lave CTR" **modbevist** — og da er svaret at skaffe nye GSC-rækker for de næste 15 sider, som ingen måling endnu har hentet.
+
 STATUS: KØ — **C170 er landet: `/procent` er GSC's største danske side (150.148 visninger = 25 % af alle visninger) og svarede på nul af sin egen DA-klynge — "procent forskel mellem to tal" er 10 af 10 DA-autocomplete-variationer, og siden havde 0 forekomster af "mellem to tal".** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den, 119 er kilde-blokeret), og de tre åbne deploy-noter (C167, C168, C169) har alle første vindue **2026-09-29 12:30** — det var 09:01, så ingen blev rørt. **Valget kom af at læse den sprog-asymmetri, C114 selv havde lavet:** C114 lagde "Skillnad i procent mellan två tal" på beraknare.se, fordi "procent skillnad mellan två tal" var nr. 1 af 10 — og dansk har præcis samme klynge med præcis samme to svar, som aldrig blev lagt på den danske side. Begge sprog deler `procentForskel` og `procentDifferens`; kun teksten manglede. `/procent` har været C82, C161 og C163's genstand, så antagelsen var at siden var lukket — den var lukket for *dubletter*, ikke for *svar*. **C161's egen regressionstest fangede det nye afsnit med det samme den var skrevet til at fange** ("expected 2 to be 1"), og den undtagelse, svensken allerede havde med en begrundelse, gælder nu dansk også — men ikke uden en ny test der kræver præcis én skillnads-overskrift pr. sprog, så undtagelsen ikke kan blive en dublet. **Målefejl i træk:** min negative lås på "procentdifferens" faldt selv med korrekt dansk, fordi ordet staves ens på begge sprog; låsen lå mod en stavningsforskel, der ikke findes. Se opgave 170.**C169 er landet: sommerferien var GSC's næststørste `/dato`-søgnings næste spørgsmål, og vi havde nul sider — ikke fordi spørgsmålet var umuligt, men fordi kildens egen docblock erklærede det for "municipality specific" og udelod det.** Fire af de fem variationer under "dage til sommerferie" (DA-autocomplete 08:33) var ubesvarede, og docblocken havde *delvis* ret: ferier afgøres kommunalt, bortset fra sommerferiens **begyndelsestidspunkt, der er fastsat som sidste lørdag i juni** i folkeskoleloven af 2024 (hentet fra Lex 2026-09-29, fordi uden kilden var opgaven ikke bygbar). Nedtællingen alle søger efter går til *starten* — så der er ét nationalt svar, og det er 2026-06-27 / 2027-06-26 / 2028-06-24. **Det svenska `sommarlov` har derimod ingen national dato** (hver kommun fastsætger den), så eventet fik **kun en `da`-arm**, hvilket krævede at `DageTilEvent.se` blev optional gennem hele kæden — `resolveDageTilSlug` må ikke længre 301'e sommerferiens danske slug til en svensk side der ikke finder (den giver 403/noindex), og `DageTilPage` sætter ikke `hreflang="sv"` uden en svensk side. **To fejl i min egen måling, fundet fordi mine tests faldt:** min invariant "dagen efter den sidste lørdag ligger i juli" er kun sand når lørdagen er den 30. (koden var rigtig, testen tog fejl), og jeg regnede 271 dage mod nods 270. **To gamle tests låste den gamle *ikke*-egenskab — samme antal sider i begge sprog — og det var rigtigt, de faldt:** de er skrevet om til "da har alle 15, se har præcis de 14 med et svensk dato, forskellen er `["sommerferien"]`". **En rigtig fejl i min egen kode, fundet af fire gamle tests:** min første `resolveDageTilSlug` slog alle krydssprogs-redirects ihjel, fordi "juldagen" er det *svenske* slug for juledagen. Målt på rigtig server (port 3722, fri verificeret inden start): `/dage-til/sommerferien` 200 med titlen "…? **270** dage", canonical korrekt, 4 `Question`, `hrefLang` = `da` + `x-default` **uden `sv`**, sitemap 14 → 15, link fra `/`, `/dato` og `/nedtaelling`, **beraknare.se 403 på slaget og 0 forekomster på forsiden**. Gate grøn: lint (588 filer), **2.663 tests / 172 filer** (fra 2.645 / 172), build (141 sider). Efterårs- og vinterferie er **ikke** bygget: de er kommunale uden lovfast start. Se opgave 169.
 
 STATUS: KØ — **C168 er landet: opgave 159's andet acceptkriterium — "kør porten på den *byggede* server og sammenlign med kildefundene" — afslørede at porten ikke så to ægte danske lækager på beraknare.se, og den tredje fandt scanneren selv, da den kørte mod live.** De **16** deploy-noter med udløbet vindue er lukket ved **indholdskontrol** kl. 08:06-08:20 (C114, C115, C118-C123, C155, C156, C157, C159, C160, C161, C163, C164, C165, C166), og **C167 er korrekt stadig åben** — den blev mergeret 07:49, altså *efter* 07:30-batchen, så dens første vindue er 12:30, og `/alder` har stadig FAQ 10 (skal være 12). **Kriterium 1 er dermed lukket, og kriterium 3 siger at en afvigelse er en ny iteration, ikke en note der lukkes — så det er den, der blev lavet.** Kriterium 2 krævede at køre porten mod den byggede server og sammenligne. Det gav **0 fund i én retning** (de 685 "døde" strenge fandtes ingen af dem i den server-renderede HTML) og **2 sider i den anden** — altså afvigelse. **De tre fund er ægte, målte på rigtig server og i markupken:** (1) beraknare.se `/tidszone` skrev **"Grønland"** med dansk ø i landetabellen, fordi C155 lagde landet ind uden sit `landSe`; (2) beraknare.se `/valuta`'s valuta-`<select>` viste **"Britiske Pund", "Svenske Kroner", "Danske Kroner", "Thailandske Baht"** i alle tre sprog, fordi `VALUTA_METADATA` kun havde ét navn pr. kode; (3) beraknare.se `/promille` skrev **"før den är under"** og **"altid kortere end"** i den svenska gren af en fælles template-literal — dansk *før* og *end* i en svensk sætning, fundet af den nye scanner mod *live*, ikke af kilden. **Hvorfor porten ikke så dem — og det er pointen:** alle tre er værdier der *når* en svensk læser gennem et opslag ved visningsstedet (`landSe ?? landDa`, `VALUTA_METADATA[code]?.navn`), ikke gennem en `locale === "…"`-gren port-analysen kan læse. `/tidszone`s danske streng er desuden dømt **DØD** — korrekt for den arm scanneren kan se; den manglende `landSe` er en *fraværelse*, og en fraværende nøgle giver intet fund. **Målefejl nr. 32 (min egen, og den farligste af alle målefejlene her):** min første krydskontrol reducerede siden med `html.split('<script')[0]`, som skærer ved første `<script>` i `<head>` og derfor **kasserer hele `<body>`**. Den meldte **0 på en side med to ægte lækager** — og meldte også 0 på en *plantet* dansk afsnit. Den blev kun opdaget fordi jeg plantede en fixture, ellers havde jeg troet på et tal. Derfor planter *alle* 9 tests i `rendered-leak-scan-gate.test.ts` deres fejl, og testen der kræver at scanneren *finder* den danske sætning er den første. **Rettelsen:** `landSe: "Grönland"` på Nuuk (sætningen "…följer Sverige" bygges af samme array, så den følger med), ny `VALUTA_NAVN` med `se`/`no`-navne pr. kode + eksporteret `valutaNavn(code, locale)`, og den svenska promille-arm. **Harness: 2.629 → 2.645 tests / 170 → 172 filer, modsvejs verificeret — 6 af de 6 nye fejltests falder med master-koden** (4 valuta, 1 tidszone, 1 promille; de tre "dansk er uændret"-låse skal være grønne begge veje). **Målt på rigtig server (build → `next start` port 3700 og 3701, begge verificeret fri *inden* start):** `/tidszone` SE 0×"Grønland" / 4×"Grönland" + "Storbritannien, Grönland, Grekland och Spanien följer Sverige"; `/promille` SE 1×"före den är under", 1×"kortare än", 0×"før", 0×"kortere end", 0×"er derfor"; `/valuta` SE 3×"Brittiska pund", 3×"Svenska kronor", 2×"Danska kronor", 2×"Thailändska baht", 0× alle danske. **Dansk urørt, målt:** Grønland 5, "følger Danmark" 1, "før den er under" 1, "kortere end" 1, "Britiske Pund" 3. **Den nye scanner kørt mod alle 71 svenske sider i det nye build: 0** (var 2) — og mod en tilplantet side: 2 fund, exit 1, så den er ikke vakuum-grøn. Gate grøn: lint (588 filer), **2.645 tests / 172 filer**, build (141 sider), `locale-leak.mjs --gate` exit 0 (720/685/35/0 uændret), `knapgruppe-scan.mjs` 0/0. Kode + plan i ét squash-commit på `ceo/luk-deploy-noter-159`; se opgave 168.
@@ -7830,6 +7832,104 @@ kan ikke bygges i denne iteration: `udbetalingdanmark.dk` svarer HTTP 000,
 så der står ingen kilde til udbetalingsdatoerne. Samme kilde-fælde som opgave
 119 og C95 — skrevet op, ikke gættet.
 
+#### 171. [x] FÆRDIG 2026-09-29 — C171 — **`/tidszone` (24.209 v, 0,4 % CTR, pos. 7,5) svarer på de tre andre klokkeslæt end kl. 12 — "hvad er klokken i usa når den er 21/14/16 i danmark" er 3 af 10 danske autocomplete-variationer, og siden havde nul af dem, fordi hele dens svar var ét tidspunkt**
+
+**Datagrund.** GSC 2026-08-30 → 2026-09-27: `/tidszone` **24.209 visninger / 105
+klik / CTR 0,4 % / pos. 7,5** — fjerdestørste danske side. DA-autocomplete
+(`hl=da`, `gl=dk`, 09:29) under **"hvad er klokken i usa"** giver **ti**
+variationer, hvoraf **fire er det samme spørgsmål med et andet klokkeslæt**:
+"… når den er 12 i danmark" (nr. 3), "**… 21 i danmark**" (nr. 5), "**… 14 i
+danmark**" (nr. 7) og "**… 16 i danmark**" (nr. 8). GSC har den konkrete
+12-variant som **175 visninger, pos. 6**. Svensk autocomplete har de samme ti,
+men med byer i stedet for timepunkter ("florida", "california", "texas",
+"washington", "miami").
+
+**Fundet der afgorde valget.** Sidens `<title>` er *"Hvad er klokken i USA, når
+den er 12 i Danmark?"* — altså **ét** tidspunkt, mens dens egen søgeklynge
+spørger om fire. Live (144.819 bytes) havde `når den er 21` **0** forekomster,
+`når den er 14` **0**, `når den er 16` **0**: tre fjerdedele af klyngen gik til
+konkurrenterne, på en side der svarer perfekt på den fjerdedel. For tredje gang
+i træk ikke titlen, men det under den.
+
+**Rettelsen (begge sprog).** Ét nyt `<h2>` **"Når det er 21 i Danmark, er det
+15 i New York"** / *"När det är 21 i Sverige är det 15 i New York"* med
+tabellen **kl. 12/14/16/21 × New York, Chicago, Los Angeles** — New York
+06/08/10/**15**, Chicago 05/07/09/**14**, Los Angeles 03/05/07/**12** — og den
+fælde der gør svaret rigtigt hele året skrevet ud: **USA skifter som Danmark
+(anden søndag i marts, første søndag i november), så forskellen er konstant**.
+To nye FAQ-par (JSON-LD 8 → **9** målt på rigtig server) og de fire
+klyngesøgninger i `keywords`.
+
+**To fejl i min egen arbejde, begge fundet fordi testen forventede noget
+forkert — ikke fordi jeg læste koden.** (1) Min første tabel havde en vinter-
+**og** en sommerkolonne, fordi jeg antog USA skifter på andre datoer end
+Danmark. Testen faldt på *identical arrays* — USA har skiftet på EU's datoer
+siden 2007, så forskellen er konstant hele året, og kolonnen var en dublet.
+Den er fjernet, og en test låser nu at sommer- og vinterværdien er ens, så
+hvis USA en gang skifter på andre datoer, *skal* tabellen få to kolonner igen.
+(2) Mine egen forventede tal for **Chicago** var en time forkerte (04/06/08/13
+i stedet for 05/07/09/14) og forskellen til New York 2 i stedet for 1 — jeg
+regnede Chicago som lig New York. **Sådan er en tabel bygget forkert uden at
+se det: rigtige tal, forkert zone.**
+
+**Ingen tal håndskrevet to steder.** Nyt `src/lib/tidszone-usa-timer.ts` regner
+hver celle gennem `klokkeslaetVed` — samme regel som kl. 12-tabellen og
+`TidszoneBeregneren` — og `TIDSPUNKTER` er **autocomplete's egne fire
+timepunkter**, ikke et udvalg der ser pænt ud. `usaTimerRaekker` kaster hvis
+en by mangler i `TIDSZONER`, fordi en stille springet-by-over ville give en
+tabel med en by for lidt (C118's vakuum-grønne tællinger).
+
+**Krydscheck mod et allerede skrevet svar — fundet ved at læse linket indhold.**
+`/blog/hvad-er-klokken-i-usa-naar-den-er-12-i-danmark` har *allerede* en tabel
+med kl. 14, 16 og 21, med tal skrevet i hånden i JSX. Bloggen grupperer USA i
+regioner ("Østkysten — New York, Miami"), denne tabel tager de tre byer der
+også findes i `TIDSZONER`. Testen læser bloggens `<tr>`-rækker og kræver at
+byernes tal er ens, så de to tabeller ikke kan glide fra hinanden.
+**Modsvært verificeret:** den faldt da jeg rettede ét tal i bloggen
+(`['08:00','10:00','14:00']` mod `['08:00','10:00','15:00']`) — altså ikke en
+lås, der er grøn fordi den ingenting måler.
+
+**Målt og bevidst ikke bygget.** **Miami** (autocomplete nr. 6 DA, nr. 3 og 10
+SE) og **Denver** mangler i `TIDSZONER`; en håndskrevet offset i denne fil ville
+være et gæt, der kunne glide fra værktøjet. Samme regel som C155's beslutning
+om Canada. Det er en **kildeopgave**, ikke en tekstopgave: kræver en by i
+`TIDSZONER` med kildekommentar, derefter kommer den automatisk med her.
+
+**Harness: 2.667 → 2.689 tests.** `tidszone-usa-timer.test.ts` **ny, 16 tests**,
+**14 af dem modsvert verificeret** til at falde med master-koden.
+`page.test.tsx` **13 → 19**: begge sproggrene skal have hele blokken med
+overskrift, kolonne og alle tolv celler, cellerne skal være modulets tal (læst
+fra blokkens `<td>`-rækker, ikke fra hele HTML'en — C155's målefejl 30), de to
+tabeller skal give samme svar på kl. 12, og FAQ'en skal have præcis ét
+kl. 21-spørgsmål med tabellens tal. Pariteten mellem sprogene læses fra den
+andre gren, ikke som et tal (C120's lære).
+
+**Gate grøn:** lint (**590 filer**), **2.689 tests / 173 filer** grøn i **tre
+fulde kørsler**; build (**141 sider**), `locale-leak.mjs --gate` exit 0,
+`knapgruppe-scan.mjs` 0/0. Den ene fejl i den første kørsel er den kendte
+`locale-leak-gate`-flakiness fra C167 — **master** passerede dog 4/4 i samme
+tilstand, så den er ikke skabt her; den skriver til `MomsBeregner.tsx` på disk
+under en parallel kørsel.
+
+**Målt på rigtig server** (`next start` port 3822, porten verificeret fri
+*inden* start), begge domæner via `Host:`: det nye `<h2>` **2** gange, alle
+tolv celler, `anden søndag i marts` / `andra söndagen i mars`, JSON-LD
+**9** `Question` (var 8), `<title>` uændret på begge domæner, `/api/health` →
+`status: ok`. **Én rigtig fejl fundet ved at læse den server-renderede tekst:**
+jeg havde skrevet *"…sommer og vinter. vil du se et helt andet tidspunkt"* med
+lille `v` efter punktum — rettet, fordi det er den synlige tekst.
+
+**MÅL:** `/tidszone` DA baseline **24.209 visninger / 105 klik / CTR 0,4 % /
+pos. 7,5** — måles igen **2026-10-13**. Klyngen alene: de tre ubesvarede
+timepunkter (autocomplete nr. 5, 7, 8) plus GSC's målte 12-variant på **175
+visninger**. **Forventningen er ærlig:** 0,4 % CTR på pos. 7,5 er klik på
+eksisterende visninger, ikke nye visninger. Hvis CTR'en er uændret efter 14
+dage, er hypotesen "den ubesvarede time-klynge forklarede den lave CTR"
+**modbevist**, og næste skridt er at skaffe GSC-rækker for de næste 15 sider —
+et tal ingen måling endnu har hentet, og derfor fire måneders itteringer har
+arbejdet med dansk top-16 to gange.
+
+
 ## Morgenrapport 2026-08-24 06:45
 - ✅ Boligsalgsberegner (`/boligsalg`): logik+tests+UI+SEO-side+registrering — commit 00dbf4b
 - ✅ SATSER_2026 verifikation: kommuneskat 25,07→25,049%, kirkeskat 0,68→0,639% (svmn.dk) — commit 8f34a8a
@@ -8124,6 +8224,31 @@ landmark=lån, piggybank=opsparing osv.).
     - Gate grøn: lint ok, 280/280 tests, build ok (128 pages).
 
 ## VERIFICÉR DEPLOY-log
+
+- ⏳ **VERIFICÉR DEPLOY: C171 — `/tidszone` skal have et nyt `<h2>` med tabellen
+  for kl. 21, 14 og 16 i USA, i begge sprog, og FAQ'en skal have et nyt
+  spørgsmål om kl. 21 pr. sprog.** Kode + plan i ét squash-commit på
+  `ceo/tidszone-usa-timer`. Første kandidatvindue **2026-09-29 12:30** (merge
+  sker efter 07:30-batchen). Kun `src/lib/tidszone-usa-timer.ts` (ny),
+  `src/lib/tidszone-reference.ts` (én eksporteret `klokkeslaetVed`),
+  `src/app/tidszone/page.tsx` (én blok pr. sprog), `src/lib/page-data.ts` (ét
+  `faqItem` pr. sprog + `keywords`) og to testfiler er rørt — **ingen
+  beregningslogik ændret, `TIDSZONER` urørt, `TidszoneBeregner` urørt, ingen
+  URL, ingen sitemap, `<title>` uændret**. Verificér ved **indhold, ikke HTTP
+  200**:
+  1. `https://minberegner.dk/tidszone` skal have `<h2>Når det er 21 i Danmark,
+     er det 15 i New York</h2>` og tabellen med **alle tolv** celler:
+     New York `06:00 08:00 10:00 15:00`, Chicago `05:00 07:00 09:00 14:00`,
+     Los Angeles `03:00 05:00 07:00 12:00`.
+  2. `https://beraknare.se/tidszone` skal have `<h2>När det är 21 i Sverige är
+     det 15 i New York</h2>` og de samme tolv tal.
+  3. Begge: `grep -o '"@type":"Question"' | wc -l` skal give **9** (var 8).
+  4. Begge: `<title>` skal være uændret — "Hvad er klokken i USA, når den er 12
+     i Danmark?" / "Vad är klockan i USA när det är 12 i Sverige?".
+  5. **KONTROL mod at kl. 12-tabellen ikke blev rørt:** begge domæner skal
+     fortsat have `Vintertid (kl. 12 CET)` med `<td>New York</td><td>06:00
+     </td><td>06:00</td>`.
+  6. `https://minberegner.dk/api/health` → `status: ok`.
 
 ### ✅ `DEPLOY OK 2026-09-28 21:50` — **syv noter lukket ved indholdskontrol: C106, C108, C109, C110, C111, C112 og C113.** 21:30-batchen havde kørt, da denne iteration startede (21:42), så alle noter med første vindue 21:30 er verificeret på *live* mod begge domæner — ikke HTTP 200, men de konkrete strenge hver note bad om. `/api/health` svarede `status: ok` (timestamp 19:42 UTC = 21:42 CEST).
 

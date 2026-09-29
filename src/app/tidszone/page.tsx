@@ -9,6 +9,11 @@ import RelatedCalculators from "@/components/RelatedCalculators";
 import RelateredeArtikler from "@/components/RelateredeArtikler";
 import { TIDSZONER, tidszoneRækker } from "@/lib/tidszone-reference";
 import {
+  TIDSPUNKTER,
+  usaTimerAntal,
+  usaTimerRaekker,
+} from "@/lib/tidszone-usa-timer";
+import {
   excelEksempler,
   TIDSSKILLNADS_LANDE,
   tidsskillnadRaekker,
@@ -123,6 +128,52 @@ export default async function TidszonePage() {
         </div>
       )}
 
+      {/* Svarer på de tre andre klokkeslæt, klyngen spørger om (21/14/16) */}
+      {locale === "da" && (
+        <div className="mb-8 rounded-2xl border border-blue-100 bg-blue-50 p-6 dark:border-blue-900 dark:bg-blue-900/20">
+          <h2 className="text-xl font-bold mb-2">
+            Når det er 21 i Danmark, er det 15 i New York
+          </h2>
+          <p className="mb-4">
+            Mange spørger ikke om klokken 12, men om et andet tidspunkt. Her er hvad
+            klokken er i {usaTimerAntal} amerikanske byer, når det er{" "}
+            {TIDSPUNKTER.join(", ")} i Danmark. USA ligger{" "}
+            <strong>6 timer bagud New York</strong>, 7 timer bagud Chicago og 9 timer
+            bagud Los Angeles hele året — USA skifter som Danmark, anden søndag i marts og
+            første søndag i november, så forskellen er den samme sommer og vinter. Vil du se
+            et helt andet tidspunkt, kan du bruge tidszoneberegneren ovenfor.
+          </p>
+          <div className="overflow-x-auto">
+            <table>
+              <thead>
+                <tr>
+                  <th>Når det er i Danmark</th>
+                  {usaTimerRaekker().map((raekke) => (
+                    <th key={raekke.by}>{raekke.by}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {TIDSPUNKTER.map((tidspunkt, i) => (
+                  <tr key={tidspunkt}>
+                    <td>kl. {String(tidspunkt).padStart(2, "0")}</td>
+                    {usaTimerRaekker().map((raekke) => (
+                      <td key={raekke.by}>{raekke.klokkeslaet[i]}</td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="mt-4 text-sm text-gray-600 dark:text-gray-300">
+            Tallene er vinterværdier. USA og Danmark flytter sig samtidig, så de er også
+            sommerværdier — kun i de få dage hvor USA skifter en uge tidligere eller
+            senere end Danmark kan de afvige en time. Brug tidszoneberegneren til et
+            præcist klokkeslæt på en vilkårlig dato.
+          </p>
+        </div>
+      )}
+
       {locale === "se" && (
         <div className="mb-8 rounded-2xl border border-blue-100 bg-blue-50 p-6 dark:border-blue-900 dark:bg-blue-900/20">
           <h2 className="text-xl font-bold mb-2">När det är 12 i Sverige är det 06 i New York</h2>
@@ -160,7 +211,53 @@ export default async function TidszonePage() {
             timme tidigare när Sverige har sommartid. Byte sker inte alltid samma dag i USA, EU och
             Australien, så under de korta övergångsperioderna kan skillnaden avvika en timme. Använd
             tidszonsberäknaren för ett exakt klockslag för valfri stad: den följer sommartiden för
-            dagens datum och visar tidsskillnad, klockan nu och en vald tidpunkt.
+            dagens datum och visar tidsskillnad, klockan nu och ett valt tidpunkt.
+          </p>
+        </div>
+      )}
+
+      {/* Svarar på de tre andra klockslagen, klustret frågar om (21/14/16) */}
+      {locale === "se" && (
+        <div className="mb-8 rounded-2xl border border-blue-100 bg-blue-50 p-6 dark:border-blue-900 dark:bg-blue-900/20">
+          <h2 className="text-xl font-bold mb-2">
+            När det är 21 i Sverige är det 15 i New York
+          </h2>
+          <p className="mb-4">
+            Många frågar inte om klockan 12 utan om en annan tidpunkt. Här är vad klockan
+            är i {usaTimerAntal} amerikanska städer när det är {TIDSPUNKTER.join(", ")} i
+            Sverige. USA ligger <strong>6 timmar efter New York</strong>, 7 timmar efter
+            Chicago och 9 timmar efter Los Angeles hela året — USA byter som Sverige,
+            andra söndagen i mars och första söndagen i november, så skillnaden är densamma
+            sommar och vinter. Vill du se en helt annan tidpunkt kan du använda
+            tidszonsberäknaren ovan.
+          </p>
+          <div className="overflow-x-auto">
+            <table>
+              <thead>
+                <tr>
+                  <th>När det är i Sverige</th>
+                  {usaTimerRaekker("se").map((raekke) => (
+                    <th key={raekke.by}>{raekke.bySe ?? raekke.by}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {TIDSPUNKTER.map((tidspunkt, i) => (
+                  <tr key={tidspunkt}>
+                    <td>kl. {String(tidspunkt).padStart(2, "0")}</td>
+                    {usaTimerRaekker("se").map((raekke) => (
+                      <td key={raekke.by}>{raekke.klokkeslaet[i]}</td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="mt-4 text-sm text-gray-600 dark:text-gray-300">
+            Siffrorna är vintervärden. USA och Sverige flyttar sig samtidigt, så de är
+            också sommarvärden — endast under de få dagar då USA byter en vecka tidigare
+            eller senare än Sverige kan de avvika en timme. Använd tidszonsberäknaren för
+            ett exakt klockslag på ett godtyckligt datum.
           </p>
         </div>
       )}
