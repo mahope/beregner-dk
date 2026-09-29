@@ -92,7 +92,7 @@ export const BEREGNER_ARTIKLER: Record<string, ArtikelKobling[]> = {
       slug: "hvad-er-klokken-i-usa-naar-den-er-12-i-danmark",
       titel: "Hvad er klokken i USA, når den er 12 i Danmark?",
       beskrivelse:
-        "Alle amerikanske tidszoner med klokkeslæt ved 12, 14, 16 og 21 dansk tid, tidsforskelen til 16 byer og de præcise sommertidsdatoer i 2026.",
+        "Alle amerikanske tidszoner med klokkeslæt ved 12, 14, 16 og 21 dansk tid, tidsforskelen til 25 byer og de præcise sommertidsdatoer i 2026.",
     },
   ],
   "/dato": [

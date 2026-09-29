@@ -1,3 +1,56 @@
+STATUS: KØ — **C188 er landet: blogindlægget om klokken i USA skrev "16 byer" i sin egen titel, `<h1>` og `og:title` — mens tabellen i artiklen havde 16 *rækker*, og fordi rækkerne var grupperede ("Kreta og Athen", "Kina, Singapore og Bali") dækkede de 21 byer, mens `/tidszone` kendte 25. Tre tal for ét spørgsmål, og den mest indekserede streng bar det ældste.** Køen havde ingen `I GANG`-opgave (98 afhænger af den `BLOCKED`-mærkede 97, 119 er kilde-blokeret, 179 kræver en rigtig browser), og de otte åbne deploy-noter har alle første vindue **2026-09-29 17:30** — det var 16:37, så ingen blev rørt. Se opgave 188.
+
+**Valget kom af at måle de 27 blogindlægs metadata mod deres egen data, en klasse ingen af C82–C187 havde målt.** De har lukket titler, beskrivelser, JSON-LD, hreflang, canonical, overskriftsstruktur, dobbelt-`<h2>`, sprogfejl og interne links — men på *bloggen* kun brødtekst og kobling, aldrig de tal en titel lover. Et scan af alle 27 indlæg efter en tælbar genstand i `<title>`/`description` (`NN byer|stæder|kommuner|land|regler|personer|dage`) gav **ét fund på hele bloggen** — og det var det brudte.
+
+**Målt på begge live-domæner 2026-09-29 16:50.** "16 byer" stod **6 gange** i `/blog/hvad-er-klokken-i-usa-naar-den-er-12-i-danmark` (title, og:title, `<h1>`, og i `blog-kobling.ts`'s beskrivelse som *gør* renderet på `/tidszone`), mens `/tidszone` siger "25 byer" **11 gange** i samme måling. De ni byer der manglede i indlægget — Toronto, Lissabon, Reykjavik, Athen, Heraklion, Miami, Boston, Phoenix, Istanbul — stod **0** gange hver. Samme fejlklasse som C84's `metaDescription` "12 byer" mod 21, og som C176 gjorde på hele domænet — men her var den **værre**, fordi artiklen ikke bare nåede at tælle forkert: den *havde aldrig læst* `TIDSZONER`, så de ni byer var ikke i artiklen overhovedet.
+
+**Rettelsen er at slette 96 linjer håndskrevet tabel og lade data skrive den.** Nyt modul `src/lib/tidszone-blog-lander.ts` med `blogVerdensRaekker()`: **ingen by og ingen offset står i filen**, hver række er en *henvisning* til en by i `TIDSZONER`, og både forskelsteksten og klokkeslættet regnes af `tidsskillnadRaekker`s og `klokkeslaetVed`s egne regler — samme to funktioner `/tidszone` bruger. Titlen, `og:title` og `<h1>` læser `blogVerdensAntal` (= `TIDSZONER.length`), så **"16 byer" kan ikke overleve**: tallet står ikke i brødteksten, det er en egenskab ved data. Bloggen er **dansk-only** (`routing.ts`: `danishOnlySections = ["/blog", "/kategori"]`, målt: beraknare.se svarer **404**), så modulet har korrekt ingen svensk arm.
+
+**To rigtige fejl, som ikke var summen af opgaven, fundet fordi de viste sig i den *rendrede* tabel:**
+
+1. **Nuuk var angivet som 3 timer bagud. Den rigtige forskel er 4.** Artiklens gamle tabel skrev "3 timer bagud" fordi den trak Grønlands UTC-forskel (WGT = UTC−3) uden at trække Danmarks UTC+1 fra. Grønland ligger faktisk 4 timer bagud Danmark hele året. Det er en **faktuel fejl i en indekseret tabel på sitets næststørste tidszone-tema** — og den lå der i al den tid artiklen har været live. Fundet fordi den nye tabel regnes af `zone.utcVinter − DANSK_UTC_VINTER` i stedet for at være skrevet ned; ingen søgning eller læsning havde fundet den.
+2. **`Sao Paulo` stod uden tilde i `TIDSZONER` — den delte kilde.** Min egen brødtekst skrev korrekt "São Paulo" (som den gamle tabel gjorde), så da den nye tabel begyndte at skrive bynavnet *fra data*, fik siden to stavemåder af samme by på samme side. Rettet **i kilden** (`tidszone-reference.ts` + 2 testreferencer + `tidszone/page.tsx`'s brødtekst), så `/tidszone`, dropdown'en og bloggen alle siger "São Paulo". Samme fejlklasse som C157's negative lås, i modsat retning: en test der låste den *forkerte* stavemåde ville have gjort rettelsen umulig.
+
+**Harness: `tidszone-blog-lander.test.ts` **ny med 12 tests**, modsvejs verificeret — **2 af 12 falder** med master's `page.tsx` + `blog-kobling.ts` (stashed og kørt), altså præcis de to tests der låser selve afdriften. `tidszone-reference.test.ts` **uændret i antal** (São Paulo-låsene er rettet, ikke slettet). Den stærkeste test kræver at tabellen dækker `TIDSZONER` **præcis** — ingen by mangler, ingen er tilføjet — så den fanger både den gamfe afdrift *og* en by der lægges til uden at bloggen følger med; den låser sit eget omfang (**≥ 25**) fordi 0 fund ellers også er det resultat en måler der ikke læser noget ville give.
+
+**Tre fejl i mit eget arbejde, alle fundet fordi et kørende sæde var rødt.** (1) `enhet` stod uden for sin blok i min egen `tekst()` — ReferenceError i 11 af 12 tests. (2) Jeg havde **omvendt** betydningen af `sommer === undefined` i min Phoenix-test: det betyder *byen skifter med Danmark*, ikke "byen har ingen sommertid", så min første liste samlede Phoenix, Tokyo og Dubai — netop de tre der **ikke** flytter sig. Fundet fordi testen faldt med en liste, der så rigtig ud. (3) **Målefejl nr. 43 (min egen, C94's nr. 16 i en ny form):** min første orfanscanning af bloggen meldte **4 indlæg med nul interne links** — men det var min crawler, ikke sitet: den læste kun `href="..."` i rå HTML og ramte ikke `/blog`-siden, fordi Next's RSC-payload escaper citaterne (`href=\"...\"`). Efter at slå op på **buildet server** viste det sig at `/tidszone` **og** `/blog` begge linker til USA-indlægget. Skrevet ned, fordi en crawler der kun læser den rå markup ville have fået mig til at "rette" en fejl der ikke findes — præcis målefejl 34 og 38 i ny form.
+
+**Målt og bevidst *ikke* bygget.** Dansk autocomplete under **"dage til skolestart"** har **én** variation, og under "skolestart" er 8 af 10 *kommunespecifikke* ("skolestart 2026 esbjerg", "… odense", "… varde kommune"). Skolestart afgøres kommunalt i Danmark, præcis som efterårs- og vinterferie gjorde det i C169 — altså samme kilde-blokering, og en national dato ville være en opgået løgn. Ikke bygget.
+
+**Gate grøn:** lint (**605 filer**), **2.885 tests / 183 filer** (fra 2.873/182), build (**142 sider**), `locale-leak.mjs --gate` **exit 0** med **uændrede 740 kandidater / 705 døde / 35 kræver øjne / 0 ureviewet**, `knapgruppe-scan.mjs` **0/0**. Målt på rigtig bygget server (`next start` :4231, porten verificeret fri *inden* start, C117's lære) med `curl -H "Host: minberegner.dk"`: **200**, titel og `og:title` begge "…for **25** byer", `<h1>` "…for **25** byer", **0** forekomster af "16 byer", **26** `<tr>` i verdens-tabellen (25 rækker + header) med alle ni nye byer fundet (Toronto 5, Lissabon 5, Reykjavik 3, Athen 5, Heraklion 3, Miami 13, Boston 7, Phoenix 9, Istanbul 5, São Paulo 3), Phoenix **8 timer bagud** / **9 timer bagud** mods Denvers ens 8/8-tal i vinter — præcis undtagelsen C172 lærer, Nuuk **4 timer bagud** (var 3), Mumbai **4,5 timer frem** med dansk komma, canonical uændret, JSON-LD **6** `Question` uændret. Kontroller: `/tidszone` **11** "25 byer", beraknare.se **404** på blog-slug'en. Rørte filer: bloggens `page.tsx` (96 håndskrevne `<tr>`-linjer → ét `.map()`), `tidszone-blog-lander.ts` (**ny**), `tidszone-blog-lander.test.ts` (**ny**), `blog-kobling.ts` (én streng), `tidszone-reference.ts` + `.test.ts` + `tidszone/page.tsx` (São Paulo) — **ingen beregningslogik, ingen ny URL, ingen sitemap, ingen `<meta description>`, ingen danske tal ændret ud over den dokumenterede Nuuk-rettelse**. Kode + plan i ét squash-commit på `ceo/tidszone-blog-25-byer`; se opgave 188.
+
+**MÅL:** `/tidszone` DA baseline **24.117 visninger / 105 klik / CTR 0,4 % / pos. 7,5** (GSC 2026-08-30 → 09-27) — måles igen **2026-10-13**; blogindlægget har **0 baseline i GSC** (det ligger under visningstællingen), så dets del af målet er kvalitetsmålet *titlen skal være sand for sit indhold* — nået og målt på den byggede server (16 → 25, "16 byer" **6 → 0**). **Forventningen er ærlig:** en forældet bytælling i en titel er en kvalitetsfejl, ikke en trafikfejl, og Nuuk's 3→4 er en *rettelse* der kan flytte siden ned, ikke op. Det der kan læses af rettelsen er at de ni byer, autocomplete faktisk spørger om, nu er i artiklen.
+
+#### 188. [x] FÆRDIG 2026-09-29 — C188 — **blogindlægget om klokken i USA lovede "16 byer" i titel, `<h1>` og `og:title`, mens tabellen havde 16 *rækker* (= 21 byer grupperet) og `/tidszone` kendte 25 — og de ni manglende byer stod 0 gange. Samme fejl som Grønlands forskel, der stod som 3 timer bagud i stedet for 4.**
+
+- **Datagrund:** målt på begge live-domæner 2026-09-29 16:50. Bloggen: "16 byer"
+  **6** forekomster i `/blog/hvad-er-klokken-i-usa-naar-den-er-12-i-danmark` + 1 i
+  `blog-kobling.ts` (renderet på `/tidszone`); `/tidszone`: "25 byer" **11** forekomster.
+  De ni byer i `TIDSZONER` men ikke i artiklen — Toronto, Lissabon, Reykjavik,
+  Athen, Heraklion (Kreta), Miami, Boston, Phoenix, Istanbul — **0** hver.
+  Kontekst: `/tidszone` er GSC's **24.117 v** (pos. 7,5, CTR 0,4 %), og
+  DA-autocomplete under "klokken i usa" spørger netop om Florida, California,
+  Miami, Boston og Colorado (C172).
+- **Rettelsen:** `src/lib/tidszone-blog-lander.ts` (**ny**) —
+  `blogVerdensRaekker()` med **25 rækker**, ingen by/offset i filen, hver
+  forskel = `zone.utcVinter − DANSK_UTC_VINTER` (samme regel som
+  `tidsskillnadRaekker`), `kl14` = `klokkeslaetVed(14, zone, false)`.
+  `blogVerdensAntal` = `TIDSZONER.length`, læst af titel, `og:title` og `<h1>`.
+  96 håndskrevne `<tr>`-linjer i `page.tsx` erstattet af ét `.map()`.
+- **To fund undervejen, begge reelle:** (a) **Nuuk var 3 timer bagud, rigtigt er
+  4** — den gamle tabel trak Grønlands UTC-forskel uden Danmarks UTC+1 fra;
+  en faktuel fejl i en indekseret tabel. (b) **`Sao Paulo` manglede tilde i
+  `TIDSZONER`**, så da tabellen begyndte at skrive bynavne fra data, fik siden
+  to stavemåder af samme by. Rettet i kilden, så `/tidszone` og bloggen er
+  ens.
+- **Harness:** `tidszone-blog-lander.test.ts` **ny med 12 tests**,
+  **modsvejs verificeret: 2 af 12 falder** med master-koden. Den kræver at
+  tabellen dækker `TIDSZONER` **præcist** (ingen mangler, ingen ekstra) og
+  låser sit eget omfang (≥ 25).
+- **Mål:** `/tidszone` 24.117 v / 105 klik / CTR 0,4 % / pos. 7,5 pr.
+  2026-08-30 → 09-27 — måles 2026-10-13. Kvalitetsmål nået: "16 byer" 6 → **0**,
+  titel/`<h1>` 16 → **25**, tabellen 16 → **25** rækker.
+
 STATUS: KØ — **C187 er landet: `/tidsberegner` — sitets tredjestørste danske side (73.117 visninger) og beraknare.se's næststørste (60.399) — svarede på nul af sin egen "læg sammen"-klynge.** Køen havde ingen `I GANG`-opgave (98 afhænger af den `BLOCKED`-mærkede 97, 119 er kilde-blokeret, 179 kræver en rigtig browser), og de otte åbne deploy-noter har alle første vindue **2026-09-29 17:30** — det var 16:20, så ingen blev rørt. Se opgave 187.
 
 **Målt først, målt på alle 207 URL'er i begge sitemapmer.** En `<h2>`-tæller på den server-renderede HTML fandt **4 danske sider med ordret ens dobbelt-Overskrift** — `/efterloen`, `/rentefradrag`, `/barselsdagpenge` (to par hver) og `/barselsplanlaegger` (ét par) — og **0 på beraknare.se's 71 sider**, fordi `/blog` og `/kategori` er dansk-only og ingen svensk side bruger komponenterne på den måde. En *udvidet* måling (nabo-`<h2>` med ordmæssigt overlappende indhold) fandt **12 danske sider / 17 par**, og de otte ekstra var de samme fejl i en mildere form: "Ofte stillede spørgsmål om dagpenge" → "Ofte stillede spørgsmål". De fire *ikke*-fejl i den udvidede måling er korrekte og bevidst urørte: `/tidszone`s to New-York-afsnit ("Når det er 12 i Danmark…" / "… 21 i Danmark…") er to forskellige spørgsmål, og `/pension`s "Folkepension 2026" → "Hvornår kan du gå på folkepension?" er to forskellige spørgsmål.
@@ -8583,6 +8636,15 @@ landmark=lån, piggybank=opsparing osv.).
     - Gate grøn: lint ok, 280/280 tests, build ok (128 pages).
 
 ## VERIFICÉR DEPLOY-log
+
+- ⏳ **VERIFICÉR DEPLOY: C188 — blogindlægget `/blog/hvad-er-klokken-i-usa-naar-den-er-12-i-danmark` skal have titel, `og:title` og `<h1>` med "Tidsforskel for **25** byer", verdens-tabellen skal have præcis **25** datarækker (26 `<tr>` med header), og "16 byer" skal stå **0** gange.** Kode + plan i ét squash-commit på `ceo/tidszone-blog-25-byer`, merge/push **2026-09-29 16:58 CEST**. Første kandidatvindue **2026-09-29 17:30**. Kun bloggens `page.tsx` (96 håndskrevne `<tr>`-linjer → ét `.map()`), **to nye filer** (`tidszone-blog-lander.ts` + test), `blog-kobling.ts` (én streng) og **São Paulo-stavemåden i den delte kilde** (`tidszone-reference.ts` + 2 testreferencer + `tidszone/page.tsx`) er rørt — **ingen beregningslogik, ingen ny URL, ingen sitemap, ingen `<meta description>`**. Verificér ved **indhold, ikke HTTP 200**:
+  - `curl -s https://minberegner.dk/blog/hvad-er-klokken-i-usa-naar-den-er-12-i-danmark | sed 's/<!-- -->//g'` skal give **0** for "16 byer" og **≥ 1** for "Tidsforskel for 25 byer" (før: 6 hhv. 0).
+  - Antallet af datarækker i verdens-tabellen skal være **25** (før: **16**). Tæl `<tr>` i tabellen mellem `<h2>Tidsforskelen til resten af verden` og den følgende `</table>`; **26** inkl. header.
+  - **Nuuk** skal sige **4 timer bagud** i tabellen — den stod **3 timer bagud**, hvilket var en faktuel fejl (Grønland ligger 4 timer bagud Danmark; den gamle tabel trak WGT = UTC−3 uden Danmarks UTC+1 fra). Se `grep -A2 '>Nuuk<'`.
+  - **Phoenix** skal sige **8 timer bagud** i vintertid og **9 timer bagud** i sommertid, mens **Denver** siger 8/8 — undtagelsen C172 lærer (Arizona er undtaget fra sommertid siden 1967).
+  - De ni byer der før stod 0 gange skal alle findes: `Toronto`, `Lissabon`, `Reykjavik`, `Athen`, `Heraklion`, `Miami`, `Boston`, `Phoenix`, `Istanbul`.
+  - **Kontrol:** `https://minberegner.dk/tidszone` skal stadig have **≥ 2** "25 byer" og **0** "Sao Paulo" (tilde-stavemåden), og `https://beraknare.se/blog/hvad-er-klokken-i-usa-naar-den-er-12-i-danmark` skal fortsat svare **404** (bloggen er dansk-only, `danishOnlySections` i `routing.ts`).
+
 
 - ⏳ **VERIFICÉR DEPLOY: C186 — de ni danske sider skal have *én* "Ofte stillede
   spørgsmål" og *én* "Relaterede beregnere" i markupken, og ingen dublet-`<h2>`

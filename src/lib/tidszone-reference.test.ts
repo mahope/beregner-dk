@@ -25,7 +25,7 @@ describe("tidszone-reference", () => {
     expect(find("New York")?.vinter).toBe("06:00");
     expect(find("Chicago")?.vinter).toBe("05:00");
     expect(find("Los Angeles")?.vinter).toBe("03:00");
-    expect(find("Sao Paulo")?.vinter).toBe("08:00");
+    expect(find("São Paulo")?.vinter).toBe("08:00");
     expect(find("Dubai")?.vinter).toBe("15:00");
     expect(find("Mumbai")?.vinter).toBe("16:30");
     expect(find("Shanghai")?.vinter).toBe("19:00");
@@ -49,8 +49,8 @@ describe("tidszone-reference", () => {
       expect(forskel).toBe(brugerSommertid(zone) ? 0 : -60);
     }
 
-    const [saoPaulo] = tidszoneRækker([{ by: "Sao Paulo", utcVinter: -3 }]);
-    expect(saoPaulo).toEqual({ by: "Sao Paulo", vinter: "08:00", sommer: "07:00" });
+    const [saoPaulo] = tidszoneRækker([{ by: "São Paulo", utcVinter: -3 }]);
+    expect(saoPaulo).toEqual({ by: "São Paulo", vinter: "08:00", sommer: "07:00" });
 
     const [sydney] = tidszoneRækker([{ by: "Sydney", utcVinter: 10, utcSommer: 11 }]);
     expect(sydney).toEqual({ by: "Sydney", vinter: "21:00", sommer: "21:00" });

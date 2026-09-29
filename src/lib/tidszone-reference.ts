@@ -6,7 +6,7 @@
  *   sidste søndag i oktober).
  * - USA/Canada/Europa/Australien: standardvinter- og sommertidszoner fra
  *   IANA-tidszonebasen (UTC-offset uden DST).
- * - Sao Paulo har haft fast UTC-3 siden 2019 og bruger ikke sommertid.
+ * - São Paulo har haft fast UTC-3 siden 2019 og bruger ikke sommertid.
  * - Grønland skiftede i marts 2023 fra UTC-4 til UTC-3 som standardtid
  *   (WGT) og har fortsat sommertid (WGST = UTC-2), jf. IANA
  *   America/Nuuk.
@@ -61,7 +61,7 @@ export const TIDSZONER: readonly TidszoneInfo[] = [
   { by: "Denver", utcVinter: -7, utcSommer: -6 },
   { by: "Phoenix", utcVinter: -7 },
   { by: "Los Angeles", utcVinter: -8, utcSommer: -7 },
-  { by: "Sao Paulo", utcVinter: -3 },
+  { by: "São Paulo", utcVinter: -3 },
   { by: "Madrid", utcVinter: 1, utcSommer: 2 },
   { by: "Istanbul", utcVinter: 3 },
   { by: "Dubai", utcVinter: 4 },
@@ -101,7 +101,7 @@ export function brugerSommertid(zone: TidszoneInfo): boolean {
  * Vinter = dansk vintertid (12:00 CET), sommer = dansk somertid (12:00 CEST).
  *
  * Byer, der skifter sommertid sammen med Danmark, viser samme klokkeslæt i
- * begge kolonner. Byer uden sommertid (fx Tokyo, Dubai, Sao Paulo) ligger en
+ * begge kolonner. Byer uden sommertid (fx Tokyo, Dubai, São Paulo) ligger en
  * time tidligere, når Danmark har somertid.
  */
 export function tidszoneRækker(

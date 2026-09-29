@@ -3,15 +3,32 @@ import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { OG_IMAGE } from "@/lib/page-helpers";
+import { blogVerdensAntal, blogVerdensRaekker } from "@/lib/tidszone-blog-lander";
 
 const SLUG = "hvad-er-klokken-i-usa-naar-den-er-12-i-danmark";
+
+/**
+ * Antallet byer i verdens-tabellen nedenfor.
+ *
+ * Læst fra `TIDSZONER` gennem `blogVerdensAntal`, aldrig skrevet i hånden.
+ * Titlen sagde "16 byer" mens tabellen viste 16 *rækker* — og rækkerne var
+ * grupperede ("Kreta og Athen", "Kina, Singapore og Bali"), så de 16 rækker
+ * dækkede 21 byer, mens `/tidszone` kendte 25. Tre tal for det samme
+ * spørgsmål. Nu er der ét, fordi alle tre læser samme liste.
+ */
+const VERDENS_ANTAL = blogVerdensAntal;
+
+/** Rækkerne i verdens-tabellen, regnet fra TIDSZONER. Se modulens docblock. */
+const VERDENS_RAEKKER = blogVerdensRaekker();
 
 export async function generateMetadata(): Promise<Metadata> {
   const dc = await getCurrentDomainConfig();
   const baseUrl = dc.baseUrl;
 
   return {
-    title: { absolute: "Hvad er klokken i USA? Tidsforskel for 16 byer" },
+    title: {
+      absolute: `Hvad er klokken i USA? Tidsforskel for ${VERDENS_ANTAL} byer`,
+    },
     description:
       "Når det er 12 i Danmark, er det 06 i New York, 05 i Chicago, 04 i Denver og 03 i Los Angeles. Se hele tabellen for USA og resten af verden — med sommertid.",
     keywords: [
@@ -24,7 +41,7 @@ export async function generateMetadata(): Promise<Metadata> {
     ],
     openGraph: {
       images: OG_IMAGE,
-      title: "Hvad er klokken i USA? Tidsforskel for 16 byer",
+      title: `Hvad er klokken i USA? Tidsforskel for ${VERDENS_ANTAL} byer`,
       description:
         "Hele tabellen: 06 i New York, 05 i Chicago, 04 i Denver og 03 i Los Angeles — plus tidsforskelen til resten af verden.",
       url: `${baseUrl}/blog/${SLUG}`,
@@ -90,7 +107,7 @@ export default function TidszoneUsaPage() {
         <header className="mb-8 not-prose">
           <span className="text-sm text-blue-600 font-medium">Praktisk &amp; Rejse</span>
           <h1 className="text-3xl md:text-4xl font-bold mt-2 mb-4">
-            Hvad er klokken i USA? Tidsforskel for 16 byer
+            Hvad er klokken i USA? Tidsforskel for {VERDENS_ANTAL} byer
           </h1>
           <div className="flex items-center gap-4 text-sm text-gray-500">
             <span>26. september 2026</span>
@@ -226,8 +243,11 @@ export default function TidszoneUsaPage() {
 
         <h2>Tidsforskelen til resten af verden</h2>
         <p>
-          Tabellen her regner fra Danmark. Fortegnet er fra <strong>dansk tid</strong>, så
-          minus betyder, at byen ligger bagud.
+          Tabellen her regner fra Danmark. Fortegnet er fra <strong>dansk tid</strong>,
+          så minus betyder, at byen ligger bagud. Den dækker de samme{" "}
+          {VERDENS_ANTAL} byer som tidszoneberegneren, og hver forskel er regnet
+          fra den liste værktøjet selv bruger — så de to tabeller ikke kan komme ud
+          af trit.
         </p>
         <div className="not-prose overflow-x-auto my-6">
           <table className="w-full text-sm border-collapse">
@@ -240,110 +260,42 @@ export default function TidszoneUsaPage() {
               </tr>
             </thead>
             <tbody>
-              <tr className="border-b border-gray-200 dark:border-gray-700">
-                <td className="py-2 pr-4">London</td>
-                <td className="py-2 pr-4">1 time bagud</td>
-                <td className="py-2 pr-4">1 time bagud</td>
-                <td className="py-2">13:00</td>
-              </tr>
-              <tr className="border-b border-gray-200 dark:border-gray-700">
-                <td className="py-2 pr-4">Nuuk, Grønland</td>
-                <td className="py-2 pr-4">3 timer bagud</td>
-                <td className="py-2 pr-4">3 timer bagud</td>
-                <td className="py-2">11:00</td>
-              </tr>
-              <tr className="border-b border-gray-200 dark:border-gray-700">
-                <td className="py-2 pr-4">New York</td>
-                <td className="py-2 pr-4">6 timer bagud</td>
-                <td className="py-2 pr-4">6 timer bagud</td>
-                <td className="py-2">08:00</td>
-              </tr>
-              <tr className="border-b border-gray-200 dark:border-gray-700">
-                <td className="py-2 pr-4">Chicago</td>
-                <td className="py-2 pr-4">7 timer bagud</td>
-                <td className="py-2 pr-4">7 timer bagud</td>
-                <td className="py-2">07:00</td>
-              </tr>
-              <tr className="border-b border-gray-200 dark:border-gray-700">
-                <td className="py-2 pr-4">Denver</td>
-                <td className="py-2 pr-4">8 timer bagud</td>
-                <td className="py-2 pr-4">8 timer bagud</td>
-                <td className="py-2">06:00</td>
-              </tr>
-              <tr className="border-b border-gray-200 dark:border-gray-700">
-                <td className="py-2 pr-4">Los Angeles</td>
-                <td className="py-2 pr-4">9 timer bagud</td>
-                <td className="py-2 pr-4">9 timer bagud</td>
-                <td className="py-2">05:00</td>
-              </tr>
-              <tr className="border-b border-gray-200 dark:border-gray-700">
-                <td className="py-2 pr-4">São Paulo</td>
-                <td className="py-2 pr-4">4 timer bagud</td>
-                <td className="py-2 pr-4">5 timer bagud</td>
-                <td className="py-2">10:00</td>
-              </tr>
-              <tr className="border-b border-gray-200 dark:border-gray-700">
-                <td className="py-2 pr-4">Berlin, Paris, Madrid</td>
-                <td className="py-2 pr-4">Samme tid</td>
-                <td className="py-2 pr-4">Samme tid</td>
-                <td className="py-2">14:00</td>
-              </tr>
-              <tr className="border-b border-gray-200 dark:border-gray-700">
-                <td className="py-2 pr-4">Kreta og Athen</td>
-                <td className="py-2 pr-4">1 time foran</td>
-                <td className="py-2 pr-4">1 time foran</td>
-                <td className="py-2">15:00</td>
-              </tr>
-              <tr className="border-b border-gray-200 dark:border-gray-700">
-                <td className="py-2 pr-4">Tyrkiet (Ankara)</td>
-                <td className="py-2 pr-4">2 timer foran</td>
-                <td className="py-2 pr-4">1 time foran</td>
-                <td className="py-2">16:00</td>
-              </tr>
-              <tr className="border-b border-gray-200 dark:border-gray-700">
-                <td className="py-2 pr-4">Dubai</td>
-                <td className="py-2 pr-4">3 timer foran</td>
-                <td className="py-2 pr-4">2 timer foran</td>
-                <td className="py-2">17:00</td>
-              </tr>
-              <tr className="border-b border-gray-200 dark:border-gray-700">
-                <td className="py-2 pr-4">Mumbai (Indien)</td>
-                <td className="py-2 pr-4">4,5 time foran</td>
-                <td className="py-2 pr-4">3,5 time foran</td>
-                <td className="py-2">18:30</td>
-              </tr>
-              <tr className="border-b border-gray-200 dark:border-gray-700">
-                <td className="py-2 pr-4">Bangkok (Thailand)</td>
-                <td className="py-2 pr-4">6 timer foran</td>
-                <td className="py-2 pr-4">5 timer foran</td>
-                <td className="py-2">20:00</td>
-              </tr>
-              <tr className="border-b border-gray-200 dark:border-gray-700">
-                <td className="py-2 pr-4">Kina, Singapore og Bali</td>
-                <td className="py-2 pr-4">7 timer foran</td>
-                <td className="py-2 pr-4">6 timer foran</td>
-                <td className="py-2">21:00</td>
-              </tr>
-              <tr className="border-b border-gray-200 dark:border-gray-700">
-                <td className="py-2 pr-4">Tokyo</td>
-                <td className="py-2 pr-4">8 timer foran</td>
-                <td className="py-2 pr-4">7 timer foran</td>
-                <td className="py-2">22:00</td>
-              </tr>
-              <tr>
-                <td className="py-2 pr-4">Sydney</td>
-                <td className="py-2 pr-4">9 timer foran</td>
-                <td className="py-2 pr-4">9 timer foran</td>
-                <td className="py-2">23:00</td>
-              </tr>
+              {VERDENS_RAEKKER.map((raekke, i) => (
+                <tr
+                  key={raekke.by}
+                  className={
+                    i === VERDENS_RAEKKER.length - 1
+                      ? undefined
+                      : "border-b border-gray-200 dark:border-gray-700"
+                  }
+                >
+                  <td className="py-2 pr-4">{raekke.by}</td>
+                  <td className="py-2 pr-4">{raekke.tekstVinter}</td>
+                  <td className="py-2 pr-4">
+                    {raekke.tekstSommer ?? raekke.tekstVinter}
+                  </td>
+                  <td className="py-2">{raekke.kl14}</td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
         <p>
-          Læg mærke til de par rækker, hvor forskellen <em>ikke</em> ændrer sig med
-          sommertiden: London, Nuuk, hele USA's kyster, Berlin, Kreta og Sydney. De skifter
-          enten sammen med Danmark eller slet ikke.Og Mumbai ligger 4,5 time foran, fordi
-          Indien ligger på UTC+5:30 — en tidszone der ikke går i hele time.
+          Læg mærke til de rækker, hvor de to midterste kolonner er ens. De byer
+          skifter <em>sammen med Danmark</em> — eller slet ikke — så{" "}
+          <em>forskjellen</em> er den samme hele året, selv om begge tal flytter
+          sig: London, Lissabon, Nuuk, Madrid, Athen, Kreta, New York, Toronto,
+          Miami, Boston, Chicago, Denver, Los Angeles, Sydney og Auckland.
+        </p>
+        <p>
+          De øvrige byer står en time tidligere i sommerspalten, fordi Danmark går
+          en time frem mens de ikke gør det med: Dubai, Mumbai, Bangkok, Bali,
+          Shanghai, Tokyo, São&nbsp;Paulo og Istanbul. Phoenix er det interessante
+          tilfælde — den ligger i samme bjergbælte som Denver, men Arizona blev
+          undtaget fra sommertid i 1967, så Phoenix er en time{" "}
+          <em>længere</em> bagud end Denver, præcis i de uger hvor Danmark har
+          somertid. Mumbai ligger 4,5 time foran, fordi Indien ligger på
+          UTC+5:30 — en tidszone der ikke går i hele time.
         </p>
 
         <h2>Sådan regner du det ud selv</h2>

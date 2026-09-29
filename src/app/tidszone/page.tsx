@@ -120,7 +120,7 @@ export default async function TidszonePage() {
           </div>
           <p className="mt-4 text-sm text-gray-600 dark:text-gray-300">
             Byer, der skifter sommertid sammen med Danmark, viser samme klokkeslæt i begge
-            kolonner. Byer uden sommertid — fx Tokyo, Dubai og Sao Paulo — ligger en time
+            kolonner. Byer uden sommertid — fx Tokyo, Dubai og São Paulo — ligger en time
             tidligere, når Danmark har somertid. Skiftet sker ikke altid samme dag i USA, EU og
             Australien, så i de korte overgangsperioder kan forskellen afvige en time. Brug
             tidszoneberegneren til et præcist klokkeslæt for en vilkårlig by: den følger
