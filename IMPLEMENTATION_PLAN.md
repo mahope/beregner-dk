@@ -1,4 +1,4 @@
-STATUS: KØ — **C160 er landet: beraknare.se's fireten `dagar-till`-sider svarede "Det finns 87 dagar *til* juldagen" — dansk på svensk, i det synlige svar, i meta description, i og:description og i JSON-LD. 112 forekomster, målt på rigtig server, på de sider der svarer direkte på svensk GSCs største dagar-klynge.** Køen havde én `I GANG`-løs opgave, **159 (de ni åbne deploy-noter)**, og den er **fortsat klokke-blokeret**: alle ni har første vindue **2026-09-29 07:30**, og det var 04:15, så ingen kunne lukkes og ingen blev rørt. **Valget kom af at køre linkgrafen som en helhed i stedet for endnu en side:** C159 havde lukket de to GSC-lister, så næste iteration målte *hvor siderne hænger sammen* — en fuld crawl af begge sitemapmer (**135 + 71 URL'er**). Den fandt **0 sider med 0 indgående links** på begge domæner, altså at C108's `//dage-til//`-klasse er lukket og forbliver lukket, og at blogindlæggene har **52-54** interne links hver — Fase 3's "bloggen skal føre videre" er **allerede** opfyldt og må ikke genbruges som åbent punkt. **Årsagen er én tegn uden for enhver tekstfil:** `DageTilPage.tsx:91` byggede svaret med `til` **hårdkodet** mellemom `copy[locale]`-opslagene, så `copy` stod på hver linje og præpositionen stod uden for den. Samme fejlklasse som C84's `metaDescription` om 12 byer. **Titlen var urørt** — den bygger på `event[locale].copy.question`, som *er* svensk — mens de tre andre overflader alle trak `headline`; derfor er alle fire låst, fordi en test der kun læser den synlige tekst ville være grøn, mens Google fortsat indekserede den danske præposition i den beskrivelse den viser under titlen. **Måleren var blind på to måder, og begge var målt forud:** (1) `buildMountGraph()` bygger grafen af `calculator-list.ts`'s 81 hrefs + forsiden, og `dage-til`/`dagar-till` er **dynamiske ruter, ikke kalkulatorer** — de står i ingen af dem, så sættet var 126 filer og de 14 svenske sider var det største udokumenterede segment på sitet; (2) **selv med filen i sættet** ville port-reglen ikke have set den, fordi `copy` er en `Record<DageTilLocale, …>` og scanneren stoler på hele tabellen — korrekt for `page-data.ts`'s 1.192 linjer, **forkert** for en tabel med ét ord der *skal* være forskelligt. Plantet modsvejs: med fejlen tilbage giver `--gate` **exit 0**. Derfor fik rettelsen en **test**, ikke kun en regel. **De tre nye fund da filen kom i sættet var alle falske, og alle tre faldt i port-klassen C158 ikke havde set:** `dageLocale: DageTilLocale = locale` (én type-annotation mellem navn og `=` — præcis C157's `sePages: Record<…>` mod R4's `se: {`), en ternary skrevet som objekt-egenskab hvor `{` åbner på `return`-linjen så hovedet var alle tidligere properties inkl. en template-literal med komma, og **en fejl i min egen rettelse fundet fordi porten røddes den forkerte vej**: jeg læste en injiceret operator som regex-gruppe 1 og fik `flags: ["!undefined"]`, hvilket erklærede hver `dageLocale === "da" ? … : …`-arm for *synlig på svensk* — det ene svar reglen aldrig må give. Fundet ved at logge `head.flags`, ikke ved at læse koden. **Tre fejl i mine egne greb undervejs, samme klasse som målefejl 9-28:** `rg -rn` igen (nr. 14, tredje gang — `-r` er replace-flaget), `dageTilHrefs()` der *gættede* dynamisk segment som `[dato]` i stedet for at læse den (en scanner der gætter den route den blev tilføjet for, springer den lydløst over), og et negativt sprog-lås der fangede `dagar-till/`-prefixet (C121's `bakåt` igen). **Harness:** `dage-til-routes.test.tsx` **18 → 22 tests**, og det afgørende var at de måtte importere `DagarTillPage` — de to stier er **to route-filer over én komponent** hvor **prefixet** vælger sproget, så *alle* eksisterende tests rendrede den danske route, hvor "til" er korrekt. Det er grunden til at fejlen levede. **Modsvejs verificeret i begge retninger:** med `to: "til"` i den svenske arm falder 2 af 4; med `to: "till"` i den *danske* arm falder 3 af 4. Scannerens to ændringer er hver verificeret forfra. **Gate grøn:** lint (**583 filer**), **2.595 tests / 169 filer** (fra 2.591/169 — de 4 nye), build (**141 sider**), `locale-leak.mjs --gate` **exit 0** med **594/559/35/0** (fra 591/556/35/0) og sættet **126 → 129 filer**, `knapgruppe-scan.mjs` **0/0**, `href-scan.mjs` 28 uændret mod `git stash`. **Målt på rigtig server** (port 3777, fri verificeret inden start): alle 14 svenske sider **0** `dagar til` / 8-11 `dagar till`, dansk uændret 8-11 `dage til` / 0 `dage till`, fire danske kontrolletitler uændrede, `/api/health` → `status: ok`, begge svenske alias 301'er stadig. Kode + plan i ét squash-commit på `ceo/dagartill-till`; se opgave 161. **MÅL:** de 14 sider har ingen egen CTR-baseline (de ligger under GSC's visningstælling; kun `/dato` 96.336 v og `/nedtaelling` 5.361 v er målt) — forventningen er CTR på de positioner de allerede har, og dansk ubevægtet; revurderes **2026-10-13** sammen med C158/C159.
+STATUS: KØ — **C163 er landet: beraknare.se `/procent` skrev norsk på svensk — `lønsprocent` og dansk `her` — og port-analysen havde set den fire hele iterationer, fordi scannerens JSX-regel var `>([^<>{}…]{2,200})<`: den krævede copy på *samme linje* som sit tag, mens JSX lægger den første brødet tekst på linjen *efter* `<p>`, og den endte i `{" "}`, hvilket tegnklassen ekskluderede. Begge udelukkelser var skrevet til at fange interpolationer og nye linjer, og de fik Prettiers almindelige sætning som følge. Måleren var altså den egentlige opgave, ikke copyen — opgaven lovede en én-linjers rettelse, og blev i stedet en måler.** Køen havde én `I GANG`-løs opgave, **159 (de ni åbne deploy-noter)**, og den er **fortsat klokke-blokeret**: alle ni har første vindue **2026-09-29 07:30**, og det var 05:11, så ingen kunne lukkes og ingen blev rørt. **Målt først, som opgaven selv bad om:** gaten ramte den ikke — `/procent` stod med 8 fund, alle døde (otte da-porte), og `lønsprocent` var ikke blandt dem. Rettelsen er at forankre reglen i sit eget tag (lookbehind på `[\w$]`, så en TypeScript-generic som `useState<string>('4.5')` ikke kan læses som copy — det var min egen målefejl nr. 21, fundet fordi mit første greb meldte LeasingBeregner som et falsk fund). **Efter reglen: 740 kandidater, 704 døde, 36 kræver øjne, og præcis 1 ureviewet — `lønsprocent` selv.** Den synlige rettelse er én linje kun i `se`: "lønprocent … kronor här". **Målt på rigtig server** (`next start` port 3411, verificeret fri inden start, begge domæner): beraknare.se **0** fund på `lønsprocent` og `som kroner her`, **2** på den nye streng; minberegner.dk **0** på den nye streng, `/api/health` `status: ok` begge steder, og C161's dedupe holder (**1** `>Formler</h3>`). **Harness: de 20 gamle tests var grønne gennem fire iterationer, fordi alle plantene skrev `<p>tekst</p>` på én linje — præcis den form den brudte regel kunne se.** Tre nye tests, modsvejs verificeret: den første (Prettiers rigtige form: `<p>` / copy / `{" "}` / `<Link>`) **falder mod den gamle regel**; den anden låser præcis min falske-positive-klasse; den tredje læser værtfilen selv, ikke en plant. **Én ærlig bivirkning:** den hånddrejede turvidde `< 700` faldt (593 → 739) og bæres nu af et **forhold** — `dead/candidates > 0,9` (i dag 0,95) — fordi en turvidde der skal skrives om hver gang måleren bliver skarpere, ikke er en værdi. Gate grøn: build (141 sider), lint (**584 filer**), **2.606 tests / 170 filer** (fra 2.593 / 169), `locale-leak.mjs --gate` exit 0, `knapgruppe-scan.mjs` 0/0, `label-a11y-scan.mjs` uændret 22/35. Kode + plan i ét commit på `ceo/procent-se-lakage`; se opgave 163. **MÅL:** beraknare.se `/procent` SE baseline **25.954 v / 2 klik / CTR 0,0 % / pos. 10,0 pr. 2026-08-29 → 2026-09-26** — måles igen 2026-10-13.
 STATUS: KØ — **C161 er landet: `/procent` — sitets største side i Google (149.879 visninger, 25 % af alle visninger) — skrev de samme fire formler to gange i ét og samme dokument, i to afsnit med to overskrifter om præcis det samme, i begge sprog.** Køen havde én `I GANG`-løs opgave, **159 (de ni åbne deploy-noter)**, og den er **fortsat klokke-blokeret**: alle ni har første vindue **2026-09-29 07:30**, og det var 04:45, så ingen kunne lukkes og ingen blev rørt. **Valget kom af at læse sitets største side som helhed i stedet for endnu en søgning.** C160's konklusion var at linkgrafen og søgeklyngerne er lukket, så næste iteration gik efter den ene side hvor tallene er mest ekstreme: `/procent` har **0,1 % CTR på pos. 7,4**, mens `/dato` på næsten samme position har **0,6 %** — altså 5-10× lavere end enhver anden side i GSC's top-16. De tre største søgninger på siden er "procentberegner" (248 v, pos 8), en rabatopgave (59 v, pos 6) og "10 procent af" (52 v, pos 6) — tilsammen ~360 visninger mod **149.879 i alt**, altså en massiv hale af lange søgninger, som en fast "procent"-sides lillebror. **Titlen og beskrivelsen er allerede svar-først** ("Procentberegner – beregn 10 procent af et tal" / "10 procent af et tal er tallet × 0,10") — for fjerde gang ikke titlen, men kroppen under den, samme konklusion som C82, C96, C99 og C100. **Målt først, målt på rigtig server:** i live-HTML'en stod **hver af de fire formler 3 gange** på begge domæner — `Procent = (Del / Heltal) × 100`, `Del = (Procent / 100) × Heltal`, `Heltal = Del × (100 / Procent)` og `((Ny - Gammel) / Gammel) × 100` — fordi **to filer ejede dem hver**: `ProcentBeregner.tsx:46-51` som boksen `<h3>Formler</h3>` under værktøjet, og `page.tsx:203` (da) og `page.tsx:450` (se) som afsnittet `<h2>Procentregningens formler</h2>` nederst i brødteksten. Tallet 3 = synlig tekst + client-komponentens SSR + sidens egen kopi i RSC-flight-payloaden. **Rettelsen er sletning, ikke tilføjelse:** de to `<h2>`-afsnit er væk, `Tip`-boksen (50 % af 40 = 40 % af 50) er den eneste tekst i dem der ikke var en dublet, og den er **beholdt i begge sprog**. Værktøjets boks er bevidst bevaret: den står lige under de fire beregningstilstande, så den er den, en læser bruger. Målt efter rettelsen på `next start` (port 3911, porten verificeret fri *inden* start) med begge `Host`-headere: **1 forekomst pr. formel**, 0 duplikat-overskrifter, da 126.046 bytes mod 127.029 før, se 123.487. **Harness:** ny `procent-formler.test.tsx` med 8 tests, **modsvejs verificeret: 4 af 8 falder** med den gamle `page.tsx` (begge sprog i begge tests), og de 4 der ikke falder er låse på Formler-boksen og Tip-boksen, som skal være grønne begge veje. **Måleren var vakuum-grøn i sit første udkast, og det er fundet fordi den tællede en streng der ikke findes:** sidefilens egen `page.test.tsx` mockerer `ProcentBeregner`, så en optælling i den fil ville have set **0** forekomster i stedet for 2 — C158's lære. Den nye fil mockerer den derfor **ikke** og pakker siden i `LocaleProvider`, så den renderer den rigtige producent. **To fejl i min egen test, begge fundet fordi de faldt:** (1) jeg skrev den fjerde formel som én delt streng, men de to sprog bruger hver sin adjektivform — dansk `Gammel`, svensk `Gammal` — så den svenske søgning gav **0** og ville have været grøn af fejltagelse; (2) jeg krævede "Hurtig reference" på begge sprog, men den svenske labels-tabel siger "Snabbreferens". **Og en ægte undtagelse blev fundet, fordi tallet ikke var 1 overalt:** C114's "Skillnad i procent mellan två tal" bruger `((Ny - Gammal) / Gammal) × 100` bevidst som den ene af to formler der skal holdes op imod hinanden, så på beraknare.se er den **2 gange efter rettelsen** — et andet afsnit med et andet formål, ikke en dublet af referenceboksen. Låsen er derfor pr. sprog og skrevet med begrundelsen i kilden. **Gate grøn:** lint (**584 filer**), **2.603 tests / 170 filer** (fra 2.595 / 169 — de 8 nye, og de 6 pre-existing `MomsBeregner`-fejl fra C160's noter er væk), build (**141 sider**), `locale-leak.mjs --gate` **exit 0** med **593 kandidater — 558 døde, 35 kræver øjne, 0 ureviewet** (fra 594/559/35/0) og sættet uændret **129 filer**, `knapgruppe-scan.mjs` **0/0**. Scannerens delta er **forhåndskontrolleret mod `git stash`** — målefejl 15's lære — så de −1/−1 er rettelsen og ikke en tilfældighed. **En tallene i opgave 159's egen note er forældede, målt her:** noten siger "54 kalkulatorsider", og `locale-leak.mjs` siger **56** både med og uden min rettelse. Ingen jævnføring, ingen handling — skrevet ned så næste iteration ikke jagter en forskel der ikke findes. Kode + plan i ét squash-commit på `ceo/procent-formler-duplikat`; se opgave 162. **MÅL:** `/procent` DA baseline **149.879 visninger / 99 klik / CTR 0,1 % / pos. 7,4** og SE **25.954 v / 2 klik / CTR 0,0 % / pos. 10,0**, begge pr. **2026-08-29 → 2026-09-26** — måles igen **2026-10-13**. **Forventningen er ærlig og lille:** en dublet er en kvalitetsfejl, ikke en trafikfejl, så jeg lover ikke flere klik. Det der *kan* læses af rettelsen, er at siden nu svarer ét sted på fire af sitets mest søgte formelspørgsmål. Hvis `/procent`s CTR forbliver under 0,2 % efter 14 dage, er hypotesen "dubleten forklærede den lave CTR" **modbevist**, og så er næste spørgsmål ikke mere indhold men søgemassen — de 149.520 visninger uden for de tre top-søgninger, som jeg ikke kan se fra loopet. Det er skrevet som en falsificérbar forudsigelse, ikke som en plan.
 
 ---
@@ -14907,6 +14907,25 @@ Gatens egne tal (591/556/35/0) måles igen **2026-10-13**; en voksende
 > grafen + to rettelser), så kriterium 2 og 3 bør måles på de nye tal
 > (**129 filer / 594 kandidater / 559 døde / 35 kræver øjne / 0 ureviewet**)
 > og ikke på C158's 126/591/556/35/0.
+>
+> **C163 (05:11) rørte den heller ikke — kriterium 1 kræver stadig 07:30, det var
+> 05:11.** Kriterium 2 og 3 har nu et **nyt** tal at måle på. Målt på *samme
+> scannerrevision* før og efter C163's JSX-rettelse, så forskellen er
+> reglens og ikke en anden kørsel:
+>
+> | | før C163 | efter C163 |
+> |---|---|---|
+> | kandidater | **593** | **739** |
+> | døde | 558 | **704** |
+> | kræver øjne | 35 | **35** |
+> | ureviewet | 0 | **0** |
+>
+> **+146 kandidater, +146 døde, 0 nye kræver-øjne, 0 nye ureviewede** — de nye
+> fund er da-porte, som port-analysen dømmer uden at spørge en mand. Det er det
+> bedste svar kriterium 2 og 3 kan få før 07:30: **rummet blev 25 % større, og
+> porten hold.** (C160's note ovenfor siger 594/559/35/0; de afviger med 1 fra
+> min måling på master. Jeg bruger **egne** tal i sammenligningen ovenfor, for
+> en forskel på 1 i en note fra en anden revision kan ikke bære en konklusion.)
 
 **⏱ Blokeret af uret, ikke af en fejl.** C159 startede 2026-09-29 03:16; alle ni
 noter har første vindue **07:30**. Kriterium 1 kan ikke udføres før det tidspunkt,
@@ -15304,25 +15323,130 @@ rapport), ikke på at skrive mere indhold til dem.
   4. KONTROL: `https://minberegner.dk/api/health` → `status: ok`, og
      `/dato`, `/moms`, `/tidsberegner` skal have uændrede titler.
 
-#### 163. [ ] Nyt kandidat i C161 — **beraknare.se `/procent` har norsk/dansk i en svensk sætning, i et afsnit C114 skrev**
+#### 163. [x] FÆRDIG 2026-09-29 — C163 — **beraknare.se `/procent` skrev norsk på svensk ("lønsprocent" + dansk "her") — og port-analysen så den ikke, fordi scannerens JSX-regel kun læste tekst på *samme linje* som sit tag. Det var *måleren*, ikke copyen, der var den egentlige opgave.**
 
-**Målt i samme render som C161** (rigtig server, `Host: beraknare.se`):
-`"En lønsprocent kan du se som kroner her: löneökning i procent"`. **`lønsprocent`**
-er norsk (og i dansk hedder det *lønprocent*), og **`her`** er dansk — svensk
-er *här*. Det står i `src/app/procent/page.tsx` lige efter C114's
-"Skillnad i procent mellan två tal"-afsnit, altså **kun på beraknare.se**
-og kun i den svenske gren. Det er **ikke** en duplikat, så C161's rettelse
-fandt det ikke ved at tælle.
+**Køen:** 159 er `TIDSBLOKERET` (alle ni noter har første vindue **07:30**,
+det var **05:11**), så næste frie opgave var denne — den er C161's egen
+kandidat, og den lovede sig selv at være "den første rigtige prøve på om
+C158's udvidede sæt nu ser `page.tsx`-teksten". **Den bestod ikke, og det er
+hele fundet.**
 
-**Hvorfor den er sin egen opgave og ikke en del af C161:** C161's fejl var
-en duplikat, og måleren var en optælling. Denne er en **locale-lækage**, og
-C157's port-analyse (`src/app/**/page.tsx` med port-regler) burde kunne se
-den — den er målet til at gøre det i næste iteration, fordi det er den
-første rigtige prøve på om C158's udvidede sæt nu ser `page.tsx`-teksten.
-**Målt først:** kør `node scripts/locale-leak.mjs --gate` og se om den
-rammer denne linje; hvis den gør, er hullet fundet og opgaven er en
-én-linjers rettelse. Hvis den *ikke* gør, er porten stadig for snæver, og
-det er den egentlige opgave. **Datagrund:** beraknare.se `/procent`
-**25.954 visninger, CTR 0,0 %, pos. 10,0** — svensk GSC's tredjestørste side.
-**MÅL:** SE baseline **25.954 v / 2 klik / CTR 0,0 % / pos. 10,0 pr.
-2026-08-29 → 2026-09-26** — måles igen 2026-10-13.
+**Målt først, på den rigtige måde.** Opgaven bad om at køre gaten og se om
+den rammer linjen. Den gjorde **ikke** det — `src/app/procent/page.tsx` stod
+med **8 fund, alle døde** (otte da-porte), og `lønsprocent` var ikke blandt
+dem. Så hullet var fundet, og opgaven var **ikke** en én-linjers rettelse.
+
+**Årsagen er én regex, og den var målt forud to gange.** Scannerens JSX-regel var
+
+```js
+const jsxRe = />([^<>{}\n]{2,200})</g;   // "bare JSX-tekst: >dansk tekst<"
+```
+
+og lækagen på `page.tsx:432` skubbede den ud på **to måder samtidig**:
+sætningen ender i `{" "}` — en `{`, som tegnklassen **ekskluderede** — og
+JSX lægger den første brødet tekst på **linjen *efter* `<p>`** — et `\n`,
+som tegnklassen også ekskluderede. Begge udelukkelser var skrevet for at
+fange *interpolationer* og *nye linjer* som ikke er copy, og de fik præcis
+Prettiers almindelige sætning som følge. **C163's målefejl (nr. 21) lå i min
+egen tidligere måling:** jeg greb først med `>([^<>{}]{2,200}?)(?=[<{])` og
+fik 968 kandidater, hvoraf de to ureviewede var ægte lækage **og** `LeasingBeregner.tsx:114` — `useState<string>('4.5')`, altså en **TypeScript-generic**, hvor `>` lukker `string` og resten ligner copy for en regel der kun kigger fremad.
+
+**Rettelsen er at forankre reglen i sit eget tag** — ikke at fjerne
+udelukkelserne, og ikke at slå dem fra:
+
+```js
+/(?<![\w$])<(?:\/[A-Za-z][\w.-]*>|[A-Za-z][\w.-]*(?:\s[^<>{}]*?)?\/?>)([^<>{}]{2,400}?)(?=[<{])/g
+```
+
+Ankoret på `<` er hele forskellen mellem copy og kode: et rigtigt tags `<`
+står efter whitespace/`(`/`{`/`,`/`;`/`=`, mens en generics `<` står efter
+et **identifier** — derfor er lookbehind på `[\w$]` hele distinktionen. **Målt
+på den nye regel: 740 kandidater, 704 døde, 36 kræver øjne, og præcis
+1 ureviewet — `lønsprocent` selv.** Ingen falske positiver, fordi false
+positive-klassen ovenfor er lukket af sammeanker.
+
+**Den synlige tekstrettelse (én linje, kun `se`):** `En lønsprocent kan du se
+som kroner her:` → **`En lönprocent kan du se som kronor här:`** — *lønprocent*
+er dansk, *lønsprocent* er norsk (samme fejlklasse som C154's
+`I_DAG`-accentfejl), og *her* er dansk, svensk er *här*. Kopien lå i
+C114's eget "Skillnad i procent mellan två tal"-afsnit, altså kun på
+beraknare.se.
+
+**Målt på rigtig server, ikke i test.** `next start` på port **3411**
+(porten verificeret fri *inden* start — målefejl nr. 15's lære), `Host:
+beraknare.se` **og** `Host: minberegner.dk`:
+
+| måling | beraknare.se | minberegner.dk |
+|---|---|---|
+| `lønsprocent` | **0** | 0 |
+| `som kroner her` | **0** | 0 |
+| `lönprocent kan du se som kronor här` | **2** | **0** |
+| `/api/health` | `status: ok` | `status: ok` |
+
+×2 = synlig tekst + RSC-flight-payload, samme fordobling C161 målte på
+`/procent`. **Kontrol for at C161's dedupe holder:** `/procent` har stadig
+**1** `>Formler</h3>`, og `/dato`, `/moms`, `/tidsberegner` har uændrede
+titler på begge domæner.
+
+**Harness — og hvorfor de 20 gamle tests var grønne gennem fire
+iterationer.** Alle plantene i `locale-leak-gate.test.ts` skrev `<p>tekst</p>`
+på **én linje** — altså præcis den form den brudte regel *kunne* se. Det er
+C115's lære i en ny form: testen reproducerede det udtryk, den skulle fange.
+Tre nye tests, **modsvejs verificeret**:
+
+1. **`flags Danish copy that ends in a {…} interpolation, on its own line`** —
+   planter den form Prettier faktisk skriver (`<p>` / copy / `{" "}` /
+   `<Link>`), i `se`-grenen af `/procent`. **FALDER mod den gamle regel**
+   (verificeret: revertet scanner → `Tests 1 failed | 21 passed`), og
+   grøn med den nye.
+2. **`does not read a TypeScript generic as JSX copy`** — isolerer min egen
+   målefejl. `æø` sidder i et **identifier** (`udbætaling`), ikke i en
+   quotet streng, så kun JSX-reglen kan se den; grøn begge veje, fordi den
+   låste den adgang den gamle regel havde.
+3. **`finds the Norwegian-on-Swedish copy that shipped on beraknare.se/procent`**
+   — læser **værtsfilen selv**, ikke en plant. Grøn nu, og ville være rød
+   samme øjeblik nogen genindsatte den.
+
+**Én ærlig bivirkning, fundet fordi testen holdt på et tal.** Den gamne
+lokale-objekt-turvidde stod på `< 700` og faldt ærligt: **593 → 739**.
+Ikke fordi reglen blev løsnet — **704 af 739 er da-port-verdiktet, de 35
+kræver-øjne er de samme 35 en mand allerede havde dømt, og `unreviewed` er
+stadig 0**. Men et tal, der skal skrives om hver gang måleren bliver skarpere,
+er en hånddrejet værdi. Den bæres derfor nu af et **forhold** —
+`dead / candidates > 0.9` (i dag 0,95): en brudt locale-udelukkelse rapporterer
+objekt-copy der *intet port-dom* har at blive dømt på, så andelen
+verdiktlaget afviser bryder sammen. Begge halvdel står i testen, og
+begrundelsen er skrevet ned, så næste iteration ikke gætter hvorfor.
+
+**Gate grøn:** build (141 sider), lint (**584 filer**), **2.606 tests / 170
+filer** (fra 2.593 / 169), `locale-leak.mjs --gate` exit 0,
+`knapgruppe-scan.mjs` 0/0, `label-a11y-scan.mjs` uændret 22/35. Rørt:
+`src/app/procent/page.tsx` (én linje), `scripts/locale-leak.mjs` (én regel),
+`src/lib/locale-leak-gate.test.ts` (+3). **Ingen beregningslogik, ingen
+dansk tekst, ingen sitemap, ingen URL ændret.**
+
+- ⏳ **VERIFICÉR DEPLOY: C163 — `src/app/procent/page.tsx` skriver
+  "lönprocent" og "här" i stedet for "lønsprocent" og "her" i den svenske
+  gren, og `scripts/locale-leak.mjs`'s JSX-regel læser nu copy der ligger på
+  linjen efter sit tag og der ender i `{" "}`.** Kode + plan i ét commit på
+  `ceo/procent-se-lakage`, squashet til `master`. Første kandidatvindue
+  **2026-09-29 12:30** (merge sker efter 07:30-batchen). Verificér **indhold**,
+  på rigtig server:
+  1. `curl -s https://beraknare.se/procent` skal have **0** fund på
+     `lønsprocent` og på `som kroner her`, og **2** fund på
+     `lönprocent kan du se som kronor här` (synlig tekst + RSC-payload).
+  2. **Kontrol mod at dansk ikke blev rørt:**
+     `curl -s https://minberegner.dk/procent` skal have **0** fund på
+     `lönprocent kan du se` og stadig **1** `>Formler</h3>` — det er C161's
+     dedupe, og dette commit rører den ikke.
+  3. `npm run test -- src/lib/locale-leak-gate.test.ts` skal give **22
+     passed** — 22, ikke 19; de tre nye er hele pointen, og test #1
+     (JSX-formen) er den der faldt mod den gamle regel.
+  4. `node scripts/locale-leak.mjs --gate` skal exit 0 med linje 1
+     **"129 filer monteres…"** og linje 2 **"739 kandidater — 704 døde, 35
+     kræver øjne (0 ureviewet)"**. `unreviewed` skal være **0** — det er
+     tallet der sagde, at hullet var lukket.
+  5. KONTROL: `https://minberegner.dk/api/health` → `status: ok`, og
+     `/dato`, `/moms`, `/tidsberegner` skal have uændrede titler på begge
+     domæner.
+

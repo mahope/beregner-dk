@@ -757,11 +757,25 @@ function scanStrings(file, weak = false) {
     found.push({ ...classify(src, raw, m.index, value), string: value });
   }
 
-  // 2. bare JSX text: >dansk tekst<
-  const jsxRe = />([^<>{}\n]{2,200})</g;
+  // 2. bare JSX text: the run of copy that opens a tag and is not another
+  // tag. C163 measured why the old `>([^<>{}\n]{2,200})<` could not see
+  // `/procent`'s own leak: the sentence ends in `her:{" "}`, and both halves
+  // of that shape escaped — `{" "}` is a `{`, which the character class
+  // excluded, and JSX puts the first run of copy on the *next* line, which
+  // the `\n` excluded. The rule is therefore anchored on the tag instead:
+  // a `<` that opens an element, its attributes, the `>`, and then the copy
+  // up to the next `<` or `{`.
+  //
+  // The anchor is what keeps this a *JSX* rule and not a `>` rule. C163's
+  // first attempt used a bare `>` and matched `useState<string>('4.5')` — a
+  // TypeScript generic, where the `>` closes `string` and the following copy
+  // is code. A real tag's `>` is preceded by its own `<`, and a TypeScript
+  // generic's `<` is preceded by an identifier — so the lookbehind on `[\w$]`
+  // is the whole difference between copy and code.
+  const jsxRe = /(?<![\w$])<(?:\/[A-Za-z][\w.-]*>|[A-Za-z][\w.-]*(?:\s[^<>]*?)?\/?>)([^<>{}]{2,400}?)(?=[<{])/g;
   while ((m = jsxRe.exec(src)) !== null) {
     if (inRanges(localeRanges, m.index)) continue;
-    const value = m[1].trim();
+    const value = m[1].replace(/\s+/g, " ").trim();
     if (value.length < 2) continue;
     if (!isDanish(value, weak)) continue;
     found.push({ ...classify(src, raw, m.index, value), string: value });

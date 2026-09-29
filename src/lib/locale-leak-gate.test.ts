@@ -82,13 +82,21 @@ describe("locale-leak scanner", () => {
     // If the locale-object exclusion broke, every labels table on the site
     // would light up — and the candidate count would jump by hundreds.
     //
-    // The bound was 250 when only the 72 components were scanned. It is now 700
-    // for 126 files, and that is the point of writing it as a number: the
-    // number moved because the scan set grew, not because the rule loosened. A
-    // broken exclusion adds every locale object on the site — thousands — so
-    // the bound has a wide margin on purpose and still fails on the real thing.
+    // The bound was 250 when only the 72 components were scanned, then 700
+    // for 126 files, and C163 moved it a third time: 593 → 739 candidates,
+    // because the JSX rule could not see copy that sits on the line after its
+    // tag or ends in `{" "}` — which is most of what Prettier writes. It moved
+    // because the scan set got sharper, not because the rule loosened: 704 of
+    // the 739 are the da-port verdict, and the other 35 are the same 35 a human
+    // had already reviewed. Unreviewed stayed at 0.
+    //
+    // The absolute number is the weak half of this assertion, so the ratio
+    // carries it: a broken exclusion reports locale-object copy that has *no*
+    // port to be judged by, so the share the verdict layer dismisses collapses.
+    // 0.9 sits under today's 0.95 and far above a broken exclusion.
     const result = scan();
-    expect(result.candidates).toBeLessThan(700);
+    expect(result.candidates).toBeLessThan(900);
+    expect(result.dead / result.candidates).toBeGreaterThan(0.9);
   });
 
   it("flags a module-scope Danish string in an SE-mounted component", () => {
@@ -445,5 +453,93 @@ describe("locale-leak scanner", () => {
     } finally {
       writeFileSync(target, original);
     }
+  });
+
+  /**
+   * C163 — the JSX rule could not see the copy that JSX actually writes.
+   *
+   * The rule was `>([^<>{}\n]{2,200})<`, and the leak on `beraknare.se/procent`
+   * defeated it twice over: its sentence ends in `{" "}` (a `{`, which the
+   * class excluded) and its first run of copy sits on the line *after* the
+   * `<p>` (a `\n`, also excluded). So `/procent` had been shipping `lønsprocent`
+   * — Norwegian — and `her` — Danish — to Swedish readers through four whole
+   * iterations of the gate, because every plant above was written as
+   * `<p>text</p>` on one line, which is the one shape the rule did catch.
+   * A test that only plants the shape the detector handles is C115's lesson
+   * repeated: it reproduces the expression instead of requiring the copy.
+   */
+  function plantInSeBranchAsJsxWritesIt(src: string, danish: string): string {
+    const re = /\{locale === "se" && \(\n/;
+    const m = re.exec(src);
+    if (!m) throw new Error("se-gren ikke fundet");
+    // `<p>` alone on its line, copy on the next, and `{" "}` closing it — the
+    // shape Prettier produces for every sentence that ends in a link.
+    const block = `        <p>\n          ${danish}:{" "}\n          <Link href="/procent">\n            svensk\n          </Link>\n        </p>\n`;
+    return `${src.slice(0, m.index + m[0].length)}${block}${src.slice(m.index + m[0].length)}`;
+  }
+
+  it("flags Danish copy that ends in a {…} interpolation, on its own line", () => {
+    const target = resolve(ROOT, "src", "app", "procent", "page.tsx");
+    const original = readFileSync(target);
+    try {
+      writeFileSync(
+        target,
+        plantInSeBranchAsJsxWritesIt(original.toString("utf8"), "En lønsprocent kan du se")
+      );
+      const failing = () =>
+        execFileSync("node", [SCRIPT, "--gate"], { cwd: ROOT, stdio: "pipe" });
+      expect(failing).toThrow();
+      expect(JSON.stringify(scan().unreviewed)).toContain("En lønsprocent kan du se");
+    } finally {
+      writeFileSync(target, original);
+    }
+  });
+
+  it("does not read a TypeScript generic as JSX copy", () => {
+    // The other half of the same fix. A bare `>` matches `useState<string>('4.5')`
+    // — the `>` closes `string` and what follows looks like copy to a rule that
+    // only looks forwards. The rule is anchored on the tag's own `<` instead,
+    // and a generic's `<` is preceded by an identifier. Without this, the fix
+    // for C163 would have traded a missed leak for a class of false ones on
+    // every `useState<T>('…')` in the repo.
+    const target = resolve(ROOT, "src", "components", "LeasingBeregner.tsx");
+    const original = readFileSync(target);
+    try {
+      const src = original.toString("utf8");
+      const anchor = /useState<string>\('30000'\)/;
+      expect(anchor.test(src)).toBe(true);
+      // The exact false positive the first attempt produced: a generic whose
+      // `>` is followed by more declarations, so a rule that only looks
+      // forwards reads the rest of the component as one long run of copy. The
+      // `æø` sits in an *identifier*, not in a quoted string, so the quoted
+      // rule cannot see it — a real leak would be caught by that one, and this
+      // plant has to isolate the JSX rule instead.
+      writeFileSync(
+        target,
+        src.replace(
+          anchor,
+          "useState<string>('30000');\n  const [udbætaling, setUdbætaling] = useState<string>('4.5');"
+        )
+      );
+      expect(() =>
+        execFileSync("node", [SCRIPT, "--gate"], { cwd: ROOT, stdio: "pipe" })
+      ).not.toThrow();
+      expect(JSON.stringify(scan().unreviewed)).not.toContain("udbætaling");
+    } finally {
+      writeFileSync(target, original);
+    }
+  });
+
+  it("finds the Norwegian-on-Swedish copy that shipped on beraknare.se/procent", () => {
+    // The host file itself, not a plant. C163's leak is fixed in `page.tsx`, so
+    // this passes now — and would have failed the moment someone reintroduced
+    // it, without anyone re-deriving a plant. The string is Norwegian
+    // (`lønsprocent`) *and* ends in Danish `her`, so it trips both halves of
+    // the same argument.
+    const target = resolve(ROOT, "src", "app", "procent", "page.tsx");
+    const src = readFileSync(target).toString("utf8");
+    const seBranch = src.slice(src.indexOf('{locale === "se" && ('));
+    expect(seBranch).not.toContain("lønsprocent");
+    expect(seBranch).not.toContain("som kroner her");
   });
 });

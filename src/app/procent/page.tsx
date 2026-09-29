@@ -429,7 +429,7 @@ export default async function ProcentPage() {
           till varandra, utan att riktningen ska betyda något.
         </p>
         <p>
-          En lønsprocent kan du se som kroner her:{" "}
+          En lönprocent kan du se som kronor här:{" "}
           <Link href="/loenstigning" className="text-blue-700 underline">
             löneökning i procent
           </Link>
