@@ -16709,3 +16709,14 @@ er værst. Se `❓ Til Mads`.
   5. Nye tests modsvejs verificeret: falder med master's kode. **Nået (26 fund).**
   6. `npm run lint`, `npm run test`, `npm run build` grønne. **Nået.**
   7. `node scripts/locale-leak.mjs --gate` exit 0 med 0 ureviewet. **Nået.**
+
+---
+
+### VERIFICÉR DEPLOY-log — nyeste først
+
+- `VERIFICÉR DEPLOY: 28 blog-/kategorititler (61-73 → ≤60 tegn) ceo/blog-kategori-titler 2026-09-29 11:56`
+  — push 11:56, før 12:30-vinduet, så første vindue er **2026-09-29 12:30**.
+  Verificér **indhold**, ikke HTTP 200: hent `/blog` og mindst tre af de otte
+  `/kategori/*` (sundhed, oekonomi, laan) og kræv `<title>` ≤ 60 tegn **og**
+  `property="og:site_name" content="MinBeregner.dk"` stadig til stede. Målet på
+  den udbyggede kode var 136/136 sider med 0 titler over 60.
