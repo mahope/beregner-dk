@@ -5,6 +5,7 @@ import { getCurrentDomainConfig, getLocale } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
 import { tidsskillnadRaekker } from "@/lib/tidszone-eksempler";
 import { usaTimerRaekker } from "@/lib/tidszone-usa-timer";
+import { usaStatRaekker } from "@/lib/tidszone-usa-stater";
 import TidszonePage from "./page";
 
 vi.mock("@/components/TidszoneBeregner", () => ({
@@ -371,6 +372,132 @@ describe("tidszone svarer på de andre klokkeslæt end kl. 12", () => {
       // Paritet mellem sprogene laases mod den anden gren, ikke mod et tal.
       const andet = getPageData("tidszone", locale === "da" ? "se" : "da")!.faqItems;
       expect(faq.length).toBe(andet.length);
+    }
+  });
+});
+
+describe("tidszone stat-tabel for USA", () => {
+  test("stat-tabellen findes i begge sprog med ni rækker og ingen i no", async () => {
+    vi.mocked(getLocale).mockResolvedValue("da");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("da"));
+    const da = renderToStaticMarkup(await TidszonePage());
+    expect(da).toContain("Når det er 12 i Danmark, er det 06 i Florida");
+
+    vi.mocked(getLocale).mockResolvedValue("se");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("se"));
+    const se = renderToStaticMarkup(await TidszonePage());
+    expect(se).toContain("När det är 12 i Sverige är det 06 i Florida");
+
+    vi.mocked(getLocale).mockResolvedValue("no");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("no"));
+    const no = renderToStaticMarkup(await TidszonePage());
+    expect(no).not.toContain("Florida");
+    expect(no).not.toContain("Kalifornien");
+  });
+
+  test("alle ni stat-navne staar i den danske og svenska tabel", async () => {
+    const forventedeDa = [
+      "Florida", "Californien", "Texas", "Washington",
+      "Georgia", "Arizona", "Colorado", "Minnesota", "Massachusetts",
+    ];
+    vi.mocked(getLocale).mockResolvedValue("da");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("da"));
+    const da = renderToStaticMarkup(await TidszonePage());
+    for (const stat of forventedeDa) expect(da).toContain(stat);
+
+    vi.mocked(getLocale).mockResolvedValue("se");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("se"));
+    const se = renderToStaticMarkup(await TidszonePage());
+    // Svensk oversaetter Californien; de otte andra hedder det samme.
+    for (const stat of forventedeDa) {
+      expect(se).toContain(stat === "Californien" ? "Kalifornien" : stat);
+    }
+    expect(se).not.toContain(">Californien<");
+  });
+
+  test("cellerne er modulets tal, laest fra tabellens rækker - ikke fra hele HTML'en", async () => {
+    // C155's laere: et grep paa hele siden taeler de samme tal ogsaa i
+    // time-tabellen, saa det kan ikke skelne stat-tabellen fra den anden.
+    vi.mocked(getLocale).mockResolvedValue("da");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("da"));
+    const html = renderToStaticMarkup(await TidszonePage());
+
+    const raekker = usaStatRaekker("da");
+    const rækkeMed = (stat: string) =>
+      html.slice(
+        html.indexOf(`<td>${stat}</td>`),
+        html.indexOf("</tr>", html.indexOf(`<td>${stat}</td>`))
+      );
+
+    for (const raekke of raekker) {
+      const celle = rækkeMed(raekke.stat);
+      expect(celle).toContain(`<td>${raekke.by}</td>`);
+      expect(celle).toContain(`<td>${raekke.vinter}</td>`);
+      expect(celle).toContain(`<td>${raekke.sommer}</td>`);
+    }
+  });
+
+  test("Arizona-undtagelsen staar i teksten med de rigtige tal", async () => {
+    vi.mocked(getLocale).mockResolvedValue("da");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("da"));
+    const da = renderToStaticMarkup(await TidszonePage());
+    // JSX bryder teksten paa nye linjer, saa assertionen laeser den
+    // sammensatte saetning - ikke en enkelt linje af markupken.
+    const daSaetning = da
+      .replace(/<!--.*?-->/g, "")
+      .replace(/<[^>]+>/g, "")
+      .replace(/\s+/g, " ");
+    expect(daSaetning).toContain(
+      "mens Phoenix står på 04 vinter og 03 sommer"
+    );
+    expect(daSaetning).toContain(
+      "flytter Denver sig med, så den står på 04 hele året"
+    );
+
+    vi.mocked(getLocale).mockResolvedValue("se");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("se"));
+    const se = renderToStaticMarkup(await TidszonePage());
+    const seSaetning = se
+      .replace(/<!--.*?-->/g, "")
+      .replace(/<[^>]+>/g, "")
+      .replace(/\s+/g, " ");
+    expect(seSaetning).toContain(
+      "medan Phoenix står på 04 vinter och 03 sommar"
+    );
+    expect(seSaetning).toContain(
+      "flyttar Denver med, så den står på 04 hela året"
+    );
+  });
+
+  test("faq'en svarer paa stat-klyngen i begge sprog, med præcis ét par pr. spørgsmål", () => {
+    for (const locale of ["da", "se"] as const) {
+      const faq = getPageData("tidszone", locale)!.faqItems;
+      const statSporgsmaal = faq.filter((f) => /Florida/.test(f.question));
+      expect(statSporgsmaal.length).toBe(1);
+      // Svaret skal naevne de fire zoner klyngen spoerger om.
+      expect(statSporgsmaal[0].answer).toContain("Eastern");
+      expect(statSporgsmaal[0].answer).toContain("Central");
+      expect(statSporgsmaal[0].answer).toContain("Pacific");
+
+      const arizona = faq.filter((f) => /Phoenix/.test(f.question));
+      expect(arizona.length).toBe(1);
+      // Svensk siger "sommar", dansk "sommer", saa aarstalet laeses via
+      // regex paa den danske del af tallene, ikke paa ordet ved siden.
+      expect(arizona[0].answer).toContain("04 vinter");
+      expect(arizona[0].answer).toMatch(/0?3 sommer|sommar/);
+
+      // Paritet mellem sprogene laeses mod den anden gren (C120's laere).
+      const andet = getPageData("tidszone", locale === "da" ? "se" : "da")!.faqItems;
+      expect(faq.length).toBe(andet.length);
+    }
+  });
+
+  test("stat-navnene ligger i keywords i begge sprog", () => {
+    for (const locale of ["da", "se"] as const) {
+      const keywords = getPageData("tidszone", locale)!.keywords.join(" ").toLowerCase();
+      for (const søgning of ["florida", "miami", "texas", "california", "arizona"]) {
+        expect(keywords).toContain(søgning);
+      }
     }
   });
 });

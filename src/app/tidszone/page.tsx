@@ -8,6 +8,7 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import RelatedCalculators from "@/components/RelatedCalculators";
 import RelateredeArtikler from "@/components/RelateredeArtikler";
 import { TIDSZONER, tidszoneRækker } from "@/lib/tidszone-reference";
+import { usaStatAntal, usaStatRaekker } from "@/lib/tidszone-usa-stater";
 import {
   TIDSPUNKTER,
   usaTimerAntal,
@@ -174,6 +175,53 @@ export default async function TidszonePage() {
         </div>
       )}
 
+      {/* Svarer på "hvad er klokken i Florida/Texas/Californien …" */}
+      {locale === "da" && (
+        <div className="mb-8 rounded-2xl border border-blue-100 bg-blue-50 p-6 dark:border-blue-900 dark:bg-blue-900/20">
+          <h2 className="text-xl font-bold mb-2">
+            Når det er 12 i Danmark, er det 06 i Florida
+          </h2>
+          <p className="mb-4">
+            Når man spørger "hvad er klokken i USA", er det ofte en <em>stat</em> man
+            mener — ikke en by. Derfor er her klokken i {usaStatAntal} af de stater, folk
+            søger på, når det er 12 i Danmark. USA har fire tidszoner: <strong>Eastern</strong>{" "}
+            (6 timer bagud), <strong>Central</strong> (7 timer bagud), <strong>Mountain</strong>{" "}
+            (8 timer bagud) og <strong>Pacific</strong> (9 timer bagud). Florida og
+            Georgia ligger i Eastern som New York, Texas og Minnesota i Central som
+            Chicago, Californien og Washington i Pacific som Los Angeles.
+          </p>
+          <div className="overflow-x-auto">
+            <table>
+              <thead>
+                <tr>
+                  <th>Stat</th>
+                  <th>Samme zone som</th>
+                  <th>Vintertid (kl. 12)</th>
+                  <th>Sommertid (kl. 12)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {usaStatRaekker().map((raekke) => (
+                  <tr key={raekke.stat}>
+                    <td>{raekke.stat}</td>
+                    <td>{raekke.by}</td>
+                    <td>{raekke.vinter}</td>
+                    <td>{raekke.sommer}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="mt-4 text-sm text-gray-600 dark:text-gray-300">
+            <strong>Arizona er undtagelsen.</strong> Phoenix ligger i Mountain Time som
+            Denver, men Arizona undtaget fra sommertid siden 1967. Når Danmark går på
+            sommertid flytter Denver sig med, så den står på 04 hele året, mens Phoenix
+            står på 04 vinter og 03 sommer. Det er den eneste stat i tabellen, hvor de to
+            sidste kolonner er forskellige.
+          </p>
+        </div>
+      )}
+
       {locale === "se" && (
         <div className="mb-8 rounded-2xl border border-blue-100 bg-blue-50 p-6 dark:border-blue-900 dark:bg-blue-900/20">
           <h2 className="text-xl font-bold mb-2">När det är 12 i Sverige är det 06 i New York</h2>
@@ -258,6 +306,54 @@ export default async function TidszonePage() {
             också sommarvärden — endast under de få dagar då USA byter en vecka tidigare
             eller senare än Sverige kan de avvika en timme. Använd tidszonsberäknaren för
             ett exakt klockslag på ett godtyckligt datum.
+          </p>
+        </div>
+      )}
+
+      {/* Svarar på "vad är klockan i Florida/Texas/Kalifornien …" */}
+      {locale === "se" && (
+        <div className="mb-8 rounded-2xl border border-blue-100 bg-blue-50 p-6 dark:border-blue-900 dark:bg-blue-900/20">
+          <h2 className="text-xl font-bold mb-2">
+            När det är 12 i Sverige är det 06 i Florida
+          </h2>
+          <p className="mb-4">
+            När man frågar "vad är klockan i USA" menar man ofta en <em>delstat</em> —
+            inte en stad. Därför visas klockan i {usaStatAntal} av de delstater folk söker
+            på, när det är 12 i Sverige. USA har fyra tidszoner: <strong>Eastern</strong>{" "}
+            (6 timmar efter), <strong>Central</strong> (7 timmar efter),{" "}
+            <strong>Mountain</strong> (8 timmar efter) och <strong>Pacific</strong> (9
+            timmar efter). Florida och Georgia ligger i Eastern som New York, Texas och
+            Minnesota i Central som Chicago, Kalifornien och Washington i Pacific som Los
+            Angeles.
+          </p>
+          <div className="overflow-x-auto">
+            <table>
+              <thead>
+                <tr>
+                  <th>Delstat</th>
+                  <th>Samma zon som</th>
+                  <th>Vintertid (kl. 12)</th>
+                  <th>Sommartid (kl. 12)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {usaStatRaekker("se").map((raekke) => (
+                  <tr key={raekke.stat}>
+                    <td>{raekke.stat}</td>
+                    <td>{raekke.by}</td>
+                    <td>{raekke.vinter}</td>
+                    <td>{raekke.sommer}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="mt-4 text-sm text-gray-600 dark:text-gray-300">
+            <strong>Arizona är undtagaget.</strong> Phoenix ligger i Mountain Time som
+            Denver, men Arizona är undtaget från sommartid sedan 1967. När Sverige går på
+            sommartid flyttar Denver med, så den står på 04 hela året, medan Phoenix står
+            på 04 vinter och 03 sommar. Det är den enda delstat i tabellen där de två
+            sista kolumnerna skiljer sig åt.
           </p>
         </div>
       )}

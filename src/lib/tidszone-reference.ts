@@ -18,6 +18,15 @@
  * - Toronto er UTC-5/-4 ligesom New York, mens Bangkok er fast UTC+7 og
  *   Denpasar (Bali) fast UTC+8, jf. IANA America/Toronto, Asia/Bangkok og
  *   Asia/Makassar.
+ * - Denver er Mountain Time (UTC-7/-6), den fjerde amerikanske zone der
+ *   manglede, og Phoenix er UTC-7 hele året fordi Arizona helt ud undtaget
+ *   fra DST i 1967, jf. IANA America/Denver og America/Phoenix. Phoenix er den
+ *   eneste amerikanske by i tabellen uden sommertid, saa dens to kolonner
+ *   adskiller sig om sommeren — det er grunden til at stat-tabellen har både
+ *   en vinter- og en sommerspalte.
+ * - Miami og Boston ligger i Eastern Time ligesom New York (UTC-5/-4), jf.
+ *   IANA America/New_York; de er her fordi autocomplete spørger om dem
+ *   ("klokken i usa miami" nr. 6 DA, "… boston usa nu" nr. 4).
  *
  * Værdierne bruges kun til at vise "hvad er klokken, når det er 12 i
  * Danmark/Sverige". Den præcise konvertering bruger TidszoneBeregneren.
@@ -45,8 +54,12 @@ export const TIDSZONER: readonly TidszoneInfo[] = [
   { by: "Athen", bySe: "Aten", utcVinter: 2, utcSommer: 3 },
   { by: "Heraklion (Kreta)", utcVinter: 2, utcSommer: 3 },
   { by: "New York", utcVinter: -5, utcSommer: -4 },
+  { by: "Miami", utcVinter: -5, utcSommer: -4 },
+  { by: "Boston", utcVinter: -5, utcSommer: -4 },
   { by: "Toronto", utcVinter: -5, utcSommer: -4 },
   { by: "Chicago", utcVinter: -6, utcSommer: -5 },
+  { by: "Denver", utcVinter: -7, utcSommer: -6 },
+  { by: "Phoenix", utcVinter: -7 },
   { by: "Los Angeles", utcVinter: -8, utcSommer: -7 },
   { by: "Sao Paulo", utcVinter: -3 },
   { by: "Madrid", utcVinter: 1, utcSommer: 2 },
