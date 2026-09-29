@@ -20,7 +20,7 @@ const ROUTE_FOR = { da: DageTilPage, se: DagarTillPage } as const;
 
 vi.mock("@/components/Breadcrumbs", () => ({ default: () => null }));
 vi.mock("@/components/FAQ", () => ({ default: () => null }));
-vi.mock("@/components/StructuredData", () => ({ FAQSchema: () => null }));
+vi.mock("@/components/StructuredData", () => ({ FAQSchema: () => null, ArticleSchema: () => null }));
 vi.mock("@/lib/get-locale", () => ({ getCurrentDomainConfig: vi.fn() }));
 
 const lastModified = new Date("2026-09-25T00:00:00.000Z");

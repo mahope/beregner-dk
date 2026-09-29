@@ -66,6 +66,7 @@ vi.mock("@/components/Breadcrumbs", () => ({ default: () => null }));
 vi.mock("@/components/StructuredData", () => ({
   CalculatorSchema: () => null,
   FAQSchema: () => null,
+  ArticleSchema: () => null,
 }));
 // `FAQ` og `RelatedCalculators` er bevidst *ikke* mocket: de er selve
 // årsagen, så en mock ville skjule fejlen og gøre testen vakuum-grøn.
