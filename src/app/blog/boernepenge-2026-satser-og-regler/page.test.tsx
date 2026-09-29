@@ -4,7 +4,7 @@ import { BOERNE_SATSER_2026, udbetalingsdatoerAar } from "@/lib/borneungeydelse"
 import Boernepenge2026Page from "./page";
 
 vi.mock("@/components/FAQ", () => ({ default: () => null }));
-vi.mock("@/components/StructuredData", () => ({ FAQSchema: () => null }));
+vi.mock("@/components/StructuredData", () => ({ FAQSchema: () => null, ArticleSchema: () => null }));
 
 const html = () => renderToStaticMarkup(<Boernepenge2026Page />);
 

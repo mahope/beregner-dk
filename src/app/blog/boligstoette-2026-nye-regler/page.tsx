@@ -1,4 +1,5 @@
 import { FAQSchema } from "@/components/StructuredData";
+import BlogArticleSchema from "@/components/BlogArticleSchema";
 import { formatNumber } from "@/lib/format";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { BOLIGSTOETTE_2026 } from "@/lib/satser-2026";
@@ -81,6 +82,11 @@ const faqItems = [
 export default function Boligstoette2026Page() {
   return (
     <div className="mx-auto max-w-3xl">
+      <BlogArticleSchema
+        slug="boligstoette-2026-nye-regler"
+        title="Boligstøtte 2026: Maksima, formue og beregning"
+        description="Se boligstøtte-standardmaksima for 2026, formuegrænser og hvilke oplysninger Udbetaling Danmark bruger. Se standardintervallet og fortsæt hos myndigheden."
+      />
       <FAQSchema items={faqItems} />
 
       <nav className="mb-6 text-sm">

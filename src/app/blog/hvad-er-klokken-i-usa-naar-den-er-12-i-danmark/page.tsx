@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
+import BlogArticleSchema from "@/components/BlogArticleSchema";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { OG_IMAGE } from "@/lib/page-helpers";
 import { blogVerdensAntal, blogVerdensRaekker } from "@/lib/tidszone-blog-lander";
@@ -91,6 +92,11 @@ const faqItems = [
 export default function TidszoneUsaPage() {
   return (
     <div className="max-w-3xl mx-auto">
+      <BlogArticleSchema
+        slug="hvad-er-klokken-i-usa-naar-den-er-12-i-danmark"
+        title="Når det er 12 i Danmark, er det 06 i New York, 05 i Chicago, 04 i Denver og 03 i Los Angeles. Se hele tabellen for USA og resten af verden — med sommertid."
+        description="Når det er 12 i Danmark, er det 06 i New York, 05 i Chicago, 04 i Denver og 03 i Los Angeles. Se hele tabellen for USA og resten af verden — med sommertid."
+      />
       <FAQSchema items={faqItems} />
 
       <nav className="text-sm mb-6" aria-label="Brødkrumme">

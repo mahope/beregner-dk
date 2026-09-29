@@ -5,7 +5,7 @@ import { getCurrentDomainConfig, getLocale } from "@/lib/get-locale";
 import { SATSER_2026 } from "@/lib/satser-2026";
 import ArveafgiftGuidePage, { generateMetadata } from "./page";
 
-vi.mock("@/components/StructuredData", () => ({ FAQSchema: () => null }));
+vi.mock("@/components/StructuredData", () => ({ FAQSchema: () => null, ArticleSchema: () => null }));
 vi.mock("@/lib/get-locale", () => ({
   getLocale: vi.fn(),
   getCurrentDomainConfig: vi.fn(),

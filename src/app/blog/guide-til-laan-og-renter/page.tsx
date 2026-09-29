@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
+import BlogArticleSchema from "@/components/BlogArticleSchema";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { OG_IMAGE } from "@/lib/page-helpers";
 
@@ -60,6 +61,11 @@ const faqItems = [
 export default function LaanOgRenterGuidePage() {
   return (
     <div className="max-w-3xl mx-auto">
+      <BlogArticleSchema
+        slug="guide-til-laan-og-renter"
+        title="Guide til lån og renter: Forstå hvad du betaler"
+        description="Alt om lån i Danmark 2026: Annuitetslån vs. serielån, fast vs. variabel rente, ÅOP forklaret. Lær at sammenligne lån og find det billigste."
+      />
       <FAQSchema items={faqItems} />
 
       <nav className="text-sm text-gray-500 dark:text-gray-400 mb-6">

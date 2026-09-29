@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
+import BlogArticleSchema from "@/components/BlogArticleSchema";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { OG_IMAGE } from "@/lib/page-helpers";
 
@@ -58,6 +59,11 @@ const faqItems = [
 export default function ElpriserGuidePage() {
   return (
     <div className="max-w-3xl mx-auto">
+      <BlogArticleSchema
+        slug="elpriser-2026-beregn-dit-forbrug"
+        title="Elpriser 2026: Sådan beregner du dit elforbrug"
+        description="Guide til elpriser i 2026: Hvad koster strøm, hvordan læser du din elregning, og hvordan sparer du penge? Se gennemsnitligt forbrug og beregn dine udgifter."
+      />
       <FAQSchema items={faqItems} />
 
       <nav className="text-sm text-gray-500 dark:text-gray-400 mb-6">

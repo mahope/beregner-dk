@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
+import BlogArticleSchema from "@/components/BlogArticleSchema";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { formatNumber } from "@/lib/format";
 import {
@@ -130,6 +131,11 @@ const faqItems = [
 export default function Boernepenge2026Page() {
   return (
     <div className="max-w-3xl mx-auto">
+      <BlogArticleSchema
+        slug="boernepenge-2026-satser-og-regler"
+        title="Børnepenge 2026: 5.370 kr./kvartal (0-2 år)"
+        description="Børnepenge 2026: 5.370 kr./kvartal (0-2 år), 4.248 (3-6 år), 3.342 (7-14 år) og 1.114 kr./måned (15-17 år). Sådan deles ydelsen mellem jer."
+      />
       <FAQSchema items={faqItems} />
 
       <nav className="text-sm text-gray-500 dark:text-gray-400 mb-4">

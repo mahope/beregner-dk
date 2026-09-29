@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
+import BlogArticleSchema from "@/components/BlogArticleSchema";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { OG_IMAGE } from "@/lib/page-helpers";
 
@@ -54,6 +55,11 @@ const faqItems = [
 export default function MomsGuidePage() {
   return (
     <div className="max-w-3xl mx-auto">
+      <BlogArticleSchema
+        slug="hvordan-beregner-man-moms"
+        title="Hvordan beregner man moms? En komplet guide"
+        description="Lær alt om dansk moms: Hvordan du tillægger og fratrækker 25% moms, hvornår du skal momsregistreres, og hvad der er momsfrit."
+      />
       <FAQSchema items={faqItems} />
 
       {/* Breadcrumb */}

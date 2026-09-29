@@ -1,4 +1,5 @@
 import { FAQSchema } from "@/components/StructuredData";
+import BlogArticleSchema from "@/components/BlogArticleSchema";
 import { formatNumber } from "@/lib/format";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { RENTEFRADRAG_2026, SATSER_2026, SKATTEFRADRAG_2026 } from "@/lib/satser-2026";
@@ -72,6 +73,11 @@ const faqItems = [
 export default function FradragGuidePage() {
   return (
     <div className="max-w-3xl mx-auto">
+      <BlogArticleSchema
+        slug="fradrag-2026-komplet-guide"
+        title="Fradrag 2026: Komplet guide til skattefradrag i Danmark"
+        description="Overblik over alle skattefradrag i 2026: Rentefradrag, kørselsfradrag, håndværkerfradrag, fagforening og mere. Se hvad du kan trække fra."
+      />
       <FAQSchema items={faqItems} />
 
       <nav className="text-sm text-gray-500 dark:text-gray-400 mb-6">

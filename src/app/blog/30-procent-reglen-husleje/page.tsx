@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
+import BlogArticleSchema from "@/components/BlogArticleSchema";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { OG_IMAGE } from "@/lib/page-helpers";
 
@@ -53,6 +54,11 @@ const faqItems = [
 export default function HuslejeGuidePage() {
   return (
     <div className="max-w-3xl mx-auto">
+      <BlogArticleSchema
+        slug="30-procent-reglen-husleje"
+        title="30% reglen: Hvor meget bør du bruge på husleje?"
+        description="Forstå 30% reglen for husleje. Lær hvordan du budgetterer din bolig korrekt baseret på din nettoindkomst."
+      />
       <FAQSchema items={faqItems} />
 
       <nav className="text-sm mb-6">

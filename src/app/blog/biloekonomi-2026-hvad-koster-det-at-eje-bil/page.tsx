@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
+import BlogArticleSchema from "@/components/BlogArticleSchema";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { elbilSammenligning } from "@/lib/braendstof";
 import { OG_IMAGE } from "@/lib/page-helpers";
@@ -69,6 +70,11 @@ const faqItems = [
 export default function BiloekonomiPage() {
   return (
     <div className="max-w-3xl mx-auto">
+      <BlogArticleSchema
+        slug="biloekonomi-2026-hvad-koster-det-at-eje-bil"
+        title="Biløkonomi 2026: Hvad koster det at eje bil?"
+        description="Komplet guide til biløkonomi i 2026: Registreringsafgift, grøn ejerafgift, forsikring, brændstof, værditab og finansiering. Få det fulde overblik over, hvad din bil koster om året."
+      />
       <FAQSchema items={faqItems} />
 
       {/* Breadcrumb */}

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
+import BlogArticleSchema from "@/components/BlogArticleSchema";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { elbilSammenligning } from "@/lib/braendstof";
 import { OG_IMAGE } from "@/lib/page-helpers";
@@ -64,6 +65,11 @@ const faqItems = [
 export default function SparBraendstofGuidePage() {
   return (
     <div className="max-w-3xl mx-auto">
+      <BlogArticleSchema
+        slug="spar-penge-paa-braendstof"
+        title="Spar penge på brændstof: Tips til billigere kørsel"
+        description="Praktiske tips til at spare på benzin, diesel og el. Kør 10-20% billigere med køreteknik, ruteplanlægning og vedligeholdelse. Priser 2026."
+      />
       <FAQSchema items={faqItems} />
 
       <nav className="text-sm text-gray-500 dark:text-gray-400 mb-6">

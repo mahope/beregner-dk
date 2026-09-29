@@ -9,8 +9,7 @@ import DagpengePage from "./page";
 
 vi.mock("@/components/StructuredData", () => ({
   CalculatorSchema: () => null,
-  FAQSchema: () => null,
-}));
+  FAQSchema: () => null, ArticleSchema: () => null }));
 vi.mock("@/components/ads/AdBanner", () => ({ InlineAd: () => null }));
 vi.mock("@/components/Sidebar", () => ({ default: () => null }));
 vi.mock("@/components/DagpengeBeregner", () => ({ default: () => null }));

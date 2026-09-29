@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
+import BlogArticleSchema from "@/components/BlogArticleSchema";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { OG_IMAGE } from "@/lib/page-helpers";
 
@@ -69,6 +70,11 @@ const faqItems = [
 export default function KvadratmeterGuidePage() {
   return (
     <div className="max-w-3xl mx-auto">
+      <BlogArticleSchema
+        slug="kvadratmeter-saadan-regner-du-ud"
+        title="Hvordan regner man kvadratmeter ud? Guide med eksempler"
+        description="Areal = længde × bredde. Sådan regner du kvadratmeter ud på vægge, gulv og i rum — med eksempler, materialespild og BBR-areal."
+      />
       <FAQSchema items={faqItems} />
 
       {/* Breadcrumb */}

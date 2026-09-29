@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
+import BlogArticleSchema from "@/components/BlogArticleSchema";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { SU_2026 } from "@/lib/satser-2026";
 import { OG_IMAGE } from "@/lib/page-helpers";
@@ -60,6 +61,11 @@ const faqItems = [
 export default function PrivatoekonomieGuidePage() {
   return (
     <div className="max-w-3xl mx-auto">
+      <BlogArticleSchema
+        slug="privatoekonomi-for-unge"
+        title="Privatøkonomi for unge: 5 beregnere du skal kende"
+        description="Guide til privatøkonomi for unge: SU-beregning, budget, husleje, opsparing og skat. 5 gratis beregnere der hjælper dig med at få styr på økonomien."
+      />
       <FAQSchema items={faqItems} />
 
       <nav className="text-sm text-gray-500 dark:text-gray-400 mb-6" aria-label="Brødkrumme">

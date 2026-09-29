@@ -16,8 +16,7 @@ vi.mock("@/components/RelatedCalculators", () => ({ default: () => null }));
 vi.mock("@/components/RelateredeArtikler", () => ({ default: () => null }));
 vi.mock("@/components/StructuredData", () => ({
   CalculatorSchema: () => null,
-  FAQSchema: () => null,
-}));
+  FAQSchema: () => null, ArticleSchema: () => null }));
 
 vi.mock("@/lib/get-locale", () => ({
   getLocale: vi.fn(),

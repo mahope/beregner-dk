@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
+import BlogArticleSchema from "@/components/BlogArticleSchema";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { OG_IMAGE } from "@/lib/page-helpers";
 
@@ -69,6 +70,11 @@ const faqItems = [
 export default function FeriepengeGuidePage() {
   return (
     <div className="max-w-3xl mx-auto">
+      <BlogArticleSchema
+        slug="guide-feriepenge-hvornaar-og-hvor-meget"
+        title="Guide: Feriepenge - Hvornår og Hvor Meget?"
+        description="Komplet guide til feriepenge i 2026: Hvornår får du dem udbetalt? Hvor meget får du? Lær om ferieåret, samtidighedsferie, og beregn dine egne feriepenge."
+      />
       <FAQSchema items={faqItems} />
 
       <nav className="text-sm mb-6">

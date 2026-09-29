@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
+import BlogArticleSchema from "@/components/BlogArticleSchema";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { OG_IMAGE } from "@/lib/page-helpers";
 
@@ -53,6 +54,11 @@ const faqItems = [
 export default function TimeprisGuidePage() {
   return (
     <div className="max-w-3xl mx-auto">
+      <BlogArticleSchema
+        slug="saadan-finder-du-din-timepris-som-freelancer"
+        title="Sådan finder du din timepris som freelancer"
+        description="Lær at beregne den rigtige timepris som freelancer. Trin-for-trin guide til at sætte en fair pris der dækker alle dine omkostninger."
+      />
       <FAQSchema items={faqItems} />
 
       <nav className="text-sm mb-6">

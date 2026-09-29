@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
+import BlogArticleSchema from "@/components/BlogArticleSchema";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { OG_IMAGE } from "@/lib/page-helpers";
 
@@ -58,6 +59,11 @@ const faqItems = [
 export default function ReelTimeloenPage() {
   return (
     <div className="max-w-3xl mx-auto">
+      <BlogArticleSchema
+        slug="saadan-beregner-du-din-reelle-timeloen"
+        title="Sådan beregner du din reelle timeløn"
+        description="Lær at beregne din faktiske timeløn inkl. alle skjulte goder som pension, frokost og ferie. Se hvad du virkelig tjener per time."
+      />
       <FAQSchema items={faqItems} />
 
       <nav className="text-sm mb-6">

@@ -6,7 +6,7 @@ import { adoption, flerling, flerlingUgevaerdi, indlaeggelse } from "@/lib/barse
 import Barsel2026Page from "./page";
 
 vi.mock("@/components/FAQ", () => ({ default: () => null }));
-vi.mock("@/components/StructuredData", () => ({ FAQSchema: () => null }));
+vi.mock("@/components/StructuredData", () => ({ FAQSchema: () => null, ArticleSchema: () => null }));
 
 const markup = () => renderToStaticMarkup(<Barsel2026Page />);
 const f = flerling();

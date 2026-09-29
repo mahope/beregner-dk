@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
+import BlogArticleSchema from "@/components/BlogArticleSchema";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { formatNumber } from "@/lib/format";
 import { SATSER_2026, SKATTEFRADRAG_2026 } from "@/lib/satser-2026";
@@ -40,11 +41,14 @@ const MAKS_STATSSKAT =
 const MAKS_MARGINALSKAT =
   MAKS_STATSSKAT + SATSER_2026.kommuneskatSnit + SATSER_2026.kirkeskatSnit;
 
+const ARTIKEL_TITEL = `Skat 2026: personfradrag ${da(SATSER_2026.personfradrag)} kr, bundskat ${pct(SATSER_2026.bundskat)} %`;
+const ARTIKEL_BESKRIVELSE = `De vigtigste skattesatser for 2026: AM-bidrag ${pct(SATSER_2026.amBidrag)} %, personfradrag ${da(SATSER_2026.personfradrag)} kr, bundskat ${pct(SATSER_2026.bundskat)} %, topskat fra ${da(SATSER_2026.topskatGraense)} kr og beskæftigelsesfradrag ${pct(SATSER_2026.beskaeftigelsesfradragPct)} %. Med regneeksempel på 40.000 kr i løn.`;
+
 export async function generateMetadata(): Promise<Metadata> {
   const dc = await getCurrentDomainConfig();
   const baseUrl = dc.baseUrl;
-  const title = `Skat 2026: personfradrag ${da(SATSER_2026.personfradrag)} kr, bundskat ${pct(SATSER_2026.bundskat)} %`;
-  const description = `De vigtigste skattesatser for 2026: AM-bidrag ${pct(SATSER_2026.amBidrag)} %, personfradrag ${da(SATSER_2026.personfradrag)} kr, bundskat ${pct(SATSER_2026.bundskat)} %, topskat fra ${da(SATSER_2026.topskatGraense)} kr og beskæftigelsesfradrag ${pct(SATSER_2026.beskaeftigelsesfradragPct)} %. Med regneeksempel på 40.000 kr i løn.`;
+  const title = ARTIKEL_TITEL;
+  const description = ARTIKEL_BESKRIVELSE;
 
   return {
     title: { absolute: title },
@@ -100,6 +104,11 @@ const faqItems = [
 export default function Skat2026GuidePage() {
   return (
     <div className="max-w-3xl mx-auto">
+      <BlogArticleSchema
+        slug="skat-2026-alt-du-skal-vide"
+        title={ARTIKEL_TITEL}
+        description={ARTIKEL_BESKRIVELSE}
+      />
       <FAQSchema items={faqItems} />
 
       <nav className="text-sm text-gray-500 dark:text-gray-400 mb-6">

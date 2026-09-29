@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
+import BlogArticleSchema from "@/components/BlogArticleSchema";
 import { InlineAd } from "@/components/ads/AdBanner";
 import { formatNumber } from "@/lib/format";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
@@ -82,6 +83,11 @@ const faqItems = [
 export default function PensionGuidePage() {
   return (
     <div className="max-w-3xl mx-auto">
+      <BlogArticleSchema
+        slug="pension-hvor-meget-skal-du-spare-op"
+        title="Pension: Hvor Meget Skal Du Spare Op? Komplet Guide 2026"
+        description="Hvor meget skal du spare op til pension? Lær om tommelfingerregler, beregn dit behov, og forstå de tre pensionssøjler. Gratis pensionsberegner inkluderet."
+      />
       <FAQSchema items={faqItems} />
 
       <nav className="text-sm mb-6">

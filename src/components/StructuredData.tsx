@@ -1,6 +1,7 @@
 // JSON-LD Structured Data Components for SEO
 
 import { getDomainConfig } from "@/lib/domain-config";
+import { OG_IMAGE_URL } from "@/lib/page-helpers";
 
 interface FAQItem {
   question: string;
@@ -133,6 +134,64 @@ export function BreadcrumbSchema({ items }: BreadcrumbSchemaProps) {
       name: item.name,
       ...(item.url ? { item: item.url } : {}),
     })),
+  };
+
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+    />
+  );
+}
+
+interface ArticleSchemaProps {
+  title: string;
+  description: string;
+  url: string;
+  /** ISO, fx "2026-02-17". */
+  datePublished: string;
+  /** ISO eller `null` — sender ikke `dateModified` hvis indlægget ikke viser en opdatering. */
+  dateModified?: string | null;
+  category?: string;
+}
+
+export function ArticleSchema({
+  title,
+  description,
+  url,
+  datePublished,
+  dateModified,
+  category = "Guide",
+}: ArticleSchemaProps) {
+  const pageUrl = new URL(url);
+  const domainConfig = getDomainConfig(pageUrl.hostname);
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "@id": `${url}#artikel`,
+    mainEntityOfPage: { "@type": "WebPage", "@id": url },
+    headline: title,
+    description,
+    url,
+    inLanguage: domainConfig.hreflangCode,
+    datePublished,
+    ...(dateModified ? { dateModified } : {}),
+    articleSection: category,
+    image: `${domainConfig.baseUrl}${OG_IMAGE_URL}`,
+    author: {
+      "@type": "Organization",
+      name: domainConfig.siteName,
+      url: domainConfig.baseUrl,
+    },
+    publisher: {
+      "@type": "Organization",
+      name: domainConfig.siteName,
+      url: domainConfig.baseUrl,
+      logo: {
+        "@type": "ImageObject",
+        url: `${domainConfig.baseUrl}/icon.svg`,
+      },
+    },
   };
 
   return (

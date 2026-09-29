@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
+import BlogArticleSchema from "@/components/BlogArticleSchema";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { OG_IMAGE } from "@/lib/page-helpers";
 
@@ -68,6 +69,11 @@ const faqItems = [
 export default function Boligsalg2026GuidePage() {
   return (
     <div className="max-w-3xl mx-auto">
+      <BlogArticleSchema
+        slug="boligsalg-2026-guide-til-omkostninger-og-provenu"
+        title="Boligsalg 2026: Guide til omkostninger og salgsprovenu"
+        description="Komplet guide til boligsalg i 2026: Hvad koster en ejendomsmægler? Hvor meget koster energimærke, tilstandsrapport og ejerskifteforsikring? Beregn dit nettoprovenu med vores gratis boligsalgsberegner."
+      />
       <FAQSchema items={faqItems} />
 
       <nav className="text-sm text-gray-500 dark:text-gray-400 mb-4">

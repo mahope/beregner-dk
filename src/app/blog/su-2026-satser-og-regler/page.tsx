@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
+import BlogArticleSchema from "@/components/BlogArticleSchema";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { SU_2026 } from "@/lib/satser-2026";
 import { OG_IMAGE } from "@/lib/page-helpers";
@@ -75,6 +76,11 @@ const faqItems = [
 export default function SU2026GuidePage() {
   return (
     <div className="max-w-3xl mx-auto">
+      <BlogArticleSchema
+        slug="su-2026-satser-og-regler"
+        title="SU 2026: 7.426 kr. pr. måned udeboende"
+        description="SU 2026: udeboende får 7.426 kr. pr. måned, hjemmeboende 1.154-3.202 kr. Fribeløb fra 15.297 kr., SU-lån op til 3.799 kr. Alle tal fra su.dk."
+      />
       <FAQSchema items={faqItems} />
 
       <nav className="text-sm text-gray-500 dark:text-gray-400 mb-6" aria-label="Brødkrumme">

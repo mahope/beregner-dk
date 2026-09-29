@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
+import BlogArticleSchema from "@/components/BlogArticleSchema";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { OG_IMAGE } from "@/lib/page-helpers";
 
@@ -69,6 +70,11 @@ const faqItems = [
 export default function BMIBoernGuidePage() {
   return (
     <div className="max-w-3xl mx-auto">
+      <BlogArticleSchema
+        slug="bmi-for-boern-saadan-tjekker-du"
+        title="BMI for Børn - Sådan Tjekker Du (Komplet Guide 2026)"
+        description="BMI for børn skal vurderes med alders- og kønsspecifikke percentiler. Se formlen, WHO's væksttabeller og eksempler på 5., 50., 85. og 95. percentil."
+      />
       <FAQSchema items={faqItems} />
 
       <nav className="text-sm mb-6">

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
+import BlogArticleSchema from "@/components/BlogArticleSchema";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { OG_IMAGE } from "@/lib/page-helpers";
 
@@ -58,6 +59,11 @@ const faqItems = [
 export default function BoliglånGuidePage() {
   return (
     <div className="max-w-3xl mx-auto">
+      <BlogArticleSchema
+        slug="boliglaan-2026-renter-og-afdrag"
+        title="Boliglån 2026: Renter, afdrag og hvad du har råd til"
+        description="Komplet guide til boliglån i 2026: Aktuelle renter, realkreditlån vs. banklån, fast vs. variabel rente og hvad du har råd til. Beregn din boliglånsydelse."
+      />
       <FAQSchema items={faqItems} />
 
       <nav className="text-sm text-gray-500 dark:text-gray-400 mb-6">

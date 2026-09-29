@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
+import BlogArticleSchema from "@/components/BlogArticleSchema";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { OG_IMAGE } from "@/lib/page-helpers";
 
@@ -57,6 +58,11 @@ const faqItems = [
 export default function BoligkoebGuidePage() {
   return (
     <div className="max-w-3xl mx-auto">
+      <BlogArticleSchema
+        slug="koeb-af-bolig-2026-omkostninger"
+        title="Køb af bolig 2026: Alle omkostninger du skal kende"
+        description="Komplet guide til boligkøb i 2026: Tinglysningsafgift, advokat, udbetaling, ejendomsværdiskat og alle skjulte omkostninger. Se det fulde billede."
+      />
       <FAQSchema items={faqItems} />
 
       <nav className="text-sm text-gray-500 dark:text-gray-400 mb-6">

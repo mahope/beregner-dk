@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
+import BlogArticleSchema from "@/components/BlogArticleSchema";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { OG_IMAGE } from "@/lib/page-helpers";
 
@@ -67,6 +68,11 @@ const faqItems = [
 export default function LeasingAfBilPage() {
   return (
     <div className="max-w-3xl mx-auto">
+      <BlogArticleSchema
+        slug="leasing-af-bil-2026-pris-og-guide"
+        title="Leasing af bil 2026: Pris, fordele, ulemper og guide"
+        description="Komplet guide til leasing af bil i 2026: Privat leasing vs. billån, typiske priser, fordele og ulemper, km-grænser og hvordan du finder det bedste tilbud."
+      />
       <FAQSchema items={faqItems} />
 
       <nav className="text-sm text-gray-500 dark:text-gray-400 mb-4">

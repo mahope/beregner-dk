@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
+import BlogArticleSchema from "@/components/BlogArticleSchema";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { OG_IMAGE } from "@/lib/page-helpers";
 
@@ -67,6 +68,11 @@ const faqItems = [
 export default function MaanedsbudgetGuidePage() {
   return (
     <div className="max-w-3xl mx-auto">
+      <BlogArticleSchema
+        slug="maanedsbudget-2026-komplet-guide"
+        title="Månedsbudget 2026 - Komplet guide til privatøkonomi"
+        description="Komplet guide til at lave et månedsbudget i 2026: Faste og variable udgifter, 50/30/20-reglen, tommelfingerregler for bolig og opsparing. Få styr på din økonomi."
+      />
       <FAQSchema items={faqItems} />
 
       <nav className="text-sm text-gray-500 dark:text-gray-400 mb-4">

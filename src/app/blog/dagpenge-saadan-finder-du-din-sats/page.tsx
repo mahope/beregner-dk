@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
+import BlogArticleSchema from "@/components/BlogArticleSchema";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { formatNumber } from "@/lib/format";
 import { DAGPENGE_2026, SATSER_2026 } from "@/lib/satser-2026";
@@ -99,6 +100,11 @@ const faqItems = [
 export default function DagpengeGuidePage() {
   return (
     <div className="max-w-3xl mx-auto">
+      <BlogArticleSchema
+        slug="dagpenge-saadan-finder-du-din-sats"
+        title="Dagpenge 2026: Max sats er 22.041 kr. pr. måned"
+        description="dagpenge 2026"
+      />
       <FAQSchema items={faqItems} />
 
       <nav className="text-sm text-gray-500 dark:text-gray-400 mb-6">
