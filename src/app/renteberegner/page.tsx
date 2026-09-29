@@ -11,11 +11,47 @@ import { getCurrentDomainConfig, getLocale } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
 import { generatePageMetadata } from "@/lib/page-helpers";
 import { RENTEFRADRAG_2026 } from "@/lib/satser-2026";
+import {
+  AARS_FIRE_PROCENT,
+  MAANEDLIG_ONE_PROCENT,
+  annuitetsEksempel,
+  effektivAarsrente,
+} from "@/lib/rente-eksempler";
+import { formatNumber } from "@/lib/format";
 import Link from "next/link";
 
 /** Fradragsværdien som dansk procenttal med ét decimal, læst fra modulet. */
 function fradragProcent(værdi: number): string {
   return (værdi * 100).toFixed(1).replace(".", ",");
+}
+
+/**
+ * Svensk tusindtalsseparator med mellemrum. Ikke `formatNumber`, fordi den
+ * følger sidens locale — brødteksten skal kunne skrives med ét talformat
+ * uanset hvilket sprog grenen er.
+ */
+function krSe(tal: number): string {
+  return tal.toLocaleString("sv-SE", { maximumFractionDigits: 2 });
+}
+
+/** Et decimal som svensk procenttal, uanset sidens locale. */
+function procent(værdi: number): string {
+  return (værdi * 100).toLocaleString("sv-SE", {
+    minimumFractionDigits: 4,
+    maximumFractionDigits: 4,
+  });
+}
+
+/** Den effektive årsränta i procent med to decimaler. */
+function effProcent(maanedligRente: number): string {
+  return (effektivAarsrente(maanedligRente) * 100).toLocaleString("sv-SE", {
+    maximumFractionDigits: 2,
+  });
+}
+
+/** Den nominella månadsränta i procent med fire decimaler. */
+function maanedligProcent(aarsrente: number): string {
+  return procent(aarsrente / 12);
 }
 
 /**
@@ -28,6 +64,9 @@ const foersteProcent = fradragProcent(RENTEFRADRAG_2026.highRate);
 const overProcent = fradragProcent(RENTEFRADRAG_2026.lowRate);
 const foersteEfterSkat = fradragProcent(EKSEMPEL_RENTE * (1 - RENTEFRADRAG_2026.highRate));
 const overEfterSkat = fradragProcent(EKSEMPEL_RENTE * (1 - RENTEFRADRAG_2026.lowRate));
+
+/** Eksemplet den svenska formelafsnittet regner på, fra `rente-eksempler`. */
+const eksempel = annuitetsEksempel();
 
 export async function generateMetadata() {
   return generatePageMetadata("renteberegner");
@@ -298,7 +337,57 @@ export default async function RenteberegnerPage() {
           Den <strong>nominella räntan</strong> är den räntesats banken anger på själva lånet.
           Den <strong>effektiva räntan</strong> räknar även in <strong>avgifter</strong>, uppläggningskostnader
           och hur ofta räntan läggs på, och ger därför den mest rättvisande bilden av vad lånet
-          faktiskt kostar. Jämför alltid lån på den <strong>effektiva räntan</strong>.
+          faktiskt kostar.           Jämför alltid lån på den <strong>effektiva räntan</strong>.
+        </p>
+        <p>
+          Skillnaden kan räknas fram. Om räntan läggs på varje månad blir
+          den effektiva årsräntan (1 + månadsränta)<sup>12</sup> &minus; 1, och
+          en månadsränta på 1 % ger alltså{" "}
+          <strong>
+            {effProcent(MAANEDLIG_ONE_PROCENT)} % per år
+          </strong>
+          . Ska du gå åt andra hållen — från en effektiv årsränta till den
+          nominella — är formeln (1 + årsränta)<sup>1/12</sup> &minus; 1, og
+          4 % om året motsvarar en månadsränta på{" "}
+          <strong>{maanedligProcent(AARS_FIRE_PROCENT)} %</strong>, vilket ger{" "}
+          <strong>{effProcent(AARS_FIRE_PROCENT / 12)} % effektivt</strong>.
+        </p>
+
+        <h2>Formeln för ett annuitetslån</h2>
+        <p>
+          Betalningen är densamma varje månad, och den hittar du med en enda
+          formel. Med lånebelopp <strong>P</strong>, den månatliga räntan{" "}
+          <strong>r</strong> och <strong>n</strong> månaders löptid:
+        </p>
+        <p>
+          <code>betalning = P &times; r &divide; (1 &minus; (1 + r)<sup>&minus;n</sup>)</code>
+        </p>
+        <p>
+          Exempel: du lånar <strong>{krSe(eksempel.hovedstol)}</strong> till{" "}
+          <strong>{eksempel.aarsrente} %</strong> i {eksempel.loebetid} år. Den
+          månatliga räntan är {eksempel.aarsrente} &divide; 12 ={" "}
+          {procent(eksempel.maanedligRente)} och n = {eksempel.antalMaaneder}{" "}
+          månader. Betalningen blir{" "}
+          <strong>{krSe(eksempel.maanedligBetalning)} i månaden</strong> —{" "}
+          {krSe(eksempel.samletBetaling)} i alt, varav{" "}
+          {krSe(eksempel.samletRante)} är ränta.
+        </p>
+        <p>
+          Formeln är inte en tumregel. Varje betalning täcker bara en bråkdel
+          av det lån som är kvar — 1 &divide; (1 + r), 1 &divide; (1 + r)²
+          och så vidare i {eksempel.antalMaaneder} led. Summan av den
+          geometriska serien är precis (1 &minus; (1 + r)<sup>&minus;n</sup>)
+          &divide; r, och därför är lånebeloppet P = betalning &times; den summan.
+          Flyttar du bara räntorna till den andra sidan av likhetstecknet får
+          du beviset — det är vad &ldquo;annuitetslån formel
+          bevis&rdquo; söker efter.
+        </p>
+        <p>
+          Vill du hellre räkna på serielånet i stället? Där är det
+          amorteringen som är fast, så varje månadsbetalning är olika.{" "}
+          <Link href="/laaneberegner">Lånekalkylatorn</Link> räknar båda
+          sorterna, och <Link href="/rentefradrag">rentefradraget</Link> visar
+          hur mycket av räntan som blir kvar.
         </p>
 
         <h2>Annuitetslån kontra rak amortering</h2>

@@ -3526,6 +3526,8 @@ const sePages: Record<string, PageData> = {
       { question: "Annuitetslån vs serielån?", answer: "Annuitetslån: fast betalning. Serielån: fast amortering, sjunkande betalning." },
       { question: "Vad blir betalningen på 100.000 kr med 5 % ränta i 5 år?", answer: "Ca 1.887 kr i månaden med annuitetslån, totalt 13.227 kr i ränta under de 60 betalningarna." },
       { question: "Effektiv ränta?", answer: "Årliga kostnader inkl. avgifter." },
+      { question: "Vad är formeln för ett annuitetslån?", answer: "Betalningen är P × r ÷ (1 − (1 + r)^-n), där r är månadsräntan och n antal månader. Ett lån på 200.000 kr till 4 % i 20 år ger 1.212 kr i månaden — 240 månader, 290.871 kr i alt varav 90.871 kr är ränta." },
+      { question: "Hur räknar man ut effektiv ränta?", answer: "Den effektiva årsräntan är (1 + månadsränta)^12 − 1. En månadsränta på 1 % blir 12,68 % per år, och en nominell årsränta på 4 % ger en månadsränta på 0,3333 %, vilket är 4,07 % effektivt." },
       { question: "Avdrag?", answer: "Kontrollera Skatteverket för avdragsregler." },
       ],
     },

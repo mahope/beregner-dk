@@ -4,6 +4,7 @@ import { getDomainConfigByLocale } from "@/lib/domain-config";
 import { getCurrentDomainConfig, getLocale } from "@/lib/get-locale";
 import { RENTEFRADRAG_2026 } from "@/lib/satser-2026";
 import { getPageData } from "@/lib/page-data";
+import { annuitetsEksempel } from "@/lib/rente-eksempler";
 import RenteberegnerPage from "./page";
 
 vi.mock("@/components/RenteBeregner", () => ({
@@ -95,5 +96,77 @@ describe("renteberegner page", () => {
 
     expect(spg).toContain("Hvilken formel beregner et annuitetslån, og hvordan gør man det i Excel?");
     expect(spg).toContain("Hvad er forskellen på nominel og effektiv rente?");
+  });
+
+  describe("svensk formelgren", () => {
+    async function seHtml(): Promise<string> {
+      vi.mocked(getLocale).mockResolvedValue("se");
+      vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("se"));
+      return renderToStaticMarkup(await RenteberegnerPage());
+    }
+
+    test("formlen og eksemplet står i markupken", async () => {
+      const html = await seHtml();
+
+      expect(html).toContain("<h2>Formeln för ett annuitetslån</h2>");
+      expect(html).toContain("betalning = P × r ÷ (1 − (1 + r)");
+      // Autocomplete: "annuitetslån formel bevis" (nr. 2 under
+      // "annuitetslån formel"), altså spørgsmålet om beviset.
+      expect(html).toContain("Summan av den geometriska serien");
+      expect(html).toContain("Flyttar du bara räntorna");
+    });
+
+    test("hvert beløb i teksten er det, modulet regner", async () => {
+      const html = await seHtml();
+      const eksempel = annuitetsEksempel();
+      const svensk = (tal: number) => tal.toLocaleString("sv-SE", { maximumFractionDigits: 2 });
+
+      expect(html).toContain(svensk(eksempel.hovedstol));
+      expect(html).toContain(svensk(eksempel.maanedligBetalning));
+      expect(html).toContain(svensk(eksempel.samletBetaling));
+      expect(html).toContain(svensk(eksempel.samletRante));
+      // De samme tal, de danske sider altid har skrevet.
+      expect(svensk(eksempel.maanedligBetalning)).toBe("1 211,96");
+    });
+
+    test("effektiv ränta er formlen, der manglede — begge veje", async () => {
+      const html = await seHtml();
+
+      // SE-autocomplete under "effektiv ränta" har "formel" på nr. 2 og
+      // "beräkna effektiv ränta formel" som egen variation. Siden havde
+      // nul af dem.
+      expect(html).toContain("(1 + månadsränta)<sup>12</sup> − 1");
+      expect(html).toContain("12,68 % per år");
+      // Og den modsatte vej, som siden heller ikke havde: 4 % om året.
+      expect(html).toContain("4,07 % effektivt");
+    });
+
+    test("den nominella må aldrig kunne stå som den effektiva", async () => {
+      const html = await seHtml();
+
+      // 4 % om året må ikke stå som 4,00 % effektivt — det er præcis den
+      // fejl afsnittet er skrevet for at undgå.
+      expect(html).not.toContain("4 % effektivt");
+      expect(html).toContain("0,3333 %");
+    });
+
+    test("den danske side er urørt af denne rettelse", async () => {
+      const html = renderToStaticMarkup(await RenteberegnerPage());
+
+      expect(html).not.toContain("Formeln för ett annuitetslån");
+      expect(html).not.toContain("månadsränta");
+      // C85's egen rettelse står, altså tog den svenska greb ikke dansk med.
+      expect(html).toContain("<h2>Formlen for et annuitetslån");
+      expect(html).toContain("=YDELSE(0,04/12;240;-200000)");
+    });
+
+    test("de to nye spørgsmål ligger i page-data, og dermed i JSON-LD", () => {
+      const spg = getPageData("renteberegner", "se")!.faqItems.map((f) => f.question);
+
+      expect(spg).toContain("Vad är formeln för ett annuitetslån?");
+      expect(spg).toContain("Hur räknar man ut effektiv ränta?");
+      // De fire forrige skal være der stadig — de nye er lagt til, ikke byttet.
+      expect(spg).toHaveLength(6);
+    });
   });
 });

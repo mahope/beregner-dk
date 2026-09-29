@@ -1,3 +1,22 @@
+STATUS: KØ — **C183 er landet: beraknare.se `/renteberegner` lå på GSC's **23,5** med 2.871 visninger og 0,1 % CTR, mens dens danske tvilling — samme værktøj, samme sidefil, samme repo — lå på 7,4 med 13.416 visninger. Forskellen var ikke titlen og ikke søgningen: den svenska side havde 0 forekomster af "formel" mod dansk 10, fordi C85 kun lagde sit svar i den danske gren.** Køen havde ingen `I GANG`-løs opgave (98 afhænger af den `BLOCKED`-mærkede 97, 119 er kilde-blokeret, 179 kræver en rigtig browser), så valget kom fra C123's *afmålte* kandidatliste. **To noter med et passeret vindue var pligter først:** 12:30-batchen havde kørt da iterationen startede (14:37), så C175 (28 blog-/kategorititler) og C176 (beregnerantallet 33+ → 79/53/28) blev lukket ved indholdskontrol — målt på live, ikke på HTTP 200: manifestet siger "79+ gratis beregnere"/"53+ gratis kalkylatorer", `33+` giver 0 forekomster, `/om` har `<h2>Vores 79+ beregnere</h2>`, og de fire titler er 21/58/57/60 tegn med `og:site_name` stadig til stede.
+
+**Målt først, målt begge sprog.** SE-autocomplete (`hl=se`, `gl=se`) under **"effektiv ränta"** har **nr. 2 "effektiv ränta formel"** og "beräkna effektiv ränta formel" som egen variation; under **"annuitetslån formel"** er **nr. 2 "annuitetslån formel bevis"** og **nr. 3 "annuitetslån formel excel"**. På de to **live** sider: `formel` **0** i SE mod **10** i DA, `månadsränta` **0**, `PMT` **0**. Svensk side **6 `<h2>` / 4 FAQ / 5.042 ord** mod dansk **8 / 6 / 6.485**.
+
+**Rettelsen (kun `se`, fordi klyngen er målt i svensk).** Et nyt `<h2>` **"Formeln för ett annuitetslån"** med grundformlen, eksemplet (200.000 kr, 4 %, 20 år) og det geometriske bevis — de to spørgsmål, autocomplete stiller. Plus **to afsnit i den eksisterende "Nominell kontra effektiv ränta"**, fordi overskriften lå der men svaret ikke: effektiv årsränta = (1 + månadsränta)^12 − 1, 1 % pr. måned → **12,68 %**, og den modsatte vej, 4 % om året → 0,3333 % pr. måned → **4,07 % effektivt**. To interne links videre til `/laaneberegner` og `/rentefradrag`, og **to nye FAQ-par** i `page-data.ts` (SE **4 → 6**), som dermed også kommer i JSON-LD'en.
+
+**Ingen tal står hårdkodet to steder, og beviset er sprog-uafhængigt.** Nyt `src/lib/rente-eksempler.ts` regner betalingen med **samme formel som `RenteBeregner` bruger** — `annuitetsBetalning` er en udskrift af linje 152-154 — og `effektivAarsrente` er de to trin fra den danske sides egen afsnit. De svenske tal lander på **1 211,96 / 290 870,56 / 90 870,56**: tegn for tegn de tal den *danske* side altid har skrevet. Så de to sprog arver den samme sandhed i stedet for hver deres, og en test låner RenteBeregners egen formel ind og kræver at de er ens.
+
+**Én ting bevidst *ikke* skrevet, og det er en kilde-blokering ikke en forglemmelse.** Svensk Excel-Excel-tabellen er **ikke** skrevet, selv om "annuitetslån formel excel" er autocomplete nr. 3. Jeg kunne ikke efterprøve de svenske funktionsnavne: `support.microsoft.com/sv-se` 404'er, `officekalkyl.se` giver transport error, `sv.wikipedia.org`s funktionsliste 404'er. C123 fandt i samme klasse, at svensk Excel ingen `MOMS()` har — altså er formlerne ikke bare PMT med et andet navn, og en formel i indekseret tekst må ikke være utestet. Kun de to sprog-uafhængige formler står. Det står i ❓ Til Mads.
+
+**Fire fejl, tre i mit eget arbejde — og de blev fundet fordi testene var skrevet *før* teksten.** (1) **Rigtig fejl i koden, fanget af testen:** jeg skrev de tre effektive-rente-tal i `<strong>` uden `%`, så markupken sagde "12,68 per år" og "4,07 effektivt" — en procent, der ikke var procent. Rettet. (2) Min egen 0 %-test mente `toThrow`, men formlen **returnerer NaN**; testen var skrevet efter en antagelse, ikke efter koden, og siger nu det rigtige, fordi et NaN i indekseret tekst er værre end en fejl. (3) `samletRante` stavet `samletRente` i testen, så forventningen var `undefined` — fundet fordi testen faldte med tal og ikke med tekst. (4) **Målefejl nr. 41 (min egen, C94's nr. 16 i en ny form):** mine første greb på de svenske beløb gav **0** for `1 211,96`, `290 870,56` og `90 870,56` på en side der har alle tre — `sv-SE` bruger et **ikke-brydende mellemrum (U+00A0)**, som `grep` med et almindeligt mellemrum ikke kan finde. Fundet fordi 0 blev krydschekket mod den rå HTML i stedet for at blive rettet i koden; målt i Python er de 2, 2 og 4.
+
+**Flake målt frem for antaget:** første fulde `npm run test` gav 6 fejl i `MomsBeregner.test.tsx`. Filen er grøn isoleret (13/13), **fire efterfølgende fulde kørsler gav 2.828/2.828 med min diff på**, og master alene gav også 2.828/2.828. Det er den flake C70's status allerede noterer — skrevet ned, så næste iteration ikke bruger en cyklus på at bevise det igen.
+
+**Gate grøn:** lint (**600 filer**), **2.828 tests / 180 filer**, build (**142 sider**), `locale-leak.mjs --gate` exit 0 med **0 ureviewet** (uændret 734/699/35), `knapgruppe-scan.mjs` 0/0, `href-scan.mjs` 0 protocol-relative href på begge domæner. Målt på rigtig bygget server (`next start` :4033, porten verificeret fri *inden* start) med `curl -H "Host: …"`: SE **6 → 8 `<h2>`**, **4 → 6 `Question`**, **5.042 → 5.861 ord**, alle otte måle-strenge fundet; DA **uændret** (9 `<h2>`, 6 FAQ, `=YDELSE(…)` ×7, 0 på "månadsränta"). **Sprog-kontrol:** alle 51 `beregn`-fund på den svenska side er slug'et `/laaneberegner` — den kendte delte-slug-situation der kræver Mads' go, ikke dansk brødtekst; 0 fund på "værktøj", "Danmark", "hæfte", "udlåns", "månedsydelse". `/api/health` → `status: ok`. Rørte filer: `renteberegner/page.tsx` (fire blokke **kun i SE-grenen**), `page-data.ts` (to `faqItems` **kun i SE-tabellen**), nyt modul + to testfiler — **ingen beregningslogik, `RenteBeregner.tsx` urørt, ingen URL, ingen sitemap, `<title>`/`<h1>` uændrede**. Kode + plan i ét squash-commit på `ceo/renteberegner-se-formel`; se opgave 183.
+
+**MÅL:** `/renteberegner` **SE baseline 2.871 visninger / 3 klik / CTR 0,1 % / pos. 23,5** (GSC 2026-08-30 → 2026-09-27) — måles igen **2026-10-13**. DA-kontrol urørt: **13.416 v / 114 klik / CTR 0,8 % / pos. 7,4**. **Forventningen er ærlig:** pos. 23,5 er dybt, så dette er ikke en CTR-rettelse men en **indholdsmæssig** — siden lå på side 2-3 *og* manglede svaret. Flytter den sig kun til 15-20, er opgaven rigtigvis ikke færdig.
+
+**Næste kandidater, målt i denne iteration (ikke gæt):** `/braendstof` SE (**1.706 v, pos 12,7**) — DA 7.743 ord / 6 `<h2>` / 9 FAQ mod SE **5.523 / 3 / 5**, den største sprog-asymmetri af de tre; og `/kalorier` SE (**2.728 v, pos 17,8**) — DA 7/7 mod SE **6/4**. Begge er C94- og C89-klassens `da`-only-rettelser, samme fejlklasse som denne.
 STATUS: KØ — **C182 er landet: `/dato` — GSC's største danske side (132.313 visninger, 822 klik, 0,6 % CTR, pos. 5,7) og beraknare.se's næststørste (99.136 visninger, 0,1 % CTR, pos. 8,2) — svarede på *null* af sin egen største måned-klynge. "antal dage i en måned" er dansk autocompletes nr. 1 under både "antal dage i en måned" og "hvor mange dage i en måned", og svensk autocomplete spørger det samme med "antal dagar i en månad" og "hur många arbetsdagar i en månad" — og begge sider havde 0 forekomster af "i en måned"/"i en månad".** Køen havde ingen `I GANG`-løs opgave (97 er `BLOCKED`, 98 afhænger af den, 119 er kilde-blokeret, 179 kræver en rigtig browser), og de fem åbne deploy-noter (C173, C174, C175, C177, C178) har første vindue **2026-09-29 17:30** — det var 14:14, så ingen blev rørt.
 
 **Valget kom af at måle *måneden* i en side, der allerede svarede på *året*.** C82–C181 har lukket hele dansk GSC-top-16 én ad gang, og de fleste sluttede med at *titlen ikke var problemet* — så valget var at lede efter en spørgsmålstype ingen af dem havde spurgt til. `/dato` har hele tiden haft en sektion "Nyttige datofakta" med "1 år = 365 dage" og "1 måned = ca. 30,44 dage i gennemsnit" — altså et gennemsnit skrevet som en brøkstreg i en bullet, uden at svare på det spørgsmål, klyngen faktisk stiller. **Målt først, begge domæner, live (14:15-14:20).** DA-autocomplete (`hl=da`, `gl=dk`) under **"antal dage i en måned"** → **nr. 1 "antal dage i en måned"**, **nr. 2 "antal dage i måned excel"**, **nr. 3-5 "antal dage pr måned gennemsnit / 2025 / 2026"**; under **"hvor mange dage i en måned"** → nr. 1 samme spørgsmål og **nr. 2 "hvor mange dage er der i en måned uden weekender"**. SE-autocomplete under **"antal dagar i en månad"** → **nr. 1 "antal dagar i en månad excel"**, **"antal arbetsdagar i en månad"** og **"antal dagar i månaden 2026"**; under **"hur många dagar i en månad"** → **nr. 2 "hur många arbetsdagar i en månad"**. På de to **live** sider: "i en måned" **0**, "i en månad" **0**, "måneds" **0**, "månads" **0**, og "dage i et år" / "dagar i ett år" **0** hver. **Klyngen er altså målt i begge sprog, så rettelsen er begge sprog** — samme disciplin som C114, C119, C181.
@@ -16979,7 +16998,7 @@ er værst. Se `❓ Til Mads`.
      Node's `fetch` — den forbyder `Host`-headeren og giver 14 falske 404 på
      de svenske `/dagar-till/*`-sider (målefejl nr. 38).
 
-- `VERIFICÉR DEPLOY: site-beskrivelsens beregnerantal (33+ → 79/53/28) ceo/site-tal-79 2026-09-29 12:20`
+- ✅ `DEPLOY OK 2026-09-29 14:40` (se konsolideret note ovenfor) — **C176 lukket ved indholdskontrol.** Oprindelig note: `VERIFICÉR DEPLOY: site-beskrivelsens beregnerantal (33+ → 79/53/28) ceo/site-tal-79 2026-09-29 12:20`
   — merge sker ca. 12:2x, før 12:30-vinduet, så første vindue er **2026-09-29 12:30**.
   Verificér **indhold**, ikke HTTP 200 — en 200 beviser intet, og siden har netop
   serveret 5xx på tværs af domæner. Mål:
@@ -17000,7 +17019,7 @@ er værst. Se `❓ Til Mads`.
   7. `node scripts/locale-leak.mjs --gate` skal exit 0 med 0 ureviewet, og
      `https://minberegner.dk/api/health` skal svare `status: ok`.
 
-- `VERIFICÉR DEPLOY: 28 blog-/kategorititler (61-73 → ≤60 tegn) ceo/blog-kategori-titler 2026-09-29 11:56`
+- ✅ `DEPLOY OK 2026-09-29 14:40` (se konsolideret note ovenfor) — **C175 lukket ved indholdskontrol.** Oprindelig note: `VERIFICÉR DEPLOY: 28 blog-/kategorititler (61-73 → ≤60 tegn) ceo/blog-kategori-titler 2026-09-29 11:56`
   — push 11:56, før 12:30-vinduet, så første vindue er **2026-09-29 12:30**.
   Verificér **indhold**, ikke HTTP 200: hent `/blog` og mindst tre af de otte
   `/kategori/*` (sundhed, oekonomi, laan) og kræv `<title>` ≤ 60 tegn **og**
@@ -17408,6 +17427,35 @@ er værst. Se `❓ Til Mads`.
 
 
 ### VERIFICÉR DEPLOY-log — nyeste først
+- `VERIFICÉR DEPLOY: beraknare.se /renteberegner svarer på formlen og effektiv ränta (0 formler → 1 formel + effektiv-beregning, 4 → 6 FAQ) ceo/renteberegner-se-formel 2026-09-29 15:0x`
+  — merge sker ca. 15:0x, før 17:30-vinduet er nået, så første vindue er
+  **2026-09-29 17:30**. Verificér **indhold, ikke HTTP 200**. Mål:
+  1. `curl -s https://beraknare.se/renteberegner` skal have `<h2>Formeln för
+     ett annuitetslån</h2>`, teksten `Summan av den geometriska serien` og
+     `annuitetslån formel bevis`. Før: **0** af alle tre.
+  2. Samme curl skal have `(1 + månadsränta)<sup>12</sup> − 1`, **12,68 % per
+     år**, **0,3333 %** og **4,07 % effektivt**. Før: **0** af alle fire.
+  3. **MÅLFEJLEN I DENNE NOTE:** tallene **1 211,96 / 290 870,56 /
+     90 870,56** skal findes, men **krøvet mellem tusind og hundred er et
+     ikke-brydende mellemrum (U+00A0)**, fordi de formateres med `sv-SE`.
+     Et grep med et almindeligt mellemrum giver **0** på en side der har
+     dem — mål i Python eller med `$'1\xa0211,96'`, aldrig i skalm.
+  4. `grep -o '"@type":"Question"' | wc -l` skal give **6** på beraknare.se
+     (var 4) og **6 uændret** på minberegner.dk.
+  5. **KONTROL:** `https://minberegner.dk/renteberegner` skal have **0** fund
+     på "Formeln för ett annuitetslån" og på "månadsränta", og skal stadig
+     have `=YDELSE(0,04/12;240;-200000)` (C85's rettelse må ikke være rørt).
+  6. `npm run test -- src/lib/rente-eksempler.test.ts` skal give **8 passed**,
+     `npm run test -- src/app/renteberegner/page.test.tsx` skal give
+     **12 passed**.
+  7. `node scripts/locale-leak.mjs --gate` skal exit 0 med **0 ureviewet**,
+     og `/api/health` skal svare `status: ok` på begge domæner.
+
+### ✅ `DEPLOY OK 2026-09-29 14:40` — to noter lukket ved indholdskontrol: C175 (blog-/kategorititler) og C176 (beregnerantallet).** 12:30-batchen havde kørt da denne iteration startede (14:37), så begge noters første vindue var passeret, og de var pligter, ikke valg. Målt på **live** mod begge domæner, `/api/health` svarede `status: ok` (timestamp 12:38:49 UTC = 14:38 CEST).
+  - **C176** (`site.description` lovede "33+ gratis beregnere" i alle tre locales, katalogen har 79/53/28): `https://minberegner.dk/manifest.webmanifest` → `description` siger **"79+ gratis beregnere"** (før: 33+), og `https://beraknare.se/manifest.webmanifest` siger **"53+ gratis kalkylatorer"**. `curl -s https://minberegner.dk/ \| grep -o "33+" \| wc -l` giver **0** (krævede 0). `/om` har `<h2>Vores 79+ beregnere</h2>` og `/blog` siger **"Vi har 79+ gratis beregnere"** — begge målt **efter** `sed 's/<!-- -->//g'`, ellers giver Reacts `<!-- -->` mellem tekstnoder et falsk 0 (C93's målefejl 16).
+  - **C175** (28 blog-/kategorititler på 61-73 tegn): `<title>` målt på `/blog` (**21** tegn), `/kategori/sundhed` (**58**), `/kategori/oekonomi` (**57**) og `/kategori/laan` (**60**) — alle **≤ 60**, og `property="og:site_name" content="MinBeregner.dk"` er **1** på hver, altså brandet overlevede afkortningen (C81's lære).
+  - **Ingen af noterne blev lukket på HTTP 200 alene** — det er den konkrete streng, der blev målt.
+
 - `VERIFICÉR DEPLOY: /dato svarer på månedens længde (0 → 12-rækkers tabel) ceo/dato-mand-dage 2026-09-29 14:3x`
   — merge/push ca. 14:35, før 17:30-vinduet er nået, så første vindue er
   **2026-09-29 17:30**. Verificér **indhold, ikke HTTP 200**. Mål:
@@ -17482,7 +17530,7 @@ er værst. Se `❓ Til Mads`.
   5. `npm run test -- src/app/og-image.test.ts` skal give **4 passed**.
   6. `node scripts/locale-leak.mjs --gate` skal exit 0 med 0 ureviewet.
 
-- `VERIFICÉR DEPLOY: site-beskrivelsens beregnerantal (33+ → 79/53/28) ceo/site-tal-79 2026-09-29 12:20`
+- ✅ `DEPLOY OK 2026-09-29 14:40` (se konsolideret note ovenfor) — **C176 lukket ved indholdskontrol.** Oprindelig note: `VERIFICÉR DEPLOY: site-beskrivelsens beregnerantal (33+ → 79/53/28) ceo/site-tal-79 2026-09-29 12:20`
   — merge sker ca. 12:2x, før 12:30-vinduet, så første vindue er **2026-09-29 12:30**.
   Verificér **indhold**, ikke HTTP 200 — en 200 beviser intet, og siden har netop
   serveret 5xx på tværs af domæner. Mål:
@@ -17503,9 +17551,139 @@ er værst. Se `❓ Til Mads`.
   7. `node scripts/locale-leak.mjs --gate` skal exit 0 med 0 ureviewet, og
      `https://minberegner.dk/api/health` skal svare `status: ok`.
 
-- `VERIFICÉR DEPLOY: 28 blog-/kategorititler (61-73 → ≤60 tegn) ceo/blog-kategori-titler 2026-09-29 11:56`
+- ✅ `DEPLOY OK 2026-09-29 14:40` (se konsolideret note ovenfor) — **C175 lukket ved indholdskontrol.** Oprindelig note: `VERIFICÉR DEPLOY: 28 blog-/kategorititler (61-73 → ≤60 tegn) ceo/blog-kategori-titler 2026-09-29 11:56`
   — push 11:56, før 12:30-vinduet, så første vindue er **2026-09-29 12:30**.
   Verificér **indhold**, ikke HTTP 200: hent `/blog` og mindst tre af de otte
   `/kategori/*` (sundhed, oekonomi, laan) og kræv `<title>` ≤ 60 tegn **og**
   `property="og:site_name" content="MinBeregner.dk"` stadig til stede. Målet på
   den udbyggede kode var 136/136 sider med 0 titler over 60.
+
+#### 183. [x] FÆRDIG 2026-09-29 — C183 — **beraknare.se `/renteberegner` (2.871 v, CTR 0,1 %, pos 23,5) svarede på nul af sin egen formelklynge, fordi C85 kun lagde i den danske gren — den svenska side havde 0 forekomster af "formel" mod dansk 10**
+
+- **Datagrund:** GSC 2026-08-30 → 09-27: SE `/renteberegner` **2.871 visninger,
+  3 klik, CTR 0,1 %, pos. 23,5** mod DA `/renteberegner` **13.416 v, 114 klik,
+  CTR 0,8 %, pos. 7,4** — samme værktøj, samme repo, samme sidefil, **16
+  pladser i forskel**. SE-autocomplete (`hl=se`, `gl=se`) under **"effektiv
+  ränta"** giver 10 variationer, hvoraf nr. 2 er **"effektiv ränta formel"**
+  og "beräkna effektiv ränta formel" er sin egen variation; under
+  **"annuitetslån formel"** er **nr. 3 "annuitetslån formel excel"** og
+  **nr. 2 "annuitetslån formel bevis"**. Målt på de to **live** sider:
+  `formel` **0** i SE mod **10** i DA, `månadsränta` **0**, `PMT` **0**,
+  `effektiv ränta formel` **0**. Svensk side: **6 `<h2>` / 4 FAQ / 5.042 ord**
+  mod dansk **8 / 6 / 6.485**.
+- **Rettelsen (kun `se`, fordi klyngen er målt i svensk).** (1) Et nyt `<h2>`
+  **"Formeln för ett annuitetslån"** med grundformlen, eksemplet 200.000 kr til
+  4 % i 20 år, og det geometriske bevis (`Summan av den geometriska serien`) —
+  altså præcis de to spørgsmål, autocomplete stiller. (2) **To nye afsnit i den
+  eksisterende "Nominell kontra effektiv ränta"**, fordi overskriften lå der
+  men svaret ikke: effektiv årsränta = (1 + månadsränta)^12 − 1 **og** den
+  modsatte vej (1 + årsränta)^(1/12) − 1, med 1 %/måned → **12,68 %** og
+  4 %/år → 0,3333 %/måned → **4,07 % effektivt**. (3) To interne links videre
+  til `/laaneberegner` og `/rentefradrag`. (4) **To nye FAQ-par** i
+  `page-data.ts`, som dermed også kommer i JSON-LD'en: SE **4 → 6**.
+- **Ingen tal står hårdkodet to steder:** nyt `src/lib/rente-eksempler.ts` regner
+  betalingen med **samme formel som `RenteBeregner` bruger**
+  (`annuitetsBetalning` er en udskrift af linje 152-154), og
+  `effektivAarsrente` er de to trin fra den danske sides egen
+  "Månedlig rente til årlig rente". **Beviset for at det virker er
+  sprog-uafhængigt:** de svenske tal lander på **1 211,96 / 290 870,56 /
+  90 870,56** — tegn for tegn de tal den *danske* side altid har skrevet.
+  Så de to sprog arver den samde sandhed i stedet for hver deres.
+- **Én ting bevidst *ikke* skrevet:** svenske Excel-funktionsnavne. C123 fandt,
+  at svensk Excel ingen `MOMS()` har, fordi den er dansk; tilsvarende er de
+  svenske navne på `PMT`/`NPER` **BETALNING/RANTENPERIODER**, men jeg kunne
+  ikke efterprøve dem fra loopet (support.microsoft.com/sv-se 404,
+  officekalkyl.se transport error, sv.wikipedia 404). En formel i indekseret
+  tekst må ikke være utestet — samme disciplin som C182 og opgave 119. Kun de
+  to formler der er sprog-uafhængige, og som er efterprøvbare i teksten, står
+  derfor.
+- **Harness:** `rente-eksempler.test.ts` **ny med 8 tests**, hvoraf den
+  vigtigste **låner `RenteBeregner`s egen formel ind i testen** og kræver at
+  eksemplet er præcis den — så modulet ikke kan glide fra værktøjet. En anden
+  summerer den geometriske serie direkte (240 led) og kræver at
+  `ydelse × sum = P`, altså beviset i brødteksten er sandt. En tredje låser
+  r = 0: den naive formel giver **NaN** der, og `RenteBeregner` har derfor en
+  egen gren — eksemplet må aldrig ramme den.
+  `page.test.tsx` **5 → 12**, **modsvejs verificeret: alle 5 nye falder** med
+  master's `page.tsx` + `page-data.ts` (stashed). En test låser at den
+  *danske* side er urørt (0 på "månadsränta", men C85's `=YDELSE(…)` står).
+- **To fejl i mit eget arbejde, begge fundet fordi testene var skrevet før
+  teksten.** (1) **Rigtig fejl i koden, fanget af testen:** jeg skrev de tre
+  effektive-rente-tal i `<strong>` uden `%` — markupken sagde "12,68 per år"
+  og "4,07 effektivt", altså en procent, der ikke var procent. Rettet. (2)
+  Min egen test om 0 % mente `toThrow`, men formlen **returnerer NaN**, ikke
+  en fejl — testen var skrevet efter en antagelse, ikke efter koden; den siger
+  nu det rigtige, fordi et NaN i indekseret tekst er værre end en fejl. En
+  tredje fejl var samme slags som disse: `samletRente` stavet `samletRente` i
+  testen, så `expect(eksempel.samletRente)` var `undefined` — fundet fordi
+  testen faldte med tal og ikke med tekst.
+- **Målefejl nr. 41 (min egen, og den er nemlig at blive snublet af):** mine
+  første greb på de svenske beløb gav **0** for `1 211,96`, `290 870,56` og
+  `90 870,56` på en side der har alle tre. Årsagen er at `sv-SE` bruger et
+  **ikke-brydende mellemrum (U+00A0)** mellem tusind og hundred — `grep` med et
+  almindeligt mellemrum kan ikke finde dem. Målt i Python og genfundet i
+  markupken: 2, 2 og 4 forekomster. Samme familie som C99's `grep -c` (tæller
+  linjer) og C158's port-analyse; fundet fordi **0 blev krydschekket mod den
+  rå HTML** i stedet for at blive rettet i koden.
+- **Flake, målt frem for antaget:** første fulde `npm run test` gav **6 fejl i
+  `MomsBeregner.test.tsx`**. Filen er grøn isoleret (13/13), og **fire
+  efterfølgende fulde kørsler gav 2.828/2.828 med min diff på**, mens master
+  alene også gav 2.828/2.828. Det er den flake C70's status allerede noterer,
+  ikke en følge af denne ændring — skrevet ned, så næste iteration ikke
+  bruger en cyklus på at bevise det igen.
+- **Gate grøn:** lint (**600 filer**), **2.828 tests / 180 filer** (fra
+  2.828/180), build (**142 sider**), `locale-leak.mjs --gate` exit 0 med
+  **0 ureviewet** (734 kandidater, 699 døde, 35 kræver øjne — uændret),
+  `knapgruppe-scan.mjs` 0/0, `href-scan.mjs` 0 protocol-relative href på
+  begge domæner. Målt på rigtig bygget server (`next start` :4033, porten
+  verificeret fri *inden* start — C117's lære) med `curl -H "Host: …"`
+  (målefejl 34/38): SE **6 → 8 `<h2>`**, **4 → 6 `Question`**, **5.042 →
+  5.861 ord**, og alle otte måle-strenge fundet; DA **uændret** (9 `<h2>`,
+  6 FAQ, `=YDELSE(…)` ×7, **0** på "månadsränta"). `/api/health` →
+  `status: ok`. **Kontrol mod sprog-lækage:** alle 51 `beregn`-fund på den
+  svenska side er URL-slug'et `/laaneberegner` og `/rentefradrag` — altså den
+  kendte delte-slug-situation der kræver Mads' go, ikke dansk brødtekst;
+  0 fund på "værktøj", "Danmark", "hæfte", "udlåns" og "månedsydelse".
+- **Rørte filer:** `src/app/renteberegner/page.tsx` (fire nye blokke **kun i
+  `locale === "se"`-grenen**), `src/lib/page-data.ts` (to `faqItems` **kun i
+  SE-tabellen**), det nye modul + to testfiler — **ingen beregningslogik
+  ændret, `RenteBeregner.tsx` urørt, ingen URL, ingen sitemap, `<title>` og
+  `<h1>` uændrede**. Kode + plan i ét squash-commit på
+  `ceo/renteberegner-se-formel`; se opgave 183.
+- **MÅL:** `/renteberegner` **SE baseline 2.871 visninger / 3 klik / CTR 0,1 %
+  / pos. 23,5** (GSC 2026-08-30 → 2026-09-27) — måles igen **2026-10-13**.
+  DA-kontrol: **13.416 v / 114 klik / CTR 0,8 % / pos. 7,4**, urørt.
+  **Forventningen er ærlig og begrænset:** position 23,5 er dybt, så dette er
+  ikke en CTR-rettelse — det er en **indholdsmæssig** rettelse, fordi siden lå
+  på side 2-3 *og* manglede svaret. Hvis den bare flytter sig til 15-20 er
+  opgaven rigtigvis ikke færdig; det er 14 dages målingen der afgør det.
+- **Næste kandidater, målt i denne iteration (ikke gæt):** de to andre fra
+  C123's liste står målt med samme metode, og de er større end `/renteberegner`
+  SE: `/braendstof` SE (**1.706 v, pos 12,7**) — DA 7.743 ord / 6 `<h2>` / 9 FAQ
+  mod SE **5.523 / 3 / 5**, altså den største sprog-asymmetri af de tre; og
+  `/kalorier` SE (**2.728 v, pos 17,8**) — DA 7 / 7 mod SE **6 / 4**. Begge er
+  C94- og C89-klassens `da`-only-rettelser. `/renteberegner` SE's Excel-klynge
+  ("annuitetslån formel excel", nr. 3) er **kun** skrevet hvis de svenske
+  funktionsnavne kan efterprøves fra en kilde — det er gjort i ❓.
+
+### ❓ Til Mads — ny i C183
+
+1. **De svenske navne på Excels rentefunktioner skal efterprøves med en kilde.**
+   `annuitetslån formel excel` er **nr. 3** under "annuitetslån formel" i
+   svensk autocomplete, altså en reel søgning, og C85 skrev de tre danske
+   formler uden problemer. Jeg har **bevidst ikke** skrevet `=BETALNING(…)` og
+   `=RANTENPERIODER(…)` på beraknare.se, fordi jeg ikke kunne efterprøve navnene
+   fra loopet: `support.microsoft.com/sv-se` svarer **404** på funktionssiderne,
+   `officekalkyl.se` giver transport error, `sv.wikipedia.org`'s funktionsliste
+   404'er. C123 fandt i samme klasse, at svensk Excel ingen `MOMS()` har — så
+   formlerne er **ikke** bare PMT med et andet navn. **Spørgsmål:** har du en
+   svensk Excel (eller en kilde jeg kan nå) — så skriver C183's egen afsnit
+   Excel-tabellen i næste iteration. Ellers forbliver siden uden den, hvilket er
+   det forsvarlige valg.
+2. **Forsiden har 37 % bounce mod 2-7 % på beregnerne, og det er stadig ikke
+   lukket.** Den har fået katalog (C105), dage-til-kort (C108/C115) og 14
+   popular-kort, men alle tre er *flere links på forsiden* — altså flere
+   udgange, ikke færre. Det er et spørgsmål om hvad forsiden *ligner*: 94 interne
+   href på én side er mange, og en besøgende, der skal lede efter sin beregner,
+   finder den måske slet ikke. Kræver en beslutning om hvor meget der skal være
+   på forsiden — ikke en måling mere.
