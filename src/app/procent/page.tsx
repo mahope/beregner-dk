@@ -200,22 +200,10 @@ export default async function ProcentPage() {
           .
         </p>
 
-        <h2>Procentregningens formler</h2>
-        <ul>
-          <li>
-            <strong>Find procent:</strong> Procent = (Del / Heltal) × 100
-          </li>
-          <li>
-            <strong>Find del:</strong> Del = (Procent / 100) × Heltal
-          </li>
-          <li>
-            <strong>Find heltal:</strong> Heltal = Del × (100 / Procent)
-          </li>
-          <li>
-            <strong>Procentvis ændring:</strong> ((Ny - Gammel) / Gammel) × 100
-          </li>
-        </ul>
-
+        {/* De fire formler står i ProcentBeregners "Formler"-boks lige
+            under værktøjet. Her lå de en gang til igen i et eget afsnit, så
+            de stod to gange i samme dokument i to overskrifter om det
+            samme. */}
         <div className="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-400 dark:border-blue-500 p-4 my-6 not-prose">
           <p className="font-medium text-blue-800">Tip</p>
           <p className="text-blue-700">
@@ -448,22 +436,8 @@ export default async function ProcentPage() {
           .
         </p>
 
-        <h2>Procenträkningens formler</h2>
-        <ul>
-          <li>
-            <strong>Hitta procent:</strong> Procent = (Del / Heltal) × 100
-          </li>
-          <li>
-            <strong>Hitta del:</strong> Del = (Procent / 100) × Heltal
-          </li>
-          <li>
-            <strong>Hitta heltal:</strong> Heltal = Del × (100 / Procent)
-          </li>
-          <li>
-            <strong>Procentuell förändring:</strong> ((Ny - Gammal) / Gammal) × 100
-          </li>
-        </ul>
-
+        {/* Samme som i den danske gren: formlerne har én ejer, boksen i
+            ProcentBeregner. */}
         <div className="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-400 dark:border-blue-500 p-4 my-6 not-prose">
           <p className="font-medium text-blue-800">Tips</p>
           <p className="text-blue-700">

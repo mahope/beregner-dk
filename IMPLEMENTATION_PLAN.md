@@ -1,4 +1,8 @@
 STATUS: KØ — **C160 er landet: beraknare.se's fireten `dagar-till`-sider svarede "Det finns 87 dagar *til* juldagen" — dansk på svensk, i det synlige svar, i meta description, i og:description og i JSON-LD. 112 forekomster, målt på rigtig server, på de sider der svarer direkte på svensk GSCs største dagar-klynge.** Køen havde én `I GANG`-løs opgave, **159 (de ni åbne deploy-noter)**, og den er **fortsat klokke-blokeret**: alle ni har første vindue **2026-09-29 07:30**, og det var 04:15, så ingen kunne lukkes og ingen blev rørt. **Valget kom af at køre linkgrafen som en helhed i stedet for endnu en side:** C159 havde lukket de to GSC-lister, så næste iteration målte *hvor siderne hænger sammen* — en fuld crawl af begge sitemapmer (**135 + 71 URL'er**). Den fandt **0 sider med 0 indgående links** på begge domæner, altså at C108's `//dage-til//`-klasse er lukket og forbliver lukket, og at blogindlæggene har **52-54** interne links hver — Fase 3's "bloggen skal føre videre" er **allerede** opfyldt og må ikke genbruges som åbent punkt. **Årsagen er én tegn uden for enhver tekstfil:** `DageTilPage.tsx:91` byggede svaret med `til` **hårdkodet** mellemom `copy[locale]`-opslagene, så `copy` stod på hver linje og præpositionen stod uden for den. Samme fejlklasse som C84's `metaDescription` om 12 byer. **Titlen var urørt** — den bygger på `event[locale].copy.question`, som *er* svensk — mens de tre andre overflader alle trak `headline`; derfor er alle fire låst, fordi en test der kun læser den synlige tekst ville være grøn, mens Google fortsat indekserede den danske præposition i den beskrivelse den viser under titlen. **Måleren var blind på to måder, og begge var målt forud:** (1) `buildMountGraph()` bygger grafen af `calculator-list.ts`'s 81 hrefs + forsiden, og `dage-til`/`dagar-till` er **dynamiske ruter, ikke kalkulatorer** — de står i ingen af dem, så sættet var 126 filer og de 14 svenske sider var det største udokumenterede segment på sitet; (2) **selv med filen i sættet** ville port-reglen ikke have set den, fordi `copy` er en `Record<DageTilLocale, …>` og scanneren stoler på hele tabellen — korrekt for `page-data.ts`'s 1.192 linjer, **forkert** for en tabel med ét ord der *skal* være forskelligt. Plantet modsvejs: med fejlen tilbage giver `--gate` **exit 0**. Derfor fik rettelsen en **test**, ikke kun en regel. **De tre nye fund da filen kom i sættet var alle falske, og alle tre faldt i port-klassen C158 ikke havde set:** `dageLocale: DageTilLocale = locale` (én type-annotation mellem navn og `=` — præcis C157's `sePages: Record<…>` mod R4's `se: {`), en ternary skrevet som objekt-egenskab hvor `{` åbner på `return`-linjen så hovedet var alle tidligere properties inkl. en template-literal med komma, og **en fejl i min egen rettelse fundet fordi porten røddes den forkerte vej**: jeg læste en injiceret operator som regex-gruppe 1 og fik `flags: ["!undefined"]`, hvilket erklærede hver `dageLocale === "da" ? … : …`-arm for *synlig på svensk* — det ene svar reglen aldrig må give. Fundet ved at logge `head.flags`, ikke ved at læse koden. **Tre fejl i mine egne greb undervejs, samme klasse som målefejl 9-28:** `rg -rn` igen (nr. 14, tredje gang — `-r` er replace-flaget), `dageTilHrefs()` der *gættede* dynamisk segment som `[dato]` i stedet for at læse den (en scanner der gætter den route den blev tilføjet for, springer den lydløst over), og et negativt sprog-lås der fangede `dagar-till/`-prefixet (C121's `bakåt` igen). **Harness:** `dage-til-routes.test.tsx` **18 → 22 tests**, og det afgørende var at de måtte importere `DagarTillPage` — de to stier er **to route-filer over én komponent** hvor **prefixet** vælger sproget, så *alle* eksisterende tests rendrede den danske route, hvor "til" er korrekt. Det er grunden til at fejlen levede. **Modsvejs verificeret i begge retninger:** med `to: "til"` i den svenske arm falder 2 af 4; med `to: "till"` i den *danske* arm falder 3 af 4. Scannerens to ændringer er hver verificeret forfra. **Gate grøn:** lint (**583 filer**), **2.595 tests / 169 filer** (fra 2.591/169 — de 4 nye), build (**141 sider**), `locale-leak.mjs --gate` **exit 0** med **594/559/35/0** (fra 591/556/35/0) og sættet **126 → 129 filer**, `knapgruppe-scan.mjs` **0/0**, `href-scan.mjs` 28 uændret mod `git stash`. **Målt på rigtig server** (port 3777, fri verificeret inden start): alle 14 svenske sider **0** `dagar til` / 8-11 `dagar till`, dansk uændret 8-11 `dage til` / 0 `dage till`, fire danske kontrolletitler uændrede, `/api/health` → `status: ok`, begge svenske alias 301'er stadig. Kode + plan i ét squash-commit på `ceo/dagartill-till`; se opgave 161. **MÅL:** de 14 sider har ingen egen CTR-baseline (de ligger under GSC's visningstælling; kun `/dato` 96.336 v og `/nedtaelling` 5.361 v er målt) — forventningen er CTR på de positioner de allerede har, og dansk ubevægtet; revurderes **2026-10-13** sammen med C158/C159.
+STATUS: KØ — **C161 er landet: `/procent` — sitets største side i Google (149.879 visninger, 25 % af alle visninger) — skrev de samme fire formler to gange i ét og samme dokument, i to afsnit med to overskrifter om præcis det samme, i begge sprog.** Køen havde én `I GANG`-løs opgave, **159 (de ni åbne deploy-noter)**, og den er **fortsat klokke-blokeret**: alle ni har første vindue **2026-09-29 07:30**, og det var 04:45, så ingen kunne lukkes og ingen blev rørt. **Valget kom af at læse sitets største side som helhed i stedet for endnu en søgning.** C160's konklusion var at linkgrafen og søgeklyngerne er lukket, så næste iteration gik efter den ene side hvor tallene er mest ekstreme: `/procent` har **0,1 % CTR på pos. 7,4**, mens `/dato` på næsten samme position har **0,6 %** — altså 5-10× lavere end enhver anden side i GSC's top-16. De tre største søgninger på siden er "procentberegner" (248 v, pos 8), en rabatopgave (59 v, pos 6) og "10 procent af" (52 v, pos 6) — tilsammen ~360 visninger mod **149.879 i alt**, altså en massiv hale af lange søgninger, som en fast "procent"-sides lillebror. **Titlen og beskrivelsen er allerede svar-først** ("Procentberegner – beregn 10 procent af et tal" / "10 procent af et tal er tallet × 0,10") — for fjerde gang ikke titlen, men kroppen under den, samme konklusion som C82, C96, C99 og C100. **Målt først, målt på rigtig server:** i live-HTML'en stod **hver af de fire formler 3 gange** på begge domæner — `Procent = (Del / Heltal) × 100`, `Del = (Procent / 100) × Heltal`, `Heltal = Del × (100 / Procent)` og `((Ny - Gammel) / Gammel) × 100` — fordi **to filer ejede dem hver**: `ProcentBeregner.tsx:46-51` som boksen `<h3>Formler</h3>` under værktøjet, og `page.tsx:203` (da) og `page.tsx:450` (se) som afsnittet `<h2>Procentregningens formler</h2>` nederst i brødteksten. Tallet 3 = synlig tekst + client-komponentens SSR + sidens egen kopi i RSC-flight-payloaden. **Rettelsen er sletning, ikke tilføjelse:** de to `<h2>`-afsnit er væk, `Tip`-boksen (50 % af 40 = 40 % af 50) er den eneste tekst i dem der ikke var en dublet, og den er **beholdt i begge sprog**. Værktøjets boks er bevidst bevaret: den står lige under de fire beregningstilstande, så den er den, en læser bruger. Målt efter rettelsen på `next start` (port 3911, porten verificeret fri *inden* start) med begge `Host`-headere: **1 forekomst pr. formel**, 0 duplikat-overskrifter, da 126.046 bytes mod 127.029 før, se 123.487. **Harness:** ny `procent-formler.test.tsx` med 8 tests, **modsvejs verificeret: 4 af 8 falder** med den gamle `page.tsx` (begge sprog i begge tests), og de 4 der ikke falder er låse på Formler-boksen og Tip-boksen, som skal være grønne begge veje. **Måleren var vakuum-grøn i sit første udkast, og det er fundet fordi den tællede en streng der ikke findes:** sidefilens egen `page.test.tsx` mockerer `ProcentBeregner`, så en optælling i den fil ville have set **0** forekomster i stedet for 2 — C158's lære. Den nye fil mockerer den derfor **ikke** og pakker siden i `LocaleProvider`, så den renderer den rigtige producent. **To fejl i min egen test, begge fundet fordi de faldt:** (1) jeg skrev den fjerde formel som én delt streng, men de to sprog bruger hver sin adjektivform — dansk `Gammel`, svensk `Gammal` — så den svenske søgning gav **0** og ville have været grøn af fejltagelse; (2) jeg krævede "Hurtig reference" på begge sprog, men den svenske labels-tabel siger "Snabbreferens". **Og en ægte undtagelse blev fundet, fordi tallet ikke var 1 overalt:** C114's "Skillnad i procent mellan två tal" bruger `((Ny - Gammal) / Gammal) × 100` bevidst som den ene af to formler der skal holdes op imod hinanden, så på beraknare.se er den **2 gange efter rettelsen** — et andet afsnit med et andet formål, ikke en dublet af referenceboksen. Låsen er derfor pr. sprog og skrevet med begrundelsen i kilden. **Gate grøn:** lint (**584 filer**), **2.603 tests / 170 filer** (fra 2.595 / 169 — de 8 nye, og de 6 pre-existing `MomsBeregner`-fejl fra C160's noter er væk), build (**141 sider**), `locale-leak.mjs --gate` **exit 0** med **593 kandidater — 558 døde, 35 kræver øjne, 0 ureviewet** (fra 594/559/35/0) og sættet uændret **129 filer**, `knapgruppe-scan.mjs` **0/0**. Scannerens delta er **forhåndskontrolleret mod `git stash`** — målefejl 15's lære — så de −1/−1 er rettelsen og ikke en tilfældighed. **En tallene i opgave 159's egen note er forældede, målt her:** noten siger "54 kalkulatorsider", og `locale-leak.mjs` siger **56** både med og uden min rettelse. Ingen jævnføring, ingen handling — skrevet ned så næste iteration ikke jagter en forskel der ikke findes. Kode + plan i ét squash-commit på `ceo/procent-formler-duplikat`; se opgave 162. **MÅL:** `/procent` DA baseline **149.879 visninger / 99 klik / CTR 0,1 % / pos. 7,4** og SE **25.954 v / 2 klik / CTR 0,0 % / pos. 10,0**, begge pr. **2026-08-29 → 2026-09-26** — måles igen **2026-10-13**. **Forventningen er ærlig og lille:** en dublet er en kvalitetsfejl, ikke en trafikfejl, så jeg lover ikke flere klik. Det der *kan* læses af rettelsen, er at siden nu svarer ét sted på fire af sitets mest søgte formelspørgsmål. Hvis `/procent`s CTR forbliver under 0,2 % efter 14 dage, er hypotesen "dubleten forklærede den lave CTR" **modbevist**, og så er næste spørgsmål ikke mere indhold men søgemassen — de 149.520 visninger uden for de tre top-søgninger, som jeg ikke kan se fra loopet. Det er skrevet som en falsificérbar forudsigelse, ikke som en plan.
+
+---
+
 
 
 ---
@@ -15186,3 +15190,139 @@ ikke en ny lækage. De skal verificeres i den note, ikke rettes igen.
      og **0** `dage till `. Dansk er bevidst urørt.
   4. KONTROL: `https://minberegner.dk/api/health` → `status: ok`, og
      `https://beraknare.se/dagar-till/juldagen` skal have **3** `<h2>`.
+
+#### 162. [x] FÆRDIG 2026-09-29 — C161 — **`/procent` skrev de samme fire formler to gange i ét dokument, i to afsnit med to overskrifter om det samme — i begge sprog**
+
+**Datagrund:** dansk GSC (2026-08-29 → 2026-09-26) — `/procent` er sitets
+**største side: 149.879 visninger, 99 klik, CTR 0,1 %, pos. 7,4**. Det er
+**25 % af alle visninger på minberegner.dk**, og CTR'en er **5-10× lavere**
+end hver anden side i top-16 på lignende position (`/dato` pos. 5,7 har
+0,6 %). Svensk GSC: **25.954 v, 2 klik, CTR 0,0 %, pos. 10,0**. De tre
+top-søgninger er "procentberegner" (248 v, pos 8), en rabatopgave (59 v,
+pos 6) og "10 procent af" (52 v, pos 6) — **~360 visninger mod 149.879 i
+alt**, altså en meget lang hale af lange søgninger. Plausible har ikke
+`/procent` i top-15, så der er ingen besøgs-baseline.
+
+**Målt først, målt på rigtig server (begge domæner).** I live-HTML'en stod
+**hver af de fire formler 3 gange**, fordi to filer ejede dem hver:
+
+| | fil | afsnit |
+|---|---|---|
+| 1 | `src/components/ProcentBeregner.tsx:46-51` | `<h3>Formler</h3>` i boksen under værktøjet |
+| 2 | `src/app/procent/page.tsx:203` (da) | `<h2>Procentregningens formler</h2>` nederst i brødteksten |
+| 3 | `src/app/procent/page.tsx:450` (se) | `<h2>Procenträkningens formler</h2>` nederst i brødteksten |
+
+Tallet 3 = synlig tekst + client-komponentens SSR-output + sidens egen kopi i
+RSC-flight-payloaden. Samme fejlklasse som C84's `metaDescription` om 12
+byer og C160's hårdkodede `til`: **én sandhed, to ejere, fordi ingen
+kunne se den anden.**
+
+**Rettelsen er sletning, ikke tilføjelse.** De to `<h2>`-afsnit er væk i begge
+sprog. `Tip`-boksen ("50 % af 40 er det samme som 40 % af 50") var den eneste
+tekst i de slettede afsnit der ikke var en dublet, og den er **beholdt i begge
+sprog** med en test-lås. Værktøjets `<h3>Formler</h3>-boks` er bevidst
+bevaret: den står lige under de fire beregningstilstande, så den er den en
+læser bruger mens han regner — og dens "Hurtig reference"-makker står
+side om side og er *ikke* duplikeret.
+
+**Målt efter rettelsen** på `next start` (port 3911, porten verificeret fri
+*inden* start — målefejl 15's lære) med begge `Host`-headere:
+`/procent` **1 forekomst pr. formel** på begge domæner, 0
+duplikat-overskrifter, da **126.046** bytes mod 127.029 før, se **123.487**.
+
+**Harness:** ny `src/app/procent/procent-formler.test.tsx` med 8 tests.
+**Modsvejs verificeret: 4 af 8 falder** med den gamle `page.tsx` — begge
+sprog i "formlerne står kun i referenceboksen" og i "det duplikerede
+formelafsnit er væk". De 4 der ikke falder er låse på Formler-boksen,
+Hurtig reference og Tip-boksen, som skal være grønne begge veje.
+
+**Måleren var vakuum-grøn i sit første udkast — fundet fordi den tællede en
+streng der ikke findes.** Sidefilens egen `page.test.tsx` mockerer
+`ProcentBeregner` med `<div>Procentværktøj</div>`, så en optælling dér ville
+have set **0** forekomster i stedet for 2 og være grøn uden at have set
+fejlen — C158's lære, tredje gang. Den nye fil mockerer den derfor **ikke**
+og pakker siden i `LocaleProvider`, så den renderer den rigtige producent.
+
+**To fejl i min egen test, begge fundet fordi de faldt, ikke ved læsning.**
+(1) Jeg skrev den fjerde formel som én delt streng, men de to sprog bruger
+hver sin adjektivform — dansk `Gammel`, svensk `Gammal` (`Gammal` er den
+svenske neutrum-form af *gammal*) — så den svenske søgning gav **0** og
+testen ville have været grøn af fejltagelse. (2) Jeg krævede
+`>Hurtig reference</h3>` på begge sprog, men den svenske labels-tabel siger
+`>Snabbreferens</h3>`.
+
+**Én ægte undtagelse, fundet fordi tallet ikke var 1 overalt.** C114's
+`<h2>Skillnad i procent mellan två tal</h2>` bruger
+`((Ny - Gammal) / Gammal) × 100` **bevidst** som den ene af to formler der
+skal holdes op imod hinanden (den anden er procentdifferensen over
+middelværdien). Den står derfor **2 gange på beraknare.se efter rettelsen** —
+et andet afsnit med et andet formål, ikke en dublet af referenceboksen. Låsen
+er derfor pr. sprog og skrevet med begrundelsen i koden, ikke som et globalt
+"præcis 1".
+
+**Gate grøn:** lint (**584 filer**), **2.603 tests / 170 filer** (fra
+2.595 / 169 — de 8 nye; de 6 pre-existing `MomsBeregner`-fejl der lå i
+C160's noter er væk), build (**141 sider**), `locale-leak.mjs --gate`
+**exit 0** med **593 kandidater — 558 døde, 35 kræver øjne, 0 ureviewet**
+(fra 594/559/35/0) og sættet uændret **129 filer**, `knapgruppe-scan.mjs`
+**0/0**. Scannerens delta er **forhåndskontrolleret mod `git stash`**, så
+de −1/−1 er rettelsen og ikke en tilfældighed.
+
+**En tallene i opgave 159's egen note er forældede, målt her:** noten siger
+"**54 kalkulatorsider**", `locale-leak.mjs` siger **56** — både *med* og
+*uden* min rettelse. Ingen jævnføring, ingen handling, men skrevet ned så
+næste iteration ikke jagter en forskel der ikke finder.
+
+**Ingen beregningslogik rørt.** `src/lib/procent.ts` urørt, ingen `no`,
+ingen anden side rørt, ingen URL, ingen sitemap-post, ingen FAQ, ingen
+titel/description. Kun `src/app/procent/page.tsx` (to slettede afsnit + to
+forklarende kommentarer) og den nye testfil.
+
+**MÅL:** `/procent` DA **149.879 visninger / 99 klik / CTR 0,1 % / pos. 7,4**
+og SE **25.954 v / 2 klik / CTR 0,0 % / pos. 10,0**, begge pr.
+**2026-08-29 → 2026-09-26** — måles igen **2026-10-13**.
+
+**Forventningen er ærlig og lille.** En dublet er en kvalitetsfejl, ikke en
+trafikfejl, så der loves ikke flere klik. Det falsificérbare er skrevet ned:
+bliver `/procent`s CTR under 0,2 % efter 14 dage, er hypotesen "dubleten
+forklærede den lave CTR" **modbevist** — og så er næste spørgsmål ikke mere
+indhold men **søgemassen**: de **149.520** visninger uden for de tre
+top-søgninger kan ikke ses fra loopet, så næste iteration skal bruge sine
+gange på `/procent` på at *finde* dem (autocomplete + GSC's søgeforespørgsels-
+rapport), ikke på at skrive mere indhold til dem.
+
+- ⏳ **VERIFICÉR DEPLOY: C161 — `/procent` skal have de fire formler præcis én gang i HTML'en i stedet for tre, på begge domæner, og de to duplikat-overskrifter skal være væk.** Kode + plan i ét squash-commit på `ceo/procent-formler-duplikat`. Første kandidatvindue **2026-09-29 07:30**. Kun `src/app/procent/page.tsx` (to `<h2>`-afsnit slettet, `Tip` bevaret) og den nye `src/app/procent/procent-formler.test.tsx` er rørt — **ingen beregningslogik, ingen FAQ, ingen titel/description, ingen anden side**. Verificér ved **indhold, ikke HTTP 200**:
+  1. `curl -s https://minberegner.dk/procent` skal have **1** forekomst af
+     `"Procent = (Del / Heltal) × 100"` og **1** af `"Heltal = Del × (100 / Procent)"`.
+     Før rettelsen var de **3** hver — brug det tal, ikke et krav om 200.
+  2. Samme kommando på `https://beraknare.se/procent` skal give **1** og **1**,
+     og `"Procentregningens formler"` skal have **0** forekomster (den
+     svenske hed "Procenträkningens formler" og skal også have **0**).
+  3. `curl -s https://minberegner.dk/procent` skal stadig have **1**
+     `>Formler</h3>` og **1** `"50% af 40 er det samme som 40% af 50"` —
+     hvis en af dem er 0, er formlerne slettet i stedet for deduplikeret.
+  4. KONTROL: `https://minberegner.dk/api/health` → `status: ok`, og
+     `/dato`, `/moms`, `/tidsberegner` skal have uændrede titler.
+
+#### 163. [ ] Nyt kandidat i C161 — **beraknare.se `/procent` har norsk/dansk i en svensk sætning, i et afsnit C114 skrev**
+
+**Målt i samme render som C161** (rigtig server, `Host: beraknare.se`):
+`"En lønsprocent kan du se som kroner her: löneökning i procent"`. **`lønsprocent`**
+er norsk (og i dansk hedder det *lønprocent*), og **`her`** er dansk — svensk
+er *här*. Det står i `src/app/procent/page.tsx` lige efter C114's
+"Skillnad i procent mellan två tal"-afsnit, altså **kun på beraknare.se**
+og kun i den svenske gren. Det er **ikke** en duplikat, så C161's rettelse
+fandt det ikke ved at tælle.
+
+**Hvorfor den er sin egen opgave og ikke en del af C161:** C161's fejl var
+en duplikat, og måleren var en optælling. Denne er en **locale-lækage**, og
+C157's port-analyse (`src/app/**/page.tsx` med port-regler) burde kunne se
+den — den er målet til at gøre det i næste iteration, fordi det er den
+første rigtige prøve på om C158's udvidede sæt nu ser `page.tsx`-teksten.
+**Målt først:** kør `node scripts/locale-leak.mjs --gate` og se om den
+rammer denne linje; hvis den gør, er hullet fundet og opgaven er en
+én-linjers rettelse. Hvis den *ikke* gør, er porten stadig for snæver, og
+det er den egentlige opgave. **Datagrund:** beraknare.se `/procent`
+**25.954 visninger, CTR 0,0 %, pos. 10,0** — svensk GSC's tredjestørste side.
+**MÅL:** SE baseline **25.954 v / 2 klik / CTR 0,0 % / pos. 10,0 pr.
+2026-08-29 → 2026-09-26** — måles igen 2026-10-13.
