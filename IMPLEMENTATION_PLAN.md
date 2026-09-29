@@ -1,3 +1,31 @@
+STATUS: KØ — **alle 12 åbne deploy-noter er lukket ved indholdskontrol efter 12:30-vinduet: C158, C167, C168, C169, C170, C171, C172, C173, C174, C175, C176 og C52 er `DEPLOY OK 2026-09-29`. Køen havde ingen `I GANG`-opgave (alle 177 er `[x]`, 97 er `BLOCKED`, 98 afhænger af den, 119 er kilde-blokeret), og 11 af de 12 noter havde første vindue 2026-09-29 12:30 — det var 12:46 ved starten, så de var **forfalden** og blev lukket. Kun **C177** (`ceo/og-image`) er stadig åben: den blev mergeret ca. 12:45, altså *efter* 12:30, så første vindue er 17:30. Denne iteration leverer derfor ingen kode — den er en ren verificeringsiteration, og det er den eneste grund til at der laves én plan-commit.**
+
+**Ingen fejl fundet i nogen af de 12.** Alle noter måler *indhold*, aldrig HTTP 200 — og det er ikke en formalitet: `/opengraph-image` svarer 200 hele tiden, også da ingen sider linkede det, så et 200 på den route beviser intet. Beviset for at der virkelig er deployet, og ikke bare at siden svarer: C170's tre nøgleformler, C173's ni FAQ-spørgsmål, C167's tolv, C172's ni stat-rækker og C174's seks relaterede hrefs står i den server-renderede HTML nu, og de var enten 0 eller det gamle antal før.
+
+**Målefejl nr. 36 og 37 (begge mine, samme fejltype som C94's 16 og C166's 22): rå-`grep` på HTML'en tæller RSC-payloaden med og døer i React' `<!-- --}`.** Mit første script meldte **0** på tre af C170's strenge (`10.000 til 12.500 = 25 procent`, `10.000 og 12.500 = 22,2 procent`, `9,5 procent store forskel`) — de står i **tabelceller**, og React skriver et kommentar-mellemrum mellem to tekstnoder i samme celle, så rå-HTML'en siger aldrig den hele streng. Efter at strippe `<script>` og `<!-- -->` er alle tre **1**. Omvendt meldte samme rå-tæller **5** på `/motion-kalorier` og **10** på `/vaegttab` (note: 2 hhv. 3), fordi hvert link optræder tre gange — synlig tekst, komponentens egen SSR og RSC-flight-payloaden. **Begge fejl pegede i modsat retning**, så ingen af dem ville være fanget ved at tage den første måling for god. Den fælles regel for enhver ny notemåling: **strip script-tags og `<!-- -->` før tælling, og læs `<h2>`-blokkens rækkefølge i markupken, ikke i et greb over hele siden.**
+
+**Fundet undervejs — et ægte, ulukket brud på det norske domæne (ny opgave 178).** C176's note bad om at verificere `https://beregner.no/manifest.webmanifest` → **"28+ gratis beregnere"**. Den svarer **404** med `/locale-unavailable`-siden (6.427 bytes HTML), og beregner.dk's forside har **0** `<link rel="manifest">` — den eneste forekomst af "manifest" i HTML'en er i RSC-client-bundlen. **Kontrollen på de to andre domæner holder:** `minberegner.dk` har `<link rel="manifest" href="/manifest.webmanifest"/>` og **"79+ …"**, `beraknare.se` **"53+ …"**. `rg -n "manifest" src/` rammer kun `src/app/manifest.ts` og `i18n.ts`, altså der er **ingen kode, der fjerner linket på norsk** — så årsagen er ikke fundet. Det er **ikke** en følge af C176 (den rørte kun strengen), og det er skrevet som en målt afvigelse frem for en formodning. Betydningen er lille (PWA-install på et domæne med 28 sider) men klassen er C84's: **indhold der serveres på to domæner og ikke på det tredje.**
+
+**Målte resultater, note for note** (live, `curl` med browser-User-Agent, 2026-09-29 12:47–12:58; `/api/health` svarede `status: ok` på begge domæner):
+
+| Note | Målt på live | Resultat |
+|---|---|---|
+| C158 | `locale-leak.mjs --gate` exit 0 på master | ✅ |
+| C167 | `da/alder` + `se/alder`: `<h2>` "Hvor mange dage har du levet?" / "Hur många dagar har du levt?" (2 hhv. 2 synlige forekomster), `24 pr. døgn` / `24 per dygn` (5 hhv. 5), JSON-LD **12** `Question` begge steder (var 10) | ✅ |
+| C168 | `se/tidszone` **0** "Grønland" / **7** "Grönland"; `se/promille` **2** "före den är under" + **2** "kortare än" / **0** "kortere end"; `se/valuta` **0** på alle fire danske valutanavne. Kontrol: `da/valuta` **4** "Britiske Pund", `da/promille` "før den er under" **2**, `da/tidszone` "Grønland" **9** + "følger Danmark" **5**. `rendered-leak-scan.mjs https://beraknare.se` → **"0 danske tegn i synlig tekst"**, exit 0, 71 sider | ✅ |
+| C169 | `/dage-til/sommerferien` **200**, titel "…til sommerferie? **270 dage**" (forventet 270), canonical korrekt, **4** `Question`, `hrefLang` = `da` + `x-default` og **ikke** `sv`; `/dage-til/sankthansaftensdag` har alle **3** hreflang; `beraknare.se/dage-til/sankthansaftensdag` **301** → `/dagar-till/midsommarafton`; `beraknare.se/dage-til/sommerferien` **404**; `beraknare.se/` **0** "sommerferien"; sitemap **15** `dage-til`-URL'er hvoraf 1 sommerferien; `href="/dage-til/sommerferien"` på `/`, `/dato`, `/nedtaelling` | ✅ |
+| C170 | `da/procent`: `<h2>` "Sådan beregner du procentforskellen mellem to tal", "mellem to tal" **10** (var 0), alle syv formler/tal-par i synlig tekst (se målefejl 36) | ✅ |
+| C171 | `se/tidszone`: "Grönland" **4**, "Excel" **3**, `=B1` **2** | ✅ |
+| C172 | `da`+`se` `/tidszone`: begge nye `<h2>` (Florida-linjen), **"25 byer"/"25 städer"** (2 hhv. 2), **0** på "21 byer"/"21 städer"; alle ni stater i begge sprog (Californien læses som Kalifornien på svensk — korrekt stavemåde, ikke en mangel) | ✅ |
+| C173 | `da/braendstof`: **præcis 1** `<h2>` "Hvorfor er diesel dyrere end benzin?", "dyrere end benzin" **2** synlige, alle syv tal med komma, JSON-LD **9** `Question` (var 7) | ✅ |
+| C174 | `/kalorier` DA **og** SE: relaterede-blokken i rækkefølgen `/motion-kalorier, /vaegttab, /proteinbehov, /1rm, /kropsfedt, /vandbehov`; `/planetvaegt` → `/ohm` **1**; kontrol `/brok` → `/ohm` **0**, `/kvadratmeter` **2** | ✅ |
+| C175 | `/blog` titel 21 tegn, `/om` 34, `/` 53 — alle ≤ 60 — og `og:site_name="MinBeregner.dk"` stadig til stede | ✅ |
+| C176 | `manifest.webmanifest`: **"79+ …"** (da), **"53+ …"** (se); `33+` **0** forekomster på forsiden; `Organization.description` "79+ gratis beregnere"; `/om` "Vores 79+ beregnere" **1**; `/blog` "Vi har 79+ gratis beregnere" **1**. Kontrol: `/procent`s egen description uændret | ✅ (men se opgave 178) |
+| C52 | `da/moms`: "Læg moms til" **10**, "Træk moms fra" **3**, "Tillæg moms" **0**; `se/moms`: "Lägg till moms" **2**, "Dra av moms" **8**. **Et afvigende fund, ikke en fejl:** "Fratræk moms" står **1** gang — som `<h4>Fratræk moms:</h4>` i formelafsnittet, ikke som knap. Notens kriterium lød "0 i hele HTML'en"; det er ikke nået ordret, men den rettelse noteen beskriver (knapperne) er. Skrevet ned, fordi det er forskellen på en måler der kigger efter en streng og en der kigger efter det element strengen lå i. | ✅ |
+| C177 | `og:image` **0** på `/procent`, `beraknare.se/dato`, `/blog`, `/dage-til/juledagen` | ⏳ åben, vindue 17:30 |
+
+**Tre noter (C55, C56, C60) kan ikke lukkes med en `fetch` — de er efter planen selv bygget på interaktivitet** (at sætte felter og læse klient-renderede tal og Kopier/Del-strenge), og de har stået åbne siden 2026-09-27 07:30. De er **ikke** slettet og **ikke** lukket på mig: de kræver én browser-pass, og det er skrevet som opgave 179, ikke som en note der lukkes på en måling der ikke kan se den.
+
 STATUS: KØ — **C177 er landet: `opengraph-image.tsx` har genereret et 93 KB PNG og serveret det med 200 siden den blev skrevet, men **0 af 206 sider** sendte en eneste `og:image` — så ethvert link delt fra sitet (Facebook, WhatsApp, Messenger, LinkedIn, SMS) har rendret som en blå URL uden forhåndsvisning. Billedet var ikke bare uden billede; det var *framtvingende* ubrugeligt, fordi den manglende `<meta>` får Facebook og WhatsApp til at vise en tom boks.** Køen havde ingen `I GANG`-opgave (97 er `BLOCKED`, 98 afhænger af den, 119 er kilde-blokeret), og de ni åbne deploy-noter (C167–C176) har alle første vindue **2026-09-29 12:30** — det var 12:10 ved starten, så ingen blev rørt. **Valget kom af at måle de ting ingen af C82–C176 havde målt.** De har lukket titler (C175), descriptions (C164, C166, C176), JSON-LD, hreflang, canonical, sprogfejl og interne links — men aldrig *social metadata på tværs af domænet*. Scanningen af alle 206 sider i begge sitemapmer fandt **én fejlklasse og ingen andet**: `og:image` **0/206** (og `twitter:image` 0/206). **Målefejl nr. 34 (min egen, samme slags som C176's 521):** min første verifikationsscript brugte `fetch` med `headers: {host}` — og undici **forbyder** at sætte `Host` i Node, så de 14 svenske `/dagar-till/*`-sider svarede **404** i min måling. De er 200 på live og 200 med `curl -H "Host: …"`. Det er målt, ikke antaget: efter at skiftede til `curl` faldt tallet fra 192/206 til **207/207**. Uden genmålingen havde jeg rapporteret en fejl, der ikke findes.
 
 **Årsagen er to lag, og kun det første er tilstrækkeligt at forklare.** (1) `opengraph-image.tsx` eksporterede `dynamic = "force-dynamic"`. Fil-konventionen (`discover.js:104` → `mergeStaticMetadata` i `resolve-metadata.js:117`) opsamler statiske billeder ved *build*-tid og skriver dem i layoutets `openGraph.images`; `force-dynamic` fik route'en til at springe den sti over. Beviset er at fjerne den linje alene fik `/` til at servere `opengraph-image?7a961a05217a97a7` — **hash-query'en er fil-konventionens egen**, så det var den der producerede tagget. `apple-icon.tsx` har aldrig haft den linje, og den har hele tiden virket. (2) Men det viser sig *kun* at være halv rettelsen: **33 sider skriver deres egen `openGraph`-literal** (27 blogindlæg + `/blog`, `/om`, `/privatlivspolitik`, `/kategori/[slug]`, …), og Next erstatter layoutets objekt **helt** — de kan ikke arve billedet, de skal navngive det selv. Målt efter lag 1: 14 `dage-til`-sider + 33 egne `openGraph` = **47 sider stadig uden**, præcis de to forventede tal. Det er C175's fejlklasse igen: **en regel, der kun gælder for den gruppe den blev skrevet for.**
@@ -7202,7 +7230,7 @@ efter datagrund:
      Procent 10. Forklaringen skal læse **"10% af 2.500,5 er 250,05"** — før
      rettelsen skrev den "2500.5" med punktum.
   7. `https://minberegner.dk/api/health` skal svare `status: ok`.
-- ⏳ **VERIFICÉR DEPLOY: C52 `/moms` — kopier/del/print gav en regning uden
+- ✅ **DEPLOY OK 2026-09-29 12:5x — lukket ved indholdskontrol.** C52 `/moms` — kopier/del/print gav en regning uden
   momsen, og de danske knapper sagde "Tillæg" — kode `aa585d3`, merge `328a656`
   2026-09-26 23:47 CEST på branch `ceo/moms-audit`.** Første kandidatvindue
   **2026-09-27 07:30**. Verificér **indhold**, HTTP 200 beviser intet:
@@ -8007,7 +8035,7 @@ kørsel — efter `git checkout` af filen er 2.705/2.705 grøn.
 måles igen **2026-10-13**. Hvis CTR'en er uændret, er "ubesvarede
 USA-klynge forklarede den lave CTR" **modbevist**.
 
-- ⏳ **VERIFICÉR DEPLOY: C172 — `/tidszone` skal have et nyt `<h2>` "Når det er 12 i Danmark, er det 06 i Florida" / "När det är 12 i Sverige är det 06 i Florida" med ni stat-rækker, og `metaDescription`/`ogDescription` skal sige 25 byer/städer i stedet for 21.** Kode + plan i ét squash-commit på `ceo/tidszone-usa-stater`. Første kandidatvindue **2026-09-29 12:30**. Kun `src/lib/tidszone-reference.ts` (fire nye byer + kildekommentar), `src/lib/tidszone-usa-stater.ts` (**ny**), `src/app/tidszone/page.tsx` (én import + én `<h2>` pr. sproggren), `src/lib/page-data.ts` (to FAQ-par + keywords pr. sprog, by-tal 21→25) og to testfiler er rørt — **ingen eksisterende beregning ændret, ingen URL, ingen sitemap, `<title>` uændret, `no` urørt**. Verificér ved **indhold, ikke HTTP 200**:
+- ✅ **DEPLOY OK 2026-09-29 12:5x — lukket ved indholdskontrol** (konsolideret note nedenfor). C172 — `/tidszone` skal have et nyt `<h2>` "Når det er 12 i Danmark, er det 06 i Florida" / "När det är 12 i Sverige är det 06 i Florida" med ni stat-rækker, og `metaDescription`/`ogDescription` skal sige 25 byer/städer i stedet for 21.** Kode + plan i ét squash-commit på `ceo/tidszone-usa-stater`. Første kandidatvindue **2026-09-29 12:30**. Kun `src/lib/tidszone-reference.ts` (fire nye byer + kildekommentar), `src/lib/tidszone-usa-stater.ts` (**ny**), `src/app/tidszone/page.tsx` (én import + én `<h2>` pr. sproggren), `src/lib/page-data.ts` (to FAQ-par + keywords pr. sprog, by-tal 21→25) og to testfiler er rørt — **ingen eksisterende beregning ændret, ingen URL, ingen sitemap, `<title>` uændret, `no` urørt**. Verificér ved **indhold, ikke HTTP 200**:
   1. `https://minberegner.dk/tidszone` → `<h2>Når det er 12 i Danmark, er det 06 i Florida</h2>` og **9** `<tr>` i stat-tabellen med Florida 06:00/06:00, Californien 03:00/03:00, Texas 05:00/05:00, **Arizona 04:00/03:00**, Colorado 04:00/04:00.
   2. `https://beraknare.se/tidszone` → samme ni rækker med **Kalifornien** (ikke "Californien"), Florida 06:00/06:00, Arizona 04:00/03:00, og **0** forekomster af "Californien".
   3. Begge: `grep -o '"@type":"Question"' | wc -l` skal give **11** (var 9) — **ikke** `grep -c`.
@@ -8313,7 +8341,7 @@ landmark=lån, piggybank=opsparing osv.).
 
 ## VERIFICÉR DEPLOY-log
 
-- ⏳ **VERIFICÉR DEPLOY: C171 — `/tidszone` skal have et nyt `<h2>` med tabellen
+- ✅ **DEPLOY OK 2026-09-29 12:5x — lukket ved indholdskontrol** (konsolideret note nedenfor). C171 — `/tidszone` skal have et nyt `<h2>` med tabellen
   for kl. 21, 14 og 16 i USA, i begge sprog, og FAQ'en skal have et nyt
   spørgsmål om kl. 21 pr. sprog.** Kode + plan i ét squash-commit på
   `ceo/tidszone-usa-timer`. Første kandidatvindue **2026-09-29 12:30** (merge
@@ -15353,7 +15381,7 @@ den batch, så C158's egen note får første vindue **12:30**.
 3. Hvis de afviger, er porten for snæver, og det er en **ny iteration**, ikke
    en note der lukkes.
 
-- ⏳ **VERIFICÉR DEPLOY: C158 — `scripts/locale-leak.mjs` læser nu
+- ✅ **DEPLOY OK 2026-09-29 12:5x — lukket ved indholdskontrol** (konsolideret note nedenfor). C158 — `scripts/locale-leak.mjs` læser nu
   `src/app/**/page.tsx` med port-analyse, og `locale-leak-gate.test.ts` har
   fem nye dobbeltplantede tests.** Kode + plan i ét commit på
   `ceo/page-portscan`, squashet til `master`. Første kandidatvindue
@@ -16184,7 +16212,7 @@ uændret efter 14 dage, er hypotesen "den ubesvarede klynge forklarede den lave
 CTR" **modbevist**, og `/dato` behøver et link til en *ny* side, ikke en dybere
 svaret. Skrevet som en falsificérbar forudsigelse.
 
-- ⏳ **VERIFICÉR DEPLOY: C167 — `/alder` skal have et nyt `<h2>` "Hvor mange
+- ✅ **DEPLOY OK 2026-09-29 12:5x — lukket ved indholdskontrol** (konsolideret note nedenfor). C167 — `/alder` skal have et nyt `<h2>` "Hvor mange
   dage har du levet?" / "Hur många dagar har du levt?" med dage-, uge-,
   måneds- og timmetal, og FAQ'en skal have to nye spørgsmål pr. sprog.** Kode
   + plan i ét squash-commit på `ceo/alder-dage-levet`. Første
@@ -16281,7 +16309,7 @@ mod en tilplantet side: 2 fund og exit 1, så den er ikke vakuum-grøn.
 sider), `locale-leak.mjs --gate` exit 0 (130/720/685/35/0 uændret),
 `knapgruppe-scan.mjs` 0/0.
 
-- ⏳ **VERIFICÉR DEPLOY: C169 — `/dage-til/sommerferien` skal være live på
+- ✅ **DEPLOY OK 2026-09-29 12:5x — lukket ved indholdskontrol** (konsolideret note nedenfor). C169 — `/dage-til/sommerferien` skal være live på
   minberegner.dk, og beraknare.se skal *ikke* have den.** Kode + plan i ét
   squash-commit på `ceo/sommerferie-dage-til`. Første kandidatvindue
   **2026-09-29 12:30**. Kun `src/lib/dage-til.ts` (ny `sommerferie`-regel +
@@ -16321,7 +16349,7 @@ sider), `locale-leak.mjs --gate` exit 0 (130/720/685/35/0 uændret),
      18 nye tests inkl. den 61-årige lovchkalkering af "sidste lørdag i juni".
   10. `https://minberegner.dk/api/health` → `status: ok`.
 
-- ⏳ **VERIFICÉR DEPLOY: C168 — beraknare.se skal have "Grönland" i stedet for
+- ✅ **DEPLOY OK 2026-09-29 12:5x — lukket ved indholdskontrol** (konsolideret note nedenfor). C168 — beraknare.se skal have "Grönland" i stedet for
   "Grønland", "Brittiska pund" i stedet for "Britiske Pund", og "före den är
   under" / "kortare än" i stedet for "før" / "kortere end".** Kode + plan i ét
   squash-commit på `ceo/luk-deploy-noter-159`. Første kandidatvindue
@@ -16374,7 +16402,7 @@ sider), `locale-leak.mjs --gate` exit 0 (130/720/685/35/0 uændret),
      `/tidszone`, `/promille`, `/valuta` skal have uændrede titler på begge
      domæner.
 
-- ⏳ **VERIFICÉR DEPLOY: C170 — den danske `/procent` skal have et nyt `<h2>`
+- ✅ **DEPLOY OK 2026-09-29 12:5x — lukket ved indholdskontrol** (konsolideret note nedenfor). C170 — den danske `/procent` skal have et nyt `<h2>`
   "Sådan beregner du procentforskellen mellem to tal" med de to formler, der
   skal holdes op imod hinanden.** Kode + plan i ét squash-commit på
   `ceo/procent-forskel-da`. Første kandidatvindue **2026-09-29 12:30** (merge
@@ -16479,7 +16507,7 @@ ingen `<title>`, ingen `metaDescription`, ingen URL, ingen sitemap.
 175 filer**, `npm run build` (grøn), `locale-leak.mjs --gate` exit 0 (130
 filer / 734 kandidater / 699 døde / 35 kræver øjne / **0 ureviewet**).
 
-- ⏳ **VERIFICÉR DEPLOY: C173 — `/braendstof` skal have et nyt `<h2>` "Hvorfor
+- ✅ **DEPLOY OK 2026-09-29 12:5x — lukket ved indholdskontrol** (konsolideret note nedenfor). C173 — `/braendstof` skal have et nyt `<h2>` "Hvorfor
   er diesel dyrere end benzin?" med pr. liter/pr. km-splittet og en 500
   km-tabel (450 kr./0,90 kr. pr. km mod 356 kr./0,71 kr. pr. km), og to nye
   FAQ-par.** Kode + plan i ét squash-commit på `ceo/braendstof-diesel`.
@@ -16629,7 +16657,7 @@ er værst. Se `❓ Til Mads`.
    gensidighedsrunde ville kræve et valg pr. side, og det er et
    redaktionsspørgsmål, ikke en måling.
 
-- ⏳ **VERIFICÉR DEPLOY: C174 — `/kalorier`'s relaterede-beregner-blok skal
+- ✅ **DEPLOY OK 2026-09-29 12:5x — lukket ved indholdskontrol** (konsolideret note nedenfor). C174 — `/kalorier`'s relaterede-beregner-blok skal
   have `/motion-kalorier`, `/vaegttab`, `/proteinbehov`, `/1rm`,
   `/kropsfedt` og `/vandbehov` (i den rækkefølge), og `/planetvaegt`'s skal
   have `/ohm`.** Kode + plan i ét squash-commit på `ceo/kalorier-relaterede`.
@@ -16948,6 +16976,74 @@ er værst. Se `❓ Til Mads`.
   5. `buildDageTilMetadata`-siderne er dækket. **Nået, modsvejs verificeret.**
   6. `npm run lint`, `npm run test`, `npm run build` grønne. **Nået.**
   7. `node scripts/locale-leak.mjs --gate` exit 0 med 0 ureviewet. **Nået.**
+
+#### 178. [ ] ÅBEN — **`beregner.no` serverer intet webmanifest: `/manifest.webmanifest` er 404 og forsiden har ingen `<link rel="manifest">`, mens de to andre domæner har begge dele**
+
+- **Iteration start:** 2026-09-29 12:46. Fandtes ved at verificere C176's
+  tredje domæne-punkt.
+- **Datagrund (målt, live 12:52):**
+  `https://beregner.no/manifest.webmanifest` → **404** (6.427 bytes
+  `/locale-unavailable`-HTML); `https://beregner.no/manifest.json` → 404;
+  forsiden på beregner.dk indeholder **0** `<link rel="manifest">` — den
+  eneste "manifest"-forekomst i HTML'en ligger i RSC-client-bundlen.
+  Kontroller på de to andre domæner er grønne: `minberegner.dk` har
+  `<link rel="manifest" href="/manifest.webmanifest"/>` og beskrivelsen
+  "79+ gratis beregnere…"; `beraknare.se` har "53+ gratis kalkylatorer…".
+  `rg -n "manifest" src/` rammer kun `src/app/manifest.ts` og `src/lib/i18n.ts`.
+- **Årsagen er IKKE fundet, og det er derfor den er en opgave.** Der er ingen
+  kode, der conditionelt fjerner manifest-linket, så de tre muligheder er:
+  (a) `getRouteDecision` returnerer `not-found` for `/manifest.webmanifest`
+  på et `no`-domæne — `routing.ts:60` gør `not-found` for ethvert
+  `dage-til`-slug på et ikke-`da/se`-domæne, men `/manifest.webmanifest` er
+  ikke et `dage-til`-slug; (b) Next bygger kun manifest-linken for de domæner
+  der findes i build-outputtet, og `beregner.no` står i
+  `domain-config.ts:91 hiddenDomains`; (c) deploy-konfigurationen for
+  beregner.no peger på en anden build. **Findes ved at læse (a) og (b) først —
+  begge er gratis at efterprøve med ét grep hver, og (a)/(b) kan begge være
+  sande samtidig.** Mål på **bygget server** med `Host: beregner.no`, ikke kun
+  på live, ellers kan man ikke skelne mellem en kodefejl og en deployfejl.
+- **Acceptkriterier:**
+  1. `curl -H "Host: beregner.no" -s localhost:<port>/manifest.webmanifest` på
+     den byggede server → **200** med `"description": "28+ gratis beregnere…"`.
+     Hvis den allerede er 200 lokalt, er fejlen i deployen, ikke i koden — skriv
+     det, og stop.
+  2. `curl -H "Host: beregner.no" -s localhost:<port>/` indeholder **ét**
+     `<link rel="manifest" href="/manifest.webmanifest"/>`.
+  3. En ny test der låser at alle **tre** domæner serverer
+     `/manifest.webmanifest` med et `description` der ikke underrapporterer
+     katalogstørrelsen (samme regel som C176's fjerde test i `i18n.test.ts`).
+  4. `npm run lint`, `npm run test`, `npm run build`,
+     `node scripts/locale-leak.mjs --gate` grønne.
+- **Forventet effekt:** lav trafikmæssig (PWA-installation på et domæne med
+  28 sider), men klassen er C84's og er generel: *hvert domæne skal måles
+  selvstændigt, fordi fælles kode og fælles deploy ikke garanterer fælles
+  output.* Rettelser som kun måles på `minberegner.dk` kan efterlade
+  `beraknare.se` og `beregner.dk` i en tilstand ingen har set.
+
+#### 179. [ ] ÅBEN — **C55, C56 og C60 er deploy-noter, der kræver interaktivitet, og har stået åbne siden 2026-09-27 07:30**
+
+- **Datagrund:** planen. Alle tre noter er skrevet på at man *sætter felter* og
+  læser klient-renderede tal og Kopier/Del-strenge:
+  - **C60 `/promille`** (vindue 2026-09-27 07:30, merge `aded200`): markér
+    "Antal genstande" og slet feltet — kortet må ikke blive grønt med "Du er
+    under …"; "præcis på grænsen" skal have erstattet "over grænsen".
+  - **C56 `/tidszone`** (merge `67d4cb1`): "Til tidszone = Indien (IST)" skal
+    give **"+3,5 timer"** og **"Mumbai er 3,5 timer foran København"**, huskelisten
+    **"+3,5t (+4,5t om vinteren)"**.
+  - **C55 `/dato`** (merge `122535d`): "Dage mellem", 25.→26. oktober 2026 skal
+    give **1** dag (før 2, som følge af et sommertidsskifte).
+- **Hvorfor de ikke er lukket i denne iteration:** de er de eneste noter i
+  planen, hvis fund ligger i klient-renderede kort. `curl` kan ikke sætte et
+  felt, og det er *ikke* løst ved at tælle strenge i HTML'en — det ville være
+  samme fejl som C158's port-analyse gjorde, bare i modsat retning. At lukke
+  dem på en teksttælling ville være vakuum-grønt.
+- **Acceptkriterier:** de tre fund verificeret i en rigtig browser med
+  noterne ved hånden, og **hver note markeret med HVILKET felt der blev sat og
+  HVAD der stod** — ikke "ser ud til at virke". Findes et afvigende fund, er
+  det en ny opgave, ikke en note der lukkes.
+- **Note:** de er **gamle** (to dage, ~14 deploy-vinduer). Hvis koden siden er
+  rørt igen på de tre sider, skal noterne skrives om mod den nuværende kode
+  før de verificeres — ellers verificerer man en gammel kravspecifikation.
 
 ### ❓ Til Mads — ny i C177
 
