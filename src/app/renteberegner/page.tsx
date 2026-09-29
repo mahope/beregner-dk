@@ -18,6 +18,7 @@ import {
   effektivAarsrente,
 } from "@/lib/rente-eksempler";
 import { formatNumber } from "@/lib/format";
+import { EXCEL_FAELLOR_SE, excelRaekkerSe } from "@/lib/rente-excel";
 import Link from "next/link";
 
 /** Fradragsværdien som dansk procenttal med ét decimal, læst fra modulet. */
@@ -434,6 +435,43 @@ export default async function RenteberegnerPage() {
             </tbody>
           </table>
         </div>
+
+        <h2>Samma tal i Excel</h2>
+        <p>
+          Du behöver inte räkna ut annuity-formeln för hand. Excel har
+          funktionen <strong>BETALNING</strong> inbyggd, och med samma tre
+          tal som ovan får du samma svar som kalkylatorn.
+        </p>
+        <div className="overflow-x-auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Fråga</th>
+                <th>Formel</th>
+                <th>Svar</th>
+              </tr>
+            </thead>
+            <tbody>
+              {excelRaekkerSe().map((raekke) => (
+              <tr key={raekke.formel}>
+                <td>{raekke.spoergsmaal}</td>
+                <td>
+                  <code>{raekke.formel}</code>
+                </td>
+                <td>{raekke.svar}</td>
+              </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p>
+          <strong>Tre fällor i svensk Excel</strong>
+        </p>
+        <ul>
+          {EXCEL_FAELLOR_SE.map((faelle) => (
+          <li key={faelle}>{faelle}</li>
+          ))}
+        </ul>
 
         <h2>Tips för att få ett bra lån</h2>
         <ul>

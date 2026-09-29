@@ -3564,6 +3564,7 @@ const sePages: Record<string, PageData> = {
       { question: "Vad är formeln för ett annuitetslån?", answer: "Betalningen är P × r ÷ (1 − (1 + r)^-n), där r är månadsräntan och n antal månader. Ett lån på 200.000 kr till 4 % i 20 år ger 1.212 kr i månaden — 240 månader, 290.871 kr i alt varav 90.871 kr är ränta." },
       { question: "Hur räknar man ut effektiv ränta?", answer: "Den effektiva årsräntan är (1 + månadsränta)^12 − 1. En månadsränta på 1 % blir 12,68 % per år, och en nominell årsränta på 4 % ger en månadsränta på 0,3333 %, vilket är 4,07 % effektivt." },
       { question: "Avdrag?", answer: "Kontrollera Skatteverket för avdragsregler." },
+      { question: "Hur räknar jag ett annuitetslån i Excel?", answer: "Använd BETALNING med semikolon mellan argumenten: =BETALNING(0,05/12;60;-100000) ger 1.887 kr i månaden på 100.000 kr under 5 år." },
       ],
     },
     "opsparing": {

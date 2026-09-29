@@ -159,13 +159,16 @@ describe("renteberegner page", () => {
       expect(html).toContain("=YDELSE(0,04/12;240;-200000)");
     });
 
-    test("de to nye spørgsmål ligger i page-data, og dermed i JSON-LD", () => {
+    test("de tre nye spørgsmål ligger i page-data, og dermed i JSON-LD", () => {
       const spg = getPageData("renteberegner", "se")!.faqItems.map((f) => f.question);
 
       expect(spg).toContain("Vad är formeln för ett annuitetslån?");
       expect(spg).toContain("Hur räknar man ut effektiv ränta?");
+      // C190: Excel-klyngen ("annuitetslån excel formel", "lån excel mal") havde
+      // nul forekomster på beraknare.se, selv om dansk fik den i C85.
+      expect(spg).toContain("Hur räknar jag ett annuitetslån i Excel?");
       // De fire forrige skal være der stadig — de nye er lagt til, ikke byttet.
-      expect(spg).toHaveLength(6);
+      expect(spg).toHaveLength(7);
     });
   });
 });
