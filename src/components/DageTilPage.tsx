@@ -30,6 +30,8 @@ const copy: Record<
     answerPrefix: string;
     today: string;
     equivalent: string;
+    /** Preposition before the event name: "til" in Danish, "till" in Swedish. */
+    to: string;
     updated: string;
     methodHeading: string;
     methodBody: string;
@@ -42,6 +44,7 @@ const copy: Record<
     answerPrefix: "Der er",
     today: "Det er",
     equivalent: "Det svarer til",
+    to: "til",
     updated: "Tallet er beregnet ud fra dagens dato og opdateres automatisk.",
     methodHeading: "Sådan er tallet beregnet",
     methodBody:
@@ -55,6 +58,7 @@ const copy: Record<
     answerPrefix: "Det finns",
     today: "Det är",
     equivalent: "Det motsvarar",
+    to: "till",
     updated: "Talet räknas ut från dagens datum och uppdateras automatiskt.",
     methodHeading: "Så här räknas talet ut",
     methodBody:
@@ -88,9 +92,9 @@ function getAnswerText(
     };
   }
   return {
-    headline: `${copy[locale].answerPrefix} ${count(answer.days, u.day, u.days)} til ${
-      event[locale].copy.short
-    }`,
+    headline: `${copy[locale].answerPrefix} ${count(answer.days, u.day, u.days)} ${
+      copy[locale].to
+    } ${event[locale].copy.short}`,
     equivalent:
       answer.daysLeft === 0
         ? `${copy[locale].equivalent} ${count(answer.weeks, u.week, u.weeks)}.`

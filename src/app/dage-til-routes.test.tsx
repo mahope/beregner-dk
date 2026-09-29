@@ -6,7 +6,17 @@ import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { getRouteDecision } from "@/lib/routing";
 import { buildSitemap } from "./sitemap";
 import DageTilPage from "./dage-til/[dato]/page";
+import DagarTillPage from "./dagar-till/[dato]/page";
 import { buildDageTilMetadata } from "@/components/DageTilPage";
+
+/**
+ * The page that actually serves a locale. `/dage-til` and `/dagar-till` are two
+ * route files over one component and the *prefix* is what picks the language,
+ * so a test that only ever imports the Danish one cannot see a Swedish page at
+ * all — which is exactly how `til` survived: every existing test rendered
+ * `dage-til`, where "til" is correct.
+ */
+const ROUTE_FOR = { da: DageTilPage, se: DagarTillPage } as const;
 
 vi.mock("@/components/Breadcrumbs", () => ({ default: () => null }));
 vi.mock("@/components/FAQ", () => ({ default: () => null }));
@@ -170,6 +180,97 @@ describe("dage-til side", () => {
     await expect(
       DageTilPage({ params: Promise.resolve({ dato: "juledagen" }) })
     ).rejects.toThrow();
+  });
+});
+
+// The Swedish preposition is "till", the Danish one "til", and the answer
+// string was built with `til` hardcoded for both — so every one of the fourteen
+// Swedish landing pages said "Det finns 87 dagar **til** juldagen", in the
+// visible answer, the meta description, og:description and the JSON-LD. These
+// tests render the real page through the real producer rather than rebuilding
+// the string, because a test that rebuilds it can only prove the copy it was
+// written from (C44's lesson, and the same trap C118's union test fell into).
+describe("dage-til svar-præpositionen er sprogets egen", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-09-29T09:00:00.000Z"));
+  });
+
+  afterAll(() => {
+    vi.useRealTimers();
+  });
+
+  for (const locale of ["da", "se"] as const) {
+    test(`hver ${locale} dage-til-side bruger sit eget "til"/"till" i svaret`, async () => {
+      vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale(locale));
+      const dansk = locale === "da" ? /\d+ dage til / : /\d+ dagar till /;
+      const andetSprog = locale === "da" ? /\d+ dagar till / : /\d+ dage till /;
+
+      for (const slug of getDageTilSlugs(locale)) {
+        const html = renderToStaticMarkup(
+          await ROUTE_FOR[locale]({ params: Promise.resolve({ dato: slug }) })
+        );
+        expect(html, `${locale}/${slug}`).toMatch(dansk);
+        // The negative half matters more than the positive one: a page can
+        // contain the right form *and* the wrong one, and only this catches it.
+        expect(html, `${locale}/${slug}`).not.toMatch(andetSprog);
+      }
+    });
+  }
+
+  test("meta description, og:description og JSON-LD bærer samme svar som skærmen", async () => {
+    // The leak reached four surfaces, not one. A test that only reads the
+    // rendered <p> would have passed while Google kept indexing the Danish
+    // preposition in the description it shows under the title.
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("se"));
+    const slug = getDageTilSlugs("se")[0];
+    const html = renderToStaticMarkup(
+      await ROUTE_FOR.se({ params: Promise.resolve({ dato: slug }) })
+    );
+    // Read the answer out of the element that shows it, not out of the whole
+    // document: the same sentence also appears inside the JSON-LD, and a regex
+    // over the raw markup would match there first and return an
+    // escaped-quote-laden fragment. The negative assertion in the loop below is
+    // what this test is really for — the positive one only pins the four
+    // surfaces to each other.
+    const synligt = /<p class="text-3xl[^"]*">([^<]+)<\/p>/.exec(html);
+    expect(synligt, "svaret skal stå i den synlige tekst").not.toBeNull();
+    const svar = synligt[1];
+    expect(svar).toMatch(/^Det finns \d+ dagar till /);
+
+    const prefix = getDageTilPrefix("se");
+    const metadata = await buildDageTilMetadata(prefix, slug, new Date("2026-09-29T09:00:00.000Z"));
+    const description = String(metadata.description);
+    const ogDescription = String(metadata.openGraph?.description);
+
+    for (const [navn, tekst] of [
+      ["meta description", description],
+      ["og:description", ogDescription],
+    ] as const) {
+      expect(tekst, navn).toContain(svar);
+      expect(tekst, navn).not.toMatch(/\d+ dagar til /);
+    }
+
+    // The JSON-LD block is rendered inline, so the markup is the assertion.
+    // Its `description` is the bare headline — the schema deliberately does not
+    // repeat the question, so it is compared against the visible answer.
+    const jsonLd = /<script type="application\/ld\+json">(.*?)<\/script>/s.exec(html);
+    expect(jsonLd, "siden skal have en JSON-LD-blok").not.toBeNull();
+    const ld = JSON.parse(jsonLd[1]);
+    expect(ld.description).toBe(svar);
+    expect(ld.description).not.toMatch(/\d+ dagar til /);
+  });
+
+  test("dansk er stadig \"til\" — den svenske rettelse må ikke have flyttet fejlen", async () => {
+    // The other direction of the same class: a "fix" that makes Swedish right
+    // by copying a Danish string over it. Locked separately so the two
+    // languages cannot be repaired into each other.
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("da"));
+    const html = renderToStaticMarkup(
+      await ROUTE_FOR.da({ params: Promise.resolve({ dato: getDageTilSlugs("da")[0] }) })
+    );
+    expect(html).toMatch(/\d+ dage til /);
+    expect(html).not.toMatch(/dagar till /);
   });
 });
 

@@ -1,4 +1,5 @@
-STATUS: KØ — **C159 er landet: beraknare.se's bedst rangerede side var en 404. `/enhudspris` står i svensk GSC med 1.260 visninger, 4 klik, CTR 0,3 % og position 6,1 — den bedste position på hele domænet — og siden har aldrig eksisteret der.** Køen havde én `I GANG`-løs opgave, **159 (de ni åbne deploy-noter)**, og den er **klokke-blokeret, ikke fejl-blokeret**: alle ni noter har første vindue **2026-09-29 07:30**, og det var 03:16, så ingen af dem kan lukkes endnu. Den blev derfor ladt ligge og mærket `TIDSBLOKERET` i stedet for `BLOCKED`, fordi en note der lukkes på et ur de ikke har gået, er en note der ikke er verificeret. **Valget kom af at gå ned ad de to lister fase 3 gav, i stedet for op ad dem:** de svenske GSC-siders CTR er lukket alle 16 steder (C114–C123, C154), og de danske alle 16 (C82–C102) — men *selve listen* var aldrig blevet kørt igennem som helhed. GSC's svenske top-16 har 15 URL'er der svarer 200 og **én der svarer 404**, og den ene er den mest rangerede af dem alle. Samme måling på den danske top-16: **alle 16 svarer 200**, så det er ikke en klasse, det er ét fund — og det er derfor fundet er værd at skrive ned som sit eget. **Årsagen er ikke en fejl i nogen side, men en mangel i en liste:** `swedishAliases` i `routing.ts:15-21` er koden, der sender en svensk stavning af en slug videre i stedet for ud i 404, og den havde fem poster (`/tidskalkylator`, `/datumkalkylator`, `/nedrakning`, `/leasingkalkylator`, `/loen-efter-skat`) — men ikke `/enhudspris`, som er den svenske stavning af den danske slug `/enhedspris` (titlen på beraknare.se er "Jämförpris", `calculator-list.ts:89`). **Rettelsen er én linje**, og den er målt på rigtig server før merge: `Host: beraknare.se` giver nu **301 → `https://beraknare.se/enhedspris`**, der svarer 200 med `<title>` "Jämförpris: 35 kr för 2 kg = 17,50 kr per kg", mens de fem gamle alias alle stadig 301'er uændret, og `/api/health` svarer `status: ok`. **Ingen intern link, ingen sitemap-post, ingen beregningslogik:** slug'en findes 0 gange i `src/`, forside og sitemap peger alle på `/enhedspris` — altså var de 1.260 visninger Googles *egen* indeksering af en URL vi aldrig har serveret, hvilket er præcis den fejltype der ikke kan findes ved at læse linkgrafen. **Harness — tre egenskaber, hver modsvejs verificeret, fordi de ellers er vakuum-grønne.** Ny `routing-alias.test.ts` med 6 tests, som læser det **eksporterede** `swedishAliases` frem for en genkopiering af det (C44's lære: en måler skal ramme den kode der faktisk renderer): *målet bag hvert alias er en beregner der faktisk serveres på beraknare.se* (fanger et alias der peger på en dansk-only eller slet ikke eksisterende side), *intet alias skygger en rigtig svensk side* (et alias der skjuler den side det burde sende videre til) og *alias er ude af sitemap* (én kanonisk URL). **Modsvejs tre gange, fordi antallet af røde tests alene ikke beviser noget:** (1) med **kun** `/enhudspris`-linjen fjernet falder **præcis 1 af 6** med en rigtig assertion på `getRouteDecision`; (2) med et plantet alias på en slagtende target (`/findesikke` → `/findesikkere`) rødheds-egenskaben; (3) med et plantet alias hvis nøgle *er* en rigtig side (`/tidsberegner` → `/dato`) rødheds skygge- **og** sitemap-egenskaberne. **En målefejl i træk fra mig selv, nr. 24, og den er samme klasse som nr. 9-17:** min første `<h2>`-tælling på `/enhudspris` gav **1**, hvilket så ud som en side uden indhold — men jeg havde talt på **404-URL'en**, hvis krop er chrome plus skjulte-headings. Den rigtige side har **4**. Den måling reddede faktisk opgaven, fordi en side med ét `<h2>` ville have været en anden (og dyrere) opgave end en 404. **Målt og bevidst ikke bygget:** `/enhudspris` 404'er også på `minberegner.dk`, men der er **ingen målt dansk efterspørgsel** efter den stavning — GSC's danske top-16 kender den ikke — så den danske halvdel er bevidst urørt og låst med en test, der siger at dansk *skal* give `allow`. Det er en beslutning, ikke en forglemmelse, og næste iteration skal derfor ikke "fikse" den uden tal. **Målt og bevidst ikke bygget (nr. 2):** DA-autocomplete under "hvor mange dage er der til" har **sommerferie** (nr. 4) og **efterårsferien** (nr. 9), og begge er ubesvarede `dage-til`-kandidater. De er **ikke bygget**, fordi feriestarten er **kommunespecifik** — `dage-til.ts:44-51` siger det eksplicit som bevidst udeladelse — og alle kilder 404'er i denne iteration (`uvm.dk/folkeskole/ferier`, `undervisning.dk`, `borger.dk/…/ferier-i-folkeskolen` giver 404, `retsinformation.dk` er en tom JS-app). Samme kilde-blokering som opgave 119; se ❓ Til Mads. Gate grøn: lint (**583 filer**), **2.591 tests / 169 filer** (fra 2.585 / 168 — de 6 nye), build (**141 sider**), `locale-leak.mjs --gate` exit 0 med **uændret 591/556/35/0**, `knapgruppe-scan.mjs` **0/0**. Kode + plan i ét squash-commit på `ceo/enhudspris-alias`; se opgave 160. **MÅL:** beraknare.se `/enhudspris` baseline **1.260 visninger / 4 klik / CTR 0,3 % / pos. 6,1 pr. 2026-08-29 → 2026-09-26** — måles igen **2026-10-12**; forventningen er at de 1.260 måles på `/enhedspris` (1.265 v / pos. 8,3) i stedet for på en 404, altså **konsolidering først og CTR bagefter** — hvis `/enhedspris` bare flytter sig uden at samle klik, er pos. 6,1 et rangeringsspørgsmål og ikke et svar-spørgsmål.
+STATUS: KØ — **C160 er landet: beraknare.se's fireten `dagar-till`-sider svarede "Det finns 87 dagar *til* juldagen" — dansk på svensk, i det synlige svar, i meta description, i og:description og i JSON-LD. 112 forekomster, målt på rigtig server, på de sider der svarer direkte på svensk GSCs største dagar-klynge.** Køen havde én `I GANG`-løs opgave, **159 (de ni åbne deploy-noter)**, og den er **fortsat klokke-blokeret**: alle ni har første vindue **2026-09-29 07:30**, og det var 04:15, så ingen kunne lukkes og ingen blev rørt. **Valget kom af at køre linkgrafen som en helhed i stedet for endnu en side:** C159 havde lukket de to GSC-lister, så næste iteration målte *hvor siderne hænger sammen* — en fuld crawl af begge sitemapmer (**135 + 71 URL'er**). Den fandt **0 sider med 0 indgående links** på begge domæner, altså at C108's `//dage-til//`-klasse er lukket og forbliver lukket, og at blogindlæggene har **52-54** interne links hver — Fase 3's "bloggen skal føre videre" er **allerede** opfyldt og må ikke genbruges som åbent punkt. **Årsagen er én tegn uden for enhver tekstfil:** `DageTilPage.tsx:91` byggede svaret med `til` **hårdkodet** mellemom `copy[locale]`-opslagene, så `copy` stod på hver linje og præpositionen stod uden for den. Samme fejlklasse som C84's `metaDescription` om 12 byer. **Titlen var urørt** — den bygger på `event[locale].copy.question`, som *er* svensk — mens de tre andre overflader alle trak `headline`; derfor er alle fire låst, fordi en test der kun læser den synlige tekst ville være grøn, mens Google fortsat indekserede den danske præposition i den beskrivelse den viser under titlen. **Måleren var blind på to måder, og begge var målt forud:** (1) `buildMountGraph()` bygger grafen af `calculator-list.ts`'s 81 hrefs + forsiden, og `dage-til`/`dagar-till` er **dynamiske ruter, ikke kalkulatorer** — de står i ingen af dem, så sættet var 126 filer og de 14 svenske sider var det største udokumenterede segment på sitet; (2) **selv med filen i sættet** ville port-reglen ikke have set den, fordi `copy` er en `Record<DageTilLocale, …>` og scanneren stoler på hele tabellen — korrekt for `page-data.ts`'s 1.192 linjer, **forkert** for en tabel med ét ord der *skal* være forskelligt. Plantet modsvejs: med fejlen tilbage giver `--gate` **exit 0**. Derfor fik rettelsen en **test**, ikke kun en regel. **De tre nye fund da filen kom i sættet var alle falske, og alle tre faldt i port-klassen C158 ikke havde set:** `dageLocale: DageTilLocale = locale` (én type-annotation mellem navn og `=` — præcis C157's `sePages: Record<…>` mod R4's `se: {`), en ternary skrevet som objekt-egenskab hvor `{` åbner på `return`-linjen så hovedet var alle tidligere properties inkl. en template-literal med komma, og **en fejl i min egen rettelse fundet fordi porten røddes den forkerte vej**: jeg læste en injiceret operator som regex-gruppe 1 og fik `flags: ["!undefined"]`, hvilket erklærede hver `dageLocale === "da" ? … : …`-arm for *synlig på svensk* — det ene svar reglen aldrig må give. Fundet ved at logge `head.flags`, ikke ved at læse koden. **Tre fejl i mine egne greb undervejs, samme klasse som målefejl 9-28:** `rg -rn` igen (nr. 14, tredje gang — `-r` er replace-flaget), `dageTilHrefs()` der *gættede* dynamisk segment som `[dato]` i stedet for at læse den (en scanner der gætter den route den blev tilføjet for, springer den lydløst over), og et negativt sprog-lås der fangede `dagar-till/`-prefixet (C121's `bakåt` igen). **Harness:** `dage-til-routes.test.tsx` **18 → 22 tests**, og det afgørende var at de måtte importere `DagarTillPage` — de to stier er **to route-filer over én komponent** hvor **prefixet** vælger sproget, så *alle* eksisterende tests rendrede den danske route, hvor "til" er korrekt. Det er grunden til at fejlen levede. **Modsvejs verificeret i begge retninger:** med `to: "til"` i den svenske arm falder 2 af 4; med `to: "till"` i den *danske* arm falder 3 af 4. Scannerens to ændringer er hver verificeret forfra. **Gate grøn:** lint (**583 filer**), **2.595 tests / 169 filer** (fra 2.591/169 — de 4 nye), build (**141 sider**), `locale-leak.mjs --gate` **exit 0** med **594/559/35/0** (fra 591/556/35/0) og sættet **126 → 129 filer**, `knapgruppe-scan.mjs` **0/0**, `href-scan.mjs` 28 uændret mod `git stash`. **Målt på rigtig server** (port 3777, fri verificeret inden start): alle 14 svenske sider **0** `dagar til` / 8-11 `dagar till`, dansk uændret 8-11 `dage til` / 0 `dage till`, fire danske kontrolletitler uændrede, `/api/health` → `status: ok`, begge svenske alias 301'er stadig. Kode + plan i ét squash-commit på `ceo/dagartill-till`; se opgave 161. **MÅL:** de 14 sider har ingen egen CTR-baseline (de ligger under GSC's visningstælling; kun `/dato` 96.336 v og `/nedtaelling` 5.361 v er målt) — forventningen er CTR på de positioner de allerede har, og dansk ubevægtet; revurderes **2026-10-13** sammen med C158/C159.
+
 
 ---
 
@@ -14896,6 +14897,13 @@ Gatens egne tal (591/556/35/0) måles igen **2026-10-13**; en voksende
 
 #### 159. [ ] `TIDSBLOKERET` (ikke `BLOCKED`) — **de ni åbne deploy-noter skal lukkes ved indholdskontrol, og port-reglen skal have kørt en hel cyklus på rigtig server**
 
+> **C160 (04:15) rørte den ikke og bekræfter blokeringen.** Kriterium 1 kræver
+> stadig 07:30. C160's *egen* note har vindue **12:30**, fordi C160 merges efter
+> 07:30-batchen. Bemærk at C160 har **udvidet** port-reglen (dage-til-ruterne i
+> grafen + to rettelser), så kriterium 2 og 3 bør måles på de nye tal
+> (**129 filer / 594 kandidater / 559 døde / 35 kræver øjne / 0 ureviewet**)
+> og ikke på C158's 126/591/556/35/0.
+
 **⏱ Blokeret af uret, ikke af en fejl.** C159 startede 2026-09-29 03:16; alle ni
 noter har første vindue **07:30**. Kriterium 1 kan ikke udføres før det tidspunkt,
 og en note må ikke lukkes på et ur, der ikke har gået. **Revurder efter 07:30.**
@@ -15031,3 +15039,150 @@ bygges videre på.
      danske halvdel er bevidst urørt.
   5. KONTROL: `https://minberegner.dk/api/health` skal svare `status: ok`, og
      `https://beraknare.se/enhedspris` skal have **4** `<h2>`.
+
+#### 161. [x] FÆRDIG 2026-09-29 — C160 — **beraknare.se's fireten `dagar-till`-sider sagde "Det finns 87 dagar *til* juldagen" — dansk på svensk, i alle fire overflader, og ingen måler kunne se den**
+
+**Datagrund:** målt på rigtig server, begge domæner, **14 sider × 2 domæner**
+(live-crawl af begge sitemapmer, 135 + 71 URL'er). `/dagar-till/*` er **14 sider**,
+og hver har **8** forekomster af `dagar til ` mod svensk `dagar till` — i alt
+**112 forekomster**. Siderne er svensk GSC's dagar-klynge: `/dato` har 96.336
+visninger, `/nedtaelling` 5.361, og `dagar-till/juldagen` + `/1-december` +
+`/midsommarafton` er de konkrete svar på de søgninger. De ligger i begge
+sitemapmer som `daily` og får 16 indgående links hver (fra `/dato`,
+`/nedtaelling` og de 13 søsker), så de er godt linket — og linket har ikke
+kunnet se ordet.
+
+**Køen.** Opgave 159 (de ni åbne deploy-noter) stod `TIDSBLOKERET` med første
+vindue **07:30**; det var 04:15, så ingen kunne lukkes, og ingen blev rørt.
+C159's egen note har vindue 12:30.
+
+**Målt først, målt hele linkgrafen og ikke et udvalg.** Crawlen fandt samtidig
+**0 sider med 0 indgående links** på begge domæner — C108's `//dage-til//`-klasse
+er lukket og forbliver lukket. Blogindlæggene har 52-54 interne links hver, så
+"bloggen skal føre videre" (Fase 3, 23/9) er **allerede** opfyldt og skal ikke
+genbruges som åbent punkt. Der, hvor `1-december` har 11 forekomster mod de
+andre sideres 8, er `1 december` også nævnt to gange i FAQ'en.
+
+**Årsagen er én tegn, og den er ikke i nogen tekstfil.** `DageTilPage.tsx:91`
+byggede svaret med `til` **hårdkodet**:
+`\`${copy[locale].answerPrefix} ${count(...)} til ${event[locale].copy.short}\``
+— `copy[locale]` stod på hver linje, og præpositionen stod *uden for* den.
+Samme fejlklasse som C84's `metaDescription` om 12 byer: en indekseret streng der
+modsiger sit eget indhold, fundet ved at koble to ting sammen.
+
+**De fire overflader, målt hver for sig.** Lækagen nåede **ikke** titlen —
+`titleText` bruger `event[locale].copy.question`, som *er* svensk
+("Hur många dagar är det till juldagen? 87 dagar"). Den nåede de tre andre:
+`<p class="text-3xl">` (det synlige svar), `meta description`, `og:description`
+og JSON-LD `description`. **En test der kun læser den synlige tekst ville være
+grøn, mens Google fortsat indekserede den danske præposition i den beskrivelse
+den viser under titlen** — derfor er alle fire låst.
+
+**Måleren var blind på to måder, og begge var målt forud.** (1) **`DageTilPage.tsx`
+var ikke i scanningssættet.** `buildMountGraph()` bygger grafen af
+`calculator-list.ts`'s 81 hrefs + forsiden. `dage-til` og `dagar-till` er **dynamiske
+ruter, ikke kalkulatorer** — de står i ingen af dem. Sættet var derfor 126 filer,
+og de 14 svenske sider var det største udokumenterede segment på hele sitet.
+Målt, ikke antaget: `page.tsx`-filer er **121**, dækket af katalogsættet er **81**,
+de 40 restende er 26 blog + `/kategori` + `/embed` + 2 dage-til + info-sider.
+(2) **Selv med filen i sættet ville port-reglen ikke have set den.** `copy` er en
+`Record<DageTilLocale, …>`, og scanneren **stoler på hele tabellen** — en
+landskabs-tabel antages at være oversat, fordi den er nøgleinddelt efter sprog.
+Det er den rigtige antagelse for `page-data.ts` (1.192 linjer) og den **forkerte**
+her, fordi tabellen rummer **én ord** der *skal* være forskelligt. Plantet
+modsvejs: med `to: "til"` i den svenske arm giver `--gate` **exit 0** — reglen
+kan ikke se den. Det er derfor rettelsen fik en **test** og ikke kun en
+scanner-regel.
+
+**Rettelsen.** Et nyt felt `to` i `copy`: `"til"` (da) / `"till"` (se), læst i
+`getAnswerText` i stedet for den hårdkodede streng. Bevæger sig gennem alle fire
+overflader alene, fordi de alle bygger på `headline`. **Ingen anden kode rørt**,
+ingen beregningslogik, ingen dansk tekst ændret, ingen URL, ingen sitemap-post.
+
+**Scanneren blev dog gjort bredere, fordi den *anden* fejl var reel.** Med
+`dage-til`-ruterne i grafen fandt den **3 nye fund i `DageTilPage.tsx` — alle
+falske**, og alle tre faldt i *den* klasse C158's port-analyse ikke havde set:
+1. **`dageLocale: DageTilLocale = locale`.** `aliasFlags` krævede
+   `const dageLocale = locale` — **én type-annotation mellem navn og `=`**, så
+   mønstret matchede nul. Præcis C157's `const sePages: Record<string, PageData>`
+   mod R4's bloknøgle `se: {`: **en regel skrevet mod den form filen blev skrevet
+   i, ikke mod den form den har.** Rettet med en valgfri type-annotation, og
+   `= locale` (uden betingelse) genkendes nu som en *locale-kopi* — et navn der
+   **er** sproget, så enhver sammenligning med det er en sammenligning med
+   `locale` og løses ved at omskrive *termen*, ikke ved at gætte et sprognavn.
+2. **Egen fejl i min egen rettelse, fundet fordi porten røddes den forkerte
+   vej:** jeg injicerede operatoren bogstaveligt og læste den så som gruppe 1,
+   hvilket gav `flags: ["!undefined"]` — og den **inverse** regel erklærede
+   hver `dageLocale === "da" ? "…" : "…"`-arm for *synlig på svensk*, som er det
+   ene svar port-reglen aldrig må give. Fundet ved at logge `head.flags`, ikke ved
+   at læse koden.
+3. **Ternary som objekt-egenskab.** `return { headline: …, equivalent: locale ===
+   "da" ? "…" : "…" }` — `{` åbner på `return`-linjen, så hovedet er *alle*
+   tidligere egenskaber inklusive en template-literal med komma i sig. `stop`
+   læste hele property-listen og fandt ingen betingelse. Nu tages kun det **sidste
+   top-niveau-segment** (dybde målt, så et komma i `${}` ikke deler), og et
+   enkelt `key:`-præfiks strippes. Uden dette: `DageTilPage.tsx:89` er fundet på
+   en linje, der er 100 % korrekt dansk i en `locale === "da"`-gren.
+
+**Tre fejl i mine egne greb undervejs, alle fundet fordi en måling blev grøn på
+den forkerte måde** — samme klasse som målefejl 9-28 i planen. (1) Min første
+`/tidsberegner`-kontrol: `rg -rn` igen — `-r` er ripgreps *replace*-flag, så
+mønsteret kom ud som `"Det finns"` (nr. 14 igen, tredje gang). (2) `dageTilHrefs()`
+læste først præfikset og *gættede* dynamisk segment som `[dato]`; en scanner der
+gætter den route den blev tilføjet for, ville have sprunget den over lydløst —
+segmentet læses nu fra mappen. (3) Min negative-lås-test søgte på `"dage"`, som
+fangede `dagar-till/`-**prefixet** — C121's `bakåt`-fejl igen; rettet til ord-
+grænser og til `dagar`/`dage` skrevet fuldt ud.
+
+**Gate grøn:** lint (**583 filer**), **2.595 tests / 169 filer** (fra 2.591 /
+169 — de 4 nye), build (**141 sider**), `locale-leak.mjs --gate` **exit 0** med
+**594 kandidater — 559 døde, 35 kræver øjne, 0 ureviewet** (fra 591/556/35/0;
++3 kandidater er de 3 nye fund, alle nu døde) og sættet **126 → 129 filer**,
+`knapgruppe-scan.mjs` **0/0**, `href-scan.mjs` 28 uændret (præ-checket mod
+`git stash` — de 14+14 erforsides egne absolutte hrefs).
+
+**Målt på rigtig server** (`next start` på port 3777, porten verificeret fri
+*inden* start — målefejl nr. 15's lære), `Host: beraknare.se`: **alle 14 sider
+0** for `dagar til` og 8-11 for `dagar till`; de fire overflader på
+`/dagar-till/juldagen` læser alle "Det finns 87 dagar **till** juldagen", titlen
+urørt. `Host: minberegner.dk`: `dage til` 8-11, `dage till` **0** på tre sider.
+KONTROL: `/procent`, `/dato`, `/moms`, `/tidsberegner` uændrede titler,
+`/api/health` → `status: ok`, og begge svenske alias 301'er stadig uændret
+(`/tidskalkylator`, `/enhudspris`).
+
+**Harness:** `dage-til-routes.test.tsx` **18 → 22 tests**. De fire nye læser den
+**rigtige producent** — og det afgørende var at de måtte importere
+`DagarTillPage`, ikke kun `DageTilPage`: `/dage-til` og `/dagar-till` er to
+route-filer over én komponent, og **prefixet** vælger sproget, så *alle* eksisterende
+tests rendrede den danske route, hvor "til" er korrekt. Det er grunden til at
+fejlen levede. **Modsvejs verificeret i begge retninger:** med `to: "til"` i den
+svenske arm falder **2 af de 4**; med `to: "till"` i den *danske* arm falder
+**3 af de 4** (de to nye + den eksisterende "viser spørgsmålet og et konkret
+antal dage i dansk"). Scannerens to ændringer er hver verificeret forfra: uden
+ruterne i grafen falder sættet tilbage til 126/591/556 og `DageTilPage` giver 0
+fund; uden locale-kopi-gendannelsen stiger `kræver øjne` 35 → **37** med 2
+ureviewede. Kode + plan i ét squash-commit på `ceo/dagartill-till`.
+
+**MÅL:** beraknare.se's 14 `dagar-till`-sider — ingen har egen CTR-baseline i
+GSC (de ligger under visningstællingen, kun `/dato` 96.336 v og `/nedtaelling`
+5.361 v er målt). Forventningen er **CTR på de eksisterende positioner** (siderne
+ligger på pos. 5-9 for "dagar till juldagen"-klyngen) og **dansk ubevægtet** —
+den danske tekst er uændret, så `/dato`s 131.920 visninger skal stå stille.
+Revurderes **2026-10-13** sammen med C158/C159.
+
+**Målt og bevidst ikke bygget.** `/procent` på beraknare.se har stadig fire
+danske afsnit (`hvor A1 er det gamle tallet`, `tager du middelverdien`, …) på
+live — det er **C157's rettelse, der endnu ikke er deployet** (vindue 12:30),
+ikke en ny lækage. De skal verificeres i den note, ikke rettes igen.
+
+- ⏳ **VERIFICÉR DEPLOY: C160 — beraknare.se's 14 `dagar-till`-sider skal sige "dagar **till**" i stedet for "dagar **til**" i det synlige svar, meta description, og:description og JSON-LD.** Kode + plan i ét squash-commit på `ceo/dagartill-till`. Første kandidatvindue **2026-09-29 12:30** (merge sker efter 07:30-batchen). Kun `src/components/DageTilPage.tsx` (ét nyt `to`-felt i `copy` + dets brug), `scripts/locale-leak.mjs` (dage-til-ruterne i grafen + to port-rettelser) og `src/app/dage-til-routes.test.tsx` er rørt — **ingen beregningslogik, ingen URL, ingen sitemap-post, ingen dansk tekst ændret**. Verificér ved **indhold, ikke HTTP 200**:
+  1. `curl -s https://beraknare.se/dagar-till/juldagen` skal have **0** forekomster
+     af `"dagar til "` og **8** af `"dagar till "`. Tallet på **alle 14** slugs.
+  2. `curl -s https://beraknare.se/dagar-till/juldagen` skal have
+     `<title>` "Hur många dagar är det till juldagen? 87 dagar" (uændret) og
+     `<meta name="description">` med **"Det finns 87 dagar till juldagen"** —
+     `"description":"Det finns 87 dagar till juldagen"` i JSON-LD'en.
+  3. KONTROL: `https://minberegner.dk/dage-til/juledagen` skal have **8** `dage til `
+     og **0** `dage till `. Dansk er bevidst urørt.
+  4. KONTROL: `https://minberegner.dk/api/health` → `status: ok`, og
+     `https://beraknare.se/dagar-till/juldagen` skal have **3** `<h2>`.

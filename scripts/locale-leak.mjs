@@ -718,6 +718,21 @@ function buildMountGraph() {
     /* no home */
   }
 
+  // The dage-til landing pages are not in calculator-list.ts either — they are
+  // one dynamic route per language, not a calculator. They are the *only* place
+  // `DageTilPage.tsx` renders, so without this the component was outside the
+  // scan set entirely and its hardcoded `til` served "Det finns 87 dagar til
+  // juldagen" on all fourteen Swedish pages for months. The prefix is read from
+  // `dage-til.ts` rather than written here, for the reason `danishOnlySections`
+  // reads its list: a hand-copied route goes stale the day someone adds one.
+  for (const href of dageTilHrefs()) {
+    const page = pageFileForHref(href);
+    if (!page) continue;
+    const set = new Set();
+    walk(page, (c) => set.add(c));
+    pages.set(page, { href, seMounted: true, components: set });
+  }
+
   return pages;
 }
 
@@ -939,6 +954,33 @@ let mountCache = null;
  * hand-copied list is a list that goes stale exactly when someone adds a
  * section — the same failure class as C118's hand-written homepage list.
  */
+/**
+ * The dage-til landing routes, read from `dage-til.ts` so the scanner follows
+ * the source rather than a list that can drift from it. The dynamic segment is
+ * read from the directory itself instead of assumed, because `[dato]` is part
+ * of the route — a scanner that guesses it would silently skip the page it was
+ * added for. Both prefixes are served, so both are scanned.
+ */
+function dageTilHrefs() {
+  const src = read(join(SRC, "lib", "dage-til.ts")) || "";
+  const hrefs = [];
+  for (const [, prefix] of src.matchAll(/_PREFIX\s*=\s*"([^"]*)"/g)) {
+    const dir = join(SRC, "app", prefix);
+    let segments = [];
+    try {
+      segments = readdirSync(dir, { withFileTypes: true })
+        .filter((e) => e.isDirectory() && e.name.startsWith("["))
+        .map((e) => e.name);
+    } catch {
+      continue;
+    }
+    for (const segment of segments) {
+      hrefs.push(`${prefix}${segment}`.replace(/\/+$/, ""));
+    }
+  }
+  return hrefs;
+}
+
 function danishOnlySections() {
   const src = read(join(SRC, "lib", "routing.ts")) || "";
   const m = /danishOnlySections\s*=\s*\[([^\]]*)\]/.exec(src);
@@ -996,11 +1038,34 @@ const PORT_UNKNOWN = "OK";
 function portCondition(before, src) {
   const stop = before.search(/&&|\?/);
   if (stop === -1) return null;
+  // A ternary written as an object-literal property carries every *earlier*
+  // property in the head, because `{` opened on the `return` line:
+  //   return {
+  //     headline: `${copy[locale].today} …`,
+  //     equivalent: locale === "da" ? "…" : "…",
+  //   }
+  // so the head is a comma-separated list of properties and the condition is
+  // only its last value. Reading the whole head is what made every such
+  // ternary "not a condition" and reported its Danish arm as a candidate.
+  // Only the last top-level segment is taken, and "top level" is measured by
+  // brace/bracket/paren depth so a comma inside a template literal, a call or
+  // an array does not split it.
+  let depth = 0;
+  let lastComma = -1;
+  for (let i = 0; i < stop; i++) {
+    const c = before[i];
+    if (c === "{" || c === "[" || c === "(") depth++;
+    else if (c === "}" || c === "]" || c === ")") depth--;
+    else if (c === "," && depth === 0) lastComma = i;
+  }
   const cond = before
-    .slice(0, stop)
+    .slice(lastComma + 1, stop)
     .trim()
     .replace(/^\(+/, "")
     .replace(/\)+$/, "")
+    .trim()
+    // A single-property object still carries its key: `equivalent: locale === "da"`.
+    .replace(/^[A-Za-z_$][\w$]*\s*:\s*(?=[A-Za-z_$])/, "")
     .trim();
   if (cond.length === 0 || cond.length > 200) return null;
   const flags = [];
@@ -1021,6 +1086,26 @@ function portCondition(before, src) {
     const name = withValue ? withValue[1] : bareName[1];
     const decl = aliasFlags(src, name);
     if (!decl) return null;
+    // `const dageLocale: DageTilLocale = locale` is not a narrowed alias, it
+    // *is* the locale under a different name — so a comparison against it
+    // compares against `locale` and is resolved by re-running the direct form
+    // on the rewritten term. Returning a locale tuple here instead would have
+    // to guess which locale the name stands for, and guessing wrong is the one
+    // direction that hides a leak.
+    if (decl.isLocaleCopy) {
+      // Substitute the name for `locale` in the *term*, then let the direct
+      // form decide. The operator is injected from the match rather than
+      // re-captured, so the only capture group left is the locale — reading
+      // `rewritten[1]` as the operator gave `"!undefined"` and reported every
+      // `dageLocale === "da" ? "…" : "…"` arm as visible on Swedish, which is
+      // the one answer this rule must never give.
+      const rewritten = new RegExp(
+        `^locale\\s*${withValue ? withValue[2] : "==="}\\s*"(da|se|no)"$`
+      ).exec(term.replace(new RegExp(`^${name}\\b`), "locale"));
+      if (!rewritten) return null;
+      flags.push(withValue && withValue[2] === "!==" ? `!${rewritten[1]}` : rewritten[1]);
+      continue;
+    }
     // A bare name is used as a boolean — it is true on its true-locale. A
     // compared name is true only on the branch it was compared against. The
     // two are distinguished by the match, not by counting capture groups: a
@@ -1083,14 +1168,27 @@ function aliasFlags(src, name) {
   // chunk of JSX is interpolated into the pattern and the regex is built from
   // file content — which then throws on the first `[` in someone's copy.
   if (!/^[A-Za-z_$][\w$]*$/.test(name)) return null;
+  // `(?:\s*:\s*[\w<>\[\]|. ]+)?` is the type annotation. `const dageLocale:
+  // DageTilLocale = locale` is the same alias as `const se = locale === "se"`,
+  // but the annotation sits between the name and the `=`, so the old pattern
+  // matched nothing and every `dageLocale === "da" ? "Dansk" : "Svensk"` arm
+  // was reported as a leak. C157 hit the identical blind spot with
+  // `const sePages: Record<string, PageData> = {` in the R4 block key.
+  const type = "(?:\\s*:\\s*[\\w<>,.\\[\\]| ]+)?";
   const plain = new RegExp(
-    `const\\s+${name}\\s*=\\s*locale\\s*(===|!==)\\s*"(da|se|no)"\\s*;`
+    `const\\s+${name}${type}\\s*=\\s*locale\\s*(===|!==)\\s*"(da|se|no)"\\s*;`
   ).exec(src);
   if (plain) return [plain[1], plain[2], null];
   const str = new RegExp(
-    `const\\s+${name}\\s*=\\s*locale\\s*===?\\s*"(da|se|no)"\\s*\\?\\s*"(da|se|no)"\\s*:\\s*"(da|se|no)"`
+    `const\\s+${name}${type}\\s*=\\s*locale\\s*===?\\s*"(da|se|no)"\\s*\\?\\s*"(da|se|no)"\\s*:\\s*"(da|se|no)"`
   ).exec(src);
   if (str) return ["===", str[2], str[3]];
+  // A plain copy: `const dageLocale: DageTilLocale = locale`. The variable
+  // *is* the locale, so any comparison against it resolves like the direct
+  // form. `isLocaleCopy` marks it as "same as locale" rather than a locale
+  // tuple, so the caller rewrites the term instead of guessing a locale name.
+  const copy = new RegExp(`const\\s+${name}${type}\\s*=\\s*locale\\s*;`).exec(src);
+  if (copy) return { isLocaleCopy: true };
   return null;
 }
 
