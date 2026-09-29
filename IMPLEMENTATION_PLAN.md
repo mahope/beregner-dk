@@ -1,4 +1,8 @@
-STATUS: KØ — **alle 12 åbne deploy-noter er lukket ved indholdskontrol efter 12:30-vinduet: C158, C167, C168, C169, C170, C171, C172, C173, C174, C175, C176 og C52 er `DEPLOY OK 2026-09-29`. Køen havde ingen `I GANG`-opgave (alle 177 er `[x]`, 97 er `BLOCKED`, 98 afhænger af den, 119 er kilde-blokeret), og 11 af de 12 noter havde første vindue 2026-09-29 12:30 — det var 12:46 ved starten, så de var **forfalden** og blev lukket. Kun **C177** (`ceo/og-image`) er stadig åben: den blev mergeret ca. 12:45, altså *efter* 12:30, så første vindue er 17:30. Denne iteration leverer derfor ingen kode — den er en ren verificeringsiteration, og det er den eneste grund til at der laves én plan-commit.**
+STATUS: KØ — **`beregner.no` er ikke dette repo. Domænet serverer en separat Lovable/TanStack-app: 0 `__next`-markører mod TanStacks `__TSR__`, `/api/health` 404, vores norske slugs 404 modsitemapets `/kalkulator/*`, og et `og:image` på et `lovable.app`-preview. Så `/manifest.webmanifest`'s 404 er en *deploy-fakta*, ikke en kodefejl — og acceptkriterium 1 i opgaven siger udtrykkeligt, at man så skal skrive det og stoppe. Det er gjort, og målt på bygget server først: alle tre domæner giver 200 med hvert sit eget korrekte antal. Ruten havde imidlertig nul tests, og fordi den læser `x-hostname` ved request-tid er netop sådanne fejl usynlige på det domæne, man tilfældigvis tester — så de er skrevet nu (5 tests, modsvejs verificeret på tre plantede fejlklasser, den tredje præcis den betingelse der kunne have lavet 404'en i koden). Køen var tom (178 var øverst ufærdig; 179 kræver interaktiv browser-verifikation, `curl` kan ikke sætte et felt).**
+
+**Tre ting denne iteration *ikke* gjorde, som er værd at sige.** Den rettede ingen kode, fordi der ikke var noget at rette — en manifest-test der "fixer" en 404 på et domæne vi ikke deployer, ville være vakuum-grøn. Den lukkede ikke C179's tre noter, fordi de kræver at *sætte felter i en browser*; at lukke dem på en teksttælling i HTML'en ville være præcis den fejl C158's portanalyse lavede i modsat retning. Og den skrev ingen ny tekst, ingen ny URL og ingen ny dependency — den eneste rørte fil er en ny testfil.
+
+**Målene der er værd at tage med til næste iteration.** For det første: **`beregner.no` skal holdes ude af alle trafikmål.** Det er et andet projekt, og 28 af repoets katalogrækker (`no`-udgaven) serveres aldrig. C176's note bad om at verificere "28+" på netop det domæne — den kan ikke verificeres, og det er skrevet i noten. For det andet: **delt kode og fælles build garanterer ikke fælles output**, og `manifest.webmanifest` er det tredje dokument i rækken efter `og:image` og sitemapet, hvor et domæne har vist sig at være et andet website. For det tredje: **en `<link rel="manifest">` er ikke en fælde-kontrol af en 404** — den er emit af Next-layoutet, så den forsvinder på et domæne Next ikke kører på, uden at nogen i koden vidste det.
 
 **Ingen fejl fundet i nogen af de 12.** Alle noter måler *indhold*, aldrig HTTP 200 — og det er ikke en formalitet: `/opengraph-image` svarer 200 hele tiden, også da ingen sider linkede det, så et 200 på den route beviser intet. Beviset for at der virkelig er deployet, og ikke bare at siden svarer: C170's tre nøgleformler, C173's ni FAQ-spørgsmål, C167's tolv, C172's ni stat-rækker og C174's seks relaterede hrefs står i den server-renderede HTML nu, og de var enten 0 eller det gamle antal før.
 
@@ -16977,48 +16981,100 @@ er værst. Se `❓ Til Mads`.
   6. `npm run lint`, `npm run test`, `npm run build` grønne. **Nået.**
   7. `node scripts/locale-leak.mjs --gate` exit 0 med 0 ureviewet. **Nået.**
 
-#### 178. [ ] ÅBEN — **`beregner.no` serverer intet webmanifest: `/manifest.webmanifest` er 404 og forsiden har ingen `<link rel="manifest">`, mens de to andre domæner har begge dele**
+#### 178. [x] FÆRDIG 2026-09-29 — C178 — **`beregner.no` er ikke dette repo: domænet serverer en helt anden app, så `/manifest.webmanifest`'s 404 er en deploy-fakta og ikke en kodefejl. Ruten havde nul tests — de er skrevet, og modsvejs verificeret på tre plantede fejl.**
 
-- **Iteration start:** 2026-09-29 12:46. Fandtes ved at verificere C176's
-  tredje domæne-punkt.
-- **Datagrund (målt, live 12:52):**
-  `https://beregner.no/manifest.webmanifest` → **404** (6.427 bytes
-  `/locale-unavailable`-HTML); `https://beregner.no/manifest.json` → 404;
-  forsiden på beregner.dk indeholder **0** `<link rel="manifest">` — den
-  eneste "manifest"-forekomst i HTML'en ligger i RSC-client-bundlen.
-  Kontroller på de to andre domæner er grønne: `minberegner.dk` har
-  `<link rel="manifest" href="/manifest.webmanifest"/>` og beskrivelsen
-  "79+ gratis beregnere…"; `beraknare.se` har "53+ gratis kalkylatorer…".
-  `rg -n "manifest" src/` rammer kun `src/app/manifest.ts` og `src/lib/i18n.ts`.
-- **Årsagen er IKKE fundet, og det er derfor den er en opgave.** Der er ingen
-  kode, der conditionelt fjerner manifest-linket, så de tre muligheder er:
-  (a) `getRouteDecision` returnerer `not-found` for `/manifest.webmanifest`
-  på et `no`-domæne — `routing.ts:60` gør `not-found` for ethvert
-  `dage-til`-slug på et ikke-`da/se`-domæne, men `/manifest.webmanifest` er
-  ikke et `dage-til`-slug; (b) Next bygger kun manifest-linken for de domæner
-  der findes i build-outputtet, og `beregner.no` står i
-  `domain-config.ts:91 hiddenDomains`; (c) deploy-konfigurationen for
-  beregner.no peger på en anden build. **Findes ved at læse (a) og (b) først —
-  begge er gratis at efterprøve med ét grep hver, og (a)/(b) kan begge være
-  sande samtidig.** Mål på **bygget server** med `Host: beregner.no`, ikke kun
-  på live, ellers kan man ikke skelne mellem en kodefejl og en deployfejl.
+- **Iteration start:** 2026-09-29 12:50. Køen havde ingen `I GANG`-opgave
+  (97 er `BLOCKED`, 98 afhænger af den, 119 er kilde-blokeret), og ingen åbne
+  `VERIFICÉR`-note var ældre end sit vindue.
+- **Datagrund (genmålt, live 13:00):** `https://beregner.no/manifest.webmanifest`
+  → **404**; forsiden har **0** `<link rel="manifest">`. De to andre domæner er
+  grønne. Opgaven stillede tre årsagsmuligheder (a) routing, (b) build-output,
+  (c) deploy — og sagde korrekt, at de skulle efterprøves på **bygget server**,
+  fordi live alene ikke kan skelne kode fra deploy.
+- **Målt på bygget server først (`next start` :3999, porten verificeret fri
+  *inden* start, målefejl 15's lære), alle tre domæner:**
+  `minberegner.dk` **200** "79+ gratis beregnere…", `beraknare.se` **200**
+  "53+ gratis kalkylatorer…", `beregner.no` **200** "28+ gratis kalkulatorer…",
+  og **ét** `<link rel="manifest" href="/manifest.webmanifest"/>` på hver af de
+  tre forsider. **Acceptkriterium 1 siger udtrykkeligt: er den 200 lokalt, er
+  fejlen i deployen, ikke i koden — skriv det, og stop.** Den er 200 lokalt, så
+  ingen kodeændring ville have rettet noget.
+- **Årsagen er fundet, og den er større end en deployfejl: `beregner.no` kører
+  ikke denne kode overhovedet.** Fire uafhængige målinger, ikke ét symptom:
+  1. **Framework-markører:** `beregner.no`'s HTML har **0** forekomster af
+     `__next` eller `_next/static` — og i stedet `__TSR__`/`$tsr` og
+     `/assets/index-Du_ZLkdM.js`, som er **TanStack Router**, ikke Next.
+  2. **Ruter, som ikke findes her:** `/api/health` **404** (den findes — den
+     svarer 200 på `minberegner.dk`), `/api/v1` **404**, `/_next/static/...`
+     **404**.
+  3. **Slug-form:** vores norske katalog skriver `/boliglan`, `/tidsberegner`,
+     `/dato`; live er de alle **404**, og sitemap'et bruger en helt anden form,
+     `/kalkulator/boliglan` (**200**). Vores repo har **ikke en enkelt**
+     `/kalkulator/*`- rute.
+  4. **En anden generator:** `og:image` på `beregner.no` peger på
+     `…lovable.app-1778795716421.png` — et Lovable-bygget preview-billede, og
+     headerne viser `x-deployment-id` bag Cloudflare, ikke Dokploy.
+  Sitemap'et har **115** URL'er mod vores 206. Kort sagt: domænet er et
+  **separat Lovable-projekt**, og ingen rettelse i dette repo kan nå det.
+  `domain-config.ts:28-38` beskriver fuldstændigt et `no`-domæne, som
+  `hiddenDomains` (`:91`) alligevel skjuler fra hreflang — koden er korrekt,
+  den serveres bare ikke.
+- **Målefejl nr. 38 (min egen, undgået ved at måle begge veje):** opgaven
+  opfordrede til at læse `routing.ts` for en `not-found` på
+  `/manifest.webmanifest`. `routing.ts` kan umuligt gøre det —
+  `isCalculatorPath` (`calculator-list.ts:117`) slår op i et `Map` over
+  katalog-slugs, og `/manifest.webmanifest` er ikke i den, så reglen kan ikke
+  fyre. **Havde jeg læst routing'en og konkluderet "ingen kodefejl", ville jeg
+  have meldt en deployfejl.** Det er `Host: beregner.no` mod den byggede server,
+  der skelnte de to, præcis som opgaven krævede.
+- **Harness: ruten havde nul tests, hvilket er hele fundet.** `manifest.ts`
+  læser `x-hostname` **ved request-tid** — så en fejl i den er usynlig på
+  det domæne, man tilfældigvis tester. Ny `src/app/manifest.test.ts` med
+  **5 tests** kalder den rigtige route-funktion pr. domæne og dækker fire
+  klasser: at alle tre domæner *overhovedet* får et manifest (den klasse
+  opgaven opdagede live), at hvert domæne får **sit eget** navn og sin egen
+  locale-beskrivelse, at ingen beskrivelse **underrapporterer** sin katalog
+  (C176's fejlklasse, i et andet sted), og at en ukendt vært falder tilbage på
+  dansk i stedet for at servere intet.
+- **Verificeret modsvejs, tre plantede fejl, én pr. klasse — alle fanget:**
+  (1) `getSiteTranslations("da")` hårdkodet i stedet for
+  `domainConfig.locale` → **1** test faldt;
+  (2) den gamle C176-streng, `33+` hårdkodet ind i `description` → **3** tests
+  faldt;
+  (3) den *egentlige* klasse, `if (locale === "no") return undefined` — altså
+  præcis den betingelse der kunne have lavet `beregner.no`'s 404 i koden — →
+  **4** tests faldt. `manifest.ts` er rørt **0 linjer**; den blev gendannet
+  fra backup og `git diff` er tom.
+- **Målt på rigtig server efter den endelige build**, alle tre domæner med
+  `curl -H`: `minberegner.dk` **200** "79+ gratis beregnere…", `beraknare.se`
+  **200** "53+ gratis kalkylatorer…", `beregner.no` **200** "28+ gratis
+  kalkulatorer for økonomi, bolig, skatt, helse og hverdag." — præcis
+  acceptkriterium 1 — og **ét** manifest-link på hver forside (kriterium 2).
+  `/api/health` grøn. Acceptkriterium 3 er de 5 nye tests.
+- **Gate grøn:** lint (**595 filer**), **2.730 tests / 177 filer** (fra
+  2.725/176), build (**142 sider**), `locale-leak.mjs --gate` exit 0 med
+  **734 kandidater / 699 døde / 35 kræver øjne / 0 ureviewet** (deltallet er
+  uændret; kun `page-data.ts` flyttede to strenge fra "kræver øjne" til "døde",
+  hvilket er C157's portanalyse der nu ser dem), `knapgruppe-scan.mjs` 0/0.
+  Rørt: **én ny fil**, `src/app/manifest.test.ts`. **Ingen produktionskode,
+  ingen beregningslogik, ingen URL, ingen tekst, ingen dependency.**
+- **Landet:** kode + plan i ét squash-commit på `ceo/no-manifest`.
+- **MÅL:** der er intet at måle på `beregner.no` — det er et andet projekt med
+  sin egen trafik og uden Plausible/GSC i dette repos målinger. Den målbare
+  del af denne iteration er et **kvalitetsmål**: *manifest-ruten er dækket af
+  tests pr. domæne* — nået (0 tests → 5, modsvejs verificeret på 3 fejl).
+  Nærmeste uændrede baseline: `minberegner.dk` 7.319 besøgende/28d,
+  `beraknare.se` 537 (+144 %), GSC `/procent` 150.148 v / 0,1 % / pos. 7,4.
+  Genmåling **2026-10-13**.
 - **Acceptkriterier:**
-  1. `curl -H "Host: beregner.no" -s localhost:<port>/manifest.webmanifest` på
-     den byggede server → **200** med `"description": "28+ gratis beregnere…"`.
-     Hvis den allerede er 200 lokalt, er fejlen i deployen, ikke i koden — skriv
-     det, og stop.
-  2. `curl -H "Host: beregner.no" -s localhost:<port>/` indeholder **ét**
-     `<link rel="manifest" href="/manifest.webmanifest"/>`.
-  3. En ny test der låser at alle **tre** domæner serverer
-     `/manifest.webmanifest` med et `description` der ikke underrapporterer
-     katalogstørrelsen (samme regel som C176's fjerde test i `i18n.test.ts`).
-  4. `npm run lint`, `npm run test`, `npm run build`,
-     `node scripts/locale-leak.mjs --gate` grønne.
-- **Forventet effekt:** lav trafikmæssig (PWA-installation på et domæne med
-  28 sider), men klassen er C84's og er generel: *hvert domæne skal måles
-  selvstændigt, fordi fælles kode og fælles deploy ikke garanterer fælles
-  output.* Rettelser som kun måles på `minberegner.dk` kan efterlade
-  `beraknare.se` og `beregner.dk` i en tilstand ingen har set.
+  1. Bygget server, `Host: beregner.no` → **200** med "28+ gratis
+     kalkulatorer…". **Nået — og derfor ingen kodeændring, jf. opgavens egen
+     instruks.**
+  2. Forsiden på `beregner.no` har ét manifest-link. **Nået (på bygget
+     server).**
+  3. Test der låser alle tre domæner + underrapportering. **Nået, modsvejs
+     verificeret på 3 plantede fejlklasser.**
+  4. `lint` / `test` / `build` / `locale-leak --gate` grønne. **Nået.**
 
 #### 179. [ ] ÅBEN — **C55, C56 og C60 er deploy-noter, der kræver interaktivitet, og har stået åbne siden 2026-09-27 07:30**
 
@@ -17045,6 +17101,36 @@ er værst. Se `❓ Til Mads`.
   rørt igen på de tre sider, skal noterne skrives om mod den nuværende kode
   før de verificeres — ellers verificerer man en gammel kravspecifikation.
 
+### ❓ Til Mads — ny i C178: `beregner.no` er et andet website
+
+1. **`beregner.no` kører ikke denne kode.** Fire uafhængige målinger, alle
+   ovenfor: 0 `__next`-markører i HTML'en (TanStack Router i stedet),
+   `/api/health` **og** `/api/v1` på **404** (de findes — de svarer 200 på
+   `minberegner.dk`), vores norske slugs (`/tidsberegner`, `/dato`,
+   `/boliglan`) på **404** mens sitemapets `/kalkulator/boliglan` svarer
+   **200**, og et `og:image` der peger på et `lovable.app`-preview-billede.
+   Det ligner et **separat Lovable-projekt** på Cloudflare, 115 URL'er mod
+   vores 206. **Spørgsmålet til dig: er det meningen?** Hvis domænet skal
+   pege på denne app, er det en DNS-/Dokploy-ændring — en *danger zone*,
+   som jeg ikke rører. Hvis det er et med vilje holdt separat site, så er
+   konsekvensen her: **repoets `no`-udgave (28 katalogrækker,
+   `domain-config.ts:28-38`) serveres aldrig**, og det er korrekt konfigureret
+   kode om intet.
+2. **Følgen for målingerne: `beregner.no` skal holdes ude af al trafik- og
+   deploy-måling herfra.** C176's `VERIFICÉR`-note bad om at tjekke manifestet
+   på netop det domæne med forventningen "28+". Den kan ikke verificeres, og
+   det står nu skrevet i noten. `next.config.ts:36` nævner
+   `allowedDevOrigins: ['beregner.no', …]`, hvilket er det eneste i repoet der
+   antyder, at norsk-domenet en gang var tænkt som en dev-vært.
+3. **Målemetoden blev reddet af opgavens egen acceptkriterium.** Kriterium 1
+   sagde ordret: *hvis den er 200 lokalt, er fejlen i deployen, ikke i koden.*
+   Målt på bygget server med `Host: beregner.no` var den 200 med korrekt
+   indhold. Havde jeg læst `routing.ts` i stedet — som opgaven også foreslog —
+   ville jeg være kommet til samme rigtige svar om routing'en og **forkert**
+   om domænet, fordi det er umuligt for `routing.ts` at 404'e den sti
+   (`isCalculatorPath` slår op i katalog-slugs, og `/manifest.webmanifest` er
+   ikke en). Det er målefejl nr. 38.
+
 ### ❓ Til Mads — ny i C177
 
 1. **Delinger har aldrig haft en forhåndsvisning.** Billedet blev genereret, men
@@ -17065,6 +17151,30 @@ er værst. Se `❓ Til Mads`.
 
 
 ### VERIFICÉR DEPLOY-log — nyeste først
+- `VERIFICÉR DEPLOY: manifest-ruten får en test pr. domæne (0 tests → 5) ceo/no-manifest 2026-09-29 13:1x`
+  — merge sker ca. 13:15, før 17:30-vinduet er nået, så første vindue er
+  **2026-09-29 17:30**. **Denne note har en vigtig forbehold, som er hele
+  pointen: der er intet på `beregner.no` at verificere.** Domænet kører ikke
+  denne kode (se opgave 178: 0 `__next`-markører, TanStack-ruter, `/api/health`
+  404, `/kalkulator/*`-slugs, `lovable.app`-billede) — så **først** af alt:
+  `curl -s https://beregner.no/api/health` skal svare **404**. Giver den 200,
+  er domænet blevet omdirigeret til denne app imellem denne note og
+  verificeringen, og så er hele opgave 178's konklusion faldet — skriv det, og
+  gå tilbage. Derefter mål på de to domæner vi faktisk deployer, og verificér
+  **indhold**, ikke HTTP 200:
+  1. `curl -s https://minberegner.dk/manifest.webmanifest | grep -o '"description":"[^"]*"'`
+     skal give **"79+ gratis beregnere…"**; samme på `beraknare.se` skal give
+     **"53+ gratis kalkylatorer…"**. Før C178: uændret (den rørte ingen tekst) —
+     en afvigelse er en fejl.
+  2. `curl -s https://minberegner.dk/ | grep -c '<link rel="manifest"'` skal
+     være **1**, samme på `beraknare.se`.
+  3. **KONTROL:** `https://minberegner.dk/procent` skal have **uændret**
+     `<title>` og `<meta description>` (denne diff rørte ét test- og intet
+     produktionsfil), og `/api/health` skal svare `status: ok` på begge
+     domæner.
+  4. `npm run test -- src/app/manifest.test.ts` skal give **5 passed**.
+  5. `node scripts/locale-leak.mjs --gate` skal exit 0 med **0 ureviewet**.
+
 - `VERIFICÉR DEPLOY: social forhåndsvisning på alle sider (og:image 0 → 207/207) ceo/og-image 2026-09-29 12:4x`
   — merge sker ca. 12:45, før 12:30-vinduet er nået, så første vindue er
   **2026-09-29 17:30**. Verificér **indhold**, ikke HTTP 200 — `/opengraph-image`
