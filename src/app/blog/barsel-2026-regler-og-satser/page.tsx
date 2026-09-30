@@ -387,6 +387,10 @@ export default function BarselGuidePage() {
         href="/barselsdagpenge"
         handling="Beregn din barselsdagpenge"
         beskrivelse="Se dagpengen for hver uge ud fra din timeløn og dine orlovsuger. Beregningen er et estimat, og Udbetaling Danmark træffer den endelige afgørelse."
+        sekundaer={{
+          href: "/barselsplanlaegger",
+          handling: "Planlæg dine uger med barselsplanlæggeren",
+        }}
       />
 
       <div className="mt-12 pt-8 border-t">

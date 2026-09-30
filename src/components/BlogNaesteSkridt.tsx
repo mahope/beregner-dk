@@ -7,6 +7,12 @@ interface NaesteSkridtProps {
   handling: string;
   /** What the calculator does, in one sentence the article has not already said. */
   beskrivelse: string;
+  /**
+   * The other tool the article is actually about, when there is a second one.
+   * Quiet by design: the primary button stays the only button, because two
+   * buttons of equal weight is how a reader ends up picking neither.
+   */
+  sekundaer?: { href: string; handling: string };
 }
 
 /**
@@ -22,7 +28,7 @@ interface NaesteSkridtProps {
  * colour is not white: `--color-primary` is a light blue in dark mode, so
  * white on it would sit near 2:1 contrast.
  */
-export function NaesteSkridt({ href, handling, beskrivelse }: NaesteSkridtProps) {
+export function NaesteSkridt({ href, handling, beskrivelse, sekundaer }: NaesteSkridtProps) {
   return (
     <section className="mt-10 rounded-lg border border-gray-200 bg-gray-50 p-5 not-prose dark:border-gray-700 dark:bg-gray-800">
       <h2 className="text-lg font-bold text-gray-900 dark:text-white">Regn det ud</h2>
@@ -33,6 +39,16 @@ export function NaesteSkridt({ href, handling, beskrivelse }: NaesteSkridtProps)
       >
         {handling}
       </Link>
+      {sekundaer ? (
+        <p className="mt-4 text-sm text-gray-700 dark:text-gray-300">
+          <Link
+            href={sekundaer.href}
+            className="inline-block py-1 font-medium underline underline-offset-2 hover:text-gray-900 focus:ring-2 focus:ring-blue-300 focus:outline-none dark:hover:text-white dark:focus:ring-blue-800"
+          >
+            {sekundaer.handling}
+          </Link>
+        </p>
+      ) : null}
     </section>
   );
 }

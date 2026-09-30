@@ -1,8 +1,14 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — 30/9 22:40. **189c er delvis lukket, og CEO-køens punkt 7 er
-rettet.** Sveriges *grove* grænse står nu i `PROMILLEGROV_SE` (trafikbrottslagen
-4 a §) og bruges i brødteksten i stedet for håndskrevede tal.
+STATUS: KØ — 30/9 23:50. **Opgave 190 er lukket** (barsel-indlægget tilbyder
+både dagpenge *og* planlægger som næste handling, målt med en port der fejler
+mod den gamle kode), og **to deploy-noter er verificeret på indhold** —
+/tidszone og forsiden er begge `DEPLOY OK`. **Syv noter åbne** (fra 189b, 189,
+188, F7 og F6), og de tre seneste merges (21:37, 22:08, 22:35) deployer først
+**1/10 07:30**. Ny opgave 191: `/bmi` har ingen koblet guide.
+
+**Næste opgave: 191**, med 183/F1/F5 som de store trafikposter når de
+løses af svar fra Mads. 187 må ikke røres før 13/10.
 
 **De fire 189c-rækker: veje udtømt, målt 30/9 22:30-22:38.** Ingen af dem kan
 hentes med de værktøjer, loven er læsbar med. Målt, ikke gættet:
@@ -43,7 +49,8 @@ der med vilje planterer **to** danske lækager. Derfor kommer to
 `FEJL: n ureviewet(e)`-blokke i output. Det er **ikke** fund i din diff. Kør
 gaten separat: `node scripts/locale-leak.mjs --gate` (exit 0).
 
-**Otte VERIFICÉR-noter åbne** (fra 189b, 189, 190, 188, F8, F7, F6 og F4). F1/F3/F5
+**Syv VERIFICÉR-noter åbne** (fra 189b, 189, 188, F7 og F6 — tidszone og
+forsiden er lukket på indhold 30/9 23:08-23:10). F1/F3/F5
 og opgaver 97/98/119/183 er blokeret af svar fra Mads. **Opgave 187 må ikke
 røres før 13/10.** **CEO-køen er tom.** Review-fund 29/9 er begge mærket
 `RETTET d563ba2` og lukket.
@@ -167,7 +174,7 @@ kaldes *ikke*-helgdag.
 
 ```
 npm run lint     # biome lint ./src      — 628 filer
-npm run test     # vitest run            — 3269 tests / 198 filer
+npm run test     # vitest run            — 3271 tests / 198 filer
 npm run build    # next build            — 142 sider
 node scripts/locale-leak.mjs --gate       # exit 0
 ```
@@ -186,10 +193,10 @@ fremover med `git stash -u` før og efter, som gjort her.
 
 ## Åbne VERIFICÉR DEPLOY-noter
 
-**Otte noter åbne.** HTTP 200 beviser intet: 189's og 189b's noter rører
+**Syv noter åbne.** HTTP 200 beviser intet: 189's og 189b's noter rører
 *tabelceller* med lovtal, der er usynlige for `curl` uden at man læser dem. De
-otte lukkede noter er verificeret 30/9 17:46-17:53 på indhold; alle målinger
-står i `docs/plan-arkiv.md`.
+otte lukkede noter er verificeret på indhold; senest 30/9 23:10 for tidszone
+og forsiden. Alle målinger står i `docs/plan-arkiv.md`.
 
 - ⏳ **Tysklands række må ikke love en grænse, StVG ikke har.** `ceo/promille-lovkilde-2`.
   På `https://minberegner.dk/promille` og `https://beraknare.se/promille` skal
@@ -210,6 +217,16 @@ står i `docs/plan-arkiv.md`.
   de to tabeller — den er lovstridigt modsat RST. HTTP 200 beviser intet, det er
   en cellecelle. Prøven på dansk er `src/lib/promille-loenkilde.test.tsx` efter
   deploy. Vindue **1/10 07:30** (denne merge sker efter 30/9 21:30).
+
+- ⏳ **Barsel-indlægget skal tilbyde begge værktøjer som næste handling.**
+  `ceo/barsel-naeste-handling`. På `https://minberegner.dk/blog/barsel-2026-regler-og-satser`
+  skal afsnittet "Regn det ud" rumme **to** links i markupken — knappen
+  `href="/barselsdagpenge"` **og** det stille link
+  `href="/barselsplanlaegger"` med teksten "Planlæg dine uger med
+  barselsplanlæggeren" — og det stille link skal stå *inden* "Relaterede
+  artikler". HTTP 200 beviser intet, det er et par linjer i en blok. Prøven på
+  dansk er `src/app/blog/naeste-skridt.test.ts` (porten `SKAL_NAAE`) efter
+  deploy. Vindue **1/10 12:30** (denne merge sker efter 30/9 21:30).
 
 - ⏳ **Skærtorsdagen må ikke kaldes helgdag, og 1. advent må ikke kaldes
   ikke-helgdag.** `ceo/helgdag-uden-allman`. På
@@ -245,15 +262,12 @@ står i `docs/plan-arkiv.md`.
   er brødtekst. Prøven på dansk er `src/lib/dage-til.test.ts` efter deploy.
   Vindue **1/10 07:30**.
 
-- ⏳ **Sydney skal stå med 8-10 timer foran, ikke 9-10.** `ceo/tidszone-tidsforskelle`.
-  På `https://minberegner.dk/tidszone` og `https://beraknare.se/tidszone`: under
-  "Populære tidsforskelle fra Danmark" skal linjerne være læst
-  `London: 1 time bagud`, `New York: 5-6 timer bagud`, `Los Angeles: 8-9 timer
-  bagud`, `Tokyo: 7-8 timer foran`, `Sydney: 8-10 timer foran` — og på svensk
+- ✅ **Sydney skal stå med 8-10 timer foran, ikke 9-10.** `ceo/tidszone-tidsforskelle`.
+  **DEPLOY OK 30/9 23:10** — hentet fra live og læst i markupken, begge domæner.
+  DA: `London : 1 time bagud`, `New York : 5-6 timer bagud`, `Los Angeles : 8-9
+  timer bagud`, `Tokyo : 7-8 timer foran`, `Sydney : 8-10 timer foran`. SE:
   `1 timme efter` / `5-6 timmar efter` / `8-9 timmar efter` / `7-8 timmar före` /
-  `8-10 timmar före`. Tallet **9-10 må ikke forekomme nogen steder** på siden.
-  Den praktiske prøve er `src/app/tidszone/page.test.tsx` efter deploy. Vindue
-  **1/10 07:30** (denne merge sker efter 30/9 17:30).
+  `8-10 timmar före`. **Strengen "9-10" forekommer 0 gange** på begge sider.
 
 - ⏳ **Norske tal skal ikke få dansk tusindtalsseparator.** `ceo/no-locale-tag`.
   Kontrollér **indhold** på `https://beregner.no/proteinbehov` (latent — domænet
@@ -263,14 +277,14 @@ står i `docs/plan-arkiv.md`.
   dansk er, at `npm run test` fortsat er grøn på
   `src/lib/intl-locale-tag.test.ts` efter deploy. Vindue **30/10 07:30** (denne
   merge sker efter 17:30).
-- ⏳ **Striben på forsiden skal ligge før tillidsrækken.** `ceo/forsiden-snabb-indgang`.
-  På `https://minberegner.dk/` og `https://beraknare.se/`: de otte links skal
-  komme **før** tillidsrækken ("Gratis beregnere"/"100+ gratis") og før
-  overskriften "Populære beregnere"/"Populära kalkylatorer" i markupken, og på
-  beraknare.se skal de otte hrefs have svenske titler. Prøven på dansk er
-  `src/app/forside.test.tsx` efter deploy. **En pixelmåling på 390 px er ikke
-  lavet** — repoet har intet Playwright (❓); højden over fold er beregnet, ikke
-  målt. Vindue **30/10 07:30**.
+- ✅ **Striben på forsiden skal ligge før tillidsrækken.** `ceo/forsiden-snabb-indgang`.
+  **DEPLOY OK 30/9 23:08** — hentet fra live, begge domæner. Striben er et
+  `<nav><ul>` med otte `<li><a href=…>` umiddelbart **før** tillidsrækken
+  ("79+ Gratis beregnere" / "Gratis kalkylatorer" @ 23.412 / 21.328 mod
+  "Populære beregnere" @ 24.074 / 22.001) og otte links på svensk med titler
+  som "Datoberegner", "Brændstofberegner". **En pixelmåling på 390 px er
+  stadig ikke lavet** — repoet har intet Playwright (❓); højden over fold er
+  beregnet, ikke målt.
 
 ## Åbne opgaver
 
@@ -372,7 +386,7 @@ står i `docs/plan-arkiv.md`.
   nu `PROMILLEGROV_SE` (4 a §) og bruges af `pct()`. 1 ny port, målt til at
   fejle mod en håndskrevet "0,3 ‰" (22:36).
 
-#### 190. [ ] 2026-09-30 — Kø — blogindlæg med høj bounce skal føre videre til en beregner
+#### 190. [x] ✅ 30/9 23:20 — Kø — blogindlæg med høj bounce skal føre videre til en beregner
 
 - **Datagrund:** `/blog/barsel-2026-regler-og-satser` har **185 besøgende/28d
   (+97 %) og 84 % bounce**, mens `/barselsdagpenge` har 225 besøgende og **1 %
@@ -389,6 +403,41 @@ står i `docs/plan-arkiv.md`.
   sig selv oprejsende. Gaten grøn.
 - **MÅL:** `/blog/barsel-2026-regler-og-satser` 185 besøgende/28d, bounce 84 %
   (Plausible 2026-09-30) → bounce under 60 % om 14 dage.
+- **Resultat 30/9 23:20:** `NaesteSkridt` kan nu have én ekstra, stille handling
+  (`sekundaer`), så barsel-indlægget tilbyder **både** `/barselsdagpenge` og
+  `/barselsplanlaegger` i markupken. Kun den primære er en knap — to knapper
+  af samme vægt er måden en læser ender på at vælge ingen. Ny port
+  `SKAL_NAAE` i `naeste-skridt.test.ts` kræver begge hrefs og kan fejle
+  (set fejle mod den gamle kode: *"har 84 % bounce, men /barselsplanlaegger
+  står ikke i næste handlingen"*).
+- **Fund undervejs (ikke rettet, kun gjort ærligt):** `naeste-skridt.test.ts`
+  læste *hele filens hale* som "næste handling", så kravet "næste handling =
+  den koblede beregner" passede for `bmi-for-boern-saadan-tjekker-du` ved at
+  finde `href="/alder"` i "Relaterede beregnere" **under** CTA'en. Indlægget
+  handler om BMI, så dets næste handling er `/bmi`, og `/alder` er koblet
+  fordi det er der, forældre slår et barns alder op. Kravet er derfor skrevet
+  om til det, der er sandt: læseren *kan* nå den koblede beregner.
+  **Og: `/bmi` (934 besøgende, −26 %) har ingen koblet guide**, mens `/alder`
+  kun har denne ene. Se ny opgave 191.
+
+#### 191. [ ] 2026-09-30 — `/bmi` mangler et koblet indlæg, og det er sitets faldende side
+
+- **Datagrund:** Plausible 30/9: `/bmi` 934 besøgende/28d og **−26 %** — den
+  eneste faldende side i top-15. `BEREGNER_ARTIKLER` har **ingen** nøgle til
+  `/bmi`, så `RelateredeArtikler` renderer ikke på siden, og det eksisterende
+  indlæg `/blog/bmi-for-boern-saadan-tjekker-du` er koblet til `/alder` i
+  stedet. Bloggen har 26 indlæg, og den største trafikfejl der (høj bounce) er
+  netop, at indlæg ikke fører videre — modsat vejen mangler også.
+- **Hvorfor ikke gjort i 190:** `blog-kobling.test.ts` låser "et indlæg kobles
+  kun til én beregner", så en flytning kræver valg mellem to sider, og `/bmi`'s
+  `page.tsx` skal have `<RelateredeArtikler current="/bmi" locale={locale} />`
+  ind. `/alder` mister sin eneste guide, hvis artiklen flyttes — derfor er det
+  en egen opgave med sit egen datagrund, ikke en bivirkning af 190.
+- **Accept:** (1) `/bmi` renderer "Guides om emnet" med mindst ét indlæg, (2)
+  artiklen nævner `/bmi` i brødteksten *før* sin næste handling, (3)
+  `naeste-skridt.test.ts` og `blog-kobling.test.ts` grønne, gaten grøn.
+- **MÅL:** `/bmi` 934 besøgende/28d, −26 % (Plausible 2026-09-30). Genmål
+  bounce på indlægget 30 dage efter deploy.
 
 #### 187. [ ] **IKKE FØR 2026-10-13** 2026-09-30 — Kø — **migrér beraknare.se til svenske URL-slugs med 301**
 
