@@ -10,7 +10,7 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import { ALDER_EKSEEMPLER, formatAlder, formatAlderRaekke, foedselsaarRaekker } from "@/lib/alder-eksempler";
 import AlderSeSvar from "@/components/AlderSeSvar";
 import AlderLevetSvar from "@/components/AlderLevetSvar";
-import { tilIsoDato } from "@/lib/lokal-dato";
+import { iDagISidensTidszone } from "@/lib/lokal-dato";
 import { getIntlLocale } from "@/lib/format";
 
 function formatDato(iso: string, locale: "da" | "no" | "se"): string {
@@ -35,7 +35,7 @@ export default async function AlderPage() {
   // `headers()`, så siden er dynamisk og tallene følger dagen — samme mønster
   // som /dato's felter. Formateres til en hel dato, så en tabeltal derfra aldrig
   // kan løbe fra den dato den er regnet til.
-  const iDag = tilIsoDato(new Date());
+  const iDag = iDagISidensTidszone(new Date(), locale === "se" ? "se" : "da");
   const foedselsaar = foedselsaarRaekker(iDag);
 
   return (

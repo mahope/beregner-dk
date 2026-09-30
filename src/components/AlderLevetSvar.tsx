@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { alderLevet, formatDageLived, formatDageTal } from "@/lib/alder-levet";
-import { tilIsoDato } from "@/lib/lokal-dato";
+import { iDagISidensTidszone } from "@/lib/lokal-dato";
 import type { Locale } from "@/lib/i18n";
 
 /**
@@ -24,7 +24,7 @@ export default function AlderLevetSvar({ locale }: { locale: Locale }) {
   if (locale === "no") return null;
 
   const se = locale === "se";
-  const iDag = tilIsoDato(new Date());
+  const iDag = iDagISidensTidszone(new Date(), se ? "se" : "da");
   const levet = alderLevet(iDag);
   const dage = formatDageLived(levet, locale);
   const [aar, maaned, dag] = levet.foedselsdato.split("-").map(Number);

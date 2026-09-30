@@ -20039,3 +20039,389 @@ commit-bodies. Noterne selv er uændrede i deres verificeringskrav.
   (verificeret med `git stash`: 3 fejl, bl.a. "expected 61 to be less than or
   equal to 60"), og porten kører nu hele året (8 datoer) i stedet for én valgt,
   så den kan ikke være grøn med fejlen i igen.
+
+## 2026-09-30 — Opgave 201 lukket: /alders snippet havde et frosset alders-tal
+
+**Fejlen.** `page-data.ts` skrev "Født 15. marts 1990 er du 36 år, 6 måneder
+og 10 dage pr. 25. september 2026" i `description`, `metaDescription` og
+`ogDescription` samt **seks** FAQ-svar, fordelt på da/se/no. `allPages` er et
+modul-niveau-`const`, så tallene blev frosset ved processens start — altså ved
+deploy, ikke ved build — og blev dagsvis mere forkert. Målt 30/9 13:40: den
+frosne tekst siger 10 dage og 13.343 dage, sandheden er 15 dage og 13.348
+dage. Det er en **fejlklasse 1 + 4** (frossen byggeværdi, dato der ikke
+følger dagen), og den ligger i præcis den tekst Google viser.
+
+**Rettelsen.** Pladsholderne `{ALDER}`, `{DATO}`, `{DAGE}` m.fl. skrives i
+`page-data.ts` og løses i `getPageData` ved hvert kald af det nye modul
+`src/lib/alder-side-tekst.ts`, som læser `alderLevet` og
+`foedselsaarRaekker` — samme moduler som selve værktøjet og
+`AlderLevetSvar` bruger. Der er 11 tokens; `ALDER_TOKENS` er den eneste
+liste, og `erstatAlderTokens` løser dem alle, så ingen tekst kan skrive sig
+ud af. Datoen læses med den nye `iDagISidensTidszone` i `lokal-dato.ts`
+(da/se/no), fordi `tilIsoDato(new Date())` læser *serverens* tidszone — på en
+UTC-server er den et døgn bag mellem kl. 00:00 og 02:00 dansk tid.
+
+**To ting rettelsen afslørede, som ikke var i opgaven:**
+
+1. **Billedteksten på tabellen løj.** `ALDER_EKSEEMPLER[0]`s bemærkning sagde
+   "Det eksempel, der står i sidens beskrivelse" — hvilket blev falsk, da
+   beskrivelsen begyndte at følge dagen. Rækken er et *fast* regnestykke til
+   25. september 2026 og siger nu det. Tabellen er bevidst ikke gjort levende:
+   den skal kunne vise et eksempel på et tidspunkt i tiden.
+2. **Excel-eksemplet havde to forskellige månedstal.** "gav 36, 438 og
+   13.343" bruger DATEDIF's `Y`, `M` og `D`, hvor `M` er *alle* måneder
+   siden fødslen (36 × 12 + 6 = 438), ikke resten af de seneste år (6). De er
+   nu hver sit token (`AAR`, `MAANEDER_IALT`, `DAGE_TAL`), så de to ikke kan
+   blandes sammen ved en ny tekst.
+
+**Porten.** `alder-side-tekst.test.ts` (13 tests) låser kilden på **to
+datoer** — 29. september og 1. januar — så en fejl der kun rammer ét
+tidspunkt (fx årsskifte, hvor både måned og dage-tal stiger) ikke kan
+slippe igennem. Dertil tre nye porte i `page-data.test.ts`: ingen
+`pr. <dato>` i metadata, ingen uløste `{TOKEN}` i det læseren ser, og
+alders-summen matcher `alderLevet(i dag)`.
+
+**Verificeret.** De nye porte **falder mod master** (git stash: 9 fejl i
+`page-data.test.ts`, bl.a. de tre "frosset 'pr. <dato>'"-porte). Målte mod
+en uafhængig dage-tælling i node: 15. marts 1990 → 29. september 2026 =
+13.347 dage og 36 år, 6 måneder, 14 dage, hvilket er præcis `alderLevet`'s
+svar. **Gate grøn:** lint (**623 filer**), **3172 tests / 193 filer** (fra
+3106/190), build (**142 sider**), `locale-leak.mjs --gate` exit 0. Build viser
+`ƒ /alder` — dynamisk, server-renderet pr. request, altså et rigtigt
+serverkald og ikke en frossen byggeværdi. Renderet i dag: "36 år, 6 måneder og
+15 dage pr. 30. september 2026" i da, "36 år, 6 månader och 15 dagar per 30
+september 2026" i se, "…15 dage per 30. september 2026" i no. `metaDescription`
+142/143/143 tegn mod grænsen på 160.
+
+
+## 2026-09-30 13:45 — De ni åbne VERIFICÉR DEPLOY-noter, fulde tekster
+
+Planen rummer kun de korte former (under "Åbne VERIFICÉR DEPLOY-noter"); her er
+de fulde, med alle målinger, kontroller og porttal. Læses med grep, ikke fra
+start til slut.
+
+## Åbne VERIFICÉR DEPLOY-noter
+
+- ⏳ **VERIFICÉR DEPLOY: `/alders` snippet skal vise dagens alder, ikke 25.
+  september.** Kode + plan i ét squash-commit på `ceo/alder-levende-snippet`.
+  Vindue **2026-09-30 17:30** (12:30 kørte før merge). Rørte filer:
+  `src/lib/alder-side-tekst.ts` (**ny**, 11 tokens), `src/lib/lokal-dato.ts`
+  (**+1 funktion**), `src/lib/page-data.ts` (**pladsholdere + `getPageData**`),
+  `alder-side-tekst.test.ts` (**ny, 13 tests**), to testfiler ændret. Ingen ny
+  afhængighed, ingen ny rute. Verificér ved **indhold** (HTTP 200 beviser intet):
+  1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
+  2. `https://minberegner.dk/alder` skal have **"pr. 30. september 2026"** i
+     `<title>`-description og **"36 år, 6 måneder og 15 dage"** i introen —
+     dagens tal, ikke "pr. 25. september 2026" og ikke "10 dage".
+  3. `https://beraknare.se/alder` skal have **"per 30 september 2026"** (svensk
+     dato uden punktum) og **"36 år, 6 månader och 15 dagar"**.
+  4. **Kontrol:** ingen kold `{ALDER}`-lignende pladsholdere må stå i HTML'en,
+     og `/dato`s pinse-sætning skal være uændret (den anden åbne note rører
+     samme `page-data.ts`-fil).
+  **Målt før merge:** de nye porter **fald mod master's `page-data.ts`**
+  (git stash: 9 fejl). `metaDescription` 142/143/143 tegn mod grænsen 160.
+  **Gate grøn:** lint (**623 filer**), **3172 tests / 193 filer** (fra 3106),
+  build (**142 sider**, `ƒ /alder` = dynamisk), `locale-leak.mjs --gate`
+  exit 0.
+
+Otte noter. HTTP 200 beviser intet: fire rører `<title>` og `<h1>` på én side,
+pinse-noten opretter to URL'er, og tidszone-noten forventer et **uændret** tal.
+
+- ⏳ **VERIFICÉR DEPLOY: pinseperiodens helligdage skal stå som ét navn pr. dag,
+  aldrig fire navne for tre dage.** Kode + plan i ét squash-commit på
+  `ceo/pinse-navne-og-arbejdstal`. Vindue **2026-09-30 17:30**.
+  Rørte filer: `src/lib/pinse-intervaller.ts` (**én privat hjælper,
+  `navnePrDag`**, + fire docblocks) og `src/lib/pinse-intervaller.test.ts`
+  (**+2 tests, 2 ændret**). Ingen UI-fil rørt: `/dato` læser feltet uændret, og
+  `page-data.ts` er fast på 2026 (de tre navne), så kun `/dato`'s **levende**
+  sætning ændrer sig — og kun i kollisionsårene. Verificér ved **indhold**:
+  1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
+  2. `https://minberegner.dk/dato` skal have **"helligdagene i perioden er Kristi
+     himmelfartsdag, Pinsedag, 2. pinsedag"** — tre navne for tre dage. (I 2028
+     bliver det **"Grundlovsdag (2. pinsedag)"** som ét navn; 2028 kan ikke
+     ses live nu, så det er kodet, ikke verificeret.)
+  3. `https://beraknare.se/dato` skal have **"Kristi himmelsfärdsdagen,
+     Pingstdagen"** — uændret, fordi Sveriges liste ikke har grundlovsdagen.
+  **Kontrol:** pinseåret skal stadig være **2027** med påskedagen 28. marts og
+  2. pinsedag 17. maj (den anden åbne note rører samme side), og ingen danske
+  strenge lækker til beraknare.se (porten kører `locale-leak.mjs --gate`).
+  **Målt før merge:** kollisionen i **7 af 61 år** (1995, 2006, 2017, 2022,
+  2028, 2033, 2044); grundlovsdagen i perioden i **18**; `da.periodeArbejdsdage`
+  = 5 i **8** år og ellers 6 i 53, `se` = 6 i **11** og ellers 7 i 50. **Gate
+  grøn:** lint (**620 filer**), **3141 tests / 191 filer** (fra 3139), build
+  (**142 sider**), `locale-leak.mjs --gate` exit 0. De tre nye tests **falder
+  mod master's `pinse-intervaller.ts`** (verificeret med `git stash`: 3 fejl).
+
+- ⏳ **VERIFICÉR DEPLOY: `/dage-til/2-pinsedag` og `/dagar-till/pingstdagen`
+  skal begge svare med hver sin dag — dansk +50, svensk +49 efter påskedag.**
+  Kode + plan i ét squash-commit på `ceo/pinse`. Første kandidatvindue
+  **2026-09-30 12:30**. Rørte filer: `src/lib/dage-til.ts` (**ét event**
+  `pinse` med 5 fakta + 5 FAQ pr. sprog, **begge** arme) og
+  `src/lib/dage-til.test.ts` (**+16 tests**). Ingen eksisterende beregning
+  rørt, ingen UI, ingen ny `kind` (ankeret er den eksisterende
+  `easterOffset`), ingen ny afhængighed; sitemap, lister og breadcrumb kommer
+  fra de eksisterende lister. Verificér ved **indhold**:
+  1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
+  2. `https://minberegner.dk/dage-til/2-pinsedag` skal have **"Hvor mange dage
+     er der til 2. pinsedag?"** i `<h1>` og `<title>` med dage-tal, og
+     brødteksten skal sige **"25. maj"** og **"12. maj (2008)"**.
+  3. `https://beraknare.se/dagar-till/pingstdagen` skal have **"Hur många dagar
+     är det till pingstdagen?"** og brødteksten **"24 maj"**.
+  4. **Kontrol — forskelsdagen:** de to sider skal give **forskellige** datoer
+     på samme dag. `/dato` liste skal have `/dage-til/2-pinsedag` blandt de 19
+     rækker.
+  **Kontrol:** de 18 andre dage-til-siders titler uændrede, og ingen danske
+  strenge lækker til beraknare.se (porten kører `locale-leak.mjs --gate`).
+
+- ⏳ **VERIFICÉR DEPLOY: `/dage-til/efteraarsferien` skal svare med uge 42 og
+  tælle til den første skoledag.** Kode + plan i ét squash-commit på
+  `ceo/efteraarsferien-uge42`. Vindue **2026-09-30 17:30**.
+  Rørte filer: `src/lib/dage-til.ts` (**ny `kind: "efteraarsferie"`**,
+  `isoUgeMandag()`, ét event med 4 fakta + 5 FAQ) og `src/lib/dage-til.test.ts`
+  (**+141**). Ingen eksisterende beregning rørt, ingen UI, ingen `<h1>`-ændring,
+  ingen ny afhængighed; sitemap, interne kryslink og breadcrumb kommer fra de
+  eksisterende lister. Verificér ved **indhold**:
+  1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
+  2. `https://minberegner.dk/dage-til/efteraarsferien` skal have
+     **"Hvor mange dage er der til efterårsferien?"** i `<h1>` og
+     `<title> = "Hvor mange dage er der til efterårsferien? 12 dage"**.
+  3. Samme sides brødtekst skal sige **"12. oktober 2026"** og **"uge 42"**.
+  4. `/datos` (ikke `/dato`) liste skal have `/dage-til/efteraarsferien` blandt
+     de 16 rækker — den kommer fra `getDageTilEvents`, samme liste som resten.
+  **Kontrol:** `https://beraknare.se/dagar-till/efteraarsferien` skal svare
+  **404** — den svenska lagen har ingen national ferieuge, så siden er dansk
+  alene, ligesom `/dage-til/sommerferien` allerede er det.
+  **Gate grøn:** lint (**618 filer**), **3054 tests / 190 filer** (fra 3039),
+  build (**142 sider**), `locale-leak.mjs --gate` exit 0. De nye tests
+  **falder mod master's `dage-til.ts`** (verificeret med `git stash`:
+  **14 fejl**). ISO-ugereglen er verificeret over **61 år** (1990-2050), ikke på
+  tre valgte år, og `fakta`-teksten er låst til de tal koden selv regner.
+
+- ⏳ **VERIFICÉR DEPLOY: `/dage-til/skolestart` skal svare med 1. august og
+  tælle til næste års skolestart.** Kode + plan i ét squash-commit på
+  `ceo/skolestart`. Vindue **2026-09-30 17:30**. Rørte filer:
+  `src/lib/dage-til.ts` (**ét event** med 4 fakta + 5 FAQ) og
+  `src/lib/dage-til.test.ts` (**+192**). Ingen eksisterende beregning rørt, ingen
+  UI, ingen `<h1>`-ændring, ingen ny `kind` (ankeret er den eksisterende
+  `fixed` 1. august), ingen ny afhængighed; sitemap, `/datos`-liste og
+  breadcrumb kommer fra de eksisterende lister. Verificér ved **indhold**:
+  1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
+  2. `https://minberegner.dk/dage-til/skolestart` skal have
+     **"Hvor mange dage er der til skolestart?"** i `<h1>` og
+     `<title> = "Hvor mange dage er der til skolestart? 305 dage"`.
+  3. Samme sides brødtekst skal sige **"1. august"** og **"uge 31"** (2026) /
+     **"uge 30"** (2027).
+  4. `/datos` liste skal have `/dage-til/skolestart` blandt de 17 rækker.
+  **Kontrol:** `https://beraknare.se/dagar-till/skolestart` skal svare **404** —
+  det svenska skolåret har ingen national dato, så siden er dansk alene,
+  ligesom `/dage-til/sommerferien` og `/dage-til/efteraarsferien`.
+  **Gate grøn:** lint (**618 filer**), **3070 tests / 190 filer** (fra 3054),
+  build (**142 sider**), `locale-leak.mjs --gate` exit 0. De 16 nye tests
+  **falder mod master's `dage-til.ts`** (verificeret med `git checkout master
+  --`: **14 fejl**). Ugedage, ISO-uger og ferieafstande er verificeret over
+  **61 år** (1990-2050), ikke på tre valgte år.
+  **⚠️ Falsk påstand fanget i egen diff (fejltype 11):** første udkast sagde
+  "5 til 6 uger fra sommerferiens start til 1. august". Målt over 1990-2050 er
+  spændvidden **32 til 38 dage** (sidste lørdag i juni falder så sent som
+  30. juni), altså 4,6-5,4 uger — teksten var **for lang** på den lave ende.
+  Rettet til "32 til 38 dage" og porten dækker nu hele året.
+
+- ⏳ **VERIFICÉR DEPLOY: `/dage-til/kristi-himmelfartsdag` og
+  `/dagar-till/kristi-himmelsfardsdag` skal begge svare med påskedag + 39
+  dage.** Kode + plan i ét squash-commit på `ceo/kristi-himmelfartsdag`. Første
+  kandidatvindue **2026-09-30 12:30**. Rørte filer: `src/lib/dage-til.ts`
+  (**ét event** med 4 fakta + 5 FAQ pr. sprog, **begge** arme) og
+  `src/lib/dage-til.test.ts` (**+236**). Ingen eksisterende beregning rørt, ingen
+  UI, ingen ny `kind` (ankeret er den eksisterende `easterOffset`), ingen ny
+  afhængighed; sitemap, `/dato`-liste og breadcrumb kommer fra de eksisterende
+  lister. Verificér ved **indhold**:
+  1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
+  2. `https://minberegner.dk/dage-til/kristi-himmelfartsdag` skal have
+     **"Hvor mange dage er der til kristi himmelfart?"** i `<h1>` og
+     `<title> = "Hvor mange dage er der til kristi himmelfart? 218 dage"**.
+  3. Samme sides brødtekst skal sige **"6. maj"** og **"14. maj"** (2026) /
+     **"25. maj"** (2028).
+  4. `https://beraknare.se/dagar-till/kristi-himmelsfardsdag` skal have
+     **"Hur många dagar är det till kristi himmelsfärd?"** og det samme svar.
+  5. `/dato` liste skal have `/dage-til/kristi-himmelfartsdag` blandt de 18
+     rækker.
+  **Kontrol:** de 17 andre dage-til-siders titler uændrede.
+  **Gate grøn:** lint (**618 filer**), **3088 tests / 190 filer** (fra 3070),
+  build (**142 sider**), `locale-leak.mjs --gate` exit 0. De nye tests
+  **falder mod master's `dage-til.ts`** (verificeret med `git checkout master
+  --`: **16 fejl**).
+
+- ⏳ **VERIFICÉR DEPLOY: `/dato` skal sige "tolv" og vise 251 danske
+  arbejdsdage for 2026, og helligdagssætningen skal ramme alle tolv navne.**
+  Kode + plan i ét squash-commit på `ceo/helligdage-liste`. Første
+  kandidatvindue **2026-09-30 12:30**. Rørte filer: `src/lib/helligdage.ts`
+  (**+3 danske dage, +1 svensk, ny `helligdagsnavne()`**),
+  `src/lib/helligdage.test.ts` (**+5**), `src/app/dato/page.tsx` (**2
+  hændskrevne lister → `helligdagsnavne()`**), `src/lib/page-data.ts`
+  (**2 FAQ-svar**), `src/lib/dato-eksempler.test.ts` + `src/app/dato/page.test.tsx`
+  (**de fire gamle 253-tal → 251**). Ingen ny URL, ingen ny afhængighed,
+  ingen ændret UI-struktur. Verificér ved **indhold**:
+  1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
+  2. `https://minberegner.dk/dato` skal have **"springer de tolv offentlige
+     helligdage over: Nytårsdag, Skærtorsdag, Langfredag, Påskedag,
+     2. påskedag, Kristi himmelfartsdag, Pinsedag, 2. pinsedag, Grundlovsdag,
+     Juleaftensdag, Juledag, 2. juledag."** i tip-boksen.
+  3. Samme sides FAQ skal svare **"De 12 danske helligdage"** (ikke ni).
+  4. Samme sides månedstabel skal summerer til **251 arbejdsdage** i 2026,
+     og **maj-rækken skal sige 19** (var 21).
+  5. `https://beraknare.se/dato` skal svare **"Sveriges 16 röddagar"** og
+     liste **Pingstdagen** — og **ikke** "Annandag pingst".
+  **Kontrol:** `https://beraknare.se/dato` månedstabel **uændret** (252
+  arbejdsdage), fordi pingstdagen altid er en søndag. Ingen danske strenge
+  lækker til beraknare.se (`locale-leak.mjs --gate`).
+  **Målt før merge:** dansk 2026 = 251, svensk 2026 = 252, pinseuge
+  25.-31. maj = 4 danske / 5 svenske arbejdsdage, navne på hverdag: himmelfart
+  torsdag, pinsedag søndag, 2. pinsedag mandag, 61/61 år (2024-2045).
+  **Gate grøn:** lint (**618 filer**), **3112 tests / 190 filer** (fra 3108),
+  build (**142 sider**), `locale-leak.mjs --gate` exit 0. De ni helligdags-tests
+  **falder mod master's `helligdage.ts`** (verificeret med `git stash`:
+  **9 fejl**).
+  **⚠️ Fejl i egen diff fanget ved selvreview (fejltype 11):** mit første
+  `helligdagsnavne()` lavede `.toLowerCase()` på hele listen, hvilket ville give
+  **"sveriges nationaldag"** — svensk genitiv skal have stort S. Navnene står nu
+  uændret, og kalderen sætter dem ind, hvor et stort bogstav passer. Låst i
+  en egen test, så et nyt frafald i den type ikke kan ske stille.
+
+
+- ⏳ **VERIFICÉR DEPLOY: `/dato` skal svare på begge pinse-intervaller med de
+  regnede tal og linke videre til hver sin pinseside.** Kode + plan i ét
+  squash-commit på `ceo/pinse-intervaller`. Første kandidatvindue
+  **2026-09-30 12:30**. Rørte filer: `src/lib/pinse-intervaller.ts` (**ny**),
+  `src/lib/pinse-intervaller.test.ts` (**ny, 12 tests**), `src/app/dato/page.tsx`
+  (**ét nyt afsnit pr. sprog + tabel**), `src/lib/page-data.ts` (**2 FAQ-svar
+  pr. sprog**), `src/app/dato/page.test.tsx` (**+6**). Ingen ny URL, ingen ny
+  afhængighed, ingen beregningslogik rørt, ingen `<title>` rørt, ingen sitemap.
+  Verificér ved **indhold**:
+  1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
+  2. `https://minberegner.dk/dato` skal have **"Hvor mange dage er der fra påske
+     til pinse?"** og **"Hvor mange dage er der i pinsen?"** som `<h2>`.
+  3. Første afsnit skal sige **"49 dage fra påskedagen til pinsedagen"** og
+     **"50 dage til 2. pinsedag"**.
+  4. Tabellen skal have **Kristi himmelfartsdag / Pinsedag / 2. pinsedag** med
+     kolonnen **39 / 49 / 50** og ugedagene **torsdag / søndag / mandag**.
+  5. Pinseafsnittet skal sige **"12 kalenderdage"** og **"6 arbejdsdage"** for
+     2027, og FAQ'en skal have **2** nye `Question`.
+  6. Siden skal linke til `/dage-til/kristi-himmelfartsdag` og
+     `/dage-til/2-pinsedag`.
+  **Kontrol:** `https://beraknare.se/dato` skal have **"Hur många dagar är det
+  mellan påsk och pingst?"** og **"7 arbetsdagar"**, og **ikke** nogen dansk
+  streng (porten kører `locale-leak.mjs --gate`). `/dage-til/*` siderne skal
+  have uændrede titler.
+   **Målt før merge:** 39/49/50 og perioden på 12 dage verificeret over **61 år**
+   (1990-2050); `periodeArbejdsdage` er 5 i **8** år hvor grundlovsdagen 5. juni
+   ligger i perioden på en hverdag, ellers 6 (og 6/7 i Sverige). *(Tallet "7" stod
+   her fejlagtig før 30/9 — 7 er antallet kollisionsår, 8 er antallet år med 5
+   arbejdsdage; rettet af samme måling som review-fundene.)* **Gate grøn:** lint
+   (**620 filer**), **3135 tests / 191 filer** (fra 3112), build (**142 sider**),
+   `locale-leak.mjs --gate` exit 0. De fire nye side-tests **falder mod master's
+   `page.tsx`** (verificeret med `git checkout master --`: **4 fejl**).
+
+- ⏳ **VERIFICÉR DEPLOY: `/dato` skal stadig vise pinseåret 2027 — påskedagen
+  28. marts og 2. pinsedag 17. maj.** Kode + plan i ét squash-commit på
+  `ceo/pinseaar-tidszone`. Vindue **2026-09-30 17:30**. Rørte
+  filer: `src/lib/pinse-intervaller.ts` (**to nye private hjælpere, `pinseAar`
+  omskrevet**) og `src/lib/pinse-intervaller.test.ts` (**+4 tidszone-tests, fire
+  assertions skrevet om til UTC-øjeblik**). Ingen UI, ingen ny URL, ingen ny
+  afhængighed, ingen `<title>` rørt, ingen beregningslogik rørt. I en
+  UTC-container er `toUtcMidnight` og `lokalDag` enige, så **det viste tal skal
+  være uændret** — netop derfor skal det verificeres på indhold, ikke på HTTP.
+  1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
+  2. `https://minberegner.dk/dato` skal have **"Påskedagen i 2027 er 28. marts"**
+     og **"17. maj"** i pinseafsnittet.
+  3. `https://beraknare.se/dato` skal have **"Påskdagen 2027 infaller 28 mars"**
+     og **"17 maj"**.
+  **Kontrol:** `https://minberegner.dk/dage-til/2-pinsedag` skal have uændret
+  titel med dage-tal, og ingen danske strenge lækker til beraknare.se (porten
+  kører `locale-leak.mjs --gate`).
+  **Målt før merge:** de fire nye tidszone-tests **falder mod master's
+  `pinse-intervaller.ts`** (verificeret med `git checkout master --`: **2 fejl**,
+  Asia/Tokyo og Pacific/Kiritimati). **Gate grøn:** lint (**620 filer**),
+  **3139 tests / 191 filer** (fra 3135), build (**142 sider**),
+  `locale-leak.mjs --gate` exit 0.
+
+- ⏳ **VERIFICÉR DEPLOY: `/dato` skal have afsnittet "Hvor mange dage er der i
+  den her måned?" med månedens længde, dagens dag-nummer og dage tilbage.**
+  Kode + plan i ét squash-commit på `ceo/denne-maaned`. Første
+  kandidatvindue **2026-09-30 17:30**. Rørte filer: `src/lib/dato-eksempler.ts`
+  (**ny `denneMaanedEksempel()` + `dagITidszone()`**), `src/app/dato/page.tsx`
+  (**ét nyt `<h2>`-afsnit, kun `da`**) og de to testfiler (**+6 tests**). Ingen
+  eksisterende beregning rørt, ingen ny URL, ingen ny afhængighed, ingen
+  `<title>` rørt, intet sitemap. Verificér ved **indhold**:
+  1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
+  2. `https://minberegner.dk/dato` skal have **"Hvor mange dage er der i den her
+     måned?"** som `<h2>`, og brødteksten skal sige **"<måned> 2026 har NN
+     dage"**, **"månedens N. dag"** og **"NN dage tilbage"**.
+  3. Samme sides Excel-streng skal være med: `=DATEDIF(2026-07-01;2026-07-31;"d")+1`.
+  **Kontrol:** `https://beraknare.se/dato` skal være **uændret** — afsnittet er
+  `locale === "da"`-kun, så der må ikke komme dansk dorthed (porten kører
+  `locale-leak.mjs --gate`). `https://minberegner.dk/dage-til/2-pinsedag` skal
+  have uændret titel med dage-tal.
+  **Målt før merge:** månedslængden mod `daysBetween` over **alle 12 måneder i
+  2026 og 2027** (dageForbruget + dageTilbage = måneds længde, hver dag),
+  og `arbejdsdage`/`weekenddage` mod tabellens egen række i januar 2026,
+  februar 2028 (skudår) og december 2027. **Gate grøn:** lint (**620 filer**),
+  **3147 tests / 191 filer** (fra 3141), build (**142 sider**),
+  `locale-leak.mjs --gate` exit 0. De to nye side-tests **falder mod master's
+  `page.tsx`** (verificeret med `git stash`: **2 fejl**).
+
+- ⏳ **VERIFICÉR DEPLOY: `/blog/barsel-2026-regler-og-satser` skal ikke have en
+  `<h2>` uden indhold under sig.** Kode + plan i ét squash-commit på
+  `ceo/tom-overskrift`. Vindue **2026-09-30 17:30**. Rørte filer:
+  `src/app/blog/barsel-2026-regler-og-satser/page.tsx` (**én tom `<h2>`
+  slettet**) og `src/app/dublet-overskrift.test.tsx` (**+2 tests, egen
+  `describe`**). Ingen beregningslogik, ingen `<title>` rørt, ingen ny URL,
+  intet sitemap, ingen ny afhængighed. Verificér ved **indhold**:
+  1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
+  2. `https://minberegner.dk/blog/barsel-2026-regler-og-satser` skal have
+     **14 `<h2>`** og **ikke** "Sådan lægger I planen". "Planlægning af barsel"
+     skal stadig være der med linket til `/barselsplanlaegger`.
+  **Kontrol:** de 26 andre blogindlæg skal have uændret antal `<h2>`, og
+  `/barselsdagpenge` uændret.
+  **Datagrund:** Plausible 28 dage — 185 besøgende (**+97 %**), **bounce 84 %**,
+  den dårligste bounce i hele billedet. Et afsnit med nul indhold under en
+  `<h2>` er præcis den fejl, der får en læser til at scanle forbi: overskriften
+  lovede planen, og der stod ingen plan.
+  **Gate grøn:** lint (**620 filer**), **3149 tests / 191 filer** (fra 3147),
+  build (**142 sider**), `locale-leak.mjs --gate` exit 0. De to nye tests **falder
+  mod master's kilde** (verificeret med `git checkout master --`: **2 fejl**,
+  bl.a. 15 `<h2>`).
+
+- ⏳ **VERIFICÉR DEPLOY: ingen brødtekst må stadig sige "SKAT" — myndigheden
+  hedder Skattestyrelsen siden 1. november 2024.** Kode + plan i ét
+  squash-commit på `ceo/skattestyrelsen`. Vindue **2026-09-30 17:30**. Rørte
+  filer: `src/lib/page-data.ts` (4), `src/lib/categories.ts` (2),
+  `src/app/rentefradrag/page.tsx`, `src/app/feriepenge/page.tsx`,
+  `src/components/RentefradragBeregner.tsx`, to blogindlæg (3),
+  `src/lib/satser-2026.ts` + test (2 kommentarer) og **ny**
+  `src/lib/myndighedsnavn.test.ts` (**3 tests**). Ingen beregningslogik, ingen
+  `<title>` rørt, ingen ny URL, intet sitemap, ingen ny afhængighed. Verificér
+  ved **indhold**:
+  1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
+  2. `https://minberegner.dk/moms` skal have **"afregner med Skattestyrelsen"**
+     i FAQ'en — og stadig sige "Skattestyrelsen" to afsnit længere nede, så
+     siden ikke længere modsiger sig selv.
+  3. `https://minberegner.dk/feriepenge` skal have **"Feriepengene indberettes
+     automatisk til Skattestyrelsen"**.
+  4. `https://minberegner.dk/rentefradrag` skal have **"Skattestyrelsen, fradrag
+     for renteudgifter"** i relaterede beregnere.
+  5. `https://minberegner.dk/blog/skat-2026-alt-du-skal-vide` skal stadig
+     nævne **skat.dk** — domænet hedder stadig sådan, kun myndighedsnavnet
+     ændrede sig.
+  **Kontrol:** de 26 andre blogindlæg og de øvrige FAQ'er uændrede; intet
+  `keywords`-array rørt (søgning på "skat" skal stadig finde siderne).
+  **Datagrund:** SKAT blev omdannet til Skattestyrelsen 1/11-2024, men navnet
+  stod i 13 brødtekstrenge på otte sider — bl.a. i `/moms`'s FAQ, som er
+  indekseret tekst på en side med **22.464 GSC-visninger**. `/moms` skrev
+  "afregner med SKAT" i FAQ'en og "Skattestyrelsen" to afsnit nede på den
+  samme side, så siden modsagde sig selv.
+  **Målt før merge:** porten dækker hele `src/` (≥200 filer) og springer kun
+  `pension-satser.test.tsx` over, fordi den *citerer* et dokument med dets
+  udgivelsesnavn — en kildeangivelse må ikke omskrives. De tre nye tests
+  **falder mod master** (verificeret med `git stash`: 1 fejl, 13 fund).
+  **Gate grøn:** lint (**621 filer**), **3152 tests / 192 filer** (fra 3149),
+  build (**142 sider**), `locale-leak.mjs --gate` exit 0.

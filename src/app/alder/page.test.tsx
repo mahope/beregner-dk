@@ -12,7 +12,7 @@ import {
 } from "@/lib/alder-eksempler";
 import { beregnAlder } from "@/lib/alder";
 import { LEVET_FOEDSELSDATO, alderLevet, formatDageTal } from "@/lib/alder-levet";
-import { tilIsoDato } from "@/lib/lokal-dato";
+import { iDagISidensTidszone, tilIsoDato } from "@/lib/lokal-dato";
 import { getPageData } from "@/lib/page-data";
 import AlderPage from "./page";
 
@@ -37,19 +37,43 @@ describe("alder page", () => {
     vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("da"));
   });
 
+  // Svaret i introen er alderen *på den dag siden viser*. Før rettelsen stod
+  // "36 år, 6 måneder og 10 dage" håndskrevet i page-data.ts og blev dagsvis
+  // mere forkert; testen låste den forkerte konstant. Nu låser den kilden.
   test.each([
-    { locale: "da" as const, heading: "Aldersberegner", answer: "36 år, 6 måneder og 10 dage" },
-    { locale: "se" as const, heading: "Ålderskalkylator", answer: "36 år, 6 månader och 10 dagar" },
-    { locale: "no" as const, heading: "Alderskalkulator", answer: "36 år, 6 måneder og 10 dager" },
-  ])("viser det konkrete alders-svar og beregneren i $locale", async ({ locale, heading, answer }) => {
+    { locale: "da" as const, heading: "Aldersberegner" },
+    { locale: "se" as const, heading: "Ålderskalkylator" },
+    { locale: "no" as const, heading: "Alderskalkulator" },
+  ])("viser det konkrete alders-svar og beregneren i $locale", async ({ locale, heading }) => {
     vi.mocked(getLocale).mockResolvedValue(locale);
     vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale(locale));
 
     const html = renderToStaticMarkup(await AlderPage());
+    const levet = alderLevet(iDagISidensTidszone(new Date(), locale === "se" ? "se" : "da"));
 
     expect(html).toContain(`>${heading}</h1>`);
-    expect(html).toContain(answer);
+    expect(html).toContain(formatAlder(levet, locale));
     expect(html).toContain("Aldersværktøj");
+  });
+
+  // Kvalitetsregel 1: frossen byggeværdi. Introens alder skal følge dagen,
+  // og den frosne dato fra den gamle konstant må ikke stå mere.
+  test("introens alder følger dagen, ikke den dag koden blev skrevet", async () => {
+    const html = renderToStaticMarkup(await AlderPage());
+    const iDag = iDagISidensTidszone(new Date(), "da");
+
+    // Kilden, ikke et valgt tidspunkt: ellers ville porten kun holde den
+    // dag den blev skrevet — præcis fejlen den her rettelse fjerner.
+    expect(html).toContain(formatAlder(alderLevet(iDag), "da"));
+    // Den frosne dato fra den gamle konstant må ikke stå i metadata og
+    // introen. (Tabellen har stadig sit eget, daterede regnestykke til
+    // 25. september 2026 — det er et eksempel, ikke et levende svar.)
+    expect(html).not.toContain("pr. 25. september 2026");
+    expect(html).toContain(
+      new Intl.DateTimeFormat("da-DK", {
+        day: "numeric", month: "long", year: "numeric",
+      }).format(new Date(`${iDag}T12:00:00`))
+    );
   });
 
   test("viser ikke den forældede frosne alders-sum i introen", async () => {
@@ -191,12 +215,12 @@ describe("alder page", () => {
     const faq = getPageData("alder", "da")!.faqItems;
     const iDage = faq.find((item) => item.question === "Hvor gammel er jeg i dage?");
     const rigtigt = beregnAlder({
-      foedselsdato: "1990-03-15",
-      beregningsdato: "2026-09-25",
+      foedselsdato: LEVET_FOEDSELSDATO,
+      beregningsdato: iDagISidensTidszone(new Date(), "da"),
     })!;
 
-    expect(rigtigt.totalDage).toBe(13343);
-    expect(iDage?.answer).toContain("13.343");
+    expect(iDage?.answer).toContain(`${formatDageTal(rigtigt.totalDage, "da")} dage`);
+    // Dage-tallet må ikke være et dag-tal der afviger fra beregnAlder.
     expect(iDage?.answer).not.toContain("13.342");
   });
 
@@ -295,12 +319,11 @@ describe("alder page", () => {
     const faq = getPageData("alder", "se")!.faqItems;
     const punkt = faq.find((item) => item.question === "Räkna ut ålder från personnummer?");
     const rigtigt = beregnAlder({
-      foedselsdato: "1990-03-15",
-      beregningsdato: "2026-09-25",
+      foedselsdato: LEVET_FOEDSELSDATO,
+      beregningsdato: iDagISidensTidszone(new Date(), "se"),
     })!;
 
-    expect(rigtigt.aar).toBe(36);
-    expect(punkt?.answer).toContain("36 år, 6 månader och 10 dagar");
+    expect(punkt?.answer).toContain(formatAlder(rigtigt, "se"));
     expect(punkt?.answer).toContain("900315");
     // Samordningsnumret: dagen er 60 højere, så 63 skal læses som 3.
     expect(punkt?.answer).toContain("63 ska läsas som 3");
@@ -371,9 +394,11 @@ describe("alder page", () => {
     const punkt = faq.find((item) => item.question === sporgsmaal);
 
     expect(punkt, `${sporgsmaal} mangler i ${locale}`).toBeDefined();
-    // Dage-levet-tallet i FAQ'en er det beregnAlder giver for de samme datoer.
-    expect(punkt?.answer).toContain("13.343");
-    expect(punkt?.answer).toContain("320.232");
+    // Dage- og timer-tallet er det beregnAlder giver for den dag siden
+    // viser — ikke de frosne 13.343 / 320.232 fra før rettelsen.
+    const levet = alderLevet(iDagISidensTidszone(new Date(), locale === "se" ? "se" : "da"));
+    expect(punkt?.answer).toContain(formatDageTal(levet.totalDage, locale));
+    expect(punkt?.answer).toContain(formatDageTal(levet.totalTimer, locale));
     expect(punkt?.answer).not.toContain("13.342");
   });
 

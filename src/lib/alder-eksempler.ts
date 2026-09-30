@@ -26,8 +26,14 @@ const raat: AlderEksempelRaat[] = [
     foedselsdato: "1990-03-15",
     beregningsdato: "2026-09-25",
     bemaerkning: {
-      da: "Det eksempel, der står i sidens beskrivelse. Helt samme tal som værktøjet viser, når du bare skriver fødselsdatoen ind.",
-      se: "Exemplet som står i sidans beskrivning. Exakt samma siffror som kalkylatorn visar när du bara fyller i födelsedatum.",
+      // Rækken er regnet til en *fast* dato, ikke til i dag, så den er et
+      // regnestykke og ikke et levende svar. Derfor siger billedteksten ikke
+      // længere, at den er "eksemplet i beskrivelsen" — beskrivens alder følger
+      // dagen (se `alder-side-tekst.ts`), og de to ville ellers glide fra
+      // hinanden. Det værktøjet viser, når man skriver fødselsdatoen ind, er
+      // stadig præcis denne række.
+      da: "Et fast regnestykke, regnet til 25. september 2026. Skriver du fødselsdatoen ind i værktøjet ovenfor, får du præcis disse tal til den dato.",
+      se: "En fast uträkning, gjord till 25 september 2026. Fyller du i födelsedatumet i verktyget ovan får du exakt dessa siffror till det datumet.",
     },
   },
   {

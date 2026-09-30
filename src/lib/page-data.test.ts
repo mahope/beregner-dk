@@ -5,6 +5,10 @@ import { beregnPromille, PROMILLEGRANSE_UDLAND } from "./promille";
 import { sammenlignEnhedspris } from "./enhedspris";
 import { TIDSZONER } from "./tidszone-reference";
 import { forkortBrok } from "./brok";
+import { alderLevet, formatDageLived } from "./alder-levet";
+import { formatAlder } from "./alder-eksempler";
+import { getIntlLocale } from "./format";
+import { iDagISidensTidszone } from "./lokal-dato";
 
 describe("getPageData", () => {
   test("returns data for known DA slug", () => {
@@ -169,48 +173,100 @@ describe("getPageData", () => {
     {
       locale: "da" as const,
       title: "Aldersberegner: hvor gammel er du i år, måneder og dage?",
-      age: "36 år, 6 måneder og 10 dage",
-      days: "13.343 dage",
       birthDate: "fødselsdato",
     },
     {
       locale: "se" as const,
       title: "Ålderskalkylator: hur gammal är du i år, månader och dagar?",
-      age: "36 år, 6 månader och 10 dagar",
-      days: "13.343 dagar",
       birthDate: "födelsedatum",
     },
     {
       locale: "no" as const,
       title: "Alderskalkulator: hvor gammel er du i år, måneder og dager?",
-      age: "36 år, 6 måneder og 10 dager",
-      days: "13.343 dager",
       birthDate: "fødselsdatoen",
     },
-  ])("has answer-first age metadata for $locale", ({ locale, title, age, days, birthDate }) => {
-    const data = getPageData("alder", locale)!;
+  ])(
+    "has answer-first age metadata for $locale",
+    ({ locale, title, birthDate }) => {
+      const data = getPageData("alder", locale)!;
+      // Alderen og dage-tallet regnes for i dag, så testen låser *kilden*
+      // (alderLevet) frem for et tal, der bliver dagsvis forkert. Før denne
+      // rettelse stod "36 år, 6 måneder og 10 dage" her som konstant — og
+      // holdt kun, fordi netop den dage blev skrevet ind i page-data.ts.
+      const levet = alderLevet(iDagISidensTidszone(new Date(), locale === "se" ? "se" : "da"));
+      const age = formatAlder(levet, locale);
+      const days = formatDageLived(levet, locale);
 
-    expect(data.metaTitle).toBe(title);
-    expect(data.metaTitle.length).toBeLessThanOrEqual(60);
-    expect(data.description).toContain(age);
-    expect(data.metaDescription).toContain(age);
-    expect(data.metaDescription.length).toBeLessThanOrEqual(160);
-    expect(data.ogTitle).toBe(title);
-    expect(data.ogDescription).toContain(age);
-    expect(data.schemaDescription).toContain(birthDate);
-    const daysFaq = data.faqItems.find((item) => item.answer.includes(days));
-    expect(daysFaq).toBeDefined();
-  });
+      expect(data.metaTitle).toBe(title);
+      expect(data.metaTitle.length).toBeLessThanOrEqual(60);
+      expect(data.description).toContain(age);
+      expect(data.metaDescription).toContain(age);
+      expect(data.metaDescription.length).toBeLessThanOrEqual(160);
+      expect(data.ogTitle).toBe(title);
+      expect(data.ogDescription).toContain(age);
+      expect(data.schemaDescription).toContain(birthDate);
+      const daysFaq = data.faqItems.find((item) => item.answer.includes(days));
+      expect(daysFaq).toBeDefined();
+    }
+  );
 
   test.each(["da", "se", "no"] as const)(
     "dropper den frosne alders-sum i %s",
     (locale) => {
       const data = getPageData("alder", locale)!;
+      const levet = alderLevet(iDagISidensTidszone(new Date(), locale === "se" ? "se" : "da"));
 
-      expect(data.metaDescription).not.toContain("35 år");
-      expect(data.description).not.toContain("35 år");
+      // Summerne i description og metadata skal være *alders-sum* for i
+      // dag, ikke kun forskellige fra den gamle konstant.
+      expect(data.metaDescription).toContain(formatAlder(levet, locale));
+      expect(data.description).toContain(formatAlder(levet, locale));
     }
   );
+
+  // Kvalitetsregel 1: en frossen byggeværdi i et snippet. `/alder` skrev
+  // "pr. 25. september 2026" i description, metaDescription, og
+  // ogDescription, og `allPages` er et modul-konst — så tallene blev frosset
+  // ved processens start og dagsvis mere forkert. Denne test fejler på
+  // master: der står stadig "25. september 2026" i kilden.
+  test.each(["da", "se", "no"] as const)(
+    "%s: ingen streng i metadata har et frosset 'pr. <dato>'",
+    (locale) => {
+      const data = getPageData("alder", locale)!;
+      const iDag = iDagISidensTidszone(new Date(), locale === "se" ? "se" : "da");
+      const rigtigDato = new Intl.DateTimeFormat(getIntlLocale(locale), {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      }).format(new Date(`${iDag}T12:00:00`));
+
+      // `description` og `metaDescription` er de to, der står i Googles
+      // snippet. `ogDescription` har aldrig haft en dato — den bærer den
+      // levende alder alene, og en længere tekst klippes i de fleste feeds.
+      for (const tekst of [data.description, data.metaDescription]) {
+        expect(tekst).toContain(rigtigDato);
+        expect(tekst).not.toMatch(/\b(pr|per) (25|27)\. (september|oktober) 2026/);
+      }
+      expect(data.ogDescription).toContain(
+        formatAlder(alderLevet(iDag), locale)
+      );
+      expect(data.ogDescription).not.toMatch(/\b(pr|per) (25|27)\. (september|oktober) 2026/);
+      for (const item of data.faqItems) {
+        expect(item.answer, item.question).not.toMatch(/\b(pr|per) (25|27)\. (september|oktober) 2026/);
+      }
+    }
+  );
+
+  // Pladsholderne skal alle være løst. En uløst `{ALDER}` ville stå i
+  // Googles snippet som rå markup.
+  test.each(["da", "se", "no"] as const)("løser alle pladsholdere i %s", (locale) => {
+    const data = getPageData("alder", locale)!;
+    const tekster = [data.description, data.metaDescription, data.ogDescription,
+      ...data.faqItems.map((item) => item.answer)];
+
+    for (const tekst of tekster) {
+      expect(tekst, tekst.slice(0, 60)).not.toMatch(/\{[A-Z0-9_]+\}/);
+    }
+  });
 
   test.each([
     {

@@ -17,6 +17,40 @@ export function tilIsoDato(dato: Date): string {
   return `${aar}-${maaned}-${dag}`;
 }
 
+/** Sitets tidszone pr. domæne — Danmark, Sverige og Norge. */
+const SIDENS_TIDSZONE = {
+  da: "Europe/Copenhagen",
+  se: "Europe/Stockholm",
+  no: "Europe/Oslo",
+} as const;
+
+/**
+ * Dagens kalenderdato i **sidens** tidszone, som "YYYY-MM-DD".
+ *
+ * `tilIsoDato(new Date())` læser datoen i *serverens* tidszone. Bygge- og
+ * kørserveren står i UTC, så mellem kl. 00:00 og 02:00 dansk tid ville den
+ * give *i går* — præcis det vindue, hvor en læser åbner "hvor gammel er jeg
+ * i dag". `dage-til.ts` og `dato-eksempler.ts` har hver sin kopi af den samme
+ * løsning; her er den delt, så en alders-tallet ikke kan komme en dag bag
+ * `/dato`'s nedtællinger.
+ */
+export function iDagISidensTidszone(
+  dato: Date,
+  tidszone: keyof typeof SIDENS_TIDSZONE
+): string {
+  const dele = new Intl.DateTimeFormat("en-CA", {
+    timeZone: SIDENS_TIDSZONE[tidszone],
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(dato);
+  const vaerdi = (type: "year" | "month" | "day") =>
+    Number(dele.find((d) => d.type === type)?.value);
+  return `${vaerdi("year")}-${String(vaerdi("month")).padStart(2, "0")}-${String(
+    vaerdi("day")
+  ).padStart(2, "0")}`;
+}
+
 /**
  * Læser "YYYY-MM-DD" som dato i lokal tid. Tomme, forkorte og umulige
  * værdier (31. februar) returneres som `null` frem for at rulle over i næste

@@ -1,5 +1,5 @@
 import { ALDER_EKSEEMPLER, formatAlder, formatAlderRaekke, foedselsaarRaekker } from "@/lib/alder-eksempler";
-import { tilIsoDato } from "@/lib/lokal-dato";
+import { iDagISidensTidszone } from "@/lib/lokal-dato";
 
 /**
  * Svensk halvdel af /alder's svar-pakke: fødselsårs-tabellen, Excel-formlerne
@@ -45,7 +45,7 @@ function formatDato(iso: string): string {
 }
 
 export default function AlderSeSvar() {
-  const iDag = tilIsoDato(new Date());
+  const iDag = iDagISidensTidszone(new Date(), "se");
   const foedselsaar = foedselsaarRaekker(iDag);
   const senesteFoedselsaar = foedselsaar[foedselsaar.length - 1].aar;
   const eksempel = ALDER_EKSEEMPLER[0];

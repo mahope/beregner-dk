@@ -11,6 +11,8 @@ import {
 } from "./nettoprisindeks";
 import { landSvarSprogholdig, satsUdenraekkeSvar } from "./moms-eu";
 import { formatNumber } from "./format";
+import { alderSideTekst, erstatAlderTokens } from "./alder-side-tekst";
+import { iDagISidensTidszone } from "./lokal-dato";
 import { getHelligdage, helligdagsnavne } from "./helligdage";
 import { pinseAfstande, pinseInterval } from "./pinse-intervaller";
 import { estimerNettoMaaned } from "./barsel/netto";
@@ -888,12 +890,12 @@ const daPages: Record<string, PageData> = {
     "alder": {
       slug: "alder",
       title: "Aldersberegner",
-      description: "Hvor gammel er du præcist? Født 15. marts 1990 er du 36 år, 6 måneder og 10 dage pr. 25. september 2026. Indtast din fødselsdato, så tæller vi hele år, måneder og dage.",
+      description: "Hvor gammel er du præcist? Født 15. marts 1990 er du {ALDER} pr. {DATO}. Indtast din fødselsdato, så tæller vi hele år, måneder og dage.",
       metaTitle: "Aldersberegner: hvor gammel er du i år, måneder og dage?",
-      metaDescription: "Hvor gammel er du præcist? Født 15. marts 1990 = 36 år, 6 måneder og 10 dage pr. 25. september 2026. Beregn alder i år, måneder, uger og dage.",
+      metaDescription: "Hvor gammel er du præcist? Født 15. marts 1990 = {ALDER} pr. {DATO}. Beregn alder i år, måneder, uger og dage.",
       keywords: ["aldersberegner", "beregn alder", "hvor gammel er jeg", "præcis alder", "alder i dage", "hvor mange dage har jeg levet", "hvor mange dage har jeg været i live", "hvor gammel er jeg i dage", "stjernetegn"],
       ogTitle: "Aldersberegner: hvor gammel er du i år, måneder og dage?",
-      ogDescription: "Fødselsdato til i dag: alder i år, måneder, uger og dage. Eksempel: født 15. marts 1990 = 36 år, 6 måneder og 10 dage.",
+      ogDescription: "Fødselsdato til i dag: alder i år, måneder, uger og dage. Eksempel: født 15. marts 1990 = {ALDER}.",
       category: "Hverdag",
       breadcrumbCategory: "Hverdag",
       breadcrumbCategoryHref: "/kategori/hverdag",
@@ -901,18 +903,18 @@ const daPages: Record<string, PageData> = {
       schemaDescription: "Beregn din alder i år, måneder, uger og dage ud fra din fødselsdato.",
       schemaCategory: "UtilitiesApplication",
       faqItems: [
-      { question: "Hvor gammel er jeg præcist?", answer: "Født 15. marts 1990 er du 36 år, 6 måneder og 10 dage pr. 25. september 2026. Indtast din egen fødselsdato for at få alderen i år, måneder og dage." },
+      { question: "Hvor gammel er jeg præcist?", answer: "Født 15. marts 1990 er du {ALDER} pr. {DATO}. Indtast din egen fødselsdato for at få alderen i år, måneder og dage." },
       { question: "Hvordan beregnes min alder?", answer: "Vi tæller hele år, måneder og dage fra din fødselsdato til i dag." },
-      { question: "Hvor gammel er jeg i dage?", answer: "Alderen i dage er antallet af dage mellem fødselsdatoen og i dag. Eksempel: født 15. marts 1990 er der gået 13.343 dage pr. 25. september 2026." },
+      { question: "Hvor gammel er jeg i dage?", answer: "Alderen i dage er antallet af dage mellem fødselsdatoen og i dag. Eksempel: født 15. marts 1990 er der gået {DAGE} pr. {DATO}." },
       { question: "Stjernetegn?", answer: "Dit stjernetegn bestemmes af din fødselsdato. Der er 12 stjernetegn." },
-      { question: "Hvor gammel er jeg, hvis jeg er født i 2007?", answer: "Et fødselsår giver to aldre, fordi fødselsdagen ikke altid er nået: født 1. januar 2007 er du den ældste i dit år, født 31. december den yngste. Derfor står der en alder fra og en alder til for hvert år i tabellen på siden, og dage-levet-tallet går fra 6.845 til 7.209 dage pr. 27. september 2026." },
-      { question: "Hvordan beregner jeg alder i Excel?", answer: "Med DATEDIF. Har fødselsdatoen i A1 og den dato, du vil regne til, i B1, er =DATEDIF(A1;B1;\"Y\") hele år, =DATEDIF(A1;B1;\"M\") måneder og =DATEDIF(A1;B1;\"D\") dage. Født 15. marts 1990 til 25. september 2026 giver 36, 438 og 13.343. Vil du hele alderen i én celle: =DATEDIF(A1;B1;\"Y\")&\" år, \"&DATEDIF(A1;B1;\"YM\")&\" måneder og \"&DATEDIF(A1;B1;\"YD\")&\" dage\". Dansk Excel bruger semikolon." },
+      { question: "Hvor gammel er jeg, hvis jeg er født i 2007?", answer: "Et fødselsår giver to aldre, fordi fødselsdagen ikke altid er nået: født 1. januar 2007 er du den ældste i dit år, født 31. december den yngste. Derfor står der en alder fra og en alder til for hvert år i tabellen på siden, og dage-levet-tallet går fra {DAGE2007} pr. {DATO}." },
+      { question: "Hvordan beregner jeg alder i Excel?", answer: "Med DATEDIF. Har fødselsdatoen i A1 og den dato, du vil regne til, i B1, er =DATEDIF(A1;B1;\"Y\") hele år, =DATEDIF(A1;B1;\"M\") måneder og =DATEDIF(A1;B1;\"D\") dage. Født 15. marts 1990 til {DATO} giver {AAR}, {MAANEDER_IALT} og {DAGE_TAL}. Vil du hele alderen i én celle: =DATEDIF(A1;B1;\"Y\")&\" år, \"&DATEDIF(A1;B1;\"YM\")&\" måneder og \"&DATEDIF(A1;B1;\"YD\")&\" dage\". Dansk Excel bruger semikolon." },
       { question: "Kan jeg beregne min alder ud fra CPR-nummeret?", answer: "Ja, men skriv fødselsdatoen ind som en rigtig dato først. CPR'ens seks første cifre er DDMMYY, og hos kvinder er dagen 40 tal højere — så 41. maj er 1. maj. Er der kun en fødselsdato, du regner til, sætter du B1 til =I2(), så Excel regner til dagens dato hver dag." },
       { question: "Kan jeg beregne alder mellem to datoer?", answer: "Ja. Værktøjet har to felter: fødselsdato og 'Beregn alder pr. dato'. Udfylder du begge, tæller det hele år, måneder og dage frem til den dato, du vælger — født 15. marts 1990 giver 20 år, 1 måned og 16 dage pr. 1. maj 2010." },
       { question: "Hvor gammel var jeg den 1. maj 2010?", answer: "Født 15. marts 1990 var du 20 år, 1 måned og 16 dage den 1. maj 2010. Sæt 'Beregn alder pr. dato' til den dato, du vil se alderen på." },
       { question: "Skudår?", answer: "Ja, beregneren tager højde for skudår og varierende månedslængder." },
-      { question: "Hvor mange dager har jeg levet?", answer: "Født 15. marts 1990 er der gått 13.343 dager pr. 25. september 2026. Det svarer til 1.906 hele uker og 438 måneder, og til 320.232 timer — 24 pr. døgn, aldrig 23 eller 25. Skriv fødselsdatoen i værktøjet, så får du dit eget tal." },
-      { question: "Hvor mange dager har jeg været i live?", answer: "Det er samme spørgsmål som 'hvor mange dage har jeg levet': antallet af kalenderdage siden din fødselsdato. Født 15. marts 1990 har du været i live 13.343 dager pr. 25. september 2026, hvilket er 320.232 timer. Dagene tælles i kalenderdage, så et døgn hvor uret stilles en time stadig tæller som 1 dag." },
+      { question: "Hvor mange dager har jeg levet?", answer: "Født 15. marts 1990 er der gått {DAGE} pr. {DATO}. Det svarer til {UGER} hele uker og {MAANEDER} måneder, og til {TIMER} timer — 24 pr. døgn, aldrig 23 eller 25. Skriv fødselsdatoen i værktøjet, så får du dit eget tal." },
+      { question: "Hvor mange dager har jeg været i live?", answer: "Det er samme spørgsmål som 'hvor mange dage har jeg levet': antallet af kalenderdage siden din fødselsdato. Født 15. marts 1990 har du været i live {DAGE} pr. {DATO}, hvilket er {TIMER} timer. Dagene tælles i kalenderdage, så et døgn hvor uret stilles en time stadig tæller som 1 dag." },
       ],
     },
     "dato": {
@@ -2220,12 +2222,12 @@ const noPages: Record<string, PageData> = {
     "alder": {
       slug: "alder",
       title: "Alderskalkulator",
-      description: "Hvor gammel er du nøyaktig? Født 15. mars 1990 er du 36 år, 6 måneder og 10 dager per 25. september 2026. Skriv inn fødselsdatoen, så teller vi hele år, måneder og dager.",
+      description: "Hvor gammel er du nøyaktig? Født 15. mars 1990 er du {ALDER} per {DATO}. Skriv inn fødselsdatoen, så teller vi hele år, måneder og dager.",
       metaTitle: "Alderskalkulator: hvor gammel er du i år, måneder og dager?",
-      metaDescription: "Hvor gammel er du nøyaktig? Født 15. mars 1990 = 36 år, 6 måneder og 10 dager per 25. september 2026. Beregn alder i år, måneder, uker og dager.",
+      metaDescription: "Hvor gammel er du nøyaktig? Født 15. mars 1990 = {ALDER} per {DATO}. Beregn alder i år, måneder, uker og dager.",
       keywords: ["alderskalkulator", "beregn alder", "hvor gammel er jeg", "nøyaktig alder", "alder i dager", "hvor mange dager har jeg levt", "hvor gammel er jeg i dager", "stjernetegn"],
       ogTitle: "Alderskalkulator: hvor gammel er du i år, måneder og dager?",
-      ogDescription: "Fødselsdatoen til i dag: alder i år, måneder, uker og dager. Eksempel: født 15. mars 1990 = 36 år, 6 måneder og 10 dager.",
+      ogDescription: "Fødselsdatoen til i dag: alder i år, måneder, uker og dager. Eksempel: født 15. mars 1990 = {ALDER}.",
       category: "Hverdag",
       breadcrumbCategory: "Hverdag",
       breadcrumbCategoryHref: "/kategori/hverdag",
@@ -2233,9 +2235,9 @@ const noPages: Record<string, PageData> = {
       schemaDescription: "Beregn alderen din i år, måneder, uker og dager ut fra fødselsdatoen.",
       schemaCategory: "UtilitiesApplication",
       faqItems: [
-      { question: "Hvor gammel er jeg nøyaktig?", answer: "Født 15. mars 1990 er du 36 år, 6 måneder og 10 dager per 25. september 2026. Skriv inn din egen fødselsdato for å få alderen i år, måneder og dager." },
+      { question: "Hvor gammel er jeg nøyaktig?", answer: "Født 15. mars 1990 er du {ALDER} per {DATO}. Skriv inn din egen fødselsdato for å få alderen i år, måneder og dager." },
       { question: "Hvordan beregnes alderen min?", answer: "Vi teller hele år, måneder og dager fra fødselsdatoen din til i dag." },
-      { question: "Hvor gammel er jeg i dager?", answer: "Alderen i dager er antallet dager mellom fødselsdatoen og i dag. Eksempel: født 15. mars 1990 er det gått 13.343 dager per 25. september 2026." },
+      { question: "Hvor gammel er jeg i dager?", answer: "Alderen i dager er antallet dager mellom fødselsdatoen og i dag. Eksempel: født 15. mars 1990 er det gått {DAGE} per {DATO}." },
       { question: "Stjernetegn?", answer: "Stjernetegnet ditt bestemmes av fødselsdatoen. Det finnes 12 stjernetegn." },
       { question: "Skuddår?", answer: "Ja, kalkulatoren tar hensyn til skuddår og varierende månedslengder." },
       ],
@@ -3391,12 +3393,12 @@ const sePages: Record<string, PageData> = {
     "alder": {
       slug: "alder",
       title: "Ålderskalkylator",
-      description: "Hur gammal är du exakt? Född 15 mars 1990 är du 36 år, 6 månader och 10 dagar per 25 september 2026. Fyll i födelsedatum, så räknar vi hela år, månader och dagar.",
+      description: "Hur gammal är du exakt? Född 15 mars 1990 är du {ALDER} per {DATO}. Fyll i födelsedatum, så räknar vi hela år, månader och dagar.",
       metaTitle: "Ålderskalkylator: hur gammal är du i år, månader och dagar?",
-      metaDescription: "Hur gammal är du exakt? Född 15 mars 1990 = 36 år, 6 månader och 10 dagar per 25 september 2026. Beräkna ålder i år, månader, veckor och dagar.",
+      metaDescription: "Hur gammal är du exakt? Född 15 mars 1990 = {ALDER} per {DATO}. Beräkna ålder i år, månader, veckor och dagar.",
       keywords: ["ålderskalkylator", "beräkna ålder", "hur gammal är jag", "exakt ålder", "ålder i dagar", "hur många dagar har jag levt", "hur många timmar har jag levt", "hur gammal är jag i dagar", "stjärntecken"],
       ogTitle: "Ålderskalkylator: hur gammal är du i år, månader och dagar?",
-      ogDescription: "Födelsedatum till idag: ålder i år, månader, veckor och dagar. Exempel: född 15 mars 1990 = 36 år, 6 månader och 10 dagar.",
+      ogDescription: "Födelsedatum till idag: ålder i år, månader, veckor och dagar. Exempel: född 15 mars 1990 = {ALDER}.",
       category: "Vardag",
       breadcrumbCategory: "Vardag",
       breadcrumbCategoryHref: "/kategori/hverdag",
@@ -3404,18 +3406,18 @@ const sePages: Record<string, PageData> = {
       schemaDescription: "Beräkna din ålder i år, månader, veckor och dagar utifrån ditt födelsedatum.",
       schemaCategory: "UtilitiesApplication",
       faqItems: [
-      { question: "Hur gammal är jag exakt?", answer: "Född 15 mars 1990 är du 36 år, 6 månader och 10 dagar per 25 september 2026. Fyll i ditt eget födelsedatum för att få åldern i år, månader och dagar." },
+      { question: "Hur gammal är jag exakt?", answer: "Född 15 mars 1990 är du {ALDER} per {DATO}. Fyll i ditt eget födelsedatum för att få åldern i år, månader och dagar." },
       { question: "Hur beräknas min ålder?", answer: "Vi räknar hela år, månader och dagar från ditt födelsedatum till idag." },
-      { question: "Hur gammal är jag i dagar?", answer: "Åldern i dagar är antalet dagar mellan födelsedatum och idag. Exempel: född 15 mars 1990 har det gått 13.343 dagar per 25 september 2026." },
+      { question: "Hur gammal är jag i dagar?", answer: "Åldern i dagar är antalet dagar mellan födelsedatum och idag. Exempel: född 15 mars 1990 har det gått {DAGE} per {DATO}." },
       { question: "Stjärntecken?", answer: "Ditt stjärntecken bestäms av ditt födelsedatum. Det finns 12 stjärntecken." },
       { question: "Kan jag beräkna ålder mellan två datum?", answer: "Ja. Kalkylatorn har två fält: födelsedatum och 'Beräkna ålder per datum'. Fyller du i båda räknar den hela år, månader och dagar fram till det datum du väljer — född 15 mars 1990 ger 20 år, 1 månad och 16 dagar per 1 maj 2010." },
       { question: "Hur gammal var jag den 1 maj 2010?", answer: "Född 15 mars 1990 var du 20 år, 1 månad och 16 dagar den 1 maj 2010. Sätt 'Beräkna ålder per datum' till det datum du vill se åldern på." },
       { question: "Skottår?", answer: "Ja, kalkylatorn tar hänsyn till skottår och varierande månadslängder." },
-      { question: "Räkna ut ålder från personnummer?", answer: "De sex första siffrorna i ett svenskt personnummer är födelsedatumet i ordningen år, månad och dag: 900315 betyder född 15 mars 1990, som ger 36 år, 6 månader och 10 dagar per 25 september 2026. Fyll in det datumet i kalkylatorn. Har du ett samordningsnummer är dagen 60 högre, så 63 ska läsas som 3. Källa: Skatteverket." },
-      { question: "Hur beräknar man ålder i Excel?", answer: "Med DATEDIF. Har du födelsedatumet i A1 och det datum du vill räkna till i B1, är =DATEDIF(A1;B1;\"Y\") hela år, =DATEDIF(A1;B1;\"M\") månader och =DATEDIF(A1;B1;\"D\") dagar. Född 15 mars 1990 till 25 september 2026 ger 36, 438 och 13.343. Vill du hela åldern i en cell: =DATEDIF(A1;B1;\"Y\")&\" år, \"&DATEDIF(A1;B1;\"YM\")&\" månader och \"&DATEDIF(A1;B1;\"YD\")&\" dagar\". Svensk Excel använder semikolon mellan argumenten." },
+      { question: "Räkna ut ålder från personnummer?", answer: "De sex första siffrorna i ett svenskt personnummer är födelsedatumet i ordningen år, månad och dag: 900315 betyder född 15 mars 1990, som ger {ALDER} per {DATO}. Fyll in det datumet i kalkylatorn. Har du ett samordningsnummer är dagen 60 högre, så 63 ska läsas som 3. Källa: Skatteverket." },
+      { question: "Hur beräknar man ålder i Excel?", answer: "Med DATEDIF. Har du födelsedatumet i A1 och det datum du vill räkna till i B1, är =DATEDIF(A1;B1;\"Y\") hela år, =DATEDIF(A1;B1;\"M\") månader och =DATEDIF(A1;B1;\"D\") dagar. Född 15 mars 1990 till {DATO} ger {AAR}, {MAANEDER_IALT} och {DAGE_TAL}. Vill du hela åldern i en cell: =DATEDIF(A1;B1;\"Y\")&\" år, \"&DATEDIF(A1;B1;\"YM\")&\" månader och \"&DATEDIF(A1;B1;\"YD\")&\" dagar\". Svensk Excel använder semikolon mellan argumenten." },
       { question: "Varför står det två åldrar för varje födelseår?", answer: "Ett födelseår ger två åldrar, eftersom födelsedagen inte alltid har inträffat: född 1 januari är du äldst i ditt år och född 31 december yngst. Därför står det en ålder från och en ålder till i tabellen på sidan, och dagar-tallet för ett år spänner mer än 365 dagar. Vill du ha dag, månad och år fyller du i födelsedatumet i verktyget." },
-      { question: "Hur många dagar har jag levt?", answer: "Född 15 mars 1990 har det gått 13.343 dagar per 25 september 2026. Det motsvarar 1.906 hela veckor och 438 månader, och 320.232 timmar — exakt 24 per dygn, aldrig 23 eller 25. Fyll i ditt födelsedatum i verktyget, så får du din egen siffra." },
-      { question: "Hur många timmar har jag levt?", answer: "Det är samma tal i två steg: dagar × 24 = timmar. Född 15 mars 1990 har du levt 13.343 dagar, vilket är 320.232 timmar per 25 september 2026. Räknas i minuter er det 19.213.920. Timmene er dage gange 24 og aldrig 23 eller 25, även på en dag då klockan ställs om." },
+      { question: "Hur många dagar har jag levt?", answer: "Född 15 mars 1990 har det gått {DAGE} per {DATO}. Det motsvarar {UGER} hela veckor och {MAANEDER} månader, och {TIMER} timmar — exakt 24 per dygn, aldrig 23 eller 25. Fyll i ditt födelsedatum i verktyget, så får du din egen siffra." },
+      { question: "Hur många timmar har jag levt?", answer: "Det är samma tal i två steg: dagar × 24 = timmar. Född 15 mars 1990 har du levt {DAGE}, vilket är {TIMER} timmar per {DATO}. Räknas i minuter er det {MINUTTER}. Timmene er dage gange 24 og aldrig 23 eller 25, även på en dag då klockan ställs om." },
       ],
     },
     "dato": {
@@ -3950,8 +3952,50 @@ const sePages: Record<string, PageData> = {
 
 const allPages: Record<Locale, Record<string, PageData>> = { da: daPages, no: noPages, se: sePages };
 
+/**
+ * Sider, hvis tekst afhænger af dagens dato, og derfor må regnes **ved
+ * hvert kald** frem for ved modulens import.
+ *
+ * `/alder` skrev "36 år, 6 måneder og 10 dage pr. 25. september 2026" i
+ * `description`, `metaDescription`, `ogDescription` og fire FAQ-svar. Da
+ * `allPages` er et modul-niveau-`const`, ville de tal være frosset ved
+ * processens start — altså ved deploy, ikke ved build — og blive dagsvis
+ * mere forkert i Googles snippet. Pladsholderne `{ALDER}`, `{DATO}` og
+ * resten løses nu her, af `alderLevet` og `foedselsaarRaekker`: de samme
+ * moduler som selve værktøjet bruger.
+ *
+ * Kaldet sker i `getPageData`, som både `generateMetadata` og sidens egen
+ * render går igennem. `/alder` er dynamisk, fordi den læser `getLocale()`,
+ * der læser `headers()` — tallene er altså et rigtigt serverkald og ikke en
+ * frossen byggeværdi. Det er samme mønster som `/dato`s nedtællinger.
+ */
+const LEVENDE_SIDER = new Set(["alder"]);
+
+/** Dagens dato i sidens egen tidszone, så tallene ikke er en dag bag. */
+function referenceDato(locale: Locale): string {
+  return iDagISidensTidszone(new Date(), locale === "se" ? "se" : "da");
+}
+
+function medLevendeTekst(
+  side: PageData,
+  slug: string,
+  locale: Locale
+): PageData {
+  if (!LEVENDE_SIDER.has(slug)) return side;
+  const vaerdier = alderSideTekst(referenceDato(locale), locale);
+  const saet = (tekst: string) => erstatAlderTokens(tekst, vaerdier);
+  return {
+    ...side,
+    description: saet(side.description),
+    metaDescription: saet(side.metaDescription),
+    ogDescription: saet(side.ogDescription),
+    faqItems: side.faqItems.map((item) => ({ ...item, answer: saet(item.answer) })),
+  };
+}
+
 export function getPageData(slug: string, locale: Locale): PageData | undefined {
-  return allPages[locale]?.[slug];
+  const side = allPages[locale]?.[slug];
+  return side ? medLevendeTekst(side, slug, locale) : undefined;
 }
 
 export function getAvailableSlugs(locale: Locale): string[] {
