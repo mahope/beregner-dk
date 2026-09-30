@@ -1,17 +1,17 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — 1/10 00:05. **Review-fund 1/10 (MIDDEL) er rettet og målt.** Den
-kompakte stribe på forsiden viste de *samme* otte beregnere som populærgitteret
-lige under den: otte af fjorten to gange på dansk, alle seks to gange på svensk.
-Striben er væk, populærgitteret ligger nu direkte under helten, og porten i
-`forside.test.tsx` tæller nu *hvor mange gange* hver populær beregner linkes i
-forsidens egne lister, i da/se/no (mutation målt: dublet → `expected 2 to be 1`).
-De to tests, der holdt den gamle fejl, krævede rækkefølge og antal — ingen af
-dem kunne se dubletten.
+STATUS: KØ — 1/10 00:11. **Opgave 192 er rettet og målt.** Review-fundets
+ diagnose var kun halv: ikke alene at porten læste filen linje for linje, men
+ også at regexen krævede `:` *direkte* efter `"sv-SE"`, så koden imellem
+ (`).format(n)`) skjulte kæden lige så godt. Nu læses hver fil som én streng
+ gennem en scanner med tilstand, og `formatGenstande` bruger `getIntlLocale`.
+ To fejl i min egen første stripning blev fundet ved at måle `src/`: en `/*`
+ i en `//`-kommentar i `dato/page.tsx:30` slugte 13 linjer rigtig kode.
+ Målt: porten rød mod gammel kode på linje 112, 0 fejl i 0 filer for
+ scanneren, 198 filer / 3274 tests grønne, lint ren, build 142/142.
 
-**Næste opgave: 192** — review-fund 1/10 (LAV): `intl-locale-tag`-porten læser
-én linje ad gangen, så den toarmede kæde i `promille-eksempler.ts:110-113` er
-usynlig for den. Derefter 191 (`/bmi` mangler et koblet indlæg).
+**Næste opgave: 191** — `/bmi` mangler et koblet indlæg, og det er sitets
+ faldende side (934 besøgende/28d, −26 %). Derefter F1 (afhænger af ❓).
 
 **Blokeret af svar fra Mads:** 97, 119 og 183, samt F1/F3/F5. **Opgave 187 må
 ikke røres før 13/10.** CEO-køens punkt 0 er lukket; 189c er lukket som "veje
@@ -420,25 +420,44 @@ og forsiden. Alle målinger står i `docs/plan-arkiv.md`.
 - **MÅL:** `/bmi` 934 besøgende/28d, −26 % (Plausible 2026-09-30). Genmål
   bounce på indlægget 30 dage efter deploy.
 
-#### 192. [ ] 2026-10-01 — review-fund 1/10 (LAV) — `intl-locale-tag`-porten er blind for en toarmet kæde fordelt på to linjer
+#### 192. [x] ✅ 1/10 00:11 — review-fund 1/10 (LAV) — `intl-locale-tag`-porten var blind for kæder med kode imellem
 
-- **Datagrund:** fundet af review 1/10 og bekræftet ved at læse alle `*.ts(x)`
-  i `src/`: `promille-eksempler.ts:110-113` er den **eneste** toarmede
-  `sv-SE`/`da-DK`-kæde i kilden, der står på to linjer. Porten læser filen
-  linje for linje (`readFileSync(...).split("\n")`), så den ser den ikke, og
-  docblock'en lover "the day the type widens, the tag must already be right" —
-  et løfte porten ikke kan holde. Fejlen er latent: `formatGenstande`'s
-  parameter er type-sat til `"da" | "se"`, så norsk kan ikke nå den i dag.
-- **Rettelse:** (1) læs hver fil som én streng med blokkommentarer fjernet og
-  kør regexen på den, så et linjeskift ikke skjuler kæden; (2) skriv
-  `formatGenstande` med `getIntlLocale(locale)`, så kæden ikke findes i koden
-  overhovedet; (3) en test der beviser at porten kan se en toarmet kæde med
-  linjeskift imellem — ellers kan den igen blive grøn uden at se noget.
-- **Accept:** (1) portens egen test fejler mod den nuværende linjelæsning,
-  (2) mutationen "fjern `nb-NO`-armen og bryd kæden over to linjer" giver rødt
-  hele vejen, (3) `promille-eksempler.ts` har ingen `sv-SE`/`da-DK`-literal
-  tilbage, (4) gaten grøn. **MÅL:** ingen trafikmåling — fundet er en
-  korrekthedsmåling, ikke en side.
+- **Datagrund:** fundet af review 1/10. `promille-eksempler.ts:110-113` var den
+  eneste toarmede `sv-SE`/`da-DK`-kæde i kilden. Fejlen var **dobbelt**, og
+  kun den halve stod i fundet:
+  1. porten læste filen linje for linje, så et linjeskift skjulte kæden;
+  2. **mere alvorligt:** regexen var `/"sv-SE"\s*:(?:(?!nb-NO)[\s\S]){0,40}"da-DK"/`,
+     og `\s*:` krævede kolonnen *direkte* efter tagget. Koden har
+     `new Intl.NumberFormat("sv-SE").format(n)` — altså `).format(n)` plus skift
+     og indrykning imellem. **Selv med hele filen som én streng ramte den gamle
+     regex den aldrig.** Målt: `gammel.test(promille-form) === false`.
+- **Rettelse:** (1) `SPAND`-form der tillader kode, skift og indrykning imellem
+  tag og kolonne, men **ikke** `nb-NO` (trearmet) og **ikke** `;`
+  (statementskillet — uden det løber porten fra `fmtKr` ind i `fmtPct` og
+  melder to separate tremarkkede hjælpere som ét fund, målt 2/2), og et andet
+  `SPAND` *efter* kolonnen fordi `? "sv-SE" : "da-DK"` har mellemrum;
+  (2) `formatGenstande` skrevet med `getIntlLocale(locale)` — ingen tag-literal
+  tilbage i filen; (3) scanner med tilstand erstattet regex-stripningen, se
+  målerfældene nedenfor.
+- **Målerfælde 1/10 — to fejl i min egen første stripning, begge fundet ved at
+  måle `src/` og ikke ved at læse koden.** (a) Blokkommentarer tømt *før*
+  linjekommentarer: `dato/page.tsx:30` er `// … \`/dage-til/*\`-siderne …`, så
+  det `/*` åbnede en "blokkommentar" helt til næste blokslut og tømte **13
+  linjer rigtig kode** (`:39-51`, hele `dageTilLinks`-blokken) — porten blev
+  blind for præcis den fejlklasse den skal fange. (b) Omvendt rækkefølge:
+  reglen for `*`-fortsættelse spiste blokkens afsluttende `*/`-linje, så `/**`
+  blev stående hængende. Løsningen er en **scanner med tilstand** (linje-/
+  blokkommentar/streng), ikke to regexer. Endnu en forfældet prøve: at tælle
+  `(`, `=`, `.` gav 30 falske fund i `alder/page.tsx`, fordi linjer *inde i* en
+  blokkommentar ligner kode — erstattet af en uafhængig tokenizer, målt til
+  **0 fejl i 0 filer** over hele `src/`.
+- **Accept:** (1) portens egen test fejler mod den gamle kode — målt ved
+  `git stash`: rød på `promille-eksempler.ts:112`, (2) mutationen "toarmet
+  kæde over to linjer" giver rødt hele vejen, (3) ingen `sv-SE`/`da-DK`-
+  literal i `promille-eksempler.ts`, (4) gaten grøn: 198 filer / **3274**
+  tests, `biome lint` ren, `locale-leak --gate` exit 0, `next build`
+  142/142. Plus 4 nye tests: linjeskiftet, linjenummerering, `/*`-i-`//`, og
+  src-låsen. **MÅL:** ingen trafikmåling — fundet er en korrekthedsmåling.
 
 #### 187. [ ] **IKKE FØR 2026-10-13** 2026-09-30 — Kø — **migrér beraknare.se til svenske URL-slugs med 301**
 

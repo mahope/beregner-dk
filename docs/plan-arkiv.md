@@ -21582,3 +21582,98 @@ forsiden er lukket på indhold 30/9 23:08-23:10). F1/F3/F5
 og opgaver 97/98/119/183 er blokeret af svar fra Mads. **Opgave 187 må ikke
 røres før 13/10.** **CEO-køen er tom.** Review-fund 29/9 er begge mærket
 `RETTET d563ba2` og lukket.
+
+---
+
+## Opgave 192 (1/10 00:11) — `intl-locale-tag`-porten var blind for kæder med kode imellem
+
+### Findet
+
+Review 1/10 (LAV) sagde: porten læser filen linje for linje
+(`readFileSync(...).split("\n")`), så den toarmede kæde i
+`promille-eksempler.ts:110-113` er usynlig for den. Det var **kun halvt**.
+Portens regex var
+
+```
+/"sv-SE"\s*:(?:(?!nb-NO)[\s\S]){0,40}"da-DK"|"da-DK"\s*:(?:(?!nb-NO)[\s\S]){0,40}"sv-SE"/
+```
+
+`\s*:` kræver kolonnen *direkte* efter tagget. Koden er
+`new Intl.NumberFormat("sv-SE").format(n)`, så der står `).format(n)` plus
+linjeskift og indrykning imellem. Målt i Node 22:
+
+| prøve | gammel regex | ny |
+|---|---|---|
+| `locale === "se" ? "sv-SE" : "da-DK"` | rammer | rammer |
+| promille-formen på 4 linjer | **slipper** | rammer |
+| samme, læst som én streng | **slipper** | rammer |
+| `value.toLocaleString("da-DK")` | slipper | slipper |
+| to tremarkkede hjælpere i træk (`AfkastBeregner.tsx:39`) | slipper | slipper |
+
+Så selv den planlagte rettelse (1) — læs filen som én streng — ville **ikke**
+have lukket porten. Det er derfor fundet blev verificeret ved måling og ikke
+ved at læse regexen.
+
+### Rettelsen
+
+`SPAND = "(?:(?!nb-NO)[^;]){0,120}?"` på begge sider af kolonnen:
+
+- **ikke `nb-NO` i spændet** — det er den trearmede kæde, som er rigtig;
+- **ikke `;` i spændet** — statementskillet. Uden det løber porten fra
+  `fmtKr` ind i `fmtPct` i `AfkastBeregner.tsx` og `LoenstigningBeregner.tsx`
+  og melder to *separate* tremarkkede hjælpere som ét fund (2/2 målt);
+- **to spænd, ét før og ét efter kolonnen** — `? "sv-SE" : "da-DK"` har et
+  mellemrum mellem `:` og `"da-DK"`. Mit første forsøg havde kun ét spænd og
+  ramte så ikke engang den gamle inline-form;
+- **120 tegn, ikke 40** — en kæde på to linjer bruger ~45 på skift og
+  indrykning.
+
+`formatGenstande` skriver nu `new Intl.NumberFormat(getIntlLocale(locale))`, så
+der ikke findes nogen tag-literal i filen.
+
+### To fejl i min egen kommentar-stripning
+
+Begge fundet ved at måle hele `src/` linje for linje, ikke ved at læse koden:
+
+1. **Blokkommentarer først** (min første rækkefølge): `dato/page.tsx:30` er
+   `// … \`/dage-til/*\`-siderne …`. Det `/*` åbnede en "blokkommentar" helt
+   til næste blokslut og tømte **13 linjer rigtig kode**, `:39-51`, som er hele
+   `dageTilLinks`-blokken. Porten blev dermed blind for præcis den fejlklasse
+   den skal fange.
+2. **Linjekommentarer først:** reglen for `*`-fortsættelse spiste også blokkens
+   afsluttende `*-linje`, så `/**` blev stående hængende uden lukning.
+
+Løsningen er en scanner med tilstand der holder rede på linjekommentar,
+blokkommentar og streng. Strenge *beholdes* — de er kode, så `/*` i en URL
+eller et glob-mønster ikke kan åbne en kommentar. Mellemrum holdes i stedet
+for at slettes, så linjenumrene passer.
+
+### Målerfælde i selve testen
+
+To forfældede prøver undervejs, begge grønne for de forkerte grunde:
+
+- Tælle `(`/`=`/`.` i rå mod strippet: kommentarer har også tegn, så den er
+  grøn uanset hvad.
+- Springe linjer over der starter med `//`, `/*` eller `*`: linjerne *inde i*
+  en blokkommentar ligner kode og gav 30 falske fund i `alder/page.tsx`.
+
+Erstattet af en uafhængig tokenizer (regex) der markerer hvilke linjer der
+overhovedet er kode, så testen ikke måler `stripKommentarer`s egen fejl.
+Målt: **0 fejl i 0 filer** over hele `src/`.
+
+### Verifikation
+
+- Mutation: `git stash` af `promille-eksempler.ts` → porten rød på
+  `promille-eksempler.ts:112`. Rettelsen lagt på → 11/11 grønne.
+- Porten scanner 137 filer i `src/` (testfiler undtaget) og er grøn.
+- Gaten: 198 filer / **3274** tests grønne, `biome lint ./src` ren over 628
+  filer, `node scripts/locale-leak.mjs --gate` exit 0, `next build` 142/142.
+
+### Generelt
+
+En port er kun så god som den fejlklasse den *måler på*. To gange i denne
+opgave viste det sig at "læs linje for linje" og "find det rigtige mønster" er
+to uafhængige fejl, og at kun den første stod i fundet. Den følgede læring er
+allerede lagt i koden: `intl-locale-tag.test.ts` har nu en test der beviser at
+porten ser en kæde brudt over to linjer, en der beviser at fundet peger på
+rigtig linje, og en src-lås der beviser at stripningen ikke spiser kode.

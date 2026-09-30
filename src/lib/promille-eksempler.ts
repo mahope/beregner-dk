@@ -1,3 +1,4 @@
+import { getIntlLocale } from "./format";
 import {
   beregnPromille,
   GRAM_PR_GENSTAND,
@@ -107,10 +108,7 @@ export function formatGenstande(
   genstande: number,
   locale: "da" | "se"
 ): { antal: string; enhed: string } {
-  const antal =
-    locale === "se"
-      ? new Intl.NumberFormat("sv-SE").format(genstande)
-      : new Intl.NumberFormat("da-DK").format(genstande);
+  const antal = new Intl.NumberFormat(getIntlLocale(locale)).format(genstande);
   return { antal, enhed: locale === "se" ? "standardglas" : "genstande" };
 }
 
