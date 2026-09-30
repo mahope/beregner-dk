@@ -140,7 +140,7 @@ export const DAGE_TIL_EVENTS: DageTilEvent[] = [
       slug: "juleaften",
       copy: {
         short: "juleaften",
-        question: "Hvor mange dage er der til juleaften?",
+        question: "Hvor mange dage er der til 24. december (juleaften)?",
         facts: [
           "Juleaften er 24. december — altid samme dato, uanset hvilken ugedag den falder på.",
           "Juleaften er dagen før juledagen, så de to ligger altid én dag fra hinanden.",

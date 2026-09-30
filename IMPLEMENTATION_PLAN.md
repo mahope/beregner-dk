@@ -1,22 +1,23 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — **opgave 204: `/renteberegner` svarede aldrig på sin største
-søgning.** GSC's største søgning på siden er **"annuitetslån beregner"** (353
-visninger, pos. 8) — og den stod i **0 forekomster** i hele den danske side.
-`<h1>` er "Renteberegner", `<title>` var "Renteberegner: 100.000 kr. i 5 år =
-1.887 kr./md.", og hverken det ene eller det andet nævner annuitetslån, selv
-om siden har en hel formelblok om det. Samme sygdom som 201/182/203. Rettelse:
-`<title>`/`<og:title>` dækker nu "månedsydelse på annuitetslån" (50 tegn), og
-første danske `<h2>` + brødtekst bekræfter det med `rente-eksempler`-tal
-(200.000 kr. til 4 % i 20 år → 1.211,96 kr./md., i alt 290.870,56 kr.). Kun `da`
-— opgave 187 frosser beraknare.se til 13/10.
+STATUS: KØ — **opgave 205: "hvor mange dage er der til den 24 december" er
+sidens næststørste nedtællingssøgning, og ingen titel eller ankertekst på
+sitet rummede datoen.** GSC 2026-08-30 → 2026-09-27: 1.013 visninger, pos. 5.
+Søster-søgningen "…til 1 december" (1.131 v, pos. 5) har allerede sit eget
+`/dage-til/1-december`-svar med datoen i spørgsmålet; juleaften gjorde ikke.
+Rettelse: spørgsmålet er nu **"Hvor mange dage er der til 24. december
+(juleaften)?"**, hvilket løfter både `<title>`/`<h1>` på `/dage-til/juleaften`
+og ankerteksten i /datos nedtællingsliste (den læser `{link.question}`).
+**Én streng, to synlige flader.** Kun `da` — opgave 187 frosser beraknare.se til
+13/10.
 
-**Mål:** `/renteberegner` 13.416 visninger / 114 klik / CTR 0,8 % / pos. 7,4
-(GSC 2026-08-30 → 2026-09-27). Genmål **2026-10-14**.
+**Mål:** `/dato` 132.313 visninger / 822 klik / CTR 0,6 % / pos. 5,7; de to
+nedtællingssøgninger 2.144 visninger / **2 klik** (GSC 2026-08-30 → 2026-09-27).
+Genmål **2026-10-14**.
 
-**Færdige i dag:** 204, 203 (`/braendstof`), 202, 201, 200 — 203 arkiveret nu.
-De **syv** åbne deploy-noter har første vindue 30/9 07:30; intet var verificerbart
-ved 04:56, og intet blev rørt.
+**Færdige i dag:** 205, 204, 203, 202, 201, 200 — 204 og 205 arkiveret nu.
+De **otte** åbne deploy-noter har første vindue 30/9 07:30; intet var
+verificerbart ved 05:50, og intet blev rørt.
 
 ## Kvalitetsgate (repoets egne scripts fra package.json)
 
@@ -36,8 +37,38 @@ Alle fire var grønne før merge 2026-09-30 04:20.
 
 ## Åbne VERIFICÉR DEPLOY-noter
 
-Fire noter. HTTP 200 beviser intet: ingen rører en URL, kun `<title>`- og
+Otte noter. HTTP 200 beviser intet: ingen rører en URL, kun `<title>`- og
 `og:title`-strenge, artiklernes **slutning** og rene visuelle elementer.
+
+- ⏳ **VERIFICÉR DEPLOY: "hvor mange dage er der til den 24 december" skal kunne
+  genfindes i juleaftens titel og i /datos ankertekst.** Kode + plan i ét
+  squash-commit på `ceo/juleaften-24-december`. Første kandidatvindue
+  **2026-09-30 07:30** (dette push sker 05:58). Rørte filer:
+  `src/lib/dage-til.ts` (**1 streng**, kun `da`-armens `copy.question` for
+  `juleaften`) og `src/app/dage-til-routes.test.tsx` (+1). `copy.short` er
+  **uændret** ("juleaften"), så h1-brødteksten "Der er N dage til juleaften",
+  alle otte andre events, `se`-armen, `og:site_name`, canonical, hreflang,
+  sitemap og IndexNow er urørte. Ingen ny URL, ingen beregningslogik.
+  Verificér ved **indhold**:
+  1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
+  2. `https://minberegner.dk/dage-til/juleaften` skal have **"Hvor mange dage
+     er der til 24. december (juleaften)?"** i både `<title>` og `<h1>`.
+  3. `https://minberegner.dk/dato` skal have **"Hvor mange dage er der til 24.
+     december (juleaften)?"** som ankertekst i nedtællingslisten.
+  4. **Kontrol:** `https://beraknare.se/dagar-till/julafton` skal være
+     **uændret** — svensk titel stadig "Hur många dagar är det till julafton?"
+     (opg. 187 frosser `se` til 13/10).
+  5. **Kontrol:** `/dage-til/grundlovsdag` skal stadig have titlen "Hvor mange
+     dage er der til grundlovsdag?" — den låste titel i `dage-til-routes.test.tsx`
+     dækker det.
+  **Gate grøn:** lint (**618 filer**), **3022 tests / 190 filer** (fra
+  3021/190), build (**142 sider**), `locale-leak.mjs --gate` exit 0. Den nye
+  titeltest **fejler mod master's `dage-til.ts`** (verificeret med
+  `git stash`: `expected 'Hvor mange dage er der til juleaften?' to be 'Hvor
+  mange dage er der til 24. decemb…'`), så den låser den gamle fejl fast.
+  390/1280 px kan ikke tjekkes (repoet har ingen Playwright, se ❓ Til Mads);
+  ændringen er én streng i en `<h1>`-spørgsmålstitel, hvilket kun gør overskriften
+  længere — ingen ny blok, ingen ny knap, intet layout.
 
 - ⏳ **VERIFICÉR DEPLOY: beraknare.se `/dato` skal svare på "antal dagar mellan
   datum" og "hur många dagar mellan två datum" i synlig tekst.** Kode + plan i ét
@@ -349,38 +380,38 @@ Fire noter. HTTP 200 beviser intet: ingen rører en URL, kun `<title>`- og
   (snippet/intention), ikke på to separate sidefejl — men at *finde* den kræver
   stadig kildefordelingen fra Mads, så opgaven står.
 
-#### 204. [x] ✅ 2026-09-30 — trafik — **`/renteberegner` (13.416 v, CTR 0,8 %, pos. 7,4) svarede aldrig på sin største søgning: "annuitetslån beregner".** (squash `ceo/renteberegner-annuitet`)
+#### 205. [x] ✅ 2026-09-30 — trafik — **"hvor mange dage er der til den 24 december" (1.013 v, pos. 5, 2 klik) fandtes hverken i juleaftens titel eller i /datos ankertekst.** (squash `ceo/juleaften-24-december`)
 
-- **Datagrund:** GSC 2026-08-30 → 2026-09-27. Sidens største søgning er
-  **"annuitetslån beregner"** (353 v, pos. 8) — større end sidens eget navn
-  ("renteberegner", 301 v, pos. 7). Målt i `page.tsx` + `page-data.ts`:
-  **0 forekomster** af "annuitetslån beregner" i hele den danske side.
-  Position 7-8 er ikke dårlig, så klikket tabes på bekræftelsen, ikke på
-  rangeringen.
-- **Årsagen er titlen og h2, ikke manglende indhold:** siden har en komplet
-  formelblok, Excel-tabel, nominel/effektiv-gren og skattefradrag — men hverken
-  `<title>` eller det første `<h2>` nævner annuitetslån, så siden ligner et
-  værktøj til *et andet* emne end det, brugeren søgte.
-- **Rettelse:** (a) `metaTitle`/`ogTitle` (**da**) → "Renteberegner: beregn
-  månedsydelse på annuitetslån" (50 tegn, under testens 60-tegns-loft) —
-  dækker både "renteberegner" (301 v) og "annuitetslån beregner" (353 v) og
-  "beregn månedsydelse på lån"; det udregnede eksempel (1.000 kr./1.887 kr.)
-  står uændret i `metaDescription`, som GSC ikke afkorter. (b) Første danske
-  `<h2>` → "Annuitetslån beregner: beregn månedsydelsen på et lån" med en
-  brødtekst der bekræfter det med **`rente-eksempler`-tal**
-  (`annuitetsEksempel()`: 200.000 kr., 4 %, 20 år, 1.211,96 kr./md., i alt
-  290.870,56 kr., 90.870,56 kr. renter) — samme kilde som formelblokken, Excel-
-  tabellen og den svenske gren, så en taleændring ikke kan afvige fra teksten.
-  Ny `krDa()` spejler den eksisterende `krSe()`: `da-DK` med to decimaler.
-  `"Sådan bruger du renteberegneren"` demoteret fra `<h2>` til `<h3>`, så
-  brugsvejledningen bliver et underafsnit af det nye svar.
-- **Harness:** `page.test.tsx` +1 (overskriften, den stærke søgeordsform og de
-  fire beregnede tal) og 1 låst titel i `page-data.test.ts` opdateret.
-  **Modsvejs verificeret:** mod master's `page.tsx` falder den nye test.
-- **Gate grøn:** lint (**618 filer**), **3021 tests / 190 filer** (fra
-  3020/190), build (**142 sider**), `locale-leak.mjs --gate` exit 0.
-- **Frosset `se`:** beraknare.se får **intet** — opgave 187 venter til 13/10 med
-  slug-migreringen, og `/renteberegner` har 2.871 GSC-visninger på pos. 23,5.
+- **Datagrund:** GSC 2026-08-30 → 2026-09-27, side `/dato` (132.313 v, 822
+  klik, CTR 0,6 %, pos. 5,7). Søgningerne **"hvor mange dage er der til 1
+  december"** (1.131 v, pos. 5) og **"hvor mange dage er der til den 24
+  december"** (1.013 v, pos. 5) er de to største i nedtællingsklyngen og gav
+  **2 klik mellem sig**. Begge er konkrete datoer, ikke navne — det er derfor
+  de er skrevet sådan.
+- **Årsagen er én streng, målt:** `1-december` er sit **eget** event med
+  spørgsmålet "…til 1. december?", men juleaftens var "…til juleaften?".
+  `copy.question` bruges to steder: i `buildDageTilMetadata` som titel OG som
+  `<h1>`, og i /datos nedtællingsliste som ankertekst (`{link.question}`) — så
+  **én** streng stod i **to** synlige flader, og ingen af dem havde "24.
+  december". Datoen stod i `facts[0]` og i to FAQ-svar, altså sand og allerede
+  verificeret — bare i den del, Google ikke viser.
+- **Rettelse:** `da`-armens `question` → "Hvor mange dage er der til 24.
+  december (juleaften)?" (49 tegn; titel med dage-tal 58, under testens
+  60-tegns-loft). `copy.short` er bevaret som "juleaften", så h1-brødteksten
+  "Der er N dage til juleaften" er uændret. Kun `da` — `se` er frosset til
+  13/10 (opg. 187).
+- **Harness:** `dage-til-routes.test.tsx` +1, der låser spørgsmålet, `short`
+  og hele titlen. **Modsvejs verificeret:** mod master's `dage-til.ts` falder
+  den. **Gate grøn:** lint (**618 filer**), **3022 tests / 190 filer** (fra
+  3021/190), build (**142 sider**), `locale-leak.mjs --gate` exit 0.
+- **MÅL:** `/dato` 132.313 visninger / 822 klik / CTR 0,6 % / pos. 5,7;
+  nedtællingsklyngen 2.144 visninger / 2 klik (GSC 2026-08-30 → 2026-09-27).
+  Genmål **2026-10-14**.
+- **⚠️ Hvad der bevidst IKKE blev gjort:** samme behandling af 25. december,
+  31. december og 1. januar. GSC nævner kun de to datoer ovenfor, så de tre
+  ville være tynd SEO-padding uden målbar efterspørgsel — og hvert ekstra
+  spørgsmål i en titel er en længere titel. De tages, når GSC viser
+  søgningen på dem.
 
 #### 187. [ ] **IKKE FØR 2026-10-13** 2026-09-30 — Kø — **migrér beraknare.se til svenske URL-slugs med 301**
 

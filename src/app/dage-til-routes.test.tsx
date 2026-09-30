@@ -316,6 +316,26 @@ describe("dage-til titler", () => {
     expect(titel).not.toContain("MinBeregner.dk");
   });
 
+  // GSC 2026-08-30 → 2026-09-27: "hvor mange dage er der til den 24 december"
+  // er 1.013 visninger på position 5 — næsten dobbelt så mange som den
+  // tilsvarende søgning på "1 december", og den side har allerede sit eget
+  // `/dage-til/1-december`-svar med datoen i spørgsmålet. Juleaften gjorde
+  // ikke: spørgsmålet var "…til juleaften?", så hverken titlen på
+  // `/dage-til/juleaften` eller ankerteksten i /datos nedtællingsliste
+  // (`{link.question}`) rummede de ord, folk faktisk skriver. Datoen står i
+  // `facts[0]` og i FAQ'en, så strengen er sand — den var bare ikke i den
+  // del, der vises i Google.
+  test("juleaftens titel og /datos ankertekst har datoen, folk søger på", async () => {
+    const juleaften = getDageTilEvents("da").find((e) => e.da.slug === "juleaften")!;
+    expect(juleaften.da.copy.question).toBe(
+      "Hvor mange dage er der til 24. december (juleaften)?"
+    );
+    expect(juleaften.da.copy.short).toBe("juleaften");
+    const titel = await titelFor("da", juleaften.da.slug);
+    expect(titel).toBe("Hvor mange dage er der til 24. december (juleaften)? 88 dage");
+    expect(titel.length).toBeLessThanOrEqual(60);
+  });
+
   test("brandstaarnet sendes stadig som og:site_name", async () => {
     const juledagen = getDageTilEvents("se").find((e) => e.se.slug === "juldagen")!;
     const prefix = getDageTilPrefix("se");

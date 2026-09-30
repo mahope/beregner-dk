@@ -19085,3 +19085,37 @@ titelændring på `/bmi` uden diagnose ville være prøvet to gange. Bemærk at
   `metaDescription` — kun én `<h2>` og én brødtekstblok i den danske tekst, samme
   mønster som opgave 181/182, der heller ikke fik en. HTTP 200 på `/braendstof`
   siger intet om indholdet; effekten måles i GSC 14/10.
+
+
+#### 204. [x] ✅ 2026-09-30 — trafik — **`/renteberegner` (13.416 v, CTR 0,8 %, pos. 7,4) svarede aldrig på sin største søgning: "annuitetslån beregner".** (squash `ceo/renteberegner-annuitet`)
+
+- **Datagrund:** GSC 2026-08-30 → 2026-09-27. Sidens største søgning er
+  **"annuitetslån beregner"** (353 v, pos. 8) — større end sidens eget navn
+  ("renteberegner", 301 v, pos. 7). Målt i `page.tsx` + `page-data.ts`:
+  **0 forekomster** af "annuitetslån beregner" i hele den danske side.
+  Position 7-8 er ikke dårlig, så klikket tabes på bekræftelsen, ikke på
+  rangeringen.
+- **Årsagen er titlen og h2, ikke manglende indhold:** siden har en komplet
+  formelblok, Excel-tabel, nominel/effektiv-gren og skattefradrag — men hverken
+  `<title>` eller det første `<h2>` nævner annuitetslån, så siden ligner et
+  værktøj til *et andet* emne end det, brugeren søgte.
+- **Rettelse:** (a) `metaTitle`/`ogTitle` (**da**) → "Renteberegner: beregn
+  månedsydelse på annuitetslån" (50 tegn, under testens 60-tegns-loft) —
+  dækker både "renteberegner" (301 v) og "annuitetslån beregner" (353 v) og
+  "beregn månedsydelse på lån"; det udregnede eksempel (1.000 kr./1.887 kr.)
+  står uændret i `metaDescription`, som GSC ikke afkorter. (b) Første danske
+  `<h2>` → "Annuitetslån beregner: beregn månedsydelsen på et lån" med en
+  brødtekst der bekræfter det med **`rente-eksempler`-tal**
+  (`annuitetsEksempel()`: 200.000 kr., 4 %, 20 år, 1.211,96 kr./md., i alt
+  290.870,56 kr., 90.870,56 kr. renter) — samme kilde som formelblokken, Excel-
+  tabellen og den svenske gren, så en taleændring ikke kan afvige fra teksten.
+  Ny `krDa()` spejler den eksisterende `krSe()`: `da-DK` med to decimaler.
+  `"Sådan bruger du renteberegneren"` demoteret fra `<h2>` til `<h3>`, så
+  brugsvejledningen bliver et underafsnit af det nye svar.
+- **Harness:** `page.test.tsx` +1 (overskriften, den stærke søgeordsform og de
+  fire beregnede tal) og 1 låst titel i `page-data.test.ts` opdateret.
+  **Modsvejs verificeret:** mod master's `page.tsx` falder den nye test.
+- **Gate grøn:** lint (**618 filer**), **3021 tests / 190 filer** (fra
+  3020/190), build (**142 sider**), `locale-leak.mjs --gate` exit 0.
+- **Frosset `se`:** beraknare.se får **intet** — opgave 187 venter til 13/10 med
+  slug-migreringen, og `/renteberegner` har 2.871 GSC-visninger på pos. 23,5.
