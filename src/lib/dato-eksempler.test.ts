@@ -3,6 +3,7 @@ import {
   GNNEMSNIT_DAGE_PR_MAANED,
   aarstal,
   erSkudaar,
+  denneMaanedEksempel,
   maanedEksempel,
   maanederITaar,
 } from "./dato-eksempler";
@@ -158,5 +159,62 @@ describe("dato-eksempler", () => {
       const sum = maanederITaar(aar, "da").reduce((s, r) => s + r.dage, 0);
       expect(sum).toBe(aarstal(aar, "da").dage);
     }
+  });
+
+  test("den her måned er den, kalenderen står i, med dage brugt og dage tilbage", () => {
+    const nu = denneMaanedEksempel(new Date(2026, 6, 21, 12), "da");
+    expect(nu.month).toBe(7);
+    expect(nu.name).toBe("juli");
+    expect(nu.dage).toBe(31);
+    expect(nu.dageForbruget).toBe(21);
+    expect(nu.dageTilbage).toBe(10);
+    expect(nu.foersteDag).toBe("2026-07-01");
+    expect(nu.sidsteDag).toBe("2026-07-31");
+  });
+
+  test("dageForbruget + dageTilbage er altid månedens længde, i alle 12 måneder", () => {
+    // Fælden ved "dage tilbage i måneden" er en tæller der løber en dag for
+    // hver måned. Hele året gennem, i begge kalenderår.
+    for (const year of [2026, 2027]) {
+      for (let day = 1; day <= 31; day++) {
+        for (let month = 1; month <= 12; month++) {
+          const foerste = new Date(year, month - 1, 1);
+          const naeste = new Date(year, month, 1);
+          const dage = daysBetween(foerste, naeste);
+          if (day > dage) continue;
+          const nu = denneMaanedEksempel(new Date(year, month - 1, day, 12), "da");
+          expect(nu.dageForbruget + nu.dageTilbage).toBe(dage);
+          expect(nu.dage).toBe(dage);
+          expect(nu.dato).toBe(day);
+        }
+      }
+    }
+  });
+
+  test("den her måned er den samme række som tabellen viser", () => {
+    // Månedslængden og arbejdsdagene må ikke kunne glide fra hinanden mellem
+    // det ene svar og den tolv-rækkers tabel.
+    for (const [year, month, day] of [
+      [2026, 1, 15],
+      [2028, 2, 29],
+      [2027, 12, 31],
+    ] as const) {
+      const nu = denneMaanedEksempel(new Date(year, month - 1, day, 12), "da");
+      const raekke = maanederITaar(year, "da").find((r) => r.month === month)!;
+      expect(nu.dage).toBe(raekke.dage);
+      expect(nu.arbejdsdage).toBe(raekke.arbejdsdage);
+      expect(nu.weekenddage).toBe(raekke.weekenddage);
+    }
+  });
+
+  test("dagens dato læses i Europe/Copenhagen, ikke i serverens tidszone", () => {
+    // En UTC-server kl. 00:30 dansk tid er stadig i går. Uden tidszonen ville
+    // måneden og dagsforbruget være en dag tilbage.
+    const senNat = new Date("2026-07-01T00:30:00+02:00");
+    const nu = denneMaanedEksempel(senNat, "da");
+    expect(nu.year).toBe(2026);
+    expect(nu.month).toBe(7);
+    expect(nu.name).toBe("juli");
+    expect(nu.dato).toBe(1);
   });
 });

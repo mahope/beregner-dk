@@ -1,32 +1,52 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — 30/9 12:30. Alle tre review-fund fra 29/9 er rettet i ét commit
-(punkt 0 har forrang for CEO-køen).
+STATUS: KØ — 30/9 13:15. `/dato` svarer nu på "hvor mange dage er der i den
+her måned" med månedens længde, dagens placaring og dage tilbage.
 
-Fundene var ikke kosmetik: `periodeHelligdagsnavne` gav **fire navne for tre
-dage**, fordi 2. pinsedag falder samme dag som grundlovsdagen. Målt er det **7
-af 61 år** (1995, 2006, 2017, 2022, 2028, 2033, 2044) — ikke de to år fundet
-nævnte. `/dato` bruger `naestePinseInterval(new Date())`, så sætningen "helligdagene
-i perioden er …" ville vist fire navne mens tabellen sagde 3, og læseren fik én
-dag for meget. 2028 er knap to år fremme. Nu er listen **ét navn pr. dag**, med
-det andet navn i parentes ("Grundlovsdag (2. pinsedag)"), så længden altid
-er lig `periodeHelligdage`.
+**Datagrund:** dansk autocomplete under "hvor mange dage er der i" (12:47) giver
+6 af 10 træffere der spørger om en *bestemt* måned — "i august", "i juli", "i
+juni", "i september", "i august 2026", "i juli 2026" — plus "i den her måned"
+(nr. 9). `/dato` havde tolv rækker i tabellen men intet sted der svarede på den
+måned læseren står i. "…i et år" og "…i en måned" var allerede besvaret, så
+hullet var præcis det månedsnære spørgsmål.
 
-De to andre fund var **talsætninger i docblocks** ("15 af 61 år", "6 i Danmark,
-7 i Sverige") der målt var 18, 7/11 og 5-6/6-7. Tallene er nu målt i porten
-over **1990-2050** og kan ikke glide fra koden igen.
+**Rettelsen:** nyt `<h2>` "Hvor mange dage er der i den her måned?" — månedens
+længde, hvilken dag i måneden det er, dage brugt og dage tilbage, månedens
+sidste dato, arbejdsdage og Excel-formlen. Alle tal fra den nye
+`denneMaanedEksempel()`, som bygger på samme `daysBetween` og
+`taellArbejdsdage` som tabellen, så det ene svar og de tolv rækker ikke kan
+sige hinanden modsat. Kun `da` — beraknare.se's `/dato` er svensk hele vejen,
+så en dansk overskrift derthe ville være en ny lækage.
 
-**Gate:** lint 620 filer, **3141 tests / 191 filer** (fra 3139), build 142
-sider, `locale-leak.mjs --gate` exit 0. De tre nye tests **falder mod master's
-`pinse-intervaller.ts`** (verificeret med `git stash`: 3 fejl, bl.a. "da 1995:
-… expected 4 to be 3").
+**⚠️ Homoglyph fanget i egen diff:** første udkast skrev `efterFoelgende` med et
+fremmed tegn i variabelnavnet, så TypeScript sagde `Cannot find name
+'etterFoelgende'. Did you mean 'efterFoelgende'?` og fire nye tests faldt med
+`ReferenceError`. Fundet fordi porten *faldt*; rettet til
+`isoDato(new Date(year, month, 0))`, som også er klarere.
 
-**Mål (uændret):** `/dato` 1.133 besøgende/28d, bounce 4 % (Plausible
-2026-09-30); GSC 133.054 visninger / 842 klik / CTR 0,6 % / pos. 5,7
-(2026-08-31 → 2026-09-28). Genmål 14 dage efter merge.
+**Tidszone (fejltype 4):** `denneMaanedEksempel` læser dagen i
+`Europe/Copenhagen` via `Intl`, aldrig serverens `getDate()` — ellers skrev en
+UTC-container "juni" på en side, der tæller dagene i juli kl. 00–02 dansk tid.
+Låst i en test med tidsstemplet 22:30 UTC.
 
-**Alle tolv tidligere deploy-noter er lukket `DEPLOY OK 2026-09-30`.** Otte noter
-åbne, vindue 30/9 12:30.
+**Gate:** lint **620 filer**, **3147 tests / 191 filer** (fra 3141), build **142
+sider**, `locale-leak.mjs --gate` exit 0. De **seks** nye tests (4 i
+`dato-eksempler.test.ts`, 2 i `dato/page.test.tsx`) **falder mod master**
+(`git stash`: 2 fejl på `page.tsx`; de 4 datatests kan ikke kalde en funktion
+der ikke findes).
+
+**Mål:** `/dato` 1.133 besøgende/28d, bounce 4 % (Plausible 2026-09-30); GSC
+133.054 visninger / 842 klik / CTR 0,6 % / pos. 5,7 (2026-08-31 → 2026-09-28).
+Genmål 14 dage efter merge.
+
+**⚠️ 12:30-batchen kørte UDEN de otte ventende ændringer.** Alle otte er merged
+før 12:18, så 12:30 var det første vindue efter dem — og intet er live:
+`/dage-til/2-pinsedag`, `/dage-til/efteraarsferien`, `/dage-til/skolestart` og
+`/dage-til/kristi-himmelfartsdag` svarer **404**, `/dagar-till/pingstdagen` på
+beraknare.se **404**, og `/dato` har hverken pinse-sætningen eller "Påskedagen i
+2027". `/api/health` svarer `status: ok` — sitet er oppe, koden er bare ældre.
+Næste vindue **17:30**. Ét vindue, ikke to: ingen `DEPLOY-MISSING`, og merges
+fortsætter. Otte noter åbne + denne iterations note = **ni**.
 
 
 ## Kvalitetsgate (repoets egne scripts fra package.json)
@@ -52,7 +72,7 @@ pinse-noten opretter to URL'er, og tidszone-noten forventer et **uændret** tal.
 
 - ⏳ **VERIFICÉR DEPLOY: pinseperiodens helligdage skal stå som ét navn pr. dag,
   aldrig fire navne for tre dage.** Kode + plan i ét squash-commit på
-  `ceo/pinse-navne-og-arbejdstal`. Første kandidatvindue **2026-09-30 12:30**.
+  `ceo/pinse-navne-og-arbejdstal`. Vindue **2026-09-30 17:30**.
   Rørte filer: `src/lib/pinse-intervaller.ts` (**én privat hjælper,
   `navnePrDag`**, + fire docblocks) og `src/lib/pinse-intervaller.test.ts`
   (**+2 tests, 2 ændret**). Ingen UI-fil rørt: `/dato` læser feltet uændret, og
@@ -136,7 +156,7 @@ pinse-noten opretter to URL'er, og tidszone-noten forventer et **uændret** tal.
 
 - ⏳ **VERIFICÉR DEPLOY: `/dage-til/efteraarsferien` skal svare med uge 42 og
   tælle til den første skoledag.** Kode + plan i ét squash-commit på
-  `ceo/efteraarsferien-uge42`. Første kandidatvindue **2026-09-30 12:30**.
+  `ceo/efteraarsferien-uge42`. Vindue **2026-09-30 17:30**.
   Rørte filer: `src/lib/dage-til.ts` (**ny `kind: "efteraarsferie"`**,
   `isoUgeMandag()`, ét event med 4 fakta + 5 FAQ) og `src/lib/dage-til.test.ts`
   (**+141**). Ingen eksisterende beregning rørt, ingen UI, ingen `<h1>`-ændring,
@@ -160,7 +180,7 @@ pinse-noten opretter to URL'er, og tidszone-noten forventer et **uændret** tal.
 
 - ⏳ **VERIFICÉR DEPLOY: `/dage-til/skolestart` skal svare med 1. august og
   tælle til næste års skolestart.** Kode + plan i ét squash-commit på
-  `ceo/skolestart`. Første kandidatvindue **2026-09-30 12:30**. Rørte filer:
+  `ceo/skolestart`. Vindue **2026-09-30 17:30**. Rørte filer:
   `src/lib/dage-til.ts` (**ét event** med 4 fakta + 5 FAQ) og
   `src/lib/dage-til.test.ts` (**+192**). Ingen eksisterende beregning rørt, ingen
   UI, ingen `<h1>`-ændring, ingen ny `kind` (ankeret er den eksisterende
@@ -284,7 +304,7 @@ pinse-noten opretter to URL'er, og tidszone-noten forventer et **uændret** tal.
 
 - ⏳ **VERIFICÉR DEPLOY: `/dato` skal stadig vise pinseåret 2027 — påskedagen
   28. marts og 2. pinsedag 17. maj.** Kode + plan i ét squash-commit på
-  `ceo/pinseaar-tidszone`. Første kandidatvindue **2026-09-30 12:30**. Rørte
+  `ceo/pinseaar-tidszone`. Vindue **2026-09-30 17:30**. Rørte
   filer: `src/lib/pinse-intervaller.ts` (**to nye private hjælpere, `pinseAar`
   omskrevet**) og `src/lib/pinse-intervaller.test.ts` (**+4 tidszone-tests, fire
   assertions skrevet om til UTC-øjeblik**). Ingen UI, ingen ny URL, ingen ny
@@ -304,6 +324,31 @@ pinse-noten opretter to URL'er, og tidszone-noten forventer et **uændret** tal.
   Asia/Tokyo og Pacific/Kiritimati). **Gate grøn:** lint (**620 filer**),
   **3139 tests / 191 filer** (fra 3135), build (**142 sider**),
   `locale-leak.mjs --gate` exit 0.
+
+- ⏳ **VERIFICÉR DEPLOY: `/dato` skal have afsnittet "Hvor mange dage er der i
+  den her måned?" med månedens længde, dagens dag-nummer og dage tilbage.**
+  Kode + plan i ét squash-commit på `ceo/denne-maaned`. Første
+  kandidatvindue **2026-09-30 17:30**. Rørte filer: `src/lib/dato-eksempler.ts`
+  (**ny `denneMaanedEksempel()` + `dagITidszone()`**), `src/app/dato/page.tsx`
+  (**ét nyt `<h2>`-afsnit, kun `da`**) og de to testfiler (**+6 tests**). Ingen
+  eksisterende beregning rørt, ingen ny URL, ingen ny afhængighed, ingen
+  `<title>` rørt, intet sitemap. Verificér ved **indhold**:
+  1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
+  2. `https://minberegner.dk/dato` skal have **"Hvor mange dage er der i den her
+     måned?"** som `<h2>`, og brødteksten skal sige **"<måned> 2026 har NN
+     dage"**, **"månedens N. dag"** og **"NN dage tilbage"**.
+  3. Samme sides Excel-streng skal være med: `=DATEDIF(2026-07-01;2026-07-31;"d")+1`.
+  **Kontrol:** `https://beraknare.se/dato` skal være **uændret** — afsnittet er
+  `locale === "da"`-kun, så der må ikke komme dansk dorthed (porten kører
+  `locale-leak.mjs --gate`). `https://minberegner.dk/dage-til/2-pinsedag` skal
+  have uændret titel med dage-tal.
+  **Målt før merge:** månedslængden mod `daysBetween` over **alle 12 måneder i
+  2026 og 2027** (dageForbruget + dageTilbage = måneds længde, hver dag),
+  og `arbejdsdage`/`weekenddage` mod tabellens egen række i januar 2026,
+  februar 2028 (skudår) og december 2027. **Gate grøn:** lint (**620 filer**),
+  **3147 tests / 191 filer** (fra 3141), build (**142 sider**),
+  `locale-leak.mjs --gate` exit 0. De to nye side-tests **falder mod master's
+  `page.tsx`** (verificeret med `git stash`: **2 fejl**).
 
 ## Åbne opgaver
 

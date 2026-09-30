@@ -611,4 +611,36 @@ describe("dato page — pinse-intervallerne", () => {
     expect(næste).toContain("Påskedagen i 2028 er 16. april");
     expect(næste).not.toContain("Påskedagen i 2027 er");
   });
+
+  test("\"/dato\" svarer p\u00e5 det m\u00e5ned, kalenderen st\u00e5r i", async () => {
+    vi.mocked(getLocale).mockResolvedValue("da");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("da"));
+    vi.setSystemTime(new Date("2026-07-21T12:00:00Z"));
+
+    const html = renderToStaticMarkup(await DatoPage());
+
+    // Autocomplete: "hvor mange dage er der i juli 2026" og "hvor mange dage
+    // er der i den her m\u00e5ned". Tabellen svarer kun indirecte, s\u00e5 dette
+    // afsnit skal give m\u00e5nedens l\u00e6ngde og dagens placaring i den.
+    expect(html).toContain("Hvor mange dage er der i den her m\u00e5ned?");
+    expect(html).toContain("juli 2026 har <strong>31 dage</strong>");
+    expect(html).toContain("m\u00e5nedens 21. dag");
+    expect(html).toContain("<strong>10 dage tilbage</strong>");
+    // Excel-formlen skal give pr\u00e6cis samme antal som br\u00f8dteksten.
+    expect(html).toContain("=DATEDIF(2026-07-01;2026-07-31;&quot;d&quot;)+1");
+  });
+
+  test("den her m\u00e5ned l\u00e6ser dagens dato i dansk tid, ikke i serverens", async () => {
+    vi.mocked(getLocale).mockResolvedValue("da");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("da"));
+    // 1. juli 2026 kl. 00:30 dansk tid er 30. juni kl. 22:30 UTC. En
+    // UTC-server ville skrive "juni" p\u00e5 en side, der t\u00e6ller dagene i
+    // m\u00e5neden.
+    vi.setSystemTime(new Date("2026-06-30T22:30:00Z"));
+
+    const html = renderToStaticMarkup(await DatoPage());
+
+    expect(html).toContain("juli 2026 har <strong>31 dage</strong>");
+    expect(html).toContain("m\u00e5nedens 1. dag");
+  });
 });

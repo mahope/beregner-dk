@@ -19893,3 +19893,59 @@ dokumenteret to gange, ikke fordi denne side alene løfter trafikken.
   ingen stash) — sandsynligvis en `git restore`/`checkout --` fra en ekstern
   opgørelse. Læren: commit på opgave-branchen *før* gaten, så tabet kun er
   tid, ikke kode.
+
+STATUS: KØ — **C208 er landet: `/dato` svarede på "hvor mange dage er der i et
+år" og "…i en måned", men ikke på den måned læseren står i.** CEO-køen havde kun
+punkt 0, som jeg målte som færdig rettet i `aca17e5` (alle otte delpunkter:
+Valborg 30. april, svensk påskafton lørdag, dansk sankthans 23./24. juni,
+påskeaften-FAQ, husleje via nettoprisindeks, `toUtcMidnight` i
+`Europe/Copenhagen`, svensk promille 1,0 ‰, `dato-eksempler` `maneder: 12` og
+1. advent 27/11–3/12), og planens egne åbne opgaver var `BLOCKED` (97, 119, 183)
+ eller lå på 13/10 (187). Så valget kom fra trafikmåling, ikke køen.
+**Datagrund:** dansk autocomplete under "hvor mange dage er der i" (hentet 12:47)
+giver 6 af 10 træffere der spørger om en *bestemt* måned — "i august", "i juli",
+"i juni", "i september", "i august 2026", "i juli 2026" — plus "i den her måned"
+(nr. 9). `/dato` målt live: **0** forekomster af "i den her måned"; tabellen med
+tolv rækker er det tætteste svar på måneden, men læseren skal selv finde sin
+egen række. Månedens *længde* for 2026 var derimod allerede dækket af
+"…i en måned"-FAQ'en og månedstabellen, så det præcise hullet var det
+månedsnære spørgsmål. Efter min måling fandt jeg samme mønster i
+"hvor mange dage er der" (nr. 1-2) og "…til" (alle otte øvrige er dage-til-sider
+der allerede findes).
+**Rettelsen:** nyt `<h2>` "Hvor mange dage er der i den her måned?" med
+månedens længde, hvilken dag i måneden det er, dage brugt og dage tilbage,
+månedens sidste dato, arbejdsdage og Excel-formlen — kun `da`, fordi
+beraknare.se's `/dato` er svensk hele vejen igennem. Tallene kommer fra den nye
+`denneMaanedEksempel()` i `dato-eksempler.ts`, som bruger samme `daysBetween`
+og `taellArbejdsdage` som `maanederITaar`, så det ene svar og de tolv rækker
+ikke kan glide fra hinanden.
+**⚠️ Homoglyph i egen diff (fund 12, ny):** mit første udkast skrev
+`efterFoelgende` med et fremmed tegn i variabelnavnet på den ene linje.
+TypeScript sagde `Cannot find name 'etterFoelgende'. Did you mean
+'efterFoelgende'?` og fire nye tests faldt med `ReferenceError: etterFoelgende
+is not defined`. Rettet til `isoDato(new Date(year, month, 0))`, som er både
+kortere og tydeligere. Dobbeltværd: det kom frem *fordi* porten faldt, ikke
+fordi jeg læste diffen.
+**Tidszone (fejltype 4):** `denneMaanedEksempel` læser dagen i
+`Europe/Copenhagen` via `Intl.DateTimeFormat`, aldrig serverens `getDate()` — en
+UTC-container ville skrive "juni" på en side der tæller dagene i juli i
+vinduet 00–02 dansk tid. Testen sætter tidsstemplet på 22:30 UTC, som er
+00:30 dansk tid dagen efter.
+**Harness:** `dato-eksempler.test.ts` 15 → **19** (den konkrete måned;
+`dageForbruget + dageTilbage = måneds længde` for **hver dag i alle 12 måneder
+i 2026 og 2027**; paritet med tabellens egen række i januar 2026, februar 2028
+og december 2027; tidszonen). `dato/page.test.tsx` 31 → **33** (afsnittet med
+de tre regnede tal + Excel-strengen; samme side ved 22:30 UTC).
+**Modsvejs verificeret:** de 2 side-tests **falder** med `git stash` på
+`page.tsx`; de 4 datatests kan ikke kalde en funktion der ikke findes.
+Gate grøn: lint (**620 filer**), **3147 tests / 191 filer** (fra 3141), build
+(**142 sider**), `locale-leak.mjs --gate` exit 0. Kode + plan i ét
+squash-commit på `ceo/denne-maaned`.
+**MÅL:** `/dato` baseline **1.133 besøgende/28d, bounce 4 % (Plausible
+2026-09-30)** og **133.054 visninger / 842 klik / CTR 0,6 % / pos. 5,7 (GSC
+2026-08-31 → 2026-09-28)** — måles igen 14 dage efter merge.
+**Driftsnote:** 12:30-batchen 30/9 kørte **uden** de otte ventende ændringer
+(første vindue efter de otte merges kl. 12:18): fire nye `/dage-til/*`-URL'er og
+`/dagar-till/pingstdagen` svarer 404, og `/dato` mangler både pinse-sætningen og
+"Påskedagen i 2027". `/api/health` svarer `status: ok`, så sitet er oppe og
+kun koden er ældre. Ét vindue, ikke to — næste er 17:30, og merges fortsætter.

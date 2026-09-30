@@ -159,3 +159,86 @@ export function maanedEksempel(
     gennemsnit: GNNEMSNIT_DAGE_PR_MAANED,
   };
 }
+
+/** The site's timezone — the one `/dato`'s countdowns are written in. */
+const DATO_TIMEZONE = "Europe/Copenhagen";
+
+/**
+ * The local day in `Europe/Copenhagen`, as UTC midnight. A UTC-server reading
+ * its own `getDate()` would be a day behind (or ahead) between midnight and
+ * 02:00, which is exactly the window somebody opens "hvor mange dage er der i
+ * den her måned" in.
+ */
+function dagITidszone(today: Date): Date {
+  const dele = new Intl.DateTimeFormat("en-CA", {
+    timeZone: DATO_TIMEZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(today);
+  const vaerdi = (type: string) =>
+    Number(dele.find((d) => d.type === type)?.value);
+  return new Date(Date.UTC(vaerdi("year"), vaerdi("month") - 1, vaerdi("day")));
+}
+
+export interface DenneMaanedEksempel {
+  /** The year the current month sits in. */
+  year: number;
+  /** 1-12, so callers can index or format without a second lookup. */
+  month: number;
+  /** Localised month name, e.g. "september". */
+  name: string;
+  /** Calendar days in the month — 28, 29, 30 or 31. */
+  dage: number;
+  /** How many of them are over, counting today as the month's first of those. */
+  dageForbruget: number;
+  /** How many are left after today. Always `dage - dageForbruget`. */
+  dageTilbage: number;
+  /** Working days in the month, from the same counter the tool uses. */
+  arbejdsdage: number;
+  /** Saturdays and Sundays in the month. */
+  weekenddage: number;
+  /** First day of the month, as `ISO`. */
+  foersteDag: string;
+  /** Last day of the month, as `ISO`. */
+  sidsteDag: string;
+  /** Day of the month, 1-31. */
+  dato: number;
+}
+
+/**
+ * The month the reader is standing in: its length, how much of it is over and
+ * how much is left. "hvor mange dage er der i juli 2026" and "hvor mange dage
+ * er der i den her måned" are Danish autocomplete suggestions, and the table
+ * on `/dato` only answers the first kind for the *whole* year — a table of
+ * twelve rows where the reader has to find their own month.
+ *
+ * The figures come from `daysBetween` and the `taell*` counters, exactly like
+ * {@link maanederITaar}, so the one-month answer and the twelve-row table can
+ * never disagree. `today` is read in `Europe/Copenhagen`.
+ */
+export function denneMaanedEksempel(
+  today: Date,
+  locale: HelligdagLocale
+): DenneMaanedEksempel {
+  const nu = dagITidszone(today);
+  const year = nu.getUTCFullYear();
+  const month = nu.getUTCMonth() + 1;
+  const foerste = new Date(year, month - 1, 1);
+  const efterFoelgende = new Date(year, month, 1);
+  const raekke = maanederITaar(year, locale).find((r) => r.month === month)!;
+  const dage = daysBetween(foerste, efterFoelgende);
+  return {
+    year,
+    month,
+    name: maanedNavn(month, locale),
+    dage,
+    dageForbruget: nu.getUTCDate(),
+    dageTilbage: dage - nu.getUTCDate(),
+    arbejdsdage: raekke.arbejdsdage,
+    weekenddage: raekke.weekenddage,
+    foersteDag: isoDato(foerste),
+    sidsteDag: isoDato(new Date(year, month, 0)),
+    dato: nu.getUTCDate(),
+  };
+}

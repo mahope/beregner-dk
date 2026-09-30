@@ -11,7 +11,7 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import Link from "next/link";
 import { dageTilbageIAaret, getDageTilEvents, getDageTilPrefix, isDageTilLocale, dageTilArm, getDageTilAnswer, formatTargetDate,
 } from "@/lib/dage-til";
-import { maanedEksempel } from "@/lib/dato-eksempler";
+import { denneMaanedEksempel, maanedEksempel } from "@/lib/dato-eksempler";
 import { helligdagsnavne } from "@/lib/helligdage";
 import { naestePinseInterval } from "@/lib/pinse-intervaller";
 import { formatNumber } from "@/lib/format";
@@ -62,6 +62,13 @@ export default async function DatoPage() {
   // måned" i begge sprog. Eksemplet følger det kalenderår siden ligger i, så
   // skudårsflaget kan ikke blive stående fra et tidligere år.
   const maaned = maanedEksempel(tilbage.year, 2, locale === "se" ? "se" : "da");
+  // "hvor mange dage er der i den her måned" er dansk autocompletes nr. 9 under
+  // "hvor mange dage er der i" (hvor nr. 1-6 og 8 er "i juli", "i august 2026"
+  // og således), og tabellen nedenfor svarer på den slags kun indirecte: tolv
+  // rækker, hvor læseren selv skal finde sin måned. `denneMaanedEksempel`
+  // læser dagen i Europe/Copenhagen og regner med de samme `daysBetween` og
+  // `taellArbejdsdage`, som rækkerne og `DatoBeregner` bruger.
+  const denneMaaned = denneMaanedEksempel(new Date(), locale === "se" ? "se" : "da");
   // "hvor mange dage er der fra påske til pinse" og "hvor mange dage er der i
   // pinsen" er de to øvrige danske autocomplete-træffere under "hvor mange
   // dage er der til pinse", og de er *interval* spørgsmål, ikke nedtællinger.
@@ -193,6 +200,32 @@ export default async function DatoPage() {
           <a href="/dage-til/nytaarsaften">nytårsaften</a> — de er forskellige
           spørgsmål med forskellige tal.
         </p>
+
+        {locale === "da" && (
+        <>
+        <h2>Hvor mange dage er der i den her måned?</h2>
+        <p>
+          {denneMaaned.name} {denneMaaned.year} har{" "}
+          <strong>{denneMaaned.dage} dage</strong> i alt. I dag er det{" "}
+          <strong>
+            {denneMaaned.dato}. {denneMaaned.name}
+          </strong>
+          , altså månedens {denneMaaned.dageForbruget}. dag, så der er{" "}
+          <strong>{denneMaaned.dageTilbage} dage tilbage</strong> i{" "}
+          {denneMaaned.name} — måneden slutter{" "}
+          <strong>{denneMaaned.sidsteDag}</strong>.
+        </p>
+        <p>
+          Ser du vil regne den i Excel, er månedens længde{" "}
+          <code>=DATEDIF({denneMaaned.foersteDag};{denneMaaned.sidsteDag};&quot;d&quot;)+1</code>{" "}
+          = <strong>{denneMaaned.dage} dage</strong>, og de dage der er gået er
+          dagens dato. Uden weekender og helligdage er der{" "}
+          <strong>{denneMaaned.arbejdsdage} arbejdsdage</strong> i{" "}
+          {denneMaaned.name} {denneMaaned.year} — samme tal som tabellen
+          nedenfor.
+        </p>
+        </>
+        )}
 
         <h2>Hvor mange dage er der i en måned?</h2>
         <p>
