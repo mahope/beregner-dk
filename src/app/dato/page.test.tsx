@@ -143,6 +143,30 @@ describe("dato page — dage tilbage i året", () => {
 // antal dagar mellan datum excel". Dansk autocomplete under "antal dage
 // mellem to datoer" har tre. Begge `/dato`-sider havde 0 forekomster af
 // "Excel" i den server-renderede HTML.
+describe("dato page — antal dagar mellan datum (svar-först)", () => {
+  test("svensk side har huvudordet og spørgsmålsformen fra GSC", async () => {
+    vi.mocked(getLocale).mockResolvedValue("se");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("se"));
+
+    const html = renderToStaticMarkup(await DatoPage());
+
+    expect(html).toContain("<h2>Antal dagar mellan datum</h2>");
+    expect(html).toContain("<strong>366 dagar</strong>");
+    // GSC 2026-08-30 → 2026-09-27: "antal dagar mellan datum" 425 v pos 9,
+    // "hur många dagar mellan två datum" 380 v pos 8. Dansk side har begge.
+    expect(html).toContain("hur många dagar mellan två datum");
+  });
+
+  test("dansk side er urørt af den svenska rettelsen", async () => {
+    vi.mocked(getLocale).mockResolvedValue("da");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("da"));
+
+    const html = renderToStaticMarkup(await DatoPage());
+
+    expect(html).not.toContain("<h2>Antal dagar mellan datum</h2>");
+  });
+});
+
 describe("dato page — antal dagar mellan datum i Excel", () => {
   test.each([
     {

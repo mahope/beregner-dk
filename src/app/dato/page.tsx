@@ -286,6 +286,15 @@ export default async function DatoPage() {
 
       {locale === "se" && (
       <div className="mt-12 prose max-w-none">
+        <h2>Antal dagar mellan datum</h2>
+        <p>
+          <strong>Antal dagar mellan datum</strong> är slutdatum minus startdatum. Från 1 mars
+          2027 till 1 mars 2028 är det <strong>366 dagar</strong>, eftersom 2028 är ett
+          skottår. Vill du veta <strong>hur många dagar mellan två datum</strong> det är,
+          fyller du i startdatum och slutdatum ovan — du får då också hela veckor,
+          ungefärligt antal månader, arbetsdagar, helgdagar och lördagar/söndagar.
+        </p>
+
         <h2>Så här använder du datumräknaren</h2>
         <p>Datumräknaren har <strong>fyra olika funktioner</strong>:</p>
 

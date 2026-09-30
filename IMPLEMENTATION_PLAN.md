@@ -1,6 +1,8 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — **`/procent` er GSC's største tabte klik: 150.148 visninger, 98
+STATUS: KØ — **beraknare.se's største side `/dato` (99.136 visninger, 95 klik, CTR 0,1 %, pos. 8,2) havde 0 forekomster af begge sine egne hovedsøgninger, mens dansk `/dato` har dem 16 gange hver.** GSC SE: "antal dagar mellan datum" 425 v pos 9 og "hur många dagar mellan två datum" 380 v pos 8. Årsagen er én ord: siden skriver altid "mellan **två** datum" og "mellan datumen", så GSC's egen formulering uden "två" findes ingen steder — præcis C191's danske rettelse (16× "dage mellem datoer", 16× "antal dage mellem to datoer") var aldrig spejlet. Rettelse: ét nyt `<h2>` "Antal dagar mellan datum" med regnestykket 1. marts 2027 → 1. marts 2028 = **366 dagar** (2028 er skottår; efterprøvet i node) + de to spørgsmålsformer. Kun `da === "se"`-grenen, dansk side urørt (0 fund på rigtig server). **Gate grøn:** lint (618), **3019 tests / 190 filer** (fra 3017/190), build (142 sider), `locale-leak.mjs --gate` exit 0. Den nye lås **fejler mod master's `page.tsx`** (`git stash`: 1 af 24 røde). Genmål 14/10.
+
+STATUS (forrige) — **`/procent` er GSC's største tabte klik: 150.148 visninger, 98
 klik (CTR 0,07 %), pos. 7,4** — større visningstal end `/dato` (132.313 v /
 822 klik / 0,6 %) med 1/8 af trafikken. Kun ~360 visninger kommer fra de fire
 søgninger GSC viser, så **149.700 er en ulistet langhale**, og positionen
@@ -53,6 +55,30 @@ Alle fire var grønne før merge 2026-09-29 22:45.
 
 Fire noter. HTTP 200 beviser intet: ingen rører en URL, kun `<title>`- og
 `og:title`-strenge, artiklernes **slutning** og rene visuelle elementer.
+
+- ⏳ **VERIFICÉR DEPLOY: beraknare.se `/dato` skal svare på "antal dagar mellan
+  datum" og "hur många dagar mellan två datum" i synlig tekst.** Kode + plan i ét
+  squash-commit på `ceo/dato-se-parafraser`. Første kandidatvindue
+  **2026-09-30 07:30** (dette push sker 03:45). Rørte filer:
+  `src/app/dato/page.tsx` (**+9 linjer**, kun den `locale === "se"`-gren, ny
+  `<h2>` som første element i den svenske tekstblok) og `src/app/dato/page.test.tsx`
+  (+2 tests). Ingen `<title>`, ingen `metaDescription`, ingen `<h1>`, ingen FAQ,
+  ingen JSON-LD-ændring, ingen beregningslogik, ingen ny URL, ingen sitemap.
+  Verificér ved **indhold**:
+  1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
+  2. `https://beraknare.se/dato` skal have **"Antal dagar mellan datum"** som et
+     `<h2>` og **"hur många dagar mellan två datum"** i brødteksten, med
+     **"366 dagar"** for 1. marts 2027 → 1. marts 2028.
+  3. **Kontrol:** `https://beraknare.se/dato`'s `<title>` skal stadig være
+     "Beräkna dagar kvar till datum: 1 jan. 2026→2027 = 365".
+  4. **Kontrol:** `https://minberegner.dk/dato` skal være **byte-for-byte
+     uændret** — 0 forekomster af "Antal dagar mellan datum" og samme titel som
+     før ("Beregn dage til en dato: 1. jan. 2026→2027 = 365").
+  Målt på rigtig server før merge (`next start` :3987, porten verificeret fri
+  *inden* start): SE 200 med 4/2/4 fund på de tre strenge, DA 200 med **0** på
+  den svenske overskrift. 390/1280 px kan ikke tjekkes (repoet har ingen
+  Playwright, se ❓ Til Mads); blokken er `<h2>` + `<p>` i `prose`, samme mønster
+  som den eksisterende Excel-blok på samme side.
 
 - ⏳ **VERIFICÉR DEPLOY: `/procent` skal have en titel der dækker hele
   klyngen.** Kode + plan i ét squash-commit på `ceo/procent-langhale`. Første
@@ -310,6 +336,35 @@ Fire noter. HTTP 200 beviser intet: ingen rører en URL, kun `<title>`- og
   forskellen er ikke-klikket Google-trafik.** Det peger på én fælles årsag
   (snippet/intention), ikke på to separate sidefejl — men at *finde* den kræver
   stadig kildefordelingen fra Mads, så opgaven står.
+
+#### 201. [x] ✅ 2026-09-30 — trafik — **beraknare.se `/dato` fik sin egen søgeintention ind i synlig tekst: 0 → 4 fund på "Antal dagar mellan datum"** (squash `ceo/dato-se-parafraser`)
+
+- **Datagrund:** GSC SE 2026-08-30 → 2026-09-27. `/dato` er beraknare.se's
+  største side: **99.136 visninger, 95 klik, CTR 0,1 %, pos. 8,2** — mod dansk
+  `/dato`'s 132.313 v / 822 klik / 0,6 %. De to største søgninger er
+  **"antal dagar mellan datum" (425 v, pos 9)** og **"hur många dagar mellan två
+  datum" (380 v, pos 8)**.
+- **Årsagen, målt:** server-renderet svensk `/dato` (137.791 B) havde **0**
+  forekomster af begge. Siden skriver konsekvent "mellan **två** datum"
+  (`title`, `description`, `h3` 1) og "mellan datumen" — aldrig GSC's
+  formulering *uden* "två". Dansk `/dato` har derimod **16** forekomster af
+  "dage mellem datoer" **og 16** af "antal dage mellem to datoer": C191's
+  svar-først-lås blev aldrig spejlet i svensk.
+- **Rettelse:** ét nyt `<h2>` **"Antal dagar mellan datum"** som første element i
+  den svenske tekstblok, med regnestykket **1. marts 2027 → 1. marts 2028 = 366
+  dagar** (2028 er skottår, efterprøvet i node) og de to spørgsmålsformer i
+  brødteksten. **Kun `locale === "se"`** — dansk side urørt, verificeret med 0
+  fund på rigtig server. Ingen `<title>`/`metaDescription`/`<h1>`/FAQ/JSON-LD,
+  ingen beregningslogik, ingen ny URL, ingen sitemap, +9 linjer.
+- **Gate grøn:** lint (**618 filer**), **3019 tests / 190 filer** (fra 3017/190),
+  build (**142 sider**), `locale-leak.mjs --gate` exit 0. Den nye lås
+  `svensk side har huvudordet og spørgsmålsformen fra GSC` **fejler mod master's
+  `page.tsx`** (`git stash`: 1 failed / 23 passed), så den låser den gamle fejl
+  fast; den negative danske lås skal være grøn begge veje.
+- **MÅL:** beraknare.se `/dato` **99.136 visninger / 95 klik / CTR 0,1 % / pos.
+  8,2** (GSC 2026-08-30 → 2026-09-27). Genmål **2026-10-14**; CTR er tallet, der
+  skal stige. Positionen er uændret ved denne opgave, så forventningen er kun
+  flere klik på de to søgninger, ikke en rankingeringsstigning.
 
 #### 200. [x] ✅ 2026-09-30 — Kø — **giv `/procent` en titel der dækker hele klyngen, ikke ét eksempel** (squash `ceo/procent-langhale`)
 
