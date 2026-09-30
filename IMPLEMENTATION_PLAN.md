@@ -1,29 +1,33 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — **20 `metaTitle`/`ogTitle` skrev domænenavnet ind i sig selv** på
-`ceo/titler-uden-brand`. Titlerne i `page-data.ts` renderer gennem
-`title: { absolute }`, så layoutets template **ikke** kører på dem — og 45 af
-strengene skrev alligevel `| MinBeregner.dk` (eller `.no`/`.se`) ind i titlen.
-17 tegn af Googles ~60 brugt på noget læseren ikke søger på; `Låneberegner |
-MinBeregner.dk` var 29 tegn for 12 tegn indhold. Strippet i alle tre sprog, og
-de **ti danske titler** der blev under 30 tegn har nu fået den frigjorte plads
-brugt på hvad værktøjet gør, hentet fra sidens egen `description`. 0 af 160
-`metaTitle` er over 60 tegn. Målt på rigtig server (`next start` :3987, port
-verificeret fri inden start): `/laaneberegner` 29 → **51**, `/elberegner` 27 →
-**46**, `/pension` 65 → **48**; `/dato` `/procent` `/moms` `/tidszone` uændrede,
-`<h1>` uændret, 0 forekomster af brandet i nogen `<title>`, 0 brand-strenge i
-`se`/`no`. **Gate grøn:** lint (**618 filer**), **3016 tests / 190 filer** (fra
-3001/189), build (**142 sider**), `locale-leak.mjs --gate` exit 0 (743/709/34/0
-uændrede). **Modsvejs verificeret: 4 af 5 nye assertions falder** med master's
-`page-data.ts` (stashed) — og da testen skrev rødt på *svensk* og *norsk* under
-den første strip, viste den at fejlen ikke var dansk alene (19 `se`, 15 `no`).
+STATUS: KØ — **`/procent` er GSC's største tabte klik: 150.148 visninger, 98
+klik (CTR 0,07 %), pos. 7,4** — større visningstal end `/dato` (132.313 v /
+822 klik / 0,6 %) med 1/8 af trafikken. Kun ~360 visninger kommer fra de fire
+søgninger GSC viser, så **149.700 er en ulistet langhale**, og positionen
+forklarer ikke at 99,93 % ikke klikkes. DA-autocomplete viser hvorfor: under
+"procent beregner" ligger *stigning, rabat, fald, besparelse, vækst, ændring*,
+under "procent stigning" *mellem to tal*, under "procent fald" *hvor mange
+procent falder*. Titlen lovede **ét** eksempel ("10 % af 250 kr. = 25 kr.") og
+matchede dermed højst én af ti opgaver — samme sygdom som `/dato` fik
+svar-først-sider for. Nu: "Procentberegner: 10 % af 250 = 25 kr. Stigning,
+fald, rabat" (59 tegn); eksemplet blev **beholdt**, fordi `title-eksempel.test.ts`
+kræver det. Svensk urørt (frosset til 13/10). **Gate grøn:** lint (618),
+**3017 tests / 190 filer**, build (142 sider), `locale-leak.mjs --gate` exit 0.
+Den nye lås **fejler mod master's `page-data.ts`** (stash: 2 af 99 røde).
+Genmål 14/10.
 
-**Køen var tom, og det er selv en fund:** CEO-kø punkt 0 er verificeret lukket i
+**Mønstret er større end /procent:** samme måling som for `/bmi` + `/su` (se
+opg. 183) — GSC's visninger ligger langt over Plausible's besøgende, og
+forskellen er **ikke-klikket Google-trafik**. `/bmi` og `/su` er målt sunde
+live (canonical, robots, hreflang, 3 schema-typer, i sitemap), så faldet er
+ikke teknik — men at finde årsagen kræver stadig Mads' svar. Derfor er 183
+nu `BLOCKED` sammen med 97/98/119, og 187 er bevidst udsat til 13/10.
+
+**Køen var tom, og det er selv et fund:** CEO-kø punkt 0 er verificeret lukket i
 kode (Valborg 30. april, svensk påskafton `offsetDays: -1`, dansk sankthans fast
 23./24. juni, `toUtcMidnight` i `Europe/Copenhagen`, lejeloven § 5, `maneder:
-12`, 1. advent 27/11–3/12), 97/98/119/183 er `BLOCKED` på Mads' svar, og 187
-er bevidst udsat til 13/10. De tre åbne deploy-noter har første vindue 07:30, så
-de var ikke rørt.
+12`, 1. advent 27/11–3/12). De fem åbne deploy-noter har første vindue 07:30,
+så de var ikke rørt.
 
 **Beslutning om opgave 187 (svenske slugs):** ikke før **2026-10-13**. C195/C196's
 svenske titler deployer 30/9 07:30, og 185's egen beskeds var at slugs først er
@@ -49,6 +53,22 @@ Alle fire var grønne før merge 2026-09-29 22:45.
 
 Fire noter. HTTP 200 beviser intet: ingen rører en URL, kun `<title>`- og
 `og:title`-strenge, artiklernes **slutning** og rene visuelle elementer.
+
+- ⏳ **VERIFICÉR DEPLOY: `/procent` skal have en titel der dækker hele
+  klyngen.** Kode + plan i ét squash-commit på `ceo/procent-langhale`. Første
+  kandidatvindue **2026-09-30 07:30** (dette push sker efter 03:00). Rørte
+  filer: `src/lib/page-data.ts` (4 strenge, kun `metaTitle`/`ogTitle`/
+  `metaDescription`/`ogDescription` for **`da`**) + to låste titler i
+  `page-data.test.ts` og `page-helpers.test.ts`. Ingen `<h1>`, ingen ny URL,
+  ingen sitemap, ingen beregningslogik. Verificér ved **indhold**:
+  1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
+  2. `<title>` på dansk skal være **"Procentberegner: 10 % af 250 = 25 kr.
+     Stigning, fald, rabat"** (59 tegn).
+  3. **Kontrol:** `<h1>` skal stadig være "Procentberegner", og den **svenske**
+     titel skal stadig være "Procenträknare: 10 % av 250 kr = 25 kr" — `se` er
+     frosset til 13/10 (opg. 187) og må ikke have rørt sig.
+  4. **Kontrol:** `/procent` på beraknare.se skal være **uændret** på dansk
+     `/dato` skal stadig have sin gamle titel.
 
 - ⏳ **VERIFICÉR DEPLOY: 20 titler skal ikke længere indeholde domænenavnet.**
   Kode + plan i ét squash-commit på `ceo/titler-uden-brand`. Første
@@ -254,7 +274,7 @@ Fire noter. HTTP 200 beviser intet: ingen rører en URL, kun `<title>`- og
   en kildefil. **C92's tabel er ikke en invitationsliste til at prøve de samme
   kilder igen.**
 
-#### 183. [ ] 2026-09-29 — Kø — **diagnosér `/bmi`s og `/su`s fald, og find ud af hvor stor en del der er overhovedet Googles**
+#### 183. [BLOCKED: afventer Mads' svar på kildespørgsmålet fra 27/9 — spørgsmålet står i ❓ Til Mads, og opgaven siger selv "ingen ny kode før diagnosen står". Ikke prøvet igen: ingen ny måling i denne iteration kan erstatte svaret] 2026-09-29 — Kø — **diagnosér `/bmi`s og `/su`s fald, og find ud af hvor stor en del der er overhovedet Googles**
 
 - **Datagrund:** Plausible 28 dage: `/bmi` 1.271 → 938 (−26 %), `/su` 220 →
   116 (−47 %). Samtidig voksede sitet **+42 %**, så faldet er relativt værre end
@@ -279,6 +299,58 @@ Fire noter. HTTP 200 beviser intet: ingen rører en URL, kun `<title>`- og
   pladsen. **Ingen ny kode før diagnosen står** — en tredje titelændring på
   samme side uden en diagnose er prøvet to gange.
 - **MÅL:** `/bmi` 938 besøgende/28d, `/su` 116 (Plausible 2026-09-29).
+- **⚠️ 30/9: fundet i side-konteksten, uden ny kode.** Målt på det *live* site:
+  `/bmi` og `/su` er begge sunde — canonical til sig selv, `robots
+  index,follow`, hreflang `da` + `x-default`, `WebApplication` + `FAQPage` +
+  `BreadcrumbList`, og begge står i sitemap.xml (136 `<loc>`). Så faldet er
+  **ikke** teknik. Samme billede som `/procent` (C200, lukket): 150.148 GSC-
+  visninger, **98 klik**, altså CTR 0,07 % på 150.148 visninger — langt under
+  det niveau hvor en rankingeringsfejl forklares. Mønstret på hele sitet er
+  det samme: **GSC's visninger ligger langt over Plausible's besøgende, og
+  forskellen er ikke-klikket Google-trafik.** Det peger på én fælles årsag
+  (snippet/intention), ikke på to separate sidefejl — men at *finde* den kræver
+  stadig kildefordelingen fra Mads, så opgaven står.
+
+#### 200. [x] ✅ 2026-09-30 — Kø — **giv `/procent` en titel der dækker hele klyngen, ikke ét eksempel** (squash `ceo/procent-langhale`)
+
+- **Datagrund:** GSC 2026-08-30 → 2026-09-27: `/procent` **150.148 visninger,
+  98 klik, CTR 0,1 %, pos. 7,4** — GSC's største enkeltvisningstal på sitet, og
+  større end `/dato` (132.313 v / 822 klik / 0,6 % / pos. 5,7). Kun ~360 af
+  visningerne kommer fra de fire søgninger GSC viser ("procentberegner" 249,
+  telefon-rabat-spørgsmålet 59, "10 procent af" 53), så **149.700 visninger er
+  en ulistet langhale** — og position 7,4 forklarer ikke, at 99,93 % af dem
+  ikke klikkes.
+- **Årsagen, målt:** DA-autocomplete (`hl=da&gl=dk`, 2026-09-30) viser at
+  langhalen er opdelt i *opgaver*, ikke i én søgning. Under **"procent
+  beregner"** ligger "stigning", "rabat", "fald", "besparelse", "vækst" og
+  "ændring i procent"; under **"procent stigning"** "mellem to tal" og "fra et
+  tal til et andet"; under **"procent fald"** "hvor mange procent falder".
+  Titlen var "Procentberegner: 10 % af 250 kr. = 25 kr." — den lovede **ét**
+  eksempel og matcher dermed højst én af ti opgaver. Samme sygdom som `/dato`
+  fik svar-først-sider for (`ceo/dage-til-fakta`): **siden svarer, men ikke i
+  den streng brugeren søger på.** Svensk er urørt (frosset til 13/10, opg. 187).
+- **Rettelse:** dansk `metaTitle`/`ogTitle` →
+  "Procentberegner: 10 % af 250 = 25 kr. Stigning, fald, rabat" (59 tegn) og
+  `metaDescription`/`ogDescription` med de fire opgaver. **Ingen ny URL, ingen
+  sitemap, intet `<h1>`, ingen beregningslogik, ingen `<article>`-ændring** —
+  kun `metaTitle`, `ogTitle`, `metaDescription`, `ogDescription` i
+  `page-data.ts` (4 strenge) + to låste titler i testene.
+- **Husreglen holdt:** `title-eksempel.test.ts` kræver et udregnet eksempel i
+  titlen, så eksemplet blev **beholdt** og de tre andre opgaver lagt til ved
+  siden af, frem for at bytte det ud. Beskrivelsen er 118 tegn (grænse 160),
+  titlen 59 (grænse 60).
+- **Gate grøn:** lint (**618 filer**), **3017 tests / 190 filer** (fra
+  3016/190), build (**142 sider**), `locale-leak.mjs --gate` exit 0.
+  **Modsvejs verificeret:** den nye lås `/procent-titlen dækker opgaverne i den
+  danske langhale` **fejler mod master's `page-data.ts`** (`git stash`: 2
+  failed / 97 passed), så den låser den gamle fejl fast.
+- **MÅL:** `/procent` **150.148 visninger / 98 klik / CTR 0,065 % / pos. 7,4**
+  (GSC 2026-08-30 → 2026-09-27). Genmål **2026-10-14** — CTR er det tal, der
+  skal stige; en forventet stigning på 0,2 % er ~200 klik/28d, på 0,5 %
+  ~650. Hvis CTR er uændret efter 14 dage, er årsagen **ikke** titlen, og så
+  skal `/procent` have ægte **søstersider** (`/procent/stigning`,
+  `/procent/rabat`, `/procent/fald`) i stedet — ikke flere titelændringer.
+
 
 
 #### 187. [ ] **IKKE FØR 2026-10-13** 2026-09-30 — Kø — **migrér beraknare.se til svenske URL-slugs med 301**

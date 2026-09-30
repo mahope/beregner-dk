@@ -43,8 +43,9 @@ describe("buildPageMetadata", () => {
   test.each([
     {
       locale: "da" as const,
-      title: "Procentberegner: 10 % af 250 kr. = 25 kr.",
-      description: "10 procent af et tal er tallet × 0,10. 10 procent af 250 er 25. Beregn også stigning, fald og andre procentopgaver.",
+      title: "Procentberegner: 10 % af 250 = 25 kr. Stigning, fald, rabat",
+      description:
+        "10 % af 250 kr. = 25 kr. Beregn procent af et tal, procentvis stigning, fald, rabat og vækst mellem to tal med formler.",
     },
     {
       locale: "se" as const,

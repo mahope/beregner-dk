@@ -51,28 +51,50 @@ describe("getPageData", () => {
   test.each([
     {
       locale: "da" as const,
-      title: "Procentberegner: 10 % af 250 kr. = 25 kr.",
+      title: "Procentberegner: 10 % af 250 = 25 kr. Stigning, fald, rabat",
       intent: "10 procent af",
-      answer: "10 procent af 250 er 25",
+      descriptionAnswer: "10 procent af 250 er 25",
+      metaAnswer: "10 % af 250 kr. = 25 kr.",
     },
     {
       locale: "se" as const,
       title: "Procenträknare: 10 % av 250 kr = 25 kr",
       intent: "10 procent av",
-      answer: "10 procent av 250 är 25",
+      descriptionAnswer: "10 procent av 250 är 25",
+      metaAnswer: "10 procent av 250 är 25",
     },
-  ])("has answer-first percentage metadata for $locale", ({ locale, title, intent, answer }) => {
-    const data = getPageData("procent", locale)!;
+  ])(
+    "has answer-first percentage metadata for $locale",
+    ({ locale, title, intent, descriptionAnswer, metaAnswer }) => {
+      const data = getPageData("procent", locale)!;
 
-    expect(data.metaTitle).toBe(title);
-    expect(data.metaTitle.length).toBeLessThanOrEqual(60);
-    expect(data.description).toContain(answer);
-    expect(data.metaDescription).toContain(answer);
-    expect(data.metaDescription.length).toBeLessThanOrEqual(160);
-    expect(data.ogTitle).toBe(title);
-    expect(data.ogDescription).toContain(answer);
-    expect(data.schemaDescription).toContain(intent);
+      expect(data.metaTitle).toBe(title);
+      expect(data.metaTitle.length).toBeLessThanOrEqual(60);
+      expect(data.description).toContain(descriptionAnswer);
+      expect(data.metaDescription).toContain(metaAnswer);
+      expect(data.metaDescription.length).toBeLessThanOrEqual(160);
+      expect(data.ogTitle).toBe(title);
+      expect(data.ogDescription).toContain(metaAnswer);
+      expect(data.schemaDescription).toContain(intent);
+    },
+  );
+
+  // GSC 2026-08-30 → 2026-09-27: /procent har 150.148 visninger og 98 klik
+  // (CTR 0,1 %, pos. 7,4) — GSC's største enkeltvisningstal på sitet, og næsten
+  // intet af det er klikket. Autocomplete (hl=da, gl=dk, 2026-09-30) viser at
+  // langhalen er opdelt i opgaver og ikke i én: "procent beregner stigning",
+  // "procent rabat beregner", "procent fald beregner" og "procent vækst
+  // beregner" ligger alle under "procent beregner". En titel der kun lovede ét
+  // eksempel ("10 % af 250 kr. = 25 kr.") matcher derfor højst én af dem — de
+  // øvrige ni har ingen grund til at blive klikket.
+  test("/procent-titlen dækker opgaverne i den danske langhale", () => {
+    const { metaTitle } = getPageData("procent", "da")!;
+
+    for (const opgave of ["10 % af", "stigning", "fald", "rabat"]) {
+      expect(metaTitle.toLowerCase()).toContain(opgave);
+    }
   });
+
 
   test.each([
     {

@@ -18855,3 +18855,94 @@ prislisten for migreringen er skrevet. Migreringen selv ligger i opgave 187, der
 nu venter til 2026-10-13, fordi C195/C196's svenske titler endnu ikke er
 målt. Se også den tekniske forudsætning i 187: en middleware-rewrite giver en
 canonical, der peger på en URL som 301'er tilbage.
+
+---
+
+## 2026-09-30 — C200 / opgave 200: `/procent` fik en titel der dækker hele klyngen
+
+Branch `ceo/procent-langhale`. Lukket i ét squash-commit.
+
+**Måling (GSC 2026-08-30 → 2026-09-27).** `/procent`: **150.148 visninger, 98
+klik, CTR 0,1 %, pos. 7,4** — GSC's største enkeltvisningstal på sitet, større
+end `/dato` (132.313 v / 822 klik / 0,6 % / pos. 5,7) med 1/8 af trafikken til
+følge. De fire søgninger GSC viser summerer til ~360 visninger
+("procentberegner" 249, telefon-rabat-spørgsmålet 59, "10 procent af" 53), så
+**149.700 visninger er en ulistet langhale**. Position 7,4 forklarer ikke at
+99,93 % af dem ikke klikkes — det er et CTR-problem, ikke et ranking-problem.
+
+**Diagnose.** DA-autocomplete (`suggestqueries.google.com`, `hl=da&gl=dk`):
+
+| Frase | Autocomplete |
+|---|---|
+| "procent beregner" | **stigning** · alkohol · **rabat** · **fald** · **besparelse** · af · skat · **vækst** · **ændring** |
+| "procent stigning" | formel · beregning · **mellem to tal** · **fra et tal til et andet** · **beregner** · og fald |
+| "procent fald" | udregning · **mellem to tal** · **beregner** · formel · **hvor mange procent falder** |
+| "procent af" | **et tal** · **et beløb** · **to tal** · **2 tal** · afvigelse · formel · excel |
+| "procent af en" | 1 % / 2 % / 5 % / 10 % / 15 % / 20 % **af en million** |
+
+Langhalen er opdelt i *opgaver*, ikke i én søgning. Den gamle titel
+"Procentberegner: 10 % af 250 kr. = 25 kr." lovede **ét** eksempel og matcher
+dermed højst én af ti opgaver. Det er samme sygdom som `/dato` fik svar-først-
+sider for i `ceo/dage-til-fakta`: **siden svarer, men ikke i den streng brugeren
+søger på.** Bemærk at indholdet *var* i orden — rabat-eksemplet 9.000 → 1.125 =
+12,5 % stod allerede på siden og er præcis GSC's andetstørste søgning. Kun
+snippet lovede for lidt.
+
+**Rettelse.** `src/lib/page-data.ts`, dansk `procent`, 4 strenge:
+`metaTitle`/`ogTitle` → "Procentberegner: 10 % af 250 = 25 kr. Stigning, fald,
+rabat" (59 tegn, grænse 60). `metaDescription`/`ogDescription` → "10 % af 250
+kr. = 25 kr. Beregn procent af et tal, procentvis stigning, fald, rabat og vækst
+mellem to tal med formler." (118 tegn, grænse 160).
+
+**Husreglen holdt.** `title-eksempel.test.ts` kræver et *udregnet* eksempel i
+titlen. Første forsøg byttede eksemplet ud mod klyngeord ("procent af, stigning,
+fald og rabat", 49 tegn) og skrev rødt i to uvedkommende tests. Løsningen var at
+**beholde** eksemplet og lægge de tre andre opgaver ved siden af — så er der
+både et svar at klikke på og fire navngivne opgaver. Det er også den ærligere
+titel: den lægger intet i huset ud over de fire opgaver, siden faktisk løser.
+
+**Fastholdt.** Svensk urørt — opgave 187 frosser `se`-titler til 13/10, fordi
+C195/C196's svenske titler deployer 30/9 07:30 og slugs-migrationen ellers
+ødelægger attributionen. `<h1>` er stadig "Procentberegner" og uændret, så
+C180's overskriftsstruktur-historik holder.
+
+**Teste.** Ny lås `/procent-titlen dækker opgaverne i den danske langhale` i
+`page-data.test.ts`, som kræver at titlen nævner "10 % af", "stigning", "fald"
+og "rabat". `page-data.test.ts` og `page-helpers.test.ts` havde begge den gamle
+titel låst og blev opdateret. **Modsvejs verificeret** med `git stash` på kun
+`page-data.ts`: den nye lås fejler mod master (2 failed / 97 passed).
+
+**Gate.** lint **618 filer** grøn · **3017 tests / 190 filer** grøn (fra
+3016/190) · build **142 sider** grøn · `locale-leak.mjs --gate` exit 0.
+
+**MÅL.** `/procent` 150.148 visninger / 98 klik / CTR 0,065 % / pos. 7,4
+(GSC 2026-08-30 → 2026-09-27). Genmål **2026-10-14**. 0,2 % CTR ≈ 200
+klik/28d, 0,5 % ≈ 650. **Hvis CTR er uændret efter 14 dage, er titlen ikke
+årsagen**, og så kræver `/procent` ægte søstersider (`/procent/stigning`,
+`/procent/rabat`, `/procent/fald`) — ikke en tredje titelændring.
+
+---
+
+## 2026-09-30 — måling til opgave 183 (`/bmi` + `/su`): teknikken er sund
+
+Live-målt i forbindelse med at køen var tom. `/bmi` og `/su` er begge sunde:
+canonical til sig selv, `robots index, follow`, hreflang `da` + `x-default`,
+`WebApplication` + `FAQPage` + `BreadcrumbList` + `BreadcrumbList`, og begge
+står i `sitemap.xml` (136 `<loc>`). `/su`'s `<title>` og `<h1>` er
+identiske ("SU Beregner 2026 - Beregn din SU og fribeløb"), og FAQ'en har 11
+konkrete 2026-spørgsmål med verificerede tal.
+
+**Konklusion:** faldet på 26 % / 47 % er **ikke** en teknisk fejl. Og målt
+sammen med `/procent` (150.148 visninger → 98 klik) peger talene på ** ét fælles
+mønster**: GSC's visninger ligger langt over Plausible's besøgende, og
+forskellen er ikke-klikket Google-trafik. `/bmi` har 938 Plausible-besøgende
+men under 4.920 GSC-visninger, fordi `/bmi` ikke står på GSC's top-15 over
+visninger (listen ender på `/brok` med 4.920).
+
+**Derfor er 183 `BLOCKED` og ikke bare forsinket:** diagnosticeringen kræver
+kildefordelingen pr. søgemaskine for de to sider, og den ligger i ❓ Til Mads
+siden 27/9. Ingen ny måling fra denne side kan erstatte svaret, så en tredje
+titelændring på `/bmi` uden diagnose ville være prøvet to gange. Bemærk at
+`/bmi` og `/su` **ikke** er blandt GSC's største sider — modsat `/procent` med
+150.148 — så de to fald er et mindre problem end den lange hale der ligger i
+/procent, og de bør prioriteres derefter.
