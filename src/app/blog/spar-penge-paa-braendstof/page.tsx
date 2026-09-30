@@ -4,6 +4,7 @@ import { FAQSchema } from "@/components/StructuredData";
 import BlogArticleSchema from "@/components/BlogArticleSchema";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { elbilSammenligning } from "@/lib/braendstof";
+import { NaesteSkridt } from "@/components/BlogNaesteSkridt";
 import { OG_IMAGE } from "@/lib/page-helpers";
 
 const elbil = elbilSammenligning("da");
@@ -237,6 +238,12 @@ export default function SparBraendstofGuidePage() {
           </div>
         ))}
       </article>
+
+      <NaesteSkridt
+        href="/braendstof"
+        handling="Beregn din brændstofpris"
+        beskrivelse="Se pris pr. kilometer for dit kørselsmønster, og sammenlign benzin, diesel og el."
+      />
     </div>
   );
 }

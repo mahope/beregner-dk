@@ -5,6 +5,7 @@ import BlogArticleSchema from "@/components/BlogArticleSchema";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { formatNumber } from "@/lib/format";
 import { DAGPENGE_2026, SATSER_2026 } from "@/lib/satser-2026";
+import { NaesteSkridt } from "@/components/BlogNaesteSkridt";
 import { OG_IMAGE } from "@/lib/page-helpers";
 
 const kr = (belob: number) => `${formatNumber(belob, "da")} kr`;
@@ -313,6 +314,12 @@ export default function DagpengeGuidePage() {
           </div>
         ))}
       </article>
+
+      <NaesteSkridt
+        href="/barselsdagpenge"
+        handling="Beregn din dagpenge"
+        beskrivelse="Din egen sats afhænger af timeløn, feriedage og orlovsuger. Læg dem ind, og se dagpengen for hver uge."
+      />
 
       <div className="mt-12 pt-8 border-t">
         <h2 className="text-xl font-bold mb-4">Relaterede artikler</h2>

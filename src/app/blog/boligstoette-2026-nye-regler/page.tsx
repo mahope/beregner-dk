@@ -3,6 +3,7 @@ import BlogArticleSchema from "@/components/BlogArticleSchema";
 import { formatNumber } from "@/lib/format";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { BOLIGSTOETTE_2026 } from "@/lib/satser-2026";
+import { NaesteSkridt } from "@/components/BlogNaesteSkridt";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { OG_IMAGE } from "@/lib/page-helpers";
@@ -363,6 +364,12 @@ export default function Boligstoette2026Page() {
           </div>
         ))}
       </article>
+
+      <NaesteSkridt
+        href="/boligstoette"
+        handling="Beregn din boligstøtte"
+        beskrivelse="Sæt husleje og indkomst ind, og se et vejledende estimat. Den endelige sagsbehandling ligger hos Udbetaling Danmark."
+      />
 
       <div className="mt-12 border-t pt-8 dark:border-gray-700">
         <h2 className="mb-4 text-xl font-bold text-gray-900 dark:text-white">Relaterede beregnere</h2>

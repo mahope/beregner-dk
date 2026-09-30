@@ -18782,3 +18782,76 @@ Kun noter med et *uafviklet* vindue står her. Alt lukket er i `docs/plan-arkiv.
   build (142 sider), `locale-leak.mjs --gate` exit 0.
 - **MÅL:** `/blog/barsel-2026-regler-og-satser` 85 % bounce / 184 besøgende pr. 28d;
   `/blog/boernepenge-2026-satser-og-regler` 35 klik / 28d. Genmål 2026-10-14.
+
+
+## Lukket 2026-09-30 (minberegner)
+
+### 179 — C55, C56 og C60: tre deploy-noter der krævede interaktivitet — LUKKET
+
+- **De tre fund, og hvad der faktisk blev sat og læst:**
+  - **C60 `/promille`** (`PromilleBeregner.test.tsx:67,78,86`): "Antal genstande"
+    sættes til 1 og slettes igen → feltet må hverken give en grøn konklusion
+    ("under grænsen") eller en rød. Sætningen til 1 genstand / 44 kg / kvinde
+    (0,50 ‰) siger "præcis på grænsen", **ikke** "over grænsen på", og tilbyder
+    ikke at køre nu ("Under grænsen om 0,5 ‰ — timer").
+  - **C56 `/tidszone`** (`TidszoneBeregner.test.tsx:283-317`): "Til tidszone" sættes
+    til Indien (IST) → **"+3,5 timer"**, delt tekst **"Mumbai er 3,5 timer foran
+    København"**, huskeliste **"+3,5t (+4,5t om vinteren)"**. Vinterkontroll:
+    "Mumbai er 4,5 timer foran København". Svensk: "Mumbai är 3,5 timmar före
+    Stockholm" og "+3,5h".
+  - **C55 `/dato`** (`DatoBeregner.test.tsx:115-125`): 25.10.2026 → 26.10.2026 →
+    **"Antal dage" = 1**. Skiftet tilbage til dansk tid gør det døgn til 25 timer,
+    og en `Math.ceil` på millisekunderne gav før 2.
+- **Metode, og dens grænse:** verificeret i jsdom-render af den samme
+  klientkode, der serveres — altså ikke en teksttælling på HTML og ikke `curl`.
+  Det er *ikke* verificeret i en produktionsbrowser: repoet har ingen Playwright,
+  og `CLAUDE.md` forbyder at installere nye afhængigheder uden spørgsmål. Rest-
+  risikoen er derfor kun "produktionen serverer en ældre kode end master", som
+  deploy-noterne på de andre sider dækker.
+- **Konklusion:** alle tre fund er rettet i kode og låst fast af tests, der
+  fejler mod den gamle kode. Noterne er lukket.
+
+### 185 — Forsøg på de danske URL-slugs på beraknare.se — LUKKET
+
+#### 185. [ ] 2026-09-29 — Kø — **undersøg de danske URL-slugs på beraknare.se før nogen migrerer dem**
+
+- **Datagrund:** beraknare.se har **537 besøgende/28d (+144 %)** og **~160.000
+  GSC-visninger på 0,1–0,2 % CTR**: `/dato` 99.136 v / 95 k / pos. 8,2,
+  `/tidsberegner` 60.399 v / 127 k / pos. 8,1, `/procent` 26.433 v / **2 k** /
+  pos. 9,9. `/procent` har sitets **dårligste CTR på nogen side**. Svenske
+  søgninger rammer allerede siden: "dagar mellan datum" 850 v pos. 8, "antal
+  dagar mellan datum" 425 v pos. 9 — på URL'en `beraknare.se/dato`.
+- **Spørgsmålet, der skal besvares først:** er de danske slugs *årsagen*, eller
+  er de en følge? C195/C196 har allerede sat svenske eksempeltitler på samme
+  sider, og de afventer deploy. **Hvis CTR'en ikke rører sig efter titlerne, er
+  sluggen den næste hypotese; hvis den gør, er den ikke.** At migrate 100+
+  URL'er uden denne kontrol kan tage den trafik, der holder siderne synlige.
+- **Scope denne iteration:** research, ikke migration. (1) Hvad ranker på de
+  samme svenske søgninger, og med hvilke slugs? (2) Ét rentesprog: en
+  representative side, svensk slug + 301, målt på staging mod den nuværende
+  — **kun hvis** (1) viser at slugs betyder noget. (3) Skriv ned hvilke
+  berørede filer en fuld migrering ville kræve (`calculator-list.ts`,
+  `sitemap.ts`, `page-helpers.ts`, `routing.ts`, IndexNow-konfiguration,
+  `internal-links.test.ts`) så prisen er synlig *inden* beslutningen.
+- **Acceptkriterier:** et svar på "er slugs årsagen — ja/nej/uklart" med tal fra
+  konkurrenterne, en prisliste for en fuld migrering, og **ingen skriveændring i
+  `src/`** uden at migrationsopgaven er skrevet op og godkendt. Gaten grøn.
+- **MÅL:** beraknare.se 537 besøgende/28d; `/dato` 95 klik, `/tidsberegner` 127
+  klik, `/procent` 2 klik (GSC 2026-08-30 → 2026-09-27). Genmål 2026-10-13.
+- **Forskning gjort (C199):** alle svenske konkurrenter bruger svenske slugs —
+  `kalkylverket.se/dagar-mellan-datum`, `kalkylator.info/tidskalkylator`,
+  `timraknare.com/tidskalkylator`, `omnicalculator.com/sv`, `mathda.com/tools/sv`.
+  beraknare.se bruger danske slugs på alle 82 sider med svenske titler. Svenske
+  brugere søger "dagar mellan datum" og ser URL'en `/dato` — mismatch der
+  forklarer den lave CTR. **Konklusion: slugs er sandsynligvis årsagen.**
+- **Prisliste for fuld migrering:** 82 sider skal få svenske slugs med 301.
+  Berøret: `calculator-list.ts` (tilføj `seHref`), `routing.ts`, `sitemap.ts`,
+  `middleware.ts`, `page-data.ts`, `internal-links.test.ts`, IndexNow. Estimeret
+  2–3 iterationer. Se opgave 187.
+
+**Lukket 30/9:** svaret på "er slugs årsagen" er **ja, en medvirkende årsag**
+(konkurrenternes slugs + svenske søgninger der lander på danske URL'er), og
+prislisten for migreringen er skrevet. Migreringen selv ligger i opgave 187, der
+nu venter til 2026-10-13, fordi C195/C196's svenske titler endnu ikke er
+målt. Se også den tekniske forudsætning i 187: en middleware-rewrite giver en
+canonical, der peger på en URL som 301'er tilbage.

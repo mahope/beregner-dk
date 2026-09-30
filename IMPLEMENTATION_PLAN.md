@@ -1,12 +1,21 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — **Review-fund 30/9 (4 stk) rettet** i commit på
-`ceo/review-fund-30-9`: dimittend-intervallet i dagpenge-beskrivelsen står
-lav–høj igen, CI kører Node 22 + `npm test`, `/dato`-titlen lover en konkret
-periode (1. jan. 2026→2027 = 365) frem for et ubetinget tal, og `/kalorier` +
-`/moms` titler nævner nu alder/aktivitet og sats. **Største åbne flade:**
-beraknare.se — 537 besøgende/28d mod 160.000+ visninger på 0,1–0,2 % CTR med
-danske URL-slugs. Forsning gjort (opgave 185), migrationsopgave skrevet (187).
+STATUS: KØ — **fjerde artikelbølge med "Regn det ud"** på `ceo/blog-naste-handling-2`:
+`boligstoette-2026-nye-regler` → `/boligstoette` (535 besøgende/28d),
+`kvadratmeter-saadan-regner-du-ud` → `/kvadratmeter` (388),
+`spar-penge-paa-braendstof` → `/braendstof` (265) og
+`dagpenge-saadan-finder-du-din-sats` → `/barselsdagpenge` (212). Dagpenge-artiklen
+linkede slet ikke til værktøjet. **Opgave 179 lukket:** C55/C56/C60 er dækket af
+komponenttests, der sætter præcis de felter noterne krævede. **Opgave 185 lukket:**
+undersøgelsen er færdig, svaret er "ja, slugs er en medvirkende årsag".
+
+**Beslutning om opgave 187 (svenske slugs):** ikke før **2026-10-13**. C195/C196's
+svenske titler deployer 30/9 07:30, og 185's egen beskeds var at slugs først er
+hypotesen *hvis* titlerne ikke flytter CTR. Derudover fandt denne iteration en
+teknisk forudsætning migrationen SKAL løse: en rewrite i middleware giver
+canonical fra den interne rute (`/tidsberegner`), som så peger på en URL der
+301'er tilbage — en redirect-loop for crawlere. Kræver per-domæne-canonical
+eller ægte ruter.
 
 ## Kvalitetsgate (repoets egne scripts fra package.json)
 
@@ -22,8 +31,27 @@ Alle fire var grønne før merge 2026-09-29 22:45.
 
 ## Åbne VERIFICÉR DEPLOY-noter
 
-Tre noter. HTTP 200 beviser intet: ingen rører en URL, kun `<title>`- og
-`og:title`-strenge — og den tredje rører artiklernes **slutning**.
+Fire noter. HTTP 200 beviser intet: ingen rører en URL, kun `<title>`- og
+`og:title`-strenge, artiklernes **slutning** og rene visuelle elementer.
+
+- ⏳ **VERIFICÉR DEPLOY: fire artikler skal slutte med "Regn det ud" — anden
+  bølge.** Kode + plan i ét squash-commit på `ceo/blog-naste-handling-2`.
+  Første kandidatvindue **2026-09-30 07:30**. Rørte filer: fire artikler
+  (`boligstoette-2026-nye-regler`, `kvadratmeter-saadan-regner-du-ud`,
+  `spar-penge-paa-braendstof`, `dagpenge-saadan-finder-du-din-sats`) — kun
+  import + ét element efter `</article>`, samme `NaesteSkridt` som første bølge,
+  ingen ny komponent, ingen ny URL, ingen sitemap, ingen `<h1>`. Verificér ved
+  **indhold**: på hver af de fire skal det være **sidste element før
+  "Relaterede artikler"** (hhv. "Relaterede beregnere" på boligstøttestykket,
+  og på brændstofstykket det eneste element efter `</article>`) — en boks med
+  overskriften "Regn det ud" og knapperne "Beregn din boligstøtte" / "Beregn dit
+  areal" / "Beregn din brændstofpris" / "Beregn din dagpenge". **Kontrol:** de
+  fire artiklers `<title>` og `<h1>` skal være uændrede, og `/boligstoette`,
+  `/kvadratmeter`, `/braendstof` og `/barselsdagpenge` skal stadig svare 200.
+  Renderet er verificeret i `BlogNaesteSkridt.test.tsx` (+4 sidetests, der
+  fejler mod master — checket med `git stash`); 390/1280 px kan **ikke** tjekkes
+  i denne iteration, repoet har ingen Playwright, og komponenten er uændret
+  fra første bølge.
 
 - ⏳ **VERIFICÉR DEPLOY: fire blogartikler skal slutte med "Regn det ud" og en
   beregnerknap.** Kode + plan i ét squash-commit på `ceo/blog-naste-handling`.
@@ -182,30 +210,6 @@ Tre noter. HTTP 200 beviser intet: ingen rører en URL, kun `<title>`- og
   en kildefil. **C92's tabel er ikke en invitationsliste til at prøve de samme
   kilder igen.**
 
-#### 179. [ ] ÅBEN — **C55, C56 og C60 er deploy-noter, der kræver interaktivitet, og har stået åbne siden 2026-09-27 07:30**
-
-- **Datagrund:** planen. Alle tre noter er skrevet på at man *sætter felter* og
-  læser klient-renderede tal og Kopier/Del-strenge:
-  - **C60 `/promille`** (vindue 2026-09-27 07:30, merge `aded200`): markér
-    "Antal genstande" og slet feltet — kortet må ikke blive grønt med "Du er
-    under …"; "præcis på grænsen" skal have erstattet "over grænsen".
-  - **C56 `/tidszone`** (merge `67d4cb1`): "Til tidszone = Indien (IST)" skal
-    give **"+3,5 timer"** og **"Mumbai er 3,5 timer foran København"**, huskelisten
-    **"+3,5t (+4,5t om vinteren)"**.
-  - **C55 `/dato`** (merge `122535d`): "Dage mellem", 25.→26. oktober 2026 skal
-    give **1** dag (før 2, som følge af et sommertidsskifte).
-- **Hvorfor de ikke er lukket i denne iteration:** de er de eneste noter i
-  planen, hvis fund ligger i klient-renderede kort. `curl` kan ikke sætte et
-  felt, og det er *ikke* løst ved at tælle strenge i HTML'en — det ville være
-  samme fejl som C158's port-analyse gjorde, bare i modsat retning. At lukke
-  dem på en teksttælling ville være vakuum-grønt.
-- **Acceptkriterier:** de tre fund verificeret i en rigtig browser med
-  noterne ved hånden, og **hver note markeret med HVILKET felt der blev sat og
-  HVAD der stod** — ikke "ser ud til at virke". Findes et afvigende fund, er
-  det en ny opgave, ikke en note der lukkes.
-- **Note:** de er **gamle** (to dage, ~14 deploy-vinduer). Hvis koden siden er
-  rørt igen på de tre sider, skal noterne skrives om mod den nuværende kode
-  før de verificeres — ellers verificerer man en gammel kravspecifikation.
 #### 183. [ ] 2026-09-29 — Kø — **diagnosér `/bmi`s og `/su`s fald, og find ud af hvor stor en del der er overhovedet Googles**
 
 - **Datagrund:** Plausible 28 dage: `/bmi` 1.271 → 938 (−26 %), `/su` 220 →
@@ -233,59 +237,53 @@ Tre noter. HTTP 200 beviser intet: ingen rører en URL, kun `<title>`- og
 - **MÅL:** `/bmi` 938 besøgende/28d, `/su` 116 (Plausible 2026-09-29).
 
 
-#### 185. [ ] 2026-09-29 — Kø — **undersøg de danske URL-slugs på beraknare.se før nogen migrerer dem**
+#### 187. [ ] **IKKE FØR 2026-10-13** 2026-09-30 — Kø — **migrér beraknare.se til svenske URL-slugs med 301**
 
-- **Datagrund:** beraknare.se har **537 besøgende/28d (+144 %)** og **~160.000
-  GSC-visninger på 0,1–0,2 % CTR**: `/dato` 99.136 v / 95 k / pos. 8,2,
-  `/tidsberegner` 60.399 v / 127 k / pos. 8,1, `/procent` 26.433 v / **2 k** /
-  pos. 9,9. `/procent` har sitets **dårligste CTR på nogen side**. Svenske
-  søgninger rammer allerede siden: "dagar mellan datum" 850 v pos. 8, "antal
-  dagar mellan datum" 425 v pos. 9 — på URL'en `beraknare.se/dato`.
-- **Spørgsmålet, der skal besvares først:** er de danske slugs *årsagen*, eller
-  er de en følge? C195/C196 har allerede sat svenske eksempeltitler på samme
-  sider, og de afventer deploy. **Hvis CTR'en ikke rører sig efter titlerne, er
-  sluggen den næste hypotese; hvis den gør, er den ikke.** At migrate 100+
-  URL'er uden denne kontrol kan tage den trafik, der holder siderne synlige.
-- **Scope denne iteration:** research, ikke migration. (1) Hvad ranker på de
-  samme svenske søgninger, og med hvilke slugs? (2) Ét rentesprog: en
-  representative side, svensk slug + 301, målt på staging mod den nuværende
-  — **kun hvis** (1) viser at slugs betyder noget. (3) Skriv ned hvilke
-  berørede filer en fuld migrering ville kræve (`calculator-list.ts`,
-  `sitemap.ts`, `page-helpers.ts`, `routing.ts`, IndexNow-konfiguration,
-  `internal-links.test.ts`) så prisen er synlig *inden* beslutningen.
-- **Acceptkriterier:** et svar på "er slugs årsagen — ja/nej/uklart" med tal fra
-  konkurrenterne, en prisliste for en fuld migrering, og **ingen skriveændring i
-  `src/`** uden at migrationsopgaven er skrevet op og godkendt. Gaten grøn.
-- **MÅL:** beraknare.se 537 besøgende/28d; `/dato` 95 klik, `/tidsberegner` 127
-  klik, `/procent` 2 klik (GSC 2026-08-30 → 2026-09-27). Genmål 2026-10-13.
-- **Forskning gjort (C199):** alle svenske konkurrenter bruger svenske slugs —
-  `kalkylverket.se/dagar-mellan-datum`, `kalkylator.info/tidskalkylator`,
-  `timraknare.com/tidskalkylator`, `omnicalculator.com/sv`, `mathda.com/tools/sv`.
-  beraknare.se bruger danske slugs på alle 82 sider med svenske titler. Svenske
-  brugere søger "dagar mellan datum" og ser URL'en `/dato` — mismatch der
-  forklarer den lave CTR. **Konklusion: slugs er sandsynligvis årsagen.**
-- **Prisliste for fuld migrering:** 82 sider skal få svenske slugs med 301.
-  Berøret: `calculator-list.ts` (tilføj `seHref`), `routing.ts`, `sitemap.ts`,
-  `middleware.ts`, `page-data.ts`, `internal-links.test.ts`, IndexNow. Estimeret
-  2–3 iterationer. Se opgave 187.
-
-#### 187. [ ] 2026-09-30 — Kø — **migrér beraknare.se til svenske URL-slugs med 301**
-
-- **Datagrund:** opgave 185. 82 sider har danske slugs (`/dato`, `/tidsberegner`,
-  `/nedtaelling`, `/renteberegner`, `/kalorier`, `/braendstof`, `/alder`,
-  `/tidszone`, `/enhedspris`, `/vaegttab`) men svenske titler. 160.000+
-  GSC-visninger på 0,1–0,2 % CTR. Alle svenske konkurrenter bruger svenske slugs.
-- **Hvorfor nu:** C195/C196 har sat svenske titler, men URL'en er stadig dansk.
-  Svenske brugere søger "dagar mellan datum" og ser `/dato` — mismatch der
-  koster klik. Migreringen er den største enkeltstående vækstmulighed på beraknare.se.
-- **Acceptkriterier:** (1) 82 sider får svenske slugs med 301 fra gamle danske
-  URLs, (2) sitemap og IndexNow sender nye URLs, (3) gamle URLs returnerer 301,
-  (4) gaten grøn, (5) ingen trafiktab målt før vs. efter 14 dage.
+- **Datagrund:** opgave 185 (lukket 30/9, se `docs/plan-arkiv.md`). 82 sider har
+  danske slugs (`/dato`, `/tidsberegner`, `/nedtaelling`, `/renteberegner`) men
+  svenske titler. 160.000+ GSC-visninger på 0,1–0,2 % CTR. Alle svenske
+  konkurrenter bruger svenske slugs: `kalkylverket.se/dagar-mellan-datum`,
+  `kalkylator.info/tidskalkylator`, `timraknare.com/tidskalkylator`. Svenske
+  brugere søger "dagar mellan datum" (850 v, pos 8) og ser URL'en `/dato`.
+  **Svar på 185s spørgsmål: slugs er en medvirkende årsag, ikke eneste.**
+- **Hvorfor den venter til 13/10:** C195/C196's svenske titler deployer 30/9
+  07:30, og 185 skrev selv at slugs først er hypotesen *hvis* titlerne ikke flytter
+  CTR. At migrere 82 URL'er *før* den måling ville både tage risikoen ved en
+  unødigvis migration og ødelægge attributionen på titelændringerne. **Derfor:
+  ingen nye title/description-ændringer på beraknare.se før 13/10.**
+- **Teknisk forudsætning, fundet 30/9 (ikke løst i opgaven):** en ren
+  middleware-rewrite er **ikke** nok. `beraknare.se/tidskalkylator` rewrite'et
+  til den interne `/tidsberegner`, men canonical dannes af den interne rute, så
+  siden ville servere `canonical: …/tidsberegner` — en URL der 301'er tilbage
+  til `/tidskalkylator`. Det er en redirect-loop for crawlere, ikke en migrering.
+  Løsningen er enten ægte ruter pr. domæne (nye `page.tsx` pr. slug) eller
+  canonical, der læser domænet fra et request-header. Begge kræver at alle 142
+  sider er statiske i dag — en header-læsning gør dem dynamiske, så vælg den
+  ægte rute.
+- **Prisliste:** `calculator-list.ts` (tilføj `seHref`), `routing.ts`, `sitemap.ts`,
+  `middleware.ts`, `page-data.ts`, `internal-links.test.ts`, IndexNow. 2–3
+  iterationer.
+- **Acceptkriterier:** (1) svenske slugs med 301 fra de danske, kun på
+  beraknare.se, (2) canonical + hreflang peger på den svenske URL, (3) sitemap
+  og IndexNow sender nye URLs, (4) gaten grøn, (5) ingen trafiktab målt før mod
+  efter 14 dage.
 - **MÅL:** beraknare.se 537 besøgende/28d; `/dato` 95 klik, `/tidsberegner` 127
   klik, `/procent` 2 klik (GSC 2026-08-30 → 2026-09-27). Genmål 2026-10-13.
 
 ## ❓ Til Mads
 
+- ❓ **IndexNow mangler en krog efter deploy (ny, 30/9).** Bing, DuckDuckGo og
+  Yahoo står for ~1.960 af 7.319 besøgende/28d, og IndexNow får ændringer ind
+  på minutter i stedet for dage. Koden kan skrives i dag, men **noget skal
+  kalde den efter et vellykket deploy** — og det er batch-deployeren, ikke mig:
+  Jeg må ikke trigge deploys og kan ikke se, hvordan den er sat op. Skal jeg
+  skrive `npm run indexnow` ind i `.dokploy/preview.template.json`, eller kører
+  du kommandoen manuelt efter en batch?
+- ❓ **Fulde browsermålinger kræver Playwright (ny, 30/9).** Deploy-noter der
+  kræver en rigtig browser kan ikke lukkes maskinelt: repoet har ingen
+  Playwright, og `CLAUDE.md` forbyder nye afhængigheder uden dit ja. Uden det
+  bruger jeg jsdom-render (som med C55/C56/C60), der dækker logikken men ikke
+  layout, breakpoints eller mørk tilstand.
 - ❓ **Kilde til madvaretabellen (opgave 119, `BLOCKED`).** `sst.dk` svarer HTTP 429
   for både browser og curl, og de fire andre danske kilder døde i C92. Enten en
   PDF af *De officielle kostanbefalinger* lagt i repoet, eller en API-nøgle til en

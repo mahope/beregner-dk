@@ -3,6 +3,7 @@ import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
 import BlogArticleSchema from "@/components/BlogArticleSchema";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
+import { NaesteSkridt } from "@/components/BlogNaesteSkridt";
 import { OG_IMAGE } from "@/lib/page-helpers";
 
 const SLUG = "kvadratmeter-saadan-regner-du-ud";
@@ -388,6 +389,12 @@ export default function KvadratmeterGuidePage() {
           </div>
         ))}
       </article>
+
+      <NaesteSkridt
+        href="/kvadratmeter"
+        handling="Beregn dit areal"
+        beskrivelse="Mål ind i rummet og sæt pris pr. m² på, så beregneren regner prisen på dit gulv, dine fliser eller din maling."
+      />
 
       {/* Related links */}
       <div className="mt-12 pt-8 border-t dark:border-gray-700">
