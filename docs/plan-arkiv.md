@@ -19017,3 +19017,39 @@ titelændring på `/bmi` uden diagnose ville være prøvet to gange. Bemærk at
   ~650. Hvis CTR er uændret efter 14 dage, er årsagen **ikke** titlen, og så
   skal `/procent` have ægte **søstersider** (`/procent/stigning`,
   `/procent/rabat`, `/procent/fald`) i stedet — ikke flere titelændringer.
+
+
+#### 202. [x] ✅ 2026-09-30 — gaten — **CI's røde test var en rigtig fejl i scanneren, ikke en flake: `--gate --json` tabte 285 KB JSON ved at afslutke med `process.exit(1)`** (squash `ceo/gate-flake`)
+
+- **Fund:** kørslen 30/9 01:07 (`/procent`-titlen, `ceo/procent-langhale`) var
+  **rød** med `locale-leak-gate.test.ts > does not flag Norwegian æ/ø` på
+  **5033 ms** — 33 ms over vitests 5000 ms-grænse. Næste kørsel grøn. Så det så
+  ud som en flake; det var ikke.
+- **Årsagen er to ting, og den anden er en fejl i værktøjet.** Filen spurgte
+  scanneren **to gange** pr. test (`--gate` for dommen, `--json` for fundene) og
+  den norske test **tre gange**. Hver kørsel er ~790 ms, så filen tog 28,9 s.
+  Men da den første kombination `--gate --json` blev brugt, kom der
+  `SyntaxError: Unterminated string in JSON at position 64446` — **afkortet
+  midt i en streng ved 64 KB**. Årsagen: `process.exit(1)` i `locale-leak.mjs`
+  dræber processen, før en asynkron pipe-skrivning er flushet. Modsat filoutput,
+  hvor skrivningen er synkron — derfor så det ikke ud som en fejl i min egen
+  kode. Rettelse: `process.exitCode = 1`, som lader Node afslutte normalt og
+  flushe først. **Samme exit-status, intet tabt** (verificeret: exit 1 stårende,
+  285 KB pipe-parsebart).
+- **Rigtigere end hurtigere:** dommen og fundene kommer nu fra *én* kørsel, så
+  "gaten blev rød" + "denne streng er i fundene" er et udsagn om den samme
+  scanning — før kunne to kørser principielt være uenige.
+- **Harness:** de 8 gaten-tester **fejler mod den gamle scanner** (kun
+  `exitCode`-linjen gendannet: `SyntaxError: Unterminated string`, 8 røde), så
+  rettelsen er låst fast og ikke bare tilfældigt grøn. Plus `ScanResult` er nu
+  en type, som også rummer `scannedPages`/`candidatesFromPages` — de to felter
+  bruges i testen men manglede i typen (én af de kendte `tsc`-fejl).
+- **Målt:** filen **28,85 s → 17,06 s**, langsomste test **2384 ms → ~800 ms**.
+  På CI's ~2,1× langsommere runner er den ~1,7 s mod 5 s — 3× luft i stedet
+  for 33 ms. Samlet gate: lint **618 filer**, **3019 tests / 190 filer**,
+  build **142 sider**, `locale-leak.mjs --gate` exit 0.
+- **Ingen `VERIFICÉR DEPLOY`-note, bevidst:** scanneren og testen er ikke i
+  runtime-fladen (målt: ingen import af `locale-leak` i `src/` uden for
+  kommentarer, ingen reference i `package.json`/workflows) og rører ingen URL,
+  titel eller beregning. En note ville sende næste iteration til at curle en
+  side og bekræfte, at intet var ændret — det er ikke en verificering.

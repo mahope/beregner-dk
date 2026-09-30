@@ -100,11 +100,16 @@ export default async function BraendstofPage() {
       {/* Informativ tekst - SEO */}
       {locale === "da" && (
       <div className="prose max-w-none mb-8">
-        <h2>Sådan regner du benzinforbrug og pris ud med tal</h2>
+        <h2>Benzin beregner: sådan regner du pris pr. kilometer ud</h2>
         <p>
-          Regnestykket er det samme hver gang: <strong>distance delt med forbrug</strong> giver
-          mængden, og mængden ganget med <strong>literprisen</strong> giver prisen. Her er de tre
-          drivmidler regnet på {braendstofKm} km med de forudsætninger, beregneren selv bruger.
+          En <strong>benzin beregner</strong> — også kaldet en <strong>brændstof beregner</strong> —
+          ganger dit forbrug med literprisen. Med {tal(benzinRække.forbrug)} km/l og{" "}
+          {kr(benzinRække.enhedPris)} kr. pr. liter koster {braendstofKm} km benzin{" "}
+          <strong>{heleKroner(benzinRække.pris)} kr.</strong>, altså{" "}
+          {kr(benzinRække.prisPrKm)} kr. pr. km. Regnestykket er det samme hver gang:{" "}
+          <strong>distance delt med forbrug</strong> giver mængden, og mængden ganget med{" "}
+          <strong>literprisen</strong> giver prisen. Her er de tre drivmidler regnet på{" "}
+          {braendstofKm} km med de forudsætninger, beregneren selv bruger.
         </p>
         <table>
           <thead>

@@ -1,33 +1,29 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — **dagens iteration (202) fandt en rigtig fejl i `locale-leak.mjs`
-og ikke en flake.** CI-kørslen 01:07 var rød med 5033 ms mod en 5000 ms-grænse;
-årsagen var `process.exit(1)`, som afkortede JSON-output ved 64 KB, når den læses
-gennem et rør. Rettet til `process.exitCode = 1`; de 8 gaten-tester fejler mod den
-gamle scanner, så den er låst fast. Filen 28,9 s → 17,1 s.
+STATUS: KØ — **opgave 203: `/braendstof` sagde aldrig sit eget navn.** De tre
+største søgninger GSC har for siden er dens egen — "benzinberegner" (49 v,
+pos. 4), "benzin beregner" (132 v, pos. 6) og "brændstof beregner" (95 v,
+pos. 7) — og alle tre stod i **0 forekomster** i den danske side. `<h1>` er
+"Brændstofberegner" som ét ord, resten af siden skrev aldrig navnet. Samme
+sygdom som opgave 201/182 fandt på beraknare.se og dansk `/dato`: Google
+vidste hvilken side det var, brugeren fandt det ikke bekræftet. Rettelse: første
+`<h2>` + brødtekst svarer på alle tre former og regner det ud med benzinRækkens
+egne tal (15 km/l × 13,50 kr. → 500 km = 450 kr. = 0,90 kr. pr. km). Kun `da` —
+opgave 187 frosser beraknare.se til 13/10.
 
-**Køen er tom, og det er et resultat i sig selv.** CEO-punkt 0 er verificeret
-lukket i kode (Valborg 30. april, svensk påskafton `offsetDays: -1`, dansk
-sankthans fast 23./24. juni, `toUtcMidnight` i `Europe/Copenhagen`, lejeloven
-§ 5, `maneder: 12`, 1. advent 27/11–3/12), og de tre review-fund er rettet i
-`37a9859`. Så de fire åbne opgaver er ikke valgt, de er det der er tilbage:
-97 `BLOCKED` (ejerskab), 98 afhænger af 97, 119 `BLOCKED` (kilde),
-183 `BLOCKED` (kræver Mads' svar). 187 er bevidst frosset til 13/10.
+**Mål:** `/braendstof` 17.024 visninger / 183 klik / CTR 1,1 % / pos. 5,9
+(GSC 2026-08-30 → 2026-09-27). Genmål **2026-10-14**.
 
-**Mønstret der binder de tre `BLOCKED` opgaver sammen:** de mangler alle en
-*uden for repoet* — en kildefil, en ejerskabsafklaring, en kildefordeling. Ingen
-iteration kan lukke dem, og det er derfor spildt at køre dem igen.
-
-**Færdige i dag:** 201 (beraknare.se `/dato` svarer på "antal dagar mellan
-datum"), 200 (`/procent`-titlen dækker hele klyngen) — begge arkiveret i
-`docs/plan-arkiv.md`. De seks åbne deploy-noter har **første vindue 30/9 07:30**;
-intet var verificerbart ved 04:03, og intet blev rørt.
+**Færdige i dag:** 202 (sprog-gatens `process.exit(1)` klippede 285 KB JSON),
+201 (beraknare.se `/dato`), 200 (`/procent`-titlen) — 202 arkiveret nu. De seks
+åbne deploy-noter har **første vindue 30/9 07:30**; intet var verificerbart ved
+04:03, og intet blev rørt.
 
 ## Kvalitetsgate (repoets egne scripts fra package.json)
 
 ```
 npm run lint     # biome lint ./src      — 618 filer
-npm run test     # vitest run            — 3019 tests / 190 filer
+npm run test     # vitest run            — 3020 tests / 190 filer
 npm run build    # next build            — 142 sider
 node scripts/locale-leak.mjs --gate       # exit 0
 ```
@@ -325,40 +321,35 @@ Fire noter. HTTP 200 beviser intet: ingen rører en URL, kun `<title>`- og
   (snippet/intention), ikke på to separate sidefejl — men at *finde* den kræver
   stadig kildefordelingen fra Mads, så opgaven står.
 
-#### 202. [x] ✅ 2026-09-30 — gaten — **CI's røde test var en rigtig fejl i scanneren, ikke en flake: `--gate --json` tabte 285 KB JSON ved at afslutke med `process.exit(1)`** (squash `ceo/gate-flake`)
+#### 203. [x] ✅ 2026-09-30 — trafik — **`/braendstof` (17.024 v, CTR 1,1 %, pos. 5,9) svarede på nul af de tre søgninger der *er* siden: dens eget navn.** (squash `ceo/braendstof-navn`)
 
-- **Fund:** kørslen 30/9 01:07 (`/procent`-titlen, `ceo/procent-langhale`) var
-  **rød** med `locale-leak-gate.test.ts > does not flag Norwegian æ/ø` på
-  **5033 ms** — 33 ms over vitests 5000 ms-grænse. Næste kørsel grøn. Så det så
-  ud som en flake; det var ikke.
-- **Årsagen er to ting, og den anden er en fejl i værktøjet.** Filen spurgte
-  scanneren **to gange** pr. test (`--gate` for dommen, `--json` for fundene) og
-  den norske test **tre gange**. Hver kørsel er ~790 ms, så filen tog 28,9 s.
-  Men da den første kombination `--gate --json` blev brugt, kom der
-  `SyntaxError: Unterminated string in JSON at position 64446` — **afkortet
-  midt i en streng ved 64 KB**. Årsagen: `process.exit(1)` i `locale-leak.mjs`
-  dræber processen, før en asynkron pipe-skrivning er flushet. Modsat filoutput,
-  hvor skrivningen er synkron — derfor så det ikke ud som en fejl i min egen
-  kode. Rettelse: `process.exitCode = 1`, som lader Node afslutte normalt og
-  flushe først. **Samme exit-status, intet tabt** (verificeret: exit 1 stårende,
-  285 KB pipe-parsebart).
-- **Rigtigere end hurtigere:** dommen og fundene kommer nu fra *én* kørsel, så
-  "gaten blev rød" + "denne streng er i fundene" er et udsagn om den samme
-  scanning — før kunne to kørser principielt være uenige.
-- **Harness:** de 8 gaten-tester **fejler mod den gamle scanner** (kun
-  `exitCode`-linjen gendannet: `SyntaxError: Unterminated string`, 8 røde), så
-  rettelsen er låst fast og ikke bare tilfældigt grøn. Plus `ScanResult` er nu
-  en type, som også rummer `scannedPages`/`candidatesFromPages` — de to felter
-  bruges i testen men manglede i typen (én af de kendte `tsc`-fejl).
-- **Målt:** filen **28,85 s → 17,06 s**, langsomste test **2384 ms → ~800 ms**.
-  På CI's ~2,1× langsommere runner er den ~1,7 s mod 5 s — 3× luft i stedet
-  for 33 ms. Samlet gate: lint **618 filer**, **3019 tests / 190 filer**,
-  build **142 sider**, `locale-leak.mjs --gate` exit 0.
-- **Ingen `VERIFICÉR DEPLOY`-note, bevidst:** scanneren og testen er ikke i
-  runtime-fladen (målt: ingen import af `locale-leak` i `src/` uden for
-  kommentarer, ingen reference i `package.json`/workflows) og rører ingen URL,
-  titel eller beregning. En note ville sende næste iteration til at curle en
-  side og bekræfte, at intet var ændret — det er ikke en verificering.
+- **Datagrund:** GSC 2026-08-30 → 2026-09-27. De tre største søgninger er
+  "benzin beregner" (132 v, pos. 6), "brændstof beregner" (95 v, pos. 7) og
+  "benzinberegner" (49 v, pos. 4). Målt i `page.tsx` + `page-data.ts`: **0, 0, 0**
+  forekomster. Position 4-6 er god, så klikket er ikke tabt på rangering.
+- **Årsagen er én form, ikke manglende indhold:** `<h1>` er "Brændstofberegner"
+  som ét ord, og ingen anden synlig tekst nævner navnet. Siden dokumenterer
+  regnestykket udmærket — den tabte bare bekræftelsen på at *dette* er svaret.
+- **Rettelse:** første danske `<h2>` → "Benzin beregner: sådan regner du pris pr.
+  kilometer ud", og brødteksten svarer på alle tre former med benzinRækkens egne
+  tal (15 km/l, 13,50 kr./l, 500 km = 450 kr. = 0,90 kr. pr. km) — samme kilde som
+  tabellen og titlen, så en taleændring ikke kan afvige fra teksten. `+7` linjer,
+  **kun `da`**, ingen `<title>`/`metaDescription`/`<h1>`/FAQ/JSON-LD, ingen
+  beregningslogik, ingen ny URL, ingen sitemap.
+- **Harness:** `page.test.tsx` +1 (de tre navneformer + de fire udregnede tal) og
+  2 eksisterende låse opdateret, fordi de låste den gamle `<h2>`. **Modsvejs
+  verificeret:** mod master's `page.tsx` falder 2 af 14.
+- **MÅLT OG IKKE RØRT:** to fund undervejs, noteret til egne opgaver, fordi de
+  er andres tekst: (a) `page.tsx:~176` mangler et mellemrum — "**budgettere
+  bilkørsel**og vælge" renderer som ét ord i den danske "Om brændstofforbrug"-blok;
+  (b) `/renteberegner`s "annuitetslån beregner" (353 v, pos. 8) står i 0
+  forekomster — næste kandidat i samme måling.
+- **Gate grøn:** lint (**618 filer**), **3020 tests / 190 filer** (fra 3019/190),
+  build (**142 sider**), `locale-leak.mjs --gate` exit 0.
+- **Ingen `VERIFICÉR DEPLOY`-note:** rører ingen `<title>`, `og:title` eller
+  `metaDescription` — kun én `<h2>` og én brødtekstblok i den danske tekst, samme
+  mønster som opgave 181/182, der heller ikke fik en. HTTP 200 på `/braendstof`
+  siger intet om indholdet; effekten måles i GSC 14/10.
 
 #### 187. [ ] **IKKE FØR 2026-10-13** 2026-09-30 — Kø — **migrér beraknare.se til svenske URL-slugs med 301**
 

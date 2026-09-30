@@ -66,7 +66,7 @@ describe("braendstof page", () => {
   test("viser regnestykket for alle tre drivmidler i dansk", async () => {
     const html = renderToStaticMarkup(await BraendstofPage());
 
-    expect(html).toContain("<h2>Sådan regner du benzinforbrug og pris ud med tal</h2>");
+    expect(html).toContain("<h2>Benzin beregner: sådan regner du pris pr. kilometer ud</h2>");
     // 500 ÷ 15 = 33,3 l, og 33,3 × 13,50 = 449,55, rundet op til de 450 kr.
     // titlen allerede lover.
     expect(html).toContain("500 ÷ 15 = 33,3 l");
@@ -106,6 +106,25 @@ describe("braendstof page", () => {
     expect(faq).toContain("Hvor meget benzin bruger en bil?");
   });
 
+  test("svarer på sidens eget navn, sådan som GSC's søgninger staver det", async () => {
+    const html = renderToStaticMarkup(await BraendstofPage());
+
+    // GSC 2026-08-30 → 2026-09-27 for /braendstof: "benzinberegner" 49 visninger
+    // pos. 4, "benzin beregner" 132 pos. 6, "brændstof beregner" 95 pos. 7. Alle tre
+    // stod i 0 forekomster i den danske side. `<h1>` er "Brændstofberegner" som ét ord,
+    // og resten af siden sagde aldrig navnet, så Google vidste hvilken side den var —
+    // men brugeren fandt det ikke bekræftet.
+    expect(html).toContain("<h2>Benzin beregner: sådan regner du pris pr. kilometer ud</h2>");
+    expect(html).toContain("<strong>benzin beregner</strong>");
+    expect(html).toContain("<strong>brændstof beregner</strong>");
+    // Svaret skal regnes ud, ikke navngives: tallene kommer fra benzinRækken, som er
+    // den samme række tabellen og titlen bruger.
+    expect(html).toContain("15 km/l");
+    expect(html).toContain("13,50 kr.");
+    expect(html).toContain("500 km benzin <strong>450 kr.</strong>");
+    expect(html).toContain("0,90 kr.");
+  });
+
   test("de svenske og norske sider er urørte af regnestykkerne", async () => {
     for (const locale of ["se", "no"] as const) {
       vi.mocked(getLocale).mockResolvedValue(locale);
@@ -115,7 +134,7 @@ describe("braendstof page", () => {
 
       // Kun strenge fra den nye danske blok. "500 ÷ 15" er bevidst ikke brugt:
       // FAQ'en er mocket her, så den ville være grøn uden at teste noget.
-      expect(html).not.toContain("Sådan regner du benzinforbrug og pris ud med tal");
+      expect(html).not.toContain("Benzin beregner: sådan regner du pris pr. kilometer ud");
       expect(html).not.toContain("Her er de tre drivmidler regnet på 500 km");
       expect(html).not.toContain("Priserne er rundet op til hele kroner");
       expect(html).not.toContain("Sådan finder du dit eget forbrug");
