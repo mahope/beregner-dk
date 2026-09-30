@@ -88,6 +88,27 @@ describe("renteberegner page", () => {
     expect(html).toContain("12,68 % om året");
   });
 
+  test("svarer på sidens største søgning: annuitetslån beregner (GSC 353 visninger, pos. 8)", async () => {
+    const html = renderToStaticMarkup(await RenteberegnerPage());
+    const eksempel = annuitetsEksempel();
+    const krDa = (tal: number) =>
+      tal.toLocaleString("da-DK", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
+
+    // Søgningen er "annuitetslån beregner". Før denne ændring stod den i 0
+    // forekomster i hele den danske side — kun `<h1>Renteberegner</h1>`.
+    expect(html).toContain("<h2>Annuitetslån beregner: beregn månedsydelsen på et lån</h2>");
+    expect(html).toContain("<strong>annuitetslån beregner</strong>");
+    // …og løftet udfyldes med `rente-eksempler`-tal, så brødteksten ikke kan
+    // glide fra formelblokken længere ned på samme side.
+    expect(html).toContain(`${eksempel.hovedstol.toLocaleString("da-DK")} kr. til`);
+    expect(html).toContain(`<strong>${krDa(eksempel.maanedligBetalning)} kr. pr. måned</strong>`);
+    expect(html).toContain(`${krDa(eksempel.samletBetaling)} kr.`);
+    expect(html).toContain(`${krDa(eksempel.samletRante)} kr. er renter`);
+  });
+
   test("de to nye spørgsmål ligger i page-data, og dermed i JSON-LD", () => {
     // FAQ-komponenten og StructuredData er begge mocket væk i denne fil, så
     // svarene læses i den tabel de begge får fra.

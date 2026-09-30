@@ -1,29 +1,28 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — **opgave 203: `/braendstof` sagde aldrig sit eget navn.** De tre
-største søgninger GSC har for siden er dens egen — "benzinberegner" (49 v,
-pos. 4), "benzin beregner" (132 v, pos. 6) og "brændstof beregner" (95 v,
-pos. 7) — og alle tre stod i **0 forekomster** i den danske side. `<h1>` er
-"Brændstofberegner" som ét ord, resten af siden skrev aldrig navnet. Samme
-sygdom som opgave 201/182 fandt på beraknare.se og dansk `/dato`: Google
-vidste hvilken side det var, brugeren fandt det ikke bekræftet. Rettelse: første
-`<h2>` + brødtekst svarer på alle tre former og regner det ud med benzinRækkens
-egne tal (15 km/l × 13,50 kr. → 500 km = 450 kr. = 0,90 kr. pr. km). Kun `da` —
-opgave 187 frosser beraknare.se til 13/10.
+STATUS: KØ — **opgave 204: `/renteberegner` svarede aldrig på sin største
+søgning.** GSC's største søgning på siden er **"annuitetslån beregner"** (353
+visninger, pos. 8) — og den stod i **0 forekomster** i hele den danske side.
+`<h1>` er "Renteberegner", `<title>` var "Renteberegner: 100.000 kr. i 5 år =
+1.887 kr./md.", og hverken det ene eller det andet nævner annuitetslån, selv
+om siden har en hel formelblok om det. Samme sygdom som 201/182/203. Rettelse:
+`<title>`/`<og:title>` dækker nu "månedsydelse på annuitetslån" (50 tegn), og
+første danske `<h2>` + brødtekst bekræfter det med `rente-eksempler`-tal
+(200.000 kr. til 4 % i 20 år → 1.211,96 kr./md., i alt 290.870,56 kr.). Kun `da`
+— opgave 187 frosser beraknare.se til 13/10.
 
-**Mål:** `/braendstof` 17.024 visninger / 183 klik / CTR 1,1 % / pos. 5,9
+**Mål:** `/renteberegner` 13.416 visninger / 114 klik / CTR 0,8 % / pos. 7,4
 (GSC 2026-08-30 → 2026-09-27). Genmål **2026-10-14**.
 
-**Færdige i dag:** 202 (sprog-gatens `process.exit(1)` klippede 285 KB JSON),
-201 (beraknare.se `/dato`), 200 (`/procent`-titlen) — 202 arkiveret nu. De seks
-åbne deploy-noter har **første vindue 30/9 07:30**; intet var verificerbart ved
-04:03, og intet blev rørt.
+**Færdige i dag:** 204, 203 (`/braendstof`), 202, 201, 200 — 203 arkiveret nu.
+De **syv** åbne deploy-noter har første vindue 30/9 07:30; intet var verificerbart
+ved 04:56, og intet blev rørt.
 
 ## Kvalitetsgate (repoets egne scripts fra package.json)
 
 ```
 npm run lint     # biome lint ./src      — 618 filer
-npm run test     # vitest run            — 3020 tests / 190 filer
+npm run test     # vitest run            — 3021 tests / 190 filer
 npm run build    # next build            — 142 sider
 node scripts/locale-leak.mjs --gate       # exit 0
 ```
@@ -166,6 +165,35 @@ Fire noter. HTTP 200 beviser intet: ingen rører en URL, kun `<title>`- og
   --gate` exit 0. De ni nye titeltests **fejler mod master's `page-data.ts`**
   (verificeret med `git stash`), så de låser den gamle fejl fast.
 
+
+- ⏳ **VERIFICÉR DEPLOY: `/renteberegner` skal have sin største søgning i
+  titlen og i første `<h2>`.** Kode + plan i ét squash-commit på
+  `ceo/renteberegner-annuitet`. Første kandidatvindue **2026-09-30 07:30**.
+  Rørte filer: `src/lib/page-data.ts` (**2 strenge**, kun `metaTitle` og
+  `ogTitle` for **`da`**), `src/app/renteberegner/page.tsx` (+14/-2: ny `krDa`
+  der spejler `krSe`, første `<h2>` + brødtekst, `"Sådan bruger du
+  renteberegneren"` demoteret `<p>`→`<h3>`), `src/app/renteberegner/page.test.tsx`
+  (+1) og `src/lib/page-data.test.ts` (1 låst titel). Ingen `<h1>`, ingen
+  `description`/`metaDescription`, ingen FAQ, ingen JSON-LD, ingen
+  beregningslogik, ingen ny URL, ingen sitemap, **intet i `se` eller `no`**.
+  Verificér ved **indhold**:
+  1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
+  2. Dansk `<title>` skal være **"Renteberegner: beregn månedsydelse på
+     annuitetslån"**, og første `<h2>` efter beregneren skal være
+     **"Annuitetslån beregner: beregn månedsydelsen på et lån"** med
+     "annuitetslån beregner" i `<strong>` og tallene **200.000**, **1.211,96**,
+     **290.870,56**, **90.870,56**.
+  3. **Kontrol:** `<h1>` skal stadig være "Renteberegner", og `metaDescription`
+     skal stadig være byte-for-byte "Annuitetslån på 100.000 kr. med 5 %
+     rente i 5 år: 1.887 kr. i måneden og 13.227 kr. i samlet rente. Beregn også
+     serielån."
+  4. **Kontrol:** `https://beraknare.se/renteberegner` skal være **uændret** —
+     svensk `<title>` stadig "Räntekalkylator: 100.000 kr i 5 år = 1.887
+     kr/mån" og svensk `<h2>` stadig "Så använder du räntekalkylatorn"
+     (opg. 187 frosser `se` til 13/10).
+  **Gate grøn:** lint (**618 filer**), **3021 tests / 190 filer** (fra
+  3020/190), build (**142 sider**), `locale-leak.mjs --gate` exit 0. Den nye
+  sidetest **fejler mod master's `page.tsx`** (verificeret med `git stash`).
 
 ## Åbne opgaver
 
@@ -321,35 +349,38 @@ Fire noter. HTTP 200 beviser intet: ingen rører en URL, kun `<title>`- og
   (snippet/intention), ikke på to separate sidefejl — men at *finde* den kræver
   stadig kildefordelingen fra Mads, så opgaven står.
 
-#### 203. [x] ✅ 2026-09-30 — trafik — **`/braendstof` (17.024 v, CTR 1,1 %, pos. 5,9) svarede på nul af de tre søgninger der *er* siden: dens eget navn.** (squash `ceo/braendstof-navn`)
+#### 204. [x] ✅ 2026-09-30 — trafik — **`/renteberegner` (13.416 v, CTR 0,8 %, pos. 7,4) svarede aldrig på sin største søgning: "annuitetslån beregner".** (squash `ceo/renteberegner-annuitet`)
 
-- **Datagrund:** GSC 2026-08-30 → 2026-09-27. De tre største søgninger er
-  "benzin beregner" (132 v, pos. 6), "brændstof beregner" (95 v, pos. 7) og
-  "benzinberegner" (49 v, pos. 4). Målt i `page.tsx` + `page-data.ts`: **0, 0, 0**
-  forekomster. Position 4-6 er god, så klikket er ikke tabt på rangering.
-- **Årsagen er én form, ikke manglende indhold:** `<h1>` er "Brændstofberegner"
-  som ét ord, og ingen anden synlig tekst nævner navnet. Siden dokumenterer
-  regnestykket udmærket — den tabte bare bekræftelsen på at *dette* er svaret.
-- **Rettelse:** første danske `<h2>` → "Benzin beregner: sådan regner du pris pr.
-  kilometer ud", og brødteksten svarer på alle tre former med benzinRækkens egne
-  tal (15 km/l, 13,50 kr./l, 500 km = 450 kr. = 0,90 kr. pr. km) — samme kilde som
-  tabellen og titlen, så en taleændring ikke kan afvige fra teksten. `+7` linjer,
-  **kun `da`**, ingen `<title>`/`metaDescription`/`<h1>`/FAQ/JSON-LD, ingen
-  beregningslogik, ingen ny URL, ingen sitemap.
-- **Harness:** `page.test.tsx` +1 (de tre navneformer + de fire udregnede tal) og
-  2 eksisterende låse opdateret, fordi de låste den gamle `<h2>`. **Modsvejs
-  verificeret:** mod master's `page.tsx` falder 2 af 14.
-- **MÅLT OG IKKE RØRT:** to fund undervejs, noteret til egne opgaver, fordi de
-  er andres tekst: (a) `page.tsx:~176` mangler et mellemrum — "**budgettere
-  bilkørsel**og vælge" renderer som ét ord i den danske "Om brændstofforbrug"-blok;
-  (b) `/renteberegner`s "annuitetslån beregner" (353 v, pos. 8) står i 0
-  forekomster — næste kandidat i samme måling.
-- **Gate grøn:** lint (**618 filer**), **3020 tests / 190 filer** (fra 3019/190),
-  build (**142 sider**), `locale-leak.mjs --gate` exit 0.
-- **Ingen `VERIFICÉR DEPLOY`-note:** rører ingen `<title>`, `og:title` eller
-  `metaDescription` — kun én `<h2>` og én brødtekstblok i den danske tekst, samme
-  mønster som opgave 181/182, der heller ikke fik en. HTTP 200 på `/braendstof`
-  siger intet om indholdet; effekten måles i GSC 14/10.
+- **Datagrund:** GSC 2026-08-30 → 2026-09-27. Sidens største søgning er
+  **"annuitetslån beregner"** (353 v, pos. 8) — større end sidens eget navn
+  ("renteberegner", 301 v, pos. 7). Målt i `page.tsx` + `page-data.ts`:
+  **0 forekomster** af "annuitetslån beregner" i hele den danske side.
+  Position 7-8 er ikke dårlig, så klikket tabes på bekræftelsen, ikke på
+  rangeringen.
+- **Årsagen er titlen og h2, ikke manglende indhold:** siden har en komplet
+  formelblok, Excel-tabel, nominel/effektiv-gren og skattefradrag — men hverken
+  `<title>` eller det første `<h2>` nævner annuitetslån, så siden ligner et
+  værktøj til *et andet* emne end det, brugeren søgte.
+- **Rettelse:** (a) `metaTitle`/`ogTitle` (**da**) → "Renteberegner: beregn
+  månedsydelse på annuitetslån" (50 tegn, under testens 60-tegns-loft) —
+  dækker både "renteberegner" (301 v) og "annuitetslån beregner" (353 v) og
+  "beregn månedsydelse på lån"; det udregnede eksempel (1.000 kr./1.887 kr.)
+  står uændret i `metaDescription`, som GSC ikke afkorter. (b) Første danske
+  `<h2>` → "Annuitetslån beregner: beregn månedsydelsen på et lån" med en
+  brødtekst der bekræfter det med **`rente-eksempler`-tal**
+  (`annuitetsEksempel()`: 200.000 kr., 4 %, 20 år, 1.211,96 kr./md., i alt
+  290.870,56 kr., 90.870,56 kr. renter) — samme kilde som formelblokken, Excel-
+  tabellen og den svenske gren, så en taleændring ikke kan afvige fra teksten.
+  Ny `krDa()` spejler den eksisterende `krSe()`: `da-DK` med to decimaler.
+  `"Sådan bruger du renteberegneren"` demoteret fra `<h2>` til `<h3>`, så
+  brugsvejledningen bliver et underafsnit af det nye svar.
+- **Harness:** `page.test.tsx` +1 (overskriften, den stærke søgeordsform og de
+  fire beregnede tal) og 1 låst titel i `page-data.test.ts` opdateret.
+  **Modsvejs verificeret:** mod master's `page.tsx` falder den nye test.
+- **Gate grøn:** lint (**618 filer**), **3021 tests / 190 filer** (fra
+  3020/190), build (**142 sider**), `locale-leak.mjs --gate` exit 0.
+- **Frosset `se`:** beraknare.se får **intet** — opgave 187 venter til 13/10 med
+  slug-migreringen, og `/renteberegner` har 2.871 GSC-visninger på pos. 23,5.
 
 #### 187. [ ] **IKKE FØR 2026-10-13** 2026-09-30 — Kø — **migrér beraknare.se til svenske URL-slugs med 301**
 

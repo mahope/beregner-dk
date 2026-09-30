@@ -27,6 +27,18 @@ function fradragProcent(værdi: number): string {
 }
 
 /**
+ * Dansk kronetal med punktum som tusindtalsseparator og altid to decimaler,
+ * så et tal læst i brødteksten kan slås op i formelblokken nedenfor. Samme
+ * regel som `krSe` på den svenske gren.
+ */
+function krDa(tal: number): string {
+  return tal.toLocaleString("da-DK", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+}
+
+/**
  * Svensk tusindtalsseparator med mellemrum. Ikke `formatNumber`, fordi den
  * følger sidens locale — brødteksten skal kunne skrives med ét talformat
  * uanset hvilket sprog grenen er.
@@ -98,11 +110,18 @@ export default async function RenteberegnerPage() {
 
       {locale === "da" && (
       <div className="mt-12 prose max-w-none">
-        <h2>Sådan bruger du renteberegneren</h2>
+        <h2>Annuitetslån beregner: beregn månedsydelsen på et lån</h2>
         <p>
-          Med vores <strong>renteberegner</strong> kan du hurtigt beregne, hvad et lån vil koste
-          dig:
+          Vores <strong>renteberegner</strong> er også en{" "}
+          <strong>annuitetslån beregner</strong>: du indtaster lånebeløbet, den
+          årlige rente og løbetiden, og får den faste månedsydelse. Et
+          annuitetslån på {eksempel.hovedstol.toLocaleString("da-DK")} kr. til{" "}
+          {eksempel.aarsrente} % over {eksempel.loebetid} år giver{" "}
+          <strong>{krDa(eksempel.maanedligBetalning)} kr. pr. måned</strong> — i
+          alt {krDa(eksempel.samletBetaling)} kr., hvoraf{" "}
+          {krDa(eksempel.samletRante)} kr. er renter.
         </p>
+        <h3>Sådan bruger du renteberegneren</h3>
         <ol>
           <li>
             <strong>Indtast lånebeløbet</strong> - hvor meget vil du låne?

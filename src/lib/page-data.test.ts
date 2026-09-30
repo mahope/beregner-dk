@@ -99,7 +99,7 @@ describe("getPageData", () => {
   test.each([
     {
       locale: "da" as const,
-      title: "Renteberegner: 100.000 kr. i 5 år = 1.887 kr./md.",
+      title: "Renteberegner: beregn månedsydelse på annuitetslån",
       loanType: "annuitetslån",
     },
     {

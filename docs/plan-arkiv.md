@@ -19053,3 +19053,35 @@ titelændring på `/bmi` uden diagnose ville være prøvet to gange. Bemærk at
   kommentarer, ingen reference i `package.json`/workflows) og rører ingen URL,
   titel eller beregning. En note ville sende næste iteration til at curle en
   side og bekræfte, at intet var ændret — det er ikke en verificering.
+
+### Opgave 203 — `/braendstof` svarede på nul af de tre søgninger der *er* siden (30/9)
+
+#### 203. [x] ✅ 2026-09-30 — trafik — **`/braendstof` (17.024 v, CTR 1,1 %, pos. 5,9) svarede på nul af de tre søgninger der *er* siden: dens eget navn.** (squash `ceo/braendstof-navn`)
+
+- **Datagrund:** GSC 2026-08-30 → 2026-09-27. De tre største søgninger er
+  "benzin beregner" (132 v, pos. 6), "brændstof beregner" (95 v, pos. 7) og
+  "benzinberegner" (49 v, pos. 4). Målt i `page.tsx` + `page-data.ts`: **0, 0, 0**
+  forekomster. Position 4-6 er god, så klikket er ikke tabt på rangering.
+- **Årsagen er én form, ikke manglende indhold:** `<h1>` er "Brændstofberegner"
+  som ét ord, og ingen anden synlig tekst nævner navnet. Siden dokumenterer
+  regnestykket udmærket — den tabte bare bekræftelsen på at *dette* er svaret.
+- **Rettelse:** første danske `<h2>` → "Benzin beregner: sådan regner du pris pr.
+  kilometer ud", og brødteksten svarer på alle tre former med benzinRækkens egne
+  tal (15 km/l, 13,50 kr./l, 500 km = 450 kr. = 0,90 kr. pr. km) — samme kilde som
+  tabellen og titlen, så en taleændring ikke kan afvige fra teksten. `+7` linjer,
+  **kun `da`**, ingen `<title>`/`metaDescription`/`<h1>`/FAQ/JSON-LD, ingen
+  beregningslogik, ingen ny URL, ingen sitemap.
+- **Harness:** `page.test.tsx` +1 (de tre navneformer + de fire udregnede tal) og
+  2 eksisterende låse opdateret, fordi de låste den gamle `<h2>`. **Modsvejs
+  verificeret:** mod master's `page.tsx` falder 2 af 14.
+- **MÅLT OG IKKE RØRT:** to fund undervejs, noteret til egne opgaver, fordi de
+  er andres tekst: (a) `page.tsx:~176` mangler et mellemrum — "**budgettere
+  bilkørsel**og vælge" renderer som ét ord i den danske "Om brændstofforbrug"-blok;
+  (b) `/renteberegner`s "annuitetslån beregner" (353 v, pos. 8) står i 0
+  forekomster — næste kandidat i samme måling.
+- **Gate grøn:** lint (**618 filer**), **3020 tests / 190 filer** (fra 3019/190),
+  build (**142 sider**), `locale-leak.mjs --gate` exit 0.
+- **Ingen `VERIFICÉR DEPLOY`-note:** rører ingen `<title>`, `og:title` eller
+  `metaDescription` — kun én `<h2>` og én brødtekstblok i den danske tekst, samme
+  mønster som opgave 181/182, der heller ikke fik en. HTTP 200 på `/braendstof`
+  siger intet om indholdet; effekten måles i GSC 14/10.
