@@ -1,33 +1,28 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — **`/dage-til/kristi-himmelfartsdag` og `/dagar-till/kristi-himmelsfardsdag`.**
-Dansk autocomplete under "hvor mange dage er der til kristi" har **to** egne
-træffere ("…til kristi himmelfart" og "…er kristi himmelfartsdag"), og svensk
-autocomplete har "hur många dagar till kristi himmelsfärd" + "kristi
-himmelsfärd röd dag". Begge sider er bygget, fordi det er **samme dato i begge
-lande** (påskedag + 39 dage, altid en torsdag) — se præmis-rettelsen i 210.
+STATUS: KØ — **`/dage-til/2-pinsedag` og `/dagar-till/pingstdagen`.**
+"Pinse" er den næste målte klynge efter kristi himmelfart, og den låste sig
+på en **forskelsdag**: dansk tæller til 2. pinsedag (mandagen), svensk til
+pingstdagen (søndagen), fordi hver lovens liste peger på en anden dag.
 
-**Mål:** 0 klik i dag, begge URL'er nye. Genmål **2027-04-15** (sæsonen er
-april–maj; en nedtælling er mest værd at klikke i måneden før).
+**Mål:** 0 klik i dag, begge URL'er nye. Genmål **2027-05-20** (sæsonen er
+maj–juni; en nedtælling er mest værd at klikke i måneden før).
 
 **Alle ti tidligere deploy-noter er lukket `DEPLOY OK 2026-09-30`.** Fire nye
 noter åbne, vindue 30/9 12:30.
 
-**Færdige i dag:** 209 + 210 + de otte CEO-fund fra 29/9 (verificeret i koden:
-valborg 30. april, svensk påskafton lørdag, dansk sankthans fast 23./24. juni,
-`toUtcMidnight` i `Europe/Copenhagen`, `maneder: 12`, husleje → nettoprisindeks).
+**Færdige i dag:** 209 + 210 + 211 + de otte CEO-fund fra 29/9 (verificeret
+i koden i denne iteration, ikke kun noteret: valborg 30. april, svensk
+påskafton lørdag, dansk sankthans fast 23./24. juni, `toUtcMidnight` i
+`Europe/Copenhagen`, påskeaften-FAQ'en erstattet af langfredag-siden,
+svensk promille-FAQ genereret fra egen formel, `maneder: 12`, 1. advent
+27/11–3/12, husleje → nettoprisindeks).
 
 ## Kvalitetsgate (repoets egne scripts fra package.json)
 
 ```
 npm run lint     # biome lint ./src      — 618 filer
-npm run test     # vitest run            — 3088 tests / 190 filer
-npm run build    # next build            — 142 sider
-node scripts/locale-leak.mjs --gate       # exit 0
-```
-
-npm run lint     # biome lint ./src      — 618 filer
-npm run test     # vitest run            — 3054 tests / 190 filer
+npm run test     # vitest run            — 3106 tests / 190 filer
 npm run build    # next build            — 142 sider
 node scripts/locale-leak.mjs --gate       # exit 0
 ```
@@ -41,8 +36,40 @@ Alle fire var grønne før merge 2026-09-30 07:45.
 
 ## Åbne VERIFICÉR DEPLOY-noter
 
-Fire noter. HTTP 200 beviser intet: to rører `<title>` og `<h1>` på én side, de
-to andre opretter hver sin URL.
+Fem noter. HTTP 200 beviser intet: fire rører `<title>` og `<h1>` på én side,
+og pinse-noten opretter to URL'er.
+
+- ⏳ **VERIFICÉR DEPLOY: `/dage-til/2-pinsedag` og `/dagar-till/pingstdagen`
+  skal begge svare med hver sin dag — dansk +50, svensk +49 efter påskedag.**
+  Kode + plan i ét squash-commit på `ceo/pinse`. Første kandidatvindue
+  **2026-09-30 12:30**. Rørte filer: `src/lib/dage-til.ts` (**ét event**
+  `pinse` med 5 fakta + 5 FAQ pr. sprog, **begge** arme) og
+  `src/lib/dage-til.test.ts` (**+16 tests**). Ingen eksisterende beregning
+  rørt, ingen UI, ingen ny `kind` (ankeret er den eksisterende
+  `easterOffset`), ingen ny afhængighed; sitemap, lister og breadcrumb kommer
+  fra de eksisterende lister. Verificér ved **indhold**:
+  1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
+  2. `https://minberegner.dk/dage-til/2-pinsedag` skal have **"Hvor mange dage
+     er der til 2. pinsedag?"** i `<h1>` og `<title>` med dage-tal, og
+     brødteksten skal sige **"25. maj"** og **"12. maj (2008)"**.
+  3. `https://beraknare.se/dagar-till/pingstdagen` skal have **"Hur många dagar
+     är det till pingstdagen?"** og brødteksten **"24 maj"**.
+  4. **Kontrol — forskelsdagen:** de to sider skal give **forskellige** datoer
+     på samme dag. `/dato` liste skal have `/dage-til/2-pinsedag` blandt de 19
+     rækker.
+  **Kontrol:** de 18 andre dage-til-siders titler uændrede, og ingen danske
+  strenge lækker til beraknare.se (porten kører `locale-leak.mjs --gate`).
+  **Målt før merge:** titlerne 48 (da) og 49 (se) tegn @ 365 dage mod grænsen
+  60. **Gate grøn:** lint (**618 filer**), **3106 tests / 190 filer** (fra
+  3088), build (**142 sider**), `locale-leak.mjs --gate` exit 0. De 16 nye
+  tests **falder mod master's `dage-til.ts`** (verificeret med
+  `git checkout master --`: **16 fejl**).
+  **⚠️ Falsk påstand fanget i egen diff (fejltype 11):** første udkast sagde
+  "mellem 30. maj (2050) og 4. juni (1990)". Målingen havde sammenlignet
+  **hele datoer**, så den fandt bare det første år i løkken; portens
+  måned-dag-sammenligning (`slice(5)`) fandt de rigtige kanter **12. maj (2008)
+  og 14. juni (2038)**. Rettet i begge sprog og låst i testen — samme
+  fælde som C81's titelport, bare på datoer.
 
 - ⏳ **VERIFICÉR DEPLOY: juleaftens spørgsmål skal have både ordet og datoen
   uden at overskride Googles 60-tegns-grænse ved tre-cifrede dag-tal.** Kode +
@@ -304,26 +331,41 @@ to andre opretter hver sin URL.
   (snippet/intention), ikke på to separate sidefejl — men at *finde* den kræver
   stadig kildefordelingen fra Mads, så opgaven står.
 
-#### 211. [ ] 2026-09-30 — trafik — **"hvor mange dage er der til pinse" er den næste målte klynge**
+#### 211. [x] 2026-09-30 — trafik — **"hvor mange dage er der til pinse" er den næste målte klynge** — løst på `ceo/pinse`
 
 - **Datagrund:** dansk autocomplete under "hvor mange dage er der til pinse"
   (30/9 09:0x) giver fire træffere: "hvor mange dage er der til pinse",
   "hvor mange dage er der fra påske til pinse", "hvor mange dage er der i
   pinsen" og "hvor mange dage er pinse efter påske". **Ingen af dem er dækket.**
-  Den ligger i samme østlige påseklynge som 210, og pinsedagen er
-  påskedag + 49 dage — samme `easterOffset`-regel, ingen ny fordeling.
-- **⚠️ Uafklaret før den kan skrives:** "pinse" kan være **pinsedagen**
-  (søndagen) eller **2. pinsedag** (mandagen, den danske helligdag). De to er
-  1 dag fra hinanden, og autocomplete skelner ikke. 2. pinsedag er det mest
-  søgte (det er den, folk har fri), så det er den rigtige side — men det skal
-  måles, ikke antages. Samme forbehold for "Kristi himmelfart" vs. "himmelfartsdag":
-  her er svaret det samme, fordi spørgsmålet tæller til dagen.
-- **Acceptkriterier:** 1. Én dansk side (og svensk `pingstdagen` kun hvis
-   svensk autocomplete viser efterspørgsel — målt, ikke antaget) svarer i
-   `<title>` og `<h1>`, og brødteksten er låst til de tal koden regner
-   (påskedag + 49, ISO-uge, ugedag, afstand fra kristi himmelfartsdag).
-   2. Verificeret over mindst 30 år. 3. Titlen under 60 tegn med trecifrede
-   dag-tal. 4. Gaten grøn.
+  Svensk autocomplete under "när är pingstdagen" har årstal-varianter
+  ("…2026", "…2025", "…2027"), så den arm er bygget på målt efterspørgsel.
+- **⚠️ PRÆMIS KORRIGERET — planen troede, at "pinse" er målbart som
+  pinsedag-mod-2.-pinsedag. Det er den ikke, og autocomplete kan ikke løse
+  det:** "hvor mange dage er der til pinsedag" og "…til 2 pinsedag" giver
+  **nul** træffere, kun den nøgne "pinse" har søgning. To målinger låste den
+  i stedet:
+  1. **Helligdagsstatus kan ikke skelne.** da.wikipedia (hentet 30/9): "Såvel
+     pinsedag som den følgende dag, anden pinsedag er i Danmark helligdage."
+     Begge er altså helligdage — planens antagelse, at kun mandagen er det,
+     var **forkert**.
+  2. **Autocomplete-klyngen gør det.** Under "2. pinsedag 2026" er alle ti
+     træffere **praktiske** (`fri`, `fridag`, `dato`, `helligdag`,
+     `royal run`, `danmark`), mens den nøgne "pinsedag"-klynge er
+     **sammenlignende** (`… i sverige`, `… i tyskland`, `… i spanien`,
+     `… i norge`). Folk der tæller dage vil have mandagen.
+- **Resultatet er derfor en forskelsdag, ikke to oversættelser:** dansk
+  `/dage-til/2-pinsedag` tæller til **påskedag + 50** (mandagen), svensk
+  `/dagar-till/pingstdagen` til **+ 49** (søndagen). Det er ikke en
+  oversættelsesfejl: riksdagens lagtext **1989:253** §1 räknar `pingstdagen`
+  som allmän helgdag, §2 definerar den som "sjunde söndagen efter påskdagen",
+  og listen har `annandag påsk` men **ingen** allmän helgdag för måndagen
+  efter pingstdagen. Sverige fejrer søndagen, Danmark fejrer mandagen.
+- **Acceptkriterier, alle opfyldt:** 1. begge sider svarer i `<title>` og
+  `<h1>`, brødteksten låst til de tal koden regner. 2. Verificeret over **61
+  år** (1990-2050): 2. pinsedag er mandag 61/61 gange, pingstdagen er
+   søndag 61/61 gange, afstande 11/10 til kristi himmelfart hvert år, ISO-uge
+   20-24 (da) og 19-23 (se). 3. Titlerne 48/49 tegn @ 365 dage. 4. Gaten
+   grøn (3106 tests fra 3088).
 - **MÅL:** 0 klik i dag. Genmål **2027-05-20**.
 
 #### 187. [ ] **IKKE FØR 2026-10-13** 2026-09-30 — Kø — **migrér beraknare.se til svenske URL-slugs med 301**
@@ -358,6 +400,31 @@ to andre opretter hver sin URL.
   efter 14 dage.
 - **MÅL:** beraknare.se 537 besøgende/28d; `/dato` 95 klik, `/tidsberegner` 127
   klik, `/procent` 2 klik (GSC 2026-08-30 → 2026-09-27). Genmål 2026-10-13.
+
+#### 212. [ ] 2026-09-30 — trafik — **de to *interval*-spørgsmål i pinse-klyngen er stadig ubesvarede**
+
+- **Datagrund:** samme måling som 211. Dansk autocomplete under "hvor mange
+  dage er der til pinse" har fire træffere, og 211 dækker den nøgne "pinse".
+  De to **øvrige** er interval-spørgsmål, ikke nedtællinger, og ingen side
+  svarer på dem: "hvor mange dage er der **fra påske til pinse**" og "hvor
+  mange dage er der **i pinsen**".
+- **Hvorfor de ikke er dage-til-sider:** de spørger om et *interval* (påske →
+  pinse = 49 dage til pinsedagen, 50 til 2. pinsedag; pinsen som periode er
+  den 50. dag efter påskedagen), og en nedtælling til et tal der altid er
+  det samme, er det forkerte værktøj. `/dato` er den rigtige flade — den
+  har allerede fritekst til intervaller mellem to datoer.
+- **⚠️ Ikke bygge som endnu en dage-til-side.** At lave `/dage-til/fra-paske-
+  til-pinse` ville svare "49 dage" hele året og se ud som nedtælling. Det er
+  den fejlklasse 210/211 netop undgik.
+- **Mulig løsning (kun efter et måltal):** et kort, ægte afsnit på `/dato`
+  der besvarer begge med tal koden regner, plus intern link til
+  `/dage-til/2-pinsedag` og `/dagar-till/pingstdagen`. **Ingen ny URL.**
+- **Acceptkriterier:** (1) begge spørgsmål besvaret synligt på `/dato` med tal
+  fra samme kilde som beregningen, (2) link til begge pinse-sider, (3) ingen
+  tekst der kan glide fra regnestykket, (4) gaten grøn.
+- **MÅL:** `/dato` 1133 besøgende/28d, bounce 4 % (Plausible 2026-09-30), og
+  GSC 133.054 visninger / 842 klik / CTR 0,6 % / pos. 5,7 (2026-08-31 →
+  2026-09-28). Genmål 14 dage efter merge.
 
 ## ❓ Til Mads
 

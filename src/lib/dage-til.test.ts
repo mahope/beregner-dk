@@ -1283,6 +1283,276 @@ describe("kristi himmelfartsdag i begge sprog", () => {
   });
 });
 
+describe("pinse i begge sprog", () => {
+  const pinse = DAGE_TIL_EVENTS.find((e) => e.id === "pinse");
+
+  test("findes i listen med begge sprog", () => {
+    expect(pinse).toBeDefined();
+    expect(pinse?.da.slug).toBe("2-pinsedag");
+    expect(pinse?.se?.slug).toBe("pingstdagen");
+  });
+
+  // De to arme er IKKE en oversættelse — de peger på hver sin dag. I Danmark
+  // er både pinsedag og 2. pinsedag helligdag, så helligdagsstatus ikke kan
+  // skelne dem; dansk tæller til mandagen (+50), fordi det er den, folk har
+  // fri. Lagen (1989:253) om allmänna helgdagar räknar däremot pingstdagen
+  // (+49) som allmän helgdag och INTE måndagen efter, så svensk tæller til
+  // søndagen. Porten låser forskellen, så en "harmonisering" ikke kan slå
+  // den ene arm ihjel.
+  test("de to arme peger på hver sin dag: +50 dansk, +49 svensk", () => {
+    expect(pinse?.anchor.da).toEqual({
+      kind: "easterOffset",
+      month: 0,
+      day: 0,
+      offsetDays: 50,
+    });
+    expect(pinse?.anchor.se).toEqual({
+      kind: "easterOffset",
+      month: 0,
+      day: 0,
+      offsetDays: 49,
+    });
+    expect(pinse?.anchor.da).not.toEqual(pinse?.anchor.se);
+  });
+
+  // 2. pinsedag er påskedag + 50, så den er påskedagen (en søndag) plus 50
+  // dage. 50 mod 7 er 1, så det er altid en mandag. Målt over 61 år.
+  test("2. pinsedag er altid en mandag, altid påskedag plus 50", () => {
+    for (let aar = 1990; aar <= 2050; aar++) {
+      const dato = getNextAnchorDate(pinse!.anchor.da, iso(`${aar}-01-05`));
+      expect(dato.getUTCDay(), `ugedag ${aar}`).toBe(1);
+      expect(daysBetween(easterSunday(aar), dato), `afstand ${aar}`).toBe(50);
+    }
+  });
+
+  // Pingstdagen er lagens "sjunde söndagen efter påskdagen" — påskedag + 49.
+  // 49 mod 7 er 0, så den er altid en søndag. Målt over 61 år.
+  test("pingstdagen er altid en søndag, altid påskedag plus 49", () => {
+    for (let aar = 1990; aar <= 2050; aar++) {
+      const dato = getNextAnchorDate(pinse!.anchor.se!, iso(`${aar}-01-05`));
+      expect(dato.getUTCDay(), `ugedag ${aar}`).toBe(0);
+      expect(daysBetween(easterSunday(aar), dato), `afstand ${aar}`).toBe(49);
+    }
+  });
+
+  // Brødteksten siger, at pinsedagen ligger 1 dag før 2. pinsedag. Det er
+  // forskellen mellem de to arme, så det er den samme påstand to steder.
+  test("pinsedagen ligger altid 1 dag før 2. pinsedag", () => {
+    for (let aar = 1990; aar <= 2050; aar++) {
+      const da = getNextAnchorDate(pinse!.anchor.da, iso(`${aar}-01-05`));
+      const se = getNextAnchorDate(pinse!.anchor.se!, iso(`${aar}-01-05`));
+      expect(toISO(se)).toBe(toISO(new Date(da.getTime() - dayMs)));
+      expect(daysBetween(se, da), `afstand ${aar}`).toBe(1);
+    }
+  });
+
+  // Faktateksten siger "mellem 12. maj (2008) og 14. juni (2038)" og "mellan
+  // 11 maj (2008) och 13 juni (2038)". Begge er spændvidden over 61 år, så de
+  // skal dække hele året og ikke tre valgte år. Sammenligningen er på
+  // måned-dag (`slice(5)`), ikke på hele datoen — ellers finder den bare det
+  // første år i løkken.
+  test("spændvidderne dækker hele året i begge sprog", () => {
+    let daTidligst = "";
+    let daSenest = "";
+    let seTidligst = "";
+    let seSenest = "";
+    for (let aar = 1990; aar <= 2050; aar++) {
+      const isoDa = toISO(getNextAnchorDate(pinse!.anchor.da, iso(`${aar}-01-05`)));
+      const isoSe = toISO(getNextAnchorDate(pinse!.anchor.se!, iso(`${aar}-01-05`)));
+      if (!daTidligst || isoDa.slice(5) < daTidligst.slice(5)) daTidligst = isoDa;
+      if (!daSenest || isoDa.slice(5) > daSenest.slice(5)) daSenest = isoDa;
+      if (!seTidligst || isoSe.slice(5) < seTidligst.slice(5)) seTidligst = isoSe;
+      if (!seSenest || isoSe.slice(5) > seSenest.slice(5)) seSenest = isoSe;
+    }
+    expect(daTidligst).toBe("2008-05-12");
+    expect(daSenest).toBe("2038-06-14");
+    expect(seTidligst).toBe("2008-05-11");
+    expect(seSenest).toBe("2038-06-13");
+    expect(pinse!.da.copy.facts.join(" ")).toContain(
+      "mellem 12. maj (2008) og 14. juni (2038)"
+    );
+    expect(pinse!.se!.copy.facts.join(" ")).toContain(
+      "mellan 11 maj (2008) och 13 juni (2038)"
+    );
+  });
+
+  // "Den ligger i uge 20 til 24" / "i vecka 19 till 23" er påstander om
+  // ISO-ugen. De skal dække hele året, så porten måler spændvidden.
+  test("ISO-uge-spændvidderne i teksten er rigtige hele året", () => {
+    const uge = (date: Date) => {
+      const d = new Date(date.getTime());
+      d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+      const start = Date.UTC(d.getUTCFullYear(), 0, 1);
+      return Math.ceil(((d.getTime() - start) / dayMs + 1) / 7);
+    };
+    const da = new Set<number>();
+    const se = new Set<number>();
+    for (let aar = 1990; aar <= 2050; aar++) {
+      da.add(uge(getNextAnchorDate(pinse!.anchor.da, iso(`${aar}-01-05`))));
+      se.add(uge(getNextAnchorDate(pinse!.anchor.se!, iso(`${aar}-01-05`))));
+    }
+    expect(Math.min(...da)).toBe(20);
+    expect(Math.max(...da)).toBe(24);
+    expect(Math.min(...se)).toBe(19);
+    expect(Math.max(...se)).toBe(23);
+    expect(pinse!.da.copy.facts.join(" ")).toContain("uge 20 til 24");
+    expect(pinse!.se!.copy.facts.join(" ")).toContain("vecka 19 till 23");
+  });
+
+  // "I 2026 er den 25. maj, i 2027 17. maj og i 2028 5. juni." De tre tal er
+  // kalkens egne, og sætningen lister dem i rækkefølge. Den svenske sætning
+  // siger det samme med sit eget datoformat, så den låses samtidig.
+  test("de tre datoer i begge sprog er kalkens egne tal", () => {
+    for (const [arm, anchor, medPunkt, maaneder] of [
+      [pinse!.da, pinse!.anchor.da, true, MAANEDER],
+      [pinse!.se!, pinse!.anchor.se!, false, MAANEDER_SE],
+    ] as const) {
+      const fakta = arm.copy.facts.join(" ");
+      for (const aar of [2026, 2027, 2028]) {
+        const dato = getNextAnchorDate(anchor, iso(`${aar}-01-05`));
+        const formateret = medPunkt
+          ? `${dato.getUTCDate()}. ${maaneder[dato.getUTCMonth()]}`
+          : `${dato.getUTCDate()} ${maaneder[dato.getUTCMonth()]}`;
+        const foer = fakta.indexOf(String(aar));
+        expect(foer, `fakta skal nævne ${aar}`).toBeGreaterThan(-1);
+        expect(
+          fakta.slice(foer, foer + 30),
+          `${aar} skal stå før "${formateret}"`
+        ).toContain(formateret);
+      }
+    }
+  });
+
+  // "altid 11 dage efter kristi himmelfartsdag" og "alltid 10 dagar efter
+  // kristi himmelsfärdsdagen" — kristi er +39, så 50-39=11 og 49-39=10.
+  test("afstanden til kristi himmelfartsdag er 11 dansk og 10 svensk", () => {
+    for (let aar = 1990; aar <= 2050; aar++) {
+      const kristiDato = new Date(easterSunday(aar).getTime() + 39 * dayMs);
+      expect(
+        daysBetween(kristiDato, getNextAnchorDate(pinse!.anchor.da, iso(`${aar}-01-05`))),
+        `dansk ${aar}`
+      ).toBe(11);
+      expect(
+        daysBetween(kristiDato, getNextAnchorDate(pinse!.anchor.se!, iso(`${aar}-01-05`))),
+        `svensk ${aar}`
+      ).toBe(10);
+    }
+  });
+
+  // FAQ'ens to konkrete datoer (påskedagen og målet) er kalkens egne tal.
+  test("de to datoer i hver FAQ er påskedagen og målet", () => {
+    for (const [arm, anchor, medPunkt, maaneder, offset] of [
+      [pinse!.da, pinse!.anchor.da, true, MAANEDER, 50],
+      [pinse!.se!, pinse!.anchor.se!, false, MAANEDER_SE, 49],
+    ] as const) {
+      const svar = arm.copy.faq[0].answer;
+      const påske = easterSunday(2027);
+      const dato = new Date(påske.getTime() + offset * dayMs);
+      const formater = (d: Date) =>
+        medPunkt
+          ? `${d.getUTCDate()}. ${maaneder[d.getUTCMonth()]}`
+          : `${d.getUTCDate()} ${maaneder[d.getUTCMonth()]}`;
+      expect(toISO(påske)).toBe("2027-03-28");
+      expect(svar).toContain(formater(påske));
+      expect(svar).toContain(formater(dato));
+    }
+  });
+
+  // "'vælger du 24. maj 2026 … står der 1 dag tilbage'" er en påstand om et
+  // konkret dag-tal. Den holder kun det år, hvor 2. pinsedag er 25. maj, så
+  // porten tager datoen fra hver sprog og tæller baglæns derfra.
+  test("'1 dag tilbage'-påstanden holder for den dato, den nævner", () => {
+    for (const [arm, locale, dagenFoer] of [
+      [pinse!.da, "da", "24. maj 2026"],
+      [pinse!.se!, "se", "23 maj 2026"],
+    ] as const) {
+      const svar = arm.copy.faq[4].answer;
+      expect(svar).toContain(dagenFoer);
+      // Dagen før målet er nævnt i teksten, så forveksler den ikke målet.
+      const svarDag = getDageTilAnswer(
+        pinse!,
+        locale,
+        iso(toISO(getNextAnchorDate(
+          locale === "da" ? pinse!.anchor.da : pinse!.anchor.se!,
+          iso("2026-01-05")
+        ))),
+      );
+      expect(toISO(svarDag.targetDate)).toBe(
+        locale === "da" ? "2026-05-25" : "2026-05-24"
+      );
+      expect(
+        getDageTilAnswer(pinse!, locale, iso(
+          toISO(new Date(svarDag.targetDate.getTime() - dayMs))
+        )).days,
+        `${locale}: dagen før målet er 1 dag tilbage`
+      ).toBe(1);
+    }
+  });
+
+  // Dansk autocomplete under "hvor mange dage er der til pinse" giver fire
+  // træffere, men "pinsedag" og "2 pinsedag" giver nul, så spørgsmålet er
+  // skrevet til den praktiske mandag. Svensk autocomplete under "när är
+  // pingstdagen" har årstal-varianter, så den arm er bygget på pingstdagen.
+  test("spørgsmålene matcher de målte autocomplete-formuleringer", () => {
+    const dansk = pinse!.da.copy.question.toLowerCase();
+    expect(dansk).toContain("hvor mange dage er der til");
+    expect(dansk).toContain("2. pinsedag");
+    const svensk = pinse!.se!.copy.question.toLowerCase();
+    expect(svensk).toContain("hur många dagar är det till");
+    expect(svensk).toContain("pingstdagen");
+  });
+
+  // Titlen er `${question} ${count}`, så den længste dag tæller. Review-fundet
+  // 30/9 (ac963e4) var præcis denne fejl: 61 tegn med trecifrede dag-tal, fordi
+  // porten låste én valgt dato. Derfor køres alle tre dag-tal-formater her.
+  test("titlen holder sig under 60 tegn med trecifrede dag-tal", () => {
+    for (const svar of ["1 dag", "99 dage", "365 dage"] as const) {
+      expect(
+        `${pinse!.da.copy.question} ${svar}`.length,
+        `dansk "${svar}"`
+      ).toBeLessThanOrEqual(60);
+    }
+    for (const svar of ["1 dag", "99 dagar", "365 dagar"] as const) {
+      expect(
+        `${pinse!.se!.copy.question} ${svar}`.length,
+        `svensk "${svar}"`
+      ).toBeLessThanOrEqual(60);
+    }
+  });
+
+  // De to arme er 1 dag fra hinanden, så det er et konkret målepunkt på
+  // forskellen mellem dem.
+  test("de to sider svarer hver sin dag", () => {
+    const da = getDageTilAnswer(pinse!, "da", iso("2027-01-01"));
+    const se = getDageTilAnswer(pinse!, "se", iso("2027-01-01"));
+    expect(toISO(da.targetDate)).toBe("2027-05-17");
+    expect(toISO(se.targetDate)).toBe("2027-05-16");
+    expect(se.days).toBe(da.days - 1);
+    expect(formatTargetDate(da.targetDate, "da")).toBe("17. maj");
+    expect(formatTargetDate(se.targetDate, "se")).toBe("16 maj");
+    expect(getDageTilSlugs("se")).toContain("pingstdagen");
+    expect(resolveDageTilSlug("2-pinsedag", "se")?.localeSlug).toBe(
+      "pingstdagen"
+    );
+    expect(resolveDageTilSlug("pingstdagen", "da")?.localeSlug).toBe(
+      "2-pinsedag"
+    );
+  });
+
+  test("på selve dagen er svaret 0 dage", () => {
+    const svar = getDageTilAnswer(pinse!, "da", iso("2027-05-17"));
+    expect(svar.days).toBe(0);
+    expect(svar.isToday).toBe(true);
+  });
+
+  test("tæller til næste års dato, når denne er passeret", () => {
+    const svar = getDageTilAnswer(pinse!, "da", iso("2026-09-30"));
+    expect(toISO(svar.targetDate)).toBe("2027-05-17");
+    // 30/9 2026 → 17/5 2027: 31+30+31+31+28+31+30+17 = 229 dage.
+    expect(svar.days).toBe(229);
+  });
+});
+
 describe("events uden svensk udgave", () => {
   test("hvert event har altid en dansk udgave", () => {
     for (const event of DAGE_TIL_EVENTS) {

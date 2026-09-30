@@ -953,6 +953,103 @@ export const DAGE_TIL_EVENTS: DageTilEvent[] = [
     },
   },
   {
+    // De to arme peger på hver sin dag, og det er ikke en oversættelse. I
+    // Danmark er både pinsedag (søndagen) og 2. pinsedag (mandagen) helligdag,
+    // så helligdagsstatus ikke kan skelne dem fra hinanden. Den danske side
+    // tæller derfor til 2. pinsedag (påskedag + 50), fordi det er mandagen,
+    // folk har fri. I Sverige er det omvendt: lagen (1989:253) om allmänna
+    // helgdagar räknar pingstdagen (påskdagen + 49) som allmän helgdag, men
+    // ikke måndagen efter. Så de to arme deler fordelingsreglen `easterOffset`
+    // og adskiller sig netop i den dag, loven peger på.
+    id: "pinse",
+    anchor: {
+      da: { kind: "easterOffset", month: 0, day: 0, offsetDays: 50 },
+      se: { kind: "easterOffset", month: 0, day: 0, offsetDays: 49 },
+    },
+    da: {
+      slug: "2-pinsedag",
+      copy: {
+        short: "2. pinsedag",
+        question: "Hvor mange dage er der til 2. pinsedag?",
+        facts: [
+          "2. pinsedag er påskedag plus 50 dage. Pinsedagen dagen før er påskedag plus 49 dage — altså den 50. dag efter påskedagen, når påskedagen selv tælles med.",
+          "I 2026 er den 25. maj, i 2027 17. maj og i 2028 5. juni.",
+          "2. pinsedag er altid en mandag. Målt fra 1990 til 2050 ligger den mellem 12. maj (2008) og 14. juni (2038), så datoen flytter sig både frem og tilbage med påsken.",
+          "Både pinsedag og 2. pinsedag er danske helligdage. Pinsedag er søndagen, 2. pinsedag er mandagen dagen efter — og mandagen er den, de fleste har fri.",
+          "Den ligger i uge 20 til 24 og er altid 11 dage efter kristi himmelfartsdag.",
+        ],
+        faq: [
+          {
+            question: "Hvornår er 2. pinsedag næste gang?",
+            answer:
+              "Den følger påsken, så du kan regne den ud: påskedag plus 50 dage. I 2027 er påskedagen 28. marts, så 2. pinsedag er 17. maj 2027.",
+          },
+          {
+            question: "Hvad er forskellen på pinsedag og 2. pinsedag?",
+            answer:
+              "Pinsedag er søndagen — påskedag plus 49 dage — og 2. pinsedag er mandagen dagen efter. I Danmark er begge helligdage, men mandagen er den, de fleste har fri. Tallet her tæller til 2. pinsedag.",
+          },
+          {
+            question: "Er 2. pinsedag altid en mandag?",
+            answer:
+              "Ja, altid. Den er påskedag plus 50 dage, og påskedag er en søndag. 50 dage efter en søndag er en mandag, hvert eneste år.",
+          },
+          {
+            question: "Hvor mange dage er der mellem kristi himmelfartsdag og 2. pinsedag?",
+            answer:
+              "Altid 11 dage. Kristi himmelfartsdag er påskedag plus 39 dage, og 2. pinsedag er påskedag plus 50 dage, så afstanden aldrig ændrer sig.",
+          },
+          {
+            question: "Tæller dagen i dag med?",
+            answer:
+              "Nej. Tallet er forskellen mellem dagens dato og 2. pinsedag, så vælger du 24. maj 2026 som dagens dato, står der 1 dag tilbage.",
+          },
+        ],
+      },
+    },
+    se: {
+      slug: "pingstdagen",
+      copy: {
+        short: "pingstdagen",
+        question: "Hur många dagar är det till pingstdagen?",
+        facts: [
+          "Pingstdagen är påskdagen plus 49 dagar. Lagen (1989:253) om allmänna helgdagar definierar den som den sjunde söndagen efter påskdagen.",
+          "I 2026 är den 24 maj, 2027 16 maj och 2028 4 juni.",
+          "Pingstdagen är alltid en söndag. Mätt mellan åren 1990 och 2050 ligger den mellan 11 maj (2008) och 13 juni (2038), så datumet flyttar sig både framåt och bakåt med påsken.",
+          "Pingstdagen är en allmän helgdag och en röd dag enligt lagen. Måndagen efter är däremot inte en allmän helgdag i Sverige — till skillnad från Danmark, där både pinsedag och 2. pinsedag är helligdage.",
+          "Den ligger i vecka 19 till 23 och är alltid 10 dagar efter kristi himmelsfärdsdagen.",
+        ],
+        faq: [
+          {
+            question: "När är pingstdagen nästa gång?",
+            answer:
+              "Den följer påsken, så du kan räkna ut den: påskdagen plus 49 dagar. 2027 infaller påskdagen 28 mars, så pingstdagen är 16 maj 2027.",
+          },
+          {
+            question: "Är pingstdagen en röd dag?",
+            answer:
+              "Ja. Lagen (1989:253) om allmänna helgdagar räknar pingstdagen som allmän helgdag, så den är en röd dag. Måndagen efter är det inte i Sverige, till skillnad från Danmark där 2. pinsedag är en helligdag.",
+          },
+          {
+            question: "Är pingstdagen alltid en söndag?",
+            answer:
+              "Ja, alltid. Den är påskdagen plus 49 dagar, och påskdagen är en söndag. 49 dagar efter en söndag är en söndag, varje år.",
+          },
+          {
+            question: "Vad är skillnaden på pingstdagen och kristi himmelsfärdsdagen?",
+            answer:
+              "Kristi himmelsfärdsdagen är påskdagen plus 39 dagar och pingstdagen är påskdagen plus 49 dagar. Det ligger därför alltid 10 dagar emellan dem.",
+          },
+          {
+            question: "Räknas dagen i dag med?",
+            answer:
+              "Nej. Talet är skillnaden mellan dagens datum och pingstdagen, så väljer du 23 maj 2026 som dagens datum står det 1 dag kvar.",
+          },
+        ],
+      },
+    },
+  },
+  {
     id: "valborg",
     anchor: {
       da: { kind: "fixed", month: 4, day: 30, offsetDays: 0 },
