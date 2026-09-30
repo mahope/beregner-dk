@@ -54,12 +54,13 @@ describe("dato-eksempler", () => {
   test("de tolv rækker summerer til hele årets arbejdsdage", () => {
     // Kontrollen der gør tabellen brugbar: summerer de tolv måneder til det
     // tal, `taellArbejdsdage` giver for hele året, kan rækkerne ikke have en
-    // forkert måned. 2026 er dansk 253 og svensk 252, fordi den danske
-    // grundlovsdag og den svenske hedningaftensdag ligger på hver sin dag.
+    // forkert måned. 2026 er dansk 251 og svensk 252, fordi danskerne har
+    // kristi himmelfartsdag (torsdag 14. maj) og 2. pinsedag (mandag 25. maj)
+    // som hverdage, mens svenskerne kun har pingstdagen — en søndag.
     const dansk = maanederITaar(2026, "da").reduce((sum, r) => sum + r.arbejdsdage, 0);
     const svensk = maanederITaar(2026, "se").reduce((sum, r) => sum + r.arbejdsdage, 0);
     expect(dansk).toBe(taellArbejdsdage(new Date(2026, 0, 1), new Date(2026, 11, 31), "da"));
-    expect(aarstal(2026, "da").arbejdsdage).toBe(253);
+    expect(aarstal(2026, "da").arbejdsdage).toBe(251);
     expect(aarstal(2026, "se").arbejdsdage).toBe(252);
     expect(svensk).toBe(aarstal(2026, "se").arbejdsdage);
   });
@@ -139,7 +140,7 @@ describe("dato-eksempler", () => {
     expect(eksempel.sluttOgKoeb).toBe("2026-03-01");
     expect(eksempel.formelResultat).toBe(28);
     expect(eksempel.aarDage).toBe(365);
-    expect(eksempel.aarArbejdsdage).toBe(253);
+    expect(eksempel.aarArbejdsdage).toBe(251);
   });
 
   test("eksemplet følger det år, det bliver kaldt med", () => {

@@ -63,6 +63,20 @@ function getFixedHelligdage(
   ];
 }
 
+/**
+ * Easter-anchored holidays: påske (-3 til +1) plus de tre danske dage der
+ * følger efter påsken, og de svenska til og med pingstdagen.
+ *
+ * Afstandene er påskedagens egne, fordi påskedagen er en søndag: kristi
+ * himmelfartsdag er torsdag (søndag + 39), pinsedagen er søndagen (søndag +
+ * 49) og 2. pinsedag er mandagen (søndag + 50). De ligger derfor på hver
+ * sin ugedag, hvert år, i begge lande.
+ *
+ * `annandag pingst` (mandagen efter pingstdagen) er med vilje *ikke* på den
+ * svenska liste: lagen (1989:253) tæller kun pingstdagen, og mandagen er en
+ * almindelig arbejdsdag i Sverige. Den er til gengæld med på den danske, hvor
+ * både pinsedag og 2. pinsedag er helligdage.
+ */
 function getEasterHelligdage(
   year: number,
   locale: HelligdagLocale
@@ -73,6 +87,9 @@ function getEasterHelligdage(
       { date: easterDate(year, -2), name: "Langfredag" },
       { date: easterDate(year, 0), name: "Påskedag" },
       { date: easterDate(year, 1), name: "2. påskedag" },
+      { date: easterDate(year, 39), name: "Kristi himmelfartsdag" },
+      { date: easterDate(year, 49), name: "Pinsedag" },
+      { date: easterDate(year, 50), name: "2. pinsedag" },
     ];
   }
   return [
@@ -80,6 +97,7 @@ function getEasterHelligdage(
     { date: easterDate(year, 0), name: "Påskdagen" },
     { date: easterDate(year, 1), name: "Annandag påsk" },
     { date: easterDate(year, 39), name: "Kristi himmelsfärdsdag" },
+    { date: easterDate(year, 49), name: "Pingstdagen" },
   ];
 }
 
@@ -90,6 +108,31 @@ export function getHelligdage(
 ): Helligdag[] {
   return [...getFixedHelligdage(year, locale), ...getEasterHelligdage(year, locale)]
     .sort((a, b) => a.date.getTime() - b.date.getTime());
+}
+
+/**
+ * The holiday names in the order they fall, joined for a sentence: "Nytårsdag,
+ * skærtorsdag, langfredag, …". Copy on `/dato` and in the FAQ used to name the
+ * holidays by hand, and the hand-written list had drifted: it never mentioned
+ * Kristi himmelfartsdag, pinsedag or 2. pinsedag, so the page told readers that
+ * the tool skipped nine holidays when it skips twelve. Reading the names out of
+ * `getHelligdage` makes that impossible — the sentence cannot outgrow the list.
+ *
+ * The names keep their own capital, so callers must introduce them where a
+ * capital is right (start of a sentence, or after a colon). Lowercasing them
+ * here would break "Sveriges nationaldag", where Swedish keeps the genitive
+ * capitalised.
+ *
+ * The year only picks the ordering and the Easter-derived dates; the names are
+ * the same every year.
+ */
+export function helligdagsnavne(
+  year: number,
+  locale: HelligdagLocale
+): string {
+  return getHelligdage(year, locale)
+    .map((h) => h.name)
+    .join(", ");
 }
 
 function hasSameDay(a: Date, b: Date): boolean {

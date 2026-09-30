@@ -5,6 +5,7 @@ import { getCurrentDomainConfig, getLocale } from "@/lib/get-locale";
 import { getDageTilSlugs, getDageTilEvents, getDageTilAnswer, dageTilArm, formatTargetDate } from "@/lib/dage-til";
 import { getPageData } from "@/lib/page-data";
 import { maanederITaar } from "@/lib/dato-eksempler";
+import { getHelligdage } from "@/lib/helligdage";
 import DatoPage from "./page";
 
 vi.mock("next/dynamic", () => ({
@@ -205,6 +206,40 @@ describe("dato page — antal dagar mellan datum i Excel", () => {
     }
   );
 
+  // Helligdagssætningen på siden og i FAQ'en var skrevet i hånden og havde
+  // mistet de tre danske dage efter påsken: den sagde "de ni danske
+  // helligdage", mens værktøjet springer tolv over. Nu læses navnene ud af
+  // `getHelligdage`, så et spørgsmål om antallet eller en manglende dag kun kan
+  // fejle hvis selve listen er forkert — og den har sit eget sæt tests.
+  test("siden og FAQ'en navngiver præcis de helligdage, værktøjet springer over", async () => {
+    for (const locale of ["da", "se"] as const) {
+      vi.mocked(getLocale).mockResolvedValue(locale);
+      vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale(locale));
+      const liste = getHelligdage(2026, locale);
+      const navne = liste.map((h) => h.name);
+      const html = renderToStaticMarkup(await DatoPage());
+      const faq = getPageData("dato", locale)!.faqItems;
+      const svar = faq.find((i) => /helligdage|helgdagar/i.test(i.question))!.answer;
+
+      for (const navn of navne) {
+        expect(svar, `${locale}/${navn}`).toContain(navn);
+      }
+      // Antallet i teksten er læst fra listen, så det kan ikke være ni.
+      const antal = new RegExp(
+        locale === "da"
+          ? `De ${liste.length} danske helligdage`
+          : `Sveriges ${liste.length} r\u00f6dagar`,
+      );
+      expect(svar).toMatch(antal);
+      expect(svar).not.toMatch(locale === "da" ? /de ni danske/i : /de fjorton r/i);
+      // Side-tip-boxen skal også have hele listen, ellers er de to steder
+      // igen begge rigtige hver for sig.
+      for (const navn of navne) {
+        expect(html, `tip/${locale}/${navn}`).toContain(navn);
+      }
+    }
+  });
+
   test("begge sprog har de to nye spørgsmål i FAQ'en, som også går i JSON-LD", async () => {
     for (const locale of ["da", "se"] as const) {
       const faq = getPageData("dato", locale)!.faqItems;
@@ -324,8 +359,9 @@ describe("dato page — antal dagar mellan datum i Excel", () => {
       const dageOrd = locale === "da" ? "dage" : "dagar";
       expect(sumDage).toBe(365);
       expect(html).toContain(`<strong>${sumDage} ${dageOrd}</strong>`);
-      // 253 dansk, 252 svensk \u2014 fordi de to lande har hver sin helligdag i 2026.
-      expect(sumArbejdsdage).toBe(locale === "da" ? 253 : 252);
+      // 251 dansk, 252 svensk \u2014 fordi danskerne har kristi himmelfartsdag og
+      // 2. pinsedag som hverdage i 2026, og svenskerne ikke har dem.
+      expect(sumArbejdsdage).toBe(locale === "da" ? 251 : 252);
       expect(html).toContain(
         locale === "da" ? `${sumArbejdsdage} arbejdsdage` : `${sumArbejdsdage} arbetsdagar`
       );

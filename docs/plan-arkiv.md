@@ -19747,3 +19747,84 @@ dokumenteret to gange, ikke fordi denne side alene løfter trafikken.
 - **Ærlig forventation:** nyt sprog 0 klik i dag, og sæsonen er syv måneder
   væk. Klyngen er valgt fordi mønsteret er dokumenteret tre gange (juleaften,
   skolestart, kristi himmelfart), ikke fordi denne side alene løfter trafikken.
+
+
+---
+
+## 2026-09-30 — afsluttede opgaver fra IMPLEMENTATION_PLAN.md
+
+### Opgave 213 (korrekthed) — de tre danske helligdage efter påsken manglede i `helligdage.ts`
+
+****de tre danske helligdage efter påsken manglede i `helligdage.ts`**
+
+- **Datagrund:** opgave 212 (`hvor mange dage har man fri i pinsen` er nr. 1
+  under dansk autocomplete) kan ikke besvares uden rigtige arbejdsdage, fordi
+  svaret er et arbejdsdagstal. Målingen deraf fandt fejlen: `getEasterHelligdage`
+  sluttede ved `offsetDays: 1` (2. påskedag) i den danske arm.
+- **Målt omfang, kørt gennem den rigtige kode** (`taellArbejdsdage` 1/1-31/12):
+  | År | dansk før | dansk efter | svensk før | svensk efter |
+  |---|---|---|---|---|
+  | 2026 | 253 | **251** | 252 | 252 |
+  | 2027 | 255 | **253** | 253 | 254 |
+  | 2028 | 254 | **253** | 252 | 252 |
+  Kun 2026 stod i en låst test, så de tre øvrige år fejlede stille.
+- **Hvorfor kun dansk flyttede sig:** de tre manglende dage ligger på hver sin
+  hverdag (kristi himmelfartsdag torsdag, 2. pinsedag mandag), mens den
+  svenske mangel — pingstdagen — altid er en søndag. Det er samme
+  forskelsdag, `/dage-til/2-pinsedag` allerede dokumenterer, nu i kode.
+- **Pinseugen 25.-31. maj 2026: 4 arbejdsdage, ikke 5.** Det er det tal
+  opgave 212 skal vise.
+- **Kollision målt 2024-2045:** 2. pinsedag er grundlovsdag i 2028, og
+  annandag pingst er Sveriges nationaldag i 2033 og 2044. Derfor læser den
+  nye test den svenske undtagelse på **navnet** ("findes ingen Annandag
+  pingst") og ikke på `erHelligdag`, der ville være sand i de to kollisionsår.
+- **Acceptkriterier, alle opfyldt:** 1. listen har de tolv danske og sexten
+  svenske helligdage. 2. Helligdagssætningen på `/dato` og i FAQ'en læses
+  fra `getHelligdage` gennem det nye `helligdagsnavne()`, så den kan ikke
+  løbe fra listen. 3. Antallet i teksten er `getHelligdage(2026, …).length`,
+  så "ni" kan ikke overleve. 4. De ni nye/opdaterede tests falder mod
+  master. 5. Gaten grøn.
+- **MÅL:** `/dato` 1.133 besøgende/28d, bounce 4 % (Plausible 2026-09-30).
+  Ingen effektmåling — dette er en rettelse af et forkert tal, ikke en
+  vækst — mål i stedet at tallene er korrekte, hvilket porten låser.
+
+
+### Opgave 211 (trafik) — "hvor mange dage er der til pinse" → to sider
+
+****"hvor mange dage er der til pinse" er den næste målte klynge** — løst på `ceo/pinse`
+
+- **Datagrund:** dansk autocomplete under "hvor mange dage er der til pinse"
+  (30/9 09:0x) giver fire træffere: "hvor mange dage er der til pinse",
+  "hvor mange dage er der fra påske til pinse", "hvor mange dage er der i
+  pinsen" og "hvor mange dage er pinse efter påske". **Ingen af dem er dækket.**
+  Svensk autocomplete under "när är pingstdagen" har årstal-varianter
+  ("…2026", "…2025", "…2027"), så den arm er bygget på målt efterspørgsel.
+- **⚠️ PRÆMIS KORRIGERET — planen troede, at "pinse" er målbart som
+  pinsedag-mod-2.-pinsedag. Det er den ikke, og autocomplete kan ikke løse
+  det:** "hvor mange dage er der til pinsedag" og "…til 2 pinsedag" giver
+  **nul** træffere, kun den nøgne "pinse" har søgning. To målinger låste den
+  i stedet:
+  1. **Helligdagsstatus kan ikke skelne.** da.wikipedia (hentet 30/9): "Såvel
+     pinsedag som den følgende dag, anden pinsedag er i Danmark helligdage."
+     Begge er altså helligdage — planens antagelse, at kun mandagen er det,
+     var **forkert**.
+  2. **Autocomplete-klyngen gør det.** Under "2. pinsedag 2026" er alle ti
+     træffere **praktiske** (`fri`, `fridag`, `dato`, `helligdag`,
+     `royal run`, `danmark`), mens den nøgne "pinsedag"-klynge er
+     **sammenlignende** (`… i sverige`, `… i tyskland`, `… i spanien`,
+     `… i norge`). Folk der tæller dage vil have mandagen.
+- **Resultatet er derfor en forskelsdag, ikke to oversættelser:** dansk
+  `/dage-til/2-pinsedag` tæller til **påskedag + 50** (mandagen), svensk
+  `/dagar-till/pingstdagen` til **+ 49** (søndagen). Det er ikke en
+  oversættelsesfejl: riksdagens lagtext **1989:253** §1 räknar `pingstdagen`
+  som allmän helgdag, §2 definerar den som "sjunde söndagen efter påskdagen",
+  og listen har `annandag påsk` men **ingen** allmän helgdag för måndagen
+  efter pingstdagen. Sverige fejrer søndagen, Danmark fejrer mandagen.
+- **Acceptkriterier, alle opfyldt:** 1. begge sider svarer i `<title>` og
+  `<h1>`, brødteksten låst til de tal koden regner. 2. Verificeret over **61
+  år** (1990-2050): 2. pinsedag er mandag 61/61 gange, pingstdagen er
+   søndag 61/61 gange, afstande 11/10 til kristi himmelfart hvert år, ISO-uge
+   20-24 (da) og 19-23 (se). 3. Titlerne 48/49 tegn @ 365 dage. 4. Gaten
+   grøn (3106 tests fra 3088).
+- **MÅL:** 0 klik i dag. Genmål **2027-05-20**.
+

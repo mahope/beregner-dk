@@ -11,6 +11,7 @@ import {
   taellWeekender,
   type HelligdagLocale,
 } from "./helligdage";
+import { helligdagsnavne } from "./helligdage";
 
 const da: HelligdagLocale = "da";
 const se: HelligdagLocale = "se";
@@ -31,13 +32,16 @@ function names(year: number, locale: HelligdagLocale): string[] {
 }
 
 describe("getHelligdage", () => {
-  test("danske helligdage 2026 er de ni officielle", () => {
+  test("danske helligdage 2026 er de tolv officielle", () => {
     expect(names(2026, da)).toEqual([
       "Nytårsdag",
       "Skærtorsdag",
       "Langfredag",
       "Påskedag",
       "2. påskedag",
+      "Kristi himmelfartsdag",
+      "Pinsedag",
+      "2. pinsedag",
       "Grundlovsdag",
       "Juleaftensdag",
       "Juledag",
@@ -52,7 +56,7 @@ describe("getHelligdage", () => {
     expect(new Set(times).size).toBe(times.length);
   });
 
-  test("de ni officielle danske helligdage ligger på de rette datoer", () => {
+  test("de tolv officielle danske helligdage ligger på de rette datoer", () => {
     const datoer = getHelligdage(2026, da).map((h) => iso(h.date));
     expect(datoer).toEqual([
       "2026-01-01",
@@ -60,6 +64,9 @@ describe("getHelligdage", () => {
       "2026-04-03",
       "2026-04-05",
       "2026-04-06",
+      "2026-05-14",
+      "2026-05-24",
+      "2026-05-25",
       "2026-06-05",
       "2026-12-24",
       "2026-12-25",
@@ -108,6 +115,7 @@ describe("getHelligdage", () => {
       "Annandag påsk",
       "Første maj",
       "Kristi himmelsfärdsdag",
+      "Pingstdagen",
       "Sveriges nationaldag",
       "Midsommarafton",
       "Midsommardagen",
@@ -152,6 +160,80 @@ describe("getHelligdage", () => {
       (himmelsfard.getTime() - paske.getTime()) / 86400000
     );
     expect(diff).toBe(39);
+  });
+
+  // De tre danske dage efter påsken manglede i listen, sa alle arbejdsdage-
+  // og helligdagstal i maj var for hoje. Testen laaser forskelsdagen, som
+  // dage-til-siden allerede dokumenterer: mandagen efter pingstdagen er
+  // helligdag i Danmark og almindelig arbejdsdag i Sverige. Den svenske
+  // undtagelse læses på *navnet*, fordi 6. juni 2033 og 2044 er både
+  // nationaldag og annandag pingst — då er mandagen alligevel en helligdag.
+  test("pinsedagen er søndag og 2. pinsedag er helligdag i Danmark men ikke i Sverige", () => {
+    for (let year = 2024; year <= 2045; year++) {
+      const dansk = getHelligdage(year, da);
+      const svensk = getHelligdage(year, se);
+      const find = (list: typeof dansk, n: string) => list.find((h) => h.name === n)!.date;
+      // Dage-tallet, ikke millisekunder: `easterDate` bygger lokale datoer, så
+      // en DST-overgang mellem påsken og pinse giver en times spring.
+      const dageMellem = (fra: Date, til: Date) =>
+        (Date.UTC(til.getFullYear(), til.getMonth(), til.getDate()) -
+          Date.UTC(fra.getFullYear(), fra.getMonth(), fra.getDate())) /
+        86400000;
+      const paske = find(dansk, "Påskedag");
+      expect(dageMellem(paske, find(dansk, "Kristi himmelfartsdag")), `himmelfart ${year}`).toBe(39);
+      expect(dageMellem(paske, find(dansk, "Pinsedag")), `pinsedag ${year}`).toBe(49);
+      expect(dageMellem(paske, find(dansk, "2. pinsedag")), `2. pinsedag ${year}`).toBe(50);
+      // Svensk pingstdagen ligger på præcis samme afstand.
+      expect(dageMellem(find(svensk, "Påskdagen"), find(svensk, "Pingstdagen")), `pingstdagen ${year}`).toBe(49);
+      expect(find(dansk, "Pinsedag").getDay(), `pinsedag ${year}`).toBe(0);
+      expect(find(dansk, "2. pinsedag").getDay(), `2. pinsedag ${year}`).toBe(1);
+      // Svensk lov (1989:253) kender pingstdagen, men ikke annandag pingst.
+      expect(find(svensk, "Pingstdagen").getDay(), `pingstdagen ${year}`).toBe(0);
+      expect(svensk.some((h) => h.name === "Annandag pingst"), `år ${year}`).toBe(false);
+    }
+  });
+
+  // Samme regel på hele året: en hverdag der er helligdag, tælles aldrig som
+  // arbejdsdag. 2026 stod på 253 før de tre danske dage kom med i listen —
+  // 251 er det rigtige tal, fordi 14. maj (torsdag) og 25. maj (mandag) er
+  // hverdage. Pinseugen 25.-31. maj har derfor fire arbejdsdage, ikke fem.
+  test("et helt dansk år har 251 arbejdsdage med de tolv helligdage", () => {
+    expect(taellArbejdsdage(d("2026-01-01"), d("2026-12-31"), da)).toBe(251);
+    expect(taellArbejdsdage(d("2026-05-25"), d("2026-05-31"), da)).toBe(4);
+    // Samme uge i Sverige: pingstdagen er søndagen, så mandagen er
+    // arbejdsdag og alle fem hverdage tæller.
+    expect(taellArbejdsdage(d("2026-05-18"), d("2026-05-24"), se)).toBe(5);
+  });
+});
+
+describe("helligdagsnavne", () => {
+  // Sætningen på /dato og i FAQ'en læses herfra. Den skal derfor ramme hvert
+  // navn i `getHelligdage` — ikke en håndskrevet liste, der kan glide fra.
+  test("sætningen rammer præcis navnene i listen, i begge sprog", () => {
+    for (const locale of ["da", "se"] as const) {
+      const liste = getHelligdage(2026, locale);
+      const sætning = helligdagsnavne(2026, locale);
+      expect(sætning.split(", ")).toHaveLength(liste.length);
+      for (const h of liste) expect(sætning).toContain(h.name);
+    }
+  });
+
+  test("de tre danske dage efter påsken står i sætningen", () => {
+    // De manglede i den håndskrevne sætning, så læseren fik at vide at
+    // værktøjet springer ni helligdage over, mens det springer tolv over.
+    const da = helligdagsnavne(2026, "da");
+    expect(da).toContain("Kristi himmelfartsdag");
+    expect(da).toContain("Pinsedag");
+    expect(da).toContain("2. pinsedag");
+    const se = helligdagsnavne(2026, "se");
+    expect(se).toContain("Pingstdagen");
+    expect(se).not.toContain("Annandag pingst");
+  });
+
+  test("egen navneform bevares, så genitivet ikke skrives med lille s", () => {
+    // Svensk genitiv skal have stort S. Derfor står navnene uændret, og den
+    // der kalder dem ind må bruge dem, hvor et stort bogstav passer.
+    expect(helligdagsnavne(2026, "se")).toContain("Sveriges nationaldag");
   });
 });
 
@@ -355,7 +437,10 @@ describe("taellHelligdagePaaHverdag", () => {
   });
 
   test("tæller de danske helligdage, der ikke er weekenddage, på et helt år", () => {
-    for (const [aar, forventet] of [[2026, 7], [2027, 5], [2028, 6]] as const) {
+    // 2026: ni hverdage (påskedag og pinsedag er søndage, 2. juledag lørdag).
+    // 2027: syv, fordi grundlovsdagen 2027 er en lørdag.
+    // 2028: syv, fordi 2. pinsedag og grundlovsdag er samme dag.
+    for (const [aar, forventet] of [[2026, 9], [2027, 7], [2028, 7]] as const) {
       expect(
         taellHelligdagePaaHverdag(d(`${aar}-01-01`), d(`${aar}-12-31`), da)
       ).toBe(forventet);

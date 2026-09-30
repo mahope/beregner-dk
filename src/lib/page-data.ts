@@ -11,6 +11,7 @@ import {
 } from "./nettoprisindeks";
 import { landSvarSprogholdig, satsUdenraekkeSvar } from "./moms-eu";
 import { formatNumber } from "./format";
+import { getHelligdage, helligdagsnavne } from "./helligdage";
 import { estimerNettoMaaned } from "./barsel/netto";
 import { PROMILLE_EKSEAMPLER, formatPromille, formatTimer } from "./promille-eksempler";
 import {
@@ -887,8 +888,8 @@ const daPages: Record<string, PageData> = {
       schemaCategory: "UtilitiesApplication",
       faqItems: [
       { question: "Hvordan beregner jeg dage mellem to datoer?", answer: "Vælg start- og slutdato. Beregneren viser dage, hele uger, ca. måneder, arbejdsdage, helligdage og weekenddage." },
-      { question: "Tæller beregneren arbejdsdage korrekt?", answer: "Ja. Arbejdsdage er mandag-fredag undtagen de offentlige helligdage: nytårsdag, skærtorsdag, langfredag, påskedag, 2. påskedag, grundlovsdag, juleaftensdag, juledag og 2. juledag. Nytårsaften er heller ikke en arbejdsdag. Store bededag blev afskaffet som helligdag i 2024." },
-      { question: "Hvilke helligdage bruger beregneren?", answer: "De ni danske helligdage: nytårsdag 1. januar, skærtorsdag, langfredag, påskedag og 2. påskedag (alle fire påskehelligdage), grundlovsdag 5. juni, juleaftensdag 24. december, juledag 25. december og 2. juledag 26. december. Påskedagen beregnes af den gregorianske algoritme og kan derfor ligge mellem 22. marts og 25. april." },
+      { question: "Tæller beregneren arbejdsdage korrekt?", answer: `Ja. Arbejdsdage er mandag-fredag undtagen de offentlige helligdage: ${helligdagsnavne(2026, "da")}. Nytårsaften er heller ikke en arbejdsdag. Store bededag blev afskaffet som helligdag i 2024.` },
+      { question: "Hvilke helligdage bruger beregneren?", answer: `De ${getHelligdage(2026, "da").length} danske helligdage: ${helligdagsnavne(2026, "da")}. Påskedagen beregnes af den gregorianske algoritme og kan derfor ligge mellem 22. marts og 25. april, og de tre dage efter påsken — kristi himmelfartsdag, pinsedag og 2. pinsedag — følger med, så de ligger altid på hver sin faste ugedag: torsdag, søndag og mandag.` },
       { question: "Kan jeg trække dage fra?", answer: "Ja! Indtast et negativt tal for at gå tilbage i tid." },
       { question: "Skudår?", answer: "Ja, beregneren håndterer skudår korrekt." },
       { question: "Hvordan beregner jeg dage mellem to datoer i Excel?", answer: "Med =B1-A1. Har startdatoen i A1 og slutdatoen i B1, trækker formlen den korte forskel: 1. januar 2026 til 1. januar 2027 er 365 dage. =DATEDIF(A1;B1;\"d\") giver præcis det samme tal, og med \"m\" får du hele måneder (15. marts 2026 til 25. september 2026 er 194 dage og 6 hele måneder) og med \"y\" hele år. Dansk Excel bruger semikolon." },
@@ -3389,7 +3390,7 @@ const sePages: Record<string, PageData> = {
       faqItems: [
       { question: "Hur beräknar jag dagar mellan två datum?", answer: "Välj start- och slutdatum. Kalkylatorn visar dagar, hela veckor, ungefärligt antal månader, arbetsdagar, helgdagar och lördagar/söndagar." },
       { question: "Räknar kalkylatorn arbetsdagar korrekt?", answer: "Ja. Arbetsdagar är måndag till fredag utom Sveriges rödagar. Helgdagar räknas alltså inte som arbetsdagar, och det syns i en egen kolumn." },
-      { question: "Vilka helgdagar använder kalkylatorn?", answer: "Sveriges rödagar: nyårsdagen, trettondedag jul, långfredagen, påskdagen, annandag påsk, första maj, kristi himmelsfärdsdag, Sveriges nationaldag, midsommarafton och midsommardagen, alla helgons dag, julafton, juldagen, annandag jul och nyårsafton. Midsommar och alla helgons dag räknas alltid som den lördag de infaller på." },
+      { question: "Vilka helgdagar använder kalkylatorn?", answer: `Sveriges ${getHelligdage(2026, "se").length} rödagar: ${helligdagsnavne(2026, "se")}. Midsommar och alla helgons dag räknas alltid som den lördag de infaller på. Annandag pingst — måndagen efter pingstdagen — är inte en röd dag i Sverige, till skillnad från Danmark där både pinsedag och 2. pinsedag är helligdagar.` },
       { question: "Hur många dagar är det mellan två datum?", answer: "Fyll i startdatum och slutdatum, så räknar kalkylatorn ut antalet dagar direkt. Den visar även hela veckor, ungefärligt antal månader, arbetsdagar, helgdagar och lördagar/söndagar." },
       { question: "Hur räknar jag ut antalet dagar mellan datum?", answer: "Ange det tidigare datumet som startdatum och det senare som slutdatum. Antallet dagar räknas som slutsiffrans datum minus startdatum, så avståndet är detsamma oavsett vilken veckodag datumen faller på." },
       { question: "Hur många dagar till 31 december?", answer: "Ange dagens datum som startdatum och 31 december som slutdatum, så ser du antalet dagar. Kalkylatorn tar også med helgdagar om du vill se hur många arbetsdagar som återstår." },

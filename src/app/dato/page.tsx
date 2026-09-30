@@ -12,6 +12,7 @@ import Link from "next/link";
 import { dageTilbageIAaret, getDageTilEvents, getDageTilPrefix, isDageTilLocale, dageTilArm, getDageTilAnswer, formatTargetDate,
 } from "@/lib/dage-til";
 import { maanedEksempel } from "@/lib/dato-eksempler";
+import { helligdagsnavne } from "@/lib/helligdage";
 import { formatNumber } from "@/lib/format";
 
 export async function generateMetadata() {
@@ -273,9 +274,8 @@ export default async function DatoPage() {
         <div className="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-400 dark:border-blue-500 p-4 my-6 not-prose">
           <p className="font-medium text-blue-800">Tip</p>
           <p className="text-blue-700">
-            Arbejdsdage tælles mandag til fredag og springer de offentlige
-            helligdage over: nytårsdag, skærtorsdag, langfredag, påskedag,
-            2. påskedag, grundlovsdag, juleaftensdag, juledag og 2. juledag.
+            Arbejdsdage tælles mandag til fredag og springer de tolv
+            offentlige helligdage over: {helligdagsnavne(tilbage.year, "da")}.
             Nytårsaften er ikke en helligdag, men er heller ikke en
             arbejdsdag, så den springes også over. Store bededag var
             afskaffet som helligdag i 2024.
@@ -491,10 +491,8 @@ export default async function DatoPage() {
           <p className="font-medium text-blue-800">Tips</p>
           <p className="text-blue-700">
             Arbetsdagar räknas måndag till fredag och hoppar över Sveriges
-            rödagar: nyårsdagen, trettondedag jul, långfredagen, påskdagen,
-            annandag påsk, första maj, kristi himmelsfärdsdag, nationaldagen,
-            midsommarafton och midsommardagen, alla helgons dag, julafton,
-            juldagen, annandag jul och nyårsafton.
+            rödagar: {helligdagsnavne(tilbage.year, "se")}. Midsommar och
+            alla helgons dag är alltid den lördag de infaller på.
           </p>
         </div>
       </div>

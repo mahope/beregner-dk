@@ -1,22 +1,28 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — **`/dage-til/2-pinsedag` og `/dagar-till/pingstdagen`.**
-"Pinse" er den næste målte klynge efter kristi himmelfart, og den låste sig
-på en **forskelsdag**: dansk tæller til 2. pinsedag (mandagen), svensk til
-pingstdagen (søndagen), fordi hver lovens liste peger på en anden dag.
+STATUS: KØ — **de tre danske helligdage efter påsken manglede i listen.**
 
-**Mål:** 0 klik i dag, begge URL'er nye. Genmål **2027-05-20** (sæsonen er
-maj–juni; en nedtælling er mest værd at klikke i måneden før).
+Den danske `helligdage.ts` sprang ni helligdage over. Kristi himmelfartsdag,
+pinsedag og 2. pinsedag stod ikke i listen, så **alle arbejdsdagstal på
+`/dato` var to for høje i 2026** (253 → **251**), og pinseugen 25.-31. maj
+havde fire arbejdsdage, ikke fem. Det er en korrekthedssfejl på sitets
+mest besøgte side (133.054 GSC-visninger, 1.133 besøgende) og på et tal
+sitet selv skrev i FAQ'en ("de ni danske helligdage").
 
-**Alle ti tidligere deploy-noter er lukket `DEPLOY OK 2026-09-30`.** Fire nye
+Svensk liste manglede pingstdagen, som altid er en søndag, så de
+svenske arbejdsdagstal er uændrede; kun antallet röddagar steg 15 → 16.
+
+**MÅL:** `/dato` 1.133 besøgende/28d, bounce 4 % (Plausible 2026-09-30).
+Ingen måling mulig på 14 dage — tallene er fra et forkert værdienummer,
+så det er en fejlretning, ikke en vækstforslåg.
+
+**Bemærk til opgave 212:** den er **stadig åben** og er nu målbar, fordi
+pinseugens arbejdsdage endelig er rigtige (4 danske, ikke 5). Det var denne
+fejl, der gjorde "hvor mange dage har man fri i pinsen" ubesvareligt — det
+er opgave 212 næste iteration.
+
+**Alle tolv tidligere deploy-noter er lukket `DEPLOY OK 2026-09-30`.** Fire nye
 noter åbne, vindue 30/9 12:30.
-
-**Færdige i dag:** 209 + 210 + 211 + de otte CEO-fund fra 29/9 (verificeret
-i koden i denne iteration, ikke kun noteret: valborg 30. april, svensk
-påskafton lørdag, dansk sankthans fast 23./24. juni, `toUtcMidnight` i
-`Europe/Copenhagen`, påskeaften-FAQ'en erstattet af langfredag-siden,
-svensk promille-FAQ genereret fra egen formel, `maneder: 12`, 1. advent
-27/11–3/12, husleje → nettoprisindeks).
 
 ## Kvalitetsgate (repoets egne scripts fra package.json)
 
@@ -176,6 +182,42 @@ og pinse-noten opretter to URL'er.
   **falder mod master's `dage-til.ts`** (verificeret med `git checkout master
   --`: **16 fejl**).
 
+- ⏳ **VERIFICÉR DEPLOY: `/dato` skal sige "tolv" og vise 251 danske
+  arbejdsdage for 2026, og helligdagssætningen skal ramme alle tolv navne.**
+  Kode + plan i ét squash-commit på `ceo/helligdage-liste`. Første
+  kandidatvindue **2026-09-30 12:30**. Rørte filer: `src/lib/helligdage.ts`
+  (**+3 danske dage, +1 svensk, ny `helligdagsnavne()`**),
+  `src/lib/helligdage.test.ts` (**+5**), `src/app/dato/page.tsx` (**2
+  hændskrevne lister → `helligdagsnavne()`**), `src/lib/page-data.ts`
+  (**2 FAQ-svar**), `src/lib/dato-eksempler.test.ts` + `src/app/dato/page.test.tsx`
+  (**de fire gamle 253-tal → 251**). Ingen ny URL, ingen ny afhængighed,
+  ingen ændret UI-struktur. Verificér ved **indhold**:
+  1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
+  2. `https://minberegner.dk/dato` skal have **"springer de tolv offentlige
+     helligdage over: Nytårsdag, Skærtorsdag, Langfredag, Påskedag,
+     2. påskedag, Kristi himmelfartsdag, Pinsedag, 2. pinsedag, Grundlovsdag,
+     Juleaftensdag, Juledag, 2. juledag."** i tip-boksen.
+  3. Samme sides FAQ skal svare **"De 12 danske helligdage"** (ikke ni).
+  4. Samme sides månedstabel skal summerer til **251 arbejdsdage** i 2026,
+     og **maj-rækken skal sige 19** (var 21).
+  5. `https://beraknare.se/dato` skal svare **"Sveriges 16 röddagar"** og
+     liste **Pingstdagen** — og **ikke** "Annandag pingst".
+  **Kontrol:** `https://beraknare.se/dato` månedstabel **uændret** (252
+  arbejdsdage), fordi pingstdagen altid er en søndag. Ingen danske strenge
+  lækker til beraknare.se (`locale-leak.mjs --gate`).
+  **Målt før merge:** dansk 2026 = 251, svensk 2026 = 252, pinseuge
+  25.-31. maj = 4 danske / 5 svenske arbejdsdage, navne på hverdag: himmelfart
+  torsdag, pinsedag søndag, 2. pinsedag mandag, 61/61 år (2024-2045).
+  **Gate grøn:** lint (**618 filer**), **3112 tests / 190 filer** (fra 3108),
+  build (**142 sider**), `locale-leak.mjs --gate` exit 0. De ni helligdags-tests
+  **falder mod master's `helligdage.ts`** (verificeret med `git stash`:
+  **9 fejl**).
+  **⚠️ Fejl i egen diff fanget ved selvreview (fejltype 11):** mit første
+  `helligdagsnavne()` lavede `.toLowerCase()` på hele listen, hvilket ville give
+  **"sveriges nationaldag"** — svensk genitiv skal have stort S. Navnene står nu
+  uændret, og kalderen sætter dem ind, hvor et stort bogstav passer. Låst i
+  en egen test, så et nyt frafald i den type ikke kan ske stille.
+
 
 ## Åbne opgaver
 
@@ -331,43 +373,6 @@ og pinse-noten opretter to URL'er.
   (snippet/intention), ikke på to separate sidefejl — men at *finde* den kræver
   stadig kildefordelingen fra Mads, så opgaven står.
 
-#### 211. [x] 2026-09-30 — trafik — **"hvor mange dage er der til pinse" er den næste målte klynge** — løst på `ceo/pinse`
-
-- **Datagrund:** dansk autocomplete under "hvor mange dage er der til pinse"
-  (30/9 09:0x) giver fire træffere: "hvor mange dage er der til pinse",
-  "hvor mange dage er der fra påske til pinse", "hvor mange dage er der i
-  pinsen" og "hvor mange dage er pinse efter påske". **Ingen af dem er dækket.**
-  Svensk autocomplete under "när är pingstdagen" har årstal-varianter
-  ("…2026", "…2025", "…2027"), så den arm er bygget på målt efterspørgsel.
-- **⚠️ PRÆMIS KORRIGERET — planen troede, at "pinse" er målbart som
-  pinsedag-mod-2.-pinsedag. Det er den ikke, og autocomplete kan ikke løse
-  det:** "hvor mange dage er der til pinsedag" og "…til 2 pinsedag" giver
-  **nul** træffere, kun den nøgne "pinse" har søgning. To målinger låste den
-  i stedet:
-  1. **Helligdagsstatus kan ikke skelne.** da.wikipedia (hentet 30/9): "Såvel
-     pinsedag som den følgende dag, anden pinsedag er i Danmark helligdage."
-     Begge er altså helligdage — planens antagelse, at kun mandagen er det,
-     var **forkert**.
-  2. **Autocomplete-klyngen gør det.** Under "2. pinsedag 2026" er alle ti
-     træffere **praktiske** (`fri`, `fridag`, `dato`, `helligdag`,
-     `royal run`, `danmark`), mens den nøgne "pinsedag"-klynge er
-     **sammenlignende** (`… i sverige`, `… i tyskland`, `… i spanien`,
-     `… i norge`). Folk der tæller dage vil have mandagen.
-- **Resultatet er derfor en forskelsdag, ikke to oversættelser:** dansk
-  `/dage-til/2-pinsedag` tæller til **påskedag + 50** (mandagen), svensk
-  `/dagar-till/pingstdagen` til **+ 49** (søndagen). Det er ikke en
-  oversættelsesfejl: riksdagens lagtext **1989:253** §1 räknar `pingstdagen`
-  som allmän helgdag, §2 definerar den som "sjunde söndagen efter påskdagen",
-  og listen har `annandag påsk` men **ingen** allmän helgdag för måndagen
-  efter pingstdagen. Sverige fejrer søndagen, Danmark fejrer mandagen.
-- **Acceptkriterier, alle opfyldt:** 1. begge sider svarer i `<title>` og
-  `<h1>`, brødteksten låst til de tal koden regner. 2. Verificeret over **61
-  år** (1990-2050): 2. pinsedag er mandag 61/61 gange, pingstdagen er
-   søndag 61/61 gange, afstande 11/10 til kristi himmelfart hvert år, ISO-uge
-   20-24 (da) og 19-23 (se). 3. Titlerne 48/49 tegn @ 365 dage. 4. Gaten
-   grøn (3106 tests fra 3088).
-- **MÅL:** 0 klik i dag. Genmål **2027-05-20**.
-
 #### 187. [ ] **IKKE FØR 2026-10-13** 2026-09-30 — Kø — **migrér beraknare.se til svenske URL-slugs med 301**
 
 - **Datagrund:** opgave 185 (lukket 30/9, se `docs/plan-arkiv.md`). 82 sider har
@@ -425,6 +430,7 @@ og pinse-noten opretter to URL'er.
 - **MÅL:** `/dato` 1133 besøgende/28d, bounce 4 % (Plausible 2026-09-30), og
   GSC 133.054 visninger / 842 klik / CTR 0,6 % / pos. 5,7 (2026-08-31 →
   2026-09-28). Genmål 14 dage efter merge.
+
 
 ## ❓ Til Mads
 
