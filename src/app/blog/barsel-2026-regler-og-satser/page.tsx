@@ -346,8 +346,6 @@ export default function BarselGuidePage() {
           Kilde til alle tre afsnit: <a href={f.kilde} className="underline">Barselsloven, LBK nr. 206 af 22. januar 2026</a> — § 14 a om flerlinger, § 14 om indlæggelse og § 8 og § 21 om adoption.
         </p>
 
-        <h2>Sådan lægger I planen</h2>
-
         <h2>Vigtige frister</h2>
         <ul>
           <li>Hvis du får løn under barsel: søg senest {BARSEL_2026.applicationDeadlineWeeks} uger efter, at lønnen stopper.</li>

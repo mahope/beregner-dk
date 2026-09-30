@@ -19949,3 +19949,48 @@ squash-commit på `ceo/denne-maaned`.
 `/dagar-till/pingstdagen` svarer 404, og `/dato` mangler både pinse-sætningen og
 "Påskedagen i 2027". `/api/health` svarer `status: ok`, så sitet er oppe og
 kun koden er ældre. Ét vindue, ikke to — næste er 17:30, og merges fortsætter.
+
+## 2026-09-30 13:15 — lukket: /dato svarer på "hvor mange dage er der i den her måned" (4e446eb)
+
+**Datagrund:** dansk autocomplete under "hvor mange dage er der i" (12:47) giver
+6 af 10 træffere der spørger om en *bestemt* måned — "i august", "i juli", "i
+juni", "i september", "i august 2026", "i juli 2026" — plus "i den her måned"
+(nr. 9). `/dato` havde tolv rækker i tabellen men intet sted der svarede på den
+måned læseren står i. "…i et år" og "…i en måned" var allerede besvaret, så
+hullet var præcis det månedsnære spørgsmål.
+
+**Rettelsen:** nyt `<h2>` "Hvor mange dage er der i den her måned?" — månedens
+længde, hvilken dag i måneden det er, dage brugt og dage tilbage, månedens
+sidste dato, arbejdsdage og Excel-formlen. Alle tal fra den nye
+`denneMaanedEksempel()`, som bygger på samme `daysBetween` og
+`taellArbejdsdage` som tabellen, så det ene svar og de tolv rækker ikke kan
+sige hinanden modsat. Kun `da` — beraknare.se's `/dato` er svensk hele vejen,
+så en dansk overskrift derthe ville være en ny lækage.
+
+**⚠️ Homoglyph fanget i egen diff:** første udkast skrev `efterFoelgende` med et
+fremmed tegn i variabelnavnet, så TypeScript sagde `Cannot find name
+'etterFoelgende'. Did you mean 'efterFoelgende'?` og fire nye tests faldt med
+`ReferenceError`. Fundet fordi porten *faldt*; rettet til
+`isoDato(new Date(year, month, 0))`, som også er klarere.
+
+**Tidszone (fejltype 4):** `denneMaanedEksempel` læser dagen i
+`Europe/Copenhagen` via `Intl`, aldrig serverens `getDate()` — ellers skrev en
+UTC-container "juni" på en side, der tæller dagene i juli kl. 00–02 dansk tid.
+Låst i en test med tidsstemplet 22:30 UTC.
+
+**Gate:** lint **620 filer**, **3147 tests / 191 filer** (fra 3141), build **142
+sider**, `locale-leak.mjs --gate` exit 0. De **seks** nye tests (4 i
+`dato-eksempler.test.ts`, 2 i `dato/page.test.tsx`) **falder mod master**
+(`git stash`: 2 fejl på `page.tsx`; de 4 datatests kan ikke kalde en funktion
+der ikke findes).
+
+**Mål:** `/dato` 1.133 besøgende/28d, bounce 4 % (Plausible 2026-09-30); GSC
+133.054 visninger / 842 klik / CTR 0,6 % / pos. 5,7 (2026-08-31 → 2026-09-28).
+Genmål 14 dage efter merge.
+
+**⚠️ 12:30-batchen kørte UDEN de otte ventende ændringer.** Alle otte er merged
+før 12:18, så 12:30 var det første vindue efter dem — og intet er live:
+`/dage-til/2-pinsedag`, `/dage-til/efteraarsferien`, `/dage-til/skolestart` og
+`/dage-til/kristi-himmelfartsdag` svarer **404**, `/dagar-till/pingstdagen` på
+beraknare.se **404**, og `/dato` har hverken pinse-sætningen eller "Påskedagen i
+2027". Næste vindue **17:30**. Ét vindue, ikke to: ingen `DEPLOY-MISSING`.

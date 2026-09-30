@@ -188,3 +188,51 @@ describe("ingen side må skrive sin egen overskrift over en komponent, der selv 
     }
   });
 });
+
+/**
+ * Den modsatte fejl: en `<h2>` der *ikke* har noget under sig.
+ *
+ * `/blog/barsel-2026-regler-og-satser` — sitets næststørste blogindlæg (185
+ * besøgende/28d, +97 %, bounce 84 %) — skrev `<h2>Sådan lægger I planen</h2>`
+ * og så **intet**, før den næste `<h2>Vigtige frister</h2>` begyndte. Indholdet
+ * var skrevet, men under en anden overskrift længere nede ("Planlægning af
+ * barsel"), så to overskrifter lovede det samme og den første leverede
+ * ingenting.
+ *
+ * Det er en reel fejl, ikke kosmetik: en overskrift er en løfte om et afsnit.
+ * Google grupperer dokumentets afsnit efter `<h2>`, så den tomme ene danner et
+ * afsnit med nul indhold, og en læser der scroller forbi den, læser "Sådan
+ * lægger I planen" og får intet — på den side med den højeste bounce i hele
+ * trafikbilledet.
+ *
+ * Kilde-scan som de øvrige: kun mellemrum mellem to `<h2>` tæller som "tom",
+ * så en `{liste}.map(...)}` imellem ikke giver falsk fund. Renset for hele
+ * sitet (121 `page.tsx`) gav den præcis ét fund, den her rettelse fjerner.
+ */
+const TOM_H2 = /<h2[^>]*>[\s\S]{0,200}?<\/h2>\s*<h2\b/;
+
+describe("ingen side må have en overskrift uden indhold under den", () => {
+  const filer = allePageFiler();
+
+  test("ingen page.tsx har to <h2> i træk", () => {
+    const fejl = filer
+      .filter((f) => TOM_H2.test(readFileSync(f, "utf8")))
+      .map((f) => f.replace(`${__dirname}/`, ""));
+    expect(fejl).toEqual([]);
+  });
+
+  test("barsel-indlægget har stadig alle sine fjorten afsnit", () => {
+    // Renset må ikke slette indholdet sammen med overskriften. Det afsnit den
+    // tomme overskrift lovede, ligger under "Planlægning af barsel" — samme
+    // opgave, samme fem bud, og den skal stadig linke til planlæggeren.
+    const src = readFileSync(
+      join(__dirname, "blog/barsel-2026-regler-og-satser/page.tsx"),
+      "utf8",
+    );
+    const h2 = [...src.matchAll(/<h2[^>]*>([\s\S]*?)<\/h2>/g)].map((m) => m[1].trim());
+    expect(h2.length).toBe(14);
+    expect(h2).toContain("Planlægning af barsel");
+    expect(h2).not.toContain("Sådan lægger I planen");
+    expect(src).toMatch(/href="\/barselsplanlaegger"/);
+  });
+});

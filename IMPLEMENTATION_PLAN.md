@@ -1,43 +1,11 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — 30/9 13:15. `/dato` svarer nu på "hvor mange dage er der i den
-her måned" med månedens længde, dagens placaring og dage tilbage.
+STATUS: KØ — 30/9 13:15. Blogindlægget om barsel 2026 har mistet sin tomme
+overskrift; intet andet er rørt.
 
-**Datagrund:** dansk autocomplete under "hvor mange dage er der i" (12:47) giver
-6 af 10 træffere der spørger om en *bestemt* måned — "i august", "i juli", "i
-juni", "i september", "i august 2026", "i juli 2026" — plus "i den her måned"
-(nr. 9). `/dato` havde tolv rækker i tabellen men intet sted der svarede på den
-måned læseren står i. "…i et år" og "…i en måned" var allerede besvaret, så
-hullet var præcis det månedsnære spørgsmål.
-
-**Rettelsen:** nyt `<h2>` "Hvor mange dage er der i den her måned?" — månedens
-længde, hvilken dag i måneden det er, dage brugt og dage tilbage, månedens
-sidste dato, arbejdsdage og Excel-formlen. Alle tal fra den nye
-`denneMaanedEksempel()`, som bygger på samme `daysBetween` og
-`taellArbejdsdage` som tabellen, så det ene svar og de tolv rækker ikke kan
-sige hinanden modsat. Kun `da` — beraknare.se's `/dato` er svensk hele vejen,
-så en dansk overskrift derthe ville være en ny lækage.
-
-**⚠️ Homoglyph fanget i egen diff:** første udkast skrev `efterFoelgende` med et
-fremmed tegn i variabelnavnet, så TypeScript sagde `Cannot find name
-'etterFoelgende'. Did you mean 'efterFoelgende'?` og fire nye tests faldt med
-`ReferenceError`. Fundet fordi porten *faldt*; rettet til
-`isoDato(new Date(year, month, 0))`, som også er klarere.
-
-**Tidszone (fejltype 4):** `denneMaanedEksempel` læser dagen i
-`Europe/Copenhagen` via `Intl`, aldrig serverens `getDate()` — ellers skrev en
-UTC-container "juni" på en side, der tæller dagene i juli kl. 00–02 dansk tid.
-Låst i en test med tidsstemplet 22:30 UTC.
-
-**Gate:** lint **620 filer**, **3147 tests / 191 filer** (fra 3141), build **142
-sider**, `locale-leak.mjs --gate` exit 0. De **seks** nye tests (4 i
-`dato-eksempler.test.ts`, 2 i `dato/page.test.tsx`) **falder mod master**
-(`git stash`: 2 fejl på `page.tsx`; de 4 datatests kan ikke kalde en funktion
-der ikke findes).
-
-**Mål:** `/dato` 1.133 besøgende/28d, bounce 4 % (Plausible 2026-09-30); GSC
-133.054 visninger / 842 klik / CTR 0,6 % / pos. 5,7 (2026-08-31 → 2026-09-28).
-Genmål 14 dage efter merge.
+**Sidste iteration (4e446eb, lukket):** `/dato` svarer på "hvor mange dage er
+der i den her måned". Datagrund, måling og den homoglyph-fælde står i
+`docs/plan-arkiv.md`.
 
 **⚠️ 12:30-batchen kørte UDEN de otte ventende ændringer.** Alle otte er merged
 før 12:18, så 12:30 var det første vindue efter dem — og intet er live:
@@ -47,7 +15,6 @@ beraknare.se **404**, og `/dato` har hverken pinse-sætningen eller "Påskedagen
 2027". `/api/health` svarer `status: ok` — sitet er oppe, koden er bare ældre.
 Næste vindue **17:30**. Ét vindue, ikke to: ingen `DEPLOY-MISSING`, og merges
 fortsætter. Otte noter åbne + denne iterations note = **ni**.
-
 
 ## Kvalitetsgate (repoets egne scripts fra package.json)
 
@@ -349,6 +316,31 @@ pinse-noten opretter to URL'er, og tidszone-noten forventer et **uændret** tal.
   **3147 tests / 191 filer** (fra 3141), build (**142 sider**),
   `locale-leak.mjs --gate` exit 0. De to nye side-tests **falder mod master's
   `page.tsx`** (verificeret med `git stash`: **2 fejl**).
+
+- ⏳ **VERIFICÉR DEPLOY: `/blog/barsel-2026-regler-og-satser` skal ikke have en
+  `<h2>` uden indhold under sig.** Kode + plan i ét squash-commit på
+  `ceo/tom-overskrift`. Vindue **2026-09-30 17:30**. Rørte filer:
+  `src/app/blog/barsel-2026-regler-og-satser/page.tsx` (**én tom `<h2>`
+  slettet**) og `src/app/dublet-overskrift.test.tsx` (**+2 tests, egen
+  `describe`**). Ingen beregningslogik, ingen `<title>` rørt, ingen ny URL,
+  intet sitemap, ingen ny afhængighed. Verificér ved **indhold**:
+  1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
+  2. `https://minberegner.dk/blog/barsel-2026-regler-og-satser` skal have
+     **14 `<h2>`** og **ikke** "Sådan lægger I planen". "Planlægning af barsel"
+     skal stadig være der med linket til `/barselsplanlaegger`.
+  **Kontrol:** de 26 andre blogindlæg skal have uændret antal `<h2>`, og
+  `/barselsdagpenge` uændret.
+  **Datagrund:** Plausible 28 dage — 185 besøgende (**+97 %**), **bounce 84 %**,
+  den dårligste bounce i hele billedet. Et afsnit med nul indhold under en
+  `<h2>` er præcis den fejl, der får en læser til at scanle forbi: overskriften
+  lovede planen, og der stod ingen plan.
+  **Målt før merge:** klassescannet over alle **121 `page.tsx`** gav **præcis ét**
+  fund — den her rettelse — så det er ikke et isoleret slip, men det er også
+  ikke en klasse endnu. Renset for hele sitet blev der 14 `<h2>` i filen.
+  **Gate grøn:** lint (**620 filer**), **3149 tests / 191 filer** (fra 3147),
+  build (**142 sider**), `locale-leak.mjs --gate` exit 0. De to nye tests **falder
+  mod master's kilde** (verificeret med `git checkout master --`: **2 fejl**,
+  bl.a. 15 `<h2>`).
 
 ## Åbne opgaver
 
