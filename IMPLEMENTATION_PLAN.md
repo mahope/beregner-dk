@@ -1,19 +1,32 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — 30/9 19:20. **F7 er færdig** (`ceo/tidszone-tidsforskelle`):
-`/tidszone` skrev "9-10 timer foran" om Sydney, mens `TIDSZONER` og
-`sommertid.ts` giver **8-10** (Sydney er UTC+10/+11 mod Danmarks UTC+1/+2).
-Tallet lå i håndskrevet JSX uden test — samme fejlklasse som de otte CEO-fund.
-De fem byers forskelle regnes nu af `tidsforskelsRækker` fra `TIDSZONER`, så
-de ikke kan glide fra tabellen. 10 nye tests, 3 mutationer kontrolleret.
+STATUS: KØ — 30/9 20:05. **F8 er færdig** (`ceo/svensk-helgdagslove`): tre
+svenske sider sagde om helgdage det modsatte af `lag (1989:253) 1 §`.
+Julafton skrev at den "räknas som helgdag", skärtorsdag skrev at den er en
+"officiell svensk helgdag" — og modsatte samtidig sin egen faktaboks — og
+nationaldagen skrev i både faktaboks og FAQ at den "ikke er en laglig
+helgdag", skønt loven tager udtrykkeligt op den. Loven er nu lagt i testen
+som data, så brødteksten tjekkes mod den.
 
-**Fire VERIFICÉR-noter åbne** (fra F7, F6 og F4). F1/F3/F5 og opgaverne
-97/98/119/183 er blokeret af svar fra Mads. **Opgave 187 må ikke røres før 13/10.**
-**CEO-køen er tom** — alle otte punkter blev rettet i `aca17e5` og verificeret
-mod koden 30/9 19:10 (valborg 30/4, svensk påskafton lørdag, dansk sankthans
-23./24. juni fast, påskeaften-FAQ slettet, husleje på nettoprisindekset,
-`toUtcMidnight` i `Europe/Copenhagen`, svensk promille-FAQ regnet fra egen
-formel, `maneder: 12` + advent 27/11-3/12).
+**⚠️ Målerfælde fundet 30/9 20:00 — læs den før du "beviser" et tal.** Et
+egen-script til at tjekke påstand i tekst fik **tre fejl i træk** på
+rigtige påstande, før det fandt den ene rigtige. (1) Det sorterede datoer
+absolut, så "ligger mellem 1. maj (2008) og 3. juni (2038)" læst som
+forkert — men påstanden er om *dag-i-året*, og den er korrekt. (2) Dets
+ugenummer forankrede på 1. januar i stedet for ISO-mandagen, så "2. pinsedag
+ligger i uge 20 til 24" læst som uge 19-24. (3) Sætnings-vis fejlfindelse
+ramte to * korrekte* negativer ("Första advent är **ikke** en allmän
+helgdag" og "Pingstdagen är en allmän helgdag ... **Måndagen efter är
+däremot ikke**"). Konklusion: et hjemmeskrevet målescript skal **krydses
+mod lovens eller kalenderens egen tekst** og måske to uafhængige
+implementeringer, før en påstand i brødtekst rettes. Det er præcis den
+fejl, reviewer-loopet selv lavede 29/9 i `pinse-intervaller.ts` (4 kollisionsår
+før det fandt 7). Rett aldrig rigtig tekst på et dårligt målescript.
+
+**Fire VERIFICÉR-noter åbne** (fra F8, F7, F6 og F4). F1/F3/F5 og opgaver
+97/98/119/183 er blokeret af svar fra Mads. **Opgave 187 må ikke røres før
+13/10.** **CEO-køen er tom** — alle otte punkter blev rettet i `aca17e5` og
+verificeret mod koden 30/9 19:10.
 
 **⚠️ Målerfælde (30/9 15:40, samme klasse som C70's).** `npm run test` kører
 `locale-leak-gate.test.ts`, som med vilje planterer **to** danske lækager og
@@ -169,6 +182,35 @@ USA-datoer) + én der fanger en regression i JSX'en alene. Se arkivet.
 CTR 0,4 % / pos. 7,5 (GSC 2026-08-31 → 2026-09-28). Genmål 14 dage efter at
 den er live.
 
+**F8. [x] ✅ `ceo/svensk-helgdagslove` — tre svenske sider modsagde
+`lag (1989:253)`.** Den 29/9 byggede `/dage-til/`-klyngen med ca. 140
+håndskrevne faktasætninger. De er ikke målt af nogen, og de er præcis den
+fejlklasse de otte CEO-fund og de to review-fund er: et tal eller en lov i
+brødteksten, ingen test. Audit af alle 19 hændelsers facts + FAQ gav tre
+fejl, alle svenske, alle i **den samme love**:
+
+| Side | Skrev | Loven siger |
+|---|---|---|
+| se `/julafton` | "Både julafton og nyårsafton räknas som helgdagar i den svenska kalendern" | 1 § räknar **juldagen och annandag jul** — inte julafton. Och **nyårsafton står inte alls**, bara nyårsdagen. |
+| se `/skartorsdagen` | "Skärtorsdag, långfredag, påskdagen och annandag påsk är alla officiella svenska helgdagar" | 1 § har långfredagen och annandag påsk, **inte skärtorsdagen**. Siden modsagde også sig selv: F3 på samme side siger at man *ikke* har automatisk ret til dagpenning. |
+| se `/nationaldagen` | "Den är inte en laglig helgdag" (F2 **og** FAQ) | 1 § tager uttryckligen upp nationaldagen, 2 § fastställer "den 6 juni". |
+
+Kilden er hentet fra riksdagen.se (SFS 1989:253 t.o.m. SFS 2004:1320). Alle
+tre er rettet til at pege på loven ved *dens* navn. Dansk side var korrekt
+igennem hele vejen — `grundlovsdag` siger "ikke en helligdag, men lovens
+fridag", og det er præcis den skelnen de svenske sider havde mistet.
+
+**Ny port:** `lag (1989:253) 1 §` ligger i `dage-til.test.ts` som data
+(`LOEN_SIGER_HELGDAG`, pr. hændelses egen svenske slug), og brødteksten
+tjekkes mod den i begge retninger — en dag loven ikke tæller må ikke kaldes
+helgdag, og en dag loven tæller må ikke kaldes *ikke*-helgdag. 2 nye tests,
+begge kontrolleret mod den gamle kode (begge faldt). Se arkivet.
+**MÅL:** se `/nedtaelling` 5.726 GSC-visninger / 12 klik / CTR 0,2 % / pos. 9,2
+og 0 visninger i GSC's top-15 for de 16 `/dagar-till/*`-sider (GSC
+2026-08-31 → 2026-09-28). Genmål 14 dage efter at den er live.
+
+## Fase 3 — trafik-drevet (fortsat fra ovenstående måling 30/9)
+
 ## Kvalitetsgate (repoets egne scripts fra package.json)
 
 ```
@@ -197,6 +239,16 @@ F4's rører rækkefølge og breakpoint, og F7's rører brødteksttal, hvor en fe
 er usynlig for `curl` — en dansk læser skal bare have et forkert tal. De otte
 lukkede noter er verificeret 30/9 17:46-17:53 på indhold; alle målinger står i
 `docs/plan-arkiv.md`.
+
+- ⏳ **De tre svenske helgdagspåstande skal være rettet i lovens ord.**
+  `ceo/svensk-helgdagslove`. På `https://beraknare.se/dagar-till/julafton`,
+  `/dagar-till/skartorsdagen` og `/dagar-till/nationaldagen`: **"9-10", "räknas
+  som helgdagar", "officiella svenska helgdagar" for skärtorsdagen og "är inte
+  en laglig helgdag" må ikke forekomme nogen steder.** Siden skal i stedet sige
+  at julafton och skärtorsdagen *ikke* er allmän helgdag enligt
+  lagen (1989:253), og at nationaldagen *er* det. HTTP 200 beviser intet — det
+  er brødtekst. Prøven på dansk er `src/lib/dage-til.test.ts` efter deploy.
+  Vindue **1/10 07:30**.
 
 - ⏳ **Sydney skal stå med 8-10 timer foran, ikke 9-10.** `ceo/tidszone-tidsforskelle`.
   På `https://minberegner.dk/tidszone` og `https://beraknare.se/tidszone`: under
@@ -378,6 +430,47 @@ lukkede noter er verificeret 30/9 17:46-17:53 på indhold; alle målinger står 
   forskellen er ikke-klikket Google-trafik.** Det peger på én fælles årsag
   (snippet/intention), ikke på to separate sidefejl — men at *finde* den kræver
   stadig kildefordelingen fra Mads, så opgaven står.
+
+#### 188. [ ] 2026-09-30 — Kø — de to "sidste hverdag/vardag"-påstande er kun sande det ene år
+
+- **Datagrund:** fundet under F8's audit, samme klasse som review-fund 2 om
+  docblockens årstal. Se `nytaarsaften` (da: "Sidste hverdag i december er 31.
+  december") og `nyarsafton` (se: "Sista vardagen i december är 31 december").
+  Begge er sande **kun** når 31. december falder på en hverdag. Målt: 31.12 er
+  weekend i **2028 (søn), 2033 (lør), 2034 (søn) og 2039 (lør)** — på de år er
+  påstanden bogstaveligt forkert, og siden viser den alle dage.
+- **Hvorfor det ikke blev rettet samme commit:** F8's gate er bygget om
+  lovens liste, og denne påstand er ikke en lov- men en kalenderpåstand. At
+  blande den ind i samme diff ville gøre de to svært forskellige rettelser
+  umulige at rulle tilbage hver for sig — og opgaven siger, at en
+  rettelsesfejl der dækker to ting er værre end to dage.
+- **Acceptkriterier:** påstandene er skrevet så de er sande i alle år (fx
+  "31. december er sidste dag i december, uanset hvilken ugedag den falder
+  på"), og en test låser at ingen `da`/`se`-sætning på den slags dato
+  kalder den en hverdag/vardag uden at nævne forbeholdet. Gaten grøn.
+- **MÅL:** ingen trafikvirkning i sig selv — `/nytaarsaften` er ikke i
+  GSC's top-15. Men den ligger på to svenske og to danske svar-først-sider,
+  og klassen (påstand om et fast tal, der ikke er fast) er den samme som
+  CEO-køens otte fund.
+
+#### 189. [ ] 2026-09-30 — Kø — mål brødtekstal mod en kilde, ikke mod et hjemmeskrevet script
+
+- **Datagrund:** F8's målerfælde. Se målerfælden øverst i planen: tre
+  fejl i træk på rigtige påstande, før den ene rigtige fund. Det er ikke et
+  mål-fejl, det er en *metode*-fejl, og den er gentaget i to uafhængige
+  loops (reviewer-loopet 29/9 i `pinse-intervaller.ts`).
+- **Hvad der mangler:** der er ingen port der siger "denne påstand skal kunne
+  hentes i en kilde". F8's `LOEN_SIGER_HELGDAG` er den første — den hænger
+  lovens liste i testen og tjekker brødteksten mod den. Samme mønster bør
+  anvendes på de andre love- og kalenderpåstande i repoet: de danske
+  helligdagstider i `dage-til.ts` (grundlovsdag, palmesøndag, juleaftensdag),
+  sats-årgangene i `satser-2026.ts`, og promille-/alkoholgrænserne.
+- **Acceptkriterier:** en prioriteret liste over de 5-8 love- og
+  kalenderpåstande i brødteksten, hver med sin kilde, og mindst **to** af dem
+  lagt ind i en port som F8's. Kilden hentes fra riksdagen.se, retsinformation.dk,
+  skat.dk eller en kommunal vedtægt — aldrig fra hukommelsen.
+- **MÅL:** ingen direkte. Denne port er det, der forhindrer at de otte CEO-fund
+  kommer tilbage som de næste otte.
 
 #### 187. [ ] **IKKE FØR 2026-10-13** 2026-09-30 — Kø — **migrér beraknare.se til svenske URL-slugs med 301**
 

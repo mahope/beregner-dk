@@ -21060,3 +21060,43 @@ alle korrekte, så de otte CEO-punkters dato-rettelser holder.
 **MÅL:** `/tidszone` under top-15 i Plausible, 24.324 GSC-visninger / 104 klik /
 CTR 0,4 % / pos. 7,5 (GSC 2026-08-31 → 2026-09-28). Genmål 14 dage efter at
 den er live.
+
+---
+
+## F8 — `ceo/svensk-helgdagslove` (30/9 20:05, 197 test-filer grønne)
+
+**Hvad:** de tre svenske helgdagspåstande i `/dage-til/`-klyngen rettet mod
+`lag (1989:253) 1 §`, + en ny port der holder dem der.
+
+**Fund.** Klyngen blev bygget 29/9 med ca. 140 håndskrevne faktasætninger
+(19 hændelser × facts + FAQ × da/se). Ingen måling, ingen test. Audit af alle
+sætninger mod lovens egen tekst (riksdagen.se, SFS 1989:253 t.o.m. SFS
+2004:1320) gav tre fejl, alle svenske, alle om den *samme* lov:
+
+| Side | Skrev | 1 § siger |
+|---|---|---|
+| se `/julafton` F3 | "Både julafton och nyårsafton 31 december räknas som helgdagar i den svenska kalendern" | juldagen + annandag jul. Julafton står ikke. Nyårsafton står heller ikke — kun nyårsdagen. |
+| se `/skartorsdagen` F2 | "Skärtorsdag, långfredag, påskdagen och annandag påsk är alla officiella svenska helgdagar" | långfredagen + annandag påsk. **Skärtorsdagen står ikke.** Siden modsagde også sig selv — F3 på samme side siger at man ikke har automatisk ret til dagpenning. |
+| se `/nationaldagen` F2 + FAQ | "Den är inte en laglig helgdag i Sverige" | nationaldagen står i 1 §, og 2 § fastställer "den 6 juni". |
+
+**Rigtige, og ladt urørt** — auditen bekræftede syv andre svenske påstande mod
+§2 ordret: pingstdagen som "sjunde söndagen efter påskdagen" (ordret §2),
+midsommardagen "lördag som infaller 20–26 juni" (§2), alla helgons dag
+"lördag 31 oktober–6 november" (§2), Kristi himmelsfärdsdag påske+39 (= den
+sjätte torsdagen efter påskdagen, §2), nationaldagen "6 juni" (§2). Dansk side
+var korrekt hele vejen igennem.
+
+**Port.** `LOEN_SIGER_HELGDAG` i `dage-til.test.ts` — lovens liste som data pr.
+hændelses egen svenske slug, brødteksten tjekket i begge retninger. 2 nye
+tests; begge faldt mod den gamle kode (`git stash push -- src/lib/dage-til.ts`).
+
+**Målerfælden.** Se målerfælden i planen. Kort: mit eget målescript havde tre
+fejl i træk på rigtige påstande, før det fandt den ene rigtige. Dels sorterede
+det datoer absolut, så planens "mellem 1. maj (2008) og 3. juni (2038)" læst
+som forkert — påstanden er om dag-i-året og er korrekt. Dels forankrede
+ugenummeret på 1. januar i stedet for ISO-mandagen. Dels ramte
+sætnings-vis søgning to korrekte negativer. Samme metodefejl som reviewer-
+loopet lavede 29/9 i `pinse-intervaller.ts` (fandt 4 kollisionsår, rigtigt er 7).
+**Målescripts skal krydses mod lovens eller kalenderens egen tekst.**
+
+**Gate:** lint 627 filer ren · 3251 tests grønne · build OK · locale-leak exit 0.

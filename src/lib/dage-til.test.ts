@@ -1567,3 +1567,144 @@ describe("events uden svensk udgave", () => {
     }
   });
 });
+
+/**
+ * Svenska påståenden om vilka dagar som är helgdagar.
+ *
+ * Lag (1989:253) om allmänna helgdagar, 1 §, jämförd med SFS 2004:1320,
+ * räknar upp exakt dessa dagar:
+ *
+ *   - söndagar, däribland påskdagen och pingstdagen
+ *   - nyårsdagen, trettondedag jul, första maj, juldagen och annandag jul
+ *   - långfredagen, annandag påsk, Kristi himmelsfärdsdag, nationaldagen,
+ *     midsommardagen och alla helgons dag
+ *
+ * Tre afsnit på beraknare.se sagde det modsatte, och de gjorde det på tre
+ * mått: julafton skrev att den räknas som helgdag, skärtorsdag skrev att den
+ * är en "officiell svensk helgdag" (och motsade samtidigt sin egen faktaboks
+ * sista punkt om att man inte har automatisk rätt till dagpenning), och
+ * nationaldagen skrev både i faktaboksen och i FAQ att den "inte är en laglig
+ * helgdag" — fast lagen tar uttryckligen upp den.
+ *
+ * Denne test lægger loven i som data og tjekker brødteksten mod den, så
+ * klassen kan ikke komme tilbage ved at nogen skriver en ny helgdagssætning.
+ */
+const LAGENS_HELGDAGE = [
+  "påskdagen",
+  "pingstdagen",
+  "nyårsdagen",
+  "trettondedag jul",
+  "första maj",
+  "juldagen",
+  "annandag jul",
+  "långfredagen",
+  "annandag påsk",
+  "kristi himmelsfärdsdag",
+  "nationaldagen",
+  "midsommardagen",
+  "alla helgons dag",
+];
+
+/** Svenska eventer der LOven *ikke* tæller som allmæn helgedag. */
+const IKKE_HELGDAG = ["julafton", "nyårsafton", "skärtorsdagen"];
+
+const svenskBrødtekst = () =>
+  DAGE_TIL_EVENTS.flatMap((event) => {
+    const se = event.se;
+    if (!se) return [];
+    return [...se.copy.facts, ...se.copy.faq.map((f) => `${f.question} ${f.answer}`)];
+  });
+
+const naevner = (tekst: string, ord: string[]) => ord.some((o) => tekst.includes(o));
+
+/**
+ * Loven 1 §, målt på den svenska hændelses egen dag. `true` = loven tæller den
+ * som allmæn helgdag, `false` = den står ikke på listen.
+ *
+ * Mangler en hændelse i tabellen, springes den over — tabellen er ikke en
+ * påstand om at *alle* dage er dækket, men om de helligdagsdage der er.
+ */
+const LOEN_SIGER_HELGDAG: Record<string, boolean> = {
+  juldagen: true, // juldagen
+  julafton: false, // julafton — kun juldagen och annandag jul sta i listan
+  nyarsafton: false, // nyårsafton — loven har nyårsdagen
+  nyarsdagen: true, // nyårsdagen
+  paskdagen: true, // söndag
+  skartorsdagen: false, // skärtorsdag — ikke i lagen
+  nationaldagen: true, // nationaldagen, jämför 2 § "den 6 juni"
+  midsommarafton: false, // midsommarafton — lagen har midsommardagen
+  midsommardagen: true, // midsommardagen
+  halloween: false, // allhelgonaafton — lagen har alla helgons dag
+  paskafton: true, // långfredagen
+  "kristi-himmelsfardsdag": true, // Kristi himmelsfärdsdag
+  pingstdagen: true, // pingstdagen
+  valborg: false,
+  "1-advent": false, // 1. advent er en söndag, men inte en helgdag
+};
+
+/** "er en allmän helgdag", "räknas som helgdag", "officiell svensk helgdag". */
+const kalderDetHelgdag = (tekst: string) =>
+  naevner(tekst, [
+    "allmän helgdag",
+    "allmänna helgdagar",
+    "helgdag i den svenska kalendern",
+    "officiell svensk helgdag",
+    "officiella svenska helgdagar",
+  ]);
+
+/** "är inte en laglig helgdag", "är inte en officiell helgdag". */
+const kalderDetIkkeHelgdag = (tekst: string) =>
+  naevner(tekst, [
+    "inte en laglig helgdag",
+    "inte en officiell helgdag",
+    "inte en allmän helgdag",
+  ]);
+
+/**
+ * En benekrande sætning — "är inte en allmän helgdag", "saknas i listan".
+ * Valborg och 1. advent er korrekt skrevet som *ikke* helgdag, så en test der
+ * kun læser "allmän helgdag" i dem ville slå fejl på rigtig tekst.
+ */
+const benekrende = (tekst: string) =>
+  naevner(tekst, [" inte ", "saknas", "utan ", "men inte ", "faller inte", "omfattas inte"]);
+
+describe("svenska helgdagspåstande mod lagen (1989:253) 1 §", () => {
+  test("nationaldagen kaldes aldrig for ikke at vaere en laglig helgdag", () => {
+    const nationaldagen = DAGE_TIL_EVENTS.find((e) => e.se?.slug === "nationaldagen");
+    expect(nationaldagen?.se).toBeDefined();
+    const tekster = [
+      ...nationaldagen!.se!.copy.facts,
+      ...nationaldagen!.se!.copy.faq.map((f) => `${f.question} ${f.answer}`),
+    ];
+    // Den skal sige det modsatte — loven tager uttryckligen upp nationaldagen.
+    expect(tekster.some((t) => kalderDetIkkeHelgdag(t))).toBe(false);
+    expect(tekster.some((t) => t.includes("allmän helgdag"))).toBe(true);
+  });
+
+  test("hver svensk dag er helgdag i brødteksten præcis som i loven", () => {
+    // Hver helligdagsdag, målt på *hændelsen* og ikke på om ordet "nationaldagen"
+    // tilfældigvis står i sætningen — ellers ville korrekt tekst med et pronomen
+    // ("I Sverige är den en allmän helgdag") blive afvist.
+    const fejl: string[] = [];
+    for (const event of DAGE_TIL_EVENTS) {
+      const se = event.se;
+      if (!se) continue;
+      const loven = LOEN_SIGER_HELGDAG[se.slug];
+      if (loven === undefined) continue;
+      for (const tekst of [...se.copy.facts, ...se.copy.faq.map((f) => f.answer)]) {
+        if (loven) {
+          // Skal den vaere en benekrende sætning. En sætning der både
+          // bekrefter og benekrter ("Pingstdagen är en allmän helgdag ...
+          // // Måndagen efter är däremot ikke ...") handler om to forskellige
+          // dage, saa den skal laeses i sin helhed og ikke slaas fejl pa.
+          if (kalderDetIkkeHelgdag(tekst) && !kalderDetHelgdag(tekst)) {
+            fejl.push(`${se.slug}: ${tekst}`);
+          }
+        } else if (kalderDetHelgdag(tekst) && !benekrende(tekst)) {
+          fejl.push(`${se.slug}: ${tekst}`);
+        }
+      }
+    }
+    expect(fejl).toEqual([]);
+  });
+});

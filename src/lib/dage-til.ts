@@ -186,7 +186,7 @@ export const DAGE_TIL_EVENTS: DageTilEvent[] = [
         facts: [
           "Julafton är 24 december — alltid samma datum, oavsett vilken veckodag den infaller på.",
           "Julafton är dagen före juldagen, så de två ligger alltid en dag ifrån varandra.",
-          "År 2026 infaller julafton på en torsdag. Både julafton och nyårsafton 31 december räknas som helgdagar i den svenska kalendern.",
+          "År 2026 infaller julafton på en torsdag. Julafton är däremot inte en allmän helgdag enligt lagen (1989:253) — det är juldagen och annandag jul som räknas, inte julafton.",
         ],
         faq: [
           {
@@ -510,7 +510,7 @@ export const DAGE_TIL_EVENTS: DageTilEvent[] = [
         question: "Hur många dagar är det till skärtorsdagen?",
         facts: [
           "Skärtorsdagen är 3 dagar före påskdagen och alltid en torsdag.",
-          "Skärtorsdag, långfredag, påskdagen och annandag påsk är alla officiella svenska helgdagar.",
+          "Långfredag, påskdagen och annandag påsk är alla allmänna helgdagar enligt lagen (1989:253). Skärtorsdag är det inte — det är en vanlig arbetsdag, och det är kollektivavtalet som avgör om du har ledigt.",
           "Om du arbetar skärtorsdagen har du inte automatiskt rätt till dagpenning — det beror på ditt avtal.",
         ],
         faq: [
@@ -575,7 +575,7 @@ export const DAGE_TIL_EVENTS: DageTilEvent[] = [
         question: "Hur många dagar är det till nationaldagen?",
         facts: [
           "Sveriges nationaldag är 6 juni, och datumet är fast — det flyttar inte beroende på vilken veckodag det infaller på.",
-          "Nationaldagen har varit 6 juni sedan 2005. Den är inte en laglig helgdag, men de flesta arbetsgivare ger ändå ledigt med lön.",
+          "Nationaldagen har varit 6 juni sedan 2005 och är en allmän helgdag enligt lagen (1989:253). Det är kollektivavtalen, inte lagen, som avgör om du får fri med lön.",
           "Nationaldagen är inte samma sak som midsommarafton, som ligger mellan 19 och 25 juni.",
         ],
         faq: [
@@ -587,7 +587,7 @@ export const DAGE_TIL_EVENTS: DageTilEvent[] = [
           {
             question: "Är nationaldagen en röd dag?",
             answer:
-              "Nej. Sedan 2005 är 6 juni nationaldag, men den är inte en laglig helgdag i Sverige. De flesta arbetsgivare ger ändå ledigt.",
+              "Ja. 6 juni är en allmän helgdag enligt lagen (1989:253) och räknas som röd dag. Lagen säger däremot ingenting om lön — det är kollektivavtalen som avgör det, och de flesta ger ledigt med lön.",
           },
           {
             question: "Hur räknar jag ut datumet helt säkert?",
