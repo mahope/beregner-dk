@@ -10,6 +10,14 @@ import {
   beregnHuslejestigning,
 } from "./nettoprisindeks";
 import { landSvarSprogholdig, satsUdenraekkeSvar } from "./moms-eu";
+import {
+  RABAT_BELOEB,
+  RABAT_EKSEMPEL,
+  RABAT_SATS_UDLAET,
+  procentAf,
+  procentForskel,
+  rabatProcent,
+} from "./procent";
 import { formatNumber } from "./format";
 import { alderSideTekst, erstatAlderTokens } from "./alder-side-tekst";
 import { iDagISidensTidszone } from "./lokal-dato";
@@ -152,6 +160,41 @@ const PINSE_PERIODE_SE_TEKST =
   `${PINSE_PERIODE_SE.periodeFrieDage} dagar utan arbete, och helgdagarna i perioden är ` +
   `${PINSE_PERIODE_SE.periodeHelligdagsnavne.join(", ")}. Annandag pingst är en vanlig måndag ` +
   `i Sverige — bara i Danmark är den en helig dag.`;
+
+// ─── /procent, rabat-FAQ'en. Hvert tal i de fire svenske og to danske svar er
+// det samme tal, som afsnittet "Sådan beregner du rabatten i procent" regner
+// lige oven i dem. De skrives derfor som regnestykker over RABAT_EKSEMPEL og
+// RABAT_BELOEB frem for i hånden: sætningen og brødteksten kan så ikke glide
+// fra hinanden — samme grund som MOMS_FAQ_FORMAT, huslejeSvaer og
+// PROMILE_80_MAND er skrevet af.
+const RABAT_NEDSAT = RABAT_EKSEMPEL.normalPris - RABAT_EKSEMPEL.nedsatPris;
+const RABAT_PROCENT = rabatProcent(RABAT_EKSEMPEL.normalPris, RABAT_EKSEMPEL.nedsatPris);
+/** Hvad nedsættelsen er i procent af den pris, læseren betaler — det andet tal. */
+const RABAT_MOD_NY = procentForskel(RABAT_EKSEMPEL.normalPris, RABAT_EKSEMPEL.nedsatPris);
+
+/**
+ * Samme tal, formatteret i det sprog de står på. `Intl` bruger U+00A0 som
+ * tusindtalsseparator på svensk, som renderer som et mellemrum men er et andet
+ * tegn end det almindelige mellemrum resten af den svenske tekst bruger — samme
+ * normalisering som `procent/page.tsx` laver på sit `num`.
+ */
+const rabatTal = (locale: "da" | "se", tal: number, decimaler = 0) =>
+  formatNumber(tal, locale, { maximumFractionDigits: decimaler }).replace(/\u00a0/g, " ");
+
+const rabatFaqTal = (locale: "da" | "se") => ({
+  normalPris: rabatTal(locale, RABAT_EKSEMPEL.normalPris),
+  nedsatPris: rabatTal(locale, RABAT_EKSEMPEL.nedsatPris),
+  nedsat: rabatTal(locale, RABAT_NEDSAT),
+  rabat: rabatTal(locale, RABAT_PROCENT, 1),
+  modNy: rabatTal(locale, RABAT_MOD_NY, 1),
+  satsBelob: rabatTal(locale, RABAT_BELOEB),
+  satsSparer: rabatTal(locale, procentAf(RABAT_BELOEB, RABAT_SATS_UDLAET)),
+  satsBetaler: rabatTal(locale, RABAT_BELOEB - procentAf(RABAT_BELOEB, RABAT_SATS_UDLAET)),
+  tredjedel: rabatTal(locale, RABAT_BELOEB / 3, 2),
+  tredjedelBetalt: rabatTal(locale, RABAT_BELOEB - RABAT_BELOEB / 3, 2),
+});
+const RABAT_DA = rabatFaqTal("da");
+const RABAT_SE = rabatFaqTal("se");
 
 /** Regnestykket i FAQ'en og på siden, samme tal som siden viser i tabellen. */
 const braendstofEksempel = braendstofEksempelRækker();
@@ -855,7 +898,8 @@ const daPages: Record<string, PageData> = {
       { question: "Hvordan lægger jeg procent til?", answer: "Gang med (1 + procent/100). Læg 20% til 150: 150 × 1,20 = 180." },
       { question: "Hvordan regner man procent i Excel?", answer: "Skriv =A1/B1*100, hvis du vil have procent direkte, og =A1*B1/100, hvis du vil have X procent af et tal. Et fald fra 9.000 kr til 7.875 kr er =(B1-A1)/A1*100 = -12,5 %. Formater cellen som procent, hvis du ikke skriver *100." },
       { question: "Hvordan regner man procentforskellen mellem to tal?", answer: "Forskellen er ((nyt tal - gammelt tal) / gammelt tal) × 100. Går en pris fra 9.000 kr til 7.875 kr, er faldet (7.875 - 9.000) / 9.000 = -12,5 %." },
-      { question: "Hvor stor er rabatten i procent?", answer: "Rabatten er (pris før rabat - pris efter rabat) / pris før rabat × 100. Er en vare på 9.000 kr sat 1.125 kr. ned, er rabatten 1.125 / 9.000 = 12,5 %." },
+      { question: "Hvor stor er rabatten i procent?", answer: `Rabatten er (pris før rabat - pris efter rabat) / pris før rabat × 100. Er en vare på ${RABAT_DA.normalPris} kr. sat ${RABAT_DA.nedsat} kr. ned, er rabatten ${RABAT_DA.nedsat} / ${RABAT_DA.normalPris} = ${RABAT_DA.rabat} %.` },
+      { question: "Hvordan regner man rabat i procent?", answer: `Det er tre trin: find forskellen mellem de to priser, del forskellen med den oprindelige pris, og gang med 100. Del med prisen FØR nedsættelsen, ikke med den du betaler — ${RABAT_DA.nedsat} kr. er ${RABAT_DA.modNy} % af den pris, men rabatten er ${RABAT_DA.rabat} %. Har du i stedet en rabatsats, er den nye pris beløb × (1 - sats ÷ 100): ${RABAT_DA.satsBelob} kr. med ${RABAT_SATS_UDLAET} % rabat koster ${RABAT_DA.satsBetaler} kr.` },
       { question: "Hvad er 10 procent af 500?", answer: "10 procent af 500 er 50, fordi du deler 500 med 10. Reglen er altid tallet delt med 10." },
       { question: "Hvad er 10 procent af 1.600?", answer: "10 procent af 1.600 er 160, fordi du deler 1.600 med 10. Det er samme regel som 10 procent af 500 = 50." },
       { question: "Hvorfor er 10 procent af 75 ikke et helt tal?", answer: "Fordi 75 ikke kan deles lige med 10. 10 procent af 75 er 7,5, og kommaet er korrekt — 10 procent af 80 ville være 8." },
@@ -3358,6 +3402,17 @@ const sePages: Record<string, PageData> = {
       { question: "Hur beräknar jag procentuell ökning?", answer: "((Ny - Gammal) / Gammal) × 100. Från 100 till 125 = 25% ökning." },
       { question: "Vad är procentenheter vs procent?", answer: "Procentenheter är absolut förändring, procent är relativ. Räntan från 2% till 3% = 1 procentenhet men 50% ökning." },
       { question: "Hur lägger jag till procent?", answer: "Multiplicera med (1 + procent/100). Lägg 20% till 150: 150 × 1,20 = 180." },
+      // Rabattklyngen. Svensk autocomplete (hl=se&gl=se, 2026-09-30) svarar på
+      // "rabatt i procent" med sju formuleringar, hvorav fyra egna frågor:
+      // "hur stor är rabatten i procent", "hur mycket rabatt i procent",
+      // "räkna ut rabatt i procent excel" och "procentuell rabatt". Ingen af dem
+      // fandtes i FAQ'en, selv om F2 gav siden hela afsnittet "Så här räknar
+      // du ut rabatten i procent" — og /rabat er daOnly, så beraknare.se har
+      // ingen anden side, hvor spørgsmålet kunne besvares.
+      { question: "Hur stor är rabatten i procent?", answer: `Rabatten är (pris före rabatt - pris efter rabatt) / pris före rabatt × 100. En vara som sänks från ${RABAT_SE.normalPris} kr till ${RABAT_SE.nedsatPris} kr har alltså en rabatt på ${RABAT_SE.nedsat} / ${RABAT_SE.normalPris} = ${RABAT_SE.rabat} procent.` },
+      { question: "Hur räknar man ut rabatt i procent i Excel?", answer: `Skriv =(B1-A1)/A1*100, där A1 är priset före rabatten och B1 det nya priset. ${RABAT_SE.normalPris} i A1 och ${RABAT_SE.nedsatPris} i B1 ger ${RABAT_SE.rabat} procent rabatt. Vill du bara se vad du sparar, skriv du =A1-B1, som ger ${RABAT_SE.nedsat} kr.` },
+      { question: "Vad är procentuell rabatt?", answer: `Procentuell rabatt är hur många procent varan har sänkts, mätt på det pris den hade före sänningen. Det är inte samma sak som hur många kronor du sparar, og ikke heller som hur mycket det vanliga priset har stigit: ${RABAT_SE.nedsat} kr är ${RABAT_SE.modNy} procent av det du betalar, men rabatten är ${RABAT_SE.rabat} procent, eftersom heltalet är det vanliga priset.` },
+      { question: "Hur mycket rabatt i procent får jag på en vara?", answer: `Har du en rabatsats i stället för två priser, så är rabatten satsen, och det du sparar är beloppet × satsen ÷ 100. ${RABAT_SATS_UDLAET} % rabatt på en vara för ${RABAT_SE.satsBelob} kr är ${RABAT_SE.satsSparer} kr, så du betalar ${RABAT_SE.satsBetaler} kr. ${RABAT_SATS_UDLAET} % är inte en tredjedel: en tredjedel av ${RABAT_SE.satsBelob} kr är ${RABAT_SE.tredjedel} kr, så du hade betalat ${RABAT_SE.tredjedelBetalt} kr.` },
       { question: "Hur räknar man ut skillnaden i procent mellan två tal?", answer: "Det beror på vilket tal som är heltalet. För procentuell förändring är det den gamla summan: 10 000 till 12 500 ger (12 500 - 10 000) / 10 000 = 25 procent. För procentdifferens, som är lika oberoende av vilken riktning du räknar i, tar du medelvärdet: 2 500 / 11 250 = 22,2 procent för samma två tal." },
       { question: "Hur räknar man ut skillnaden mellan två tal i Excel?", answer: "Skriv =(B1-A1)/A1*100, där A1 är det gamla talet och B1 det nya. 10 000 i A1 och 12 500 i B1 ger 25 procent. Vill du ha den symmetriska skillnaden i stället, skriver du =ABS(A1-B1)/((A1+B1)/2)*100, som ger 22,2 procent för samma tal." },
       { question: "Vad är 10 procent av 500?", answer: "10 procent av 500 är 50, eftersom du delar 500 med 10. Regeln är alltid att talet delas med 10." },

@@ -116,16 +116,25 @@ export const RABAT_EKSEMPEL = { normalPris: 9000, nedsatPris: 7875 };
 export const RABAT_BELOEB = 1000;
 
 /**
+ * The one rate the prose argues about, named because two sentences on the page
+ * make a claim about it: 33 % is not a third, so the "buy three, pay for two"
+ * offer really costs 670 kr of a 1 000 kr item and not the 666,67 kr a third
+ * would. Without a name the only way to write that claim is to type 33, which
+ * is how the number and the sentence would drift apart.
+ */
+export const RABAT_SATS_UDLAET = 33;
+
+/**
  * The discount rates a Danish or Swedish price tag actually carries, in the
  * order a shopper meets them.
  *
  * These are the rates the page could already document — 10 % and 25 % stand in
  * the "Procentregning i hverdagen" bullet and in the quick-trick table, and
  * 20 % is the standard "udsal" in Danish retail — so the table adds rows
- * rather than claims. 33 % is the odd one out on purpose: it is the rate
- * behind "køb tre, betal for to" style offers, and it is the only row whose
- * answer is not a round hundred, so it shows the rounding the reader would
- * otherwise have to guess.
+ * rather than claims. {@link RABAT_SATS_UDLAET} is the odd one out on purpose:
+ * it is the rate behind "køb tre, betal for to" style offers, and it is the
+ * only row whose answer is not a round hundred, so it shows the rounding the
+ * reader would otherwise have to guess.
  */
-export const RABAT_SATS = [10, 20, 25, 33, 50];
+export const RABAT_SATS = [10, 20, 25, RABAT_SATS_UDLAET, 50];
 

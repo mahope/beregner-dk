@@ -20765,3 +20765,110 @@ docblock, og det er ærligt sagt i commit-beskeden.
 `ProteinbehovBeregner.tsx:55`, `TerminBeregner.tsx:117`,
 `KalorieBeregner.tsx:129`) er præcis samme fejl og blev fundet af denne
 genmåling. De er ikke rørt her — de er en anden opgave.
+
+---
+
+## F2b — svensk rabatt-FAQ på `/procent` (30/9 17:40, `ceo/procent-svensk-rabatt-faq`)
+
+### Målingen, opgaven bygger på
+
+Autocomplete-genmålt 30/9 17:32 med `curl` mod Googles egen
+`suggestqueries` (ikke antaget fra 16:45-noten):
+
+| Land | Seed | Svar |
+|---|---|---|
+| `hl=se&gl=se` | `rabatt i procent` | **7** træffere: "rabatt i procent", "rabat i procent", "räkna rabatt i procent", "beräkna rabatt i procent", "räkna ut rabatt i procent", **"räkna ut rabatt i procent excel"**, **"hur mycket rabatt i procent"** |
+| `hl=se&gl=se` | `procentuell rabatt` | **3** træffere: "procentuell rabatt", "beräkna procentuell rabatt", "räkna ut procentuell rabatt" |
+| `hl=se&gl=se` | `hur stor är rabatten i procent` | 1 træf, subtype 22 (rigtig søgning) |
+| `hl=da&gl=dk` | `hvordan regner man rabat i procent` | 1 træf, subtype 512 |
+| `hl=da&gl=dk` | `beregn rabat i procent` | 1 træf, subtype 512 |
+
+Alle syv svenske træffere har subtype 22, altså rigtige søgninger og ikke
+"people also search"-stik. Fire af dem er egne spørgsmål, og **ingen** af de fire
+stod i `sePages.procent.faqItems` før denne opgave — selv om F2 (`4051781`) lagde
+hele afsnittet "Så här räknar du ut rabatten i procent" på beraknare.se's `/procent`.
+`/rabat` er `daOnly` (`calculator-list.ts:90`), så beraknare.se har ingen anden
+side, hvor spørgsmålet kan besvares.
+
+### Hvad der blev bygget
+
+Fire nye svenske rækker og én dansk, i `src/lib/page-data.ts`:
+
+| Sprog | Spørgsmål | Hvilken autocomplete-træf den dækker |
+|---|---|---|
+| se | Hur stor är rabatten i procent? | "hur stor är rabatten i procent" + "räkna/beräkna rabatt i procent" |
+| se | Hur mycket rabatt i procent får jag på en vara? | "hur mycket rabatt i procent" |
+| se | Hur räknar man ut rabatt i procent i Excel? | "räkna ut rabatt i procent excel" |
+| se | Vad är procentuell rabatt? | "procentuell rabatt" + de to "ut procentuell rabatt" |
+| da | Hvordan regner man rabat i procent? | "hvordan regner man rabat i procent", "beregn rabat i procent" |
+
+Den danske eksisterende række "Hvor stor er rabatten i procent?" blev bevaret med
+**samme** operatorer og tal (så `page-data.test.ts:990`'s port på
+"1.125 / 9.000 = 12,5" stadig holder), men tallene er nu regnet frem for skrevet.
+
+Spørgsmålene er fire *forskellige* spørgsmål, ikke fire formuleringer af ét: to
+priser givet → rabatten; en sats givet → sparing og pris; Excel-formlen; og
+begrebet "procentuell" (målt på prisen *før* sænkningen, ikke på den nye pris).
+At skrive "hur stor är rabatten" og "hur mycket rabatt i procent" som to rækker
+med samme svar ville være tyndt indhold, og tynde FAQ-rækker skader hele siden.
+
+### Tallene er regnet, ikke skrevet
+
+`page-data.ts` fik et tal-bundt pr. sprog bygget af `RABAT_EKSEMPEL` (9 000 →
+7 875), `RABAT_BELOEB` (1 000) og `RABAT_SATS`:
+
+```ts
+const RABAT_NEDSAT   = RABAT_EKSEMPEL.normalPris - RABAT_EKSEMPEL.nedsatPris;   // 1 125
+const RABAT_PROCENT  = rabatProcent(...);                                          // 12,5
+const RABAT_MOD_NY   = procentForskel(normalPris, nedsatPris);                    // 14,3
+```
+
+`RABAT_SATS_UDLAET = 33` blev navngivet i `procent.ts`, fordi to sætninger på
+siden og to FAQ-svar regner med den sats — uden et navn er den eneste måde at
+skrive påstanden på at skrive `33`, og det er sådan tal og sætning glider.
+
+Samme konvention som `MOMS_FAQ_FORMAT`, `huslejeSvaer` og `PROMILLE_80_MAND` i
+samme fil.
+
+**Én fælde fundet undervejs:** `Intl` bruger **U+00A0** som tusindtalsseparator på
+svensk. Den renderer som et mellemrum, men er et andet tegn end det almindelige
+mellemrum resten af den svenske tekst bruger — præcis som `procent/page.tsx`'s
+`num` normaliserer. Uden normaliseringen ville `9 000` i FAQ'en være en anden
+streng end `9 000` i brødteksten, uden at nogen forskel kunne ses i en diff.
+`rabatTal` gør derfor `.replace(/\u00a0/g, " ")` lige som siden.
+
+### Tests, og at de kan fejle
+
+10 nye tests. Forventningerne er **regnet af konstanterne i testen**, ikke
+skrevet som strenge — ellers låser de kun det tal, der står der nu, uden at sige
+noget om hvor det kommer fra.
+
+Fire mutationer kørt mod den ændrede kode, alle faldt:
+
+| Mutation | Tests der faldt |
+|---|---|
+| `${RABAT_DA.rabat}` → `12,9` i den danske sætning | 2 (den nye + `page-data.test.ts:982` den gamle) |
+| `.replace(/\u00a0/g, " ")` fjernet fra `rabatTal` | 2 (tal-porten + mellemrums-porten) |
+| alle fire svenske rækker slettet | 6 |
+| `.replace("\u00a0", " ")` uden `g` | 0 — **ikke** fanget, fordi hvert tal kun har ét skilletegn; erstattet af mutation 3 |
+
+Svensk-blokken testes mod `[æø]`, fordi æ og ø er danske bogstaver alene blandt
+sidets live locales (samme regel som `locale-leak.mjs`'s R4), og mod fire danske
+ord uden æ/ø ("tre trin", "mellem to priser", "nedsat pris", "pris før").
+
+### Gaten
+
+`npm run lint` (624 filer) · `npm run test` (**3.223 tests / 194 filer**) ·
+`npm run build` (142 sider) · `node scripts/locale-leak.mjs --gate` (**0
+ureviewet**, 761 kandidater / 39 kræver øjne). Den `FEJL: 1 ureviewet(e)`-linje
+med `procent/page.tsx` i `npm run test`-output er målerfælden fra planens egen
+sektion — `locale-leak-gate.test.ts` planterer en dansk streng med vilje.
+
+### Deploy-måling 30/9 17:37
+
+Ingen af de seks åbne noter er live: `/procent` mangler stadig `<h2>Sådan
+beregner du rabatten i procent</h2>`, `/alder` siger "pr. 25. september 2026" 16
+gange, og `/boligstoette`'s `<title>` er "Boligstøtte 2026: Standardmaksima,
+formue og beregning" — ikke den nye. De fire merges er fra 13:19–16:53, så
+17:30-batchen var den første kørsel efter dem, og den var syv minutter gammel.
+**21:30 er derfor det vindue, hvorfra det kan dømmes.**

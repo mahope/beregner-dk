@@ -7,8 +7,130 @@ import { TIDSZONER } from "./tidszone-reference";
 import { forkortBrok } from "./brok";
 import { alderLevet, formatDageLived } from "./alder-levet";
 import { formatAlder } from "./alder-eksempler";
-import { getIntlLocale } from "./format";
+import { formatNumber, getIntlLocale } from "./format";
 import { iDagISidensTidszone } from "./lokal-dato";
+import {
+  RABAT_BELOEB,
+  RABAT_EKSEMPEL,
+  RABAT_SATS_UDLAET,
+  procentAf,
+  procentForskel,
+  rabatProcent,
+} from "./procent";
+
+// ─── /procent's rabat-FAQ. Forventningerne i de to nedenstående porte er
+// *regnet* af de samme konstanter, som FAQ'en selv bygger sine svar af, så
+// porten holder i begge retninger: et tal, der skrives forkert i sætningen,
+// falder her, og en konstant der ændres, flytter forventningen med. Det er
+// derfor tallene ikke er skrevet som strenge i testen — det ville kun låse det
+// tal, der står der nu, uden at sige noget om hvor det kommer fra.
+const talDa = (tal: number, decimaler = 0) =>
+  formatNumber(tal, "da", { maximumFractionDigits: decimaler }).replace(/\u00a0/g, " ");
+const talSe = (tal: number, decimaler = 0) =>
+  formatNumber(tal, "se", { maximumFractionDigits: decimaler }).replace(/\u00a0/g, " ");
+
+describe("procentens rabat-FAQ", () => {
+  const nedsat = RABAT_EKSEMPEL.normalPris - RABAT_EKSEMPEL.nedsatPris;
+  const rabat = rabatProcent(RABAT_EKSEMPEL.normalPris, RABAT_EKSEMPEL.nedsatPris);
+  const modNy = procentForskel(RABAT_EKSEMPEL.normalPris, RABAT_EKSEMPEL.nedsatPris);
+
+  const svar = (locale: "da" | "se", spoergsmaal: string) =>
+    getPageData("procent", locale)!.faqItems.find((i) => i.question === spoergsmaal)?.answer;
+
+  // Svensk autocomplete (hl=se&gl=se, 2026-09-30) svarer på "rabatt i procent"
+  // med sju formuleringar. Fire af dem er egna frågor, og ingen af dem fandtes
+  // i FAQ'en — selv om F2 gav beraknare.se hela afsnittet "Så här räknar du ut
+  // rabatten i procent". /rabat er daOnly (calculator-list.ts:90), så
+  // beraknare.se har ingen anden side, hvor frågan kan besvaras.
+  test.each([
+    "Hur stor är rabatten i procent?",
+    "Hur mycket rabatt i procent får jag på en vara?",
+    "Hur räknar man ut rabatt i procent i Excel?",
+    "Vad är procentuell rabatt?",
+  ])("den svenska FAQ'en svarer på %s", (spoergsmaal) => {
+    expect(svar("se", spoergsmaal), spoergsmaal).toBeDefined();
+  });
+
+  // Hver af de fire rækker skal bære de tal, afsnittet over dem regner. Uden
+  // denne port kan et tal skrives i sætningen og glide fra brødteksten, og
+  // det er præcis den fejl, hele rabat-afsnitten er skrevet for at undgå.
+  test("de svenske svar bærer de samme tal som afsnittet oven for dem", () => {
+    const normalPris = talSe(RABAT_EKSEMPEL.normalPris);
+    const nedsatPris = talSe(RABAT_EKSEMPEL.nedsatPris);
+    const belob = talSe(RABAT_BELOEB);
+    const sparer = talSe(procentAf(RABAT_BELOEB, RABAT_SATS_UDLAET));
+    const betaler = talSe(RABAT_BELOEB - procentAf(RABAT_BELOEB, RABAT_SATS_UDLAET));
+
+    // "hur stor är rabatten i procent" — de to priser, som i brødteksten.
+    const stor = svar("se", "Hur stor är rabatten i procent?")!;
+    expect(stor).toContain(`${normalPris} kr till ${nedsatPris} kr`);
+    expect(stor).toContain(`${talSe(nedsat)} / ${normalPris} = ${talSe(rabat, 1)} procent`);
+
+    // Excel-formlen skal give præcis samme rabat som formlen over den.
+    const excel = svar("se", "Hur räknar man ut rabatt i procent i Excel?")!;
+    expect(excel).toContain(`${normalPris} i A1 och ${nedsatPris} i B1 ger ${talSe(rabat, 1)} procent rabatt`);
+    expect(excel).toContain(`=A1-B1, som ger ${talSe(nedsat)} kr`);
+
+    // Begge de to tal, der ligner hinanden, skal stå i den samme sætning.
+    const begreb = svar("se", "Vad är procentuell rabatt?")!;
+    expect(begreb).toContain(`${talSe(nedsat)} kr är ${talSe(modNy, 1)} procent av det du betalar`);
+    expect(begreb).toContain(`men rabatten är ${talSe(rabat, 1)} procent`);
+
+    // Satstabellen: 33 % er ikke en tredjedel — samme påstand som på siden.
+    const sats = svar("se", "Hur mycket rabatt i procent får jag på en vara?")!;
+    expect(sats).toContain(
+      `${RABAT_SATS_UDLAET} % rabatt på en vara för ${belob} kr är ${sparer} kr, så du betalar ${betaler} kr`
+    );
+    expect(sats).toContain(`en tredjedel av ${belob} kr är ${talSe(RABAT_BELOEB / 3, 2)} kr`);
+    expect(sats).toContain(`så du hade betalat ${talSe(RABAT_BELOEB - RABAT_BELOEB / 3, 2)} kr`);
+  });
+
+  // Svensk skriver aldrig æ eller ø, så det er de to tegn, der afslører en
+  // dansk sætning kopieret ind i den svenska blok — og det er sket før
+  // (C71, "Færre personer" på /del-regning). Ord uden æ/ø fanges af den
+  // næste linje, fordi de danske rækker indeholder dem.
+  test("de nye svenske rækker er svenske, ikke danske", () => {
+    for (const spoergsmaal of [
+      "Hur stor är rabatten i procent?",
+      "Hur mycket rabatt i procent får jag på en vara?",
+      "Hur räknar man ut rabatt i procent i Excel?",
+      "Vad är procentuell rabatt?",
+    ]) {
+      const svaret = svar("se", spoergsmaal)!;
+      expect(svaret, spoergsmaal).not.toMatch(/[æø]/i);
+      expect(svaret, spoergsmaal).not.toMatch(
+        /tre trin|mellem to priser|nedsat pris|pris før|oprindelige pris/i
+      );
+    }
+  });
+
+  // Og modsætningen: de to danske rækker må ikke have svensk sætning ind.
+  test("de danske rækker er danske, ikke svenske", () => {
+    for (const spoergsmaal of [
+      "Hvor stor er rabatten i procent?",
+      "Hvordan regner man rabat i procent?",
+    ]) {
+      const svaret = svar("da", spoergsmaal)!;
+      expect(svaret, spoergsmaal).toBeDefined();
+      expect(svaret, spoergsmaal).not.toMatch(
+        /hur stor|procentuell|rabattsats|och |från |vilken/i
+      );
+    }
+  });
+
+  // Tusindtalsseparatoren er den, fejlen ofte gemmer sig i: Intl bruger
+  // U+00A0 på svensk, og resten af den svenske side bruger et almindeligt
+  // mellemrum. U+00A0 i et JSON-LD-svar er usynligt i en diff og ændrer
+  // strengen, så den testes her.
+  test("de svenske tal bruger almindeligt mellemrum, ikke U+00A0", () => {
+    for (const spoergsmaal of [
+      "Hur stor är rabatten i procent?",
+      "Hur mycket rabatt i procent får jag på en vara?",
+    ]) {
+      expect(svar("se", spoergsmaal), spoergsmaal).not.toMatch(/\u00a0/);
+    }
+  });
+});
 
 describe("getPageData", () => {
   test("returns data for known DA slug", () => {
@@ -988,6 +1110,32 @@ describe("svenska svar på frågeformulerade sökningar", () => {
     // Rabattallet fra GSC: "en telefon er sat 1125 kr. ned. normalt koster
     // den 9000 kr." (54 visninger, pos. 6) er 12,5 %.
     expect(text).toContain("1.125 / 9.000 = 12,5");
+  });
+
+  // Dansk autocomplete (hl=da&gl=dk, 2026-09-30) har to rækker under
+  // "hvordan regner man rabat i procent" og "beregn rabat i procent", og
+  // ingen af dem fandtes i FAQ'en — kun den kortere "hvor stor er
+  // rabatten i procent?". Den nye række er *metoden* i tre trin plus den
+  // fælde, der gør 12,5 og 14,3 til to forvirrende tal.
+  test("/procent svarer på 'hvordan regner man rabat i procent' i dansk", () => {
+    const faq = getPageData("procent", "da")!.faqItems;
+    const raekke = faq.find((i) => i.question === "Hvordan regner man rabat i procent?");
+
+    expect(raekke, "rækken skal findes i den danske blok").toBeDefined();
+    expect(raekke!.answer).toContain("Del med prisen FØR nedsættelsen");
+    // De tre tal er de samme som afsnittet over FAQ'en regner, så de er
+    // bygget af konstanterne her — ikke skrevet i sætningen.
+    const nedsat = RABAT_EKSEMPEL.normalPris - RABAT_EKSEMPEL.nedsatPris;
+    const modNy = procentForskel(RABAT_EKSEMPEL.normalPris, RABAT_EKSEMPEL.nedsatPris);
+    expect(raekke!.answer).toContain(
+      `${talDa(nedsat)} kr. er ${talDa(modNy, 1)} %`
+    );
+    expect(raekke!.answer).toContain(
+      `men rabatten er ${talDa(rabatProcent(RABAT_EKSEMPEL.normalPris, RABAT_EKSEMPEL.nedsatPris), 1)} %`
+    );
+    expect(raekke!.answer).toContain(
+      `${talDa(RABAT_BELOEB)} kr. med ${RABAT_SATS_UDLAET} % rabat koster ${talDa(RABAT_BELOEB - procentAf(RABAT_BELOEB, RABAT_SATS_UDLAET))} kr.`
+    );
   });
 
   test("den svenska leasing-FAQ har ingen dansk rester eller brudt svensk", () => {

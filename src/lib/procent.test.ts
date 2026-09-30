@@ -5,6 +5,7 @@ import {
   RABAT_BELOEB,
   RABAT_EKSEMPEL,
   RABAT_SATS,
+  RABAT_SATS_UDLAET,
   procentAf,
   procentDifferens,
   procentForskel,
@@ -260,5 +261,14 @@ describe("RABAT_SATS", () => {
     for (const sats of RABAT_SATS) {
       expect(RABAT_BELOEB - procentAf(RABAT_BELOEB, sats)).toBeLessThan(RABAT_BELOEB);
     }
+  });
+
+  // RABAT_SATS_UDLAET blev navngivet, fordi to sætninger på siden og to
+  // FAQ-svar regner med den. Uden denne port kunne navnet pege på en sats,
+  // der ikke længere står i tabellen, og læseren ville få et tal, siden ikke
+  // kan finde — præcis den fejl, konstanten blev navngivet for at undgå.
+  test("den navngivne udlætssats står i tabellen, så tal og sætning følges", () => {
+    expect(RABAT_SATS).toContain(RABAT_SATS_UDLAET);
+    expect(RABAT_SATS_UDLAET).toBe(33);
   });
 });

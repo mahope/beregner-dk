@@ -1,19 +1,21 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — 30/9 16:52. **Alle fem review-fund er nu rettet** (`74e7861` lukkede
-de tre fra 11:45; `ceo/rett-aabne-review-fund` lukkede MIDDEL-grenen på
-`/alders` norsk og LAV-grenen på pinse-docblockene — målingen fandt samtidig en
-tredje læk af samme klasse, se `docs/plan-arkiv.md`). CEO-køens punkt 0 er
-færdigt (`aca17e5`). Fase 3: **F2 er færdig**, `/procent` svarer på GSC's
-tredjestørste søgning med formel og gennemregnet eksempel.
+STATUS: KØ — 30/9 17:40. **F2b er færdig** (`ceo/procent-svensk-rabatt-faq`): den
+svenska `/procent` har nu **fire** rabatt-rækker i FAQ'en — de fire formuleringer
+svensk autocomplete faktisk har (genmålt 17:32) — og den danske har fået
+metoden i "Hvordan regner man rabat i procent?". Alle tal er regnet af
+`RABAT_EKSEMPEL`/`RABAT_BELOEB`/`RABAT_SATS`, 10 nye tests, 4 mutationer
+kontrolleret. Alle fem review-fund er rettet (`74e7861`, `d563ba2`), CEO-køens
+punkt 0 er færdigt (`aca17e5`).
 
-**Næste frie opgave: F2b** (svensk rabatt-FAQ på `/procent`, se Fase 3).
+**Næste frie opgave: F6** (fire beregnere deler `/alders` `no`-fejl, se Fase 3).
 F4 kræver Playwright (❓), F1/F3/F5 og opgaverne 97/98/119/183 er blokeret af
 svar fra Mads. **Opgave 187 må ikke røres før 13/10.**
 
-**⚠️ Fire VERIFICÉR-noter venter på vinduet 17:30** (`/alder`-snippet, to blog-CTA-
-bølger, `/boligstoette`-titel) plus denne iterations nye `/procent`-note. De kan ikke
-lukkes før da.
+**⚠️ Fire VERIFICÉR-noter fra tidligere + denne iterations `/procent`-note.** Alle
+fem er målt på live 30/9 **17:37** og **ingen** er live endnu. Den 17:30-batch
+løb først syv minutter inden målingen, så det er **21:30** der er sidste frist —
+skriv først `DEPLOY-MISSING` når et vindue er gået.
 
 **⚠️ Målerfælde (30/9 15:40, samme klasse som C70's).** `npm run test` kører
 `locale-leak-gate.test.ts`, som med vilje planterer en dansk streng i
@@ -99,20 +101,19 @@ gennemregnet eksempel på läsarens egna tal (9.000 → 7.875 kr = 1.125 kr ned 
 9 nye tests hvor 8 fejler mod gammel kode. Se arkivet. **MÅL:** `/procent`
 150.470 visninger / 97 klik / CTR 0,1 % (GSC 2026-08-31 → 2026-09-28). Genmål
 14 dage efter at den er live.
-**F2b. [ ]** Næste skridt på samme side: en **FAQ-række i `page-data.ts`** der
-rammer spørgsmålsformuleringen, fordi FAQ'en er det Google viser i sit snippet.
-Udeladt i F2 af tidsbudget og fordi `page-data.ts` er den fil hvor
-`locale-leak.mjs`'s `REVIEWED`-poster ligger tættest — tilføj den som sit eget
-punkt, og kør `node scripts/locale-leak.mjs --gate` separat.
-**Målt 30/9 16:45 (autocomplete `hl=da&gl=dk` / `hl=se&gl=se`):** den danske
-FAQ har *ingen* række på "hvordan regner man rabat i procent" eller "beregn
-rabat i procent", og den **svenska `/procent` har ingen rabatt-række overhovedet**
-— selv om F2 gav siden et helt `Så här räknar du ut rabatten i procent`-afsnit.
-Målte svenske formuleringer: "hur stor är rabatten i procent", "hur mycket
-rabatt i procent", "räkna ut rabatt i procent excel", "procentuell rabatt".
-**Accept:** de fire svenske rækker + "hvordan regner man rabat i procent" på
-dansk, med **alle** tal udledt af `RABAT_EKSEMPEL`/`RABAT_BELOEB`/`RABAT_SATS`,
-så de ikke kan glide fra brødteksten ved siden af.
+**F2b. [x] ✅ `ceo/procent-svensk-rabatt-faq` — FAQ'en rammer de fire
+formuleringer, svensk autocomplete har.** Fire nye svenske rækker ("Hur stor är
+rabatten i procent?", "Hur mycket rabatt i procent får jag på en vara?", "Hur
+räknar man ut rabatt i procent i Excel?", "Vad är procentuell rabatt?") plus
+den danske "Hvordan regner man rabat i procent?" (metoden i tre trin + fælden
+med 14,3 mod 12,5). **Alle tal er regnet** af `RABAT_EKSEMPEL`/`RABAT_BELOEB`/
+`RABAT_SATS` gennem et tal-bundt pr. sprog, så de ikke kan glide fra afsnittet
+lige oven i dem; 33 % fik navnet `RABAT_SATS_UDLAET` i `procent.ts`, fordi to
+sætninger og to FAQ-svar regner med den. 10 nye tests, heraf fire mutations-
+kontrollerede (hardkodet forkert tal, manglende U+00A0-normalisering, rækkerne
+fjernet) — alle faldt i den mutatede kode. Se arkivet.
+**MÅL:** se `/procent` 26.933 visninger / 2 klik / CTR 0,0 % / pos. 9,9 (GSC
+2026-08-31 → 2026-09-28). Genmål 14 dage efter at den er live.
 
 **F3. [ ] Beraknare.se: position, ikke titel.** 190.447 visninger på pos.
 8-10. Opgave 187 (svenske slugs, 301) er sat til **13/10** og må ikke flyttes
@@ -166,10 +167,25 @@ Alle fire var grønne før merge 2026-09-30 07:45.
 
 ## Åbne VERIFICÉR DEPLOY-noter
 
-**Fire noter åbne fra tidligere + den nye fra F2.** HTTP 200 beviser intet: noterne
+**Fire noter åbne fra tidligere + to fra F2/F2b.** HTTP 200 beviser intet: noterne
 rører `<title>`, `<h1>`, brødtekst, JSON-LD eller nye URL'er, og tidszone-noten
 forventer et **uændret** tal. Fulde tekster med alle målinger står i
 `docs/plan-arkiv.md`. De elleve lukkede noter er verificeret 30/9 14:12 på indhold.
+
+**Alle seks er målt på live 30/9 17:37 og ingen er live.** De fire merges er fra
+13:19–16:53, så 17:30-batchen var den første kørsel efter dem — og den var kun syv
+minutter gammel ved målingen. Sidste frist er derfor **21:30**; skriv først
+`DEPLOY-MISSING` når *det* vindue også er gået.
+
+- ⏳ **F2b: `/procent`s FAQ skal ramme de fire svenske rabatt-spørgsmål.**
+  `ceo/procent-svensk-rabatt-faq`. Kontrollér **indhold** på
+  `https://beraknare.se/procent`: JSON-LD skal have `FAQPage` med spørgsmålene
+  "Hur stor är rabatten i procent?", "Hur mycket rabatt i procent får jag på
+  en vara?", "Hur räknar man ut rabatt i procent i Excel?" og "Vad är
+  procentuell rabatt?", og svaret på den første skal sige "1 125 / 9 000 = 12,5
+  procent" (mellemrum, **ikke** U+00A0). På `minberegner.dk/procent` skal den
+  danske FAQ have "Hvordan regner man rabat i procent?" med svaret
+  "1.125 / 9.000 = 12,5 %". Målt 17:37: ingen af delene er live endnu.
 
 - ⏳ **`/procent` skal svare på frågan om rabatten.** `ceo/procent-rabat-spørgsmal`.
    Kontrollér **indhold**: `<h2>Sådan beregner du rabatten i procent</h2>` og
@@ -177,14 +193,15 @@ forventer et **uændret** tal. Fulde tekster med alle målinger står i
    sige "1.125 ÷ 9.000 × 100 = 12,5 procent" (da) og "1 125 ÷ 9 000 × 100 = 12,5
    procent" (se), og sats-tabellen skal have alle fem rækker. **Og** den gamle
    bullet må ikke længere sige "1.125 ÷ 9.000 = 12,5" — den skal kun sige
-   "25% rabat på en vare til 400 kr = du sparer 100 kr". Vindue **17:30**.
+   "25% rabat på en vare til 400 kr = du sparar 100 kr". Målt 17:37: `<h2>` er
+   **ikke** på siden, så F2 er heller ikke live endnu. Vindue **21:30**.
 
 - ⏳ **`/alder`s snippet skal vise dagens alder, ikke 25. september.**
   `ceo/alder-levende-snippet`. Skal have "pr. 30. september 2026" og
   "36 år, 6 måneder og 15 dage" (da) / "per 30 september 2026" + "36 år, 6
    månader och 15 dagar" (se). Ingen `{ALDER}`-pladsholdere i HTML'en.
    Målt 14:12: beskrivelsen siger stadig "pr. 25. september 2026" — korrekt,
-   fordi den ikke er live endnu. Vindue **17:30**.
+   fordi den ikke er live endnu. Vindue **21:30**.
 
 - ⏳ **Syv blogindlæg skal slutte med deres beregner.** `ceo/blog-naeste-handling`.
   `/blog/arveafgift-regler-og-satser` → `/arveafgift`, `hvordan-beregner-man-moms`
@@ -195,7 +212,7 @@ forventer et **uændret** tal. Fulde tekster med alle målinger står i
   hver side skal have "Regn det ud" **før** "Relaterede artikler", og
   `/moms` skal have **0** forekomster af den gamle CTA-løsning. Målt 15:00:
   de fire kontrollerede sider har `regn=0`, altså endnu ikke live. Vindue
-  **17:30**.
+  **21:30**.
 
 - ⏳ **`/boligstoette` skal ramme sin egen største søgning i titlen.**
   `ceo/boligstoette-titel`. Titlen skal være **"Beregn boligstøtte 2026:
@@ -203,7 +220,7 @@ forventer et **uændret** tal. Fulde tekster med alle målinger står i
   `description`, og beskrivelsen skal stadig sige "Vejledende — fortsæt hos
   Udbetaling Danmark". Siden skal **stadig** have **0** forekomster på
   "Boligstøtteberegner" — det er en korrekthedslås, ikke en fejl. Vindue
-  **17:30**.
+  **21:30**.
 
 - ⏳ **Alle 27 blogindlæg skal slutte med en næste handling.**
   `ceo/blog-cta-rest`. De **tolv** artikler fra opgave 202 skal have
@@ -217,7 +234,7 @@ forventer et **uændret** tal. Fulde tekster med alle målinger står i
   `saadan-beregner-du-din-reelle-timeloen` → `/brok`,
   `saadan-finder-du-din-timepris…` → `/timepris`, `skat-2026…` →
   `/skattefradrag`. **Og** `dagpenge-saadan-finder-du-din-sats` skal pege på
-  `/dagpenge`, ikke `/barselsdagpenge`. Vindue **17:30**.
+  `/dagpenge`, ikke `/barselsdagpenge`. Vindue **21:30**.
 
 
 
