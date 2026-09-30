@@ -6,6 +6,7 @@ import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
 import FAQ from "@/components/FAQ";
 import RelatedCalculators from "@/components/RelatedCalculators";
+import RelateredeArtikler from "@/components/RelateredeArtikler";
 import {
   CalculatorSchema,
   FAQSchema,
@@ -254,6 +255,7 @@ export default async function BMIPage() {
       <FAQ items={pageData.faqItems} />
 
       <RelatedCalculators current="/bmi" />
+      <RelateredeArtikler current="/bmi" locale={locale} />
       </div>
 
       {/* Sidebar - Right Column (Desktop only) */}

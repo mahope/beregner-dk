@@ -116,6 +116,13 @@ const blogPosts = [
     category: "Sundhed & Børn",
   },
   {
+    slug: "bmi-voksen-saadan-tolk-er-du-tallet",
+    title: "BMI for voksne: Sådan tolker du dit BMI-tal",
+    description:
+      "WHO's grænser for voksne, hvad BMI ikke kan se, og hvornår du skal bruge taljemål ved siden af. Med eksempler på samme BMI-tal ved forskellig højde.",
+    category: "Sundhed",
+  },
+  {
     slug: "guide-feriepenge-hvornaar-og-hvor-meget",
     title: "Guide: Feriepenge - Hvornår og Hvor Meget?",
     description: "Komplet guide til feriepenge i 2026: Hvornår får du dem udbetalt? Hvor meget får du? Lær om ferieåret og samtidighedsferie.",

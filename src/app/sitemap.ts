@@ -100,6 +100,7 @@ function getBlogSlugs(locale: Locale): string[] {
     "pension-hvor-meget-skal-du-spare-op",
     "boligstoette-2026-nye-regler",
     "bmi-for-boern-saadan-tjekker-du",
+    "bmi-voksen-saadan-tolk-er-du-tallet",
     "guide-feriepenge-hvornaar-og-hvor-meget",
     "saadan-beregner-du-din-reelle-timeloen",
     "hvordan-beregner-man-moms",

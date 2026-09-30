@@ -79,6 +79,21 @@ export const BEREGNER_ARTIKLER: Record<string, ArtikelKobling[]> = {
         "Hvornår BMI kan bruges for børn, hvad grænserne er, og hvornår du skal bruge vægt og højde.",
     },
   ],
+  /**
+   * `/alder` og `/bmi` deler emne, men ikke læser: en forælder slår barnets
+   * alder op for at finde den rigtige percentil, en voksen slår BMI op for
+   * sin egen kategori. Derfor to artikler og to koblinger — `/bmi` har sit
+   * eget indlæg om voksne, så den voksne læser ikke sendes videre til en
+   * børneguide.
+   */
+  "/bmi": [
+    {
+      slug: "bmi-voksen-saadan-tolk-er-du-tallet",
+      titel: "BMI for voksne: sådan tolker du dit BMI-tal",
+      beskrivelse:
+        "WHO's grænser for voksne, hvornår BMI ikke kan bruges, og hvad taljemål fortælder ud over tallet.",
+    },
+  ],
   "/kvadratmeter": [
     {
       slug: "kvadratmeter-saadan-regner-du-ud",

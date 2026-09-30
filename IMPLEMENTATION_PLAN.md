@@ -1,41 +1,33 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — 1/10 00:50. **CI var rød på `master` og er grøn igen.** To tests i
-  `alder/page.test.tsx` sammenlignede den renderede markup med et tal regnet på
-  **serverens** dato (`tilIsoDato(new Date())`), mens siden læser dagen med
-  **sidens** ur (`iDagPaSiden`). CI kører i UTC, så mellem 00:00 og 02:00
-  dansk tid er de to ure uenige: siden sagde 13.349 dage (1. oktober),
-  testen forventede 13.348 (30. september). Målt med `TZ=UTC npx vitest run`:
-  2 fejl i 1 fil — de samme to som CI. Lokalt var de grønne, fordi maskinen
-  står i København.
+STATUS: KØ — 1/10 01:35. Opgave 191 er færdig: `/bmi` (934 besøgende/28d, −26 %,
+  den eneste faldende side i top-15) manglede et koblet indlæg, så siden viste
+  læseren ingen vej ud af værktøjet. Nyt indlæg `/blog/bmi-voksen-saadan-tolk-er-du-tallet`
+  med WHO's grænser som **data med kilde** (factsheet 2025-12-08), koblet under
+  `/bmi` og synligt på siden. Valget var enten-eller (børneguide til en voksen
+  læser), så der blev skrevet et nyt indlæg i stedet for at flytte det gamle.
 
-  **⚠️ Målerfælde (1/10).** Kør `TZ=UTC npx vitest run` før du melder gaten
-  grøn. `npm run test` på Mads' maskine er grøn **fordi maskinen er dansk** —
-  CI's ur er UTC, og de fleste af sådanne fejl falder netop i et to-timers
-  vindue. Det er ikke en ny testkommando, det er den *samme* suite.
+  **⚠️ Ny målerfælde (1/10 01:24) — porten skal rendere, ikke læse kode.** En
+  port der læser sidens kildekode ser ikke om komponenten renderer noget:
+  `RelateredeArtikler` returnerer `null` for `locale !== "da"`, så den gamle
+  `blog-kobling.test.ts` er grøn på alle tre domæner uden at blokken nogensinde
+  dukker op. Den nye port renderer `/bmi` og måler markupken. To fejl i min egen
+  kode blev fundet derved: BMI 25,0 faldt i "Normalvægt" (epsilon på begge
+  grænser), og vægtintervallet endte på 76,6 i stedet for 76,3 kg. Fire
+  mutationer beviser porten kan blive rød. Målinger i `docs/plan-arkiv.md`.
 
-  Rettelsen samler reglen ét sted (`iDagPaSiden`), så test og side ikke længere
-  kan være uenige om hvilket ur der gælder, og en ny port `test-tidszone.test.ts`
-  forbyder serverens ur i tests med en hvidliste der tæller forekomster.
-  Målt: porten rød på 2 mutationer (den oprindelige fejl + en ny fil),
-  de to løste påstande rød på hver sin mutation, 199 filer / 3278 tests grønne
-  i **begge** tidszoner, lint ren, `locale-leak --gate` exit 0, build 142/142,
-  `tsc` 82 fejl i 17 filer — alle i `*.test.ts(x)`, ingen i de rørte filer.
+  **Næste opgave: 187 er stadig sat til 13/10.** Køen herfra: 98 (blokeret af
+  97), så F1/F3/F5 — og en ny opgave, hvis der er flere `/bmi`-lignende sider
+  uden koblet indlæg.
 
-  **Ingen VERIFICÉR-note:** `iDagPaSiden` er en flytning af den eksisterende
-  regel, så `/alder` renderer præcis som før. Søg ikke efter en forskad udfoldning.
+  **Blokeret af svar fra Mads:** 97, 119 og 183, samt F1/F3/F5. **Opgave 187 må
+  ikke røres før 13/10.** CEO-køens punkt 0 er lukket; 189c er lukket som "veje
+  udtømt" (syv domæner testet, ingen leverer dansk lovtekst — kildetabel i
+  arkivet).
 
-**Næste opgave: 191** — `/bmi` mangler et koblet indlæg, og det er sitets
-  faldende side (934 besøgende/28d, −26 %). Derefter F1 (afhænger af ❓).
-
-**Blokeret af svar fra Mads:** 97, 119 og 183, samt F1/F3/F5. **Opgave 187 må
-ikke røres før 13/10.** CEO-køens punkt 0 er lukket; 189c er lukket som "veje
-udtømt" (syv domæner testet, ingen leverer dansk lovtekst — kildetabel i
-arkivet).
-
-**Otte VERIFICÉR-noter åbne.** HTTP 200 beviser intet: de rører tabelceller med
-lovtal, brødtekst og rækkefølge i markupken. De otte lukkede er verificeret på
-indhold; senest 30/9 23:10. Målingerne står i `docs/plan-arkiv.md`.
+  **Otte VERIFICÉR-noter åbne.** HTTP 200 beviser intet: de rører tabelceller med
+  lovtal, brødtekst og rækkefølge i markupken. De otte lukkede er verificeret på
+  indhold; senest 30/9 23:10. Målingerne står i `docs/plan-arkiv.md`.
 
 **⚠️ Målerfælde (30/9 15:40).** `npm run test` kører `locale-leak-gate.test.ts`,
 der med vilje planterer danske lækager. Derfor kommer `FEJL: n ureviewet(e)`-
@@ -136,10 +128,10 @@ kaldes *ikke*-helgdag.
 ## Kvalitetsgate (repoets egne scripts fra package.json)
 
 ```
-npm run lint     # biome lint ./src      — 630 filer
-npm run test     # vitest run            — 3278 tests / 199 filer
+npm run lint     # biome lint ./src      — 633 filer
+npm run test     # vitest run            — 3291 tests / 200 filer
 TZ=UTC npm run test   # CI's ur — se målerfælden 1/10 i STATUS
-npm run build    # next build            — 142 sider
+npm run build    # next build            — 143 sider
 node scripts/locale-leak.mjs --gate       # exit 0
 ```
 
@@ -241,6 +233,16 @@ og forsiden. Alle målinger står i `docs/plan-arkiv.md`.
   dansk er, at `npm run test` fortsat er grøn på
   `src/lib/intl-locale-tag.test.ts` efter deploy. Vindue **30/10 07:30** (denne
   merge sker efter 17:30).
+- ⏳ **`/bmi` skal vise sit eget indlæg under FAQ'en.** `ceo/bmi-voksen-indlaeg`.
+  På `https://minberegner.dk/bmi` skal `<h2>Guides om emnet</h2>` stå i markupken
+  med **ét** `/blog/`-href, og det skal være
+  `href="/blog/bmi-voksen-saadan-tolk-er-du-tallet"` — **ikke** børneguiden
+  `/blog/bmi-for-boern-saadan-tjekker-du`, som stadig skal findes i den blå
+  "BMI for børn?"-boks højere oppe. På `https://beraknare.se/bmi` må
+  "Guides om emnet" **ikke** forekomme (indlæggene er danske). HTTP 200 beviser
+  intet — det er rækkefølge og antal i markupken. Prøven på dansk er
+  `src/lib/bmi-voksen-grænser.test.tsx` efter deploy. Vindue **1/10 12:30**.
+
 - ⏳ **Forsiden skal vise de populære beregnere én gang, lige under helten.**
   `ceo/forsiden-dublet-liste`. På `https://minberegner.dk/` og
   `https://beraknare.se/` skal den kompakte stribe med otte `<a>`-links være
@@ -386,22 +388,36 @@ og forsiden. Alle målinger står i `docs/plan-arkiv.md`.
   **Og: `/bmi` (934 besøgende, −26 %) har ingen koblet guide**, mens `/alder`
   kun har denne ene. Se ny opgave 191.
 
-#### 191. [ ] 2026-09-30 — `/bmi` mangler et koblet indlæg, og det er sitets faldende side
+#### 191. [x] ✅ 1/10 01:35 — `/bmi` manglede et koblet indlæg, og det er sitets faldende side
 
 - **Datagrund:** Plausible 30/9: `/bmi` 934 besøgende/28d og **−26 %** — den
-  eneste faldende side i top-15. `BEREGNER_ARTIKLER` har **ingen** nøgle til
+  eneste faldende side i top-15. `BEREGNER_ARTIKLER` havde ingen nøgle til
   `/bmi`, så `RelateredeArtikler` renderer ikke på siden, og det eksisterende
-  indlæg `/blog/bmi-for-boern-saadan-tjekker-du` er koblet til `/alder` i
-  stedet. Bloggen har 26 indlæg, og den største trafikfejl der (høj bounce) er
-  netop, at indlæg ikke fører videre — modsat vejen mangler også.
-- **Hvorfor ikke gjort i 190:** `blog-kobling.test.ts` låser "et indlæg kobles
-  kun til én beregner", så en flytning kræver valg mellem to sider, og `/bmi`'s
-  `page.tsx` skal have `<RelateredeArtikler current="/bmi" locale={locale} />`
-  ind. `/alder` mister sin eneste guide, hvis artiklen flyttes — derfor er det
-  en egen opgave med sit egen datagrund, ikke en bivirkning af 190.
-- **Accept:** (1) `/bmi` renderer "Guides om emnet" med mindst ét indlæg, (2)
-  artiklen nævner `/bmi` i brødteksten *før* sin næste handling, (3)
-  `naeste-skridt.test.ts` og `blog-kobling.test.ts` grønne, gaten grøn.
+  indlæg `/blog/bmi-for-boern-saadan-tjekker-du` var koblet til `/alder`.
+- **Valget mellem de to veje:** 191 sagde at en flytning krævede valg mellem to
+  sider — `/alder` mister sin eneste guide, eller `/bmi` får en børneguide som
+  sin eneste guide. Begge er dårlige for en voksen læser: en børnepercentil er
+  ikke svaret på "hvad betyder mit BMI". Derfor blev der **skrevet et nyt
+  indlæg** om voksne, så begge sider har en guide til *deres* læser. Bloggen 27
+  → 28 indlæg.
+- **Rettelsen:** (1) nyt indlæg `/blog/bmi-voksen-saadan-tolk-er-du-tallet`,
+  koblet i `blog-kobling.ts` under `/bmi`, med `<RelateredeArtikler current="/bmi">`
+  ind i `bmi/page.tsx`; (2) WHO's grænser ligger som **data med kilde** i
+  `src/lib/bmi-voksen-grænser.ts` (factsheet opdateret 2025-12-08, hentet
+  1/10) — brødteksten, tabellen og eksemplerne læser derfra, så de ikke kan
+  glide fra hinanden eller fra `/bmi`s egen brødtekst; (3) ny port
+  `bmi-voksen-grænser.test.tsx` (13 tests) renderer **markupken** — kun derfra
+  kan den se at blokken vises på dansk og forsvinder på svensk. Se målerfældene
+  i `docs/plan-arkiv.md`.
+- **⚠️ Målerfælde 1/10 01:24 (ny, viktig for flere opgaver).** En port der læser
+  sidens *kildekode* ser ikke, om komponenten renderer noget. `RelateredeArtikler`
+  returnerer `null` for `locale !== "da"`, så `blog-kobling.test.ts` er grøn på
+  alle tre domæner uden at blokken nogensinde dukker op. Når en opgave gør en
+  side *vise* noget nyt, må porten rendere siden — kun så måles resultatet.
+- **Accept:** (1) ✅ `bmiMarkup("da")` har "Guides om emnet" med ét `/blog/`-href,
+  `bmiMarkup("se")` har ingen blok; (2) ✅ artiklen nævner `/bmi` i brødteksten
+  før `NaesteSkridt` (låst af `naeste-skridt.test.ts`); (3) ✅ gaten grøn — 3291
+  tests i **begge** tidszoner, lint ren, locale-leak exit 0, build 143/143.
 - **MÅL:** `/bmi` 934 besøgende/28d, −26 % (Plausible 2026-09-30). Genmål
   bounce på indlægget 30 dage efter deploy.
 

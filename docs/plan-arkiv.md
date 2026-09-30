@@ -21852,3 +21852,64 @@ decimaler mod lovens tal gav 29 danske og 31 svenske fund, alle rigtige. Og et
 "region-tal"-mønster faldt, fordi den svenske celle skriver tallet før
 regionens navn. **Porten skal kræve kildens tal frem for at søge efter
 forkerte.** `\b` før `är` matcher aldrig i JS (`\w` er ASCII).
+
+## Opgave 191 (1/10 01:30) — `/bmi` manglede et koblet indlæg
+
+**Datagrund.** Plausible 30/9: `/bmi` 934 besøgende/28d, **−26 %** — den eneste
+faldende side i top-15. `BEREGNER_ARTIKLER` havde ingen nøgle til `/bmi`, så
+`RelateredeArtikler` renderer ikke på siden. Det eksisterende BMI-indlæg
+(`/blog/bmi-for-boern-saadan-tjekker-du`) var koblet til `/alder`.
+
+**Valg mellem to veje.** 191 sagde at en flytning af artiklen krævede valg:
+`/alder` mister sin eneste guide, eller `/bmi` får en børneguide som sin eneste
+guide. Begge er dårlige for en voksen læser — en børnepercentil er ikke svaret
+på "hvad betyder mit BMI". Derfor blev der **skrevet et nyt indlæg**
+(`/blog/bmi-voksen-saadan-tolk-er-du-tallet`), så begge sider har en guide til
+*deres* læser. Bloggen går 27 → 28 indlæg, og `/bmi` får sin egen
+indgangsvej ud over den blå boks, der kun linkede til børneguiden.
+
+**Målerfælde 1/10 01:24 — porten måtte læse markupken, ikke koden.**
+Første udgave af `bmi-voksen-grænser.test.tsx` krævede at indlæggets *kilde*
+indeholder kildenavnet og WHO-citatet. Målingen viste, at den så gennem en
+tekst, der ikke findes: kilde-URL'en ligger i `bmi-voksen-grænser.ts` (én
+fil), og WHO-citatet ligger i brødteksten (én anden). To mål, to filer, én
+kildekodelæsning — den mutation jeg skrev for at bevise porten rød, ramte
+ikke noget, og porten viste sig at være grøn uden at se noget som helhed.
+
+Rettelsen: porten renderer **siden** med `renderToStaticMarkup` og læser
+markupken, og kilde-URL'en læses fra den fil, der faktisk ejer den. Det samme
+gælder returlinken: `blog-kobling.test.ts` ser kun efter strengen
+`RelateredeArtikler` i `bmi/page.tsx`, men komponenten returnerer `null` for
+`locale !== "da"` — dansk kode kan altså være grøn på alle tre domæner uden at
+blokken nogensinde dukker op. Målt: `bmiMarkup("da")` har **én** `/blog/`-href
+i "Guides om emnet"-sektionen, `bmiMarkup("se")` har **nul** "Guides om emnet".
+
+To måleforhindringer undervejs, begge fundet ved at køre porten og ikke ved at
+læse koden: `/bmi` indlægger værktøjet med `next/dynamic`, som suspenderer og
+derfor ikke kan renderes synkront (stubbet), og `BlogArticleSchema` videresender
+til `ArticleSchema`, som skulle med i stubben af `StructuredData` ellers kan
+indlægget slet ikke renderes — porten ville aldrig nå de påstande, den er
+skrevet for.
+
+**To fejl i min egen kode, fundet af porten.** (a) `bmiBaand` gav BMI 25,0
+→ "Normalvægt": epsilon'en sad på *begge* grænser, så `find` ramte båndet
+nedenfor. Kun den nedre grænse må have epsilon — ellers forfalder WHO's "greater
+than or equal to" ved præcis de tal, porten er bygget til at fange. (b)
+`vaegtInterval` gav 76,6 kg som øvre ende for 1,75 m, fordi den brugte båndets
+`max` (25,0) i stedet for sidste decimal under (24,9). 76,3 er samme tal som
+`/bmi`'s egen FAQ, så de to viste det samme interval.
+
+**Målerfælde 1/10 01:26 — porten skal kunne blive rød.** Fire mutationer, alle
+ægte: skalaens overvægtsgrænse 25 → 26 (3 tests røde, bl.a. hullet mellem
+båndene); epsilon'en tilbage på den øvre grænse (1 rød); `max - 0.1` → `max`
+i vægtintervallet (1 rød); børne-FAQ'en skrevet om til "Ja, BMI kan bruges for
+alle aldre" (1 rød). Fjerning af `<RelateredeArtikler current="/bmi">` gav også
+rødt på den nye markup-port — den gamle `blog-kobling`-port ville have været
+grøn, fordi den læser strengen i koden, ikke resultatet.
+
+**Andre målinger.** `TZ=UTC npx vitest run` **og** `npx vitest run`: 200 filer /
+3291 tests grønne i begge tidszoner (var 3289 før de to nye tests).
+`npm run lint` ren (633 filer). `node scripts/locale-leak.mjs --gate` exit 0 —
+de nye filer er danske, men ligger i `blog/` og `lib/`, som porten kun skanner
+for `da`-leakage i komponenter der monteres på beraknare.se. `npm run build`
+142 → **143** sider, `/blog/bmi-voksen-saadan-tolk-er-du-tallet` på 245 B.
