@@ -1614,7 +1614,13 @@ function run() {
     for (const f of unreviewed.slice(0, 20)) {
       console.error(`  ${f.file}:${f.line}  "${truncate(f.string)}"`);
     }
-    process.exit(1);
+    // `exitCode`, not `exit(1)`. Writes to a pipe are async in Node, so exiting
+    // here drops whatever has not been flushed: with `--gate --json` the JSON is
+    // ~285 KB and a consumer reading the pipe got it cut off mid-string at
+    // 64 KB — a silent truncation that looks like broken JSON, not a lost
+    // verdict. Setting the code and returning lets the process end normally,
+    // which flushes stdout first. Same exit status, no truncation.
+    process.exitCode = 1;
   }
 
   return { all, unreviewed, seFiles };

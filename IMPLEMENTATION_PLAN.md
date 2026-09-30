@@ -1,55 +1,43 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — **beraknare.se's største side `/dato` (99.136 visninger, 95 klik, CTR 0,1 %, pos. 8,2) havde 0 forekomster af begge sine egne hovedsøgninger, mens dansk `/dato` har dem 16 gange hver.** GSC SE: "antal dagar mellan datum" 425 v pos 9 og "hur många dagar mellan två datum" 380 v pos 8. Årsagen er én ord: siden skriver altid "mellan **två** datum" og "mellan datumen", så GSC's egen formulering uden "två" findes ingen steder — præcis C191's danske rettelse (16× "dage mellem datoer", 16× "antal dage mellem to datoer") var aldrig spejlet. Rettelse: ét nyt `<h2>` "Antal dagar mellan datum" med regnestykket 1. marts 2027 → 1. marts 2028 = **366 dagar** (2028 er skottår; efterprøvet i node) + de to spørgsmålsformer. Kun `da === "se"`-grenen, dansk side urørt (0 fund på rigtig server). **Gate grøn:** lint (618), **3019 tests / 190 filer** (fra 3017/190), build (142 sider), `locale-leak.mjs --gate` exit 0. Den nye lås **fejler mod master's `page.tsx`** (`git stash`: 1 af 24 røde). Genmål 14/10.
+STATUS: KØ — **dagens iteration (202) fandt en rigtig fejl i `locale-leak.mjs`
+og ikke en flake.** CI-kørslen 01:07 var rød med 5033 ms mod en 5000 ms-grænse;
+årsagen var `process.exit(1)`, som afkortede JSON-output ved 64 KB, når den læses
+gennem et rør. Rettet til `process.exitCode = 1`; de 8 gaten-tester fejler mod den
+gamle scanner, så den er låst fast. Filen 28,9 s → 17,1 s.
 
-STATUS (forrige) — **`/procent` er GSC's største tabte klik: 150.148 visninger, 98
-klik (CTR 0,07 %), pos. 7,4** — større visningstal end `/dato` (132.313 v /
-822 klik / 0,6 %) med 1/8 af trafikken. Kun ~360 visninger kommer fra de fire
-søgninger GSC viser, så **149.700 er en ulistet langhale**, og positionen
-forklarer ikke at 99,93 % ikke klikkes. DA-autocomplete viser hvorfor: under
-"procent beregner" ligger *stigning, rabat, fald, besparelse, vækst, ændring*,
-under "procent stigning" *mellem to tal*, under "procent fald" *hvor mange
-procent falder*. Titlen lovede **ét** eksempel ("10 % af 250 kr. = 25 kr.") og
-matchede dermed højst én af ti opgaver — samme sygdom som `/dato` fik
-svar-først-sider for. Nu: "Procentberegner: 10 % af 250 = 25 kr. Stigning,
-fald, rabat" (59 tegn); eksemplet blev **beholdt**, fordi `title-eksempel.test.ts`
-kræver det. Svensk urørt (frosset til 13/10). **Gate grøn:** lint (618),
-**3017 tests / 190 filer**, build (142 sider), `locale-leak.mjs --gate` exit 0.
-Den nye lås **fejler mod master's `page-data.ts`** (stash: 2 af 99 røde).
-Genmål 14/10.
+**Køen er tom, og det er et resultat i sig selv.** CEO-punkt 0 er verificeret
+lukket i kode (Valborg 30. april, svensk påskafton `offsetDays: -1`, dansk
+sankthans fast 23./24. juni, `toUtcMidnight` i `Europe/Copenhagen`, lejeloven
+§ 5, `maneder: 12`, 1. advent 27/11–3/12), og de tre review-fund er rettet i
+`37a9859`. Så de fire åbne opgaver er ikke valgt, de er det der er tilbage:
+97 `BLOCKED` (ejerskab), 98 afhænger af 97, 119 `BLOCKED` (kilde),
+183 `BLOCKED` (kræver Mads' svar). 187 er bevidst frosset til 13/10.
 
-**Mønstret er større end /procent:** samme måling som for `/bmi` + `/su` (se
-opg. 183) — GSC's visninger ligger langt over Plausible's besøgende, og
-forskellen er **ikke-klikket Google-trafik**. `/bmi` og `/su` er målt sunde
-live (canonical, robots, hreflang, 3 schema-typer, i sitemap), så faldet er
-ikke teknik — men at finde årsagen kræver stadig Mads' svar. Derfor er 183
-nu `BLOCKED` sammen med 97/98/119, og 187 er bevidst udsat til 13/10.
+**Mønstret der binder de tre `BLOCKED` opgaver sammen:** de mangler alle en
+*uden for repoet* — en kildefil, en ejerskabsafklaring, en kildefordeling. Ingen
+iteration kan lukke dem, og det er derfor spildt at køre dem igen.
 
-**Køen var tom, og det er selv et fund:** CEO-kø punkt 0 er verificeret lukket i
-kode (Valborg 30. april, svensk påskafton `offsetDays: -1`, dansk sankthans fast
-23./24. juni, `toUtcMidnight` i `Europe/Copenhagen`, lejeloven § 5, `maneder:
-12`, 1. advent 27/11–3/12). De fem åbne deploy-noter har første vindue 07:30,
-så de var ikke rørt.
-
-**Beslutning om opgave 187 (svenske slugs):** ikke før **2026-10-13**. C195/C196's
-svenske titler deployer 30/9 07:30, og 185's egen beskeds var at slugs først er
-hypotesen *hvis* titlerne ikke flytter CTR. Derudover fandt denne iteration en
-teknisk forudsætning migrationen SKAL løse: en rewrite i middleware giver
-canonical fra den interne rute (`/tidsberegner`), som så peger på en URL der
-301'er tilbage — en redirect-loop for crawlere. Kræver per-domæne-canonical
-eller ægte ruter.
+**Færdige i dag:** 201 (beraknare.se `/dato` svarer på "antal dagar mellan
+datum"), 200 (`/procent`-titlen dækker hele klyngen) — begge arkiveret i
+`docs/plan-arkiv.md`. De seks åbne deploy-noter har **første vindue 30/9 07:30**;
+intet var verificerbart ved 04:03, og intet blev rørt.
 
 ## Kvalitetsgate (repoets egne scripts fra package.json)
 
 ```
 npm run lint     # biome lint ./src      — 618 filer
-npm run test     # vitest run            — 3016 tests / 190 filer
+npm run test     # vitest run            — 3019 tests / 190 filer
 npm run build    # next build            — 142 sider
 node scripts/locale-leak.mjs --gate       # exit 0
 ```
 
-`tsc --noEmit` har 7 kendte forhåndsfejl i testfiler og er **ikke** del af gaten.
-Alle fire var grønne før merge 2026-09-29 22:45.
+`tsc --noEmit` er **ikke** del af gaten: 72 kendte forhåndsfejl, alle i
+`*.test.ts(x)` (målt 30/9; 33 i `dage-til.test.ts`, 14 i
+`dage-til-routes.test.tsx`, resten spredt) og **0 i ikke-test-filer**. Opgave
+202 fjernede de 2 her: `scannedPages` og `candidatesFromPages` blev brugt i
+`locale-leak-gate.test.ts` uden at stå i returtypen (74 → 72).
+Alle fire var grønne før merge 2026-09-30 04:20.
 
 ## Åbne VERIFICÉR DEPLOY-noter
 
@@ -337,76 +325,40 @@ Fire noter. HTTP 200 beviser intet: ingen rører en URL, kun `<title>`- og
   (snippet/intention), ikke på to separate sidefejl — men at *finde* den kræver
   stadig kildefordelingen fra Mads, så opgaven står.
 
-#### 201. [x] ✅ 2026-09-30 — trafik — **beraknare.se `/dato` fik sin egen søgeintention ind i synlig tekst: 0 → 4 fund på "Antal dagar mellan datum"** (squash `ceo/dato-se-parafraser`)
+#### 202. [x] ✅ 2026-09-30 — gaten — **CI's røde test var en rigtig fejl i scanneren, ikke en flake: `--gate --json` tabte 285 KB JSON ved at afslutke med `process.exit(1)`** (squash `ceo/gate-flake`)
 
-- **Datagrund:** GSC SE 2026-08-30 → 2026-09-27. `/dato` er beraknare.se's
-  største side: **99.136 visninger, 95 klik, CTR 0,1 %, pos. 8,2** — mod dansk
-  `/dato`'s 132.313 v / 822 klik / 0,6 %. De to største søgninger er
-  **"antal dagar mellan datum" (425 v, pos 9)** og **"hur många dagar mellan två
-  datum" (380 v, pos 8)**.
-- **Årsagen, målt:** server-renderet svensk `/dato` (137.791 B) havde **0**
-  forekomster af begge. Siden skriver konsekvent "mellan **två** datum"
-  (`title`, `description`, `h3` 1) og "mellan datumen" — aldrig GSC's
-  formulering *uden* "två". Dansk `/dato` har derimod **16** forekomster af
-  "dage mellem datoer" **og 16** af "antal dage mellem to datoer": C191's
-  svar-først-lås blev aldrig spejlet i svensk.
-- **Rettelse:** ét nyt `<h2>` **"Antal dagar mellan datum"** som første element i
-  den svenske tekstblok, med regnestykket **1. marts 2027 → 1. marts 2028 = 366
-  dagar** (2028 er skottår, efterprøvet i node) og de to spørgsmålsformer i
-  brødteksten. **Kun `locale === "se"`** — dansk side urørt, verificeret med 0
-  fund på rigtig server. Ingen `<title>`/`metaDescription`/`<h1>`/FAQ/JSON-LD,
-  ingen beregningslogik, ingen ny URL, ingen sitemap, +9 linjer.
-- **Gate grøn:** lint (**618 filer**), **3019 tests / 190 filer** (fra 3017/190),
-  build (**142 sider**), `locale-leak.mjs --gate` exit 0. Den nye lås
-  `svensk side har huvudordet og spørgsmålsformen fra GSC` **fejler mod master's
-  `page.tsx`** (`git stash`: 1 failed / 23 passed), så den låser den gamle fejl
-  fast; den negative danske lås skal være grøn begge veje.
-- **MÅL:** beraknare.se `/dato` **99.136 visninger / 95 klik / CTR 0,1 % / pos.
-  8,2** (GSC 2026-08-30 → 2026-09-27). Genmål **2026-10-14**; CTR er tallet, der
-  skal stige. Positionen er uændret ved denne opgave, så forventningen er kun
-  flere klik på de to søgninger, ikke en rankingeringsstigning.
-
-#### 200. [x] ✅ 2026-09-30 — Kø — **giv `/procent` en titel der dækker hele klyngen, ikke ét eksempel** (squash `ceo/procent-langhale`)
-
-- **Datagrund:** GSC 2026-08-30 → 2026-09-27: `/procent` **150.148 visninger,
-  98 klik, CTR 0,1 %, pos. 7,4** — GSC's største enkeltvisningstal på sitet, og
-  større end `/dato` (132.313 v / 822 klik / 0,6 % / pos. 5,7). Kun ~360 af
-  visningerne kommer fra de fire søgninger GSC viser ("procentberegner" 249,
-  telefon-rabat-spørgsmålet 59, "10 procent af" 53), så **149.700 visninger er
-  en ulistet langhale** — og position 7,4 forklarer ikke, at 99,93 % af dem
-  ikke klikkes.
-- **Årsagen, målt:** DA-autocomplete (`hl=da&gl=dk`, 2026-09-30) viser at
-  langhalen er opdelt i *opgaver*, ikke i én søgning. Under **"procent
-  beregner"** ligger "stigning", "rabat", "fald", "besparelse", "vækst" og
-  "ændring i procent"; under **"procent stigning"** "mellem to tal" og "fra et
-  tal til et andet"; under **"procent fald"** "hvor mange procent falder".
-  Titlen var "Procentberegner: 10 % af 250 kr. = 25 kr." — den lovede **ét**
-  eksempel og matcher dermed højst én af ti opgaver. Samme sygdom som `/dato`
-  fik svar-først-sider for (`ceo/dage-til-fakta`): **siden svarer, men ikke i
-  den streng brugeren søger på.** Svensk er urørt (frosset til 13/10, opg. 187).
-- **Rettelse:** dansk `metaTitle`/`ogTitle` →
-  "Procentberegner: 10 % af 250 = 25 kr. Stigning, fald, rabat" (59 tegn) og
-  `metaDescription`/`ogDescription` med de fire opgaver. **Ingen ny URL, ingen
-  sitemap, intet `<h1>`, ingen beregningslogik, ingen `<article>`-ændring** —
-  kun `metaTitle`, `ogTitle`, `metaDescription`, `ogDescription` i
-  `page-data.ts` (4 strenge) + to låste titler i testene.
-- **Husreglen holdt:** `title-eksempel.test.ts` kræver et udregnet eksempel i
-  titlen, så eksemplet blev **beholdt** og de tre andre opgaver lagt til ved
-  siden af, frem for at bytte det ud. Beskrivelsen er 118 tegn (grænse 160),
-  titlen 59 (grænse 60).
-- **Gate grøn:** lint (**618 filer**), **3017 tests / 190 filer** (fra
-  3016/190), build (**142 sider**), `locale-leak.mjs --gate` exit 0.
-  **Modsvejs verificeret:** den nye lås `/procent-titlen dækker opgaverne i den
-  danske langhale` **fejler mod master's `page-data.ts`** (`git stash`: 2
-  failed / 97 passed), så den låser den gamle fejl fast.
-- **MÅL:** `/procent` **150.148 visninger / 98 klik / CTR 0,065 % / pos. 7,4**
-  (GSC 2026-08-30 → 2026-09-27). Genmål **2026-10-14** — CTR er det tal, der
-  skal stige; en forventet stigning på 0,2 % er ~200 klik/28d, på 0,5 %
-  ~650. Hvis CTR er uændret efter 14 dage, er årsagen **ikke** titlen, og så
-  skal `/procent` have ægte **søstersider** (`/procent/stigning`,
-  `/procent/rabat`, `/procent/fald`) i stedet — ikke flere titelændringer.
-
-
+- **Fund:** kørslen 30/9 01:07 (`/procent`-titlen, `ceo/procent-langhale`) var
+  **rød** med `locale-leak-gate.test.ts > does not flag Norwegian æ/ø` på
+  **5033 ms** — 33 ms over vitests 5000 ms-grænse. Næste kørsel grøn. Så det så
+  ud som en flake; det var ikke.
+- **Årsagen er to ting, og den anden er en fejl i værktøjet.** Filen spurgte
+  scanneren **to gange** pr. test (`--gate` for dommen, `--json` for fundene) og
+  den norske test **tre gange**. Hver kørsel er ~790 ms, så filen tog 28,9 s.
+  Men da den første kombination `--gate --json` blev brugt, kom der
+  `SyntaxError: Unterminated string in JSON at position 64446` — **afkortet
+  midt i en streng ved 64 KB**. Årsagen: `process.exit(1)` i `locale-leak.mjs`
+  dræber processen, før en asynkron pipe-skrivning er flushet. Modsat filoutput,
+  hvor skrivningen er synkron — derfor så det ikke ud som en fejl i min egen
+  kode. Rettelse: `process.exitCode = 1`, som lader Node afslutte normalt og
+  flushe først. **Samme exit-status, intet tabt** (verificeret: exit 1 stårende,
+  285 KB pipe-parsebart).
+- **Rigtigere end hurtigere:** dommen og fundene kommer nu fra *én* kørsel, så
+  "gaten blev rød" + "denne streng er i fundene" er et udsagn om den samme
+  scanning — før kunne to kørser principielt være uenige.
+- **Harness:** de 8 gaten-tester **fejler mod den gamle scanner** (kun
+  `exitCode`-linjen gendannet: `SyntaxError: Unterminated string`, 8 røde), så
+  rettelsen er låst fast og ikke bare tilfældigt grøn. Plus `ScanResult` er nu
+  en type, som også rummer `scannedPages`/`candidatesFromPages` — de to felter
+  bruges i testen men manglede i typen (én af de kendte `tsc`-fejl).
+- **Målt:** filen **28,85 s → 17,06 s**, langsomste test **2384 ms → ~800 ms**.
+  På CI's ~2,1× langsommere runner er den ~1,7 s mod 5 s — 3× luft i stedet
+  for 33 ms. Samlet gate: lint **618 filer**, **3019 tests / 190 filer**,
+  build **142 sider**, `locale-leak.mjs --gate` exit 0.
+- **Ingen `VERIFICÉR DEPLOY`-note, bevidst:** scanneren og testen er ikke i
+  runtime-fladen (målt: ingen import af `locale-leak` i `src/` uden for
+  kommentarer, ingen reference i `package.json`/workflows) og rører ingen URL,
+  titel eller beregning. En note ville sende næste iteration til at curle en
+  side og bekræfte, at intet var ændret — det er ikke en verificering.
 
 #### 187. [ ] **IKKE FØR 2026-10-13** 2026-09-30 — Kø — **migrér beraknare.se til svenske URL-slugs med 301**
 

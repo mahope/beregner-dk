@@ -18948,3 +18948,72 @@ titelændring på `/bmi` uden diagnose ville være prøvet to gange. Bemærk at
 /procent, og de bør prioriteres derefter.
 
 #### 201. [x] FÆRDIG 2026-09-30 — trafik — **beraknare.se `/dato` (99.136 v, 95 klik, CTR 0,1 %, pos. 8,2) havde 0 forekomster af begge sine egne hovedsøgninger; dansk `/dato` har dem 16 gange hver.** Køen var tom (CEO-punkt 0 verificeret lukket i kode, 97/98/119/183 `BLOCKED`, 187 frosset til 13/10), og de fem åbne deploy-noter har alle første vindue **2026-09-30 07:30** — det var 03:08, så intet kunne verificeres, og ingen blev rørt. **Valget kom af den samme måling som C191 gjorde på dansk, kørt på den anden ende:** GSC's egne søgninger for beraknare.se `/dato` er "antal dagar mellan datum" (425 v, pos 9) og "hur många dagar mellan två datum" (380 v, pos 8), og begge er **0** i den server-renderede side (137.791 B) — mens den danske tvilling har 16 og 16. **Årsagen er ét ord, ikke manglende indhold:** siden skriver "mellan **två** datum" (`title`, `description`, `<h3>1.`) og "mellan datumen", aldrig GSC's formulering uden "två". Rettelsen er ét nyt `<h2>` "Antal dagar mellan datum" med regnestykket 1. marts 2027 → 1. marts 2028 = **366 dagar** (2028 er skottår; efterprøvet i node, ikke i min egen test — C84's krav) + de to spørgsmålsformer i brødteksten. **Kun `locale === "se"`**, +9 linjer, dansk urørt. `metaTitle` er bevidst urørt, fordi opgave 187 frosser svenske titelændringer til 13/10. **Målt på rigtig server** (`next start` :3987, porten verificeret fri *inden* start): SE 200 med 4/2/4 fund på de tre strenge og uændret titel, DA 200 med **0** fund på den svenske overskrift og uændret titel, `/api/health` → `status: ok`. **Harness:** `page.test.tsx` +2 (den svenske lås på `<h2>` + begge spørgsmålsformer + 366, og en negativ dansk lås) — **modsvejs verificeret: 1 af 24 falder** med master's `page.tsx` (`git stash`); den negative lås skal være grøn begge veje. **Målt og bevidst ikke bygget:** "hur många dagar har jag levt" (385 v, pos 10) manglede også på `/dato`, men hører til `/alder`, der har den 6 gange på svensk — det er Googles egen tvilling, ikke et hul. Gate grøn: lint (**618 filer**), **3019 tests / 190 filer** (fra 3017/190), build (**142 sider**), `locale-leak.mjs --gate` exit 0. Kode + plan i ét squash-commit på `ceo/dato-se-parafraser`; se opgave 201.
+
+#### 201. [x] ✅ 2026-09-30 — trafik — **beraknare.se `/dato` fik sin egen søgeintention ind i synlig tekst: 0 → 4 fund på "Antal dagar mellan datum"** (squash `ceo/dato-se-parafraser`)
+
+- **Datagrund:** GSC SE 2026-08-30 → 2026-09-27. `/dato` er beraknare.se's
+  største side: **99.136 visninger, 95 klik, CTR 0,1 %, pos. 8,2** — mod dansk
+  `/dato`'s 132.313 v / 822 klik / 0,6 %. De to største søgninger er
+  **"antal dagar mellan datum" (425 v, pos 9)** og **"hur många dagar mellan två
+  datum" (380 v, pos 8)**.
+- **Årsagen, målt:** server-renderet svensk `/dato` (137.791 B) havde **0**
+  forekomster af begge. Siden skriver konsekvent "mellan **två** datum"
+  (`title`, `description`, `h3` 1) og "mellan datumen" — aldrig GSC's
+  formulering *uden* "två". Dansk `/dato` har derimod **16** forekomster af
+  "dage mellem datoer" **og 16** af "antal dage mellem to datoer": C191's
+  svar-først-lås blev aldrig spejlet i svensk.
+- **Rettelse:** ét nyt `<h2>` **"Antal dagar mellan datum"** som første element i
+  den svenske tekstblok, med regnestykket **1. marts 2027 → 1. marts 2028 = 366
+  dagar** (2028 er skottår, efterprøvet i node) og de to spørgsmålsformer i
+  brødteksten. **Kun `locale === "se"`** — dansk side urørt, verificeret med 0
+  fund på rigtig server. Ingen `<title>`/`metaDescription`/`<h1>`/FAQ/JSON-LD,
+  ingen beregningslogik, ingen ny URL, ingen sitemap, +9 linjer.
+- **Gate grøn:** lint (**618 filer**), **3019 tests / 190 filer** (fra 3017/190),
+  build (**142 sider**), `locale-leak.mjs --gate` exit 0. Den nye lås
+  `svensk side har huvudordet og spørgsmålsformen fra GSC` **fejler mod master's
+  `page.tsx`** (`git stash`: 1 failed / 23 passed), så den låser den gamle fejl
+  fast; den negative danske lås skal være grøn begge veje.
+- **MÅL:** beraknare.se `/dato` **99.136 visninger / 95 klik / CTR 0,1 % / pos.
+  8,2** (GSC 2026-08-30 → 2026-09-27). Genmål **2026-10-14**; CTR er tallet, der
+  skal stige. Positionen er uændret ved denne opgave, så forventningen er kun
+  flere klik på de to søgninger, ikke en rankingeringsstigning.
+
+#### 200. [x] ✅ 2026-09-30 — Kø — **giv `/procent` en titel der dækker hele klyngen, ikke ét eksempel** (squash `ceo/procent-langhale`)
+
+- **Datagrund:** GSC 2026-08-30 → 2026-09-27: `/procent` **150.148 visninger,
+  98 klik, CTR 0,1 %, pos. 7,4** — GSC's største enkeltvisningstal på sitet, og
+  større end `/dato` (132.313 v / 822 klik / 0,6 % / pos. 5,7). Kun ~360 af
+  visningerne kommer fra de fire søgninger GSC viser ("procentberegner" 249,
+  telefon-rabat-spørgsmålet 59, "10 procent af" 53), så **149.700 visninger er
+  en ulistet langhale** — og position 7,4 forklarer ikke, at 99,93 % af dem
+  ikke klikkes.
+- **Årsagen, målt:** DA-autocomplete (`hl=da&gl=dk`, 2026-09-30) viser at
+  langhalen er opdelt i *opgaver*, ikke i én søgning. Under **"procent
+  beregner"** ligger "stigning", "rabat", "fald", "besparelse", "vækst" og
+  "ændring i procent"; under **"procent stigning"** "mellem to tal" og "fra et
+  tal til et andet"; under **"procent fald"** "hvor mange procent falder".
+  Titlen var "Procentberegner: 10 % af 250 kr. = 25 kr." — den lovede **ét**
+  eksempel og matcher dermed højst én af ti opgaver. Samme sygdom som `/dato`
+  fik svar-først-sider for (`ceo/dage-til-fakta`): **siden svarer, men ikke i
+  den streng brugeren søger på.** Svensk er urørt (frosset til 13/10, opg. 187).
+- **Rettelse:** dansk `metaTitle`/`ogTitle` →
+  "Procentberegner: 10 % af 250 = 25 kr. Stigning, fald, rabat" (59 tegn) og
+  `metaDescription`/`ogDescription` med de fire opgaver. **Ingen ny URL, ingen
+  sitemap, intet `<h1>`, ingen beregningslogik, ingen `<article>`-ændring** —
+  kun `metaTitle`, `ogTitle`, `metaDescription`, `ogDescription` i
+  `page-data.ts` (4 strenge) + to låste titler i testene.
+- **Husreglen holdt:** `title-eksempel.test.ts` kræver et udregnet eksempel i
+  titlen, så eksemplet blev **beholdt** og de tre andre opgaver lagt til ved
+  siden af, frem for at bytte det ud. Beskrivelsen er 118 tegn (grænse 160),
+  titlen 59 (grænse 60).
+- **Gate grøn:** lint (**618 filer**), **3017 tests / 190 filer** (fra
+  3016/190), build (**142 sider**), `locale-leak.mjs --gate` exit 0.
+  **Modsvejs verificeret:** den nye lås `/procent-titlen dækker opgaverne i den
+  danske langhale` **fejler mod master's `page-data.ts`** (`git stash`: 2
+  failed / 97 passed), så den låser den gamle fejl fast.
+- **MÅL:** `/procent` **150.148 visninger / 98 klik / CTR 0,065 % / pos. 7,4**
+  (GSC 2026-08-30 → 2026-09-27). Genmål **2026-10-14** — CTR er det tal, der
+  skal stige; en forventet stigning på 0,2 % er ~200 klik/28d, på 0,5 %
+  ~650. Hvis CTR er uændret efter 14 dage, er årsagen **ikke** titlen, og så
+  skal `/procent` have ægte **søstersider** (`/procent/stigning`,
+  `/procent/rabat`, `/procent/fald`) i stedet — ikke flere titelændringer.

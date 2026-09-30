@@ -14,20 +14,56 @@ import { describe, expect, it } from "vitest";
 const ROOT = resolve(__dirname, "..", "..");
 const SCRIPT = resolve(ROOT, "scripts", "locale-leak.mjs");
 
-function scan(args: string[] = []) {
-  return JSON.parse(
-    execFileSync("node", [SCRIPT, "--json", ...args], {
+type ScanResult = {
+  seMountedComponents: number;
+  scannedPages: number;
+  candidatesFromPages: number;
+  candidates: number;
+  needsEyes: number;
+  dead: number;
+  unreviewed: { file: string; line: number; string: string }[];
+  reviewed: { file: string; verdict: string; reviewNote: string }[];
+};
+
+/**
+ * One scanner run answers both questions this file asks.
+ *
+ * `--gate --json` writes the JSON to stdout (locale-leak.mjs:1562) *and* exits 1
+ * on an unreviewed candidate (1617), so the verdict and the findings come out of
+ * a single walk over the repo instead of two. That is worth more than the time:
+ * two runs could in principle disagree, and "the gate went red" plus "this string
+ * is in the findings" is only a claim about the *same* scan if it is one scan.
+ *
+ * The cost of asking twice was measurable. Every test here spawns a fresh
+ * process over all 743 candidates, ~790 ms a run, so a two-question test cost
+ * 1.6 s and the file took 29 s. The Norwegian-plant test asked three times and
+ * reached 5033 ms in CI — past vitest's 5000 ms default — so it reddened a
+ * green train on 30/9 and passed again on the next run. One run per test puts
+ * the slowest at ~0.8 s here, ~1.7 s on CI's slower runner.
+ */
+function runScanner(): { failed: boolean; json: ScanResult } {
+  let stdout: string;
+  let failed = false;
+  try {
+    stdout = execFileSync("node", [SCRIPT, "--gate", "--json"], {
       cwd: ROOT,
       encoding: "utf8",
-    })
-  ) as {
-    seMountedComponents: number;
-    candidates: number;
-    needsEyes: number;
-    dead: number;
-    unreviewed: { file: string; line: number; string: string }[];
-    reviewed: { file: string; verdict: string; reviewNote: string }[];
-  };
+    });
+  } catch (error) {
+    const failure = error as { status: number; stdout: string };
+    // Only exit 1 is an answer this file expects: the gate refusing. Any other
+    // status is the scanner itself crashing, and swallowing that would turn a
+    // broken gate into a passing test.
+    if (failure.status !== 1) throw error;
+    failed = true;
+    stdout = failure.stdout;
+  }
+  return { failed, json: JSON.parse(stdout) as ScanResult };
+}
+
+/** The findings alone, for the tests that never ask whether the gate held. */
+function scan() {
+  return runScanner().json;
 }
 
 /**
@@ -51,9 +87,7 @@ describe("locale-leak scanner", () => {
   it("fails the gate: every candidate a human has not judged is known", () => {
     // The load-bearing assertion. If someone pastes a Danish string into a
     // component that renders on beraknare.se, this is what turns red.
-    expect(() =>
-      execFileSync("node", [SCRIPT, "--gate"], { cwd: ROOT, stdio: "pipe" })
-    ).not.toThrow();
+    expect(runScanner().failed).toBe(false);
   });
 
   it("derives the SE-mounted components from calculator-list.ts", () => {
@@ -110,10 +144,9 @@ describe("locale-leak scanner", () => {
         target,
         `${original.toString("utf8")}\nconst PLANTED = [{ titel: "Vaskemaskine (per vask)" }];\n`
       );
-      const failing = () =>
-        execFileSync("node", [SCRIPT, "--gate"], { cwd: ROOT, stdio: "pipe" });
-      expect(failing).toThrow();
-      expect(JSON.stringify(scan().unreviewed)).toContain("Vaskemaskine");
+      const run = runScanner();
+      expect(run.failed).toBe(true);
+      expect(JSON.stringify(run.json.unreviewed)).toContain("Vaskemaskine");
     } finally {
       // byte-exact, not a shell heredoc: a heredoc appends a newline and the
       // next run would diff a file it thinks it restored.
@@ -148,8 +181,9 @@ describe("locale-leak scanner", () => {
           `  return <PlantetDA />;\n` +
           `}\n`
       );
-      expect(execFileSync("node", [SCRIPT, "--gate"], { cwd: ROOT, stdio: "pipe" })).toBeTruthy();
-      expect(JSON.stringify(scan().unreviewed)).not.toContain("Tørremaskine");
+      const run = runScanner();
+      expect(run.failed).toBe(false);
+      expect(JSON.stringify(run.json.unreviewed)).not.toContain("Tørremaskine");
     } finally {
       writeFileSync(target, original);
     }
@@ -172,10 +206,9 @@ describe("locale-leak scanner", () => {
           `  return <PlantetDA2 />;\n` +
           `}\n`
       );
-      const failing = () =>
-        execFileSync("node", [SCRIPT, "--gate"], { cwd: ROOT, stdio: "pipe" });
-      expect(failing).toThrow();
-      expect(JSON.stringify(scan().unreviewed)).toContain("Opvaskemaskine");
+      const run = runScanner();
+      expect(run.failed).toBe(true);
+      expect(JSON.stringify(run.json.unreviewed)).toContain("Opvaskemaskine");
     } finally {
       writeFileSync(target, original);
     }
@@ -196,13 +229,12 @@ describe("locale-leak scanner", () => {
           `const PLANTET_LABELS = { da: { apparat: "Støvsuger" }, se: { apparat: "Støvsuger" } };\n` +
           `export function Plantet3() { return <div>{PLANTET_LABELS.se.apparat}</div>; }\n`
       );
-      const failing = () =>
-        execFileSync("node", [SCRIPT, "--gate"], { cwd: ROOT, stdio: "pipe" });
-      expect(failing).toThrow();
+      const run = runScanner();
+      expect(run.failed).toBe(true);
       // Egen streng, ikke den i DelRegningBeregner: ellers ville plantet være
       // grønt på grund af en virkelig lækage, og R4's egen dækning ville være
       // ubevis. Samme argument som i "flags a module-scope Danish string".
-      expect(JSON.stringify(scan().unreviewed)).toContain("Støvsuger");
+      expect(JSON.stringify(run.json.unreviewed)).toContain("Støvsuger");
     } finally {
       writeFileSync(target, original);
     }
@@ -226,13 +258,12 @@ describe("locale-leak scanner", () => {
           `};\n` +
           `export function Plantet4() { return <div>{PLANTET_OK.no.faerre}</div>; }\n`
       );
-      expect(() =>
-        execFileSync("node", [SCRIPT, "--gate"], { cwd: ROOT, stdio: "pipe" })
-      ).not.toThrow();
-      expect(JSON.stringify(scan().unreviewed)).not.toContain("Færre personer");
+      const run = runScanner();
+      expect(run.failed).toBe(false);
+      expect(JSON.stringify(run.json.unreviewed)).not.toContain("Færre personer");
       // `ø` i den norske blok er det samme argument: norsk skriver ø, så det må
       // ikke give en ny vurdering hverken.
-      expect(JSON.stringify(scan().unreviewed)).not.toContain("lønn");
+      expect(JSON.stringify(run.json.unreviewed)).not.toContain("lønn");
     } finally {
       writeFileSync(target, original);
     }
@@ -258,10 +289,9 @@ describe("locale-leak scanner", () => {
           '  procent: { slug: "plantet", faqItems: [{ question: "Q", answer: "hvor A1 er det gamle tallet og B1 er det nye" }], },'
         )
       );
-      const failing = () =>
-        execFileSync("node", [SCRIPT, "--gate"], { cwd: ROOT, stdio: "pipe" });
-      expect(failing).toThrow();
-      expect(JSON.stringify(scan().unreviewed)).toContain("hvor A1 er det gamle tallet");
+      const run = runScanner();
+      expect(run.failed).toBe(true);
+      expect(JSON.stringify(run.json.unreviewed)).toContain("hvor A1 er det gamle tallet");
     } finally {
       writeFileSync(target, original);
     }
@@ -290,9 +320,8 @@ describe("locale-leak scanner", () => {
           '  plantet: { slug: "plantet", faqItems: [{ question: "Q", answer: `Med kalkylatorns standardvärden på ${elbilSe.forudsætninger.kmPrAar} km per år är besparingen ca.` }], },'
         )
       );
-      expect(() =>
-        execFileSync("node", [SCRIPT, "--gate"], { cwd: ROOT, stdio: "pipe" })
-      ).not.toThrow();
+      const run = runScanner();
+      expect(run.failed).toBe(false);
     } finally {
       writeFileSync(target, original);
     }
@@ -314,10 +343,9 @@ describe("locale-leak scanner", () => {
           `  plantet: { slug: "plantet", faqItems: [{ question: "Q", answer: "${long}" }], },`
         )
       );
-      const failing = () =>
-        execFileSync("node", [SCRIPT, "--gate"], { cwd: ROOT, stdio: "pipe" });
-      expect(failing).toThrow();
-      expect(JSON.stringify(scan().unreviewed)).toContain("hvor hvor");
+      const run = runScanner();
+      expect(run.failed).toBe(true);
+      expect(JSON.stringify(run.json.unreviewed)).toContain("hvor hvor");
     } finally {
       writeFileSync(target, original);
     }
@@ -375,10 +403,9 @@ describe("locale-leak scanner", () => {
         target,
         plantInSeBranch(original.toString("utf8"), "hvor A1 er det gamle tallet")
       );
-      const failing = () =>
-        execFileSync("node", [SCRIPT, "--gate"], { cwd: ROOT, stdio: "pipe" });
-      expect(failing).toThrow();
-      expect(JSON.stringify(scan().unreviewed)).toContain("hvor A1 er det gamle tallet");
+      const run = runScanner();
+      expect(run.failed).toBe(true);
+      expect(JSON.stringify(run.json.unreviewed)).toContain("hvor A1 er det gamle tallet");
     } finally {
       writeFileSync(target, original);
     }
@@ -396,10 +423,9 @@ describe("locale-leak scanner", () => {
         target,
         plantInDaBranch(original.toString("utf8"), "hvor A1 er det gamle tallet")
       );
-      expect(() =>
-        execFileSync("node", [SCRIPT, "--gate"], { cwd: ROOT, stdio: "pipe" })
-      ).not.toThrow();
-      expect(JSON.stringify(scan().unreviewed)).not.toContain("hvor A1 er det gamle tallet");
+      const run = runScanner();
+      expect(run.failed).toBe(false);
+      expect(JSON.stringify(run.json.unreviewed)).not.toContain("hvor A1 er det gamle tallet");
     } finally {
       writeFileSync(target, original);
     }
@@ -424,10 +450,9 @@ describe("locale-leak scanner", () => {
         target,
         src.replace(anchor, '$1"Svar på de oftest stillede aldersspørgsmål og hvor gammel er jeg"')
       );
-      expect(() =>
-        execFileSync("node", [SCRIPT, "--gate"], { cwd: ROOT, stdio: "pipe" })
-      ).not.toThrow();
-      expect(JSON.stringify(scan().unreviewed)).not.toContain("hvor gammel er jeg");
+      const run = runScanner();
+      expect(run.failed).toBe(false);
+      expect(JSON.stringify(run.json.unreviewed)).not.toContain("hvor gammel er jeg");
     } finally {
       writeFileSync(target, original);
     }
@@ -446,10 +471,9 @@ describe("locale-leak scanner", () => {
       // Un-gate the read: the `{locale === "da" && (` above it becomes a plain
       // fragment, which is the state a real leak would be in.
       writeFileSync(target, src.replace(/\{locale === "da" && \(\n/, "{\n"));
-      const failing = () =>
-        execFileSync("node", [SCRIPT, "--gate"], { cwd: ROOT, stdio: "pipe" });
-      expect(failing).toThrow();
-      expect(JSON.stringify(scan().unreviewed)).toContain("Østrig");
+      const run = runScanner();
+      expect(run.failed).toBe(true);
+      expect(JSON.stringify(run.json.unreviewed)).toContain("Østrig");
     } finally {
       writeFileSync(target, original);
     }
@@ -486,10 +510,9 @@ describe("locale-leak scanner", () => {
         target,
         plantInSeBranchAsJsxWritesIt(original.toString("utf8"), "En lønsprocent kan du se")
       );
-      const failing = () =>
-        execFileSync("node", [SCRIPT, "--gate"], { cwd: ROOT, stdio: "pipe" });
-      expect(failing).toThrow();
-      expect(JSON.stringify(scan().unreviewed)).toContain("En lønsprocent kan du se");
+      const run = runScanner();
+      expect(run.failed).toBe(true);
+      expect(JSON.stringify(run.json.unreviewed)).toContain("En lønsprocent kan du se");
     } finally {
       writeFileSync(target, original);
     }
@@ -521,10 +544,9 @@ describe("locale-leak scanner", () => {
           "useState<string>('30000');\n  const [udbætaling, setUdbætaling] = useState<string>('4.5');"
         )
       );
-      expect(() =>
-        execFileSync("node", [SCRIPT, "--gate"], { cwd: ROOT, stdio: "pipe" })
-      ).not.toThrow();
-      expect(JSON.stringify(scan().unreviewed)).not.toContain("udbætaling");
+      const run = runScanner();
+      expect(run.failed).toBe(false);
+      expect(JSON.stringify(run.json.unreviewed)).not.toContain("udbætaling");
     } finally {
       writeFileSync(target, original);
     }
