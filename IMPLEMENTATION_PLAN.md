@@ -1,25 +1,26 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — 30/9 15:40. Fire VERIFICÉR-noter venter på vinduet **17:30**
-(`/alders`, blog-bølgen fra i går, `/boligstoette`-titlen og denne iterations
-tolv artikler). De elleve ældre noter er lukket på indhold, ikke på HTTP 200.
+STATUS: KØ — 30/9 16:15. Denne iteration var **research** (se `## Fase 3 —
+trafik-drevet`): CEO-køens punkt 0 er færdigt (`aca17e5`), alle plan-opgaver er
+BLOCKED eller udskudt, så køen var tom. Fire VERIFICÉR-noter venter på
+vinduet **17:30** — de kan ikke lukkes før 16:27 (iterationsgrænsen).
 
-**Nyt i denne iteration:** de **sidste tolv** blogindlæg sluttede stadig på
-"Relaterede artikler" — opgave 202 efterlod dem. De har nu alle en næste
-handling, og en ny port låser mønstret for alle 27. Se opgave 204.
-
-**⚠️ Den nye port fandt en rigtig fejl i gårsdagens arbejde.**
-`/blog/dagpenge-saadan-finder-du-din-sats` havde knappen "Beregn din dagpenge"
-hængt på `/barselsdagpenge` — en barselsdagpengeberegner under en dagpengeknap.
-Artiklen handler om at finde sin egen dagpengesats, og den linkede allerede til
-`/dagpenge` i løbende tekst. Rettet.
+**Målt og bekræftet færdigt i denne iteration (CEO-kø punkt 0, alle otte):**
+Valborg fast 30. april (`dage-til.ts:1055`), svensk påskafton `offsetDays: -1`
+(`:802`), dansk sankthans fast 23./24. juni (`:604`, `:669`) og ingen "fri med
+løn" i dansk tekst, dansk påskeaften-FAQ svarer "to forskellige dage" (`:818`),
+`/husleje` siger at nævnet ikke sætter sats pr. område
+(`page-data.ts:1804`, `HuslejeNettopnisindeks.tsx:174`), `toUtcMidnight` læser
+`DAGE_TIL_TIMEZONE` (`dage-til.ts:1347`), svensk promille-FAQ bruger 0,2/1,0 ‰
+(`page-data.ts:2976`), `maneder: 12` (`dato-eksempler.ts:103`), 1. advent
+"mellem 27. november og 3. december" (`dage-til.ts:1129`).
 
 **⚠️ 12:30-batchen kørte UDEN de otte dengang ventende ændringer.** Alle otte var
 merged før 12:18. Kl. 14:12 er **elleve af dem live** — 12:30-batchen må altså
 have dækket dem alligevel, så ingen `DEPLOY-MISSING`. Kun `/alders`-noten
 (merged 13:43, efter batchen) venter stadig på **17:30**.
 
-**⚠️ Målerfælde fra denne iteration (samme klasse som C70's).** Under
+**⚠️ Målerfælde fra 30/9 15:40 (samme klasse som C70's).** Under
 `npm run test` skriver `locale-leak-gate.test.ts` med vilje en dansk streng ind
 i `src/app/procent/page.tsx`, kører scanneren og hævter at den **bliver**
 fundet (`page.test.tsx`-scenen "flags Danish copy that ends in a {…}
@@ -32,6 +33,113 @@ restoreret bagefter (`git status` ren). Kør gaten separat.
 nøglet på **fil + linjenummer**, så enhver redigering i `page-data.ts` kan
 fjerne en godkendt post. Ikke opdaget i denne iteration (6 linjer for 6 linjer),
 men en reel fælde for næste agent der tilføjer linjer i den fil.
+
+## Fase 3 — trafik-drevet
+
+### Baselines (målt 30/9, bliv her til næste måling)
+
+| Side | Plausible/28d | GSC-visninger/28d | CTR | Pos. |
+|---|---|---|---|---|
+| `/procent` | under top-15 | 150.470 | 0,1 % | 7,4 |
+| `/dato` | 1.133 | 133.054 | 0,6 % | 5,7 |
+| `/tidsberegner` | 290 | 73.666 | 0,3 % | 6,9 |
+| `/tidszone` | under top-15 | 24.324 | 0,4 % | 7,5 |
+| `/moms` | under top-15 | 22.464 | 0,2 % | 7,0 |
+| `/kvadratmeter` | 390 | 21.344 | 1,4 % | 4,9 |
+| `/braendstof` | 263 | 17.051 | 1,1 % | 5,9 |
+| `/boligstoette` | 529 | 7.465 | 2,4 % | 8,7 |
+| `/` (forside) | 218, bounce 38 % | under top-15 | — | — |
+| se `/dato` | 133 | 101.580 | 0,1 % | 8,2 |
+| se `/tidsberegner` | 167 | 61.934 | 0,2 % | 8,0 |
+| se `/procent` | under top-15 | 26.933 | 0,0 % | 9,9 |
+
+Site: minberegner.dk 7.421 besøgende/28d (+42 %), ~600.000 GSC-visninger pr.
+måned. Kilder: Google 4.170, Bing 1.319, DDG 378, Yahoo 274 — **1.971 af 7.319
+(27 %) kommer fra søgemaskiner der ikke er Google.**
+
+### Resultatet af målingen: tre ting er IKKE problemet
+
+Disse er målt på det *live* site 30/9 kl. 15:45-16:10, ikke læst i koden.
+De er skrevet ned, så ingen efterfølgende agent bruger en iteration på dem.
+
+1. **Teknisk SEO er ren.** `/procent`, `/dato`, `/tidsberegner`, `/moms`,
+   `/tidszone`, `/alder` på begge domæner: `hreflang` (da + sv + x-default),
+   canonical til sig selv, `og:locale` (`da_DK`/`sv_SE`), `<html lang>`,
+   `robots index,follow`. Sitemap: 140 `<loc>` på minberegner.dk, 73 på
+   beraknare.se, `robots.txt` korrekt med `Sitemap:`-linje.
+2. **Ingen forældede sider.** `/dage-til/1-december` har dynamisk title
+   ("Hvor mange dage er der til 1. december? 62 dage"), canonical til sig
+   selv, og **18 af 19** søskendesider i linkene plus et link tilbage til
+   `/dato`. Svensk `dagar-till/1-december` har 15 af 16. Ingen orphaner.
+3. **Ordantal forudsiger IKKE position.** Målt på 14 sider:
+
+   | Side | Ord | Pos. | Side | Ord | Pos. |
+   |---|---|---|---|---|---|
+   | `/kvadratmeter` | 741 | **4,9** | `/dato` | 1.723 | 5,7 |
+   | `/brok` | 636 | 5,2 | `/tidsberegner` | 1.658 | 6,9 |
+   | `/braendstof` | 1.063 | 5,9 | `/procent` | 1.055 | 7,4 |
+   | `/fart` | 485 | 7,0 | `/tidszone` | 1.756 | 7,5 |
+   | `/alder` | 1.215 | 7,5 | `/boligstoette` | 1.149 | **8,7** |
+
+   Sidet med **mindst** tekst på sitets bedste søgerangering, og sidet med
+   **mest** tekst på en af de dårligste. Så dybde er ikke flaskehalsen, og
+   "skriv mere tekst på de store sider" er en dyr fejlretning.
+4. **Titles er allerede skrevet til hovedordet.** Alle 14 største sider har
+   hovedordet i både `title`, `metaTitle` og `h1` ("Procentberegner",
+   "Tidsberegner", "Momsberegner", "Aldersberegner", …). Det er lavet.
+
+### Den faktiske flaskehals
+
+CTR følger position, ikke sidekvalitet: pos. 4,9-5,9 giver 0,6-1,4 %, pos.
+7,0-8,7 giver 0,1-0,5 %. Vi ligger **på position 5-8 på 600.000 visninger**.
+Der er ingen titel, beskrivelse, schema- eller intern-link-fejl tilbage at rette
+på de eksisterende sider — kun **positionen** er lav, og den afgøres af den
+danske konkurrence i hvert enkelt ord.
+
+**Den største *målbare* afstand:** beraknare.se har **190.447 visninger**
+(`/dato` 101.580 + `/tidsberegner` 61.934 + `/procent` 26.933) og **229 klik**
+— 0,12 % CTR. Det er en tredjedel af sitets samlede visninger og en
+halvredsdel af dets klik. Svensk indholdsdybde er målt til at være **lig med
+den danske** (`/dato` 1.617 mod 1.723 ord, `/tidszone` 1.706 mod 1.756), så
+det er heller ikke et dybde-problem — det er opgave 187's slugs plus den
+svenske domæneautoritet.
+
+### Prioriterede opgaver
+
+**F1. [ ] Få søgeniveau-data for `/procent` — det er 150.470 visninger og
+0,1 %.** De tre søgninger GSC viser for `/procent` (`procentberegner` 254 v,
+`10 procent af` 54 v, en rabat-spørgsmål 56 v) summerer **364 visninger af
+150.470**. Vi ved altså intet om de 150.106. Uden søgningsniveau kan ingen
+vælge mellem "ny side", "dybere side" og "nye links". **Accept:** GSC
+søgningseksport for `/procent` (eller de 20 største søgninger site-wide) ligger
+i planen. **Spørgsmål til Mads: se ❓.**
+
+**F2. [ ] `/procent`: svar på spørgsmålet "hvor stor er rabatten i procent?"
+på selve siden.** Den søgning (56 v, pos. 6) er en hel sætning fra en
+læser, og GSC's øvrige visninger på `/procent` ligner samme type. Kæden
+"to prisser → rabat i kroner og procent" findes i dag kun som værktøj, ikke
+som en svart boks på siden. **Accept:** en sektion med den konkrete
+formel og et gennemregnet eksempel, genereret fra sidens egen
+`beregnRabat`-logik (kvalitet punkt 11), plus en test der fejler uden den.
+**MÅL:** `/procent` 150.470 visninger / 97 klik / CTR 0,1 % (GSC
+2026-08-31 → 2026-09-28). Genmål 14 dage efter deploy.
+
+**F3. [ ] Beraknare.se: position, ikke titel.** 190.447 visninger på pos.
+8-10. Opgave 187 (svenske slugs, 301) er sat til **13/10** og må ikke flyttes
+før de svenske titelændringer fra C195/C196 er målt. Efter den dato er
+dette den største enkeltpost i trafikplanen. **Accept:** se opgave 187.
+
+**F4. [ ] Forsiden som indgangspunkt.** `/` har 465 indgangssider og 38 %
+bounce mod 2-7 % på beregnerne; beraknare.se `/` har 80 % bounce på 20
+besøgende. Direct-trafikken er 1.050 besøgende/28d. **Accept:** de otte
+mest brugte beregnere ligger i det første skærmbillede på 390 px, målt med
+skærmbilleder (kræver Playwright — se ❓).
+
+**F5. [ ] Søg på de 27 % ikke-Google-trafik.** Bing 1.319 + DDG 378 +
+Yahoo 274 besøgende/28d. IndexNow er kodet og instrumenteret
+(`src/lib/indexnow.ts`, `src/app/api/internal/indexnow/route.ts`), men
+`❓ Til Mads` spørger om krogen efter deploy er sat op — uden svar er
+Bing/DDG/Yahoo indeksering uafhængig af vores deploys.
 
 ## Kvalitetsgate (repoets egne scripts fra package.json)
 
@@ -331,6 +439,16 @@ hver sides måling). De fire åbne er merged efter 12:30-batchen.
 
 ## ❓ Til Mads
 
+- ❓ **Søgningseksport fra Search Console (ny, 30/9, højst prioriteret).**
+  GSC's opsummering viser kun de 3-4 største søgninger pr. side. For `/procent`
+  — **150.470 visninger, 97 klik, pos. 7,4, sitets største side** — er de tre
+  søgninger tilsammen **364 visninger**, altså 0,24 % af det vi vil vide noget
+  om. Uden de øvrige søgninger kan ingen af os vælge mellem "byg en ny side",
+  "gør siden dybere" og "byg flere interne links", og det er præcis de tre
+  retninger der er brugt de seneste uger. **Et skærmbillede af Search Console →
+  Effektivitet → Søgninger, filtreret på `/procent`, plus de 20 største
+  søgninger for hele domænet, låser F1-F4.** GSC-data kan ikke hentes fra en
+  agent — API'en kræver din konto.
 - ❓ **IndexNow mangler en krog efter deploy (ny, 30/9).** Bing, DuckDuckGo og
   Yahoo står for ~1.960 af 7.319 besøgende/28d, og IndexNow får ændringer ind
   på minutter i stedet for dage. Koden kan skrives i dag, men **noget skal
