@@ -47,7 +47,7 @@ describe("boligstoette page", () => {
       </LocaleProvider>,
     );
 
-    expect(html).toContain("Boligstøtte 2026: Standardmaksima, formue og beregning");
+    expect(html).toContain("Beregn boligstøtte 2026: standardmaksima og formue");
     expect(html).toContain("Åbn den officielle beregner");
     expect(html).toContain("basisoplysninger");
     expect(html).toContain("1.194");
@@ -66,6 +66,11 @@ describe("boligstoette page", () => {
      expect(html).toContain("forbedringer som et nyt køkken eller bad");
      expect(html).toContain("0–896.400");
      expect(html).toContain("0–1.060.300");
+     // Sidens største søgning er "beregn boligstøtte" (900 visninger/28d, pos.
+     // 10), og før denne titel brugte siden slet ikke ordene. Den hedder
+     // stadig ikke "Boligstøtteberegner": værktøjet er en screening, ikke en
+     // ansøgningsberegning, så løftet skal være handlingen, ikke et navn der
+     // lover en endelig udbetaling.
      expect(html).not.toContain("Boligstøtteberegner");
      expect(html).not.toContain("113.000");
      expect(html).not.toContain("73.000");

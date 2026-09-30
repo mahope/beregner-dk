@@ -1,18 +1,33 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — 30/9 14:25. Elleve af tolv deploy-noter er lukket på indhold;
-`/alders` venter stadig på vinduet 17:30.
+STATUS: KØ — 30/9 15:10. Elleve af tolv deploy-noter er lukket på indhold;
+`/alders` venter stadig på vinduet 17:30, og blog-noten fra i går venter
+med på samme vindue.
 
-**Nyt i denne iteration:** syv af de otte mest besøgte blogindlæg sluttede på
-"Relaterede artikler" — det afgående klik var endnu en artikel, aldrig det
-værktøj artiklen handler om. De har nu alle en næste handling
-(`ceo/blog-naeste-handling`). De elleve lukkede noter er verificeret på
-indhold, ikke på HTTP 200; målingerne står i `docs/plan-arkiv.md`.
+**Nyt i denne iteration:** `/boligstoette` er sitets bedst rangerende side i
+forhold til sit CTR (2,4 %), men lå på position 10-13 for *sine egne* ord,
+fordi hverken titel eller `<h1>` brugte "beregn" — dens største søgning. Se
+opgave 203. De elleve lukkede noter er verificeret på indhold, ikke på
+HTTP 200; målingerne står i `docs/plan-arkiv.md`.
 
 **⚠️ 12:30-batchen kørte UDEN de otte dengang ventende ændringer.** Alle otte var
 merged før 12:18. Kl. 14:12 er **elleve af dem live** — 12:30-batchen må altså
 have dækket dem alligevel, så ingen `DEPLOY-MISSING`. Kun `/alders`-noten
 (merged 13:43, efter batchen) venter stadig på **17:30**.
+
+**⚠️ Målerfælde fra denne iteration (samme klasse som C70's).** Under
+`npm run test` skriver `locale-leak-gate.test.ts` med vilje en dansk streng ind
+i `src/app/procent/page.tsx`, kører scanneren og hævter at den **bliver**
+fundet (`page.test.tsx`-scenen "flags Danish copy that ends in a {…}
+interpolation"). Rækkefølgen `npm run test` → `locale-leak --gate` giver derfor
+en `FEJL: 1 ureviewet(e)`-linje med `procent/page.tsx:339`, der ser ud som et
+fund i denne iterations diff. Det er den **gamle kode**, og filen er
+restoreret bagefter (`git status` ren). Kør gaten separat.
+
+**Generelt om gaten:** `REVIEWED`-poster i `scripts/locale-leak.mjs` er
+nøglet på **fil + linjenummer**, så enhver redigering i `page-data.ts` kan
+fjerne en godkendt post. Ikke opdaget i denne iteration (6 linjer for 6 linjer),
+men en reel fælde for næste agent der tilføjer linjer i den fil.
 
 ## Kvalitetsgate (repoets egne scripts fra package.json)
 
@@ -62,10 +77,45 @@ den blev merged 13:43 — efter 12:30-batchen.
   `/bmi`, `guide-feriepenge-hvornaar-og-hvor-meget` → `/dato`,
   `pension-hvor-meget-skal-du-spare-op` → `/pension`. Kontrol på indhold:
   hver side skal have "Regn det ud" **før** "Relaterede artikler", og
-  `/moms` skal have **0** forekomster af den gamle CTA-løsning.
+  `/moms` skal have **0** forekomster af den gamle CTA-løsning. Målt 15:00:
+  de fire kontrollerede sider har `regn=0`, altså endnu ikke live. Vindue
+  **17:30**.
+
+### Ny note fra denne iteration
+
+- ⏳ **`/boligstoette` skal ramme sin egen største søgning i titlen.**
+  `ceo/boligstoette-titel`. Titlen skal være **"Beregn boligstøtte 2026:
+  standardmaksima og formue"** i `<title>`, `<h1>`, `og:title` og
+  `description`, og beskrivelsen skal stadig sige "Vejledende — fortsæt hos
+  Udbetaling Danmark". Siden skal **stadig** have **0** forekomster på
+  "Boligstøtteberegner" — det er en korrekthedslås, ikke en fejl.
 
 
 ## Åbne opgaver
+
+#### 203. [x] ✅ 2026-09-30 — `/boligstoette` lå på position 10-13 for sine egne ord
+
+- **Lukket 30/9** på `ceo/boligstoette-titel`. Målinger, klassen af fund og
+  portteksten ligger i `docs/plan-arkiv.md`.
+- **Datagrund:** GSC 2026-08-31 → 2026-09-28: `/boligstoette` 7.465
+  visninger / 176 klik / **CTR 2,4 %** / pos. **8,7** — sitets *bedste* CTR.
+  Plausible 529 besøgende/28d (+78 %). Dens egne søgninger: "beregn
+  boligstøtte" **900 v, pos 10**, "boligstøtte beregner" 282 v, pos 13.
+- **Fundet:** titel, `<h1>`, `og:title` og `description` sagde
+  "Boligstøtte 2026: Standardmaksima, formue og beregning". Ordet **"beregn"
+  stod ingen steder på siden** (0 forekomster, målt på den renderede HTML),
+  selv om det er hovedordet i sidens største søgning. Nu: "Beregn boligstøtte
+  2026: standardmaksima og formue".
+- **Datagrænsen, og hvorfor hypotesen ikke er stærkere end den er:** de elleve
+  andre top-sider har *alle* "beregner"/"beregn" i `<h1>`, så mønstret så
+  stærkt ud. Men `/kalorier` har "Kalorieberegner" i h1 *og* titel og ligger
+  stadig på **pos 18**, så "<h1> med hovedord → god placering" er **kun en
+  hypotese, ikke en lov**. Rettelsen er derfor begrænset til det
+  ubestridelige: siden skal kunne svare på sin egen største søgning. Om det
+  flytter positionen, måles efter 14 dage — det er ikke påstandt her.
+- **MÅL:** `/boligstoette` 7.465 visninger / 176 klik / CTR 2,4 % / pos. 8,7;
+  "beregn boligstøtte" 900 v pos 10 (GSC 2026-08-31 → 2026-09-28).
+  Genmål 14 dage efter at den er live.
 
 #### 97. [BLOCKED: afventer Mads' svar på ejerskabsspørgsmålet — spørgsmålet står i ❓ Til Mads, ingen kode uden svar] 2026-09-27 — C69 — afklar hvad `beregner.no` egentlig er: et domæne der skal lanceres, et reserveret navn — eller en helt anden udgivelse
 

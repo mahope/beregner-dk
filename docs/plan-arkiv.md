@@ -20503,3 +20503,99 @@ af en gammel.
 
 **Ulæst:** Playwright. Blogindlæggene er dynamiske sider, så bygget gemmer
 ingen HTML at screenshotte, og repoet har ingen Playwright (se ❓ Til Mads).
+
+## 2026-09-30 — opgave 203: `/boligstoette` lå på position 10-13 for sine egne ord
+
+**Datagrund (GSC 2026-08-31 → 2026-09-28).** `/boligstoette` 7.465
+visninger / 176 klik / **CTR 2,4 %** / pos. **8,7** — sitets bedste CTR på
+nogen side, og Plausible 529 besøgende/28d (+78 %). Sidens egne søgninger er
+"beregn boligstøtte" (**900 v, pos 10**), "boligstøtte beregner" (282 v,
+pos 13), "boligsikring beregner" (192 v, pos 10) og "beregn boligsikring"
+(169 v, pos 9).
+
+**Fundet.** Titel, `<h1>`, `og:title` og `description` lød alle "Boligstøtte
+2026: Standardmaksima, formue og beregning". Ordet **"beregn" stod ingen
+steder på den renderede side** (0 forekomster, målt på `/boligstoette`'s
+faktiske HTML med scripts/styles fjernet) — hovedordet i sidens største
+søgning optrådte slet ikke. Nu: "Beregn boligstøtte 2026: standardmaksima og
+formue".
+
+**Hypotesen er ændret undervejs, og det er den vigtigste del af fundet.**
+Først så det ud som en ren regel: elleve af de tolv mest trafikerede sider har
+"beregner"/"beregn" i `<h1>`, og `/boligstoette` var den eneste undtagelse
+sammen med `/tidszone`'s og `/moms`' relative h1'er. Men da hypotesen blev
+målt mod sitets **egne kontroller**, faldt den:
+
+| side | hovedord i `<h1>` | pos. | CTR |
+|---|---|---|---|
+| `/kvadratmeter` | ja | 4,9 | 1,4 % |
+| `/brok` | ja | 5,2 | 0,7 % |
+| `/dato` | "Beregn antal dage…" | 5,7 | 0,6 % |
+| `/braendstof` | ja | 5,9 | 1,1 % |
+| `/moms` | "Momsberegner" | 7,0 | 0,2 % |
+| `/renteberegner` | ja | 7,4 | 0,9 % |
+| `/tidszone` | "Tidszoneberegner" | 7,5 | 0,4 % |
+| `/alder` | ja | 7,5 | 0,5 % |
+| `/promille` | ja | 7,9 | 1,5 % |
+| `/kalorier` | **ja** ("Kalorieberegner") | **8,1** | 1,0 % |
+| `/boligstoette` | **nej** | 8,7 | 2,4 % |
+
+`/kalorier` har hovedordet i både `<h1>` og `<title>` og ligger alligevel på
+**position 18** for sit eget navn ("kalorieberegner" 194 v). Så
+"hovedord i h1 → god placering" er **ikke en lov**, og det ville være
+overdrift at påstå at titlen flytter `/boligstoette` fra 10 mod 5. Rettelsen
+er derfor begrænset til det ubestridelige og målbare: **siden skal kunne
+svare på sin egen største søgning**. Effekten på placering måles efter 14
+dage; intet derom er påstandt her.
+
+**En næsten-fældt fejl, som er værd at notere.** Første forsøg var titlen
+**"Boligstøtteberegner 2026"** — det er præcis det ord de elleve andre sider
+bruger. Det blev stoppet af en eksisterende lås i
+`src/app/boligstoette/page.test.tsx`:
+
+```js
+expect(html).not.toContain("Boligstøtteberegner");
+```
+
+Låsen blev skrevet i `f8227f3` ("Implementér boligstøtte-screening") ** lige
+ved siden af** en række `not.toContain("113.000")`, `not.toContain("73.000")`,
+`not.toContain("800.000")` — altså tal, værktøjet ikke må påstå at regne. Den
+er en **korrekthedslås, ikke en manglefejl**: `BoligstoetteBeregner.tsx:756`
+siger "Vejledende standardinterval — **ikke en ansøgningsberegning**", og
+siden sender brugeren videre til Udbetaling Danmarks egen beregner. At kalde
+den "Boligstøtteberegner" ville være et løfte om et endeligt beløb, siden
+ikke kan holde — på en side om andres offentlige ydelse. Låsen er derfor
+beholdt, og **udvidet med en kommentar** der siger hvorfor den findes, så
+næste agent ikke "retter" den som en fejl igen. Den faktiske rettelse er
+handlingen ("Beregn boligstøtte"), ikke navnet.
+
+**Review af egen diff fandt en reel tilbagegang.** Min første
+`description` tabte "Fortsæt hos Udbetaling Danmark", som den gamle havde.
+Det er præcis den type vild oplysning kvalitetsregel 11 (påstande i tekst er
+kode) forbyder, så den blev lagt tilbage i både `description` og
+`ogDescription`.
+
+**Verificeret.** `npm run lint` 623 filer grøn. `npm run test` **3180 tests /
+193 filer** grøn (fra 3172 / 193 — de 8 nye er i `locale-leak-gate`-scenens
+egen hjælp, ikke her). `npm run build` grøn, 142 sider.
+`node scripts/locale-leak.mjs --gate` exit 0. Den nye lås er **modsvejs
+verificeret**: med `page-data.ts` på den gamle tekst falder
+`src/app/boligstoette/page.test.tsx` (1 af 4), med den nye består den.
+
+**⚠️ Målerfælde fundet undervejs (samme klasse som C70's tre).**
+`npm run test` skriver en `FEJL: 1 ureviewet(e)`-linje med
+`src/app/procent/page.tsx:339 "En lønsprocent kan du se:"`. Det ser ud som et
+fund i denne iterations diff, men er det ikke: `src/lib/locale-leak-gate.test.ts:511`
+planter **med vilje** den streng i `src/app/procent/page.tsx`, kører scanneren
+og hævder at den **bliver** fundet (den er "den afsluttende rettelse" — scanneren
+skal kunne fange præcis den). Filen gendannes i en `finally`. Verificeret på
+den rene træ: samme linje, exit 0, og `git status src/app/procent/page.tsx`
+er ren efter kørslen. **Kør `locale-leak --gate` separat fra `npm run test`.**
+
+**Relateret fælde, ikke udløst her.** `REVIEWED`-posterne i
+`scripts/locale-leak.mjs` er nøglet på **fil + linjenummer**
+(`find` på `file` + `line`). Denne iteration byttede 6 linjer for 6 linjer i
+`page-data.ts`, så ingen post faldt; men den næste agent der **tilføjer**
+linjer i den fil kan få en godkendt post til at forsvinde, og gaten så en
+mængde nye "kræver øjne"-fund der i virkeligheden er kendte. Noteret, ikke
+udbedret — en fiks til scannerens nøglesæt er en selvstændig opgave.
