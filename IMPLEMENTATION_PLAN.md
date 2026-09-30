@@ -1,27 +1,31 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — CI på `master` var rød efter `6c2deeb`; rettet 30/9 11:45.
+STATUS: KØ — 30/9 12:30. Alle tre review-fund fra 29/9 er rettet i ét commit
+(punkt 0 har forrang for CEO-køen).
 
-`pinse-intervaller.test.ts` testede `new Date(2027, 4, 17, 23, 59)`, som er
-23:59 i *testens* tidszone — i CI (UTC) er det 00:59 dagen efter i København,
-så porten fald. Rettelsen er ikke kun i testen: `pinseAar` sammenlignede 2.
-pinsedags **lokale midnat** med `today` gennem `daysBetween`, som læser begge
-sider via `Europe/Copenhagen`. På en server øst for København (Asia/Tokyo,
-UTC+9) er 17. maj kl. 00:00 den 16. maj dér, så årsgrænsen vendte en dag for
-tidligt. Nu læses dagen i sidens egen tidszone (`dagITidszone`) og fra
-datoens egne felter (`lokalDag`, samme greb som `page.tsx:81`), så svaret kun
-afhænger af det øjeblik læseren har. Fire tidszoner er låst i porten (UTC,
-Asia/Tokyo, Pacific/Kiritimati, America/Los_Angeles) — de to østlige faldt mod
-master.
+Fundene var ikke kosmetik: `periodeHelligdagsnavne` gav **fire navne for tre
+dage**, fordi 2. pinsedag falder samme dag som grundlovsdagen. Målt er det **7
+af 61 år** (1995, 2006, 2017, 2022, 2028, 2033, 2044) — ikke de to år fundet
+nævnte. `/dato` bruger `naestePinseInterval(new Date())`, så sætningen "helligdagene
+i perioden er …" ville vist fire navne mens tabellen sagde 3, og læseren fik én
+dag for meget. 2028 er knap to år fremme. Nu er listen **ét navn pr. dag**, med
+det andet navn i parentes ("Grundlovsdag (2. pinsedag)"), så længden altid
+er lig `periodeHelligdage`.
 
-**Gate:** lint 620 filer, **3139 tests / 191 filer** (fra 3135), build 142
-sider, `locale-leak.mjs --gate` exit 0.
+De to andre fund var **talsætninger i docblocks** ("15 af 61 år", "6 i Danmark,
+7 i Sverige") der målt var 18, 7/11 og 5-6/6-7. Tallene er nu målt i porten
+over **1990-2050** og kan ikke glide fra koden igen.
+
+**Gate:** lint 620 filer, **3141 tests / 191 filer** (fra 3139), build 142
+sider, `locale-leak.mjs --gate` exit 0. De tre nye tests **falder mod master's
+`pinse-intervaller.ts`** (verificeret med `git stash`: 3 fejl, bl.a. "da 1995:
+… expected 4 to be 3").
 
 **Mål (uændret):** `/dato` 1.133 besøgende/28d, bounce 4 % (Plausible
 2026-09-30); GSC 133.054 visninger / 842 klik / CTR 0,6 % / pos. 5,7
 (2026-08-31 → 2026-09-28). Genmål 14 dage efter merge.
 
-**Alle tolv tidligere deploy-noter er lukket `DEPLOY OK 2026-09-30`.** Syv noter
+**Alle tolv tidligere deploy-noter er lukket `DEPLOY OK 2026-09-30`.** Otte noter
 åbne, vindue 30/9 12:30.
 
 
@@ -43,8 +47,33 @@ Alle fire var grønne før merge 2026-09-30 07:45.
 
 ## Åbne VERIFICÉR DEPLOY-noter
 
-Syv noter. HTTP 200 beviser intet: fire rører `<title>` og `<h1>` på én side,
+Otte noter. HTTP 200 beviser intet: fire rører `<title>` og `<h1>` på én side,
 pinse-noten opretter to URL'er, og tidszone-noten forventer et **uændret** tal.
+
+- ⏳ **VERIFICÉR DEPLOY: pinseperiodens helligdage skal stå som ét navn pr. dag,
+  aldrig fire navne for tre dage.** Kode + plan i ét squash-commit på
+  `ceo/pinse-navne-og-arbejdstal`. Første kandidatvindue **2026-09-30 12:30**.
+  Rørte filer: `src/lib/pinse-intervaller.ts` (**én privat hjælper,
+  `navnePrDag`**, + fire docblocks) og `src/lib/pinse-intervaller.test.ts`
+  (**+2 tests, 2 ændret**). Ingen UI-fil rørt: `/dato` læser feltet uændret, og
+  `page-data.ts` er fast på 2026 (de tre navne), så kun `/dato`'s **levende**
+  sætning ændrer sig — og kun i kollisionsårene. Verificér ved **indhold**:
+  1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
+  2. `https://minberegner.dk/dato` skal have **"helligdagene i perioden er Kristi
+     himmelfartsdag, Pinsedag, 2. pinsedag"** — tre navne for tre dage. (I 2028
+     bliver det **"Grundlovsdag (2. pinsedag)"** som ét navn; 2028 kan ikke
+     ses live nu, så det er kodet, ikke verificeret.)
+  3. `https://beraknare.se/dato` skal have **"Kristi himmelsfärdsdagen,
+     Pingstdagen"** — uændret, fordi Sveriges liste ikke har grundlovsdagen.
+  **Kontrol:** pinseåret skal stadig være **2027** med påskedagen 28. marts og
+  2. pinsedag 17. maj (den anden åbne note rører samme side), og ingen danske
+  strenge lækker til beraknare.se (porten kører `locale-leak.mjs --gate`).
+  **Målt før merge:** kollisionen i **7 af 61 år** (1995, 2006, 2017, 2022,
+  2028, 2033, 2044); grundlovsdagen i perioden i **18**; `da.periodeArbejdsdage`
+  = 5 i **8** år og ellers 6 i 53, `se` = 6 i **11** og ellers 7 i 50. **Gate
+  grøn:** lint (**620 filer**), **3141 tests / 191 filer** (fra 3139), build
+  (**142 sider**), `locale-leak.mjs --gate` exit 0. De tre nye tests **falder
+  mod master's `pinse-intervaller.ts`** (verificeret med `git stash`: 3 fejl).
 
 - ⏳ **VERIFICÉR DEPLOY: `/dage-til/2-pinsedag` og `/dagar-till/pingstdagen`
   skal begge svare med hver sin dag — dansk +50, svensk +49 efter påskedag.**
@@ -244,12 +273,14 @@ pinse-noten opretter to URL'er, og tidszone-noten forventer et **uændret** tal.
   mellan påsk och pingst?"** og **"7 arbetsdagar"**, og **ikke** nogen dansk
   streng (porten kører `locale-leak.mjs --gate`). `/dage-til/*` siderne skal
   have uændrede titler.
-  **Målt før merge:** 39/49/50 og perioden på 12 dage verificeret over **61 år**
-  (1990-2050); `periodeArbejdsdage` er 5 i de 7 år hvor grundlovsdagen 5. juni
-  ligger i perioden, ellers 6 (og 6/7 i Sverige). **Gate grøn:** lint (**620
-  filer**), **3135 tests / 191 filer** (fra 3112), build (**142 sider**),
-  `locale-leak.mjs --gate` exit 0. De fire nye side-tests **falder mod master's
-  `page.tsx`** (verificeret med `git checkout master --`: **4 fejl**).
+   **Målt før merge:** 39/49/50 og perioden på 12 dage verificeret over **61 år**
+   (1990-2050); `periodeArbejdsdage` er 5 i **8** år hvor grundlovsdagen 5. juni
+   ligger i perioden på en hverdag, ellers 6 (og 6/7 i Sverige). *(Tallet "7" stod
+   her fejlagtig før 30/9 — 7 er antallet kollisionsår, 8 er antallet år med 5
+   arbejdsdage; rettet af samme måling som review-fundene.)* **Gate grøn:** lint
+   (**620 filer**), **3135 tests / 191 filer** (fra 3112), build (**142 sider**),
+   `locale-leak.mjs --gate` exit 0. De fire nye side-tests **falder mod master's
+   `page.tsx`** (verificeret med `git checkout master --`: **4 fejl**).
 
 - ⏳ **VERIFICÉR DEPLOY: `/dato` skal stadig vise pinseåret 2027 — påskedagen
   28. marts og 2. pinsedag 17. maj.** Kode + plan i ét squash-commit på

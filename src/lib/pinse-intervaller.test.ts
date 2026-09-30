@@ -123,27 +123,77 @@ describe("pinse-intervaller", () => {
       for (const locale of ["da", "se"] as const) {
         const navne = pinseInterval(year, locale).periodeHelligdagsnavne;
         for (const dag of pinseInterval(year, locale).dage) {
-          if (dag.helligdag) expect(navne, `${locale} ${year}`).toContain(dag.navn);
+          // Et navn kan stå i parentes, når dagen bærer to navne: 2. pinsedag er
+          // også grundlovsdag i 7 af de 61 år, og da hedder posten
+          // "Grundlovsdag (2. pinsedag)".
+          if (dag.helligdag) {
+            expect(
+              navne.some((n) => n === dag.navn || n.includes(dag.navn)),
+              `${locale} ${year} ${dag.navn}`
+            ).toBe(true);
+          }
         }
-        // Annandag pingst er ikke en helgdag i Sverige, så den må ikke stå der.
+        // Annandag pingst är inte en helgdag i Sverige, så den må inte stå där.
         expect(navne, `se ${year}`).not.toContain("Annandag pingst");
       }
     }
   });
 
+  test("navnelisten har præcis ét navn pr. helligdagsdag — i alle 61 år", () => {
+    // Det var her sætningen på /dato modsignede tabellen. 2. pinsedag falder
+    // samme dag som grundlovsdagen i 7 af årene, og da stod der fire navne
+    // (Kristi himmelfartsdag, Pinsedag, Grundlovsdag, 2. pinsedag) for tre
+    // dage, mens `periodeHelligdage` sagde 3. Læseren talte dagefter og fik
+    // én dag for meget. Invarianten er derfor ikke et tal, men ligheden: et
+    // navn pr. dag, uanset hvor mange navne dagen bærer.
+    for (const year of AAR) {
+      for (const locale of ["da", "se"] as const) {
+        const p = pinseInterval(year, locale);
+        expect(
+          p.periodeHelligdagsnavne.length,
+          `${locale} ${year}: ${p.periodeHelligdagsnavne.join(", ")}`
+        ).toBe(p.periodeHelligdage);
+      }
+    }
+    // De to nærmeste kollisionsår. 2028 er ikke et fjernt år: 2. pinsedag er
+    // 5. juni 2028, og pinseAar() skifter til 2028 den 6. juni 2028, så /dato
+    // viser denne sætning i knap to år.
+    for (const year of [1995, 2028]) {
+      const p = pinseInterval(year, "da");
+      expect(p.periodeHelligdagsnavne).toEqual([
+        "Kristi himmelfartsdag",
+        "Pinsedag",
+        "Grundlovsdag (2. pinsedag)",
+      ]);
+      expect(p.periodeHelligdage).toBe(3);
+    }
+    // 1992 er det modsatte tilfælde: grundlovsdagen 5. juni ligger i perioden
+    // på en hverdag for sig selv, fordi påsken er sen, så der er fire *dage* —
+    // og navnelisten har så fire navne, hver sit eget.
+    const s1992 = pinseInterval(1992, "da");
+    expect(s1992.periodeHelligdagsnavne).toEqual([
+      "Kristi himmelfartsdag",
+      "Grundlovsdag",
+      "Pinsedag",
+      "2. pinsedag",
+    ]);
+    expect(s1992.periodeHelligdage).toBe(4);
+  });
+
+
   test("grundlovsdagen kan ligge i perioden — og i 1995 er den 2. pinsedag", () => {
     // Når kristi himmelfartsdag falder sidst i maj, kommer grundlovsdagen 5. juni
-    // ind i de 12 dage. Det sker i 7 af de 61 år, så sætningen på siden lister
+    // ind i de 12 dage. Det sker i 18 af de 61 år, så sætningen på siden lister
     // helligdagene ud af `getHelligdage` i stedet for at sige "tre". I 1995 er
     // 2. pinsedag 5. juni — samme dag som grundlovsdagen — så de tælles som én.
     const medGrundlovsdag = AAR.filter((year) =>
-      pinseInterval(year, "da").periodeHelligdagsnavne.includes("Grundlovsdag")
+      pinseInterval(year, "da").periodeHelligdagsnavne.some((n) => n.includes("Grundlovsdag"))
     );
     expect(medGrundlovsdag.length).toBeGreaterThan(0);
     for (const year of medGrundlovsdag) {
       const p = pinseInterval(year, "da");
-      // Helligdagene tælles pr. dag: 1995 har grundlovsdagen og 2. pinsedag på
-      // samme dato, så listen har fire navne, men dagen tælles én gang.
+      // Helligdagene tælles pr. dag: i kollisionsårene har grundlovsdagen og
+      // 2. pinsedag samme dato, så der er tre dage og ét navn med to navne i.
       expect(p.periodeHelligdage, `da ${year}`).toBeLessThanOrEqual(4);
       expect(p.periodeHelligdagsnavne.length).toBeLessThanOrEqual(4);
       expect(p.periodeArbejdsdage, `da ${year}`).toBeGreaterThanOrEqual(5);
@@ -155,8 +205,7 @@ describe("pinse-intervaller", () => {
     expect(s1995.periodeHelligdagsnavne).toEqual([
       "Kristi himmelfartsdag",
       "Pinsedag",
-      "Grundlovsdag",
-      "2. pinsedag",
+      "Grundlovsdag (2. pinsedag)",
     ]);
     expect(s1995.periodeHelligdage).toBe(3);
     expect(s1995.periodeArbejdsdage).toBe(6);
@@ -165,6 +214,30 @@ describe("pinse-intervaller", () => {
     expect(pinseInterval(2026, "da").periodeArbejdsdage).toBe(6);
     expect(pinseInterval(2027, "da").periodeArbejdsdage).toBe(6);
     expect(pinseInterval(2027, "se").periodeArbejdsdage).toBe(7);
+  });
+
+  test("tallene i docblockene er målt over 61 år, ikke gæt", () => {
+    // `pinse-intervaller.ts` skriver i sine kommentarer at grundlovsdagen
+    // ligger i perioden i 18 af 61 år, at de to navne står på samme dag i 7,
+    // at Danmark har 5 arbejdsdage i 8 år og Sverige 6 i 11. De fire tal var
+    // forkerte i den version de erstattede (henholdsvis 15, 2 og hårdkodede
+    // "altid 6/7"), og en docblock med et tal i stedet for reglen er svært at
+    // holde rigtig. Derfor låses de her, målt over det samme 1990-2050-vindue
+    // som resten af porten bruger.
+    const grundlovsdagIperioden = AAR.filter((year) =>
+      pinseInterval(year, "da").periodeHelligdagsnavne.some((n) => n.includes("Grundlovsdag"))
+    );
+    expect(grundlovsdagIperioden).toHaveLength(18);
+    const sammeDag = AAR.filter((year) =>
+      pinseInterval(year, "da").periodeHelligdagsnavne.some((n) => n.includes("("))
+    );
+    expect(sammeDag).toEqual([1995, 2006, 2017, 2022, 2028, 2033, 2044]);
+    expect(AAR.filter((y) => pinseInterval(y, "da").periodeArbejdsdage === 5)).toHaveLength(8);
+    expect(AAR.filter((y) => pinseInterval(y, "se").periodeArbejdsdage === 6)).toHaveLength(11);
+    // Og de almindelige år findes stadig, så tallene ovenfor beskriver undtagelsen
+    // og ikke en regel, der er vendt om.
+    expect(AAR.filter((y) => pinseInterval(y, "da").periodeArbejdsdage === 6)).toHaveLength(53);
+    expect(AAR.filter((y) => pinseInterval(y, "se").periodeArbejdsdage === 7)).toHaveLength(50);
   });
 
   test("kun 2. pinsedag er forskellig mellem landene", () => {

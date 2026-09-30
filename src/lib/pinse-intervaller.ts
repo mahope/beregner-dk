@@ -19,6 +19,7 @@
 import { daysBetween } from "./dage-til";
 import {
   getHelligdage,
+  type Helligdag,
   taellArbejdsdage,
   taellHelligdage,
   taellHelligdagePaaHverdag,
@@ -65,6 +66,26 @@ function datoMedNavn(
 }
 
 /**
+ * The holidays by name, in date order, with **one entry per day** rather than
+ * one per list entry. `getHelligdage` can carry two names on the same date, and
+ * in the pinse period it does whenever 2. pinsedag falls on Grundlovsdag — 7 of
+ * the 61 years the tests cover, the next being 2028. The old list read
+ * "Grundlovsdag, 2. pinsedag" as two holidays on one day, so the sentence on
+ * `/dato` named four holidays while `periodeHelligdage` counted three, and the
+ * reader counting the days along got one day too many. The extra name now goes
+ * in parentheses, so both names survive and the length still equals the days.
+ */
+function navnePrDag(helligdage: Helligdag[]): string[] {
+  const prDag = new Map<number, string[]>();
+  for (const h of [...helligdage].sort((a, b) => a.date.getTime() - b.date.getTime())) {
+    prDag.set(h.date.getTime(), [...(prDag.get(h.date.getTime()) ?? []), h.name]);
+  }
+  return [...prDag.values()].map((navne) =>
+    navne.length === 1 ? navne[0] : `${navne[0]} (${navne.slice(1).join(", ")})`
+  );
+}
+
+/**
  * Adds days on the calendar, not on the clock. The dates from `getHelligdage`
  * are local midnights, so shifting them with the `Date` constructor keeps the
  * calendar day through a daylight-saving change.
@@ -104,28 +125,40 @@ export interface PinseInterval {
   dageHimmelfartTilAndenPinse: number;
   /** Calendar days in [Kristi himmelfartsdag, 2. pinsedag]: always 12. */
   periodeKalenderdage: number;
-  /** Working days inside that period: 6 in Denmark, 7 in Sweden. */
+  /**
+   * Working days inside that period: 6 in Denmark and 7 in Sweden in most
+   * years, but not as a rule — a holiday that lands on a weekend takes no
+   * working day with it, so both figures are one lower in some years (5 in
+   * Denmark in 8 of the 61 years the tests cover, 6 in Sweden in 11). Counted,
+   * never fixed; `periodeArbejdsdage` is why the page quotes a number for the
+   * year it shows instead of a constant.
+   */
   periodeArbejdsdage: number;
   /**
-   * Holiday *days* inside the period: 3 in Denmark, 2 in Sweden, and 4 in the
-   * years when Grundlovsdag joins them. Counted by day, not by list entry, so a
-   * day that carries two names — 2. pinsedag fell on Grundlovsdag in 1995 —
-   * still counts once.
+   * Holiday *days* inside the period: 3 in Denmark and 2 in Sweden, and 4 in
+   * Denmark in the 11 of the 18 years when Grundlovsdag 5 June falls inside it
+   * on a day of its own. Counted by day, not by list entry, so a day that
+   * carries two names — 2. pinsedag fell on Grundlovsdag in 1995, 2006, 2017,
+   * 2022, 2028, 2033 and 2044 — still counts once, and it always equals
+   * `periodeHelligdagsnavne.length`.
    */
   periodeHelligdage: number;
   /**
-   * The holidays inside the period by name, in date order. Not always just the
-   * three pinse days: when Kristi himmelfartsdag falls late in May, Grundlovsdag
-   * on 5 June lands inside the period too and takes one working day with it.
-   * That happens in 15 of the 61 years the tests cover, so the names are read
-   * out of the list instead of being written in the sentence.
+   * The holidays inside the period by name, in date order, one entry per day.
+   * Not always just the three pinse days: when Kristi himmelfartsdag falls late
+   * in May, Grundlovsdag on 5 June lands inside the period too, and it does so
+   * in 18 of the 61 years the tests cover. The names are read out of the list
+   * instead of being written in the sentence, so they cannot drift.
    */
   periodeHelligdagsnavne: string[];
   /** Weekend days inside the period: always 4, because it spans two weekends. */
   periodeWeekenddage: number;
   /** Holidays inside the period that are not already weekend days. */
   periodeHelligdagePaaHverdag: number;
-  /** Days that are not working days inside the period: 6 in Denmark, 5 in Sweden. */
+  /**
+   * Days that are not working days inside the period: the 12 calendar days minus
+   * `periodeArbejdsdage`, so 6 or 7 in Denmark and 5 or 6 in Sweden.
+   */
   periodeFrieDage: number;
 }
 
@@ -172,7 +205,7 @@ export function pinseInterval(year: number, locale: HelligdagLocale): PinseInter
     periodeKalenderdage,
     periodeArbejdsdage,
     periodeHelligdage: taellHelligdage(himmelfartsdag, andenPinsedag, locale),
-    periodeHelligdagsnavne: iPerioden.map((h) => h.name),
+    periodeHelligdagsnavne: navnePrDag(iPerioden),
     periodeWeekenddage: taellWeekender(himmelfartsdag, andenPinsedag),
     periodeHelligdagePaaHverdag: taellHelligdagePaaHverdag(himmelfartsdag, andenPinsedag, locale),
     periodeFrieDage: periodeKalenderdage - periodeArbejdsdage,
