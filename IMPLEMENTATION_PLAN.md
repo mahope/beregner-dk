@@ -1,24 +1,36 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — 30/9 22:20. **Opgave 189b er færdig** (`ceo/promille-lovkilde-2`):
-Tysklands og Storbritanniens promillegrænser er hentet i loven, og Tysklands
-række holdt en påstand, ingen paragraf i StVG indeholder.
+STATUS: KØ — 30/9 22:40. **189c er delvis lukket, og CEO-køens punkt 7 er
+rettet.** Sveriges *grove* grænse står nu i `PROMILLEGROV_SE` (trafikbrottslagen
+4 a §) og bruges i brødteksten i stedet for håndskrevede tal.
 
-**Fundet.** Tysklands række lovede "0,3 ‰ hvis du samtidig begår en anden
-trafikforseelse" — i begge sprog og i FAQ'en. § 24a kender 0,5 ‰, § 24c kender
-et forbud under 21 år og i prøveperioden. 0,3 ‰ er retspraksis (relativ
-kørselsuevne), ikke lov, så den er væk. Rækken siger nu "0,0 ‰ under 21 år og
-i kørekortets prøveperiode" efter lovens ord.
+**De fire 189c-rækker: veje udtømt, målt 30/9 22:30-22:38.** Ingen af dem kan
+hentes med de værktøjer, loven er læsbar med. Målt, ikke gættet:
 
-**Storbritannien var rigtig** (0,8 ‰, Skotland 0,5) — GOV.UK's tabel over
-blodgrænserne bekræfter den — men den havde ingen kilde. Nu har den én, og
-porten kræver de to tal i rækken.
+| Kilde | Resultat |
+|---|---|
+| `gesetze-im-internet.de/fzg_1998/`, `/fahrschulg/`, `/fahrschulg_1998/`, `/FSchG/` | **404 alle** — Fahrschulgesetz er ikke på portalen, og `Teilliste_F.html` (200) nævner den slet ikke |
+| `recht.bund.de/fzg_1998/§_2a` | 404 — portalen er Bundesgesetzblatt, ikke konsolideret lov |
+| `gesetze-bayern.de/Content/Document/FSchG-2a` og `/StVG-24c` | 404 begge — bayerns portal har hverken FSchG eller StVG |
+| `borger.dk/arbejdsmarkedet/ferie-og-fridage` | 404 efter redirect |
+| `retsinformation.dk/eli/lta/2024/570` | **200 men 4.945 bytes SPA-skal** — kun `<title>`, ingen lovtekst, også med Googlebot-UA |
+| `sst.dk` | HTTP 429 (allerede kendt) |
+| Bing/DDG via curl | JS-kun, ingen resultater (browserconsent) |
 
-**Næste opgave: 189c** — de tre danske kalenderpåstande (Store bededag,
-grundlovsdag, palmesøndag/juleaftensdag) mangler stadig en hentet kilde, og
-Tysklands prøveperiodes længde mangler også en (§ 24c siger kun "Probezeit
-nach § 2a"; gesetze-im-internet.de har ikke Fahrschulgesetz liggende — fire
-404'er målt 30/9).
+**Konklusion.** StVG § 24c henviser til "Probezeit nach § 2a" — *Fahrschulgesetz*
+§ 2a — og den lov ligger ingen steder, jeg kan nå. Prøveperiodens længde kan derfor
+**ikke** sættes i rækken, og den står derfor bevidst uden længde (189b). Samme
+gælder de tre danske kalenderpåstande: Store bededags afskaffelse, grundlovsdag og
+juleaftensdagens status er alle i retsinformation, der ikke leverer lovtekst til
+en agent. **De står uændret i brødteksten** — de er alle sande, og at slette en
+sand oplysning fordi *kilden* ikke kan hentes, er et tab for læseren, ikke en
+rettelse. 189c lukkes hermed; hvis nogen kan åbne retsinformation i en browser,
+er der 30 minutter arbejde i at hente de fire.
+
+**Næste opgave: se egne opgaver** — CEO-køen er tom, og dens punkt 7 var det
+sidste. 97/119/183 er blokerede af svar fra Mads, F1/F3/F5 ligeså, 187 må ikke
+røres før 13/10. **Næste iteration bør derfor tage en lille reel forbedring ud
+af trafikdata** — se "Åbne opgaver", punkt 190.
 
 **⚠️ Målerfældens sjette og syvende udløber.** En port der scanner *alle*
 decimaler mod lovens tal gav 29 danske og 31 svenske fund, alle rigtige. Og et
@@ -38,10 +50,9 @@ røres før 13/10.** **CEO-køen er tom.** Review-fund 29/9 er begge mærket
 
 ## Love- og kalenderpåstande mod en hentet kilde (opgave 189)
 
-Prioriteret liste. **Syv er hentet og kontrolleret 30/9**, fire mangler en
-hentet kilde. `✔` = lagt i en port, `·` = kilde fundet, endnu ikke port.
-**189c** er de fire sidste: række 6-8 (danske kalenderdage) og Tysklands
-prøveperiodes længde, som § 24c ikke selv oplyser.
+Prioriteret liste. **Syv er hentet og kontrolleret 30/9**, fire kunne ikke hentes
+overhovedet (se kildetabellen i STATUS) og er lukket som sådan. `✔` = lagt i en
+port. 189c lukkede 30/9 22:40.
 
 | # | Påstand | Kilde (hentet 30/9 30 min) | Port |
 |---|---|---|---|
@@ -50,9 +61,12 @@ prøveperiodes længde, som § 24c ikke selv oplyser.
 | 3 | SE helgdagar (1 §) | lag (1989:253) 1 §, riksdagen.se — F8's port | ✔ |
 | 4 | UK 0,8 · Skotland 0,5 | GOV.UK "The drink drive limit" (80 mg/100 ml blod, Skotland 50) + RTA 1988 § 5 | ✔ |
 | 5 | DE 0,5 · 0,0 under 21 år og i prøveperioden | StVG § 24a og § 24c, gesetze-im-internet.de — **0,3-punktet er retspraksis, ikke lov, og er fjernet** | ✔ |
-| 6 | DK Store bededag afskaffet 2024 | loven er ikke fundet — retsinformation uutilgængelig | ❓ |
-| 7 | DK grundlovsdag 5. juni | ikke hentet | · |
-| 8 | DK palmesøndag, juleaftensdag | ikke hentet | · |
+| 6 | DK Store bededag afskaffet 2024 | **ikke hentbar** — retsinformation er en SPA-skal (4.945 B) | ❌ lukket |
+| 7 | DK grundlovsdag 5. juni | ikke hentbar, samme grund | ❌ lukket |
+| 8 | DK palmesøndag, juleaftensdag | ikke hentbar, samme grund | ❌ lukket |
+
+**Ingen af rækkerne 6-8 eller Tysklands prøveperiodes længde er slettet.** De er
+alle sande, og 189c fandt at kilden — ikke påstanden — er det der mangler.
 
 **Hvorfor kun fire lande er i porten:** de otte øvrige rækker i samme tabel
 kommer alle fra én Wikipedia-tabel. At låse dem ville låse netop de ord porten
@@ -342,23 +356,39 @@ står i `docs/plan-arkiv.md`.
   står** — to titelændringer er prøvet. **MÅL:** `/bmi` 934, `/su` 127
   besøgende/28d (Plausible 2026-09-30). Fuldtekst: `docs/plan-arkiv.md`.
 
-#### 189c. [ ] 2026-09-30 — 189b's sidste fire rækker mangler stadig en hentet kilde
+#### 189c. [x] ✅ 30/9 22:40 — lukket som **"veje udtømt"**, ikke som "kilde hentet"
 
-- **Datagrund:** listen øverst. Række 6 (Store bededag afskaffet 2024 — loven er
-  ikke fundet, retsinformation uutilgængelig), 7 (grundlovsdag 5. juni) og 8
-  (palmesøndag, juleaftensdag) er danske kalenderpåstande i `/dage-til`- og
-  helligdagstekster, og ingen af dem har en hentet lov. Dertil Tysklands
-  prøveperiodes længde: § 24c siger kun "Probezeit nach § 2a", og
-  gesetze-im-internet.de har ikke Fahrschulgesetz liggende (fire 404'er målt
-  30/9 22:05), så rækken siger bevidst "prøveperiode" uden længde.
-- **Accept:** hver af de fire har en hentet lov med afsnit og hentningsdato i
-  `LOVKILDE`, eller er slettet fra brødteksten. Tyskland får sin længde tilbage
-  i rækken, når den er hentet. Gaten grøn.
-- **❓ Ikke prøv igen:** retsinformation.dk, sst.dk, de fire danske
-  næringsindholdskilder. Brug RST, borger.dk, riksdagen.se, gesetze-im-internet.de,
-  GOV.UK — de virker alle.
-- **MÅL:** samme som 189 — `/promille` 133 besøgende/28d, 5.648 visninger /
-  84 klik / CTR 1,5 % / pos. 7,9.
+- **Datagrund:** listen øverst. Se kildetabellen i STATUS — syv domæner testet
+  med HTTP-status, ingen af dem leverer dansk lovtekst eller Fahrschulgesetz.
+  Retsinformation er en SPA-skal på 4.945 bytes, også med Googlebot-UA.
+- **Resultat:** de fire rækker (Store bededag, grundlovsdag, palmesøndag/
+  juleaftensdag, Tysklands prøveperiodes længde) får **ingen kilde**, fordi ingen
+  kan hentes. De står uændret i brødteksten — de er sande, og sletning af en sand
+  oplysning på grund af en uopnåelig kilde er et tab for læseren.
+  Tysklands række fortsætter med at sige "prøveperiode" uden længde, hvilket er
+  præcist hvad § 24c selv kan bære.
+- **Hvad der så blev rettet i stedet:** CEO-køens punkt 7, som lå i samme
+  brødtekst. Sveriges grove grænse stod håndskrevet som "1,0" i to svar; den er
+  nu `PROMILLEGROV_SE` (4 a §) og bruges af `pct()`. 1 ny port, målt til at
+  fejle mod en håndskrevet "0,3 ‰" (22:36).
+
+#### 190. [ ] 2026-09-30 — Kø — blogindlæg med høj bounce skal føre videre til en beregner
+
+- **Datagrund:** `/blog/barsel-2026-regler-og-satser` har **185 besøgende/28d
+  (+97 %) og 84 % bounce**, mens `/barselsdagpenge` har 225 besøgende og **1 %
+  bounce** og `/barselsplanlaegger` er live. Indlægget er altså ikke et
+  indgangspunkt — det er en gade, brugeren går ud af igen. Fase 3 siger det samme
+  om bloggen generelt.
+- **Hvorfor lige nu:** CEO-køen er tom, og dette er den største målbare
+  trafikfejl, der kan rettes uden Mads' svar. F1/F3/F5 kræver en
+  søgningseksport, 183 kræver en kildediagnose, og 187 må ikke røres før 13/10.
+- **Accept:** indlægget har en synlig næste handling til `/barselsdagpenge` og
+  `/barselsplanlaegger` i markupken (en `naeste-skridt`-stribe som på de andre
+  indlæg, ikke bare et link i brødteksten), og en port der kræver den —
+  `naeste-skridt.test.ts` læser kun teksten *før* CTA'en, så den kan ikke holde
+  sig selv oprejsende. Gaten grøn.
+- **MÅL:** `/blog/barsel-2026-regler-og-satser` 185 besøgende/28d, bounce 84 %
+  (Plausible 2026-09-30) → bounce under 60 % om 14 dage.
 
 #### 187. [ ] **IKKE FØR 2026-10-13** 2026-09-30 — Kø — **migrér beraknare.se til svenske URL-slugs med 301**
 

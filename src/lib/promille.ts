@@ -34,6 +34,19 @@ export const PROMILLEGRANSE: Record<"da" | "se" | "no", number> = {
 export const PROMILLEGRANSE_DA = PROMILLEGRANSE.da;
 
 /**
+ * Sveriges *grove* rattfylleri-grænse, i ‰. Trafikbrottslagen (1951:649) 4 a §:
+ * rattfylleri är grovt när alkoholkoncentrationen "under eller efter färden
+ * uppgår till minst 1,0 promille i blodet" — hentet 30/9 2026 fra riksdagen.se.
+ *
+ * **Der er kun ét land her, og det er ikke en mangel.** Danmark har ingen
+ * tilsvarende inddeling: færdselslovens § 53 kender 0,5 ‰ som grænse og
+ * 2,0 ‰ som det niveau, hvor kørekortet frakendes ubetinget — det er en
+ * følge, ikke en "grov" grænse. Lægges tallet ind i et dansk felt, så opstår
+ * præcis den fejl `/promille` havde: en grænse, ingen paragraf har den.
+ */
+export const PROMILLEGROV_SE = 1.0;
+
+/**
  * Legal driving limits per country, in ‰, for the /promille page's
  * "grænsen i udlandet" table. Numbers only — the country names and the
  * special rules are Danish copy on the page itself, so the library stays

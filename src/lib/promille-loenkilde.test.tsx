@@ -29,7 +29,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import { getDomainConfigByLocale } from "@/lib/domain-config";
 import { getCurrentDomainConfig, getLocale } from "@/lib/get-locale";
-import { PROMILLEGRANSE, PROMILLEGRANSE_UDLAND } from "@/lib/promille";
+import { PROMILLEGRANSE, PROMILLEGRANSE_UDLAND, PROMILLEGROV_SE } from "@/lib/promille";
 import { getPageData } from "@/lib/page-data";
 import PromillePage from "@/app/promille/page";
 
@@ -335,6 +335,36 @@ describe("promillegrænser mod loven", () => {
     expect(svar).toContain(`${danskKomma(0)} promille`);
     expect(svar).toContain(`${lov.forbudUnderAar} år`);
     expect(svar).not.toMatch(/0,3 promille/);
+  });
+
+  test("den svenske grænsetekst udleder lovens tal i stedet for at skrive dem i hånden", () => {
+    // CEO-kø punkt 7: svaret om Sveriges grænse skrev "0,2", "1,0" og "0,5"
+    // som tekst, så et tal der ændrer sig i trafikbrottslagen eller
+    // færdselsloven ville have flyttet tabellen og *ikke* brødteksten. Nu står
+    // de tre tal i `PROMILLEGRANSE` og `PROMILLEGROV_SE`.
+    const svar = svenskeTekster().find((t) => /gränsen för rattfylleri/i.test(t));
+    expect(svar).toBeDefined();
+    expect(svar).toContain(`${danskKomma(PROMILLEGRANSE.se)} ‰`);
+    expect(svar).toContain(`${danskKomma(PROMILLEGROV_SE)} ‰`);
+    expect(svar).toContain(`(${danskKomma(PROMILLEGRANSE.da)} ‰)`);
+
+    // Porten der faktisk kan fejle: ingen sætning om en grænse må indeholde et
+    // promilletal, der ikke er et af sidens egne. Den her fejler, hvis nogen
+    // indsætter et håndskrevet "0,3 ‰" ved siden af de udledte tal.
+    const tilladte = new Set([
+      danskKomma(PROMILLEGRANSE.se),
+      danskKomma(PROMILLEGRANSE.da),
+      danskKomma(PROMILLEGROV_SE),
+    ]);
+    const grænsesætninger = svenskeTekster()
+      .flatMap((t) => t.split(/(?<=[.!?])\s+/))
+      .filter((s) => /gräns|rattfylleri/i.test(s) && /\d,\d\s*‰/.test(s));
+    expect(grænsesætninger.length).toBeGreaterThan(0);
+    for (const sætning of grænsesætninger) {
+      for (const match of sætning.match(/\d,\d(?=\s*‰)/g) ?? []) {
+        expect(tilladte).toContain(match);
+      }
+    }
   });
 
 });

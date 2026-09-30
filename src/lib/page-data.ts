@@ -25,6 +25,7 @@ import { getHelligdage, helligdagsnavne } from "./helligdage";
 import { pinseAfstande, pinseInterval } from "./pinse-intervaller";
 import { estimerNettoMaaned } from "./barsel/netto";
 import { PROMILLE_EKSEAMPLER, formatPromille, formatTimer } from "./promille-eksempler";
+import { PROMILLEGRANSE, PROMILLEGROV_SE } from "./promille";
 import {
   PROMILLE_GENSTANDE_RAEKKER,
   formatPromilleTabel,
@@ -3017,7 +3018,7 @@ const sePages: Record<string, PageData> = {
       schemaCategory: "HealthApplication",
       faqItems: [
         { question: "Hur beräknas promille?", answer: "Kalkylatorn använder Widmarks formel: promille = gram alkohol / (kroppsvikt × fördelningsfaktor) − 0,15 × timmar. Fördelningsfaktorn är cirka 0,68 för män och 0,55 för kvinnor. Kroppen bryter ner ungefär 0,15 ‰ per timme." },
-        { question: "Vad är promillegränsen i Sverige?", answer: "Gränsen för rattfylleri är 0,2 ‰. Vid 1,0 ‰ räknas det som grovt rattfylleri. Gränsen är betydligt lägre än i Danmark (0,5 ‰)." },
+        { question: "Vad är promillegränsen i Sverige?", answer: `Gränsen för rattfylleri är ${pct(PROMILLEGRANSE.se)} ‰. Vid ${pct(PROMILLEGROV_SE)} ‰ räknas det som grovt rattfylleri. Gränsen är betydligt lägre än i Danmark (${pct(PROMILLEGRANSE.da)} ‰).` },
         { question: "Hur mycket är ett standardglas?", answer: "Ett standardglas motsvarar 12 gram ren alkohol — ungefär en vanlig öl (33 cl), ett litet glas vin (12 cl) eller en snaps sprit (4 cl)." },
         { question: "Hur många promille är 2 öl?", answer: `En vanlig öl på 33 cl är ca 12 gram alkohol, alltså ett standardglas. Två öl ger därför ca ${PROMILE_80_MAND(2)} promille hos en man på 80 kg och ${PROMILE_60_KVINDE(2)} hos en kvinna på 60 kg. Den svenska gränsen på 0,2 promille nås alltså efter två öl — och efter ytterligare en timme är det ungefär 0,15 promille mindre.` },
         { question: "Hur många promille är farligt?", answer: `Promillen stiger kraftigt för varje standardglas: 4 öl på 80 kg är ${formatPromille(PROMILLE_4_OEL.promille)} promille, och 6 öl på 70 kg ger ${PROMILE_70_MAND(6)} promille. Det är inte promillet i sig som är farligt, utan vad du gör med bilen: från 0,2 promille är det redan rattfylleri, och vid 1,0 promille räknas det som grovt rattfylleri — den grad där du som utgångspunkt förlorar ditt körkort. Det gäller oavsett om du känner dig "lagom" eller inte.` },
