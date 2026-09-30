@@ -6,6 +6,7 @@ import { getDageTilSlugs, getDageTilEvents, getDageTilAnswer, dageTilArm, format
 import { getPageData } from "@/lib/page-data";
 import { maanederITaar } from "@/lib/dato-eksempler";
 import { getHelligdage } from "@/lib/helligdage";
+import { pinseInterval } from "@/lib/pinse-intervaller";
 import DatoPage from "./page";
 
 vi.mock("next/dynamic", () => ({
@@ -500,5 +501,114 @@ describe("dato page — dage-til-listen svarer selv", () => {
 
     expect(html).not.toContain("/dage-til/");
     expect(html).not.toContain("Tallet nedenfor er dagens antal dage");
+  });
+});
+
+describe("dato page — pinse-intervallerne", () => {
+  // "hvor mange dage er der fra påske til pinse" og "hvor mange dage er der i
+  // pinsen" er de to øvrige autocomplete-træffere under pinse-klyngen. De er
+  // interval-spørgsmål, så svaret skal ligge på /dato ved siden af måneds- og
+  // årstabellen — ikke på en dage-til-side, der ville se ud som en nedtælling.
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-09-30T12:00:00Z"));
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  test("da svarer på begge interval-spørgsmål med de regnede tal", async () => {
+    vi.mocked(getLocale).mockResolvedValue("da");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("da"));
+
+    const html = renderToStaticMarkup(await DatoPage());
+
+    expect(html).toContain("Hvor mange dage er der fra påske til pinse?");
+    expect(html).toContain("Hvor mange dage er der i pinsen?");
+    // 49 og 50 fra påskedagen, 39 til kristi himmelfartsdag.
+    expect(html).toContain("49 dage fra påskedagen til pinsedagen");
+    expect(html).toContain("50 dage til 2.");
+    expect(html).toMatch(/påskedag \+ ?39/);
+    // Pinseperioden: 12 kalenderdage, 6 arbejdsdage, 6 dage fri, 3 helligdage.
+    expect(html).toContain("12 kalenderdage");
+    expect(html).toContain("6 arbejdsdage");
+    expect(html).toContain("6 dage uden arbejde");
+    expect(html).toContain("Kristi himmelfartsdag, Pinsedag, 2. pinsedag");
+  });
+
+  test("da tabellen viser de tre dage med dato, ugedag og påske-afstand", async () => {
+    vi.mocked(getLocale).mockResolvedValue("da");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("da"));
+
+    const html = renderToStaticMarkup(await DatoPage());
+
+    // Næste pinse efter 30. september 2026 er 2027: påskedagen 28. marts.
+    const pinse = pinseInterval(2027, "da");
+    expect(html).toContain("Påskedagen i 2027 er 28. marts");
+    for (const dag of pinse.dage) {
+      expect(html, dag.navn).toContain(dag.navn);
+      expect(html, dag.navn).toContain(
+        formatTargetDate(
+          new Date(Date.UTC(dag.date.getFullYear(), dag.date.getMonth(), dag.date.getDate())),
+          "da"
+        )
+      );
+    }
+    expect(html).toContain("torsdag");
+    expect(html).toContain("søndag");
+    expect(html).toContain("mandag");
+  });
+
+  test("da linker videre til begge pinsesider", async () => {
+    vi.mocked(getLocale).mockResolvedValue("da");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("da"));
+
+    const html = renderToStaticMarkup(await DatoPage());
+
+    expect(html).toContain('href="/dage-til/kristi-himmelfartsdag"');
+    expect(html).toContain('href="/dage-til/2-pinsedag"');
+  });
+
+  test("se svarar på samma två frågor på svenska", async () => {
+    vi.mocked(getLocale).mockResolvedValue("se");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("se"));
+
+    const html = renderToStaticMarkup(await DatoPage());
+
+    expect(html).toContain("Hur många dagar är det mellan påsk och pingst?");
+    expect(html).toContain("Hur många dagar är det i pingsten?");
+    expect(html).toContain("49 dagar från påskdagen till pingstdagen");
+    // Annandag pingst är inte en röd dag i Sverige — det skal stå i tabellen.
+    expect(html).toMatch(/Annandag pingst[\s\S]{0,400}?Nej/);
+    expect(html).toContain("7 arbetsdagar");
+    expect(html).toContain("5 dagar utan arbete");
+    expect(html).toContain('href="/dagar-till/kristi-himmelsfardsdag"');
+    expect(html).toContain('href="/dagar-till/pingstdagen"');
+  });
+
+  test("no får hverken interval-teksten eller danske pinse-links", async () => {
+    vi.mocked(getLocale).mockResolvedValue("no");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("no"));
+
+    const html = renderToStaticMarkup(await DatoPage());
+
+    expect(html).not.toContain("fra påske til pinse");
+    expect(html).not.toContain("mellan påsk och pingst");
+    expect(html).not.toContain("/dage-til/");
+    expect(html).not.toContain("/dagar-till/");
+  });
+
+  test("overskriftstal fra året påske står i tabellen, ikke i en fast streng", async () => {
+    vi.mocked(getLocale).mockResolvedValue("da");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("da"));
+
+    const html = renderToStaticMarkup(await DatoPage());
+
+    // Går pinseintervallet over i 2028, må tabellen sige 2028 — ellers står der
+    // et gammelt årstal på en side, der regner om hver dag.
+    vi.setSystemTime(new Date("2027-09-30T12:00:00Z"));
+    const næste = renderToStaticMarkup(await DatoPage());
+    expect(næste).toContain("Påskedagen i 2028 er 16. april");
+    expect(næste).not.toContain("Påskedagen i 2027 er");
   });
 });

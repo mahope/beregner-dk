@@ -19828,3 +19828,39 @@ dokumenteret to gange, ikke fordi denne side alene løfter trafikken.
    grøn (3106 tests fra 3088).
 - **MÅL:** 0 klik i dag. Genmål **2027-05-20**.
 
+
+
+---
+
+## 2026-09-30 — Opgave 212 lukket: pinse-intervallerne på `/dato` (commit 797e317)
+
+#### 212. [x] LUKKET 2026-09-30 — trafik — **de to *interval*-spørgsmål i pinse-klyngen er besvaret på `/dato`**
+
+- **Løst:** 797e317 (grøn gate, se deploy-noten i `IMPLEMENTATION_PLAN.md`). Ny
+  `src/lib/pinse-intervaller.ts` + ét nyt afsnit med tabel pr. sprog på `/dato`
+  + 2 FAQ-svar pr. sprog. Måltal uændret: `/dato` 1.133 besøgende/28d, bounce
+  4 %, GSC 133.054 visninger / 842 klik / CTR 0,6 % / pos. 5,7. Genmål 14 dage
+  efter merge.
+
+- **Datagrund:** samme måling som 211. Dansk autocomplete under "hvor mange
+  dage er der til pinse" har fire træffere, og 211 dækker den nøgne "pinse".
+  De to **øvrige** er interval-spørgsmål, ikke nedtællinger, og ingen side
+  svarer på dem: "hvor mange dage er der **fra påske til pinse**" og "hvor
+  mange dage er der **i pinsen**".
+- **Hvorfor de ikke er dage-til-sider:** de spørger om et *interval* (påske →
+  pinse = 49 dage til pinsedagen, 50 til 2. pinsedag; pinsen som periode er
+  den 50. dag efter påskedagen), og en nedtælling til et tal der altid er
+  det samme, er det forkerte værktøj. `/dato` er den rigtige flade — den
+  har allerede fritekst til intervaller mellem to datoer.
+- **⚠️ Ikke bygge som endnu en dage-til-side.** At lave `/dage-til/fra-paske-
+  til-pinse` ville svare "49 dage" hele året og se ud som nedtælling. Det er
+  den fejlklasse 210/211 netop undgik.
+- **Mulig løsning (kun efter et måltal):** et kort, ægte afsnit på `/dato`
+  der besvarer begge med tal koden regner, plus intern link til
+  `/dage-til/2-pinsedag` og `/dagar-till/pingstdagen`. **Ingen ny URL.**
+- **Acceptkriterier:** (1) begge spørgsmål besvaret synligt på `/dato` med tal
+  fra samme kilde som beregningen, (2) link til begge pinse-sider, (3) ingen
+  tekst der kan glide fra regnestykket, (4) gaten grøn.
+- **MÅL:** `/dato` 1133 besøgende/28d, bounce 4 % (Plausible 2026-09-30), og
+  GSC 133.054 visninger / 842 klik / CTR 0,6 % / pos. 5,7 (2026-08-31 →
+  2026-09-28). Genmål 14 dage efter merge.

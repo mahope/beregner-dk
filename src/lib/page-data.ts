@@ -12,6 +12,7 @@ import {
 import { landSvarSprogholdig, satsUdenraekkeSvar } from "./moms-eu";
 import { formatNumber } from "./format";
 import { getHelligdage, helligdagsnavne } from "./helligdage";
+import { pinseAfstande, pinseInterval } from "./pinse-intervaller";
 import { estimerNettoMaaned } from "./barsel/netto";
 import { PROMILLE_EKSEAMPLER, formatPromille, formatTimer } from "./promille-eksempler";
 import {
@@ -106,6 +107,49 @@ const krPrKm = (value: number, decimals: number) =>
   value.toFixed(decimals).replace(".", ",") + " kr. pr. km";
 /** Procent med komma — dansk, svensk og norsk bruger ikke punktum. */
 const pct = (value: number) => value.toFixed(1).replace(".", ",");
+
+/**
+ * De to interval-svar i pinse-klyngen, regnet i `pinse-intervaller` i stedet
+ * for skrevet i hånden. Afstandene 39, 49 og 50 dage følger af, at påskedagen
+ * er en søndag, så de er ens i ethvert år — porten i `pinse-intervaller.test.ts`
+ * låser dem over 61 år. Arbejdsdagene i perioden er derimod *ikke* konstante:
+ * når kristi himmelfartsdag falder sidst i maj, kommer grundlovsdagen 5. juni
+ * ind i perioden og tager én arbejdsdag med. Derfor står de tal også regnet.
+ */
+const PINSE_DA = pinseAfstande(2026, "da");
+const PINSE_SE = pinseAfstande(2026, "se");
+const PINSE_PERIODE_DA = pinseInterval(2026, "da");
+const PINSE_PERIODE_SE = pinseInterval(2026, "se");
+const PINSE_FRA_PAASKE_DA =
+  `Der er ${PINSE_DA.pinse} dage fra påskedagen til pinsedagen og ` +
+  `${PINSE_DA.andenPinse} dage til 2. pinsedag — altid, hvert år. ` +
+  `Kristi himmelfartsdag er påskedag plus ${PINSE_DA.himmelfart} dage, så ` +
+  `mellem kristi himmelfartsdag og pinsedagen er der ${PINSE_DA.himmelfartTilPinse} dage. ` +
+  `Påskedagen er en søndag, og derfor ligger de tre dage på hver sin fast ugedag: ` +
+  `torsdag, søndag og mandag.`;
+const PINSE_PERIODE_DA_TEKST =
+  `Pinseperioden er de ${PINSE_PERIODE_DA.periodeKalenderdage} kalenderdage fra ` +
+  `kristi himmelfartsdag til 2. pinsedag — ${PINSE_PERIODE_DA.dageHimmelfartTilAndenPinse} dage ` +
+  `imellem, ikke én uge, fordi de tre helligdage ligger i to kalenderuger. Inden for dem ` +
+  `er der ${PINSE_PERIODE_DA.periodeArbejdsdage} arbejdsdage og ` +
+  `${PINSE_PERIODE_DA.periodeFrieDage} dage uden arbejde, og helligdagene i perioden er ` +
+  `${PINSE_PERIODE_DA.periodeHelligdagsnavne.join(", ")}. Brug værktøjet ovenfor med de to ` +
+  `datoer, hvis du vil tælle en bestemt periode selv.`;
+const PINSE_FRA_PAASKE_SE =
+  `Det är ${PINSE_SE.pinse} dagar från påskdagen till pingstdagen och ` +
+  `${PINSE_SE.andenPinse} dagar till annandag pingst — alltid, varje år. ` +
+  `Kristi himmelsfärdsdagen är påskdagen plus ${PINSE_SE.himmelfart} dagar, så mellan ` +
+  `kristi himmelsfärdsdagen och pingstdagen ligger det ${PINSE_SE.himmelfartTilPinse} dagar. ` +
+  `Påskdagen är en söndag, och därför ligger de tre dagarna på var sin fast veckodag: ` +
+  `torsdag, söndag och måndag.`;
+const PINSE_PERIODE_SE_TEKST =
+  `Pingstperioden är de ${PINSE_PERIODE_SE.periodeKalenderdage} kalenderdagar från kristi ` +
+  `himmelsfärdsdagen till annandag pingst — ${PINSE_PERIODE_SE.dageHimmelfartTilAndenPinse} dagar ` +
+  `emellan, inte en vecka, eftersom de tre dagarna ligger i två kalenderveckor. Inom dem ` +
+  `finns ${PINSE_PERIODE_SE.periodeArbejdsdage} arbetsdagar och ` +
+  `${PINSE_PERIODE_SE.periodeFrieDage} dagar utan arbete, och helgdagarna i perioden är ` +
+  `${PINSE_PERIODE_SE.periodeHelligdagsnavne.join(", ")}. Annandag pingst är en vanlig måndag ` +
+  `i Sverige — bara i Danmark är den en helig dag.`;
 
 /** Regnestykket i FAQ'en og på siden, samme tal som siden viser i tabellen. */
 const braendstofEksempel = braendstofEksempelRækker();
@@ -898,6 +942,8 @@ const daPages: Record<string, PageData> = {
       { question: "Hvordan tæller jeg dage i en måned i Excel?", answer: "Sæt månedens første dag i A1 og første dag i næste måned i B1, så giver =B1-A1 månedens længde: 1. februar 2026 til 1. marts 2026 er 28 dage. Skriv ikke månedens sidste dag — giver du B1 = 28. februar, får du 27, fordi Excel tæller forskellen i hele døgn. =DATEDIF(A1;B1;\"d\") giver samme tal." },
       { question: "Hvor mange dage er der i et år?", answer: "365 dage, eller 366 i et skudår — et år er skudår hvis det er deleligt med 4, med undtagelse af de hundredeårhundreder der ikke er delelige med 400. 365 dage er 52,1 uger, så et kalenderår er altid lidt mere end 52 uger." },
       { question: "Hvor mange arbejdsdage er der i en måned?", answer: "Det afhænger af måneden og af hvilke helligdage der falder i den. En måned med 31 dage har typisk 21 eller 23 arbejdsdage, og en måned med 30 dage typisk 20 eller 21. Tabellen ovenfor viser det præcise tal for hver måned, og hele årets sum står under den." },
+      { question: "Hvor mange dage er der fra påske til pinse?", answer: PINSE_FRA_PAASKE_DA },
+      { question: "Hvor mange dage er der i pinsen?", answer: PINSE_PERIODE_DA_TEKST },
       ],
     },
     "tidsberegner": {
@@ -3402,6 +3448,8 @@ const sePages: Record<string, PageData> = {
       { question: "Hur räknar jag ut dagar i en månad i Excel?", answer: "Sätt månadens första dag i A1 och första dagen i nästa månad i B1, så ger =B1-A1 månadens längd: 1 februari 2026 till 1 mars 2026 är 28 dagar. Skriv inte månadens sista dag — sätter du B1 = 28 februari får du 27, eftersom Excel räknar skillnaden i hela dygn. =DATEDIF(A1;B1;\"d\") ger samma tal." },
       { question: "Hur många dagar är det i ett år?", answer: "365 dagar, eller 366 under ett skottår — ett år är skottår om det är delbart med 4, med undantag för de hundraårsårtal som inte är delbara med 400. 365 dagar är 52,1 veckor, så ett kalenderår är alltid lite mer än 52 veckor." },
       { question: "Hur många arbetsdagar är det i en månad?", answer: "Det beror på vilken månad det är och vilka helgdagar som infaller i den. En månad med 31 dagar har vanligtvis 21 eller 23 arbetsdagar, och en månad med 30 dagar vanligtvis 20 eller 21. Tabellen ovan visar det exakta talet för varje månad, och hela årets summa står under den." },
+      { question: "Hur många dagar är det mellan påsk och pingst?", answer: PINSE_FRA_PAASKE_SE },
+      { question: "Hur många dagar är det i pingsten?", answer: PINSE_PERIODE_SE_TEKST },
       ],
     },
     "tidsberegner": {

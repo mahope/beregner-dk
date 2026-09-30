@@ -13,6 +13,7 @@ import { dageTilbageIAaret, getDageTilEvents, getDageTilPrefix, isDageTilLocale,
 } from "@/lib/dage-til";
 import { maanedEksempel } from "@/lib/dato-eksempler";
 import { helligdagsnavne } from "@/lib/helligdage";
+import { naestePinseInterval } from "@/lib/pinse-intervaller";
 import { formatNumber } from "@/lib/format";
 
 export async function generateMetadata() {
@@ -61,6 +62,32 @@ export default async function DatoPage() {
   // måned" i begge sprog. Eksemplet følger det kalenderår siden ligger i, så
   // skudårsflaget kan ikke blive stående fra et tidligere år.
   const maaned = maanedEksempel(tilbage.year, 2, locale === "se" ? "se" : "da");
+  // "hvor mange dage er der fra påske til pinse" og "hvor mange dage er der i
+  // pinsen" er de to øvrige danske autocomplete-træffere under "hvor mange
+  // dage er der til pinse", og de er *interval* spørgsmål, ikke nedtællinger.
+  // En dage-til-side ville svare med et tal der altid er det samme og se ud
+  // som en nedtælling, så de hører hjemme her, ved siden af måneds- og
+  // årstabellen. Afstandene (39, 49, 50) er uafhængige af året; datoerne er
+  // næste pinses, så en forældet rendering er synlig i teksten frem for at
+  // gemme sig i et tal der tilfældigvis stadig passer.
+  const pinse = isDageTilLocale(locale)
+    ? naestePinseInterval(new Date(), locale)
+    : null;
+  const pinseLocale = locale === "se" ? "se" : "da";
+  // `getHelligdage` bygger lokale midnatspunkter, så en ISO-formatering ville
+  // trække dagen en enhed tilbage i de tidszoner, der ligger foran UTC. Begge
+  // formater normaliserer derfor til UTC-midnat først — samme greb som
+  // `formatTargetDate` gør på dage-til-siderne.
+  const pinseDato = (d: Date) =>
+    formatTargetDate(
+      new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())),
+      pinseLocale
+    );
+  const pinseUgedag = (d: Date) =>
+    new Intl.DateTimeFormat(pinseLocale === "se" ? "sv-SE" : "da-DK", {
+      weekday: "long",
+      timeZone: "UTC",
+    }).format(new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())));
 
   return (
     <div>
@@ -281,6 +308,71 @@ export default async function DatoPage() {
             afskaffet som helligdag i 2024.
           </p>
         </div>
+
+        {pinse && (
+        <>
+        <h2>Hvor mange dage er der fra påske til pinse?</h2>
+        <p>
+          Der er <strong>{formatNumber(pinse.dage[1].dageFraPaaske, "da")} dage
+          fra påskedagen til pinsedagen</strong> — og{" "}
+          <strong>{formatNumber(pinse.dage[2].dageFraPaaske, "da")} dage til 2.
+          pinsedag</strong>. De tal ændrer sig aldrig, fordi påskedagen er en
+          søndag: kristi himmelfartsdag er påskedag +{" "}
+          {formatNumber(pinse.dage[0].dageFraPaaske, "da")} (torsdag), pinsedagen
+          er påskedag + {formatNumber(pinse.dage[1].dageFraPaaske, "da")} (søndag
+          igen), og 2. pinsedag er påskedag +{" "}
+          {formatNumber(pinse.dage[2].dageFraPaaske, "da")} (mandag). Mellem
+          kristi himmelfartsdag og pinsedagen er der derfor altid 10 dage.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Dag</th>
+              <th>{pinse.year}</th>
+              <th>Ugedag</th>
+              <th>Dage fra påskedag</th>
+              <th>Helligdag</th>
+            </tr>
+          </thead>
+          <tbody>
+            {pinse.dage.map((dag) => (
+              <tr key={dag.navn}>
+                <th scope="row">{dag.navn}</th>
+                <td>{pinseDato(dag.date)}</td>
+                <td>{pinseUgedag(dag.date)}</td>
+                <td>{formatNumber(dag.dageFraPaaske, "da")}</td>
+                <td>{dag.helligdag ? "Ja" : "Nej"}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p>
+          Påskedagen i {pinse.year} er {pinseDato(pinse.paaskedag)}, så alle tre
+          datoer ovenfor følger af den. De er fundet i den samme helligdagsliste,
+          som værktøjet ovenfor bruger, når det springer helligdagene over.
+        </p>
+
+        <h2>Hvor mange dage er der i pinsen?</h2>
+        <p>
+          Pinseperioden er de{" "}
+          <strong>{formatNumber(pinse.periodeKalenderdage, "da")} kalenderdage</strong>{" "}
+          fra kristi himmelfartsdag {pinseDato(pinse.himmelfartsdag)} til 2.
+          pinsedag {pinseDato(pinse.andenPinsedag)} — altså{" "}
+          {formatNumber(pinse.dageHimmelfartTilAndenPinse, "da")} dage imellem, ikke
+          én uge, fordi de tre helligdage ligger i to kalenderuger. Inden for de{" "}
+          {formatNumber(pinse.periodeKalenderdage, "da")} dage er der{" "}
+          {formatNumber(pinse.periodeArbejdsdage, "da")} arbejdsdage og{" "}
+          {formatNumber(pinse.periodeFrieDage, "da")} dage uden arbejde, og
+          helligdagene i perioden er{" "}
+          {pinse.periodeHelligdagsnavne.join(", ")}.
+        </p>
+        <p>
+          Vil du se den enkelte dato tælle ned til, er der en side for hver af dem:{" "}
+          <Link href="/dage-til/kristi-himmelfartsdag">kristi himmelfartsdag</Link>{" "}
+          og <Link href="/dage-til/2-pinsedag">2. pinsedag</Link>.
+        </p>
+        </>
+        )}
       </div>
       )}
 
@@ -495,6 +587,75 @@ export default async function DatoPage() {
             alla helgons dag är alltid den lördag de infaller på.
           </p>
         </div>
+
+        {pinse && (
+        <>
+        <h2>Hur många dagar är det mellan påsk och pingst?</h2>
+        <p>
+          Det är <strong>{formatNumber(pinse.dage[1].dageFraPaaske, "se")} dagar
+          från påskdagen till pingstdagen</strong> — och{" "}
+          <strong>{formatNumber(pinse.dage[2].dageFraPaaske, "se")} dagar till
+          annandag pingst</strong>. Talen ändras aldrig, eftersom påskdagen är
+          en söndag: kristi himmelsfärdsdagen är påskdagen +{" "}
+          {formatNumber(pinse.dage[0].dageFraPaaske, "se")} (torsdag), pingstdagen
+          är påskdagen + {formatNumber(pinse.dage[1].dageFraPaaske, "se")} (söndag
+          igen) och annandag pingst är påskdagen +{" "}
+          {formatNumber(pinse.dage[2].dageFraPaaske, "se")} (måndag). Mellan
+          kristi himmelsfärdsdagen och pingstdagen ligger det därför alltid 10
+          dagar.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Dag</th>
+              <th>{pinse.year}</th>
+              <th>Veckodag</th>
+              <th>Dagar från påskdagen</th>
+              <th>Röd dag</th>
+            </tr>
+          </thead>
+          <tbody>
+            {pinse.dage.map((dag) => (
+              <tr key={dag.navn}>
+                <th scope="row">{dag.navn}</th>
+                <td>{pinseDato(dag.date)}</td>
+                <td>{pinseUgedag(dag.date)}</td>
+                <td>{formatNumber(dag.dageFraPaaske, "se")}</td>
+                <td>{dag.helligdag ? "Ja" : "Nej"}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p>
+          Påskdagen {pinse.year} infaller {pinseDato(pinse.paaskedag)}, så alla
+          tre datum ovan följer av den. De är hämtade ur samma rödagslista som
+          verktyget ovan använder när det hoppar över helgdagarna.
+        </p>
+
+        <h2>Hur många dagar är det i pingsten?</h2>
+        <p>
+          Pingstperioden är de{" "}
+          <strong>{formatNumber(pinse.periodeKalenderdage, "se")} kalenderdagar</strong>{" "}
+          från kristi himmelsfärdsdagen {pinseDato(pinse.himmelfartsdag)} till
+          annandag pingst {pinseDato(pinse.andenPinsedag)} — alltså{" "}
+          {formatNumber(pinse.dageHimmelfartTilAndenPinse, "se")} dagar emellan,
+          inte en vecka, eftersom de tre dagarna ligger i två kalenderveckor.
+          Inom de {formatNumber(pinse.periodeKalenderdage, "se")} dagarna finns{" "}
+          {formatNumber(pinse.periodeArbejdsdage, "se")} arbetsdagar och{" "}
+          {formatNumber(pinse.periodeFrieDage, "se")} dagar utan arbete, och
+          helgdagarna i perioden är{" "}
+          {pinse.periodeHelligdagsnavne.join(", ")}. Annandag pingst är en vanlig
+          måndag i Sverige — bara i Danmark är den en helig dag.
+        </p>
+        <p>
+          Vill du räkna ner till det enstaka datumet finns en sida för var och en:{" "}
+          <Link href="/dagar-till/kristi-himmelsfardsdag">
+            kristi himmelsfärdsdagen
+          </Link>{" "}
+          och <Link href="/dagar-till/pingstdagen">pingstdagen</Link>.
+        </p>
+        </>
+        )}
       </div>
       )}
 
