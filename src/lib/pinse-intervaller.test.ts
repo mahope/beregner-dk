@@ -1,4 +1,4 @@
-import { describe, expect, test } from "vitest";
+import { afterEach, describe, expect, test } from "vitest";
 import {
   naestePinseInterval,
   pinseAfstande,
@@ -231,14 +231,47 @@ describe("pinse-intervaller", () => {
   });
 
   test("pinseAar står på året pinse er over, også på selve mandagen", () => {
-    const sidste = pinseInterval(2027, "da").andenPinsedag;
-    // 2. pinsedag 2027 er 17. maj. Sidste time på dagen er stadig 2027, og
-    // dagen efter er 2028.
-    expect(pinseAar(new Date(2027, 4, 17, 23, 59))).toBe(2027);
-    expect(pinseAar(new Date(2027, 4, 18, 0, 0))).toBe(2028);
+    // 2. pinsedag 2027 er 17. maj. Øjeblikkene er skrevet som UTC, fordi det er
+    // det eneste tidspunkt der betyder det samme i enhver tidszone: København og
+    // Stockholm er begge UTC+2 i maj, så 21:59 UTC er dagens sidste time, mens
+    // 22:00 UTC allerede er 18. maj. En `new Date(2027, 4, 17, 23, 59)` er derimod
+    // 23:59 i *testens* tidszone, og i CI (UTC) er det først 18. maj i København —
+    // porten faldt, fordi den testede uret, ikke regnestykket.
+    const sidsteTime = new Date("2027-05-17T21:59:00Z");
+    const foersteTimeEfter = new Date("2027-05-17T22:00:00Z");
+    expect(pinseAar(sidsteTime, "da")).toBe(2027);
+    expect(pinseAar(foersteTimeEfter, "da")).toBe(2028);
     // Samme i Sverige: mandagen er ikke en röd dag, men perioden slutter der.
-    expect(pinseAar(new Date(2027, 4, 17, 12, 0), "se")).toBe(2027);
-    expect(pinseAar(new Date(2027, 4, 18, 12, 0), "se")).toBe(2028);
+    expect(pinseAar(sidsteTime, "se")).toBe(2027);
+    expect(pinseAar(foersteTimeEfter, "se")).toBe(2028);
+  });
+
+  describe("pinseAar er uafhængig af serverens tidszone", () => {
+    // Produktionen kører i UTC, og det er derfor de gamle assertions var grønne
+    // herhjemme. Men `pinseInterval` bygger datoer som lokale midnatspunkter, og
+    // `daysBetween` læser dem gennem Europe/Copenhagen — på en server der ligger
+    // *øst for* København (Asia/Tokyo, UTC+9) er 17. maj kl. 00:00 den 16. maj i
+    // København, så grænsen flytter sig en dag. Kun en test der flytter uret kan se
+    // det, og den skal genindstille TZ bagefter, så ingen anden test arver uret.
+    const oprindelig = process.env.TZ;
+    afterEach(() => {
+      // `Reflect.deleteProperty` i stedet for `delete`, som biome forbyder.
+      if (oprindelig === undefined) Reflect.deleteProperty(process.env, "TZ");
+      else process.env.TZ = oprindelig;
+    });
+    // 17. maj 2027 er 2. pinsedag: hele dagen hører til 2027, dagen efter til 2028.
+    const dagenSelv = new Date("2027-05-17T12:00:00Z");
+    const dagenEfter = new Date("2027-05-18T12:00:00Z");
+    for (const tidszone of ["UTC", "Asia/Tokyo", "Pacific/Kiritimati", "America/Los_Angeles"]) {
+      test(tidszone, () => {
+        process.env.TZ = tidszone;
+        for (const locale of ["da", "se"] as const) {
+          expect(pinseAar(dagenSelv, locale), `${locale} 17. maj`).toBe(2027);
+          expect(pinseAar(dagenEfter, locale), `${locale} 18. maj`).toBe(2028);
+          expect(naestePinseInterval(dagenSelv, locale).year, `${locale} interval`).toBe(2027);
+        }
+      });
+    }
   });
 
   test("pinseAar læser kalenderåret i sidens egen tidszone", () => {

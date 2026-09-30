@@ -19864,3 +19864,32 @@ dokumenteret to gange, ikke fordi denne side alene løfter trafikken.
 - **MÅL:** `/dato` 1133 besøgende/28d, bounce 4 % (Plausible 2026-09-30), og
   GSC 133.054 visninger / 842 klik / CTR 0,6 % / pos. 5,7 (2026-08-31 →
   2026-09-28). Genmål 14 dage efter merge.
+
+## 30/9 11:45 — CI-fix: `pinseAar` må ikke afhænge af serverens tidszone (ceo/pinseaar-tidszone)
+
+- **Udløser:** CI på `master` var **rød** efter `6c2deeb` (pinse-intervallerne).
+  `pinse-intervaller.test.ts` skrev `new Date(2027, 4, 17, 23, 59)` og forventede
+  2027; i CI (UTC) er det 23:59 UTC = 00:59 dagen efter i København, så
+  `pinseAar` svarede 2028. Porten var altså ikke bare forældet — den testede
+  *urets* tidszone, ikke regnestykket.
+- **Den egentlige fejl:** `pinseAar` sammenlignede `interval.andenPinsedag` (et
+  lokalt midnatspunkt fra `getHelligdage`) med `today` via `daysBetween`, som
+  læser begge sider gennem `Europe/Copenhagen`. På en server **øst for**
+  København er 17. maj kl. 00:00 den 16. maj i København, så årsgrænsen vendte
+  en dag for tidligt. Produktionen kører i UTC, så tallene har været rigtige —
+  men fejlen er i kode, ikke i miljøet, og næste kørende miljø kunne have den.
+- **Rettelse:** `dagITidszone()` (kalenderdagen i sidens egen tidszone, ét sted
+  brugt af både `kalenderAar` og `pinseAar`) og `lokalDag()` (datoens egne
+  Y/M/D — samme greb som `src/app/dato/page.tsx:81`). `pinseAar` afhænger nu kun
+  af det øjeblik læseren har.
+- **Port:** fire tidszoner (UTC, Asia/Tokyo, Pacific/Kiritimati,
+  America/Los_Angeles) med de fire gamle assertions skrevet om til UTC-øjeblik.
+  De to østlige **faldt mod master** (verificeret med `git checkout master --`:
+  2 fejl), så porten kan ikke være grøn med fejlen i igen.
+- **Gate:** lint 620 filer, 3139 tests / 191 filer (fra 3135), build 142 sider,
+  `locale-leak.mjs --gate` exit 0.
+- **⚠️ Driftsnote (ikke en kodefejl):** under iterationen blev det ucommittede
+  arbejdsrummet i repoet **to gange nulstillet uden git-spor** (ingen reflog,
+  ingen stash) — sandsynligvis en `git restore`/`checkout --` fra en ekstern
+  opgørelse. Læren: commit på opgave-branchen *før* gaten, så tabet kun er
+  tid, ikke kode.

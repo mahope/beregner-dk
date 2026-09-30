@@ -1,35 +1,28 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — de to pinse-*interval*-spørgsmål er nu besvaret på `/dato` med tal koden regner.
+STATUS: KØ — CI på `master` var rød efter `6c2deeb`; rettet 30/9 11:45.
 
-Opgave 212 var den sidste åbne trafikopgave. "Hvor mange dage er der fra påske
-til pinse" og "hvor mange dage er der i pinsen" lå i dansk autocomplete under
-pinse-klyngen, men er **interval**-spørgsmål. En `/dage-til/*`-side ville have
-svaret med et tal, der altid er det samme, og set ud som en nedtælling — så
-svaret ligger nu på `/dato` ved siden af måneds- og årstabellen: **49 dage**
-fra påskedagen til pinsedagen, **50** til 2. pinsedag, **39** til kristi
-himmelfartsdag, og pinseperioden som de **12 kalenderdage** fra kristi
-himmelfartsdag til 2. pinsedag — 6 arbejdsdage i Danmark, 7 i Sverige.
-Begge sprog, begge med en tabel over de tre dage (dato, ugedag, dage fra
-påskedagen, helligdag ja/nej) og link videre til hver sin pinseside.
+`pinse-intervaller.test.ts` testede `new Date(2027, 4, 17, 23, 59)`, som er
+23:59 i *testens* tidszone — i CI (UTC) er det 00:59 dagen efter i København,
+så porten fald. Rettelsen er ikke kun i testen: `pinseAar` sammenlignede 2.
+pinsedags **lokale midnat** med `today` gennem `daysBetween`, som læser begge
+sider via `Europe/Copenhagen`. På en server øst for København (Asia/Tokyo,
+UTC+9) er 17. maj kl. 00:00 den 16. maj dér, så årsgrænsen vendte en dag for
+tidligt. Nu læses dagen i sidens egen tidszone (`dagITidszone`) og fra
+datoens egne felter (`lokalDag`, samme greb som `page.tsx:81`), så svaret kun
+afhænger af det øjeblik læseren har. Fire tidszoner er låst i porten (UTC,
+Asia/Tokyo, Pacific/Kiritimati, America/Los_Angeles) — de to østlige faldt mod
+master.
 
-**MÅL:** `/dato` 1.133 besøgende/28d, bounce 4 % (Plausible 2026-09-30) og GSC
-133.054 visninger / 842 klik / CTR 0,6 % / pos. 5,7 (2026-08-31 → 2026-09-28).
-Genmål 14 dage efter merge.
+**Gate:** lint 620 filer, **3139 tests / 191 filer** (fra 3135), build 142
+sider, `locale-leak.mjs --gate` exit 0.
 
-**⚠️ Fejl i egen diff fanget ved selvreview (fejltype 11) — to gange.** Første
-udkast skrev "6 arbejdsdage og 6 dage uden arbejde" som et fladt tal. En
-61-års løkke (1990-2050) viste, at grundlovsdagen 5. juni falder *inde i*
-perioden i 7 af de 61 år og så tager én arbejdsdag med, og at Sveriges
-nationaldag 6. juni i 1992 falder på en lørdag — forskellen mellem landene er
-derfor 1, 2 eller 0 dage, ikke altid 1. (En tredje fejl: `periodeHelligdage`
-talte liste-*elementer*, så 1995 — hvor 2. pinsedag *er* grundlovsdagen — gav 4
-i stedet for 3.) Alle tal er nu regnet, helligdagene i perioden læses ud af
-`getHelligdage`, og porten låser **reglen** — de 12 dage deler sig i
-arbejdsdage + weekender + hverdags-helligdage — frem for et fast tal.
+**Mål (uændret):** `/dato` 1.133 besøgende/28d, bounce 4 % (Plausible
+2026-09-30); GSC 133.054 visninger / 842 klik / CTR 0,6 % / pos. 5,7
+(2026-08-31 → 2026-09-28). Genmål 14 dage efter merge.
 
-**Alle tolv tidligere deploy-noter er lukket `DEPLOY OK 2026-09-30`.** Fire nye
-noter åbne, vindue 30/9 12:30.
+**Alle tolv tidligere deploy-noter er lukket `DEPLOY OK 2026-09-30`.** Syv noter
+åbne, vindue 30/9 12:30.
 
 
 ## Kvalitetsgate (repoets egne scripts fra package.json)
@@ -50,8 +43,8 @@ Alle fire var grønne før merge 2026-09-30 07:45.
 
 ## Åbne VERIFICÉR DEPLOY-noter
 
-Fem noter. HTTP 200 beviser intet: fire rører `<title>` og `<h1>` på én side,
-og pinse-noten opretter to URL'er.
+Syv noter. HTTP 200 beviser intet: fire rører `<title>` og `<h1>` på én side,
+pinse-noten opretter to URL'er, og tidszone-noten forventer et **uændret** tal.
 
 - ⏳ **VERIFICÉR DEPLOY: `/dage-til/2-pinsedag` og `/dagar-till/pingstdagen`
   skal begge svare med hver sin dag — dansk +50, svensk +49 efter påskedag.**
@@ -257,6 +250,29 @@ og pinse-noten opretter to URL'er.
   filer**), **3135 tests / 191 filer** (fra 3112), build (**142 sider**),
   `locale-leak.mjs --gate` exit 0. De fire nye side-tests **falder mod master's
   `page.tsx`** (verificeret med `git checkout master --`: **4 fejl**).
+
+- ⏳ **VERIFICÉR DEPLOY: `/dato` skal stadig vise pinseåret 2027 — påskedagen
+  28. marts og 2. pinsedag 17. maj.** Kode + plan i ét squash-commit på
+  `ceo/pinseaar-tidszone`. Første kandidatvindue **2026-09-30 12:30**. Rørte
+  filer: `src/lib/pinse-intervaller.ts` (**to nye private hjælpere, `pinseAar`
+  omskrevet**) og `src/lib/pinse-intervaller.test.ts` (**+4 tidszone-tests, fire
+  assertions skrevet om til UTC-øjeblik**). Ingen UI, ingen ny URL, ingen ny
+  afhængighed, ingen `<title>` rørt, ingen beregningslogik rørt. I en
+  UTC-container er `toUtcMidnight` og `lokalDag` enige, så **det viste tal skal
+  være uændret** — netop derfor skal det verificeres på indhold, ikke på HTTP.
+  1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
+  2. `https://minberegner.dk/dato` skal have **"Påskedagen i 2027 er 28. marts"**
+     og **"17. maj"** i pinseafsnittet.
+  3. `https://beraknare.se/dato` skal have **"Påskdagen 2027 infaller 28 mars"**
+     og **"17 maj"**.
+  **Kontrol:** `https://minberegner.dk/dage-til/2-pinsedag` skal have uændret
+  titel med dage-tal, og ingen danske strenge lækker til beraknare.se (porten
+  kører `locale-leak.mjs --gate`).
+  **Målt før merge:** de fire nye tidszone-tests **falder mod master's
+  `pinse-intervaller.ts`** (verificeret med `git checkout master --`: **2 fejl**,
+  Asia/Tokyo og Pacific/Kiritimati). **Gate grøn:** lint (**620 filer**),
+  **3139 tests / 191 filer** (fra 3135), build (**142 sider**),
+  `locale-leak.mjs --gate` exit 0.
 
 ## Åbne opgaver
 

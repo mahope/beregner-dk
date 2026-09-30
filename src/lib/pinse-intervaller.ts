@@ -179,13 +179,42 @@ export function pinseInterval(year: number, locale: HelligdagLocale): PinseInter
   };
 }
 
+/**
+ * The calendar day an instant falls on in a timezone, as a UTC midnight. The
+ * instant is read the way a reader in that timezone reads the clock, so
+ * 2027-05-17T21:59Z is still 17 May in Copenhagen and Stockholm (both are
+ * UTC+2 in May), while 22:00Z is already 18 May.
+ */
+function dagITidszone(dato: Date, tidszone: string): number {
+  const dele = new Intl.DateTimeFormat("en-CA", {
+    timeZone: tidszone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(dato);
+  const vaerdi = (type: "year" | "month" | "day") =>
+    Number(dele.find((del) => del.type === type)?.value);
+  return Date.UTC(vaerdi("year"), vaerdi("month") - 1, vaerdi("day"));
+}
+
+/**
+ * The calendar day of a date `pinseInterval` built as a local midnight, read
+ * from its own fields.
+ *
+ * `daysBetween` would have been the shorter way to compare the two, but it maps
+ * both sides through `Europe/Copenhagen`: a local midnight *east* of the site — a
+ * server in Asia/Tokyo, where 17 May 00:00 is 16 May in Copenhagen — becomes the
+ * day before, so the year turned over a day early. The fields a date was built
+ * from *are* the date, in every timezone, so nothing here depends on the clock
+ * the server happens to run on.
+ */
+function lokalDag(dato: Date): number {
+  return Date.UTC(dato.getFullYear(), dato.getMonth(), dato.getDate());
+}
+
 /** The calendar year the reader stands on, in the locale's own timezone. */
 function kalenderAar(today: Date, locale: HelligdagLocale): number {
-  const vaerdi = new Intl.DateTimeFormat("en-CA", {
-    timeZone: TIDZONE[locale],
-    year: "numeric",
-  }).formatToParts(today).find((part) => part.type === "year")?.value;
-  return Number(vaerdi);
+  return new Date(dagITidszone(today, TIDZONE[locale])).getUTCFullYear();
 }
 
 /**
@@ -196,7 +225,9 @@ function kalenderAar(today: Date, locale: HelligdagLocale): number {
 export function pinseAar(today: Date, locale: HelligdagLocale = "da"): number {
   const year = kalenderAar(today, locale);
   const interval = pinseInterval(year, locale);
-  return daysBetween(interval.andenPinsedag, today) > 0 ? year + 1 : year;
+  return dagITidszone(today, TIDZONE[locale]) > lokalDag(interval.andenPinsedag)
+    ? year + 1
+    : year;
 }
 
 /**
