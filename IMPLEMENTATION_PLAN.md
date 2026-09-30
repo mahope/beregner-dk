@@ -1,13 +1,19 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — 30/9 18:45. **F4 er færdig** (`ceo/forsiden-snabb-indgang`): forsiden
-linkede de mest brugte beregnere som ét kort i et gitter med én kolonne på
-mobil, tre skærmbilleder ned. Nu ligger en kompakt stribe med links til de otte
-mest brugte **før** tillidsrækken, og en renderet test låser rækkefølgen for
-dansk og svensk. Se arkivet for målingen og de fire mutationer.
+STATUS: KØ — 30/9 19:20. **F7 er færdig** (`ceo/tidszone-tidsforskelle`):
+`/tidszone` skrev "9-10 timer foran" om Sydney, mens `TIDSZONER` og
+`sommertid.ts` giver **8-10** (Sydney er UTC+10/+11 mod Danmarks UTC+1/+2).
+Tallet lå i håndskrevet JSX uden test — samme fejlklasse som de otte CEO-fund.
+De fem byers forskelle regnes nu af `tidsforskelsRækker` fra `TIDSZONER`, så
+de ikke kan glide fra tabellen. 10 nye tests, 3 mutationer kontrolleret.
 
-**To VERIFICÉR-noter åbne** (fra F6 og F4). F1/F3/F5 og opgaverne 97/98/119/183
-er blokeret af svar fra Mads. **Opgave 187 må ikke røres før 13/10.**
+**Fire VERIFICÉR-noter åbne** (fra F7, F6 og F4). F1/F3/F5 og opgaverne
+97/98/119/183 er blokeret af svar fra Mads. **Opgave 187 må ikke røres før 13/10.**
+**CEO-køen er tom** — alle otte punkter blev rettet i `aca17e5` og verificeret
+mod koden 30/9 19:10 (valborg 30/4, svensk påskafton lørdag, dansk sankthans
+23./24. juni fast, påskeaften-FAQ slettet, husleje på nettoprisindekset,
+`toUtcMidnight` i `Europe/Copenhagen`, svensk promille-FAQ regnet fra egen
+formel, `maneder: 12` + advent 27/11-3/12).
 
 **⚠️ Målerfælde (30/9 15:40, samme klasse som C70's).** `npm run test` kører
 `locale-leak-gate.test.ts`, som med vilje planterer **to** danske lækager og
@@ -142,11 +148,32 @@ nedenfor, den er ærlig om hvorfor de alligevel er rettet. Ny port
 (kæde med svensk/dansk tag og ingen `nb-NO` indeni), så klassen kan ikke komme
 tilbage. 8 nye tests, 3 mutationer kontrolleret. Se arkivet.
 
+**F7. [x] ✅ `ceo/tidszone-tidsforskelle` — Sydney lå på 9-10 timer, kalenderen
+giver 8-10.** `/tidszone`s "Populære tidsforskelle" var fem håndskrevne
+`<li>`-linjer i begge sprog. Sydney stod som "9-10 timer foran", men Sydney er
+AEST (UTC+10) / AEDT (UTC+11) mod Danmarks CET/CEST (UTC+1/+2), og dens
+sommertid løber **modsat** Danmarks — så den laveste forskel er **8** timer, ikke
+9. `sommertid.test.ts:62-63` regnede allerede 8 og 10, så brødteksten modsatte
+repoets egen test. Nu regnes alle fem forskelle af `tidsforskelsRækker`, som
+går **hver dag i et helt år** igennem `erSommertid` med byens egen `dst`-regel
+(nyt felt i `TIDSZONER`, samme regler som `TidszoneBeregner.tsx`), så tallene
+kommer fra samme kilde som tabellen ovenfor. **Målet blev fire fund undervejs,
+alle rettet før commit:** New York er 5-6 (ikke 6) og LA 8-9, fordi USA skifter
+2. søndag i marts mod Danmarks sidste søndag; Tokyo er 7-8 i stedet for den
+gamle sætning om "8 om vinteren, 7 om sommeren"; Madrid deler CET/CEST med
+Danmark og skrives "samme tid som Danmark" frem for "0 timer foran"; og et
+interval skrives stigende ("5-6") og altid med to tal. 10 nye tests, 3
+mutationer kontrolleret (interval baglæns, enhed efter bredde, London på
+USA-datoer) + én der fanger en regression i JSX'en alene. Se arkivet.
+**MÅL:** `/tidszone` under top-15 i Plausible, 24.324 GSC-visninger / 104 klik /
+CTR 0,4 % / pos. 7,5 (GSC 2026-08-31 → 2026-09-28). Genmål 14 dage efter at
+den er live.
+
 ## Kvalitetsgate (repoets egne scripts fra package.json)
 
 ```
-npm run lint     # biome lint ./src      — 626 filer
-npm run test     # vitest run            — 3231 tests / 196 filer
+npm run lint     # biome lint ./src      — 627 filer
+npm run test     # vitest run            — 3249 tests / 197 filer
 npm run build    # next build            — 142 sider
 node scripts/locale-leak.mjs --gate       # exit 0
 ```
@@ -165,10 +192,21 @@ fremover med `git stash -u` før og efter, som gjort her.
 
 ## Åbne VERIFICÉR DEPLOY-noter
 
-**To noter åbne.** HTTP 200 beviser intet: F6's note rører Intl-formatering, hvor
-en fejl er usynlig i en dansk browser, og F4's rører rækkefølge og breakpoint,
-hvor en fejl også er usynlig for `curl`. De otte lukkede noter er verificeret
-30/9 17:46-17:53 på indhold; alle målinger står i `docs/plan-arkiv.md`.
+**Fire noter åbne.** HTTP 200 beviser intet: F6's note rører Intl-formatering,
+F4's rører rækkefølge og breakpoint, og F7's rører brødteksttal, hvor en fejl
+er usynlig for `curl` — en dansk læser skal bare have et forkert tal. De otte
+lukkede noter er verificeret 30/9 17:46-17:53 på indhold; alle målinger står i
+`docs/plan-arkiv.md`.
+
+- ⏳ **Sydney skal stå med 8-10 timer foran, ikke 9-10.** `ceo/tidszone-tidsforskelle`.
+  På `https://minberegner.dk/tidszone` og `https://beraknare.se/tidszone`: under
+  "Populære tidsforskelle fra Danmark" skal linjerne være læst
+  `London: 1 time bagud`, `New York: 5-6 timer bagud`, `Los Angeles: 8-9 timer
+  bagud`, `Tokyo: 7-8 timer foran`, `Sydney: 8-10 timer foran` — og på svensk
+  `1 timme efter` / `5-6 timmar efter` / `8-9 timmar efter` / `7-8 timmar före` /
+  `8-10 timmar före`. Tallet **9-10 må ikke forekomme nogen steder** på siden.
+  Den praktiske prøve er `src/app/tidszone/page.test.tsx` efter deploy. Vindue
+  **1/10 07:30** (denne merge sker efter 30/9 17:30).
 
 - ⏳ **Norske tal skal ikke få dansk tusindtalsseparator.** `ceo/no-locale-tag`.
   Kontrollér **indhold** på `https://beregner.no/proteinbehov` (latent — domænet

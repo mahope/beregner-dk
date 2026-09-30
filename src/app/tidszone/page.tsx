@@ -7,7 +7,13 @@ import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import RelatedCalculators from "@/components/RelatedCalculators";
 import RelateredeArtikler from "@/components/RelateredeArtikler";
-import { TIDSZONER, tidszoneRækker } from "@/lib/tidszone-reference";
+import {
+  TIDSZONER,
+  tidszoneRækker,
+  tidsforskelsRækker,
+  tidsforskelBy,
+  tidsforskelTekst,
+} from "@/lib/tidszone-reference";
 import { usaStatAntal, usaStatRaekker } from "@/lib/tidszone-usa-stater";
 import {
   TIDSPUNKTER,
@@ -20,6 +26,30 @@ import {
   tidsskillnadRaekker,
 } from "@/lib/tidszone-eksempler";
 import Link from "next/link";
+
+/**
+ * De byer, brødteksten lister under "Populære tidsforskelle". Listen er de
+ * fem byer, der stod der i hånden, og forskellene er **regnet** af
+ * `tidsforskelsRækker` frem for skrevet som tekst.
+ *
+ * Det skyldes, at Sydney stod som "9-10 timer foran", mens `TIDSZONER` og
+ * `sommertid.ts` giver 8-10: Sydney er UTC+10/+11 mod Danmarks UTC+1/+2, så
+ * den laveste forskel er 8 timer, ikke 9. Tallet lå i en håndskrevet
+ * brødtekstlinje, der hverken blev læst fra tabellen eller dækket af en
+ * test — samme fejlklasse som de otte CEO-fund 29/9. Nu kommer tallet fra
+ * samme kilde som tabellen ovenfor, så de to ikke kan glide fra hinanden.
+ *
+ * Rækkefølgen er ens på dansk og svensk, og begge sprog læser den samme
+ * række, så en by ikke kan stå med et tal på det ene domæne og et andet på
+ * det andet.
+ */
+const POPULAERE_TIDSFORSKELSER = tidsforskelsRækker([
+  "London",
+  "New York",
+  "Los Angeles",
+  "Tokyo",
+  "Sydney",
+]);
 
 /**
  * Byerne bag landetabellen, som en kommasepareret liste med "og" til sidst.
@@ -381,11 +411,11 @@ export default async function TidszonePage() {
 
         <h3>Populære tidsforskelle fra Danmark</h3>
         <ul>
-          <li><strong>London:</strong> 1 time bagud</li>
-          <li><strong>New York:</strong> 6 timer bagud</li>
-          <li><strong>Los Angeles:</strong> 9 timer bagud</li>
-          <li><strong>Tokyo:</strong> 8 timer foran om vinteren, 7 timer mens Danmark har sommertid</li>
-          <li><strong>Sydney:</strong> 9-10 timer foran</li>
+          {POPULAERE_TIDSFORSKELSER.map((raekke) => (
+            <li key={raekke.by}>
+              <strong>{tidsforskelBy(raekke, "da")}:</strong> {tidsforskelTekst(raekke, "da")}
+            </li>
+          ))}
         </ul>
 
         <h3>Tips til internationale møder</h3>
@@ -486,11 +516,11 @@ export default async function TidszonePage() {
 
         <h3>Populära tidsskillnader från Sverige</h3>
         <ul>
-          <li><strong>London:</strong> 1 timme efter</li>
-          <li><strong>New York:</strong> 6 timmar efter</li>
-          <li><strong>Los Angeles:</strong> 9 timmar efter</li>
-          <li><strong>Tokyo:</strong> 8 timmar före på vintern, 7 timmar när Sverige har sommartid</li>
-          <li><strong>Sydney:</strong> 9-10 timmar före</li>
+          {POPULAERE_TIDSFORSKELSER.map((raekke) => (
+            <li key={raekke.by}>
+              <strong>{tidsforskelBy(raekke, "se")}:</strong> {tidsforskelTekst(raekke, "se")}
+            </li>
+          ))}
         </ul>
 
         <h3>Tips för internationella möten</h3>

@@ -21002,3 +21002,61 @@ rækkeføljetesten rød. (2) `slice(0, 6)` + `quick` sat til samme ord som
 
 **Gaten:** lint 627 filer ren, `vitest` 3.239 tests / 197 filer grønne (+8 mod
 3231), `next build` grøn, `locale-leak.mjs --gate` exit 0.
+
+---
+
+## F7 — `ceo/tidszone-tidsforskelle` (30/9 19:20) — Sydney lå på 9-10 timer, kalenderen giver 8-10
+
+**Fundet.** `/tidszone`s afsnit "Populære tidsforskelle fra Danmark" (og det
+svenske modstykke) var fem håndskrevne `<li>`-linjer i JSX. Sydney stod som
+**"9-10 timer foran"**. Sydney er AEST (UTC+10) / AEDT (UTC+11) mod Danmarks
+CET/CEST (UTC+1/+2), og dens sommertid løber **modsat** Danmarks — derfor er
+den laveste forskel **8** timer, ikke 9. `src/lib/sommertid.test.ts:62-63`
+regnede allerede 8 og 10 med to uafhængige datoer, så brødteksten modsatte
+repoets egen test. Samme fejlklasse som de otte CEO-fund 29/9: et tal i
+almindelig skrift, som Google har indekseret, der ikke er læst fra kilden.
+
+**Rettelsen.** `tidsforskelsRækker` i `src/lib/tidszone-reference.ts` går
+**hver dag i et helt år** igennem `erSommertid` med byens egen DST-regel og
+tager mindste og største forskel. Zonen fik et nyt `dst`-felt, så reglen står
+i rækken i stedet for at blive gættet på bynavn — en mellemtidsudgave gættede
+London på USA's skiftedatoer og gav 0 timer, hvilket testen fangede. Begge
+sprog læser nu den samme række gennem `tidsforskelBy`/`tidsforskelTekst`.
+
+**Fire fund undervejs, alle rettet før commit.** Målingen afslørede, at kun
+Sydney var forkert, og at fire andre linjer var unøjagtige på samme måde:
+
+| By | Stod som | Er | Hvorfor |
+|---|---|---|---|
+| New York | 6 timer bagud | **5-6** | USA skifter 2. søndag i marts, Danmark sidste søndag |
+| Los Angeles | 9 timer bagud | **8-9** | samme grund, vestkysten |
+| Tokyo | "8 om vinteren, 7 om sommeren" | **7-8** | sandt, men skrevet som en sætning frem for et interval |
+| Sydney | 9-10 timer foran | **8-10** | den egentlige fejl |
+| London | 1 time bagud | 1 time bagud | uændret — den skifter på Danmarks datoer |
+
+En fjerde fejl kom fra min egen kode undervejs: Madrid deler CET/CEST med
+Danmark, så forskellen er 0 hele året, og først skrev formatteren "0 timer
+foran". Den skriver nu "samme tid som Danmark" / "samma tid som Sverige". Et
+interval skrives desuden stigende ("5-6", ikke "6-5") og altid med to tal, så
+det hedder "timer" selv når bredden er 1.
+
+**Verifieret.** 10 nye tests (8 i `tidszone-reference.test.ts`, 2 i
+`page.test.tsx`). Fire mutationer kontrolleret, alle faldt: interval skrevet
+baglæns (4 tests), enhed valgt efter bredden så "5-6 time" (3 tests), London
+sat på USA-datoer (1 test), og den danske JSX-linje sat tilbage til den
+håndskrevne "9-10 timer foran" (1 test). Den sidste er bevidst en test på
+**renderet markup**, så fejlen ikke kan komme tilbage via JSX'en alene.
+
+**Målt på den levende kode, ikke på papiret:** `npx tsx` mod repoets egne
+funktioner giver London 1, New York 5-6, LA 8-9, Tokyo 7-8, Sydney 8-10,
+Auckland 10-12, Nuuk 4, Mumbai 3,5-4,5 — mod `TIDSZONER`'s UTC-offsetter og
+`sommertid.ts`' skiftedatoer. `/dage-til`'s 19 begivenheder blev desuden
+kørt gennem `getDageTilAnswer` mod en rigtig kalender i samme iteration og var
+alle korrekte, så de otte CEO-punkters dato-rettelser holder.
+
+**Gaten:** lint 627 filer ren, `vitest` 3.249 tests / 197 filer grønne (+18 mod
+3231), `next build` grøn (142 sider), `locale-leak.mjs --gate` exit 0.
+
+**MÅL:** `/tidszone` under top-15 i Plausible, 24.324 GSC-visninger / 104 klik /
+CTR 0,4 % / pos. 7,5 (GSC 2026-08-31 → 2026-09-28). Genmål 14 dage efter at
+den er live.

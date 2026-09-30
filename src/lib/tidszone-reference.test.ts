@@ -5,6 +5,9 @@ import {
   DANSK_UTC_SOMMER,
   DANSK_UTC_VINTER,
   TIDSZONER,
+  tidsforskelsRækker,
+  tidsforskelBy,
+  tidsforskelTekst,
   tidszoneRækker,
 } from "./tidszone-reference";
 
@@ -108,6 +111,109 @@ describe("tidszone-reference", () => {
       const { metaDescription } = getPageData("tidszone", locale)!;
       const loevet = Number(metaDescription.match(/till? (\d+) (?:byer|städer)/)?.[1]);
       expect(loevet).toBe(TIDSZONER.length);
+    }
+  });
+});
+
+/**
+ * Tidsforskellene i "Populære tidsforskelle fra Danmark". Før dette var de
+ * håndskrevet i `src/app/tidszone/page.tsx`, og Sydney stod som "9-10 timer
+ * foran" — de to midterste kombinationer frem for det interval, kalenderen
+ * faktisk har. `sommertid.test.ts` regnede allerede 8 og 10, så brødteksten
+ * modsatte repoets egen test.
+ */
+describe("tidsforskelsRækker", () => {
+  const BYER = ["London", "New York", "Los Angeles", "Tokyo", "Sydney"];
+  const raekker = tidsforskelsRækker(BYER);
+  const find = (by: string) => raekker.find((r) => r.by === by)!;
+
+  test("Sydney ligger 8-10 timer foran, ikke 9-10", () => {
+    // Sydney er AEST (UTC+10) og AEDT (UTC+11), og dens somertid loeber modsat
+    // Danmarks, saa forskellen svinger mellem 8 og 10 timer. Det laveste tal
+    // er 8, fordi Danmark staar paa CEST mens Sydney staar paa AEST.
+    expect(find("Sydney")).toMatchObject({ mindst: 8, mest: 10, fast: false });
+    expect(tidsforskelTekst(find("Sydney"), "da")).toBe("8-10 timer foran");
+    expect(tidsforskelTekst(find("Sydney"), "se")).toBe("8-10 timmar före");
+  });
+
+  test("byer der skifter paa Danmarks datoer har én fast forskel", () => {
+    // London (GMT/BST) skifter sidste soendag i marts og sidste soendag i
+    // oktober, ligesom Danmark, saa forskellen er 1 time bagud hele aaret.
+    expect(find("London")).toMatchObject({ mindst: -1, mest: -1, fast: true });
+    expect(tidsforskelTekst(find("London"), "da")).toBe("1 time bagud");
+  });
+
+  test("New York er 5-6 timer bagud, fordi USA skifter en soendag foer Danmark", () => {
+    // USA gaar paa EDT 2. soendag i marts, Danmark paa CEST sidste soendag i
+    // marts. I de dage imellem er forskellen 5 og ikke 6 timer.
+    expect(find("New York")).toMatchObject({ mindst: -6, mest: -5, fast: false });
+    expect(tidsforskelTekst(find("New York"), "da")).toBe("5-6 timer bagud");
+    expect(tidsforskelTekst(find("New York"), "se")).toBe("5-6 timmar efter");
+  });
+
+  test("Tokyo ligger 7-8 timer foran, fordi Japan ikke har sommertid", () => {
+    // Tokyo er fast UTC+9, saa det er Danmark der flytter sig: 8 timer foran
+    // om vinteren, 7 mens Danmark har CEST.
+    expect(find("Tokyo")).toMatchObject({ mindst: 7, mest: 8, fast: false });
+    expect(tidsforskelTekst(find("Tokyo"), "da")).toBe("7-8 timer foran");
+  });
+
+  test("hver by i TIDSZONER har en brugbar forskel", () => {
+    for (const by of TIDSZONER.map((z) => z.by)) {
+      const [raekke] = tidsforskelsRækker([by]);
+      expect(raekke.mest).toBeGreaterThanOrEqual(raekke.mindst);
+      // Retningen skal følge byens egen forskel, ikke et fast valg. Madrid
+      // deler CET/CEST med Danmark og har forskellen 0 hele året, så den
+      // skrives som "samme tid" frem for "0 timer foran".
+      const tekst = tidsforskelTekst(raekke, "da");
+      if (raekke.fast && raekke.mindst === 0) {
+        expect(tekst).toBe("samme tid som Danmark");
+        expect(tidsforskelTekst(raekke, "se")).toBe("samma tid som Sverige");
+        continue;
+      }
+      expect(tekst).toMatch(raekke.mest < 0 ? /bagud$/ : /foran$/);
+      expect(tidsforskelTekst(raekke, "se")).toMatch(raekke.mest < 0 ? /efter$/ : /före$/);
+    }
+  });
+
+  test("et interval skrives stigende og altid med to tal", () => {
+    // `mindst` er -6 for New York, saa tallene skal sorteres, ellers stod der
+    // "6-5 timer bagud" — et interval læst baglæns.
+    const newYork = find("New York");
+    const [lav, hoej] = [
+      Math.abs(newYork.mindst),
+      Math.abs(newYork.mest),
+    ].sort((a, b) => a - b);
+    expect(tidsforskelTekst(newYork, "da")).toBe(`${lav}-${hoej} timer bagud`);
+    expect(hoej).toBeGreaterThan(lav);
+  });
+
+  test("en by der mangler i tabellen kaster, saa listen ikke kan miste en raekke", () => {
+    // Tidsforskel-bylisten skal ikke kunne ramme en by, der ikke findes: den
+    // ville givet en linje uden tal, fordi koden lop paa `undefined`.
+    expect(() => tidsforskelsRækker(["Nuuk", "Kbh"])).toThrow(/Kbh/);
+  });
+
+  test("dansk og svensk raekke har samme rækkefølge og samme tal", () => {
+    const da = tidsforskelsRækker(BYER, "da");
+    const se = tidsforskelsRækker(BYER, "se");
+
+    // `by` er dansk i begge, saa nøglerne kan sammenlignes direkte.
+    expect(se.map((r) => r.by)).toEqual(da.map((r) => r.by));
+    expect(se.map((r) => [r.mindst, r.mest])).toEqual(da.map((r) => [r.mindst, r.mest]));
+    // Sproget maa kun boe i navnet og i retningen, ikke i tallene.
+    expect(tidsforskelBy(find("Sydney"), "se")).toBe("Sydney");
+  });
+
+  test("brodteksten i begge sprog bruger de regnede tal", () => {
+    // Laes fra den konstant, siden renderer, saa testen ikke kan holde sig
+    // oprejst, hvis JSX gaar tilbage til haandskrevne tal.
+    const mønster =
+      /^\d+(?:[.,]\d+)?(?:-\d+(?:[.,]\d+)?)? (?:time|timer|timme|timmar) (?:bagud|foran|efter|före)$/;
+    for (const spoergsprog of ["da", "se"] as const) {
+      for (const raekke of tidsforskelsRækker(BYER, spoergsprog)) {
+        expect(tidsforskelTekst(raekke, spoergsprog)).toMatch(mønster);
+      }
     }
   });
 });

@@ -4,6 +4,11 @@ import { getDomainConfigByLocale } from "@/lib/domain-config";
 import { getCurrentDomainConfig, getLocale } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
 import { tidsskillnadRaekker } from "@/lib/tidszone-eksempler";
+import {
+  tidsforskelsRækker,
+  tidsforskelBy,
+  tidsforskelTekst,
+} from "@/lib/tidszone-reference";
 import { usaTimerRaekker } from "@/lib/tidszone-usa-timer";
 import { usaStatRaekker } from "@/lib/tidszone-usa-stater";
 import TidszonePage from "./page";
@@ -497,6 +502,36 @@ describe("tidszone stat-tabel for USA", () => {
       for (const søgning of ["florida", "miami", "texas", "california", "arizona"]) {
         expect(keywords).toContain(søgning);
       }
+    }
+  });
+
+  test("de populære tidsforskelle er de regnede, i begge sprog", async () => {
+    // Tallet for Sydney stod i JSX som "9-10 timer foran", mens TIDSZONER og
+    // sommertid.ts giver 8-10. Listen læses nu fra `tidsforskelsRækker`, så
+    // denne test falder, hvis nogen gaar tilbage til haandskrevne tal.
+    for (const locale of ["da", "se"] as const) {
+      vi.mocked(getLocale).mockResolvedValue(locale);
+      vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale(locale));
+
+      const html = renderToStaticMarkup(await TidszonePage());
+      const spoergsprog = locale === "da" ? "da" : "se";
+      const raekker = tidsforskelsRækker(
+        ["London", "New York", "Los Angeles", "Tokyo", "Sydney"],
+        spoergsprog
+      );
+
+      for (const raekke of raekker) {
+        const by = tidsforskelBy(raekke, spoergsprog);
+        const tekst = tidsforskelTekst(raekke, spoergsprog);
+        // Byen staar i <strong>, forskellen i den followinge tekstnode, saa
+        // hele raekken slaas sammen for at ramme den renderede markup.
+        expect(html).toContain(`<strong>${by}:</strong> ${tekst}`);
+      }
+
+      // Sydney maa ikke skrive det gamle 9-10, og den skal ligge foran.
+      const sydney = raekker.find((r) => r.by === "Sydney")!;
+      expect(tidsforskelTekst(sydney, spoergsprog)).toMatch(/^8-10 /);
+      expect(html).not.toContain("9-10");
     }
   });
 });
