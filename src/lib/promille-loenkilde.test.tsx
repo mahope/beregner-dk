@@ -16,12 +16,13 @@
  *    kun en SPA-skal til en agent (alle `/api/document/*`-stier svarer 200 med
  *    index.html), så den danske lov er læst gennem Rådet for Sikker Trafik, der
  *    gengiver færdselslovens § 53 ordret. Den svenske lov er læst i sin
- *    gældende lydelse på riksdagen.se.
+ *    gældende lydelse på riksdagen.se, den tyske i StVG § 24a og § 24c på
+ *    gesetze-im-internet.de, og den britiske i GOV.UK's blodgrænsetabel.
  * 2. Tabellen herunder er *data fra kilden*, og porten læser tallene herfra — så
  *    et tal der ændrer sig i loven, ændrer hvad porten kræver af brødteksten.
- * 3. Kun de to lande med en hentet kilde måles. De otte anden rækker er Springvand
- *    fra den samme Wikipedia-tabel og springes over, ligesom F8's port gjorde;
- *    at låse dem ville bare låse de ord porten så.
+ * 3. Kun de fire lande med en hentet kilde måles. De otte andre rækker er
+ *    Springvand fra den samme Wikipedia-tabel og springes over, ligesom F8's
+ *    port gjorde; at låse dem ville bare låse de ord porten så.
  */
 
 import { renderToStaticMarkup } from "react-dom/server";
@@ -62,6 +63,12 @@ interface Lovkilde {
   nyBilistAar?: number;
   /** Grænsen for det grove brud, i ‰, hvis loven har en. */
   grov?: number;
+  /** Alder hvor loven forbyder alkohol helt, hvis den har et tal. */
+  forbudUnderAar?: number;
+  /** Loven forbyder alkohol i kørekortets prøveperiode. */
+  forbudIProbeperiode?: boolean;
+  /** En del af landet har sin egen grænse, i ‰. */
+  regioner?: Record<string, number>;
 }
 
 const LOVKILDE: Record<string, Lovkilde> = {
@@ -82,6 +89,27 @@ const LOVKILDE: Record<string, Lovkilde> = {
     generel: 0.2,
     grov: 1.0,
   },
+  tyskland: {
+    // § 24a(1): "0,25 mg/l oder mehr Alkohol in der Atemluft oder 0,5 Promille
+    // oder mehr Alkohol im Blut". § 24c(1) forbyder alkohol "in der Probezeit
+    // nach § 2a oder vor Vollendung des 21. Lebensjahres" — et forbud, ikke et
+    // lavere tal, så det skrives 0,0 ‰.
+    kilde: "Straßenverkehrsgesetz (StVG) § 24a og § 24c, gesetze-im-internet.de",
+    hentet: "2026-09-30",
+    generel: 0.5,
+    forbudUnderAar: 21,
+    forbudIProbeperiode: true,
+  },
+  storbritannien: {
+    // GOV.UK, "The drink drive limit": 80 mg pr. 100 ml blod i England, Wales
+    // og Nordirland, 50 mg i Skotland = 0,8 hhv. 0,5 promille. RTA 1988 § 5
+    // straffer den der "exceeds the prescribed limit", så det er 80/50 der er
+    // grænsen, ikke et roundere tal.
+    kilde: "GOV.UK, The drink drive limit (grænserne i RTA 1988 § 5)",
+    hentet: "2026-09-30",
+    generel: 0.8,
+    regioner: { Skotland: 0.5 },
+  },
 };
 
 /**
@@ -94,11 +122,14 @@ const LOVKILDE: Record<string, Lovkilde> = {
 const danskKomma = (tal: number) => (Number.isInteger(tal) ? tal.toFixed(1) : `${tal}`).replace(".", ",");
 
 /** Alle tal i den hentede lovgivning — tilladt i en sætning der sammenligner. */
-const TAL_FRA_LOVEN = Object.values(LOVKILDE).flatMap((lov) =>
-  [lov.generel, lov.nyBilist, lov.nyBilistAar, lov.grov]
-    .filter((t): t is number => typeof t === "number")
-    .map(danskKomma)
-);
+const TAL_FRA_LOVEN = Object.values(LOVKILDE).flatMap((lov) => [
+  lov.generel,
+  lov.nyBilist,
+  lov.nyBilistAar,
+  lov.grov,
+  lov.forbudUnderAar,
+  ...Object.values(lov.regioner ?? {}),
+].filter((t): t is number => typeof t === "number").map(danskKomma));
 
 /** Hent en `<tr>` ud af den renderede landstabel. */
 const raekke = (html: string, land: string): string => {
@@ -158,6 +189,19 @@ describe("promillegrænser mod loven", () => {
       nyBilist: 0.2,
       nyBilistAar: 3,
       grov: 2.0,
+    });
+    expect(LOVKILDE.tyskland).toEqual({
+      kilde: "Straßenverkehrsgesetz (StVG) § 24a og § 24c, gesetze-im-internet.de",
+      hentet: "2026-09-30",
+      generel: 0.5,
+      forbudUnderAar: 21,
+      forbudIProbeperiode: true,
+    });
+    expect(LOVKILDE.storbritannien).toEqual({
+      kilde: "GOV.UK, The drink drive limit (grænserne i RTA 1988 § 5)",
+      hentet: "2026-09-30",
+      generel: 0.8,
+      regioner: { Skotland: 0.5 },
     });
   });
 
@@ -237,6 +281,60 @@ describe("promillegrænser mod loven", () => {
       // den en løs promilleoplysning uden lovens følge.
       expect(sætning).toMatch(/kørekort/);
     }
+  });
+
+  test("Tysklands række må kun nævne de regler, StVG faktisk indeholder", async () => {
+    const lov = LOVKILDE.tyskland;
+    // Begge sprog. Review-fundet 16/9 var præcis denne fejlklasse: en tekst der
+    // kun blev rettet i den ene sproggren, så beraknare.se fik danske ord.
+    for (const [land, domæne, prøveperiode] of [
+      ["Tyskland", "da", "prøveperiode"],
+      ["Tyskland", "se", "provperiod"],
+    ] as const) {
+      vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale(domæne));
+      const række = raekke(renderToStaticMarkup(await PromillePage()), land);
+
+      // § 24c er et *forbud* ("ein alkoholisches Getränk … zu sich nimmt"), så
+      // brødteksten skal skrive 0,0 og alderen, ellers er den en lavere grænse
+      // som loven ikke har.
+      expect(række).toContain(`${danskKomma(0)} ‰`);
+      expect(række).toContain(`${lov.forbudUnderAar} år`);
+      expect(række.toLowerCase()).toContain(prøveperiode.toLowerCase());
+      // Og den må ikke opfinde en tredje grænse. "0,3 ‰ ved en anden
+      // trafikforseelse" stod i begge tabeller før denne opgave: det er relativ
+      // kørselsuevne, altså retspraksis, og ingen paragraf i StVG taler om det.
+      expect(række).not.toMatch(/0,3 ‰/);
+    }
+  });
+
+  test("Storbritanniens række skal skelne mellem Skotland og resten af Storbritannien", async () => {
+    const lov = LOVKILDE.storbritannien;
+    const skotland = Object.entries(lov.regioner ?? {});
+    expect(skotland.length).toBeGreaterThan(0);
+
+    const html = renderToStaticMarkup(await PromillePage());
+    const række = raekke(html, "Storbritannien");
+
+    expect(række).toContain(`${danskKomma(lov.generel)} ‰`);
+    for (const [region, graense] of skotland) {
+      // Rækken skriver tallet enten før eller efter regionens navn
+      // ("0,5 ‰ i Skotland" / "Skotland: 0,5 ‰"), så begge rækkefølger
+      // tæller — men de to tal må ikke stå uden for hinandens sætning.
+      const tal = danskKomma(graense);
+      const tæt = `[^<]{0,40}`;
+      expect(række).toMatch(new RegExp(`${tal}${tæt}${region}|${region}${tæt}${tal}`, "i"));
+    }
+  });
+
+  test("det danske Tyskland-svar må ikke love en lavere grænse end lovens", () => {
+    const lov = LOVKILDE.tyskland;
+    const svar = danskeTekster().find((t) => /promillegrænsen i Tyskland/i.test(t));
+    expect(svar).toBeDefined();
+
+    expect(svar).toContain(`${danskKomma(lov.generel)} promille`);
+    expect(svar).toContain(`${danskKomma(0)} promille`);
+    expect(svar).toContain(`${lov.forbudUnderAar} år`);
+    expect(svar).not.toMatch(/0,3 promille/);
   });
 
 });

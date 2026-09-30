@@ -21408,3 +21408,117 @@ så brug ikke en iteration på dem igen:
 
 Flyttet ud af planen 30/9 21:55: kontrakten siger at planen er en arbejdskø, ikke
 en dagbog — en målerapport hører hjemme her, ikke i køen.
+
+## Opgave 189b — Tysklands og Storbritanniens grænser hentet i loven (30/9 22:10)
+
+**Hvorfor den her opgave findes.** 189 lagde de to første love i en port. 189b er
+resten af listen: fire påstande stod stadig uden hentet kilde, og de to der
+handlede om udlandet lå i `/promille`s landstabel som fri håndskrevet tekst.
+
+**De fire hentede kilder (alle læst 30/9 22:00-22:08, ikke husket):**
+
+- **Tyskland, 0,5 ‰** — Straßenverkehrsgesetz § 24a(1) på
+  gesetze-im-internet.de: "0,25 mg/l oder mehr Alkohol in der Atemluft oder
+  0,5 Promille oder mehr Alkohol im Blut".
+- **Tyskland, 0,0 ‰ under 21 år og i prøveperioden** — samme lov, § 24c(1):
+  forbud mod at tage en alkoholholdig drik til sig "in der Probezeit nach § 2a
+  oder vor Vollendung des 21. Lebensjahres". Det er et *forbud*, ikke et lavere
+  tal, så brødteksten skal skrive 0,0.
+- **Storbritannien 0,8 ‰ / Skotland 0,5 ‰** — GOV.UK, "The drink drive
+  limit": 80 mg pr. 100 ml blod i England, Wales og Nordirland, 50 mg i
+  Skotland (35 hhv. 22 µg pr. 100 ml i udåndingsluften). RTA 1988 § 5 blev også
+  læst: den straffer den der "exceeds the prescribed limit", så det er 80/50 mg
+  der *er* grænsen — ikke et roundere tal.
+
+**Fund ved læsningen — en påstand uden lov.** Tysklands række sagde "0,3 ‰ hvis
+du samtidig begår en anden trafikforseelse", i **begge** sprog og i FAQ'en.
+Ingen paragraf i StVG taler om 0,3 ‰; § 24a kender 0,5, § 24c kender forbud.
+0,3 ‰ er *relativ kørselsuevne* — altså retspraksis (BGH's 0,3-punkt), ikke
+lov. Rækken lovede dermed en talgrænse, ingen dansk eller svensk læser kunne
+finde i loven, og den lovede den i en kolonne der ellers kun indeholdt
+lovtekster. Den er fjernet, og porten forbyder nu at den kommer tilbage.
+
+**Den anden ændring i samme celle:** "de første 2 år med kørekort" er udeladt,
+fordi § 24c kun siger "Probezeit nach § 2a" uden at længden står i StVG, og
+gesetze-im-internet.de har ikke Fahrschulgesetz liggende under noget slug (fire
+404'er: `/fschg/`, `/fschg/__2a.html`, `/fschg/__2.html`,
+`/fachg/BJNR_069710997.html`). Rækken siger derfor "i kørekortets prøveperiode",
+hvilket er præcis hvad loven siger. Længden er en **åben kildeopgave** — se
+planens næste opgave.
+
+**Porten.** `LOVKILDE` har nu to lande til, med `forbudUnderAar`,
+`forbudIProbeperiode` og `regioner` som felter. Fire nye tests: Tysklands række
+i **begge sprog** (den svenske med — review-fundet 16/9 var præcis en tekst der
+kun blev rettet i dansk), Storbritanniens række skal skelne Skotland fra resten
+af landet, og det danske Tyskland-svar må ikke love en lavere grænse end lovens.
+**Fire mutationer kontrolleret:** gammel dansk rækketext (1 fejl), gammel dansk
+FAQ (1 fejl), gammel svensk rækketext (1 fejl), Skotland sat til 0,8 i kilden
+(1 fejl). Alle faldt.
+
+**Målerfældens syvende udløber.** Mønsteret "region[^<]*tal" faldt, fordi den
+svenske række skriver tallet *før* regionens navn ("0,5 ‰ i Skotland"). Begge
+rækkefølger tæller nu, med en afstand på 40 tegn imellem dem, så de to tal ikke
+kan stå i hver sin ende af en lang celle.
+
+## Målerapport fra F2, F2b, F4, F6, F7, F8 (flyttet ud 30/9 22:15)
+
+De otte afsluttede Fase-3-opgaver lå i planen med hele målerapporten. De er
+dateret, afkrydset og arkiveret her; `MÅL:`-linjerne for hver side står stadig
+i planens baseline-tabel, så næste måling kan finde dem.
+
+- **F2/F2b `/procent`** (svensk rabat-spørgsmål + 4 svenske FAQ-rækker): alle
+  tal regnet af `RABAT_EKSEMPEL`/`RABAT_BELOEB`/`RABAT_SATS` gennem et
+  tal-bundt pr. sprog. 19 nye tests, 12 mutations-kontrollerede.
+- **F4 forsiden** (hurtig indgang til de otte mest brugte beregnere, de otte
+  første `popular: true`): 8 nye tests, 4 mutationer faldt. Højden over fold på
+  390 px er **beregnet, ikke målt** — repoet har intet Playwright (❓).
+- **F6 `no`-locale** (seks Intl-tag der sendte norsk til dansk formatering):
+  ny port `intl-locale-tag.test.ts` scanner hele `src/` på *formen* af kæden,
+  8 nye tests, 3 mutationer.
+- **F7 `/tidszone`** (Sydney lå på 9-10 timer, kalenderen giver 8-10): alle fem
+  forskelle regnes nu af `tidsforskelsRækker` gennem byens egen `dst`-regel.
+  Målet fandt fire fejl undervejs, alle rettet før commit. 10 nye tests.
+- **F8 svenske helgdagslove**: tre sider modsagde lag (1989:253) 1 §. Kilden
+  hentet fra riksdagen.se, lovens liste ligger som data i `dage-til.test.ts`, og
+  brødteksten tjekkes mod den i begge retninger.
+
+## Opgave 188, 189 og 190 (fuldtekst, flyttet ud 30/9 22:15)
+
+**188 `ceo/sidste-hverdag-paastand`** — tre ugedags-påstande rettet.
+Datagrund: fundet under F8's audit, samme klasse som review-fund 2 om
+docblockens årstal. "Sidste hverdag i december er 31. december" (da) og "Sista
+vardagen i december är 31 december" (se) er sande **kun** når 31. december
+falder på en hverdag; 31.12 er weekend i 2028, 2033, 2034 og 2039. Opgaven
+fandt to fejl den ikke navngavde, begge samme klasse: `sankthansaftensdag`'s FAQ
+kaldte 23. juni "en almindelig aften på en **almindelig hverdag**" (23. juni er
+weekend i 2029, 2030, 2035, 2040), og dansk `skaertorsdag` svarede på "er
+skærtorsdag en fridag?" med "ja, den er en fridag" — to linjer ovenfor stod at
+skærtorsdag *altid* er en torsdag. Port: `muligeUgedage` regner
+`getNextAnchorDate` for 2020-2080 og kræver forbehold på enhver hverdag-påstand
+der kan ligge i en weekend. Alle tre mutationer faldt. **Målerfældens anden
+udløber:** en bredere port ("enhver nævnt ugedag skal være blandt ankerets
+dage") gav 15 fund hvor 13 var om andre dage — "Fredagen efter Kristi
+himmelfartsdag er en hverdag" er rigtig tekst. Porten blev snævret til de to
+påstande der faktisk var forkerte.
+
+**190 `ceo/helgdag-uden-allman`** — det bløde "helgdag" på en dag loven ikke
+tæller. F8's søgning ramte kun "allmän helgdag" og ikke det bløde ord, og
+fandt tre sætninger der modsagde deres egen faktaboks
+(`skartorsdagen:525`, `:530`, `paskdagen:460`). Den fjerde fejl fandt loven, ikke
+porten: 1 § första stycket tæller **alla söndagar**, så 1. advent *er* en
+allmän helgdag, mens tabellen sagde `false` — siden modsagde loven med lovens
+eget navn, to linjer under at alle søndagar er røde dage. Port:
+`kalderDetBlødeHelgdag` arbejder på klausul-niveau og skelner *predikat* fra
+*omtale* af en anden dag — uden den skelnen ville porten afvise
+halloween-siden, som er korrekt. Fire mutationer faldt. **Målerfældens tredje
+udløber:** `\b` før `är` matcher aldrig i JS, fordi `\w` er ASCII.
+
+**189 `ceo/promille-lovkilde`** — de to første love-påstande hentet. Se afsnittet
+ovenfor for 189b, der bygger videre på porten. Fundet ved første kørsel:
+landstabellen skrev "Ingen særregel" for Danmark på begge domæner, mens RST
+siger 0,2 ‰ de første 3 år med kørekort. Otte tests, 2 mutationer.
+**Målerfældens sjette udløber:** en port der scanner *alle* decimaler mod lovens
+tal gav 29 danske og 31 svenske fund, **alle rigtige** (beregnede promiller,
+Tysklands 0,0, Storbritanniens 0,8, et hypotetisk "må jeg køre med 0,4"), og en
+syvende fejl var min egen formatter: `String(2.0)` er `"2"`. Løsningen er samme
+som F8's: porten skal **kræve kildens tal**, ikke søge efter forkerte.

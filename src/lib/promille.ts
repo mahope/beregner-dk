@@ -43,16 +43,23 @@ export const PROMILLEGRANSE_DA = PROMILLEGRANSE.da;
  * src/app/promille/page.test.tsx, so the printed table can never contradict
  * the limit the calculator itself compares against.
  *
- * Source for Denmark and Sweden: the law itself, not a summary of it.
- * Denmark 0.5 ‰ is færdselsloven § 53 ("overstiger 0,50 promille"), read
- * 2026-09-30 in Rådet for Sikker Trafik's verbatim reproduction because
+ * Source for four countries: the law itself, not a summary of it, all read
+ * 2026-09-30. Denmark 0.5 ‰ is færdselsloven § 53 ("overstiger 0,50
+ * promille"), read in Rådet for Sikker Trafik's verbatim reproduction because
  * retsinformation.dk serves agents nothing but the SPA shell. Sweden 0.2 ‰ is
- * trafikbrottslagen (1951:649) 4 §, read 2026-09-30 on riksdagen.se. The eight
- * other countries still come from WHO's country overview via Wikipedia — they
- * are left alone on purpose, see `LOVKILDE` in promille-loenkilde.test.tsx.
+ * trafikbrottslagen (1951:649) 4 §, read on riksdagen.se. Germany 0.5 ‰ is
+ * Straßenverkehrsgesetz § 24a(1) ("0,25 mg/l oder mehr Alkohol in der Atemluft
+ * oder 0,5 Promille oder mehr Alkohol im Blut") on gesetze-im-internet.de.
+ * Britain 0.8 ‰ is 80 mg alcohol pr. 100 ml blood in England, Wales and
+ * Northern Ireland against 50 mg in Scotland, read on GOV.UK. The other eight
+ * countries still come from WHO's country overview via Wikipedia — they are
+ * left alone on purpose, see `LOVKILDE` in promille-loenkilde.test.tsx.
  * These are ordinary-driver limits. The page's "strengere regel" column states
  * the separate lower limits, including Denmark's 0.2 ‰ for a licence holder's
- * first 3 years, which are not in this map.
+ * first 3 years, which are not in this map. That column is only allowed to
+ * state rules a fetched law contains: the same task dropped Germany's
+ * "0,3 ‰ ved en anden trafikforseelse", which no statute in StVG has — it is
+ * case law, and an unquoted rule is exactly what this map exists to stop.
  */
 export const PROMILLEGRANSE_UDLAND: Record<string, number> = {
   danmark: 0.5,

@@ -1,68 +1,63 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — 30/9 21:50. **Opgave 189 er fændig** (`ceo/promille-lovkilde`):
-de to første love-påstande er hentet i lovens *egne* ord og lagt i en port, og
-porten fandt en rigtig fejl første gang den kørte. Se listen nedenfor.
+STATUS: KØ — 30/9 22:20. **Opgave 189b er færdig** (`ceo/promille-lovkilde-2`):
+Tysklands og Storbritanniens promillegrænser er hentet i loven, og Tysklands
+række holdt en påstand, ingen paragraf i StVG indeholder.
 
-**Fundet.** `/promille`s landstabel skrev at Danmark har **"Ingen særregel"** —
-på dansk *og* svensk side. Rådet for Sikker Trafik, læst 30/9 21:20, siger det
-modsatte: "For nye bilister er promillegrænsen 0,2 de første 3 år med kørekort",
-sænket i 2025. En dansk læser fik dermed den forkerte besked at kun de
-svenske og norske læsere har en lavere grænse. Rettet i begge tabeller.
+**Fundet.** Tysklands række lovede "0,3 ‰ hvis du samtidig begår en anden
+trafikforseelse" — i begge sprog og i FAQ'en. § 24a kender 0,5 ‰, § 24c kender
+et forbud under 21 år og i prøveperioden. 0,3 ‰ er retspraksis (relativ
+kørselsuevne), ikke lov, så den er væk. Rækken siger nu "0,0 ‰ under 21 år og
+i kørekortets prøveperiode" efter lovens ord.
 
-**Fandt også en løgnemesis.** `PROMILLEGRANSE_UDLAND`'s docblock sagde at
-kilden var WHO's landoversigt, og at siden "stater den lavere grænse for nye
-og professionelle bilister" — den gjorde den *ikke*, for Danmark. Docblocken er
-nu rigtig for de to lande der har en hentet kilde, og siger ærligt at de otte
-andre stadig er Springvand.
+**Storbritannien var rigtig** (0,8 ‰, Skotland 0,5) — GOV.UK's tabel over
+blodgrænserne bekræfter den — men den havde ingen kilde. Nu har den én, og
+porten kræver de to tal i rækken.
 
-**⚠️ Målerfældens sjette udløber.** En port der scanner "alle decimaler i
-FAQ'en" mod lovens tal gav **29 fund i dansk og 31 i svensk, og alle var
-rigtige**: beregnede promiller ("2 øl ger 0,44 promille"), Tysklands 0,0,
-Storbritanniens 0,8 og et hypotetisk "må jeg køre med 0,4". En syvende fejl
-var min egen formatter: `String(2.0)` er `"2"`, ikke `"2,0"`, så to tests fejlede
-på sig selv. **Porten skal kræve kildens tal frem for at søge efter forkerte.**
+**Næste opgave: 189c** — de tre danske kalenderpåstande (Store bededag,
+grundlovsdag, palmesøndag/juleaftensdag) mangler stadig en hentet kilde, og
+Tysklands prøveperiodes længde mangler også en (§ 24c siger kun "Probezeit
+nach § 2a"; gesetze-im-internet.de har ikke Fahrschulgesetz liggende — fire
+404'er målt 30/9).
 
-**Næste opgave: 189b** — de fire love-påstande der stadig mangler en hentet
-kilde. Retsinformation.dk svarer **kun en SPA-skal** til en agent (alle
-`/api/document/*`-stier: HTTP 200, `text/html`, ~4,5 KB index.html), så danske
-love skal læses gennem RST, borger.dk eller en kommunal vedtægt.
-
-**⚠️ Målerfælder fra 190, fortsat gældende.** `\b` før `är` matcher aldrig i JS
-(`\w` er ASCII). En bred ugedags-port gav 15 fund hvor 13 var om andre dage. Et
-egenscript til at tjekke påstande fik tre fejl i træk — kryds altid mod lovens
-egen tekst.
+**⚠️ Målerfældens sjette og syvende udløber.** En port der scanner *alle*
+decimaler mod lovens tal gav 29 danske og 31 svenske fund, alle rigtige. Og et
+"region-tal"-mønster faldt, fordi den svenske celle skriver tallet før
+regionens navn. **Porten skal kræve kildens tal frem for at søge efter
+forkerte.** `\b` før `är` matcher aldrig i JS (`\w` er ASCII).
 
 **⚠️ Målerfælde (30/9 15:40).** `npm run test` kører `locale-leak-gate.test.ts`,
 der med vilje planterer **to** danske lækager. Derfor kommer to
 `FEJL: n ureviewet(e)`-blokke i output. Det er **ikke** fund i din diff. Kør
 gaten separat: `node scripts/locale-leak.mjs --gate` (exit 0).
 
-**Seks VERIFICÉR-noter åbne** (fra 190, 188, F8, F7, F6 og F4). F1/F3/F5 og
-opgaver 97/98/119/183 er blokeret af svar fra Mads. **Opgave 187 må ikke røres
-før 13/10.** **CEO-køen er tom** — alle otte punkter blev rettet i `aca17e5`.
-Review-fund 29/9 er begge mærket `RETTET d563ba2` og lukket.
+**Otte VERIFICÉR-noter åbne** (fra 189b, 189, 190, 188, F8, F7, F6 og F4). F1/F3/F5
+og opgaver 97/98/119/183 er blokeret af svar fra Mads. **Opgave 187 må ikke
+røres før 13/10.** **CEO-køen er tom.** Review-fund 29/9 er begge mærket
+`RETTET d563ba2` og lukket.
 
 ## Love- og kalenderpåstande mod en hentet kilde (opgave 189)
 
-Prioriteret liste. **Fem er hentet og kontrolleret 30/9**, fire mangler en
+Prioriteret liste. **Syv er hentet og kontrolleret 30/9**, fire mangler en
 hentet kilde. `✔` = lagt i en port, `·` = kilde fundet, endnu ikke port.
+**189c** er de fire sidste: række 6-8 (danske kalenderdage) og Tysklands
+prøveperiodes længde, som § 24c ikke selv oplyser.
 
 | # | Påstand | Kilde (hentet 30/9 30 min) | Port |
 |---|---|---|---|
 | 1 | SE 0,2 ‰ rattfylleri · 1,0 ‰ grovt | trafikbrottslagen (1951:649) 4 § og 4 a §, riksdagen.se | ✔ |
 | 2 | DK 0,5 ‰ · nye bilister 0,2 ‰ i 3 år · over 2,0 kørekort ubetinget | færdselsloven § 53, ordret gengivet af Rådet for Sikker Trafik | ✔ |
 | 3 | SE helgdagar (1 §) | lag (1989:253) 1 §, riksdagen.se — F8's port | ✔ |
-| 4 | UK 0,8 / Skotland 0,5 | WHO's landoversigt via Wikipedia — **ikke hentet lov** | · |
-| 5 | DE 0,0 under 21 og 2 år · 0,3 ved anden forseelse | samme som 4 | · |
+| 4 | UK 0,8 · Skotland 0,5 | GOV.UK "The drink drive limit" (80 mg/100 ml blod, Skotland 50) + RTA 1988 § 5 | ✔ |
+| 5 | DE 0,5 · 0,0 under 21 år og i prøveperioden | StVG § 24a og § 24c, gesetze-im-internet.de — **0,3-punktet er retspraksis, ikke lov, og er fjernet** | ✔ |
 | 6 | DK Store bededag afskaffet 2024 | loven er ikke fundet — retsinformation uutilgængelig | ❓ |
 | 7 | DK grundlovsdag 5. juni | ikke hentet | · |
 | 8 | DK palmesøndag, juleaftensdag | ikke hentet | · |
 
-**Hvorfor kun to blev lagt i port nu:** de otte øvrige rækker i samme tabel
+**Hvorfor kun fire lande er i porten:** de otte øvrige rækker i samme tabel
 kommer alle fra én Wikipedia-tabel. At låse dem ville låse netop de ord porten
-så (F8's målerfælde) uden at have læst en eneste lov. **189b** er den
-fortsatte opgave, og den skal hente lovene — ikke flere regler.
+så (F8's målerfælde) uden at have læst en eneste lov. **189c** skal hente
+lovene — ikke skrive flere regler. Fuldtekst for 189-189c: `docs/plan-arkiv.md`.
 
 ## Fase 3 — trafik-drevet
 
@@ -113,42 +108,24 @@ vælge mellem "ny side", "dybere side" og "nye links". **Accept:** GSC
 søgningseksport for `/procent` (eller de 20 største søgninger site-wide) ligger
 i planen. **Spørgsmål til Mads: se ❓.**
 
-**F2. [x] ✅ `ceo/procent-rabat-spørgsmal` — `/procent` svarar nu på frågan.**
-Overskrift, formel (`Rabatprocent = (Prisnedsættelse ÷ Normalpris) × 100`),
-gennemregnet eksempel på läsarens egna tal (9.000 → 7.875 kr = 1.125 kr ned =
-**12,5 %**), fällan med den nye prisen (14,3 %) og en sats-tabell med det man
-*sparar* og det man *betalar*. Alt tal udledt af `RABAT_EKSEMPEL`/`RABAT_SATS`,
-9 nye tests hvor 8 fejler mod gammel kode. Se arkivet. **MÅL:** `/procent`
-150.470 visninger / 97 klik / CTR 0,1 % (GSC 2026-08-31 → 2026-09-28). Genmål
-14 dage efter at den er live.
-**F2b. [x] ✅ `ceo/procent-svensk-rabatt-faq` — FAQ'en rammer de fire
-formuleringer, svensk autocomplete har.** Fire nye svenske rækker ("Hur stor är
-rabatten i procent?", "Hur mycket rabatt i procent får jag på en vara?", "Hur
-räknar man ut rabatt i procent i Excel?", "Vad är procentuell rabatt?") plus
-den danske "Hvordan regner man rabat i procent?" (metoden i tre trin + fælden
-med 14,3 mod 12,5). **Alle tal er regnet** af `RABAT_EKSEMPEL`/`RABAT_BELOEB`/
-`RABAT_SATS` gennem et tal-bundt pr. sprog, så de ikke kan glide fra afsnittet
-lige oven i dem; 33 % fik navnet `RABAT_SATS_UDLAET` i `procent.ts`, fordi to
-sætninger og to FAQ-svar regner med den. 10 nye tests, heraf fire mutations-
-kontrollerede (hardkodet forkert tal, manglende U+00A0-normalisering, rækkerne
-fjernet) — alle faldt i den mutatede kode. Se arkivet.
-**MÅL:** se `/procent` 26.933 visninger / 2 klik / CTR 0,0 % / pos. 9,9 (GSC
-2026-08-31 → 2026-09-28). Genmål 14 dage efter at den er live.
+**F2 + F2b. [x] ✅ `ceo/procent-rabat-spørgsmal`, `ceo/procent-svensk-rabatt-faq`
+— `/procent` svarar på rabat-spørgsmålet med en gennemregnet formel, fire svenske
+FAQ-rækker der rammer svensk autocomplete, og alle tal udledt af kildetal-bundne
+`RABAT_*`-konstanter. 19 nye tests, 12 mutationer faldt.
+**MÅL:** `/procent` 150.470 visninger / 97 klik / CTR 0,1 % / pos. 7,4 (da) og
+26.933 / 2 / 0,0 % / pos. 9,9 (se), GSC 2026-08-31 → 2026-09-28.
 
 **F3. [ ] Beraknare.se: position, ikke titel.** 190.447 visninger på pos.
 8-10. Opgave 187 (svenske slugs, 301) er sat til **13/10** og må ikke flyttes
 før de svenske titelændringer fra C195/C196 er målt. Efter den dato er
 dette den største enkeltpost i trafikplanen. **Accept:** se opgave 187.
 
-**F4. [x] ✅ `ceo/forsiden-snabb-indgang` — forsiden er et indgangspunkt, ikke
-en tekstside.** Kompakt stribe med links til de otte mest brugte beregnere,
-lige under helten og før tillidsrækken; `grid-cols-2 sm:grid-cols-3
-lg:grid-cols-4`, `min-h-11` pr. flade, mørk tilstand på de tokens siden
-allerede bruger. Listen er **de otte første `popular: true`**, ikke en ny liste,
-så den ikke kan rådne væk fra trafikken. Otte nye tests, fire mutationer
-faldt. Se arkivet.
-**MÅL:** `/` 218 besøgende/28d, bounce 38 % → mod 2-7 % (Plausible 2026-09-30);
-se `/` 20 besøgende, bounce 80 %. Genmål 14 dage efter at den er live.
+**F4. [x] ✅ `ceo/forsiden-snabb-indgang`** — forsiden har en kompakt stribe med de
+otte mest brugte beregnere (de otte første `popular: true`) lige under helten.
+8 nye tests, 4 mutationer faldt. Højden over fold på 390 px er **beregnet, ikke
+målt** — repoet har intet Playwright (❓).
+**MÅL:** `/` 218 besøgende/28d, bounce 38 % (Plausible 2026-09-30) → mod 2-7 %;
+se `/` 20 besøgende, bounce 80 %.
 
 **F5. [ ] Søg på de 27 % ikke-Google-trafik.** Bing 1.319 + DDG 378 +
 Yahoo 274 besøgende/28d. IndexNow er kodet og instrumenteret
@@ -156,71 +133,27 @@ Yahoo 274 besøgende/28d. IndexNow er kodet og instrumenteret
 `❓ Til Mads` spørger om krogen efter deploy er sat op — uden svar er
 Bing/DDG/Yahoo indeksering uafhængig af vores deploys.
 
-**F6. [x] ✅ `ceo/no-locale-tag` — de seks Intl-tag der sendte norsk til dansk
-formatering.** Den håndskrevne kæde `locale === "se" ? "sv-SE" : "da-DK"` har
-kun to arme, så `no` faldt igennem til dansk. Retter alle **seks** steder:
-`ProteinbehovBeregner` (den eneste med synlig fejl — 500 kg på højeste niveau er
-præcis 1.000 g, som `da-DK` skriver "1.000" med punktum og `nb-NO` "1 000" med
-U+00A0), `TerminBeregner`, `KalorieBeregner`, `AlderLevetSvar`, `/dato` og
-`/tidsberegner`. De fire andre har ingen *observerbar* fejl i dag — se målingen
-nedenfor, den er ærlig om hvorfor de alligevel er rettet. Ny port
-`src/lib/intl-locale-tag.test.ts` scanner hele `src/` og fejler på **formen**
-(kæde med svensk/dansk tag og ingen `nb-NO` indeni), så klassen kan ikke komme
-tilbage. 8 nye tests, 3 mutationer kontrolleret. Se arkivet.
+**F6. [x] ✅ `ceo/no-locale-tag`** — de seks Intl-tag der sendte norsk til dansk
+formatering (`ProteinbehovBeregner` viste 500 kg som "1.000"). Ny port
+`intl-locale-tag.test.ts` scanner hele `src/` på kædens *form*, 8 nye tests.
 
-**F7. [x] ✅ `ceo/tidszone-tidsforskelle` — Sydney lå på 9-10 timer, kalenderen
-giver 8-10.** `/tidszone`s "Populære tidsforskelle" var fem håndskrevne
-`<li>`-linjer i begge sprog. Sydney stod som "9-10 timer foran", men Sydney er
-AEST (UTC+10) / AEDT (UTC+11) mod Danmarks CET/CEST (UTC+1/+2), og dens
-sommertid løber **modsat** Danmarks — så den laveste forskel er **8** timer, ikke
-9. `sommertid.test.ts:62-63` regnede allerede 8 og 10, så brødteksten modsatte
-repoets egen test. Nu regnes alle fem forskelle af `tidsforskelsRækker`, som
-går **hver dag i et helt år** igennem `erSommertid` med byens egen `dst`-regel
-(nyt felt i `TIDSZONER`, samme regler som `TidszoneBeregner.tsx`), så tallene
-kommer fra samme kilde som tabellen ovenfor. **Målet blev fire fund undervejs,
-alle rettet før commit:** New York er 5-6 (ikke 6) og LA 8-9, fordi USA skifter
-2. søndag i marts mod Danmarks sidste søndag; Tokyo er 7-8 i stedet for den
-gamle sætning om "8 om vinteren, 7 om sommeren"; Madrid deler CET/CEST med
-Danmark og skrives "samme tid som Danmark" frem for "0 timer foran"; og et
-interval skrives stigende ("5-6") og altid med to tal. 10 nye tests, 3
-mutationer kontrolleret (interval baglæns, enhed efter bredde, London på
-USA-datoer) + én der fanger en regression i JSX'en alene. Se arkivet.
-**MÅL:** `/tidszone` under top-15 i Plausible, 24.324 GSC-visninger / 104 klik /
-CTR 0,4 % / pos. 7,5 (GSC 2026-08-31 → 2026-09-28). Genmål 14 dage efter at
-den er live.
+**F7. [x] ✅ `ceo/tidszone-tidsforskelle`** — Sydney lå på 9-10 timer, kalenderen
+giver 8-10. Alle fem forskelle regnes nu af `tidsforskelsRækker` gennem byens
+egen `dst`-regel; målet fandt fire fejl mere, alle rettet før commit.
+**MÅL:** `/tidszone` 24.324 visninger / 104 klik / CTR 0,4 % / pos. 7,5.
 
-**F8. [x] ✅ `ceo/svensk-helgdagslove` — tre svenske sider modsagde
-`lag (1989:253)`.** Den 29/9 byggede `/dage-til/`-klyngen med ca. 140
-håndskrevne faktasætninger. De er ikke målt af nogen, og de er præcis den
-fejlklasse de otte CEO-fund og de to review-fund er: et tal eller en lov i
-brødteksten, ingen test. Audit af alle 19 hændelsers facts + FAQ gav tre
-fejl, alle svenske, alle i **den samme love**:
-
-| Side | Skrev | Loven siger |
-|---|---|---|
-| se `/julafton` | "Både julafton og nyårsafton räknas som helgdagar i den svenska kalendern" | 1 § räknar **juldagen och annandag jul** — inte julafton. Och **nyårsafton står inte alls**, bara nyårsdagen. |
-| se `/skartorsdagen` | "Skärtorsdag, långfredag, påskdagen och annandag påsk är alla officiella svenska helgdagar" | 1 § har långfredagen och annandag påsk, **inte skärtorsdagen**. Siden modsagde også sig selv: F3 på samme side siger at man *ikke* har automatisk ret til dagpenning. |
-| se `/nationaldagen` | "Den är inte en laglig helgdag" (F2 **og** FAQ) | 1 § tager uttryckligen upp nationaldagen, 2 § fastställer "den 6 juni". |
-
-Kilden er hentet fra riksdagen.se (SFS 1989:253 t.o.m. SFS 2004:1320). Alle
-tre er rettet til at pege på loven ved *dens* navn. Dansk side var korrekt
-igennem hele vejen — `grundlovsdag` siger "ikke en helligdag, men lovens
-fridag", og det er præcis den skelnen de svenske sider havde mistet.
-
-**Ny port:** `lag (1989:253) 1 §` ligger i `dage-til.test.ts` som data
-(`LOEN_SIGER_HELGDAG`, pr. hændelses egen svenske slug), og brødteksten
-tjekkes mod den i begge retninger — en dag loven ikke tæller må ikke kaldes
-helgdag, og en dag loven tæller må ikke kaldes *ikke*-helgdag. 2 nye tests,
-begge kontrolleret mod den gamle kode (begge faldt). Se arkivet.
-**MÅL:** se `/nedtaelling` 5.726 GSC-visninger / 12 klik / CTR 0,2 % / pos. 9,2
-og 0 visninger i GSC's top-15 for de 16 `/dagar-till/*`-sider (GSC
-2026-08-31 → 2026-09-28). Genmål 14 dage efter at den er live.
+**F8. [x] ✅ `ceo/svensk-helgdagslove`** — tre svenske sider modsagde
+`lag (1989:253)` 1 §. Kilden er hentet fra riksdagen.se, lovens liste ligger som
+data i `dage-til.test.ts`, og brødteksten tjekkes mod den i begge retninger — en
+dag loven ikke tæller må ikke kaldes helgdag, og en dag loven tæller må ikke
+kaldes *ikke*-helgdag.
+**MÅL:** se `/nedtaelling` 5.726 visninger / 12 klik / CTR 0,2 % / pos. 9,2.
 
 ## Kvalitetsgate (repoets egne scripts fra package.json)
 
 ```
-npm run lint     # biome lint ./src      — 627 filer
-npm run test     # vitest run            — 3249 tests / 197 filer
+npm run lint     # biome lint ./src      — 628 filer
+npm run test     # vitest run            — 3269 tests / 198 filer
 npm run build    # next build            — 142 sider
 node scripts/locale-leak.mjs --gate       # exit 0
 ```
@@ -239,10 +172,20 @@ fremover med `git stash -u` før og efter, som gjort her.
 
 ## Åbne VERIFICÉR DEPLOY-noter
 
-**Syv noter åbne.** HTTP 200 beviser intet: 189's note rører to *tabelceller* med
-lovtal, der er usynlige for `curl` uden at man læser dem. De otte lukkede noter
-er verificeret 30/9 17:46-17:53 på indhold; alle målinger står i
-`docs/plan-arkiv.md`.
+**Otte noter åbne.** HTTP 200 beviser intet: 189's og 189b's noter rører
+*tabelceller* med lovtal, der er usynlige for `curl` uden at man læser dem. De
+otte lukkede noter er verificeret 30/9 17:46-17:53 på indhold; alle målinger
+står i `docs/plan-arkiv.md`.
+
+- ⏳ **Tysklands række må ikke love en grænse, StVG ikke har.** `ceo/promille-lovkilde-2`.
+  På `https://minberegner.dk/promille` og `https://beraknare.se/promille` skal
+  Tysklands række lyde **"0,0 ‰ under 21 år og i kørekortets prøveperiode"** /
+  **"0,0 ‰ under 21 år och i körkortets provperiod"**, og strengen **"0,3 ‰" må
+  ikke forekomme på Tysklands række** i nogen af de to tabeller — § 24a kender
+  0,5 og § 24c et forbud, mens 0,3 er retspraksis. Storbritanniens række skal
+  stadig sige 0,8 med Skotland på 0,5. HTTP 200 beviser intet, det er en
+  tabelcelle. Prøven på dansk er `src/lib/promille-loenkilde.test.tsx` efter
+  deploy. Vindue **1/10 12:30** (denne merge sker efter 30/9 21:30).
 
 - ⏳ **Danmarks række skal sige 0,2 ‰ de første 3 år, ikke "Ingen særregel".**
   `ceo/promille-lovkilde`. På `https://minberegner.dk/promille` skal
@@ -399,118 +342,23 @@ er verificeret 30/9 17:46-17:53 på indhold; alle målinger står i
   står** — to titelændringer er prøvet. **MÅL:** `/bmi` 934, `/su` 127
   besøgende/28d (Plausible 2026-09-30). Fuldtekst: `docs/plan-arkiv.md`.
 
-#### 188. [x] ✅ `ceo/sidste-hverdag-paastand` — tre ugedags-påstande rettet, og de måles nu mod ankeret (30/9)
+#### 189c. [ ] 2026-09-30 — 189b's sidste fire rækker mangler stadig en hentet kilde
 
-- **Datagrund:** fundet under F8's audit, samme klasse som review-fund 2 om
-  docblockens årstal. Se `nytaarsaften` (da: "Sidste hverdag i december er 31.
-  december") og `nyarsafton` (se: "Sista vardagen i december är 31 december").
-  Begge er sande **kun** når 31. december falder på en hverdag. Målt: 31.12 er
-  weekend i **2028 (søn), 2033 (lør), 2034 (søn) og 2039 (lør)** — på de år er
-  påstanden bogstaveligt forkert, og siden viser den alle dage.
-- **Hvorfor det ikke blev rettet samme commit:** F8's gate er bygget om
-  lovens liste, og denne påstand er ikke en lov- men en kalenderpåstand. At
-  blande den ind i samme diff ville gøre de to svært forskellige rettelser
-  umulige at rulle tilbage hver for sig — og opgaven siger, at en
-  rettelsesfejl der dækker to ting er værre end to dage.
-- **Acceptkriterier:** påstandene er skrevet så de er sande i alle år (fx
-  "31. december er sidste dag i december, uanset hvilken ugedag den falder
-  på"), og en test låser at ingen `da`/`se`-sætning på den slags dato
-  kalder den en hverdag/vardag uden at nævne forbeholdet. Gaten grøn.
-- **MÅL:** ingen trafikvirkning i sig selv — `/nytaarsaften` er ikke i
-  GSC's top-15. Men den ligger på to svenske og to danske svar-først-sider,
-  og klassen (påstand om et fast tal, der ikke er fast) er den samme som
-  CEO-køens otte fund.
-- **⚠️ 30/9: opgaven fandt to fejl den ikke navngavde.** Porten regner de
-  faktiske datoer over 61 år, så den fandt to *mere* end de to i
-  opgaveteksten, begge i samme klasse: (1) `sankthansaftensdag`'s FAQ svarede
-  at 23. juni er "en almindelig aften på en **almindelig hverdag**" — 23. juni
-  er weekend i **2029, 2030, 2035 og 2040**; (2) dansk `skaertorsdag`
-  svarede på spørgsmålet "er skærtorsdag en fridag?" med **"ja, den er en
-  fridag"** — på en side der to linjer ovenfor siger at skærtorsdag *altid*
-  er en **torsdag**. Begge er rettet i samme commit, fordi de er samme
-  fejlklasse og samme fil, og de deler port.
-- **⚠️ Målerfældens anden udløber — dokumenteret i testens docblock.** En
-  *bredere* port ("enhver nævnt ugedag skal være blandt ankerets dage") gav 15
-  fund, hvor **13 var om andre dage**: "Fredagen efter Kristi himmelfartsdag er
-  en hverdag", "Påskeaften er torsdag" (siden handler om langfredag),
-  "sommerferien starter den **sidste lørdag i juni**" på efterårsferiens side.
-  Alle 13 var rigtig tekst, som porten ville have tvunget til ødelæggelse.
-  Porten er derfor snæver: den tester de to påstande der faktisk var forkerte,
-  ikke alle ord i brødteksten. Samme lektion som F8's målerfælde.
-- **Port:** `muligeUgedage` regner `getNextAnchorDate` for hvert år 2020-2080 og
-  kræver (a) at "hverdag/vardag" på en dato der kan ligge i en weekend har et
-  forbehold i samme sætning eller en ledsætning ("når … holdes på en
-  hverdag" tæller), (b) at et "er X en \<ugedag\>-spørgsmål" med *ja*-svar
-  rammer en dag ankeret faktisk kan falde på, og (c) at skærtorsdagen svarer
-  *nej* på fridags-spørgsmålet og kun falder på uge 4 (torsdag). Alle tre
-  mutation-kontrollerede mod den gamle kode — alle tre faldt.
-
-#### 190. [x] ✅ `ceo/helgdag-uden-allman` — det bløde "helgdag" på en dag loven ikke tæller (30/9)
-
-- **Datagrund:** F8's fejlsøgning. `kalderDetHelgdag` matchede kun "allmän
-  helgdag", "allmänna helgdagar", "helgdag i den svenska kalendern",
-  "officiell svensk helgdag" og "officiella svenska helgdagar" — det bløde
-  "helgdag" var ikke på listen. Den fandt tre sætninger, der modsagde deres
-  egen faktaboks: `skartorsdagen:525` ("Ja, den är en torsdag och en helgdag"),
-  `skartorsdagen:530` ("Båda är helgdagar") og `paskdagen:460` ("Båda är
-  officiella helgdagar") — sidstnævnte på en helt anden side, fordi porten
-  målte på *sidens* slug og ikke på den dag sætningen omtaler.
-- **Den fjerde fejl fandt loven, ikke porten.** 1 § första stycket: "Med allmän
-  helgdag avses … **söndagar**, däribland påskdagen och pingstdagen". Advent står
-  ikke i nogen liste, men 1. advent er *altid* en søndag, så loven tæller den —
-  og tabellen sagde `false`. Siden skrev derfor "Första advent är ikke en allmän
-  helgdag enligt lag (1989:253)", modsat loven med lovens eget navn, to linjer
-  under at alle søndagar er røde dage. **Mål ikke kun mod egne data:** loven
-  blev hentet fra riksdagen.se 30/9 20:45.
-- **Port:** `kalderDetBlødeHelgdag` arbejder på **klausul**-niveau (skel på
-  punktum *og* komma) og skelner *predikat* fra *omtale*: kun klausler der
-  navngiver en lovfri dag, eller der `PRAEDIKERER_HELGDAG` rammer
-  ("den är en torsdag och en helgdag", "Båda är helgdagar"), tjekkes. Uden den
-  skelnen ville porten afvise halloween-siden ("Det är allhelgonadagen 1
-  november och alla helgons dag som är helgdagar" — korrekt, og *allhelgons
-  dag* er netop i loven). To tests mere: tabellen skal sige `true` for enhver
-  hændelse der **beregnes** at være en søndag over 61 år (påskedagen,
-  påskedagen+49, 1. advent — alle tre regnet, ingen håndplukket), og siden skal
-  sige *positivt* at søndagen er grunden.
-- **Fire mutationer kontrolleret:** gammel skärtorsdagen-tekst (2 fund), gammel
-  paskdagen-svar (1 fund), `1-advent: false` i tabellen (3 fejl), begge gamle
-  1-advent-tekster (1 fejl). Alle faldt; ingen af dem lod porten være grøn.
-- **⚠️ Målerfældens tredje udløber — skrevet i testens docblock.** JavaScripts
-  `\w` er ASCII, så `\b` før `är` **aldrig** matcher: `kalderDetHelgdag`-formen
-  `\b(?:er|är)\b` så rigtig ud og fangede intet, fordi den kun virkede for
-  svenske *helgdag* — altså et mønster der låser præcis de ord porten så.
-- **MÅL:** ingen trafikvirkning — se `/skartorsdagen` og se `/paskdagen` er ikke
-  i GSC's top-15 (0 visninger for de 16 `/dagar-till/*`-sider, målt 30/9). Værdi
-  som 188: en svensk læser skal ikke møde to sider der siger modsatte ting om
-  loven på 200 ord. VERIFICÉR: nedenfor.
-
-#### 189. [x] ✅ `ceo/promille-lovkilde` — de to første love-påstande er hentet i lovens egne ord
-
-- **Datagrund:** `PROMILLEGRANSE_UDLAND`'s docblock sagde at kilden var WHO's
-  landoversigt, og at siden "stater den lavere grænse for nye og professionelle
-  bilister" — den gjorde den ikke, for Danmark. Særreglerne var frie håndskrevne
-  strenge over for tabellens tal.
-- **Port:** `src/lib/promille-loenkilde.test.tsx`. `LOVKILDE` er *data fra
-  kilden* med afsnit og hentningsdato, og porten læser tallene derfra — så et
-  tal der ændrer sig i loven, ændrer hvad porten kræver af brødteksten.
-  8 tests, **2 mutationer kontrolleret**: gammel kode med "Ingen særregel" (1
-  fejl) og svensk kilde ændret til 0,3 (5 fejl).
-- **Fund ved første kørsel:** landstabellen skrev "Ingen særregel" for Danmark
-  på begge domæner. RST siger 0,2 ‰ de første 3 år med kørekort, sænket i 2025.
-- **Målerfældens sjette udløber.** En port der scanner *alle* decimaler mod
-  lovens tal gav 29 danske og 31 svenske fund, **alle rigtige** — beregnede
-  promiller, Tysklands 0,0, Storbritanniens 0,8 og et hypotetisk "må jeg køre
-  med 0,4". En syvende fejl var min egen formatter: `String(2.0)` er `"2"`, så
-  to tests fejlede på sig selv. **Løsningen er samme som F8's: porten skal
-  kræve kildens tal, ikke søge efter forkerte.** Se listen øverst.
-- **189b.** Fire påstande mangler stadig en hentet kilde. Retsinformation.dk
-  svarer kun en SPA-skal til en agent — alle `/api/document/*`-stier giver HTTP
-  200 `text/html` ~4,5 KB index.html — så danske love skal læses gennem RST,
-  borger.dk eller en kommunal vedtægt. Ikke samme fejl tre gange: hent først,
-  skriv så porten.
-- **MÅL:** `/promille` 133 besøgende/28d, 5.648 GSC-visninger / 84 klik /
-  CTR 1,5 % / pos. 7,9 (GSC 2026-08-31 → 2026-09-28). Genmål 14 dage efter at
-  den er live. Fuldtekst: `docs/plan-arkiv.md`, "Opgave 189".
+- **Datagrund:** listen øverst. Række 6 (Store bededag afskaffet 2024 — loven er
+  ikke fundet, retsinformation uutilgængelig), 7 (grundlovsdag 5. juni) og 8
+  (palmesøndag, juleaftensdag) er danske kalenderpåstande i `/dage-til`- og
+  helligdagstekster, og ingen af dem har en hentet lov. Dertil Tysklands
+  prøveperiodes længde: § 24c siger kun "Probezeit nach § 2a", og
+  gesetze-im-internet.de har ikke Fahrschulgesetz liggende (fire 404'er målt
+  30/9 22:05), så rækken siger bevidst "prøveperiode" uden længde.
+- **Accept:** hver af de fire har en hentet lov med afsnit og hentningsdato i
+  `LOVKILDE`, eller er slettet fra brødteksten. Tyskland får sin længde tilbage
+  i rækken, når den er hentet. Gaten grøn.
+- **❓ Ikke prøv igen:** retsinformation.dk, sst.dk, de fire danske
+  næringsindholdskilder. Brug RST, borger.dk, riksdagen.se, gesetze-im-internet.de,
+  GOV.UK — de virker alle.
+- **MÅL:** samme som 189 — `/promille` 133 besøgende/28d, 5.648 visninger /
+  84 klik / CTR 1,5 % / pos. 7,9.
 
 #### 187. [ ] **IKKE FØR 2026-10-13** 2026-09-30 — Kø — **migrér beraknare.se til svenske URL-slugs med 301**
 

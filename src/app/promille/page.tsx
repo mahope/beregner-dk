@@ -41,7 +41,7 @@ const PROMILLEGRAENSER_UDLAND: { land: string; nokkel: string; saerregel: string
   {
     land: "Tyskland",
     nokkel: "tyskland",
-    saerregel: "0,0 ‰ under 21 år og de første 2 år med kørekort, og 0,3 ‰ hvis du samtidig begår en anden trafikforseelse",
+    saerregel: "0,0 ‰ under 21 år og i kørekortets prøveperiode",
   },
   {
     land: "Frankrig",
@@ -99,7 +99,7 @@ const PROMILLEGRAENSER_UDLAND_SE: { land: string; nokkel: string; saerregel: str
   {
     land: "Tyskland",
     nokkel: "tyskland",
-    saerregel: "0,0 ‰ under 21 år och de första 2 åren med körkort, och 0,3 ‰ om du samtidigt begår ett annat trafikbrott",
+    saerregel: "0,0 ‰ under 21 år och i körkortets provperiod",
   },
   {
     land: "Frankrike",
