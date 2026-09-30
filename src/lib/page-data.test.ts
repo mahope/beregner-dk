@@ -531,10 +531,10 @@ describe("getPageData", () => {
   test.each([
     {
       locale: "da" as const,
-      title: "Tidsberegner: 08:30 til 16:45 = 8 t 15 min.",
+      title: "Tidsberegner: 08:30 til 16:45 = 8 t 15 min. Mellem datoer",
       intent: "mellem to klokkeslæt",
       example: "08:30 til 16:45 er 8 timer og 15 minutter",
-      schema: "Gratis tidsberegner. Beregn tidsrum mellem to klokkeslæt og se resultatet i timer, minutter og decimaltimer.",
+      schema: "Gratis tidsberegner. Beregn tidsrum mellem to klokkeslæt eller mellem to datoer, og se resultatet i timer, minutter, dage, arbejdsdage og decimaltimer.",
     },
     {
       locale: "se" as const,

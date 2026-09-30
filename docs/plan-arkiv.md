@@ -19155,3 +19155,69 @@ titelændring på `/bmi` uden diagnose ville være prøvet to gange. Bemærk at
   spørgsmål i en titel er en længere titel. De tages, når GSC viser
   søgningen på dem.
 
+
+---
+
+#### 206. [x] ✅ 2026-09-30 — trafik — **`/procent` (150.148 v, 98 klik, CTR 0,07 %, pos. 7,4) svarede på nul af de 17 tal, dens egen tredjestørste søgning spørger om.** (squash `ceo/procent-10-af-tal`)
+
+- **Datagrund:** GSC 2026-08-30 → 2026-09-27. Søgningerne er
+  "procentberegner" (249 v, pos. 8), "en telefon er sat 1125 kr. ned, normalt
+  koster den 9000 kr, hvor stor er rabatten i procent?" (59 v, pos. 6) og
+  **"10 procent af" (53 v, pos. 6)**. Sidens **første og tredje** søgning er
+  altså spørgsmål, den ikke besvarer. Plausible: `/procent` er ikke i
+  top-15, så dette er en ren CTR-opgave, ikke en trafikopgave.
+- **Målt først, begge sprog.** DA-autocomplete (`hl=da&gl=dk`, 30/9 06:0x) under
+  **"10 procent af"** svarer med **9 tal ud af 10**: 100, 200, 75, 1 600,
+  25 000, 500, 300, 600, 400. SE (`hl=se&gl=se`) under **"10 procent av"**:
+  10 000, 500, 1 000, 2 000, 2/3/4/5 mio. Begge lister er **ren tal** — de er
+  slå-op-tabeller, ikke forklaringer. Den server-renderede `/procent` indeholdt
+  **0 af dem**: kun "10 % af 250" i tricks-tabellen og "10 procent af 10.000"
+  i Excel-tabellen.
+- **Rettelse:** nyt `<h2>` **"10 procent af et tal"** med regnestykket og en
+  **17-rækkers** tabel (Spørgsmål / Svar) i `da`-grenen, og
+  **"10 procent av ett tal"** med præcis samme 17 tal i `se`-grenen. **Ingen
+  tal står hårdkodet to steder:** den nye `procentAf(tal, procent) = tal ×
+  procent / 100` er den ene regel bag tabellen, tricks-tabellen og
+  `ProcentBeregner` — samme mønster som C181's `MINUTTER_TILL_TIMMAR`. De to
+  domæner deler **én** `PROCENT_10_AF_TAL`, så en ny række kun i det ene sprog
+  er umulig. **75 er med fordi det er det eneste målte tal med komma i svaret**
+  (7,5), så tabellen låser både heltals- og decimalformatering. Tre nye FAQ-par
+  pr. sprog (10 procent af 500 / 1.600 / hvorfor 75 ikke er helt) — de kommer
+  dermed også i JSON-LD'en, som bragte siden fra 7 til 10 spørgsmål.
+- **⚠️ Egen diff-review før commit fandt en reel fejl, som en grøn gate ikke
+  ville have fanget:** brødteksten skrev at "250 bliver til 2,5" for at
+  forklare komma-tricket. Det er **forkert** — én plads til venstre på 250 er
+  **25**; 2,5 er 1 procent. Rettet til "250 bliver til 25,0". Samme gennemgang
+  erstattede superlativet "det mest stillede spørgsmål" med "det tredjestørste
+  spørgsmål", fordi GSC's placering er målt, og superlativet ikke var det.
+  Dette er **fejltype 11** (påstande i tekst er kode) fundet ved at læse diffen
+  som reviewer.
+- **Harness:** `procent.test.ts` **+11** (reglen, konstantens dækning,
+  stigende/uden dubletter, at præcis 75 har decimal), `procent/page.test.tsx`
+  **+4** (hvert målt tal i hvert sprog, 75 → 7,5, ens rækker i begge sprog,
+  ingen kryds-sprog-omtekst). **Modsvejs verificeret: 15 af de nye tests
+  falder** med master's `procent.ts` + `page.tsx` (`git stash`).
+- **Målt på rigtig server** (`next start` :3991, porten verificeret fri *inden*
+  start): **17 rækker i begge domæner**, `75 → 7,5` i begge, `500 → 50`,
+  `1.600 → 160` (dansk punktum) og `1 000 → 100` (svensk mellemrum), **0**
+  danske markører på beraknare.se og **0** svenske på minberegner.dk, begge
+  `<title>` og `<h1>` uændrede, canonical uændret, sitemap uændret (1 `/procent`),
+  `/tidszone`-titlen uændret, `/api/health` → `status: ok`.
+- **Gate grøn:** lint (**618 filer**), **3037 tests / 190 filer** (fra
+  3022/190), build (**142 sider**), `locale-leak.mjs --gate` exit 0. Rørte
+  filer:
+  `procent.ts` (+29), `procent/page.tsx` (+78), `page-data.ts` (+6) og de to
+  tests — **ingen titel, ingen `<h1>`, ingen ny URL, ingen sitemap, ingen
+  ændret beregningslogik**.
+- **MÅL:** `/procent` 150.148 visninger / 98 klik / CTR 0,07 % / pos. 7,4;
+  "10 procent af" 53 v / pos. 6 (GSC 2026-08-30 → 2026-09-27). Genmål
+  **2026-10-14**.
+- **⚠️ Ærlig forventning:** de ni målte tal-søgninger er en lille del af de
+  150.148 visninger — GSC's tre top-søgninger er tilsammen ~360 v. Jeg lover
+  derfor ikke en ny CTR. Det læsbare er, at siden nu svarer på sin egen
+  tredjestørste søgning i sit eget sprog. Er CTR'en uændret efter 14 dage, er
+  "den manglende tal-tabel forklarede den lave CTR" **modbevist**, og næste
+  spørgsmål er ikke mere indhold men søgemassen. **Målt og bevidst ikke
+  bygget:** "procent rabat"/"procent fald"/"procent vækst" (9 af 10 under
+  "procent beregner") er **alle** allerede `<h2>`-afsnit på samme side, så de
+  er ikke huller; det er heller ikke nye sider værd.

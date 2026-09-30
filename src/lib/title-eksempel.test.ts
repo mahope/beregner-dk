@@ -89,6 +89,30 @@ describe("tallene i titlerne er rigtige", () => {
     }
   });
 
+  test("tidsberegner: titlen lover de datoer, værktøjet faktisk regner på", () => {
+    // GSC: "tidsberegner" er 27.000 visninger på pos. 4, og dansk autocomplete
+    // svarer variation 2 med "tidsberegner mellem datoer". Værktøjet har kunnet
+    // regne på tværs af datoer siden C51, men titlen lovede kun klokkeslæt — så
+    // den overløbte en kapacitet den ikke havde. Kaldet her beviser den først,
+    // så påstanden i titlen ikke kan overleve et brudt datofelt.
+    const overDatoer = beregnTidsinterval({
+      startTid: "08:30",
+      slutTid: "16:45",
+      startDato: "2026-09-28",
+      slutDato: "2026-09-30",
+    });
+    expect(overDatoer).toMatchObject({ timer: 56, minutter: 15 });
+    const page = getPageData("tidsberegner", "da")!;
+    for (const streng of [page.metaTitle, page.ogTitle]) {
+      expect(streng).toMatch(/datoer/i);
+    }
+    for (const streng of [page.metaDescription, page.ogDescription, page.schemaDescription]) {
+      expect(streng).toMatch(/datoer/i);
+    }
+    // Svensk titel er frosset til 13/10 (opgave 187), så den skal ikke røres.
+    expect(getPageData("tidsberegner", "se")!.metaTitle).not.toMatch(/datoer/i);
+  });
+
   test("moms: 1.000 kr. ekskl. moms er 1.250 kr. inkl. 25 %", () => {
     const r = beregnMoms(1000, "tillaegMoms", 25);
     expect(r.prisInklMoms).toBe(1250);

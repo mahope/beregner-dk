@@ -66,8 +66,8 @@ describe("buildPageMetadata", () => {
     {
       slug: "tidsberegner" as const,
       locale: "da" as const,
-      title: "Tidsberegner: 08:30 til 16:45 = 8 t 15 min.",
-      description: "Beregn hvor lang tid der går mellem to klokkeslæt. Eksempel: 08:30 til 16:45 er 8 timer og 15 minutter. Se decimaltimer og træk en pause fra.",
+      title: "Tidsberegner: 08:30 til 16:45 = 8 t 15 min. Mellem datoer",
+      description: "Beregn tid mellem to klokkeslæt eller to datoer. 08:30 til 16:45 er 8 timer og 15 minutter. Se dage, arbejdsdage, sekunder og decimaltimer.",
     },
     {
       slug: "tidsberegner" as const,

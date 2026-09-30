@@ -46,7 +46,7 @@ describe("tidsberegner page", () => {
       locale: "da" as const,
       heading: "Hvor lang tid er der mellem to klokkeslæt?",
       answer: "Beregn hvor lang tid der går mellem to klokkeslæt – i timer, minutter og decimaltimer. Træk en pause fra.",
-      schema: "Gratis tidsberegner. Beregn tidsrum mellem to klokkeslæt og se resultatet i timer, minutter og decimaltimer.",
+      schema: "Gratis tidsberegner. Beregn tidsrum mellem to klokkeslæt eller mellem to datoer, og se resultatet i timer, minutter, dage, arbejdsdage og decimaltimer.",
     },
     {
       locale: "se" as const,
