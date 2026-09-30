@@ -140,7 +140,14 @@ export const DAGE_TIL_EVENTS: DageTilEvent[] = [
       slug: "juleaften",
       copy: {
         short: "juleaften",
-        question: "Hvor mange dage er der til 24. december (juleaften)?",
+        // 50 tegn. Titlen er `${question} ${count}` (DageTilPage.tsx), så
+        // spørgsmålet skal have plads til " 366 dage" — tre-cifrede dage — og
+        // stadig være under de 60 tegn, porten i dage-til-routes.test.tsx
+        // håndhæver. Juleaften er fast 24. december, så dagene er tre-cifrede
+        // fra 15. september til 31. december hvert år. Parentesen "(juleaften)"
+        // var to tegn mere end nødvendigt: ordet står allerede i `facts[0]`, i
+        // FAQ'en og i `short`, og det er `short` der bruges som slug.
+        question: "Hvor mange dage er der til juleaften 24. december?",
         facts: [
           "Juleaften er 24. december — altid samme dato, uanset hvilken ugedag den falder på.",
           "Juleaften er dagen før juledagen, så de to ligger altid én dag fra hinanden.",

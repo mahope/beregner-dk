@@ -1,20 +1,21 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — **opgave 207: `/tidsberegner` er tredjestørste danske side (73.666
-visninger) og lovede kun "timer mellem klokkeslæt" i sin titel og beskrivelse,
-selv om værktøjet har regnet på tværs af datoer siden C51.** Hovedordet har 27.000
-visninger på pos. 4 med ~1 klik pr. 1.000, og dansk autocomplete svarer
-variation 2 med "tidsberegner mellem datoer". Rettelse: de fem `da`-strenge i
-`page-data.ts` lover nu datoer og de enheder værktøjet faktisk regner på
-(titel 57 af 60 tegn, beskrivelse 139 af 160). `se` urørt — opg. 187 frosser
-svenske titler til 13/10. Ny test kalder `beregnTidsinterval` med to datofelter
-først, så påstanden dør hvis felterne holder op med at virke.
+STATUS: KØ — **review-fund (HØJ, 30/9) rettet: juleaftens spørgsmål var 52 tegn,
+så dage-til-titlen blev 61 ved tre-cifrede dag-tal — og 24. december er fast, så
+det er 61 fra 15/9 til 31/12 hvert år.** Google klippede da dage-tallet af, som er
+den del der adskiller siden fra de andre. Ny streng: "Hvor mange dage er der til
+juleaften 24. december?" (50 tegn → 58/59). Titelposten kører nu hele året (8
+datoer) i stedet for én valgt dato, så porten ikke kan være grøn med fejlen i.
 
-**Mål:** `/tidsberegner` 73.666 v / 199 klik / CTR 0,3 % / pos. 6,9; hovedordet
-27.000 v / pos. 4. Genmål **2026-10-14**.
+**Mål:** `/dage-til/juleaften` "hvor mange dage er der til den 24 december" 1.013
+v / 3 klik / pos. 5. Genmål **2026-10-14**.
 
-**Færdige i dag:** 207, 206, 205, 204, 203, 202, 201, 200. De **ti** åbne
-deploy-noter har ni med første vindue 30/9 07:30 og den nyeste 30/9 12:30.
+**Alle ti deploy-noter er lukket `DEPLOY OK 2026-09-30`** efter batch 07:30,
+verificeret ved indhold (titler, artiklenes slutning, tabellen på /procent).
+De otte "Regn det ud"-artikler, de 20 brand-frie titler, de seks eksempel-titler
+og beraknare.se `/dato` er alle live. Én ny note åben, vindue 30/9 12:30.
+
+**Færdige i dag:** 207, 206, 205, 204, 203, 202, 201, 200 + review-fund.
 
 ## Kvalitetsgate (repoets egne scripts fra package.json)
 
@@ -34,262 +35,34 @@ Alle fire var grønne før merge 2026-09-30 07:45.
 
 ## Åbne VERIFICÉR DEPLOY-noter
 
-Ti noter. HTTP 200 beviser intet: ingen rører en URL, kun `<title>`- og
-`og:title`-strenge, artiklernes **slutning** og rene visuelle elementer.
+Én note. HTTP 200 beviser intet: den rører `<title>` og `<h1>` på én side.
 
-- ⏳ **VERIFICÉR DEPLOY: `/tidsberegner`s danske titel skal navnge de datoer,
-  værktøjet allerede regner på.** Kode + plan i ét squash-commit på
-  `ceo/tidszone-klokketid-spg`. Første kandidatvindue **2026-09-30 12:30** (push
-  sker 07:4x). Rørte filer: `src/lib/page-data.ts` (**4 `da`-strenge**,
-  `metaTitle` + `ogTitle` + `metaDescription` + `ogDescription` +
-  `schemaDescription`) og **3 tests**. `se`-blocket urørt (frosset til 13/10,
-  opg. 187). Ingen `<h1>`, ingen ny URL, ingen sitemap, ingen beregningslogik.
-  Verificér ved **indhold**:
+- ⏳ **VERIFICÉR DEPLOY: juleaftens spørgsmål skal have både ordet og datoen
+  uden at overskride Googles 60-tegns-grænse ved tre-cifrede dag-tal.** Kode +
+  plan i ét squash-commit på `ceo/juleaften-titellaengde`. Første
+  kandidatvindue **2026-09-30 12:30**. Rørte filer: `src/lib/dage-til.ts`
+  (**én streng** + kommentar) og `src/app/dage-til-routes.test.tsx` (**+31**).
+  Ingen `<h1>`-ændring ud over `copy.question` (samme felt bruges begge steder),
+  ingen ny URL, ingen sitemap, ingen beregningslogik, ingen `se`-ændring. Det
+  var et **review-fund** (HØJ, 30/9): `cf0a355` satte spørgsmålet til 52 tegn, så
+  titlen blev 60 ved to-cifrede dage men **61 ved tre-cifrede** — og 24. december
+  er fast, så det er 61 fra 15/9 til 31/12 hvert år, altså lige i julehandlen.
+  Google klipper da dage-tallet af, som er den del der adskiller siden fra de
+  andre. Nye streng: "Hvor mange dage er der til juleaften 24. december?" (50
+  tegn → 58/59 med dage-tal). Verificér ved **indhold**:
   1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
-  2. `https://minberegner.dk/tidsberegner` skal have **"Tidsberegner: 08:30 til
-     16:45 = 8 t 15 min. Mellem datoer"** i `<title>` og samme i `og:title`.
-  3. Samme sides `<meta name="description">` skal indeholde **"to datoer"** og
-     "dage, arbejdsdage, sekunder".
-  4. **Kontrol:** `https://beraknare.se/tidsberegner` skal være **uændret** —
-     svensk titel stadig "Tidskalkylator: 08:30 till 16:45 = 8 t 15 min".
-  5. **Kontrol:** `/procent`, `/dato`, `/moms` og `/tidszone` skal have
-     uændrede titler; `/sitemap.xml` uændret.
-  Målt før merge: ny titel 57 tegn (grænsen er 60), beskrivelse 139 (grænsen
-  160), JSON-LD-skemaDescription med de nye evner. **Gate grøn:** lint (**618
-  filer**), **3038 tests / 190 filer** (fra 3037/190), build (**142 sider**),
-  `locale-leak.mjs --gate` exit 0. Den nye titeltest **falder mod master's
-  `page-data.ts`** (verificeret med `git stash`: `expected … to match
-  /datoer/i`), så den låser den gamle fejl fast. 390/1280 px kan ikke tjekkes
-  (repoet har ingen Playwright, se ❓ Til Mads); ændringen er metadata og rører
-  ingen synlig blok.
-
-- ⏳ **VERIFICÉR DEPLOY: `/procent` skal svare på "10 procent af" med et tal
-  for hvert af de 17 tal, siden selv målte i autocomplete.** Kode + plan i ét
-  squash-commit på `ceo/procent-10-af-tal`. Første kandidatvindue
-  **2026-09-30 07:30** (dette push sker 06:3x). Rørte filer:
-  `src/lib/procent.ts` (ny `procentAf` + `PROCENT_10_AF_TAL`),
-  `src/app/procent/page.tsx` (**+78**, ét `<h2>` + 17-rækkers tabel + brødtekst
-  i hver sproggren), `src/lib/page-data.ts` (**6 strenge**, 3 FAQ-par pr. sprog)
-  og de to tests. Ingen `<title>`, ingen `metaDescription`, ingen `<h1>`, ingen
-  ny URL, ingen sitemap, ingen beregningslogik ændret. Verificér ved
-  **indhold**:
-  1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
-  2. `https://minberegner.dk/procent` skal have **`<h2>10 procent af et
-     tal</h2>`** og **17** rækker med "10 procent af N", hvor **75 → 7,5**,
-     **500 → 50** og **1.600 → 160** (dansk tusindtalsseparator med punktum).
-  3. `https://beraknare.se/procent` skal have **`<h2>10 procent av ett
-     tal</h2>`** og **17** rækker, hvor **500 → 50** og **1 000 → 100** (svensk
-     tusindtalsseparator med mellemrum).
-  4. **Kontrol:** begge `<title>` skal være **uændrede** — dansk
-     "Procentberegner: 10 % af 250 = 25 kr. Stigning, fald, rabat" og svensk
-     "Procenträknare: 10 % av 250 kr = 25 kr" — og `<h1>` stadig
-     "Procentberegner".
-  5. **Kontrol:** `0` danske markører ("fjerdedel", "tredjestørste") på
-     beraknare.se og `0` svenske ("fjärdedel", "tredjestörsta") på
-     minberegner.dk. `/tidszone`-titlen skal være uændret.
-  6. **Kontrol:** `/sitemap.xml` skal stadig have præcis **1** `/procent`-URL.
-  Målt på rigtig server før merge (`next start` :3991, porten verificeret fri
-  *inden* start): 17/17 rækker i begge domæner, 75 → 7,5 i begge, **0** kryds-
-  sprog-markører, uændrede titler, canonical uændret, de tre nye FAQ-spørgsmål i
-  JSON-LD'en, sitemap uændret. **Gate grøn:** lint (**618 filer**), **3037
-  tests / 190 filer** (fra 3022/190), build (**142 sider**),
-  `locale-leak.mjs --gate` exit 0. **15 af de nye tests falder mod master's
-   `procent.ts`/`page.tsx`** (verificeret med `git stash`), så de låser den
-   gamle fejl fast — bl.a. én der kræver hvert enkelt målt tal i markupken.
-  390/1280 px kan ikke tjekkes (repoet har ingen Playwright, se ❓ Til Mads);
-  tilføjelsen er ét `<h2>`, ét afsnit og én tabel i samme `prose`-blok som de
-  tre eksisterende tabeller på samme side, alle i `overflow-x-auto`.
-  **Egen diff-review fangede en reel fejl, før commit:** brødteksten skrev
-  først at "250 bliver til 2,5" — men komma-tricket én plads til venstre giver
-  **25**, og 2,5 er *1* procent. Rettet til "250 bliver til 25,0". Samme
-  gennemgang fjernede et uverificerbart superlativ ("mest stillede spørgsmål" →
-  "tredjestørste spørgsmål", hvilket er præcis GSC's placering).
-
-- ⏳ **VERIFICÉR DEPLOY: "hvor mange dage er der til den 24 december" skal kunne
-  genfindes i juleaftens titel og i /datos ankertekst.** Kode + plan i ét
-  squash-commit på `ceo/juleaften-24-december`. Første kandidatvindue
-  **2026-09-30 07:30** (dette push sker 05:58). Rørte filer:
-  `src/lib/dage-til.ts` (**1 streng**, kun `da`-armens `copy.question` for
-  `juleaften`) og `src/app/dage-til-routes.test.tsx` (+1). `copy.short` er
-  **uændret** ("juleaften"), så h1-brødteksten "Der er N dage til juleaften",
-  alle otte andre events, `se`-armen, `og:site_name`, canonical, hreflang,
-  sitemap og IndexNow er urørte. Ingen ny URL, ingen beregningslogik.
-  Verificér ved **indhold**:
-  1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
-  2. `https://minberegner.dk/dage-til/juleaften` skal have **"Hvor mange dage
-     er der til 24. december (juleaften)?"** i både `<title>` og `<h1>`.
-  3. `https://minberegner.dk/dato` skal have **"Hvor mange dage er der til 24.
-     december (juleaften)?"** som ankertekst i nedtællingslisten.
-  4. **Kontrol:** `https://beraknare.se/dagar-till/julafton` skal være
-     **uændret** — svensk titel stadig "Hur många dagar är det till julafton?"
-     (opg. 187 frosser `se` til 13/10).
-  5. **Kontrol:** `/dage-til/grundlovsdag` skal stadig have titlen "Hvor mange
-     dage er der til grundlovsdag?" — den låste titel i `dage-til-routes.test.tsx`
-     dækker det.
-  **Gate grøn:** lint (**618 filer**), **3022 tests / 190 filer** (fra
-  3021/190), build (**142 sider**), `locale-leak.mjs --gate` exit 0. Den nye
-  titeltest **fejler mod master's `dage-til.ts`** (verificeret med
-  `git stash`: `expected 'Hvor mange dage er der til juleaften?' to be 'Hvor
-  mange dage er der til 24. decemb…'`), så den låser den gamle fejl fast.
-  390/1280 px kan ikke tjekkes (repoet har ingen Playwright, se ❓ Til Mads);
-  ændringen er én streng i en `<h1>`-spørgsmålstitel, hvilket kun gør overskriften
-  længere — ingen ny blok, ingen ny knap, intet layout.
-
-- ⏳ **VERIFICÉR DEPLOY: beraknare.se `/dato` skal svare på "antal dagar mellan
-  datum" og "hur många dagar mellan två datum" i synlig tekst.** Kode + plan i ét
-  squash-commit på `ceo/dato-se-parafraser`. Første kandidatvindue
-  **2026-09-30 07:30** (dette push sker 03:45). Rørte filer:
-  `src/app/dato/page.tsx` (**+9 linjer**, kun den `locale === "se"`-gren, ny
-  `<h2>` som første element i den svenske tekstblok) og `src/app/dato/page.test.tsx`
-  (+2 tests). Ingen `<title>`, ingen `metaDescription`, ingen `<h1>`, ingen FAQ,
-  ingen JSON-LD-ændring, ingen beregningslogik, ingen ny URL, ingen sitemap.
-  Verificér ved **indhold**:
-  1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
-  2. `https://beraknare.se/dato` skal have **"Antal dagar mellan datum"** som et
-     `<h2>` og **"hur många dagar mellan två datum"** i brødteksten, med
-     **"366 dagar"** for 1. marts 2027 → 1. marts 2028.
-  3. **Kontrol:** `https://beraknare.se/dato`'s `<title>` skal stadig være
-     "Beräkna dagar kvar till datum: 1 jan. 2026→2027 = 365".
-  4. **Kontrol:** `https://minberegner.dk/dato` skal være **byte-for-byte
-     uændret** — 0 forekomster af "Antal dagar mellan datum" og samme titel som
-     før ("Beregn dage til en dato: 1. jan. 2026→2027 = 365").
-  Målt på rigtig server før merge (`next start` :3987, porten verificeret fri
-  *inden* start): SE 200 med 4/2/4 fund på de tre strenge, DA 200 med **0** på
-  den svenske overskrift. 390/1280 px kan ikke tjekkes (repoet har ingen
-  Playwright, se ❓ Til Mads); blokken er `<h2>` + `<p>` i `prose`, samme mønster
-  som den eksisterende Excel-blok på samme side.
-
-- ⏳ **VERIFICÉR DEPLOY: `/procent` skal have en titel der dækker hele
-  klyngen.** Kode + plan i ét squash-commit på `ceo/procent-langhale`. Første
-  kandidatvindue **2026-09-30 07:30** (dette push sker efter 03:00). Rørte
-  filer: `src/lib/page-data.ts` (4 strenge, kun `metaTitle`/`ogTitle`/
-  `metaDescription`/`ogDescription` for **`da`**) + to låste titler i
-  `page-data.test.ts` og `page-helpers.test.ts`. Ingen `<h1>`, ingen ny URL,
-  ingen sitemap, ingen beregningslogik. Verificér ved **indhold**:
-  1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
-  2. `<title>` på dansk skal være **"Procentberegner: 10 % af 250 = 25 kr.
-     Stigning, fald, rabat"** (59 tegn).
-  3. **Kontrol:** `<h1>` skal stadig være "Procentberegner", og den **svenske**
-     titel skal stadig være "Procenträknare: 10 % av 250 kr = 25 kr" — `se` er
-     frosset til 13/10 (opg. 187) og må ikke have rørt sig.
-  4. **Kontrol:** `/procent` på beraknare.se skal være **uændret** på dansk
-     `/dato` skal stadig have sin gamle titel.
-
-- ⏳ **VERIFICÉR DEPLOY: 20 titler skal ikke længere indeholde domænenavnet.**
-  Kode + plan i ét squash-commit på `ceo/titler-uden-brand`. Første
-  kandidatvindue **2026-09-30 07:30**. Rørte filer: `src/lib/page-data.ts`
-  (**45 strenge**, kun `metaTitle`/`ogTitle` — `git diff` verificerer at intet
-  andet er rørt) og `src/lib/page-data.test.ts` (**+61**). Ingen `<h1>`, ingen
-  `description`, ingen beregningslogik, ingen ny URL, ingen sitemap. Verificér
-  ved **indhold**:
-  1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
-  2. `<title>` på de ti omskrevne: `/laaneberegner` **"Låneberegner: beregn
-     månedsydelse og sammenlign lån"** (51) · `/elberegner` "Elberegner: hvad
-     koster dine apparater i strøm" (46) · `/termin` "Terminsdato Beregner: se
-     din graviditetsuge" (43) · `/pension` **"Pensionsberegner 2026: folkepension
-     16.273 kr/md"** (48, var 65).
-  3. **Ingen `<title>` på minberegner.dk, beraknare.se eller beregner.no må
-     indeholde "MinBeregner.dk", "Beräknare.se" eller "Beregner.no"** — grep
-     på de tre domæners hovedsider og de ti sider.
-  4. **Kontrol:** `/dato` "Beregn dage til en dato: 1. jan. 2026→2027 = 365" ·
-     `/procent` "Procentberegner: 10 % af 250 kr. = 25 kr." · `/moms` og
-     `/tidszone` uændrede, og alle `<h1>` uændrede.
-  Målt på rigtig server før merge (`next start` :3987, porten verificeret fri
-  *inden* start) — alle otte tal ovenfor er rigtige i den danske render, og 0
-  brand-strenge i `se`/`no` er målt i data-laget. **Gate grøn:** lint (**618
-  filer**), **3016 tests / 190 filer**, build (**142 sider**),
-  `locale-leak.mjs --gate` exit 0. De fem nye assertions **fejler mod master's
-  `page-data.ts`** (verificeret med `git stash`: 4 af 5), så de låser den gamle
-  fejl fast — og da den første strip kun rørte `da`, skrev testen rødt på *se*
-  (19 strenge) og *no* (15), hvilket viste at fejlen ikke var dansk alene.
-
-- ⏳ **VERIFICÉR DEPLOY: fire artikler skal slutte med "Regn det ud" — anden
-  bølge.** Kode + plan i ét squash-commit på `ceo/blog-naste-handling-2`.
-  Første kandidatvindue **2026-09-30 07:30**. Rørte filer: fire artikler
-  (`boligstoette-2026-nye-regler`, `kvadratmeter-saadan-regner-du-ud`,
-  `spar-penge-paa-braendstof`, `dagpenge-saadan-finder-du-din-sats`) — kun
-  import + ét element efter `</article>`, samme `NaesteSkridt` som første bølge,
-  ingen ny komponent, ingen ny URL, ingen sitemap, ingen `<h1>`. Verificér ved
-  **indhold**: på hver af de fire skal det være **sidste element før
-  "Relaterede artikler"** (hhv. "Relaterede beregnere" på boligstøttestykket,
-  og på brændstofstykket det eneste element efter `</article>`) — en boks med
-  overskriften "Regn det ud" og knapperne "Beregn din boligstøtte" / "Beregn dit
-  areal" / "Beregn din brændstofpris" / "Beregn din dagpenge". **Kontrol:** de
-  fire artiklers `<title>` og `<h1>` skal være uændrede, og `/boligstoette`,
-  `/kvadratmeter`, `/braendstof` og `/barselsdagpenge` skal stadig svare 200.
-  Renderet er verificeret i `BlogNaesteSkridt.test.tsx` (+4 sidetests, der
-  fejler mod master — checket med `git stash`); 390/1280 px kan **ikke** tjekkes
-  i denne iteration, repoet har ingen Playwright, og komponenten er uændret
-  fra første bølge.
-
-- ⏳ **VERIFICÉR DEPLOY: fire blogartikler skal slutte med "Regn det ud" og en
-  beregnerknap.** Kode + plan i ét squash-commit på `ceo/blog-naste-handling`.
-  Første kandidatvindue **2026-09-30 07:30**. Rørte filer: ny
-  `src/components/BlogNaesteSkridt.tsx`, dens test, og fire artikler
-  (`barsel-2026-regler-og-satser`, `boernepenge-2026-satser-og-regler`,
-  `fradrag-2026-komplet-guide`, `su-2026-satser-og-regler`) — kun import +
-  ét element efter `</article>`. Ingen `<h1>`, ingen beregningslogik, ingen ny
-  URL, ingen sitemap. Verificér ved **indhold**: på hver af de fire artikler skal
-  det være **sidste element før "Relaterede artikler"** (hhv. "Relaterede
-  beregnere" på børnepengestykket) — en boks med overskriften "Regn det ud" og
-  knappen "Beregn din barselsdagpenge" / "Beregn børnepengen" / "Beregn dit
-  rentefradrag" / "Beregn din SU". **Kontrol:** artiklernes `<title>` og
-  `<h1>` skal være uændrede, og de fire beregnere skal stadig svare 200.
-
-- ⏳ **VERIFICÉR DEPLOY: seks titler med et udregnet eksempel (`/bmi`, `/fart`,
-  `/kalorier`).** Kode + plan i ét squash-commit på `ceo/eksempel-titler-fall`.
-  Første kandidatvindue **2026-09-30 07:30**. Rørte filer: `src/lib/page-data.ts`
-  (**12 strenge**, kun `metaTitle` og `ogTitle` — `git diff` verificerer at
-  intet andet er rørt), `src/lib/title-eksempel.test.ts` (+3 sider, +3
-  talverificeringer) og `src/lib/page-data.test.ts` (to låste titler
-  opdateret). Ingen `<h1>`, ingen beregningslogik, ingen ny URL, ingen
-  sitemap. Verificér ved **indhold**:
-  1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
-  2. `<title>` på dansk: `/bmi` "BMI-beregner for voksne: 75 kg / 1,75² = 24,5" ·
-     `/fart` "Fartberegner: 100 km/t i 2 timer = 200 km" · `/kalorier`
-     "Kalorieberegner: mand 80 kg, 180 cm = 2.759 kcal/dag".
-  3. Samme på beraknare.se: "BMI-kalkylator för vuxna: 75 kg / 1,75² = 24,5" ·
-     "Hastighetsberäknare: 100 km/h i 2 timmar = 200 km" · "Kalorikalkylator:
-     man 80 kg, 180 cm = 2 759 kcal/dag".
-  4. **Kontrol:** de tre `meta description` skal være byte-for-byte uændrede,
-     og de tre `<h1>` skal stadig være "BMI Beregner for voksne",
-     "Fartberegner - beregn fart, distance og tid" og "Kalorieberegner".
-  **Målt på rigtig server før merge** (`next start` :3987, porten verificeret
-  fri *inden* start): alle seks titler er korrekte i begge sprog, de tre
-  beskrivelser og de tre `<h1>` er uændrede. **Gate grøn:** lint (**616
-  filer**), **3001 tests / 189 filer**, build (**142 sider**), `locale-leak.mjs
-  --gate` exit 0. De ni nye titeltests **fejler mod master's `page-data.ts`**
-  (verificeret med `git stash`), så de låser den gamle fejl fast.
-
-
-- ⏳ **VERIFICÉR DEPLOY: `/renteberegner` skal have sin største søgning i
-  titlen og i første `<h2>`.** Kode + plan i ét squash-commit på
-  `ceo/renteberegner-annuitet`. Første kandidatvindue **2026-09-30 07:30**.
-  Rørte filer: `src/lib/page-data.ts` (**2 strenge**, kun `metaTitle` og
-  `ogTitle` for **`da`**), `src/app/renteberegner/page.tsx` (+14/-2: ny `krDa`
-  der spejler `krSe`, første `<h2>` + brødtekst, `"Sådan bruger du
-  renteberegneren"` demoteret `<p>`→`<h3>`), `src/app/renteberegner/page.test.tsx`
-  (+1) og `src/lib/page-data.test.ts` (1 låst titel). Ingen `<h1>`, ingen
-  `description`/`metaDescription`, ingen FAQ, ingen JSON-LD, ingen
-  beregningslogik, ingen ny URL, ingen sitemap, **intet i `se` eller `no`**.
-  Verificér ved **indhold**:
-  1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
-  2. Dansk `<title>` skal være **"Renteberegner: beregn månedsydelse på
-     annuitetslån"**, og første `<h2>` efter beregneren skal være
-     **"Annuitetslån beregner: beregn månedsydelsen på et lån"** med
-     "annuitetslån beregner" i `<strong>` og tallene **200.000**, **1.211,96**,
-     **290.870,56**, **90.870,56**.
-  3. **Kontrol:** `<h1>` skal stadig være "Renteberegner", og `metaDescription`
-     skal stadig være byte-for-byte "Annuitetslån på 100.000 kr. med 5 %
-     rente i 5 år: 1.887 kr. i måneden og 13.227 kr. i samlet rente. Beregn også
-     serielån."
-  4. **Kontrol:** `https://beraknare.se/renteberegner` skal være **uændret** —
-     svensk `<title>` stadig "Räntekalkylator: 100.000 kr i 5 år = 1.887
-     kr/mån" og svensk `<h2>` stadig "Så använder du räntekalkylatorn"
-     (opg. 187 frosser `se` til 13/10).
-  **Gate grøn:** lint (**618 filer**), **3021 tests / 190 filer** (fra
-  3020/190), build (**142 sider**), `locale-leak.mjs --gate` exit 0. Den nye
-  sidetest **fejler mod master's `page.tsx`** (verificeret med `git stash`).
+  2. `https://minberegner.dk/dage-til/juleaften` skal have **"Hvor mange dage er
+     der til juleaften 24. december?"** i `<title>`, `<h1>` og `og:title`.
+  3. Samme sides `<h1>` skal være læselig (den er spørgsmålet, ikke bare datoen).
+  4. `/datos` ankertekst "…til juleaften 24. december?" skal være med.
+  **Kontrol:** de 15 andre dage-til-siders titler uændrede, og
+  `https://beraknare.se/dato` uændret. Målt før merge: 58 tegn @ 88 dage, 59 @
+  357 og 366 (grænsen 60). **Gate grøn:** lint (**618 filer**), **3039 tests /
+  190 filer** (fra 3038), build (**142 sider**), `locale-leak.mjs --gate`
+  exit 0. De tre nye assertions **falder mod master's `dage-til.ts`**
+  (verificeret med `git stash`: 3 fejl, bl.a. "expected 61 to be less than or
+  equal to 60"), og porten kører nu hele året (8 datoer) i stedet for én valgt,
+  så den kan ikke være grøn med fejlen i igen.
 
 ## Åbne opgaver
 

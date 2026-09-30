@@ -281,15 +281,31 @@ describe("dage-til titler", () => {
   // on the live site they were 61-67 characters in both languages. The test
   // calls the real producer instead of rebuilding the string, so it cannot
   // pass on a copy of the old rule (C44's lesson).
+  // Titlen er `${question} ${count}`, så længden afhænger af dagens dato: de
+  // faste dato-heleds (juleaften, nytårsaften) har tre-cifrede dag-tal i
+  // store dele af året, mens påskehelgen altid har to-cifrede. En port der kun
+  // så ét referencedato var grøn med 61 tegne i live — 27/9-reviewen fandt
+  // det. Derfor kører porten hele året igennem.
   const I_DAG = new Date("2026-09-27T12:00:00.000Z");
+  const AARS_GAMLE_DATOER = [
+    "2026-01-01T12:00:00.000Z",
+    "2026-03-21T12:00:00.000Z",
+    "2026-06-01T12:00:00.000Z",
+    "2026-07-01T12:00:00.000Z",
+    "2026-09-15T12:00:00.000Z",
+    "2026-12-24T12:00:00.000Z",
+    "2027-01-01T12:00:00.000Z",
+    "2027-06-01T12:00:00.000Z",
+  ].map((iso) => new Date(iso));
 
   async function titelFor(
     locale: "da" | "se",
-    slug: string
+    slug: string,
+    today: Date = I_DAG
   ): Promise<string> {
     const prefix = getDageTilPrefix(locale);
     vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale(locale));
-    const metadata = await buildDageTilMetadata(prefix, slug, I_DAG);
+    const metadata = await buildDageTilMetadata(prefix, slug, today);
     const title = metadata.title;
     return (typeof title === "string" ? title : (title?.absolute ?? "")) as string;
   }
@@ -300,11 +316,25 @@ describe("dage-til titler", () => {
       expect(events.length).toBeGreaterThan(5);
       for (const event of events) {
         const slug = event[locale].slug;
-        const titel = await titelFor(locale, slug);
-        expect(titel.length, `${slug}: "${titel}"`).toBeLessThanOrEqual(60);
+        for (const iDag of AARS_GAMLE_DATOER) {
+          const titel = await titelFor(locale, slug, iDag);
+          expect(titel.length, `${slug} @ ${iDag.toISOString().slice(0, 10)}: "${titel}"`)
+            .toBeLessThanOrEqual(60);
+        }
       }
     });
   }
+
+  // Samme fejl, låst direkte: et fast datoheleds dag-tal er tre-cifret i store
+  // dele af året, og det er præcis de dage titlen bliver ét tegn for lang.
+  test("de laengste dage-til-sporgsmaal holder 60 tegn med et tresifret dag-tal", async () => {
+    const juleaften = getDageTilEvents("da").find((e) => e.da.slug === "juleaften")!;
+    for (const iso of ["2026-12-25T12:00:00.000Z", "2027-01-01T12:00:00.000Z", "2027-06-01T12:00:00.000Z"]) {
+      const titel = await titelFor("da", juleaften.da.slug, new Date(iso));
+      expect(titel, iso).toMatch(/ \d{3} dage$/);
+      expect(titel.length, `${iso}: "${titel}"`).toBeLessThanOrEqual(60);
+    }
+  });
 
   test("titlen har stadig spoergsmaalet og dage-tallet, og ingen brand i halen", async () => {
     // Uden denne kunne titlen blive kortere ved at miste svaret — det er den
@@ -328,11 +358,11 @@ describe("dage-til titler", () => {
   test("juleaftens titel og /datos ankertekst har datoen, folk søger på", async () => {
     const juleaften = getDageTilEvents("da").find((e) => e.da.slug === "juleaften")!;
     expect(juleaften.da.copy.question).toBe(
-      "Hvor mange dage er der til 24. december (juleaften)?"
+      "Hvor mange dage er der til juleaften 24. december?"
     );
     expect(juleaften.da.copy.short).toBe("juleaften");
     const titel = await titelFor("da", juleaften.da.slug);
-    expect(titel).toBe("Hvor mange dage er der til 24. december (juleaften)? 88 dage");
+    expect(titel).toBe("Hvor mange dage er der til juleaften 24. december? 88 dage");
     expect(titel.length).toBeLessThanOrEqual(60);
   });
 
