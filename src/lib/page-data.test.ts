@@ -1204,3 +1204,64 @@ describe("/brok — svar på regneregel-klyngen", () => {
     expect(elskatt?.answer).toContain("SEK");
   });
 });
+
+/**
+ * Titlerne i `page-data.ts` renderer gennem `title: { absolute }`, så
+ * layoutets `title.template` ("%s | <domænenavn>") **ikke** kører på dem.
+ * Det betyder to ting, og begge er målt her:
+ *
+ * 1. En titel der selv skriver domænenavnet brænder 17 tegn af Googles
+ *    ca. 60 tegn til noget læseren ikke søger på. Det var 20 strenge
+ *    (`metaTitle` og `ogTitle`), hvor `Låneberegner | MinBeregner.dk`
+ *    brugte 29 tegn på 12 tegn indhold.
+ * 2. `ogTitle` sendes videre til Facebook og LinkedIn. Brandet kommer der
+ *    fra `openGraph.siteName` (jf. `title-suffix.test.ts`), ikke fra at
+ *    stå i strengen — så den plads kan bruges på indhold i stedet.
+ */
+describe("sidetitler bruger ikke de 17 tegn på domænenavnet", () => {
+  const locales = ["da", "se", "no"] as const;
+
+  for (const locale of locales) {
+    test(`${locale}: ingen metaTitle/ogTitle skriver domænenavnet i sig`, () => {
+      const offenders: string[] = [];
+      for (const slug of getAvailableSlugs(locale)) {
+        const data = getPageData(slug, locale);
+        if (!data) continue;
+        for (const [felt, vaerdi] of [
+          ["metaTitle", data.metaTitle],
+          ["ogTitle", data.ogTitle],
+        ] as const) {
+          if (vaerdi && /MinBeregner\.dk|Beregner\.no|Beräknare\.se/.test(vaerdi)) {
+            offenders.push(`${slug}.${felt}: ${vaerdi}`);
+          }
+        }
+      }
+      expect(offenders).toEqual([]);
+    });
+  }
+
+  // Titlen skal også *indeholde* noget efter stripping — ellers ville en
+  // fejlslået regex bare have slettet hele strengen. De ti korte titler
+  // får deres frigjorte tegn brugt på det værktøjet gør, hentet fra
+  // sidens egen `description`, så påstanden kan efterprøves.
+  test("de ti korte titler navngiver hvad værktøjet beregner", () => {
+    const forventet: Record<string, RegExp> = {
+      laaneberegner: /månedsydelse/i,
+      billaan: /månedsydelse|ÅOP/i,
+      leasing: /leasingydelse/i,
+      forbrugslaan: /månedsydelse/i,
+      gaeldsfri: /lavine|snebold/i,
+      boliglaan: /månedsydelse|skattefradrag/i,
+      elberegner: /strøm/i,
+      solceller: /besparelse|tilbagebetalingstid/i,
+      timepris: /skat|ferie|drift/i,
+      termin: /terminsdato|graviditetsuge/i,
+    };
+    for (const [slug, mønster] of Object.entries(forventet)) {
+      const data = getPageData(slug, "da")!;
+      expect(data, slug).toBeDefined();
+      expect(data.metaTitle, slug).toMatch(mønster);
+      expect(data.metaTitle, slug).toBe(data.ogTitle);
+    }
+  });
+});

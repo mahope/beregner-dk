@@ -1,13 +1,29 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — **fjerde artikelbølge med "Regn det ud"** på `ceo/blog-naste-handling-2`:
-`boligstoette-2026-nye-regler` → `/boligstoette` (535 besøgende/28d),
-`kvadratmeter-saadan-regner-du-ud` → `/kvadratmeter` (388),
-`spar-penge-paa-braendstof` → `/braendstof` (265) og
-`dagpenge-saadan-finder-du-din-sats` → `/barselsdagpenge` (212). Dagpenge-artiklen
-linkede slet ikke til værktøjet. **Opgave 179 lukket:** C55/C56/C60 er dækket af
-komponenttests, der sætter præcis de felter noterne krævede. **Opgave 185 lukket:**
-undersøgelsen er færdig, svaret er "ja, slugs er en medvirkende årsag".
+STATUS: KØ — **20 `metaTitle`/`ogTitle` skrev domænenavnet ind i sig selv** på
+`ceo/titler-uden-brand`. Titlerne i `page-data.ts` renderer gennem
+`title: { absolute }`, så layoutets template **ikke** kører på dem — og 45 af
+strengene skrev alligevel `| MinBeregner.dk` (eller `.no`/`.se`) ind i titlen.
+17 tegn af Googles ~60 brugt på noget læseren ikke søger på; `Låneberegner |
+MinBeregner.dk` var 29 tegn for 12 tegn indhold. Strippet i alle tre sprog, og
+de **ti danske titler** der blev under 30 tegn har nu fået den frigjorte plads
+brugt på hvad værktøjet gør, hentet fra sidens egen `description`. 0 af 160
+`metaTitle` er over 60 tegn. Målt på rigtig server (`next start` :3987, port
+verificeret fri inden start): `/laaneberegner` 29 → **51**, `/elberegner` 27 →
+**46**, `/pension` 65 → **48**; `/dato` `/procent` `/moms` `/tidszone` uændrede,
+`<h1>` uændret, 0 forekomster af brandet i nogen `<title>`, 0 brand-strenge i
+`se`/`no`. **Gate grøn:** lint (**618 filer**), **3016 tests / 190 filer** (fra
+3001/189), build (**142 sider**), `locale-leak.mjs --gate` exit 0 (743/709/34/0
+uændrede). **Modsvejs verificeret: 4 af 5 nye assertions falder** med master's
+`page-data.ts` (stashed) — og da testen skrev rødt på *svensk* og *norsk* under
+den første strip, viste den at fejlen ikke var dansk alene (19 `se`, 15 `no`).
+
+**Køen var tom, og det er selv en fund:** CEO-kø punkt 0 er verificeret lukket i
+kode (Valborg 30. april, svensk påskafton `offsetDays: -1`, dansk sankthans fast
+23./24. juni, `toUtcMidnight` i `Europe/Copenhagen`, lejeloven § 5, `maneder:
+12`, 1. advent 27/11–3/12), 97/98/119/183 er `BLOCKED` på Mads' svar, og 187
+er bevidst udsat til 13/10. De tre åbne deploy-noter har første vindue 07:30, så
+de var ikke rørt.
 
 **Beslutning om opgave 187 (svenske slugs):** ikke før **2026-10-13**. C195/C196's
 svenske titler deployer 30/9 07:30, og 185's egen beskeds var at slugs først er
@@ -20,8 +36,8 @@ eller ægte ruter.
 ## Kvalitetsgate (repoets egne scripts fra package.json)
 
 ```
-npm run lint     # biome lint ./src      — 616 filer
-npm run test     # vitest run            — 2992 tests / 189 filer
+npm run lint     # biome lint ./src      — 618 filer
+npm run test     # vitest run            — 3016 tests / 190 filer
 npm run build    # next build            — 142 sider
 node scripts/locale-leak.mjs --gate       # exit 0
 ```
@@ -33,6 +49,34 @@ Alle fire var grønne før merge 2026-09-29 22:45.
 
 Fire noter. HTTP 200 beviser intet: ingen rører en URL, kun `<title>`- og
 `og:title`-strenge, artiklernes **slutning** og rene visuelle elementer.
+
+- ⏳ **VERIFICÉR DEPLOY: 20 titler skal ikke længere indeholde domænenavnet.**
+  Kode + plan i ét squash-commit på `ceo/titler-uden-brand`. Første
+  kandidatvindue **2026-09-30 07:30**. Rørte filer: `src/lib/page-data.ts`
+  (**45 strenge**, kun `metaTitle`/`ogTitle` — `git diff` verificerer at intet
+  andet er rørt) og `src/lib/page-data.test.ts` (**+61**). Ingen `<h1>`, ingen
+  `description`, ingen beregningslogik, ingen ny URL, ingen sitemap. Verificér
+  ved **indhold**:
+  1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
+  2. `<title>` på de ti omskrevne: `/laaneberegner` **"Låneberegner: beregn
+     månedsydelse og sammenlign lån"** (51) · `/elberegner` "Elberegner: hvad
+     koster dine apparater i strøm" (46) · `/termin` "Terminsdato Beregner: se
+     din graviditetsuge" (43) · `/pension` **"Pensionsberegner 2026: folkepension
+     16.273 kr/md"** (48, var 65).
+  3. **Ingen `<title>` på minberegner.dk, beraknare.se eller beregner.no må
+     indeholde "MinBeregner.dk", "Beräknare.se" eller "Beregner.no"** — grep
+     på de tre domæners hovedsider og de ti sider.
+  4. **Kontrol:** `/dato` "Beregn dage til en dato: 1. jan. 2026→2027 = 365" ·
+     `/procent` "Procentberegner: 10 % af 250 kr. = 25 kr." · `/moms` og
+     `/tidszone` uændrede, og alle `<h1>` uændrede.
+  Målt på rigtig server før merge (`next start` :3987, porten verificeret fri
+  *inden* start) — alle otte tal ovenfor er rigtige i den danske render, og 0
+  brand-strenge i `se`/`no` er målt i data-laget. **Gate grøn:** lint (**618
+  filer**), **3016 tests / 190 filer**, build (**142 sider**),
+  `locale-leak.mjs --gate` exit 0. De fem nye assertions **fejler mod master's
+  `page-data.ts`** (verificeret med `git stash`: 4 af 5), så de låser den gamle
+  fejl fast — og da den første strip kun rørte `da`, skrev testen rødt på *se*
+  (19 strenge) og *no* (15), hvilket viste at fejlen ikke var dansk alene.
 
 - ⏳ **VERIFICÉR DEPLOY: fire artikler skal slutte med "Regn det ud" — anden
   bølge.** Kode + plan i ét squash-commit på `ceo/blog-naste-handling-2`.
