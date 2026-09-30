@@ -457,7 +457,7 @@ export const DAGE_TIL_EVENTS: DageTilEvent[] = [
           {
             question: "Räknas skärtorsdag och långfredag med?",
             answer:
-              "Båda är officiella helgdagar och ligger 3 respektive 2 dagar före påskdagen.",
+              "Långfredagen är en allmän helgdag enligt lagen (1989:253). Skärtorsdagen är det inte — den räknas visserligen ofta som en röd dag, men det är kollektivavtalet som avgör om du har ledigt.",
           },
           {
             question: "Kan jag räkna dagar mellan två helgdagar?",
@@ -522,12 +522,12 @@ export const DAGE_TIL_EVENTS: DageTilEvent[] = [
           {
             question: "Är skärtorsdagen en röd dag?",
             answer:
-              "Ja, den är en torsdag och en helgdag, men den är inte automatiskt en frivillig heldag eller dagpenning.",
+              "Ja, i praktiken. Många kollektivavtal ger dig ledigt med lön skärtorsdagen, och derför kaldes den ofta en röd dag. Hon är däremot inte en allmän helgdag enligt lagen (1989:253) — en röd dag får du av kollektivavtalet, medan en allmän helgdag står i lagen.",
           },
           {
             question: "Vad är skillnaden mellan skärtorsdag och långfredag?",
             answer:
-              "Skärtorsdagen är 3 dagar före påskdagen och långfredagen 2 dagar före. Båda är helgdagar.",
+              "Skärtorsdagen är 3 dagar före påskdagen och långfredagen 2 dagar före. Långfredagen är en allmän helgdag enligt lagen (1989:253), men skärtorsdagen är det inte — den är bara en röd dag.",
           },
         ],
       },
@@ -1158,7 +1158,7 @@ export const DAGE_TIL_EVENTS: DageTilEvent[] = [
         facts: [
           "1 advent är alltid den första söndagen i advent, och infaller alltid mellan 27 november och 3 december.",
           "Advent har fyra söndagar, och den fjärde infaller alltid mellan 18 och 24 december — alltså nära juldagen.",
-          "Första advent är inte en allmän helgdag enligt lag (1989:253) om allmänna helgdagar. Däremot är den en söndag, och alla söndagar är röda dagar i Sverige.",
+          "Första advent är en söndag, och lagen (1989:253) om allmänna helgdagar räknar alla söndagar som allmänna helgdagar. Advent står inte självt i lagen — det är söndagen som gör 1 advent till en helgdag.",
           "2026: 29 november, 2027: 28 november och 2028: 3 december.",
         ],
         faq: [
@@ -1175,7 +1175,7 @@ export const DAGE_TIL_EVENTS: DageTilEvent[] = [
           {
             question: "Är 1 advent en röd dag?",
             answer:
-              "Ja, men bara för att den är en söndag. Adventssöndagarna står inte själva i lagen (1989:253) om allmänna helgdagar, till skillnad från långfredagen, påskdagen och annandag påsk.",
+              "Ja. Lagen (1989:253) om allmänna helgdagar räknar alla söndagar som allmänna helgdagar, så adventssöndagarna är helgdagar. Advent står inte upptaget i lagen själv — det är att de alltid är söndagar.",
           },
         ],
       },

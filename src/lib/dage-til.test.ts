@@ -1639,7 +1639,9 @@ const LOEN_SIGER_HELGDAG: Record<string, boolean> = {
   "kristi-himmelsfardsdag": true, // Kristi himmelsfärdsdag
   pingstdagen: true, // pingstdagen
   valborg: false,
-  "1-advent": false, // 1. advent er en söndag, men inte en helgdag
+  "1-advent": true, // 1 § första stycket: "söndagar, däribland påskdagen och
+  // pingstdagen". Advent står inte upptaget själv, men 1 advent är *alltid*
+  // en söndag, så loven räknar den — mätt på hændelsens egen dag.
 };
 
 /** "er en allmän helgdag", "räknas som helgdag", "officiell svensk helgdag". */
@@ -1708,6 +1710,197 @@ describe("svenska helgdagspåstande mod lagen (1989:253) 1 §", () => {
     expect(fejl).toEqual([]);
   });
 });
+
+/**
+ * Det bløde "helgdag" — uden "allmän", "officiell" eller "laglig" foran.
+ *
+ * `kalderDetHelgdag` målte kun de formuleringer den oprindelige tekst brugte,
+ * så to sætninger på `/skartorsdagen` slap igennem: "Ja, den är en torsdag och
+ * en helgdag" og "Båda är helgdagar" — på en side hvis egen faktaboks tre
+ * linjer ovenfor siger at skärtorsdagen *inte* är en allmän helgdag. Det er
+ * lovens egen skelnen, som brødteksten havde tabt: en **röd dag** (de facto
+ * fridag, ifølge kollektivavtal) er ikke det samme som en **allmän helgdag**
+ * (fastsat i lag), og skärtorsdagen er den første uden at være den anden.
+ *
+ * Formen er snæver med vilje, efter to målerfælder i dette repo (ugedags-
+ * porten 30/9 fandt 15 fund hvor 13 var rigtig tekst om andre dage):
+ *
+ *  1. Kun klausler der *navngiver* en dag loven ikke tæller — i klauslen
+ *     eller i det FAQ-spørgsmål den står i — tjekkes. Ellers ville "Datum-
+ *     räknaren visar också veckor, arbetsdagar och helgdagar" på
+ *     `/1-december` blive afvist for en korrekt generisk omtale.
+ *  2. Negationen skal ligge i *samme klausul* som ordet. Sætningen "Ja, den
+ *     är en torsdag och en helgdag, men den är inte automatiskt en frivillig
+ *     heldag" indeholder netop denne fejl, og en sætningsvis negation ville
+ *     have godkendt den — så komma er også et skel.
+ *
+ * Undtagelsen er klauslen der selv bruger det præcise ord: "röd dag" /
+ * "röda dagar" er det korrekte fagord for en fridag uden lovens støtte.
+ */
+const HELGDAGSORD = /helgdag/;
+
+/** "inte en allmän helgdag", "saknas i listan över allmänna helgdagar". */
+const NEKTER_I_KLAUSUL = /\binte\b[^.?!,]{0,40}helgdag|saknas|omfattas inte|faller inte/;
+
+const ROED_DAG = /röd dag|röda dagar/;
+
+/** Sætninger, og sætningernes klausler — skel på både punktum og komma. */
+const klausler = (tekst: string) => tekst.split(/(?<=[.!?])\s+|(?<=[a-zåäö]),\s+/i);
+
+/**
+ * En klausal der *predikerer* helgdag om den lovsfrie dag: "den är en torsdag
+ * och en helgdag", "Båda är helgdagar". Det er den konstruktion, der gør
+ * helgdagsordet til en påstand *om dagen* — og den skal ikke forveksles med
+ * omtalen af en anden dag, som i "Det är allhelgonadagen 1 november och alla
+ * helgons dag som är helgdagar" (halloween-siden, hvor allhelgons dag *er* en
+ * allmän helgdag). Derfor står pronomenet først og verbet tæt på: med en
+ * åben længde ville porten igen ramme rigtig tekst om andre dage.
+ *
+ * ⚠️ Ordgrænserne er talt i ord, ikke skrevet med `\b`: JavaScripts `\w` er
+ * ASCII, så `\bär` aldrig kan matche — et portens mønster der *ser* rigtigt ud
+ * og så aldrig fanger noget.
+ */
+const PRAEDIKERER_HELGDAG =
+  /^(?:den|det|dagen|den dagen|båda|båda dagarna)(?:\s+\S+){0,2}\s+(?:er|är|räknas)(?:\s+\S+){0,4}\s+helgdag/iu;
+
+const svenskSætninger = () =>
+  DAGE_TIL_EVENTS.flatMap((event) => {
+    const se = event.se;
+    if (!se) return [];
+    return [
+      ...se.copy.facts.map((tekst) => ({ hændelse: se.slug, spoergsmaal: "", tekst })),
+      ...se.copy.faq.map((f) => ({ hændelse: se.slug, spoergsmaal: f.question, tekst: f.answer })),
+    ];
+  });
+
+/**
+ * De dage 1 § *ikke* tæller, med de navne brødteksten skriver dem med —
+ * både "skärtorsdagen" og "skärtorsdag", fordi et FAQ-spørgsmål skriver
+ * ubestemt ("Räknas skärtorsdag och långfredag med?") mens svaret skriver
+ * bestemt ("Båda är helgdagar"), og det er præcis den ubestemte sætning
+ * porten skal fange.
+ */
+const dageLovenIkkeTæller = () => {
+  const dage = new Map<string, string[]>();
+  for (const event of DAGE_TIL_EVENTS) {
+    const se = event.se;
+    if (!se || LOEN_SIGER_HELGDAG[se.slug] !== false) continue;
+    const kort = se.copy.short.toLowerCase();
+    const ubestemt = /(?:en|et|ar)$/.test(kort) ? kort.slice(0, -2) : kort;
+    dage.set(se.slug, ubestemt === kort ? [kort] : [kort, ubestemt]);
+  }
+  return [...dage];
+};
+
+describe("det bløde \"helgdag\" på en dag loven ikke tæller", () => {
+  test("skärtorsdagen og de andre lovfrie dage må ikke kaldes helgdag i brødteksten", () => {
+    const fejl: string[] = [];
+    for (const { hændelse, spoergsmaal, tekst } of svenskSætninger()) {
+      const spoergsmaaletNævnerLovfriDag = `${spoergsmaal}`.toLowerCase();
+      for (const klausul of klausler(tekst)) {
+        if (!HELGDAGSORD.test(klausul)) continue;
+        if (NEKTER_I_KLAUSUL.test(klausul) || ROED_DAG.test(klausul)) continue;
+        const laeg = klausul.toLowerCase();
+        // (1) Klauslen navngiver en lovsfri dag, eller (2) den *predikerer*
+        // helgdag om den dag dens FAQ-spørgsmål handler om.
+        const nævnteITeksten = dageLovenIkkeTæller().filter(([, varianter]) =>
+          varianter.some((navn) => laeg.includes(navn)),
+        );
+        const nævnteISpørgsmålet = PRAEDIKERER_HELGDAG.test(klausul)
+          ? dageLovenIkkeTæller().filter(([, varianter]) =>
+              varianter.some((navn) => spoergsmaaletNævnerLovfriDag.includes(navn)),
+            )
+          : [];
+        const nævnte = [...new Map([...nævnteITeksten, ...nævnteISpørgsmålet]).keys()];
+        if (nævnte.length === 0) continue;
+        fejl.push(`${hændelse} nævner ${nævnte.join(" + ")}: ${klausul}`);
+      }
+    }
+    expect(fejl).toEqual([]);
+  });
+
+  test("skærtorsdagen er sig selv modsigende uden forskellen mellem röd dag og allmän helgdag", () => {
+    const skartorsdagen = DAGE_TIL_EVENTS.find((e) => e.se?.slug === "skartorsdagen");
+    const tekster = [
+      ...skartorsdagen!.se!.copy.facts,
+      ...skartorsdagen!.se!.copy.faq.map((f) => f.answer),
+    ];
+    // Forskellen skal stå på siden — ellers står der bare en ny modsigelse,
+    // hvor "helgdag" var ("en röd dag", uden at nogen siger hvad det er).
+    expect(tekster.filter((t) => ROED_DAG.test(t)).length).toBeGreaterThanOrEqual(1);
+    expect(tekster.some((t) => t.includes("allmän helgdag") && t.includes(" inte "))).toBe(true);
+  });
+});
+
+/**
+ * Loven tæller **alle søndagar**, ikke kun dem den navngiver.
+ *
+ * 1 § första stycket: "Med allmän helgdag avses i lag eller annan författning
+ * söndagar, däribland påskdagen och pingstdagen". Advent står ikke opptaget i
+ * nogen liste — men 1 advent är *alltid* en söndag, så loven tæller den. Det
+ * er den ræson, der låste `LOEN_SIGER_HELGDAG["1-advent"]` til `true` 30/9:
+ * tabellen sagde `false`, og siden skrev derfor "Första advent är inte en
+ * allmän helgdag enligt lag (1989:253)" — den modsagde loven med lovens eget
+ * navn, på en side der to linjer længere nede siger at alle søndagar er
+ * røde dage.
+ *
+ * Hændelserne er ikke håndplukkede: `pingstdagen` står ikke i nogen dansk
+ * kalenderfil, men er påske + 49 dage, altså en søndag. Derfor regnes her de
+ * faktiske datoer, som `LOEN_SIGER_HELGDAG` gør andet sted.
+ */
+describe("1 § räknar alla söndagar, också dem lagen ikke navngiver", () => {
+  const altidSondag: Record<string, (aar: number) => Date> = {
+    paskdagen: (aar) => easterSunday(aar),
+    pingstdagen: (aar) => new Date(easterSunday(aar).getTime() + 49 * 86_400_000),
+    "1-advent": (aar) => forstaAdvent(aar),
+  };
+
+  test("en hændelse der altid er en söndag skal være en allmän helgdag i tabellen", () => {
+    for (const aar of Array.from({ length: 61 }, (_, i) => 2020 + i)) {
+      for (const [slug, dato] of Object.entries(altidSondag)) {
+        expect({ slug, aar, ugedag: dato(aar).getUTCDay() }).toEqual({ slug, aar, ugedag: 0 });
+        expect(LOEN_SIGER_HELGDAG[slug]).toBe(true);
+      }
+    }
+  });
+
+  /**
+   * De søndage loven *ikke* navngiver — dem er søndagsreglen den eneste grund
+   * til. Tabellen må sige `true`, **og** siden skal forklare hvorfor, ellers
+   * kan næste skrivning finde på at sige "1 advent er ikke en allmän helgdag"
+   * igen, denne gang med en anden begrundelse.
+   *
+   * Påskdagen och pingstdagen er *nævnt* i 1 §, så de behøver ikke den
+   * forklaring — derfor står de ikke i denne liste.
+   */
+  test("dagen loven ikke navngiver skal sige at det er söndagen, der gør den til helgdag", () => {
+    for (const slug of ["1-advent"]) {
+      expect(LOEN_SIGER_HELGDAG[slug]).toBe(true);
+      const hændelse = DAGE_TIL_EVENTS.find((e) => e.se?.slug === slug);
+      expect(hændelse?.se).toBeDefined();
+      const tekster = [
+        ...hændelse!.se!.copy.facts,
+        ...hændelse!.se!.copy.faq.map((f) => `${f.question} ${f.answer}`),
+      ];
+      // Forklaringen skal være en *positiv* sætning: nævner søndagen, nævner
+      // helgdagen og benævner den ikke. Ellers slap den gamle tekst igennem på
+      // "Adventssöndagarna står inte själva i lagen … om allmänna helgdagar",
+      // der nævner begge ord og alligevel modsiger loven.
+      const forklarerSondagen = tekster.some((t) =>
+        t
+          .split(/(?<=[.!?])\s+/)
+          .some(
+            (sætning) =>
+              sætning.includes("söndag") &&
+              sætning.includes("helgdag") &&
+              !NEKTER_I_KLAUSUL.test(sætning),
+          ),
+      );
+      expect({ slug, forklarerSondagen }).toEqual({ slug, forklarerSondagen: true });
+    }
+  });
+});
+
 
 /**
  * Ugedags-påstande i brødteksten, målt mod de datoer ankeret faktisk producerer.

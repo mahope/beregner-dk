@@ -21241,3 +21241,49 @@ Planen var over 40 KB efter 188. De tre `BLOCKED`-opgaver stod med
   (snippet/intention), ikke på to separate sidefejl — men at *finde* den kræver
   stadig kildefordelingen fra Mads, så opgaven står.
 
+
+## Opgave 190 (30/9 2026) — `ceo/helgdag-uden-allman`
+
+Fandt under F8's audit, samme fil og samme lov. F8's port (`kalderDetHelgdag`)
+matchede kun "allmän helgdag", "allmänna helgdagar", "helgdag i den svenska
+kalendern", "officiell svensk helgdag", "officiella svenska helgdagar" — det
+bløde "helgdag" var ikke på listen. Tre sætninger modsagde deres egen side:
+
+| Side | Skrev | Rigtigt |
+|---|---|---|
+| se `/skartorsdagen` | "Ja, den är en torsdag och en helgdag, men den är inte automatiskt en frivillig heldag eller dagpenning." | skärtorsdagen är **inte** en allmän helgdag; den är en röd dag |
+| se `/skartorsdagen` | "…långfredagen 2 dagar före. Båda är helgdagar." | kun långfredagen |
+| se `/paskdagen` | "Båda är officiella helgdagar och ligger 3 respektive 2 dagar före påskdagen." | kun långfredagen |
+
+Den tredje lå på en *anden* side: porten målte på sidens egen slug, ikke på den
+dag sætningen omtaler. Derfor tjekker den nye port klausler, der *predikerer*
+helgdag om en dag loven ikke tæller — også når nævnet står i FAQ-spørgsmålet.
+
+**Den fjerde fejl, fra loven selv.** 1 § första stycket (riksdagen.se 30/9
+20:45): "Med allmän helgdag avses i lag eller annan författning **söndagar**,
+däribland påskdagen och pingstdagen, nyårsdagen, trettondedag jul, första maj,
+juldagen och annandag jul, även när de inte infaller på en söndag, långfredagen,
+annandag påsk, Kristi himmelsfärdsdag, nationaldagen, midsommardagen och alla
+helgons dag." Advent står ikke i listen, men 1. advent er *altid* en søndag, så
+loven tæller den. `LOEN_SIGER_HELGDAG["1-advent"]` sagde `false`, og siden skrev
+"Första advent är inte en allmän helgdag enligt lag (1989:253) om allmänna
+helgdagar. Däremot er den en söndag, och alla söndagar är röda dagar i Sverige."
+— modsagde loven med lovens eget navn. Dansk side urørt: i dansk ret er
+søndage ikke helligdage, så påstanden der er et andet spørgsmål.
+
+**Målerfælder undervejs (tre, alle samme familie).**
+
+1. `\b` før `är` matcher aldrig — JavaScripts `\w` er `[A-Za-z0-9_]`, så æ/ø/å er
+   ikke ordtegn. En port skrevet som `\b(?:er|är)\b` så rigtig ud og fangede intet.
+   Ordgrænser skrives som ordtælling: `(?:\s+\S+){0,4}`.
+2. Negationen skal ligge i samme *klausul* som ordet. Sætningsniveau ville
+   godkende "Ja, den är en torsdag och en helgdag, **men den är inte**
+   automatiskt en frivillig heldag" — netop fejlen.
+3. Negationen skal også kunne stå *bagefter* ("Nyårsdagen är en officiell
+   helgdag i Sverige, nyårsafton är inte."), ellers afvises korrekt tekst.
+
+**Gate:** `npm run lint` 627 filer ren, `npm run test` 3.258 tests / 197 filer
+grønne, `npm run build` 142 sider, `node scripts/locale-leak.mjs --gate` exit 0.
+Fire mutationer kontrolleret, alle faldt: gammel skärtorsdagen-tekst (2 fund),
+gammel paskdagen-svar (1 fund), `1-advent: false` i tabellen (3 fejl), begge
+gamle 1-advent-tekster (1 fejl).

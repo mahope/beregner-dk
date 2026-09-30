@@ -1,59 +1,50 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — 30/9 20:25. **Opgave 188 er færdig** (`ceo/sidste-hverdag-paastand`):
-tre ugedags-påstande i `/dage-til/`-klyngen var kun sande i nogle år, og er nu
-rettet *og* målt mod de datoer ankeret faktisk producerer. De to i opgaveteksten
-(sidste hverdag/vardag i december) plus to den fandt: sankthans som "en
-almindelig hverdag" (23. juni er weekend i 2029/30/35/40) og dansk skærtorsdag,
-der svarede *ja* til "er skærtorsdag en fridag" på en side der siger at den
-altid er en **torsdag**. Ny port regner 61 år frem, 3 nye tests, alle tre
-mutation-kontrolleret.
+STATUS: KØ — 30/9 21:05. **Opgave 190 er færdig** (`ceo/helgdag-uden-allman`):
+F8's port målte kun "allmän helgdag", så det bløde "helgdag" slap igennem — tre
+sætninger sagde at skærtorsdagen *er* en helgdag, to steder på dens egen side og
+en på `/paskdagen`, modsat sidens egen faktaboks. Ny port rammer det bløde ord
+på **klausul**-niveau og skelner *predikat* ("den är en helgdag") fra *omtale af
+en anden dag* ("Det är allhelgons dag som är helgdagar"), så den fanger klassen
+uden at kræve rigtig tekst ødelagt. Loven hentet fra riksdagen.se 30/9 20:45.
 
-**Næste opgave: 190** — F8's port matcher kun "allmän helgdag", ikke det bløde
-"helgdag", så se `/skartorsdagen` stadig modsiger sin egen faktaboks to steder.
-Det er F8's fejlsøgning, ikke F8's arbejde: porten låser de ord den så.
+**⚠️ Den fjerde fund var værre end de tre.** Læsning af 1 § ("söndagar,
+däribland påskdagen og pingstdagen") viste at `LOEN_SIGER_HELGDAG["1-advent"]`
+var `false` — men 1. advent er *altid* en søndag, så loven tæller den. Siden
+skrev derfor "Första advent är inte en allmän helgdag enligt lag (1989:253)" og
+modsagde loven med lovens eget navn, to linjer under at alle søndagar er røde
+dage. Rettet, og to nye tests låser det: tabellen skal sige `true` for enhver
+hændelse der *beregnes* at være en søndag (påske, påske+49, 1. advent — 61 år),
+og siden skal forklare at det er søndagen, der gør den til helgdag.
+
+**Næste opgave: 189** — mål brødtekstal mod en kilde, ikke mod et
+hjemmeskrevet script. 190 er et eksempel på hvorfor: porten skal *regne* noget
+(fra loven, fra kalenderen), ellers låser den de ord den så.
+
+**⚠️ Målerfældens tredje udløber (30/9 20:40).** JavaScripts `\w` er ASCII, så
+`\b` før `är` **aldrig** matcher — en port der så rigtig ud og så intet fangede.
+Ordgrænser skal skrives som ordtælling (`(?:\s+\S+){0,4}`), ikke `\b`.
 
 **⚠️ Målerfældens anden udløber (30/9 20:20).** En *bredere* ugedags-port
 ("enhver nævnt ugedag skal være blandt ankerets dage") gav 15 fund, hvor 13 var
-**om andre dage** — "Fredagen efter Kristi himmelfartsdag er en hverdag",
-"sommerferien starter den sidste lørdag i juni" på efterårsferiens side. Alle 13
-var rigtig tekst, som porten ville have tvunget til ødelæggelse. Samme fejl som
-den målerfælde nedenfor, fra den anden side. 188's port er derfor snæver: den
-tester de to påstande der faktisk var forkerte, ikke alle ord i brødteksten.
+**om andre dage**. 190's port er snæver af samme grund: den tjekker kun klausler
+der navngiver eller *predikerer* om en lovfri dag.
 
 **⚠️ Målerfælde fundet 30/9 20:00 — læs den før du "beviser" et tal.** Et
-egen-script til at tjekke påstand i tekst fik **tre fejl i træk** på
-rigtige påstande, før det fandt den ene rigtige. (1) Det sorterede datoer
-absolut, så "ligger mellem 1. maj (2008) og 3. juni (2038)" læst som
-forkert — men påstanden er om *dag-i-året*, og den er korrekt. (2) Dets
-ugenummer forankrede på 1. januar i stedet for ISO-mandagen, så "2. pinsedag
-ligger i uge 20 til 24" læst som uge 19-24. (3) Sætnings-vis fejlfindelse
-ramte to *korrekte* negativer ("Första advent är **ikke** en allmän
-helgdag" og "Pingstdagen är en allmän helgdag ... **Måndagen efter är
-däremot inte**"). Konklusion: et hjemmeskrevet målescript skal **krydses
-mod lovens eller kalenderens egen tekst** og måske to uafhængige
-implementeringer, før en påstand i brødtekst rettes. Det er præcis den
-fejl, reviewer-loopet selv lavede 29/9 i `pinse-intervaller.ts` (4 kollisionsår
-før det fandt 7). Rett aldrig rigtig tekst på et dårligt målescript.
+egenscript til at tjekke påstand i tekst fik **tre fejl i træk** på rigtige
+påstande. Konklusion: et hjemmeskrevet målescript skal **krydses mod lovens
+eller kalenderens egen tekst** og måske to uafhængige implementeringer, før en
+påstand i brødtekst rettes. Rett aldrig rigtig tekst på et dårligt målescript.
 
-**Fem VERIFICÉR-noter åbne** (fra 188, F8, F7, F6 og F4). F1/F3/F5 og opgaver
-97/98/119/183 er blokeret af svar fra Mads. **Opgave 187 må ikke røres før
-13/10.** **CEO-køen er tom** — alle otte punkter blev rettet i `aca17e5` og
-verificeret mod koden 30/9 19:10. Review-fund 29/9 er begge mærket
-`RETTET d563ba2` og lukket.
+**⚠️ Målerfælde (30/9 15:40).** `npm run test` kører `locale-leak-gate.test.ts`,
+der med vilje planterer **to** danske lækager. Derfor kommer to
+`FEJL: n ureviewet(e)`-blokke i output. Det er **ikke** fund i din diff. Kør
+gaten separat: `node scripts/locale-leak.mjs --gate` (exit 0).
 
-**⚠️ Målerfælde (30/9 15:40, samme klasse som C70's).** `npm run test` kører
-`locale-leak-gate.test.ts`, som med vilje planterer **to** danske lækager og
-hævder at scanneren finder dem. Derfor kommer der **to** `FEJL: n ureviewet(e)`-
-blokke i output: én med 34 strenge fra `promille/page.tsx` (testen fjerner
-`{locale === "da" && (`-porten, så landestabelens danske rækker bliver
-læsbare) og én med 1 fra `procent/page.tsx` (plantet JSX-lækage). Begge
-gendannes i en `finally`. Det er **ikke** fund i din diff. Kør gaten separat:
-`node scripts/locale-leak.mjs --gate` (exit 0).
-
-**Generelt om gaten:** `REVIEWED`-poster i `scripts/locale-leak.mjs` matches på
-`file` + `key` + `string`, **ikke** linjenummer — så en indsats i en fil flytter
-ikke godkendt-fund.
+**Seks VERIFICÉR-noter åbne** (fra 190, 188, F8, F7, F6 og F4). F1/F3/F5 og
+opgaver 97/98/119/183 er blokeret af svar fra Mads. **Opgave 187 må ikke røres
+før 13/10.** **CEO-køen er tom** — alle otte punkter blev rettet i `aca17e5`.
+Review-fund 29/9 er begge mærket `RETTET d563ba2` og lukket.
 
 ## Fase 3 — trafik-drevet
 
@@ -255,6 +246,17 @@ er usynlig for `curl` — en dansk læser skal bare have et forkert tal. De otte
 lukkede noter er verificeret 30/9 17:46-17:53 på indhold; alle målinger står i
 `docs/plan-arkiv.md`.
 
+- ⏳ **Skærtorsdagen må ikke kaldes helgdag, og 1. advent må ikke kaldes
+  ikke-helgdag.** `ceo/helgdag-uden-allman`. På
+  `https://beraknare.se/dagar-till/skartorsdagen` må **"en torsdag och en
+  helgdag"** og **"Båda är helgdagar"** ikke forekomme nogen steder; siden skal
+  forklare forskellen mellem *röd dag* og *allmän helgdag*. På
+  `https://beraknare.se/dagar-till/paskdagen` må **"Båda är officiella
+  helgdagar"** ikke forekomme. På `https://beraknare.se/dagar-till/1-advent` må
+  **"Första advent är inte en allmän helgdag"** ikke forekomme — lovens 1 §
+  tæller alle søndagar. HTTP 200 beviser intet, det er brødtekst. Prøven på
+  dansk er `src/lib/dage-til.test.ts` efter deploy. Vindue **30/10 07:30**.
+
 - ⏳ **Ingen side må kalde en skiftende dato en hverdag, og skærtorsdag er en
   torsdag.** `ceo/sidste-hverdag-paastand`. På
   `https://minberegner.dk/nyaarsaften` og `https://beraknare.se/nyarsafton`
@@ -435,40 +437,44 @@ lukkede noter er verificeret 30/9 17:46-17:53 på indhold; alle målinger står 
   *nej* på fridags-spørgsmålet og kun falder på uge 4 (torsdag). Alle tre
   mutation-kontrollerede mod den gamle kode — alle tre faldt.
 
-#### 190. [ ] 2026-09-30 — Kø — F8's port slipper "helgdag" uden "allmän", så se `/skartorsdagen` stadig modsiger sig selv
+#### 190. [x] ✅ `ceo/helgdag-uden-allman` — det bløde "helgdag" på en dag loven ikke tæller (30/9)
 
-- **Datagrund:** fundet under 188's audit, samme fil og samme række.
-  `dage-til.ts:513` siger efter F8's rettelse *korrekt*: "Långfredag, påskdagen
-  og annandag påsk är alla allmänna helgdagar enligt lagen (1989:253).
-  **Skärtorsdag är det inte — det är en vanlig arbetsdag.**" To sætninger
-  længere nede på **samme side** siger modsatte: `dage-til.ts:525` svarer på
-  "Är skärtorsdagen en röd dag?" med "**Ja, den är en torsdag och en
-  helgdag**", og `dage-til.ts:530` siger "Skärtorsdagen är 3 dagar före
-  påskdagen och långfredagen 2 dagar före. **Båda är helgdagar.**"
-- **Hvorfor F8's port ikke fandt det:** `kalderDetHelgdag` matcher kun
-  "allmän helgdag", "allmänna helgdagar", "helgdag i den svenska kalendern",
-  "officiell svensk helgdag" og "officiella svenska helgdagar" — **det bløde
-  "helgdag" er ikke på listen**. Det er præcis F8's fejlsøgning, som kun
-  rammer de formuleringer den oprindelige tekst brugte. F8 rettede de tre
-  sætninger med *fejl* og lod de to med *mindre tydelig* fejl stå, fordi de
-  ikke matchede mønstret. Samme fejlklasse som review-fund 2 om docblockens
-  årstal: porten låser de ord, den så, ikke påstanden.
-- **Fagligt er der et skelnepunkt, der skal skrives rigtigt:** svensk *röd
-  dag* (de facto fridag, grundet på avtal eller sed) er **ikke** det samme som
-  *allmän helgdag* (fastsat i lag). Skärtorsdagen er en röd dag uden at være
-  en allmän helgdag. Svaret på spørgsmålet skal derfor skelne mellem de to
-  ord, ikke bare bytte "helgdag" med "röd dag" — ellers står der en ny
-  modsigelse på siden i stedet for den gamle. Kilde: riksdagen.se, lag
-  (1989:253) 1 § (samme kilde som F8's).
-- **Acceptkriterier:** de to sætninger er skrevet så de modsider ikke
-  faktaboksen, og forskellen mellem *röd dag* og *allmän helgdag* er
-  forklaret mindst én gang på siden. **Port:** `kalderDetHelgdag` udvides til
-  også at ramme det bløde "helgdag"/"helgdagar" på en hændelse, loven ikke
-  tæller, **med mindre** sætningen selv siger at den *er* en röd dag — så
-  klassen ikke kan komme tilbage. Gaten grøn.
-- **MÅL:** ingen trafikvirkning — se `/skartorsdagen` er ikke i GSC's top-15.
-  Samme værdi som 188: en svensk læser skal ikke møde to sider der siger
-  modsatte ting om loven på 200 ord.
+- **Datagrund:** F8's fejlsøgning. `kalderDetHelgdag` matchede kun "allmän
+  helgdag", "allmänna helgdagar", "helgdag i den svenska kalendern",
+  "officiell svensk helgdag" og "officiella svenska helgdagar" — det bløde
+  "helgdag" var ikke på listen. Den fandt tre sætninger, der modsagde deres
+  egen faktaboks: `skartorsdagen:525` ("Ja, den är en torsdag och en helgdag"),
+  `skartorsdagen:530` ("Båda är helgdagar") og `paskdagen:460` ("Båda är
+  officiella helgdagar") — sidstnævnte på en helt anden side, fordi porten
+  målte på *sidens* slug og ikke på den dag sætningen omtaler.
+- **Den fjerde fejl fandt loven, ikke porten.** 1 § första stycket: "Med allmän
+  helgdag avses … **söndagar**, däribland påskdagen och pingstdagen". Advent står
+  ikke i nogen liste, men 1. advent er *altid* en søndag, så loven tæller den —
+  og tabellen sagde `false`. Siden skrev derfor "Första advent är ikke en allmän
+  helgdag enligt lag (1989:253)", modsat loven med lovens eget navn, to linjer
+  under at alle søndagar er røde dage. **Mål ikke kun mod egne data:** loven
+  blev hentet fra riksdagen.se 30/9 20:45.
+- **Port:** `kalderDetBlødeHelgdag` arbejder på **klausul**-niveau (skel på
+  punktum *og* komma) og skelner *predikat* fra *omtale*: kun klausler der
+  navngiver en lovfri dag, eller der `PRAEDIKERER_HELGDAG` rammer
+  ("den är en torsdag och en helgdag", "Båda är helgdagar"), tjekkes. Uden den
+  skelnen ville porten afvise halloween-siden ("Det är allhelgonadagen 1
+  november och alla helgons dag som är helgdagar" — korrekt, og *allhelgons
+  dag* er netop i loven). To tests mere: tabellen skal sige `true` for enhver
+  hændelse der **beregnes** at være en søndag over 61 år (påskedagen,
+  påskedagen+49, 1. advent — alle tre regnet, ingen håndplukket), og siden skal
+  sige *positivt* at søndagen er grunden.
+- **Fire mutationer kontrolleret:** gammel skärtorsdagen-tekst (2 fund), gammel
+  paskdagen-svar (1 fund), `1-advent: false` i tabellen (3 fejl), begge gamle
+  1-advent-tekster (1 fejl). Alle faldt; ingen af dem lod porten være grøn.
+- **⚠️ Målerfældens tredje udløber — skrevet i testens docblock.** JavaScripts
+  `\w` er ASCII, så `\b` før `är` **aldrig** matcher: `kalderDetHelgdag`-formen
+  `\b(?:er|är)\b` så rigtig ud og fangede intet, fordi den kun virkede for
+  svenske *helgdag* — altså et mønster der låser præcis de ord porten så.
+- **MÅL:** ingen trafikvirkning — se `/skartorsdagen` og se `/paskdagen` er ikke
+  i GSC's top-15 (0 visninger for de 16 `/dagar-till/*`-sider, målt 30/9). Værdi
+  som 188: en svensk læser skal ikke møde to sider der siger modsatte ting om
+  loven på 200 ord. VERIFICÉR: nedenfor.
 
 #### 189. [ ] 2026-09-30 — Kø — mål brødtekstal mod en kilde, ikke mod et hjemmeskrevet script
 
