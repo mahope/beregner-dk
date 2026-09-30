@@ -20,7 +20,7 @@ import {
 } from "./procent";
 import { formatNumber } from "./format";
 import { alderSideTekst, erstatAlderTokens } from "./alder-side-tekst";
-import { iDagISidensTidszone } from "./lokal-dato";
+import { iDagPaSiden } from "./lokal-dato";
 import { getHelligdage, helligdagsnavne } from "./helligdage";
 import { pinseAfstande, pinseInterval } from "./pinse-intervaller";
 import { estimerNettoMaaned } from "./barsel/netto";
@@ -4029,7 +4029,7 @@ const LEVENDE_SIDER = new Set(["alder"]);
 
 /** Dagens dato i sidens egen tidszone, så tallene ikke er en dag bag. */
 function referenceDato(locale: Locale): string {
-  return iDagISidensTidszone(new Date(), locale === "se" ? "se" : "da");
+  return iDagPaSiden(new Date(), locale);
 }
 
 function medLevendeTekst(

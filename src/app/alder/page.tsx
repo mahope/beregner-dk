@@ -10,7 +10,7 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import { ALDER_EKSEEMPLER, formatAlder, formatAlderRaekke, foedselsaarRaekker } from "@/lib/alder-eksempler";
 import AlderSeSvar from "@/components/AlderSeSvar";
 import AlderLevetSvar from "@/components/AlderLevetSvar";
-import { iDagISidensTidszone } from "@/lib/lokal-dato";
+import { iDagPaSiden } from "@/lib/lokal-dato";
 import { getIntlLocale } from "@/lib/format";
 
 function formatDato(iso: string, locale: "da" | "no" | "se"): string {
@@ -31,11 +31,13 @@ export default async function AlderPage() {
   const domainConfig = await getCurrentDomainConfig();
   const pageData = getPageData("alder", locale) || getPageData("alder", "da")!;
   const intlLocale = getIntlLocale(locale);
-  // Sidens kalenderdato, læst i læserens tidszone. `getLocale()` læser
-  // `headers()`, så siden er dynamisk og tallene følger dagen — samme mønster
-  // som /dato's felter. Formateres til en hel dato, så en tabeltal derfra aldrig
-  // kan løbe fra den dato den er regnet til.
-  const iDag = iDagISidensTidszone(new Date(), locale === "se" ? "se" : "da");
+  // Sidens kalenderdato, læst i *sidens* tidszone (aldrig læserens og aldrig
+  // serverens). `getLocale()` læser `headers()`, så siden er dynamisk og
+  // tallene følger dagen — samme mønster som /dato's felter. Formateres til en
+  // hel dato, så en tabeltal derfra aldrig kan løbe fra den dato den er
+  // regnet til. `iDagPaSiden` er samme funktion som `getPageData` bruger, så
+  // brødteksten og tabellen ikke kan regne på to forskellige dage.
+  const iDag = iDagPaSiden(new Date(), locale);
   const foedselsaar = foedselsaarRaekker(iDag);
 
   return (

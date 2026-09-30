@@ -1,17 +1,32 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — 1/10 00:11. **Opgave 192 er rettet og målt.** Review-fundets
- diagnose var kun halv: ikke alene at porten læste filen linje for linje, men
- også at regexen krævede `:` *direkte* efter `"sv-SE"`, så koden imellem
- (`).format(n)`) skjulte kæden lige så godt. Nu læses hver fil som én streng
- gennem en scanner med tilstand, og `formatGenstande` bruger `getIntlLocale`.
- To fejl i min egen første stripning blev fundet ved at måle `src/`: en `/*`
- i en `//`-kommentar i `dato/page.tsx:30` slugte 13 linjer rigtig kode.
- Målt: porten rød mod gammel kode på linje 112, 0 fejl i 0 filer for
- scanneren, 198 filer / 3274 tests grønne, lint ren, build 142/142.
+STATUS: KØ — 1/10 00:50. **CI var rød på `master` og er grøn igen.** To tests i
+  `alder/page.test.tsx` sammenlignede den renderede markup med et tal regnet på
+  **serverens** dato (`tilIsoDato(new Date())`), mens siden læser dagen med
+  **sidens** ur (`iDagPaSiden`). CI kører i UTC, så mellem 00:00 og 02:00
+  dansk tid er de to ure uenige: siden sagde 13.349 dage (1. oktober),
+  testen forventede 13.348 (30. september). Målt med `TZ=UTC npx vitest run`:
+  2 fejl i 1 fil — de samme to som CI. Lokalt var de grønne, fordi maskinen
+  står i København.
+
+  **⚠️ Målerfælde (1/10).** Kør `TZ=UTC npx vitest run` før du melder gaten
+  grøn. `npm run test` på Mads' maskine er grøn **fordi maskinen er dansk** —
+  CI's ur er UTC, og de fleste af sådanne fejl falder netop i et to-timers
+  vindue. Det er ikke en ny testkommando, det er den *samme* suite.
+
+  Rettelsen samler reglen ét sted (`iDagPaSiden`), så test og side ikke længere
+  kan være uenige om hvilket ur der gælder, og en ny port `test-tidszone.test.ts`
+  forbyder serverens ur i tests med en hvidliste der tæller forekomster.
+  Målt: porten rød på 2 mutationer (den oprindelige fejl + en ny fil),
+  de to løste påstande rød på hver sin mutation, 199 filer / 3278 tests grønne
+  i **begge** tidszoner, lint ren, `locale-leak --gate` exit 0, build 142/142,
+  `tsc` 82 fejl i 17 filer — alle i `*.test.ts(x)`, ingen i de rørte filer.
+
+  **Ingen VERIFICÉR-note:** `iDagPaSiden` er en flytning af den eksisterende
+  regel, så `/alder` renderer præcis som før. Søg ikke efter en forskad udfoldning.
 
 **Næste opgave: 191** — `/bmi` mangler et koblet indlæg, og det er sitets
- faldende side (934 besøgende/28d, −26 %). Derefter F1 (afhænger af ❓).
+  faldende side (934 besøgende/28d, −26 %). Derefter F1 (afhænger af ❓).
 
 **Blokeret af svar fra Mads:** 97, 119 og 183, samt F1/F3/F5. **Opgave 187 må
 ikke røres før 13/10.** CEO-køens punkt 0 er lukket; 189c er lukket som "veje
@@ -22,41 +37,10 @@ arkivet).
 lovtal, brødtekst og rækkefølge i markupken. De otte lukkede er verificeret på
 indhold; senest 30/9 23:10. Målingerne står i `docs/plan-arkiv.md`.
 
-**⚠️ Målerfældens sjette og syvende udløber.** En port der scanner *alle*
-decimaler mod lovens tal gav 29 danske og 31 svenske fund, alle rigtige. Og et
-"region-tal"-mønster faldt, fordi den svenske celle skriver tallet før
-regionens navn. **Porten skal kræve kildens tal frem for at søge efter
-forkerte.** `\b` før `är` matcher aldrig i JS (`\w` er ASCII).
-
 **⚠️ Målerfælde (30/9 15:40).** `npm run test` kører `locale-leak-gate.test.ts`,
 der med vilje planterer danske lækager. Derfor kommer `FEJL: n ureviewet(e)`-
 blokke i output. Det er **ikke** fund i din diff. Kør gaten separat:
 `node scripts/locale-leak.mjs --gate` (exit 0).
-
-## Love- og kalenderpåstande mod en hentet kilde (opgave 189)
-
-Prioriteret liste. **Syv er hentet og kontrolleret 30/9**, fire kunne ikke hentes
-overhovedet (se kildetabellen i STATUS) og er lukket som sådan. `✔` = lagt i en
-port. 189c lukkede 30/9 22:40.
-
-| # | Påstand | Kilde (hentet 30/9 30 min) | Port |
-|---|---|---|---|
-| 1 | SE 0,2 ‰ rattfylleri · 1,0 ‰ grovt | trafikbrottslagen (1951:649) 4 § og 4 a §, riksdagen.se | ✔ |
-| 2 | DK 0,5 ‰ · nye bilister 0,2 ‰ i 3 år · over 2,0 kørekort ubetinget | færdselsloven § 53, ordret gengivet af Rådet for Sikker Trafik | ✔ |
-| 3 | SE helgdagar (1 §) | lag (1989:253) 1 §, riksdagen.se — F8's port | ✔ |
-| 4 | UK 0,8 · Skotland 0,5 | GOV.UK "The drink drive limit" (80 mg/100 ml blod, Skotland 50) + RTA 1988 § 5 | ✔ |
-| 5 | DE 0,5 · 0,0 under 21 år og i prøveperioden | StVG § 24a og § 24c, gesetze-im-internet.de — **0,3-punktet er retspraksis, ikke lov, og er fjernet** | ✔ |
-| 6 | DK Store bededag afskaffet 2024 | **ikke hentbar** — retsinformation er en SPA-skal (4.945 B) | ❌ lukket |
-| 7 | DK grundlovsdag 5. juni | ikke hentbar, samme grund | ❌ lukket |
-| 8 | DK palmesøndag, juleaftensdag | ikke hentbar, samme grund | ❌ lukket |
-
-**Ingen af rækkerne 6-8 eller Tysklands prøveperiodes længde er slettet.** De er
-alle sande, og 189c fandt at kilden — ikke påstanden — er det der mangler.
-
-**Hvorfor kun fire lande er i porten:** de otte øvrige rækker i samme tabel
-kommer alle fra én Wikipedia-tabel. At låse dem ville låse netop de ord porten
-så (F8's målerfælde) uden at have læst en eneste lov. **189c** skal hente
-lovene — ikke skrive flere regler. Fuldtekst for 189-189c: `docs/plan-arkiv.md`.
 
 ## Fase 3 — trafik-drevet
 
@@ -152,8 +136,9 @@ kaldes *ikke*-helgdag.
 ## Kvalitetsgate (repoets egne scripts fra package.json)
 
 ```
-npm run lint     # biome lint ./src      — 628 filer
-npm run test     # vitest run            — 3271 tests / 198 filer
+npm run lint     # biome lint ./src      — 630 filer
+npm run test     # vitest run            — 3278 tests / 199 filer
+TZ=UTC npm run test   # CI's ur — se målerfælden 1/10 i STATUS
 npm run build    # next build            — 142 sider
 node scripts/locale-leak.mjs --gate       # exit 0
 ```
@@ -458,6 +443,36 @@ og forsiden. Alle målinger står i `docs/plan-arkiv.md`.
   tests, `biome lint` ren, `locale-leak --gate` exit 0, `next build`
   142/142. Plus 4 nye tests: linjeskiftet, linjenummerering, `/*`-i-`//`, og
   src-låsen. **MÅL:** ingen trafikmåling — fundet er en korrekthedsmåling.
+
+#### 193. [x] ✅ 1/10 00:50 — rød CI på `master` — tests regnede dagen med **serverens** ur
+
+- **Datagrund:** CI (`ubuntu-latest` = UTC) blev rød 30/9 22:12 UTC på `4de4ca7`
+  med 2 af 3274 tests. Målt lokalt med `TZ=UTC npx vitest run`: præcis de samme
+  2 fejl i `alder/page.test.tsx`. Årsagen er ikke flakiness: `alder`'s test
+  skrev sit forventningstal med `tilIsoDato(new Date())` — serverens tidszone —
+  mens siden læser dagen med `iDagPaSiden` — sidens. Mellem 00:00 og 02:00
+  dansk tid er det to forskellige datoer, og kun det ene ur har ret.
+- **Rettelse:** (1) `iDagPaSiden(dato, locale)` i `lokal-dato.ts` ejer nu reglen
+  "Sverige får sit ur, alt andet Danmarks", og `page.tsx` + `page-data.ts` +
+  testen kalder *samme* funktion — en test kan ikke længere holde sin egen
+  regel. (2) alle 15 kald i `alder/page.test.tsx` går gennem den, inklusive den
+  svenske tabel der før regnede med dansk ur. (3) ny port `test-tidszone.test.ts`
+  forbyder serverens ur i tests; hvidlisten tæller *forekomster*, så `alder`s ene
+  negative kald kan blive stående uden at filen får frit lejde. (4)
+  `stripKommentarer` flyttet til `kommentar-scanner.ts`, fordi to porte nu
+  læser kode — målt til 0 fejl i 0 filer over `src/`.
+- **Målt (3 mutationer, alle røde):** porten rød ved at gendan den oprindelige
+  fejl (`alder/page.test.tsx: hvidlisten siger 1, der er 2 på linje 355,371`) og
+  ved en ny fil med kaldet (`src/lib/ny-test.test.ts:3`). Den positive påstand
+  rød ved at sætte `AlderLevetSvar` tilbage på serverens ur; den negative
+  påstand rød ved at lade siden rendere **begge** tals ur. Sidstnævnte mutation
+  fandt først `AlderLevetSvar` som den egentlige producer af afsnittet — de to
+  mutationer i `page.tsx`/`page-data.ts` gav *grønt*, fordi de ikke rørte den.
+- **Accept:** (1) `TZ=UTC` og dansk tid begge 199 filer / 3278 tests grønne,
+  (2) lint ren, `locale-leak --gate` exit 0, build 142/142, (3) `tsc` 82 fejl i
+  17 filer, alle i `*.test.ts(x)` og ingen i de syv rørte filer, (4) ingen
+  bruger-synlig ændring — reglen er flyttet, ikke ændret. **MÅL:** ingen
+  trafikmåling; fundet er en korrekthedsmåling, og CI-grønt er beviset.
 
 #### 187. [ ] **IKKE FØR 2026-10-13** 2026-09-30 — Kø — **migrér beraknare.se til svenske URL-slugs med 301**
 

@@ -2,6 +2,9 @@ import { readFileSync, readdirSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { getIntlLocale } from "./format";
+// Stripningen bor her, ikke i denne fil: `test-tidszone.test.ts` læser også
+// kun kode, og to kopier af en scanner med tilstand er to steder at vedligeholde.
+import { linjeNummer, stripKommentarer } from "./kommentar-scanner";
 
 /**
  * Gate on the locale-tag class, not on a single page.
@@ -94,66 +97,6 @@ const UDEN_NO_ARM_KILDE = new RegExp(
 
 const UDEN_NO_ARM = new RegExp(UDEN_NO_ARM_KILDE.source);
 const UDEN_NO_ARM_GLOBAL = new RegExp(UDEN_NO_ARM_KILDE.source, "g");
-
-/**
- * Sande kommentarer er ikke kode — de skal blankes ud *inden* porten læser
- * filen, ellers ville en docblock der forklarer den gamle kæde tælle som et
- * fund og gøre porten umulig at rette: rettelsen *er* at slette kæden fra koden,
- * mens forklaringen med vilje bliver stående.
- *
- * **Målt 1/10, to fejl i en naiv regex-stripper — begge fundet her:**
- * 1. `dato/page.tsx:30` er `// … \`/dage-til/\*\`-siderne …`. Tømmer man blokke
- *    FØR linjekommentarer, åbner det `/\*` en "blokkommentar" helt til næste
- *    blokslut og tømmer **13 linjer rigtig kode** (`:39-51`, hele
- *    `dageTilLinks`-blokken). Så bliver porten blind for præcis den fejlklasse
- *    den skal fange.
- * 2. Tømmer man linjekommentarer først, spiser reglen for `\*`-fortsættelse
- *    også blokkens afsluttende `*\`-linje, og en `/\*\*` blir stående uden
- *    lukning — et hængende `/\*` der parrer sig med næste `/\*` i filen.
- *
- * Derfor er dette en **scanner med tilstand**, ikke to regexer: den holder rede
- * på om den står i en linjekommentar, en blokkommentar eller en streng, og
- * rører ingen af de tre. Strenge *beholdes* — de er kode, så et `/\*` i en
- * URL eller et glob-mønster i `"/dage-til/*"` kan ikke åbne en kommentar.
- *
- * Mellemrum holdes i stedet for at slettes, så **linjenumrene stadig passer**.
- */
-function stripKommentarer(kilde: string): string {
-  let ud = "";
-  let i = 0;
-  const n = kilde.length;
-  while (i < n) {
-    const to = kilde.slice(i, i + 2);
-    if (to === "//") {
-      const nyeLinje = kilde.indexOf("\n", i);
-      const stop = nyeLinje === -1 ? n : nyeLinje;
-      ud += kilde.slice(i, stop).replace(/[^\n]/g, " ");
-      i = stop;
-    } else if (to === "/*") {
-      const slut = kilde.indexOf("*/", i + 2);
-      const stop = slut === -1 ? n : slut + 2;
-      ud += kilde.slice(i, stop).replace(/[^\n]/g, " ");
-      i = stop;
-    } else if (kilde[i] === '"' || kilde[i] === "'" || kilde[i] === "`") {
-      // Kopiér strengen ordentligt med escapes, så dens indhold ikke fejles
-      // for kommentar-start.
-      const citat = kilde[i];
-      const start = i;
-      i += 1;
-      while (i < n && kilde[i] !== citat) i += kilde[i] === "\\" ? 2 : 1;
-      i = Math.min(i + 1, n);
-      ud += kilde.slice(start, i);
-    } else {
-      ud += kilde[i];
-      i += 1;
-    }
-  }
-  return ud;
-}
-
-function linjeNummer(kode: string, indeks: number): number {
-  return kode.slice(0, indeks).split("\n").length;
-}
 
 function findere(): { fil: string; linje: number; tekst: string }[] {
   const fund: { fil: string; linje: number; tekst: string }[] = [];

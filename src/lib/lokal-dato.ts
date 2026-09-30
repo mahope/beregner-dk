@@ -52,6 +52,25 @@ export function iDagISidensTidszone(
 }
 
 /**
+ * Dagens kalenderdato i **sidens** tidszone, med sitets eget sprog-til-ur.
+ *
+ * Sverige får sit eget ur, alt andet Danmarks. Det lyder som en vilkårlig
+ * regel, fordi `Europe/Oslo` og `Europe/Copenhagen` ligger samme sted — men
+ * reglen lå tidligere skrevet to steder i koden (`page-data.ts`'s
+ * `referenceDato` og `page.tsx`) og en tredje gang i hver test der regner sit
+ * forventningstal. Da CI kørte i UTC blev `/alder`s to tests røde 30/9 22:12
+ * UTC, fordi testen læste dagen med *serverens* ur mens siden læste den med
+ * sidens. Én definition gør den afvej umulig: test og side kalder samme
+ * funktion med samme regel.
+ */
+export function iDagPaSiden(
+  dato: Date,
+  locale: "da" | "se" | "no"
+): string {
+  return iDagISidensTidszone(dato, locale === "se" ? "se" : "da");
+}
+
+/**
  * Læser "YYYY-MM-DD" som dato i lokal tid. Tomme, forkorte og umulige
  * værdier (31. februar) returneres som `null` frem for at rulle over i næste
  * måned, så et afklaret felt ikke viser en stille forkert dato.

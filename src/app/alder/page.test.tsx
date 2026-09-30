@@ -12,7 +12,7 @@ import {
 } from "@/lib/alder-eksempler";
 import { beregnAlder } from "@/lib/alder";
 import { LEVET_FOEDSELSDATO, alderLevet, formatDageTal } from "@/lib/alder-levet";
-import { iDagISidensTidszone, tilIsoDato } from "@/lib/lokal-dato";
+import { iDagPaSiden, tilIsoDato } from "@/lib/lokal-dato";
 import { getPageData } from "@/lib/page-data";
 import AlderPage from "./page";
 
@@ -30,6 +30,18 @@ vi.mock("@/lib/get-locale", () => ({
   getLocale: vi.fn(),
   getCurrentDomainConfig: vi.fn(),
 }));
+
+/**
+ * Dagens dato læst med **sidens eget ur** — samme funktion som `page.tsx` og
+ * `getPageData` kalder, så reglen kun findes ét sted.
+ *
+ * `tilIsoDato(new Date())` læser datoen i *serverens* tidszone. Bygge- og
+ * kørserveren står i UTC, så mellem kl. 00:00 og 02:00 dansk tid giver den
+ * *i går*, og en test der regner sit forventningstal med den modsiger den side
+ * den renderede. Det var ikke en hypotese: CI kørte i UTC og blev rød 30/9
+ * 22:12 UTC på præcis de to tests, der gjorde det her. Se `test-tidszone.ts`.
+ */
+const iDag = (locale: "da" | "se" | "no") => iDagPaSiden(new Date(), locale);
 
 describe("alder page", () => {
   beforeEach(() => {
@@ -49,7 +61,7 @@ describe("alder page", () => {
     vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale(locale));
 
     const html = renderToStaticMarkup(await AlderPage());
-    const levet = alderLevet(iDagISidensTidszone(new Date(), locale === "se" ? "se" : "da"));
+    const levet = alderLevet(iDag(locale));
 
     expect(html).toContain(`>${heading}</h1>`);
     expect(html).toContain(formatAlder(levet, locale));
@@ -60,11 +72,11 @@ describe("alder page", () => {
   // og den frosne dato fra den gamle konstant må ikke stå mere.
   test("introens alder følger dagen, ikke den dag koden blev skrevet", async () => {
     const html = renderToStaticMarkup(await AlderPage());
-    const iDag = iDagISidensTidszone(new Date(), "da");
+    const idag = iDag("da");
 
     // Kilden, ikke et valgt tidspunkt: ellers ville porten kun holde den
     // dag den blev skrevet — præcis fejlen den her rettelse fjerner.
-    expect(html).toContain(formatAlder(alderLevet(iDag), "da"));
+    expect(html).toContain(formatAlder(alderLevet(idag), "da"));
     // Den frosne dato fra den gamle konstant må ikke stå i metadata og
     // introen. (Tabellen har stadig sit eget, daterede regnestykke til
     // 25. september 2026 — det er et eksempel, ikke et levende svar.)
@@ -72,7 +84,7 @@ describe("alder page", () => {
     expect(html).toContain(
       new Intl.DateTimeFormat("da-DK", {
         day: "numeric", month: "long", year: "numeric",
-      }).format(new Date(`${iDag}T12:00:00`))
+      }).format(new Date(`${idag}T12:00:00`))
     );
   });
 
@@ -142,7 +154,7 @@ describe("alder page", () => {
   // pos. 7,8 med 0,6 % CTR. Tabellen er svaret på den klynge.
   test("svarer på 'hvor gammel er jeg, hvis jeg er født i …' med en alder fra og en alder til pr. dagens dato", async () => {
     const html = renderToStaticMarkup(await AlderPage());
-    const raekker = foedselsaarRaekker(tilIsoDato(new Date()));
+    const raekker = foedselsaarRaekker(iDag("da"));
 
     expect(html).toContain("Hvor gammel er jeg, hvis jeg er født i 2007?");
     for (const raekke of raekker) {
@@ -152,7 +164,7 @@ describe("alder page", () => {
   });
 
   test("fødselsårs-tabellen dækker de år, dansk autocomplete faktisk viser", async () => {
-    const aar = new Set(foedselsaarRaekker(tilIsoDato(new Date())).map((r) => r.aar));
+    const aar = new Set(foedselsaarRaekker(iDag("da")).map((r) => r.aar));
 
     // De fem år, autocomplete gav under "hvor gammel er jeg".
     for (const autocompleteAar of [1989, 2006, 2007, 2008, 2009]) {
@@ -166,17 +178,17 @@ describe("alder page", () => {
   // Et fødselsår giver to aldre. Uden denne test kunne en række miste sin
   // "til"-alder og svare forkert på præcis den søgning, tabellen er lavet til.
   test("giver hvert fødselsår højst ét års aldersforskel, og alderen er dagene fødselsdagen fortjener", async () => {
-    for (const raekke of foedselsaarRaekker(tilIsoDato(new Date()))) {
+    for (const raekke of foedselsaarRaekker(iDag("da"))) {
       expect(raekke.maxAlder - raekke.minAlder).toBeLessThanOrEqual(1);
       expect(raekke.minAlder).toBeGreaterThanOrEqual(0);
 
       const senest = beregnAlder({
         foedselsdato: `${raekke.aar}-12-31`,
-        beregningsdato: tilIsoDato(new Date()),
+        beregningsdato: iDag("da"),
       })!;
       const tidligst = beregnAlder({
         foedselsdato: `${raekke.aar}-01-01`,
-        beregningsdato: tilIsoDato(new Date()),
+        beregningsdato: iDag("da"),
       })!;
       expect(raekke.minDage).toBe(senest.totalDage);
       expect(raekke.maxDage).toBe(tidligst.totalDage);
@@ -216,7 +228,7 @@ describe("alder page", () => {
     const iDage = faq.find((item) => item.question === "Hvor gammel er jeg i dage?");
     const rigtigt = beregnAlder({
       foedselsdato: LEVET_FOEDSELSDATO,
-      beregningsdato: iDagISidensTidszone(new Date(), "da"),
+      beregningsdato: iDag("da"),
     })!;
 
     expect(iDage?.answer).toContain(`${formatDageTal(rigtigt.totalDage, "da")} dage`);
@@ -295,7 +307,7 @@ describe("alder page", () => {
     vi.mocked(getLocale).mockResolvedValue("se");
     vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("se"));
     const html = renderToStaticMarkup(await AlderPage());
-    const raekker = foedselsaarRaekker(tilIsoDato(new Date()));
+    const raekker = foedselsaarRaekker(iDag("se"));
 
     expect(html).toMatch(/<h2[^>]*>Hur gammal är jag om jag är född i \d{4}\?<\/h2>/);
     const aarIHeadline = Number(html.match(/är jag om jag är född i (\d{4})\?/)?.[1]);
@@ -320,7 +332,7 @@ describe("alder page", () => {
     const punkt = faq.find((item) => item.question === "Räkna ut ålder från personnummer?");
     const rigtigt = beregnAlder({
       foedselsdato: LEVET_FOEDSELSDATO,
-      beregningsdato: iDagISidensTidszone(new Date(), "se"),
+      beregningsdato: iDag("se"),
     })!;
 
     expect(punkt?.answer).toContain(formatAlder(rigtigt, "se"));
@@ -340,7 +352,7 @@ describe("alder page", () => {
     vi.mocked(getLocale).mockResolvedValue(locale);
     vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale(locale));
     const html = renderToStaticMarkup(await AlderPage());
-    const levet = alderLevet(tilIsoDato(new Date()));
+    const levet = alderLevet(iDag(locale));
 
     expect(html).toContain(`<h2>${overskrift}</h2>`);
     // Tallene skriver sig selv fra beregnAlder, så brødteksten kan ikke love
@@ -351,6 +363,16 @@ describe("alder page", () => {
     // Kalenderdage, ikke timer: et døgn med uret stillet er stadig 1 dag.
     expect(html).toContain("24");
     expect(html).toContain('href="/dato"');
+
+    // Og når de to ure *er* uenige — UTC-server mellem 00:00 og 02:00 dansk
+    // tid, altså det vindue CI lå i da denne test blev rød — må tallet fra
+    // serverens ur slet ikke stå på siden. Uden denne linje ville testen bare
+    // være holdt op med at være rød, uden at forsvare *hvilket* ur siden bruger.
+    const serverensDag = tilIsoDato(new Date());
+    if (serverensDag !== iDag(locale)) {
+      const medServerensUr = formatDageTal(alderLevet(serverensDag).totalDage, locale);
+      expect(html).not.toContain(medServerensUr);
+    }
   });
 
   // Modulet skal ikke kunne svare med et tal, der ikke stemmer med
@@ -396,7 +418,7 @@ describe("alder page", () => {
     expect(punkt, `${sporgsmaal} mangler i ${locale}`).toBeDefined();
     // Dage- og timer-tallet er det beregnAlder giver for den dag siden
     // viser — ikke de frosne 13.343 / 320.232 fra før rettelsen.
-    const levet = alderLevet(iDagISidensTidszone(new Date(), locale === "se" ? "se" : "da"));
+    const levet = alderLevet(iDag(locale));
     expect(punkt?.answer).toContain(formatDageTal(levet.totalDage, locale));
     expect(punkt?.answer).toContain(formatDageTal(levet.totalTimer, locale));
     expect(punkt?.answer).not.toContain("13.342");

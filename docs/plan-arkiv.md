@@ -21677,3 +21677,178 @@ to uafhængige fejl, og at kun den første stod i fundet. Den følgede læring e
 allerede lagt i koden: `intl-locale-tag.test.ts` har nu en test der beviser at
 porten ser en kæde brudt over to linjer, en der beviser at fundet peger på
 rigtig linje, og en src-lås der beviser at stripningen ikke spiser kode.
+
+## Opgave 193 — rød CI 30/9 22:12 UTC: tests regnede dagen med serverens ur
+
+Opdaget af `gh run list -L 1` ved iterationens start. Kontrakten siger at en rød
+kørsel på default-branchen er første opgave, så den gik foran 191.
+
+### Symptomet
+
+`4de4ca7` gjorde `master` rød med 2 af 3274 tests, begge i
+`src/app/alder/page.test.tsx`:
+
+```
+AssertionError: expected '<div class="max-w-4xl mx-auto">…' to contain '13.348'
+```
+
+### Målingen der satte diagnose
+
+CI kører på `ubuntu-latest`, altså UTC. Lokalt står maskinen i København, så
+`npm run test` var grøn. Kørte hele suiten med CI's ur:
+
+```
+TZ=UTC npx vitest run   →   Test Files 1 failed | 197 passed (198)
+                             Tests      2 failed | 3272 passed (3274)
+```
+
+Præcis de samme to tests som CI. Altså ikke flakiness og ikke en ny fejl fra
+den seneste commit — en fejl der *kun* kan falde på en UTC-server.
+
+### Årsagen
+
+`page.test.tsx:343` regnede sit forventningstal sådan:
+
+```ts
+const levet = alderLevet(tilIsoDato(new Date()));   // serverens tidszone
+```
+
+mens siden læser dagen med `iDagISidensTidszone(new Date(), …)`. `lokal-dato.ts`'s
+egen docblock siger det allerede:
+
+> `tilIsoDato(new Date())` læser datoen i *serverens* tidszone. Bygge- og
+> kørserveren står i UTC, så mellem kl. 00:00 og 02:00 dansk tid ville den give
+> *i går* — præcis det vindue, hvor en læser åbner "hvor gammel er jeg i dag".
+
+Målt kl. 22:24 UTC 30/9:
+
+```
+15.3.1990 → 30.9.2026: 13348     ← testens forventning
+15.3.1990 →  1.10.2026: 13349    ← sidens tal, rigtigt for København
+nu UTC:            2026-09-30T22:24Z
+nu Copenhagen:      2026-10-01
+nu Stockholm:       2026-10-01
+```
+
+Siden var altså **rigtig** og testen **forkert**. Det er den sjældne variant,
+hvor den røde CI peger på testen og ikke på koden.
+
+### Hvorfor kun to tests, når filen har 15 kald
+
+De øvrige kald regner *også* med serverens ur, men de er ikke synlige lige nu:
+- `foedselsaarRaekker(…)` bygger en års-tabel, og 30/9 vs 1/10 er samme år.
+- `beregnAlder({ …, beregningsdato: … })` bruges til selvkontrol mellem to
+  funktioner, der begge får samme (forkerte) dato — de kan ikke komme i strid.
+
+De bliver røde ved årsskiftet 31/12 kl. 23:00 UTC, altså én gang om året i et
+to-timers vindue. Derfor blev **alle 15** rettet, ikke kun de to.
+
+### Rettelsen
+
+1. `iDagPaSiden(dato, locale)` i `lokal-dato.ts` — reglen "Sverige får sit eget
+   ur, alt andet Danmarks" lå skrevet to steder (`page-data.ts`'s
+   `referenceDato` og `page.tsx`) og mindst en gang til i hver test. Én
+   funktion gør det umuligt for test og side at være uenige.
+2. `page.tsx` og `page-data.ts` kalder den. `page.tsx`'s docblock sagde
+   "læst i læserens tidszone", hvilket er **forkert** — det er sidens, ikke
+   læserens; en svensk læser i Oslo får Stockholms ur, fordi domænet er
+   beraknare.se. Rettet.
+3. Ny port `src/lib/test-tidszone.test.ts`.
+4. `stripKommentarer` flyttet fra `intl-locale-tag.test.ts` til
+   `src/lib/kommentar-scanner.ts`, fordi to porte nu skal læse kode. Målt: de 11
+   eksisterende tests i `intl-locale-tag.test.ts` er grønne mod det udtrukne.
+
+### Målerfælde 1 — portens egen regex havde en `lastIndex`
+
+Første kørsel af porten faldt med `expected false to be true` på det *fjerde*
+af fire syntetiske eksempler. Årsagen var ikke et dårligt mønster: porten havde
+et `g`-flag på den delte regex, så `lastIndex` stod og pegede forbi det næste
+match. En port der genbruger en global regex uden at nulstille den, bliver grøn
+for den forkerte grund — samme fejltype som review 1/10 fandt i
+`intl-locale-tag`-porten, bare i min egen kode. Løsningen er samme som dér:
+`MONSTER` er ikke global, og tællingen går gennem en frisk
+`new RegExp(MONSTER.source, "g")` hver gang.
+
+### Målerfælde 2 — porten markerede sig selv
+
+Uden kommentar-stripning fandt porten 10 forekomster i sig selv: sin egen
+docblock, hvidlistens begrundelser og sine syntetiske eksempler. Løsningen er
+`stripKommentarer` (linjenumrene bevares) plus **fire undtagelser, der tæller
+forekomster frem for filer**:
+
+| Fil | Antal | Hvorfor |
+|---|---|---|
+| `components/DatoBeregner.test.tsx` | 1 | `DatoBeregner` er en klientkomponent, der bruger `tilIsoDato` i læserens browser |
+| `components/standarddato.test.tsx` | 1 | Testen *beviser* med falsk tid at `tilIsoDato` læser det lokale ur |
+| `app/alder/page.test.tsx` | 1 | Det negative bevis: tallet fra serverens dag må **ikke** stå i markupken |
+| `lib/test-tidszone.test.ts` | 7 | Portens egne syntetiske strenge. Antallet er en fælde mod en ny reel reference |
+
+Tællingen er hele pointen: uden den måtte `alder/page.test.tsx` have fået frit
+lejde som *fil*, og så kunne den nye fejl flytte ind i præcis den fil hvor den
+gjorde mest skade. Med tællingen fangedes mutationen som
+`hvidlisten siger 1, der er 2 på linje 355,371`.
+
+### Tre mutationer, alle røde
+
+| Mutation | Forventet | Målt |
+|---|---|---|
+| Gendan `alderLevet(tilIsoDato(new Date()))` i testen | port rød | `alder/page.test.tsx: hvidlisten siger 1, der er 2 på linje 355,371` |
+| Ny fil `ny-test.test.ts` med ét kald | port rød | `src/lib/ny-test.test.ts:3 (1 forekomster)` |
+| `AlderLevetSvar` sættes tilbage på serverens ur | 2 tests røde | `to contain '13.349'`, begge sprog |
+| Siden renderer **begge** tals ur | negativ påstand rød | `not to contain '13.348'`, begge sprog |
+
+De to sidste mutationer gav først **grønt** i `page.tsx` og `page-data.ts`.
+Afsnittet "Hvor mange dage har du levet?" produceres af
+`components/AlderLevetSvar.tsx:28`, som selv læser dagen — så de mutationer rørte
+ikke den tekst, testen læser. Først mutationen i `AlderLevetSvar` gav rødt.
+Havde jeg stoppet ved de to grønne, ville jeg have meldt en port, der aldrig
+kan blive rød.
+
+### Resultat
+
+```
+TZ=UTC npx vitest run   →  199 filer / 3278 tests grønne
+npm run test            →  199 filer / 3278 tests grønne
+npm run lint            →  630 filer, ingen fund
+locale-leak.mjs --gate  →  0 ureviewet, exit 0
+npm run build           →  142/142 sider
+tsc --noEmit            →  82 fejl i 17 filer, alle i *.test.ts(x),
+                           0 i de syv rørte filer
+```
+
+Ingen bruger-synlig ændring: `iDagPaSiden` er en flytning af den eksisterende
+regel, så `/alder` renderer præcis som før. Der er derfor **ingen
+VERIFICÉR-note** for denne opgave.
+
+## Opgave 189 — love- og kalenderpåstande mod en hentet kilde
+
+## Love- og kalenderpåstande mod en hentet kilde (opgave 189)
+
+Prioriteret liste. **Syv er hentet og kontrolleret 30/9**, fire kunne ikke hentes
+overhovedet (se kildetabellen i STATUS) og er lukket som sådan. `✔` = lagt i en
+port. 189c lukkede 30/9 22:40.
+
+| # | Påstand | Kilde (hentet 30/9 30 min) | Port |
+|---|---|---|---|
+| 1 | SE 0,2 ‰ rattfylleri · 1,0 ‰ grovt | trafikbrottslagen (1951:649) 4 § og 4 a §, riksdagen.se | ✔ |
+| 2 | DK 0,5 ‰ · nye bilister 0,2 ‰ i 3 år · over 2,0 kørekort ubetinget | færdselsloven § 53, ordret gengivet af Rådet for Sikker Trafik | ✔ |
+| 3 | SE helgdagar (1 §) | lag (1989:253) 1 §, riksdagen.se — F8's port | ✔ |
+| 4 | UK 0,8 · Skotland 0,5 | GOV.UK "The drink drive limit" (80 mg/100 ml blod, Skotland 50) + RTA 1988 § 5 | ✔ |
+| 5 | DE 0,5 · 0,0 under 21 år og i prøveperioden | StVG § 24a og § 24c, gesetze-im-internet.de — **0,3-punktet er retspraksis, ikke lov, og er fjernet** | ✔ |
+| 6 | DK Store bededag afskaffet 2024 | **ikke hentbar** — retsinformation er en SPA-skal (4.945 B) | ❌ lukket |
+| 7 | DK grundlovsdag 5. juni | ikke hentbar, samme grund | ❌ lukket |
+| 8 | DK palmesøndag, juleaftensdag | ikke hentbar, samme grund | ❌ lukket |
+
+**Ingen af rækkerne 6-8 eller Tysklands prøveperiodes længde er slettet.** De er
+alle sande, og 189c fandt at kilden — ikke påstanden — er det der mangler.
+
+**Hvorfor kun fire lande er i porten:** de otte øvrige rækker i samme tabel
+kommer alle fra én Wikipedia-tabel. At låse dem ville låse netop de ord porten
+så (F8's målerfælde) uden at have læst en eneste lov. **189c** skal hente
+lovene — ikke skrive flere regler. Fuldtekst for 189-189c: `docs/plan-arkiv.md`.
+
+**⚠️ Målerfældens sjette og syvende (flyttet fra planen 1/10).** **⚠️ Målerfældens sjette og syvende udløber.** En port der scanner *alle*
+decimaler mod lovens tal gav 29 danske og 31 svenske fund, alle rigtige. Og et
+"region-tal"-mønster faldt, fordi den svenske celle skriver tallet før
+regionens navn. **Porten skal kræve kildens tal frem for at søge efter
+forkerte.** `\b` før `är` matcher aldrig i JS (`\w` er ASCII).
