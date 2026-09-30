@@ -222,7 +222,7 @@ export const DAGE_TIL_EVENTS: DageTilEvent[] = [
         facts: [
           "Nytårsaftensdag er 31. december og nytårsdag er 1. januar — de to datoer er altid hinanden følgende.",
           "Nytårsaften er ikke en officiel helligdag, men bankdagen er 31. december.",
-          "Sidste hverdag i december er 31. december, så det er den dato, når året er omme.",
+          "31. december er månedens sidste dag, uanset hvilken ugedag den falder på, så det er den dato, når året er omme.",
         ],
         faq: [
           {
@@ -251,7 +251,7 @@ export const DAGE_TIL_EVENTS: DageTilEvent[] = [
         facts: [
           "Nyårsaftonsdagen är 31 december och nyårsdagen 1 januari — de två datumen är alltid efter varandra.",
           "Nyårsafton är inte en officiell helgdag, men bankdagen är 31 december.",
-          "Sista vardagen i december är 31 december, alltså den dagen då året är slut.",
+          "31 december är månadens sista dag, oavsett vilken veckodag den infaller på, alltså den dagen då året är slut.",
         ],
         faq: [
           {
@@ -493,7 +493,7 @@ export const DAGE_TIL_EVENTS: DageTilEvent[] = [
           {
             question: "Er skærtorsdag en fridag?",
             answer:
-              "Ja, den er en fridag og en helligdag, men den er ikke automatisk en frivillig fridag eller dagpenge.",
+              "Nej. Skærtorsdag er altid en torsdag — tre dage før påskedagen, som altid er en søndag. Den er en helligdag, men du har ikke automatisk ret til dagpenge; det afhænger af din overenskomst.",
           },
           {
             question: "Hvad er forskellen på skærtorsdag og langfredag?",
@@ -628,7 +628,7 @@ export const DAGE_TIL_EVENTS: DageTilEvent[] = [
           {
             question: "Er sankthans en helligdag?",
             answer:
-              "Nej. Sankthans står ikke på Danmarks liste over helligdage, så det er en almindelig aften på en almindelig hverdag.",
+              "Nej. Sankthans står ikke på Danmarks liste over helligdage, så det er en almindelig aften — uanset om 23. juni falder på en hverdag eller i en weekend.",
           },
         ],
       },

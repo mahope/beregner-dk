@@ -1708,3 +1708,174 @@ describe("svenska helgdagspåstande mod lagen (1989:253) 1 §", () => {
     expect(fejl).toEqual([]);
   });
 });
+
+/**
+ * Ugedags-påstande i brødteksten, målt mod de datoer ankeret faktisk producerer.
+ *
+ * De 140 håndskrevne sætninger i `DAGE_TIL_EVENTS` siger flere steder hvilken
+ * ugedag en dato falder på, og det er kun sandt i *nogle* år, når datoen er
+ * fast: 31. december er en hverdag i 2026 (fredag) og en weekend i 2028
+ * (søndag), og 23. juni er en weekend i 2029, 2030, 2035 og 2040 — mens
+ * siden viser den alle dage. Samme fejlklasse som CEO-køens otte fund: et
+ * fast tal i brødteksten, ingen test.
+ *
+ * Denne port *regner* de datoer ankeret giver, år for år over 61 år (et helt
+ * 19-års påske-cyklus-udspil plus alle gregorianske skudårs-mønstre), og
+ * kræver at påstandene følger med. Den fandt tre fejl, alle forkerte i sig
+ * selv: nytårsaften kaldte 31. december en hverdag og en vardag uden
+ * forbehold, sankthans kaldte 23. juni "en almindelig hverdag", og dansk
+ * skærtorsdag svarede på "er skærtorsdag en fridag?" med "ja, den er en
+ * fridag" — på en side der to linjer ovenfor siger at den *altid* er en
+ * torsdag.
+ *
+ * ⚠️ Formen er snæver med vilje. En bredere version ("enhver nævnt ugedag
+ * skal være blandt ankerets dage") gav 15 fund, hvor 13 var *om andre
+ * dage* — "Fredagen efter Kristi himmelfartsdag er en hverdag", "den
+ * sidste lørdag i juni" — altså rigtig tekst, som et målescript ville have
+ * tvunget til at blive ødelagt. Det er præcis F8's målerfælde, og derfor
+ * testes de to påstande, der faktisk er forkerte, og ikke alle ord i
+ * brødteksten.
+ */
+const UGE_AAR = Array.from({ length: 61 }, (_, i) => 2020 + i);
+
+/** Søndag = 0, som `Date.getUTCDay()`. */
+const UGEDAG_DA = [
+  "søndag",
+  "mandag",
+  "tirsdag",
+  "onsdag",
+  "torsdag",
+  "fredag",
+  "lørdag",
+  // "fridag" er dansk for *fri dag* (dag fri fra arbejde), ikke for fredagen.
+  // Det tages med, fordi spørgsmålet "er skærtorsdag en fridag?" engang blev
+  // besvaret med "ja, den er en fridag" — altså en påstand om fredagen, på en
+  // torsdag. Svaret på et sådant spørgsmål er altid "nej", fordi ingen
+  // dansk helligdag automatisk giver dagpenge.
+  "fridag",
+];
+const UGEDAG_SE = [
+  "söndag",
+  "måndag",
+  "tisdag",
+  "onsdag",
+  "torsdag",
+  "fredag",
+  "lördag",
+];
+
+/**
+ * "fridag" står i to FAQ-spørgsmål. Det er dansk for *fri dag* (dag fri fra
+ * arbejde), ikke for fredagen — svaret på begge er "nej", fordi hverken
+ * nytårsdagen eller skærtorsdag automatisk giver en fri dag.
+ */
+const FRIDAG_DA = 5;
+
+const hverdagsDage = new Set([1, 2, 3, 4, 5]);
+
+/** De ugedage et anker faktisk falder på, målt år for år. */
+const muligeUgedage = (anchor: (typeof DAGE_TIL_EVENTS)[number]["anchor"]["da"]) => {
+  const dage = new Set<number>();
+  for (const aar of UGE_AAR) {
+    // 1. januar som "i dag" giver altid ankeret i *samme* år, fordi intet
+    // anker ligger før nytår — getNextAnchorDate ruller først videre til næste
+    // år, når dagens dato er efter kandidaten.
+    dage.add(getNextAnchorDate(anchor, new Date(Date.UTC(aar, 0, 1))).getUTCDay());
+  }
+  return dage;
+};
+
+const alleTekster = (arm: (typeof DAGE_TIL_EVENTS)[number]["da"] | undefined) =>
+  arm
+    ? [...arm.copy.facts, ...arm.copy.faq.map((f) => `${f.question} ${f.answer}`)]
+    : [];
+
+describe("ugedags-påstande mod de datoer ankeret producerer", () => {
+  test("en dato der også kan ligge i en weekend kaldes ikke hverdag uden forbehold", () => {
+    // Et forbehold tæller, hvis det står i samme sætning — sådan skriver
+    // brødteksten allerede om en fast dato der skifter ugedag: "uanset om den
+    // falder på en hverdag eller en weekend", "kan være alle ugedage". En
+    // ledsætning tælder også ("der er halv fridag, *når* grundlovsdagen
+    // holdes på en hverdag"), fordi den gør påstanden betinget i stedet for
+    // ubetinget. Det er de to måder, brødteksten gør det rigtige på.
+    const sprog = [
+      {
+        id: "da" as const,
+        helg: /\bhverdage?n?\b/gi,
+        forbehold:
+          /\b(uanset|afhængig|kan falde|kan ligge|ikke altid|weekend|lørdag|søndag|fredag)\b/i,
+        betingelse: /\b(når|hvis|om|efter)\b[^.!?]{0,45}$/i,
+      },
+      {
+        id: "se" as const,
+        helg: /\bvardag(en|ar|arna)?\b/gi,
+        forbehold:
+          /\b(oavsett|beroende|kan infalla|kan falla|inte alltid|veckoslut|lördag|söndag|fredag)\b/i,
+        betingelse: /\b(när|hvis|om|efter)\b[^.!?]{0,45}$/i,
+      },
+    ];
+    const fejl: string[] = [];
+    for (const event of DAGE_TIL_EVENTS) {
+      for (const { id, helg, forbehold, betingelse } of sprog) {
+        const arm = id === "da" ? event.da : event.se;
+        if (!arm) continue;
+        const mulige = muligeUgedage(event.anchor[id]);
+        const kanVæreWeekend = [...mulige].some((dag) => !hverdagsDage.has(dag));
+        if (!kanVæreWeekend) continue;
+        for (const tekst of alleTekster(arm)) {
+          helg.lastIndex = 0;
+          for (const traefe of tekst.matchAll(helg)) {
+            const foran = tekst.slice(Math.max(0, traefe.index - 40), traefe.index);
+            if (forbehold.test(tekst) || betingelse.test(foran)) continue;
+            fejl.push(
+              `${event.id} (${id}): "${tekst}" — dage ${[...mulige].sort().join(",")}`
+            );
+          }
+        }
+      }
+    }
+    expect(fejl).toEqual([]);
+  });
+
+  test("et 'er X en <ugedag>'-spørgsmål med ja-svar skal ramme en dag ankeret kan falde på", () => {
+    // Kun "ja"-svar tjekkes: "er nytårsdagen altid en fridag?" har korrekt svaret
+    // "nej, den kan være alle ugedage", og et nej-svar kan ikke være en
+    // påstand om ugedagen.
+    const fejl: string[] = [];
+    for (const event of DAGE_TIL_EVENTS) {
+      for (const [id, arm, ugedage] of [
+        ["da", event.da, UGEDAG_DA],
+        ["se", event.se, UGEDAG_SE],
+      ] as const) {
+        if (!arm) continue;
+        const mulige = muligeUgedage(event.anchor[id]);
+        for (const faq of arm.copy.faq) {
+          const spg = new RegExp(`\\b(?:er|är) .* en (${ugedage.join("|")})\\?`, "i").exec(
+            faq.question
+          );
+          if (!spg) continue;
+          const svar = faq.answer.toLowerCase();
+          if (!svar.startsWith("ja")) continue;
+          const index = ugedage.indexOf(spg[1].toLowerCase());
+          if (index !== -1 && !mulige.has(index)) {
+            fejl.push(`${event.id} (${id}): "${faq.question}" → "${faq.answer}"`);
+          }
+        }
+      }
+    }
+    expect(fejl).toEqual([]);
+  });
+
+  test("skærtorsdag er en torsdag, og spørgsmålet om 'fridag' har et nej-svar", () => {
+    // "fridag" er fri dag, ikke fredag, så den skal ikke læses som en ugedag —
+    // men svaret på spørgsmålet skal alligevel være et nej, fordi skærtorsdag
+    // ikke automatisk giver dagpenge. Låst, fordi det er den her fejlklasse:
+    // et spørgsmål der læser "fredag" og svarer "ja".
+    const skaertorsdag = DAGE_TIL_EVENTS.find((e) => e.da.slug === "skaertorsdag");
+    const faq = skaertorsdag?.da.copy.faq.find((f) => f.question.includes("fridag"));
+    expect(faq).toBeDefined();
+    expect(faq?.answer.startsWith("Nej")).toBe(true);
+    expect(muligeUgedage(skaertorsdag!.anchor.da)).toEqual(new Set([4]));
+    expect(FRIDAG_DA).not.toBe(4);
+  });
+});

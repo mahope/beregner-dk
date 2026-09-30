@@ -1,12 +1,25 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — 30/9 20:05. **F8 er færdig** (`ceo/svensk-helgdagslove`): tre
-svenske sider sagde om helgdage det modsatte af `lag (1989:253) 1 §`.
-Julafton skrev at den "räknas som helgdag", skärtorsdag skrev at den er en
-"officiell svensk helgdag" — og modsatte samtidig sin egen faktaboks — og
-nationaldagen skrev i både faktaboks og FAQ at den "ikke er en laglig
-helgdag", skønt loven tager udtrykkeligt op den. Loven er nu lagt i testen
-som data, så brødteksten tjekkes mod den.
+STATUS: KØ — 30/9 20:25. **Opgave 188 er færdig** (`ceo/sidste-hverdag-paastand`):
+tre ugedags-påstande i `/dage-til/`-klyngen var kun sande i nogle år, og er nu
+rettet *og* målt mod de datoer ankeret faktisk producerer. De to i opgaveteksten
+(sidste hverdag/vardag i december) plus to den fandt: sankthans som "en
+almindelig hverdag" (23. juni er weekend i 2029/30/35/40) og dansk skærtorsdag,
+der svarede *ja* til "er skærtorsdag en fridag" på en side der siger at den
+altid er en **torsdag**. Ny port regner 61 år frem, 3 nye tests, alle tre
+mutation-kontrolleret.
+
+**Næste opgave: 190** — F8's port matcher kun "allmän helgdag", ikke det bløde
+"helgdag", så se `/skartorsdagen` stadig modsiger sin egen faktaboks to steder.
+Det er F8's fejlsøgning, ikke F8's arbejde: porten låser de ord den så.
+
+**⚠️ Målerfældens anden udløber (30/9 20:20).** En *bredere* ugedags-port
+("enhver nævnt ugedag skal være blandt ankerets dage") gav 15 fund, hvor 13 var
+**om andre dage** — "Fredagen efter Kristi himmelfartsdag er en hverdag",
+"sommerferien starter den sidste lørdag i juni" på efterårsferiens side. Alle 13
+var rigtig tekst, som porten ville have tvunget til ødelæggelse. Samme fejl som
+den målerfælde nedenfor, fra den anden side. 188's port er derfor snæver: den
+tester de to påstande der faktisk var forkerte, ikke alle ord i brødteksten.
 
 **⚠️ Målerfælde fundet 30/9 20:00 — læs den før du "beviser" et tal.** Et
 egen-script til at tjekke påstand i tekst fik **tre fejl i træk** på
@@ -15,18 +28,19 @@ absolut, så "ligger mellem 1. maj (2008) og 3. juni (2038)" læst som
 forkert — men påstanden er om *dag-i-året*, og den er korrekt. (2) Dets
 ugenummer forankrede på 1. januar i stedet for ISO-mandagen, så "2. pinsedag
 ligger i uge 20 til 24" læst som uge 19-24. (3) Sætnings-vis fejlfindelse
-ramte to * korrekte* negativer ("Första advent är **ikke** en allmän
+ramte to *korrekte* negativer ("Första advent är **ikke** en allmän
 helgdag" og "Pingstdagen är en allmän helgdag ... **Måndagen efter är
-däremot ikke**"). Konklusion: et hjemmeskrevet målescript skal **krydses
+däremot inte**"). Konklusion: et hjemmeskrevet målescript skal **krydses
 mod lovens eller kalenderens egen tekst** og måske to uafhængige
 implementeringer, før en påstand i brødtekst rettes. Det er præcis den
 fejl, reviewer-loopet selv lavede 29/9 i `pinse-intervaller.ts` (4 kollisionsår
 før det fandt 7). Rett aldrig rigtig tekst på et dårligt målescript.
 
-**Fire VERIFICÉR-noter åbne** (fra F8, F7, F6 og F4). F1/F3/F5 og opgaver
+**Fem VERIFICÉR-noter åbne** (fra 188, F8, F7, F6 og F4). F1/F3/F5 og opgaver
 97/98/119/183 er blokeret af svar fra Mads. **Opgave 187 må ikke røres før
 13/10.** **CEO-køen er tom** — alle otte punkter blev rettet i `aca17e5` og
-verificeret mod koden 30/9 19:10.
+verificeret mod koden 30/9 19:10. Review-fund 29/9 er begge mærket
+`RETTET d563ba2` og lukket.
 
 **⚠️ Målerfælde (30/9 15:40, samme klasse som C70's).** `npm run test` kører
 `locale-leak-gate.test.ts`, som med vilje planterer **to** danske lækager og
@@ -39,7 +53,7 @@ gendannes i en `finally`. Det er **ikke** fund i din diff. Kør gaten separat:
 
 **Generelt om gaten:** `REVIEWED`-poster i `scripts/locale-leak.mjs` matches på
 `file` + `key` + `string`, **ikke** linjenummer — så en indsats i en fil flytter
-ikke godkendt-fund. Det er rettet mod den tidligere notat i planen.
+ikke godkendt-fund.
 
 ## Fase 3 — trafik-drevet
 
@@ -234,13 +248,27 @@ fremover med `git stash -u` før og efter, som gjort her.
 
 ## Åbne VERIFICÉR DEPLOY-noter
 
-**Fire noter åbne.** HTTP 200 beviser intet: F6's note rører Intl-formatering,
+**Fem noter åbne.** HTTP 200 beviser intet: 188's note rører brødtekst på fire
+statiske sider, F6's note rører Intl-formatering,
 F4's rører rækkefølge og breakpoint, og F7's rører brødteksttal, hvor en fejl
 er usynlig for `curl` — en dansk læser skal bare have et forkert tal. De otte
 lukkede noter er verificeret 30/9 17:46-17:53 på indhold; alle målinger står i
 `docs/plan-arkiv.md`.
 
+- ⏳ **Ingen side må kalde en skiftende dato en hverdag, og skærtorsdag er en
+  torsdag.** `ceo/sidste-hverdag-paastand`. På
+  `https://minberegner.dk/nyaarsaften` og `https://beraknare.se/nyarsafton`
+  må "Sidste hverdag i december" og "Sista vardagen i december" **ikke**
+  forekomme nogen steder — teksten skal sige månedens sidste dag uanset
+  ugedag. På `https://minberegner.dk/sankthansaftensdag` må "en almindelig
+  hverdag" **ikke** forekomme (23. juni er weekend i 2029, 2030, 2035, 2040).
+  På `https://minberegner.dk/skaertorsdag` skal spørgsmålet "Er skærtorsdag en
+  fridag?" have svaret **"Nej"** med "altid en torsdag" i svaret. HTTP 200
+  beviser intet — det er brødtekst på statiske sider. Prøven på dansk er
+  `src/lib/dage-til.test.ts` efter deploy. Vindue **1/10 07:30**.
+
 - ⏳ **De tre svenske helgdagspåstande skal være rettet i lovens ord.**
+
   `ceo/svensk-helgdagslove`. På `https://beraknare.se/dagar-till/julafton`,
   `/dagar-till/skartorsdagen` og `/dagar-till/nationaldagen`: **"9-10", "räknas
   som helgdagar", "officiella svenska helgdagar" for skärtorsdagen og "är inte
@@ -279,57 +307,21 @@ lukkede noter er verificeret 30/9 17:46-17:53 på indhold; alle målinger står 
 
 ## Åbne opgaver
 
-#### 97. [BLOCKED: afventer Mads' svar på ejerskabsspørgsmålet — spørgsmålet står i ❓ Til Mads, ingen kode uden svar] 2026-09-27 — C69 — afklar hvad `beregner.no` egentlig er: et domæne der skal lanceres, et reserveret navn — eller en helt anden udgivelse
+#### 97. [BLOCKED: afventer Mads' svar — spørgsmålet står i ❓ Til Mads, ingen kode uden svar] 2026-09-27 — C69 — afklar hvad `beregner.no` er
 
-- **Datagrund:** målt under C66. `https://beregner.no/` svarer **200**, men
-  `/moms`, `/procent`, `/dato`, `/tidszone` og `/elberegner` svarer alle **404**.
-  Kodeporten siger imidlertid ja: `isCalculatorAvailable("/moms", "no")` er
-  `true`, fordi `/moms` hverken har `daOnly` eller `seOnly` i
-  `calculator-list.ts:79`.
-- **⚠️ PRÆMIS KORRIGERET under C68 — `beregner.no` er ikke dette repo.** Begge
-  beviser i den gamle formulering er modsagt af målingen, så opgaven er skrevet
-  om fra "hvilken beslutning mangler i porten" til "hvilket domæne er det
-  egentlig". 1. **Forsiden er ikke vores.** `https://beregner.no/` er en 12,7 KB
-  norsk side med `<title>beregner.no – 100+ gratis norske kalkulatorer</title>`,
-  `<h2>Kategorier</h2>` og `<h2>Mest brukte</h2>`, og **uden ét eneste
-  `/_next/static`-chunk** — vores forside vejer 192 KB og renderer
-  `HomeContent`. `git log -S "Mest brukte"` giver **ingen træffere**: siden har
-  aldrig eksisteret i dette repo. 2. **404'en er ikke vores heller.**
-  `https://beregner.no/moms` svarer med `<h1 class="text-7xl font-bold
-  text-foreground">404`, og `text-foreground` står i **nul** filer i repoet
-  (biome linter 551) — den danske "Siden finnes ikke"-side, C66 antog, har ingen
-  `text-foreground`. Konklusion: **beregner.no peger på en anden udgivelse end
-  den, C65-C68 har arbejdet på.**
-- **Følgen for resten af planen:** (a) Denne opgave er ikke længere en
-  kodebeslutning, den er et **spørgsmål om ejerskab** — se `❓ Til Mads`.
-  (b) Opgave 98 (`TidszoneBeregner` mangler et `no`-sprog) er, hvis det er den
-  *anden* udgivelse der mangler norsk, ikke en opgave overhovedet. (c) Scannerens
-  overskrift "70 komponenter monteres på beraknare.se/beregner.no" er i praksis
-  "på beraknare.se". (d) Alle `no`-fund fra C65/C66 (`navnNo`, `Hårtørrer`,
-  `labels` uden `no`) er **uopnåelige** lige nu: ingen kan se dem, og de er
-  derfor heller ikke målbare. De er bevaret, fordi de er korrekte og bliver
-  nødvendige den dag `no` lanceres fra *dette* repo.
-- **Hvorfor det ikke er en refaktor men en beslutning:** det er **forventeligt** ud fra
-  `domain-config.ts:91`, `hiddenDomains = new Set(["localhost", "beregner.no"])` —
-  kommentaren siger eksplicit "domains not yet launched". Det er altså en
-  beslutning, der mangler, ikke en fejl. Men beslutningen er uafskrevet i koden,
-  og **den gør C65's og C66's arbejde uverificerbart for `no`**: de oversatte
-  `no`-strenge kan ikke ses af nogen, og ingen test kan se dem live.
-- **Scope (kræver Mads' svar, ikke en iteration):** er `beregner.no` et domæne
-  der skal lanceres snart, eller et reserveret navn? Der er tre mulige svar, og
-  de er **ikke** ens:
-  1. **Lanceres snart** → så er `no`-klassen (opgave 98) rigtig prioritet, og
-     alle `no`-fund fra C65/C66 skal måles live i stedet for i tests.
-  2. **Lanceres ikke** → `no` skal lukkes eksplicit i `calculator-list.ts` (alle
-     ikke-`daOnly`/`seOnly`-defs skal få `no`-porte, eller `isCalculatorAvailable`
-     skal kræve et eksplicit `no`-flag), så koden siger hvad der sker, og 404'en
-     er en *beslutning* i stedet for en *bivirkning*.
-  3. **Uafklaret** → skriv det i planen som et `❓ Til Mads`-spørgsmål og lad
-     porten være som den er, men noter at `no` er ubevidst ubeskyttet.
-- **Acceptkriterier:** 1. `❓ Til Mads` har spørgsmålet. 2. Uanset svar står der
-  en linje i `IMPLEMENTATION_PLAN.md` om hvad `no` er: lanceret, lukket eller
-  uafklaret. 3. Gaten grøn. **Ingen kodeændring uden Mads' svar** — lukning af
-  et domæne er en domænebeslutning, ikke en refaktor.
+- **Datagrund:** `https://beregner.no/` svarer 200 med en 12,7 KB norsk side
+  ("Mest brukte") og **uden ét `/_next/static`-chunk**; `git log -S "Mest
+  brukte"` giver ingen træffere, og 404-siden bruger `text-foreground`, som
+  står i nul filer her. **beregner.no peger på en anden udgivelse end denne
+  repo** — så det er et ejerskabsspørgsmål, ikke en kodebeslutning.
+- **Følgen:** opgave 98 er betinget, alle `no`-fund fra C65/C66 er uopnåelige
+  (ingen kan se dem) men bevares, fordi de bliver nødvendige den dag `no`
+  lanceres herfra. `domain-config.ts:91` har `beregner.no` i `hiddenDomains`
+  ("not yet launched").
+- **Accept:** 1. `❓ Til Mads` har spørgsmålet (det har den). 2. Der står en
+  linje i planen om hvad `no` er: lanceret, lukket eller uafklaret.
+  3. Gaten grøn. **Ingen kodeændring uden svar** — at lukke et domæne er en
+  domænebeslutning. Fuldtekst: `docs/plan-arkiv.md`, "Opgave 97, 119 og 183".
 
 #### 98. [ ] 2026-09-27 — C70 — `TidszoneBeregner` har intet `no`-sprog (afhænger af opgave 97)
 
@@ -352,86 +344,52 @@ lukkede noter er verificeret 30/9 17:46-17:53 på indhold; alle målinger står 
 - **MÅL:** ingen brugerdata endnu — beregner.no har ingen trafikmåling. Mål først
   14 dage efter en eventuel lancering.
 
-#### 119. [BLOCKED: anden kildejerngang — Sundhedsstyrelsen svarer HTTP 429 på alle sider, så de officielle portionsværdier kan ikke citeres, og de må ikke gættes] 2026-09-29 — Kø — madvare-klyngen på "kalorier" (kræver en kilde, før den bygges)
+#### 119. [BLOCKED: ingen citable dansk kilde — sst.dk svarer HTTP 429, de fire andre kilder døde i C92] 2026-09-29 — madvare-klyngen på "kalorier"
 
-- **Datagrund:** DA-autocomplete under "kalorier" → **9 af 10** er madvarer
-  (æg, banan, vandmelon, jordbær, avocado, kirsebær, kartofler, vindruer,
-  havregryn); under "kalorie indhold" → **10 af 10**; under "kalorier i æg" →
-  æggehvide, æggeblomme, æggekage, æggekage med bacon, æg uden blomme,
-  æggesalat, æggemad. Det er den næststørste danske klynge på ordet, og
-  `/kalorier` har **0** tabeller over madvarer.
-- **Hvorfor den ligger og ikke er bygget nu:** den kræver en *kildefølt*
-  værdi pr. vare, og den eneste citable danske tabel kunne ikke hentes.
-  Gættede kalorietal ville være præcis den fejlklasse planen fører.
-- **⚠️ Kildejerngang nr. 2 (C92, 2026-09-27 15:05) — spild ikke en tredje
-  iteration på de samme kilder.** Prøvet i denne rækkefølge, alle med curl
-  *og* webfetch:
-  | Kilde | Resultat |
-  |---|---|
-  | `frasco.dk` | HTTP 000, ingen forbindelse (domænet er dødt) |
-  | `francofooddata.dk` + `www.` | HTTP 000 |
-  | `kostviddatabase.kk.dk` (København Kommune) | HTTP 000 |
-  | `kostviddatabase.dk`, `fdev.dk` | HTTP 000 |
-  | Open Food Facts API (`/api/v2/search`, danske produkter) | **HTTP 503** — serveren svarer "temporarily unavailable … not available to anonymous users" |
-  | da.wikipedia.org API, `Infoboks næringsindhold` | **Virker**, men kun 2 af 24 fødevarer har den: `Havregryn` (368 kcal) og `Banan`. `Kartoffel`, `Gulerod`, `Æg`, `Vindrue`, `Jordbær`, `Kirsebær`, `Avocado`, `Vandmelon`, `Kylling`, `Laks`, `Ost`, `Mælk`, `Hvedebrød`, `Smør`, `Broccoli` har **ikke** infoboksen. Kilden er desuden *Wikipedia*, ikke DTU. |
-  **Konklusion:** der er ingen citable dansk tabel tilgængelig fra en agent i
-  denne iteration. Wikipedia-vejen er lukket som hovedkilde (2/24) — brug den
-  kun til at *krydschecke* to-tre tal, aldrig som grundlag for en tabel.
-  **Ny præmis for den næste agent:** byg den **ikke** som en færdig
-  madvare-tabel. (a) Få Mads til at give adgang til en kilde
-  (`❓ Til Mads`), eller (b) byg i stedet det, der *kan* dokumenteres i dag:
-  de danske ** portionsværdier for de fire-fem hovedgrupper** i
-  Sundhedsstyrelsens kostanbefalinger (Find flere oplysninger i
-  `Mål hver dag` → tallerkken og 400/600 kcal) — citable, danske, og de
-  svarrer på "hvor mange kalorier skal jeg have om dagen", som er GSC's
-  søgning på `/kalorier` (1 v, pos. 1).
-- **⚠️ Kildejerngang nr. 3 (2026-09-29 21:35) — både (a) og (b) er lukket i denne
-  iteration.** Både `webfetch` og `curl` på `sst.dk` giver **HTTP 429** (rate
-  limited) på `/forbruger/kost-og-motion/tallerkenmodellen` og
-  `/viden-og-raadgivning/kost-og-motion/kostanbefalinger`; `…/maaltider` er 404.
-  Uden kilden kan hverken tallerkenmodellens andele eller 400/600 kcal skrives
-  ned som fakta, så opgaven er `BLOCKED` indtil Mads enten giver adgang eller
-  en kildefil. **C92's tabel er ikke en invitationsliste til at prøve de samme
-  kilder igen.**
+- **Datagrund:** DA-autocomplete under "kalorier" → 9 af 10 er madvarer (æg,
+  banan, vandmelon, kartofler, havregryn); under "kalorie indhold" → 10 af 10.
+  Det er den næststørste danske klynge på ordet, og `/kalorier` har **0**
+  tabeller over madvarer (289 besøgende/28d, +50 %).
+- **Kildejerngang nr. 2 og 3 (C92 + 29/9) lukkede alle veje:** `frasco.dk`,
+  `francofooddata.dk`, `kostviddatabase.{kk.}dk`, `fdev.dk` → HTTP 000; Open
+  Food Facts → 503; Wikipedia har kun 2 af 24 fødevarer; `sst.dk` (browser
+  og curl) → **HTTP 429** på tallerkenmodellen og kostanbefalingerne.
+  Wikipedia er lukket som hovedkilde (2/24) — kun til at krydschecke to-tre tal.
+- **Præmis for næste agent:** byg den **ikke** som en færdig madvare-tabel.
+  Enten (a) Mads giver adgang til en kildefil/API-nøgle (`❓ Til Mads`), eller
+  (b) byg det der *kan* dokumenteres i dag: Sundhedsstyrelsens
+  **portionsværdier for de fire-fem hovedgrupper** i kostanbefalingerne
+  (tallerkenmodellen, 400/600 kcal), som svarrer på GSC's søgning "hvor mange
+  kalorier skal jeg have om dagen" (1 v, pos. 1). Gættede kalorietal ville være
+  præcis den fejlklasse planen fører. Må ikke prøve de samme kilder igen.
+- **MÅL:** `/kalorier` 289 besøgende/28d (Plausible 2026-09-30). Fuldtekst:
+  `docs/plan-arkiv.md`, "Opgave 97, 119 og 183".
 
-#### 183. [BLOCKED: afventer Mads' svar på kildespørgsmålet fra 27/9 — spørgsmålet står i ❓ Til Mads, og opgaven siger selv "ingen ny kode før diagnosen står". Ikke prøvet igen: ingen ny måling i denne iteration kan erstatte svaret] 2026-09-29 — Kø — **diagnosér `/bmi`s og `/su`s fald, og find ud af hvor stor en del der er overhovedet Googles**
+#### 183. [BLOCKED: afventer Mads' svar på kildespørgsmålet fra 27/9 — "ingen ny kode før diagnosen står", og ingen ny måling kan erstatte svaret] 2026-09-29 — Kø — **diagnosér `/bmi`s og `/su`s fald**
 
 - **Datagrund:** Plausible 28 dage: `/bmi` 1.271 → 938 (−26 %), `/su` 220 →
-  116 (−47 %). Samtidig voksede sitet **+42 %**, så faldet er relativt værre end
-  26 %. Til sammenligning: `/dato` 1.110 (+77 %), `/boligstoette` 535 (+86 %),
-  `/kvadratmeter` 388 (+94 %), `/rentefradrag` 331 (+145 %).
-- **Den måling, der låser diagnosen:** GSC's top-15 over *visninger* ender på
-  `/brok` med 4.920. **Hverken `/bmi` eller `/su` står på listen**, så begge
-  har **under 4.920 Google-visninger** pr. 28 dage — mens `/bmi` har 938
-  Plausible-besøgende. Det kan ikke være en ren CTR-fejl: en visning der ikke
-  klikkes, ville give en *høj* CTR på den lille visningsmængde. Enten kommer
-  `/bmi`s trafik i overvejende grad fra Bing/DuckDuckGo/Yahoo/direkte
-  (Plausible: Bing 1.308, DDG 371, Yahoo 281, Direct 1.041 mod Google 4.089),
-  eller GSC's eksport er ældre end Plausible's 28 dage.
-- **Hvorfor det ikke er løst i C196:** en diagnose uden tal er gætteri, og en
-  titelændring er ikke en diagnose. Det kræver ét svar fra Mads eller en
-  Plausible-udtræk: **hvilke kilder kommer `/bmi` og `/su` fra, delt på
- søgemaskiner?** Uden det kan ingen af os vide om faldet er ranking, sæson
-  (bmi-søgninger topper i januar) eller noget tredje.
-- **Acceptkriterier:** (1) kildefordelingen for `/bmi` og `/su` står i planen,
-  (2) faldet er klassificeret som ranking / sæson / CTR med et tal til hver
-  mulighed, (3) hvis det er ranking, navngives konkurrenten der har taget
-  pladsen. **Ingen ny kode før diagnosen står** — en tredje titelændring på
-  samme side uden en diagnose er prøvet to gange.
-- **MÅL:** `/bmi` 938 besøgende/28d, `/su` 116 (Plausible 2026-09-29).
-- **⚠️ 30/9: fundet i side-konteksten, uden ny kode.** Målt på det *live* site:
-  `/bmi` og `/su` er begge sunde — canonical til sig selv, `robots
-  index,follow`, hreflang `da` + `x-default`, `WebApplication` + `FAQPage` +
-  `BreadcrumbList`, og begge står i sitemap.xml (136 `<loc>`). Så faldet er
-  **ikke** teknik. Samme billede som `/procent` (C200, lukket): 150.148 GSC-
-  visninger, **98 klik**, altså CTR 0,07 % på 150.148 visninger — langt under
-  det niveau hvor en rankingeringsfejl forklares. Mønstret på hele sitet er
-  det samme: **GSC's visninger ligger langt over Plausible's besøgende, og
-  forskellen er ikke-klikket Google-trafik.** Det peger på én fælles årsag
-  (snippet/intention), ikke på to separate sidefejl — men at *finde* den kræver
-  stadig kildefordelingen fra Mads, så opgaven står.
+  116 (−47 %), mens sitet voksede +42 % — så faldet er relativt værre. GSC's
+  top-15 over visninger ender på `/brok` med 4.920, og **hverken `/bmi` eller
+  `/su` står på den**, så begge har under 4.920 Google-visninger pr. 28 dage
+  mod 938 Plausible-besøgende. Det kan ikke være ren CTR: en visning der ikke
+  klikkes, giver høj CTR på lille volumen. Enten kommer trafikken overvejende
+  fra Bing/DDG/Yahoo/direkte, eller GSC's eksport er ældre end Plausible's 28
+  dage.
+- **Ikke teknisk (målt på live 30/9):** begge sider er sunde — canonical til
+  sig selv, `robots index,follow`, hreflang `da` + `x-default`,
+  `WebApplication` + `FAQPage` + `BreadcrumbList`, i sitemap.xml (136 `<loc>`).
+  Samme billede som `/procent` (C200): 150.148 visninger, 98 klik, CTR 0,07 %.
+  Mønstret site-wej er det samme — GSC's visninger ligger langt over
+  Plausible's besøgende, og forskellen er ikke-klikket Google-trafik. Det
+  peger på én fælles årsag (snippet/intention), men at *finde* den kræver
+  kildefordelingen fra Mads.
+- **Accept:** (1) kildefordelingen for begge sider står i planen, (2) faldet er
+  klassificeret som ranking / sæson / CTR med et tal til hver mulighed,
+  (3) er det ranking, navngives konkurrenten. **Ingen ny kode før diagnosen
+  står** — to titelændringer er prøvet. **MÅL:** `/bmi` 934, `/su` 127
+  besøgende/28d (Plausible 2026-09-30). Fuldtekst: `docs/plan-arkiv.md`.
 
-#### 188. [ ] 2026-09-30 — Kø — de to "sidste hverdag/vardag"-påstande er kun sande det ene år
+#### 188. [x] ✅ `ceo/sidste-hverdag-paastand` — tre ugedags-påstande rettet, og de måles nu mod ankeret (30/9)
 
 - **Datagrund:** fundet under F8's audit, samme klasse som review-fund 2 om
   docblockens årstal. Se `nytaarsaften` (da: "Sidste hverdag i december er 31.
@@ -452,6 +410,65 @@ lukkede noter er verificeret 30/9 17:46-17:53 på indhold; alle målinger står 
   GSC's top-15. Men den ligger på to svenske og to danske svar-først-sider,
   og klassen (påstand om et fast tal, der ikke er fast) er den samme som
   CEO-køens otte fund.
+- **⚠️ 30/9: opgaven fandt to fejl den ikke navngavde.** Porten regner de
+  faktiske datoer over 61 år, så den fandt to *mere* end de to i
+  opgaveteksten, begge i samme klasse: (1) `sankthansaftensdag`'s FAQ svarede
+  at 23. juni er "en almindelig aften på en **almindelig hverdag**" — 23. juni
+  er weekend i **2029, 2030, 2035 og 2040**; (2) dansk `skaertorsdag`
+  svarede på spørgsmålet "er skærtorsdag en fridag?" med **"ja, den er en
+  fridag"** — på en side der to linjer ovenfor siger at skærtorsdag *altid*
+  er en **torsdag**. Begge er rettet i samme commit, fordi de er samme
+  fejlklasse og samme fil, og de deler port.
+- **⚠️ Målerfældens anden udløber — dokumenteret i testens docblock.** En
+  *bredere* port ("enhver nævnt ugedag skal være blandt ankerets dage") gav 15
+  fund, hvor **13 var om andre dage**: "Fredagen efter Kristi himmelfartsdag er
+  en hverdag", "Påskeaften er torsdag" (siden handler om langfredag),
+  "sommerferien starter den **sidste lørdag i juni**" på efterårsferiens side.
+  Alle 13 var rigtig tekst, som porten ville have tvunget til ødelæggelse.
+  Porten er derfor snæver: den tester de to påstande der faktisk var forkerte,
+  ikke alle ord i brødteksten. Samme lektion som F8's målerfælde.
+- **Port:** `muligeUgedage` regner `getNextAnchorDate` for hvert år 2020-2080 og
+  kræver (a) at "hverdag/vardag" på en dato der kan ligge i en weekend har et
+  forbehold i samme sætning eller en ledsætning ("når … holdes på en
+  hverdag" tæller), (b) at et "er X en \<ugedag\>-spørgsmål" med *ja*-svar
+  rammer en dag ankeret faktisk kan falde på, og (c) at skærtorsdagen svarer
+  *nej* på fridags-spørgsmålet og kun falder på uge 4 (torsdag). Alle tre
+  mutation-kontrollerede mod den gamle kode — alle tre faldt.
+
+#### 190. [ ] 2026-09-30 — Kø — F8's port slipper "helgdag" uden "allmän", så se `/skartorsdagen` stadig modsiger sig selv
+
+- **Datagrund:** fundet under 188's audit, samme fil og samme række.
+  `dage-til.ts:513` siger efter F8's rettelse *korrekt*: "Långfredag, påskdagen
+  og annandag påsk är alla allmänna helgdagar enligt lagen (1989:253).
+  **Skärtorsdag är det inte — det är en vanlig arbetsdag.**" To sætninger
+  længere nede på **samme side** siger modsatte: `dage-til.ts:525` svarer på
+  "Är skärtorsdagen en röd dag?" med "**Ja, den är en torsdag och en
+  helgdag**", og `dage-til.ts:530` siger "Skärtorsdagen är 3 dagar före
+  påskdagen och långfredagen 2 dagar före. **Båda är helgdagar.**"
+- **Hvorfor F8's port ikke fandt det:** `kalderDetHelgdag` matcher kun
+  "allmän helgdag", "allmänna helgdagar", "helgdag i den svenska kalendern",
+  "officiell svensk helgdag" og "officiella svenska helgdagar" — **det bløde
+  "helgdag" er ikke på listen**. Det er præcis F8's fejlsøgning, som kun
+  rammer de formuleringer den oprindelige tekst brugte. F8 rettede de tre
+  sætninger med *fejl* og lod de to med *mindre tydelig* fejl stå, fordi de
+  ikke matchede mønstret. Samme fejlklasse som review-fund 2 om docblockens
+  årstal: porten låser de ord, den så, ikke påstanden.
+- **Fagligt er der et skelnepunkt, der skal skrives rigtigt:** svensk *röd
+  dag* (de facto fridag, grundet på avtal eller sed) er **ikke** det samme som
+  *allmän helgdag* (fastsat i lag). Skärtorsdagen er en röd dag uden at være
+  en allmän helgdag. Svaret på spørgsmålet skal derfor skelne mellem de to
+  ord, ikke bare bytte "helgdag" med "röd dag" — ellers står der en ny
+  modsigelse på siden i stedet for den gamle. Kilde: riksdagen.se, lag
+  (1989:253) 1 § (samme kilde som F8's).
+- **Acceptkriterier:** de to sætninger er skrevet så de modsider ikke
+  faktaboksen, og forskellen mellem *röd dag* og *allmän helgdag* er
+  forklaret mindst én gang på siden. **Port:** `kalderDetHelgdag` udvides til
+  også at ramme det bløde "helgdag"/"helgdagar" på en hændelse, loven ikke
+  tæller, **med mindre** sætningen selv siger at den *er* en röd dag — så
+  klassen ikke kan komme tilbage. Gaten grøn.
+- **MÅL:** ingen trafikvirkning — se `/skartorsdagen` er ikke i GSC's top-15.
+  Samme værdi som 188: en svensk læser skal ikke møde to sider der siger
+  modsatte ting om loven på 200 ord.
 
 #### 189. [ ] 2026-09-30 — Kø — mål brødtekstal mod en kilde, ikke mod et hjemmeskrevet script
 

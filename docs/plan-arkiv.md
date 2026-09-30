@@ -21100,3 +21100,144 @@ loopet lavede 29/9 i `pinse-intervaller.ts` (fandt 4 kollisionsår, rigtigt er 7
 **Målescripts skal krydses mod lovens eller kalenderens egen tekst.**
 
 **Gate:** lint 627 filer ren · 3251 tests grønne · build OK · locale-leak exit 0.
+
+
+<!-- arkiveret 30/9 fra IMPLEMENTATION_PLAN.md, opgave 188's iteration -->
+
+## Opgave 97, 119 og 183 — fuldtekst fra planen (30/9)
+
+Planen var over 40 KB efter 188. De tre `BLOCKED`-opgaver stod med
+50-60 linjer hver, hvilket bryder planens egen regel (højst 8 linjer pr.
+åben opgave). Fuldteksten står her; planen peger på den.
+
+#### 97. [BLOCKED: afventer Mads' svar på ejerskabsspørgsmålet — spørgsmålet står i ❓ Til Mads, ingen kode uden svar] 2026-09-27 — C69 — afklar hvad `beregner.no` egentlig er: et domæne der skal lanceres, et reserveret navn — eller en helt anden udgivelse
+
+- **Datagrund:** målt under C66. `https://beregner.no/` svarer **200**, men
+  `/moms`, `/procent`, `/dato`, `/tidszone` og `/elberegner` svarer alle **404**.
+  Kodeporten siger imidlertid ja: `isCalculatorAvailable("/moms", "no")` er
+  `true`, fordi `/moms` hverken har `daOnly` eller `seOnly` i
+  `calculator-list.ts:79`.
+- **⚠️ PRÆMIS KORRIGERET under C68 — `beregner.no` er ikke dette repo.** Begge
+  beviser i den gamle formulering er modsagt af målingen, så opgaven er skrevet
+  om fra "hvilken beslutning mangler i porten" til "hvilket domæne er det
+  egentlig". 1. **Forsiden er ikke vores.** `https://beregner.no/` er en 12,7 KB
+  norsk side med `<title>beregner.no – 100+ gratis norske kalkulatorer</title>`,
+  `<h2>Kategorier</h2>` og `<h2>Mest brukte</h2>`, og **uden ét eneste
+  `/_next/static`-chunk** — vores forside vejer 192 KB og renderer
+  `HomeContent`. `git log -S "Mest brukte"` giver **ingen træffere**: siden har
+  aldrig eksisteret i dette repo. 2. **404'en er ikke vores heller.**
+  `https://beregner.no/moms` svarer med `<h1 class="text-7xl font-bold
+  text-foreground">404`, og `text-foreground` står i **nul** filer i repoet
+  (biome linter 551) — den danske "Siden finnes ikke"-side, C66 antog, har ingen
+  `text-foreground`. Konklusion: **beregner.no peger på en anden udgivelse end
+  den, C65-C68 har arbejdet på.**
+- **Følgen for resten af planen:** (a) Denne opgave er ikke længere en
+  kodebeslutning, den er et **spørgsmål om ejerskab** — se `❓ Til Mads`.
+  (b) Opgave 98 (`TidszoneBeregner` mangler et `no`-sprog) er, hvis det er den
+  *anden* udgivelse der mangler norsk, ikke en opgave overhovedet. (c) Scannerens
+  overskrift "70 komponenter monteres på beraknare.se/beregner.no" er i praksis
+  "på beraknare.se". (d) Alle `no`-fund fra C65/C66 (`navnNo`, `Hårtørrer`,
+  `labels` uden `no`) er **uopnåelige** lige nu: ingen kan se dem, og de er
+  derfor heller ikke målbare. De er bevaret, fordi de er korrekte og bliver
+  nødvendige den dag `no` lanceres fra *dette* repo.
+- **Hvorfor det ikke er en refaktor men en beslutning:** det er **forventeligt** ud fra
+  `domain-config.ts:91`, `hiddenDomains = new Set(["localhost", "beregner.no"])` —
+  kommentaren siger eksplicit "domains not yet launched". Det er altså en
+  beslutning, der mangler, ikke en fejl. Men beslutningen er uafskrevet i koden,
+  og **den gør C65's og C66's arbejde uverificerbart for `no`**: de oversatte
+  `no`-strenge kan ikke ses af nogen, og ingen test kan se dem live.
+- **Scope (kræver Mads' svar, ikke en iteration):** er `beregner.no` et domæne
+  der skal lanceres snart, eller et reserveret navn? Der er tre mulige svar, og
+  de er **ikke** ens:
+  1. **Lanceres snart** → så er `no`-klassen (opgave 98) rigtig prioritet, og
+     alle `no`-fund fra C65/C66 skal måles live i stedet for i tests.
+  2. **Lanceres ikke** → `no` skal lukkes eksplicit i `calculator-list.ts` (alle
+     ikke-`daOnly`/`seOnly`-defs skal få `no`-porte, eller `isCalculatorAvailable`
+     skal kræve et eksplicit `no`-flag), så koden siger hvad der sker, og 404'en
+     er en *beslutning* i stedet for en *bivirkning*.
+  3. **Uafklaret** → skriv det i planen som et `❓ Til Mads`-spørgsmål og lad
+     porten være som den er, men noter at `no` er ubevidst ubeskyttet.
+- **Acceptkriterier:** 1. `❓ Til Mads` har spørgsmålet. 2. Uanset svar står der
+  en linje i `IMPLEMENTATION_PLAN.md` om hvad `no` er: lanceret, lukket eller
+  uafklaret. 3. Gaten grøn. **Ingen kodeændring uden Mads' svar** — lukning af
+  et domæne er en domænebeslutning, ikke en refaktor.
+
+#### 119. [BLOCKED: anden kildejerngang — Sundhedsstyrelsen svarer HTTP 429 på alle sider, så de officielle portionsværdier kan ikke citeres, og de må ikke gættes] 2026-09-29 — Kø — madvare-klyngen på "kalorier" (kræver en kilde, før den bygges)
+
+- **Datagrund:** DA-autocomplete under "kalorier" → **9 af 10** er madvarer
+  (æg, banan, vandmelon, jordbær, avocado, kirsebær, kartofler, vindruer,
+  havregryn); under "kalorie indhold" → **10 af 10**; under "kalorier i æg" →
+  æggehvide, æggeblomme, æggekage, æggekage med bacon, æg uden blomme,
+  æggesalat, æggemad. Det er den næststørste danske klynge på ordet, og
+  `/kalorier` har **0** tabeller over madvarer.
+- **Hvorfor den ligger og ikke er bygget nu:** den kræver en *kildefølt*
+  værdi pr. vare, og den eneste citable danske tabel kunne ikke hentes.
+  Gættede kalorietal ville være præcis den fejlklasse planen fører.
+- **⚠️ Kildejerngang nr. 2 (C92, 2026-09-27 15:05) — spild ikke en tredje
+  iteration på de samme kilder.** Prøvet i denne rækkefølge, alle med curl
+  *og* webfetch:
+  | Kilde | Resultat |
+  |---|---|
+  | `frasco.dk` | HTTP 000, ingen forbindelse (domænet er dødt) |
+  | `francofooddata.dk` + `www.` | HTTP 000 |
+  | `kostviddatabase.kk.dk` (København Kommune) | HTTP 000 |
+  | `kostviddatabase.dk`, `fdev.dk` | HTTP 000 |
+  | Open Food Facts API (`/api/v2/search`, danske produkter) | **HTTP 503** — serveren svarer "temporarily unavailable … not available to anonymous users" |
+  | da.wikipedia.org API, `Infoboks næringsindhold` | **Virker**, men kun 2 af 24 fødevarer har den: `Havregryn` (368 kcal) og `Banan`. `Kartoffel`, `Gulerod`, `Æg`, `Vindrue`, `Jordbær`, `Kirsebær`, `Avocado`, `Vandmelon`, `Kylling`, `Laks`, `Ost`, `Mælk`, `Hvedebrød`, `Smør`, `Broccoli` har **ikke** infoboksen. Kilden er desuden *Wikipedia*, ikke DTU. |
+  **Konklusion:** der er ingen citable dansk tabel tilgængelig fra en agent i
+  denne iteration. Wikipedia-vejen er lukket som hovedkilde (2/24) — brug den
+  kun til at *krydschecke* to-tre tal, aldrig som grundlag for en tabel.
+  **Ny præmis for den næste agent:** byg den **ikke** som en færdig
+  madvare-tabel. (a) Få Mads til at give adgang til en kilde
+  (`❓ Til Mads`), eller (b) byg i stedet det, der *kan* dokumenteres i dag:
+  de danske ** portionsværdier for de fire-fem hovedgrupper** i
+  Sundhedsstyrelsens kostanbefalinger (Find flere oplysninger i
+  `Mål hver dag` → tallerkken og 400/600 kcal) — citable, danske, og de
+  svarrer på "hvor mange kalorier skal jeg have om dagen", som er GSC's
+  søgning på `/kalorier` (1 v, pos. 1).
+- **⚠️ Kildejerngang nr. 3 (2026-09-29 21:35) — både (a) og (b) er lukket i denne
+  iteration.** Både `webfetch` og `curl` på `sst.dk` giver **HTTP 429** (rate
+  limited) på `/forbruger/kost-og-motion/tallerkenmodellen` og
+  `/viden-og-raadgivning/kost-og-motion/kostanbefalinger`; `…/maaltider` er 404.
+  Uden kilden kan hverken tallerkenmodellens andele eller 400/600 kcal skrives
+  ned som fakta, så opgaven er `BLOCKED` indtil Mads enten giver adgang eller
+  en kildefil. **C92's tabel er ikke en invitationsliste til at prøve de samme
+  kilder igen.**
+
+#### 183. [BLOCKED: afventer Mads' svar på kildespørgsmålet fra 27/9 — spørgsmålet står i ❓ Til Mads, og opgaven siger selv "ingen ny kode før diagnosen står". Ikke prøvet igen: ingen ny måling i denne iteration kan erstatte svaret] 2026-09-29 — Kø — **diagnosér `/bmi`s og `/su`s fald, og find ud af hvor stor en del der er overhovedet Googles**
+
+- **Datagrund:** Plausible 28 dage: `/bmi` 1.271 → 938 (−26 %), `/su` 220 →
+  116 (−47 %). Samtidig voksede sitet **+42 %**, så faldet er relativt værre end
+  26 %. Til sammenligning: `/dato` 1.110 (+77 %), `/boligstoette` 535 (+86 %),
+  `/kvadratmeter` 388 (+94 %), `/rentefradrag` 331 (+145 %).
+- **Den måling, der låser diagnosen:** GSC's top-15 over *visninger* ender på
+  `/brok` med 4.920. **Hverken `/bmi` eller `/su` står på listen**, så begge
+  har **under 4.920 Google-visninger** pr. 28 dage — mens `/bmi` har 938
+  Plausible-besøgende. Det kan ikke være en ren CTR-fejl: en visning der ikke
+  klikkes, ville give en *høj* CTR på den lille visningsmængde. Enten kommer
+  `/bmi`s trafik i overvejende grad fra Bing/DuckDuckGo/Yahoo/direkte
+  (Plausible: Bing 1.308, DDG 371, Yahoo 281, Direct 1.041 mod Google 4.089),
+  eller GSC's eksport er ældre end Plausible's 28 dage.
+- **Hvorfor det ikke er løst i C196:** en diagnose uden tal er gætteri, og en
+  titelændring er ikke en diagnose. Det kræver ét svar fra Mads eller en
+  Plausible-udtræk: **hvilke kilder kommer `/bmi` og `/su` fra, delt på
+ søgemaskiner?** Uden det kan ingen af os vide om faldet er ranking, sæson
+  (bmi-søgninger topper i januar) eller noget tredje.
+- **Acceptkriterier:** (1) kildefordelingen for `/bmi` og `/su` står i planen,
+  (2) faldet er klassificeret som ranking / sæson / CTR med et tal til hver
+  mulighed, (3) hvis det er ranking, navngives konkurrenten der har taget
+  pladsen. **Ingen ny kode før diagnosen står** — en tredje titelændring på
+  samme side uden en diagnose er prøvet to gange.
+- **MÅL:** `/bmi` 938 besøgende/28d, `/su` 116 (Plausible 2026-09-29).
+- **⚠️ 30/9: fundet i side-konteksten, uden ny kode.** Målt på det *live* site:
+  `/bmi` og `/su` er begge sunde — canonical til sig selv, `robots
+  index,follow`, hreflang `da` + `x-default`, `WebApplication` + `FAQPage` +
+  `BreadcrumbList`, og begge står i sitemap.xml (136 `<loc>`). Så faldet er
+  **ikke** teknik. Samme billede som `/procent` (C200, lukket): 150.148 GSC-
+  visninger, **98 klik**, altså CTR 0,07 % på 150.148 visninger — langt under
+  det niveau hvor en rankingeringsfejl forklares. Mønstret på hele sitet er
+  det samme: **GSC's visninger ligger langt over Plausible's besøgende, og
+  forskellen er ikke-klikket Google-trafik.** Det peger på én fælles årsag
+  (snippet/intention), ikke på to separate sidefejl — men at *finde* den kræver
+  stadig kildefordelingen fra Mads, så opgaven står.
+
