@@ -3,6 +3,7 @@ import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
 import BlogArticleSchema from "@/components/BlogArticleSchema";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
+import { NaesteSkridt } from "@/components/BlogNaesteSkridt";
 import { SATSER_2026 } from "@/lib/satser-2026";
 import { OG_IMAGE } from "@/lib/page-helpers";
 
@@ -271,6 +272,12 @@ export default function ArveafgiftGuidePage() {
           </div>
         ))}
       </article>
+
+      <NaesteSkridt
+        href="/arveafgift"
+        handling="Beregn arveafgiften"
+        beskrivelse="Sæt værdien af arven og arvingerne ind, og se afgiften fordelt på arvingerne."
+      />
 
       <div className="mt-12 pt-8 border-t">
         <h2 className="text-xl font-bold mb-4">Relaterede artikler</h2>

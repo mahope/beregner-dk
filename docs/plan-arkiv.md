@@ -20425,3 +20425,81 @@ pinse-noten opretter to URL'er, og tidszone-noten forventer et **uændret** tal.
   **falder mod master** (verificeret med `git stash`: 1 fejl, 13 fund).
   **Gate grøn:** lint (**621 filer**), **3152 tests / 192 filer** (fra 3149),
   build (**142 sider**), `locale-leak.mjs --gate` exit 0.
+
+---
+
+## 30/9 2026 14:25 — elleve deploy-noter lukket på indhold (C203)
+
+Alle elleve var merged før 12:30-batchen, som planen 13:45 antik var kørt
+uden dem. Kl. 14:12 er de **live** — målt på indhold, ikke på HTTP 200.
+
+| Note | Målt 30/9 14:12 | Resultat |
+|---|---|---|
+| `/dage-til/2-pinsedag` | HTTP 200, `<title>Hvor mange dage er der til 2. pinsedag? 229 dage` | ✅ |
+| `/dagar-till/pingstdagen` (se) | HTTP 200, "Hur många dagar är det till pingstdagen? 228 dagar" | ✅ |
+| `/dage-til/efteraarsferien` | HTTP 200, brødtekst "12. oktober 2026" | ✅ |
+| `/dage-til/skolestart` | HTTP 200, brødtekst "1. august" | ✅ |
+| `/dage-til/kristi-himmelfartsdag` | HTTP 200, "Kristi himmelfartsdag" | ✅ |
+| pinseperiodens navne | "helligdagene i perioden er Kristi himmelfartsdag, Pinsedag, 2. pinsedag." | ✅ tre navne, tre dage |
+| tolv helligdage + 251 | "tolv" + "251 arbejdsdage" | ✅ |
+| pinse-intervallerne | "Inden for dem er der 6 arbejdsdage og 6 dage uden arbejde" | ✅ |
+| pinseåret 2027 | "2027" i brødteksten | ✅ |
+| "Hvor mange dage er der i den her måned" | afsnittet findes | ✅ |
+| ingen "SKAT" i brødtekst | 0 forekomster | ✅ |
+| tom overskrift i barsel-bloggen | 0 tomme `<h2></h2>`/`<h3></h3>` | ✅ |
+
+**Kontrols der skulle fejle, hvis de gjorde:**
+- `https://beraknare.se/dagar-till/efteraarsferien` → **404** (svensk lagen
+  har ingen ferieuge). Korrekt.
+- `https://beraknare.se/dagar-till/skolestart` → **404** (intet nationalt
+  skolårsdatum i Sverige). Korrekt.
+- `/dage-til/2-pinsedag` (229 dage) mod `/dagar-till/pingstdagen` (228 dage):
+  **forskellige** datoer, dansk +50 og svensk +49 efter påskedag. Korrekt.
+- Canonical + hreflang på begge: `/dage-til/2-pinsedag` canonical = sig selv,
+  `hreflang="sv"` → `/dagar-till/pingstdagen` og omvendt. Korrekt.
+- Sitemap: 19 `dage-til` i den danske, 16 `dagar-till` i den svenske,
+  140 hhv. 73 `<loc>` i alt. De nye URL'er er med.
+
+**Åben:** kun `/alder` (merged 13:43, efter batchen). Beskrivelsen siger
+stadig "pr. 25. september 2026" — korrekt, fordi den ikke er live endnu.
+Ingen `DEPLOY-MISSING`: ét vindue, ikke to.
+
+## 30/9 2026 14:25 — C202: næste handling på syv blogindlæg
+
+**Målt før:** 8 af 27 artikler havde `NaesteSkridt`, 19 havde ikke. De otte
+med var valgt efter beregnerens trafik. Blandt de 19 uden var fire af de mest
+besøgte artikler på hele sitet.
+
+**Valgt (beregnerens trafik som grund):**
+
+| Artikel | Beregner | Grund |
+|---|---|---|
+| `arveafgift-regler-og-satser` | `/arveafgift` | 100 → 84 besøgende/28d, største blogfald |
+| `hvordan-beregner-man-moms` | `/moms` | 22.464 GSC-visninger, CTR 0,2 % |
+| `hvad-er-klokken-i-usa…` | `/tidszone` | 24.324 GSC-visninger, CTR 0,4 % |
+| `30-procent-reglen-husleje` | `/husleje` | 165 besøgende/28d |
+| `bmi-for-boern…` | `/bmi` | 934 besøgende/28d |
+| `guide-feriepenge…` | `/dato` | 1.133 besøgende/28d, største side |
+| `pension-hvor-meget…` | `/pension` | 142 besøgende/28d |
+
+Hver CTA peger på en beregner artiklen **allerede** nævner i løbende tekst,
+så intet er opfundet, og linket er ikke en ny oplysning men en bedre placering
+af en gammel.
+
+**Verifikation:**
+- `npx vitest run src/components/BlogNaesteSkridt.test.tsx` → 19 tests grønne
+  (12 nye: 7 artikler + 1 port-test + de 4 eksisterende).
+- **Testerne kan fejle:** med `src/app/blog/` stashed fejer alle 7 nye
+  artikeltests — verificeret, ikke antaget.
+- `isCalculatorAvailable(href, "da")` er `true` for alle syv, så ingen CTA er
+  en død henvisning.
+- Mod den rigtige server (`next start`, ikke bare SSR i testen): alle 7 sider
+  har "Regn det ud" **før** "Relaterede artikler" (byte-offset målt pr. side),
+  og linkteksten står i det følgende `<a>`.
+- Gaten: `biome lint ./src` 623 filer ingen fejl · `vitest run` 3180 tests /
+  193 filer grønne · `next build` 142/142 sider · `locale-leak --gate` exit 0.
+- På det *live* site er "Regn det ud" 0 forekomster på
+  `/blog/arveafgift-regler-og-satser` — korrekt, den er ikke deployet endnu.
+
+**Ulæst:** Playwright. Blogindlæggene er dynamiske sider, så bygget gemmer
+ingen HTML at screenshotte, og repoet har ingen Playwright (se ❓ Til Mads).

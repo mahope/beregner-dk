@@ -3,6 +3,7 @@ import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
 import BlogArticleSchema from "@/components/BlogArticleSchema";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
+import { NaesteSkridt } from "@/components/BlogNaesteSkridt";
 import { OG_IMAGE } from "@/lib/page-helpers";
 import { blogVerdensAntal, blogVerdensRaekker } from "@/lib/tidszone-blog-lander";
 
@@ -491,6 +492,12 @@ export default function TidszoneUsaPage() {
           </div>
         ))}
       </article>
+
+      <NaesteSkridt
+        href="/tidszone"
+        handling="Se klokken i din by"
+        beskrivelse="Find tidsforskelen til 25 byer og se, hvad klokken er dér, når det er 12 i Danmark."
+      />
 
       <div className="mt-12 pt-8 border-t dark:border-gray-700">
         <h2 className="text-xl font-bold mb-4 dark:text-white">Relaterede artikler</h2>

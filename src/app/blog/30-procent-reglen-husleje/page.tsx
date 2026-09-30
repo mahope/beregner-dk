@@ -3,6 +3,7 @@ import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
 import BlogArticleSchema from "@/components/BlogArticleSchema";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
+import { NaesteSkridt } from "@/components/BlogNaesteSkridt";
 import { OG_IMAGE } from "@/lib/page-helpers";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -198,6 +199,12 @@ export default function HuslejeGuidePage() {
           </div>
         ))}
       </article>
+
+      <NaesteSkridt
+        href="/husleje"
+        handling="Se hvor meget du har til husleje"
+        beskrivelse="Sæt indkomsten ind, og se hvad der er til husleje efter de 30 % regel."
+      />
 
       <div className="mt-12 pt-8 border-t">
         <h2 className="text-xl font-bold mb-4">Relaterede artikler</h2>

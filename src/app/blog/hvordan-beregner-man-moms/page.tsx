@@ -3,6 +3,7 @@ import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
 import BlogArticleSchema from "@/components/BlogArticleSchema";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
+import { NaesteSkridt } from "@/components/BlogNaesteSkridt";
 import { OG_IMAGE } from "@/lib/page-helpers";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -223,6 +224,12 @@ export default function MomsGuidePage() {
           </div>
         ))}
       </article>
+
+      <NaesteSkridt
+        href="/moms"
+        handling="Beregn din moms"
+        beskrivelse="Læg moms til en pris ekskl. moms, eller træk moms fra en pris inkl. moms."
+      />
 
       {/* Related links */}
       <div className="mt-12 pt-8 border-t">

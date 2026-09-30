@@ -3,6 +3,7 @@ import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
 import BlogArticleSchema from "@/components/BlogArticleSchema";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
+import { NaesteSkridt } from "@/components/BlogNaesteSkridt";
 import { OG_IMAGE } from "@/lib/page-helpers";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -370,6 +371,12 @@ export default function FeriepengeGuidePage() {
           </div>
         ))}
       </article>
+
+      <NaesteSkridt
+        href="/dato"
+        handling="Tæll dagene til din ferie"
+        beskrivelse="Find datoen for din ferie, og se hvor mange dage der er til den."
+      />
 
       <div className="mt-12 pt-8 border-t dark:border-gray-700">
         <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Relaterede beregnere</h2>

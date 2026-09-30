@@ -3,6 +3,7 @@ import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
 import BlogArticleSchema from "@/components/BlogArticleSchema";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
+import { NaesteSkridt } from "@/components/BlogNaesteSkridt";
 import { OG_IMAGE } from "@/lib/page-helpers";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -444,6 +445,12 @@ export default function BMIBoernGuidePage() {
           </div>
         ))}
       </article>
+
+      <NaesteSkridt
+        href="/bmi"
+        handling="Beregn dit barns BMI"
+        beskrivelse="Indtast vægt og højde, og se BMI-tallet og hvad det betyder for dit barns alder."
+      />
 
       <div className="mt-12 pt-8 border-t dark:border-gray-700">
         <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Værktøjer til voksne og familien</h2>

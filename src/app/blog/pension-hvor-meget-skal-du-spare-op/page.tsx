@@ -4,6 +4,7 @@ import { FAQSchema } from "@/components/StructuredData";
 import BlogArticleSchema from "@/components/BlogArticleSchema";
 import { InlineAd } from "@/components/ads/AdBanner";
 import { formatNumber } from "@/lib/format";
+import { NaesteSkridt } from "@/components/BlogNaesteSkridt";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { SATSER_2026 } from "@/lib/satser-2026";
 import { OG_IMAGE } from "@/lib/page-helpers";
@@ -493,6 +494,12 @@ export default function PensionGuidePage() {
           </div>
         ))}
       </article>
+
+      <NaesteSkridt
+        href="/pension"
+        handling="Beregn din pension"
+        beskrivelse="Se et estimat af din folkepension ud fra alder og indkomst."
+      />
 
       <div className="mt-12 pt-8 border-t dark:border-gray-700">
         <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Relaterede beregnere</h2>

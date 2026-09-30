@@ -1,20 +1,18 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — 30/9 13:45. `/alders` snippet viste et frosset alders-tal fra
-25. september; det følger nu dagen.
+STATUS: KØ — 30/9 14:25. Elleve af tolv deploy-noter er lukket på indhold;
+`/alders` venter stadig på vinduet 17:30.
 
-**Sidste iteration (opgave 201, lukket):** `{ALDER}`/`{DATO}` løses i
-`getPageData` ved hvert kald af `alderLevet`. Målinger og de to ting
-rettelsen afslørede står i `docs/plan-arkiv.md`.
+**Nyt i denne iteration:** syv af de otte mest besøgte blogindlæg sluttede på
+"Relaterede artikler" — det afgående klik var endnu en artikel, aldrig det
+værktøj artiklen handler om. De har nu alle en næste handling
+(`ceo/blog-naeste-handling`). De elleve lukkede noter er verificeret på
+indhold, ikke på HTTP 200; målingerne står i `docs/plan-arkiv.md`.
 
-**⚠️ 12:30-batchen kørte UDEN de otte ventende ændringer.** Alle otte er merged
-før 12:18, så 12:30 var det første vindue efter dem — og intet er live:
-`/dage-til/2-pinsedag`, `/dage-til/efteraarsferien`, `/dage-til/skolestart` og
-`/dage-til/kristi-himmelfartsdag` svarer **404**, `/dagar-till/pingstdagen` på
-beraknare.se **404**, og `/dato` har hverken pinse-sætningen eller "Påskedagen i
-2027". `/api/health` svarer `status: ok` — sitet er oppe, koden er bare ældre.
-Næste vindue **17:30**. Ét vindue, ikke to: ingen `DEPLOY-MISSING`, og merges
-fortsætter. Elleve noter åbne + denne iterations note = **tolv**.
+**⚠️ 12:30-batchen kørte UDEN de otte dengang ventende ændringer.** Alle otte var
+merged før 12:18. Kl. 14:12 er **elleve af dem live** — 12:30-batchen må altså
+have dækket dem alligevel, så ingen `DEPLOY-MISSING`. Kun `/alders`-noten
+(merged 13:43, efter batchen) venter stadig på **17:30**.
 
 ## Kvalitetsgate (repoets egne scripts fra package.json)
 
@@ -40,43 +38,31 @@ Alle fire var grønne før merge 2026-09-30 07:45.
 
 ## Åbne VERIFICÉR DEPLOY-noter
 
-Tolv noter. HTTP 200 beviser intet: de rører `<title>`, `<h1>`, JSON-LD eller
-nye URL'er, og tidszone-noten forventer et **uændret** tal. Fulde tekster med
-alle målinger og kontroller står i `docs/plan-arkiv.md` (30/9 13:45).
+**Én note åben.** HTTP 200 beviser intet: noterne rører `<title>`, `<h1>`,
+JSON-LD eller nye URL'er, og tidszone-noten forventer et **uændret** tal.
+Fulde tekster med alle målinger og kontroller står i `docs/plan-arkiv.md`.
 
-Alle elleve gamle noter venter på vinduet **2026-09-30 17:30** — de er merged
-før 12:30, som kørte uden dem. Denne iterations note er den tolvte.
+De elleve lukkede noter er verificeret 30/9 14:12 på indhold (se arkivet for
+hver sides måling). `/alders`-noten er den eneste der stadig er åben, fordi
+den blev merged 13:43 — efter 12:30-batchen.
 
 - ⏳ **`/alder`s snippet skal vise dagens alder, ikke 25. september.**
   `ceo/alder-levende-snippet`. Skal have "pr. 30. september 2026" og
   "36 år, 6 måneder og 15 dage" (da) / "per 30 september 2026" + "36 år, 6
-  månader och 15 dagar" (se). Ingen `{ALDER}`-pladsholdere i HTML'en.
-- ⏳ **Pinseperiodens helligdage skal stå som ét navn pr. dag.** `ceo/pinse-
-  navne-og-arbejdstal`. "helligdagene i perioden er Kristi himmelfartsdag,
-  Pinsedag, 2. pinsedag" — tre navne for tre dage. Kontrol: pinseåret stadig
-  2027, påskedag 28. marts, 2. pinsedag 17. maj.
-- ⏳ **`/dage-til/2-pinsedag` + `/dagar-till/pingstdagen` skal svare.** `ceo/
-  pinse`. "Hvor mange dage er der til 2. pinsedag?" / "Hur många dagar är det
-  till pingstdagen?" — de to skal give **forskellige** datoer (dansk +50,
-  svensk +49 efter påskedag).
-- ⏳ **`/dage-til/efteraarsferien` skal svare med uge 42.** `ceo/efteraarsferien-
-  uge42`. Brødteksten skal sige "12. oktober 2026" og "uge 42". Kontrol:
-  beraknare.se-siden skal svare **404** (svensk lagen har ingen ferieuge).
-- ⏳ **`/dage-til/skolestart` skal svare med 1. august.** `ceo/skolestart`.
-  "1. august" og "uge 31" (2026) / "uge 30" (2027). Kontrol: beraknare.se
-  **404** (intet nationalt skolårsdatum i Sverige).
-- ⏳ **`/dage-til/kristi-himmelfartsdag` + svensk `pingstdagen` skal svare.**
-  `ceo/kristi-himmelfartsdag`. Se arkivet for de to URL'ers forventede
-  brødtekst.
-- ⏳ **`/dato` skal sige "tolv" og vise 251 danske arbejdsdage.** Se arkiv.
-- ⏳ **`/dato` skal svare på begge pinse-intervaller med de tal koden regner.**
-  Se arkiv.
-- ⏳ **`/dato` skal stadig vise pinseåret 2027.** Kontrol mod de to forrige.
-- ⏳ **`/dato` skal have afsnittet "Hvor mange dage er der i den her måned".**
-  Se arkiv.
-- ⏳ **Ingen brødtekst må stadig sige "SKAT".** Skal sige "Skattestyrelsen".
-- ⏳ **`/blog/barsel-2026-regler-og-satser` skal ikke have en tom overskrift.**
-  Se arkiv.
+   månader och 15 dagar" (se). Ingen `{ALDER}`-pladsholdere i HTML'en.
+   Målt 14:12: beskrivelsen siger stadig "pr. 25. september 2026" — korrekt,
+   fordi den ikke er live endnu. Vindue **17:30**.
+
+### Ny note fra denne iteration
+
+- ⏳ **Syv blogindlæg skal slutte med deres beregner.** `ceo/blog-naeste-handling`.
+  `/blog/arveafgift-regler-og-satser` → `/arveafgift`, `hvordan-beregner-man-moms`
+  → `/moms`, `hvad-er-klokken-i-usa-naar-den-er-12-i-danmark` → `/tidszone`,
+  `30-procent-reglen-husleje` → `/husleje`, `bmi-for-boern-saadan-tjekker-du` →
+  `/bmi`, `guide-feriepenge-hvornaar-og-hvor-meget` → `/dato`,
+  `pension-hvor-meget-skal-du-spare-op` → `/pension`. Kontrol på indhold:
+  hver side skal have "Regn det ud" **før** "Relaterede artikler", og
+  `/moms` skal have **0** forekomster af den gamle CTA-løsning.
 
 
 ## Åbne opgaver
@@ -279,6 +265,33 @@ før 12:30, som kørte uden dem. Denne iterations note er den tolvte.
   13.348 dage pr. 30. september 2026".
 - **MÅL:** `/alder` 7.909 visninger / 39 klik / CTR 0,5 % / pos. 7,5
   (GSC 2026-08-31 → 2026-09-28). Genmål 14 dage efter at den er live.
+
+#### 202. [x] ✅ 2026-09-30 — de otte mest besøgte blogindlæg sluttede på en artikel, ikke på værktøjet
+
+- **Lukket 30/9** på `ceo/blog-naeste-handling`. Otte artikler havde
+  `NaesteSkridt` (barsel, børnepenge, fradrag, su, boligstøtte, kvadratmeter,
+  brændstof, dagpenge); **19 af 27 gjorde ikke**. De syv mest besøgte uden
+  er rettet nu.
+- **Datagrund:** `/blog/arveafgift-regler-og-satser` faldt 100 → 84
+  besøgende/28d — det største fald på sitets blogliste, og artiklen linkede
+  til `/arveafgift` i løbende tekst uden at næste handling pegede derhen.
+  Blog-bounce er desuden målt til 84-85 % på de største artikler mod 2-7 %
+  på selve beregnerne.
+- **De syv:** `arveafgift` → `/arveafgift`, `hvordan-beregner-man-moms` →
+  `/moms`, `hvad-er-klokken-i-usa…` → `/tidszone`, `30-procent-reglen-husleje`
+  → `/husleje`, `bmi-for-boern…` → `/bmi`, `guide-feriepenge…` → `/dato`,
+  `pension-hvor-meget…` → `/pension`. Hver CTA peger på den beregner artiklen
+  allerede nævner i teksten, så intet er opfundet.
+- **Endnu 12 artikler mangler** samme behandling (biloekonomi, boliglaan,
+  boligsalg, elpriser, guide-til-laan-og-renter, koeb-af-bolig, leasing,
+  maanedsbudget, privatoekonomi, reelle-timeloen, timepris, skat-2026,
+  hvordan-beregner-man-moms er gjort). Næste iteration tager de otte mest
+  besøgte; samme mønster, samme komponent.
+- **MÅL:** `/blog/arveafgift-regler-og-satser` 84 besøgende/28d (fald fra
+  100), `/blog/boligstoette-2026-nye-regler` 67, `/blog/boernepenge-2026-satser-
+  og-regler` 36 klik (GSC 2026-08-31 → 2026-09-28). Genmål 14 dage efter at
+  den er live. Effekten ses som **flere sidevisninger pr. artikel** (bloggen
+  skal sende trafik videre) og lavere bounce, ikke som nye klik på artiklen.
 
 ## ❓ Til Mads
 
