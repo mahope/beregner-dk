@@ -7,7 +7,7 @@ import { CalcIcon, CategoryIcon, getCategoryColor } from "@/components/ui/icons"
 import { getTrendingHrefs } from "@/lib/trending";
 import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
 import { getAllDomainConfigs } from "@/lib/domain-config";
-import { getDageTilKort, getHomePageData, getHomeCalculators, getHomeQuickLinks } from "@/lib/home-data";
+import { getDageTilKort, getHomePageData, getHomeCalculators } from "@/lib/home-data";
 import { getSearchContent } from "@/lib/search-content";
 import { HomeContent } from "@/components/HomeContent";
 import CountryFlag from "@/components/CountryFlag";
@@ -52,7 +52,6 @@ export default async function Home() {
   const trendingHrefs = getTrendingHrefs();
 
   const popularBeregnere = beregnere.filter((b) => b.popular);
-  const quickLinks = getHomeQuickLinks(locale);
   const oevrigeBeregnere = beregnere.filter((b) => !b.popular);
   const dageTilKort = getDageTilKort(locale, new Date());
 
@@ -102,56 +101,12 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Quick access — the most visited calculators as links, before the trust
-          bar. A visitor who lands on / from direct traffic or from a search
-          that named no calculator gets a menu on the first screen instead of
-          one card of a grid that starts three screens down. */}
-      {quickLinks.length > 0 && (
-        <nav aria-label={data.sections.quick} className="mb-8 md:mb-12">
-          <h2 className="sr-only">{data.sections.quick}</h2>
-          <ul className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
-            {quickLinks.map((beregner) => (
-              <li key={beregner.href}>
-                <Link
-                  href={beregner.href}
-                  className="flex items-center gap-2.5 min-h-11 px-3 py-2 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-400 transition-colors"
-                >
-                  <CalcIcon
-                    href={beregner.href}
-                    className={`h-5 w-5 flex-shrink-0 ${getCategoryColor(beregner.category)}`}
-                  />
-                  <span className="text-sm font-medium leading-snug text-gray-900 dark:text-gray-100">
-                    {beregner.title}
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
-      )}
-
-      {/* Trust signals */}
-      <section className="flex flex-wrap justify-center gap-6 md:gap-10 mb-12 text-center">
-        <div>
-          <div className="text-2xl md:text-3xl font-bold text-blue-600 dark:text-blue-400">{ts.calculators.value}</div>
-          <div className="text-sm text-gray-600 dark:text-gray-400">{ts.calculators.label}</div>
-        </div>
-        <div>
-          <div className="text-2xl md:text-3xl font-bold text-blue-600 dark:text-blue-400">{ts.rates.value}</div>
-          <div className="text-sm text-gray-600 dark:text-gray-400">{ts.rates.label}</div>
-        </div>
-        <div>
-          <div className="text-2xl md:text-3xl font-bold text-blue-600 dark:text-blue-400">{ts.price.value}</div>
-          <div className="text-sm text-gray-600 dark:text-gray-400">{ts.price.label}</div>
-        </div>
-        <div>
-          <div className="text-2xl md:text-3xl font-bold text-blue-600 dark:text-blue-400">{ts.privacy.value}</div>
-          <div className="text-sm text-gray-600 dark:text-gray-400">{ts.privacy.label}</div>
-        </div>
-      </section>
-
-      {/* Popular calculators */}
-      <section className="mb-16">
+      {/* Popular calculators — the site's measured top pages, directly under
+          the hero. They used to sit below the trust bar with a compact strip
+          of the same links above it, which showed a Danish reader eight of the
+          fourteen twice and a Swedish reader the same six twice. One list, one
+          place, on the first screen. */}
+      <section className="mb-12">
         <h2 className="text-2xl font-bold mb-6 dark:text-white">{data.sections.popular}</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 animate-stagger">
           {popularBeregnere.map((beregner) => {
@@ -185,6 +140,26 @@ export default async function Home() {
               </Link>
             );
           })}
+        </div>
+      </section>
+
+      {/* Trust signals */}
+      <section className="flex flex-wrap justify-center gap-6 md:gap-10 mb-12 text-center">
+        <div>
+          <div className="text-2xl md:text-3xl font-bold text-blue-600 dark:text-blue-400">{ts.calculators.value}</div>
+          <div className="text-sm text-gray-600 dark:text-gray-400">{ts.calculators.label}</div>
+        </div>
+        <div>
+          <div className="text-2xl md:text-3xl font-bold text-blue-600 dark:text-blue-400">{ts.rates.value}</div>
+          <div className="text-sm text-gray-600 dark:text-gray-400">{ts.rates.label}</div>
+        </div>
+        <div>
+          <div className="text-2xl md:text-3xl font-bold text-blue-600 dark:text-blue-400">{ts.price.value}</div>
+          <div className="text-sm text-gray-600 dark:text-gray-400">{ts.price.label}</div>
+        </div>
+        <div>
+          <div className="text-2xl md:text-3xl font-bold text-blue-600 dark:text-blue-400">{ts.privacy.value}</div>
+          <div className="text-sm text-gray-600 dark:text-gray-400">{ts.privacy.label}</div>
         </div>
       </section>
 

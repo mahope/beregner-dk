@@ -1,5 +1,6 @@
 /**
- * F4 (2026-09-30): forsiden som indgangspunkt.
+ * F4 (2026-09-30): forsiden som genvej til beregnerne — og dens retteelse
+ * 1/10, efter en review fandt at genvejen *kopierede* listen.
  *
  * **Målingen der satte opgaven op.** Plausible 28 dage: `/` havde 218
  * besøgende, 38 % bounce og 465 indgangssider, mens selve beregnerne havde
@@ -8,18 +9,30 @@
  * helten, søgefeltet og tillidsrækken, med kort der er ca. 230 px høje. På en
  * telefon i 390 px bredde nåede man **ét** kort.
  *
- * **Hvorfor denne test renderer frem for at grepe kilden.** Rækkefølgen er hele
- * rettelsen: stripen skal ligge *før* tillidsrækken og *før* det fulde
- * populære gitter. Et grep i `page.tsx` kan ikke se, hvor de to ender i DOM'en,
- * og det er præcis det blind spot, der lod bounce-problemet ligge — kilden's
- * rækkefølge så rigtig ud, fordi den faktisk var rigtig, men tre skærmbilleder
- * ned. Markupken er den, browseren tegner.
+ * **Hvad der så skete, og hvorfor porten så ud som den gjorde.** F4 lagde en
+ * kompakt stribe med de otte mest brugte *ovenfor* tillidsrækken og lod
+ * gitteret blive stående lige under den. Review fandt at de otte links var de
+ * samme som gitterets — målt: `se` 6 populære / 6 i striben og hrefs
+ * identiske, `da` 14 populære og striben er de første 8, så **otte af fjorten
+ * optrådte to gange på samme skærm**. De to gamle tests holdt alligevel, fordi
+ * de krævede *rækkefølgen* (striben før tillidsrækken) og *antallet* (otte
+ * links) — ingen af dem kunne se, at de otte var de samme.
+ *
+ * **Rettelsen.** Én liste, ét sted: striben er væk, og populærgitteret med
+ * kort, beskrivelser og kategori ligger nu direkte under helten. Porten her er
+ * derfor skrevet om til at tælle *hvor mange gange* hver populær beregner
+ * linkes i forsidens egne lister, i alle tre sprog — den fejl, de to gamle
+ * tests ikke kunne se.
+ *
+ * Hvorfor den renderer frem for at grepe kilden: rækkefølgen og dubletten er
+ * hele rettelsen, og en grep i `page.tsx` kan ikke se, hvor de to lister ender
+ * i DOM'en — det er præcis det blind spot, der lod bounce-problemet ligge.
  */
 import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import { getDomainConfigByLocale } from "@/lib/domain-config";
 import { getCurrentDomainConfig, getLocale } from "@/lib/get-locale";
-import { getHomePageData, getHomeQuickLinks } from "@/lib/home-data";
+import { getHomeCalculators, getHomePageData } from "@/lib/home-data";
 import type { Locale } from "@/lib/i18n";
 import HomePage from "./page";
 
@@ -31,14 +44,24 @@ vi.mock("@/lib/get-locale", () => ({
   getCurrentDomainConfig: vi.fn(),
 }));
 
-/** Uddér kun den kompakte strips <nav>, som aria-label identificerer. */
-function quickNav(html: string, locale: Locale): string {
-  const label = getHomePageData(locale).sections.quick;
-  const start = html.indexOf(`aria-label="${label}"`);
-  expect(start, `forsiden har ingen nav med aria-label "${label}"`).toBeGreaterThan(-1);
-  const end = html.indexOf("</nav>", start);
-  expect(end, "strippen er ikke lukket").toBeGreaterThan(start);
+/**
+ * Forsidens egne lister: helten, populærgitteret, tillidsrækken,
+ * nedtællingskortene og kategorierne — altså alt hvad *siden* linker med sit
+ * eget gitter, og intet af `HomeContent`s brødtekst, der med vilje omtaler
+ * `/procent` og `/moms` igen.
+ */
+function forsideLister(html: string, locale: Locale): string {
+  const data = getHomePageData(locale);
+  const start = html.indexOf("</section>");
+  const end = html.indexOf(`>${data.sections.whyUse}<`);
+  expect(start, "forsiden har ingen helt").toBeGreaterThan(-1);
+  expect(end, "forsiden har ingen feature-sektion").toBeGreaterThan(start);
   return html.slice(start, end);
+}
+
+/** Hvor mange gange `href` optræder som link i markupken. */
+function linkForekomster(html: string, href: string): number {
+  return html.split(`href="${href}"`).length - 1;
 }
 
 describe("forsidens genvej til beregnerne", () => {
@@ -47,51 +70,63 @@ describe("forsidens genvej til beregnerne", () => {
     vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("da"));
   });
 
-  test("stripen ligger før tillidsrækken og før det fulde populære gitter", async () => {
+  test("populærgitteret ligger direkte under helten, før tillidsrækken", async () => {
     const html = renderToStaticMarkup(await HomePage());
     const data = getHomePageData("da");
 
-    const stripen = html.indexOf(`aria-label="${data.sections.quick}"`);
+    const gitter = html.indexOf(`>${data.sections.popular}<`);
     const tillidsRaekke = html.indexOf(data.trustSignals.calculators.split("|")[1]);
-    const populæreGitter = html.indexOf(`>${data.sections.popular}<`);
 
-    expect(stripen, "stripen findes ikke").toBeGreaterThan(-1);
-    expect(stripen, "stripen kommer efter tillidsrækken").toBeLessThan(tillidsRaekke);
-    expect(stripen, "stripen kommer efter populære gitter").toBeLessThan(populæreGitter);
+    expect(gitter, "populærgitteret findes ikke").toBeGreaterThan(-1);
+    expect(tillidsRaekke, "tillidsrækken findes ikke").toBeGreaterThan(-1);
+    // F4's pointe: en telefon skal nå beregnerne på første skærm, ikke tre
+    // skærme ned. Rækkefølgen i markupken er den, browseren tegner.
+    expect(gitter, "populærgitteret kommer efter tillidsrækken").toBeLessThan(tillidsRaekke);
   });
 
-  test("alle otte mest brugte beregnere er links i stripen", async () => {
-    const nav = quickNav(renderToStaticMarkup(await HomePage()), "da");
-    for (const link of getHomeQuickLinks("da")) {
-      expect(nav, `stripen mangler et link til ${link.href}`).toContain(`href="${link.href}"`);
-      expect(nav, `stripen skal vise titlen på ${link.href}`).toContain(link.title);
+  test("hver populær beregner linkes præcis én gang i forsidens lister", async () => {
+    for (const locale of ["da", "se", "no"] as const) {
+      vi.mocked(getLocale).mockResolvedValue(locale);
+      vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale(locale));
+      const lister = forsideLister(renderToStaticMarkup(await HomePage()), locale);
+
+      const popular = getHomeCalculators(locale).filter((c) => c.popular);
+      expect(popular.length, `${locale} popular count`).toBeGreaterThan(3);
+      for (const beregner of popular) {
+        expect(
+          linkForekomster(lister, beregner.href),
+          `${locale}: ${beregner.href} er linket mere end én gang i forsidens lister`
+        ).toBe(1);
+      }
     }
-    // Otte links, ikke fjorten: tælles på <li>, så en ekstra markering et sted
-    // ikke kan gøre testen grøn ved et tilfældighedstmatch.
-    expect(nav.match(/<li>/g) ?? []).toHaveLength(getHomeQuickLinks("da").length);
   });
 
-  test("stripen har en overskrift for skærmlæsere, men ikke en synlig dublet", async () => {
+  test("tællingen kan se en dublet", () => {
+    // Uden dette kunne porten være grøn, fordi den tæller forkert. Den fejl den
+    // her låser opstod som otte ens links i to lister — to forekomster, én
+    // beregner.
+    const toLister = `<a href="/dato">Dato</a><a href="/dato">Dato igen</a>`;
+    expect(linkForekomster(toLister, "/dato")).toBe(2);
+    expect(linkForekomster(toLister, "/bmi")).toBe(0);
+  });
+
+  test("alle populære beregnere er stadig kort med titel og beskrivelse", async () => {
     const html = renderToStaticMarkup(await HomePage());
-    const data = getHomePageData("da");
-    // sr-only: skærmlæseren hører "Mest brugte beregnere", det synlige gitter
-    // bærer sin egen "Populære beregnere". To ens h2 i træk er den fejl
-    // dublet-overskrift-testen findes for.
-    expect(html).toContain(`<h2 class="sr-only">${data.sections.quick}</h2>`);
-    expect(data.sections.quick).not.toBe(data.sections.popular);
+    for (const beregner of getHomeCalculators("da").filter((c) => c.popular)) {
+      expect(html, `forsiden mangler et kort til ${beregner.href}`).toContain(`href="${beregner.href}"`);
+      expect(html, `kortet til ${beregner.href} mangler titlen`).toContain(beregner.title);
+    }
   });
 
-  test("den svenske forside har stripen med svensk overskrift og svenske titler", async () => {
+  test("den svenske forside har svenske populære kort", async () => {
     vi.mocked(getLocale).mockResolvedValue("se");
     vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("se"));
-    const nav = quickNav(renderToStaticMarkup(await HomePage()), "se");
-
-    expect(nav, "svensk overskrift").not.toMatch(/[æø]/i);
-    for (const link of getHomeQuickLinks("se")) {
-      expect(nav, `svensk strib mangler ${link.href}`).toContain(`href="${link.href}"`);
+    const html = renderToStaticMarkup(await HomePage());
+    const popular = getHomeCalculators("se").filter((c) => c.popular);
+    expect(popular.length).toBeGreaterThan(3);
+    for (const beregner of popular) {
+      expect(html, `svensk forside mangler ${beregner.href}`).toContain(`href="${beregner.href}"`);
+      expect(beregner.title, `svensk titel på ${beregner.href}`).not.toMatch(/[æø]/i);
     }
-    // Danske titler på beraknare.se er den fejlklasse locale-leak.mjs scannerer
-    // for; de svenske populære kort har hver sin svenske titel.
-    expect(nav).not.toContain("Beregner");
   });
 });

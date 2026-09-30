@@ -33,14 +33,11 @@ export interface HomePageData {
     privacy: string;
   };
   sections: {
-    popular: string;
     /**
-     * Accessible name for the quick-access strip that sits directly under the
-     * hero. It is the *same* calculators as `popular`, shown compactly so a
-     * phone lands on links instead of prose — hence a distinct wording, so the
-     * page does not carry two identical <h2>s (see dublet-overskrift).
+     * Heading for the popular-calculator cards. They sit directly under the
+     * hero, so a phone lands on a menu of calculators instead of prose.
      */
-    quick: string;
+    popular: string;
     /**
      * Heading for the countdown-link section. Only the locales that serve
      * /dage-til pages carry it; beregner.no serves no dage-til section at all,
@@ -105,7 +102,6 @@ const daPageData: HomePageData = {
   },
   sections: {
     popular: "Populære beregnere",
-    quick: "Mest brugte beregnere",
     dageTil: "Hvor mange dage er der til…",
     whyUse: "Hvorfor bruge MinBeregner.dk?",
     features: {
@@ -307,7 +303,6 @@ const noPageData: HomePageData = {
   },
   sections: {
     popular: "Populære kalkulatorer",
-    quick: "Mest brukte kalkulatorer",
     whyUse: "Hvorfor bruke Beregner.no?",
     features: {
       free: {
@@ -432,7 +427,6 @@ const sePageData: HomePageData = {
   },
   sections: {
     popular: "Populära kalkylatorer",
-    quick: "Mest använda kalkylatorer",
     dageTil: "Hur många dagar är det till…",
     whyUse: "Varför använda Beräknare.se?",
     features: {
@@ -607,31 +601,21 @@ export function getHomeCalculators(locale: Locale): HomeCalculator[] {
 }
 
 /**
- * How many calculators fit above the fold on a 390 px phone: two columns,
- * four rows.
- */
-const HOME_QUICK_LINK_COUNT = 8;
-
-/**
- * The most visited calculators, in measured order, for the compact strip that
- * sits directly under the hero.
+ * The homepage's most visited calculators, in measured order (Plausible,
+ * 28 days), rendered as the popular cards directly under the hero.
  *
- * **Why this exists.** The homepage's own numbers said it: 38 % bounce against
- * 2-7 % on the calculators themselves, 465 entry sessions, and on the Swedish
- * domain 80 %. The calculators it did link sat *below* the hero, the search bar
- * and the trust bar, in a one-column grid of ~230 px cards — on a phone that is
- * one card, not a menu. So the entry point existed but was three screens down.
+ * **One list, one place.** A compact "quick links" strip used to sit above the
+ * trust bar with the *first eight of these same cards*, so a Danish reader met
+ * eight of the fourteen twice on one screen: as bare links under the hero and
+ * again as 230 px cards further down, while the Swedish and Norwegian homepages
+ * — which have only six popular entries — met the same six links twice. The
+ * cards now sit directly under the hero instead, so the entry point is on the
+ * first screen and each calculator is linked once.
  *
- * **Why it is a slice and not a new list.** The `popular: true` block is
- * already kept in measured order (Plausible, 28 days), so the first eight are
- * the eight most used without a second place where that can rot. A locale with
- * fewer popular entries (Sweden has six) gets those six, never padded.
+ * **Why the cards and not eight bare links.** The cards carry the
+ * calculator's own description and category, which is what lets a visitor
+ * choose; the strip only repeated the titles. A locale is never padded.
  */
-export function getHomeQuickLinks(locale: Locale): HomeCalculator[] {
-  return getHomeCalculators(locale)
-    .filter((calculator) => calculator.popular)
-    .slice(0, HOME_QUICK_LINK_COUNT);
-}
 
 /** Per-locale words for the countdown line. Each is that language's own. */
 const dageTilOrd: Record<DageTilLocale, { dag: string; til: string; idag: string }> = {

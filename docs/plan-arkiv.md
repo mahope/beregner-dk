@@ -21522,3 +21522,63 @@ tal gav 29 danske og 31 svenske fund, **alle rigtige** (beregnede promiller,
 Tysklands 0,0, Storbritanniens 0,8, et hypotetisk "må jeg køre med 0,4"), og en
 syvende fejl var min egen formatter: `String(2.0)` er `"2"`. Løsningen er samme
 som F8's: porten skal **kræve kildens tal**, ikke søge efter forkerte.
+
+
+---
+
+## Arkiveret 1/10 00:05 — STATUS 30/9 23:50 (ordret, slået sammen med de to nye fund)
+
+STATUS: KØ — 30/9 23:50. **Opgave 190 er lukket** (barsel-indlægget tilbyder
+både dagpenge *og* planlægger som næste handling, målt med en port der fejler
+mod den gamle kode), og **to deploy-noter er verificeret på indhold** —
+/tidszone og forsiden er begge `DEPLOY OK`. **Syv noter åbne** (fra 189b, 189,
+188, F7 og F6), og de tre seneste merges (21:37, 22:08, 22:35) deployer først
+**1/10 07:30**. Ny opgave 191: `/bmi` har ingen koblet guide.
+
+**Næste opgave: 191**, med 183/F1/F5 som de store trafikposter når de
+løses af svar fra Mads. 187 må ikke røres før 13/10.
+
+**De fire 189c-rækker: veje udtømt, målt 30/9 22:30-22:38.** Ingen af dem kan
+hentes med de værktøjer, loven er læsbar med. Målt, ikke gættet:
+
+| Kilde | Resultat |
+|---|---|
+| `gesetze-im-internet.de/fzg_1998/`, `/fahrschulg/`, `/fahrschulg_1998/`, `/FSchG/` | **404 alle** — Fahrschulgesetz er ikke på portalen, og `Teilliste_F.html` (200) nævner den slet ikke |
+| `recht.bund.de/fzg_1998/§_2a` | 404 — portalen er Bundesgesetzblatt, ikke konsolideret lov |
+| `gesetze-bayern.de/Content/Document/FSchG-2a` og `/StVG-24c` | 404 begge — bayerns portal har hverken FSchG eller StVG |
+| `borger.dk/arbejdsmarkedet/ferie-og-fridage` | 404 efter redirect |
+| `retsinformation.dk/eli/lta/2024/570` | **200 men 4.945 bytes SPA-skal** — kun `<title>`, ingen lovtekst, også med Googlebot-UA |
+| `sst.dk` | HTTP 429 (allerede kendt) |
+| Bing/DDG via curl | JS-kun, ingen resultater (browserconsent) |
+
+**Konklusion.** StVG § 24c henviser til "Probezeit nach § 2a" — *Fahrschulgesetz*
+§ 2a — og den lov ligger ingen steder, jeg kan nå. Prøveperiodens længde kan derfor
+**ikke** sættes i rækken, og den står derfor bevidst uden længde (189b). Samme
+gælder de tre danske kalenderpåstande: Store bededags afskaffelse, grundlovsdag og
+juleaftensdagens status er alle i retsinformation, der ikke leverer lovtekst til
+en agent. **De står uændret i brødteksten** — de er alle sande, og at slette en
+sand oplysning fordi *kilden* ikke kan hentes, er et tab for læseren, ikke en
+rettelse. 189c lukkes hermed; hvis nogen kan åbne retsinformation i en browser,
+er der 30 minutter arbejde i at hente de fire.
+
+**Næste opgave: se egne opgaver** — CEO-køen er tom, og dens punkt 7 var det
+sidste. 97/119/183 er blokerede af svar fra Mads, F1/F3/F5 ligeså, 187 må ikke
+røres før 13/10. **Næste iteration bør derfor tage en lille reel forbedring ud
+af trafikdata** — se "Åbne opgaver", punkt 190.
+
+**⚠️ Målerfældens sjette og syvende udløber.** En port der scanner *alle*
+decimaler mod lovens tal gav 29 danske og 31 svenske fund, alle rigtige. Og et
+"region-tal"-mønster faldt, fordi den svenske celle skriver tallet før
+regionens navn. **Porten skal kræve kildens tal frem for at søge efter
+forkerte.** `\b` før `är` matcher aldrig i JS (`\w` er ASCII).
+
+**⚠️ Målerfælde (30/9 15:40).** `npm run test` kører `locale-leak-gate.test.ts`,
+der med vilje planterer **to** danske lækager. Derfor kommer to
+`FEJL: n ureviewet(e)`-blokke i output. Det er **ikke** fund i din diff. Kør
+gaten separat: `node scripts/locale-leak.mjs --gate` (exit 0).
+
+**Syv VERIFICÉR-noter åbne** (fra 189b, 189, 188, F7 og F6 — tidszone og
+forsiden er lukket på indhold 30/9 23:08-23:10). F1/F3/F5
+og opgaver 97/98/119/183 er blokeret af svar fra Mads. **Opgave 187 må ikke
+røres før 13/10.** **CEO-køen er tom.** Review-fund 29/9 er begge mærket
+`RETTET d563ba2` og lukket.

@@ -1,42 +1,26 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — 30/9 23:50. **Opgave 190 er lukket** (barsel-indlægget tilbyder
-både dagpenge *og* planlægger som næste handling, målt med en port der fejler
-mod den gamle kode), og **to deploy-noter er verificeret på indhold** —
-/tidszone og forsiden er begge `DEPLOY OK`. **Syv noter åbne** (fra 189b, 189,
-188, F7 og F6), og de tre seneste merges (21:37, 22:08, 22:35) deployer først
-**1/10 07:30**. Ny opgave 191: `/bmi` har ingen koblet guide.
+STATUS: KØ — 1/10 00:05. **Review-fund 1/10 (MIDDEL) er rettet og målt.** Den
+kompakte stribe på forsiden viste de *samme* otte beregnere som populærgitteret
+lige under den: otte af fjorten to gange på dansk, alle seks to gange på svensk.
+Striben er væk, populærgitteret ligger nu direkte under helten, og porten i
+`forside.test.tsx` tæller nu *hvor mange gange* hver populær beregner linkes i
+forsidens egne lister, i da/se/no (mutation målt: dublet → `expected 2 to be 1`).
+De to tests, der holdt den gamle fejl, krævede rækkefølge og antal — ingen af
+dem kunne se dubletten.
 
-**Næste opgave: 191**, med 183/F1/F5 som de store trafikposter når de
-løses af svar fra Mads. 187 må ikke røres før 13/10.
+**Næste opgave: 192** — review-fund 1/10 (LAV): `intl-locale-tag`-porten læser
+én linje ad gangen, så den toarmede kæde i `promille-eksempler.ts:110-113` er
+usynlig for den. Derefter 191 (`/bmi` mangler et koblet indlæg).
 
-**De fire 189c-rækker: veje udtømt, målt 30/9 22:30-22:38.** Ingen af dem kan
-hentes med de værktøjer, loven er læsbar med. Målt, ikke gættet:
+**Blokeret af svar fra Mads:** 97, 119 og 183, samt F1/F3/F5. **Opgave 187 må
+ikke røres før 13/10.** CEO-køens punkt 0 er lukket; 189c er lukket som "veje
+udtømt" (syv domæner testet, ingen leverer dansk lovtekst — kildetabel i
+arkivet).
 
-| Kilde | Resultat |
-|---|---|
-| `gesetze-im-internet.de/fzg_1998/`, `/fahrschulg/`, `/fahrschulg_1998/`, `/FSchG/` | **404 alle** — Fahrschulgesetz er ikke på portalen, og `Teilliste_F.html` (200) nævner den slet ikke |
-| `recht.bund.de/fzg_1998/§_2a` | 404 — portalen er Bundesgesetzblatt, ikke konsolideret lov |
-| `gesetze-bayern.de/Content/Document/FSchG-2a` og `/StVG-24c` | 404 begge — bayerns portal har hverken FSchG eller StVG |
-| `borger.dk/arbejdsmarkedet/ferie-og-fridage` | 404 efter redirect |
-| `retsinformation.dk/eli/lta/2024/570` | **200 men 4.945 bytes SPA-skal** — kun `<title>`, ingen lovtekst, også med Googlebot-UA |
-| `sst.dk` | HTTP 429 (allerede kendt) |
-| Bing/DDG via curl | JS-kun, ingen resultater (browserconsent) |
-
-**Konklusion.** StVG § 24c henviser til "Probezeit nach § 2a" — *Fahrschulgesetz*
-§ 2a — og den lov ligger ingen steder, jeg kan nå. Prøveperiodens længde kan derfor
-**ikke** sættes i rækken, og den står derfor bevidst uden længde (189b). Samme
-gælder de tre danske kalenderpåstande: Store bededags afskaffelse, grundlovsdag og
-juleaftensdagens status er alle i retsinformation, der ikke leverer lovtekst til
-en agent. **De står uændret i brødteksten** — de er alle sande, og at slette en
-sand oplysning fordi *kilden* ikke kan hentes, er et tab for læseren, ikke en
-rettelse. 189c lukkes hermed; hvis nogen kan åbne retsinformation i en browser,
-er der 30 minutter arbejde i at hente de fire.
-
-**Næste opgave: se egne opgaver** — CEO-køen er tom, og dens punkt 7 var det
-sidste. 97/119/183 er blokerede af svar fra Mads, F1/F3/F5 ligeså, 187 må ikke
-røres før 13/10. **Næste iteration bør derfor tage en lille reel forbedring ud
-af trafikdata** — se "Åbne opgaver", punkt 190.
+**Otte VERIFICÉR-noter åbne.** HTTP 200 beviser intet: de rører tabelceller med
+lovtal, brødtekst og rækkefølge i markupken. De otte lukkede er verificeret på
+indhold; senest 30/9 23:10. Målingerne står i `docs/plan-arkiv.md`.
 
 **⚠️ Målerfældens sjette og syvende udløber.** En port der scanner *alle*
 decimaler mod lovens tal gav 29 danske og 31 svenske fund, alle rigtige. Og et
@@ -45,15 +29,9 @@ regionens navn. **Porten skal kræve kildens tal frem for at søge efter
 forkerte.** `\b` før `är` matcher aldrig i JS (`\w` er ASCII).
 
 **⚠️ Målerfælde (30/9 15:40).** `npm run test` kører `locale-leak-gate.test.ts`,
-der med vilje planterer **to** danske lækager. Derfor kommer to
-`FEJL: n ureviewet(e)`-blokke i output. Det er **ikke** fund i din diff. Kør
-gaten separat: `node scripts/locale-leak.mjs --gate` (exit 0).
-
-**Syv VERIFICÉR-noter åbne** (fra 189b, 189, 188, F7 og F6 — tidszone og
-forsiden er lukket på indhold 30/9 23:08-23:10). F1/F3/F5
-og opgaver 97/98/119/183 er blokeret af svar fra Mads. **Opgave 187 må ikke
-røres før 13/10.** **CEO-køen er tom.** Review-fund 29/9 er begge mærket
-`RETTET d563ba2` og lukket.
+der med vilje planterer danske lækager. Derfor kommer `FEJL: n ureviewet(e)`-
+blokke i output. Det er **ikke** fund i din diff. Kør gaten separat:
+`node scripts/locale-leak.mjs --gate` (exit 0).
 
 ## Love- og kalenderpåstande mod en hentet kilde (opgave 189)
 
@@ -141,10 +119,11 @@ FAQ-rækker der rammer svensk autocomplete, og alle tal udledt af kildetal-bundn
 før de svenske titelændringer fra C195/C196 er målt. Efter den dato er
 dette den største enkeltpost i trafikplanen. **Accept:** se opgave 187.
 
-**F4. [x] ✅ `ceo/forsiden-snabb-indgang`** — forsiden har en kompakt stribe med de
-otte mest brugte beregnere (de otte første `popular: true`) lige under helten.
-8 nye tests, 4 mutationer faldt. Højden over fold på 390 px er **beregnet, ikke
-målt** — repoet har intet Playwright (❓).
+**F4. [x] ✅ `ceo/forsiden-snabb-indgang` → rettet 1/10 af `ceo/forsiden-dublet-liste`** —
+striben med de otte mest brugte viste de samme otte som populærgitteret lige
+under den (otte af fjorten to gange i da, seks af seks i se). Striben er væk;
+populærgitteret ligger nu direkte under helten, så genvejen er der stadig på
+første skærm — uden at læseren møder listen to gange.
 **MÅL:** `/` 218 besøgende/28d, bounce 38 % (Plausible 2026-09-30) → mod 2-7 %;
 se `/` 20 besøgende, bounce 80 %.
 
@@ -277,14 +256,16 @@ og forsiden. Alle målinger står i `docs/plan-arkiv.md`.
   dansk er, at `npm run test` fortsat er grøn på
   `src/lib/intl-locale-tag.test.ts` efter deploy. Vindue **30/10 07:30** (denne
   merge sker efter 17:30).
-- ✅ **Striben på forsiden skal ligge før tillidsrækken.** `ceo/forsiden-snabb-indgang`.
-  **DEPLOY OK 30/9 23:08** — hentet fra live, begge domæner. Striben er et
-  `<nav><ul>` med otte `<li><a href=…>` umiddelbart **før** tillidsrækken
-  ("79+ Gratis beregnere" / "Gratis kalkylatorer" @ 23.412 / 21.328 mod
-  "Populære beregnere" @ 24.074 / 22.001) og otte links på svensk med titler
-  som "Datoberegner", "Brændstofberegner". **En pixelmåling på 390 px er
-  stadig ikke lavet** — repoet har intet Playwright (❓); højden over fold er
-  beregnet, ikke målt.
+- ⏳ **Forsiden skal vise de populære beregnere én gang, lige under helten.**
+  `ceo/forsiden-dublet-liste`. På `https://minberegner.dk/` og
+  `https://beraknare.se/` skal den kompakte stribe med otte `<a>`-links være
+  **væk**, `<h2>Populære beregnere</h2>` skal komme **før** tillidsrækken
+  ("Gratis beregnere" / antallet @ 23.412 / 21.328), og ingen populær href må
+  forekomme to gange i forsidens lister. HTTP 200 beviser intet — det er
+  rækkefølge og antal i markupken. Prøven på dansk er
+  `src/app/forside.test.tsx` efter deploy. Vindue **1/10 12:30**.
+  *(Stribens egen note fra `ceo/forsiden-snabb-indgang` blev DEPLOY OK 30/9
+  23:08, men er udfaset af denne rettelse: samme links, to gange.)*
 
 ## Åbne opgaver
 
@@ -439,6 +420,26 @@ og forsiden. Alle målinger står i `docs/plan-arkiv.md`.
 - **MÅL:** `/bmi` 934 besøgende/28d, −26 % (Plausible 2026-09-30). Genmål
   bounce på indlægget 30 dage efter deploy.
 
+#### 192. [ ] 2026-10-01 — review-fund 1/10 (LAV) — `intl-locale-tag`-porten er blind for en toarmet kæde fordelt på to linjer
+
+- **Datagrund:** fundet af review 1/10 og bekræftet ved at læse alle `*.ts(x)`
+  i `src/`: `promille-eksempler.ts:110-113` er den **eneste** toarmede
+  `sv-SE`/`da-DK`-kæde i kilden, der står på to linjer. Porten læser filen
+  linje for linje (`readFileSync(...).split("\n")`), så den ser den ikke, og
+  docblock'en lover "the day the type widens, the tag must already be right" —
+  et løfte porten ikke kan holde. Fejlen er latent: `formatGenstande`'s
+  parameter er type-sat til `"da" | "se"`, så norsk kan ikke nå den i dag.
+- **Rettelse:** (1) læs hver fil som én streng med blokkommentarer fjernet og
+  kør regexen på den, så et linjeskift ikke skjuler kæden; (2) skriv
+  `formatGenstande` med `getIntlLocale(locale)`, så kæden ikke findes i koden
+  overhovedet; (3) en test der beviser at porten kan se en toarmet kæde med
+  linjeskift imellem — ellers kan den igen blive grøn uden at se noget.
+- **Accept:** (1) portens egen test fejler mod den nuværende linjelæsning,
+  (2) mutationen "fjern `nb-NO`-armen og bryd kæden over to linjer" giver rødt
+  hele vejen, (3) `promille-eksempler.ts` har ingen `sv-SE`/`da-DK`-literal
+  tilbage, (4) gaten grøn. **MÅL:** ingen trafikmåling — fundet er en
+  korrekthedsmåling, ikke en side.
+
 #### 187. [ ] **IKKE FØR 2026-10-13** 2026-09-30 — Kø — **migrér beraknare.se til svenske URL-slugs med 301**
 
 - **Datagrund:** opgave 185 (lukket 30/9, se `docs/plan-arkiv.md`). 82 sider har
@@ -496,9 +497,10 @@ og forsiden. Alle målinger står i `docs/plan-arkiv.md`.
   Playwright, og `CLAUDE.md` forbyder nye afhængigheder uden dit ja. Uden det
   bruger jeg jsdom-render (som med C55/C56/C60), der dækker logikken men ikke
   layout, breakpoints eller mørk tilstand. **Én konkret måling mangler nu:**
-  F4's højde over fold på 390 px. Jeg har låst rækkefølgen i markupken og
-  beregnet højden, men ikke målt den — og layoutet i helten, tillidsrækken og
-  striben er det, en skærmdump ville afkræfte.
+  hvor højt populærgitterets første kort ligger på 390 px efter F4's rettelse
+  1/10 (kortene er ca. 230 px, helten og søgefeltet fylder meget af første
+  skærm). Jeg har låst rækkefølgen i markupken, men ikke målt den — og layoutet
+  i helten og gitteret er det, en skærmdump ville afkræfte.
 - ❓ **Kilde til madvaretabellen (opgave 119, `BLOCKED`).** `sst.dk` svarer HTTP 429
   for både browser og curl, og de fire andre danske kilder døde i C92. Enten en
   PDF af *De officielle kostanbefalinger* lagt i repoet, eller en API-nøgle til en

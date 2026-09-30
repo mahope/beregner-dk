@@ -3,7 +3,6 @@ import {
   getHomePageData,
   getHomeCalculators,
   getHomeCalculatorCount,
-  getHomeQuickLinks,
   getDageTilKort,
 } from "./home-data";
 import { getCalculatorsByLocale, isCalculatorAvailable } from "./calculator-list";
@@ -271,68 +270,23 @@ describe("getHomeCalculators", () => {
 });
 
 /**
- * F4 (2026-09-30): the homepage's own numbers said it was not an entry point —
- * 38 % bounce against 2-7 % on the calculators, 80 % on beraknare.se, 465 entry
- * sessions. The calculators were linked, but three screens down on a phone.
- * These tests lock *which* eight the compact strip shows, so the strip cannot
- * become a second, differently-ordered list of "some popular calculators".
+ * F4 (2026-09-30) lagde en kompakt stribe med de otte mest brugte beregnere
+ * *ovenfor* tillidsrækken, mens populærgitteret blev stående lige under den.
+ * Review 1/10 fandt at de otte var de første otte i `popular`: en dansk læser
+ * mødte otte af fjorten to gange på samme skærm, en svensk læser de samme sex
+ * to gange. Striben er væk, og popularrækken er den eneste liste — derfor er
+ * egenskaberne den havde nu egenskaber på *den*: ingen dubletter, og ingen
+ * post, domænet ikke serverer.
  */
-describe("getHomeQuickLinks", () => {
-  test("the Danish quick row is the eight most visited calculators, in traffic order", () => {
-    // Plausible 2026-09-30, 28 dage: /dato 1133, /bmi 934, /boligstoette 529,
-    // /kvadratmeter 390, /rentefradrag 378, /tidsberegner 290, /kalorier 289,
-    // /braendstof 263. The ninth, /barselsdagpenge 225, is the first that falls
-    // off — the strip is the eight that carry the traffic, not "the first eight
-    // in the file", which is why this is an exact list.
-    expect(getHomeQuickLinks("da").map((c) => c.href)).toEqual([
-      "/dato",
-      "/bmi",
-      "/boligstoette",
-      "/kvadratmeter",
-      "/rentefradrag",
-      "/tidsberegner",
-      "/kalorier",
-      "/braendstof",
-    ]);
-  });
-
-  test("quick links are the popular cards and nothing else", () => {
+describe("populærrækken er forsidens eneste liste", () => {
+  test("den har ingen dubletter og ingen post, domænet ikke serverer", () => {
     for (const locale of ["da", "no", "se"] as const) {
-      const popular = new Set(
-        getHomeCalculators(locale)
-          .filter((c) => c.popular)
-          .map((c) => c.href)
-      );
-      expect(getHomeQuickLinks(locale).length, `${locale} quick count`).toBeGreaterThan(0);
-      for (const link of getHomeQuickLinks(locale)) {
-        expect(popular.has(link.href), `${locale} ${link.href} is popular`).toBe(true);
-      }
-    }
-  });
-
-  test("quick links are never padded to eight, and never point at a closed locale", () => {
-    // Sverige har seks populære, Norge har sit eget sæt. En stræk-liste ville
-    // fylde de manglende pladser med kort, domænet ikke serverer — det er præcis
-    // den fejl, isCalculatorAvailable findes for at forhindre.
-    for (const locale of ["da", "no", "se"] as const) {
-      const quick = getHomeQuickLinks(locale);
       const popular = getHomeCalculators(locale).filter((c) => c.popular);
-      expect(quick.length, `${locale} quick length`).toBeLessThanOrEqual(8);
-      expect(quick.length, `${locale} quick length`).toBe(Math.min(8, popular.length));
-      for (const link of quick) {
-        expect(isCalculatorAvailable(link.href, locale), `${locale} ${link.href}`).toBe(true);
+      const hrefs = popular.map((c) => c.href);
+      expect(new Set(hrefs).size, `${locale}: populærrækken har dubletter`).toBe(hrefs.length);
+      for (const href of hrefs) {
+        expect(isCalculatorAvailable(href, locale), `${locale} ${href}`).toBe(true);
       }
-    }
-  });
-
-  test("the quick heading is written in the locale's own language", () => {
-    // Nyt felt, og det er håndskrevet tekst i tre sprog — den klasse af fejl
-    // locale-leak.mjs scanneren findes for. æ og ø er danske blandt de tre
-    // sprog, de andet to skriver.
-    const quick = (["da", "no", "se"] as const).map((l) => getHomePageData(l).sections.quick);
-    expect(new Set(quick).size, "quick heading is not shared between locales").toBe(3);
-    for (const locale of ["no", "se"] as const) {
-      expect(getHomePageData(locale).sections.quick, locale).not.toMatch(/[æø]/i);
     }
   });
 });
