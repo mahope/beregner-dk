@@ -9,7 +9,8 @@ export type DageTilKind =
   | "easterOffset"
   | "midsummer"
   | "advent"
-  | "summerferie";
+  | "summerferie"
+  | "efteraarsferie";
 
 export interface DageTilAnchor {
   kind: DageTilKind;
@@ -24,6 +25,11 @@ export interface DageTilAnchor {
    * fire søndage, så offset 7/14/21 er de tre næste.
    */
   adventOffsetDays?: number;
+  /**
+   * ISO-uge, kun relevant for kind "efteraarsferie". Efterårsferien ligger
+   * fast i uge 42, så `week: 42` peger på den mandag.
+   */
+  week?: number;
 }
 
 export interface DageTilCopy {
@@ -1027,6 +1033,52 @@ export const DAGE_TIL_EVENTS: DageTilEvent[] = [
       },
     },
   },
+  {
+    id: "efteraarsferien",
+    anchor: {
+      da: { kind: "efteraarsferie", month: 10, day: 0, offsetDays: 0, week: 42 },
+    },
+    da: {
+      slug: "efteraarsferien",
+      copy: {
+        short: "efterårsferien",
+        question: "Hvor mange dage er der til efterårsferien?",
+        facts: [
+          "Efterårsferien starter altid i **uge 42**, altså en mandag i oktober. I 2026 er det 12. oktober, i 2027 18. oktober og i 2028 16. oktober.",
+          "Ugen er den samme i hele landet, så du kan regne den ud uden at slå din kommune op. Det er den eneste ferie ud over sommerferiens start, der har en fast national dato.",
+          "Nogle kommuner skriver ferien som skolehverdage (12.-16. oktober 2026), andre som hele perioden med weekender (10.-18. oktober 2026). Tallet her tæller til den **første skoledag** — den mandag, børnene har undervisning igen.",
+          "Efterårsferien kaldes også kartoffelferien, fordi børnene før i tiden hjalp til at tage kartofler op.",
+        ],
+        faq: [
+          {
+            question: "Hvornår er efterårsferien i 2026?",
+            answer:
+              "Uge 42. Skolerne har fri mandag 12. til fredag 16. oktober 2026, og med weekenderne løber ferien fra lørdag 10. til søndag 18. oktober. Første skoledag igen er mandag 19. oktober.",
+          },
+          {
+            question: "Er efterårsferien samme dato i alle kommuner?",
+            answer:
+              "Ja, ugen er ens i hele landet. Det, der varierer, er kun hvordan kommunerne skriver den: nogle viser skolehverdage (12.-16. oktober 2026), andre viser hele ferieperioden inklusive weekender (10.-18. oktober 2026). Begge dele er den samme ferieuge.",
+          },
+          {
+            question: "Hvornår starter skolen igen efter efterårsferien?",
+            answer:
+              "Mandagen efter uge 42. I 2026 er det 19. oktober. Har din kommune enkelte skolelørdage eller ekstra fridage, kan den enkelte skole ligge forud eller bagefter, så tjek barnets egen ferieplan.",
+          },
+          {
+            question: "Hvor lang er efterårsferien?",
+            answer:
+              "Den er én uge — man-fre i skolehverdage, altså 5 dage. Sammen med weekenderne er hele perioden 9 dage, for uge 42 i 2026 er lørdag 10. til søndag 18. oktober.",
+          },
+          {
+            question: "Er efterårsferien fastsat i loven?",
+            answer:
+              "Skoleåret begynder 1. august og sommerferien starter den sidste lørdag i juni — det står i folkeskoleloven. Efterårsferien er derimod fastsat til uge 42 for hele landet af undervisningsministeriet, og derfor er den samme dato overalt, selv om den ikke står i selve loven.",
+          },
+        ],
+      },
+    },
+  },
 ];
 
 /** Locales that have a real dage-til landing page. */
@@ -1156,6 +1208,30 @@ export function forstaAdvent(year: number, adventOffsetDays = 0): Date {
   throw new Error(`Ingen søndag 27. november-3. december ${year}`);
 }
 
+/**
+ * Mandagen i en ISO-uge for a year, from the same ISO definition used by the
+ * kalender: uge 1 er den uge med torsdagen i januar, så mandagen i uge 1 er
+ * den mandag mellem 29. december og 4. januar.
+ *
+ * Efterårsferien ligger fast i uge 42 i hele landet og på tværs af kommuner —
+ * det er den eneste danske skoleferie ud over sommerferiens start, der har en
+ * national dato, og den flytter sig ikke med påsken. Kommunerne afgiver den
+ * samme uge, kun skolehverdage (man-fre 12.-16. oktober 2026) eller hele
+ * ferieperioden inkl. weekender (lør-søn 10.-18. oktober 2026). Denne
+ * funktion returnerer mandagen, fordi den er det tidspunkt skolen genoptages
+ * på, og fordi en nedtælling til en lørdag ville svare på det forkerte
+ * spørgsmål.
+ */
+export function isoUgeMandag(year: number, week: number): Date {
+  // 4. januar ligger altid i uge 1, så uge 1's mandag er den mandag der
+  // ligger højest oppe før den 4. januar.
+  const januar4 = new Date(Date.UTC(year, 0, 4));
+  const uge1Mandag = new Date(
+    januar4.getTime() - ((januar4.getUTCDay() + 6) % 7) * MS_PER_DAY
+  );
+  return new Date(uge1Mandag.getTime() + (week - 1) * 7 * MS_PER_DAY);
+}
+
 function anchorInYear(anchor: DageTilAnchor, year: number): Date {
   if (anchor.kind === "fixed") {
     return new Date(Date.UTC(year, anchor.month - 1, anchor.day));
@@ -1165,6 +1241,9 @@ function anchorInYear(anchor: DageTilAnchor, year: number): Date {
   }
   if (anchor.kind === "summerferie") {
     return sommerferieStart(year);
+  }
+  if (anchor.kind === "efteraarsferie") {
+    return isoUgeMandag(year, anchor.week ?? 42);
   }
   if (anchor.kind === "advent") {
     return forstaAdvent(year, anchor.adventOffsetDays ?? 0);

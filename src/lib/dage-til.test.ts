@@ -12,6 +12,7 @@ import {
   getDageTilSlugs,
   getNextAnchorDate,
   isDageTilLocale,
+  isoUgeMandag,
   midsommarafton,
   resolveDageTilSlug,
   sommerferieStart,
@@ -463,7 +464,10 @@ describe("slug-opløsning", () => {
     const kunDansk = DAGE_TIL_EVENTS.filter((e) => !e.se);
     expect(da).toHaveLength(DAGE_TIL_EVENTS.length);
     expect(se).toHaveLength(DAGE_TIL_EVENTS.length - kunDansk.length);
-    expect(kunDansk.map((e) => e.da.slug)).toEqual(["sommerferien"]);
+    expect(kunDansk.map((e) => e.da.slug)).toEqual([
+      "sommerferien",
+      "efteraarsferien",
+    ]);
     // Slugs er ikke et sæt, der indeholder hinanden: dansk siger "juleaften",
     // svensk siger "julafton". Det er derfor kun antallet kan sammenlignes.
     expect(da).toContain("juleaften");
@@ -713,6 +717,141 @@ describe("sommerferien som dansk dato", () => {
     const svar = getDageTilAnswer(sommerferien!, "da", iso("2027-06-26"));
     expect(svar.days).toBe(0);
     expect(svar.isToday).toBe(true);
+  });
+});
+
+describe("isoUgeMandag", () => {
+  // ISO-ugedefinitionen: uge 1 er den uge med torsdagen i januar, så uge 1's
+  // mandag ligger mellem 29. december og 4. januar. De tre års tal her er
+  // efterårsferiens faktiske mandage (12. / 18. / 16. oktober), verificeret
+  // mod de 21 kommunale ferieplaner.
+  test.each([
+    [2026, "2026-10-12"],
+    [2027, "2027-10-18"],
+    [2028, "2028-10-16"],
+  ])("uge 42 i %i starter mandag %s", (year, expected) => {
+    expect(toISO(isoUgeMandag(year, 42))).toBe(expected);
+  });
+
+  // De tre hårdkodede år ville også passe en forkert regel, der tilfældigvis
+  // var enig tre gange, så invarianten låses over 61 år i stedet: mandagen i
+  // uge 42 er altid en mandag i oktober, og uge 43 ligger præcis 7 dage senere.
+  test("er altid en mandag i oktober, og uge 43 ligger 7 dage senere, 1990-2050", () => {
+    for (let year = 1990; year <= 2050; year++) {
+      const uge42 = isoUgeMandag(year, 42);
+      // `getUTCDay()` er 0=søn..6=lør, så en mandag er 1.
+      expect(uge42.getUTCDay(), `uge 42 i ${year}`).toBe(1);
+      expect(uge42.getUTCMonth()).toBe(9);
+      expect(isoUgeMandag(year, 43).getTime() - uge42.getTime()).toBe(
+        7 * 86_400_000
+      );
+      // ISO-ugen må aldrig løbe ind i november — uge 42's mandag er i oktober,
+      // og hvis reglen var "første mandag i oktober" ville den ligge i uge 40.
+      expect(uge42.getUTCDate()).toBeGreaterThanOrEqual(8);
+    }
+  });
+
+  // Uge 1's mandag kan ligge i december året før (2026: 29. december 2025).
+  // Uden denne test ville en fejl i jan4-udregningen give stærkt plausible,
+  // men forkerte datoer i alle de år hvor uge 1's mandag ligger i december.
+  test("uge 1's mandag ligger mellem 29. december og 4. januar, 1990-2050", () => {
+    for (let year = 1990; year <= 2050; year++) {
+      const uge1 = isoUgeMandag(year, 1);
+      // `getUTCDay()` er 0=søn..6=lør, så en mandag er 1.
+      expect(uge1.getUTCDay(), `uge 1 i ${year}`).toBe(1);
+      if (uge1.getUTCMonth() === 11) {
+        expect(uge1.getUTCDate()).toBeGreaterThanOrEqual(29);
+      } else {
+        expect(uge1.getUTCMonth()).toBe(0);
+        expect(uge1.getUTCDate()).toBeLessThanOrEqual(4);
+      }
+    }
+  });
+});
+
+describe("efteraarsferien som dansk dato", () => {
+  const ferien = DAGE_TIL_EVENTS.find((e) => e.id === "efteraarsferien");
+
+  test("findes i listen", () => {
+    expect(ferien).toBeDefined();
+  });
+
+  test("har et dansk slug og en dansk spørgsmål", () => {
+    expect(ferien?.da.slug).toBe("efteraarsferien");
+    expect(ferien?.da.copy.question).toBe(
+      "Hvor mange dage er der til efterårsferien?"
+    );
+  });
+
+  // Efterårsferien er uge 42 i hele landet, så en svensk udgave ville kunne
+  // regne det rigtige tal — men den svenska lagen har ingen tilsvarende
+  // national ferieuge, og opgaven er dansk. Sådan skal den side findes.
+  test("har INGEN svensk udgave", () => {
+    expect(ferien?.se).toBeUndefined();
+    expect(ferien?.anchor.se).toBeUndefined();
+    expect(getDageTilEvents("se").some((e) => e.id === "efteraarsferien")).toBe(false);
+    expect(getDageTilSlugs("se")).not.toContain("efteraarsferien");
+  });
+
+  test("løser ikke det danske slug på beraknare.se", () => {
+    expect(resolveDageTilSlug("efteraarsferien", "se")).toBeUndefined();
+    expect(resolveDageTilSlug("efteraarsferien", "da")?.isOwnLocale).toBe(true);
+  });
+
+  test("tæller til mandagen i uge 42", () => {
+    // 30. september 2026 → 12. oktober 2026 = 12 dage (talt i node).
+    const svar = getDageTilAnswer(ferien!, "da", iso("2026-09-30"));
+    expect(toISO(svar.targetDate)).toBe("2026-10-12");
+    expect(svar.days).toBe(12);
+    expect(svar.weeks).toBe(1);
+    expect(svar.daysLeft).toBe(5);
+  });
+
+  test("på selve startdagen er svaret 0 dage", () => {
+    const svar = getDageTilAnswer(ferien!, "da", iso("2026-10-12"));
+    expect(svar.days).toBe(0);
+    expect(svar.isToday).toBe(true);
+  });
+
+  // Efterårsferien er én gang om året, så spørger man i januar tæller den til
+  // oktober i samme år — ikke til næste.
+  test("i januar tæller den til oktober i samme år", () => {
+    const svar = getDageTilAnswer(ferien!, "da", iso("2027-01-05"));
+    expect(toISO(svar.targetDate)).toBe("2027-10-18");
+    expect(svar.days).toBe(286);
+  });
+
+  // De tre årstal i brødteksten skal være de samme tal koden regner — ellers
+  // står der en forkert dato i teksten, som ingen anden test kan se. Teksten
+  // skriver dem som "i 2026 er det 12. oktober", altså årstal og dato i to
+  // led, og derfor ledes der efter datoen med årstallet i parentesen.
+  test("de tre år i fakta-teksten er kalkens egne tal", () => {
+    const fakta = ferien!.da.copy.facts.join(" ");
+    const maaneder = [
+      "januar", "februar", "marts", "april", "maj", "juni",
+      "juli", "august", "september", "oktober", "november", "december",
+    ];
+    for (const year of [2026, 2027, 2028]) {
+      const [aar, maaned, dag] = toISO(isoUgeMandag(year, 42)).split("-");
+      const dato = `${Number(dag)}. ${maaneder[Number(maaned) - 1]}`;
+      // Teksten lister årene i én sætning ("i 2026 er det 12. oktober, i 2027
+      // 18. oktober …"), så kræves år og dato på hver side af hinanden.
+      const foer = fakta.indexOf(String(year));
+      expect(foer, `fakta skal nævne ${year}`).toBeGreaterThan(-1);
+      expect(
+        fakta.slice(foer, foer + 40),
+        `året ${year} skal stå lige før ${dato}`
+      ).toContain(dato);
+    }
+  });
+
+  // Google's danske autocomplete spørger om præcis disse: "hvor mange dage er
+  // der til efterårsferien" og "... efterårsferien 2026/2025". Sådan skal
+  // spørgsmålet findes, ellers rammer siden ikke sin egen søgning.
+  test("spørgsmålet matcher autocomplete-formuleringerne", () => {
+    const spg = ferien!.da.copy.question.toLowerCase();
+    expect(spg).toContain("hvor mange dage er der til");
+    expect(spg).toContain("efterårsferien");
   });
 });
 

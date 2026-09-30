@@ -1,27 +1,28 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — **review-fund (HØJ, 30/9) rettet: juleaftens spørgsmål var 52 tegn,
-så dage-til-titlen blev 61 ved tre-cifrede dag-tal — og 24. december er fast, så
-det er 61 fra 15/9 til 31/12 hvert år.** Google klippede da dage-tallet af, som er
-den del der adskiller siden fra de andre. Ny streng: "Hvor mange dage er der til
-juleaften 24. december?" (50 tegn → 58/59). Titelposten kører nu hele året (8
-datoer) i stedet for én valgt dato, så porten ikke kan være grøn med fejlen i.
+STATUS: KØ — **ny countdown-side `/dage-til/efteraarsferien` (uge 42).** Dansk
+autocomplete under "hvor mange dage er der til " har **efterårsferien** (nr. 8) og
+under "hvor mange dage er der til efterårsferien" tre varianter (2025, 2026, og
+"…i efterårsferien") — vi dækkede ingen af dem. Efterårsferien er den største
+ubearbejdede countdown-klynge, og uge 42 er en **fast regel**: efterårsferien er
+uge 42 i 2025, 2026 og 2027 (verificeret via de 21 kommunale ferieplaner).
 
-**Mål:** `/dage-til/juleaften` "hvor mange dage er der til den 24 december" 1.013
-v / 3 klik / pos. 5. Genmål **2026-10-14**.
+**Mål:** `/dage-til/efteraarsferien` ny URL, 0 klik i dag.
+`/dato` "hvor mange dage er der til 1 december" 1.171 v / 3 klik / pos. 5.
+Genmål **2026-10-14**.
 
-**Alle ti deploy-noter er lukket `DEPLOY OK 2026-09-30`** efter batch 07:30,
-verificeret ved indhold (titler, artiklenes slutning, tabellen på /procent).
-De otte "Regn det ud"-artikler, de 20 brand-frie titler, de seks eksempel-titler
-og beraknare.se `/dato` er alle live. Én ny note åben, vindue 30/9 12:30.
+**Alle ti tidligere deploy-noter er lukket `DEPLOY OK 2026-09-30`.** To nye noter
+åbne, vindue 30/9 12:30.
 
-**Færdige i dag:** 207, 206, 205, 204, 203, 202, 201, 200 + review-fund.
+**Færdige i dag:** 208 + de otte CEO-fund fra 29/9 (verificeret i koden: valborg
+30. april, svensk påskafton lørdag, dansk sankthans fast 23./24. juni,
+`toUtcMidnight` i `Europe/Copenhagen`, `maneder: 12`, husleje → nettoprisindeks).
 
 ## Kvalitetsgate (repoets egne scripts fra package.json)
 
 ```
 npm run lint     # biome lint ./src      — 618 filer
-npm run test     # vitest run            — 3038 tests / 190 filer
+npm run test     # vitest run            — 3054 tests / 190 filer
 npm run build    # next build            — 142 sider
 node scripts/locale-leak.mjs --gate       # exit 0
 ```
@@ -35,7 +36,8 @@ Alle fire var grønne før merge 2026-09-30 07:45.
 
 ## Åbne VERIFICÉR DEPLOY-noter
 
-Én note. HTTP 200 beviser intet: den rører `<title>` og `<h1>` på én side.
+To noter. HTTP 200 beviser intet: den ene rører `<title>` og `<h1>` på én side,
+den anden opretter én URL.
 
 - ⏳ **VERIFICÉR DEPLOY: juleaftens spørgsmål skal have både ordet og datoen
   uden at overskride Googles 60-tegns-grænse ved tre-cifrede dag-tal.** Kode +
@@ -55,7 +57,7 @@ Alle fire var grønne før merge 2026-09-30 07:45.
      der til juleaften 24. december?"** i `<title>`, `<h1>` og `og:title`.
   3. Samme sides `<h1>` skal være læselig (den er spørgsmålet, ikke bare datoen).
   4. `/datos` ankertekst "…til juleaften 24. december?" skal være med.
-  **Kontrol:** de 15 andre dage-til-siders titler uændrede, og
+  **Kontrol:** de 16 andre dage-til-siders titler uændrede, og
   `https://beraknare.se/dato` uændret. Målt før merge: 58 tegn @ 88 dage, 59 @
   357 og 366 (grænsen 60). **Gate grøn:** lint (**618 filer**), **3039 tests /
   190 filer** (fra 3038), build (**142 sider**), `locale-leak.mjs --gate`
@@ -63,6 +65,31 @@ Alle fire var grønne før merge 2026-09-30 07:45.
   (verificeret med `git stash`: 3 fejl, bl.a. "expected 61 to be less than or
   equal to 60"), og porten kører nu hele året (8 datoer) i stedet for én valgt,
   så den kan ikke være grøn med fejlen i igen.
+
+- ⏳ **VERIFICÉR DEPLOY: `/dage-til/efteraarsferien` skal svare med uge 42 og
+  tælle til den første skoledag.** Kode + plan i ét squash-commit på
+  `ceo/efteraarsferien-uge42`. Første kandidatvindue **2026-09-30 12:30**.
+  Rørte filer: `src/lib/dage-til.ts` (**ny `kind: "efteraarsferie"`**,
+  `isoUgeMandag()`, ét event med 4 fakta + 5 FAQ) og `src/lib/dage-til.test.ts`
+  (**+141**). Ingen eksisterende beregning rørt, ingen UI, ingen `<h1>`-ændring,
+  ingen ny afhængighed; sitemap, interne kryslink og breadcrumb kommer fra de
+  eksisterende lister. Verificér ved **indhold**:
+  1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
+  2. `https://minberegner.dk/dage-til/efteraarsferien` skal have
+     **"Hvor mange dage er der til efterårsferien?"** i `<h1>` og
+     `<title> = "Hvor mange dage er der til efterårsferien? 12 dage"**.
+  3. Samme sides brødtekst skal sige **"12. oktober 2026"** og **"uge 42"**.
+  4. `/datos` (ikke `/dato`) liste skal have `/dage-til/efteraarsferien` blandt
+     de 16 rækker — den kommer fra `getDageTilEvents`, samme liste som resten.
+  **Kontrol:** `https://beraknare.se/dagar-till/efteraarsferien` skal svare
+  **404** — den svenska lagen har ingen national ferieuge, så siden er dansk
+  alene, ligesom `/dage-til/sommerferien` allerede er det.
+  **Gate grøn:** lint (**618 filer**), **3054 tests / 190 filer** (fra 3039),
+  build (**142 sider**), `locale-leak.mjs --gate` exit 0. De nye tests
+  **falder mod master's `dage-til.ts`** (verificeret med `git stash`:
+  **14 fejl**). ISO-ugereglen er verificeret over **61 år** (1990-2050), ikke på
+  tre valgte år, og `fakta`-teksten er låst til de tal koden selv regner.
+
 
 ## Åbne opgaver
 
