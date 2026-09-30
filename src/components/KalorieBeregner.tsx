@@ -15,7 +15,7 @@ import {
   type AktivitetsNiveau,
 } from "@/lib/makroer";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
-import { formatNumber } from "@/lib/format";
+import { formatNumber, getIntlLocale } from "@/lib/format";
 import { useLocale } from "@/components/LocaleProvider";
 
 type Koen = "mand" | "kvinde";
@@ -126,7 +126,7 @@ export default function KalorieBeregner() {
   // 999 g ved de største inputs, så det er ikke et spørgsmål om skønhed.
   const num = (value: number) => formatNumber(value, locale);
   const firstLower = (s: string) =>
-    s.charAt(0).toLocaleLowerCase(locale === "se" ? "sv-SE" : "da-DK") + s.slice(1);
+    s.charAt(0).toLocaleLowerCase(getIntlLocale(locale)) + s.slice(1);
 
   const [alder, setAlder] = useState<number>(30);
   const [koen, setKoen] = useState<Koen>("mand");

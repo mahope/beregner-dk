@@ -20872,3 +20872,78 @@ gange, og `/boligstoette`'s `<title>` er "Boligstøtte 2026: Standardmaksima,
 formue og beregning" — ikke den nye. De fire merges er fra 13:19–16:53, så
 17:30-batchen var den første kørsel efter dem, og den var syv minutter gammel.
 **21:30 er derfor det vindue, hvorfra det kan dømmes.**
+
+## 30/9 17:55 — otte VERIFICÉR-noter lukket på live-måling
+
+Alle otte er målt på **indhold** på de live domæner 30/9 17:46-17:53, efter at
+17:30-batchen havde kørt (den var kun 16 minutter gammel ved målingen, så de var
+ikke live ved målingen 17:37).
+
+| Note | Branch | Målt |
+|---|---|---|
+| F2 `/procent` svarar på frågan | `ceo/procent-rabat-spørgsmal` | `<h2>Sådan beregner du rabatten i procent</h2>` på minberegner.dk og `<h2>Så här räknar du ut rabatten i procent</h2>` på beraknare.se — begge 2 forekomster. Gamle bullet med "1.125 ÷ 9.000 = 12,5" væk. |
+| F2b svenske rabatt-FAQ | `ceo/procent-svensk-rabatt-faq` | "Hur stor är rabatten i procent?" på beraknare.se — 2 forekomster |
+| `/alder` snippet | `ceo/alder-levede-snippet` | da "pr. 30. september 2026" + "36 år, 6 måneder og 15 dage"; se "per 30 september 2026" + "36 år, 6 månader och 15 dagar". `{ALDER}`-pladsholdere: **0**. |
+| 7 blogindlæg med beregner | `ceo/blog-naeste-handling` | Alle 7 har "Regn det ud" **før** "Relaterede artikler". `/blog/hvordan-beregner-man-moms`: 0 forekomster af den gamle CTA-løsning. |
+| `/boligstoette` titel | `ceo/boligstoette-titel` | `<title>Beregn boligstøtte 2026: standardmaksima og formue</title>`; "Boligstøtteberegner" **0** forekomster (korrekthedslåsen holder); "Vejledende — fortsæt hos Udbetaling Danmark" står. |
+| 12 blogindlæg + dagpenge | `ceo/blog-cta-rest` | Alle 12 har CTA før relaterede artikler. `dagpenge-saadan-finder-du-din-sats` peger på `/dagpenge` (3 links) og har **1** tilbage til `/barselsdagpenge` — den er i brødteksten, ikke CTA'en, så låsen holder. |
+
+To målemetoder undervejs, begge falske alarmer denne gang:
+
+1. **Falske 404'er.** Mit første slug-gæt ramte syv blog-URL'er med 404. Slugene
+   var ikke rigtige — de rigtige står i `src/app/blog/`. En 404 på en URL man
+   selv har gættet er ikke et fund på sitet.
+2. **`guide-til-laan-og-renter` så ud til at mangle relaterede artikler.** Den har
+   overhovedet ingen "Relaterede artikler"-sektion: "Regn det ud" er dens
+   sidste `<h2>`. Kravet er opfyldt vakuum, ikke brudt.
+
+## 30/9 17:58 — F6: seks Intl-tag, men kun ÉN synlig fejl
+
+Porten `src/lib/intl-locale-tag.test.ts` fandt seks steder med den toarmede
+kæde `locale === "se" ? "sv-SE" : "da-DK"`. Målt på hver af dem, for kun én er en
+fejl en læser kan se i dag:
+
+| Sted | Hvad det formatterer | Forskel mellem `da-DK` og `nb-NO` | Status |
+|---|---|---|---|
+| `ProteinbehovBeregner.tsx:55` | **tal** | Ja: `da-DK` 1.000 (punktum) / `nb-NO` 1 000 (U+00A0). 500 kg × 2,0 = 1.000 g er nået med inputets max. | **Synlig fejl** |
+| `TerminBeregner.tsx:117` | datoer (`day`/`month`/`year`/`weekday`) | Nej — målt: begge siger "27. sep." og "søndag", "15. marts 1990". | Latent |
+| `KalorieBeregner.tsx:129` | `toLocaleLowerCase` på ét bogstav | Nej — `Æ`→`æ` er ens i begge. | Latent |
+| `AlderLevetSvar.tsx:31` | fødselsdato | Nej — men linjen er efter `if (locale === "no") return null`, så `no` når den aldrig. | Død kode |
+| `/tidsberegner/page.tsx:113` | kort dato | Nej — parametren var typet `"da" \| "se"`, så typen gjorde arbejdet. | Død kode |
+| `/dato/page.tsx:94` | ugedag | Nej — `pinseLocale` er `"se" \| "da"`, fordi `pinse` kun beregnes når `isDageTilLocale` er sand, og den er `da \| se`. | Død kode |
+
+**Konklusion: F6's acceptkriterium var delvis forkert.** Det krævede at "hver har
+en test der tjekker at `no` ikke får dansk tusindtalsseparator" — men fem af de
+seks formaterer slet ikke tal, så den test kan ikke skrives. Kun
+`ProteinbehovBeregner` har den egenskab, at fejlen er synlig, og det er den der
+fik den målrettede test.
+
+De fem andre er alligevel rettet, af to grunde der begge er verificerede:
+
+1. **Porten.** Den fejler på *formen*, ikke på om outputtet er synligt forskelligt.
+   Så længe kæden står, kan en senere typevidelse sende `no` derigennem igen —
+   det var præcis hvad der skete med `/alder` i `2f4b22a`.
+2. **To af dem er enlig døde, fordi en type er smallet for tidligt.** `formatDato`
+   i `/tidsberegner` er gjort bredere igen (`"da" \| "se"` → `Locale`), fordi
+   `formatTimer` lige under den allerede var `Locale` — den samme fil havde to
+   forskellige signaturer for det samme spørgsmål.
+
+**Målt at intet flytter sig på de live domæner:** `formatNumber(n, da|se,
+{maximumFractionDigits: 0})` mod den gamle `n.toLocaleString(tag, …)` på 12 tal
+(0, 1, 75, 400, 999, 1000, 1234, 9999, 50000, 0,4, 1,5, 12,34) i begge sprog —
+0 afvigelser. `Intl.NumberFormat` med `minimumFractionDigits: undefined` er det
+samme som `toLocaleString` uden den nøgle.
+
+**Tre mutationer, alle faldt:** gammel `Proteinbehov`-kæde (både komponenttesten
+og porten røde), gammel `/dato`-kæde (kun porten), gammel
+`TerminBeregner`-kæde (kun porten).
+
+**To fælder i selve testen, begge fundet ved at skrive den:**
+1. `nb-NO` grupperer med **U+00A0**. Skrevet med et synligt mellemrum i testen
+   forklarede den porten ulæselig, fordi min egen assertion var det den skulle
+   fange. Løst med `"1\u00A0000"` — eksplicit escape, ingen usynlige tegn i kode.
+2. Testing Librarys normaliseringsskive laver **ethvert** mellemrum om til
+   U+0020, også U+00A0. `getByText("1 000")` kan derfor aldrig finde det `nb-NO`
+   netop har skrevet. Løst med `somOrd()` på begge sider, så prøven rammer
+   *tallet* og ikke kodetegnet. Det samme greb låser `locale-leak.mjs`'s
+   egen matching på `file + key + string`.

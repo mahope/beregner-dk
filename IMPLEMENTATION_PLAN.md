@@ -1,28 +1,27 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — 30/9 17:40. **F2b er færdig** (`ceo/procent-svensk-rabatt-faq`): den
-svenska `/procent` har nu **fire** rabatt-rækker i FAQ'en — de fire formuleringer
-svensk autocomplete faktisk har (genmålt 17:32) — og den danske har fået
-metoden i "Hvordan regner man rabat i procent?". Alle tal er regnet af
-`RABAT_EKSEMPEL`/`RABAT_BELOEB`/`RABAT_SATS`, 10 nye tests, 4 mutationer
-kontrolleret. Alle fem review-fund er rettet (`74e7861`, `d563ba2`), CEO-køens
-punkt 0 er færdigt (`aca17e5`).
+STATUS: KØ — 30/9 17:58. **Alle otte forrige deploy-noter er lukket** på
+live-indhold 17:46-17:53 (17:30-batchen var 16 min gammel ved 17:37-målingen,
+så de var ikke live da). Målingerne står i `docs/plan-arkiv.md`. **F6 er færdig**
+(`ceo/no-locale-tag`): de seks steder der valgte `Intl`-sprog med den toarmede
+kæde `locale === "se" ? "sv-SE" : "da-DK"` bruger nu `getIntlLocale`, og en port
+scanner hele `src/` så klassen ikke kan komme tilbage. Dansk og svensk output er
+målt uændret på 12 tal i begge sprog, så intet på de live domæner flytter sig.
+Alle fem review-fund er rettet (`74e7861`, `d563ba2`), CEO-køens punkt 0 er
+færdigt (`aca17e5`).
 
-**Næste frie opgave: F6** (fire beregnere deler `/alders` `no`-fejl, se Fase 3).
-F4 kræver Playwright (❓), F1/F3/F5 og opgaverne 97/98/119/183 er blokeret af
-svar fra Mads. **Opgave 187 må ikke røres før 13/10.**
-
-**⚠️ Fire VERIFICÉR-noter fra tidligere + denne iterations `/procent`-note.** Alle
-fem er målt på live 30/9 **17:37** og **ingen** er live endnu. Den 17:30-batch
-løb først syv minutter inden målingen, så det er **21:30** der er sidste frist —
-skriv først `DEPLOY-MISSING` når et vindue er gået.
+**Én ny VERIFICÉR-note** (denne iteration). F4 kræver Playwright (❓),
+F1/F3/F5 og opgaverne 97/98/119/183 er blokeret af svar fra Mads.
+**Opgave 187 må ikke røres før 13/10.**
 
 **⚠️ Målerfælde (30/9 15:40, samme klasse som C70's).** `npm run test` kører
-`locale-leak-gate.test.ts`, som med vilje planterer en dansk streng i
-`src/app/procent/page.tsx` og hævder at scanneren **finder** den. Derfor kommer der
-en `FEJL: 1 ureviewet(e)`-linje med `procent/page.tsx` indeni `npm run test`-output.
-Det er **ikke** et fund i din diff — filen er restoreret bagefter. Kør gaten separat:
-`node scripts/locale-leak.mjs --gate`.
+`locale-leak-gate.test.ts`, som med vilje planterer **to** danske lækager og
+hævder at scanneren finder dem. Derfor kommer der **to** `FEJL: n ureviewet(e)`-
+blokke i output: én med 34 strenge fra `promille/page.tsx` (testen fjerner
+`{locale === "da" && (`-porten, så landestabelens danske rækker bliver
+læsbare) og én med 1 fra `procent/page.tsx` (plantet JSX-lækage). Begge
+gendannes i en `finally`. Det er **ikke** fund i din diff. Kør gaten separat:
+`node scripts/locale-leak.mjs --gate` (exit 0).
 
 **Generelt om gaten:** `REVIEWED`-poster i `scripts/locale-leak.mjs` matches på
 `file` + `key` + `string`, **ikke** linjenummer — så en indsats i en fil flytter
@@ -132,22 +131,23 @@ Yahoo 274 besøgende/28d. IndexNow er kodet og instrumenteret
 `❓ Til Mads` spørger om krogen efter deploy er sat op — uden svar er
 Bing/DDG/Yahoo indeksering uafhængig af vores deploys.
 
-**F6. [ ] Fire beregnere deler den samme `no`-fejl som `/alder` havde.**
-Fundet 30/9 under F6's rettelse af `/alder`. Alle fire steder vælger zone med
-`locale === "se" ? "sv-SE" : "da-DK"`, så `no` får dansk formatering — samme
-mønster som `formatDageTal` havde:
-`src/app/tidsberegner/page.tsx:113`, `src/components/ProteinbehovBeregner.tsx:55`,
-`src/components/TerminBeregner.tsx:117`, `src/components/KalorieBeregner.tsx:129`.
-**Accept:** alle fire bruger `getIntlLocale(locale)`, og hver har en test der
-tjekker at `no` ikke får dansk tusindtalsseparator. De er latente (beregner.no
-404'er, opgave 97), så prioriteringen er lavere end F2b — men de er den samme
-fejlklasse, og de bliver ikke fundet igen af en reviewer.
+**F6. [x] ✅ `ceo/no-locale-tag` — de seks Intl-tag der sendte norsk til dansk
+formatering.** Den håndskrevne kæde `locale === "se" ? "sv-SE" : "da-DK"` har
+kun to arme, så `no` faldt igennem til dansk. Retter alle **seks** steder:
+`ProteinbehovBeregner` (den eneste med synlig fejl — 500 kg på højeste niveau er
+præcis 1.000 g, som `da-DK` skriver "1.000" med punktum og `nb-NO` "1 000" med
+U+00A0), `TerminBeregner`, `KalorieBeregner`, `AlderLevetSvar`, `/dato` og
+`/tidsberegner`. De fire andre har ingen *observerbar* fejl i dag — se målingen
+nedenfor, den er ærlig om hvorfor de alligevel er rettet. Ny port
+`src/lib/intl-locale-tag.test.ts` scanner hele `src/` og fejler på **formen**
+(kæde med svensk/dansk tag og ingen `nb-NO` indeni), så klassen kan ikke komme
+tilbage. 8 nye tests, 3 mutationer kontrolleret. Se arkivet.
 
 ## Kvalitetsgate (repoets egne scripts fra package.json)
 
 ```
-npm run lint     # biome lint ./src      — 623 filer
-npm run test     # vitest run            — 3172 tests / 193 filer
+npm run lint     # biome lint ./src      — 626 filer
+npm run test     # vitest run            — 3231 tests / 196 filer
 npm run build    # next build            — 142 sider
 node scripts/locale-leak.mjs --gate       # exit 0
 ```
@@ -158,85 +158,26 @@ et alders-tal i et snippet følger dagen. Dagens dato læses i sidens egen
 tidszone via `iDagISidensTidszone` — `tilIsoDato(new Date())` læser
 *serverens* tidszone og er et døgn bag mellem 00:00 og 02:00 dansk tid.
 
-`tsc --noEmit` er **ikke** del af gaten: 72 kendte forhåndsfejl, alle i
-`*.test.ts(x)` (målt 30/9; 33 i `dage-til.test.ts`, 14 i
-`dage-til-routes.test.tsx`, resten spredt) og **0 i ikke-test-filer**. Opgave
-202 fjernede de 2 her: `scannedPages` og `candidatesFromPages` blev brugt i
-`locale-leak-gate.test.ts` uden at stå i returtypen (74 → 72).
-Alle fire var grønne før merge 2026-09-30 07:45.
+`tsc --noEmit` er **ikke** del af gaten: **80** kendte forhåndsfejl, alle i
+`*.test.ts(x)` og **0 i ikke-test-filer**. Genmålt 30/9 17:53 på `master` og på
+`ceo/no-locale-tag` — tallene er ens, så ingen af denne ændringer har tilføjet en.
+Planen sagde 72; de otte ekstra kom fra commits efter sidste måling. Verificér
+fremover med `git stash -u` før og efter, som gjort her.
 
 ## Åbne VERIFICÉR DEPLOY-noter
 
-**Fire noter åbne fra tidligere + to fra F2/F2b.** HTTP 200 beviser intet: noterne
-rører `<title>`, `<h1>`, brødtekst, JSON-LD eller nye URL'er, og tidszone-noten
-forventer et **uændret** tal. Fulde tekster med alle målinger står i
-`docs/plan-arkiv.md`. De elleve lukkede noter er verificeret 30/9 14:12 på indhold.
+**Én note åben.** HTTP 200 beviser intet: noten rører Intl-formatering, og
+en fejl i den er usynlig i en dansk browser. De otte lukkede noter er verificeret
+30/9 17:46-17:53 på indhold; alle målinger står i `docs/plan-arkiv.md`.
 
-**Alle seks er målt på live 30/9 17:37 og ingen er live.** De fire merges er fra
-13:19–16:53, så 17:30-batchen var den første kørsel efter dem — og den var kun syv
-minutter gammel ved målingen. Sidste frist er derfor **21:30**; skriv først
-`DEPLOY-MISSING` når *det* vindue også er gået.
-
-- ⏳ **F2b: `/procent`s FAQ skal ramme de fire svenske rabatt-spørgsmål.**
-  `ceo/procent-svensk-rabatt-faq`. Kontrollér **indhold** på
-  `https://beraknare.se/procent`: JSON-LD skal have `FAQPage` med spørgsmålene
-  "Hur stor är rabatten i procent?", "Hur mycket rabatt i procent får jag på
-  en vara?", "Hur räknar man ut rabatt i procent i Excel?" og "Vad är
-  procentuell rabatt?", og svaret på den første skal sige "1 125 / 9 000 = 12,5
-  procent" (mellemrum, **ikke** U+00A0). På `minberegner.dk/procent` skal den
-  danske FAQ have "Hvordan regner man rabat i procent?" med svaret
-  "1.125 / 9.000 = 12,5 %". Målt 17:37: ingen af delene er live endnu.
-
-- ⏳ **`/procent` skal svare på frågan om rabatten.** `ceo/procent-rabat-spørgsmal`.
-   Kontrollér **indhold**: `<h2>Sådan beregner du rabatten i procent</h2>` og
-   `<h2>Så här räknar du ut rabatten i procent</h2>` skal begge stå, teksten skal
-   sige "1.125 ÷ 9.000 × 100 = 12,5 procent" (da) og "1 125 ÷ 9 000 × 100 = 12,5
-   procent" (se), og sats-tabellen skal have alle fem rækker. **Og** den gamle
-   bullet må ikke længere sige "1.125 ÷ 9.000 = 12,5" — den skal kun sige
-   "25% rabat på en vare til 400 kr = du sparar 100 kr". Målt 17:37: `<h2>` er
-   **ikke** på siden, så F2 er heller ikke live endnu. Vindue **21:30**.
-
-- ⏳ **`/alder`s snippet skal vise dagens alder, ikke 25. september.**
-  `ceo/alder-levende-snippet`. Skal have "pr. 30. september 2026" og
-  "36 år, 6 måneder og 15 dage" (da) / "per 30 september 2026" + "36 år, 6
-   månader och 15 dagar" (se). Ingen `{ALDER}`-pladsholdere i HTML'en.
-   Målt 14:12: beskrivelsen siger stadig "pr. 25. september 2026" — korrekt,
-   fordi den ikke er live endnu. Vindue **21:30**.
-
-- ⏳ **Syv blogindlæg skal slutte med deres beregner.** `ceo/blog-naeste-handling`.
-  `/blog/arveafgift-regler-og-satser` → `/arveafgift`, `hvordan-beregner-man-moms`
-  → `/moms`, `hvad-er-klokken-i-usa-naar-den-er-12-i-danmark` → `/tidszone`,
-  `30-procent-reglen-husleje` → `/husleje`, `bmi-for-boern-saadan-tjekker-du`
-  → `/bmi`, `guide-feriepenge-hvornaar-og-hvor-meget` → `/dato`,
-  `pension-hvor-meget-skal-du-spare-op` → `/pension`. Kontrol på indhold:
-  hver side skal have "Regn det ud" **før** "Relaterede artikler", og
-  `/moms` skal have **0** forekomster af den gamle CTA-løsning. Målt 15:00:
-  de fire kontrollerede sider har `regn=0`, altså endnu ikke live. Vindue
-  **21:30**.
-
-- ⏳ **`/boligstoette` skal ramme sin egen største søgning i titlen.**
-  `ceo/boligstoette-titel`. Titlen skal være **"Beregn boligstøtte 2026:
-  standardmaksima og formue"** i `<title>`, `<h1>`, `og:title` og
-  `description`, og beskrivelsen skal stadig sige "Vejledende — fortsæt hos
-  Udbetaling Danmark". Siden skal **stadig** have **0** forekomster på
-  "Boligstøtteberegner" — det er en korrekthedslås, ikke en fejl. Vindue
-  **21:30**.
-
-- ⏳ **Alle 27 blogindlæg skal slutte med en næste handling.**
-  `ceo/blog-cta-rest`. De **tolv** artikler fra opgave 202 skal have
-  "Regn det ud" **før** "Relaterede artikler", hver med en CTA der peger på
-  en beregner artiklen allerede nævner i brødteksten:
-  `biloekonomi…` → `/bil`, `boliglaan…` → `/rentefradrag`,
-  `boligsalg…` → `/boligsalg`, `elpriser…` → `/elberegner`,
-  `guide-til-laan-og-renter` → `/renteberegner`,
-  `koeb-af-bolig…` → `/rentefradrag`, `leasing-af-bil…` → `/leasing`,
-  `maanedsbudget…` → `/budget`, `privatoekonomi-for-unge` → `/loen-efter-skat`,
-  `saadan-beregner-du-din-reelle-timeloen` → `/brok`,
-  `saadan-finder-du-din-timepris…` → `/timepris`, `skat-2026…` →
-  `/skattefradrag`. **Og** `dagpenge-saadan-finder-du-din-sats` skal pege på
-  `/dagpenge`, ikke `/barselsdagpenge`. Vindue **21:30**.
-
-
+- ⏳ **Norske tal skal ikke få dansk tusindtalsseparator.** `ceo/no-locale-tag`.
+  Kontrollér **indhold** på `https://beregner.no/proteinbehov` (latent — domænet
+  404’er i dag, så læg på dansk og svensk at dansk/svensk output er uændret):
+  `ProteinbehovBeregner` skal bruge `getIntlLocale`, og ingen fil må stå med
+  den toarmede kæde `locale === "se" ? "sv-SE" : "da-DK"`. Den praktiske prøve på
+  dansk er, at `npm run test` fortsat er grøn på
+  `src/lib/intl-locale-tag.test.ts` efter deploy. Vindue **30/10 07:30** (denne
+  merge sker efter 17:30).
 
 ## Åbne opgaver
 

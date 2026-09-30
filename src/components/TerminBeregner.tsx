@@ -7,6 +7,7 @@ import { CopyResultButton, ResetButton } from '@/components/ui';
 import { generateShareableLink, getStateFromUrl, CalculationState } from '@/lib/calculation-state';
 import { trackCalculation, initScrollDepthTracking } from '@/lib/analytics';
 import { BARSEL_2026 } from '@/lib/satser-2026';
+import { getIntlLocale } from '@/lib/format';
 import { useLocale } from '@/components/LocaleProvider';
 
 const GRAVIDITET_DAGE = 280; // 40 uger
@@ -114,7 +115,7 @@ export default function TerminBeregner() {
   const l = labels[locale as keyof typeof labels] || labels.da;
   const ugerMilepaleForLocale = locale === "se" ? ugerMilepale.se : ugerMilepale.da;
   const barselStartDayCount = locale === "se" ? barselStartDays.se : barselStartDays.da;
-  const dateLocale = locale === "se" ? "sv-SE" : "da-DK";
+  const dateLocale = getIntlLocale(locale);
   const [sidsteMens, setSidsteMens] = useState<string>('');
 
   const hasLoadedUrl = useRef(false);

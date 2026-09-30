@@ -7,6 +7,7 @@ import { generateShareableLink, getStateFromUrl, type CalculationState } from "@
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { useLocale } from "@/components/LocaleProvider";
 import { beregnProteinbehov, type Aktivitetsniveau } from "@/lib/proteinbehov";
+import { formatNumber } from "@/lib/format";
 
 const labels = {
   da: {
@@ -52,7 +53,10 @@ const labels = {
 export default function ProteinbehovBeregner() {
   const { locale } = useLocale();
   const l = labels[locale as keyof typeof labels] || labels.da;
-  const fmt = (n: number) => n.toLocaleString(locale === "se" ? "sv-SE" : "da-DK", { maximumFractionDigits: 0 });
+  // `formatNumber` kender alle tre sprog. Den håndskrevne kæde
+  // `locale === "se" ? "sv-SE" : "da-DK"` gav norsk dansk tusindtalsseparator, så
+  // 500 kg på højeste niveau stod som "1.000 gram" i norsk tekst.
+  const fmt = (n: number) => formatNumber(n, locale, { maximumFractionDigits: 0 });
 
   const [weight, setWeight] = useState<number>(75);
   const [level, setLevel] = useState<Aktivitetsniveau>("moderat-aktiv");

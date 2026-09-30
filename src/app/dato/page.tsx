@@ -3,6 +3,7 @@ const DatoBeregner = dynamic(() => import("@/components/DatoBeregner"));
 import { generatePageMetadata } from "@/lib/page-helpers";
 import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
+import { getIntlLocale } from "@/lib/format";
 import FAQ from "@/components/FAQ";
 import RelatedCalculators from "@/components/RelatedCalculators";
 import RelateredeArtikler from "@/components/RelateredeArtikler";
@@ -91,7 +92,7 @@ export default async function DatoPage() {
       pinseLocale
     );
   const pinseUgedag = (d: Date) =>
-    new Intl.DateTimeFormat(pinseLocale === "se" ? "sv-SE" : "da-DK", {
+    new Intl.DateTimeFormat(getIntlLocale(pinseLocale), {
       weekday: "long",
       timeZone: "UTC",
     }).format(new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())));

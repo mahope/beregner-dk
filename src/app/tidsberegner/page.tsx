@@ -2,7 +2,8 @@ import TidsBeregner from "@/components/TidsBeregner";
 import { generatePageMetadata } from "@/lib/page-helpers";
 import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
-import { formatNumber } from "@/lib/format";
+import { formatNumber, getIntlLocale } from "@/lib/format";
+import type { Locale } from "@/lib/i18n";
 import {
   TIDS_EKSEEMPLER,
   TIDS_EKSEMPEL_DAG,
@@ -106,11 +107,11 @@ const TEMPO_NAEVN_SE: Record<TempoEksempel["id"], string> = {
   maraton: "Maraton (42,2 km)",
 };
 
-/** "2026-09-25" → "25. sep.". Datoerne læses i UTC, så de kan ikke glide en dag. */function formatDato(iso: string | undefined, locale: "da" | "se"): string {
+/** "2026-09-25" → "25. sep.". Datoerne læses i UTC, så de kan ikke glide en dag. */function formatDato(iso: string | undefined, locale: Locale): string {
   if (!iso) return "";
   const dato = new Date(`${iso}T00:00:00Z`);
   if (Number.isNaN(dato.getTime())) return iso;
-  return new Intl.DateTimeFormat(locale === "se" ? "sv-SE" : "da-DK", {
+  return new Intl.DateTimeFormat(getIntlLocale(locale), {
     day: "numeric",
     month: "short",
     timeZone: "UTC",
