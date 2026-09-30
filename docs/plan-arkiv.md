@@ -21287,3 +21287,124 @@ grønne, `npm run build` 142 sider, `node scripts/locale-leak.mjs --gate` exit 0
 Fire mutationer kontrolleret, alle faldt: gammel skärtorsdagen-tekst (2 fund),
 gammel paskdagen-svar (1 fund), `1-advent: false` i tabellen (3 fejl), begge
 gamle 1-advent-tekster (1 fejl).
+
+## Opgave 189 — mål brødtekstal mod en kilde, ikke mod et hjemmeskrevet script (30/9)
+
+Branch `ceo/promille-lovkilde`. Opgaveteksten:
+
+```
+- **Datagrund:** F8's målerfælde. Se målerfælden øverst i planen: tre
+  fejl i træk på rigtige påstande, før den ene rigtige fund. Det er ikke et
+  mål-fejl, det er en *metode*-fejl, og den er gentaget i to uafhængige
+  loops (reviewer-loopet 29/9 i `pinse-intervaller.ts`).
+- **Hvad der mangler:** der er ingen port der siger "denne påstand skal kunne
+  hentes i en kilde". F8's `LOEN_SIGER_HELGDAG` er den første — den hænger
+  lovens liste i testen og tjekker brødteksten mod den. Samme mønster bør
+  anvendes på de andre love- og kalenderpåstande i repoet: de danske
+  helligdagstider i `dage-til.ts` (grundlovsdag, palmesøndag, juleaftensdag),
+  sats-årgangene i `satser-2026.ts`, og promille-/alkoholgrænserne.
+- **Acceptkriterier:** en prioriteret liste over de 5-8 love- og
+  kalenderpåstande i brødteksten, hver med sin kilde, og mindst **to** af dem
+  lagt ind i en port som F8's. Kilden hentes fra riksdagen.se, retsinformation.dk,
+  skat.dk eller en kommunal vedtægt — aldrig fra hukommelsen.
+```
+
+### Kilder hentet 30/9
+
+**Svensk trafikbrottslag (1951:649)** — riksdagen.se, gældende lydelse t.o.m.
+SFS 2024:715, hentet 21:18.
+- 4 §: "alkoholkoncentrationen under eller efter färden uppgår till **minst
+  0,2 promille** i blodet eller 0,10 milligram per liter i utandningsluften"
+  → rattfylleri.
+- 4 a §: grovt rattfylleri når "särskilt beaktas om 1. föraren har haft en
+  alkoholkoncentration som uppgått till **minst 1,0 promille** i blodet eller
+  0,50 milligram per liter".
+
+**Dansk færdselslov § 53** — ordret gengivet af Rådet for Sikker Trafik,
+`sikkertrafik.dk/rad-og-viden/bil/spirituskorsel/promillegraenser/`, hentet
+21:20.
+- "I Danmark er den generelle promillegrænse 0,5."
+- § 53: straffes den "der … alkoholkoncentrationen i blodet under eller efter
+  kørslen **overstiger 0,50 promille**, eller at alkoholkoncentrationen i
+  udåndingsluften … overstiger 0,25 mg pr. liter luft".
+- "For nye bilister er promillegrænserne 0,2 de første **3 år** med kørekort"
+  og historikken "2025: Promillegrænsen bliver sat ned til 0,2 for nye bilister
+  de første 3 år med kørekort."
+- `sikkertrafik.dk/rad-og-viden/bil/spirituskorsel/over-2-0-promille/`: "Du får
+  frakendt kørekortet ubetinget i mindst 3 år … 20 dages betinget fængsel."
+
+**Retsinformation.dk er ubrugelig for en agent.** Alle ELI-stier
+(`/eli/lta/1986/579`, `/eli/lta/2023/210`) og alle API-stier under
+`/api/document/*` svarer HTTP 200 `text/html` med index.html (~4,5 KB).
+`/api/ressort` og `/api/lawregistry` virker, fordi de er rå JSON, men
+dokumentteksten er client-renderet. **Kosterte ~20 minutter at finde ud af.**
+Anden dansk kilde er derfor RST's ordrette gengivelse af § 53.
+
+### Fund
+
+`src/app/promille/page.tsx` skrev **"Ingen særregel"** for Danmark i *begge*
+landstabeller (dansk :68 og svensk :90), mens RST oplyser at grænsen blev sænket
+til 0,2 ‰ for nye bilister de første 3 år med kørekort i 2025. Rettet i begge.
+
+`src/lib/promille.ts:46-52` — docblocken sagde "Source: WHO's country overview …
+retrieved 2026-09-27 (en.wikipedia.org…)" og "the page's table states the
+separate lower limit for new and professional drivers". Den gjorde den ikke, for
+Danmark. Nu: rigtig kilde for de to hentede lande, ærlig note om de otte andre.
+
+### Målerfælder — seks udløbere i denne opgave
+
+1. `String(2.0)` er `"2"`, ikke `"2,0"`. Min egen formatter lod to tests fejle
+   på sig selv, så de så ud som fund i brødteksten. Brug `toFixed(1)`.
+2. En port der scanner *alle decimaler i FAQ'en* mod lovens tal gav **29 fund i
+   dansk og 31 i svensk, alle rigtige**: beregnede promiller ("2 öl ger 0,44
+   promille"), Tysklands 0,0, Storbritanniens 0,8, og et hypotetisk "må jeg
+   køre med 0,4 promille i udlandet?" — der er et tal i en sætning, ikke en
+   grænse.
+3. En tredje variant med "kun tal der følger på 'er/vid/på'" fandt de samme 0,4.
+4. En fjerde med "kun sætninger der nævner grænsen" fandt Tysklands og
+   Storbritanniens tal, fordi de står i sætninger der sammenligner.
+5. Kun da den også krævede at sætningen nævner *sidens eget land*, gav den 0
+   fund på svensk — fordi Sveriges egen FAQ-sætning ("Gränsen för rattfylleri
+   är 0,2 ‰") ikke siger "Sverige" i sig selv.
+6. Løsningen var at **vende porten om**: kræv at brødteksten indeholder
+   kildens tal, i stedet for at søge efter tal der ikke gør. Det er F8's
+   mønster, og det er mutation-modstandstægtigt: ændres kilden, røder testen;
+   ændres brødteksten, røder testen.
+
+### Mutationer
+
+| Mutation | Resultat |
+|---|---|
+| Gammel kode, Danmark "Ingen særregel" | 1 fejl (Danmark-rækken) |
+| Svensk kilde ændret til `generel: 0.3` | 5 fejl af 8 |
+
+### Hvad der ikke blev gjort
+
+De otte øvrige lande i samme tabel (Tyskland, Frankrig, Spanien, Italien,
+Grækenland, Holland, Østrig, Storbritannien) kommer alle fra den samme
+Wikipedia-tabel. At låse dem ville låse netop de ord porten så, uden at have
+læst en eneste lov. De er **sprunget over, dokumenteret og gjort til opgave
+189b** — de skal hente lovene først.
+
+## Fase 3 — målingsresultat 30/9 (flyttet fra planen 30/9 21:55)
+
+```
+### Resultatet af målingen 30/9 (fulde tal i `docs/plan-arkiv.md`)
+
+Målt på det *live* site 30/9 kl. 15:45-16:10. **Tre ting er IKKE flaskehalsen**,
+så brug ikke en iteration på dem igen:
+
+1. **Teknisk SEO er ren.** `/procent`, `/dato`, `/tidsberegner`, `/moms`,
+   `/tidszone`, `/alder` på begge domæner: `hreflang` (da + sv + x-default),
+   canonical til sig selv, `og:locale`, `<html lang>`, `robots index,follow`.
+   Sitemap 140 `<loc>` på minberegner.dk, 73 på beraknare.se.
+2. **Ingen forældede sider.** `/dage-til/1-december` har dynamisk title,
+   canonical til sig selv, 18 af 19 søskend i linkene. Ingen orphaner.
+3. **Ordantal forudsiger IKKE position.** Sidets *mindst* tekst (`/kvadratmeter`,
+   741 ord) har sitets bedste rangering (pos. 4,9); sidet med *mest* tekst
+   (`/tidszone`, 1.756 ord) ligger på 7,5. "Skriv mere tekst på de store sider"
+   er altså en dyr fejlretning.
+```
+
+Flyttet ud af planen 30/9 21:55: kontrakten siger at planen er en arbejdskø, ikke
+en dagbog — en målerapport hører hjemme her, ikke i køen.

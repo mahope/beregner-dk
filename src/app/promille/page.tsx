@@ -65,7 +65,11 @@ const PROMILLEGRAENSER_UDLAND: { land: string; nokkel: string; saerregel: string
   },
   { land: "Holland", nokkel: "holland", saerregel: "0,2 ‰ de første 5 år med kørekort" },
   { land: "Østrig", nokkel: "oestrig", saerregel: "0,1 ‰ de første 2 år med kørekort" },
-  { land: "Danmark", nokkel: "danmark", saerregel: "Ingen særregel" },
+  {
+    land: "Danmark",
+    nokkel: "danmark",
+    saerregel: "0,2 ‰ de første 3 år med kørekort (sænket i 2025)",
+  },
   {
     land: "Storbritannien",
     nokkel: "storbritannien",
@@ -87,7 +91,11 @@ const PROMILLEGRAENSER_UDLAND_SE: { land: string; nokkel: string; saerregel: str
   },
   { land: "Norge", nokkel: "norge", saerregel: "Ingen särregel" },
   { land: "Polen", nokkel: "polen", saerregel: "Ingen särregel" },
-  { land: "Danmark", nokkel: "danmark", saerregel: "Ingen särregel" },
+  {
+    land: "Danmark",
+    nokkel: "danmark",
+    saerregel: "0,2 ‰ de första 3 åren med körkort (sänkt 2025)",
+  },
   {
     land: "Tyskland",
     nokkel: "tyskland",

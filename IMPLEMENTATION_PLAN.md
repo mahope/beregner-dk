@@ -1,40 +1,37 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — 30/9 21:05. **Opgave 190 er færdig** (`ceo/helgdag-uden-allman`):
-F8's port målte kun "allmän helgdag", så det bløde "helgdag" slap igennem — tre
-sætninger sagde at skærtorsdagen *er* en helgdag, to steder på dens egen side og
-en på `/paskdagen`, modsat sidens egen faktaboks. Ny port rammer det bløde ord
-på **klausul**-niveau og skelner *predikat* ("den är en helgdag") fra *omtale af
-en anden dag* ("Det är allhelgons dag som är helgdagar"), så den fanger klassen
-uden at kræve rigtig tekst ødelagt. Loven hentet fra riksdagen.se 30/9 20:45.
+STATUS: KØ — 30/9 21:50. **Opgave 189 er fændig** (`ceo/promille-lovkilde`):
+de to første love-påstande er hentet i lovens *egne* ord og lagt i en port, og
+porten fandt en rigtig fejl første gang den kørte. Se listen nedenfor.
 
-**⚠️ Den fjerde fund var værre end de tre.** Læsning af 1 § ("söndagar,
-däribland påskdagen og pingstdagen") viste at `LOEN_SIGER_HELGDAG["1-advent"]`
-var `false` — men 1. advent er *altid* en søndag, så loven tæller den. Siden
-skrev derfor "Första advent är inte en allmän helgdag enligt lag (1989:253)" og
-modsagde loven med lovens eget navn, to linjer under at alle søndagar er røde
-dage. Rettet, og to nye tests låser det: tabellen skal sige `true` for enhver
-hændelse der *beregnes* at være en søndag (påske, påske+49, 1. advent — 61 år),
-og siden skal forklare at det er søndagen, der gør den til helgdag.
+**Fundet.** `/promille`s landstabel skrev at Danmark har **"Ingen særregel"** —
+på dansk *og* svensk side. Rådet for Sikker Trafik, læst 30/9 21:20, siger det
+modsatte: "For nye bilister er promillegrænsen 0,2 de første 3 år med kørekort",
+sænket i 2025. En dansk læser fik dermed den forkerte besked at kun de
+svenske og norske læsere har en lavere grænse. Rettet i begge tabeller.
 
-**Næste opgave: 189** — mål brødtekstal mod en kilde, ikke mod et
-hjemmeskrevet script. 190 er et eksempel på hvorfor: porten skal *regne* noget
-(fra loven, fra kalenderen), ellers låser den de ord den så.
+**Fandt også en løgnemesis.** `PROMILLEGRANSE_UDLAND`'s docblock sagde at
+kilden var WHO's landoversigt, og at siden "stater den lavere grænse for nye
+og professionelle bilister" — den gjorde den *ikke*, for Danmark. Docblocken er
+nu rigtig for de to lande der har en hentet kilde, og siger ærligt at de otte
+andre stadig er Springvand.
 
-**⚠️ Målerfældens tredje udløber (30/9 20:40).** JavaScripts `\w` er ASCII, så
-`\b` før `är` **aldrig** matcher — en port der så rigtig ud og så intet fangede.
-Ordgrænser skal skrives som ordtælling (`(?:\s+\S+){0,4}`), ikke `\b`.
+**⚠️ Målerfældens sjette udløber.** En port der scanner "alle decimaler i
+FAQ'en" mod lovens tal gav **29 fund i dansk og 31 i svensk, og alle var
+rigtige**: beregnede promiller ("2 øl ger 0,44 promille"), Tysklands 0,0,
+Storbritanniens 0,8 og et hypotetisk "må jeg køre med 0,4". En syvende fejl
+var min egen formatter: `String(2.0)` er `"2"`, ikke `"2,0"`, så to tests fejlede
+på sig selv. **Porten skal kræve kildens tal frem for at søge efter forkerte.**
 
-**⚠️ Målerfældens anden udløber (30/9 20:20).** En *bredere* ugedags-port
-("enhver nævnt ugedag skal være blandt ankerets dage") gav 15 fund, hvor 13 var
-**om andre dage**. 190's port er snæver af samme grund: den tjekker kun klausler
-der navngiver eller *predikerer* om en lovfri dag.
+**Næste opgave: 189b** — de fire love-påstande der stadig mangler en hentet
+kilde. Retsinformation.dk svarer **kun en SPA-skal** til en agent (alle
+`/api/document/*`-stier: HTTP 200, `text/html`, ~4,5 KB index.html), så danske
+love skal læses gennem RST, borger.dk eller en kommunal vedtægt.
 
-**⚠️ Målerfælde fundet 30/9 20:00 — læs den før du "beviser" et tal.** Et
-egenscript til at tjekke påstand i tekst fik **tre fejl i træk** på rigtige
-påstande. Konklusion: et hjemmeskrevet målescript skal **krydses mod lovens
-eller kalenderens egen tekst** og måske to uafhængige implementeringer, før en
-påstand i brødtekst rettes. Rett aldrig rigtig tekst på et dårligt målescript.
+**⚠️ Målerfælder fra 190, fortsat gældende.** `\b` før `är` matcher aldrig i JS
+(`\w` er ASCII). En bred ugedags-port gav 15 fund hvor 13 var om andre dage. Et
+egenscript til at tjekke påstande fik tre fejl i træk — kryds altid mod lovens
+egen tekst.
 
 **⚠️ Målerfælde (30/9 15:40).** `npm run test` kører `locale-leak-gate.test.ts`,
 der med vilje planterer **to** danske lækager. Derfor kommer to
@@ -45,6 +42,27 @@ gaten separat: `node scripts/locale-leak.mjs --gate` (exit 0).
 opgaver 97/98/119/183 er blokeret af svar fra Mads. **Opgave 187 må ikke røres
 før 13/10.** **CEO-køen er tom** — alle otte punkter blev rettet i `aca17e5`.
 Review-fund 29/9 er begge mærket `RETTET d563ba2` og lukket.
+
+## Love- og kalenderpåstande mod en hentet kilde (opgave 189)
+
+Prioriteret liste. **Fem er hentet og kontrolleret 30/9**, fire mangler en
+hentet kilde. `✔` = lagt i en port, `·` = kilde fundet, endnu ikke port.
+
+| # | Påstand | Kilde (hentet 30/9 30 min) | Port |
+|---|---|---|---|
+| 1 | SE 0,2 ‰ rattfylleri · 1,0 ‰ grovt | trafikbrottslagen (1951:649) 4 § og 4 a §, riksdagen.se | ✔ |
+| 2 | DK 0,5 ‰ · nye bilister 0,2 ‰ i 3 år · over 2,0 kørekort ubetinget | færdselsloven § 53, ordret gengivet af Rådet for Sikker Trafik | ✔ |
+| 3 | SE helgdagar (1 §) | lag (1989:253) 1 §, riksdagen.se — F8's port | ✔ |
+| 4 | UK 0,8 / Skotland 0,5 | WHO's landoversigt via Wikipedia — **ikke hentet lov** | · |
+| 5 | DE 0,0 under 21 og 2 år · 0,3 ved anden forseelse | samme som 4 | · |
+| 6 | DK Store bededag afskaffet 2024 | loven er ikke fundet — retsinformation uutilgængelig | ❓ |
+| 7 | DK grundlovsdag 5. juni | ikke hentet | · |
+| 8 | DK palmesøndag, juleaftensdag | ikke hentet | · |
+
+**Hvorfor kun to blev lagt i port nu:** de otte øvrige rækker i samme tabel
+kommer alle fra én Wikipedia-tabel. At låse dem ville låse netop de ord porten
+så (F8's målerfælde) uden at have læst en eneste lov. **189b** er den
+fortsatte opgave, og den skal hente lovene — ikke flere regler.
 
 ## Fase 3 — trafik-drevet
 
@@ -68,22 +86,6 @@ Review-fund 29/9 er begge mærket `RETTET d563ba2` og lukket.
 Site: minberegner.dk 7.421 besøgende/28d (+42 %), ~600.000 GSC-visninger pr.
 måned. Kilder: Google 4.170, Bing 1.319, DDG 378, Yahoo 274 — **1.971 af 7.319
 (27 %) kommer fra søgemaskiner der ikke er Google.**
-
-### Resultatet af målingen 30/9 (fulde tal i `docs/plan-arkiv.md`)
-
-Målt på det *live* site 30/9 kl. 15:45-16:10. **Tre ting er IKKE flaskehalsen**,
-så brug ikke en iteration på dem igen:
-
-1. **Teknisk SEO er ren.** `/procent`, `/dato`, `/tidsberegner`, `/moms`,
-   `/tidszone`, `/alder` på begge domæner: `hreflang` (da + sv + x-default),
-   canonical til sig selv, `og:locale`, `<html lang>`, `robots index,follow`.
-   Sitemap 140 `<loc>` på minberegner.dk, 73 på beraknare.se.
-2. **Ingen forældede sider.** `/dage-til/1-december` har dynamisk title,
-   canonical til sig selv, 18 af 19 søskend i linkene. Ingen orphaner.
-3. **Ordantal forudsiger IKKE position.** Sidets *mindst* tekst (`/kvadratmeter`,
-   741 ord) har sitets bedste rangering (pos. 4,9); sidet med *mest* tekst
-   (`/tidszone`, 1.756 ord) ligger på 7,5. "Skriv mere tekst på de store sider"
-   er altså en dyr fejlretning.
 
 ### Den faktiske flaskehals
 
@@ -214,8 +216,6 @@ begge kontrolleret mod den gamle kode (begge faldt). Se arkivet.
 og 0 visninger i GSC's top-15 for de 16 `/dagar-till/*`-sider (GSC
 2026-08-31 → 2026-09-28). Genmål 14 dage efter at den er live.
 
-## Fase 3 — trafik-drevet (fortsat fra ovenstående måling 30/9)
-
 ## Kvalitetsgate (repoets egne scripts fra package.json)
 
 ```
@@ -239,12 +239,20 @@ fremover med `git stash -u` før og efter, som gjort her.
 
 ## Åbne VERIFICÉR DEPLOY-noter
 
-**Fem noter åbne.** HTTP 200 beviser intet: 188's note rører brødtekst på fire
-statiske sider, F6's note rører Intl-formatering,
-F4's rører rækkefølge og breakpoint, og F7's rører brødteksttal, hvor en fejl
-er usynlig for `curl` — en dansk læser skal bare have et forkert tal. De otte
-lukkede noter er verificeret 30/9 17:46-17:53 på indhold; alle målinger står i
+**Syv noter åbne.** HTTP 200 beviser intet: 189's note rører to *tabelceller* med
+lovtal, der er usynlige for `curl` uden at man læser dem. De otte lukkede noter
+er verificeret 30/9 17:46-17:53 på indhold; alle målinger står i
 `docs/plan-arkiv.md`.
+
+- ⏳ **Danmarks række skal sige 0,2 ‰ de første 3 år, ikke "Ingen særregel".**
+  `ceo/promille-lovkilde`. På `https://minberegner.dk/promille` skal
+  Danmarks række i landstabellen lyde **"0,2 ‰ de første 3 år med kørekort
+  (sænket i 2025)"**, og på `https://beraknare.se/promille` den svenske
+  **"0,2 ‰ de första 3 åren med körkort (sänkt 2025)"**. Strengen **"Ingen
+  særregel" / "Ingen särregel" må ikke forekomme på Danmarks række** i nogen af
+  de to tabeller — den er lovstridigt modsat RST. HTTP 200 beviser intet, det er
+  en cellecelle. Prøven på dansk er `src/lib/promille-loenkilde.test.tsx` efter
+  deploy. Vindue **1/10 07:30** (denne merge sker efter 30/9 21:30).
 
 - ⏳ **Skærtorsdagen må ikke kaldes helgdag, og 1. advent må ikke kaldes
   ikke-helgdag.** `ceo/helgdag-uden-allman`. På
@@ -476,24 +484,33 @@ lukkede noter er verificeret 30/9 17:46-17:53 på indhold; alle målinger står 
   som 188: en svensk læser skal ikke møde to sider der siger modsatte ting om
   loven på 200 ord. VERIFICÉR: nedenfor.
 
-#### 189. [ ] 2026-09-30 — Kø — mål brødtekstal mod en kilde, ikke mod et hjemmeskrevet script
+#### 189. [x] ✅ `ceo/promille-lovkilde` — de to første love-påstande er hentet i lovens egne ord
 
-- **Datagrund:** F8's målerfælde. Se målerfælden øverst i planen: tre
-  fejl i træk på rigtige påstande, før den ene rigtige fund. Det er ikke et
-  mål-fejl, det er en *metode*-fejl, og den er gentaget i to uafhængige
-  loops (reviewer-loopet 29/9 i `pinse-intervaller.ts`).
-- **Hvad der mangler:** der er ingen port der siger "denne påstand skal kunne
-  hentes i en kilde". F8's `LOEN_SIGER_HELGDAG` er den første — den hænger
-  lovens liste i testen og tjekker brødteksten mod den. Samme mønster bør
-  anvendes på de andre love- og kalenderpåstande i repoet: de danske
-  helligdagstider i `dage-til.ts` (grundlovsdag, palmesøndag, juleaftensdag),
-  sats-årgangene i `satser-2026.ts`, og promille-/alkoholgrænserne.
-- **Acceptkriterier:** en prioriteret liste over de 5-8 love- og
-  kalenderpåstande i brødteksten, hver med sin kilde, og mindst **to** af dem
-  lagt ind i en port som F8's. Kilden hentes fra riksdagen.se, retsinformation.dk,
-  skat.dk eller en kommunal vedtægt — aldrig fra hukommelsen.
-- **MÅL:** ingen direkte. Denne port er det, der forhindrer at de otte CEO-fund
-  kommer tilbage som de næste otte.
+- **Datagrund:** `PROMILLEGRANSE_UDLAND`'s docblock sagde at kilden var WHO's
+  landoversigt, og at siden "stater den lavere grænse for nye og professionelle
+  bilister" — den gjorde den ikke, for Danmark. Særreglerne var frie håndskrevne
+  strenge over for tabellens tal.
+- **Port:** `src/lib/promille-loenkilde.test.tsx`. `LOVKILDE` er *data fra
+  kilden* med afsnit og hentningsdato, og porten læser tallene derfra — så et
+  tal der ændrer sig i loven, ændrer hvad porten kræver af brødteksten.
+  8 tests, **2 mutationer kontrolleret**: gammel kode med "Ingen særregel" (1
+  fejl) og svensk kilde ændret til 0,3 (5 fejl).
+- **Fund ved første kørsel:** landstabellen skrev "Ingen særregel" for Danmark
+  på begge domæner. RST siger 0,2 ‰ de første 3 år med kørekort, sænket i 2025.
+- **Målerfældens sjette udløber.** En port der scanner *alle* decimaler mod
+  lovens tal gav 29 danske og 31 svenske fund, **alle rigtige** — beregnede
+  promiller, Tysklands 0,0, Storbritanniens 0,8 og et hypotetisk "må jeg køre
+  med 0,4". En syvende fejl var min egen formatter: `String(2.0)` er `"2"`, så
+  to tests fejlede på sig selv. **Løsningen er samme som F8's: porten skal
+  kræve kildens tal, ikke søge efter forkerte.** Se listen øverst.
+- **189b.** Fire påstande mangler stadig en hentet kilde. Retsinformation.dk
+  svarer kun en SPA-skal til en agent — alle `/api/document/*`-stier giver HTTP
+  200 `text/html` ~4,5 KB index.html — så danske love skal læses gennem RST,
+  borger.dk eller en kommunal vedtægt. Ikke samme fejl tre gange: hent først,
+  skriv så porten.
+- **MÅL:** `/promille` 133 besøgende/28d, 5.648 GSC-visninger / 84 klik /
+  CTR 1,5 % / pos. 7,9 (GSC 2026-08-31 → 2026-09-28). Genmål 14 dage efter at
+  den er live. Fuldtekst: `docs/plan-arkiv.md`, "Opgave 189".
 
 #### 187. [ ] **IKKE FØR 2026-10-13** 2026-09-30 — Kø — **migrér beraknare.se til svenske URL-slugs med 301**
 

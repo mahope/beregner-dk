@@ -43,10 +43,16 @@ export const PROMILLEGRANSE_DA = PROMILLEGRANSE.da;
  * src/app/promille/page.test.tsx, so the printed table can never contradict
  * the limit the calculator itself compares against.
  *
- * Source: WHO's country overview of legal BAC limits, retrieved 2026-09-27
- * (en.wikipedia.org/wiki/Drunk_driving_law_by_country, which cites WHO 2018).
- * These are ordinary-driver limits; the page's table states the separate
- * lower limit for new and professional drivers, which is not in this map.
+ * Source for Denmark and Sweden: the law itself, not a summary of it.
+ * Denmark 0.5 ‰ is færdselsloven § 53 ("overstiger 0,50 promille"), read
+ * 2026-09-30 in Rådet for Sikker Trafik's verbatim reproduction because
+ * retsinformation.dk serves agents nothing but the SPA shell. Sweden 0.2 ‰ is
+ * trafikbrottslagen (1951:649) 4 §, read 2026-09-30 on riksdagen.se. The eight
+ * other countries still come from WHO's country overview via Wikipedia — they
+ * are left alone on purpose, see `LOVKILDE` in promille-loenkilde.test.tsx.
+ * These are ordinary-driver limits. The page's "strengere regel" column states
+ * the separate lower limits, including Denmark's 0.2 ‰ for a licence holder's
+ * first 3 years, which are not in this map.
  */
 export const PROMILLEGRANSE_UDLAND: Record<string, number> = {
   danmark: 0.5,
