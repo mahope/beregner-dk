@@ -19604,3 +19604,146 @@ fil, fordi porten var skrevet til ét eksempel.
 **2027-06-01**, fordi siden først har sæson da. Ærlig forventning: ni måneders
 sæsonpause før første søgning, så klyngen er valgt fordi mønsteret er
 dokumenteret to gange, ikke fordi denne side alene løfter trafikken.
+
+
+---
+
+## Afslutede opgaver 2026-09-30 (flyttet fra planen 30/9 09:2x, da planen nåede 37,7 KB)
+
+#### 206. [x] ✅ 2026-09-30 — trafik — **`/procent` (150.148 v, CTR 0,07 %) svarede på nul af de 17 tal, dens egen tredjestørste søgning spørger om.** (squash `ceo/procent-10-af-tal`)
+
+- Rettelse: nyt `<h2>` "10 procent af et tal" med 17-rækkers tabel i begge sprog,
+  `procentAf(tal, procent)` som den ene regel bag alle tre tabeller, 3 nye FAQ-par
+  pr. sprog. **Ingen titel, ingen `<h1>`, ingen ny URL, ingen beregningslogik.**
+  Hele målerapporten står i `docs/plan-arkiv.md`.
+- **MÅL:** 150.148 v / 98 klik / CTR 0,07 % / pos. 7,4; "10 procent af" 53 v /
+  pos. 6. Genmål **2026-10-14**.
+
+#### 207. [x] ✅ 2026-09-30 — trafik — **`/tidsberegner` (73.666 v, 199 klik, CTR 0,3 %, pos. 6,9) lovede kun "timer mellem klokkeslæt" i titel og beskrivelse, selv om værktøjet har regnet på tværs af datoer siden C51 — og dansk autocomplete svarer variation 2 med "tidsberegner mellem datoer".** (squash `ceo/tidszone-klokketid-spg`)
+
+- **Datagrund:** GSC 2026-08-30 → 2026-09-27. Hovedordet **"tidsberegner" er
+  27.000 visninger på pos. 4** med ~1 klik pr. 1.000 visninger — en visning der
+  er klikket, når den er der. DA-autocomplete under "tidsberegner" (30/9 06:5x):
+  variation 2 er **"tidsberegner mellem datoer"**, og 4, 6, 8 og 9 er
+  "dato", "arbejde", "med sekunder" og "dage". Siden svarer på dem alle i
+  brødteksten, men **titlen lovede kun klokkeslæt** — så søgeren på pos. 4 så
+  et værktøj der ligner mindre end det er, og klikkede videre.
+- **Rettelse:** de fem `da`-strenge i `page-data.ts` lover nu datoer og de
+  enheder værktøjet faktisk regner på. Titlen blev **57 tegn** mod grænsen 60,
+  beskrivelsen **139** mod 160. `se`-blocket urørt: opg. 187 frosser svenske
+  titler til 13/10, og en ny dansk titel uden en svensk ville gøre
+  attributionen på C194/C195 ubrugelig.
+- **Harness:** ny test i `title-eksempel.test.ts` **kalder først
+  `beregnTidsinterval` med to datofelter** (56 t 15 min for 28/9 → 30/9) og
+  kræver så at titel og beskrivelser navnger datoer — så påstanden i teksten
+  dør, hvis datofelterne engang holder op med at virke (**fejltype 11**).
+  Testen kræver også at den **svenske** titel *ikke* nævner datoer, så
+  187's frys ikke kan brydes ved en senere dansk rettelse.
+  **Modsvært verificeret: den falder** mod master's `page-data.ts`
+  (`git checkout master --`): `expected … to match /datoer/i`.
+- **To forventede-værdi-locks opdateret, ikke slettet:** `page-data.test.ts` og
+  `page-helpers.test.ts` låste den gamle titel tegn for tegn. De er skrevet om
+  til den nye streng, så de låser den nye i stedet.
+- **⚠️ Egen diff-review undervejs:** min egen assertion krævede *"mellem to
+  datoer"* i alle tre beskrivelser, men den kortere og mere læsbare sætning
+  "mellem to klokkeslæt eller to datoer" skrev sig ikke ind i regex'en. Fundet
+  fordi testen faldt — rettet til `/datoer/i`, som er den egentlige påstand.
+- **Gate grøn:** lint (**618 filer**), **3038 tests / 190 filer** (fra
+  3037/190), build (**142 sider**), `locale-leak.mjs --gate` exit 0. Rørte
+  filer: `page-data.ts` (**5 `da`-strenge**) + 3 tests — **ingen `<h1>`, ingen
+  ny URL, ingen sitemap, ingen ændret beregningslogik, `tidsberegner.ts` urørt**.
+- **MÅL:** `/tidsberegner` DA baseline **73.666 visninger / 199 klik / CTR 0,3 %
+  / pos. 6,9**; "tidsberegner" 27.000 v / pos. 4 (GSC 2026-08-30 → 2026-09-27).
+  Genmål **2026-10-14**.
+- **Ærlig forventning:** 0,3 % CTR på pos. 6,9 er et *ranking*-problem før det er
+  et tekstproblem, og det er samme konklusion som C172, C194 og C195 nåede.
+  Læsbart er, at titlen nu ikke længere underlover. Er CTR'en uændret efter 14
+  dage, er "den underlovende titel forklarede den lave CTR" **modbevist**.
+
+#### 209. [x] ✅ 2026-09-30 — trafik — **dansk autocomplete spørger om skolestart, og vi havde ingen side for det.** (squash `ceo/skolestart`)
+
+- **Datagrund:** dansk autocomplete under "hvor mange dage er der til" (30/9
+  08:4x) giver 9 træffere. Efter f0dbdba (`efteraarsferien`) var de otte første
+  alle dækket: juleaften, 1. december, jul, sommerferie, halloween, den
+  24. december, tilbage af 2026 (besvaret på `/dato`) og efterårsferien. Det niende
+  var **"hvor mange dage er der til skolestart"** — som har sin *egen*
+  autocomplete-post under sit eget forespørgselsord, altså reel efterspørgsel og
+  ikke bare en variant af en vi allerede dækker. Klyngens mønster holdt: de to
+  største nul-klik-søgninger på `/dato` ("…til 1 december" 1.171 v / 3 klik,
+  "…til den 24 december" 1.013 v / 3 klik) er begge dage-til-spørgsmål.
+- **Rettelse:** nyt event `skolestart` med `anchor.da = { kind: "fixed",
+  month: 8, day: 1 }` — folkeskolelovens dato, så **ingen ny `kind`**
+  (juleaften, grundlovsdag og nationaldagen bruger samme anker). 4 fakta +
+  5 FAQ. **Ingen titel, ingen `<h1>`, ingen ny URL ud over den nye, ingen
+  beregningslogik, ingen UI.**
+- **Harness:** 16 nye tests. Ugedagene, ISO-ugerne og ferieafstandene i
+  brødteksten er **beregnet** i testen og sammenholdt med strengen, så de kan
+  ikke blive en påstand der glide fra koden (**fejltype 11**). ISO-ugereglen er
+  verificeret over **61 år**, og 1. august ligger *altid* i uge 30 eller 31.
+  Antallet i svaret er dækket fra før, under og på selve dagen.
+- **⚠️ Falsk påstand fundet i egen diff, før commit.** Første udkast skrev "5 til
+  6 uger" fra sommerferiens start til 1. august. Kørte jeg spændvidden over
+  1990-2050, er den **32 til 38 dage** (4,6-5,4 uger) — fordi sidste lørdag i
+  juni kan falde så sent som 30. juni. Teksten var altså **for lang** i den
+  lave ende, og kun tre valgte år (2026/2027/2028) ville aldrig have vist det.
+  Rettet til "32 til 38 dage", og porten kører nu hele året.
+- **Gate grøn:** lint (**618 filer**), **3070 tests / 190 filer** (fra
+  3054/190), build (**142 sider**), `locale-leak.mjs --gate` exit 0. Rørte
+  filer: `dage-til.ts` (+46) + `dage-til.test.ts` (+192).
+- **MÅL:** `/dage-til/skolestart` 0 klik i dag. Genmål først **2027-06-01** —
+  siden har ingen sæson før da. Klyngens samlede mål er `/dato`'s to nule
+  spørgsmål: 1.171 v og 1.013 v pr. 28 dage, pos. 5, **6 klik i alt**. Genmål
+  **2026-10-14**.
+- **Ærlig forventning:** nyt sprog 0 klik i dag, og skolestart har ni måneders
+  sæsonpause før sin første søgning. Klyngen er valgt fordi mønsteret er
+  dokumenteret to gange, ikke fordi denne side alene løfter trafikken.
+
+#### 210. [x] ✅ 2026-09-30 — trafik — **"hvor mange dage er der til kristi himmelfart" havde to autocomplete-træffere og ingen side.** (squash `ceo/kristi-himmelfartsdag`)
+
+- **Datagrund:** dansk autocomplete under "hvor mange dage er der til kristi"
+  (30/9 09:0x) giver **to** træffere: "hvor mange dage er der til kristi
+  himmelfart" og "hvor mange dage er kristi himmelfartsdag". Under sit eget ord
+  "antal dagar till kristi himmelfärdsdag" svarer svensk autocomplete
+  "hur många dagar till kristi himmelsfärd", og "kristi himmelsfärd röd dag" er
+  en svensk træffer. Den generiske dato-træffer ("…til den 10 august") er stadig
+  bevidst **ikke** bygget — tusindvis af tynde varianter er den fejlklasse
+  planen advarer mod.
+- **⚠️ PRÆMIS-FEJL I DENNE OPGAVES TEKST, fundet og rettet under
+  implementeringen.** Opgaven skrev to ting, som begge var forkerte:
+  1. **`offsetDays: 40` er en dag for meget.** Kristi himmelfartsdag er
+     påskedag **+ 39 dage** — den 40. dag *hvis påskedagen selv tælles med*
+     (da.wikipedia: "Dagen infaller 39 dagar (på den 40:e dagen) efter
+     påskdagen"). Med `40` ville siden have vist **fredagen** efter. Verificeret
+     mod **51 publicerede datoer 2000–2050** fra da- og sv.wikipedia, som begge
+     fører egne lister: alle 51 matcher kalken, og de er uafhængige af
+     `easterSunday`, så porten kan ikke være grøn med en forskubbet påske.
+  2. **"Dansk alene" var en forkert begrundelse.** Kristi himmelsfärdsdag er en
+     *allmän helgdag och röd dag* i Sverige, ikke kun dansk lovgivning — og
+     repoets egen `helligdage.ts:82` regner den allerede (`easterDate(year,
+     39)`), og `page-data.ts:3392` lister den blandt Sveriges rödagar.
+     Datoen er desuden **identisk** i begge lande, så det er samme
+     `easterOffset`-anker i begge arme. Siden er derfor bygget i **begge
+     sprog**, hvilket også er der svensk autocomplete spørger om.
+- **Harness:** 16 nye tests. "Altid en torsdag", "39 dage efter påskedag",
+  "10 dage før pinsedag" og spændvidden "1. maj (2008) – 3. juni (2038)" er
+  alle **beregnet over 61 år** (1990–2050), ikke på tre valgte år — præcis den
+  fælde, der gav 5–6-ugers-påstanden i 209. Brødtekstens tal (14. maj 2026,
+  6. maj 2027, 25. maj 2028, 28. marts 2027, "1 dag tilbage" fra 13. maj 2026)
+  er hver især låst til kalkens eget output i begge sprog.
+- **⚠️ Tre fejl fundet i egen diff, før commit.** (1) "Store Bededag lå
+  dagen før kristi himmelfartsdag" — da.wikipedia siger "forud for", altså
+  *før*, ikke *dagen før*; reglen kunne ikke verificeres i tide, så påstanden er
+  **fjernet** frem for rettet. (2) "klæmdag" i dansk tekst er et svenskt
+  låneord → "indeklemt fredag", som er den danske term. (3) "vælger du 13. maj"
+  holder kun i år hvor datoen er 14. maj → "13. **maj 2026**", og porten låser
+  det. (4) Egen test faldt på den svenske måned *mars* med den danske
+  `MAANEDER`-liste — den svenske tekst var korrekt, testen var ikke.
+- **Rettelse:** ét event med **begge** arme, 4 fakta + 5 FAQ pr. sprog.
+  **Ingen titel, ingen `<h1>`, ingen UI, ingen ændret beregningslogik.**
+- **Gate grøn:** lint (**618 filer**), **3088 tests / 190 filer** (fra 3070),
+  build (**142 sider**), `locale-leak.mjs --gate` exit 0. Rørte filer:
+  `dage-til.ts` (+91) + `dage-til.test.ts` (+236).
+- **MÅL:** begge URL'er 0 klik i dag. Genmål **2027-04-15**.
+- **Ærlig forventation:** nyt sprog 0 klik i dag, og sæsonen er syv måneder
+  væk. Klyngen er valgt fordi mønsteret er dokumenteret tre gange (juleaften,
+  skolestart, kristi himmelfart), ikke fordi denne side alene løfter trafikken.

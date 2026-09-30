@@ -872,6 +872,12 @@ const MAANEDER = [
   "juli", "august", "september", "oktober", "november", "december",
 ];
 
+/** Svensk månedsliste — marts hedder "mars", ikke "marts". */
+const MAANEDER_SE = [
+  "januari", "februari", "mars", "april", "maj", "juni",
+  "juli", "augusti", "september", "oktober", "november", "december",
+];
+
 /** ISO-ugenummer, samme regel som `isoUgeMandag` bruger internt. */
 function isoUgeNummer(date: Date): number {
   const torsdag = new Date(
@@ -1044,6 +1050,236 @@ describe("skolestart som dansk dato", () => {
     const svar = getDageTilAnswer(start!, "da", iso("2027-01-01"));
     expect(formatTargetDate(svar.targetDate, "da")).toBe("1. august");
     expect(formatTargetYear(svar.targetDate)).toBe("2027");
+  });
+});
+
+describe("kristi himmelfartsdag i begge sprog", () => {
+  const kristi = DAGE_TIL_EVENTS.find((e) => e.id === "kristi-himmelfartsdag");
+
+  test("findes i listen med begge sprog", () => {
+    expect(kristi).toBeDefined();
+    expect(kristi?.da.slug).toBe("kristi-himmelfartsdag");
+    expect(kristi?.se?.slug).toBe("kristi-himmelsfardsdag");
+  });
+
+  // Kristi himmelsfärdsdag är en allmän helgdag och röd dag i Sverige, så
+  // begge sprog har en ægte side — i modsætning til skolestart og ferierne,
+  // der kun findes i Danmark.
+  test("begge arme peger på samme dato: påskedag plus 39 dage", () => {
+    expect(kristi?.anchor.da).toEqual(kristi?.anchor.se);
+    expect(kristi?.anchor.da).toEqual({
+      kind: "easterOffset",
+      month: 0,
+      day: 0,
+      offsetDays: 39,
+    });
+  });
+
+  // De 51 datoer er hentet fra dansk og svensk Wikipedia, som begge fører
+  // deres egne lister over kristi himmelfartsdag 2000-2050. De er uafhængige
+  // af `easterSunday`, så porten kan ikke være grøn med en forskubbet påske.
+  test("de 51 publicerede datoer 2000-2050 matcher kalken", () => {
+    const PUBLICERET: [number, string][] = [
+      [2000, "2000-06-01"], [2001, "2001-05-24"], [2002, "2002-05-09"],
+      [2003, "2003-05-29"], [2004, "2004-05-20"], [2005, "2005-05-05"],
+      [2006, "2006-05-25"], [2007, "2007-05-17"], [2008, "2008-05-01"],
+      [2009, "2009-05-21"], [2010, "2010-05-13"], [2011, "2011-06-02"],
+      [2012, "2012-05-17"], [2013, "2013-05-09"], [2014, "2014-05-29"],
+      [2015, "2015-05-14"], [2016, "2016-05-05"], [2017, "2017-05-25"],
+      [2018, "2018-05-10"], [2019, "2019-05-30"], [2020, "2020-05-21"],
+      [2021, "2021-05-13"], [2022, "2022-05-26"], [2023, "2023-05-18"],
+      [2024, "2024-05-09"], [2025, "2025-05-29"], [2026, "2026-05-14"],
+      [2027, "2027-05-06"], [2028, "2028-05-25"], [2029, "2029-05-10"],
+      [2030, "2030-05-30"], [2031, "2031-05-22"], [2032, "2032-05-06"],
+      [2033, "2033-05-26"], [2034, "2034-05-18"], [2035, "2035-05-03"],
+      [2036, "2036-05-22"], [2037, "2037-05-14"], [2038, "2038-06-03"],
+      [2039, "2039-05-19"], [2040, "2040-05-10"], [2041, "2041-05-30"],
+      [2042, "2042-05-15"], [2043, "2043-05-07"], [2044, "2044-05-26"],
+      [2045, "2045-05-18"], [2046, "2046-05-03"], [2047, "2047-05-23"],
+      [2048, "2048-05-14"], [2049, "2049-05-27"], [2050, "2050-05-19"],
+    ];
+    for (const [aar, forventet] of PUBLICERET) {
+      expect(
+        toISO(getNextAnchorDate(kristi!.anchor.da, iso(`${aar}-01-05`))),
+        `kristi himmelfartsdag ${aar}`
+      ).toBe(forventet);
+    }
+  });
+
+  // "Kristi himmelfartsdag er altid en torsdag" er en påstand i brødteksten,
+  // så den skal gælde hele året og ikke for de tre år teksten nævner.
+  test("er altid en torsdag, og altid 39 dage efter påskedag", () => {
+    for (let aar = 1990; aar <= 2050; aar++) {
+      const dato = getNextAnchorDate(kristi!.anchor.da, iso(`${aar}-01-05`));
+      expect(dato.getUTCDay(), `ugedag ${aar}`).toBe(4);
+      expect(daysBetween(easterSunday(aar), dato), `afstand ${aar}`).toBe(39);
+    }
+  });
+
+  // Faktateksten siger "mellem 1. maj (2008) og 3. juni (2038)". Begge tal er
+  // spændvidden over 61 år, så de skal dække hele året, ikke tre valgte år.
+  test("spændvidden 1. maj 2008 til 3. juni 2038 dækker hele året", () => {
+    let tidligst = "";
+    let senest = "";
+    for (let aar = 1990; aar <= 2050; aar++) {
+      const isoDato = toISO(
+        getNextAnchorDate(kristi!.anchor.da, iso(`${aar}-01-05`))
+      );
+      if (!tidligst || isoDato.slice(5) < tidligst.slice(5)) tidligst = isoDato;
+      if (!senest || isoDato.slice(5) > senest.slice(5)) senest = isoDato;
+    }
+    expect(tidligst).toBe("2008-05-01");
+    expect(senest).toBe("2038-06-03");
+    expect(kristi!.da.copy.facts.join(" ")).toContain(
+      "mellem 1. maj (2008) og 3. juni (2038)"
+    );
+    expect(kristi!.se!.copy.facts.join(" ")).toContain(
+      "mellan 1 maj (2008) och 3 juni (2038)"
+    );
+  });
+
+  // "Der er derfor altid 10 dage imellem dem" (pinsedag) er en påstand fra FAQ'en.
+  // Pinsedag er påskedag + 49, så forskellen er 10 — hvert år.
+  test("ligger altid 10 dage før pinsedag", () => {
+    for (let aar = 1990; aar <= 2050; aar++) {
+      const kristiDato = getNextAnchorDate(kristi!.anchor.da, iso(`${aar}-01-05`));
+      const pinse = new Date(easterSunday(aar).getTime() + 49 * dayMs);
+      expect(daysBetween(kristiDato, pinse), `til pinsedag ${aar}`).toBe(10);
+    }
+  });
+
+  // "I 2026 er den 14. maj, i 2027 6. maj og i 2028 25. maj." — de tre datoer
+  // er kalkens egne tal, og sætningen lister dem i rækkefølge. Den svenske
+  // sætning siger det samme med sit eget datoformat, så den låses samtidig.
+  test("de tre datoer i begge sprog er kalkens egne tal", () => {
+    for (const [arm, medPunkt, maaneder] of [
+      [kristi!.da, true, MAANEDER],
+      [kristi!.se!, false, MAANEDER_SE],
+    ] as const) {
+      const fakta = arm.copy.facts.join(" ");
+      for (const aar of [2026, 2027, 2028]) {
+        const dato = getNextAnchorDate(kristi!.anchor.da, iso(`${aar}-01-05`));
+        const formateret = medPunkt
+          ? `${dato.getUTCDate()}. ${maaneder[dato.getUTCMonth()]}`
+          : `${dato.getUTCDate()} ${maaneder[dato.getUTCMonth()]}`;
+        const foer = fakta.indexOf(String(aar));
+        expect(foer, `fakta skal nævne ${aar}`).toBeGreaterThan(-1);
+        expect(
+          fakta.slice(foer, foer + 30),
+          `${aar} skal stå før "${formateret}"`
+        ).toContain(formateret);
+      }
+    }
+  });
+
+  // FAQ'en siger "I 2027 er påskedagen 28. marts, så kristi himmelfartsdag er
+  // 6. maj 2027". Det er to tal fra kalken, så begge skal kunne regnes efter.
+  test("de to datoer i FAQ'en er påskedagen og påskedagen plus 39 dage", () => {
+    for (const [arm, medPunkt, maaneder] of [
+      [kristi!.da, true, MAANEDER],
+      [kristi!.se!, false, MAANEDER_SE],
+    ] as const) {
+      const svar = arm.copy.faq[0].answer;
+      const påske = easterSunday(2027);
+      const dato = new Date(påske.getTime() + 39 * dayMs);
+      const formater = (d: Date) =>
+        medPunkt
+          ? `${d.getUTCDate()}. ${maaneder[d.getUTCMonth()]}`
+          : `${d.getUTCDate()} ${maaneder[d.getUTCMonth()]}`;
+      expect(toISO(påske)).toBe("2027-03-28");
+      expect(toISO(dato)).toBe("2027-05-06");
+      expect(svar).toContain(formater(påske));
+      expect(svar).toContain(formater(dato));
+    }
+  });
+
+  // "vælger du 13. maj 2026 som dagens dato, står der 1 dag tilbage" er en
+  // påstand om et konkret dag-tal. Den holder kun for det år, hvor kristi
+  // himmelfartsdag faktisk er 14. maj, så porten låser begge dele.
+  test("'1 dag tilbage'-påstanden holder for den dato, den nævner", () => {
+    for (const [arm, medPunkt] of [
+      [kristi!.da, true],
+      [kristi!.se!, false],
+    ] as const) {
+      const svar = arm.copy.faq[4].answer;
+      const dagenFoer = medPunkt ? "13. maj 2026" : "13 maj 2026";
+      expect(svar).toContain(dagenFoer);
+      const foer = getDageTilAnswer(kristi!, "da", iso("2026-05-13"));
+      expect(toISO(foer.targetDate)).toBe("2026-05-14");
+      expect(foer.days).toBe(1);
+    }
+  });
+
+  // Den 5. maj 2026 er passeret, så en læser i dag skal tælle til 2027 — samme
+  // som påske-siderne gør.
+  test("tæller til næste års dato, når denne er passeret", () => {
+    const svar = getDageTilAnswer(kristi!, "da", iso("2026-09-30"));
+    expect(toISO(svar.targetDate)).toBe("2027-05-06");
+    expect(svar.days).toBe(218);
+    expect(svar.weeks).toBe(31);
+    expect(svar.daysLeft).toBe(1);
+  });
+
+  test("tæller til samme års dato, når vi er før den", () => {
+    const svar = getDageTilAnswer(kristi!, "da", iso("2027-01-01"));
+    expect(toISO(svar.targetDate)).toBe("2027-05-06");
+    expect(svar.days).toBe(125);
+  });
+
+  test("på selve dagen er svaret 0 dage", () => {
+    const svar = getDageTilAnswer(kristi!, "da", iso("2027-05-06"));
+    expect(svar.days).toBe(0);
+    expect(svar.isToday).toBe(true);
+  });
+
+  // Dansk autocomplete under "hvor mange dage er der til kristi" giver
+  // "hvor mange dage er der til kristi himmelfart" og "hvor mange dage er
+  // kristi himmelfartsdag". Den første er brugt som spørgsmål, fordi den også
+  // holder titlen under Googles afkortningsgrænse med trecifrede dag-tal.
+  test("spørgsmålet matcher autocomplete-formuleringen", () => {
+    const dansk = kristi!.da.copy.question.toLowerCase();
+    expect(dansk).toContain("hvor mange dage er der til");
+    expect(dansk).toContain("kristi himmelfart");
+    const svensk = kristi!.se!.copy.question.toLowerCase();
+    expect(svensk).toContain("hur många dagar är det till");
+    expect(svensk).toContain("kristi himmelsfärd");
+  });
+
+  // Titlen er `${question} ${count}`, så den længste dag tæller: tre-cifrede
+  // dag-tal giver 55 tegn på dansk og 57 på svensk mod grænsen 60.
+  test("titlen holder sig under 60 tegn med trecifrede dag-tal", () => {
+    for (const svar of [
+      "188 dage", "1 dag", "356 dage",
+    ] as const) {
+      expect(
+        `${kristi!.da.copy.question} ${svar}`.length,
+        `dansk "${svar}"`
+      ).toBeLessThanOrEqual(60);
+    }
+    for (const svar of ["188 dagar", "1 dag", "356 dagar"] as const) {
+      expect(
+        `${kristi!.se!.copy.question} ${svar}`.length,
+        `svensk "${svar}"`
+      ).toBeLessThanOrEqual(60);
+    }
+  });
+
+  test("den svenske side tæller til samme dato som den danske", () => {
+    const da = getDageTilAnswer(kristi!, "da", iso("2026-09-30"));
+    const se = getDageTilAnswer(kristi!, "se", iso("2026-09-30"));
+    expect(toISO(se.targetDate)).toBe(toISO(da.targetDate));
+    expect(se.days).toBe(da.days);
+    expect(getDageTilSlugs("se")).toContain("kristi-himmelsfardsdag");
+    expect(resolveDageTilSlug("kristi-himmelfartsdag", "se")?.localeSlug).toBe(
+      "kristi-himmelsfardsdag"
+    );
+  });
+
+  test("datoen formateres med sit eget sprog", () => {
+    const svar = getDageTilAnswer(kristi!, "da", iso("2027-01-01"));
+    expect(formatTargetDate(svar.targetDate, "da")).toBe("6. maj");
+    expect(formatTargetYear(svar.targetDate)).toBe("2027");
+    expect(formatTargetDate(svar.targetDate, "se")).toBe("6 maj");
   });
 });
 

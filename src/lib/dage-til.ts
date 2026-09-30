@@ -862,6 +862,97 @@ export const DAGE_TIL_EVENTS: DageTilEvent[] = [
     },
   },
   {
+    // Påskedag + 39 dage. Det er den 40. dag efter påskedagen, når påskedagen
+    // selv tælles med, og derfor er den altid en torsdag: påskedag er en søndag,
+    // og 39 dage efter en søndag er en torsdag. Samme fordelingsregel i begge
+    // lande, så begge arme bruger det samme `easterOffset`-anker.
+    id: "kristi-himmelfartsdag",
+    anchor: {
+      da: { kind: "easterOffset", month: 0, day: 0, offsetDays: 39 },
+      se: { kind: "easterOffset", month: 0, day: 0, offsetDays: 39 },
+    },
+    da: {
+      slug: "kristi-himmelfartsdag",
+      copy: {
+        short: "kristi himmelfartsdag",
+        question: "Hvor mange dage er der til kristi himmelfart?",
+        facts: [
+          "Kristi himmelfartsdag er altid en torsdag og ligger 39 dage efter påskedag — altså den 40. dag efter påskedagen, når påskedagen selv tælles med.",
+          "I 2026 er den 14. maj, i 2027 6. maj og i 2028 25. maj.",
+          "Målt fra 1990 til 2050 ligger den mellem 1. maj (2008) og 3. juni (2038), så datoen flytter sig både frem og tilbage med påsken.",
+          "Kristi himmelfartsdag er en helligdag i Danmark. Fredagen efter er en hverdag, men fordi torsdagen er en helligdag og lørdagen er weekend, er den en indeklemt fredag — og der er steder, hvor den er lukket.",
+        ],
+        faq: [
+          {
+            question: "Hvornår er kristi himmelfartsdag næste gang?",
+            answer:
+              "Den følger påsken, så du kan regne den ud: påskedag plus 39 dage. I 2027 er påskedagen 28. marts, så kristi himmelfartsdag er 6. maj 2027.",
+          },
+          {
+            question: "Er kristi himmelfartsdag en helligdag?",
+            answer:
+              "Ja, den er en dansk helligdag, og den er altid en torsdag. Om du har fri den dag afhænger af din overenskomst — helligdagen er ikke automatisk en fridag.",
+          },
+          {
+            question: "Er kristi himmelfartsdag altid en torsdag?",
+            answer:
+              "Ja, altid. Den er 39 dage efter påskedag, og påskedag er en søndag. 39 dage efter en søndag er en torsdag, hvert eneste år.",
+          },
+          {
+            question: "Hvad er forskellen på kristi himmelfartsdag og pinsedag?",
+            answer:
+              "Kristi himmelfartsdag er påskedag plus 39 dage, og pinsedag er påskedag plus 49 dage. Der er derfor altid 10 dage imellem dem.",
+          },
+          {
+            question: "Tæller dagen i dag med?",
+            answer:
+              "Nej. Tallet er forskellen mellem dagens dato og kristi himmelfartsdag, så vælger du 13. maj 2026 som dagens dato, står der 1 dag tilbage.",
+          },
+        ],
+      },
+    },
+    se: {
+      slug: "kristi-himmelsfardsdag",
+      copy: {
+        short: "kristi himmelsfärdsdag",
+        question: "Hur många dagar är det till kristi himmelsfärd?",
+        facts: [
+          "Kristi himmelsfärdsdag är alltid en torsdag och ligger 39 dagar efter påskdagen — alltså den 40:e dagen när påskdagen räknas in.",
+          "I 2026 är den 14 maj, 2027 6 maj och 2028 25 maj.",
+          "Mätt mellan åren 1990 och 2050 ligger den mellan 1 maj (2008) och 3 juni (2038), så datumet flyttar sig både framåt och bakåt med påsken.",
+          "I Sverige är den en allmän helgdag och en röd dag. Fredagen efter blir en klämdag, och det är den enda klämdagen i Sverige som återkommer varje år.",
+        ],
+        faq: [
+          {
+            question: "När är kristi himmelsfärdsdag nästa gång?",
+            answer:
+              "Den följer påsken, så du kan räkna ut den: påskdagen plus 39 dagar. 2027 infaller påskdagen 28 mars, så kristi himmelsfärdsdagen är 6 maj 2027.",
+          },
+          {
+            question: "Är kristi himmelsfärdsdag en röd dag?",
+            answer:
+              "Ja. I Sverige är den en allmän helgdag och en röd dag, och eftersom den alltid är en torsdag blir fredagen efter en klämdag. Det är årets enda klämdag som återkommer varje år.",
+          },
+          {
+            question: "Är kristi himmelsfärdsdag alltid en torsdag?",
+            answer:
+              "Ja, alltid. Den är 39 dagar efter påskdagen, och påskdagen är en söndag. 39 dagar efter en söndag är en torsdag, varje år.",
+          },
+          {
+            question: "Vad är skillnaden på kristi himmelsfärdsdag och pingstdagen?",
+            answer:
+              "Kristi himmelsfärdsdagen är påskdagen plus 39 dagar, och pingstdagen är påskdagen plus 49 dagar. Det ligger därför alltid 10 dagar emellan dem.",
+          },
+          {
+            question: "Räknas dagen i dag med?",
+            answer:
+              "Nej. Talet är skillnaden mellan dagens datum och kristi himmelsfärdsdagen, så väljer du 13 maj 2026 som dagens datum står det 1 dag kvar.",
+          },
+        ],
+      },
+    },
+  },
+  {
     id: "valborg",
     anchor: {
       da: { kind: "fixed", month: 4, day: 30, offsetDays: 0 },
