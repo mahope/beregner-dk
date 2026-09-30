@@ -148,13 +148,17 @@ describe("ALDER_EKSEEMPLER", () => {
     expect(formatAlder({ aar: 25, maaneder: 0, dage: 0 }, "se")).toBe("25 år, 0 månader och 0 dagar");
     expect(formatAlder({ aar: 36, maaneder: 6, dage: 10 }, "da")).toBe("36 år, 6 måneder og 10 dage");
     expect(formatAlder({ aar: 36, maaneder: 6, dage: 10 }, "se")).toBe("36 år, 6 månader och 10 dagar");
-    expect(formatAlder({ aar: 36, maaneder: 6, dage: 10 }, "no")).toBe("36 år, 6 måneder og 10 dage");
+    // Review-fund 30/9 (MIDDEL): den forrige forventning her var "… og 10
+    // dage" — altså den danske fejl, låst fast som om den var rigtig. Norsk
+    // skriver "dager". Ordet stod i `formatAlders` egen gren-familie, og det
+    // samme galt faldt igennem til `{ALDER}` i /alders metadata og FAQ.
+    expect(formatAlder({ aar: 36, maaneder: 6, dage: 10 }, "no")).toBe("36 år, 6 måneder og 10 dager");
   });
 
   test("hvert eksempel er formateret uden fejlmorphing", () => {
     // Negativt mønster med tal-grænse: "11 måneder" må ikke fejle, fordi
     // teksten indeholder bogstaverne i "1 måneder".
-    const fejlMønstre = /(^|[^0-9])1 (måneder|månader|dage|dagar)\b/;
+    const fejlMønstre = /(^|[^0-9])1 (måneder|månader|dage|dagar|dager)\b/;
     for (const eksempel of ALDER_EKSEEMPLER) {
       for (const locale of ["da", "se", "no"] as const) {
         expect(formatAlder(eksempel, locale)).not.toMatch(fejlMønstre);

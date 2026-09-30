@@ -101,11 +101,19 @@ function uddrag(r: AlderResultat) {
 }
 
 /**
- * "36 år, 6 måneder og 10 dage" / "36 år, 6 månader och 10 dagar".
+ * "36 år, 6 måneder og 15 dage" / "36 år, 6 månader och 15 dagar" /
+ * "36 år, 6 måneder og 15 dager".
  *
  * Dansk og svensk bruger ental ved 1, og dansk bruger altid flertal ved 0 —
  * "0 måneder og 0 dage", ikke "0 måned". Værktøjet bruger den samme
  * formatter, så de to aldrig viser forskellige grammatikker for samme tal.
+ *
+ * Norsk har sin egen gren og ikke en dansk-fallback. Det er ikke en
+ * nydelse: norsk har *ikke* samme ord som dansk — måneder er "måneder" i begge,
+ * men dage er "dager" på norsk og "dage" på dansk. Før grenen fandtes skrev
+ * `formatAlder(…, "no")` "6 måneder og 15 dage" ind i norsk tekst, og det var
+ * ikke kun `page.tsx`: `alderSideTekst` løser `{ALDER}` i description,
+ * metaDescription, ogDescription og FAQ-svar, så de landede i Googles snippet.
  */
 export function formatAlder(
   resultat: { aar: number; maaneder: number; dage: number },
@@ -116,6 +124,11 @@ export function formatAlder(
     const maanederTekst = maaneder === 1 ? "1 månad" : `${maaneder} månader`;
     const dageTekst = dage === 1 ? "1 dag" : `${dage} dagar`;
     return `${aar} år, ${maanederTekst} och ${dageTekst}`;
+  }
+  if (locale === "no") {
+    const maanederTekst = maaneder === 1 ? "1 måned" : `${maaneder} måneder`;
+    const dageTekst = dage === 1 ? "1 dag" : `${dage} dager`;
+    return `${aar} år, ${maanederTekst} og ${dageTekst}`;
   }
   const maanederTekst = maaneder === 1 ? "1 måned" : `${maaneder} måneder`;
   const dageTekst = dage === 1 ? "1 dag" : `${dage} dage`;

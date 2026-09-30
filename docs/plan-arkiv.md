@@ -20709,3 +20709,59 @@ Rigetig fejl fundet af porten: `dagpenge-saadan-finder-du-dan-sats` havde knappe
 "Beregn din dagpenge" hængt på `/barselsdagpenge` — indført af opgave 202 i dag —
 nu `/dagpenge`, som artiklen handler om. Tre `beskrivelse`-tekster blev strammet,
 fordi de lovede felter værktøjet ikke har.
+
+**Opgave: ret de to åbne review-fund ✅ `ceo/rett-aabne-review-fund`** (30/9 16:52).
+Fundene lå i `~/.local/oxloop/review/minberegner.md`, som efter `74e7861` havde
+fem fund — de tre fra 11:45 lukket, to åbne. Begge er bekræftet og rettet, og
+genmålingen fandt en **tredje læk af samme klasse som fund 1**, som ikke stod i
+fundlisten.
+
+**Fund MIDDEL — `formatAlder`/`formatDageLived` uden `no`-gren.** Bekræftet:
+`alderSideTekst("2026-09-30","no")` → `ALDER: "36 år, 6 måneder og 15 dage"`,
+`DAGE: "13.348 dage"`. Rettet: `formatAlder` har nu sin egen `no`-gren
+("måneder"/"dager", "og"), `formatDageLived` går gennem det nye `dageEnhed()`, og
+`formatDageTal` bruger `getIntlLocale(locale)` i stedet for
+`locale === "se" ? "sv-SE" : "da-DK"` — som gav norsk `da-DK`, altså dansk
+tusindtalsseparator.
+
+**Tredje læk, samme klasse, ikke i fundlisten:** `dage2007` i
+`alder-side-tekst.ts` skrev `"dage"` *uanset sprog* — så den svensk `{DAGE2007}`
+skrev dansk. Kun den danske `/alder`-FAQ bruger tokenen i dag, så den var latent,
+men den lå i den del af koden der løser pladsholdere for alle tre domæner.
+Samlet måling før → efter:
+
+| | `ALDER` | `DAGE` | `DAGE2007` |
+|---|---|---|---|
+| da (før/efter) | 36 år, 6 måneder og 15 dage | 13.348 dage | 6.848 til 7.212 dage |
+| se | … 6 månader och 15 dagar | 13 348 dagar | 6 848 till 7 212 **dagar** |
+| no | 36 år, 6 måneder og 15 **dager** | 13 348 **dager** | 6 848 til 7 212 **dager** |
+
+**Dansk output er uændret** — ingen synlig ændring på minberegner.dk eller
+beraknare.se; det hele er i den norske sti, der er latent (opgave 97).
+
+**En eksisterende test låste fejlen fast.** `alder.test.ts:151` skrev
+`expect(formatAlder({…}, "no")).toBe("36 år, 6 måneder og 10 dage")` — altså den
+danske forventing som om den var rigtig. Det er gjort om til "dager", og
+negativmønstret i samme fil (`/(^|[^0-9])1 (måneder|månader|dage|dagar)\b/`)
+har nu `dager` med, så entalsfejlen også dækkes for norsk.
+
+**Fund LAV — pinse-docblockene.** Bekræftet og rettet: de to docblocks sagde, at
+grundlovsdagen altid kolliderede med **2. pinsedag**. Målt over de 61 år mod
+repoets egen kode er den 2. pinsedag i **4** år (1995, 2006, 2017, 2028) og
+**pinsedag** i 3 (2022, 2033, 2044 — påske er 17. april de år, så pinsedagen
+falder dagen før grundlovsdagen). Docblockene siger nu "pinsedag eller 2.
+pinsedag", og en ny test låser **delingen** 4/3 plus at påske er 17. april i de
+tre år. ⚠️ **Ærlig om porten:** denne test passerer mod den gamle kode, fordi
+logikken var rigtig — kun kommentaren var forkert. Den låser målingen, så
+docblockens tal ikke kan glide fra koden; den kan ikke se en ny forkert
+docblock, og det er ærligt sagt i commit-beskeden.
+
+**Gate:** lint 624 filer, 3.213 tests / 194 filer grønne, `next build` ok,
+`node scripts/locale-leak.mjs --gate` exit 0. De 4 nye/rettede tests i
+`alder-side-tekst.test.ts` er modvejs verificeret: 4 fejler mod gammel kode.
+
+**F6 lagt til som ny opgave:** de fire andre steder med
+`locale === "se" ? "sv-SE" : "da-DK"` (`tidsberegner/page.tsx:113`,
+`ProteinbehovBeregner.tsx:55`, `TerminBeregner.tsx:117`,
+`KalorieBeregner.tsx:129`) er præcis samme fejl og blev fundet af denne
+genmåling. De er ikke rørt her — de er en anden opgave.

@@ -240,6 +240,31 @@ describe("pinse-intervaller", () => {
     expect(AAR.filter((y) => pinseInterval(y, "se").periodeArbejdsdage === 7)).toHaveLength(50);
   });
 
+  // Review-fund 30/9 (LAV): de to docblocks sagde, at kollisionen altid var
+  // "2. pinsedag på grundlovsdagen". Tallet 7 var rigtigt, årsagen var ikke:
+  // kun fire af årene er 2. pinsedag, de tre øvrige er *pinsedag*, fordi påske
+  // der er 17. april og pinsedagen derfor falder dagen før grundlovsdagen. En
+  // docblock der siger "2. pinsedag" uden at nævne pinsedagen giver det forkerte
+  // svar på "hvornår sætter navnePrDag parentes", så grunden låses her — den kan
+  // ikke glide fra koden igen, fordi den er målt over de samme 61 år.
+  test("grundlovsdagen er 2. pinsedag i fire år og pinsedag i tre — ikke syv gange 2. pinsedag", () => {
+    const kollision = (aar: number) =>
+      pinseInterval(aar, "da").periodeHelligdagsnavne.find(
+        (n) => n.includes("Grundlovsdag") && n.includes("(")
+      );
+    const somAndenPinsedag = AAR.filter((y) => kollision(y)?.includes("2. pinsedag"));
+    const somPinsedag = AAR.filter((y) => kollision(y)?.includes("(Pinsedag)"));
+    expect(somAndenPinsedag).toEqual([1995, 2006, 2017, 2028]);
+    expect(somPinsedag).toEqual([2022, 2033, 2044]);
+    // De to lister er disjunkte og dækker alle syv, så "7" ikke kan være rigtigt
+    // af en anden grund end den docblocken nu angiver.
+    expect(somAndenPinsedag.length + somPinsedag.length).toBe(7);
+    for (const aar of somPinsedag) {
+      expect(pinseInterval(aar, "da").paaskedag.getMonth()).toBe(3);
+      expect(pinseInterval(aar, "da").paaskedag.getDate()).toBe(17);
+    }
+  });
+
   test("kun 2. pinsedag er forskellig mellem landene", () => {
     // `Annandag pingst` står med vilje ikke på den svenska liste. Derfor er den
     // danske dags `helligdag` true, den svenske false, og de to tal for

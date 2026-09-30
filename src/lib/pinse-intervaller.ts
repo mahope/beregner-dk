@@ -68,12 +68,22 @@ function datoMedNavn(
 /**
  * The holidays by name, in date order, with **one entry per day** rather than
  * one per list entry. `getHelligdage` can carry two names on the same date, and
- * in the pinse period it does whenever 2. pinsedag falls on Grundlovsdag — 7 of
- * the 61 years the tests cover, the next being 2028. The old list read
- * "Grundlovsdag, 2. pinsedag" as two holidays on one day, so the sentence on
- * `/dato` named four holidays while `periodeHelligdage` counted three, and the
- * reader counting the days along got one day too many. The extra name now goes
- * in parentheses, so both names survive and the length still equals the days.
+ * in the pinse period it does whenever 5 June — Grundlovsdag — lands on pinsedag
+ * or on 2. pinsedag: 7 of the 61 years the tests cover, the next being 2028.
+ *
+ * The reason matters, so it is spelled out rather than shortened to "2.
+ * pinsedag". Measured over the same 61 years (`npx tsx`, 2026-09-30, against
+ * `dateutil` and a Meeus-implementering), Grundlovsdag is 2. pinsedag in 1995,
+ * 2006, 2017 and 2028, and pinsedag in 2022, 2033 and 2044 — påske is 17.
+ * april in the last three, so pinsedag falls a day before the Monday. Seven is
+ * the right count either way, but only four are the case an earlier version of
+ * this comment named, and the test locks the split.
+ *
+ * The old list read "Grundlovsdag, 2. pinsedag" as two holidays on one day, so
+ * the sentence on `/dato` named four holidays while `periodeHelligdage` counted
+ * three, and the reader counting the days along got one day too many. The extra
+ * name now goes in parentheses, so both names survive and the length still
+ * equals the days.
  */
 function navnePrDag(helligdage: Helligdag[]): string[] {
   const prDag = new Map<number, string[]>();
@@ -138,9 +148,9 @@ export interface PinseInterval {
    * Holiday *days* inside the period: 3 in Denmark and 2 in Sweden, and 4 in
    * Denmark in the 11 of the 18 years when Grundlovsdag 5 June falls inside it
    * on a day of its own. Counted by day, not by list entry, so a day that
-   * carries two names — 2. pinsedag fell on Grundlovsdag in 1995, 2006, 2017,
-   * 2022, 2028, 2033 and 2044 — still counts once, and it always equals
-   * `periodeHelligdagsnavne.length`.
+   * carries two names — pinsedag or 2. pinsedag fell on Grundlovsdag in 1995,
+   * 2006, 2017, 2022, 2028, 2033 and 2044 — still counts once, and it always
+   * equals `periodeHelligdagsnavne.length`.
    */
   periodeHelligdage: number;
   /**

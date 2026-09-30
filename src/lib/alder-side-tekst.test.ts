@@ -1,8 +1,9 @@
 import { describe, expect, test } from "vitest";
 import { alderSideTekst, ALDER_TOKENS, alderPaDato, erstatAlderTokens } from "./alder-side-tekst";
-import { alderLevet } from "./alder-levet";
+import { alderLevet, formatDageTal } from "./alder-levet";
 import { foedselsaarRaekker } from "./alder-eksempler";
 import { iDagISidensTidszone } from "./lokal-dato";
+import { getIntlLocale } from "./format";
 import type { Locale } from "./i18n";
 
 /**
@@ -33,15 +34,15 @@ describe("alderSideTekst", () => {
         expect(t.ALDER).toContain(String(levet.aar));
         expect(t.ALDER).toContain(String(levet.maaneder));
         expect(t.ALDER).toContain(String(levet.dage));
-        expect(t.AAR).toBe(new Intl.NumberFormat(locale === "se" ? "sv-SE" : "da-DK").format(levet.aar));
-        expect(t.DAGE_TAL).toBe(new Intl.NumberFormat(locale === "se" ? "sv-SE" : "da-DK").format(levet.totalDage));
-        expect(t.UGER).toBe(new Intl.NumberFormat(locale === "se" ? "sv-SE" : "da-DK").format(levet.totalUger));
-        expect(t.TIMER).toBe(new Intl.NumberFormat(locale === "se" ? "sv-SE" : "da-DK").format(levet.totalTimer));
-        expect(t.MINUTTER).toBe(new Intl.NumberFormat(locale === "se" ? "sv-SE" : "da-DK").format(levet.totalMinutter));
+        expect(t.AAR).toBe(new Intl.NumberFormat(getIntlLocale(locale)).format(levet.aar));
+        expect(t.DAGE_TAL).toBe(new Intl.NumberFormat(getIntlLocale(locale)).format(levet.totalDage));
+        expect(t.UGER).toBe(new Intl.NumberFormat(getIntlLocale(locale)).format(levet.totalUger));
+        expect(t.TIMER).toBe(new Intl.NumberFormat(getIntlLocale(locale)).format(levet.totalTimer));
+        expect(t.MINUTTER).toBe(new Intl.NumberFormat(getIntlLocale(locale)).format(levet.totalMinutter));
         // Månederne i Excel-eksemplet er *alle* måneder siden fødslen, ikke
         // resten af de seneste år. De to er let at blande sammen.
         expect(t.MAANEDER_IALT).toBe(
-          new Intl.NumberFormat(locale === "se" ? "sv-SE" : "da-DK").format(
+          new Intl.NumberFormat(getIntlLocale(locale)).format(
             levet.aar * 12 + levet.maaneder
           )
         );
@@ -50,10 +51,10 @@ describe("alderSideTekst", () => {
 
         const raekke = foedselsaarRaekker(iso).find((r) => r.aar === 2007)!;
         expect(t.DAGE2007).toContain(
-          new Intl.NumberFormat(locale === "se" ? "sv-SE" : "da-DK").format(raekke.minDage)
+          new Intl.NumberFormat(getIntlLocale(locale)).format(raekke.minDage)
         );
         expect(t.DAGE2007).toContain(
-          new Intl.NumberFormat(locale === "se" ? "sv-SE" : "da-DK").format(raekke.maxDage)
+          new Intl.NumberFormat(getIntlLocale(locale)).format(raekke.maxDage)
         );
       }
     }
@@ -88,6 +89,43 @@ describe("alderSideTekst", () => {
 
   test("en ugyldig reference-dato kaster, frem for at vise en forkert dato", () => {
     expect(() => alderSideTekst("2026-13-45", "da")).toThrow();
+  });
+
+  // Review-fund 30/9 (MIDDEL). `formatAlder` og `formatDageLived` havde ingen
+  // `no`-gren, så norsk tekst fik danske ord, og `dage2007` skrev "dage" i
+  // *alle* sprog. Det var ikke kun brødteksten: `medLevendeTekst` løser
+  // `{ALDER}` og `{DAGE}` i description, metaDescription, ogDescription og
+  // FAQ-svar, så ordene landede i Googles snippet for beregner.no. Porten nedenfor
+  // er ord-grenen: den fejler mod den gamle kode, fordi `no` skrev "dage".
+  const LEVET_SEPT = alderLevet(SEPTEMBER);
+  test.each([
+    { locale: "da" as const, dage: "dage", maaned: "måneder" },
+    { locale: "se" as const, dage: "dagar", maaned: "månader" },
+    { locale: "no" as const, dage: "dager", maaned: "måneder" },
+  ])("$locale skriver sine egne ord for dage og måneder", ({ locale, dage, maaned }) => {
+    const t = alderSideTekst(SEPTEMBER, locale);
+    expect(t.ALDER).toContain(`${LEVET_SEPT.maaneder} ${maaned}`);
+    expect(t.ALDER).toContain(`${LEVET_SEPT.dage} ${dage}`);
+    expect(t.DAGE).toContain(` ${dage}`);
+    expect(t.DAGE2007).toContain(` ${dage}`);
+    // Ingen af de to øvrige ord må stå i samme sætning — det er præcis den
+    // fejl de to grene lukker, så porten ville ikke have fejlet uden dem.
+    // `\b` fordi "dager" indeholder "dage" som delord.
+    for (const andet of ["dage", "dagar", "dager"].filter((o) => o !== dage)) {
+      const fremmed = new RegExp(`\\b${andet}\\b`);
+      expect(t.ALDER, `ALDER må ikke sige "${andet}"`).not.toMatch(fremmed);
+      expect(t.DAGE, `DAGE må ikke sige "${andet}"`).not.toMatch(fremmed);
+      expect(t.DAGE2007, `DAGE2007 må ikke sige "${andet}"`).not.toMatch(fremmed);
+    }
+  });
+
+  // Norsk får sit eget tusindtalformat. Før grenen fik `no` `da-DK` gennem
+  // `locale === "se" ? "sv-SE" : "da-DK"`, så et femcifret tal fik punktum.
+  test("norske tal får norsk tusindtalsseparator, ikke dansk", () => {
+    expect(alderSideTekst(SEPTEMBER, "no").DAGE_TAL).not.toBe(
+      alderSideTekst(SEPTEMBER, "da").DAGE_TAL
+    );
+    expect(formatDageTal(13348, "no")).toBe(new Intl.NumberFormat("nb-NO").format(13348));
   });
 });
 

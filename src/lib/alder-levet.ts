@@ -1,4 +1,5 @@
 import { beregnAlder } from "./alder";
+import { getIntlLocale } from "./format";
 import type { Locale } from "./i18n";
 
 /**
@@ -64,18 +65,36 @@ export function alderLevet(referenceIso: string): AlderLevet {
 }
 
 /**
- * "13.343 dage" — med den locale's tusindtalsseparator. Dansk og svensk
- * bruger begge et tegn, der ikke er et almindeligt mellemrum i den
- * server-renderede HTML, så formatteres tallet her og ikke i teksten.
+ * Flødeformen af "dage" i sidens eget sprog: "dage", "dagar", "dager".
+ *
+ * Ordet lå tidligere skrevet ind i den tekst, der bruger det — og
+ * `dage2007` i `alder-side-tekst.ts` skrev "dage" *uanset* sprog, så en svensk
+ * og en norsk sætning fik dansk. Det er en regel, ikke en formateringsdetalje,
+ * så den har én ejer her, ligesom `formatAlder` har sin egen ord-gren pr. sprog.
  */
-export function formatDageLived(l: AlderLevet, locale: Locale): string {
-  const intlLocale = locale === "se" ? "sv-SE" : "da-DK";
-  const dage = new Intl.NumberFormat(intlLocale).format(l.totalDage);
-  return locale === "se" ? `${dage} dagar` : `${dage} dage`;
+export function dageEnhed(locale: Locale): string {
+  if (locale === "se") return "dagar";
+  if (locale === "no") return "dager";
+  return "dage";
 }
 
-/** "13.343" alene — til de steder hvor "dage"/"dagar" står i kolonneoverskriften. */
+/**
+ * "13.343 dage" / "13 343 dagar" / "13 348 dager" — med den locale's egen
+ * tusindtalsseparator. Dansk og svensk bruger begge et tegn, der ikke er et
+ * almindeligt mellemrum i den server-renderede HTML, så formatteres tallet her
+ * og ikke i teksten.
+ */
+export function formatDageLived(l: AlderLevet, locale: Locale): string {
+  return `${formatDageTal(l.totalDage, locale)} ${dageEnhed(locale)}`;
+}
+
+/**
+ * "13.343" alene — til de steder hvor dage/dagar står i kolonneoverskriften.
+ *
+ * Zonen kommer fra `getIntlLocale`, der kender alle tre sprog. Den var før
+ * `locale === "se" ? "sv-SE" : "da-DK"`, som gav norsk `da-DK` — altså dansk
+ * tusindtalsseparator på en norsk side.
+ */
 export function formatDageTal(tal: number, locale: Locale): string {
-  const intlLocale = locale === "se" ? "sv-SE" : "da-DK";
-  return new Intl.NumberFormat(intlLocale).format(tal);
+  return new Intl.NumberFormat(getIntlLocale(locale)).format(tal);
 }

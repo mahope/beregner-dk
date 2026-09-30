@@ -1,5 +1,5 @@
 import { formatAlder, foedselsaarRaekker } from "./alder-eksempler";
-import { alderLevet, formatDageLived, formatDageTal } from "./alder-levet";
+import { alderLevet, dageEnhed, formatDageLived, formatDageTal } from "./alder-levet";
 import { getIntlLocale } from "./format";
 import type { Locale } from "./i18n";
 import { parseIsoDato } from "./lokal-dato";
@@ -61,13 +61,20 @@ export function alderPaDato(iso: string, locale: Locale): string {
   return formatAlder(alderLevet(iso), locale);
 }
 
-/** De dage, fødselsårs-tabellen viser for fødte i 2007. */
+/**
+ * De dage, fødselsårs-tabellen viser for fødte i 2007.
+ *
+ * Enheden kommer fra `dageEnhed`, ikke fra et ord skrevet i denne sætning:
+ * her stod "dage" for *alle* sprog, så en svensk eller norsk række fik dansk.
+ * Kun den danske blok bruger tokenen i dag, så fejlen var latent — men den lå i
+ * den del af koden der løser pladsholdere for alle tre domæner.
+ */
 function dage2007(iso: string, locale: Locale): string {
   const raekke = foedselsaarRaekker(iso).find((r) => r.aar === 2007);
   if (!raekke) {
     throw new Error("Fødselsårs-tabellen har ingen række for 2007");
   }
-  return `${formatDageTal(raekke.minDage, locale)} til ${formatDageTal(raekke.maxDage, locale)} dage`;
+  return `${formatDageTal(raekke.minDage, locale)} til ${formatDageTal(raekke.maxDage, locale)} ${dageEnhed(locale)}`;
 }
 
 /**

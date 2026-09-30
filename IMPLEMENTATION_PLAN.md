@@ -1,12 +1,15 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — 30/9 16:45. CEO-køens punkt 0 er færdigt (`aca17e5`), de tre review-fra
-30/9 er rettet (`74e7861`). Fase 3-opgaven **F2 er færdig**: `/procent` svarer nu på
-GSC's tredjestørste søgning med formel og gennemregnet eksempel.
+STATUS: KØ — 30/9 16:52. **Alle fem review-fund er nu rettet** (`74e7861` lukkede
+de tre fra 11:45; `ceo/rett-aabne-review-fund` lukkede MIDDEL-grenen på
+`/alders` norsk og LAV-grenen på pinse-docblockene — målingen fandt samtidig en
+tredje læk af samme klasse, se `docs/plan-arkiv.md`). CEO-køens punkt 0 er
+færdigt (`aca17e5`). Fase 3: **F2 er færdig**, `/procent` svarer på GSC's
+tredjestørste søgning med formel og gennemregnet eksempel.
 
-**Næste frie opgave: F4** (forsiden som indgangspunkt — kræver Playwright, se ❓).
-F1/F3/F5 og opgaverne 97/98/119/183 er alle blokeret af svar fra Mads. **Opgave 187
-må ikke røres før 13/10.**
+**Næste frie opgave: F2b** (svensk rabatt-FAQ på `/procent`, se Fase 3).
+F4 kræver Playwright (❓), F1/F3/F5 og opgaverne 97/98/119/183 er blokeret af
+svar fra Mads. **Opgave 187 må ikke røres før 13/10.**
 
 **⚠️ Fire VERIFICÉR-noter venter på vinduet 17:30** (`/alder`-snippet, to blog-CTA-
 bølger, `/boligstoette`-titel) plus denne iterations nye `/procent`-note. De kan ikke
@@ -96,11 +99,20 @@ gennemregnet eksempel på läsarens egna tal (9.000 → 7.875 kr = 1.125 kr ned 
 9 nye tests hvor 8 fejler mod gammel kode. Se arkivet. **MÅL:** `/procent`
 150.470 visninger / 97 klik / CTR 0,1 % (GSC 2026-08-31 → 2026-09-28). Genmål
 14 dage efter at den er live.
-**F2b. [ ]** Næste skridt på samme side: en **FAQ-række** i `page-data.ts` der
+**F2b. [ ]** Næste skridt på samme side: en **FAQ-række i `page-data.ts`** der
 rammer spørgsmålsformuleringen, fordi FAQ'en er det Google viser i sit snippet.
 Udeladt i F2 af tidsbudget og fordi `page-data.ts` er den fil hvor
 `locale-leak.mjs`'s `REVIEWED`-poster ligger tættest — tilføj den som sit eget
 punkt, og kør `node scripts/locale-leak.mjs --gate` separat.
+**Målt 30/9 16:45 (autocomplete `hl=da&gl=dk` / `hl=se&gl=se`):** den danske
+FAQ har *ingen* række på "hvordan regner man rabat i procent" eller "beregn
+rabat i procent", og den **svenska `/procent` har ingen rabatt-række overhovedet**
+— selv om F2 gav siden et helt `Så här räknar du ut rabatten i procent`-afsnit.
+Målte svenske formuleringer: "hur stor är rabatten i procent", "hur mycket
+rabatt i procent", "räkna ut rabatt i procent excel", "procentuell rabatt".
+**Accept:** de fire svenske rækker + "hvordan regner man rabat i procent" på
+dansk, med **alle** tal udledt af `RABAT_EKSEMPEL`/`RABAT_BELOEB`/`RABAT_SATS`,
+så de ikke kan glide fra brødteksten ved siden af.
 
 **F3. [ ] Beraknare.se: position, ikke titel.** 190.447 visninger på pos.
 8-10. Opgave 187 (svenske slugs, 301) er sat til **13/10** og må ikke flyttes
@@ -118,6 +130,17 @@ Yahoo 274 besøgende/28d. IndexNow er kodet og instrumenteret
 (`src/lib/indexnow.ts`, `src/app/api/internal/indexnow/route.ts`), men
 `❓ Til Mads` spørger om krogen efter deploy er sat op — uden svar er
 Bing/DDG/Yahoo indeksering uafhængig af vores deploys.
+
+**F6. [ ] Fire beregnere deler den samme `no`-fejl som `/alder` havde.**
+Fundet 30/9 under F6's rettelse af `/alder`. Alle fire steder vælger zone med
+`locale === "se" ? "sv-SE" : "da-DK"`, så `no` får dansk formatering — samme
+mønster som `formatDageTal` havde:
+`src/app/tidsberegner/page.tsx:113`, `src/components/ProteinbehovBeregner.tsx:55`,
+`src/components/TerminBeregner.tsx:117`, `src/components/KalorieBeregner.tsx:129`.
+**Accept:** alle fire bruger `getIntlLocale(locale)`, og hver har en test der
+tjekker at `no` ikke får dansk tusindtalsseparator. De er latente (beregner.no
+404'er, opgave 97), så prioriteringen er lavere end F2b — men de er den samme
+fejlklasse, og de bliver ikke fundet igen af en reviewer.
 
 ## Kvalitetsgate (repoets egne scripts fra package.json)
 
