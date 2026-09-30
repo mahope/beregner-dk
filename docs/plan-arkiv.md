@@ -20947,3 +20947,58 @@ og porten røde), gammel `/dato`-kæde (kun porten), gammel
    netop har skrevet. Løst med `somOrd()` på begge sider, så prøven rammer
    *tallet* og ikke kodetegnet. Det samme greb låser `locale-leak.mjs`'s
    egen matching på `file + key + string`.
+
+---
+
+## F4 (30/9 18:40) — `ceo/forsiden-snabb-indgang`: forsiden som indgangspunkt
+
+**Målingen der satte opgaven op.** Plausible 28 dage: `/` 218 besøgende,
+**38 % bounce**, 465 indgangssider — mod 2-7 % på beregnerne selv. beraknare.se
+`/` 80 % bounce på 20 besøgende. Direct-trafik 1.050 besøgende/28d. Forsiden
+linkede altså de mest brugte beregnere, men som ét kort i et gitter med **én
+kolonne på mobil** (`grid-cols-1 sm:grid-cols-2 lg:grid-cols-3`), efter helten,
+søgefeltet og tillidsrækken. Kortene er `p-6` + 48 px ikon + badge + `h3
+text-xl` + beskrivelse = ca. 230 px. På en telefon i 390 px bredde nåede man
+**ét** kort, og de otte mest brugte lå omkring skærmbillede 8-10.
+
+**Rettelsen.** En kompakt stribe af de otte mest brugte beregnere som *links*,
+lige under helten og **før** tillidsrækken. `getHomeQuickLinks(locale)` i
+`home-data.ts` tager de otte første `popular: true` — samme blok, samme
+måle-rækkefølge, så der ikke opstår en anden liste der kan rådne. Sverige har
+seks populære og får seks, aldrig otte fyldt op med kort domænet ikke serverer.
+
+**Layout (390 / 768 / 1280).** `grid-cols-2 sm:grid-cols-3 lg:grid-cols-4`,
+`gap-2`, `min-h-11` pr. flade (44 px, kravet), `py-2 px-3`, `h-5 w-5`-ikon fra
+det eksisterende `CalcIcon` (allerede `aria-hidden`), `text-sm leading-snug` på
+titel. Helten fik `pb-12 mb-12` → `pb-8 mb-8 md:pb-12 md:mb-12`, altså 32 px
+mindre over fold på mobil, uændret fra `md` og op. Mørk tilstand bruger de
+tokens sideren allerede bruger (`bg-gray-800`, `border-gray-700`).
+
+**Forventet højde over fold (beregnet, ikke målt i browser).** Site-header ca.
+72 px + helt ca. 354 px (`pt-4` 16, `h1` 2 linjer a 44 + `mb-4` 16, subtitle 4
+linjer a 28 + `mb-8` 32, søgefelt 58) + `mb-8` 32 = ca. 458 px, hvorefter
+stribens fire rækker (2-2 linjetitler, `min-h-11`→56 px) er ca. 232 px. Første
+skærmbillede på en 844 px telefon (iPhone 12-15, Pixel 5-8) ender altså ** efter
+otte links**. På en 667 px telefon (iPhone SE) fyldes syv af otte. En pixelmåling
+kræver Playwright — se ❓.
+
+**Adgangskontrol for skærmlæsere.** `<nav aria-label>` + `sr-only` `<h2>` med
+samme ord, så overskriften høres uden at være en synlig dublet af gitterets
+"Populære beregnere" — det er den fejl `dublet-overskrift.test.tsx` findes for.
+Nyt håndskrevet felt `sections.quick` i tre sprog, med en test der kræver tre
+*forskellige* formuleringer og forbyder æ/ø i `se` og `no`.
+
+**Otte nye tests.** Fire i `home-data.test.ts` (de otte hrefs som eksakt liste i
+måle-rækkefølge; kun populære kort; aldrig strækket og aldrig et lukket domænes
+kort; overskriften i eget sprog) og fire i ny `src/app/forside.test.tsx`, som
+*renderer* forsiden i da og se — rækkefølgen mellem stribe, tillidsrække og
+populært gitter er rettelsen, og den kan ikke måles i kilden.
+
+**Fire mutationer, alle faldt.** (1) Striben flyttet ned efter tillidsrækken →
+rækkeføljetesten rød. (2) `slice(0, 6)` + `quick` sat til samme ord som
+`popular` → to røde i home-data, en rød i forsiden. (3)
+`getHomeQuickLinks("da")` hårdkodet i stedet for `locale` → den svenske test rød
+(striben fik danske titler på beraknare.se).
+
+**Gaten:** lint 627 filer ren, `vitest` 3.239 tests / 197 filer grønne (+8 mod
+3231), `next build` grøn, `locale-leak.mjs --gate` exit 0.

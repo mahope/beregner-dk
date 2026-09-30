@@ -7,7 +7,7 @@ import { CalcIcon, CategoryIcon, getCategoryColor } from "@/components/ui/icons"
 import { getTrendingHrefs } from "@/lib/trending";
 import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
 import { getAllDomainConfigs } from "@/lib/domain-config";
-import { getDageTilKort, getHomePageData, getHomeCalculators } from "@/lib/home-data";
+import { getDageTilKort, getHomePageData, getHomeCalculators, getHomeQuickLinks } from "@/lib/home-data";
 import { getSearchContent } from "@/lib/search-content";
 import { HomeContent } from "@/components/HomeContent";
 import CountryFlag from "@/components/CountryFlag";
@@ -52,6 +52,7 @@ export default async function Home() {
   const trendingHrefs = getTrendingHrefs();
 
   const popularBeregnere = beregnere.filter((b) => b.popular);
+  const quickLinks = getHomeQuickLinks(locale);
   const oevrigeBeregnere = beregnere.filter((b) => !b.popular);
   const dageTilKort = getDageTilKort(locale, new Date());
 
@@ -89,7 +90,7 @@ export default async function Home() {
       <FAQSchema items={data.faqItems} />
 
       {/* Hero */}
-      <section className="-mx-4 px-4 pt-4 pb-12 mb-12 bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-gray-900 dark:via-gray-950 dark:to-blue-950">
+      <section className="-mx-4 px-4 pt-4 pb-8 mb-8 md:pb-12 md:mb-12 bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-gray-900 dark:via-gray-950 dark:to-blue-950">
         <div className="max-w-3xl mx-auto text-center">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-4 bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent">
             {data.hero.title}
@@ -100,6 +101,34 @@ export default async function Home() {
           <SearchBar beregnere={searchData} />
         </div>
       </section>
+
+      {/* Quick access — the most visited calculators as links, before the trust
+          bar. A visitor who lands on / from direct traffic or from a search
+          that named no calculator gets a menu on the first screen instead of
+          one card of a grid that starts three screens down. */}
+      {quickLinks.length > 0 && (
+        <nav aria-label={data.sections.quick} className="mb-8 md:mb-12">
+          <h2 className="sr-only">{data.sections.quick}</h2>
+          <ul className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+            {quickLinks.map((beregner) => (
+              <li key={beregner.href}>
+                <Link
+                  href={beregner.href}
+                  className="flex items-center gap-2.5 min-h-11 px-3 py-2 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-400 transition-colors"
+                >
+                  <CalcIcon
+                    href={beregner.href}
+                    className={`h-5 w-5 flex-shrink-0 ${getCategoryColor(beregner.category)}`}
+                  />
+                  <span className="text-sm font-medium leading-snug text-gray-900 dark:text-gray-100">
+                    {beregner.title}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      )}
 
       {/* Trust signals */}
       <section className="flex flex-wrap justify-center gap-6 md:gap-10 mb-12 text-center">

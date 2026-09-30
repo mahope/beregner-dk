@@ -1,18 +1,13 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — 30/9 17:58. **Alle otte forrige deploy-noter er lukket** på
-live-indhold 17:46-17:53 (17:30-batchen var 16 min gammel ved 17:37-målingen,
-så de var ikke live da). Målingerne står i `docs/plan-arkiv.md`. **F6 er færdig**
-(`ceo/no-locale-tag`): de seks steder der valgte `Intl`-sprog med den toarmede
-kæde `locale === "se" ? "sv-SE" : "da-DK"` bruger nu `getIntlLocale`, og en port
-scanner hele `src/` så klassen ikke kan komme tilbage. Dansk og svensk output er
-målt uændret på 12 tal i begge sprog, så intet på de live domæner flytter sig.
-Alle fem review-fund er rettet (`74e7861`, `d563ba2`), CEO-køens punkt 0 er
-færdigt (`aca17e5`).
+STATUS: KØ — 30/9 18:45. **F4 er færdig** (`ceo/forsiden-snabb-indgang`): forsiden
+linkede de mest brugte beregnere som ét kort i et gitter med én kolonne på
+mobil, tre skærmbilleder ned. Nu ligger en kompakt stribe med links til de otte
+mest brugte **før** tillidsrækken, og en renderet test låser rækkefølgen for
+dansk og svensk. Se arkivet for målingen og de fire mutationer.
 
-**Én ny VERIFICÉR-note** (denne iteration). F4 kræver Playwright (❓),
-F1/F3/F5 og opgaverne 97/98/119/183 er blokeret af svar fra Mads.
-**Opgave 187 må ikke røres før 13/10.**
+**To VERIFICÉR-noter åbne** (fra F6 og F4). F1/F3/F5 og opgaverne 97/98/119/183
+er blokeret af svar fra Mads. **Opgave 187 må ikke røres før 13/10.**
 
 **⚠️ Målerfælde (30/9 15:40, samme klasse som C70's).** `npm run test` kører
 `locale-leak-gate.test.ts`, som med vilje planterer **to** danske lækager og
@@ -119,11 +114,15 @@ fjernet) — alle faldt i den mutatede kode. Se arkivet.
 før de svenske titelændringer fra C195/C196 er målt. Efter den dato er
 dette den største enkeltpost i trafikplanen. **Accept:** se opgave 187.
 
-**F4. [ ] Forsiden som indgangspunkt.** `/` har 465 indgangssider og 38 %
-bounce mod 2-7 % på beregnerne; beraknare.se `/` har 80 % bounce på 20
-besøgende. Direct-trafikken er 1.050 besøgende/28d. **Accept:** de otte
-mest brugte beregnere ligger i det første skærmbillede på 390 px, målt med
-skærmbilleder (kræver Playwright — se ❓).
+**F4. [x] ✅ `ceo/forsiden-snabb-indgang` — forsiden er et indgangspunkt, ikke
+en tekstside.** Kompakt stribe med links til de otte mest brugte beregnere,
+lige under helten og før tillidsrækken; `grid-cols-2 sm:grid-cols-3
+lg:grid-cols-4`, `min-h-11` pr. flade, mørk tilstand på de tokens siden
+allerede bruger. Listen er **de otte første `popular: true`**, ikke en ny liste,
+så den ikke kan rådne væk fra trafikken. Otte nye tests, fire mutationer
+faldt. Se arkivet.
+**MÅL:** `/` 218 besøgende/28d, bounce 38 % → mod 2-7 % (Plausible 2026-09-30);
+se `/` 20 besøgende, bounce 80 %. Genmål 14 dage efter at den er live.
 
 **F5. [ ] Søg på de 27 % ikke-Google-trafik.** Bing 1.319 + DDG 378 +
 Yahoo 274 besøgende/28d. IndexNow er kodet og instrumenteret
@@ -166,8 +165,9 @@ fremover med `git stash -u` før og efter, som gjort her.
 
 ## Åbne VERIFICÉR DEPLOY-noter
 
-**Én note åben.** HTTP 200 beviser intet: noten rører Intl-formatering, og
-en fejl i den er usynlig i en dansk browser. De otte lukkede noter er verificeret
+**To noter åbne.** HTTP 200 beviser intet: F6's note rører Intl-formatering, hvor
+en fejl er usynlig i en dansk browser, og F4's rører rækkefølge og breakpoint,
+hvor en fejl også er usynlig for `curl`. De otte lukkede noter er verificeret
 30/9 17:46-17:53 på indhold; alle målinger står i `docs/plan-arkiv.md`.
 
 - ⏳ **Norske tal skal ikke få dansk tusindtalsseparator.** `ceo/no-locale-tag`.
@@ -178,6 +178,14 @@ en fejl i den er usynlig i en dansk browser. De otte lukkede noter er verificere
   dansk er, at `npm run test` fortsat er grøn på
   `src/lib/intl-locale-tag.test.ts` efter deploy. Vindue **30/10 07:30** (denne
   merge sker efter 17:30).
+- ⏳ **Striben på forsiden skal ligge før tillidsrækken.** `ceo/forsiden-snabb-indgang`.
+  På `https://minberegner.dk/` og `https://beraknare.se/`: de otte links skal
+  komme **før** tillidsrækken ("Gratis beregnere"/"100+ gratis") og før
+  overskriften "Populære beregnere"/"Populära kalkylatorer" i markupken, og på
+  beraknare.se skal de otte hrefs have svenske titler. Prøven på dansk er
+  `src/app/forside.test.tsx` efter deploy. **En pixelmåling på 390 px er ikke
+  lavet** — repoet har intet Playwright (❓); højden over fold er beregnet, ikke
+  målt. Vindue **30/10 07:30**.
 
 ## Åbne opgaver
 
@@ -389,7 +397,10 @@ en fejl i den er usynlig i en dansk browser. De otte lukkede noter er verificere
   kræver en rigtig browser kan ikke lukkes maskinelt: repoet har ingen
   Playwright, og `CLAUDE.md` forbyder nye afhængigheder uden dit ja. Uden det
   bruger jeg jsdom-render (som med C55/C56/C60), der dækker logikken men ikke
-  layout, breakpoints eller mørk tilstand.
+  layout, breakpoints eller mørk tilstand. **Én konkret måling mangler nu:**
+  F4's højde over fold på 390 px. Jeg har låst rækkefølgen i markupken og
+  beregnet højden, men ikke målt den — og layoutet i helten, tillidsrækken og
+  striben er det, en skærmdump ville afkræfte.
 - ❓ **Kilde til madvaretabellen (opgave 119, `BLOCKED`).** `sst.dk` svarer HTTP 429
   for både browser og curl, og de fire andre danske kilder døde i C92. Enten en
   PDF af *De officielle kostanbefalinger* lagt i repoet, eller en API-nøgle til en
