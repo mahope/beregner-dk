@@ -1,6 +1,8 @@
 import { describe, expect, test } from "vitest";
 import {
+  PROCENT_10_AF_TAL,
   PROCENT_SKILLNAD_EKSEMPEL,
+  procentAf,
   procentDifferens,
   procentForskel,
 } from "./procent";
@@ -47,6 +49,70 @@ describe("procentDifferens", () => {
 
   test("to tal der summerer til 0 giver ingen division med 0", () => {
     expect(procentDifferens(10000, -10000)).toBe(0);
+  });
+});
+
+describe("procentAf", () => {
+  test("10 procent er tallet delt med 10", () => {
+    expect(procentAf(250, 10)).toBe(25);
+    expect(procentAf(100, 10)).toBe(10);
+    expect(procentAf(500, 10)).toBe(50);
+    expect(procentAf(1600, 10)).toBe(160);
+  });
+
+  test("et tal der ikke kan deles med 10 giver et decimaltal", () => {
+    // 75 ligger i PROCENT_10_AF_TAL med vilje: det er det eneste målte tal,
+    // hvis svar ikke er et helt tal, så formateringen skal kunne begge dele.
+    expect(procentAf(75, 10)).toBe(7.5);
+  });
+
+  test("de andre satser bruger samme regel", () => {
+    expect(procentAf(200, 25)).toBe(50);
+    expect(procentAf(180, 50)).toBe(90);
+    expect(procentAf(350, 1)).toBe(3.5);
+  });
+
+  test("0 procent er 0, og 100 procent er tallet selv", () => {
+    expect(procentAf(500, 0)).toBe(0);
+    expect(procentAf(500, 100)).toBe(500);
+  });
+});
+
+describe("PROCENT_10_AF_TAL", () => {
+  test("dækker de tal dansk og svensk autocomplete faktisk spørger om", () => {
+    // Målt 2026-09-30 (hl=da&gl=dk / hl=se&gl=se). Listen er de viste tal,
+    // ikke et udvalg — en række der mangler her, mangler også i tabellen.
+    for (const tal of [75, 100, 200, 300, 400, 500, 600, 1000, 1600, 25000]) {
+      expect(PROCENT_10_AF_TAL).toContain(tal);
+    }
+    for (const tal of [500, 1000, 2000, 10000, 1000000, 5000000]) {
+      expect(PROCENT_10_AF_TAL).toContain(tal);
+    }
+  });
+
+  test("hver række svarer til tallet delt med 10", () => {
+    // Tallene er beregnet, ikke skrevet i hånden, så en forkert række er umulig
+    // at få ind uden at denne test falder.
+    for (const tal of PROCENT_10_AF_TAL) {
+      expect(procentAf(tal, 10)).toBe(tal / 10);
+    }
+  });
+
+  test("er stigende og uden dubletter", () => {
+    expect(PROCENT_10_AF_TAL).toEqual([...PROCENT_10_AF_TAL].sort((a, b) => a - b));
+    expect(new Set(PROCENT_10_AF_TAL).size).toBe(PROCENT_10_AF_TAL.length);
+  });
+
+  test("indeholder 75, fordi det er det eneste målte tal med komma i svaret", () => {
+    const medDecimal = PROCENT_10_AF_TAL.filter((tal) => procentAf(tal, 10) % 1 !== 0);
+    expect(medDecimal).toEqual([75]);
+  });
+
+  test("alle tal er positive heltal", () => {
+    for (const tal of PROCENT_10_AF_TAL) {
+      expect(Number.isInteger(tal)).toBe(true);
+      expect(tal).toBeGreaterThan(0);
+    }
   });
 });
 

@@ -1,23 +1,26 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — **opgave 205: "hvor mange dage er der til den 24 december" er
-sidens næststørste nedtællingssøgning, og ingen titel eller ankertekst på
-sitet rummede datoen.** GSC 2026-08-30 → 2026-09-27: 1.013 visninger, pos. 5.
-Søster-søgningen "…til 1 december" (1.131 v, pos. 5) har allerede sit eget
-`/dage-til/1-december`-svar med datoen i spørgsmålet; juleaften gjorde ikke.
-Rettelse: spørgsmålet er nu **"Hvor mange dage er der til 24. december
-(juleaften)?"**, hvilket løfter både `<title>`/`<h1>` på `/dage-til/juleaften`
-og ankerteksten i /datos nedtællingsliste (den læser `{link.question}`).
-**Én streng, to synlige flader.** Kun `da` — opgave 187 frosser beraknare.se til
-13/10.
+STATUS: KØ — **opgave 206: `/procent` — sitets største side med 150.148
+visninger og 0,07 % CTR — svarede på nul af de tal, dens egen største
+søgning spørger om.** GSC's tredjestørste søgning på siden er "10 procent af"
+(53 v, pos. 6), og dansk autocomplete svarer den med **9 tal ud af 10** (100,
+200, 75, 1 600, 25 000, 500, 300, 600, 400) — mens den server-renderede side
+havde **0** af dem og svarede alene på "10 % af 250". Rettelse: et nyt `<h2>`
+"10 procent af et tal" med en **17-rækkers** tabel i begge sprog, hvis tal
+**regnes** af den nye `procentAf(tal, procent) = tal × procent / 100` — samme
+regel som værktøjet bruger — så en række ikke kan komme i uoverensstemmelse
+med beregneren. Svensk får sin egen "10 procent av ett tal" med de samme
+17 tal. Tre nye FAQ-par pr. sprog, dermed også i JSON-LD'en. **Mål før
+rettelsen:** 0 af 17 målte tal i markupken. Kun brødtekst, `<h2>` og FAQ —
+ingen titel, ingen `<h1>`, ingen ny URL, ingen beregningslogik.
 
-**Mål:** `/dato` 132.313 visninger / 822 klik / CTR 0,6 % / pos. 5,7; de to
-nedtællingssøgninger 2.144 visninger / **2 klik** (GSC 2026-08-30 → 2026-09-27).
-Genmål **2026-10-14**.
+**Mål:** `/procent` 150.148 visninger / 98 klik / CTR 0,07 % / pos. 7,4;
+"10 procent af" 53 v / pos. 6 (GSC 2026-08-30 → 2026-09-27). Genmål
+**2026-10-14**.
 
-**Færdige i dag:** 205, 204, 203, 202, 201, 200 — 204 og 205 arkiveret nu.
-De **otte** åbne deploy-noter har første vindue 30/9 07:30; intet var
-verificerbart ved 05:50, og intet blev rørt.
+**Færdige i dag:** 206, 205, 204, 203, 202, 201, 200. De **ni** åbne
+deploy-noter har første vindue 30/9 07:30; intet var verificerbart ved 06:00,
+og intet blev rørt.
 
 ## Kvalitetsgate (repoets egne scripts fra package.json)
 
@@ -37,8 +40,50 @@ Alle fire var grønne før merge 2026-09-30 04:20.
 
 ## Åbne VERIFICÉR DEPLOY-noter
 
-Otte noter. HTTP 200 beviser intet: ingen rører en URL, kun `<title>`- og
+Ni noter. HTTP 200 beviser intet: ingen rører en URL, kun `<title>`- og
 `og:title`-strenge, artiklernes **slutning** og rene visuelle elementer.
+
+- ⏳ **VERIFICÉR DEPLOY: `/procent` skal svare på "10 procent af" med et tal
+  for hvert af de 17 tal, siden selv målte i autocomplete.** Kode + plan i ét
+  squash-commit på `ceo/procent-10-af-tal`. Første kandidatvindue
+  **2026-09-30 07:30** (dette push sker 06:3x). Rørte filer:
+  `src/lib/procent.ts` (ny `procentAf` + `PROCENT_10_AF_TAL`),
+  `src/app/procent/page.tsx` (**+78**, ét `<h2>` + 17-rækkers tabel + brødtekst
+  i hver sproggren), `src/lib/page-data.ts` (**6 strenge**, 3 FAQ-par pr. sprog)
+  og de to tests. Ingen `<title>`, ingen `metaDescription`, ingen `<h1>`, ingen
+  ny URL, ingen sitemap, ingen beregningslogik ændret. Verificér ved
+  **indhold**:
+  1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
+  2. `https://minberegner.dk/procent` skal have **`<h2>10 procent af et
+     tal</h2>`** og **17** rækker med "10 procent af N", hvor **75 → 7,5**,
+     **500 → 50** og **1.600 → 160** (dansk tusindtalsseparator med punktum).
+  3. `https://beraknare.se/procent` skal have **`<h2>10 procent av ett
+     tal</h2>`** og **17** rækker, hvor **500 → 50** og **1 000 → 100** (svensk
+     tusindtalsseparator med mellemrum).
+  4. **Kontrol:** begge `<title>` skal være **uændrede** — dansk
+     "Procentberegner: 10 % af 250 = 25 kr. Stigning, fald, rabat" og svensk
+     "Procenträknare: 10 % av 250 kr = 25 kr" — og `<h1>` stadig
+     "Procentberegner".
+  5. **Kontrol:** `0` danske markører ("fjerdedel", "tredjestørste") på
+     beraknare.se og `0` svenske ("fjärdedel", "tredjestörsta") på
+     minberegner.dk. `/tidszone`-titlen skal være uændret.
+  6. **Kontrol:** `/sitemap.xml` skal stadig have præcis **1** `/procent`-URL.
+  Målt på rigtig server før merge (`next start` :3991, porten verificeret fri
+  *inden* start): 17/17 rækker i begge domæner, 75 → 7,5 i begge, **0** kryds-
+  sprog-markører, uændrede titler, canonical uændret, de tre nye FAQ-spørgsmål i
+  JSON-LD'en, sitemap uændret. **Gate grøn:** lint (**618 filer**), **3037
+  tests / 190 filer** (fra 3031/190), build (**142 sider**),
+  `locale-leak.mjs --gate` exit 0. **15 af de nye tests falder mod master's
+   `procent.ts`/`page.tsx`** (verificeret med `git stash`), så de låser den
+   gamle fejl fast — bl.a. én der kræver hvert enkelt målt tal i markupken.
+  390/1280 px kan ikke tjekkes (repoet har ingen Playwright, se ❓ Til Mads);
+  tilføjelsen er ét `<h2>`, ét afsnit og én tabel i samme `prose`-blok som de
+  tre eksisterende tabeller på samme side, alle i `overflow-x-auto`.
+  **Egen diff-review fangede en reel fejl, før commit:** brødteksten skrev
+  først at "250 bliver til 2,5" — men komma-tricket én plads til venstre giver
+  **25**, og 2,5 er *1* procent. Rettet til "250 bliver til 25,0". Samme
+  gennemgang fjernede et uverificerbart superlativ ("mest stillede spørgsmål" →
+  "tredjestørste spørgsmål", hvilket er præcis GSC's placering).
 
 - ⏳ **VERIFICÉR DEPLOY: "hvor mange dage er der til den 24 december" skal kunne
   genfindes i juleaftens titel og i /datos ankertekst.** Kode + plan i ét
@@ -380,38 +425,68 @@ Otte noter. HTTP 200 beviser intet: ingen rører en URL, kun `<title>`- og
   (snippet/intention), ikke på to separate sidefejl — men at *finde* den kræver
   stadig kildefordelingen fra Mads, så opgaven står.
 
-#### 205. [x] ✅ 2026-09-30 — trafik — **"hvor mange dage er der til den 24 december" (1.013 v, pos. 5, 2 klik) fandtes hverken i juleaftens titel eller i /datos ankertekst.** (squash `ceo/juleaften-24-december`)
+#### 206. [x] ✅ 2026-09-30 — trafik — **`/procent` (150.148 v, 98 klik, CTR 0,07 %, pos. 7,4) svarede på nul af de 17 tal, dens egen tredjestørste søgning spørger om.** (squash `ceo/procent-10-af-tal`)
 
-- **Datagrund:** GSC 2026-08-30 → 2026-09-27, side `/dato` (132.313 v, 822
-  klik, CTR 0,6 %, pos. 5,7). Søgningerne **"hvor mange dage er der til 1
-  december"** (1.131 v, pos. 5) og **"hvor mange dage er der til den 24
-  december"** (1.013 v, pos. 5) er de to største i nedtællingsklyngen og gav
-  **2 klik mellem sig**. Begge er konkrete datoer, ikke navne — det er derfor
-  de er skrevet sådan.
-- **Årsagen er én streng, målt:** `1-december` er sit **eget** event med
-  spørgsmålet "…til 1. december?", men juleaftens var "…til juleaften?".
-  `copy.question` bruges to steder: i `buildDageTilMetadata` som titel OG som
-  `<h1>`, og i /datos nedtællingsliste som ankertekst (`{link.question}`) — så
-  **én** streng stod i **to** synlige flader, og ingen af dem havde "24.
-  december". Datoen stod i `facts[0]` og i to FAQ-svar, altså sand og allerede
-  verificeret — bare i den del, Google ikke viser.
-- **Rettelse:** `da`-armens `question` → "Hvor mange dage er der til 24.
-  december (juleaften)?" (49 tegn; titel med dage-tal 58, under testens
-  60-tegns-loft). `copy.short` er bevaret som "juleaften", så h1-brødteksten
-  "Der er N dage til juleaften" er uændret. Kun `da` — `se` er frosset til
-  13/10 (opg. 187).
-- **Harness:** `dage-til-routes.test.tsx` +1, der låser spørgsmålet, `short`
-  og hele titlen. **Modsvejs verificeret:** mod master's `dage-til.ts` falder
-  den. **Gate grøn:** lint (**618 filer**), **3022 tests / 190 filer** (fra
-  3021/190), build (**142 sider**), `locale-leak.mjs --gate` exit 0.
-- **MÅL:** `/dato` 132.313 visninger / 822 klik / CTR 0,6 % / pos. 5,7;
-  nedtællingsklyngen 2.144 visninger / 2 klik (GSC 2026-08-30 → 2026-09-27).
-  Genmål **2026-10-14**.
-- **⚠️ Hvad der bevidst IKKE blev gjort:** samme behandling af 25. december,
-  31. december og 1. januar. GSC nævner kun de to datoer ovenfor, så de tre
-  ville være tynd SEO-padding uden målbar efterspørgsel — og hvert ekstra
-  spørgsmål i en titel er en længere titel. De tages, når GSC viser
-  søgningen på dem.
+- **Datagrund:** GSC 2026-08-30 → 2026-09-27. Søgningerne er
+  "procentberegner" (249 v, pos. 8), "en telefon er sat 1125 kr. ned, normalt
+  koster den 9000 kr, hvor stor er rabatten i procent?" (59 v, pos. 6) og
+  **"10 procent af" (53 v, pos. 6)**. Sidens **første og tredje** søgning er
+  altså spørgsmål, den ikke besvarer. Plausible: `/procent` er ikke i
+  top-15, så dette er en ren CTR-opgave, ikke en trafikopgave.
+- **Målt først, begge sprog.** DA-autocomplete (`hl=da&gl=dk`, 30/9 06:0x) under
+  **"10 procent af"** svarer med **9 tal ud af 10**: 100, 200, 75, 1 600,
+  25 000, 500, 300, 600, 400. SE (`hl=se&gl=se`) under **"10 procent av"**:
+  10 000, 500, 1 000, 2 000, 2/3/4/5 mio. Begge lister er **ren tal** — de er
+  slå-op-tabeller, ikke forklaringer. Den server-renderede `/procent` indeholdt
+  **0 af dem**: kun "10 % af 250" i tricks-tabellen og "10 procent af 10.000"
+  i Excel-tabellen.
+- **Rettelse:** nyt `<h2>` **"10 procent af et tal"** med regnestykket og en
+  **17-rækkers** tabel (Spørgsmål / Svar) i `da`-grenen, og
+  **"10 procent av ett tal"** med præcis samme 17 tal i `se`-grenen. **Ingen
+  tal står hårdkodet to steder:** den nye `procentAf(tal, procent) = tal ×
+  procent / 100` er den ene regel bag tabellen, tricks-tabellen og
+  `ProcentBeregner` — samme mønster som C181's `MINUTTER_TILL_TIMMAR`. De to
+  domæner deler **én** `PROCENT_10_AF_TAL`, så en ny række kun i det ene sprog
+  er umulig. **75 er med fordi det er det eneste målte tal med komma i svaret**
+  (7,5), så tabellen låser både heltals- og decimalformatering. Tre nye FAQ-par
+  pr. sprog (10 procent af 500 / 1.600 / hvorfor 75 ikke er helt) — de kommer
+  dermed også i JSON-LD'en, som bragte siden fra 7 til 10 spørgsmål.
+- **⚠️ Egen diff-review før commit fandt en reel fejl, som en grøn gate ikke
+  ville have fanget:** brødteksten skrev at "250 bliver til 2,5" for at
+  forklare komma-tricket. Det er **forkert** — én plads til venstre på 250 er
+  **25**; 2,5 er 1 procent. Rettet til "250 bliver til 25,0". Samme gennemgang
+  erstattede superlativet "det mest stillede spørgsmål" med "det tredjestørste
+  spørgsmål", fordi GSC's placering er målt, og superlativet ikke var det.
+  Dette er **fejltype 11** (påstande i tekst er kode) fundet ved at læse diffen
+  som reviewer.
+- **Harness:** `procent.test.ts` **+11** (reglen, konstantens dækning,
+  stigende/uden dubletter, at præcis 75 har decimal), `procent/page.test.tsx`
+  **+4** (hvert målt tal i hvert sprog, 75 → 7,5, ens rækker i begge sprog,
+  ingen kryds-sprog-omtekst). **Modsvejs verificeret: 15 af de nye tests
+  falder** med master's `procent.ts` + `page.tsx` (`git stash`).
+- **Målt på rigtig server** (`next start` :3991, porten verificeret fri *inden*
+  start): **17 rækker i begge domæner**, `75 → 7,5` i begge, `500 → 50`,
+  `1.600 → 160` (dansk punktum) og `1 000 → 100` (svensk mellemrum), **0**
+  danske markører på beraknare.se og **0** svenske på minberegner.dk, begge
+  `<title>` og `<h1>` uændrede, canonical uændret, sitemap uændret (1 `/procent`),
+  `/tidszone`-titlen uændret, `/api/health` → `status: ok`.
+- **Gate grøn:** lint (**618 filer**), **3037 tests / 190 filer**, build
+  (**142 sider**), `locale-leak.mjs --gate` exit 0. Rørte filer:
+  `procent.ts` (+29), `procent/page.tsx` (+78), `page-data.ts` (+6) og de to
+  tests — **ingen titel, ingen `<h1>`, ingen ny URL, ingen sitemap, ingen
+  ændret beregningslogik**.
+- **MÅL:** `/procent` 150.148 visninger / 98 klik / CTR 0,07 % / pos. 7,4;
+  "10 procent af" 53 v / pos. 6 (GSC 2026-08-30 → 2026-09-27). Genmål
+  **2026-10-14**.
+- **⚠️ Ærlig forventning:** de ni målte tal-søgninger er en lille del af de
+  150.148 visninger — GSC's tre top-søgninger er tilsammen ~360 v. Jeg lover
+  derfor ikke en ny CTR. Det læsbare er, at siden nu svarer på sin egen
+  tredjestørste søgning i sit eget sprog. Er CTR'en uændret efter 14 dage, er
+  "den manglende tal-tabel forklarede den lave CTR" **modbevist**, og næste
+  spørgsmål er ikke mere indhold men søgemassen. **Målt og bevidst ikke
+  bygget:** "procent rabat"/"procent fald"/"procent vækst" (9 af 10 under
+  "procent beregner") er **alle** allerede `<h2>`-afsnit på samme side, så de
+  er ikke huller; det er heller ikke nye sider værd.
 
 #### 187. [ ] **IKKE FØR 2026-10-13** 2026-09-30 — Kø — **migrér beraknare.se til svenske URL-slugs med 301**
 

@@ -809,6 +809,9 @@ const daPages: Record<string, PageData> = {
       { question: "Hvordan regner man procent i Excel?", answer: "Skriv =A1/B1*100, hvis du vil have procent direkte, og =A1*B1/100, hvis du vil have X procent af et tal. Et fald fra 9.000 kr til 7.875 kr er =(B1-A1)/A1*100 = -12,5 %. Formater cellen som procent, hvis du ikke skriver *100." },
       { question: "Hvordan regner man procentforskellen mellem to tal?", answer: "Forskellen er ((nyt tal - gammelt tal) / gammelt tal) × 100. Går en pris fra 9.000 kr til 7.875 kr, er faldet (7.875 - 9.000) / 9.000 = -12,5 %." },
       { question: "Hvor stor er rabatten i procent?", answer: "Rabatten er (pris før rabat - pris efter rabat) / pris før rabat × 100. Er en vare på 9.000 kr sat 1.125 kr. ned, er rabatten 1.125 / 9.000 = 12,5 %." },
+      { question: "Hvad er 10 procent af 500?", answer: "10 procent af 500 er 50, fordi du deler 500 med 10. Reglen er altid tallet delt med 10." },
+      { question: "Hvad er 10 procent af 1.600?", answer: "10 procent af 1.600 er 160, fordi du deler 1.600 med 10. Det er samme regel som 10 procent af 500 = 50." },
+      { question: "Hvorfor er 10 procent af 75 ikke et helt tal?", answer: "Fordi 75 ikke kan deles lige med 10. 10 procent af 75 er 7,5, og kommaet er korrekt — 10 procent af 80 ville være 8." },
       ],
     },
     "kvadratmeter": {
@@ -3308,6 +3311,9 @@ const sePages: Record<string, PageData> = {
       { question: "Hur lägger jag till procent?", answer: "Multiplicera med (1 + procent/100). Lägg 20% till 150: 150 × 1,20 = 180." },
       { question: "Hur räknar man ut skillnaden i procent mellan två tal?", answer: "Det beror på vilket tal som är heltalet. För procentuell förändring är det den gamla summan: 10 000 till 12 500 ger (12 500 - 10 000) / 10 000 = 25 procent. För procentdifferens, som är lika oberoende av vilken riktning du räknar i, tar du medelvärdet: 2 500 / 11 250 = 22,2 procent för samma två tal." },
       { question: "Hur räknar man ut skillnaden mellan två tal i Excel?", answer: "Skriv =(B1-A1)/A1*100, där A1 är det gamla talet och B1 det nya. 10 000 i A1 och 12 500 i B1 ger 25 procent. Vill du ha den symmetriska skillnaden i stället, skriver du =ABS(A1-B1)/((A1+B1)/2)*100, som ger 22,2 procent för samma tal." },
+      { question: "Vad är 10 procent av 500?", answer: "10 procent av 500 är 50, eftersom du delar 500 med 10. Regeln är alltid att talet delas med 10." },
+      { question: "Vad är 10 procent av 1 600?", answer: "10 procent av 1 600 är 160, eftersom du delar 1 600 med 10. Det är samma regel som 10 procent av 500 = 50." },
+      { question: "Varför är 10 procent av 75 inte ett helt tal?", answer: "För att 75 inte kan delas jämnt med 10. 10 procent av 75 är 7,5, och kommat är korrekt — 10 procent av 80 hade varit 8." },
       ],
     },
     "kvadratmeter": {

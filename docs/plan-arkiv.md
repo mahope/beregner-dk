@@ -19119,3 +19119,39 @@ titelændring på `/bmi` uden diagnose ville være prøvet to gange. Bemærk at
   3020/190), build (**142 sider**), `locale-leak.mjs --gate` exit 0.
 - **Frosset `se`:** beraknare.se får **intet** — opgave 187 venter til 13/10 med
   slug-migreringen, og `/renteberegner` har 2.871 GSC-visninger på pos. 23,5.
+
+## Arkiveret 2026-09-30 — opgave 205 (juleaftens spørgsmål med datoen)
+
+#### 205. [x] ✅ 2026-09-30 — trafik — **"hvor mange dage er der til den 24 december" (1.013 v, pos. 5, 2 klik) fandtes hverken i juleaftens titel eller i /datos ankertekst.** (squash `ceo/juleaften-24-december`)
+
+- **Datagrund:** GSC 2026-08-30 → 2026-09-27, side `/dato` (132.313 v, 822
+  klik, CTR 0,6 %, pos. 5,7). Søgningerne **"hvor mange dage er der til 1
+  december"** (1.131 v, pos. 5) og **"hvor mange dage er der til den 24
+  december"** (1.013 v, pos. 5) er de to største i nedtællingsklyngen og gav
+  **2 klik mellem sig**. Begge er konkrete datoer, ikke navne — det er derfor
+  de er skrevet sådan.
+- **Årsagen er én streng, målt:** `1-december` er sit **eget** event med
+  spørgsmålet "…til 1. december?", men juleaftens var "…til juleaften?".
+  `copy.question` bruges to steder: i `buildDageTilMetadata` som titel OG som
+  `<h1>`, og i /datos nedtællingsliste som ankertekst (`{link.question}`) — så
+  **én** streng stod i **to** synlige flader, og ingen af dem havde "24.
+  december". Datoen stod i `facts[0]` og i to FAQ-svar, altså sand og allerede
+  verificeret — bare i den del, Google ikke viser.
+- **Rettelse:** `da`-armens `question` → "Hvor mange dage er der til 24.
+  december (juleaften)?" (49 tegn; titel med dage-tal 58, under testens
+  60-tegns-loft). `copy.short` er bevaret som "juleaften", så h1-brødteksten
+  "Der er N dage til juleaften" er uændret. Kun `da` — `se` er frosset til
+  13/10 (opg. 187).
+- **Harness:** `dage-til-routes.test.tsx` +1, der låser spørgsmålet, `short`
+  og hele titlen. **Modsvejs verificeret:** mod master's `dage-til.ts` falder
+  den. **Gate grøn:** lint (**618 filer**), **3022 tests / 190 filer** (fra
+  3021/190), build (**142 sider**), `locale-leak.mjs --gate` exit 0.
+- **MÅL:** `/dato` 132.313 visninger / 822 klik / CTR 0,6 % / pos. 5,7;
+  nedtællingsklyngen 2.144 visninger / 2 klik (GSC 2026-08-30 → 2026-09-27).
+  Genmål **2026-10-14**.
+- **⚠️ Hvad der bevidst IKKE blev gjort:** samme behandling af 25. december,
+  31. december og 1. januar. GSC nævner kun de to datoer ovenfor, så de tre
+  ville være tynd SEO-padding uden målbar efterspørgsel — og hvert ekstra
+  spørgsmål i en titel er en længere titel. De tages, når GSC viser
+  søgningen på dem.
+

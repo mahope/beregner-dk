@@ -1,7 +1,9 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import { getDomainConfigByLocale } from "@/lib/domain-config";
+import { formatNumber } from "@/lib/format";
 import { getCurrentDomainConfig, getLocale } from "@/lib/get-locale";
+import { PROCENT_10_AF_TAL } from "@/lib/procent";
 import ProcentPage from "./page";
 
 vi.mock("@/components/ProcentBeregner", () => ({
@@ -216,5 +218,77 @@ describe("procent page", () => {
     expect(da).not.toContain("Skillnad i procent mellan två tal");
     expect(se.match(/Skillnad i procent mellan två tal/g)).toHaveLength(1);
     expect(se).not.toContain("procentforskellen mellem to tal");
+  });
+
+  // "10 procent af" er GSC's tredjestørste søgning på siden (53 visninger,
+  // pos. 6) og dansk autocomplete svarer den med ni tal ud af ti. Siden
+  // indeholdt før kun "10 % af 250", så låsen er på hvert eneste målt tal.
+  test.each([
+    { locale: "da" as const, spoergsmaal: "10 procent af" },
+    { locale: "se" as const, spoergsmaal: "10 procent av" },
+  ])("$locale svarer på hvert tal fra sin egen autocomplete-liste", async ({ locale, spoergsmaal }) => {
+    const html = await render(locale);
+
+    for (const tal of PROCENT_10_AF_TAL) {
+      // Samme formatering som page.tsx bruger: Intl med landets eget
+      // tusindtalsseparator, og U+00A0 (som svensk Intl bruger) normaliseret
+      // til et mellemrum, fordi resten af den svenske side gør det.
+      const formateret = formatNumber(tal, locale, {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+      }).replace(/ /g, " ");
+      expect(html).toContain(`${spoergsmaal} ${formateret}</td>`);
+    }
+  });
+
+  test("svaret i hver række er tallet delt med 10", async () => {
+    const html = await render("da");
+
+    // 75 er det eneste tal med komma i svaret, så det låser både heltal og
+    // decimal: en formatteringsfejl ville skrive 7,5 som 8. 1.600 står med
+    // punktum, fordi det er dansk tusindtalsseparator.
+    expect(html).toContain("10 procent af 75</td><td>7,5</td>");
+    expect(html).toContain("10 procent af 500</td><td>50</td>");
+    expect(html).toContain("10 procent af 1.600</td><td>160</td>");
+  });
+
+  // Svensk skal have præcis sin egen 10-procent-sektion. Samme lære som
+  // skillnadsafsnittet ovenfor: et negativt lås må kræve en egenskab, ikke
+  // en tilstand — "dansk må ikke have den svenska sektion" låser den
+  // tilstand før rettelsen og ville blokere næste svar-rettelse.
+  test("hvert sprog har præcis sin egen 10-procent-overskrift", async () => {
+    const da = await render("da");
+    const se = await render("se");
+
+    expect(da.match(/10 procent af et tal/g)).toHaveLength(1);
+    expect(da).not.toContain("10 procent av ett tal");
+    expect(se.match(/10 procent av ett tal/g)).toHaveLength(1);
+    expect(se).not.toContain("10 procent af et tal");
+  });
+
+  test("begge tabeller har præcis de samme rækker", async () => {
+    const da = await render("da");
+    const se = await render("se");
+
+    // En ny række kun i det ene sprog er en fejl: tallene kommer fra én
+    // konstant, så de to domæner skal se identiske tabeller.
+    const rækker = (html: string, mønster: RegExp) =>
+      html.match(new RegExp(mønster.source, "g"))?.length ?? 0;
+    expect(
+      rækker(da, /10 procent af ([\d\s.]+)<\/td>/),
+    ).toBe(PROCENT_10_AF_TAL.length);
+    expect(
+      rækker(se, /10 procent av ([\d\s.]+)<\/td>/),
+    ).toBe(PROCENT_10_AF_TAL.length);
+  });
+
+  test("hverken dansk eller svensk side har den anden sprogbloks sats-omtekst", async () => {
+    const da = await render("da");
+    const se = await render("se");
+
+    expect(da).toContain("25 procent er en fjerdedel");
+    expect(da).not.toContain("25 procent är en fjärdedel");
+    expect(se).toContain("25 procent är en fjärdedel");
+    expect(se).not.toContain("25 procent er en fjerdedel");
   });
 });

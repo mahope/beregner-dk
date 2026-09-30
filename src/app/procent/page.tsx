@@ -13,7 +13,9 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import Sidebar from "@/components/Sidebar";
 import { formatNumber } from "@/lib/format";
 import {
+  PROCENT_10_AF_TAL,
   PROCENT_SKILLNAD_EKSEMPEL,
+  procentAf,
   procentDifferens,
   procentForskel,
 } from "@/lib/procent";
@@ -193,6 +195,44 @@ export default async function ProcentPage() {
           .
         </p>
 
+        <h2>10 procent af et tal</h2>
+        <p>
+          "10 procent af" er det tredjestørste spørgsmål Google har registreret
+          på denne side, og det er altid samme regnestykke:{" "}
+          <strong>tallet delt med 10</strong>. Flytter du blot kommaet én plads
+          til venstre, får du svaret med det samme: 250 bliver til 25,0, altså
+          10 procent af 250 er 25.
+        </p>
+        <div className="overflow-x-auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Spørgsmål</th>
+                <th>Svar</th>
+              </tr>
+            </thead>
+            <tbody>
+              {PROCENT_10_AF_TAL.map((tal) => (
+                <tr key={tal}>
+                  <td>10 procent af {num(tal)}</td>
+                  <td>{num(procentAf(tal, 10), 1)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p>
+          Tallene i tabellen er regnet, ikke skrevet i hånden, så de kan ikke
+          komme i uoverensstemmelse med værktøjet ovenfor. Et beløb der ikke
+          ender på 0 giver et svar med decimaler, og det er ikke en fejl: 10
+          procent af 75 er 7,5. Skal du regne en anden sats, er reglen den
+          samme —{" "}
+          <Link href="/moms" className="text-blue-700 underline">
+            25 procent er en fjerdedel
+          </Link>
+          , mens 1 procent er tallet delt med 100.
+        </p>
+
         <h2>Hurtige procent-tricks</h2>
         <div className="overflow-x-auto">
           <table>
@@ -346,6 +386,43 @@ export default async function ProcentPage() {
             .
           </li>
         </ul>
+
+        <h2>10 procent av ett tal</h2>
+        <p>
+          "10 procent av" är det tredjestörsta sökordet Google registrerat för
+          den här sidan, och det är alltid samma uträkning:{" "}
+          <strong>dela talet med 10</strong>. Flyttar du bara kommat ett steg
+          åt vänster får du svaret på samma sätt: 250 blir 25,0, alltså är 10
+          procent av 250 = 25.
+        </p>
+        <div className="overflow-x-auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Fråga</th>
+                <th>Svar</th>
+              </tr>
+            </thead>
+            <tbody>
+              {PROCENT_10_AF_TAL.map((tal) => (
+                <tr key={tal}>
+                  <td>10 procent av {num(tal)}</td>
+                  <td>{num(procentAf(tal, 10), 1)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p>
+          Siffrorna i tabellen är uträknade, inte handskrivna, så de inte kan
+          komma i konflikt med verktyget ovan. Ett belopp som inte slutar på 0
+          ger ett svar med decimaler, och det är inget fel: 10 procent av 75 är
+          7,5. Räknar du med en annan sats är regeln densamma —{" "}
+          <Link href="/moms" className="text-blue-700 underline">
+            25 procent är en fjärdedel
+          </Link>
+          , medan 1 procent är talet delat med 100.
+        </p>
 
         <h2>Snabba procent-knep</h2>
         <div className="overflow-x-auto">

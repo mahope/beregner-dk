@@ -44,3 +44,34 @@ export const PROCENT_SKILLNAD_EKSEMPEL = [
   { gammal: 10000, ny: 12500 },
 ];
 
+/**
+ * The whole numbers people ask "10 procent af" about, in both languages.
+ *
+ * Measured, not guessed: GSC lists "10 procent af" as the third largest query
+ * on /procent (53 visninger, pos. 6, 2026-08-30 → 2026-09-27), and Danish
+ * autocomplete (hl=da&gl=dk, 2026-09-30) answers it with nine numbers out of
+ * ten — 100, 200, 75, 1 600, 25 000, 500, 300, 600, 400. Swedish autocomplete
+ * (hl=se&gl=se, same date) answers "10 procent av" with 10 000, 500, 1 000,
+ * 2 000 and four round million figures. The two lists are kept in one constant
+ * so both domains answer the same cluster from a single source, the way
+ * MINUTTER_TILL_TIMMAR does for /tidsberegner.
+ *
+ * The answers are *computed* by {@link procentAf}, never written out by hand:
+ * 10 % is the number divided by ten, and a table that drifts from that rule
+ * would be a wrong answer rather than a stale one. 75 is in the list on
+ * purpose — it is the only measured number whose answer has a decimal
+ * (7,5), so the table has to format a fraction correctly.
+ */
+export const PROCENT_10_AF_TAL = [75, 100, 200, 300, 400, 500, 600, 1000, 1600, 2000, 10000, 25000, 1000000, 2000000, 3000000, 4000000, 5000000];
+
+/**
+ * A given percent of a number: (tal × procent) / 100.
+ *
+ * The single rule behind every example on the page — the 10 % table, the
+ * "Hurtige procent-tricks" rows and the calculator itself. Written once so the
+ * table cannot disagree with the tool that produced the query.
+ */
+export function procentAf(tal: number, procent: number): number {
+  return (tal * procent) / 100;
+}
+
