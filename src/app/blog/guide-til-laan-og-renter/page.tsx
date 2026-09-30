@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
 import BlogArticleSchema from "@/components/BlogArticleSchema";
+import { NaesteSkridt } from "@/components/BlogNaesteSkridt";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { OG_IMAGE } from "@/lib/page-helpers";
 
@@ -273,6 +274,12 @@ export default function LaanOgRenterGuidePage() {
           </div>
         ))}
       </article>
+
+      <NaesteSkridt
+        href="/renteberegner"
+        handling="Beregn rente og afdrag på dit lån"
+        beskrivelse="Se ydelsen hver måned, hvor meget af den der er afdrag, og hvad rente og løbetid gør ved tallet."
+      />
     </div>
   );
 }

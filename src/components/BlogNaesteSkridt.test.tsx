@@ -26,8 +26,13 @@ import PensionGuidePage from "@/app/blog/pension-hvor-meget-skal-du-spare-op/pag
  *
  * Den anden bølge (2026-09-30) tager de artikler, hvis beregner er blandt
  * sitets mest besøgte: /boligstoette 535, /kvadratmeter 388, /braendstof 265
- * og /barselsdagpenge 212 besøgende pr. 28 dage. Dagpenge-artiklen linkede
- * slet ikke til /barselsdagpenge, så der var ingen vej til værktøjet overhovedet.
+ * og /barselsdagpenge 212 besøgende pr. 28 dage.
+ *
+ * Dagpenge-artiklen havde i den bølge en CTA til /barselsdagpenge under
+ * knappen "Beregn din dagpenge". Det var en fejl: artiklen handler om at
+ * finde sin *egen* dagpengesats, og den er skrevet om /dagpenge, som den også
+ * linkede til i løbende tekst. Rettet 30/9 — se `blog/naeste-skridt.test.ts`,
+ * der fanger den slags fremover.
  */
 const artikler = [
   { navn: "barsel", href: "/barselsdagpenge", handling: "Beregn din barselsdagpenge", side: BarselGuidePage },
@@ -37,7 +42,7 @@ const artikler = [
   { navn: "boligstoette", href: "/boligstoette", handling: "Beregn din boligstøtte", side: Boligstoette2026Page },
   { navn: "kvadratmeter", href: "/kvadratmeter", handling: "Beregn dit areal", side: KvadratmeterGuidePage },
   { navn: "braendstof", href: "/braendstof", handling: "Beregn din brændstofpris", side: BraendstofGuidePage },
-  { navn: "dagpenge", href: "/barselsdagpenge", handling: "Beregn din dagpenge", side: DagpengeGuidePage },
+  { navn: "dagpenge", href: "/dagpenge", handling: "Beregn din dagpenge", side: DagpengeGuidePage },
 ] as const;
 
 /**

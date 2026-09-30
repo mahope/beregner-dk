@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
 import BlogArticleSchema from "@/components/BlogArticleSchema";
+import { NaesteSkridt } from "@/components/BlogNaesteSkridt";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { OG_IMAGE } from "@/lib/page-helpers";
 
@@ -479,6 +480,12 @@ export default function Boligsalg2026GuidePage() {
           </Link>
         </div>
       </div>
+
+      <NaesteSkridt
+        href="/boligsalg"
+        handling="Beregn dit boligsalgs provenu"
+        beskrivelse="Salgspris og omkostninger ind, og se hvor meget der bliver til dig."
+      />
 
       <div className="mt-8 pt-8 border-t border-gray-200 dark:border-gray-700">
         <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Relaterede artikler</h2>

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
 import BlogArticleSchema from "@/components/BlogArticleSchema";
+import { NaesteSkridt } from "@/components/BlogNaesteSkridt";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { OG_IMAGE } from "@/lib/page-helpers";
 
@@ -254,6 +255,12 @@ export default function TimeprisGuidePage() {
           </div>
         ))}
       </article>
+
+      <NaesteSkridt
+        href="/timepris"
+        handling="Beregn din timepris"
+        beskrivelse="Sæt det beløb du vil have udbetalt ind, og se hvilken timepris der skal til for at få det — ferie, drift og skat regnet med."
+      />
 
       <div className="mt-12 pt-8 border-t">
         <h2 className="text-xl font-bold mb-4">Relaterede artikler</h2>

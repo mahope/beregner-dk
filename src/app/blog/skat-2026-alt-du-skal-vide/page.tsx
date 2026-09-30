@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
 import BlogArticleSchema from "@/components/BlogArticleSchema";
+import { NaesteSkridt } from "@/components/BlogNaesteSkridt";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { formatNumber } from "@/lib/format";
 import { SATSER_2026, SKATTEFRADRAG_2026 } from "@/lib/satser-2026";
@@ -490,6 +491,12 @@ export default function Skat2026GuidePage() {
           </div>
         ))}
       </article>
+
+      <NaesteSkridt
+        href="/skattefradrag"
+        handling="Beregn dine skattefradrag"
+        beskrivelse="Se hvor meget dine fradrag er værd i skat — både samlet og hver måned."
+      />
 
       <div className="mt-12 pt-8 border-t">
         <h2 className="text-xl font-bold mb-4">Relaterede artikler</h2>

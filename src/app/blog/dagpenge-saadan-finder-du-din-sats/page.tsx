@@ -316,7 +316,7 @@ export default function DagpengeGuidePage() {
       </article>
 
       <NaesteSkridt
-        href="/barselsdagpenge"
+        href="/dagpenge"
         handling="Beregn din dagpenge"
         beskrivelse="Din egen sats afhænger af timeløn, feriedage og orlovsuger. Læg dem ind, og se dagpengen for hver uge."
       />

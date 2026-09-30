@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
 import BlogArticleSchema from "@/components/BlogArticleSchema";
+import { NaesteSkridt } from "@/components/BlogNaesteSkridt";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { OG_IMAGE } from "@/lib/page-helpers";
 
@@ -304,6 +305,12 @@ export default function LeasingAfBilPage() {
           </Link>
         </div>
       </div>
+
+      <NaesteSkridt
+        href="/leasing"
+        handling="Beregn din leasingpris"
+        beskrivelse="Se månedsprisen, renterne og den samlede leasingudgift over hele perioden."
+      />
 
       <div className="mt-8 pt-8 border-t border-gray-200 dark:border-gray-700">
         <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Relaterede artikler</h2>

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
 import BlogArticleSchema from "@/components/BlogArticleSchema";
+import { NaesteSkridt } from "@/components/BlogNaesteSkridt";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { OG_IMAGE } from "@/lib/page-helpers";
 
@@ -400,6 +401,12 @@ export default function ReelTimeloenPage() {
           </div>
         ))}
       </article>
+
+      <NaesteSkridt
+        href="/brok"
+        handling="Beregn din reelle timepris"
+        beskrivelse="Løn delt i timer er et brøk. Sæt løn og timer ind, og se timeprisen som decimal."
+      />
 
       <div className="mt-12 pt-8 border-t dark:border-gray-700">
         <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Relaterede artikler</h2>

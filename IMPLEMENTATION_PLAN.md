@@ -1,14 +1,18 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — 30/9 15:10. Elleve af tolv deploy-noter er lukket på indhold;
-`/alders` venter stadig på vinduet 17:30, og blog-noten fra i går venter
-med på samme vindue.
+STATUS: KØ — 30/9 15:40. Fire VERIFICÉR-noter venter på vinduet **17:30**
+(`/alders`, blog-bølgen fra i går, `/boligstoette`-titlen og denne iterations
+tolv artikler). De elleve ældre noter er lukket på indhold, ikke på HTTP 200.
 
-**Nyt i denne iteration:** `/boligstoette` er sitets bedst rangerende side i
-forhold til sit CTR (2,4 %), men lå på position 10-13 for *sine egne* ord,
-fordi hverken titel eller `<h1>` brugte "beregn" — dens største søgning. Se
-opgave 203. De elleve lukkede noter er verificeret på indhold, ikke på
-HTTP 200; målingerne står i `docs/plan-arkiv.md`.
+**Nyt i denne iteration:** de **sidste tolv** blogindlæg sluttede stadig på
+"Relaterede artikler" — opgave 202 efterlod dem. De har nu alle en næste
+handling, og en ny port låser mønstret for alle 27. Se opgave 204.
+
+**⚠️ Den nye port fandt en rigtig fejl i gårsdagens arbejde.**
+`/blog/dagpenge-saadan-finder-du-din-sats` havde knappen "Beregn din dagpenge"
+hængt på `/barselsdagpenge` — en barselsdagpengeberegner under en dagpengeknap.
+Artiklen handler om at finde sin egen dagpengesats, og den linkede allerede til
+`/dagpenge` i løbende tekst. Rettet.
 
 **⚠️ 12:30-batchen kørte UDEN de otte dengang ventende ændringer.** Alle otte var
 merged før 12:18. Kl. 14:12 er **elleve af dem live** — 12:30-batchen må altså
@@ -53,13 +57,12 @@ Alle fire var grønne før merge 2026-09-30 07:45.
 
 ## Åbne VERIFICÉR DEPLOY-noter
 
-**Én note åben.** HTTP 200 beviser intet: noterne rører `<title>`, `<h1>`,
+**Fire noter åbne.** HTTP 200 beviser intet: noterne rører `<title>`, `<h1>`,
 JSON-LD eller nye URL'er, og tidszone-noten forventer et **uændret** tal.
 Fulde tekster med alle målinger og kontroller står i `docs/plan-arkiv.md`.
 
 De elleve lukkede noter er verificeret 30/9 14:12 på indhold (se arkivet for
-hver sides måling). `/alders`-noten er den eneste der stadig er åben, fordi
-den blev merged 13:43 — efter 12:30-batchen.
+hver sides måling). De fire åbne er merged efter 12:30-batchen.
 
 - ⏳ **`/alder`s snippet skal vise dagens alder, ikke 25. september.**
   `ceo/alder-levende-snippet`. Skal have "pr. 30. september 2026" og
@@ -68,54 +71,42 @@ den blev merged 13:43 — efter 12:30-batchen.
    Målt 14:12: beskrivelsen siger stadig "pr. 25. september 2026" — korrekt,
    fordi den ikke er live endnu. Vindue **17:30**.
 
-### Ny note fra denne iteration
-
 - ⏳ **Syv blogindlæg skal slutte med deres beregner.** `ceo/blog-naeste-handling`.
   `/blog/arveafgift-regler-og-satser` → `/arveafgift`, `hvordan-beregner-man-moms`
   → `/moms`, `hvad-er-klokken-i-usa-naar-den-er-12-i-danmark` → `/tidszone`,
-  `30-procent-reglen-husleje` → `/husleje`, `bmi-for-boern-saadan-tjekker-du` →
-  `/bmi`, `guide-feriepenge-hvornaar-og-hvor-meget` → `/dato`,
+  `30-procent-reglen-husleje` → `/husleje`, `bmi-for-boern-saadan-tjekker-du`
+  → `/bmi`, `guide-feriepenge-hvornaar-og-hvor-meget` → `/dato`,
   `pension-hvor-meget-skal-du-spare-op` → `/pension`. Kontrol på indhold:
   hver side skal have "Regn det ud" **før** "Relaterede artikler", og
   `/moms` skal have **0** forekomster af den gamle CTA-løsning. Målt 15:00:
   de fire kontrollerede sider har `regn=0`, altså endnu ikke live. Vindue
   **17:30**.
 
-### Ny note fra denne iteration
-
 - ⏳ **`/boligstoette` skal ramme sin egen største søgning i titlen.**
   `ceo/boligstoette-titel`. Titlen skal være **"Beregn boligstøtte 2026:
   standardmaksima og formue"** i `<title>`, `<h1>`, `og:title` og
   `description`, og beskrivelsen skal stadig sige "Vejledende — fortsæt hos
   Udbetaling Danmark". Siden skal **stadig** have **0** forekomster på
-  "Boligstøtteberegner" — det er en korrekthedslås, ikke en fejl.
+  "Boligstøtteberegner" — det er en korrekthedslås, ikke en fejl. Vindue
+  **17:30**.
+
+- ⏳ **Alle 27 blogindlæg skal slutte med en næste handling.**
+  `ceo/blog-cta-rest`. De **tolv** artikler fra opgave 202 skal have
+  "Regn det ud" **før** "Relaterede artikler", hver med en CTA der peger på
+  en beregner artiklen allerede nævner i brødteksten:
+  `biloekonomi…` → `/bil`, `boliglaan…` → `/rentefradrag`,
+  `boligsalg…` → `/boligsalg`, `elpriser…` → `/elberegner`,
+  `guide-til-laan-og-renter` → `/renteberegner`,
+  `koeb-af-bolig…` → `/rentefradrag`, `leasing-af-bil…` → `/leasing`,
+  `maanedsbudget…` → `/budget`, `privatoekonomi-for-unge` → `/loen-efter-skat`,
+  `saadan-beregner-du-din-reelle-timeloen` → `/brok`,
+  `saadan-finder-du-din-timepris…` → `/timepris`, `skat-2026…` →
+  `/skattefradrag`. **Og** `dagpenge-saadan-finder-du-din-sats` skal pege på
+  `/dagpenge`, ikke `/barselsdagpenge`. Vindue **17:30**.
+
 
 
 ## Åbne opgaver
-
-#### 203. [x] ✅ 2026-09-30 — `/boligstoette` lå på position 10-13 for sine egne ord
-
-- **Lukket 30/9** på `ceo/boligstoette-titel`. Målinger, klassen af fund og
-  portteksten ligger i `docs/plan-arkiv.md`.
-- **Datagrund:** GSC 2026-08-31 → 2026-09-28: `/boligstoette` 7.465
-  visninger / 176 klik / **CTR 2,4 %** / pos. **8,7** — sitets *bedste* CTR.
-  Plausible 529 besøgende/28d (+78 %). Dens egne søgninger: "beregn
-  boligstøtte" **900 v, pos 10**, "boligstøtte beregner" 282 v, pos 13.
-- **Fundet:** titel, `<h1>`, `og:title` og `description` sagde
-  "Boligstøtte 2026: Standardmaksima, formue og beregning". Ordet **"beregn"
-  stod ingen steder på siden** (0 forekomster, målt på den renderede HTML),
-  selv om det er hovedordet i sidens største søgning. Nu: "Beregn boligstøtte
-  2026: standardmaksima og formue".
-- **Datagrænsen, og hvorfor hypotesen ikke er stærkere end den er:** de elleve
-  andre top-sider har *alle* "beregner"/"beregn" i `<h1>`, så mønstret så
-  stærkt ud. Men `/kalorier` har "Kalorieberegner" i h1 *og* titel og ligger
-  stadig på **pos 18**, så "<h1> med hovedord → god placering" er **kun en
-  hypotese, ikke en lov**. Rettelsen er derfor begrænset til det
-  ubestridelige: siden skal kunne svare på sin egen største søgning. Om det
-  flytter positionen, måles efter 14 dage — det er ikke påstandt her.
-- **MÅL:** `/boligstoette` 7.465 visninger / 176 klik / CTR 2,4 % / pos. 8,7;
-  "beregn boligstøtte" 900 v pos 10 (GSC 2026-08-31 → 2026-09-28).
-  Genmål 14 dage efter at den er live.
 
 #### 97. [BLOCKED: afventer Mads' svar på ejerskabsspørgsmålet — spørgsmålet står i ❓ Til Mads, ingen kode uden svar] 2026-09-27 — C69 — afklar hvad `beregner.no` egentlig er: et domæne der skal lanceres, et reserveret navn — eller en helt anden udgivelse
 
@@ -302,46 +293,41 @@ den blev merged 13:43 — efter 12:30-batchen.
 - **MÅL:** beraknare.se 537 besøgende/28d; `/dato` 95 klik, `/tidsberegner` 127
   klik, `/procent` 2 klik (GSC 2026-08-30 → 2026-09-27). Genmål 2026-10-13.
 
-#### 201. [x] ✅ 2026-09-30 — `/alder`s snippet havde et frosset alders-tal, der blev dagsvis forkert
+#### 204. [x] ✅ 2026-09-30 — de sidste tolv blogindlæg sluttede stadig på en artikel
 
-- **Lukket 30/9** på `ceo/alder-levende-snippet`. Målinger, de to ting
-  rettelsen afslørede (tabellens billedtekst løj om at være "eksemplet i
-  beskrivelsen"; Excel-eksemplet blandede DATEDIF's `M` med resten af
-  årene) og hele portteksten ligger i `docs/plan-arkiv.md`.
-- **Kort fortalt:** `{ALDER}`/`{DATO}`-pladsholdere i `page-data.ts` løses nu
-  i `getPageData` ved hvert kald af `alderLevet` og `foedselsaarRaekker` —
-  samme moduler som værktøjet bruger. Datoen læses i sidens egen tidszone.
-  Før: "10 dage … 13.343 dage pr. 25. september 2026". Nu: "15 dage …
-  13.348 dage pr. 30. september 2026".
-- **MÅL:** `/alder` 7.909 visninger / 39 klik / CTR 0,5 % / pos. 7,5
-  (GSC 2026-08-31 → 2026-09-28). Genmål 14 dage efter at den er live.
-
-#### 202. [x] ✅ 2026-09-30 — de otte mest besøgte blogindlæg sluttede på en artikel, ikke på værktøjet
-
-- **Lukket 30/9** på `ceo/blog-naeste-handling`. Otte artikler havde
-  `NaesteSkridt` (barsel, børnepenge, fradrag, su, boligstøtte, kvadratmeter,
-  brændstof, dagpenge); **19 af 27 gjorde ikke**. De syv mest besøgte uden
-  er rettet nu.
-- **Datagrund:** `/blog/arveafgift-regler-og-satser` faldt 100 → 84
-  besøgende/28d — det største fald på sitets blogliste, og artiklen linkede
-  til `/arveafgift` i løbende tekst uden at næste handling pegede derhen.
-  Blog-bounce er desuden målt til 84-85 % på de største artikler mod 2-7 %
-  på selve beregnerne.
-- **De syv:** `arveafgift` → `/arveafgift`, `hvordan-beregner-man-moms` →
-  `/moms`, `hvad-er-klokken-i-usa…` → `/tidszone`, `30-procent-reglen-husleje`
-  → `/husleje`, `bmi-for-boern…` → `/bmi`, `guide-feriepenge…` → `/dato`,
-  `pension-hvor-meget…` → `/pension`. Hver CTA peger på den beregner artiklen
-  allerede nævner i teksten, så intet er opfundet.
-- **Endnu 12 artikler mangler** samme behandling (biloekonomi, boliglaan,
-  boligsalg, elpriser, guide-til-laan-og-renter, koeb-af-bolig, leasing,
-  maanedsbudget, privatoekonomi, reelle-timeloen, timepris, skat-2026,
-  hvordan-beregner-man-moms er gjort). Næste iteration tager de otte mest
-  besøgte; samme mønster, samme komponent.
-- **MÅL:** `/blog/arveafgift-regler-og-satser` 84 besøgende/28d (fald fra
-  100), `/blog/boligstoette-2026-nye-regler` 67, `/blog/boernepenge-2026-satser-
-  og-regler` 36 klik (GSC 2026-08-31 → 2026-09-28). Genmål 14 dage efter at
-  den er live. Effekten ses som **flere sidevisninger pr. artikel** (bloggen
-  skal sende trafik videre) og lavere bounce, ikke som nye klik på artiklen.
+- **Datagrund:** blog-bounce er målt til **84-85 %** på de største artikler mod
+  2-7 % på selve beregnerne. `/blog/arveafgift-regler-og-satser` faldt 100 → 84
+  besøgende/28d, og artiklen linkede til `/arveafgift` i løbende tekst uden at
+  næste handling pegede derhen. Opgave 202 (i går) rettede de syv mest
+  besøgte og skrev selv, at **tolv** stadig manglede samme behandling.
+- **Løst:** alle 27 artikler har nu `<NaesteSkridt>` **før** "Relaterede
+  artikler". Hver CTA peger på en beregner artiklen allerede nævner i
+  brødteksten, og hvor `blog-kobling.ts` har en canonisk kobling, peger CTA'en
+  på **den** — ellers ville beregnerens egen "Guides om emnet"-blok pege på
+  en anden retning end artiklens afgående klik.
+- **Port:** `src/app/blog/naeste-skridt.test.ts` (6 scener) læser alle 27
+  `page.tsx` og låser (1) at der er en næste handling, (2) at den ligger før
+  de relaterede artikler, (3) at den peger på den koblede beregner, (4) at den
+  peger på en beregner artiklen nævner *før* CTA'en — så porten ikke kan holde
+  sig selv oprejsende — og (5) at siden findes. Porten er modsvejs verificeret:
+  med `/renteberegner` byttet ud på `guide-til-laan-og-renter` fejler den.
+- **Rigetig fejl fundet af porten:** `dagpenge-saadan-finder-du-din-sats` havde
+  knappen "Beregn din dagpenge" hængt på `/barselsdagpenge` — en
+  barselsdagpengeberegner under en dagpengeknap, indført af opgave 202 i går.
+  Nu `/dagpenge`, som artiklen handler om. `BlogNaesteSkridt.test.tsx`'s
+  dataarray hævdede det forkerte par og er rettet med.
+- **Korrekthedstjek af teksten (kvalitet punkt 11):** alle tolv
+  `beskrivelse`-tekster er læst op imod de felter værktøjet faktisk har.
+  Tre blev strammet, fordi de lovede noget der ikke er et felt:
+  `/budget` lovede "sparerpenge" (værktøjets poster er bolig, transport, mad,
+  forsikring, abonnementer, afdrag, øvrige), `/timepris` lovede "din dagsats"
+  (den spørger "Hvad vil du have udbetalt?"), og `/rentefradrag` lovede "hvad
+  afdraget er værd" (det viser `/skattefradrag`).
+- **MÅL:** bloggen skal sende trafik videre, så effekten er **flere
+  sidevisninger pr. artikel** (altså flere udgående klik) og lavere bounce —
+  ikke flere klik på artiklen selv. Baseline: 84-85 % bounce på de største,
+  2-7 % på beregnerne (Plausible 2026-09-29). Genmål 14 dage efter at den er
+  live.
 
 ## ❓ Til Mads
 
@@ -376,9 +362,6 @@ den blev merged 13:43 — efter 12:30-batchen.
   Jeg har kun verificeret denne ene række og ikke rørt filen, fordi den er fælles
   for otte projekter — en opdatering skal laves med vilje, ikke ved en
   sideeffekt.
-- ❓ **21:30-batchen 2026-09-29 kørte og lagde alt efter `c6c0079` live** — alle
-  seks åbne noter er lukket på indhold (se `docs/plan-arkiv.md`). Ingen
-  `DEPLOY-MISSING`. Kun C194/C195/C196 venter på 2026-09-30 07:30.
 - ❓ **Nedetid 29/9:** en fuld site-scanning kørte mens produktion svarede 521 på alle
   domæner, og skanningen skrev "ingen fejl" for alle 206 sider. Ingen kode fejl — men
   en måling af et nedbrudt site giver et troværdigt tal om ingenting.

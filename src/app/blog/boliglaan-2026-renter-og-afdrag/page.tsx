@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
 import BlogArticleSchema from "@/components/BlogArticleSchema";
+import { NaesteSkridt } from "@/components/BlogNaesteSkridt";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { OG_IMAGE } from "@/lib/page-helpers";
 
@@ -242,6 +243,12 @@ export default function BoliglånGuidePage() {
           </div>
         ))}
       </article>
+
+      <NaesteSkridt
+        href="/rentefradrag"
+        handling="Beregn dit rentefradrag"
+        beskrivelse="Se hvor meget af din renteudgift du kan trække fra i skatten hvert år."
+      />
 
       <div className="mt-12 pt-8 border-t">
         <h2 className="text-xl font-bold mb-4">Relaterede artikler</h2>

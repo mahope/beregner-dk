@@ -20599,3 +20599,31 @@ er ren efter kørslen. **Kør `locale-leak --gate` separat fra `npm run test`.**
 linjer i den fil kan få en godkendt post til at forsvinde, og gaten så en
 mængde nye "kræver øjne"-fund der i virkeligheden er kendte. Noteret, ikke
 udbedret — en fiks til scannerens nøglesæt er en selvstændig opgave.
+
+---
+
+## 2026-09-30 — Lukkede opgaver 201, 202 og 203 (ført fra IMPLEMENTATION_PLAN.md)
+
+**Opgave 203 ✅ `ceo/boligstoette-titel`** — `/boligstoette` lå på position 10-13 for
+sine egne ord. GSC 2026-08-31 → 2026-09-28: 7.465 visninger / 176 klik / CTR 2,4 % /
+pos. 8,7. Plausible 529 besøgende/28d (+78 %). Egne søgninger: "beregn boligstøtte"
+900 v pos 10, "boligstøtte beregner" 282 v pos 13. Titel, `<h1>`, `og:title` og
+`description` sagde "Boligstøtte 2026: Standardmaksima, formue og beregning", og
+ordet **"beregn" stod 0 steder** på den renderede HTML. Nu: "Beregn boligstøtte
+2026: standardmaksima og formue". Datagrænsen er noteret i planen: `/kalorier` har
+"beregner" i `<h1>` *og* titel og ligger stadig på pos 18, så mønstret er en
+hypotese, ikke en lov.
+
+**Opgave 201 ✅ `ceo/alder-levende-snippet`** — `/alder`s snippet havde et frosset
+alders-tal. `{ALDER}`/`{DATO}`-pladsholdere i `page-data.ts` løses nu i `getPageData`
+ved hvert kald af `alderLevet` og `foedselsaarRaekker`; datoen læses i sidens egen
+tidszone. Før: "10 dage … 13.343 dage pr. 25. september 2026". Nu: "15 dage …
+13.348 dage pr. 30. september 2026". Rettelsen afslørede to ting: tabellens
+billedtekst lød om "eksemplet i beskrivelsen", og Excel-eksemplet blandede
+DATEDIF's `M` med resten af årene.
+
+**Opgave 202 ✅ `ceo/blog-naeste-handling`** — otte artikler sluttede på "Relaterede
+artikler". 19 af 27 gjorde ikke; de syv mest besøgte blev rettet i denne bølge og de
+sidste tolv i `ceo/blog-cta-rest` (opgave 204). Datagrund:
+`/blog/arveafgift-regler-og-satser` faldt 100 → 84 besøgende/28d, og blog-bounce er
+målt til 84-85 % på de største artikler mod 2-7 % på selve beregnerne.

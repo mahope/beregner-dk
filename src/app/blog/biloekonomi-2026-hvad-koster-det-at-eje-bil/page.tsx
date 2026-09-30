@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { FAQSchema } from "@/components/StructuredData";
 import BlogArticleSchema from "@/components/BlogArticleSchema";
+import { NaesteSkridt } from "@/components/BlogNaesteSkridt";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { elbilSammenligning } from "@/lib/braendstof";
 import { OG_IMAGE } from "@/lib/page-helpers";
@@ -377,6 +378,12 @@ export default function BiloekonomiPage() {
       </article>
 
       {/* Related links */}
+      <NaesteSkridt
+        href="/bil"
+        handling="Beregn din biløkonomi"
+        beskrivelse="Sæt benzinpris, kilometerår og forsikring ind, og se hvad bilen koster dig om året."
+      />
+
       <div className="mt-12 pt-8 border-t">
         <h2 className="text-xl font-bold mb-4">Relaterede artikler</h2>
         <div className="grid gap-4">
