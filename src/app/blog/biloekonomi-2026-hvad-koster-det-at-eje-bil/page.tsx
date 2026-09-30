@@ -190,7 +190,7 @@ export default function BiloekonomiPage() {
 
         <h2>Grøn ejerafgift — den løbende afgift</h2>
         <p>
-          Den grønne ejerafgift (tidligere kaldt vægtafgift) betales hvert år og afhænger af bilens brændstoftype og km/l. Den opkræves halvårligt af SKAT. Cirka satser i 2026:
+          Den grønne ejerafgift (tidligere kaldt vægtafgift) betales hvert år og afhænger af bilens brændstoftype og km/l. Den opkræves halvårligt af Skattestyrelsen. Cirka satser i 2026:
         </p>
         <ul>
           <li><strong>Benzinbil</strong> (14-20 km/l): 2.000-5.000 kr/år</li>

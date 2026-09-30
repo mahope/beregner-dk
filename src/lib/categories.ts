@@ -111,7 +111,7 @@ export const categories: CategoryData[] = [
     name: "Økonomi",
     title: "Økonomiberegnere — Løn, Skat, Pension & Opsparing",
     metaDescription: "Gratis økonomiberegnere til løn efter skat, feriepenge, dagpenge, pension, opsparing, moms og rentefradrag. Opdateret med 2026-satser.",
-    description: "Beregn løn efter skat, feriepenge, dagpenge, pension, opsparing og meget mere. Alle beregnere er opdateret med de nyeste 2026-satser og regler fra SKAT og borger.dk.",
+    description: "Beregn løn efter skat, feriepenge, dagpenge, pension, opsparing og meget mere. Alle beregnere er opdateret med de nyeste 2026-satser og regler fra Skattestyrelsen og borger.dk.",
     keywords: ["økonomi beregner", "løn efter skat", "skatteberegner", "pensionsberegner", "feriepenge beregner", "dagpenge beregner", "momsberegner", "opsparingsberegner"],
     faqItems: [
       {
@@ -120,7 +120,7 @@ export const categories: CategoryData[] = [
       },
       {
         question: "Er beregningerne baseret på de nyeste satser?",
-        answer: "Ja, alle vores økonomiberegnere er opdateret med de gældende 2026-satser fra SKAT, ATP og relevante myndigheder. Vi opdaterer satserne årligt.",
+        answer: "Ja, alle vores økonomiberegnere er opdateret med de gældende 2026-satser fra Skattestyrelsen, ATP og relevante myndigheder. Vi opdaterer satserne årligt.",
       },
       {
         question: "Kan jeg beregne min løn efter skat?",

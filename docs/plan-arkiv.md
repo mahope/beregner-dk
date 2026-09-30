@@ -19994,3 +19994,48 @@ før 12:18, så 12:30 var det første vindue efter dem — og intet er live:
 `/dage-til/kristi-himmelfartsdag` svarer **404**, `/dagar-till/pingstdagen` på
 beraknare.se **404**, og `/dato` har hverken pinse-sætningen eller "Påskedagen i
 2027". Næste vindue **17:30**. Ét vindue, ikke to: ingen `DEPLOY-MISSING`.
+
+## 2026-09-30 13:40 — kødetal fra otte åbne deploy-noter (arkiveret)
+
+Køen beholder hvad der skal verificeres og hvorfor. Det følgende var målinger
+og fejlhistorik fra de otte noters kodefaser; de ligger i de tilsvarende
+commit-bodies. Noterne selv er uændrede i deres verificeringskrav.
+
+**Målt før merge:** titlerne 48 (da) og 49 (se) tegn @ 365 dage mod grænsen
+  60. **Gate grøn:** lint (**618 filer**), **3106 tests / 190 filer** (fra
+  3088), build (**142 sider**), `locale-leak.mjs --gate` exit 0. De 16 nye
+  tests **falder mod master's `dage-til.ts`** (verificeret med
+  `git checkout master --`: **16 fejl**).
+  **⚠️ Falsk påstand fanget i egen diff (fejltype 11):** første udkast sagde
+  "mellem 30. maj (2050) og 4. juni (1990)". Målingen havde sammenlignet
+  **hele datoer**, så den fandt bare det første år i løkken; portens
+  måned-dag-sammenligning (`slice(5)`) fandt de rigtige kanter **12. maj (2008)
+  og 14. juni (2038)**. Rettet i begge sprog og låst i testen — samme
+  fælde som C81's titelport, bare på datoer.
+
+- ⏳ **VERIFICÉR DEPLOY: juleaftens spørgsmål skal have både ordet og datoen
+  uden at overskride Googles 60-tegns-grænse ved tre-cifrede dag-tal.** Kode +
+  plan i ét squash-commit på `ceo/juleaften-titellaengde`. Første
+  kandidatvindue **2026-09-30 12:30**. Rørte filer: `src/lib/dage-til.ts`
+  (**én streng** + kommentar) og `src/app/dage-til-routes.test.tsx` (**+31**).
+  Ingen `<h1>`-ændring ud over `copy.question` (samme felt bruges begge steder),
+  ingen ny URL, ingen sitemap, ingen beregningslogik, ingen `se`-ændring. Det
+  var et **review-fund** (HØJ, 30/9): `cf0a355` satte spørgsmålet til 52 tegn, så
+  titlen blev 60 ved to-cifrede dage men **61 ved tre-cifrede** — og 24. december
+  er fast, så det er 61 fra 15/9 til 31/12 hvert år, altså lige i julehandlen.
+  Google klipper da dage-tallet af, som er den del der adskiller siden fra de
+  andre. Nye streng: "Hvor mange dage er der til juleaften 24. december?" (50
+  tegn → 58/59 med dage-tal). Verificér ved **indhold**:
+  1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
+  2. `https://minberegner.dk/dage-til/juleaften` skal have **"Hvor mange dage er
+     der til juleaften 24. december?"** i `<title>`, `<h1>` og `og:title`.
+  3. Samme sides `<h1>` skal være læselig (den er spørgsmålet, ikke bare datoen).
+  4. `/datos` ankertekst "…til juleaften 24. december?" skal være med.
+  **Kontrol:** de 16 andre dage-til-siders titler uændrede, og
+  `https://beraknare.se/dato` uændret. Målt før merge: 58 tegn @ 88 dage, 59 @
+  357 og 366 (grænsen 60). **Gate grøn:** lint (**618 filer**), **3039 tests /
+  190 filer** (fra 3038), build (**142 sider**), `locale-leak.mjs --gate`
+  exit 0. De tre nye assertions **falder mod master's `dage-til.ts`**
+  (verificeret med `git stash`: 3 fejl, bl.a. "expected 61 to be less than or
+  equal to 60"), og porten kører nu hele året (8 datoer) i stedet for én valgt,
+  så den kan ikke være grøn med fejlen i igen.

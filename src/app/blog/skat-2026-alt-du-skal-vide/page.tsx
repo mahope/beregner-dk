@@ -305,7 +305,7 @@ export default function Skat2026GuidePage() {
           nedsætter skattegrundlaget for både statsskat og kommuneskat.
         </p>
         <p>
-          Du behøver ikke gøre noget for at få fradraget — det beregnes automatisk af SKAT.
+          Du behøver ikke gøre noget for at få fradraget — det beregnes automatisk af Skattestyrelsen.
         </p>
 
         <h2>Skattefradrag du selv skal huske</h2>

@@ -347,7 +347,7 @@ export default function RentefradragBeregner() {
         <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
           <h2 className="font-semibold text-green-800 dark:text-green-300 mb-2 flex items-center gap-2"><CircleCheck className="h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden="true" focusable="false" />Automatisk indberetning</h2>
           <p className="text-sm text-green-700 dark:text-green-400">
-            Din bank indberetter automatisk dine renteudgifter til SKAT. 
+            Din bank indberetter automatisk dine renteudgifter til Skattestyrelsen. 
             Tjek at tallene stemmer i din forskudsopgørelse.
           </p>
         </div>

@@ -149,7 +149,7 @@ export default function MomsGuidePage() {
         <h2>Momsregistrering for virksomheder</h2>
         <p>
           Virksomheder med en årlig omsætning over <strong>50.000 kr</strong> skal 
-          momsregistreres hos SKAT. Er du freelancer? Læs vores{" "}
+          momsregistreres hos Skattestyrelsen. Er du freelancer? Læs vores{" "}
           <Link href="/blog/saadan-finder-du-din-timepris-som-freelancer" className="text-blue-600 hover:underline">guide til timepris</Link>{" "}
           og brug <Link href="/timepris" className="text-blue-600 hover:underline">timepris-beregneren</Link>.
           Som momsregistreret virksomhed:
@@ -157,7 +157,7 @@ export default function MomsGuidePage() {
         <ul>
           <li>Opkræver du moms af dit salg (salgsmoms)</li>
           <li>Kan du trække moms fra på erhvervsmæssige indkøb (købsmoms)</li>
-          <li>Afregner du forskellen med SKAT (typisk kvartalsvis)</li>
+          <li>Afregner du forskellen med Skattestyrelsen (typisk kvartalsvis)</li>
         </ul>
 
         <h2>Moms vs. indkomstskat</h2>

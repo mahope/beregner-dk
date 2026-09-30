@@ -123,7 +123,7 @@ export default async function RentefradragPage() {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  SKAT, fradrag for renteudgifter
+                  Skattestyrelsen, fradrag for renteudgifter
                 </a>{" "}
                 (hvilke renter der kan fradrages, og at banken indberetter dem automatisk) og{" "}
                 <a

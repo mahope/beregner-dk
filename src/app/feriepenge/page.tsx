@@ -109,7 +109,7 @@ export default async function FeriepengePage() {
         <ol>
           <li>AM-bidrag (8%) trækkes først</li>
           <li>Derefter beregnes A-skat efter dit skattekort</li>
-          <li>Feriepengene indberettes automatisk til SKAT</li>
+          <li>Feriepengene indberettes automatisk til Skattestyrelsen</li>
         </ol>
 
         <div className="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-400 dark:border-blue-500 p-4 my-6 not-prose">

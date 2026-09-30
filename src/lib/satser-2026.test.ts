@@ -2,7 +2,7 @@ import { describe, expect, test } from "vitest";
 import { BARSEL_2026, BOLIGSTOETTE_2026, RENTEFRADRAG_2026 as R, SATSER_2026 as S, SU_2026 } from "./satser-2026";
 
 // These lock in the officially-verified 2026 figures (skm.dk / skat.dk).
-// If SKAT changes a rate, update satser-2026.ts AND this test together.
+// If Skattestyrelsen changes a rate, update satser-2026.ts AND this test together.
 describe("SATSER_2026 single source of truth", () => {
   test("income-tax model (personskattereform 2026)", () => {
     expect(S.amBidrag).toBe(0.08);

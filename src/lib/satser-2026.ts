@@ -6,7 +6,7 @@
  * between calculators, prose and blog articles again.
  *
  * Verified against the official sources noted per field (skm.dk / skat.dk).
- * When SKAT publishes new numbers, update them HERE only.
+ * When Skattestyrelsen publishes new numbers, update them HERE only.
  *
  * Rates are decimals (0.08 = 8 %); amounts are DKK per year unless noted;
  * bracket thresholds are measured AFTER AM-bidrag.

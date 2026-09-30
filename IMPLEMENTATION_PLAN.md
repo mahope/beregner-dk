@@ -82,44 +82,6 @@ pinse-noten opretter to URL'er, og tidszone-noten forventer et **uændret** tal.
      rækker.
   **Kontrol:** de 18 andre dage-til-siders titler uændrede, og ingen danske
   strenge lækker til beraknare.se (porten kører `locale-leak.mjs --gate`).
-  **Målt før merge:** titlerne 48 (da) og 49 (se) tegn @ 365 dage mod grænsen
-  60. **Gate grøn:** lint (**618 filer**), **3106 tests / 190 filer** (fra
-  3088), build (**142 sider**), `locale-leak.mjs --gate` exit 0. De 16 nye
-  tests **falder mod master's `dage-til.ts`** (verificeret med
-  `git checkout master --`: **16 fejl**).
-  **⚠️ Falsk påstand fanget i egen diff (fejltype 11):** første udkast sagde
-  "mellem 30. maj (2050) og 4. juni (1990)". Målingen havde sammenlignet
-  **hele datoer**, så den fandt bare det første år i løkken; portens
-  måned-dag-sammenligning (`slice(5)`) fandt de rigtige kanter **12. maj (2008)
-  og 14. juni (2038)**. Rettet i begge sprog og låst i testen — samme
-  fælde som C81's titelport, bare på datoer.
-
-- ⏳ **VERIFICÉR DEPLOY: juleaftens spørgsmål skal have både ordet og datoen
-  uden at overskride Googles 60-tegns-grænse ved tre-cifrede dag-tal.** Kode +
-  plan i ét squash-commit på `ceo/juleaften-titellaengde`. Første
-  kandidatvindue **2026-09-30 12:30**. Rørte filer: `src/lib/dage-til.ts`
-  (**én streng** + kommentar) og `src/app/dage-til-routes.test.tsx` (**+31**).
-  Ingen `<h1>`-ændring ud over `copy.question` (samme felt bruges begge steder),
-  ingen ny URL, ingen sitemap, ingen beregningslogik, ingen `se`-ændring. Det
-  var et **review-fund** (HØJ, 30/9): `cf0a355` satte spørgsmålet til 52 tegn, så
-  titlen blev 60 ved to-cifrede dage men **61 ved tre-cifrede** — og 24. december
-  er fast, så det er 61 fra 15/9 til 31/12 hvert år, altså lige i julehandlen.
-  Google klipper da dage-tallet af, som er den del der adskiller siden fra de
-  andre. Nye streng: "Hvor mange dage er der til juleaften 24. december?" (50
-  tegn → 58/59 med dage-tal). Verificér ved **indhold**:
-  1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
-  2. `https://minberegner.dk/dage-til/juleaften` skal have **"Hvor mange dage er
-     der til juleaften 24. december?"** i `<title>`, `<h1>` og `og:title`.
-  3. Samme sides `<h1>` skal være læselig (den er spørgsmålet, ikke bare datoen).
-  4. `/datos` ankertekst "…til juleaften 24. december?" skal være med.
-  **Kontrol:** de 16 andre dage-til-siders titler uændrede, og
-  `https://beraknare.se/dato` uændret. Målt før merge: 58 tegn @ 88 dage, 59 @
-  357 og 366 (grænsen 60). **Gate grøn:** lint (**618 filer**), **3039 tests /
-  190 filer** (fra 3038), build (**142 sider**), `locale-leak.mjs --gate`
-  exit 0. De tre nye assertions **falder mod master's `dage-til.ts`**
-  (verificeret med `git stash`: 3 fejl, bl.a. "expected 61 to be less than or
-  equal to 60"), og porten kører nu hele året (8 datoer) i stedet for én valgt,
-  så den kan ikke være grøn med fejlen i igen.
 
 - ⏳ **VERIFICÉR DEPLOY: `/dage-til/efteraarsferien` skal svare med uge 42 og
   tælle til den første skoledag.** Kode + plan i ét squash-commit på
@@ -334,13 +296,45 @@ pinse-noten opretter to URL'er, og tidszone-noten forventer et **uændret** tal.
   den dårligste bounce i hele billedet. Et afsnit med nul indhold under en
   `<h2>` er præcis den fejl, der får en læser til at scanle forbi: overskriften
   lovede planen, og der stod ingen plan.
-  **Målt før merge:** klassescannet over alle **121 `page.tsx`** gav **præcis ét**
-  fund — den her rettelse — så det er ikke et isoleret slip, men det er også
-  ikke en klasse endnu. Renset for hele sitet blev der 14 `<h2>` i filen.
   **Gate grøn:** lint (**620 filer**), **3149 tests / 191 filer** (fra 3147),
   build (**142 sider**), `locale-leak.mjs --gate` exit 0. De to nye tests **falder
   mod master's kilde** (verificeret med `git checkout master --`: **2 fejl**,
   bl.a. 15 `<h2>`).
+
+- ⏳ **VERIFICÉR DEPLOY: ingen brødtekst må stadig sige "SKAT" — myndigheden
+  hedder Skattestyrelsen siden 1. november 2024.** Kode + plan i ét
+  squash-commit på `ceo/skattestyrelsen`. Vindue **2026-09-30 17:30**. Rørte
+  filer: `src/lib/page-data.ts` (4), `src/lib/categories.ts` (2),
+  `src/app/rentefradrag/page.tsx`, `src/app/feriepenge/page.tsx`,
+  `src/components/RentefradragBeregner.tsx`, to blogindlæg (3),
+  `src/lib/satser-2026.ts` + test (2 kommentarer) og **ny**
+  `src/lib/myndighedsnavn.test.ts` (**3 tests**). Ingen beregningslogik, ingen
+  `<title>` rørt, ingen ny URL, intet sitemap, ingen ny afhængighed. Verificér
+  ved **indhold**:
+  1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
+  2. `https://minberegner.dk/moms` skal have **"afregner med Skattestyrelsen"**
+     i FAQ'en — og stadig sige "Skattestyrelsen" to afsnit længere nede, så
+     siden ikke længere modsiger sig selv.
+  3. `https://minberegner.dk/feriepenge` skal have **"Feriepengene indberettes
+     automatisk til Skattestyrelsen"**.
+  4. `https://minberegner.dk/rentefradrag` skal have **"Skattestyrelsen, fradrag
+     for renteudgifter"** i relaterede beregnere.
+  5. `https://minberegner.dk/blog/skat-2026-alt-du-skal-vide` skal stadig
+     nævne **skat.dk** — domænet hedder stadig sådan, kun myndighedsnavnet
+     ændrede sig.
+  **Kontrol:** de 26 andre blogindlæg og de øvrige FAQ'er uændrede; intet
+  `keywords`-array rørt (søgning på "skat" skal stadig finde siderne).
+  **Datagrund:** SKAT blev omdannet til Skattestyrelsen 1/11-2024, men navnet
+  stod i 13 brødtekstrenge på otte sider — bl.a. i `/moms`'s FAQ, som er
+  indekseret tekst på en side med **22.464 GSC-visninger**. `/moms` skrev
+  "afregner med SKAT" i FAQ'en og "Skattestyrelsen" to afsnit nede på den
+  samme side, så siden modsagde sig selv.
+  **Målt før merge:** porten dækker hele `src/` (≥200 filer) og springer kun
+  `pension-satser.test.tsx` over, fordi den *citerer* et dokument med dets
+  udgivelsesnavn — en kildeangivelse må ikke omskrives. De tre nye tests
+  **falder mod master** (verificeret med `git stash`: 1 fejl, 13 fund).
+  **Gate grøn:** lint (**621 filer**), **3152 tests / 192 filer** (fra 3149),
+  build (**142 sider**), `locale-leak.mjs --gate` exit 0.
 
 ## Åbne opgaver
 
@@ -528,6 +522,36 @@ pinse-noten opretter to URL'er, og tidszone-noten forventer et **uændret** tal.
   efter 14 dage.
 - **MÅL:** beraknare.se 537 besøgende/28d; `/dato` 95 klik, `/tidsberegner` 127
   klik, `/procent` 2 klik (GSC 2026-08-30 → 2026-09-27). Genmål 2026-10-13.
+
+#### 201. [ ] 2026-09-30 — Kø — **`/alder`s snippet har et frosset alders-tal, der
+bliver dagsvis forkert** (fundet i denne iteration, ikke rørt — for stort til
+én iteration)
+
+- **Datagrund:** `/alder` har **7.909 GSC-visninger, 39 klik, CTR 0,5 %,
+  pos. 7,5** (2026-08-31 → 2026-09-28) — og nummer fire på listen er
+  "aldersberegner" (315 v, **27.000 søgninger/måned**, pos. 5). Siden er altså
+  synlig for den største søgning den har, og taber den.
+- **Fejlen:** `page-data.ts:891-915` skriver **"Født 15. marts 1990 er du 36 år,
+  6 måneder og 10 dage pr. 25. september 2026"** i `description`,
+  `metaDescription`, `ogDescription` og tre FAQ-svar, plus "13.343 dage" og
+  "pr. 27. september 2026". I dag (30/9) er sandheden 36 år, 6 måneder og **15**
+  dage. Det er en frossen byggeværdi i Google-snippet'en — fejltype 1 og 4 —
+  og den bliver dagsvis mere forkert. Der er allerede en test ("dropper den
+  frosne alders-sum") mod et *frosne summenivå*; dagstemplet slap igennem.
+- **Hvorfor den ikke blev rettet nu:** rettelsen kræver at eksemplet regnes
+  **ved hvert request** (fødselsdato + `Europe/Copenhagen` + `new Date()`), og
+  `daPages` er et modul-niveau-`const` — en `new Date()` dér ville fryse ved
+  processens start, altså ved deploy, ikke ved build. Beviset for at det er
+  muligt ligger i `DageTilPage.tsx`, der gør præcis dette for
+  dage-til-siderne; `getPageData("alder", …)` skal derfor lappes ved kald
+  (eller `/alder` skal bygge sin egen `generateMetadata`). Det rører
+  metadata for **da, se og no** og fire testfiler med hårdkodede tal.
+- **Acceptkriterier:** 1. Snippet'ens alder, dage-tal og "pr. <dato>" stemmer
+  med `daysBetween` på den dag, siden renders. 2. Port med et fast tidsstempel
+  (29. september) **og** et andet (1. januar) — ikke ét valgt tidspunkt.
+  3. Ingen streng i `page-data.ts` har et hårdkodet "pr. <dato>". 4. Gaten grøn.
+- **MÅL:** `/alder` 7.909 visninger / 39 klik / CTR 0,5 % / pos. 7,5
+  (GSC 2026-08-31 → 2026-09-28). Genmål 14 dage efter merge.
 
 ## ❓ Til Mads
 
