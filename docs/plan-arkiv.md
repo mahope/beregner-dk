@@ -19501,3 +19501,106 @@ Første `DEPLOY OK` i denne plan. Alle ti er verificeret ved **indhold** (ikke H
   sidetest **fejler mod master's `page.tsx`** (verificeret med `git stash`).
 
   **DEPLOY OK 2026-09-30** — batch 07:30. `/renteberegner` — "Renteberegner: beregn månedsydelse på annuitetslån".
+
+---
+
+## 209 — /dage-til/skolestart (30/9 2026, `ceo/skolestart`)
+
+**Hvorfor:** dansk autocomplete under "hvor mange dage er der til" (curl mod
+`suggestqueries.google.com/complete/search?client=firefox&hl=da&gl=dk`, 30/9
+08:45) giver ni træffere:
+
+```
+ 1. hvor mange dage er der til juleaften        → dage-til/juleaften
+ 2. hvor mange dage er der til 1 december       → dage-til/1-december
+ 3. hvor mange dage er der til jul              → dage-til/juledagen
+ 4. hvor mange dage er der til sommerferie      → dage-til/sommerferien
+ 5. hvor mange dage er der til halloween        → dage-til/halloween
+ 6. hvor mange dage er der til den 24 december  → dage-til/juleaften
+ 7. hvor mange dage er der tilbage af 2026      → besvaret på /dato (227 v, pos. 5)
+ 8. hvor mange dage er der til den 10 august     → generisk dato, ikke bygget
+ 9. hvor mange dage er der til efterårsferien   → dage-til/efteraarsferien (f0dbdba)
+```
+
+Efter f0dbdba var 1-7 og 9 dækket. Nr. 8 er en vilkårlig dato og er bevidst
+ikke bygget (tynde varianter, fejlklasse planen advarer mod). Det eneste
+**egne** søgeord med en ubetjent klynge var `hvor mange dage er der til
+skolestart` — den har sin egen autocomplete-post under sit eget
+forespørgselsord, hvilket betyder reel efterspørgsel og ikke en variant af
+noget vi allerede dækker. Samme målemetode fandt også
+`hvor mange dage er der til kristi himmelfart`, som står ubetjent — se
+opgave 210 i planen.
+
+**Mønsteret klyngen bygger på:** de to største nul-klik-søgninger på `/dato`
+(133.054 visninger) er begge dage-til-spørgsmål — "hvor mange dage er der til
+1 december" 1.171 v / **3 klik** / pos. 5, og "hvor mange dage er der til den
+24 december" 1.013 v / **3 klik** / pos. 5. 2.184 visninger, 6 klik. Begge er nu
+egne sider med svaret i `<title>`.
+
+**Rettelse:** ét nyt event i `src/lib/dage-til.ts`:
+
+- `anchor.da = { kind: "fixed", month: 8, day: 1, offsetDays: 0 }` — 1. august
+  er folkeskolelovens dato (samme påstand, samme kilde, som `efteraarsferien`'s
+  egen FAQ allerede gør), så ankeret er den **eksisterende** `fixed`-regel.
+  Ingen ny `kind`, ingen ny afhængighed, ingen eksisterende beregning rørt.
+- 4 fakta + 5 FAQ, alle med tal fra kode eller fra loven.
+- Dansk alene. Det svenska skolåret har ingen national startdato, så
+  `beraknare.se/dagar-till/skolestart` skal svare 404 — samme mønster som
+  `sommerferien` og `efteraarsferien`.
+
+**Harness (16 nye tests, `dage-til.test.ts` +192):** brødtekstens tal regnes i
+testen og sammenholdes med strengen, så de ikke kan blive en påstand der glide
+fra koden:
+
+- **ugedagene** "I 2026 er det en lørdag, i 2027 en søndag og i 2028 en tirsdag"
+  — hvert år ledes efter i strengen, og `UGE_DAGE[toISO(...).getUTCDay()]` skal
+  stå i de 40 tegn derefter.
+- **ISO-ugerne** "i uge 31 i 2026 og 2028, men i uge 30 i 2027" — låst på de tre
+  konkrete tal *og* på en 61-års løkke (1990-2050) der siger, at 1. august
+  **aldrig** ligger uden for uge 30 og 31. Kausalen er også testet: 1. januar
+  2027 er en fredag (`getUTCDay() === 5`) og 31. december 2026 er uge 53.
+- **ferieafstanden** "32 til 38 dage" — `daysBetween(sommerferieStart(year),
+  1. august)` skal ligge i [32, 38] for **alle** 61 år, plus de tre konkrete
+  tal 35 / 36 / 38.
+- **første skoledag**: 1. august 2026 er en lørdag (`getUTCDay() === 6`), så
+  "mandag 3. august 2026" er startdatoen plus to dage, og den dage skal være en
+  mandag.
+- **antallet svarer** fra før (1. januar 2027 → 1. august 2027 = 212 dage),
+  under (30. sep 2026 → 1. august 2027 = 305 dage) og **på selve dagen** (0).
+- **ankeret er fast**: `toEqual({ kind: "fixed", month: 8, day: 1, offsetDays:
+  0 })`, plus at `getNextAnchorDate` giver 1. august hvert år 1990-2050.
+- **ingen svensk arm** og slug'en løses ikke på beraknare.se.
+- **autocomplete-formuleringen** matcher "hvor mange dage er der til skolestart".
+- Paritets-testens `kunDansk`-liste er opdateret til
+  `["sommerferien", "efteraarsferien", "skolestart"]`.
+
+**⚠️ Falsk påstand i eget første udkast, fanget før commit (fejltype 11).**
+Fakta skrev "5 til 6 uger fra sommerferiens start til 1. august". Porten blev
+skrevet til at slå *3 valgte år* (2026/2027/2028) imod, og alle tre gav 35, 36
+og 38 dage — altså grøn. Kørte jeg spændvidden over 1990-2050, er den **32 til
+38 dage**: sidste lørdag i juni kan falde så sent som 30. juni (32 dage til
+1. august, 4,6 uger), fordi et juni med 31 dage kan begynde på en søndag. Så
+teksten var **for lang** i den lave ende, og tre valgte år ville aldrig have
+vist det. Rettet til "32 til 38 dage … fire til seks uger", og porten kører nu
+hele året. Samme fejlklasse som C207's undertitel — den så den kun i én
+fil, fordi porten var skrevet til ét eksempel.
+
+**Verifikation:**
+
+- **Modsvært verificeret:** `git checkout master -- src/lib/dage-til.ts` →
+  **14 fejl** i `dage-til.test.ts`, bl.a. "fakta skal nævne 2026" og hele
+  paritets-testen. Ingen af de nye tests kan være grøn mod master.
+- **Gate grøn:** lint (**618 filer**), **3070 tests / 190 filer** (fra
+  3054/190), build (**142 sider**), `locale-leak.mjs --gate` exit 0.
+- **Titellængde målt før merge:** "Hvor mange dage er der til skolestart? 305
+  dage" = 48 tegn mod grænsen 60. `dage-til-routes.test.tsx` kører porten over
+  alle slugs og otte datoer i hele året, så den nye side er dækket uden en ny
+  assertion.
+- **Ingen UI-ændring:** siden kommer fra den eksisterende `[dato]`-rute, så
+  `<h1>`, breadcrumb, schema og `/datos`-liste er de samme komponenter som de
+  17 andre dage-til-sider. Derfor ingen skærmbilleder — intet rendret er ændret.
+
+**Mål:** `/dage-til/skolestart` 0 klik i dag, 0 visninger. Genmål først
+**2027-06-01**, fordi siden først har sæson da. Ærlig forventning: ni måneders
+sæsonpause før første søgning, så klyngen er valgt fordi mønsteret er
+dokumenteret to gange, ikke fordi denne side alene løfter trafikken.

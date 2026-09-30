@@ -1079,6 +1079,52 @@ export const DAGE_TIL_EVENTS: DageTilEvent[] = [
       },
     },
   },
+  {
+    id: "skolestart",
+    anchor: {
+      da: { kind: "fixed", month: 8, day: 1, offsetDays: 0 },
+    },
+    da: {
+      slug: "skolestart",
+      copy: {
+        short: "skolestart",
+        question: "Hvor mange dage er der til skolestart?",
+        facts: [
+          "Skoleåret begynder **1. august** — det står i folkeskoleloven. I 2026 er det en lørdag, i 2027 en søndag og i 2028 en tirsdag.",
+          "1. august er en fast dato, men ikke altid en skoledag. Falder den på en weekend, begynder undervisningen først om mandagen: 1. august 2026 er en lørdag, så den første undervisningsdag er mandag 3. august 2026.",
+          "Ugen varierer, fordi et år ikke altid har 52 ISO-uger. 1. august ligger i uge 31 i 2026 og 2028, men i uge 30 i 2027 — fordi 1. januar 2027 er en fredag og derfor hører til uge 53 i 2026, som gjorde 2026 til et år med 53 ISO-uger.",
+          "Sommerferien starter den sidste lørdag i juni (lovens dato), og det er **32 til 38 dage** derfra til 1. august — altså fire til seks uger.",
+        ],
+        faq: [
+          {
+            question: "Hvornår starter skolen i 2027?",
+            answer:
+              "Skoleåret begynder 1. august, og 1. august 2027 er en **søndag**. Undervisningen starter derfor mandag 2. august 2027. I 2026 var 1. august en lørdag, så den første undervisningsdag var mandag 3. august.",
+          },
+          {
+            question: "Er skolestart altid 1. august?",
+            answer:
+              "Ja, det er lovens dato. Folkeskoleloven fastlægger, at skoleåret begynder 1. august, og det gælder for alle kommunale skoler. Er 1. august en lørdag eller søndag, begynder undervisningen den næste hverdag.",
+          },
+          {
+            question: "Hvilken uge er skolestart i?",
+            answer:
+              "1. august ligger i uge 31 i både 2026 og 2028, men i uge 30 i 2027. Det er ikke en fejl: 1. januar 2027 er en fredag og hører derfor med til uge 53 i 2026, så 2026 fik 53 ISO-uger. Målt fra 1990 til 2050 ligger 1. august altid i uge 30 eller 31.",
+          },
+          {
+            question: "Hvornår slutter sommerferien?",
+            answer:
+              "Slutdatoen er ikke fastlagt i loven — den er kommunal. I 2026 starter sommerferien 27. juni, og med de tre til fem uger, der er sædvanlige, ender ferien typisk 18.-31. juli, altså senest dagen før skolestart 1. august. Tjek din egen kommunes ferieplan.",
+          },
+          {
+            question: "Hvor lang tid er der mellem sommerferie og skolestart?",
+            answer:
+              "32 til 38 dage, fordi sommerferien starter den sidste lørdag i juni. I 2026 er det 27. juni til 1. august = 35 dage, i 2027 26. juni til 1. august = 36 dage, og i 2028 24. juni til 1. august = 38 dage.",
+          },
+        ],
+      },
+    },
+  },
 ];
 
 /** Locales that have a real dage-til landing page. */

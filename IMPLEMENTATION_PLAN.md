@@ -1,20 +1,20 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — **ny countdown-side `/dage-til/efteraarsferien` (uge 42).** Dansk
-autocomplete under "hvor mange dage er der til " har **efterårsferien** (nr. 8) og
-under "hvor mange dage er der til efterårsferien" tre varianter (2025, 2026, og
-"…i efterårsferien") — vi dækkede ingen af dem. Efterårsferien er den største
-ubearbejdede countdown-klynge, og uge 42 er en **fast regel**: efterårsferien er
-uge 42 i 2025, 2026 og 2027 (verificeret via de 21 kommunale ferieplaner).
+STATUS: KØ — **ny countdown-side `/dage-til/skolestart` (1. august).** Det er det
+sidste hul i dage-til-klyngen: dansk autocomplete under "hvor mange dage er der
+til" giver 9 træffere, og de otte første var alle dækket efter f0dbdba. Det niende,
+"hvor mange dage er der til skolestart", har sin **egen** autocomplete-post og var
+ikke dækket. 1. august er folkeskolelovens dato, så den er en fast anker-dato —
+ingen ny `kind` nødvendig, kun den eksisterende `fixed`.
 
-**Mål:** `/dage-til/efteraarsferien` ny URL, 0 klik i dag.
-`/dato` "hvor mange dage er der til 1 december" 1.171 v / 3 klik / pos. 5.
-Genmål **2026-10-14**.
+**Mål:** `/dage-til/skolestart` ny URL, 0 klik i dag. `/dato` "hvor mange dage er
+der til 1 december" 1.171 v / 3 klik / pos. 5. Genmål **2026-10-14** (men
+skolestart-siden har først sæson i juni–juli 2027).
 
-**Alle ti tidligere deploy-noter er lukket `DEPLOY OK 2026-09-30`.** To nye noter
+**Alle ti tidligere deploy-noter er lukket `DEPLOY OK 2026-09-30`.** Tre nye noter
 åbne, vindue 30/9 12:30.
 
-**Færdige i dag:** 208 + de otte CEO-fund fra 29/9 (verificeret i koden: valborg
+**Færdige i dag:** 209 + de otte CEO-fund fra 29/9 (verificeret i koden: valborg
 30. april, svensk påskafton lørdag, dansk sankthans fast 23./24. juni,
 `toUtcMidnight` i `Europe/Copenhagen`, `maneder: 12`, husleje → nettoprisindeks).
 
@@ -36,8 +36,8 @@ Alle fire var grønne før merge 2026-09-30 07:45.
 
 ## Åbne VERIFICÉR DEPLOY-noter
 
-To noter. HTTP 200 beviser intet: den ene rører `<title>` og `<h1>` på én side,
-den anden opretter én URL.
+Tre noter. HTTP 200 beviser intet: to rører `<title>` og `<h1>` på én side, den
+tredje opretter én URL.
 
 - ⏳ **VERIFICÉR DEPLOY: juleaftens spørgsmål skal have både ordet og datoen
   uden at overskride Googles 60-tegns-grænse ved tre-cifrede dag-tal.** Kode +
@@ -89,6 +89,35 @@ den anden opretter én URL.
   **falder mod master's `dage-til.ts`** (verificeret med `git stash`:
   **14 fejl**). ISO-ugereglen er verificeret over **61 år** (1990-2050), ikke på
   tre valgte år, og `fakta`-teksten er låst til de tal koden selv regner.
+
+- ⏳ **VERIFICÉR DEPLOY: `/dage-til/skolestart` skal svare med 1. august og
+  tælle til næste års skolestart.** Kode + plan i ét squash-commit på
+  `ceo/skolestart`. Første kandidatvindue **2026-09-30 12:30**. Rørte filer:
+  `src/lib/dage-til.ts` (**ét event** med 4 fakta + 5 FAQ) og
+  `src/lib/dage-til.test.ts` (**+192**). Ingen eksisterende beregning rørt, ingen
+  UI, ingen `<h1>`-ændring, ingen ny `kind` (ankeret er den eksisterende
+  `fixed` 1. august), ingen ny afhængighed; sitemap, `/datos`-liste og
+  breadcrumb kommer fra de eksisterende lister. Verificér ved **indhold**:
+  1. `curl -s https://minberegner.dk/api/health` skal svare `status: ok`.
+  2. `https://minberegner.dk/dage-til/skolestart` skal have
+     **"Hvor mange dage er der til skolestart?"** i `<h1>` og
+     `<title> = "Hvor mange dage er der til skolestart? 305 dage"`.
+  3. Samme sides brødtekst skal sige **"1. august"** og **"uge 31"** (2026) /
+     **"uge 30"** (2027).
+  4. `/datos` liste skal have `/dage-til/skolestart` blandt de 17 rækker.
+  **Kontrol:** `https://beraknare.se/dagar-till/skolestart` skal svare **404** —
+  det svenska skolåret har ingen national dato, så siden er dansk alene,
+  ligesom `/dage-til/sommerferien` og `/dage-til/efteraarsferien`.
+  **Gate grøn:** lint (**618 filer**), **3070 tests / 190 filer** (fra 3054),
+  build (**142 sider**), `locale-leak.mjs --gate` exit 0. De 16 nye tests
+  **falder mod master's `dage-til.ts`** (verificeret med `git checkout master
+  --`: **14 fejl**). Ugedage, ISO-uger og ferieafstande er verificeret over
+  **61 år** (1990-2050), ikke på tre valgte år.
+  **⚠️ Falsk påstand fanget i egen diff (fejltype 11):** første udkast sagde
+  "5 til 6 uger fra sommerferiens start til 1. august". Målt over 1990-2050 er
+  spændvidden **32 til 38 dage** (sidste lørdag i juni falder så sent som
+  30. juni), altså 4,6-5,4 uger — teksten var **for lang** på den lave ende.
+  Rettet til "32 til 38 dage" og porten dækker nu hele året.
 
 
 ## Åbne opgaver
@@ -294,6 +323,68 @@ den anden opretter én URL.
   et tekstproblem, og det er samme konklusion som C172, C194 og C195 nåede.
   Læsbart er, at titlen nu ikke længere underlover. Er CTR'en uændret efter 14
   dage, er "den underlovende titel forklarede den lave CTR" **modbevist**.
+
+#### 209. [x] ✅ 2026-09-30 — trafik — **dansk autocomplete spørger om skolestart, og vi havde ingen side for det.** (squash `ceo/skolestart`)
+
+- **Datagrund:** dansk autocomplete under "hvor mange dage er der til" (30/9
+  08:4x) giver 9 træffere. Efter f0dbdba (`efteraarsferien`) var de otte første
+  alle dækket: juleaften, 1. december, jul, sommerferie, halloween, den
+  24. december, tilbage af 2026 (besvaret på `/dato`) og efterårsferien. Det niende
+  var **"hvor mange dage er der til skolestart"** — som har sin *egen*
+  autocomplete-post under sit eget forespørgselsord, altså reel efterspørgsel og
+  ikke bare en variant af en vi allerede dækker. Klyngens mønster holdt: de to
+  største nul-klik-søgninger på `/dato` ("…til 1 december" 1.171 v / 3 klik,
+  "…til den 24 december" 1.013 v / 3 klik) er begge dage-til-spørgsmål.
+- **Rettelse:** nyt event `skolestart` med `anchor.da = { kind: "fixed",
+  month: 8, day: 1 }` — folkeskolelovens dato, så **ingen ny `kind`**
+  (juleaften, grundlovsdag og nationaldagen bruger samme anker). 4 fakta +
+  5 FAQ. **Ingen titel, ingen `<h1>`, ingen ny URL ud over den nye, ingen
+  beregningslogik, ingen UI.**
+- **Harness:** 16 nye tests. Ugedagene, ISO-ugerne og ferieafstandene i
+  brødteksten er **beregnet** i testen og sammenholdt med strengen, så de kan
+  ikke blive en påstand der glide fra koden (**fejltype 11**). ISO-ugereglen er
+  verificeret over **61 år**, og 1. august ligger *altid* i uge 30 eller 31.
+  Antallet i svaret er dækket fra før, under og på selve dagen.
+- **⚠️ Falsk påstand fundet i egen diff, før commit.** Første udkast skrev "5 til
+  6 uger" fra sommerferiens start til 1. august. Kørte jeg spændvidden over
+  1990-2050, er den **32 til 38 dage** (4,6-5,4 uger) — fordi sidste lørdag i
+  juni kan falde så sent som 30. juni. Teksten var altså **for lang** i den
+  lave ende, og kun tre valgte år (2026/2027/2028) ville aldrig have vist det.
+  Rettet til "32 til 38 dage", og porten kører nu hele året.
+- **Gate grøn:** lint (**618 filer**), **3070 tests / 190 filer** (fra
+  3054/190), build (**142 sider**), `locale-leak.mjs --gate` exit 0. Rørte
+  filer: `dage-til.ts` (+46) + `dage-til.test.ts` (+192).
+- **MÅL:** `/dage-til/skolestart` 0 klik i dag. Genmål først **2027-06-01** —
+  siden har ingen sæson før da. Klyngens samlede mål er `/dato`'s to nule
+  spørgsmål: 1.171 v og 1.013 v pr. 28 dage, pos. 5, **6 klik i alt**. Genmål
+  **2026-10-14**.
+- **Ærlig forventning:** nyt sprog 0 klik i dag, og skolestart har ni måneders
+  sæsonpause før sin første søgning. Klyngen er valgt fordi mønsteret er
+  dokumenteret to gange, ikke fordi denne side alene løfter trafikken.
+
+#### 210. [ ] 2026-09-30 — trafik — **dage-til-klyngens sidste to huller: "hvor mange dage er der til kristi himmelfart" og den generiske dato-spørgning**
+
+- **Datagrund:** samme måling som opgave 209 (dansk autocomplete,
+  `suggestqueries.google.com`, 30/9 08:45). Under "hvor mange dage er der til"
+  er alle ni træffere nu dækket undtagen *"hvor mange dage er der til den 10
+  august"* (position 8), som er en **generisk dato** og skal bevidst *ikke* bygges
+  — tusindvis af tynde varianter er den fejlklasse planen advarer mod. Under sit
+  eget søgeord har derimod **"hvor mange dage er der til kristi himmelfart"** en
+  autocomplete-post, og det er ubetjent.
+- **Kristi himmelfartsdag** er **40 dage efter påskedagen** (første torsdag efter
+  pinsedagen er 50 dage efter), så den kræver et `easterOffset`-anker med
+  `offsetDays: 40` — den `kind` findes allerede (`paskafton` bruger
+  `offsetDays: -2`). Der er altså ingen ny fordelingsregel at finde på, kun
+  samme opskrift som opgave 209.
+- **Dansk alene:** kristi himmelfartsdag er dansk lovgivning, og det svenska
+  nationaldagen har ingen tilsvarende *flytende* dato — samme grund som
+  `efteraarsferien` og `skolestart` er dansk alene.
+- **Acceptkriterier:** 1. `/dage-til/kristi-himmelfartsdag` svarer i `<title>` og
+  `<h1>`, og brødteksten er låst til de tal koden regner (påskedag + 40 dage,
+  ISO-uge, ugedag). 2. Verificeret over mindst 30 år, ikke tre valgte — det er
+  præcis den fælde, der gav **5-6-ugers-påstanden** i 209. 3. `beraknare.se`
+  svarer 404. 4. Porten over alle slugs og otte datoer er grøn. 5. Gaten grøn.
+- **MÅL:** 0 klik i dag. Genmål **2027-04-15** (sæsonen er april–maj).
 
 #### 187. [ ] **IKKE FØR 2026-10-13** 2026-09-30 — Kø — **migrér beraknare.se til svenske URL-slugs med 301**
 
