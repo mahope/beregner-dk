@@ -292,3 +292,124 @@ describe("procent page", () => {
     expect(se).not.toContain("25 procent er en fjerdedel");
   });
 });
+
+// GSC's tredjestørste søgning på /procent (56 visninger, pos. 6,
+// 2026-08-31 → 2026-09-28) er en hel sætning fra en læser: "en telefon er
+// sat 1125 kr. ned. normalt koster den 9000 kr. hvor stor er rabatten i
+// procent?". Før dette afsnit stod svaret kun som en bullet i "Procentregning
+// i hverdagen", skrevet i hånden og uden formlen — altså ikke et svar, man
+// kan regne efter, og tal der intet låste ved siden af.
+describe("rabat i procent", () => {
+  test("den danske side svarer på spørgsmålet med formel og gennemregnet eksempel", async () => {
+    const html = await render("da");
+
+    expect(html).toContain("<h2>Sådan beregner du rabatten i procent</h2>");
+    expect(html).toContain("Rabatprocent = (Prisnedsættelse ÷ Normalpris) × 100");
+    // Alle tre tal regnes fra RABAT_EKSEMPEL, så de kan ikke være skrevet
+    // forkert ved siden af formlen. Punktum er dansk tusindtalsseparator.
+    expect(html).toContain("normalprisen er 9.000 kr, varen er sat 1.125 kr ned, så den nye pris er 7.875 kr");
+    expect(html).toContain("1.125 ÷ 9.000 × 100 = <strong>12,5 procent</strong>");
+    // Fælden skal stå, ellers er 12,5 og 14,3 bare to forvirrende tal.
+    expect(html).toContain("Del med den normale pris, ikke med den nye");
+    expect(html).toContain("1.125 kr er 14,3 procent af den pris, du betaler");
+    // Og den værktøjet der regner de to priser uden regnestykke.
+    expect(html).toContain('href="/rabat"');
+  });
+
+  test("den svenska side har samme svar, samme tal og sin egen formulering", async () => {
+    const html = await render("se");
+
+    expect(html).toContain("<h2>Så här räknar du ut rabatten i procent</h2>");
+    expect(html).toContain("Rabatprocent = (Prisnedsättning ÷ Vanligt pris) × 100");
+    // Svensk tusindtalsseparator er mellemrum, ikke punktum.
+    expect(html).toContain("det vanliga priset är 9 000 kr, varan har sänkts 1 125 kr, så det nya priset är 7 875 kr");
+    expect(html).toContain("1 125 ÷ 9 000 × 100 = <strong>12,5 procent</strong>");
+    expect(html).toContain("Dela med det vanliga priset, inte med det nya");
+    expect(html).toContain("1 125 kr är 14,3 procent av det du betalar");
+  });
+
+  // Samme fejlklasse som C84/C115, der lå på den danske tekst i den svenske
+  // blok: en test der genskaber den kode, den skal modsige, beviser intet.
+  test("hvert sprog har præcis sin egen rabat-tekst", async () => {
+    const da = await render("da");
+    const se = await render("se");
+
+    expect(da).not.toContain("Rabatprocent = (Prisnedsättning ÷ Vanligt pris)");
+    expect(da).not.toContain("Så här räknar du ut rabatten i procent");
+    expect(se).not.toContain("Rabatprocent = (Prisnedsættelse ÷ Normalpris)");
+    expect(se).not.toContain("Sådan beregner du rabatten i procent");
+  });
+
+  // Formlen skal have én ejer, som de fire formler i referenceboksen har.
+  // Tæller forekomster, så en dansk sætning kopieret ind i den svenske
+  // gren fanges her i stedet for at give to sider samme svar.
+  test("rabatformlen står præcis én gang pr. sprog", async () => {
+    const da = await render("da");
+    const se = await render("se");
+
+    const tæl = (html: string, mønster: RegExp) => html.match(mønster)?.length ?? 0;
+    expect(tæl(da, /Rabatprocent = \(Prisnedsættelse ÷ Normalpris\)/g)).toBe(1);
+    expect(tæl(se, /Rabatprocent = \(Prisnedsättning ÷ Vanligt pris\)/g)).toBe(1);
+  });
+
+  // Sats-tabellen viser det, man *betaler* — det var ikke på siden før, og
+  // det er det folk spørger om ("hvor meget koster 30 % rabat"). Rækkerne
+  // kommer fra RABAT_SATS, så de to sprog skal se ens ud.
+  test.each([
+    { locale: "da" as const, spoergsmaal: "Hvad koster X % rabat på en vare til 1.000 kr?" },
+    { locale: "se" as const, spoergsmaal: "Vad kostar X % rabatt på en vara för 1 000 kr?" },
+  ])("$locale tabellerer både besparelse og pris", async ({ locale, spoergsmaal }) => {
+    const html = await render(locale);
+
+    expect(html).toContain(`<h3>${spoergsmaal}</h3>`);
+    for (const [sats, sparer, betaler] of [
+      [10, 100, 900],
+      [20, 200, 800],
+      [25, 250, 750],
+      [33, 330, 670],
+      [50, 500, 500],
+    ] as const) {
+      expect(html).toContain(`<td>${sats} %</td><td>${sparer}</td><td>${betaler}</td>`);
+    }
+  });
+
+  // Påstanden i teksten om 33 %: en tredjedel af 1.000 er 333,33, så den
+  // giver 666,67 kr — ikke de 670 kr som 33 % giver. Uden denne test er
+  // sætningen en ubevidst påstand i brødteksten.
+  test.each([
+    {
+      locale: "da" as const,
+      paastand: "33 % er ikke en tredjedel",
+      foelge: "så du ville betalt 666,67 kr",
+      pris: "du betaler 670 kr",
+      tusind: "en tredjedel af 1.000 kr er 333,33 kr",
+    },
+    {
+      locale: "se" as const,
+      paastand: "33 % är inte en tredjedel",
+      foelge: "så du hade betalat 666,67 kr",
+      pris: "du betalar 670 kr",
+      tusind: "en tredjedel av 1 000 kr är 333,33 kr",
+    },
+  ])("$locale siger at 33 % ikke er en tredjedel", async ({ locale, paastand, foelge, pris, tusind }) => {
+    const html = await render(locale);
+
+    expect(html).toContain(paastand);
+    expect(html).toContain(tusind);
+    expect(html).toContain(foelge);
+    expect(html).toContain(pris);
+  });
+
+  // De 9.000/1.125-tal lå tidligere to steder: i bulletten og i det nye
+  // afsnit. Kun det nye afsnit regner dem, så bulletten skal være ryddet —
+  // ellers kan de to glide fra hinanden, og det er præcis den dublet
+  // "formlerne har én ejer"-testen fjernede for formlerne.
+  test("hverdagsbulletten ikke længere gentager rabattallene", async () => {
+    const html = await render("da");
+
+    expect(html).toContain(
+      "<li><strong>Rabatter:</strong> 25% rabat på en vare til 400 kr = du sparer 100 kr</li>",
+    );
+    expect(html).not.toContain("1.125 ÷ 9.000 = 12,5");
+  });
+});

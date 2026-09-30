@@ -75,3 +75,57 @@ export function procentAf(tal: number, procent: number): number {
   return (tal * procent) / 100;
 }
 
+/**
+ * A price cut as a positive percent of the normal price.
+ *
+ * Same rule as {@link procentForskel} — the price the item had before the cut
+ * is the whole — but always positive, because nobody asks how big a discount
+ * is and expects a minus sign. The absolute value is part of the rule, not a
+ * formatting decision, so it lives here and not in the prose.
+ *
+ * What it does *not* carry is which of the two prices was higher. It measures
+ * the gap on the normal price and drops the sign, so it can only ever produce
+ * 12,5 for the pair below — never the 14,3 the reader gets by dividing with
+ * the sale price, which is a different question answered by
+ * {@link procentForskel} with the arguments the other way round. That is why
+ * the prose names the divisor instead of leaving it to the reader.
+ */
+export function rabatProcent(normalPris: number, nedsatPris: number): number {
+  return Math.abs(procentForskel(nedsatPris, normalPris));
+}
+
+/**
+ * The two prices behind the question Google has registered for this page as
+ * "en telefon er sat 1125 kr. ned. normalt koster den 9000 kr. hvor stor er
+ * rabatten i procent?" (56 visninger, pos. 6, 2026-08-31 → 2026-09-28).
+ *
+ * Both figures are the reader's own, so the answer the page gives is the one
+ * the query asks for. Every number in the rabat section is computed from this
+ * pair — the discount, the new price and the 14,3 % the reader gets if they
+ * divide by the sale price instead — so none of them can be typed wrong or
+ * drift away from the sentence beside it.
+ */
+export const RABAT_EKSEMPEL = { normalPris: 9000, nedsatPris: 7875 };
+
+/**
+ * The price the "what does X % off cost" rows are worked out from.
+ *
+ * A round figure, because the rows are about the *rate*, not about a product:
+ * 20 % off a 1 000 kr item is 800 kr whatever the item costs.
+ */
+export const RABAT_BELOEB = 1000;
+
+/**
+ * The discount rates a Danish or Swedish price tag actually carries, in the
+ * order a shopper meets them.
+ *
+ * These are the rates the page could already document — 10 % and 25 % stand in
+ * the "Procentregning i hverdagen" bullet and in the quick-trick table, and
+ * 20 % is the standard "udsal" in Danish retail — so the table adds rows
+ * rather than claims. 33 % is the odd one out on purpose: it is the rate
+ * behind "køb tre, betal for to" style offers, and it is the only row whose
+ * answer is not a round hundred, so it shows the rounding the reader would
+ * otherwise have to guess.
+ */
+export const RABAT_SATS = [10, 20, 25, 33, 50];
+

@@ -15,9 +15,13 @@ import { formatNumber } from "@/lib/format";
 import {
   PROCENT_10_AF_TAL,
   PROCENT_SKILLNAD_EKSEMPEL,
+  RABAT_BELOEB,
+  RABAT_EKSEMPEL,
+  RABAT_SATS,
   procentAf,
   procentDifferens,
   procentForskel,
+  rabatProcent,
 } from "@/lib/procent";
 
 export async function generateMetadata() {
@@ -39,6 +43,11 @@ export default async function ProcentPage() {
       minimumFractionDigits: 0,
       maximumFractionDigits: decimaler,
     }).replace(/\u00a0/g, " ");
+
+  // Rabatafsnittets tal. De to priser er læserens egne (RABAT_EKSEMPEL), så
+  // nedsættelsen, den nye pris, rabatten og den 14,3 % man får ved at dele med
+  // den nye pris regnes alle her — ingen af dem står skrevet i sætningen.
+  const rabatNedsat = RABAT_EKSEMPEL.normalPris - RABAT_EKSEMPEL.nedsatPris;
 
   return (
     <div className="flex flex-col lg:flex-row gap-8">
@@ -82,13 +91,80 @@ export default async function ProcentPage() {
           </li>
         </ol>
 
+        <h2>Sådan beregner du rabatten i procent</h2>
+        <p>
+          &quot;En telefon er sat {num(rabatNedsat)} kr. ned.
+          Normalt koster den {num(RABAT_EKSEMPEL.normalPris)} kr. Hvor stor er
+          rabatten i procent?&quot; er et af de største spørgsmål, Google har
+          registreret på denne side. Svaret er én deling:{" "}
+          <strong>prisnedsættelsen delt med den normale pris</strong>, ganget
+          med 100.
+        </p>
+        <p>
+          <code>Rabatprocent = (Prisnedsættelse ÷ Normalpris) × 100</code>
+        </p>
+        <p>
+          Regnet på spørgslens tal: normalprisen er {num(RABAT_EKSEMPEL.normalPris)} kr,
+          varen er sat {num(rabatNedsat)} kr ned, så den nye pris er{" "}
+          {num(RABAT_EKSEMPEL.nedsatPris)} kr. Rabatten er altså{" "}
+          {num(rabatNedsat)} ÷ {num(RABAT_EKSEMPEL.normalPris)} × 100 ={" "}
+          <strong>{num(rabatProcent(RABAT_EKSEMPEL.normalPris, RABAT_EKSEMPEL.nedsatPris), 1)} procent</strong>.
+        </p>
+        <p>
+          <strong>Del med den normale pris, ikke med den nye.</strong>{" "}
+          {num(rabatNedsat)} kr er{" "}
+          {num(procentForskel(RABAT_EKSEMPEL.normalPris, RABAT_EKSEMPEL.nedsatPris), 1)}{" "}
+          procent af den pris, du betaler, men det er et andet spørgsmål: hvor
+          meget er den normale pris stigeret fra den pris, du betaler. Rabatten
+          på varen er {num(rabatProcent(RABAT_EKSEMPEL.normalPris, RABAT_EKSEMPEL.nedsatPris), 1)}{" "}
+          procent, fordi det er den pris, varen lå på før nedsættelsen, der er
+          heltalet.
+        </p>
+        <h3>Hvad koster X % rabat på en vare til {num(RABAT_BELOEB)} kr?</h3>
+        <div className="overflow-x-auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Rabat</th>
+                <th>Du sparer</th>
+                <th>Du betaler</th>
+              </tr>
+            </thead>
+            <tbody>
+              {RABAT_SATS.map((sats) => (
+                <tr key={sats}>
+                  <td>{sats} %</td>
+                  <td>{num(procentAf(RABAT_BELOEB, sats))}</td>
+                  <td>{num(RABAT_BELOEB - procentAf(RABAT_BELOEB, sats))}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p>
+          Tallene i tabellen er regnet, ikke skrevet i hånden, så de kan ikke
+          glide fra regnestykket ovenfor. 33 % er ikke en tredjedel: en
+          tredjedel af {num(RABAT_BELOEB)} kr er{" "}
+          {num(RABAT_BELOEB / 3, 2)} kr, så du ville betalt{" "}
+          {num(RABAT_BELOEB - RABAT_BELOEB / 3, 2)} kr. Butikker skriver 33 %
+          fordi det ser pænere ud — du betaler {num(RABAT_BELOEB - procentAf(RABAT_BELOEB, 33))} kr.
+        </p>
+        <p>
+          Har du de to priser og vil have tallet uden at regne:{" "}
+          <Link href="/rabat" className="text-blue-700 underline">
+            rabatberegneren
+          </Link>
+          .
+        </p>
+
         <h2>Procentregning i hverdagen</h2>
         <p>Procent bruges overalt i hverdagen:</p>
         <ul>
           <li>
+            {/* De 9.000/1.125-tal stod her tidligere, men nu har
+                rabatafsnittet dem regnet — samme par, én ejer. */}
             <strong>Rabatter:</strong> 25% rabat på en vare til 400 kr = du
-            sparer 100 kr. En vare, der koster 9.000 kr og er sat 1.125 kr.
-            ned, har en rabat på 1.125 ÷ 9.000 = 12,5 %
+            sparer 100 kr
           </li>
           <li>
             <strong>Moms:</strong> 25% moms på 1.000 kr = 250 kr i moms (1.250
@@ -357,6 +433,67 @@ export default async function ProcentPage() {
             ökningen/minskningen från X till Y?
           </li>
         </ol>
+
+        <h2>Så här räknar du ut rabatten i procent</h2>
+        <p>
+          Frågan "en telefon har sänkts {num(rabatNedsat)} kr. Normalt
+          kostar den {num(RABAT_EKSEMPEL.normalPris)} kr. Hur stor är rabatten
+          i procent?" är ett av de största sökord Google registrerat för den
+          här sidan. Svaret är en enda division:{" "}
+          <strong>prisnedsättningen delad med det vanliga priset</strong>,
+          gånger 100.
+        </p>
+        <p>
+          <code>Rabatprocent = (Prisnedsättning ÷ Vanligt pris) × 100</code>
+        </p>
+        <p>
+          Räknat på frågans siffror: det vanliga priset är{" "}
+          {num(RABAT_EKSEMPEL.normalPris)} kr, varan har sänkts{" "}
+          {num(rabatNedsat)} kr, så det nya priset är{" "}
+          {num(RABAT_EKSEMPEL.nedsatPris)} kr. Rabatten är alltså{" "}
+          {num(rabatNedsat)} ÷ {num(RABAT_EKSEMPEL.normalPris)} × 100 ={" "}
+          <strong>{num(rabatProcent(RABAT_EKSEMPEL.normalPris, RABAT_EKSEMPEL.nedsatPris), 1)} procent</strong>.
+        </p>
+        <p>
+          <strong>Dela med det vanliga priset, inte med det nya.</strong>{" "}
+          {num(rabatNedsat)} kr är{" "}
+          {num(procentForskel(RABAT_EKSEMPEL.normalPris, RABAT_EKSEMPEL.nedsatPris), 1)}{" "}
+          procent av det du betalar, men det är en annan fråga: hur mycket har
+          det vanliga priset stigit från det du betalar. Rabatten är{" "}
+          {num(rabatProcent(RABAT_EKSEMPEL.normalPris, RABAT_EKSEMPEL.nedsatPris), 1)}{" "}
+          procent, eftersom det är priset varan hade före nedsättningen som är
+          heltalet.
+        </p>
+        <h3>Vad kostar X % rabatt på en vara för {num(RABAT_BELOEB)} kr?</h3>
+        <div className="overflow-x-auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Rabatt</th>
+                <th>Du sparar</th>
+                <th>Du betalar</th>
+              </tr>
+            </thead>
+            <tbody>
+              {RABAT_SATS.map((sats) => (
+                <tr key={sats}>
+                  <td>{sats} %</td>
+                  <td>{num(procentAf(RABAT_BELOEB, sats))}</td>
+                  <td>{num(RABAT_BELOEB - procentAf(RABAT_BELOEB, sats))}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p>
+          Siffrorna i tabellen är uträknade, inte handskrivna, så de inte kan
+          glida ifrån regnestycket ovan. 33 % är inte en tredjedel: en
+          tredjedel av {num(RABAT_BELOEB)} kr är{" "}
+          {num(RABAT_BELOEB / 3, 2)} kr, så du hade betalat{" "}
+          {num(RABAT_BELOEB - RABAT_BELOEB / 3, 2)} kr. Butiker skriver 33 %
+          eftersom det ser snyggare ut — du betalar{" "}
+          {num(RABAT_BELOEB - procentAf(RABAT_BELOEB, 33))} kr.
+        </p>
 
         <h2>Procenträkning i vardagen</h2>
         <p>Procent används överallt i vardagen:</p>

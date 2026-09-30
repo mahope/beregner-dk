@@ -1,38 +1,27 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — 30/9 16:15. Denne iteration var **research** (se `## Fase 3 —
-trafik-drevet`): CEO-køens punkt 0 er færdigt (`aca17e5`), alle plan-opgaver er
-BLOCKED eller udskudt, så køen var tom. Fire VERIFICÉR-noter venter på
-vinduet **17:30** — de kan ikke lukkes før 16:27 (iterationsgrænsen).
+STATUS: KØ — 30/9 16:45. CEO-køens punkt 0 er færdigt (`aca17e5`), de tre review-fra
+30/9 er rettet (`74e7861`). Fase 3-opgaven **F2 er færdig**: `/procent` svarer nu på
+GSC's tredjestørste søgning med formel og gennemregnet eksempel.
 
-**Målt og bekræftet færdigt i denne iteration (CEO-kø punkt 0, alle otte):**
-Valborg fast 30. april (`dage-til.ts:1055`), svensk påskafton `offsetDays: -1`
-(`:802`), dansk sankthans fast 23./24. juni (`:604`, `:669`) og ingen "fri med
-løn" i dansk tekst, dansk påskeaften-FAQ svarer "to forskellige dage" (`:818`),
-`/husleje` siger at nævnet ikke sætter sats pr. område
-(`page-data.ts:1804`, `HuslejeNettopnisindeks.tsx:174`), `toUtcMidnight` læser
-`DAGE_TIL_TIMEZONE` (`dage-til.ts:1347`), svensk promille-FAQ bruger 0,2/1,0 ‰
-(`page-data.ts:2976`), `maneder: 12` (`dato-eksempler.ts:103`), 1. advent
-"mellem 27. november og 3. december" (`dage-til.ts:1129`).
+**Næste frie opgave: F4** (forsiden som indgangspunkt — kræver Playwright, se ❓).
+F1/F3/F5 og opgaverne 97/98/119/183 er alle blokeret af svar fra Mads. **Opgave 187
+må ikke røres før 13/10.**
 
-**⚠️ 12:30-batchen kørte UDEN de otte dengang ventende ændringer.** Alle otte var
-merged før 12:18. Kl. 14:12 er **elleve af dem live** — 12:30-batchen må altså
-have dækket dem alligevel, så ingen `DEPLOY-MISSING`. Kun `/alders`-noten
-(merged 13:43, efter batchen) venter stadig på **17:30**.
+**⚠️ Fire VERIFICÉR-noter venter på vinduet 17:30** (`/alder`-snippet, to blog-CTA-
+bølger, `/boligstoette`-titel) plus denne iterations nye `/procent`-note. De kan ikke
+lukkes før da.
 
-**⚠️ Målerfælde fra 30/9 15:40 (samme klasse som C70's).** Under
-`npm run test` skriver `locale-leak-gate.test.ts` med vilje en dansk streng ind
-i `src/app/procent/page.tsx`, kører scanneren og hævter at den **bliver**
-fundet (`page.test.tsx`-scenen "flags Danish copy that ends in a {…}
-interpolation"). Rækkefølgen `npm run test` → `locale-leak --gate` giver derfor
-en `FEJL: 1 ureviewet(e)`-linje med `procent/page.tsx:339`, der ser ud som et
-fund i denne iterations diff. Det er den **gamle kode**, og filen er
-restoreret bagefter (`git status` ren). Kør gaten separat.
+**⚠️ Målerfælde (30/9 15:40, samme klasse som C70's).** `npm run test` kører
+`locale-leak-gate.test.ts`, som med vilje planterer en dansk streng i
+`src/app/procent/page.tsx` og hævder at scanneren **finder** den. Derfor kommer der
+en `FEJL: 1 ureviewet(e)`-linje med `procent/page.tsx` indeni `npm run test`-output.
+Det er **ikke** et fund i din diff — filen er restoreret bagefter. Kør gaten separat:
+`node scripts/locale-leak.mjs --gate`.
 
-**Generelt om gaten:** `REVIEWED`-poster i `scripts/locale-leak.mjs` er
-nøglet på **fil + linjenummer**, så enhver redigering i `page-data.ts` kan
-fjerne en godkendt post. Ikke opdaget i denne iteration (6 linjer for 6 linjer),
-men en reel fælde for næste agent der tilføjer linjer i den fil.
+**Generelt om gaten:** `REVIEWED`-poster i `scripts/locale-leak.mjs` matches på
+`file` + `key` + `string`, **ikke** linjenummer — så en indsats i en fil flytter
+ikke godkendt-fund. Det er rettet mod den tidligere notat i planen.
 
 ## Fase 3 — trafik-drevet
 
@@ -57,44 +46,29 @@ Site: minberegner.dk 7.421 besøgende/28d (+42 %), ~600.000 GSC-visninger pr.
 måned. Kilder: Google 4.170, Bing 1.319, DDG 378, Yahoo 274 — **1.971 af 7.319
 (27 %) kommer fra søgemaskiner der ikke er Google.**
 
-### Resultatet af målingen: tre ting er IKKE problemet
+### Resultatet af målingen 30/9 (fulde tal i `docs/plan-arkiv.md`)
 
-Disse er målt på det *live* site 30/9 kl. 15:45-16:10, ikke læst i koden.
-De er skrevet ned, så ingen efterfølgende agent bruger en iteration på dem.
+Målt på det *live* site 30/9 kl. 15:45-16:10. **Tre ting er IKKE flaskehalsen**,
+så brug ikke en iteration på dem igen:
 
 1. **Teknisk SEO er ren.** `/procent`, `/dato`, `/tidsberegner`, `/moms`,
    `/tidszone`, `/alder` på begge domæner: `hreflang` (da + sv + x-default),
-   canonical til sig selv, `og:locale` (`da_DK`/`sv_SE`), `<html lang>`,
-   `robots index,follow`. Sitemap: 140 `<loc>` på minberegner.dk, 73 på
-   beraknare.se, `robots.txt` korrekt med `Sitemap:`-linje.
-2. **Ingen forældede sider.** `/dage-til/1-december` har dynamisk title
-   ("Hvor mange dage er der til 1. december? 62 dage"), canonical til sig
-   selv, og **18 af 19** søskendesider i linkene plus et link tilbage til
-   `/dato`. Svensk `dagar-till/1-december` har 15 af 16. Ingen orphaner.
-3. **Ordantal forudsiger IKKE position.** Målt på 14 sider:
-
-   | Side | Ord | Pos. | Side | Ord | Pos. |
-   |---|---|---|---|---|---|
-   | `/kvadratmeter` | 741 | **4,9** | `/dato` | 1.723 | 5,7 |
-   | `/brok` | 636 | 5,2 | `/tidsberegner` | 1.658 | 6,9 |
-   | `/braendstof` | 1.063 | 5,9 | `/procent` | 1.055 | 7,4 |
-   | `/fart` | 485 | 7,0 | `/tidszone` | 1.756 | 7,5 |
-   | `/alder` | 1.215 | 7,5 | `/boligstoette` | 1.149 | **8,7** |
-
-   Sidet med **mindst** tekst på sitets bedste søgerangering, og sidet med
-   **mest** tekst på en af de dårligste. Så dybde er ikke flaskehalsen, og
-   "skriv mere tekst på de store sider" er en dyr fejlretning.
-4. **Titles er allerede skrevet til hovedordet.** Alle 14 største sider har
-   hovedordet i både `title`, `metaTitle` og `h1` ("Procentberegner",
-   "Tidsberegner", "Momsberegner", "Aldersberegner", …). Det er lavet.
+   canonical til sig selv, `og:locale`, `<html lang>`, `robots index,follow`.
+   Sitemap 140 `<loc>` på minberegner.dk, 73 på beraknare.se.
+2. **Ingen forældede sider.** `/dage-til/1-december` har dynamisk title,
+   canonical til sig selv, 18 af 19 søskend i linkene. Ingen orphaner.
+3. **Ordantal forudsiger IKKE position.** Sidets *mindst* tekst (`/kvadratmeter`,
+   741 ord) har sitets bedste rangering (pos. 4,9); sidet med *mest* tekst
+   (`/tidszone`, 1.756 ord) ligger på 7,5. "Skriv mere tekst på de store sider"
+   er altså en dyr fejlretning.
 
 ### Den faktiske flaskehals
 
 CTR følger position, ikke sidekvalitet: pos. 4,9-5,9 giver 0,6-1,4 %, pos.
 7,0-8,7 giver 0,1-0,5 %. Vi ligger **på position 5-8 på 600.000 visninger**.
-Der er ingen titel, beskrivelse, schema- eller intern-link-fejl tilbage at rette
-på de eksisterende sider — kun **positionen** er lav, og den afgøres af den
-danske konkurrence i hvert enkelt ord.
+Der er ingen titel, beskrivelse- eller intern-link-fejl tilbage at rette på de
+eksisterende sider — kun **positionen** er lav, og den afgøres af den danske
+konkurrence i hvert enkelt ord.
 
 **Den største *målbare* afstand:** beraknare.se har **190.447 visninger**
 (`/dato` 101.580 + `/tidsberegner` 61.934 + `/procent` 26.933) og **229 klik**
@@ -114,15 +88,19 @@ vælge mellem "ny side", "dybere side" og "nye links". **Accept:** GSC
 søgningseksport for `/procent` (eller de 20 største søgninger site-wide) ligger
 i planen. **Spørgsmål til Mads: se ❓.**
 
-**F2. [ ] `/procent`: svar på spørgsmålet "hvor stor er rabatten i procent?"
-på selve siden.** Den søgning (56 v, pos. 6) er en hel sætning fra en
-læser, og GSC's øvrige visninger på `/procent` ligner samme type. Kæden
-"to prisser → rabat i kroner og procent" findes i dag kun som værktøj, ikke
-som en svart boks på siden. **Accept:** en sektion med den konkrete
-formel og et gennemregnet eksempel, genereret fra sidens egen
-`beregnRabat`-logik (kvalitet punkt 11), plus en test der fejler uden den.
-**MÅL:** `/procent` 150.470 visninger / 97 klik / CTR 0,1 % (GSC
-2026-08-31 → 2026-09-28). Genmål 14 dage efter deploy.
+**F2. [x] ✅ `ceo/procent-rabat-spørgsmal` — `/procent` svarar nu på frågan.**
+Overskrift, formel (`Rabatprocent = (Prisnedsættelse ÷ Normalpris) × 100`),
+gennemregnet eksempel på läsarens egna tal (9.000 → 7.875 kr = 1.125 kr ned =
+**12,5 %**), fällan med den nye prisen (14,3 %) og en sats-tabell med det man
+*sparar* og det man *betalar*. Alt tal udledt af `RABAT_EKSEMPEL`/`RABAT_SATS`,
+9 nye tests hvor 8 fejler mod gammel kode. Se arkivet. **MÅL:** `/procent`
+150.470 visninger / 97 klik / CTR 0,1 % (GSC 2026-08-31 → 2026-09-28). Genmål
+14 dage efter at den er live.
+**F2b. [ ]** Næste skridt på samme side: en **FAQ-række** i `page-data.ts` der
+rammer spørgsmålsformuleringen, fordi FAQ'en er det Google viser i sit snippet.
+Udeladt i F2 af tidsbudget og fordi `page-data.ts` er den fil hvor
+`locale-leak.mjs`'s `REVIEWED`-poster ligger tættest — tilføj den som sit eget
+punkt, og kør `node scripts/locale-leak.mjs --gate` separat.
 
 **F3. [ ] Beraknare.se: position, ikke titel.** 190.447 visninger på pos.
 8-10. Opgave 187 (svenske slugs, 301) er sat til **13/10** og må ikke flyttes
@@ -165,12 +143,18 @@ Alle fire var grønne før merge 2026-09-30 07:45.
 
 ## Åbne VERIFICÉR DEPLOY-noter
 
-**Fire noter åbne.** HTTP 200 beviser intet: noterne rører `<title>`, `<h1>`,
-JSON-LD eller nye URL'er, og tidszone-noten forventer et **uændret** tal.
-Fulde tekster med alle målinger og kontroller står i `docs/plan-arkiv.md`.
+**Fire noter åbne fra tidligere + den nye fra F2.** HTTP 200 beviser intet: noterne
+rører `<title>`, `<h1>`, brødtekst, JSON-LD eller nye URL'er, og tidszone-noten
+forventer et **uændret** tal. Fulde tekster med alle målinger står i
+`docs/plan-arkiv.md`. De elleve lukkede noter er verificeret 30/9 14:12 på indhold.
 
-De elleve lukkede noter er verificeret 30/9 14:12 på indhold (se arkivet for
-hver sides måling). De fire åbne er merged efter 12:30-batchen.
+- ⏳ **`/procent` skal svare på frågan om rabatten.** `ceo/procent-rabat-spørgsmal`.
+   Kontrollér **indhold**: `<h2>Sådan beregner du rabatten i procent</h2>` og
+   `<h2>Så här räknar du ut rabatten i procent</h2>` skal begge stå, teksten skal
+   sige "1.125 ÷ 9.000 × 100 = 12,5 procent" (da) og "1 125 ÷ 9 000 × 100 = 12,5
+   procent" (se), og sats-tabellen skal have alle fem rækker. **Og** den gamle
+   bullet må ikke længere sige "1.125 ÷ 9.000 = 12,5" — den skal kun sige
+   "25% rabat på en vare til 400 kr = du sparer 100 kr". Vindue **17:30**.
 
 - ⏳ **`/alder`s snippet skal vise dagens alder, ikke 25. september.**
   `ceo/alder-levende-snippet`. Skal have "pr. 30. september 2026" og
@@ -400,42 +384,6 @@ hver sides måling). De fire åbne er merged efter 12:30-batchen.
   efter 14 dage.
 - **MÅL:** beraknare.se 537 besøgende/28d; `/dato` 95 klik, `/tidsberegner` 127
   klik, `/procent` 2 klik (GSC 2026-08-30 → 2026-09-27). Genmål 2026-10-13.
-
-#### 204. [x] ✅ 2026-09-30 — de sidste tolv blogindlæg sluttede stadig på en artikel
-
-- **Datagrund:** blog-bounce er målt til **84-85 %** på de største artikler mod
-  2-7 % på selve beregnerne. `/blog/arveafgift-regler-og-satser` faldt 100 → 84
-  besøgende/28d, og artiklen linkede til `/arveafgift` i løbende tekst uden at
-  næste handling pegede derhen. Opgave 202 (i går) rettede de syv mest
-  besøgte og skrev selv, at **tolv** stadig manglede samme behandling.
-- **Løst:** alle 27 artikler har nu `<NaesteSkridt>` **før** "Relaterede
-  artikler". Hver CTA peger på en beregner artiklen allerede nævner i
-  brødteksten, og hvor `blog-kobling.ts` har en canonisk kobling, peger CTA'en
-  på **den** — ellers ville beregnerens egen "Guides om emnet"-blok pege på
-  en anden retning end artiklens afgående klik.
-- **Port:** `src/app/blog/naeste-skridt.test.ts` (6 scener) læser alle 27
-  `page.tsx` og låser (1) at der er en næste handling, (2) at den ligger før
-  de relaterede artikler, (3) at den peger på den koblede beregner, (4) at den
-  peger på en beregner artiklen nævner *før* CTA'en — så porten ikke kan holde
-  sig selv oprejsende — og (5) at siden findes. Porten er modsvejs verificeret:
-  med `/renteberegner` byttet ud på `guide-til-laan-og-renter` fejler den.
-- **Rigetig fejl fundet af porten:** `dagpenge-saadan-finder-du-din-sats` havde
-  knappen "Beregn din dagpenge" hængt på `/barselsdagpenge` — en
-  barselsdagpengeberegner under en dagpengeknap, indført af opgave 202 i går.
-  Nu `/dagpenge`, som artiklen handler om. `BlogNaesteSkridt.test.tsx`'s
-  dataarray hævdede det forkerte par og er rettet med.
-- **Korrekthedstjek af teksten (kvalitet punkt 11):** alle tolv
-  `beskrivelse`-tekster er læst op imod de felter værktøjet faktisk har.
-  Tre blev strammet, fordi de lovede noget der ikke er et felt:
-  `/budget` lovede "sparerpenge" (værktøjets poster er bolig, transport, mad,
-  forsikring, abonnementer, afdrag, øvrige), `/timepris` lovede "din dagsats"
-  (den spørger "Hvad vil du have udbetalt?"), og `/rentefradrag` lovede "hvad
-  afdraget er værd" (det viser `/skattefradrag`).
-- **MÅL:** bloggen skal sende trafik videre, så effekten er **flere
-  sidevisninger pr. artikel** (altså flere udgående klik) og lavere bounce —
-  ikke flere klik på artiklen selv. Baseline: 84-85 % bounce på de største,
-  2-7 % på beregnerne (Plausible 2026-09-29). Genmål 14 dage efter at den er
-  live.
 
 ## ❓ Til Mads
 

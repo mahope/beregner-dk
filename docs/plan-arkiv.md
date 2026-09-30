@@ -20627,3 +20627,85 @@ artikler". 19 af 27 gjorde ikke; de syv mest besøgte blev rettet i denne bølge
 sidste tolv i `ceo/blog-cta-rest` (opgave 204). Datagrund:
 `/blog/arveafgift-regler-og-satser` faldt 100 → 84 besøgende/28d, og blog-bounce er
 målt til 84-85 % på de største artikler mod 2-7 % på selve beregnerne.
+
+**F2 ✅ `ceo/procent-rabat-spørgsmal`** — `/procent` svarer nu på GSC's
+tredjestørste søgning på siden: "en telefon er sat 1125 kr. ned. normalt koster
+den 9000 kr. hvor stor er rabatten i procent?" (56 visninger, pos. 6,
+2026-08-31 → 2026-09-28). Før stod svaret som **én bullet** i "Procentregning i
+hverdagen", skrevet i hånden og uden formlen — altså ikke et svar, man kan regne
+efter, og intet låste tallene mod sætningen ved siden af.
+
+Nu er der et eget afsnit i begge sprog: overskrift, formlen
+`Rabatprocent = (Prisnedsættelse ÷ Normalpris) × 100`, gennemregnet eksempel på
+læserens egne tal (9.000 kr → 7.875 kr = 1.125 kr ned = **12,5 %**), fælden
+(1.125 ÷ 7.875 giver 14,3 %, som er et andet spørgsmål), og en tabel med det man
+**sparder** og det man **betaler** ved 10/20/25/33/50 % på 1.000 kr — det sidste
+stod ikke på siden før. Svensk side peger på de samme tal med sit eget sprog.
+
+**Kvalitet punkt 11 (påstande i tekst er kode):** intet tal står skrevet i sætningen.
+`rabatProcent(normalPris, nedsatPris)` og `RABAT_EKSEMPEL`/`RABAT_SATS`/`RABAT_BELOEB`
+i `src/lib/procent.ts` er den ene kilde, så formel, eksempel, citat af søgningen og
+tabel ikke kan glide fra hinanden. `RABAT_SATS`-testen låser desuden at 33, 10 og 25
+står i listen, fordi brødteksten nævner dem.
+
+**To fejl fundet af porten undervejs — begge mine, begge rettet:**
+1. Docblock'en på `rabatProcent` hævdede at en stigende pris giver en *negativ*
+   rabat (`rabatProcent(7875, 9000)` er -14,3). Funktionen tager `Math.abs`, så den
+   er +14,3. Påstanden var altså dobbelt falsk, og testen der låste den faldt
+   næsten. Docblock'en siger nu det sande: funktionen måler afstanden på den normale
+   pris og smider fortegnet væk, så den siger aldrig noget om retningen — og derfor
+   er det teksten, der skal navngæne den normale pris som heltal.
+2. Teksten sagde "33 % er den eneste række, der ikke giver et rundt hundtal". Målt:
+   900, 800, 750, 670, 500 — **750** er ikke et rundt hundtal, så påstanden var
+   falsk. Efter et forgæves forsøg på "ender ikke på 0" (670 *gør* det) står der nu
+   en sand og nyttig påstand: 33 % er ikke en tredjedel, en tredjedel af 1.000 er
+   333,33 kr, så du ville betalt 666,67 kr — du betaler 670 kr. Testen locker
+   regnestykket, så påstanden ikke kan stå uden at være regnet.
+
+**Port:** 9 nye tests i `src/app/procent/page.test.tsx` og `src/lib/procent.test.ts`.
+Modsvejs verificeret: med `page.tsx` fra master og de nye tests kørende fejler
+**8 af 9** (den niende er en negativ lås på sprogblanding, som korrekt er grøn mod
+gammel kode). Samme fejlklasse som C84/C115 er dækket med negative lås, så en dansk
+sætning kopieret ind i den svenske gren fanges.
+
+**Ændret uden at det er en refaktorering:** bulletten i "Procentregning i hverdagen"
+mistede sin halvdel. De 9.000/1.125-tal lå nu to steder, og kun den nye svar-sektion
+regner dem — samme "én ejer"-princip som `procent-formler.test.ts` håndhæver for de
+fire formler i referenceboksen. Dansk bullet: "25% rabat på en vare til 400 kr = du
+sparer 100 kr". Link til `/rabat` (dansk `daOnly`-side med tilstanden "Find
+rabatprocent") er tilføjet i den danske sektion; den svenske har ingen, fordi siden
+ikke findes på beraknare.se.
+
+**MÅL:** `/procent` 150.470 visninger / 97 klik / CTR 0,1 % / pos. 7,4 (GSC
+2026-08-31 → 2026-09-28). Genmål 14 dage efter at den er live. Plausible har
+`/procent` under top-15, så GSC er den eneste målestavle her.
+
+**Måling 30/9 kl. 15:45-16:10 (arkiveret fra planens STATUS).** Målt på det *live*
+site, ikke læst i koden. 1. **Teknisk SEO er ren:** `/procent`, `/dato`,
+`/tidsberegner`, `/moms`, `/tidszone`, `/alder` på begge domæner har `hreflang`
+(da + sv + x-default), canonical til sig selv, `og:locale` (`da_DK`/`sv_SE`),
+`<html lang>` og `robots index,follow`; sitemap 140 `<loc>` på minberegner.dk, 73 på
+beraknare.se; `robots.txt` korrekt med `Sitemap:`-linje. 2. **Ingen forældede sider:**
+`/dage-til/1-december` har dynamisk title ("Hvor mange dage er der til 1. december?
+62 dage"), canonical til sig selv og 18 af 19 søskendesider i linkene plus et link
+tilbage til `/dato`; svensk `dagar-till/1-december` har 15 af 16; ingen orphaner.
+3. **Ordantal forudsiger ikke position** (14 sider): `/kvadratmeter` 741 ord →
+pos. **4,9**, `/brok` 636 → 5,2, `/braendstof` 1.063 → 5,9, `/fart` 485 → 7,0,
+`/alder` 1.215 → 7,5, `/procent` 1.055 → 7,4, `/dato` 1.723 → 5,7,
+`/tidsberegner` 1.658 → 6,9, `/tidszone` 1.756 → 7,5, `/boligstoette` 1.149 →
+pos. **8,7**. Sidet med mindst tekst har sitets bedste rangering, sidet med mest
+tekst en af de dårligste. 4. **Titles er allerede skrevet til hovedordet:** alle 14
+største sider har hovedordet i `title`, `metaTitle` *og* `h1`.
+
+**Opgave 204 ✅ `ceo/blog-cta-rest`** — de sidste tolv blogindlæg sluttede stadig på
+en artikel. Datagrund: blog-bounce er målt til 84-85 % på de største artikler mod
+2-7 % på selve beregnerne, og `/blog/arveafgift-regler-og-satser` faldt 100 → 84
+besøgende/28d. Løst: alle 27 artikler har nu `<NaesteSkridt>` **før** "Relaterede
+artikler", og hver CTA peger på en beregner artiklen allerede nævner i brødteksten —
+hvor `blog-kobling.ts` har en canonisk kobling, peger CTA'en på **den**, ellers ville
+beregnerens egen "Guides om emnet"-blok pege en anden vej end artiklens afgående klik.
+Port: `src/app/blog/naeste-skridt.test.ts` (6 scener), modsvejs verificeret.
+Rigetig fejl fundet af porten: `dagpenge-saadan-finder-du-dan-sats` havde knappen
+"Beregn din dagpenge" hængt på `/barselsdagpenge` — indført af opgave 202 i dag —
+nu `/dagpenge`, som artiklen handler om. Tre `beskrivelse`-tekster blev strammet,
+fordi de lovede felter værktøjet ikke har.

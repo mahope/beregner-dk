@@ -2,9 +2,13 @@ import { describe, expect, test } from "vitest";
 import {
   PROCENT_10_AF_TAL,
   PROCENT_SKILLNAD_EKSEMPEL,
+  RABAT_BELOEB,
+  RABAT_EKSEMPEL,
+  RABAT_SATS,
   procentAf,
   procentDifferens,
   procentForskel,
+  rabatProcent,
 } from "./procent";
 
 describe("procentForskel", () => {
@@ -145,5 +149,116 @@ describe("de to formler er ikke det samme", () => {
     }
     expect(PROCENT_SKILLNAD_EKSEMPEL[0]).toMatchObject({ gammal: 30000, ny: 33000 });
     expect(PROCENT_SKILLNAD_EKSEMPEL[1]).toMatchObject({ gammal: 10000, ny: 12500 });
+  });
+});
+
+describe("rabatProcent", () => {
+  test("et prisfald er 12,5 procent rabat på 9.000 kr", () => {
+    // Målt på læserens egne tal fra GSC's tredjestørste søgning på siden
+    // ("en telefon er sat 1125 kr. ned. normalt koster den 9000 kr.",
+    // 56 visninger, pos. 6). 1.125 / 9.000 = 12,5 %.
+    expect(rabatProcent(9000, 7875)).toBe(12.5);
+  });
+
+  test("er altid positiv, selv om prisen faldt", () => {
+    // procentForskel(7875, 9000) er -12,5, fordi et fald er negativt. En
+    // rabat er et fald, og spørgsmålet "hvor stor er rabatten" forventer
+    // 12,5 og ikke -12,5. Det er derfor værdien er absolut her og ikke i
+    // teksten — en ny tekstformulering kan ikke slå fortegnet af.
+    expect(procentForskel(RABAT_EKSEMPEL.nedsatPris, RABAT_EKSEMPEL.normalPris)).toBe(-12.5);
+    expect(rabatProcent(RABAT_EKSEMPEL.normalPris, RABAT_EKSEMPEL.nedsatPris)).toBe(12.5);
+  });
+
+  test("deler med den normale pris, ikke med den nye", () => {
+    // Den fælde, svareafsnittet advarer om: 1.125 / 7.875 er 14,3 %, og det
+    // er et andet spørgsmål end rabatten. De to tal må derfor aldrig kunne
+    // forveksles ved at se ens ud.
+    const medDenNye = rabatProcent(RABAT_EKSEMPEL.nedsatPris, RABAT_EKSEMPEL.nedsatPris);
+    expect(medDenNye).toBe(0);
+    const fejltal = procentForskel(RABAT_EKSEMPEL.normalPris, RABAT_EKSEMPEL.nedsatPris);
+    expect(fejltal).toBeCloseTo(14.2857, 3);
+    expect(rabatProcent(RABAT_EKSEMPEL.normalPris, RABAT_EKSEMPEL.nedsatPris)).not.toBeCloseTo(
+      fejltal,
+      1,
+    );
+  });
+
+  test("giver de 25 procent, siden allerede lover i hverdagsbulletten", () => {
+    // "25% rabat på en vare til 400 kr = du sparer 100 kr" står i
+    // hverdagsafsnittet og er skrevet i hånden. Den nye funktion skal give
+    // præcis den værdi, så de to steder ikke kan komme i strid.
+    expect(rabatProcent(400, 300)).toBe(25);
+    expect(400 - 300).toBe(procentAf(400, 25));
+  });
+
+  test("ingen ændring er 0 procent", () => {
+    expect(rabatProcent(9000, 9000)).toBe(0);
+  });
+
+  test("en normalpris på 0 giver ingen division med 0", () => {
+    expect(rabatProcent(0, 500)).toBe(0);
+  });
+
+  test("de almindelige satsers rækker følger procentAf", () => {
+    for (const sats of RABAT_SATS) {
+      expect(procentAf(RABAT_BELOEB, sats)).toBe((RABAT_BELOEB * sats) / 100);
+      expect(RABAT_BELOEB - procentAf(RABAT_BELOEB, sats)).toBe(
+        RABAT_BELOEB - (RABAT_BELOEB * sats) / 100,
+      );
+    }
+  });
+});
+
+describe("RABAT_EKSEMPEL", () => {
+  test("er priserne fra den søgning, afsnittet svarer på", () => {
+    // GSC 2026-08-31 → 2026-09-28: "en telefon er sat 1125 kr. ned. normalt
+    // koster den 9000 kr. hvor stor er rabatten i procent?" 56 visninger,
+    // pos. 6. Hvis tallene ændres, skal søgningen og konstanten følge med.
+    expect(RABAT_EKSEMPEL).toEqual({ normalPris: 9000, nedsatPris: 7875 });
+  });
+
+  test("nedsættelsen er 1.125 kr, så de tre tal i sætningen kan afledes", () => {
+    const nedsat = RABAT_EKSEMPEL.normalPris - RABAT_EKSEMPEL.nedsatPris;
+    expect(nedsat).toBe(1125);
+    expect(RABAT_EKSEMPEL.normalPris).toBeGreaterThan(RABAT_EKSEMPEL.nedsatPris);
+  });
+});
+
+describe("RABAT_SATS", () => {
+  test("er stigende, uden dubletter og positive heltal", () => {
+    expect(RABAT_SATS).toEqual([...RABAT_SATS].sort((a, b) => a - b));
+    expect(new Set(RABAT_SATS).size).toBe(RABAT_SATS.length);
+    for (const sats of RABAT_SATS) {
+      expect(Number.isInteger(sats)).toBe(true);
+      expect(sats).toBeGreaterThan(0);
+      expect(sats).toBeLessThan(100);
+    }
+  });
+
+  test("indeholder de satser, siden allerede dokumenterer", () => {
+    // 10 % og 25 % står i "Hurtige procent-tricks" og i hverdagsbulletten,
+    // så de er ikke nye påstande — de er de samme tal et andet sted. 33 %
+    // nævnes uden for tabellen i sætningen om at den ikke er en tredjedel,
+    // så den skal også stå i listen — ellers kan teksten tale om en sats,
+    // tabellen ikke har, uden at nogen opdager det.
+    for (const sats of [10, 25, 33]) {
+      expect(RABAT_SATS).toContain(sats);
+    }
+  });
+
+  test("33 er ikke en tredjedel, og det er derfor teksten siger det", () => {
+    // Sætningen ved tabellen hævder præcis dette: en tredjedel af 1.000 kr
+    // er 333,33 kr, så en tredjedels rabat giver 666,67 kr — ikke de 670 kr
+    // som 33 % giver. Uden denne test kan teksten påstå det uden at nogen
+    // har tjekket regnestykket.
+    expect(RABAT_BELOEB - procentAf(RABAT_BELOEB, 33)).toBe(670);
+    expect(procentAf(RABAT_BELOEB, 33)).not.toBeCloseTo(RABAT_BELOEB / 3, 5);
+    expect(RABAT_BELOEB - RABAT_BELOEB / 3).toBeCloseTo(666.6667, 3);
+  });
+
+  test("hver sats giver en pris der koster mindre end beløbet", () => {
+    for (const sats of RABAT_SATS) {
+      expect(RABAT_BELOEB - procentAf(RABAT_BELOEB, sats)).toBeLessThan(RABAT_BELOEB);
+    }
   });
 });
