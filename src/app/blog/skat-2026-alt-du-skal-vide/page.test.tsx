@@ -38,8 +38,8 @@ describe("skat-2026 artiklen", () => {
     expect(markup).toContain("0,639 %"); // kirkeskat, SVMN-gennemsnit
     expect(markup).toContain("12,75 %"); // beskæftigelsesfradrag
     expect(markup).toContain("63.300 kr"); // loft
-    expect(markup).toContain("12.400 kr"); // håndværkerfradrag
-    expect(markup).toContain("6.200 kr"); // servicefradrag
+    expect(markup).toContain("9.000 kr"); // håndværkerfradrag, kun grønne arbejder
+    expect(markup).toContain("18.300 kr"); // servicefradrag
     expect(markup).toContain("3,17 kr./km");
     expect(markup).toContain("1,59 kr./km");
     expect(markup).toContain("uden loft"); // A-kasse
@@ -50,8 +50,13 @@ describe("skat-2026 artiklen", () => {
 
     // 1) kirkeskat var 0,88 % — den officielle 2026-gennemsats er 0,639 %
     expect(markup).not.toContain("0,88");
-    // 2) håndværkerfradrag var 12.900 kr — loftet er 12.400 kr
+    // 2) håndværkerfradrag var 12.900 kr — loftet er 9.000 kr
     expect(markup).not.toContain("12.900");
+    // 2b) boligjobordningen var 12.400/6.200 kr, som er 2025-tallene. Fra 2026
+    // er håndværkerfradraget kun grønne arbejder til 9.000 kr, og
+    // servicefradraget er steget til 18.300 kr.
+    expect(markup).not.toContain("12.400 kr");
+    expect(markup).not.toContain("6.200 kr");
     // 3) kommuneskat var "ca. 25,1 %" — gennemsnittet er 25,049 %
     expect(markup).not.toContain("25,1%");
     // 4) A-kasse blev fejlagtigt sat til 7.000 kr-loftet for fagforening

@@ -287,27 +287,41 @@ export const RENTEFRADRAG_2026 = {
  * Kørselsfradragets satser ligger i `SATSER_2026` og er delt med
  * `/befordringsfradrag`, så de to sider ikke kan komme ud af trit.
  *
- * `haandvaerkerMax` og `servicefradragMax` er vores sider og værktøjets
- * nuværende tal. De er **ikke** verificeret mod en primær 2026-kilde endnu:
- * skat.dk's fradragssider er JS-renderede, og den sekundære kilde, der nævner
- * beløbsloft for 2026, modsiger beløbene (se IMPLEMENTATION_PLAN.md, ❓ Til
- * Mads). Indtil en primær kilde er fundet, er værktøjet derfor mærket
- * vejledende for disse to felter, og tallene må ikke præsenteres som sikre.
+ * `haandvaerkerMax` og `servicefradragMax` er de to dele af boligjobordningen,
+ * som fra 1. januar 2026 har hvert sit loft **og sit formål**:
+ *
+ * - `haandvaerkerMax` gælder **kun grønne og energibesparende** arbejder
+ *   (isolering, energirigtige vinduer og døre, varmepumpe, solceller,
+ *   ladestander). Almindeligt vedligeholdelsesarbejde som maling og
+ *   udskiftning af et køkken er ikke længere omfattet.
+ * - `servicefradragMax` gælder private serviceydelser i og omkring hjemmet:
+ *   rengøring, vinduespudsning, havearbejde, snerydning og børnepasning i
+ *   hjemmet.
+ *
+ * Begge loft er pr. person pr. år, og begge har fradragsværdi omkring 26 %.
+ *
+ * Kilde: Borgerhåndbogs to 2026-guider, læst 2026-10-01 — de er interne
+ * konsistente (26 % × 18.300 ≈ 4.760 kr og 26 % × 9.000 = 2.340 kr), men de
+ * er stadig en **sekundær** kilde: skat.dk svarede HTTP 500 på alle
+ * fradragssider samme dag. Værktøjet markerer derfor de to felter som
+ * vejledende, indtil en primærkilde kan aflæse beløbsgrænserne direkte.
  *
  * `boligfradragSkattevaerdi` er en forenkling: de præcise fradragsværdier er
  * progressive, så 26 % er et vejledende gennemsnit for de samlede
  * boligjob-/servicefradrag, ikke en myndighedssats.
  */
 export const SKATTEFRADRAG_2026 = {
-  verifiedAt: "2026-09-25",
+  verifiedAt: "2026-10-01",
   sources: {
     koerselsfradrag: "https://skat.dk/borger/fradrag/koerselsfradrag",
     haandvaerkerfradrag:
       "https://borgerhaandbog.dk/skat-og-personlig-oekonomi/haandvaerkerfradrag",
+    servicefradrag:
+      "https://borgerhaandbog.dk/skat-og-personlig-oekonomi/servicefradrag-rengoering-havepasning/",
     rentefradrag: RENTEFRADRAG_2026.officialRules,
   },
-  haandvaerkerMax: 12400, // pr. person pr. år (Boligjobordningen)
-  servicefradragMax: 6200, // serviceydelser, særskilt loft pr. person pr. år
+  haandvaerkerMax: 9000, // grønne/energibesparende arbejder, pr. person pr. år
+  servicefradragMax: 18300, // private serviceydelser, særskilt loft pr. person pr. år
   fagforeningMax: 7000, // max fradrag for fagforening pr. år
   koerselDageMax: 216, // antal fradragsberettigede arbejdsdage (indtastet af brugeren)
   boligfradragSkattevaerdi: 0.26, // vejledende fradragsværdi for boligjob/service

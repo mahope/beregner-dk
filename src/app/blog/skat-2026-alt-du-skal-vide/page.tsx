@@ -346,7 +346,8 @@ export default function Skat2026GuidePage() {
           </li>
           <li>
             <strong>Håndværkerfradrag:</strong> Op til{" "}
-            {da(SKATTEFRADRAG_2026.haandvaerkerMax)} kr for ydelser i hjemmet i 2026.
+            {da(SKATTEFRADRAG_2026.haandvaerkerMax)} kr for grønne og energibesparende
+            arbejder i 2026.
             Serviceydelser har et særskilt loft på{" "}
             {da(SKATTEFRADRAG_2026.servicefradragMax)} kr. Fradragsværdien af begge er ca.{" "}
             {pct(SKATTEFRADRAG_2026.boligfradragSkattevaerdi)} % af beløbet.

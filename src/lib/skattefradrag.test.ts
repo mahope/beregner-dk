@@ -20,13 +20,33 @@ function input(overrides: Partial<typeof TOM> = {}) {
 
 describe("SKATTEFRADRAG_2026", () => {
   test("locked 2026 figures and documented provenance", () => {
-    expect(SKATTEFRADRAG_2026.haandvaerkerMax).toBe(12400);
-    expect(SKATTEFRADRAG_2026.servicefradragMax).toBe(6200);
+    expect(SKATTEFRADRAG_2026.haandvaerkerMax).toBe(9000);
+    expect(SKATTEFRADRAG_2026.servicefradragMax).toBe(18300);
     expect(SKATTEFRADRAG_2026.fagforeningMax).toBe(7000);
     expect(SKATTEFRADRAG_2026.koerselDageMax).toBe(216);
     expect(SKATTEFRADRAG_2026.boligfradragSkattevaerdi).toBe(0.26);
-    expect(SKATTEFRADRAG_2026.verifiedAt).toBe("2026-09-25");
+    expect(SKATTEFRADRAG_2026.verifiedAt).toBe("2026-10-01");
     expect(SKATTEFRADRAG_2026.sources.koerselsfradrag).toContain("skat.dk");
+  });
+
+  test("begge boligjob-lofter er kildeført hver for sig", () => {
+    // Loftet for grønne arbejder og loftet for serviceydelser er to forskellige
+    // ordninger med hver sin side, så de må ikke deles kildeangivelse.
+    expect(SKATTEFRADRAG_2026.sources.haandvaerkerfradrag).toContain("haandvaerkerfradrag");
+    expect(SKATTEFRADRAG_2026.sources.servicefradrag).toContain("servicefradrag");
+    expect(SKATTEFRADRAG_2026.sources.servicefradrag).not.toBe(
+      SKATTEFRADRAG_2026.sources.haandvaerkerfradrag,
+    );
+  });
+
+  test("fradragsværdien 26 % giver de maksimale besparelser kilden nævner", () => {
+    // Kilden angiver ca. 2.340 kr for grønne arbejder og ca. 4.760 kr for
+    // serviceydelser. 26 % × 9.000 er præcis 2.340, og 26 % × 18.300 er
+    // 4.758 — altså de to "ca."-tal, avrundet til nærmeste 10.
+    const vaerdi = SKATTEFRADRAG_2026.boligfradragSkattevaerdi;
+    const tilNaermeste10 = (n: number) => Math.round(n / 10) * 10;
+    expect(tilNaermeste10(SKATTEFRADRAG_2026.haandvaerkerMax * vaerdi)).toBe(2340);
+    expect(tilNaermeste10(SKATTEFRADRAG_2026.servicefradragMax * vaerdi)).toBe(4760);
   });
 });
 

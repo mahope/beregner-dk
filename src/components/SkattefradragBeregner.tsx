@@ -186,22 +186,22 @@ export default function SkattefradragBeregner() {
 
       {/* Håndværkerfradrag */}
       <div className="bg-white dark:bg-gray-800 rounded-2xl shadow p-6 space-y-4">
-        <h2 className="text-lg font-semibold dark:text-white">Boligjobordning (håndværkerfradrag)</h2>
+        <h2 className="text-lg font-semibold dark:text-white">Boligjobordning (håndværker- og servicefradrag)</h2>
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label htmlFor="haandvaerker" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Håndværkerydelser (max {formatKr(SKATTEFRADRAG_2026.haandvaerkerMax)})
+              Energibesparende arbejder (max {formatKr(SKATTEFRADRAG_2026.haandvaerkerMax)})
             </label>
             <div className="relative">
               <input id="haandvaerker" type="number" value={haandvaerker} onChange={(e) => setHaandvaerker(e.target.value)}
-                placeholder="F.eks. 10000" min="0"
+                placeholder="F.eks. 6000" min="0"
                 className="w-full border border-gray-300 dark:border-gray-600 rounded-lg py-3 px-4 pr-12 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">{getCurrencySuffix(locale)}</span>
             </div>
           </div>
           <div>
             <label htmlFor="serviceydelser" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Serviceydelser (max {formatKr(SKATTEFRADRAG_2026.servicefradragMax)})
+              Rengøring, have m.fl. (max {formatKr(SKATTEFRADRAG_2026.servicefradragMax)})
             </label>
             <div className="relative">
               <input id="serviceydelser" type="number" value={serviceydelser} onChange={(e) => setServiceydelser(e.target.value)}

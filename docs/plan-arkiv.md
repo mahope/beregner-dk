@@ -22889,3 +22889,40 @@ for 1990-2050, slug-parret mellem sprogene og det 364 dage lange interval der
 gør 2. juledags titel trecifret. Mutation målt: `-47` → `-46` giver 3 røde
 tests. De eksisterende sløjfer gennem `getDageTilSlugs` dækker titler ≤ 60
 tegn hele året, sitemap, routing/301 mellem sprog og forside-kort.
+
+## ceo/boligjob-lofter-2026 (1/10 21:25) — boligjobordningens 2026-lofter var 2025-tal
+
+**Fund.** `/skattefradrag` viste håndværkerfradrag til **12.400 kr.** og
+servicefradraget til **6.200 kr.** begge mærket «i 2026». Borgerhåndbogs to 2026-guider
+siger det modsatte: **9.000 kr.** for håndværkerfradraget (kun *grønne og
+energibesparende* arbejder) og **18.300 kr.** for servicefradraget (rengøring,
+vinduespudsning, havearbejde, snerydning, børnepasning i hjemmet). Loftene var altså
+ombyttede, og håndværkerfradraget har et snævrere formål end siden påstod — maling og
+køkkenskift har ikke fradrag. Fire steder læste `SKATTEFRADRAG_2026` (to blogsider,
+beregnerens labels, `satser-2026.ts`), to steder havde tal stående i brødtekst
+(`/skattefradrag/page.tsx`) og i FAQ'en (`page-data.ts`).
+
+**Kilde og begrænsning.** Borgerhåndbog læst 1/10 2026; de to sider er interne
+konsistente (26 % × 18.300 ≈ 4.760 kr, 26 % × 9.000 = 2.340 kr — begge tal nævnes
+på siderne). skat.dk svarer HTTP 500 på *alle* fradragssider, så tallene er stadig
+**sekundært** kildeført, og docblock'en siger det. `sources.servicefradrag` er tilføjet,
+så de to ordninger har hver sin kildeangivelse.
+
+**Rettelse.** Konstanten, docblock'en, de to feltlabels («Energibesparende arbejder» og
+«Rengøring, have m.fl.»), placeholderen over loftet (10.000 → 6.000), brødteksten og
+FAQ'en — de to sidste læser nu konstanten i stedet for hårdkodede tal.
+
+**Port.** Ny `src/app/skattefradrag/page.test.tsx` (4 tests) renderer siden og læser
+lofterne ud af markup'en og ud af FAQ-teksten. Den fangede undervejs en reel fejl i
+rettelsen: FAQ-svaret stod i almindelige anførselstegn, så `${daKr(...)}` lækkede
+bogstaveligt ud i HTML'en — samme fejlklasse som `$1`-resten i review-fund 13. Der er
+nu en test på, at ingen `${` må over i markup'en. Eksisterende port
+`skat-2026-alt-du-skal-vide/page.test.tsx` låste de gamle tal og blev opdateret til de
+nye plus `not.toContain`-påstande på 12.400/6.200.
+
+**Målt.** De tre nye taltests i `skattefradrag.test.ts` kørte mod den gamle kode:
+3 røde (`expected 12400 to be 9000`, `undefined`-kilde, `3224 vs 2340`). Gaten grøn:
+lint 0 (652 filer), typecheck 0, 3457 tests / 211 filer, build ok.
+
+**MÅL:** `/skattefradrag` har ingen GSC-baseline. `/blog/skat-2026-alt-du-skal-vide`
+har ingen heller — skriv begge fra næste snapshot.

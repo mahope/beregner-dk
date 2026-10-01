@@ -1,36 +1,37 @@
-STATUS: 1/10 19:55. Rød CI: ingen (seneste kørsel grøn 17:15 UTC). Sentry:
-  ingen nye hændelser. CEO-køen er **tom** — punkt 0 verificeret i koden igen.
-  **Ingen åbne PR'er.**
+STATUS: 1/10 21:25. Rød CI: ingen. Sentry: ingen nye hændelser. CEO-køen er
+  **tom** — punkt 0 verificeret i koden igen (Valborg 30. april, svensk påskafton
+  `offsetDays: -1`, dansk sankthans fast 23. juni, ingen dansk påskeaften-FAQ,
+  `/husleje` på nettoprisindekset, `toUtcMidnight` med `Europe/Copenhagen`,
+  `dato-eksempler.ts` `maneder: 12`). **Ingen åbne PR'er.**
 
-  **Seneste opgave: tre nye `/dage-til`-sider — fastelavn, palmesøndag og
-  2. juledag.** `ceo/dage-til-fastelavn-palmesondag-2juledag`. Seks sider
-  (3 da + 3 se), bygget på den færdige skabelon og **uden ny kilde**: 26.
-  december er fast, de to andre er påskedagen minus 47 og minus 7 dage.
-  *Datagrund:* dansk autocomplete 1/10 — «fastelavn» har 10/10 completioner,
-  og «hvor mange dage er der til fastelavn» er en completion i sig selv;
-  «palmesøndag» og «2 juledag» har begge årstal-varianter («palmesøndag
-  2026», «2 juledag 2026 dato»). Svensk: «fettisdagen» 8/8, «annandag jul
-  datum», «palmsöndagen 2026». `2. juledags` danske spørgsmål har datoen i
-  sig («…til 2. juledag 26. december?»), fordi «2 juledag dato» er en
-  completion — samme læring som juleaften. Port: 6 rendering-cases kræver
-  dato, ugedag og dag-tal i heroen; mutation af offset −47 → −46 målt rød i
-  3 tests. Se `docs/plan-arkiv.md`.
+  **Seneste opgave: boligjobordningens 2026-lofter var 2025-tal.** `ceo/boligjob-lofter-2026`.
+  Håndværkerfradraget stod på 12.400 kr. og servicefradraget på 6.200 kr. — fra
+  1. januar 2026 er de **9.000 kr. og 18.300 kr.**, altså omvendt, og
+  håndværkerfradraget gælder kun *grønne og energibesparende* arbejder, så maling
+  og køkkenskift har ikke længere fradrag. Fire steder læste konstanten, to
+  steder havde hårdkodede tal; alle læser nu `SKATTEFRADRAG_2026`.
+  *Datagrund:* Borgerhåndbogs to 2026-guider, læst 1/10 — internt konsistente
+  (26 % × 18.300 ≈ 4.760 kr, 26 % × 9.000 = 2.340 kr). skat.dk svarer HTTP 500
+  på alle fradragssider, så det er stadig en sekundær kilde, og begge tal er
+  fortsat mærket vejledende. Port: ny `/skattefradrag/page.test.tsx` (4 tests)
+  læser lofterne ud af den **renderede markup** og af FAQ-teksten.
+  Se `docs/plan-arkiv.md`.
 
-  **Gaten:** `lint` 0 (651) · `typecheck` 0 · `TZ=UTC npm run test`
-  **3451 grønne / 210 filer** · `next build` ok. `locale-leak` melder stadig
-  én ureviewet dansk streng på `/procent:522` — forhåndsfandet, ikke rørt.
+  **Gaten:** `lint` 0 (652) · `typecheck` 0 · `TZ=UTC npm run test`
+  **3457 grønne / 211 filer** · `next build` ok.
 
 ## Næste opgave (klar til næste iteration)
 
-**De fire manglende enkeltfradrag på `/skattefradrag`.** *Datagrund:* dansk
-autocomplete 1/10 under «fradrag 2026» giver «fradrag for fitness», «fradrag
-for rengøring», «fradrag havearbejde» og «fradrag sommerhusudlejning» — fire
-konkrete fradrag vi ikke dækker. Vi har allerede `/skattefradrag` og satserne
-ligger i repoet, så det er **indhold på en eksisterende side**, ikke en ny
-side og ikke en ny kilde. *Accept:* de fire fradrag står i beregneren med den
-danske 2026-sats kildeført, i begge sprog, med tests på kant-tilfælde
-(sammenligningsgrundlag, ingen fradrag over indkomsten). **MÅL:** `/skattefradrag`
-har ingen GSC-baseline endnu — skriv CTR og visninger fra næste snapshot.
+**Sommerhusudlejningsfradraget og fitnessfradraget på `/skattefradrag`** — de to
+sidste af de fire fradrag fra autocomplete-klyngen «fradrag 2026». Rengøring og
+havearbejde er dækket af boligjob-rettelsen 1/10 (servicefradraget, 18.300 kr.,
+og felterne hedder nu «Rengøring, have m.fl.»). *Accept:* begge fradrag står i
+beregneren med den danske 2026-sats kildeført, i begge sprog, med tests på
+kant-tilfælde (loft pr. person, ingen fradrag over indkomsten).
+**Forudsætning:** begge satser skal findes i en læsbar kilde — skat.dk er 500,
+og 1/10 fandt ingen. Uden kilde skal de **ikke** bygges; skriv i stedet et ❓.
+**MÅL:** `/skattefradrag` har ingen GSC-baseline — skriv CTR og visninger fra
+næste snapshot.
 
 ## ❓ Uafklaret — ferielov (rammer `/dage-til/summerferien` **og** skolestart)
 
@@ -146,8 +147,11 @@ Prioriteret efter forventet effekt på **trafik**. Datagrund fra GSC 1/10
   satsen i stedet for at bygge en ny side. (2) *børnepenge 2026* — «børnepenge
   juli 2026», «børnepenge hvornår» ud over de to vi allerede dækker.
   (3) *fradrag 2026* — «fradrag for fitness», «fradrag for rengøring»,
-  «fradrag havearbejde», «fradrag sommerhusudlejning»: enkeltfradrag der mangler
-  på `/skattefradrag`. (4) *skoleferie/skolestart 2026* — «skoleferie 2026»,
+  «fradrag havearbejde», «fradrag sommerhusudlejning». **Delvis lukket 1/10:**
+  rengøring og havearbejde er servicefradraget (18.300 kr.), og de to felter hedder
+  nu «Rengøring, have m.fl.» — men boligjob-lofterne var 2025-tal og er rettet,
+  se `ceo/boligjob-lofter-2026`. Fitness og sommerhusudlejning mangler stadig og
+  kræver en sats, der kan læses i en kilde (skat.dk er 500). (4) *skoleferie/skolestart 2026* — «skoleferie 2026»,
   «skolestart 2026»: matcher `/dage-til`-mønstret, men ❓ opgave 201 (ferielovens
   startdato) blokerer det. (5) *renteprognose 2026/2027/2030* — årstal-varianter
   af den side vi lige byggede; de er samme intention, så de skal **ikke** blive
@@ -174,6 +178,13 @@ Prioriteret efter forventet effekt på **trafik**. Datagrund fra GSC 1/10
   ikke gættes tal.
 
 ## Åbne VERIFICÉR DEPLOY-noter
+
+- ⏳ **Boligjobordningens 2026-lofter: 9.000 kr. og 18.300 kr.**
+  `ceo/boligjob-lofter-2026`. Prøven er på indhold: `curl -s
+  https://minberegner.dk/skattefradrag` skal indeholde «op til 9.000 kr. pr.
+  person i 2026» og «særskilt loft på 18.300 kr.» og **ikke** «12.400» eller
+  «6.200»; `https://minberegner.dk/blog/skat-2026-alt-du-skal-vide` skal have
+  «18.300 kr» i listen. Vindue 1/10 21:30.
 
 - ⏳ **Tre nye `/dage-til`-sider: fastelavn, palmesøndag, 2. juledag.**
   `ceo/dage-til-fastelavn-palmesondag-2juledag`. Prøven er på indhold: `curl -s

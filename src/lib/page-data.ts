@@ -1,5 +1,5 @@
 import type { Locale } from "./i18n";
-import { BARSEL_2026, SATSER_2026, SU_2026 } from "./satser-2026";
+import { BARSEL_2026, SATSER_2026, SKATTEFRADRAG_2026, SU_2026 } from "./satser-2026";
 import { SOLCELLE_LEVETID_AAR_MAX, SOLCELLE_LEVETID_AAR_MIN } from "./energi/solceller";
 import { BRAENDSTOF_EGENT_FORBRUG, BRAENDSTOF_EKSEMPEL_KM, BRAENDSTOF_FORUDSETNINGER, BRAENDSTOF_FORUDSETNINGER_SE, besparelseProcent, braendstofEksempelRækker, breakEvenKwhPris, elbilSammenligning, heleKroner, literPr100km, prisPrKm, prisPrMil, procent1Decimals } from "./braendstof";
 import { HUSLEJE_EKSEMPEL, HUSLEJE_STANDARD } from "./husleje";
@@ -264,6 +264,8 @@ const elbilSe = elbilSammenligning("se");
 const krTal = (value: number) => value.toFixed(2).replace(".", ",");
 /** Tusindtalsseparator som i Sverige: 12400 -> "12 400". */
 const seKr = (value: number) => value.toLocaleString("sv-SE");
+/** Tusindtalsseparator som i Danmark: 9000 -> "9.000". Samme notation som `formatNumber` i `format.ts`. */
+const daKr = (value: number) => formatNumber(value, "da");
 /** Pris pr. km med svensk notation: 1.1875 -> "1,19 kr/km". */
 const seKrPrKm = (value: number) => value.toFixed(2).replace(".", ",") + " kr/km";
 
@@ -1728,7 +1730,7 @@ const daPages: Record<string, PageData> = {
       faqItems: [
       { question: "Hvad er kørselsfradrag?", answer: "Kørselsfradrag (befordringsfradrag) er et fradrag for transport mellem hjem og arbejde. Du kan få fradrag for kørsel over 24 km dagligt (12 km hver vej), uanset om du kører bil, cykel eller bruger offentlig transport. Satsen er 3,17 kr./km for 25-120 km og 1,59 kr./km derover i 2026." },
       { question: "Hvad er rentefradrag?", answer: "Rentefradrag er et fradrag for renteudgifter på lån — fx boliglån, billån og SU-lån. Fradragsværdien er 33,6% op til 50.000 kr. renteudgifter og 25,6% oveni. Det betyder, at du sparer ca. 336 kr. i skat for hver 1.000 kr. du betaler i renter, indtil du når grænsen." },
-      { question: "Hvad dækker håndværkerfradraget?", answer: "Boligjobordningen (håndværkerfradraget) dækker arbejdsløn til håndværkerydelser (maling, VVS, el mv.) op til 12.400 kr. og serviceydelser (rengøring, havearbejde mv.) op til 6.200 kr. pr. person i 2026. Kun arbejdsløn — ikke materialer — kan fradrages." },
+      { question: "Hvad dækker håndværkerfradraget?", answer: `Boligjobordningen er delt i to ordninger i 2026. Håndværkerfradraget dækker arbejdsløn til grønne og energibesparende forbedringer — isolering, energirigtige vinduer og døre, varmepumpe, solceller og ladestander — op til ${daKr(SKATTEFRADRAG_2026.haandvaerkerMax)} kr. pr. person. Maling og andet almindeligt vedligeholdelse er ikke længere omfattet. Servicefradraget har sit eget loft på ${daKr(SKATTEFRADRAG_2026.servicefradragMax)} kr. pr. person for private serviceydelser i hjemmet: rengøring, vinduespudsning, havearbejde, snerydning og børnepasning i hjemmet. Kun arbejdsløn — ikke materialer — kan fradrages i begge ordninger.` },
       { question: "Kan jeg trække fagforening fra i skat?", answer: "Ja, du kan trække kontingent til fagforening fra op til 7.000 kr. årligt i 2026. A-kasse-kontingent kan trækkes fuldt fra uden loft. Begge fradrages som ligningsmæssige fradrag." },
       { question: "Hvornår skal jeg indberette fradrag?", answer: "De fleste fradrag indberettes automatisk af din arbejdsgiver, bank eller fagforening. Kørselsfradrag og håndværkerfradrag skal du selv indberette via skat.dk. Fristen er typisk 1. maj for årsopgørelsen." },
       ],
