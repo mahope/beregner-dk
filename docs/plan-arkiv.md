@@ -22363,3 +22363,50 @@ det er celle- og brødtekst, så hver streng er talt.
 
 **Målt 1/10 07:45, samme måling som brugeren kan gentage:** 12 URL'er hentet,
 alle 200, ingen fejl. Blokerende fejl: ingen.
+
+## Iteration 1/10 09:12-09:55 — måling af link-graf + fund af lovpåstand i sommerferien (ingen kode)
+
+**Link-graf målt på live, 141 sitemap-URL'er.** Alle sider hentet med curl
+(16 MB markup), `href="/…"` talt pr. side, kun links der er i sitemap'en og
+ikke self-links. Resultat: **median 20 indgående interne links**, **0 sider
+uden indgående link**, laveste 1. `/aegloesning` ← `/kategori/familie`;
+`/planetvaegt` ← `/kategori/matematik`; `/blog/privatoekonomi-for-unge` ←
+`/blog`; `/blog/leasing-af-bil-2026-pris-and-guide` ← `/blog`. Øverste: `/` 140,
+og footerens linkliste giver `/om`, `/privatlivspolitik`, `/cookiepolitik` 139
+hver. **Målerfælde:** footerlinkene gør indgående-tallet uegentligt ubrugeligt
+som PageRank-mål; tallet er kun brugt til at finde *klynger af oversatte*
+sider, og der er ingen.
+
+**De 19 `/dage-til/*`-sider målt (juleaften, 1-december, sommerferien,
+skolestart).** Alle har `<title>` med spørgsmål + dagens tal
+("Hvor mange dage er der til juleaften 24. december? 84 dage"),
+`<meta description>` med samme tal og ugedagen for måldatoen, canonical på sig
+selv, og JSON-LD med `Answer` + `FAQPage` + `BreadcrumbList` + `WebPage` +
+`Organization`. hreflang: `da` + `sv` + `x-default` på juleaften og
+1-december, korrekt kun `da` + `x-default` på sommerferien og skolestart
+(danske-only ferier). Ingen fejl fundet.
+
+**Fundet: sommerferiens startdato.** `sommerferieStart()`
+(`src/lib/dage-til.ts:1413-1423`) returnerer den **sidste lørdag i juni**.
+Docblock: "fixed by the Folkeskoleloven (2024)". Facts: "Sommerferien begynder
+altid den sidste lørdag i juni. I 2026 er det 27. juni, i 2027 26. juni og i
+2028 24. juni." FAQ: "Kan sommerferien begynne senere end 27. juni?".
+Internt er de tre strenge konsistente, og dageafstandene i skolestart-FAQ'en er
+aritmetisk rigtige mod de samme formel (2026: 27/6→1/8 = 35 dage, 2027: 36,
+2028: 38 — alle efterprøvet med `Date.UTC`).
+
+Kildejerngang 1/10 09:33-09:50 (alle resultater i planens opgave 201):
+- `https://www.retsinformation.dk/eli/lta/2024/1053` → 200 men 4.856 bytes
+  SPA-skal; `…/1053.xml` → 200 men 2.832 bytes, samme skal.
+- `https://www.retsinformation.dk/eli/lta/2026/1173` → 404.
+- `https://www.undervisningsministeriet.dk/folkeskolen/skoletræt-og-ferie/skolernes-ferie` → transportfejl.
+- `https://ferieinfo.dk/ferier-2027/`, `https://ferieloven.dk/` → transportfejl.
+- `https://www.lovguiden.dk/loven/ferieloven` → **HTTP 429**.
+- `https://danskelove.dk/ferieloven` → 200, men kun ferieloven for ansatte
+  (krav om feriedage, feriegodtgørelse); intet om skoleferiers startdato.
+- `https://da.wikipedia.org/wiki/Sommerferie` → 200, artikel tom (866 bytes rå).
+- Google og `lite.duckduckgo.com` gav ingen brugbare uddrag.
+
+**Beslutning: ingen kodeændring.** En lovpåstand uden kilde er præcis den
+fejlklasse, der fyldte CEO-køens punkt 0 og sidste iterations "op fra 49.700
+kr"-strenge. Opgave 201 er skrevet med acceptkriterier og et ❓ til Mads.

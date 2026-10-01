@@ -1,67 +1,43 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — 1/10 08:40. Én deploy-note lukket på indhold, ingen kode leveret.
+STATUS: KØ — 1/10 09:50. **Én ny, målt lovfejl fundet (opgave 201).** Ingen kode
+leveret igen, og denne gang er grunden konkret, ikke "intet at finde".
 
-  **Denne iteration leverede ingen produktkode, og det er et målt resultat,
-  ikke et valg.** CEO-køens punkt 0 er lukket, 97/119/183 er `BLOCKED` på
-  Mads, 187 må ikke røres før 13/10, og 200's vej 1 er din Cloudflare-regel mens
-  vej 2 er sat til efter 187's måling. Jeg brugte iterationen på at lede efter
-  en målt fejl i stedet for at gætte — og fandt ingen:
+  **Opdagelsen:** `/dage-til/sommerferien` fortæller brugeren, at sommerferien
+  "altid begynder den **sidste lørdag i juni**", og `sommerferieStart()`
+  (`src/lib/dage-til.ts:1413-1423`) implementerer præcis den regel. Docblock'en
+  og to facts-strenge siger, at det er fastsat i **folkeskoleloven (2024)**. Den
+  regel er den *eneste* skoleferie-start på sitet, der hævder en fast
+  lovbestemt dato, så den skal kunne verificeres — og det kunne jeg ikke.
+  retsinformation.dk serverer SPA-skallen (`.xml`-varianten er skallen, 2.832
+  bytes), `undervisningsministeriet.dk` og `ferieinfo.dk`/`ferieloven.dk` svarer
+  transportfejl, `lovguiden.dk` **HTTP 429**, DuckDuckGo-lite og Google gav ingen
+  brugbare uddrag. **Jeg ændrer derfor intet**, fordi en lovpåstand uden kilde
+  præcis er den fejlklasse CEO-køens punkt 0 og sidste iterations 2025-tal er
+  lavet af. Opgave 201 står med den præcise afvejning.
 
-  - **hreflang er ikke en fejl, selv om den først så ud som én.** Live-hentet
-    HTML skriver `hrefLang="da"` (React bevarer camelCase; HTML-attributnavne er
-    case-følsomme i grep, ikke i browseren). Målt på `/`, `/dato`, `/procent`,
-    `/bil`, `/tidszone`, `/alder`, `/husleje`: `da` + `sv` + `x-default` overalt,
-    kun `/husleje` uden `sv` — korrekt, siden den er daOnly. Canonical på sig
-    selv alle steder.
-  - **Ingen titel- eller descriptionsfejl tilbage.** Live `<title>` for
-    `/procent` "Procentberegner: 10 % af 250 = 25 kr. Stigning, fald, rabat" og
-    de svenske titler er alle oversatte ("Procenträknare: 10 % av 250 kr = 25
-    kr"). `/dato` har **alle** 19 dage-til-events i listen med dagens tal fra
-    `getDageTilAnswer`, altså også juleaften — GSC's to største søgninger er
-    dækket.
-  - **De svenske `/dagar-till/*`-ruter findes og har 301** fra det danske
-    `/dage-til/*`-prefix, så `/dato`s svenske kontekstlink er ikke dødt.
-  - **Målerfælde, ikke fejl:** et statisk grep over `href="/…"` i `src/` under-
-    vurderer indgående links stærkt, fordi næsten alle sider får deres
-    "Relaterede beregnere" fra `RelatedCalculators` + `calculator-list.ts` som
-    data. `/promille` så således ud til at have 1 indgående link. Brug
-    komponenten, ikke grepet.
+  **Målt i samme kørsel, ingen fejl:** 141 sitemap-URL'er hentet og deres
+  indgående `href` talt — **median 20 indgående interne links pr. side, nul
+  sider uden et eneste indgående link**. Den laveste er 1 (`/aegloesning` ←
+  `/kategori/familie`, `/planetvaegt` ← `/kategori/matematik`,
+  `/blog/privatoekonomi-for-unge` ← `/blog`). **Bemærk målerfælden:** footerens
+  linkliste gør `/om` og `/privatlivspolitik` til 139, så tallet må ikke læses
+  som PageRank — kun som "er der en klynge af oversete sider". Svar: ingen.
+  Link-grafen er sunn.
 
-  **Lukket:** `ceo/no-locale-tag` → `DEPLOY OK 1/10 08:35` (batch 07:30).
-  Bevis, fejlmåling og de præcise strenge står under noten.
-  **Åbne noter: 7**, alle med vindue **1/10 12:30** — ingen kan lukkes før det.
+  **De 19 `/dage-til/*`-sider er teknisk i orden** (målt på de fire mest
+  søgte): `<title>` har spørgsmålet *og* dagens tal ("Hvor mange dage er der til
+  juleaften 24. december? 84 dage"), `<meta description>` har samme tal,
+  canonical på sig selv, `hreflang da`+`sv`(+`x-default`) på juleaften/1.
+  december og korrekt kun `da`+`x-default` på de danske-only ferier, og alle har
+  `Answer` + `FAQPage` + `BreadcrumbList` + `WebPage`.
 
-  **Leveret i forgangende iteration:** `/loen-efter-skat` skrev skattesatserne
-  i hånden — siden sagde **"Allerød (23,3 %)"** mens `KOMMUNER` siger
-  **24,80 %** (og Allerød er ikke blandt de tre laveste; det er
-  Lyngby-Taarbæk med 23,00 %). Den gamle tabel skrev også **"Rundersdal"** med
-  omvendt e/r. Alle 13 satser læser nu `SATSER_2026`, tabellen *er*
-  `KOMMUNER.slice(0,3)`/`slice(-3)`, og fem nye porte i
-  `fact-consistency.test.ts` låser det (tre mutationer målt røde).
-  `ceo/loen-efter-skat-tal-kilden`.
+  **Åbne noter: 7**, alle med vindue **1/10 12:30** — denne iteration merger
+  før det, så ingen kan lukkes nu. De lukkes i næste iteration efter ét
+  `curl`-kald.
 
-  **Fjernet, ikke rettet: tre 2025-sammenligninger** ("op fra 49.700 kr",
-  "op fra 45.100 kr", "sat ned fra 12,22 %"). De har ingen kilde i repoet, og
-  skat.dk svarer **HTTP 500** for både browser og curl (1/10 07:00), så de kunne
-  ikke verificeres. `SATSER_2026` bærer de kildeførte 2026-tal; en påstand om
-  et gammelt år uden kilde hører ikke der. **Åben for Mads: en 2025-tal-fil
-  eller et screenshots-bevis ville genåbne dem.**
-
-  **Målt 1/10 06:50-07:05 på live, 140 sitemap-URL'er, ingen fejl:** `npm audit`
-  **0 sårbarheder**, ingen døde interne links, **hreflang `da`/`sv`/`x-default`
-  på alle målte sider** — begge domæner — canonical på sig selv, 23-49 KB HTML
-  gzip. **Ingen ny opgave herfra:** hverken titel, beskrivelse, links,
-  hastighed, indexering eller afhængigheder har en målt fejl tilbage.
-
-  **`/dage-til/*` er ikke et ranking-problem.** Alle 19 danske sider er live, i
-  sitemap, og titlen *svarer* på søgningen med dagens tal ("… 61 dage"). De kom
-  live 25/9 19:48 (`70e75b9`), GSC-vinduet slutter 28/9 — dagen efter. Fraværet
-  i GSC's top-16 er vinduet, ikke siden. **Ingen handling; genmål 9/10.**
-
-  **Blokeret af svar fra Mads:** 97, 119 og 183, samt F1/F3/F5. **Opgave 187 må
-  ikke røres før 13/10.** CEO-køens punkt 0 er lukket (alle otte tal verificeret
-  i koden 1/10 02:00). **Nyt ❓: skat.dk er HTTP 500 for automatiske hentninger.**
+  **Blokeret på Mads:** 97, 119, 183, F1, F5. **187 må ikke røres før 13/10.**
+  CEO-køens punkt 0 er lukket. 200s vej 1 er din Cloudflare-regel.
 
   **⚠️ Målerfælde:** `/tidszone` er dynamisk (`no-store`), så `new Date()` i
   dens JSX er ikke frosset ved build. Kun statiske sider må regne på et fast år.
@@ -431,6 +407,43 @@ alle 200, hver streng talt i markupken. Alle målinger står i
   (uændret hensigt — immutable statiske assets) og `optimizePackageImports`
   står stadig under `experimental`.
 
+#### 201. [ ] I GANG — Kø — **verificér sommerferiens startdato mod loven, før den bruges som countdown**
+
+- **Datagrund:** `sommerferieStart()` (`src/lib/dage-til.ts:1413-1423`) returnerer
+  **den sidste lørdag i juni**, og docblock'en siger at den er "fixed by the
+  Folkeskoleloven (2024)". To facts-strenge i `sommerferien`-events følger
+  samme regel: "Sommerferien begynder altid den **sidste lørdag i juni**. I 2026
+  er det 27. juni, i 2027 26. juni og i 2028 24. juni", og FAQ'en spørger "Kan
+  sommerferien begynne senere end 27. juni?". Sidens nedtælling, `<title>` og
+  `<meta description>` stammer alle fra den funktion, så **hvis reglen er forkert
+  er hele `/dage-til/sommerferien` dagevis forkert** — ikke kun teksten.
+- **Hvorfor jeg ikke rettede den 1/10:** ingen kilde kunne hentes.
+  retsinformation.dk serverer SPA-skallen også på `.xml` (2.832 bytes),
+  `undervisningsministeriet.dk` → transportfejl, `ferieinfo.dk` og
+  `ferieloven.dk` → transportfejl, `lovguiden.dk` → **HTTP 429**,
+  `danskelove.dk/ferieloven` svarer 200 men handler om ferieloven for
+  *ansatte* (intet om skoleferier), Google og DDG-lite gav ingen brugbare
+  uddrag. At skrive "sidste lørdag" fra hukommelsen — eller skifte det til en
+  anden ugeregel — ville være **opfundet tal** i en nedtælling, så punkt 11 i
+  kvalitetsreglerne forbyder begge dele.
+- **Afvejningen, som næste agent skal træffe:** hvis lovens regel er "den lørdag
+  i den kalenderuge, hvori 20. juni ligger", afviger den fra koden i **7 dage**
+  for de fleste år (de to regler falder kun sammen, når 20. juni *er* den
+  sidste lørdag) — så alle tre nævnte årstal og hele countdownet er forkert. Er
+  lovens regel "sidste lørdag i juni", er siden korrekt og skal have en port der
+  låser loven, ikke kun formlen.
+- **Acceptkriterier:** (1) lovens ordlyd eller et ministerium/kommune-bevis for
+  reglen ligger i `docs/plan-arkiv.md` med URL og hentningsdato, (2) `sommerferieStart`
+  + alle tre facts-strenge + FAQ'en + docblock'en læser den kildeførte regel,
+  (3) en port i `dage-til.test.ts` verificerer datoerne mod loven — ikke mod
+  formlen, ellers låses en fejl fast igen, (4) mutation målt rød, (5) gaten grøn.
+- **❓ Se `❓ Til Mads`: ét skærmbillede af ferieloven § om sommerferiens start
+  lukker hele opgaven på ti minutter.**
+- **MÅL:** `/dage-til/sommerferien` — ikke i GSC's top-16 endnu (kom live 25/9),
+  så baseline er 0 Google-visninger; Plausible har ingen måling for den endnu.
+  `/dato` er klyngens moderside: 1.127 besøgende/28d, bounce 4 %, GSC
+  134.567 visninger / 880 klik / CTR 0,7 % / pos. 5,7 (2026-10-01).
+
 #### 200. [ ] 1/10 — Kø — **siteet er 100 % dynamisk; intet kan caches på kanten**
 
 - **Datagrund (målt 1/10 05:35 + 06:00):** `next build` giver 138 ruter, **136
@@ -507,6 +520,19 @@ alle 200, hver streng talt i markupken. Alle målinger står i
 
 ## ❓ Til Mads
 
+- ❓ **Ferielovens regel for sommerferiens startdato (opgave 201, ny 1/10,
+  højst prioriteret).** `/dage-til/sommerferien` siger "sommerferien begynder
+  altid den **sidste lørdag i juni**" og hævder, at det står i folkeskoleloven
+  (2024) — og hele nedtællingen, titlen og beskrivelsen er regnet ud fra den
+  regel. Jeg kunne ikke hente loven: retsinformation.dk er en SPA (også på
+  `.xml`), `undervisningsministeriet.dk`, `ferieinfo.dk` og `ferieloven.dk`
+  svarer transportfejl, `lovguiden.dk` svarer HTTP 429, og
+  `danskelove.dk/ferieloven` handler om ferieloven for *ansatte*, ikke om
+  skoleferier. **Ét skærmbillede af den relevante bestemmelse (eller teksten
+  kopieret herind) låser det.** Hvis reglen er "den lørdag i den kalenderuge,
+  hvori 20. juni ligger", står siden **7 dage forkert** i de fleste år.
+  Jeg har bevidst ikke rørt koden, fordi en lovpåstand uden kilde er præcis den
+  fejl, CEO-køens punkt 0 handler om.
 - ❓ **Kan Cloudflare cache HTML'en på trods af Next's `Vary: RSC`?** (opgave 200,
   ny 1/10 06:00, højst prioriteret.) Der står Cloudflare foran sitet, og
   `cf-cache-status: DYNAMIC` — fordi Next svarer `cache-control: private,
