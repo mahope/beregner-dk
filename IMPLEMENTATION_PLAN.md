@@ -1,54 +1,34 @@
-STATUS: 1/10 18:25. Rød CI: ingen (seneste kørsel grøn 15:57 UTC). Sentry:
-  ingen nye hændelser efter router-støj-filteret. CEO-køen er **tom** — punkt 0
-  verificeret i koden igen. **Ingen åbne PR'er.**
+STATUS: 1/10 19:20. Rød CI: ingen (seneste kørsel grøn 16:30 UTC). Sentry:
+  ingen nye hændelser. CEO-køen er **tom** — punkt 0 verificeret i koden igen.
+  **Ingen åbne PR'er.**
 
-  **Denne iteration leverede ingen kode** — den brugte budgetten på at lukke
-  to deploy-noter med bevis og på at finde næste opgave. Fund fra research:
-  **hele køen er kildeblokeret.** skat.dk svarer HTTP 500 på
-  `/taxfiler/privat/fradrag` (uden redirect: 308), så fradrag-klyngen fra
-  autocomplete kan ikke få satser. borger.dk's dagpenge-side er 404.
-  `/procent` (151.005 visninger, 0,1 %) er helt færdigbygget: titel, beskrivelse,
-  H1, formler, FAQ og procentpoint — det er *kun* positionen, og den er ikke
-  en skriveopgave. Derfor er næste opgave sat til det, der faktisk er ubevidst
-  og kan laves uden ekstern kilde: se `## Næste opgave`.
-
-  **Seneste opgave: skolestart tæller til den første skoledag.**
-  `ceo/skolestart-forste-skoledag`. Nedtællingen på `/dage-til/skolestart`
-  pegede på lovens 1. august, som er lørdag 2026 og søndag 2027 — aldrig en
-  skoledag, mens sidens egen brødtekst siger «undervisningen begynder mandag
-  3. august». Ny `kind: "skoleaar"` + `foersteSkoledag(year)`: lovens dato
-  forskydes til næste hverdag, og nedtællingen og alle facts følger den.
-  Porten måler invarianten over 61 år (aldrig en weekend, aldrig mere end 2
-  dages forskydning) og læser **skoledagens** uge ud, ikke 1. august — det
-  var den sidste selvmodsigelse, rettelsen ellers havde indført (2026:
-  skoledag i uge 32, lovens dato i uge 31). Ny port målt rød mod master.
+  **Seneste opgave: dagens dato står i heroen på alle `/dage-til`-sider.**
+  `ceo/dage-til-dagens-dato`. De to største søgninger på sitets #1-side `/dato`
+  («hvor mange dage er der til 1. december» 1.209v/3k, «…til den 24 december»
+  1.014v/2k, begge pos. 5) peger på `/dage-til/*`, som viste svaret uden at
+  sige hvilken dag det var regnet fra — heller ikke for Googles uddrag. Ny
+  eksport `dagensDatoAnker(today)` er præcis det `toUtcMidnight`-anker
+  `daysBetween` bruger, så linjen «I dag er det torsdag 1. oktober 2026» ikke
+  kan glide fra tallet ved siden af. Porten renderer alle 19 (da) + 16 (se)
+  sider kl. 00.30 dansk tid og kræver at de to datoer i heroen er præcis det
+  par afstanden er regnet fra; målt rød (2 fejl) mod en `getUTC*`-mutation.
 
   **Gaten:** `lint` 0 (651) · `typecheck` 0 · `TZ=UTC npm run test`
-  **3427 grønne / 210 filer** · `next build` ok, 143 ruter. `locale-leak`
-  melder én ureviewet dansk streng på `/procent:522` (fra procentpoint-
-  opgaven samme dag) — forhåndsfandet, ikke rørt.
-
-  **Næste opgave skal være en feature** (de tre forrige var features, denne
-  var en rettelse).
+  **3433 grønne / 210 filer** · `next build` ok, 142 ruter. `locale-leak`
+  melder stadig én ureviewet dansk streng på `/procent:522` — forhåndsfandet,
+  ikke rørt.
 
 ## Næste opgave (klar til næste iteration)
 
-**Vis dagens dato på `/dage-til/*`.** *Datagrund:* GSC 1/10 — de to største
-søgninger på sitets #1-side `/dato` er «hvor mange dage er der til 1. december»
-1.209 visninger (3 klik) og «hvor mange dage er der til den 24 december» 1.014
-visninger (2 klik), begge pos. 5. `/dage-til/1-december` og
-`/dage-til/juleaften` er de to sider, der svarer på dem, og de er bygget
-rigtigt (svar, uge, ugedag, krydslinks, «Andre datoer»). **Men svaret
-«Der er 61 dage til 1. december» står alene** — siden siger «Tallet er
-beregnet ud fra dagens dato», men viser aldrig hvad dagens dato *er*. En
-læser der lander kl. 23.50, en der deler linket, og Googles uddrag kan
-derfor ikke se at tallet er dagsfrisk. *Accept:* heroen på alle 19 (da) og 16
-(se) `/dage-til`-sider viser «I dag er det torsdag 1. oktober 2026» i samme
-blok som svaret, datoen læst fra **samme** `toUtcMidnight`-anker som selve
-opgørelsen bruger (ikke et nyt `new Date()`), og en ny port renderer siden og
-kræver at dagens dato står i heroen på dansk og svensk. *Ingen ny kilde
-påkrævet.* **MÅL:** `/dage-til/1-december` + `/dage-til/juleaften` — ingen
-baseline i GSC, måles på Plausible sidevisninger fra 2/10.
+**Udbyg de tre ubyggede `/dage-til`-sider.** *Datagrund:* GSC 1/10 + dansk
+autocomplete 1/10 — «skoleferie 2026» og «skolestart 2026» er endnu ikke dækket
+som egne sider, og `/dage-til/skolestart` findes allerede med 0 GSC-visninger,
+altså endnu ikke indekseret. *Accept:* klyngen er kildeblokeret på ferielovens
+startdato (❓ nedenfor), så opgaven er **ikke** ferie-start: byg i stedet den
+færdige `/dage-til`-skabelon omkring datoer vi *kan* kildeføre fra kalenderen
+(juledag 2. juledag, nytårsaftensdag, grundlovsdag, palmesøndag) og giv hver
+side en `<title>` med spørgsmål **og** dato. *Ingen ny kilde.* **MÅL:** nye
+sider, ingen baseline; genmål på Plausible 15/10.
 
 ## ❓ Uafklaret — ferielov (rammer `/dage-til/summerferien` **og** skolestart)
 
@@ -188,13 +168,20 @@ Prioriteret efter forventet effekt på **trafik**. Datagrund fra GSC 1/10
 
 ## Åbne VERIFICÉR DEPLOY-noter
 
+- ⏳ **Dagens dato står i heroen på alle `/dage-til`-sider.**
+  `ceo/dage-til-dagens-dato`. Prøven er på indhold: `curl -s
+  https://minberegner.dk/dage-til/1-december` skal indeholde «I dag er det» og
+  et `<time>` med dagens ISO-dato i Copenhagen-tid. Vindue 1/10 21:30.
+
 - ⏳ **`/dage-til/skolestart` tæller til den første skoledag.**
   `ceo/skolestart-forste-skoledag` (dae670a). Prøven er på indhold: `curl -s
   https://minberegner.dk/dage-til/skolestart` skal indeholde «mandag 3. august
   2026» **og** «i uge 32 i 2026». Målt 1/10 18:22: «mandag 3. august 2026» er
   **der** (men kun fordi den stod i den gamle tekst), mens «i uge 32 i 2026»
   **mangler** — FAQ'en serverer stadig «1. august ligger i uge 31 i både 2026 og
-  2028». Korrekt: vinduet er **1/10 21:30**, committen er fra 17:57.
+  2028». Målt igen 1/10 19:10: «mandag 3. august 2026» er der, «i uge 32 i 2026»
+  mangler stadig, altså endnu ikke deployet. Vinduet er **1/10 21:30**,
+  committen er fra 17:57.
 
 - ✅ **`/renteprognose` er live og virker.** `ceo/renteprognose` (9b283d3).
   Målt 1/10 18:22: `<title>` er «Renteprognose - hvad koster boliglånet om 5, 10

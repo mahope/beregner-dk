@@ -1,7 +1,13 @@
 import { describe, expect, test, vi, beforeEach, afterAll } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { getDomainConfigByLocale } from "@/lib/domain-config";
-import { getDageTilSlugs, getDageTilEvents, getDageTilPrefix } from "@/lib/dage-til";
+import {
+  getDageTilSlugs,
+  getDageTilEvents,
+  getDageTilPrefix,
+  daysBetween,
+  dagensDatoAnker,
+} from "@/lib/dage-til";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { getRouteDecision } from "@/lib/routing";
 import { buildSitemap } from "./sitemap";
@@ -174,6 +180,58 @@ describe("dage-til side", () => {
     expect(html).toContain("Det er juledagen");
     expect(html).toContain("0 dage");
   });
+
+  // "Der er 61 dage til 1. december" uden dagens dato kan ikke læses af
+  // Google (uddraget skal kunne se at tallet er dagsfrisk) og ikke af en læser
+  // der lander kl. 23.50 og deler linket. Datoen skal komme fra SAMME anker som
+  // optællingen bruger — ikke et eget `new Date()` — ellers ville den være én
+  // dag forskudt mellem 00:00 og 02:00 dansk tid.
+  test("heroen viser dagens dato i samme blok som svaret", async () => {
+    const html = renderToStaticMarkup(
+      await DageTilPage({ params: Promise.resolve({ dato: "juledagen" }) })
+    );
+    const hero = /<div class="bg-blue-50[^"]*">([\s\S]*?)<\/div>/.exec(html);
+    expect(hero, "hero-blokken skal findes").not.toBeNull();
+    expect(hero![1]).toContain("I dag er det");
+    expect(hero![1]).toContain('<time dateTime="2026-09-25">');
+    // 25. september 2026 er en fredag.
+    expect(hero![1]).toContain("fredag 25. september 2026");
+  });
+
+  for (const locale of ["da", "se"] as const) {
+    test(`${locale}-siderne viser dagens dato i sit eget sprog`, async () => {
+      // 00.30 dansk tid. Klokken er UTC 22.30 dagen før, så en side der læser
+      // dagens dato med `getUTC*` viser 29. september, mens optællingen regner
+      // fra 30. september — den fejl skal den her port kunne fange.
+      const I_DAG = new Date("2026-09-29T22:30:00.000Z");
+      vi.setSystemTime(I_DAG);
+      vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale(locale));
+      for (const slug of getDageTilSlugs(locale)) {
+        const html = renderToStaticMarkup(
+          await ROUTE_FOR[locale]({ params: Promise.resolve({ dato: slug }) })
+        );
+        expect(html, `${locale}/${slug}`).toContain(
+          locale === "da" ? "I dag er det" : "I dag är det"
+        );
+        // The date and the count must not drift apart: the day the hero names is
+        // the day the number was counted from.
+        const hero = /<div class="bg-blue-50[^"]*">([\s\S]*?)<\/div>/.exec(html)!;
+        const dage = Number(/(\d+) (?:dage|dagar) (?:til|till) /.exec(hero[1])?.[1]);
+        const datoer = [...hero[1].matchAll(/dateTime="(\d{4}-\d{2}-\d{2})"/g)].map((m) => m[1]);
+        // Two dates in the same block: first today, then the target. They must
+        // be the pair the answer was computed from, so the count is exactly the
+        // distance between them — not merely "a date is shown".
+        expect(datoer.length, `${locale}/${slug}`).toBeGreaterThanOrEqual(2);
+        expect(dagensDatoAnker(I_DAG).toISOString().slice(0, 10), `${locale}/${slug}`).toBe(
+          datoer[0]
+        );
+        expect(
+          daysBetween(I_DAG, new Date(`${datoer[1]}T00:00:00.000Z`)),
+          `${locale}/${slug}: ${dage} dage, ${datoer[0]} → ${datoer[1]}`
+        ).toBe(dage);
+      }
+    });
+  }
 
   test("et dansk slug paa det svenske domaene giver 404 i stedet for et dobbelt svar", async () => {
     vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("se"));

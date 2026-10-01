@@ -1525,6 +1525,20 @@ export function getNextAnchorDate(anchor: DageTilAnchor, today: Date): Date {
   return anchorInYear(anchor, thisYear + 1);
 }
 
+/**
+ * Dagens kalenderdag som UTC-midnat — det samme anker `daysBetween` regner på.
+ *
+ * Siden skal vise dagens dato sammen med svaret ("Der er 61 dage til 1.
+ * december" er ubrugeligt uden at vide hvilken dag de 61 er regnet fra), og den
+ * skal kunne læses af søgemaskiner og af en læser der lander kl. 23.50. Derfor
+ * må den ikke komme fra et eget `new Date()` i komponenten: mellem 00:00 og
+ * 02:00 dansk tid ville den vise dagen i forvegne, altså én dag ved siden af
+ * det tal den står ved siden af.
+ */
+export function dagensDatoAnker(today: Date): Date {
+  return toUtcMidnight(today);
+}
+
 export function daysBetween(from: Date, to: Date): number {
   return Math.round(
     (toUtcMidnight(to).getTime() - toUtcMidnight(from).getTime()) / MS_PER_DAY

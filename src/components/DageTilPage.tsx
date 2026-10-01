@@ -16,6 +16,7 @@ import {
   type DageTilEvent,
   type DageTilLocale,
   dageTilArm,
+  dagensDatoAnker,
 } from "@/lib/dage-til";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { getDomainConfigByLocale } from "@/lib/domain-config";
@@ -31,6 +32,8 @@ const copy: Record<
   {
     answerPrefix: string;
     today: string;
+    /** The line above the answer: "I dag er det" / "I dag är det". */
+    todayIs: string;
     equivalent: string;
     /** Preposition before the event name: "til" in Danish, "till" in Swedish. */
     to: string;
@@ -45,6 +48,7 @@ const copy: Record<
   da: {
     answerPrefix: "Der er",
     today: "Det er",
+    todayIs: "I dag er det",
     equivalent: "Det svarer til",
     to: "til",
     updated: "Tallet er beregnet ud fra dagens dato og opdateres automatisk.",
@@ -59,6 +63,7 @@ const copy: Record<
   se: {
     answerPrefix: "Det finns",
     today: "Det är",
+    todayIs: "I dag är det",
     equivalent: "Det motsvarar",
     to: "till",
     updated: "Talet räknas ut från dagens datum och uppdateras automatiskt.",
@@ -215,6 +220,12 @@ export async function DageTilRoute({
   const dageLocale: DageTilLocale = locale;
   const event = resolved.event;
   const today = new Date();
+  // The same anchor the day count is computed from, so the date shown is the
+  // date the number was counted from — a `new Date()` here would disagree with
+  // it between 00:00 and 02:00 Danish time.
+  const iDag = dagensDatoAnker(today);
+  const iDagIso = iDag.toISOString().slice(0, 10);
+  const iDagTekst = `${formatTargetDate(iDag, dageLocale)} ${formatTargetYear(iDag)}`;
   const c = copy[dageLocale];
   const u = units[dageLocale];
   const eventCopy = dageTilArm(event, dageLocale).copy;
@@ -255,6 +266,12 @@ export async function DageTilRoute({
       <h1 className="text-3xl md:text-4xl font-bold mb-4">{eventCopy.question}</h1>
 
       <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-2xl p-6 md:p-8 mb-8">
+        <p className="text-sm text-blue-700 dark:text-blue-300 mb-2">
+          {c.todayIs}{" "}
+          <time dateTime={iDagIso}>
+            {c.weekday(iDag.getUTCDay())} {iDagTekst}
+          </time>
+        </p>
         <p className="text-3xl md:text-4xl font-bold text-blue-900 dark:text-blue-100">
           {headline}
         </p>
