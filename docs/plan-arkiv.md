@@ -23015,3 +23015,36 @@ Gate efter børnepenge-opgaven: lint 0 · typecheck 0 · 3478 tests grønne/212 
   Locale-leak-gatens ene `ureviewet`-fund er portens egen test, der planter
   strengen med vilje (`locale-leak-gate.test.ts:511`) — ikke en læk.
 - **Deploy-note:** ⏳ `ceo/rentefradrag-tal-fra-kilden`, vindue 2/10 07:30.
+
+## Færdig 1/10 23:00 — Tal i brødtekst målt på hele sitet (`ceo/regnestykker-port`)
+
+- **Opgaven** (fra STATUS 1/10 22:50): en port der renderer alle `page.tsx` og
+  tæller tal med tusindtalsseparator i `<p>`/`<li>`/`<td>` der ikke kan spores
+  til et modul-konstant. Listen målt **før** rettelserne.
+- **Fund 1 — den første scanner var blind.** En klammebalance-scanner målte
+  **0 fund på alle 124 sider**. `return ( <main>…)` ligger inde i funktionens
+  klammer, så al JSX-tekst lå på dybde 1 og blev aldrig set. Rettelse:
+  `ts.createSourceFile` + `ts.isJsxText` — samme parser som `tsc` bruger i
+  gaten. Dette er præcis den fejl, `_kvalitet.md`'s punkt 12 og portens egen
+  mutationstest er skrevet for at fange.
+- **Fund 2 — den rigtige måling er 474.** Beløb med tusindtalsseparator som
+  rå JSX-tekst på **57 `page.tsx`**. Listen ligger i porten, tæller
+  forekomster pr. fil og må kun blive kortere; en ny side med et beløb er rød,
+  fordi filen ikke står i listen. Køen står i planen under «Næste opgave»,
+  prioriteret efter GSC-visninger × fund.
+- **Rettelse i samme opgave:** `/rentefradrag` skrev «Fordel 95.000 kr. og
+  5.000 kr. i stedet for 100.000 kr. samlet» som tekst, selv om `ULIJ_HAEJ` og
+  `ULIJ_LAV` lå i modulet to linjer ovenfor. Nu interpoleres de, så siden har
+  **0** hårdkodede beløb — sidste stykke af forrige iterations opgave.
+- **Anden del af porten:** 30 regnestykker på sitet («A kr × F = C kr»,
+  «A kr ÷ F = C kr», «P procent af H = R», «A af B = P») regnes igen med
+  tallene fra sætningen. **Alle 30 er korrekte.** Bemærk: de svenske sider
+  bruger mellemrum som tusindtalsseparator (`1 250 kr`), så porten læser begge
+  — uden det ville den have dømt de svenske eksempler forkerte.
+- **Port:** ny `src/app/regnestykker.test.ts`, 5 tests. Fire mutationer målt
+  røde mod master: (a) `/moms`' svenske «1 250 kr ÷ 1,25 = 1 500 kr»,
+  (b) nyt beløb på `/dato` (fil ikke i listen), (c) ét ekstra beløb på
+  `/topskat` (9 > 8), (d) syntetisk fejl i hver af de fem regler.
+- **Gate:** `biome lint ./src` 655 filer 0 · `tsc --noEmit -p tsconfig.test.json`
+  0 · `TZ=UTC vitest run` **3484 grønne / 213 filer** · `next build` exit 0.
+- **Deploy-note:** ⏳ `ceo/regnestykker-port`, vindue 2/10 07:30.

@@ -193,8 +193,11 @@ export default async function RentefradragPage() {
               <p className="mt-3">
                 Det bliver først en fordel at fordele, når renterne er{" "}
                 <strong>ujævnt fordelt</strong>, fordi den enkeltes lavere sats så kan bruges
-                på den andens høje sats. Fordel 95.000 kr. og 5.000 kr. i stedet for
-                100.000 kr. samlet, og besparelsen falder fra{" "}
+                på den andens høje sats. Fordel{" "}
+                {ULIJ_HAEJ.toLocaleString("da-DK")} kr. og{" "}
+                {ULIJ_LAV.toLocaleString("da-DK")} kr. i stedet for{" "}
+                {(ULIJ_HAEJ + ULIJ_LAV).toLocaleString("da-DK")} kr. samlet, og
+                besparelsen falder fra{" "}
                 {uligBesparelseSamlet.toLocaleString("da-DK")} kr. til{" "}
                 {uligBesparelseFordelt.toLocaleString("da-DK")} kr. — altså{" "}
                 {Math.abs(uligBesparelseFordelt - uligBesparelseSamlet).toLocaleString("da-DK")}{" "}

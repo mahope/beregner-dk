@@ -1,53 +1,79 @@
-STATUS: 1/10 22:50. Rød CI: ingen (seneste kørsel grøn 20:08 UTC). Sentry: ingen
+STATUS: 1/10 23:00. Rød CI: ingen (seneste kørsel grøn 20:25 UTC). Sentry: ingen
   nye hændelser. CEO-køen er tom; punkt 0 verificeret direkte i koden igen.
-  **Ingen åbne PR'er** (`PR-TJEK: 2026-10-01`). Branch-tjek foretaget i denne
-  iteration: 13 remote-branches, ingen slettet (kun `fix/sentry-7765903656`
-  er fra i dag; resten er 2-4 måneder gammel og kræver et `branch-oprydning.sh`
-  kørsel, `BRANCH-TJEK: 2026-10-01`).
+  **Ingen åbne PR'er** (`PR-TJEK: 2026-10-01`). Branch-tjek foretaget 1/10 22:50:
+  13 remote-branches, ingen slettet (`BRANCH-TJEK: 2026-10-01`).
 
-  **Bloggen har nu næste handling på alle 29 indlæg** — opgaven i forrige
-  plan-status var færdig længe før den blev skrevet ned (markeret FÆRDIG i
-  `docs/plan-arkiv.md` under C198/C202). De otte automatiske porte i
-  `src/app/blog/naeste-skridt.test.ts` dømmer på markupken, ikke på et
-  kodestykke, så den kan ikke glide tilbage.
+  **Målt hele sitet for tal i brødtekst, og gjort målingen til en port.**
+  `ceo/regnestykker-port`. To fund i den forrige iterations opgave:
+  1. **Porten så ikke JSX-tekst.** Den første scanner målte 0 fund på alle 124
+     sider, fordi den arbejdede på klammebalance og `return ( <main>…)` ligger
+     inde i funktionens klammer. Nu parseres filerne med TypeScript's eget AST —
+     samme parser som `tsc` bruger i gaten.
+  2. **Den rigtige måling er 474, ikke 0.** 474 beløb med tusindtalsseparator
+     står som tekst i JSX på 57 `page.tsx`. Listen ligger i porten, tæller
+     forekomster pr. fil og må kun blive kortere. Køen står under «Næste
+     opgave», prioriteret efter GSC-visninger × fund: `/moms` (21.651 visninger,
+     21 fund), `/procent` (151.005, 11), `/arveafgift` (8 — bundfradraget 392.300
+     står 7 gange), `/ejendomsvaerdiskat` (6), `/renteberegner` (13.288, 6).
+  Begge mutationer målt røde mod master: et nyt beløb på `/dato` (fil ikke i
+  listen) og ét ekstra på `/topskat` (9 > 8). **Porten afslutter forrige
+  iterations opgave**: `/rentefradrag` stod med 1 fund —
+  «Fordel 95.000 kr. og 5.000 kr. i stedet for 100.000 kr.» — og læser nu
+  `ULIJ_HAEJ`/`ULIJ_LAV`, så hele siden er uden hårdkodede beløb.
+  *Port:* ny `src/app/regnestykker.test.ts` (5 tests) + 30 regnestykker på
+  sitet regnet igen af 5 regler (alle korrekte), 3484 tests i alt.
 
-  **Nyt: /rentefradrag'ens «Eksempel» læser nu sine tal fra modulet.**
-  `ceo/rentefradrag-tal-fra-kilden`. Sektionen skrev `50.000 × 33,6% = 16.800 kr.`,
-  `24.480 kr.` og `26.880 kr.` håndskrevet, mens hele resten af siden læser
-  `RENTEFRADRAG_2026` + `beregnRentefradrag`. Tallene var *lige* rigtige
-  1/10 — men det er præcis punkt 11 i kvalitetsreglerne: en påstand i copy der
-  kan glide fra sin beregning, når satsen opdateres til 2027. Den eksisterende
-  port (`alle tal i eksemplet stammer fra beregnRentefradrag`) så på **hele
-  siden**, altså også på loft-afsnittets beregnede tal, og var derfor grøn mod
-  den håndskrevne liste. Ny port muterer *kilden* (0,25/0,15, 40.000/80.000) og
-  kræver at Eksempel-listen følger med — målt **rød mod master**.
-  *Port:* +1 test i `src/app/rentefradrag/page.test.tsx`, 8 grønne.
-  **MÅL:** `/rentefradrag` 417 besøgende/28d, +204 %, bounce 3 % (Plausible
-  2026-10-01). Genmål 15/10. Denne ændring flytter ikke position — den forhindrer
-  en forkert sats i 2027.
+  **Dagpenge- og børnepenge-klyngerne er lukket** (autocomplete 1/10): de fire
+  nye seeds er dækket eller kildeblokerede — se ❓ og F-køen nedenfor.
+  `borger.dk` svarer 200 fra denne maskine (mods `dagpenge.dk`/`star.dk`), så
+  kilde-blokeringen er ikke længere universiel.
 
-  **Målt 1/10 22:20, ikke bygget:** de fire nye autocomplete-klynger er enten
-  dækket eller kildeblokerede — se ❓ og F-køen nedenfor. `borger.dk` svarer 200
-  fra denne maskine (mods `dagpenge.dk`/`star.dk`), så kilde-blokeringen er ikke
-  længere universiel.
-
-  **Gaten:** `lint` 0 (654 filer) · `typecheck` 0 · `TZ=UTC npm run test`
-  **3479 grønne / 212 filer** · `next build` exit 0. Locale-leak-gatens ene
+  **Gaten:** `lint` 0 (655 filer) · `typecheck` 0 · `TZ=UTC npm run test`
+  **3484 grønne / 213 filer** · `next build` exit 0. Locale-leak-gatens ene
   `ureviewet`-fund er portens egen test, der planter strengen med vilje
   (`locale-leak-gate.test.ts:511`) — ikke en læk.
 
 ## Næste opgave (klar til næste iteration)
 
-**Tal i brødtekst der ikke læses fra et modul — målt på hele sitet.**
-Denne iteration fandt fejlen på én side ved at læse den. Den samme fejlklasse
-findes formodentlig andre steder, og den er usynlig for både `tsc`, lint og
-build, fordi en streng med et tal er gyldig JSX. *Accept:* en port der
-renderer alle `page.tsx` og **tæller tal med tusindtalsseparator i `<p>`/`<li>`/
-`<td>` der ikke kan spores til et modul-konstant**, så listen er målt før den
-rettes — og antallet går fra N til 0 på de sider porten dømmer på.
-*Metode:* `fact-consistency.test.ts` scanner allerede filer efter
-`stripKommentarer`; samme greb her. **MÅL:** `/rentefradrag` 417
-besøgende/28d (+204 %) som reference; de øvrige sider måles i samme port.
+**F5b. Beløb i JSX-tekst → modulkonstanter, i trafikrækkefølge.** Porten fra 1/10
+måler **474 beløb med tusindtalsseparator i JSX-tekst på 57 `page.tsx`** — de
+kan ikke glide fra satsen, fordi de ikke hænger ved den. Listen i
+`src/app/regnestykker.test.ts` tæller forekomster pr. fil og må kun blive
+kortere, så dette er rækkefølgen. *Accept pr. side:* listen for den side falder
+til 0, og regnestykkerne er verificeret af `regnestykker-porten` (30 sætninger
+på sitet, alle regnet igen). Prioriter efter **GSC-visninger × fund**:
+- **`/moms`** — 21.651 visninger (0,2 % CTR, pos. 7,1), **21 fund**. De
+  illustrative regnestykker («1.000 kr × 1,25 = 1.250 kr») er korrekte og
+  porten dømmer dem; de to **satser** er det, der skal læses fra et modul:
+  «Virksomheder med en årlig omsætning over **50.000 kr**» (registreringsgrænsen)
+  og «told ved import over **1.150 kr**». *MÅL:* `/moms` under top-15 i Plausible,
+  GSC-baseline 21.651 / 36 / 0,2 % / 7,1.
+- **`/procent`** — 151.005 visninger (0,1 %, pos. 7,4), **11 fund**, alle i
+  `<li>`/`<td>` med eksempler («2.500 af 10.000 = 25»). Samme afgørelse som
+  `/moms`: eksemplerne er korrekte, så de skal enten genereres fra `procent.ts`
+  eller indgå i portens undtagelsesliste med en begrundelse pr. linje.
+- **`/arveafgift`** — 8 fund, og **«392.300 kr» står 7 gange i brødteksten**.
+  Det er bundfradraget, og det er det tal på sitet der først bliver forkert
+  (2027-sats). Ét modul + syv interpolationer.
+- **`/ejendomsvaerdiskat`** — 6 fund: «5,1 ‰ / 14 ‰» og «9.007.000 kr for
+  2026-2027» er lovsatser i brødteksten og i et regnestykke
+  («3.000.000 × 80% × 5,1‰ = 12.240 kr/år»).
+- **`/renteberegner`** — 13.288 visninger (0,9 %, pos. 7,5), 6 fund.
+- **`/bil`** (16), **`/billaan`** (24), **`/opsparing`** (10), **`/boligsalg`**
+  (9), **`/topskat`** (8) — ingen GSC-visning i top-15, så laveste prioritet;
+  `/bil` er desuden faldet 46 → 21 besøgende.
+- **Blogindlæg (19 filer, 273 fund).** Redaktionelle beløb i et indlæg er ikke
+  samme fejlklasse som et beløb på en beregnerside — de er ikke koblet til en
+  sats, brugeren læser dem som et eksempel. Beslut først om de skal med; hvis
+  ikke, skal de stå i portens undtagelsesliste som *blog*, så listen ikke
+  blandes sammen med beregnersiderne.
+
+**Bemærk til målingen:** den første scanner var blind. Den så efter
+klammebalance og målte **0 fund på alle 124 sider** — fordi `return ( <main>…)`
+ligger inde i funktionens klammer, så al JSX-tekst lå på dybde 1. Porten
+parserer nu med TypeScript's eget AST. Begge mutationer er målt røde mod
+master: et nyt beløb på `/dato` (ukendt fil) og ét ekstra på `/topskat`
+(9 > 8).
 
 ## ❓ Uafklaret — ferielov (rammer `/dage-til/summerferien` **og** skolestart)
 
@@ -217,6 +243,11 @@ Prioriteret efter forventet effekt på **trafik**. Datagrund fra GSC 1/10
   `ceo/rentefradrag-tal-fra-kilden`. Prøven er på indhold: `curl -s
   https://minberegner.dk/rentefradrag` skal indeholde `50.000 × 33,6% = 16.800 kr.`
   — og, efter en `satser-2026`-opdatering, de nye tal. Vindue **2/10 07:30**.
+- ⏳ **Beløb i JSX-tekst er målt på hele sitet (474) og porten er grøn.**
+  `ceo/regnestykker-port`. Prøven er på indhold: `curl -s
+  https://minberegner.dk/rentefradrag` skal **ikke** længere indeholde
+  `Fordel 95.000 kr. og 5.000 kr.` som tekst — og `/toppat` skal fortsat findes
+  i sitemap. Vindue **2/10 07:30**.
 
 ## ❓ Til Mads
 
