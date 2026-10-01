@@ -21988,3 +21988,51 @@ De fem opgaver stod i planen indtil de var færdige. De er flyttet her, så
   ny fil med kaldet, og den positive påstand rød ved at sætte `AlderLevetSvar`
   tilbage på serverens ur. De to mutationer i `page.tsx`/`page-data.ts` gav
   *grønt*, fordi de ikke rørte den egentlige producer af afsnittet.
+
+
+### Opgave 194 — to trafikstærke beregnere viste ikke den guide, de har (fuldtekst, 1/10 02:05)
+
+#### Opgave 194. [x] ✅ 1/10 02:05 — to trafikstærke beregnere viste ikke den guide, de har
+
+- **Datagrund:** målt 1/10 med `npx tsx` over `blog-kobling.ts` og alle 29
+  `page.tsx` i `src/app/blog/`. Af Plausibles top-15 manglede **fire** sider en
+  synlig guide: `/boligstoette` (**529 besøgende/28d, +78 %**), `/tidsberegner`
+  290, `/pension` 142 og `/kalorier` 289. Kun to af dem kan løses i dag:
+  - `/boligstoette` havde indlægget, men kun som et skjult link under
+    `<h3>Vil du se den fulde guide?</h3>` nederst i brødteksten;
+  - `/pension` manglede vej til indlægket **helt**.
+  - `/tidsberegner`s eneste indlæg er allerede koblet til `/tidszone`, og
+    `blog-kobling.test.ts` forbyder ét indlæg på to beregnere;
+  - `/kalorier` er opgave 119, bloket på en dansk kilde.
+- **Rettelse:** `RelateredeArtikler` på begge sider, og den begravede
+  `/boligstoette`-reference er **fjernet** — ellers mødte læseren samme artikel
+  to gange, præcis den fejl review-fundet 1/10 fandt på forsiden.
+- **⚠️ Hvad jeg *ikke* gjorde, og hvorfor.** Først koblede jeg fire sider,
+  inklusive `/su` og `/barselsdagpenge`. Da standsede porten mig: der står
+  allerede en blå boks med artiklens link lige under værktøjet på begge, så
+  blokken ville være link nr. to til det samme indlæg på én skærm. De to blev
+  rullet tilbage, og grunden står nu i `blog-kobling.ts`'s docblock, så næste
+  iteration ikke "hjælper" dem igen.
+- **Port:** ny `store-beregnere-guide.test.tsx` (6 tests) renderer **markupken**
+  med `renderToStaticMarkup(await Side())` — ikke kildekoden, jf. målerfælden fra
+  191. Tre krav: blokken vises på dansk, forsvinder på beraknare.se, og hvert
+  indlæg linkes **ét** sted. Sidste krav er det nye.
+- **Målerfælde 1/10 02:00 — `renderToStaticMarkup` kan ikke gøre `async`.**
+  Begge sider er async server components. `<Side />` kaster "A component
+  suspended while responding to synchronous input", fordi siden *suspenderer*
+  på sin `await getPageData()`. `renderToStaticMarkup(await Side())` virker —
+  samme form som `dato/page.test.tsx` og `forside.test.tsx` bruger. En test der
+  renderer hele siden skal derfor altid `await'e` kaldet, ikke komponenten.
+- **Målt (3 mutationer, alle røde):** blokken fjernet fra `/boligstoette`;
+  artiklen linket to gange i samme brødtekst; `RelateredeArtikler` holdt op med
+  at returnere `null` for `locale !== "da"`.
+- **Accept:** ✅ (1) `daMarkup` har "Guides om emnet" + artiklens titel på begge
+  sider, `seMarkup` har ingen blok; (2) hvert `/blog/`-href forekommer præcis
+  én gang i markupken; (3) gaten grøn — **3297** tests i 201 filer i **begge**
+  tidszoner, `biome lint` ren over 634 filer, `locale-leak --gate` exit 0,
+  `next build` 143/143.
+- **MÅL:** `/boligstoette` 529 besøgende/28d (+78 %) og `/pension` 142
+  (Plausible 2026-09-30). Genmål om 14 dage: `/blog/boligstoette-2026-nye-regler`
+  (67→84 faldende) og `/blog/pension-hvor-meget-skal-du-spare-op` skal stige, og
+  de to beregneres bounce skal ligge på 2-5 % som de andre værktøjer.
+

@@ -248,6 +248,10 @@ export default function BoliglånGuidePage() {
         href="/rentefradrag"
         handling="Beregn dit rentefradrag"
         beskrivelse="Se hvor meget af din renteudgift du kan trække fra i skatten hvert år."
+        sekundaer={{
+          href: "/boliglaan",
+          handling: "Se hvad dit boliglån koster pr. måned",
+        }}
       />
 
       <div className="mt-12 pt-8 border-t">

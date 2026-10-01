@@ -1,6 +1,12 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — 1/10 02:05. Opgave 194 er færdig: `/boligstoette`
+STATUS: KØ — 1/10 03:05. Målt alle 29 artiklers næste handling mod det emne
+  hvert indlæg selv lover: feriepenge- og boliglån-guiden sendte læseren videre
+  til en datoberegner og et fradrag, selv om begge artikler har en tabel med
+  beløb og linker det rigtige værktøj i brødteksten. Begge tilbyder nu også
+  det værktøj. Porten er målt rød uden rettelsen.
+
+  Forrige opgave (194) var: `/boligstoette`
   (**529 besøgende/28d, +78 %**) havde sin guide begravet nederst i brødteksten,
   og `/pension` manglede den helt. Begge har nu en synlig "Guides om emnet"-blok,
   og den begravede reference er fjernet så læseren ikke møder artiklen to gange.
@@ -22,7 +28,7 @@ STATUS: KØ — 1/10 02:05. Opgave 194 er færdig: `/boligstoette`
   `Europe/Copenhagen`, `PROMILLEGROV_SE`, `maneder: 12`). De otte lukkede
   VERIFICÉR-noter er verificeret på indhold; senest 30/9 23:10.
 
-  **⚠️ Otte VERIFICÉR-noter åbne.** HTTP 200 beviser intet: de rører tabelceller
+  **⚠️ Ni VERIFICÉR-noter åbne.** HTTP 200 beviser intet: de rører tabelceller
   med lovtal, brødtekst og rækkefølge i markupken. Målingerne står i
   `docs/plan-arkiv.md`. Næste forfaldsvindue er **1/10 07:30** — de otte noter med
   vinduer 07:30 og 12:30 kan lukkes fra den iteration.
@@ -147,7 +153,20 @@ måling, ikke fra denne ændring.
 
 ## Åbne VERIFICÉR DEPLOY-noter
 
-**Otte noter åbne.** HTTP 200 beviser intet: 189's og 189b's noter rører
+- ⏳ **To artikler skal i næste handling tilbyde det værktøj, der regner
+  beløbet ud.** `ceo/indlaeg-naeste-vaerktoej`. På
+  `https://minberegner.dk/blog/guide-feriepenge-hvornaar-og-hvor-meget` skal
+  **"Beregn hvor meget du får i feriepenge"** med `href="/feriepenge"` stå i
+  blokken "Regn det ud", ved siden af den knap der går til `/dato`. På
+  `https://minberegner.dk/blog/boliglaan-2026-renter-og-afdrag` skal
+  **"Se hvad dit boliglån koster pr. måned"** med `href="/boliglaan"` stå der
+  samlet sted. Begge artikler har **allerede** disse to href i brødteksten, så
+  det er kun næste handling der manglede dem. HTTP 200 beviser intet — det er
+  to linjer under `<h2>Regn det ud</h2>`. Prøven på dansk er
+  `src/app/blog/naeste-skridt.test.ts` efter deploy. Vindue **1/10 12:30**
+  (denne merge sker efter 07:30).
+
+**Ni noter åbne.** HTTP 200 beviser intet: 189's og 189b's noter rører
 *tabelceller* med lovtal, der er usynlige for `curl` uden at man læser dem. De
 otte lukkede noter er verificeret på indhold; senest 30/9 23:10 for tidszone
 og forsiden. Alle målinger står i `docs/plan-arkiv.md`.
@@ -349,49 +368,11 @@ og forsiden. Alle målinger står i `docs/plan-arkiv.md`.
   står** — to titelændringer er prøvet. **MÅL:** `/bmi` 934, `/su` 127
   besøgende/28d (Plausible 2026-09-30). Fuldtekst: `docs/plan-arkiv.md`.
 
-#### 194. [x] ✅ 1/10 02:05 — to trafikstærke beregnere viste ikke den guide, de har
+#### 194. [x] ✅ 1/10 02:05 — `/boligstoette` og `/pension` fik en synlig "Guides om emnet"-blok
 
-- **Datagrund:** målt 1/10 med `npx tsx` over `blog-kobling.ts` og alle 29
-  `page.tsx` i `src/app/blog/`. Af Plausibles top-15 manglede **fire** sider en
-  synlig guide: `/boligstoette` (**529 besøgende/28d, +78 %**), `/tidsberegner`
-  290, `/pension` 142 og `/kalorier` 289. Kun to af dem kan løses i dag:
-  - `/boligstoette` havde indlægget, men kun som et skjult link under
-    `<h3>Vil du se den fulde guide?</h3>` nederst i brødteksten;
-  - `/pension` manglede vej til indlægket **helt**.
-  - `/tidsberegner`s eneste indlæg er allerede koblet til `/tidszone`, og
-    `blog-kobling.test.ts` forbyder ét indlæg på to beregnere;
-  - `/kalorier` er opgave 119, bloket på en dansk kilde.
-- **Rettelse:** `RelateredeArtikler` på begge sider, og den begravede
-  `/boligstoette`-reference er **fjernet** — ellers mødte læseren samme artikel
-  to gange, præcis den fejl review-fundet 1/10 fandt på forsiden.
-- **⚠️ Hvad jeg *ikke* gjorde, og hvorfor.** Først koblede jeg fire sider,
-  inklusive `/su` og `/barselsdagpenge`. Da standsede porten mig: der står
-  allerede en blå boks med artiklens link lige under værktøjet på begge, så
-  blokken ville være link nr. to til det samme indlæg på én skærm. De to blev
-  rullet tilbage, og grunden står nu i `blog-kobling.ts`'s docblock, så næste
-  iteration ikke "hjælper" dem igen.
-- **Port:** ny `store-beregnere-guide.test.tsx` (6 tests) renderer **markupken**
-  med `renderToStaticMarkup(await Side())` — ikke kildekoden, jf. målerfælden fra
-  191. Tre krav: blokken vises på dansk, forsvinder på beraknare.se, og hvert
-  indlæg linkes **ét** sted. Sidste krav er det nye.
-- **Målerfælde 1/10 02:00 — `renderToStaticMarkup` kan ikke gøre `async`.**
-  Begge sider er async server components. `<Side />` kaster "A component
-  suspended while responding to synchronous input", fordi siden *suspenderer*
-  på sin `await getPageData()`. `renderToStaticMarkup(await Side())` virker —
-  samme form som `dato/page.test.tsx` og `forside.test.tsx` bruger. En test der
-  renderer hele siden skal derfor altid `await'e` kaldet, ikke komponenten.
-- **Målt (3 mutationer, alle røde):** blokken fjernet fra `/boligstoette`;
-  artiklen linket to gange i samme brødtekst; `RelateredeArtikler` holdt op med
-  at returnere `null` for `locale !== "da"`.
-- **Accept:** ✅ (1) `daMarkup` har "Guides om emnet" + artiklens titel på begge
-  sider, `seMarkup` har ingen blok; (2) hvert `/blog/`-href forekommer præcis
-  én gang i markupken; (3) gaten grøn — **3297** tests i 201 filer i **begge**
-  tidszoner, `biome lint` ren over 634 filer, `locale-leak --gate` exit 0,
-  `next build` 143/143.
-- **MÅL:** `/boligstoette` 529 besøgende/28d (+78 %) og `/pension` 142
-  (Plausible 2026-09-30). Genmål om 14 dage: `/blog/boligstoette-2026-nye-regler`
-  (67→84 faldende) og `/blog/pension-hvor-meget-skal-du-spare-op` skal stige, og
-  de to beregneres bounce skal ligge på 2-5 % som de andre værktøjer.
+  Målt 1/10 med `npx tsx` over alle 29 `page.tsx` i `src/app/blog/`. Fuldtekst
+  med målinger, mutationer og de to sider der bevidst *ikke* blev koblet:
+  `docs/plan-arkiv.md`, "Opgave 194".
 
 #### 187. [ ] **IKKE FØR 2026-10-13** 2026-09-30 — Kø — **migrér beraknare.se til svenske URL-slugs med 301**
 

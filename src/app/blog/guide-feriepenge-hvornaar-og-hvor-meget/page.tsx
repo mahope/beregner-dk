@@ -376,6 +376,10 @@ export default function FeriepengeGuidePage() {
         href="/dato"
         handling="Tæll dagene til din ferie"
         beskrivelse="Find datoen for din ferie, og se hvor mange dage der er til den."
+        sekundaer={{
+          href: "/feriepenge",
+          handling: "Beregn hvor meget du får i feriepenge",
+        }}
       />
 
       <div className="mt-12 pt-8 border-t dark:border-gray-700">

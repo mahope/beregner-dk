@@ -49,9 +49,29 @@ function hrefs(cta: string): string[] {
  * skulle finde linket selv. Hver linje er derfor et krav på markupken, ikke
  * en præference: værktøjerne er bygget og verificeret, de mangler kun at
  * blive tilbudt.
+ *
+ * De to linjer fra 1/10 er samme fejlklasse fundet ved at måle alle 29
+ * indlægs næste handling mod det emne hvert indlæg selv lover. Begge artikler
+ * linker værktøjet i brødteksten og har en tabel med et konkret tal om det,
+ * men deres *sidste* klik var et andet værktøj — så den læser, der spørger
+ * "hvor meget", bliver sendt et sted hen, der ikke regner beløb ud.
  */
-const SKAL_NAAE: { slug: string; hrefs: string[] }[] = [
-  { slug: "barsel-2026-regler-og-satser", hrefs: ["/barselsdagpenge", "/barselsplanlaegger"] },
+const SKAL_NAAE: { slug: string; hrefs: string[]; hvorfor: string }[] = [
+  {
+    slug: "barsel-2026-regler-og-satser",
+    hrefs: ["/barselsdagpenge", "/barselsplanlaegger"],
+    hvorfor: "185 besøgende/28d og 84 % bounce",
+  },
+  {
+    slug: "guide-feriepenge-hvornaar-og-hvor-meget",
+    hrefs: ["/dato", "/feriepenge"],
+    hvorfor: "indlægget svarer på \"hvor meget feriepenge\" med en tabel, men sendte læseren til en datoberegner",
+  },
+  {
+    slug: "boliglaan-2026-renter-og-afdrag",
+    hrefs: ["/rentefradrag", "/boliglaan"],
+    hvorfor: "indlægget handler om renter og afdrag, men sendte læseren til fradraget og ikke til ydelsen",
+  },
 ];
 
 const ALLE = artikler();
@@ -138,14 +158,14 @@ describe("bloggens næste handling", () => {
     }
   });
 
-  test("højt bounce-indlæg tilbyder begge sine værktøjer som næste handling", () => {
+  test("indlæg der svarer på \"hvor meget\" tilbyder også det værktøj, der regner det ud", () => {
     for (const krav of SKAL_NAAE) {
       const a = ALLE.find((x) => x.slug === krav.slug);
       expect(a, `/blog/${krav.slug} findes ikke blandt indlæggene`).toBeDefined();
       for (const href of krav.hrefs) {
         expect(
           hrefs(a!.cta),
-          `/blog/${krav.slug} har 84 % bounce, men ${href} står ikke i næste handlingen`,
+          `/blog/${krav.slug} (${krav.hvorfor}), men ${href} står ikke i næste handlingen`,
         ).toContain(href);
       }
     }
