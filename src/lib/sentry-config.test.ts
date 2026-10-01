@@ -7,6 +7,7 @@ import {
   SENTRY_DATA_COLLECTION,
   SENTRY_REPLAYS_SESSION_SAMPLE_RATE,
   sentryDsn,
+  shouldDropSentryEvent,
   sentryIsEnabled,
   SENTRY_TRACES_SAMPLE_RATE,
 } from "./sentry-config";
@@ -118,6 +119,26 @@ describe("scrubSentryUrl", () => {
   });
 });
 
+describe("shouldDropSentryEvent", () => {
+  it("dropper Next.js RSC-støj fra en ødelagt router state header", () => {
+    expect(
+      shouldDropSentryEvent({
+        exception: {
+          values: [
+            { value: "The router state header was sent but could not be parsed." },
+          ],
+        },
+      }),
+    ).toBe(true);
+  });
+
+  it("dropper ikke andre serverfejl", () => {
+    expect(
+      shouldDropSentryEvent({ exception: { values: [{ value: "Database failed" }] } }),
+    ).toBe(false);
+  });
+});
+
 describe("scrubSentryEvent", () => {
   it("skrubber både request.url og query_string", () => {
     const event = {
@@ -134,5 +155,17 @@ describe("scrubSentryEvent", () => {
   it("går ikke ned i en hændelse uden request", () => {
     const event = {};
     expect(scrubSentryEvent(event)).toBe(event);
+  });
+
+  it("returnerer null for den støjende Next.js router-state fejl", () => {
+    expect(
+      scrubSentryEvent({
+        exception: {
+          values: [
+            { value: "The router state header was sent but could not be parsed." },
+          ],
+        },
+      }),
+    ).toBeNull();
   });
 });
