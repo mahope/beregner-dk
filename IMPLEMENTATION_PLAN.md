@@ -1,10 +1,28 @@
-STATUS: 2/10 01:25. Rød CI: ingen. Sentry: MINBEREGNER-1 er Next-router-støj, filtreret
-  siden 3e67ed3 — ingen hændelse efter filteret. PR-TJEK: 2026-10-02 — ingen åbne
+STATUS: 2/10 02:25. Rød CI: ingen. Sentry: MINBEREGNER-1 er Next-router-støj,
+  filtreret siden 3e67ed3 — og filteret kan ikke længere dø af en tekstændring,
+  se `ceo/sentry-router-stoej-paa-kode`. PR-TJEK: 2026-10-02 — ingen åbne
   PR'er. BRANCH-TJEK: ikke endnu kørt i denne uge.
   **Gatens definition (portens):** `npm run lint` (biome ./src) · `npm run
   typecheck` (`tsc --noEmit -p tsconfig.test.json`, eget program for
   testfilerne) · `TZ=UTC npm run test` (vitest run) · `npm run build`. Målt
-  2/10: 0 · 0 · **3508 grønne i 215 filer** · exit 0.
+  2/10 02:25: 0 · 0 · **3518 grønne i 216 filer** · exit 0.
+  **R3 (Sentry-filteret hang på en sætning).** Reviewen 1/10 fandt at
+  `3e67ed3`s filter kun matchede Nexts *ordlyd*, så en Next-opgradering der
+  omformulerer den ville slå filteret fra **med alle tests grønne** — fordi
+  testen hængede på den samme sætning. Målt 2/10 mod den installerede
+  ramme (next 16.3.8, kaldt gennem Next's egen
+  `parseAndValidateFlightRouterState`): fejlen har koden `E10` på
+  `__NEXT_ERROR_CODE`, men **ikke** i den serialiserede hændelse, og
+  `beforeSend` får på client-`captureException`-vejen kun `event_id` og
+  `integrations` — aldrig `originalException` (målt på den live klient med
+  `client.on("beforeSendEvent")`). Så koden kan ikke stå alene. Filteret har
+  derfor tre nøgler: koden *når hintet bærer den*, den fulde sætning, og
+  emnet «router state header» som overlever en omskrivning. Beviset: rødt
+  ved mutation — `NEXT_ROUTER_STATE_PHRASE` væk → 2 tests røde, kodetjekket
+  væk → 1 test rød. End-to-end mod en rigtig collector på 127.0.0.1: Nexts
+  egen fejl → **0** event-enveloper, samme fejl med omskrevet ordlyd → **0**,
+  kontrol-fejl → 1. (Kun *event*-enveloper tælles: en droppet hændelse sender
+  stadig en client-report, som er `{}` på ledningen.)
   **Begge review-fund fra 29/9 er rettet** —
   `ceo/review-fund-palmesondag-og-komponenter`.
   **R2 (palmesøndag):** `/dage-til/palmesondag`'s FAQ sagde, at palmesøndag «står
@@ -236,6 +254,13 @@ Prioriteret efter forventet effekt på **trafik**. Datagrund fra GSC 1/10
   ikke gættes tal.
 
 ## Åbne VERIFICÉR DEPLOY-noter
+
+- ⏳ **RSC-støjens filter kan ikke dø af en tekstændring.**
+  `ceo/sentry-router-stoej-paa-kode`. Prøven er på indhold, og den skal **ikke**
+  slå MINBEREGNER-1 til: efter deploy skal Sentry-projektet fortsat stå på **0**
+  nye hændelser for router-state-fejlen. Lokalt er beviset de ni tests i
+  `sentry-config.test.ts` + de tre end-to-end i `sentry-send.test.ts`, som alle
+  læser Next's egen installerede kaste. Vindue **2/10 07:30**.
 
 - ⏳ **Sverenske satsers og lønetekstens tal læses fra modulerne.**
   `ceo/bolan-og-loen-tekstal-fra-modul`. `curl -s

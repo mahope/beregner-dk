@@ -100,20 +100,69 @@ export interface SentryEventLike {
   exception?: SentryExceptionLike;
 }
 
+/**
+ * Next.js throws this when a request carries a malformed RSC router-state
+ * header. The page renders fine — it is client-side RSC noise, MINBEREGNER-1 in
+ * the Sentry project — so it must not cost us a real error's attention.
+ *
+ * Three keys, strongest first, because no single one is safe on its own:
+ *
+ *  1. Next's **error code**. `next/dist/server/app-render/
+ *     parse-and-validate-flight-router-state` throws
+ *     `Object.defineProperty(new Error(msg), "__NEXT_ERROR_CODE", { value:
+ *     "E10" })`. Measured 2/10: it is *not* part of the serialized event, and on
+ *     the client-`captureException` path `beforeSend` gets a hint holding only
+ *     `event_id` and `integrations` — no `originalException`, so the code is not
+ *     always reachable. Read when it is there; never relied on alone.
+ *  2. The **exact sentence**, the fallback for re-thrown or reconstructed errors.
+ *  3. The **subject phrase**, so a Next upgrade that only rewrites the wording
+ *     ("…header was sent but could not be parsed" → "…header kunne ikke læses")
+ *     still drops instead of flooding the project again.
+ *
+ * What made the old filter fragile was not the matching but the *test*: it
+ * hardcoded the same sentence, so it stayed green on a dead rule. Every key
+ * below is now asserted against Next's own installed message and code — see
+ * `__fixtures__/next-router-state-fejl.ts`.
+ */
+export const NEXT_ROUTER_STATE_ERROR_CODE = "E10";
+
 const NOISY_NEXT_ROUTER_STATE_ERRORS = new Set([
   "The router state header was sent but could not be parsed.",
 ]);
 
-export function shouldDropSentryEvent(event: SentryEventLike): boolean {
+/** The part of the sentence that names the failure, and not the phrasing. */
+const NEXT_ROUTER_STATE_PHRASE = /router state header/i;
+
+export interface SentryHintLike {
+  /** Sentry's own name for the thrown value; typed `unknown` in the SDK. */
+  originalException?: unknown;
+}
+
+function nextFejlkode(original: unknown): string | undefined {
+  if (typeof original !== "object" || original === null) return undefined;
+  const kode = (original as { __NEXT_ERROR_CODE?: unknown }).__NEXT_ERROR_CODE;
+  return typeof kode === "string" ? kode : undefined;
+}
+
+export function shouldDropSentryEvent(
+  event: SentryEventLike,
+  hint: SentryHintLike = {},
+): boolean {
+  if (nextFejlkode(hint.originalException) === NEXT_ROUTER_STATE_ERROR_CODE) return true;
   return (
-    event.exception?.values?.some((exception) =>
-      exception.value ? NOISY_NEXT_ROUTER_STATE_ERRORS.has(exception.value) : false,
-    ) ?? false
+    event.exception?.values?.some((exception) => {
+      const value = exception.value;
+      if (!value) return false;
+      return NOISY_NEXT_ROUTER_STATE_ERRORS.has(value) || NEXT_ROUTER_STATE_PHRASE.test(value);
+    }) ?? false
   );
 }
 
-export function scrubSentryEvent<T extends SentryEventLike>(event: T): T | null {
-  if (shouldDropSentryEvent(event)) return null;
+export function scrubSentryEvent<T extends SentryEventLike>(
+  event: T,
+  hint: SentryHintLike = {},
+): T | null {
+  if (shouldDropSentryEvent(event, hint)) return null;
 
   const request = event.request;
   if (!request) return event;

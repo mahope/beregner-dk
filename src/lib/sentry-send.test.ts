@@ -28,6 +28,7 @@ import type { AddressInfo } from "node:net";
 import { readFile } from "node:fs/promises";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { SCRUBBED_VALUE } from "./sentry-config";
+import { nextRouterStateParseFejl } from "./__fixtures__/next-router-state-fejl";
 import {
   initSentryServer,
   resetSentryServerForTests,
@@ -89,8 +90,30 @@ async function sendOgVent(hændelse: () => unknown): Promise<void> {
   await Sentry.flush(5_000);
   // The Node transport hands the envelope to the agent on a later tick, so a
   // flush that returns before the socket writes would read as "nothing sent".
-  const deadline = Date.now() + 5_000;
-  while (indkomne.length === før && Date.now() < deadline) {
+  await ventPåTransport(indkomne.length, før);
+}
+
+/**
+ * Only the event envelopes count. A dropped event still produces a *client
+ * report* envelope — `{}` on the wire — because Sentry reports its own outcome;
+ * counting those would make a working filter look like a leak.
+ */
+function antalEvents(): number {
+  return indkomne.filter((indkommet) => indkommet.body.includes('"type":"event"')).length;
+}
+
+/**
+ * Wait until the count reaches `forventet`, or give up. A dropped event never
+ * arrives, so the negative cases have to wait out a real budget — otherwise
+ * they pass in a millisecond, before the envelope would have gone out.
+ */
+async function ventPåTransport(
+  indkommet: number,
+  forventet: number,
+  budget = 2_000,
+): Promise<void> {
+  const deadline = Date.now() + budget;
+  while (indkommet === forventet && Date.now() < deadline) {
     await new Promise((resolve) => setTimeout(resolve, 25));
   }
 }
@@ -108,6 +131,52 @@ describe("Sentry sender fra processen", () => {
     expect(envelope.url).toContain("sentry_key=selvtest");
     expect(envelope.body).toContain('"type":"event"');
     expect(envelope.body).toContain("selvtest-sendepipeline");
+  }, 20_000);
+});
+
+describe("RSC-støjen fra Next overhovedet ikke forlader processen", () => {
+  it("sender 0 envelopes for Next's egen router-state fejl", async () => {
+    const Sentry = await import("@sentry/nextjs");
+    const før = indkomne.length;
+    const eventsFør = antalEvents();
+
+    // Next's egen kaster, ikke en efterligning: det er den her fejl der fylder
+    // Sentry-projektet (MINBEREGNER-1, 15 hændelser på 14 dage).
+    Sentry.getClient()?.captureException(nextRouterStateParseFejl());
+    await Sentry.flush(5_000);
+    await ventPåTransport(indkomne.length, før);
+
+    expect(antalEvents()).toBe(eventsFør);
+  }, 20_000);
+
+  it("sender 0 envelopes for den samme fejl med en omskrevet ordlyd", async () => {
+    const Sentry = await import("@sentry/nextjs");
+    const før = indkomne.length;
+    const eventsFør = antalEvents();
+
+    // Sådan ser en Next-opgradering ud: samme fejl, ny formulering. `E10` er
+    // ikke på den serialiserede hændelse (målt: hintet bærer kun `event_id`
+    // og `integrations`), så det er emnet i sætningen, der holder filteret.
+    const fejl = nextRouterStateParseFejl();
+    fejl.message = "The router state header could not be read.";
+    Sentry.getClient()?.captureException(fejl);
+    await Sentry.flush(5_000);
+    await ventPåTransport(indkomne.length, før);
+
+    expect(fejl.message).not.toBe(nextRouterStateParseFejl().message);
+    expect(antalEvents()).toBe(eventsFør);
+  }, 20_000);
+
+  it("sender stadig en rigtig fejl, så filteret ikke dræber projektet", async () => {
+    const Sentry = await import("@sentry/nextjs");
+    const før = indkomne.length;
+
+    Sentry.getClient()?.captureException(new Error("kontrol-ikke-stoej"));
+    await Sentry.flush(5_000);
+    await ventPåTransport(indkomne.length, før);
+
+    expect(indkomne.length).toBeGreaterThan(før);
+    expect(indkomne.at(-1)?.body).toContain("kontrol-ikke-stoej");
   }, 20_000);
 });
 

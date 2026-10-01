@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   FALLBACK_SENTRY_DSN,
+  NEXT_ROUTER_STATE_ERROR_CODE,
   SCRUBBED_VALUE,
   scrubSentryEvent,
   scrubSentryUrl,
@@ -11,6 +12,17 @@ import {
   sentryIsEnabled,
   SENTRY_TRACES_SAMPLE_RATE,
 } from "./sentry-config";
+import {
+  nextFejlkode,
+  nextRouterStateParseFejl,
+} from "./__fixtures__/next-router-state-fejl";
+
+/**
+ * The noise filter's subject, read out of Next itself instead of hardcoded:
+ * a reworded message or a renumbered code in a Next upgrade must show up here.
+ */
+const NEXT_STØJ = nextRouterStateParseFejl();
+const NEXT_STØJTEKST = NEXT_STØJ.message;
 
 /** Every leaf must be off: `false`, `0` or `[]`. Nothing may be `true`. */
 function slåAlleBladeTil(value: unknown, sti: string): string[] {
@@ -120,14 +132,65 @@ describe("scrubSentryUrl", () => {
 });
 
 describe("shouldDropSentryEvent", () => {
-  it("dropper Next.js RSC-støj fra en ødelagt router state header", () => {
+  it("kender Next's egen fejlkode for en rodet router-state header", () => {
+    // The port dømmer på den installerede ramme: et kodenummer-skift i en
+    // Next-opgradering gør den her rød i stedet for at slå filteret fra i stilhed.
+    expect(nextFejlkode(NEXT_STØJ)).toBe(NEXT_ROUTER_STATE_ERROR_CODE);
+  });
+
+  it("dropper Next.js RSC-støj på fejlens kode, selv hvis teksten er omskrevet", () => {
+    // Næste opgraderingsformular: samme kaste, ny ordlyd. Kun koden redder
+    // filteret her — uden denne test ville porten være grøn på en død regel.
+    const omskrevet = { ...NEXT_STØJ, message: "router state header kunne ikke læses" };
+    expect(omskrevet.message).not.toBe(NEXT_STØJTEKST);
+    expect(
+      shouldDropSentryEvent(
+        { exception: { values: [{ value: omskrevet.message }] } },
+        { originalException: NEXT_STØJ },
+      ),
+    ).toBe(true);
+  });
+
+  it("dropper den også uden koden at være med, fordi teksten stadig er reserve", () => {
+    expect(
+      shouldDropSentryEvent({ exception: { values: [{ value: NEXT_STØJTEKST }] } }),
+    ).toBe(true);
+  });
+
+  it("dropper på koden alene, når hintet faktisk bærer den", () => {
+    // Målt 2/10: på client-`captureException`-vejen er hintet kun `event_id` og
+    // `integrations`, så koden er ikke altid tilgængelig. Den er derfor aldrig
+    // eneste nøgle — men når den er med, skal den slå en helt fremmed ordlyd ihjel.
+    expect(
+      shouldDropSentryEvent(
+        { exception: { values: [{ value: "Helt ukendt Next-fejl" }] } },
+        { originalException: NEXT_STØJ },
+      ),
+    ).toBe(true);
+    // Og en anden kode må ikke gøre det.
+    const rodet = Object.defineProperty(new Error("Helt ukendt Next-fejl"), "__NEXT_ERROR_CODE", {
+      value: "E999",
+      enumerable: false,
+    });
+    expect(
+      shouldDropSentryEvent(
+        { exception: { values: [{ value: rodet.message }] } },
+        { originalException: rodet },
+      ),
+    ).toBe(false);
+  });
+
+  it("dropper den omskrevne ordlyd på emnet, ikke på sætningen", () => {
+    // Den egentlige grund til filteret overlever en Next-opgradering: en ny
+    // formulering af samme fejl. Kun `E10`-koden og emnet kan vide det her.
     expect(
       shouldDropSentryEvent({
-        exception: {
-          values: [
-            { value: "The router state header was sent but could not be parsed." },
-          ],
-        },
+        exception: { values: [{ value: "The router state header could not be read." }] },
+      }),
+    ).toBe(true);
+    expect(
+      shouldDropSentryEvent({
+        exception: { values: [{ value: "Router state header kunne ikke læses." }] },
       }),
     ).toBe(true);
   });
@@ -136,6 +199,14 @@ describe("shouldDropSentryEvent", () => {
     expect(
       shouldDropSentryEvent({ exception: { values: [{ value: "Database failed" }] } }),
     ).toBe(false);
+  });
+
+  it("går ikke ned på en manglende hint", () => {
+    expect(
+      shouldDropSentryEvent({ exception: { values: [{ value: NEXT_STØJTEKST }] } }, {}),
+    ).toBe(true);
+    expect(shouldDropSentryEvent({}, { originalException: "ikke et objekt" })).toBe(false);
+    expect(shouldDropSentryEvent({}, { originalException: null })).toBe(false);
   });
 });
 
@@ -159,13 +230,14 @@ describe("scrubSentryEvent", () => {
 
   it("returnerer null for den støjende Next.js router-state fejl", () => {
     expect(
-      scrubSentryEvent({
-        exception: {
-          values: [
-            { value: "The router state header was sent but could not be parsed." },
-          ],
-        },
-      }),
+      scrubSentryEvent({ exception: { values: [{ value: NEXT_STØJTEKST }] } }),
+    ).toBeNull();
+    // Og for den omskrevne udgave, kun takket være fejlkoden.
+    expect(
+      scrubSentryEvent(
+        { exception: { values: [{ value: "router state header kunne ikke læses" }] } },
+        { originalException: NEXT_STØJ },
+      ),
     ).toBeNull();
   });
 });
