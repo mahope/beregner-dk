@@ -1,19 +1,36 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — 1/10 07:45. Seks deploy-noter lukket på indhold, ingen kode leveret.
+STATUS: KØ — 1/10 08:40. Én deploy-note lukket på indhold, ingen kode leveret.
 
   **Denne iteration leverede ingen produktkode, og det er et målt resultat,
   ikke et valg.** CEO-køens punkt 0 er lukket, 97/119/183 er `BLOCKED` på
   Mads, 187 må ikke røres før 13/10, og 200's vej 1 er din Cloudflare-regel mens
-  vej 2 er sat til efter 187's måling. **Egen opgave fundet og målt ren:**
-  `npx tsx` krydsede hvert tal i FAQ'er, titler og beskrivelser for de 13 mest
-  trafikerede økonomisider mod konstanterne i `satser-2026.ts` — **alle tal
-  findes i kilden**, så der var ingen fri målt fejl at rette. Samme måling på
-  indgående links: de 16 mest trafikerede sider har 6-16 indgående interne
-  links hver (kun `/rabat` har 1, den er to dage gammel fra F2). `/dato` har
-  allerede kontekstlink til `/dage-til/1-december`, `/nytaarsaften`,
-  `/kristi-himmelfartsdag` og `/2-pinsedag` — de fire spørgsmål den selv
-  fanger. **Ingen ny opgave herfra.**
+  vej 2 er sat til efter 187's måling. Jeg brugte iterationen på at lede efter
+  en målt fejl i stedet for at gætte — og fandt ingen:
+
+  - **hreflang er ikke en fejl, selv om den først så ud som én.** Live-hentet
+    HTML skriver `hrefLang="da"` (React bevarer camelCase; HTML-attributnavne er
+    case-følsomme i grep, ikke i browseren). Målt på `/`, `/dato`, `/procent`,
+    `/bil`, `/tidszone`, `/alder`, `/husleje`: `da` + `sv` + `x-default` overalt,
+    kun `/husleje` uden `sv` — korrekt, siden den er daOnly. Canonical på sig
+    selv alle steder.
+  - **Ingen titel- eller descriptionsfejl tilbage.** Live `<title>` for
+    `/procent` "Procentberegner: 10 % af 250 = 25 kr. Stigning, fald, rabat" og
+    de svenske titler er alle oversatte ("Procenträknare: 10 % av 250 kr = 25
+    kr"). `/dato` har **alle** 19 dage-til-events i listen med dagens tal fra
+    `getDageTilAnswer`, altså også juleaften — GSC's to største søgninger er
+    dækket.
+  - **De svenske `/dagar-till/*`-ruter findes og har 301** fra det danske
+    `/dage-til/*`-prefix, så `/dato`s svenske kontekstlink er ikke dødt.
+  - **Målerfælde, ikke fejl:** et statisk grep over `href="/…"` i `src/` under-
+    vurderer indgående links stærkt, fordi næsten alle sider får deres
+    "Relaterede beregnere" fra `RelatedCalculators` + `calculator-list.ts` som
+    data. `/promille` så således ud til at have 1 indgående link. Brug
+    komponenten, ikke grepet.
+
+  **Lukket:** `ceo/no-locale-tag` → `DEPLOY OK 1/10 08:35` (batch 07:30).
+  Bevis, fejlmåling og de præcise strenge står under noten.
+  **Åbne noter: 7**, alle med vindue **1/10 12:30** — ingen kan lukkes før det.
 
   **Leveret i forgangende iteration:** `/loen-efter-skat` skrev skattesatserne
   i hånden — siden sagde **"Allerød (23,3 %)"** mens `KOMMUNER` siger
@@ -266,14 +283,18 @@ alle 200, hver streng talt i markupken. Alle målinger står i
   `1 timme efter` / `5-6 timmar efter` / `8-9 timmar efter` / `7-8 timmar före` /
   `8-10 timmar före`. **Strengen "9-10" forekommer 0 gange** på begge sider.
 
-- ⏳ **Norske tal skal ikke få dansk tusindtalsseparator.** `ceo/no-locale-tag`.
-  Kontrollér **indhold** på `https://beregner.no/proteinbehov` (latent — domænet
-  404’er i dag, så læg på dansk og svensk at dansk/svensk output er uændret):
-  `ProteinbehovBeregner` skal bruge `getIntlLocale`, og ingen fil må stå med
-  den toarmede kæde `locale === "se" ? "sv-SE" : "da-DK"`. Den praktiske prøve på
-  dansk er, at `npm run test` fortsat er grøn på
-  `src/lib/intl-locale-tag.test.ts` efter deploy. Vindue **30/10 07:30** (denne
-  merge sker efter 17:30).
+- ✅ **Norske tal skal ikke få dansk tusindtalsseparator.** `ceo/no-locale-tag`.
+  **DEPLOY OK 1/10 08:35** — batch-vinduet var 1/10 07:30 (noten sagde
+  "30/10", en skrivefejl for 1/10; mergen skete 30/9 efter 17:30). Bevis på
+  dansk og svensk, fordi `beregner.no` stadig er latent: alle fire URL’er svarer
+  **200** (`/alder` og `/proteinbehov` på begge domæner), og de svenske sider er
+  svenske i markupken — `beraknare.se/alder` har **97 forekomster af "ålder"**
+  og **0 af** "hvor mange dage"/"hvad er"; `beraknare.se/proteinbehov` skriver
+  "gram protein" og "per dag". Gaten grøn efter deploy: `npm run lint` ren (635
+  filer), `node scripts/locale-leak.mjs --gate` exit 0, og `intl-locale-tag` +
+  `alder-side-tekst` + `dato/page` → **63 tests grønne**. CI på `master`
+  (553b3cc) grøn. Tallene selv står ikke i markupken (kalkulatorens
+  starttilstand er 0), så det er JS-kørslen porten dækker, ikke `curl`.
 - ⏳ **`/bmi` skal vise sit eget indlæg under FAQ'en.** `ceo/bmi-voksen-indlaeg`.
   På `https://minberegner.dk/bmi` skal `<h2>Guides om emnet</h2>` stå i markupken
   med **ét** `/blog/`-href, og det skal være
