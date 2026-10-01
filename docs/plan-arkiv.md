@@ -22518,3 +22518,75 @@ opgaver er flyttet her. Mål- og facitlinjerne er bevaret i planen.
 
 F2/F2b, F4, F6, F7 og F8 er færdige; deres fulde tekst står i de afsnit, der
 blev flyttet her i tidligere iterationer, og i git-historikken på planen.
+
+## Opgave 204 — Sentry opsat (1/10 11:25, `ceo/sentry-fejl`)
+
+**Udgangspunkt:** snapshottet sagde "Ingen uløste fejl de seneste 14 dage", men
+`@sentry/nextjs` lå ikke i `package.json`, og der var ingen `Sentry.init` nogen
+steder i koden. Visheden om at intet fejlede holdt altså ikke.
+
+**Rettelsen:**
+- `@sentry/nextjs` 11.1.0 (peer `next ^16.0.0-0`, altså Next 16 er understøttet).
+- `src/instrumentation-client.ts` — browserens `Sentry.init()` plus
+  `onRouterTransitionStart = Sentry.captureRouterTransitionStart`.
+- `src/sentry.server.config.ts` — `initSentryServer()`, kaldt fra
+  `register()`. Har egen idempotens-flag, fordi `init()` ikke er idempotent.
+- `src/instrumentation.ts` — **ny `export const onRequestError =
+  Sentry.captureRequestError`.** Målt nødvendigt: Next 16 rapporterer
+  uafhandlede serverfejl gennem denne hook, ikke gennem `register()`. Uden den
+  fanger serveren intet — hverken i route handlers eller server components.
+- `src/app/error.tsx` kalder `Sentry.captureException(error)` i en `useEffect`.
+- `next.config.ts` er viklet i `withSentryConfig` fra `@sentry/nextjs/config`
+  (den flyttede ditto i v11) med `sourcemaps: { disable: true }`,
+  `widenClientFileUpload: false`, `silent: true`.
+- `register()` blev omstruktureret, så `NEXT_RUNTIME === "edge"` tjekkes først og
+  Sentry-init er **uafhængig** af `INDEXNOW_ENABLED`. IndexNow-betingelsen er
+  uændret, så `instrumentation.test.ts` og `instrumentation.lifecycle.test.ts`
+  (21 tests) holder.
+
+**Fundet der var opgavens egen værdi:** v11 fjernede `sendDefaultPii` og erstattede
+det med `dataCollection` — og samler i modsætning til v10 **mere som standard**:
+cookies, alle HTTP-headere (request *og* response), fire slags HTTP-bodies, URL-
+ parametre, databaseværdier, kø-argumenter og lokale variabelværdier i hver
+stack-frame. På et dansk site med cookie-consent er det andre brugeres data på
+vej ud over en sidevisning. Derfor står alle ti felter eksplicit `false`/`[]` i
+`SENTRY_DATA_COLLECTION`, og porten fejler på to måder: et blad der bliver
+`true`, og en ændret nøgleliste ved en opgradering.
+
+**Porten:** `src/lib/sentry-config.test.ts`, 15 tests. DSN'ens form, at env'en
+kan styre den, produktionsvip, `tracesSampleRate` 0,1, replay 0, de ti
+dataindsamlingsfelte, og URL-skrubben. **Skrubben fandt to huller under
+skrivningen:** Sentrys `request.query_string` har intet `?` foran `s=` (kun `^`
+alternativet dækker det), og `calculation-state-privacy.ts` lægger staten i
+fragmentet som `#s=`. Begge dækket nu. Mutation målt rød: scrubben gjort til
+no-op → 4 tests røde. Testtal 3318 → **3333**.
+
+**Målt lokalt, og hvor det stoppede:**
+- ✅ `Sentry.init` kører i prod-build (`node .next/standalone/server.js`) med
+  `NODE_ENV=production` og den rigtige DSN — bekræftet med et midlertidigt
+  `console.error`.
+- ✅ `onRequestError` fanger en fejl fra en kastende route handler, med fuld
+  request-kontekst (path, headers, url med `?s=…`).
+- ✅ `onRequestError` findes slet ikke i Next's log uden den nye eksport.
+- ❌ **Ingen envelope forlod SDK'en.** En ren HTTP-collector på 127.0.0.1:4000
+  med DSN `http://selvtest@127.0.0.1:4000/1` modtog nul. (Først forsøgt med
+  `https://` mod den samme collector → TLS-fejl, min egen fejl.)
+- Mistanke: `withSentryConfig(..., { silent: true })`. v11 auto-wirer
+  orkestrations-instrumenteringen *ved build* gennem den, så en build-option kan
+  slå den fra uden at builden taler. Næste agent: `silent: false` i ét hug.
+
+**Midlertidig kode fjernet igen:** `src/app/api/sentry-selvtest/route.ts` (hele
+ruten), de to `console.error`-linjer og den indpakede `onRequestError`.
+Selvtesten lå bag `SENTRY_SELVTEST=true`, så den kun var aktiv i det lokale kørsel.
+
+**Gaten:** `npm run lint` 0 (640 filer) · `npm run typecheck` 0 ·
+`TZ=UTC npm run test` **3333 grønne / 204 filer** ·
+`node scripts/locale-leak.mjs --gate` exit 0 · `npm run build` 138 ruter
+(`✓ Compiled successfully`). De 7 Turbopack-CSS-advarsler i `globals.css` er
+før optaget og urørt af denne opgave.
+
+**Bemærk til næste agent om målemetoden:** målingen kørte to gange mod en
+**gammel** `next start`-proces på port 3999 (`output: standalone` gør at
+`next start` ikke virker ordentligt, og EADDRINUSE lod den gamle leve videre).
+Brug `node .next/standalone/server.js` og `lsof -ti:<port> | xargs kill -9`
+før hver måling.

@@ -1,4 +1,5 @@
 import type { NextConfig } from 'next';
+import { withSentryConfig } from '@sentry/nextjs/config';
 
 const securityHeaders = [
   {
@@ -92,4 +93,10 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withSentryConfig(nextConfig, {
+  // We deliberately ship no auth token, so the build must not try to upload
+  // anything or inject Sentry's own value maps into the client bundle.
+  sourcemaps: { disable: true },
+  widenClientFileUpload: false,
+  silent: true,
+});

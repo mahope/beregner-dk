@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/nextjs";
 import { buildSitemap } from "./app/sitemap";
 import { getAllDomainConfigs } from "./lib/domain-config";
 import {
@@ -5,6 +6,7 @@ import {
   type IndexNowEnv,
   type IndexNowResult,
 } from "./lib/indexnow";
+import { initSentryServer } from "./sentry.server.config";
 
 export type { IndexNowEnv } from "./lib/indexnow";
 
@@ -64,10 +66,17 @@ function logSubmissionResult(
 }
 
 export function register() {
+  if (process.env.NEXT_RUNTIME === "edge") {
+    return;
+  }
+
+  // Sentry has its own guard (production only) and must run even when
+  // INDEXNOW_ENABLED is off, so it cannot share the IndexNow condition below.
+  initSentryServer();
+
   if (
     process.env.NODE_ENV !== "production" ||
     process.env.INDEXNOW_ENABLED !== "true" ||
-    process.env.NEXT_RUNTIME === "edge" ||
     deploymentSubmissionStarted
   ) {
     return;
@@ -84,3 +93,11 @@ export function register() {
       console.error("[indexnow] deployment submission failed");
     });
 }
+
+/**
+ * Next.js 15.3+ reports every unhandled server error here rather than through
+ * `register()`, so without this export a crashing route handler or server
+ * component never reaches Sentry at all. The client side is covered by
+ * `src/instrumentation-client.ts` and `src/app/error.tsx`.
+ */
+export const onRequestError = Sentry.captureRequestError;

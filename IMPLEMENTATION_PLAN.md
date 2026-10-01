@@ -1,44 +1,44 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — 1/10 10:20. **Review-fundet om `/loen-efter-skat` er lukket**
-(opgave 203, `ceo/loen-efter-skat-en-kilde`) — og det trak to fund mere med sig.
+STATUS: KØ — 1/10 11:25. **Sentry er sat op** (opgave 204, `ceo/sentry-fejl`).
+  Sentry lå ikke i koden, så "Ingen uløste fejl i 14 dage" betød intet.
 
-  **Hvad der skete:** afsnittet «5. Kommuneskat» skrev to tal om de samme
-  kommuner fra to kilder i én sætning: «Landsgennemsnittet er ca. 25,049 %» fra
-  `SATSER_2026` (svmn.dk) og «den billigste ligger på 22,5 %, 27,8 % er den
-  dyreste» fra `KOMMUNER`. Målt med `npx tsx`: `KOMMUNER`s 98 rækker har eget
-  middeltal **25,626 %**, så de to tal kan ikke begge være sande om de 98
-  kommuner — en læser kan ikke få dem til at hænge sammen.
+  **Rettet:** `@sentry/nextjs` 11.1.0 i tre steder — browseren
+  (`instrumentation-client.ts`), Node (`sentry.server.config.ts` kaldt fra
+  `register()`) og `instrumentation.ts`'s `onRequestError`, som uden den
+  fanger Next 16 **intet** server-side. `error.tsx` kalder `captureException`.
 
-  **Rettelsen:** `KOMMUNER` eksporterer nu selv `KOMMUNER_ANTAL` og
-  `KOMMUNER_SNIT` som afledede værdier, siden skriver tabellens eget middeltal,
-  og satsfilens 25,049 % har fået **sit eget afsnit med sin kilde** — uden påstand
-  om hvordan svmn.dk vægter sit, for det kan ikke dokumenteres. Samme fejl lå i
-  FAQ'en i `page-data.ts`, og derudover skrev **`LoenBeregner.tsx` «Landsgennemsnit:
-  24,94 %» under sit eget felt** — et tal der aldrig har været i beregningen
-  (feltet er 25,049 %). Alle tre er rettet ved konstruktion.
+  **Det vigtigste fund:** v11 fjernede `sendDefaultPii` og samler **mere** end
+  v10 gjorde med PII fra — cookies, HTTP-headere, bodies, URL-parametre,
+  DB-værdier og lokale variabelværdier i hver stack-frame. Kontrakten sagde
+  `sendDefaultPii: false`; på v11 hedder det `dataCollection`, og alle ti felter
+  er slået fra eksplicit. Porten fejler hvis et blad bliver `true` **eller**
+  hvis nøglenlisten ændrer sig ved en opgradering. Det var opgavens værdi.
 
-  **Porten:** ny `loen-efter-skat/page.test.tsx` renderer siden og læser de tre
-  tal **ud af den `<p>` der indeholder dem**, så den dømmer på egenskaben «to tal
-  om samme population fra samme kilde» og ikke på et kodestykke, der kan skrives
-  om. To nye tests i `fact-consistency.test.ts` dømmer på bindingen til modulerne.
-  **Mutationer målt røde:** gennemsnittet tilbage på `SATSER_2026` → rød;
-  «24,94 %» tilbage i værktøjet → rød. Testtal **3318** (var 3313).
+  **Porten:** 15 tests i `src/lib/sentry-config.test.ts`. DSN-form,
+  produktionsvip, `tracesSampleRate` 0,1, replay 0, alle ti felte fra, og
+  URL-skrubben — som **fandt to huller**: query-strengen har intet `?` foran
+  `s=`, og staten kan ligge i fragmentet. Mutation målt rød (4 tests).
+  Testtal **3333** (var 3318).
 
-  **Gaten:** `lint` 0 · `typecheck` 0 · `TZ=UTC npm run test` **3318 grønne /
-  203 filer** · `locale-leak --gate` exit 0 · `next build` 142 ruter. CI på
-  `master` var grøn ved iterationens start (36831555037).
+  **⚠️ Ikke færdigbevist:** at en fejl *faktisk forlader* browseren. Målt at
+  init kører i prod-build med den rigtige DSN og at `onRequestError` fanger
+  fejlen fra en kastende route handler — men min lokale collector modtog ingen
+  envelope. Se opgave 204 og ❓.
 
-  **Åbne noter: 8**, alle med vindue **1/10 12:30** — merger før det, så ingen
-  kan lukkes i denne iteration.
+  **Gaten:** `lint` 0 · `typecheck` 0 · `TZ=UTC npm run test` **3333 grønne /
+  204 filer** · `locale-leak --gate` exit 0 · `next build` 138 ruter. CI på
+  `master` grøn ved start (36835264244).
 
-  **Blokeret på Mads:** 97, 119, 183, 201 (nu eksplicit), F1, F5. **187 må ikke
-  røres før 13/10.** CEO-køens punkt 0 er lukket.
+  **Åbne noter: 9** — otte fra før med vindue **1/10 12:30** (kan ikke lukkes
+  før det) plus Sentry-noten.
+
+  **Blokeret på Mads:** 97, 119, 183, 201, F1, F5 + Sentry-spørgsmålet.
 
   **⚠️ Målerfælde:** `npm run test` kører `locale-leak-gate.test.ts`, der med
-  vilje planterer danske lækager. Derfor kommer `FEJL: n ureviewet(e)`-blokke i
-  output. Det er **ikke** fund i din diff. Kør gaten separat:
-  `node scripts/locale-leak.mjs --gate` (exit 0).
+  vilje planterer danske lækager. `FEJL: n ureviewet(e)` i output er derfor
+  **ikke** fund i din diff. Kør gaten separat: `node scripts/locale-leak.mjs
+  --gate` (exit 0).
 
 ## Fase 3 — trafik-drevet
 
@@ -84,33 +84,30 @@ svenske domæneautoritet.
 
 ### Prioriterede opgaver
 
-**F1. [ ] Få søgeniveau-data for `/procent` — det er 150.470 visninger og
-0,1 %.** De tre søgninger GSC viser for `/procent` (`procentberegner` 254 v,
-`10 procent af` 54 v, en rabat-spørgsmål 56 v) summerer **364 visninger af
-150.470**. Vi ved altså intet om de 150.106. Uden søgningsniveau kan ingen
-vælge mellem "ny side", "dybere side" og "nye links". **Accept:** GSC
-søgningseksport for `/procent` (eller de 20 største søgninger site-wide) ligger
-i planen. **Spørgsmål til Mads: se ❓.**
+**F1. [ ] Få søgeniveau-data for `/procent` — 150.470 visninger og 0,1 %.**
+GSC's tre søgninger for siden summerer **364 visninger af 150.470**, så vi ved
+intet om resten. Uden søgningsniveau kan ingen vælge mellem "ny side", "dybere
+side" og "nye links". **Accept:** GSC-eksport for `/procent` (eller de 20
+største søgninger site-wide) ligger i planen. **❓ se nedenfor.**
 
 **F2 + F2b. [x] ✅ `ceo/procent-rabat-spørgsmal`, `ceo/procent-svensk-rabatt-faq`
 — 19 tests, 12 mutationer faldt. Kort: `docs/plan-arkiv.md`.
 **MÅL:** `/procent` 150.470 visninger / 97 klik / CTR 0,1 % / pos. 7,4 (da) og
 26.933 / 2 / 0,0 % / pos. 9,9 (se), GSC 2026-08-31 → 2026-09-28.
 
-**F3. [ ] Beraknare.se: position, ikke titel.** 190.447 visninger på pos.
-8-10. Opgave 187 (svenske slugs, 301) er sat til **13/10** og må ikke flyttes
-før de svenske titelændringer fra C195/C196 er målt. Efter den dato er
-dette den største enkeltpost i trafikplanen. **Accept:** se opgave 187.
+**F3. [ ] Beraknare.se: position, ikke titel.** 190.447 visninger på pos. 8-10.
+Opgave 187 (svenske slugs, 301) er sat til **13/10** og må ikke flyttes før de
+svenske titelændringer fra C195/C196 er målt. Efter den dato er det den største
+enkeltpost i trafikplanen. **Accept:** se opgave 187.
 
 **F4. [x] ✅ `ceo/forsiden-dublet-liste` — den dobbelerede stribe er væk; se
 `docs/plan-arkiv.md`. **MÅL:** `/` 218 besøgende/28d, bounce 38 %
 (Plausible 2026-09-30) → mod 2-7 %; se `/` 20 besøgende, bounce 80 %.
 
 **F5. [ ] Søg på de 27 % ikke-Google-trafik.** Bing 1.319 + DDG 378 +
-Yahoo 274 besøgende/28d. IndexNow er kodet og instrumenteret
-(`src/lib/indexnow.ts`, `src/app/api/internal/indexnow/route.ts`), men
-`❓ Til Mads` spørger om krogen efter deploy er sat op — uden svar er
-Bing/DDG/Yahoo indeksering uafhængig af vores deploys.
+Yahoo 274 besøgende/28d. IndexNow er kodet (`src/lib/indexnow.ts`), men ❓
+spørger om krogen efter deploy er sat op — uden svar er Bing/DDG/Yahoo
+indeksering uafhængig af vores deploys.
 
 **F6. [x] ✅ `ceo/no-locale-tag` — 8 tests, port `intl-locale-tag.test.ts`.**
 
@@ -119,6 +116,25 @@ Bing/DDG/Yahoo indeksering uafhængig af vores deploys.
 
 **F8. [x] ✅ `ceo/svensk-helgdagslove` — se `docs/plan-arkiv.md`.
 **MÅL:** se `/nedtaelling` 5.726 visninger / 12 klik / CTR 0,2 % / pos. 9,2.
+
+## Feature-kø
+
+Mindst hver tredje opgave skal være noget brugeren kan se. Kandidater, prioriteret
+efter forventet effekt på **trafik** (GSC-tallene fra 1/10):
+
+- **Landing-side pr. konkrete countdown-spørgsmål** (`/dage-til/[dato]`).
+  *Hvem:* alle der googler «hvor mange dage er der til 1 december» — 1.209
+  visninger, 3 klik, pos. 5. *Accept:* én ægte side for jul, nytår, sommerferie
+  og skolestart, med svaret i `<title>`. *Datagrund:* GSC, 1/10.
+- **Forskelsside til `/dato` og `/tidsberegner` på beraknare.se.** *Hvem:* de
+  190.447 svenske visninger på 0,12 % CTR. *Accept:* CTR over 0,3 % på 14 dage.
+  *Datagrund:* GSC se, 1/10. **Kan ikke før 13/10** (opgave 187).
+- **Pristalsregulering på `/husleje`** som selvstændig side. *Hvem:* lejere der
+  vil vide hvad deres lejlighed må stige til. *Accept:* beregner + FAQ med
+  nettoprisindekset som kilde. *Datagrund:* `/husleje` 161 besøgende/28d.
+- **Kalorieguide på `/kalorier`.** *Hvem:* 9 af 10 danske autocomplete-træffere
+  under «kalorier» er madvarer. **Blokeret på kilde** (opgave 119, ❓) — må ikke
+  gættes tal.
 
 ### Åbne VERIFICÉR DEPLOY-noter
 
@@ -150,21 +166,16 @@ Den type-tjekker **kun** `src/**/*.test.ts(x)` — altså de filer
 typekontrol af testfiler overhovedet; med den er der 0 fejl i 202 filer.
 
 **Målt 1/10:** `next build` på Next 16.3.8 (Turbopack) giver **138 ruter,
-136 `ƒ` og 2 `○`** — se opgave 200. Testtal: **3313** (var 3306).
+136 `ƒ` og 2 `○`** — se opgave 200.
 
-**`next build` tjekker ikke testfiler mere** (1/10 05:30). 1/10 05:30: med Next 16 type-tjekkede `next build` **alle 85 fejl i 18
-`*.test.ts(x)`-filer** og bygget faldt — på Next 15 gjorde det ikke, så de fejl
-er arv fra mange commits (83 i den 1/10 02:04-måling, +2 fra siden da). Løsningen
-var ikke at rette 85 fejl i en opgraderings-commit, men at tage testfilerne ud af
-`tsconfig.json`s `exclude` — de skriver **ikke** til det kodede output, så de
-hører til vitest og ikke til skibsbuilden. **Løst 1/10 (`ceo/typecheck-testfiler`):** opgave 202 satte de manglende typer
-tilbage — se afsnittet "typecheck på testfiler" i `docs/plan-arkiv.md`.
+**`next build` tjekker ikke testfiler mere** (1/10): med Next 16 type-tjekkede
+`next build` alle 85 fejl i 18 `*.test.ts(x)`-filer og bygget faldt. De blev
+taget ud af `tsconfig.json`s `exclude` (de skriver ikke til det kodede output)
+og fik i stedet `npm run typecheck`. Se `docs/plan-arkiv.md`.
 
-Sidens tekst kan regnes pr. request: `getPageData` løser `/alders
-{ALDER}`-pladsholdere ved hvert kald (se `src/lib/alder-side-tekst.ts`), så
-et alders-tal i et snippet følger dagen. Dagens dato læses i sidens egen
-tidszone via `iDagISidensTidszone` — `tilIsoDato(new Date())` læser
-*serverens* tidszone og er et døgn bag mellem 00:00 og 02:00 dansk tid.
+Sidens tekst kan regnes pr. request: `getPageData` løser `/alders{ALDER}`
+ved hvert kald, så et alders-tal i et snippet følger dagen. Dagens dato læses i
+sidens egen tidszone via `iDagISidensTidszone`.
 
 
 ## Åbne VERIFICÉR DEPLOY-noter
@@ -215,17 +226,12 @@ alle 200, hver streng talt i markupken. Alle målinger står i
 `docs/plan-arkiv.md`, "Deploy-noter lukket på indhold 1/10 07:45".
 
 - ⏳ **`/boligstoette` og `/pension` skal vise "Guides om emnet" under de
-  relaterede beregnere.** `ceo/guides-til-store-beregnere`. På
-  `https://minberegner.dk/boligstoette` skal `<h2>Guides om emnet</h2>` stå i
-  markupken med **ét** `/blog/boligstoette-2026-nye-regler`-href, og **strengen
-  "Vil du se den fulde guide?" må ikke forekomme** nogen steder — den blev
-  fjernet, fordi læseren ellers mødte artiklen to gange. På
-  `https://minberegner.dk/pension` skal samme blok stå med **ét**
-  `/blog/pension-hvor-meget-skal-du-spare-op`-href. På `https://beraknare.se/` på
-  begge domæner må "Guides om emnet" **ikke** forekomme. HTTP 200 beviser intet —
-  det er en blok i markupken. Prøven på dansk er
-  `src/lib/store-beregnere-guide.test.tsx` efter deploy. Vindue **1/10 12:30**
-  (denne merge sker efter 07:30).
+  relaterede beregnere.** `ceo/guides-til-store-beregnere`. På begge sider skal
+  `<h2>Guides om emnet</h2>` stå i markupken med **ét** `/blog/`-href (henholdsvis
+  `boligstoette-2026-nye-regler` og `pension-hvor-meget-skal-du-spare-op`), og
+  **"Vil du se den fulde guide?" må ikke forekomme** nogen steder. På
+  `https://beraknare.se/` må blokken **ikke** forekomme. HTTP 200 beviser intet.
+  Prøven på dansk er `src/lib/store-beregnere-guide.test.tsx`. Vindue **1/10 12:30**.
 
 
 
@@ -301,16 +307,14 @@ alle 200, hver streng talt i markupken. Alle målinger står i
 
 - **Datagrund:** målt under C66. `labels` i `TidszoneBeregner.tsx` har kun `da`
   og `se`, og `const l = labels[locale] || labels.da` giver derfor **dansk** på
-  beregner.no — hele værktøjet, inklusive dropdown, huskeliste, klokkeslæt og
-  sommertidsnote. Usynligt i dag, fordi beregner.no 404'er på alt ud over `/`
-  (opgave 97), men det er 24 timers advarsel om et dansk domæne.
-- **Afhængighed:** opgave 97. Hvis svaret er "lanceres ikke", er denne opgave
-  **gratuleringens fallenhed** — så er det nok at slå `no` fra i porten. Hvis
-  svaret er "lanceres snart", skal `TidszoneBeregner` have et rigtigt `no`-sprog:
-  `Tidssone`, `Fra tidssone`, `Timeforskjell`, `timer`, `(dagen før)`,
-  `(neste dag)`, `Tidsforskjell fra Norge`, `hjemmetidssonen er Norge` — samme
-  mønster som C65 gjorde for `STANDARD_APPARATER` (`navnNo` pr. post), altså
-  **ikke** en `labels.no`-nøgle, fordi `by`/`navn` nu ligger i rækkerne.
+  beregner.no — hele værktøjet, inklusive dropdown, huskeliste og sommertidsnote.
+  Usynligt i dag, fordi beregner.no 404'er på alt ud over `/` (opgave 97).
+- **Afhængighed:** opgave 97. Svarer den "lanceres ikke", er opgaven
+  **gratuleringens fallenhed** — slå `no` fra i porten. Svarer den "lanceres
+  snart", skal værktøjet have et rigtigt `no`-sprog: `Tidssone`, `Fra tidssone`,
+  `Timeforskjell`, `timer`, `(dagen før)`, `(neste dag)`, `hjemmetidssonen er
+  Norge` — samme mønster som C65 gjorde for `STANDARD_APPARATER` (`navnNo` pr.
+  post), altså **ikke** en `labels.no`-nøgle.
 - **Acceptkriterier:** hvis domænet er lukket: `isCalculatorAvailable("/tidszone", "no")`
   er `false` med en test på det. Hvis domænet er live: `TidszoneBeregner.test.tsx`
   kører i **da, se og no**, og `no`-renderet indeholder ingen danske
@@ -448,9 +452,8 @@ alle 200, hver streng talt i markupken. Alle målinger står i
   `getCurrentDomainConfig()`, som begge `await headers()` — fordi `src/proxy.ts`
   sætter `x-locale`/`x-hostname` på *request*-headerne. Én `await headers()` i
   root-layouten gør hele træet dynamisk.
-- **Live 1/10 06:00:** TTFB `/` 367 ms, `/dato` 433 ms, `/procent` 282 ms.
-  `cf-cache-status: DYNAMIC`, `server: cloudflare` — **der står en CDN foran**,
-  og den har intet at cache.
+- **Live 1/10 06:00:** TTFB `/` 367 ms, `/dato` 433 ms, `/procent` 282 ms;
+  `cf-cache-status: DYNAMIC` — **der står en CDN foran**, og den har intet at cache.
 - **Målt og fundet 1/10: den naive løsning er farlig.** Next svarer
   `vary: rsc, next-router-state-tree, next-router-prefetch,
   next-router-segment-prefetch, Accept-Encoding`. Klientens rute-navigation
@@ -467,10 +470,9 @@ alle 200, hver streng talt i markupken. Alle målinger står i
      routemigrering og må **ikke** køres i samme iteration som 187.
   3. **Bygge 3 statiske builds** (`NEXT_PUBLIC_DOMAIN` ved build). Også stor,
      og kræver 3 containere.
-- **Besluttet:** køre **1** som spørgsmål nu, og **2** først efter at 187's
-  måling er lukket 13/10 — den er samme opløsning. **En delvis ombygning af
-  layouten uden et af de to er værst af alt**: den gør sitet dynamisk *og*
-  dansk-på-svensk.
+- **Besluttet:** køre **1** som spørgsmål nu, og **2** efter at 187's måling er
+  lukket 13/10 — samme opløsning. En delvis ombygning uden et af de to er værst
+  af alt: den gør sitet dynamisk *og* dansk-på-svensk.
 - **Acceptkriterier:** (1) måling af hvor mange ruter der bliver `○`,
   (2) `cache-control` på `/dato` på live efter næste batch, (3) domæne-skelnene
   må ikke blive dansk-på-svensk — `layout-scroll`- og `proxy`-portene dækker
@@ -493,15 +495,11 @@ alle 200, hver streng talt i markupken. Alle målinger står i
   CTR. At migrere 82 URL'er *før* den måling ville både tage risikoen ved en
   unødigvis migration og ødelægge attributionen på titelændringerne. **Derfor:
   ingen nye title/description-ændringer på beraknare.se før 13/10.**
-- **Teknisk forudsætning, fundet 30/9 (ikke løst i opgaven):** en ren
-  middleware-rewrite er **ikke** nok. `beraknare.se/tidskalkylator` rewrite'et
-  til den interne `/tidsberegner`, men canonical dannes af den interne rute, så
-  siden ville servere `canonical: …/tidsberegner` — en URL der 301'er tilbage
-  til `/tidskalkylator`. Det er en redirect-loop for crawlere, ikke en migrering.
-  Løsningen er enten ægte ruter pr. domæne (nye `page.tsx` pr. slug) eller
-  canonical, der læser domænet fra et request-header. Begge kræver at alle 142
-  sider er statiske i dag — en header-læsning gør dem dynamiske, så vælg den
-  ægte rute.
+- **Teknisk forudsætning, fundet 30/9 (ikke løst):** en ren middleware-rewrite
+  er **ikke** nok. `beraknare.se/tidskalkylator` rewrite'et til `/tidsberegner`,
+  men canonical dannes af den interne rute, så siden ville servere
+  `canonical: …/tidsberegner` — en URL der 301'er tilbage. Det er en
+  redirect-loop, ikke en migrering. Løsningen er ægte ruter pr. domæne.
 - **Prisliste:** `calculator-list.ts` (tilføj `seHref`), `routing.ts`, `sitemap.ts`,
   `middleware.ts`, `page-data.ts`, `internal-links.test.ts`, IndexNow. 2–3
   iterationer.
@@ -512,7 +510,41 @@ alle 200, hver streng talt i markupken. Alle målinger står i
 - **MÅL:** beraknare.se 537 besøgende/28d; `/dato` 95 klik, `/tidsberegner` 127
   klik, `/procent` 2 klik (GSC 2026-08-30 → 2026-09-27). Genmål 2026-10-13.
 
+#### 204. [x] ✅ 1/10 11:25 — Kø — **Sentry opsat, og slået fra for de data den ville samle**
+
+- **Rettet:** `@sentry/nextjs` 11.1.0. Tret steder: `instrumentation-client.ts`
+  (browser), `sentry.server.config.ts` kaldt fra `register()` (Node), og
+  `instrumentation.ts`'s `onRequestError` — sidste er den vigtigste, for uden
+  den fanger Next 16 **intet** server-side. `error.tsx` kalder `captureException`.
+- **Fund undervejs (det er opgavens egen værdi):** v11 fjernede `sendDefaultPii`
+  og samler *mere* end v10 gjorde med PII fra — cookies, HTTP-headere, bodies,
+  URL-parametre, DB-værdier, lokale variabelværdier. Kontrakten sagde
+  `sendDefaultPii: false`; på v11 hedder det `dataCollection`, og alle ti felter
+  er slået fra eksplicit. Porten fejler på både et `true`-blad og en ændret nøgleliste.
+- **URL-skrubben** fandt to huller under skrivningen: query-strengen har intet
+  `?` foran `s=`, og staten kan ligge i fragmentet. Begge dækket nu.
+- **Åbent og udokumenteret:** ❓ se nedenfor. Meget plausibel årsag er
+  `withSentryConfig(..., { silent: true })` — v11 auto-wirer orchestrion ved
+  *build* via `withSentryConfig`, så en forkert build-option kan slå
+  auto-instrumentering fra. Næste agent: sæt `silent: false` i ét hug, byg, og
+  læs hvad builden skriver om orchestrion.
+- **MÅL:** ingen brugerdata endnu. `/` og `/dato` er referencerammen;
+  første rigtige måling er antallet af hændelser efter næste batch.
+
 ## ❓ Til Mads
+
+- ❓ **Sentry: ingen hændelse slap ud, da jegtestede det (opgave 204).**
+  Lokalt prod-build, kastende route handler bag et flag, `onRequestError` fik
+  fejlen med fuld request-kontekst — men min lokale collector (ren HTTP på
+  127.0.0.1:4000, DSN `http://selvtest@127.0.0.1:4000/1`) modtog **ingen**
+  envelope. Min stærkeste mistanke er `withSentryConfig(..., { silent: true })`:
+  v11 auto-wirer instrumenteringen ved *build* gennem den, så en build-option
+  kan slå den fra uden at builden siger noget. **Den farligere halvdel er den
+  anden vej rundt:** hvis SDK'en ikke sender, er «Ingen uløste fejl i 14 dage»
+  i dit snapshot en vished om ingenting, og det er den vished resten af køen
+  styrer på. Skal jeg køre næste iteration som diagnose (drop `silent`, læs
+  orkestrations-loggen, og hænge et `[Sentry]`-flag på init), eller vil du kigge
+  i Sentry-projektet først — om du overhovedet ser events fra minberegner.dk?
 
 - ❓ **Ferielovens regel for sommerferiens startdato (opgave 201, ny 1/10,
   højst prioriteret).** `/dage-til/sommerferien` siger "sommerferien begynder
@@ -527,17 +559,16 @@ alle 200, hver streng talt i markupken. Alle målinger står i
   hvori 20. juni ligger", står siden **7 dage forkert** i de fleste år.
   Jeg har bevidst ikke rørt koden, fordi en lovpåstand uden kilde er præcis den
   fejl, CEO-køens punkt 0 handler om.
-- ❓ **Kan Cloudflare cache HTML'en på trods af Next's `Vary: RSC`?** (opgave 200,
-  ny 1/10 06:00, højst prioriteret.) Der står Cloudflare foran sitet, og
-  `cf-cache-status: DYNAMIC` — fordi Next svarer `cache-control: private,
+- ❓ **Kan Cloudflare cache HTML'en på trods af Next's `Vary: RSC`?** (opgave
+  200, højst prioriteret.) Der står Cloudflare foran sitet med
+  `cf-cache-status: DYNAMIC`, fordi Next svarer `cache-control: private,
   no-cache, no-store`. Sætter vi bare `s-maxage` på HTML'en, **bryder vi
   Next's egen rute-navigation**: klienten genanmoder samme URL med `RSC: 1`, og
   en CDN der cache'r på URL ville give routeren HTML i stedet for sit
   flight-svar. Løsningen er en Cloudflare-regel (spring RSC-anmodninger over)
-  eller en Worker — altså din infra, ikke repoet. **Uden det er 280-433 ms
-  TTFB på alle 600.000 månedlige visninger den faste pris.** Kan du lave den
-  regel, eller skal jeg holde vej 2 (ægte ruter pr. domæne) i beredskab til
-  13/10?
+  eller en Worker — altså din infra, ikke repoet. **Uden det er 280-433 ms TTFB
+  på alle 600.000 månedlige visninger den faste pris.** Kan du lave den regel,
+  eller skal jeg holde vej 2 (ægte ruter pr. domæne) i beredskab til 13/10?
 - ❓ **Søgningseksport fra Search Console (ny, 30/9, højst prioriteret).**
   GSC's opsummering viser kun de 3-4 største søgninger pr. side. For `/procent`
   — **150.470 visninger, 97 klik, pos. 7,4, sitets største side** — er de tre
