@@ -163,7 +163,7 @@ const HAARDKODEDE_BELOB: Record<string, number> = {
   "src/app/loen-efter-skat/page.tsx": 1,
   "src/app/loenstigning/page.tsx": 2,
   "src/app/lon-efter-skatt/page.tsx": 5,
-  "src/app/moms/page.tsx": 21,
+  "src/app/moms/page.tsx": 18,
   "src/app/opsparing/page.tsx": 10,
   "src/app/pension/page.tsx": 2,
   "src/app/procent/page.tsx": 11,
@@ -174,7 +174,7 @@ const HAARDKODEDE_BELOB: Record<string, number> = {
 };
 
 /** Summen af listen, så de to tal ikke kan glide fra hinanden. */
-const HAARDKODEDE_BELOB_I_LISTEN = 474;
+const HAARDKODEDE_BELOB_I_LISTEN = 471;
 
 const ROT = join(__dirname, "..", "..");
 const tekstfiler = () =>
@@ -276,6 +276,6 @@ describe("beløb i JSX-tekst på siderne", () => {
     // At rette en side er altid tilladt — listen er en loftpunktssum, ikke en
     // målsætning — så her tælles det samlede antal mod summen af listen.
     expect(fund.length).toBeLessThanOrEqual(HAARDKODEDE_BELOB_I_LISTEN);
-    expect(HAARDKODEDE_BELOB_I_LISTEN).toBe(474);
+    expect(HAARDKODEDE_BELOB_I_LISTEN).toBe(471);
   });
 });

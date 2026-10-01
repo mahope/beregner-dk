@@ -23048,3 +23048,23 @@ Gate efter børnepenge-opgaven: lint 0 · typecheck 0 · 3478 tests grønne/212 
 - **Gate:** `biome lint ./src` 655 filer 0 · `tsc --noEmit -p tsconfig.test.json`
   0 · `TZ=UTC vitest run` **3484 grønne / 213 filer** · `next build` exit 0.
 - **Deploy-note:** ⏳ `ceo/regnestykker-port`, vindue 2/10 07:30.
+
+## Færdig 1/10 23:35 — /moms' Excel-tabel regnede med det forkerte grundlag (`ceo/moms-excel-talene`)
+
+- **Fund ved at læse siden:** «Hurtig reference»-tabellen har overskriften
+  «På 1.000 kr. ekskl. moms», men de tre sidste rækker (`=A1/1,25`,
+  `=MOMS(A1/1,25;25;0;0)`, `=A1-A1/1,25`) kan kun regne på et beløb **med**
+  moms. `=A1/1,25` med A1 = 1.000 er **800**, ikke 1.000, og `MOMS(800)` er
+  **200**, ikke 250. Formlerne var rigtige, cellerne var ikke — og en læser der
+  kopierer formlen får et andet svar end den der læser cellen.
+- **Rettelse:** grundlaget står nu i hver af de tre rækker («A1 er her 1.000 kr.
+  inkl. moms»), og de fem resultater, beløbet og satsen læses fra
+  `MOMS_REFERENCE_BELOEB`, `DEFAULT_MOMS_SATS`, `momsFaktor` og `beregnMoms`.
+  Ny afsnit under tabellen forklarer de to grundlag.
+- **Port:** `de tre baglæns-rækker viser 800, 200 og 200` læser hele kolonnen i
+  rækkefølge, fordi `toContain("800 kr.")` er grøn mod et 800 kr. der står andre
+  steder på siden. **Mutation målt rød:** sæt «1.000 kr.» tilbage i cellen.
+- **Bivirkning:** `/moms` i portens løftepunktsliste går 21 → **18**.
+- **Gate:** `biome lint ./src` 655 filer 0 · `tsc --noEmit -p tsconfig.test.json`
+  0 · `TZ=UTC vitest run` **3485 grønne / 213 filer** · `next build` exit 0.
+- **Deploy-note:** ⏳ `ceo/moms-excel-talene`, vindue 2/10 07:30.

@@ -13,7 +13,7 @@ import RelateredeArtikler from "@/components/RelateredeArtikler";
 import Sidebar from "@/components/Sidebar";
 import { SelvstaendigAffiliate } from "@/components/AffiliateBox";
 import { formatNumber } from "@/lib/format";
-import { beregnMoms, DEFAULT_MOMS_SATS, fratraekRaekker, momsFaktor } from "@/lib/moms";
+import { beregnMoms, DEFAULT_MOMS_SATS, fratraekRaekker, MOMS_REFERENCE_BELOEB, momsFaktor } from "@/lib/moms";
 import { baklaengesEksempler, baklaengesTabel, krSe } from "@/lib/moms-eksempler";
 import { MOMS_LANDE, momsSatsUdenraekke, udenlandRaeekker } from "@/lib/moms-eu";
 
@@ -29,6 +29,15 @@ export default async function MomsPage() {
   // Samme modul som vaerktøjet bruger, saa tabellerne ikke kan modsige
   // regnestykket. Kun den danske gren bruger dem.
   const kr = (tal: number) => `${formatNumber(tal, "da", { maximumFractionDigits: 2 })} kr.`;
+  // "Hurtig reference"-tabellen skal vise præcis det, modulet regner. Med tallene
+  // håndskrevet i cellerne var den en sjette kopi af momsen, og det var den der
+  // ville blive stående, når satsen ændrer sig. 1.000 kr. er
+  // `MOMS_REFERENCE_BELOEB`s tredje beløb.
+  const EXCEL_BELOEB = MOMS_REFERENCE_BELOEB[2];
+  const EXCEL_FAKTOR = formatNumber(momsFaktor(DEFAULT_MOMS_SATS), "da");
+  const EXCEL_SATS = String(DEFAULT_MOMS_SATS);
+  const excelTillaeg = beregnMoms(EXCEL_BELOEB, "tillaegMoms", DEFAULT_MOMS_SATS);
+  const excelFratraek = beregnMoms(EXCEL_BELOEB, "fratraekMoms", DEFAULT_MOMS_SATS);
   const fratraek = fratraekRaekker(DEFAULT_MOMS_SATS);
   // 499 er med, fordi det er det beløb hvor 20 %-metoden og ÷ 1,25 giver
   // hver sit svar — det er den forskel afsnittet handler om.
@@ -205,40 +214,46 @@ export default async function MomsPage() {
             <tr className="border-b">
               <th className="py-2 pr-4">Formel</th>
               <th className="py-2 pr-4">Gør hvad</th>
-              <th className="py-2">På 1.000 kr. ekskl. moms</th>
+              <th className="py-2">På {kr(EXCEL_BELOEB)}</th>
             </tr>
           </thead>
           <tbody>
             <tr className="border-b">
-              <td className="py-2 pr-4"><code>=MOMS(A1;25;0;0)</code></td>
+              <td className="py-2 pr-4"><code>=MOMS(A1;{EXCEL_SATS};0;0)</code></td>
               <td className="py-2 pr-4">momsen på et beløb uden moms</td>
-              <td className="py-2">250 kr.</td>
+              <td className="py-2">{kr(excelTillaeg.momsBeloeb)}</td>
             </tr>
             <tr className="border-b">
-              <td className="py-2 pr-4"><code>=A1+MOMS(A1;25;0;0)</code></td>
+              <td className="py-2 pr-4"><code>=A1+MOMS(A1;{EXCEL_SATS};0;0)</code></td>
               <td className="py-2 pr-4">beløbet med moms lagt på</td>
-              <td className="py-2">1.250 kr.</td>
+              <td className="py-2">{kr(excelTillaeg.prisInklMoms)}</td>
             </tr>
             <tr className="border-b">
-              <td className="py-2 pr-4"><code>=A1/1,25</code></td>
-              <td className="py-2 pr-4">beløb med moms, regnet baglæns</td>
-              <td className="py-2">1.000 kr.</td>
+              <td className="py-2 pr-4"><code>=A1/{EXCEL_FAKTOR}</code></td>
+              <td className="py-2 pr-4">beløb med moms, regnet baglæns (A1 er her {kr(EXCEL_BELOEB)} inkl. moms)</td>
+              <td className="py-2">{kr(excelFratraek.prisUdenMoms)}</td>
             </tr>
             <tr className="border-b">
-              <td className="py-2 pr-4"><code>=MOMS(A1/1,25;25;0;0)</code></td>
-              <td className="py-2 pr-4">momsen i et beløb med moms</td>
-              <td className="py-2">250 kr.</td>
+              <td className="py-2 pr-4"><code>=MOMS(A1/{EXCEL_FAKTOR};{EXCEL_SATS};0;0)</code></td>
+              <td className="py-2 pr-4">momsen i et beløb med moms (A1 er her {kr(EXCEL_BELOEB)} inkl. moms)</td>
+              <td className="py-2">{kr(excelFratraek.momsBeloeb)}</td>
             </tr>
             <tr className="border-b">
-              <td className="py-2 pr-4"><code>=A1-A1/1,25</code></td>
-              <td className="py-2 pr-4">samme som ovenfor, uden MOMS-funktionen</td>
-              <td className="py-2">250 kr.</td>
+              <td className="py-2 pr-4"><code>=A1-A1/{EXCEL_FAKTOR}</code></td>
+              <td className="py-2 pr-4">samme som ovenfor, uden MOMS-funktionen (A1 er her {kr(EXCEL_BELOEB)} inkl. moms)</td>
+              <td className="py-2">{kr(excelFratraek.momsBeloeb)}</td>
             </tr>
           </tbody>
         </table>
         <p>
+          <strong>De to første rækker</strong> regner på {kr(EXCEL_BELOEB)} <em>uden</em>{" "}
+          moms, som overskriften siger. <strong>De tre sidste</strong> regner på{" "}
+          {kr(EXCEL_BELOEB)} <em>med</em> moms — for det er kun et beløb med moms, man
+          kan regne momsen ud af. Derfor står grundlaget i hver af de rækker.
+        </p>
+        <p>
           <strong>Pas på, når du kopierer:</strong> på dansk og svensk Excel bruger formler
-          <em>semikolon</em> som tegn mellem argumenterne, så <code>=MOMS(A1;25;0;0)</code>
+          <em>semikolon</em> som tegn mellem argumenterne, så <code>=MOMS(A1;{EXCEL_SATS};0;0)</code>
           — på engelsk Excel er det komma. Og får du &oslash;, fordi cellen er formateret
           som tekst, skal den formateres som Tal.
         </p>
@@ -463,7 +478,7 @@ export default async function MomsPage() {
               <td className="py-2">1 000 kr exkl. &rarr; {krSe(beregnMoms(1000, "tillaegMoms", DEFAULT_MOMS_SATS).prisInklMoms)} inkl.</td>
             </tr>
             <tr className="border-b">
-              <td className="py-2 pr-4"><code>=A1/1,25</code></td>
+              <td className="py-2 pr-4"><code>=A1/{EXCEL_FAKTOR}</code></td>
               <td className="py-2 pr-4">belopp med moms, räknat baklänges</td>
               <td className="py-2">1 250 kr inkl. &rarr; {krSe(beregnMoms(1250, "fratraekMoms", DEFAULT_MOMS_SATS).prisUdenMoms)} exkl.</td>
             </tr>
@@ -473,7 +488,7 @@ export default async function MomsPage() {
               <td className="py-2">1 250 kr inkl. &rarr; {krSe(beregnMoms(1250, "fratraekMoms", DEFAULT_MOMS_SATS).momsBeloeb)} i moms</td>
             </tr>
             <tr className="border-b">
-              <td className="py-2 pr-4"><code>=A1-A1/1,25</code></td>
+              <td className="py-2 pr-4"><code>=A1-A1/{EXCEL_FAKTOR}</code></td>
               <td className="py-2 pr-4">momsen i ett belopp inkl. moms</td>
               <td className="py-2">1 250 kr inkl. &rarr; {krSe(beregnMoms(1250, "fratraekMoms", DEFAULT_MOMS_SATS).momsBeloeb)} i moms</td>
             </tr>

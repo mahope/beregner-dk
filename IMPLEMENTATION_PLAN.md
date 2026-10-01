@@ -21,7 +21,16 @@ STATUS: 1/10 23:00. Rød CI: ingen (seneste kørsel grøn 20:25 UTC). Sentry: in
   «Fordel 95.000 kr. og 5.000 kr. i stedet for 100.000 kr.» — og læser nu
   `ULIJ_HAEJ`/`ULIJ_LAV`, så hele siden er uden hårdkodede beløb.
   *Port:* ny `src/app/regnestykker.test.ts` (5 tests) + 30 regnestykker på
-  sitet regnet igen af 5 regler (alle korrekte), 3484 tests i alt.
+  sitet regnet igen af 5 regler (alle korrekte), 3485 tests i alt.
+
+  **Og: /moms' Excel-tabel regnede med det forkerte grundlag.**
+  `ceo/moms-excel-talene`. Overskriften sagde «På 1.000 kr. ekskl. moms», men de
+  tre sidste rækker regner på et beløb *med* moms — `=A1/1,25` med A1 = 1.000 er
+  800, ikke 1.000, og `=MOMS(800;25;0;0)` er 200, ikke 250. Læseren kopierede
+  formlerne og fik tal, der ikke hang sammen med cellen. Grundlaget står nu i
+  hver række, og alle fem resultater læses fra `beregnMoms`.
+  **MÅL:** `/moms` GSC 21.651 visninger / 36 klik / 0,2 % / pos. 7,1 (1/10).
+  Genmål 15/10.
 
   **Dagpenge- og børnepenge-klyngerne er lukket** (autocomplete 1/10): de fire
   nye seeds er dækket eller kildeblokerede — se ❓ og F-køen nedenfor.
@@ -42,12 +51,14 @@ kan ikke glide fra satsen, fordi de ikke hænger ved den. Listen i
 kortere, så dette er rækkefølgen. *Accept pr. side:* listen for den side falder
 til 0, og regnestykkerne er verificeret af `regnestykker-porten` (30 sætninger
 på sitet, alle regnet igen). Prioriter efter **GSC-visninger × fund**:
-- **`/moms`** — 21.651 visninger (0,2 % CTR, pos. 7,1), **21 fund**. De
-  illustrative regnestykker («1.000 kr × 1,25 = 1.250 kr») er korrekte og
-  porten dømmer dem; de to **satser** er det, der skal læses fra et modul:
-  «Virksomheder med en årlig omsætning over **50.000 kr**» (registreringsgrænsen)
-  og «told ved import over **1.150 kr**». *MÅL:* `/moms` under top-15 i Plausible,
-  GSC-baseline 21.651 / 36 / 0,2 % / 7,1.
+- **`/moms`** — 21.651 visninger (0,2 % CTR, pos. 7,1), **18 fund** (var 21).
+  ✅ **Delvis lukket 1/10**, `ceo/moms-excel-talene`: Excel-tabellens fem
+  resultatceller, dens beløb og dens 25 % læser nu `MOMS_REFERENCE_BELOEB`,
+  `DEFAULT_MOMS_SATS` og `beregnMoms`. **Resten:** «Virksomheder med en årlig
+  omsætning over **50.000 kr**» (registreringsgrænsen) og «told ved import
+  over **1.150 kr**» — sidstnævnte er en EUR-grænse omregnet til kroner, så den
+  flytter sig med valutakursen og kan ikke stå som et fast tal. Kræver en kilde.
+  *MÅL:* `/moms` under top-15 i Plausible, GSC-baseline 21.651 / 36 / 0,2 % / 7,1.
 - **`/procent`** — 151.005 visninger (0,1 %, pos. 7,4), **11 fund**, alle i
   `<li>`/`<td>` med eksempler («2.500 af 10.000 = 25»). Samme afgørelse som
   `/moms`: eksemplerne er korrekte, så de skal enten genereres fra `procent.ts`
@@ -243,7 +254,12 @@ Prioriteret efter forventet effekt på **trafik**. Datagrund fra GSC 1/10
   `ceo/rentefradrag-tal-fra-kilden`. Prøven er på indhold: `curl -s
   https://minberegner.dk/rentefradrag` skal indeholde `50.000 × 33,6% = 16.800 kr.`
   — og, efter en `satser-2026`-opdatering, de nye tal. Vindue **2/10 07:30**.
-- ⏳ **Beløb i JSX-tekst er målt på hele sitet (474) og porten er grøn.**
+- ⏳ **/moms' Excel-tabel viser nu 800, 200 og 200, ikke 1.000 og 250.**
+  `ceo/moms-excel-talene`. Prøven er på indhold: `curl -s
+  https://minberegner.dk/moms` skal indeholde `800 kr.` og `200 kr.` i Excel-
+  tabellens kolonne **og** teksten «De tre sidste regner på 1.000 kr. med moms».
+  Vindue **2/10 07:30**.
+- ⏳ **Beløb i JSX-tekst er målt på hele sitet (471) og porten er grøn.**
   `ceo/regnestykker-port`. Prøven er på indhold: `curl -s
   https://minberegner.dk/rentefradrag` skal **ikke** længere indeholde
   `Fordel 95.000 kr. og 5.000 kr.` som tekst — og `/toppat` skal fortsat findes

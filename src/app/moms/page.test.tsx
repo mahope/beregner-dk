@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, test, vi } from "vitest";
 import { getDomainConfigByLocale } from "@/lib/domain-config";
 import { getCurrentDomainConfig, getLocale } from "@/lib/get-locale";
 import { formatNumber } from "@/lib/format";
-import { beregnMoms, momsFaktor } from "@/lib/moms";
+import { beregnMoms, DEFAULT_MOMS_SATS, momsFaktor } from "@/lib/moms";
 import { momsSatsUdenraekke, udenlandRaeekker } from "@/lib/moms-eu";
 import MomsPage from "./page";
 
@@ -158,6 +158,39 @@ describe("moms page", () => {
     expect(html).toContain("=MOMS(A1/1,25;25;0;0)");
     expect(html).toContain("=A1-A1/1,25");
     expect(html).toContain("semikolon");
+  });
+
+  /**
+   * Fund 1/10: de tre sidste rækker i Excel-tabellen regner på et beløb *med*
+   * moms, men overskriften sagde «På 1.000 kr. ekskl. moms» — og resultaterne
+   * var dem for 1.000 kr. *inkl.* moms. `=A1/1,25` med A1 = 1.000 er 800, ikke
+   * 1.000, og `=MOMS(800;25;0;0)` er 200, ikke 250. Læseren kopierede formlerne
+   * og fik et tal, der ikke hang sammen med det, cellen viste.
+   *
+   * Nu står grundlaget i hver række, og alle tal læses fra `beregnMoms`.
+   */
+  test("de tre baglæns-rækker viser 800, 200 og 200 for 1.000 kr. inkl. moms", async () => {
+    const html = renderToStaticMarkup(await MomsPage());
+    const inkl = beregnMoms(1000, "fratraekMoms", DEFAULT_MOMS_SATS);
+    const kr = (tal: number) => `${formatNumber(tal, "da", { maximumFractionDigits: 2 })} kr.`;
+
+    expect(inkl.prisUdenMoms).toBe(800);
+    expect(inkl.momsBeloeb).toBe(200);
+    // Mutation: sæt de gamle tal 1.000/250/250 tilbage i cellerne. Derfor læses
+    // hele kolonnen i rækkefølge — en enkelt `toContain("800 kr.")` ville være
+    // grøn, fordi 800 kr. står flere steder på siden.
+    const kolonne = [...html.matchAll(/<td class="py-2">([\d.]+ kr\.)<\/td>/g)].map((m) => m[1]);
+    expect(kolonne).toEqual([
+      kr(beregnMoms(1000, "tillaegMoms", DEFAULT_MOMS_SATS).momsBeloeb),
+      kr(beregnMoms(1000, "tillaegMoms", DEFAULT_MOMS_SATS).prisInklMoms),
+      kr(inkl.prisUdenMoms),
+      kr(inkl.momsBeloeb),
+      kr(inkl.momsBeloeb),
+    ]);
+    expect(kolonne).not.toContain("1.000 kr.");
+    expect(html.match(/A1 er her 1\.000 kr\. inkl\. moms/g)).toHaveLength(3);
+    expect(html).toContain(`regner på ${kr(1000)} <em>uden</em>`);
+    expect(html).not.toContain("På 1.000 kr. ekskl. moms");
   });
 
   test("de nye tal i brødteksten er dem, modulet regner", async () => {
