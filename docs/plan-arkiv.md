@@ -22472,3 +22472,49 @@ kr"-strenge. Opgave 201 er skrevet med acceptkriterier og et ❓ til Mads.
   prop-løst ikke længere prop-tjekkes. Ægte fix = valgfrie props i komponenterne.
 - **Ingen deploy-note:** ændringen rører kun tests, scripts og tsconfig —
   produktionsoutput er uændret, så intet at verificere live.
+
+
+## Opgave 194 og 202 arkiveret 1/10 10:20 (`ceo/loen-efter-skat-en-kilde`)
+
+Planen var 41.525 B efter opgave 203 (grænse 40.960 B), så de to færdige
+opgaver er flyttet her. Mål- og facitlinjerne er bevaret i planen.
+
+#### 194. [x] ✅ 1/10 02:05 — `/boligstoette` og `/pension` fik en synlig "Guides om emnet"-blok
+
+  Målt 1/10 med `npx tsx` over alle 29 `page.tsx` i `src/app/blog/`. Fuldtekst
+  med målinger, mutationer og de to sider der bevidst *ikke* blev koblet:
+  `docs/plan-arkiv.md`, "Opgave 194".
+
+#### 202. [x] ✅ 1/10 07:50 — Kø — **testfilerne fik typekontrol igen, og de 76 reelle fejl blev rettet**
+
+- **Datagrund:** målt med en probe-tsconfig over `src/**/*.test.ts(x)`:
+  **401 fejl i 30 filer**. 325 af dem var jest-dom-matchere (`toBeRequired`,
+  `toHaveValue`, …) som tsc ikke kendte, fordi `vitest.setup.ts` ikke var i
+  programmet; **76 var reelle typefejl** i 15 filer. Fundet fra review 29/9
+  (MIDDEL) på `tsconfig.json:38-42`.
+- **Hvorfor:** `vitest` transpilerer med esbuild og type-tjekker ikke,
+  `biome lint` er en linter, og før denne opgave havde intet script rørt
+  testfilerne. Et omdøbt prop eller en udvidet `locale` kunne derfor have fået
+  en test til at køre mod det gamle navn — eller til at blive grøn på
+  `undefined`.
+- **Rettelse:** `tsconfig.test.json` (kun testfiler + `vitest.setup.ts`,
+  `types: ["vitest/globals"]`, `target: ES2018`), `npm run typecheck`, og de
+  76 fejl rettet ved konstruktion. `dage-til.test.ts` fik `eventById`,
+  `armOf` og `anchorOf`, som **kaster** i stedet for at give `undefined`.
+  `meta-description.test.ts` fik Vites `import.meta.glob` typet lokalt i stedet
+  for `vite/client` (den erklærer `glob` på `ImportMeta` og kan ikke coexistere
+  med en lokal deklaration under `skipLibCheck`).
+- **Accept:** (1) `npm run typecheck` exit 0, målt, (2) mutation rød —
+  `isoUgeMandag` → `isoUgeMandagTEMP` gav `TS2724 has no exported member named`,
+  (3) `lint` 0, `TZ=UTC npm run test` 3313 grønne / 202 filer, `next build`
+  grøn, (4) `typecheck` står i gaten i planens gate-afsnit.
+- **⚠️ Tilbagegang der er noteret:** `renderIn` i `label-a11y.test.tsx` er nu
+  `React.ElementType`, så de seks prop-krævende komponenter den renderer
+  prop-løst ikke længere prop-tjekkes. Ægte fix = valgfrie props i komponenterne.
+- **Ingen deploy-note:** ændringen rører kun tests, scripts og tsconfig —
+  produktionsoutput er uændret, så intet at verificere live.
+
+## Fase 3-opgaver komprimeret 1/10 10:20
+
+F2/F2b, F4, F6, F7 og F8 er færdige; deres fulde tekst står i de afsnit, der
+blev flyttet her i tidligere iterationer, og i git-historikken på planen.

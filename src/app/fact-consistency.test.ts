@@ -5,7 +5,7 @@ import { describe, expect, test } from "vitest";
 import { SOLCELLE_LEVETID_AAR, SOLCELLE_LEVETID_AAR_MAX, SOLCELLE_LEVETID_AAR_MIN } from "@/lib/energi/solceller";
 import { HUSLEJE_EKSEMPEL, HUSLEJE_EKSEMPEL_MED_FORBRUG, HUSLEJE_STANDARD } from "@/lib/husleje";
 import { formatNumber } from "@/lib/format";
-import { KOMMUNER } from "@/lib/kommuner";
+import { KOMMUNER, KOMMUNER_ANTAL, KOMMUNER_SNIT } from "@/lib/kommuner";
 import { getPageData } from "@/lib/page-data";
 import { SATSER_2026 } from "@/lib/satser-2026";
 
@@ -29,6 +29,7 @@ const solcellerSide = laes("solceller", "page.tsx");
 const solcelleBeregner = laes("..", "components", "SolcelleBeregner.tsx");
 const huslejeSide = laes("husleje", "page.tsx");
 const huslejeBudgetBeregner = laes("..", "components", "HuslejeBudgetBeregner.tsx");
+const loenBeregner = laes("..", "components", "LoenBeregner.tsx");
 
 describe("solcellernes levetid", () => {
   test("ligger i det nedre ende af det dokumenterede interval", () => {
@@ -206,8 +207,31 @@ describe("løn-efter-skat læser satserne fra modulerne", () => {
     expect(stigende[stigende.length - 1].kommuneskat).toBeCloseTo(27.8, 2);
   });
 
-  test("landsgennemsnittet er SATSER_2026.kommuneskatSnit, ikke et hårdkodet tal", () => {
+  test("satsfilens gennemsnit er SATSER_2026.kommuneskatSnit, ikke et hårdkodet tal", () => {
     expect(rå).toContain("SATSER_2026.kommuneskatSnit");
     expect(pct(SATSER_2026.kommuneskatSnit)).toBe("25,049");
+  });
+
+  // Review-fund 29/9 (LAV): afsnittet skrev «Landsgennemsnittet er ca. 25,049 %»
+  // fra `SATSER_2026` og «den billigste ligger på 22,5 %, 27,8 % er den dyreste»
+  // fra `KOMMUNER` i samme afsnit. `KOMMUNER`s 98 rækker har eget middeltal
+  // 25,626 %, så de to tal kan ikke begge være sande om de 98 kommuner.
+  // Siden skriver nu tabellens middeltal og nævner satsfilens tal i eget afsnit.
+  test("kommuneskatens gennemsnit på siden er middeltallet af KOMMUNER", () => {
+    // Mutation: sæt «Landsgennemsnittet er ca. …» tilbage i afsnittet.
+    expect(loenSide).not.toContain("Landsgennemsnittet");
+    expect(rå).toContain("KOMMUNER_SNIT");
+    expect(KOMMUNER_ANTAL).toBe(KOMMUNER.length);
+    expect(KOMMUNER_SNIT).toBeCloseTo(25.626, 3);
+    // De to gennemsnit er netop forskellige — det er derfor siden siger det.
+    expect(KOMMUNER_SNIT).not.toBeCloseTo(SATSER_2026.kommuneskatSnit * 100, 2);
+  });
+
+  test("kommuneskattens hjælpetekst i værktøjet er bundet til satsfilen", () => {
+    // `LoenBeregner` skrev «Landsgennemsnit: 24,94 %» under feltet, mens
+    // feltets forudindstillede værdi er `SATSER_2026.kommuneskatSnit` (25,049 %)
+    // — et tal, der aldrig har været i beregningen. Mutation: sæt 24,94 % tilbage.
+    expect(loenBeregner).not.toMatch(/24,94/);
+    expect(loenBeregner).toContain("SKATTESATSER.kommuneSkatSnit");
   });
 });

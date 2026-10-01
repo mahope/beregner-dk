@@ -1,5 +1,5 @@
 import type { Locale } from "./i18n";
-import { BARSEL_2026, SU_2026 } from "./satser-2026";
+import { BARSEL_2026, SATSER_2026, SU_2026 } from "./satser-2026";
 import { SOLCELLE_LEVETID_AAR_MAX, SOLCELLE_LEVETID_AAR_MIN } from "./energi/solceller";
 import { BRAENDSTOF_EGENT_FORBRUG, BRAENDSTOF_EKSEMPEL_KM, BRAENDSTOF_FORUDSETNINGER, BRAENDSTOF_FORUDSETNINGER_SE, besparelseProcent, braendstofEksempelRækker, breakEvenKwhPris, elbilSammenligning, heleKroner, literPr100km, prisPrKm, prisPrMil, procent1Decimals } from "./braendstof";
 import { HUSLEJE_EKSEMPEL, HUSLEJE_STANDARD } from "./husleje";
@@ -31,6 +31,19 @@ import {
   formatPromilleTabel,
   vaegtNogle,
 } from "./promille-genstande";
+
+/**
+ * svmn.dk's 2026-gennemsnit for kommuneskat, skrevet som procent. Det er
+ * **et andet gennemsnit** end middeltallet over de 98 kommuner i `KOMMUNER`
+ * (25,626 %), fordi vi ikke ved hvordan svmn.dk danner sit. En FAQ der også
+ * nævner den billigste og dyreste kommune skal derfor skrive den sats med sin
+ * kilde og ikke kalde den tabellens gennemsnit (review-fund 29/9).
+ */
+const KOMMUNESKAT_SNIT_PCT = formatNumber(
+  SATSER_2026.kommuneskatSnit * 100,
+  "da",
+  { maximumFractionDigits: 3 }
+);
 
 /**
  * Formateringen i de to momssvar, der laeser et tal ud af `MOMS_LANDE`. Den er
@@ -1514,7 +1527,7 @@ const daPages: Record<string, PageData> = {
       { question: "Hvad er AM-bidrag?", answer: "AM-bidrag (arbejdsmarkedsbidrag) er 8% af din bruttoløn før andre fradrag. Bidraget går til at finansiere dagpenge, efterløn og andre arbejdsmarkedsordninger. AM-bidrag trækkes før skat beregnes." },
       { question: "Hvornår skal jeg betale mellemskat eller topskat i 2026?", answer: "I 2026 er der indført et nyt skattesystem: Mellemskat på 7,5% af indkomst over 641.200 kr, topskat på 7,5% over 777.900 kr, og top-topskat på 5% over 2.592.700 kr (alle efter AM-bidrag). Den gamle topskat på 15% er afskaffet." },
       { question: "Hvad er personfradraget i 2026?", answer: "Personfradraget i 2026 er 54.100 kr (op fra 49.700 kr). Det betyder, at du ikke betaler skat af de første 54.100 kr af din årlige indkomst (efter AM-bidrag). Alle skatteydere får automatisk dette fradrag." },
-      { question: "Hvorfor varierer kommuneskatten?", answer: "Hver kommune fastsætter sin egen skatteprocent baseret på kommunens økonomi og serviceniveau. I 2026 varierer kommuneskatten fra ca. 22,5% (Rudersdal) til 27,8% (Langeland). Landsgennemsnittet er 25,049%." },
+      { question: "Hvorfor varierer kommuneskatten?", answer: `Hver kommune fastsætter sin egen skatteprocent baseret på kommunens økonomi og serviceniveau. I 2026 varierer kommuneskatten fra ca. 22,5 % (Rudersdal) til 27,8 % (Langeland). Beregnerens forudindstillede sats er et andet gennemsnit end tabellens: ${KOMMUNESKAT_SNIT_PCT} % ifølge svmn.dk's 2026-gennemsnit.` },
       { question: "Hvad er forskellen på brutto og netto?", answer: "Bruttoløn er din løn før skat og bidrag. Nettoløn er det beløb, du faktisk får udbetalt på kontoen efter alle fradrag. Forskellen udgøres af AM-bidrag, skat, pension og eventuelle andre fradrag." },
       { question: "Hvordan påvirker pension min skat?", answer: "Arbejdsgiverbetalt pension trækkes fra bruttolønnen før AM-bidrag beregnes, hvilket reducerer din skattepligtige indkomst. Det betyder, at du betaler mindre i skat nu, men skal betale skat når du hæver pensionen." },
       { question: "Er denne beregner præcis?", answer: "Beregneren giver et godt estimat baseret på gennemsnitlige satser. Din faktiske nettoløn kan variere afhængigt af dine specifikke fradrag, kommune og situation. For præcis beregning, brug Skattestyrelsens officielle værktøjer." },

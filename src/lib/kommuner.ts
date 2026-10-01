@@ -106,3 +106,20 @@ export const KOMMUNER: Kommune[] = [
   { navn: "Aalborg", kommuneskat: 25.40, kirkeskat: 0.72 },
   { navn: "Aarhus", kommuneskat: 25.10, kirkeskat: 0.59 },
 ];
+
+/** Antallet af kommuner i tabellen ovenfor, så copy ikke kan sige et andet. */
+export const KOMMUNER_ANTAL = KOMMUNER.length;
+
+/**
+ * Uvægtet middeltal af kommunalskatterne i `KOMMUNER` (målt 1/10: 98 rækker,
+ * 25,626 %).
+ *
+ * Bevidst **ikke** `SATSER_2026.kommuneskatSnit` (svmn.dk's 2026-gennemsnit,
+ * 25,049 %), som er beregnerens forudindstillede sats. Vi ved ikke hvordan
+ * svmn.dk's gennemsnit er dannet, så de to tal kan afvige — og en
+ * side der viser **tabellen** skal derfor skrive sit gennemsnit med denne værdi.
+ * Ellers står der i samme afsnit to tal om de samme kommuner, der ikke kan begge
+ * være sande (fundet af review 29/9).
+ */
+export const KOMMUNER_SNIT =
+  KOMMUNER.reduce((sum, k) => sum + k.kommuneskat, 0) / KOMMUNER.length;

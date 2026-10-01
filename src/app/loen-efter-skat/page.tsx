@@ -13,7 +13,7 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import { InlineAd } from "@/components/ads/AdBanner";
 import Sidebar from "@/components/Sidebar";
 import { formatNumber } from "@/lib/format";
-import { KOMMUNER } from "@/lib/kommuner";
+import { KOMMUNER, KOMMUNER_ANTAL, KOMMUNER_SNIT } from "@/lib/kommuner";
 import { SATSER_2026 } from "@/lib/satser-2026";
 
 /**
@@ -33,12 +33,22 @@ import { SATSER_2026 } from "@/lib/satser-2026";
  * repoet, og skat.dk svarer HTTP 500 for både browser og hentning (1/10), så de
  * kunne ikke verificeres. `SATSER_2026` bærer de verificerede 2026-tal med
  * kilde — en påstand om et gammelt år uden kilde hører ikke der.
+ *
+ * Kommuneskat-afsnittet blandede to populationer (review-fund 29/9): det skrev
+ * «Landsgennemsnittet er ca. 25,049 %» fra `SATSER_2026` og «den billigste
+ * ligger på 22,5 %, 27,8 % er den dyreste» fra `KOMMUNER` i samme afsnit. De 98
+ * rækkers eget middeltal er **25,626 %**, så de to tal kan ikke begge være
+ * sande om de 98 kommuner. Afsnittet skriver nu tabellens middeltal
+ * (`KOMMUNER_SNIT`) og nævner satsfilens tal i en egen linje med sin kilde.
  */
 const da = (beloeb: number) => formatNumber(beloeb, "da");
 const pct = (sats: number) =>
   formatNumber(sats * 100, "da", { maximumFractionDigits: 3 });
 /** `KOMMUNER` fører procent som 22.5, mens `pct` forventer en andel. */
 const pctTal = (procent: number) => pct(procent / 100);
+/** Tabellens middeltal vises med to decimaler — det er et gennemsnit. */
+const pctSnit = (procent: number) =>
+  formatNumber(procent, "da", { maximumFractionDigits: 2 });
 
 /** De tre laveste og tre højeste kommuneskatter i `KOMMUNER`, beregnet her. */
 const KOMMUNER_STIGENDE = [...KOMMUNER].sort(
@@ -117,10 +127,18 @@ export default async function LoenPage() {
 
         <h3>5. Kommuneskat (varierer)</h3>
         <p>
-          <strong>Kommuneskatten</strong> varierer fra kommune til kommune.
-          Landsgennemsnittet er ca. {pct(SATSER_2026.kommuneskatSnit)} % i 2026.
-          Den billigste kommune ligger på {pctTal(LAVESTE_KOMMUNER[0].kommuneskat)} %,{" "}
+          <strong>Kommuneskatten</strong> varierer fra kommune til kommune. I
+          tabellen med de {KOMMUNER_ANTAL} kommuner er gennemsnittet{" "}
+          {pctSnit(KOMMUNER_SNIT)} %, den billigste ligger på{" "}
+          {pctTal(LAVESTE_KOMMUNER[0].kommuneskat)} %, og{" "}
           {pctTal(HOEJESTE_KOMMUNER[0].kommuneskat)} % er den dyreste.
+        </p>
+        <p>
+          <small>
+            Beregnerens forudindstillede sats er et andet gennemsnit:{" "}
+            {pct(SATSER_2026.kommuneskatSnit)} % ifølge svmn.dk's
+            2026-gennemsnit. Det er ikke det samme som tabellens middeltal.
+          </small>
         </p>
 
         <h3>6. Kirkeskat (valgfri)</h3>

@@ -292,7 +292,11 @@ export default function LoenBeregner() {
               max={30}
               step={0.01}
               unit="%"
-              helpText="Landsgennemsnit: 24,94%"
+              helpText={`Forudindstillet: ${formatNumber(
+                SKATTESATSER.kommuneSkatSnit * 100,
+                locale,
+                { maximumFractionDigits: 3 }
+              )} %`}
             />
           )}
 

@@ -1,42 +1,39 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — 1/10 07:50. **Testfilerne har igen typekontrol** (opgave 202,
-`ceo/typecheck-testfiler`). Gaten har nu fem grønne trin.
+STATUS: KØ — 1/10 10:20. **Review-fundet om `/loen-efter-skat` er lukket**
+(opgave 203, `ceo/loen-efter-skat-en-kilde`) — og det trak to fund mere med sig.
 
-  **Hvad der skete:** `tsconfig.json` steger `*.test.ts(x)` væk, fordi Next 16
-  type-tjekker testfiler under `build` og bygget faldt på 85 fejl. Men da blev
-  den eneste typekontrol testfilerne havde lagt ned — `vitest` bruger esbuild,
-  `biome lint` er en linter, og intet script type-tjekkede dem. Målt nu med en
-  probe-tsconfig: **401 fejl i 30 filer**, hvor **325** var *én* fejlklasse —
-  `toBeRequired`/`toHaveValue`/300 andre jest-dom-matchere som tsc ikke kendte,
-  fordi `vitest.setup.ts` (som importerer `@testing-library/jest-dom/vitest`)
-  ikke var med i programmet. **76 var reelle**, fordelt på 15 filer.
+  **Hvad der skete:** afsnittet «5. Kommuneskat» skrev to tal om de samme
+  kommuner fra to kilder i én sætning: «Landsgennemsnittet er ca. 25,049 %» fra
+  `SATSER_2026` (svmn.dk) og «den billigste ligger på 22,5 %, 27,8 % er den
+  dyreste» fra `KOMMUNER`. Målt med `npx tsx`: `KOMMUNER`s 98 rækker har eget
+  middeltal **25,626 %**, så de to tal kan ikke begge være sande om de 98
+  kommuner — en læser kan ikke få dem til at hænge sammen.
 
-  **Rettelsen:** `tsconfig.test.json` (kun testfiler + `vitest.setup.ts`,
-  `types: ["vitest/globals"]`, `target: ES2018` for regex-`s`-flaget), et
-  `typecheck`-script, og de 76 fejl rettet ved konstruktion — ikke ved
-  `any`. `dage-til.test.ts` (35 fejl) fik tre helpers (`eventById`, `armOf`,
-  `anchorOf`) der **kaster** i stedet for at returnere `undefined`, så en test
-  der peger på et omdøbt event fejler højt i stedet for at blive grøn på
-  `undefined` — præcis scenariet i fundet. Mutation målt: `isoUgeMandag` →
-  `isoUgeMandagTEMP` giver `TS2724 has no exported member named`, tilbage til
-  grøn. `npm run typecheck` exit 0, `lint` 0, `TZ=UTC npm run test` **3313
-  grønne**, `next build` grøn (de 7 CSS-advarsler er uændrede).
+  **Rettelsen:** `KOMMUNER` eksporterer nu selv `KOMMUNER_ANTAL` og
+  `KOMMUNER_SNIT` som afledede værdier, siden skriver tabellens eget middeltal,
+  og satsfilens 25,049 % har fået **sit eget afsnit med sin kilde** — uden påstand
+  om hvordan svmn.dk vægter sit, for det kan ikke dokumenteres. Samme fejl lå i
+  FAQ'en i `page-data.ts`, og derudover skrev **`LoenBeregner.tsx` «Landsgennemsnit:
+  24,94 %» under sit eget felt** — et tal der aldrig har været i beregningen
+  (feltet er 25,049 %). Alle tre er rettet ved konstruktion.
 
-  **⚠️ En afvejning, der skal være synlig:** `label-a11y.test.tsx`'s
-  `renderIn(locale, Component)` accepterede før kun komponenter *uden* props og
-  afviste dem med en typefejl; seks kaldersteder renderede komponenter med
-  påkrævede props (`officielleKurser`, `dstInflation?`) prop-løst. Signaturen er
-  nu `React.ElementType`, så de går igennem — og **de kaldersteder tjekker ikke
-  længere props**. Det er en reel tilbagegang i kontrol dér, skrevet ned i
-  `docs/plan-arkiv.md`; den ægte løsning er at gøre props valgfrie i de seks
-  komponenter.
+  **Porten:** ny `loen-efter-skat/page.test.tsx` renderer siden og læser de tre
+  tal **ud af den `<p>` der indeholder dem**, så den dømmer på egenskaben «to tal
+  om samme population fra samme kilde» og ikke på et kodestykke, der kan skrives
+  om. To nye tests i `fact-consistency.test.ts` dømmer på bindingen til modulerne.
+  **Mutationer målt røde:** gennemsnittet tilbage på `SATSER_2026` → rød;
+  «24,94 %» tilbage i værktøjet → rød. Testtal **3318** (var 3313).
 
-  **Åbne noter: 7**, alle med vindue **1/10 12:30** — merger før det, så ingen
+  **Gaten:** `lint` 0 · `typecheck` 0 · `TZ=UTC npm run test` **3318 grønne /
+  203 filer** · `locale-leak --gate` exit 0 · `next build` 142 ruter. CI på
+  `master` var grøn ved iterationens start (36831555037).
+
+  **Åbne noter: 8**, alle med vindue **1/10 12:30** — merger før det, så ingen
   kan lukkes i denne iteration.
 
-  **Blokeret på Mads:** 97, 119, 183, 201, F1, F5. **187 må ikke røres før
-  13/10.** CEO-køens punkt 0 er lukket.
+  **Blokeret på Mads:** 97, 119, 183, 201 (nu eksplicit), F1, F5. **187 må ikke
+  røres før 13/10.** CEO-køens punkt 0 er lukket.
 
   **⚠️ Målerfælde:** `npm run test` kører `locale-leak-gate.test.ts`, der med
   vilje planterer danske lækager. Derfor kommer `FEJL: n ureviewet(e)`-blokke i
@@ -96,9 +93,7 @@ søgningseksport for `/procent` (eller de 20 største søgninger site-wide) ligg
 i planen. **Spørgsmål til Mads: se ❓.**
 
 **F2 + F2b. [x] ✅ `ceo/procent-rabat-spørgsmal`, `ceo/procent-svensk-rabatt-faq`
-— `/procent` svarar på rabat-spørgsmålet med en gennemregnet formel, fire svenske
-FAQ-rækker der rammer svensk autocomplete, og alle tal udledt af kildetal-bundne
-`RABAT_*`-konstanter. 19 nye tests, 12 mutationer faldt.
+— 19 tests, 12 mutationer faldt. Kort: `docs/plan-arkiv.md`.
 **MÅL:** `/procent` 150.470 visninger / 97 klik / CTR 0,1 % / pos. 7,4 (da) og
 26.933 / 2 / 0,0 % / pos. 9,9 (se), GSC 2026-08-31 → 2026-09-28.
 
@@ -107,13 +102,9 @@ FAQ-rækker der rammer svensk autocomplete, og alle tal udledt af kildetal-bundn
 før de svenske titelændringer fra C195/C196 er målt. Efter den dato er
 dette den største enkeltpost i trafikplanen. **Accept:** se opgave 187.
 
-**F4. [x] ✅ `ceo/forsiden-snabb-indgang` → rettet 1/10 af `ceo/forsiden-dublet-liste`** —
-striben med de otte mest brugte viste de samme otte som populærgitteret lige
-under den (otte af fjorten to gange i da, seks af seks i se). Striben er væk;
-populærgitteret ligger nu direkte under helten, så genvejen er der stadig på
-første skærm — uden at læseren møder listen to gange.
-**MÅL:** `/` 218 besøgende/28d, bounce 38 % (Plausible 2026-09-30) → mod 2-7 %;
-se `/` 20 besøgende, bounce 80 %.
+**F4. [x] ✅ `ceo/forsiden-dublet-liste` — den dobbelerede stribe er væk; se
+`docs/plan-arkiv.md`. **MÅL:** `/` 218 besøgende/28d, bounce 38 %
+(Plausible 2026-09-30) → mod 2-7 %; se `/` 20 besøgende, bounce 80 %.
 
 **F5. [ ] Søg på de 27 % ikke-Google-trafik.** Bing 1.319 + DDG 378 +
 Yahoo 274 besøgende/28d. IndexNow er kodet og instrumenteret
@@ -121,21 +112,26 @@ Yahoo 274 besøgende/28d. IndexNow er kodet og instrumenteret
 `❓ Til Mads` spørger om krogen efter deploy er sat op — uden svar er
 Bing/DDG/Yahoo indeksering uafhængig af vores deploys.
 
-**F6. [x] ✅ `ceo/no-locale-tag`** — de seks Intl-tag der sendte norsk til dansk
-formatering (`ProteinbehovBeregner` viste 500 kg som "1.000"). Ny port
-`intl-locale-tag.test.ts` scanner hele `src/` på kædens *form*, 8 nye tests.
+**F6. [x] ✅ `ceo/no-locale-tag` — 8 tests, port `intl-locale-tag.test.ts`.**
 
-**F7. [x] ✅ `ceo/tidszone-tidsforskelle`** — Sydney lå på 9-10 timer, kalenderen
-giver 8-10. Alle fem forskelle regnes nu af `tidsforskelsRækker` gennem byens
-egen `dst`-regel; målet fandt fire fejl mere, alle rettet før commit.
+**F7. [x] ✅ `ceo/tidszone-tidsforskelle` — se `docs/plan-arkiv.md`.
 **MÅL:** `/tidszone` 24.324 visninger / 104 klik / CTR 0,4 % / pos. 7,5.
 
-**F8. [x] ✅ `ceo/svensk-helgdagslove`** — tre svenske sider modsagde
-`lag (1989:253)` 1 §. Kilden er hentet fra riksdagen.se, lovens liste ligger som
-data i `dage-til.test.ts`, og brødteksten tjekkes mod den i begge retninger — en
-dag loven ikke tæller må ikke kaldes helgdag, og en dag loven tæller må ikke
-kaldes *ikke*-helgdag.
+**F8. [x] ✅ `ceo/svensk-helgdagslove` — se `docs/plan-arkiv.md`.
 **MÅL:** se `/nedtaelling` 5.726 visninger / 12 klik / CTR 0,2 % / pos. 9,2.
+
+### Åbne VERIFICÉR DEPLOY-noter
+
+- ⏳ **`/loen-efter-skat` skal ikke blande to kilder om de samme kommuner.**
+  `ceo/loen-efter-skat-en-kilde`. På `https://minberegner.dk/loen-efter-skat` skal
+  **"Landsgennemsnittet" forekomme 0 gange**, afsnittet under «5. Kommuneskat
+  (varierer)» skal lyde **"I tabellen med de 98 kommuner er gennemsnittet
+  25,63 %, den billigste ligger på 22,5 %, og 27,8 % er den dyreste"**, og et
+  **eget** afsnit skal sige **"25,049 % ifølge svmn.dk's 2026-gennemsnit"**.
+  FAQ'en «Hvorfor varierer kommuneskatten?» skal ikke længere sige
+  «Landsgennemsnittet er 25,049%». HTTP 200 beviser intet — det er brødtekst.
+  Prøven på dansk er `src/app/loen-efter-skat/page.test.tsx` +
+  `src/app/fact-consistency.test.ts` efter deploy. Vindue **1/10 12:30**.
 
 ## Kvalitetsgate (repoets egne scripts fra package.json)
 
@@ -367,42 +363,17 @@ alle 200, hver streng talt i markupken. Alle målinger står i
   står** — to titelændringer er prøvet. **MÅL:** `/bmi` 934, `/su` 127
   besøgende/28d (Plausible 2026-09-30). Fuldtekst: `docs/plan-arkiv.md`.
 
-#### 194. [x] ✅ 1/10 02:05 — `/boligstoette` og `/pension` fik en synlig "Guides om emnet"-blok
+#### 201. [ ] **VENTER PÅ MADS** — Kø — **verificér sommerferiens startdato mod loven, før den bruges som countdown**
 
-  Målt 1/10 med `npx tsx` over alle 29 `page.tsx` i `src/app/blog/`. Fuldtekst
-  med målinger, mutationer og de to sider der bevidst *ikke* blev koblet:
-  `docs/plan-arkiv.md`, "Opgave 194".
-
-#### 202. [x] ✅ 1/10 07:50 — Kø — **testfilerne fik typekontrol igen, og de 76 reelle fejl blev rettet**
-
-- **Datagrund:** målt med en probe-tsconfig over `src/**/*.test.ts(x)`:
-  **401 fejl i 30 filer**. 325 af dem var jest-dom-matchere (`toBeRequired`,
-  `toHaveValue`, …) som tsc ikke kendte, fordi `vitest.setup.ts` ikke var i
-  programmet; **76 var reelle typefejl** i 15 filer. Fundet fra review 29/9
-  (MIDDEL) på `tsconfig.json:38-42`.
-- **Hvorfor:** `vitest` transpilerer med esbuild og type-tjekker ikke,
-  `biome lint` er en linter, og før denne opgave havde intet script rørt
-  testfilerne. Et omdøbt prop eller en udvidet `locale` kunne derfor have fået
-  en test til at køre mod det gamle navn — eller til at blive grøn på
-  `undefined`.
-- **Rettelse:** `tsconfig.test.json` (kun testfiler + `vitest.setup.ts`,
-  `types: ["vitest/globals"]`, `target: ES2018`), `npm run typecheck`, og de
-  76 fejl rettet ved konstruktion. `dage-til.test.ts` fik `eventById`,
-  `armOf` og `anchorOf`, som **kaster** i stedet for at give `undefined`.
-  `meta-description.test.ts` fik Vites `import.meta.glob` typet lokalt i stedet
-  for `vite/client` (den erklærer `glob` på `ImportMeta` og kan ikke coexistere
-  med en lokal deklaration under `skipLibCheck`).
-- **Accept:** (1) `npm run typecheck` exit 0, målt, (2) mutation rød —
-  `isoUgeMandag` → `isoUgeMandagTEMP` gav `TS2724 has no exported member named`,
-  (3) `lint` 0, `TZ=UTC npm run test` 3313 grønne / 202 filer, `next build`
-  grøn, (4) `typecheck` står i gaten i planens gate-afsnit.
-- **⚠️ Tilbagegang der er noteret:** `renderIn` i `label-a11y.test.tsx` er nu
-  `React.ElementType`, så de seks prop-krævende komponenter den renderer
-  prop-løst ikke længere prop-tjekkes. Ægte fix = valgfrie props i komponenterne.
-- **Ingen deploy-note:** ændringen rører kun tests, scripts og tsconfig —
-  produktionsoutput er uændret, så intet at verificere live.
-
-#### 201. [ ] I GANG — Kø — **verificér sommerferiens startdato mod loven, før den bruges som countdown**
+- **Status 1/10 10:20:** opgaven er **taget af `I GANG`**, fordi den ikke kan
+  gå videre uden et svar: seks kilder blev forsøgt 1/10 05:30 og alle døde
+  (retsinformation.dk er en SPA, `undervisningsministeriet.dk`/`ferieinfo.dk`/
+  `ferieloven.dk` transportfejl, `lovguiden.dk` HTTP 429, `danskelove.dk` er
+  ferieloven for *ansatte*). Genforsøg er ikke kodet, fordi resultatet vil være
+  det samme. **Koden er urørt** — at gætte lovens ordlyd i en nedtælling er
+  punkt 11 i kvalitetsreglerne. ❓ står i `❓ Til Mads` (ét skærmbillede løser
+  opgaven på ti minutter). Næste agent skal ikke bruge en iteration på at
+  prøve de samme seks URL'er igen.
 
 - **Datagrund:** `sommerferieStart()` (`src/lib/dage-til.ts:1413-1423`) returnerer
   **den sidste lørdag i juni**, og docblock'en siger at den er "fixed by the
@@ -439,23 +410,30 @@ alle 200, hver streng talt i markupken. Alle målinger står i
   `/dato` er klyngens moderside: 1.127 besøgende/28d, bounce 4 %, GSC
   134.567 visninger / 880 klik / CTR 0,7 % / pos. 5,7 (2026-10-01).
 
-#### 203. [ ] 1/10 — Kø — **`/loen-efter-skat` skal ikke blande to kilder i samme afsnit**
+#### 203. [x] ✅ 1/10 10:20 — Kø — **`/loen-efter-skat` skal ikke blande to kilder i samme afsnit**
 
-- **Fund:** review 29/9 (LAV), `src/app/loen-efter-skat/page.tsx:120-124`.
-  Sætningen siger «Landsgennemsnittet er ca. 25,049 %» læst fra
-  `SATSER_2026.kommuneskatSnit`, og næste sætning «Den billigste kommune ligger på
-  22,5 % / 27,8 % er den dyreste» læst fra `KOMMUNER`. Målt med `npx tsx`:
-  `KOMMUNER` har **98** rækker med egen middelværdi **25,63 %** — de to tal kan
-  ikke begge være sande om de 98 rækker, og en læser f dem ikke til at hænge
-  sammen. Et vægtet landsgennemsnit *kan* afvige fra et uvægtet middeltal, men
-  siden siger det ikke.
-- **Rettelse:** skriv «Gennemsnit for de 98 kommuner i vores tabel: 25,63 %» —
-  et tal læst fra `KOMMUNER`, så det ikke kan glide fra tabellen — og behold
-  svmn.dk-tallet som en kildeagtig linje med link, eller lad det være.
-  Samme port som `fact-consistency.test.ts` bør dømme på: to tal i samme afsnit
-  om samme population skal komme fra samme kilde.
-- **Accept:** (1) tallet læses fra `KOMMUNER` i koden, (2) en port i
-  `fact-consistency.test.ts` dømmer på det, (3) mutation målt rød, (4) gaten grøn.
+- **Rettet:** `src/lib/kommuner.ts` eksporterer nu `KOMMUNER_ANTAL` (98) og
+  `KOMMUNER_SNIT` (uvægtet middeltal **25,626 %**) som *afledede* værdier, så
+  de ikke kan glide fra tabellen. Afsnittet skriver «I tabellen med de 98 kommuner
+  er gennemsnittet 25,63 %, den billigste ligger på 22,5 %, og 27,8 % er den
+  dyreste», og satsfilens 25,049 % flyttede til **sit eget afsnit** mærket
+  «ifølge svmn.dk's 2026-gennemsnit. Det er ikke det samme som tabellens
+  middeltal» — altså uden at påstå hvordan svmn.dk vægter sit, for det kan vi
+  ikke dokumentere.
+- **To fund mere i samme række, rettet samme sted:** (1) `page-data.ts`'s
+  FAQ «Hvorfor varierer kommuneskatten?» blandede de samme to kilder og skrev
+  «Landsgennemsnittet er 25,049 %»; nu med `KOMMUNESKAT_SNIT_PCT` (afledt af
+  `SATSER_2026`) og samme kildeangivelse. (2) **`LoenBeregner.tsx:295` skrev
+  «Landsgennemsnit: 24,94 %» under kommuneskatsfeltet** — et tal der aldrig har
+  været i beregningen, mens feltets forudindstilling er 25,049 %. Hjælpeteksten
+  læser nu `SKATTESATSER.kommuneSkatSnit`.
+- **Port:** (a) ny `src/app/loen-efter-skat/page.test.tsx` (3 tests) renderer
+  siden med `renderToStaticMarkup`, **finder den `<p>` der indeholder
+  gennemsnittet** og kræver at gennemsnit + laveste + højeste alle er læst fra
+  `KOMMUNER` — den dømmer på egenskab, ikke på et kodestykke; (b) to nye tests i
+  `fact-consistency.test.ts`. **Mutation målt rød:** gennemsnittet sat tilbage
+  på `SATSER_2026.kommuneskatSnit` → 1 rød; `24,94 %` sat tilbage i
+  `LoenBeregner` → 1 rød. Testtal 3313 → **3318**.
 - **MÅL:** `/loen-efter-skat` — ikke i GSC's top-16; Plausible har ingen måling
   for den. Siden er statisk indhold, så effekten er kun indirekte via `/dato`- og
   `/boliglaan`-links.
