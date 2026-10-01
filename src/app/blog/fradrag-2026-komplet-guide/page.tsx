@@ -332,6 +332,10 @@ export default function FradragGuidePage() {
         href="/rentefradrag"
         handling="Beregn dit rentefradrag"
         beskrivelse="Se hvor mange renter du kan trække fra på dit lån i 2026, og hvad fradraget er værd."
+        sekundaer={{
+          href: "/befordringsfradrag",
+          handling: "Beregn dit befordringsfradrag",
+        }}
       />
 
       <div className="mt-12 pt-8 border-t">

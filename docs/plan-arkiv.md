@@ -22036,3 +22036,129 @@ De fem opgaver stod i planen indtil de var færdige. De er flyttet her, så
   (67→84 faldende) og `/blog/pension-hvor-meget-skal-du-spare-op` skal stige, og
   de to beregneres bounce skal ligge på 2-5 % som de andre værktøjer.
 
+
+### Opgave 199-forberedelse + tre lukkede deploy-noter (fuldtekst, 1/10 04:25)
+
+#### Bloggens næste handling: to artikler sendede læseren til et andet værktøj end deres eget
+
+- **Datagrund:** målt 1/10 med `npx tsx` over alle 29 `page.tsx` i
+  `src/app/blog/`, og derefter læst de 29 `NaesteSkridt`-kald. Plausible:
+  bloggen har 84-85 % bounce mod 2-7 % på beregnerne. `naeste-skridt.test.ts`
+  krævede i forvejen, at *alle* artikler har en næste handling — den sagde
+  intet om **hvilken**. To artikler fejlede det krav i virkeligheden:
+  - **`koeb-af-bolig-2026-omkostninger`** ("Køb af bolig 2026: Alle omkostninger
+    du skal kende") havde `/rentefradrag` som eneste knap. Men artiklen peger
+    **to gange i sin egen brødtekst** på boliglånsberegneren: i tjeklisten
+    ("Beregn din ydelse: Brug boliglånsberegneren", linje 253) og i den blå
+    boks ("Brug vores boliglånsberegner til din ydelse", linje 266). Og
+    tjeklistens *næste* linje beder læseren selv gøre arbejdet: "Tjek dit
+    budget: Kan du betale ydelse + alle faste udgifter?" — præcis det
+    `/boliglaan` gør. `BoliglaanBeregner.tsx` har felterne `Boligpris`,
+    `Udbetaling`, `Rente (% p.a.)`, `Løbetid (år)` og summerer under "Øvrige
+    boligomkostninger (pr. måned)" ejendomsskat, forsikring og ejerforening
+    til "Samlede månedlige boligomkostninger". Det var altså en selvm
+    modsigelse på én side: artikkelens emne, artiklens egen anvisning og
+    sidens sidste klik pegede på tre forskellige ting.
+  - **`fradrag-2026-komplet-guide`** ("Fradrag 2026: Komplet guide til
+    skattefradrag") tilbød kun `/rentefradrag`, selv om introduktionen
+    (linje 52) siger at de vigtigste fradrag er "rentefradrag (boliglån),
+    **befordringsfradrag (over 24 km)**, fagforeningskontingent, A-kasse …",
+    og artiklen regner en sats for befordringsfradraget (linje 202) med sit
+    eget `/befordringsfradrag`-link (linje 221). En "komplet guide" der kun
+    tilbyder ét af de to fradrag den selv udregner.
+- **Rettelse:** ingen ny komponent, ingen nye tokens. `BlogNaesteSkridt`
+  har allerede `sekundaer` (én knap + ét stille link, "fordi to knapper af
+  samme vægt er måden en læser ender med at vælge ingen af dem"), så
+  koeb-af-bolig fik `/boliglaan` som primær og `/rentefradrag` som sekundær,
+  og fradrag-guiden fik `/befordringsfradrag` som sekundær. **Designreglen
+  "ét fokus pr. skærm" er dermed ikke rørt** — samme form som
+  `barsel-2026-regler-og-satser` og `boliglaan-2026-renter-og-afdrag` har
+  haft siden 30/9.
+- **Port udvidet, fordi tilstedeværelse ikke var nok.** `SKAL_NAAE` fik et
+  valgfrit `foerste`, og en ny test læser `<NaesteSkridt href="…">` —
+  altså *knappen* — og kræver at den er den, artiklen handler om.
+  `sekundaer` ligger i et andet objekt og kan ikke træffe ved en
+  fejltagelse.
+- **Målt (3 mutationer, alle røde):** (1) knappen på koeb-af-bolig sat tilbage
+  til `/rentefradrag` → `næste handlingens knap er den beregner, artiklen
+  handler om` faldt med *"så knap /rentefradrag i stedet for /boliglaan"*;
+  (2) `sekundaer` fjernet fra fradrag-guiden → `SKAL_NAAE`-testen faldt med
+  *"expected [ '/rentefradrag' ] to include '/befordringsfradrag'"*; (3) et
+  `slug` for en artikel der ikke findes → læsbarlig assertion
+  (*"findes ikke blandt indlæggene"*) i stedet for et `TypeError`, som den
+  første version ville have givet med `a!` på en muligvis `undefined`.
+- **Accept:** ✅ porten grøn med 8 tests; ✅ gaten grøn — `biome lint` ren over
+  **634 filer**, **3.304 tests / 201 filer i begge tidszoner**
+  (`npm run test` og `TZ=UTC npm run test`), `locale-leak.mjs --gate` exit 0,
+  `next build` **143/143**.
+- **MÅL:** Plausible har ingen trafik for de to artikler (de er ikke i
+  top-15), så effekten måles på indgangssider og ikke på artiklens egen
+  bounce: `/blog/koeb-af-bolig-2026-omkostninger` og
+  `/blog/fradrag-2026-komplet-guide` skal give indgangssider på `/boliglaan`,
+  `/rentefradrag` og `/befordringsfradrag`. Genmål 15/10.
+
+#### Tre deploy-noter lukket på indhold — og to af dem pegede på URL'er der 404'er
+
+Sidste deploy-vindu før denne iteration var **30/9 21:30**. Kun to merges var
+ældre end det: `a592590` (20:16) og `e6d82a4` (21:08). Alt efter 21:30 lander
+i vinduet **1/10 07:30** og er ikke forfaldet.
+
+**Fund først — målerfælde.** Min egen første måling af `ceo/sidste-hverdag-paastand`
+på de tre noterede URL'er (`/nyaarsaaven`, `/nyarsafton`, `/sankthansaftensdag`)
+rapporterede **"ingen forbudt streng" på alle tre**. De 404'er alle. En 404-side
+består naturligvis ikke af de forbudte strenge, så et friteksts-tjek på en
+forkert URL er grønt ud at prøve noget — det er `_kvalitet.md`'s "HTTP 200
+beviser intet" vendt om: **også 404 beviser intet**. Tjek statuskoden først.
+Rigtige ruter er `/dage-til/<slug>` og `/dagar-till/<slug>`.
+
+- ✅ **`ceo/sidste-hverdag-paastand` — DEPLOY OK 1/10 04:25.** Målt på de
+  rigtige URL'er, alle **200** med 2.769-2.988 ord:
+  `/dage-til/nytaarsaften`, `/dagar-till/nyarsafton` og
+  `/dage-til/sankthansaftensdag` har ingen af "Sidste hverdag i december",
+  "Sista vardagen i december", "en almindelig hverdag".
+  `/dage-til/skaertorsdag` har spørgsmålet **"Er skærtorsdag en fridag?"** med
+  svaret **"Nej. Skærtorsdag er altid en torsdag …"**, og det samme står i
+  FAQPage-JSON'en.
+- ✅ **`ceo/helgdag-uden-allman` — DEPLOY OK 1/10 04:25.** Alle fem svenske
+  sider **200**: `/dagar-till/skartorsdagen` (2.914 ord) og
+  `/dagar-till/paskdagen`, `/dagar-till/1-advent`,
+  `/dagar-till/julafton`, `/dagar-till/nationaldagen`. Ingen af "en torsdag
+  och en helgdag", "Båda är helgdagar", "Båda är officiella helgdagar",
+  "Första advent är ikke en allmän helgdag". Skärtorsdagen, julafton og
+  nationaldagen siger alle **"allmän helgdag enligt lagen (1989:253)"** med
+  hver sit ord (skärtorsdagen er *ikke* en, julafton er *ikke* en,
+  nationaldagen *er* det), og skärtorsdagen skelner mellem *röd dag* og
+  *allmän helgdag*.
+- ✅ **`ceo/svensk-helgdagslove` — DEPLOY OK 1/10 04:25.** Samme tre sider
+  som ovenfor: "9-10", "räknas som helgdagar", "officiella svenska helgdagar"
+  og "är inte en laglig helgdag" forekommer **0 gange** på nogen af dem.
+
+#### Målt og bevidst ikke bygget: `/dage-til/*` er ikke et ranking-problem
+
+Alle 19 danske `/dage-til`-sider er live med **200**, i `sitemap.xml` (19 `<loc>`
+på minberegner.dk, 16 på beraknare.se), og titlen svarer på søgningen *med
+dagens tal*: "Hvor mange dage er der til 1. december? 61 dage", "Hvor mange
+dage er der til juleaften 24. december? 84 dage", "Hvor mange dage er der til
+skolestart? 304 dage". De kom live med `70e75b9` den **25/9 kl. 19:48**, og
+GSC-vinduet slutter **28/9** — tre dage efter. Deres
+fravær i GSC's top-16 over visninger er altså **vinduet, ikke siden**.
+Ingen handling. Genmål 9/10.
+
+#### Køen er tom, og hvorfor
+
+97/119/183 `BLOCKED` på svar fra Mads, 98 afhænger af 97, 187 må ikke røres før
+13/10, F1/F3/F5 har brug for GSC-søgningsdata (❓) eller 187's dato. 194's to
+resterende sider kan ikke løses: `/tidsberegner`s eneste indlæg er koblet til
+`/tidszone` og `blog-kobling.test.ts` forbyder ét indlæg på to beregnere, og
+`/kalorier` er opgave 119. Planens gamle "Næste opgave"-linje var forældet.
+Næste opgave er derfor **199, Next 16**.
+
+#### Sikkerhed og afhængigheder, målt 1/10
+
+`npm audit --omit=dev` → **0 sårbarheder** (C197 holder). `npm outdated`:
+`next` wanted 15.5.27 / latest 16.3.8; `tailwindcss` + `@tailwindcss/postcss`
+4.1.18 → 4.3.3 (patch/minor, ubrugt her); `lucide-react` 0.563.0 → 1.49.0
+(major); `@biomejs/biome` 1.9.4 → 2.5.15 (major); `typescript` 5.9.3 → 7.0.2;
+`vitest` 4.1.11 → 5.0.3; `jsdom` 28 → 30. **Én major pr. commit**, og
+runtime-kravet er allerede erklæret korrekt (`engines.node ">=22 <23"`,
+`.nvmrc` = 22, `node:22-alpine`), så ingen af disse kræver en Node-bump.

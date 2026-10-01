@@ -56,7 +56,7 @@ function hrefs(cta: string): string[] {
  * men deres *sidste* klik var et andet værktøj — så den læser, der spørger
  * "hvor meget", bliver sendt et sted hen, der ikke regner beløb ud.
  */
-const SKAL_NAAE: { slug: string; hrefs: string[]; hvorfor: string }[] = [
+const SKAL_NAAE: { slug: string; hrefs: string[]; foerste?: string; hvorfor: string }[] = [
   {
     slug: "barsel-2026-regler-og-satser",
     hrefs: ["/barselsdagpenge", "/barselsplanlaegger"],
@@ -71,6 +71,28 @@ const SKAL_NAAE: { slug: string; hrefs: string[]; hvorfor: string }[] = [
     slug: "boliglaan-2026-renter-og-afdrag",
     hrefs: ["/rentefradrag", "/boliglaan"],
     hvorfor: "indlægget handler om renter og afdrag, men sendte læseren til fradraget og ikke til ydelsen",
+  },
+  {
+    slug: "koeb-af-bolig-2026-omkostninger",
+    hrefs: ["/boliglaan", "/rentefradrag"],
+    // Her stod `/rentefradrag` som eneste knap, selv om artiklen selv to gange
+    // i brødteksten siger at boliglånsberegneren er værktøjet: i
+    // tjeklisten ("Beregn din ydelse: brug boliglånsberegneren") og i den
+    // blå boks ("Brug vores boliglånsberegner til din ydelse"). Siden er
+    // "Køb af bolig 2026: Alle omkostninger du skal kende", og
+    // boliglånsberegneren lægger ydelsen sammen med ejendomsskat, forsikring
+    // og ejerforening — altså præcis "ydelse + alle faste udgifter", som
+    // tjeklistens næste linje beder læseren selv lægge sammen. Det var en
+    // selvm modsigelse på én side: artiklen pegede to gange på
+    // boliglånsberegneren og sluttede på en anden beregner. Derfor kræver
+    // linjen her `foerste` — tilstedeværelse alene lader rækkefølgen glide.
+    foerste: "/boliglaan",
+    hvorfor: "artiklen sender læseren videre til rentefradraget, selv om den selv navngiver boliglånsberegneren to gange",
+  },
+  {
+    slug: "fradrag-2026-komplet-guide",
+    hrefs: ["/rentefradrag", "/befordringsfradrag"],
+    hvorfor: "en komplet guide til fradrag, der kun tilbød ét af de to fradrag artiklen selv regner en sats for",
   },
 ];
 
@@ -168,6 +190,33 @@ describe("bloggens næste handling", () => {
           `/blog/${krav.slug} (${krav.hvorfor}), men ${href} står ikke i næste handlingen`,
         ).toContain(href);
       }
+    }
+  });
+
+  /**
+   * Hvilket værktøj der *er* knappen, ikke bare hvilke der står i blokken.
+   *
+   * `NaesteSkridt` har én knap og ét stille link, fordi to knapper af samme
+   * vægt er måden en læser ender med at vælge ingen af dem. Det gør rækkefølgen
+   * til en påstand i stedet for en detalje: `/rentefradrag` som eneste knap på
+   * et indlæg om boligomkostninger er ikke en mindre mellemting — det er en
+   * anden handling, end den artiklen har lovet hele vejen.
+   *
+   * Testen læser kun `href`-attributten på `<NaesteSkridt>`, altså den
+   * primære knap; `sekundaer` ligger i et andet objekt og kan ikke træffe
+   * ved en fejltagelse.
+   */
+  test("næste handlingens knap er den beregner, artiklen handler om", () => {
+    for (const krav of SKAL_NAAE) {
+      if (!krav.foerste) continue;
+      const a = ALLE.find((x) => x.slug === krav.slug);
+      expect(a, `/blog/${krav.slug} findes ikke blandt indlæggene`).toBeDefined();
+      const knap = a!.cta.match(/<NaesteSkridt\s+href="(\/[^"]*)"/);
+      expect(knap, `/blog/${krav.slug}: næste handlingen har ingen primær href`).not.toBeNull();
+      expect(
+        knap![1],
+        `/blog/${krav.slug} (${krav.hvorfor}), så knap ${knap![1]} i stedet for ${krav.foerste}`,
+      ).toBe(krav.foerste);
     }
   });
 });

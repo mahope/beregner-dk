@@ -1,34 +1,37 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — 1/10 03:50. Målt hele sitet for nye fejl: 140 danske sitemap-URL'er
-  scannet, alle 200 med korrekt canonical (3 undtagen er templates med
-  " | MinBeregner.dk"), ingen tomme eller duplikate titler. Undervejs fandt jeg
-  fire filer, der siger at USA og Danmark skifter sommertid på **samme datoer**
-  — målt falsk: USA 2. søndag i marts / 1. søndag i november, Danmark sidste /
-  sidste, så forskellen til New York er 6 timer på 337 af 365 dage og 5 timer i
-  28. Sidens egen tabel 40 linjer længere oppe sagde allerede "5-6 timer
-  bagud", altså en selvm modsigelse på en indexeret side med 24.324 visninger.
-  Bloggen lovede desuden "5 eller 7 timer", og 7 er umuligt.
+STATUS: KØ — 1/10 04:25. **Tre deploy-noter lukket på indhold** — og to af dem
+  kun efter at noterne viste sig at pege på URL'er, der **404'er**:
+  `/nyaarsaaven`, `/nyarsafton` og `/sankthansaftensdag` findes ikke; de hedder
+  `/dage-til/nytaarsaften`, `/dagar-till/nyarsafton` og
+  `/dage-til/sankthansaftensdag`. Målt på de rigtige: alle 200, 2.769-2.988 ord,
+  ingen forbudt streng. **Målerfælde: en 404-side består også uden de forbudte
+  strenge**, så et friteksts-tjek på en forkert URL er grønt ud at prøve
+  noget. Tjek HTTP-koden først, altid.
 
-  **Næste opgave:** de øvrige tre noters vinduer er nået (de otte med 1/10 07:30
-  kan lukkes fra den iteration). Køen herfra: 98 (blokeret af 97), så F1/F3/F5 —
-  og de `/tidsberegner`/`/kalorier`-guides som målingen i 194 fandt.
+  **Næste opgave: opgave 199 (Next 16).** Køen er ellers tom — se nedenfor.
+
+  **Hvorfor køen er tom, målt 1/10:** 97 og 119 og 183 er `BLOCKED` på svar fra
+  Mads, 98 afhænger af 97, 187 må ikke røres før 13/10, og F1/F3/F5 har alle
+  brug for enten GSC-søgningsdata (❓) eller 187's dato. 194's to resterende
+  sider kan **ikke** løses: `/tidsberegner`s eneste indlæg er koblet til
+  `/tidszone`, og `blog-kobling.test.ts` forbyder ét indlæg på to beregnere;
+  `/kalorier` er opgave 119. **Den gamle "Næste opgave"-linje var derfor
+  forældet** — den pegede på to opgaver, målingen i 194 selv havde lukket.
+
+  **`/dage-til/*` er ikke et ranking-problem.** Alle 19 danske sider er live
+  (200), i sitemap, og titlen *svarer* på søgningen med dagens tal: "Hvor mange
+  dage er der til 1. december? 61 dage". De kom live 25/9 19:48 (`70e75b9`), og
+  GSC-vinduet slutter 28/9 — dagen efter. Deres fravær i GSC's top-16 er
+  altså vinduet, ikke siden. **Ingen handling; genmål 9/10.**
+
+  **Blokeret af svar fra Mads:** 97, 119 og 183, samt F1/F3/F5. **Opgave 187 må
+  ikke røres før 13/10.** CEO-køens punkt 0 er lukket — alle otte tal er
+  verificeret i koden 1/10 02:00.
 
   **⚠️ Målerfælde: `/tidszone` er dynamisk** (`cache-control: no-store`), så
   `new Date()` i dens JSX er ikke frosset ved build. Kun statiske sider må regne
   på et fast år.
-
-  **Blokeret af svar fra Mads:** 97, 119 og 183, samt F1/F3/F5. **Opgave 187 må
-  ikke røres før 13/10.** CEO-køens punkt 0 er lukket — alle otte tal er
-  verificeret i koden 1/10 02:00 (Valborg 30. april, påskafton `offsetDays: -1`,
-  fast sankthans 23./24. juni, påskeaften-FAQ væk, nettoprisindeks,
-  `Europe/Copenhagen`, `PROMILLEGROV_SE`, `maneder: 12`). De otte lukkede
-  VERIFICÉR-noter er verificeret på indhold; senest 30/9 23:10.
-
-  **⚠️ Ni VERIFICÉR-noter åbne.** HTTP 200 beviser intet: de rører tabelceller
-  med lovtal, brødtekst og rækkefølge i markupken. Målingerne står i
-  `docs/plan-arkiv.md`. Næste forfaldsvindue er **1/10 07:30** — de otte noter med
-  vinduer 07:30 og 12:30 kan lukkes fra den iteration.
 
   **⚠️ Målerfælde (30/9 15:40).** `npm run test` kører `locale-leak-gate.test.ts`,
   der med vilje planterer danske lækager. Derfor kommer `FEJL: n ureviewet(e)`-
@@ -129,8 +132,8 @@ kaldes *ikke*-helgdag.
 ## Kvalitetsgate (repoets egne scripts fra package.json)
 
 ```
-npm run lint     # biome lint ./src      — 633 filer
-npm run test     # vitest run            — 3297 tests / 201 filer
+npm run lint     # biome lint ./src      — 634 filer
+npm run test     # vitest run            — 3304 tests / 201 filer
 TZ=UTC npm run test   # CI's ur — se målerfælden 1/10 i STATUS
 npm run build    # next build            — 143 sider
 node scripts/locale-leak.mjs --gate       # exit 0
@@ -211,39 +214,34 @@ og forsiden. Alle målinger står i `docs/plan-arkiv.md`.
   dansk er `src/app/blog/naeste-skridt.test.ts` (porten `SKAL_NAAE`) efter
   deploy. Vindue **1/10 12:30** (denne merge sker efter 30/9 21:30).
 
-- ⏳ **Skærtorsdagen må ikke kaldes helgdag, og 1. advent må ikke kaldes
-  ikke-helgdag.** `ceo/helgdag-uden-allman`. På
-  `https://beraknare.se/dagar-till/skartorsdagen` må **"en torsdag och en
-  helgdag"** og **"Båda är helgdagar"** ikke forekomme nogen steder; siden skal
-  forklare forskellen mellem *röd dag* og *allmän helgdag*. På
-  `https://beraknare.se/dagar-till/paskdagen` må **"Båda är officiella
-  helgdagar"** ikke forekomme. På `https://beraknare.se/dagar-till/1-advent` må
-  **"Första advent är inte en allmän helgdag"** ikke forekomme — lovens 1 §
-  tæller alle søndagar. HTTP 200 beviser intet, det er brødtekst. Prøven på
-  dansk er `src/lib/dage-til.test.ts` efter deploy. Vindue **30/10 07:30**.
-
 - ⏳ **Ingen side må kalde en skiftende dato en hverdag, og skærtorsdag er en
   torsdag.** `ceo/sidste-hverdag-paastand`. På
-  `https://minberegner.dk/nyaarsaften` og `https://beraknare.se/nyarsafton`
-  må "Sidste hverdag i december" og "Sista vardagen i december" **ikke**
-  forekomme nogen steder — teksten skal sige månedens sidste dag uanset
-  ugedag. På `https://minberegner.dk/sankthansaftensdag` må "en almindelig
+  `https://minberegner.dk/dage-til/nytaarsaften` og
+  `https://beraknare.se/dagar-till/nyarsafton` må "Sidste hverdag i december" og
+  "Sista vardagen i december" **ikke** forekomme nogen steder — teksten skal sige
+  månedens sidste dag uanset ugedag. På
+  `https://minberegner.dk/dage-til/sankthansaftensdag` må "en almindelig
   hverdag" **ikke** forekomme (23. juni er weekend i 2029, 2030, 2035, 2040).
-  På `https://minberegner.dk/skaertorsdag` skal spørgsmålet "Er skærtorsdag en
-  fridag?" have svaret **"Nej"** med "altid en torsdag" i svaret. HTTP 200
-  beviser intet — det er brødtekst på statiske sider. Prøven på dansk er
-  `src/lib/dage-til.test.ts` efter deploy. Vindue **1/10 07:30**.
+  På `https://minberegner.dk/dage-til/skaertorsdag` skal spørgsmålet "Er
+  skærtorsdag en fridag?" have svaret **"Nej"** med "altid en torsdag" i svaret.
+  HTTP 200 beviser intet — det er brødtekst på statiske sider. Prøven på
+  dansk er `src/lib/dage-til.test.ts` efter deploy. Vindue **1/10 07:30**.
+  **URL'erne i denne note var alle forkerte** — de tre første 404'ede. Rettet
+  ovenfor efter måling 1/10 04:25.
 
-- ⏳ **De tre svenske helgdagspåstande skal være rettet i lovens ord.**
-
-  `ceo/svensk-helgdagslove`. På `https://beraknare.se/dagar-till/julafton`,
-  `/dagar-till/skartorsdagen` og `/dagar-till/nationaldagen`: **"9-10", "räknas
-  som helgdagar", "officiella svenska helgdagar" for skärtorsdagen og "är inte
-  en laglig helgdag" må ikke forekomme nogen steder.** Siden skal i stedet sige
-  at julafton och skärtorsdagen *ikke* er allmän helgdag enligt
-  lagen (1989:253), og at nationaldagen *er* det. HTTP 200 beviser intet — det
-  er brødtekst. Prøven på dansk er `src/lib/dage-til.test.ts` efter deploy.
-  Vindue **1/10 07:30**.
+- ⏳ **Bloggen skal sende læseren videre til det værktøj, artiklen handler om.**
+  `ceo/blog-naeste-vaerktoej`. På
+  `https://minberegner.dk/blog/koeb-af-bolig-2026-omkostninger` skal blokken
+  "Regn det ud" have **`/boliglaan` som primær knap** ("Beregn alle dine
+  månedlige boligomkostninger") og `/rentefradrag` som stille sekundær — det
+  omvendte var den gamle rækkefølge, selv om artiklen selv to gange i
+  brødteksten peger på boliglånsberegneren. På
+  `https://minberegner.dk/blog/fradrag-2026-komplet-guide` skal samme blok have
+  et `/befordringsfradrag`-link. Beraknare.se skal **ikke** have artiklerne
+  (de er danske og `/blog/*` 404'er på beraknare.se — målt 1/10). HTTP 200
+  beviser intet — det er rækkefølge og to links i én blok. Prøven på dansk er
+  `src/app/blog/naeste-skridt.test.ts` efter deploy. Vindue **1/10 07:30**
+  (denne merge sker efter 30/9 21:30).
 
 - ✅ **Sydney skal stå med 8-10 timer foran, ikke 9-10.** `ceo/tidszone-tidsforskelle`.
   **DEPLOY OK 30/9 23:10** — hentet fra live og læst i markupken, begge domæner.
@@ -380,6 +378,27 @@ og forsiden. Alle målinger står i `docs/plan-arkiv.md`.
   Målt 1/10 med `npx tsx` over alle 29 `page.tsx` i `src/app/blog/`. Fuldtekst
   med målinger, mutationer og de to sider der bevidst *ikke* blev koblet:
   `docs/plan-arkiv.md`, "Opgave 194".
+
+#### 199. [ ] 1/10 — Kø — **opgradér Next.js 15.5.25 → 16.3.8 (én major, egen commit)**
+
+- **Datagrund:** `npm outdated` 1/10: `next` wanted **15.5.27** (patch), latest
+  **16.3.8** (major). `npm audit --omit=dev` → **0 sårbarheder**, så dette er
+  ikke et sikkerhedshul — det er Mads' løbende krav om nyeste versioner. Runtime
+  er allerede erklæret og korrekt: `engines.node ">=22 <23"`, `.nvmrc` = 22,
+  `Dockerfile` på `node:22-alpine`. Next 16 kræver Node 20.9+, så **intet
+  runtime-ændring er nødvendig** — lad dog `@types/node` blive på 22, så
+  byggeserveren ikke får en ny type-kontrakt oveni.
+- **Hvorfor en hel iteration:** 3.304 tests + 143 statiske sider er hele
+  gaten, og Next 16 er en major. `npm run lint` er biome (ikke `next lint`), så
+  den forsvundne `next lint` rammer ikke. Forventede brud: middleware-signatur,
+  `generateStaticParams`, `images`-config og `output: "standalone"` i Dockerfile.
+- **Acceptkriterier:** (1) patch først i **én commit** (`15.5.25 → 15.5.27`) så
+  major kan rulles tilbage præcist, (2) major i sin egen commit, (3) gaten
+  grøn i **begge** tidszoner + `locale-leak --gate` exit 0 + build 143/143,
+  (4) `curl -fsI https://minberegner.dk/api/health` efter næste batch, (5) hvis
+  gaten ikke kan blive grøn: **rulle tilbage**, ikke lade det stå.
+- **Mål ikke.** Infrastruktur — effekten er at opgraderingen ikke gør skade.
+  Notér i planen hvad der rent faktisk ændrede sig.
 
 #### 187. [ ] **IKKE FØR 2026-10-13** 2026-09-30 — Kø — **migrér beraknare.se til svenske URL-slugs med 301**
 

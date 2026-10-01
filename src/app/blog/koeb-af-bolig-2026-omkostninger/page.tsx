@@ -280,9 +280,13 @@ export default function BoligkoebGuidePage() {
       </article>
 
       <NaesteSkridt
-        href="/rentefradrag"
-        handling="Beregn dit rentefradrag"
-        beskrivelse="Se hvor meget af renterne på dit nye lån du kan trække fra i skatten hvert år."
+        href="/boliglaan"
+        handling="Beregn alle dine månedlige boligomkostninger"
+        beskrivelse="Sæt boligpris, udbetaling, rente og løbetid ind. Beregneren lægger ydelsen sammen med ejendomsskat, forsikring og ejerforening, så du ser hele regningen på ét sted."
+        sekundaer={{
+          href: "/rentefradrag",
+          handling: "Beregn dit rentefradrag",
+        }}
       />
 
       <div className="mt-12 pt-8 border-t">
