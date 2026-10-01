@@ -22837,3 +22837,55 @@ katalogside, navigation kun sider der findes i det lokale sprog, og
 `/renteprognose` ikke fik en artikelblok: de 14 ledige artikler passer ikke, og
 «guide-til-laan-og-renter» er allerede koblet til `/rentefradrag`. Siden linker
 i stedet til guiden i brødteksten.
+
+## 1/10 19:55 — ceo/dage-til-fastelavn-palmesondag-2juledag ✅
+
+**Hvad.** Seks nye `/dage-til`-sider (3 da + 3 se) på den færdige skabelon:
+`/dage-til/fastelavn`, `/dage-til/palmesondag`, `/dage-til/2-juledag` og
+`/dagar-till/fettisdagen`, `/dagar-till/palmsondagen`,
+`/dagar-till/annandag-jul`.
+
+**Hvorfor.** Sektionen er bygget på spørgsmålstypen «hvor mange dage er der
+til X», og de to største søgninger på sitets #1-side (`/dato`, 134.567
+visninger) er præcis den type. Vi havde 19 danske og 18 svenske sider, og målt
+på dansk autocomplete (hl=da, gl=dk) 1/10 var de tre stærkeste urørte datoer:
+
+- `fastelavn` — 10 af 10 completioner, herunder «hvor mange dage er der til
+  fastelavn» (3 completioner: ordet selv, «…fastelavn 2026» og «hvor mange
+  dage er der tilbage til fastelavn»). Den rene tælle-intention.
+- `palmesøndag` — 10 af 10 med årstal-varianter (2025–2028) og «helligdag».
+- `2 juledag` — 10 af 10 med «2 juledag dato» og «2 juledag 2026».
+
+Svensk (hl=sv, gl=se): `fettisdagen` 8 completioner (alle årstal), `annandag
+jul` 10 med «datum» og «röd dag», `palmsöndagen` 10 med årstal.
+
+**Ingen ny kilde.** 26. december er fast, og de to andre er påskedagen minus
+47 og minus 7 dage — samme `easterOffset`-anker som skærtorsdag og påskaften
+allerede bruger. `helligdage.ts` fører i forvejen «2. juledag» på den
+danske og «Annandag jul» på den svenska liste, så navnet er kildeført i
+repoet. Det er derfor opgaven er **ikke** ferie-start: den klynge er stadig
+blokeret på ferieloven (❓).
+
+**Beslutninger der låses.**
+
+1. Dansk `2. juledag` har datoen i spørgsmålet («…til 2. juledag 26.
+   december?»), fordi «2 juledag dato» er en completion. Svensk gør det
+   ikke: «dagar» er fem tegn mod «dage», og «… 364 dagar» ville skubbet
+   titlen over de 60 tegn. Samme valg som juleaften gjorde.
+2. Fastelavn og palmesøndag er **én** regel hver, delt mellem landene — de
+   er samme dato, så der er kun ét tal at vedligeholde, og ingen svensk
+   undtagelse som sommerferien har.
+3. Påstande om helligdagsstatus er kun skrevet, hvor de er kildeført:
+   fastelavn/fettisdagen er **ikke** officielle helligdage/röda dagar,
+   palmesøndag **er** dansk helligdag men ikke svensk röd dag, 2. juledag er
+   dansk helligdag og annandag jul svensk allmän helgdag enligt lagen
+   (1989:253) — samme kilde som `helligdage.ts` bruger.
+
+**Portene.** Seks rendering-cases i `dage-til-routes.test.tsx` kræver dato,
+ugedag og dag-tal i heroen for alle seks sider (talt fra kalenderen fra 15.
+januar 2026, ikke læst af samme ankerfunktion som siden renderer), og en
+`test.each`-serie i `dage-til.test.ts` låser datoerne for 2026 og 2027, ugedagen
+for 1990-2050, slug-parret mellem sprogene og det 364 dage lange interval der
+gør 2. juledags titel trecifret. Mutation målt: `-47` → `-46` giver 3 røde
+tests. De eksisterende sløjfer gennem `getDageTilSlugs` dækker titler ≤ 60
+tegn hele året, sitemap, routing/301 mellem sprog og forside-kort.

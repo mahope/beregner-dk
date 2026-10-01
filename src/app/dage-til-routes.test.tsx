@@ -239,6 +239,35 @@ describe("dage-til side", () => {
       DageTilPage({ params: Promise.resolve({ dato: "juledagen" }) })
     ).rejects.toThrow();
   });
+
+  // De tre sider fra 1/10 (fastelavn, palmesøndag, 2. juledag) dømmes på den
+  // viste side, ikke på data-tabellen: en fejloffset giver stadig en side med
+  // et tal i, bare et tal til det forkerte dato. Dato, ugedag og dag-tal er alle
+  // tre regnet fra en kalender (2026 påske er 5. april, så fastelavn er
+  // 17. februar og palmesøndag 29. marts) — ikke læst af samme ankerfunktion
+  // som den renderer, ellers ville porten være en restatement af koden.
+  test.each([
+    ["da", "2-juledag", "2026-12-26", "26. december 2026", "lørdag", 345],
+    ["da", "fastelavn", "2026-02-17", "17. februar 2026", "tirsdag", 33],
+    ["da", "palmesondag", "2026-03-29", "29. marts 2026", "søndag", 73],
+    ["se", "annandag-jul", "2026-12-26", "26 december 2026", "lördag", 345],
+    ["se", "fettisdagen", "2026-02-17", "17 februari 2026", "tisdag", 33],
+    ["se", "palmsondagen", "2026-03-29", "29 mars 2026", "söndag", 73],
+  ] as const)(
+    "%s-siden /%s rammer %s i dag og %i dage",
+    async (locale, slug, isoTarget, dato, ugedag, dage) => {
+      vi.setSystemTime(new Date("2026-01-15T09:00:00.000Z"));
+      vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale(locale));
+      const html = renderToStaticMarkup(
+        await ROUTE_FOR[locale]({ params: Promise.resolve({ dato: slug }) })
+      );
+      expect(html, slug).toContain(`<time dateTime="${isoTarget}">${dato} er en ${ugedag}</time>`);
+      expect(
+        new RegExp(`${dage} (?:dage|dagar) (?:til|till) `).test(html),
+        `${slug}: ${dage} dage fra 15. januar 2026 skal stå i svaret`
+      ).toBe(true);
+    }
+  );
 });
 
 // The Swedish preposition is "till", the Danish one "til", and the answer

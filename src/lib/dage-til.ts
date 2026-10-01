@@ -210,6 +210,83 @@ export const DAGE_TIL_EVENTS: DageTilEvent[] = [
     },
   },
   {
+    // 26. december. Fast i begge lande, og `helligdage.ts` fører den på begge
+    // lister ("2. juledag" / "Annandag jul"), så navnet er kildeført her.
+    id: "juledag-2",
+    anchor: {
+      da: { kind: "fixed", month: 12, day: 26, offsetDays: 0 },
+      se: { kind: "fixed", month: 12, day: 26, offsetDays: 0 },
+    },
+    da: {
+      slug: "2-juledag",
+      copy: {
+        short: "2. juledag",
+        // Datoen står i spørgsmålet, fordi den er det folk googler: dansk
+        // autocomplete målt 1/10 giver "2 juledag dato" og "2 juledag 2026" som
+        // to af ti completioner under "2 juledag". Titlen er `${question}
+        // ${count}`, så spørgsmålet skal have plads til " 364 dage" — 26.
+        // december er fast, så dagene er tre-cifrede fra 27. december til
+        // 15. januar hvert år. Porten i dage-til-routes.test.tsx håndhæver de 60
+        // tegn hele året igennem.
+        question: "Hvor mange dage er der til 2. juledag 26. december?",
+        facts: [
+          "2. juledag er 26. december — altid samme dato, uanset hvilken ugedag den falder på.",
+          "2. juledag er dagen efter juledagen, og der er 5 dage fra 2. juledag til nytårsaften den 31. december.",
+          "I 2026 falder 2. juledag på en lørdag, i 2027 på en søndag — datoen flytter sig aldrig, kun ugedagen.",
+        ],
+        faq: [
+          {
+            question: "Hvornår er 2. juledag næste gang?",
+            answer:
+              "2. juledag er altid 26. december. I 2027 falder den på en søndag, så datoen er fast, men ugedagen skifter.",
+          },
+          {
+            question: "Er 2. juledag en helligdag?",
+            answer:
+              "Ja. 2. juledag står i listen over Danmarks helligdage sammen med juleaftensdag og juledag.",
+          },
+          {
+            question: "Kan jeg finde ud af, hvor mange dage der er mellem to andre datoer?",
+            answer:
+              "Ja. Datoberegneren tæller dage mellem to valgte datoer og viser også uger, arbejdsdage og weekenddage.",
+          },
+        ],
+      },
+    },
+    se: {
+      // Svensk titlen har ingen dato: "dagar" er fem tegn mod dansk "dage", så
+      // " 364 dagar" ville skubbet spørgsmålet over de 60 tegn. Samme valg som
+      // juleaften gjorde.
+      slug: "annandag-jul",
+      copy: {
+        short: "annandag jul",
+        question: "Hur många dagar är det till annandag jul?",
+        facts: [
+          "Annandag jul är 26 december — alltid samma datum, oavsett vilken veckodag det infaller på.",
+          "Annandag jul är dagen efter juldagen, och det är 5 dagar till nyårsafton den 31 december.",
+          "År 2026 infaller annandag jul på en lördag och 2027 på en söndag — datumet flyttar sig aldrig, bara veckodagen.",
+        ],
+        faq: [
+          {
+            question: "När är annandag jul nästa gång?",
+            answer:
+              "Annandag jul är alltid 26 december. År 2027 infaller det på en söndag, så datumet är fast men veckodagen växlar.",
+          },
+          {
+            question: "Är annandag jul en röd dag?",
+            answer:
+              "Ja. Annandag jul är en allmän helgdag enligt lagen (1989:253). Det gäller till skillnad från annandag pingst, som inte är en röd dag i Sverige.",
+          },
+          {
+            question: "Kan jag räkna dagar mellan två andra datum?",
+            answer:
+              "Ja. Datumräknaren räknar dagar mellan två valda datum och visar också veckor, arbetsdagar och helgdagar.",
+          },
+        ],
+      },
+    },
+  },
+  {
     id: "nytaarsaften",
     anchor: {
       da: { kind: "fixed", month: 12, day: 31, offsetDays: 0 },
@@ -397,6 +474,142 @@ export const DAGE_TIL_EVENTS: DageTilEvent[] = [
           },
           {
             question: "Kan jag räkna ut hur många dagar som går mellan två andra datum?",
+            answer:
+              "Ja. Datumräknaren räknar dagar mellan två valda datum och visar också veckor, arbetsdagar och helgdagar.",
+          },
+        ],
+      },
+    },
+  },
+  {
+    // Påskedagen minus 47 dage. Dansk "fastelavn" og svensk "fettisdagen" er
+    // samme tirsdag. Dansk autocomplete målt 1/10 har "hvor mange dage er der
+    // til fastelavn" (3 completioner, ordet selv plus … 2026 plus "…tilbage
+    // til fastelavn"), altså præcis den spørgsmålstype hele sektionen svarer på.
+    id: "fastelavn",
+    anchor: {
+      da: { kind: "easterOffset", month: 0, day: 0, offsetDays: -47 },
+      se: { kind: "easterOffset", month: 0, day: 0, offsetDays: -47 },
+    },
+    da: {
+      slug: "fastelavn",
+      copy: {
+        short: "fastelavn",
+        question: "Hvor mange dage er der til fastelavn?",
+        facts: [
+          "Fastelavn er påskedagen minus 47 dage, så datoen kan beregnes uden et kalenderopslag.",
+          "Fastelavn er derfor altid en tirsdag: påskedagen er altid en søndag.",
+          "Påskedagen ligger mellem 22. marts og 25. april, så fastelavn ligger mellem 3. februar og 9. marts.",
+        ],
+        faq: [
+          {
+            question: "Hvornår er fastelavn næste gang?",
+            answer:
+              "Fastelavn er tirsdagen 47 dage før påskedagen. Påskedagen er den første søndag efter det fulde måne på eller efter 21. marts, så fastelavn kan regnes ud af påskedagen.",
+          },
+          {
+            question: "Er fastelavn en helligdag?",
+            answer:
+              "Nej. Fastelavn er ikke en af Danmarks officielle helligdage, men dagen bruges stadig til børnetraditionen med fastelavnsboller.",
+          },
+          {
+            question: "Kan jeg finde ud af, hvor mange dage der er mellem to andre datoer?",
+            answer:
+              "Ja. Datoberegneren tæller dage mellem to valgte datoer og viser også uger, arbejdsdage og weekenddage.",
+          },
+        ],
+      },
+    },
+    se: {
+      slug: "fettisdagen",
+      copy: {
+        short: "fettisdagen",
+        question: "Hur många dagar är det till fettisdagen?",
+        facts: [
+          "Fettisdagen är påskdagen minus 47 dagar, så datumet går att räkna ut utan att slå upp i en kalender.",
+          "Fettisdagen är därför alltid en tisdag: påskdagen är alltid en söndag.",
+          "Påskdagen ligger mellan 22 mars och 25 april, så fettisdagen ligger mellan 3 februari och 9 mars.",
+        ],
+        faq: [
+          {
+            question: "När är fettisdagen nästa gång?",
+            answer:
+              "Fettisdagen är tisdagen 47 dagar före påskdagen. Påskdagen är den första söndagen efter det fulla mån på eller efter 21 mars, så fettisdagen räknas ut av påskdagen.",
+          },
+          {
+            question: "Är fettisdagen en röd dag?",
+            answer:
+              "Nej. Fettisdagen är inte en allmän helgdag i Sverige. På lagen (1989:253) står påskdagen och annandag påsk, men ikke fettisdagen.",
+          },
+          {
+            question: "Kan jag räkna dagar mellan två andra datum?",
+            answer:
+              "Ja. Datumräknaren räknar dagar mellan två valda datum och visar också veckor, arbetsdagar och helgdagar.",
+          },
+        ],
+      },
+    },
+  },
+  {
+    // Påskedagen minus 7 dage — palmesøndag og palmsöndag er samme søndag, så
+    // det er én regel og ikke to.
+    id: "palmesondag",
+    anchor: {
+      da: { kind: "easterOffset", month: 0, day: 0, offsetDays: -7 },
+      se: { kind: "easterOffset", month: 0, day: 0, offsetDays: -7 },
+    },
+    da: {
+      slug: "palmesondag",
+      copy: {
+        short: "palmesøndag",
+        question: "Hvor mange dage er der til palmesøndag?",
+        facts: [
+          "Palmesøndag er påskedagen minus 7 dage — altså søndagen før påskedag.",
+          "Palmesøndag er den første søndag i den kristne kirkes fasteperiode og kaldes derfor også første søndag i tiden.",
+          "Påskedagen ligger mellem 22. marts og 25. april, så palmesøndag ligger mellem 15. marts og 18. april.",
+        ],
+        faq: [
+          {
+            question: "Hvornår er palmesøndag næste gang?",
+            answer:
+              "Palmesøndag er søndagen før påskedagen. Påskedagen er den første søndag efter det fulde måne på eller efter 21. marts, så palmesøndag kan beregnes uden et kalenderopslag.",
+          },
+          {
+            question: "Er palmesøndag en helligdag?",
+            answer:
+              "Ja. Palmesøndag står i listen over Danmarks religiøse helligdage sammen med skærtorsdag, langfredag og de øvrige påskedage.",
+          },
+          {
+            question: "Kan jeg finde ud af, hvor mange dage der er mellem to andre datoer?",
+            answer:
+              "Ja. Datoberegneren tæller dage mellem to valgte datoer og viser også uger, arbejdsdage og weekenddage.",
+          },
+        ],
+      },
+    },
+    se: {
+      slug: "palmsondagen",
+      copy: {
+        short: "palmsöndag",
+        question: "Hur många dagar är det till palmsöndag?",
+        facts: [
+          "Palmsöndag är påskdagen minus 7 dagar — alltså söndagen före påskdagen.",
+          "Palmsöndag är kyrkans första söndag i fastetiden, och kallas därför också första söndagen i tiden.",
+          "Påskdagen ligger mellan 22 mars och 25 april, så palmsöndag ligger mellan 15 mars och 18 april.",
+        ],
+        faq: [
+          {
+            question: "När är palmsöndag nästa gång?",
+            answer:
+              "Palmsöndag är söndagen före påskdagen. Påskdagen är den första söndagen efter det fulla mån på eller efter 21 mars, så palmsöndag går att räkna ut utan att slå upp i en kalender.",
+          },
+          {
+            question: "Är palmsöndag en röd dag?",
+            answer:
+              "Nej. Palmsöndag är inte en allmän helgdag i Sverige. På lagen (1989:253) står påskdagen och annandag påsk, men inte palmsöndagen.",
+          },
+          {
+            question: "Kan jag räkna dagar mellan två andra datum?",
             answer:
               "Ja. Datumräknaren räknar dagar mellan två valda datum och visar också veckor, arbetsdagar och helgdagar.",
           },

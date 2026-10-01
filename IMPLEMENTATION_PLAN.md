@@ -1,43 +1,46 @@
-STATUS: 1/10 19:20. Rød CI: ingen (seneste kørsel grøn 16:30 UTC). Sentry:
+STATUS: 1/10 19:55. Rød CI: ingen (seneste kørsel grøn 17:15 UTC). Sentry:
   ingen nye hændelser. CEO-køen er **tom** — punkt 0 verificeret i koden igen.
   **Ingen åbne PR'er.**
 
-  **Seneste opgave: dagens dato står i heroen på alle `/dage-til`-sider.**
-  `ceo/dage-til-dagens-dato`. De to største søgninger på sitets #1-side `/dato`
-  («hvor mange dage er der til 1. december» 1.209v/3k, «…til den 24 december»
-  1.014v/2k, begge pos. 5) peger på `/dage-til/*`, som viste svaret uden at
-  sige hvilken dag det var regnet fra — heller ikke for Googles uddrag. Ny
-  eksport `dagensDatoAnker(today)` er præcis det `toUtcMidnight`-anker
-  `daysBetween` bruger, så linjen «I dag er det torsdag 1. oktober 2026» ikke
-  kan glide fra tallet ved siden af. Porten renderer alle 19 (da) + 16 (se)
-  sider kl. 00.30 dansk tid og kræver at de to datoer i heroen er præcis det
-  par afstanden er regnet fra; målt rød (2 fejl) mod en `getUTC*`-mutation.
+  **Seneste opgave: tre nye `/dage-til`-sider — fastelavn, palmesøndag og
+  2. juledag.** `ceo/dage-til-fastelavn-palmesondag-2juledag`. Seks sider
+  (3 da + 3 se), bygget på den færdige skabelon og **uden ny kilde**: 26.
+  december er fast, de to andre er påskedagen minus 47 og minus 7 dage.
+  *Datagrund:* dansk autocomplete 1/10 — «fastelavn» har 10/10 completioner,
+  og «hvor mange dage er der til fastelavn» er en completion i sig selv;
+  «palmesøndag» og «2 juledag» har begge årstal-varianter («palmesøndag
+  2026», «2 juledag 2026 dato»). Svensk: «fettisdagen» 8/8, «annandag jul
+  datum», «palmsöndagen 2026». `2. juledags` danske spørgsmål har datoen i
+  sig («…til 2. juledag 26. december?»), fordi «2 juledag dato» er en
+  completion — samme læring som juleaften. Port: 6 rendering-cases kræver
+  dato, ugedag og dag-tal i heroen; mutation af offset −47 → −46 målt rød i
+  3 tests. Se `docs/plan-arkiv.md`.
 
   **Gaten:** `lint` 0 (651) · `typecheck` 0 · `TZ=UTC npm run test`
-  **3433 grønne / 210 filer** · `next build` ok, 142 ruter. `locale-leak`
-  melder stadig én ureviewet dansk streng på `/procent:522` — forhåndsfandet,
-  ikke rørt.
+  **3451 grønne / 210 filer** · `next build` ok. `locale-leak` melder stadig
+  én ureviewet dansk streng på `/procent:522` — forhåndsfandet, ikke rørt.
 
 ## Næste opgave (klar til næste iteration)
 
-**Udbyg de tre ubyggede `/dage-til`-sider.** *Datagrund:* GSC 1/10 + dansk
-autocomplete 1/10 — «skoleferie 2026» og «skolestart 2026» er endnu ikke dækket
-som egne sider, og `/dage-til/skolestart` findes allerede med 0 GSC-visninger,
-altså endnu ikke indekseret. *Accept:* klyngen er kildeblokeret på ferielovens
-startdato (❓ nedenfor), så opgaven er **ikke** ferie-start: byg i stedet den
-færdige `/dage-til`-skabelon omkring datoer vi *kan* kildeføre fra kalenderen
-(juledag 2. juledag, nytårsaftensdag, grundlovsdag, palmesøndag) og giv hver
-side en `<title>` med spørgsmål **og** dato. *Ingen ny kilde.* **MÅL:** nye
-sider, ingen baseline; genmål på Plausible 15/10.
+**De fire manglende enkeltfradrag på `/skattefradrag`.** *Datagrund:* dansk
+autocomplete 1/10 under «fradrag 2026» giver «fradrag for fitness», «fradrag
+for rengøring», «fradrag havearbejde» og «fradrag sommerhusudlejning» — fire
+konkrete fradrag vi ikke dækker. Vi har allerede `/skattefradrag` og satserne
+ligger i repoet, så det er **indhold på en eksisterende side**, ikke en ny
+side og ikke en ny kilde. *Accept:* de fire fradrag står i beregneren med den
+danske 2026-sats kildeført, i begge sprog, med tests på kant-tilfælde
+(sammenligningsgrundlag, ingen fradrag over indkomsten). **MÅL:** `/skattefradrag`
+har ingen GSC-baseline endnu — skriv CTR og visninger fra næste snapshot.
 
 ## ❓ Uafklaret — ferielov (rammer `/dage-til/summerferien` **og** skolestart)
 
-  ❓ ferielov (se nedenfor) er **stadig åbent**. Denne iteration ændrede kun
-  skolestarts **anker**, ikke påstanden «sommerferien starter den sidste
-  lørdag i juni (lovens dato)» — den ligger der stadig. 1/10 17:55 er
-  retsinformation.dk stadig en SPA-skal på `eli/lsa/2024/1072`, `data.xml`
-  og `para/3` (200 men kun 2,8-4,5 kB HTML), `uv.dk/emner/folkeskoler` er
-  404, og ft.dk ligger bag Cloudflare.
+  ❓ ferielov (se nedenfor) er **stadig åbent**. Denne iteration rørte hverken
+  skolestart eller sommerferien — de to nye påske-ankrede sider er fastelavn
+  og palmesøndag, fordi de er påskedagen minus et fast antal dage og derfor
+  ikke kan være forkerte af ferieloven. 1/10 17:55 er retsinformation.dk stadig
+  en SPA-skal på `eli/lsa/2024/1072`, `data.xml` og `para/3` (200 men kun
+  2,8-4,5 kB HTML), `uv.dk/emner/folkeskoler` er 404, og ft.dk ligger bag
+  Cloudflare.
 
 ## Fase 3 — trafik-drevet
 
@@ -154,7 +157,11 @@ Prioriteret efter forventet effekt på **trafik**. Datagrund fra GSC 1/10
   *Hvem:* «hvor mange dage er der til 1 december» 1.209 visninger, 3 klik,
   pos. 5. *Accept:* de fire sider findes allerede (jul, nytår, sommerferie,
   skolestart) med svaret i `<title>` og i sitemap — **mål om de ranker, før
-  der bygges flere.** *Datagrund:* GSC 1/10.
+  der bygges flere.** *Datagrund:* GSC 1/10. ✅ **Udbygget 1/10** med fastelavn,
+  palmesøndag og 2. juledag (`ceo/dage-til-fastelavn-palmesondag-2juledag`) —
+  seks sider, autocomplete 1/10, ingen ny kilde. Nu er der 22 da + 19 se
+  `/dage-til`-sider (målt med `getDageTilSlugs`), og hver af dem linker til de
+  øvrige. **MÅL:** nye sider, ingen baseline. Genmål 15/10.
 - **Pristalsregulering på `/husleje`** — ✅ 1/10. *MÅL:* `/husleje` 161
   besøgende/28d, bounce 4 % (Plausible 2026-10-01). GSC har ingen
   `/husleje`-visning i top-15, så CTR-baseline er **ikke** kendt — trafikken
@@ -167,6 +174,14 @@ Prioriteret efter forventet effekt på **trafik**. Datagrund fra GSC 1/10
   ikke gættes tal.
 
 ## Åbne VERIFICÉR DEPLOY-noter
+
+- ⏳ **Tre nye `/dage-til`-sider: fastelavn, palmesøndag, 2. juledag.**
+  `ceo/dage-til-fastelavn-palmesondag-2juledag`. Prøven er på indhold: `curl -s
+  https://minberegner.dk/dage-til/2-juledag` skal indeholde «26. december
+  2026 er en» og et `<time>` med dagens ISO-dato;
+  `https://minberegner.dk/dage-til/fastelavn` skal sige «Fastelavn er påskedagen
+  minus 47 dage», og `https://beraknare.se/dagar-till/fettisdagen` skal have
+  `<title>` med «fettisdagen». Vindue 1/10 21:30.
 
 - ⏳ **Dagens dato står i heroen på alle `/dage-til`-sider.**
   `ceo/dage-til-dagens-dato`. Prøven er på indhold: `curl -s

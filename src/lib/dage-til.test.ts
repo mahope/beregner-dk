@@ -2169,3 +2169,93 @@ describe("ugedags-påstande mod de datoer ankeret producerer", () => {
     expect(FRIDAG_DA).not.toBe(4);
   });
 });
+
+// Tre nye kalenderdatoer, bygget 1/10 efter autocomplete på dansk (hl=da,
+// gl=dk) og svensk (hl=sv, gl=se): "fastelavn" har 10 af 10 completioner, og
+// "hvor mange dage er der til fastelavn" er en completion i sig selv; både
+// "palmesøndag" og "2 juledag" har årstal-varianter ("palmesøndag 2026",
+// "2 juledag 2026 dato"). De tre er computable uden nogen ny kilde: 26.
+// december er fast, og de to andre er påskedagen minus henholdsvis 47 og 7
+// dage. De forventede datoer er slået op i en kalender og ikke udregnet af
+// samme påskeformel som koden — ellers kunne en forkert offset være sit eget
+// bevis.
+describe("fastelavn, palmesøndag og 2. juledag (1/10)", () => {
+  // 2026 påske er 5. april, 2027 er 28. marts, 2028 er 16. april.
+  test.each([
+    ["fastelavn", "2026-02-17", "2027-02-09", 2],
+    ["palmesondag", "2026-03-29", "2027-03-21", 0],
+  ] as const)(
+    "%s er %s i 2026 og %s i 2027, og er altid uge %i",
+    (id, i2026, i2027, ugedag) => {
+      const event = eventById(id);
+      for (const locale of ["da", "se"] as const) {
+        expect(toISO(getNextAnchorDate(anchorOf(event, locale), iso("2026-01-01"))), `${id}/${locale}`).toBe(i2026);
+        expect(toISO(getNextAnchorDate(anchorOf(event, locale), iso("2027-01-01"))), `${id}/${locale}`).toBe(i2027);
+        // Begge datoer ligger efter 1. januar hvert år (3/2–9/3 og 15/3–18/4),
+        // så 1. januar som "i dag" finder altid årets egen forekomst.
+        for (let year = 1990; year <= 2050; year++) {
+          const dato = getNextAnchorDate(anchorOf(event, locale), iso(`${year}-01-01`));
+          expect(dato.getUTCDay(), `${id}/${locale}/${year}`).toBe(ugedag);
+        }
+      }
+    }
+  );
+
+  test("2. juledag er fast 26. december i begge sprog", () => {
+    const event = eventById("juledag-2");
+    for (const locale of ["da", "se"] as const) {
+      expect(anchorOf(event, locale), locale).toMatchObject({ kind: "fixed", month: 12, day: 26 });
+      for (const [iDag, forventet] of [
+        ["2026-01-01", "2026-12-26"],
+        ["2027-01-01", "2027-12-26"],
+        // Efter julen er næste 2. juledag et helt år senere, ikke den i år.
+        ["2027-12-27", "2028-12-26"],
+      ] as const) {
+        expect(toISO(getNextAnchorDate(anchorOf(event, locale), iso(iDag))), `${locale}/${iDag}`).toBe(forventet);
+      }
+      // 27. december er før julen er om igen: næste 2. juledag er 364 dage
+      // senere, altså det trecifrede dag-tal titlen skal have plads til.
+      expect(daysBetween(iso("2026-12-27"), getNextAnchorDate(anchorOf(event, locale), iso("2026-12-27")))).toBe(364);
+    }
+  });
+
+  test("hvert sprog har sit eget slug, og den anden sprogvariant redirectes", () => {
+    for (const [da, se] of [
+      ["2-juledag", "annandag-jul"],
+      ["fastelavn", "fettisdagen"],
+      ["palmesondag", "palmsondagen"],
+    ] as const) {
+      expect(getDageTilSlugs("da"), da).toContain(da);
+      expect(getDageTilSlugs("se"), se).toContain(se);
+      expect(resolveDageTilSlug(se, "da")?.localeSlug, se).toBe(da);
+      expect(resolveDageTilSlug(da, "se")?.localeSlug, da).toBe(se);
+    }
+  });
+
+  test("2. juledags spørgsmål har datoen med — den del Google viser", () => {
+    // Samme lektion som juleaften: "2 juledag dato" og "2 juledag 2026" er to
+    // af ti completioner under "2 juledag" (autocomplete 1/10), så datoen skal
+    // stå i spørgsmålet. Titlen er `${question} ${count}`, og 26. december er
+    // fast, så den skal også have plads til " 364 dage".
+    const spg = armOf(eventById("juledag-2"), "da").copy.question;
+    expect(spg).toBe("Hvor mange dage er der til 2. juledag 26. december?");
+    expect(`${spg} 364 dage`.length).toBeLessThanOrEqual(60);
+    // Svensk må ikke få samme dato ind i spørgsmålet: "dagar" er fem tegn mod
+    // dansk "dage", og det ville skubbe titlen over de 60 tegn.
+    expect(`${armOf(eventById("juledag-2"), "se").copy.question} 364 dagar`.length).toBeLessThanOrEqual(60);
+  });
+
+  test("de to påske-ankrede datoer har ingen uge- eller lovpåstand uden kilde", () => {
+    // De må ikke sige det samme om helligdagsstatus som en fast dato, fordi de
+    // falder på forskellige ugedage — de påstande skal være dem, der gælder
+    // uanset år. Kun "påskedagen minus N dage" og de to ugedage er sådan.
+    for (const id of ["fastelavn", "palmesondag"]) {
+      for (const locale of ["da", "se"] as const) {
+        const tekst = alleTekster(armOf(eventById(id), locale)).join(" ");
+        expect(tekst, `${id}/${locale}`).toMatch(
+          locale === "da" ? /påskedagen minus \d+ dage/ : /påskdagen minus \d+ dagar/
+        );
+      }
+    }
+  });
+});
