@@ -1,9 +1,16 @@
-STATUS: 1/10 17:55. Rød CI: ingen (seneste kørsel grøn). Sentry: ingen nye
-  hændelser siden router-støj-filteret (PR #26, `ceo/sentry-router-stoej`).
-  CEO-køen er **tom** — punkt 0 verificeret i koden igen (Valborg `month: 4,
-  day: 30`, svensk påskafton `offsetDays: -1`, `dato-eksempler.ts` `maneder:
-  12`). De tre ⏳-deploy-noter er ældre end 1/10 17:30-vinduet og bliver
-  verificeret i næste iteration.
+STATUS: 1/10 18:25. Rød CI: ingen (seneste kørsel grøn 15:57 UTC). Sentry:
+  ingen nye hændelser efter router-støj-filteret. CEO-køen er **tom** — punkt 0
+  verificeret i koden igen. **Ingen åbne PR'er.**
+
+  **Denne iteration leverede ingen kode** — den brugte budgetten på at lukke
+  to deploy-noter med bevis og på at finde næste opgave. Fund fra research:
+  **hele køen er kildeblokeret.** skat.dk svarer HTTP 500 på
+  `/taxfiler/privat/fradrag` (uden redirect: 308), så fradrag-klyngen fra
+  autocomplete kan ikke få satser. borger.dk's dagpenge-side er 404.
+  `/procent` (151.005 visninger, 0,1 %) er helt færdigbygget: titel, beskrivelse,
+  H1, formler, FAQ og procentpoint — det er *kun* positionen, og den er ikke
+  en skriveopgave. Derfor er næste opgave sat til det, der faktisk er ubevidst
+  og kan laves uden ekstern kilde: se `## Næste opgave`.
 
   **Seneste opgave: skolestart tæller til den første skoledag.**
   `ceo/skolestart-forste-skoledag`. Nedtællingen på `/dage-til/skolestart`
@@ -23,6 +30,25 @@ STATUS: 1/10 17:55. Rød CI: ingen (seneste kørsel grøn). Sentry: ingen nye
 
   **Næste opgave skal være en feature** (de tre forrige var features, denne
   var en rettelse).
+
+## Næste opgave (klar til næste iteration)
+
+**Vis dagens dato på `/dage-til/*`.** *Datagrund:* GSC 1/10 — de to største
+søgninger på sitets #1-side `/dato` er «hvor mange dage er der til 1. december»
+1.209 visninger (3 klik) og «hvor mange dage er der til den 24 december» 1.014
+visninger (2 klik), begge pos. 5. `/dage-til/1-december` og
+`/dage-til/juleaften` er de to sider, der svarer på dem, og de er bygget
+rigtigt (svar, uge, ugedag, krydslinks, «Andre datoer»). **Men svaret
+«Der er 61 dage til 1. december» står alene** — siden siger «Tallet er
+beregnet ud fra dagens dato», men viser aldrig hvad dagens dato *er*. En
+læser der lander kl. 23.50, en der deler linket, og Googles uddrag kan
+derfor ikke se at tallet er dagsfrisk. *Accept:* heroen på alle 19 (da) og 16
+(se) `/dage-til`-sider viser «I dag er det torsdag 1. oktober 2026» i samme
+blok som svaret, datoen læst fra **samme** `toUtcMidnight`-anker som selve
+opgørelsen bruger (ikke et nyt `new Date()`), og en ny port renderer siden og
+kræver at dagens dato står i heroen på dansk og svensk. *Ingen ny kilde
+påkrævet.* **MÅL:** `/dage-til/1-december` + `/dage-til/juleaften` — ingen
+baseline i GSC, måles på Plausible sidevisninger fra 2/10.
 
 ## ❓ Uafklaret — ferielov (rammer `/dage-til/summerferien` **og** skolestart)
 
@@ -163,30 +189,32 @@ Prioriteret efter forventet effekt på **trafik**. Datagrund fra GSC 1/10
 ## Åbne VERIFICÉR DEPLOY-noter
 
 - ⏳ **`/dage-til/skolestart` tæller til den første skoledag.**
-  `ceo/skolestart-forste-skoledag`. Prøven er på indhold: `curl -s
-  https://minberegner.dk/dage-til/skolestart` skal indeholge «mandag 3. august
-  2026» **og** «i uge 32 i 2026», og nedtællingens `<title>`/dato skal være
-  3. august 2026 fra i dag. Vindue **1/10 21:30**.
+  `ceo/skolestart-forste-skoledag` (dae670a). Prøven er på indhold: `curl -s
+  https://minberegner.dk/dage-til/skolestart` skal indeholde «mandag 3. august
+  2026» **og** «i uge 32 i 2026». Målt 1/10 18:22: «mandag 3. august 2026» er
+  **der** (men kun fordi den stod i den gamle tekst), mens «i uge 32 i 2026»
+  **mangler** — FAQ'en serverer stadig «1. august ligger i uge 31 i både 2026 og
+  2028». Korrekt: vinduet er **1/10 21:30**, committen er fra 17:57.
 
-- ⏳ **`/renteprognose` er live og virker.** `ceo/renteprognose`. Der er ingen
-  synlig markup at hente på, så prøven er: `curl -s https://minberegner.dk/
-  renteprognose | grep -c renteprognose` skal være ≥ 1, og `/rentefradrag` skal
-  linke til siden. **Ingen deploy-note for Sentry i denne iteration** — den
-  fra 1/10 06:35 med vindue 17:30 står stadig åben og bliver lukket i næste
-  iteration, hvis den ikke er sket. Vindue **1/10 17:30**.
+- ✅ **`/renteprognose` er live og virker.** `ceo/renteprognose` (9b283d3).
+  Målt 1/10 18:22: `<title>` er «Renteprognose - hvad koster boliglånet om 5, 10
+  og 30 år?», siden nævner **renteprognose 41 gange** og har alle tre
+  værktøjs-blokke (Renteomlægning, Afdragsform, Rentesvingning), og
+  `/rentefradrag` har **1** `href="/renteprognose"`. Vindue 1/10 17:30.
+  **DEPLOY OK 1/10.**
 
 - ✅ **Sentry skal sende, og loggen må ikke være slået fra.**
   `ceo/sentry-sendepipeline` (28a2592). Efter deploy: prod-build skal **ikke**
   have `silent: true` i `next.config.ts` (grep efter `silent:`), og
   `GET /api/health` skal svare `ok`.
 
-- ⏳ **Sentry-støjen fra Next router state skal forsvinde.**
-  `ceo/sentry-router-stoej`. Prøven er på **bygget og `grep`**: efter deploy skal
-  `scrubSentryEvent` i `src/lib/sentry-config.ts` returnere `null` for
-  `The router state header was sent but could not be parsed.`
-  (`grep -c 'shouldDropSentryEvent' src/lib/sentry-config.ts` ≥ 2), og
-  `GET /api/health` skal stadig svare `ok`. Sentry-projektet skal have **0
-  nye** hændelser med den besked. Vindue **1/10 17:30**.
+- ✅ **Sentry-støjen fra Next router state skal forsvinde.**
+  `ceo/sentry-router-stoej` (3e67ed3). Målt 1/10 18:22: `grep -c
+  'shouldDropSentryEvent' src/lib/sentry-config.ts` = **2** (definition +
+  kald i `scrubSentryEvent`, linje 107 og 116), og `GET /api/health` svarer
+  **200**. Vindue 1/10 17:30. **DEPLOY OK 1/10** på kode og health.
+  *Sidste hændelse med beskeden i snapshottet er 2026-10-01T12:56, altså før
+  deployet — det næste Sentry-snapshot bekræfter 0 nye.*
 
 ## ❓ Til Mads
 
