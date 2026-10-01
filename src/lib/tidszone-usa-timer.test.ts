@@ -3,10 +3,12 @@ import { resolve } from "node:path";
 import { describe, expect, test } from "vitest";
 import {
   TIDSPUNKTER,
+  afvigendeDage,
   usaTimerAntal,
   usaTimerRaekker,
 } from "./tidszone-usa-timer";
 import { klokkeslaetVed, TIDSZONER } from "./tidszone-reference";
+import { erSommertid } from "./sommertid";
 
 describe("tidszone-usa-timer", () => {
   test("tidsrækken er de fire klokkeslæt, autocomplete faktisk spørger om", () => {
@@ -184,6 +186,133 @@ describe("tidszone-usa-timer", () => {
       // sidste tre: kl. 14, 16 og 21.
       expect(region[1]).toEqual(modul.get(by)!.slice(1));
     }
+  });
+});
+
+/**
+ * Porten på den påstand, der lå i fire filer: at USA og Danmark skifter
+ * sommertid på samme datoer, så forskellen til New York er 6 timer *hele
+ * året*.
+ *
+ * Den er målt mod `sommertid.ts` og ikke mod en forfatters hukommelse, fordi
+ * den faktisk er falsk: USA skifter 2. søndag i marts / 1. søndag i november,
+ * Danmark sidste søndag i marts / sidste søndag i oktober. I de dage hvor
+ * kun USA har skiftet, ligger New York 5 timer bagud, ikke 6. Sidens egen
+ * "Populære tidsforskelle" sagde allerede "5-6 timer bagud", 40 linjer
+ * under den brødtekst der sagde "hele året".
+ *
+ * Tre ting låses, fordi de er hver sin fejlklasse:
+ * 1. `afvigendeDage()` skal finde **flere end nul** dage. Nule dage ville
+ *    gøle porten grøn for det præcis den fejl, den skal fange.
+ * 2. Forskellen må aldrig blive 7 timer. Danmark skifter tilbage *før* USA,
+ *    så den kan kun blive mindre, ikke større. Bloggen skrev "5 eller 7",
+ *    og 7 er umuligt.
+ * 3. Ingen af de fire filer må sige "hele året" eller "skifter som
+ *    Danmark"/"på samme datoer" om USA. Det er den håndskrevne påstand.
+ */
+describe("påstanden om USA's sommertid", () => {
+  const AAR = 2026;
+
+  test("der er dage hvor USA og Danmark ikke er enige, så 'hele året' er falsk", () => {
+    expect(afvigendeDage(AAR)).toBeGreaterThan(0);
+    // 2026 er et år med 28 afvigende dage. Tallet låst, fordi det er det
+    // brødteksten og bloggen viser — de skal ikke kunne glide fra
+    // hinanden eller fra kalenderen.
+    expect(afvigendeDage(AAR)).toBe(28);
+  });
+
+  test("afvigendeDage er målt på hver dag, ikke hævet til et tal", () => {
+    // Samme år målt to gange skal give samme svar, og et andet år skal
+    // give et andet — ellers er funktionen en konstant.
+    expect(afvigendeDage(AAR)).toBe(afvigendeDage(AAR));
+    const andetAar = afvigendeDage(2027);
+    expect(andetAar).toBeGreaterThan(0);
+    expect(andetAar).not.toBe(0);
+    // 2026 og 2027 er hver 21 og 28 dage forskellige, fordi skiftedatoerne
+    // falder på forskellige søndage.
+    expect(new Set([afvigendeDage(AAR), andetAar]).size).toBe(2);
+  });
+
+  test("forskellen til New York er aldrig 7 timer", () => {
+    // Danmark skifter tilbage sidste søndag i oktober, USA første søndag i
+    // november, så USA er stadig på sommertid mens Danmark ikke er det. Det
+    // gør forskellen *mindre* end 6, aldrig større.
+    const forskelle = new Set<number>();
+    for (let dag = 0; dag < 366; dag++) {
+      const dato = new Date(AAR, 0, 1 + dag);
+      if (dato.getFullYear() !== AAR) break;
+      const dansk = erSommertid(dato, "eu") ? 2 : 1;
+      const usa = erSommertid(dato, "us") ? -4 : -5;
+      forskelle.add(dansk - usa);
+    }
+    expect([...forskelle].sort((a, b) => a - b)).toEqual([5, 6]);
+    expect(forskelle.has(7)).toBe(false);
+  });
+
+  test("alle afvigende dage er USA i sommertid mens Danmark er i vintertid", () => {
+    // Retningen er ikke en detalje: brødteksten skal kunne sige *hvad* der er
+    // sket, og det er kun USA der har skiftet om foråret (2. mod sidste
+    // søndag i marts) og om efteråret (Danmark går tilbage før USA). Målt
+    // på hver dag, så en ny regel eller et forkert årstal falder ud.
+    const tilstande = new Set<string>();
+    for (let dag = 0; dag < 366; dag++) {
+      const dato = new Date(AAR, 0, 1 + dag);
+      if (dato.getFullYear() !== AAR) break;
+      const eu = erSommertid(dato, "eu");
+      const us = erSommertid(dato, "us");
+      if (eu === us) continue;
+      tilstande.add(`usa=${us ? "sommer" : "vinter"}/dk=${eu ? "sommer" : "vinter"}`);
+    }
+    expect([...tilstande]).toEqual(["usa=sommer/dk=vinter"]);
+  });
+
+  test("ingen af de fire filer siger 'hele året' eller 'samme datoer' om USA", () => {
+    const filer = [
+      "src/app/tidszone/page.tsx",
+      "src/lib/page-data.ts",
+      "src/app/blog/hvad-er-klokken-i-usa-naar-den-er-12-i-danmark/page.tsx",
+      "src/components/TidszoneBeregner.tsx",
+    ];
+    // Kun de linjer der **om USA** — "Danmark bruger sommertid hele året" er
+    // sandt og må ikke fanges. Derfor kræver hvert fund et USA-mærke på
+    // samme linje, plus et af de forkerte udsagn.
+    const forkerte = [
+      /hele året/i,
+      /hel(a|et) år/i,
+      /samma (?:datum|data|år)/i,
+      /samme datoer/i,
+      /skifter som Danmark/i,
+      /skifter som Sverige/i,
+      /byter som Sverige/i,
+      /på samme datoer/i,
+    ];
+    const fund: string[] = [];
+    for (const fil of filer) {
+      const kilde = readFileSync(resolve(process.cwd(), fil), "utf-8");
+      kilde.split("\n").forEach((linje, i) => {
+        if (!/USA|\bUS\b/.test(linje)) return;
+        if (!forkerte.some((m) => m.test(linje))) return;
+        fund.push(`${fil}:${i + 1}: ${linje.trim()}`);
+      });
+    }
+    expect(fund).toEqual([]);
+  });
+
+  test("tallet læses af modulet, så det ikke kan forsvinde fra brødteksten", () => {
+    // Negativ måling mod den anden fejlretning: porten ovenfor er grøn, hvis
+    // påstanden blot er *slettet* i stedet for rettet. Derfor kræver den, at
+    // begge sider faktisk **interpolerer** `afvigendeDage` — et håndskrevet
+    // "28" ville være lige så forkert som det gamle "hele året", fordi det
+    // ikke kan følge kalenderen.
+    for (const fil of [
+      "src/app/tidszone/page.tsx",
+      "src/app/blog/hvad-er-klokken-i-usa-naar-den-er-12-i-danmark/page.tsx",
+    ]) {
+      const kilde = readFileSync(resolve(process.cwd(), fil), "utf-8");
+      expect(kilde).toContain("afvigendeDage(");
+    }
+    // Og tallet skal være et reelt antal dage, ikke 0.
+    expect(afvigendeDage(2026)).toBe(28);
   });
 });
 

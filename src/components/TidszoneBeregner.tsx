@@ -50,10 +50,12 @@ const HJEM_DST: DstRegel = "eu";
 //
 // `offsetSommer` og `dst` er nødvendige, fordi vinteroffsetten alene gav
 // forkerte svar i den del af året, hvor Danmark har sommertid. Forskellen til
-// USA er 6 timer hele året, fordi USA skifter nogenlunde samtidig med Danmark,
-// men Tokyo (ingen sommertid) er 8 timer foran om vinteren og 7 timer foran
-// mens Danmark har CEST, og Sydney ligger mellem 8 og 10 timer foran. Det er den
-// bevægelse, brugeren ellers ikke så. `src/lib/sommertid.ts` slår sommer-
+// USA er 6 timer på 337 af årets 365 dage og 5 timer i de 28 øvrige, fordi
+// USA skifter anden søndag i marts og første søndag i november mens Danmark
+// skifter sidste søndag i marts og oktober. Tokyo (ingen sommertid) er 8
+// timer foran om vinteren og 7 timer foran mens Danmark har CEST, og Sydney
+// ligger mellem 8 og 10 timer foran. Det er den bevægelse, brugeren ellers
+// ikke så. `src/lib/sommertid.ts` slår sommer-
 // perioden op, og `TidszoneBeregner.test.tsx` holder offsettene samstemt med
 // `src/lib/tidszone-reference.ts`, som sidder i brødteksten.
 //

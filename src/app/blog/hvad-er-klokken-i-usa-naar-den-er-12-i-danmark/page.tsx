@@ -6,6 +6,7 @@ import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { NaesteSkridt } from "@/components/BlogNaesteSkridt";
 import { OG_IMAGE } from "@/lib/page-helpers";
 import { blogVerdensAntal, blogVerdensRaekker } from "@/lib/tidszone-blog-lander";
+import { afvigendeDage } from "@/lib/tidszone-usa-timer";
 
 const SLUG = "hvad-er-klokken-i-usa-naar-den-er-12-i-danmark";
 
@@ -22,6 +23,18 @@ const VERDENS_ANTAL = blogVerdensAntal;
 
 /** Rækkerne i verdens-tabellen, regnet fra TIDSZONER. Se modulens docblock. */
 const VERDENS_RAEKKER = blogVerdensRaekker();
+
+/**
+ * Antallet af dage om året, hvor USA's og Danmarks sommertid er uenige.
+ *
+ * Læst fra `sommertid.ts` gennem `afvigendeDage`, aldrig skrevet i hånden.
+ * Artiklen siger to gange noget om hvor mange dage forskellen svinger, og
+ * begge gange skal de være det samme tal som det, brødteksten og
+ * `/tidszone` viser. Før målingen stod der "hele året" og "5 eller 7 timer",
+ * og 7 er umuligt: Danmark skifter tilbage før USA, så forskellen kan kun
+ * blive *mindre*, ikke større.
+ */
+const AFVIGENDE_DAGE = afvigendeDage();
 
 export async function generateMetadata(): Promise<Metadata> {
   const dc = await getCurrentDomainConfig();
@@ -71,7 +84,7 @@ const faqItems = [
   {
     question: "Er der altid 6 timers forskel til New York?",
     answer:
-      "Ja. Danmark og USA skifter begge til sommertid, men på hver sin dato, så den samlede forskel til New York er 6 timer hele året. I de få uger, hvor kun den ene side har skiftet, kan den være 5 eller 7 timer.",
+      "Nej. Danmark og USA skifter begge til sommertid, men på hver sin dato: USA anden søndag i marts og første søndag i november, Danmark sidste søndag i marts og sidste søndag i oktober. Forskellen er derfor 6 timer på 337 af årets 365 dage. I de 28 dage hvor USA står på sommertid mens Danmark står på vintertid, er den 5 timer — aldrig 7, fordi Danmark skifter tilbage før USA gør det om efterånet.",
   },
   {
     question: "Hvornår skifter Danmark til sommertid i 2026?",
@@ -288,11 +301,20 @@ export default function TidszoneUsaPage() {
           </table>
         </div>
         <p>
-          Læg mærke til de rækker, hvor de to midterste kolonner er ens. De byer
-          skifter <em>sammen med Danmark</em> — eller slet ikke — så{" "}
-          <em>forskjellen</em> er den samme hele året, selv om begge tal flytter
-          sig: London, Lissabon, Nuuk, Madrid, Athen, Kreta, New York, Toronto,
-          Miami, Boston, Chicago, Denver, Los Angeles, Sydney og Auckland.
+          Læg mærke til de rækker, hvor de to midterste kolonner er ens. De
+          byer flytter uret <em>sammen med Danmark</em> — eller slet ikke — så{" "}
+          <em>vinter- og sommertidsspalten</em> viser det samme klokkeslæt,
+          selv om begge tal flytter sig: London, Lissabon, Nuuk, Madrid,
+          Athen, Kreta, New York, Toronto, Miami, Boston, Chicago, Denver, Los
+          Angeles, Sydney og Auckland.
+        </p>
+        <p>
+          <strong>Ens spalter er ikke det samme som en fast forskel.</strong> New
+          York står derfor i to kolonner med samme tal, men forskellen svinger
+          alligevel mellem 6 og 5 timer om året. USA står på sommertid i{" "}
+          {AFVIGENDE_DAGE} dage hvor Danmark endnu står på vintertid, fordi USA
+          skifter anden søndag i marts og Danmark sidste. Brug
+          tidszoneberegneren til et præcist klokkeslæt på en bestemt dato.
         </p>
         <p>
           De øvrige byer står en time tidligere i sommerspalten, fordi Danmark går

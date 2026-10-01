@@ -9,7 +9,7 @@ import {
   tidsforskelBy,
   tidsforskelTekst,
 } from "@/lib/tidszone-reference";
-import { usaTimerRaekker } from "@/lib/tidszone-usa-timer";
+import { usaTimerRaekker, afvigendeDage } from "@/lib/tidszone-usa-timer";
 import { usaStatRaekker } from "@/lib/tidszone-usa-stater";
 import TidszonePage from "./page";
 
@@ -311,10 +311,14 @@ describe("tidszone svarer på de andre klokkeslæt end kl. 12", () => {
       for (const celle of [...række21, ...række14, ...række16]) {
         expect(html).toContain(celle);
       }
-      // Fælden der gør svaret rigtigt hele året: USA skifter paa samme
-      // datoer som Danmark, saa forskellen er konstant. Uden den note
-      // ville tabellen se ud til at have vinter- og sommer-forskelle.
+      // Fælden der gør svaret rigtigt: USA skifter anden søndag i marts,
+      // Danmark sidste. Derfor er der dage hvor forskellen er 5 timer, og
+      // siden skal sige det — ellers læser en bruger tabellen som "altid 6".
+      // (Testens gamle begrundelse sagde, at USA skifter "på samme datoer som
+      // Danmark", hvilket er målt falsk; `tidszone-usa-timer.test.ts` låser
+      // nu dagetallet i stedet.)
       expect(html).toContain(forklaring);
+      expect(html).toContain(String(afvigendeDage()));
     }
   );
 

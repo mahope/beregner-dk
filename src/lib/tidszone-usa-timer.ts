@@ -13,12 +13,16 @@
  * Derfor er `TIDSPUNKTER` de timer, klyngen faktisk spørger om — ikke et
  * udvalg, der ser pænt ud. Rækken er målt mod autocomplete.
  *
- * **Hvorfor der er én kolonne og ikke to.** USA skifter som Danmark — anden
- * søndag i marts og første søndag i november siden 2007 — så tidsforskellen
- * til en amerikansk by er den samme hele året, og en vinter/sommer-tabel
- * ville have to ens kolonner. Min første version havde dem, og testen
- * fangede det: `06:00 … 15:00` i begge lister. Det er C121's lære modsat,
- * hvor byen bruger egen sommertid; her bruger byen Danmarks.
+ * **Hvorfor der er én kolonne og ikke to.** USA's og Danmarks forskel er den
+ * samme, når **begge** har skiftet og når **ingen** har skiftet, så de to
+ * kolonner ville være ens i 337 af årets 365 dage. Min første version havde
+ * dem, og testen fangede, at de var ens. Det er C121's lære modsat, hvor byen
+ * bruger egen sommertid.
+ *
+ * De sidste 28 dage er undtagelsen, og de skyldes at reglerne **ikke** er de
+ * samme: USA skifter anden søndag i marts og første søndag i november,
+ * Danmark sidste søndag i marts og sidste søndag i oktober. `afvigendeDage()`
+ * tæller dem, og brødteksten læser tallet — den må ikke sige "hele året".
  *
  * Alt er udregnet fra TIDSZONER og DANSK_UTC_VINTER/-SOMMER via
  * `klokkeslaetVed`, altså samme regel som den eksisterende kl. 12-tabel og
@@ -35,6 +39,7 @@ import {
   type TidszoneSprog,
   klokkeslaetVed,
 } from "./tidszone-reference";
+import { erSommertid } from "./sommertid";
 
 /**
  * De klokkeslæt i Danmark/Sverige, klyngen spørger om: 12, 14, 16 og 21.
@@ -66,12 +71,16 @@ export interface UsaTimerRaekke {
   /** Klokkeslæt i byen for hvert tidspunkt i `TIDSPUNKTER`. */
   klokkeslaet: string[];
   /**
-   * Om byen skifter sommertid på **EU's datoer**, altså samtidig med
-   * Danmark. Sandt for alle tre amerikanske byer siden 2007, og derfor er
-   * svaret det samme om vinteren og sommeren.
+   * Om byens **offset spring** er lige så stort som Danmarks, altså om den
+   * flytter uret lige så mange timer. Sandt for alle tre amerikanske byer.
+   *
+   * Det er **ikke** det samme som at byen skifter på Danmarks datoer, og
+   * må ikke læses som det: USA skifter 2. søndag i marts og Danmark sidste,
+   * så i 28 dage om året er forskellen en time mindre end tabellen viser.
+   * Se `afvigendeDage()`, som tæller dem.
    *
    * Det må ikke udledes af "har byen sommertid": alle tre har den, men kun
-   * fordi de skifter samtidig. Det er C121's skel.
+   * fordi de flytter samme antal timer. Det er C121's skel.
    */
   skifterSamtidigMedDanmark: boolean;
 }
@@ -93,9 +102,13 @@ export function usaTimerRaekker(
 ): UsaTimerRaekke[] {
   return BYER.map((by) => {
     const zone = zoneFor(by);
-    // Vinter-værdien bruges, fordi USA og Danmark skifter samtidig, så
-    // sommer-værdien er den samme. Skulle de en dag skifte på forskellige
-    // datoer, er det her det skal ændre sig — ikke i tabellens markup.
+    // Vinter-værdien bruges, fordi USA's og Danmarks forskel er den samme
+    // både når begge har skiftet og når ingen har det. De to skifter på
+    // **forskellige datoer** (USA 2. søndag i marts / 1. søndag i november,
+    // Danmark sidste søndag i marts / sidste søndag i oktober), så i de dage
+    // hvor kun USA har skiftet, ligger byen én time tættere på. Antallet af
+    // sådanne dage er `afvigendeDage()` — brødteksten læser det, så den
+    // ikke kan sige "hele året" om et tal, der kun holder 337 dage.
     return {
       by,
       bySe: zone.bySe,
@@ -108,3 +121,34 @@ export function usaTimerRaekker(
 
 /** Antallet af byer i time-tabellen, som teksten skal kunne navngive. */
 export const usaTimerAntal = BYER.length;
+
+/**
+ * Antallet af dage i `aar`, hvor tidsforskellen til en amerikansk by **ikke**
+ * er tabellens værdi, fordi USA har skiftet sommertid mens Danmark end ikke
+ * har det (eller omvendt).
+ *
+ * **Hvorfor brødteksten ikke må sige "hele året".** USA skifter anden søndag
+ * i marts og første søndag i november; Danmark skifter sidste søndag i marts
+ * og sidste søndag i oktober. De to regler er altså *forskellige*, selv om
+ * de flytter uret samme antal timer. Det betyder, at forskellen til New York
+ * er 6 timer på 337 af årets 365 dage og 5 timer i resten — aldrig 7, fordi
+ * Danmark skifter tilbage *før* USA gør det om efteråret. Målt med
+ * `erSommertid(dag, "eu")` mod `erSommertid(dag, "us")` for hver dag i
+ * `aar`; standarden er 2026, samme år som resten af modulet.
+ *
+ * Før denne måling skrev siden "6 timer … hele året", "forskellen er den
+ * samme sommer og vinter" og "USA skifter sommertid på samme datoer som
+ * Danmark" — tre formuleringer, der alle er modsat af `sommertid.ts`, og
+ * som modsiges af sidens egen tabel 40 linjer længere oppe (New York står
+ * der som "5-6 timer bagud"). Brødteksten læser derfor dette tal i stedet
+ * for at hævde en egenskab ved USA's regel.
+ */
+export function afvigendeDage(aar = 2026): number {
+  let antal = 0;
+  for (let dag = 0; dag < 366; dag++) {
+    const dato = new Date(aar, 0, 1 + dag);
+    if (dato.getFullYear() !== aar) break;
+    if (erSommertid(dato, "eu") !== erSommertid(dato, "us")) antal++;
+  }
+  return antal;
+}

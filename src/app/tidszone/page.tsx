@@ -19,6 +19,7 @@ import {
   TIDSPUNKTER,
   usaTimerAntal,
   usaTimerRaekker,
+  afvigendeDage,
 } from "@/lib/tidszone-usa-timer";
 import {
   excelEksempler,
@@ -170,9 +171,12 @@ export default async function TidszonePage() {
             klokken er i {usaTimerAntal} amerikanske byer, når det er{" "}
             {TIDSPUNKTER.join(", ")} i Danmark. USA ligger{" "}
             <strong>6 timer bagud New York</strong>, 7 timer bagud Chicago og 9 timer
-            bagud Los Angeles hele året — USA skifter som Danmark, anden søndag i marts og
-            første søndag i november, så forskellen er den samme sommer og vinter. Vil du se
-            et helt andet tidspunkt, kan du bruge tidszoneberegneren ovenfor.
+            bagud Los Angeles på {365 - afvigendeDage()} af årets 365 dage. USA skifter
+            anden søndag i marts og første søndag i november, mens Danmark
+            skifter sidste søndag i marts og sidste søndag i oktober, så i de{" "}
+            {afvigendeDage()} dage hvor USA står på sommertid mens Danmark står på
+            vintertid, ligger alle tre en time tættere på. Vil du se et helt andet
+            tidspunkt, kan du bruge tidszoneberegneren ovenfor.
           </p>
           <div className="overflow-x-auto">
             <table>
@@ -304,10 +308,12 @@ export default async function TidszonePage() {
             Många frågar inte om klockan 12 utan om en annan tidpunkt. Här är vad klockan
             är i {usaTimerAntal} amerikanska städer när det är {TIDSPUNKTER.join(", ")} i
             Sverige. USA ligger <strong>6 timmar efter New York</strong>, 7 timmar efter
-            Chicago och 9 timmar efter Los Angeles hela året — USA byter som Sverige,
-            andra söndagen i mars och första söndagen i november, så skillnaden är densamma
-            sommar och vinter. Vill du se en helt annan tidpunkt kan du använda
-            tidszonsberäknaren ovan.
+            Chicago och 9 timmar efter Los Angeles på {365 - afvigendeDage()} av årets 365
+            dagar. USA byter andra söndagen i mars och första söndagen i november,
+            medan Sverige byter sista söndagen i mars och sista söndagen i oktober, så
+            under de {afvigendeDage()} dagar där USA står på sommartid medan Sverige
+            står på vintertid ligger alla tre en timme närmare. Vill du se en helt
+            annan tidpunkt kan du använda tidszonsberäknaren ovan.
           </p>
           <div className="overflow-x-auto">
             <table>

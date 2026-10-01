@@ -1,25 +1,22 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — 1/10 03:05. Målt alle 29 artiklers næste handling mod det emne
-  hvert indlæg selv lover: feriepenge- og boliglån-guiden sendte læseren videre
-  til en datoberegner og et fradrag, selv om begge artikler har en tabel med
-  beløb og linker det rigtige værktøj i brødteksten. Begge tilbyder nu også
-  det værktøj. Porten er målt rød uden rettelsen.
+STATUS: KØ — 1/10 03:50. Målt hele sitet for nye fejl: 140 danske sitemap-URL'er
+  scannet, alle 200 med korrekt canonical (3 undtagen er templates med
+  " | MinBeregner.dk"), ingen tomme eller duplikate titler. Undervejs fandt jeg
+  fire filer, der siger at USA og Danmark skifter sommertid på **samme datoer**
+  — målt falsk: USA 2. søndag i marts / 1. søndag i november, Danmark sidste /
+  sidste, så forskellen til New York er 6 timer på 337 af 365 dage og 5 timer i
+  28. Sidens egen tabel 40 linjer længere oppe sagde allerede "5-6 timer
+  bagud", altså en selvm modsigelse på en indexeret side med 24.324 visninger.
+  Bloggen lovede desuden "5 eller 7 timer", og 7 er umuligt.
 
-  Forrige opgave (194) var: `/boligstoette`
-  (**529 besøgende/28d, +78 %**) havde sin guide begravet nederst i brødteksten,
-  og `/pension` manglede den helt. Begge har nu en synlig "Guides om emnet"-blok,
-  og den begravede reference er fjernet så læseren ikke møder artiklen to gange.
-  To sider blev bevidst **ikke** koblet — `/su` og `/barselsdagpenge` har allerede
-  linket i en blå boks under værktøjet, så porten stoppede mig dér.
+  **Næste opgave:** de øvrige tre noters vinduer er nået (de otte med 1/10 07:30
+  kan lukkes fra den iteration). Køen herfra: 98 (blokeret af 97), så F1/F3/F5 —
+  og de `/tidsberegner`/`/kalorier`-guides som målingen i 194 fandt.
 
-  **⚠️ Målerfælde 1/10 02:00 (ny, for enhver port der renderer en hel side).**
-  `renderToStaticMarkup(<Side />)` kaster "A component suspended" på en async
-  server component. Skriv `renderToStaticMarkup(await Side())`.
-
-  **Næste opgave: 187 er stadig sat til 13/10.** Køen herfra: 98 (blokeret af
-  97), så F1/F3/F5 — og de `/tidsberegner`/`/kalorier`-guides som målingen i
-  194 fandt og som ikke kan løses før hhv. 187 og 119.
+  **⚠️ Målerfælde: `/tidszone` er dynamisk** (`cache-control: no-store`), så
+  `new Date()` i dens JSX er ikke frosset ved build. Kun statiske sider må regne
+  på et fast år.
 
   **Blokeret af svar fra Mads:** 97, 119 og 183, samt F1/F3/F5. **Opgave 187 må
   ikke røres før 13/10.** CEO-køens punkt 0 er lukket — alle otte tal er
@@ -283,6 +280,16 @@ og forsiden. Alle målinger står i `docs/plan-arkiv.md`.
   `src/app/forside.test.tsx` efter deploy. Vindue **1/10 12:30**.
   *(Stribens egen note fra `ceo/forsiden-snabb-indgang` blev DEPLOY OK 30/9
   23:08, men er udfaset af denne rettelse: samme links, to gange.)*
+
+- ⏳ **`/tidszone` må ikke sige at USA og Danmark skifter på samme datoer.**
+  `ceo/tidszone-usa-forskelsdag`. På `https://minberegner.dk/tidszone` og
+  `https://beraknare.se/tidszone` skal blokken "Når det er 21 i Danmark" sige
+  **"på 337 af årets 365 dage"** og **"28 dage"** (ikke "hele året" og ikke
+  "skifter som Danmark"), og FAQ'en skal have samme tal. På
+  `https://minberegner.dk/blog/hvad-er-klokken-i-usa-naar-den-er-12-i-danmark`
+  skal strengen **"5 eller 7 timer"** være væk, og FAQ'en skal svare **"Nej"**
+  (den sagde "Ja"). HTTP 200 beviser intet — det er brødtekst og FAQPage-json.
+  Prøven på dansk er `src/lib/tidszone-usa-timer.test.ts` efter deploy.
 
 ## Åbne opgaver
 
