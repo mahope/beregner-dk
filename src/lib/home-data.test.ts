@@ -338,7 +338,7 @@ describe("getDageTilKort", () => {
       const kort = getDageTilKort(locale, idag);
       expect(kort).toHaveLength(events.length);
       for (const [i, event] of events.entries()) {
-        expect(kort[i].title).toBe(event[sprog].copy.question);
+        expect(kort[i]?.title).toBe(event[sprog]!.copy.question);
       }
     }
   });

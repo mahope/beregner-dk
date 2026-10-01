@@ -87,7 +87,7 @@ describe("fart page", () => {
   });
 
   test("de to nye spørgsmål ligger i FAQ-tabellen, som også JSON-LD'en læser", () => {
-    const da = getPageData("fart", "da");
+    const da = getPageData("fart", "da")!;
     const spgs = da.faqItems.map((f) => f.question);
 
     expect(spgs).toContain("Hvordan beregner jeg tid ud fra hastighed og distance?");

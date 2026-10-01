@@ -31,7 +31,7 @@ describe("social preview image", () => {
     const ogImages = metadata.openGraph?.images;
     const twitterImages = metadata.twitter?.images;
 
-    expect(metadata.twitter?.card).toBe("summary_large_image");
+    expect((metadata.twitter as { card?: string } | undefined)?.card).toBe("summary_large_image");
     expect(ogImages).toEqual([
       {
         url: OG_IMAGE_URL,
@@ -102,7 +102,7 @@ describe("social preview image", () => {
     );
 
     expect(metadata.openGraph?.images).toEqual(OG_IMAGE);
-    expect(metadata.twitter?.card).toBe("summary_large_image");
+    expect((metadata.twitter as { card?: string } | undefined)?.card).toBe("summary_large_image");
     expect(metadata.twitter?.images).toEqual(OG_IMAGE);
   });
 });

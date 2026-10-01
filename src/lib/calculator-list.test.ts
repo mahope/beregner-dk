@@ -146,7 +146,7 @@ describe("editorial inbound links", () => {
     const collisions: string[] = [];
 
     for (const [page, links] of Object.entries(RELATED_CALCULATORS)) {
-      const sig = signature(links);
+      const sig = signature([...links]);
       const previous = owner.get(sig);
       if (previous) collisions.push(`${page} and ${previous} share: ${sig.replace(/\|/g, ", ")}`);
       else owner.set(sig, page);

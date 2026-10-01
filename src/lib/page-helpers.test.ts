@@ -34,7 +34,7 @@ describe("buildPageMetadata", () => {
             alt: "MinBeregner.dk / Beräknare.se",
           },
         ]);
-        expect(metadata.twitter?.card).toBe("summary_large_image");
+        expect((metadata.twitter as { card?: string } | undefined)?.card).toBe("summary_large_image");
         expect(metadata.twitter?.images).toEqual(metadata.openGraph?.images);
       }
     }

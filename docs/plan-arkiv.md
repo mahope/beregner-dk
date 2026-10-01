@@ -22410,3 +22410,65 @@ Kildejerngang 1/10 09:33-09:50 (alle resultater i planens opgave 201):
 **Beslutning: ingen kodeændring.** En lovpåstand uden kilde er præcis den
 fejlklasse, der fyldte CEO-køens punkt 0 og sidste iterations "op fra 49.700
 kr"-strenge. Opgave 201 er skrevet med acceptkriterier og et ❓ til Mads.
+
+---
+
+## Afsluttet 1/10 — typecheck på testfiler (opgave 199 og 202)
+
+#### 199. [x] ✅ 1/10 05:38 — Next.js 15.5.25 → 16.3.8
+
+  **Hvad der rent faktisk ændrede sig:** (1) `src/middleware.ts` → `src/proxy.ts`
+  (funktionen hedder nu `proxy`, ellers intet) — Next 16's navnerename; proxyen
+  kører på `nodejs` og må ikke konfigureres, hvilket er ligegyldigt her fordi
+  koden kun bruger `NextResponse` og ren TS. De 15 tests i `proxy.test.ts` er
+  grønne uændret, inklusive Next's interne `x-middleware-request-x-locale`.
+  (2) `next build` bruger nu **Turbopack** som standard; der er ingen
+  webpack-config, så intet brød. (3) **Async Request APIs er fjernet helt** —
+  `headers()`, `params` og `searchParams` var alle allerede `await`et i denne
+  kodebase, så nul kildekode. (4) `<html>` fik
+  `data-scroll-behavior="smooth"`: `globals.css:89` har
+  `html { scroll-behavior: smooth }`, og Next 16 overskriver ikke længere den
+  egenskab under en klientnavigation — uden attributten ville **hvert** sidestik
+  rulle langsomt gennem siden. Ny port `layout-scroll.test.ts` låser begge
+  halve (mutation målt: attributten fjernet → testen rød). (5) `tsconfig.json`s
+  `exclude` fik `**/*.test.ts(x)` — se gaten. (6) `next-env.d.ts` er Next 16's
+  egen managed fil, regenereret af buildet.
+  **Ikke brudt:** 3.306 tests grønne i **begge** tidszoner, `locale-leak --gate`
+  exit 0, build exit 0. Røgsystemstest mod den byggede app: `/` 200, `/dato` 200,
+  `/dage-til/juleaften` 200, `/api/health` → `{"status":"ok"}`, og
+  `Host: beraknare.se` på `/dato` giver `<html lang="sv">` med svensk titel — så
+  proxyen sætter stadig `x-locale`/`x-hostname`.
+  **Ny advarsel i buildet:** `Custom Cache-Control headers detected … /_next/static/:path*`
+  (uændret hensigt — immutable statiske assets) og `optimizePackageImports`
+  står stadig under `experimental`.
+
+### Opgave 202 — typecheck på testfiler (fuld tekst fra planen)
+
+#### 202. [x] ✅ 1/10 07:50 — Kø — **testfilerne fik typekontrol igen, og de 76 reelle fejl blev rettet**
+
+- **Datagrund:** målt med en probe-tsconfig over `src/**/*.test.ts(x)`:
+  **401 fejl i 30 filer**. 325 af dem var jest-dom-matchere (`toBeRequired`,
+  `toHaveValue`, …) som tsc ikke kendte, fordi `vitest.setup.ts` ikke var i
+  programmet; **76 var reelle typefejl** i 15 filer. Fundet fra review 29/9
+  (MIDDEL) på `tsconfig.json:38-42`.
+- **Hvorfor:** `vitest` transpilerer med esbuild og type-tjekker ikke,
+  `biome lint` er en linter, og før denne opgave havde intet script rørt
+  testfilerne. Et omdøbt prop eller en udvidet `locale` kunne derfor have fået
+  en test til at køre mod det gamle navn — eller til at blive grøn på
+  `undefined`.
+- **Rettelse:** `tsconfig.test.json` (kun testfiler + `vitest.setup.ts`,
+  `types: ["vitest/globals"]`, `target: ES2018`), `npm run typecheck`, og de
+  76 fejl rettet ved konstruktion. `dage-til.test.ts` fik `eventById`,
+  `armOf` og `anchorOf`, som **kaster** i stedet for at give `undefined`.
+  `meta-description.test.ts` fik Vites `import.meta.glob` typet lokalt i stedet
+  for `vite/client` (den erklærer `glob` på `ImportMeta` og kan ikke coexistere
+  med en lokal deklaration under `skipLibCheck`).
+- **Accept:** (1) `npm run typecheck` exit 0, målt, (2) mutation rød —
+  `isoUgeMandag` → `isoUgeMandagTEMP` gav `TS2724 has no exported member named`,
+  (3) `lint` 0, `TZ=UTC npm run test` 3313 grønne / 202 filer, `next build`
+  grøn, (4) `typecheck` står i gaten i planens gate-afsnit.
+- **⚠️ Tilbagegang der er noteret:** `renderIn` i `label-a11y.test.tsx` er nu
+  `React.ElementType`, så de seks prop-krævende komponenter den renderer
+  prop-løst ikke længere prop-tjekkes. Ægte fix = valgfrie props i komponenterne.
+- **Ingen deploy-note:** ændringen rører kun tests, scripts og tsconfig —
+  produktionsoutput er uændret, så intet at verificere live.

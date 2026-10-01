@@ -1,50 +1,46 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — 1/10 09:50. **Én ny, målt lovfejl fundet (opgave 201).** Ingen kode
-leveret igen, og denne gang er grunden konkret, ikke "intet at finde".
+STATUS: KØ — 1/10 07:50. **Testfilerne har igen typekontrol** (opgave 202,
+`ceo/typecheck-testfiler`). Gaten har nu fem grønne trin.
 
-  **Opdagelsen:** `/dage-til/sommerferien` fortæller brugeren, at sommerferien
-  "altid begynder den **sidste lørdag i juni**", og `sommerferieStart()`
-  (`src/lib/dage-til.ts:1413-1423`) implementerer præcis den regel. Docblock'en
-  og to facts-strenge siger, at det er fastsat i **folkeskoleloven (2024)**. Den
-  regel er den *eneste* skoleferie-start på sitet, der hævder en fast
-  lovbestemt dato, så den skal kunne verificeres — og det kunne jeg ikke.
-  retsinformation.dk serverer SPA-skallen (`.xml`-varianten er skallen, 2.832
-  bytes), `undervisningsministeriet.dk` og `ferieinfo.dk`/`ferieloven.dk` svarer
-  transportfejl, `lovguiden.dk` **HTTP 429**, DuckDuckGo-lite og Google gav ingen
-  brugbare uddrag. **Jeg ændrer derfor intet**, fordi en lovpåstand uden kilde
-  præcis er den fejlklasse CEO-køens punkt 0 og sidste iterations 2025-tal er
-  lavet af. Opgave 201 står med den præcise afvejning.
+  **Hvad der skete:** `tsconfig.json` steger `*.test.ts(x)` væk, fordi Next 16
+  type-tjekker testfiler under `build` og bygget faldt på 85 fejl. Men da blev
+  den eneste typekontrol testfilerne havde lagt ned — `vitest` bruger esbuild,
+  `biome lint` er en linter, og intet script type-tjekkede dem. Målt nu med en
+  probe-tsconfig: **401 fejl i 30 filer**, hvor **325** var *én* fejlklasse —
+  `toBeRequired`/`toHaveValue`/300 andre jest-dom-matchere som tsc ikke kendte,
+  fordi `vitest.setup.ts` (som importerer `@testing-library/jest-dom/vitest`)
+  ikke var med i programmet. **76 var reelle**, fordelt på 15 filer.
 
-  **Målt i samme kørsel, ingen fejl:** 141 sitemap-URL'er hentet og deres
-  indgående `href` talt — **median 20 indgående interne links pr. side, nul
-  sider uden et eneste indgående link**. Den laveste er 1 (`/aegloesning` ←
-  `/kategori/familie`, `/planetvaegt` ← `/kategori/matematik`,
-  `/blog/privatoekonomi-for-unge` ← `/blog`). **Bemærk målerfælden:** footerens
-  linkliste gør `/om` og `/privatlivspolitik` til 139, så tallet må ikke læses
-  som PageRank — kun som "er der en klynge af oversete sider". Svar: ingen.
-  Link-grafen er sunn.
+  **Rettelsen:** `tsconfig.test.json` (kun testfiler + `vitest.setup.ts`,
+  `types: ["vitest/globals"]`, `target: ES2018` for regex-`s`-flaget), et
+  `typecheck`-script, og de 76 fejl rettet ved konstruktion — ikke ved
+  `any`. `dage-til.test.ts` (35 fejl) fik tre helpers (`eventById`, `armOf`,
+  `anchorOf`) der **kaster** i stedet for at returnere `undefined`, så en test
+  der peger på et omdøbt event fejler højt i stedet for at blive grøn på
+  `undefined` — præcis scenariet i fundet. Mutation målt: `isoUgeMandag` →
+  `isoUgeMandagTEMP` giver `TS2724 has no exported member named`, tilbage til
+  grøn. `npm run typecheck` exit 0, `lint` 0, `TZ=UTC npm run test` **3313
+  grønne**, `next build` grøn (de 7 CSS-advarsler er uændrede).
 
-  **De 19 `/dage-til/*`-sider er teknisk i orden** (målt på de fire mest
-  søgte): `<title>` har spørgsmålet *og* dagens tal ("Hvor mange dage er der til
-  juleaften 24. december? 84 dage"), `<meta description>` har samme tal,
-  canonical på sig selv, `hreflang da`+`sv`(+`x-default`) på juleaften/1.
-  december og korrekt kun `da`+`x-default` på de danske-only ferier, og alle har
-  `Answer` + `FAQPage` + `BreadcrumbList` + `WebPage`.
+  **⚠️ En afvejning, der skal være synlig:** `label-a11y.test.tsx`'s
+  `renderIn(locale, Component)` accepterede før kun komponenter *uden* props og
+  afviste dem med en typefejl; seks kaldersteder renderede komponenter med
+  påkrævede props (`officielleKurser`, `dstInflation?`) prop-løst. Signaturen er
+  nu `React.ElementType`, så de går igennem — og **de kaldersteder tjekker ikke
+  længere props**. Det er en reel tilbagegang i kontrol dér, skrevet ned i
+  `docs/plan-arkiv.md`; den ægte løsning er at gøre props valgfrie i de seks
+  komponenter.
 
-  **Åbne noter: 7**, alle med vindue **1/10 12:30** — denne iteration merger
-  før det, så ingen kan lukkes nu. De lukkes i næste iteration efter ét
-  `curl`-kald.
+  **Åbne noter: 7**, alle med vindue **1/10 12:30** — merger før det, så ingen
+  kan lukkes i denne iteration.
 
-  **Blokeret på Mads:** 97, 119, 183, F1, F5. **187 må ikke røres før 13/10.**
-  CEO-køens punkt 0 er lukket. 200s vej 1 er din Cloudflare-regel.
+  **Blokeret på Mads:** 97, 119, 183, 201, F1, F5. **187 må ikke røres før
+  13/10.** CEO-køens punkt 0 er lukket.
 
-  **⚠️ Målerfælde:** `/tidszone` er dynamisk (`no-store`), så `new Date()` i
-  dens JSX er ikke frosset ved build. Kun statiske sider må regne på et fast år.
-
-  **⚠️ Målerfælde (30/9 15:40).** `npm run test` kører `locale-leak-gate.test.ts`,
-  der med vilje planterer danske lækager. Derfor kommer `FEJL: n ureviewet(e)`-
-  blokke i output. Det er **ikke** fund i din diff. Kør gaten separat:
+  **⚠️ Målerfælde:** `npm run test` kører `locale-leak-gate.test.ts`, der med
+  vilje planterer danske lækager. Derfor kommer `FEJL: n ureviewet(e)`-blokke i
+  output. Det er **ikke** fund i din diff. Kør gaten separat:
   `node scripts/locale-leak.mjs --gate` (exit 0).
 
 ## Fase 3 — trafik-drevet
@@ -144,27 +140,29 @@ kaldes *ikke*-helgdag.
 ## Kvalitetsgate (repoets egne scripts fra package.json)
 
 ```
-npm run lint     # biome lint ./src      — 635 filer
-npm run test     # vitest run            — 3306 tests / 202 filer
+npm run lint        # biome lint ./src      — 635 filer
+npm run typecheck   # tsc --noEmit -p tsconfig.test.json — **kun testfiler**, 0 fejl
+npm run test        # vitest run            — 3313 tests / 202 filer
 TZ=UTC npm run test   # CI's ur — se målerfælden 1/10 i STATUS
-npm run build    # next build            — 138 ruter, **alle `ƒ` (dynamiske)**
+npm run build       # next build            — 138 ruter, **alle `ƒ` (dynamiske)**
 node scripts/locale-leak.mjs --gate       # exit 0
 ```
 
-**Rettet 1/10:** gaten sagde "143 statiske sider". `next build` på Next 16
-16.3.8 (Turbopack) giver **138 ruter, hvor 136 er `ƒ` og 2 er `○`**, og live
-serverer `/dato` med `no-store`. Tallene 143/"statiske" var fra en tidligere
-Next-version og beskrev ikke, hvad buildet faktisk lavede — se opgave 200.
+**`typecheck` er ny 1/10 (`ceo/typecheck-testfiler`) og er en del af gaten.**
+Den type-tjekker **kun** `src/**/*.test.ts(x)` — altså de filer
+`tsconfig.json`s `exclude` steger væk fra `next build`. Uden den var der ingen
+typekontrol af testfiler overhovedet; med den er der 0 fejl i 202 filer.
 
-**`tsc --noEmit` er ikke del af gaten, og `next build` tjekker ikke testfiler
-mere.** 1/10 05:30: med Next 16 type-tjekkede `next build` **alle 85 fejl i 18
+**Målt 1/10:** `next build` på Next 16.3.8 (Turbopack) giver **138 ruter,
+136 `ƒ` og 2 `○`** — se opgave 200. Testtal: **3313** (var 3306).
+
+**`next build` tjekker ikke testfiler mere** (1/10 05:30). 1/10 05:30: med Next 16 type-tjekkede `next build` **alle 85 fejl i 18
 `*.test.ts(x)`-filer** og bygget faldt — på Next 15 gjorde det ikke, så de fejl
 er arv fra mange commits (83 i den 1/10 02:04-måling, +2 fra siden da). Løsningen
 var ikke at rette 85 fejl i en opgraderings-commit, men at tage testfilerne ud af
 `tsconfig.json`s `exclude` — de skriver **ikke** til det kodede output, så de
-hører til vitest og ikke til skibsbuilden. **Mærket:** `tsc --noEmit` på
-testfiler er nu 0 i stedet for 85, så det tal i planen skal ikke bruges som
-kvalitetsmål mere. Ret testfilerne i en opgave for sig, hvis de skal have type.
+hører til vitest og ikke til skibsbuilden. **Løst 1/10 (`ceo/typecheck-testfiler`):** opgave 202 satte de manglende typer
+tilbage — se afsnittet "typecheck på testfiler" i `docs/plan-arkiv.md`.
 
 Sidens tekst kan regnes pr. request: `getPageData` løser `/alders
 {ALDER}`-pladsholdere ved hvert kald (se `src/lib/alder-side-tekst.ts`), så
@@ -172,11 +170,6 @@ et alders-tal i et snippet følger dagen. Dagens dato læses i sidens egen
 tidszone via `iDagISidensTidszone` — `tilIsoDato(new Date())` læser
 *serverens* tidszone og er et døgn bag mellem 00:00 og 02:00 dansk tid.
 
-`tsc --noEmit` er **ikke** del af gaten. Genmålt 1/10 02:04 på `master` og på
-`ceo/guides-til-store-beregnere` med `git stash -u` før og efter: **83 fejl i 18
-filer** begge steder, alle i `*.test.ts(x)`, ingen i de tre rørte filer. Planen
-sagde tidligere 82/17 og før det 72 — de ekstra kommer fra commits efter sidste
-måling, ikke fra denne ændring.
 
 ## Åbne VERIFICÉR DEPLOY-noter
 
@@ -380,32 +373,34 @@ alle 200, hver streng talt i markupken. Alle målinger står i
   med målinger, mutationer og de to sider der bevidst *ikke* blev koblet:
   `docs/plan-arkiv.md`, "Opgave 194".
 
-#### 199. [x] ✅ 1/10 05:38 — Next.js 15.5.25 → 16.3.8
+#### 202. [x] ✅ 1/10 07:50 — Kø — **testfilerne fik typekontrol igen, og de 76 reelle fejl blev rettet**
 
-  **Hvad der rent faktisk ændrede sig:** (1) `src/middleware.ts` → `src/proxy.ts`
-  (funktionen hedder nu `proxy`, ellers intet) — Next 16's navnerename; proxyen
-  kører på `nodejs` og må ikke konfigureres, hvilket er ligegyldigt her fordi
-  koden kun bruger `NextResponse` og ren TS. De 15 tests i `proxy.test.ts` er
-  grønne uændret, inklusive Next's interne `x-middleware-request-x-locale`.
-  (2) `next build` bruger nu **Turbopack** som standard; der er ingen
-  webpack-config, så intet brød. (3) **Async Request APIs er fjernet helt** —
-  `headers()`, `params` og `searchParams` var alle allerede `await`et i denne
-  kodebase, så nul kildekode. (4) `<html>` fik
-  `data-scroll-behavior="smooth"`: `globals.css:89` har
-  `html { scroll-behavior: smooth }`, og Next 16 overskriver ikke længere den
-  egenskab under en klientnavigation — uden attributten ville **hvert** sidestik
-  rulle langsomt gennem siden. Ny port `layout-scroll.test.ts` låser begge
-  halve (mutation målt: attributten fjernet → testen rød). (5) `tsconfig.json`s
-  `exclude` fik `**/*.test.ts(x)` — se gaten. (6) `next-env.d.ts` er Next 16's
-  egen managed fil, regenereret af buildet.
-  **Ikke brudt:** 3.306 tests grønne i **begge** tidszoner, `locale-leak --gate`
-  exit 0, build exit 0. Røgsystemstest mod den byggede app: `/` 200, `/dato` 200,
-  `/dage-til/juleaften` 200, `/api/health` → `{"status":"ok"}`, og
-  `Host: beraknare.se` på `/dato` giver `<html lang="sv">` med svensk titel — så
-  proxyen sætter stadig `x-locale`/`x-hostname`.
-  **Ny advarsel i buildet:** `Custom Cache-Control headers detected … /_next/static/:path*`
-  (uændret hensigt — immutable statiske assets) og `optimizePackageImports`
-  står stadig under `experimental`.
+- **Datagrund:** målt med en probe-tsconfig over `src/**/*.test.ts(x)`:
+  **401 fejl i 30 filer**. 325 af dem var jest-dom-matchere (`toBeRequired`,
+  `toHaveValue`, …) som tsc ikke kendte, fordi `vitest.setup.ts` ikke var i
+  programmet; **76 var reelle typefejl** i 15 filer. Fundet fra review 29/9
+  (MIDDEL) på `tsconfig.json:38-42`.
+- **Hvorfor:** `vitest` transpilerer med esbuild og type-tjekker ikke,
+  `biome lint` er en linter, og før denne opgave havde intet script rørt
+  testfilerne. Et omdøbt prop eller en udvidet `locale` kunne derfor have fået
+  en test til at køre mod det gamle navn — eller til at blive grøn på
+  `undefined`.
+- **Rettelse:** `tsconfig.test.json` (kun testfiler + `vitest.setup.ts`,
+  `types: ["vitest/globals"]`, `target: ES2018`), `npm run typecheck`, og de
+  76 fejl rettet ved konstruktion. `dage-til.test.ts` fik `eventById`,
+  `armOf` og `anchorOf`, som **kaster** i stedet for at give `undefined`.
+  `meta-description.test.ts` fik Vites `import.meta.glob` typet lokalt i stedet
+  for `vite/client` (den erklærer `glob` på `ImportMeta` og kan ikke coexistere
+  med en lokal deklaration under `skipLibCheck`).
+- **Accept:** (1) `npm run typecheck` exit 0, målt, (2) mutation rød —
+  `isoUgeMandag` → `isoUgeMandagTEMP` gav `TS2724 has no exported member named`,
+  (3) `lint` 0, `TZ=UTC npm run test` 3313 grønne / 202 filer, `next build`
+  grøn, (4) `typecheck` står i gaten i planens gate-afsnit.
+- **⚠️ Tilbagegang der er noteret:** `renderIn` i `label-a11y.test.tsx` er nu
+  `React.ElementType`, så de seks prop-krævende komponenter den renderer
+  prop-løst ikke længere prop-tjekkes. Ægte fix = valgfrie props i komponenterne.
+- **Ingen deploy-note:** ændringen rører kun tests, scripts og tsconfig —
+  produktionsoutput er uændret, så intet at verificere live.
 
 #### 201. [ ] I GANG — Kø — **verificér sommerferiens startdato mod loven, før den bruges som countdown**
 
@@ -443,6 +438,27 @@ alle 200, hver streng talt i markupken. Alle målinger står i
   så baseline er 0 Google-visninger; Plausible har ingen måling for den endnu.
   `/dato` er klyngens moderside: 1.127 besøgende/28d, bounce 4 %, GSC
   134.567 visninger / 880 klik / CTR 0,7 % / pos. 5,7 (2026-10-01).
+
+#### 203. [ ] 1/10 — Kø — **`/loen-efter-skat` skal ikke blande to kilder i samme afsnit**
+
+- **Fund:** review 29/9 (LAV), `src/app/loen-efter-skat/page.tsx:120-124`.
+  Sætningen siger «Landsgennemsnittet er ca. 25,049 %» læst fra
+  `SATSER_2026.kommuneskatSnit`, og næste sætning «Den billigste kommune ligger på
+  22,5 % / 27,8 % er den dyreste» læst fra `KOMMUNER`. Målt med `npx tsx`:
+  `KOMMUNER` har **98** rækker med egen middelværdi **25,63 %** — de to tal kan
+  ikke begge være sande om de 98 rækker, og en læser f dem ikke til at hænge
+  sammen. Et vægtet landsgennemsnit *kan* afvige fra et uvægtet middeltal, men
+  siden siger det ikke.
+- **Rettelse:** skriv «Gennemsnit for de 98 kommuner i vores tabel: 25,63 %» —
+  et tal læst fra `KOMMUNER`, så det ikke kan glide fra tabellen — og behold
+  svmn.dk-tallet som en kildeagtig linje med link, eller lad det være.
+  Samme port som `fact-consistency.test.ts` bør dømme på: to tal i samme afsnit
+  om samme population skal komme fra samme kilde.
+- **Accept:** (1) tallet læses fra `KOMMUNER` i koden, (2) en port i
+  `fact-consistency.test.ts` dømmer på det, (3) mutation målt rød, (4) gaten grøn.
+- **MÅL:** `/loen-efter-skat` — ikke i GSC's top-16; Plausible har ingen måling
+  for den. Siden er statisk indhold, så effekten er kun indirekte via `/dato`- og
+  `/boliglaan`-links.
 
 #### 200. [ ] 1/10 — Kø — **siteet er 100 % dynamisk; intet kan caches på kanten**
 

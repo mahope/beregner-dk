@@ -110,7 +110,7 @@ function h1Antal(html: string): number {
  * `<h1>`-kontekst for at efterligne siden. `<h1>`-taggen er med for at give
  * målingen det den måler på live: spring *fra* h1.
  */
-function renderSomSide(Comp: () => React.ReactElement | null): string {
+function renderSomSide(Comp: React.ElementType): string {
   return renderToStaticMarkup(
     <LocaleProvider locale="da" domainConfig={daDomain}>
       <h1>Side</h1>

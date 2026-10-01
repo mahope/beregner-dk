@@ -147,7 +147,7 @@ describe("/braendstof FAQ", () => {
   it("dansk og norsk: besparelsen er lavere mod diesel end mod benzin", () => {
     // I Sverige er rækkefølgen omvendt, fordi diesel kostar mere pr. liter end bensin.
     // Derfor må testen være hård på de to sprog, hvor den gælder.
-    for (const locale of ["da", "no"]) {
+    for (const locale of ["da", "no"] as const) {
       const svar = elSvar(locale);
       const benzinPct = svar.indexOf(`${medKomma(besparelseProcent("benzin"))} %`);
       const dieselPct = svar.indexOf(`${medKomma(besparelseProcent("diesel"))} %`);

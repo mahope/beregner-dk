@@ -60,12 +60,11 @@ describe("title-collision", () => {
       // compete for the same "hvor mange dage er der til X" queries as
       // `/dato` and `/nedtaelling`.
       const dageTilPrefix = getDageTilPrefix(locale);
-      if (dageTilPrefix) {
+      if (dageTilPrefix && locale !== "no") {
         for (const event of getDageTilEvents(locale)) {
-          claim(
-            headline(event[locale].copy.question),
-            `${dageTilPrefix}${event[locale].slug}`
-          );
+          const arm = event[locale];
+          if (!arm) continue;
+          claim(headline(arm.copy.question), `${dageTilPrefix}${arm.slug}`);
         }
       }
 

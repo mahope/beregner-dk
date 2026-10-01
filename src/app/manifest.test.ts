@@ -61,9 +61,8 @@ describe("web manifest", () => {
     // real catalog is a false claim shipped in a fetched document.
     for (const host of HOSTS) {
       const locale = getDomainConfig(host).locale;
-      const stated = Number(
-        (await manifestFor(host)).description.match(/(\d+)\+/)?.[1],
-      );
+      const beskrivelse = String((await manifestFor(host)).description ?? "");
+      const stated = Number(beskrivelse.match(/(\d+)\+/)?.[1]);
       expect(stated, host).toBeGreaterThanOrEqual(
         getHomeCalculatorCount(locale),
       );

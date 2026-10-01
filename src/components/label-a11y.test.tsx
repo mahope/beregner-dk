@@ -91,7 +91,7 @@ Object.defineProperty(document, "execCommand", {
   writable: true,
 });
 
-function renderIn(locale: "da" | "se", Component: () => React.JSX.Element) {
+function renderIn(locale: "da" | "se", Component: React.ElementType) {
   return render(
     <LocaleProvider locale={locale} domainConfig={domainConfig}>
       <Component />
@@ -702,7 +702,7 @@ describe("Feltnavn for skærmlæsere — de fire mest besøgte beregnere", () =>
         const gruppe = screen.getByRole("group", { name: VELG_VISNING[locale] });
         expect(gruppe.querySelectorAll("button").length).toBe(2);
         // Knapperne skal stadig skifte visning, ellers navngiver vi døde ting.
-        fireEvent.click(screen.getByText(locale === "se" ? "Vad har jag råd med?" : locale === "no" ? "Hva har jeg råd til?" : "Hvad har jeg råd til?"));
+        fireEvent.click(screen.getByText(locale === "se" ? "Vad har jag råd med?" : "Hvad har jeg råd til?"));
         expect(gruppe.querySelectorAll("button").length).toBe(2);
       });
 

@@ -1,6 +1,9 @@
 import { describe, expect, test } from "vitest";
 import {
   DAGE_TIL_EVENTS,
+  type DageTilAnchor,
+  type DageTilEvent,
+  type DageTilLocaleArm,
   dageTilbageIAaret,
   daysBetween,
   easterSunday,
@@ -22,6 +25,28 @@ import {
 const iso = (value: string) => new Date(`${value}T00:00:00.000Z`);
 const dayMs = 86_400_000;
 const toISO = (date: Date) => date.toISOString().slice(0, 10);
+
+// `anchor.se` and `se` are optional on the type, because some dates only have
+// a Danish answer. These three helpers throw instead of yielding `undefined`,
+// so a test that points at a renamed or removed event fails loudly rather than
+// asserting against `undefined`.
+const eventById = (id: string): DageTilEvent => {
+  const event = DAGE_TIL_EVENTS.find((e) => e.id === id);
+  if (!event) throw new Error(`DAGE_TIL_EVENTS mangler "${id}"`);
+  return event;
+};
+
+const armOf = (event: DageTilEvent, locale: "da" | "se"): DageTilLocaleArm => {
+  const arm = event[locale];
+  if (!arm) throw new Error(`"${event.id}" mangler ${locale}-arm`);
+  return arm;
+};
+
+const anchorOf = (event: DageTilEvent, locale: "da" | "se"): DageTilAnchor => {
+  const anchor = event.anchor[locale];
+  if (!anchor) throw new Error(`"${event.id}" mangler ${locale}-anchor`);
+  return anchor;
+};
 
 describe("easterSunday", () => {
   test.each([
@@ -81,16 +106,16 @@ describe("midsommarafton", () => {
     expect(afton).toBeDefined();
     expect(dagen).toBeDefined();
     for (const locale of ["da", "se"] as const) {
-      const fra = getNextAnchorDate(afton!.anchor[locale], iso("2027-01-15"));
-      const til = getNextAnchorDate(dagen!.anchor[locale], iso("2027-01-15"));
+      const fra = getNextAnchorDate(anchorOf(afton!, locale), iso("2027-01-15"));
+      const til = getNextAnchorDate(anchorOf(dagen!, locale), iso("2027-01-15"));
       expect((til.getTime() - fra.getTime()) / dayMs).toBe(1);
     }
     // Dansk sankthans er fast 23./24. juni; svensk midsummer er fredagen mellem
     // 19. og 25. juni. I 2027 er de to sprog derfor på hver sin dato.
-    expect(toISO(getNextAnchorDate(afton!.anchor.da, iso("2027-01-15")))).toBe("2027-06-23");
-    expect(toISO(getNextAnchorDate(dagen!.anchor.da, iso("2027-01-15")))).toBe("2027-06-24");
-    expect(toISO(getNextAnchorDate(afton!.anchor.se, iso("2027-01-15")))).toBe("2027-06-25");
-    expect(toISO(getNextAnchorDate(dagen!.anchor.se, iso("2027-01-15")))).toBe("2027-06-26");
+    expect(toISO(getNextAnchorDate(anchorOf(afton!, "da"), iso("2027-01-15")))).toBe("2027-06-23");
+    expect(toISO(getNextAnchorDate(anchorOf(dagen!, "da"), iso("2027-01-15")))).toBe("2027-06-24");
+    expect(toISO(getNextAnchorDate(anchorOf(afton!, "se"), iso("2027-01-15")))).toBe("2027-06-25");
+    expect(toISO(getNextAnchorDate(anchorOf(dagen!, "se"), iso("2027-01-15")))).toBe("2027-06-26");
   });
 
   test("begge sprog har deres eget slug med sit eget spørgsmål", () => {
@@ -104,7 +129,7 @@ describe("midsommarafton", () => {
     expect(getDageTilEventBySlug("sankthansaftensdag", "da")?.id).toBe("midsommarafton");
     for (const event of [afton!, dagen!]) {
       for (const locale of ["da", "se"] as const) {
-        expect(event[locale].copy.question).toContain(event[locale].copy.short);
+        expect(armOf(event, locale).copy.question).toContain(armOf(event, locale).copy.short);
       }
     }
   });
@@ -160,7 +185,7 @@ describe("forstaAdvent", () => {
     const advent = DAGE_TIL_EVENTS.find((e) => e.id === "advent");
     expect(advent).toBeDefined();
     for (const locale of ["da", "se"] as const) {
-      const anchor = advent!.anchor[locale];
+      const anchor = anchorOf(advent!, locale);
       expect(anchor.kind).toBe("advent");
       expect(toISO(getNextAnchorDate(anchor, iso("2026-09-25")))).toBe("2026-11-29");
       // Efter 1. advent er næste søndag 2. advent — altså ikke 1. december.
@@ -205,15 +230,15 @@ describe("påskafton", () => {
     expect(paskedag).toBeDefined();
     const iDag = iso("2027-01-15");
     for (const locale of ["da", "se"] as const) {
-      const torsdag = getNextAnchorDate(skaertorsdag!.anchor[locale], iDag);
-      const fredag = getNextAnchorDate(paskafton!.anchor[locale], iDag);
-      const sondag = getNextAnchorDate(paskedag!.anchor[locale], iDag);
+      const torsdag = getNextAnchorDate(anchorOf(skaertorsdag!, locale), iDag);
+      const fredag = getNextAnchorDate(anchorOf(paskafton!, locale), iDag);
+      const sondag = getNextAnchorDate(anchorOf(paskedag!, locale), iDag);
       expect(sondag.getTime() - fredag.getTime()).toBeLessThanOrEqual(2 * dayMs);
       expect(fredag.getTime()).toBeGreaterThan(torsdag.getTime());
     }
     // Dansk langfredag er påskedag minus 2 dage, svensk påskafton minus 1.
-    expect(toISO(getNextAnchorDate(paskafton!.anchor.da, iDag))).toBe("2027-03-26");
-    expect(toISO(getNextAnchorDate(paskafton!.anchor.se, iDag))).toBe("2027-03-27");
+    expect(toISO(getNextAnchorDate(anchorOf(paskafton!, "da"), iDag))).toBe("2027-03-26");
+    expect(toISO(getNextAnchorDate(anchorOf(paskafton!, "se"), iDag))).toBe("2027-03-27");
   });
 
   test("begge sprog har deres eget slug, og de to navne er hver sin dato", () => {
@@ -222,21 +247,21 @@ describe("påskafton", () => {
     expect(getDageTilSlugs("se")).toContain("paskafton");
     // Svensk påskafton er lørdagen, dansk langfredag er fredagen dagen før —
     // de er to forskellige datoer, så hvert sprog har sit eget slug.
-    expect(paskafton!.da.slug).toBe("langfredag");
-    expect(paskafton!.se.slug).toBe("paskafton");
+    expect(armOf(paskafton!, "da").slug).toBe("langfredag");
+    expect(armOf(paskafton!, "se").slug).toBe("paskafton");
     expect(resolveDageTilSlug("langfredag", "se")?.localeSlug).toBe("paskafton");
     expect(resolveDageTilSlug("paskafton", "da")?.localeSlug).toBe("langfredag");
     for (const locale of ["da", "se"] as const) {
-      expect(paskafton![locale].copy.question).toContain(
-        paskafton![locale].copy.short
+      expect(armOf(paskafton!, locale).copy.question).toContain(
+        armOf(paskafton!, locale).copy.short
       );
     }
   });
 
   test("begge sprog kalder den anden, så læseren ikke tror de er samme dag", () => {
     const paskafton = DAGE_TIL_EVENTS.find((e) => e.id === "paskafton");
-    expect(paskafton!.se.copy.facts.join(" ")).toContain("Långfredagen");
-    expect(paskafton!.se.copy.facts.join(" ")).toContain("1 dag före");
+    expect(armOf(paskafton!, "se").copy.facts.join(" ")).toContain("Långfredagen");
+    expect(armOf(paskafton!, "se").copy.facts.join(" ")).toContain("1 dag före");
   });
 });
 
@@ -245,16 +270,16 @@ describe("valborg", () => {
     const valborg = DAGE_TIL_EVENTS.find((e) => e.id === "valborg");
     expect(valborg).toBeDefined();
     for (const locale of ["da", "se"] as const) {
-      expect(valborg!.anchor[locale]).toEqual({
+      expect(anchorOf(valborg!, locale)).toEqual({
         kind: "fixed",
         month: 4,
         day: 30,
         offsetDays: 0,
       });
-      expect(toISO(getNextAnchorDate(valborg!.anchor[locale], iso("2026-09-25")))).toBe(
+      expect(toISO(getNextAnchorDate(anchorOf(valborg!, locale), iso("2026-09-25")))).toBe(
         "2027-04-30"
       );
-      expect(toISO(getNextAnchorDate(valborg!.anchor[locale], iso("2026-04-29")))).toBe(
+      expect(toISO(getNextAnchorDate(anchorOf(valborg!, locale), iso("2026-04-29")))).toBe(
         "2026-04-30"
       );
     }
@@ -283,8 +308,8 @@ describe("valborg", () => {
     const valborg = DAGE_TIL_EVENTS.find((e) => e.id === "valborg")!;
     for (const locale of ["da", "se"] as const) {
       const tekst = [
-        ...valborg[locale].copy.facts,
-        ...valborg[locale].copy.faq.map((f) => `${f.question} ${f.answer}`),
+        armOf(valborg!, locale).copy.facts,
+        armOf(valborg!, locale).copy.faq.map((f) => `${f.question} ${f.answer}`),
       ].join(" ");
       expect(tekst).toContain(locale === "da" ? "30. april" : "30 april");
       expect(tekst).toMatch(/51-82 dage|51-82 dagar/);
@@ -513,10 +538,10 @@ describe("slug-opløsning", () => {
     expect(juleaften).toBeDefined();
     expect(juledagen).toBeDefined();
     for (const locale of ["da", "se"] as const) {
-      expect(getDageTilSlugs(locale)).toContain(juleaften![locale].slug);
-      expect(juleaften![locale].copy.question).toContain(juleaften![locale].copy.short);
-      const from = getNextAnchorDate(juleaften!.anchor[locale], iso("2026-09-25"));
-      const to = getNextAnchorDate(juledagen!.anchor[locale], iso("2026-09-25"));
+      expect(getDageTilSlugs(locale)).toContain(armOf(juleaften!, locale).slug);
+      expect(armOf(juleaften!, locale).copy.question).toContain( armOf(juleaften!, locale).copy.short);
+      const from = getNextAnchorDate(anchorOf(juleaften!, locale), iso("2026-09-25"));
+      const to = getNextAnchorDate(anchorOf(juledagen!, locale), iso("2026-09-25"));
       expect((to.getTime() - from.getTime()) / dayMs).toBe(1);
       expect(getDageTilAnswer(juleaften!, locale, iso("2026-09-25")).days).toBe(90);
     }
@@ -526,14 +551,14 @@ describe("slug-opløsning", () => {
     const halloween = DAGE_TIL_EVENTS.find((e) => e.id === "halloween");
     expect(halloween).toBeDefined();
     for (const locale of ["da", "se"] as const) {
-      expect(halloween!.anchor[locale]).toMatchObject({
+      expect(anchorOf(halloween!, locale)).toMatchObject({
         kind: "fixed",
         month: 10,
         day: 31,
       });
-      expect(getDageTilSlugs(locale)).toContain(halloween![locale].slug);
-      expect(halloween![locale].copy.question).toContain(
-        halloween![locale].copy.short
+      expect(getDageTilSlugs(locale)).toContain(armOf(halloween!, locale).slug);
+      expect(armOf(halloween!, locale).copy.question).toContain(
+        armOf(halloween!, locale).copy.short
       );
     }
   });
@@ -557,8 +582,8 @@ describe("slug-opløsning", () => {
     const foerveksling = { da: "1. november", se: "1 november" } as const;
     for (const locale of ["da", "se"] as const) {
       const tekst = [
-        ...halloween[locale].copy.facts,
-        ...halloween[locale].copy.faq.map((item) => `${item.question} ${item.answer}`),
+        armOf(halloween!, locale).copy.facts,
+        armOf(halloween!, locale).copy.faq.map((item) => `${item.question} ${item.answer}`),
       ].join(" ");
       expect(tekst).toContain(foerveksling[locale]);
     }
@@ -581,7 +606,7 @@ describe("slug-opløsning", () => {
 describe("dato-anker", () => {
   test("alle computérbare events ligger i et realistisk interval", () => {
     for (const event of DAGE_TIL_EVENTS) {
-      const anchor = getNextAnchorDate(event.anchor.da, iso("2026-09-25"));
+      const anchor = getNextAnchorDate(anchorOf(event, "da"), iso("2026-09-25"));
       const days = (anchor.getTime() - iso("2026-09-25").getTime()) / dayMs;
       expect(days).toBeGreaterThanOrEqual(0);
       expect(days).toBeLessThan(400);
@@ -950,7 +975,7 @@ describe("skolestart som dansk dato", () => {
       offsetDays: 0,
     });
     for (let year = 1990; year <= 2050; year++) {
-      expect(toISO(getNextAnchorDate(start!.anchor.da, iso(`${year}-01-05`)))).toBe(
+      expect(toISO(getNextAnchorDate(anchorOf(start!, "da"), iso(`${year}-01-05`)))).toBe(
         `${year}-08-01`
       );
     }
@@ -1100,7 +1125,7 @@ describe("kristi himmelfartsdag i begge sprog", () => {
     ];
     for (const [aar, forventet] of PUBLICERET) {
       expect(
-        toISO(getNextAnchorDate(kristi!.anchor.da, iso(`${aar}-01-05`))),
+        toISO(getNextAnchorDate(anchorOf(kristi!, "da"), iso(`${aar}-01-05`))),
         `kristi himmelfartsdag ${aar}`
       ).toBe(forventet);
     }
@@ -1110,7 +1135,7 @@ describe("kristi himmelfartsdag i begge sprog", () => {
   // så den skal gælde hele året og ikke for de tre år teksten nævner.
   test("er altid en torsdag, og altid 39 dage efter påskedag", () => {
     for (let aar = 1990; aar <= 2050; aar++) {
-      const dato = getNextAnchorDate(kristi!.anchor.da, iso(`${aar}-01-05`));
+      const dato = getNextAnchorDate(anchorOf(kristi!, "da"), iso(`${aar}-01-05`));
       expect(dato.getUTCDay(), `ugedag ${aar}`).toBe(4);
       expect(daysBetween(easterSunday(aar), dato), `afstand ${aar}`).toBe(39);
     }
@@ -1123,7 +1148,7 @@ describe("kristi himmelfartsdag i begge sprog", () => {
     let senest = "";
     for (let aar = 1990; aar <= 2050; aar++) {
       const isoDato = toISO(
-        getNextAnchorDate(kristi!.anchor.da, iso(`${aar}-01-05`))
+        getNextAnchorDate(anchorOf(kristi!, "da"), iso(`${aar}-01-05`))
       );
       if (!tidligst || isoDato.slice(5) < tidligst.slice(5)) tidligst = isoDato;
       if (!senest || isoDato.slice(5) > senest.slice(5)) senest = isoDato;
@@ -1142,7 +1167,7 @@ describe("kristi himmelfartsdag i begge sprog", () => {
   // Pinsedag er påskedag + 49, så forskellen er 10 — hvert år.
   test("ligger altid 10 dage før pinsedag", () => {
     for (let aar = 1990; aar <= 2050; aar++) {
-      const kristiDato = getNextAnchorDate(kristi!.anchor.da, iso(`${aar}-01-05`));
+      const kristiDato = getNextAnchorDate(anchorOf(kristi!, "da"), iso(`${aar}-01-05`));
       const pinse = new Date(easterSunday(aar).getTime() + 49 * dayMs);
       expect(daysBetween(kristiDato, pinse), `til pinsedag ${aar}`).toBe(10);
     }
@@ -1158,7 +1183,7 @@ describe("kristi himmelfartsdag i begge sprog", () => {
     ] as const) {
       const fakta = arm.copy.facts.join(" ");
       for (const aar of [2026, 2027, 2028]) {
-        const dato = getNextAnchorDate(kristi!.anchor.da, iso(`${aar}-01-05`));
+        const dato = getNextAnchorDate(anchorOf(kristi!, "da"), iso(`${aar}-01-05`));
         const formateret = medPunkt
           ? `${dato.getUTCDate()}. ${maaneder[dato.getUTCMonth()]}`
           : `${dato.getUTCDate()} ${maaneder[dato.getUTCMonth()]}`;
@@ -1319,7 +1344,7 @@ describe("pinse i begge sprog", () => {
   // dage. 50 mod 7 er 1, så det er altid en mandag. Målt over 61 år.
   test("2. pinsedag er altid en mandag, altid påskedag plus 50", () => {
     for (let aar = 1990; aar <= 2050; aar++) {
-      const dato = getNextAnchorDate(pinse!.anchor.da, iso(`${aar}-01-05`));
+      const dato = getNextAnchorDate(anchorOf(pinse!, "da"), iso(`${aar}-01-05`));
       expect(dato.getUTCDay(), `ugedag ${aar}`).toBe(1);
       expect(daysBetween(easterSunday(aar), dato), `afstand ${aar}`).toBe(50);
     }
@@ -1329,7 +1354,7 @@ describe("pinse i begge sprog", () => {
   // 49 mod 7 er 0, så den er altid en søndag. Målt over 61 år.
   test("pingstdagen er altid en søndag, altid påskedag plus 49", () => {
     for (let aar = 1990; aar <= 2050; aar++) {
-      const dato = getNextAnchorDate(pinse!.anchor.se!, iso(`${aar}-01-05`));
+      const dato = getNextAnchorDate(anchorOf(pinse!, "se")!, iso(`${aar}-01-05`));
       expect(dato.getUTCDay(), `ugedag ${aar}`).toBe(0);
       expect(daysBetween(easterSunday(aar), dato), `afstand ${aar}`).toBe(49);
     }
@@ -1339,8 +1364,8 @@ describe("pinse i begge sprog", () => {
   // forskellen mellem de to arme, så det er den samme påstand to steder.
   test("pinsedagen ligger altid 1 dag før 2. pinsedag", () => {
     for (let aar = 1990; aar <= 2050; aar++) {
-      const da = getNextAnchorDate(pinse!.anchor.da, iso(`${aar}-01-05`));
-      const se = getNextAnchorDate(pinse!.anchor.se!, iso(`${aar}-01-05`));
+      const da = getNextAnchorDate(anchorOf(pinse!, "da"), iso(`${aar}-01-05`));
+      const se = getNextAnchorDate(anchorOf(pinse!, "se")!, iso(`${aar}-01-05`));
       expect(toISO(se)).toBe(toISO(new Date(da.getTime() - dayMs)));
       expect(daysBetween(se, da), `afstand ${aar}`).toBe(1);
     }
@@ -1357,8 +1382,8 @@ describe("pinse i begge sprog", () => {
     let seTidligst = "";
     let seSenest = "";
     for (let aar = 1990; aar <= 2050; aar++) {
-      const isoDa = toISO(getNextAnchorDate(pinse!.anchor.da, iso(`${aar}-01-05`)));
-      const isoSe = toISO(getNextAnchorDate(pinse!.anchor.se!, iso(`${aar}-01-05`)));
+      const isoDa = toISO(getNextAnchorDate(anchorOf(pinse!, "da"), iso(`${aar}-01-05`)));
+      const isoSe = toISO(getNextAnchorDate(anchorOf(pinse!, "se")!, iso(`${aar}-01-05`)));
       if (!daTidligst || isoDa.slice(5) < daTidligst.slice(5)) daTidligst = isoDa;
       if (!daSenest || isoDa.slice(5) > daSenest.slice(5)) daSenest = isoDa;
       if (!seTidligst || isoSe.slice(5) < seTidligst.slice(5)) seTidligst = isoSe;
@@ -1388,8 +1413,8 @@ describe("pinse i begge sprog", () => {
     const da = new Set<number>();
     const se = new Set<number>();
     for (let aar = 1990; aar <= 2050; aar++) {
-      da.add(uge(getNextAnchorDate(pinse!.anchor.da, iso(`${aar}-01-05`))));
-      se.add(uge(getNextAnchorDate(pinse!.anchor.se!, iso(`${aar}-01-05`))));
+      da.add(uge(getNextAnchorDate(anchorOf(pinse!, "da"), iso(`${aar}-01-05`))));
+      se.add(uge(getNextAnchorDate(anchorOf(pinse!, "se")!, iso(`${aar}-01-05`))));
     }
     expect(Math.min(...da)).toBe(20);
     expect(Math.max(...da)).toBe(24);
@@ -1404,8 +1429,8 @@ describe("pinse i begge sprog", () => {
   // siger det samme med sit eget datoformat, så den låses samtidig.
   test("de tre datoer i begge sprog er kalkens egne tal", () => {
     for (const [arm, anchor, medPunkt, maaneder] of [
-      [pinse!.da, pinse!.anchor.da, true, MAANEDER],
-      [pinse!.se!, pinse!.anchor.se!, false, MAANEDER_SE],
+      [pinse!.da, anchorOf(pinse!, "da"), true, MAANEDER],
+      [pinse!.se!, anchorOf(pinse!, "se")!, false, MAANEDER_SE],
     ] as const) {
       const fakta = arm.copy.facts.join(" ");
       for (const aar of [2026, 2027, 2028]) {
@@ -1429,11 +1454,11 @@ describe("pinse i begge sprog", () => {
     for (let aar = 1990; aar <= 2050; aar++) {
       const kristiDato = new Date(easterSunday(aar).getTime() + 39 * dayMs);
       expect(
-        daysBetween(kristiDato, getNextAnchorDate(pinse!.anchor.da, iso(`${aar}-01-05`))),
+        daysBetween(kristiDato, getNextAnchorDate(anchorOf(pinse!, "da"), iso(`${aar}-01-05`))),
         `dansk ${aar}`
       ).toBe(11);
       expect(
-        daysBetween(kristiDato, getNextAnchorDate(pinse!.anchor.se!, iso(`${aar}-01-05`))),
+        daysBetween(kristiDato, getNextAnchorDate(anchorOf(pinse!, "se")!, iso(`${aar}-01-05`))),
         `svensk ${aar}`
       ).toBe(10);
     }
@@ -1442,8 +1467,8 @@ describe("pinse i begge sprog", () => {
   // FAQ'ens to konkrete datoer (påskedagen og målet) er kalkens egne tal.
   test("de to datoer i hver FAQ er påskedagen og målet", () => {
     for (const [arm, anchor, medPunkt, maaneder, offset] of [
-      [pinse!.da, pinse!.anchor.da, true, MAANEDER, 50],
-      [pinse!.se!, pinse!.anchor.se!, false, MAANEDER_SE, 49],
+      [pinse!.da, anchorOf(pinse!, "da"), true, MAANEDER, 50],
+      [pinse!.se!, anchorOf(pinse!, "se")!, false, MAANEDER_SE, 49],
     ] as const) {
       const svar = arm.copy.faq[0].answer;
       const påske = easterSunday(2027);
@@ -1473,7 +1498,7 @@ describe("pinse i begge sprog", () => {
         pinse!,
         locale,
         iso(toISO(getNextAnchorDate(
-          locale === "da" ? pinse!.anchor.da : pinse!.anchor.se!,
+          locale === "da" ? anchorOf(pinse!, "da") : anchorOf(pinse!, "se")!,
           iso("2026-01-05")
         ))),
       );
@@ -1557,13 +1582,13 @@ describe("events uden svensk udgave", () => {
   test("hvert event har altid en dansk udgave", () => {
     for (const event of DAGE_TIL_EVENTS) {
       expect(event.da).toBeDefined();
-      expect(event.anchor.da).toBeDefined();
+      expect(anchorOf(event, "da")).toBeDefined();
     }
   });
 
   test("et event med svensk slug har også et svensk anker", () => {
     for (const event of DAGE_TIL_EVENTS) {
-      if (event.se) expect(event.anchor.se).toBeDefined();
+      if (event.se) expect(anchorOf(event, "se")).toBeDefined();
     }
   });
 });
@@ -2012,7 +2037,7 @@ describe("ugedags-påstande mod de datoer ankeret producerer", () => {
       for (const { id, helg, forbehold, betingelse } of sprog) {
         const arm = id === "da" ? event.da : event.se;
         if (!arm) continue;
-        const mulige = muligeUgedage(event.anchor[id]);
+        const mulige = muligeUgedage(anchorOf(event, id));
         const kanVæreWeekend = [...mulige].some((dag) => !hverdagsDage.has(dag));
         if (!kanVæreWeekend) continue;
         for (const tekst of alleTekster(arm)) {
@@ -2041,7 +2066,7 @@ describe("ugedags-påstande mod de datoer ankeret producerer", () => {
         ["se", event.se, UGEDAG_SE],
       ] as const) {
         if (!arm) continue;
-        const mulige = muligeUgedage(event.anchor[id]);
+        const mulige = muligeUgedage(anchorOf(event, id));
         for (const faq of arm.copy.faq) {
           const spg = new RegExp(`\\b(?:er|är) .* en (${ugedage.join("|")})\\?`, "i").exec(
             faq.question
@@ -2068,7 +2093,7 @@ describe("ugedags-påstande mod de datoer ankeret producerer", () => {
     const faq = skaertorsdag?.da.copy.faq.find((f) => f.question.includes("fridag"));
     expect(faq).toBeDefined();
     expect(faq?.answer.startsWith("Nej")).toBe(true);
-    expect(muligeUgedage(skaertorsdag!.anchor.da)).toEqual(new Set([4]));
+    expect(muligeUgedage(anchorOf(skaertorsdag!, "da"))).toEqual(new Set([4]));
     expect(FRIDAG_DA).not.toBe(4);
   });
 });

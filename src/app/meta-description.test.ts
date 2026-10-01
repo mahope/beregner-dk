@@ -62,7 +62,14 @@ type SideModul = {
   }) => Promise<{ description?: unknown }>;
 };
 
-const PAGE_MODULER = import.meta.glob<SideModul>("./**/page.tsx");
+// Vite's `import.meta.glob` type is a set of overloads that never take the
+// module type as its single type argument, so the loader is typed here. Same
+// shape as the transform itself: one lazy loader per matched path.
+const PAGE_MODULER = (
+  import.meta.glob as unknown as (
+    pattern: string,
+  ) => Record<string, () => Promise<SideModul>>
+)("./**/page.tsx");
 
 function ruteFor(nøgle: string): string {
   return `/${nøgle.replace(/^\.\//, "").replace(/page\.tsx$/, "").replace(/\/$/, "")}`;

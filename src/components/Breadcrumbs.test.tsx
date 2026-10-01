@@ -13,7 +13,7 @@ vi.mock("@/lib/get-locale", () => ({
 const da = getDomainConfigByLocale("da");
 const se = getDomainConfigByLocale("se");
 
-async function render(locale: "da" | "se", items: { name: string; href: string }[]) {
+async function render(locale: "da" | "se" | "no", items: { name: string; href: string }[]) {
   vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale(locale));
   return renderToStaticMarkup(await Breadcrumbs({ items }));
 }

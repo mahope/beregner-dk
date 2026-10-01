@@ -235,10 +235,10 @@ describe("dage-til svar-præpositionen er sprogets egen", () => {
     // surfaces to each other.
     const synligt = /<p class="text-3xl[^"]*">([^<]+)<\/p>/.exec(html);
     expect(synligt, "svaret skal stå i den synlige tekst").not.toBeNull();
-    const svar = synligt[1];
+    const svar = synligt![1];
     expect(svar).toMatch(/^Det finns \d+ dagar till /);
 
-    const prefix = getDageTilPrefix("se");
+    const prefix = getDageTilPrefix("se")!;
     const metadata = await buildDageTilMetadata(prefix, slug, new Date("2026-09-29T09:00:00.000Z"));
     const description = String(metadata.description);
     const ogDescription = String(metadata.openGraph?.description);
@@ -256,7 +256,7 @@ describe("dage-til svar-præpositionen er sprogets egen", () => {
     // repeat the question, so it is compared against the visible answer.
     const jsonLd = /<script type="application\/ld\+json">(.*?)<\/script>/s.exec(html);
     expect(jsonLd, "siden skal have en JSON-LD-blok").not.toBeNull();
-    const ld = JSON.parse(jsonLd[1]);
+    const ld = JSON.parse(jsonLd![1]);
     expect(ld.description).toBe(svar);
     expect(ld.description).not.toMatch(/\d+ dagar til /);
   });
@@ -303,11 +303,11 @@ describe("dage-til titler", () => {
     slug: string,
     today: Date = I_DAG
   ): Promise<string> {
-    const prefix = getDageTilPrefix(locale);
+    const prefix = getDageTilPrefix(locale)!;
     vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale(locale));
     const metadata = await buildDageTilMetadata(prefix, slug, today);
     const title = metadata.title;
-    return (typeof title === "string" ? title : (title?.absolute ?? "")) as string;
+    return (typeof title === "string" ? title : (title as { absolute?: string } | undefined)?.absolute ?? "") as string;
   }
 
   for (const locale of ["da", "se"] as const) {
@@ -315,7 +315,7 @@ describe("dage-til titler", () => {
       const events = getDageTilEvents(locale);
       expect(events.length).toBeGreaterThan(5);
       for (const event of events) {
-        const slug = event[locale].slug;
+        const slug = event[locale]!.slug;
         for (const iDag of AARS_GAMLE_DATOER) {
           const titel = await titelFor(locale, slug, iDag);
           expect(titel.length, `${slug} @ ${iDag.toISOString().slice(0, 10)}: "${titel}"`)
@@ -367,10 +367,11 @@ describe("dage-til titler", () => {
   });
 
   test("brandstaarnet sendes stadig som og:site_name", async () => {
-    const juledagen = getDageTilEvents("se").find((e) => e.se.slug === "juldagen")!;
-    const prefix = getDageTilPrefix("se");
+    const juledagen = getDageTilEvents("se").find((e) => e.se?.slug === "juldagen");
+    if (!juledagen?.se) throw new Error("juldagen mangler svensk arm");
+    const prefix = getDageTilPrefix("se")!;
     vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("se"));
-    const metadata = await buildDageTilMetadata(prefix, juledagen.se.slug, I_DAG);
+    const metadata = await buildDageTilMetadata(prefix!, juledagen.se!.slug, I_DAG);
     expect(metadata.openGraph?.siteName).toBe("Beräknare.se");
   });
 });
@@ -391,7 +392,7 @@ describe("dage-til meta descriptions", () => {
     today: Date = I_DAG
   ) {
     vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale(locale));
-    return buildDageTilMetadata(getDageTilPrefix(locale), slug, today);
+    return buildDageTilMetadata(getDageTilPrefix(locale)!, slug, today);
   }
 
   for (const locale of ["da", "se"] as const) {
@@ -399,7 +400,7 @@ describe("dage-til meta descriptions", () => {
       const events = getDageTilEvents(locale);
       expect(events.length).toBeGreaterThan(5);
       for (const event of events) {
-        const slug = event[locale].slug;
+        const slug = event[locale]!.slug;
         const metadata = await metadataFor(locale, slug);
         const title = (metadata.title as { absolute?: string }).absolute ?? "";
         const description = String(metadata.description);
@@ -408,7 +409,7 @@ describe("dage-til meta descriptions", () => {
         // pass on a description that repeated the question and then diverged —
         // which is exactly the bug.
         expect(description, `${locale}/${slug}`).not.toContain(
-          event[locale].copy.question
+          event[locale]!.copy.question
         );
         expect(title.length, `${locale}/${slug}`).toBeLessThanOrEqual(60);
       }
@@ -416,7 +417,7 @@ describe("dage-til meta descriptions", () => {
 
     test(`alle ${locale} descriptioner er under Googles afkortningsgrænse`, async () => {
       for (const event of getDageTilEvents(locale)) {
-        const slug = event[locale].slug;
+        const slug = event[locale]!.slug;
         const description = String((await metadataFor(locale, slug)).description);
         expect(description.length, `${locale}/${slug}: "${description}"`)
           .toBeLessThanOrEqual(160);

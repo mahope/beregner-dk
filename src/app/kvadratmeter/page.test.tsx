@@ -84,7 +84,7 @@ describe("kvadratmeter page", () => {
   });
 
   test("de nye svar kommer i FAQ'en og dermed i JSON-LD'en", async () => {
-    const faqItems = getPageData("kvadratmeter", "da").faqItems;
+    const faqItems = getPageData("kvadratmeter", "da")!.faqItems;
     const questions = faqItems.map((item) => item.question);
 
     expect(questions).toContain("Hvordan regner man kvadratmeter ud?");
@@ -114,7 +114,7 @@ describe("kvadratmeter page", () => {
   });
 
   test("de to nye frågorna står i den svenska FAQ og dermed i JSON-LD'en", async () => {
-    const faqItems = getPageData("kvadratmeter", "se").faqItems;
+    const faqItems = getPageData("kvadratmeter", "se")!.faqItems;
     const questions = faqItems.map((item) => item.question);
 
     expect(questions).toContain("Hur räknar man ut kvadratmeter?");
