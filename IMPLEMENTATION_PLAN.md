@@ -1,49 +1,41 @@
-STATUS: 1/10 23:55. Rød CI: ingen (seneste kørsel grøn 21:06 UTC). Sentry:
-  MINBEREGNER-1 er Next-router-støj, filtreret siden 3e67ed3 (16:36) — ingen ny
-  hændelse efter filteret. CEO-køen er tom; punkt 0 verificeret direkte i koden
-  igen (Valborg 30. april, dansk sankthans fast 23. juni, `toUtcMidnight` på
-  `Europe/Copenhagen`). Ingen åbne PR'er (`PR-TJEK: 2026-10-01`), branch-tjek
-  gjort 1/10 22:50 (`BRANCH-TJEK: 2026-10-01`).
+STATUS: 2/10 00:25. Rød CI: ingen (seneste kørsel grøn 1/10 21:39 UTC). Sentry:
+  MINBEREGNER-1 er Next-router-støj, filtreret siden 3e67ed3 — ingen ny
+  hændelse efter filteret. CEO-køens punkt 0 verificeret direkte i koden igen
+  (Valborg 30. april, `DAGE_TIL_TIMEZONE = "Europe/Copenhagen"`,
+  grundlovsdag/sankthans). Ingen åbne PR'er (`PR-TJEK: 2026-10-02`).
 
-  **`/procent`: elleve hårdkodede beløb er væk, hele siden.** `ceo/procent-eksempler-fra-modul`.
-  De stod i «Procentregning i hverdagen» og i Excel-tabellen i **begge** sprog:
-  «25% moms på 1.000 kr = 250 kr i moms (1.250 kr total)», «5% rente på 10.000
-  kr = 500 kr i rente», «10 procent af 10.000 = 1.000», «9.000 til 7.875 = -12,5»
-  (+ deres svenske tvillinger). De var alle rigtige — og netop derfor var de
-  farlige: intet hang ved dem. Nu ligger beløbene i `HVERDAG_*` og `EXCEL_*` i
-  `src/lib/procent.ts`, og **moms-satsen er `DEFAULT_MOMS_SATS`**, altså samme
-  ejer som på `/moms` — den kan ikke læve 25 % ved siden af sig selv.
-  Excel-række 3 læser desuden `RABAT_EKSEMPEL` (da) og `belobEksempel` fra
-  `PROCENT_SKILLNAD_EKSEMPEL` (se), altså de par formelafsnittene ovenfor
-  allerede bruger — de to sprog kan ikke få hver sit eget tal ved en fejl.
-  **AST-scanneren: 11 fund på `/procent` → 0**, portens loftpunktssum 471 → 460.
-  *Port:* `page.test.tsx` renderer begge sprog og regner hver sætning fra de tal
-  den selv læser i modulet. **Fire mutationer målt:** en hårdkodet 550 i
-  rente-bulletten gør den rød i begge sprog; Excel-andelen som 30 i stedet for
-  25 gør den rød; dansk række 3 med det svenske par gør den rød; og en
-  hårdkodet **korrekt** 25 forbliver grøn — fordi den så er rigtig. 3490 tests.
-
-  **F5b fortsat** — næste side i rækkefølgen er `/arveafgift` (8 fund, «392.300
-  kr» står 7 gange i brødteksten) og `/ejendomsvaerdiskat` (6 fund). `/moms`
-  er delvis lukket; de to sidste fund dér kræver en kilde (registreringsgrænsen,
-  told ved import i EUR) og er derfor ikke løst.
-
-  **Gaten:** `lint` 0 (655 filer) · `typecheck` 0 · `TZ=UTC npm run test`
-  **3490 grønne / 213 filer** · `next build` exit 0. Locale-leak-gatens ene
-  `ureviewet`-fund er portens egen test, der planter strengen med vilje
-  (`locale-leak-gate.test.ts:511`) — ikke en læk.
+  **`/arveafgift` læser nu sin egen sats, hele vejen rundt.**
+  `ceo/arveafgift-tal-fra-modul`. «392.300 kr» stod **syv gange** i brødteksten,
+  og regnestykket «(1.000.000 − 392.300) × 15% = 91.155 kr» stod håndskrevet —
+  de var rigtige for 2026 og ville stående for 2027, hvor bundfradraget stiger.
+  Nyt `src/lib/arveafgift.ts` ejer bundfradraget, `beregnArveafgift(arv,
+  medTillaeg)`, de to eksempler og `EFFEKTIV_MARGINAL_SATS = 0,15 + 0,85 ×
+  0,25 = 36,25 %`; «nærmer sig 36,25 %» er væk, fordi satsen er præcis.
+  **To ting lå desuden tilbage:** `page-data.ts`'s to arveafgift-FAQ skrev deres
+  eget «392.300 kr» (nu `formatNumber(SATSER_2026.arveBundfradrag)`), og
+  guideboksens «to fulde regneeksempler på 1.500.000 kr til børn og 800.000 kr
+  til en søskende» er en påstand om *indlæggets* indhold — de to beløb bor derfor
+  i modulet, og bloggen læser dem samme sted.
+  *Port:* `arveafgift/page.test.tsx` renderer siden og kræver, at **hvert** beløb
+  i markupken er et tal modulet regner (6 × bundfradraget + de fire andre), at
+  regnestykket kommer fra `EKSEMPEL_BARN`, og at ingen FAQ har sit eget beløb.
+  **To mutationer målt:** en hårdkodet `392.500 kr` i en tabelcelle gør den rød;
+  en hårdkodet korrekt `36,25` forbliver grøn — fordi den så er rigtig.
+  `regnestykker`-listen: `/arveafgift` væk (8 fund), bloggen 19 → 15,
+  loftpunktssum 460 → 453.
+  **Gaten:** `lint` 0 (657 filer) · `typecheck` 0 · `TZ=UTC npm run test`
+  **3500 grønne / 214 filer** · `next build` exit 0. Locale-leak-gatens ene
+  `ureviewet`-fund er portens egen test, der planter strengen med vilje — ikke
+  en læk.
 
 ## Næste opgave (klar til næste iteration)
 
-**F5b. Beløb i JSX-tekst → modulkonstanter, i trafikrækkefølge.** Porten fra 1/10
+**F5b. Beløb i JSX-tekst → modulkonstanter, i trafikrækkefølge.** `/procent` ✅ 1/10 og `/arveafgift` ✅ 2/10 (`ceo/arveafgift-tal-fra-modul`, se STATUS). Porten fra 1/10
 måler beløb med tusindtalsseparator i JSX-tekst på `page.tsx` — de kan ikke
 glide fra satsen, fordi de ikke hænger ved den. Listen i
 `src/app/regnestykker.test.ts` tæller forekomster pr. fil og må kun blive
 kortere, så dette er rækkefølgen. *Accept pr. side:* listen for den side falder
 til 0, og regnestykkerne er verificeret af `regnestykker-porten`.
-- **`/arveafgift`** — 8 fund, og **«392.300 kr» står 7 gange i brødteksten**.
-  Det er bundfradraget, og det er det tal på sitet der først bliver forkert
-  (2027-sats). Ét modul + syv interpolationer.
 - **`/ejendomsvaerdiskat`** — 6 fund: «5,1 ‰ / 14 ‰» og «9.007.000 kr for
   2026-2027» er lovsatser i brødteksten og i et regnestykke
   («3.000.000 × 80% × 5,1‰ = 12.240 kr/år»).
@@ -217,6 +209,13 @@ Prioriteret efter forventet effekt på **trafik**. Datagrund fra GSC 1/10
 
 ## Åbne VERIFICÉR DEPLOY-noter
 
+- ⏳ **/arveafgift læser bundfradraget og eksemplerne fra modulet.**
+  `ceo/arveafgift-tal-fra-modul`. Prøven er på indhold: `curl -s
+  https://minberegner.dk/arveafgift` skal vise `392.300 kr` i **alle** de otte
+  steder (tre tabellerceller, «Nærmeste familie …», «Bundfradraget … de første
+  …», regnestykket og guideboksens to beløb) og **ikke** «nærmer sig 36,25%».
+  Samme prøve på `/blog/arveafgift-regler-og-satser` for de to guidebeløb.
+  Vindue **2/10 07:30**.
 - ⏳ **/boernepenge svarer på «hvornår udbetales».** `ceo/boernepenge-udbetalingsdatoer`.
   Prøven er på indhold: `curl -s https://minberegner.dk/boernepenge` skal indeholde
   «Hvornår kommer børnepengen ud?», «om N dage» og en `<time dateTime="...">` med den

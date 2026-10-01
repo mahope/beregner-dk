@@ -5,6 +5,7 @@ import BlogArticleSchema from "@/components/BlogArticleSchema";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { NaesteSkridt } from "@/components/BlogNaesteSkridt";
 import { SATSER_2026 } from "@/lib/satser-2026";
+import { EKSEMPLER_GUIDE } from "@/lib/arveafgift";
 import { OG_IMAGE } from "@/lib/page-helpers";
 
 const BUNDFRADRAG = SATSER_2026.arveBundfradrag;
@@ -17,6 +18,12 @@ const EFFEKTIV_PCT = Math.round(
     SATSER_2026.tillaegsboafgift * (1 - SATSER_2026.boafgift)) *
     10000,
 ) / 100;
+
+// Arvbeløbene i de to regneeksempler nedenfor. `/arveafgift`s guideboks lover at
+// indlægget viser «to fulde regneeksempler på 1.500.000 kr til børn og 800.000
+// kr til en søskende», så beløbene har samme ejer som den påstand.
+const GUIDE_BARN_TEKST = EKSEMPLER_GUIDE.barn.arv.toLocaleString("da-DK");
+const GUIDE_SOESKENDE_TEKST = EKSEMPLER_GUIDE.soeskende.arv.toLocaleString("da-DK");
 
 export async function generateMetadata(): Promise<Metadata> {
   const dc = await getCurrentDomainConfig();
@@ -183,10 +190,10 @@ export default function ArveafgiftGuidePage() {
         <h2>Sådan beregnes arveafgiften</h2>
         <h3>Eksempel 1: Arv til børn</h3>
         <p>
-          En forælder efterlader 1.500.000 kr til sine to børn:
+          En forælder efterlader {GUIDE_BARN_TEKST} kr til sine to børn:
         </p>
         <ol>
-          <li>Bobeholdning: 1.500.000 kr</li>
+          <li>Bobeholdning: {GUIDE_BARN_TEKST} kr</li>
           <li>Bundfradrag: −{BUND_FAEDRET} kr</li>
           <li>Afgiftspligtigt beløb: 1.107.700 kr</li>
           <li>Boafgift ({BOAFGIFT_PCT}%): 166.155 kr</li>
@@ -195,12 +202,12 @@ export default function ArveafgiftGuidePage() {
 
         <h3>Eksempel 2: Arv til søskende</h3>
         <p>
-          En person efterlader 800.000 kr til sin bror. Søskende betaler boafgift{" "}
+          En person efterlader {GUIDE_SOESKENDE_TEKST} kr til sin bror. Søskende betaler boafgift{" "}
           {BOAFGIFT_PCT} % og tillægsafgift {TILLAEGS_PCT} % af beløbet <em>efter</em> boafgift. Der
           er intet bundfradrag for tillægsafgiften:
         </p>
         <ol>
-          <li>Bobeholdning: 800.000 kr</li>
+          <li>Bobeholdning: {GUIDE_SOESKENDE_TEKST} kr</li>
           <li>Bundfradrag: −{BUND_FAEDRET} kr</li>
           <li>Afgiftspligtigt beløb: 407.700 kr</li>
           <li>Boafgift ({BOAFGIFT_PCT}%): 61.155 kr</li>

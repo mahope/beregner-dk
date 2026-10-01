@@ -117,12 +117,11 @@ function findFejl(kode: string, fil: string): Fund[] {
 const HAARDKODEDE_BELOB: Record<string, number> = {
   "src/app/aktieskat/page.tsx": 5,
   "src/app/alder/page.tsx": 1,
-  "src/app/arveafgift/page.tsx": 8,
   "src/app/befordringsfradrag/page.tsx": 3,
   "src/app/bil/page.tsx": 16,
   "src/app/billaan/page.tsx": 24,
   "src/app/blog/30-procent-reglen-husleje/page.tsx": 4,
-  "src/app/blog/arveafgift-regler-og-satser/page.tsx": 19,
+  "src/app/blog/arveafgift-regler-og-satser/page.tsx": 15,
   "src/app/blog/biloekonomi-2026-hvad-koster-det-at-eje-bil/page.tsx": 47,
   "src/app/blog/boernepenge-2026-satser-og-regler/page.tsx": 2,
   "src/app/blog/boliglaan-2026-renter-og-afdrag/page.tsx": 4,
@@ -173,7 +172,7 @@ const HAARDKODEDE_BELOB: Record<string, number> = {
 };
 
 /** Summen af listen, så de to tal ikke kan glide fra hinanden. */
-const HAARDKODEDE_BELOB_I_LISTEN = 460;
+const HAARDKODEDE_BELOB_I_LISTEN = 453;
 
 const ROT = join(__dirname, "..", "..");
 const tekstfiler = () =>
@@ -275,6 +274,6 @@ describe("beløb i JSX-tekst på siderne", () => {
     // At rette en side er altid tilladt — listen er en loftpunktssum, ikke en
     // målsætning — så her tælles det samlede antal mod summen af listen.
     expect(fund.length).toBeLessThanOrEqual(HAARDKODEDE_BELOB_I_LISTEN);
-    expect(HAARDKODEDE_BELOB_I_LISTEN).toBe(460);
+    expect(HAARDKODEDE_BELOB_I_LISTEN).toBe(453);
   });
 });

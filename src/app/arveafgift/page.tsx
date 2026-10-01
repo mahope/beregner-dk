@@ -2,6 +2,7 @@ import Link from "next/link";
 import { generatePageMetadata } from "@/lib/page-helpers";
 import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
+import { BUNDFRADRAG, EFFEKTIV_MARGINAL_SATS, EKSEMPEL_BARN, EKSEMPLER_GUIDE } from "@/lib/arveafgift";
 import ArveafgiftBeregner from "@/components/ArveafgiftBeregner";
 import FAQ from "@/components/FAQ";
 import RelatedCalculators from "@/components/RelatedCalculators";
@@ -11,6 +12,14 @@ import {
 } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { TestamenteAffiliate } from "@/components/AffiliateBox";
+
+/** Bundfradraget i den skrivemåde brødteksten bruger: «392.300 kr». */
+const BUND_TEKST = BUNDFRADRAG.toLocaleString("da-DK");
+
+/** Den effektive marginale sats for søskende: 36,25. */
+const EFFEKTIV_PCT = (EFFEKTIV_MARGINAL_SATS * 100).toLocaleString("da-DK", {
+  maximumFractionDigits: 2,
+});
 
 export async function generateMetadata() {
   return generatePageMetadata("arveafgift");
@@ -69,19 +78,19 @@ export default async function ArveafgiftPage() {
               <td>Børn, børnebørn, forældre</td>
               <td>15%</td>
               <td>0%</td>
-              <td>392.300 kr</td>
+              <td>{BUND_TEKST} kr</td>
             </tr>
             <tr>
               <td>Søskende</td>
               <td>15%</td>
               <td>25% af arv efter boafgift</td>
-              <td>392.300 kr</td>
+              <td>{BUND_TEKST} kr</td>
             </tr>
             <tr>
               <td>Andre (venner, fjern familie)</td>
               <td>15%</td>
               <td>25% af arv efter boafgift</td>
-              <td>392.300 kr</td>
+              <td>{BUND_TEKST} kr</td>
             </tr>
           </tbody>
         </table>
@@ -98,7 +107,7 @@ export default async function ArveafgiftPage() {
         <h3>Børn, børnebørn og forældre</h3>
         <p>
           Nærmeste familie betaler <strong>15% i boafgift</strong> af beløbet over bundfradraget
-          på <strong>392.300 kr</strong>. Der er ingen <strong>tillægsafgift</strong> for denne gruppe.
+          på <strong>{BUND_TEKST} kr</strong>. Der er ingen <strong>tillægsafgift</strong> for denne gruppe.
         </p>
         <ul>
           <li><strong>Børn:</strong> Arv fra forældre</li>
@@ -109,7 +118,7 @@ export default async function ArveafgiftPage() {
         <h3>Søskende</h3>
         <p>
           Søskende betaler <strong>15% boafgift</strong> plus <strong>25% tillægsafgift</strong> af arven efter
-          boafgift. Den <strong>effektive marginale sats</strong> nærmer sig <strong>36,25%</strong> for store arvebeløb.
+          boafgift. Den <strong>effektive marginale sats</strong> er for store arvebeløb <strong>{EFFEKTIV_PCT}%</strong>.
           <strong>Bemærk:</strong> Fra 1. januar 2027 afskaffes tillægsafgiften for
           søskende, så de fremover kun betaler 15% boafgift.
         </p>
@@ -123,13 +132,15 @@ export default async function ArveafgiftPage() {
 
         <h2>Bundfradraget</h2>
         <p>
-          <strong>Bundfradraget</strong> på <strong>392.300 kr</strong> (2026) gælder for alle arvinger undtagen
-          ægtefæller. Det betyder, at de første 392.300 kr af arven er
+          <strong>Bundfradraget</strong> på <strong>{BUND_TEKST} kr</strong> (2026) gælder for alle arvinger undtagen
+          ægtefæller. Det betyder, at de første {BUND_TEKST} kr af arven er
           <strong>afgiftsfri</strong> — uanset hvem der arver.
         </p>
         <p>
-          <strong>Eksempel:</strong> Et barn arver 1.000.000 kr. Arveafgiften
-          beregnes således: (1.000.000 − 392.300) × 15% = 91.155 kr i afgift.
+          <strong>Eksempel:</strong> Et barn arver {EKSEMPEL_BARN.arv.toLocaleString("da-DK")} kr.
+          Arveafgiften beregnes således:{" "}
+          ({EKSEMPEL_BARN.arv.toLocaleString("da-DK")} − {BUND_TEKST}) × 15% ={" "}
+          {EKSEMPEL_BARN.boafgift.toLocaleString("da-DK")} kr i afgift.
         </p>
 
         <h2>Hvornår skal arveafgift betales?</h2>
@@ -165,7 +176,8 @@ export default async function ArveafgiftPage() {
               guide til arveafgift
             </Link>{" "}
             gennemgår bundfradraget, kredsene, tillægsafgiften og to fulde regneeksempler
-            på 1.500.000 kr til børn og 800.000 kr til en søskende.
+            på {EKSEMPLER_GUIDE.barn.arv.toLocaleString("da-DK")} kr til børn og{" "}
+            {EKSEMPLER_GUIDE.soeskende.arv.toLocaleString("da-DK")} kr til en søskende.
           </p>
         </div>
       </section>

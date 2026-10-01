@@ -23106,3 +23106,50 @@ Genmål 15/10.
 Autocomplete 1/10: de fire nye seeds er dækket eller kildeblokerede — se ❓ og
 F-køen. `borger.dk` svarer 200 fra denne maskine (mods `dagpenge.dk`/`star.dk`),
 så kilde-blokeringen er ikke længere universiel.
+
+## 2/10 2026 — `/arveafgift`: bundfradrag og eksempler læses fra `src/lib/arveafgift.ts`
+
+Branch `ceo/arveafgift-tal-fra-modul`. F5b, anden side i rækkefølgen efter
+`/procent`.
+
+**Fund.** «392.300 kr» stod syv gange i brødteksten på `/arveafgift` — tre
+tabellerceller, to i «Nærmeste familie …», to i «Bundfradraget …» — og
+regnestykket «(1.000.000 − 392.300) × 15% = 91.155 kr» stod håndskrevet.
+Alle tal var rigtige for 2026, og ingen af dem hang ved `SATSER_2026`, så de
+ville være stående i 2027, hvor bundfradraget stiger. Samme fejlklasse som
+`/rentefradrag`s «Eksempel» (1/10).
+
+To ting lå uden for `page.tsx` og blev fundet undervejs:
+
+- `page-data.ts`'s to arveafgift-FAQ skrev hvert sit «392.300 kr». Rettet til
+  `formatNumber(SATSER_2026.arveBundfradrag, "da")` via
+  `ARVE_BUNDFRADRAG_TEKST`.
+- Guideboksen sagde «to fulde regneeksempler på 1.500.000 kr til børn og 800.000
+  kr til en søskende» — en påstand om `/blog/arveafgift-regler-og-satser`s
+  indhold, med beløbene skrevet to steder. Nu `EKSEMPLER_GUIDE` i modulet, og
+  bloggens fire beløb læser den.
+
+**Rettelse.** Nyt `src/lib/arveafgift.ts`: `BUNDFRADRAG`, `BOAFGIFT_SATS`,
+`TILLAEGSBOAFGIFT_SATS`, `EFFEKTIV_MARGINAL_SATS = 0,15 + 0,85 × 0,25`,
+`beregnArveafgift(arv, medTillaeg)` og eksemplerne. Siden bruger
+`toLocaleString("da-DK")`, samme mønster som `/rentefradrag`. «Den effektive
+marginale sats nærmer sig 36,25%» → «er for store arvebeløb 36,25%»: satsen er
+præcis, ikke grænsende.
+
+**Port.** `src/app/arveafgift/page.test.tsx`, 10 tests. Renderer siden og
+kræver at hvert beløb i markupken er et tal modulet regner (6 × bundfradraget +
+1.000.000 + 91.155 + 1.500.000 + 800.000), at regnestykket er regnet fra
+`EKSEMPEL_BARN`, at guideboksens løfte matcher `EKSEMPLER_GUIDE`, og at ingen
+FAQ har sit eget beløb. To mutationer målt: hårdkodet `392.500 kr` i en
+tabelcelle → rød; hårdkodet korrekt `36,25` → grøn (den er rigtig).
+
+`regnestykker.test.ts`: `/arveafgift` fjernet fra listen (8 fund), bloggen
+19 → 15, loftpunktssum 460 → 453.
+
+**Målt.** `lint` 0 (657 filer) · `typecheck` 0 · `TZ=UTC npm run test`
+3500 grønne / 214 filer · `next build` exit 0.
+
+**Åbent.** Blogindlæggets øvrige afledede rækker («Afgiftspliktigt beløb:
+1.107.700 kr» m.fl.) står stadig håndskrevet — bloggen er en selvstændig
+beslutning i F5b. Påstanden «Fra 1. januar 2027 afskaffes tillægsafgiften for
+søskende» er ikke verificeret mod en kilde; siden er mærket «vejledende».

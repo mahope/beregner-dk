@@ -46,6 +46,14 @@ const KOMMUNESKAT_SNIT_PCT = formatNumber(
 );
 
 /**
+ * Bundfradraget i de to arveafgift-svar. Skrevet her og ikke i svaret, fordi
+ * `/arveafgift`s tabel og brødtekst læser samme tal fra `arveafgift`-modulet —
+ * et FAQ der skrev sit eget bundfradrag, ville være det tal, der bliver stående
+ * naar satsen stiger (punkt 11).
+ */
+const ARVE_BUNDFRADRAG_TEKST = formatNumber(SATSER_2026.arveBundfradrag, "da");
+
+/**
  * Formateringen i de to momssvar, der laeser et tal ud af `MOMS_LANDE`. Den er
  * laest her og ikke i svaret, fordi ellers ville hvert sprog skrive sit eget
  * talformat ved siden af tabellens.
@@ -1775,10 +1783,10 @@ const daPages: Record<string, PageData> = {
       schemaDescription: "Gratis arveafgift beregner. Beregn boafgift baseret på din relation: ægtefælle (fritaget), børn (15%), søskende (15% + 25% tillægsafgift).",
       schemaCategory: "FinanceApplication",
       faqItems: [
-      { question: "Hvad er arveafgiften i Danmark i 2026?", answer: "I 2026 betaler nærmeste familie (børn, børnebørn, forældre) 15% boafgift af arv over bundfradraget på 392.300 kr. Ægtefæller er helt fritaget. Søskende og andre betaler 15% boafgift plus 25% tillægsafgift af arven efter boafgiften." },
+      { question: "Hvad er arveafgiften i Danmark i 2026?", answer: `I 2026 betaler nærmeste familie (børn, børnebørn, forældre) 15% boafgift af arv over bundfradraget på ${ARVE_BUNDFRADRAG_TEKST} kr. Ægtefæller er helt fritaget. Søskende og andre betaler 15% boafgift plus 25% tillægsafgift af arven efter boafgiften.` },
       { question: "Kan ægtefæller undgå arveafgift?", answer: "Ja, ægtefæller er fuldstændig fritaget for arveafgift i Danmark uanset beløbets størrelse. Det anbefales ofte at oprette ægtepagt, så den længstlevende ægtefælle sikres bedst muligt." },
       { question: "Hvad er tillægsafgift på arv?", answer: "Tillægsafgift er en ekstra afgift på 25% af arven efter fradrag af boafgiften. Der er intet bundfradrag for tillægsafgiften. Den gælder for søskende (indtil 2027) og andre arvinger, der ikke er i direkte op- eller nedstigende linje." },
-      { question: "Hvad er bundfradraget for arveafgift i 2026?", answer: "Bundfradraget er 392.300 kr i 2026. Det betyder, at de første 392.300 kr af arven er afgiftsfri for alle arvinger undtagen ægtefæller (som er helt fritaget)." },
+      { question: "Hvad er bundfradraget for arveafgift i 2026?", answer: `Bundfradraget er ${ARVE_BUNDFRADRAG_TEKST} kr i 2026. Det betyder, at de første ${ARVE_BUNDFRADRAG_TEKST} kr af arven er afgiftsfri for alle arvinger undtagen ægtefæller (som er helt fritaget).` },
       { question: "Betaler børnebørn samme arveafgift som børn?", answer: "Ja, børnebørn betaler samme sats som biologiske børn: 15% boafgift uden tillægsafgift. Der er dog en undtagelse, hvis barnets forældre stadig lever — i så fald arver bedsteforældrenes formue typisk gennem forældrene først." },
       { question: "Hvornår skal arveafgift betales?", answer: "Arveafgiften skal betales til Skattestyrelsen inden 1 år efter dødsfaldet. Boet afvikles typisk gennem en bobestyrer eller advokat, som sørger for at beregne og afregne afgifterne." },
       { question: "Ændres reglerne for søskende i 2027?", answer: "Ja, fra 1. januar 2027 afskaffes tillægsafgiften for søskende. Det betyder at søskende fremover kun betaler 15% boafgift i stedet for den nuværende effektive sats på op til 36,25%." },
