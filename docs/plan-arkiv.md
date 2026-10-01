@@ -22325,3 +22325,41 @@ citerer de gamle tal. Tre mutationer målt røde: bundskaten hardcodet igen →
 3 porte røde; `<td>Allerød (23,3%)</td>` tilbage i tabellen → 2 porte røde.
 Porten låser desuden de tre laveste og tre højeste kommuner *i rækkefølge*,
 så et bytte til `KOMMUNER.slice(0, 3)` uden sortering falder.
+
+## Deploy-noter lukket på indhold 1/10 07:45 (seks noter)
+
+Hentet fra live og læst i markupken, begge domæner. HTTP 200 siger intet —
+det er celle- og brødtekst, så hver streng er talt.
+
+- **`ceo/next-16`** ✅ `data-scroll-behavior="smooth"` på `<html>` på
+  `https://minberegner.dk/`. `beraknare.se/dato` svarer stadig
+  `<html lang="sv" data-scroll-behavior="smooth">` med svensk titel
+  ("Beräkna dagar kvar till datum: 1 jan. 2026→2027 = 365"), så proxyen sætter
+  stadig `x-locale`/`x-hostname`. `/api/health` → `{"status":"ok"}`, og
+  `curl -I /dato` svarer stadig `cache-control: private, no-cache, no-store,
+  max-age=0, must-revalidate` — altså ingen utilsigtet `s-maxage` fra Next 16.
+- **`ceo/promille-lovkilde`** ✅ Danmarks række: "0,2 ‰ de første 3 år med
+  kørekort og for buschauffører" (da) / "0,2 ‰ de första 3 åren med körkort
+  (sänkt 2025)" (se). "Ingen særregel"/"Ingen särregel" forekommer kun på
+  Sverige-, Norge- og Polen-rækkerne — altså ikke på Danmarks, hverken i
+  HTML'en eller i RSC-flight'en.
+- **`ceo/promille-lovkilde-2`** ✅ Tysklands række: "0,0 ‰ under 21 år og i
+  kørekortets prøveperiode" / "0,0 ‰ under 21 år och i körkortets provperiod".
+  "0,3 ‰" forekommer 1 gang pr. side og kun på **Spanien** (0,3 de første 2 år) —
+  aldrig på Tysklands række.
+- **`ceo/sidste-hverdag-paastand`** ✅ "Sidste hverdag i december" 0 gange,
+  "Sista vardagen i december" 0 gange, "en almindelig hverdag" 0 gange på
+  `/dage-til/sankthansaftensdag`. Skærtorsdag-FAQ'en svarer "Nej. Skærtorsdag er
+  altid en torsdag — tre dage før påskedagen, som altid er en søndag."
+- **`ceo/blog-naeste-vaerktoej`** ✅ `/blog/koeb-af-bolig-2026-omkostninger`:
+  "Regn det ud"-blokken har `/boliglaan` ("Beregn alle dine månedlige
+  boligomkostninger") først og `/rentefradrag` ("Beregn dit rentefradrag")
+  som stille sekundær. `/blog/fradrag-2026-komplet-guide` har både
+  `/rentefradrag` og `/befordringsfradrag`.
+- **`ceo/tidszone-usa-forskelsdag`** ✅ "337 af årets" 1 gang, "28 dage" 1 gang,
+  "skifter som Danmark" 0 gange. "hele året" forekommer 2 gange, men kun om
+  Storbritannien/Grønland/Grækenland/Spanien følger Danmark (korrekt, de har
+  ingen DST) og om Phoenix. Bloggen har 0 forekomster af "5 eller 7 timer".
+
+**Målt 1/10 07:45, samme måling som brugeren kan gentage:** 12 URL'er hentet,
+alle 200, ingen fejl. Blokerende fejl: ingen.

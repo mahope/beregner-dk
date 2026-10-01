@@ -1,13 +1,26 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — 1/10 07:30. Én ting leveret, resten af køen er stadig blokederet.
+STATUS: KØ — 1/10 07:45. Seks deploy-noter lukket på indhold, ingen kode leveret.
 
-  **Leveret: `/loen-efter-skat` skrev skattesatserne i hånden.** Fund ved at
-  sammenligne kommunetabellen med `KOMMUNER`: siden sagde **"Allerød (23,3 %)"**
-  mens data siger **24,80 %** — og Allerød er ikke blandt de tre laveste
-  kommuner (Lyngby-Taarbæk er det, 23,00 %). Den gamle tabel skrev også
-  **"Rundersdal"** med omvendt e/r. Alle 13 satser læser nu `SATSER_2026`,
-  tabellen *er* `KOMMUNER.slice(0,3)`/`slice(-3)`, og fem nye porte i
+  **Denne iteration leverede ingen produktkode, og det er et målt resultat,
+  ikke et valg.** CEO-køens punkt 0 er lukket, 97/119/183 er `BLOCKED` på
+  Mads, 187 må ikke røres før 13/10, og 200's vej 1 er din Cloudflare-regel mens
+  vej 2 er sat til efter 187's måling. **Egen opgave fundet og målt ren:**
+  `npx tsx` krydsede hvert tal i FAQ'er, titler og beskrivelser for de 13 mest
+  trafikerede økonomisider mod konstanterne i `satser-2026.ts` — **alle tal
+  findes i kilden**, så der var ingen fri målt fejl at rette. Samme måling på
+  indgående links: de 16 mest trafikerede sider har 6-16 indgående interne
+  links hver (kun `/rabat` har 1, den er to dage gammel fra F2). `/dato` har
+  allerede kontekstlink til `/dage-til/1-december`, `/nytaarsaften`,
+  `/kristi-himmelfartsdag` og `/2-pinsedag` — de fire spørgsmål den selv
+  fanger. **Ingen ny opgave herfra.**
+
+  **Leveret i forgangende iteration:** `/loen-efter-skat` skrev skattesatserne
+  i hånden — siden sagde **"Allerød (23,3 %)"** mens `KOMMUNER` siger
+  **24,80 %** (og Allerød er ikke blandt de tre laveste; det er
+  Lyngby-Taarbæk med 23,00 %). Den gamle tabel skrev også **"Rundersdal"** med
+  omvendt e/r. Alle 13 satser læser nu `SATSER_2026`, tabellen *er*
+  `KOMMUNER.slice(0,3)`/`slice(-3)`, og fem nye porte i
   `fact-consistency.test.ts` låser det (tre mutationer målt røde).
   `ceo/loen-efter-skat-tal-kilden`.
 
@@ -19,17 +32,10 @@ STATUS: KØ — 1/10 07:30. Én ting leveret, resten af køen er stadig blokeder
   eller et screenshots-bevis ville genåbne dem.**
 
   **Målt 1/10 06:50-07:05 på live, 140 sitemap-URL'er, ingen fejl:** `npm audit`
-  **0 sårbarheder**, ingen døde interne links (alle 140 sider har ≥2 indgående
-  links undtagen to blogindlæg med 1), **hreflang `da`/`sv`/`x-default` på alle
-  målte sider** — minberegner.dk *og* beraknare.se — canonical på sig selv,
-  og 23-49 KB HTML gzip (376 KB rå på forsiden er ikke et problem).
-  **Ingen ny opgave herfra:** hverken titel, beskrivelse, links, hastighed,
-  indexering eller afhængigheder har en målt fejl tilbage på minberegner.dk.
-
-  **Hvorfor køen ellers er tom, målt 1/10:** 97, 119 og 183 er `BLOCKED` på
-  Mads, 98 afhænger af 97, 187 må ikke røres før 13/10, F1/F3/F5 kræver
-  GSC-data (❓) eller 187's dato, og 194's to sidste sider kan ikke løses
-  (`/tidsberegner`s eneste indlæg hænger på `/tidszone`, `/kalorier` er 119).
+  **0 sårbarheder**, ingen døde interne links, **hreflang `da`/`sv`/`x-default`
+  på alle målte sider** — begge domæner — canonical på sig selv, 23-49 KB HTML
+  gzip. **Ingen ny opgave herfra:** hverken titel, beskrivelse, links,
+  hastighed, indexering eller afhængigheder har en målt fejl tilbage.
 
   **`/dage-til/*` er ikke et ranking-problem.** Alle 19 danske sider er live, i
   sitemap, og titlen *svarer* på søgningen med dagens tal ("… 61 dage"). De kom
@@ -205,17 +211,6 @@ måling, ikke fra denne ændring.
   Prøven på dansk er `src/app/dato/page.test.tsx` (de to nye porte) efter
   deploy. Vindue **1/10 12:30** (denne merge sker efter 07:30).
 
-- ⏳ **Next 16 + proxy.ts + scroll-attributen.** `ceo/next-16`. På
-  `https://minberegner.dk/` skal markupken have `<html … data-scroll-behavior="smooth">`,
-  og `https://beraknare.se/dato` skal stadig være **svensk** (`lang="sv"` og den
-  svenske `<title>`) — det er den eneste synlige forskel på `proxy.ts` og den
-  gamle `middleware.ts`. `https://minberegner.dk/api/health` skal svare
-  `status: ok`, og `curl -I /dato` skal **stadig** sige `no-store`: blev den
-  `s-maxage`, er der sket en utilsigtet ændring i stedet for Next 16.
-  HTTP 200 beviser intet her. Prøven på dansk er `npm run test`
-  (`src/proxy.test.ts` + `src/app/layout-scroll.test.ts`) efter deploy.
-  Vindue **1/10 07:30** (denne merge sker efter 30/9 21:30).
-
 - ⏳ **To artikler skal i næste handling tilbyde det værktøj, der regner
   beløbet ud.** `ceo/indlaeg-naeste-vaerktoej`. På
   `https://minberegner.dk/blog/guide-feriepenge-hvornaar-og-hvor-meget` skal
@@ -229,10 +224,13 @@ måling, ikke fra denne ændring.
   `src/app/blog/naeste-skridt.test.ts` efter deploy. Vindue **1/10 12:30**
   (denne merge sker efter 07:30).
 
-**Ni noter åbne.** HTTP 200 beviser intet: 189's og 189b's noter rører
-*tabelceller* med lovtal, der er usynlige for `curl` uden at man læser dem. De
-otte lukkede noter er verificeret på indhold; senest 30/9 23:10 for tidszone
-og forsiden. Alle målinger står i `docs/plan-arkiv.md`.
+**Syv noter åbne.** HTTP 200 beviser intet: 189's og 189b's noter rører
+*tabelceller* med lovtal, der er usynlige for `curl` uden at man læser dem.
+**Seks noter lukket på indhold 1/10 07:45** (`ceo/next-16`,
+`ceo/promille-lovkilde`, `ceo/promille-loenkilde-2`, `ceo/sidste-hverdag-paastand`,
+`ceo/blog-naeste-vaerktoej`, `ceo/tidszone-usa-forskelsdag`) — 12 URL'er hentet,
+alle 200, hver streng talt i markupken. Alle målinger står i
+`docs/plan-arkiv.md`, "Deploy-noter lukket på indhold 1/10 07:45".
 
 - ⏳ **`/boligstoette` og `/pension` skal vise "Guides om emnet" under de
   relaterede beregnere.** `ceo/guides-til-store-beregnere`. På
@@ -247,25 +245,7 @@ og forsiden. Alle målinger står i `docs/plan-arkiv.md`.
   `src/lib/store-beregnere-guide.test.tsx` efter deploy. Vindue **1/10 12:30**
   (denne merge sker efter 07:30).
 
-- ⏳ **Tysklands række må ikke love en grænse, StVG ikke har.** `ceo/promille-lovkilde-2`.
-  På `https://minberegner.dk/promille` og `https://beraknare.se/promille` skal
-  Tysklands række lyde **"0,0 ‰ under 21 år og i kørekortets prøveperiode"** /
-  **"0,0 ‰ under 21 år och i körkortets provperiod"**, og strengen **"0,3 ‰" må
-  ikke forekomme på Tysklands række** i nogen af de to tabeller — § 24a kender
-  0,5 og § 24c et forbud, mens 0,3 er retspraksis. Storbritanniens række skal
-  stadig sige 0,8 med Skotland på 0,5. HTTP 200 beviser intet, det er en
-  tabelcelle. Prøven på dansk er `src/lib/promille-loenkilde.test.tsx` efter
-  deploy. Vindue **1/10 12:30** (denne merge sker efter 30/9 21:30).
 
-- ⏳ **Danmarks række skal sige 0,2 ‰ de første 3 år, ikke "Ingen særregel".**
-  `ceo/promille-lovkilde`. På `https://minberegner.dk/promille` skal
-  Danmarks række i landstabellen lyde **"0,2 ‰ de første 3 år med kørekort
-  (sænket i 2025)"**, og på `https://beraknare.se/promille` den svenske
-  **"0,2 ‰ de första 3 åren med körkort (sänkt 2025)"**. Strengen **"Ingen
-  særregel" / "Ingen särregel" må ikke forekomme på Danmarks række** i nogen af
-  de to tabeller — den er lovstridigt modsat RST. HTTP 200 beviser intet, det er
-  en cellecelle. Prøven på dansk er `src/lib/promille-loenkilde.test.tsx` efter
-  deploy. Vindue **1/10 07:30** (denne merge sker efter 30/9 21:30).
 
 - ⏳ **Barsel-indlægget skal tilbyde begge værktøjer som næste handling.**
   `ceo/barsel-naeste-handling`. På `https://minberegner.dk/blog/barsel-2026-regler-og-satser`
@@ -277,34 +257,7 @@ og forsiden. Alle målinger står i `docs/plan-arkiv.md`.
   dansk er `src/app/blog/naeste-skridt.test.ts` (porten `SKAL_NAAE`) efter
   deploy. Vindue **1/10 12:30** (denne merge sker efter 30/9 21:30).
 
-- ⏳ **Ingen side må kalde en skiftende dato en hverdag, og skærtorsdag er en
-  torsdag.** `ceo/sidste-hverdag-paastand`. På
-  `https://minberegner.dk/dage-til/nytaarsaften` og
-  `https://beraknare.se/dagar-till/nyarsafton` må "Sidste hverdag i december" og
-  "Sista vardagen i december" **ikke** forekomme nogen steder — teksten skal sige
-  månedens sidste dag uanset ugedag. På
-  `https://minberegner.dk/dage-til/sankthansaftensdag` må "en almindelig
-  hverdag" **ikke** forekomme (23. juni er weekend i 2029, 2030, 2035, 2040).
-  På `https://minberegner.dk/dage-til/skaertorsdag` skal spørgsmålet "Er
-  skærtorsdag en fridag?" have svaret **"Nej"** med "altid en torsdag" i svaret.
-  HTTP 200 beviser intet — det er brødtekst på statiske sider. Prøven på
-  dansk er `src/lib/dage-til.test.ts` efter deploy. Vindue **1/10 07:30**.
-  **URL'erne i denne note var alle forkerte** — de tre første 404'ede. Rettet
-  ovenfor efter måling 1/10 04:25.
 
-- ⏳ **Bloggen skal sende læseren videre til det værktøj, artiklen handler om.**
-  `ceo/blog-naeste-vaerktoej`. På
-  `https://minberegner.dk/blog/koeb-af-bolig-2026-omkostninger` skal blokken
-  "Regn det ud" have **`/boliglaan` som primær knap** ("Beregn alle dine
-  månedlige boligomkostninger") og `/rentefradrag` som stille sekundær — det
-  omvendte var den gamle rækkefølge, selv om artiklen selv to gange i
-  brødteksten peger på boliglånsberegneren. På
-  `https://minberegner.dk/blog/fradrag-2026-komplet-guide` skal samme blok have
-  et `/befordringsfradrag`-link. Beraknare.se skal **ikke** have artiklerne
-  (de er danske og `/blog/*` 404'er på beraknare.se — målt 1/10). HTTP 200
-  beviser intet — det er rækkefølge og to links i én blok. Prøven på dansk er
-  `src/app/blog/naeste-skridt.test.ts` efter deploy. Vindue **1/10 07:30**
-  (denne merge sker efter 30/9 21:30).
 
 - ✅ **Sydney skal stå med 8-10 timer foran, ikke 9-10.** `ceo/tidszone-tidsforskelle`.
   **DEPLOY OK 30/9 23:10** — hentet fra live og læst i markupken, begge domæner.
@@ -341,18 +294,6 @@ og forsiden. Alle målinger står i `docs/plan-arkiv.md`.
   `src/app/forside.test.tsx` efter deploy. Vindue **1/10 12:30**.
   *(Stribens egen note fra `ceo/forsiden-snabb-indgang` blev DEPLOY OK 30/9
   23:08, men er udfaset af denne rettelse: samme links, to gange.)*
-
-- ⏳ **`/tidszone` må ikke sige at USA og Danmark skifter på samme datoer.**
-  `ceo/tidszone-usa-forskelsdag`. På `https://minberegner.dk/tidszone` og
-  `https://beraknare.se/tidszone` skal blokken "Når det er 21 i Danmark" sige
-  **"på 337 af årets 365 dage"** og **"28 dage"** (ikke "hele året" og ikke
-  "skifter som Danmark"), og FAQ'en skal have samme tal. På
-  `https://minberegner.dk/blog/hvad-er-klokken-i-usa-naar-den-er-12-i-danmark`
-  skal strengen **"5 eller 7 timer"** være væk, og FAQ'en skal svare **"Nej"**
-  (den sagde "Ja"). HTTP 200 beviser intet — det er brødtekst og FAQPage-json.
-  Prøven på dansk er `src/lib/tidszone-usa-timer.test.ts` efter deploy.
-
-## Åbne opgaver
 
 #### 97. [BLOCKED: afventer Mads' svar — spørgsmålet står i ❓ Til Mads, ingen kode uden svar] 2026-09-27 — C69 — afklar hvad `beregner.no` er
 
