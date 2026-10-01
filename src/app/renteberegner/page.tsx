@@ -7,18 +7,18 @@ import {
   CalculatorSchema,
   FAQSchema,
 } from "@/components/StructuredData";
+import { formatNumber } from "@/lib/format";
 import { getCurrentDomainConfig, getLocale } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
 import { generatePageMetadata } from "@/lib/page-helpers";
-import { RENTEFRADRAG_2026 } from "@/lib/satser-2026";
 import {
   AARS_FIRE_PROCENT,
   MAANEDLIG_ONE_PROCENT,
   annuitetsEksempel,
   effektivAarsrente,
 } from "@/lib/rente-eksempler";
-import { formatNumber } from "@/lib/format";
 import { EXCEL_FAELLOR_SE, excelRaekkerSe } from "@/lib/rente-excel";
+import { RENTEFRADRAG_2026 } from "@/lib/satser-2026";
 import Link from "next/link";
 
 /** Fradragsværdien som dansk procenttal med ét decimal, læst fra modulet. */
@@ -33,6 +33,53 @@ function fradragProcent(værdi: number): string {
  */
 function krDa(tal: number): string {
   return tal.toLocaleString("da-DK", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+}
+
+/**
+ * Dansk procenttal med komma og fire decimaler, uanset sidens locale. Samme
+ * præcision som `procent` på den svenske gren, så de to sprog viser samme
+ * månedlige rentesats.
+ */
+function procentDa(værdi: number): string {
+  return (værdi * 100).toLocaleString("da-DK", {
+    minimumFractionDigits: 4,
+    maximumFractionDigits: 4,
+  });
+}
+
+/** Den nominelle månedsrente i dansk procenttal med fire decimaler. */
+function maanedligProcentDa(aarsrente: number): string {
+  return procentDa(aarsrente / 12);
+}
+
+/** Den effektive årsrente i dansk procenttal med to decimaler. */
+function effProcentDa(maanedligRente: number): string {
+  return (effektivAarsrente(maanedligRente) * 100).toLocaleString("da-DK", {
+    maximumFractionDigits: 2,
+  });
+}
+
+/**
+ * Et tal som det skrives i en dansk Excel-formel: komma som decimaltegn og
+ * ingen tusindtalsseparator, fordi separatoren i formlen er skilletegnet.
+ */
+function excelDa(tal: number): string {
+  return tal.toLocaleString("da-DK", {
+    useGrouping: false,
+    maximumFractionDigits: 6,
+  });
+}
+
+/**
+ * Ydelsen som den skrives i en dansk Excel-formel: to decimaler, fordi det er
+ * de samme to decimaler brødteksten viser, og brugeren indtaster dem.
+ */
+function excelBetalning(tal: number): string {
+  return tal.toLocaleString("da-DK", {
+    useGrouping: false,
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
@@ -78,8 +125,25 @@ const overProcent = fradragProcent(RENTEFRADRAG_2026.lowRate);
 const foersteEfterSkat = fradragProcent(EKSEMPEL_RENTE * (1 - RENTEFRADRAG_2026.highRate));
 const overEfterSkat = fradragProcent(EKSEMPEL_RENTE * (1 - RENTEFRADRAG_2026.lowRate));
 
-/** Eksemplet den svenska formelafsnittet regner på, fra `rente-eksempler`. */
+/** Eksemplet både formelafsnittene regner på, fra `rente-eksempler`. */
 const eksempel = annuitetsEksempel();
+
+/** Den danske Excel-formel til ydelsen, med tallene fra eksemplet. */
+const formelYdelse = `=YDELSE(${excelDa(eksempel.aarsrente / 100)}/12;${
+  eksempel.antalMaaneder
+};-${eksempel.hovedstol})`;
+
+/** Den danske Excel-formel til løbetiden på den ydelse. */
+const formelRentePerioder = `=RENTENPERIODER(${excelDa(
+  eksempel.aarsrente / 100
+)}/12;-${excelBetalning(eksempel.maanedligBetalning)};${eksempel.hovedstol})`;
+
+/** Den danske Excel-formel til den samlede rente. */
+const formelSamletRente = `=YDELSE(${excelDa(
+  eksempel.aarsrente / 100
+)}/12;${eksempel.antalMaaneder};-${eksempel.hovedstol})*${
+  eksempel.antalMaaneder
+}-${eksempel.hovedstol}`;
 
 export async function generateMetadata() {
   return generatePageMetadata("renteberegner");
@@ -193,10 +257,15 @@ export default async function RenteberegnerPage() {
           <code>ydelse = P &times; r &divide; (1 &minus; (1 + r)<sup>&minus;n</sup>)</code>
         </p>
         <p>
-          Eksempel: du låner <strong>200.000 kr.</strong> til <strong>4 %</strong> i
-          20 år. Den månedlige rente er 0,04 &divide; 12 = 0,003333, og n = 240
-          måneder. Ydelsen bliver <strong>1.211,96 kr. pr. måned</strong> — i alt
-          290.870,56 kr., hvoraf 90.870,56 kr. er renter.
+          Eksempel: du låner{" "}
+          <strong>{eksempel.hovedstol.toLocaleString("da-DK")} kr.</strong> til{" "}
+          <strong>{eksempel.aarsrente} %</strong> i {eksempel.loebetid} år. Den
+          månedlige rente er {eksempel.aarsrente} &divide; 12 ={" "}
+          {maanedligProcentDa(eksempel.aarsrente / 100)}, og n ={" "}
+          {eksempel.antalMaaneder} måneder. Ydelsen bliver{" "}
+          <strong>{krDa(eksempel.maanedligBetalning)} kr. pr. måned</strong> — i
+          alt {krDa(eksempel.samletBetaling)} kr., hvoraf{" "}
+          {krDa(eksempel.samletRante)} kr. er renter.
         </p>
         <p>
           Formlen er ikke en tommelfingerregel. Hver ydelse dækker kun en
@@ -225,25 +294,29 @@ export default async function RenteberegnerPage() {
             </thead>
             <tbody>
               <tr>
-                <td>Hvad er ydelsen på 200.000 kr. over 240 måneder?</td>
                 <td>
-                  <code>=YDELSE(0,04/12;240;-200000)</code>
+                  Hvad er ydelsen på{" "}
+                  {eksempel.hovedstol.toLocaleString("da-DK")} kr. over{" "}
+                  {eksempel.antalMaaneder} måneder?
                 </td>
-                <td>1.211,96 kr.</td>
+                <td>
+                  <code>{formelYdelse}</code>
+                </td>
+                <td>{krDa(eksempel.maanedligBetalning)} kr.</td>
               </tr>
               <tr>
                 <td>Hvor mange måneder varer lånet på den ydelse?</td>
                 <td>
-                  <code>=RENTENPERIODER(0,04/12;-1211,96;200000)</code>
+                  <code>{formelRentePerioder}</code>
                 </td>
-                <td>240 måneder</td>
+                <td>{eksempel.antalMaaneder} måneder</td>
               </tr>
               <tr>
                 <td>Hvad er den samlede rente på lånet?</td>
                 <td>
-                  <code>=YDELSE(0,04/12;240;-200000)*240-200000</code>
+                  <code>{formelSamletRente}</code>
                 </td>
-                <td>90.870,56 kr.</td>
+                <td>{krDa(eksempel.samletRante)} kr.</td>
               </tr>
             </tbody>
           </table>
@@ -258,13 +331,14 @@ export default async function RenteberegnerPage() {
         </p>
         <ul>
           <li>
-            1 % <strong>pr. måned</strong> er (1,01)<sup>12</sup> &minus; 1 =
-            <strong>12,68 % om året</strong>
+            1 % <strong>pr. måned</strong> er (1,01)<sup>12</sup> &minus; 1 ={" "}
+            <strong>{effProcentDa(MAANEDLIG_ONE_PROCENT)} % om året</strong>
           </li>
           <li>
-            4 % <strong>om året</strong> er 0,04 &divide; 12 = 0,3333 % pr.
-            måned, hvilket svarer til (1 + 0,003333)<sup>12</sup> &minus; 1 =
-            <strong>4,07 % effektivt</strong>
+            4 % <strong>om året</strong> er 0,04 &divide; 12 ={" "}
+            {maanedligProcentDa(AARS_FIRE_PROCENT)} % pr. måned, hvilket svarer
+            til (1 + {procentDa(eksempel.maanedligRente)})<sup>12</sup> &minus; 1 ={" "}
+            <strong>{effProcentDa(AARS_FIRE_PROCENT / 12)} % effektivt</strong>
           </li>
         </ul>
 

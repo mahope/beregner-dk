@@ -1,60 +1,26 @@
-STATUS: 2/10 02:25. Rød CI: ingen. Sentry: MINBEREGNER-1 er Next-router-støj,
-  filtreret siden 3e67ed3 — og filteret kan ikke længere dø af en tekstændring,
-  se `ceo/sentry-router-stoej-paa-kode`. PR-TJEK: 2026-10-02 — ingen åbne
-  PR'er. BRANCH-TJEK: ikke endnu kørt i denne uge.
-  **Gatens definition (portens):** `npm run lint` (biome ./src) · `npm run
-  typecheck` (`tsc --noEmit -p tsconfig.test.json`, eget program for
-  testfilerne) · `TZ=UTC npm run test` (vitest run) · `npm run build`. Målt
-  2/10 02:25: 0 · 0 · **3518 grønne i 216 filer** · exit 0.
-  **R3 (Sentry-filteret hang på en sætning).** Reviewen 1/10 fandt at
-  `3e67ed3`s filter kun matchede Nexts *ordlyd*, så en Next-opgradering der
-  omformulerer den ville slå filteret fra **med alle tests grønne** — fordi
-  testen hængede på den samme sætning. Målt 2/10 mod den installerede
-  ramme (next 16.3.8, kaldt gennem Next's egen
-  `parseAndValidateFlightRouterState`): fejlen har koden `E10` på
-  `__NEXT_ERROR_CODE`, men **ikke** i den serialiserede hændelse, og
-  `beforeSend` får på client-`captureException`-vejen kun `event_id` og
-  `integrations` — aldrig `originalException` (målt på den live klient med
-  `client.on("beforeSendEvent")`). Så koden kan ikke stå alene. Filteret har
-  derfor tre nøgler: koden *når hintet bærer den*, den fulde sætning, og
-  emnet «router state header» som overlever en omskrivning. Beviset: rødt
-  ved mutation — `NEXT_ROUTER_STATE_PHRASE` væk → 2 tests røde, kodetjekket
-  væk → 1 test rød. End-to-end mod en rigtig collector på 127.0.0.1: Nexts
-  egen fejl → **0** event-enveloper, samme fejl med omskrevet ordlyd → **0**,
-  kontrol-fejl → 1. (Kun *event*-enveloper tælles: en droppet hændelse sender
-  stadig en client-report, som er `{}` på ledningen.)
-  **Begge review-fund fra 29/9 er rettet** —
-  `ceo/review-fund-palmesondag-og-komponenter`.
-  **R2 (palmesøndag):** `/dage-til/palmesondag`'s FAQ sagde, at palmesøndag «står
-  i listen over Danmarks helligdage», men `getHelligdage(2026,"da")` gav 12 navne
-  uden den. Den ligger nu i modulet som påskedag − 7 (**13** helligdage), og to
-  beviser låser den: fjernes den igen, bliver **5 tests** røde (målt 2/10).
-  Målt samtidig: kun **9** af de 13 falder på en hverdag — palmesøndag, påskedag
-  og pinsedag er søndage, 2. juledag er lørdag i 2026 — så `/dato`s arbejdsdage-
-  tal (251) er uændret, og det er `taellHelligdagePaaHverdag` der beviser det.
-  FAQ'en siger nu, at den er en søndag og derfor ingen ekstra fridag.
-  **R1 (beløbsscanneren):** scanneren så kun `page.tsx`, så hele `src/components`
-  lå uden for porten. Nu scannes de **152** `.tsx` uden for `page.tsx` med egen
-  liste (**2** fund: `BolanBeregner` 1, `LoenBeregner` 1), `ScriptKind` læses af
-  filendelsen, og mønstret kræver at de tre cifre **slutter** på tallet — «Kilde:
-  borger.dk, verificeret 26/9 2026» var ellers fundet som «9 202» (siden 453 →
-  **448** på siderne). Efterlønnens to håndskrevne portioner faldt væk som bonus:
-  `EfterloensBeregner.tsx` læser nu `SKATTEFRI_PRAEMIE_2026` (portion, 481 timer,
-  12 portioner, 3.120 timer). Nye `EfterloensBeregner.test.tsx` dømmer på den
-  **renderede** tekst og fangede en manglende `{" "}` — JSX spiser linjeskiftet
-  lige efter `}`, så teksten ville have læst «10.580kr. for deltidsforsikrede».
-  Mutation målt: `{" "}` fjernet → rød; `portion.full` 15870 → 16000 → stadig
-  grøn, altså læst fra modulet og ikke håndskrevet.
-  **Samme iteration, anden opgave: komponenternes sidste to fund er væk.**
-  `ceo/bolan-og-loen-tekstal-fra-modul`. `BolanBeregner.tsx` skrev de svenske
-  satser håndskrevet («max 2%», «30%», «100 000 kr», «21%») i samme komponent
-  som `SVENSK_BOLAN_2026` lå i, og `LoenBeregner.tsx` skrev «1.000 kr mere i
-  bruttoløn» oven i den `EKSTRA_BRUTTO` beregningen selv brugte. Nu læses begge
-  dele fra modulet, og **`HAARDKODEDE_BELOB_I_KOMPONENTER` er tom** — det første
-  håndskrevne beløb i en beregner gør porten rød. Ny
-  `bolan-loen-sater.test.tsx` dømmer på den renderede tekst (samme `{" "}`-fælde).
-  **Åbne VERIFICÉR-noter: 10** (6 fra 1/10 + 3 fra palmesøndag + 1 herfra), alle
-  med vindue **2/10 07:30**.
+STATUS: 2/10 00:05. Rød CI: ingen. Sentry: MINBEREGNER-1 er Next-router-støj,
+  filtreret siden 3e67ed3, kodetestet siden 5f137d4. PR-TJEK: 2026-10-02 — ingen
+  åbne PR'er. BRANCH-TJEK: ikke kørt i denne uge.
+  **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` ·
+  `npm run build`. Målt 2/10 00:05: 0 · 0 · **3521 grønne i 217 filer** · 0.
+  **Denne iteration: `/renteberegner`'s danske eksempel læser modulet.**
+  `ceo/renteberegner-eksempel-fra-modul`. `metaDescription` og den *svenske*
+  gren læste allerede `rente-eksempler`; den *danske* brødtekst skrev sit
+  eksempel håndskrevet — «200.000 kr.», «1.211,96 kr.», «290.870,56 kr.»,
+  «90.870,56 kr.», «12,68 %», «0,3333 %», «4,07 %» og tre Excel-formler med
+  håndskrevet `0,04/12;240;-200000`. Nu kommer alle otte fra
+  `annuitetsEksempel()` og `effektivAarsrente()`. Modulet giver præcis de
+  samme tal (målt), så **det synlige er uændret** — rettelsen er koplingsformen.
+  *Bevis:* tallene er lig med de håndskrevne til øre, så `toContain` på dem er
+  intet bevis. Den nye test mocker modulet med 123.456 kr. / 7 % / 15 år og
+  `effektivAarsrente() → 0,5`: mod gammel kode **3 af 3 røde**, mod ny grønne.
+  *Én fejl fundet undervejs:* første version skrev «4 ÷ 12 = 33,3333 %», fordi
+  `eksempel.aarsrente` er 4 (procent) mens `AARS_FIRE_PROCENT` er 0,04 (brøk) —
+  to enheder i ét modul. Rettet med /100 på det ene sted.
+  *Ærligt om porten:* `HAARDKODEDE_BELOB` for siden står **uændret på 6**; de
+  otte lå i `<code>`-strenge og interpolationer, porten ser kun `isJsxText`.
+  De 6 tilbage er rentefradrag-sætningen på samme side → næste opgave.
+  **Åbne VERIFICÉR-noter: 11**, alle med vindue **2/10 07:30**.
 
 ## Review-fund 29/9 — lukket (detaljer i `docs/plan-arkiv.md`)
 
@@ -79,7 +45,12 @@ for den side falder, og regnestykkerne er verificeret af `regnestykker-porten`.
   og «told ved import over **1.150 kr**» — sidstnævnte er en EUR-grænse omregnet
   til kroner, så den flytter sig med valutakursen og kan ikke stå som et fast tal.
   **Begge kræver en kilde** (❓ nedenfor), så de må ikke gættes.
-- **`/renteberegner`** — 13.288 visninger (0,9 %, pos. 7,5), 6 fund.
+- **`/renteberegner`** — ✅ 2/10 for de **otte** håndskrevne tal i eksemplet,
+  se STATUS og `ceo/renteberegner-eksempel-fra-modul`. De **6** fund
+  `regnestykker`-porten stadig tæller på siden er *ikke* dem: de er
+  rentefradrag-sætningen («33,6 %», «50.000 kr.», «100.000 kr.», «3,3 %
+  efter skat» …), som står i `RENTEFRADRAG_2026`-nærheden. *Accept:* de 6
+  falder, og porten tæller dem ikke, fordi de læses fra modulet.
 - **Komponenterne: 0 fund** ✅ 2/10 (`ceo/review-fund-palmesondag-og-komponenter`,
   `ceo/bolan-og-loen-tekstal-fra-modul`). Listen
   `HAARDKODEDE_BELOB_I_KOMPONENTER` er tom, så næste håndskrevne beløb i en
@@ -286,6 +257,16 @@ Prioriteret efter forventet effekt på **trafik**. Datagrund fra GSC 1/10
   `src/app/regnestykker.test.ts` — så prøven er lokal: de 152 `.tsx` uden for
   `page.tsx` giver pr. fil de tal i `HAARDKODEDE_BELOB_I_KOMPONENTER`, og
   `EfterloensBeregner.test.tsx` er grøn på den renderede tekst.
+
+- ⏳ **`/renteberegner`'s danske eksempel og Excel-tabel læser modulet.**
+  `ceo/renteberegner-eksempel-fra-modul`. Prøven er på indhold: `curl -s
+  https://minberegner.dk/renteberegner` skal vise **uændret** «200.000 kr.»,
+  «1.211,96 kr. pr. måned», «290.870,56 kr.», «90.870,56 kr.», «0,04 ÷ 12 =
+  0,3333 %», «12,68 % om året», «4,07 % effektivt» og formlerne
+  `=YDELSE(0,04/12;240;-200000)`, `=RENTENPERIODER(0,04/12;-1211,96;200000)`
+  og `=YDELSE(0,04/12;240;-200000)*240-200000`. Tallene skal være **præcis
+  de samme som før** — hvis en af dem er ændret, er der gået en fejl i
+  koblingsformen. Vindue **2/10 07:30**.
 
 - ⏳ **Regnestykker-porten ser hele kæden og sitets egen notationsform.**
   `ceo/regnestykker-porten-ser-hele-kaden`. **Ingen produktionsændring** — kun

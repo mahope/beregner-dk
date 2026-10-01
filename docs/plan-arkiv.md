@@ -23256,3 +23256,99 @@ LoenBeregner — ellers forventer testen «1.000» og får «1 000».
 
 **Gate 2/10 01:47:** lint 0 · typecheck 0 · **3510 grønne i 215 filer** ·
 build exit 0.
+STATUS: 2/10 02:25. Rød CI: ingen. Sentry: MINBEREGNER-1 er Next-router-støj,
+  filtreret siden 3e67ed3 — og filteret kan ikke længere dø af en tekstændring,
+  se `ceo/sentry-router-stoej-paa-kode`. PR-TJEK: 2026-10-02 — ingen åbne
+  PR'er. BRANCH-TJEK: ikke endnu kørt i denne uge.
+  **Gatens definition (portens):** `npm run lint` (biome ./src) · `npm run
+  typecheck` (`tsc --noEmit -p tsconfig.test.json`, eget program for
+  testfilerne) · `TZ=UTC npm run test` (vitest run) · `npm run build`. Målt
+  2/10 02:25: 0 · 0 · **3518 grønne i 216 filer** · exit 0.
+  **R3 (Sentry-filteret hang på en sætning).** Reviewen 1/10 fandt at
+  `3e67ed3`s filter kun matchede Nexts *ordlyd*, så en Next-opgradering der
+  omformulerer den ville slå filteret fra **med alle tests grønne** — fordi
+  testen hængede på den samme sætning. Målt 2/10 mod den installerede
+  ramme (next 16.3.8, kaldt gennem Next's egen
+  `parseAndValidateFlightRouterState`): fejlen har koden `E10` på
+  `__NEXT_ERROR_CODE`, men **ikke** i den serialiserede hændelse, og
+  `beforeSend` får på client-`captureException`-vejen kun `event_id` og
+  `integrations` — aldrig `originalException` (målt på den live klient med
+  `client.on("beforeSendEvent")`). Så koden kan ikke stå alene. Filteret har
+  derfor tre nøgler: koden *når hintet bærer den*, den fulde sætning, og
+  emnet «router state header» som overlever en omskrivning. Beviset: rødt
+  ved mutation — `NEXT_ROUTER_STATE_PHRASE` væk → 2 tests røde, kodetjekket
+  væk → 1 test rød. End-to-end mod en rigtig collector på 127.0.0.1: Nexts
+  egen fejl → **0** event-enveloper, samme fejl med omskrevet ordlyd → **0**,
+  kontrol-fejl → 1. (Kun *event*-enveloper tælles: en droppet hændelse sender
+  stadig en client-report, som er `{}` på ledningen.)
+  **Begge review-fund fra 29/9 er rettet** —
+  `ceo/review-fund-palmesondag-og-komponenter`.
+  **R2 (palmesøndag):** `/dage-til/palmesondag`'s FAQ sagde, at palmesøndag «står
+  i listen over Danmarks helligdage», men `getHelligdage(2026,"da")` gav 12 navne
+  uden den. Den ligger nu i modulet som påskedag − 7 (**13** helligdage), og to
+  beviser låser den: fjernes den igen, bliver **5 tests** røde (målt 2/10).
+  Målt samtidig: kun **9** af de 13 falder på en hverdag — palmesøndag, påskedag
+  og pinsedag er søndage, 2. juledag er lørdag i 2026 — så `/dato`s arbejdsdage-
+  tal (251) er uændret, og det er `taellHelligdagePaaHverdag` der beviser det.
+  FAQ'en siger nu, at den er en søndag og derfor ingen ekstra fridag.
+  **R1 (beløbsscanneren):** scanneren så kun `page.tsx`, så hele `src/components`
+  lå uden for porten. Nu scannes de **152** `.tsx` uden for `page.tsx` med egen
+  liste (**2** fund: `BolanBeregner` 1, `LoenBeregner` 1), `ScriptKind` læses af
+  filendelsen, og mønstret kræver at de tre cifre **slutter** på tallet — «Kilde:
+  borger.dk, verificeret 26/9 2026» var ellers fundet som «9 202» (siden 453 →
+  **448** på siderne). Efterlønnens to håndskrevne portioner faldt væk som bonus:
+  `EfterloensBeregner.tsx` læser nu `SKATTEFRI_PRAEMIE_2026` (portion, 481 timer,
+  12 portioner, 3.120 timer). Nye `EfterloensBeregner.test.tsx` dømmer på den
+  **renderede** tekst og fangede en manglende `{" "}` — JSX spiser linjeskiftet
+  lige efter `}`, så teksten ville have læst «10.580kr. for deltidsforsikrede».
+  Mutation målt: `{" "}` fjernet → rød; `portion.full` 15870 → 16000 → stadig
+  grøn, altså læst fra modulet og ikke håndskrevet.
+  **Samme iteration, anden opgave: komponenternes sidste to fund er væk.**
+  `ceo/bolan-og-loen-tekstal-fra-modul`. `BolanBeregner.tsx` skrev de svenske
+  satser håndskrevet («max 2%», «30%», «100 000 kr», «21%») i samme komponent
+  som `SVENSK_BOLAN_2026` lå i, og `LoenBeregner.tsx` skrev «1.000 kr mere i
+  bruttoløn» oven i den `EKSTRA_BRUTTO` beregningen selv brugte. Nu læses begge
+  dele fra modulet, og **`HAARDKODEDE_BELOB_I_KOMPONENTER` er tom** — det første
+  håndskrevne beløb i en beregner gør porten rød. Ny
+  `bolan-loen-sater.test.tsx` dømmer på den renderede tekst (samme `{" "}`-fælde).
+  **Åbne VERIFICÉR-noter: 10** (6 fra 1/10 + 3 fra palmesøndag + 1 herfra), alle
+  med vindue **2/10 07:30**.
+
+
+## 2/10 00:05 — ceo/renteberegner-eksempel-fra-modul (arkiveret STATUS)
+
+Opgaven var F5b i køen: `/renteberegner` (13.288 GSC-visninger, 0,9 % CTR,
+pos. 7,5) skrev sit annuitets-eksempel håndskrevet i den danske brødtekst, mens
+`metaDescription` og den svenske gren allerede læste `src/lib/rente-eksempler`.
+De otte håndskrevne tal: 200.000 kr., 1.211,96 kr., 290.870,56 kr.,
+90.870,56 kr., 12,68 %, 0,3333 %, 4,07 % og Excel-formlernes `0,04/12;240;-200000`
+samt `-1211,96`.
+
+Målt før ændringen med `npx tsx` mod modulet: `annuitetsEksempel()` →
+1.211,96 / 290.870,56 / 90.870,56, `effektivAarsrente(0,01)` → 12,68 %,
+`0,04/12` → 0,3333 % og 4,07 %. De synlige tal er dermed uændrede; kun
+koplingsformen er rettet.
+
+Bevis der kan fejle: `eksempel-fra-modul.test.tsx` mocker modulet med
+123.456 kr. / 7 % / 15 år (maanedligBetalning 1.111,22) og
+`effektivAarsrente() → 0,5`, og spørger den danske side om at vise dem.
+Mod `master:src/app/renteberegner/page.tsx` er 3 af 3 tests røde; mod den
+nye kode er de grønne. Uden mocken ville testen være grøn mod begge, fordi de
+håndskrevne tal er lig med de beregnede til øre.
+
+Fejl fundet undervejs: første version skrev «4 ÷ 12 = 33,3333 %», fordi
+`eksempel.aarsrente` er 4 (procenttal) mens `AARS_FIRE_PROCENT` er 0,04
+(brøk) — to enheder for samme størrelse i ét modul, hver med sit brugssted.
+Rettet ved at dividere `aarsrente` med 100 på det ene sted. Biome's
+`noSuspiciousSemicolonInJsx` afvorde desuden de tre formler som JSX, fordi et
+semikolon i starten af en JSX-linje læses som en tastefejl; de er nu tre
+konstanter bygget uden for JSX.
+
+Bemærk til porten: `HAARDKODEDE_BELOB["src/app/renteberegner/page.tsx"]
+står uændret på 6. Beløbene i dette eksempel kom ikke fra porten — de lå i
+`<code>`-strenge og i interpolationer, og `jsxBelob` ser kun `ts.isJsxText`.
+Sumlisten `HAARDKODEDE_BELOB_I_LISTEN` er derfor heller ikke ændret. De 6
+tilbage er rentefradrag-sætningen på samme side.
+
+Gate 2/10 00:05: `npm run lint` 0 · `npm run typecheck` 0 · `TZ=UTC npm run
+test` 3521 grønne i 217 filer · `npm run build` exit 0.
