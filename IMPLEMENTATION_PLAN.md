@@ -1,37 +1,30 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — 1/10 06:35. To ting lå åbne fra sidste iteration.
+STATUS: KØ — 1/10 07:30. Én ting leveret, resten af køen er stadig blokederet.
 
-  **1. Leveret: `/dato`s datoliste lævede to sprogfejl.** "12 **uger og 1
-  dage**" i stedet for "1 dag" — antallet og ugerne blev bøjet, restdagen ikke,
-  i alle 19 rækker og begge sprog. Plus en svensk `<h2>` uden "som". Ny port
-  regner hele parentesen fra `getDageTilAnswer` for hver række i begge sprog.
-  `ceo/dato-datoliste-bøjning`.
+  **Leveret: `/loen-efter-skat` skrev skattesatserne i hånden.** Fund ved at
+  sammenligne kommunetabellen med `KOMMUNER`: siden sagde **"Allerød (23,3 %)"**
+  mens data siger **24,80 %** — og Allerød er ikke blandt de tre laveste
+  kommuner (Lyngby-Taarbæk er det, 23,00 %). Den gamle tabel skrev også
+  **"Rundersdal"** med omvendt e/r. Alle 13 satser læser nu `SATSER_2026`,
+  tabellen *er* `KOMMUNER.slice(0,3)`/`slice(-3)`, og fem nye porte i
+  `fact-consistency.test.ts` låser det (tre mutationer målt røde).
+  `ceo/loen-efter-skat-tal-kilden`.
 
-  **2. Fund der retter planens egen præmis: CTR følger IKKE position.** Planen
-  skrev "pos. 4,9-5,9 giver 0,6-1,4 %, pos. 7,0-8,7 giver 0,1-0,5 %". GSC's
-  egne tal modbevider det: `/boligstoette` har **2,4 % CTR på pos. 8,7**,
-  `/promille` **1,5 % på pos. 7,9** (nyeste stjerne, +2.183 %/28d), mens
-  `/procent` har **0,1 % på pos. 7,4** og `/moms` **0,2 % på pos. 7,0** —
-  24x spredning ved næsten samme position, samme site, samme måned. Præmissen
-  er fjernet. **Konsekvens:** `/procent` og `/moms` skal **ikke** få flere
-  titelændringer, før vi har set hvilke søgninger deres 172.934 visninger er —
-  ellers brænder vi flere målinger på det forkerte spørgsmål.
+  **Fjernet, ikke rettet: tre 2025-sammenligninger** ("op fra 49.700 kr",
+  "op fra 45.100 kr", "sat ned fra 12,22 %"). De har ingen kilde i repoet, og
+  skat.dk svarer **HTTP 500** for både browser og curl (1/10 07:00), så de kunne
+  ikke verificeres. `SATSER_2026` bærer de kildeførte 2026-tal; en påstand om
+  et gammelt år uden kilde hører ikke der. **Åben for Mads: en 2025-tal-fil
+  eller et screenshots-bevis ville genåbne dem.**
 
-  **Opgave 200 er blokeret på Cloudflare, ikke på Node.** Live 1/10 06:00: `/`
-  367 ms, `/dato` 433 ms, `/procent` 282 ms TTFB, `cf-cache-status: DYNAMIC`,
-  `cache-control: private, no-cache, no-store`. Den naive løsning (`s-maxage`
-  på HTML'en) er farlig og målt grund: Next svarer `vary: rsc, …`, og
-  klientens rute-navigation genanmoder samme URL med `RSC: 1`. En CDN der
-  cache'r på URL og ikke på `Vary` giver routeren HTML i stedet for sit
-  flight-svar → brudt navigation på alle cachede sider. Det er Mads' infra.
-  ❓ spørgsmålet er skrevet.
-
-  **Resten af sitet målt sundt i samme sweep (38 sider, begge domæner).** Alle
-  200 med korrekt `lang` og canonical på sig selv; `beraknare.se` svensk alle
-  steder; `/dage-til/*` har dansk canonical + `hreflang` `sv` → `/dagar-till/*`.
-  **Alle 19 nedtællingstal rigtige** — genregnet mod kalenderen fra 2026-10-01.
-  **Ingen fejl fundet, intet rettet** (CEO-køens punkt 0 verificeret igen).
+  **Målt 1/10 06:50-07:05 på live, 140 sitemap-URL'er, ingen fejl:** `npm audit`
+  **0 sårbarheder**, ingen døde interne links (alle 140 sider har ≥2 indgående
+  links undtagen to blogindlæg med 1), **hreflang `da`/`sv`/`x-default` på alle
+  målte sider** — minberegner.dk *og* beraknare.se — canonical på sig selv,
+  og 23-49 KB HTML gzip (376 KB rå på forsiden er ikke et problem).
+  **Ingen ny opgave herfra:** hverken titel, beskrivelse, links, hastighed,
+  indexering eller afhængigheder har en målt fejl tilbage på minberegner.dk.
 
   **Hvorfor køen ellers er tom, målt 1/10:** 97, 119 og 183 er `BLOCKED` på
   Mads, 98 afhænger af 97, 187 må ikke røres før 13/10, F1/F3/F5 kræver
@@ -45,7 +38,7 @@ STATUS: KØ — 1/10 06:35. To ting lå åbne fra sidste iteration.
 
   **Blokeret af svar fra Mads:** 97, 119 og 183, samt F1/F3/F5. **Opgave 187 må
   ikke røres før 13/10.** CEO-køens punkt 0 er lukket (alle otte tal verificeret
-  i koden 1/10 02:00).
+  i koden 1/10 02:00). **Nyt ❓: skat.dk er HTTP 500 for automatiske hentninger.**
 
   **⚠️ Målerfælde:** `/tidszone` er dynamisk (`no-store`), så `new Date()` i
   dens JSX er ikke frosset ved build. Kun statiske sider må regne på et fast år.
@@ -187,6 +180,19 @@ sagde tidligere 82/17 og før det 72 — de ekstra kommer fra commits efter sids
 måling, ikke fra denne ændring.
 
 ## Åbne VERIFICÉR DEPLOY-noter
+
+- ⏳ **`/loen-efter-skat` skal vise de rigtige kommuner og læse satser fra
+  modulerne.** `ceo/loen-efter-skat-tal-kilden`. På
+  `https://minberegner.dk/loen-efter-skat` skal kommunetabellen lyde **"Rudersdal
+  (22,5 %) | Langeland (27,8 %)", "Gentofte (22,8 %) | Ishøj (27,2 %)",
+  "Lyngby-Taarbæk (23 %) | Brøndby (27,1 %)"** — Lyngby-Taarbæk erstattede
+  **Allerød (23,3 %)**, som `KOMMUNER` siger er 24,80 %. Strengen **"Allerød"**
+  må **ikke** forekomme nogen steder på siden, og **"Rundersdal"** må ikke
+  forekomme (data skriver "Rudersdal"). **"op fra 49.700 kr", "op fra 45.100 kr"
+  og "sat ned fra 12,22 %" skal være væk.** Sats skal stå som "8 %", "12,01 %",
+  "12,75 %" med mellemrum. HTTP 200 beviser intet — det er en tabel og en
+  brødtekst. Prøven på dansk er `src/app/fact-consistency.test.ts` efter deploy.
+  Vindue **1/10 12:30** (denne merge sker efter 07:30).
 
 - ⏳ **Datolisten på `/dato` skal bøje "1 dag", ikke "1 dage", og den svenske
   overskrift skal have "som".** `ceo/dato-datoliste-bøjning`. På

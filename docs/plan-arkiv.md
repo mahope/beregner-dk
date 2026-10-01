@@ -22284,3 +22284,44 @@ mens `/procent` har **0,1 % på pos. 7,4** og `/moms` **0,2 % på pos. 7,0**.
 er fjernet fra planen, og F1 (søgningseksport fra Mads) er dermed vigtigere end
 den var — uden søgningsniveau ved vi ikke om `/procent`s 150.470 visninger er
 et snippet-problem eller et mix-problem, og de to kræver hver sin rettelse.
+
+## Iteration 1/10 07:30 — `/loen-efter-skat` læser satserne fra modulerne
+
+Findet kom fra at sammenligne `/loen-efter-skat`s kommunetabel med
+`src/lib/kommuner.ts` (98 kommuner, kilde skm.dk/satser/statistik/kommuneskatter):
+
+- Siden sagde **"Allerød (23,3 %)"**. `KOMMUNER` siger **24,80 %**.
+- Allerød er **ikke** blandt de tre laveste kommuner: `KOMMUNER` sorteret
+  stigende giver R**u**dersdal 22,50 → Gentofte 22,80 → Lyngby-Taarbæk 23,00,
+  mens Allerød er nr. 31. Den gamle tabel havde altså både et **forkert tal**
+  og en **forkert kommune** på den tredje række.
+- Den gamle tabel skrev **"Rundersdal"**; data skriver **"Rudersdal"** (e/r
+  omvendt). Rettet ved konstruktion, fordi navnet nu kommer fra data.
+- Målt med `npx tsx` over `KOMMUNER`: laveste 3 = R**u**ndersdal 22,50 /
+  Gentofte 22,80 / Lyngby-Taarbæk 23,00; højeste 3 = Langeland 27,80 /
+  Ishøj 27,20 / Brøndby 27,10.
+
+Dertil var alle 13 skattesatser i brødteksten hårdkodede (8 %, 54.100 kr,
+12,75 %, 63.300 kr, 12,01 %, 25,05 %, 0,639 %, 7,5 %, 641.200, 777.900,
+2.592.700), mens beregneren læser `SATSER_2026`. Nu læser de `SATSER_2026` /
+`KOMMUNER` med samme `da`/`pct`-idiom som `/blog/skat-2026-alt-du-skal-vide`.
+
+**De tre 2025-sammenligninger blev fjernet, ikke rettet.** "op fra 49.700 kr"
+(personfradrag), "op fra 45.100 kr" (beskæftigelsesfradrag) og "sat ned fra
+12,22 %" (bundskat) har ingen kilde i repoet. Kildejerngang 1/10 07:00:
+`skat.dk/privat/skat-til-person` → **HTTP 500** for både webfetch og curl med
+browser-UA; `info.skat.dk` → 404; `lex.dk/Personfradrag` → 404. Det samme mønster
+som opgave 119 (sst.dk 429). Ifølge `_kvalitet.md` punkt 11 må fakta ikke
+opfindes, så påstanden om 2025 er væk; `SATSER_2026` har kilde på 2026-tallene.
+
+**Gate:** `npm run lint` exit 0 (635 filer), `TZ=UTC npm run test` **3313 tests /
+202 filer grønne**, `node scripts/locale-leak.mjs --gate` exit 0,
+`next build` compiled successfully (142/142).
+
+**Fem nye porte** i `src/app/fact-consistency.test.ts`. Negativprøverne
+scanner filen **efter at kommentarer er fjernet** (samme greb som
+`ViwFindbarhedTest`) — uden det ramte porten sin egen docblock, der med vilje
+citerer de gamle tal. Tre mutationer målt røde: bundskaten hardcodet igen →
+3 porte røde; `<td>Allerød (23,3%)</td>` tilbage i tabellen → 2 porte røde.
+Porten låser desuden de tre laveste og tre højeste kommuner *i rækkefølge*,
+så et bytte til `KOMMUNER.slice(0, 3)` uden sortering falder.

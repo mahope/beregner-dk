@@ -4,7 +4,10 @@ import { describe, expect, test } from "vitest";
 
 import { SOLCELLE_LEVETID_AAR, SOLCELLE_LEVETID_AAR_MAX, SOLCELLE_LEVETID_AAR_MIN } from "@/lib/energi/solceller";
 import { HUSLEJE_EKSEMPEL, HUSLEJE_EKSEMPEL_MED_FORBRUG, HUSLEJE_STANDARD } from "@/lib/husleje";
+import { formatNumber } from "@/lib/format";
+import { KOMMUNER } from "@/lib/kommuner";
 import { getPageData } from "@/lib/page-data";
+import { SATSER_2026 } from "@/lib/satser-2026";
 
 /**
  * C27 (2026-09-26) fandt to dokumenterede modstridelser mellem sider, der
@@ -125,5 +128,86 @@ describe("huslejens 30 %-eksempel", () => {
     // Regnestykket skal komme fra modulet, ikke fra en egen formel i komponenten.
     expect(huslejeBudgetBeregner).toContain("beregnHusleje({");
     expect(huslejeBudgetBeregner).not.toMatch(/0\.30|0\.33/);
+  });
+});
+
+/**
+ * `/loen-efter-skat` skrev skattesatser, personfradrag, beskæftigelsesfradrag og
+ * kommuneskatter som hårdkodede tal i brødteksten, mens beregneren læste
+ * `SATSER_2026` og `KOMMUNER`. Det er den fejlklasse denne fil findes for:
+ * påstande i tekst er kode.
+ *
+ * Fundet 1/10 ved at sammenligne tabellen med `KOMMUNER`: siden sagde
+ * "Allerød (23,3 %)", data siger 24,80 % — og Allerød er ikke blandt de tre
+ * laveste kommuner (Lyngby-Taarbæk, 23,00 %). Resten af tabel og brødtekst
+ * var hårdkodede, så de kunne glide fra modulet næste år.
+ */
+describe("løn-efter-skat læser satserne fra modulerne", () => {
+  const loenSideRå = laes("loen-efter-skat", "page.tsx");
+  // Kommentarer fjernes før de negative prøver, ellers rammer porten sin egen
+  // docblock, der med vilje citerer de gamle tal. Samme greb som
+  // `ViwFindbarhedTest` bruger.
+  const loenSide = loenSideRå.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^[ \t]*\/\/.*$/gm, "");
+  const rå = loenSideRå;
+  const pct = (sats: number) =>
+    formatNumber(sats * 100, "da", { maximumFractionDigits: 3 });
+  const stigende = [...KOMMUNER].sort((a, b) => a.kommuneskat - b.kommuneskat);
+
+  test("hver sats i brødteksten læses fra SATSER_2026", () => {
+    for (const felt of [
+      "amBidrag",
+      "personfradrag",
+      "beskaeftigelsesfradragPct",
+      "beskaeftigelsesfradragMax",
+      "bundskat",
+      "kommuneskatSnit",
+      "kirkeskatSnit",
+      "mellemskat",
+      "mellemskatGraense",
+      "topskat",
+      "topskatGraense",
+      "topTopskat",
+      "topTopskatGraense",
+    ]) {
+      expect(rå).toContain(`SATSER_2026.${felt}`);
+    }
+  });
+
+  test("de gamle hårdkodede satser må ikke komme tilbage i copy", () => {
+    // Mutation: læg en af disse tal tilbage, testen skal blive rød.
+    expect(loenSide).not.toMatch(/54\.100|63\.300|12,01|25,05|0,639|12,75/);
+    expect(loenSide).not.toMatch(/641\.200|777\.900|2\.592\.700/);
+  });
+
+  test("sammenligninger med 2025 er væk, fordi de ikke kan verificeres", () => {
+    // Mutation: sæt "op fra 49.700 kr" tilbage, testen skal blive rød.
+    expect(loenSide).not.toMatch(/op fra (49\.700|45\.100)/);
+    expect(loenSide).not.toMatch(/sat ned fra 12,22/);
+    expect(loenSide).not.toMatch(/22,5%|27,8%|22,8%|27,2%|23,3%|27,1%/);
+  });
+
+  test("kommunetabellen er de tre laveste og højeste i KOMMUNER", () => {
+    expect(rå).toContain("LAVESTE_KOMMUNER");
+    expect(rå).toContain("HOEJESTE_KOMMUNER");
+    expect(loenSide).not.toMatch(/Rundersdal \(|Langeland \(|Allerød \(/);
+
+    // Mutation: byt listen til KOMMUNER.slice(0, 3) — rækkefølgen skal røbes.
+    expect(stigende.slice(0, 3).map((k) => k.navn)).toEqual([
+      "Rudersdal",
+      "Gentofte",
+      "Lyngby-Taarbæk",
+    ]);
+    expect(stigende.slice(-3).reverse().map((k) => k.navn)).toEqual([
+      "Langeland",
+      "Ishøj",
+      "Brøndby",
+    ]);
+    expect(stigende[0].kommuneskat).toBeCloseTo(22.5, 2);
+    expect(stigende[stigende.length - 1].kommuneskat).toBeCloseTo(27.8, 2);
+  });
+
+  test("landsgennemsnittet er SATSER_2026.kommuneskatSnit, ikke et hårdkodet tal", () => {
+    expect(rå).toContain("SATSER_2026.kommuneskatSnit");
+    expect(pct(SATSER_2026.kommuneskatSnit)).toBe("25,049");
   });
 });

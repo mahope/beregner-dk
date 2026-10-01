@@ -12,6 +12,40 @@ import {
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { InlineAd } from "@/components/ads/AdBanner";
 import Sidebar from "@/components/Sidebar";
+import { formatNumber } from "@/lib/format";
+import { KOMMUNER } from "@/lib/kommuner";
+import { SATSER_2026 } from "@/lib/satser-2026";
+
+/**
+ * Alle tallene i afsnittet "Sådan beregnes din skat i Danmark" læses fra
+ * `SATSER_2026` — samme fil som beregneren og `/blog/skat-2026-alt-du-skal-vide`
+ * bruger. De stod tidligere som hårdkodede tal i brødteksten, så en
+ * satsændring kunne ramme beregningen og ikke copyen (eller omvendt).
+ *
+ * Kommunetabellen er tilsvarende afledet af `KOMMUNER` i stedet for at være
+ * skrevet i hånden. Den hårdkodede tabel sagde "Allerød (23,3 %)", mens
+ * `KOMMUNER` siger 24,80 % — og Allerød er ikke blandt de tre laveste
+ * kommuner overhovedet (Lyngby-Taarbæk er det med 23,00 %). Nu kan tabellen
+ * ikke komme på afveje, fordi den *er* tabellen.
+ *
+ * Sammenligninger med 2025 ("op fra 49.700 kr", "op fra 45.100 kr", "sat ned
+ * fra 12,22 %") er fjernet i stedet for rettet: de 2025-tal har ingen kilde i
+ * repoet, og skat.dk svarer HTTP 500 for både browser og hentning (1/10), så de
+ * kunne ikke verificeres. `SATSER_2026` bærer de verificerede 2026-tal med
+ * kilde — en påstand om et gammelt år uden kilde hører ikke der.
+ */
+const da = (beloeb: number) => formatNumber(beloeb, "da");
+const pct = (sats: number) =>
+  formatNumber(sats * 100, "da", { maximumFractionDigits: 3 });
+/** `KOMMUNER` fører procent som 22.5, mens `pct` forventer en andel. */
+const pctTal = (procent: number) => pct(procent / 100);
+
+/** De tre laveste og tre højeste kommuneskatter i `KOMMUNER`, beregnet her. */
+const KOMMUNER_STIGENDE = [...KOMMUNER].sort(
+  (a, b) => a.kommuneskat - b.kommuneskat
+);
+const LAVESTE_KOMMUNER = KOMMUNER_STIGENDE.slice(0, 3);
+const HOEJESTE_KOMMUNER = KOMMUNER_STIGENDE.slice(-3).reverse();
 
 export async function generateMetadata() {
   return generatePageMetadata("loen-efter-skat");
@@ -53,42 +87,46 @@ export default async function LoenPage() {
           oversigt over hvordan din løn beskattes i 2026:
         </p>
 
-        <h3>1. AM-bidrag (8%)</h3>
+        <h3>1. AM-bidrag ({pct(SATSER_2026.amBidrag)} %)</h3>
         <p>
-          Først trækkes <strong>arbejdsmarkedsbidraget</strong> på 8% fra din
-          bruttoløn. Dette bidrag går til dagpenge, efterløn og andre
-          arbejdsmarkedsordninger.
+          Først trækkes <strong>arbejdsmarkedsbidraget</strong> på{" "}
+          {pct(SATSER_2026.amBidrag)} % fra din bruttoløn. Dette bidrag går til
+          dagpenge, efterløn og andre arbejdsmarkedsordninger.
         </p>
 
-        <h3>2. Personfradrag (54.100 kr)</h3>
+        <h3>2. Personfradrag ({da(SATSER_2026.personfradrag)} kr)</h3>
         <p>
-          Alle har ret til et <strong>personfradrag</strong> på 54.100 kr i
-          2026 (op fra 49.700 kr). Du betaler ikke skat af dette beløb.
+          Alle har ret til et <strong>personfradrag</strong> på{" "}
+          {da(SATSER_2026.personfradrag)} kr i 2026. Du betaler ikke skat af dette
+          beløb.
         </p>
 
-        <h3>3. Beskæftigelsesfradrag (12,75%)</h3>
+        <h3>3. Beskæftigelsesfradrag ({pct(SATSER_2026.beskaeftigelsesfradragPct)} %)</h3>
         <p>
-          Som lønmodtager får du et ekstra fradrag på 12,75% af din lønindkomst
-          (efter AM-bidrag), dog maks. 63.300 kr i 2026 (op fra 45.100 kr).
+          Som lønmodtager får du et ekstra fradrag på{" "}
+          {pct(SATSER_2026.beskaeftigelsesfradragPct)} % af din lønindkomst (efter
+          AM-bidrag), dog maks. {da(SATSER_2026.beskaeftigelsesfradragMax)} kr i
+          2026.
         </p>
 
-        <h3>4. Bundskat (12,01%)</h3>
+        <h3>4. Bundskat ({pct(SATSER_2026.bundskat)} %)</h3>
         <p>
-          Alle betaler <strong>bundskat</strong> af den skattepligtige indkomst
-          (efter fradrag). Satsen er sat ned fra 12,22% til 12,01% i 2026.
+          Alle betaler <strong>bundskat</strong> på {pct(SATSER_2026.bundskat)} %
+          af den skattepligtige indkomst (efter fradrag).
         </p>
 
         <h3>5. Kommuneskat (varierer)</h3>
         <p>
           <strong>Kommuneskatten</strong> varierer fra kommune til kommune.
-          Landsgennemsnittet er ca. 25,05% i 2026. De billigste kommuner ligger
-          omkring 22%, mens de dyreste er over 27%.
+          Landsgennemsnittet er ca. {pct(SATSER_2026.kommuneskatSnit)} % i 2026.
+          Den billigste kommune ligger på {pctTal(LAVESTE_KOMMUNER[0].kommuneskat)} %,{" "}
+          {pctTal(HOEJESTE_KOMMUNER[0].kommuneskat)} % er den dyreste.
         </p>
 
         <h3>6. Kirkeskat (valgfri)</h3>
         <p>
-          Medlemmer af folkekirken betaler <strong>kirkeskat</strong> på ca.
-          0,6-1% (gennemsnit 0,639%).
+          Medlemmer af folkekirken betaler <strong>kirkeskat</strong> på ca. 0,6-1 %
+          (gennemsnit {pct(SATSER_2026.kirkeskatSnit)} %).
         </p>
 
         <h3>7. Nyt: Mellemskat, topskat og top-topskat (2026)</h3>
@@ -97,13 +135,18 @@ export default async function LoenPage() {
         </p>
         <ul>
           <li>
-            <strong>Mellemskat (7,5%):</strong> Indkomst over 641.200 kr/år (efter AM-bidrag)
+            <strong>Mellemskat ({pct(SATSER_2026.mellemskat)} %):</strong>{" "}
+            Indkomst over {da(SATSER_2026.mellemskatGraense)} kr/år (efter
+            AM-bidrag)
           </li>
           <li>
-            <strong>Topskat (7,5%):</strong> Indkomst over 777.900 kr/år (efter AM-bidrag)
+            <strong>Topskat ({pct(SATSER_2026.topskat)} %):</strong> Indkomst
+            over {da(SATSER_2026.topskatGraense)} kr/år (efter AM-bidrag)
           </li>
           <li>
-            <strong>Top-topskat (5%):</strong> Indkomst over 2.592.700 kr/år (efter AM-bidrag)
+            <strong>Top-topskat ({pct(SATSER_2026.topTopskat)} %):</strong>{" "}
+            Indkomst over {da(SATSER_2026.topTopskatGraense)} kr/år (efter
+            AM-bidrag)
           </li>
         </ul>
         <p>
@@ -116,24 +159,23 @@ export default async function LoenPage() {
           <table>
             <thead>
               <tr>
-                <th>Laveste skatteprocent</th>
-                <th>Højeste skatteprocent</th>
+<th>Laveste skatteprocent</th>
+              <th>Højeste skatteprocent</th>
+            </tr>
+          </thead>
+          <tbody>
+            {LAVESTE_KOMMUNER.map((k, i) => (
+              <tr key={k.navn}>
+                <td>
+                  {k.navn} ({pctTal(k.kommuneskat)} %)
+                </td>
+                <td>
+                  {HOEJESTE_KOMMUNER[i].navn} (
+                  {pctTal(HOEJESTE_KOMMUNER[i].kommuneskat)} %)
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Rudersdal (22,5%)</td>
-                <td>Langeland (27,8%)</td>
-              </tr>
-              <tr>
-                <td>Gentofte (22,8%)</td>
-                <td>Ishøj (27,2%)</td>
-              </tr>
-              <tr>
-                <td>Allerød (23,3%)</td>
-                <td>Brøndby (27,1%)</td>
-              </tr>
-            </tbody>
+            ))}
+          </tbody>
           </table>
         </div>
 
