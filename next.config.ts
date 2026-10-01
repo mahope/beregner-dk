@@ -98,5 +98,4 @@ export default withSentryConfig(nextConfig, {
   // anything or inject Sentry's own value maps into the client bundle.
   sourcemaps: { disable: true },
   widenClientFileUpload: false,
-  silent: true,
 });

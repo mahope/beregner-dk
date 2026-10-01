@@ -22,7 +22,7 @@ export function initSentryServer(): boolean {
     dsn: sentryDsn(),
     dataCollection: SENTRY_DATA_COLLECTION,
     tracesSampleRate: SENTRY_TRACES_SAMPLE_RATE,
-      beforeSend: scrubSentryEvent,
+    beforeSend: scrubSentryEvent,
   });
   return true;
 }

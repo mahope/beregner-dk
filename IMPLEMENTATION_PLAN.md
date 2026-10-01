@@ -1,31 +1,32 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — 1/10 13:05. **Alle otte deploy-noter er lukket på indhold**,
-  og `/procent` har fået et procentpoint-værktøj (opgave 207,
-  `ceo/procentpoint-vaerktoej`).
+STATUS: KØ — 1/10 14:40. CEO-køens otte punkter er **alle otte verificeret
+  rettet i koden** (Valborg 30/4, svensk påskafton lørdag, dansk sankthans
+  fast 23./24. juni, påskeaften-FAQ væk, pristalsregulering, `toUtcMidnight`,
+  svensk promille-FAQ, `maneder: 12`), så CEO-køen er tom. Seneste opgave:
+  **Sentry-sendepipeline bevist** (`ceo/sentry-sendepipeline`).
 
-  **Deploy:** 12:30-vinduet var gået. 18 URL'er hentet, alle 200, hver streng
-  talt i markupken — kommuneskat-tabellen, «Landsgennemsnittet» 0 gange,
-  de fire bøjninger i `/dato` begge sprog, månedens afsnit på beraknare.se,
-  `Guides om emnet` på tre sider, og pristalsreguleringen på `/husleje`.
-  Bevis pr. note i `docs/plan-arkiv.md`, "Deploy-noter lukket på indhold
-  1/10 13:05". `/api/health` er `ok`.
+  **Sentry — spørgsmålet fra ❓ er besvaret modsat.** En kastende route
+  handler nåede `onRequestError` med fuld kontekst, men collectoren på
+  127.0.0.1 modtog ingen envelope. Målt: **transporten sender**, også over
+  ren `http://` (envelope med 3.241 bytes modtaget), og **`silent: true`
+  slår den ikke fra** — den slår kun Sentrys egen log fra, så et DSN der
+  engang holder op med at virke ville have stået som stilhed. Den er væk.
+  Det egentlige hul var et andet: `sentry-config.test.ts` testede
+  `scrubSentryEvent` som en *ren funktion*, så en tabt `beforeSend`-linje
+  ville have ladet tilstanden i `?s=`-links flyve til USA med alle tests
+  grønne. Nyt `sentry-send.test.ts` (3 tests) kører den rigtige
+  `initSentryServer()` mod en collector på fri port og dømmer på (1) at en
+  envelope forlader processen og (2) at den live klients `beforeSend` *er*
+  `scrubSentryEvent`. **2 mutationer målt røde** (fjerne `beforeSend` → 2
+  røde; fjern DSN → 1 rød). Beviset ligger nu i gaten, så spørgsmålet ikke
+  kan genåbnes uden at en test falder.
 
-  **Procentpoint:** dansk autocomplete målt i dag svarer på «hvad er procent»
-  med «hvad er procentpoint» som nr. 1, og 8 af 8 completions under «procent
-  point» er point-spørgsmål. `/procent` (151.005 visninger, 0,1 % CTR) havde
-  én FAQ-sætning om emnet. Nu: værktøj der viser point forskellen og den
-  procentvise ændring side om side, afsnit i begge sprog, 3 nye FAQ-spørgsmål.
-  **11 mutationer målt røde.** Nationalbanks rentebane er **ikke** gengivet —
-  kilden svarer 404, så eksemplerne er regneeksempler og siden linker til
-  kilden i stedet.
+  **Gaten:** `lint` 0 (646) · `typecheck` 0 · `TZ=UTC npm run test`
+  **3384 grønne / 208 filer** · `locale-leak --gate` exit 0 · `next build`
+  142 ruter.
 
-  **Gaten:** `lint` 0 (645) · `typecheck` 0 · `TZ=UTC npm run test`
-  **3381 grønne / 207 filer** · `locale-leak --gate` exit 0 · `next build`
-  142 ruter. Lokalt prod-build på 3111 verificeret med begge `Host`: ingen
-  sprog-lækage mellem de to domæner.
-
-  **Blokeret på Mads:** 97, 119, 183, 201, F1, F5 + Sentry + Cloudflare.
+  **Blokeret på Mads:** 97, 119, 183, 201, F1, F5 + Cloudflare.
 
   **⚠️ Målerfælde:** `npm run test` kører `locale-leak-gate.test.ts`, der med
   vilje planterer lækager — `FEJL: n ureviewet(e)` er derfor **ikke** fund i
@@ -146,37 +147,30 @@ Prioriteret efter forventet effekt på **trafik**. Datagrund fra GSC 1/10
 
 ## Åbne VERIFICÉR DEPLOY-noter
 
-- ⏳ **`/procent` skal svare på procentpoint-spørgsmålet med et værktøj.**
-  `ceo/procentpoint-vaerktoej`. På `https://minberegner.dk/procent` skal
-  `<h2>Forskellen på procentpoint og procent</h2>` stå i markupken, teksten
-  **"De tre renterækker er det samme flytning, tre gange."** og
-  **"22,1 % til 19,7 %"** i tabellen, `<label for="procentpoint-gammel">` med
-  sit felt, `aria-live="polite"` på **beholderen** (ikke på den betingede
-  blok) og et link til `https://www.nationalbanken.dk/den-rabende-rente`.
-  På `https://beraknare.se/procent` skal `<h2>Skillnad mellan
-  procentenheter och procent</h2>` stå, **"Ränderaderna är samma flytt, tre
-  gånger."**, `<label for="procentpoint-gammel">` med **"Första
-  procenttalet"**, og **"Första procenttal" forekomme 0 gange** (dansk må ikke
-  lække ind) — og omvendt må «Första procenttalet» forekomme 0 gange på
-  dansk. HTTP 200 beviser intet — det er en overskrift, fem talrækker og to
-  sprog. Prøven på dansk er `src/app/procent/page.test.tsx` +
-  `src/components/ProcentpointBeregner.test.tsx` efter deploy.
-  Vindue **1/10 17:30** (mergen sker efter 12:30).
+- ⏳ **Sentry skal sende, og loggen må ikke være slået fra.**
+  `ceo/sentry-sendepipeline`. Der er ingen synlig overflade at hente på, så
+  prøven er på **bygget og serverloggen**, ikke på markup: efter deploy skal
+  et prod-build **ikke** have `silent: true` i `next.config.ts` (sletningen
+  sker ved grep efter `silent:`), og `GET /api/health` skal stadig svare
+  `ok`. **Selve beviset på afsendelse ligger i testen**, som kører mod en
+  lokal collector og ikke kræver en hændelse i produktion. Hvis du vil se
+  det i virkeligheden, så kast én fejl i prod-build'en og se efter
+  `[Sentry]`-linjer i Dokploy-loggen — de skal nu være med, for første gang.
+  Vindue **1/10 17:30**.
 
 ## ❓ Til Mads
 
-- ❓ **Sentry: ingen hændelse slap ud, da jegtestede det (opgave 204).**
-  Lokalt prod-build, kastende route handler bag et flag, `onRequestError` fik
-  fejlen med fuld request-kontekst — men min lokale collector (ren HTTP på
-  127.0.0.1:4000, DSN `http://selvtest@127.0.0.1:4000/1`) modtog **ingen**
-  envelope. Min stærkeste mistanke er `withSentryConfig(..., { silent: true })`:
-  v11 auto-wirer instrumenteringen ved *build* gennem den, så en build-option
-  kan slå den fra uden at builden siger noget. **Den farligere halvdel er den
-  anden vej rundt:** hvis SDK'en ikke sender, er «Ingen uløste fejl i 14 dage»
-  i dit snapshot en vished om ingenting, og det er den vished resten af køen
-  styrer på. Skal jeg køre næste iteration som diagnose (drop `silent`, læs
-  orkestrations-loggen, og hænge et `[Sentry]`-flag på init), eller vil du kigge
-  i Sentry-projektet først — om du overhovedet ser events fra minberegner.dk?
+- ❓ **Ser du events fra minberegner.dk i Sentry-projektet?** Det er nu det
+  eneste stykke af spørgsmålet fra opgave 204, der ikke er besvaret af kode.
+  Afsendelsen er **bevist** — `sentry-send.test.ts` får en rigtig envelope
+  gennem den rigtige `initSentryServer()` og modtager den på en collector, så
+  SDK'en sender, og `beforeSend` er registreret på begge sider. Men det beviser
+  *transporten*, ikke at **dit projekt** modtager: det afhænger af DSN-projektet
+  og af at traffic'et rent faktisk rammer en kastende rute. **Ingen fejl i 14
+  dage er derfor stadig en svag vished** — den kan betyde "alt er godt" eller
+  "intet kaster". Ét skærmbillede af Sentry-projektet, eller en bevidst fejl i
+  et prod-build med et `[Sentry]`-flag på init, låser det. Jeg kan ikke se
+  projektet: API'en kræver din konto.
 
 - ❓ **Ferielovens regel for sommerferiens startdato (opgave 201, ny 1/10,
   højst prioriteret).** `/dage-til/sommerferien` siger "sommerferien begynder
