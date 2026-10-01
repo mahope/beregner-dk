@@ -3,7 +3,17 @@ import { beforeEach, describe, expect, test, vi } from "vitest";
 import { getDomainConfigByLocale } from "@/lib/domain-config";
 import { formatNumber } from "@/lib/format";
 import { getCurrentDomainConfig, getLocale } from "@/lib/get-locale";
-import { PROCENT_10_AF_TAL } from "@/lib/procent";
+import {
+  EXCEL_ANDEL,
+  EXCEL_PROCENT_AF,
+  HVERDAG_LOENSTIGNING,
+  HVERDAG_MOMS,
+  HVERDAG_RABAT,
+  HVERDAG_RENTE,
+  PROCENT_10_AF_TAL,
+  PROCENT_SKILLNAD_EKSEMPEL,
+  RABAT_EKSEMPEL,
+} from "@/lib/procent";
 import ProcentPage from "./page";
 
 vi.mock("@/components/ProcentBeregner", () => ({
@@ -413,10 +423,152 @@ describe("rabat i procent", () => {
   test("hverdagsbulletten ikke længere gentager rabattallene", async () => {
     const html = await render("da");
 
-    expect(html).toContain(
-      "<li><strong>Rabatter:</strong> 25% rabat på en vare til 400 kr = du sparer 100 kr</li>",
-    );
+    expect(html).toContain("<li><strong>Rabatter:</strong>");
     expect(html).not.toContain("1.125 ÷ 9.000 = 12,5");
+  });
+});
+
+// ─── Hverdags- og Excel-eksemplerne regnes, ikke skrives ─────────────────
+// 1/10 skrev elleve beløb i `/procent`'s JSX-tekst: «25% moms på 1.000 kr =
+// 250 kr i moms (1.250 kr total)», «5% rente på 10.000 kr = 500 kr i rente»,
+// «10 procent af 10.000 = 1.000» og «9.000 til 7.875 = -12,5». De var alle
+// rigtige — og netop derfor var de farlige: intet hang ved dem, så en sats der
+// ændrede sig, ville have ladet sætningen stå.
+//
+// Porten her regner hver sætning fra de tal den selv læser i
+// `HVERDAG_*` og `EXCEL_*`, og kræver at den RENDEREDE sætning indeholder
+// præcis det resultat. En fremtidig redigering af et eksempel-tal uden at
+// regne svaret med gør den rød, fordi svaret ikke følger med.
+describe("hverdags- og Excel-eksemplerne er regnet fra modulet", () => {
+  // Tusindtalsseparator: dansk punktum, svensk mellemrum. `num` i page.tsx
+  // normaliserer desuden Intls U+00A0, så markupken indeholder mellemrum.
+  const tal = (v: number, locale: "da" | "se", dec = 0) =>
+    new Intl.NumberFormat(locale === "da" ? "da-DK" : "sv-SE", {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: dec,
+    })
+      .format(v)
+      .replace(/ /g, " ");
+
+  test.each([
+    {
+      locale: "da" as const,
+      moms: "moms på",
+      rente: "rente på",
+      loen: "stigning på",
+      tilPris: "til",
+    },
+    {
+      locale: "se" as const,
+      moms: "moms på",
+      rente: "ränta på",
+      loen: "ökning på",
+      tilPris: "för",
+    },
+  ])(
+    "$locale hverdagsbulletten har regnet alle fire eksempler",
+    async ({ locale, moms, rente, loen, tilPris }) => {
+      const html = await render(locale);
+
+      // Moms: satsen er DEFAULT_MOMS_SATS, så hvis dansk moms flytter fra 25 %,
+      // følger sætningen med i stedet for at sige 25 % ved siden af 1.000 kr.
+      const momsSvar = (HVERDAG_MOMS.beloeb * HVERDAG_MOMS.sats) / 100;
+      expect(html).toContain(
+        `${HVERDAG_MOMS.sats}% ${moms} ${tal(HVERDAG_MOMS.beloeb, locale)} kr = ${tal(
+          momsSvar,
+          locale,
+        )} kr i moms (${tal(HVERDAG_MOMS.beloeb + momsSvar, locale)} kr`,
+      );
+
+      for (const [eksempel, tekst] of [
+        [HVERDAG_RABAT, null],
+        [HVERDAG_RENTE, rente],
+        [HVERDAG_LOENSTIGNING, loen],
+      ] as const) {
+        const svar = tal((eksempel.beloeb * eksempel.sats) / 100, locale);
+        if (tekst) {
+          expect(html).toContain(
+            `${eksempel.sats}% ${tekst} ${tal(eksempel.beloeb, locale)} kr = ${svar} kr`,
+          );
+        } else {
+          expect(html).toContain(`${tilPris} ${tal(eksempel.beloeb, locale)} kr`);
+        }
+      }
+    },
+  );
+
+test.each([
+    {
+      locale: "da" as const,
+      til: "til",
+      tusind: "1.000",
+      af: "af",
+      change: { gammal: RABAT_EKSEMPEL.normalPris, ny: RABAT_EKSEMPEL.nedsatPris },
+    },
+    {
+      locale: "se" as const,
+      til: "till",
+      tusind: "1 000",
+      af: "av",
+      change: {
+        gammal: PROCENT_SKILLNAD_EKSEMPEL[1].gammal,
+        ny: PROCENT_SKILLNAD_EKSEMPEL[1].ny,
+      },
+    },
+  ])("$locale Excel-tabellens tre eksempler er regnet, ikke skrevet", async ({ locale, til, tusind, af, change }) => {
+    const html = await render(locale);
+
+    // Række 1 er andelen (A1/B1*100), ikke en ændring — den har ingen hjælper
+    // i modulet, så porten regner den selv.
+    const andel = (EXCEL_ANDEL.del / EXCEL_ANDEL.heltal) * 100;
+    expect(html).toContain(
+      `${tal(EXCEL_ANDEL.del, locale)} ${af} ${tal(EXCEL_ANDEL.heltal, locale)} = ${tal(andel, locale)}`,
+    );
+
+    // Række 2 er den anden vej: X % af heltalet.
+    expect(html).toContain(
+      `${EXCEL_PROCENT_AF.sats} procent ${af} ${tal(EXCEL_PROCENT_AF.heltal, locale)} = ${tal(
+        (EXCEL_PROCENT_AF.heltal * EXCEL_PROCENT_AF.sats) / 100,
+        locale,
+      )}`,
+    );
+
+    // Række 3 er den procentvise ændring mellem to priser. Dansk bruger
+    // RABAT_EKSEMPEL (9.000 → 7.875, et fald), svensk belobEksemplet fra
+    // PROCENT_SKILLNAD_EKSEMPEL (10.000 → 12.500, en stigning) — begge par har
+    // allerede en ejer, så de to sprog kan ikke få hver sit eget tal ved en
+    // fejl.
+    const aendring = ((change.ny - change.gammal) / change.gammal) * 100;
+    expect(html).toContain(
+      `${tal(change.gammal, locale)} ${til} ${tal(change.ny, locale)} = ${tal(aendring, locale, 1)}`,
+    );
+
+    // Og "0,25" i teksten under tabellen er den samme andel, ikke en ny.
+    expect(html).toContain(
+      `andelen (${tal(EXCEL_ANDEL.del / EXCEL_ANDEL.heltal, locale, 2)})`,
+    );
+    // Sidens egen tusindtalsskrivemåde skal være brugt — en der skriver 1.000
+    // på den svenske side ville også give et forkert svar for den svenske
+    // læser, selv om tallet er rigtigt.
+    expect(html).toContain(tusind);
+  });
+
+  // Punkt 11: et eksempel-tal uden svar, der følger med, er en påstand uden
+  // ejerskab. Hverdags-eksemplerne skal derfor alle stå med deres svar, så
+  // en redaktør der ændrer beløbet ser det samme sted røde.
+  test("intet beløb i eksemplerne står uden sit svar", async () => {
+    for (const locale of ["da", "se"] as const) {
+      const html = await render(locale);
+      for (const eksempel of [
+        HVERDAG_RABAT,
+        HVERDAG_MOMS,
+        HVERDAG_RENTE,
+        HVERDAG_LOENSTIGNING,
+      ]) {
+        const svar = tal((eksempel.beloeb * eksempel.sats) / 100, locale);
+        expect(html).toContain(svar);
+      }
+    }
   });
 });
 

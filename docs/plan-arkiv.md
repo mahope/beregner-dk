@@ -23068,3 +23068,41 @@ Gate efter børnepenge-opgaven: lint 0 · typecheck 0 · 3478 tests grønne/212 
 - **Gate:** `biome lint ./src` 655 filer 0 · `tsc --noEmit -p tsconfig.test.json`
   0 · `TZ=UTC vitest run` **3485 grønne / 213 filer** · `next build` exit 0.
 - **Deploy-note:** ⏳ `ceo/moms-excel-talene`, vindue 2/10 07:30.
+
+## 1/10 21:25 — Beløb i JSX-tekst blev målt på hele sitet (F5b's port)
+
+`ceo/regnestykker-port`. To fund i opgaven, begge rettet i samme commit:
+
+1. **Porten så ikke JSX-tekst.** Første scanner arbejdede på klammebalancer og
+   målte **0 fund på alle 124 sider** — `return ( <main>…)` ligger inde i
+   funktionens klammer, så al JSX-tekst lå på dybde 1 og blev aldrig set.
+   Nu parseres filerne med TypeScript's eget AST, samme parser som `tsc`.
+2. **Den rigtige måling er 471, ikke 0.** 471 JSX-text-noder med beløb på 57
+   `page.tsx`. Listen ligger i porten, tæller forekomster pr. fil og må kun
+   blive kortere.
+
+Porten afsluttede samtidig forrige iterations opgave: `/rentefradrag` stod med
+1 fund («Fordel 95.000 kr. og 5.000 kr. i stedet for 100.000 kr.») og læser nu
+`ULIJ_HAEJ`/`ULIJ_LAV`.
+
+Målinger: `src/app/regnestykker.test.ts` (5 tests) + 30 regnestykker på sitet
+regnet igen af 5 regler (alle korrekte). Begge mutationer målt røde mod master:
+et nyt beløb på `/dato` (fil ikke i listen) og ét ekstra på `/topskat` (9 > 8).
+3485 tests i alt.
+
+## 1/10 21:25 — /moms' Excel-tabel regnede med det forkerte grundlag
+
+`ceo/moms-excel-talene`. Overskriften sagde «På 1.000 kr. ekskl. moms», men de
+tre sidste rækker regnede på et beløb *med* moms — `=A1/1,25` med A1 = 1.000 er
+800, ikke 1.000, og `=MOMS(800;25;0;0)` er 200, ikke 250. Læseren kopierede
+formlerne og fik tal, der ikke hang sammen med cellen. Grundlaget står nu i
+hver række, og alle fem resultater læses fra `beregnMoms`.
+
+**MÅL:** `/moms` GSC 21.651 visninger / 36 klik / 0,2 % / pos. 7,1 (1/10).
+Genmål 15/10.
+
+## 1/10 21:25 — Dagpenge- og børnepenge-klyngerne blev lukket
+
+Autocomplete 1/10: de fire nye seeds er dækket eller kildeblokerede — se ❓ og
+F-køen. `borger.dk` svarer 200 fra denne maskine (mods `dagpenge.dk`/`star.dk`),
+så kilde-blokeringen er ikke længere universiel.

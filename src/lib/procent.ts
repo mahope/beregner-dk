@@ -1,3 +1,5 @@
+import { DEFAULT_MOMS_SATS } from "./moms";
+
 /**
  * The two ways to compare two numbers in percent.
  *
@@ -137,4 +139,45 @@ export const RABAT_SATS_UDLAET = 33;
  * reader would otherwise have to guess.
  */
 export const RABAT_SATS = [10, 20, 25, RABAT_SATS_UDLAET, 50];
+
+/**
+ * The four "percent in everyday life" figures, as `{ rate, amount }`.
+ *
+ * These are the worked examples in the bullet list under "Procentregning i
+ * hverdagen": a 25 % discount on a 400 kr item, 25 % VAT on 1 000 kr, 5 % on
+ * 10 000 kr, and a 3 % raise on 30 000 kr. They are *examples*, not rates —
+ * nobody has to look them up, which is why the page may show them at all — but
+ * every number in the sentence has to come from one of them, so the sentence
+ * cannot state a discount that is not 25 % of 400 kr.
+ *
+ * The VAT rate is {@link DEFAULT_MOMS_SATS} rather than a number typed again,
+ * because that one *is* a real rate and it already has an owner: if Danish
+ * VAT ever moves off 25 %, this list follows it instead of contradicting
+ * {@link DEFAULT_MOMS_SATS} one screen up.
+ */
+export interface HverdagsEksempel {
+  /** The percentage the example applies. */
+  sats: number;
+  /** The amount the percentage is applied to, in kronor. */
+  beloeb: number;
+}
+
+export const HVERDAG_RABAT: HverdagsEksempel = { sats: 25, beloeb: 400 };
+export const HVERDAG_MOMS: HverdagsEksempel = { sats: DEFAULT_MOMS_SATS, beloeb: 1000 };
+export const HVERDAG_RENTE: HverdagsEksempel = { sats: 5, beloeb: 10000 };
+export const HVERDAG_LOENSTIGNING: HverdagsEksempel = { sats: 3, beloeb: 30000 };
+
+/**
+ * The two numbers behind the Excel table's first two rows.
+ *
+ * Row one is "how many percent is A1 of B1" — the share, not a change, so it
+ * is `A1/B1*100` and nothing in the existing helpers produces it: the
+ * calculator divides inline. Row two is the other direction,
+ * {@link procentAf}. Both used to be written out in the table as
+ * "2.500 af 10.000 = 25" and "10 procent af 10.000 = 1.000", so the answers
+ * were typed rather than computed — the same class of mistake as a stale
+ * rate, in a table the reader is told to copy into a spreadsheet.
+ */
+export const EXCEL_ANDEL = { del: 2500, heltal: 10000 };
+export const EXCEL_PROCENT_AF = { sats: 10, heltal: 10000 };
 

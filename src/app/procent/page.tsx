@@ -19,6 +19,12 @@ import {
   procentpointRelativ,
 } from "@/lib/procentpoint";
 import {
+  EXCEL_ANDEL,
+  EXCEL_PROCENT_AF,
+  HVERDAG_LOENSTIGNING,
+  HVERDAG_MOMS,
+  HVERDAG_RABAT,
+  HVERDAG_RENTE,
   PROCENT_10_AF_TAL,
   PROCENT_SKILLNAD_EKSEMPEL,
   RABAT_BELOEB,
@@ -167,21 +173,33 @@ export default async function ProcentPage() {
         <p>Procent bruges overalt i hverdagen:</p>
         <ul>
           <li>
-            {/* De 9.000/1.125-tal stod her tidligere, men nu har
-                rabatafsnittet dem regnet — samme par, én ejer. */}
-            <strong>Rabatter:</strong> 25% rabat på en vare til 400 kr = du
-            sparer 100 kr
+            {/* Alle fire regnes fra HVERDAG_* i src/lib/procent.ts. De 9.000/
+                1.125-tal stod her tidligere, men nu har rabatafsnittet dem
+                regnet — samme par, én ejer. */}
+            <strong>Rabatter:</strong> {HVERDAG_RABAT.sats}% rabat på en vare
+            til {num(HVERDAG_RABAT.beloeb)} kr = du sparer{" "}
+            {num(procentAf(HVERDAG_RABAT.beloeb, HVERDAG_RABAT.sats))} kr
           </li>
           <li>
-            <strong>Moms:</strong> 25% moms på 1.000 kr = 250 kr i moms (1.250
+            <strong>Moms:</strong> {HVERDAG_MOMS.sats}% moms på{" "}
+            {num(HVERDAG_MOMS.beloeb)} kr ={" "}
+            {num(procentAf(HVERDAG_MOMS.beloeb, HVERDAG_MOMS.sats))} kr i moms
+            ({num(HVERDAG_MOMS.beloeb + procentAf(HVERDAG_MOMS.beloeb, HVERDAG_MOMS.sats))}{" "}
             kr total)
           </li>
           <li>
-            <strong>Renter:</strong> 5% rente på 10.000 kr = 500 kr i rente
+            <strong>Renter:</strong> {HVERDAG_RENTE.sats}% rente på{" "}
+            {num(HVERDAG_RENTE.beloeb)} kr ={" "}
+            {num(procentAf(HVERDAG_RENTE.beloeb, HVERDAG_RENTE.sats))} kr i
+            rente
           </li>
           <li>
-            <strong>Lønstigninger:</strong> 3% stigning på 30.000 kr = 900 kr
-            mere
+            <strong>Lønstigninger:</strong> {HVERDAG_LOENSTIGNING.sats}%
+            stigning på {num(HVERDAG_LOENSTIGNING.beloeb)} kr ={" "}
+            {num(
+              procentAf(HVERDAG_LOENSTIGNING.beloeb, HVERDAG_LOENSTIGNING.sats),
+            )}{" "}
+            kr mere
           </li>
           <li>
             <strong>Skat:</strong> Skatten er ikke én sats. Kommuneskatten er i
@@ -476,27 +494,47 @@ export default async function ProcentPage() {
                 <td>
                   <code>=A1/B1*100</code>
                 </td>
-                <td>2.500 af 10.000 = 25</td>
+                <td>
+                  {num(EXCEL_ANDEL.del)} af {num(EXCEL_ANDEL.heltal)} ={" "}
+                  {num((EXCEL_ANDEL.del / EXCEL_ANDEL.heltal) * 100)}
+                </td>
               </tr>
               <tr>
                 <td>Hvad er A1 procent af B1?</td>
                 <td>
                   <code>=A1*B1/100</code>
                 </td>
-                <td>10 procent af 10.000 = 1.000</td>
+                <td>
+                  {EXCEL_PROCENT_AF.sats} procent af{" "}
+                  {num(EXCEL_PROCENT_AF.heltal)} ={" "}
+                  {num(procentAf(EXCEL_PROCENT_AF.heltal, EXCEL_PROCENT_AF.sats))}
+                </td>
               </tr>
               <tr>
                 <td>Hvor stor er ændringen fra A1 til B1?</td>
                 <td>
                   <code>=(B1-A1)/A1*100</code>
                 </td>
-                <td>9.000 til 7.875 = -12,5</td>
+                <td>
+                  {/* Samme par som rabatafsnittet ovenfor — 9.000 kr varen koster
+                      7.875 kr, altså et fald på 12,5 %. */}
+                  {num(RABAT_EKSEMPEL.normalPris)} til{" "}
+                  {num(RABAT_EKSEMPEL.nedsatPris)} ={" "}
+                  {num(
+                    procentForskel(
+                      RABAT_EKSEMPEL.nedsatPris,
+                      RABAT_EKSEMPEL.normalPris,
+                    ),
+                    1,
+                  )}
+                </td>
               </tr>
             </tbody>
           </table>
         </div>
         <p>
-          Skriver du <code>=A1/B1</code> får du andelen (0,25), og så skal cellen
+          Skriver du <code>=A1/B1</code> får du andelen (
+          {num(EXCEL_ANDEL.del / EXCEL_ANDEL.heltal, 2)}), og så skal cellen
           formateres som procent. En løn, der stiger i procent, regner du med{" "}
           <Link href="/loenstigning" className="text-blue-700 underline">
             lønstigning i procent
@@ -606,19 +644,30 @@ export default async function ProcentPage() {
         <p>Procent används överallt i vardagen:</p>
         <ul>
           <li>
-            <strong>Rabatter:</strong> 25% rabatt på en vara för 400 kr = du
-            sparar 100 kr
+            <strong>Rabatter:</strong> {HVERDAG_RABAT.sats}% rabatt på en
+            vara för {num(HVERDAG_RABAT.beloeb)} kr = du sparar{" "}
+            {num(procentAf(HVERDAG_RABAT.beloeb, HVERDAG_RABAT.sats))} kr
           </li>
           <li>
-            <strong>Moms:</strong> 25% moms på 1000 kr = 250 kr i moms (1250 kr
-            totalt)
+            <strong>Moms:</strong> {HVERDAG_MOMS.sats}% moms på{" "}
+            {num(HVERDAG_MOMS.beloeb)} kr ={" "}
+            {num(procentAf(HVERDAG_MOMS.beloeb, HVERDAG_MOMS.sats))} kr i moms
+            ({num(HVERDAG_MOMS.beloeb + procentAf(HVERDAG_MOMS.beloeb, HVERDAG_MOMS.sats))}{" "}
+            kr totalt)
           </li>
           <li>
-            <strong>Ränta:</strong> 5% ränta på 10 000 kr = 500 kr i ränta
+            <strong>Ränta:</strong> {HVERDAG_RENTE.sats}% ränta på{" "}
+            {num(HVERDAG_RENTE.beloeb)} kr ={" "}
+            {num(procentAf(HVERDAG_RENTE.beloeb, HVERDAG_RENTE.sats))} kr i
+            ränta
           </li>
           <li>
-            <strong>Löneökningar:</strong> 3% ökning på 30 000 kr = 900 kr
-            mer
+            <strong>Löneökningar:</strong> {HVERDAG_LOENSTIGNING.sats}%
+            ökning på {num(HVERDAG_LOENSTIGNING.beloeb)} kr ={" "}
+            {num(
+              procentAf(HVERDAG_LOENSTIGNING.beloeb, HVERDAG_LOENSTIGNING.sats),
+            )}{" "}
+            kr mer
           </li>
           <li>
             <strong>Skatt:</strong> Skatt i Sverige är kommunal skatt
@@ -728,27 +777,41 @@ export default async function ProcentPage() {
                 <td>
                   <code>=A1/B1*100</code>
                 </td>
-                <td>2 500 av 10 000 = 25</td>
+                <td>
+                  {num(EXCEL_ANDEL.del)} av {num(EXCEL_ANDEL.heltal)} ={" "}
+                  {num((EXCEL_ANDEL.del / EXCEL_ANDEL.heltal) * 100)}
+                </td>
               </tr>
               <tr>
                 <td>Vad är A1 procent av B1?</td>
                 <td>
                   <code>=A1*B1/100</code>
                 </td>
-                <td>10 procent av 10 000 = 1 000</td>
+                <td>
+                  {EXCEL_PROCENT_AF.sats} procent av{" "}
+                  {num(EXCEL_PROCENT_AF.heltal)} ={" "}
+                  {num(procentAf(EXCEL_PROCENT_AF.heltal, EXCEL_PROCENT_AF.sats))}
+                </td>
               </tr>
               <tr>
                 <td>Hur stor ändring är det från A1 till B1?</td>
                 <td>
                   <code>=(B1-A1)/A1*100</code>
                 </td>
-                <td>10 000 till 12 500 = 25</td>
+                <td>
+                  {/* Samme par som belobEksempel fra PROCENT_SKILLNAD_EKSEMPEL,
+                      som skillnadsafsnittet ovenfor bruger, så Excel-eksemplet
+                      og formelafsnittet ikke kan glide fra hinanden. */}
+                  {num(belobEksempel.gammal)} till {num(belobEksempel.ny)} ={" "}
+                  {num(procentForskel(belobEksempel.ny, belobEksempel.gammal), 1)}
+                </td>
               </tr>
             </tbody>
           </table>
         </div>
         <p>
-          Skriver du <code>=A1/B1</code> får du andelen (0,25) och måste
+          Skriver du <code>=A1/B1</code> får du andelen (
+          {num(EXCEL_ANDEL.del / EXCEL_ANDEL.heltal, 2)}) och måste
           då formatera cellen som procent. Vill du se kronor och procent
           samtidigt på en löneforhåndring är det{" "}
           <Link href="/loenstigning" className="text-blue-700 underline">

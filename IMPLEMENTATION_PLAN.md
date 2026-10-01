@@ -1,90 +1,64 @@
-STATUS: 1/10 23:00. Rød CI: ingen (seneste kørsel grøn 20:25 UTC). Sentry: ingen
-  nye hændelser. CEO-køen er tom; punkt 0 verificeret direkte i koden igen.
-  **Ingen åbne PR'er** (`PR-TJEK: 2026-10-01`). Branch-tjek foretaget 1/10 22:50:
-  13 remote-branches, ingen slettet (`BRANCH-TJEK: 2026-10-01`).
+STATUS: 1/10 23:55. Rød CI: ingen (seneste kørsel grøn 21:06 UTC). Sentry:
+  MINBEREGNER-1 er Next-router-støj, filtreret siden 3e67ed3 (16:36) — ingen ny
+  hændelse efter filteret. CEO-køen er tom; punkt 0 verificeret direkte i koden
+  igen (Valborg 30. april, dansk sankthans fast 23. juni, `toUtcMidnight` på
+  `Europe/Copenhagen`). Ingen åbne PR'er (`PR-TJEK: 2026-10-01`), branch-tjek
+  gjort 1/10 22:50 (`BRANCH-TJEK: 2026-10-01`).
 
-  **Målt hele sitet for tal i brødtekst, og gjort målingen til en port.**
-  `ceo/regnestykker-port`. To fund i den forrige iterations opgave:
-  1. **Porten så ikke JSX-tekst.** Den første scanner målte 0 fund på alle 124
-     sider, fordi den arbejdede på klammebalance og `return ( <main>…)` ligger
-     inde i funktionens klammer. Nu parseres filerne med TypeScript's eget AST —
-     samme parser som `tsc` bruger i gaten.
-  2. **Den rigtige måling er 474, ikke 0.** 474 beløb med tusindtalsseparator
-     står som tekst i JSX på 57 `page.tsx`. Listen ligger i porten, tæller
-     forekomster pr. fil og må kun blive kortere. Køen står under «Næste
-     opgave», prioriteret efter GSC-visninger × fund: `/moms` (21.651 visninger,
-     21 fund), `/procent` (151.005, 11), `/arveafgift` (8 — bundfradraget 392.300
-     står 7 gange), `/ejendomsvaerdiskat` (6), `/renteberegner` (13.288, 6).
-  Begge mutationer målt røde mod master: et nyt beløb på `/dato` (fil ikke i
-  listen) og ét ekstra på `/topskat` (9 > 8). **Porten afslutter forrige
-  iterations opgave**: `/rentefradrag` stod med 1 fund —
-  «Fordel 95.000 kr. og 5.000 kr. i stedet for 100.000 kr.» — og læser nu
-  `ULIJ_HAEJ`/`ULIJ_LAV`, så hele siden er uden hårdkodede beløb.
-  *Port:* ny `src/app/regnestykker.test.ts` (5 tests) + 30 regnestykker på
-  sitet regnet igen af 5 regler (alle korrekte), 3485 tests i alt.
+  **`/procent`: elleve hårdkodede beløb er væk, hele siden.** `ceo/procent-eksempler-fra-modul`.
+  De stod i «Procentregning i hverdagen» og i Excel-tabellen i **begge** sprog:
+  «25% moms på 1.000 kr = 250 kr i moms (1.250 kr total)», «5% rente på 10.000
+  kr = 500 kr i rente», «10 procent af 10.000 = 1.000», «9.000 til 7.875 = -12,5»
+  (+ deres svenske tvillinger). De var alle rigtige — og netop derfor var de
+  farlige: intet hang ved dem. Nu ligger beløbene i `HVERDAG_*` og `EXCEL_*` i
+  `src/lib/procent.ts`, og **moms-satsen er `DEFAULT_MOMS_SATS`**, altså samme
+  ejer som på `/moms` — den kan ikke læve 25 % ved siden af sig selv.
+  Excel-række 3 læser desuden `RABAT_EKSEMPEL` (da) og `belobEksempel` fra
+  `PROCENT_SKILLNAD_EKSEMPEL` (se), altså de par formelafsnittene ovenfor
+  allerede bruger — de to sprog kan ikke få hver sit eget tal ved en fejl.
+  **AST-scanneren: 11 fund på `/procent` → 0**, portens loftpunktssum 471 → 460.
+  *Port:* `page.test.tsx` renderer begge sprog og regner hver sætning fra de tal
+  den selv læser i modulet. **Fire mutationer målt:** en hårdkodet 550 i
+  rente-bulletten gør den rød i begge sprog; Excel-andelen som 30 i stedet for
+  25 gør den rød; dansk række 3 med det svenske par gør den rød; og en
+  hårdkodet **korrekt** 25 forbliver grøn — fordi den så er rigtig. 3490 tests.
 
-  **Og: /moms' Excel-tabel regnede med det forkerte grundlag.**
-  `ceo/moms-excel-talene`. Overskriften sagde «På 1.000 kr. ekskl. moms», men de
-  tre sidste rækker regner på et beløb *med* moms — `=A1/1,25` med A1 = 1.000 er
-  800, ikke 1.000, og `=MOMS(800;25;0;0)` er 200, ikke 250. Læseren kopierede
-  formlerne og fik tal, der ikke hang sammen med cellen. Grundlaget står nu i
-  hver række, og alle fem resultater læses fra `beregnMoms`.
-  **MÅL:** `/moms` GSC 21.651 visninger / 36 klik / 0,2 % / pos. 7,1 (1/10).
-  Genmål 15/10.
-
-  **Dagpenge- og børnepenge-klyngerne er lukket** (autocomplete 1/10): de fire
-  nye seeds er dækket eller kildeblokerede — se ❓ og F-køen nedenfor.
-  `borger.dk` svarer 200 fra denne maskine (mods `dagpenge.dk`/`star.dk`), så
-  kilde-blokeringen er ikke længere universiel.
+  **F5b fortsat** — næste side i rækkefølgen er `/arveafgift` (8 fund, «392.300
+  kr» står 7 gange i brødteksten) og `/ejendomsvaerdiskat` (6 fund). `/moms`
+  er delvis lukket; de to sidste fund dér kræver en kilde (registreringsgrænsen,
+  told ved import i EUR) og er derfor ikke løst.
 
   **Gaten:** `lint` 0 (655 filer) · `typecheck` 0 · `TZ=UTC npm run test`
-  **3484 grønne / 213 filer** · `next build` exit 0. Locale-leak-gatens ene
+  **3490 grønne / 213 filer** · `next build` exit 0. Locale-leak-gatens ene
   `ureviewet`-fund er portens egen test, der planter strengen med vilje
   (`locale-leak-gate.test.ts:511`) — ikke en læk.
 
 ## Næste opgave (klar til næste iteration)
 
 **F5b. Beløb i JSX-tekst → modulkonstanter, i trafikrækkefølge.** Porten fra 1/10
-måler **474 beløb med tusindtalsseparator i JSX-tekst på 57 `page.tsx`** — de
-kan ikke glide fra satsen, fordi de ikke hænger ved den. Listen i
+måler beløb med tusindtalsseparator i JSX-tekst på `page.tsx` — de kan ikke
+glide fra satsen, fordi de ikke hænger ved den. Listen i
 `src/app/regnestykker.test.ts` tæller forekomster pr. fil og må kun blive
 kortere, så dette er rækkefølgen. *Accept pr. side:* listen for den side falder
-til 0, og regnestykkerne er verificeret af `regnestykker-porten` (30 sætninger
-på sitet, alle regnet igen). Prioriter efter **GSC-visninger × fund**:
-- **`/moms`** — 21.651 visninger (0,2 % CTR, pos. 7,1), **18 fund** (var 21).
-  ✅ **Delvis lukket 1/10**, `ceo/moms-excel-talene`: Excel-tabellens fem
-  resultatceller, dens beløb og dens 25 % læser nu `MOMS_REFERENCE_BELOEB`,
-  `DEFAULT_MOMS_SATS` og `beregnMoms`. **Resten:** «Virksomheder med en årlig
-  omsætning over **50.000 kr**» (registreringsgrænsen) og «told ved import
-  over **1.150 kr**» — sidstnævnte er en EUR-grænse omregnet til kroner, så den
-  flytter sig med valutakursen og kan ikke stå som et fast tal. Kræver en kilde.
-  *MÅL:* `/moms` under top-15 i Plausible, GSC-baseline 21.651 / 36 / 0,2 % / 7,1.
-- **`/procent`** — 151.005 visninger (0,1 %, pos. 7,4), **11 fund**, alle i
-  `<li>`/`<td>` med eksempler («2.500 af 10.000 = 25»). Samme afgørelse som
-  `/moms`: eksemplerne er korrekte, så de skal enten genereres fra `procent.ts`
-  eller indgå i portens undtagelsesliste med en begrundelse pr. linje.
+til 0, og regnestykkerne er verificeret af `regnestykker-porten`.
 - **`/arveafgift`** — 8 fund, og **«392.300 kr» står 7 gange i brødteksten**.
   Det er bundfradraget, og det er det tal på sitet der først bliver forkert
   (2027-sats). Ét modul + syv interpolationer.
 - **`/ejendomsvaerdiskat`** — 6 fund: «5,1 ‰ / 14 ‰» og «9.007.000 kr for
   2026-2027» er lovsatser i brødteksten og i et regnestykke
   («3.000.000 × 80% × 5,1‰ = 12.240 kr/år»).
+- **`/moms`** — 21.651 visninger (0,2 % CTR, pos. 7,1), 2 fund tilbage:
+  «Virksomheder med en årlig omsætning over **50.000 kr**» (registreringsgrænsen)
+  og «told ved import over **1.150 kr**» — sidstnævnte er en EUR-grænse omregnet
+  til kroner, så den flytter sig med valutakursen og kan ikke stå som et fast tal.
+  **Begge kræver en kilde** (❓ nedenfor), så de må ikke gættes.
 - **`/renteberegner`** — 13.288 visninger (0,9 %, pos. 7,5), 6 fund.
 - **`/bil`** (16), **`/billaan`** (24), **`/opsparing`** (10), **`/boligsalg`**
   (9), **`/topskat`** (8) — ingen GSC-visning i top-15, så laveste prioritet;
   `/bil` er desuden faldet 46 → 21 besøgende.
 - **Blogindlæg (19 filer, 273 fund).** Redaktionelle beløb i et indlæg er ikke
-  samme fejlklasse som et beløb på en beregnerside — de er ikke koblet til en
-  sats, brugeren læser dem som et eksempel. Beslut først om de skal med; hvis
-  ikke, skal de stå i portens undtagelsesliste som *blog*, så listen ikke
-  blandes sammen med beregnersiderne.
-
-**Bemærk til målingen:** den første scanner var blind. Den så efter
-klammebalance og målte **0 fund på alle 124 sider** — fordi `return ( <main>…)`
-ligger inde i funktionens klammer, så al JSX-tekst lå på dybde 1. Porten
-parserer nu med TypeScript's eget AST. Begge mutationer er målt røde mod
-master: et nyt beløb på `/dato` (ukendt fil) og ét ekstra på `/topskat`
-(9 > 8).
+  samme fejlklasse som et beløb på en beregnerside. Beslut først om de skal med;
+  hvis ikke, skal de stå i portens undtagelsesliste som *blog*.
 
 ## ❓ Uafklaret — ferielov (rammer `/dage-til/summerferien` **og** skolestart)
 
@@ -264,6 +238,11 @@ Prioriteret efter forventet effekt på **trafik**. Datagrund fra GSC 1/10
   https://minberegner.dk/rentefradrag` skal **ikke** længere indeholde
   `Fordel 95.000 kr. og 5.000 kr.` som tekst — og `/toppat` skal fortsat findes
   i sitemap. Vindue **2/10 07:30**.
+- ⏳ **`/procent` er helt uden hårdkodede beløb.** `ceo/procent-eksempler-fra-modul`.
+  Prøven er på indhold: `curl -s https://minberegner.dk/procent` skal **ikke**
+  indeholde `25% moms på 1.000 kr = 250 kr i moms` som sammenhængende tekst, og
+  skal derimod vise den i markupken med de fire beløb hver for sig. Samme prøve
+  på `Host: beraknare.se` (svensk: `moms på 1 000 kr`). Vindue **2/10 07:30**.
 
 ## ❓ Til Mads
 
