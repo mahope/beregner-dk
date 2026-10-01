@@ -2,13 +2,13 @@ import BoligstoetteBeregner from "@/components/BoligstoetteBeregner";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import FAQ from "@/components/FAQ";
 import RelatedCalculators from "@/components/RelatedCalculators";
+import RelateredeArtikler from "@/components/RelateredeArtikler";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import { formatNumber } from "@/lib/format";
 import { getCurrentDomainConfig, getLocale } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
 import { generatePageMetadata } from "@/lib/page-helpers";
 import { BOLIGSTOETTE_2026 } from "@/lib/satser-2026";
-import Link from "next/link";
 
 export async function generateMetadata() {
   const metadata = await generatePageMetadata("boligstoette");
@@ -252,12 +252,6 @@ export default async function BoligstoettePage() {
             ordning ind i den anden.
           </p>
 
-          <h3>Vil du se den fulde guide?</h3>
-          <p>
-            Læs <Link href="/blog/boligstoette-2026-nye-regler">boligstøtte 2026-guiden</Link>{" "}
-            for sammenhængen mellem husleje, indkomst, formue, areal og de officielle kilder.
-          </p>
-
           <div className="not-prose my-6 rounded-lg border-l-4 border-blue-400 bg-blue-50 p-4">
             <p className="font-medium text-blue-900">Få den officielle vurdering</p>
             <p className="mt-1 text-blue-800">
@@ -277,6 +271,8 @@ export default async function BoligstoettePage() {
       <section className="mt-12">
         <RelatedCalculators current="/boligstoette" />
       </section>
+
+      <RelateredeArtikler current="/boligstoette" locale={locale} />
     </div>
   );
 }

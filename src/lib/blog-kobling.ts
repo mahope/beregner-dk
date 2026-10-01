@@ -11,6 +11,14 @@
  * visninger pr. 28 dage, altså nok indgangslinks til at måle effekten på indlæggene.
  * `/dato` (131.920) og `/brok` (4.913) er koblet efter GSC 2026-08-29→09-26.
  *
+ * De to sidste blev koblet 1/10 efter Plausible 2026-09-30: `/boligstoette`
+ * 529 besøgende/28d (+78 %) og `/pension` 142. Begge havde indlægget, og
+ * indlægget linkede tilbage, men kun som et skjult link i brødteksten —
+ * `/pension` manglede det helt. `/su` og `/barselsdagpenge` blev målt samme
+ * dag og **ikke** koblet: der står indlægget allerede i en blå boks lige under
+ * værktøjet, så en "Guides om emnet"-blok ville give læseren det samme link
+ * to gange på én skærm.
+ *
  * Koblingen skal være gensidig: indlægget skal selv linke tilbage til den
  * beregner, det er koblet til. Det låser `blog-kobling.test.ts`, fordi en
  * kobling uden returlink er halv sand — beregneren peger på indlægget, men
@@ -124,6 +132,22 @@ export const BEREGNER_ARTIKLER: Record<string, ArtikelKobling[]> = {
       titel: "Sådan beregner du din reelle timeløn",
       beskrivelse:
         "Løn delt i timer er et brøk: hvad pension, frokost og skjulte timer gør ved det tal, du faktisk tjener pr. time.",
+    },
+  ],
+  "/boligstoette": [
+    {
+      slug: "boligstoette-2026-nye-regler",
+      titel: "Boligstøtte 2026: de nye regler",
+      beskrivelse:
+        "Sammenhængen mellem husleje, indkomst, formue og areal, og hvilke kilder der står bag standardmaksima.",
+    },
+  ],
+  "/pension": [
+    {
+      slug: "pension-hvor-meget-skal-du-spare-op",
+      titel: "Pension: hvor meget skal du spare op?",
+      beskrivelse:
+        "Folkepension, ATP og det private spareri — hvor meget du selv bør lægge til side, og hvornår.",
     },
   ],
 };

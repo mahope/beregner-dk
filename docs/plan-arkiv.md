@@ -21913,3 +21913,78 @@ grøn, fordi den læser strengen i koden, ikke resultatet.
 de nye filer er danske, men ligger i `blog/` og `lib/`, som porten kun skanner
 for `da`-leakage i komponenter der monteres på beraknare.se. `npm run build`
 142 → **143** sider, `/blog/bmi-voksen-saadan-tolk-er-du-tallet` på 245 B.
+
+---
+
+## Opgave 189c, 190, 191, 192, 193 — afsluttet 30/9-1/10 (arkiveret 1/10 02:05 fra IMPLEMENTATION_PLAN.md)
+
+De fem opgaver stod i planen indtil de var færdige. De er flyttet her, så
+`IMPLEMENTATION_PLAN.md` forbliver en arbejdskø og ikke et dagbog.
+
+### 189c ✅ 30/9 22:40 — lukket som "veje udtømt", ikke som "kilde hentet"
+
+- **Datagrund:** listen øverst. Syv domæner testet med HTTP-status, ingen af dem
+  leverer dansk lovtekst eller Fahrschulgesetz. Retsinformation er en SPA-skal på
+  4.945 bytes, også med Googlebot-UA.
+- **Resultat:** de fire rækker (Store bededag, grundlovsdag, palmesøndag/
+  juleaftensdag, Tysklands prøveperiodes længde) får **ingen kilde**, fordi ingen
+  kan hentes. De står uændret i brødteksten — de er sande, og sletning af en sand
+  oplysning på grund af en uopnåelig kilde er et tab for læseren.
+- **Rettet i stedet:** Sveriges grove grænse stod håndskrevet som "1,0" i to svar;
+  den er nu `PROMILLEGROV_SE` (4 a §) og bruges af `pct()`. 1 ny port, målt til at
+  fejle mod en håndskrevet "0,3 ‰".
+
+### 190 ✅ 30/9 23:20 — blogindlæg med høj bounce skal føre videre til en beregner
+
+- **Datagrund:** `/blog/barsel-2026-regler-og-satser` 185 besøgende/28d (+97 %)
+  og **84 % bounce**, mens `/barselsdagpenge` har 225 besøgende og **1 % bounce**.
+- **Rettelse:** `NaesteSkridt` kan nu have én ekstra, stille handling
+  (`sekundaer`), så barsel-indlægget tilbyder **både** `/barselsdagpenge` og
+  `/barselsplanlaegger`. Kun den primære er en knap — to knapper af samme vægt
+  er måden en læser ender på at vælge ingen. Ny port `SKAL_NAAE` i
+  `naeste-skridt.test.ts`.
+- **Fund undervejs:** `naeste-skridt.test.ts` læste *hele filens hale* som
+  "næste handling", så kravet passede ved at finde `href="/alder"` i "Relaterede
+  beregnere" **under** CTA'en. Kravet blev skrevet om til det, der er sandt.
+
+### 191 ✅ 1/10 01:35 — `/bmi` manglede et koblet indlæg, og det er sitets faldende side
+
+- **Datagrund:** `/bmi` 934 besøgende/28d og **−26 %** — den eneste faldende
+  side i top-15. `BEREGNER_ARTIKLER` havde ingen nøgle til `/bmi`.
+- **Rettelse:** nyt indlæg `/blog/bmi-voksen-saadan-tolk-er-du-tallet`, koblet i
+  `blog-kobling.ts` under `/bmi`, med `<RelateredeArtikler current="/bmi">` ind i
+  `bmi/page.tsx`; WHO's grænser ligger som **data med kilde** i
+  `src/lib/bmi-voksen-grænser.ts` (factsheet opdateret 2025-12-08, hentet 1/10);
+  ny port `bmi-voksen-grænser.test.tsx` (13 tests) renderer **markupken**.
+- **⚠️ Målerfælde 1/10 01:24 (ny, viktig for flere opgaver).** En port der læser
+  sidens *kildekode* ser ikke, om komponenten renderer noget.
+  `RelateredeArtikler` returnerer `null` for `locale !== "da"`, så
+  `blog-kobling.test.ts` er grøn på alle tre domæner uden at blokken nogensinde
+  dukker op. Når en opgave gør en side *vise* noget nyt, må porten rendere siden.
+
+### 192 ✅ 1/10 00:11 — review-fund 1/10 (LAV) — `intl-locale-tag`-porten var blind
+
+- Fejlen var **dobbelt**: porten læste filen linje for linje, så et linjeskift
+  skjulte kæden; og regexen krævede kolonnen *direkte* efter tagget, så
+  `new Intl.NumberFormat("sv-SE").format(n)` skjulte den. Målt:
+  `gammel.test(promille-form) === false`.
+- **Rettelse:** `SPAND`-form der tillader kode og skift imellem tag og kolonne men
+  **ikke** `nb-NO` (trearmet) og **ikke** `;`; `formatGenstande` skrevet med
+  `getIntlLocale(locale)`; scanner med tilstand erstattet regex-stripningen.
+- **Målerfælde 1/10 — to fejl i min egen første stripning.** Blokkommentarer tømt
+  *før* linjekommentarer: `dato/page.tsx:30` åbnede en "blokkommentar" helt til
+  næste blokslut og tømte 13 linjer rigtig kode. Løsningen er en **scanner med
+  tilstand**, ikke to regexer — målt til 0 fejl i 0 filer over hele `src/`.
+
+### 193 ✅ 1/10 00:50 — rød CI på `master` — tests regnede dagen med serverens ur
+
+- CI (`ubuntu-latest` = UTC) blev rød 30/9 22:12 UTC på `4de4ca7` med 2 af 3274
+  tests. Målt lokalt med `TZ=UTC npx vitest run`: præcis de samme 2 fejl.
+- **Rettelse:** `iDagPaSiden(dato, locale)` i `lokal-dato.ts` ejer nu reglen
+  "Sverige får sit ur, alt andet Danmarks", og `page.tsx` + `page-data.ts` +
+  testen kalder *samme* funktion. Ny port `test-tidszone.test.ts` forbyder
+  serverens ur i tests; hvidlisten tæller *forekomster*.
+- **Målt (3 mutationer):** porten rød ved at gendan den oprindelige fejl, ved en
+  ny fil med kaldet, og den positive påstand rød ved at sætte `AlderLevetSvar`
+  tilbage på serverens ur. De to mutationer i `page.tsx`/`page-data.ts` gav
+  *grønt*, fordi de ikke rørte den egentlige producer af afsnittet.

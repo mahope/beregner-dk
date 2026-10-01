@@ -13,6 +13,7 @@ import { FOLKEPENSION_2026, folkepensionMedFormel, folkepensionsalderRækker } f
 import { formatNumber } from "@/lib/format";
 import { SATSER_2026 } from "@/lib/satser-2026";
 import RelatedCalculators from "@/components/RelatedCalculators";
+import RelateredeArtikler from "@/components/RelateredeArtikler";
 
 export async function generateMetadata() {
   return generatePageMetadata("pension");
@@ -330,6 +331,8 @@ export default async function PensionPage() {
       <section className="mt-12">
         <RelatedCalculators current="/pension" />
       </section>
+
+      <RelateredeArtikler current="/pension" locale={locale} />
     </div>
   );
 }

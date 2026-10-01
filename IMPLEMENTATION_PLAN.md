@@ -1,38 +1,36 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — 1/10 01:35. Opgave 191 er færdig: `/bmi` (934 besøgende/28d, −26 %,
-  den eneste faldende side i top-15) manglede et koblet indlæg, så siden viste
-  læseren ingen vej ud af værktøjet. Nyt indlæg `/blog/bmi-voksen-saadan-tolk-er-du-tallet`
-  med WHO's grænser som **data med kilde** (factsheet 2025-12-08), koblet under
-  `/bmi` og synligt på siden. Valget var enten-eller (børneguide til en voksen
-  læser), så der blev skrevet et nyt indlæg i stedet for at flytte det gamle.
+STATUS: KØ — 1/10 02:05. Opgave 194 er færdig: `/boligstoette`
+  (**529 besøgende/28d, +78 %**) havde sin guide begravet nederst i brødteksten,
+  og `/pension` manglede den helt. Begge har nu en synlig "Guides om emnet"-blok,
+  og den begravede reference er fjernet så læseren ikke møder artiklen to gange.
+  To sider blev bevidst **ikke** koblet — `/su` og `/barselsdagpenge` har allerede
+  linket i en blå boks under værktøjet, så porten stoppede mig dér.
 
-  **⚠️ Ny målerfælde (1/10 01:24) — porten skal rendere, ikke læse kode.** En
-  port der læser sidens kildekode ser ikke om komponenten renderer noget:
-  `RelateredeArtikler` returnerer `null` for `locale !== "da"`, så den gamle
-  `blog-kobling.test.ts` er grøn på alle tre domæner uden at blokken nogensinde
-  dukker op. Den nye port renderer `/bmi` og måler markupken. To fejl i min egen
-  kode blev fundet derved: BMI 25,0 faldt i "Normalvægt" (epsilon på begge
-  grænser), og vægtintervallet endte på 76,6 i stedet for 76,3 kg. Fire
-  mutationer beviser porten kan blive rød. Målinger i `docs/plan-arkiv.md`.
+  **⚠️ Målerfælde 1/10 02:00 (ny, for enhver port der renderer en hel side).**
+  `renderToStaticMarkup(<Side />)` kaster "A component suspended" på en async
+  server component. Skriv `renderToStaticMarkup(await Side())`.
 
   **Næste opgave: 187 er stadig sat til 13/10.** Køen herfra: 98 (blokeret af
-  97), så F1/F3/F5 — og en ny opgave, hvis der er flere `/bmi`-lignende sider
-  uden koblet indlæg.
+  97), så F1/F3/F5 — og de `/tidsberegner`/`/kalorier`-guides som målingen i
+  194 fandt og som ikke kan løses før hhv. 187 og 119.
 
   **Blokeret af svar fra Mads:** 97, 119 og 183, samt F1/F3/F5. **Opgave 187 må
-  ikke røres før 13/10.** CEO-køens punkt 0 er lukket; 189c er lukket som "veje
-  udtømt" (syv domæner testet, ingen leverer dansk lovtekst — kildetabel i
-  arkivet).
+  ikke røres før 13/10.** CEO-køens punkt 0 er lukket — alle otte tal er
+  verificeret i koden 1/10 02:00 (Valborg 30. april, påskafton `offsetDays: -1`,
+  fast sankthans 23./24. juni, påskeaften-FAQ væk, nettoprisindeks,
+  `Europe/Copenhagen`, `PROMILLEGROV_SE`, `maneder: 12`). De otte lukkede
+  VERIFICÉR-noter er verificeret på indhold; senest 30/9 23:10.
 
-  **Otte VERIFICÉR-noter åbne.** HTTP 200 beviser intet: de rører tabelceller med
-  lovtal, brødtekst og rækkefølge i markupken. De otte lukkede er verificeret på
-  indhold; senest 30/9 23:10. Målingerne står i `docs/plan-arkiv.md`.
+  **⚠️ Otte VERIFICÉR-noter åbne.** HTTP 200 beviser intet: de rører tabelceller
+  med lovtal, brødtekst og rækkefølge i markupken. Målingerne står i
+  `docs/plan-arkiv.md`. Næste forfaldsvindue er **1/10 07:30** — de otte noter med
+  vinduer 07:30 og 12:30 kan lukkes fra den iteration.
 
-**⚠️ Målerfælde (30/9 15:40).** `npm run test` kører `locale-leak-gate.test.ts`,
-der med vilje planterer danske lækager. Derfor kommer `FEJL: n ureviewet(e)`-
-blokke i output. Det er **ikke** fund i din diff. Kør gaten separat:
-`node scripts/locale-leak.mjs --gate` (exit 0).
+  **⚠️ Målerfælde (30/9 15:40).** `npm run test` kører `locale-leak-gate.test.ts`,
+  der med vilje planterer danske lækager. Derfor kommer `FEJL: n ureviewet(e)`-
+  blokke i output. Det er **ikke** fund i din diff. Kør gaten separat:
+  `node scripts/locale-leak.mjs --gate` (exit 0).
 
 ## Fase 3 — trafik-drevet
 
@@ -129,7 +127,7 @@ kaldes *ikke*-helgdag.
 
 ```
 npm run lint     # biome lint ./src      — 633 filer
-npm run test     # vitest run            — 3291 tests / 200 filer
+npm run test     # vitest run            — 3297 tests / 201 filer
 TZ=UTC npm run test   # CI's ur — se målerfælden 1/10 i STATUS
 npm run build    # next build            — 143 sider
 node scripts/locale-leak.mjs --gate       # exit 0
@@ -141,18 +139,31 @@ et alders-tal i et snippet følger dagen. Dagens dato læses i sidens egen
 tidszone via `iDagISidensTidszone` — `tilIsoDato(new Date())` læser
 *serverens* tidszone og er et døgn bag mellem 00:00 og 02:00 dansk tid.
 
-`tsc --noEmit` er **ikke** del af gaten: **80** kendte forhåndsfejl, alle i
-`*.test.ts(x)` og **0 i ikke-test-filer**. Genmålt 30/9 17:53 på `master` og på
-`ceo/no-locale-tag` — tallene er ens, så ingen af denne ændringer har tilføjet en.
-Planen sagde 72; de otte ekstra kom fra commits efter sidste måling. Verificér
-fremover med `git stash -u` før og efter, som gjort her.
+`tsc --noEmit` er **ikke** del af gaten. Genmålt 1/10 02:04 på `master` og på
+`ceo/guides-til-store-beregnere` med `git stash -u` før og efter: **83 fejl i 18
+filer** begge steder, alle i `*.test.ts(x)`, ingen i de tre rørte filer. Planen
+sagde tidligere 82/17 og før det 72 — de ekstra kommer fra commits efter sidste
+måling, ikke fra denne ændring.
 
 ## Åbne VERIFICÉR DEPLOY-noter
 
-**Syv noter åbne.** HTTP 200 beviser intet: 189's og 189b's noter rører
+**Otte noter åbne.** HTTP 200 beviser intet: 189's og 189b's noter rører
 *tabelceller* med lovtal, der er usynlige for `curl` uden at man læser dem. De
 otte lukkede noter er verificeret på indhold; senest 30/9 23:10 for tidszone
 og forsiden. Alle målinger står i `docs/plan-arkiv.md`.
+
+- ⏳ **`/boligstoette` og `/pension` skal vise "Guides om emnet" under de
+  relaterede beregnere.** `ceo/guides-til-store-beregnere`. På
+  `https://minberegner.dk/boligstoette` skal `<h2>Guides om emnet</h2>` stå i
+  markupken med **ét** `/blog/boligstoette-2026-nye-regler`-href, og **strengen
+  "Vil du se den fulde guide?" må ikke forekomme** nogen steder — den blev
+  fjernet, fordi læseren ellers mødte artiklen to gange. På
+  `https://minberegner.dk/pension` skal samme blok stå med **ét**
+  `/blog/pension-hvor-meget-skal-du-spare-op`-href. På `https://beraknare.se/` på
+  begge domæner må "Guides om emnet" **ikke** forekomme. HTTP 200 beviser intet —
+  det er en blok i markupken. Prøven på dansk er
+  `src/lib/store-beregnere-guide.test.tsx` efter deploy. Vindue **1/10 12:30**
+  (denne merge sker efter 07:30).
 
 - ⏳ **Tysklands række må ikke love en grænse, StVG ikke har.** `ceo/promille-lovkilde-2`.
   På `https://minberegner.dk/promille` og `https://beraknare.se/promille` skal
@@ -338,157 +349,49 @@ og forsiden. Alle målinger står i `docs/plan-arkiv.md`.
   står** — to titelændringer er prøvet. **MÅL:** `/bmi` 934, `/su` 127
   besøgende/28d (Plausible 2026-09-30). Fuldtekst: `docs/plan-arkiv.md`.
 
-#### 189c. [x] ✅ 30/9 22:40 — lukket som **"veje udtømt"**, ikke som "kilde hentet"
+#### 194. [x] ✅ 1/10 02:05 — to trafikstærke beregnere viste ikke den guide, de har
 
-- **Datagrund:** listen øverst. Se kildetabellen i STATUS — syv domæner testet
-  med HTTP-status, ingen af dem leverer dansk lovtekst eller Fahrschulgesetz.
-  Retsinformation er en SPA-skal på 4.945 bytes, også med Googlebot-UA.
-- **Resultat:** de fire rækker (Store bededag, grundlovsdag, palmesøndag/
-  juleaftensdag, Tysklands prøveperiodes længde) får **ingen kilde**, fordi ingen
-  kan hentes. De står uændret i brødteksten — de er sande, og sletning af en sand
-  oplysning på grund af en uopnåelig kilde er et tab for læseren.
-  Tysklands række fortsætter med at sige "prøveperiode" uden længde, hvilket er
-  præcist hvad § 24c selv kan bære.
-- **Hvad der så blev rettet i stedet:** CEO-køens punkt 7, som lå i samme
-  brødtekst. Sveriges grove grænse stod håndskrevet som "1,0" i to svar; den er
-  nu `PROMILLEGROV_SE` (4 a §) og bruges af `pct()`. 1 ny port, målt til at
-  fejle mod en håndskrevet "0,3 ‰" (22:36).
-
-#### 190. [x] ✅ 30/9 23:20 — Kø — blogindlæg med høj bounce skal føre videre til en beregner
-
-- **Datagrund:** `/blog/barsel-2026-regler-og-satser` har **185 besøgende/28d
-  (+97 %) og 84 % bounce**, mens `/barselsdagpenge` har 225 besøgende og **1 %
-  bounce** og `/barselsplanlaegger` er live. Indlægget er altså ikke et
-  indgangspunkt — det er en gade, brugeren går ud af igen. Fase 3 siger det samme
-  om bloggen generelt.
-- **Hvorfor lige nu:** CEO-køen er tom, og dette er den største målbare
-  trafikfejl, der kan rettes uden Mads' svar. F1/F3/F5 kræver en
-  søgningseksport, 183 kræver en kildediagnose, og 187 må ikke røres før 13/10.
-- **Accept:** indlægget har en synlig næste handling til `/barselsdagpenge` og
-  `/barselsplanlaegger` i markupken (en `naeste-skridt`-stribe som på de andre
-  indlæg, ikke bare et link i brødteksten), og en port der kræver den —
-  `naeste-skridt.test.ts` læser kun teksten *før* CTA'en, så den kan ikke holde
-  sig selv oprejsende. Gaten grøn.
-- **MÅL:** `/blog/barsel-2026-regler-og-satser` 185 besøgende/28d, bounce 84 %
-  (Plausible 2026-09-30) → bounce under 60 % om 14 dage.
-- **Resultat 30/9 23:20:** `NaesteSkridt` kan nu have én ekstra, stille handling
-  (`sekundaer`), så barsel-indlægget tilbyder **både** `/barselsdagpenge` og
-  `/barselsplanlaegger` i markupken. Kun den primære er en knap — to knapper
-  af samme vægt er måden en læser ender på at vælge ingen. Ny port
-  `SKAL_NAAE` i `naeste-skridt.test.ts` kræver begge hrefs og kan fejle
-  (set fejle mod den gamle kode: *"har 84 % bounce, men /barselsplanlaegger
-  står ikke i næste handlingen"*).
-- **Fund undervejs (ikke rettet, kun gjort ærligt):** `naeste-skridt.test.ts`
-  læste *hele filens hale* som "næste handling", så kravet "næste handling =
-  den koblede beregner" passede for `bmi-for-boern-saadan-tjekker-du` ved at
-  finde `href="/alder"` i "Relaterede beregnere" **under** CTA'en. Indlægget
-  handler om BMI, så dets næste handling er `/bmi`, og `/alder` er koblet
-  fordi det er der, forældre slår et barns alder op. Kravet er derfor skrevet
-  om til det, der er sandt: læseren *kan* nå den koblede beregner.
-  **Og: `/bmi` (934 besøgende, −26 %) har ingen koblet guide**, mens `/alder`
-  kun har denne ene. Se ny opgave 191.
-
-#### 191. [x] ✅ 1/10 01:35 — `/bmi` manglede et koblet indlæg, og det er sitets faldende side
-
-- **Datagrund:** Plausible 30/9: `/bmi` 934 besøgende/28d og **−26 %** — den
-  eneste faldende side i top-15. `BEREGNER_ARTIKLER` havde ingen nøgle til
-  `/bmi`, så `RelateredeArtikler` renderer ikke på siden, og det eksisterende
-  indlæg `/blog/bmi-for-boern-saadan-tjekker-du` var koblet til `/alder`.
-- **Valget mellem de to veje:** 191 sagde at en flytning krævede valg mellem to
-  sider — `/alder` mister sin eneste guide, eller `/bmi` får en børneguide som
-  sin eneste guide. Begge er dårlige for en voksen læser: en børnepercentil er
-  ikke svaret på "hvad betyder mit BMI". Derfor blev der **skrevet et nyt
-  indlæg** om voksne, så begge sider har en guide til *deres* læser. Bloggen 27
-  → 28 indlæg.
-- **Rettelsen:** (1) nyt indlæg `/blog/bmi-voksen-saadan-tolk-er-du-tallet`,
-  koblet i `blog-kobling.ts` under `/bmi`, med `<RelateredeArtikler current="/bmi">`
-  ind i `bmi/page.tsx`; (2) WHO's grænser ligger som **data med kilde** i
-  `src/lib/bmi-voksen-grænser.ts` (factsheet opdateret 2025-12-08, hentet
-  1/10) — brødteksten, tabellen og eksemplerne læser derfra, så de ikke kan
-  glide fra hinanden eller fra `/bmi`s egen brødtekst; (3) ny port
-  `bmi-voksen-grænser.test.tsx` (13 tests) renderer **markupken** — kun derfra
-  kan den se at blokken vises på dansk og forsvinder på svensk. Se målerfældene
-  i `docs/plan-arkiv.md`.
-- **⚠️ Målerfælde 1/10 01:24 (ny, viktig for flere opgaver).** En port der læser
-  sidens *kildekode* ser ikke, om komponenten renderer noget. `RelateredeArtikler`
-  returnerer `null` for `locale !== "da"`, så `blog-kobling.test.ts` er grøn på
-  alle tre domæner uden at blokken nogensinde dukker op. Når en opgave gør en
-  side *vise* noget nyt, må porten rendere siden — kun så måles resultatet.
-- **Accept:** (1) ✅ `bmiMarkup("da")` har "Guides om emnet" med ét `/blog/`-href,
-  `bmiMarkup("se")` har ingen blok; (2) ✅ artiklen nævner `/bmi` i brødteksten
-  før `NaesteSkridt` (låst af `naeste-skridt.test.ts`); (3) ✅ gaten grøn — 3291
-  tests i **begge** tidszoner, lint ren, locale-leak exit 0, build 143/143.
-- **MÅL:** `/bmi` 934 besøgende/28d, −26 % (Plausible 2026-09-30). Genmål
-  bounce på indlægget 30 dage efter deploy.
-
-#### 192. [x] ✅ 1/10 00:11 — review-fund 1/10 (LAV) — `intl-locale-tag`-porten var blind for kæder med kode imellem
-
-- **Datagrund:** fundet af review 1/10. `promille-eksempler.ts:110-113` var den
-  eneste toarmede `sv-SE`/`da-DK`-kæde i kilden. Fejlen var **dobbelt**, og
-  kun den halve stod i fundet:
-  1. porten læste filen linje for linje, så et linjeskift skjulte kæden;
-  2. **mere alvorligt:** regexen var `/"sv-SE"\s*:(?:(?!nb-NO)[\s\S]){0,40}"da-DK"/`,
-     og `\s*:` krævede kolonnen *direkte* efter tagget. Koden har
-     `new Intl.NumberFormat("sv-SE").format(n)` — altså `).format(n)` plus skift
-     og indrykning imellem. **Selv med hele filen som én streng ramte den gamle
-     regex den aldrig.** Målt: `gammel.test(promille-form) === false`.
-- **Rettelse:** (1) `SPAND`-form der tillader kode, skift og indrykning imellem
-  tag og kolonne, men **ikke** `nb-NO` (trearmet) og **ikke** `;`
-  (statementskillet — uden det løber porten fra `fmtKr` ind i `fmtPct` og
-  melder to separate tremarkkede hjælpere som ét fund, målt 2/2), og et andet
-  `SPAND` *efter* kolonnen fordi `? "sv-SE" : "da-DK"` har mellemrum;
-  (2) `formatGenstande` skrevet med `getIntlLocale(locale)` — ingen tag-literal
-  tilbage i filen; (3) scanner med tilstand erstattet regex-stripningen, se
-  målerfældene nedenfor.
-- **Målerfælde 1/10 — to fejl i min egen første stripning, begge fundet ved at
-  måle `src/` og ikke ved at læse koden.** (a) Blokkommentarer tømt *før*
-  linjekommentarer: `dato/page.tsx:30` er `// … \`/dage-til/*\`-siderne …`, så
-  det `/*` åbnede en "blokkommentar" helt til næste blokslut og tømte **13
-  linjer rigtig kode** (`:39-51`, hele `dageTilLinks`-blokken) — porten blev
-  blind for præcis den fejlklasse den skal fange. (b) Omvendt rækkefølge:
-  reglen for `*`-fortsættelse spiste blokkens afsluttende `*/`-linje, så `/**`
-  blev stående hængende. Løsningen er en **scanner med tilstand** (linje-/
-  blokkommentar/streng), ikke to regexer. Endnu en forfældet prøve: at tælle
-  `(`, `=`, `.` gav 30 falske fund i `alder/page.tsx`, fordi linjer *inde i* en
-  blokkommentar ligner kode — erstattet af en uafhængig tokenizer, målt til
-  **0 fejl i 0 filer** over hele `src/`.
-- **Accept:** (1) portens egen test fejler mod den gamle kode — målt ved
-  `git stash`: rød på `promille-eksempler.ts:112`, (2) mutationen "toarmet
-  kæde over to linjer" giver rødt hele vejen, (3) ingen `sv-SE`/`da-DK`-
-  literal i `promille-eksempler.ts`, (4) gaten grøn: 198 filer / **3274**
-  tests, `biome lint` ren, `locale-leak --gate` exit 0, `next build`
-  142/142. Plus 4 nye tests: linjeskiftet, linjenummerering, `/*`-i-`//`, og
-  src-låsen. **MÅL:** ingen trafikmåling — fundet er en korrekthedsmåling.
-
-#### 193. [x] ✅ 1/10 00:50 — rød CI på `master` — tests regnede dagen med **serverens** ur
-
-- **Datagrund:** CI (`ubuntu-latest` = UTC) blev rød 30/9 22:12 UTC på `4de4ca7`
-  med 2 af 3274 tests. Målt lokalt med `TZ=UTC npx vitest run`: præcis de samme
-  2 fejl i `alder/page.test.tsx`. Årsagen er ikke flakiness: `alder`'s test
-  skrev sit forventningstal med `tilIsoDato(new Date())` — serverens tidszone —
-  mens siden læser dagen med `iDagPaSiden` — sidens. Mellem 00:00 og 02:00
-  dansk tid er det to forskellige datoer, og kun det ene ur har ret.
-- **Rettelse:** (1) `iDagPaSiden(dato, locale)` i `lokal-dato.ts` ejer nu reglen
-  "Sverige får sit ur, alt andet Danmarks", og `page.tsx` + `page-data.ts` +
-  testen kalder *samme* funktion — en test kan ikke længere holde sin egen
-  regel. (2) alle 15 kald i `alder/page.test.tsx` går gennem den, inklusive den
-  svenske tabel der før regnede med dansk ur. (3) ny port `test-tidszone.test.ts`
-  forbyder serverens ur i tests; hvidlisten tæller *forekomster*, så `alder`s ene
-  negative kald kan blive stående uden at filen får frit lejde. (4)
-  `stripKommentarer` flyttet til `kommentar-scanner.ts`, fordi to porte nu
-  læser kode — målt til 0 fejl i 0 filer over `src/`.
-- **Målt (3 mutationer, alle røde):** porten rød ved at gendan den oprindelige
-  fejl (`alder/page.test.tsx: hvidlisten siger 1, der er 2 på linje 355,371`) og
-  ved en ny fil med kaldet (`src/lib/ny-test.test.ts:3`). Den positive påstand
-  rød ved at sætte `AlderLevetSvar` tilbage på serverens ur; den negative
-  påstand rød ved at lade siden rendere **begge** tals ur. Sidstnævnte mutation
-  fandt først `AlderLevetSvar` som den egentlige producer af afsnittet — de to
-  mutationer i `page.tsx`/`page-data.ts` gav *grønt*, fordi de ikke rørte den.
-- **Accept:** (1) `TZ=UTC` og dansk tid begge 199 filer / 3278 tests grønne,
-  (2) lint ren, `locale-leak --gate` exit 0, build 142/142, (3) `tsc` 82 fejl i
-  17 filer, alle i `*.test.ts(x)` og ingen i de syv rørte filer, (4) ingen
-  bruger-synlig ændring — reglen er flyttet, ikke ændret. **MÅL:** ingen
-  trafikmåling; fundet er en korrekthedsmåling, og CI-grønt er beviset.
+- **Datagrund:** målt 1/10 med `npx tsx` over `blog-kobling.ts` og alle 29
+  `page.tsx` i `src/app/blog/`. Af Plausibles top-15 manglede **fire** sider en
+  synlig guide: `/boligstoette` (**529 besøgende/28d, +78 %**), `/tidsberegner`
+  290, `/pension` 142 og `/kalorier` 289. Kun to af dem kan løses i dag:
+  - `/boligstoette` havde indlægget, men kun som et skjult link under
+    `<h3>Vil du se den fulde guide?</h3>` nederst i brødteksten;
+  - `/pension` manglede vej til indlægket **helt**.
+  - `/tidsberegner`s eneste indlæg er allerede koblet til `/tidszone`, og
+    `blog-kobling.test.ts` forbyder ét indlæg på to beregnere;
+  - `/kalorier` er opgave 119, bloket på en dansk kilde.
+- **Rettelse:** `RelateredeArtikler` på begge sider, og den begravede
+  `/boligstoette`-reference er **fjernet** — ellers mødte læseren samme artikel
+  to gange, præcis den fejl review-fundet 1/10 fandt på forsiden.
+- **⚠️ Hvad jeg *ikke* gjorde, og hvorfor.** Først koblede jeg fire sider,
+  inklusive `/su` og `/barselsdagpenge`. Da standsede porten mig: der står
+  allerede en blå boks med artiklens link lige under værktøjet på begge, så
+  blokken ville være link nr. to til det samme indlæg på én skærm. De to blev
+  rullet tilbage, og grunden står nu i `blog-kobling.ts`'s docblock, så næste
+  iteration ikke "hjælper" dem igen.
+- **Port:** ny `store-beregnere-guide.test.tsx` (6 tests) renderer **markupken**
+  med `renderToStaticMarkup(await Side())` — ikke kildekoden, jf. målerfælden fra
+  191. Tre krav: blokken vises på dansk, forsvinder på beraknare.se, og hvert
+  indlæg linkes **ét** sted. Sidste krav er det nye.
+- **Målerfælde 1/10 02:00 — `renderToStaticMarkup` kan ikke gøre `async`.**
+  Begge sider er async server components. `<Side />` kaster "A component
+  suspended while responding to synchronous input", fordi siden *suspenderer*
+  på sin `await getPageData()`. `renderToStaticMarkup(await Side())` virker —
+  samme form som `dato/page.test.tsx` og `forside.test.tsx` bruger. En test der
+  renderer hele siden skal derfor altid `await'e` kaldet, ikke komponenten.
+- **Målt (3 mutationer, alle røde):** blokken fjernet fra `/boligstoette`;
+  artiklen linket to gange i samme brødtekst; `RelateredeArtikler` holdt op med
+  at returnere `null` for `locale !== "da"`.
+- **Accept:** ✅ (1) `daMarkup` har "Guides om emnet" + artiklens titel på begge
+  sider, `seMarkup` har ingen blok; (2) hvert `/blog/`-href forekommer præcis
+  én gang i markupken; (3) gaten grøn — **3297** tests i 201 filer i **begge**
+  tidszoner, `biome lint` ren over 634 filer, `locale-leak --gate` exit 0,
+  `next build` 143/143.
+- **MÅL:** `/boligstoette` 529 besøgende/28d (+78 %) og `/pension` 142
+  (Plausible 2026-09-30). Genmål om 14 dage: `/blog/boligstoette-2026-nye-regler`
+  (67→84 faldende) og `/blog/pension-hvor-meget-skal-du-spare-op` skal stige, og
+  de to beregneres bounce skal ligge på 2-5 % som de andre værktøjer.
 
 #### 187. [ ] **IKKE FØR 2026-10-13** 2026-09-30 — Kø — **migrér beraknare.se til svenske URL-slugs med 301**
 
