@@ -9,6 +9,12 @@ import ProcentPage from "./page";
 vi.mock("@/components/ProcentBeregner", () => ({
   default: () => <div>Procentværktøj</div>,
 }));
+// Samme grund som linjen oven: renderToStaticMarkup kører uden LocaleProvider,
+// som de to værktøjer læser deres sprog fra. Værktøjets egen port
+// (ProcentpointBeregner.test.tsx) dækker dens adfærd med provider.
+vi.mock("@/components/ProcentpointBeregner", () => ({
+  default: () => <div>Procentpointværktøj</div>,
+}));
 vi.mock("@/components/Breadcrumbs", () => ({ default: () => null }));
 vi.mock("@/components/FAQ", () => ({ default: () => null }));
 vi.mock("@/components/RelatedCalculators", () => ({ default: () => null }));
@@ -411,5 +417,66 @@ describe("rabat i procent", () => {
       "<li><strong>Rabatter:</strong> 25% rabat på en vare til 400 kr = du sparer 100 kr</li>",
     );
     expect(html).not.toContain("1.125 ÷ 9.000 = 12,5");
+  });
+});
+
+// ─── Procentpoint-klyngen ────────────────────────────────────────────────
+// Dansk autocomplete (hl=da&gl=dk, målt 2026-10-01) svarer på "hvad er
+// procent" med "hvad er procentpoint" som nummer ét, og alle otte
+// completions under "procent point" handler om den enhed. Siden havde før
+// dette afsnit kun én FAQ-sætning om den. Porten dømmer på den RENDEREDE
+// markup, fordi hele pointen er at læseren kan se forskellen — tallene
+// stammer fra PROCENTPOINT_EKSEMPEL, så de kan ikke glide fra tabellen.
+describe("procentpoint-afsnittet", () => {
+  test("dansk: overskrift, definition og de fem tabelrækker", async () => {
+    const html = await render("da");
+
+    expect(html).toContain("Forskellen på procentpoint og procent");
+    // Point forskellen for de tre rentetrin, alle +1.
+    expect(html).toContain("De tre renterækker er det samme flytning, tre gange.");
+    // Rækkerne i markupken, med de to tal og point forskellen.
+    expect(html).toContain("1 % til 2 %");
+    expect(html).toContain("3 % til 4 %");
+    expect(html).toContain("22,1 % til 19,7 %");
+    // Point forskellen er skrevet i tabellen, den relative i næste kolonne.
+    expect(html).toContain("point");
+    expect(html).toMatch(/100 %/);
+    expect(html).toMatch(/33,3 %/);
+  });
+
+  test("svensk: egen overskrift og egen enhed", async () => {
+    const html = await render("se");
+
+    expect(html).toContain("Skillnad mellan procentenheter och procent");
+    expect(html).toContain("Ränderaderna är samma flytt, tre gånger.");
+    // Svensk må ikke tale om danske "point" alene — enheden hedder
+    // procentenheter, og det er den svenske læser skal se.
+    expect(html).not.toContain("point</strong>");
+  });
+
+  test("begge sprog har værktøjet og en kilde på rentebanen", async () => {
+    for (const [locale, kilde] of [
+      ["da", "https://www.nationalbanken.dk/den-rabende-rente"],
+      ["se", "https://www.riksbank.se/sv/politik/penningpolitik/"],
+    ] as const) {
+      const html = await render(locale);
+      expect(html).toContain("Procentpointværktøj");
+      expect(html).toContain(kilde);
+    }
+  });
+
+  test("dansk: FAQ'en svarer på de tre spørgsmål, autocomplete har vist", async () => {
+    // FAQ'en og FAQSchema er mock'et væk i denne fil, så spørgsmålene læses
+    // fra sidekilden — den samme kilde som de to komponenter læser.
+    const { getPageData } = await import("@/lib/page-data");
+    const spg = getPageData("procent", "da")!.faqItems;
+    const spoergsmaal = spg.map((f) => f.question);
+    const svar = spg.map((f) => f.answer).join(" ");
+
+    expect(spoergsmaal).toContain("Hvad er procentpoint vs procent?");
+    expect(spoergsmaal).toContain("Hvad er forskellen på procentpoint og procent?");
+    expect(spoergsmaal).toContain("Hvor mange procentpoint er 1 procent?");
+    // Svaret skal pege på værktøjet, ellers er der ingen næste handling.
+    expect(svar).toContain("procentpointberegneren");
   });
 });

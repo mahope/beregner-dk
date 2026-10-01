@@ -22718,3 +22718,84 @@ CTR-baseline. Genmål 15/10.
 ville konkurrere med `/husleje` om de samme søgninger og kræve egen kategori,
 sitemap-entry og interne links for at være mere end et tynt spejl. Værktøjet
 bor i den eksisterende side, der allerede har indholdet.
+
+---
+
+## Deploy-noter lukket på indhold 1/10 13:05
+
+12:30-vinduet var gået, og alle otte åbne noter blev verificeret mod **indhold**,
+ikke HTTP-status. 18 URL'er hentet, alle 200, hver streng talt i markupken.
+
+| Note | Commit | Bevis i markupken |
+|---|---|---|
+| `loen-efter-skat-tal-kilden` | 970502e | Tabellens 6 navne er `Rundersdal, Gentofte, Lyngby-Taarbæk, Langeland, Ishøj, Brøndby`. `Rundersdal` (forkert e/r) 0 gange, `Allerød` kun som `<option>` med **24,8 %** — ikke 23,3. `sat ned fra 12,22` 0. |
+| `loen-efter-skat-en-kilde` | 825031d | «Landsgennemsnittet» **0** gange. «I tabellen med de 98 kommuner er gennemsnittet 25,63 %, den billigste ligger på 22,5 %, og 27,8 % er den dyreste» står ordret, og «25,049 % ifølge svmn.dk's 2026-gennemsnit» har sit eget afsnit. |
+| `dato-datoliste-bøjning` | e6f4f0e | « og 1 dage)» og « och 1 dagar)» 0 gange i begge domæner. «12 uger og 1 dag» (da) og «12 veckor och 1 dag» (se) står i rækkerne med 87 dage. Svensk `<h2>` er «Datum **som** folk oftast räknar ner till». |
+| `dato-svensk-maaned` | 3928162 | «<h2>Hur många dagar är det i den här månaden?</h2>» står på beraknare.se. «1 dagar kvar» 0 gange, «1 dagar» efter veckor 0 gange, «har **31 dagar** totalt» står. På dansk er «1 dage tilbage» 0 gange. |
+| `indlaeg-naeste-vaerktoej` | ae538a0, 7f82749 | «Beregn hvor meget du får i feriepenge» (`/feriepenge`) og «Se hvad dit boliglån koster pr. måned» (`/boliglaan`) står begge i markupken. |
+| `guides-til-store-beregnere` | a6b4366 | `<h2>Guides om emnet</h2>` på `/boligstoette` og `/pension`, som **sidste** h2 på begge. «Vil du se den fulde guide?» 0 gange. På beraknare.se forekommer blokken ikke. |
+| `barsel-naeste-handling` | 54a3705 | `/barselsdagpenge` **og** `/barselsplanlaegger» («Planlæg dine uger med barselsplanlæggeren») står begge i «Regn det ud» på dansk. |
+| `bmi-voksen-indlaeg` | 47c9720 | `<h2>Guides om emnet</h2>` på `/bmi` med `href="/blog/bmi-voksen-saadan-tolk-er-du-tallet"`. På beraknare.se forekommer «Guides om emnet» ikke. |
+| `husleje-pristalsregulering` | eac2f98 | `<label for="husleje-pristalsregulering">Din husleje pr. måned</label>` + feltet i markupken. «8.000 kr. × 2,9 % = 232 kr. → 8.000 kr. + 232 kr. = 8.232 kr.», tabellens «8.000 kr. bliver» og «På 8.000 kr. bliver det 200 kr. mere om måneden.» står alle i **serverens** HTML. |
+
+**To ting min egen måling først sagde FEJL, som viste sig at være målefejl:**
+«Skriv din egen husleje i feltet under» kom ikke frem i `/husleje` — men det er
+aldrig en streng på siden; FAQ'en læser «Din husleje pr. måned kr» og
+beskriver feltet i sin egen sætning. Og «12 uger og 1 dag» stod i *strippet*
+markup med Reacts `<!-- -->` mellem tekstnoder, ikke i rå markup. Begge dele
+blev efterprøvet og var i orden.
+
+`/api/health` svarer `status: ok`. Produktion kører 12:30-batchen.
+
+## Opgave 207 — procentpoint-værktøj (1/10 13:05)
+
+**Datagrund:** dansk Google autocomplete (hl=da&gl=dk, målt 2026-10-01 kl.
+13:05) svarer på **«hvad er procent»** med **«hvad er procentpoint» som
+nummer ét**, og under **«procent point»** er alle otte completions
+point-spørgsmål: «udregn procent point», «1 procent point», «procentpoint til
+procent», «procentpoint engelsk», «procentpoint tegn», «procentpoint
+forkortelse». `/procent` er sitets største enkeltasset (**151.005 visninger,
+92 klik, CTR 0,1 %, pos. 7,4**, GSC 2026-09-01 → 2026-09-29) og havde **én**
+FAQ-sætning om emnet: «Procentpoint er absolut ændring, procent er
+relativ.» Ingen sektion, intet værktøj, ingen overskrift.
+
+**Rettet:** `ProcentpointBeregner` (da/se) med to procenttal-felter, et
+`aria-live`-svar der viser **point forskellen** og **den procentvise ændring**
+side om side, en retningsord-mappe (stigning/fald/uændret), formelboks,
+og en venlig besked når det gamle procenttal er 0 — fordi 0 ikke kan være
+heltalet, så «Det svarer til» skjules i stedet for at vise et falsk 0 %.
+Svensk enhed er **procentenheter**, ikke dansk «point»; porten dømmer på det.
+`/procent` fik et afsnit i begge sprog med en femrækket tabel, alle tal regnet
+fra `PROCENTPOINT_EKSEMPEL`, plus **tre nye FAQ-spørgsmål** i begge sprog.
+
+**Hvorfor ikke Nationalbanks rentebane:** `nationalbanken.dk/den-rabende-rente`
+svarer HTTP 404 for både den rå og `/penningpolitik/`-URL'en (målt 1/10
+13:08). En rentebane skrevet fra hukommelsen ville være et opfundet tal
+(punkt 11), så eksemplerne er **regneeksempler** — tre rentetrin der alle er
++1 point, plus to valgstal — og siden linker til kilden i stedet for at
+fortryde at gengive den.
+
+**Port:** `ProcentpointBeregner.test.tsx` (12 tests, skriver i felterne og
+læser begge tal ud af DOM'en i begge sprog) + `procentpoint.test.ts` (14
+tests) + 4 nye porte i `procent/page.test.tsx` på renderet markup. **11
+mutationer målt røde**, heraf de tre vigtigste: point forskellen erstattet af
+den relative ændring (5 røde), beregningen automatisk uden knap (2 røde), og
+`aria-live` flyttet fra beholderen til den betingede blok (1 rød — en
+skærmlæser så intet, fordi boksen først opstod med svaret).
+
+**Gaten:** `lint` 0 (645 filer) · `typecheck` 0 · `TZ=UTC npm run test`
+**3381 grønne / 207 filer** · `locale-leak --gate` exit 0 · `next build`
+142 ruter. Verificeret i **lokalt prod-build på 3111** med begge `Host`
+headere: dansk og svensk h2, fem tabelrækker, begge kilde-links, felt-id'erne,
+`<label for>`, `aria-describedby` og `aria-live="polite"` i markupken, og
+**ingen sprog-lækage** (svensk side har ingen dansk «Første procenttal» /
+«Regn ud», dansk side ingen svensk «Första procenttalet» / «Räkna ut»).
+
+**MÅL:** `/procent` 151.005 visninger / 92 klik / CTR 0,1 % / pos. 7,4 (da,
+GSC 2026-09-01 → 2026-09-29); beraknare.se `/procent` 27.778 / 2 / 0,0 % /
+9,9. Genmål 15/10.
+
+## De otte lukkede VERIFICÉR-noter, ordret (1/10 13:05)
+
+Noterne lå i planen med vindue 1/10 12:30 og er nu lukket på indhold — se
+tabellen ovenfor. Bevis for hver enkelt note står der.

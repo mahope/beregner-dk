@@ -1,38 +1,37 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — 1/10 12:35. **Pristalsreguleringen på `/husleje` blev et
-  værktøj** (opgave 206, `ceo/husleje-pristalsregulering`).
+STATUS: KØ — 1/10 13:05. **Alle otte deploy-noter er lukket på indhold**,
+  og `/procent` har fået et procentpoint-værktøj (opgave 207,
+  `ceo/procentpoint-vaerktoej`).
 
-  Nettoprisindeks-blokken var 210 linjer statisk tekst med 8.000 kr håndskrevet
-  ind i regnestykket, i tabellens sidste kolonne, i forskellen mellem de to
-  indekser og i kvartalsafsnittet — læseren skulle selv regne sin egen husleje
-  igennem fire steder. Nu er læserens husleje input til **alle** tal, og
-  svaret står i en `aria-live`-boks under overskriften. `parseDanskTal` gør
-  «12.500» dansk korrekt i stedet for 12 kr.
+  **Deploy:** 12:30-vinduet var gået. 18 URL'er hentet, alle 200, hver streng
+  talt i markupken — kommuneskat-tabellen, «Landsgennemsnittet» 0 gange,
+  de fire bøjninger i `/dato` begge sprog, månedens afsnit på beraknare.se,
+  `Guides om emnet` på tre sider, og pristalsreguleringen på `/husleje`.
+  Bevis pr. note i `docs/plan-arkiv.md`, "Deploy-noter lukket på indhold
+  1/10 13:05". `/api/health` er `ok`.
 
-  **Port:** 6 tests der skriver i feltet og læser tallene ud af DOM'en —
-  svaret, regnestykket, tabellens kolonne, kvartalsafsnittet, dansk
-  tusindtalspunktum og det ugyldige felt. **3 mutationer målt røde** (ignorer
-  inputtet → 4 røde; kvartalsafsnittet hårdkodet → 1 rød; tabellen hårdkodet
-  → 1 rød). Testtal 3345 → **3351**.
+  **Procentpoint:** dansk autocomplete målt i dag svarer på «hvad er procent»
+  med «hvad er procentpoint» som nr. 1, og 8 af 8 completions under «procent
+  point» er point-spørgsmål. `/procent` (151.005 visninger, 0,1 % CTR) havde
+  én FAQ-sætning om emnet. Nu: værktøj der viser point forskellen og den
+  procentvise ændring side om side, afsnit i begge sprog, 3 nye FAQ-spørgsmål.
+  **11 mutationer målt røde.** Nationalbanks rentebane er **ikke** gengivet —
+  kilden svarer 404, så eksemplerne er regneeksempler og siden linker til
+  kilden i stedet.
 
-  **Gaten:** `lint` 0 (641) · `typecheck` 0 · `TZ=UTC npm run test`
-  **3351 grønne / 205 filer** · `locale-leak --gate` exit 0 · `next build`
-  142 ruter. Verificeret i **lokalt prod-build på 3111**: label, `aria-live`,
-  `aria-describedby` og «Din husleje stiger 232 kr. til 8.232 kr. pr. måned ved
-  2,9 % i august 2026.» står i **serverens** HTML, de 10 øvrige 8.000-forekomster
-  er uændrede, ingen `NaN`, ingen svensk lækage.
+  **Gaten:** `lint` 0 (645) · `typecheck` 0 · `TZ=UTC npm run test`
+  **3381 grønne / 207 filer** · `locale-leak --gate` exit 0 · `next build`
+  142 ruter. Lokalt prod-build på 3111 verificeret med begge `Host`: ingen
+  sprog-lækage mellem de to domæner.
 
-  **⚠️ 8 deploy-noter er stadig åbne.** 12:30-vinduet er målt T+3 minutter
-  og var ikke nået endnu — alle otte merges lå 12:05-12:25. Målingen står i
-  `docs/plan-arkiv.md`; næste iteration måler igen og skriver først
-  `DEPLOY-MISSING` hvis et **helt** vindue er gået. `/api/health` er `ok`.
-
-  **Blokeret på Mads:** 97, 119, 183, 201, F1, F5 + Sentry-spørgsmålet.
+  **Blokeret på Mads:** 97, 119, 183, 201, F1, F5 + Sentry + Cloudflare.
 
   **⚠️ Målerfælde:** `npm run test` kører `locale-leak-gate.test.ts`, der med
   vilje planterer lækager — `FEJL: n ureviewet(e)` er derfor **ikke** fund i
   din diff. Gaten: `node scripts/locale-leak.mjs --gate` (exit 0).
+  **⚠️ Målerfælde 2:** React skriver `<!-- -->` mellem to tekstnoder i én
+  JSX-celle, så rå markup-grep på brødtekst skal strippe den først.
 
 ## Fase 3 — trafik-drevet
 
@@ -110,410 +109,59 @@ indeksering uafhængig af vores deploys.
 
 ## Feature-kø
 
-Mindst hver tredje opgave skal være noget brugeren kan se. Kandidater, prioriteret
-efter forventet effekt på **trafik** (GSC-tallene fra 1/10):
+Prioriteret efter forventet effekt på **trafik**. Datagrund fra GSC 1/10
+(2026-09-01 → 2026-09-29) og dansk autocomplete målt 1/10 13:05.
 
-- **Landing-side pr. konkrete countdown-spørgsmål** (`/dage-til/[dato]`).
-  *Hvem:* alle der googler «hvor mange dage er der til 1 december» — 1.209
-  visninger, 3 klik, pos. 5. *Accept:* én ægte side for jul, nytår, sommerferie
-  og skolestart, med svaret i `<title>`. *Datagrund:* GSC, 1/10.
-- **Forskelsside til `/dato` og `/tidsberegner` på beraknare.se.** *Hvem:* de
-  190.447 svenske visninger på 0,12 % CTR. *Accept:* CTR over 0,3 % på 14 dage.
-  *Datagrund:* GSC se, 1/10. **Kan ikke før 13/10** (opgave 187).
-- **Pristalsregulering på `/husleje`** — ✅ 1/10, `ceo/husleje-pristalsregulering`,
-  se `docs/plan-arkiv.md`. *MÅL:* `/husleje` 161 besøgende/28d, bounce 4 %
-  (Plausible 2026-10-01). GSC har ingen `/husleje`-visning i top-15, så
-  baseline for CTR er **ikke** kendt — tæt på 0 visninger mod 161 besøgende,
-  dvs. trafikken er overvejende ikke-Google. Genmål 15/10.
-- **Tænkeværdigt spørgsmål pr. fælde: "hvad må min husleje stige til".** Næste
-  skridt efter 206 er de samme tal på sig selv — `/procent` har 151.005
-  visninger og **92 klik** på pos. 7,4, fordi siden svarer på *hvor meget*
-  procent, ikke på hvad beløbet er. **Accept:** et beløbsværktøj på en side
-  med høj visning og lav CTR. *Datagrund:* GSC 1/10. Kræver F1's søgningsdata
-  for at vælge side, ellers er det gætteri (❓).
+- **Procentpoint på `/procent`** — ✅ 1/10, `ceo/procentpoint-vaerktoej`.
+  *Hvem:* alle der googler «hvad er procentpoint» (autocomplete #1 under
+  «hvad er procent», 8 af 8 completions under «procent point»).
+  *Accept:* værktøj + afsnit + 3 FAQ i begge sprog — leveret.
+  *Datagrund:* GSC + autocomplete 1/10. **MÅL:** `/procent` 151.005 / 92 /
+  0,1 % / 7,4 (da) · 27.778 / 2 / 0,0 % / 9,9 (se). Genmål 15/10.
+  *Næste skridt hvis det virker:* de samme tal på sig selv — point leder
+  videre til opinionsmålinger og rentetrin.
+- **Autocomplete som datagrund for de næste sider (ny, 1/10).**
+  *Hvem:* planen mangler søgningsdata for alt ud over GSCs top-3 pr. side
+  (F1 ❓). *Accept:* 10 danske seeds målt, klyngerne skrevet i planen, og
+  **én** ny side bygget på den stærkeste klynge.
+  *Datagrund:* F1 er blokeret på Mads, men autocomplete er frit tilgængelig
+  og målt i dag. Det er den eneste måde at få søgeintention uden GSC.
+  *Metode målt 1/10:*
+  `suggestqueries.google.com/complete/search?client=firefox&hl=da&gl=dk&q=…`
+- **Landing-side pr. konkrete countdown-spørgsmål** (`/dage-til/<slug>`).
+  *Hvem:* «hvor mange dage er der til 1 december» 1.209 visninger, 3 klik,
+  pos. 5. *Accept:* de fire sider findes allerede (jul, nytår, sommerferie,
+  skolestart) med svaret i `<title>` og i sitemap — **mål om de ranker, før
+  der bygges flere.** *Datagrund:* GSC 1/10.
+- **Pristalsregulering på `/husleje`** — ✅ 1/10. *MÅL:* `/husleje` 161
+  besøgende/28d, bounce 4 % (Plausible 2026-10-01). GSC har ingen
+  `/husleje`-visning i top-15, så CTR-baseline er **ikke** kendt — trafikken
+  er overvejende ikke-Google. Genmål 15/10.
+- **Forskelsside til `/dato` og `/tidsberegner` på beraknare.se.** *Hvem:*
+  190.447 svenske visninger på 0,12 % CTR. *Accept:* CTR over 0,3 % på 14
+  dage. *Datagrund:* GSC se, 1/10. **Kan ikke før 13/10** (opgave 187).
 - **Kalorieguide på `/kalorier`.** *Hvem:* 9 af 10 danske autocomplete-træffere
-  under «kalorier» er madvarer. **Blokeret på kilde** (opgave 119, ❓) — må ikke
-  gættes tal.
-
-### Åbne VERIFICÉR DEPLOY-noter
-
-- ⏳ **`/loen-efter-skat` skal ikke blande to kilder om de samme kommuner.**
-  `ceo/loen-efter-skat-en-kilde`. På `https://minberegner.dk/loen-efter-skat` skal
-  **"Landsgennemsnittet" forekomme 0 gange**, afsnittet under «5. Kommuneskat
-  (varierer)» skal lyde **"I tabellen med de 98 kommuner er gennemsnittet
-  25,63 %, den billigste ligger på 22,5 %, og 27,8 % er den dyreste"**, og et
-  **eget** afsnit skal sige **"25,049 % ifølge svmn.dk's 2026-gennemsnit"**.
-  FAQ'en «Hvorfor varierer kommuneskatten?» skal ikke længere sige
-  «Landsgennemsnittet er 25,049%». HTTP 200 beviser intet — det er brødtekst.
-  Prøven på dansk er `src/app/loen-efter-skat/page.test.tsx` +
-  `src/app/fact-consistency.test.ts` efter deploy. Vindue **1/10 12:30**.
-
-- ⏳ **`/dato` på svensk skal have månedens eget afsnit og bøje «1 dag».**
-  `ceo/dato-svensk-maaned`. På `https://beraknare.se/dato` skal `<h2>Hur många
-  dagar är det i den här månaden?</h2>` stå i markupken, og brødteksten skal
-  lyde «… har **31 dagar** totalt» med månadens navn fra `maanedNavn(7, "se")`.
-  **«1 dagar kvar» og «1 dagar» efter ugerne skal forekomme 0 gange**, og
-  «veckor och 1 dag» skal stå, når restdagen er 1. På
-  `https://minberegner.dk/dato` skal «1 dage tilbage» forekomme 0 gange.
-  HTTP 200 beviser intet — det er fire bøjninger i brødtekst. Prøven på dansk
-  er `src/app/dato/page.test.tsx` efter deploy. Vindue **1/10 12:30**.
+  under «kalorier» er madvarer. **Blokeret på kilde** (opgave 119, ❓) — må
+  ikke gættes tal.
 
 ## Åbne VERIFICÉR DEPLOY-noter
 
-- ⏳ **`/husleje` skal regne pristalsreguleringen på læserens egen husleje.**
-  `ceo/husleje-pristalsregulering`. På `https://minberegner.dk/husleje` skal
-  `<label for="husleje-pristalsregulering">Din husleje pr. måned</label>` stå i
-  markupken med sit `input`, og **serverens** HTML skal indeholde
-  **"Din husleje stiger 232 kr. til 8.232 kr. pr. måned ved 2,9 % i august
-  2026."** — altså at den nye boks er i den server-renderede tekst, ikke kun i
-  klienten. Regnestykket skal lyde **"8.000 kr. × 2,9 % = 232 kr. → 8.000 kr.
-  + 232 kr. = 8.232 kr."**, tabellens kolonne **"8.000 kr. bliver"**, og
-  kvartalsafsnittet **"På 8.000 kr. bliver det 200 kr. mere om måneden."**
-  FAQ'en «Hvor meget stiger huslejen efter nettoprisindekset?» skal pege på
-  feltet med **"Skriv din egen husleje i feltet under"**. På
-  `https://beraknare.se/husleje` må **"nettoprisindeks" forekomme 0 gange** —
-  den svenske lejeside må ikke få den danske blok. HTTP 200 beviser intet, det
-  er et input og fire beløb i brødteksten. Prøven på dansk er
-  `src/components/HuslejePristalsregulering.test.tsx` +
-  `src/components/HuslejeNettoprisindeks.test.tsx` efter deploy. Vindue
-  **1/10 17:30** (mergen sker efter 12:30).
-
-## Kvalitetsgate (repoets egne scripts fra package.json)
-
-```
-npm run lint        # biome lint ./src      — 635 filer
-npm run typecheck   # tsc --noEmit -p tsconfig.test.json — **kun testfiler**, 0 fejl
-npm run test        # vitest run            — 3313 tests / 202 filer
-TZ=UTC npm run test   # CI's ur — se målerfælden 1/10 i STATUS
-npm run build       # next build            — 138 ruter, **alle `ƒ` (dynamiske)**
-node scripts/locale-leak.mjs --gate       # exit 0
-```
-
-**`typecheck` er ny 1/10 (`ceo/typecheck-testfiler`) og er en del af gaten.**
-Den type-tjekker **kun** `src/**/*.test.ts(x)` — altså de filer
-`tsconfig.json`s `exclude` steger væk fra `next build`. Uden den var der ingen
-typekontrol af testfiler overhovedet; med den er der 0 fejl i 202 filer.
-
-**Målt 1/10:** `next build` på Next 16.3.8 (Turbopack) giver **138 ruter,
-136 `ƒ` og 2 `○`** — se opgave 200.
-
-**`next build` tjekker ikke testfiler mere** (1/10): med Next 16 type-tjekkede
-`next build` alle 85 fejl i 18 `*.test.ts(x)`-filer og bygget faldt. De blev
-taget ud af `tsconfig.json`s `exclude` (de skriver ikke til det kodede output)
-og fik i stedet `npm run typecheck`. Se `docs/plan-arkiv.md`.
-
-Sidens tekst kan regnes pr. request: `getPageData` løser `/alders{ALDER}`
-ved hvert kald, så et alders-tal i et snippet følger dagen. Dagens dato læses i
-sidens egen tidszone via `iDagISidensTidszone`.
-
-
-## Åbne VERIFICÉR DEPLOY-noter (forts. — otte noter med vindue 1/10 12:30)
-
-- ⏳ **`/loen-efter-skat` skal vise de rigtige kommuner og læse satser fra
-  modulerne.** `ceo/loen-efter-skat-tal-kilden`. På
-  `https://minberegner.dk/loen-efter-skat` skal kommunetabellen lyde **"Rudersdal
-  (22,5 %) | Langeland (27,8 %)", "Gentofte (22,8 %) | Ishøj (27,2 %)",
-  "Lyngby-Taarbæk (23 %) | Brøndby (27,1 %)"** — Lyngby-Taarbæk erstattede
-  **Allerød (23,3 %)**, som `KOMMUNER` siger er 24,80 %. Strengen **"Allerød"**
-  må **ikke** forekomme nogen steder på siden, og **"Rundersdal"** må ikke
-  forekomme (data skriver "Rudersdal"). **"op fra 49.700 kr", "op fra 45.100 kr"
-  og "sat ned fra 12,22 %" skal være væk.** Sats skal stå som "8 %", "12,01 %",
-  "12,75 %" med mellemrum. HTTP 200 beviser intet — det er en tabel og en
-  brødtekst. Prøven på dansk er `src/app/fact-consistency.test.ts` efter deploy.
-  Vindue **1/10 12:30** (denne merge sker efter 07:30).
-
-- ⏳ **Datolisten på `/dato` skal bøje "1 dag", ikke "1 dage", og den svenske
-  overskrift skal have "som".** `ceo/dato-datoliste-bøjning`. På
-  `https://minberegner.dk/dato` og `https://beraknare.se/dato` må strengen
-  **" og 1 dage)"** / **" och 1 dagar)"** forekomme 0 gange i markupken, og
-  **"12 uger og 1 dag."** / **"12 veckor och 1 dag."** skal stå i rækkerne med
-  87 dage til juledagen (1/10-1/12 og 2/12-24/12). Den svenske `<h2>` skal
-  lyde **"Datum som folk oftast räknar ner till"** — ikke "Datum folk oftast
-  räknar ner till". HTTP 200 beviser intet, det er tekst i 19 `<li>`-rækker.
-  Prøven på dansk er `src/app/dato/page.test.tsx` (de to nye porte) efter
-  deploy. Vindue **1/10 12:30** (denne merge sker efter 07:30).
-
-- ⏳ **To artikler skal i næste handling tilbyde det værktøj, der regner
-  beløbet ud.** `ceo/indlaeg-naeste-vaerktoej`. På
-  `https://minberegner.dk/blog/guide-feriepenge-hvornaar-og-hvor-meget` skal
-  **"Beregn hvor meget du får i feriepenge"** med `href="/feriepenge"` stå i
-  blokken "Regn det ud", ved siden af den knap der går til `/dato`. På
-  `https://minberegner.dk/blog/boliglaan-2026-renter-og-afdrag` skal
-  **"Se hvad dit boliglån koster pr. måned"** med `href="/boliglaan"` stå der
-  samlet sted. Begge artikler har **allerede** disse to href i brødteksten, så
-  det er kun næste handling der manglede dem. HTTP 200 beviser intet — det er
-  to linjer under `<h2>Regn det ud</h2>`. Prøven på dansk er
-  `src/app/blog/naeste-skridt.test.ts` efter deploy. Vindue **1/10 12:30**
-  (denne merge sker efter 07:30).
-
-**Otte noter åbne med vindue 1/10 12:30** (de otte nedenfor) plus opgave 206's
-note. HTTP 200 beviser intet: 189's og 189b's noter rører *tabelceller* med
-lovtal, der er usynlige for `curl` uden at man læser dem. **Målt 1/10 12:33:
-produktion kører en build fra før 12:05**, se `docs/plan-arkiv.md`, "12:30-
-vinduet". **Seks noter lukket på indhold 1/10 07:45** (`ceo/next-16`,
-`ceo/promille-lovkilde`, `ceo/promille-loenkilde-2`, `ceo/sidste-hverdag-paastand`,
-`ceo/blog-naeste-vaerktoej`, `ceo/tidszone-usa-forskelsdag`) — 12 URL'er hentet,
-alle 200, hver streng talt i markupken. Alle målinger står i
-`docs/plan-arkiv.md`, "Deploy-noter lukket på indhold 1/10 07:45".
-
-- ⏳ **`/boligstoette` og `/pension` skal vise "Guides om emnet" under de
-  relaterede beregnere.** `ceo/guides-til-store-beregnere`. På begge sider skal
-  `<h2>Guides om emnet</h2>` stå i markupken med **ét** `/blog/`-href (henholdsvis
-  `boligstoette-2026-nye-regler` og `pension-hvor-meget-skal-du-spare-op`), og
-  **"Vil du se den fulde guide?" må ikke forekomme** nogen steder. På
-  `https://beraknare.se/` må blokken **ikke** forekomme. HTTP 200 beviser intet.
-  Prøven på dansk er `src/lib/store-beregnere-guide.test.tsx`. Vindue **1/10 12:30**.
-
-
-
-- ⏳ **Barsel-indlægget skal tilbyde begge værktøjer som næste handling.**
-  `ceo/barsel-naeste-handling`. På `https://minberegner.dk/blog/barsel-2026-regler-og-satser`
-  skal afsnittet "Regn det ud" rumme **to** links i markupken — knappen
-  `href="/barselsdagpenge"` **og** det stille link
-  `href="/barselsplanlaegger"` med teksten "Planlæg dine uger med
-  barselsplanlæggeren" — og det stille link skal stå *inden* "Relaterede
-  artikler". HTTP 200 beviser intet, det er et par linjer i en blok. Prøven på
-  dansk er `src/app/blog/naeste-skridt.test.ts` (porten `SKAL_NAAE`) efter
-  deploy. Vindue **1/10 12:30** (denne merge sker efter 30/9 21:30).
-
-
-
-- ⏳ **`/bmi` skal vise sit eget indlæg under FAQ'en.** `ceo/bmi-voksen-indlaeg`.
-  På `https://minberegner.dk/bmi` skal `<h2>Guides om emnet</h2>` stå i markupken
-  med **ét** `/blog/`-href, og det skal være
-  `href="/blog/bmi-voksen-saadan-tolk-er-du-tallet"` — **ikke** børneguiden
-  `/blog/bmi-for-boern-saadan-tjekker-du`, som stadig skal findes i den blå
-  "BMI for børn?"-boks højere oppe. På `https://beraknare.se/bmi` må
-  "Guides om emnet" **ikke** forekomme (indlæggene er danske). HTTP 200 beviser
-  intet — det er rækkefølge og antal i markupken. Prøven på dansk er
-  `src/lib/bmi-voksen-grænser.test.tsx` efter deploy. Vindue **1/10 12:30**.
-
-- ⏳ **Forsiden skal vise de populære beregnere én gang, lige under helten.**
-  `ceo/forsiden-dublet-liste`. På `https://minberegner.dk/` og
-  `https://beraknare.se/` skal den kompakte stribe med otte `<a>`-links være
-  **væk**, `<h2>Populære beregnere</h2>` skal komme **før** tillidsrækken
-  ("Gratis beregnere" / antallet @ 23.412 / 21.328), og ingen populær href må
-  forekomme to gange i forsidens lister. HTTP 200 beviser intet — det er
-  rækkefølge og antal i markupken. Prøven på dansk er
-  `src/app/forside.test.tsx` efter deploy. Vindue **1/10 12:30**.
-  *(Stribens egen note fra `ceo/forsiden-snabb-indgang` blev DEPLOY OK 30/9
-  23:08, men er udfaset af denne rettelse: samme links, to gange.)*
-
-#### 97. [BLOCKED: afventer Mads' svar — spørgsmålet står i ❓ Til Mads, ingen kode uden svar] 2026-09-27 — C69 — afklar hvad `beregner.no` er
-
-- **Datagrund:** `https://beregner.no/` svarer 200 med en 12,7 KB norsk side
-  ("Mest brukte") og **uden ét `/_next/static`-chunk**; `git log -S "Mest
-  brukte"` giver ingen træffere, og 404-siden bruger `text-foreground`, som
-  står i nul filer her. **beregner.no peger på en anden udgivelse end denne
-  repo** — så det er et ejerskabsspørgsmål, ikke en kodebeslutning.
-- **Følgen:** opgave 98 er betinget, alle `no`-fund fra C65/C66 er uopnåelige
-  (ingen kan se dem) men bevares, fordi de bliver nødvendige den dag `no`
-  lanceres herfra. `domain-config.ts:91` har `beregner.no` i `hiddenDomains`
-  ("not yet launched").
-- **Accept:** 1. `❓ Til Mads` har spørgsmålet (det har den). 2. Der står en
-  linje i planen om hvad `no` er: lanceret, lukket eller uafklaret.
-  3. Gaten grøn. **Ingen kodeændring uden svar** — at lukke et domæne er en
-  domænebeslutning. Fuldtekst: `docs/plan-arkiv.md`, "Opgave 97, 119 og 183".
-
-#### 98. [ ] 2026-09-27 — C70 — `TidszoneBeregner` har intet `no`-sprog (afhænger af opgave 97)
-
-- **Datagrund:** målt under C66. `labels` i `TidszoneBeregner.tsx` har kun `da`
-  og `se`, og `const l = labels[locale] || labels.da` giver derfor **dansk** på
-  beregner.no — hele værktøjet, inklusive dropdown, huskeliste og sommertidsnote.
-  Usynligt i dag, fordi beregner.no 404'er på alt ud over `/` (opgave 97).
-- **Afhængighed:** opgave 97. Svarer den "lanceres ikke", er opgaven
-  **gratuleringens fallenhed** — slå `no` fra i porten. Svarer den "lanceres
-  snart", skal værktøjet have et rigtigt `no`-sprog: `Tidssone`, `Fra tidssone`,
-  `Timeforskjell`, `timer`, `(dagen før)`, `(neste dag)`, `hjemmetidssonen er
-  Norge` — samme mønster som C65 gjorde for `STANDARD_APPARATER` (`navnNo` pr.
-  post), altså **ikke** en `labels.no`-nøgle.
-- **Acceptkriterier:** hvis domænet er lukket: `isCalculatorAvailable("/tidszone", "no")`
-  er `false` med en test på det. Hvis domænet er live: `TidszoneBeregner.test.tsx`
-  kører i **da, se og no**, og `no`-renderet indeholder ingen danske
-  `navn`/`by`-former. Gaten grøn i begge tilfælde.
-- **MÅL:** ingen brugerdata endnu — beregner.no har ingen trafikmåling. Mål først
-  14 dage efter en eventuel lancering.
-
-#### 119. [BLOCKED: ingen citable dansk kilde — sst.dk svarer HTTP 429, de fire andre kilder døde i C92] 2026-09-29 — madvare-klyngen på "kalorier"
-
-- **Datagrund:** DA-autocomplete under "kalorier" → 9 af 10 er madvarer (æg,
-  banan, vandmelon, kartofler, havregryn); under "kalorie indhold" → 10 af 10.
-  Det er den næststørste danske klynge på ordet, og `/kalorier` har **0**
-  tabeller over madvarer (289 besøgende/28d, +50 %).
-- **Kildejerngang nr. 2 og 3 (C92 + 29/9) lukkede alle veje:** `frasco.dk`,
-  `francofooddata.dk`, `kostviddatabase.{kk.}dk`, `fdev.dk` → HTTP 000; Open
-  Food Facts → 503; Wikipedia har kun 2 af 24 fødevarer; `sst.dk` (browser
-  og curl) → **HTTP 429** på tallerkenmodellen og kostanbefalingerne.
-  Wikipedia er lukket som hovedkilde (2/24) — kun til at krydschecke to-tre tal.
-- **Præmis for næste agent:** byg den **ikke** som en færdig madvare-tabel.
-  Enten (a) Mads giver adgang til en kildefil/API-nøgle (`❓ Til Mads`), eller
-  (b) byg det der *kan* dokumenteres i dag: Sundhedsstyrelsens
-  **portionsværdier for de fire-fem hovedgrupper** i kostanbefalingerne
-  (tallerkenmodellen, 400/600 kcal), som svarrer på GSC's søgning "hvor mange
-  kalorier skal jeg have om dagen" (1 v, pos. 1). Gættede kalorietal ville være
-  præcis den fejlklasse planen fører. Må ikke prøve de samme kilder igen.
-- **MÅL:** `/kalorier` 289 besøgende/28d (Plausible 2026-09-30). Fuldtekst:
-  `docs/plan-arkiv.md`, "Opgave 97, 119 og 183".
-
-#### 183. [BLOCKED: afventer Mads' svar på kildespørgsmålet fra 27/9 — "ingen ny kode før diagnosen står", og ingen ny måling kan erstatte svaret] 2026-09-29 — Kø — **diagnosér `/bmi`s og `/su`s fald**
-
-- **Datagrund:** Plausible 28 dage: `/bmi` 1.271 → 938 (−26 %), `/su` 220 →
-  116 (−47 %), mens sitet voksede +42 % — så faldet er relativt værre. GSC's
-  top-15 over visninger ender på `/brok` med 4.920, og **hverken `/bmi` eller
-  `/su` står på den**, så begge har under 4.920 Google-visninger pr. 28 dage
-  mod 938 Plausible-besøgende. Det kan ikke være ren CTR: en visning der ikke
-  klikkes, giver høj CTR på lille volumen. Enten kommer trafikken overvejende
-  fra Bing/DDG/Yahoo/direkte, eller GSC's eksport er ældre end Plausible's 28
-  dage.
-- **Ikke teknisk (målt på live 30/9):** begge sider er sunde — canonical til
-  sig selv, `robots index,follow`, hreflang `da` + `x-default`,
-  `WebApplication` + `FAQPage` + `BreadcrumbList`, i sitemap.xml (136 `<loc>`).
-  Samme billede som `/procent` (C200): 150.148 visninger, 98 klik, CTR 0,07 %.
-  Mønstret site-wej er det samme — GSC's visninger ligger langt over
-  Plausible's besøgende, og forskellen er ikke-klikket Google-trafik. Det
-  peger på én fælles årsag (snippet/intention), men at *finde* den kræver
-  kildefordelingen fra Mads.
-- **Accept:** (1) kildefordelingen for begge sider står i planen, (2) faldet er
-  klassificeret som ranking / sæson / CTR med et tal til hver mulighed,
-  (3) er det ranking, navngives konkurrenten. **Ingen ny kode før diagnosen
-  står** — to titelændringer er prøvet. **MÅL:** `/bmi` 934, `/su` 127
-  besøgende/28d (Plausible 2026-09-30). Fuldtekst: `docs/plan-arkiv.md`.
-
-#### 201. [ ] **VENTER PÅ MADS** — Kø — **verificér sommerferiens startdato mod loven, før den bruges som countdown**
-
-- **Status 1/10 10:20:** opgaven er **taget af `I GANG`**, fordi den ikke kan
-  gå videre uden et svar: seks kilder blev forsøgt 1/10 05:30 og alle døde
-  (retsinformation.dk er en SPA, `undervisningsministeriet.dk`/`ferieinfo.dk`/
-  `ferieloven.dk` transportfejl, `lovguiden.dk` HTTP 429, `danskelove.dk` er
-  ferieloven for *ansatte*). Genforsøg er ikke kodet, fordi resultatet vil være
-  det samme. **Koden er urørt** — at gætte lovens ordlyd i en nedtælling er
-  punkt 11 i kvalitetsreglerne. ❓ står i `❓ Til Mads` (ét skærmbillede løser
-  opgaven på ti minutter). Næste agent skal ikke bruge en iteration på at
-  prøve de samme seks URL'er igen.
-
-- **Datagrund:** `sommerferieStart()` (`src/lib/dage-til.ts:1413-1423`) returnerer
-  **den sidste lørdag i juni**, og docblock'en siger at den er "fixed by the
-  Folkeskoleloven (2024)". To facts-strenge i `sommerferien`-events følger
-  samme regel: "Sommerferien begynder altid den **sidste lørdag i juni**. I 2026
-  er det 27. juni, i 2027 26. juni og i 2028 24. juni", og FAQ'en spørger "Kan
-  sommerferien begynne senere end 27. juni?". Sidens nedtælling, `<title>` og
-  `<meta description>` stammer alle fra den funktion, så **hvis reglen er forkert
-  er hele `/dage-til/sommerferien` dagevis forkert** — ikke kun teksten.
-- **Hvorfor jeg ikke rettede den 1/10:** ingen kilde kunne hentes.
-  retsinformation.dk serverer SPA-skallen også på `.xml` (2.832 bytes),
-  `undervisningsministeriet.dk` → transportfejl, `ferieinfo.dk` og
-  `ferieloven.dk` → transportfejl, `lovguiden.dk` → **HTTP 429**,
-  `danskelove.dk/ferieloven` svarer 200 men handler om ferieloven for
-  *ansatte* (intet om skoleferier), Google og DDG-lite gav ingen brugbare
-  uddrag. At skrive "sidste lørdag" fra hukommelsen — eller skifte det til en
-  anden ugeregel — ville være **opfundet tal** i en nedtælling, så punkt 11 i
-  kvalitetsreglerne forbyder begge dele.
-- **Afvejningen, som næste agent skal træffe:** hvis lovens regel er "den lørdag
-  i den kalenderuge, hvori 20. juni ligger", afviger den fra koden i **7 dage**
-  for de fleste år (de to regler falder kun sammen, når 20. juni *er* den
-  sidste lørdag) — så alle tre nævnte årstal og hele countdownet er forkert. Er
-  lovens regel "sidste lørdag i juni", er siden korrekt og skal have en port der
-  låser loven, ikke kun formlen.
-- **Acceptkriterier:** (1) lovens ordlyd eller et ministerium/kommune-bevis for
-  reglen ligger i `docs/plan-arkiv.md` med URL og hentningsdato, (2) `sommerferieStart`
-  + alle tre facts-strenge + FAQ'en + docblock'en læser den kildeførte regel,
-  (3) en port i `dage-til.test.ts` verificerer datoerne mod loven — ikke mod
-  formlen, ellers låses en fejl fast igen, (4) mutation målt rød, (5) gaten grøn.
-- **❓ Se `❓ Til Mads`: ét skærmbillede af ferieloven § om sommerferiens start
-  lukker hele opgaven på ti minutter.**
-- **MÅL:** `/dage-til/sommerferien` — ikke i GSC's top-16 endnu (kom live 25/9),
-  så baseline er 0 Google-visninger; Plausible har ingen måling for den endnu.
-  `/dato` er klyngens moderside: 1.127 besøgende/28d, bounce 4 %, GSC
-  134.567 visninger / 880 klik / CTR 0,7 % / pos. 5,7 (2026-10-01).
-
-#### 205. [x] ✅ 1/10 12:05 — Kø — **svensk `/dato` får månedens afsnit, og fire bøjninger rettes**
-
-- **Hvorfor:** beraknare.se/dato er sitets næststørste enkeltasset (GSC
-  103.776 visninger, 97 klik, CTR 0,1 %, pos. 8,1), og to af de fire største
-  søgninger er «antal dagar i en månad» og «hur många dagar i en månad».
-  Den danske `/dato` fik i C-tallet et eget afsnit netop til det; den
-  svenske gjorde ikke, fordi hele blokken lå indeni `{locale === "da" && (`.
-- **Rettet:** afsnittet er nu gengivet på svensk i den svenske sektion, lige
-  før «Hur många dagar är det i en månad?» — samme placering som på dansk.
-  `denneMaanedEksempel(new Date(), "se")` læser dagen i
-  `Europe/Copenhagen`, som den danske side gør.
-- **Fire bøjningsfejl, målt i markupken:** «1 dage tilbage af 2026» + «1
-  dage» efter ugerne (da), «1 dagar kvar av 2026» + «1 dagar» efter ugerne
-  (se). Alle fire er den 30. december synlige, fordi der da er præcis 1 dag
-  tilbage. Samme klasse som e6f4f0e — den rettede kun den ene sætning.
-- **Port:** 14 tests, alle på renderet markup i begge sprog med uret sat til
-  de datoer hvor tallet er 1. 5 mutationer målt røde, begge veje.
-- **MÅL:** se `/dato` 103.776 visninger / 97 klik / CTR 0,1 % / pos. 8,1
-  (GSC 2026-09-01 → 2026-09-29); Plausible 140 besøgende/28d, bounce 4 %
-  (2026-10-01). Genmål efter 14 dage.
-
-#### 200. [ ] 1/10 — Kø — **siteet er 100 % dynamisk; intet kan caches på kanten**
-
-- **Datagrund (målt 1/10 05:35 + 06:00):** `next build` giver 138 ruter, **136
-  `ƒ`**, kun `/icon.svg` + `/apple-icon` `○`. `curl -I https://minberegner.dk/dato`
-  → `cache-control: private, no-cache, no-store, max-age=0, must-revalidate`.
-  Alt i `src/app/` er altså server-rendered på hvert request. **Årsagen er én
-  linje:** `src/app/layout.tsx:91-92` kalder `getLocale()` og
-  `getCurrentDomainConfig()`, som begge `await headers()` — fordi `src/proxy.ts`
-  sætter `x-locale`/`x-hostname` på *request*-headerne. Én `await headers()` i
-  root-layouten gør hele træet dynamisk.
-- **Live 1/10 06:00:** TTFB `/` 367 ms, `/dato` 433 ms, `/procent` 282 ms;
-  `cf-cache-status: DYNAMIC` — **der står en CDN foran**, og den har intet at cache.
-- **Målt og fundet 1/10: den naive løsning er farlig.** Next svarer
-  `vary: rsc, next-router-state-tree, next-router-prefetch,
-  next-router-segment-prefetch, Accept-Encoding`. Klientens rute-navigation
-  genanmoder **samme URL med `RSC: 1`**. En `s-maxage` på HTML'en giver derfor
-  Next's router en HTML-svar i stedet for et flight-svar, altså brudt
-  navigation på hver cachede side. Det skal løses i Cloudflare (regel der
-  springer RSC-anmodninger over, eller Worker) — ikke i dette repo. **❓ nyt
-  spørgsmål til Mads.**
-- **Tre veje, kun én er kode:**
-  1. **CDN-cache uden for repoet** (RSC-betinget Cloudflare-regel). Størst
-     effekt, hurtigst at få, men kræver Mads. **Spørgsmål er skrevet.**
-  2. **Ægte ruter pr. domæne** (`app/[locale]/…` eller tre builds). Løser
-     dynamikken *og* opgave 187's slugs på én gang, men er en stor
-     routemigrering og må **ikke** køres i samme iteration som 187.
-  3. **Bygge 3 statiske builds** (`NEXT_PUBLIC_DOMAIN` ved build). Også stor,
-     og kræver 3 containere.
-- **Besluttet:** køre **1** som spørgsmål nu, og **2** efter at 187's måling er
-  lukket 13/10 — samme opløsning. En delvis ombygning uden et af de to er værst
-  af alt: den gør sitet dynamisk *og* dansk-på-svensk.
-- **Acceptkriterier:** (1) måling af hvor mange ruter der bliver `○`,
-  (2) `cache-control` på `/dato` på live efter næste batch, (3) domæne-skelnene
-  må ikke blive dansk-på-svensk — `layout-scroll`- og `proxy`-portene dækker
-  kun den mekaniske side, ikke indholdet, (4) hvis løsningen kræver pr. domæne-
-  ruter, skrives det i planen og det **ikke** køres i samme iteration som 187.
-- **MÅL:** `/dato` 1.127 besøgende/28d, 81 s gennemsnitlig besøgstid, bounce 4 %
-  (Plausible 2026-10-01); GSC 133.054 visninger / 842 klik / CTR 0,6 % / pos. 5,7.
-
-#### 187. [ ] **IKKE FØR 2026-10-13** 2026-09-30 — Kø — **migrér beraknare.se til svenske URL-slugs med 301**
-
-- **Datagrund:** opgave 185 (lukket 30/9, se `docs/plan-arkiv.md`). 82 sider har
-  danske slugs (`/dato`, `/tidsberegner`, `/nedtaelling`, `/renteberegner`) men
-  svenske titler. 160.000+ GSC-visninger på 0,1–0,2 % CTR. Alle svenske
-  konkurrenter bruger svenske slugs: `kalkylverket.se/dagar-mellan-datum`,
-  `kalkylator.info/tidskalkylator`, `timraknare.com/tidskalkylator`. Svenske
-  brugere søger "dagar mellan datum" (850 v, pos 8) og ser URL'en `/dato`.
-  **Svar på 185s spørgsmål: slugs er en medvirkende årsag, ikke eneste.**
-- **Hvorfor den venter til 13/10:** C195/C196's svenske titler deployer 30/9
-  07:30, og 185 skrev selv at slugs først er hypotesen *hvis* titlerne ikke flytter
-  CTR. At migrere 82 URL'er *før* den måling ville både tage risikoen ved en
-  unødigvis migration og ødelægge attributionen på titelændringerne. **Derfor:
-  ingen nye title/description-ændringer på beraknare.se før 13/10.**
-- **Teknisk forudsætning, fundet 30/9 (ikke løst):** en ren middleware-rewrite
-  er **ikke** nok. `beraknare.se/tidskalkylator` rewrite'et til `/tidsberegner`,
-  men canonical dannes af den interne rute, så siden ville servere
-  `canonical: …/tidsberegner` — en URL der 301'er tilbage. Det er en
-  redirect-loop, ikke en migrering. Løsningen er ægte ruter pr. domæne.
-- **Prisliste:** `calculator-list.ts` (tilføj `seHref`), `routing.ts`, `sitemap.ts`,
-  `middleware.ts`, `page-data.ts`, `internal-links.test.ts`, IndexNow. 2–3
-  iterationer.
-- **Acceptkriterier:** (1) svenske slugs med 301 fra de danske, kun på
-  beraknare.se, (2) canonical + hreflang peger på den svenske URL, (3) sitemap
-  og IndexNow sender nye URLs, (4) gaten grøn, (5) ingen trafiktab målt før mod
-  efter 14 dage.
-- **MÅL:** beraknare.se 537 besøgende/28d; `/dato` 95 klik, `/tidsberegner` 127
-  klik, `/procent` 2 klik (GSC 2026-08-30 → 2026-09-27). Genmål 2026-10-13.
+- ⏳ **`/procent` skal svare på procentpoint-spørgsmålet med et værktøj.**
+  `ceo/procentpoint-vaerktoej`. På `https://minberegner.dk/procent` skal
+  `<h2>Forskellen på procentpoint og procent</h2>` stå i markupken, teksten
+  **"De tre renterækker er det samme flytning, tre gange."** og
+  **"22,1 % til 19,7 %"** i tabellen, `<label for="procentpoint-gammel">` med
+  sit felt, `aria-live="polite"` på **beholderen** (ikke på den betingede
+  blok) og et link til `https://www.nationalbanken.dk/den-rabende-rente`.
+  På `https://beraknare.se/procent` skal `<h2>Skillnad mellan
+  procentenheter och procent</h2>` stå, **"Ränderaderna är samma flytt, tre
+  gånger."**, `<label for="procentpoint-gammel">` med **"Första
+  procenttalet"**, og **"Första procenttal" forekomme 0 gange** (dansk må ikke
+  lække ind) — og omvendt må «Första procenttalet» forekomme 0 gange på
+  dansk. HTTP 200 beviser intet — det er en overskrift, fem talrækker og to
+  sprog. Prøven på dansk er `src/app/procent/page.test.tsx` +
+  `src/components/ProcentpointBeregner.test.tsx` efter deploy.
+  Vindue **1/10 17:30** (mergen sker efter 12:30).
 
 ## ❓ Til Mads
 

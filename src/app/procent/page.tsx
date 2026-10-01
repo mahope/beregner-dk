@@ -1,5 +1,6 @@
 import Link from "next/link";
 import ProcentBeregner from "@/components/ProcentBeregner";
+import ProcentpointBeregner from "@/components/ProcentpointBeregner";
 import { generatePageMetadata } from "@/lib/page-helpers";
 import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
@@ -12,6 +13,11 @@ import {
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Sidebar from "@/components/Sidebar";
 import { formatNumber } from "@/lib/format";
+import {
+  PROCENTPOINT_EKSEMPEL,
+  procentpointForskel,
+  procentpointRelativ,
+} from "@/lib/procentpoint";
 import {
   PROCENT_10_AF_TAL,
   PROCENT_SKILLNAD_EKSEMPEL,
@@ -189,6 +195,107 @@ export default async function ProcentPage() {
             .
           </li>
         </ul>
+
+        <h2>Forskellen på procentpoint og procent</h2>
+        <p>
+          Når det er to <em>procenttal</em> der flytter sig, har dansk og
+          svensk to ord for det, og de er ikke det samme.{" "}
+          <strong>Procentpoint</strong> er de to tal minus hinanden. Den
+          procentvise ændring regner du på det gamle tal. Begge svar er
+          rigtige — de måler bare hver deres ting, og det er derfor en
+          rentehævning på ét procentpoint kan omtales som en stor stigning
+          eller en lille.
+        </p>
+        <div className="overflow-x-auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Ændring</th>
+                <th>Procentpoint</th>
+                <th>Procentvis ændring</th>
+              </tr>
+            </thead>
+            <tbody>
+              {PROCENTPOINT_EKSEMPEL.rente.map((par) => (
+                <tr key={`${par.gammel}-${par.ny}`}>
+                  <td>
+                    {num(par.gammel, 1)} % til {num(par.ny, 1)} %
+                  </td>
+                  <td>
+                    <strong>
+                      {num(procentpointForskel(par.gammel, par.ny), 1)} point
+                    </strong>
+                  </td>
+                  <td>{num(procentpointRelativ(par.gammel, par.ny), 1)} %</td>
+                </tr>
+              ))}
+              {PROCENTPOINT_EKSEMPEL.valg.map((par) => (
+                <tr key={`${par.gammel}-${par.ny}`}>
+                  <td>
+                    {num(par.gammel, 1)} % til {num(par.ny, 1)} %
+                  </td>
+                  <td>
+                    <strong>
+                      {num(procentpointForskel(par.gammel, par.ny), 1)} point
+                    </strong>
+                  </td>
+                  <td>{num(procentpointRelativ(par.gammel, par.ny), 1)} %</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p>
+          <strong>De tre renterækker er det samme flytning, tre gange.</strong>{" "}
+          De er alle sammen +1 procentpoint, fordi point forskellen er den
+          absolutte afstand. Men den procentvise ændring bliver mindre og
+          mindre for hver gang, fordi den regnes på et større tal:{" "}
+          {num(PROCENTPOINT_EKSEMPEL.rente[0].gammel, 1)} % til{" "}
+          {num(PROCENTPOINT_EKSEMPEL.rente[0].ny, 1)} % er{" "}
+          {num(procentpointRelativ(PROCENTPOINT_EKSEMPEL.rente[0].gammel, PROCENTPOINT_EKSEMPEL.rente[0].ny))}{" "}
+          %, mens{" "}
+          {num(PROCENTPOINT_EKSEMPEL.rente[2].gammel, 1)} % til{" "}
+          {num(PROCENTPOINT_EKSEMPEL.rente[2].ny, 1)} % kun er{" "}
+          {num(
+            procentpointRelativ(
+              PROCENTPOINT_EKSEMPEL.rente[2].gammel,
+              PROCENTPOINT_EKSEMPEL.rente[2].ny,
+            ),
+            1,
+          )}{" "}
+          %. Ved et valgresultat er det samme regnestykke, bare med komma:{" "}
+          {num(PROCENTPOINT_EKSEMPEL.valg[0].gammel, 1)} % til{" "}
+          {num(PROCENTPOINT_EKSEMPEL.valg[0].ny, 1)} % er{" "}
+          {num(
+            procentpointForskel(
+              PROCENTPOINT_EKSEMPEL.valg[0].gammel,
+              PROCENTPOINT_EKSEMPEL.valg[0].ny,
+            ),
+            1,
+          )}{" "}
+          procentpoint, svarende til{" "}
+          {num(
+            procentpointRelativ(
+              PROCENTPOINT_EKSEMPEL.valg[0].gammel,
+              PROCENTPOINT_EKSEMPEL.valg[0].ny,
+            ),
+            1,
+          )}{" "}
+          %. Har du to procenttal fra en avis eller en nyhedsartikel, så får du
+          begge tal uden at regne:{" "}
+          <ProcentpointBeregner />
+        </p>
+        <p>
+          Nationalbanken hæver den danske rente i skridt af 0,25 procentpoint ad
+          gangen. Den fulde rentebane står på{" "}
+          <a
+            href="https://www.nationalbanken.dk/den-rabende-rente"
+            className="text-blue-700 underline"
+          >
+            Danmarks Nationalbank
+          </a>
+          .
+        </p>
 
         <h2>Sådan beregner du procentforskellen mellem to tal</h2>
         <p>
@@ -648,6 +755,104 @@ export default async function ProcentPage() {
             löneökning i procent
           </Link>{" "}
           du söker efter.
+        </p>
+
+        <h2>Skillnad mellan procentenheter och procent</h2>
+        <p>
+          När det är två <em>procenttal</em> som flyttar sig har svensk och
+          dansk två ord för det, och de är inte samma sak.{" "}
+          <strong>Procentenheter</strong> är de två talen minus varandra. Den
+          procentuella förändringen räknar du på det gamla talet. Båda svaren
+          är rätta — de mäter var sitt, och det är därför en räntehöjning på
+          en procentenhet kan beskrivas som stor eller liten.
+        </p>
+        <div className="overflow-x-auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Förändring</th>
+                <th>Procentenheter</th>
+                <th>Procentuell förändring</th>
+              </tr>
+            </thead>
+            <tbody>
+              {PROCENTPOINT_EKSEMPEL.rente.map((par) => (
+                <tr key={`${par.gammel}-${par.ny}`}>
+                  <td>
+                    {num(par.gammel, 1)} % till {num(par.ny, 1)} %
+                  </td>
+                  <td>
+                    <strong>
+                      {num(procentpointForskel(par.gammel, par.ny), 1)}
+                    </strong>
+                  </td>
+                  <td>{num(procentpointRelativ(par.gammel, par.ny), 1)} %</td>
+                </tr>
+              ))}
+              {PROCENTPOINT_EKSEMPEL.valg.map((par) => (
+                <tr key={`${par.gammel}-${par.ny}`}>
+                  <td>
+                    {num(par.gammel, 1)} % till {num(par.ny, 1)} %
+                  </td>
+                  <td>
+                    <strong>
+                      {num(procentpointForskel(par.gammel, par.ny), 1)}
+                    </strong>
+                  </td>
+                  <td>{num(procentpointRelativ(par.gammel, par.ny), 1)} %</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p>
+          <strong>Ränderaderna är samma flytt, tre gånger.</strong> De är alla
+          +1 procentenhet, eftersom enhetsskillnaden är det absoluta avståndet.
+          Men den procentuella förändringen blir mindre för varje steg, eftersom
+          den räknas på ett större tal: {num(PROCENTPOINT_EKSEMPEL.rente[0].gammel, 1)} % till{" "}
+          {num(PROCENTPOINT_EKSEMPEL.rente[0].ny, 1)} % är{" "}
+          {num(procentpointRelativ(PROCENTPOINT_EKSEMPEL.rente[0].gammel, PROCENTPOINT_EKSEMPEL.rente[0].ny))}{" "}
+          %, medan {num(PROCENTPOINT_EKSEMPEL.rente[2].gammel, 1)} % till{" "}
+          {num(PROCENTPOINT_EKSEMPEL.rente[2].ny, 1)} % bara är{" "}
+          {num(
+            procentpointRelativ(
+              PROCENTPOINT_EKSEMPEL.rente[2].gammel,
+              PROCENTPOINT_EKSEMPEL.rente[2].ny,
+            ),
+            1,
+          )}{" "}
+          %. Samma uträkning gäller ett valresultat, bara med komma:{" "}
+          {num(PROCENTPOINT_EKSEMPEL.valg[0].gammel, 1)} % till{" "}
+          {num(PROCENTPOINT_EKSEMPEL.valg[0].ny, 1)} % är{" "}
+          {num(
+            procentpointForskel(
+              PROCENTPOINT_EKSEMPEL.valg[0].gammel,
+              PROCENTPOINT_EKSEMPEL.valg[0].ny,
+            ),
+            1,
+          )}{" "}
+          procentenheter, vilket motsvarar{" "}
+          {num(
+            procentpointRelativ(
+              PROCENTPOINT_EKSEMPEL.valg[0].gammel,
+              PROCENTPOINT_EKSEMPEL.valg[0].ny,
+            ),
+            1,
+          )}{" "}
+          %. Har du två procenttal från en tidning eller en nyhetsartikel, så
+          får du båda talen utan att räkna:{" "}
+          <ProcentpointBeregner />
+        </p>
+        <p>
+          Sveriges Riksbank höjer sin styrränta i steg om 0,25 procentenheter.
+          Hela räntebanan står på{" "}
+          <a
+            href="https://www.riksbank.se/sv/politik/penningpolitik/"
+            className="text-blue-700 underline"
+          >
+            Riksbanken
+          </a>
+          .
         </p>
 
         <h2>Skillnad i procent mellan två tal</h2>
