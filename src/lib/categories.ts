@@ -26,6 +26,7 @@ export const beregnere: BeregnerItem[] = [
   { title: "Momsberegner", description: "Tillæg eller fratræk 25% moms nemt og hurtigt", href: "/moms", category: "Økonomi" },
   { title: "Valutaberegner", description: "Omregn mellem DKK, EUR, USD og andre valutaer", href: "/valuta", category: "Økonomi" },
   { title: "Renteberegner", description: "Beregn ydelse, rente og tilbagebetaling på lån", href: "/renteberegner", category: "Økonomi" },
+  { title: "Renteprognose", description: "Se hvad et boliglån koster om 5, 10 og 30 år", href: "/renteprognose", category: "Økonomi" },
   { title: "Opsparingsberegner", description: "Beregn renters rente og se din opsparing vokse", href: "/opsparing", category: "Økonomi" },
   { title: "Rådighedsbeløb", description: "Beregn dit månedlige rådighedsbeløb", href: "/budget", category: "Økonomi" },
   { title: "Lønberegner", description: "Omregn mellem timeløn, månedsløn og årsløn", href: "/loen-konverter", category: "Økonomi" },

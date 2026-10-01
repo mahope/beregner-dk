@@ -53,6 +53,7 @@ const navigationData: Record<Locale, NavItem[]> = {
       name: "Lån & Rente",
       children: [
         { name: "Renteberegner", href: "/renteberegner" },
+        { name: "Renteprognose", href: "/renteprognose" },
         { name: "Låneberegner", href: "/laaneberegner" },
         { name: "Forbrugslån", href: "/forbrugslaan" },
         { name: "Billån", href: "/billaan" },

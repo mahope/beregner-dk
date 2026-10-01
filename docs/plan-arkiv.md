@@ -22799,3 +22799,41 @@ GSC 2026-09-01 → 2026-09-29); beraknare.se `/procent` 27.778 / 2 / 0,0 % /
 
 Noterne lå i planen med vindue 1/10 12:30 og er nu lukket på indhold — se
 tabellen ovenfor. Bevis for hver enkelt note står der.
+
+---
+
+## 1/10 2026 — /renteprognose (autocomplete som datagrund)
+
+Feature-kø-punktet «Autocomplete som datagrund for de næste sider» krævede 10
+danske seeds målt, klyngerne skrevet i planen og **én** ny side på den
+stærkeste klynge. Alle tre dele er gjort.
+
+**Måleteknik.** `suggestqueries.google.com/complete/search?client=firefox&
+hl=da&gl=dk&q=<seed>` giver de 10 mest søgte completioner pr. seed. Det er den
+eneste intentionskilde, der er frit tilgængelig, når GSC-eksporten (❓) ikke er.
+
+28 seeds målt: løn, ferie, dag, rente, skat, pension, bmi, husleje, feriepenge,
+dagpenge, renteprognose, rente, tilbud, kontrakt, børnepenge, fradrag, skole,
+gave, kasse, netto, grad, rækkefølge, kalorier, procent, løn, feriepenge,
+dagpenge, renteprognose.
+
+**Klynger fundet.** Renteprognose var den eneste helt uafdækkede med ren
+intention: 10/10 completions under «renteprognose» er renteprognose + år eller
+bank, og 3/10 under «rente» er renteprognose-varianter. Vi havde
+`/renteberegner` og `/rentefradrag` men intet under selve ordet.
+
+De øvrige fund (dagpenge-satser, børnepenge-datoer, enkeltfradrag) er skrevet
+i planens Feature-kø med tal, så næste iteration kan gå på dem uden at måle
+igen.
+
+**Beslutning om ikke at gætte.** Renteudviklingen er et *valg* i spring fra −2
+til +3 procentpoint, standard 0. Der findes ingen offentlig kilde til danske
+realkreditrenter om 5 eller 10 år, og en renteprognose der lader som om den
+gætter ville være punkt 11 i `_kvalitet.md` brudt i sin reneste form.
+
+**Portene der greb siden.** Relaterede lister (maks 6), forside-kort pr.
+katalogside, navigation kun sider der findes i det lokale sprog, og
+`blog-kobling`'s kontrakt om ét indlæg pr. beregner. Den sidste gjorde at
+`/renteprognose` ikke fik en artikelblok: de 14 ledige artikler passer ikke, og
+«guide-til-laan-og-renter» er allerede koblet til `/rentefradrag`. Siden linker
+i stedet til guiden i brødteksten.

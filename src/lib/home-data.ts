@@ -169,6 +169,7 @@ const daCalculators: HomeCalculator[] = [
   { title: "Boligstøtte", description: "Se standardmaksima og formuegrænser for boligstøtte", href: "/boligstoette", popular: true, category: "Bolig" },
   { title: "Kvadratmeterberegner", description: "Beregn areal af rum, haver og grunde", href: "/kvadratmeter", popular: true, category: "Matematik" },
   { title: "Rentefradrag", description: "Beregn din skattebesparelse på rentefradrag", href: "/rentefradrag", popular: true, category: "Økonomi" },
+  { title: "Renteprognose", description: "Se hvad dit boliglån koster om 5, 10 og 30 år", href: "/renteprognose", popular: false, category: "Økonomi" },
   { title: "Tidsberegner", description: "Beregn timer og minutter mellem tidspunkter", href: "/tidsberegner", popular: true, category: "Praktisk" },
   { title: "Kalorieberegner", description: "Beregn dit daglige kaloriebehov og makroer", href: "/kalorier", popular: true, category: "Sundhed" },
   { title: "Brændstofberegner", description: "Beregn pris for benzin, diesel eller el-bil", href: "/braendstof", popular: true, category: "Hverdag" },

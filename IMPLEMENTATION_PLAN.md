@@ -1,38 +1,35 @@
-# IMPLEMENTATION PLAN — minberegner.dk (oxloop)
+STATUS: KØ — 1/10 15:12. CEO-køen er stadig **tom** (alle otte verificeret
+  rettet i koden), så denne iteration gik til Feature-køen. Seneste opgave:
+  **/renteprognose** (`ceo/renteprognose`) — ny beregner bygget på den
+  autocomplete-måling, der lå i køen.
 
-STATUS: KØ — 1/10 14:40. CEO-køens otte punkter er **alle otte verificeret
-  rettet i koden** (Valborg 30/4, svensk påskafton lørdag, dansk sankthans
-  fast 23./24. juni, påskeaften-FAQ væk, pristalsregulering, `toUtcMidnight`,
-  svensk promille-FAQ, `maneder: 12`), så CEO-køen er tom. Seneste opgave:
-  **Sentry-sendepipeline bevist** (`ceo/sentry-sendepipeline`).
+  **Autocomplete som datagrund er målt og brugt.** 28 danske seeds målt med
+  `suggestqueries.google.com` (blokken «Metode målt 1/10» i Feature-køen).Ud af
+  dem gav **renteprognose** den eneste klynge, vi ikke allerede dækker:
+  10 af 10 completions under «renteprognose» er renteprognose + år eller bank
+  (2026, 2027, 2030, nykredit, realkredit, nordea, danske bank, totalkredit), og
+  3 af 10 under «rente» er renteprognose-varianter. Vi havde `/renteberegner` og
+  `/rentefradrag`, men ingen side der svarer på selve ordet.
 
-  **Sentry — spørgsmålet fra ❓ er besvaret modsat.** En kastende route
-  handler nåede `onRequestError` med fuld kontekst, men collectoren på
-  127.0.0.1 modtog ingen envelope. Målt: **transporten sender**, også over
-  ren `http://` (envelope med 3.241 bytes modtaget), og **`silent: true`
-  slår den ikke fra** — den slår kun Sentrys egen log fra, så et DSN der
-  engang holder op med at virke ville have stået som stilhed. Den er væk.
-  Det egentlige hul var et andet: `sentry-config.test.ts` testede
-  `scrubSentryEvent` som en *ren funktion*, så en tabt `beforeSend`-linje
-  ville have ladet tilstanden i `?s=`-links flyve til USA med alle tests
-  grønne. Nyt `sentry-send.test.ts` (3 tests) kører den rigtige
-  `initSentryServer()` mod en collector på fri port og dømmer på (1) at en
-  envelope forlader processen og (2) at den live klients `beforeSend` *er*
-  `scrubSentryEvent`. **2 mutationer målt røde** (fjerne `beforeSend` → 2
-  røde; fjern DSN → 1 rød). Beviset ligger nu i gaten, så spørgsmålet ikke
-  kan genåbnes uden at en test falder.
+  **Siden bygger uden at gætte en rente** (punkt 11). Renteudviklingen er et
+  *valg* i spring fra −2 til +3 procentpoint med 0 som standard, fordi ingen
+  offentlig kilde forudsiger danske realkreditrenter. Brødtekstens tal læses fra
+  `beregnRenteprognose` — eksemplet siger eksplicit, at prognosen er en
+  følsomhedsberegning og ikke en forudsigelse. `page.test.tsx` renderer siden
+  og kræver at de to tal i eksemplet kan genberegnes af modulet; **2 mutationer
+  målt røde** (hårdkodet ydelse, og renteudviklingen fjernet fra eksemplet).
 
-  **Gaten:** `lint` 0 (646) · `typecheck` 0 · `TZ=UTC npm run test`
-  **3384 grønne / 208 filer** · `locale-leak --gate` exit 0 · `next build`
-  142 ruter.
+  **Fem porter greb den nye side**, som de skal: relaterede lister er maks 6,
+  forsiden kræver et kort pr. katalogside, navigationen kræver en side der findes
+  i det lokale sprog, og `blog-kobling` kræver at et indlæg kun kobles til ÉN
+  beregner. Den sidste gjorde, at `/renteprognose` **ikke** fik en
+  artikelblok: de 14 ledige artikler passer ikke emnet, og artiklen om lån og
+  renter er allerede koblet til `/rentefradrag`. Siden linker i stedet til den
+  guide i brødteksten.
 
-  **Blokeret på Mads:** 97, 119, 183, 201, F1, F5 + Cloudflare.
-
-  **⚠️ Målerfælde:** `npm run test` kører `locale-leak-gate.test.ts`, der med
-  vilje planterer lækager — `FEJL: n ureviewet(e)` er derfor **ikke** fund i
-  din diff. Gaten: `node scripts/locale-leak.mjs --gate` (exit 0).
-  **⚠️ Målerfælde 2:** React skriver `<!-- -->` mellem to tekstnoder i én
-  JSX-celle, så rå markup-grep på brødtekst skal strippe den først.
+  **Gaten:** `lint` 0 (651) · `typecheck` 0 · `TZ=UTC npm run test`
+  **3425 grønne / 210 filer** · `locale-leak --gate` exit 0 · `next build`
+  143 ruter (142 → 143).
 
 ## Fase 3 — trafik-drevet
 
@@ -121,14 +118,30 @@ Prioriteret efter forventet effekt på **trafik**. Datagrund fra GSC 1/10
   0,1 % / 7,4 (da) · 27.778 / 2 / 0,0 % / 9,9 (se). Genmål 15/10.
   *Næste skridt hvis det virker:* de samme tal på sig selv — point leder
   videre til opinionsmålinger og rentetrin.
-- **Autocomplete som datagrund for de næste sider (ny, 1/10).**
-  *Hvem:* planen mangler søgningsdata for alt ud over GSCs top-3 pr. side
-  (F1 ❓). *Accept:* 10 danske seeds målt, klyngerne skrevet i planen, og
-  **én** ny side bygget på den stærkeste klynge.
-  *Datagrund:* F1 er blokeret på Mads, men autocomplete er frit tilgængelig
-  og målt i dag. Det er den eneste måde at få søgeintention uden GSC.
-  *Metode målt 1/10:*
-  `suggestqueries.google.com/complete/search?client=firefox&hl=da&gl=dk&q=…`
+- **Renteprognose** — ✅ 1/10, `ceo/renteprognose`. *Hvem:* alle der
+  googler «renteprognose» (10 af 10 danske completions under ordet selv, 3 af 10
+  under «rente»). *Accept:* ny beregner med renteomlægning, afdragsform og
+  rentesvingning — leveret. *Datagrund:* autocomplete 1/10.
+  **MÅL:** ny side, ingen baseline. Genmål 15/10 på Plausible og GSC.
+  *Næste skridt:* de samme completions peger på banknavnene — overvej en
+  `/renteprognose`-tilføjelse der viser forskellen på 3-årig og 5-årig.
+- **Autocomplete: 28 seeds målt 1/10.** *Accept (delvis):* seeds målt og
+  klyngerne skrevet herunder — det stærkeste klynge er bygget. Resten er
+  prioriteret. *Datagrund:* `suggestqueries.google.com`, hl=da gl=dk.
+  **Klynger vi ikke dækker, i rækkefølge efter hvor ren intentionen er:**
+  (1) *dagpenge* — «dagpengesats 2026», «dagpenge nyuddannet», «dagpengekort»,
+  «dagpengetæller», «dagpengesats 2026 efter skat»: 6 af 10 er konkrete satser
+  på to underemner (nyuddannet, efter skat). Vi *har* `/dagpenge` — spørg om
+  satsen i stedet for at bygge en ny side. (2) *børnepenge 2026* — «børnepenge
+  juli 2026», «børnepenge hvornår» ud over de to vi allerede dækker.
+  (3) *fradrag 2026* — «fradrag for fitness», «fradrag for rengøring»,
+  «fradrag havearbejde», «fradrag sommerhusudlejning»: enkeltfradrag der mangler
+  på `/skattefradrag`. (4) *skoleferie/skolestart 2026* — «skoleferie 2026»,
+  «skolestart 2026»: matcher `/dage-til`-mønstret, men ❓ opgave 201 (ferielovens
+  startdato) blokerer det. (5) *renteprognose 2026/2027/2030* — årstal-varianter
+  af den side vi lige byggede; de er samme intention, så de skal **ikke** blive
+  egne sider.
+
 - **Landing-side pr. konkrete countdown-spørgsmål** (`/dage-til/<slug>`).
   *Hvem:* «hvor mange dage er der til 1 december» 1.209 visninger, 3 klik,
   pos. 5. *Accept:* de fire sider findes allerede (jul, nytår, sommerferie,
@@ -146,6 +159,13 @@ Prioriteret efter forventet effekt på **trafik**. Datagrund fra GSC 1/10
   ikke gættes tal.
 
 ## Åbne VERIFICÉR DEPLOY-noter
+
+- ⏳ **`/renteprognose` er live og virker.** `ceo/renteprognose`. Der er ingen
+  synlig markup at hente på, så prøven er: `curl -s https://minberegner.dk/
+  renteprognose | grep -c renteprognose` skal være ≥ 1, og `/rentefradrag` skal
+  linke til siden. **Ingen deploy-note for Sentry i denne iteration** — den
+  fra 1/10 06:35 med vindue 17:30 står stadig åben og bliver lukket i næste
+  iteration, hvis den ikke er sket. Vindue **1/10 17:30**.
 
 - ⏳ **Sentry skal sende, og loggen må ikke være slået fra.**
   `ceo/sentry-sendepipeline`. Der er ingen synlig overflade at hente på, så
