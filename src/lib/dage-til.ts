@@ -10,7 +10,8 @@ export type DageTilKind =
   | "midsummer"
   | "advent"
   | "summerferie"
-  | "efteraarsferie";
+  | "efteraarsferie"
+  | "skoleaar";
 
 export interface DageTilAnchor {
   kind: DageTilKind;
@@ -1270,7 +1271,7 @@ export const DAGE_TIL_EVENTS: DageTilEvent[] = [
   {
     id: "skolestart",
     anchor: {
-      da: { kind: "fixed", month: 8, day: 1, offsetDays: 0 },
+      da: { kind: "skoleaar", month: 8, day: 1, offsetDays: 0 },
     },
     da: {
       slug: "skolestart",
@@ -1279,35 +1280,35 @@ export const DAGE_TIL_EVENTS: DageTilEvent[] = [
         question: "Hvor mange dage er der til skolestart?",
         facts: [
           "Skoleåret begynder **1. august** — det står i folkeskoleloven. I 2026 er det en lørdag, i 2027 en søndag og i 2028 en tirsdag.",
-          "1. august er en fast dato, men ikke altid en skoledag. Falder den på en weekend, begynder undervisningen først om mandagen: 1. august 2026 er en lørdag, så den første undervisningsdag er mandag 3. august 2026.",
+          "1. august er en fast dato, men ikke altid en skoledag. Falder den på en weekend, begynder undervisningen først om mandagen, og **nedtællingen følger den første skoledag**: 1. august 2026 er en lørdag, så undervisningen begynder mandag 3. august 2026, og 1. august 2027 er en søndag, så den begynder mandag 2. august 2027.",
           "Ugen varierer, fordi et år ikke altid har 52 ISO-uger. 1. august ligger i uge 31 i 2026 og 2028, men i uge 30 i 2027 — fordi 1. januar 2027 er en fredag og derfor hører til uge 53 i 2026, som gjorde 2026 til et år med 53 ISO-uger.",
-          "Sommerferien starter den sidste lørdag i juni (lovens dato), og det er **32 til 38 dage** derfra til 1. august — altså fire til seks uger.",
+          "Sommerferien starter den sidste lørdag i juni (lovens dato), og det er **32 til 38 dage** derfra til skolestart — altså fire til seks uger.",
         ],
         faq: [
           {
             question: "Hvornår starter skolen i 2027?",
             answer:
-              "Skoleåret begynder 1. august, og 1. august 2027 er en **søndag**. Undervisningen starter derfor mandag 2. august 2027. I 2026 var 1. august en lørdag, så den første undervisningsdag var mandag 3. august.",
+              "Skoleåret begynder 1. august, og 1. august 2027 er en **søndag**. Undervisningen starter derfor mandag 2. august 2027, og det er den dag nedtællingen tæller til. I 2026 var 1. august en lørdag, så den første undervisningsdag var mandag 3. august.",
           },
           {
             question: "Er skolestart altid 1. august?",
             answer:
-              "Ja, det er lovens dato. Folkeskoleloven fastlægger, at skoleåret begynder 1. august, og det gælder for alle kommunale skoler. Er 1. august en lørdag eller søndag, begynder undervisningen den næste hverdag.",
+              "Lovens dato er altid 1. august. Folkeskoleloven fastlægger, at skoleåret begynder 1. august, og det gælder for alle kommunale skoler. Er 1. august en lørdag eller søndag, begynder undervisningen den næste hverdag, og nedtællingen på denne side følger den dag — 2 dage senere i 2026 og 1 dag senere i 2027.",
           },
           {
             question: "Hvilken uge er skolestart i?",
             answer:
-              "1. august ligger i uge 31 i både 2026 og 2028, men i uge 30 i 2027. Det er ikke en fejl: 1. januar 2027 er en fredag og hører derfor med til uge 53 i 2026, så 2026 fik 53 ISO-uger. Målt fra 1990 til 2050 ligger 1. august altid i uge 30 eller 31.",
+              "Den første skoledag ligger i uge 32 i 2026 (3. august), i uge 31 i 2027 (2. august) og i uge 31 i 2028 (1. august). 1. august — lovens dato — ligger derimod i uge 31 i både 2026 og 2028, men i uge 30 i 2027, så de to datoer kan ligge i hvert sit uge. Det er ikke en fejl: 1. januar 2027 er en fredag og hører derfor med til uge 53 i 2026, så 2026 fik 53 ISO-uger. Målt fra 1990 til 2050 ligger 1. august altid i uge 30 eller 31.",
           },
           {
             question: "Hvornår slutter sommerferien?",
             answer:
-              "Slutdatoen er ikke fastlagt i loven — den er kommunal. I 2026 starter sommerferien 27. juni, og med de tre til fem uger, der er sædvanlige, ender ferien typisk 18.-31. juli, altså senest dagen før skolestart 1. august. Tjek din egen kommunes ferieplan.",
+              "Slutdatoen er ikke fastlagt i loven — den er kommunal. I 2026 starter sommerferien 27. juni, og med de tre til fem uger, der er sædvanlige, ender ferien typisk 18.-31. juli, altså senest dagen før skolen starter igen. Tjek din egen kommunes ferieplan.",
           },
           {
             question: "Hvor lang tid er der mellem sommerferie og skolestart?",
             answer:
-              "32 til 38 dage, fordi sommerferien starter den sidste lørdag i juni. I 2026 er det 27. juni til 1. august = 35 dage, i 2027 26. juni til 1. august = 36 dage, og i 2028 24. juni til 1. august = 38 dage.",
+              "32 til 38 dage, fordi sommerferien starter den sidste lørdag i juni. I 2026 er det 27. juni til 3. august = 37 dage, i 2027 26. juni til 2. august = 37 dage, og i 2028 24. juni til 1. august = 38 dage.",
           },
         ],
       },
@@ -1466,9 +1467,33 @@ export function isoUgeMandag(year: number, week: number): Date {
   return new Date(uge1Mandag.getTime() + (week - 1) * 7 * MS_PER_DAY);
 }
 
+/**
+ * Første skoledag for et skoleår: lovens dato er 1. august, men en lørdag
+ * eller søndag er ikke en skoledag, så undervisningen begynder den første
+ * hverdag — mandag 3. august 2026 (1. august er en lørdag) og mandag
+ * 2. august 2027 (1. august er en søndag).
+ *
+ * Nedtællingen skal pege på den dag undervisningen faktisk begynder. En
+ * nedtælling til en lørdag eller søndag ville svare på det forkerte
+ * spørgsmål — og det er præcis samme greb som `isoUgeMandag` gør for
+ * efterårsferien, hvor uge 42's lørdag ikke er den dag skolen genoptages på.
+ */
+export function foersteSkoledag(year: number): Date {
+  const august = new Date(Date.UTC(year, 7, 1));
+  // `getUTCDay()` er 0=søn..6=lør, så en mandag er 1. Lørdag (6) skal
+  // springes to dage frem til mandag, søndag (0) én dag frem.
+  const ugedag = august.getUTCDay();
+  if (ugedag === 6) return new Date(august.getTime() + 2 * MS_PER_DAY);
+  if (ugedag === 0) return new Date(august.getTime() + MS_PER_DAY);
+  return august;
+}
+
 function anchorInYear(anchor: DageTilAnchor, year: number): Date {
   if (anchor.kind === "fixed") {
     return new Date(Date.UTC(year, anchor.month - 1, anchor.day));
+  }
+  if (anchor.kind === "skoleaar") {
+    return foersteSkoledag(year);
   }
   if (anchor.kind === "midsummer") {
     return midsommarafton(year, anchor.offsetDays);

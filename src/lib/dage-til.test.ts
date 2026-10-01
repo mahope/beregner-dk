@@ -10,6 +10,7 @@ import {
   formatTargetDate,
   formatTargetYear,
   forstaAdvent,
+  foersteSkoledag,
   getDageTilAnswer,
   getDageTilEventBySlug,
   getDageTilEvents,
@@ -943,40 +944,64 @@ describe("skolestart som dansk dato", () => {
   });
 
   // 1. august 2026 ligger i fortiden, så en læser i dag skal tælle til næste
-  // års skolestart — det er hele pointen med siden i efterårsferien.
-  test("tæller til 1. august næste år, når datoen er passeret", () => {
+  // års skoledag — det er hele pointen med siden i efterårsferien.
+  test("tæller til næste års skoledag, når datoen er passeret", () => {
     const svar = getDageTilAnswer(start!, "da", iso("2026-09-30"));
-    expect(toISO(svar.targetDate)).toBe("2027-08-01");
-    expect(svar.days).toBe(305);
+    // 1. august 2027 er en søndag, så undervisningen begynder mandag 2. august.
+    expect(toISO(svar.targetDate)).toBe("2027-08-02");
+    expect(svar.days).toBe(306);
     expect(svar.weeks).toBe(43);
-    expect(svar.daysLeft).toBe(4);
+    expect(svar.daysLeft).toBe(5);
   });
 
-  test("tæller til 1. august samme år, når vi er før den", () => {
+  test("tæller til skoledagen samme år, når vi er før den", () => {
     const svar = getDageTilAnswer(start!, "da", iso("2027-01-01"));
-    expect(toISO(svar.targetDate)).toBe("2027-08-01");
-    expect(svar.days).toBe(212);
+    expect(toISO(svar.targetDate)).toBe("2027-08-02");
+    expect(svar.days).toBe(213);
   });
 
-  test("på selve 1. august er svaret 0 dage", () => {
+  // På selve 1. august er svaret ikke 0 dage: 2026-08-01 er en lørdag, så
+  // undervisningen først starter mandag 3. august. Svaret 0 dage ville sige
+  // "skolen starter i dag" en lørdag, hvilket er det forkerte svar — og
+  // brødteksten på siden siger udtrykkeligt mandag 3. august.
+  test("på en weekend-1. august er svaret mandagen, ikke 0 dage", () => {
     const svar = getDageTilAnswer(start!, "da", iso("2026-08-01"));
+    expect(toISO(svar.targetDate)).toBe("2026-08-03");
+    expect(svar.days).toBe(2);
+    expect(svar.isToday).toBe(false);
+  });
+
+  test("på en hverdag-1. august er svaret 0 dage", () => {
+    const svar = getDageTilAnswer(start!, "da", iso("2028-08-01"));
+    expect(toISO(svar.targetDate)).toBe("2028-08-01");
     expect(svar.days).toBe(0);
     expect(svar.isToday).toBe(true);
   });
 
-  // Folkeskoleloven siger 1. august, så ankeret er en fast dato — ikke en
-  // beregnet. Hvis nogen senere gør den til en ny `kind`, skal porten sige
-  // det, fordi en regel der flytter sig ville give et andet svar.
-  test("ankeret er den faste dato 1. august", () => {
-    expect(start?.anchor.da).toEqual({
-      kind: "fixed",
-      month: 8,
-      day: 1,
-      offsetDays: 0,
-    });
+  // Porten dømmer på den regel, brødteksten fortæller: "nedtællingen følger
+  // den første skoledag". Den må aldrig pege på en lørdag eller søndag, over
+  // 61 år — så et kalkbrud i `foersteSkoledag` fanges, ikke tre valgte år.
+  test("ankeret er altid en hverdag, og lovens 1. august kun forskubbes", () => {
+    expect(start?.anchor.da.kind).toBe("skoleaar");
     for (let year = 1990; year <= 2050; year++) {
-      expect(toISO(getNextAnchorDate(anchorOf(start!, "da"), iso(`${year}-01-05`)))).toBe(
-        `${year}-08-01`
+      const anker = getNextAnchorDate(anchorOf(start!, "da"), iso(`${year}-01-05`));
+      const ugedag = anker.getUTCDay();
+      expect(
+        ugedag >= 1 && ugedag <= 5,
+        `skolestart ${year} (${toISO(anker)}) må ikke ligge på en weekend`,
+      ).toBe(true);
+      const forskydning = Math.round(
+        (anker.getTime() - iso(`${year}-08-01`).getTime()) / dayMs,
+      );
+      // 1. august er enten hverdag (0 dage), lørdag (2 dage frem) eller
+      // søndag (1 dag frem). Aldrig mere, aldrig baglæns.
+      expect([0, 1, 2]).toContain(forskydning);
+      expect(forskydning).toBe(
+        iso(`${year}-08-01`).getUTCDay() === 6
+          ? 2
+          : iso(`${year}-08-01`).getUTCDay() === 0
+            ? 1
+            : 0,
       );
     }
   });
@@ -1016,47 +1041,90 @@ describe("skolestart som dansk dato", () => {
     }
   });
 
+  // Nedtællingen peger på den første skoledag, så det er den uge, spørgsmålet
+  // skal svare på — ikke 1. august. I 2026 er skoledagen i uge 32, selv om
+  // lovens dato ligger i uge 31, og uden den her sætning får læseren to tal
+  // uden at kunne se, at de gælder hver sin dato. Porten læser derfor både
+  // dato og uge for hvert år og regner dem efter.
+  test("FAQ'en svarer med skoledagens uge, og ugen er kalkens egen", () => {
+    const svar = start!.da.copy.faq[2].answer;
+    for (const year of [2026, 2027, 2028]) {
+      const skoledag = foersteSkoledag(year);
+      const dato = `${skoledag.getUTCDate()}. ${MAANEDER[skoledag.getUTCMonth()]}`;
+      const fund = new RegExp(
+        `i uge (\\d+) i ${year} \\(${dato.replace(".", "\\.")}\\)`,
+      ).exec(svar);
+      expect(fund, `FAQ skal svare med skoledagens uge for ${year} (${dato})`).not.toBeNull();
+      expect(Number(fund?.[1]), `ugenummer for ${year}`).toBe(isoUgeNummer(skoledag));
+    }
+  });
+
   // "1. august 2026 er en lørdag, så det første skolebørn har undervisning er
-  // mandag 3. august 2026." Mandagen efter er ikke en påstand, den er
-  // startdatoen plus to dage — hvis skolestartsdatoen flytter sig, skal
-  // teksten følge med.
-  test("den første skoledag er dagen efter en weekend-start", () => {
-    const foerste = getDageTilAnswer(start!, "da", iso("2026-08-01"));
-    expect(foerste.targetDate.getUTCDay()).toBe(6);
-    const foersteSkoledag = new Date(foerste.targetDate.getTime() + 2 * dayMs);
-    expect(toISO(foersteSkoledag)).toBe("2026-08-03");
-    expect(foersteSkoledag.getUTCDay()).toBe(1);
+  // mandag 3. august 2026." Det er netop det nedtællingen nu peger på, så
+  // porten skal kunne læse dagen ud af ankeret i stedet for at hænge den på
+  // kalenderen ved siden af.
+  test("den første skoledag er ankeret, når 1. august er en weekend", () => {
+    const foerste = getDageTilAnswer(start!, "da", iso("2026-07-01"));
+    expect(iso("2026-08-01").getUTCDay()).toBe(6);
+    expect(toISO(foerste.targetDate)).toBe("2026-08-03");
+    expect(foerste.targetDate.getUTCDay()).toBe(1);
+    expect(toISO(foersteSkoledag(2026))).toBe("2026-08-03");
+    expect(toISO(foersteSkoledag(2027))).toBe("2027-08-02");
+    expect(toISO(foersteSkoledag(2028))).toBe("2028-08-01");
     expect(start!.da.copy.faq[0].answer).toContain("mandag 2. august 2027");
     expect(start!.da.copy.faq[0].answer).toContain("mandag 3. august");
-  });
-
-  // Faktateksten siger "32 til 38 dage" fra sommerferiens start til 1. august.
-  // Begge tal er sommerferieStart()'s egne tal, så de skal kunne regnes efter
-  // — og de skal dække hele året, ikke tre valgte år.
-  test("afstanden fra sommerferiens start er 32 til 38 dage hele året", () => {
-    for (let year = 1990; year <= 2050; year++) {
-      const dage = daysBetween(sommerferieStart(year), iso(`${year}-08-01`));
-      expect(dage, `sommerferie ${year} → 1. august`).toBeGreaterThanOrEqual(32);
-      expect(dage, `sommerferie ${year} → 1. august`).toBeLessThanOrEqual(38);
+    // Brødteksten skal sige det samme, ellers er siden dens egen
+    // selvmodsigelse: tallet peger på mandagen, teksten på en weekend.
+    expect(start!.da.copy.facts.join(" ")).toContain("nedtællingen følger den første skoledag");
+    // FAQ'en siger "2 dage senere i 2026 og 1 dag senere i 2027". De to tal er
+    // forskydningen mellem lovens 1. august og `foersteSkoledag`, så de skal
+    // regnes efter — ellers kan brødteksten rodes tilbage til 1. august,
+    // mens portene på ankeret stadig er grønne. 2028 er bevidst ikke nævnt:
+    // 1. august er en tirsdag det år, så der er ingen forskydning at nævne,
+    // og porten sikrer derfor at ingen 0-tals-påstand kan snige sig ind.
+    const faq = start!.da.copy.faq[1].answer;
+    for (const year of [2026, 2027]) {
+      const august = iso(`${year}-08-01`);
+      const forskydning = Math.round(
+        (foersteSkoledag(year).getTime() - august.getTime()) / dayMs,
+      );
+      // "1 dag" og "2 dage" — tallet bøjes, så porten leder efter begge
+      // former frem for at hænge sig ved den ene.
+      const rigtigtBøjet = forskydning === 1 ? "1 dag" : `${forskydning} dage`;
+      expect(
+        faq,
+        `${year} skal have en påstand om ${forskydning} dages forskydning`,
+      ).toContain(`${rigtigtBøjet} senere i ${year}`);
     }
-    expect(daysBetween(sommerferieStart(2026), iso("2026-08-01"))).toBe(35);
-    expect(daysBetween(sommerferieStart(2027), iso("2027-08-01"))).toBe(36);
-    expect(daysBetween(sommerferieStart(2028), iso("2028-08-01"))).toBe(38);
+    expect(faq).not.toContain("0 dage");
   });
 
-  test("de tre dagetal i FAQ'en er sommerferieStart minus 1. august", () => {
+  // Faktateksten siger "32 til 38 dage" fra sommerferiens start til skolestart.
+  // Begge tal er sommerferieStart() og ankerets egne tal, så de skal kunne
+  // regnes efter — og de skal dække hele året, ikke tre valgte år.
+  test("afstanden fra sommerferiens start er 32 til 38 dage hele år", () => {
+    for (let year = 1990; year <= 2050; year++) {
+      const dage = daysBetween(sommerferieStart(year), foersteSkoledag(year));
+      expect(dage, `sommerferie ${year} → skoledag`).toBeGreaterThanOrEqual(32);
+      expect(dage, `sommerferie ${year} → skoledag`).toBeLessThanOrEqual(38);
+    }
+    expect(daysBetween(sommerferieStart(2026), foersteSkoledag(2026))).toBe(37);
+    expect(daysBetween(sommerferieStart(2027), foersteSkoledag(2027))).toBe(37);
+    expect(daysBetween(sommerferieStart(2028), foersteSkoledag(2028))).toBe(38);
+  });
+
+  test("de tre dagetal i FAQ'en er sommerferieStart minus skoledagen", () => {
     const svar = start!.da.copy.faq[4].answer;
     for (const year of [2026, 2027, 2028]) {
       const ferieStart = sommerferieStart(year);
-      const dage = daysBetween(ferieStart, iso(`${year}-08-01`));
+      const skoledag = foersteSkoledag(year);
+      const dage = daysBetween(ferieStart, skoledag);
       expect(svar).toContain(`${dage} dage`);
+      // Både feriens startdato og skoledagen skal stå, så et tal ikke kan
+      // stå alene og se ud som om det gjaldt en anden dato.
       const ferieDato = `${ferieStart.getUTCDate()}. ${MAANEDER[ferieStart.getUTCMonth()]}`;
-      const foer = svar.indexOf(String(year));
-      expect(foer, `FAQ skal nævne ${year}`).toBeGreaterThan(-1);
-      expect(
-        svar.slice(foer, foer + 30),
-        `året ${year} skal stå lige før ${ferieDato}`
-      ).toContain(ferieDato);
+      const skoleDato = `${skoledag.getUTCDate()}. ${MAANEDER[skoledag.getUTCMonth()]}`;
+      expect(svar).toContain(`${ferieDato} til ${skoleDato} = ${dage} dage`);
     }
   });
 
@@ -1068,13 +1136,17 @@ describe("skolestart som dansk dato", () => {
     expect(spg).toContain("skolestart");
   });
 
-  // Skolestart må ikke tælle nederdags. 1. august formateres med det danske
-  // datoformat, og året står i en egen funktion, fordi det er det samme år
-  // hele vejen.
+  // Skolestart må ikke tælle nederdags. 1. august (og den hverdag den evt.
+  // forskyder til) formateres med det danske datoformat, og året står i en
+  // egen funktion, fordi det er det samme år hele vejen. I 2027 er den
+  // hverdag 2. august — lovens 1. august er en søndag.
   test("startdatoen formateres som dansk dato", () => {
     const svar = getDageTilAnswer(start!, "da", iso("2027-01-01"));
-    expect(formatTargetDate(svar.targetDate, "da")).toBe("1. august");
+    expect(formatTargetDate(svar.targetDate, "da")).toBe("2. august");
     expect(formatTargetYear(svar.targetDate)).toBe("2027");
+    const haverdag = getDageTilAnswer(start!, "da", iso("2028-01-05"));
+    expect(formatTargetDate(haverdag.targetDate, "da")).toBe("1. august");
+    expect(formatTargetYear(haverdag.targetDate)).toBe("2028");
   });
 });
 

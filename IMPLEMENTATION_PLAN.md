@@ -1,41 +1,37 @@
-STATUS: PR-TJEK: 1/10 16:30. CEO-køen er stadig **tom** — punkt 0 er
-  verificeret i koden igen (Valborg `month: 4, day: 30`, svensk påskafton
-  `offsetDays: -1`, `dato-eksempler.ts` `maneder: 12`). Rød CI: ingen, seneste
-  kørsel grøn. Sentry MINBEREGNER-1 er den eneste åbne fejl, så den lå før
-  Feature-køen.
+STATUS: 1/10 17:55. Rød CI: ingen (seneste kørsel grøn). Sentry: ingen nye
+  hændelser siden router-støj-filteret (PR #26, `ceo/sentry-router-stoej`).
+  CEO-køen er **tom** — punkt 0 verificeret i koden igen (Valborg `month: 4,
+  day: 30`, svensk påskafton `offsetDays: -1`, `dato-eksempler.ts` `maneder:
+  12`). De tre ⏳-deploy-noter er ældre end 1/10 17:30-vinduet og bliver
+  verificeret i næste iteration.
 
-  **Seneste opgave: PR #26 landet** (`ceo/sentry-router-stoej`) — 53 linjer,
-  `shouldDropSentryEvent` i `beforeSend`. Next.js kaster en uhandlet
-  serverfejl på `GET /procent/page`, når en RSC-anmodning kommer med en
-  ugyldig router state header; det er støj fra malformed/eksterne requests,
-  ikke procentberegnerens logik. Filteret matcher **præcis den ene besked**
-  (`Set` med én streng), så andre serverfejl sendes stadig. Porten er målt
-  rød uden fixen: slettet man `return null`, fejler
-  «returnerer null for den støjende Next.js router-state fejl» (1 failed /
-  17 passed), med fixen 18/18 grønne. PR'en er lukket med `gh pr close`.
+  **Seneste opgave: skolestart tæller til den første skoledag.**
+  `ceo/skolestart-forste-skoledag`. Nedtællingen på `/dage-til/skolestart`
+  pegede på lovens 1. august, som er lørdag 2026 og søndag 2027 — aldrig en
+  skoledag, mens sidens egen brødtekst siger «undervisningen begynder mandag
+  3. august». Ny `kind: "skoleaar"` + `foersteSkoledag(year)`: lovens dato
+  forskydes til næste hverdag, og nedtællingen og alle facts følger den.
+  Porten måler invarianten over 61 år (aldrig en weekend, aldrig mere end 2
+  dages forskydning) og læser **skoledagens** uge ud, ikke 1. august — det
+  var den sidste selvmodsigelse, rettelsen ellers havde indført (2026:
+  skoledag i uge 32, lovens dato i uge 31). Ny port målt rød mod master.
 
   **Gaten:** `lint` 0 (651) · `typecheck` 0 · `TZ=UTC npm run test`
-  **3428 grønne / 210 filer** · `locale-leak --gate` exit 0 · `next build`
-  143 ruter.
+  **3427 grønne / 210 filer** · `next build` ok, 143 ruter. `locale-leak`
+  melder én ureviewet dansk streng på `/procent:522` (fra procentpoint-
+  opgaven samme dag) — forhåndsfandet, ikke rørt.
 
-  **⚠️ Rednings-commit på `ceo/skolestart-forste-skoledag`** (`e231975`, WIP).
-  En tidligere iteration døde med ucommittet arbejde i `/dage-til/skolestart`:
-  nedtællingen peger på 1. august, som er en **lørdag i 2026 og søndag i
-  2027**, altså aldrig en skoledag. Brødteksten på samme side siger allerede
-  «undervisningen begynder mandag 3. august» — så side og tekst modsiger
-  hinanden i dag. Arbejdet tilføjer `foersteSkoledag(year)` og et `skoleaar`-
-  anker. **Det er uverificeret: gaten er ikke kørt på den**, så det er ikke
-  landet. Næste iteration skal køre gaten, se ❓ ferielov-rækkefølgen nedenfor,
-  og enten lande eller slette den.
+  **Næste opgave skal være en feature** (de tre forrige var features, denne
+  var en rettelse).
 
-## ❓ Uafklaret — skolestart og ferielov (gælder `e231975`)
+## ❓ Uafklaret — ferielov (rammer `/dage-til/summerferien` **og** skolestart)
 
-  CEO-køens ferielov-spørgsmål (se ❓ nedenfor) er **også** en blokering for
-  `e231975`: siden hævder «sommerferien starter den **sidste lørdag i juni**
-  (lovens dato)», og det er den uverificerede regel. Hvis ferielovens regel er
-  «den lørdag i den kalenderuge, hvori 20. juni ligger», rammer fejlen både
-  `/dage-til/summerferien` og `/dage-til/skolestart`, og de to sider skal
-  rettes sammen. **Derfor er ❓ ferielov det vigtigste svar, der mangler.**
+  ❓ ferielov (se nedenfor) er **stadig åbent**. Denne iteration ændrede kun
+  skolestarts **anker**, ikke påstanden «sommerferien starter den sidste
+  lørdag i juni (lovens dato)» — den ligger der stadig. 1/10 17:55 er
+  retsinformation.dk stadig en SPA-skal på `eli/lsa/2024/1072`, `data.xml`
+  og `para/3` (200 men kun 2,8-4,5 kB HTML), `uv.dk/emner/folkeskoler` er
+  404, og ft.dk ligger bag Cloudflare.
 
 ## Fase 3 — trafik-drevet
 
@@ -165,6 +161,12 @@ Prioriteret efter forventet effekt på **trafik**. Datagrund fra GSC 1/10
   ikke gættes tal.
 
 ## Åbne VERIFICÉR DEPLOY-noter
+
+- ⏳ **`/dage-til/skolestart` tæller til den første skoledag.**
+  `ceo/skolestart-forste-skoledag`. Prøven er på indhold: `curl -s
+  https://minberegner.dk/dage-til/skolestart` skal indeholge «mandag 3. august
+  2026» **og** «i uge 32 i 2026», og nedtællingens `<title>`/dato skal være
+  3. august 2026 fra i dag. Vindue **1/10 21:30**.
 
 - ⏳ **`/renteprognose` er live og virker.** `ceo/renteprognose`. Der er ingen
   synlig markup at hente på, så prøven er: `curl -s https://minberegner.dk/
