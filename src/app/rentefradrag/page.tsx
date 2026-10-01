@@ -216,15 +216,35 @@ export default async function RentefradragPage() {
 
               <h3 className="text-xl font-semibold mt-6 mb-3">Eksempel</h3>
               <p>
-                Hvis du har <strong>80.000 kr. i årlige renteudgifter</strong> som enlig:
+                Hvis du har{" "}
+                <strong>
+                  {LOFT_EKSEMPEL_BELOEB.toLocaleString("da-DK")} kr. i årlige renteudgifter
+                </strong>{" "}
+                som enlig:
               </p>
               <ul className="list-disc pl-6 space-y-1">
-                <li>De første 50.000 kr. giver fradrag: 50.000 × 33,6% = 16.800 kr.</li>
-                <li>De næste 30.000 kr. giver fradrag: 30.000 × 25,6% = 7.680 kr.</li>
-                <li><strong>Samlet skattebesparelse: 24.480 kr.</strong></li>
                 <li>
-                  Er I gift eller samlevende med fælles økonomi, er grænsen 100.000 kr., så
-                  hele beløbet ville give 80.000 × 33,6% = 26.880 kr.
+                  De første {loftEksempel.hoejAndel.toLocaleString("da-DK")} kr. giver
+                  fradrag: {loftEksempel.hoejAndel.toLocaleString("da-DK")} ×{" "}
+                  {HOEJ_SATS_PCT}% ={" "}
+                  {(loftEksempel.hoejAndel * RENTEFRADRAG_2026.highRate).toLocaleString("da-DK")} kr.
+                </li>
+                <li>
+                  De næste {loftEksempel.lavAndel.toLocaleString("da-DK")} kr. giver
+                  fradrag: {loftEksempel.lavAndel.toLocaleString("da-DK")} ×{" "}
+                  {LAV_SATS_PCT}% ={" "}
+                  {(loftEksempel.lavAndel * RENTEFRADRAG_2026.lowRate).toLocaleString("da-DK")} kr.
+                </li>
+                <li>
+                  <strong>
+                    Samlet skattebesparelse: {loftEksempel.besparelse.toLocaleString("da-DK")} kr.
+                  </strong>
+                </li>
+                <li>
+                  Er I gift eller samlevende med fælles økonomi, er grænsen{" "}
+                  {loftEksempelPar.graense.toLocaleString("da-DK")} kr., så hele beløbet ville
+                  give {LOFT_EKSEMPEL_BELOEB.toLocaleString("da-DK")} × {HOEJ_SATS_PCT}% ={" "}
+                  {(LOFT_EKSEMPEL_BELOEB * RENTEFRADRAG_2026.highRate).toLocaleString("da-DK")} kr.
                 </li>
               </ul>
               <p className="text-sm text-gray-700 mt-3">

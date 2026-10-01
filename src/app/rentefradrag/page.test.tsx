@@ -114,6 +114,61 @@ describe("rentefradrag: er der et loft?", () => {
     expect(loft!.answer.startsWith("Nej.")).toBe(true);
   });
 
+  /**
+   * Porten der kan fejle på den ændrede kode.
+   *
+   * `alle tal i eksemplet stammer fra beregnRentefradrag` så på hele siden —
+   * altså på *alle* tal, også dem fra «Er der et loft?»-afsnittet ovenfor,
+   * som allerede var beregnet. Derfor var den grøn mod en håndskrevet
+   * «Eksempel»-liste: de to lister indeholdt de samme tal, så porten kunne
+   * ikke se forskellen.
+   *
+   * Denne port muterer derimod kilden — satserne og beløbsgrænsen — og
+   * kræver at «Eksempel»-afsnittet følger med. Mod master's håndskrevne
+   * liste står tallene fast i markupken og kan ikke følge en mutation, så
+   * porten er målt rød dér.
+   */
+  test("eksemplet følger satserne, når kilden muteres", async () => {
+    vi.resetModules();
+    vi.doMock("@/lib/satser-2026", async (importOriginal) => {
+      const original = await importOriginal<typeof import("@/lib/satser-2026")>();
+      return {
+        ...original,
+        RENTEFRADRAG_2026: {
+          ...original.RENTEFRADRAG_2026,
+          highRate: 0.25,
+          lowRate: 0.15,
+          highRateLimitSingle: 40_000,
+          highRateLimitCouple: 80_000,
+        },
+      };
+    });
+    vi.mocked(getLocale).mockResolvedValue("da");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("da"));
+
+    const { default: Side } = await import("./page");
+    const html = renderToStaticMarkup(await Side());
+
+    // Kun selve Eksempel-listen — ikke hele siden, der også indeholder
+    // loft-afsnittets beregnede tal.
+    const start = html.indexOf(">Eksempel<");
+    expect(start, "Eksempel-afsnittet findes ikke").toBeGreaterThan(-1);
+    const liste = html.slice(start, html.indexOf("</ul>", start));
+
+    // 80.000 kr. mod en grænse på 40.000 kr. → 40.000 + 40.000
+    // 40.000 × 25 % = 10.000 · 40.000 × 15 % = 6.000 · i alt 16.000
+    // Par: grænsen 80.000, så hele beløbet 80.000 × 25 % = 20.000
+    for (const forventet of ["40.000", "10.000", "6.000", "16.000", "20.000"]) {
+      expect(liste, `Eksempel-listen mangler ${forventet}`).toContain(forventet);
+    }
+    // De gamle satser må ikke stå mere — de ermutationen netop fjernede.
+    expect(liste).not.toContain("16.800");
+    expect(liste).not.toContain("24.480");
+    expect(liste).not.toContain("26.880");
+    vi.doUnmock("@/lib/satser-2026");
+    vi.resetModules();
+  });
+
   test("de svenske og norske sider er urørte af den danske 'loft'-tekst", async () => {
     for (const locale of ["se", "no"] as const) {
       const html = await render(locale);

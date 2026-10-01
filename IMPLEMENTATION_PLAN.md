@@ -1,50 +1,53 @@
-STATUS: 2/10 21:52. Rød CI: ingen (seneste kørsel grøn 19:13 UTC). Sentry:
-  ingen nye hændelser efter router-støj-fixen. **Alle fem åbne deploy-noter er
-  lukket** af 21:30-vinduet — målt på indhold, se `docs/plan-arkiv.md`.
-  CEO-køen er tom; punkt 0 er verificeret direkte i koden igen (otte fund).
-  **Ingen åbne PR'er** (`PR-TJEK: 2026-10-01`).
+STATUS: 1/10 22:50. Rød CI: ingen (seneste kørsel grøn 20:08 UTC). Sentry: ingen
+  nye hændelser. CEO-køen er tom; punkt 0 verificeret direkte i koden igen.
+  **Ingen åbne PR'er** (`PR-TJEK: 2026-10-01`). Branch-tjek foretaget i denne
+  iteration: 13 remote-branches, ingen slettet (kun `fix/sentry-7765903656`
+  er fra i dag; resten er 2-4 måneder gammel og kræver et `branch-oprydning.sh`
+  kørsel, `BRANCH-TJEK: 2026-10-01`).
 
-  **Nyt: /boernepenge svarer på «hvornår kommer pengene».**
-  `ceo/boernepenge-udbetalingsdatoer`. Autocomplete 1/10 gav 10 af 10 træffere
-  under «børnepenge hvornår» og 10 under «børnepenge juli» («børnepenge juli 2026
-  udbetaling», «børnepenge 20 juli»). GSC: blogindlægget har 6.126 visninger på
-  «børnepenge 2026» med 1.031 visninger på pos. 9 — **placeringen tabes af
-  blogindlægget, fordi det var det eneste svar på spørgsmålet.** Siden havde kun
-  «den 20. i januar, april, juli og oktober» i en lille brødtekstlinje.
-  Nu: to bloksider («om 19 dage» + dato), en tabel med årets fire kvartalsdatoer,
-  og dagens dato læst med `iDagPaSiden`. `naesteUdbetalingsdato` i
-  `borneungeydelse.ts` bruger samme `udbetalingsdatoerAar` som satsen og
-  blogindlægget, og løber over årsskiftet — december er ikke et kvartal.
-  *Port:* 13 tests i `/boernepenge/page.test.tsx` renderer siden og læser
-  svaret ud af markuppen; 6 mutationer målt røde.
-  **MÅL:** `/boernepenge` har ingen baseline — skriv CTR og visninger fra næste
-  snapshot. Blogindlægget som reference: 6.126 visninger / 41 klik / 0,7 % /
-  pos. 8,4.
+  **Bloggen har nu næste handling på alle 29 indlæg** — opgaven i forrige
+  plan-status var færdig længe før den blev skrevet ned (markeret FÆRDIG i
+  `docs/plan-arkiv.md` under C198/C202). De otte automatiske porte i
+  `src/app/blog/naeste-skridt.test.ts` dømmer på markupken, ikke på et
+  kodestykke, så den kan ikke glide tilbage.
 
-  **Kilde-blokeret:** fradrag 2026 (fitness, sommerhusudlejning) kan **ikke**
-  bygges. 1/10 21:25 forsøgte igen: `dagpenge.dk`, `star.dk` (404), `fristen.dk`
-  og `borgerhåndbog.dk` svarer alle med forbindelsesfejl fra denne maskine. Uden
-  kilde bygges de ikke — se ❓ nedenfor.
+  **Nyt: /rentefradrag'ens «Eksempel» læser nu sine tal fra modulet.**
+  `ceo/rentefradrag-tal-fra-kilden`. Sektionen skrev `50.000 × 33,6% = 16.800 kr.`,
+  `24.480 kr.` og `26.880 kr.` håndskrevet, mens hele resten af siden læser
+  `RENTEFRADRAG_2026` + `beregnRentefradrag`. Tallene var *lige* rigtige
+  1/10 — men det er præcis punkt 11 i kvalitetsreglerne: en påstand i copy der
+  kan glide fra sin beregning, når satsen opdateres til 2027. Den eksisterende
+  port (`alle tal i eksemplet stammer fra beregnRentefradrag`) så på **hele
+  siden**, altså også på loft-afsnittets beregnede tal, og var derfor grøn mod
+  den håndskrevne liste. Ny port muterer *kilden* (0,25/0,15, 40.000/80.000) og
+  kræver at Eksempel-listen følger med — målt **rød mod master**.
+  *Port:* +1 test i `src/app/rentefradrag/page.test.tsx`, 8 grønne.
+  **MÅL:** `/rentefradrag` 417 besøgende/28d, +204 %, bounce 3 % (Plausible
+  2026-10-01). Genmål 15/10. Denne ændring flytter ikke position — den forhindrer
+  en forkert sats i 2027.
 
-  **Gaten:** `lint` 0 (654) · `typecheck` 0 · `TZ=UTC npm run test`
-  **3478 grønne / 212 filer** · `next build` ok (exit 0), `/boernepenge` er `ƒ`
-  altså dynamisk — datoen er ikke frosset ved build.
+  **Målt 1/10 22:20, ikke bygget:** de fire nye autocomplete-klynger er enten
+  dækket eller kildeblokerede — se ❓ og F-køen nedenfor. `borger.dk` svarer 200
+  fra denne maskine (mods `dagpenge.dk`/`star.dk`), så kilde-blokeringen er ikke
+  længere universiel.
+
+  **Gaten:** `lint` 0 (654 filer) · `typecheck` 0 · `TZ=UTC npm run test`
+  **3479 grønne / 212 filer** · `next build` exit 0. Locale-leak-gatens ene
+  `ureviewet`-fund er portens egen test, der planter strengen med vilje
+  (`locale-leak-gate.test.ts:511`) — ikke en læk.
 
 ## Næste opgave (klar til næste iteration)
 
-**Blogindlæg skal føre videre til den beregner de handler om.**
-`/blog/barsel-2026-regler-og-satser` har **85 % bounce** på 182 besøgende/28d,
-mens beregnerne ligger på 1-8 %. GSC viser samme billede for
-`/blog/boernepenge-2026-satser-og-satser`: 6.126 visninger, 41 klik, pos. 8,4 —
-altså læst, men ikke fulgt. Indlæggene har allerede interne links (børnepenge-
-indlægget linker til kalkulatoren), så opgaven er at finde de indlæg der mangler
-et **synligt næste skridt** — en knap med handlingen, ikke et link i en
-brødtekstlinje — og at tjekke at hvert indlægs `RelatedCalculators` faktisk
-peger på den kalkulator, emnet handler om.
-*Accept:* målt antal af blogindlæg uden et synligt næste skridt går fra N til 0,
-hvor et indlægs `RelatedCalculators` er tom eller peger på et emne, indlægget
-ikke handler om. **MÅL:** `/blog/barsel-2026-regler-og-satser` 182
-besøgende/28d, bounce 85 % (Plausible 2026-10-01). Genmål 15/10.
+**Tal i brødtekst der ikke læses fra et modul — målt på hele sitet.**
+Denne iteration fandt fejlen på én side ved at læse den. Den samme fejlklasse
+findes formodentlig andre steder, og den er usynlig for både `tsc`, lint og
+build, fordi en streng med et tal er gyldig JSX. *Accept:* en port der
+renderer alle `page.tsx` og **tæller tal med tusindtalsseparator i `<p>`/`<li>`/
+`<td>` der ikke kan spores til et modul-konstant**, så listen er målt før den
+rettes — og antallet går fra N til 0 på de sider porten dømmer på.
+*Metode:* `fact-consistency.test.ts` scanner allerede filer efter
+`stripKommentarer`; samme greb her. **MÅL:** `/rentefradrag` 417
+besøgende/28d (+204 %) som reference; de øvrige sider måles i samme port.
 
 ## ❓ Uafklaret — ferielov (rammer `/dage-til/summerferien` **og** skolestart)
 
@@ -153,6 +156,14 @@ Prioriteret efter forventet effekt på **trafik**. Datagrund fra GSC 1/10
 - **Autocomplete: 28 seeds målt 1/10.** *Accept (delvis):* seeds målt og
   klyngerne skrevet herunder — det stærkeste klynge er bygget. Resten er
   prioriteret. *Datagrund:* `suggestqueries.google.com`, hl=da gl=dk.
+  **Målt igen 1/10 22:20 på fire nye seeds — alle fire er dækket eller
+  kildeblokerede:** `annuitetslån` (10/10, men «serielån vs» og «formel bevis»
+  er allerede et `<h2>` på `/renteberegner` + FAQ), `promille` («promille på 2»
+  svarer siden med «Hvor mange promille er 2 øl?»), `rentefradrag` (loft/sats/
+  begrænsning er hele siden), `boligstøtte` (2 af 10 er **udbetaling** —
+  «hvornår kommer pengene» — og det findes ingen overskrift om; kræver
+  betalingsdato fra en kilde, `borger.dk` svarer 200 men ikke fundet endnu).
+  `fradrag børnebidrag` er det eneste **nye** fradrag-emne i klyngen.
   **Klynger vi ikke dækker, i rækkefølge efter hvor ren intentionen er:**
   (1) *dagpenge* — «dagpengesats 2026», «dagpenge nyuddannet», «dagpengekort»,
   «dagpengetæller», «dagpengesats 2026 efter skat»: 6 af 10 er konkrete satser
@@ -195,12 +206,17 @@ Prioriteret efter forventet effekt på **trafik**. Datagrund fra GSC 1/10
 
 ## Åbne VERIFICÉR DEPLOY-noter
 
-- ⏳ **Nyt afsnit: /boernepenge svarer på «hvornår udbetales».**
-  `ceo/boernepenge-udbetalingsdatoer`. Prøven er på indhold: `curl -s
-  https://minberegner.dk/boernepenge` skal indeholde «Hvornår kommer børnepengen
-  ud?», «om N dage» og en `<time dateTime="...">` med den næste betalingsdato i
-  **dagens** danske tid — ikke den 20. hver måned i en fast måned. Vindue 3/10
-  07:30.
+- ⏳ **/boernepenge svarer på «hvornår udbetales».** `ceo/boernepenge-udbetalingsdatoer`.
+  Prøven er på indhold: `curl -s https://minberegner.dk/boernepenge` skal indeholde
+  «Hvornår kommer børnepengen ud?», «om N dage» og en `<time dateTime="...">` med den
+  næste betalingsdato i **dagens** danske tid. Målt 1/10 22:19 (21:30-vinduet):
+  **ikke live** — kun ét fund på «Hvornår», titlen er stadig den gamle, og
+  `NaesteUdbetalingsdato` mangler i markupken. Committen er fra 20:08 UTC = 22:08
+  dansk tid, altså *efter* 21:30-vinduet. Vindue **2/10 07:30**.
+- ⏳ **Nyt afsnit: /rentefradrag'ens «Eksempel» læser fra modulet.**
+  `ceo/rentefradrag-tal-fra-kilden`. Prøven er på indhold: `curl -s
+  https://minberegner.dk/rentefradrag` skal indeholde `50.000 × 33,6% = 16.800 kr.`
+  — og, efter en `satser-2026`-opdatering, de nye tal. Vindue **2/10 07:30**.
 
 ## ❓ Til Mads
 

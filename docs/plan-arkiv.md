@@ -22979,3 +22979,39 @@ læser `PROMILLEGRANSE.se`; `dato-eksempler.ts` har `maneder: 12`.
 
 Gate efter børnepenge-opgaven: lint 0 · typecheck 0 · 3478 tests grønne/212 filer
 · build exit 0 · `/boernepenge` er `ƒ` (dynamisk, altså ingen frossen dato).
+
+## 1/10 2026 22:50 — /rentefradrag: tal i brødteksten læst fra modulet
+
+- **Fund:** `src/app/rentefradrag/page.tsx` — «Eksempel»-afsnittet skrev
+  `50.000 × 33,6% = 16.800 kr.`, `30.000 × 25,6% = 7.680 kr.`,
+  `Samlet skattebesparelse: 24.480 kr.`, `grænsen 100.000 kr.` og
+  `80.000 × 33,6% = 26.880 kr.` som **håndskrevet tekst**, mens de otte
+  afsnit ovenfor læser `RENTEFRADRAG_2026` og `beregnRentefradrag`.
+  Målt 1/10: tallene var lige rigtige (33,6/25,6 %, 50.000/100.000 kr.,
+  16.800/7.680/24.480/26.880 kr. mod `beregnRentefradrag(80000,'single')` →
+  `{graense:50000, hoejAndel:50000, lavAndel:30000, besparelse:24480}`), så
+  det var **ikke** en synlig fejl — det var punkt 11 i `_kvalitet.md` i sin
+  rene form: en påstand i copy der kan glide fra sin beregning, når satsen
+  opdateres til 2027, uden at `tsc`, lint eller build mærker det (en streng med
+  et tal er gyldig JSX).
+- **Den eksisterende port var grøn mod fejlen.** `alle tal i eksemplet stammer
+  fra beregnRentefradrag, ikke fra brødteksten` læste **hele markupken**, og
+  loft-afsnittet ovenfor indeholdt de samme tal beregnet — så porten kunne
+  ikke se forskel på en håndskrevet og en beregnet liste. Læren generelt: en
+  port skal dømme på det *afsnit* den påstår at dække, ellers dækker den
+  kun et andet.
+- **Rettelse:** hele «Eksempel»-listen læser nu `loftEksempel` /
+  `loftEksempelPar` og `RENTEFRADRAG_2026`. Par-grænsen læses som
+  `loftEksempelPar.graense` i stedet for et håndskrevet 100.000. Ingen
+  beregningslogik ændret — `rentefradrag.ts` urørt.
+- **Port:** ny test `eksemplet følger satserne, når kilden muteres` — den
+  muterer *kilden* (`highRate: 0.25, lowRate: 0.15, highRateLimitSingle:
+  40_000, highRateLimitCouple: 80_000`) og skærer **kun** Eksempel-listen ud af
+  markupken. **Modsvejs målt:** rød mod master's håndskrevne `page.tsx`
+  (`Eksempel-listen mangler 40.000`, modtaget markup med `16.800`/`24.480`/
+  `26.880`), grøn med rettelsen. 8 tests grønne i filen.
+- **Gate:** `biome lint ./src` 654 filer 0 · `tsc --noEmit -p tsconfig.test.json`
+  0 · `TZ=UTC vitest run` **3479 grønne / 212 filer** · `next build` exit 0.
+  Locale-leak-gatens ene `ureviewet`-fund er portens egen test, der planter
+  strengen med vilje (`locale-leak-gate.test.ts:511`) — ikke en læk.
+- **Deploy-note:** ⏳ `ceo/rentefradrag-tal-fra-kilden`, vindue 2/10 07:30.
