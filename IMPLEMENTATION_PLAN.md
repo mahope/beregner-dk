@@ -1,37 +1,48 @@
-STATUS: 1/10 21:25. Rød CI: ingen. Sentry: ingen nye hændelser. CEO-køen er
-  **tom** — punkt 0 verificeret i koden igen (Valborg 30. april, svensk påskafton
-  `offsetDays: -1`, dansk sankthans fast 23. juni, ingen dansk påskeaften-FAQ,
-  `/husleje` på nettoprisindekset, `toUtcMidnight` med `Europe/Copenhagen`,
-  `dato-eksempler.ts` `maneder: 12`). **Ingen åbne PR'er.**
+STATUS: 1/10 21:40. Rød CI: ingen (seneste kørsel grøn 18:54). Sentry: ingen nye
+  hændelser efter router-støj-fixen. CEO-køen er **tom** — punkt 0 verificeret i
+  koden igen. **Ingen åbne PR'er** (`PR-TJEK: 2026-10-01`).
 
-  **Seneste opgave: boligjobordningens 2026-lofter var 2025-tal.** `ceo/boligjob-lofter-2026`.
-  Håndværkerfradraget stod på 12.400 kr. og servicefradraget på 6.200 kr. — fra
-  1. januar 2026 er de **9.000 kr. og 18.300 kr.**, altså omvendt, og
-  håndværkerfradraget gælder kun *grønne og energibesparende* arbejder, så maling
-  og køkkenskift har ikke længere fradrag. Fire steder læste konstanten, to
-  steder havde hårdkodede tal; alle læser nu `SKATTEFRADRAG_2026`.
-  *Datagrund:* Borgerhåndbogs to 2026-guider, læst 1/10 — internt konsistente
-  (26 % × 18.300 ≈ 4.760 kr, 26 % × 9.000 = 2.340 kr). skat.dk svarer HTTP 500
-  på alle fradragssider, så det er stadig en sekundær kilde, og begge tal er
-  fortsat mærket vejledende. Port: ny `/skattefradrag/page.test.tsx` (4 tests)
-  læser lofterne ud af den **renderede markup** og af FAQ-teksten.
-  Se `docs/plan-arkiv.md`.
+  **Nyt: /dagpenge svarede ikke på «dagpenge nyuddannet».** `ceo/dagpenge-nyuddannet`.
+  Ordet «nyuddannet» fandtes ikke ét sted på siden — den sagde kun «Dimittend» — og
+  de to betingelser for dimittendsatsen (18 måneders uddannelse, tilmelding til
+  A-kassen inden for 14 dage) lå kun i et blogindlæg, ikke på den kalkulatorside
+  folk faktisk lander på. Nyt afsnit læser alle tal fra `DAGPENGE_2026`.
+  *Datagrund:* dansk autocomplete 1/10 — 6 af 10 træffere under «dagpenge» er
+  konkrete satser på to underemner (nyuddannet, efter skat). Det er den stærkeste
+  uafsluttede klynge i Feature-køen. **MÅL:** /dagpenge har ingen GSC- eller
+  Plausible-baseline (ikke i top-15); sæt fra næste snapshot.
+  *Port:* 2 nye tests i `/dagpenge/page.test.tsx` læser betingelserne og begge
+  satser ud af den **renderede** markup.
+
+  **Kilde-blokeret:** fradrag 2026 (fitness, sommerhusudlejning) kan **ikke** bygges.
+  1/10 21:25 forsøgte igen: `dagpenge.dk`, `star.dk` (404), `fristen.dk` og
+  `borgerhåndbog.dk` svarer alle med forbindelsesfejl fra denne maskine. Uden
+  kilde bygges de ikke — se ❓ nedenfor.
+
+  **Deploy: 21:30-vinduet har ikke hentet 1/10's ændringer.** Målt 21:38:
+  `/dage-til/2-juledag`, `/dage-til/fastelavn` og se `/dagar-till/fettisdagen`
+  svarer **404**, `/dage-til/1-december` mangler «I dag er det», `/skattefradrag`
+  har stadig 12.400/6.200 og ikke 9.000/18.300, og `/dage-til/skolestart` har
+  stadig «1. august ligger i uge 31». Det er **ét** vindue, målt 8 min efter det
+  åbner, så det er ikke DEPLOY-MISSING endnu — næste iteration måler igen efter
+  **07:30**-vinduet.
 
   **Gaten:** `lint` 0 (652) · `typecheck` 0 · `TZ=UTC npm run test`
-  **3457 grønne / 211 filer** · `next build` ok.
+  **3459 grønne / 211 filer** · `next build` ok (exit 0).
 
 ## Næste opgave (klar til næste iteration)
 
-**Sommerhusudlejningsfradraget og fitnessfradraget på `/skattefradrag`** — de to
-sidste af de fire fradrag fra autocomplete-klyngen «fradrag 2026». Rengøring og
-havearbejde er dækket af boligjob-rettelsen 1/10 (servicefradraget, 18.300 kr.,
-og felterne hedder nu «Rengøring, have m.fl.»). *Accept:* begge fradrag står i
-beregneren med den danske 2026-sats kildeført, i begge sprog, med tests på
-kant-tilfælde (loft pr. person, ingen fradrag over indkomsten).
-**Forudsætning:** begge satser skal findes i en læsbar kilde — skat.dk er 500,
-og 1/10 fandt ingen. Uden kilde skal de **ikke** bygges; skriv i stedet et ❓.
-**MÅL:** `/skattefradrag` har ingen GSC-baseline — skriv CTR og visninger fra
-næste snapshot.
+**Hvornår kommer børnepengen ud? På `/boernepenge`.** Den fjerde og sidste
+uafsluttede autocomplete-klynge under «fradrag 2026» er lukket med ❓ (se nedenfor),
+så næste klynge er børnepenge: «børnepenge hvornår» og «børnepenge juli 2026» er
+træffere, og GSC har **6.126 visninger** på blogindlægget
+`/blog/boernepenge-2026-satser-og-satser` med «børnepenge 2026» 1.031 visninger
+på pos. 9 — altså **placeringen tabes af et blogindlæg, ikke af kalkulatoren**.
+*Accept:* `/boernepenge` svarer synligt på, hvornår udbetalingen sker, i begge
+sprog, med tallene læst fra samme modul som satsen, og en test der læser svaret ud
+af den renderede markup. **Ingen kilde → ❓, ikke et gæt** (punkt 11).
+**MÅL:** `/boernepenge` har ingen baseline endnu — skriv CTR og visninger fra næste
+snapshot.
 
 ## ❓ Uafklaret — ferielov (rammer `/dage-til/summerferien` **og** skolestart)
 
@@ -184,7 +195,7 @@ Prioriteret efter forventet effekt på **trafik**. Datagrund fra GSC 1/10
   https://minberegner.dk/skattefradrag` skal indeholde «op til 9.000 kr. pr.
   person i 2026» og «særskilt loft på 18.300 kr.» og **ikke** «12.400» eller
   «6.200»; `https://minberegner.dk/blog/skat-2026-alt-du-skal-vide` skal have
-  «18.300 kr» i listen. Vindue 1/10 21:30.
+  «18.300 kr» i listen. Målt 1/10 **21:38**: **ikke live** endnu (skattekassen har stadig 12.400/6.200). Genmål efter 07:30.
 
 - ⏳ **Tre nye `/dage-til`-sider: fastelavn, palmesøndag, 2. juledag.**
   `ceo/dage-til-fastelavn-palmesondag-2juledag`. Prøven er på indhold: `curl -s
@@ -192,12 +203,12 @@ Prioriteret efter forventet effekt på **trafik**. Datagrund fra GSC 1/10
   2026 er en» og et `<time>` med dagens ISO-dato;
   `https://minberegner.dk/dage-til/fastelavn` skal sige «Fastelavn er påskedagen
   minus 47 dage», og `https://beraknare.se/dagar-till/fettisdagen` skal have
-  `<title>` med «fettisdagen». Vindue 1/10 21:30.
+  `<title>` med «fettisdagen». Målt 1/10 **21:38**: **ikke live** endnu (skattekassen har stadig 12.400/6.200). Genmål efter 07:30.
 
 - ⏳ **Dagens dato står i heroen på alle `/dage-til`-sider.**
   `ceo/dage-til-dagens-dato`. Prøven er på indhold: `curl -s
   https://minberegner.dk/dage-til/1-december` skal indeholde «I dag er det» og
-  et `<time>` med dagens ISO-dato i Copenhagen-tid. Vindue 1/10 21:30.
+  et `<time>` med dagens ISO-dato i Copenhagen-tid. Målt 1/10 **21:38**: **ikke live** endnu (skattekassen har stadig 12.400/6.200). Genmål efter 07:30.
 
 - ⏳ **`/dage-til/skolestart` tæller til den første skoledag.**
   `ceo/skolestart-forste-skoledag` (dae670a). Prøven er på indhold: `curl -s
@@ -206,8 +217,9 @@ Prioriteret efter forventet effekt på **trafik**. Datagrund fra GSC 1/10
   **der** (men kun fordi den stod i den gamle tekst), mens «i uge 32 i 2026»
   **mangler** — FAQ'en serverer stadig «1. august ligger i uge 31 i både 2026 og
   2028». Målt igen 1/10 19:10: «mandag 3. august 2026» er der, «i uge 32 i 2026»
-  mangler stadig, altså endnu ikke deployet. Vinduet er **1/10 21:30**,
-  committen er fra 17:57.
+  mangler stadig, altså endnu ikke deployet. Målt 1/10 **21:38**: «mandag 3. august
+  2026» er der (3 gange), «i uge 32 i 2026» mangler stadig, og den gamle «1. august
+  ligger i uge 31» står stadig 6 gange. **Endnu ikke live.** Genmål efter 07:30.
 
 - ✅ **`/renteprognose` er live og virker.** `ceo/renteprognose` (9b283d3).
   Målt 1/10 18:22: `<title>` er «Renteprognose - hvad koster boliglånet om 5, 10
@@ -229,6 +241,12 @@ Prioriteret efter forventet effekt på **trafik**. Datagrund fra GSC 1/10
   *Sidste hændelse med beskeden i snapshottet er 2026-10-01T12:56, altså før
   deployet — det næste Sentry-snapshot bekræfter 0 nye.*
 
+- ⏳ **Nyt afsnit: /dagpenge svarer på «dagpenge nyuddannet».**
+  `ceo/dagpenge-nyuddannet`. Prøven er på indhold: `curl -s
+  https://minberegner.dk/dagpenge` skal indeholde «Nyuddannet?» og «18 måneder» og
+  «14 dage» i samme afsnit, og **ikke** mangle ordet «nyuddannet».
+  Vindue 2/10 07:30.
+
 ## ❓ Til Mads
 
 - ❓ **Ser du events fra minberegner.dk i Sentry-projektet?** Det er nu det
@@ -243,6 +261,12 @@ Prioriteret efter forventet effekt på **trafik**. Datagrund fra GSC 1/10
   et prod-build med et `[Sentry]`-flag på init, låser det. Jeg kan ikke se
   projektet: API'en kræver din konto.
 
+- ❓ **Ingen læsbar kilde til fitnessfradraget og sommerhusudlejningsfradraget
+  (opgave fra 1/10 21:25, ny blokering).** De to er de sidste af «fradrag 2026»-klyngen,
+  og 1/10 21:25 fik hverken `dagpenge.dk` eller `star.dk` til at svare
+  (forbindelsesfejl / 404), mens `skat.dk` har været 500 siden C19. **Et skærmbillede
+  af de to linjer i SKAT's fradragsvejledning** — eller teksten kopieret herind —
+  låser dem. Uden det bygges de ikke, jf. punkt 11 i kvalitetsreglerne.
 - ❓ **Ferielovens regel for sommerferiens startdato (opgave 201, ny 1/10,
   højst prioriteret).** `/dage-til/sommerferien` siger "sommerferien begynder
   altid den **sidste lørdag i juni**" og hævder, at det står i folkeskoleloven

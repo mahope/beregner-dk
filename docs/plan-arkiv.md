@@ -22926,3 +22926,21 @@ lint 0 (652 filer), typecheck 0, 3457 tests / 211 filer, build ok.
 
 **MÅL:** `/skattefradrag` har ingen GSC-baseline. `/blog/skat-2026-alt-du-skal-vide`
 har ingen heller — skriv begge fra næste snapshot.
+
+
+## 2026-10-01 21:40 — ceo/dagpenge-nyuddannet
+
+Målt, ikke gættet: ordet «nyuddannet» fandtes 0 gange på /dagpenge. De to
+betingelser for dimittendsatsen (18 måneders uddannelse, A-kasse-tilmeldelse inden
+for 14 dage) lå kun i `/blog/dagpenge-saadan-finder-du-din-sats`, aldrig på den
+kalkulatorside som GSC og autocomplete peger på. Nyt `<h3>`-afsnit efter
+satser-tabellen læser alle fire tal fra `DAGPENGE_2026` (bm.dk, verificeret
+26/9), så de kan ikke glide fra modulet. 2 nye tests læser dem ud af den
+renderede markup; begge fejlede rødt før rettelsen (indexOf → -1).
+`locale-leak.mjs` giver præcis samme output med og uden ændringen — den ene
+ureviewede streng (`src/app/procent/page.tsx:522`) er ældre og ikke min.
+Gate: lint 0 · typecheck 0 · 3459 tests grønne/211 filer · build exit 0.
+
+Deploy 21:38: 1/10's fire ændringer var **ikke** live. /dage-til/2-juledag,
+/dage-til/fastelavn og se /dagar-till/fettisdagen svarer 404; /skattefradrag har
+stadig 12.400/6.200. Ét vindue, målt 8 min efter åbning — ikke DEPLOY-MISSING endnu.

@@ -89,6 +89,18 @@ export default async function DagpengePage() {
           </table>
         </div>
 
+        <h3>Nyuddannet? Sådan får du dimittendsatsen</h3>
+        <p>
+          Er du nyuddannet, altså <strong>dimittend</strong>, får du dagpenge efter en lavere
+          sats end maxsatsen: <strong>{kr(DAGPENGE_2026.dimittendFuldtidUdenForsorgerpligt)}</strong> pr. måned
+          uden forsørgelsespligt, og <strong>{kr(DAGPENGE_2026.dimittendFuldtidMedForsorgerpligt)}</strong> hvis
+          du har forsørgelsespligt. Dimittendsatsen gælder, når din uddannelse har varet mindst{" "}
+          <strong>{DAGPENGE_2026.dimittendUddannelseMdr} måneder</strong>, og du har
+          tilmeldt dig A-kassen senest{" "}
+          <strong>{DAGPENGE_2026.dimittendTilmeldingDage} dage</strong> efter at uddannelsen
+          er afsluttet.
+        </p>
+
         <h3>Hvad påvirker din dagpengesats?</h3>
         <ul>
           <li><strong>Din tidligere løn:</strong> Dagpenge = 90% af løn efter 8% AM-bidrag</li>

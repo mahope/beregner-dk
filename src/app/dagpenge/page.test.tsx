@@ -53,4 +53,34 @@ describe("side /dagpenge", () => {
     expect(html).toContain(kr(DAGPENGE_2026.dimittendFuldtidMedForsorgerpligt));
     expect(html).toContain(kr(DAGPENGE_2026.dimittendFuldtidUdenForsorgerpligt));
   });
+
+  /**
+   * 1/10: «dagpenge nyuddannet» er en af de danske autocomplete-træffere under
+   * «dagpenge», men ordet «nyuddannet» fandtes ikke ét sted på /dagpenge — siden
+   * sagde kun «Dimittend», og de to betingelser for dimittendsatsen (uddannelsens
+   * længde og tilmelding til A-kassen) lå kun i et blogindlæg. Porten dømmer på
+   * den **renderede** side, så den kan ikke grønne ved at læse kildefilen.
+   */
+  test("svarer på «dagpenge nyuddannet» med dimittendens to betingelser", async () => {
+    const html = renderToStaticMarkup(await DagpengePage());
+    const kr = (n: number) => `${new Intl.NumberFormat("da-DK").format(n)} kr`;
+    const start = html.indexOf("Nyuddannet?");
+    expect(start).toBeGreaterThan(-1);
+    const afsnit = html.slice(start);
+
+    expect(afsnit).toContain(String(DAGPENGE_2026.dimittendUddannelseMdr));
+    expect(afsnit).toContain(String(DAGPENGE_2026.dimittendTilmeldingDage));
+    expect(afsnit).toContain(kr(DAGPENGE_2026.dimittendFuldtidUdenForsorgerpligt));
+    expect(afsnit).toContain(kr(DAGPENGE_2026.dimittendFuldtidMedForsorgerpligt));
+  });
+
+  test("«nyuddannet» og «dimittend» bruges om hinanden, så begge søgninger rammer", async () => {
+    const html = renderToStaticMarkup(await DagpengePage());
+    const start = html.indexOf("Nyuddannet?");
+    expect(start).toBeGreaterThan(-1);
+    const afsnit = html.slice(start);
+
+    expect(afsnit).toContain("nyuddannet");
+    expect(afsnit).toContain("dimittend");
+  });
 });
