@@ -98,7 +98,14 @@ export interface Udbetalingsdato {
   betalingsdato: Date;
 }
 
-const UGEDAGE_DA = [
+/**
+ * Ugedagene i dansk, som de skrives i en sætning: «tirsdag 20. oktober 2026».
+ *
+ * Eksporteres, fordi tre steder ellers ville eje hver sin liste — og en liste
+ * der glider fra den, `Udbetalingsdato.ugedag` kommer fra, giver to forskellige
+ * ugedage for den samme dato på to sider.
+ */
+export const UGEDAGE_DA = [
   "søndag",
   "mandag",
   "tirsdag",
@@ -106,6 +113,26 @@ const UGEDAGE_DA = [
   "torsdag",
   "fredag",
   "lørdag",
+] as const;
+
+/**
+ * Månedernes navne i dansk, som de skrives i en sætning. Eksporteres af samme
+ * grund som `UGEDAGE_DA`: et tidspunkt skal kunne læses med de samme ord
+ * overallest, søgemaskinen og i koden.
+ */
+export const MAANEDER_DA = [
+  "januar",
+  "februar",
+  "marts",
+  "april",
+  "maj",
+  "juni",
+  "juli",
+  "august",
+  "september",
+  "oktober",
+  "november",
+  "december",
 ] as const;
 
 /**
@@ -140,6 +167,51 @@ export function udbetalingsdatoerAar(
       betalingsdato: forskudt ? foegArbejdsdage(dato, -1, "da") : dato,
     };
   });
+}
+
+/**
+ * Den næste udbetaling på eller efter `fraDato`, for det givne interval.
+ *
+ * Autocomplete 1/10 viser, at spørgsmålet ikke er «hvad er reglen», men «hvornår
+ * kommer de»: «børnepenge hvornår», «børnepenge juli 2026 udbetaling» og «børnepenge
+ * 20 juli» er alle træffere. Det svarer kræver dagens dato, så det kun kan regnes
+ * i et serverkald — ikke i et modul-niveau-`const` som `allPages` i
+ * `page-data.ts`.
+ *
+ * Reglen er den samme som `udbetalingsdatoerAar` bruger, så de to ikke kan komme
+ * på afveje: nominelle 20. og den arbejdsdag pengene faktisk står på konto.
+ * Søgningen løber over årsskiftet, fordi det næste kvartal efter 20. december er
+ * 20. januar året efter — et fast årstal ville give det sidste af i december.
+ *
+ * `fraDato` skal være dagens kalenderdato læst i **sidens** tidszone
+ * (`iDagPaSiden`), aldrig `new Date()` i serverens egen zone.
+ */
+export function naesteUdbetalingsdato(
+  fraDato: Date,
+  interval: BoernSats["interval"]
+): { betalingsdato: Date; nominell: Date; dage: number } {
+  // Dag-tallet bygges af UTC-dagnumre, så et skifte mellem sommer- og vintertid
+  // hverken springer en dag over eller tæller den to gange — samme greb som
+  // `helligdage.ts` bruger.
+  const dagNummer = (d: Date) =>
+    Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / 86400000;
+  const fra = dagNummer(fraDato);
+
+  // To års udkig er nok: begge intervaller har mindst fire betalinger om året,
+  // så den næste ligger aldrig mere end ni måneder ude i fremtiden.
+  for (let aar = fraDato.getFullYear(); aar <= fraDato.getFullYear() + 1; aar++) {
+    const traef = udbetalingsdatoerAar(aar, interval).find(
+      (u) => dagNummer(u.betalingsdato) >= fra
+    );
+    if (traef) {
+      return {
+        betalingsdato: traef.betalingsdato,
+        nominell: traef.dato,
+        dage: dagNummer(traef.betalingsdato) - fra,
+      };
+    }
+  }
+  throw new Error(`Ingen udbetalingsdato for ${interval} efter ${fraDato.toISOString()}`);
 }
 
 /**

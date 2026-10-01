@@ -2,6 +2,7 @@ import { generatePageMetadata } from "@/lib/page-helpers";
 import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
 import BoernepengBeregner from "@/components/BoernepengBeregner";
+import NaesteUdbetalingsdato from "@/components/NaesteUdbetalingsdato";
 import FAQ from "@/components/FAQ";
 import RelatedCalculators from "@/components/RelatedCalculators";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
@@ -10,6 +11,7 @@ import Link from "next/link";
 import { formatNumber } from "@/lib/format";
 import { BOERNE_SATSER_2026, aarligBelob } from "@/lib/borneungeydelse";
 import { BARNETILSKUD_2026_KILDE, barnetilskudSats } from "@/lib/barnetilskud";
+import { iDagPaSiden } from "@/lib/lokal-dato";
 
 export async function generateMetadata() {
   return generatePageMetadata("boernepenge");
@@ -19,6 +21,13 @@ export default async function BoernepengePage() {
   const locale = await getLocale();
   const domainConfig = await getCurrentDomainConfig();
   const pageData = getPageData("boernepenge", locale) || getPageData("boernepenge", "da")!;
+  // Dagens kalenderdato i sidens egen tidszone. `getLocale()` læser `headers()`,
+  // så siden er dynamisk og tallene er et rigtigt serverkald — ikke en værdi
+  // frosset ved build. `iDagPaSiden` er samme funktion som `page-data.ts` og
+  // `/alder` bruger, så dagen kun findes ét sted. Udbetalingsdatoerne læses fra
+  // `borneungeydelse.ts` — samme modul som satsen og samme kalenderregel som
+  // blogindlægget — så dato og sats ikke kan komme fra to kilder.
+  const iDag = iDagPaSiden(new Date(), locale);
 
   return (
     <div>
@@ -37,6 +46,8 @@ export default async function BoernepengePage() {
       </p>
 
       <BoernepengBeregner />
+
+      <NaesteUdbetalingsdato iDag={iDag} />
 
       {locale === "da" && (
       <div className="mt-12 prose max-w-none dark:prose-invert">

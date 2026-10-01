@@ -5,6 +5,7 @@ import {
   aarligBelob,
   beregnAftrapning,
   maanedligOmregnet,
+  naesteUdbetalingsdato,
   satsForAlder,
   udbetalingerPrAar,
   udbetalingsdatoerAar,
@@ -214,5 +215,67 @@ describe("udbetalingsdatoerAar", () => {
       "2027-06-20",
       "2027-11-20",
     ]);
+  });
+});
+
+describe("naesteUdbetalingsdato", () => {
+  // Lokal kalenderdato. Et `new Date("2026-10-01")` er UTC-midnat og dermed
+  // 1. oktober kl. 02:00 dansk tid — i praksis det samme her, men på en dag hvor
+  // de to tidszoner er forskudte ville `new Date(aar, maaned-1, dag)` være det
+  // ufarlige valg, fordi det er dansk kalenderdato uden tidszone.
+  const d = (aar: number, maaned: number, dag: number) =>
+    new Date(aar, maaned - 1, dag);
+  const iso = (x: Date) =>
+    `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, "0")}-${String(x.getDate()).padStart(2, "0")}`;
+
+  it("giver den 20. selv den er den 20.", () => {
+    // Betalingen er den dag den står på konto, så den skal kunne svare «i dag».
+    const n = naesteUdbetalingsdato(d(2026, 10, 20), "kvartal");
+    expect(iso(n.betalingsdato)).toBe("2026-10-20");
+    expect(n.dage).toBe(0);
+  });
+
+  it("giver dagens betaling også når den er forskudt fra en weekend", () => {
+    // 20. juni 2026 er en lørdag, så pengene står på konto 19. juni. Læser man
+    // siden 19. juni, er svaret «i dag» — ikke «20. juni», for den er forbi.
+    const n = naesteUdbetalingsdato(d(2026, 6, 19), "maaned");
+    expect(iso(n.betalingsdato)).toBe("2026-06-19");
+    expect(iso(n.nominell)).toBe("2026-06-20");
+    expect(n.dage).toBe(0);
+  });
+
+  it("springer frem til januar når oktober er det sidste kvartal", () => {
+    // December er *ikke* et kvartal — kun den månedlige ungeydelse har den.
+    // Derfor er januar det næste kvartal efter 20. oktober, 91 dage senere:
+    // 10 dage til 31. oktober, 30 i november, 31 i december og 20 i januar.
+    const n = naesteUdbetalingsdato(d(2026, 10, 21), "kvartal");
+    expect(iso(n.betalingsdato)).toBe("2027-01-20");
+    expect(n.dage).toBe(91);
+  });
+
+  it("løber over årsskiftet, så en november-læsning ikke får en gået dato", () => {
+    // Et fast årstal ville svare 20. oktober *i år* for en læsning i november,
+    // altså en dato der er gået, når den vises.
+    const n = naesteUdbetalingsdato(d(2026, 11, 5), "kvartal");
+    expect(iso(n.betalingsdato)).toBe("2027-01-20");
+    expect(n.nominell.getFullYear()).toBe(2027);
+    expect(n.dage).toBe(76);
+  });
+
+  it("tæller dage hele vejen over sommer- og vintertid", () => {
+    // 22. marts 2026 er efter skiftet til sommertid, 20. januar før det. En
+    // naiv måling i millisekunder ville tælle 29 dage minus én time her, fordi
+    // timezonen skifter en time; dagnumrene tæller 29 hele dage.
+    const n = naesteUdbetalingsdato(d(2026, 3, 22), "maaned");
+    expect(iso(n.betalingsdato)).toBe("2026-04-20");
+    expect(n.dage).toBe(29);
+  });
+
+  it("giver den samme dato uanset hvilken dag i samme ugeinterval man læser", () => {
+    const foer = naesteUdbetalingsdato(d(2026, 3, 23), "maaned");
+    const efter = naesteUdbetalingsdato(d(2026, 3, 29), "maaned");
+    expect(iso(foer.betalingsdato)).toBe("2026-04-20");
+    expect(iso(efter.betalingsdato)).toBe("2026-04-20");
+    expect(efter.dage).toBe(foer.dage - 6);
   });
 });

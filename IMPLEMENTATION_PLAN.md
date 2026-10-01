@@ -1,48 +1,50 @@
-STATUS: 1/10 21:40. Rød CI: ingen (seneste kørsel grøn 18:54). Sentry: ingen nye
-  hændelser efter router-støj-fixen. CEO-køen er **tom** — punkt 0 verificeret i
-  koden igen. **Ingen åbne PR'er** (`PR-TJEK: 2026-10-01`).
+STATUS: 2/10 21:52. Rød CI: ingen (seneste kørsel grøn 19:13 UTC). Sentry:
+  ingen nye hændelser efter router-støj-fixen. **Alle fem åbne deploy-noter er
+  lukket** af 21:30-vinduet — målt på indhold, se `docs/plan-arkiv.md`.
+  CEO-køen er tom; punkt 0 er verificeret direkte i koden igen (otte fund).
+  **Ingen åbne PR'er** (`PR-TJEK: 2026-10-01`).
 
-  **Nyt: /dagpenge svarede ikke på «dagpenge nyuddannet».** `ceo/dagpenge-nyuddannet`.
-  Ordet «nyuddannet» fandtes ikke ét sted på siden — den sagde kun «Dimittend» — og
-  de to betingelser for dimittendsatsen (18 måneders uddannelse, tilmelding til
-  A-kassen inden for 14 dage) lå kun i et blogindlæg, ikke på den kalkulatorside
-  folk faktisk lander på. Nyt afsnit læser alle tal fra `DAGPENGE_2026`.
-  *Datagrund:* dansk autocomplete 1/10 — 6 af 10 træffere under «dagpenge» er
-  konkrete satser på to underemner (nyuddannet, efter skat). Det er den stærkeste
-  uafsluttede klynge i Feature-køen. **MÅL:** /dagpenge har ingen GSC- eller
-  Plausible-baseline (ikke i top-15); sæt fra næste snapshot.
-  *Port:* 2 nye tests i `/dagpenge/page.test.tsx` læser betingelserne og begge
-  satser ud af den **renderede** markup.
+  **Nyt: /boernepenge svarer på «hvornår kommer pengene».**
+  `ceo/boernepenge-udbetalingsdatoer`. Autocomplete 1/10 gav 10 af 10 træffere
+  under «børnepenge hvornår» og 10 under «børnepenge juli» («børnepenge juli 2026
+  udbetaling», «børnepenge 20 juli»). GSC: blogindlægget har 6.126 visninger på
+  «børnepenge 2026» med 1.031 visninger på pos. 9 — **placeringen tabes af
+  blogindlægget, fordi det var det eneste svar på spørgsmålet.** Siden havde kun
+  «den 20. i januar, april, juli og oktober» i en lille brødtekstlinje.
+  Nu: to bloksider («om 19 dage» + dato), en tabel med årets fire kvartalsdatoer,
+  og dagens dato læst med `iDagPaSiden`. `naesteUdbetalingsdato` i
+  `borneungeydelse.ts` bruger samme `udbetalingsdatoerAar` som satsen og
+  blogindlægget, og løber over årsskiftet — december er ikke et kvartal.
+  *Port:* 13 tests i `/boernepenge/page.test.tsx` renderer siden og læser
+  svaret ud af markuppen; 6 mutationer målt røde.
+  **MÅL:** `/boernepenge` har ingen baseline — skriv CTR og visninger fra næste
+  snapshot. Blogindlægget som reference: 6.126 visninger / 41 klik / 0,7 % /
+  pos. 8,4.
 
-  **Kilde-blokeret:** fradrag 2026 (fitness, sommerhusudlejning) kan **ikke** bygges.
-  1/10 21:25 forsøgte igen: `dagpenge.dk`, `star.dk` (404), `fristen.dk` og
-  `borgerhåndbog.dk` svarer alle med forbindelsesfejl fra denne maskine. Uden
+  **Kilde-blokeret:** fradrag 2026 (fitness, sommerhusudlejning) kan **ikke**
+  bygges. 1/10 21:25 forsøgte igen: `dagpenge.dk`, `star.dk` (404), `fristen.dk`
+  og `borgerhåndbog.dk` svarer alle med forbindelsesfejl fra denne maskine. Uden
   kilde bygges de ikke — se ❓ nedenfor.
 
-  **Deploy: 21:30-vinduet har ikke hentet 1/10's ændringer.** Målt 21:38:
-  `/dage-til/2-juledag`, `/dage-til/fastelavn` og se `/dagar-till/fettisdagen`
-  svarer **404**, `/dage-til/1-december` mangler «I dag er det», `/skattefradrag`
-  har stadig 12.400/6.200 og ikke 9.000/18.300, og `/dage-til/skolestart` har
-  stadig «1. august ligger i uge 31». Det er **ét** vindue, målt 8 min efter det
-  åbner, så det er ikke DEPLOY-MISSING endnu — næste iteration måler igen efter
-  **07:30**-vinduet.
-
-  **Gaten:** `lint` 0 (652) · `typecheck` 0 · `TZ=UTC npm run test`
-  **3459 grønne / 211 filer** · `next build` ok (exit 0).
+  **Gaten:** `lint` 0 (654) · `typecheck` 0 · `TZ=UTC npm run test`
+  **3478 grønne / 212 filer** · `next build` ok (exit 0), `/boernepenge` er `ƒ`
+  altså dynamisk — datoen er ikke frosset ved build.
 
 ## Næste opgave (klar til næste iteration)
 
-**Hvornår kommer børnepengen ud? På `/boernepenge`.** Den fjerde og sidste
-uafsluttede autocomplete-klynge under «fradrag 2026» er lukket med ❓ (se nedenfor),
-så næste klynge er børnepenge: «børnepenge hvornår» og «børnepenge juli 2026» er
-træffere, og GSC har **6.126 visninger** på blogindlægget
-`/blog/boernepenge-2026-satser-og-satser` med «børnepenge 2026» 1.031 visninger
-på pos. 9 — altså **placeringen tabes af et blogindlæg, ikke af kalkulatoren**.
-*Accept:* `/boernepenge` svarer synligt på, hvornår udbetalingen sker, i begge
-sprog, med tallene læst fra samme modul som satsen, og en test der læser svaret ud
-af den renderede markup. **Ingen kilde → ❓, ikke et gæt** (punkt 11).
-**MÅL:** `/boernepenge` har ingen baseline endnu — skriv CTR og visninger fra næste
-snapshot.
+**Blogindlæg skal føre videre til den beregner de handler om.**
+`/blog/barsel-2026-regler-og-satser` har **85 % bounce** på 182 besøgende/28d,
+mens beregnerne ligger på 1-8 %. GSC viser samme billede for
+`/blog/boernepenge-2026-satser-og-satser`: 6.126 visninger, 41 klik, pos. 8,4 —
+altså læst, men ikke fulgt. Indlæggene har allerede interne links (børnepenge-
+indlægget linker til kalkulatoren), så opgaven er at finde de indlæg der mangler
+et **synligt næste skridt** — en knap med handlingen, ikke et link i en
+brødtekstlinje — og at tjekke at hvert indlægs `RelatedCalculators` faktisk
+peger på den kalkulator, emnet handler om.
+*Accept:* målt antal af blogindlæg uden et synligt næste skridt går fra N til 0,
+hvor et indlægs `RelatedCalculators` er tom eller peger på et emne, indlægget
+ikke handler om. **MÅL:** `/blog/barsel-2026-regler-og-satser` 182
+besøgende/28d, bounce 85 % (Plausible 2026-10-01). Genmål 15/10.
 
 ## ❓ Uafklaret — ferielov (rammer `/dage-til/summerferien` **og** skolestart)
 
@@ -155,8 +157,11 @@ Prioriteret efter forventet effekt på **trafik**. Datagrund fra GSC 1/10
   (1) *dagpenge* — «dagpengesats 2026», «dagpenge nyuddannet», «dagpengekort»,
   «dagpengetæller», «dagpengesats 2026 efter skat»: 6 af 10 er konkrete satser
   på to underemner (nyuddannet, efter skat). Vi *har* `/dagpenge` — spørg om
-  satsen i stedet for at bygge en ny side. (2) *børnepenge 2026* — «børnepenge
-  juli 2026», «børnepenge hvornår» ud over de to vi allerede dækker.
+  satsen i stedet for at bygge en ny side. (2) *børnepenge 2026* — ✅ 2/10,
+  `ceo/boernepenge-udbetalingsdatoer`. «børnepenge hvornår» (10 af 10) og «børnepenge
+  juli» (10 af 10) besvares nu på kalkulatoren selv med dagens dato, ikke kun i
+  blogindlægget. Datoerne læses fra samme modul som satsen. **MÅL:** ingen baseline
+  endnu; blogindlægget er reference med 6.126 visninger / 41 klik / 0,7 % / pos. 8,4.
   (3) *fradrag 2026* — «fradrag for fitness», «fradrag for rengøring»,
   «fradrag havearbejde», «fradrag sommerhusudlejning». **Delvis lukket 1/10:**
   rengøring og havearbejde er servicefradraget (18.300 kr.), og de to felter hedder
@@ -190,62 +195,12 @@ Prioriteret efter forventet effekt på **trafik**. Datagrund fra GSC 1/10
 
 ## Åbne VERIFICÉR DEPLOY-noter
 
-- ⏳ **Boligjobordningens 2026-lofter: 9.000 kr. og 18.300 kr.**
-  `ceo/boligjob-lofter-2026`. Prøven er på indhold: `curl -s
-  https://minberegner.dk/skattefradrag` skal indeholde «op til 9.000 kr. pr.
-  person i 2026» og «særskilt loft på 18.300 kr.» og **ikke** «12.400» eller
-  «6.200»; `https://minberegner.dk/blog/skat-2026-alt-du-skal-vide` skal have
-  «18.300 kr» i listen. Målt 1/10 **21:38**: **ikke live** endnu (skattekassen har stadig 12.400/6.200). Genmål efter 07:30.
-
-- ⏳ **Tre nye `/dage-til`-sider: fastelavn, palmesøndag, 2. juledag.**
-  `ceo/dage-til-fastelavn-palmesondag-2juledag`. Prøven er på indhold: `curl -s
-  https://minberegner.dk/dage-til/2-juledag` skal indeholde «26. december
-  2026 er en» og et `<time>` med dagens ISO-dato;
-  `https://minberegner.dk/dage-til/fastelavn` skal sige «Fastelavn er påskedagen
-  minus 47 dage», og `https://beraknare.se/dagar-till/fettisdagen` skal have
-  `<title>` med «fettisdagen». Målt 1/10 **21:38**: **ikke live** endnu (skattekassen har stadig 12.400/6.200). Genmål efter 07:30.
-
-- ⏳ **Dagens dato står i heroen på alle `/dage-til`-sider.**
-  `ceo/dage-til-dagens-dato`. Prøven er på indhold: `curl -s
-  https://minberegner.dk/dage-til/1-december` skal indeholde «I dag er det» og
-  et `<time>` med dagens ISO-dato i Copenhagen-tid. Målt 1/10 **21:38**: **ikke live** endnu (skattekassen har stadig 12.400/6.200). Genmål efter 07:30.
-
-- ⏳ **`/dage-til/skolestart` tæller til den første skoledag.**
-  `ceo/skolestart-forste-skoledag` (dae670a). Prøven er på indhold: `curl -s
-  https://minberegner.dk/dage-til/skolestart` skal indeholde «mandag 3. august
-  2026» **og** «i uge 32 i 2026». Målt 1/10 18:22: «mandag 3. august 2026» er
-  **der** (men kun fordi den stod i den gamle tekst), mens «i uge 32 i 2026»
-  **mangler** — FAQ'en serverer stadig «1. august ligger i uge 31 i både 2026 og
-  2028». Målt igen 1/10 19:10: «mandag 3. august 2026» er der, «i uge 32 i 2026»
-  mangler stadig, altså endnu ikke deployet. Målt 1/10 **21:38**: «mandag 3. august
-  2026» er der (3 gange), «i uge 32 i 2026» mangler stadig, og den gamle «1. august
-  ligger i uge 31» står stadig 6 gange. **Endnu ikke live.** Genmål efter 07:30.
-
-- ✅ **`/renteprognose` er live og virker.** `ceo/renteprognose` (9b283d3).
-  Målt 1/10 18:22: `<title>` er «Renteprognose - hvad koster boliglånet om 5, 10
-  og 30 år?», siden nævner **renteprognose 41 gange** og har alle tre
-  værktøjs-blokke (Renteomlægning, Afdragsform, Rentesvingning), og
-  `/rentefradrag` har **1** `href="/renteprognose"`. Vindue 1/10 17:30.
-  **DEPLOY OK 1/10.**
-
-- ✅ **Sentry skal sende, og loggen må ikke være slået fra.**
-  `ceo/sentry-sendepipeline` (28a2592). Efter deploy: prod-build skal **ikke**
-  have `silent: true` i `next.config.ts` (grep efter `silent:`), og
-  `GET /api/health` skal svare `ok`.
-
-- ✅ **Sentry-støjen fra Next router state skal forsvinde.**
-  `ceo/sentry-router-stoej` (3e67ed3). Målt 1/10 18:22: `grep -c
-  'shouldDropSentryEvent' src/lib/sentry-config.ts` = **2** (definition +
-  kald i `scrubSentryEvent`, linje 107 og 116), og `GET /api/health` svarer
-  **200**. Vindue 1/10 17:30. **DEPLOY OK 1/10** på kode og health.
-  *Sidste hændelse med beskeden i snapshottet er 2026-10-01T12:56, altså før
-  deployet — det næste Sentry-snapshot bekræfter 0 nye.*
-
-- ⏳ **Nyt afsnit: /dagpenge svarer på «dagpenge nyuddannet».**
-  `ceo/dagpenge-nyuddannet`. Prøven er på indhold: `curl -s
-  https://minberegner.dk/dagpenge` skal indeholde «Nyuddannet?» og «18 måneder» og
-  «14 dage» i samme afsnit, og **ikke** mangle ordet «nyuddannet».
-  Vindue 2/10 07:30.
+- ⏳ **Nyt afsnit: /boernepenge svarer på «hvornår udbetales».**
+  `ceo/boernepenge-udbetalingsdatoer`. Prøven er på indhold: `curl -s
+  https://minberegner.dk/boernepenge` skal indeholde «Hvornår kommer børnepengen
+  ud?», «om N dage» og en `<time dateTime="...">` med den næste betalingsdato i
+  **dagens** danske tid — ikke den 20. hver måned i en fast måned. Vindue 3/10
+  07:30.
 
 ## ❓ Til Mads
 

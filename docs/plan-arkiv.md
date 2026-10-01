@@ -22944,3 +22944,38 @@ Gate: lint 0 · typecheck 0 · 3459 tests grønne/211 filer · build exit 0.
 Deploy 21:38: 1/10's fire ændringer var **ikke** live. /dage-til/2-juledag,
 /dage-til/fastelavn og se /dagar-till/fettisdagen svarer 404; /skattefradrag har
 stadig 12.400/6.200. Ét vindue, målt 8 min efter åbning — ikke DEPLOY-MISSING endnu.
+
+## 2/10 21:52 — 21:30-vinduet lukkede alle fem åbne deploy-noter
+
+Deploy-noterne fra 1/10 blev målt igen kl. 21:52, 22 min efter at 21:30-vinduet
+åbnede. Alle fem er live, hver på sit eget indholdstal:
+
+- **Boligjob-lofterne** `ceo/boligjob-lofter-2026`: `/skattefradrag` har 6× «9.000 kr.»
+  og 6× «18.300 kr.» og **nul** «12.400»/«6.200». DEPLOY OK.
+- **Tre nye `/dage-til`-sider** `ceo/dage-til-fastelavn-palmesondag-2juledag`:
+  `/dage-til/2-juledag` og `/dage-til/fastelavn` svarer 200 med «26. december 2026
+  er en» og «påskedagen minus 47 dage»; `beraknare.se/dagar-till/fettisdagen`
+  svarer 200 med «Hur många dagar är det till fettisdagen?». DEPLOY OK.
+- **Dagens dato i heroen** `ceo/dage-til-dagens-dato`: `/dage-til/1-december`
+  har «I dag er det». DEPLOY OK.
+- **`/dage-til/skolestart`** `ceo/skolestart-forste-skoledag`: «mandag 3. august 2026»
+  3 gange og «i uge 32 i 2026» 3 gange. Den gamle «1. august ligger i uge 31» står
+  stadig 3 gange, men er nu i en forklaring om **lovens dato** 1. august imod
+  **første skoledag** — altså ikke længere det samme påstand. DEPLOY OK.
+- **«dagpenge nyuddannet»** `ceo/dagpenge-nyuddannet`: «Nyuddannet?» står 2 gange,
+  og 18 måneder + 14 dage ligger i samme `<p>` (React sætter `<!-- -->` mellem
+  tal og ord, så en rå grep på «18 måneder» giver 0 — fundet ved at læse
+  markuppen). DEPLOY OK.
+
+## 2/10 21:52 — CEO-kø punkt 0 verificeret lukket i koden igen
+
+Alle otte fund gennemgået direkte i filerne, ikke via planens egne noter:
+Valborg er `month: 4, day: 30`; svensk påskafton er `offsetDays: -1` (lørdag);
+dansk sankthans er fast `month: 6, day: 23` / 24. juni med svensk midsommar-logik
+kun på `se`; den danske påskeaften-FAQ er skrevet om til at skelne de to dage;
+`/husleje` peger på nettoprisindekset og siger at nævnet ikke fastsætter en sats
+pr. område; `toUtcMidnight` bruger `DAGE_TIL_TIMEZONE`; den svenske promille-FAQ
+læser `PROMILLEGRANSE.se`; `dato-eksempler.ts` har `maneder: 12`.
+
+Gate efter børnepenge-opgaven: lint 0 · typecheck 0 · 3478 tests grønne/212 filer
+· build exit 0 · `/boernepenge` er `ƒ` (dynamisk, altså ingen frossen dato).
