@@ -697,7 +697,7 @@ export default async function DatoPage() {
       <div className="prose dark:prose-invert max-w-none mt-12">
         <h2>
           {locale === "se"
-            ? "Datum folk oftast räknar ner till"
+            ? "Datum som folk oftast räknar ner till"
             : "Datoer folk oftest tæller ned til"}
         </h2>
         <p>
@@ -718,13 +718,13 @@ export default async function DatoPage() {
                 <>
                   {link.target} {formatNumber(link.days, "se")}{" "}
                   {link.days === 1 ? "dag" : "dagar"}
-                  {link.days === 0 ? " — det är dagen i dag." : ` (${formatNumber(link.weeks, "se")} ${link.weeks === 1 ? "vecka" : "veckor"}${link.daysLeft === 0 ? "" : ` och ${formatNumber(link.daysLeft, "se")} dagar`}).`}
+                  {link.days === 0 ? " — det är dagen i dag." : ` (${formatNumber(link.weeks, "se")} ${link.weeks === 1 ? "vecka" : "veckor"}${link.daysLeft === 0 ? "" : ` och ${formatNumber(link.daysLeft, "se")} ${link.daysLeft === 1 ? "dag" : "dagar"}`}).`}
                 </>
               ) : (
                 <>
                   {link.target}:{" "}
                   <strong>{formatNumber(link.days, "da")} dage</strong>
-                  {link.days === 0 ? " — det er dagen i dag." : ` (${formatNumber(link.weeks, "da")} ${link.weeks === 1 ? "uge" : "uger"}${link.daysLeft === 0 ? "" : ` og ${formatNumber(link.daysLeft, "da")} dage`}).`}
+                  {link.days === 0 ? " — det er dagen i dag." : ` (${formatNumber(link.weeks, "da")} ${link.weeks === 1 ? "uge" : "uger"}${link.daysLeft === 0 ? "" : ` og ${formatNumber(link.daysLeft, "da")} ${link.daysLeft === 1 ? "dag" : "dage"}`}).`}
                 </>
               )}
             </li>

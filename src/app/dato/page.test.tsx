@@ -74,7 +74,7 @@ describe("dato page", () => {
 
     const html = renderToStaticMarkup(await DatoPage());
 
-    expect(html).toContain("Datum folk oftast räknar ner till");
+    expect(html).toContain("Datum som folk oftast räknar ner till");
     for (const slug of getDageTilSlugs("se")) {
       expect(html, slug).toContain(`href="/dagar-till/${slug}"`);
     }
@@ -501,6 +501,60 @@ describe("dato page — dage-til-listen svarer selv", () => {
 
     expect(html).not.toContain("/dage-til/");
     expect(html).not.toContain("Tallet nedenfor er dagens antal dage");
+  });
+
+  // Overskriften er den eneste sætning på listen, der ikke er genereret fra
+  // `dage-til.ts`. Den læser på beraknare.se — sitets næststørste side med
+  // 101.580 visninger — så et relativt led uden "som" gør hele sætningen
+  // ungrammatisk: svensk kræver "datum som folk räknar ner till", mens
+  // dansk godt kan droppe stedordet ("datoer folk tæller ned til"). Derfor
+  // låses den i hver sprogarm, så en fremtidig overskrift ikke kan låne den
+  // andens form.
+  test("begge overskrifter bruger den rigtige form for sit sprog", async () => {
+    vi.mocked(getLocale).mockResolvedValue("se");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("se"));
+    const svensk = renderToStaticMarkup(await DatoPage());
+    expect(svensk).toContain("Datum som folk oftast räknar ner till");
+    expect(svensk).not.toContain("Datum folk oftast räknar ner till");
+
+    vi.mocked(getLocale).mockResolvedValue("da");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("da"));
+    const dansk = renderToStaticMarkup(await DatoPage());
+    expect(dansk).toContain("Datoer folk oftest tæller ned til");
+    expect(dansk).not.toContain("Datum");
+  });
+
+  // Restdagen i parentesen var skrevet "dage"/"dagar" uden at føje et tal til,
+  // så juledagen læste "12 uger og 1 dage" den dag 87 dage lå forude — 87 dage
+  // er 12 uger *og 1 dag*. Hovedtallet og ugerne blev bøjet, restdagen ikke,
+  // og det rammer halvdelen af alle rækker alt efter hvilken ugedag dagen har.
+  // Porten regner hele parentesen fra `getDageTilAnswer` for alle rækker, så
+  // den kan ikke gå fra sit eget tal, og den låser "1 dage"/"1 dagar" væk.
+  test("hver række bøjer både antal, uge og restdage i sit eget sprog", async () => {
+    const SPROG = {
+      da: { uge: "uge", uger: "uger", og: "og", dage: "dage" },
+      se: { uge: "vecka", uger: "veckor", og: "och", dage: "dagar" },
+    } as const;
+
+    for (const locale of ["da", "se"] as const) {
+      vi.mocked(getLocale).mockResolvedValue(locale);
+      vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale(locale));
+      const html = renderToStaticMarkup(await DatoPage());
+      const s = SPROG[locale];
+
+      for (const event of getDageTilEvents(locale)) {
+        const a = getDageTilAnswer(event, locale, new Date());
+        const uge = a.weeks === 1 ? s.uge : s.uger;
+        const rest =
+          a.daysLeft === 0 ? "" : ` ${s.og} ${a.daysLeft} ${a.daysLeft === 1 ? "dag" : s.dage}`;
+        expect(html, `${locale}/${event.id}`).toContain(`(${a.weeks} ${uge}${rest})`);
+      }
+
+      // Restdagen bøjes, så listen aldrig siger "og 1 dage"/"och 1 dagar".
+      // (Siden har ændre steder med "1 uge = 7 dage", som er korrektdansk.)
+      const fejlForm = locale === "se" ? " och 1 dagar)" : " og 1 dage)";
+      expect(html.includes(fejlForm), `${locale}: ${fejlForm}`).toBe(false);
+    }
   });
 });
 

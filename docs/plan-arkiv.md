@@ -22238,3 +22238,49 @@ Udgangspunkt 2026-10-01. `d = 30 + månedene okt.–maj + dag-i-måned`.
 *ét dag mindre* end sankthansdag (266) — korrekt, fordi aftenen er 23/06, mens
 dagen er 24/06. Det er den uventede rækkefølge, så den står her, så næste
 iteration ikke "retter" den.
+
+## Iteration 1/10 06:35 — `ceo/dato-datoliste-bøjning`
+
+**Hvad:** `/dato`'s "Datoer folk oftest tæller ned til"-liste skrev restdagen i
+parentesen uden at bøje den: antallet og ugerne blev bøjet (`1 dag` / `1 uge`),
+restdagen ikke. Juledagen læste derfor "12 **uger og 1 dage**" på de dage
+hvor 87 dage lå forude. Samme fejl i begge sprogarmé (`dage` / `dagar`), altså
+på sitets næststørste side: `/dato` har 133.054 GSC-visninger (da) og 101.580
+(se), og listen er den eneste del af siden der linker til de 19 `/dage-til/*`-
+sider, der selv kom live 25/9. Fundet kom fra at læse den faktiske SSR-markup
+for `beraknare.se`, ikke fra at læse koden — de to strenge stod i samme
+skabelonlinje og så ens ud.
+
+**Målt:** `npx vitest run src/app/dato/page.test.tsx` mod den gamle kode giver
+2 røde; mutationen (`daysLeft === 1 ? "dag" : "dage"` → `dage`) giver
+`da/midsommarafton: expected ... to contain '(38 uger og 1 dag)'`. Færdigt:
+35 tests i filen grønne.
+
+**Rettelsen:** restdagen bøjes nu i begge sprogarmé. To nye porte: den ene
+regner hele parentesen fra `getDageTilAnswer` for alle 19 (da) / 16 (se) rækker
+og tjekker, at hver findes i markupken — den kan ikke gå fra sit eget tal; den
+anden låser " og 1 dage)" / " och 1 dagar)" væk, fordi siden har ændre steder
+med korrekt "1 uge = 7 dage", som et blødt `\b1 dage\b`-forbud ville dræbe.
+
+**En fejl mere i samme klasses:** den svenske `<h2>` læste "Datum folk oftast
+räknar ner till" — relativt led uden "som" i svensk, som ikke tåler det
+modsatte. Dansk kan godt ("datoer folk tæller ned til"), så kun den svenske arm
+rettes, og porten låser hver arms egen form så en fremtidig overskrift ikke kan
+låne den andens. `page.test.tsx:77` havde den gamle streng som forventning
+(låst fast som om den var rigtig) — rettet.
+
+**Gaten:** `biome lint` ren (635 filer), `locale-leak --gate` exit 0,
+`TZ=UTC npm run test` **3.308 tests grønne i 202 filer**, `next build exit 0`
+(142 sider). Én flak: `dato-eksempler.test.ts` løb i 5 s-timeout under
+parallel load i det første lokale kørsel; filen er grøn alene og i det fulde
+UTC-kørsel.
+
+**Fund der retter planens egen præmis:** planen skrev at "CTR følger position,
+ikke sidekvalitet" og slog den til grunden med to position-intervaller. GSC's
+egne tal modbeviser den: `/boligstoette` har **2,4 % CTR på pos. 8,7** og
+`/promille` **1,5 % på pos. 7,9** (og er site nyeste stjerne, +2.183 %/28d),
+mens `/procent` har **0,1 % på pos. 7,4** og `/moms` **0,2 % på pos. 7,0**.
+24x CTR-forskel på næsten samme placering, samme site, samme måned. Præmissen
+er fjernet fra planen, og F1 (søgningseksport fra Mads) er dermed vigtigere end
+den var — uden søgningsniveau ved vi ikke om `/procent`s 150.470 visninger er
+et snippet-problem eller et mix-problem, og de to kræver hver sin rettelse.

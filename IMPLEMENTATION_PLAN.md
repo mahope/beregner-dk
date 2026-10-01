@@ -1,53 +1,54 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — 1/10 06:00. **Ingen kode i denne iteration.** Opgave 200 er målt
-  igennem til en afgørelse, og ingen af de tre veje kan gøres sikkert i én
-  iteration — se nedenfor.
+STATUS: KØ — 1/10 06:35. To ting lå åbne fra sidste iteration.
 
-  **Opgave 200 er blokeret på Cloudflare, ikke på Node.** Live målt 1/10 06:00:
-  `/` 367 ms, `/dato` 433 ms, `/procent` 282 ms TTFB, og
-  `cf-cache-status: DYNAMIC` med `cache-control: private, no-cache, no-store`.
-  **Den naive løsning (sæt `s-maxage` på HTML'en) er farlig, og det er målt
-  grund:** Next svarer `vary: rsc, next-router-state-tree,
-  next-router-prefetch, next-router-segment-prefetch, Accept-Encoding`, og
-  klientens rute-navigation **genanmoder samme URL med `RSC: 1`-header**. En
-  CDN der cache'r på URL og ikke på `Vary` ville give Next's router en
-  HTML-svar i stedet for et flight-svar → brudt navigation på alle cachede
-  sider. Det kræver en Cloudflare-regel/Worker, altså Mads' infra — ikke kode i
-  dette repo. Skriv det i ❓.
+  **1. Leveret: `/dato`s datoliste lævede to sprogfejl.** "12 **uger og 1
+  dage**" i stedet for "1 dag" — antallet og ugerne blev bøjet, restdagen ikke,
+  i alle 19 rækker og begge sprog. Plus en svensk `<h2>` uden "som". Ny port
+  regner hele parentesen fra `getDageTilAnswer` for hver række i begge sprog.
+  `ceo/dato-datoliste-bøjning`.
 
-  **Resten af sitet er målt sundt i samme sweep (38 sider, begge domæner).**
-  Alle 200 med korrekt `lang` og canonical på sig selv; `beraknare.se` er
-  svensk på alle tjekkede sider; `/dage-til/*` har dansk canonical + `hreflang`
-  `sv` → `/dagar-till/*` og omvendt. **Alle 19 nedtællingstal er rigtige** —
-  hver især genregnet mod kalenderen fra 2026-10-01 (juledagen 85, juleaften 84,
-  nytårsaften 91, påskedag 178, grundlovsdag 247, sankthansaftensdag 265,
-  sankthansdag 266, halloween 30, 1. advent 59, skolestart 304). **Ingen fejl
-  fundet, intet rettet** — det er CEO-køens punkt 0-klasse verificeret igen.
+  **2. Fund der retter planens egen præmis: CTR følger IKKE position.** Planen
+  skrev "pos. 4,9-5,9 giver 0,6-1,4 %, pos. 7,0-8,7 giver 0,1-0,5 %". GSC's
+  egne tal modbevider det: `/boligstoette` har **2,4 % CTR på pos. 8,7**,
+  `/promille` **1,5 % på pos. 7,9** (nyeste stjerne, +2.183 %/28d), mens
+  `/procent` har **0,1 % på pos. 7,4** og `/moms` **0,2 % på pos. 7,0** —
+  24x spredning ved næsten samme position, samme site, samme måned. Præmissen
+  er fjernet. **Konsekvens:** `/procent` og `/moms` skal **ikke** få flere
+  titelændringer, før vi har set hvilke søgninger deres 172.934 visninger er —
+  ellers brænder vi flere målinger på det forkerte spørgsmål.
 
-  **Næste opgave: opgave 200, men kun den del der ikke kræver Mads** — se
-  opgave 200 for de tre veje og hvilken der er kode.
+  **Opgave 200 er blokeret på Cloudflare, ikke på Node.** Live 1/10 06:00: `/`
+  367 ms, `/dato` 433 ms, `/procent` 282 ms TTFB, `cf-cache-status: DYNAMIC`,
+  `cache-control: private, no-cache, no-store`. Den naive løsning (`s-maxage`
+  på HTML'en) er farlig og målt grund: Next svarer `vary: rsc, …`, og
+  klientens rute-navigation genanmoder samme URL med `RSC: 1`. En CDN der
+  cache'r på URL og ikke på `Vary` giver routeren HTML i stedet for sit
+  flight-svar → brudt navigation på alle cachede sider. Det er Mads' infra.
+  ❓ spørgsmålet er skrevet.
 
-  **Hvorfor køen er tom, målt 1/10:** 97 og 119 og 183 er `BLOCKED` på svar fra
-  Mads, 98 afhænger af 97, 187 må ikke røres før 13/10, og F1/F3/F5 har alle
-  brug for enten GSC-søgningsdata (❓) eller 187's dato. 194's to resterende
-  sider kan **ikke** løses: `/tidsberegner`s eneste indlæg er koblet til
-  `/tidszone`, og `blog-kobling.test.ts` forbyder ét indlæg på to beregnere;
-  `/kalorier` er opgave 119.
+  **Resten af sitet målt sundt i samme sweep (38 sider, begge domæner).** Alle
+  200 med korrekt `lang` og canonical på sig selv; `beraknare.se` svensk alle
+  steder; `/dage-til/*` har dansk canonical + `hreflang` `sv` → `/dagar-till/*`.
+  **Alle 19 nedtællingstal rigtige** — genregnet mod kalenderen fra 2026-10-01.
+  **Ingen fejl fundet, intet rettet** (CEO-køens punkt 0 verificeret igen).
 
-  **`/dage-til/*` er ikke et ranking-problem.** Alle 19 danske sider er live
-  (200), i sitemap, og titlen *svarer* på søgningen med dagens tal: "Hvor mange
-  dage er der til 1. december? 61 dage". De kom live 25/9 19:48 (`70e75b9`), og
-  GSC-vinduet slutter 28/9 — dagen efter. Deres fravær i GSC's top-16 er
-  altså vinduet, ikke siden. **Ingen handling; genmål 9/10.**
+  **Hvorfor køen ellers er tom, målt 1/10:** 97, 119 og 183 er `BLOCKED` på
+  Mads, 98 afhænger af 97, 187 må ikke røres før 13/10, F1/F3/F5 kræver
+  GSC-data (❓) eller 187's dato, og 194's to sidste sider kan ikke løses
+  (`/tidsberegner`s eneste indlæg hænger på `/tidszone`, `/kalorier` er 119).
+
+  **`/dage-til/*` er ikke et ranking-problem.** Alle 19 danske sider er live, i
+  sitemap, og titlen *svarer* på søgningen med dagens tal ("… 61 dage"). De kom
+  live 25/9 19:48 (`70e75b9`), GSC-vinduet slutter 28/9 — dagen efter. Fraværet
+  i GSC's top-16 er vinduet, ikke siden. **Ingen handling; genmål 9/10.**
 
   **Blokeret af svar fra Mads:** 97, 119 og 183, samt F1/F3/F5. **Opgave 187 må
-  ikke røres før 13/10.** CEO-køens punkt 0 er lukket — alle otte tal er
-  verificeret i koden 1/10 02:00.
+  ikke røres før 13/10.** CEO-køens punkt 0 er lukket (alle otte tal verificeret
+  i koden 1/10 02:00).
 
-  **⚠️ Målerfælde: `/tidszone` er dynamisk** (`cache-control: no-store`), så
-  `new Date()` i dens JSX er ikke frosset ved build. Kun statiske sider må regne
-  på et fast år.
+  **⚠️ Målerfælde:** `/tidszone` er dynamisk (`no-store`), så `new Date()` i
+  dens JSX er ikke frosset ved build. Kun statiske sider må regne på et fast år.
 
   **⚠️ Målerfælde (30/9 15:40).** `npm run test` kører `locale-leak-gate.test.ts`,
   der med vilje planterer danske lækager. Derfor kommer `FEJL: n ureviewet(e)`-
@@ -79,8 +80,11 @@ måned. Kilder: Google 4.170, Bing 1.319, DDG 378, Yahoo 274 — **1.971 af 7.31
 
 ### Den faktiske flaskehals
 
-CTR følger position, ikke sidekvalitet: pos. 4,9-5,9 giver 0,6-1,4 %, pos.
-7,0-8,7 giver 0,1-0,5 %. Vi ligger **på position 5-8 på 600.000 visninger**.
+CTR følger **ikke** position — se fundet i STATUS 1/10 06:35. `/boligstoette`
+har 2,4 % CTR på pos. 8,7 mod `/procent`s 0,1 % på pos. 7,4. Det er 24x
+forskel på næsten samme placering, samme site, samme måned. Vi ligger
+**på position 5-8 på 600.000 visninger**, men positionen er ikke den eneste
+variabel.
 Der er ingen titel, beskrivelse- eller intern-link-fejl tilbage at rette på de
 eksisterende sider — kun **positionen** er lav, og den afgøres af den danske
 konkurrence i hvert enkelt ord.
@@ -183,6 +187,17 @@ sagde tidligere 82/17 og før det 72 — de ekstra kommer fra commits efter sids
 måling, ikke fra denne ændring.
 
 ## Åbne VERIFICÉR DEPLOY-noter
+
+- ⏳ **Datolisten på `/dato` skal bøje "1 dag", ikke "1 dage", og den svenske
+  overskrift skal have "som".** `ceo/dato-datoliste-bøjning`. På
+  `https://minberegner.dk/dato` og `https://beraknare.se/dato` må strengen
+  **" og 1 dage)"** / **" och 1 dagar)"** forekomme 0 gange i markupken, og
+  **"12 uger og 1 dag."** / **"12 veckor och 1 dag."** skal stå i rækkerne med
+  87 dage til juledagen (1/10-1/12 og 2/12-24/12). Den svenske `<h2>` skal
+  lyde **"Datum som folk oftast räknar ner till"** — ikke "Datum folk oftast
+  räknar ner till". HTTP 200 beviser intet, det er tekst i 19 `<li>`-rækker.
+  Prøven på dansk er `src/app/dato/page.test.tsx` (de to nye porte) efter
+  deploy. Vindue **1/10 12:30** (denne merge sker efter 07:30).
 
 - ⏳ **Next 16 + proxy.ts + scroll-attributen.** `ceo/next-16`. På
   `https://minberegner.dk/` skal markupken have `<html … data-scroll-behavior="smooth">`,
