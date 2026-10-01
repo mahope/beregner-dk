@@ -20,6 +20,9 @@ import { linjeNummer, stripKommentarer } from "@/lib/kommentar-scanner";
  * 1. **Regnestykker.** Hver «A kr × F = C kr», «A kr ÷ F = C kr»,
  *    «P procent af H = R» og «A af B = P» i al brødtekst på sitet regnes igen
  *    med tallene fra sætningen selv. Et forkert regnestykke er en rød port.
+ *    Også kæder («40.000 kr/måned × 12 × 1% = 4.800 kr») og kæder uden `kr`
+ *    efter første faktor («50.000 × 33,6 % = 16.800 kr.»), som er sitets egen
+ *    notationsform.
  * 2. **Hårdkodede beløb i JSX.** Et beløb med tusindtalsseparator må ikke stå som
  *    tekst i `page.tsx` — det skal komme fra et modul gennem `{…}`. Målt 1/10:
  *    0 fund på tværs af alle 124 sider.
@@ -37,39 +40,105 @@ import { linjeNummer, stripKommentarer } from "@/lib/kommentar-scanner";
  */
 const TAL = "\\d{1,3}(?:[. ]\\d{3})+(?:,\\d+)?|\\d+(?:,\\d+)?";
 
+/**
+ * `TAL` skal **altid** pakkes i en gruppe, når den indsættes i en større
+ * mønsterstreng. Den indeholder selv et `|`, så en blot indsættelse lader
+ * alternativet løbe ud af den gruppe, det skulle være lukket i — og mønsteret
+ * matcher så tal, der slet ikke har noget med regnestykket at gøre.
+ */
+const T = `(?:${TAL})`;
+
+/** Gange- og delingstegn, i de skrivemåder JSX og brødtekst bruger. */
+const MUL = "(?:&times;|×|x|\\*)";
+const DIV = "(?:&divide;|÷)";
+
+/** Ét led i en kæde: tegn, faktor, valgfrit procenttal. */
+const LED = `(?:${MUL}|${DIV})\\s*${T}\\s*%?\\s*`;
+
+/**
+ * Hvor en regel må begynde at læse.
+ *
+ * Uden `START` så et regnestykke læses fra en **midterste** faktor: «40.000
+ * kr/måned × 12 × 1% = 4.800 kr» blev læst som «12 × 1% = 4.800 kr», fordi
+ * `×` ikke var en del af mønsteret. Første faktor springes så over, og porten
+ * erklærer en rigtig sætning forkert. De tre betingelser er:
+ *
+ * - ikke lige efter et gange-/delingstegn (altså ikke midt i en kæde),
+ * - ikke lige efter et `x` med luft omkring («max 2.000 kr», ikke «× 2.000»),
+ * - ikke midt i et tal, så «40.000» ikke kan læses som «0.000».
+ */
+const START = "(?<![×*÷&;]\\s*)(?<!\\s[xX]\\s)(?<![.\\d])";
+
+/**
+ * Enheden på første faktor. `kr` er **valgfrit**, fordi sitets mest brugte
+ * notationsform skriver beløbet uden den — «50.000 × 33,6 % = 16.800 kr.» — og
+ * en regel, der kræver `kr` lige efter første faktor, ser **ingen** af dem.
+ * Slash-enheder («40.000 kr/måned») er med, fordi de står i rigtige kæder på
+ * feriepenge-siden.
+ */
+const ENHED = "(?:kr\\.?\\s*(?:\\/[a-zA-ZæøåÆØÅäöü]{1,12})?)?";
+
 interface Regel {
   navn: string;
   regex: RegExp;
+  /** Er gruppe 2 en kæde af operatorer og faktorer frem for ét tal? */
+  kæde?: boolean;
   rigtig: (a: number, f: number, c: number) => boolean;
 }
 
 /** Beløb og procenter i brødtekst er hele kroner, så én krones afrunding er nok. */
 const afrund = (a: number, b: number) => Math.abs(a - b) <= 1;
 
+/**
+ * Ganger en kæde sammen til **én** faktor, så «× 12 × 1%» bliver 0,12 og «÷
+ * 1,25» bliver 0,8. Begge regler bruger så samme dom: `a × faktor = c`.
+ * `null` betyder at kæden ikke indeholdt noget brugbart.
+ */
+function foldér(kæde: string): number | null {
+  let værdi = 1;
+  let led = 0;
+  for (const m of kæde.matchAll(/(÷|&divide;|×|&times;|\*|x)\s*(\d[\d.,]*)\s*(%?)/gi)) {
+    const n = tal(m[2]) * (m[3] ? 0.01 : 1);
+    if (!Number.isFinite(n) || n === 0) return null;
+    const tegn = m[1].toLowerCase();
+    værdi = tegn === "÷" || tegn === "&divide;" ? værdi / n : værdi * n;
+    led++;
+  }
+  return led > 0 ? værdi : null;
+}
+
 const REGLER: Regel[] = [
   {
     navn: "gang",
-    regex: new RegExp(`(${TAL})\\s*kr\\.?\\s*(?:&times;|×|x|\\*)\\s*(${TAL})\\s*=\\s*(${TAL})\\s*kr`, "gi"),
-    rigtig: (a, f, c) => afrund(a * f, c),
+    regex: new RegExp(
+      `${START}(${T})\\s*${ENHED}\\s*(${MUL}\\s*${T}\\s*%?\\s*(?:${LED})*?)\\s*=\\s*(${T})\\s*kr`,
+      "gi",
+    ),
+    kæde: true,
+    rigtig: (a, f, c) => f !== 0 && afrund(a * f, c),
   },
   {
     navn: "del",
-    regex: new RegExp(`(${TAL})\\s*kr\\.?\\s*(?:&divide;|÷)\\s*(${TAL})\\s*=\\s*(${TAL})\\s*kr`, "gi"),
-    rigtig: (a, f, c) => f !== 0 && afrund(a / f, c),
+    regex: new RegExp(
+      `${START}(${T})\\s*${ENHED}\\s*(${DIV}\\s*${T}\\s*%?\\s*(?:${LED})*?)\\s*=\\s*(${T})\\s*kr`,
+      "gi",
+    ),
+    kæde: true,
+    rigtig: (a, f, c) => f !== 0 && afrund(a * f, c),
   },
   {
     navn: "procentAf",
-    regex: new RegExp(`(${TAL})\\s*(?:procent|%)\\s*af\\s+(${TAL})(?:\\s*kr\\.?)?\\s*=\\s*(${TAL})`, "gi"),
+    regex: new RegExp(`(${T})\\s*(?:procent|%)\\s*af\\s+(${T})(?:\\s*kr\\.?)?\\s*=\\s*(${T})`, "gi"),
     rigtig: (p, hel, c) => afrund((p / 100) * hel, c),
   },
   {
     navn: "stigning",
-    regex: new RegExp(`(${TAL})\\s*(?:procent|%)\\s*(?:stigning|vækst|stiger|økning|ökning|rente)[^=]{0,24}?(${TAL})\\s*kr\\.?\\s*=\\s*(${TAL})\\s*kr`, "gi"),
+    regex: new RegExp(`(${T})\\s*(?:procent|%)\\s*(?:stigning|vækst|stiger|økning|ökning|rente)[^=]{0,24}?(${T})\\s*kr\\.?\\s*=\\s*(${T})\\s*kr`, "gi"),
     rigtig: (p, hel, c) => afrund((p / 100) * hel, c),
   },
   {
     navn: "andel",
-    regex: new RegExp(`(${TAL})\\s+af\\s+(${TAL})\\s*=\\s*(${TAL})`, "gi"),
+    regex: new RegExp(`(${T})\\s+af\\s+(${T})\\s*=\\s*(${T})`, "gi"),
     rigtig: (del, hel, p) => hel !== 0 && (afrund((del / hel) * 100, p) || afrund((del / p) * 100, hel)),
   },
 ];
@@ -91,8 +160,10 @@ function findFejl(kode: string, fil: string): Fund[] {
   const fund: Fund[] = [];
   for (const regel of REGLER) {
     for (const match of rå.matchAll(regel.regex)) {
-      const [a, f, c] = [tal(match[1]), tal(match[2]), tal(match[3])];
-      if (!Number.isFinite(a) || !Number.isFinite(f) || !Number.isFinite(c)) continue;
+      const a = tal(match[1]);
+      const f = regel.kæde ? foldér(match[2]) : tal(match[2]);
+      const c = tal(match[3]);
+      if (f === null || !Number.isFinite(a) || !Number.isFinite(f) || !Number.isFinite(c)) continue;
       if (regel.rigtig(a, f, c)) continue;
       fund.push({
         fil,
@@ -209,6 +280,56 @@ function jsxBelob(kilde: string, navn: string): string[] {
   return fund;
 }
 
+/**
+ * Hver regels **egen** sætning: én rigtig, der skal være grøn, og én der kun
+ * er forskel fra den rigtige ved at resultatet er sat til et forkert tal, som
+ * skal være rød — og rød **af den regel**, der er sat på prøven.
+ *
+ * Før 2/10 var der ingen sådanne sætninger pr. regel, kun ét samlet tal for
+ * alle fem. Derfor kunne `gang` miste dækningen i sitets egen notationsform
+ * uden at nogen test blev rød: porten var grøn på sider, hvor alle
+ * regnestykker var forkerte, fordi den slet ikke så dem.
+ *
+ * Målt 2/10 med de gamle mønstre: porten så **3 af de 9** forkerte sætninger.
+ * De tre den så ikke, var netop dem uden `kr` efter første faktor — to rene
+ * («50.000 × 33,6 % = 19.800 kr.») og én i kædeform («40.000 kr/måned × 12 ×
+ * 1% = 9.600 kr»).
+ */
+const KANONISKE: [regel: string, rigtig: string, forkert: string][] = [
+  ["gang", "50.000 × 33,6 % = 16.800 kr.", "50.000 × 33,6 % = 19.800 kr."],
+  ["gang", "30.000 × 25,6 % = 7.680 kr.", "30.000 × 25,6 % = 10.680 kr."],
+  ["gang", "1.000 kr &times; 1,25 = 1.250 kr", "1.000 kr &times; 1,25 = 1.500 kr"],
+  ["gang", "40.000 kr/måned × 12 × 1% = 4.800 kr", "40.000 kr/måned × 12 × 1% = 9.600 kr"],
+  ["del", "1.000 kr ÷ 1,25 = 800 kr", "1.000 kr ÷ 1,25 = 1.200 kr"],
+  ["del", "1 250 kr &divide; 1,25 = 1 000 kr", "1 250 kr &divide; 1,25 = 800 kr"],
+  ["procentAf", "10 procent af 10.000 = 1.000", "10 procent af 10.000 = 500"],
+  ["stigning", "3 % stigning på 30.000 kr = 900 kr", "3 % stigning på 30.000 kr = 1.200 kr"],
+  ["andel", "2.500 af 10.000 = 25", "2.500 af 10.000 = 30"],
+];
+
+/**
+ * Hvad hver regel ser i korpus, målt 2/10 med mønsterne ovenfor over `src/app`
+ * og `src/lib`. Før 2/10 var der ét samlet tal (`antal >= 25`) for alle fem, så
+ * en regel der døde gav ingen rød port — `stigning` og `andel` så **0** fund
+ * hver, og ingen opdagede det. Nu er der ét tal pr. regel.
+ *
+ * De to nul-tal er ærlige: sitet skriver ingen sætninger i «P % stigning på H
+ * kr = R»- og «A af B = P»-form (kun `procent.ts`'s docblock gør det, og
+ * kommentarer strippes). De to regler er derfor dækket af `KANONISKE` ovenfor,
+ * så de ikke kan forblive døde i det stille — og de får deres første rigtige
+ * sætning den dag siden skriver en.
+ *
+ * Tællerne er loftpunkter, ikke målsætninger: de må gerne stige. Sænkes de,
+ * skal det være en synlig linje i diffen.
+ */
+const FORVENTEDE_FUND: Record<string, number> = {
+  gang: 12,
+  del: 8,
+  procentAf: 13,
+  stigning: 0,
+  andel: 0,
+};
+
 describe("regnestykker i brødteksten", () => {
   test("porten genkender rigtige og forkerte sætninger i begge skrivemåder", () => {
     // Mutation: porten skal være rød på netop de forkerte sætninger.
@@ -220,15 +341,33 @@ describe("regnestykker i brødteksten", () => {
     expect(findFejl("<li>2.500 af 10.000 = 25</li>", "t")).toHaveLength(0);
   });
 
-  test("porten har noget at holde øje med", () => {
+  test("hver regel dømmer sin egen notationsform, også uden kr efter første faktor", () => {
+    for (const [regel, rigtig, forkert] of KANONISKE) {
+      // Mutation: en regel, der ikke kan se sin egen skrivemåde, ville give 0
+      // fund på den forkerte sætning — og porten ville være grøn på fejl.
+      const fund = findFejl(`<li>${forkert}</li>`, "t");
+      expect(fund, `regel ${regel} så ikke «${forkert}»`).toHaveLength(1);
+      expect(fund[0].regel, `forkert sætning blev dømt af den forkerte regel`).toBe(regel);
+      expect(findFejl(`<li>${rigtig}</li>`, "t"), `regel ${regel} erklærede «${rigtig}» forkert`).toEqual([]);
+    }
+  });
+
+  test("hver regel har målt dækning, så ingen kan dø i det stille", () => {
     // Uden dette ville «alle regnestykker er rigtige» være grøn, fordi porten
-    // intet genkender. Målt 1/10: 30 sætninger fordelt på /procent, /moms,
-    // /bil, /loenstigning og /renteprognose.
-    const antal = tekstfiler().reduce((sum, fil) => {
+    // intet genkender.
+    const målt: Record<string, number> = {};
+    for (const fil of tekstfiler()) {
       const kode = stripKommentarer(las(fil));
-      return sum + REGLER.reduce((n, r) => n + [...kode.matchAll(r.regex)].length, 0);
-    }, 0);
-    expect(antal).toBeGreaterThanOrEqual(25);
+      for (const regel of REGLER) {
+        målt[regel.navn] = (målt[regel.navn] ?? 0) + [...kode.matchAll(regel.regex)].length;
+      }
+    }
+    for (const [navn, forventet] of Object.entries(FORVENTEDE_FUND)) {
+      expect(målt[navn], `dækningen for regel ${navn} har ændret sig`).toBe(forventet);
+    }
+    // Før 2/10 var summen 26: `stigning` og `andel` så 0 fund hver, og `gang`
+    // så kun de sætninger, der skrev `kr` efter første faktor. Nu er den 33.
+    expect(Object.values(målt).reduce((a, b) => a + b, 0)).toBe(33);
   });
 
   test("alle regnestykker på sitet er regnet rigtigt", () => {

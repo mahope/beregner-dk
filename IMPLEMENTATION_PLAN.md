@@ -1,32 +1,56 @@
-STATUS: 2/10 00:25. Rød CI: ingen (seneste kørsel grøn 1/10 21:39 UTC). Sentry:
+STATUS: 2/10 00:50. Rød CI: ingen (seneste kørsel grøn 1/10 21:39 UTC). Sentry:
   MINBEREGNER-1 er Next-router-støj, filtreret siden 3e67ed3 — ingen ny
   hændelse efter filteret. CEO-køens punkt 0 verificeret direkte i koden igen
   (Valborg 30. april, `DAGE_TIL_TIMEZONE = "Europe/Copenhagen"`,
-  grundlovsdag/sankthans). Ingen åbne PR'er (`PR-TJEK: 2026-10-02`).
+  grundlovsdag/sankthans). PR-TJEK: 2026-10-02 — ingen åbne PR'er.
+  BRANCH-TJEK: ikke endnu kørt i denne uge.
+  **Gatens definition (portens):** `npm run lint` (biome ./src) · `npm run
+  typecheck` (`tsc --noEmit -p tsconfig.test.json`, eget program for
+  testfilerne) · `TZ=UTC npm run test` (vitest run) · `npm run build`. Målt
+  2/10: 0 · 0 · **3501 grønne i 214 filer** · exit 0. Locale-leak-gatens ene
+  `ureviewet`-fund er portens egen test, der planter strengen med vilje.
 
-  **`/arveafgift` læser nu sin egen sats, hele vejen rundt.**
-  `ceo/arveafgift-tal-fra-modul`. «392.300 kr» stod **syv gange** i brødteksten,
-  og regnestykket «(1.000.000 − 392.300) × 15% = 91.155 kr» stod håndskrevet —
-  de var rigtige for 2026 og ville stående for 2027, hvor bundfradraget stiger.
-  Nyt `src/lib/arveafgift.ts` ejer bundfradraget, `beregnArveafgift(arv,
-  medTillaeg)`, de to eksempler og `EFFEKTIV_MARGINAL_SATS = 0,15 + 0,85 ×
-  0,25 = 36,25 %`; «nærmer sig 36,25 %» er væk, fordi satsen er præcis.
-  **To ting lå desuden tilbage:** `page-data.ts`'s to arveafgift-FAQ skrev deres
-  eget «392.300 kr» (nu `formatNumber(SATSER_2026.arveBundfradrag)`), og
-  guideboksens «to fulde regneeksempler på 1.500.000 kr til børn og 800.000 kr
-  til en søskende» er en påstand om *indlæggets* indhold — de to beløb bor derfor
-  i modulet, og bloggen læser dem samme sted.
-  *Port:* `arveafgift/page.test.tsx` renderer siden og kræver, at **hvert** beløb
-  i markupken er et tal modulet regner (6 × bundfradraget + de fire andre), at
-  regnestykket kommer fra `EKSEMPEL_BARN`, og at ingen FAQ har sit eget beløb.
-  **To mutationer målt:** en hårdkodet `392.500 kr` i en tabelcelle gør den rød;
-  en hårdkodet korrekt `36,25` forbliver grøn — fordi den så er rigtig.
-  `regnestykker`-listen: `/arveafgift` væk (8 fund), bloggen 19 → 15,
-  loftpunktssum 460 → 453.
-  **Gaten:** `lint` 0 (657 filer) · `typecheck` 0 · `TZ=UTC npm run test`
-  **3500 grønne / 214 filer** · `next build` exit 0. Locale-leak-gatens ene
-  `ureviewet`-fund er portens egen test, der planter strengen med vilje — ikke
-  en læk.
+  **Review-fund 29/9 fund 1 (HØJ) er rettet** —
+  `ceo/regnestykker-porten-ser-hele-kaden`. Regnestykker-porten krævede `kr`
+  lige efter første faktor, så den så **ingen** sætninger i sitets egen
+  notationsform: «50.000 × 33,6 % = 19.800 kr.» gav 0 fund, både rigtig og
+  forkert, mens porten var grøn. Målt med de gamle mønstre var 3 af de 9 nye
+  kanoniske sætninger usynlige, alle uden `kr` efter første faktor. Nu er `kr`
+  valgfrit, kæder foldes («40.000 kr/måned × 12 × 1% = 4.800 kr» — de to øvrige
+  feriepenge-sætninger var *også* dømt forkerte, fordi første faktor sprang
+  over), og en regel må ikke starte midt i et regnestykke. Dækning pr. regel:
+  gang 10→12, del 3→8, procentAf 13, **stigning 0, andel 0** (de to døde
+  regler står nu som nul i portens egne tal), sum 26→33, og hver regel har sin
+  egen sætning, så ingen kan dø i det stille. Bevis: en plantet «50.000 ×
+  33,6 % = 17.800 kr» på `/rentefradrag` gør tre tests røde. **Åbne
+  VERIFICÉR-noter: 6**, alle med vindue **2/10 07:30**, ikke efterprøvet endnu.
+
+## Review-fund 29/9 — to fund tilbage (punkt 0 for næste iteration)
+
+**R1. Beløbsscanneren springer `src/components/` over** (fund 2, MIDDEL).
+Hvor: `regnestykker.test.ts` — `jsxBelob` kører kun på `page.tsx`, og hele
+listen `HAARDKODEDE_BELOB` er pr. side. Målt: `EfterloensBeregner.tsx:258-259`
+skriver «15.870 kr.» («10.580 kr.» for deltidsforsikrede) og gentager parret i
+linje 387; `BoligsalgBeregner.tsx:48` skriver «1.850 kr (skøde)» og «1.825 kr
+(pantebrev)». Hvorfor: `LoenBeregner.tsx` blev rettet af 825031d i samme batch
+som beløbene, og ingen port så dem. *Accept:* scanneren kører på
+`src/components/**/*.tsx` med sin egen liste og loftpunktssum, og de fire beløb
+ovenfor står i den. Bemærk at `jsxBelob` i dag **ignorerer filendelsen**
+(`ts.ScriptKind.TSX` er hardkodet, linje 199-200), så testen på linje 250-253
+består kun fordi `<p>` er strippet i inputtet — ret scanneren til at læse
+endelsen, ellers er den nye liste kun halvt dækkende.
+
+**R2. Palmesøndag påstås at stå i helligdagslisten, men gør ikke** (fund 3,
+MIDDEL). Hvor: `src/lib/dage-til.ts:580` siger «Palmesøndag står i listen over
+Danmarks religiøse helligdage sammen med skærtorsdag, langfredag og de øvrige
+påskedage». Målt med repoets egen kilde: `getHelligdage(2026,"da")` giver 12
+navne og **ingen palmesøndag**, `erHelligdag(29/3/2026)` er `false` mens
+`erHelligdag(3/4/2026)` er `true`, `taellHelligdage(1/1/2026, 31/12/2026,"da")`
+er 12. To sider modsiger hinanden om én liste — punkt 11. Tallene på siden er
+**ikke** skadet: palmesøndag er altid en søndag, så `erArbejdsdag` holder.
+*Accept:* palmesøndag tilføjes til `getFixedHelligdage("da")` (`helligdage.ts:
+38-50`) med en note om at den aldrig flytter en hverdag, så den bliver den 13. og
+påstanden holder i bogstavelig forstand — eller FAQ'en skrives om til «ikke».
 
 ## Næste opgave (klar til næste iteration)
 
@@ -209,6 +233,13 @@ Prioriteret efter forventet effekt på **trafik**. Datagrund fra GSC 1/10
 
 ## Åbne VERIFICÉR DEPLOY-noter
 
+- ⏳ **Regnestykker-porten ser hele kæden og sitets egen notationsform.**
+  `ceo/regnestykker-porten-ser-hele-kaden`. **Ingen produktionsændring** — kun
+  `src/app/regnestykker.test.ts` — så der er intet at hente på det levende site.
+  Beviset er lokalt: de ni kanoniske sætninger i `KANONISKE` (6 grønne rigtige,
+  3 røde forkerte, hver rød af den rette regel) og den plantede sætning på
+  `/rentefradrag`, der gjorde tre tests røde. Deploy-vindue 2/10 07:30 er
+  uden betydning for denne note; de seks nedenfor er dem, der skal efterprøves.
 - ⏳ **/arveafgift læser bundfradraget og eksemplerne fra modulet.**
   `ceo/arveafgift-tal-fra-modul`. Prøven er på indhold: `curl -s
   https://minberegner.dk/arveafgift` skal vise `392.300 kr` i **alle** de otte
