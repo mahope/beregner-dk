@@ -6,9 +6,18 @@ import { ShareCalculation } from "@/components/ShareCalculation";
 import { CopyResultButton, ResetButton } from "@/components/ui";
 import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/calculation-state";
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
-import { beregnSvenskBolan } from "@/lib/svensk-bolan";
+import { beregnSvenskBolan, SVENSK_BOLAN_2026 } from "@/lib/svensk-bolan";
 
 const fmt = (n: number) => Math.round(n).toLocaleString("sv-SE");
+
+/**
+ * Satserne i brødteksten læses fra `SVENSK_BOLAN_2026`, der driver beregningen.
+ * De var håndskrevne («max 2%», «30%», «100 000 kr», «21%») i samme komponent som
+ * modulen lå i, så de kunne glide fra hinanden ved en satopdatering.
+ */
+const amorteringHogPct = SVENSK_BOLAN_2026.amorteringHog * 100;
+const ranteavdragPct = SVENSK_BOLAN_2026.ranteavdrag * 100;
+const ranteavdragHogPct = SVENSK_BOLAN_2026.ranteavdragHog * 100;
 
 export default function BolanBeregner() {
   const [bostadsvarde, setBostadsvarde] = useState<number>(3000000);
@@ -148,8 +157,10 @@ export default function BolanBeregner() {
               </div>
 
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                Amorteringskravet följer reglerna från 1 april 2026 (baseras på belåningsgrad,
-                max 2%). Ränteavdraget är 30% upp till 100 000 kr, sedan 21%.
+                Amorteringskravet följer reglerna från 1 april 2026 (baseras på
+                belåningsgrad, max {amorteringHogPct}%). Ränteavdraget är{" "}
+                {ranteavdragPct}% upp till {fmt(SVENSK_BOLAN_2026.ranteavdragBrytpunkt)}{" "}
+                kr, sedan {ranteavdragHogPct}%.
               </p>
             </div>
           ) : (

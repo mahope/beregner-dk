@@ -257,24 +257,21 @@ const HAARDKODEDE_BELOB_I_LISTEN = 448;
  * `src/components` og sidens egen ramme (`layout.tsx`, `error.tsx`,
  * `not-found.tsx`, ikonerne). Før 2/10 lå hele mappen uden for porten, og der
  * lå håndskrevne beløb i den: `EfterloensBeregner.tsx` skrev præmieportionen på
- * «15.870 kr.» og «10.580 kr.» to steder, selv om `SKATTEFRI_PRAEMIE_2026`
- * lå i `src/lib/efterloen.ts` og drev selve beregningen — samme fejlklasse som
- * `/rentefradrag`s håndskrevne «Eksempel». De to er nu interpolationer, så
- * porten ser dem ikke længere.
+ * «15.870 kr.» og «10.580 kr.» to steder, `BolanBeregner.tsx` skrev de svenske
+ * satser («100 000 kr») og `LoenBeregner.tsx` skrev «1.000 kr mere i
+ * bruttoløn» — selv om modulerne `SKATTEFRI_PRAEMIE_2026`,
+ * `SVENSK_BOLAN_2026` og beregningens egen `EKSTRA_BRUTTO` lå i samme kode.
+ * Alle fire er nu interpolationer, så listen er **tom**: det første beløb der
+ * skrives håndskrevet i en beregner gør porten rød.
  *
  * Kun `.tsx` scannes: TypeScript giver ikke `.ts`-filer lov til JSX, så en
- * `.ts`-fil kan ikke indeholme JSX-tekst, og dens tal er kode — ikke brødtekst.
- *
- * Målt 2/10: 4 fund i 3 filer; 2 af dem rettet i samme commit, så listen er de
- * to der står tilbage.
+ * `.ts`-fil kan ikke indeholde JSX-tekst, og dens tal er kode — ikke brødtekst.
  */
-const HAARDKODEDE_BELOB_I_KOMPONENTER: Record<string, number> = {
-  "src/components/BolanBeregner.tsx": 1,
-  "src/components/LoenBeregner.tsx": 1,
-};
+const HAARDKODEDE_BELOB_I_KOMPONENTER: Record<string, number> = {};
 
 /** Summen af komponentlisten. */
-const HAARDKODEDE_BELOB_I_KOMPONENTER_I_LISTEN = 2;
+const HAARDKODEDE_BELOB_I_KOMPONENTER_I_LISTEN = 0;
+
 
 const ROT = join(__dirname, "..", "..");
 const tekstfiler = () =>
@@ -479,9 +476,9 @@ describe("beløb i JSX-tekst på siderne", () => {
 describe("beløb i JSX-tekst i beregnerne", () => {
   test("ingen beregner har flere hårdkodede beløb end listen siger", () => {
     // Målt 2/10 med AST-scanneren på tværs af de 152 `.tsx` uden for
-    // `page.tsx`. Før 2/10 var det 0 filer, så hele `src/components` lå uden for
-    // porten — og `EfterloensBeregner.tsx` skrev præmieportionen håndskrevet to
-    // steder, selv om modulet havde den.
+    // `page.tsx`: **4 fund i 3 filer** (Efterloens 2, Bolan 1, Loen 1), alle
+    // fire rettet i samme commit — så her er fundtallet **0**. Før rettelsen var
+    // det 0 *filer*, så hele `src/components` lå uden for porten.
     const fund = komponenter.flatMap((fil) => jsxBelob(las(fil), fil));
     const prFil = new Map<string, number>();
     for (const f of fund) {
@@ -502,7 +499,7 @@ describe("beløb i JSX-tekst i beregnerne", () => {
     expect(overskredet).toEqual([]);
 
     expect(fund.length).toBeLessThanOrEqual(HAARDKODEDE_BELOB_I_KOMPONENTER_I_LISTEN);
-    expect(HAARDKODEDE_BELOB_I_KOMPONENTER_I_LISTEN).toBe(2);
+    expect(HAARDKODEDE_BELOB_I_KOMPONENTER_I_LISTEN).toBe(0);
   });
 
   test("porten scanner hele mappen, ikke en håndplukket liste", () => {

@@ -23232,3 +23232,27 @@ kortere), `src/components/EfterloensBeregner.tsx` (JSX-mellemrum).
 
 **Gate 2/10 01:25:** lint 0 · typecheck 0 · **3508 grønne i 215 filer** ·
 build exit 0.
+
+### 2/10 01:47 — Komponenternes sidste to fund — `ceo/bolan-og-loen-tekstal-fra-modul`
+
+`BolanBeregner.tsx` skrev de svenske satser håndskrevet («max 2%», «30%»,
+«100 000 kr», «21%») i den samme komponent som `SVENSK_BOLAN_2026` lå i, og
+`LoenBeregner.tsx` skrev «1.000 kr mere i bruttoløn» i den tekst, der peger på
+den `useMemo`, der regner på `const ekstraBrutto = 1000` — den samme
+forhøjelse lå altså to steder. Nu er de `amorteringHog`, `ranteavdrag`,
+`ranteavdragHog`, `ranteavdragBrytpunkt` fra modulet og `EKSTRA_BRUTTO` hævet
+til modulniveau, og teksten læser dem med sidens egen formatering
+(`formatNumber(…, locale)` — dansk «1.000», svensk «1 000»).
+
+**Porten:** `HAARDKODEDE_BELOB_I_KOMPONENTER` er nu **tom** og summen 0, så de 152
+`.tsx` uden for `page.tsx` har **0 fund** (før 2/10: 4 fund i 3 filer). Det første
+håndskrevne beløb i en beregner gør porten rød med det samme.
+
+**Ny test `src/components/bolan-loen-sater.test.tsx`** dømmer på den renderede
+tekst, fordi det er den eneste måde at se et manglende `{" "}` på («max
+2%Ränteavdraget» er gyldig JSX og grøn i `tsc`, lint og build). Målt: `medLocale`
+skal have locale `se` til BolanBeregner (svensk tusindtalsseparator) og `da` til
+LoenBeregner — ellers forventer testen «1.000» og får «1 000».
+
+**Gate 2/10 01:47:** lint 0 · typecheck 0 · **3510 grønne i 215 filer** ·
+build exit 0.

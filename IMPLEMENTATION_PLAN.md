@@ -27,7 +27,16 @@ STATUS: 2/10 01:25. Rød CI: ingen. Sentry: MINBEREGNER-1 er Next-router-støj, 
   lige efter `}`, så teksten ville have læst «10.580kr. for deltidsforsikrede».
   Mutation målt: `{" "}` fjernet → rød; `portion.full` 15870 → 16000 → stadig
   grøn, altså læst fra modulet og ikke håndskrevet.
-  **Åbne VERIFICÉR-noter: 9** (6 fra før + 3 nye), alle med vindue **2/10 07:30**.
+  **Samme iteration, anden opgave: komponenternes sidste to fund er væk.**
+  `ceo/bolan-og-loen-tekstal-fra-modul`. `BolanBeregner.tsx` skrev de svenske
+  satser håndskrevet («max 2%», «30%», «100 000 kr», «21%») i samme komponent
+  som `SVENSK_BOLAN_2026` lå i, og `LoenBeregner.tsx` skrev «1.000 kr mere i
+  bruttoløn» oven i den `EKSTRA_BRUTTO` beregningen selv brugte. Nu læses begge
+  dele fra modulet, og **`HAARDKODEDE_BELOB_I_KOMPONENTER` er tom** — det første
+  håndskrevne beløb i en beregner gør porten rød. Ny
+  `bolan-loen-sater.test.tsx` dømmer på den renderede tekst (samme `{" "}`-fælde).
+  **Åbne VERIFICÉR-noter: 10** (6 fra 1/10 + 3 fra palmesøndag + 1 herfra), alle
+  med vindue **2/10 07:30**.
 
 ## Review-fund 29/9 — lukket (detaljer i `docs/plan-arkiv.md`)
 
@@ -53,10 +62,11 @@ for den side falder, og regnestykkerne er verificeret af `regnestykker-porten`.
   til kroner, så den flytter sig med valutakursen og kan ikke stå som et fast tal.
   **Begge kræver en kilde** (❓ nedenfor), så de må ikke gættes.
 - **`/renteberegner`** — 13.288 visninger (0,9 %, pos. 7,5), 6 fund.
-- **Komponenternes to sidste fund** (ny, 2/10): `BolanBeregner.tsx` skriver
-  «Amorteringskravet følger reglerna från 1 april 2026 (baseras på
-  belåningsgrad, max 2%)» i en svensk streng, og `LoenBeregner.tsx` skriver
-  «1.000 kr mere i bruttoløn =». Begge skal læses fra deres eget modul.
+- **Komponenterne: 0 fund** ✅ 2/10 (`ceo/review-fund-palmesondag-og-komponenter`,
+  `ceo/bolan-og-loen-tekstal-fra-modul`). Listen
+  `HAARDKODEDE_BELOB_I_KOMPONENTER` er tom, så næste håndskrevne beløb i en
+  beregner er rød med det samme. Det næste **ikke** dækkede sted er
+  strengliteraler i props — se nedenfor.
 - **Beløb i prop-strenge er stadig uden for porten** (ny, 2/10).
   `jsxBelob` ser kun `ts.isJsxText`, så en `disclaimer`-streng i et objekt er
   usynlig: `BoligsalgBeregner.tsx:48` skriver «Tinglysningssatser 0,6% + 1.850 kr
@@ -226,6 +236,13 @@ Prioriteret efter forventet effekt på **trafik**. Datagrund fra GSC 1/10
   ikke gættes tal.
 
 ## Åbne VERIFICÉR DEPLOY-noter
+
+- ⏳ **Sverenske satsers og lønetekstens tal læses fra modulerne.**
+  `ceo/bolan-og-loen-tekstal-fra-modul`. `curl -s
+  https://beraknare.se/bolan` skal vise «max 2%», «30% upp till 100 000 kr,
+  sedan 21%» med korrekte mellemrum, og `curl -s https://minberegner.dk/loen`
+  skal vise «1.000 kr mere i bruttoløn» (dansk tusindtalsseparator på
+  minberegner.dk, svensk «1 000» på beraknare.se). Vindue **2/10 07:30**.
 
 - ⏳ **Palmesøndag står nu i helligdagslisten, og listen siger 13.**
   `ceo/review-fund-palmesondag-og-komponenter`. Prøven er på indhold:

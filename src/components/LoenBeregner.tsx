@@ -29,6 +29,13 @@ const SKATTESATSER = {
   beskaeftigelsesfradragPct: SATSER_2026.beskaeftigelsesfradragPct,
 };
 
+/**
+ * Hvad «+ X kr mere i bruttoløn» regnes på. Stod håndskrevet som `1000` inde i
+ * `useMemo` og som «1.000 kr» i den tekst, der henviser til det, så den samme
+ * forhøjelse lå to steder. Én konstant, og teksten læser den.
+ */
+const EKSTRA_BRUTTO = 1000;
+
 export default function LoenBeregner() {
   const { locale } = useLocale();
   const [bruttoLoen, setBruttoLoen] = useState<number>(40000);
@@ -168,11 +175,10 @@ export default function LoenBeregner() {
     };
   }, [bruttoLoen, periode, medKirkeskat, kommuneSkat, valgtKommune, pension]);
 
-  // Beregn gevinst ved 1.000 kr mere i månedsløn
+  // Beregn gevinst ved den forhøjede bruttoløn
   const ekstraBeregning = useMemo(() => {
     if (periode !== "maaned") return null;
-    const ekstraBrutto = 1000;
-    const nyBrutto = (bruttoLoen + ekstraBrutto) * 12;
+    const nyBrutto = (bruttoLoen + EKSTRA_BRUTTO) * 12;
     const pensionBidrag = nyBrutto * (pension / 100);
     const loenEfterPension = nyBrutto - pensionBidrag;
     const amBidrag = loenEfterPension * SKATTESATSER.amBidrag;
@@ -354,7 +360,9 @@ export default function LoenBeregner() {
         {ekstraBeregning !== null && (
           <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg text-center">
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              1.000 kr mere i bruttoløn = <strong className="text-green-700 dark:text-green-400">+{ekstraBeregning} kr</strong> netto/md
+              {formatNumber(EKSTRA_BRUTTO, locale)} kr mere i bruttoløn ={" "}
+              <strong className="text-green-700 dark:text-green-400">+{ekstraBeregning} kr</strong>{" "}
+              netto/md
             </p>
           </div>
         )}
