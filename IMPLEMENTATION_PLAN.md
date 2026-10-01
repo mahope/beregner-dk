@@ -1,31 +1,39 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — 1/10 04:25. **Tre deploy-noter lukket på indhold** — og to af dem
-  kun efter at noterne viste sig at pege på URL'er, der **404'er**:
-  `/nyaarsaaven`, `/nyarsafton` og `/sankthansaftensdag` findes ikke; de hedder
-  `/dage-til/nytaarsaften`, `/dagar-till/nyarsafton` og
-  `/dage-til/sankthansaftensdag`. Målt på de rigtige: alle 200, 2.769-2.988 ord,
-  ingen forbudt streng. **Målerfælde: en 404-side består også uden de forbudte
-  strenge**, så et friteksts-tjek på en forkert URL er grønt ud at prøve
-  noget. Tjek HTTP-koden først, altid.
+STATUS: KØ — 1/10 06:00. **Ingen kode i denne iteration.** Opgave 200 er målt
+  igennem til en afgørelse, og ingen af de tre veje kan gøres sikkert i én
+  iteration — se nedenfor.
 
-  **Næste opgave: opgave 200 (siteet er 100 % dynamisk).** Køen er ellers tom —
-  se nedenfor.
+  **Opgave 200 er blokeret på Cloudflare, ikke på Node.** Live målt 1/10 06:00:
+  `/` 367 ms, `/dato` 433 ms, `/procent` 282 ms TTFB, og
+  `cf-cache-status: DYNAMIC` med `cache-control: private, no-cache, no-store`.
+  **Den naive løsning (sæt `s-maxage` på HTML'en) er farlig, og det er målt
+  grund:** Next svarer `vary: rsc, next-router-state-tree,
+  next-router-prefetch, next-router-segment-prefetch, Accept-Encoding`, og
+  klientens rute-navigation **genanmoder samme URL med `RSC: 1`-header**. En
+  CDN der cache'r på URL og ikke på `Vary` ville give Next's router en
+  HTML-svar i stedet for et flight-svar → brudt navigation på alle cachede
+  sider. Det kræver en Cloudflare-regel/Worker, altså Mads' infra — ikke kode i
+  dette repo. Skriv det i ❓.
 
-  **Målt 1/10 05:35 i opgave 199:** build-outputtet er **138 ruter, alle `ƒ`
-  (server-rendered on demand)** — kun `/icon.svg` og `/apple-icon` er `○`. Det
-  er **ikke** en Next 16-regression: `curl -I https://minberegner.dk/dato` på
-  *live* giver `cache-control: private, no-cache, no-store` — præcis som før
-  opgraderingen, og præcis som `/tidszone`. **Planens "143 statiske sider" i
-  gaten var forkert hele vejen** (se opgave 200).
+  **Resten af sitet er målt sundt i samme sweep (38 sider, begge domæner).**
+  Alle 200 med korrekt `lang` og canonical på sig selv; `beraknare.se` er
+  svensk på alle tjekkede sider; `/dage-til/*` har dansk canonical + `hreflang`
+  `sv` → `/dagar-till/*` og omvendt. **Alle 19 nedtællingstal er rigtige** —
+  hver især genregnet mod kalenderen fra 2026-10-01 (juledagen 85, juleaften 84,
+  nytårsaften 91, påskedag 178, grundlovsdag 247, sankthansaftensdag 265,
+  sankthansdag 266, halloween 30, 1. advent 59, skolestart 304). **Ingen fejl
+  fundet, intet rettet** — det er CEO-køens punkt 0-klasse verificeret igen.
+
+  **Næste opgave: opgave 200, men kun den del der ikke kræver Mads** — se
+  opgave 200 for de tre veje og hvilken der er kode.
 
   **Hvorfor køen er tom, målt 1/10:** 97 og 119 og 183 er `BLOCKED` på svar fra
   Mads, 98 afhænger af 97, 187 må ikke røres før 13/10, og F1/F3/F5 har alle
   brug for enten GSC-søgningsdata (❓) eller 187's dato. 194's to resterende
   sider kan **ikke** løses: `/tidsberegner`s eneste indlæg er koblet til
   `/tidszone`, og `blog-kobling.test.ts` forbyder ét indlæg på to beregnere;
-  `/kalorier` er opgave 119. **Den gamle "Næste opgave"-linje var derfor
-  forældet** — den pegede på to opgaver, målingen i 194 selv havde lukket.
+  `/kalorier` er opgave 119.
 
   **`/dage-til/*` er ikke et ranking-problem.** Alle 19 danske sider er live
   (200), i sitemap, og titlen *svarer* på søgningen med dagens tal: "Hvor mange
@@ -442,27 +450,38 @@ og forsiden. Alle målinger står i `docs/plan-arkiv.md`.
 
 #### 200. [ ] 1/10 — Kø — **siteet er 100 % dynamisk; intet kan caches på kanten**
 
-- **Datagrund (målt 1/10 05:35):** `next build` giver 138 ruter, **136 `ƒ`**,
-  kun `/icon.svg` + `/apple-icon` `○`. `curl -I https://minberegner.dk/dato` →
-  `cache-control: private, no-cache, no-store, max-age=0, must-revalidate`.
+- **Datagrund (målt 1/10 05:35 + 06:00):** `next build` giver 138 ruter, **136
+  `ƒ`**, kun `/icon.svg` + `/apple-icon` `○`. `curl -I https://minberegner.dk/dato`
+  → `cache-control: private, no-cache, no-store, max-age=0, must-revalidate`.
   Alt i `src/app/` er altså server-rendered på hvert request. **Årsagen er én
   linje:** `src/app/layout.tsx:91-92` kalder `getLocale()` og
   `getCurrentDomainConfig()`, som begge `await headers()` — fordi `src/proxy.ts`
   sætter `x-locale`/`x-hostname` på *request*-headerne. Én `await headers()` i
   root-layouten gør hele træet dynamisk.
-- **Hvorfor det er den største ikke-målte post:** sitet har ~600.000
-  GSC-visninger og 7.499 besøgende/28d på 81 s besøgstid, og **hver eneste
-  sidevisning er et Node-request**. Cloudflare og Traefik kan ikke engang cache
-  HTML'en. De to dataintegrationer der *er* cachebare, ligger i Route Handlers
-  (`/api/bbr`, `/api/energi`), som ikke er berørt.
-- **Hvorfor det er **ikke** en time- eller to-timers rettelse:** den locale skal
-  kendes **pr. domæne** (minberegner.dk / beraknare.se / beregner.no), og den
-  kommer i dag fra et request-header. Statisk prerender kræver at domænet er
-  kendt på byggetidspunktet — altså enten ægte ruter pr. domæne (samme
-  forhindring som opgave 187), eller at layouten læser domænet i en
-  `generateMetadata`/param-rute. **Skal måles og ikke gættes**; se evt.
-  sammenligning med `rewrites()` i stedet for headers.
-- **Acceptkriterier:** (1) en måling der viser hvor mange ruter der bliver `○`,
+- **Live 1/10 06:00:** TTFB `/` 367 ms, `/dato` 433 ms, `/procent` 282 ms.
+  `cf-cache-status: DYNAMIC`, `server: cloudflare` — **der står en CDN foran**,
+  og den har intet at cache.
+- **Målt og fundet 1/10: den naive løsning er farlig.** Next svarer
+  `vary: rsc, next-router-state-tree, next-router-prefetch,
+  next-router-segment-prefetch, Accept-Encoding`. Klientens rute-navigation
+  genanmoder **samme URL med `RSC: 1`**. En `s-maxage` på HTML'en giver derfor
+  Next's router en HTML-svar i stedet for et flight-svar, altså brudt
+  navigation på hver cachede side. Det skal løses i Cloudflare (regel der
+  springer RSC-anmodninger over, eller Worker) — ikke i dette repo. **❓ nyt
+  spørgsmål til Mads.**
+- **Tre veje, kun én er kode:**
+  1. **CDN-cache uden for repoet** (RSC-betinget Cloudflare-regel). Størst
+     effekt, hurtigst at få, men kræver Mads. **Spørgsmål er skrevet.**
+  2. **Ægte ruter pr. domæne** (`app/[locale]/…` eller tre builds). Løser
+     dynamikken *og* opgave 187's slugs på én gang, men er en stor
+     routemigrering og må **ikke** køres i samme iteration som 187.
+  3. **Bygge 3 statiske builds** (`NEXT_PUBLIC_DOMAIN` ved build). Også stor,
+     og kræver 3 containere.
+- **Besluttet:** køre **1** som spørgsmål nu, og **2** først efter at 187's
+  måling er lukket 13/10 — den er samme opløsning. **En delvis ombygning af
+  layouten uden et af de to er værst af alt**: den gør sitet dynamisk *og*
+  dansk-på-svensk.
+- **Acceptkriterier:** (1) måling af hvor mange ruter der bliver `○`,
   (2) `cache-control` på `/dato` på live efter næste batch, (3) domæne-skelnene
   må ikke blive dansk-på-svensk — `layout-scroll`- og `proxy`-portene dækker
   kun den mekaniske side, ikke indholdet, (4) hvis løsningen kræver pr. domæne-
@@ -505,6 +524,17 @@ og forsiden. Alle målinger står i `docs/plan-arkiv.md`.
 
 ## ❓ Til Mads
 
+- ❓ **Kan Cloudflare cache HTML'en på trods af Next's `Vary: RSC`?** (opgave 200,
+  ny 1/10 06:00, højst prioriteret.) Der står Cloudflare foran sitet, og
+  `cf-cache-status: DYNAMIC` — fordi Next svarer `cache-control: private,
+  no-cache, no-store`. Sætter vi bare `s-maxage` på HTML'en, **bryder vi
+  Next's egen rute-navigation**: klienten genanmoder samme URL med `RSC: 1`, og
+  en CDN der cache'r på URL ville give routeren HTML i stedet for sit
+  flight-svar. Løsningen er en Cloudflare-regel (spring RSC-anmodninger over)
+  eller en Worker — altså din infra, ikke repoet. **Uden det er 280-433 ms
+  TTFB på alle 600.000 månedlige visninger den faste pris.** Kan du lave den
+  regel, eller skal jeg holde vej 2 (ægte ruter pr. domæne) i beredskab til
+  13/10?
 - ❓ **Søgningseksport fra Search Console (ny, 30/9, højst prioriteret).**
   GSC's opsummering viser kun de 3-4 største søgninger pr. side. For `/procent`
   — **150.470 visninger, 97 klik, pos. 7,4, sitets største side** — er de tre

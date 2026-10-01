@@ -22162,3 +22162,79 @@ Næste opgave er derfor **199, Next 16**.
 `vitest` 4.1.11 → 5.0.3; `jsdom` 28 → 30. **Én major pr. commit**, og
 runtime-kravet er allerede erklæret korrekt (`engines.node ">=22 <23"`,
 `.nvmrc` = 22, `node:22-alpine`), så ingen af disse kræver en Node-bump.
+
+## Opgave 200 — måling 1/10 05:35–06:00 (ingen kode)
+
+**Uden svar.** Jeg forsøgte at finde en lille, færdig del af opgave 200 og fandt
+i stedet udelukkende de tre store veje. Jeg startede ingen af dem, fordi en halv
+ombygning af layouten gør sitet dynamisk *og* dansk-på-svensk — dvs. værre end
+det uændrede.
+
+### Målt på live 1/10 06:00 (curl)
+
+| URL | HTTP | TTFB | cache-control | cf-cache-status |
+|---|---|---|---|---|
+| `minberegner.dk/` | 200 | 367 ms | `private, no-cache, no-store` | DYNAMIC |
+| `minberegner.dk/dato` | 200 | 433 ms | `private, no-cache, no-store` | DYNAMIC |
+| `minberegner.dk/procent` | 200 | 282 ms | `private, no-cache, no-store` | DYNAMIC |
+
+`sitemap.xml` har 19 `<loc>` under `/dage-til/`. `next build` (opgave 199): 138
+ruter, 136 `ƒ`.
+
+### Den nye, afgørende måling: RSC-Vary
+
+```
+vary: rsc, next-router-state-tree, next-router-prefetch,
+      next-router-segment-prefetch, Accept-Encoding
+```
+
+Next's klientrouter genanmoder **samme URL** med `RSC: 1`. Cloudflare's
+standard-cache-nøgle er URL (+ visse headere), ikke hele `Vary`. En
+`s-maxage` på HTML'en ville derfor servere HTML til routeren, som forventer et
+RSC-flight-svar. Det er ikke en teoretisk risiko: det er præcis den fejl, der
+gør "sæt bare cache-control" til en udokumenteret regression. Derfor er
+`Cache-Control` ikke en del af denne opgaves kode.
+
+### Sundhedssweep, 38 sider, begge domæner
+
+Alle danske `/` `/dato` `/bmi` `/boligstoette` `/rentefradrag` `/kvadratmeter`
+`/tidsberegner` `/kalorier` `/braendstof` `/barselsdagpenge` `/husleje`
+`/renteberegner` `/pension` `/promille` `/procent` `/moms` `/alder` `/tidszone`
+`/fart` `/brok` `/su` `/leasing` `/nedtaelling` → 200 med
+`html lang="da"` og dansk `<title>`.
+
+`beraknare.se` `/` `/dato` `/tidsberegner` `/procent` `/nedtaelling` `/moms`
+`/alder` `/tidszone` `/kvadratmeter` `/leasing` `/kalorier` → 200 med
+`html lang="sv"` og svensk `<title>`. `/dagar-till` (uden slughen) 404'er, hvilket
+er korrekt — familien har 19 børnesider, ingen oversigtsside.
+
+### Alle 19 nedtællingstal genregnet (CEO-køens punkt 0-klasse)
+
+Udgangspunkt 2026-10-01. `d = 30 + månedene okt.–maj + dag-i-måned`.
+
+| Slug | Side | Egen regel | Forskel |
+|---|---|---|---|
+| juledagen | 85 | 30+30+25 | 85 ✓ |
+| juleaften | 84 | 30+30+24 | 84 ✓ |
+| nytaarsaften | 91 | 30+30+31 | 91 ✓ |
+| nytaarsdag | 92 | 30+30+31+1 | 92 ✓ |
+| 1-december | 61 | 30+30+1 | 61 ✓ |
+| halloween | 30 | 30 | 30 ✓ |
+| 1-advent | 59 | 30+29 (1. advent 2026 = søndag 29/11, planens 27/11–3/12) | 59 ✓ |
+| skærtorsdag | 175 | påske 2027 = 28/03 → 25/03 | 175 ✓ |
+| langfredag | 176 | 26/03 | 176 ✓ |
+| påskedag | 178 | 28/03 | 178 ✓ |
+| kristi himmelfart | 217 | 28/03+39 = 06/05 | 217 ✓ |
+| 2. pinsedag | 228 | 28/03+50 = 17/05 | 228 ✓ |
+| valborg | 211 | 30/04 | 211 ✓ |
+| grundlovsdag | 247 | 05/06 | 247 ✓ |
+| sankthansaftensdag | 265 | 23/06 (aftenen) | 265 ✓ |
+| sankthansdag | 266 | 24/06 | 266 ✓ |
+| sommerferien | 268 | 26/06 (sidste lørdag i juni) | 268 ✓ |
+| skolestart | 304 | 01/08 | 304 ✓ |
+| efterårsferien | 11 | uge med 12/10 | 11 ✓ |
+
+**19 af 19 rigtige. Ingen kode ændret.** Bemærk at sankthansaftensdag (265) er
+*ét dag mindre* end sankthansdag (266) — korrekt, fordi aftenen er 23/06, mens
+dagen er 24/06. Det er den uventede rækkefølge, så den står her, så næste
+iteration ikke "retter" den.
