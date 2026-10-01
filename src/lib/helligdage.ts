@@ -31,8 +31,8 @@ function saturdayInWindow(year: number, month: number, day: number): Date {
 }
 
 /**
- * Official public holidays per locale. Store bededag is deliberately absent: it
- * was abolished as a public holiday from 2024. Nytårsaften is also absent on the
+ * Fixed-date holidays per locale. Store bededag is deliberately absent: it was
+ * abolished as a public holiday from 2024. Nytårsaften is also absent on the
  * Danish side because it is not an official holiday, only a non-working day.
  */
 function getFixedHelligdage(
@@ -64,13 +64,19 @@ function getFixedHelligdage(
 }
 
 /**
- * Easter-anchored holidays: påske (-3 til +1) plus de tre danske dage der
+ * Easter-anchored holidays: påske (-7 til +1) plus de tre danske dage der
  * følger efter påsken, og de svenska til og med pingstdagen.
  *
- * Afstandene er påskedagens egne, fordi påskedagen er en søndag: kristi
- * himmelfartsdag er torsdag (søndag + 39), pinsedagen er søndagen (søndag +
- * 49) og 2. pinsedag er mandagen (søndag + 50). De ligger derfor på hver
- * sin ugedag, hvert år, i begge lande.
+ * Afstandene er påskedagens egne, fordi påskedagen er en søndag: palmesøndag er
+ * den søndag før påsken (påskedag - 7), kristi himmelfartsdag er torsdag
+ * (søndag + 39), pinsedagen er søndagen (søndag + 49) og 2. pinsedag er
+ * mandagen (søndag + 50). De ligger derfor på hver sin ugedag, hvert år, i
+ * begge lande.
+ *
+ * Palmesøndag og påskedagen er begge **helligdage uden ekstra fridag**: de er
+ * altid søndage, så de tælles af `taellWeekender` og ikke af
+ * `taellHelligdagePaaHverdag`. Danmark har 13 helligdage, men kun 12 der falder
+ * på en hverdag — og det er dem `/dato` kalder «helligdage på hverdage».
  *
  * `annandag pingst` (mandagen efter pingstdagen) er med vilje *ikke* på den
  * svenska liste: lagen (1989:253) tæller kun pingstdagen, og mandagen er en
@@ -83,6 +89,7 @@ function getEasterHelligdage(
 ): Helligdag[] {
   if (locale === "da") {
     return [
+      { date: easterDate(year, -7), name: "Palmesøndag" },
       { date: easterDate(year, -3), name: "Skærtorsdag" },
       { date: easterDate(year, -2), name: "Langfredag" },
       { date: easterDate(year, 0), name: "Påskedag" },
@@ -101,7 +108,7 @@ function getEasterHelligdage(
   ];
 }
 
-/** All official public holidays in `year`, sorted by date. */
+/** All Danish/Swedish helligdage in `year`, sorted by date. */
 export function getHelligdage(
   year: number,
   locale: HelligdagLocale

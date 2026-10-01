@@ -27,14 +27,21 @@ function iso(date: Date): string {
   return `${date.getFullYear()}-${m}-${day}`;
 }
 
+/** Signed number of calendar days from `a` to `b`, via UTC day numbers. */
+function dageMellem(a: Date, b: Date): number {
+  const dag = (d: Date) => Date.UTC(d.getFullYear(), d.getMonth(), d.getDate());
+  return Math.round((dag(a) - dag(b)) / 86400000);
+}
+
 function names(year: number, locale: HelligdagLocale): string[] {
   return getHelligdage(year, locale).map((h) => h.name);
 }
 
 describe("getHelligdage", () => {
-  test("danske helligdage 2026 er de tolv officielle", () => {
+  test("danske helligdage 2026 er de tretten officielle", () => {
     expect(names(2026, da)).toEqual([
       "Nytårsdag",
+      "Palmesøndag",
       "Skærtorsdag",
       "Langfredag",
       "Påskedag",
@@ -56,10 +63,11 @@ describe("getHelligdage", () => {
     expect(new Set(times).size).toBe(times.length);
   });
 
-  test("de tolv officielle danske helligdage ligger på de rette datoer", () => {
+  test("de tretten officielle danske helligdage ligger på de rette datoer", () => {
     const datoer = getHelligdage(2026, da).map((h) => iso(h.date));
     expect(datoer).toEqual([
       "2026-01-01",
+      "2026-03-29",
       "2026-04-02",
       "2026-04-03",
       "2026-04-05",
@@ -72,6 +80,41 @@ describe("getHelligdage", () => {
       "2026-12-25",
       "2026-12-26",
     ]);
+  });
+
+  test("palmesøndag er påskedagen minus 7 dage og altid en søndag", () => {
+    // `/dage-til/palmesondag` siger i sin FAQ, at palmesøndag står i listen over
+    // Danmarks helligdage. Før 2/10 sagde den det uden at være sand: listen havde
+    // 12 helligdage og ingen palmesøndag, så læseren kunne tælle listen på
+    // `/dato` og ikke finde den. Derfor ligger den nu i modulet, og denne test er
+    // beviset på at påstanden holder — tages den ud af modulet igen, bliver den
+    // rød.
+    for (let year = 2024; year <= 2045; year++) {
+      const list = getHelligdage(year, da);
+      const palme = list.find((h) => h.name === "Palmesøndag");
+      expect(palme, `palmesøndag mangler i ${year}`).toBeDefined();
+      const paske = list.find((h) => h.name === "Påskedag")!.date;
+      expect(palme!.date.getDay(), `palmesøndag ${year} er ikke en søndag`).toBe(0);
+      expect(dageMellem(palme!.date, paske), `palmesøndag ${year} er ikke 7 dage før påskedagen`).toBe(-7);
+      expect(erHelligdag(palme!.date, da)).toBe(true);
+    }
+  });
+
+  test("palmesøndag er en helligdag, men aldrig en helligdag på en hverdag", () => {
+    // Palmesøndag og påskedagen er helligdage, men altid søndage, så de hører til
+    // weekenden og ikke til «helligdage på hverdag». `/dato`s arbejdsdage- og
+    // helligdagstal er derfor uændrede af at palmesøndag kom på listen, og denne
+    // test låser det — en port der tæller alle helligdage med på hverdagene ville
+    // give 13 og 12 i stedet for 13 og 9 for 2026.
+    for (let year = 2024; year <= 2045; year++) {
+      const palme = getHelligdage(year, da).find((h) => h.name === "Palmesøndag")!.date;
+      expect(taellHelligdage(palme, palme, da)).toBe(1);
+      expect(taellHelligdagePaaHverdag(palme, palme, da)).toBe(0);
+      expect(erArbejdsdag(palme, da)).toBe(false);
+    }
+    expect(taellHelligdage(d("2026-01-01"), d("2026-12-31"), da)).toBe(13);
+    expect(taellHelligdagePaaHverdag(d("2026-01-01"), d("2026-12-31"), da)).toBe(9);
+    expect(taellArbejdsdage(d("2026-01-01"), d("2026-12-31"), da)).toBe(251);
   });
 
   test("påske-relaterede datoer følger den gregorianske algoritme", () => {
@@ -197,7 +240,7 @@ describe("getHelligdage", () => {
   // arbejdsdag. 2026 stod på 253 før de tre danske dage kom med i listen —
   // 251 er det rigtige tal, fordi 14. maj (torsdag) og 25. maj (mandag) er
   // hverdage. Pinseugen 25.-31. maj har derfor fire arbejdsdage, ikke fem.
-  test("et helt dansk år har 251 arbejdsdage med de tolv helligdage", () => {
+  test("et helt dansk år har 251 arbejdsdage med de tretten helligdage", () => {
     expect(taellArbejdsdage(d("2026-01-01"), d("2026-12-31"), da)).toBe(251);
     expect(taellArbejdsdage(d("2026-05-25"), d("2026-05-31"), da)).toBe(4);
     // Samme uge i Sverige: pingstdagen er søndagen, så mandagen er
@@ -220,7 +263,7 @@ describe("helligdagsnavne", () => {
 
   test("de tre danske dage efter påsken står i sætningen", () => {
     // De manglede i den håndskrevne sætning, så læseren fik at vide at
-    // værktøjet springer ni helligdage over, mens det springer tolv over.
+    // værktøjet springer ni helligdage over, mens det springer tretten over.
     const da = helligdagsnavne(2026, "da");
     expect(da).toContain("Kristi himmelfartsdag");
     expect(da).toContain("Pinsedag");
@@ -437,7 +480,8 @@ describe("taellHelligdagePaaHverdag", () => {
   });
 
   test("tæller de danske helligdage, der ikke er weekenddage, på et helt år", () => {
-    // 2026: ni hverdage (påskedag og pinsedag er søndage, 2. juledag lørdag).
+    // 2026: ni hverdage (palmesøndag, påskedag og pinsedag er søndage, 2.
+    // juledag lørdag).
     // 2027: syv, fordi grundlovsdagen 2027 er en lørdag.
     // 2028: syv, fordi 2. pinsedag og grundlovsdag er samme dag.
     for (const [aar, forventet] of [[2026, 9], [2027, 7], [2028, 7]] as const) {

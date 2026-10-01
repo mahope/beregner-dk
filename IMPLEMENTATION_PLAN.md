@@ -1,65 +1,49 @@
-STATUS: 2/10 00:50. Rød CI: ingen (seneste kørsel grøn 1/10 21:39 UTC). Sentry:
-  MINBEREGNER-1 er Next-router-støj, filtreret siden 3e67ed3 — ingen ny
-  hændelse efter filteret. CEO-køens punkt 0 verificeret direkte i koden igen
-  (Valborg 30. april, `DAGE_TIL_TIMEZONE = "Europe/Copenhagen"`,
-  grundlovsdag/sankthans). PR-TJEK: 2026-10-02 — ingen åbne PR'er.
-  BRANCH-TJEK: ikke endnu kørt i denne uge.
+STATUS: 2/10 01:25. Rød CI: ingen. Sentry: MINBEREGNER-1 er Next-router-støj, filtreret
+  siden 3e67ed3 — ingen hændelse efter filteret. PR-TJEK: 2026-10-02 — ingen åbne
+  PR'er. BRANCH-TJEK: ikke endnu kørt i denne uge.
   **Gatens definition (portens):** `npm run lint` (biome ./src) · `npm run
   typecheck` (`tsc --noEmit -p tsconfig.test.json`, eget program for
   testfilerne) · `TZ=UTC npm run test` (vitest run) · `npm run build`. Målt
-  2/10: 0 · 0 · **3501 grønne i 214 filer** · exit 0. Locale-leak-gatens ene
-  `ureviewet`-fund er portens egen test, der planter strengen med vilje.
+  2/10: 0 · 0 · **3508 grønne i 215 filer** · exit 0.
+  **Begge review-fund fra 29/9 er rettet** —
+  `ceo/review-fund-palmesondag-og-komponenter`.
+  **R2 (palmesøndag):** `/dage-til/palmesondag`'s FAQ sagde, at palmesøndag «står
+  i listen over Danmarks helligdage», men `getHelligdage(2026,"da")` gav 12 navne
+  uden den. Den ligger nu i modulet som påskedag − 7 (**13** helligdage), og to
+  beviser låser den: fjernes den igen, bliver **5 tests** røde (målt 2/10).
+  Målt samtidig: kun **9** af de 13 falder på en hverdag — palmesøndag, påskedag
+  og pinsedag er søndage, 2. juledag er lørdag i 2026 — så `/dato`s arbejdsdage-
+  tal (251) er uændret, og det er `taellHelligdagePaaHverdag` der beviser det.
+  FAQ'en siger nu, at den er en søndag og derfor ingen ekstra fridag.
+  **R1 (beløbsscanneren):** scanneren så kun `page.tsx`, så hele `src/components`
+  lå uden for porten. Nu scannes de **152** `.tsx` uden for `page.tsx` med egen
+  liste (**2** fund: `BolanBeregner` 1, `LoenBeregner` 1), `ScriptKind` læses af
+  filendelsen, og mønstret kræver at de tre cifre **slutter** på tallet — «Kilde:
+  borger.dk, verificeret 26/9 2026» var ellers fundet som «9 202» (siden 453 →
+  **448** på siderne). Efterlønnens to håndskrevne portioner faldt væk som bonus:
+  `EfterloensBeregner.tsx` læser nu `SKATTEFRI_PRAEMIE_2026` (portion, 481 timer,
+  12 portioner, 3.120 timer). Nye `EfterloensBeregner.test.tsx` dømmer på den
+  **renderede** tekst og fangede en manglende `{" "}` — JSX spiser linjeskiftet
+  lige efter `}`, så teksten ville have læst «10.580kr. for deltidsforsikrede».
+  Mutation målt: `{" "}` fjernet → rød; `portion.full` 15870 → 16000 → stadig
+  grøn, altså læst fra modulet og ikke håndskrevet.
+  **Åbne VERIFICÉR-noter: 9** (6 fra før + 3 nye), alle med vindue **2/10 07:30**.
 
-  **Review-fund 29/9 fund 1 (HØJ) er rettet** —
-  `ceo/regnestykker-porten-ser-hele-kaden`. Regnestykker-porten krævede `kr`
-  lige efter første faktor, så den så **ingen** sætninger i sitets egen
-  notationsform: «50.000 × 33,6 % = 19.800 kr.» gav 0 fund, både rigtig og
-  forkert, mens porten var grøn. Målt med de gamle mønstre var 3 af de 9 nye
-  kanoniske sætninger usynlige, alle uden `kr` efter første faktor. Nu er `kr`
-  valgfrit, kæder foldes («40.000 kr/måned × 12 × 1% = 4.800 kr» — de to øvrige
-  feriepenge-sætninger var *også* dømt forkerte, fordi første faktor sprang
-  over), og en regel må ikke starte midt i et regnestykke. Dækning pr. regel:
-  gang 10→12, del 3→8, procentAf 13, **stigning 0, andel 0** (de to døde
-  regler står nu som nul i portens egne tal), sum 26→33, og hver regel har sin
-  egen sætning, så ingen kan dø i det stille. Bevis: en plantet «50.000 ×
-  33,6 % = 17.800 kr» på `/rentefradrag` gør tre tests røde. **Åbne
-  VERIFICÉR-noter: 6**, alle med vindue **2/10 07:30**, ikke efterprøvet endnu.
+## Review-fund 29/9 — lukket (detaljer i `docs/plan-arkiv.md`)
 
-## Review-fund 29/9 — to fund tilbage (punkt 0 for næste iteration)
-
-**R1. Beløbsscanneren springer `src/components/` over** (fund 2, MIDDEL).
-Hvor: `regnestykker.test.ts` — `jsxBelob` kører kun på `page.tsx`, og hele
-listen `HAARDKODEDE_BELOB` er pr. side. Målt: `EfterloensBeregner.tsx:258-259`
-skriver «15.870 kr.» («10.580 kr.» for deltidsforsikrede) og gentager parret i
-linje 387; `BoligsalgBeregner.tsx:48` skriver «1.850 kr (skøde)» og «1.825 kr
-(pantebrev)». Hvorfor: `LoenBeregner.tsx` blev rettet af 825031d i samme batch
-som beløbene, og ingen port så dem. *Accept:* scanneren kører på
-`src/components/**/*.tsx` med sin egen liste og loftpunktssum, og de fire beløb
-ovenfor står i den. Bemærk at `jsxBelob` i dag **ignorerer filendelsen**
-(`ts.ScriptKind.TSX` er hardkodet, linje 199-200), så testen på linje 250-253
-består kun fordi `<p>` er strippet i inputtet — ret scanneren til at læse
-endelsen, ellers er den nye liste kun halvt dækkende.
-
-**R2. Palmesøndag påstås at stå i helligdagslisten, men gør ikke** (fund 3,
-MIDDEL). Hvor: `src/lib/dage-til.ts:580` siger «Palmesøndag står i listen over
-Danmarks religiøse helligdage sammen med skærtorsdag, langfredag og de øvrige
-påskedage». Målt med repoets egen kilde: `getHelligdage(2026,"da")` giver 12
-navne og **ingen palmesøndag**, `erHelligdag(29/3/2026)` er `false` mens
-`erHelligdag(3/4/2026)` er `true`, `taellHelligdage(1/1/2026, 31/12/2026,"da")`
-er 12. To sider modsiger hinanden om én liste — punkt 11. Tallene på siden er
-**ikke** skadet: palmesøndag er altid en søndag, så `erArbejdsdag` holder.
-*Accept:* palmesøndag tilføjes til `getFixedHelligdage("da")` (`helligdage.ts:
-38-50`) med en note om at den aldrig flytter en hverdag, så den bliver den 13. og
-påstanden holder i bogstavelig forstand — eller FAQ'en skrives om til «ikke».
+  R1 og R2 er begge rettet i `ceo/review-fund-palmesondag-og-komponenter`; målinger,
+  mutationer og den røde liste over følsomme filer står i arkivet.
 
 ## Næste opgave (klar til næste iteration)
 
-**F5b. Beløb i JSX-tekst → modulkonstanter, i trafikrækkefølge.** `/procent` ✅ 1/10 og `/arveafgift` ✅ 2/10 (`ceo/arveafgift-tal-fra-modul`, se STATUS). Porten fra 1/10
-måler beløb med tusindtalsseparator i JSX-tekst på `page.tsx` — de kan ikke
-glide fra satsen, fordi de ikke hænger ved den. Listen i
-`src/app/regnestykker.test.ts` tæller forekomster pr. fil og må kun blive
-kortere, så dette er rækkefølgen. *Accept pr. side:* listen for den side falder
-til 0, og regnestykkerne er verificeret af `regnestykker-porten`.
+**F5b. Beløb i JSX-tekst → modulkonstanter, i trafikrækkefølge.** `/procent` ✅ 1/10,
+`/arveafgift` ✅ 2/10 og `EfterloensBeregner` ✅ 2/10 (se STATUS), se
+`ceo/procent-eksempler-fra-modul`, `ceo/arveafgift-tal-fra-modul` og
+`ceo/review-fund-palmesondag-og-komponenter`. Porten fra 1/10 måler beløb med
+tusindtalsseparator i JSX-tekst — de kan ikke glide fra satsen, fordi de ikke
+hænger ved den. Listerne i `src/app/regnestykker.test.ts` tæller forekomster pr.
+fil og må kun blive kortere, så dette er rækkefølgen. *Accept pr. side:* listen
+for den side falder, og regnestykkerne er verificeret af `regnestykker-porten`.
 - **`/ejendomsvaerdiskat`** — 6 fund: «5,1 ‰ / 14 ‰» og «9.007.000 kr for
   2026-2027» er lovsatser i brødteksten og i et regnestykke
   («3.000.000 × 80% × 5,1‰ = 12.240 kr/år»).
@@ -69,6 +53,16 @@ til 0, og regnestykkerne er verificeret af `regnestykker-porten`.
   til kroner, så den flytter sig med valutakursen og kan ikke stå som et fast tal.
   **Begge kræver en kilde** (❓ nedenfor), så de må ikke gættes.
 - **`/renteberegner`** — 13.288 visninger (0,9 %, pos. 7,5), 6 fund.
+- **Komponenternes to sidste fund** (ny, 2/10): `BolanBeregner.tsx` skriver
+  «Amorteringskravet følger reglerna från 1 april 2026 (baseras på
+  belåningsgrad, max 2%)» i en svensk streng, og `LoenBeregner.tsx` skriver
+  «1.000 kr mere i bruttoløn =». Begge skal læses fra deres eget modul.
+- **Beløb i prop-strenge er stadig uden for porten** (ny, 2/10).
+  `jsxBelob` ser kun `ts.isJsxText`, så en `disclaimer`-streng i et objekt er
+  usynlig: `BoligsalgBeregner.tsx:48` skriver «Tinglysningssatser 0,6% + 1.850 kr
+  (skøde) og 1,45% + 1.825 kr (pantebrev)», og ingen port ser de to tal. *Accept:*
+  scanneren dækker strengliteraler i `.tsx` med egen liste — målt først, da der
+  kan være mange fund.
 - **`/bil`** (16), **`/billaan`** (24), **`/opsparing`** (10), **`/boligsalg`**
   (9), **`/topskat`** (8) — ingen GSC-visning i top-15, så laveste prioritet;
   `/bil` er desuden faldet 46 → 21 besøgende.
@@ -232,6 +226,24 @@ Prioriteret efter forventet effekt på **trafik**. Datagrund fra GSC 1/10
   ikke gættes tal.
 
 ## Åbne VERIFICÉR DEPLOY-noter
+
+- ⏳ **Palmesøndag står nu i helligdagslisten, og listen siger 13.**
+  `ceo/review-fund-palmesondag-og-komponenter`. Prøven er på indhold:
+  `curl -s https://minberegner.dk/dato` skal vise «De **13** danske helligdage»
+  i FAQ'en og **Palmesøndag** i den kommaseparerede navneliste, og
+  `curl -s https://minberegner.dk/dage-til/palmesondag` skal indeholde
+  «altid en søndag» og **ikke** «religiøse helligdage». Vindue **2/10 07:30**.
+  Tallene på `/dato` skal være uændrede: 9 helligdage på hverdag i 2026.
+- ⏳ **Efterlønnens brødtekst læser portion, timer og loft fra modulet.**
+  Samme slug. `curl -s https://minberegner.dk/efterloen` skal vise
+  «15.870 kr.», «10.580 kr. for deltidsforsikrede» (mellemrum!), «481 timer»,
+  «12 portioner» og «3.120 timer» — og **ikke** «10.580kr.». Vindue
+  **2/10 07:30**.
+- ⏳ **Beløbsscanneren ser `src/components` og `ScriptKind` følger endelsen.**
+  Samme slug. **Ingen produktionsændring** i porten — kun
+  `src/app/regnestykker.test.ts` — så prøven er lokal: de 152 `.tsx` uden for
+  `page.tsx` giver pr. fil de tal i `HAARDKODEDE_BELOB_I_KOMPONENTER`, og
+  `EfterloensBeregner.test.tsx` er grøn på den renderede tekst.
 
 - ⏳ **Regnestykker-porten ser hele kæden og sitets egen notationsform.**
   `ceo/regnestykker-porten-ser-hele-kaden`. **Ingen produktionsændring** — kun

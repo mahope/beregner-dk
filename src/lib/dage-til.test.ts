@@ -22,6 +22,7 @@ import {
   resolveDageTilSlug,
   sommerferieStart,
 } from "./dage-til";
+import { erArbejdsdag, erHelligdag } from "./helligdage";
 
 const iso = (value: string) => new Date(`${value}T00:00:00.000Z`);
 const dayMs = 86_400_000;
@@ -263,6 +264,28 @@ describe("påskafton", () => {
     const paskafton = DAGE_TIL_EVENTS.find((e) => e.id === "paskafton");
     expect(armOf(paskafton!, "se").copy.facts.join(" ")).toContain("Långfredagen");
     expect(armOf(paskafton!, "se").copy.facts.join(" ")).toContain("1 dag före");
+  });
+});
+
+describe("palmesøndag", () => {
+  test("FAQ'ens påstand om helligdagslisten er sand i modulet", () => {
+    // Siden siger «Palmesøndag står i listen over Danmarks helligdage». Før 2/10
+    // sagde den det uden at være sand: `getHelligdage` havde 12 navne og ingen
+    // palmesøndag, så læseren kunne tælle listen på /dato og ikke finde den.
+    // Palmesøndag ligger nu i modulet, og denne test er beviset — tages den ud
+    // igen, bliver den rød.
+    const arm = armOf(eventById("palmesondag"), "da");
+    const faq = arm.copy.faq.find((f) => f.question.includes("helligdag"));
+    expect(faq, "palmesøndagside mangler spørgsmålet om helligdage").toBeDefined();
+    expect(faq!.answer).toContain("helligdage");
+    for (let year = 2024; year <= 2045; year++) {
+      const paske = iso(toISO(easterSunday(year)));
+      const palme = new Date(paske.getTime() - 7 * dayMs);
+      expect(erHelligdag(palme, "da"), `palmesøndag ${year} er ikke i helligdagslisten`).toBe(true);
+      // …men den flytter aldrig en arbejdsdag, fordi den er en søndag.
+      expect(palme.getUTCDay()).toBe(0);
+      expect(erArbejdsdag(palme, "da")).toBe(false);
+    }
   });
 });
 

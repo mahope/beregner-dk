@@ -19,13 +19,17 @@ import {
 const MAX_EFTERLOEN_91 = 20057;  // 91% af max dagpenge (22.041 × 0,91)
 const MAX_EFTERLOEN_100 = 22041; // 100% for 2 års udskydelse
 
+/** Ét års timers i den toårige udskydelse — det beløb timerfeltet er forudfyldt med. */
+const FORUDFYLDT_TIMER =
+  SKATTEFRI_PRAEMIE_2026.udskydelseTimer.full / SKATTEFRI_PRAEMIE_2026.udskydelseAar;
+
 export default function EfterloensBeregner() {
   const [birthYear, setBirthYear] = useState<string>('1963');
   const [insurance, setInsurance] = useState<'full' | 'part'>('full');
   const [yearsContributed, setYearsContributed] = useState<string>('30');
   const [postpone2Years, setPostpone2Years] = useState(false);
   const [workWhileOnEfterloen, setWorkWhileOnEfterloen] = useState(false);
-  const [hoursPerYear, setHoursPerYear] = useState<string>('1560');
+  const [hoursPerYear, setHoursPerYear] = useState<string>(String(FORUDFYLDT_TIMER));
   const hasLoadedUrl = useRef(false);
   const hasTracked = useRef(false);
 
@@ -72,7 +76,7 @@ export default function EfterloensBeregner() {
     setYearsContributed('30');
     setPostpone2Years(false);
     setWorkWhileOnEfterloen(false);
-    setHoursPerYear('1560');
+    setHoursPerYear(String(FORUDFYLDT_TIMER));
   }, []);
 
   const result = useMemo(() => {
@@ -255,10 +259,15 @@ export default function EfterloensBeregner() {
                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 text-sm">timer</span>
               </div>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Hver 481 timer giver én skattefri præmieportion på 15.870 kr.
-                (10.580 kr. for deltidsforsikrede). Maks 12 portioner. Forudfyldt
-                er 1.560 timer, som er de 3.120 timer borger.dk kræver i de to års
-                udskydelse
+                Hver {SKATTEFRI_PRAEMIE_2026.timerPerPortion} timer giver én
+                skattefri præmieportion på{" "}
+                {SKATTEFRI_PRAEMIE_2026.portion.full.toLocaleString('da-DK')} kr.
+                ({SKATTEFRI_PRAEMIE_2026.portion.part.toLocaleString('da-DK')} kr.
+                for deltidsforsikrede). Maks {SKATTEFRI_PRAEMIE_2026.maxPortioner}{" "}
+                portioner. Forudfyldt er{" "}
+                {FORUDFYLDT_TIMER.toLocaleString('da-DK')} timer, som er de{" "}
+                {SKATTEFRI_PRAEMIE_2026.udskydelseTimer.full.toLocaleString('da-DK')}{" "}
+                timer borger.dk kræver i de to års udskydelse
               </p>
             </div>
           )}
@@ -383,9 +392,13 @@ export default function EfterloensBeregner() {
         <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
           <h3 className="font-semibold text-green-800 dark:text-green-300 mb-2 flex items-center gap-2"><Trophy className="h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden="true" focusable="false" />Præmieordningen</h3>
           <p className="text-sm text-green-700 dark:text-green-400">
-            Som udgangspunkt udløser 481 arbejdstimer én skattefri præmieportion på
-            15.870 kr. for fuldtidsforsikrede (10.580 kr. for deltidsforsikrede), og
-            du kan højst optjene 12 portioner. Kilde: borger.dk, verificeret 26/9 2026.
+            Som udgangspunkt udløser {SKATTEFRI_PRAEMIE_2026.timerPerPortion}{" "}
+            arbejdstimer én skattefri præmieportion på{" "}
+            {SKATTEFRI_PRAEMIE_2026.portion.full.toLocaleString('da-DK')} kr. for
+            fuldtidsforsikrede ({SKATTEFRI_PRAEMIE_2026.portion.part.toLocaleString('da-DK')}{" "}
+            kr. for deltidsforsikrede), og du kan højst optjene{" "}
+            {SKATTEFRI_PRAEMIE_2026.maxPortioner} portioner. Kilde: borger.dk,
+            verificeret 26/9 2026.
           </p>
         </div>
       </div>

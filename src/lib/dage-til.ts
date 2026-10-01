@@ -577,7 +577,7 @@ export const DAGE_TIL_EVENTS: DageTilEvent[] = [
           {
             question: "Er palmesøndag en helligdag?",
             answer:
-              "Ja. Palmesøndag står i listen over Danmarks religiøse helligdage sammen med skærtorsdag, langfredag og de øvrige påskedage.",
+              "Ja. Palmesøndag står i listen over Danmarks helligdage sammen med skærtorsdag, langfredag og de øvrige påskedage. Den er altid en søndag, så den tælles som weekenddag og ikke som en ekstra fridag.",
           },
           {
             question: "Kan jeg finde ud af, hvor mange dage der er mellem to andre datoer?",

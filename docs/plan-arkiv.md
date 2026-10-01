@@ -23153,3 +23153,82 @@ tabelcelle → rød; hårdkodet korrekt `36,25` → grøn (den er rigtig).
 1.107.700 kr» m.fl.) står stadig håndskrevet — bloggen er en selvstændig
 beslutning i F5b. Påstanden «Fra 1. januar 2027 afskaffes tillægsafgiften for
 søskende» er ikke verificeret mod en kilde; siden er mærket «vejledende».
+
+---
+
+## 2/10 01:25 — Review-fund 29/9 lukket (R1 + R2) — `ceo/review-fund-palmesondag-og-komponenter`
+
+**R2 (palmesøndag, fund 3 MIDDEL).** `/dage-til/palmesondag`'s FAQ sagde «Ja.
+Palmesøndag står i listen over Danmarks religiøse helligdage sammen med
+skærtorsdag, langfredag og de øvrige påskedage», mens repoets egen kilde
+`getHelligdage(2026,"da")` gav **12** navne og ingen palmesøndag
+(`erHelligdag(29/3/2026)` false, `erHelligdag(3/4/2026)` true,
+`taellHelligdage(1/1–31/12 2026,"da")` = 12). To sider modsiger hinanden om én
+liste — punkt 11, målbart for læseren.
+
+Rettelse: `Palmesøndag` ligger nu i `getEasterHelligdage("da")` som påskedag − 7
+med en note om, at den er en helligdag **uden** ekstra fridag. Valget er
+palmesøndag, ikke `getFixedHelligdage` som fundet foreslog, fordi den følger
+påskedagen og derfor ikke er en fast dato; tilføjes den til en fast liste, giver
+den intet år efter år.
+
+**Målt, og en antagelse i fundet var forkert:** fundet skrev, at de 13 danske
+helligdage ville give 12 på hverdag. Målt er det **9**. Palmesøndag, påskedag og
+pinsedag er altid søndage, og 2. juledag er en lørdag i 2026; 2027 og 2028 har 7
+(helt ugeårstal med grundlovsdag hhv. 2. pinsedag på en lørdag/sammenfald).
+`taellArbejdsdage(2026)` er derfor uændret på **251**, og det er
+`taellHelligdagePaaHverdag` der beviser det — den filtrerer weekenddage væk, så
+tilføjelsen af en søndagshelligdag ikke kan flytte en arbejdsdag.
+
+**Bevis (tester der kan fejle):** to nye tests i `helligdage.test.ts` (palmesøndag
+er påskedagen − 7 og altid søndag for 2024-2045; palmesøndag er helligdag men
+tælles 0 på hverdag, og 2026 giver 13 helligdage / 9 på hverdag / 251
+arbejdsdage) og én i `dage-til.test.ts` der binder **FAQ'ens ord** til modulet
+(`erHelligdag(palme, "da")` for 2024-2045). Mutation målt 2/10: `Palmesøndag`
+fjernet fra modulet → **5 tests røde**. De to lister i `helligdage.test.ts` er
+opdateret 12 → 13, og kommentaren ved 2026's ni hverdage nævner nu palmesøndag.
+
+**R1 (beløbsscanneren, fund 2 MIDDEL).** `jsxBelob` kører kun på `page.tsx`, så
+alle 148 `.tsx` i `src/components` lå uden for porten. Nu:
+
+- `komponenter` = de **152** `.tsx` under `src/components` + `src/app` uden
+  `page.tsx` og uden `*.test.tsx` (dvs. også `layout.tsx`, `error.tsx`,
+  `not-found.tsx`, `apple-icon.tsx`, `opengraph-image.tsx`,
+  `DesignSystemShowcase.tsx` — målt: 0 fund i dem).
+- `HAARDKODEDE_BELOB_I_KOMPONENTER` har **2** fund: `BolanBeregner.tsx` 1,
+  `LoenBeregner.tsx` 1, plus loftpunktssummen 2 — samme form som sidelisten.
+- `ScriptKind` læses af filendelsen i stedet for at være hardkodet `TSX`, så
+  docblockens «samme parser som `tsc`» også er sand for `.ts`. Kun `.tsx`
+  scannes: `tsc` giver ikke `.ts`-filer lov til JSX, så de kan ikke have
+  JSX-tekst.
+- **Nyt mønsterkrav:** de tre cifre skal **slutte** på tallet (`: (?!\d)`).
+  Uden det læste scanneren «Kilde: borger.dk, verificeret **26/9 2026**» som
+  beløbet «**9 202**» og meldte hele `EfterloensBeregner.tsx` ind i listen for en
+  kildeangivelse. Målt før/efter på siderne: **453 → 448** (5 fund var datoer).
+  Decimaler («1.250,50») rammer stadig, fordi der står et komma efter de tre.
+- To tests dømmer på, at scanneren ikke er blind: `komponenter.length > 100` og
+  de tre fil-krav (indeholder `EfterloensBeregner.tsx`, ingen test, ingen side).
+
+**Efterlønnen som bonus (F5b).** `EfterloensBeregner.tsx` skrev portionen
+håndskrevet to steder, selv om `SKATTEFRI_PRAEMIE_2026` drev selve beregningen.
+Nu læses `portion.full/part`, `timerPerPortion` (481), `maxPortioner` (12) og
+`udskydelseTimer.full` (3.120) fra modulet, og `FORUDFYLDT_TIMER`
+(= 3.120 / 2 år = 1.560) er blivende intervallet — så både teksten og
+`useState`-standarden kommer fra samme sats. De **to** fund forsvandt dermed fra
+listen, og `HuslejeNettoprisindeks.tsx`s «8.000 kr» (nævnt i `eac2f98`) er
+stadig ikke et fund, fordi den ligger i et objekt og ikke i JSX-tekst.
+
+**Ny test: `src/components/EfterloensBeregner.test.tsx`.** Dømmer på den
+**renderede** tekst, fordi den fangede en fejl ingen anden port ser: JSX spiser
+et linjeskift lige efter et `}`, så «(10.580 kr.» med «kr. for
+deltidsforsikrede» på næste linje ville have renderet «**10.580kr.** for
+deltidsforsikrede». Mutation målt: `{" "}` fjernet → test rød; `portion.full`
+15870 → 16000 → stadig grøn (altså læst fra modulet, ikke håndskrevet).
+
+**Følsomme filer:** `src/lib/helligdage.ts` (helligdagsliste og alle
+arbejdsdagstal), `src/lib/dage-til.ts:578-581` (FAQ-teksten),
+`src/app/regnestykker.test.ts` (listetallene 448 og 2 — de må kun blive
+kortere), `src/components/EfterloensBeregner.tsx` (JSX-mellemrum).
+
+**Gate 2/10 01:25:** lint 0 · typecheck 0 · **3508 grønne i 215 filer** ·
+build exit 0.

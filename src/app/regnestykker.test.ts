@@ -188,6 +188,7 @@ function findFejl(kode: string, fil: string): Fund[] {
 const HAARDKODEDE_BELOB: Record<string, number> = {
   "src/app/aktieskat/page.tsx": 5,
   "src/app/alder/page.tsx": 1,
+
   "src/app/befordringsfradrag/page.tsx": 3,
   "src/app/bil/page.tsx": 16,
   "src/app/billaan/page.tsx": 24,
@@ -242,8 +243,38 @@ const HAARDKODEDE_BELOB: Record<string, number> = {
   "src/app/vaegttab/page.tsx": 2,
 };
 
-/** Summen af listen, så de to tal ikke kan glide fra hinanden. */
-const HAARDKODEDE_BELOB_I_LISTEN = 453;
+/**
+ * Summen af listen, så de to tal ikke kan glide fra hinanden.
+ *
+ * 453 → 448 den 2/10: fem fund var datoer, ikke beløb («Kilde: borger.dk,
+ * verificeret 26/9 2026» blev læst som «9 202»), da scanneren ikke krævede at
+ * de tre cifre var slut på tallet.
+ */
+const HAARDKODEDE_BELOB_I_LISTEN = 448;
+
+/**
+ * Samme port på de `.tsx`-filer der **ikke** er `page.tsx`: beregnerne i
+ * `src/components` og sidens egen ramme (`layout.tsx`, `error.tsx`,
+ * `not-found.tsx`, ikonerne). Før 2/10 lå hele mappen uden for porten, og der
+ * lå håndskrevne beløb i den: `EfterloensBeregner.tsx` skrev præmieportionen på
+ * «15.870 kr.» og «10.580 kr.» to steder, selv om `SKATTEFRI_PRAEMIE_2026`
+ * lå i `src/lib/efterloen.ts` og drev selve beregningen — samme fejlklasse som
+ * `/rentefradrag`s håndskrevne «Eksempel». De to er nu interpolationer, så
+ * porten ser dem ikke længere.
+ *
+ * Kun `.tsx` scannes: TypeScript giver ikke `.ts`-filer lov til JSX, så en
+ * `.ts`-fil kan ikke indeholme JSX-tekst, og dens tal er kode — ikke brødtekst.
+ *
+ * Målt 2/10: 4 fund i 3 filer; 2 af dem rettet i samme commit, så listen er de
+ * to der står tilbage.
+ */
+const HAARDKODEDE_BELOB_I_KOMPONENTER: Record<string, number> = {
+  "src/components/BolanBeregner.tsx": 1,
+  "src/components/LoenBeregner.tsx": 1,
+};
+
+/** Summen af komponentlisten. */
+const HAARDKODEDE_BELOB_I_KOMPONENTER_I_LISTEN = 2;
 
 const ROT = join(__dirname, "..", "..");
 const tekstfiler = () =>
@@ -254,6 +285,16 @@ const tekstfiler = () =>
     .filter((f) => !f.includes(".test."));
 
 const sider = tekstfiler().filter((f) => f.endsWith("page.tsx"));
+
+/** Alle `.tsx` der ikke er `page.tsx` og ikke en test: beregnere og sidens ramme. */
+const komponenter = execSync(
+  "find src/components src/app -name '*.tsx' ! -name 'page.tsx' ! -name '*.test.tsx'",
+  { encoding: "utf8", cwd: ROT }
+)
+  .toString()
+  .trim()
+  .split("\n");
+
 const las = (fil: string) => readFileSync(join(ROT, fil), "utf8");
 
 /**
@@ -261,17 +302,27 @@ const las = (fil: string) => readFileSync(join(ROT, fil), "utf8");
  * komme fra et modul — ellers er det et tal, der kan glide fra sin egen
  * beregning, når satsen opdateres.
  *
- * Første udgave af porten scanrede for klammebalancer og målte **0 fund på alle
- * 124 sider**, hvilket så ud som en ren port. Den var blind: `return ( <main>…)`
+ * Mønstret kræver, at der **ikke** står et ciffer efter de tre (`: (?!\d)`):
+ * uden det læser porten en dato som «verificeret 26/9 2026» som beløbet «9 202»
+ * og melder en hel beregner ind i listen for en kildeangivelse. Et beløb med
+ * decimaler («1.250,50») rammer stadig, fordi der står et komma efter de tre.
+ *
+ * Første udgave af porten scanner klammebalancer og målte **0 fund på alle 124
+ * sider**, hvilket så ud som en ren port. Den var blind: `return ( <main>…)`
  * ligger inde i funktionens klammer, så al JSX-tekst lå på dybde 1 og aldrig
  * blev set. Derfor parseres filen med TypeScript's eget AST i stedet — samme
  * parser som `tsc` bruger i gaten, og den kan ikke blive vild af en klamme.
+ *
+ * `ScriptKind` læses **af filendelsen**. Før 2/10 stod `TSX` hardkodet, så navnet
+ * var ikke rigtigt for en `.ts`-fil, og testen «samme kilde set som TS (ikke
+ * TSX) skal give samme svar» bestod kun fordi `<p>` var strippet i inputtet.
  */
 function jsxBelob(kilde: string, navn: string): string[] {
-  const fil = ts.createSourceFile(navn, kilde, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+  const kind = navn.endsWith(".tsx") ? ts.ScriptKind.TSX : ts.ScriptKind.TS;
+  const fil = ts.createSourceFile(navn, kilde, ts.ScriptTarget.Latest, true, kind);
   const fund: string[] = [];
   const gaa = (node: ts.Node) => {
-    if (ts.isJsxText(node) && /\d{1,3}[. ]\d{3}/.test(node.text)) {
+    if (ts.isJsxText(node) && /\d{1,3}[. ]\d{3}(?!\d)/.test(node.text)) {
       fund.push(`${navn}: ${node.text.replace(/\s+/g, " ").trim().slice(0, 90)}`);
     }
     ts.forEachChild(node, gaa);
@@ -387,8 +438,16 @@ describe("beløb i JSX-tekst på siderne", () => {
     expect(jsxBelob(kilde, "ren.tsx")).toHaveLength(1);
     expect(jsxBelob(kilde, "ren.tsx")[0]).toContain("12.500");
     // Samme kilde set som TS (ikke TSX) skal give samme svar — ellers ville porten
-    // være afhængig af filendelsen.
+    // være afhængig af filendelsen. Før 2/10 holdt `ScriptKind.TSX` fast, så det
+    // var kun `<p>`'s stripning der gjorde den grøn; med endelsen læst af navnet
+    // er det en `.ts`-fil, der parseres som TS, og derfor intet JSX-tekst.
     expect(jsxBelob(kilde.replace(/<\/?p>/g, ""), "ren.ts")).toEqual([]);
+    // …mens endelsen stadig styrer: samme kode med endelsen bevaret set som `.ts`
+    // giver ingen JSX-tekst, fordi TS-parseren læser `<p>` som typeAssertion.
+    expect(jsxBelob(kilde, "ren.ts")).toEqual([]);
+    // En dato er ikke et beløb: «26/9 2026» må ikke læses som «9 202».
+    expect(jsxBelob("<p>Kilde: borger.dk, verificeret 26/9 2026.</p>", "dato.tsx")).toEqual([]);
+    expect(jsxBelob("<p>Portionen er 15.870 kr.</p>", "krone.tsx")).toHaveLength(1);
   });
 
   test("ingen side har flere hårdkodede beløb end listen siger", () => {
@@ -413,6 +472,46 @@ describe("beløb i JSX-tekst på siderne", () => {
     // At rette en side er altid tilladt — listen er en loftpunktssum, ikke en
     // målsætning — så her tælles det samlede antal mod summen af listen.
     expect(fund.length).toBeLessThanOrEqual(HAARDKODEDE_BELOB_I_LISTEN);
-    expect(HAARDKODEDE_BELOB_I_LISTEN).toBe(453);
+    expect(HAARDKODEDE_BELOB_I_LISTEN).toBe(448);
+  });
+});
+
+describe("beløb i JSX-tekst i beregnerne", () => {
+  test("ingen beregner har flere hårdkodede beløb end listen siger", () => {
+    // Målt 2/10 med AST-scanneren på tværs af de 152 `.tsx` uden for
+    // `page.tsx`. Før 2/10 var det 0 filer, så hele `src/components` lå uden for
+    // porten — og `EfterloensBeregner.tsx` skrev præmieportionen håndskrevet to
+    // steder, selv om modulet havde den.
+    const fund = komponenter.flatMap((fil) => jsxBelob(las(fil), fil));
+    const prFil = new Map<string, number>();
+    for (const f of fund) {
+      const fil = f.slice(0, f.indexOf(": "));
+      prFil.set(fil, (prFil.get(fil) ?? 0) + 1);
+    }
+
+    // En beregner, der ikke står i listen, har et beløb porten aldrig har set.
+    const ukendte = [...prFil.keys()].filter(
+      (fil) => !(fil in HAARDKODEDE_BELOB_I_KOMPONENTER)
+    );
+    expect(ukendte).toEqual([]);
+
+    // Mutation: skriv et beløb ind i en beregners tekst, porten skal blive rød.
+    const overskredet = Object.entries(HAARDKODEDE_BELOB_I_KOMPONENTER)
+      .filter(([fil, antal]) => (prFil.get(fil) ?? 0) > antal)
+      .map(([fil, antal]) => `${fil}: ${(prFil.get(fil) ?? 0)} > ${antal}`);
+    expect(overskredet).toEqual([]);
+
+    expect(fund.length).toBeLessThanOrEqual(HAARDKODEDE_BELOB_I_KOMPONENTER_I_LISTEN);
+    expect(HAARDKODEDE_BELOB_I_KOMPONENTER_I_LISTEN).toBe(2);
+  });
+
+  test("porten scanner hele mappen, ikke en håndplukket liste", () => {
+    // Mutation: hvis `komponenter` var en tom liste, ville de to tests ovenfor
+    // være grønne uden at se noget — præcis den blindhed første udgave af porten
+    // havde, da den målte 0 fund på alle 124 sider.
+    expect(komponenter.length).toBeGreaterThan(100);
+    expect(komponenter).toContain("src/components/EfterloensBeregner.tsx");
+    expect(komponenter.some((f) => f.endsWith(".test.tsx"))).toBe(false);
+    expect(komponenter.some((f) => f.endsWith("page.tsx"))).toBe(false);
   });
 });
