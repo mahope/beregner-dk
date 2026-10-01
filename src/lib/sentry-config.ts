@@ -91,11 +91,30 @@ export interface SentryRequestLike {
   query_string?: string | Record<string, string> | [string, string][];
 }
 
-export interface SentryEventLike {
-  request?: SentryRequestLike;
+export interface SentryExceptionLike {
+  values?: Array<{ value?: string }>;
 }
 
-export function scrubSentryEvent<T extends SentryEventLike>(event: T): T {
+export interface SentryEventLike {
+  request?: SentryRequestLike;
+  exception?: SentryExceptionLike;
+}
+
+const NOISY_NEXT_ROUTER_STATE_ERRORS = new Set([
+  "The router state header was sent but could not be parsed.",
+]);
+
+export function shouldDropSentryEvent(event: SentryEventLike): boolean {
+  return (
+    event.exception?.values?.some((exception) =>
+      exception.value ? NOISY_NEXT_ROUTER_STATE_ERRORS.has(exception.value) : false,
+    ) ?? false
+  );
+}
+
+export function scrubSentryEvent<T extends SentryEventLike>(event: T): T | null {
+  if (shouldDropSentryEvent(event)) return null;
+
   const request = event.request;
   if (!request) return event;
   if (request.url) request.url = scrubSentryUrl(request.url);

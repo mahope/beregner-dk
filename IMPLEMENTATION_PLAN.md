@@ -1,35 +1,41 @@
-STATUS: KØ — 1/10 15:12. CEO-køen er stadig **tom** (alle otte verificeret
-  rettet i koden), så denne iteration gik til Feature-køen. Seneste opgave:
-  **/renteprognose** (`ceo/renteprognose`) — ny beregner bygget på den
-  autocomplete-måling, der lå i køen.
+STATUS: PR-TJEK: 1/10 16:30. CEO-køen er stadig **tom** — punkt 0 er
+  verificeret i koden igen (Valborg `month: 4, day: 30`, svensk påskafton
+  `offsetDays: -1`, `dato-eksempler.ts` `maneder: 12`). Rød CI: ingen, seneste
+  kørsel grøn. Sentry MINBEREGNER-1 er den eneste åbne fejl, så den lå før
+  Feature-køen.
 
-  **Autocomplete som datagrund er målt og brugt.** 28 danske seeds målt med
-  `suggestqueries.google.com` (blokken «Metode målt 1/10» i Feature-køen).Ud af
-  dem gav **renteprognose** den eneste klynge, vi ikke allerede dækker:
-  10 af 10 completions under «renteprognose» er renteprognose + år eller bank
-  (2026, 2027, 2030, nykredit, realkredit, nordea, danske bank, totalkredit), og
-  3 af 10 under «rente» er renteprognose-varianter. Vi havde `/renteberegner` og
-  `/rentefradrag`, men ingen side der svarer på selve ordet.
-
-  **Siden bygger uden at gætte en rente** (punkt 11). Renteudviklingen er et
-  *valg* i spring fra −2 til +3 procentpoint med 0 som standard, fordi ingen
-  offentlig kilde forudsiger danske realkreditrenter. Brødtekstens tal læses fra
-  `beregnRenteprognose` — eksemplet siger eksplicit, at prognosen er en
-  følsomhedsberegning og ikke en forudsigelse. `page.test.tsx` renderer siden
-  og kræver at de to tal i eksemplet kan genberegnes af modulet; **2 mutationer
-  målt røde** (hårdkodet ydelse, og renteudviklingen fjernet fra eksemplet).
-
-  **Fem porter greb den nye side**, som de skal: relaterede lister er maks 6,
-  forsiden kræver et kort pr. katalogside, navigationen kræver en side der findes
-  i det lokale sprog, og `blog-kobling` kræver at et indlæg kun kobles til ÉN
-  beregner. Den sidste gjorde, at `/renteprognose` **ikke** fik en
-  artikelblok: de 14 ledige artikler passer ikke emnet, og artiklen om lån og
-  renter er allerede koblet til `/rentefradrag`. Siden linker i stedet til den
-  guide i brødteksten.
+  **Seneste opgave: PR #26 landet** (`ceo/sentry-router-stoej`) — 53 linjer,
+  `shouldDropSentryEvent` i `beforeSend`. Next.js kaster en uhandlet
+  serverfejl på `GET /procent/page`, når en RSC-anmodning kommer med en
+  ugyldig router state header; det er støj fra malformed/eksterne requests,
+  ikke procentberegnerens logik. Filteret matcher **præcis den ene besked**
+  (`Set` med én streng), så andre serverfejl sendes stadig. Porten er målt
+  rød uden fixen: slettet man `return null`, fejler
+  «returnerer null for den støjende Next.js router-state fejl» (1 failed /
+  17 passed), med fixen 18/18 grønne. PR'en er lukket med `gh pr close`.
 
   **Gaten:** `lint` 0 (651) · `typecheck` 0 · `TZ=UTC npm run test`
-  **3425 grønne / 210 filer** · `locale-leak --gate` exit 0 · `next build`
-  143 ruter (142 → 143).
+  **3428 grønne / 210 filer** · `locale-leak --gate` exit 0 · `next build`
+  143 ruter.
+
+  **⚠️ Rednings-commit på `ceo/skolestart-forste-skoledag`** (`e231975`, WIP).
+  En tidligere iteration døde med ucommittet arbejde i `/dage-til/skolestart`:
+  nedtællingen peger på 1. august, som er en **lørdag i 2026 og søndag i
+  2027**, altså aldrig en skoledag. Brødteksten på samme side siger allerede
+  «undervisningen begynder mandag 3. august» — så side og tekst modsiger
+  hinanden i dag. Arbejdet tilføjer `foersteSkoledag(year)` og et `skoleaar`-
+  anker. **Det er uverificeret: gaten er ikke kørt på den**, så det er ikke
+  landet. Næste iteration skal køre gaten, se ❓ ferielov-rækkefølgen nedenfor,
+  og enten lande eller slette den.
+
+## ❓ Uafklaret — skolestart og ferielov (gælder `e231975`)
+
+  CEO-køens ferielov-spørgsmål (se ❓ nedenfor) er **også** en blokering for
+  `e231975`: siden hævder «sommerferien starter den **sidste lørdag i juni**
+  (lovens dato)», og det er den uverificerede regel. Hvis ferielovens regel er
+  «den lørdag i den kalenderuge, hvori 20. juni ligger», rammer fejlen både
+  `/dage-til/summerferien` og `/dage-til/skolestart`, og de to sider skal
+  rettes sammen. **Derfor er ❓ ferielov det vigtigste svar, der mangler.**
 
 ## Fase 3 — trafik-drevet
 
@@ -167,16 +173,18 @@ Prioriteret efter forventet effekt på **trafik**. Datagrund fra GSC 1/10
   fra 1/10 06:35 med vindue 17:30 står stadig åben og bliver lukket i næste
   iteration, hvis den ikke er sket. Vindue **1/10 17:30**.
 
-- ⏳ **Sentry skal sende, og loggen må ikke være slået fra.**
-  `ceo/sentry-sendepipeline`. Der er ingen synlig overflade at hente på, så
-  prøven er på **bygget og serverloggen**, ikke på markup: efter deploy skal
-  et prod-build **ikke** have `silent: true` i `next.config.ts` (sletningen
-  sker ved grep efter `silent:`), og `GET /api/health` skal stadig svare
-  `ok`. **Selve beviset på afsendelse ligger i testen**, som kører mod en
-  lokal collector og ikke kræver en hændelse i produktion. Hvis du vil se
-  det i virkeligheden, så kast én fejl i prod-build'en og se efter
-  `[Sentry]`-linjer i Dokploy-loggen — de skal nu være med, for første gang.
-  Vindue **1/10 17:30**.
+- ✅ **Sentry skal sende, og loggen må ikke være slået fra.**
+  `ceo/sentry-sendepipeline` (28a2592). Efter deploy: prod-build skal **ikke**
+  have `silent: true` i `next.config.ts` (grep efter `silent:`), og
+  `GET /api/health` skal svare `ok`.
+
+- ⏳ **Sentry-støjen fra Next router state skal forsvinde.**
+  `ceo/sentry-router-stoej`. Prøven er på **bygget og `grep`**: efter deploy skal
+  `scrubSentryEvent` i `src/lib/sentry-config.ts` returnere `null` for
+  `The router state header was sent but could not be parsed.`
+  (`grep -c 'shouldDropSentryEvent' src/lib/sentry-config.ts` ≥ 2), og
+  `GET /api/health` skal stadig svare `ok`. Sentry-projektet skal have **0
+  nye** hændelser med den besked. Vindue **1/10 17:30**.
 
 ## ❓ Til Mads
 
