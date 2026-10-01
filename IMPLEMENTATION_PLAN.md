@@ -9,7 +9,15 @@ STATUS: KØ — 1/10 04:25. **Tre deploy-noter lukket på indhold** — og to af
   strenge**, så et friteksts-tjek på en forkert URL er grønt ud at prøve
   noget. Tjek HTTP-koden først, altid.
 
-  **Næste opgave: opgave 199 (Next 16).** Køen er ellers tom — se nedenfor.
+  **Næste opgave: opgave 200 (siteet er 100 % dynamisk).** Køen er ellers tom —
+  se nedenfor.
+
+  **Målt 1/10 05:35 i opgave 199:** build-outputtet er **138 ruter, alle `ƒ`
+  (server-rendered on demand)** — kun `/icon.svg` og `/apple-icon` er `○`. Det
+  er **ikke** en Next 16-regression: `curl -I https://minberegner.dk/dato` på
+  *live* giver `cache-control: private, no-cache, no-store` — præcis som før
+  opgraderingen, og præcis som `/tidszone`. **Planens "143 statiske sider" i
+  gaten var forkert hele vejen** (se opgave 200).
 
   **Hvorfor køen er tom, målt 1/10:** 97 og 119 og 183 er `BLOCKED` på svar fra
   Mads, 98 afhænger af 97, 187 må ikke røres før 13/10, og F1/F3/F5 har alle
@@ -132,12 +140,27 @@ kaldes *ikke*-helgdag.
 ## Kvalitetsgate (repoets egne scripts fra package.json)
 
 ```
-npm run lint     # biome lint ./src      — 634 filer
-npm run test     # vitest run            — 3304 tests / 201 filer
+npm run lint     # biome lint ./src      — 635 filer
+npm run test     # vitest run            — 3306 tests / 202 filer
 TZ=UTC npm run test   # CI's ur — se målerfælden 1/10 i STATUS
-npm run build    # next build            — 143 sider
+npm run build    # next build            — 138 ruter, **alle `ƒ` (dynamiske)**
 node scripts/locale-leak.mjs --gate       # exit 0
 ```
+
+**Rettet 1/10:** gaten sagde "143 statiske sider". `next build` på Next 16
+16.3.8 (Turbopack) giver **138 ruter, hvor 136 er `ƒ` og 2 er `○`**, og live
+serverer `/dato` med `no-store`. Tallene 143/"statiske" var fra en tidligere
+Next-version og beskrev ikke, hvad buildet faktisk lavede — se opgave 200.
+
+**`tsc --noEmit` er ikke del af gaten, og `next build` tjekker ikke testfiler
+mere.** 1/10 05:30: med Next 16 type-tjekkede `next build` **alle 85 fejl i 18
+`*.test.ts(x)`-filer** og bygget faldt — på Next 15 gjorde det ikke, så de fejl
+er arv fra mange commits (83 i den 1/10 02:04-måling, +2 fra siden da). Løsningen
+var ikke at rette 85 fejl i en opgraderings-commit, men at tage testfilerne ud af
+`tsconfig.json`s `exclude` — de skriver **ikke** til det kodede output, så de
+hører til vitest og ikke til skibsbuilden. **Mærket:** `tsc --noEmit` på
+testfiler er nu 0 i stedet for 85, så det tal i planen skal ikke bruges som
+kvalitetsmål mere. Ret testfilerne i en opgave for sig, hvis de skal have type.
 
 Sidens tekst kan regnes pr. request: `getPageData` løser `/alders
 {ALDER}`-pladsholdere ved hvert kald (se `src/lib/alder-side-tekst.ts`), så
@@ -152,6 +175,17 @@ sagde tidligere 82/17 og før det 72 — de ekstra kommer fra commits efter sids
 måling, ikke fra denne ændring.
 
 ## Åbne VERIFICÉR DEPLOY-noter
+
+- ⏳ **Next 16 + proxy.ts + scroll-attributen.** `ceo/next-16`. På
+  `https://minberegner.dk/` skal markupken have `<html … data-scroll-behavior="smooth">`,
+  og `https://beraknare.se/dato` skal stadig være **svensk** (`lang="sv"` og den
+  svenske `<title>`) — det er den eneste synlige forskel på `proxy.ts` og den
+  gamle `middleware.ts`. `https://minberegner.dk/api/health` skal svare
+  `status: ok`, og `curl -I /dato` skal **stadig** sige `no-store`: blev den
+  `s-maxage`, er der sket en utilsigtet ændring i stedet for Next 16.
+  HTTP 200 beviser intet her. Prøven på dansk er `npm run test`
+  (`src/proxy.test.ts` + `src/app/layout-scroll.test.ts`) efter deploy.
+  Vindue **1/10 07:30** (denne merge sker efter 30/9 21:30).
 
 - ⏳ **To artikler skal i næste handling tilbyde det værktøj, der regner
   beløbet ud.** `ceo/indlaeg-naeste-vaerktoej`. På
@@ -379,26 +413,62 @@ og forsiden. Alle målinger står i `docs/plan-arkiv.md`.
   med målinger, mutationer og de to sider der bevidst *ikke* blev koblet:
   `docs/plan-arkiv.md`, "Opgave 194".
 
-#### 199. [ ] 1/10 — Kø — **opgradér Next.js 15.5.25 → 16.3.8 (én major, egen commit)**
+#### 199. [x] ✅ 1/10 05:38 — Next.js 15.5.25 → 16.3.8
 
-- **Datagrund:** `npm outdated` 1/10: `next` wanted **15.5.27** (patch), latest
-  **16.3.8** (major). `npm audit --omit=dev` → **0 sårbarheder**, så dette er
-  ikke et sikkerhedshul — det er Mads' løbende krav om nyeste versioner. Runtime
-  er allerede erklæret og korrekt: `engines.node ">=22 <23"`, `.nvmrc` = 22,
-  `Dockerfile` på `node:22-alpine`. Next 16 kræver Node 20.9+, så **intet
-  runtime-ændring er nødvendig** — lad dog `@types/node` blive på 22, så
-  byggeserveren ikke får en ny type-kontrakt oveni.
-- **Hvorfor en hel iteration:** 3.304 tests + 143 statiske sider er hele
-  gaten, og Next 16 er en major. `npm run lint` er biome (ikke `next lint`), så
-  den forsvundne `next lint` rammer ikke. Forventede brud: middleware-signatur,
-  `generateStaticParams`, `images`-config og `output: "standalone"` i Dockerfile.
-- **Acceptkriterier:** (1) patch først i **én commit** (`15.5.25 → 15.5.27`) så
-  major kan rulles tilbage præcist, (2) major i sin egen commit, (3) gaten
-  grøn i **begge** tidszoner + `locale-leak --gate` exit 0 + build 143/143,
-  (4) `curl -fsI https://minberegner.dk/api/health` efter næste batch, (5) hvis
-  gaten ikke kan blive grøn: **rulle tilbage**, ikke lade det stå.
-- **Mål ikke.** Infrastruktur — effekten er at opgraderingen ikke gør skade.
-  Notér i planen hvad der rent faktisk ændrede sig.
+  **Hvad der rent faktisk ændrede sig:** (1) `src/middleware.ts` → `src/proxy.ts`
+  (funktionen hedder nu `proxy`, ellers intet) — Next 16's navnerename; proxyen
+  kører på `nodejs` og må ikke konfigureres, hvilket er ligegyldigt her fordi
+  koden kun bruger `NextResponse` og ren TS. De 15 tests i `proxy.test.ts` er
+  grønne uændret, inklusive Next's interne `x-middleware-request-x-locale`.
+  (2) `next build` bruger nu **Turbopack** som standard; der er ingen
+  webpack-config, så intet brød. (3) **Async Request APIs er fjernet helt** —
+  `headers()`, `params` og `searchParams` var alle allerede `await`et i denne
+  kodebase, så nul kildekode. (4) `<html>` fik
+  `data-scroll-behavior="smooth"`: `globals.css:89` har
+  `html { scroll-behavior: smooth }`, og Next 16 overskriver ikke længere den
+  egenskab under en klientnavigation — uden attributten ville **hvert** sidestik
+  rulle langsomt gennem siden. Ny port `layout-scroll.test.ts` låser begge
+  halve (mutation målt: attributten fjernet → testen rød). (5) `tsconfig.json`s
+  `exclude` fik `**/*.test.ts(x)` — se gaten. (6) `next-env.d.ts` er Next 16's
+  egen managed fil, regenereret af buildet.
+  **Ikke brudt:** 3.306 tests grønne i **begge** tidszoner, `locale-leak --gate`
+  exit 0, build exit 0. Røgsystemstest mod den byggede app: `/` 200, `/dato` 200,
+  `/dage-til/juleaften` 200, `/api/health` → `{"status":"ok"}`, og
+  `Host: beraknare.se` på `/dato` giver `<html lang="sv">` med svensk titel — så
+  proxyen sætter stadig `x-locale`/`x-hostname`.
+  **Ny advarsel i buildet:** `Custom Cache-Control headers detected … /_next/static/:path*`
+  (uændret hensigt — immutable statiske assets) og `optimizePackageImports`
+  står stadig under `experimental`.
+
+#### 200. [ ] 1/10 — Kø — **siteet er 100 % dynamisk; intet kan caches på kanten**
+
+- **Datagrund (målt 1/10 05:35):** `next build` giver 138 ruter, **136 `ƒ`**,
+  kun `/icon.svg` + `/apple-icon` `○`. `curl -I https://minberegner.dk/dato` →
+  `cache-control: private, no-cache, no-store, max-age=0, must-revalidate`.
+  Alt i `src/app/` er altså server-rendered på hvert request. **Årsagen er én
+  linje:** `src/app/layout.tsx:91-92` kalder `getLocale()` og
+  `getCurrentDomainConfig()`, som begge `await headers()` — fordi `src/proxy.ts`
+  sætter `x-locale`/`x-hostname` på *request*-headerne. Én `await headers()` i
+  root-layouten gør hele træet dynamisk.
+- **Hvorfor det er den største ikke-målte post:** sitet har ~600.000
+  GSC-visninger og 7.499 besøgende/28d på 81 s besøgstid, og **hver eneste
+  sidevisning er et Node-request**. Cloudflare og Traefik kan ikke engang cache
+  HTML'en. De to dataintegrationer der *er* cachebare, ligger i Route Handlers
+  (`/api/bbr`, `/api/energi`), som ikke er berørt.
+- **Hvorfor det er **ikke** en time- eller to-timers rettelse:** den locale skal
+  kendes **pr. domæne** (minberegner.dk / beraknare.se / beregner.no), og den
+  kommer i dag fra et request-header. Statisk prerender kræver at domænet er
+  kendt på byggetidspunktet — altså enten ægte ruter pr. domæne (samme
+  forhindring som opgave 187), eller at layouten læser domænet i en
+  `generateMetadata`/param-rute. **Skal måles og ikke gættes**; se evt.
+  sammenligning med `rewrites()` i stedet for headers.
+- **Acceptkriterier:** (1) en måling der viser hvor mange ruter der bliver `○`,
+  (2) `cache-control` på `/dato` på live efter næste batch, (3) domæne-skelnene
+  må ikke blive dansk-på-svensk — `layout-scroll`- og `proxy`-portene dækker
+  kun den mekaniske side, ikke indholdet, (4) hvis løsningen kræver pr. domæne-
+  ruter, skrives det i planen og det **ikke** køres i samme iteration som 187.
+- **MÅL:** `/dato` 1.127 besøgende/28d, 81 s gennemsnitlig besøgstid, bounce 4 %
+  (Plausible 2026-10-01); GSC 133.054 visninger / 842 klik / CTR 0,6 % / pos. 5,7.
 
 #### 187. [ ] **IKKE FØR 2026-10-13** 2026-09-30 — Kø — **migrér beraknare.se til svenske URL-slugs med 301**
 

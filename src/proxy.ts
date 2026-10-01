@@ -3,7 +3,7 @@ import type { NextRequest } from "next/server";
 import { getDomainConfigForHost } from "@/lib/domain-config";
 import { getRouteDecision } from "@/lib/routing";
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const hostname = request.headers.get("host") || "localhost";
   const domainConfig = getDomainConfigForHost(hostname);
   const locale = domainConfig?.locale || "da";

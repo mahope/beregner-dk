@@ -92,7 +92,11 @@ export default async function RootLayout({
   const domainConfig = await getCurrentDomainConfig();
   const htmlLang = domainConfig.hreflangCode;
   return (
-    <html lang={htmlLang}>
+    // (with globals.css' `html { scroll-behavior:
+    // smooth }`) makes Next restore instant scroll-to-top during SPA navigation.
+    // Next 16 stopped overriding scroll-behavior on its own, so without this
+    // attribute every route change would animate slowly down the new page.
+    <html lang={htmlLang} data-scroll-behavior="smooth">
       <head>
         <script dangerouslySetInnerHTML={{ __html: calculationStatePrivacyScript }} />
 
