@@ -190,8 +190,13 @@ export default async function DatoPage() {
 
         <h2>Hvor mange dage er der tilbage af {tilbage.year}?</h2>
         <p>
-          Der er <strong>{tilbage.dage} dage tilbage af {tilbage.year}</strong> —{" "}
-          altså {tilbage.uger} uger og {tilbage.dageEfterUger} dage. Det er den
+          Der er{" "}
+          <strong>
+            {tilbage.dage} {tilbage.dage === 1 ? "dag" : "dage"} tilbage af{" "}
+            {tilbage.year}
+          </strong>{" "}
+          — altså {tilbage.uger} uger og {tilbage.dageEfterUger}{" "}
+          {tilbage.dageEfterUger === 1 ? "dag" : "dage"}. Det er den
           officielle kalender, ikke kalorier: årets sidste dag er 31. december,
           så tællingen står på 0 nytårsaften og begynder forfra 1. januar.
         </p>
@@ -212,7 +217,10 @@ export default async function DatoPage() {
             {denneMaaned.dato}. {denneMaaned.name}
           </strong>
           , altså månedens {denneMaaned.dageForbruget}. dag, så der er{" "}
-          <strong>{denneMaaned.dageTilbage} dage tilbage</strong> i{" "}
+          <strong>
+            {denneMaaned.dageTilbage}{" "}
+            {denneMaaned.dageTilbage === 1 ? "dag" : "dage"} tilbage
+          </strong>{" "}
           {denneMaaned.name} — måneden slutter{" "}
           <strong>{denneMaaned.sidsteDag}</strong>.
         </p>
@@ -494,16 +502,45 @@ export default async function DatoPage() {
 
         <h2>Hur många dagar är det kvar av {tilbage.year}?</h2>
         <p>
-          Det är <strong>{tilbage.dage} dagar kvar av {tilbage.year}</strong> —
-          alltså {tilbage.uger} veckor och {tilbage.dageEfterUger} dagar. Det
-          gäller kalenderåret, inte räkenskapsåret: årets sista dag är 31
-          december, så räknaren står på 0 nyårsafton och börjar om 1 januari.
+          Det är{" "}
+          <strong>
+            {tilbage.dage} {tilbage.dage === 1 ? "dag" : "dagar"} kvar av{" "}
+            {tilbage.year}
+          </strong>{" "}
+          — alltså {tilbage.uger} veckor och {tilbage.dageEfterUger}{" "}
+          {tilbage.dageEfterUger === 1 ? "dag" : "dagar"}. Det gäller
+          kalenderåret, inte räkenskapsåret: årets sista dag är 31 december,
+          så räknaren står på 0 nyårsafton och börjar om 1 januari.
         </p>
         <p>
           Vill du räkna till ett bestämt datum i stället för till årsskiftet
           finns <a href="/dagar-till/1-december">dagarna till 1 december</a> och{" "}
           <a href="/dagar-till/nyarsafton">nyårsafton</a> — olika frågor med
           olika siffror.
+        </p>
+
+        <h2>Hur många dagar är det i den här månaden?</h2>
+        <p>
+          {denneMaaned.name} {denneMaaned.year} har{" "}
+          <strong>{denneMaaned.dage} dagar</strong> totalt. I dag är det{" "}
+          <strong>
+            {denneMaaned.dato}. {denneMaaned.name}
+          </strong>
+          , alltså månadens {denneMaaned.dageForbruget}. dag, så det finns{" "}
+          <strong>
+            {denneMaaned.dageTilbage}{" "}
+            {denneMaaned.dageTilbage === 1 ? "dag" : "dagar"} kvar
+          </strong>{" "}
+          {denneMaaned.name} — månaden slutar{" "}
+          <strong>{denneMaaned.sidsteDag}</strong>.
+        </p>
+        <p>
+          Vill du räkna ut det i Excel är månadens längd{" "}
+          <code>=DATEDIF({denneMaaned.foersteDag};{denneMaaned.sidsteDag};&quot;d&quot;)+1</code>{" "}
+          = <strong>{denneMaaned.dage} dagar</strong>, och de dagar som gått är
+          dagens datum. Utan veckoslut och helger är det{" "}
+          <strong>{denneMaaned.arbejdsdage} arbetsdagar</strong> i{" "}
+          {denneMaaned.name} {denneMaaned.year} — samma tal som tabellen nedan.
         </p>
 
         <h2>Hur många dagar är det i en månad?</h2>

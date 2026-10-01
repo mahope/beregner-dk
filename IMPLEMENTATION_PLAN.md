@@ -1,44 +1,30 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — 1/10 11:25. **Sentry er sat op** (opgave 204, `ceo/sentry-fejl`).
-  Sentry lå ikke i koden, så "Ingen uløste fejl i 14 dage" betød intet.
+STATUS: KØ — 1/10 12:05. **Svensk `/dato` fik månedens eget afsnit, og fire
+  bøjningsfejl rettet** (opgave 205, `ceo/dato-svensk-maaned`).
 
-  **Rettet:** `@sentry/nextjs` 11.1.0 i tre steder — browseren
-  (`instrumentation-client.ts`), Node (`sentry.server.config.ts` kaldt fra
-  `register()`) og `instrumentation.ts`'s `onRequestError`, som uden den
-  fanger Next 16 **intet** server-side. `error.tsx` kalder `captureException`.
+  beraknare.se/dato er næststørste asset (GSC 103.776 visninger, 97 klik, CTR
+  0,1 %, pos. 8,1) og to af fire største søgninger er «antal dagar i en
+  månad»/«hur många dagar i en månad». Blokken lå indeni
+  `{locale === "da" && (`; `denneMaanedEksempel`/`maanedNavn` fandtes
+  allerede på svensk. Undervejs fandt fire bøjningsfejl, alle synlige 30/12:
+  «1 dage tilbage» + «1 dage» (da), «1 dagar kvar» + «1 dagar» (se) —
+  samme klasse som e6f4f0e, der kun rettede den ene sætning.
 
-  **Det vigtigste fund:** v11 fjernede `sendDefaultPii` og samler **mere** end
-  v10 gjorde med PII fra — cookies, HTTP-headere, bodies, URL-parametre,
-  DB-værdier og lokale variabelværdier i hver stack-frame. Kontrakten sagde
-  `sendDefaultPii: false`; på v11 hedder det `dataCollection`, og alle ti felter
-  er slået fra eksplicit. Porten fejler hvis et blad bliver `true` **eller**
-  hvis nøglenlisten ændrer sig ved en opgradering. Det var opgavens værdi.
+  **Port:** 14 tests på renderet markup, begge sprog, med uret på de datoer
+  hvor tallet er 1. **5 mutationer målt røde**, begge veje (også når den
+  overbøjes til altid «dag»). Testtal 3333 → **3345**.
 
-  **Porten:** 15 tests i `src/lib/sentry-config.test.ts`. DSN-form,
-  produktionsvip, `tracesSampleRate` 0,1, replay 0, alle ti felte fra, og
-  URL-skrubben — som **fandt to huller**: query-strengen har intet `?` foran
-  `s=`, og staten kan ligge i fragmentet. Mutation målt rød (4 tests).
-  Testtal **3333** (var 3318).
+  **Gaten:** `lint` 0 (640) · `typecheck` 0 · `TZ=UTC npm run test`
+  **3345 grønne / 204 filer** · `locale-leak --gate` exit 0 · `next build`
+  138 ruter. CI på `master` grøn ved start (36840363481).
 
-  **⚠️ Ikke færdigbevist:** at en fejl *faktisk forlader* browseren. Målt at
-  init kører i prod-build med den rigtige DSN og at `onRequestError` fanger
-  fejlen fra en kastende route handler — men min lokale collector modtog ingen
-  envelope. Se opgave 204 og ❓.
-
-  **Gaten:** `lint` 0 · `typecheck` 0 · `TZ=UTC npm run test` **3333 grønne /
-  204 filer** · `locale-leak --gate` exit 0 · `next build` 138 ruter. CI på
-  `master` grøn ved start (36835264244).
-
-  **Åbne noter: 9** — otte fra før med vindue **1/10 12:30** (kan ikke lukkes
-  før det) plus Sentry-noten.
-
+  **Åbne noter: 9** — otte med vindue **1/10 12:30** + Sentry-noten.
   **Blokeret på Mads:** 97, 119, 183, 201, F1, F5 + Sentry-spørgsmålet.
 
   **⚠️ Målerfælde:** `npm run test` kører `locale-leak-gate.test.ts`, der med
-  vilje planterer danske lækager. `FEJL: n ureviewet(e)` i output er derfor
-  **ikke** fund i din diff. Kør gaten separat: `node scripts/locale-leak.mjs
-  --gate` (exit 0).
+  vilje planterer lækager — `FEJL: n ureviewet(e)` er derfor **ikke** fund i
+  din diff. Gaten: `node scripts/locale-leak.mjs --gate` (exit 0).
 
 ## Fase 3 — trafik-drevet
 
@@ -90,32 +76,29 @@ intet om resten. Uden søgningsniveau kan ingen vælge mellem "ny side", "dybere
 side" og "nye links". **Accept:** GSC-eksport for `/procent` (eller de 20
 største søgninger site-wide) ligger i planen. **❓ se nedenfor.**
 
-**F2 + F2b. [x] ✅ `ceo/procent-rabat-spørgsmal`, `ceo/procent-svensk-rabatt-faq`
-— 19 tests, 12 mutationer faldt. Kort: `docs/plan-arkiv.md`.
-**MÅL:** `/procent` 150.470 visninger / 97 klik / CTR 0,1 % / pos. 7,4 (da) og
-26.933 / 2 / 0,0 % / pos. 9,9 (se), GSC 2026-08-31 → 2026-09-28.
+**F2 + F2b. [x] ✅** rabat-spørgsmål + svensk rabatt-FAQ — `docs/plan-arkiv.md`.
+**MÅL:** `/procent` 150.470 / 97 / 0,1 % / 7,4 (da), 26.933 / 2 / 0,0 % / 9,9 (se).
 
 **F3. [ ] Beraknare.se: position, ikke titel.** 190.447 visninger på pos. 8-10.
 Opgave 187 (svenske slugs, 301) er sat til **13/10** og må ikke flyttes før de
 svenske titelændringer fra C195/C196 er målt. Efter den dato er det den største
 enkeltpost i trafikplanen. **Accept:** se opgave 187.
 
-**F4. [x] ✅ `ceo/forsiden-dublet-liste` — den dobbelerede stribe er væk; se
-`docs/plan-arkiv.md`. **MÅL:** `/` 218 besøgende/28d, bounce 38 %
-(Plausible 2026-09-30) → mod 2-7 %; se `/` 20 besøgende, bounce 80 %.
+**F4. [x] ✅** dobbelerede stribe væk — `docs/plan-arkiv.md`. **MÅL:** `/` 218
+besøgende/28d, bounce 38 % → mod 2-7 %; se `/` 20, bounce 80 %.
 
 **F5. [ ] Søg på de 27 % ikke-Google-trafik.** Bing 1.319 + DDG 378 +
 Yahoo 274 besøgende/28d. IndexNow er kodet (`src/lib/indexnow.ts`), men ❓
 spørger om krogen efter deploy er sat op — uden svar er Bing/DDG/Yahoo
 indeksering uafhængig af vores deploys.
 
-**F6. [x] ✅ `ceo/no-locale-tag` — 8 tests, port `intl-locale-tag.test.ts`.**
+**F6. [x] ✅** norske tal uden dansk separator — port `intl-locale-tag.test.ts`.**
 
-**F7. [x] ✅ `ceo/tidszone-tidsforskelle` — se `docs/plan-arkiv.md`.
-**MÅL:** `/tidszone` 24.324 visninger / 104 klik / CTR 0,4 % / pos. 7,5.
+**F7. [x] ✅** tidsforskellers dage læst fra `afvigendeDage()`. **MÅL:**
+`/tidszone` 24.324 / 104 / 0,4 % / 7,5.
 
-**F8. [x] ✅ `ceo/svensk-helgdagslove` — se `docs/plan-arkiv.md`.
-**MÅL:** se `/nedtaelling` 5.726 visninger / 12 klik / CTR 0,2 % / pos. 9,2.
+**F8. [x] ✅** svenske helgdagslove kildeført. **MÅL:** se `/nedtaelling`
+5.726 / 12 / 0,2 % / 9,2.
 
 ## Feature-kø
 
@@ -148,6 +131,16 @@ efter forventet effekt på **trafik** (GSC-tallene fra 1/10):
   «Landsgennemsnittet er 25,049%». HTTP 200 beviser intet — det er brødtekst.
   Prøven på dansk er `src/app/loen-efter-skat/page.test.tsx` +
   `src/app/fact-consistency.test.ts` efter deploy. Vindue **1/10 12:30**.
+
+- ⏳ **`/dato` på svensk skal have månedens eget afsnit og bøje «1 dag».**
+  `ceo/dato-svensk-maaned`. På `https://beraknare.se/dato` skal `<h2>Hur många
+  dagar är det i den här månaden?</h2>` stå i markupken, og brødteksten skal
+  lyde «… har **31 dagar** totalt» med månadens navn fra `maanedNavn(7, "se")`.
+  **«1 dagar kvar» og «1 dagar» efter ugerne skal forekomme 0 gange**, og
+  «veckor och 1 dag» skal stå, når restdagen er 1. På
+  `https://minberegner.dk/dato` skal «1 dage tilbage» forekomme 0 gange.
+  HTTP 200 beviser intet — det er fire bøjninger i brødtekst. Prøven på dansk
+  er `src/app/dato/page.test.tsx` efter deploy. Vindue **1/10 12:30**.
 
 ## Kvalitetsgate (repoets egne scripts fra package.json)
 
@@ -414,33 +407,26 @@ alle 200, hver streng talt i markupken. Alle målinger står i
   `/dato` er klyngens moderside: 1.127 besøgende/28d, bounce 4 %, GSC
   134.567 visninger / 880 klik / CTR 0,7 % / pos. 5,7 (2026-10-01).
 
-#### 203. [x] ✅ 1/10 10:20 — Kø — **`/loen-efter-skat` skal ikke blande to kilder i samme afsnit**
+#### 205. [x] ✅ 1/10 12:05 — Kø — **svensk `/dato` får månedens afsnit, og fire bøjninger rettes**
 
-- **Rettet:** `src/lib/kommuner.ts` eksporterer nu `KOMMUNER_ANTAL` (98) og
-  `KOMMUNER_SNIT` (uvægtet middeltal **25,626 %**) som *afledede* værdier, så
-  de ikke kan glide fra tabellen. Afsnittet skriver «I tabellen med de 98 kommuner
-  er gennemsnittet 25,63 %, den billigste ligger på 22,5 %, og 27,8 % er den
-  dyreste», og satsfilens 25,049 % flyttede til **sit eget afsnit** mærket
-  «ifølge svmn.dk's 2026-gennemsnit. Det er ikke det samme som tabellens
-  middeltal» — altså uden at påstå hvordan svmn.dk vægter sit, for det kan vi
-  ikke dokumentere.
-- **To fund mere i samme række, rettet samme sted:** (1) `page-data.ts`'s
-  FAQ «Hvorfor varierer kommuneskatten?» blandede de samme to kilder og skrev
-  «Landsgennemsnittet er 25,049 %»; nu med `KOMMUNESKAT_SNIT_PCT` (afledt af
-  `SATSER_2026`) og samme kildeangivelse. (2) **`LoenBeregner.tsx:295` skrev
-  «Landsgennemsnit: 24,94 %» under kommuneskatsfeltet** — et tal der aldrig har
-  været i beregningen, mens feltets forudindstilling er 25,049 %. Hjælpeteksten
-  læser nu `SKATTESATSER.kommuneSkatSnit`.
-- **Port:** (a) ny `src/app/loen-efter-skat/page.test.tsx` (3 tests) renderer
-  siden med `renderToStaticMarkup`, **finder den `<p>` der indeholder
-  gennemsnittet** og kræver at gennemsnit + laveste + højeste alle er læst fra
-  `KOMMUNER` — den dømmer på egenskab, ikke på et kodestykke; (b) to nye tests i
-  `fact-consistency.test.ts`. **Mutation målt rød:** gennemsnittet sat tilbage
-  på `SATSER_2026.kommuneskatSnit` → 1 rød; `24,94 %` sat tilbage i
-  `LoenBeregner` → 1 rød. Testtal 3313 → **3318**.
-- **MÅL:** `/loen-efter-skat` — ikke i GSC's top-16; Plausible har ingen måling
-  for den. Siden er statisk indhold, så effekten er kun indirekte via `/dato`- og
-  `/boliglaan`-links.
+- **Hvorfor:** beraknare.se/dato er sitets næststørste enkeltasset (GSC
+  103.776 visninger, 97 klik, CTR 0,1 %, pos. 8,1), og to af de fire største
+  søgninger er «antal dagar i en månad» og «hur många dagar i en månad».
+  Den danske `/dato` fik i C-tallet et eget afsnit netop til det; den
+  svenske gjorde ikke, fordi hele blokken lå indeni `{locale === "da" && (`.
+- **Rettet:** afsnittet er nu gengivet på svensk i den svenske sektion, lige
+  før «Hur många dagar är det i en månad?» — samme placering som på dansk.
+  `denneMaanedEksempel(new Date(), "se")` læser dagen i
+  `Europe/Copenhagen`, som den danske side gør.
+- **Fire bøjningsfejl, målt i markupken:** «1 dage tilbage af 2026» + «1
+  dage» efter ugerne (da), «1 dagar kvar av 2026» + «1 dagar» efter ugerne
+  (se). Alle fire er den 30. december synlige, fordi der da er præcis 1 dag
+  tilbage. Samme klasse som e6f4f0e — den rettede kun den ene sætning.
+- **Port:** 14 tests, alle på renderet markup i begge sprog med uret sat til
+  de datoer hvor tallet er 1. 5 mutationer målt røde, begge veje.
+- **MÅL:** se `/dato` 103.776 visninger / 97 klik / CTR 0,1 % / pos. 8,1
+  (GSC 2026-09-01 → 2026-09-29); Plausible 140 besøgende/28d, bounce 4 %
+  (2026-10-01). Genmål efter 14 dage.
 
 #### 200. [ ] 1/10 — Kø — **siteet er 100 % dynamisk; intet kan caches på kanten**
 
@@ -509,27 +495,6 @@ alle 200, hver streng talt i markupken. Alle målinger står i
   efter 14 dage.
 - **MÅL:** beraknare.se 537 besøgende/28d; `/dato` 95 klik, `/tidsberegner` 127
   klik, `/procent` 2 klik (GSC 2026-08-30 → 2026-09-27). Genmål 2026-10-13.
-
-#### 204. [x] ✅ 1/10 11:25 — Kø — **Sentry opsat, og slået fra for de data den ville samle**
-
-- **Rettet:** `@sentry/nextjs` 11.1.0. Tret steder: `instrumentation-client.ts`
-  (browser), `sentry.server.config.ts` kaldt fra `register()` (Node), og
-  `instrumentation.ts`'s `onRequestError` — sidste er den vigtigste, for uden
-  den fanger Next 16 **intet** server-side. `error.tsx` kalder `captureException`.
-- **Fund undervejs (det er opgavens egen værdi):** v11 fjernede `sendDefaultPii`
-  og samler *mere* end v10 gjorde med PII fra — cookies, HTTP-headere, bodies,
-  URL-parametre, DB-værdier, lokale variabelværdier. Kontrakten sagde
-  `sendDefaultPii: false`; på v11 hedder det `dataCollection`, og alle ti felter
-  er slået fra eksplicit. Porten fejler på både et `true`-blad og en ændret nøgleliste.
-- **URL-skrubben** fandt to huller under skrivningen: query-strengen har intet
-  `?` foran `s=`, og staten kan ligge i fragmentet. Begge dækket nu.
-- **Åbent og udokumenteret:** ❓ se nedenfor. Meget plausibel årsag er
-  `withSentryConfig(..., { silent: true })` — v11 auto-wirer orchestrion ved
-  *build* via `withSentryConfig`, så en forkert build-option kan slå
-  auto-instrumentering fra. Næste agent: sæt `silent: false` i ét hug, byg, og
-  læs hvad builden skriver om orchestrion.
-- **MÅL:** ingen brugerdata endnu. `/` og `/dato` er referencerammen;
-  første rigtige måling er antallet af hændelser efter næste batch.
 
 ## ❓ Til Mads
 

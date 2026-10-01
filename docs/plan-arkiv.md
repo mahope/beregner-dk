@@ -22590,3 +22590,55 @@ før optaget og urørt af denne opgave.
 `next start` ikke virker ordentligt, og EADDRINUSE lod den gamle leve videre).
 Brug `node .next/standalone/server.js` og `lsof -ti:<port> | xargs kill -9`
 før hver måling.
+
+
+## Opgave 203 og 204 — lukket 1/10 (arkiveret 1/10 fra planen)
+
+#### 203. [x] ✅ 1/10 10:20 — Kø — **`/loen-efter-skat` skal ikke blande to kilder i samme afsnit**
+
+- **Rettet:** `src/lib/kommuner.ts` eksporterer nu `KOMMUNER_ANTAL` (98) og
+  `KOMMUNER_SNIT` (uvægtet middeltal **25,626 %**) som *afledede* værdier, så
+  de ikke kan glide fra tabellen. Afsnittet skriver «I tabellen med de 98 kommuner
+  er gennemsnittet 25,63 %, den billigste ligger på 22,5 %, og 27,8 % er den
+  dyreste», og satsfilens 25,049 % flyttede til **sit eget afsnit** mærket
+  «ifølge svmn.dk's 2026-gennemsnit. Det er ikke det samme som tabellens
+  middeltal» — altså uden at påstå hvordan svmn.dk vægter sit, for det kan vi
+  ikke dokumentere.
+- **To fund mere i samme række, rettet samme sted:** (1) `page-data.ts`'s
+  FAQ «Hvorfor varierer kommuneskatten?» blandede de samme to kilder og skrev
+  «Landsgennemsnittet er 25,049 %»; nu med `KOMMUNESKAT_SNIT_PCT` (afledt af
+  `SATSER_2026`) og samme kildeangivelse. (2) **`LoenBeregner.tsx:295` skrev
+  «Landsgennemsnit: 24,94 %» under kommuneskatsfeltet** — et tal der aldrig har
+  været i beregningen, mens feltets forudindstilling er 25,049 %. Hjælpeteksten
+  læser nu `SKATTESATSER.kommuneSkatSnit`.
+- **Port:** (a) ny `src/app/loen-efter-skat/page.test.tsx` (3 tests) renderer
+  siden med `renderToStaticMarkup`, **finder den `<p>` der indeholder
+  gennemsnittet** og kræver at gennemsnit + laveste + højeste alle er læst fra
+  `KOMMUNER` — den dømmer på egenskab, ikke på et kodestykke; (b) to nye tests i
+  `fact-consistency.test.ts`. **Mutation målt rød:** gennemsnittet sat tilbage
+  på `SATSER_2026.kommuneskatSnit` → 1 rød; `24,94 %` sat tilbage i
+  `LoenBeregner` → 1 rød. Testtal 3313 → **3318**.
+- **MÅL:** `/loen-efter-skat` — ikke i GSC's top-16; Plausible har ingen måling
+  for den. Siden er statisk indhold, så effekten er kun indirekte via `/dato`- og
+  `/boliglaan`-links.
+
+#### 204. [x] ✅ 1/10 11:25 — Kø — **Sentry opsat, og slået fra for de data den ville samle**
+
+- **Rettet:** `@sentry/nextjs` 11.1.0. Tret steder: `instrumentation-client.ts`
+  (browser), `sentry.server.config.ts` kaldt fra `register()` (Node), og
+  `instrumentation.ts`'s `onRequestError` — sidste er den vigtigste, for uden
+  den fanger Next 16 **intet** server-side. `error.tsx` kalder `captureException`.
+- **Fund undervejs (det er opgavens egen værdi):** v11 fjernede `sendDefaultPii`
+  og samler *mere* end v10 gjorde med PII fra — cookies, HTTP-headere, bodies,
+  URL-parametre, DB-værdier, lokale variabelværdier. Kontrakten sagde
+  `sendDefaultPii: false`; på v11 hedder det `dataCollection`, og alle ti felter
+  er slået fra eksplicit. Porten fejler på både et `true`-blad og en ændret nøgleliste.
+- **URL-skrubben** fandt to huller under skrivningen: query-strengen har intet
+  `?` foran `s=`, og staten kan ligge i fragmentet. Begge dækket nu.
+- **Åbent og udokumenteret:** ❓ se nedenfor. Meget plausibel årsag er
+  `withSentryConfig(..., { silent: true })` — v11 auto-wirer orchestrion ved
+  *build* via `withSentryConfig`, så en forkert build-option kan slå
+  auto-instrumentering fra. Næste agent: sæt `silent: false` i ét hug, byg, og
+  læs hvad builden skriver om orchestrion.
+- **MÅL:** ingen brugerdata endnu. `/` og `/dato` er referencerammen;
+  første rigtige måling er antallet af hændelser efter næste batch.

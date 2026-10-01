@@ -127,6 +127,49 @@ describe("dato page — dage tilbage i året", () => {
     expect(html).toContain('href="/dagar-till/nyarsafton"');
   });
 
+  // "26 veckor och 1 dagar" stod live på beraknare.se/dato: restdagen blev
+  // skrevet med flertal uden at blive böjet, selv om antallet og ugerne var
+  // det. Samme fejltype som "1 dage" i datolisten (e6f4f0e), samme side —
+  // og den danske undgik den kun fordi "dage" og "dagar" har samme flertal.
+  test("restdagen efter ugerne b\u00f8jes i begge sprog", async () => {
+    vi.mocked(getLocale).mockResolvedValue("da");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("da"));
+
+    const html = renderToStaticMarkup(await DatoPage());
+
+    // 95 dage = 13 uger og 4 dage: 4 er flertal på begge sprog.
+    expect(html).toContain("13 uger og 4 dage");
+  });
+
+  test("se b\u00f8jer '1 dag' i ental, mens flertal stadig er 'dagar'", async () => {
+    vi.mocked(getLocale).mockResolvedValue("se");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("se"));
+    // 30. december: 1 dag tilbage, altsaa 0 uger og 1 dag — netop den
+    // bøjning der var forkert ("1 dagar"). Datoen er valgt, fordi den er
+    // den eneste i december, der giver netop 1.
+    vi.setSystemTime(new Date("2026-12-30T12:00:00Z"));
+
+    const html = renderToStaticMarkup(await DatoPage());
+
+    expect(html).toContain("<strong>1 dag kvar av 2026</strong>");
+    expect(html).toContain("0 veckor och 1 dag.");
+    // Kun restdagen ved ugerne: overskriftens "1 dagar kvar av 2026" er
+    // korrekt flertal og skal ikke faa denne port til at fejle.
+    expect(html).not.toContain("veckor och 1 dagar");
+  });
+
+  test("se beh\u00e6lder 'dagar' i flertal, så b\u00f8jningen ikke sl\u00e5r fejl den anden vej", async () => {
+    vi.mocked(getLocale).mockResolvedValue("se");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("se"));
+    // 27. september: 95 dage tilbage = 13 uger og 4 dagar.
+    vi.setSystemTime(new Date("2026-09-27T12:00:00Z"));
+
+    const html = renderToStaticMarkup(await DatoPage());
+
+    expect(html).toContain("13 veckor och 4 dagar.");
+    expect(html).not.toContain("4 dag.");
+  });
+
   test("tallet følger dagen, så siden kan ikke stå med gårsdags svar", async () => {
     vi.setSystemTime(new Date("2026-12-31T08:00:00Z"));
     vi.mocked(getLocale).mockResolvedValue("da");
@@ -696,5 +739,114 @@ describe("dato page — pinse-intervallerne", () => {
 
     expect(html).toContain("juli 2026 har <strong>31 dage</strong>");
     expect(html).toContain("m\u00e5nedens 1. dag");
+  });
+
+  // Svensk GSC (1/10) har "antal dagar i en m\u00e5nad" og "hur m\u00e5nga
+  // dagar i en m\u00e5nad" blandt de fire st\u00f6rste s\u00f8gninger p\u00e5
+  // beraknare.se/dato (103.776 visninger, 97 klik, CTR 0,1 %, pos. 8,1).
+  // Svensk autocomplete sp\u00f6rger det samme som den danske: "antal dagar
+  // i en m\u00e5nad" (nr. 2 efter Excel) og "hur m\u00e5nga arbetsdagar i en
+  // m\u00e5nad". Den danske side fik derfor et eget afsnit med m\u00e5nedens
+  // l\u00e6ngde og dagens placering i den \u2014 tabellen med tolv r\u00e6kker
+  // svarer kun indirecte, s\u00e5 l\u00e6seren skal selv finde sin m\u00e5ned.
+  // Svensk side havde det samme afsnit manglende, selv om
+  // `denneMaanedEksempel` og `maanedNavn` allerede findes p\u00e5 svensk.
+  test("se svarer p\u00e5 'antal dagar i en m\u00e5nad' med m\u00e5nedens l\u00e6ngde og dagens placering", async () => {
+    vi.mocked(getLocale).mockResolvedValue("se");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("se"));
+    vi.setSystemTime(new Date("2026-07-21T12:00:00Z"));
+
+    const html = renderToStaticMarkup(await DatoPage());
+
+    expect(html).toContain("Hur m\u00e5nga dagar \u00e4r det i den h\u00e4r m\u00e5naden?");
+    expect(html).toContain("juli 2026 har <strong>31 dagar</strong>");
+    // M\u00e5nedens svenska navn skal komme fra `maanedNavn(7, "se")`, derfor
+    // er det "juli" p\u00e5 begge sprog \u2014 men ikke den danske "juli 2026 har"
+    // med det danske ord "dage" eller det danske "m\u00e5nedens".
+    expect(html).toContain("m\u00e5nadens 21. dag");
+    expect(html).toContain("<strong>10 dagar kvar</strong>");
+    // Excel-formlen skal give pr\u00e6cis samme antal som br\u00f6dteksten. Svensk
+    // Excel bruger semikolon som skilletegn (komma er decimaltegn) \u2014 samme
+    // afgr\u00e6nser som den danske, s\u00e5 formlen er identisk p\u00e5 begge sprog.
+    expect(html).toContain("=DATEDIF(2026-07-01;2026-07-31;&quot;d&quot;)+1");
+  });
+
+  // Samme fejltype som restdagen ved ugerne, men i det nye afsnit: den
+  // danske side skrev "1 dage tilbage", den svenske "1 dagar kvar", fordi
+  // antallet blev skrevet med flertal uden at blive b\u00f8jet. 30. september
+  // er den eneste dag i m\u00e5neden, der giver pr\u00e6cis 1 (m\u00e5neden er 30
+  // dage, s\u00e5 30 - 29 = 1).
+  test.each([
+    { locale: "da" as const, en: "<strong>1 dag tilbage</strong>", to: "<strong>1 dage tilbage</strong>" },
+    { locale: "se" as const, en: "<strong>1 dag kvar</strong>", to: "<strong>1 dagar kvar</strong>" },
+  ])("$locale b\u00f8jer m\u00e5nedens sidste dag i ental", async ({ locale, en, to }) => {
+    vi.mocked(getLocale).mockResolvedValue(locale);
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale(locale));
+    vi.setSystemTime(new Date("2026-09-29T12:00:00Z"));
+
+    const html = renderToStaticMarkup(await DatoPage());
+
+    expect(html).toContain(en);
+    expect(html).not.toContain(to);
+  });
+
+  // Og flertallet m\u00e5 ikke forsvinde: 21. juli har 10 dage tilbage.
+  test.each([
+    { locale: "da" as const, s: "<strong>10 dage tilbage</strong>" },
+    { locale: "se" as const, s: "<strong>10 dagar kvar</strong>" },
+  ])("$locale beh\u00e6lder flertal i m\u00e5nedens dage tilbage", async ({ locale, s }) => {
+    vi.mocked(getLocale).mockResolvedValue(locale);
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale(locale));
+    vi.setSystemTime(new Date("2026-07-21T12:00:00Z"));
+
+    const html = renderToStaticMarkup(await DatoPage());
+
+    expect(html).toContain(s);
+  });
+
+  // Sidens egen hovedtal kan ogsaa blive 1: den 30. december er der pr\u00e6cis
+  // 1 dag tilbage af aaret. Skrevet med flertal giver det "1 dage tilbage af
+  // 2026" (da) og "1 dagar kvar av 2026" (se) — de to strenge, der sto i
+  // markupken da opgaven startede.
+  test.each([
+    { locale: "da" as const, en: "<strong>1 dag tilbage af 2026</strong>" },
+    { locale: "se" as const, en: "<strong>1 dag kvar av 2026</strong>" },
+  ])("$locale b\u00f8jer \u00e5rets sidste dag i ental", async ({ locale, en }) => {
+    vi.mocked(getLocale).mockResolvedValue(locale);
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale(locale));
+    vi.setSystemTime(new Date("2026-12-30T12:00:00Z"));
+
+    const html = renderToStaticMarkup(await DatoPage());
+
+    expect(html).toContain(en);
+    expect(html).not.toContain("1 dage tilbage");
+    expect(html).not.toContain("1 dagar kvar");
+    // Restdagen ved ugerne er ogsaa 1 den 30. december.
+    expect(html).toContain(locale === "da" ? "0 uger og 1 dag." : "0 veckor och 1 dag.");
+  });
+
+  test("tallet foelger dagen, saa siden ikke kan staa med gaarsdags svar", async () => {
+    vi.setSystemTime(new Date("2026-12-31T08:00:00Z"));
+    vi.mocked(getLocale).mockResolvedValue("da");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("da"));
+
+    const html = renderToStaticMarkup(await DatoPage());
+
+    expect(html).toContain("<h2>Hvor mange dage er der tilbage af 2026?</h2>");
+    expect(html).toContain("<strong>0 dage tilbage af 2026</strong>");
+  });
+
+  test("se-l\u00e6sningen l\u00e6ser dagens dato i dansk tid, som den svenske side g\u00f8r", async () => {
+    vi.mocked(getLocale).mockResolvedValue("se");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("se"));
+    // 1. juli 2026 kl. 00:30 dansk tid er 30. juni kl. 22:30 UTC. Begge
+    // `/dato`-sider bruger `dagITidszone`, s\u00e5 det er samme dag som den
+    // danske side \u2014 men kun den danske havde porten.
+    vi.setSystemTime(new Date("2026-06-30T22:30:00Z"));
+
+    const html = renderToStaticMarkup(await DatoPage());
+
+    expect(html).toContain("juli 2026 har <strong>31 dagar</strong>");
+    expect(html).toContain("m\u00e5nadens 1. dag");
   });
 });
