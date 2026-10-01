@@ -1,25 +1,33 @@
 # IMPLEMENTATION PLAN — minberegner.dk (oxloop)
 
-STATUS: KØ — 1/10 12:05. **Svensk `/dato` fik månedens eget afsnit, og fire
-  bøjningsfejl rettet** (opgave 205, `ceo/dato-svensk-maaned`).
+STATUS: KØ — 1/10 12:35. **Pristalsreguleringen på `/husleje` blev et
+  værktøj** (opgave 206, `ceo/husleje-pristalsregulering`).
 
-  beraknare.se/dato er næststørste asset (GSC 103.776 visninger, 97 klik, CTR
-  0,1 %, pos. 8,1) og to af fire største søgninger er «antal dagar i en
-  månad»/«hur många dagar i en månad». Blokken lå indeni
-  `{locale === "da" && (`; `denneMaanedEksempel`/`maanedNavn` fandtes
-  allerede på svensk. Undervejs fandt fire bøjningsfejl, alle synlige 30/12:
-  «1 dage tilbage» + «1 dage» (da), «1 dagar kvar» + «1 dagar» (se) —
-  samme klasse som e6f4f0e, der kun rettede den ene sætning.
+  Nettoprisindeks-blokken var 210 linjer statisk tekst med 8.000 kr håndskrevet
+  ind i regnestykket, i tabellens sidste kolonne, i forskellen mellem de to
+  indekser og i kvartalsafsnittet — læseren skulle selv regne sin egen husleje
+  igennem fire steder. Nu er læserens husleje input til **alle** tal, og
+  svaret står i en `aria-live`-boks under overskriften. `parseDanskTal` gør
+  «12.500» dansk korrekt i stedet for 12 kr.
 
-  **Port:** 14 tests på renderet markup, begge sprog, med uret på de datoer
-  hvor tallet er 1. **5 mutationer målt røde**, begge veje (også når den
-  overbøjes til altid «dag»). Testtal 3333 → **3345**.
+  **Port:** 6 tests der skriver i feltet og læser tallene ud af DOM'en —
+  svaret, regnestykket, tabellens kolonne, kvartalsafsnittet, dansk
+  tusindtalspunktum og det ugyldige felt. **3 mutationer målt røde** (ignorer
+  inputtet → 4 røde; kvartalsafsnittet hårdkodet → 1 rød; tabellen hårdkodet
+  → 1 rød). Testtal 3345 → **3351**.
 
-  **Gaten:** `lint` 0 (640) · `typecheck` 0 · `TZ=UTC npm run test`
-  **3345 grønne / 204 filer** · `locale-leak --gate` exit 0 · `next build`
-  138 ruter. CI på `master` grøn ved start (36840363481).
+  **Gaten:** `lint` 0 (641) · `typecheck` 0 · `TZ=UTC npm run test`
+  **3351 grønne / 205 filer** · `locale-leak --gate` exit 0 · `next build`
+  142 ruter. Verificeret i **lokalt prod-build på 3111**: label, `aria-live`,
+  `aria-describedby` og «Din husleje stiger 232 kr. til 8.232 kr. pr. måned ved
+  2,9 % i august 2026.» står i **serverens** HTML, de 10 øvrige 8.000-forekomster
+  er uændrede, ingen `NaN`, ingen svensk lækage.
 
-  **Åbne noter: 9** — otte med vindue **1/10 12:30** + Sentry-noten.
+  **⚠️ 8 deploy-noter er stadig åbne.** 12:30-vinduet er målt T+3 minutter
+  og var ikke nået endnu — alle otte merges lå 12:05-12:25. Målingen står i
+  `docs/plan-arkiv.md`; næste iteration måler igen og skriver først
+  `DEPLOY-MISSING` hvis et **helt** vindue er gået. `/api/health` er `ok`.
+
   **Blokeret på Mads:** 97, 119, 183, 201, F1, F5 + Sentry-spørgsmålet.
 
   **⚠️ Målerfælde:** `npm run test` kører `locale-leak-gate.test.ts`, der med
@@ -112,9 +120,17 @@ efter forventet effekt på **trafik** (GSC-tallene fra 1/10):
 - **Forskelsside til `/dato` og `/tidsberegner` på beraknare.se.** *Hvem:* de
   190.447 svenske visninger på 0,12 % CTR. *Accept:* CTR over 0,3 % på 14 dage.
   *Datagrund:* GSC se, 1/10. **Kan ikke før 13/10** (opgave 187).
-- **Pristalsregulering på `/husleje`** som selvstændig side. *Hvem:* lejere der
-  vil vide hvad deres lejlighed må stige til. *Accept:* beregner + FAQ med
-  nettoprisindekset som kilde. *Datagrund:* `/husleje` 161 besøgende/28d.
+- **Pristalsregulering på `/husleje`** — ✅ 1/10, `ceo/husleje-pristalsregulering`,
+  se `docs/plan-arkiv.md`. *MÅL:* `/husleje` 161 besøgende/28d, bounce 4 %
+  (Plausible 2026-10-01). GSC har ingen `/husleje`-visning i top-15, så
+  baseline for CTR er **ikke** kendt — tæt på 0 visninger mod 161 besøgende,
+  dvs. trafikken er overvejende ikke-Google. Genmål 15/10.
+- **Tænkeværdigt spørgsmål pr. fælde: "hvad må min husleje stige til".** Næste
+  skridt efter 206 er de samme tal på sig selv — `/procent` har 151.005
+  visninger og **92 klik** på pos. 7,4, fordi siden svarer på *hvor meget*
+  procent, ikke på hvad beløbet er. **Accept:** et beløbsværktøj på en side
+  med høj visning og lav CTR. *Datagrund:* GSC 1/10. Kræver F1's søgningsdata
+  for at vælge side, ellers er det gætteri (❓).
 - **Kalorieguide på `/kalorier`.** *Hvem:* 9 af 10 danske autocomplete-træffere
   under «kalorier» er madvarer. **Blokeret på kilde** (opgave 119, ❓) — må ikke
   gættes tal.
@@ -141,6 +157,26 @@ efter forventet effekt på **trafik** (GSC-tallene fra 1/10):
   `https://minberegner.dk/dato` skal «1 dage tilbage» forekomme 0 gange.
   HTTP 200 beviser intet — det er fire bøjninger i brødtekst. Prøven på dansk
   er `src/app/dato/page.test.tsx` efter deploy. Vindue **1/10 12:30**.
+
+## Åbne VERIFICÉR DEPLOY-noter
+
+- ⏳ **`/husleje` skal regne pristalsreguleringen på læserens egen husleje.**
+  `ceo/husleje-pristalsregulering`. På `https://minberegner.dk/husleje` skal
+  `<label for="husleje-pristalsregulering">Din husleje pr. måned</label>` stå i
+  markupken med sit `input`, og **serverens** HTML skal indeholde
+  **"Din husleje stiger 232 kr. til 8.232 kr. pr. måned ved 2,9 % i august
+  2026."** — altså at den nye boks er i den server-renderede tekst, ikke kun i
+  klienten. Regnestykket skal lyde **"8.000 kr. × 2,9 % = 232 kr. → 8.000 kr.
+  + 232 kr. = 8.232 kr."**, tabellens kolonne **"8.000 kr. bliver"**, og
+  kvartalsafsnittet **"På 8.000 kr. bliver det 200 kr. mere om måneden."**
+  FAQ'en «Hvor meget stiger huslejen efter nettoprisindekset?» skal pege på
+  feltet med **"Skriv din egen husleje i feltet under"**. På
+  `https://beraknare.se/husleje` må **"nettoprisindeks" forekomme 0 gange** —
+  den svenske lejeside må ikke få den danske blok. HTTP 200 beviser intet, det
+  er et input og fire beløb i brødteksten. Prøven på dansk er
+  `src/components/HuslejePristalsregulering.test.tsx` +
+  `src/components/HuslejeNettoprisindeks.test.tsx` efter deploy. Vindue
+  **1/10 17:30** (mergen sker efter 12:30).
 
 ## Kvalitetsgate (repoets egne scripts fra package.json)
 
@@ -171,7 +207,7 @@ ved hvert kald, så et alders-tal i et snippet følger dagen. Dagens dato læses
 sidens egen tidszone via `iDagISidensTidszone`.
 
 
-## Åbne VERIFICÉR DEPLOY-noter
+## Åbne VERIFICÉR DEPLOY-noter (forts. — otte noter med vindue 1/10 12:30)
 
 - ⏳ **`/loen-efter-skat` skal vise de rigtige kommuner og læse satser fra
   modulerne.** `ceo/loen-efter-skat-tal-kilden`. På
@@ -210,9 +246,11 @@ sidens egen tidszone via `iDagISidensTidszone`.
   `src/app/blog/naeste-skridt.test.ts` efter deploy. Vindue **1/10 12:30**
   (denne merge sker efter 07:30).
 
-**Syv noter åbne.** HTTP 200 beviser intet: 189's og 189b's noter rører
-*tabelceller* med lovtal, der er usynlige for `curl` uden at man læser dem.
-**Seks noter lukket på indhold 1/10 07:45** (`ceo/next-16`,
+**Otte noter åbne med vindue 1/10 12:30** (de otte nedenfor) plus opgave 206's
+note. HTTP 200 beviser intet: 189's og 189b's noter rører *tabelceller* med
+lovtal, der er usynlige for `curl` uden at man læser dem. **Målt 1/10 12:33:
+produktion kører en build fra før 12:05**, se `docs/plan-arkiv.md`, "12:30-
+vinduet". **Seks noter lukket på indhold 1/10 07:45** (`ceo/next-16`,
 `ceo/promille-lovkilde`, `ceo/promille-loenkilde-2`, `ceo/sidste-hverdag-paastand`,
 `ceo/blog-naeste-vaerktoej`, `ceo/tidszone-usa-forskelsdag`) — 12 URL'er hentet,
 alle 200, hver streng talt i markupken. Alle målinger står i
@@ -240,25 +278,6 @@ alle 200, hver streng talt i markupken. Alle målinger står i
 
 
 
-- ✅ **Sydney skal stå med 8-10 timer foran, ikke 9-10.** `ceo/tidszone-tidsforskelle`.
-  **DEPLOY OK 30/9 23:10** — hentet fra live og læst i markupken, begge domæner.
-  DA: `London : 1 time bagud`, `New York : 5-6 timer bagud`, `Los Angeles : 8-9
-  timer bagud`, `Tokyo : 7-8 timer foran`, `Sydney : 8-10 timer foran`. SE:
-  `1 timme efter` / `5-6 timmar efter` / `8-9 timmar efter` / `7-8 timmar före` /
-  `8-10 timmar före`. **Strengen "9-10" forekommer 0 gange** på begge sider.
-
-- ✅ **Norske tal skal ikke få dansk tusindtalsseparator.** `ceo/no-locale-tag`.
-  **DEPLOY OK 1/10 08:35** — batch-vinduet var 1/10 07:30 (noten sagde
-  "30/10", en skrivefejl for 1/10; mergen skete 30/9 efter 17:30). Bevis på
-  dansk og svensk, fordi `beregner.no` stadig er latent: alle fire URL’er svarer
-  **200** (`/alder` og `/proteinbehov` på begge domæner), og de svenske sider er
-  svenske i markupken — `beraknare.se/alder` har **97 forekomster af "ålder"**
-  og **0 af** "hvor mange dage"/"hvad er"; `beraknare.se/proteinbehov` skriver
-  "gram protein" og "per dag". Gaten grøn efter deploy: `npm run lint` ren (635
-  filer), `node scripts/locale-leak.mjs --gate` exit 0, og `intl-locale-tag` +
-  `alder-side-tekst` + `dato/page` → **63 tests grønne**. CI på `master`
-  (553b3cc) grøn. Tallene selv står ikke i markupken (kalkulatorens
-  starttilstand er 0), så det er JS-kørslen porten dækker, ikke `curl`.
 - ⏳ **`/bmi` skal vise sit eget indlæg under FAQ'en.** `ceo/bmi-voksen-indlaeg`.
   På `https://minberegner.dk/bmi` skal `<h2>Guides om emnet</h2>` stå i markupken
   med **ét** `/blog/`-href, og det skal være

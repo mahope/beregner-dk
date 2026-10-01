@@ -1,4 +1,6 @@
-import Link from "next/link";
+"use client";
+
+import { useState } from "react";
 import {
   FORBRUGERPRISINDEKS_2026M08,
   NETTOPRISINDEKS_2026M08,
@@ -9,10 +11,12 @@ import {
   udregnNettoprisindeks,
   beregnHuslejestigning,
 } from "@/lib/nettoprisindeks";
+import { parseDanskTal } from "@/lib/bolig-areal";
 import { formatCurrency } from "@/lib/format";
 
 /**
- * The nettoprisindeks block on /husleje.
+ * The nettoprisindeks block on /husleje, and the page's pristalsregulering
+ * calculator.
  *
  * Danish rent has two price indices and they are not interchangeable:
  * pristalsregulering follows *nettoprisindekset* (lejeloven § 5), which
@@ -24,6 +28,14 @@ import { formatCurrency } from "@/lib/format";
  * Statistik's published figures plus the derivation for the quarterly one, so
  * the prose and the module cannot drift apart. Danish only: beraknare.se has
  * its own rent page and must not receive these strings.
+ *
+ * The reader's own rent is the input to every figure in the block — the
+ * worked example, the table's last column, the gap between the two indices
+ * and the quarterly paragraph all read it, so nothing on the page is an
+ * example the reader has to do the arithmetic on by hand. The state starts at
+ * {@link EKSEMPEL_HUSLEJE} and an unusable entry falls back to it, so the
+ * server-rendered text is the same 8.000 kr example as before and never
+ * collapses into a broken or empty page.
  */
 
 const kr = (value: number) =>
@@ -42,15 +54,27 @@ function kvartalTekst(kvartal: string): string {
   return `${KVARTAL_NAVN[`K${k}`]} ${aar}`;
 }
 
+/**
+ * The rent the block starts on, and the one an unusable entry falls back to.
+ * 8.000 kr is a round Danish rent, so every led of the worked example can be
+ * checked by hand.
+ */
+const EKSEMPEL_HUSLEJE = 8000;
+
 export default function HuslejeNettoprisindeks() {
+  const [husleje, setHusleje] = useState(String(EKSEMPEL_HUSLEJE));
+
   const senesteKvartal = senesteKompletteKvartal();
   const kvartalPct = senesteKvartal ? udregnNettoprisindeks(senesteKvartal) : null;
   const maanedsPct = NETTOPRISINDEKS_2026M08.aarsVaeksningPct;
   const pristalPct = FORBRUGERPRISINDEKS_2026M08.aarsVaeksningPct;
   const faktiskHuslejePct = FAKTISK_HUSLEJE_2026M08.aarsVaeksningPct;
 
-  // 8.000 kr er et rundt huslejebeløb, så læseren kan efterprøve hvert led.
-  const eksempelHusleje = 8000;
+  // A rent of 0 or a half-typed field must not divide the block away, so the
+  // prose keeps the example and the answer says what to type.
+  const indtastet = parseDanskTal(husleje);
+  const egenHusleje = indtastet !== null && indtastet > 0;
+  const eksempelHusleje = egenHusleje ? indtastet : EKSEMPEL_HUSLEJE;
   const medNettopris = beregnHuslejestigning(eksempelHusleje, maanedsPct);
   const medPristal = beregnHuslejestigning(eksempelHusleje, pristalPct);
   const medFaktiskHusleje = beregnHuslejestigning(eksempelHusleje, faktiskHuslejePct);
@@ -58,6 +82,44 @@ export default function HuslejeNettoprisindeks() {
   return (
     <div className="prose max-w-none mb-8">
       <h2 id="nettoprisindeks-husleje">Hvor meget stiger huslejen efter nettoprisindekset?</h2>
+
+      <div className="not-prose rounded-xl border border-gray-200 p-4 dark:border-gray-700 dark:bg-gray-800">
+        <label
+          htmlFor="husleje-pristalsregulering"
+          className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-200"
+        >
+          Din husleje pr. måned
+        </label>
+        <div className="relative">
+          <input
+            id="husleje-pristalsregulering"
+            type="text"
+            inputMode="numeric"
+            value={husleje}
+            onChange={(e) => setHusleje(e.target.value)}
+            placeholder="Fx 8.000"
+            aria-describedby="husleje-pristalsregulering-resultat"
+            className="w-full rounded-lg border border-gray-300 px-4 py-3 pr-12 text-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+          />
+          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500">kr</span>
+        </div>
+        <p
+          id="husleje-pristalsregulering-resultat"
+          aria-live="polite"
+          className="mt-3 mb-0 text-base text-gray-800 dark:text-gray-100"
+        >
+          {egenHusleje ? (
+            <>
+              Din husleje stiger <strong>{kr(medNettopris.stigning)}</strong> til{" "}
+              <strong>{kr(medNettopris.efter)}</strong> pr. måned ved {maanedsPct.toLocaleString("da-DK")} % i{" "}
+              {NETTOPRISINDELS_MAANED}.
+            </>
+          ) : (
+            <>Skriv din husleje ovenfor, så regner jeg stigningen ud på dit eget beløb.</>
+          )}
+        </p>
+      </div>
+
       <p>
         Har du fået en huslejestigning, er den næsten altid sat efter <strong>nettoprisindekset</strong>:
         det er forbrugerprisindekset <em>minus</em> moms, told og afgifter. I{" "}
@@ -179,9 +241,9 @@ export default function HuslejeNettoprisindeks() {
       </p>
       <p>
         Er din husleje steget mere end det, din aftale tillader, er det en forskel du kan gøre ind på.
-        Beregneren ovenfor hjælper dig ikke med det, men den viser hvad du har til rådighed, hvis
-        du vil finde en billigere bolig. Sammenlign husleje pr. m², eller se hvad 30 %-reglen
-        egentlig giver.
+        Huslejebudget-beregneren ovenfor hjælper dig ikke med det, men den viser hvad du har til
+        rådighed, hvis du vil finde en billigere bolig. Sammenlign husleje pr. m², eller se hvad
+        30 %-reglen egentlig giver.
       </p>
       <p className="text-sm text-gray-600 dark:text-gray-400">
         Kilder: Danmarks Statistik, tabel{" "}

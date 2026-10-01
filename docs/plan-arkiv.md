@@ -22642,3 +22642,79 @@ før hver måling.
   læs hvad builden skriver om orchestrion.
 - **MÅL:** ingen brugerdata endnu. `/` og `/dato` er referencerammen;
   første rigtige måling er antallet af hændelser efter næste batch.
+
+## Deploy-noter: 12:30-vinduet 1/10 er gået uden ændringerne (målt 12:33)
+
+Tolv URL'er hentet 1/10 12:31-12:33, efter 12:30-vinduet. **Ingen af de otte
+noter er opfyldt endnu** — produktion kører en build fra før 12:05. `/api/health`
+svarer `status: ok`, så det er en forsinkelse, ikke et nedbrud:
+
+| Note | Målt |
+|---|---|
+| `ceo/loen-efter-skat-en-kilde` | «Landsgennemsnittet» **5** (skal 0), «I tabellen med de 98 kommuner» 0, «25,63 %» 0, «25,049 % ifølge svmn.dk» 0 |
+| `ceo/loen-efter-skat-tal-kilden` | «Allerød» **2** (skal 0), «op fra 49.700 kr» **3** (skal 0), «Lyngby-Taarbæk» 5, «Rundersdal» 0 |
+| `ceo/dato-svensk-maaned` | «Hur många dagar är det i den här månaden?» **0** (skal ≥1), «1 dagar» **13** (skal 0) |
+| `ceo/dato-datoliste-bøjning` | « og 1 dage)» 0 ✓, «12 uger og 1 dag.» 2 ✓, se-h2 «Datum som folk oftast räknar ner till» 2 ✓ |
+| `ceo/indlaeg-naeste-vaerktoej` | ikke målt (kun de to artikler) |
+| `ceo/guides-til-store-beregnere` | «Guides om emnet» 1 på `/boligstoette` **og** `/pension` ✓ (blog-href ikke talt) |
+| `ceo/bmi-voksen-indlaeg` | «Guides om emnet» 1 på `/bmi` ✓ |
+| `ceo/forsiden-dublet-liste` | ikke målt |
+
+Ikke `DEPLOY-MISSING`: målingen lå T+3 minutter efter vinduet, og de otte merges
+(var 12:05-12:25) lå alle før 12:30. Næste iteration måler igen og skriver
+`DEPLOY-MISSING` først hvis et helt vindue er gået.
+
+## To lukkede deploy-noter (historik, flyttet ud af planen 1/10 12:35)
+
+- ✅ **Sydney skal stå med 8-10 timer foran, ikke 9-10.** `ceo/tidszone-tidsforskelle`.
+  **DEPLOY OK 30/9 23:10** — hentet fra live og læst i markupken, begge domæner.
+  DA: `London : 1 time bagud`, `New York : 5-6 timer bagud`, `Los Angeles : 8-9
+  timer bagud`, `Tokyo : 7-8 timer foran`, `Sydney : 8-10 timer foran`. SE:
+  `1 timme efter` / `5-6 timmar efter` / `8-9 timmar efter` / `7-8 timmar före` /
+  `8-10 timmar före`. **Strengen "9-10" forekommer 0 gange** på begge sider.
+- ✅ **Norske tal skal ikke få dansk tusindtalsseparator.** `ceo/no-locale-tag`.
+  **DEPLOY OK 1/10 08:35** — batch-vinduet var 1/10 07:30 (noten sagde
+  "30/10", en skrivefejl for 1/10; mergen skete 30/9 efter 17:30). Bevis på
+  dansk og svensk, fordi `beregner.no` stadig er latent: alle fire URL’er svarer
+  **200** (`/alder` og `/proteinbehov` på begge domæner), og de svenske sider er
+  svenske i markupken — `beraknare.se/alder` har **97 forekomster af "ålder"**
+  og **0 af** "hvor mange dage"/"hvad er"; `beraknare.se/proteinbehov` skriver
+  "gram protein" og "per dag". Gaten grøn efter deploy: `npm run lint` ren (635
+  filer), `node scripts/locale-leak.mjs --gate` exit 0, og `intl-locale-tag` +
+  `alder-side-tekst` + `dato/page` → **63 tests grønne**. CI på `master`
+  (553b3cc) grøn. Tallene selv står ikke i markupken (kalkulatorens
+  starttilstand er 0), så det er JS-kørslen porten dækker, ikke `curl`.
+
+## Opgave 206 — pristalsregulering på /husleje (1/10 12:35)
+
+**Hvorfor:** `/husleje` har 161 besøgende/28d og bounce 4 %, men blokken om
+nettoprisindekset var 210 linjer statisk tekst med 8.000 kr håndskrevet ind i
+fire steder — regnestykket, tabellens sidste kolonne, forskellen mellem de to
+indekser og kvartalsafsnittet. Læseren skulle selv regne sin egen husleje
+igennem alle fire. «Hvad må min husleje stige til» er den søgning siden burde
+kunne svare på med et tal, ikke med en metode.
+
+**Rettet:** `HuslejeNettoprisindeks` er nu en client-komponent med ét felt,
+«Din husleje pr. måned», og **hvert** beløb i blokken læser det. `parseDanskTal`
+gør «12.500» dansk korrekt (et `type="number"`-felt ville givet 12 kr). Starttilstand
+og enhver ugyldig indtastning falder tilbage på 8.000 kr, så server-HTML'en er
+uændret og blokken aldrig bliver tom eller viser `NaN`. Svaret ligger i en
+`aria-live="polite"`-boks med `aria-describedby` på feltet. FAQ'en
+«Hvor meget stiger huslejen efter nettoprisindekset?» peger nu på feltet.
+«Beregneren ovenfor» blev «Huslejebudget-beregneren ovenfor», fordi der nu er
+to beregnere på siden.
+
+**Port:** `src/components/HuslejePristalsregulering.test.tsx`, 6 tests der
+skriver i feltet og læser tallene ud af DOM'en. 3 mutationer målt røde: ignorer
+inputtet (4 røde), kvartalsafsnittet hårdkodet på 8.000 (1 rød), tabellen
+hårdkodet (1 rød).
+
+**Mål:** `/husleje` 161 besøgende/28d, bounce 4 % (Plausible 2026-10-01). GSC
+har ingen `/husleje`-visning i top-15, så trafikken er overvejende ikke-Google —
+det er også derfor der ikke blev rørt ved titel eller beskrivelse, uden en
+CTR-baseline. Genmål 15/10.
+
+**Ikke gjort, bevidst:** ingen ny selvstændig `/pristalsregulering`-rute. Den
+ville konkurrere med `/husleje` om de samme søgninger og kræve egen kategori,
+sitemap-entry og interne links for at være mere end et tynt spejl. Værktøjet
+bor i den eksisterende side, der allerede har indholdet.
