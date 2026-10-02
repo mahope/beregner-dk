@@ -24774,3 +24774,48 @@ build (168 sider). Punkt 13: `git diff | grep -nE '^\+.*\$[0-9]'` er tom.
 målt 2/10 13:04) og falder 105 → 74 i GSC. Titelen, beskrivelsen og `og:` er
 **byte-uændrede**, så der er ingen CTR-effekt at måle — det købare er
 rigtigheden ved næste satsår. Baseline: 105 visninger/28d, 0,7 % CTR, pos 5,1.
+
+---
+
+## `ceo/norsk-pace-side` — review-fund 2/10 15:10, begge fund (2/10 14:05)
+
+**Fundet:** `/pace` på det norske domæne var **halvt dansk**. `noPages` har
+ingen `pace`-nøgle, så `page.tsx:89`s `getPageData("pace", locale) ||
+getPageData("pace", "da")!` gav hele sidens `pageData` på dansk — `<h1>`,
+beskrivelse, brødkrummer og alle ni FAQ-svar — mens det nye triatlon-afsnit fra
+`3720dea` læste `TRIATLON_TEKST[locale]` og derfor var norsk. Fund 2: de tre
+`no`-grene i `pace.ts` var døde kode, ingen test dømte dem.
+
+**Målt før:** `getAvailableSlugs` = da 81 / se 54 / no 28; `pace` i `da` og
+`se`, ikke i `no`; `getPageData("pace","no") === undefined`. Mutationerne
+`Løping`→`Løb` og `no`-sætningen→den danske var begge **grønne** (44/44).
+
+**Rettet i fire greb, ikke to.** De to sidste blev fundet af den nye test, ikke
+af reviewer, og er samme fejlklasse:
+
+1. `pace`-nøgle i `noPages`: ni norske (bokmål) spørgsmål, hvor de to
+   triatlon-svar kalder `triatlonTotalFaqSvar("no")` / `triatlonCykelAndelFaqSvar("no")`.
+2. `distanceEksempelFaqSvar` havde **kun** en `se`-gren — `no` faldt til den
+   danske sætning «Samme regel **gælder** alle distancer: del tiden med
+   **distancen**». Nu en ægte `no`-gren («gjelder … distansen»).
+3. `PaceBeregner.tsx:58` var `labels[locale === "se" ? "se" : "da"]`, så
+   **beregnerens egne labels** var danske på den norske side: norsk brødtekst
+   og norsk tabel over en dansk beregner. Ny `no`-labels + `labels[locale]`.
+4. Ny `PaceBeregner.test.tsx` renderer beregneren i `da`/`no`/`se`.
+
+**Fire mutationer, alle målt røde:** `Løping`→`Løb` (1 rød), `no`-sætningen→
+den danske (1 rød), fjernet `pace`-nøgle fra `noPages` (3 røde),
+`labels[locale]`→`labels[…?…:"da"]` (2 røde). Muterede filer genskabt
+byte-for-byte.
+
+**Gate grøn:** lint (687 filer), typecheck, **3738 tests / 229 filer** (+8),
+build (168 sider). Punkt 13: `git diff | grep -nE '^\+.*\$[0-9]'` er tom.
+
+**Fandt mens jeg rettede — samme mønster 13 steder til.** `grep -rn 'locale ===
+"se" ? "se" : "da"'` giver 18 træffere i 15 filer; 13 er bruger-synlige og
+ ligger i `dato/page.tsx` (3), `tidsberegner/page.tsx`, `alder/page.tsx`,
+`opsparing/page.tsx`, `bil/page.tsx` og komponenterne `DatoBeregner`,
+`MomsBeregner`, `EnhederBeregner`, `PlanetVaegtBeregner` (+ `lokal-dato.ts` og
+`bil-omkostninger.ts`). Skrevet op som F9 i planen — **ikke** rettet her, for
+`/dato` og `/tidsberegner` er de to største sider på sitet, og en halv
+oversættelse af dem er dyrere end slet ingen.

@@ -2889,6 +2889,33 @@ const noPages: Record<string, PageData> = {
       { question: "Når kan virksomheter trekke fra MVA?", answer: "MVA-registrerte virksomheter kan trekke fra inngående MVA og rapporterer til Skatteetaten." },
       ],
     },
+    "pace": {
+      slug: "pace",
+      title: "Løpetidsberegner - beregn fart og deltider",
+      description: "Beregn fart i minutter pr. kilometer, løpetid ut fra fart og deltider for hver kilometer. Til løping, sykling og triatlon.",
+      metaTitle: "Løpetidsberegner: 5 km på 25 min = 5:00 pr. km",
+      metaDescription: "Gratis løpetidsberegner. Beregn fart pr. kilometer, løpetid ut fra fart og deltider for hver kilometer. 5 km på 25 min er 5:00 pr. km.",
+      keywords: ["løpetidsberegner", "pace beregner", "fart beregner", "km tid beregner", "marathon tid beregner", "halvmarathon tid beregner", "ironman tid beregner", "triatlon tid beregner", "sykkel tid beregner", "fart pr kilometer", "deltider"],
+      ogTitle: "Løpetidsberegner: 5 km på 25 min = 5:00 pr. km",
+      ogDescription: "Beregn fart pr. kilometer, løpetid ut fra fart og deltider for hver kilometer.",
+      category: "Hverdag",
+      breadcrumbCategory: "Hverdag",
+      breadcrumbCategoryHref: "/kategori/hverdag",
+      schemaName: "Løpetidsberegner",
+      schemaDescription: "Beregn fart i minutter pr. kilometer, løpetid ut fra fart og deltider for hver kilometer.",
+      schemaCategory: "UtilitiesApplication",
+      faqItems: [
+      { question: "Hvordan beregner jeg fart på en distance?", answer: "Del løpetiden med distansen. 5 km på 25 minutter er 25 delt på 5 = 5 minutter pr. kilometer, altså 5:00 pr. km. Samme regel for alle distanser." },
+      { question: "Hvordan regner jeg løpetiden ut fra farten?", answer: "Gang distansen med farten. 5 km med 5:00 pr. kilometer er 5 ganger 5:00 = 25 minutter. Velg «Løpetid fra fart» i verktøyet, så får du deltidene for hver kilometer." },
+      { question: "Hva er en god fart på halvmaraton?", answer: distanceEksempelFaqSvar("halvmaraton", "no") + " Hva som er godt for deg, avhenger av treningen din og målet ditt." },
+      { question: "Hva er en god fart på maraton?", answer: distanceEksempelFaqSvar("maraton", "no") + " Hva som er godt for deg, avhenger av treningen din og målet ditt." },
+      { question: "Hva er en god fart på 10 km?", answer: distanceEksempelFaqSvar("tiaaenkilometer", "no") + " Hva som er godt for deg, avhenger av treningen din og målet ditt." },
+      { question: "Hva er deltider, og hvorfor summerer de ikke helt?", answer: "Deltider er tiden hver kilometer tar. Verktøyet legger avrundingen i den siste kilometeren, så deltidene summerer til nøyaktig den løpetiden du har tastet inn." },
+      { question: "Kan jeg bruke verktøyet til sykling og triatlon?", answer: "Ja. Verktøyet regner i minutter pr. kilometer, så samme fart kan brukes til løping, sykling, kajakk og rulleski." },
+      { question: "Hvor lang tid tar et Ironman?", answer: triatlonTotalFaqSvar("no") },
+      { question: "Hvor stor en del av et Ironman er sykkeletappen?", answer: triatlonCykelAndelFaqSvar("no") },
+      ],
+    },
 };
 
 // ─── SWEDISH (se) PAGE DATA ────────────────────────────────────────────────

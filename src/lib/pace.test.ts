@@ -282,12 +282,86 @@ describe("triatlon og Ironman", () => {
   });
 
   test("siderne bruger svarene fra modulet, så FAQ og tabel ikke kan glide fra hinanden", () => {
-    for (const locale of ["da", "se"] as const) {
+    for (const locale of ["da", "se", "no"] as const) {
       const svar = getPageData("pace", locale)!.faqItems.map((f) => f.answer);
       expect(svar).toContain(triatlonTotalFaqSvar(locale));
       expect(svar).toContain(triatlonCykelAndelFaqSvar(locale));
     }
     expect(getPageData("pace", "da")!.faqItems.length).toBe(9);
     expect(getPageData("pace", "se")!.faqItems.length).toBe(9);
+    expect(getPageData("pace", "no")!.faqItems.length).toBe(9);
+  });
+});
+
+/**
+ * Ord der kun er danske. Den norske og den svenske `/pace` må ikke leje dem —
+ * de to sprog bruger «vårt», «deltider», «svømming»/«simning» og «av»,
+ * hvor dansk skriver «vores», «holdtider», «svømning» og «af». Uden denne
+ * liste faldt `no`-grenene i `pace.ts` bare tilbage på den danske sætning,
+ * fordi ingen port dømte dem.
+ */
+const DANSKE_ORD =
+  /vores|holdtider|gælder|svømning|løbning|\baf\b|hvad er et godt tempo/i;
+
+describe("den norske /pace-side", () => {
+  test("siden findes på norsk, så den ikke falder tilbage på dansk", () => {
+    const no = getPageData("pace", "no");
+    expect(no, "pace mangler i noPages — siden falder tilbage på dansk").toBeDefined();
+
+    const da = getPageData("pace", "da")!;
+    expect(no!.title).not.toBe(da.title);
+    expect(no!.faqItems.map((f) => f.question)).not.toEqual(
+      da.faqItems.map((f) => f.question)
+    );
+  });
+
+  test("hele siden er norsk — titel, beskrivelse og alle ni spørgsmål", () => {
+    const no = getPageData("pace", "no")!;
+    const tekst = [
+      no.title,
+      no.description,
+      no.metaTitle,
+      no.metaDescription,
+      ...no.faqItems.map((f) => `${f.question} ${f.answer}`),
+    ].join(" ");
+
+    const danske = tekst.match(new RegExp(DANSKE_ORD, "gi")) ?? [];
+    expect(danske, `danske ord på den norske side: ${danske.join(", ")}`).toEqual([]);
+    expect(no.faqItems.length).toBe(9);
+  });
+
+  test("hvert sprog har sin egen sætning, så ingen kan låne en andens", () => {
+    const total = (locale: "da" | "se" | "no") => triatlonTotalFaqSvar(locale);
+    expect(total("no")).not.toBe(total("da"));
+    expect(total("no")).not.toBe(total("se"));
+    expect(total("se")).not.toBe(total("da"));
+    expect(total("no")).toContain("1:00:00 + 5:00:00 + 3:30:00 = 9:30:00");
+    expect(total("no")).toContain("3,8 km");
+
+    const andel = (locale: "da" | "se" | "no") => triatlonCykelAndelFaqSvar(locale);
+    expect(andel("no")).not.toBe(andel("da"));
+    expect(andel("no")).not.toMatch(/\baf\b/);
+    expect(andel("no")).toContain("52,6 %");
+    expect(andel("no")).toContain("79,6 %");
+  });
+
+  test("etappenavnene er hvert sprog sine, også norsk", () => {
+    expect(triatlonBenNaevn("svomning", "no")).toBe("Svømming");
+    expect(triatlonBenNaevn("cykel", "no")).toBe("Sykkel");
+    expect(triatlonBenNaevn("lob", "no")).toBe("Løping");
+    expect(triatlonBenNaevn("svomning", "se")).toBe("Simning");
+    expect(triatlonBenNaevn("lob", "se")).toBe("Löpning");
+    expect(triatlonBenNaevn("lob", "da")).toBe("Løb");
+  });
+
+  test("distancesvarene er skrevet på norsk, ikke på dansk", () => {
+    for (const id of ["halvmaraton", "maraton", "tiaaenkilometer"] as const) {
+      const no = distanceEksempelFaqSvar(id, "no");
+      expect(no).not.toBe("");
+      expect(no).not.toMatch(DANSKE_ORD);
+    }
+    expect(distanceEksempelFaqSvar("halvmaraton", "no")).not.toBe(
+      distanceEksempelFaqSvar("halvmaraton", "da")
+    );
   });
 });

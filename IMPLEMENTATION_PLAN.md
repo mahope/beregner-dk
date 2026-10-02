@@ -1,17 +1,17 @@
-STATUS: 2/10 15:25. CI grøn (`gh run list -L 1`, 13:23). PR-TJEK 2/10: ingen
-   åbne PR'er. BRANCH-TJEK 2/10: ingen forældede branches. Sentry: begge fejl
-   lukket. CEO-kø punkt 0 lukket (`04ca30a`, alle otte delpunkter efterprøvet
-   2/10 15:05). Review-fund fra 2/10 12:20 rettet (`1174169`) og lukket med
-   mutation.
+STATUS: 2/10 14:05. CI grøn ved start (`gh run list -L 2`). PR-TJEK 2/10: ingen
+   åbne PR'er. BRANCH-TJEK 2/10: ingen branches ≥14 dage. Sentry: begge fejl
+   lukket. CEO-kø punkt 0 lukket (`04ca30a`). **Review-fund 2/10 15:10 rettet**
+   (`ceo/norsk-pace-side`) — begge fund + to af samme klasse, målt med fire
+   mutationer; detaljer i `docs/plan-arkiv.md`.
    **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` ·
-   `npm run build` — målt grøn 2/10 15:22 (**3730** tests i 228 filer, +4).
-   **Denne iteration: `ceo/arveafgift-belob-fra-modul`** — de 22 håndskrevne
-   beløb i **arveafgift-indlægget** (15 i JSX-teksten + 7 i strengliteralerne)
-   læses fra `EKSEMPLER_GUIDE`, `EKSEMPEL_BARN` og `SATSER_2026`. `TITEL` og `BESKRIVELSE` er nu én konstant hver, brugt i
-   `<head>`, `og:` og JSON-LD. **Fandt en reel fejl:** sats-tabellen skrev
-   `36.25%` med punktum i dansk brødtekst, mens resten af siden skrev
-   «36,25 %» — målt på den live HTML: `36.25` × 6 mod `36,25` × 8. Metadata er
-   **byte-uændret** (dømt af en ny test), så der er ingen CTR-effekt at måle.
+   `npm run build` — grøn 2/10 14:01 (**3738** tests i 229 filer, +8).
+   **Denne iteration:** `/pace` på norsk var **halvt dansk** (hele `pageData`
+   faldt tilbage på `da`), og beregnerens egne labels var danske. Rettet med
+   `pace`-nøgle i `noPages`, `no`-gren i `distanceEksempelFaqSvar`, `no`-labels
+   i `PaceBeregner` (`labels[locale]`) og to nye tests. Samme mønster findes 13
+   steder mere → opgave **F9**.
+   **Ingen bruger kan se det endnu:** `beregner.no` serverer et andet site
+   (❓ nedenfor). Dansk og svensk `/pace` er uændrede — prøven i noten.
    **Næste iteration:** strenglistens næste fil er `/boligsalg` (9 fund, 8
    redaktionelle prisintervaller uden kilde). Feature-kø har ingen kildefri
    kandidat; de fire er blokeret af ❓.
@@ -81,6 +81,21 @@ ved serverstart. Nøglefilen lå på `/api/indexnow-key/…` og er rettet 2/10
 **F6. [x] ✅** norske tal uden dansk separator. **F7. [x] ✅** tidsforskellens
 dage læst fra `afvigendeDage()`. **F8. [x] ✅** svenske helgdagslove kildeført.
 
+**F9. [ ] `locale === "se" ? "se" : "da"` — 13 steder med dansk på
+norske domæner.** *Hvad:* mønstret er målt med grep efter `ceo/norsk-pace-side`
+(2/10): 18 træffere i 15 filer, hvoraf **13 er bruger-synlige** —
+`dato/page.tsx` (3), `tidsberegner/page.tsx`, `alder/page.tsx`,
+`opsparing/page.tsx`, `bil/page.tsx` og `DatoBeregner`, `MomsBeregner`,
+`EnhederBeregner`, `PlanetVaegtBeregner` (+ `lokal-dato.ts`,
+`bil-omkostninger.ts`). Det er præcis fejlen i review-fundet: norsk/brødtekst
+over danske labels. *Hvorfor:* `/dato` (1.135 besøgende/28d) og
+`/tidsberegner` (291) er sitets to største sider, så en halv oversættelse
+af dem er dyrere end slet ingen. *Accept:* hvert sted får en rigtig `no`-gren
+eller en `Record<Locale, …>`, og en port (samme som `DANSKE_ORD`-listen i
+`PaceBeregner.test.tsx`) dømmer `da`/`no`/`se` hver for sig. ⛔ ❓ nedenfor:
+`beregner.no` serverer et andet site, så rettelsen har 0 bruger-effekt indtil
+den er besvaret — og norsk trafik er 0 i Plausible.
+
 ## Feature-kø
 
 Fire kandidater, i rækkefølge efter hvor ren intentionen er. Alt med ⛔
@@ -134,6 +149,7 @@ ingen regex på tal og tekst.
 
 | Slug | Prøv på indhold |
 |---|---|
+| `norsk-pace-side` (**ny**, vindue 2/10 17:30) | **De norske rettelser er ikke live og kan ikke være det:** `beregner.no` serverer et andet site (❓ 2/10 14:15). Prøven er derfor at de to **live** domæner er uændrede. `minberegner.dk/pace`: FAQ'en skal have **ni** spørgsmål, «Hvor lang tid tager et Ironman?» skal svare «… 1:00:00 + 5:00:00 + 3:30:00 = 9:30:00 i alt …», og beregneren skal vise «**Holdtider pr. kilometer**» (dansk label). **Intet** «Deltider pr. kilometer» og intet «Løpetidsberegner - beregn fart» på den danske side. `beraknare.se/pace`: skal vise «**Deltider per kilometer**» (svensk label) og de samme ni spørgsmål, **intet** «Deltider pr. kilometer» (norsk) |
 | `arveafgift-belob-fra-modul` (**ny**, vindue 2/10 17:30) | `minberegner.dk/blog/arveafgift-regler-og-satser`: `<title>` byte-uændret «Arveafgift 2026: 1 mio. kr. til børn koster 91.155 kr.» og `<meta name="description">«Arveafgift (boafgift) 2026: Et barn arver 1 mio. kr. og betaler 91.155 kr. Se bundfradrag på 392.300 kr, 15 % for nære arvinger og 36,25 % for søskende.»», `og:description` «Arveafgift 2026: 91.155 kr for et barn der arver 1 mio. kr. Bundfradrag, satser og to regneeksempler.» — **intet** dobbelt punktum. Sats-tabellen skal have **«36,25%»** i to celler, «Kort svar» **«36,25 %»**, og **intet** «36.25» i hele HTML'en. Begge regnestykker byte-uændrede: `1.107.700 / 166.155 / 1.333.845 / 666.923` og `407.700 / 61.155 / 738.845 / 184.711 / 245.866 / 554.134`. FAQ'en skal have **fire** spørgsmål, hvor «Hvad koster arveafgiften, hvis et barn arver 1.000.000 kr?» svarer «… afgiftsgrundlaget er 607.700 kr … modtager 908.845 kr.». Gavegrænserne (74.100 / 26.600 kr) er bevaret med vilje |
 | `su-indlaeg-belob-fra-modul` (**ny**, vindue 2/10 17:30) | `minberegner.dk/blog/su-2026-satser-og-regler`: `<title>` skal være «SU 2026: 7.426 kr. pr. måned udeboende» (byte-uændret) og `<meta name="description">` skal være «SU 2026: udeboende får 7.426 kr. pr. måned, hjemmeboende 1.154-3.202 kr. **Videregående fribeløb fra 20.749 kr.**, SU-lån op til 3.799 kr. Alle tal fra su.dk.». **`Intet` «Fribeløb fra 15.297 kr.»** — det var ungdomsuddansatte sats på en side om videregående uddannelse. Artiklens JSON-LD-`description` skal have den samme nye sætning, og `og:description` skal have «fribeløb fra 20.749 kr. på videregående uddannelse». Resten af siden (tabel, otte FAQ, brødtekst) skal være byte-uændret |
 | `triatlon-ironman-tid` (**åben**, vindue 2/10 17:30) | `minberegner.dk/pace`: en `<h2>` «Triatlon og Ironman: tiden for alle tre ben» med en tabel på fire rækker (Svømning 3,8 km 1:00:00 15:47 · Cykel 180 km 5:00:00 1:40 · Løb 42,195 km 3:30:00 4:59 · I alt 225,995 km 9:30:00) og FAQ'en skal have **ni** spørgsmål, hvor «Hvor lang tid tager et Ironman?» svarer «… 1:00:00 + 5:00:00 + 3:30:00 = 9:30:00 i alt …» og «Hvor stor en del af et Ironman er cyklen?» «… 52,6 % af tiden … 79,6 % af distancen». `beraknare.se/pace` skal have «Triathlon och Ironman» + «Löpning» + «Totalt» og de samme ni spørgsmål. **Intet** «9:30:00» på `/pace` uden for tabellen og de to svar |

@@ -51,11 +51,31 @@ const labels = {
     ingen: "—",
     forLille: "Ange en sträcka över 0 km och en tid över 0.",
   },
+  no: {
+    name: "Løpetidsberegner",
+    retning: "Hva vil du beregne",
+    fraTid: "Fart fra løpetid",
+    fraTempo: "Løpetid fra fart",
+    distance: "Distanse",
+    tid: "Løpetid",
+    minutter: "Minutter",
+    sekunder: "Sekunder",
+    tempo: "Fart",
+    resultat: "Resultat",
+    totalTid: "Løpetid",
+    prKm: "pr. kilometer",
+    splits: "Deltider pr. kilometer",
+    splitsForklaring: "Siste kilometer er kortere når distansen ikke er et helt antall kilometer.",
+    km: "km",
+    note: "Farten er den gjennomsnittlige tiden pr. kilometer. Deltidene summerer til den samme løpetiden som resultatet.",
+    ingen: "—",
+    forLille: "Skriv inn en distanse over 0 km og en tid over 0.",
+  },
 } as const;
 
 export default function PaceBeregner() {
   const { locale } = useLocale();
-  const l = labels[locale === "se" ? "se" : "da"];
+  const l = labels[locale];
 
   const [modus, setModus] = useState<PaceModus>("tid");
   const [distance, setDistance] = useState<number>(5);

@@ -179,7 +179,9 @@ export function distanceEksempelFaqSvar(
 
   return locale === "se"
     ? `På ${distance} km är ${tid} ett tempo på ${pace} per kilometer. Samma regel gäller alla distanser: dela tiden med sträckan.`
-    : `På ${distance} km er ${tid} et tempo på ${pace} pr. kilometer. Samme regel gælder alle distancer: del tiden med distancen.`;
+    : locale === "no"
+      ? `På ${distance} km er ${tid} et tempo på ${pace} pr. kilometer. Samme regel gjelder alle distanser: del tiden med distansen.`
+      : `På ${distance} km er ${tid} et tempo på ${pace} pr. kilometer. Samme regel gælder alle distancer: del tiden med distancen.`;
 }
 /**
  * Triathlon and Ironman: the three legs and the total time.
