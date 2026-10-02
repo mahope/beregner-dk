@@ -24273,3 +24273,53 @@ mod `master`s fil. `regnestykker`-portens loftpunktssum 370 → 365 (JSX) og 83 
 
 Mål (Plausible 2/10): `/blog/saadan-finder-du-din-timepris-som-freelancer` har ingen
 baseline i top-15; `/timepris` er gruppen den skal flytte. Genmål 16/10.
+
+## 2026-10-02 11:45 — ceo/procent-fald: procentfald og besparelse på /procent
+
+Branch `ceo/procent-fald`, squash-merge på `master` 2/10 11:50.
+
+**Hvorfor:** `/procent` er sitets største side i Search Console (152.615
+visninger, 92 klik, 0,1 % CTR, pos 7,4; beraknare.se 28.674 / 2 / 0,0 % / 9,8) og
+havde **0 forekomster af «procentfald» og 0 af «besparelse»** i begge sprog. Målt
+2/10 11:15 med `suggestqueries.google.com`: «procent fald beregner» er 5. af 10
+under «procent beregner» og «procent besparelse beregner» 6. af 10; svensk «procent
+fall» gav «räkna ut procent fall», «procent fald» 10 af 10 (bl.a. «procent fald
+mellan to tal», «procent fald formel», «procent stigning och fald») og «procent
+minskning» 10 af 10.
+
+**Hvad der blev lavet:**
+- `src/lib/procent.ts`: `procentFald(gammal, ny)` = ((gammal - ny) / gammal) × 100,
+  `procentBesparelse(belob, faldProcent)` = `procentAf(belob, faldProcent)` (den
+  del der er væk), og `PROCENTFALD_EKSEMPEL` = [{30 000 → 27 000}, {1 000 → 800}].
+- `src/app/procent/page.tsx`: `<h2>Sådan beregner du procentfald</h2>` (da) og
+  `<h2>Så här räknar du ut procentfall</h2>` (se), hver med formlen, Excel-formlen,
+  en firekolonnetabel (Fra / Til / Procentfald / Sparar) og afsluttningen om at
+  bevægelsen skal starte fra det samme tal. Alle tal regnes; ingen er skrevet i
+  brødteksten.
+- `src/lib/procent.test.ts`: 6 nye tests (37 → 44 i filen).
+
+**To fund undervejs, begge fanget af de nye tests:**
+1. Et fald er **ikke** stigningens modsat på et omvendt par. 33.000 → 30.000 er
+   9,09 % fald, mens 30.000 → 33.000 er 10 % stigning, fordi heltalet er det tal
+   bevægelsen starter fra. Faldparrene er derfor valgt til runde procenter (10 %
+   og 20 %), så siden ikke kan vise 9,1 % i faldtabellen og 10 % i
+   stigningstabellen for den samme løn. Testen
+   «et fald og en stigning mellem de samme to tal har forskellige heltal» låser
+   den asymmetric.
+2. `procentBesparelse` returnerede først restprisen. `procentAf(1000, 20)` er 200,
+   så besparelsen er `procentAf`, ikke `belob - procentAf`. Porten
+   «besparelsen i kroner er den del af beløbet der er væk» dømmer det.
+
+**Port:** 6 nye tests i `procent.test.ts`, målt **3 røde** mod den gamle kode.
+De 3 røde var reelle forker (punkt 2 ovenfor, og to tests der blandede
+argumentrækkefølgen på `procentForskel(ny, gammal)`), ikke kun manglende
+eksporter. `regnestykker`-porten uændret: de nye sektioner tilføjer 0 fund,
+fordi hvert beløb regnes. En håndskreven «9,1 procent»-sætning blev fjernet igen
+efter at den var skrevet — den ville have været et nyt fund i samme diff.
+
+**Gate:** `npm run lint` ✅ · `npm run typecheck` ✅ · `TZ=UTC npm run test` ✅
+(3690 tests i 227 filer, +9 fra de 6 nye tests og 3 fra `procent.test.ts`s
+egen fil) · `npm run build` ✅ (exit 0).
+
+**MÅL:** `/procent` 152.615 visninger / 92 klik / 0,1 % / pos 7,4 (da) og
+28.674 / 2 / 0,0 % / 9,8 (se), GSC 2026-09-02 → 2026-09-30. Genmål 16/10.

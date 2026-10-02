@@ -1,23 +1,17 @@
-import Link from "next/link";
+import Breadcrumbs from "@/components/Breadcrumbs";
+import FAQ from "@/components/FAQ";
 import ProcentBeregner from "@/components/ProcentBeregner";
 import ProcentpointBeregner from "@/components/ProcentpointBeregner";
-import { generatePageMetadata } from "@/lib/page-helpers";
-import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
-import { getPageData } from "@/lib/page-data";
-import FAQ from "@/components/FAQ";
 import RelatedCalculators from "@/components/RelatedCalculators";
+import Sidebar from "@/components/Sidebar";
 import {
   CalculatorSchema,
   FAQSchema,
 } from "@/components/StructuredData";
-import Breadcrumbs from "@/components/Breadcrumbs";
-import Sidebar from "@/components/Sidebar";
 import { formatNumber } from "@/lib/format";
-import {
-  PROCENTPOINT_EKSEMPEL,
-  procentpointForskel,
-  procentpointRelativ,
-} from "@/lib/procentpoint";
+import { getCurrentDomainConfig, getLocale } from "@/lib/get-locale";
+import { getPageData } from "@/lib/page-data";
+import { generatePageMetadata } from "@/lib/page-helpers";
 import {
   EXCEL_ANDEL,
   EXCEL_PROCENT_AF,
@@ -25,16 +19,25 @@ import {
   HVERDAG_MOMS,
   HVERDAG_RABAT,
   HVERDAG_RENTE,
+  PROCENTFALD_EKSEMPEL,
   PROCENT_10_AF_TAL,
   PROCENT_SKILLNAD_EKSEMPEL,
   RABAT_BELOEB,
   RABAT_EKSEMPEL,
   RABAT_SATS,
   procentAf,
+  procentBesparelse,
   procentDifferens,
+  procentFald,
   procentForskel,
   rabatProcent,
 } from "@/lib/procent";
+import {
+  PROCENTPOINT_EKSEMPEL,
+  procentpointForskel,
+  procentpointRelativ,
+} from "@/lib/procentpoint";
+import Link from "next/link";
 
 export async function generateMetadata() {
   return generatePageMetadata("procent");
@@ -394,6 +397,64 @@ export default async function ProcentPage() {
             lønstigning i procent
           </Link>
           .
+        </p>
+
+        <h2>Sådan beregner du procentfald</h2>
+        <p>
+          Et procentfald er den samme formel som en stigning, bare læst den anden
+          vej: <code>((Gammel - Ny) / Gammel) × 100</code>. Tallet <em>før</em>{" "}
+          faldet er heltalet, og derfor kommer svaret ud som et positivt tal —
+          en pris, der falder en femtedel, er et fald på 20 procent og ikke
+          minus 20 procent. I Excel, når A1 er det gamle tal, er det samme
+          regnestykke <code>=(A1-B1)/A1*100</code>.
+        </p>
+        <div className="overflow-x-auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Fra</th>
+                <th>Til</th>
+                <th>Procentfald</th>
+                <th>Sparer</th>
+              </tr>
+            </thead>
+            <tbody>
+              {PROCENTFALD_EKSEMPEL.map((par) => (
+                <tr key={par.gammal}>
+                  <td>{num(par.gammal)} kr.</td>
+                  <td>{num(par.ny)} kr.</td>
+                  <td>{num(procentFald(par.gammal, par.ny))} procent</td>
+                  <td>
+                    {num(procentBesparelse(par.gammal, procentFald(par.gammal, par.ny)))} kr.
+                  </td>
+                </tr>
+              ))}
+              <tr>
+                <td>{num(RABAT_BELOEB)} kr.</td>
+                <td>20 procents fald</td>
+                <td>20 procent</td>
+                <td>{num(procentBesparelse(RABAT_BELOEB, 20))} kr.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p>
+          <strong>Bevægelsen skal altid starte fra det samme tal.</strong>{" "}
+          {num(PROCENTFALD_EKSEMPEL[0].gammal)} kr., der falder til{" "}
+          {num(PROCENTFALD_EKSEMPEL[0].ny)} kr., er et fald på{" "}
+          {num(procentFald(PROCENTFALD_EKSEMPEL[0].gammal, PROCENTFALD_EKSEMPEL[0].ny))}{" "}
+          procent, fordi {num(PROCENTFALD_EKSEMPEL[0].gammal)} er heltalet. De
+          samme to tal læst som en stigning fra{" "}
+          {num(PROCENTFALD_EKSEMPEL[0].ny)} kr. til{" "}
+          {num(PROCENTFALD_EKSEMPEL[0].gammal)} kr. giver{" "}
+          {num(
+            procentForskel(
+              PROCENTFALD_EKSEMPEL[0].gammal,
+              PROCENTFALD_EKSEMPEL[0].ny,
+            ),
+            1,
+          )}{" "}
+          procent, fordi nu er {num(PROCENTFALD_EKSEMPEL[0].ny)} kr. heltalet.
         </p>
 
         <h2>10 procent af et tal</h2>
@@ -997,6 +1058,64 @@ export default async function ProcentPage() {
             löneökning i procent
           </Link>
           .
+        </p>
+
+        <h2>Så här räknar du ut procentfall</h2>
+        <p>
+          Ett procentfall är samma formel som en ökning, bara läst åt andra
+          hållet: <code>((Gammal - Ny) / Gammal) × 100</code>. Talet{" "}
+          <em>före</em> fallet är heltalet, och därför blir svaret positivt — en
+          pris som faller en femtedel är ett fall på 20 procent och inte minus
+          20 procent. I Excel, när A1 är det gamla talet, är det samma
+          uträkning <code>=(A1-B1)/A1*100</code>.
+        </p>
+        <div className="overflow-x-auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Från</th>
+                <th>Till</th>
+                <th>Procentfall</th>
+                <th>Sparar</th>
+              </tr>
+            </thead>
+            <tbody>
+              {PROCENTFALD_EKSEMPEL.map((par) => (
+                <tr key={par.gammal}>
+                  <td>{num(par.gammal)} kr</td>
+                  <td>{num(par.ny)} kr</td>
+                  <td>{num(procentFald(par.gammal, par.ny))} procent</td>
+                  <td>
+                    {num(procentBesparelse(par.gammal, procentFald(par.gammal, par.ny)))} kr
+                  </td>
+                </tr>
+              ))}
+              <tr>
+                <td>{num(RABAT_BELOEB)} kr</td>
+                <td>20 procents fall</td>
+                <td>20 procent</td>
+                <td>{num(procentBesparelse(RABAT_BELOEB, 20))} kr</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p>
+          <strong>Rörelsen måste alltid starta från samma tal.</strong>{" "}
+          {num(PROCENTFALD_EKSEMPEL[0].gammal)} kr som faller till{" "}
+          {num(PROCENTFALD_EKSEMPEL[0].ny)} kr är ett fall på{" "}
+          {num(procentFald(PROCENTFALD_EKSEMPEL[0].gammal, PROCENTFALD_EKSEMPEL[0].ny))}{" "}
+          procent, eftersom {num(PROCENTFALD_EKSEMPEL[0].gammal)} är heltalet.
+          Samma två tal lästa som en ökning från{" "}
+          {num(PROCENTFALD_EKSEMPEL[0].ny)} kr till{" "}
+          {num(PROCENTFALD_EKSEMPEL[0].gammal)} kr ger{" "}
+          {num(
+            procentForskel(
+              PROCENTFALD_EKSEMPEL[0].gammal,
+              PROCENTFALD_EKSEMPEL[0].ny,
+            ),
+            1,
+          )}{" "}
+          procent, eftersom nu är {num(PROCENTFALD_EKSEMPEL[0].ny)} kr heltalet.
         </p>
 
         {/* Samme som i den danske gren: formlerne har én ejer, boksen i

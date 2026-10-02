@@ -1,44 +1,36 @@
-STATUS: 2/10 11:35. CI grøn (`9c44d4c`). Sentry MINBEREGNER-1 er Next-router-støj
-  (filtreret siden 3e67ed3), MINBEREGNER-2 rettet i `4d48370`+`def070c`. Alle tre
-  review-fund fra 2/10 lukket (`3875b83`, `73c7e64`, `def070c`). CEO-kø punkt 0 lukket
-  (`04ca30a`). PR-TJEK 2026-10-02: ingen åbne PR'er. BRANCH-TJEK 2/10: ingen forældede.
+STATUS: 2/10 11:45. CI grøn. Sentry MINBEREGNER-1 er Next-router-støj (filtreret
+  siden 3e67ed3), MINBEREGNER-2 rettet i `4d48370`+`def070c`. Alle tre
+  review-fund fra 2/10 lukket (`3875b83`, `73c7e64`, `def070c`), CEO-kø punkt 0
+  lukket (`04ca30a`). PR-TJEK 2026-10-02: ingen åbne PR'er. BRANCH-TJEK 2/10:
+  ingen forældede.
   **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` · `npm run build`
-  — målt grøn 2/10 11:30 (3681 tests i 227 filer).
-  **Deploy 2/10 07:30 målt på indhold, ingen DEPLOY-MISSING.** Vindue 12:30 ikke målt
-  endnu: `tidsberegner-faq-fra-modul`, `timepris-lokale-tal`, `timepris-markedspriser`,
-  `timer-periode`, `moms-eksempler-fra-modul`, `error-side-locale`, `fejlside-locale`.
-  **Denne iteration: `ceo/blog-indlaeg-belob-fra-modul`. VERIFICÉR DEPLOY:
-  /blog/saadan-finder-du-din-timepris-som-freelancer skal vise modulets 12 timepriser og
-  FAQ'en «seniorudviklere 800-1.200 kr, tekstforfattere 600-1.000 kr, konsulenter
-  800-1.500 kr», og **intet** «800-1.400», «600-900 kr» eller «1.000-2.000 kr»
-  ceo/blog-indlaeg-belob-fra-modul 2/10 11:35**
-  Fund: blogindlægget havde sin egen «Typiske timepriser i Danmark (2026)»-tabel med otte
-  håndskrevne beløb og sit eget FAQ-svar med tre til — og de modsagde `/timepris`: «800-1.400
-  kr» for seniorudvikler stod ingen steder i koden, «Webudviklere 600-1.200 kr» lå under
-  modulets 800-1.200, og «tekstforfattere 500-1.000 kr» under 600-1.000. To sider på samme
-  site gav to prisér på samme fag. Nu renderer tabellen `markedspriser("da")` med
-  `GRUPPE_ETIKETTER`/`POST_ETIKETTER` og `formaterMarkedspris`, FAQ'en læser fra
-  `freelancerTimeprisFaqSvar()`, og tabellen har fået samme «vejledende og ekskl. moms»-note
-  som beregnen. Port: 3 nye tests i `timepris-markedspriser.test.ts`, målt **3 røde** mod
-  `master`s fil; loftpunktssummen 370 → 365 (JSX) og 83 → 82 (strenge).
-  Autocomplete målt 2/10 04:40 (hl=da gl=dk): under «tid beregner» er 7 af 10
-  completions distancer (marathon, halvmarathon, km, cykel, ironman, triathlon, pace);
-  «tid beregner» selv har ~27k månedlige søgninger på position 5, og siden havde intet
-  svar på dem. To fund: (a) «halvmarahton» stod i dansk brødtekst og i FAQ-spørgsmålet,
-  altså i `<FAQSchema>`'s JSON-LD; (b) marathon- og 10 km-svaret var håndskrevet — samme
-  fejlklasse som revieweren fandt på `/tidsberegner`. Nu bygger
-  `distanceEksempelFaqSvar(id, locale)` i `src/lib/pace.ts` sætningen af `beregnPace`, så
-  distancen, tiden og tempoet ikke kan glide fra hinanden; distancerne (42,195 /
-  21,0975 / 10 km) er faste regeltal fra løbernes egne regler og kræver ingen kilde.
-  Begge sprog får samme tre spørgsmål, og otte distancetermer ligger i `keywords`.
-  Port: 7 nye tests i `pace.test.ts`, målt røde mod den gamle kode — den afgørende
-  skriver marathon-svaret i hånden igen («3 timer og 30 minutter er 5:00 pr.
-  kilometer») og rammer netop `page-data.ts' svar indeholder de tal modulet regner`.
-  Eftersynet fandt to overbygninger, begge fjernet: `paceDistanceFaq` (indpakning der
-  blot kaldte videre) og `formaterPace` (rent alias). Målt undervejs, ikke ændret:
-  hreflang er allerede på alle sider — Next emiterer `languages` som `hrefLang` med
-  stort L, som et grep på `hreflang` missede; og `/bmi` er teknisk sund, så faldet
-  der er ikke indexering. «bil værdi» er service-intent og kræver en værdibaser.
+  — målt grøn 2/10 11:44 (3690 tests i 227 filer, +9 fra `ceo/procent-fald`).
+  **Denne iteration: `ceo/procent-fald`. VERIFICÉR DEPLOY: /procent skal have
+  `<h2>Sådan beregner du procentfald</h2>` med tabellen `Fra / Til /
+  Procentfald / Sparer` og rækkerne `30.000 kr. 27.000 kr. 10 procent 3.000 kr.`
+  + `1.000 kr. 800 kr. 20 procent 200 kr.` + `1.000 kr. 20 procents fald 20
+  procent 200 kr.`, og `<h2>Så här räknar du ut procentfall</h2>` med de samme tre
+  rækker i kronor uden punktum. Ingen hånd skrevne beløb i ny brødtekst: alle tal
+  kommer fra `procentFald`/`procentBesparelse`/`PROCENTFALD_EKSEMPEL`.
+  ceo/procent-fald 2/10 11:45
+  Fund: /procent er sidens største side (152.615 visninger, 0,1 % CTR, pos 7,4;
+  se 28.674 / 0,0 % / 9,8) og havde **0 forekomster af «procentfald» og 0 af
+  «besparelse»**, mens dansk autocomplete (hl=da&gl=dk, målt 2/10 11:15) svarer
+  «procent beregner» med «procent fald beregner» som 5. af 10 og «procent
+  besparelse beregner» som 6. af 10; svensk «procent fald» og «procent
+  minskning» er 10 af 10 hver, og «procent fald mellem to tal» er #2. Nu er der
+  et «Sådan beregner du procentfald»-afsnit i begge sprog med formel, Excel-formel
+  og besparelsen i kroner. To ting viste sig undervejs, begge fanget af porten:
+  (a) et fald er **ikke** stigningens modsat på et *omvendt* par — 33.000→30.000
+  er 9,09 % fald, mens 30.000→33.000 er 10 % stigning, fordi heltalet er det tal
+  bevægelsen starter fra. Derfor er faldparrene valgt til runde procenter, så
+  siden ikke viser 9,1 % i den ene tabel og 10 % i den anden for samme løn;
+  (b) `procentBesparelse` må være den del der er væk (200 kr. af 1.000), ikke
+  restprisen (800 kr.) — `procentAf` er procenten af beløbet, så besparelsen er
+  præcis det kald. Port: 6 nye tests i `procent.test.ts`, målt **3 røde** mod
+  den gamle kode (og de 3 fejl var reelle forker, ikke kun manglende funktion).
+  MÅL: /procent 152.615 visninger / 92 klik / 0,1 % / 7,4 (da) · 28.674 / 2 /
+  0,0 % / 9,8 (se). Genmål 16/10.
 ## Åbne opgaver — F5b: beløb i JSX-tekst → modulkonstanter
 
 Listen `src/app/regnestykker.test.ts` tæller forekomster pr. fil og må kun
@@ -199,6 +191,13 @@ Prioriteret efter forventet effekt på **trafik**. Datagrund fra GSC 1/10
   0,1 % / 7,4 (da) · 27.778 / 2 / 0,0 % / 9,9 (se). Genmål 15/10.
   *Næste skridt hvis det virker:* de samme tal på sig selv — point leder
   videre til opinionsmålinger og rentetrin.
+- **Procentfald på `/procent`** — ✅ 2/10, `ceo/procent-fald`. *Hvem:* alle der
+  googler «procent fald beregner» (5. af 10 under «procent beregner») og «procent
+  besparelse beregner» (6. af 10); svensk «procent fald» og «procent minskning» er
+  10 af 10 hver. *Accept:* afsnit med formel, Excel-formel, faldtabel og
+  besparelse i kroner i begge sprog — leveret. *Datagrund:* autocomplete 2/10 11:15
+  + `/procent` 152.615 visninger / 0,1 % CTR / pos 7,4 (da), se 28.674 / 0,0 % / 9,8.
+  **MÅL:** se STATUS. Genmål 16/10.
 - **Renteprognose** — ✅ 1/10, `ceo/renteprognose`. *Hvem:* alle der
   googler «renteprognose» (10 af 10 danske completions under ordet selv, 3 af 10
   under «rente»). *Accept:* ny beregner med renteomlægning, afdragsform og

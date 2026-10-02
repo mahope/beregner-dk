@@ -47,6 +47,57 @@ export const PROCENT_SKILLNAD_EKSEMPEL = [
 ];
 
 /**
+ * Percent fall from `gammal` to `ny`: ((gammal - ny) / gammal) × 100.
+ *
+ * The same arithmetic as `procentForskel` with the direction reversed, but the
+ * answer belongs positive: a price that drops by a fifth is "a fall of 20 %",
+ * not "-20 %". The old figure is the whole, exactly as in the rise, so the two
+ * are the same formula read the other way round.
+ *
+ * Why this exists: Danish autocomplete (hl=da&gl=dk, 2026-10-02) answers
+ * "procent beregner" with "procent fald beregner" as completion 5 of 10 and
+ * "procent besparelse beregner" as completion 6 of 10, and Swedish autocomplete
+ * (hl=se&gl=se, same date) answers "procent fald" with ten completions about
+ * fall ("procent fald mellem to tal", "procent fald formel", "procent stigning
+ * och fald") and "procent minskning" with ten about decrease. /procent had
+ * neither word in either language.
+ */
+export function procentFald(gammal: number, ny: number): number {
+  if (gammal === 0) return 0;
+  return ((gammal - ny) / gammal) * 100;
+}
+
+/**
+ * What a fall of `faldProcent` saves on `belob`, in kroner: the part that is
+ * gone, not the part that is left.
+ *
+ * This is the "besparelse" side of the autocomplete cluster — the question is
+ * asked in kroner, not in percent ("hvor meget sparer jeg, når prisen falder
+ * 20 %"), and answering it in percent alone leaves the search unanswered. It
+ * is `procentAf` on purpose, so "20 % fald på 1.000 kr." is 200 kr. saved
+ * everywhere on the page, and the price afterwards is the same call minus
+ * this one.
+ */
+export function procentBesparelse(belob: number, faldProcent: number): number {
+  return procentAf(belob, faldProcent);
+}
+
+/**
+ * The fall pairs both languages show.
+ *
+ * Both are figures the page already promises elsewhere — 30 000 kr is the
+ * salary in the FAQ and in `lonEksempel`, and 1 000 kr is `RABAT_BELOEB` in the
+ * discount section — and each pair falls by a round percent, so the table
+ * cannot show 9,09 % next to a "10 procent" somewhere else. That the salary
+ * falls 10 % from 30 000 while it *rises* 11,1 % from 27 000 is the point of
+ * the section: heltalet er det tal, bevægelsen starter fra.
+ */
+export const PROCENTFALD_EKSEMPEL = [
+  { gammal: 30000, ny: 27000 },
+  { gammal: 1000, ny: 800 },
+];
+
+/**
  * The whole numbers people ask "10 procent af" about, in both languages.
  *
  * Measured, not guessed: GSC lists "10 procent af" as the third largest query

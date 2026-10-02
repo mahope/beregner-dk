@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 import {
+  PROCENTFALD_EKSEMPEL,
   PROCENT_10_AF_TAL,
   PROCENT_SKILLNAD_EKSEMPEL,
   RABAT_BELOEB,
@@ -7,7 +8,9 @@ import {
   RABAT_SATS,
   RABAT_SATS_UDLAET,
   procentAf,
+  procentBesparelse,
   procentDifferens,
+  procentFald,
   procentForskel,
   rabatProcent,
 } from "./procent";
@@ -270,5 +273,82 @@ describe("RABAT_SATS", () => {
   test("den navngivne udlætssats står i tabellen, så tal og sætning følges", () => {
     expect(RABAT_SATS).toContain(RABAT_SATS_UDLAET);
     expect(RABAT_SATS_UDLAET).toBe(33);
+  });
+});
+
+describe("procentFald", () => {
+  // Autocomplete 2/10 (hl=da&gl=dk) svarer «procent beregner» med «procent
+  // fald beregner» som 5. af 10 og «procent besparelse beregner» som 6. af 10;
+  // svensk «procent fald» og «procent minskning» er 10 af 10 hver. Porten
+  // dømmer de tal, siden skriver, så et fald ikke kan få et negativt svar
+  // eller et andet procenttal end det, stigningstabellen ovenfor lover.
+  test("procentvis fald fra gammal til ny", () => {
+    expect(procentFald(30000, 27000)).toBe(10);
+    expect(procentFald(1000, 800)).toBe(20);
+  });
+
+  test("et fald er positivt, uanset hvilken vej de to tal læses", () => {
+    expect(procentFald(30000, 27000)).toBe(10);
+    expect(procentFald(30000, 36000)).toBe(-20);
+  });
+
+  // Samme par læst begge veje: faldet er præcis stigningens modsat, fordi
+  // heltalet er det tal bevægelsen starter fra.
+  test("et fald er præcis stigningens modsat på det samme par", () => {
+    for (const par of PROCENTFALD_EKSEMPEL) {
+      expect(procentFald(par.gammal, par.ny)).toBe(
+        -procentForskel(par.ny, par.gammal),
+      );
+    }
+  });
+
+  // Bevægelsen skal starte fra det samme tal begge veje, ellers får læseren et
+  // forkert svar: 30 000 -> 27 000 er 10 % fald, men 27 000 -> 30 000 er 11,1 %
+  // stigning, fordi heltalet er det tal, bevægelsen starter fra. Derfor er
+  // faldtabellens par valgt, så de fald er runde — ellers ville siden vise
+  // 9,09 % i faldtabellen og 10 % i stigningstabellen for det samme par løn.
+  test("et fald og en stigning mellem de samme to tal har forskellige heltal", () => {
+    expect(procentFald(30000, 27000)).toBe(10);
+    expect(procentForskel(27000, 30000)).toBe(-10);
+    expect(procentForskel(30000, 27000)).toBe(3000 / 27000 * 100);
+  });
+
+  test("ingen ændring er 0 procent, og et gammelt tal på 0 giver ingen division med 0", () => {
+    expect(procentFald(10000, 10000)).toBe(0);
+    expect(procentFald(0, 10000)).toBe(0);
+  });
+
+  // Faldtabellens beløb er de beløb, siden allerede viser andre steder, så der
+  // ikke opstår en ny sum, kun et nyt fald på en kendt.
+  test("faldtabellens beløb er løneksemplets og rabatbeløbet", () => {
+    expect(PROCENTFALD_EKSEMPEL[0].gammal).toBe(PROCENT_SKILLNAD_EKSEMPEL[0].gammal);
+    expect(PROCENTFALD_EKSEMPEL[1].gammal).toBe(RABAT_BELOEB);
+    for (const par of PROCENTFALD_EKSEMPEL) {
+      expect(Number.isInteger(procentFald(par.gammal, par.ny))).toBe(true);
+    }
+  });
+});
+
+describe("procentBesparelse", () => {
+  test("besparelsen i kroner er den del af beløbet der er væk", () => {
+    expect(procentBesparelse(1000, 20)).toBe(200);
+    expect(procentBesparelse(30000, 10)).toBe(3000);
+    expect(procentBesparelse(1000, 0)).toBe(0);
+  });
+
+  test("besparelse og restpris regner til det beløb besparelsen startede fra", () => {
+    for (const sats of RABAT_SATS) {
+      expect(
+        procentBesparelse(RABAT_BELOEB, sats) + (RABAT_BELOEB - procentBesparelse(RABAT_BELOEB, sats)),
+      ).toBe(RABAT_BELOEB);
+    }
+  });
+
+  test("besparelsen er netop faldet på faldtabellens par", () => {
+    for (const par of PROCENTFALD_EKSEMPEL) {
+      expect(procentBesparelse(par.gammal, procentFald(par.gammal, par.ny))).toBe(
+        par.gammal - par.ny,
+      );
+    }
   });
 });
