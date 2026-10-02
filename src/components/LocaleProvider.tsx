@@ -35,3 +35,21 @@ export function useLocale(): LocaleContextValue {
   }
   return ctx;
 }
+
+/**
+ * Samme kontekst, men **uden** at kaste.
+ *
+ * Rodens `error.tsx` lå tidligere i en `useLocale`, og Sentry fangede
+ * «useLocale must be used within a LocaleProvider» 2/10 på `POST /` — altså
+ * lige i den komponent, der skal vise en fejl. Konteksten mangler, når fejlen
+ * rammer `layout.tsx` selv: så står Next over `error.tsx` og renderer den uden
+ * rod-layoutens `LocaleProvider`.
+ *
+ * Derfor læser fejlsiden denne i stedet: med provider får den domænets sprog
+ * **på serveren**, altså i den HTML Google og alle uden JavaScript ser, og
+ * uden provider falder den tilbage på domænet i browseren i stedet for at
+ * kaste en ny fejl oven i fejlen.
+ */
+export function useLocaleOptional(): LocaleContextValue | null {
+  return useContext(LocaleContext);
+}

@@ -24118,3 +24118,58 @@ sitets svenske tal.
 **Gate.** lint 0 · typecheck 0 · `TZ=UTC npm run test` **3669 grønne i 227
 filer** · `npm run build` grøn. Deploy-note: `tidsberegner-faq-fra-modul`
 (vindue 2/10 12:30).
+
+---
+
+## `ceo/fejlside-locale` — review-fund LAV 2/10 (2026-10-02)
+
+**Fundet:** rettelsen i 4d48370 fjernede `useLocale()` fra rodens `error.tsx` —
+den kastede — og erstattede den med `getBrowserLocale()`, som læser
+`getDomainConfig(window.location.hostname).locale` i en `useEffect`. Første
+render er derfor altid `useState<Locale>("da")`, **også i den server-renderede
+HTML**, fordi `error.tsx` er en client-komponent og stadig SSR'er. En fejl på
+beraknare.se serverede altså dansk «Noget gik galt / Prøv igen» til Google og til
+enhver uden JavaScript, og først efter hydration switchede den til svensk — det
+er modsat af den retning, committen ville: den vil *stoppe* med at vise dansk på
+et dansk-fejl-domæne.
+
+**Rettelsen løser begge sider af afvejningen, fordi rod-layoutet allerede gør
+arbejdet.** `src/app/layout.tsx:132` lægger `LocaleProvider locale={locale}`
+om hele træet med et `locale`, der er læst **på serveren** via `getLocale()`,
+og et segment-`error.tsx` renderer *inden for* sit layout. Så fejlsiden kan læse
+`sprog` fra konteksten i første render — på serveren.
+
+Den kastende `useLocale()` er **urørt**, fordi afvejningen er reel: konteksten
+mangler, når fejlen rammer `layout.tsx` selv, fordi Next så renderer
+`error.tsx` uden provideren. Derfor er der kommet `useLocaleOptional()` ved siden
+af den i `LocaleProvider.tsx` — samme kontekst, `useContext` uden `throw` — og
+`error.tsx` bruger den. Uden provider falder siden tilbage på domænet i
+browseren præcis som før, så ingen ny fejl kan opstå oven i fejlen.
+
+**Porten var blind, og det var porten, der skulle dømmes.** `error.test.tsx` havde
+**én** test, «renders Danish fallback text without LocaleProvider», som renderer i
+jsdom hvor `window.location.hostname` er `localhost` — altså `getDomainConfig`s
+`da`-fallback. Hele den nye sprog-gren var aldrig dømt; `se`- og `no`-teksten
+kunne have vært hvilket som helst, og porten ville være grøn.
+
+To nye tests, begge målt **2/3 rød mod den gamle kode** (kun den gamle
+dansk-test var grøn, og det er den den skal være):
+
+1. `alle tre domæner får deres eget sprog i første render` — renderer
+   `<ErrorPage>` i `LocaleProvider` for `da`/`se`/`no` og kræver overskrift og
+   knap i `t(locale, …)`, **og** at «Noget gik galt»/«Prøv igen» er væk på de to
+   andre domæner. Den sidste klaus er den, der gør testen rød: den gamle kode
+   har dansk i første render på alle tre.
+2. `sproget er rigtigt i server-HTML, før nogen effekt har kørt` — bruger
+   `renderToStaticMarkup`, som slet ingen effekt kører, altså den markup Google og
+   alle uden JavaScript ser. Kræver «Något gick fel» og «Noe gikk galt» på de to
+   andre domæner og forbyder «Noget gik galt».
+
+**Ingen HTML-prøve på live findes, og det er ikke en mangel på vilje.** Rodens
+fejlside kan ikke udløses uden en kastende fejl i et segment, og det er ikke
+noget der kan sendes mod produktion. Deploy-noten er derfor kodetestet plus
+`/api/health`.
+
+**Gate.** lint 0 · typecheck 0 · `TZ=UTC npm run test` **3671 grønne i 227
+filer** · `npm run build` grøn. Deploy-note: `fejlside-locale` (vindue 2/10
+12:30).

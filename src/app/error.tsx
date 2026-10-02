@@ -2,6 +2,7 @@
 
 import * as Sentry from "@sentry/nextjs";
 import { useEffect, useState } from "react";
+import { useLocaleOptional } from "@/components/LocaleProvider";
 import { getDomainConfig } from "@/lib/domain-config";
 import { t } from "@/lib/i18n";
 import type { Locale } from "@/lib/i18n";
@@ -18,15 +19,27 @@ export default function Error({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
-  const [locale, setLocale] = useState<Locale>("da");
+  // Rod-layoutet læser domænet **på serveren** og lægger `LocaleProvider` om
+  // hele træet, så konteksten er med, når en side kaster. Da behøver den ingen
+  // `useEffect` for at vide sit sprog: server-HTML'en på beraknare.se siger
+  // «Något gick fel» og ikke «Noget gik galt».
+  //
+  // `useLocale()` kastede, da konteksten mangner — altså når fejlen rammer
+  // `layout.tsx` selv, fordi Next så renderer denne side uden provideren. Derfor
+  // læses den med `useLocaleOptional`, og så falder vi tilbage på domænet i
+  // browseren i stedet for at kaste oven i fejlen.
+  const ctx = useLocaleOptional();
+  const [browserLocale, setBrowserLocale] = useState<Locale | null>(null);
 
   useEffect(() => {
-    setLocale(getBrowserLocale());
+    setBrowserLocale(getBrowserLocale());
   }, []);
 
   useEffect(() => {
     Sentry.captureException(error);
   }, [error]);
+
+  const locale = ctx?.locale ?? browserLocale ?? "da";
 
   return (
     <div className="max-w-lg mx-auto text-center py-16">

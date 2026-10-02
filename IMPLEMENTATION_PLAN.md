@@ -19,7 +19,7 @@ STATUS: 2/10 09:55. CI grøn (seneste master-kørsel 2/10 06:15Z). Sentry:
   (12 `/klockan-i/` på se, 0 danske dér). De ligger i `docs/plan-arkiv.md`.
   `/topskat` kan ikke skelnes fra den gamle kode ved indhold — tallene blev
   byte-identiske.
-  **Denne iteration: to review-fund fra 2/10.**
+  **Denne iteration: tre review-fund fra 2/10.**
   1. **MIDDEL, `ceo/timepris-lokale-tal` → `3875b83`.**
   `formaterMarkedspris` hårdkodede
   `formatNumber(post.min, "da")`, så beraknare.se og beregnerno skrev «Advokat:
@@ -39,6 +39,18 @@ STATUS: 2/10 09:55. CI grøn (seneste master-kørsel 2/10 06:15Z). Sentry:
   **Port:** 3 tests, målt **1/11 rød mod den gamle kode** på præcis den mutation
   revieweren målte som grøn («8.760 → 9.999» i det danske svar, som efterlod
   50/50 grønne før).
+  3. **LAV, `ceo/fejlside-locale`.** Rodens `error.tsx` læste domænet i en
+  `useEffect`, så **hele server-HTML'en** på beraknare.se og beregnerno sagde
+  «Noget gik galt / Prøv igen» — modsat af den commit, der ville stoppe med at
+  vise dansk på et dansk-fejl-domæne. Rod-layoutet læser domænet på serveren og
+  lægger `LocaleProvider` om hele træet, så fejlsiden læser nu **den** kontekst
+  gennem en ny `useLocaleOptional()`, der ikke kaster. Den kastende `useLocale()`
+  er urørt, for den lå i `error.tsx` netop fordi konteksten mangner, når fejlen
+  rammer `layout.tsx` selv (Sentry MINBEREGNER-2). Uden provider falder siden
+  tilbage på domænet i browseren, som før. **Port:** de to nye tests er målt
+  **2/3 rød mod den gamle kode** — den ene dømmer alle tre domæner, den anden
+  bruger `renderToStaticMarkup`, som slet ingen effekt kører, altså den HTML
+  Google ser. Den gamle port havde **én** test, kun på `localhost`.
   **Før:** hreflang på de 24 `/klokken-i/*`-sider. De serverede
   **én** `<link>` — kun canonical — mens `/dage-til/*` på samme domæne
   serverede alle tre. Google kunne derfor ikke se, at
@@ -335,7 +347,8 @@ under sit slug. Noterne med vindue **2/10 12:30** måles efter kl. 12:30.
 | `timepris-markedspriser` (**ny**) | `minberegner.dk/timepris`: overskriften skal være «Typiske timepriser i Danmark (2026)», de 12 rækker skal være `Junior udvikler: 500-700 kr`, `Senior udvikler: 800-1.200 kr`, `IT-konsulent: 900-1.500 kr`, `Grafisk designer: 500-800 kr`, `Tekstforfatter: 600-1.000 kr`, `Marketing konsulent: 700-1.200 kr`, `Konsulent: 800-1.500 kr`, `Advokat: 1.500-3.500 kr`, `Revisor: 900-1.800 kr`, `Håndværkere: 400-600 kr`, `Fotograf: 500-1.500 kr`, `Underviser: 500-1.000 kr`; **intet** «i Sverige» eller «i Norge». FAQ'en skal sige «IT: 900-1.500 kr/time. Håndværkere: 400-600 kr/time.» på minberegner.dk og på de to andre domæner «Dansk nivå: IT 900–1 500 DKK/timme, hantverkare 400–600 DKK/timme.» (rettet 2/10 10:05: «900–1 500», se `timepris-lokale-tal`) — **intet** «1.800 SEK» eller «1.800 NOK». `beraknare.se/timepris` overskrift «Danska typiska timpriser (2026)» + noten «Nivåerna nedan är danska…», `beregnerno/timepris` «Danske typiske timepriser (2026)» + «Nivåene nedenfor er danske…». Kopierknappen skal på beraknare.se sige «Rekommenderad timpris: …» og på beregnerno «Anbefalt timepris: … ekskl. mva» |
 | `timer-periode` (**ny**) | `minberegner.dk/tidsberegner`: «Hvor mange timer er der i et døgn, en uge, en måned og et år?» med fem rækker `Et døgn 1 24 1.440 86.400` · `En uge 7 168 10.080 604.800` · `En måned (snit af 12 måneder) 30,42 730 43.800 2.628.000` · `Et kvartal (snit af 4 kvartaler) 91,25 2.190 131.400 7.884.000` · `Et år 365 8.760 525.600 31.536.000`, og «Et skudår har 366 dage, altså 8.784 timer». `beraknare.se/tidsberegner`: samme fem rækker med **mellemrum** i separatoren (`8 760`, `525 600`, `31 536 000`) og «Ett skottår har 366 dagar, alltså 8 784 timmar»; **intet** «Hvor mange timer», **intet** «En vecka» på minberegner.dk |
 | `moms-eksempler-fra-modul` (**ny**) | `minberegner.dk/moms`: introens tre listeregler skal være `Læg moms til: … 1.000 kr. × 1,25 = 1.250 kr. inkl. moms`, `Træk moms fra: … 1.250 kr. ÷ 1,25 = 1.000 kr. ekskl. moms` og `Find momsandelen: … 1.250 kr. × 0,20 = 250 kr. i moms`; «er 2,4414, så 1.000 kr. bliver 2.441,41 kr.» og «bliver prisen 0,4096 af den oprindelige — altså 409,60 kr. i alt»; **intet** «kun 410 kr. oveni». `beraknare.se/moms`: de samme tre linjer med **mellemrum** i separatoren (`1 000 kr × 1,25 = 1 250 kr inkl. moms`), «2,4414»/«0,4096», «10,71 %»/«5,66 %», og Excel-rækkerne `1 000 kr exkl. → 1 250 kr inkl.`, `1 250 kr inkl. → 1 000 kr exkl.`, to gange `1 250 kr inkl. → 250 kr i moms`. Uændret: de tre lovgrænser og alle tabeller |
-| `error-side-locale` (**ny**) | **Ingen HTML-prøve findes** — ændringerne ligger kun i rodens fejlside, som ikke kan udløses uden en kastende fejl. Verificér i stedet at `minberegner.dk/api/health` svarer `status: ok`, og at der i 14 dage **ikke** dukker en Sentry-hændelse med `useLocale must be used within a LocaleProvider` op |
+| `error-side-locale` (**opdateret 2/10 10:35**) | Samme note som før — rodens fejlside kan ikke udløses uden en kastende fejl, så der er ingen HTML-prøve. Verificér at `minberegner.dk/api/health` svarer `status: ok`, og at der i 14 dage **ikke** dukker en Sentry-hændelse med `useLocale must be used within a LocaleProvider` op. **Den nye del af rettelsen** er dækket af `error.test.tsx` alene: `renderToStaticMarkup` med `LocaleProvider locale="se"/"no"` skal give «Något gick fel» og «Noe gikk galt» og **ikke** «Noget gik galt» |
+| `fejlside-locale` (**ny**) | Samme som `error-side-locale` — ingen HTML-prøve findes, fordi fejlsiden ikke kan udløses uden en kastende fejl. Den er kodetestet i stedet: `error.test.tsx` skal være **3 tests** grønne, og de to nye skal være røde mod den gamle kode |
 
 ## ❓ Til Mads
 
