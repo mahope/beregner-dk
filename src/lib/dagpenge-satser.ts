@@ -230,6 +230,27 @@ export function dagpengeNyuddannetPeriodeFaqSvar(): string {
 }
 
 /**
+ * Hvert sprog har sin egen sætning om dagpengeperioden, så intet domæne
+ * arver en andens sprog ved en faldlinje. Kun tallene (`aar`, `timer`) er
+ * fælles, og de regnes begge fra `DAGPENGE_2026`.
+ *
+ * 2/10 13:15 (review-fund, MIDDEL): norsk lå i den danske sætning. Bokmål kan
+ * godt sige «dagpengeperiode», «normalt», «år» og «timer», så den danske sætning
+ * sagde ikke noget forkert i norsk — men den gjorde `no` til en faldlinje, og
+ * porten «periodelinjen er samme sætning i tre sprog» dømte `no` på de danske
+ * ord. Norsk har derfor sin egen sætning i «Du»-form, som den linje den følger
+ * i informationsboksen også har («Du må være medlem av en A-kasse …»).
+ */
+const DAGPENGE_PERIODE_SAETNING: Record<
+  Locale,
+  (aar: string, timer: string) => string
+> = {
+  da: (aar, timer) => `Dagpengeperioden er normalt ${aar} år (${timer} timer)`,
+  se: (aar, timer) => `Dagpenningperioden är normalt ${aar} år (${timer} timmar)`,
+  no: (aar, timer) => `Du kan normalt ha dagpenge i ${aar} år (${timer} timer)`,
+};
+
+/**
  * Værktøjets og sidens linje om dagpengeperioden, i de tre sprog.
  *
  * Før 2/10 skrev `DagpengeBeregner.tsx` «normalt 2 år (3.848 timer)» tre gange,
@@ -238,13 +259,11 @@ export function dagpengeNyuddannetPeriodeFaqSvar(): string {
  * `DAGPENGE_2026`, så portens liste for `DagpengeBeregner.tsx` er 0.
  */
 export function dagpengePeriodeTekst(locale: Locale): string {
-  const aar = dagpengeTimer(
-    DAGPENGE_2026.dagpengeperiodeTimer / DAGPENGE_2026.fuldtidTimerPerAar,
-    locale,
+  return DAGPENGE_PERIODE_SAETNING[locale](
+    dagpengeTimer(
+      DAGPENGE_2026.dagpengeperiodeTimer / DAGPENGE_2026.fuldtidTimerPerAar,
+      locale,
+    ),
+    dagpengeTimer(DAGPENGE_2026.dagpengeperiodeTimer, locale),
   );
-  const timer = dagpengeTimer(DAGPENGE_2026.dagpengeperiodeTimer, locale);
-  if (locale === "se") {
-    return `Dagpenningperioden är normalt ${aar} år (${timer} timmar)`;
-  }
-  return `Dagpengeperioden er normalt ${aar} år (${timer} timer)`;
 }

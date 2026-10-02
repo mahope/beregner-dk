@@ -1,14 +1,18 @@
-STATUS: 2/10 12:35. CI grøn. Sentry MINBEREGNER-1 er Next-router-støj (filtreret
-   siden 3e67ed3), MINBEREGNER-2 rettet i `4d48370`+`def070c`. Alle tre
-   review-fund fra 2/10 lukket (`3875b83`, `73c7e64`, `def070c`), CEO-kø punkt 0
-   lukket (`04ca30a`). PR-TJEK 2026-10-02: ingen åbne PR'er. BRANCH-TJEK 2/10:
-   ingen forældede.
+STATUS: 2/10 11:12. CI grøn (`gh run list -L 1`, 10:49). PR-TJEK 2/10: ingen
+   åbne PR'er. BRANCH-TJEK 2/10: ingen forældede. Sentry MINBEREGNER-1 er
+   Next-router-støj (filtreret siden 3e67ed3), MINBEREGNER-2 rettet i
+   `4d48370`+`def070c`. CEO-kø punkt 0 lukket (`04ca30a`). **Review-fund MIDDEL
+   fra 2/10 12:20 er rettet** (dagens eneste åbne fund) — norsk dagpenge-linje
+   havde dansk sætning, se VERIFICÉR-tabellen.
    **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` · `npm run build`
-   — målt grøn 2/10 12:30 (3713 tests i 228 filer, +5 fra `ceo/boernepenge-indlaeg`).
-   **Denne iteration: `ceo/boernepenge-indlaeg` + `ceo/boernepenge-aarstal`.** Se
-   tabellen nederst.
-   **Næste iteration skal være en feature** (Fase 3-reglen: mindst hver tredje
-   opgave), ikke endnu en fil i F5b-kæden.
+   — målt grøn 2/10 11:10 (3713 tests i 228 filer, uændret antal: rettelsen er i
+   en eksisterende port, ikke en ny testfil).
+   **Denne iteration: `ceo/dagpenge-no-sprog`.**
+   ⚠️ `regnestykker`-porten logger (men får ikke rød) **1 ureviewet dansk
+   streng i komponenter der monteres på beraknare.se**:
+   `src/app/procent/page.tsx:621` «En lønsprocent kan du se:». Ikke min kode,
+   fra `ceo/procent-fald` 2/10 — skal vurderes (norsk «lønn» vs dansk «løn»).
+   **Næste iteration skal være en feature** (Fase 3-reglen).
    **Deploy 2/10 12:30 bekræftet på indhold** (kl. 12:47): `dagpenge` har alle
    14 beløb (26.198/18.160 … 10.506/8.283), «25,049 % i kommunaleskat», **otte**
    FAQ-spørgsmål i JSON-LD'en og intet «1.924 kr timer». `pace` har de tre
@@ -311,6 +315,7 @@ under sit slug. Noterne med vindue **2/10 12:30** måles efter kl. 12:30.
 
 | Slug | Prøv på indhold |
 |---|---|
+| `dagpenge-no-sprog` (**ny**, vindue 2/10 12:30) | `beregnerno/dagpenge`: informationskassen skal have **«Du kan normalt ha dagpenge i 2 år (3 848 timer)»** som periodelinje — norsk i «Du»-form, som linjen under («Du må være medlem av en A-kasse …»), og tusindtalsseparator som **mellemrum** (ikke «3.848»). `minberegner.dk/dagpenge` skal være byte-uændret på «Dagpengeperioden er normalt 2 år (3.848 timer)», `beraknare.se` på «Dagpenningperioden är normalt 2 år (3 848 timmar)». **Intet** «Dagpengeperioden er» på beregnerno |
 | `boernepenge-aarstal` (**ny**, vindue 2/10 17:30) | `minberegner.dk/blog/boernepenge-2026-satser-og-regler`: aftrapningseksemplets parentes skal være **byte-uændret** «Har du to børn på 0-2 år (21.480 kr × 2 = 42.960 kr.), får du udbetalt 40.182 kr.» — det er **årstal** (5.370 × 4), ikke kvartal. **Intet** «10.740 kr × 2 = 21.480 kr» og intet «18.702 kr»: dem skrev min første version af `ceo/boernepenge-indlaeg`, fordi `eksempelToBorn` var `sats0.hel * 2` (kvartalsbeløbet for to børn) i stedet for `aarligBelob(sats0)`. Fundet ved at læse den **live** side efter deployet, ikke ved porten |
 | `boernepenge-indlaeg` (**åben**, vindue 2/10 17:30) | `minberegner.dk/blog/boernepenge-2026-satser-og-regler`: `<title>` skal være **byte-uændret** «Børnepenge 2026: 5.370 kr./kvartal (0-2 år)» og `<meta name="description">» «Børnepenge 2026: 5.370 kr./kvartal (0-2 år), 4.248 (3-6 år), 3.342 (7-14 år) og 1.114 kr./måned (15-17 år). Sådan deles ydelsen mellem jer.» — de er nu bygget af `BOERNE_SATSER_2026`, så tallene er de samme, kun kilden er ændret. **Målt OK 2/10 12:47** på title og description. FAQ'en skal have **ti** spørgsmål, og «Hvornår skifter børnepengen sats, når barnet bliver ældre?» skal svare «… Ungeydelsen er 1.114 kr. pr. måned, altså 13.368 kr. om året.» og «Hvad er forskellen på børnepenge og barnetilskud?» «… 1.741 kr. pr. kvartal pr. barn, 1.774 kr. i ekstra børnetilskud … 5.025 kr. i særligt børnetilskud ved adoption.». Familietabellen skal have `10.740`, `9.618`, `11.838` og `6.684` i kolonnen «Pr. kvartal». **Målt OK 12:47** på de tre børnetilskud; eksemplet venter på `boernepenge-aarstal` |
 | `dagpenge-efter-skat` (**DEPLOY OK 2/10 12:47**, vindue 2/10 12:30) | `minberegner.dk/dagpenge`: sats-tabellen skal have **syv** rækker med to tal pr. række — `Med beskæftigelsestillæg / 26.198 kr / ca. 18.160 kr efter skat`, `Max dagpengesats, fuldtidsforsikret / 22.041 kr / ca. 15.544 kr efter skat`, `Dimittend, fuldtid med forsørgelsespligt / 18.074 kr / ca. 13.047 kr efter skat`, `Dimittend, fuldtid uden forsørgelsespligt / 15.759 kr / ca. 11.590 kr efter skat`, `Max dagpengesats, deltidsforsikret / 14.694 kr / ca. 10.919 kr efter skat`, `Dimittend, deltid med forsørgelsespligt / 12.049 kr / ca. 9.255 kr efter skat`, `Dimittend, deltid uden forsørgelsespligt / 10.506 kr / ca. 8.283 kr efter skat` — med **hele kroner**, ingen decimaler («18.160,026» er den fejl porten fangede). Indledningen skal sige «25,049 % i kommunaleskat». FAQ'en skal have **otte** spørgsmål, og de tre nye skal starte med «Hvad er dagpengesatsen for nyuddannet i 2026?» → «… 15.759 kr pr. måned før skat uden forsørgelsespligt, og 18.074 kr hvis du har forsørgelsespligt. Det er 71,5 % hhv. 82 % af maxsatsen på 22.041 kr.», «Hvor længe har nyuddannede ret til dagpenge?» → «… normalt 2 år, svarende til 3.848 timer fuldtid, inden for 3 år.» og «Skal jeg betale skat af dagpenge?» → «… ca. 15.544 kr om måneden tilbage på kontoen.». **Intet** «1.924 kr timer» nogen steder — det stod på den live side 2/10. `minberegner.dk/dagpenge`s `<meta name="description">` skal være uændret i ordlyd: «Beregn dagpenge 2026. Max sats: 22.041 kr/md (90% af løn efter AM-bidrag). Med beskæftigelsestillæg op til 26.198 kr/md. Beregn din dagpengesats ud fra din løn.» |

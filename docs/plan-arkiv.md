@@ -24480,3 +24480,33 @@ skat`. To ting låste op: strip kommentarmarkørerne med
 `re.sub(r'<!-- -->','',h)` før tal søges, og læs FAQ-spørgsmålene i **JSON-LD'en**
 (`application/ld+json` → `FAQPage` → `mainEntity`) — `<h3>` ligger ikke i den
 server-renderede HTML, fordi FAQ'en klient-renderes.
+
+## 2026-10-02 — `dagpenge-no-sprog` (review-fund MIDDEL, punkt 0)
+
+Review-fundet (2/10 12:20) sagde, at `dagpengePeriodeTekst` skrev den danske
+sætning for `no`, fordi funktionen kun havde en `locale === "se"`-gren og
+faldt tilbage på dansk ellers. **Ordene var ikke danske:** bokmål siger
+«dagpengeperiode», «normalt», «år» og «timer» lige så vel, så en norsk læser
+læste ikke noget forkert. Men fundet havde ret i to ting, og begge er rettet:
+
+1. **`no` var en faldlinje, ikke et sprog.** Sætningerne ligger nu i
+   `DAGPENGE_PERIODE_SAETNING`, ét pr. sprog, så intet domæne kan arve et andets
+   sprog ved at glemme en gren. Norsk har sin egen sætning i «Du»-form —
+   «Du kan normalt ha dagpenge i 2 år (3 848 timer)» — som den linje den følger
+   i boksen også har («Du må være medlem av en A-kasse og oppfylle inntektskravet»).
+   Kun tallene er fælles, og de regnes begge fra `DAGPENGE_2026`.
+2. **Porten dømte norsk på danske ord.** Rækken i
+   «periodelinjen er … i tre sprog» læste `no` med de danske ord, så den låste
+   faldlinjen fast. Rækken er nu norsk, og porten får to nye påstande, der
+   dømmer faldlinjen direkte: `dagpengePeriodeTekst("no")` må ikke være lig
+   `dagpengePeriodeTekst("da")` og må ikke indeholde «Dagpengeperioden er».
+
+**Mutation (punkt 12):** `no`-sætningen tilbage til den danske →
+`dagpenge-satser.test.ts` **1 rød** af 16. Filen genskabt byte-for-byte.
+
+**Kildeundersøgelse:** `nav.no/arbeid/losning-pa-arbeidspolitikk/dagpenge` er
+404, `nav.no/sok` svarer uden resultater, `lovdata.no/dokument/NL/lov/1966-06-07`
+er 404, DuckDuckGo kræver captcha og Bing ignorerer citater. Derfor er der
+**ingen læst norsk kilde** til periodens længde i denne iteration, og docblocken
+påstander ingen: den siger kun, at hvert sprog har sin egen sætning. Tallene
+(2 år / 3.848 / 3 848 timer) er uændrede og kommer stadig fra `DAGPENGE_2026`.

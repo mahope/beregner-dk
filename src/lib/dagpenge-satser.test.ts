@@ -156,27 +156,32 @@ describe("dagpenge-FAQ", () => {
     expect(dagpengeTimer(DAGPENGE_2026.dagpengeperiodeTimer)).toBe("3.848");
   });
 
-  test("periodelinjen er samme sætning i tre sprog, med hvert sprog sin separator", () => {
+  test("periodelinjen er hvert sprog sin sætning, med hvert sprog sin separator", () => {
     // `DagpengeBeregner.tsx` skrev «normalt 2 år (3.848 timer)» tre gange, med
     // «2 år» og timetallet håndskrevet. Nu regnes begge dele.
     // Forventningen bygges med samme `formatNumber`, fordi svensk og norsk
     // skriver tusindtalsseparatoren som U+00A0 — «3 848» med et hårdt mellemrum
     // er ikke samme streng (samme greb som `timepris-lokale-tal` 2/10).
-    for (const [locale, foraelser, timer] of [
+    // Rækken for `no` er norsk, ikke dansk: 2/10 faldt «no» tilbage på den
+    // danske sætning, så porten dømte norsk på danske ord (review-fund MIDDEL).
+    for (const [locale, sætning, timer] of [
       ["da", "Dagpengeperioden er normalt 2 år", "timer"],
       ["se", "Dagpenningperioden är normalt 2 år", "timmar"],
-      ["no", "Dagpengeperioden er normalt 2 år", "timer"],
+      ["no", "Du kan normalt ha dagpenge i 2 år", "timer"],
     ] as const) {
       const t = new Intl.NumberFormat(getIntlLocale(locale)).format(
         DAGPENGE_2026.dagpengeperiodeTimer,
       );
-      expect(dagpengePeriodeTekst(locale)).toBe(`${foraelser} (${t} ${timer})`);
+      expect(dagpengePeriodeTekst(locale)).toBe(`${sætning} (${t} ${timer})`);
       expect(dagpengeTimer(DAGPENGE_2026.dagpengeperiodeTimer, locale)).toBe(t);
     }
     // Dansk bruger punktum, de to andre ikke — det er hele pointen.
     expect(dagpengeTimer(3848, "da")).toBe("3.848");
     expect(dagpengeTimer(3848, "se")).not.toContain(".");
     expect(dagpengeTimer(3848, "no")).not.toContain(".");
+    // Norsk er sin egen sætning, ikke dansk med et andet tusindtalstegn.
+    expect(dagpengePeriodeTekst("no")).not.toBe(dagpengePeriodeTekst("da"));
+    expect(dagpengePeriodeTekst("no")).not.toContain("Dagpengeperioden er");
   });
 
   test("svarene skriver ingen sats med «kr/md» — de bruger formatterens beløb", () => {
