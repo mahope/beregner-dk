@@ -1,15 +1,22 @@
-STATUS: 2/10 09:55. CI grøn (seneste master-kørsel 2/10 06:15Z). Sentry:
+STATUS: 2/10 10:40. **Alle tre åbne review-fund fra 2/10 er lukket** (MIDDEL
+  `3875b83`, LAV `73c7e64`, LAV `def070c`) — hver med en port målt rød mod den
+  gamle kode. De tre ligger **efter** deploy-vinduet 07:30 og får vindue **12:30**.
+  CI grøn på `ad018e9` (2/10 06:15Z); de tre nye er lokalt gaten: lint 0 ·
+  typecheck 0 · `TZ=UTC npm run test` **3671 grønne i 227 filer** · build grøn.
+  Sentry:
   MINBEREGNER-1 er Next-router-støj, filtreret siden 3e67ed3 og kodetestet siden
-  5f137d4; MINBEREGNER-2 er rettet i 4d48370. PR-TJEK: 2026-10-02 — ingen åbne
-  PR'er. BRANCH-TJEK: 2/10 — ingen forældede branches. CEO-kø punkt 0 er lukket
-  (RETTET 04ca30a). Review-fund 2/10 er lukket (RETTET bacfd42).
+  5f137d4; MINBEREGNER-2 er rettet i 4d48370 og `def070c` gør fejlsiden læse
+  domænets sprog fra konteksten i stedet for i en `useEffect`. PR-TJEK:
+  2026-10-02 — ingen åbne PR'er. BRANCH-TJEK: 2/10 — ingen forældede branches.
+  CEO-kø punkt 0 er lukket (RETTET 04ca30a).
   **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` ·
   `npm run build`.
   **Deploy-vinduet 2/10 07:30 er målt på indhold.** Live: `bacfd42` (klokken-i
   «byens egen tidszone», «din tidszone» = 0), `4d48370` (health 200),
   `b39da19` (/topskat), `652966b` (/boligsalg), `029692b` (/timepris). **Ingen
   DEPLOY-MISSING.** `22af62d` (moms) og `1e5a446` (timer-periode) er efter
-  vinduet og får vindue 12:30 — forventet ikke live endnu.
+  vinduet og får vindue 12:30 — forventet ikke live endnu. Det samme gælder
+  `3875b83`, `73c7e64` og `def070c`.
   **2/10 09:50 er otte ældre noter lukket ved måling på indhold:** `/topskat`
   har `697.000 kr./år` + `over 2.592.700 kr.`, `/boligsalg` `1.850 kr. (skøde)`
   + `1.825 kr. (pantebrev)`, `/opsparing` `1.522.077`/`1.674.259`/`43.219`,
