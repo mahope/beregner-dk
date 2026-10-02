@@ -25347,3 +25347,29 @@ i denne gate.
    udskiftning på en genereret sætning. Den er væk; de to hållformer skrives nu
    begge ud fra talene. Pointen er punkt 13 i samme stil: en sådan konstruktion
    går i stykker i det øjeblik, et tal ændrer længde.
+
+## Lukket 2/10 20:53 — `pension-dobbelt-valuta`
+
+**Find:** «8.729 kr. kr.» lå live på `minberegner.dk/pension`, målt i den rene
+HTML med `curl`. `PensionBeregner.tsx:204` definerer
+`formatKr = (amount) => formatCurrency(amount, locale, {minimumFractionDigits: 0, maximumFractionDigits: 0})`,
+og `formatCurrency` med `style: "currency"` afslutter **selv** med «kr.» (og
+«kr» for sv-SE). Fire sætninger i folkepensionsdetaljerne satte « kr.» oveni:
+bortfald, nedsaetning, fuldt tillæg og under-grænse. De fire literals er
+fjernet, så hvert tal bærer præcis én enhed — og den svenske side får «kr»
+uden det dobbeltte mellemrum.
+
+**Modvejs målt:** literals « kr.» tilbage i pensionstillæg-sætningen giver
+**1 rød** af 11 i `PensionBeregner.test.tsx`; filen genskabt byte-for-byte
+(`diff -q` tom). Porten dømmer den *rendrede* streng
+(`toHaveTextContent("pensionstillæg på 8.729 kr.")` + `not.toMatch(/kr\. kr\.|kr kr/)`),
+så den kan ikke reddes ved at ændre formatteren.
+
+**Korrektion af planens gamle note:** den skrev «7 beregnere». Målt i koden er
+det **3** — `LeasingBeregner`, `SUBeregner`, `PensionBeregner`. De fire andre
+på listen (`GaeldsfriBeregner`, `BruttoNettoBeregner`, `TopskatBeregner`,
+`AktieskatBeregner`) bruger `toLocaleString` og har aldrig skrevet dobbelt
+enhed. `/leasing` (20 kallesteder) og `/su` (7) er stadig åbne.
+
+**Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test`
+(3803 i 234 filer) · `npm run build` — alle grønne 2/10 20:53.

@@ -125,6 +125,12 @@ describe("PensionBeregner — pensionstillæg efter indkomst", () => {
     expect(
       screen.getByText(/Du har ikke opgivet andre indkomster, så du får det fulde pensionstillæg/),
     ).toBeInTheDocument();
+    // `formatKr` er `formatCurrency`, som selv afslutter med valutaenheden, så
+    // et bogstaveligt " kr." bag ved kalden skrev "8.729 kr. kr." på den
+    // levende side. Sætningen skal have præcis én enhed.
+    const naesteSkridt = screen.getByText(/Du har ikke opgivet andre indkomster/);
+    expect(naesteSkridt).toHaveTextContent("pensionstillæg på 8.729 kr.");
+    expect(naesteSkridt.textContent).not.toMatch(/kr\. kr\.|kr kr/);
   });
 
   test("giver gifte og samlevende det lavere tillæg på 12.011 kr.", async () => {

@@ -438,12 +438,12 @@ export default function PensionBeregner() {
                 </ul>
                 <p className="mt-2">
                   {resultat.folkepensionDetaljer.bortfaldet
-                    ? `Din indkomst på ${formatKr(resultat.folkepensionDetaljer.indkomstGrundlag)} over bortfaldsgrænsen på ${formatKr(resultat.folkepensionDetaljer.graense.bortfaldOver)} kr. fjerner pensionstillægget helt. Grundbeløbet betales stadig.`
+                    ? `Din indkomst på ${formatKr(resultat.folkepensionDetaljer.indkomstGrundlag)} over bortfaldsgrænsen på ${formatKr(resultat.folkepensionDetaljer.graense.bortfaldOver)} fjerner pensionstillægget helt. Grundbeløbet betales stadig.`
                     : resultat.folkepensionDetaljer.nedsatMed > 0
-                      ? `Tillægget sættes ned med ${(resultat.folkepensionDetaljer.graense.pct * 100).toLocaleString("da-DK")} % af indkomsten over ${formatKr(resultat.folkepensionDetaljer.graense.nedsaetningOver)} kr. Du har opgivet ${formatKr(resultat.folkepensionDetaljer.indkomstGrundlag)} i årlig indkomst ud over arbejdsindkomst.`
+                      ? `Tillægget sættes ned med ${(resultat.folkepensionDetaljer.graense.pct * 100).toLocaleString("da-DK")} % af indkomsten over ${formatKr(resultat.folkepensionDetaljer.graense.nedsaetningOver)}. Du har opgivet ${formatKr(resultat.folkepensionDetaljer.indkomstGrundlag)} i årlig indkomst ud over arbejdsindkomst.`
                       : resultat.folkepensionDetaljer.indkomstGrundlag === 0
-                        ? `Du har ikke opgivet andre indkomster, så du får det fulde pensionstillæg på ${formatKr(resultat.folkepensionDetaljer.tillaegFuld)} kr.`
-                        : `Din indkomst på ${formatKr(resultat.folkepensionDetaljer.indkomstGrundlag)} er under grænsen på ${formatKr(resultat.folkepensionDetaljer.graense.nedsaetningOver)} kr., så du får det fulde pensionstillæg.`}
+                        ? `Du har ikke opgivet andre indkomster, så du får det fulde pensionstillæg på ${formatKr(resultat.folkepensionDetaljer.tillaegFuld)}`
+                        : `Din indkomst på ${formatKr(resultat.folkepensionDetaljer.indkomstGrundlag)} er under grænsen på ${formatKr(resultat.folkepensionDetaljer.graense.nedsaetningOver)}, så du får det fulde pensionstillæg.`}
                   {resultat.folkepensionDetaljer.samleverUdeladt > 0 &&
                     ` Der er holdt ${formatKr(resultat.folkepensionDetaljer.samleverUdeladt)} ude, fordi kun 46 % af din samlevers indkomst tæller med, når samleveren ikke er pensionist.`}
                 </p>

@@ -1,13 +1,35 @@
-STATUS: 2/10 20:42. CI grøn ved start (`37044864618`). PR-TJEK 2/10 19:47:
+STATUS: 2/10 20:54. CI grøn ved start (`37044864618`). PR-TJEK 2/10 19:47:
     ingen åbne PR'er (næste tjek 3/10). Sentry: ingen uløste fejl 14 dage, og det
     er et **rigtigt** signal — `sentryDsn()` har en fallback-DSN og `init`
     kører i `sentry.server.config.ts` + `instrumentation-client.ts`, kun i
     produktion, ingen replay, ingen upload af source maps.
     CEO-kø punkt 0: lukket 2/10 14:48.
     **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` ·
-    `npm run build` — grøn 2/10 20:40 (**3803** tests i 234 filer, +6), plus
-    `locale-leak.mjs --gate` exit 0 og `knapgruppe-scan.mjs` 0/0.
-    **Denne iteration:** `/leasing`s **svenske** blok skrev sit eget eksempel som
+    `npm run build` — grøn 2/10 20:53 (**3803** tests i 234 filer), plus
+    `locale-leak.mjs --gate` og knapgruppe-scan fra de forrige iterationer.
+    **Denne iteration:** `/pension` skrev **«8.729 kr. kr.»** live — målt i
+    den rene HTML, ikke i koden. `formatKr` er `formatCurrency`, som **selv**
+    afslutter med valutaenheden, og fire sætninger satte « kr.» oveni. De fire
+    er rettet, så tallet bærer nu præcis én enhed — og på beraknare.se bliver
+    det «8.729 kr» (Intl skriver «kr» for sv-SE) i stedet for «kr kr».
+    **Målt:** planens påstand om «7 beregnere» var **for bred** — kun 3 af de 7
+    bruger `formatCurrency`: `LeasingBeregner`, `SUBeregner`,
+    `PensionBeregner`. `GaeldsfriBeregner`, `BruttoNettoBeregner`,
+    `TopskatBeregner` og `AktieskatBeregner` bruger `toLocaleString` og har
+    derfor **aldrig** haft dobbelt enhed. Mutation: « kr.» tilbage i
+    pensionstillæg-sætningen giver **1 rød** af 11.
+    **Næste iteration:** `LeasingBeregner` (20 kallesteder) → `SUBeregner`
+    (7) → så **skal** der være en feature.
+    **Forslag til næste feature (researchet 2/10 20:50, ikke bygget):** en
+    `/dage-til`-**hub** i da + se. Målt: `/dage-til` og `/dagar-till` er **404**
+    på begge domæner, de 23 + 20 countdown-sider har ingen fælles side (kun
+    1-2 links fra `/dato` hver), og de er **ikke** blandt top-15 i Plausible,
+    selv om GSC viser «hvor mange dage er der til 1. december» (1.254
+    visninger, pos. 5) og «… til den 24. december» (1.025, pos. 5) — to søgninger
+    `/dato` taber til `/dato` selv. Alt indholdet findes allerede verificeret i
+    `dage-til.ts`; hubben er en liste over alle events med dagens tal. Måles på
+    `/dage-til` i Plausible om 14 dage.
+    **Sidste iteration:** `/leasing`s **svenske** blok skrev sit eget eksempel som
     rå tekst — «300.000», «4.121», «178.350», «28.350» — i titel, description,
     metaDescription, ogDescription, schemaDescription og **tre** FAQ-svar, og
     `FAQSchema` læser præcis `faqItems`, så de var tal i Googles rich resultat.
@@ -228,16 +250,21 @@ master-koden. `/renteberegner` se: 3.124 visninger, 33 klik, 1,1 %, pos. 12,2.
 **Åben:** `/moms` har 3 fund tilbage, som er lovgrænser (dansk registrering over
 50.000 kr, svensk over 120.000 kr, told ved import over 1.150 kr). ❓ nedenfor.
 
-**Åben: dobbelt valutaenhed på 7 beregnere.** Målt 2/10 20:26 i den rene
-HTML fra `next start`: `LeasingBeregner` skriver **«178.350 kr. kr.»**, fordi
-`formatCurrency(v, "da")` med `style: "currency"` **selv** afslutter med
-«kr.», og komponenten så skriver « kr.» oveni. Samme mønster i
-`SUBeregner`, `GaeldsfriBeregner`, `BruttoNettoBeregner`, `TopskatBeregner`,
-`PensionBeregner` og `AktieskatBeregner`. *Accept:* `formatKr`-kaldene
-sender ikke længere `kr.` med, **eller** de bruger `formatNumber` +
-`getCurrencySuffix`, som er de to andre steder i repoet gør — og en test på den
-rendrede streng, så den ikke kan komme tilbage. Ikke rettet i `/leasing`-opgaven:
-det ville gøre diffen dobbelt så stor for en fejl uden for dens emne.
+**Delvis lukket 2/10 20:53 — `pension-dobbelt-valuta`.** Se
+`docs/plan-arkiv.md`. *Målt:* «8.729 kr. kr.» er væk fra den rene HTML på
+`minberegner.dk/pension`. **De fire øvrige påstande i den gamle note var
+forkerte:** `GaeldsfriBeregner`, `BruttoNettoBeregner`, `TopskatBeregner` og
+`AktieskatBeregner` bruger `toLocaleString` (ingen valutaenhed) og har aldrig
+skrevet dobbelt enhed. `formatNumber` + `getCurrencySuffix` er rigtigere for
+de to, men det er en anden opgave.
+
+**Åben: dobbelt valutaenhed i `LeasingBeregner` og `SUBeregner`.** Samme
+mønster som pension: `formatKr` = `formatCurrency`, som selv afslutter med
+enheden, og komponenten sætter « kr.» oveni. `LeasingBeregner` har **20**
+sådanne kallesteder (hele resultatblokken for alle tre betalingsformer) og
+`SUBeregner` **7**. *Accept:* ingen `formatKr(…)} kr.` tilbage i de to filer,
+og en test på den rendrede streng for hver (som `PensionBeregner.test.tsx`
+nu har). På beraknare.se bliver «kr kr.» til «kr».
 
 **Åben: norske tusindtalsseparatorer.** `/renteberegner` skriver nu «1 887»
 med mellemrum, mens resten af `noPages` skriver «2.500» med punktum («BMR
@@ -264,6 +291,7 @@ ingen regex på tal og tekst.
 
 | Slug | Prøv på indhold |
 |---|---|
+| `pension-dobbelt-valuta` (**ny**, vindue 3/10 07:30**) | `minberegner.dk/pension`: sætningen under resultatlisten skal være «Du har ikke opgivet andre indkomster, så du får det fulde pensionstillæg på **8.729 kr.**» — og **hele HTML'en skal have 0** `kr. kr.` og **0** `kr kr`. Rækkerne skal stadig være «16.273 kr.», «7.544 kr.» og «8.729 kr.». `beraknare.se/pension`: samme sætning med **én** enhed («8.729 kr», Intl skriver «kr» for sv-SE) og 0 dobbelt enheder. |
 | `leasing-svenske-tal-fra-modul` (**ny**, vindue 3/10 07:30**) | `beraknare.se/leasing`: `<title>` skal være «Leasingkalkylator: bil på **300 000** kr = **4 121** kr/mån» og `metaDescription` «Bil på **300 000** kr med **150 000** kr i restvärde, **4,5** % ränta, **30 000** kr i kontantinsats och **36** mån: **4 121** kr i leasingkostnad per månad.». `schemaDescription` skal have «**4 121** kr per månad över **36** månader». FAQ'en skal have **syv** spørgsmål, hvor «Vad kostar leasing av en bil på **300 000** kr?» svarer «… blir månadskostnaden **4 121** kr, vilket är **178 350** kr totalt inklusive **28 350** kr i ränta.», «Vad är värdetabet på en leasingbil?» svarer «… är det **150 000** kr. Det är det belopp du betalar …» (~~belöp~~ → **belopp**, svensk stavemåde) og «Vad är fåretagsleasing och vad kostar det?» svarer «… ger **4 121** kr i leasingkostnad per månad.». **Hele HTML'en skal have 0** `\d\.\d{3}` på beløb — altså **intet** «4.121» / «300.000» / «178.350» / «28.350». **Intet** `NaN`. `minberegner.dk/leasing`: uændret (dansk og norsk blok har ingen beløb) |
 | `vaegttab-tal-fra-modul` (**ny**, vindue 2/10 21:30) | `minberegner.dk/vaegttab`: `<title>` skal være byte-uændret «Vægttab: 6 kg på 12 uger = 550 kcal/dag» og `<meta name="description">` «Mand på 80 kg, 180 cm og 30 år med moderat aktivitet: 6 kg på 12 uger kræver 550 kcal i underskud, så du skal spise **2.209** kcal om dagen.»; `og:description` og JSON-LD `description` skal have «**2.209** kcal om dagen (TDEE **2.759** kcal).» og «spiser **2.209** kcal/dag.». **Hele HTML'en skal have 0** `2 209` (dansk side) og FAQ'en skal stadig have «2.759»/«2.209»/«7.700»/«1.500»/«1.200» — de er halve 2, ikke denne. `beraknare.se/vaegttab`: `<title>` «Viktminskning: 6 kg på 12 veckor = 550 kcal/dag» og beskrivelsen «… du behöver äta **2 209** kcal per dag.» — **2 209 med mellemrum**, og **intet** «2.209» på domænet. `beregner.no`: 404'er (❓ nedenfor), uændret |
 | `leasing-restvaerdi-sammenlign` (**ny**, vindue 2/10 21:30) | `beraknare.se/leasing`: FAQ-en skal have **syv** spørgsmål, hvor «Blir leasing dyrare eller billigare än ett billån?» svarer med **hele regnestykket**: «Det beror på restvärdet och räntan. Med kalkylatorns standardvärden — **300 000** kr i bilpris, **150 000** kr i restvärde, **4,5** % ränta, **30 000** kr i kontantinsats och **36** månader — kostar leasingen **178 350** kr. Ett billån med samma förutsättningar kostar **169 140** kr, alltså **9 210** kr mer. Skillnaden är att du äger bilen under ett billån: du har **150 000** kr kvar att sälja den för när långivstiden är slut, medan du med leasing står med **0** kr.». Samme sætning skal stå i JSON-LD `acceptedAnswer`. **Intet** «Det beror på restvärdet och räntan. Ett lågt restvärde» i hele HTML'en. `minberegner.dk/leasing`: FAQ-en skal stadig have de **tre** generiske spørgsmål (byte-uændret) og **intet** «169 140» / «178 350». **Intet** `NaN` nogen steder |
