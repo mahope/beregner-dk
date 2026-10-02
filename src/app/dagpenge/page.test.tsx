@@ -5,6 +5,12 @@ import { beforeEach, describe, expect, test, vi } from "vitest";
 import { getDomainConfigByLocale } from "@/lib/domain-config";
 import { getCurrentDomainConfig, getLocale } from "@/lib/get-locale";
 import { DAGPENGE_2026 } from "@/lib/satser-2026";
+import {
+  DAGPENGE_SATSER,
+  KOMMUNESKAT_SNIT_PCT_DAGPENGE,
+  dagpengeEfterSkat,
+  dagpengeKroner,
+} from "@/lib/dagpenge-satser";
 import DagpengePage from "./page";
 
 vi.mock("@/components/StructuredData", () => ({
@@ -72,6 +78,44 @@ describe("side /dagpenge", () => {
     expect(afsnit).toContain(String(DAGPENGE_2026.dimittendTilmeldingDage));
     expect(afsnit).toContain(kr(DAGPENGE_2026.dimittendFuldtidUdenForsorgerpligt));
     expect(afsnit).toContain(kr(DAGPENGE_2026.dimittendFuldtidMedForsorgerpligt));
+  });
+
+  /**
+   * 2/10: «dagpenge sats 2026 efter skat» er dansk autocomplete nr. 2 under «dagpenge
+   * sats 2026» og nr. 4 under «dagpenge sats» (målt 11:25), og siden lovede
+   * «dagpenge efter skat» i sin egen `keywords` og FAQ uden at vise ét beløb.
+   * Porten dømmer den **renderede** tabel, så den kan ikke grønne ved at læse
+   * kildefilen eller FAQ'en.
+   */
+  test("viser beløbet efter skat for hver sats, regnet af dagpenge-modulet", async () => {
+    const html = renderToStaticMarkup(await DagpengePage());
+    const kr = (n: number) => `${new Intl.NumberFormat("da-DK").format(Math.round(n))} kr`;
+
+    for (const sats of DAGPENGE_SATSER) {
+      expect(html).toContain(kr(sats.belob));
+      expect(html).toContain(dagpengeKroner(dagpengeEfterSkat(sats.belob).efterSkat));
+    }
+    expect(html).toContain("efter skat");
+    expect(html).toContain(KOMMUNESKAT_SNIT_PCT_DAGPENGE);
+  });
+
+  test("skriver intet dagpenge-beløb som tekstliteral", async () => {
+    // Før 2/10 stod «26.198 kr» to gange, «263.232 kr» og «90 % … 8 % AM-bidrag»
+    // i brødteksten. De læses nu fra `dagpenge-satser`/`satser-2026`.
+    expect(kilde).toContain('from "@/lib/dagpenge-satser"');
+    expect(kilde).not.toContain("26.198");
+    expect(kilde).not.toContain("263.232");
+    expect(kilde).not.toContain("22.041");
+    expect(kilde).not.toContain("90%");
+    expect(kilde).not.toContain("8% AM-bidrag");
+
+    // `kr(DAGPENGE_2026.indkomstkravTimer)` skrev «1.924 kr timer» på den live
+    // side 2/10 — «kr» på et timetal. Porten dømmer den renderede tekst.
+    const html = renderToStaticMarkup(await DagpengePage());
+    expect(html).not.toContain("kr timer");
+    expect(html).toContain(
+      `${new Intl.NumberFormat("da-DK").format(DAGPENGE_2026.indkomstkravTimer)} timer`,
+    );
   });
 
   test("«nyuddannet» og «dimittend» bruges om hinanden, så begge søgninger rammer", async () => {

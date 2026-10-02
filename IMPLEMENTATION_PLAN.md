@@ -1,36 +1,13 @@
-STATUS: 2/10 11:45. CI grøn. Sentry MINBEREGNER-1 er Next-router-støj (filtreret
+STATUS: 2/10 11:40. CI grøn. Sentry MINBEREGNER-1 er Next-router-støj (filtreret
   siden 3e67ed3), MINBEREGNER-2 rettet i `4d48370`+`def070c`. Alle tre
   review-fund fra 2/10 lukket (`3875b83`, `73c7e64`, `def070c`), CEO-kø punkt 0
   lukket (`04ca30a`). PR-TJEK 2026-10-02: ingen åbne PR'er. BRANCH-TJEK 2/10:
   ingen forældede.
   **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` · `npm run build`
-  — målt grøn 2/10 11:44 (3690 tests i 227 filer, +9 fra `ceo/procent-fald`).
-  **Denne iteration: `ceo/procent-fald`. VERIFICÉR DEPLOY: /procent skal have
-  `<h2>Sådan beregner du procentfald</h2>` med tabellen `Fra / Til /
-  Procentfald / Sparer` og rækkerne `30.000 kr. 27.000 kr. 10 procent 3.000 kr.`
-  + `1.000 kr. 800 kr. 20 procent 200 kr.` + `1.000 kr. 20 procents fald 20
-  procent 200 kr.`, og `<h2>Så här räknar du ut procentfall</h2>` med de samme tre
-  rækker i kronor uden punktum. Ingen hånd skrevne beløb i ny brødtekst: alle tal
-  kommer fra `procentFald`/`procentBesparelse`/`PROCENTFALD_EKSEMPEL`.
-  ceo/procent-fald 2/10 11:45
-  Fund: /procent er sidens største side (152.615 visninger, 0,1 % CTR, pos 7,4;
-  se 28.674 / 0,0 % / 9,8) og havde **0 forekomster af «procentfald» og 0 af
-  «besparelse»**, mens dansk autocomplete (hl=da&gl=dk, målt 2/10 11:15) svarer
-  «procent beregner» med «procent fald beregner» som 5. af 10 og «procent
-  besparelse beregner» som 6. af 10; svensk «procent fald» og «procent
-  minskning» er 10 af 10 hver, og «procent fald mellem to tal» er #2. Nu er der
-  et «Sådan beregner du procentfald»-afsnit i begge sprog med formel, Excel-formel
-  og besparelsen i kroner. To ting viste sig undervejs, begge fanget af porten:
-  (a) et fald er **ikke** stigningens modsat på et *omvendt* par — 33.000→30.000
-  er 9,09 % fald, mens 30.000→33.000 er 10 % stigning, fordi heltalet er det tal
-  bevægelsen starter fra. Derfor er faldparrene valgt til runde procenter, så
-  siden ikke viser 9,1 % i den ene tabel og 10 % i den anden for samme løn;
-  (b) `procentBesparelse` må være den del der er væk (200 kr. af 1.000), ikke
-  restprisen (800 kr.) — `procentAf` er procenten af beløbet, så besparelsen er
-  præcis det kald. Port: 6 nye tests i `procent.test.ts`, målt **3 røde** mod
-  den gamle kode (og de 3 fejl var reelle forker, ikke kun manglende funktion).
-  MÅL: /procent 152.615 visninger / 92 klik / 0,1 % / 7,4 (da) · 28.674 / 2 /
-  0,0 % / 9,8 (se). Genmål 16/10.
+  — målt grøn 2/10 11:37 (3708 tests i 228 filer, +18 fra `ceo/dagpenge-efter-skat`).
+  **Denne iteration: `ceo/dagpenge-efter-skat`.** VERIFICÉR DEPLOY-noten står i
+  tabellen nederst. ceo/dagpenge-efter-skat 2/10 11:40
+
 ## Åbne opgaver — F5b: beløb i JSX-tekst → modulkonstanter
 
 Listen `src/app/regnestykker.test.ts` tæller forekomster pr. fil og må kun
@@ -54,6 +31,11 @@ blive kortere. Rækkefølgen er trafikrækkefølge. ✅ betyder lukket.
    fra `SATSER_2026` med beregnerens egen betingelse; målt byte-identisk med
    den gamle tekst. Det ene fund er «lønforhøjelse på 1.000 kr.», der er den
    illustrerede forhøjelse.
+0. **`/dagpenge`** — ✅ 2/10 11:35 (`ceo/dagpenge-efter-skat`). 3 fund i JSX-tekst
+   («Op til 26.198 kr» to gange, «263.232 kr») → **0**; 3 fund i strenge i
+   `DagpengeBeregner.tsx` («normalt 2 år (3.848 timer)» i tre sprog) → **0**.
+   Læser nu `src/lib/dagpenge-satser.ts`. Læste `page-data.ts` er det samme modul
+   (kr/md-svarene, `description`, `metaDescription`).
 4. **Beløb i prop-strenge er uden for porten** — ✅ 2/10 07:25
    (`ceo/porten-ser-strenge`). `strengBelob` scanner `isStringLiteral` og
    template literals uden substitution i alle 190 `.tsx`. Målt: **111 fund i 38
@@ -297,6 +279,16 @@ Prioriteret efter forventet effekt på **trafik**. Datagrund fra GSC 1/10
   linker nu til `/klokken-i/usa`, og `/tidszone` har en sektion med alle 12
   links i begge sprog (`ceo/tidszone-links-til-lande`) — de 24 sider havde
   ingen indgang *fra* den side, der har flest visninger.
+- **Dagpenge-sats efter skat på `/dagpenge`** — ✅ 2/10, `ceo/dagpenge-efter-skat`.
+  *Hvem:* «dagpenge nyuddannet» har **10 af 10** danske autocomplete-træffere, og
+  «dagpenge sats 2026 efter skat» er nr. 2 under «dagpenge sats 2026» og nr. 4
+  under «dagpenge sats» (målt 2/10 11:25) — mens siden lovede «dagpenge efter
+  skat» i sin egen `keywords` og FAQ og viste **nul** beløb efter skat.
+  *Accept:* beløb efter skat for alle syv satser, tre nye FAQ-spørgsmål, syv
+  beløb læst fra ét modul i stedet for at stå i fem strenge — leveret.
+  *Datagrund:* autocomplete 2/10 11:25 + `/dagpenge` har ingen GSC-top-15-plads,
+  så CTR-baseline er **ikke kendt**; trafikken måles i Plausible og genmåles ved
+  næste snapshot.
 - **Kalorieguide på `/kalorier`.** *Hvem:* 9 af 10 danske autocomplete-træffere
   under «kalorier» er madvarer. **Blokeret på kilde** (opgave 119, ❓) — må
   ikke gættes tal.
@@ -325,6 +317,7 @@ under sit slug. Noterne med vindue **2/10 12:30** måles efter kl. 12:30.
 
 | Slug | Prøv på indhold |
 |---|---|
+| `dagpenge-efter-skat` (**ny**, vindue 2/10 12:30) | `minberegner.dk/dagpenge`: sats-tabellen skal have **syv** rækker med to tal pr. række — `Med beskæftigelsestillæg / 26.198 kr / ca. 18.160 kr efter skat`, `Max dagpengesats, fuldtidsforsikret / 22.041 kr / ca. 15.544 kr efter skat`, `Dimittend, fuldtid med forsørgelsespligt / 18.074 kr / ca. 13.047 kr efter skat`, `Dimittend, fuldtid uden forsørgelsespligt / 15.759 kr / ca. 11.590 kr efter skat`, `Max dagpengesats, deltidsforsikret / 14.694 kr / ca. 10.919 kr efter skat`, `Dimittend, deltid med forsørgelsespligt / 12.049 kr / ca. 9.255 kr efter skat`, `Dimittend, deltid uden forsørgelsespligt / 10.506 kr / ca. 8.283 kr efter skat` — med **hele kroner**, ingen decimaler («18.160,026» er den fejl porten fangede). Indledningen skal sige «25,049 % i kommunaleskat». FAQ'en skal have **otte** spørgsmål, og de tre nye skal starte med «Hvad er dagpengesatsen for nyuddannet i 2026?» → «… 15.759 kr pr. måned før skat uden forsørgelsespligt, og 18.074 kr hvis du har forsørgelsespligt. Det er 71,5 % hhv. 82 % af maxsatsen på 22.041 kr.», «Hvor længe har nyuddannede ret til dagpenge?» → «… normalt 2 år, svarende til 3.848 timer fuldtid, inden for 3 år.» og «Skal jeg betale skat af dagpenge?» → «… ca. 15.544 kr om måneden tilbage på kontoen.». **Intet** «1.924 kr timer» nogen steder — det stod på den live side 2/10. `minberegner.dk/dagpenge`s `<meta name="description">` skal være uændret i ordlyd: «Beregn dagpenge 2026. Max sats: 22.041 kr/md (90% af løn efter AM-bidrag). Med beskæftigelsestillæg op til 26.198 kr/md. Beregn din dagpengesats ud fra din løn.» |
 | `blog-indlaeg-belob-fra-modul` (**ny**) | `minberegner.dk/blog/saadan-finder-du-din-timepris-som-freelancer`: tabellen «Typiske timepriser i Danmark (2026)» skal have fire grupperækker (`IT & Udvikling`, `Kreativ & Marketing`, `Rådgivning`, `Håndværk & Service`) med de 12 poster, hver som `<postnavn> <interval> kr` — altså `Senior udvikler 800-1.200 kr` (ikke 1.400), `Grafisk designer 500-800 kr`, `Konsulent 800-1.500 kr`, `Fotograf 500-1.500 kr`. **Intet** «Junior»/«Senior»-hoved, intet «800-1.400», intet «600-900 kr», intet «1.000-2.000 kr». FAQ'en «Hvad er en normal timepris for en freelancer?» skal svare «… seniorudviklere 800-1.200 kr, tekstforfattere 600-1.000 kr, konsulenter 800-1.500 kr …» i både JSON-LD'en og den synlige tekst, og noten «Priserne er vejledende og ekskl. moms.» skal stå under tabellen. `/timepris` skal være **byte-uændret** |
 | `pace-marathon-faq` (**ny**) | `minberegner.dk/pace`: FAQ'en skal have «Hvad er et godt tempo for en marathon?» → «På 42,195 km er 3:30:00 et tempo på 4:59 pr. kilometer.», «Hvad er et godt tempo for en halvmaraton?» → «På 21,0975 km er 1:45:00 et tempo på 4:59 pr. kilometer.» og «Hvad er et godt tempo på 10 km?» → «På 10 km er 50:00 et tempo på 5:00 pr. kilometer.» — hver med «… Hvad der er godt for dig, afhænger af din træning og din målsætning.» **Intet** «halvmarahton» nogen steder på siden eller i JSON-LD'en. `beraknare.se/pace` skal have de samme tre spørgsmål med «per kilometer» og **ikke** «pr. kilometer». |
 | `tidsberegner-faq-fra-modul` (**ny**) | `minberegner.dk/tidsberegner`: FAQ'en skal have «Hvor mange timer er der i et år?» → «Et år har 365 dage, og 365 × 24 = 8.760 timer, altså 525.600 minutter. Måned og kvartal er gennemsnit af året, så en måned er 730 timer.» og «Hvor mange timer er der i en uge?» → «En uge har 7 dage, og 7 × 24 = 168 timer, altså 10.080 minutter. Et døgn har 24 timer, så en måned er 730 timer og et skudår 8.784 timer.». `beraknare.se/tidsberegner`: «Ett år har 365 dagar, och 365 × 24 = 8 760 timmar, alltså 525 600 minuter.» og «En vecka har 7 dagar, och 7 × 24 = 168 timmar, alltså 10 080 minuter. Ett dygn har 24 timmar, så en månad är 730 timmar och ett skottår 8 784 timmar.». Begge steder **skal** have præcis disse tal; de svenske nu med U+00A0 som `Intl` skriver tusindtalsseparatoren (ligesom resten af sitets svenske tal). De norske `faqItems` på `/tidsberegner` er **uændrede** — de har ikke de to spørgsmål |
@@ -348,17 +341,11 @@ under sit slug. Noterne med vindue **2/10 12:30** måles efter kl. 12:30.
   `src/lib/timepris-markedspriser.ts` pr. `Locale` og få hvert domæne sine
   egne tal. Samme kilde ville kunne give `/timepris` sin manglende norske
   brødtekst.
-- ❓ **Ser du events fra minberegner.dk i Sentry-projektet?** Det er nu det
-  eneste stykke af spørgsmålet fra opgave 204, der ikke er besvaret af kode.
-  Afsendelsen er **bevist** — `sentry-send.test.ts` får en rigtig envelope
-  gennem den rigtige `initSentryServer()` og modtager den på en collector, så
-  SDK'en sender, og `beforeSend` er registreret på begge sider. Men det beviser
-  *transporten*, ikke at **dit projekt** modtager: det afhænger af DSN-projektet
-  og af at traffic'et rent faktisk rammer en kastende rute. **Ingen fejl i 14
-  dage er derfor stadig en svag vished** — den kan betyde "alt er godt" eller
-  "intet kaster". Ét skærmbillede af Sentry-projektet, eller en bevidst fejl i
-  et prod-build med et `[Sentry]`-flag på init, låser det. Jeg kan ikke se
-  projektet: API'en kræver din konto.
+- ❓ **Ser du events fra minberegner.dk i Sentry-projektet?** Transporten er
+  **bevist** (`sentry-send.test.ts` får en rigtig envelope gennem den rigtige
+  `initSentryServer()`), men det beviser ikke at **dit projekt** modtager. Ét
+  skærmbillede af projektet — eller en bevidst fejl i et prod-build med et
+  `[Sentry]`-flag — låser det. Jeg kan ikke se det: API'en kræver din konto.
 
 - ❓ **Hvilken vægtafgift har en elbil i Danmark i 2026?** (ny, 2/10.)
   `/bil` skrev «Elbil: 0 kr (til 2026)» og «Afgifter kommer (2026+)» — to
@@ -396,14 +383,12 @@ under sit slug. Noterne med vindue **2/10 12:30** måles efter kl. 12:30.
   er reglen «den lørdag i den kalenderuge, hvori 20. juni ligger», står siden
   7 dage forkert i de fleste år. Koden er bevidst urørt: en lovpåstand uden
   kilde er præcis den fejl, CEO-køens punkt 0 handler om.
-- ❓ **Kan Cloudflare cache HTML'en på trods af Next's `Vary: RSC`?** (opgave
-  200, højst prioriteret.) Cloudflare foran sitet giver `cf-cache-status:
-  DYNAMIC`, fordi Next svarer `no-cache, no-store`. Sætter vi `s-maxage` på
-  HTML'en, **bryder vi Next's egen rute-navigation**: klienten genanmoder
-  samme URL med `RSC: 1`, og en CDN der cache'r på URL ville give routeren
-  HTML i stedet for sit flight-svar. Løsningen er en Cloudflare-regel (spring
-  RSC-anmodninger over) eller en Worker — din infra, ikke repoet. Uden det er
-  280-433 ms TTFB på alle 600.000 månedlige visninger den faste pris.
+- ❓ **Kan Cloudflare cache HTML'en på trods af Next's `Vary: RSC`?** (opgave 200.)
+  Next svarer `no-cache, no-store`, så alt er dynamisk: 280-433 ms TTFB på alle
+  600.000 månedlige visninger. `s-maxage` på HTML'en **bryder Next's egen
+  rute-navigation** (klienten genanmoder samme URL med `RSC: 1`). Løsningen er
+  en Cloudflare-regel eller Worker, der springer RSC-anmodninger over — din infra,
+  ikke repoet.
 - ❓ **Søgningseksport fra Search Console (ny, 30/9, højst prioriteret).**
   GSC's opsummering viser kun de 3-4 største søgninger pr. side. For `/procent`
   — **150.470 visninger, 97 klik, pos. 7,4, sitets største side** — er de tre
@@ -425,12 +410,9 @@ under sit slug. Noterne med vindue **2/10 12:30** måles efter kl. 12:30.
   og du vil se `[indexnow] … skipped (disabled)` i deploy-loggen — den linje er
   det hurtigste tegn på om det virker.
 - ❓ **Fulde browsermålinger kræver Playwright (ny, 30/9).** Deploy-noter der
-  kræver en rigtig browser kan ikke lukkes maskinelt: repoet har ingen
-  Playwright, og `CLAUDE.md` forbyder nye afhængigheder uden dit ja. Uden det
-  bruger jeg jsdom-render, der dækker logikken men ikke layout, breakpoints
-  eller mørk tilstand. Én konkret måling mangler: hvor højt populærgitterets
-  første kort ligger på 390 px efter F4's rettelse 1/10 (kortene er ca. 230 px,
-  helten og søgefeltet fylder meget af første skærm).
+  kræver en rigtig browser kan ikke lukkes maskinelt: repoet har ingen Playwright,
+  og `CLAUDE.md` forbyder nye afhængigheder uden dit ja. Én konkret måling
+  mangler: hvor højt populærgitterets første kort ligger på 390 px.
 - ❓ **Kilde til madvaretabellen (opgave 119, `BLOCKED`).** `sst.dk` svarer HTTP 429
   for både browser og curl, og de fire andre danske kilder døde i C92. Enten en
   PDF af *De officielle kostanbefalinger* lagt i repoet, eller en API-nøgle til en
@@ -456,6 +438,3 @@ under sit slug. Noterne med vindue **2/10 12:30** måles efter kl. 12:30.
   formel. Hvis du kender en kilde (bolig.guide, KL eller kommunens
   beskatningsvedtægt), lægges Varde bare ind i `GRUNDSKYLD_KOMMUNER`, og
   tabellen og dropdown'en får den samme post.
-- ❓ **Nedetid 29/9:** en fuld site-scanning kørte mens produktion svarede 521 på alle
-  domæner, og skanningen skrev "ingen fejl" for alle 206 sider. Ingen kode fejl — men
-  en måling af et nedbrudt site giver et troværdigt tal om ingenting.

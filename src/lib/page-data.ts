@@ -1,5 +1,5 @@
 import type { Locale } from "./i18n";
-import { BARSEL_2026, SATSER_2026, SKATTEFRADRAG_2026, SU_2026 } from "./satser-2026";
+import { BARSEL_2026, DAGPENGE_2026, SATSER_2026, SKATTEFRADRAG_2026, SU_2026 } from "./satser-2026";
 import { SOLCELLE_LEVETID_AAR_MAX, SOLCELLE_LEVETID_AAR_MIN } from "./energi/solceller";
 import { BRAENDSTOF_EGENT_FORBRUG, BRAENDSTOF_EKSEMPEL_KM, BRAENDSTOF_FORUDSETNINGER, BRAENDSTOF_FORUDSETNINGER_SE, besparelseProcent, braendstofEksempelRækker, breakEvenKwhPris, elbilSammenligning, heleKroner, literPr100km, prisPrKm, prisPrMil, procent1Decimals } from "./braendstof";
 import { HUSLEJE_EKSEMPEL, HUSLEJE_STANDARD } from "./husleje";
@@ -19,6 +19,15 @@ import {
   rabatProcent,
 } from "./procent";
 import { formatNumber } from "./format";
+import {
+  BESKAEFTIGELSESTILLAEG_2026,
+  INDKOMSTKRAV_2026,
+  dagpengeEfterSkatFaqSvar,
+  dagpengeKroner,
+  dagpengeNyuddannetFaqSvar,
+  dagpengeNyuddannetPeriodeFaqSvar,
+  dagpengeTimer,
+} from "./dagpenge-satser";
 import { markedsprisFaqSvar } from "./timepris-markedspriser";
 import { timerIPeriodeFaqSvar } from "./timer-periode";
 import { distanceEksempelFaqSvar } from "./pace";
@@ -55,6 +64,25 @@ const KOMMUNESKAT_SNIT_PCT = formatNumber(
  * naar satsen stiger (punkt 11).
  */
 const ARVE_BUNDFRADRAG_TEKST = formatNumber(SATSER_2026.arveBundfradrag, "da");
+
+/**
+ * Dagpengens egne tal, skrevet ét sted for `/dagpenge`s beskrivelse, FAQ og
+ * tabeller. Før 2/10 stod de samme beløb i fem separate strenge — «22.041 kr/md»
+ * to gange, «26.198 kr/md» tre gange, «90 %», «8 %» og «263.232 kr» — så en
+ * satsstigning ville have efterladt fem tal stående i de gamle (punkt 11).
+ * `/dagpenge`s egen side læser dem fra samme modul.
+ */
+const DAGPENGE_MAX_TEKST = dagpengeKroner(DAGPENGE_2026.fuldtid);
+const DAGPENGE_TILLAEG_TEKST = dagpengeKroner(BESKAEFTIGELSESTILLAEG_2026);
+const DAGPENGE_INDKOMSTKRAV_TEKST = dagpengeKroner(INDKOMSTKRAV_2026);
+const DAGPENGE_PROCENT_TEKST = formatNumber(DAGPENGE_2026.dagpengeProcent * 100, "da", {
+  maximumFractionDigits: 0,
+});
+const DAGPENGE_AM_PROCENT_TEKST = formatNumber(SATSER_2026.amBidrag * 100, "da", {
+  maximumFractionDigits: 0,
+});
+const DAGPENGE_PERIODE_TIMER_TEKST = dagpengeTimer(DAGPENGE_2026.dagpengeperiodeTimer);
+const DAGPENGE_BESKRIVELSE = `Beregn dagpenge 2026. Max sats: ${DAGPENGE_MAX_TEKST}/md (${DAGPENGE_PROCENT_TEKST}% af løn efter AM-bidrag). Med beskæftigelsestillæg op til ${DAGPENGE_TILLAEG_TEKST}/md. Beregn din dagpengesats ud fra din løn.`;
 
 /**
  * Formateringen i de to momssvar, der laeser et tal ud af `MOMS_LANDE`. Den er
@@ -1635,10 +1663,10 @@ const daPages: Record<string, PageData> = {
     "dagpenge": {
       slug: "dagpenge",
       title: "Dagpengeberegner 2026 - Beregn dine dagpenge",
-      description: "Beregn dagpenge 2026. Max sats: 22.041 kr/md (90% af løn efter AM-bidrag). Med beskæftigelsestillæg op til 26.198 kr/md. Beregn din dagpengesats ud fra din løn.",
+      description: DAGPENGE_BESKRIVELSE,
       metaTitle: "Dagpengeberegner 2026 - Beregn dine dagpenge",
-      metaDescription: "Beregn dagpenge 2026. Max sats: 22.041 kr/md (90% af løn efter AM-bidrag). Med beskæftigelsestillæg op til 26.198 kr/md. Beregn din dagpengesats ud fra din løn.",
-      keywords: ["dagpenge beregner", "dagpenge 2026", "beregn dagpenge", "dagpenge sats", "a-kasse beregner", "arbejdsløshedsdagpenge", "dagpenge efter skat", "max dagpenge 2026"],
+      metaDescription: DAGPENGE_BESKRIVELSE,
+      keywords: ["dagpenge beregner", "dagpenge 2026", "beregn dagpenge", "dagpenge sats", "a-kasse beregner", "arbejdsløshedsdagpenge", "dagpenge efter skat", "max dagpenge 2026", "dagpenge sats 2026", "dagpenge sats 2026 nyuddannet", "dagpenge nyuddannet sats", "dagpenge sats 2026 efter skat", "dimittendsats 2026"],
       ogTitle: "Dagpengeberegner 2026 - Beregn dine dagpenge",
       ogDescription: "Beregn hvad du kan få i dagpenge i 2026. Gratis og nem dagpengeberegner.",
       category: "Økonomi",
@@ -1648,12 +1676,14 @@ const daPages: Record<string, PageData> = {
       schemaDescription: "Beregn hvad du kan få i dagpenge baseret på din tidligere løn",
       schemaCategory: "FinanceApplication",
       faqItems: [
-      { question: "Hvordan beregnes dagpenge?", answer: "Dagpenge beregnes som 90% af din løn efter fradrag af 8% AM-bidrag, dog højst maxsatsen på 22.041 kr/md i 2026. Din A-kasse ser på din gennemsnitlige indtægt de seneste 12 måneder." },
-      { question: "Hvad er maxsatsen for dagpenge i 2026?", answer: "I 2026 er den maksimale dagpengesats 22.041 kr/md før skat for fuldtidsforsikrede. Med beskæftigelsestillæg kan satsen de første 3 måneder være op til 26.198 kr/md." },
-      { question: "Hvad er beskæftigelsestillægget?", answer: "Beskæftigelsestillægget er et ekstra tillæg de første 3 måneders ledighed, som kan give op til 26.198 kr/md i 2026. Tillægget kræver at du opfylder visse beskæftigelseskrav." },
-      { question: "Hvor længe kan jeg få dagpenge?", answer: "Dagpengeperioden er normalt 2 år (3.848 timer) inden for 3 år. Perioden kan forlænges ved arbejde eller uddannelse." },
-      { question: "Skal jeg betale skat af dagpenge?", answer: "Ja, dagpenge er skattepligtig indkomst. Der trækkes A-skat efter dit skattekort. Du kan bruge vores løn efter skat beregner til at estimere nettobeløbet." },
-      { question: "Hvornår har jeg ret til dagpenge?", answer: "Du skal have været medlem af en A-kasse i mindst 1 år, have haft en vis indkomst (indkomstkravet på ca. 263.232 kr over 3 år), og være aktivt jobsøgende og tilmeldt jobcentret." },
+      { question: "Hvordan beregnes dagpenge?", answer: `Dagpenge beregnes som ${DAGPENGE_PROCENT_TEKST}% af din løn efter fradrag af ${DAGPENGE_AM_PROCENT_TEKST}% AM-bidrag, dog højst maxsatsen på ${DAGPENGE_MAX_TEKST}/md i 2026. Din A-kasse ser på din gennemsnitlige indtægt de seneste 12 måneder.` },
+      { question: "Hvad er maxsatsen for dagpenge i 2026?", answer: `I 2026 er den maksimale dagpengesats ${DAGPENGE_MAX_TEKST}/md før skat for fuldtidsforsikrede. Med beskæftigelsestillæg kan satsen de første 3 måneder være op til ${DAGPENGE_TILLAEG_TEKST}/md.` },
+      { question: "Hvad er beskæftigelsestillægget?", answer: `Beskæftigelsestillægget er et ekstra tillæg de første 3 måneders ledighed, som kan give op til ${DAGPENGE_TILLAEG_TEKST}/md i 2026. Tillægget kræver at du opfylder visse beskæftigelseskrav.` },
+      { question: "Hvor længe kan jeg få dagpenge?", answer: `Dagpengeperioden er normalt 2 år (${DAGPENGE_PERIODE_TIMER_TEKST} timer) inden for ${DAGPENGE_2026.indkomstkravAar} år. Perioden kan forlænges ved arbejde eller uddannelse.` },
+      { question: "Skal jeg betale skat af dagpenge?", answer: dagpengeEfterSkatFaqSvar() },
+      { question: "Hvornår har jeg ret til dagpenge?", answer: `Du skal have været medlem af en A-kasse i mindst ${DAGPENGE_2026.aKasseMedlemskabMdr} måneder, have haft en vis indkomst (indkomstkravet på ca. ${DAGPENGE_INDKOMSTKRAV_TEKST} over ${DAGPENGE_2026.indkomstkravAar} år), og være aktivt jobsøgende og tilmeldt jobcentret.` },
+      { question: "Hvad er dagpengesatsen for nyuddannet i 2026?", answer: dagpengeNyuddannetFaqSvar() },
+      { question: "Hvor længe har nyuddannede ret til dagpenge?", answer: dagpengeNyuddannetPeriodeFaqSvar() },
       ],
     },
     "sygedagpenge": {

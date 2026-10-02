@@ -10,7 +10,8 @@ import { useLocale } from "@/components/LocaleProvider";
 import { getCurrencySuffix } from "@/lib/format";
 import { AffiliateBox } from "./AffiliateBox";
 import { adtractionLink } from "@/lib/adtraction";
-import { DAGPENGE_2026 } from "@/lib/satser-2026";
+import { DAGPENGE_2026, SATSER_2026 as SKATTESATSER } from "@/lib/satser-2026";
+import { BESKAEFTIGELSESTILLAEG_2026, dagpengePeriodeTekst } from "@/lib/dagpenge-satser";
 
 // Officielle 2026 dagpenge-satser
 // Kilde: bm.dk/satser/satser-for-2026 (Beskæftigelsesministeriet), verificeret
@@ -18,9 +19,9 @@ import { DAGPENGE_2026 } from "@/lib/satser-2026";
 // G-dag-satserne, som /dagpenge og blogguiden læser fra samme modul.
 const SATSER_2026 = {
   maxDagpenge: DAGPENGE_2026.fuldtid, // Max dagpengesats kr/måned (2026)
-  beskaeftigelsesTillaeg: 26198, // Med beskæftigelsestillæg, de første 3 mdr
+  beskaeftigelsesTillaeg: BESKAEFTIGELSESTILLAEG_2026, // Med beskæftigelsestillæg, de første 3 mdr
   dagpengeProcent: DAGPENGE_2026.dagpengeProcent * 100, // % af beregningsgrundlag
-  amBidragProcent: 8, // AM-bidrag fratrækkes først
+  amBidragProcent: SKATTESATSER.amBidrag * 100, // AM-bidrag fratrækkes først
   dimittendsats: DAGPENGE_2026.dimittendFuldtidUdenForsorgerpligt, // Dimittend uden forsørgelsespligt
   dimittendsatsForsorger: DAGPENGE_2026.dimittendFuldtidMedForsorgerpligt, // Dimittend med forsørgelsespligt
 };
@@ -69,7 +70,7 @@ export default function DagpengeBeregner() {
       info1: "Dagpenge = 90% af løn efter AM-bidrag (8%)",
       info2: "Max dagpengesats:",
       info3: "Med beskæftigelsestillæg (første 3 mdr): op til",
-      info4: "Dagpengeperioden er normalt 2 år (3.848 timer)",
+      info4: dagpengePeriodeTekst("da"),
       info5: "Du skal være medlem af en A-kasse og opfylde indkomstkravet",
       source: "Kilde: bm.dk/satser/satser-for-2026 — Kontakt din A-kasse for præcis beregning.",
     },
@@ -103,7 +104,7 @@ export default function DagpengeBeregner() {
       info1: "Dagpenning = 90% av lön efter AM-bidrag (8%)",
       info2: "Max dagpenningsats:",
       info3: "Med sysselsättningstillägg (första 3 mån): upp till",
-      info4: "Dagpenningperioden är normalt 2 år (3 848 timmar)",
+      info4: dagpengePeriodeTekst("se"),
       info5: "Du måste vara medlem i en A-kassa och uppfylla inkomstkravet",
       source: "Källa: bm.dk/satser/satser-for-2026 — Kontakta din A-kassa för exakt beräkning.",
     },
@@ -137,7 +138,7 @@ export default function DagpengeBeregner() {
       info1: "Dagpenger = 90% av lønn etter AM-bidrag (8%)",
       info2: "Maks dagpengesats:",
       info3: "Med sysselsettingstillegg (første 3 mnd): opptil",
-      info4: "Dagpengeperioden er normalt 2 år (3 848 timer)",
+      info4: dagpengePeriodeTekst("no"),
       info5: "Du må være medlem av en A-kasse og oppfylle inntektskravet",
       source: "Kilde: bm.dk/satser/satser-for-2026 — Kontakt A-kassen din for nøyaktig beregning.",
     },

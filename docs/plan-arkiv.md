@@ -24323,3 +24323,57 @@ egen fil) · `npm run build` ✅ (exit 0).
 
 **MÅL:** `/procent` 152.615 visninger / 92 klik / 0,1 % / pos 7,4 (da) og
 28.674 / 2 / 0,0 % / 9,8 (se), GSC 2026-09-02 → 2026-09-30. Genmål 16/10.
+
+---
+
+## `ceo/dagpenge-efter-skat` — 2/10 11:40
+
+**Hvad:** `/dagpenge` viste satsen **før** skat og intet efter, selv om sidens egen
+`keywords` og FAQ lovede «dagpenge efter skat». Nu har alle syv satser et beløb
+efter skat, og de syv beløb læses fra ét modul.
+
+**Datagrund:** «dagpenge nyuddannet» har **10 af 10** danske autocomplete-træffere
+(`suggestqueries`, hl=da gl=dk, 2/10 11:25) — de tre første er «… sats», «… efter
+skat» og «… hvor længe». «dagpenge sats 2026 efter skat» er nr. 2 under «dagpenge
+sats 2026» og nr. 4 under «dagpenge sats»; «dagpenge sats 2026 nyuddannet» er nr. 1
+under både «dagpenge sats» og «dagpenge 2026». `/dagpenge` har ingen GSC-top-15-plads,
+så der er ingen CTR-baseline at skrive — kun Plausible og genmåling.
+
+**Beslutninger:**
+1. Efter-skat-tallet regnes med `estimerNettoMaaned` fra `src/lib/barsel/netto.ts` —
+   samme funktion `/barselsdagpenge` bruger, fordi dagpenge og barselsdagpenge er
+   begge offentlige ydelser **uden AM-bidrag**. Ingen ny skatmotor.
+2. Beløbet sendes gennem `ydelse`, ikke `loen`. Porten dømmer det: samme beløb som
+   løn og som ydelse giver to forskellige nettobeløb.
+3. `BESKAEFTIGELSESTILLAEG_2026 = 26198` og `INDKOMSTKRAV_2026 = 263232` ligger i det
+   nye modul, **ikke** i `DAGPENGE_2026` — ministeriet oplyser ikke beskæftigelses-
+   tillægget, så de må ikke skrive ministeriet som kilde. De får en docblock der siger
+   «**Kilde: ingen læst**». Indkomstkravet er et ❓ i planen.
+4. `1.924 kr timer` — en **dokumenteret fejl på det live site** fundet af den nye
+   renderport: `kr(DAGPENGE_2026.indkomstkravTimer)` lagde «kr» på et timetal.
+   Modulet har derfor to formattere, `dagpengeKroner` og `dagpengeTimer`.
+5. Svensk/norsk tusindtalsseparator kommer fra `formatNumber(tal, locale)`, så «3 848»
+   er U+00A0 og ikke et hårdt mellemrum (samme greb som `timepris-lokale-tal`).
+6. Tabellen fik **én** ekstra linje pr. række («ca. 15.544 kr efter skat») frem for
+   fire kolonner — fire kolonner ville give vandret scroll på 390 px, som designreglen
+   forbyder.
+
+**Port:** 16 nye tests i `src/lib/dagpenge-satser.test.ts` + 2 i `page.test.tsx`,
+målt **2 røde** mod den gamle `page.tsx` (mutation: køre porten med
+`git checkout HEAD -- src/app/dagpenge/page.tsx`). `regnestykker` strammet:
+`dagpenge/page.tsx` 3 → **0** (JSX-tekst, liste 365 → 362),
+`DagpengeBeregner.tsx` 3 → **0** (strenge, liste 82 → 79).
+
+**Gate:** `npm run lint` ✅ · `npm run typecheck` ✅ · `TZ=UTC npm run test` ✅
+(3708 tests i 228 filer) · `npm run build` ✅ (exit 0).
+
+**VERIFICÉR DEPLOY (vindue 2/10 12:30):**
+```
+curl -s https://minberegner.dk/dagpenge | grep -oE 'ca\. [0-9.]+ kr efter skat'
+curl -s https://minberegner.dk/dagpenge | grep -c 'kr timer'   # skal være 0
+curl -s https://minberegner.dk/dagpenge | grep -o 'Hvad er dagpengesatsen for nyuddannet i 2026?'
+curl -s https://minberegner.dk/dagpenge | python3 -c "import sys,re;h=sys.stdin.read();print(sorted(set(re.findall(r'ca\. [0-9.,]+ kr efter skat',h))))"
+```
+Forventet: `['ca. 10.919 kr efter skat', 'ca. 11.590 kr efter skat',
+'ca. 13.047 kr efter skat', 'ca. 15.544 kr efter skat', 'ca. 18.160 kr efter skat',
+'ca. 8.283 kr efter skat', 'ca. 9.255 kr efter skat']` og `kr timer` → 0.

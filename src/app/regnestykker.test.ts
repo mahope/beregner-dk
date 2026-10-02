@@ -220,7 +220,7 @@ const HAARDKODEDE_BELOB: Record<string, number> = {
   "src/app/brutto-netto/page.tsx": 4,
   "src/app/bryllup/page.tsx": 4,
   "src/app/budget/page.tsx": 2,
-  "src/app/dagpenge/page.tsx": 3,
+  "src/app/dagpenge/page.tsx": 0,
   "src/app/elberegner/page.tsx": 2,
   "src/app/enheder/page.tsx": 2,
   "src/app/feriepenge/page.tsx": 4,
@@ -290,7 +290,7 @@ const HAARDKODEDE_BELOB: Record<string, number> = {
  * verificeret 26/9 2026» blev læst som «9 202»), da scanneren ikke krævede at
  * de tre cifre var slut på tallet.
  */
-const HAARDKODEDE_BELOB_I_LISTEN = 365;
+const HAARDKODEDE_BELOB_I_LISTEN = 362;
 
 /**
  * Samme port på de `.tsx`-filer der **ikke** er `page.tsx`: beregnerne i
@@ -338,7 +338,7 @@ const HAARDKODEDE_BELOB_I_STRENGE: Record<string, number> = {
   "src/app/blog/biloekonomi-2026-hvad-koster-det-at-eje-bil/page.tsx": 5,
   "src/app/blog/boligsalg-2026-guide-til-omkostninger-og-provenu/page.tsx": 4,
   "src/components/ForbrugslaanBeregner.tsx": 3,
-  "src/components/DagpengeBeregner.tsx": 3,
+  "src/components/DagpengeBeregner.tsx": 0,
   "src/components/barsel/Opsaetning.tsx": 3,
   "src/components/BillaanBeregner.tsx": 3,
   "src/components/BoligstoetteBeregner.tsx": 3,
@@ -371,7 +371,7 @@ const HAARDKODEDE_BELOB_I_STRENGE: Record<string, number> = {
 };
 
 /** Summen af strenglisten. */
-const HAARDKODEDE_BELOB_I_STRENGE_I_LISTEN = 82;
+const HAARDKODEDE_BELOB_I_STRENGE_I_LISTEN = 79;
 
 
 const ROT = join(__dirname, "..", "..");
@@ -619,7 +619,7 @@ describe("beløb i JSX-tekst på siderne", () => {
     // 2/10: 385 → 370, da `/moms'` 15 eksempelbeløb læses fra modulet. De 370
     // fund er de samme filers øvrige beløb, så tallet siger hvor meget af
     // korpuset porten endnu dømmer — det må ikke stige i det stille.
-    expect(HAARDKODEDE_BELOB_I_LISTEN).toBe(365);
+    expect(HAARDKODEDE_BELOB_I_LISTEN).toBe(362);
   });
 });
 
@@ -711,7 +711,7 @@ describe("beløb i strengliteraler", () => {
     expect(overskredet).toEqual([]);
 
     expect(fund.length).toBeLessThanOrEqual(HAARDKODEDE_BELOB_I_STRENGE_I_LISTEN);
-    expect(HAARDKODEDE_BELOB_I_STRENGE_I_LISTEN).toBe(82);
+    expect(HAARDKODEDE_BELOB_I_STRENGE_I_LISTEN).toBe(79);
   });
 
   test("listen er målt på hele mappen, ikke på en håndplukket fil", () => {

@@ -8,7 +8,15 @@ import { FAQ } from "@/components/FAQ";
 import { RelatedCalculators } from "@/components/RelatedCalculators";
 import Sidebar from "@/components/Sidebar";
 import { formatNumber } from "@/lib/format";
-import { DAGPENGE_2026 } from "@/lib/satser-2026";
+import { DAGPENGE_2026, SATSER_2026 } from "@/lib/satser-2026";
+import {
+  BESKAEFTIGELSESTILLAEG_2026,
+  INDKOMSTKRAV_2026,
+  KOMMUNESKAT_SNIT_PCT_DAGPENGE,
+  dagpengeEfterSkat,
+  dagpengeKroner,
+  DAGPENGE_SATSER,
+} from "@/lib/dagpenge-satser";
 
 export async function generateMetadata() {
   return generatePageMetadata("dagpenge");
@@ -56,35 +64,44 @@ export default async function DagpengePage() {
         </p>
 
         <h3>Dagpenge-satser 2026</h3>
+        <p>
+          Alle satser er pr. måned. <strong>Før skat</strong> er det beløb, din
+          A-kasse udbetaler. <strong>Efter skat</strong> er et vejledende estimat — det
+          regner med {KOMMUNESKAT_SNIT_PCT_DAGPENGE} % i kommunaleskat og 2026&apos;s
+          øvrige satser, men hverken med din egen kirkeskat eller din øvrige indkomst,
+          så det endelige tal kommer fra dit skattekort. Dagpenge er skattepligtig
+          indkomst uden AM-bidrag.
+        </p>
         <div className="overflow-x-auto">
           <table>
             <thead>
               <tr>
                 <th>Type</th>
-                <th>Sats pr. måned (før skat)</th>
+                <th>Beløb pr. måned</th>
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>Max dagpengesats</td>
-                <td>{kr(DAGPENGE_2026.fuldtid)}</td>
-              </tr>
-              <tr>
-                <td>Max dagpengesats (deltidsforsikret)</td>
-                <td>{kr(DAGPENGE_2026.deltid)}</td>
-              </tr>
-              <tr>
-                <td>Med beskæftigelsestillæg (3 mdr)</td>
-                <td>Op til 26.198 kr</td>
-              </tr>
-              <tr>
-                <td>Dimittend (ikke-forsørger)</td>
-                <td>{kr(DAGPENGE_2026.dimittendFuldtidUdenForsorgerpligt)}</td>
-              </tr>
-              <tr>
-                <td>Dimittend (forsørger)</td>
-                <td>{kr(DAGPENGE_2026.dimittendFuldtidMedForsorgerpligt)}</td>
-              </tr>
+              {DAGPENGE_SATSER.map((sats) => {
+                const efterSkat = dagpengeEfterSkat(sats.belob);
+                return (
+                  <tr key={sats.id}>
+                    <td>
+                      {sats.label}
+                      <br />
+                      <span className="text-sm text-gray-600 dark:text-gray-400">
+                        {sats.note}
+                      </span>
+                    </td>
+                    <td className="whitespace-nowrap align-top">
+                      {kr(sats.belob)}
+                      <br />
+                      <span className="text-sm">
+                        ca. {dagpengeKroner(efterSkat.efterSkat)} efter skat
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -103,9 +120,9 @@ export default async function DagpengePage() {
 
         <h3>Hvad påvirker din dagpengesats?</h3>
         <ul>
-          <li><strong>Din tidligere løn:</strong> Dagpenge = 90% af løn efter 8% AM-bidrag</li>
+          <li><strong>Din tidligere løn:</strong> Dagpenge = {formatNumber(DAGPENGE_2026.dagpengeProcent * 100, locale, { maximumFractionDigits: 0 })}% af løn efter {formatNumber(SATSER_2026.amBidrag * 100, locale, { maximumFractionDigits: 0 })}% AM-bidrag</li>
           <li><strong>Maxsatsen:</strong> Uanset din løn kan du højst få {kr(DAGPENGE_2026.fuldtid)}/md i 2026</li>
-          <li><strong>Beskæftigelsestillæg:</strong> Op til 26.198 kr/md de første 3 måneder</li>
+          <li><strong>Beskæftigelsestillæg:</strong> Op til {kr(BESKAEFTIGELSESTILLAEG_2026)}/md de første 3 måneder</li>
           <li><strong>Arbejdstid:</strong> Deltidsforsikrede får {kr(DAGPENGE_2026.deltid)}/md — 2/3 af fuldtidssatsen</li>
           <li><strong>A-kasse medlemskab:</strong> Du skal have været medlem i mindst 1 år</li>
         </ul>
@@ -113,8 +130,10 @@ export default async function DagpengePage() {
         <h3>Indkomstkravet</h3>
         <p>
           For at få ret til dagpenge skal du opfylde et <strong>indkomstkrav</strong>. I 2026 skal du
-          have haft en samlet indkomst på mindst <strong>263.232 kr</strong> inden for de seneste 3 år,
-          eller have haft <strong>fuldtidsarbejde</strong> i mindst <strong>{kr(DAGPENGE_2026.indkomstkravTimer)} timer</strong> inden for de seneste {DAGPENGE_2026.indkomstkravAar} år.
+          have haft en samlet indkomst på mindst <strong>{kr(INDKOMSTKRAV_2026)}</strong> inden for de seneste {DAGPENGE_2026.indkomstkravAar} år,
+          eller have haft <strong>fuldtidsarbejde</strong> i mindst{" "}
+          <strong>{formatNumber(DAGPENGE_2026.indkomstkravTimer, locale)} timer</strong>{" "}
+          inden for de seneste {DAGPENGE_2026.indkomstkravAar} år.
         </p>
 
         <h3>Supplerende dagpenge</h3>
