@@ -19,6 +19,7 @@ import {
   rabatProcent,
 } from "./procent";
 import { formatNumber } from "./format";
+import { markedsprisFaqSvar } from "./timepris-markedspriser";
 import { alderSideTekst, erstatAlderTokens } from "./alder-side-tekst";
 import { iDagPaSiden } from "./lokal-dato";
 import { getHelligdage, helligdagsnavne } from "./helligdage";
@@ -1483,7 +1484,7 @@ const daPages: Record<string, PageData> = {
       schemaCategory: "FinanceApplication",
       faqItems: [
       { question: "Beregn timepris som freelancer?", answer: "Start med ønsket nettoløn, tillæg skat (~45%), drift, ferie, sygdom og admin-tid." },
-      { question: "Normal konsulent-timepris?", answer: "IT: 800-1.500 DKK/time. Håndværkere: 400-600 DKK/time." },
+      { question: "Normal konsulent-timepris?", answer: markedsprisFaqSvar("da") },
       { question: "Moms på timepris?", answer: "Ja, 25% moms hvis omsætning over 50.000 DKK/år." },
       { question: "Fakturerbare timer?", answer: "Realistisk 100-130 timer/måned." },
       ],
@@ -2793,7 +2794,7 @@ const noPages: Record<string, PageData> = {
       schemaCategory: "FinanceApplication",
       faqItems: [
       { question: "Beregn timepris som frilanser?", answer: "Start med ønsket nettolønn, legg til skatt (~40%), drift, ferie, sykdom og admin-tid." },
-      { question: "Normal konsulent-timepris?", answer: "IT: 900-1.800 NOK/time. Håndverkere: 500-800 NOK/time." },
+      { question: "Normal konsulent-timepris?", answer: markedsprisFaqSvar("no") },
       { question: "MVA på timepris?", answer: "Ja, 25% MVA hvis omsetning over 50.000 NOK/år. Registrer hos Skatteetaten." },
       { question: "Fakturerbare timer?", answer: "Realistisk 100-130 timer/måned." },
       ],
@@ -4049,7 +4050,7 @@ const sePages: Record<string, PageData> = {
       schemaCategory: "FinanceApplication",
       faqItems: [
       { question: "Beräkna timpris som frilansare?", answer: "Börja med önskad nettolön, lägg till skatt (~40%), drift, semester, sjukdom och admin-tid." },
-      { question: "Normalt konsult-timpris?", answer: "IT: 900-1.800 SEK/timme. Hantverkare: 500-800 SEK/timme." },
+      { question: "Normalt konsult-timpris?", answer: markedsprisFaqSvar("se") },
       { question: "Moms på timpris?", answer: "Ja, 25% moms om omsättning över ca. 80.000 SEK/år. Registrera hos Skatteverket." },
       { question: "Fakturerbara timmar?", answer: "Realistiskt 100-130 timmar/månad." },
       ],

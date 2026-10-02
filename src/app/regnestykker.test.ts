@@ -323,16 +323,15 @@ const HAARDKODEDE_BELOB_I_KOMPONENTER_I_LISTEN = 0;
  * filer** — og det første fund er rettet i samme commit (110):
  * `BoligsalgBeregner.tsx` skrev tinglysningens to faste beløb igen i sin egen
  * disclaimer, mens modulet havde dem liggende i `beregnTinglysning`. Den
- * største fil er `TimeprisBeregner.tsx` (27 — lønintervallerne for
- * freelancere, håndskrevet tre gange på tre sprog), og fire blogindlæg har
- * 5-9 hver. Ingen af dem lå i JSX-teksten, så den gamle port så dem alle
+ * først og fremmest var det `TimeprisBeregner.tsx` (27 — lønintervallerne
+ * for freelancere, håndskrevet tre gange på tre sprog); de ligger nu i
+ * `src/lib/timepris-markedspriser.ts`. Fire blogindlæg har 5-9 hver. Ingen af dem lå i JSX-teksten, så den gamle port så dem alle
  * som *0*.
  *
  * Listen er et loftpunktssum: en ny tekst med et håndskrevet beløb gør porten
  * rød, og en rettet tekst sænker den.
  */
 const HAARDKODEDE_BELOB_I_STRENGE: Record<string, number> = {
-  "src/components/TimeprisBeregner.tsx": 27,
   "src/app/blog/boernepenge-2026-satser-og-regler/page.tsx": 9,
   "src/app/blog/arveafgift-regler-og-satser/page.tsx": 7,
   "src/app/blog/su-2026-satser-og-regler/page.tsx": 6,
@@ -372,7 +371,7 @@ const HAARDKODEDE_BELOB_I_STRENGE: Record<string, number> = {
 };
 
 /** Summen af strenglisten. */
-const HAARDKODEDE_BELOB_I_STRENGE_I_LISTEN = 110;
+const HAARDKODEDE_BELOB_I_STRENGE_I_LISTEN = 83;
 
 
 const ROT = join(__dirname, "..", "..");
@@ -712,7 +711,7 @@ describe("beløb i strengliteraler", () => {
     expect(overskredet).toEqual([]);
 
     expect(fund.length).toBeLessThanOrEqual(HAARDKODEDE_BELOB_I_STRENGE_I_LISTEN);
-    expect(HAARDKODEDE_BELOB_I_STRENGE_I_LISTEN).toBe(110);
+    expect(HAARDKODEDE_BELOB_I_STRENGE_I_LISTEN).toBe(83);
   });
 
   test("listen er målt på hele mappen, ikke på en håndplukket fil", () => {
@@ -720,7 +719,7 @@ describe("beløb i strengliteraler", () => {
     // af mappen holdt op at findes — så listen skal dække begge sider og
     // beregnere, og den skal have flere filer end de to største.
     expect(komponenterAndSider.length).toBeGreaterThan(150);
-    expect(HAARDKODEDE_BELOB_I_STRENGE).toHaveProperty("src/components/TimeprisBeregner.tsx");
+    expect(HAARDKODEDE_BELOB_I_STRENGE).not.toHaveProperty("src/components/TimeprisBeregner.tsx");
     expect(HAARDKODEDE_BELOB_I_STRENGE).toHaveProperty(
       "src/app/blog/su-2026-satser-og-regler/page.tsx"
     );

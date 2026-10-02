@@ -8,6 +8,12 @@ import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { useLocale } from "@/components/LocaleProvider";
 import { formatCurrency } from "@/lib/format";
+import {
+  GRUPPE_ETIKETTER,
+  POST_ETIKETTER,
+  formaterMarkedspris,
+  markedspriser,
+} from "@/lib/timepris-markedspriser";
 
 export default function TimeprisBeregner() {
   const { locale } = useLocale();
@@ -54,23 +60,11 @@ export default function TimeprisBeregner() {
       tip4: "Overvej dine driftsomkostninger: software, udstyr, forsikring",
       tip5: "Start ikke for lavt - det er sv\u00e6rt at h\u00e6ve prisen bagefter",
       typiskePriser: "Typiske timepriser i Danmark (2026)",
-      itUdvikling: "IT & Udvikling",
-      juniorUdvikler: "Junior udvikler: 500-700 kr",
-      seniorUdvikler: "Senior udvikler: 800-1.200 kr",
-      itKonsulent: "IT-konsulent: 900-1.500 kr",
-      kreativMarketing: "Kreativ & Marketing",
-      grafiskDesigner: "Grafisk designer: 500-800 kr",
-      tekstforfatter: "Tekstforfatter: 600-1.000 kr",
-      marketingKonsulent: "Marketing konsulent: 700-1.200 kr",
-      raadgivning: "R\u00e5dgivning",
-      konsulent: "Konsulent: 800-1.500 kr",
-      advokat: "Advokat: 1.500-3.500 kr",
-      revisor: "Revisor: 900-1.800 kr",
-      haandvaerkService: "H\u00e5ndv\u00e6rk & Service",
-      haandvaerker: "H\u00e5ndv\u00e6rker: 400-600 kr",
-      fotograf: "Fotograf: 500-1.500 kr",
-      underviser: "Underviser: 500-1.000 kr",
+      danskNote: "",
       priserVejledende: "Priserne er vejledende og ekskl. moms. Faktiske priser afh\u00e6nger af erfaring, speciale og geografi.",
+      kopierAnbefalet: "Anbefalet timepris: {pris} ekskl. moms",
+      kopierNetto: "Nettol\u00f8n: {netto}/md ved {pris}/time",
+      calculatorName: "Timeprisberegner",
     },
     se: {
       findTimepris: "Hitta ditt timpris",
@@ -112,24 +106,13 @@ export default function TimeprisBeregner() {
       tip3: "Som frilansare har du ingen betald semester, s\u00e5 r\u00e4kna in det",
       tip4: "T\u00e4nk p\u00e5 dina driftskostnader: programvara, utrustning, f\u00f6rs\u00e4kring",
       tip5: "B\u00f6rja inte f\u00f6r l\u00e5gt \u2014 det \u00e4r sv\u00e5rt att h\u00f6ja priset efter\u00e5t",
-      typiskePriser: "Typiska timpriser i Sverige (2026)",
-      itUdvikling: "IT & Utveckling",
-      juniorUdvikler: "Juniorutvecklare: 500\u2013700 kr",
-      seniorUdvikler: "Seniorutvecklare: 800\u20131 200 kr",
-      itKonsulent: "IT-konsult: 900\u20131 500 kr",
-      kreativMarketing: "Kreativt & Marknadsf\u00f6ring",
-      grafiskDesigner: "Grafisk designer: 500\u2013800 kr",
-      tekstforfatter: "Copywriter: 600\u20131 000 kr",
-      marketingKonsulent: "Marknadsf\u00f6ringskonsult: 700\u20131 200 kr",
-      raadgivning: "R\u00e5dgivning",
-      konsulent: "Konsult: 800\u20131 500 kr",
-      advokat: "Advokat: 1 500\u20133 500 kr",
-      revisor: "Revisor: 900\u20131 800 kr",
-      haandvaerkService: "Hantverk & Service",
-      haandvaerker: "Hantverkare: 400\u2013600 kr",
-      fotograf: "Fotograf: 500\u20131 500 kr",
-      underviser: "L\u00e4rare: 500\u20131 000 kr",
+      typiskePriser: "Danska typiska timpriser (2026)",
+      danskNote:
+        "Niv\u00e5erna nedan \u00e4r danska. Vi saknar en k\u00e4lla f\u00f6r svensk marknadsniv\u00e5, s\u00e5 tabellen visar danska timpriser som j\u00e4mf\u00f6relse.",
       priserVejledende: "Priserna \u00e4r v\u00e4gledande och exkl. moms. Faktiska priser beror p\u00e5 erfarenhet, specialisering och geografi.",
+      kopierAnbefalet: "Rekommenderad timpris: {pris} exkl. moms",
+      kopierNetto: "Nettol\u00f6n: {netto}/m\u00e5n vid {pris}/timme",
+      calculatorName: "Timpriskalkylator",
     },
     no: {
       findTimepris: "Finn din timepris",
@@ -171,24 +154,13 @@ export default function TimeprisBeregner() {
       tip3: "Som frilanser har du ikke betalt ferie, s\u00e5 regn med dette",
       tip4: "Vurder dine driftskostnader: programvare, utstyr, forsikring",
       tip5: "Start ikke for lavt \u2014 det er vanskelig \u00e5 \u00f8ke prisen etterp\u00e5",
-      typiskePriser: "Typiske timepriser i Norge (2026)",
-      itUdvikling: "IT & Utvikling",
-      juniorUdvikler: "Juniorutvikler: 500\u2013700 kr",
-      seniorUdvikler: "Seniorutvikler: 800\u20131 200 kr",
-      itKonsulent: "IT-konsulent: 900\u20131 500 kr",
-      kreativMarketing: "Kreativt & Markedsf\u00f8ring",
-      grafiskDesigner: "Grafisk designer: 500\u2013800 kr",
-      tekstforfatter: "Tekstforfatter: 600\u20131 000 kr",
-      marketingKonsulent: "Markedsf\u00f8ringskonsulent: 700\u20131 200 kr",
-      raadgivning: "R\u00e5dgivning",
-      konsulent: "Konsulent: 800\u20131 500 kr",
-      advokat: "Advokat: 1 500\u20133 500 kr",
-      revisor: "Revisor: 900\u20131 800 kr",
-      haandvaerkService: "H\u00e5ndverk & Service",
-      haandvaerker: "H\u00e5ndverker: 400\u2013600 kr",
-      fotograf: "Fotograf: 500\u20131 500 kr",
-      underviser: "Underviser: 500\u20131 000 kr",
+      typiskePriser: "Danske typiske timepriser (2026)",
+      danskNote:
+        "Niv\u00e5ene nedenfor er danske. Vi mangler en kilde til det norske niv\u00e5et, s\u00e5 tabellen viser danske timepriser som sammenligning.",
       priserVejledende: "Prisene er veiledende og ekskl. mva. Faktiske priser avhenger av erfaring, spesialisering og geografi.",
+      kopierAnbefalet: "Anbefalt timepris: {pris} ekskl. mva",
+      kopierNetto: "Nettol\u00f8nn: {netto}/m\u00e5ned ved {pris}/time",
+      calculatorName: "Timepriskalkulator",
     },
   };
   const l = labels[locale as keyof typeof labels] || labels.da;
@@ -461,11 +433,11 @@ export default function TimeprisBeregner() {
           </div>
 
           <div className="flex justify-center">
-            <CopyResultButton text={`Anbefalet timepris: ${formatKr(beregningFraLoen.beregnetTimepris)} ekskl. moms`} />
+            <CopyResultButton text={l.kopierAnbefalet.replace("{pris}", formatKr(beregningFraLoen.beregnetTimepris))} />
             <ShareCalculation
               getShareableLink={getShareableLink}
-              calculatorName="Timeprisberegner"
-              resultSummary={`Anbefalet timepris: ${formatKr(beregningFraLoen.beregnetTimepris)} ekskl. moms`}
+              calculatorName={l.calculatorName}
+              resultSummary={l.kopierAnbefalet.replace("{pris}", formatKr(beregningFraLoen.beregnetTimepris))}
             />
           </div>
         </>
@@ -555,11 +527,11 @@ export default function TimeprisBeregner() {
           </div>
 
           <div className="flex justify-center">
-            <CopyResultButton text={`Nettoløn: ${formatKr(beregningFraTimepris.nettoLoenMaaned)}/md ved ${formatKr(timepris)}/time`} />
+            <CopyResultButton text={l.kopierNetto.replace("{netto}", formatKr(beregningFraTimepris.nettoLoenMaaned)).replace("{pris}", formatKr(timepris))} />
             <ShareCalculation
               getShareableLink={getShareableLink}
-              calculatorName="Timeprisberegner"
-              resultSummary={`Nettoløn: ${formatKr(beregningFraTimepris.nettoLoenMaaned)}/md ved ${formatKr(timepris)}/time`}
+              calculatorName={l.calculatorName}
+              resultSummary={l.kopierNetto.replace("{netto}", formatKr(beregningFraTimepris.nettoLoenMaaned)).replace("{pris}", formatKr(timepris))}
             />
           </div>
         </>
@@ -584,39 +556,22 @@ export default function TimeprisBeregner() {
         </div>
         <div className="p-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-            <div>
-              <h3 className="font-medium mb-2 dark:text-gray-200">{l.itUdvikling}</h3>
-              <ul className="space-y-1 text-gray-600 dark:text-gray-400">
-                <li>{l.juniorUdvikler}</li>
-                <li>{l.seniorUdvikler}</li>
-                <li>{l.itKonsulent}</li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-medium mb-2 dark:text-gray-200">{l.kreativMarketing}</h3>
-              <ul className="space-y-1 text-gray-600 dark:text-gray-400">
-                <li>{l.grafiskDesigner}</li>
-                <li>{l.tekstforfatter}</li>
-                <li>{l.marketingKonsulent}</li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-medium mb-2 dark:text-gray-200">{l.raadgivning}</h3>
-              <ul className="space-y-1 text-gray-600 dark:text-gray-400">
-                <li>{l.konsulent}</li>
-                <li>{l.advokat}</li>
-                <li>{l.revisor}</li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-medium mb-2 dark:text-gray-200">{l.haandvaerkService}</h3>
-              <ul className="space-y-1 text-gray-600 dark:text-gray-400">
-                <li>{l.haandvaerker}</li>
-                <li>{l.fotograf}</li>
-                <li>{l.underviser}</li>
-              </ul>
-            </div>
+            {markedspriser(locale).map((gruppe) => (
+              <div key={gruppe.id}>
+                <h3 className="font-medium mb-2 dark:text-gray-200">{GRUPPE_ETIKETTER[gruppe.id][locale]}</h3>
+                <ul className="space-y-1 text-gray-600 dark:text-gray-400">
+                  {gruppe.poster.map((post) => (
+                    <li key={post.id}>
+                      {POST_ETIKETTER[post.id][locale]}: {formaterMarkedspris(post, locale)}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
           </div>
+          {l.danskNote ? (
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-4">{l.danskNote}</p>
+          ) : null}
           <p className="text-xs text-gray-400 mt-4">
             {l.priserVejledende}
           </p>

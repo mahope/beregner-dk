@@ -1,18 +1,24 @@
-STATUS: 2/10 08:50. CI grøn (seneste master-kørsel 2/10 05:45Z). Sentry:
+STATUS: 2/10 09:05. CI grøn (seneste master-kørsel 2/10 06:15Z). Sentry:
   MINBEREGNER-1 er Next-router-støj, filtreret siden 3e67ed3 og kodetestet siden
   5f137d4; MINBEREGNER-2 er rettet i 4d48370. PR-TJEK: 2026-10-02 — ingen åbne
   PR'er. BRANCH-TJEK: 2/10 — ingen forældede branches. CEO-kø punkt 0 er lukket
   (RETTET 04ca30a). Review-fund 2/10 er lukket (RETTET bacfd42).
   **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` ·
   `npm run build`.
-  **Denne iteration: periodetabel på `/tidsberegner`** («hvor mange timer er der
-  i et døgn, en uge, en måned og et år?»), da + se, fra
-  `src/lib/timer-periode.ts`. Datagrund: dansk autocomplete 2/10 —
-  «hvor mange timer er der på et år» er **nr. 1 under «hvor mange timer»**,
-  «hvor mange timer i en uge» nr. 1 under «timer i en uge»; svensk «hur många
-  timmar är det på ett år» og «…på en vecka». Mål: `/tidsberegner`
-  291 besøgende/28d (bounce 8 %), GSC 75.622 visninger / 0,3 % CTR / pos. 6,8.
-  Genmål 16/10.
+  **Deploy-vinduet 2/10 07:30 er målt på indhold.** Live: `bacfd42` (klokken-i
+  «byens egen tidszone», «din tidszone» = 0), `4d48370` (health 200),
+  `b39da19` (/topskat renderer præcis de forventede grænser) og `652966b`
+  (/boligsalg 1.850/1.825 kr.). **Ingen DEPLOY-MISSING.** `22af62d` (moms) og
+  `1e5a446` (timer-periode) er efter vinduet og får vindue 12:30 — de er målt
+  endnu ikke live, hvilket er forventet. `/topskat` kan ikke skelnes fra den
+  gamle kode ved indhold, fordi committen gjorde tallene byte-identiske.
+  **Denne iteration: `/timepris` på tværs af tre domæner.** Panelet sagde
+  «Typiske timepriser i Norge (2026)» og «Typiska timpriser i Sverige (2026)»
+  over **danske** niveauer, og sidens egen FAQ modsagde sit panel med tal
+  («900-1.800 SEK/timme») der stod ingen steder i koden. Nu ligger de 12
+  intervaller i `src/lib/timepris-markedspriser.ts`, FAQ'en læser fra samme
+  modul, kopier/del-knapperne er oversat, og `se`/`no` siger at tabellen er
+  dansk. 27 fund i porten, liste 110 → 83.
 
 ## Åbne opgaver — F5b: beløb i JSX-tekst → modulkonstanter
 
@@ -44,9 +50,16 @@ blive kortere. Rækkefølgen er trafikrækkefølge. ✅ betyder lukket.
    Det første fund er rettet samme sted:
    `BoligsalgBeregner.tsx`'s disclaimer skrev tinglysningens 1.850/1.825 kr igen,
    mens modulet havde dem i `beregnTinglysning` — de er nu navngivne eksporter.
-   **Næste bane i rækken:** `TimeprisBeregner.tsx` (27 fund — lønintervallerne
-   for freelancere, håndskrevet tre gange på tre sprog), som også **mangler
-   norsk sprog** (dets `no`-objekt gentager dansk). Fire blogindlæg har 5-9 hver.
+   **Næste bane i rækken:** `TimeprisBeregner.tsx` var den største fil med 27
+   fund — ✅ 2/10 09:05 (`ceo/timepris-markedspriser`). De 12 lønintervaller
+   lå nu i `src/lib/timepris-markedspriser.ts`, FAQ'en læser fra samme modul,
+   og de tre domæner får hver sit sprog i kopier/del-teksten. Listen 110 →
+   **83**. **Næste fil:** `src/app/blog/saadan-finder-du-din-timepris-som-freelancer/page.tsx`
+   (2 fund — samme intervaller i et blogindlæg) og derpå
+   `src/app/blog/boernepenge-2026-satser-og-regler/page.tsx` (9 fund).
+   `/timepris` mangler stadig **norsk brødtekst** på siden (kun `da` og `se`
+   har et afsnit) — ❓ kilde til norske timepriser låser både brødteksten og
+   tabellen.
 5. **Blogindlæg (19 filer, 273 fund).** Redaktionelle beløb i et indlæg er ikke
    samme fejlklasse som et beløb på en beregnerside. Beslut først, om de skal
    med; ellers skal de stå i portens undtagelsesliste som *blog*.
@@ -287,6 +300,7 @@ den fulde kommando står i `docs/plan-arkiv.md` under sit slug.
 
 | Slug | Prøv på indhold |
 |---|---|
+| `timepris-markedspriser` (**ny**) | `minberegner.dk/timepris`: overskriften skal være «Typiske timepriser i Danmark (2026)», de 12 rækker skal være `Junior udvikler: 500-700 kr`, `Senior udvikler: 800-1.200 kr`, `IT-konsulent: 900-1.500 kr`, `Grafisk designer: 500-800 kr`, `Tekstforfatter: 600-1.000 kr`, `Marketing konsulent: 700-1.200 kr`, `Konsulent: 800-1.500 kr`, `Advokat: 1.500-3.500 kr`, `Revisor: 900-1.800 kr`, `Håndværkere: 400-600 kr`, `Fotograf: 500-1.500 kr`, `Underviser: 500-1.000 kr`; **intet** «i Sverige» eller «i Norge»; **ingen** dansknote. FAQ'en skal sige «IT: 900-1.500 kr/time. Håndværkere: 400-600 kr/time.» på minberegner.dk og på beraknare.se/beregnerno: «Dansk nivå: IT 900–1.500 DKK/timme, hantverkare 400–600 DKK/timme.» hhv. «…DKK/time, håndverkere …» — **intet** «1.800 SEK» eller «1.800 NOK». `beraknare.se/timepris` overskrift «Danska typiska timpriser (2026)» + noten «Nivåerna nedan är danska…», `beregnerno/timepris` «Danske typiske timepriser (2026)» + «Nivåene nedenfor er danske…». Kopierknappen skal på beraknare.se sige «Rekommenderad timpris: …» og på beregnerno «Anbefalt timepris: … ekskl. mva» — **intet** dansk «Anbefalet timepris» på de to domæner. Beregnerens tal uændret |
 | `timer-periode` (**ny**) | `minberegner.dk/tidsberegner`: overskriften «Hvor mange timer er der i et døgn, en uge, en måned og et år?» med fem rækker `Et døgn 1 24 1.440 86.400` · `En uge 7 168 10.080 604.800` · `En måned (snit af 12 måneder) 30,42 730 43.800 2.628.000` · `Et kvartal (snit af 4 kvartaler) 91,25 2.190 131.400 7.884.000` · `Et år 365 8.760 525.600 31.536.000`, og «Et skudår har 366 dage, altså 8.784 timer». `beraknare.se/tidsberegner`: samme fem rækker med **mellemrum** i separatoren (`8 760`, `525 600`, `31 536 000`) og «Ett skottår har 366 dagar, alltså 8 784 timmar»; **intet** «Hvor mange timer», **intet** «En vecka» på minberegner.dk. Uændret: alle tidligere tabeller og formler |
 | `moms-eksempler-fra-modul` (**ny**) | `minberegner.dk/moms`: introens tre listeregler skal være `Læg moms til: … 1.000 kr. × 1,25 = 1.250 kr. inkl. moms`, `Træk moms fra: … 1.250 kr. ÷ 1,25 = 1.000 kr. ekskl. moms` og `Find momsandelen: … 1.250 kr. × 0,20 = 250 kr. i moms` — med **punktum efter kr.** i alle beløb; «er 2,4414, så 1.000 kr. bliver 2.441,41 kr.» og «bliver prisen 0,4096 af den oprindelige — altså 409,60 kr. i alt»; **intet** «kun 410 kr. oveni». `beraknare.se/moms`: de samme tre linjer med **mellemrum** i separatoren (`1 000 kr × 1,25 = 1 250 kr inkl. moms`), «2,4414»/«0,4096», «10,71 %»/«5,66 %», og Excel-rækkerne `1 000 kr exkl. → 1 250 kr inkl.`, `1 250 kr inkl. → 1 000 kr exkl.`, to gange `1 250 kr inkl. → 250 kr i moms`. Uændret: de tre lovgrænser (50.000 kr, 120 000 kr, 1.150 kr) og alle tabeller |
 | `porten-ser-strenge` (**ny**) | **Ingen produktionsændring i brugerfladen ud over én tekst:** `minberegner.dk/boligsalg` skal vise «Tinglysningssatser 0,6% + **1.850 kr.** (skøde) og 1,45% + **1.825 kr.** (pantebrev)» i beregnerens disclaimer, og beregnerens eget tal for tinglysning skal være uændret (samme formel, kun konstanterne er navngivne). Tallet skrives nu med `Intl` (`da-DK`), så «kr.» med punktum er forventet |
@@ -316,6 +330,17 @@ den fulde kommando står i `docs/plan-arkiv.md` under sit slug.
 
 ## ❓ Til Mads
 
+- ❓ **Kilde til svenske og norske frilanstimepriser (ny, 2/10).**
+  `/timepris` viste «Typiske timepriser i Norge (2026)» og «Typiska timpriser
+  i Sverige (2026)» over **danske** niveauer, og FAQ'en påstod samtidig
+  «IT: 900-1.800 SEK/timme» og «900-1.800 NOK/time» — tal der stod ingen
+  steder i koden. 2/10 står tabellen derfor som **dansk** på alle tre domæner,
+  og overskriften og noten siger det. **Ét skærmbillede af et niveau (f.eks.
+  en fagforening eller etmarkedstal for Danmark, Sverige og Norge) låser
+  den rigtige version**, som kan lægges i
+  `src/lib/timepris-markedspriser.ts` pr. `Locale` og få hvert domæne sine
+  egne tal. Samme kilde ville kunne give `/timepris` sin manglende norske
+  brødtekst.
 - ❓ **Ser du events fra minberegner.dk i Sentry-projektet?** Det er nu det
   eneste stykke af spørgsmålet fra opgave 204, der ikke er besvaret af kode.
   Afsendelsen er **bevist** — `sentry-send.test.ts` får en rigtig envelope
@@ -350,34 +375,28 @@ den fulde kommando står i `docs/plan-arkiv.md` under sit slug.
   svenske grænse låser de to første; EUR-Lex' bilag til forordning 1186/2009
   låser den tredje.** Indtil da står de, som de har stået.
 - ❓ **Ingen læsbar kilde til fitnessfradraget og sommerhusudlejningsfradraget
-  (opgave fra 1/10 21:25, ny blokering).** De to er de sidste af «fradrag 2026»-klyngen,
-  og 1/10 21:25 fik hverken `dagpenge.dk` eller `star.dk` til at svare
-  (forbindelsesfejl / 404), mens `skat.dk` har været 500 siden C19. **Et skærmbillede
-  af de to linjer i SKAT's fradragsvejledning** — eller teksten kopieret herind —
-  låser dem. Uden det bygges de ikke, jf. punkt 11 i kvalitetsreglerne.
-- ❓ **Ferielovens regel for sommerferiens startdato (opgave 201, ny 1/10,
-  højst prioriteret).** `/dage-til/sommerferien` siger "sommerferien begynder
-  altid den **sidste lørdag i juni**" og hævder, at det står i folkeskoleloven
-  (2024) — og hele nedtællingen, titlen og beskrivelsen er regnet ud fra den
-  regel. Jeg kunne ikke hente loven: retsinformation.dk er en SPA (også på
-  `.xml`), `undervisningsministeriet.dk`, `ferieinfo.dk` og `ferieloven.dk`
-  svarer transportfejl, `lovguiden.dk` svarer HTTP 429, og
-  `danskelove.dk/ferieloven` handler om ferieloven for *ansatte*, ikke om
-  skoleferier. **Ét skærmbillede af den relevante bestemmelse (eller teksten
-  kopieret herind) låser det.** Hvis reglen er "den lørdag i den kalenderuge,
-  hvori 20. juni ligger", står siden **7 dage forkert** i de fleste år.
-  Jeg har bevidst ikke rørt koden, fordi en lovpåstand uden kilde er præcis den
-  fejl, CEO-køens punkt 0 handler om.
+  (1/10).** De to er de sidste af «fradrag 2026»-klyngen; 1/10 21:25 svarade
+  hverken `dagpenge.dk` eller `star.dk`, og `skat.dk` har været 500 siden C19.
+  Et skærmbillede af de to linjer i SKAT's fradragsvejledning låser dem. Uden
+  det bygges de ikke, jf. punkt 11.
+- ❓ **Ferielovens regel for sommerferiens startdato (opgave 201, højst
+  prioriteret).** `/dage-til/sommerferien` siger «sommerferien begynder altid
+  den **sidste lørdag i juni**» og hævder, det står i folkeskoleloven (2024).
+  1/10 17:55 kunne jeg ikke hente loven: retsinformation.dk er en SPA (også på
+  `.xml`), `undervisningsministeriet.dk`/`ferieinfo.dk`/`ferieloven.dk` svarer
+  transportfejl, `lovguiden.dk` 429, `danskelove.dk/ferieloven` handler om
+  ferieloven for *ansatte*. **Ét skærmbillede af bestemmelsen låser det** —
+  er reglen «den lørdag i den kalenderuge, hvori 20. juni ligger», står siden
+  7 dage forkert i de fleste år. Koden er bevidst urørt: en lovpåstand uden
+  kilde er præcis den fejl, CEO-køens punkt 0 handler om.
 - ❓ **Kan Cloudflare cache HTML'en på trods af Next's `Vary: RSC`?** (opgave
-  200, højst prioriteret.) Der står Cloudflare foran sitet med
-  `cf-cache-status: DYNAMIC`, fordi Next svarer `cache-control: private,
-  no-cache, no-store`. Sætter vi bare `s-maxage` på HTML'en, **bryder vi
-  Next's egen rute-navigation**: klienten genanmoder samme URL med `RSC: 1`, og
-  en CDN der cache'r på URL ville give routeren HTML i stedet for sit
-  flight-svar. Løsningen er en Cloudflare-regel (spring RSC-anmodninger over)
-  eller en Worker — altså din infra, ikke repoet. **Uden det er 280-433 ms TTFB
-  på alle 600.000 månedlige visninger den faste pris.** Kan du lave den regel,
-  eller skal jeg holde vej 2 (ægte ruter pr. domæne) i beredskab til 13/10?
+  200, højst prioriteret.) Cloudflare foran sitet giver `cf-cache-status:
+  DYNAMIC`, fordi Next svarer `no-cache, no-store`. Sætter vi `s-maxage` på
+  HTML'en, **bryder vi Next's egen rute-navigation**: klienten genanmoder
+  samme URL med `RSC: 1`, og en CDN der cache'r på URL ville give routeren
+  HTML i stedet for sit flight-svar. Løsningen er en Cloudflare-regel (spring
+  RSC-anmodninger over) eller en Worker — din infra, ikke repoet. Uden det er
+  280-433 ms TTFB på alle 600.000 månedlige visninger den faste pris.
 - ❓ **Søgningseksport fra Search Console (ny, 30/9, højst prioriteret).**
   GSC's opsummering viser kun de 3-4 største søgninger pr. side. For `/procent`
   — **150.470 visninger, 97 klik, pos. 7,4, sitets største side** — er de tre
@@ -401,12 +420,10 @@ den fulde kommando står i `docs/plan-arkiv.md` under sit slug.
 - ❓ **Fulde browsermålinger kræver Playwright (ny, 30/9).** Deploy-noter der
   kræver en rigtig browser kan ikke lukkes maskinelt: repoet har ingen
   Playwright, og `CLAUDE.md` forbyder nye afhængigheder uden dit ja. Uden det
-  bruger jeg jsdom-render (som med C55/C56/C60), der dækker logikken men ikke
-  layout, breakpoints eller mørk tilstand. **Én konkret måling mangler nu:**
-  hvor højt populærgitterets første kort ligger på 390 px efter F4's rettelse
-  1/10 (kortene er ca. 230 px, helten og søgefeltet fylder meget af første
-  skærm). Jeg har låst rækkefølgen i markupken, men ikke målt den — og layoutet
-  i helten og gitteret er det, en skærmdump ville afkræfte.
+  bruger jeg jsdom-render, der dækker logikken men ikke layout, breakpoints
+  eller mørk tilstand. Én konkret måling mangler: hvor højt populærgitterets
+  første kort ligger på 390 px efter F4's rettelse 1/10 (kortene er ca. 230 px,
+  helten og søgefeltet fylder meget af første skærm).
 - ❓ **Kilde til madvaretabellen (opgave 119, `BLOCKED`).** `sst.dk` svarer HTTP 429
   for både browser og curl, og de fire andre danske kilder døde i C92. Enten en
   PDF af *De officielle kostanbefalinger* lagt i repoet, eller en API-nøgle til en
@@ -414,11 +431,10 @@ den fulde kommando står i `docs/plan-arkiv.md` under sit slug.
   Uden det bliver madvare-klyngen (9 af 10 danske autocomplete-træffere under
   "kalorier") liggende, selv om `/kalorier` har 289 besøgende/28d og +50 %.
 - ❓ **Hvilke søgemaskiner kommer `/bmi` og `/su`s trafik fra?** (opgave 183.)
-  Eneste måde til at diagnosticere de to sides fald. `/bmi` har 938 besøgende/28d
-  men under 4.920 Google-visninger, så mindst halvdelen er ikke Googles — et
-  skærmbillede af Plausible's kilder filtreret på de to sider (eller et
-  råudtræk) låser diagnosen. Uden det bliver faldet uforklarligt, og C196's
-  titelændring kan heller ikke måles.
+  `/bmi` har 933 besøgende/28d (-25 %) men under 4.920 Google-visninger, så
+  mindst halvdelen er ikke Googles. Et skærmbillede af Plausible's kilder
+  filtreret på de to sider låser diagnosen; uden den bliver faldet
+  uforklarligt, og C196's titelændring kan heller ikke måles.
 - ❓ **`AFHAENGIGHEDER.md`'s række for `beregner-dk` er delvis forældet.** Den
   siger "kritiske sårbarheder" og "mangler engines-erklæring". Sikkerhedsdelen er
   nu lukket (C197, `npm audit` 1 høj → 0), og runtime-kravet *er* erklæret:
