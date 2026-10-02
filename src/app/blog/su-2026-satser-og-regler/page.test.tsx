@@ -1,9 +1,16 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { describe, expect, test } from "vitest";
+import { beforeEach, describe, expect, test, vi } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
+import { getDomainConfigByLocale } from "@/lib/domain-config";
+import { getCurrentDomainConfig, getLocale } from "@/lib/get-locale";
 import { SU_2026 } from "@/lib/satser-2026";
-import SU2026GuidePage from "./page";
+import SU2026GuidePage, { generateMetadata } from "./page";
+
+vi.mock("@/lib/get-locale", () => ({
+  getLocale: vi.fn(),
+  getCurrentDomainConfig: vi.fn(),
+}));
 
 const kilde = readFileSync(join(__dirname, "page.tsx"), "utf8");
 
@@ -15,19 +22,41 @@ const kilde = readFileSync(join(__dirname, "page.tsx"), "utf8");
  * delt bolig med en på SU/kontanthjælp, og udlandsstudielånet.
  */
 describe("blogartikel su-2026-satser-og-regler", () => {
+  beforeEach(() => {
+    vi.mocked(getLocale).mockResolvedValue("da");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("da"));
+  });
+
   test("læser 2026-satser fra det delte satsmodul", () => {
     expect(kilde).toContain('from "@/lib/satser-2026"');
   });
 
-  test("titlen svarer på søgningen med udeboendesatsen fra modulet", () => {
+  test("titlen svarer på søgningen med udeboendesatsen fra modulet", async () => {
     const da = (n: number) => new Intl.NumberFormat("da-DK").format(n);
+    const meta = await generateMetadata();
 
-    expect(kilde).toContain(
-      `title: "SU 2026: ${da(SU_2026.udeboende)} kr. pr. måned udeboende"`,
+    // Før 2/10 låste denne test den håndskrevede streng i kilden med
+    // `expect(kilde).toContain('title: "SU 2026: 7.426 kr. …"')` — altså krævede
+    // den fejl, F5b fjerner, og den passede lige så vel med 2025-tal. Nu dømmer
+    // den metadata, Google faktisk får, mod den sats modulet holder i dag.
+    expect(meta.title).toEqual({
+      absolute: `SU 2026: ${da(SU_2026.udeboende)} kr. pr. måned udeboende`,
+    });
+    expect(meta.description).toContain(`${da(SU_2026.udeboende)} kr. pr. måned`);
+    expect(meta.description).toContain(
+      `${da(SU_2026.homewardBase)}-${da(SU_2026.homewardMaximum)} kr.`,
     );
-    expect(kilde).toContain(
-      "SU 2026: {kr(SU_2026.udeboende)} kr. pr. måned udeboende",
+    expect(meta.description).toContain(
+      `Videregående fribeløb fra ${da(SU_2026.freeAllowance.videregaaendeWithSu)} kr.`,
     );
+    expect(meta.description).toContain(
+      `SU-lån op til ${da(SU_2026.loan.ordinaryMonthly)} kr.`,
+    );
+    // Fribeløbet findes i to niveauer, og kun det ene hører til denne sides
+    // emne. Uden navnet på niveauet lovede beskrivelsen 2/10 den
+    // ungdomsuddannelsessats på en side om videregående uddannelse.
+    expect(meta.description).not.toContain(da(SU_2026.freeAllowance.youthWithSu));
+    expect(kilde).toContain("SU 2026: {kr(SU_2026.udeboende)} kr. pr. måned udeboende");
   });
 
   test("renderer k-satserne fra modulet", async () => {

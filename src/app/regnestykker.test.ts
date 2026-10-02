@@ -337,7 +337,7 @@ const HAARDKODEDE_BELOB_I_KOMPONENTER_I_LISTEN = 0;
  */
 const HAARDKODEDE_BELOB_I_STRENGE: Record<string, number> = {
   "src/app/blog/arveafgift-regler-og-satser/page.tsx": 7,
-  "src/app/blog/su-2026-satser-og-regler/page.tsx": 6,
+  "src/app/blog/su-2026-satser-og-regler/page.tsx": 0,
   "src/app/blog/biloekonomi-2026-hvad-koster-det-at-eje-bil/page.tsx": 5,
   "src/app/blog/boligsalg-2026-guide-til-omkostninger-og-provenu/page.tsx": 4,
   "src/components/ForbrugslaanBeregner.tsx": 3,
@@ -379,8 +379,15 @@ const HAARDKODEDE_BELOB_I_STRENGE: Record<string, number> = {
  * gentages i `openGraph` og i `BlogArticleSchema`), ungeydelsens sats i to
  * FAQ-svar og de tre børnetilskud i et tredje. De læses nu fra
  * `BOERNE_SATSER_2026`, `aarligBelob` og `barnetilskudSats`.
+ *
+ * 70 → 64 den 2/10 (senere samme dag): `blog/su-2026-satser-og-regler` stod
+ * med de næststørste — samme seks strenge som på børnepengesiden, fordi begge
+ * artikler gentager titel og beskrivelse i `generateMetadata`, i `openGraph` og
+ * som attributter på `BlogArticleSchema`. De læses nu fra `SU_2026` gennem
+ * `titel`, `beskrivelse` og `ogBeskrivelse`, så de ikke kan glide fra sats-
+ * tabellen, fra de otte FAQ-svar eller fra brødteksten ved næste satsår.
  */
-const HAARDKODEDE_BELOB_I_STRENGE_I_LISTEN = 70;
+const HAARDKODEDE_BELOB_I_STRENGE_I_LISTEN = 64;
 
 
 const ROT = join(__dirname, "..", "..");
@@ -725,7 +732,7 @@ describe("beløb i strengliteraler", () => {
     expect(overskredet).toEqual([]);
 
     expect(fund.length).toBeLessThanOrEqual(HAARDKODEDE_BELOB_I_STRENGE_I_LISTEN);
-    expect(HAARDKODEDE_BELOB_I_STRENGE_I_LISTEN).toBe(70);
+    expect(HAARDKODEDE_BELOB_I_STRENGE_I_LISTEN).toBe(64);
   });
 
   test("listen er målt på hele mappen, ikke på en håndplukket fil", () => {

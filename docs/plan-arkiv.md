@@ -24677,3 +24677,58 @@ reglen «den lørdag i den kalenderuge, hvori 20. juni ligger», står siden 7 d
 forkert i de fleste år. Koden er bevidst urørt: en lovpåstand uden kilde er præcis
 den fejl, CEO-køens punkt 0 handler om. Efterårsferien har derimod en side
 (`/dage-til/efteraarsferien`), så kun sommerferien og skolestart er blokeret.
+
+## 2026-10-02 — `su-indlaeg-belob-fra-modul` (F5b, strenglisten 6 → 0)
+
+**Hvad:** `src/app/blog/su-2026-satser-og-regler/page.tsx` havde seks
+håndskrevede strenge med beløb — `<title>`, `<meta description>`, begge dele
+igen i `openGraph`, og de samme to som attributter på `BlogArticleSchema`. De
+læses nu fra `SU_2026` gennem tre modulkonstanter (`titel`, `beskrivelse`,
+`ogBeskrivelse`). Brødteksten, tabellen og de otte FAQ-svar læste alle satsmodulet
+i forvejen; det var kun de seks strenge der ikke gjorde det.
+
+**Hvorfor de lå i strenglisten:** TypeScript parserer en JSX-attributværdi som
+`StringLiteral`, så `title="… 7.426 kr. …"` på `BlogArticleSchema` er præcis den
+form porten `regnestykker` finder — de to af de seks lå derfor i markup, ikke
+kun i `generateMetadata`.
+
+**Den farligste af de seks låste den gamle test fast.** `page.test.tsx` havde
+
+    expect(kilde).toContain(`title: "SU 2026: ${da(SU_2026.udeboende)} kr. pr. måned udeboende"`)
+
+altså en påstand om *kilden*, der krævede den håndskrevede streng og passede lige
+så vel med 2025-tal. Den er nu en påstand om `await generateMetadata()` — den
+metadata Google faktisk får — plus fire `toContain` på de fire beløb i
+beskrivelsen. `get-locale` mockes, som `arveafgift` og `boernepenge` gør det.
+
+**En reel fejl fundet undervejs (punkt 11).** Beskrivelsen lovede «Fribeløb fra
+15.297 kr.» Uden niveau er det tvetydigt, og målt i modulet er det
+**ungdomsuddansatte** sats: `freeAllowance.youthWithSu: 15297` mod
+`videregaaendeWithSu: 20749`. Siden handler om videregående uddannelse i titel,
+brødtekst og FAQ, så den lovede det forkerte niveau. Ny sætning:
+«**Videregående fribeløb fra 20.749 kr.**, SU-lån op til 3.799 kr.» —
+`grep -rn "15\.297" src/` giver nu kun modulens egen `youthWithSu` og den
+docblock der forklarer rettelsen, så ingen anden side har arvet fejlen.
+
+**Porten, ikke formateringen, afgorde sætningen.** Første forsøg skrev «Fribeløb
+fra 20.749 kr. på videregående uddannelse» = **168 tegn**, og gaten blev rød i
+`meta-description.test.ts` («meta description under 160 tegn»). Den kortere
+formulering er 154 tegn og beholder alle fire løfter.
+
+**Mutationer (punkt 12).** (1) Listens række sat fra 6 til 0 **før** rettelsen:
+`regnestykker` rød med «su-2026-satser-og-regler/page.tsx: 6 > 0». (2)
+`titel` læste `SU_2026.homewardMaximum` i stedet for `udeboende`:
+`page.test.tsx` rød på `expect(meta.title).toEqual(…)`. (3) Loftet
+`HAARDKODEDE_BELOB_I_STRENGE_I_LISTEN` målt til 0 gav «expected 64 to be less
+than or equal to 0» — de reelle 64 fund er sat i koden som 70 → 64.
+
+**Gate grøn:** lint (686 filer), typecheck, **3726 tests / 228 filer** (uændret
+tælle — rettelsen er provenance, ingen nye tests), build (142 sider). Rørte
+filer: SU-indlæggets `page.tsx`, samme `page.test.tsx`, `regnestykker.test.ts`
+(6 → 0 og 70 → 64) — **ingen beregningslogik, ingen ny URL, ingen sitemap, ingen
+`<h1>`**.
+
+**MÅL:** `/su` 129 besøgende/28d (faldet fra 203) og
+`/blog/su-2026-satser-og-regler` har ingen GSC-top-15-plads, så effekten måles
+ved næste Plausible-snapshot. Det købare her er rigtigheden: en beskrivelse der
+lovede det forkerte fribeløbsniveau.

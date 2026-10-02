@@ -1,21 +1,26 @@
-STATUS: 2/10 14:25. CI grøn (`gh run list -L 1`, 13:23). PR-TJEK 2/10: ingen
+STATUS: 2/10 14:45. CI grøn (`gh run list -L 1`, 13:23). PR-TJEK 2/10: ingen
    åbne PR'er. BRANCH-TJEK 2/10: ingen forældede branches. Sentry: begge fejl
    lukket (MINBEREGNER-1 er Next-router-støj, filtreret siden `3e67ed3`;
    MINBEREGNER-2 rettet i `4d48370`+`def070c`). CEO-kø punkt 0 lukket (`04ca30a`).
-   Review-fund fra 2/10 12:20 rettet (`1174169`), og fundet er lukket med
-   mutation i review-loopet.
+   Review-fund fra 2/10 12:20 rettet (`1174169`) og lukket med mutation.
    **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` ·
-   `npm run build` — målt grøn 2/10 14:12 (**3726** tests i 228 filer, +6 fra
-   `ceo/triatlon-ironman-tid`).
-   **Denne iteration: `ceo/triatlon-ironman-tid`** — `/pace` får de tre
-   triatlon-ben, hver sit tempo regnet af `beregnPace`, + 2 FAQ pr. sprog, og
-   sideteksten findes på da/se/no.
+   `npm run build` — målt grøn 2/10 14:45 (**3726** tests i 228 filer, uændret;
+   F5b-ændringen er provenance, ikke nye tests).
+   **Denne iteration: `ceo/su-indlaeg-belob-fra-modul`** — de seks håndskrevede
+   strenge i SU-indlæggets titel/beskrivelse læses fra `SU_2026`. Den gamle test
+   låste fejlen fast (den krævede `title: "SU 2026: 7.426 kr. …"` i kilden) og
+   dømmer nu den metadata, Google får. **Fandt en reel fejl undervejs:**
+   beskrivelsen lovede «Fribeløb fra 15.297 kr.» — det er *ungdomsuddansatte*
+   sats, på en side hvis titel og brødtekst handler om videregående uddannelse
+   (20.749 kr.). Målt: `youthWithSu: 15297` / `videregaaendeWithSu: 20749`, og
+   `15.297` fandt ingen anden forekomst i `src/`. Ny sætning 154 tegn — `meta-
+   description`-portens 160-tegns-loft fangede min første forsøg på 168.
+   **Næste iteration:** strenglistens næste fil er `arveafgift-regler-og-regler`
+   (7 + 15). Feature-kø har ingen kildefri kandidat; de fire er blokeret af ❓
+   (ferielov, sst.dk, opgave 187 den 13/10, beregner.no).
    ⚠️ `regnestykker`-porten logger (men får ikke rød) 1 ureviewet dansk streng
    i komponenter der monteres på beraknare.se: `src/app/procent/page.tsx:621`.
    Målt 2/10 13:45: falsk positiv — den ligger i `{locale === "da" && …}`.
-   **Næste iteration:** de kildeblokerede klynger (momsfrister, madvaretabel,
-   fitnessfradrag, ferielov) kan ikke bygges, så kandidaterne er flere
-   værktøjer på eksisterende sider eller nye `/dage-til`-sider. Se Feature-kø.
    **Målt 2/10 14:15:** alle 247 URL'er i begge sitemap'er svarer 200, og
    `beraknare.se` har ingen dansk brødtekst lækket på de 16 mest besøgte sider.
 
@@ -107,8 +112,12 @@ Listen `src/app/regnestykker.test.ts` tæller forekomster pr. fil og må kun
 blive kortere. ✅ betyder lukket; detaljerne står i `docs/plan-arkiv.md`.
 
 **Åben række (strenglisten):** næste fil er
-`src/app/blog/su-2026-satser-og-regler/page.tsx` (6 fund — `/su` er samtidig en
-faldende side, 203 → 129), derefter `arveafgift-regler-og-satser` (7 + 15).
+`src/app/blog/arveafgift-regler-og-regler/page.tsx` (7 i strenglisten + 15 i
+JSX-teksten), derefter `/boligsalg`. **SU-indlægget er lukket 2/10 14:45**
+(`su-indlaeg-belob-fra-modul`): de seks strenge læses fra `SU_2026`, og
+beskrivelsens fribeløb lovede *ungdomsuddansatte* sats på en side om videregående
+uddannelse — den sagde nu «Videregående fribeløb fra …». Strenglistens loft er
+**70 → 64**.
 
 **Åben:** `/boligsalg` — 9 fund, hvor 8 er redaktionelle prisintervaller (mægler,
 tinglysning, avance, byggeskade …) uden kilde i repoet, og den niende er
@@ -134,8 +143,9 @@ ingen regex på tal og tekst.
 
 | Slug | Prøv på indhold |
 |---|---|
-| `triatlon-ironman-tid` (**ny**, vindue 2/10 17:30) | `minberegner.dk/pace`: en `<h2>` «Triatlon og Ironman: tiden for alle tre ben» med en tabel på fire rækker (Svømning 3,8 km 1:00:00 15:47 · Cykel 180 km 5:00:00 1:40 · Løb 42,195 km 3:30:00 4:59 · I alt 225,995 km 9:30:00) og FAQ'en skal have **ni** spørgsmål, hvor «Hvor lang tid tager et Ironman?» svarer «… 1:00:00 + 5:00:00 + 3:30:00 = 9:30:00 i alt …» og «Hvor stor en del af et Ironman er cyklen?» «… 52,6 % af tiden … 79,6 % af distancen». `beraknare.se/pace` skal have «Triathlon och Ironman» + «Löpning» + «Totalt» og de samme ni spørgsmål. **Intet** «9:30:00» på `/pace` uden for tabellen og de to svar |
-| `ugenummer-uge-datoer` (**ny**, vindue 2/10 17:30) | `minberegner.dk/ugenummer`: resultatboksen skal vise de **syv** datoer i den valgte uge — `Mandag 12. oktober` … `Søndag 18. oktober` for uge 42 — i kort under «Uge 42 / 2026». FAQ'en skal have **fem** spørgsmål, og «Hvilke datoer er der i uge 42?» skal svare «… går fra **mandag den 12. oktober 2026** til **søndag den 18. oktober 2026** …». `keywords` skal have «datoer i uge» og «datoer i uge 42». **Intet** dansk i `beraknare.se/ugenummer` ændret |
+| `su-indlaeg-belob-fra-modul` (**ny**, vindue 2/10 17:30) | `minberegner.dk/blog/su-2026-satser-og-regler`: `<title>` skal være «SU 2026: 7.426 kr. pr. måned udeboende» (byte-uændret) og `<meta name="description">` skal være «SU 2026: udeboende får 7.426 kr. pr. måned, hjemmeboende 1.154-3.202 kr. **Videregående fribeløb fra 20.749 kr.**, SU-lån op til 3.799 kr. Alle tal fra su.dk.». **`Intet` «Fribeløb fra 15.297 kr.»** — det var ungdomsuddansatte sats på en side om videregående uddannelse. Artiklens JSON-LD-`description` skal have den samme nye sætning, og `og:description` skal have «fribeløb fra 20.749 kr. på videregående uddannelse». Resten af siden (tabel, otte FAQ, brødtekst) skal være byte-uændret |
+| `triatlon-ironman-tid` (**åben**, vindue 2/10 17:30) | `minberegner.dk/pace`: en `<h2>` «Triatlon og Ironman: tiden for alle tre ben» med en tabel på fire rækker (Svømning 3,8 km 1:00:00 15:47 · Cykel 180 km 5:00:00 1:40 · Løb 42,195 km 3:30:00 4:59 · I alt 225,995 km 9:30:00) og FAQ'en skal have **ni** spørgsmål, hvor «Hvor lang tid tager et Ironman?» svarer «… 1:00:00 + 5:00:00 + 3:30:00 = 9:30:00 i alt …» og «Hvor stor en del af et Ironman er cyklen?» «… 52,6 % af tiden … 79,6 % af distancen». `beraknare.se/pace` skal have «Triathlon och Ironman» + «Löpning» + «Totalt» og de samme ni spørgsmål. **Intet** «9:30:00» på `/pace` uden for tabellen og de to svar |
+| `ugenummer-uge-datoer` (**åben**, vindue 2/10 17:30) | `minberegner.dk/ugenummer`: resultatboksen skal vise de **syv** datoer i den valgte uge — `Mandag 12. oktober` … `Søndag 18. oktober` for uge 42 — i kort under «Uge 42 / 2026». FAQ'en skal have **fem** spørgsmål, og «Hvilke datoer er der i uge 42?» skal svare «… går fra **mandag den 12. oktober 2026** til **søndag den 18. oktober 2026** …». `keywords` skal have «datoer i uge» og «datoer i uge 42». **Intet** dansk i `beraknare.se/ugenummer` ændret |
 | `boernepenge-aarstal` (**ny**, vindue 2/10 17:30) | `minberegner.dk/blog/boernepenge-2026-satser-og-regler`: aftrapningseksemplets parentes skal være **byte-uændret** «Har du to børn på 0-2 år (21.480 kr × 2 = 42.960 kr.), får du udbetalt 40.182 kr.» — det er **årstal** (5.370 × 4), ikke kvartal. **Intet** «10.740 kr × 2 = 21.480 kr» og intet «18.702 kr» |
 | `boernepenge-indlaeg` (**åben**, vindue 2/10 17:30) | Samme side: `<title>` byte-uændret «Børnepenge 2026: 5.370 kr./kvartal (0-2 år)» (målt OK 12:47). FAQ'en skal have **ti** spørgsmål med svarene «… Ungeydelsen er 1.114 kr. pr. måned, altså 13.368 kr. om året.» og «… 1.741 kr. pr. kvartal pr. barn, 1.774 kr. i ekstra børnetilskud … 5.025 kr. i særligt børnetilskud ved adoption.». Familietabellen skal have `10.740`, `9.618`, `11.838` og `6.684` i kolonnen «Pr. kvartal» |
 | `moms-eksempler-fra-modul` (**åben**, vindue 2/10 17:30) | `minberegner.dk/moms`: introens tre listeregler skal være `Læg moms til: … 1.000 kr. × 1,25 = 1.250 kr. inkl. moms`, `Træk moms fra: … 1.250 kr. ÷ 1,25 = 1.000 kr. ekskl. moms` og `Find momsandelen: … 1.250 kr. × 0,20 = 250 kr. i moms»; «er 2,4414, så 1.000 kr. bliver 2.441,41 kr.» og «bliver prisen 0,4096 af den oprindelige — altså 409,60 kr. i alt»; **intet** «kun 410 kr. oveni». `beraknare.se/moms`: de samme tre linjer med **mellemrum** (`1 000 kr exkl. → 1 250 kr inkl.`), «2,4414»/«0,4096», «10,71 %»/«5,66 %» |

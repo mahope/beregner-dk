@@ -12,9 +12,8 @@ export async function generateMetadata(): Promise<Metadata> {
   const baseUrl = dc.baseUrl;
 
   return {
-    title: { absolute: "SU 2026: 7.426 kr. pr. måned udeboende" },
-    description:
-      "SU 2026: udeboende får 7.426 kr. pr. måned, hjemmeboende 1.154-3.202 kr. Fribeløb fra 15.297 kr., SU-lån op til 3.799 kr. Alle tal fra su.dk.",
+    title: { absolute: titel },
+    description: beskrivelse,
     keywords: [
       "SU 2026",
       "SU satser 2026",
@@ -27,9 +26,8 @@ export async function generateMetadata(): Promise<Metadata> {
     ],
     openGraph: {
       images: OG_IMAGE,
-      title: "SU 2026: 7.426 kr. pr. måned udeboende",
-      description:
-        "SU 2026: udeboende 7.426 kr. pr. måned, hjemmeboende 1.154-3.202 kr., fribeløb fra 15.297 kr. og SU-lån op til 3.799 kr.",
+      title: titel,
+      description: ogBeskrivelse,
       url: `${baseUrl}/blog/su-2026-satser-og-regler`,
       type: "article",
       siteName: dc.siteName,
@@ -42,6 +40,24 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 const kr = (value: number) => value.toLocaleString("da-DK");
+
+/**
+ * Titel og beskrivelse dannes af satserne, så de ikke kan glide fra tabellen, fra
+ * de otte FAQ-svar og fra de steder i brødteksten der nævner samme beløb. De
+ * stod håndskrevet i seks strenge — herunder som JSX-attributter på
+ * `BlogArticleSchema`, som TypeScript parserer som strengliteraler, så de lå
+ * uden for porten `regnestykker` dømmer resten af korpuset med.
+ *
+ * Beskrivelsen læser **ungdomsuddansatte** fribeløb, men lovede «Fribeløb fra
+ * 15.297 kr.» uden at sige hvilken uddannelse — altså ungdomssatsen på en side
+ * hvis titel og brødtekst handler om videregående uddannelse, hvor
+ * fribeløbet er `videregaaendeWithSu`. Derfor står niveauet nu i strengen.
+ */
+const titel = `SU 2026: ${kr(SU_2026.udeboende)} kr. pr. måned udeboende`;
+
+const beskrivelse = `SU 2026: udeboende får ${kr(SU_2026.udeboende)} kr. pr. måned, hjemmeboende ${kr(SU_2026.homewardBase)}-${kr(SU_2026.homewardMaximum)} kr. Videregående fribeløb fra ${kr(SU_2026.freeAllowance.videregaaendeWithSu)} kr., SU-lån op til ${kr(SU_2026.loan.ordinaryMonthly)} kr. Alle tal fra su.dk.`;
+
+const ogBeskrivelse = `SU 2026: udeboende ${kr(SU_2026.udeboende)} kr. pr. måned, hjemmeboende ${kr(SU_2026.homewardBase)}-${kr(SU_2026.homewardMaximum)} kr., fribeløb fra ${kr(SU_2026.freeAllowance.videregaaendeWithSu)} kr. på videregående uddannelse og SU-lån op til ${kr(SU_2026.loan.ordinaryMonthly)} kr.`;
 
 const faqItems = [
   {
@@ -79,8 +95,8 @@ export default function SU2026GuidePage() {
     <div className="max-w-3xl mx-auto">
       <BlogArticleSchema
         slug="su-2026-satser-og-regler"
-        title="SU 2026: 7.426 kr. pr. måned udeboende"
-        description="SU 2026: udeboende får 7.426 kr. pr. måned, hjemmeboende 1.154-3.202 kr. Fribeløb fra 15.297 kr., SU-lån op til 3.799 kr. Alle tal fra su.dk."
+        title={titel}
+        description={beskrivelse}
       />
       <FAQSchema items={faqItems} />
 
