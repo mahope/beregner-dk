@@ -23990,3 +23990,38 @@ tømt; `skat.dk` er 500. De er **bevaret med vilje** og ligger som ❓ i planen.
 **Gate.** lint 0 · typecheck 0 · `TZ=UTC npm run test` **3644 grønne i 225
 filer** · `npm run build` grøn (`/moms` `ƒ` som før). CEO-kø punkt 0 efterprøvet i
 koden 2/10 07:35 — otte fund, alle lukket.
+
+
+---
+
+## VERIFICÉR-noter lukket 2/10 09:50 på indhold
+
+Målt på **indhold** på de tre domæner 2/10 09:45-09:55, ikke på HTTP 200.
+
+- `topskat-graense-fra-sats` — 200, `697.000 kr./år`, `over 2.592.700 kr.`, `641.200 kr.`
+- `porten-ser-strenge` — 200, `1.850 kr. (skøde)` + `1.825 kr. (pantebrev)`
+- `opsparing-eksempler-fra-modul` — 200, `1.522.077` / `1.674.259` / `43.219`
+- `billaan-tal-fra-modul` — 200, ÅOP **6,91**
+- `tidszone-links-til-lande` — **12** `href="/klokken-i/…"` på da, **12** `/klockan-i/` på se, **0** danske på beraknare.se
+- `tidsberegner-halvmaraton-tempo` — `4:58` = **0** på begge domæner
+- `pace-tidsberegner` — `5:00` på siden, `/pace.txt` = **404**
+- `klokken-i-land` — «Det er HH:MM i New York lige nu», se «Vad är klockan i Türkiet?», `/klokken-i/danmark` = **404**
+- `klokken-tidszone-paastand` — `din tidszone` = **0** på begge domæner
+- `bolan-og-loen-tekstal-fra-modul` — 200 på begge domæner
+- `review-fund-palmesondag-og-komponenter` — 200, `/dage-til/palmesondag` har «altid en søndag»
+- `renteberegner-eksempel-fra-modul` — 200, `1.211,96` / `290.870,56` / `12,68` / `4,07`
+- `arveafgift-tal-fra-modul` — 200, `392.300`
+- `boernepenge-udbetalingsdatoer` — 200, «Hvornår kommer børnepengen ud»
+- `rentefradrag-tal-fra-kilden` — 200, `16.800` ×3
+- `moms-excel-talene` — 200, `800 kr.` + `200 kr.` i Excel-kolonnen
+- `regnestykker-port` — porten grøn i gaten (11 tests)
+- `procent-eksempler-fra-modul` — 200
+- `ejendomsvaerdiskat-tal-fra-modul` — 200, `9.007.000`
+- `typecheck-dækker-hele-src` — kun `package.json`/`tsconfig.app.json`/porten — intet at verificere på live
+- `sentry-router-stoej-paa-kode` — `/api/health` svarer `{"status":"ok"}`
+- `indexnow-noeglefil` — `/abc12345.txt` = **404** på begge domæner (nøgle ikke konfigureret, så 404 er korrekt)
+- `bil-omkostninger-fra-modul` — 200 på begge domæner
+
+**Gate.** lint 0 · typecheck 0 · `TZ=UTC npm run test` **3665 grønne i 227 filer** · `npm run build` grøn.
+CEO-kø punkt 0 efterprøvet i koden 2/10 08:55 — alle otte fund lukket.
+Ingen `DEPLOY-MISSING`: ingen note har været åben gennem to deploy-vinduer uden at blive live.

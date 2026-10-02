@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import FAQ from "@/components/FAQ";
 import { FAQSchema } from "@/components/StructuredData";
+import { getDomainConfigByLocale } from "@/lib/domain-config";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { OG_IMAGE } from "@/lib/page-helpers";
 import {
@@ -87,12 +88,31 @@ export function buildKlokkenMetadata(
   const svar = beregnKlokkenNu(land.byer[0], sprog, tidspunkt);
   const landet = landetsNavn(land, sprog);
   const title = c.question(landet);
+  // hreflang for hvert land i **begge** sprog. Slugene læses fra
+  // `KLOKKEN_LANDE` — samme modul `getKlokkenSlugs` bygger ruterne af — så en
+  // ny tid ikke kan få en dansk side uden sin svenske modpart. Uden disse tag
+  // så `/klokken-i/usa` (da) og `/klockan-i/usa` (se) ud som to sider om det
+  // samme emne i stedet for som én side i to sprog, hvilket er det de er bygget
+  // til. `/dage-til` gjorde det samme med `getDomainConfigByLocale`.
+  const languages: Record<string, string> = {
+    [getDomainConfigByLocale("da").hreflangCode]: `${getDomainConfigByLocale(
+      "da"
+    ).baseUrl}${KLOKKEN_PREFIX.da}${slugForSprog(land, "da")}`,
+    [getDomainConfigByLocale("se").hreflangCode]: `${getDomainConfigByLocale(
+      "se"
+    ).baseUrl}${KLOKKEN_PREFIX.se}${slugForSprog(land, "se")}`,
+  };
+  languages["x-default"] = languages[getDomainConfigByLocale("da").hreflangCode];
+
   return getCurrentDomainConfig().then((domainConfig) => ({
     title,
     description: sprog === "da"
       ? `Det er ${svar.tid} i ${svar.by} lige nu, ${svar.forskel} Danmark. Se klokken i alle tidszoner i ${landet} og konverter til en hvilken som helst by.`
       : `Det är ${svar.tid} i ${svar.by} just nu, ${svar.forskel} Sverige. Se klockan i alla tidszoner i ${landet} och konvertera till vilken stad som helst.`,
-    alternates: { canonical: `${domainConfig.baseUrl}${KLOKKEN_PREFIX[sprog]}${slug}` },
+    alternates: {
+      canonical: `${domainConfig.baseUrl}${KLOKKEN_PREFIX[sprog]}${slug}`,
+      languages,
+    },
     openGraph: {
       title,
       description: `${svar.tid} i ${svar.by}`,

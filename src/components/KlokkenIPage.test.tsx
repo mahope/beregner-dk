@@ -2,8 +2,13 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import { getDomainConfigByLocale } from "@/lib/domain-config";
 import { getCurrentDomainConfig } from "@/lib/get-locale";
-import { byensNavn, findKlokkenLand, getKlokkenSlugs } from "@/lib/klokken-i";
-import KlokkenIPage from "./KlokkenIPage";
+import {
+  byensNavn,
+  findKlokkenLand,
+  getKlokkenSlugs,
+  slugForSprog,
+} from "@/lib/klokken-i";
+import KlokkenIPage, { buildKlokkenMetadata } from "./KlokkenIPage";
 
 vi.mock("@/components/Breadcrumbs", () => ({ default: () => null }));
 
@@ -143,5 +148,103 @@ describe("FAQ'en på /klokken-i fortæller, hvilken tidszone tallet følger", ()
       // Mindst to: afsnittet «Sådan er tallet fundet» og FAQ-svaret.
       expect(egenForekomster).toBeGreaterThanOrEqual(2);
     }
+  });
+});
+
+/**
+ * Målt 2/10 09:40 på live: `/klokken-i/usa` serverede **én** `<link>` — kun
+ * canonical — mens `/dage-til/juledagen` på samme domæne serverede alle tre
+ * (`da`, `sv`, `x-default`). Uden hreflang kan Google ikke se, at
+ * `minberegner.dk/klokken-i/usa` og `beraknare.se/klockan-i/usa` er samme
+ * spørgsmål i to sprog, så de konkurrerer om de samme søgninger i stedet for
+ * at supplere hinanden — på de 24 nye sider, der er bygget specifikt for at
+ * fange det danske autocomplete-cluster «hvad er klokken i» (10 af 10).
+ *
+ * Porten dømmer på **metadata-objektet**, ikke på renderet HTML, fordi `<link>`
+ * skrives af Nexts metadata-lag og ikke af komponenten. Den kræver tre ting ad
+ * gangen, så en side der kun erklærer sit eget sprog (altså ingen `sv`) ikke
+ * kan være grøn.
+ */
+describe("hreflang på /klokken-i peger på samme land i begge sprog", () => {
+  beforeEach(() => {
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(
+      getDomainConfigByLocale("da")
+    );
+  });
+
+  /** Metadata som Next faktisk ville skrive i `<head>`. */
+  async function metadata(sprog: Sprog, slug: string) {
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(
+      getDomainConfigByLocale(sprog)
+    );
+    return buildKlokkenMetadata(sprog, slug, new Date());
+  }
+
+  test("hvert land i hvert sprog erklærer da, sv og x-default", async () => {
+    for (const sprog of ["da", "se"] as const) {
+      const slugs = getKlokkenSlugs(sprog);
+      expect(slugs.length).toBeGreaterThan(0);
+      for (const slug of slugs) {
+        const meta = await metadata(sprog, slug);
+        const languages = (meta.alternates?.languages ?? {}) as Record<
+          string,
+          string
+        >;
+        const krav = { da: /minberegner\.dk\/klokken-i\//, sv: /beraknare\.se\/klockan-i\// };
+
+        expect(Object.keys(languages).sort(), `${sprog}/${slug}`).toEqual([
+          "da",
+          "sv",
+          "x-default",
+        ]);
+        expect(languages.da, `${sprog}/${slug}`).toMatch(krav.da);
+        expect(languages.sv, `${sprog}/${slug}`).toMatch(krav.sv);
+        // x-default skal pege på den danske side, ellers er den norske
+        // bruger sendt videre til svensk, som `no` ikke kan læse.
+        expect(languages["x-default"], `${sprog}/${slug}`).toBe(languages.da);
+      }
+    }
+  });
+
+  test("hreflang peger på det samme land, ikke bare på en vilkårlig side", async () => {
+    // Slugs er **sprogspecifikke** (`tyrkiet`/`turkiet`, `canada`/`kanada`), så
+    // de læses fra modulet. Ellers kunne alle 24 sider pege på USA og porten
+    // stadig være grøn.
+    for (const sprog of ["da", "se"] as const) {
+      for (const slug of getKlokkenSlugs(sprog)) {
+        const meta = await metadata(sprog, slug);
+        const languages = (meta.alternates?.languages ?? {}) as Record<
+          string,
+          string
+        >;
+        const danskSlug = slugForSprog(
+          findKlokkenLand(slug, sprog)!,
+          "da"
+        );
+        const svenskSlug = slugForSprog(
+          findKlokkenLand(slug, sprog)!,
+          "se"
+        );
+        expect(languages.da, `${sprog}/${slug}`).toBe(
+          `https://minberegner.dk/klokken-i/${danskSlug}`
+        );
+        expect(languages.sv, `${sprog}/${slug}`).toBe(
+          `https://beraknare.se/klockan-i/${svenskSlug}`
+        );
+      }
+    }
+  });
+
+  test("canonical på den danske side er ikke på den svenske", async () => {
+    // Ellers erklærer den ene side den anden som sin kopi — og Google
+    // vragter den, der gør det.
+    const dansk = await metadata("da", "usa");
+    const svensk = await metadata("se", "usa");
+    expect(dansk.alternates?.canonical).toBe(
+      "https://minberegner.dk/klokken-i/usa"
+    );
+    expect(svensk.alternates?.canonical).toBe(
+      "https://beraknare.se/klockan-i/usa"
+    );
   });
 });
