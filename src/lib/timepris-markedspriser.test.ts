@@ -34,6 +34,15 @@ function allePoster() {
   return DANSKE_MARKEDSPRISER.flatMap((g) => g.poster);
 }
 
+/**
+ * `Intl` skriver tusindtalsseparatoren som et ubrudt mellemrum (U+00A0), som
+ * er det korrekte i brødtekst, men umuligt at skrive i en assertion. Her
+ * normaliseres det, så porten kan dømme tallene og ikke tegnsættet.
+ */
+function medMellemrum(str: string): string {
+  return str.replace(/\u00a0/g, " ");
+}
+
 describe("timepris-markedspriser", () => {
   test("alle tre domæner får præcis samme fire grupper og tolv poster", () => {
     const da = markedspriser("da");
@@ -77,6 +86,33 @@ describe("timepris-markedspriser", () => {
     expect(formaterMarkedspris(post, "se")).toContain("–");
   });
 
+  test("tusindtalsseparatoren følger domænet, ikke altid dansk", () => {
+    // Punkt 13-bristen: modulet hårdkodede `formatNumber(post.min, "da")`, så
+    // beraknare.se skrev «Advokat: 1.500-3.500 DKK». I svensk og norsk er «.»
+    // decimaltegn, så «1.500» læses som 1,5 — en faktor 1.000 for lav i en
+    // pris-tabel. Ni af de tolv poster har en tusindtalsseparator.
+    expect(medMellemrum(formaterMarkedspris(findMarkedspris("raadgivning", "advokat"), "se"))).toBe(
+      "1 500–3 500 DKK"
+    );
+    expect(medMellemrum(formaterMarkedspris(findMarkedspris("raadgivning", "advokat"), "no"))).toBe(
+      "1 500–3 500 DKK"
+    );
+    expect(medMellemrum(formaterMarkedspris(findMarkedspris("raadgivning", "advokat"), "da"))).toBe(
+      "1.500-3.500 kr"
+    );
+
+    for (const post of allePoster()) {
+      // Ingen punktum-tusindtalsseparator på de to domæner, hvor «.» er
+      // decimaltegn.
+      for (const locale of ["se", "no"] as const) {
+        expect(formaterMarkedspris(post, locale)).not.toMatch(/\d\.\d{3}/);
+      }
+      // Og intet mellemrum som tusindtalsseparator i dansk.
+      expect(formaterMarkedspris(post, "da")).not.toMatch(/\d\s\d/);
+      expect(medMellemrum(formaterMarkedspris(post, "se"))).toContain("–");
+    }
+  });
+
   test("tabellen er dansk på de domæner, hvor den ikke er det lokale marked", () => {
     expect(markedsprisOmraade()).toBe("danmark");
     expect(markedspriserErDanske("da")).toBe(false);
@@ -95,11 +131,11 @@ describe("timepris-markedspriser", () => {
       expect(svar).not.toContain("1.800");
     }
     expect(markedsprisFaqSvar("da")).toBe("IT: 900-1.500 kr/time. Håndværkere: 400-600 kr/time.");
-    expect(markedsprisFaqSvar("se")).toBe(
-      "Dansk nivå: IT 900–1.500 DKK/timme, hantverkare 400–600 DKK/timme."
+    expect(medMellemrum(markedsprisFaqSvar("se"))).toBe(
+      "Dansk nivå: IT 900–1 500 DKK/timme, hantverkare 400–600 DKK/timme."
     );
-    expect(markedsprisFaqSvar("no")).toBe(
-      "Dansk nivå: IT 900–1.500 DKK/time, håndverkere 400–600 DKK/time."
+    expect(medMellemrum(markedsprisFaqSvar("no"))).toBe(
+      "Dansk nivå: IT 900–1 500 DKK/time, håndverkere 400–600 DKK/time."
     );
   });
 });

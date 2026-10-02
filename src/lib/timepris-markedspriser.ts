@@ -92,12 +92,19 @@ export const DANSKE_MARKEDSPRISER: MarkedsprisGruppe[] = [
 ];
 
 /**
+ * Ét interval som domænet skriver det.
+ *
  * Kun `da` får tallene skrevet som «kr» i dansk skrivemåde; `se` og `no` får
  * dem med landekoden, fordi «kr» i svensk og norsk læses som sin egen valuta.
+ *
+ * Tusindtalsseparatoren følger **domænet**: `da-DK` skriver «1.500», mens
+ * `sv-SE` og `nb-NO` skriver «1 500». Det er ikke en kosmetisk detalje — «.» er
+ * decimaltegn på de to andre domæner, så en dansk «1.500-3.500 DKK» læses som
+ * 1,5-3,5 DKK, altså en faktor 1.000 for lav i en pris-tabel.
  */
 export function formaterMarkedspris(post: MarkedsprisPost, locale: Locale): string {
-  const min = formatNumber(post.min, "da");
-  const max = formatNumber(post.max, "da");
+  const min = formatNumber(post.min, locale);
+  const max = formatNumber(post.max, locale);
   return locale === "da" ? `${min}-${max} kr` : `${min}–${max} DKK`;
 }
 

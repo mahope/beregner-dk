@@ -24025,3 +24025,46 @@ Målt på **indhold** på de tre domæner 2/10 09:45-09:55, ikke på HTTP 200.
 **Gate.** lint 0 · typecheck 0 · `TZ=UTC npm run test` **3665 grønne i 227 filer** · `npm run build` grøn.
 CEO-kø punkt 0 efterprøvet i koden 2/10 08:55 — alle otte fund lukket.
 Ingen `DEPLOY-MISSING`: ingen note har været åben gennem to deploy-vinduer uden at blive live.
+
+---
+
+## `ceo/timepris-lokale-tal` — review-fund MIDDEL 2/10 (2026-10-02)
+
+**Fundet:** `formaterMarkedspris` i `src/lib/timepris-markedspriser.ts` hårdkodede
+`formatNumber(post.min, "da")` og `formatNumber(post.max, "da")`, altså `da-DK`
+uanset `locale`. `locale` blev så brugt **kun** til at vælge mellem «kr» og
+«DKK». Resultatet på beraknare.se og beregnerno var «Advokat: 1.500-3.500 DKK»
+og «Revisor: 900-1.800 DKK», og på de to domæner er «.» **decimaltegnet** — så
+et frilanserlæseinterval på 1,5-3,5 DKK i stedet for 1.500-3.500. Det er en
+**regression** mod den gamle kode i `TimeprisBeregner.tsx`, der skrev
+«1 500–3 500 kr» med mellemrum i alle tre sprog. Ni af de tolv poster har en
+tusindtalsseparator; kun `400-600`, `500-700` og `500-800` faldt ved
+tilfældighed. Samme fejl lå i `markedsprisFaqSvar("se"/"no")` og dermed i
+`<FAQSchema>`'s JSON-LD på `/timepris`.
+
+**Rettelsen** er to tegn pr. linje: `formatNumber(post.min, locale)` og
+`formatNumber(post.max, locale)`. Dansk er byte-uændret («1.500-3.500 kr»),
+svensk og norsk får «1 500–3 500 DKK» med U+00A0 som `Intl` skriver det.
+
+**Målt før rettelsen** med `Intl.NumberFormat` for alle tolv poster i `da-DK`,
+`sv-SE` og `nb-NO`: 9 af 12 er forskellige mellem `da-DK` og de to andre.
+
+**Porten kan fejle.** Ny test «tusindtalsseparatoren følger domænet, ikke altid
+dansk» i `timepris-markedspriser.test.ts` dømmer fire separate ting: `Advokat` på
+`se` og `no` som «1 500–3 500 DKK», på `da` som «1.500-3.500 kr», **alle tolv**
+poster for `\d\.\d{3}` på de to andre domæner og `\d\s\d` på dansk. Målt **1/11
+rød mod den gamle kode** på præcis `1.500–3.500 DKK` mod `1 500–3 500 DKK`, så
+den gamle port lå fejlen fast: den skrev selv `toBe("400–600 DKK")` på en
+trecifret post, hvor separatoren ikke findes. De to FAQ-assertioner er opdateret
+til «900–1 500», fordi de læser samme formatter.
+
+**Harness:** `medMellemrum()` i testen normaliserer U+00A0, så assertionerne kan
+skrives med et synligt mellemrum i stedet for usynlige tegn — det er den fejl,
+der gjorde den oprindelige fejl usynlig. `formaterMarkedspris`' signatur er
+uændret; de to kaldere (`TimeprisBeregner.tsx:565` og testen) er fundet med
+grep. `/tidsberegner`' tabeller bruger derimod `formatNumber(raekke.timer,
+locale)` pr. sprog-blok (`:513` dansk, `:825` svensk) og var ikke ramt.
+
+**Gate.** lint 0 · typecheck 0 · `TZ=UTC npm run test` **3666 grønne i 227
+filer** · `npm run build` grøn. Deploy-note: `timepris-lokale-tal` (vindue
+2/10 12:30).
