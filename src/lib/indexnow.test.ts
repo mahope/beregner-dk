@@ -1,6 +1,9 @@
 import { describe, expect, test, vi } from "vitest";
+import { getAllDomainConfigs } from "./domain-config";
 import {
   buildIndexNowPayload,
+  getIndexNowKeyFromPathname,
+  getIndexNowKeyPathname,
   isValidIndexNowKey,
   parseIndexNowTarget,
   submitIndexNow,
@@ -34,6 +37,49 @@ describe("IndexNow key validation", () => {
       expect(isValidIndexNowKey(key)).toBe(false);
     },
   );
+});
+
+describe("IndexNow key location", () => {
+  /**
+   * IndexNow henter `keyLocation` før den accepterer en eneste URL, så et 404
+   * dér afviser hele indsendelsen — og nøglen er et env-værdi, så den kan ikke
+   * ligge som fil i `public/`. Adressen i payload'en skal derfor være den samme
+   * form som den, serveren svarer på; det er denne assertion, der fanger
+   * mismatchen mellem de to.
+   */
+  test.each(getAllDomainConfigs().map((config) => config.baseUrl))(
+    "advertises a keyLocation that the key path resolves: %s",
+    (baseUrl) => {
+      const host = new URL(baseUrl).hostname;
+      const payload = buildIndexNowPayload({
+        baseUrl,
+        key: KEY,
+        urls: [`https://${host}/procent`],
+      });
+
+      const keyLocation = new URL(payload?.keyLocation ?? "");
+      expect(keyLocation.host).toBe(host);
+      expect(getIndexNowKeyFromPathname(keyLocation.pathname)).toBe(KEY);
+    },
+  );
+
+  test("serves the key at the path the rewrite sends it to", () => {
+    expect(getIndexNowKeyPathname(KEY)).toBe(`/api/indexnow-key/${KEY}`);
+    expect(getIndexNowKeyFromPathname(getIndexNowKeyPathname(KEY))).toBeNull();
+  });
+
+  test.each([
+    "/abc12345.TXT",
+    "/abc12345",
+    "/abc12345.txt/",
+    "/nested/abc12345.txt",
+    "/abc_12345.txt",
+    "/short.txt",
+    `/${"a".repeat(129)}.txt`,
+    "/abc12345.txt.png",
+  ])("ignores a path that is not a key file: %s", (pathname) => {
+    expect(getIndexNowKeyFromPathname(pathname)).toBeNull();
+  });
 });
 
 describe("IndexNow payload", () => {

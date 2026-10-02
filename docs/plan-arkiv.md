@@ -23352,3 +23352,76 @@ tilbage er rentefradrag-sætningen på samme side.
 
 Gate 2/10 00:05: `npm run lint` 0 · `npm run typecheck` 0 · `TZ=UTC npm run
 test` 3521 grønne i 217 filer · `npm run build` exit 0.
+
+## 2/10 02:20 — IndexNow sendte til en nøglefil, der ikke fandtes (C203)
+
+**Fundet ved at læse F5's ❓, ikke ved at måle noget.** Planen spurgte, om
+krogen efter deploy var sat op. Svaret var ja — `src/instrumentation.ts`
+`register()` kalder `submitDeploymentIndexNow()` ved serverstart, og modulet,
+den interne rute, nøgleruten og otte tests var alle på plads. **Men den ene URL,
+der afgør om Bing overhovedet godkender en indsendelse, var der ikke.**
+
+`buildIndexNowPayload` erklærer `keyLocation: "https://{host}/{key}.txt"`.
+IndexNow-protokollen henter den URL **før den accepterer en eneste URL** i
+`urlList`, og svarer 403/422, hvis nøglen ikke kan hentes. Nøglen blev serveret
+på `/api/indexnow-key/{key}`. Målt på live 2/10 02:12:
+`https://minberegner.dk/abc12345.txt` → **404**. Der findes ingen fil i `public/`
+med `.txt` (kun `ads.txt` og `sw.js`), og nøglen er et env-værdi, så den kan
+ikke ligge der — den skal genereres ved request-tid. **Konklusionen er derfor
+hård: hver indsendelse, koden nogensinde har lavet, blev afvist.** Det er
+2.153 af 7.490 besøgende/28d (29 %) — Bing, DuckDuckGo, Yahoo, Ecosia, Qwant —
+der ventede på en kanal, der ikke virkede.
+
+**Rettelsen er 18 linjer i `proxy.ts` + to hjælpere i `indexnow.ts`.** En
+rewrite, **før** locale-afgørelsen, så `{host}/{key}.txt` bliver den URL
+serveren svarer på. Den ligger før `getRouteDecision`, fordi nøglefilen tilhører
+værten og ikke et sprog — ellers ville `/abc12345.txt` på beraknare.se være en
+dansk-only 404. Patternet `^\/([A-Za-z0-9-]{8,128})\.txt$` ligger i
+`indexnow.ts` ved siden af det, `keyLocation` allerede bruger, så de to sider
+ikke kan glide fra hinanden.
+
+**Bevis på rigtig server** (`npm run build` → `next start` på port 3466,
+verificeret fri inden start, med `INDEXNOW_API_KEY=abc12345`):
+`/abc12345.txt` → **200**, `content-type: text/plain; charset=utf-8`, krop
+`abc12345`; `Host: beraknare.se` samme; `/wrongkey123.txt` → **404** (nøglen er
+ikke gættet); `/api/indexnow-key/abc12345` → 200 uændret; `/dato` → 200 med
+fuld HTML, så rewrite'en ødelægger ikke normal routing. Mod live-sitet var den
+samme `.txt` 404 kl. 02:12.
+
+**Harness.** Fire af de fem nye proxy-tests **faller** mod master, verificeret
+ved at stashe `proxy.ts` væk: de to per-host-rewrite, den der siger at rewrite'en
+ligger før locale-afgørelsen, og hele kæden `buildIndexNowPayload` →
+`keyLocation` → `proxy()` → rewrite-målet i én test. Den femte (at rewrite'en
+ikke sluger en statisk fil) er grøn på begge sider med vilje — den låser
+grænsen.
+
+**To fund i min egen diff, fundet fordi jeg gik den igennem som reviewer:**
+
+1. *En fremtidig `public/manifest.txt` ville være sluget.* Rewrite'en kører før
+   statiske filer, og 8+ teg i stammen er nok. Min første løsning var at læse
+   `INDEXNOW_API_KEY` i proxy'en og kun rewrite'e ved match — **det ville have
+   frosset værdien ved build** i edge-runtime og været præcis jordemoderstudys
+   fejl. Jeg lod være med at læse env i proxy'en og lukkede klassen i stedet med
+   en test, der læser `public/` og kræver nul filer med nøgleformet stamme
+   (og låser `ads.txt` med). `robots.txt` (6 teg) og `ads.txt` (3) kan aldrig
+   ramme patternet; `sw.js` er ikke `.txt`.
+2. *Testen brugte `beregner.no`, som ikke er lanceret.* `getAllDomainConfigs()`
+   skjuler den, så `buildIndexNowPayload` returnerede `null`, og
+   `new URL("")` kastede. Rettet til at iterere `getAllDomainConfigs()` — så
+   testen følger de domæner, der faktisk er live, og dækker automatisk et
+   senere lanceret domæne. Det er målefejl nr. 24: jeg gik ud fra den fjerde
+   konfiguration i stedet for at læse, hvilke der er synlige.
+
+**Hvad der stadig mangler, ærligt:** `INDEXNOW_ENABLED=true` og
+`INDEXNOW_API_KEY` skal sættes i Dokploys env — det kan jeg ikke selv, og
+nøglen må ikke i en commit. Uden dem returnerer modulet `skipped: disabled` ved
+hver boot, og loggen siger `[indexnow] … skipped (disabled)`. Den linje er det
+hurtigste tegn. ❓ opdateret i planen. **Effekten kan derfor først måles, når
+Mads har sat nøglen** — ændringen her er en forudsætning, ikke en vækst i
+sig selv, og det er sagt sådan i planen.
+
+**MÅL:** `/dage-til`-siderne (22 da + 19 se, nyere end baseline) og de øvrige
+nylige sider er den første måleflade for Bing/DDG/Yahoo. Plausible's
+ikke-Google-andel: **2.153 af 7.490 = 29 %** pr. 2026-10-02 (Bing 1.334, DDG
+383, Yahoo 265, Ecosia 119, Qwant 52). Genmål **2026-10-16** — 14 dage er for
+lidt til Bing, men en ændret andel i de kilder er det første tegn.

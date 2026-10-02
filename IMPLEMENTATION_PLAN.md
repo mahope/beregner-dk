@@ -1,26 +1,27 @@
-STATUS: 2/10 00:05. Rød CI: ingen. Sentry: MINBEREGNER-1 er Next-router-støj,
-  filtreret siden 3e67ed3, kodetestet siden 5f137d4. PR-TJEK: 2026-10-02 — ingen
-  åbne PR'er. BRANCH-TJEK: ikke kørt i denne uge.
+STATUS: 2/10 02:20. Rød CI: ingen (seneste kørsel grøn 23:57Z). Sentry: MINBEREGNER-1
+  er Next-router-støj, filtreret siden 3e67ed3, kodetestet siden 5f137d4.
+  PR-TJEK: 2026-10-02 — ingen åbne PR'er. BRANCH-TJEK: ikke kørt i denne uge.
+  CEO-kø punkt 0 gennemgået i kode 2/10: Valborg er 30. april, påskafton er
+  lørdag (1 dag før påskedag), dansk påskeaften-FAQ er væk, `toUtcMidnight`
+  læser `DAGE_TIL_TIMEZONE`, `maneder: 12` har en forklaring, advent-teksten
+  siger 27/11–3/12, og den svenske promille-FAQ genererer fra egen formel med
+  1,0 ‰. Alle otte er lukket.
   **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` ·
-  `npm run build`. Målt 2/10 00:05: 0 · 0 · **3521 grønne i 217 filer** · 0.
-  **Denne iteration: `/renteberegner`'s danske eksempel læser modulet.**
-  `ceo/renteberegner-eksempel-fra-modul`. `metaDescription` og den *svenske*
-  gren læste allerede `rente-eksempler`; den *danske* brødtekst skrev sit
-  eksempel håndskrevet — «200.000 kr.», «1.211,96 kr.», «290.870,56 kr.»,
-  «90.870,56 kr.», «12,68 %», «0,3333 %», «4,07 %» og tre Excel-formler med
-  håndskrevet `0,04/12;240;-200000`. Nu kommer alle otte fra
-  `annuitetsEksempel()` og `effektivAarsrente()`. Modulet giver præcis de
-  samme tal (målt), så **det synlige er uændret** — rettelsen er koplingsformen.
-  *Bevis:* tallene er lig med de håndskrevne til øre, så `toContain` på dem er
-  intet bevis. Den nye test mocker modulet med 123.456 kr. / 7 % / 15 år og
-  `effektivAarsrente() → 0,5`: mod gammel kode **3 af 3 røde**, mod ny grønne.
-  *Én fejl fundet undervejs:* første version skrev «4 ÷ 12 = 33,3333 %», fordi
-  `eksempel.aarsrente` er 4 (procent) mens `AARS_FIRE_PROCENT` er 0,04 (brøk) —
-  to enheder i ét modul. Rettet med /100 på det ene sted.
-  *Ærligt om porten:* `HAARDKODEDE_BELOB` for siden står **uændret på 6**; de
-  otte lå i `<code>`-strenge og interpolationer, porten ser kun `isJsxText`.
-  De 6 tilbage er rentefradrag-sætningen på samme side → næste opgave.
-  **Åbne VERIFICÉR-noter: 11**, alle med vindue **2/10 07:30**.
+  `npm run build`. Målt 2/10 02:15: 0 · 0 · **3537 grønne i 217 filer** · 0.
+  **Denne iteration: IndexNow sendte til en nøglefil, der ikke fandtes.**
+  `ceo/indexnow-noeglefil`. `buildIndexNowPayload` erklærede
+  `keyLocation: {host}/{key}.txt`, men nøglen blev serveret på
+  `/api/indexnow-key/{key}` — og IndexNow henter `keyLocation`, før den
+  accepterer **én eneste** URL. Målt på live 2/10 02:12:
+  `https://minberegner.dk/abc12345.txt` → **404**, altså afvises hver
+  indsendelse. Nøglen er et env-værdi og kan derfor ikke ligge i `public/`;
+  løsningen er en rewrite i `proxy.ts` **før** locale-afgørelsen, så
+  `{host}/{key}.txt` bliver den URL, serveren svarer på. Bevis på rigtig
+  server (`next start`, port 3466, `INDEXNOW_API_KEY=abc12345`): `.txt` → 200
+  `text/plain` med nøglen, forkert nøgle → 404, `/dato` → 200, beraknare.se
+  → 200. *Modsvejs:* 4 af de 5 nye proxy-tests **falder** mod master, den 5.
+  låser at rewrite'en ikke sluger en statisk fil.
+  **Åbne VERIFICÉR-noter: 12**, alle med vindue **2/10 07:30**.
 
 ## Review-fund 29/9 — lukket (detaljer i `docs/plan-arkiv.md`)
 
@@ -140,10 +141,18 @@ enkeltpost i trafikplanen. **Accept:** se opgave 187.
 **F4. [x] ✅** dobbelerede stribe væk — `docs/plan-arkiv.md`. **MÅL:** `/` 218
 besøgende/28d, bounce 38 % → mod 2-7 %; se `/` 20, bounce 80 %.
 
-**F5. [ ] Søg på de 27 % ikke-Google-trafik.** Bing 1.319 + DDG 378 +
-Yahoo 274 besøgende/28d. IndexNow er kodet (`src/lib/indexnow.ts`), men ❓
-spørger om krogen efter deploy er sat op — uden svar er Bing/DDG/Yahoo
-indeksering uafhængig af vores deploys.
+**F5. [~] ✅ nøglefilen — delvis. Søg på de 27 % ikke-Google-trafik.** Bing 1.334
+  + DDG 383 + Yahoo 265 + Ecosia 119 + Qwant 52 = **2.153 af 7.490** besøgende/28d
+  (Plausible 2026-10-02). IndexNow er kodet (`src/lib/indexnow.ts`), og **krogen
+  findes**: `src/instrumentation.ts` `register()` kalder
+  `submitDeploymentIndexNow()` ved serverstart, altså efter hvert batch-deploy.
+  ❓ om krogen er dermed besvaret. **Men den kunne aldrig have virket:** payload'en
+  erklærede `{host}/{key}.txt`, og nøglen blev serveret på `/api/indexnow-key/…`.
+  Rettet 2/10 (`ceo/indexnow-noeglefil`) — se den nye VERIFICÉR-note. *Hvad der
+  stadig mangler:* `INDEXNOW_ENABLED=true` og `INDEXNOW_API_KEY` i Dokploys env
+  (❓ nedenfor). Uden dem returnerer `submitIndexNow` `skipped: disabled`, og
+  loggen siger `[indexnow] … skipped (disabled)` ved hver boot.
+
 
 **F6. [x] ✅** norske tal uden dansk separator — port `intl-locale-tag.test.ts`.**
 
@@ -204,6 +213,16 @@ Prioriteret efter forventet effekt på **trafik**. Datagrund fra GSC 1/10
   af den side vi lige byggede; de er samme intention, så de skal **ikke** blive
   egne sider.
 
+- **Emoji ud, rigtige ikoner ind — etape 1: kategorier og forside (ny, 2/10).**
+  *Hvem:* alle 7.490 besøgende/28d; det er den første skærm efter et Google-resultat.
+  *Hvilket tal den skal flytte:* CTR og bounce på `/` (211 besøgende, bounce 38 %)
+  og på kategorisiderne — et site der ligner et hobbyprojekt får færre klik.
+  *Accept:* ét centralt ikon-map med `lucide-react` (allerede en afhængighed),
+  brugt af `src/lib/home-data.ts` (~154 emoji), `categories.ts` (~94) og
+  `navigation.ts` (~112); **0 emoji** i de tre filer; dekorative ikoner skjult
+  for skærmlæsere; ét lag ad gangen med grøn gate imellem. *Datagrund:* Mads'
+  mission (prioritet 1) + `wc` målt på repoet 2/10. Resten af de 45 filer er
+  etape 2 og 3 — ikke denne iteration.
 - **Landing-side pr. konkrete countdown-spørgsmål** (`/dage-til/<slug>`).
   *Hvem:* «hvor mange dage er der til 1 december» 1.209 visninger, 3 klik,
   pos. 5. *Accept:* de fire sider findes allerede (jul, nytår, sommerferie,
@@ -226,6 +245,16 @@ Prioriteret efter forventet effekt på **trafik**. Datagrund fra GSC 1/10
 
 ## Åbne VERIFICÉR DEPLOY-noter
 
+- ⏳ **IndexNow-nøglefilen ligger nu på den URL, payload'en erklærer.**
+  `ceo/indexnow-noeglefil`. Prøven er på indhold: `curl -sI
+  https://minberegner.dk/abc12345.txt` skal svare **404** (den nøgle er ikke
+  konfigureret — så 404 er det *korrekte* svar her), mens
+  `https://beraknare.se/abc12345.txt` også skal være 404. Skal Mads sætte
+  `INDEXNOW_API_KEY` i env, bliver den rigtige prøve i stedet
+  `curl -s https://{vært}/{nøgle}.txt` → **200** med `content-type: text/plain`
+  og nøglen i kroppen. Før rettelsen var begge **404 altid**. Vindue
+  **2/10 07:30**. Uden nøglen i env er resten af kæden ubevistelig uden for
+  lokal test — sig til når den er sat, så jeg kan lukke den på indhold.
 - ⏳ **RSC-støjens filter kan ikke dø af en tekstændring.**
   `ceo/sentry-router-stoej-paa-kode`. Prøven er på indhold, og den skal **ikke**
   slå MINBEREGNER-1 til: efter deploy skal Sentry-projektet fortsat stå på **0**
@@ -362,13 +391,16 @@ Prioriteret efter forventet effekt på **trafik**. Datagrund fra GSC 1/10
   Effektivitet → Søgninger, filtreret på `/procent`, plus de 20 største
   søgninger for hele domænet, låser F1-F4.** GSC-data kan ikke hentes fra en
   agent — API'en kræver din konto.
-- ❓ **IndexNow mangler en krog efter deploy (ny, 30/9).** Bing, DuckDuckGo og
-  Yahoo står for ~1.960 af 7.319 besøgende/28d, og IndexNow får ændringer ind
-  på minutter i stedet for dage. Koden kan skrives i dag, men **noget skal
-  kalde den efter et vellykket deploy** — og det er batch-deployeren, ikke mig:
-  Jeg må ikke trigge deploys og kan ikke se, hvordan den er sat op. Skal jeg
-  skrive `npm run indexnow` ind i `.dokploy/preview.template.json`, eller kører
-  du kommandoen manuelt efter en batch?
+- ❓ **IndexNow mangler to env-værdier (opdateret 2/10 — krogen er ikke problemet).**
+  Krogen efter deploy findes og er kodet: `src/instrumentation.ts` `register()`
+  kalder `submitDeploymentIndexNow()` ved serverstart, og `.dokploy/preview.template.json`
+  indeholder kun `NODE_ENV`. Så det eneste, der mangler, er at **`INDEXNOW_ENABLED=true`**
+  og **`INDEXNOW_API_KEY=<8-128 teg af A-Z, a-z, 0-9, - >`** er sat i Dokploys
+  miljøvariabler — det kan jeg ikke gøre selv, og nøglen skal ikke i en commit.
+  Skal jeg skrive dem i `preview.template.json` som pladsholdere, eller sætter du
+  dem i Dokploy? Uden dem returnerer modulet `skipped: disabled` ved hver boot,
+  og du vil se `[indexnow] … skipped (disabled)` i deploy-loggen — den linje er
+  det hurtigste tegn på om det virker.
 - ❓ **Fulde browsermålinger kræver Playwright (ny, 30/9).** Deploy-noter der
   kræver en rigtig browser kan ikke lukkes maskinelt: repoet har ingen
   Playwright, og `CLAUDE.md` forbyder nye afhængigheder uden dit ja. Uden det

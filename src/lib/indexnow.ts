@@ -6,6 +6,8 @@ const INDEXNOW_ENDPOINT = "https://api.indexnow.org/indexnow";
 const MAX_URLS_PER_REQUEST = 10_000;
 const DEFAULT_TIMEOUT_MS = 5_000;
 const INDEXNOW_KEY_PATTERN = /^[A-Za-z0-9-]{8,128}$/;
+/** The only shape that resolves to the key file: `/{key}.txt` at the root. */
+const INDEXNOW_KEY_PATHNAME_PATTERN = /^\/([A-Za-z0-9-]{8,128})\.txt$/;
 
 export type IndexNowEnv = Record<string, string | undefined>;
 
@@ -102,6 +104,26 @@ function parseCanonicalUrl(
 
 export function isValidIndexNowKey(value: string | undefined): value is string {
   return Boolean(value && INDEXNOW_KEY_PATTERN.test(value));
+}
+
+/** Where the key file is served from, for a key that already passed validation. */
+export function getIndexNowKeyPathname(key: string): string {
+  return `/api/indexnow-key/${key}`;
+}
+
+/**
+ * The key in a `/{key}.txt` request path, or `null` when the path is not a key
+ * file. `buildIndexNowPayload` advertises exactly this URL as `keyLocation`, and
+ * IndexNow fetches it before it accepts a single URL — so the path the payload
+ * names and the path the server answers have to be the same shape. `proxy.ts`
+ * rewrites the match here onto the key route, which is why this lives next to
+ * the pattern it shares with the payload.
+ */
+export function getIndexNowKeyFromPathname(
+  pathname: string,
+): string | null {
+  const match = INDEXNOW_KEY_PATHNAME_PATTERN.exec(pathname);
+  return match && isValidIndexNowKey(match[1]) ? match[1] : null;
 }
 
 export function getIndexNowKey(

@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getDomainConfigForHost } from "@/lib/domain-config";
+import {
+  getIndexNowKeyFromPathname,
+  getIndexNowKeyPathname,
+} from "@/lib/indexnow";
 import { getRouteDecision } from "@/lib/routing";
 
 export function proxy(request: NextRequest) {
@@ -10,6 +14,20 @@ export function proxy(request: NextRequest) {
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-locale", locale);
   requestHeaders.set("x-hostname", hostname);
+
+  // The IndexNow payload advertises `{host}/{key}.txt` as its `keyLocation`, and
+  // the protocol has the search engine fetch that exact URL before it accepts
+  // the submission. The key itself is an env value, so it cannot be a file in
+  // `public/`; this rewrite makes the advertised URL real on every domain, and
+  // it runs before the locale decision because the key file belongs to the host,
+  // not to one language. The route answers 404 for a key that is not configured.
+  const indexnowKey = getIndexNowKeyFromPathname(request.nextUrl.pathname);
+  if (indexnowKey) {
+    return NextResponse.rewrite(
+      new URL(getIndexNowKeyPathname(indexnowKey), request.url),
+      { request: { headers: requestHeaders } },
+    );
+  }
 
   const decision = getRouteDecision(domainConfig, request.nextUrl.pathname);
 

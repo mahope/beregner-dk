@@ -1,5 +1,11 @@
+import { readdirSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, test } from "vitest";
 import { NextRequest } from "next/server";
+import {
+  buildIndexNowPayload,
+  getIndexNowKeyFromPathname,
+} from "./lib/indexnow";
 import { config, proxy } from "./proxy";
 
 function makeRequest(hostname: string, path: string): NextRequest {
@@ -147,5 +153,87 @@ describe("proxy locale routing", () => {
   test("keeps local development routes unrestricted", () => {
     const response = proxy(makeRequest("localhost:3000", "/su"));
     expect(response.status).toBe(200);
+  });
+});
+
+describe("proxy IndexNow key file", () => {
+  /**
+   * `buildIndexNowPayload` sender `https://{host}/{key}.txt` som `keyLocation`,
+   * og IndexNow henter den URL før den accepterer en eneste URL. Uden denne
+   * rewrite er der intet, der svarer på den, så hver indsendelse bliver afvist
+   * — for de domæner, der leverer næsten en tredjedel af trafikken.
+   */
+  test.each(["minberegner.dk", "beraknare.se"])(
+    "rewrites the advertised key path to the key route: %s",
+    (host) => {
+      const response = proxy(makeRequest(host, "/abc12345.txt"));
+
+      expect(response.status).toBe(200);
+      expect(response.headers.get("x-middleware-rewrite")).toBe(
+        `https://${host}/api/indexnow-key/abc12345`,
+      );
+      expect(response.headers.get("x-middleware-request-x-hostname")).toBe(host);
+    },
+  );
+
+  test("rewrites before the locale decision, so Swedish and Danish both work", () => {
+    for (const host of ["minberegner.dk", "beraknare.se"]) {
+      const response = proxy(makeRequest(host, "/abc12345.txt"));
+      expect(response.headers.get("x-middleware-rewrite"), host).not.toContain(
+        "locale-unavailable",
+      );
+      expect(response.status, host).toBe(200);
+    }
+  });
+
+  test("leaves a page-shaped path to the normal routing", () => {
+    for (const path of [
+      "/dato",
+      "/procent",
+      "/abc12345",
+      "/abc_12345.txt",
+      "/robots.txt",
+      "/ads.txt",
+    ]) {
+      const response = proxy(makeRequest("minberegner.dk", path));
+      expect(response.headers.get("x-middleware-rewrite"), path).toBeNull();
+    }
+  });
+
+  /**
+   * Rewrite'en kører før statiske filer, så et `public/*.txt` med otte teg eller
+   * mere i stammen ville blive slugt. Nøglen er et env-værdi, som ikke må læses
+   * i proxy'en — der ville den frosset ved build — så klassen lukkes her i stedet.
+   */
+  test("cannot shadow a static root file, because none has a key-shaped stem", () => {
+    const publicDir = join(__dirname, "..", "public");
+    const keyShaped = readdirSync(publicDir)
+      .filter((name) => name.endsWith(".txt"))
+      .filter((name) => getIndexNowKeyFromPathname(`/${name}`) !== null);
+
+    expect(keyShaped).toEqual([]);
+    expect(readdirSync(publicDir)).toContain("ads.txt");
+  });
+
+  /**
+   * Hele kæden i én test: den URL, payload'en sender til api.indexnow.org, er
+   * den URL, proxy'en svarer på. Det er den eneste assertion, der falder, hvis
+   * nogen af de to sider flyttes — og den fejlede mod master, fordi ingen af
+   * dem gjorde det samme.
+   */
+  test("answers the exact keyLocation the submission advertises", () => {
+    const payload = buildIndexNowPayload({
+      baseUrl: "https://minberegner.dk",
+      key: "abc12345",
+      urls: ["https://minberegner.dk/procent"],
+    });
+    const keyLocation = new URL(payload?.keyLocation ?? "");
+    const response = proxy(
+      makeRequest(keyLocation.host, keyLocation.pathname),
+    );
+
+    expect(response.headers.get("x-middleware-rewrite")).toBe(
+      `${keyLocation.origin}/api/indexnow-key/abc12345`,
+    );
   });
 });
