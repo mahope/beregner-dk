@@ -1,28 +1,23 @@
-STATUS: 2/10 14:45. CI grøn (`gh run list -L 1`, 13:23). PR-TJEK 2/10: ingen
+STATUS: 2/10 15:25. CI grøn (`gh run list -L 1`, 13:23). PR-TJEK 2/10: ingen
    åbne PR'er. BRANCH-TJEK 2/10: ingen forældede branches. Sentry: begge fejl
-   lukket (MINBEREGNER-1 er Next-router-støj, filtreret siden `3e67ed3`;
-   MINBEREGNER-2 rettet i `4d48370`+`def070c`). CEO-kø punkt 0 lukket (`04ca30a`).
-   Review-fund fra 2/10 12:20 rettet (`1174169`) og lukket med mutation.
+   lukket. CEO-kø punkt 0 lukket (`04ca30a`, alle otte delpunkter efterprøvet
+   2/10 15:05). Review-fund fra 2/10 12:20 rettet (`1174169`) og lukket med
+   mutation.
    **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` ·
-   `npm run build` — målt grøn 2/10 14:45 (**3726** tests i 228 filer, uændret;
-   F5b-ændringen er provenance, ikke nye tests).
-   **Denne iteration: `ceo/su-indlaeg-belob-fra-modul`** — de seks håndskrevede
-   strenge i SU-indlæggets titel/beskrivelse læses fra `SU_2026`. Den gamle test
-   låste fejlen fast (den krævede `title: "SU 2026: 7.426 kr. …"` i kilden) og
-   dømmer nu den metadata, Google får. **Fandt en reel fejl undervejs:**
-   beskrivelsen lovede «Fribeløb fra 15.297 kr.» — det er *ungdomsuddansatte*
-   sats, på en side hvis titel og brødtekst handler om videregående uddannelse
-   (20.749 kr.). Målt: `youthWithSu: 15297` / `videregaaendeWithSu: 20749`, og
-   `15.297` fandt ingen anden forekomst i `src/`. Ny sætning 154 tegn — `meta-
-   description`-portens 160-tegns-loft fangede min første forsøg på 168.
-   **Næste iteration:** strenglistens næste fil er `arveafgift-regler-og-regler`
-   (7 + 15). Feature-kø har ingen kildefri kandidat; de fire er blokeret af ❓
-   (ferielov, sst.dk, opgave 187 den 13/10, beregner.no).
+   `npm run build` — målt grøn 2/10 15:22 (**3730** tests i 228 filer, +4).
+   **Denne iteration: `ceo/arveafgift-belob-fra-modul`** — de 22 håndskrevne
+   beløb i **arveafgift-indlægget** (15 i JSX-teksten + 7 i strengliteralerne)
+   læses fra `EKSEMPLER_GUIDE`, `EKSEMPEL_BARN` og `SATSER_2026`. `TITEL` og `BESKRIVELSE` er nu én konstant hver, brugt i
+   `<head>`, `og:` og JSON-LD. **Fandt en reel fejl:** sats-tabellen skrev
+   `36.25%` med punktum i dansk brødtekst, mens resten af siden skrev
+   «36,25 %» — målt på den live HTML: `36.25` × 6 mod `36,25` × 8. Metadata er
+   **byte-uændret** (dømt af en ny test), så der er ingen CTR-effekt at måle.
+   **Næste iteration:** strenglistens næste fil er `/boligsalg` (9 fund, 8
+   redaktionelle prisintervaller uden kilde). Feature-kø har ingen kildefri
+   kandidat; de fire er blokeret af ❓.
    ⚠️ `regnestykker`-porten logger (men får ikke rød) 1 ureviewet dansk streng
    i komponenter der monteres på beraknare.se: `src/app/procent/page.tsx:621`.
    Målt 2/10 13:45: falsk positiv — den ligger i `{locale === "da" && …}`.
-   **Målt 2/10 14:15:** alle 247 URL'er i begge sitemap'er svarer 200, og
-   `beraknare.se` har ingen dansk brødtekst lækket på de 16 mest besøgte sider.
 
 ## Fase 3 — trafik-drevet
 
@@ -88,14 +83,13 @@ dage læst fra `afvigendeDage()`. **F8. [x] ✅** svenske helgdagslove kildefør
 
 ## Feature-kø
 
-Fire åbne kandidater, i rækkefølge efter hvor ren intentionen er. Alt med ⛔
+Fire kandidater, i rækkefølge efter hvor ren intentionen er. Alt med ⛔
 er blokeret af en ❓ og må ikke gættes.
 
-- **Ironman-total som værktøj i `/pace`** — *Hvem:* «ironman tid beregner» og
-  «triathlon tid beregner» er 2 af 10 danske completioner under «tid beregner»
-  (27k visninger, pos. 5). *Accept:* tre tidsfelter → samlet tid + tempo pr. ben,
-  bygget på `beregnTriatlon`, da+se+no. *Datagrund:* autocomplete 2/10 14:10.
-  Vi har kun tabellen fra 2/10, ikke indtastningen.
+- **[x] ✅ Ironman-total i `/pace`** — tre tidsfelter → samlet tid + tempo pr. ben,
+  bygget på `beregnTriatlon`, da+se+no (`3720dea`). MÅL: `/pace` 2 af 10
+  danske completioner under «tid beregner» (27k visninger, pos. 5) konverterer
+  nu til et værktøj. Måles ved næste Plausible-snapshot.
 - **Feriesider: vinterferie og påskeferie** — *Hvem:* «skoleferie 2026» og
   «efterårsferien» (10. af 10 completioner under «hvor mange dage er der til»).
   *Accept:* to sider i `/dage-til` med samme mønster som efterårsferien.
@@ -111,13 +105,10 @@ er blokeret af en ❓ og må ikke gættes.
 Listen `src/app/regnestykker.test.ts` tæller forekomster pr. fil og må kun
 blive kortere. ✅ betyder lukket; detaljerne står i `docs/plan-arkiv.md`.
 
-**Åben række (strenglisten):** næste fil er
-`src/app/blog/arveafgift-regler-og-regler/page.tsx` (7 i strenglisten + 15 i
-JSX-teksten), derefter `/boligsalg`. **SU-indlægget er lukket 2/10 14:45**
-(`su-indlaeg-belob-fra-modul`): de seks strenge læses fra `SU_2026`, og
-beskrivelsens fribeløb lovede *ungdomsuddansatte* sats på en side om videregående
-uddannelse — den sagde nu «Videregående fribeløb fra …». Strenglistens loft er
-**70 → 64**.
+**Åben række (strenglisten):** næste fil er `/boligsalg`. **To indlæg er lukket
+2/10:** SU (`su-indlaeg-belob-fra-modul`) og arveafgift
+(`arveafgift-belob-fra-modul`); begge i `docs/plan-arkiv.md`. Strenglistens loft
+er **70 → 57**, JSX-listen **360 → 347**.
 
 **Åben:** `/boligsalg` — 9 fund, hvor 8 er redaktionelle prisintervaller (mægler,
 tinglysning, avance, byggeskade …) uden kilde i repoet, og den niende er
@@ -143,6 +134,7 @@ ingen regex på tal og tekst.
 
 | Slug | Prøv på indhold |
 |---|---|
+| `arveafgift-belob-fra-modul` (**ny**, vindue 2/10 17:30) | `minberegner.dk/blog/arveafgift-regler-og-satser`: `<title>` byte-uændret «Arveafgift 2026: 1 mio. kr. til børn koster 91.155 kr.» og `<meta name="description">«Arveafgift (boafgift) 2026: Et barn arver 1 mio. kr. og betaler 91.155 kr. Se bundfradrag på 392.300 kr, 15 % for nære arvinger og 36,25 % for søskende.»», `og:description` «Arveafgift 2026: 91.155 kr for et barn der arver 1 mio. kr. Bundfradrag, satser og to regneeksempler.» — **intet** dobbelt punktum. Sats-tabellen skal have **«36,25%»** i to celler, «Kort svar» **«36,25 %»**, og **intet** «36.25» i hele HTML'en. Begge regnestykker byte-uændrede: `1.107.700 / 166.155 / 1.333.845 / 666.923` og `407.700 / 61.155 / 738.845 / 184.711 / 245.866 / 554.134`. FAQ'en skal have **fire** spørgsmål, hvor «Hvad koster arveafgiften, hvis et barn arver 1.000.000 kr?» svarer «… afgiftsgrundlaget er 607.700 kr … modtager 908.845 kr.». Gavegrænserne (74.100 / 26.600 kr) er bevaret med vilje |
 | `su-indlaeg-belob-fra-modul` (**ny**, vindue 2/10 17:30) | `minberegner.dk/blog/su-2026-satser-og-regler`: `<title>` skal være «SU 2026: 7.426 kr. pr. måned udeboende» (byte-uændret) og `<meta name="description">` skal være «SU 2026: udeboende får 7.426 kr. pr. måned, hjemmeboende 1.154-3.202 kr. **Videregående fribeløb fra 20.749 kr.**, SU-lån op til 3.799 kr. Alle tal fra su.dk.». **`Intet` «Fribeløb fra 15.297 kr.»** — det var ungdomsuddansatte sats på en side om videregående uddannelse. Artiklens JSON-LD-`description` skal have den samme nye sætning, og `og:description` skal have «fribeløb fra 20.749 kr. på videregående uddannelse». Resten af siden (tabel, otte FAQ, brødtekst) skal være byte-uændret |
 | `triatlon-ironman-tid` (**åben**, vindue 2/10 17:30) | `minberegner.dk/pace`: en `<h2>` «Triatlon og Ironman: tiden for alle tre ben» med en tabel på fire rækker (Svømning 3,8 km 1:00:00 15:47 · Cykel 180 km 5:00:00 1:40 · Løb 42,195 km 3:30:00 4:59 · I alt 225,995 km 9:30:00) og FAQ'en skal have **ni** spørgsmål, hvor «Hvor lang tid tager et Ironman?» svarer «… 1:00:00 + 5:00:00 + 3:30:00 = 9:30:00 i alt …» og «Hvor stor en del af et Ironman er cyklen?» «… 52,6 % af tiden … 79,6 % af distancen». `beraknare.se/pace` skal have «Triathlon och Ironman» + «Löpning» + «Totalt» og de samme ni spørgsmål. **Intet** «9:30:00» på `/pace` uden for tabellen og de to svar |
 | `ugenummer-uge-datoer` (**åben**, vindue 2/10 17:30) | `minberegner.dk/ugenummer`: resultatboksen skal vise de **syv** datoer i den valgte uge — `Mandag 12. oktober` … `Søndag 18. oktober` for uge 42 — i kort under «Uge 42 / 2026». FAQ'en skal have **fem** spørgsmål, og «Hvilke datoer er der i uge 42?» skal svare «… går fra **mandag den 12. oktober 2026** til **søndag den 18. oktober 2026** …». `keywords` skal have «datoer i uge» og «datoer i uge 42». **Intet** dansk i `beraknare.se/ugenummer` ændret |

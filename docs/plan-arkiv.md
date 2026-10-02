@@ -24732,3 +24732,45 @@ filer: SU-indlæggets `page.tsx`, samme `page.test.tsx`, `regnestykker.test.ts`
 `/blog/su-2026-satser-og-regler` har ingen GSC-top-15-plads, så effekten måles
 ved næste Plausible-snapshot. Det købare her er rigtigheden: en beskrivelse der
 lovede det forkerte fribeløbsniveau.
+
+## Iteration 2/10 15:25 — `ceo/arveafgift-belob-fra-modul`
+
+**Hvad:** `blog/arveafgift-regler-og-satser` skrev 22 beløb for sig: 15 i
+JSX-teksten og 7 i strengliteralerne. De læses nu fra `EKSEMPLER_GUIDE`,
+`EKSEMPEL_BARN` og `SATSER_2026` — de moduler brødteksten i forvejen læste
+satsernes **dele** fra. `TITEL` og `BESKRIVELSE` er nu én konstant hver, brugt
+i `generateMetadata`, i `openGraph` og på `BlogArticleSchema`, så JSON-LD og
+`<head>` ikke kan glide fra hinanden.
+
+**De to beløb der er bevaret** er gavegrænserne (74.100 kr til børn og
+børnebørn, 26.600 kr til svigerbørn). De har ingen kilde i repoet, så de må ikke
+gættes (punkt 11), og de står i portens liste med vilje. Strenglisten for
+filen er **tom** (7 → 0), JSX-listen 15 → 2, løftet 360 → 347 og strengløftet
+64 → 57.
+
+**Rettelsen fandt en reel fejl: `36.25%` i dansk brødtekst.** Sats-tabellen
+skrev `{EFFEKTIV_PCT}%` med et JS-tal, så den skrev **punktum** i «36,25 %»,
+mens metadata, FAQ'en og resten af artiklen skrev **komma**. Målt på den
+live HTML før rettelsen: `36.25` × 6 (tre synlige + tre i RSC-payloaden),
+`36,25` × 8. Ny `pct()` bruger `toLocaleString("da-DK")`.
+
+**Mutationer (punkt 12) — målt, filen genskabt byte-for-byte:**
+1. `TITEL` tilbage til den håndskrevne streng → «beløbene følger bundfradraget
+   i SATSER_2026» rød (`expect(titel).toBe(…)`).
+2. `<td>{EFFEKTIV_PCT}%</td>` + `<li>…407.700 kr</li>` → **2 røde**: «alle
+   procenter staves med dansk decimalkomma» og bundfradrags-porten.
+3. De tre nye tests mod den gamle kode: barn-eksemplet (1.107.700 / 166.155 /
+   1.333.845 / 666.923) og FAQ'ens (607.700 / 91.155 / 908.845) stod slet ikke
+   i nogen test før.
+
+**Porten, der fangede en fejl jeg selv introducerede:** `krMio()` ender på
+«1 mio. kr.», og min første `og:description` satte et punktum til bagefter →
+«…1 mio. kr.. Bundfradrag». Den nye byte-uændrethedstest dømte den rød.
+
+**Gate grøn:** lint (686 filer), typecheck, **3730 tests / 228 filer** (+4),
+build (168 sider). Punkt 13: `git diff | grep -nE '^\+.*\$[0-9]'` er tom.
+
+**MÅL:** `/blog/arveafgift-regler-og-satser` 74 besøgende/28d (Plausible,
+målt 2/10 13:04) og falder 105 → 74 i GSC. Titelen, beskrivelsen og `og:` er
+**byte-uændrede**, så der er ingen CTR-effekt at måle — det købare er
+rigtigheden ved næste satsår. Baseline: 105 visninger/28d, 0,7 % CTR, pos 5,1.

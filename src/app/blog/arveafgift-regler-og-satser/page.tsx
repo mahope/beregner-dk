@@ -1,12 +1,12 @@
+import BlogArticleSchema from "@/components/BlogArticleSchema";
+import { NaesteSkridt } from "@/components/BlogNaesteSkridt";
+import { FAQSchema } from "@/components/StructuredData";
+import { EKSEMPEL_BARN, EKSEMPLER_GUIDE } from "@/lib/arveafgift";
+import { getCurrentDomainConfig } from "@/lib/get-locale";
+import { OG_IMAGE } from "@/lib/page-helpers";
+import { SATSER_2026 } from "@/lib/satser-2026";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { FAQSchema } from "@/components/StructuredData";
-import BlogArticleSchema from "@/components/BlogArticleSchema";
-import { getCurrentDomainConfig } from "@/lib/get-locale";
-import { NaesteSkridt } from "@/components/BlogNaesteSkridt";
-import { SATSER_2026 } from "@/lib/satser-2026";
-import { EKSEMPLER_GUIDE } from "@/lib/arveafgift";
-import { OG_IMAGE } from "@/lib/page-helpers";
 
 const BUNDFRADRAG = SATSER_2026.arveBundfradrag;
 const BOAFGIFT_PCT = Math.round(SATSER_2026.boafgift * 100);
@@ -19,20 +19,53 @@ const EFFEKTIV_PCT = Math.round(
     10000,
 ) / 100;
 
+/**
+ * Hele kroner i dansk skrivemåde.
+ *
+ * Beløbene i brødteksten er bruttotaler — bundfradraget trækkes fra først, og
+ * tillægsafgiften af *resten* efter boafgift giver derfor altid brøkdele. De
+ * skrives med `Math.round` fordi artiklen hele vejen regner i hele kroner, så
+ * læseren kan læge tallene sammen: 800.000 − 245.866 = 554.134.
+ */
+const kr = (belob: number) => Math.round(belob).toLocaleString("da-DK");
+
+/** Procent med dansk decimalkomma. Uden den skrev sats-tabellen `36.25%`. */
+const pct = (andel: number) => andel.toLocaleString("da-DK");
+
+/**
+ * «1 mio. kr.», så titel og beskrivelse ikke skriver arvebeløbet for sig. Den
+ * afledes af `EKSEMPEL_BARN.arv`, så et nyt eksempelbeløb ikke kan efterlade en
+ * «1 mio. kr.» der ikke længere passer.
+ */
+const krMio = (belob: number) => `${Math.round(belob / 1_000_000)} mio. kr.`;
+
 // Arvbeløbene i de to regneeksempler nedenfor. `/arveafgift`s guideboks lover at
 // indlægget viser «to fulde regneeksempler på 1.500.000 kr til børn og 800.000
 // kr til en søskende», så beløbene har samme ejer som den påstand.
 const GUIDE_BARN_TEKST = EKSEMPLER_GUIDE.barn.arv.toLocaleString("da-DK");
 const GUIDE_SOESKENDE_TEKST = EKSEMPLER_GUIDE.soeskende.arv.toLocaleString("da-DK");
 
+// Det beløb, der er tilbage når boafgiften er betalt. Regnestykket for
+// søskende har den som sit eget led («Beløb efter boafgift»), og tillægsafgiften
+// er netop 25 % af *dette* — ikke af afgiftsgrundlaget.
+const SOESKENDE_EFTER_BOAFGIFT = EKSEMPLER_GUIDE.soeskende.arv - EKSEMPLER_GUIDE.soeskende.boafgift;
+
+// Titel og beskrivelse er de strenge Google får, så de læses fra de samme tal
+// som brødteksten. De skal være byte-uændrede — de er rigtige — men de må ikke
+// blive stående, når bundfradraget stiger.
+const TITEL = `Arveafgift 2026: ${krMio(EKSEMPEL_BARN.arv)} til børn koster ${kr(EKSEMPEL_BARN.boafgift)} kr.`;
+const BESKRIVELSE =
+  `Arveafgift (boafgift) 2026: Et barn arver ${krMio(EKSEMPEL_BARN.arv)} og betaler ` +
+  `${kr(EKSEMPEL_BARN.boafgift)} kr. Se bundfradrag på ${BUND_FAEDRET} kr, ` +
+  `${pct(BOAFGIFT_PCT)} % for nære arvinger og ${pct(EFFEKTIV_PCT)} % for søskende.`;
+
 export async function generateMetadata(): Promise<Metadata> {
   const dc = await getCurrentDomainConfig();
   const baseUrl = dc.baseUrl;
 
   return {
-    title: { absolute: "Arveafgift 2026: 1 mio. kr. til børn koster 91.155 kr." },
-    description:
-      "Arveafgift (boafgift) 2026: Et barn arver 1 mio. kr. og betaler 91.155 kr. Se bundfradrag på 392.300 kr, 15 % for nære arvinger og 36,25 % for søskende.",
+    title: { absolute: TITEL },
+    description: BESKRIVELSE,
     keywords: [
       "arveafgift 2026",
       "boafgift 2026",
@@ -45,9 +78,10 @@ export async function generateMetadata(): Promise<Metadata> {
     ],
     openGraph: {
       images: OG_IMAGE,
-      title: "Arveafgift 2026: 1 mio. kr. til børn koster 91.155 kr.",
+      title: TITEL,
       description:
-        "Arveafgift 2026: 91.155 kr for et barn der arver 1 mio. kr. Bundfradrag, satser og to regneeksempler.",
+        `Arveafgift 2026: ${kr(EKSEMPEL_BARN.boafgift)} kr for et barn der arver ` +
+        `${krMio(EKSEMPEL_BARN.arv)} Bundfradrag, satser og to regneeksempler.`,
       url: `${baseUrl}/blog/arveafgift-regler-og-satser`,
       type: "article",
       siteName: dc.siteName,
@@ -62,16 +96,15 @@ export async function generateMetadata(): Promise<Metadata> {
 const faqItems = [
   {
     question: "Hvad er arveafgiften i Danmark i 2026?",
-    answer:
-      "Boafgiften er 15 % for nære arvinger (børn, børnebørn, forældre). Søskende og andre fjere arvinger betaler 15 % boafgift plus 25 % tillægsafgift af beløbet efter boafgift, svarende til 36,25 % af afgiftsgrundlaget. Ægtefæller betaler ingen arveafgift.",
+    answer: `Boafgiften er ${pct(BOAFGIFT_PCT)} % for nære arvinger (børn, børnebørn, forældre). Søskende og andre fjere arvinger betaler ${pct(BOAFGIFT_PCT)} % boafgift plus ${pct(TILLAEGS_PCT)} % tillægsafgift af beløbet efter boafgift, svarende til ${pct(EFFEKTIV_PCT)} % af afgiftsgrundlaget. Ægtefæller betaler ingen arveafgift.`,
   },
   {
     question: "Hvad er bundfradraget for arveafgift i 2026?",
     answer: `Bundfradraget (det afgiftsfri beløb) er ${BUND_FAEDRET} kr i 2026. Det gælder per bo, ikke per arving. Boafgift beregnes kun af beløbet over bundfradraget.`,
   },
   {
-    question: "Hvad koster arveafgiften, hvis et barn arver 1.000.000 kr?",
-    answer: `Barnet arver 1.000.000 kr. Bundfradraget er ${BUND_FAEDRET} kr, så afgiftsgrundlaget er 607.700 kr. Afgiften er 15 % = 91.155 kr, og barnet modtager 908.845 kr.`,
+    question: `Hvad koster arveafgiften, hvis et barn arver ${kr(EKSEMPEL_BARN.arv)} kr?`,
+    answer: `Barnet arver ${kr(EKSEMPEL_BARN.arv)} kr. Bundfradraget er ${BUND_FAEDRET} kr, så afgiftsgrundlaget er ${kr(EKSEMPEL_BARN.grundlag)} kr. Afgiften er ${pct(BOAFGIFT_PCT)} % = ${kr(EKSEMPEL_BARN.boafgift)} kr, og barnet modtager ${kr(EKSEMPEL_BARN.modtager)} kr.`,
   },
   {
     question: "Betaler ægtefæller arveafgift?",
@@ -85,8 +118,8 @@ export default function ArveafgiftGuidePage() {
     <div className="max-w-3xl mx-auto">
       <BlogArticleSchema
         slug="arveafgift-regler-og-satser"
-        title="Arveafgift 2026: 1 mio. kr. til børn koster 91.155 kr."
-        description="Arveafgift (boafgift) 2026: Et barn arver 1 mio. kr. og betaler 91.155 kr. Se bundfradrag på 392.300 kr, 15 % for nære arvinger og 36,25 % for søskende."
+        title={TITEL}
+        description={BESKRIVELSE}
       />
       <FAQSchema items={faqItems} />
 
@@ -102,7 +135,7 @@ export default function ArveafgiftGuidePage() {
         <header className="mb-8 not-prose">
           <span className="text-sm text-blue-600 dark:text-blue-400 font-medium">Arv & Økonomi</span>
           <h1 className="text-3xl md:text-4xl font-bold mt-2 text-gray-900 dark:text-white">
-            Arveafgift 2026: 1 mio. kr. til børn koster 91.155 kr.
+            {TITEL}
           </h1>
           <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400 mt-4">
             <time dateTime="2026-02-17">17. februar 2026</time>
@@ -118,12 +151,12 @@ export default function ArveafgiftGuidePage() {
         </p>
 
         <p>
-          <strong>Kort svar:</strong> Et barn, der arver 1.000.000 kr, betaler{" "}
-          <strong>91.155 kr i arveafgift</strong> — fordi bundfradraget er{" "}
-          {BUND_FAEDRET} kr, og resten (607.700 kr) beskattes med {BOAFGIFT_PCT} %.
-          Søskende og andre fjere arvinge betaler {BOAFGIFT_PCT} % boafgift plus{" "}
-          {TILLAEGS_PCT} % tillægsafgift af beløbet efter boafgift, svarende til{" "}
-          {EFFEKTIV_PCT} % af afgiftsgrundlaget. Ægtefæller betaler ingen arveafgift.
+          <strong>Kort svar:</strong> Et barn, der arver {kr(EKSEMPEL_BARN.arv)} kr, betaler{" "}
+          <strong>{kr(EKSEMPEL_BARN.boafgift)} kr i arveafgift</strong> — fordi bundfradraget er{" "}
+          {BUND_FAEDRET} kr, og resten ({kr(EKSEMPEL_BARN.grundlag)} kr) beskattes med {pct(BOAFGIFT_PCT)} %.
+          Søskende og andre fjere arvinge betaler {pct(BOAFGIFT_PCT)} % boafgift plus{" "}
+          {pct(TILLAEGS_PCT)} % tillægsafgift af beløbet efter boafgift, svarende til{" "}
+          {pct(EFFEKTIV_PCT)} % af afgiftsgrundlaget. Ægtefæller betaler ingen arveafgift.
         </p>
 
         <div className="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-400 p-4 my-6 not-prose">
@@ -154,27 +187,27 @@ export default function ArveafgiftGuidePage() {
               </tr>
               <tr>
                 <td>Børn, børnebørn, forældre</td>
-                <td>{BOAFGIFT_PCT}%</td>
+                <td>{pct(BOAFGIFT_PCT)}%</td>
                 <td>0%</td>
-                <td>{BOAFGIFT_PCT}%</td>
+                <td>{pct(BOAFGIFT_PCT)}%</td>
               </tr>
               <tr>
                 <td>Stedbørn, svigerbørn</td>
-                <td>{BOAFGIFT_PCT}%</td>
+                <td>{pct(BOAFGIFT_PCT)}%</td>
                 <td>0%</td>
-                <td>{BOAFGIFT_PCT}%</td>
+                <td>{pct(BOAFGIFT_PCT)}%</td>
               </tr>
               <tr>
                 <td>Søskende, niecer, nevøer</td>
-                <td>{BOAFGIFT_PCT}%</td>
-                <td>{TILLAEGS_PCT}% af beløbet efter boafgift</td>
-                <td>{EFFEKTIV_PCT}%</td>
+                <td>{pct(BOAFGIFT_PCT)}%</td>
+                <td>{pct(TILLAEGS_PCT)}% af beløbet efter boafgift</td>
+                <td>{pct(EFFEKTIV_PCT)}%</td>
               </tr>
               <tr>
                 <td>Venner, andre</td>
-                <td>{BOAFGIFT_PCT}%</td>
-                <td>{TILLAEGS_PCT}% af beløbet efter boafgift</td>
-                <td>{EFFEKTIV_PCT}%</td>
+                <td>{pct(BOAFGIFT_PCT)}%</td>
+                <td>{pct(TILLAEGS_PCT)}% af beløbet efter boafgift</td>
+                <td>{pct(EFFEKTIV_PCT)}%</td>
               </tr>
             </tbody>
           </table>
@@ -195,26 +228,29 @@ export default function ArveafgiftGuidePage() {
         <ol>
           <li>Bobeholdning: {GUIDE_BARN_TEKST} kr</li>
           <li>Bundfradrag: −{BUND_FAEDRET} kr</li>
-          <li>Afgiftspligtigt beløb: 1.107.700 kr</li>
-          <li>Boafgift ({BOAFGIFT_PCT}%): 166.155 kr</li>
-          <li>Til fordeling mellem børn: 1.333.845 kr (ca. 666.923 kr hver)</li>
+          <li>Afgiftspliktigt beløb: {kr(EKSEMPLER_GUIDE.barn.grundlag)} kr</li>
+          <li>Boafgift ({pct(BOAFGIFT_PCT)}%): {kr(EKSEMPLER_GUIDE.barn.boafgift)} kr</li>
+          <li>
+            Til fordeling mellem børn: {kr(EKSEMPLER_GUIDE.barn.modtager)} kr (ca.{" "}
+            {kr(EKSEMPLER_GUIDE.barn.modtager / 2)} kr hver)
+          </li>
         </ol>
 
         <h3>Eksempel 2: Arv til søskende</h3>
         <p>
           En person efterlader {GUIDE_SOESKENDE_TEKST} kr til sin bror. Søskende betaler boafgift{" "}
-          {BOAFGIFT_PCT} % og tillægsafgift {TILLAEGS_PCT} % af beløbet <em>efter</em> boafgift. Der
+          {pct(BOAFGIFT_PCT)} % og tillægsafgift {pct(TILLAEGS_PCT)} % af beløbet <em>efter</em> boafgift. Der
           er intet bundfradrag for tillægsafgiften:
         </p>
         <ol>
           <li>Bobeholdning: {GUIDE_SOESKENDE_TEKST} kr</li>
           <li>Bundfradrag: −{BUND_FAEDRET} kr</li>
-          <li>Afgiftspligtigt beløb: 407.700 kr</li>
-          <li>Boafgift ({BOAFGIFT_PCT}%): 61.155 kr</li>
-          <li>Beløb efter boafgift: 738.845 kr</li>
-          <li>Tillægsafgift ({TILLAEGS_PCT}%): 184.711 kr</li>
-          <li>Samlet afgift: 245.866 kr</li>
-          <li>Arving modtager: 554.134 kr</li>
+          <li>Afgiftspliktigt beløb: {kr(EKSEMPLER_GUIDE.soeskende.grundlag)} kr</li>
+          <li>Boafgift ({pct(BOAFGIFT_PCT)}%): {kr(EKSEMPLER_GUIDE.soeskende.boafgift)} kr</li>
+          <li>Beløb efter boafgift: {kr(SOESKENDE_EFTER_BOAFGIFT)} kr</li>
+          <li>Tillægsafgift ({pct(TILLAEGS_PCT)}%): {kr(EKSEMPLER_GUIDE.soeskende.tillaeg)} kr</li>
+          <li>Samlet afgift: {kr(EKSEMPLER_GUIDE.soeskende.iAlt)} kr</li>
+          <li>Arving modtager: {kr(EKSEMPLER_GUIDE.soeskende.modtager)} kr</li>
         </ol>
 
         <h2>Ægtefæller: Ingen arveafgift</h2>

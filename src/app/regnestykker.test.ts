@@ -1,5 +1,5 @@
-import { readFileSync } from "node:fs";
 import { execSync } from "node:child_process";
+import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import ts from "typescript";
 import { describe, expect, test } from "vitest";
@@ -191,7 +191,7 @@ const HAARDKODEDE_BELOB: Record<string, number> = {
 
   "src/app/befordringsfradrag/page.tsx": 3,
   "src/app/blog/30-procent-reglen-husleje/page.tsx": 4,
-  "src/app/blog/arveafgift-regler-og-satser/page.tsx": 15,
+  "src/app/blog/arveafgift-regler-og-satser/page.tsx": 2,
   "src/app/blog/biloekonomi-2026-hvad-koster-det-at-eje-bil/page.tsx": 47,
   "src/app/blog/boernepenge-2026-satser-og-regler/page.tsx": 0,
   "src/app/blog/boliglaan-2026-renter-og-afdrag/page.tsx": 4,
@@ -292,9 +292,15 @@ const HAARDKODEDE_BELOB: Record<string, number> = {
  * vilje — de må ikke gættes, og de må ikke forsvinde uden erstatning.
  * 453 → 448 den 2/10: fem fund var datoer, ikke beløb («Kilde: borger.dk,
  * verificeret 26/9 2026» blev læst som «9 202»), da scanneren ikke krævede at
- * de tre cifre var slut på tallet.
+* de tre cifre var slut på tallet.
+ * 360 → 347 den 2/10: `arveafgift-regler-og-satser` stod med 15 fund i
+ * JSX-teksten og 7 i strengliteralerne. De læses nu fra `EKSEMPLER_GUIDE`,
+ * `EKSEMPEL_BARN` og `SATSER_2026`, som brødteksten i forvejen havde gjort for
+ * satserne. De **to** der er bevaret er gavegrænserne (74.100 kr til børn og
+ * børnebørn, 26.600 kr til svigerbørn) — de har ingen kilde i repoet, så de må
+ * ikke gættes, og de må ikke forsvinde uden erstatning.
  */
-const HAARDKODEDE_BELOB_I_LISTEN = 360;
+const HAARDKODEDE_BELOB_I_LISTEN = 347;
 
 /**
  * Samme port på de `.tsx`-filer der **ikke** er `page.tsx`: beregnerne i
@@ -336,7 +342,7 @@ const HAARDKODEDE_BELOB_I_KOMPONENTER_I_LISTEN = 0;
  * rød, og en rettet tekst sænker den.
  */
 const HAARDKODEDE_BELOB_I_STRENGE: Record<string, number> = {
-  "src/app/blog/arveafgift-regler-og-satser/page.tsx": 7,
+  "src/app/blog/arveafgift-regler-og-satser/page.tsx": 0,
   "src/app/blog/su-2026-satser-og-regler/page.tsx": 0,
   "src/app/blog/biloekonomi-2026-hvad-koster-det-at-eje-bil/page.tsx": 5,
   "src/app/blog/boligsalg-2026-guide-til-omkostninger-og-provenu/page.tsx": 4,
@@ -386,9 +392,14 @@ const HAARDKODEDE_BELOB_I_STRENGE: Record<string, number> = {
  * som attributter på `BlogArticleSchema`. De læses nu fra `SU_2026` gennem
  * `titel`, `beskrivelse` og `ogBeskrivelse`, så de ikke kan glide fra sats-
  * tabellen, fra de otte FAQ-svar eller fra brødteksten ved næste satsår.
+ *
+ * 64 → 57 den 2/10: `blog/arveafgift-regler-og-satser` stod med 7 — titel og
+ * beskrivelse hver to gange, `og:description` og det FAQ-spørgsmål, der har «et
+ * barn arver 1.000.000 kr» i sig. De læses nu fra `EKSEMPEL_BARN`, så det er det
+ * samme eksempel som brødteksten og beregneren regner på. Strenglisten er tom
+ * for den fil.
  */
-const HAARDKODEDE_BELOB_I_STRENGE_I_LISTEN = 64;
-
+const HAARDKODEDE_BELOB_I_STRENGE_I_LISTEN = 57;
 
 const ROT = join(__dirname, "..", "..");
 const tekstfiler = () =>
@@ -640,7 +651,7 @@ describe("beløb i JSX-tekst på siderne", () => {
     // 2/10: 385 → 370, da `/moms'` 15 eksempelbeløb læses fra modulet. De 370
     // fund er de samme filers øvrige beløb, så tallet siger hvor meget af
     // korpuset porten endnu dømmer — det må ikke stige i det stille.
-    expect(HAARDKODEDE_BELOB_I_LISTEN).toBe(360);
+    expect(HAARDKODEDE_BELOB_I_LISTEN).toBe(347);
   });
 });
 
@@ -732,7 +743,7 @@ describe("beløb i strengliteraler", () => {
     expect(overskredet).toEqual([]);
 
     expect(fund.length).toBeLessThanOrEqual(HAARDKODEDE_BELOB_I_STRENGE_I_LISTEN);
-    expect(HAARDKODEDE_BELOB_I_STRENGE_I_LISTEN).toBe(64);
+    expect(HAARDKODEDE_BELOB_I_STRENGE_I_LISTEN).toBe(57);
   });
 
   test("listen er målt på hele mappen, ikke på en håndplukket fil", () => {
