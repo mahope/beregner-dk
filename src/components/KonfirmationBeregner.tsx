@@ -10,13 +10,13 @@ import { formatCurrency, getCurrencySuffix } from "@/lib/format";
 
 type FestType = "hjemme" | "forsamlingshus" | "restaurant";
 
-const PRISER = {
+export const PRISER = {
   hjemme: { madPrPerson: 200, lokalePris: 0, label: "Hjemme" },
   forsamlingshus: { madPrPerson: 350, lokalePris: 3500, label: "Forsamlingshus" },
   restaurant: { madPrPerson: 550, lokalePris: 0, label: "Restaurant" },
 };
 
-const FASTE_POSTER = {
+export const FASTE_POSTER = {
   kirke: 0,
   konfirmandToej: 2500,
   fotograf: 1500,
@@ -25,7 +25,7 @@ const FASTE_POSTER = {
   kage: 500,
 };
 
-const GAVEGENNEMSNIT = {
+export const GAVEGENNEMSNIT = {
   foraeldre: 3000,
   bedsteforaeldre: 1500,
   oevrigFamilie: 700,

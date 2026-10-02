@@ -1310,7 +1310,7 @@ faqItems: kalorierFaqItems("da"),
       schemaDescription: "Gratis konfirmationsbudget beregner.",
       schemaCategory: "FinanceApplication",
       faqItems: [
-      { question: "Hvad koster en konfirmation?", answer: "8.000-25.000 DKK afhængigt af antal gæster." },
+      { question: "Hvad koster en konfirmation?", answer: "Gaverne ligger typisk mellem 10.000 og 25.000 kr. oveni festens egne udgifter. Beregneren lægger mad, lokaleleje, konfirmandtøj og fotograf sammen med gaverne, så du ser det samlede beløb for din egen konfirmation." },
       { question: "Gavebeløb?", answer: "Forældre: 2.000-5.000 kr. Bedsteforældre: 1.000-2.000 kr." },
       { question: "Hvornår er konfirmation?", answer: "Typisk april-maj i Danmark." },
       { question: "Spare på festen?", answer: "Hold festen hjemme, lav maden selv." },

@@ -25935,3 +25935,62 @@ bounce 4 %)** pr. 2026-10-02. Svensk side: **3.705 visninger / 5 klik / CTR
 0,1 % / pos. 10,6** — den laveste CTR på sitet efter `/procent`, og dens fire
 største søgninger («5 i kvadrat är» 35 v pos. 8, «mått i kvadratmeter» 12 v pos.
 10, «5 kvadratmeter» 11 v pos. 11) ligger på pos. 8-11. Måles igen 17/10+.
+
+## 3/10 01:50 — konfirmation-faq-tal-fra-modul (delvis)
+
+**Fund.** `/konfirmation`s FAQ-svar på «Hvad koster en konfirmation?» lød
+«8.000-25.000 DKK afhængigt af antal gæster» og blev publiceret som
+`FAQPage`-JSON-LD af `FAQSchema`. Sætningen påstår et **samlet** beløb.
+
+**Målt mod beregnerens egne tal.** `KonfirmationBeregner.tsx`:
+`PRISER.forsamlingshus = { madPrPerson: 350, lokalePris: 3_500 }`,
+`FASTE_POSTER = { konfirmandToej: 2_500, fotograf: 1_500, pynt: 800,
+invitation: 300, kage: 500 }`, `GAVEGENNEMSNIT = { foraeldre: 3_000,
+bedsteforaeldre: 1_500, oevrigFamilie: 700, venner: 300 }`.
+Standardindstillinger er 30 gæster, forsamlingshus, fotograf med, ekstra 0,
+gavefordeling 2/4/8/5:
+
+- festen = 30 × 350 + 3.500 + 2.500 + 1.500 + 800 + 300 + 500 = **19.600 kr.**
+- gaver = 2 × 3.000 + 4 × 1.500 + 8 × 700 + 5 × 300 = **19.100 kr.**
+- i alt **38.700 kr.**
+
+Siden sagde altså «højst 25.000» om et beløb, dens egen beregner viser 38.700.
+Og 25.000 var ikke et total-loft: brødteksten (page.tsx:53) skriver præcis
+«mellem **10.000 og 25.000 kr.** i gaver», så FAQ'en havde taget **gave**
+loftet og udstyret det som et total. Enheden «DKK» er desuden ukorrekt på en
+dansk side, der skriver «kr.» i brødtekst og i de øvrige FAQ-svar.
+
+**Rettelse.** Svaret er nu det samme gaveinterval plus en henvisning til, hvad
+værktøjet summerer. Ingen ny kilde, ingen nyt tal, ingen ny sats. De tre
+konstantgrupper er eksporteret, så `konfirmation-faq.test.ts` (3 tests) læser
+beregnerens tal: den dømmer at standardforløbet overstiger det gamle loft på
+25.000, at svaret ikke rammer under værktøjet, og at `DKK` er væk.
+Mutation (gamle streng genindsat) → **2 røde af 3**.
+
+**Ikke lukket.** Brødtekstens seks beløb er stadig håndskrevne
+(`HAARDKODEDE_BELOB` = 6, uændret), og dansk/svensk er uenige om tre af dem:
+
+| | dansk (page.tsx:48) | svensk (page.tsx:76) |
+|---|---|---|
+| mad hjemme | 150-200 kr./person | 150-250 kr/person |
+| mad restaurant | 400-700 kr./person | 400-800 kr/person |
+| konfirmandtøj | 1.500-4.000 kr. | 1 500-4 000 kr |
+| fotograf | 1.000-3.000 kr. | 1 500-4 000 kr |
+
+Kun fotografintervallet er en reel uoverensstemmelse: de to sprog giver to
+forskellige svar på det samme spørgsmål om det samme beløb, og
+`FASTE_POSTER.fotograf` er 1.500 — midten af det danske interval, i den nedre
+ende af det svenske. Hvilket der er rigtigt, kræver en kilde (❓), så det er
+ikke rørt. Næste halve: træk alle otte tal ind i et `konfirmation-eksempler.ts`
+bygget på de tre konstantgrupper, så de tre intervaller følger `PRISER`.
+
+**Negativ måling samme iteration (lukker spørgsmål).** Alle **158** URL'er i
+`minberegner.dk/sitemap.xml` og alle **89** i `beraknare.se/sitemap.xml`
+svarer **200** — ingen døde sider i nogen af de to filer, inklusive de 34/31
+dage-til- og klokken-i-URL'er. `/lon-efter-skatt` giver 404 på minberegner.dk,
+men det er korrekt (den er `seOnly` i `calculator-list.ts:20`); de to
+forekomster af strengen på `/loen-efter-skat` er hreflang-alternates til
+`beraknare.se`, ikke interne links, og hreflang-mætningen er korrekt
+(da/sv/x-default). Missionens emoji-prioritet 1 er lukket: ingen af
+`home-data.ts`, `navigation.ts`, `categories.ts`, `calculator-list.ts` eller
+`footer-data.ts` har emoji tilbage, og ikonerne ligger i `src/lib/icons.ts`.
