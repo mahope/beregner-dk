@@ -25688,3 +25688,60 @@ fleste visninger.
 `page-data.test.ts`, `src/app/kalorier/page.test.tsx`.
 **Ikke ændret:** `KalorieBeregner.tsx` og `makroer.ts` — de tal, siden lover,
 kommer allerede derfra.
+
+## 3/10 23:20 — `svenska-tekstfejl` («Första maj» + «använda»)
+
+De to copy-fejl planen havde under ❓ siden 2/10, lukket i én opgave — de lå i
+to forskellige filer og to forskellige fejlklasser, men begge var **dansk
+stavemåde i en streng en svensk læser læser**.
+
+- **`helligdage.ts:54`: «Første maj» → «Första maj».** Den svenske
+  helligdagsliste er håndskrevet pr. sprog (den danske har slet ikke 1. maj med,
+  fordi det ikke er en dansk helligdag), så den danske stavemåde «Første maj»
+  stod i den svenske. Fundet af `rendered-leak-scan.mjs` i den **serverede**
+  HTML, fordi `locale-leak.mjs` måler kilden og ikke kan se, at netop denne
+  streng er den, der bliver læst.
+- **`nedtaelling/page.tsx:330`: «kan du använna» → «kan du använda».**
+  Bestemt form af «använda» i den svensk krydsreference til `/dato` — ikke
+  dansk, så hverken `locale-leak.mjs` (æ/ø) eller den ord-liste i
+  `rendered-leak-scan.mjs` kunne se den.
+
+**Porten.** `helligdage.test.ts` låste fejlen fast med en `toEqual` på hele den
+svenske 2026-liste; den er rettet, og **en ny prøve** dømmer *alle* navne i den
+svenske liste for **2024-2035** mod `/[æø]/i`, fordi 2026-listen alene ville
+lade en ny dansk stavemåde slippe igennom i et nyt år. `nedtaelling`'s egen
+leak-prøve dømte otte danske ord i Excel-blokken; den nye prøve dømmer den
+**renderede** svenske sætning med `/kan du använda\s*<a href="\/dato"/` og
+forbyder `använna`.
+
+**Porten kan fejle, målt:** mutationen (begge fejl tilbage) giver **3 røde** af
+72 i de to filer — `svenske helligdage 2026`, `svenske helligdagsnavne har ingen
+danske bogstaver` og `svensk krydsreference til /dato bruger verbet i grundform`.
+Grøn på den nye kode: 72/72.
+
+**Gate 3/10 23:19:** `lint`, `typecheck`, `TZ=UTC npm run test` (**3858** tests
+i 238 filer, 3856 → +2), `npm run build`, `locale-leak.mjs --gate` exit 0.
+Ingen ny lækage. Punkt 13: `git diff | grep -E '^\+.*\$[0-9]'` er tom.
+
+**Mål:** `beraknare.se/dato` 101.580 GSC-visninger / 100 klik / 0,1 % / pos. 8,1
+og `beraknare.se/nedtaelling` 6.648 visninger / 13 klik / 0,2 % / pos. 8,9 —
+«nedränkning dagar» (211v, pos. 9) og «hur många dagar är det kvar till
+1 november» (21v, pos. 5). Ingen ændring i tal, kun to ord.
+
+## 3/10 23:13 — fem VERIFICÉR-noter målt på indhold (vinduet 2/10 21:30)
+
+Deploy-vinduerne er 07:30/12:30/17:30/21:30. 21:30-kørselen Byggede master som
+den så ud **21:30-21:50** — fire af de fem noter var færdige før vinduet, og en
+måtte vente til næste.
+
+| Slug | Merge | Resultat |
+|---|---|---|
+| `pension-dobbelt-valuta` | 20:55 | ✅ **DEPLOY OK.** «Du har ikke opgivet andre indkomster, så du får det fulde pensionstillæg på **8.729 kr.**» med **én** enhed; rækkerne «16.273» (34×), «7.544» (25×), «8.729» (24×). Hele HTML'en: **0** `kr. kr.`, **0** `kr kr`. |
+| `leasing-dobbelt-valuta` | 20:58 | ✅ **DEPLOY OK.** DA: «4.121 kr.», «178.350 kr.», «28.350 kr.», «150.000 kr.» (værdi på biler), «300.000 kr.» — alle med én enhed. SE: «4 121 kr», «178 350 kr», «28 350 kr», «150 000 kr» med **mellemrum** og én enhed. Begge domæner: **0** `kr. kr.`, **0** `kr kr`. |
+| `su-dobbelt-valuta` | 21:04 | ✅ **DEPLOY OK.** **0** `kr. kr.`, **0** `kr kr`; «3.799» (5×), «7.426» (29×), «20.749» (5×). «1.114» er **0**, men det er ikke en mangel: `SUBeregner.tsx:574` skriver forsørgertillægget i en **betinget** klynge, så tallet står kun i den valgte ordnings tilstand — ikke en del af den statiske HTML. |
+| `dage-til-hub` | 21:30 | ✅ **DEPLOY OK.** `minberegner.dk/dage-til`: title «Hvor mange dage er der til …? 22 datoer med dagens tal», **ét** `h1`, **22** distinkte `href="/dage-til/*"`. `beraknare.se/dagar-till`: «Hur många dagar är det till …? 19 datum med dagens tal» og **19** `href="/dagar-till/*"`. Målt mod `getDageTilSlugs()` i master: **da 22, se 19** — altså præcis den nye hub. *Planens «23 danske / 20 svenske» fra 2/10 var et skøn, ikke en tælling; koden siger 22/19.* |
+| `leasing-faq-retning` | 21:51 | ❌ **ikke live.** `beraknare.se/leasing` skriver stadig «kostar leasingen 178 350 kr. Ett billån … kostar 169 140 kr, alltså **9 210 kr mer**» — den gamle, modsatte retning. 3 forekomster (synlig tekst, JSON-LD, RSC). Mergen kom **21 minutter efter** 21:30-vinduet. Næste vindue **3/10 07:30**; det er ét vindue, ikke to, så det er endnu ikke `DEPLOY-MISSING`. |
+
+`/klokken-i` (22:07), `/vaegttab` (22:33) og `/kalorier` (22:56) er efter
+vinduet og måles 3/10 07:30. `/klokken-i` er målt til **ikke** at svare endnu
+(0 bytes), altså som forventet.

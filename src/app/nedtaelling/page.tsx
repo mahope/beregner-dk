@@ -327,7 +327,7 @@ export default async function NedtaellingPage() {
               {locale === "se" ? (
                 <>
                   Ska du räkna dagar mellan två valfria datum, arbetsdagar eller datum plus veckor
-                  kan du använna{" "}
+                  kan du använda{" "}
                   <Link href="/dato">datokalkylatorn</Link>.
                 </>
               ) : (

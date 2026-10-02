@@ -51,7 +51,7 @@ function getFixedHelligdage(
   return [
     { date: localDate(year, 1, 1), name: "Nyårsdagen" },
     { date: localDate(year, 1, 6), name: "Trettondedag jul" },
-    { date: localDate(year, 5, 1), name: "Første maj" },
+    { date: localDate(year, 5, 1), name: "Första maj" },
     { date: localDate(year, 6, 6), name: "Sveriges nationaldag" },
     { date: saturdayInWindow(year, 6, 20), name: "Midsommarafton" },
     { date: saturdayInWindow(year, 6, 21), name: "Midsommardagen" },

@@ -133,6 +133,17 @@ describe("nedtaelling page", () => {
     }
   });
 
+  // «använna» er ikke dansk, men den bestemte form af «använda» — en
+  // stavemådefejl, som hverken `locale-leak.mjs` (æ/ø) eller
+  // `rendered-leak-scan.mjs` (æ/ø + en ordliste) kan se. Den lå i den
+  // krydsreference til /dato, som er det sidste en svensk læser læser.
+  test("svensk krydsreference til /dato bruger verbet i grundform", async () => {
+    const html = await render("se");
+
+    expect(html).toMatch(/kan du använda\s*<a href="\/dato"/);
+    expect(html).not.toMatch(/\banvänna\b/);
+  });
+
   test("begge sprog har de to nye spørgsmaal i sidens egen svarsdatasæt", () => {
     const se = getPageData("nedtaelling", "se")!;
     const da = getPageData("nedtaelling", "da")!;

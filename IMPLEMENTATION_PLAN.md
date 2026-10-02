@@ -1,27 +1,28 @@
-STATUS: 2/10 23:31. CI grøn ved start (`37061387270`). PR-TJEK 2/10 19:47: ingen
+STATUS: 3/10 23:20. CI grøn ved start (`37063823003`). PR-TJEK 2/10 19:47: ingen
     åbne PR'er (næste tjek 4/10). Sentry: ingen uløste fejl 14 dage — et rigtigt
     signal, SDK'en er sat op med fallback-DSN, kun i produktion, intet replay.
     **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` ·
-    `npm run build` — grøn 2/10 23:29 (**3856** tests i 238 filer), plus
+    `npm run build` — grøn 3/10 23:19 (**3858** tests i 238 filer), plus
     `locale-leak --gate` (exit 0).
-    **Denne iteration: `/kalorier` henter sit eksempel fra modulet.** 17 fund
-    væk fra `page-data.ts` (**131 → 114**). Syv af dem var svenske strenge med
-    dansk tusindtalsseparator — «BMR 1.780 kcal», «TDEE 2.759 kcal», «2 259»,
-    «7.700 kcal» — i `description`, `metaDescription` og to FAQ-svar, altså
-    præcis de tal Google citerer på beraknare.se (2.825 visninger). Ny
-    `src/lib/kalorier-eksempler.ts` bygger alle 19 svar i alle tre sprog fra
-    `beregnBmr`/`beregnTdee`/`kalorierForMaal` + `KALORIE_UNDERSKUD` +
-    `PROTEIN_G_PER_KG` + `VAEGTTAB_KCAL_PR_KG`. Dansk er byte-uændret (`toEqual`
-    mod de syv gamle strenge). **Porten låste fejlen fast:** `page-data.test.ts`
-    og `kalorier/page.test.tsx` krævede «1.780»/«2.502» på *alle* sprog;
-    begge dømmer nu `formatBelob` og forbyder `\d\.\d{3}` for se/no.
-    **MÅL:** `beraknare.se/kalorier` 2.825 GSC-visninger / 7 klik / 0,2 % /
-    pos. 15,4 → 0 visninger med dansk separator; `minberegner.dk/kalorier`
-    11.827 visninger, 276 besøgende/28d, ingen tal ændret.
-    **Næste iteration:** (1) de to små tekstfejl nederst i ❓ («Første maj» →
-    «Första maj», «använna» → «använda»), (2) `/moms`-slaget er ⛔ (lovgrænser),
-    så næste frie slug er `/pension` (12 fund). De syv VERIFICÉR-noter er ikke
-    due før vinduet 3/10 07:30.
+    **Denne iteration: to danske stavemåder i svensk tekst.** «Første maj» →
+    «Första maj» i den svenske helligdagsliste (`helligdage.ts:54`, hele
+    listen er håndskrevet pr. sprog) og «kan du använna» → «använda» i
+    `/nedtaelling`s krydsreference til `/dato`. Copy uden ny logik, men begge
+    står på sider med svensk trafik: `/dato` 101.580 visninger, `/nedtaelling`
+    6.648. `helligdage.test.ts` låste fejlen fast med `toEqual` på hele den
+    svenske 2026-liste; en **ny** prøve dømmer nu alle svenske navne 2024-2035
+    mod `/[æø]/i`, så 2026-listen alene ikke lader en ny dansk stavemåde
+    slippe igennem. Mutation (begge fejl tilbage) → **3 røde** af 72.
+    **Deploy målt på indhold 23:13** (vinduet 2/10 21:30 byggede master som den
+    så ud 21:30-21:50): ✅ `pension-dobbelt-valuta`, ✅ `leasing-dobbelt-valuta`,
+    ✅ `su-dobbelt-valuta`, ✅ `dage-til-hub` (22 da / 19 se links — målt mod
+    `getDageTilSlugs()`; planens «23/20» var et skøn). ❌ `leasing-faq-retning`
+    er **ikke live**: beraknare.se/leasing skriver stadig «alltså 9 210 kr
+    **mer**», fordi committen kom 21:51 — 21 minutter efter vinduet. Ét vindue,
+    ikke to, så ikke `DEPLOY-MISSING` endnu.
+    **Næste iteration:** (1) mål de fire noter i vinduet 3/10 07:30 på indhold,
+    (2) `/moms`-slaget er ⛔ (lovgrænser), så næste frie slug i F5b-køen er
+    `/pension` (12 fund).
 
 ## Fase 3 — trafik-drevet
 
@@ -275,26 +276,28 @@ kode. Hver note er én linje; den fulde kommando står i `docs/plan-arkiv.md` un
 sit slug. Strip `<!-- -->`-kommentarmarkørerne fra HTML'en, ellers matcher
 ingen regex på tal og tekst.
 
-`VERIFICÉR DEPLOY: /klokken-i + /klockan-i (hub med klokken i 12 lande) ceo/klokken-i-hub 2/10 22:30`
+`VERIFICÉR DEPLOY: svensk «Första maj» + «använda» på /dato og /nedtaelling ceo/svenska-tekstfejl 3/10 23:20`
 
-`VERIFICÉR DEPLOY: /dage-til + /dagar-till (hub med alle datoer) ceo/dage-til-hub 2/10 21:30`
+`VERIFICÉR DEPLOY: /leasing FAQ'ens retning (svensk skal sige 9 210 kr mindre) ceo/leasing-faq-retning 2/10 21:51 — MÅLT 3/10 23:13: IKKE live, ét vindue forgået, måles igen 3/10 07:30`
 
-`VERIFICÉR DEPLOY: /vaegttab FAQ tal fra modulet (svensk 2 209, ikke 2.209) ceo/vaegttab-faq-fra-modul 3/10 22:33`
+`VERIFICÉR DEPLOY: /klokken-i + /klockan-i (hub med klokken i 12 lande) ceo/klokken-i-hub 2/10 22:07`
 
-`VERIFICÉR DEPLOY: /kalorier eksempel fra modulet (svensk 1 780, ikke 1.780) ceo/kalorier-faq-tal-fra-modul 2/10 23:31`
+`VERIFICÉR DEPLOY: /vaegttab FAQ tal fra modulet (svensk 2 209, ikke 2.209) ceo/vaegttab-faq-fra-modul 2/10 22:33`
 
-`VERIFICÉR DEPLOY: /leasing FAQ'ens retning + kr.. i dansk ceo/leasing-faq-retning 2/10 19:55`
+`VERIFICÉR DEPLOY: /kalorier eksempel fra modulet (svensk 1 780, ikke 1.780) ceo/kalorier-faq-tal-fra-modul 2/10 22:56`
+
+Lukket 3/10 23:13 på indhold: `pension-dobbelt-valuta`, `leasing-dobbelt-valuta`,
+`su-dobbelt-valuta` og `dage-til-hub` — målingerne står i
+`docs/plan-arkiv.md`. Bemærk at planens «23 danske / 20 svenske» datoer var et
+skøn: `getDageTilSlugs()` giver **22 / 19**, og live har 22 / 19.
 
 | Slug | Prøv på indhold |
 |---|---|
 | `vaegttab-faq-fra-modul` (**ny**, vindue 3/10 21:30) | `beraknare.se/vaegttab`: **0** `2\.209` i hele HTML'en — synlig FAQ-tekst, `FAQSchema`-JSON-LD og RSC-payloaden skal alle skrive «2 209», «1 780», «2 759», «7 700», «1 000», «1 500», «1 200» med **mellemrum**. FAQ'en skal stadig have **fem** spørgsmål, hvor «Hur många kalorier ska jag äta för att gå ner 6 kg på 12 veckor?» svarer «… förbrukar **2 759** kcal per dag (BMR **1 780** kcal × aktivitetsfaktor **1,55**) … så du behöver äta **2 209** kcal per dag.». `minberegner.dk/vaegttab`: FAQ'en skal have de **samme fem** spørgsmål **byte-uændret** med dansk punktum («2.759», «1.780», «550 kcal», «2.209»), og `0` `2 209`. **Intet** `NaN`. |
 | `kalorier-faq-tal-fra-modul` (**ny**, vindue 3/10 07:30) | `beraknare.se/kalorier`: hele HTML'en skal have **0** `\d\.\d{3}` på tal — altså **intet** «1.780» / «2.759» / «2.259» / «7.700». `<meta name="description">` skal være «Hur många kalorier behöver du per dag? Man, 80 kg, 180 cm och 30 år: BMR **1 780** kcal och TDEE **2 759** kcal vid måttlig aktivitet.», `metaDescription` «… BMR **1 780** kcal, TDEE **2 759** kcal. Beräkna BMR, TDEE och makrofördelning.», `metaTitle`/`ogTitle` uændret «Kalorikalkylator: man 80 kg, 180 cm = **2 759** kcal/dag». FAQ'en skal have de **otte** svenske spørgsmål, hvor «Hur många kalorier behöver jag?» svarer «… dagligt behov på **2 759** kcal. En kvinna med samma mått har **2 502** kcal.» og «Hur många kalorier behöver jag för att gå ner 1 kg?» svarer «… cirka **7 700** kcal per kilo fatt … underskott på **7 700** kcal …». Brødteksten skal have «2 259 kcal» og «2 759 kcal» i tabellerne (allerede sådan). **Intet** `NaN`. `minberegner.dk/kalorier`: FAQ'en skal have de **syv** danske spørgsmål **byte-uændret** med dansk punktum («1.780», «2.759», «2.259», «7.700»), og `0` `1 780`. |
-| `leasing-faq-retning` (**ny**, vindue 3/10 07:30 — måles på ny, den forrige note forventede den modsatte retning) | Som skrevet. Bemærk: **6** spørgsmål i live, ikke 7 som noten siger — `FAQPage`-JSON-LD'en er målt til 6. |
-| `dage-til-hub` (**ny**, vindue 3/10 07:30) | Som skrevet. |
+| `svenska-tekstfejl` (**ny**, vindue 3/10 07:30) | `beraknare.se/dato`: **0** `Første maj` i hele HTML'en — den svenske helligdagsliste skal skrive «**Första maj**» (synlig liste, `helligdagsnavne`, RSC). `beraknare.se/nedtaelling`: **0** `använna` og sætningen skal være «… kan du **använda** `datokalkylatorn`». `minberegner.dk/dato` + `/nedtaelling`: uændret (dansk skriver «Første maj» korrekt, og den danske blok sagde «kan du bruge»). **Intet** `NaN`. |
+| `leasing-faq-retning` (**målt 3/10 23:13: ikke live**, vindue 3/10 07:30) | `beraknare.se/leasing`: hele HTML'en skal have **0** `9 210 kr mer` og **3** `9 210 kr mindre` (synlig FAQ-tekst, `FAQPage`-JSON-LD, RSC) — sætningen «kostar leasingen 178 350 kr. Ett billån … kostar 169 140 kr, alltså 9 210 kr **mindre**». **0** `kr..` og **0** `kr.,` i hele HTML'en. Bemærk: **6** spørgsmål i live, ikke 7. |
 | `klokken-i-hub` (**ny**, vindue 3/10 07:30**) | `minberegner.dk/klokken-i`: `<title>` skal være «Hvad er klokken i …? Klokken i 12 lande lige nu», `<meta name="description">` skal starte med «Det er HH:MM i <første land på siden>» og slutte med «Se klokken i alle 12 lande og tidsforskellen til Danmark.». `<h1>` «Hvad er klokken i …?» **én** gang. Siden skal have **12** links til `/klokken-i/*` plus ét til `/tidszone`. Rækkerne er sorteret på \|minutter\|, så rækkefølgen skifter med sommer-/vintertid: **første** række skal være det land der ligger tættest på Danmark (0 eller 60 minutter) og **sidste** det fjerneste (Australien/New York, 8-9 timer) — mål det på de to yderste, ikke på hele rækkefølgen. `beraknare.se/klockan-i`: samme **12** links med svenske slugs (`/klockan-i/spanien` …) og **intet** dansk: hverken «Tyrkiet» eller bogstaverne æ/ø. `minberegner.dk/klockan-i` skal **301** til `/klokken-i`, og `beraknare.se/klokken-i` 301 til `/klockan-i`. Sitemap på begge domæner skal have `…/klokken-i` og `…/klockan-i` som `daily`. `minberegner.dk/tidszone` skal have teksten «klokken i tolv lande» med link til hubben, `beraknare.se/tidszone` «klockan i tolv länder». **Intet** `NaN` |
-| `su-dobbelt-valuta` (**ny**, vindue 3/10 07:30**) | `minberegner.dk/su`: hele HTML'en skal have **0** `kr. kr.` og **0** `kr kr`. Brødteksten skal have «Inkl. **3.799** kr. forældrelån», «… ligger mellem **7.426** kr. og **20.749** kr. pr. måned», «Det separate forsørgertillæg er **1.114** kr. pr. måned før skat» og «… ungdomsuddannelse er 18-19-åriges grundsats **6.043** kr., mens den faste sats fra 20 år er **6.043** kr.». `beraknare.se/su` (dansk fallback): samme tal, 0 dobbelt enheder. `Intet** `NaN` |
-| `leasing-dobbelt-valuta` (**ny**, vindue 3/10 07:30**) | `minberegner.dk/leasing`: hele HTML'en skal have **0** `kr. kr.` og **0** `kr kr`. Resultatblokken skal have «**4.121** kr.», «**178.350** kr.», «**28.350** kr.», «**150.000** kr.» (værdi på biler), «**169.140** kr.» (billån i alt), «**9.210** kr.» (forskel) og «**30.000** kr.» pr. måned med `/mån` på de to månedstal. `beraknare.se/leasing`: de samme tal med **mellemrum** («4 121 kr») og **én** enhed, 0 dobbelt. `Intet** `NaN` |
-| `pension-dobbelt-valuta` (**ny**, vindue 3/10 07:30**) | `minberegner.dk/pension`: sætningen under resultatlisten skal være «Du har ikke opgivet andre indkomster, så du får det fulde pensionstillæg på **8.729 kr.**» — og **hele HTML'en skal have 0** `kr. kr.` og **0** `kr kr`. Rækkerne skal stadig være «16.273 kr.», «7.544 kr.» og «8.729 kr.». `beraknare.se/pension`: samme sætning med **én** enhed («8.729 kr», Intl skriver «kr» for sv-SE) og 0 dobbelt enheder. |
 | `leasing-svenske-tal-fra-modul` (**ny**, vindue 3/10 07:30**) | `beraknare.se/leasing`: `<title>` skal være «Leasingkalkylator: bil på **300 000** kr = **4 121** kr/mån» og `metaDescription` «Bil på **300 000** kr med **150 000** kr i restvärde, **4,5** % ränta, **30 000** kr i kontantinsats och **36** mån: **4 121** kr i leasingkostnad per månad.». `schemaDescription` skal have «**4 121** kr per månad över **36** månader». FAQ'en skal have **syv** spørgsmål, hvor «Vad kostar leasing av en bil på **300 000** kr?» svarer «… blir månadskostnaden **4 121** kr, vilket är **178 350** kr totalt inklusive **28 350** kr i ränta.», «Vad är värdetabet på en leasingbil?» svarer «… är det **150 000** kr. Det är det belopp du betalar …» (~~belöp~~ → **belopp**, svensk stavemåde) og «Vad är fåretagsleasing och vad kostar det?» svarer «… ger **4 121** kr i leasingkostnad per månad.». **Hele HTML'en skal have 0** `\d\.\d{3}` på beløb — altså **intet** «4.121» / «300.000» / «178.350» / «28.350». **Intet** `NaN`. `minberegner.dk/leasing`: uændret (dansk og norsk blok har ingen beløb) |
 ## ❓ Til Mads
 
@@ -333,13 +336,6 @@ ingen regex på tal og tekst.
   0 kr (til 2026)» og «Afgifter kommer (2026+)»; `skat.dk` svarer 500. Teksten
   siger nu kun hvad beregneren regner med, og tallet ligger i
   `bil-omkostninger.ts` som `DRIFT.da.vaegt.el`.
-- ❓ **To synlige tekstfejl, målt 2/10 (10 min, ingen kilde nødvendig).**
-  1. `rendered-leak-scan` peger på **én** dansk rest på beraknare.se: `/dato`
-     skriver «Første maj» i den svenske helligdagsliste (`helligdage.ts:54`,
-     forhårslig, fundet 2/10). Svensk er «Första maj».
-  2. `/nedtaelling` har «kan du **använna**» i den svenske blok (pre-existing
-     stavemåde-fejl på en live svensk side; bemærket under diff-review 2/10).
-  Begge er copy rettelser uden ny logik — én lille opgave, ikke to.
 - ❓ **Fitnessfradrag, sommerhusudlejning, madvaretabel, grundskyld for Varde og
   Playwright.** Fem mindre kilder, alle noteret med detaljer i
   `docs/plan-arkiv.md` 2/10 14:20. Uden dem bygges intet, jf. punkt 11.

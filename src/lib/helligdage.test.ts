@@ -156,7 +156,7 @@ describe("getHelligdage", () => {
       "Långfredagen",
       "Påskdagen",
       "Annandag påsk",
-      "Første maj",
+      "Första maj",
       "Kristi himmelsfärdsdag",
       "Pingstdagen",
       "Sveriges nationaldag",
@@ -168,6 +168,19 @@ describe("getHelligdage", () => {
       "Annandag jul",
       "Nyårsafton",
     ]);
+  });
+
+  // listen er håndskrevet pr. sprog, så en dansk stavemåde kan komme ind i den
+  // svenske. «Første maj» gjorde det — og `rendered-leak-scan.mjs` fandt den
+  // først i den serverede HTML, fordi `locale-leak.mjs` måler kilden, ikke den
+  // streng der så bliver læst af en svensk læser. Derfor dømmes her alle
+  // navne i den svenske liste, ikke blot 2026.
+  test("svenske helligdagsnavne har ingen danske bogstaver", () => {
+    for (let year = 2024; year <= 2035; year++) {
+      for (const holiday of getHelligdage(year, se)) {
+        expect(holiday.name, `${year} ${holiday.name}`).not.toMatch(/[æø]/i);
+      }
+    }
   });
 
   test("midsommar og alla helgons dag ligger på en lørdag", () => {
