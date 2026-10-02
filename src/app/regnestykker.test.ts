@@ -190,7 +190,6 @@ const HAARDKODEDE_BELOB: Record<string, number> = {
   "src/app/alder/page.tsx": 1,
 
   "src/app/befordringsfradrag/page.tsx": 3,
-  "src/app/bil/page.tsx": 16,
   "src/app/blog/30-procent-reglen-husleje/page.tsx": 4,
   "src/app/blog/arveafgift-regler-og-satser/page.tsx": 15,
   "src/app/blog/biloekonomi-2026-hvad-koster-det-at-eje-bil/page.tsx": 47,
@@ -257,11 +256,20 @@ const HAARDKODEDE_BELOB: Record<string, number> = {
  * eksemplets beløb, så et tal i siden kan ikke længere glide fra satsen. Som
  * erstatning for portens dækning af de tre regnestykker har modulet sin egen
  * test, der holder `EKSEMPEL_TEKST` på de beregnede tal.
+ * 418 → 402 den 2/10: `bil` stod med 16 fund — otte redaktionelle estimater i
+ * hvert sprog (vægtafgift, service, bremser, tandemrem, dæk og dækkenes
+ * holdelighed) uden en kilde. De læses nu fra `src/lib/bil-omkostninger.ts`,
+ * som også danner beregnerens eget resultat, så artiklen ikke længere kan
+ * sige noget andet end værktøjet: den lovede 2,50-4,50 kr/km, mens
+ * `BilBeregner` viste 4,90 kr/km for de samme standardindgange. Samme
+ * iteration gav komponenten sine standardindgange pr. sprog fra modulet, så
+ * beraknare.se holdt op med at regne benzin til 13,5 kr/liter mens artiklen
+ * skrev 18-20 kr/liter.
  * 453 → 448 den 2/10: fem fund var datoer, ikke beløb («Kilde: borger.dk,
  * verificeret 26/9 2026» blev læst som «9 202»), da scanneren ikke krævede at
  * de tre cifre var slut på tallet.
  */
-const HAARDKODEDE_BELOB_I_LISTEN = 418;
+const HAARDKODEDE_BELOB_I_LISTEN = 402;
 
 /**
  * Samme port på de `.tsx`-filer der **ikke** er `page.tsx`: beregnerne i
@@ -480,7 +488,7 @@ describe("beløb i JSX-tekst på siderne", () => {
     // At rette en side er altid tilladt — listen er en loftpunktssum, ikke en
     // målsætning — så her tælles det samlede antal mod summen af listen.
     expect(fund.length).toBeLessThanOrEqual(HAARDKODEDE_BELOB_I_LISTEN);
-    expect(HAARDKODEDE_BELOB_I_LISTEN).toBe(418);
+    expect(HAARDKODEDE_BELOB_I_LISTEN).toBe(402);
   });
 });
 

@@ -8,6 +8,7 @@ import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { useLocale } from "@/components/LocaleProvider";
 import { formatCurrency, formatNumber, getCurrencySuffix } from "@/lib/format";
+import { bilStandardindgange, beregnBilOmkostninger } from "@/lib/bil-omkostninger";
 
 type Braendstoftype = "benzin" | "diesel" | "el" | "hybrid";
 
@@ -138,17 +139,21 @@ export default function BilBeregner() {
   };
   const l = labels[locale as keyof typeof labels] || labels.da;
 
-  const [bilpris, setBilpris] = useState<number>(250000);
+  // Standardindgangene ligger i modulet, fordi artiklen på /bil viser dem, og
+  // fordi benzin- og elprisen før 2/10 var den danske på *alle* domæner.
+  const standard = useMemo(() => bilStandardindgange(locale), [locale]);
+
+  const [bilpris, setBilpris] = useState<number>(standard.bilpris);
   const [braendstof, setBraendstof] = useState<Braendstoftype>("benzin");
-  const [kmPrLiter, setKmPrLiter] = useState<number>(15);
-  const [kmPrAar, setKmPrAar] = useState<number>(15000);
-  const [braendstofpris, setBraendstofpris] = useState<number>(13.5);
-  const [forsikring, setForsikring] = useState<number>(8000);
-  const [vaerditab, setVaerditab] = useState<number>(15);
+  const [kmPrLiter, setKmPrLiter] = useState<number>(standard.kmPrLiter);
+  const [kmPrAar, setKmPrAar] = useState<number>(standard.kmPrAar);
+  const [braendstofpris, setBraendstofpris] = useState<number>(standard.braendstofpris);
+  const [forsikring, setForsikring] = useState<number>(standard.forsikring);
+  const [vaerditab, setVaerditab] = useState<number>(standard.vaerditabProcent);
 
   // El-bil specifikt
-  const [kwh100km, setKwh100km] = useState<number>(17);
-  const [elpris, setElpris] = useState<number>(2.5);
+  const [kwh100km, setKwh100km] = useState<number>(standard.kwh100km);
+  const [elpris, setElpris] = useState<number>(standard.elpris);
 
   const hasLoadedUrl = useRef(false);
   const hasTracked = useRef(false);
@@ -194,54 +199,43 @@ export default function BilBeregner() {
   }, [bilpris, braendstof, kmPrLiter, kmPrAar, braendstofpris, forsikring, vaerditab, kwh100km, elpris]);
 
   const handleReset = useCallback(() => {
-    setBilpris(250000);
+    setBilpris(standard.bilpris);
     setBraendstof("benzin");
-    setKmPrLiter(15);
-    setKmPrAar(15000);
-    setBraendstofpris(13.5);
-    setForsikring(8000);
-    setVaerditab(15);
-    setKwh100km(17);
-    setElpris(2.5);
-  }, []);
+    setKmPrLiter(standard.kmPrLiter);
+    setKmPrAar(standard.kmPrAar);
+    setBraendstofpris(standard.braendstofpris);
+    setForsikring(standard.forsikring);
+    setVaerditab(standard.vaerditabProcent);
+    setKwh100km(standard.kwh100km);
+    setElpris(standard.elpris);
+  }, [standard]);
 
   const resultat = useMemo(() => {
-    let braendstofOmkostning: number;
-
-    if (braendstof === "el") {
-      braendstofOmkostning = (kwh100km / 100) * kmPrAar * elpris;
-    } else {
-      braendstofOmkostning = (kmPrAar / kmPrLiter) * braendstofpris;
-    }
-
-    let vaegt: number;
-    if (braendstof === "el") {
-      vaegt = 0;
-    } else if (braendstof === "benzin") {
-      vaegt = 4000;
-    } else if (braendstof === "diesel") {
-      vaegt = 5500;
-    } else {
-      vaegt = 3000;
-    }
-
-    const aarligtVaerditab = bilpris * (vaerditab / 100);
-    const service = bilpris * 0.03;
-    const daek = 3000;
-    const aarligtTotal = braendstofOmkostning + forsikring + vaegt + aarligtVaerditab + service + daek;
-    const maanedligtTotal = aarligtTotal / 12;
-    const prKm = aarligtTotal / kmPrAar;
+    const r = beregnBilOmkostninger(
+      {
+        bilpris,
+        braendstof,
+        kmPrLiter,
+        kmPrAar,
+        braendstofpris,
+        forsikring,
+        vaerditabProcent: vaerditab,
+        kwh100km,
+        elpris,
+      },
+      locale,
+    );
 
     return {
-      braendstof: Math.round(braendstofOmkostning),
-      forsikring: Math.round(forsikring),
-      vaegt: Math.round(vaegt),
-      vaerditab: Math.round(aarligtVaerditab),
-      service: Math.round(service),
-      daek: Math.round(daek),
-      aarligt: Math.round(aarligtTotal),
-      maanedligt: Math.round(maanedligtTotal),
-      prKm: formatNumber(prKm, locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+      braendstof: Math.round(r.braendstof),
+      forsikring: Math.round(r.forsikring),
+      vaegt: Math.round(r.vaegt),
+      vaerditab: Math.round(r.vaerditab),
+      service: Math.round(r.service),
+      daek: Math.round(r.daek),
+      aarligt: Math.round(r.aarligt),
+      maanedligt: Math.round(r.maanedligt),
+      prKm: formatNumber(r.prKm, locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
     };
   }, [bilpris, braendstof, kmPrLiter, kmPrAar, braendstofpris, forsikring, vaerditab, kwh100km, elpris, locale]);
 

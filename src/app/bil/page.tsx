@@ -6,6 +6,19 @@ import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
+import { formatNumber } from "@/lib/format";
+import {
+  bilDaekHoldelighed,
+  bilBelob,
+  bilDriftsomkostninger,
+  bilEnhedspris,
+  bilKrPrKm,
+  bilPrisPrKmSpaendTekst,
+  bilProcent,
+  bilRaekker,
+  bilServiceomkostning,
+  bilStandardindgange,
+} from "@/lib/bil-omkostninger";
 
 export async function generateMetadata() {
   return generatePageMetadata("bil");
@@ -15,6 +28,17 @@ export default async function BilPage() {
   const locale = await getLocale();
   const domainConfig = await getCurrentDomainConfig();
   const pageData = getPageData("bil", locale) || getPageData("bil", "da")!;
+
+  /**
+   * Artiklen læser hvert beløb fra `bil-omkostninger`, som er den samme kilde
+   * `BilBeregner` regner med. Før 2/10 skrev siden 16 beløb håndskrevet, og
+   * de sagde noget andet end værktøjet: artiklen lovede 2,50-4,50 kr pr. km,
+   * mens beregneren viste 4,90 kr for de samme standardindgange.
+   */
+  const sprog = locale === "se" ? "se" : "da";
+  const standard = bilStandardindgange(sprog);
+  const drift = bilDriftsomkostninger(sprog);
+  const rækker = bilRaekker(sprog);
 
   return (
     <div>
@@ -49,10 +73,13 @@ export default async function BilPage() {
           Den mest synlige udgift. Afhænger af <strong>kørselsomfang</strong>, bilens forbrug og <strong>brændstofpriser</strong>.
         </p>
         <ul>
-          <li><strong>Benzin:</strong> Ca. 13-14 kr/liter (2026)</li>
-          <li><strong>Diesel:</strong> Ca. 12-13 kr/liter</li>
-          <li><strong>El (hjemme):</strong> Ca. 2-3 kr/kWh</li>
-          <li><strong>El (offentlig):</strong> Ca. 3-5 kr/kWh</li>
+          <li>
+            <strong>Brændstofpris:</strong> {bilEnhedspris(standard.braendstofpris, locale, "liter")} — feltet bruges til benzin, diesel og hybrid
+          </li>
+          <li>
+            <strong>Elpris:</strong> {bilEnhedspris(standard.elpris, locale, "kWh")} ved {standard.kwh100km} kWh/100 km
+          </li>
+          <li><strong>Offentlig opladning</strong> er dyrere end hjemmeladning. Sæt elprisen højere, hvis du hovedsageligt lader ude</li>
         </ul>
 
         <h3>2. Værditab (den skjulte kæmpe)</h3>
@@ -106,51 +133,49 @@ export default async function BilPage() {
 
         <h3>4. Vægtafgift / grøn ejerafgift</h3>
         <p>
-          Afgiften afhænger af bilens <strong>brændstofforbrug</strong> og <strong>udledning</strong>:
+          Afgiften afhænger af bilens <strong>brændstofforbrug</strong> og <strong>udledning</strong>. Beregneren bruger
+          følgende gennemsnit, fordi den ellers skulle kende hver bil:
         </p>
         <table>
           <thead>
             <tr>
               <th>Type</th>
-              <th>Årlig afgift (ca.)</th>
+              <th>Årlig afgift i beregneren</th>
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>Elbil</td>
-              <td>0 kr (til 2026)</td>
-            </tr>
-            <tr>
-              <td>Hybrid</td>
-              <td>2.000-4.000 kr</td>
-            </tr>
-            <tr>
-              <td>Benzin (gennemsnit)</td>
-              <td>3.000-5.000 kr</td>
-            </tr>
-            <tr>
-              <td>Diesel</td>
-              <td>4.000-7.000 kr</td>
-            </tr>
+            {rækker.map((række) => (
+              <tr key={række.type}>
+                <td>{række.navn}</td>
+                <td>{bilBelob(locale, række.vaegt)}</td>
+              </tr>
+            ))}
           </tbody>
         </table>
+        <p>
+          <strong>Elbiler</strong> regnes uden vægtafgift, så beregnerens årlige omkostning for en elbil er lavere, end
+          den bliver med en afgift.
+        </p>
 
         <h3>5. Service og reparationer</h3>
         <p>
-          Regn med ca. <strong>3% af bilens værdi</strong> årligt til service, olie, bremser osv.
+          For en bil på {bilBelob(locale, standard.bilpris)} bruger beregneren{" "}
+          <strong>{bilProcent(drift.serviceProcent, locale)} af bilens pris</strong> til service og reparationer, altså{" "}
+          {bilBelob(locale, bilServiceomkostning(standard.bilpris, sprog))} om året. Det dækker serviceeftersyn,
+          olieskift og mindre reparationer.
         </p>
-        <ul>
-          <li><strong>Serviceeftersyn:</strong> 1.500-4.000 kr</li>
-          <li><strong>Bremser:</strong> 2.000-5.000 kr pr. aksel</li>
-          <li><strong>Tandrem:</strong> 4.000-8.000 kr</li>
-        </ul>
+        <p>
+          <strong>Ikke medregnet:</strong> tandemrem, større reparationer og syn af bilen. De kommer for sjældent til at
+          være værd at regne på.
+        </p>
         <p>
           <strong>Elbiler</strong> har markant lavere serviceomkostninger (færre sliddele).
         </p>
 
         <h3>6. Dæk</h3>
         <p>
-          Dæk holder typisk <strong>30.000-50.000 km</strong>. Regn med ca. <strong>3.000 kr/år</strong> inkl. skift.
+          Dæk holder typisk <strong>{bilDaekHoldelighed(locale)}</strong>. Beregneren bruger{" "}
+          <strong>{bilBelob(locale, drift.daek)} om året</strong> inkl. skift.
         </p>
 
         <h2>Benzin vs. Diesel vs. Elbil</h2>
@@ -158,57 +183,51 @@ export default async function BilPage() {
         <h3>Benzin</h3>
         <ul>
           <li>Billigst at købe</li>
-          <li>Lav vægtafgift</li>
-          <li>Højere brændstofforbrug</li>
+          <li>Højere brændstofforbrug end el</li>
           <li>Højere CO2-udledning</li>
+          <li>Vægtafgift i beregneren: {bilBelob(locale, drift.vaegt.benzin)}</li>
         </ul>
 
         <h3>Diesel</h3>
         <ul>
-          <li>Lavere forbrug (km/l)</li>
           <li>God til lange ture</li>
-          <li>Højere afgifter</li>
           <li>Dyrere service (partikelfilter mm.)</li>
+          <li>Højere vægtafgift end benzin</li>
+          <li>Vægtafgift i beregneren: {bilBelob(locale, drift.vaegt.diesel)}</li>
         </ul>
 
         <h3>Elbil</h3>
         <ul>
-          <li>Laveste driftsomkostninger</li>
-          <li>Ingen afgift (endnu)</li>
+          <li>Lavere brændstofomkostning</li>
           <li>Minimal service</li>
           <li>Højere købspris</li>
           <li>Rækkevidde-begrænsning</li>
-          <li>Afgifter kommer (2026+)</li>
+          <li>Vægtafgift i beregneren: {bilBelob(locale, drift.vaegt.el)}</li>
         </ul>
 
         <h2>Pris pr. kilometer</h2>
         <p>
-          En typisk dansk bil koster <strong>2,50-4,50 kr/km</strong> i samlede omkostninger:
+          Med beregnerens standardindgange — en bil på {bilBelob(locale, standard.bilpris)},{" "}
+          {formatNumber(standard.kmPrAar, locale)} km om året og{" "}
+          {bilProcent(standard.vaerditabProcent, locale)} i årligt værditab — er den samlede pris pr. kilometer{" "}
+          <strong>{bilPrisPrKmSpaendTekst(sprog, locale)}</strong> pr. brændstoftype:
         </p>
         <table>
           <thead>
             <tr>
-              <th>Biltype</th>
-              <th>Pris/km (ca.)</th>
+              <th>Brændstof</th>
+              <th>Brændstof om året</th>
+              <th>Pris pr. kilometer</th>
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>Lille benzinbil, brugt</td>
-              <td>2,00-2,50 kr</td>
-            </tr>
-            <tr>
-              <td>Mellemstor benzin, brugt</td>
-              <td>2,50-3,50 kr</td>
-            </tr>
-            <tr>
-              <td>Ny familiebil</td>
-              <td>3,50-5,00 kr</td>
-            </tr>
-            <tr>
-              <td>Elbil (efter køb)</td>
-              <td>1,50-2,50 kr</td>
-            </tr>
+            {rækker.map((række) => (
+              <tr key={række.type}>
+                <td>{række.navn}</td>
+                <td>{bilBelob(locale, række.braendstof)}</td>
+                <td>{bilKrPrKm(række.prKm, locale)}</td>
+              </tr>
+            ))}
           </tbody>
         </table>
 
@@ -238,10 +257,13 @@ export default async function BilPage() {
           Den mest synliga utgiften. Beror på <strong>körsträcka</strong>, bilens förbrukning och <strong>bränslepriser</strong>.
         </p>
         <ul>
-          <li><strong>Bensin:</strong> Ca 18-20 kr/liter (2026)</li>
-          <li><strong>Diesel:</strong> Ca 19-21 kr/liter</li>
-          <li><strong>El (hemma):</strong> Ca 1,5-3 kr/kWh</li>
-          <li><strong>El (publik laddning):</strong> Ca 4-7 kr/kWh</li>
+          <li>
+            <strong>Bränslepris:</strong> {bilEnhedspris(standard.braendstofpris, locale, "liter")} — fältet används för bensin, diesel och laddhybrid
+          </li>
+          <li>
+            <strong>Elpris:</strong> {bilEnhedspris(standard.elpris, locale, "kWh")} vid {standard.kwh100km} kWh/100 km
+          </li>
+          <li><strong>Publik laddning</strong> kostar mer än laddning hemma. Sätt elpriset högre om du laddar ute</li>
         </ul>
 
         <h3>2. Värdeminskning (den dolda jätten)</h3>
@@ -295,33 +317,24 @@ export default async function BilPage() {
 
         <h3>4. Fordonsskatt</h3>
         <p>
-          <strong>Fordonsskatten</strong> i Sverige är i huvudsak <strong>CO2-baserad</strong> - ju högre koldioxidutsläpp, desto högre skatt.
+          Fordonsskatten i Sverige är i huvudsak <strong>CO2-baserad</strong> - ju högre koldioxidutsläpp, desto högre skatt.
           För nya bilar med höga utsläpp tillkommer en förhöjd skatt, <strong>malus</strong>, under de tre första åren.
+          Räknaren använder dessa genomsnitt:
         </p>
         <table>
           <thead>
             <tr>
               <th>Typ</th>
-              <th>Årlig fordonsskatt (ca.)</th>
+              <th>Årlig fordonsskatt i räknaren</th>
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>Elbil</td>
-              <td>360 kr (lägsta nivå)</td>
-            </tr>
-            <tr>
-              <td>Laddhybrid</td>
-              <td>Ca 400-3 000 kr</td>
-            </tr>
-            <tr>
-              <td>Bensin (genomsnitt)</td>
-              <td>Ca 1 500-5 000 kr</td>
-            </tr>
-            <tr>
-              <td>Ny bil med höga utsläpp (malus, år 1-3)</td>
-              <td>Upp till 15 000+ kr</td>
-            </tr>
+            {rækker.map((række) => (
+              <tr key={række.type}>
+                <td>{række.navn}</td>
+                <td>{bilBelob(locale, række.vaegt)}</td>
+              </tr>
+            ))}
           </tbody>
         </table>
         <p>
@@ -330,20 +343,23 @@ export default async function BilPage() {
 
         <h3>5. Service och reparationer</h3>
         <p>
-          Räkna med ca <strong>3% av bilens värde</strong> per år för service, olja, bromsar osv.
+          För en bil på {bilBelob(locale, standard.bilpris)} använder räknaren{" "}
+          <strong>{bilProcent(drift.serviceProcent, locale)} av bilens värde</strong> till service och reparationer,
+          alltså {bilBelob(locale, bilServiceomkostning(standard.bilpris, sprog))} per år. Det täcker
+          serviceöversyn, oljebyte och mindre reparationer.
         </p>
-        <ul>
-          <li><strong>Serviceöversyn:</strong> 2 000-5 000 kr</li>
-          <li><strong>Bromsar:</strong> 2 500-6 000 kr per axel</li>
-          <li><strong>Kamrem:</strong> 5 000-10 000 kr</li>
-        </ul>
+        <p>
+          <strong>Inte medräknat:</strong> kambandet, större reparationer och besiktning. De kommer för sällan till att
+          vara värda att räkna på.
+        </p>
         <p>
           <strong>Elbilar</strong> har markant lägre servicekostnader (färre slitdelar).
         </p>
 
         <h3>6. Däck</h3>
         <p>
-          Däck håller vanligtvis <strong>30 000-50 000 km</strong>. Räkna med ca <strong>3 000-4 000 kr/år</strong> inkl. skifte. Kom ihåg att vinterdäck är lagkrav i Sverige under vinterväglag.
+          Däck håller vanligtvis <strong>{bilDaekHoldelighed(locale)}</strong>. Räknaren använder{" "}
+          <strong>{bilBelob(locale, drift.daek)} per år</strong> inkl. skifte. Kom ihåg att vinterdäck är lagkrav i Sverige under vinterväglag.
         </p>
 
         <h2>Bensin vs. Diesel vs. Elbil</h2>
@@ -351,64 +367,58 @@ export default async function BilPage() {
         <h3>Bensin</h3>
         <ul>
           <li>Billigast att köpa</li>
-          <li>Lägre fordonsskatt vid låga utsläpp</li>
-          <li>Högre bränsleförbrukning</li>
+          <li>Högre bränsleförbrukning än el</li>
           <li>Högre CO2-utsläpp (risk för malus på nya bilar)</li>
+          <li>Fordonsskatt i räknaren: {bilBelob(locale, drift.vaegt.benzin)}.</li>
         </ul>
 
         <h3>Diesel</h3>
         <ul>
-          <li>Lägre förbrukning (mil/liter)</li>
           <li>Bra för långkörning</li>
-          <li>Högre fordonsskatt</li>
           <li>Dyrare service (partikelfilter m.m.)</li>
+          <li>Högre fordonsskatt än bensin</li>
+          <li>Fordonsskatt i räknaren: {bilBelob(locale, drift.vaegt.diesel)}.</li>
         </ul>
 
         <h3>Elbil</h3>
         <ul>
-          <li>Lägsta driftskostnaderna</li>
-          <li>Lägsta fordonsskatt</li>
+          <li>Lägre bränslekostnad</li>
           <li>Minimal service</li>
           <li>Högre inköpspris</li>
           <li>Räckviddsbegränsning</li>
-          <li>Lägre förmånsvärde för tjänstebil</li>
+          <li>Fordonsskatt i räknaren: {bilBelob(locale, drift.vaegt.el)}.</li>
         </ul>
 
         <h2>Pris per kilometer</h2>
         <p>
-          En typisk svensk bil kostar <strong>3,00-5,00 kr/km</strong> i totala kostnader:
+          Med räknarens standardvärden — en bil på {bilBelob(locale, standard.bilpris)},{" "}
+          {formatNumber(standard.kmPrAar, locale)} km per år och{" "}
+          {bilProcent(standard.vaerditabProcent, locale)} i årlig värdeminskning — blir den totala prisen per kilometer{" "}
+          <strong>{bilPrisPrKmSpaendTekst(sprog, locale)}</strong> per drivmedel:
         </p>
         <table>
           <thead>
             <tr>
-              <th>Biltyp</th>
-              <th>Pris/km (ca.)</th>
+              <th>Drivmedel</th>
+              <th>Bränsle per år</th>
+              <th>Pris per kilometer</th>
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>Liten bensinbil, begagnad</td>
-              <td>2,50-3,00 kr</td>
-            </tr>
-            <tr>
-              <td>Mellanstor bensin, begagnad</td>
-              <td>3,00-4,00 kr</td>
-            </tr>
-            <tr>
-              <td>Ny familjebil</td>
-              <td>4,00-5,50 kr</td>
-            </tr>
-            <tr>
-              <td>Elbil (efter inköp)</td>
-              <td>2,00-3,00 kr</td>
-            </tr>
+            {rækker.map((række) => (
+              <tr key={række.type}>
+                <td>{række.navn}</td>
+                <td>{bilBelob(locale, række.braendstof)}</td>
+                <td>{bilKrPrKm(række.prKm, locale)}</td>
+              </tr>
+            ))}
           </tbody>
         </table>
 
         <div className="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 dark:border-yellow-500 p-4 my-6 not-prose">
           <p className="font-medium text-yellow-800">Viktigt</p>
           <p className="text-yellow-700">
-            Den här räknaren ger en uppskattning baserad på typiska värden. De faktiska kostnaderna
+            Den här räknaren ger en uppskattning baserat på typiska värden. De faktiska kostnaderna
             beror på din specifika bil, ditt körmönster och lokala priser. Använd den som utgångspunkt
             för att jämföra olika bilar.
           </p>
