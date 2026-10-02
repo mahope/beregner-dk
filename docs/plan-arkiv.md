@@ -23875,3 +23875,33 @@ mismatch.
 **Gate 2/10 06:25:** `lint` 0 · `typecheck` 0 · `TZ=UTC npm run test` **3638
 grønne i 225 filer** (den nye test er den 3638.) · `npm run build` 0.
 `scripts/locale-leak.mjs --gate` uændret.
+
+## 2/10 07:00 — `/topskat`: de syv beløbsgrænser læses fra `SATSER_2026`
+
+`/topskat` skrev alle tre skattetrins-grænser, deres bruttotals og deres
+månedstal håndskrevet i brødteksten, mens `TopskatBeregner` fik dem fra
+`src/lib/satser-2026.ts`.
+
+**Målt før:** scanneren i `src/app/regnestykker.test.ts` fandt **8** fund på
+siden — 641.200 / 777.900 / 2.592.700 kr., 697.000 og 845.500 kr./år og 58.100
+og 70.500 kr./md. **Efter: 1**, listen **392 → 385**.
+
+Bruttotallene er ikke en ny formel, de er **beregnerens egen betingelse**:
+`TopskatBeregner` opkræver topskat, når `indkomstEfterAm > 777900`, altså når
+brutto overstiger `777900 / (1 - 0,08) = 845.543`. Målt i node med repoets
+egne tal: **641.200 / 777.900 / 2.592.700**, **697.000 / 58.100** og
+**845.500 / 70.500** — altså byte-identisk med den tekst, der stod på siden
+før. Runden til næste hundrede ligger i koden, så «ca.» betyder det samme
+som før. Procenterne (7,5 / 7,5 / 5) læses også fra modulet nu.
+
+Det ene fund, der er bevaret, er «af en lønforhøjelse på **1.000 kr.**» — det
+*er* den illustrerede forhøjelse, så tallet er ikke en kalkulationsfejl.
+
+Port: `regnestykker`-porten bliver rød, hvis et beløb lægges tilbage i
+JSX-teksten (den måler JSX-tekst, ikke interpolerede udtryk), og
+`satser-2026.test.ts` dømmer satsernes værdier. Jeg har **ikke** tilføjet en
+port der renderer siden og sammenligner med modulet — det er det næste
+loops naturlige skridt for den slags sider.
+
+**Gate 2/10 06:58:** `lint` 0 · `typecheck` 0 · `TZ=UTC npm run test` 3638
+grønne i 225 filer · `npm run build` 0.

@@ -235,7 +235,12 @@ const HAARDKODEDE_BELOB: Record<string, number> = {
   "src/app/pension/page.tsx": 2,
   "src/app/renteberegner/page.tsx": 6,
   "src/app/rygestop/page.tsx": 2,
-  "src/app/topskat/page.tsx": 8,
+  // 8 → 1 den 2/10: de tre skattetrins-grænser, deres bruttotals (697.000 og
+  // 845.500 kr.) og deres månedstal læses fra `src/lib/satser-2026.ts` nu, med
+  // beregnerens egen betingelse `grænse / (1 - AM-bidrag)`. Det ene fund er
+  // «lønforhøjelse på 1.000 kr.», der beholder sit tal, fordi den netop *er*
+  // den illustrerede forhøjelse.
+  "src/app/topskat/page.tsx": 1,
   "src/app/vaegttab/page.tsx": 2,
 };
 
@@ -271,11 +276,14 @@ const HAARDKODEDE_BELOB: Record<string, number> = {
  * iteration gav komponenten sine standardindgange pr. sprog fra modulet, så
  * beraknare.se holdt op med at regne benzin til 13,5 kr/liter mens artiklen
  * skrev 18-20 kr/liter.
+ * 392 → 385 den 2/10: `topskat` stod med 8 fund, hvor syv var beløbsgrænser
+ * der lå i `SATSER_2026` og i beregnerens egen formel. Det sidste fund
+ * («af en lønforhøjelse på 1.000 kr.») er bevaret med vilje.
  * 453 → 448 den 2/10: fem fund var datoer, ikke beløb («Kilde: borger.dk,
  * verificeret 26/9 2026» blev læst som «9 202»), da scanneren ikke krævede at
  * de tre cifre var slut på tallet.
  */
-const HAARDKODEDE_BELOB_I_LISTEN = 392;
+const HAARDKODEDE_BELOB_I_LISTEN = 385;
 
 /**
  * Samme port på de `.tsx`-filer der **ikke** er `page.tsx`: beregnerne i
@@ -494,7 +502,7 @@ describe("beløb i JSX-tekst på siderne", () => {
     // At rette en side er altid tilladt — listen er en loftpunktssum, ikke en
     // målsætning — så her tælles det samlede antal mod summen af listen.
     expect(fund.length).toBeLessThanOrEqual(HAARDKODEDE_BELOB_I_LISTEN);
-    expect(HAARDKODEDE_BELOB_I_LISTEN).toBe(392);
+    expect(HAARDKODEDE_BELOB_I_LISTEN).toBe(385);
   });
 });
 

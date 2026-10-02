@@ -1,6 +1,8 @@
 import { generatePageMetadata } from "@/lib/page-helpers";
 import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
+import { SATSER_2026 } from "@/lib/satser-2026";
+import { formatNumber } from "@/lib/format";
 import TopskatBeregner from "@/components/TopskatBeregner";
 import FAQ from "@/components/FAQ";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
@@ -16,6 +18,15 @@ export default async function TopskatPage() {
   const locale = await getLocale();
   const domainConfig = await getCurrentDomainConfig();
   const pageData = getPageData("topskat", locale) || getPageData("topskat", "da")!;
+
+  // Beløbene og satserne i brødteksten læses fra den samme kilde som
+  // TopskatBeregner, så de ikke kan glide fra hinanden. Bruttotallene er
+  // beregnerens egen betingelse: mellem- og topskat beregnes af indkomsten
+  // efter AM-bidrag, så grænsen nås ved grænse / (1 - AM-bidrag).
+  const kr = (belob: number) => `${formatNumber(belob, locale)} kr.`;
+  const pct = (sats: number) => formatNumber(sats * 100, locale);
+  const caBelob = (graense: number, divider = 1) =>
+    Math.round(graense / (1 - SATSER_2026.amBidrag) / divider / 100) * 100;
 
   return (
     <div className="flex flex-col lg:flex-row gap-8">
@@ -43,14 +54,14 @@ export default async function TopskatPage() {
             I 2026 er det danske skattesystem ændret med en ny skattemodel. Den gamle topskat er erstattet af <strong>tre progressive skattetrin</strong>:
           </p>
           <ul>
-            <li><strong>Mellemskat (7,5%):</strong> Betales af indkomst over 641.200 kr. (efter AM-bidrag)</li>
-            <li><strong>Topskat (7,5%):</strong> Betales af indkomst over 777.900 kr. (efter AM-bidrag)</li>
-            <li><strong>Top-topskat (5%):</strong> Betales af indkomst over 2.592.700 kr. (efter AM-bidrag)</li>
+            <li><strong>Mellemskat ({pct(SATSER_2026.mellemskat)}%):</strong> Betales af indkomst over {kr(SATSER_2026.mellemskatGraense)} (efter AM-bidrag)</li>
+            <li><strong>Topskat ({pct(SATSER_2026.topskat)}%):</strong> Betales af indkomst over {kr(SATSER_2026.topskatGraense)} (efter AM-bidrag)</li>
+            <li><strong>Top-topskat ({pct(SATSER_2026.topTopskat)}%):</strong> Betales af indkomst over {kr(SATSER_2026.topTopskatGraense)} (efter AM-bidrag)</li>
           </ul>
 
           <h2>Hvem betaler topskat?</h2>
           <p>
-            Omregnet til bruttoindkomst (før AM-bidrag) betaler du mellemskat fra ca. <strong>697.000 kr./år</strong> (ca. 58.100 kr./md) og topskat fra ca. <strong>845.500 kr./år</strong> (ca. 70.500 kr./md).
+            Omregnet til bruttoindkomst (før AM-bidrag) betaler du mellemskat fra ca. <strong>{kr(caBelob(SATSER_2026.mellemskatGraense))}/år</strong> (ca. {kr(caBelob(SATSER_2026.mellemskatGraense, 12))}/md) og topskat fra ca. <strong>{kr(caBelob(SATSER_2026.topskatGraense))}/år</strong> (ca. {kr(caBelob(SATSER_2026.topskatGraense, 12))}/md).
           </p>
           <p>
             Ca. <strong>10-15% af alle danske lønmodtagere</strong> betaler topskat. Det inkluderer typisk ledere, specialister, læger og andre med <strong>høj indkomst</strong>.

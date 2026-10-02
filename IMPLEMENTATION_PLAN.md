@@ -7,15 +7,15 @@ STATUS: 2/10 06:30. CI grøn (seneste master-kørsel 2/10 04:08Z). Sentry:
 **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` ·
   `npm run build`. Målt 2/10 06:25: 0 · 0 · **3638 grønne i 225 filer** · 0
   (`/klokken-i` og `/klockan-i` stadig `ƒ`, `force-dynamic` urørt).
-  **Denne iteration: PR 27 landet — rodens fejlside kastede selv en fejl.**
-  `src/app/error.tsx` kaldte `useLocale()`, som kaster `useLocale must be used
-  within a LocaleProvider` uden provider, så fejlvisningen viste Next's egen
-  fallback i stedet for dansk tekst og «Prøv igen». Målt: den nye
-  `src/app/error.test.tsx` er **rød mod den gamle kode** (kast fra
-  `error.tsx:16`) og grøn med rettelsen. Rettelsen læser domænet fra
-  `window.location.hostname` med dansk startværdi, så hydration ikke afviger.
-  `ceo/error-side-locale`. Målinger fra de fire forrige iterationer (opsparing,
-  bil, billaan, landesiderne) er flyttet til `docs/plan-arkiv.md`.
+  **Denne iteration: `/topskat` fik sine beløb fra kilden.** De tre
+  skattetrins-grænser, deres bruttotals og månedstal lå håndskrevet i
+  brødteksten, mens `TopskatBeregner` fik dem fra `SATSER_2026`. Målt før:
+  **8 fund på siden, efter: 1**, listen **392 → 385**. Bruttotallene er
+  beregnerens egen betingelse (`grænse / (1 − AM-bidrag)`), så de er
+  byte-identiske med den gamle tekst — nu med kilde. `ceo/topskat-graense-fra-sats`.
+  **Også landet:** PR 27 — rodens fejlside kaldte `useLocale()` og kastede
+  derfor selv en fejl; målt rød mod den gamle kode, `4d48370`. Målinger fra
+  de fem forrige iterationer ligger i `docs/plan-arkiv.md`.
 
 ## Åbne opgaver — F5b: beløb i JSX-tekst → modulkonstanter
 
@@ -30,12 +30,11 @@ blive kortere. Rækkefølgen er trafikrækkefølge. ✅ betyder lukket.
    tinglysning, avance, byggeskade …) uden kilde i repoet, og den niende er
    «opdateret august 2025». Formelbeløb kan læses fra `src/lib/boligsalg.ts`
    (findes, har tests); prisintervallerne kræver en kilde. Lav trafikrækkefølge.
-3. **`/topskat`** — 8 fund, hvor **syv er beløbsgrænser** (641.200 / 777.900 /
-   2.592.700 kr. pr. år, 697.000 og 845.500 kr./år + de to månedstal), der
-   højst sansynvis allerede ligger i modulets satser. Den ottende («af en
-   lønforhøjelse på 1.000 kr.») beholder sit tal, fordi den netop *er* den
-   illustrerede forhøjelse. *Accept:* listen for siden falder, og porten
-   tæller dem ikke, fordi de læses fra modulet.
+3. **`/topskat`** — ✅ 2/10 07:00 (`ceo/topskat-graense-fra-sats`). 8 fund → 1,
+   listen 392 → **385**. Alle tre grænser, deres bruttotals og månedstal læses
+   fra `SATSER_2026` med beregnerens egen betingelse; målt byte-identisk med
+   den gamle tekst. Det ene fund er «lønforhøjelse på 1.000 kr.», der er den
+   illustrerede forhøjelse.
 4. **Beløb i prop-strenge er stadig uden for porten** (ny, 2/10). `jsxBelob` ser
    kun `ts.isJsxText`, så `BoligsalgBeregner.tsx:48`s «0,6% + 1.850 kr (skøde)»
    og «1,45% + 1.825 kr (pantebrev)» er usynlig for porten. *Accept:* scanneren
@@ -260,13 +259,14 @@ Prioriteret efter forventet effekt på **trafik**. Datagrund fra GSC 1/10
 
 ## Åbne VERIFICÉR DEPLOY-noter
 
-Alle notes under har vindue **2/10 07:30** (den nyeste fra 06:30) (batch-deployeren kører 07:30/12:30/
+Alle notes under har vindue **2/10 07:30** (den nyeste fra 07:00) (batch-deployeren kører 07:30/12:30/
 17:30/21:30). Prøverne er på **indhold**, aldrig på HTTP 200: en 200 beviser
 at svaret serveres, ikke at det er den nye kode. Hver note er én linje her;
 den fulde kommando står i `docs/plan-arkiv.md` under sit slug.
 
 | Slug | Prøv på indhold |
 |---|---|
+| `topskat-graense-fra-sats` (**ny**) | `minberegner.dk/topskat`: rækkerne skal være `Mellemskat (7,5%) … over 641.200 kr.`, `Topskat (7,5%) … over 777.900 kr.`, `Top-topskat (5%) … over 2.592.700 kr.`, og «ca. **697.000 kr./år** (ca. **58.100 kr./md**)» + «ca. **845.500 kr./år** (ca. **70.500 kr./md**)»; `grep -c '641.200 kr\.'` skal være **2** (JSX-teksten + `<title>`/metadata) og antallet af `697.000` skal være uændret |
 | `error-side-locale` (**ny**) | **Ingen HTML-prøve findes** — ændringerne ligger kun i rodens fejlside, som ikke kan udløses uden en kastende fejl, så den kan ikke verificeres på indhold. Verificér i stedet at `minberegner.dk/api/health` svarer `status: ok`, og at der i 14 dage **ikke** dukker en Sentry-hændelse med `useLocale must be used within a LocaleProvider` op |
 | `klokken-tidszone-paastand` | `minberegner.dk/klokken-i/usa`: FAQ-svaret på «Hvad er klokken i New York lige nu?» skal sige «**byens egen** tidszone» og **ikke** «din tidszone» — i både den synlige tekst og JSON-LD'en; `beraknare.se/klockan-i/usa` skal sige «**stadens egen** tidszon» og **ikke** «din tidszon». `grep -c 'din tidszone'` på hele siden skal være **0** i begge domæner. Samme svar skal stå på alle 12 lande |
 | `opsparing-eksempler-fra-modul` | `minberegner.dk/opsparing`: «Uden renters rente» skal give `10.000 kr.` / `25.000 kr.`, «Med renters rente» `10.000 kr.` / `43.219 kr.`, og kalletoten `1.522.077 kr.` for Person A og `1.674.259 kr.` for B, med «480.000 kr.» / «720.000 kr:» og «240.000 kr. mere ind» / «152.182 kr. mere til sidst»; **intet** «1,5 mio», «1,7 mio», «5%», «(5% rente)» eller «forskellen er minimal». `beraknare.se/opsparing`: `100 000 kr` / `250 000 kr` og `100 000 kr` / `432 194 kr` med **mellemrum** i separatoren, `1 522 077 kr` / `1 674 259 kr` og `480 000 kr` / `720 000 kr`; **intet** «1,5 mkr» |
