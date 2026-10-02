@@ -46,7 +46,7 @@ const copy = {
       },
       {
         question: `Hvad er klokken i ${by} lige nu?`,
-        answer: `Lige nu er det ${tid} i ${by}. Tallet regnes hver gang siden indlæses, så det følger din tidszone og landets egen skiftedag.`,
+        answer: `Lige nu er det ${tid} i ${by}. Tallet regnes hver gang siden indlæses, så det følger byens egen tidszone og landets egen skiftedag.`,
       },
     ],
   },
@@ -70,7 +70,7 @@ const copy = {
       },
       {
         question: `Vad är klockan i ${by} just nu?`,
-        answer: `Just nu är det ${tid} i ${by}. Talet räknas om varje gång sidan hämtas, så det följer din tidszon och landets eget byte.`,
+        answer: `Just nu är det ${tid} i ${by}. Talet räknas om varje gång sidan hämtas, så det följer stadens egen tidszon och landets eget byte.`,
       },
     ],
   },

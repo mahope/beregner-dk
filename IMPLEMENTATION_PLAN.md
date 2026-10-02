@@ -1,17 +1,30 @@
-STATUS: 2/10 05:40. Rød CI: ingen (seneste kørsel grøn 2/10 03:10Z). Sentry:
+STATUS: 2/10 06:20. Rød CI: ingen (seneste kørsel grøn 2/10 03:34Z). Sentry:
   MINBEREGNER-1 er Next-router-støj, filtreret siden 3e67ed3 og kodetestet siden
   5f137d4 — ingen ny hændelsesgruppe. PR-TJEK: 2026-10-02 — ingen åbne PR'er.
   BRANCH-TJEK: 2/10 — ingen forældede remote-branches. CEO-kø punkt 0 er lukket
   (RETTET 04ca30a) og de otte CEO-punkter er efterprøvet i koden 2/10 04:40.
 **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` ·
-  `npm run build`. Målt 2/10 05:36: 0 · 0 · **3632 grønne i 223 filer** · 0
-  (`/opsparing` stadig `ƒ`, ingen rutedynamik ændret).
-  **Denne iteration: `/opsparing` har løftet ti håndskrevne beløb ud af
-  brødteksten, så siden regner dem frem med den samme simulering som
-  beregneren.** Datagrund: F5b-køens trafikrækkefølge (`/moms` 18 kræver en
-  kilde, ❓), målt med portens egen scanner — **10 → 0 fund**, listen
-  **402 → 392**. Mutation: med den gamle `page.tsx` er porten rød.
-  `ceo/opsparing-eksempler-fra-modul`.
+  `npm run build`. Målt 2/10 06:10: 0 · 0 · **3637 grønne i 224 filer** · 0
+  (`/klokken-i` og `/klockan-i` stadig `ƒ`, `force-dynamic` urørt).
+  **Denne iteration: FAQ'en på de 24 landesider sagde, at klokkeslættet
+  «følger din tidszone». Det er målt falsk, og halvdelen lå i den strukturerede
+  data, Google kan citere.** Egen måling 06:05 med `beregnKlokkenNu` under to
+  processer: `TZ=Europe/Copenhagen` og `TZ=America/New_York` gav **identiske**
+  tal (New York 00:02, Tokyo 13:02) — byens egen vægur, intet læserinput.
+  Rettet med to ord, én i hvert sprog. Ny port dømmer på **ejendaben** (svaret
+  skal navngive byens egen tidszone) og renderer den rigtige JSON-LD; målt 5/5
+  rød mod den gamle kode. `ceo/klokken-tidszone-paastand`.
+
+## Review-fund 2/10 06:15 — lukket ✅ (LAV, `ceo/klokken-tidszone-paastand`)
+
+  `/klokken-i/<land>` og `/klockan-i/<land>` skrev i FAQ'en, at tallet «følger
+  **din** tidszone». Målt falsk: `beregnKlokkenNu(by, sprog, tidspunkt)` læser
+  kun `by.zone`, og egen måling under to `TZ` gav identiske tal. Halvdelen lå i
+  `FAQSchema`'s JSON-LD, altså den tekst Google kan citere, og den modsagde
+  sidens egen brødtekst otte linjer længere nede. Rettet med **to ord**.
+  Porten dømmer på ejendaben og renderer den rigtige JSON-LD, så den kan ikke
+  være grøn fordi sætningen bare forsvinder. Målinger, mutation og
+  selve fund-teksten: `docs/plan-arkiv.md`.
 
 ## Review-fund 2/10 — lukket ✅ (MIDDEL, `ceo/tidsberegner-halvmarathon-tempo`)
 
@@ -329,14 +342,15 @@ Prioriteret efter forventet effekt på **trafik**. Datagrund fra GSC 1/10
 
 ## Åbne VERIFICÉR DEPLOY-noter
 
-Alle notes under har vindue **2/10 07:30** (den nyeste fra 05:35) (batch-deployeren kører 07:30/12:30/
+Alle notes under har vindue **2/10 07:30** (den nyeste fra 06:15) (batch-deployeren kører 07:30/12:30/
 17:30/21:30). Prøverne er på **indhold**, aldrig på HTTP 200: en 200 beviser
 at svaret serveres, ikke at det er den nye kode. Hver note er én linje her;
 den fulde kommando står i `docs/plan-arkiv.md` under sit slug.
 
 | Slug | Prøv på indhold |
 |---|---|
-| `opsparing-eksempler-fra-modul` (**ny**) | `minberegner.dk/opsparing`: «Uden renters rente» skal give `10.000 kr.` / `25.000 kr.`, «Med renters rente» `10.000 kr.` / `43.219 kr.`, og kalletoten `1.522.077 kr.` for Person A og `1.674.259 kr.` for B, med «480.000 kr.» / «720.000 kr:» og «240.000 kr. mere ind» / «152.182 kr. mere til sidst»; **intet** «1,5 mio», «1,7 mio», «5%», «(5% rente)» eller «forskellen er minimal». `beraknare.se/opsparing`: `100 000 kr` / `250 000 kr` og `100 000 kr` / `432 194 kr` med **mellemrum** i separatoren, `1 522 077 kr` / `1 674 259 kr` og `480 000 kr` / `720 000 kr`; **intet** «1,5 mkr» |
+| `klokken-tidszone-paastand` (**ny**) | `minberegner.dk/klokken-i/usa`: FAQ-svaret på «Hvad er klokken i New York lige nu?» skal sige «**byens egen** tidszone» og **ikke** «din tidszone» — i både den synlige tekst og JSON-LD'en; `beraknare.se/klockan-i/usa` skal sige «**stadens egen** tidszon» og **ikke** «din tidszon». `grep -c 'din tidszone'` på hele siden skal være **0** i begge domæner. Samme svar skal stå på alle 12 lande |
+| `opsparing-eksempler-fra-modul` | `minberegner.dk/opsparing`: «Uden renters rente» skal give `10.000 kr.` / `25.000 kr.`, «Med renters rente» `10.000 kr.` / `43.219 kr.`, og kalletoten `1.522.077 kr.` for Person A og `1.674.259 kr.` for B, med «480.000 kr.» / «720.000 kr:» og «240.000 kr. mere ind» / «152.182 kr. mere til sidst»; **intet** «1,5 mio», «1,7 mio», «5%», «(5% rente)» eller «forskellen er minimal». `beraknare.se/opsparing`: `100 000 kr` / `250 000 kr` og `100 000 kr` / `432 194 kr` med **mellemrum** i separatoren, `1 522 077 kr` / `1 674 259 kr` og `480 000 kr` / `720 000 kr`; **intet** «1,5 mkr» |
 | `bil-omkostninger-fra-modul` | `minberegner.dk/bil`: artiklen skal have `4,16-5,00 kr.` i pr/km-sætningen og rækkerne `Benzin 4,90 / Diesel 5,00 / Hybrid 4,83 / Elbil 4,16`, «7.500 kr. om året» i serviceafsnittet og `4.000/5.500/3.000/0 kr.` i vægtafgiftstabellen; **intet** «2,50-4,50 kr» og ingen `<li>` med beløb. `beraknare.se/bil`: `4,10-5,27 kr.`, rækkerne `Bensin 5,17 / Diesel 5,27 / Laddhybrid 5,10 / Elbil 4,10`, «17,57 kr/liter», «7 500 kr per år» og `Elbil 360 kr` i tabellen; **intet** «18-20 kr/liter». Beregnerens brændstofpris skal være 17,57 på beraknare.se (var 13,5 på alle domæner) |
 | `billaan-tal-fra-modul` (**ny**) | `minberegner.dk/billaan`: rækkerne skal være `100.000/10.000/5 år/6 %/1.740 kr/114.397 kr`, `200.000/20.000/7 år/6 %/**2.630 kr**/240.881 kr`, `300.000/30.000/7 år/6 %/**3.944 kr**/361.322 kr`; **intet** «3.017» eller «4.525»; beregnerens ÅOP skal være **6,91** (var 3,46) | `beraknare.se/billaan` skal have `150 000/30 000/7 %/2 376 kr/172 569 kr` med **mellemrum** i tusindtalsseparatoren |
 | `tidszone-links-til-lande` | `minberegner.dk/tidszone` skal have **12** links med `href="/klokken-i/<slug>"` og ankerteksten «Hvad er klokken i Japan?»; `beraknare.se/tidszone` skal have 12 med `/klockan-i/…` og «Vad är klockan i Kanada?»; **intet** `/klockan-i/` på minberegner.dk og intet `/klokken-i/` på beraknare.se; den svenske landetabel-boen skal **ikke** have 11 mellemrum efter «eftersom»; `/blog/hvad-er-klokken-i-usa-naar-den-er-12-i-danmark` skal linke til `/klokken-i/usa` |

@@ -23761,3 +23761,53 @@ Med den nye `page.tsx`: 8/8 grøn. Ny `src/lib/opsparing.test.ts`: 16/16 grøn.
 `TZ=UTC npm run test` **3632 grønne i 223 filer** · `npm run build` 0,
 `/opsparing` stadig `ƒ`. (Den ureviewede danske streng i
 `src/app/procent/page.tsx:560` er fra master og urørt.)
+
+---
+
+## `ceo/klokken-tidszone-paastand` — 2/10 06:15 (review-fund, punkt 0)
+
+**Fundet.** `KlokkenIPage.tsx:49` (da) og `:73` (se): FAQ-svaret på «Hvad er
+klokken i <by> lige nu?» skrev, at tallet «følger din tidszone». Målt falsk.
+
+**Måling (egen, 2/10 06:05).** `beregnKlokkenNu` tager kun `(by, sprog,
+tidspunkt)` og læser `by.zone` — intet læserinput. Kørsel med repoets egen
+funktion på samme øjeblik under to processer:
+
+```
+TZ=Europe/Copenhagen  New York 00:02 · Chicago 23:02 · Tokyo 13:02
+TZ=America/New_York   New York 00:02 · Chicago 23:02 · Tokyo 13:02
+```
+
+Identisk. To læsere i to lande ser præcis samme tal, så tallet følger **ikke**
+læserens tidszone. Halvdelen lå i `FAQSchema`'s JSON-LD — altså den tekst Google
+kan citere i søgeresultatet — og den modsagde sidens egen brødtekst (`:204`)
+«Tallet er læst i {landet}s egen tidszone».
+
+**Rettelsen.** To ord, én i hvert sprog: `din tidszone` → `byens egen tidszone`
+og `din tidszon` → `stadens egen tidszon`. «stadens» er svensk fordi
+`converterBody` i samme fil allerede skriver «en stad som inte finns på den här
+sidan»; «egen» findes i begge sprog. Halvdelen «landets egen skiftedag» /
+«landets eget byte» var **rigtig** og er urørt.
+
+**Porten.** Ny `src/components/KlokkenIPage.test.tsx` (5 tests). Den dømmer på
+**ejendaben** — svaret skal navngive byens egen tidszone — fordi
+`not.toContain("din tidszone")` alene ville være grøn for en side der slettede
+hele sætningen. Den renderer den rigtige `FAQSchema`, altså JSON-LD'en er med i
+dommen (i `tidszone/page.test.tsx` mockes den væk, her ville det være
+vakuum-grøn). `FAQ` mockes **til markup, ikke til `null`**, fordi den synlige
+FAQ er den anden halvdel af samme påstand. Rækken af lande læses fra
+`getKlokkenSlugs(sprog)` — slugs er sprogspecifikke (`tyrkiet`/`turkiet`,
+`canada`/`kanada`), så en hardkodet liste ville 404'e. USA's første by læses fra
+modulet i stedet for «New York» (C182's lære).
+
+**Mutation (punkt 12).** Før rettelsen: 5/5 røde, med `expected 'Lige nu er det
+00:03 i New York…' to contain 'egen tidszone'`. Efter at sætningen var sat tilbage
+med `perl -pi -e 's/byens egen tidszone/din tidszone/'`: 4 røde, 1 grøn (se var
+ stadig rettet). Mutationen fjernet igen.
+
+**Gate 2/10 06:10.** `npm run lint` 0 · `npm run typecheck` 0 ·
+`TZ=UTC npm run test` **3637 grønne i 224 filer** · `npm run build` 0. Begge
+ruter er stadig `ƒ` i byggetabelen, altså `force-dynamic` holder. De 7
+build-advarsler er Tailwind-CSS i `globals.css` og er fra master.
+`node scripts/locale-leak.mjs --gate` exit 0 før og efter, output
+byte-identisk (`diff` tom) — den `FEJL:`-linje i testloggen er forhånds.
