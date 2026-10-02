@@ -259,22 +259,22 @@ export default function LeasingBeregner() {
                   <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{l.leasingberegning}</h2>
                   <div className="bg-white dark:bg-gray-700 rounded-lg p-4 shadow-sm">
                     <div className="text-sm text-gray-500 dark:text-gray-400">{l.maanedligLeasingydelse}</div>
-                    <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">{formatKr(result.maanedligYdelse)} kr.</div>
+                    <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">{formatKr(result.maanedligYdelse)}</div>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="bg-white dark:bg-gray-700 rounded-lg p-3 shadow-sm">
                       <div className="text-xs text-gray-500 dark:text-gray-400">{l.samletLeasingudgift}</div>
-                      <div className="text-lg font-bold text-gray-900 dark:text-white">{formatKr(result.totalLeasing)} kr.</div>
+                      <div className="text-lg font-bold text-gray-900 dark:text-white">{formatKr(result.totalLeasing)}</div>
                     </div>
                     <div className="bg-white dark:bg-gray-700 rounded-lg p-3 shadow-sm">
                       <div className="text-xs text-gray-500 dark:text-gray-400">{l.herafRenter}</div>
-                      <div className="text-lg font-bold text-red-600 dark:text-red-400">{formatKr(result.totalRente)} kr.</div>
+                      <div className="text-lg font-bold text-red-600 dark:text-red-400">{formatKr(result.totalRente)}</div>
                     </div>
                   </div>
                   <div className="bg-white dark:bg-gray-700 rounded-lg p-3 shadow-sm text-sm">
-                    <div className="flex justify-between"><span className="text-gray-600 dark:text-gray-400">{l.bilprisLabel}</span><span className="dark:text-gray-200">{formatKr(bilprisNum)} kr.</span></div>
-                    <div className="flex justify-between"><span className="text-gray-600 dark:text-gray-400">{l.restvaerdiLabel}</span><span className="dark:text-gray-200">{formatKr(restvaerdiNum)} kr.</span></div>
-                    <div className="flex justify-between"><span className="text-gray-600 dark:text-gray-400">{l.vaerdtab}</span><span className="font-medium dark:text-gray-200">{formatKr(result.vaerdtab)} kr.</span></div>
+                    <div className="flex justify-between"><span className="text-gray-600 dark:text-gray-400">{l.bilprisLabel}</span><span className="dark:text-gray-200">{formatKr(bilprisNum)}</span></div>
+                    <div className="flex justify-between"><span className="text-gray-600 dark:text-gray-400">{l.restvaerdiLabel}</span><span className="dark:text-gray-200">{formatKr(restvaerdiNum)}</span></div>
+                    <div className="flex justify-between"><span className="text-gray-600 dark:text-gray-400">{l.vaerdtab}</span><span className="font-medium dark:text-gray-200">{formatKr(result.vaerdtab)}</span></div>
                   </div>
                 </>
               ) : (
@@ -283,29 +283,29 @@ export default function LeasingBeregner() {
                   <div className="space-y-3">
                     <div className="bg-white dark:bg-gray-700 rounded-lg p-4 shadow-sm border-l-4 border-blue-500">
                       <div className="text-sm font-medium text-blue-600 dark:text-blue-400">{l.leasing}</div>
-                      <div className="text-xl font-bold text-gray-900 dark:text-white">{formatKr(result.leasing.maanedlig)} kr./{l.months}</div>
+                      <div className="text-xl font-bold text-gray-900 dark:text-white">{formatKr(result.leasing.maanedlig)}/{l.months}</div>
                       <dl className="mt-2 grid grid-cols-3 gap-2 text-xs">
-                        <div><dt className="text-gray-500 dark:text-gray-400">{l.iaalt}</dt><dd className="dark:text-gray-200">{formatKr(result.leasing.total)} kr.</dd></div>
-                        <div><dt className="text-gray-500 dark:text-gray-400">{l.efterPerioden}</dt><dd className="dark:text-gray-200">{formatKr(result.leasing.ejerVedUdlob)} kr.</dd></div>
-                        <div><dt className="text-gray-500 dark:text-gray-400">{l.nettoOmkostning}</dt><dd className="font-semibold dark:text-gray-200">{formatKr(result.leasing.nettoOmkostning)} kr.</dd></div>
+                        <div><dt className="text-gray-500 dark:text-gray-400">{l.iaalt}</dt><dd className="dark:text-gray-200">{formatKr(result.leasing.total)}</dd></div>
+                        <div><dt className="text-gray-500 dark:text-gray-400">{l.efterPerioden}</dt><dd className="dark:text-gray-200">{formatKr(result.leasing.ejerVedUdlob)}</dd></div>
+                        <div><dt className="text-gray-500 dark:text-gray-400">{l.nettoOmkostning}</dt><dd className="font-semibold dark:text-gray-200">{formatKr(result.leasing.nettoOmkostning)}</dd></div>
                       </dl>
                     </div>
                     <div className="bg-white dark:bg-gray-700 rounded-lg p-4 shadow-sm border-l-4 border-green-500">
                       <div className="text-sm font-medium text-green-600 dark:text-green-400">{l.billaan}</div>
-                      <div className="text-xl font-bold text-gray-900 dark:text-white">{formatKr(result.billaan.maanedlig)} kr./{l.months}</div>
+                      <div className="text-xl font-bold text-gray-900 dark:text-white">{formatKr(result.billaan.maanedlig)}/{l.months}</div>
                       <dl className="mt-2 grid grid-cols-3 gap-2 text-xs">
-                        <div><dt className="text-gray-500 dark:text-gray-400">{l.iaalt}</dt><dd className="dark:text-gray-200">{formatKr(result.billaan.total)} kr.</dd></div>
-                        <div><dt className="text-gray-500 dark:text-gray-400">{l.efterPerioden}</dt><dd className="dark:text-gray-200">{formatKr(result.billaan.ejerVedUdlob)} kr.</dd></div>
-                        <div><dt className="text-gray-500 dark:text-gray-400">{l.nettoOmkostning}</dt><dd className="font-semibold dark:text-gray-200">{formatKr(result.billaan.nettoOmkostning)} kr.</dd></div>
+                        <div><dt className="text-gray-500 dark:text-gray-400">{l.iaalt}</dt><dd className="dark:text-gray-200">{formatKr(result.billaan.total)}</dd></div>
+                        <div><dt className="text-gray-500 dark:text-gray-400">{l.efterPerioden}</dt><dd className="dark:text-gray-200">{formatKr(result.billaan.ejerVedUdlob)}</dd></div>
+                        <div><dt className="text-gray-500 dark:text-gray-400">{l.nettoOmkostning}</dt><dd className="font-semibold dark:text-gray-200">{formatKr(result.billaan.nettoOmkostning)}</dd></div>
                       </dl>
                     </div>
                     <div className="bg-white dark:bg-gray-700 rounded-lg p-4 shadow-sm border-l-4 border-purple-500">
                       <div className="text-sm font-medium text-purple-600 dark:text-purple-400">{l.kontantkoeb}</div>
-                      <div className="text-xl font-bold text-gray-900 dark:text-white">{formatKr(result.kontant.maanedlig)} kr./{l.months}*</div>
+                      <div className="text-xl font-bold text-gray-900 dark:text-white">{formatKr(result.kontant.maanedlig)}/{l.months}*</div>
                       <dl className="mt-2 grid grid-cols-3 gap-2 text-xs">
-                        <div><dt className="text-gray-500 dark:text-gray-400">{l.iaalt}</dt><dd className="dark:text-gray-200">{formatKr(result.kontant.total)} kr.</dd></div>
-                        <div><dt className="text-gray-500 dark:text-gray-400">{l.efterPerioden}</dt><dd className="dark:text-gray-200">{formatKr(result.kontant.ejerVedUdlob)} kr.</dd></div>
-                        <div><dt className="text-gray-500 dark:text-gray-400">{l.nettoOmkostning}</dt><dd className="font-semibold dark:text-gray-200">{formatKr(result.kontant.nettoOmkostning)} kr.</dd></div>
+                        <div><dt className="text-gray-500 dark:text-gray-400">{l.iaalt}</dt><dd className="dark:text-gray-200">{formatKr(result.kontant.total)}</dd></div>
+                        <div><dt className="text-gray-500 dark:text-gray-400">{l.efterPerioden}</dt><dd className="dark:text-gray-200">{formatKr(result.kontant.ejerVedUdlob)}</dd></div>
+                        <div><dt className="text-gray-500 dark:text-gray-400">{l.nettoOmkostning}</dt><dd className="font-semibold dark:text-gray-200">{formatKr(result.kontant.nettoOmkostning)}</dd></div>
                       </dl>
                       <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">{l.vaerdtabNote}</p>
                     </div>
@@ -333,11 +333,11 @@ export default function LeasingBeregner() {
 
       {/* Share */}
       <div className="flex justify-center mt-6 gap-3">
-        <CopyResultButton text={result ? `Leasing: ${formatKr(result.leasing.maanedlig)} kr./{l.months} — Lån: ${formatKr(result.billaan.maanedlig)} kr./{l.months}` : ''} />
+        <CopyResultButton text={result ? `Leasing: ${formatKr(result.leasing.maanedlig)}/{l.months} — Lån: ${formatKr(result.billaan.maanedlig)}/{l.months}` : ''} />
         <ShareCalculation
           getShareableLink={getShareableLink}
           calculatorName="Leasing Beregner"
-          resultSummary={result ? `Leasing: ${formatKr(result.leasing.maanedlig)} kr./{l.months}` : ''}
+          resultSummary={result ? `Leasing: ${formatKr(result.leasing.maanedlig)}/{l.months}` : ''}
         />
       </div>
 

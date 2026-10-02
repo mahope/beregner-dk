@@ -25373,3 +25373,27 @@ enhed. `/leasing` (20 kallesteder) og `/su` (7) er stadig åbne.
 
 **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test`
 (3803 i 234 filer) · `npm run build` — alle grønne 2/10 20:53.
+
+## Lukket 2/10 20:57 — `leasing-dobbelt-valuta`
+
+**Find:** samme rodårsag som `pension-dobbelt-valuta`, bare 20 steder i stedet
+for fire. `LeasingBeregner.tsx:186` definerer `formatKr` som
+`formatCurrency(...)` — som selv afslutter med valutaenheden — og **alle 20**
+kald stod med et bogstaveligt « kr.» bagefter. Hele resultatblokken for
+leasing, billån og kontant skrev derfor «4.121 kr. kr.», «178.350 kr. kr.»,
+«28.350 kr. kr.», «150.000 kr. kr.», «169.140 kr. kr.» og «9.210 kr. kr.»,
+og på beraknare.se «4 121 kr kr.» (Intl skriver «kr» for sv-SE). På de to
+månedslinjer blev det «4.121 kr. kr./mån».
+
+**Rettelse:** de 20 literals er fjernet, så hvert tal bærer præcis én enhed
+og månedslinjerne nu læser «4.121 kr./mån» og «4 121 kr/mån».
+
+**Port:** ny `src/components/LeasingBeregner.test.tsx` (3 tests) dømmer den
+**rendrede** side — `document.body.textContent må ikke matche /kr\. kr\.|kr kr/`
+i både `da` og `se` — og låser månedsydelsen til
+`beregnLeasingSammenlign(LEASING_EKSEMPEL)` med én enhed, så porten ikke kan
+reddes ved at ændre formatteren. **Modvejs målt:** « kr.» tilbage i alle 20
+kald giver **2 røde** af 3; filen genskabt byte-for-byte (`diff -q` tom).
+
+**Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test`
+(3806 i 234 filer) · `npm run build` — alle grønne 2/10 20:57.
