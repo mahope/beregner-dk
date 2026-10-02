@@ -1,21 +1,21 @@
-STATUS: 2/10 18:35. CI grøn ved start (`37031930026`). PR-TJEK 2/10 15:12 og
+STATUS: 2/10 19:05. CI grøn ved start (`37034220496`). PR-TJEK 2/10 15:12 og
    17:30: ingen åbne PR'er (næste tjek 3/10). Sentry: ingen opgave med reel
    effekt — MINBEREGNER-2 var allerede rettet i `def070c`, MINBEREGNER-1 er
    15 hændelser / 0 brugere = bot-trafik. CEO-kø punkt 0: lukket 2/10 14:48.
    **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` ·
-   `npm run build` — grøn 2/10 18:32 (**3767** tests i 231 filer, +7).
-   **Denne iteration:** review-fundet fra 19:05 (punkt 0). `/procent`s eget
-   FAQ-svar om procentpoint skrev «-11,3 %», men sætningen siger selv at
-   procent regnes på det gamle tal, så (19,7 − 22,1) / 22,1 er **-10,9 %** —
-   tallet kom af ingen af de to regnestykker. Begge sprog læser nu
-   `procentpointForskelFaqSvar()` fra `src/lib/procentpoint.ts`, som regner
-   alle fire tal af det samme par som tabellen på siden bruger. Dansk er
-   byte-identisk på de tre andre tal; svensk får `Intl`s U+2212-minus, så
-   FAQ'en nu bærer samme tegn som tabellen ved siden af. Se `docs/plan-arkiv.md`.
-   **Næste iteration:** `/kvadratmeter` (6 fund, se 3.705 visninger) eller
-   `/leasing` (9 fund, se 2.923) — og som **feature** den svenske
-   Excel-formel der er gal, fordi den er en **fejl læseren kan se**, ikke et
-   tal i en streng.
+   `npm run build` — grøn 2/10 18:55 (**3768** tests i 231 filer, +1).
+   **Denne iteration:** den svenske Excel-tabel på `beraknare.se/renteberegner`
+   skrev `=BETALNING(4/12;240;-200000)` — 33 % pr. måned, **66 666,67 kr** mod de
+   **1 211,96 kr** svarcellen lige til højre lovede (målt uafhængigt). Raten i
+   en formel er en brøk, så 4 % er `0,04`; den ligner nu den danske
+   `=YDELSE(0,04/12;240;-200000)`. Fælde-teksten «0,04/12, inte 0.04/12» lå
+   under den forkerte formel, så **porten modsagde brødteksten**: evalueringen
+   sprang BETALNING-rækkerne over, og semikolon-testen forbød netop det
+   decimalkomma, fælden kræver. Se `docs/plan-arkiv.md`.
+   **Næste iteration:** `/vaegttab` (24 fund, se 1.277) → `/kalorier` (17, se
+   2.825) → `/leasing` (9, se 2.923), alle i `page-data.ts` alene. Som
+   **feature**: `/leasing` (3.124 visninger, pos. 12,2) mangler en
+   leasingkalkylator-til-sammenligning, konkurrenterne har den.
 
 ## Fase 3 — trafik-drevet
 
@@ -158,15 +158,18 @@ lang og de 176 tal bliver en tilladelsesliste** — det er måske nok det, men e
 tilladelsesliste over fejl er dyrere end porten er bred. Derfor: fix slugs
 først, portudvidelsen som sidste skridt når de er nede mod 0.
 
-**Ny målt fejl — den svenske Excel-formel er gal, ikke et beløb.** Den
-`rente-excel.ts`-drevne tabel på `/renteberegner` skriver
-**«=BETALNING(4/12;240;-200000)»** mens svarcellen ved siden af sig siger
-1 211,96 kr. `4/12` er 33 % pr. måned, så formlen giver et helt andet beløb,
-og tabellens egen fælde-tekst «0,04/12, ikke 0.04/12» er dermed en
-modsigelse til formlen over den. Samme fejlklasse som beløbene, anden fil.
-*Accept:* formlen læser `aarsrente / 100` formateret til Excel, samme greb som
-`page.tsx`' `excelDa`, og en test dømmer at formlen **og** svaret stammer fra
-samme `annuitetsEksempel()`.
+**Lukket 2/10 18:55 — `svensk-excel-formel`.** Den svenske Excel-tabel på
+`/renteberegner` skrev `=BETALNING(4/12;240;-200000)`, som er 33 % pr. måned
+og giver **66 666,67 kr** mod de **1 211,96 kr** svarcellen lovede; fælde-
+teksten «0,04/12, inte 0.04/12» lå under den, og porten sprang
+BETALNING-rækkerne over *og* forbød decimalkommaet i rentesatsen. Raten
+læses nu som `aarsrente / 100` formateret i svensk Excel-syntax, samme greb
+som `excelDa` på den danske side, og fælden citerer samme sats. Formlerne er
+`=BETALNING(0,04/12;240;-200000)` → 1 211,96 kr og
+`=BETALNING(0,04/12;240;-200000)*240-200000` → 90 870,56 kr.
+**Accept:** ✅ opfyldt — evaluerer hver formel i tabellen til sit eget svar
+(også BETALNING), målt på rigtig bygget server; 2 mutationer røde med
+master-koden. `/renteberegner` se: 3.124 visninger, 33 klik, 1,1 %, pos. 12,2.
 
 **Åben:** `/moms` har 3 fund tilbage, som er lovgrænser (dansk registrering over
 50.000 kr, svensk over 120.000 kr, told ved import over 1.150 kr). ❓ nedenfor.
@@ -196,6 +199,7 @@ ingen regex på tal og tekst.
 
 | Slug | Prøv på indhold |
 |---|---|
+| `svensk-excel-formel` (**ny**, vindue 2/10 21:30) | `beraknare.se/renteberegner`: Excel-tabellen skal have **`=BETALNING(0,04/12;240;-200000)`** → svar **1 211,96 kr** og **`=BETALNING(0,04/12;240;-200000)*240-200000`** → **90 870,56 kr**, og fældene skal sige «Använd det svenska decimaltecknet (komma) i räntan: **0,04/12**, inte 0.04/12.». **Intet** `BETALNING(4/12` i hele HTML'en, og **intet** `BETALNING(0.04` (punktum som decimaltegn). Tredje række `=200000*4/100` → **8 000 kr** uændret. **0** `NaN` og **0** `æ`/`ø`. `minberegner.dk/renteberegner`: **0** `BETALNING`, **7** `=YDELSE(0,04/12;240;-200000)` og **2** `=RENTENPERIODER(0,04/12;-1211,96;200000)` uændrede |
 | `procentpoint-faq-tal-fra-modul` (**ny**, vindue 2/10 21:30) | `minberegner.dk/procent`: FAQ'en skal have **«Procentpoint trækker du to procenttal fra hinanden: 22,1 % til 19,7 % er -2,4 procentpoint. Procent regner du på det gamle tal: de samme tal er -10,9 %.»** — **intet** «11,3 %» i hele HTML'en (det skal kun stå på `/ejendomsvaerdiskat`, om mio. kr). `beraknare.se/procent`: «Procentenheter får du genom att dra två procenttal från varandra: 22,1 % till 19,7 % är **−2,4** procentenheter. Procent räknar du på det gamla talet: samma tal är **−10,9** %.» — minus skal være **U+2212** (prøv: `grep -c $'är −2,4'` på strippet HTML), fordi `Intl` skriver det for sv-SE, så FAQ'en nu bærer samme tegn som tabellen ved siden af. Dansk minus er ASCII-bindestreg. **Intet** «NaN» nogen steder |
 | `renteberegner-belob-fra-modul` (**ny**, vindue 2/10 21:30) | `minberegner.dk/renteberegner`: `<meta name="description">` skal være **byte-uændret** «Annuitetslån på **100.000** kr. med **5** % rente i **5** år: **1.887** kr. i måneden og **13.227** kr. i samlet rente. Beregn også serielån.» — dansk er bevidst uændret. **Intet** «1.887» på beraknare.se og intet «1 887» på minberegner.dk. `beraknare.se/renteberegner`: `<title>` skal være «Räntekalkylator: **100 000** kr i **5** år = **1 887** kr/mån» og beskrivelsen «… kostar **1 887** kr i månaden … Total ränta: **13 227** kr.», FAQ'en skal have **syv** spørgsmål hvor «Vad är formeln för ett annuitetslån?» svarer «… lån på **200 000** kr till **4** % i **20** år ger **1 212** kr i månaden — **240** månader, **290 871** kr i alt varav **90 871** kr är ränta.» og «Hur räknar jag ett annuitetslån i Excel?» svarer «… =BETALNING(**0,05**/12;**60**;-100000) ger **1 887** kr …». `minberegner.dk/renteberegner`: FAQ'en skal have **seks** spørgsmål hvor formelsvaret svarer «… lån på **200.000** kr. til **4** % i **20** år giver **1.211,96** kr. pr. måned. I Excel er det =YDELSE(**0,04**/12;**240**;-200000)». **Intet** «1 887» og **intet** «13 227» på minberegner.dk. **Intet** «NaN» nogen steder |
 | `procent-faq-tal-fra-modul` (**ny**, vindue 2/10 21:30) | `minberegner.dk/procent`: FAQ'en skal have de to svar «Skriv =A1/B1\*100 … Et fald fra **9.000** kr til **7.875** kr er =(B1-A1)/A1\*100 = **-12,5 %**.» og «Går en pris fra **9.000** kr til **7.875** kr, er faldet (7.875 - 9.000) / 9.000 = **-12,5 %**.», plus «10 procent af **1.600** er **160**». `beraknare.se/procent`: «**2 500** kr av **10 000** kr ger **0,25**, alltså **25** procent», «**2 500** / **10 000** = **0,25** = **25** procent», «**33 000** kr mot **30 000** kr ger **3 000** / 30 000 = **10** procent», «**10 000** till **12 500** ger … = **25** procent … **2 500** / **11 250** = **22,2** procent», «**10 000** i A1 och **12 500** i B1 ger **25** procent … **22,2** procent», «10 procent av **1 600** är **160**». **Hele teksten skal være byte-uændret** — det er pointen ved opgaven. **Intet** `1.600` på beraknare.se og intet `1 600` på minberegner.dk |

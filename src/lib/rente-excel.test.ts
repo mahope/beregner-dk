@@ -4,24 +4,67 @@ import { EXCEL_FAELLOR_SE, excelRaekkerSe } from "./rente-excel";
 import { annuitetsBetalning, annuitetsEksempel } from "./rente-eksempler";
 import { getPageData } from "./page-data";
 
+/** Svenskt decimalkomma læses som punktum, som Excel gør det. */
+function tilPunktum(tal: string): string {
+  return tal.replace(/,/g, ".");
+}
+
 /**
- * Evaluerer en ren aritmetisk Excel-formel (kun tal, `*` og `/`) venstre mod
- * højre, som Excel gør. Bruges til at bevise at formlen faktisk giver det
- * svar tabellen lover — en test der kun læser formlens tekst ville være grøn
- * på `=200000*4/12`, der giver 66.666,67 i stedet for 8.000.
+ * Evaluerer ren aritmetik (tal, `*`, `/` og `-`) venstre mod højre, som Excel
+ * gør. Kaster på alt andet, så formlen ikke kan være noget som kun ligner
+ * aritmetik.
  */
-function evaluerRenneFormel(formel: string): number {
-  const udenLighedstegn = formel.replace(/^=/, "").trim();
-  if (!/^[0-9*/\s.]+$/.test(udenLighedstegn)) {
-    throw new Error(`formlen er ikke ren aritmetik: ${formel}`);
+function evaluerAritmetik(udtryk: string): number {
+  if (!/^[0-9*/\s.+-]+$/.test(udtryk)) {
+    throw new Error(`udtrykket er ikke ren aritmetik: ${udtryk}`);
   }
-  const dele = udenLighedstegn.match(/[0-9.]+|[*/]/g)!;
+  const dele = udtryk.match(/[0-9.]+|[*/+-]/g)!;
   let resultat = Number(dele[0]);
   for (let i = 1; i < dele.length; i += 2) {
+    const tegn = dele[i];
     const operand = Number(dele[i + 1]);
-    resultat = dele[i] === "*" ? resultat * operand : resultat / operand;
+    if (tegn === "*") resultat = resultat * operand;
+    else if (tegn === "/") resultat = resultat / operand;
+    else if (tegn === "-") resultat = resultat - operand;
+    else throw new Error(`ukendt operator i formlen: ${tegn}`);
   }
   return resultat;
+}
+
+/**
+ * Evaluerer en hel Excel-formel fra tabellen: enten ren aritmetik, eller et
+ * `BETALNING(rate;antal;belop)`-kald med valfri ren aritmetik bagefter.
+ *
+ * BETALNING regnes med {@link annuitetsBetalning}, altså den samme annuity
+ * formel som værktøjet bruger, så formlen bedømmes på **hvad den lover** og
+ * ikke på hvordan den ser ud. Det er den eneste port der kan fange en
+ * ratesats, der er skrevet som årsprocenten: `=BETALNING(4/12;240;-200000)`
+ * ser rigtig ud, men 4/12 er 33 % pr. måned, så den giver 66 666,67 kr i stedet
+ * for de 1 211,96 kr tabellen lovede lige til højre — 55 gange for meget.
+ */
+function evaluerFormel(formel: string): number {
+  const ren = tilPunktum(formel.replace(/^=/, "").trim());
+  const match = ren.match(/^BETALNING\(([^;]+);([0-9]+);(-?[0-9]+)\)(.*)$/);
+  if (!match) {
+    // Ingen BETALNING: formlen skal være ren aritmetik, ellers er den noget
+    // denne port ikke kan dømme.
+    if (ren.includes("BETALNING")) {
+      throw new Error(`BETALNING-formlen har uventede argumenter: ${formel}`);
+    }
+    return evaluerAritmetik(ren);
+  }
+  const rate = evaluerAritmetik(match[1]);
+  if (!Number.isFinite(rate)) {
+    throw new Error(`ratesatsen er ikke et tal: ${match[1]}`);
+  }
+  const ydelse = annuitetsBetalning(-Number(match[3]), rate, Number(match[2]));
+  const rest = match[4].trim();
+  return rest === "" ? ydelse : evaluerAritmetik(`${ydelse}${rest}`);
+}
+
+/** Svaret i tabellen som et tal, uanset tusindtalsseparator og «kr». */
+function svarSomTal(svar: string): number {
+  return Number(tilPunktum(svar.replace(/[^0-9,]/g, "")));
 }
 
 /**
@@ -75,26 +118,59 @@ describe("renteberegner — Excel-rækkerne på beraknare.se", () => {
     for (const række of rækker) {
       if (række.formel.includes("BETALNING(")) expect(række.formel).toContain(";");
     }
-    // Engelsk Excel använder komma; en formel med komma skulle inte fungera
-    // i den Excel som sidan instruerar läsaren att använda.
-    expect(rækker[0].formel.replace(/\*/g, "")).not.toMatch(/BETALNING\([^;)]*,/);
+    // Tre argument, skilda av semikolon. Engelsk Excel använder komma som
+    // skilljetecken, så ett komma *mellan* argumenterna skulle inte fungera i
+    // den Excel som sidan instruerar läsaren att använda. Decimalkommot i
+    // räntesatsen (0,04) är deremot rätt — det är ju exakt det fällan listar,
+    // så porten får inte förbjuda det.
+    const foerste = rækker[0].formel;
+    const argument = foerste.slice(foerste.indexOf("(") + 1, foerste.lastIndexOf(")"));
+    const delar = argument.split(";");
+    expect(delar).toHaveLength(3);
+    for (const del of delar.slice(1)) {
+      expect(del).not.toContain(",");
+    }
   });
 
   it("skriver lånebeloppet som ett negativt tal", () => {
     expect(rækker[0].formel).toContain(`;${-e.hovedstol})`);
   });
 
-  it("regner varje ren aritmetisk formel til det svar den lover", () => {
-    // En formel der ikke passer sit eget svar er en forkert kalkulator — og det
-    // var præcis en fejl i min egen første udkast af den tredje række
-    // (=200000*4/12 giver 66.666,67, ikke 8.000). Derfor evalueres formlen
-    // her, ikke bare dens tekst.
+  it("regner hver formel i tabellen til det svar den lover", () => {
+    // En formel der ikke passer sit eget svar er en forkert kalkulator — og
+    // det var præcis en fejl i min egen første udkast af den tredje række
+    // (=200000*4/12 giver 66.666,67, ikke 8.000). Derfor evalueres hver
+    // formel her, ikke bare dens tekst — også BETALNING-rækkerne, hvis
+    // ratesats ingen tekstport kan se.
     for (const række of rækker) {
-      if (række.formel.includes("BETALNING(")) continue; // har sin egen test ovenfor
-      const værdi = evaluerRenneFormel(række.formel);
-      const lovet = Number(række.svar.replace(/[^0-9,]/g, "").replace(",", "."));
-      expect(værdi).toBeCloseTo(lovet, 0);
+      const værdi = evaluerFormel(række.formel);
+      expect(værdi).toBeCloseTo(svarSomTal(række.svar), 0);
     }
+  });
+
+  it("skriver månadsräntan som 0,04/12 i formlen, ikke årsprocenten 4/12", () => {
+    // Formateres i svensk Excel-syntax med komma som decimalkomma, fordi
+    // tabellens egen fälla-lista siger det: «0,04/12, inte 0.04/12».
+    const forventet = `${(e.aarsrente / 100).toLocaleString("sv-SE", {
+      useGrouping: false,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })}/12`;
+    const rækkerMedFormel = rækker.filter((række) => række.formel.includes("BETALNING("));
+    expect(rækkerMedFormel.length).toBeGreaterThanOrEqual(2);
+    for (const række of rækkerMedFormel) {
+      const sats = række.formel.match(/BETALNING\(([^;]+);/)![1];
+      expect(sats).toBe(forventet);
+      // Og den skal være den månadsrente eksemplet faktisk regner med — ikke
+      // blot en anden skrivemåde af den samme fejl.
+      expect(evaluerAritmetik(tilPunktum(sats))).toBeCloseTo(
+        e.aarsrente / 100 / 12,
+        12,
+      );
+    }
+    // Den tredje fælla citerer præcis den sats tabellen bruger, så en ændret
+    // eksempelrente ikke efterlader en fælde, der lærer noget forkert.
+    expect(EXCEL_FAELLOR_SE[2]).toContain(`: ${forventet},`);
   });
 
   it("har exakt tre fällor, och ingen av dem nämner danska eller norska ord", () => {

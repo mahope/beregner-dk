@@ -30,6 +30,23 @@ function krHelt(tal: number): string {
   return tal.toLocaleString("sv-SE", { maximumFractionDigits: 0 });
 }
 
+/**
+ * A number as it is typed into a Swedish Excel formula: comma as the decimal
+ * sign and no thousands separator, because in the formula the separator is
+ * the argument delimiter.
+ *
+ * The monthly rate is written here and not as `aarsrente / 12`: the rate in a
+ * formula is a *fraction*, so 4 % is `0,04`, not `4`. `=BETALNING(4/12;…)` is
+ * 33 % per month — a formula that looks right and answers something else,
+ * which is exactly what the traps below warn against.
+ */
+function excelSe(tal: number): string {
+  return tal.toLocaleString("sv-SE", {
+    useGrouping: false,
+    maximumFractionDigits: 6,
+  });
+}
+
 /** An amount with two decimals in Swedish format: 1 211,96. */
 function kr(tal: number): string {
   return tal.toLocaleString("sv-SE", {
@@ -46,7 +63,7 @@ function kr(tal: number): string {
 export function excelRaekkerSe(): ExcelRaekke[] {
   const e = annuitetsEksempel();
   const n = Math.round(e.antalMaaneder);
-  const r = `${e.aarsrente}/12`;
+  const r = `${excelSe(e.aarsrente / 100)}/12`;
   const belob = e.hovedstol;
 
   return [
@@ -73,9 +90,17 @@ export function excelRaekkerSe(): ExcelRaekke[] {
  * the same words. Without them the formulas do not work: a comma between the
  * arguments is a syntax error, and a positive loan amount gives a negative
  * payment.
+ *
+ * The third one quotes the very rate the table above uses, so it is written
+ * from the example. When the example's rate changes, the trap changes with it —
+ * a trap that names a rate the table no longer uses teaches the reader
+ * something false, and it is the exact contradiction this file had before:
+ * the formula said `4/12` while the trap said `0,04/12`.
  */
 export const EXCEL_FAELLOR_SE: string[] = [
   "Argumenten skiljs åt med semikolon i svensk Excel. Med komma får du ett syntaxfel.",
   "Lånebelöpet skrivs som ett negativt tal, annars blir månadsbetalningen negativ.",
-  "Använd det svenska decimaltecknet (komma) i räntan: 0,04/12, inte 0.04/12.",
+  `Använd det svenska decimaltecknet (komma) i räntan: ${excelSe(
+    annuitetsEksempel().aarsrente / 100,
+  )}/12, inte ${(annuitetsEksempel().aarsrente / 100).toFixed(2)}/12.`,
 ];

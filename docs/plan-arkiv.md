@@ -25055,3 +25055,63 @@ samme som i `3720dea`. `page.tsx`' tabel er urørt — den har allerede
 
 **Gate grøn:** lint (689 filer), typecheck, **3767 tests / 231 filer** (+7),
 build. Punkt 13: `git diff | grep -nE '^\+.*\$[0-9]'` er tom.
+
+---
+
+## `svensk-excel-formel` — 2/10 18:55. Den svenske Excel-formel på `/renteberegner` var gal, og porten havde låst fejlen fast
+
+**Fundet ved at læse koden, ikke ved at se den.** `rente-excel.ts` skrev
+`const r = \`${e.aarsrente}/12\`` — altså `4/12`. Raten i en formel er en
+**brøk**, så 4 % er `0,04`; `4/12` er 33 % pr. måned. Formlen lignede den
+danske (`=YDELSE(0,04/12;240;-200000)`, låst i `page.test.tsx:83`) men var
+55 gange for høj: målt uafhængigt i python giver
+`=BETALNING(4/12;240;-200000)` **66 666,67 kr**, mens svarcellen lige til
+højre siger **1 211,96 kr**. En svensk læser der indtastede formlen fik et
+annuitetslån til 5,5 mio. kr. på sit 200 000 kr. lån.
+
+**To ting låste fejlen fast, og begge er værd at notere.**
+
+1. **Porten.** `rente-excel.test.ts` evaluerede *kun rene aritmetiske*
+   formler og **sprung BETALNING-rækkerne over** med
+   `if (formel.includes("BETALNING(")) continue;` — den test, der var lavet
+   med præcis det formål at fange en formel der ikke passer sit eget svar,
+   var blind for de to rækker, der var forkerte. Den anden test krævede
+   `not.toMatch(/BETALNING\([^;)]*,/)`, altså **intet komma i argumenterne** —
+   hvilket forbyder decimalkommaet i rentesatsen, altså den skrivemåde
+   tabellens egen fælde-liste kræver («0,04/12, inte 0.04/12»). Porten og
+   brødteksten modsagde hinanden, og kun deres fejl passede.
+2. **Fælde-teksten.** `EXCEL_FAELLOR_SE[2]` var håndskrevet med «0,04/12»,
+   altså den rigtige sats lige under den forkerte formel. Rettelsen læser
+   nu begge steder fra `annuitetsEksempel()`.
+
+**Rettelsen.** Én linje i `rente-excel.ts` — `excelSe(e.aarsrente / 100)`,
+samme greb som `excelDa` på den danske side (komma, ingen tusindtalsseparator,
+fordi separatoren i formlen er skilletegnet) — plus den tredje fælde som
+skabelon af samme sats. Formlerne er nu
+`=BETALNING(0,04/12;240;-200000)` → 1 211,96 kr og
+`=BETALNING(0,04/12;240;-200000)*240-200000` → 90 870,56 kr, hvilket er præcis
+de tal svarcellerne lovede. Den tredje række (`=200000*4/100` → 8 000 kr) var
+og er rigtig: den er helårsrente på hele hovedstolen.
+
+**Porten kan fejle, målt to gange.** Den gamle kode giver **2 røde** af 17
+(evalueringen af formlen og sats-assertionen); den nye er 17/17. Den
+oprindelige semikolon-test er skrevet om, så den tjekker det den mente:
+præcis tre argumenter og intet komma *mellem* dem (det må gerne være et
+decimalkomma i rentesatsen). Endelig mutation: fældeteksten håndskrevet
+tilbage til en gammel sats → **1 rød** («forventede ": 0,04/12," mod
+"Använd det svenska decimaltecknet (komma) i räntan: 0,05/12"»). Muterede
+filer genskabt byte-for-byte.
+
+**Målt på rigtig bygget server** (`next start` :4411, porten verificeret fri
+*inden* start, `curl -H "Host: beraknare.se"`): `<h2>Samma tal i Excel</h2>` og
+tabellen med de to rettede formler, svarene `1 211,96 kr` / `90 870,56 kr` /
+`8 000 kr`, fældene `… i räntan: 0,04/12, inte 0.04/12.`, **0** `NaN`, **0**
+`æ`/`ø`. Kontrol: `minberegner.dk/renteberegner` har **0** `BETALNING`, **7**
+`=YDELSE(0,04/12;240;-200000)` og **2** `=RENTENPERIODER(0,04/12;-1211,96;200000)`,
+**0** `NaN` — den danske side er urørt. Kun `rente-excel.ts` (svensk gren) og
+`rente-excel.test.ts` er rørt: ingen beregningslogik, ingen ny URL, ingen
+sitemap, ingen `<title>`, ingen `<meta description>`, ingen dansk side.
+
+**Gate grøn:** lint (689 filer), typecheck, **3768 tests / 231 filer** (+1),
+build (168 sider, de 7 kendte CSS-advarsler uændrede). Punkt 13:
+`git diff | grep -nE '^\+.*\$[0-9]'` er tom.
