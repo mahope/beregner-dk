@@ -25606,3 +25606,42 @@ ikke på listen), `href-scan` 0, `knapgruppe-scan` 0.
 
 **Mål:** `/tidszone` 24.401 visninger / 106 klik / 0,4 % / pos. 7,6 (uændret
 baseline), `/klokken-i` 0 — ny URL 2/10, første Plausible-tall 16/10.
+
+## 3/10 22:35 — `vaegttab-faq-fra-modul` + otte VERIFICÉR-noter målt på indhold
+
+**Deploy-verifikation 3/10 22:28-22:32** (efter 2/10 21:30-vinduet). Alle seks
+noter med vindue 2/10 21:30 er prøvet på **indhold**, ikke på HTTP 200, med
+`curl | sed 's/<!--[^>]*-->//g'` og — efter at have fundet tre falske nuller —
+normalisering af U+00A0/U+202F til almindeligt mellemrum, ellers matcher intet
+på tal med tusindtalsseparator.
+
+| Slug | Resultat |
+|---|---|
+| `vaegttab-tal-fra-modul` | ❌ **halv deploy.** Dansk helt OK (0 × «2 209», 13 × «2.209» som før). `beraknare.se/vaegttab` har stadig **3** × «2.209» — i synlig FAQ-tekst, i `FAQSchema`-JSON-LD og i RSC-payloaden, altså ét og samme **håndskrevne** FAQ-svar, der aldrig kom med i halve 1. Denne iterations opgave. |
+| `leasing-restvaerdi-sammenlign` | ✅ **udfaset.** Regnestykket er live (6 spørgsmål, 300 000 / 150 000 / 4,5 % / 178 350 / 169 140 / 9 210 / 0 kr). Men noten forventer «9 210 kr **mer**», som var den **modsatte** retning — `c4f376d` rettede den til «mindre». Den dækkes nu af `leasing-faq-retning`. |
+| `svensk-excel-formel` | ✅ **DEPLOY OK.** 6 × `BETALNING(0,04/12;240;-200000)`, 3 × `BETALNING(0,05/12;60;-100000)`, 3 × «inte 0.04/12», **0** × `BETALNING(4/12`, **0** × `BETALNING(0.04`. Excel-tabellen: 4 × «1 211,96», 6 × «90 870,56», 2 × «8 000 kr». Dansk uændret: 7 × `=YDELSE(0,04/12;240;-200000)`, 2 × `=RENTENPERIODER(0,04/12;-1211,96;200000)`. 0 `NaN`. |
+| `procentpoint-faq-tal-fra-modul` | ✅ **DEPLOY OK.** DA: «22,1 % til 19,7 % er -2,4 procentpoint … -10,9 %», **0** × «11,3 %». SE: «22,1 % till 19,7 % är **−2,4** procentenheter … **−10,9** %» med U+2212, samme tegn som tabellen ved siden af. |
+| `renteberegner-belob-fra-modul` | ✅ **DEPLOY OK.** SE title «Räntekalkylator: 100 000 kr i 5 år = 1 887 kr/mån», desc «… 1 887 kr i månaden och 13 227 kr i total ränta.», FAQ-svarene «1 212 kr i månaden — 240 månader, 290 871 kr i alt varav 90 871 kr är ränta» og «=BETALNING(0,05/12;60;-100000) ger 1 887 kr». DA desc byte-uændret, FAQ-svaret «1.211,96 kr. pr. måned … =YDELSE(0,04/12;240;-200000)». **0** «1 887»/«13 227» på minberegner.dk, **0** «1.887»/«13.227» på beraknare.se. 0 `NaN`. |
+| `procent-faq-tal-fra-modul` | ✅ **DEPLOY OK.** Alle fem danske og alle seks svenske svar er byte-uændret på de læste fragmenter («Et fald fra 9.000 kr til 7.875 kr er =(B1-A1)/A1*100 = -12,5 %», «10 procent af 1.600 er 160», «2 500 kr av 10 000 kr ger 0,25», «33 000 kr mot 30 000 kr ger 3 000 / 30 000 = 10 procent», «10 procent av 1 600 är 160» m.fl.). **0** «1.600» på beraknare.se, **0** «1 600» på minberegner.dk. |
+
+**`vaegttab-faq-fra-modul` (denne iteration).** Fundet under deploy-målingen:
+de **tre** resterende «2.209» på beraknare.se var ikke en fejl i
+`vaegttab-eksempler.ts` — de lå i `page-data.ts`'s **håndskrevne**
+`faqItems`, fordi halve 1 kun flyttede de fem metadata-felter. Ny
+`vaegttabFaqItems(locale)` i modulet bygger nu alle **fem** svar i **alle tre**
+sprog ud fra `vaegttabEksempelTal()` + `VAEGTTAB_KCAL_PR_KG` +
+`KALORIE_UNDERSKUD` + `AKTIVITETS_FAKTORER`, og `page-data.ts` binder den.
+*21 håndskrevne talgrupper væk fra `page-data.ts` (7 pr. sprog)*, så
+planens liste er **152 → 131**.
+
+**Porten låste fejlen fast — samme mønster som leasing-fundet.** `page-data.test.ts`
+`:735-737` krævede «2.759», «550 kcal» og «2.209» i FAQ-svaret for **alle tre**
+sprog, altså præcis den danske separator på de svenske og norske sider. Den
+dømmer nu `formatBelob(2209, locale)` / `formatBelob(2759, locale)` og
+forbyder desuden `\d\.\d{3}` i hvert svar for `se`/`no`. Dansk beholder punktum
+og er **byte-uændret**, låst med `toEqual` mod de gamle strenge.
+
+*Porten kan fejle, målt:* regexen rammer **4 af 4** gamle svenske svar
+(1.000, 7.700, 1.500/1.200, 2.759/1.780/2.209), så den nye prøve er rød mod den
+gamle kode. `page-data`-bindingen kan heller ikke være grøn mod den, fordi
+modulens `faqItems` slet ikke fandtes.

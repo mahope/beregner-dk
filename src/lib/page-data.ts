@@ -40,7 +40,7 @@ import { markedsprisFaqSvar } from "./timepris-markedspriser";
 import { timerIPeriodeFaqSvar } from "./timer-periode";
 import { ugeDatoerFaqSvar } from "./ugenummer";
 import { distanceEksempelFaqSvar, triatlonCykelAndelFaqSvar, triatlonTotalFaqSvar } from "./pace";
-import { vaegttabOverskrifter } from "./vaegttab-eksempler";
+import { vaegttabFaqItems, vaegttabOverskrifter } from "./vaegttab-eksempler";
 import { annuitetsEksempel, hovedEksempel } from "./rente-eksempler";
 import { alderSideTekst, erstatAlderTokens } from "./alder-side-tekst";
 import { iDagPaSiden } from "./lokal-dato";
@@ -1023,13 +1023,7 @@ const daPages: Record<string, PageData> = {
       schemaName: "Vægttab Beregner",
       schemaDescription: vaegttabDa.schemaDescription,
       schemaCategory: "HealthApplication",
-      faqItems: [
-      { question: "Hvor hurtigt kan man tabe sig sundt?", answer: "0,5-1 kg pr. uge. Svarer til 500-1.000 kcal underskud pr. dag." },
-      { question: "Hvad er kalorieunderskud?", answer: "At du spiser færre kalorier end du forbrænder. 7.700 kcal underskud ≈ 1 kg tab." },
-      { question: "Min. kalorier?", answer: "Mænd: min. 1.500 kcal/dag. Kvinder: min. 1.200 kcal/dag." },
-      { question: "Spise mindre eller motionere mere?", answer: "Kombination er bedst. Kost vigtigst for vægttab, motion bevarer muskelmasse." },
-      { question: "Hvor mange kalorier skal jeg spise for at tabe 6 kg på 12 uger?", answer: "En mand på 80 kg, 180 cm og 30 år med moderat aktivitet bruger 2.759 kcal om dagen (BMR 1.780 kcal × aktivitetsfaktor 1,55). 6 kg på 12 uger er 0,5 kg om ugen, som kræver 550 kcal i underskud, så du skal spise 2.209 kcal om dagen." },
-      ],
+      faqItems: vaegttabFaqItems("da"),
     },
     "procent": {
       slug: "procent",
@@ -2429,13 +2423,7 @@ const noPages: Record<string, PageData> = {
       schemaName: "Vekttap Kalkulator",
       schemaDescription: vaegttabNo.schemaDescription,
       schemaCategory: "HealthApplication",
-      faqItems: [
-      { question: "Hvor raskt kan man gå ned i vekt sunt?", answer: "0,5-1 kg per uke. Tilsvarer 500-1.000 kcal underskudd per dag." },
-      { question: "Hva er kaloriunderskudd?", answer: "At du spiser færre kalorier enn du forbrenner. 7.700 kcal underskudd ≈ 1 kg tap." },
-      { question: "Min. kalorier?", answer: "Menn: min. 1.500 kcal/dag. Kvinner: min. 1.200 kcal/dag." },
-      { question: "Spise mindre eller trene mer?", answer: "Kombinasjon er best. Kosthold viktigst for vekttap, trening bevarer muskelmasse." },
-      { question: "Hvor mange kalorier må jeg spise for å gå ned 6 kg på 12 uker?", answer: "En mann på 80 kg, 180 cm og 30 år med moderat aktivitet bruker 2.759 kcal per dag (BMR 1.780 kcal × aktivitetsfaktor 1,55). 6 kg på 12 uker er 0,5 kg per uke, som krever 550 kcal i underskudd, så du må spise 2.209 kcal per dag." },
-      ],
+      faqItems: vaegttabFaqItems("no"),
     },
     "procent": {
       slug: "procent",
@@ -3617,13 +3605,7 @@ const sePages: Record<string, PageData> = {
       schemaName: "Viktminskning Kalkylator",
       schemaDescription: vaegttabSe.schemaDescription,
       schemaCategory: "HealthApplication",
-      faqItems: [
-      { question: "Hur snabbt kan man gå ner i vikt hälsosamt?", answer: "0,5-1 kg per vecka. Motsvarar 500-1.000 kcal underskott per dag." },
-      { question: "Vad är kaloriunderskott?", answer: "Att du äter färre kalorier än du förbränner. 7.700 kcal underskott ≈ 1 kg minskning." },
-      { question: "Min. kalorier?", answer: "Män: min. 1.500 kcal/dag. Kvinnor: min. 1.200 kcal/dag." },
-      { question: "Äta mindre eller träna mer?", answer: "Kombination är bäst. Kost viktigast för viktminskning, träning bevarar muskelmassa." },
-      { question: "Hur många kalorier ska jag äta för att gå ner 6 kg på 12 veckor?", answer: "En man på 80 kg, 180 cm och 30 år med måttlig aktivitet förbrukar 2.759 kcal per dag (BMR 1.780 kcal × aktivitetsfaktor 1,55). 6 kg på 12 veckor är 0,5 kg per vecka, som kräver 550 kcal i underskott, så du behöver äta 2.209 kcal per dag." },
-      ],
+      faqItems: vaegttabFaqItems("se"),
     },
     "procent": {
       slug: "procent",

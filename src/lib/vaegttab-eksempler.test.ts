@@ -5,8 +5,10 @@ import {
   VAEGTTAB_EKSEMPEL,
   VAEGTTAB_KCAL_PR_KG,
   vaegttabEksempelTal,
+  vaegttabFaqItems,
   vaegttabOverskrifter,
 } from "./vaegttab-eksempler";
+import { AKTIVITETS_FAKTORER } from "./makroer";
 
 /**
  * /vaegttab's title and four description fields used to spell 2.209, 2.759 and
@@ -159,5 +161,85 @@ describe("page-data bruger modulet på alle tre sprog", () => {
     expect(t.metaTitle).toBe("Vægttab: 6 kg på 8 uger = 825 kcal/dag");
     // 6 × 7.700 / (8 × 7) = 825 pr. dag, så dagsmålet er 2.759 − 825 = 1.934
     expect(t.description).toContain("1.934 kcal om dagen");
+  });
+});
+
+describe("vaegttabFaqItems", () => {
+  const gammelDa = [
+    { question: "Hvor hurtigt kan man tabe sig sundt?", answer: "0,5-1 kg pr. uge. Svarer til 500-1.000 kcal underskud pr. dag." },
+    { question: "Hvad er kalorieunderskud?", answer: "At du spiser færre kalorier end du forbrænder. 7.700 kcal underskud ≈ 1 kg tab." },
+    { question: "Min. kalorier?", answer: "Mænd: min. 1.500 kcal/dag. Kvinder: min. 1.200 kcal/dag." },
+    { question: "Spise mindre eller motionere mere?", answer: "Kombination er bedst. Kost vigtigst for vægttab, motion bevarer muskelmasse." },
+    { question: "Hvor mange kalorier skal jeg spise for at tabe 6 kg på 12 uger?", answer: "En mand på 80 kg, 180 cm og 30 år med moderat aktivitet bruger 2.759 kcal om dagen (BMR 1.780 kcal × aktivitetsfaktor 1,55). 6 kg på 12 uger er 0,5 kg om ugen, som kræver 550 kcal i underskud, så du skal spise 2.209 kcal om dagen." },
+  ];
+
+  test("dansk er byte-uændret — de fem svar lå på de tal, før de kom fra modulet", () => {
+    expect(vaegttabFaqItems("da")).toEqual(gammelDa);
+  });
+
+  test.each(["se", "no"] as const)(
+    "%s skriver intet tusindtal med dansk punktum — «2.209» læses som 2,209 kcal",
+    (locale) => {
+      for (const { question, answer } of vaegttabFaqItems(locale)) {
+        // Punktum mellem to talgrupper er den danske separator. I svensk og
+        // norsk løbende tekst er den en decimal, så «2.209 kcal» er ulæseligt.
+        expect(answer, `${locale}: ${question}`).not.toMatch(/\d\.\d{3}/);
+        expect(answer, `${locale}: ${question}`).not.toContain("NaN");
+        expect(answer.length, `${locale}: ${question}`).toBeGreaterThan(20);
+      }
+    },
+  );
+
+  test("det lange svar bæger de tal, beregningen giver, i alle tre sprog", () => {
+    const { bmr, tdee, dagligtDeficit, dagligtMaal } = vaegttabEksempelTal();
+    for (const locale of ["da", "no", "se"] as const) {
+      const svar = vaegttabFaqItems(locale).at(-1)!.answer;
+      for (const vaerdi of [
+        bmr,
+        tdee,
+        dagligtDeficit,
+        dagligtMaal,
+        VAEGTTAB_EKSEMPEL.vaegtKg,
+        VAEGTTAB_EKSEMPEL.hoejdeCm,
+        VAEGTTAB_EKSEMPEL.alder,
+        VAEGTTAB_EKSEMPEL.tabKg,
+        VAEGTTAB_EKSEMPEL.uger,
+      ]) {
+        expect(svar, `${locale}: ${vaerdi}`).toContain(formatBelob(vaerdi, locale));
+      }
+      // Aktivitetsfaktoren er den, makroer.ts bruger — ikke en håndskrevet 1,55.
+      expect(svar, locale).toContain(
+        `aktivitetsfaktor ${formatBelob(AKTIVITETS_FAKTORER.moderat, locale, 2)}`,
+      );
+      // Og den konstant, hele beregningen hviler på, står i sit eget svar.
+      // Ordet efter kalorierne er hvert sprogs eget, så det er tallet der dømmes.
+      expect(vaegttabFaqItems(locale)[1].answer, locale).toContain(
+        `${formatBelob(VAEGTTAB_KCAL_PR_KG, locale)} kcal`,
+      );
+    }
+  });
+
+  test("et andet eksempel giver et andet svar — tallene er ikke skrevet i sætningen", () => {
+    // 90 kg, 175 cm, 45 år, stillesiddende, 5 kg på 10 uger: BMR 1.773,75,
+    // TDEE 2.128,5, underskud 550 pr. dag, dagsmål 1.578,5.
+    const svar = vaegttabFaqItems("da", {
+      vaegtKg: 90,
+      hoejdeCm: 175,
+      alder: 45,
+      aktivitet: "stillesiddende",
+      tabKg: 5,
+      uger: 10,
+    });
+    const sidste = svar.at(-1)!;
+    expect(sidste.question).toContain("5 kg på 10 uger");
+    expect(sidste.answer).toContain("aktivitetsfaktor 1,2");
+    // 2.128,5 − 550 = 1.578,5, som sætningen runder til hele kcal.
+    expect(sidste.answer).toContain("1.579 kcal om dagen");
+  });
+
+  test("page-data leverer modulens svar i alle tre sprog", () => {
+    for (const locale of ["da", "no", "se"] as const) {
+      expect(getPageData("vaegttab", locale)!.faqItems).toEqual(vaegttabFaqItems(locale));
+    }
   });
 });

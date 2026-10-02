@@ -719,7 +719,8 @@ describe("getPageData", () => {
       const data = getPageData("vaegttab", locale)!;
       // Svensk og norsk løbende tekst skriver tusindtalsseparator med mellemrum,
       // dansk med punktum — `formatBelob` af dagsmålet, se `vaegttab-eksempler`.
-      const dagsmal = locale === "da" ? "2.209" : "2 209";
+      const dagsmal = formatBelob(2209, locale);
+      const tdee = formatBelob(2759, locale);
 
       expect(data.metaTitle).toBe(title);
       expect(data.metaTitle.length).toBeLessThanOrEqual(60);
@@ -732,9 +733,16 @@ describe("getPageData", () => {
       expect(data.ogDescription).toContain(dagsmal);
       expect(data.schemaDescription).toContain(dagsmal);
       const goalFaq = data.faqItems.find((item) => goal.test(item.question));
-      expect(goalFaq?.answer).toContain("2.759");
+      expect(goalFaq?.answer).toContain(tdee);
       expect(goalFaq?.answer).toContain("550 kcal");
-      expect(goalFaq?.answer).toContain("2.209");
+      expect(goalFaq?.answer).toContain(dagsmal);
+      // Samme skel mellem alle sprogens svar: et tusindtal med punktum er dansk,
+      // og i svensk og norsk løbende tekst læses det som 2,759 kcal.
+      if (locale !== "da") {
+        for (const item of data.faqItems) {
+          expect(item.answer, `${locale}: ${item.question}`).not.toMatch(/\d\.\d{3}/);
+        }
+      }
     }
   );
 
@@ -750,7 +758,8 @@ describe("getPageData", () => {
 
     for (const locale of ["da", "se", "no"] as const) {
       const data = getPageData("vaegttab", locale)!;
-      const dagsmal = locale === "da" ? "2.209" : "2 209";
+      const dagsmal = formatBelob(2209, locale);
+      const tdee = formatBelob(2759, locale);
       expect(data.description).toContain("550");
       expect(data.description).toContain(dagsmal);
     }

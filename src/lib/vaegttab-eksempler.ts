@@ -3,11 +3,11 @@
  * 180 cm, 30 years, moderately active, who wants to lose 6 kg in 12 weeks.
  *
  * Every figure in the page's `description`, `metaDescription`, `ogDescription`,
- * `schemaDescription` and title used to be typed into the sentence. That is
- * the drift the quality rules call out: the tool and the page are two
- * implementations of one calculation, and a change to the activity factor or
- * to the kcal-per-kilo constant silently leaves the search result promising
- * numbers the calculator no longer produces.
+ * `schemaDescription`, title and five FAQ answers used to be typed into the
+ * sentence. That is the drift the quality rules call out: the tool and the page
+ * are two implementations of one calculation, and a change to the activity
+ * factor or to the kcal-per-kilo constant silently leaves the search result
+ * promising numbers the calculator no longer produces.
  *
  * So the sentences are built from the tool's own formula
  * ({@link beregnBmr} + {@link beregnTdee}, the same functions
@@ -18,11 +18,29 @@
  */
 
 import { formatBelob } from "./format";
-import { beregnBmr, beregnTdee, type AktivitetsNiveau } from "./makroer";
+import {
+  AKTIVITETS_FAKTORER,
+  beregnBmr,
+  beregnTdee,
+  KALORIE_UNDERSKUD,
+  type AktivitetsNiveau,
+} from "./makroer";
 import type { Locale } from "./i18n";
 
 /** Energy in one kilo of body fat, the figure every weight-loss plan rests on. */
 export const VAEGTTAB_KCAL_PR_KG = 7700;
+
+/**
+ * The daily intake floor the page quotes as a minimum, moved out of the
+ * sentences so the three languages cannot drift apart. These are the figures
+ * the page has always stated; no official source is on file for them, so they
+ * are documented here rather than presented as sourced.
+ */
+export const VAEGTTAB_MIN_MAEND = 1500;
+export const VAEGTTAB_MIN_KVINDER = 1200;
+
+/** The weekly weight-loss range the page quotes as healthy: 0,5-1 kg. */
+export const VAEGTTAB_KG_PR_UGE = { min: 0.5, maks: 1 } as const;
 
 /** The assumptions the page's example states, kept in one place. */
 export interface VaegttabEksempel {
@@ -133,4 +151,127 @@ export function vaegttabOverskrifter(
     metaDescription: `${tab} kg på ${uger} uger kræver ${underskud} kcal i dagligt underskud. Mand på ${vaegt} kg, ${hoejde} cm og ${aar} år: spis ${maal} kcal om dagen (TDEE ${forbrug} kcal).`,
     schemaDescription: `Beregn dagligt kalorieunderskud: ${tab} kg på ${uger} uger er ${underskud} kcal/dag, så en mand på ${vaegt} kg spiser ${maal} kcal/dag.`,
   };
+}
+
+/** One question and its answer, in the shape `page-data.ts` binds. */
+export interface VaegttabFaqItem {
+  question: string;
+  answer: string;
+}
+
+/**
+ * The five questions and answers `/vaegttab` publishes, in one of the site's
+ * three languages.
+ *
+ * The metadata above was moved here first; these five answers were left behind
+ * in `page-data.ts`, where every figure was typed into the sentence. That is
+ * where a Swedish visitor met "2.209 kcal" and a Norwegian one the same — a
+ * Danish thousands separator in running text reads as 2,209 kcal in both
+ * languages — and it is also how the page could promise a figure the tool no
+ * longer produces.
+ *
+ * So every number here is `formatBelob` over the same constants and the same
+ * `vaegttabEksempelTal` the calculator calls: the BMR and TDEE of the example
+ * person, the activity factor behind the TDEE, the kcal per kilo, the tool's
+ * own daily deficit, and the intake floor. Danish is byte-identical to what it
+ * said before; Swedish and Norwegian get the separator their language uses,
+ * and the values themselves are unchanged.
+ */
+export function vaegttabFaqItems(
+  locale: Locale,
+  eksempel: VaegttabEksempel = VAEGTTAB_EKSEMPEL,
+): VaegttabFaqItem[] {
+  const { bmr, tdee, dagligtDeficit, dagligtMaal } = vaegttabEksempelTal(eksempel);
+  const n = (vaerdi: number, dec = 0) => formatBelob(vaerdi, locale, dec);
+  const vaegt = n(eksempel.vaegtKg);
+  const hoejde = n(eksempel.hoejdeCm);
+  const aar = n(eksempel.alder);
+  const tab = n(eksempel.tabKg);
+  const uger = n(eksempel.uger);
+  const prUge = n(eksempel.tabKg / eksempel.uger, 1);
+  const faktor = n(AKTIVITETS_FAKTORER[eksempel.aktivitet], 2);
+  const grund = n(bmr);
+  const forbrug = n(tdee);
+  const underskud = n(dagligtDeficit);
+  const maal = n(dagligtMaal);
+  const kilo = n(VAEGTTAB_KCAL_PR_KG);
+  const ugeMin = n(VAEGTTAB_KG_PR_UGE.min, 1);
+  const ugeMaks = n(VAEGTTAB_KG_PR_UGE.maks, 1);
+  const dagMin = n(KALORIE_UNDERSKUD);
+  const dagMaks = n(2 * KALORIE_UNDERSKUD);
+  const minMand = n(VAEGTTAB_MIN_MAEND);
+  const minKvinde = n(VAEGTTAB_MIN_KVINDER);
+
+  if (locale === "se") {
+    return [
+      {
+        question: "Hur snabbt kan man gå ner i vikt hälsosamt?",
+        answer: `${ugeMin}-${ugeMaks} kg per vecka. Motsvarar ${dagMin}-${dagMaks} kcal underskott per dag.`,
+      },
+      {
+        question: "Vad är kaloriunderskott?",
+        answer: `Att du äter färre kalorier än du förbränner. ${kilo} kcal underskott ≈ 1 kg minskning.`,
+      },
+      {
+        question: "Min. kalorier?",
+        answer: `Män: min. ${minMand} kcal/dag. Kvinnor: min. ${minKvinde} kcal/dag.`,
+      },
+      {
+        question: "Äta mindre eller träna mer?",
+        answer: "Kombination är bäst. Kost viktigast för viktminskning, träning bevarar muskelmassa.",
+      },
+      {
+        question: `Hur många kalorier ska jag äta för att gå ner ${tab} kg på ${uger} veckor?`,
+        answer: `En man på ${vaegt} kg, ${hoejde} cm och ${aar} år med måttlig aktivitet förbrukar ${forbrug} kcal per dag (BMR ${grund} kcal × aktivitetsfaktor ${faktor}). ${tab} kg på ${uger} veckor är ${prUge} kg per vecka, som kräver ${underskud} kcal i underskott, så du behöver äta ${maal} kcal per dag.`,
+      },
+    ];
+  }
+
+  if (locale === "no") {
+    return [
+      {
+        question: "Hvor raskt kan man gå ned i vekt sunt?",
+        answer: `${ugeMin}-${ugeMaks} kg per uke. Tilsvarer ${dagMin}-${dagMaks} kcal underskudd per dag.`,
+      },
+      {
+        question: "Hva er kaloriunderskudd?",
+        answer: `At du spiser færre kalorier enn du forbrenner. ${kilo} kcal underskudd ≈ 1 kg tap.`,
+      },
+      {
+        question: "Min. kalorier?",
+        answer: `Menn: min. ${minMand} kcal/dag. Kvinner: min. ${minKvinde} kcal/dag.`,
+      },
+      {
+        question: "Spise mindre eller trene mer?",
+        answer: "Kombinasjon er best. Kosthold viktigst for vekttap, trening bevarer muskelmasse.",
+      },
+      {
+        question: `Hvor mange kalorier må jeg spise for å gå ned ${tab} kg på ${uger} uker?`,
+        answer: `En mann på ${vaegt} kg, ${hoejde} cm og ${aar} år med moderat aktivitet bruker ${forbrug} kcal per dag (BMR ${grund} kcal × aktivitetsfaktor ${faktor}). ${tab} kg på ${uger} uker er ${prUge} kg per uke, som krever ${underskud} kcal i underskudd, så du må spise ${maal} kcal per dag.`,
+      },
+    ];
+  }
+
+  return [
+    {
+      question: "Hvor hurtigt kan man tabe sig sundt?",
+      answer: `${ugeMin}-${ugeMaks} kg pr. uge. Svarer til ${dagMin}-${dagMaks} kcal underskud pr. dag.`,
+    },
+    {
+      question: "Hvad er kalorieunderskud?",
+      answer: `At du spiser færre kalorier end du forbrænder. ${kilo} kcal underskud ≈ 1 kg tab.`,
+    },
+    {
+      question: "Min. kalorier?",
+      answer: `Mænd: min. ${minMand} kcal/dag. Kvinder: min. ${minKvinde} kcal/dag.`,
+    },
+    {
+      question: "Spise mindre eller motionere mere?",
+      answer: "Kombination er bedst. Kost vigtigst for vægttab, motion bevarer muskelmasse.",
+    },
+    {
+      question: `Hvor mange kalorier skal jeg spise for at tabe ${tab} kg på ${uger} uger?`,
+      answer: `En mand på ${vaegt} kg, ${hoejde} cm og ${aar} år med moderat aktivitet bruger ${forbrug} kcal om dagen (BMR ${grund} kcal × aktivitetsfaktor ${faktor}). ${tab} kg på ${uger} uger er ${prUge} kg om ugen, som kræver ${underskud} kcal i underskud, så du skal spise ${maal} kcal om dagen.`,
+    },
+  ];
 }
