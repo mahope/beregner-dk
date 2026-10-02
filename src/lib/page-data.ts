@@ -61,6 +61,7 @@ import {
   kvadratmeterEksempelProdukt,
   kvadratmeterFaqSvar,
 } from "./kvadratmeter-eksempler";
+import { konfirmationFaqSvar } from "./konfirmation-eksempler";
 import { PROMILLEGRANSE, PROMILLEGROV_SE } from "./promille";
 import { SVENSK_SKATT_2026 as SV_SKATT, SVENSK_SKATT_TAL } from "./svensk-skatt";
 import {
@@ -1310,8 +1311,8 @@ faqItems: kalorierFaqItems("da"),
       schemaDescription: "Gratis konfirmationsbudget beregner.",
       schemaCategory: "FinanceApplication",
       faqItems: [
-      { question: "Hvad koster en konfirmation?", answer: "Gaverne ligger typisk mellem 10.000 og 25.000 kr. oveni festens egne udgifter. Beregneren lægger mad, lokaleleje, konfirmandtøj og fotograf sammen med gaverne, så du ser det samlede beløb for din egen konfirmation." },
-      { question: "Gavebeløb?", answer: "Forældre: 2.000-5.000 kr. Bedsteforældre: 1.000-2.000 kr." },
+      { question: "Hvad koster en konfirmation?", answer: konfirmationFaqSvar("da").koster },
+      { question: "Gavebeløb?", answer: konfirmationFaqSvar("da").gavebelob },
       { question: "Hvornår er konfirmation?", answer: "Typisk april-maj i Danmark." },
       { question: "Spare på festen?", answer: "Hold festen hjemme, lav maden selv." },
       ],
@@ -2613,8 +2614,8 @@ const noPages: Record<string, PageData> = {
       schemaDescription: "Gratis konfirmasjonsbudsjett kalkulator.",
       schemaCategory: "FinanceApplication",
       faqItems: [
-      { question: "Hva koster en konfirmasjon?", answer: "10.000-30.000 NOK avhengig av antall gjester." },
-      { question: "Gavebeløp?", answer: "Foreldre: 3.000-8.000 NOK. Besteforeldre: 1.500-3.000 NOK." },
+      { question: "Hva koster en konfirmasjon?", answer: konfirmationFaqSvar("no").koster },
+      { question: "Gavebeløp?", answer: konfirmationFaqSvar("no").gavebelob },
       { question: "Når er konfirmasjon?", answer: "Typisk mai i Norge." },
       { question: "Spare på festen?", answer: "Hold festen hjemme, lag maten selv." },
       ],
@@ -3874,8 +3875,8 @@ const sePages: Record<string, PageData> = {
       schemaDescription: "Gratis konfirmationsbudget kalkylator.",
       schemaCategory: "FinanceApplication",
       faqItems: [
-      { question: "Vad kostar en konfirmation?", answer: "10.000-30.000 SEK beroende på antal gäster." },
-      { question: "Gåvobelopp?", answer: "Föräldrar: 3.000-8.000 SEK. Mor-/farföräldrar: 1.500-3.000 SEK." },
+      { question: "Vad kostar en konfirmation?", answer: konfirmationFaqSvar("se").koster },
+      { question: "Gåvobelopp?", answer: konfirmationFaqSvar("se").gavebelob },
       { question: "När är konfirmation?", answer: "Typiskt april-maj i Sverige." },
       { question: "Spara på festen?", answer: "Ha festen hemma, laga maten själv." },
       ],

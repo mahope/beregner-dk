@@ -2,6 +2,7 @@ import KonfirmationBeregner from "@/components/KonfirmationBeregner";
 import { generatePageMetadata } from "@/lib/page-helpers";
 import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
+import { konfirmationBrødtekstTal } from "@/lib/konfirmation-eksempler";
 import FAQ from "@/components/FAQ";
 import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
@@ -16,6 +17,7 @@ export default async function KonfirmationPage() {
   const locale = await getLocale();
   const domainConfig = await getCurrentDomainConfig();
   const pageData = getPageData("konfirmation", locale) || getPageData("konfirmation", "da")!;
+  const tal = konfirmationBrødtekstTal(locale);
 
   return (
     <div className="flex flex-col lg:flex-row gap-8">
@@ -45,12 +47,12 @@ export default async function KonfirmationPage() {
 
           <h2>De største udgiftsposter</h2>
           <p>
-            <strong>Mad og drikke</strong> er typisk den største post og kan variere fra 150-200 kr./person hjemme til 400-700 kr./person på restaurant. <strong>Konfirmandtøj</strong> koster typisk 1.500-4.000 kr., og en <strong>fotograf</strong> ligger omkring 1.000-3.000 kr.
+            <strong>Mad og drikke</strong> er typisk den største post og kan variere fra {tal.madHjemme} hjemme til {tal.madRestaurant} på restaurant. <strong>Konfirmandtøj</strong> koster typisk {tal.konfirmandtoej}, og en <strong>fotograf</strong> ligger omkring {tal.fotograf}.
           </p>
 
           <h2>Gennemsnitlige konfirmationsgaver 2026</h2>
           <p>
-            Gavebeløbet afhænger af <strong>relationen til konfirmanden</strong>. Forældre giver typisk mest, efterfulgt af bedsteforældre. Mange konfirmander modtager samlet set mellem <strong>10.000 og 25.000 kr.</strong> i gaver.
+            Gavebeløbet afhænger af <strong>relationen til konfirmanden</strong>. Forældre giver typisk mest, efterfulgt af bedsteforældre. Mange konfirmander modtager samlet set mellem <strong>{tal.gaver}</strong> i gaver.
           </p>
 
           <h2>Sparetips til konfirmationen</h2>
@@ -73,12 +75,12 @@ export default async function KonfirmationPage() {
 
           <h2>De största utgiftsposterna</h2>
           <p>
-            <strong>Mat och dryck</strong> är oftast den största posten och kan variera från 150-250 kr/person hemma till 400-800 kr/person på restaurang. <strong>Konfirmationskläder</strong> kostar vanligtvis 1 500-4 000 kr, och en <strong>fotograf</strong> ligger kring 1 500-4 000 kr.
+            <strong>Mat och dryck</strong> är oftast den största posten och kan variera från {tal.madHjemme} hemma till {tal.madRestaurant} på restaurang. <strong>Konfirmationskläder</strong> kostar vanligtvis {tal.konfirmandtoej}, och en <strong>fotograf</strong> ligger kring {tal.fotograf}.
           </p>
 
           <h2>Genomsnittliga konfirmationspresenter 2026</h2>
           <p>
-            Presentbeloppet beror på <strong>relationen till konfirmanden</strong>. Föräldrar ger vanligtvis mest, följt av mor- och farföräldrar. Många konfirmander tar sammanlagt emot mellan <strong>10 000 och 25 000 kr</strong> i presenter.
+            Presentbeloppet beror på <strong>relationen till konfirmanden</strong>. Föräldrar ger vanligtvis mest, följt av mor- och farföräldrar. Många konfirmander tar sammanlagt emot mellan <strong>{tal.gaver}</strong> i presenter.
           </p>
 
           <h2>Spartips till konfirmationen</h2>

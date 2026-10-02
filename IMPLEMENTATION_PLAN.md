@@ -1,34 +1,32 @@
-STATUS: 3/10 01:50. CI grøn ved start (`37074310690`). Sentry: ingen uløste
+STATUS: 3/10 01:40. CI grøn ved start (`37075771219`). Sentry: ingen uløste
      fejl 14 dage. **Gate:** `npm run lint` · `npm run typecheck` ·
-     `TZ=UTC npm run test` · `npm run build` — **grøn 3/10 01:52** (lint exit 0,
-     typecheck exit 0, **3884** tests i 242 filer, build exit 0).
-     **Denne iteration: /konfirmation — FAQ'en lovede et lavere beløb end
-     sidens eget værktøj.** «Hvad koster en konfirmation?» svarede «8.000-25.000
-     DKK afhængigt af antal gæster» og blev publiceret som `FAQPage`-JSON-LD.
-     **Målt mod `KonfirmationBeregner`s egne konstanter** (30 gæster,
-     forsamlingshus, fotograf med): festen 19.600 kr. + gaver 19.100 kr. =
-     **38.700 kr.** Siden sagde altså «højst 25.000» om det beløb, dens egen
-     beregner viser 38.700, og 25.000 var i virkeligheden loftet for *gaverne
-     alene* — de samme tal brødteksten skriver som gaveinterval. Svaret er nu
-     det interval plus en henvisning til hvad beregneren summerer, så ingen
-     kan modsige den; «DKK» er væk (siden skriver «kr.» alle andre steder).
-     `PRISER`/`FASTE_POSTER`/`GAVEGENNEMSNIT` er eksporteret, så porten læser
-     beregnerens tal i stedet for at hænge på konstanter. **3 nye tests**;
-     mutation mod den gamle streng giver **2 røde**.
-     **Målt i denne iteration (negativt, lukker to åbne spørgsmål):** alle
-     **158** danske og **89** svenske sitemap-URL svarer 200 — ingen døde
-     sider i nogen af de to filer. `/lon-efter-skatt` 404'er på minberegner.dk,
-     men det er korrekt: den er `seOnly`, og de to forekomster på
-     `/loen-efter-skat` er hreflang-alternates til **beraknare.se**, ikke
-     interne links. hreflang på `/loen-efter-skat` er korrekt
-     (da/sv/x-default). Missionens emoji-prioritet 1 er lukket: ingen af
-     `home-data.ts`, `navigation.ts`, `categories.ts`, `calculator-list.ts`
-     eller `footer-data.ts` har emoji tilbage (ikonkortet er `icons.ts`).
-     **Næste iteration:** (1) mål de noter i vinduet 3/10 07:30 på indhold,
-     (2) F5b: `/konfirmation` er delvis lukket — brødtekstens tal (150-200 /
-     400-700 / 1.500-4.000 / 1.000-3.000 da mod 150-250 / 400-800 / 1 500-4 000
-     / 1 500-4 000 se) skal læse de samme konstanter; svensk og dansk
-     fotografinterval er forskellige (se `docs/plan-arkiv.md`).
+     `TZ=UTC npm run test` · `npm run build` — **grøn 3/10 01:31** (lint exit 0,
+     typecheck exit 0, **3894** tests i 242 filer, build exit 0).
+     **Denne iteration: /konfirmation halve 2 — de svenske og norske FAQ-svar
+     havde den fejl, den danske fik rettet i går.** Målt: svensk svarede
+     «10.000-30.000 **SEK** beroende på antal gäster» og norsk «10.000-30.000
+     **NOK** avhengig av antall gjester» på «hvad koster en konfirmation?» —
+     altså et *samlet* beløb på under halvdelen af beregnerens egne 38.700 kr.
+     (30 gæster, forsamlingshus, fotograf med: 19.600 + 19.100), med **dansk
+     punktum** i en svensk og en norsk sætning, i en valutaenhed ingen anden
+     sted på siderne bruger. Brødteksten lige ovenfor sagde «mellan **10 000
+     och 25 000 kr** i presenter», så FAQ'en modsagde brødteksten på den
+     samme side — og `FAQSchema` publicerede den. Norsk lovede desuden
+     3.000-8.000 kr. til forældre, dansk 2.000-5.000, for én beregner der bruger
+     3.000 på alle domæner. Ny `konfirmation-eksempler.ts` bygger alle otte
+     brødtekstbeløb og alle seks FAQ-beløb i tre sprog gennem `formatBelob`.
+     Dansk **byte-uændret** (de to strenge låste med `toEqual`).
+     *Valg uden kilde, begrundet:* fotografintervallet var 1.000-3.000 på dansk
+     og 1.500-4.000 på svensk for samme konstant; valgt er det danske, fordi
+     beregneren har én pristabel for alle domæner (1.500 kr.), så det snævreste
+     interval er det, alle tre kan indfri. ❓ for et svensk markedstal står
+     uændret.
+     **13 nye tests** (3884 → 3894), hvoraf 5 er røde mod den gamle kode;
+     mutation «kr.» + punktum → «kr..» er fanget af en egen port.
+     `HAARDKODEDE_BELOB` for `konfirmation/page.tsx` **6 → 0** og listens målte
+     sum **332 → 320** (målt med portens egen `jsxBelob`).
+     **Næste iteration:** (1) mål de otte noter i vinduet 3/10 07:30 på indhold,
+     (2) F5b: næste slug er `/efterloen` (5) eller `/aktieskat` (5).
 
 ## Fase 3 — trafik-drevet
 
@@ -223,23 +221,23 @@ den påstand ikke kan efterprøves. Dansk ellers uændret på nær «33,6%» →
 (3864 → 3870); mutation mod `page-data.ts` fra før rettelsen giver **1 rød** af 6
 (bindingsprøven), resten låser modulet.
 
-**Delvis lukket 3/10 01:50 — `konfirmation-faq-tal-fra-modul`.** Se
-`docs/plan-arkiv.md`. *Målt:* FAQ'en på «Hvad koster en konfirmation?» lovede
-«8.000-25.000 **DKK** afhængigt af antal gæster» som et **samlet** beløb, men
-`KonfirmationBeregner`s standardindstillinger (30 gæster, forsamlingshus,
-fotograf med) summerer til 19.600 kr. i festen + 19.100 kr. i gaver =
-**38.700 kr.** Loftet 25.000 var i virkeligheden gaveintervallet, som
-brødteksten og `GAVEGENNEMSNIT` allerede skriver. Svaret er nu dét interval
-plus en henvisning til hvad værktøjet summerer — ingen ny kilde, ingen nyt
-tal. **De tre konstantgrupper i `KonfirmationBeregner.tsx` er eksporteret**, så
-den nye port læser beregnerens egne tal (3 tests) i stedet for at hænge på
-hårdkodede forventninger; mutation mod den gamle streng → **2 røde af 3**.
-`HAARDKODEDE_BELOB` for `konfirmation/page.tsx` er **uændret 6** — brødtekstens
-intervaller er endnu håndskrevne, og det er næste halve.
+**Lukket 3/10 01:50 + 01:40 — `konfirmation-faq-tal-fra-modul` (halve 1 og 2).**
+Se `docs/plan-arkiv.md`. *Målt:* halve 1 fandt den danske fejl (FAQ'en lovede
+«8.000-25.000 **DKK**» som *samlet* beløb mod beregnerens 38.700 kr.);
+**halve 2 fandt den samme fejl to gange til, i de to andre sprog** — svensk
+«10.000-30.000 **SEK** beroende på antal gäster», norsk «10.000-30.000 **NOK**
+avhengig av antall gjester»: samme forveksling, dansk punktum i svensk og
+norsk sætning, og en valutaenhed ingen anden sted på siderne bruger. Norsk
+lovede desuden 3.000-8.000 kr. til forældre mod dansks 2.000-5.000, for én
+beregner der bruger 3.000 på alle domæner. Ny `konfirmation-eksempler.ts`
+bygger **alle otte** brødtekstbeløb og **alle seks** FAQ-beløb i tre sprog
+gennem `formatBelob`; `HAARDKODEDE_BELOB` for `konfirmation/page.tsx` **6 → 0**
+og listens målte sum **332 → 320**. Dansk byte-uændret.
 
 **Åben række (strenglisten):** næste fil skal måles på ny — de punkt der stod
-åbne er alle ❓-blokerede. **Syv filer er lukket**, se listen nedenfor.
-Strenglistens loft er **70 → 57**, JSX-listen **360 → 347 → 338 → 333 → 332**.
+åbne er alle ❓-blokerede. **Otte filer er lukket**, se listen nedenfor.
+Strenglistens loft er **70 → 57**, JSX-listen **360 → 347 → 338 → 333 → 332 →
+320**.
 
 **Ny målt fejlklasse — `page-data.ts` ligger uden for begge beløbs-porte.**
 `strengBelob`/`jsxBelob` måler kun `.tsx`, så de usourcede intervaller i
@@ -266,22 +264,24 @@ gamle strenge). `/vaegttab` se: 1.277 visninger.
 **Åben: beløbs-porten scanner kun `*.tsx`.** *Accept:* `strengBelob` kører på
 `src/lib/*.ts` også, og listen opdateres i samme commit.
 
-**Syv filer er lukket:** SU (`su-indlaeg-belob-fra-modul`), arveafgift
+**Otte filer er lukket:** SU (`su-indlaeg-belob-fra-modul`), arveafgift
 (`arveafgift-belob-fra-modul`), `/boligsalg` (`boligsalg-belob-fra-modul`),
 `/procent` (`procent-faq-tal-fra-modul`), `/renteberegner`
 (`renteberegner-belob-fra-modul`), `/procent`s procentpoint-svar
-(`procentpoint-faq-tal-fra-modul`) og `/kvadratmeter`
-(`kvadratmeter-faq-tal-fra-modul`) — alle i `docs/plan-arkiv.md`.
+(`procentpoint-faq-tal-fra-modul`), `/kvadratmeter`
+(`kvadratmeter-faq-tal-fra-modul`) og `/konfirmation`
+(`konfirmation-faq-tal-fra-modul`) — alle i `docs/plan-arkiv.md`.
 
 **Målt 2/10 18:35 (egen AST-probe, samme mønster som portens `strengBelob`):
 alle fund lå i `page-data.ts` alene** — ikke fordelt i `src/lib/*.ts` som
 portens docblock siger. Efter `/renteberegner` var de **176** (var 195 ved
 iterationens start); efter `/vaegttab` halve 2 er de **131** målt 3/10 22:33.
 Køen pr. slug (**86** efter kvadratmeter 3/10 00:45, målt med egen AST-probe):
-`moms` 15 (⛔) · `konfirmation` 6 · `efterloen` 5 · `aktieskat` 5 ·
-`loen-efter-skatt` 4 · `topskat` 4 · `boernepenge` 4 · resten ≤3.
-**Anbefalet rækkefølge:** `/konfirmation` (6) → `/efterloen` (5) → `/aktieskat`
-(5). `/moms` er ⛔ (de 3 lovgrænser).
+`moms` 15 (⛔) · `konfirmation` 6 → **0** 3/10 01:40 · `efterloen` 5 ·
+`aktieskat` 5 · `loen-efter-skatt` 4 · `topskat` 4 · `boernepenge` 4 · resten ≤3.
+De øvrige tal er fra målingen 3/10 00:45 og kan være faldet siden — mål den
+slug, du tager, på ny. **Anbefalet rækkefølge:** `/efterloen` (5) →
+`/aktieskat` (5) → `/loen-efter-skatt` (4). `/moms` er ⛔ (de 3 lovgrænser).
 *Accept pr. slice:* ét slug pr. opgave, 12 fund eller færre, de læses fra sit
 eget modul, og en mutation i porten. `/vaegttab` blev delt i to halvdele
 (12 + 12), fordi den er 24 fund. **Hvis porten udvides til `.ts` med det samme,
@@ -346,6 +346,8 @@ kode. Hver note er én linje; den fulde kommando står i `docs/plan-arkiv.md` un
 sit slug. Strip `<!-- -->`-kommentarmarkørerne fra HTML'en, ellers matcher
 ingen regex på tal og tekst.
 
+`VERIFICÉR DEPLOY: /konfirmation FAQ i alle tre sprog (beraknare.se skal have «mellan 10 000 och 25 000 kr», 0 × «10.000», 0 × «SEK», og fotografintervallet «1 000-3 000 kr») ceo/konfirmation-se-no-tal-fra-modul 3/10 01:40`
+
 `VERIFICÉR DEPLOY: /konfirmation FAQ (svaret på «Hvad koster en konfirmation?» skal være gaveintervallet 10.000-25.000 kr. + henvisning til beregneren, ikke «8.000-25.000 DKK») ceo/konfirmation-faq-tal-fra-modul 3/10 01:50`
 
 `VERIFICÉR DEPLOY: /kvadratmeter FAQ (svensk og norsk «10 000 cm²» og «3 000 kr», materialerne «Nivåerna är danska») ceo/kvadratmeter-faq-tal-fra-modul 3/10 00:45`
@@ -369,6 +371,7 @@ skøn: `getDageTilSlugs()` giver **22 / 19**, og live har 22 / 19.
 
 | Slug | Prøv på indhold |
 |---|---|
+| `konfirmation-se-no-tal-fra-modul` (**ny**, vindue 3/10 07:30) | `beraknare.se/konfirmation`: hele HTML'en skal have **0** `10\.000`, **0** `30\.000` og **0** `\bSEK\b` — altså ingen danske tal og ingen valutaenhed. `FAQPage`-JSON-LD skal have de **fire** spørgsmål, hvor «Vad kostar en konfirmation?» svarer «Presenterna ligger typiskt mellan **10 000 och 25 000 kr** ovanpå festens egna utgifter. Kalkylatorn lägger ihop mat, lokalhyra, konfirmationskläder och fotograf med presenterna, så du ser det totala beloppet för din egen konfirmation.» og «Gåvobelopp?» svarer «Föräldrar: **2 000-5 000 kr**. Mor-/farföräldrar: **1 000-2 000 kr**.». Brødteksten skal have «**150-200** kr/person hemma till **400-700** kr/person på restaurang», «**1 500-4 000** kr» og fotograf «kring **1 000-3 000** kr» (ikke 1 500-4 000), plus «mellan **10 000 och 25 000 kr** i presenter». Hele HTML'en skal have **0** `kr\.\.`. `minberegner.dk/konfirmation`: FAQ'en skal have de **fire** danske spørgsmål **byte-uændret** med dansk punktum («10.000 og 25.000 kr.», «Forældre: 2.000-5.000 kr. Bedsteforældre: 1.000-2.000 kr.»), brødteksten uændret («150-200 kr./person», «1.000-3.000 kr.»), og `0` `kr\.\.`. **Intet** `NaN`. |
 | `konfirmation-faq-tal-fra-modul` (**ny**, vindue 3/10 07:30) | `minberegner.dk/konfirmation`: hele HTML'en skal have **0** `8.000-25.000` og **0** `DKK`. `FAQPage`-JSON-LD skal have **4** spørgsmål, hvor «Hvad koster en konfirmation?» svarer «Gaverne ligger typisk mellem **10.000 og 25.000 kr.** oveni festens egne udgifter.», og «Gavebeløb?» svarer «Forældre: 2.000-5.000 kr. Bedsteforældre: 1.000-2.000 kr.». Brødteksten skal stadig have «10.000 og 25.000 kr.» (uændret). **Intet** `NaN`. |
 | `kvadratmeter-faq-tal-fra-modul` (**ny**, vindue 3/10 07:30) | `beraknare.se/kvadratmeter` og norsk `/kvadratmeter`: **0** `\d\.\d{3}` i hele HTML'en — altså **intet** «10.000 cm²» / «10.000 m²» / «3.000 kr». **2** `10 000 cm²` og **2** `3 000 kr` skal stå (ét i synlig FAQ-tekst, ét i `FAQPage`-JSON-LD). FAQ'en skal have de **syv** svenske spørgsmål, hvor «Vad kostar 20 m² golv?» svarer «… blir det **3 000** kr för 20 m².» og «Omvandling?» svarer «1 m² = **10 000** cm². **10 000** m² = 1 hektar. 1 m² ≈ 10,76 sq ft.», og «Vad kostar golv per m²?» svarer «Laminat 80-200 kr/m², trägolv 300-800 kr/m², kakel 200-500 kr/m². **Nivåerna är danska — vi saknar en källa till svenska materialpriser.**». Norsk skal have de **fem** spørgsmål med «Nivåene er danske — vi mangler en kilde til norske materialpriser.». **0** `SEK/m²` og **0** `NOK/m²`. `minberegner.dk/kvadratmeter`: FAQ'en skal have de **otte** danske spørgsmål **byte-uændret** (dansk skriver «10.000 cm²» og «3.000 kr.»), og `<meta name="description">` skal starte med «Et rum på 5 x 4 m er 20 m².». **Intet** `NaN`. |
 | `vaegttab-faq-fra-modul` (**ny**, vindue 3/10 21:30) | `beraknare.se/vaegttab`: **0** `2\.209` i hele HTML'en — synlig FAQ-tekst, `FAQSchema`-JSON-LD og RSC-payloaden skal alle skrive «2 209», «1 780», «2 759», «7 700», «1 000», «1 500», «1 200» med **mellemrum**. FAQ'en skal stadig have **fem** spørgsmål, hvor «Hur många kalorier ska jag äta för att gå ner 6 kg på 12 veckor?» svarer «… förbrukar **2 759** kcal per dag (BMR **1 780** kcal × aktivitetsfaktor **1,55**) … så du behöver äta **2 209** kcal per dag.». `minberegner.dk/vaegttab`: FAQ'en skal have de **samme fem** spørgsmål **byte-uændret** med dansk punktum («2.759», «1.780», «550 kcal», «2.209»), og `0` `2 209`. **Intet** `NaN`. |

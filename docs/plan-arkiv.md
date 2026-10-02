@@ -25994,3 +25994,89 @@ forekomster af strengen på `/loen-efter-skat` er hreflang-alternates til
 (da/sv/x-default). Missionens emoji-prioritet 1 er lukket: ingen af
 `home-data.ts`, `navigation.ts`, `categories.ts`, `calculator-list.ts` eller
 `footer-data.ts` har emoji tilbage, og ikonerne ligger i `src/lib/icons.ts`.
+
+---
+
+## 3/10 01:40 — `konfirmation-se-no-tal-fra-modul` (F5b, halve 2)
+
+Halve 1 (3/10 01:04, `99473a6`) rettede den **danske** gren af samme fejl. Denne
+halve fandt den samme fejl **to gange til, i de to andre sprog**, som halve 1
+lod stå — og to af dem lå i `FAQSchema`-JSON-LD.
+
+### Fund, målt mod `KonfirmationBeregner`s egne konstanter
+
+Standardindstillinger: 30 gæster, forsamlingshus, fotograf med →
+`30 × 350 + 3.500 + 2.500 + 1.500 + 800 + 300 + 500` = **19.600 kr.** i festen,
+`2 × 3.000 + 4 × 1.500 + 8 × 700 + 5 × 300` = **19.100 kr.** i gaver,
+i alt **38.700 kr.**
+
+| sted | før | fejlen |
+|---|---|---|
+| `page-data.ts:3877` (se) | «10.000-30.000 **SEK** beroende på antal gäster» | samlet beløb under halvdelen af egen beregner · dansk punktum i svensk sætning · «SEK» ingen anden sted på siden bruger |
+| `page-data.ts:3878` (se) | «Föräldrar: 3.000-8.000 **SEK**. Mor-/farföräldrar: 1.500-3.000 SEK.» | samme to formfejl |
+| `page-data.ts:2616` (no) | «10.000-30.000 **NOK** avhengig av antall gjester» | samme tre fejl |
+| `page-data.ts:2617` (no) | «Foreldre: 3.000-8.000 NOK. Besteforeldre: 1.500-3.000 NOK.» | lovede 8.000 mod dansks 5.000 for `GAVEGENNEMSNIT.foraeldre = 3000` |
+| `page.tsx:48` (da) + `:76` (se) | otte brødtekstbeløb håndskrevet | håndkode uden for beregnerens tal; de to sprog uenige om **alle tre** intervaller |
+
+Den værste var modsigelsen **inden på samme side**: den svenske brødtekst sagde
+«mellan **10 000 och 25 000 kr** i presenter», og FAQ'en 300 px under den sagde
+«10.000-30.000 SEK beroende på antal gäster». Kun JSON-LD'en bar den ene, så en
+læser og en Google-citat ikke kunne se det samme svar.
+
+De tre uoverensstemmelser mellem sprogene var: mad hjemme 150-200 mod
+150-250, mad restaurant 400-700 mod 400-800, fotograf 1.000-3.000 mod
+1.500-4.000. Alle **snævrere** på dansk, og `FASTE_POSTER.fotograf = 1500` lå i
+alle danske intervaller og i den nedre kant af det svenske.
+
+### Rettelsen
+
+Ny `src/lib/konfirmation-eksempler.ts` (rent data, ingen import af komponenten)
+med svyv deklarerede intervaller og to funktioner:
+`konfirmationBrødtekstTal(locale)` til de otte brødtekstbeløb og
+`konfirmationFaqSvar(locale)` til de seks FAQ-beløb — alle gennem `formatBelob`,
+så svensk og norsk får mellemrum. Modulet importeres i `page.tsx` (otte
+JSX-beløb → 0 fund i porten) og i `page-data.ts` (seks strenge i tre sprog).
+
+**Valget af fotografinterval er ikke et krav om at vide det svenske marked.**
+Beregneren har én pristabel for alle domæner (1.500 kr. i fotograf på både
+minberegner.dk og beraknare.se), så en svensk sætning med et *andet* interval
+lover noget værktøjet ikke holder. Det snævreste interval er det, alle tre
+domæner kan indfri, og derfor står det på alle tre. ❓ for et svensk
+markedstal er uændret, og beregnerens egen mærkat («Priserne er vejledende
+estimater for 2026») dækker det manglende markedstal, som den gjorde før.
+
+### Porten
+
+13 tests i `konfirmation-faq.test.ts` (3 → 13, **3884 → 3894** i hele suiten):
+
+- **De svyv par.** `PRISER.hjemme.madPrPerson` skal ligge i `MAD_PR_PERSON.hjemme`,
+  `FASTE_POSTER.fotograf` i `FOTOGRAF`, osv. Sættes en pris i komponenten uden
+  at intervallet følger med, bliver porten rød — altså kan siden ikke begynde
+  at lyve, fordi porten dømmer begge sider. Det er den bivirkning, der gør
+  deklarationen ærlig; den er ikke en tilladelsesliste.
+- **Beløbene i svaret, talt.** `koster`-svaret skal indeholde præcis de to
+  endepunkter af `GAVEINTERVAL`, formatteret i sprog egen skrivemåde. Den
+  gamle svenske streng gav `{10.000, 30.000}` — rød på både separator og
+  beløb. Samme prøve dømmer `gavebelob`-svaret i alle tre sprog.
+- **Ingen `SEK`/`NOK`/`DKK`**, **intet `\d\.\d{3}`** i svensk eller norsk svar.
+- **Ingen `kr..`.** Se nedenfor.
+- **Dansk byte-uændret**, låst med `toEqual` mod de to gamle strenge.
+
+**Mutation mod den gamle kode: 5 røde af 13** (`git stash` af `page-data.ts` +
+`page.tsx`, kun den nye testfil kørende).
+
+**Egen fejl fundet i review af min egen diff.** Første version af
+`gavebelob`-svaret skrev «Forældre: 2.000-5.000 kr**..** Bedsteforældre:
+1.000-2.000 kr**..**» — `interval()` lægger «kr.» på i dansk, og sætningen satte
+et punktum til oveni. Rettet ved `gavepunkt()`, der kun sætter punktum for de
+sprog, der skriver «kr» uden det. En mutation, der sætter punktumet tilbage,
+er fanget af den nye `kr\.\.`-port — samme residue som `/leasing` havde i to
+dage (punkt 13): hverken tsc, lint eller build ser den.
+
+### Målt porten
+
+`HAARDKODEDE_BELOB["src/app/konfirmation/page.tsx"]` **6 → 0**, målt med
+portens egen `jsxBelob`. `HAARDKODEDE_BELOB_I_LISTEN` **332 → 320** — *målt* med
+samme scanner (loftet lå 6 over det målte tal, så de 6 er ikke hele faldet).
+`/konfirmation` er dermed lukket på hele linien: 0 fund i JSX, 0 fund i
+`page-data.ts`, 0 håndskrevne beløb i brødteksten.

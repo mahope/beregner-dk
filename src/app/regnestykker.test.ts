@@ -226,7 +226,7 @@ const HAARDKODEDE_BELOB: Record<string, number> = {
   "src/app/feriepenge/page.tsx": 4,
   "src/app/flyttebudget/page.tsx": 3,
   "src/app/kalorier/page.tsx": 2,
-  "src/app/konfirmation/page.tsx": 6,
+  "src/app/konfirmation/page.tsx": 0,
   // 1 → 0 den 3/10: `kvadratmeter`'s «20 m² til 150 kr./m² er 3.000 kr.» lå
   // håndskrevet i den danske blok, mens den svenske allerede læste sit beløb
   // fra `PRIS_EKSEMPEL`. Begge læser nu `kvadratmeter-eksempler`, så de to
@@ -314,7 +314,7 @@ const HAARDKODEDE_BELOB: Record<string, number> = {
  * `DEFAULT_VALUES` og tinglysningens eksporterede satser. **Ingen** er bevaret
  * som interval: de har ingen kilde, så de må ikke gættes (punkt 11).
  */
-const HAARDKODEDE_BELOB_I_LISTEN = 332;
+const HAARDKODEDE_BELOB_I_LISTEN = 320;
 
 /**
  * Samme port på de `.tsx`-filer der **ikke** er `page.tsx`: beregnerne i
@@ -678,7 +678,10 @@ describe("beløb i JSX-tekst på siderne", () => {
     // 2/10: 385 → 370, da `/moms'` 15 eksempelbeløb læses fra modulet. De 370
     // fund er de samme filers øvrige beløb, så tallet siger hvor meget af
     // korpuset porten endnu dømmer — det må ikke stige i det stille.
-    expect(HAARDKODEDE_BELOB_I_LISTEN).toBe(332);
+    // 3/10: 332 → 320, målt med portens egen `jsxBelob`, da
+    // `/konfirmation`s 6 brødtekstbeløb læses fra `konfirmation-eksempler`.
+    // (Listen lå 6 over det målte tal, så de 6 er ikke hele faldet.)
+    expect(HAARDKODEDE_BELOB_I_LISTEN).toBe(320);
   });
 });
 
