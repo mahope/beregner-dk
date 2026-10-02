@@ -16,6 +16,12 @@ import {
   MINUTTER_TILL_TIMMAR,
 } from "@/lib/tids-eksempler";
 import {
+  DAGE_I_SKUDAAR,
+  TIMER_I_SKUDAAR,
+  TIMER_PERIODER,
+  timerIPeriode,
+} from "@/lib/timer-periode";
+import {
   TIDS_SUMMER,
   summerTidsrum,
   EXCEL_SUM_FORMEL,
@@ -638,6 +644,51 @@ describe("lægge to tidsrum sammen på /tidsberegner", () => {
     expect(toVagter.timer).toBe(13);
     expect(toVagter.minutter).toBe(30);
     expect(daSvar).toContain("13 timer og 30 minutter");
+  });
+
+  const TIMER_PERIODE_IDER = TIMER_PERIODER.map((r) => r.id);
+
+  test("periodetabellen viser modulets timer i begge sprog", async () => {
+    const daHtml = renderToStaticMarkup(await (async () => {
+      vi.mocked(getLocale).mockResolvedValue("da");
+      return TidsberegnerPage();
+    })());
+    const seHtml = renderToStaticMarkup(await (async () => {
+      vi.mocked(getLocale).mockResolvedValue("se");
+      return TidsberegnerPage();
+    })());
+
+    // Hver periode skal staa med det modul, ikke med et haandskrevet tal:
+    // timer, minutter OG sekunder, saa en aendret dag-taeler virker paa alle tre.
+    for (const [locale, html] of [
+      ["da", daHtml],
+      ["se", seHtml],
+    ] as const) {
+      for (const id of TIMER_PERIODE_IDER) {
+        const raekke = timerIPeriode(id);
+        expect(html).toContain(formatNumber(raekke.timer, locale));
+        expect(html).toContain(formatNumber(raekke.minutter, locale));
+        expect(html).toContain(formatNumber(raekke.sekunder, locale));
+        expect(html).toContain(raekke.naevn[locale]);
+      }
+      // Skudaaret nævnes med sit eget tal, og det er ét døgn mere.
+      expect(html).toContain(formatNumber(DAGE_I_SKUDAAR, locale));
+      expect(html).toContain(formatNumber(TIMER_I_SKUDAAR, locale));
+    }
+
+    // Maaneden og kvartalet er snit, saa de maa staa med brøktal — ellers
+    // skriver brødteksten 30 dage og tabellen siger 30,42.
+    expect(daHtml).toContain("30,42");
+    expect(daHtml).toContain("91,25");
+    expect(seHtml).toContain("30,42");
+    expect(seHtml).toContain("91,25");
+
+    // Hvert sprog skal have sit egen navn paa hver periode: en dansk
+    // overskrift paa beraknare.se er det, locale-leak-porten dømmer paa.
+    expect(daHtml).toContain("En uge");
+    expect(daHtml).not.toContain("En vecka");
+    expect(seHtml).toContain("En vecka");
+    expect(seHtml).not.toContain("En uge");
   });
 
   test("de to nye spørgsmål er kun i det sprog de er skrevet i", () => {

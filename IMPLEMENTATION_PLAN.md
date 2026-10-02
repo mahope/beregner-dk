@@ -1,22 +1,18 @@
-STATUS: 2/10 07:50. CI grøn (seneste master-kørsel 2/10 05:19Z). Sentry:
+STATUS: 2/10 08:50. CI grøn (seneste master-kørsel 2/10 05:45Z). Sentry:
   MINBEREGNER-1 er Next-router-støj, filtreret siden 3e67ed3 og kodetestet siden
   5f137d4; MINBEREGNER-2 er rettet i 4d48370. PR-TJEK: 2026-10-02 — ingen åbne
   PR'er. BRANCH-TJEK: 2/10 — ingen forældede branches. CEO-kø punkt 0 er lukket
-  (RETTET 04ca30a) og efterprøvet i koden 2/10 07:35 (Valborg `month: 4, day:
-  30`, svensk påskafton `offsetDays: -1`, `toUtcMidnight` læser
-  `DAGE_TIL_TIMEZONE = "Europe/Copenhagen"`, `maneder: 12`, 1. advent 27/11-3/12,
-  ingen påskeaften-FAQ, `/husleje` skriver nettoprisindeks og at nævnet ikke
-  fastsætter en sats pr. område).
-**Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` ·
-   `npm run build`. Målt 2/10 07:47: 0 · 0 · **3644 grønne i 225 filer** · 0
-   (`/moms` er stadig `ƒ` i byggetabel). **Denne iteration: `/moms`' 15
-   eksempelbeløb læses fra modulet.** Portens fund i `src/app/moms/page.tsx` faldt
-   **18 → 3**; listen er 385 → **370**, og `FORVENTEDE_FUND` `gang` 12→8 /
-   `del` 8→6 (sum 33→**27**) fordi de seks intro-regnestykker nu er *regne* frem
-   for håndskrevet — dømt af tre nye tests i `moms/page.test.tsx`, målt rød mod
-   den gamle kode. De **3** resterende er lovgrænser (se ❓ nedenfor).
-   `ceo/moms-eksempler-fra-modul`. Målinger fra de forrige iterationer ligger i
-   `docs/plan-arkiv.md`.
+  (RETTET 04ca30a). Review-fund 2/10 er lukket (RETTET bacfd42).
+  **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` ·
+  `npm run build`.
+  **Denne iteration: periodetabel på `/tidsberegner`** («hvor mange timer er der
+  i et døgn, en uge, en måned og et år?»), da + se, fra
+  `src/lib/timer-periode.ts`. Datagrund: dansk autocomplete 2/10 —
+  «hvor mange timer er der på et år» er **nr. 1 under «hvor mange timer»**,
+  «hvor mange timer i en uge» nr. 1 under «timer i en uge»; svensk «hur många
+  timmar är det på ett år» og «…på en vecka». Mål: `/tidsberegner`
+  291 besøgende/28d (bounce 8 %), GSC 75.622 visninger / 0,3 % CTR / pos. 6,8.
+  Genmål 16/10.
 
 ## Åbne opgaver — F5b: beløb i JSX-tekst → modulkonstanter
 
@@ -267,6 +263,21 @@ Prioriteret efter forventet effekt på **trafik**. Datagrund fra GSC 1/10
   under «kalorier» er madvarer. **Blokeret på kilde** (opgave 119, ❓) — må
   ikke gættes tal.
 
+- **Timer pr. periode på `/tidsberegner`** — ✅ 2/10, `ceo/timer-periode`.
+  *Hvem:* alle der googler «hvor mange timer er der på et år» (autocomplete
+  **nr. 1** under «hvor mange timer» 2/10) og «hvor mange timer i en uge»
+  (nr. 1 under «timer i en uge»); svensk «hur många timmar är det på ett år».
+  *Accept:* fem perioder (døgn, uge, måned, kvartal, år) med dage, timer,
+  minutter og sekunder i begge sprog, måned og kvartal som **snit** af 365
+  dage, skudåret nævnt, to nye FAQ-spørgsmål pr. sprog, 8 nye
+  enhedstests + 1 renderport — leveret. *Datagrund:* autocomplete 2/10 +
+  GSC `/tidsberegner` 75.622 / 194 / 0,3 % / 6,8.
+  **MÅL:** `/tidsberegner` 291 besøgende/28d, bounce 8 % (Plausible 2/10);
+  GSC 75.622 / 194 / 0,3 % / 6,8 (1/10). Genmål **16/10**.
+  *Næste skridt:* det samme spørgsmål findes i beraknare.se-versionen, men
+  `/tid` har ingen `/timer-i-…`-rute; overvej at samme tabel får en svensk
+  `<title>`-frase, når opgave 187 (svenske slugs) sætter gang 13/10.
+
 ## Åbne VERIFICÉR DEPLOY-noter
 
 Alle notes under har vindue **2/10 07:30** (den nyeste fra 07:00) (batch-deployeren kører 07:30/12:30/
@@ -276,6 +287,7 @@ den fulde kommando står i `docs/plan-arkiv.md` under sit slug.
 
 | Slug | Prøv på indhold |
 |---|---|
+| `timer-periode` (**ny**) | `minberegner.dk/tidsberegner`: overskriften «Hvor mange timer er der i et døgn, en uge, en måned og et år?» med fem rækker `Et døgn 1 24 1.440 86.400` · `En uge 7 168 10.080 604.800` · `En måned (snit af 12 måneder) 30,42 730 43.800 2.628.000` · `Et kvartal (snit af 4 kvartaler) 91,25 2.190 131.400 7.884.000` · `Et år 365 8.760 525.600 31.536.000`, og «Et skudår har 366 dage, altså 8.784 timer». `beraknare.se/tidsberegner`: samme fem rækker med **mellemrum** i separatoren (`8 760`, `525 600`, `31 536 000`) og «Ett skottår har 366 dagar, alltså 8 784 timmar»; **intet** «Hvor mange timer», **intet** «En vecka» på minberegner.dk. Uændret: alle tidligere tabeller og formler |
 | `moms-eksempler-fra-modul` (**ny**) | `minberegner.dk/moms`: introens tre listeregler skal være `Læg moms til: … 1.000 kr. × 1,25 = 1.250 kr. inkl. moms`, `Træk moms fra: … 1.250 kr. ÷ 1,25 = 1.000 kr. ekskl. moms` og `Find momsandelen: … 1.250 kr. × 0,20 = 250 kr. i moms` — med **punktum efter kr.** i alle beløb; «er 2,4414, så 1.000 kr. bliver 2.441,41 kr.» og «bliver prisen 0,4096 af den oprindelige — altså 409,60 kr. i alt»; **intet** «kun 410 kr. oveni». `beraknare.se/moms`: de samme tre linjer med **mellemrum** i separatoren (`1 000 kr × 1,25 = 1 250 kr inkl. moms`), «2,4414»/«0,4096», «10,71 %»/«5,66 %», og Excel-rækkerne `1 000 kr exkl. → 1 250 kr inkl.`, `1 250 kr inkl. → 1 000 kr exkl.`, to gange `1 250 kr inkl. → 250 kr i moms`. Uændret: de tre lovgrænser (50.000 kr, 120 000 kr, 1.150 kr) og alle tabeller |
 | `porten-ser-strenge` (**ny**) | **Ingen produktionsændring i brugerfladen ud over én tekst:** `minberegner.dk/boligsalg` skal vise «Tinglysningssatser 0,6% + **1.850 kr.** (skøde) og 1,45% + **1.825 kr.** (pantebrev)» i beregnerens disclaimer, og beregnerens eget tal for tinglysning skal være uændret (samme formel, kun konstanterne er navngivne). Tallet skrives nu med `Intl` (`da-DK`), så «kr.» med punktum er forventet |
 | `topskat-graense-fra-sats` | `minberegner.dk/topskat`: rækkerne skal være `Mellemskat (7,5%) … over 641.200 kr.`, `Topskat (7,5%) … over 777.900 kr.`, `Top-topskat (5%) … over 2.592.700 kr.`, og «ca. **697.000 kr./år** (ca. **58.100 kr./md**)» + «ca. **845.500 kr./år** (ca. **70.500 kr./md**)»; `grep -c '641.200 kr\.'` skal være **2** (JSX-teksten + `<title>`/metadata) og antallet af `697.000` skal være uændret |

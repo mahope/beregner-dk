@@ -21,6 +21,12 @@ import {
   summerTidsrum,
   formatDoegn,
 } from "@/lib/tids-summer";
+import {
+  DAGE_I_SKUDAAR,
+  TIMER_I_DAGT,
+  TIMER_I_SKUDAAR,
+  TIMER_PERIODER,
+} from "@/lib/timer-periode";
 import RelatedCalculators from "@/components/RelatedCalculators";
 import {
   TEMPO_EKSEMPLER,
@@ -131,6 +137,18 @@ const TEMPO_NAEVN_SE: Record<TempoEksempel["id"], string> = {
  * så notationen vælges her. Før dette skrev tabellen og brødteksten
  * "8.25 timer" på både minberegner.dk og beraknare.se.
  */
+/**
+ * Periodernes dage er brøktal for måned og kvartal (30,4167 og 91,25), fordi
+ * de er snit af et år på 365 dage. Derfor får de to decimaler, mens et døgn,
+ * en uge og et år står som hele tal.
+ */
+function formatDage(dage: number, locale: "da" | "se" | "no"): string {
+  return formatNumber(dage, locale, {
+    minimumFractionDigits: Number.isInteger(dage) ? 0 : 2,
+    maximumFractionDigits: 2,
+  });
+}
+
 function formatTimer(tal: number, locale: "da" | "se" | "no"): string {
   return formatNumber(tal, locale, {
     minimumFractionDigits: 2,
@@ -463,6 +481,53 @@ export default async function TidsberegnerPage() {
           <a href="/fart">fartberegneren</a>.
         </p>
 
+        {/* Autocomplete (målt 2/10, hl=da gl=dk) spørger om hele perioden:
+            "hvor mange timer er der på et år" er nr. 1 under "hvor mange
+            timer", "hvor mange timer i en uge" er nr. 1 under "timer i en
+            uge", og "hvor mange timer er der i en måned" ligger i samme
+            blok. Siden svarede på "minutter ÷ 60" men ikke på periode-spørgsmålet.
+            Alle tal læses fra `TIMER_PERIODER`, så et døgn og dets timer ikke
+            kan glide fra hinanden. Måned og kvartal er snit af et år på 365
+            dage — det står i modulens docblock og i teksten under. */}
+        <h2>Hvor mange timer er der i et døgn, en uge, en måned og et år?</h2>
+        <p>
+          Et døgn har {TIMER_I_DAGT} timer, så alt andet er samme tal ganget
+          med antallet af dage. Tabellen regner alle rækker for dig:
+        </p>
+        <div className="overflow-x-auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Periode</th>
+                <th>Dage</th>
+                <th>Timer</th>
+                <th>Minutter</th>
+                <th>Sekunder</th>
+              </tr>
+            </thead>
+            <tbody>
+              {TIMER_PERIODER.map((raekke) => (
+                <tr key={raekke.id}>
+                  <td>{raekke.naevn.da}</td>
+                  <td>{formatDage(raekke.dage, "da")}</td>
+                  <td>{formatNumber(raekke.timer, "da")}</td>
+                  <td>{formatNumber(raekke.minutter, "da")}</td>
+                  <td>{formatNumber(raekke.sekunder, "da")}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p>
+          Måneden og kvartalet er gennemsnit af et normalt år, så de står med
+          brøkdele af en dag — en måned er lidt mere end 30 dage, fordi
+          månederne ikke er lige lange. Et skudår har {DAGE_I_SKUDAAR} dage,
+          altså {formatNumber(TIMER_I_SKUDAAR, "da")} timer, og det er præcis
+          ét døgn mere end et normalt år. Skal du regne et bestemt tidsrum ud,
+          bruger du værktøjet ovenfor, og vil du bare omregne, står omregningen
+          fra minutter til timer lige over denne tabel.
+        </p>
+
         {/* C187: DA-autocomplete under "timer og minutter" har fire
             variationer om at lægge sammen — "læg timer og minutter
             sammen" (nr. 4), "regn timer og minutter sammen" (nr. 7) og
@@ -728,6 +793,51 @@ export default async function TidsberegnerPage() {
           verktyget räknar. Vill du veta hur långt du kommit under ett lopp
           delar du tiden med tempot i stället, och det står under{" "}
           <a href="/fart">fartberäknaren</a>.
+        </p>
+
+        {/* Samma klynge som den danska tabellen ovan, målt på svensk
+            autocomplete 2/10 (hl=sv gl=se): "hur många timmar är det på ett
+            år" och "hur många timmar är det på en vecka" ligger överst, och
+            "hur många timmar på en månad" i samma block. Talen läses från
+            `TIMER_PERIODER`, så timmar och minuter för samma period inte kan
+            glida ifrån varandra. */}
+        <h2>Hur många timmar finns det i ett dygn, en vecka, en månad och ett år?</h2>
+        <p>
+          Ett dygn har {TIMER_I_DAGT} timmar, så allt annat är samma tal gånger
+          antalet dagar. Tabellen räknar alla rader åt dig:
+        </p>
+        <div className="overflow-x-auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Period</th>
+                <th>Dagar</th>
+                <th>Timmar</th>
+                <th>Minuter</th>
+                <th>Sekunder</th>
+              </tr>
+            </thead>
+            <tbody>
+              {TIMER_PERIODER.map((raekke) => (
+                <tr key={raekke.id}>
+                  <td>{raekke.naevn.se}</td>
+                  <td>{formatDage(raekke.dage, "se")}</td>
+                  <td>{formatNumber(raekke.timer, "se")}</td>
+                  <td>{formatNumber(raekke.minutter, "se")}</td>
+                  <td>{formatNumber(raekke.sekunder, "se")}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p>
+          Månaden och kvartalet är genomsnitt av ett normalt år, därför står de
+          med bråktal av en dag — en månad är lite mer än 30 dagar, eftersom
+          månaderna inte är lika långa. Ett skottår har {DAGE_I_SKUDAAR}
+          dagar, alltså {formatNumber(TIMER_I_SKUDAAR, "se")} timmar, och det
+          är exakt ett dygn mer än ett normalt år. Vill du räkna ut en viss
+          tidsperiod använder du verktyget ovan, och vill du bara omräkna står
+          omräkningen från minuter till timmar strax under den här tabellen.
         </p>
 
         {/* C187: SE-autocomplete under "timmar och minuter" har "addera
