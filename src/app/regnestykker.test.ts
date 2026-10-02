@@ -231,7 +231,7 @@ const HAARDKODEDE_BELOB: Record<string, number> = {
   "src/app/loen-efter-skat/page.tsx": 1,
   "src/app/loenstigning/page.tsx": 2,
   "src/app/lon-efter-skatt/page.tsx": 5,
-  "src/app/moms/page.tsx": 18,
+  "src/app/moms/page.tsx": 3,
   "src/app/pension/page.tsx": 2,
   "src/app/renteberegner/page.tsx": 6,
   "src/app/rygestop/page.tsx": 2,
@@ -279,11 +279,18 @@ const HAARDKODEDE_BELOB: Record<string, number> = {
  * 392 → 385 den 2/10: `topskat` stod med 8 fund, hvor syv var beløbsgrænser
  * der lå i `SATSER_2026` og i beregnerens egen formel. Det sidste fund
  * («af en lønforhøjelse på 1.000 kr.») er bevaret med vilje.
+ * 385 → 370 den 2/10: `moms` stod med 18 fund, hvor 15 var de eksempler
+ * brødteksten selv regner — «1.000 kr × 1,25 = 1.250 kr», to gange i hvert
+ * sprog plus de fire rækker i Excel-tabellen på beraknare.se. De læses nu fra
+ * `beregnMoms`, `momsFaktor` og `momsAndel`, altså samme modul som tabellerne
+ * og værktøjet. De tre resterende er lovgrænser (momsregistrering i Danmark
+ * og Sverige og toldens værdigrænse) uden kilde i repoet, så de er bevaret med
+ * vilje — de må ikke gættes, og de må ikke forsvinde uden erstatning.
  * 453 → 448 den 2/10: fem fund var datoer, ikke beløb («Kilde: borger.dk,
  * verificeret 26/9 2026» blev læst som «9 202»), da scanneren ikke krævede at
  * de tre cifre var slut på tallet.
  */
-const HAARDKODEDE_BELOB_I_LISTEN = 385;
+const HAARDKODEDE_BELOB_I_LISTEN = 370;
 
 /**
  * Samme port på de `.tsx`-filer der **ikke** er `page.tsx`: beregnerne i
@@ -506,8 +513,12 @@ const KANONISKE: [regel: string, rigtig: string, forkert: string][] = [
  * skal det være en synlig linje i diffen.
  */
 const FORVENTEDE_FUND: Record<string, number> = {
-  gang: 12,
-  del: 8,
+  // 2/10: `gang` og `del` tabte fire fund hver, fordi `/moms`' brødtekst nu
+  // læser «1.000 kr. × 1,25 = 1.250 kr.» fra `beregnMoms` frem for at skrive
+  // det. Sætningen er derfor *rigtig ved konstruktion* i stedet for dømt af
+  // porten — de ni `KANONISKE` sætninger ovenfor holder reglerne dømmende.
+  gang: 8,
+  del: 6,
   procentAf: 13,
   stigning: 0,
   andel: 0,
@@ -549,8 +560,10 @@ describe("regnestykker i brødteksten", () => {
       expect(målt[navn], `dækningen for regel ${navn} har ændret sig`).toBe(forventet);
     }
     // Før 2/10 var summen 26: `stigning` og `andel` så 0 fund hver, og `gang`
-    // så kun de sætninger, der skrev `kr` efter første faktor. Nu er den 33.
-    expect(Object.values(målt).reduce((a, b) => a + b, 0)).toBe(33);
+    // så kun de sætninger, der skrev `kr` efter første faktor. Den steg til 33,
+    // og 2/10 faldt den til 27 igen, da `/moms`' seks eksempelregnestykker blev
+    // læst fra modulet i stedet for at være håndskrevet.
+    expect(Object.values(målt).reduce((a, b) => a + b, 0)).toBe(27);
   });
 
   test("alle regnestykker på sitet er regnet rigtigt", () => {
@@ -604,7 +617,10 @@ describe("beløb i JSX-tekst på siderne", () => {
     // At rette en side er altid tilladt — listen er en loftpunktssum, ikke en
     // målsætning — så her tælles det samlede antal mod summen af listen.
     expect(fund.length).toBeLessThanOrEqual(HAARDKODEDE_BELOB_I_LISTEN);
-    expect(HAARDKODEDE_BELOB_I_LISTEN).toBe(385);
+    // 2/10: 385 → 370, da `/moms'` 15 eksempelbeløb læses fra modulet. De 370
+    // fund er de samme filers øvrige beløb, så tallet siger hvor meget af
+    // korpuset porten endnu dømmer — det må ikke stige i det stille.
+    expect(HAARDKODEDE_BELOB_I_LISTEN).toBe(370);
   });
 });
 

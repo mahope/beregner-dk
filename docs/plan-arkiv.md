@@ -23943,3 +23943,50 @@ og norske satser med kilde (punkt 11), så den ligger som ❓.
 
 **Gate:** lint 0 · typecheck 0 · `TZ=UTC npm run test` **3641 grønne i 225
 filer** · `npm run build` 0.
+
+---
+
+## 2/10 07:50 — `/moms`: eksemplerne læses fra modulet (`ceo/moms-eksempler-fra-modul`)
+
+**Opgaven.** F5b punkt 1: `/moms` stod med 18 fund i porten — sidste side i
+trafikrækkefølgen med beløb i brødteksten.
+
+**Fundene.** 15 af de 18 var tal, brødteksten selv regner, skrevet i hån:
+- Introens tre listeregler i begge sprog («1.000 kr × 1,25 = 1.250 kr inkl.
+  moms» osv.) — 6 fund.
+- «Og når du skal lægge momsen oveni igen» i begge sprog — 2 fund.
+- Den svenske Excel-tabels fire rækker skrev indgangen (»1 000 kr exkl.«,
+  »1 250 kr inkl.«) i hån, mens resultatet kom fra `beregnMoms` — 4 fund.
+- «1,25 gang fire er 2,4414 … kun 410 kr. oveni» og den svenske
+  «10,71 %»/«5,66 %» — 3 fund.
+
+**Rettelsen.** Alle læses nu fra `src/lib/moms.ts` gennem `MOMS_REFERENCE_BELOEB`
+(1.000 kr.), `beregnMoms`, `momsFaktor` og `momsAndel`. Excel-formlernes faktorer
+er `formatNumber(momsFaktor(25))` og `momsAndel(25)`, så `=A1*0,20` er skrevet
+som `{ANDEL_FAKTOR_SE}` i stedet for en konstant.
+
+**En tekstfejl fundet undervejs.** «får du 0,4096 — altså kun 410 kr. oveni»
+er forkert: 0,8⁴ af 1.000 kr. er 409,60 kr. *i alt*, ikke 410 kr. *oveni*. Den
+gamle sætning læst som en difference. Nyt: «bliver prisen 0,4096 af den
+oprindelige — altså 409,60 kr. i alt».
+
+**Porten.** `src/app/moms/page.tsx` 18 → **3** fund, `HAARDKODEDE_BELOB_I_LISTEN`
+385 → **370**. `FORVENTEDE_FUND`: `gang` 12 → **8**, `del` 8 → **6**, sum 33 →
+**27** — de seks intro-regnestykker er ikke længere tekst porten kan dømme, men
+regne-resultater. `KANONISKE`s ni sætninger holder reglerne dømmende.
+
+**Målt.** De tre nye tests i `moms/page.test.tsx` dømmer på **hele den renderede
+liste** (`html.split("<h3>Sådan beregner du moms</h3>")[1].split("</ul>")[0]`) med
+forventninger bygget af `beregnMoms`, så én tilføjet `<li>` giver rød. Målt rød
+mod den gamle kode: `git show HEAD:src/app/moms/page.tsx` + de nye tests → 3 røde
+(«1.000 kr × 1,25» mod «1.000 kr. × 1,25», «oveni» mod «i alt»). De 27 gamle
+tests er uændrede grønne.
+
+**De 3 resterende fund er lovgrænser**: dansk registrering over 50.000 kr, svensk
+over 120.000 kr og «told ved import over 1.150 kr» (150 EUR). `info.skat.dk`
+svarer 200, men afsnittene ligger bag id'er jeg ikke kan gætte; `eur-lex` svarede
+tømt; `skat.dk` er 500. De er **bevaret med vilje** og ligger som ❓ i planen.
+
+**Gate.** lint 0 · typecheck 0 · `TZ=UTC npm run test` **3644 grønne i 225
+filer** · `npm run build` grøn (`/moms` `ƒ` som før). CEO-kø punkt 0 efterprøvet i
+koden 2/10 07:35 — otte fund, alle lukket.

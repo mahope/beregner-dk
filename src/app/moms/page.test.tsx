@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, test, vi } from "vitest";
 import { getDomainConfigByLocale } from "@/lib/domain-config";
 import { getCurrentDomainConfig, getLocale } from "@/lib/get-locale";
 import { formatNumber } from "@/lib/format";
-import { beregnMoms, DEFAULT_MOMS_SATS, momsFaktor } from "@/lib/moms";
+import { beregnMoms, DEFAULT_MOMS_SATS, momsAndel, momsFaktor, MOMS_REFERENCE_BELOEB } from "@/lib/moms";
 import { momsSatsUdenraekke, udenlandRaeekker } from "@/lib/moms-eu";
 import MomsPage from "./page";
 
@@ -208,6 +208,100 @@ describe("moms page", () => {
         expect(html).toContain(`${formatNumber(moms, "da", { maximumFractionDigits: 2 })} kr.`);
       }
     }
+  });
+
+  /**
+   * Fund 2/10: de tre regnestykker i introen stod håndskrevet i begge sprog —
+   * «1.000 kr × 1,25 = 1.250 kr inkl. moms» lå på siden to gange i hvert sprog
+   * (én i listen, én i «når du skal lægge momsen oveni igen»), selv om
+   * `MOMS_REFERENCE_BELOEB`, `beregnMoms` og tabellerne lige under dem regner de
+   * samme tal. De var ikke forkerte — de var fem kopier, der ville blive
+   * stående, når satsen ændrer sig.
+   *
+   * Sætningerne dømmes nu på hele den *renderede* liste, ikke på en løs
+   * `toContain`:mutationen ville være at sætte «1.000 kr × 1,25» tilbage i
+   * én `<li>`, og så ville kun den ene af de tre fejle.
+   */
+  test("de tre intro-regnestykker er regnet af modulet i begge sprog", async () => {
+    const EK = MOMS_REFERENCE_BELOEB[2];
+    const med = beregnMoms(EK, "tillaegMoms", DEFAULT_MOMS_SATS);
+    const fra = beregnMoms(med.prisInklMoms, "fratraekMoms", DEFAULT_MOMS_SATS);
+    const faktor = formatNumber(momsFaktor(DEFAULT_MOMS_SATS), "da");
+    const andel = formatNumber(momsAndel(DEFAULT_MOMS_SATS), "da", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+    const kr = (tal: number) => `${formatNumber(tal, "da", { maximumFractionDigits: 2 })} kr.`;
+
+    const html = renderToStaticMarkup(await MomsPage());
+    // Kun introens liste — den næste liste på siden (baglæns) bruger samme
+    // tegn, så et løst filter ville tage den med.
+    const intro = (html.split("<h3>Sådan beregner du moms</h3>")[1]?.split("</ul>")[0] ?? "").match(
+      /<li>([\s\S]*?)<\/li>/g
+    );
+
+    expect(intro).toEqual([
+      `<li><strong>Læg moms til:</strong> Gang beløbet med ${faktor}. Eksempel: ${kr(EK)} × ${faktor} = ${kr(med.prisInklMoms)} inkl. moms</li>`,
+      `<li><strong>Træk moms fra:</strong> Divider beløbet med ${faktor}. Eksempel: ${kr(med.prisInklMoms)} ÷ ${faktor} = ${kr(fra.prisUdenMoms)} ekskl. moms</li>`,
+      `<li><strong>Find momsandelen:</strong> Gang beløbet inkl. moms med ${andel}. Eksempel: ${kr(med.prisInklMoms)} × ${andel} = ${kr(fra.momsBeloeb)} i moms</li>`,
+    ]);
+  });
+
+  test("svensk introduktion har samme tre regnestykker, i svensk notation", async () => {
+    vi.mocked(getLocale).mockResolvedValue("se");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("se"));
+
+    const EK = MOMS_REFERENCE_BELOEB[2];
+    const med = beregnMoms(EK, "tillaegMoms", DEFAULT_MOMS_SATS);
+    const fra = beregnMoms(med.prisInklMoms, "fratraekMoms", DEFAULT_MOMS_SATS);
+    const faktor = formatNumber(momsFaktor(DEFAULT_MOMS_SATS), "se", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+    const andel = formatNumber(momsAndel(DEFAULT_MOMS_SATS), "se", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+    const kr = (tal: number) => `${formatNumber(tal, "se", { maximumFractionDigits: 2 })} kr`;
+
+    const html = renderToStaticMarkup(await MomsPage());
+    const intro = (
+      html.split("<h3>Så här räknar du ut moms</h3>")[1]?.split("</ul>")[0] ?? ""
+    ).match(/<li>([\s\S]*?)<\/li>/g);
+
+    expect(intro).toEqual([
+      `<li><strong>Lägga på moms:</strong> Multiplicera beloppet med ${faktor}. Exempel: ${kr(EK)} × ${faktor} = ${kr(med.prisInklMoms)} inkl. moms</li>`,
+      `<li><strong>Räkna bort moms:</strong> Dividera beloppet med ${faktor}. Exempel: ${kr(med.prisInklMoms)} ÷ ${faktor} = ${kr(fra.prisUdenMoms)} exkl. moms</li>`,
+      `<li><strong>Hitta momsandelen:</strong> Multiplicera beloppet inkl. moms med ${andel}. Exempel: ${kr(med.prisInklMoms)} × ${andel} = ${kr(fra.momsBeloeb)} i moms</li>`,
+    ]);
+  });
+
+  /**
+   * Samme fund, anden halvdel: «1,25 gang fire er 2,4414» og «0,4096» var også
+   * håndskrevet, selv om de er 1,25⁴ og 0,8⁴. Sætningen siger nu, hvad den
+   * trækker 20 % fire gange *gør* — prisen bliver 409,60 kr. — hvor den gamle
+   * skrev «får du 0,4096 — altså kun 410 kr. oveni», hvilket læst som en
+   * difference, selv om det er hele prisen.
+   */
+  test("«momsen fire gange i træk» regner begge faktorer og den nye pris", async () => {
+    const html = renderToStaticMarkup(await MomsPage());
+    const f4 = momsFaktor(DEFAULT_MOMS_SATS) ** 4;
+    const p4 = (1 - momsAndel(DEFAULT_MOMS_SATS)) ** 4;
+    const kr = (tal: number) => `${formatNumber(tal, "da", { maximumFractionDigits: 2 })} kr.`;
+
+    // Afsnittets *anden* stykke: det første er indgangen til reglen.
+    const afsnit =
+      html
+        .split("<h3>Momsen fire gange i træk</h3>")[1]
+        ?.split("Derfor er der kun én sats")[1]
+        ?.split("</p>")[0] ?? "";
+    expect(afsnit).toContain(`er ${formatNumber(f4, "da", { maximumFractionDigits: 4 })}, så`);
+    expect(afsnit).toContain(kr(MOMS_REFERENCE_BELOEB[2] * f4));
+    expect(afsnit).toContain(`bliver prisen ${formatNumber(p4, "da", { maximumFractionDigits: 4 })} af den oprindelige`);
+    expect(afsnit).toContain(kr(MOMS_REFERENCE_BELOEB[2] * p4));
+    // Negativ lås: den gamle sætning skrev den afrundede sum og kaldte den
+    // en difference oveni.
+    expect(afsnit).not.toContain("oveni");
   });
 
   test("den danske side siger ikke, at forbrugsudstyr er uden moms", async () => {

@@ -13,7 +13,7 @@ import RelateredeArtikler from "@/components/RelateredeArtikler";
 import Sidebar from "@/components/Sidebar";
 import { SelvstaendigAffiliate } from "@/components/AffiliateBox";
 import { formatNumber } from "@/lib/format";
-import { beregnMoms, DEFAULT_MOMS_SATS, fratraekRaekker, MOMS_REFERENCE_BELOEB, momsFaktor } from "@/lib/moms";
+import { beregnMoms, DEFAULT_MOMS_SATS, fratraekRaekker, MOMS_REFERENCE_BELOEB, momsAndel, momsFaktor } from "@/lib/moms";
 import { baklaengesEksempler, baklaengesTabel, krSe } from "@/lib/moms-eksempler";
 import { MOMS_LANDE, momsSatsUdenraekke, udenlandRaeekker } from "@/lib/moms-eu";
 
@@ -72,6 +72,42 @@ export default async function MomsPage() {
   const krSeLang = (tal: number) =>
     `${formatNumber(tal, "se", { maximumFractionDigits: 2 })} kr`;
 
+  // Eksemplerne i brødteksten er de beløb, "hurtig reference" bruger (1.000
+  // kr.), og de er regnet af `beregnMoms` — samme modul som tabellerne og
+  // værktøjet. De var håndskrevet i begge sprog, to gange i hvert sprog plus de
+  // fire rækker i den svenske Excel-tabel, så de var otte kopier af tal, der
+  // ville blive stående, når satsen ændrer sig.
+  const EK = MOMS_REFERENCE_BELOEB[2];
+  const EK_MED = beregnMoms(EK, "tillaegMoms", DEFAULT_MOMS_SATS);
+  const EK_BRUTTO = EK_MED.prisInklMoms;
+  const EK_FRA = beregnMoms(EK_BRUTTO, "fratraekMoms", DEFAULT_MOMS_SATS);
+  // Momsandelen i en pris *med* moms er 0,20 — ikke satsen. Den er skrevet med
+  // to decimaler, fordi det er den notationsform brødteksten bruger.
+  const ANDEL_FAKTOR = formatNumber(momsAndel(DEFAULT_MOMS_SATS), "da", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+  const ANDEL_FAKTOR_SE = formatNumber(momsAndel(DEFAULT_MOMS_SATS), "se", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+  const EXCEL_FAKTOR_SE = formatNumber(momsFaktor(DEFAULT_MOMS_SATS), "se", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+  const ANDEL_PCT_DA = `${procentDa(momsAndel(DEFAULT_MOMS_SATS) * 100)} %`;
+  const ANDEL_PCT_SE = `${procentSe(momsAndel(DEFAULT_MOMS_SATS) * 100)} %`;
+  // Svensk momsandel for de andre satserna, med to decimaler sa 12 %'s
+  // 10,71 % ikke bliver til 10,7 %.
+  const andelSe = (momssats: number) =>
+    formatNumber(momsAndel(momssats) * 100, "se", { maximumFractionDigits: 2 });
+  // «Momsen fire gange i træk»: 1,25⁴ mod 0,8⁴. Begge faktorer læses fra
+  // modulet, så de to tal i afsnittet ikke kan modsige hinanden.
+  const KVART_GANGE = 4;
+  const KVART_25 = momsFaktor(DEFAULT_MOMS_SATS) ** KVART_GANGE;
+  const KVART_20 = (1 - momsAndel(DEFAULT_MOMS_SATS)) ** KVART_GANGE;
+  const faktorDa = (f: number) => formatNumber(f, "da", { maximumFractionDigits: 4 });
+
   return (
     <div className="flex flex-col lg:flex-row gap-8">
       <div className="flex-1 min-w-0">
@@ -115,13 +151,13 @@ export default async function MomsPage() {
           Der er tre typiske beregninger, når du arbejder med moms:
         </p>
         <ul>
-          <li><strong>Læg moms til:</strong> Gang beløbet med 1,25. Eksempel: 1.000 kr &times; 1,25 = 1.250 kr inkl. moms</li>
-          <li><strong>Træk moms fra:</strong> Divider beløbet med 1,25. Eksempel: 1.250 kr &divide; 1,25 = 1.000 kr ekskl. moms</li>
-          <li><strong>Find momsandelen:</strong> Gang beløbet inkl. moms med 0,20. Eksempel: 1.250 kr &times; 0,20 = 250 kr i moms</li>
+          <li><strong>Læg moms til:</strong> Gang beløbet med {EXCEL_FAKTOR}. Eksempel: {kr(EK)} &times; {EXCEL_FAKTOR} = {kr(EK_MED.prisInklMoms)} inkl. moms</li>
+          <li><strong>Træk moms fra:</strong> Divider beløbet med {EXCEL_FAKTOR}. Eksempel: {kr(EK_BRUTTO)} &divide; {EXCEL_FAKTOR} = {kr(EK_FRA.prisUdenMoms)} ekskl. moms</li>
+          <li><strong>Find momsandelen:</strong> Gang beløbet inkl. moms med {ANDEL_FAKTOR}. Eksempel: {kr(EK_BRUTTO)} &times; {ANDEL_FAKTOR} = {kr(EK_FRA.momsBeloeb)} i moms</li>
         </ul>
         <p>
-          Bemærk at momsandelen i en pris <em>inklusiv</em> moms er 20% (ikke 25%), fordi momsen
-          beregnes af prisen uden moms: 25 / 125 = 0,20.
+          Bemærk at momsandelen i en pris <em>inklusiv</em> moms er {ANDEL_PCT_DA} (ikke 25%), fordi momsen
+          beregnes af prisen uden moms: 25 / 125 = {ANDEL_FAKTOR}.
         </p>
 
         <h3>Sådan beregner du moms baglæns</h3>
@@ -140,8 +176,8 @@ export default async function MomsPage() {
           ))}
         </ul>
         <p>
-          <strong>Findes momsen direkte i prisen:</strong> tag 20 % af beløbet. 1.250 kr. &times; 0,20
-          = <strong>250 kr. moms</strong>. Det er den kortere vej, men den kan give et rundt tal,
+          <strong>Findes momsen direkte i prisen:</strong> tag {ANDEL_PCT_DA} af beløbet. {kr(EK_BRUTTO)} &times; {ANDEL_FAKTOR}
+          = <strong>{kr(EK_FRA.momsBeloeb)} moms</strong>. Det er den kortere vej, men den kan give et rundt tal,
           fordi 499 &minus; 499 / 1,25 = {kr(eksempler[1].momsBeloeb)} — altså 100 kr. hvis du
           tager 20 % af de 499 kr.
         </p>
@@ -166,8 +202,8 @@ export default async function MomsPage() {
           </tbody>
         </table>
         <p>
-          <strong>Og når du skal lægge momsen oveni igen:</strong> 1.000 kr. ekskl. &times; 1,25
-          = 1.250 kr. inkl. De to regler er hinandens modsætning, så tallet kan altid findes
+          <strong>Og når du skal lægge momsen oveni igen:</strong> {kr(EK)} ekskl. &times; {EXCEL_FAKTOR}
+          = {kr(EK_MED.prisInklMoms)} inkl. De to regler er hinandens modsætning, så tallet kan altid findes
           tilbage.
         </p>
 
@@ -197,9 +233,10 @@ export default async function MomsPage() {
           </tbody>
         </table>
         <p>
-          <strong>Derfor er der kun én sats at regne med:</strong> 1,25 gang fire er 2,4414, så
-          1.000 kr. bliver 2.441 kr. Men hvis du i stedet trækker 20 % fire gange, får du
-          0,4096 — altså kun 410 kr. oveni. Det er den forskel, der gør at en pris kan se
+          <strong>Derfor er der kun én sats at regne med:</strong> {EXCEL_FAKTOR} gang fire er {faktorDa(KVART_25)}, så
+          {kr(kvart25[1].pris)} bliver {kr(kvart25[1].pris25)}. Men hvis du i stedet trækker {ANDEL_PCT_DA} fire gange,
+          bliver prisen {faktorDa(KVART_20)} af den oprindelige — altså {kr(kvart25[1].pris * KVART_20)} i alt.
+          Det er den forskel, der gør at en pris kan se
           ud til at være 10 % billigere end en konkurrent, mens den reelt er dobbelt så
           dyr. <strong>Beregn kun med 25 %, aldrig med 20 % gentaget.</strong>
         </p>
@@ -402,14 +439,14 @@ export default async function MomsPage() {
           Det finns tre typiska beräkningar när du arbetar med moms (exemplen utgår från 25%):
         </p>
         <ul>
-          <li><strong>Lägga på moms:</strong> Multiplicera beloppet med 1,25. Exempel: 1 000 kr &times; 1,25 = 1 250 kr inkl. moms</li>
-          <li><strong>Räkna bort moms:</strong> Dividera beloppet med 1,25. Exempel: 1 250 kr &divide; 1,25 = 1 000 kr exkl. moms</li>
-          <li><strong>Hitta momsandelen:</strong> Multiplicera beloppet inkl. moms med 0,20. Exempel: 1 250 kr &times; 0,20 = 250 kr i moms</li>
+          <li><strong>Lägga på moms:</strong> Multiplicera beloppet med {EXCEL_FAKTOR_SE}. Exempel: {krSe(EK)} &times; {EXCEL_FAKTOR_SE} = {krSe(EK_MED.prisInklMoms)} inkl. moms</li>
+          <li><strong>Räkna bort moms:</strong> Dividera beloppet med {EXCEL_FAKTOR_SE}. Exempel: {krSe(EK_BRUTTO)} &divide; {EXCEL_FAKTOR_SE} = {krSe(EK_FRA.prisUdenMoms)} exkl. moms</li>
+          <li><strong>Hitta momsandelen:</strong> Multiplicera beloppet inkl. moms med {ANDEL_FAKTOR_SE}. Exempel: {krSe(EK_BRUTTO)} &times; {ANDEL_FAKTOR_SE} = {krSe(EK_FRA.momsBeloeb)} i moms</li>
         </ul>
         <p>
-          Observera att momsandelen i ett pris <em>inklusive</em> 25% moms är 20% (inte 25%), eftersom
-          momsen beräknas på priset utan moms: 25 / 125 = 0,20. För 12% moms är andelen ca 10,71% och för
-          6% moms ca 5,66%.
+          Observera att momsandelen i ett pris <em>inklusive</em> 25% moms är {ANDEL_PCT_SE} (inte 25%), eftersom
+          momsen beräknas på priset utan moms: 25 / 125 = {ANDEL_FAKTOR_SE}. För 12% moms är andelen ca {andelSe(12)}% och för
+          6% moms ca {andelSe(6)}%.
         </p>
 
         <h3>Så räknar du ut moms baklänges</h3>
@@ -428,8 +465,8 @@ export default async function MomsPage() {
           ))}
         </ul>
         <p>
-          <strong>Hittar du momsen direkt i priset:</strong> ta 20 % av beloppet. 1 250 kr &times; 0,20
-          = <strong>250 kr i moms</strong>. Det är den kortare vägen, men den kan ge ett runt tal,
+          <strong>Hittar du momsen direkt i priset:</strong> ta {ANDEL_PCT_SE} av beloppet. {krSe(EK_BRUTTO)} &times; {ANDEL_FAKTOR_SE}
+          = <strong>{krSe(EK_FRA.momsBeloeb)} i moms</strong>. Det är den kortare vägen, men den kan ge ett runt tal,
           eftersom 499 &minus; 499 / 1,25 = {krSe(baklaengesEksempler()[1].momsBeloeb)} — alltså 100 kr
           om du tar 20 % av de 499 kr.
         </p>
@@ -454,8 +491,8 @@ export default async function MomsPage() {
           </tbody>
         </table>
         <p>
-          <strong>Och när du ska lägga på momsen igen:</strong> 1 000 kr exkl. &times; 1,25
-          = 1 250 kr inkl. De två reglerna är varandras motsats, så talet kan alltid hittas tillbaka.
+          <strong>Och när du ska lägga på momsen igen:</strong> {krSe(EK)} exkl. &times; {EXCEL_FAKTOR_SE}
+          = {krSe(EK_MED.prisInklMoms)} inkl. De två reglerna är varandras motsats, så talet kan alltid hittas tillbaka.
         </p>
 
         <h3>Moms i Excel</h3>
@@ -473,24 +510,24 @@ export default async function MomsPage() {
           </thead>
           <tbody>
             <tr className="border-b">
-              <td className="py-2 pr-4"><code>=A1*1,25</code></td>
+              <td className="py-2 pr-4"><code>=A1*{EXCEL_FAKTOR_SE}</code></td>
               <td className="py-2 pr-4">lägga till moms på ett belopp utan moms</td>
-              <td className="py-2">1 000 kr exkl. &rarr; {krSe(beregnMoms(1000, "tillaegMoms", DEFAULT_MOMS_SATS).prisInklMoms)} inkl.</td>
+              <td className="py-2">{krSe(EK)} exkl. &rarr; {krSe(EK_MED.prisInklMoms)} inkl.</td>
             </tr>
             <tr className="border-b">
-              <td className="py-2 pr-4"><code>=A1/{EXCEL_FAKTOR}</code></td>
+              <td className="py-2 pr-4"><code>=A1/{EXCEL_FAKTOR_SE}</code></td>
               <td className="py-2 pr-4">belopp med moms, räknat baklänges</td>
-              <td className="py-2">1 250 kr inkl. &rarr; {krSe(beregnMoms(1250, "fratraekMoms", DEFAULT_MOMS_SATS).prisUdenMoms)} exkl.</td>
+              <td className="py-2">{krSe(EK_BRUTTO)} inkl. &rarr; {krSe(EK_FRA.prisUdenMoms)} exkl.</td>
             </tr>
             <tr className="border-b">
-              <td className="py-2 pr-4"><code>=A1*0,20</code></td>
+              <td className="py-2 pr-4"><code>=A1*{ANDEL_FAKTOR_SE}</code></td>
               <td className="py-2 pr-4">momsandelen i ett belopp inkl. moms</td>
-              <td className="py-2">1 250 kr inkl. &rarr; {krSe(beregnMoms(1250, "fratraekMoms", DEFAULT_MOMS_SATS).momsBeloeb)} i moms</td>
+              <td className="py-2">{krSe(EK_BRUTTO)} inkl. &rarr; {krSe(EK_FRA.momsBeloeb)} i moms</td>
             </tr>
             <tr className="border-b">
-              <td className="py-2 pr-4"><code>=A1-A1/{EXCEL_FAKTOR}</code></td>
+              <td className="py-2 pr-4"><code>=A1-A1/{EXCEL_FAKTOR_SE}</code></td>
               <td className="py-2 pr-4">momsen i ett belopp inkl. moms</td>
-              <td className="py-2">1 250 kr inkl. &rarr; {krSe(beregnMoms(1250, "fratraekMoms", DEFAULT_MOMS_SATS).momsBeloeb)} i moms</td>
+              <td className="py-2">{krSe(EK_BRUTTO)} inkl. &rarr; {krSe(EK_FRA.momsBeloeb)} i moms</td>
             </tr>
           </tbody>
         </table>

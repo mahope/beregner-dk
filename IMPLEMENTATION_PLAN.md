@@ -1,30 +1,37 @@
-STATUS: 2/10 06:30. CI grøn (seneste master-kørsel 2/10 04:08Z). Sentry:
+STATUS: 2/10 07:50. CI grøn (seneste master-kørsel 2/10 05:19Z). Sentry:
   MINBEREGNER-1 er Next-router-støj, filtreret siden 3e67ed3 og kodetestet siden
-  5f137d4 — ingen ny hændelsesgruppe. PR-TJEK: 2026-10-02 — PR 27 landet og
-  lukket. BRANCH-TJEK: 2/10 — ingen forældede branches; den nye
-  `fix/sentry-7767249621` lukkedes med PR'en. CEO-kø punkt 0 er lukket (RETTET
-  04ca30a), de otte CEO-punkter er efterprøvet i koden 2/10 04:40.
+  5f137d4; MINBEREGNER-2 er rettet i 4d48370. PR-TJEK: 2026-10-02 — ingen åbne
+  PR'er. BRANCH-TJEK: 2/10 — ingen forældede branches. CEO-kø punkt 0 er lukket
+  (RETTET 04ca30a) og efterprøvet i koden 2/10 07:35 (Valborg `month: 4, day:
+  30`, svensk påskafton `offsetDays: -1`, `toUtcMidnight` læser
+  `DAGE_TIL_TIMEZONE = "Europe/Copenhagen"`, `maneder: 12`, 1. advent 27/11-3/12,
+  ingen påskeaften-FAQ, `/husleje` skriver nettoprisindeks og at nævnet ikke
+  fastsætter en sats pr. område).
 **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` ·
-   `npm run build`. Målt 2/10 07:20: 0 · 0 · **3641 grønne i 225 filer** · 0
-   (`/klokken-i` og `/klockan-i` stadig `ƒ`, `force-dynamic` urørt).
-   **Denne iteration: porten ser nu også strenge.** `jsxBelob` så kun
-   `ts.isJsxText`, så hele den måde tekst skrives på — en `Record<Locale, …>`
-   med «Du låner 250.000 kr.» — lå uden for porten. `strengBelob` måler **111
-   fund i 38 filer** på de 190 `.tsx`; listen er loftpunktssum, så det første
-   nye hårdkodede beløb i en streng gør porten rød (mutation målt: en indsat
-   streng i `AktieskatBeregner.tsx` gør den rød). Det første fund er rettet samme
-   sted, så listen er 110. `ceo/porten-ser-strenge`. Målinger fra de fem
-   forrige iterationer ligger i `docs/plan-arkiv.md`.
+   `npm run build`. Målt 2/10 07:47: 0 · 0 · **3644 grønne i 225 filer** · 0
+   (`/moms` er stadig `ƒ` i byggetabel). **Denne iteration: `/moms`' 15
+   eksempelbeløb læses fra modulet.** Portens fund i `src/app/moms/page.tsx` faldt
+   **18 → 3**; listen er 385 → **370**, og `FORVENTEDE_FUND` `gang` 12→8 /
+   `del` 8→6 (sum 33→**27**) fordi de seks intro-regnestykker nu er *regne* frem
+   for håndskrevet — dømt af tre nye tests i `moms/page.test.tsx`, målt rød mod
+   den gamle kode. De **3** resterende er lovgrænser (se ❓ nedenfor).
+   `ceo/moms-eksempler-fra-modul`. Målinger fra de forrige iterationer ligger i
+   `docs/plan-arkiv.md`.
 
 ## Åbne opgaver — F5b: beløb i JSX-tekst → modulkonstanter
 
 Listen `src/app/regnestykker.test.ts` tæller forekomster pr. fil og må kun
 blive kortere. Rækkefølgen er trafikrækkefølge. ✅ betyder lukket.
 
-1. **`/moms`** — 21.651 visninger (0,2 % CTR, pos. 7,1), 18 fund. **Kræver en
-   kilde** (❓ nedenfor): «registrering over 50.000 kr» og «told ved import over
-   1.150 kr» (sidstnævnte er en EUR-grænse og kan ikke stå som fast tal). Må
-   ikke gættes (punkt 11).
+1. **`/moms`** — ✅ 2/10 07:50 (`ceo/moms-eksempler-fra-modul`). 18 fund → **3**,
+   listen 385 → **370**. De 15 var eksemplerne brødteksten selv regner
+   («1.000 kr. × 1,25 = 1.250 kr. inkl. moms» to gange i hvert sprog, fire
+   rækker i den svenske Excel-tabel, «2,4414»/«0,4096» og de svenske
+   «10,71 %»/«5,66 %»); de læses nu fra `beregnMoms`, `momsFaktor` og
+   `momsAndel` på `MOMS_REFERENCE_BELOEB`s tredje beløb. **De 3 resterende er
+   lovgrænser** — dansk registrering over 50.000 kr, svensk over 120.000 kr og
+   «told ved import over 1.150 kr» (en EUR-grænse, der ikke må stå som fast
+   tal) — og de kræver en kilde, se ❓ nedenfor.
 2. **`/boligsalg`** — 9 fund, hvor 8 er redaktionelle prisintervaller (mægler,
    tinglysning, avance, byggeskade …) uden kilde i repoet, og den niende er
    «opdateret august 2025». Formelbeløb kan læses fra `src/lib/boligsalg.ts`
@@ -269,6 +276,7 @@ den fulde kommando står i `docs/plan-arkiv.md` under sit slug.
 
 | Slug | Prøv på indhold |
 |---|---|
+| `moms-eksempler-fra-modul` (**ny**) | `minberegner.dk/moms`: introens tre listeregler skal være `Læg moms til: … 1.000 kr. × 1,25 = 1.250 kr. inkl. moms`, `Træk moms fra: … 1.250 kr. ÷ 1,25 = 1.000 kr. ekskl. moms` og `Find momsandelen: … 1.250 kr. × 0,20 = 250 kr. i moms` — med **punktum efter kr.** i alle beløb; «er 2,4414, så 1.000 kr. bliver 2.441,41 kr.» og «bliver prisen 0,4096 af den oprindelige — altså 409,60 kr. i alt»; **intet** «kun 410 kr. oveni». `beraknare.se/moms`: de samme tre linjer med **mellemrum** i separatoren (`1 000 kr × 1,25 = 1 250 kr inkl. moms`), «2,4414»/«0,4096», «10,71 %»/«5,66 %», og Excel-rækkerne `1 000 kr exkl. → 1 250 kr inkl.`, `1 250 kr inkl. → 1 000 kr exkl.`, to gange `1 250 kr inkl. → 250 kr i moms`. Uændret: de tre lovgrænser (50.000 kr, 120 000 kr, 1.150 kr) og alle tabeller |
 | `porten-ser-strenge` (**ny**) | **Ingen produktionsændring i brugerfladen ud over én tekst:** `minberegner.dk/boligsalg` skal vise «Tinglysningssatser 0,6% + **1.850 kr.** (skøde) og 1,45% + **1.825 kr.** (pantebrev)» i beregnerens disclaimer, og beregnerens eget tal for tinglysning skal være uændret (samme formel, kun konstanterne er navngivne). Tallet skrives nu med `Intl` (`da-DK`), så «kr.» med punktum er forventet |
 | `topskat-graense-fra-sats` | `minberegner.dk/topskat`: rækkerne skal være `Mellemskat (7,5%) … over 641.200 kr.`, `Topskat (7,5%) … over 777.900 kr.`, `Top-topskat (5%) … over 2.592.700 kr.`, og «ca. **697.000 kr./år** (ca. **58.100 kr./md**)» + «ca. **845.500 kr./år** (ca. **70.500 kr./md**)»; `grep -c '641.200 kr\.'` skal være **2** (JSX-teksten + `<title>`/metadata) og antallet af `697.000` skal være uændret |
 | `error-side-locale` (**ny**) | **Ingen HTML-prøve findes** — ændringerne ligger kun i rodens fejlside, som ikke kan udløses uden en kastende fejl, så den kan ikke verificeres på indhold. Verificér i stedet at `minberegner.dk/api/health` svarer `status: ok`, og at der i 14 dage **ikke** dukker en Sentry-hændelse med `useLocale must be used within a LocaleProvider` op |
@@ -317,6 +325,18 @@ den fulde kommando står i `docs/plan-arkiv.md` under sit slug.
   kopieret herind) låser det**, og så kan både beregneren og artiklen få det
   rigtige tal. Samme spørgsmål for Sveriges fordonsskatt på elbiler: siden
   sagde 360 kr, beregneren sagde 0, og begge tal er uverificerede.
+- ❓ **Kilder til de tre momslovgrænser på `/moms` (ny, 2/10).** De er de tre
+  eneste fund porten stadig ser i `src/app/moms/page.tsx`: dansk
+  momsregistrering «over 50.000 kr», svensk «högst 120 000 kr per år» og
+  «eventuel told ved import over 1.150 kr». Den første er ML § 48 stk. 1's
+  registreringstærskel, den anden er Sveriges momsfri omsætningsgrænse, og den
+  tredje er **en EUR-grænse** (150 EUR) — den må ikke stå som et fast dansk
+  beløb, fordi den så bliver forkert, hver gang kursen flytter sig.
+  `info.skat.dk` svarer 200 (D.A.14 Registrering findes i oversigten), men
+  afsnittene ligger bag lange id'er jeg ikke kan gætte; `eur-lex.europa.eu`
+  svarede tomt, og `skat.dk` er 500. **Ét skærmbillede af ML § 48 og ét af den
+  svenske grænse låser de to første; EUR-Lex' bilag til forordning 1186/2009
+  låser den tredje.** Indtil da står de, som de har stået.
 - ❓ **Ingen læsbar kilde til fitnessfradraget og sommerhusudlejningsfradraget
   (opgave fra 1/10 21:25, ny blokering).** De to er de sidste af «fradrag 2026»-klyngen,
   og 1/10 21:25 fik hverken `dagpenge.dk` eller `star.dk` til at svare
