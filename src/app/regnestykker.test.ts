@@ -560,8 +560,12 @@ const FORVENTEDE_FUND: Record<string, number> = {
   // Samme grund tabte `gang` sit ottende fund 2/10 senere på dagen:
   // børnepenge-indlæggets «21.480 kr × 2 = 42.960 kr» ligger nu i to
   // interpolationer omkring portens mønster, så den regel ikke kan læse den
-  // længere. Summen gik 27 → 26.
-  gang: 7,
+  // længere. Summen gik 27 → 26. Samme grund tabte `gang` sit syvende fund
+  // 3/10: /pensions «40.000 kr × 0,15 = 6.000 kr» lå i FAQ'en som håndskrevet
+  // tekst og ligger nu i to interpolationer omkring portens mønster, fordi
+  // beløbet, satsen og produktet kommer fra `pension-eksempler`. Sætningen er
+  // rigtig ved konstruktion i stedet for dømt af porten. Summen gik 7 → 6.
+  gang: 6,
   del: 6,
   procentAf: 13,
   stigning: 0,
@@ -607,8 +611,10 @@ describe("regnestykker i brødteksten", () => {
     // så kun de sætninger, der skrev `kr` efter første faktor. Den steg til 33,
     // og 2/10 faldt den til 27 igen, da `/moms`' seks eksempelregnestykker blev
     // læst fra modulet i stedet for at være håndskrevet, og til 26 da
-    // børnepenge-indlæggets «21.480 kr × 2 = 42.960 kr» blev interpolationer.
-    expect(Object.values(målt).reduce((a, b) => a + b, 0)).toBe(26);
+    // børnepenge-indlæggets «21.480 kr × 2 = 42.960 kr» blev interpolationer,
+    // og 3/10 faldt den til 25 da /pensions «40.000 kr × 0,15 = 6.000 kr» blev
+    // interpolationer omkring `pension-eksempler`s beløb, sats og produktsum.
+    expect(Object.values(målt).reduce((a, b) => a + b, 0)).toBe(25);
   });
 
   test("alle regnestykker på sitet er regnet rigtigt", () => {

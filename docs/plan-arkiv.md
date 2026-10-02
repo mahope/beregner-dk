@@ -25745,3 +25745,60 @@ måtte vente til næste.
 `/klokken-i` (22:07), `/vaegttab` (22:33) og `/kalorier` (22:56) er efter
 vinduet og måles 3/10 07:30. `/klokken-i` er målt til **ikke** at svare endnu
 (0 bytes), altså som forventet.
+
+## 3/10 00:12 — `ceo/pension-belob-fra-modul`: /pension's tal læses fra folkepension.ts
+
+**Fund.** `src/lib/page-data.ts`'s `pension`-blok (dansk-only, `daOnly: true` i
+`calculator-list.ts`) skrev **12** talgrupper i metadata og i **alle elleve**
+FAQ-svar. `FAQSchema items={pageData.faqItems}` læser præcis den liste, så
+tallene var JSON-LD, ikke kun brødtekst — samme fejlklasse som `/vaegttab` og
+`/kalorier`, men uden svensk/norsk-skel, fordi siden kun findes på dansk.
+
+**Én reel fejl, ikke kun drift.** Svaret på «Hvornår kan jeg gå på folkepension?»
+læste: «Folkepensionsalderen afhænger af dit fødselsår: 65 år hvis du er født i
+1953 eller før, 67 år hvis du er født i 1956-1962, 68 år for født 1963-1966, 69
+år for født 1967-1970 og 70 år for 1971 eller senere.» `FOLKEPENSION_2026.alderSkala`
+siger 65 år fra **1. januar 1954**, 65 ½ fra 1. juli 1954, 66 fra 1. januar 1955,
+66 ½ fra 1. juli 1955, 67 fra 1956 — så påstanden er forkert for alle født i 1954
+og 1955 (som fik 65 ½, 66 og 66 ½), og den nævner slet ikke de to halve trin.
+`folkepensionsalder()` klemmer født før 1/1 1954 til 65, så «født i 1953 eller
+før» beskriver en anden regel end den, værktøjet bruger. Samme fødselsår står i
+tabellen på siden, som **er** rigtig — altså modsagelsen lå i FAQ'en alene.
+
+**Rettelse.** Ny `src/lib/pension-eksempler.ts`:
+- `pensionOverskrifter()` — de fire metadata-felter + `ogTitle`/`ogDescription`
+  af `FOLKEPENSION_2026.iAlt`, så titlen ikke kan love sidste års folkepension.
+- `folkepensionsalderFaqSprog()` — `alderSkala` gjort til aldersbånd
+  (to trin med samme alder merges), hvert bånd som «for født 1956-1962»,
+  «for den 2. halvdel af 1954», «for alle født 1954 eller tidligere»,
+  «for født 1971 eller senere». Fødselsdatoerne er ISO, `dagenFoer()` regner
+  UTC-dage, så skalaen kan ikke afhænge af maskinens tidszone.
+- `pensionFaqItems()` — alle elleve svar, hvert beløb `formatBelob` over
+  `FOLKEPENSION_2026` / `SATSER_2026` / `PENSION_AMP_EKSEMPEL` /
+  `PENSION_ATP_MD` / `PENSION_SPAREPROCENT` / `PENSION_LEVENIVEAU_PROCENT`.
+  De to «hvornår forsvinder tillægget»-beløb (127.449 / 212.759) er fortsat
+  **beregnede** som `nedsaetningOver + tillaeg / pct`, ikke slået op.
+  ATP-intervallet og tommelfingerreglerne er erklærede konstanter med begrundelse
+  i docblocken, for der er ingen officiel kilde på dem.
+
+**Målt.** `git show HEAD:src/lib/page-data.ts` som `page-data-old.ts`, begge
+udtræk dumpet til JSON og diffet: **kun de to linjer af aldersvaret** afviger.
+Excel-svarets `×0,309` (Excel-tal) og `32 %` (uden decimal) blev begge fundet af
+den eksisterende prøve i `pension/page.test.tsx` undervejs — de lå i
+påstanden om rækkefølgen, ikke i formateringen.
+
+**Port.** Ny `src/lib/pension-eksempler.test.ts` (6 prøver). Den vigtigste er
+**adfærdsbaseret**: den trækker hvert beløb med tusindtalsseparator ud af al
+metadata og alle svar og kræver, at det står i `TILLADTE_BELOB` — sætningen fra
+modulerne. Et håndskrevet beløb er rødt med en tekst, der siger hvilket.
+Mutation målt: «8.500» i stedet for `enligTillaeg` → rød; den gamle
+1953-påstand → rød. **2 røde af 6**, filen genskabt byte-for-byte.
+
+**Portens egen liste.** `gang` misted ét fund, 7 → 6 (summen 26 → 25): Excel-svarets
+«40.000 kr × 0,15 = 6.000 kr» ligger nu i interpolationer omkring modulet, så
+regesten kan ikke læse den. Samme dokumenterede grund som `/moms` og
+børnepenge-indlæggets «21.480 kr × 2 = 42.960 kr».
+
+**Gate.** lint 0 · typecheck 0 · **3864 tests i 239 filer grønne** · build exit 0.
+Bredder: ingen UI-ændring, så ingen browserskærmbillede — de eneste ændrede
+strenge er i metadata og FAQ, som ikke er layout.

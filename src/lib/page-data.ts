@@ -42,6 +42,7 @@ import { ugeDatoerFaqSvar } from "./ugenummer";
 import { distanceEksempelFaqSvar, triatlonCykelAndelFaqSvar, triatlonTotalFaqSvar } from "./pace";
 import { kalorierFaqItems, kalorierOverskrifter } from "./kalorier-eksempler";
 import { vaegttabFaqItems, vaegttabOverskrifter } from "./vaegttab-eksempler";
+import { pensionFaqItems, pensionOverskrifter } from "./pension-eksempler";
 import { annuitetsEksempel, hovedEksempel } from "./rente-eksempler";
 import { alderSideTekst, erstatAlderTokens } from "./alder-side-tekst";
 import { iDagPaSiden } from "./lokal-dato";
@@ -206,6 +207,13 @@ const pct = (value: number) => value.toFixed(1).replace(".", ",");
 const vaegttabDa = vaegttabOverskrifter("da");
 const vaegttabNo = vaegttabOverskrifter("no");
 const vaegttabSe = vaegttabOverskrifter("se");
+
+/**
+ * /pension er dansk-only, så metadata og de elleve FAQ-svar læser samme
+ * konstanter som `folkepension.ts` og `satser-2026.ts`. Svarene er dem, `FAQSchema`
+ * giver Google, så et tal der ikke kan glide fra beregneren.
+ */
+const pensionDa = pensionOverskrifter();
 
 /**
  * De to interval-svar i pinse-klyngen, regnet i `pinse-intervaller` i stedet
@@ -1796,32 +1804,20 @@ faqItems: kalorierFaqItems("da"),
     },
     "pension": {
       slug: "pension",
-      title: "Pensionsberegner 2026: folkepension 16.273 kr/md | MinBeregner.dk",
-      description: "Beregn din pension 2026. Folkepensionen er 16.273 kr/md for enlige og 12.011 kr/md for gifte før skat. Se hvad arbejdsmarkedspension og ATP ændrer, og hvor meget du skal opspare.",
-      metaTitle: "Pensionsberegner 2026: folkepension 16.273 kr/md",
-      metaDescription: "Beregn din pension 2026. Folkepensionen er 16.273 kr/md for enlige og 12.011 kr/md for gifte før skat. Se hvad du skal opspare ved siden af.",
+      title: `${pensionDa.metaTitle} | MinBeregner.dk`,
+      description: pensionDa.description,
+      metaTitle: pensionDa.metaTitle,
+      metaDescription: pensionDa.metaDescription,
       keywords: ["pension"],
-      ogTitle: "Pensionsberegner 2026: folkepension 16.273 kr/md",
-      ogDescription: "Beregn din pension 2026. Folkepensionen er 16.273 kr/md for enlige og 12.011 kr/md for gifte før skat.",
+      ogTitle: pensionDa.ogTitle,
+      ogDescription: pensionDa.ogDescription,
       category: "Økonomi",
       breadcrumbCategory: "Økonomi",
       breadcrumbCategoryHref: "/kategori/oekonomi",
       schemaName: "Pensionsberegner - Beregn din pension",
       schemaDescription: "Gratis pensionsberegner. Beregn folkepensionen for 2026 og se hvor meget din opsparing giver pr. måned, når du går på pension.",
       schemaCategory: "FinanceApplication",
-      faqItems: [
-      { question: "Hvad er folkepensionen i 2026?", answer: "I 2026 er grundbeløbet 7.544 kr/md for alle. Dertil kommer pensionstillæg på 8.729 kr/md for enlige eller 4.467 kr/md for gifte/samlevende, altså 16.273 kr/md hhv. 12.011 kr/md i alt før skat. Grundbeløbet påvirkes ikke af andre indkomster, men pensionstillægget sættes ned af indkomster ud over arbejdsindkomst." },
-      { question: "Hvornår kan jeg gå på folkepension?", answer: "Folkepensionsalderen afhænger af dit fødselsår: 65 år hvis du er født i 1953 eller før, 67 år hvis du er født 1956-1962, 68 år for født 1963-1966, 69 år for født 1967-1970 og 70 år for født 1971 eller senere. Du skal selv søge, og du kan søge 6 måneder før du har ret til folkepension." },
-      { question: "Hvor meget skal jeg spare op til pension?", answer: "En tommelfingerregel er at spare 12-17% af din bruttoløn til pension. De fleste har brug for 60-80% af deres arbejdsindkomst som pensionist for at bevare deres levestandard." },
-      { question: "Hvad er forskellen på ratepension og aldersopsparing?", answer: "Ratepension giver fradrag ved indbetaling (op til 68.700 kr/år i 2026) men beskattes ved udbetaling. Aldersopsparing giver ikke fradrag, men udbetales skattefrit. Max indbetaling til aldersopsparing er 9.900 kr/år i 2026." },
-      { question: "Hvad er ATP pension?", answer: "ATP er en obligatorisk pension for alle lønmodtagere i Danmark. Den livslange udbetaling ligger typisk på 2.000-3.000 kr/md afhængig af dine indbetalinger gennem arbejdslivet." },
-      { question: "Kan jeg se alle mine pensioner ét sted?", answer: "Ja, på PensionsInfo.dk kan du logge ind med MitID og se et samlet overblik over alle dine pensionsordninger, herunder folkepension, ATP, arbejdsmarkedspension og private opsparinger." },
-      { question: "Beskattes pension ved udbetaling?", answer: "Det afhænger af pensionstypen. Ratepension og livrente beskattes som personlig indkomst. Aldersopsparing udbetales skattefrit. Folkepension beskattes som personlig indkomst." },
-      { question: "Hvad er en livrente?", answer: "En livrente er en pensionsordning der udbetales livslangt. Den beskytter mod at du 'løber tør' for penge. Til gengæld kan du ikke arve den resterende opsparing, som du kan med ratepension." },
-      { question: "Hvordan beregner jeg pension i Excel?", answer: "Folkepensionen er grundbeløbet 7.544 kr plus pensionstillægget, altså 7.544+8.729 = 16.273 kr/md for enlige. Arbejdsmarkedspensionen er løn × sats, fx 40.000 kr × 0,15 = 6.000 kr. Nedsættelsen af pensionstillægget kræver to funktioner: tillæg minus MIN(tillæg;MAKS(0;(indkomst-99.200)×0,309)). Excel bruger semiklon mellem argumenterne på dansk og svensk Excel. Vores egen beregner bruger præcis samme regel." },
-      { question: "Hvor meget er pensionstillægget for enlige?", answer: "Pensionstillægget for enlige er 8.729 kr/md i 2026, mod 4.467 kr for gifte og samlevende, så en enlig får 4.262 kr mere i tillæg. Grundbeløbet på 7.544 kr er det samme for alle. Hvis du har anden indkomst ud over arbejdsindkomst, bliver tillægget nedsat med 30,9 % af det beløb, der overstiger 99.200 kr — og over 438.380 kr er tillægget væk, så du får kun grundbeløbet." },
-      { question: "Hvornår forsvinder pensionstillægget helt?", answer: "Pensionstillægget for enlige forsvinder ved 99.200 kr + 8.729 kr delt med 0,309 = 127.449 kr i årlig indkomst ud over arbejdsindkomst. Det er et lavere beløb end bortfaldsgrænsen på 438.380 kr, fordi nedsættelsen med 30,9 % når hele tillægget, inden grænsen nås. Er du gift eller samlevende uden en pensionist, er grænsen 198.800 kr og satsen 32 %, så tillægget forsvinder allerede ved 212.759 kr." },
-      ],
+      faqItems: pensionFaqItems(),
     },
     "efterloen": {
       slug: "efterloen",

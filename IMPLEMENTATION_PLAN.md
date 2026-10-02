@@ -1,28 +1,20 @@
-STATUS: 3/10 23:20. CI grøn ved start (`37063823003`). PR-TJEK 2/10 19:47: ingen
-    åbne PR'er (næste tjek 4/10). Sentry: ingen uløste fejl 14 dage — et rigtigt
-    signal, SDK'en er sat op med fallback-DSN, kun i produktion, intet replay.
+STATUS: 3/10 00:10. CI grøn ved start (`37063823003`); svensk-tekstfejl-kørslen
+    var stadig `in_progress` ved start (ét kald, ingen polling). PR-TJEK 2/10 19:47:
+    ingen åbne PR'er (næste tjek 4/10). Sentry: ingen uløste fejl 14 dage.
     **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` ·
-    `npm run build` — grøn 3/10 23:19 (**3858** tests i 238 filer), plus
-    `locale-leak --gate` (exit 0).
-    **Denne iteration: to danske stavemåder i svensk tekst.** «Første maj» →
-    «Första maj» i den svenske helligdagsliste (`helligdage.ts:54`, hele
-    listen er håndskrevet pr. sprog) og «kan du använna» → «använda» i
-    `/nedtaelling`s krydsreference til `/dato`. Copy uden ny logik, men begge
-    står på sider med svensk trafik: `/dato` 101.580 visninger, `/nedtaelling`
-    6.648. `helligdage.test.ts` låste fejlen fast med `toEqual` på hele den
-    svenske 2026-liste; en **ny** prøve dømmer nu alle svenske navne 2024-2035
-    mod `/[æø]/i`, så 2026-listen alene ikke lader en ny dansk stavemåde
-    slippe igennem. Mutation (begge fejl tilbage) → **3 røde** af 72.
-    **Deploy målt på indhold 23:13** (vinduet 2/10 21:30 byggede master som den
-    så ud 21:30-21:50): ✅ `pension-dobbelt-valuta`, ✅ `leasing-dobbelt-valuta`,
-    ✅ `su-dobbelt-valuta`, ✅ `dage-til-hub` (22 da / 19 se links — målt mod
-    `getDageTilSlugs()`; planens «23/20» var et skøn). ❌ `leasing-faq-retning`
-    er **ikke live**: beraknare.se/leasing skriver stadig «alltså 9 210 kr
-    **mer**», fordi committen kom 21:51 — 21 minutter efter vinduet. Ét vindue,
-    ikke to, så ikke `DEPLOY-MISSING` endnu.
-    **Næste iteration:** (1) mål de fire noter i vinduet 3/10 07:30 på indhold,
-    (2) `/moms`-slaget er ⛔ (lovgrænser), så næste frie slug i F5b-køen er
-    `/pension` (12 fund).
+    `npm run build` — grøn 3/10 00:12 (**3864** tests i 239 filer), plus
+    `locale-leak --gate` (sidst målt 3/10 23:19, ikke kørt i denne iteration).
+    **Denne iteration: /pension's 12 håndskrevne beløb læser `folkepension.ts`.**
+    Metadata og de elleve FAQ-svar (dem `FAQSchema` giver Google) bygges nu af
+    `pension-eksempler.ts` fra `FOLKEPENSION_2026` + `SATSER_2026`. **Én reel
+    fejl fundet:** FAQ'en sagde «65 år hvis du er født i 1953 eller før» og
+    sprang til 1956 — `alderSkala` siger 65 fra 1/1 1954 og 65 ½/66/66 ½ i
+    1954-55, så 1954 og 1955 stod uden svar. Svaret bygges nu trin for trin af
+    skalaen. Resten er byte-uændret (målt mod `HEAD`: kun de to linjer af
+    aldersvaret). Ny port dømmer hvert beløb mod de tal modulerne må skrive;
+    mutation → 2 røde af 6. Se `docs/plan-arkiv.md`.
+    **Næste iteration:** (1) mål de fem noter i vinduet 4/10 07:30 på indhold,
+    (2) næste frie F5b-slug er `/leasing` (9 fund) — `/moms` er ⛔.
 
 ## Fase 3 — trafik-drevet
 
@@ -167,6 +159,21 @@ dansk punktum for alle tre sprog, `kalorier/page.test.tsx` «2.502 kcal» og
 og forbyder `\d\.\d{3}` i hvert svensk og norsk felt. **12 nye tests**
 (3856 mod 3844); dansk låst med `toEqual` mod de syv gamle strenge.
 
+**Lukket 3/10 23:20 23:58 — `pension-belob-fra-modul`.** Se
+`docs/plan-arkiv.md`. *Målt:* **12** håndskrevne talgrupper væk fra
+`page-data.ts` (metadata + 11 FAQ-svar, alle publiceret som `FAQSchema`-JSON-LD),
+så listen er **131 → 119**. Ny `pension-eksempler.ts` læser `FOLKEPENSION_2026`
+og `SATSER_2026` gennem `formatBelob`. **Én reel fejl fundet og rettet:**
+«Hvornår kan jeg gå på folkepension?» sagde «65 år hvis du er født i 1953 eller
+før» og sprang så til 1956 — det modsiger `alderSkala` (65 fra 1/1 1954, 65 ½
+og 66/66 ½ i 1954-55) og lod 1954-55 stå uden svar. Svaret bygges nu trin for
+trin af skalaen. Dansk ellers byte-uændret (målt: kun de to linjer af
+aldersvaret adskiller sig fra `HEAD`). Porten er ny og **adfærdsbaseret**:
+den dømmer *hvert* beløb i metadata og svar mod de tal modulerne må skrive, så et
+håndskrevet beløb er rødt; mutation (8.500 i et svar + den gamle 1953-påstand)
+→ **2 røde** af 6. `gang`-reglen tabte ét fund 7 → 6 (Excel-svarets
+«40.000 × 0,15 = 6.000» er nu interpolationer), portens sum 26 → 25.
+
 **Åben række (strenglisten):** næste fil skal måles på ny — de punkt der stod
 åbne er alle ❓-blokerede. **Fem filer er lukket 2/10**, se listen nedenfor.
 Strenglistens loft er **70 → 57**, JSX-listen **360 → 347 → 338 → 333**.
@@ -206,12 +213,11 @@ gamle strenge). `/vaegttab` se: 1.277 visninger.
 alle fund lå i `page-data.ts` alene** — ikke fordelt i `src/lib/*.ts` som
 portens docblock siger. Efter `/renteberegner` var de **176** (var 195 ved
 iterationens start); efter `/vaegttab` halve 2 er de **131** målt 3/10 22:33.
-Køen pr. slug nu: `kalorier` 17 · `moms` 15 · `pension` 12 · `leasing` 9 ·
+Køen pr. slug nu: `moms` 15 · `leasing` 9 ·
 `rentefradrag` 7 · `kvadratmeter` 6 · `konfirmation` 6 · `efterloen` 5 ·
 `aktieskat` 5 · `loen-efter-skatt` 4 · `topskat` 4 · `boernepenge` 4 · resten ≤3.
-**Anbefalet rækkefølge:** `/kalorier` (17, se 2.825) → `/moms` (men ⛔ de 3
-lovgrænser) → `/pension` (12) → `/leasing` (se 2.923) →
-`/kvadratmeter` (6, se 3.705).
+**Anbefalet rækkefølge:** `/moms` (15, men ⛔ de 3 lovgrænser) → `/leasing`
+(9, se 2.923) → `/kvadratmeter` (6, se 3.705) → `/rentefradrag` (7).
 *Accept pr. slice:* ét slug pr. opgave, 12 fund eller færre, de læses fra sit
 eget modul, og en mutation i porten. `/vaegttab` blev delt i to halvdele
 (12 + 12), fordi den er 24 fund. **Hvis porten udvides til `.ts` med det samme,
