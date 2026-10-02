@@ -153,7 +153,9 @@ describe("børnepenge 2026 — beløb læst fra modulet", () => {
   test("aftrapningseksemplet regner sig selv", async () => {
     const markup = await html();
     const graense = BOERNEUNGEYDELSE_2026.aftrapning.graense;
-    const toBorn = BOERNE_SATSER_2026[0].hel * 2;
+    // Parentesen er et **årstal**, ikke et kvartalsbeløb: 5.370 kr. pr. kvartal
+    // for ét barn er 21.480 kr. om året, og to børn er 42.960 kr.
+    const toBorn = aarligBelob(BOERNE_SATSER_2026[0]);
 
     // Eksemplets indkomst ligger 138.900 kr over grænsen, og de beløb, der står i
     // brødteksten, er præcis dem — de skal ikke kunne stå som håndskrevne tal.
@@ -162,11 +164,12 @@ describe("børnepenge 2026 — beløb læst fra modulet", () => {
     expect(markup).toContain(
       `Nedsættelsen bliver 2 % × ${da(1100000 - graense)} kr. = ${da(beregnAftrapning(1100000))} kr. årligt.`,
     );
-    // De to børn er satserne selv, to gange: 5.370 × 2 = 10.740 pr. kvartal.
+    // De to børn er satserne selv, to gange: 21.480 × 2 = 42.960 om året.
     expect(markup).toContain(`(${da(toBorn)} kr × 2 = ${da(toBorn * 2)} kr.)`);
-    expect(toBorn).toBe(BOERNE_SATSER_2026[0].hel * 2);
+    expect(toBorn).toBe(21480);
     // Og nedsættelsen trækkes fra det samlede beløb for de to børn.
     expect(markup).toContain(da(toBorn * 2 - beregnAftrapning(1100000)));
+    expect(toBorn * 2 - beregnAftrapning(1100000)).toBe(40182);
   });
 
   test("familietabellen summerer satserne, ikke tal der er skrevet ved siden af dem", async () => {

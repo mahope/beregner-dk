@@ -69,10 +69,15 @@ const beskrivelse =
  * «1.100.000 kr.» i både FAQ'en og brødteksten, og beløbet over grænsen,
  * nedsættelsen og de to børn var håndskrevet ud fra det — så et tal i eksemplet
  * kunne glide fra sit eget regnestykke.
+ *
+ * `eksempelToBorn` er **årsbeløbet for ét barn på 0-2 år**, fordi parentesen
+ * i teksten er et årstal («21.480 kr × 2 = 42.960 kr»), ikke et kvartalsbeløb.
+ * Den gamle kode skrev `da(21480 * 2)` — 21.480 hardkodet, altså
+ * `aarligBelob(sats0)` skrevet som tal.
  */
 const EKSEMPEL_INDKOMST = 1100000;
 const eksempelOverGraense = EKSEMPEL_INDKOMST - BOERNEUNGEYDELSE_2026.aftrapning.graense;
-const eksempelToBorn = sats0.hel * 2;
+const eksempelToBorn = aarligBelob(sats0);
 const eksempelNedaettelse = beregnAftrapning(EKSEMPEL_INDKOMST);
 
 const MAANEDER_DA = [

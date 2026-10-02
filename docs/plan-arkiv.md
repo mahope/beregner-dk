@@ -24432,3 +24432,51 @@ strenge, de var — kun kilden er ændret. Verificeret i test mod
   `/timepris`: «800-1.400 kr» stod ingen steder i koden.
 - **Denne iteration** ✅ `ceo/boernepenge-indlaeg`. 11 fund → 0, strenglisten
   82 → 70.
+
+## 2026-10-02 — `boernepenge-aarstal` (rettelse fundet ved live-verifikation)
+
+Efter at `ceo/boernepenge-indlaeg` var squashed og pushet, blev **alle** åbne
+VERIFICÉR-noter læst på den live side. `/dagpenge` viste sig at være korrekt
+deployet (se nedenfor), og da jeg nåede børnepenge-indlægget stod der:
+
+> Har du to børn på 0-2 år (**10.740 kr × 2 = 21.480 kr.**), får du udbetalt
+> **18.702 kr.**
+
+Den gamle kode skrev «(21.480 kr × 2 = 42.960 kr.) … 40.182 kr.» — altså
+**årstal**, fordi teksten siger «om året» og forældreholdet på 0-2 år er
+5.370 kr. pr. kvartal = 21.480 kr. om året. Min første version havde lavet
+`eksempelToBorn = sats0.hel * 2`, altså **kvartalsbeløbet for to børn**, og
+skrev dermed et regnestykke, der ser rigtigt ud (10.740 × 2 = 21.480) men
+er en anden størrelsesorden end den, sætningen handler om. Rettet til
+`aarligBelob(sats0)`, som er den samme værdi som det gamle `21480` — altså
+byte-identisk output.
+
+**Målt:** `git show eed3c20:…/page.tsx` bekræfter `21.480` (JSX-tekst) og
+`21480` (formatterens argument) i den gamle kode. Porten så ingen fejl, for
+begge tal var korrekte; den er døv for *værdien* af en refaktorering.
+
+**Hvorfor det er værd at notere:** porten dømmer beløb, der står som tekst, mod
+deres egen regnestykke — ikke mod den sætning de indgår i. En interpolation
+kan være regnestykket korrekt og meningen forkert. Den eneste måde at fange
+denne klasse er at læse den **renderede** side. Det er gjort nu, og det er
+grunden til, at `boernepenge-indlaeg`s note står åben til 17:30-vinduet.
+
+### Deploy 2/10 12:30 — målt på indhold kl. 12:47
+
+| Side | Resultat |
+|---|---|
+| `minberegner.dk/dagpenge` | ✅ alle 14 beløb (26.198/18.160, 22.041/15.544, 18.074/13.047, 15.759/11.590, 14.694/10.919, 12.049/9.255, 10.506/8.283), «25,049 % i kommunaleskat», **otte** FAQ-spørgsmål i JSON-LD, **intet** «1.924 kr timer» |
+| `minberegner.dk/pace` | ✅ tre tempo-FAQ'er med «pr. kilometer», **intet** «halvmarahton» |
+| `…/saadan-finder-du-din-timepris-som-freelancer` | ✅ alle 12 poster, `Senior udvikler 800-1.200 kr`, fire grupper, noten «Priserne er vejledende» |
+| `minberegner.dk/timepris` | ✅ byte-uændret dansk: «Advokat: 1.500-3.500 kr», «IT: 900-1.500 kr/time» |
+| `beraknare.se/timepris` | ✅ «Advokat: 1 500–3 500 DKK» (U+00A0), FAQ «Dansk nivå: IT 900–1 500 DKK/timme», ingen dansk separator i listen, noten «Nivåerna nedan är danska» |
+| `minberegner.dk/tidsberegner` | ✅ begge time-FAQ'er med 8.760/525.600/10.080/8.784 |
+
+**Målemetoden, som kostede en halv time:** min første regex til `/dagpenge` gav
+**ét** «kr efter skat» og så ud som om deployet manglede. Det var **min
+regex**, der var for stram: React indsætter `<!-- -->` mellem interpoleret tal
+og tekst, så den server-renderede HTML indeholder `18.160 kr<!-- --> efter
+skat`. To ting låste op: strip kommentarmarkørerne med
+`re.sub(r'<!-- -->','',h)` før tal søges, og læs FAQ-spørgsmålene i **JSON-LD'en**
+(`application/ld+json` → `FAQPage` → `mainEntity`) — `<h3>` ligger ikke i den
+server-renderede HTML, fordi FAQ'en klient-renderes.
