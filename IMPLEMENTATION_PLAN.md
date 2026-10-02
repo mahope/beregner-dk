@@ -293,8 +293,10 @@ Prioriteret efter forventet effekt på **trafik**. Datagrund fra GSC 1/10
 
 ## Åbne VERIFICÉR DEPLOY-noter
 
-Alle notes under har vindue **2/10 07:30** (den nyeste fra 07:00) (batch-deployeren kører 07:30/12:30/
-17:30/21:30). Prøverne er på **indhold**, aldrig på HTTP 200: en 200 beviser
+Notes med vindue **2/10 07:30** (fra commits før 07:30) er målt 2/10 09:00 —
+se STATUS. Den øverste note (`timepris-markedspriser`) er fra 09:02 og har
+**vindue 2/10 12:30**; den måles først efter kl. 12:30. Batch-deployeren kører
+07:30/12:30/17:30/21:30. Prøverne er på **indhold**, aldrig på HTTP 200: en 200 beviser
 at svaret serveres, ikke at det er den nye kode. Hver note er én linje her;
 den fulde kommando står i `docs/plan-arkiv.md` under sit slug.
 
