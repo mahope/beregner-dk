@@ -770,6 +770,19 @@ export default async function DatoPage() {
         <p>
           {locale === "se" ? (
             <>
+              Du kan också se{" "}
+              <Link href="/dagar-till">alla datum samlade på en sida</Link>.
+            </>
+          ) : (
+            <>
+              Du kan også se{" "}
+              <Link href="/dage-til">alle datoer samlet på én side</Link>.
+            </>
+          )}
+        </p>
+        <p>
+          {locale === "se" ? (
+            <>
               Vill du bara räkna ner till ett datum och se det som veckor och dagar kan du
               använda <Link href="/nedtaelling">nedräkningen</Link>.
             </>

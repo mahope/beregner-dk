@@ -25427,3 +25427,93 @@ mellem kørslerne.
 
 **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test`
 (3807 i 235 filer) · `npm run build` — grønne 2/10 21:01.
+
+---
+
+## 2026-10-02 — `dage-til-hub` (arkiveret fra planen: F5b-afsnittets lukkede poster)
+
+Disse afsnit lå i planen under «Åbne opgaver — F5b» og er lukket arbejde, så de
+flytter her, mens den åbne kø (strenglisten, rækkefølgen og acceptkriteriet)
+bliver i planen.
+
+**Lukket 2/10 20:42 — `leasing-svenske-tal-fra-modul`.** *Målt:* `sePages.leasing`
+går fra **32** håndskrevne beløb til **0**; `daPages` og `noPages` stod på 0 hele
+vejen. De tre beløb, der blev tilbage i `page-data.test.ts`, lå med **dansk**
+tusindtalsseparator på en svensk side («4.121 kr») — de er nu «4 121 kr», samme
+som `/renteberegner`, `/moms` og `/procent` allerede skrev. Ny
+`src/lib/leasing-eksempler.ts` med `leasingSeEksempelTekster()`.
+
+**Lukket 2/10 20:20 — `leasing-restvaerdi-sammenlign` (delvis).** Porten går rød 5
+steder, når `nettoOmkostning` for billånet sættes tilbage til det gamme
+bruttobeløb. Den **åbne** del var de **32** håndskrevne beløb i den svenske blok
+(titel, description, metaDescription, ogDescription, schemaDescription + 5
+FAQ-svar) — lukket af `leasing-svenske-tal-fra-modul` samme aften.
+
+**Lukket 2/10 17:30 — `vaegttab-tal-fra-modul` (halve 1: metadata).** De fire
+tal læses nu fra modulet; mutationen «2.500 kcal» tilbage i `page-data.ts` giver
+1 rød på «da læser titlen og beskrivelserne fra modulet».
+
+**Lukket 2/10 18:55 — `svensk-excel-formel`.** Den svenske Excel-tabel på
+`/renteberegner` bruger `=BETALNING(0,04/12;240;-200000)` → 1 211,96 kr og
+`=BETALNING(0,04/12;240;-200000)*240-200000` → 90 870,56 kr. Accept ✅ opfyldt:
+evaluerer hver formel i tabellen til sit eget svar, målt på rigtig bygget server;
+2 mutationer røde med master-koden.
+
+---
+
+## 2026-10-02 21:30 — `dage-til-hub` (arkiveret fra planen)
+
+**Hvad.** `/dage-til` (da) og `/dagar-till` (se): en side der lister *alle*
+countdown-datoer i sektionen med dagens antal dage, sorteret efter hvad der
+kommer først.
+
+**Hvorfor.** Sektionen havde 23 danske og 20 svenske dato-sider og **ingen side
+af sin egen** — begge hub-stier var 404 på begge domæner. Dato-siderne var kun
+linket fra `/dato` og `/nedtaelling`. GSC viser to konkrete søgninger i præcis
+den familie på **position 5**: «hvor mange dage er der til 1. december» (1.254
+visninger, 3k klik, pos. 5) og «hvor mange dage er der til den 24. december»
+(1.025 visninger, 2k klik, pos. 5) — de taber i dag til `/dato` selv. Foresiden
+har dage-til-kort, men ingen side samler spørgsmålet.
+
+**Filer.** `src/lib/dage-til.ts` (`getDageTilHubPath`, `getDageTilHubRækker`),
+`src/components/DageTilHub.tsx` (copy + metadata + route), to route-filer,
+`sitemap.ts` (hub som `daily`, prioritet 0,8), `routing.ts` (301 mellem
+domænerne), `/dato` + `/nedtaelling` (link til hubben), og
+`src/app/dage-til-hub.test.tsx` (15 tests).
+
+**Målt.**
+- Hver række er præcis `getDageTilAnswer(event, sprog, today)` for samme dag:
+  `days`, `weeks`, `daysLeft`, `isToday` og `targetIso` er testet mod modulet for
+  alle 43 rækker, så rækken og den linkede side ikke kan stride.
+- Sortering: `days` stigende, med `question` som tiebreak. Mutation (omvendt
+  sortering) → 1 rød.
+- `href` bygges af locale-prefixet + **egne** slug. Mutation (dansk slug i det
+  svenske href) → 1 rød.
+- Sproglæk: den svenske side må ikke have dansk (verdier, præposition, `æ/ø`) →
+  fangede en rigtig fejl undervejs: «31 oktober 2026 **er** en lördag» med
+  dansk «er». Nu `ER`-tabel.
+- Metadata: title 54 tegn i begge sprog (loftet i testen er 60), description
+  ≤ 160, canonical + `hreflang` (da/se/x-default) på hub-stien uden slash.
+- Router: `/dage-til` allow på minberegner.dk, `/dagar-till` allow på
+  beraknare.se, **og 301 til egen sprogsti på det andet domæne**; norsk 404.
+  Uden den regel serverede hvert domæne en dublet af listen — samme fejl som
+  `/dagar-till/[dato]` allerede løser for enkelt-dato-siderne. Rendereren er
+  forsvar i dybet: `buildDageTilHubMetadata` med forkert sti giver `noindex` og
+  ingen description/canonical.
+- Sitemap: `…/dage-til` og `…/dagar-till` som `daily`, dansk sitemap har ingen
+  `/dage-til/` med slash (308), norsk ingen dage-til overhovedet.
+- `meta-description.test.ts`: `/dagar-till` lagt til `SIDER_UDEN_DESCRIPTION` —
+  samme håndtering som `/dagar-till/[dato]`, fordi den danske host ikke må have
+  en description på den svenske sti.
+- Gate 2/10 21:25: `lint`, `typecheck`, `TZ=UTC npm run test` (**3822** tests i
+  236 filer), `npm run build` (begge hub-ruter er `ƒ`, altså dynamiske — de
+  skal regnes om hver dag), `locale-leak.mjs --gate` 0 nye, `href-scan` 0,
+  `knapgruppe-scan` 0, `rendered-leak-scan` 1 forhårslig (`/dato` skrev
+  «Første maj», se ❓).
+- Diff-review fangede én bivirkning: en python-indsættelse havde tilfældigvis
+  rettet «använna» → «använda» i `/nedtaelling`s svenske blok. Det er en
+  forhårslig stavemåde-fejl, men ikke denne opgaves tekst, så den blev lagt
+  tilbage og noteret i ❓ i stedet.
+
+**MÅL.** `/dage-til` er en ny URL → 0 besøgende/28d 2/10. Måles i Plausible
+16/10; GSC efter 14 dage (de to søgninger ovenfor).

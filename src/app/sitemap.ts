@@ -5,7 +5,7 @@ import { isCalculatorAvailable } from "@/lib/calculator-list";
 import { getFooterBlogLinks } from "@/lib/footer-data";
 import type { Locale } from "@/lib/i18n";
 import { getAvailableSlugs } from "@/lib/page-data";
-import { getDageTilPrefix, getDageTilSlugs } from "@/lib/dage-til";
+import { getDageTilHubPath, getDageTilPrefix, getDageTilSlugs } from "@/lib/dage-til";
 import { getKlokkenPrefix, getKlokkenSlugs } from "@/lib/klokken-i";
 
 // The sitemap route is rendered per request (it resolves the host from
@@ -68,13 +68,24 @@ export function buildSitemap(
   // Curated "hvor mange dage er der til X" pages. The answer changes every
   // day, so they are re-crawled daily.
   const dageTilPrefix = getDageTilPrefix(locale);
+  const dageTilHubPath = getDageTilHubPath(locale);
   const dageTilEntries: MetadataRoute.Sitemap = dageTilPrefix
-    ? getDageTilSlugs(locale).map((slug) => ({
-        url: `${baseUrl}${dageTilPrefix}${slug}`,
-        lastModified: now,
-        changeFrequency: "daily" as const,
-        priority: 0.7,
-      }))
+    ? [
+        // The section's own page, so the date pages are not an orphan set
+        // reachable only from two other pages.
+        {
+          url: `${baseUrl}${dageTilHubPath}`,
+          lastModified: now,
+          changeFrequency: "daily" as const,
+          priority: 0.8,
+        },
+        ...getDageTilSlugs(locale).map((slug) => ({
+          url: `${baseUrl}${dageTilPrefix}${slug}`,
+          lastModified: now,
+          changeFrequency: "daily" as const,
+          priority: 0.7,
+        })),
+      ]
     : [];
 
   const klokkenPrefix = getKlokkenPrefix(locale);

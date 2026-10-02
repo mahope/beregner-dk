@@ -43,6 +43,7 @@ const SIDER_UDEN_DESCRIPTION = new Set([
   "/embed/moms",
   "/design-system",
   "/locale-unavailable",
+  "/dagar-till",
   "/dagar-till/[dato]",
 ]);
 

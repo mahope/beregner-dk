@@ -313,6 +313,19 @@ export default async function NedtaellingPage() {
             <p>
               {locale === "se" ? (
                 <>
+                  Du kan också se{" "}
+                  <Link href="/dagar-till">alla datum samlade på en sida</Link>.
+                </>
+              ) : (
+                <>
+                  Du kan også se{" "}
+                  <Link href="/dage-til">alle datoer samlet på én side</Link>.
+                </>
+              )}
+            </p>
+            <p>
+              {locale === "se" ? (
+                <>
                   Ska du räkna dagar mellan två valfria datum, arbetsdagar eller datum plus veckor
                   kan du använna{" "}
                   <Link href="/dato">datokalkylatorn</Link>.

@@ -1,53 +1,33 @@
-STATUS: 2/10 20:54. CI grøn ved start (`37044864618`). PR-TJEK 2/10 19:47:
-    ingen åbne PR'er (næste tjek 3/10). Sentry: ingen uløste fejl 14 dage, og det
-    er et **rigtigt** signal — `sentryDsn()` har en fallback-DSN og `init`
-    kører i `sentry.server.config.ts` + `instrumentation-client.ts`, kun i
-    produktion, ingen replay, ingen upload af source maps.
-    CEO-kø punkt 0: lukket 2/10 14:48.
+STATUS: 2/10 21:30. CI grøn ved start (`37051678023`). PR-TJEK 2/10 19:47: ingen
+    åbne PR'er (næste tjek 3/10). Sentry: ingen uløste fejl 14 dage, og det er et
+    **rigtigt** signal — `sentryDsn()` har fallback-DSN, `init` kører i
+    `sentry.server.config.ts` + `instrumentation-client.ts`, kun i produktion,
+    intet replay, ingen source maps. CEO-kø punkt 0: lukket 2/10 14:48.
     **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` ·
-    `npm run build` — grøn 2/10 20:53 (**3803** tests i 234 filer), plus
-    `locale-leak.mjs --gate` og knapgruppe-scan fra de forrige iterationer.
-    **Denne iteration:** `/pension` skrev **«8.729 kr. kr.»** live — målt i
-    den rene HTML, ikke i koden. `formatKr` er `formatCurrency`, som **selv**
-    afslutter med valutaenheden, og fire sætninger satte « kr.» oveni. De fire
-    er rettet, så tallet bærer nu præcis én enhed — og på beraknare.se bliver
-    det «8.729 kr» (Intl skriver «kr» for sv-SE) i stedet for «kr kr».
-    **Målt:** planens påstand om «7 beregnere» var **for bred** — kun 3 af de 7
-    bruger `formatCurrency`: `LeasingBeregner`, `SUBeregner`,
-    `PensionBeregner`. `GaeldsfriBeregner`, `BruttoNettoBeregner`,
-    `TopskatBeregner` og `AktieskatBeregner` bruger `toLocaleString` og har
-    derfor **aldrig** haft dobbelt enhed. Mutation: « kr.» tilbage i
-    pensionstillæg-sætningen giver **1 rød** af 11.
-    **Næste iteration:** en **feature** — `/dage-til`-hubben (forslaget nedenfor)
-    er den mest målbare, fordi GSC viser to konkrete søgninger i den familie.
-    **Forslag til næste feature (researchet 2/10 20:50, ikke bygget):** en
-    `/dage-til`-**hub** i da + se. Målt: `/dage-til` og `/dagar-till` er **404**
-    på begge domæner, de 23 + 20 countdown-sider har ingen fælles side (kun
-    1-2 links fra `/dato` hver), og de er **ikke** blandt top-15 i Plausible,
-    selv om GSC viser «hvor mange dage er der til 1. december» (1.254
-    visninger, pos. 5) og «… til den 24. december» (1.025, pos. 5) — to søgninger
-    `/dato` taber til `/dato` selv. Alt indholdet findes allerede verificeret i
-    `dage-til.ts`; hubben er en liste over alle events med dagens tal. Måles på
-    `/dage-til` i Plausible om 14 dage.
-    **Sidste iteration:** `/leasing`s **svenske** blok skrev sit eget eksempel som
-    rå tekst — «300.000», «4.121», «178.350», «28.350» — i titel, description,
-    metaDescription, ogDescription, schemaDescription og **tre** FAQ-svar, og
-    `FAQSchema` læser præcis `faqItems`, så de var tal i Googles rich resultat.
-    De læses nu fra `LEASING_EKSEMPEL` + `beregnLeasing`, de samme to ting
-    `LeasingBeregner` starter med. Målt: **32 → 0** håndskrevne beløb i
-    `sePages.leasing`, og de tre beløb de lå på var **også danske** — «4.121 kr»
-    med punktum på en svensk side. De skriver nu «4 121 kr» med mellemrum, som
-    `formatBelob(…, "se")` og de andre svenske sider gør.
-    **Review-gælden på `b0d719b` er betalt:** målt uafhængigt, `hovedEksempel()`
-    giver 1.887,12 kr/måned og 13.227 kr rente på 100.000/5 %/5 år, og
-    `annuitetsEksempel()` giver 1.211,96 / 290.871 / 90.871 på 200.000/4 %/20
-    år — altså præcis de tal committen skrev i titel, description og FAQ.
-    **Næste iteration:** `/kalorier` (17 fund, se 2.825 visninger) → `/leasing`
-    er nu på **0** i alle tre sprog → `/moms` (⛔ lovgrænser) → `/pension` (12) →
-    `/rentefradrag` (7) → `/kvadratmeter` (6). **Feature-køen er stadig helt
-    ⛔-blokeret** — fem iterationer på rad har lukket tal, ikke bygget
-    synlige ting, så næste iteration skal være en feature. Se ❓ om ferieloven,
-    GSC-eksporten og `sst.dk`; de tre låser hver sin kø-kandidat.
+    `npm run build` — grøn 2/10 21:25 (**3822** tests i 236 filer), plus
+    `locale-leak.mjs --gate` (0 nye), `href-scan` (0), `knapgruppe-scan` (0) og
+    `rendered-leak-scan` (1 **forhårslig** på /dato, se ❓).
+    **Denne iteration er en FEATURE (`dage-til-hub`).** `/dage-til` og
+    `/dagar-till` var **404** på begge domæner, mens de 23 + 20 countdown-sider
+    kun blev linket fra `/dato` og `/nedtaelling`. GSC viser to søgninger i præcis
+    den familie på **position 5**. Hubben lister alle datoer med dagens tal,
+    sorteret efter hvad der kommer først, i da + se; `/dato` og `/nedtaelling`
+    linker nu til den.
+    **Målt:** hver række er præcis `getDageTilAnswer` for samme dag, så række og
+    linkede side aldrig kan stride (15 nye tests; mutationer dør hver for sig:
+    omvendt sortering, dansk slug i svensk href, dansk «er» i den svenske
+    uge-sætning). Title 54 tegn, description ≤ 160, én `h1`. Routeren sender
+    `/dagar-till` på dansk domæne 301 til `/dage-til` (og omvendt) — ellers havde
+    hvert domæne serveret en dublet af listen; metadata er `noindex` hvis den
+    alligevel nås. **MÅL:** `/dage-til` er en ny URL → 0 i Plausible 2/10;
+    måles 16/10.
+    **Næste iteration:** (1) de to små tekstfejl nederst i ❓, (2) en research-
+    iteration — **hele feature-køen er ⛔-blokeret igen**, så kandidater skal
+    findes i GSC-tallene. Første kandidat: en `/klokken-i`-**hub** pr. mønster fra
+    denne iteration (samme fejl som dage-til: 24.401 visninger på `/tidszone`, og
+    «hvad er klokken i usa når den er 12 i danmark» (178v) + «hvad er klokken i
+    de forskellige tidszoner» (89v) ligger på pos. 5-6, mens landesiderne kun er
+    linket fra `/klokken-i` og bloggen).
 
 ## Fase 3 — trafik-drevet
 
@@ -64,6 +44,7 @@ STATUS: 2/10 20:54. CI grøn ved start (`37044864618`). PR-TJEK 2/10 19:47:
 | `/braendstof` | 263 | 17.051 | 1,1 % | 5,9 |
 | `/boligstoette` | 529 | 7.465 | 2,4 % | 8,7 |
 | `/` (forside) | 218, bounce 38 % | under top-15 | — | — |
+| `/dage-til` + se `/dagar-till` | **0 — nye URL'er 2/10** (hubben) | — | — | — |
 | se `/dato` | 133 | 101.580 | 0,1 % | 8,2 |
 | se `/tidsberegner` | 167 | 61.934 | 0,2 % | 8,0 |
 | se `/procent` | under top-15 | 26.933 | 0,0 % | 9,9 |
@@ -142,6 +123,20 @@ er blokeret af en ❓ og må ikke gættes.
   (160v), «leasing kalkylator» (112v) og «leasingkostnad bil» (109v) ligger på
   pos. 9-15, og svaret på «blir leasing billigere eller dyrere» lå før uden
   ét tal.
+- **[x] ✅ `/dage-til`-hub** — se `docs/plan-arkiv.md`. *Hvem:* alle 23 danske og
+  20 svenske countdown-sider var kun linket fra `/dato` og `/nedtaelling`, og
+  sektionen havde ingen side af sin egen. *Accept:* `/dage-til` + `/dagar-till`
+  lister hver dato med dagens tal, sorteret efter hvad der kommer først, med
+  canonical/hreflang, daglig sitemap-entry og 301 mellem domænerne.
+  **MÅL:** `/dage-til` 0 (ny URL 2/10) → Plausible 16/10; GSC 14 dage:
+  «hvor mange dage er der til 1. december» (1.254v, pos. 5) og «… til den 24.
+  december» (1.025v, pos. 5).
+- **`/klokken-i`-hub** — *Hvem:* samme fejl som dage-til: `/tidszone` har 24.401
+  visninger (0,4 %, pos. 7,6), «hvad er klokken i usa når den er 12 i danmark»
+  (178v, pos. 6) og «hvad er klokken i de forskellige tidszoner» (89v, pos. 5),
+  mens landesiderne kun linkes fra `/klokken-i` og bloggen.
+  *Accept:* en hub der lister alle lande med klokken nu, i da + se.
+  *Datagrund:* GSC 2/10 + `/tidszone` under top-15 i Plausible.
 - **Feriesider: vinterferie og påskeferie** — *Hvem:* «skoleferie 2026» og
   «efterårsferien» (10. af 10 completioner under «hvor mange dage er der til»).
   *Accept:* to sider i `/dage-til` med samme mønster som efterårsferien.
@@ -194,58 +189,6 @@ eget modul, og en mutation i porten. `/vaegttab` blev delt i to halvdele
 bliver listen 152 lang og de 152 tal bliver en tilladelsesliste** — det er
 måske nok det, men en tilladelsesliste over fejl er dyrere end porten er bred.
 Derfor: fix slugs først, portudvidelsen som sidste skridt når de er nede mod 0.
-
-**Lukket 2/10 20:42 — `leasing-svenske-tal-fra-modul`.** Se
-`docs/plan-arkiv.md`. *Målt:* `sePages.leasing` går fra **32** håndskrevne
-beløb til **0**; `daPages` og `noPages` stod på 0 hele vejen. De tre beløb, der
-blev tilbage i `page-data.test.ts`, lå med **dansk** tusindtalsseparator på en
-svensk side («4.121 kr») — de er nu «4 121 kr», samme som `/renteberegner`,
-`/moms` og `/procent` allerede skrev. Ny `src/lib/leasing-eksempler.ts` med
-`leasingSeEksempelTekster()`.
-
-**Lukket 2/10 20:20 — `leasing-restvaerdi-sammenlign` (delvis).** Se
-`docs/plan-arkiv.md`. *Målt:* porten går rød 5 steder, når
-`nettoOmkostning` for billånet sættes tilbage til det gamle bruttobeløb. Den
-**åbne** del er de **32** håndskrevne beløb i den svenske blok (titel,
-description, metaDescription, ogDescription, schemaDescription + 5 FAQ-svar) —
-de læses fra `LEASING_EKSEMPEL` og `beregnLeasingSammenlign` nu, så det er en
-ren om-skrivning af strenge, ikke en ny måling.
-
-**Lukket 2/10 17:30 — `vaegttab-tal-fra-modul` (halve 1: metadata).** De fire
-beskrivelsesfelter og titlen på alle tre sprog skrev «2.209», «2.759» og
-«550 kcal» som tal i sætningen (12 fund). De læses nu fra
-`vaegttabOverskrifter(locale)` i ny `src/lib/vaegttab-eksempler.ts`, som bygger
-dem på `beregnBmr` + `beregnTdee` fra `makroer.ts` — **de samme to funktioner
-`KalorieBeregner` bruger** — så eksemplet er værktøjets egen kørsel. Samme opgave
-fjernede de tre private kopier i `VaegttabBeregner.tsx`: sin egen
-Mifflin-St-Jeor-funktion, fem aktivitetsfaktorer og `KCAL_PR_KG = 7700`. Uden
-det var «fra sit eget modul» kun halvt sandt — modulet og værktøjet havde hver
-deres formel. **Målt:** dansk er byte-uændret på alle fire felter (test mod
-præcis den gamle streng), `bmr/tdee/samlet/dagligtDeficit/dagligtMaal` er
-**1.780 / 2.759 / 46.200 / 550 / 2.209** regnet uafhængigt i testen, og nye
-inputs giver nye tal (90 kg/175/45/stillesiddende/5 kg/10 uger → 1.773,75 →
-2.128,5 → 1.578,5). **Modvejs målt:** `VAEGTTAB_KCAL_PR_KG` 7.700 → 7.000 giver
-**9 røde** af 137 i to filer; en hårdkodet «2.500 kcal» i `page-data.ts` giver
-**1 rød** på `da læser titlen og beskrivelserne fra modulet`. **Sideeffekt
-rettet:** svensk og norsk skrev tusindtalsseparator med dansk punktum («2.209»
-læses som 2,209 kcal) — de skriver nu «2 209», samme retning som planens åbne
-`no`-punkt, og samme tegn som de svenske sider, der allerede er rettet
-(`/renteberegner`, `/moms`, `/procent`). Titler 39/39/47 tegn, beskrivelser
-128/127/128 — alle under Google's grænser. `/vaegttab` se: 1.277 visninger,
-13 klik, 0,2 %, pos. 8,2; da under top-15.
-
-**Lukket 2/10 18:55 — `svensk-excel-formel`.** Den svenske Excel-tabel på
-`/renteberegner` skrev `=BETALNING(4/12;240;-200000)`, som er 33 % pr. måned
-og giver **66 666,67 kr** mod de **1 211,96 kr** svarcellen lovede; fælde-
-teksten «0,04/12, inte 0.04/12» lå under den, og porten sprang
-BETALNING-rækkerne over *og* forbød decimalkommaet i rentesatsen. Raten
-læses nu som `aarsrente / 100` formateret i svensk Excel-syntax, samme greb
-som `excelDa` på den danske side, og fælden citerer samme sats. Formlerne er
-`=BETALNING(0,04/12;240;-200000)` → 1 211,96 kr og
-`=BETALNING(0,04/12;240;-200000)*240-200000` → 90 870,56 kr.
-**Accept:** ✅ opfyldt — evaluerer hver formel i tabellen til sit eget svar
-(også BETALNING), målt på rigtig bygget server; 2 mutationer røde med
-master-koden. `/renteberegner` se: 3.124 visninger, 33 klik, 1,1 %, pos. 12,2.
 
 **Åben:** `/moms` har 3 fund tilbage, som er lovgrænser (dansk registrering over
 50.000 kr, svensk over 120.000 kr, told ved import over 1.150 kr). ❓ nedenfor.
@@ -304,8 +247,11 @@ kode. Hver note er én linje; den fulde kommando står i `docs/plan-arkiv.md` un
 sit slug. Strip `<!-- -->`-kommentarmarkørerne fra HTML'en, ellers matcher
 ingen regex på tal og tekst.
 
+`VERIFICÉR DEPLOY: /dage-til + /dagar-till (hub med alle datoer) ceo/dage-til-hub 2/10 21:30`
+
 | Slug | Prøv på indhold |
 |---|---|
+| `dage-til-hub` (**ny**, vindue 3/10 07:30**) | `minberegner.dk/dage-til`: `<title>` skal være «Hvor mange dage er der til …? 23 datoer med dagens tal», `<meta name="description">` skal starte med «29 dage til Halloween 2026» (eller dagens nærmeste dato med dens år) og slutte med «Se alle 23 datoer med dagens antal dage, sorteret efter hvad der kommer først.». `<h1>` «Hvor mange dage er der til …?» én gang. Siden skal have **23** links til `/dage-til/*` og links til `/dato` og `/nedtaelling`. `beraknare.se/dagar-till`: `<title>` «Hur många dagar är det till …? 20 datum med dagens tal», **20** links til `/dagar-till/*`, og **intet** dansk: hverken «til» som præposition, «dage» som enhed eller bogstaverne æ/ø. `minberegner.dk/dagar-till` skal **301** til `/dage-til`, og `beraknare.se/dage-til` 301 til `/dagar-till`. Sitemap på begge domæner skal have `…/dage-til` og `…/dagar-till` som `daily`. **Intet** `NaN` |
 | `su-dobbelt-valuta` (**ny**, vindue 3/10 07:30**) | `minberegner.dk/su`: hele HTML'en skal have **0** `kr. kr.` og **0** `kr kr`. Brødteksten skal have «Inkl. **3.799** kr. forældrelån», «… ligger mellem **7.426** kr. og **20.749** kr. pr. måned», «Det separate forsørgertillæg er **1.114** kr. pr. måned før skat» og «… ungdomsuddannelse er 18-19-åriges grundsats **6.043** kr., mens den faste sats fra 20 år er **6.043** kr.». `beraknare.se/su` (dansk fallback): samme tal, 0 dobbelt enheder. `Intet** `NaN` |
 | `leasing-dobbelt-valuta` (**ny**, vindue 3/10 07:30**) | `minberegner.dk/leasing`: hele HTML'en skal have **0** `kr. kr.` og **0** `kr kr`. Resultatblokken skal have «**4.121** kr.», «**178.350** kr.», «**28.350** kr.», «**150.000** kr.» (værdi på biler), «**169.140** kr.» (billån i alt), «**9.210** kr.» (forskel) og «**30.000** kr.» pr. måned med `/mån` på de to månedstal. `beraknare.se/leasing`: de samme tal med **mellemrum** («4 121 kr») og **én** enhed, 0 dobbelt. `Intet** `NaN` |
 | `pension-dobbelt-valuta` (**ny**, vindue 3/10 07:30**) | `minberegner.dk/pension`: sætningen under resultatlisten skal være «Du har ikke opgivet andre indkomster, så du får det fulde pensionstillæg på **8.729 kr.**» — og **hele HTML'en skal have 0** `kr. kr.` og **0** `kr kr`. Rækkerne skal stadig være «16.273 kr.», «7.544 kr.» og «8.729 kr.». `beraknare.se/pension`: samme sætning med **én** enhed («8.729 kr», Intl skriver «kr» for sv-SE) og 0 dobbelt enheder. |
@@ -365,6 +311,13 @@ ingen regex på tal og tekst.
   0 kr (til 2026)» og «Afgifter kommer (2026+)»; `skat.dk` svarer 500. Teksten
   siger nu kun hvad beregneren regner med, og tallet ligger i
   `bil-omkostninger.ts` som `DRIFT.da.vaegt.el`.
+- ❓ **To synlige tekstfejl, målt 2/10 (10 min, ingen kilde nødvendig).**
+  1. `rendered-leak-scan` peger på **én** dansk rest på beraknare.se: `/dato`
+     skriver «Første maj» i den svenske helligdagsliste (`helligdage.ts:54`,
+     forhårslig, fundet 2/10). Svensk er «Första maj».
+  2. `/nedtaelling` har «kan du **använna**» i den svenske blok (pre-existing
+     stavemåde-fejl på en live svensk side; bemærket under diff-review 2/10).
+  Begge er copy rettelser uden ny logik — én lille opgave, ikke to.
 - ❓ **Fitnessfradrag, sommerhusudlejning, madvaretabel, grundskyld for Varde og
   Playwright.** Fem mindre kilder, alle noteret med detaljer i
   `docs/plan-arkiv.md` 2/10 14:20. Uden dem bygges intet, jf. punkt 11.

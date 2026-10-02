@@ -1861,6 +1861,77 @@ export function getDageTilSlugs(locale: Locale): string[] {
   });
 }
 
+/**
+ * The section's own path, without a trailing slash: `/dage-til` in Danish and
+ * `/dagar-till` in Swedish. The per-date pages hang under `getDageTilPrefix`,
+ * which ends in a slash, so this is the one place in the module that has to
+ * strip it — a sitemap entry of `…/dage-til/` would point at a path the
+ * router answers with a 308, and `hreflang` between the two sections would
+ * point each language at the other language's directory.
+ */
+export function getDageTilHubPath(locale: Locale): string | undefined {
+  const prefix = getDageTilPrefix(locale);
+  return prefix ? prefix.replace(/\/$/, "") : undefined;
+}
+
+export interface DageTilHubRække {
+  id: string;
+  href: string;
+  /** The event's own question, which is also that page's <h1>. */
+  question: string;
+  /** Short name, fx "1. december" / "juledagen". */
+  short: string;
+  days: number;
+  weeks: number;
+  daysLeft: number;
+  isToday: boolean;
+  targetDate: Date;
+  /** "2026-12-01" — the target's calendar day, for a <time dateTime>. */
+  targetIso: string;
+}
+
+/**
+ * Every date in the section as one row, nearest first.
+ *
+ * The section had 23 Danish and 20 Swedish date pages and no page of its own:
+ * a visitor who asked the section's question in the plural ("hvor mange dage
+ * er der til …", 1.254 visninger, pos. 5) landed on `/dato`, and the date
+ * pages were only linked from two other pages. The hub answers the same
+ * question as the pages it links to, so every number here is the number
+ * `getDageTilAnswer` gives the linked page for the same `today` — the row and
+ * the page cannot disagree.
+ *
+ * Sorted by days ascending, so the answer the visitor came for is the first
+ * thing on the page. Ties (two dates that land on the same day) fall back to
+ * the question, so the order never depends on the order of the event list.
+ */
+export function getDageTilHubRækker(
+  locale: Locale,
+  today: Date
+): DageTilHubRække[] {
+  const prefix = getDageTilPrefix(locale);
+  if (!prefix) return [];
+  const sprog = locale as DageTilLocale;
+  return getDageTilEvents(sprog)
+    .map((event) => {
+      const arm = dageTilArm(event, sprog);
+      const answer = getDageTilAnswer(event, sprog, today);
+      return {
+        id: event.id,
+        href: `${prefix}${arm.slug}`,
+        question: arm.copy.question,
+        short: arm.copy.short,
+        days: answer.days,
+        weeks: answer.weeks,
+        daysLeft: answer.daysLeft,
+        isToday: answer.isToday,
+        targetDate: answer.targetDate,
+        targetIso: answer.targetDate.toISOString().slice(0, 10),
+      };
+    })
+    .sort((a, b) => a.days - b.days || a.question.localeCompare(b.question, sprog));
+}
+
 /** The event for a slug, or undefined if the slug is not one of ours. */
 export function getDageTilEventBySlug(
   slug: string,

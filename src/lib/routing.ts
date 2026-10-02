@@ -1,11 +1,15 @@
 import type { DomainConfig } from "./domain-config";
 import { isCalculatorAvailable, isCalculatorPath } from "./calculator-list";
 import {
+  getDageTilHubPath,
   getDageTilPrefix,
   getDageTilSlugFromPathname,
   isDageTilLocale,
   resolveDageTilSlug,
 } from "./dage-til";
+
+/** The section's own path in each language. Kept here, next to the rule. */
+const DAGE_TIL_HUBS = ["/dage-til", "/dagar-till"] as const;
 
 export type RouteDecision =
   | { type: "allow" }
@@ -51,6 +55,19 @@ export function getRouteDecision(
   if (domainConfig.locale === "se") {
     const alias = swedishAliases[normalizedPath];
     if (alias) return { type: "redirect", destination: alias, status: 301 };
+  }
+
+  // The section's own page. `/dage-til` and `/dagar-till` are the same list in
+  // two languages, so the one that is not this domain's is redirected to the
+  // one that is — the same rule the date pages below follow for their slugs.
+  // Without it, minberegner.dk/dagar-till would serve a second copy of
+  // /dage-til and beraknare.se/dage-til a second copy of /dagar-till.
+  if (DAGE_TIL_HUBS.includes(normalizedPath as (typeof DAGE_TIL_HUBS)[number])) {
+    const egenHub = getDageTilHubPath(domainConfig.locale);
+    if (!egenHub) return { type: "not-found" };
+    if (egenHub !== normalizedPath) {
+      return { type: "redirect", destination: egenHub, status: 301 };
+    }
   }
 
   const dageTil = getDageTilSlugFromPathname(normalizedPath);

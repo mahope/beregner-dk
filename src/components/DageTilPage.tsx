@@ -22,12 +22,12 @@ import { getCurrentDomainConfig } from "@/lib/get-locale";
 import { getDomainConfigByLocale } from "@/lib/domain-config";
 import { OG_IMAGE } from "@/lib/page-helpers";
 
-const units: Record<DageTilLocale, { day: string; days: string; week: string; weeks: string }> = {
+export const units: Record<DageTilLocale, { day: string; days: string; week: string; weeks: string }> = {
   da: { day: "dag", days: "dage", week: "uge", weeks: "uger" },
   se: { day: "dag", days: "dagar", week: "vecka", weeks: "veckor" },
 };
 
-const copy: Record<
+export const copy: Record<
   DageTilLocale,
   {
     answerPrefix: string;
@@ -77,7 +77,7 @@ const copy: Record<
   },
 };
 
-function count(n: number, one: string, many: string): string {
+export function count(n: number, one: string, many: string): string {
   return `${n} ${n === 1 ? one : many}`;
 }
 
