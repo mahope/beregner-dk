@@ -8,6 +8,7 @@ import { generateShareableLink, getStateFromUrl, CalculationState } from '@/lib/
 import { trackCalculation, initScrollDepthTracking } from '@/lib/analytics';
 import { useLocale } from "@/components/LocaleProvider";
 import { formatCurrency, getCurrencySuffix } from "@/lib/format";
+import { LEASING_EKSEMPEL, beregnLeasingSammenlign, leasingSammenlignSætning } from "@/lib/leasing";
 
 type VisningsType = 'leasing' | 'sammenlign';
 
@@ -33,9 +34,7 @@ export default function LeasingBeregner() {
       vaerdtab: "V\u00e6rditab (du betaler for)",
       leasingVsLaan: "Leasing vs. L\u00e5n vs. Kontant",
       leasing: "Leasing",
-      totalDuEjerIkke: "Total: {total} (du ejer ikke bilen)",
       billaan: "Bill\u00e5n",
-      totalDuEjer: "Total: {total} (du ejer bilen)",
       kontantkoeb: "Kontantk\u00f8b",
       vaerdtabNote: "*V\u00e6rditab fordelt over perioden. Ingen renter.",
       disclaimer: "* Vejledende beregning. Faktisk leasingydelse kan variere med gebyrer og vilk\u00e5r.",
@@ -44,6 +43,11 @@ export default function LeasingBeregner() {
       privatLeasingDesc: "Ved privat leasing lejer du bilen i en fast periode. Du betaler for bilens v\u00e6rditab plus renter, men ejer ikke bilen. Ved periodens udl\u00f8b afleverer du bilen.",
       erhvervsleasing: "Erhvervsleasing",
       erhvervsleasingDesc: "Ved erhvervsleasing kan leasingydelsen fradrages som driftsudgift. Momsen p\u00e5 ydelsen kan ogs\u00e5 fradrages. Det g\u00f8r leasing ofte fordelagtigt for virksomheder.",
+      maanedlig: "M\u00e5nedligt",
+      iaalt: "I alt",
+      efterPerioden: "Efter perioden",
+      nettoOmkostning: "Netto omkostning",
+      nettoForklaering: "Netto omkostning er alt, du betaler, minus bilens v\u00e6rdi, n\u00e5r perioden er slut. Det er det eneste tal de tre kan sammenlignes p\u00e5.",
     },
     se: {
       bilpris: "Bilpris",
@@ -63,9 +67,7 @@ export default function LeasingBeregner() {
       vaerdtab: "V\u00e4rdeminskning (du betalar f\u00f6r)",
       leasingVsLaan: "Leasing vs. L\u00e5n vs. Kontant",
       leasing: "Leasing",
-      totalDuEjerIkke: "Totalt: {total} (du \u00e4ger inte bilen)",
       billaan: "Bill\u00e5n",
-      totalDuEjer: "Totalt: {total} (du \u00e4ger bilen)",
       kontantkoeb: "Kontantk\u00f6p",
       vaerdtabNote: "*V\u00e4rdeminskning f\u00f6rdelad \u00f6ver perioden. Inga r\u00e4ntor.",
       disclaimer: "* V\u00e4gledande ber\u00e4kning. Faktisk leasingkostnad kan variera med avgifter och villkor.",
@@ -74,6 +76,11 @@ export default function LeasingBeregner() {
       privatLeasingDesc: "Vid privatleasing hyr du bilen under en fast period. Du betalar f\u00f6r bilens v\u00e4rdeminskning plus r\u00e4nta, men \u00e4ger inte bilen. Vid periodens slut l\u00e4mnar du tillbaka bilen.",
       erhvervsleasing: "F\u00f6retagsleasing",
       erhvervsleasingDesc: "Vid f\u00f6retagsleasing kan leasingkostnaden dras av som driftskostnad. Momsen p\u00e5 avgiften kan ocks\u00e5 dras av. Det g\u00f6r leasing ofta f\u00f6rdelaktigt f\u00f6r f\u00f6retag.",
+      maanedlig: "M\u00e5nadsvis",
+      iaalt: "Totalt",
+      efterPerioden: "Efter perioden",
+      nettoOmkostning: "Netto kostnad",
+      nettoForklaering: "Netto kostnad \u00e4r allt du betalar minus bilens v\u00e4rde n\u00e4r perioden \u00e4r slut. Det \u00e4r det enda talet de tre g\u00e5r att j\u00e4mf\u00f6ra p\u00e5.",
     },
     no: {
       bilpris: "Bilpris",
@@ -93,9 +100,7 @@ export default function LeasingBeregner() {
       vaerdtab: "Verditap (du betaler for)",
       leasingVsLaan: "Leasing vs. L\u00e5n vs. Kontant",
       leasing: "Leasing",
-      totalDuEjerIkke: "Totalt: {total} (du eier ikke bilen)",
       billaan: "Bill\u00e5n",
-      totalDuEjer: "Totalt: {total} (du eier bilen)",
       kontantkoeb: "Kontantkj\u00f8p",
       vaerdtabNote: "*Verditap fordelt over perioden. Ingen renter.",
       disclaimer: "* Veiledende beregning. Faktisk leasingkostnad kan variere med gebyrer og vilk\u00e5r.",
@@ -104,15 +109,20 @@ export default function LeasingBeregner() {
       privatLeasingDesc: "Ved privat leasing leier du bilen i en fast periode. Du betaler for bilens verditap pluss renter, men eier ikke bilen. Ved periodens utl\u00f8p leverer du tilbake bilen.",
       erhvervsleasing: "N\u00e6ringsleasing",
       erhvervsleasingDesc: "Ved n\u00e6ringsleasing kan leasingkostnaden trekkes fra som driftskostnad. Momsen p\u00e5 ytelsen kan ogs\u00e5 trekkes fra. Det gj\u00f8r leasing ofte fordelaktig for bedrifter.",
+      maanedlig: "M\u00e5nedlig",
+      iaalt: "Totalt",
+      efterPerioden: "Etter perioden",
+      nettoOmkostning: "Netto kostnad",
+      nettoForklaering: "Netto kostnad er alt du betaler minus bilens verdi n\u00e5r perioden er slutt. Det er det eneste tallet de tre kan sammenlignes p\u00e5.",
     },
   };
   const l = labels[locale as keyof typeof labels] || labels.da;
 
-  const [bilpris, setBilpris] = useState<string>('300000');
-  const [restvaerdi, setRestvaerdi] = useState<string>('150000');
-  const [loebetid, setLoebetid] = useState<string>('36');
-  const [rente, setRente] = useState<string>('4.5');
-  const [udbetaling, setUdbetaling] = useState<string>('30000');
+  const [bilpris, setBilpris] = useState<string>(String(LEASING_EKSEMPEL.bilpris));
+  const [restvaerdi, setRestvaerdi] = useState<string>(String(LEASING_EKSEMPEL.restvaerdi));
+  const [loebetid, setLoebetid] = useState<string>(String(LEASING_EKSEMPEL.loebetid));
+  const [rente, setRente] = useState<string>(String(LEASING_EKSEMPEL.rentesats));
+  const [udbetaling, setUdbetaling] = useState<string>(String(LEASING_EKSEMPEL.udbetaling));
   const [visning, setVisning] = useState<VisningsType>('leasing');
 
   const hasLoadedUrl = useRef(false);
@@ -153,56 +163,30 @@ export default function LeasingBeregner() {
   }, [bilpris, restvaerdi, loebetid, rente, udbetaling, visning]);
 
   const handleReset = useCallback(() => {
-    setBilpris('300000');
-    setRestvaerdi('150000');
-    setLoebetid('36');
-    setRente('4.5');
-    setUdbetaling('30000');
+    setBilpris(String(LEASING_EKSEMPEL.bilpris));
+    setRestvaerdi(String(LEASING_EKSEMPEL.restvaerdi));
+    setLoebetid(String(LEASING_EKSEMPEL.loebetid));
+    setRente(String(LEASING_EKSEMPEL.rentesats));
+    setUdbetaling(String(LEASING_EKSEMPEL.udbetaling));
     setVisning('leasing');
   }, []);
 
-  const result = useMemo(() => {
-    const pris = parseFloat(bilpris) || 0;
-    const rest = parseFloat(restvaerdi) || 0;
-    const mdr = parseInt(loebetid) || 0;
-    const r = (parseFloat(rente) || 0) / 100 / 12;
-    const udb = parseFloat(udbetaling) || 0;
-
-    if (pris <= 0 || mdr <= 0) return null;
-
-    const afskrivning = (pris - udb - rest) / mdr;
-    const gennemsnitsGaeld = (pris - udb + rest) / 2;
-    const renteBeloeb = gennemsnitsGaeld * r;
-    const maanedligYdelse = afskrivning + renteBeloeb;
-    const totalLeasing = udb + (maanedligYdelse * mdr);
-    const totalRente = renteBeloeb * mdr;
-
-    const laanBeloeb = pris - udb;
-    let maanedligLaan = 0;
-    if (r > 0) {
-      maanedligLaan = (laanBeloeb * r * Math.pow(1 + r, mdr)) / (Math.pow(1 + r, mdr) - 1);
-    } else {
-      maanedligLaan = laanBeloeb / mdr;
-    }
-    const totalLaan = udb + (maanedligLaan * mdr);
-
-    const vaerdtab = pris - rest;
-    const kontantMaanedlig = vaerdtab / mdr;
-
-    return {
-      maanedligYdelse: Math.round(maanedligYdelse),
-      totalLeasing: Math.round(totalLeasing),
-      totalRente: Math.round(totalRente),
-      maanedligLaan: Math.round(maanedligLaan),
-      totalLaan: Math.round(totalLaan),
-      kontantMaanedlig: Math.round(kontantMaanedlig),
-      vaerdtab: Math.round(vaerdtab),
-      bilpris: pris,
-      restvaerdiNum: rest,
-    };
-  }, [bilpris, restvaerdi, loebetid, rente, udbetaling]);
+  const result = useMemo(
+    () =>
+      beregnLeasingSammenlign({
+        bilpris: parseFloat(bilpris) || 0,
+        restvaerdi: parseFloat(restvaerdi) || 0,
+        loebetid: parseInt(loebetid) || 0,
+        rentesats: parseFloat(rente) || 0,
+        udbetaling: parseFloat(udbetaling) || 0,
+      }),
+    [bilpris, restvaerdi, loebetid, rente, udbetaling],
+  );
 
   const formatKr = (amount: number) => formatCurrency(amount, locale, { maximumFractionDigits: 0, minimumFractionDigits: 0 });
+  const bilprisNum = parseFloat(bilpris) || 0;
+  const restvaerdiNum = parseFloat(restvaerdi) || 0;
+  const loebetidNum = parseInt(loebetid) || 0;
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 md:p-8">
@@ -288,8 +272,8 @@ export default function LeasingBeregner() {
                     </div>
                   </div>
                   <div className="bg-white dark:bg-gray-700 rounded-lg p-3 shadow-sm text-sm">
-                    <div className="flex justify-between"><span className="text-gray-600 dark:text-gray-400">{l.bilprisLabel}</span><span className="dark:text-gray-200">{formatKr(result.bilpris)} kr.</span></div>
-                    <div className="flex justify-between"><span className="text-gray-600 dark:text-gray-400">{l.restvaerdiLabel}</span><span className="dark:text-gray-200">{formatKr(result.restvaerdiNum)} kr.</span></div>
+                    <div className="flex justify-between"><span className="text-gray-600 dark:text-gray-400">{l.bilprisLabel}</span><span className="dark:text-gray-200">{formatKr(bilprisNum)} kr.</span></div>
+                    <div className="flex justify-between"><span className="text-gray-600 dark:text-gray-400">{l.restvaerdiLabel}</span><span className="dark:text-gray-200">{formatKr(restvaerdiNum)} kr.</span></div>
                     <div className="flex justify-between"><span className="text-gray-600 dark:text-gray-400">{l.vaerdtab}</span><span className="font-medium dark:text-gray-200">{formatKr(result.vaerdtab)} kr.</span></div>
                   </div>
                 </>
@@ -299,20 +283,37 @@ export default function LeasingBeregner() {
                   <div className="space-y-3">
                     <div className="bg-white dark:bg-gray-700 rounded-lg p-4 shadow-sm border-l-4 border-blue-500">
                       <div className="text-sm font-medium text-blue-600 dark:text-blue-400">{l.leasing}</div>
-                      <div className="text-xl font-bold text-gray-900 dark:text-white">{formatKr(result.maanedligYdelse)} kr./{l.months}</div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400">{l.totalDuEjerIkke.replace("{total}", `${formatKr(result.totalLeasing)} kr.`)}</div>
+                      <div className="text-xl font-bold text-gray-900 dark:text-white">{formatKr(result.leasing.maanedlig)} kr./{l.months}</div>
+                      <dl className="mt-2 grid grid-cols-3 gap-2 text-xs">
+                        <div><dt className="text-gray-500 dark:text-gray-400">{l.iaalt}</dt><dd className="dark:text-gray-200">{formatKr(result.leasing.total)} kr.</dd></div>
+                        <div><dt className="text-gray-500 dark:text-gray-400">{l.efterPerioden}</dt><dd className="dark:text-gray-200">{formatKr(result.leasing.ejerVedUdlob)} kr.</dd></div>
+                        <div><dt className="text-gray-500 dark:text-gray-400">{l.nettoOmkostning}</dt><dd className="font-semibold dark:text-gray-200">{formatKr(result.leasing.nettoOmkostning)} kr.</dd></div>
+                      </dl>
                     </div>
                     <div className="bg-white dark:bg-gray-700 rounded-lg p-4 shadow-sm border-l-4 border-green-500">
                       <div className="text-sm font-medium text-green-600 dark:text-green-400">{l.billaan}</div>
-                      <div className="text-xl font-bold text-gray-900 dark:text-white">{formatKr(result.maanedligLaan)} kr./{l.months}</div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400">{l.totalDuEjer.replace("{total}", `${formatKr(result.totalLaan)} kr.`)}</div>
+                      <div className="text-xl font-bold text-gray-900 dark:text-white">{formatKr(result.billaan.maanedlig)} kr./{l.months}</div>
+                      <dl className="mt-2 grid grid-cols-3 gap-2 text-xs">
+                        <div><dt className="text-gray-500 dark:text-gray-400">{l.iaalt}</dt><dd className="dark:text-gray-200">{formatKr(result.billaan.total)} kr.</dd></div>
+                        <div><dt className="text-gray-500 dark:text-gray-400">{l.efterPerioden}</dt><dd className="dark:text-gray-200">{formatKr(result.billaan.ejerVedUdlob)} kr.</dd></div>
+                        <div><dt className="text-gray-500 dark:text-gray-400">{l.nettoOmkostning}</dt><dd className="font-semibold dark:text-gray-200">{formatKr(result.billaan.nettoOmkostning)} kr.</dd></div>
+                      </dl>
                     </div>
                     <div className="bg-white dark:bg-gray-700 rounded-lg p-4 shadow-sm border-l-4 border-purple-500">
                       <div className="text-sm font-medium text-purple-600 dark:text-purple-400">{l.kontantkoeb}</div>
-                      <div className="text-xl font-bold text-gray-900 dark:text-white">{formatKr(result.kontantMaanedlig)} kr./{l.months}*</div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400">{l.vaerdtabNote}</div>
+                      <div className="text-xl font-bold text-gray-900 dark:text-white">{formatKr(result.kontant.maanedlig)} kr./{l.months}*</div>
+                      <dl className="mt-2 grid grid-cols-3 gap-2 text-xs">
+                        <div><dt className="text-gray-500 dark:text-gray-400">{l.iaalt}</dt><dd className="dark:text-gray-200">{formatKr(result.kontant.total)} kr.</dd></div>
+                        <div><dt className="text-gray-500 dark:text-gray-400">{l.efterPerioden}</dt><dd className="dark:text-gray-200">{formatKr(result.kontant.ejerVedUdlob)} kr.</dd></div>
+                        <div><dt className="text-gray-500 dark:text-gray-400">{l.nettoOmkostning}</dt><dd className="font-semibold dark:text-gray-200">{formatKr(result.kontant.nettoOmkostning)} kr.</dd></div>
+                      </dl>
+                      <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">{l.vaerdtabNote}</p>
                     </div>
                   </div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{l.nettoForklaering}</p>
+                  <p className="text-sm text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 rounded-lg p-3 shadow-sm">
+                    {leasingSammenlignSætning(result, loebetidNum, locale)}
+                  </p>
                 </>
               )}
               <div className="text-xs text-gray-500 dark:text-gray-400 mt-4">
@@ -332,11 +333,11 @@ export default function LeasingBeregner() {
 
       {/* Share */}
       <div className="flex justify-center mt-6 gap-3">
-        <CopyResultButton text={result ? `Leasing: ${formatKr(result.maanedligYdelse)} kr./{l.months} — Lån: ${formatKr(result.maanedligLaan)} kr./{l.months}` : ''} />
+        <CopyResultButton text={result ? `Leasing: ${formatKr(result.leasing.maanedlig)} kr./{l.months} — Lån: ${formatKr(result.billaan.maanedlig)} kr./{l.months}` : ''} />
         <ShareCalculation
           getShareableLink={getShareableLink}
           calculatorName="Leasing Beregner"
-          resultSummary={result ? `Leasing: ${formatKr(result.maanedligYdelse)} kr./{l.months}` : ''}
+          resultSummary={result ? `Leasing: ${formatKr(result.leasing.maanedlig)} kr./{l.months}` : ''}
         />
       </div>
 

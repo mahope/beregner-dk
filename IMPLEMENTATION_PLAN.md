@@ -1,23 +1,27 @@
-STATUS: 2/10 17:30. CI grøn ved start (`37037443374`). PR-TJEK 2/10 15:12 og
-   17:30: ingen åbne PR'er (næste tjek 3/10). Sentry: ingen opgave med reel
-   effekt — MINBEREGNER-2 var allerede rettet i `def070c`, MINBEREGNER-1 er
-   15 hændelser / 0 brugere = bot-trafik. CEO-kø punkt 0: lukket 2/10 14:48.
-   **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` ·
-   `npm run build` — grøn 2/10 17:27 (**3781** tests i 232 filer, +13), plus
-   `locale-leak.mjs --gate` 0 og `knapgruppe-scan.mjs` 0/0.
-   **Denne iteration:** `/vaegttab`s titel og fire beskrivelsesfelter skrev
-   2.209 / 2.759 / 550 kcal som tal i sætningen, i alle tre sprog. De læses nu
-   fra `vaegttabEksempelTal`, som regner med præcis `VaegttabBeregners` egen
-   formel, og komponentens egne kopier af formlen, faktorerne og 7.700 kcal
-   pr. kilo er væk. Dansk er byte-uændret; **svensk og norsk** skrev «2.209» med
-   dansk punktum og skriver nu «2 209», som er `Intl`s og begge sprogs
-   tusindtalsseparator — samme retning som planens åbne `no`-punkt. Se
-   `docs/plan-arkiv.md`.
-   **Næste iteration:** `/vaegttab`s **FAQ-svar** (12 fund tilbage, halve 2 af
-   samme opgave: 1.000 / 7.700 / 1.500 / 1.200 / 1.780 kcal) → `/kalorier`
-   (17) → `/moms` (⛔ lovgrænser) → `/leasing` (9). Som **feature**:
-   `/leasing` (3.124 visninger, pos. 12,2) mangler en
-   leasingkalkylator-til-sammenligning, konkurrenterne har den.
+STATUS: 2/10 20:20. CI grøn ved start (`37041313843`). PR-TJEK 2/10 19:47:
+    ingen åbne PR'er (næste tjek 3/10). Sentry: ingen uløste fejl 14 dage, og det
+    er et **rigtigt** signal — `sentryDsn()` har en fallback-DSN og `init`
+    kører i `sentry.server.config.ts` + `instrumentation-client.ts`, kun i
+    produktion, ingen replay, ingen upload af source maps.
+    CEO-kø punkt 0: lukket 2/10 14:48.
+    **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` ·
+    `npm run build` — grøn 2/10 20:12 (**3797** tests i 233 filer, +16), plus
+    `locale-leak.mjs --gate` exit 0 og `knapgruppe-scan.mjs` 0/0.
+    **Denne iteration:** `/leasing`s sammenligning var **det modsatte af
+    rigtigt**. Den stillede bruttobeløbene op mod hinanden — leasing 178.350 kr
+    mod billån 319.134 kr — så siden læser som om leasing var 140.784 kr
+    billigere. Men du ejer bilen under et billån: 150.000 kr står tilbage, så
+    **nettet er 169.140 mod 178.350**, og et billån er 9.210 kr. billigere.
+    Hver mulighed har nu «Efter perioden» og «Netto omkostning», dommen skrives
+    af modulet i da/se/no, og regnestykket — der lå i `useMemo` uden en eneste
+    test — ligger nu i `src/lib/leasing.ts` med 16 tests.
+    **Næste iteration:** `/leasing`s svenske blok har stadig **32**
+    håndskrevne beløb (titel, description, metaDescription, ogDescription,
+    schemaDescription + 5 FAQ-svar) — de læses nu fra samme modul, så det er en
+    ren streng-om-skrivning → `/kalorier` (17) → `/moms` (⛔ lovgrænser) →
+    `/kvadratmeter` (6). **Feature-slot:** planens `## Feature-kø` er alle
+    ⛔-blokerede; se ❓ om ferieloven og GSC-eksporten, for de to kan låse hen-
+    holdsvis `/dage-til` og F1-F3 op.
 
 ## Fase 3 — trafik-drevet
 
@@ -105,6 +109,13 @@ er blokeret af en ❓ og må ikke gættes.
   bygget på `beregnTriatlon`, da+se+no (`3720dea`). MÅL: `/pace` 2 af 10
   danske completioner under «tid beregner» (27k visninger, pos. 5) konverterer
   nu til et værktøj. Måles ved næste Plausible-snapshot.
+- **[x] ✅ `/leasing` sammenligner på det rigtige tal** — `leasing-restvaerdi-`
+  sammenlign` 2/10. Se `docs/plan-arkiv.md`. MÅL: `beraknare.se/leasing`
+  2.923 visninger / 33 klik / 1,1 % / pos. 12,2 → mod 14 dage; de fire
+  søgninger «fåretagsleasing bil kalkyl» (169v), «beräkna leasing bil företag»
+  (160v), «leasing kalkylator» (112v) og «leasingkostnad bil» (109v) ligger på
+  pos. 9-15, og svaret på «blir leasing billigere eller dyrere» lå før uden
+  ét tal.
 - **Feriesider: vinterferie og påskeferie** — *Hvem:* «skoleferie 2026» og
   «efterårsferien» (10. af 10 completioner under «hvor mange dage er der til»).
   *Accept:* to sider i `/dage-til` med samme mønster som efterårsferien.
@@ -149,7 +160,7 @@ Køen pr. slug efter `/vaegttab` er: `kalorier` 17 · `moms` 15 ·
 `aktieskat` 5 · `loen-efter-skatt` 4 · `topskat` 4 · `boernepenge` 4 · resten ≤3.
 **Anbefalet rækkefølge:** `/vaegttab` FAQ (12, se 1.277 visninger — halve 2 af
 den opgave der lukkede metadata i dag) → `/kalorier` (17, se 2.825) →
-`/moms` (men ⛔ de 3 lovgrænser) → `/leasing` (9, se 2.923) →
+`/moms` (men ⛔ de 3 lovgrænser) → `/leasing` (se 2.923) →
 `/kvadratmeter` (6, se 3.705).
 *Accept pr. slice:* ét slug pr. opgave, 12 fund eller færre, de læses fra sit
 eget modul, og en mutation i porten. `/vaegttab` blev delt i to halvdele
@@ -157,6 +168,14 @@ eget modul, og en mutation i porten. `/vaegttab` blev delt i to halvdele
 bliver listen 152 lang og de 152 tal bliver en tilladelsesliste** — det er
 måske nok det, men en tilladelsesliste over fejl er dyrere end porten er bred.
 Derfor: fix slugs først, portudvidelsen som sidste skridt når de er nede mod 0.
+
+**Lukket 2/10 20:20 — `leasing-restvaerdi-sammenlign` (delvis).** Se
+`docs/plan-arkiv.md`. *Målt:* porten går rød 5 steder, når
+`nettoOmkostning` for billånet sættes tilbage til det gamle bruttobeløb. Den
+**åbne** del er de **32** håndskrevne beløb i den svenske blok (titel,
+description, metaDescription, ogDescription, schemaDescription + 5 FAQ-svar) —
+de læses fra `LEASING_EKSEMPEL` og `beregnLeasingSammenlign` nu, så det er en
+ren om-skrivning af strenge, ikke en ny måling.
 
 **Lukket 2/10 17:30 — `vaegttab-tal-fra-modul` (halve 1: metadata).** De fire
 beskrivelsesfelter og titlen på alle tre sprog skrev «2.209», «2.759» og
@@ -197,6 +216,17 @@ master-koden. `/renteberegner` se: 3.124 visninger, 33 klik, 1,1 %, pos. 12,2.
 **Åben:** `/moms` har 3 fund tilbage, som er lovgrænser (dansk registrering over
 50.000 kr, svensk over 120.000 kr, told ved import over 1.150 kr). ❓ nedenfor.
 
+**Åben: dobbelt valutaenhed på 7 beregnere.** Målt 2/10 20:26 i den rene
+HTML fra `next start`: `LeasingBeregner` skriver **«178.350 kr. kr.»**, fordi
+`formatCurrency(v, "da")` med `style: "currency"` **selv** afslutter med
+«kr.», og komponenten så skriver « kr.» oveni. Samme mønster i
+`SUBeregner`, `GaeldsfriBeregner`, `BruttoNettoBeregner`, `TopskatBeregner`,
+`PensionBeregner` og `AktieskatBeregner`. *Accept:* `formatKr`-kaldene
+sender ikke længere `kr.` med, **eller** de bruger `formatNumber` +
+`getCurrencySuffix`, som er de to andre steder i repoet gør — og en test på den
+rendrede streng, så den ikke kan komme tilbage. Ikke rettet i `/leasing`-opgaven:
+det ville gøre diffen dobbelt så stor for en fejl uden for dens emne.
+
 **Åben: norske tusindtalsseparatorer.** `/renteberegner` skriver nu «1 887»
 med mellemrum, mens resten af `noPages` skriver «2.500» med punktum («BMR
 1.780 kcal» på `/kalorier»). Mellemrum er den rigtige bokmålsskrivemåde, så
@@ -223,6 +253,7 @@ ingen regex på tal og tekst.
 | Slug | Prøv på indhold |
 |---|---|
 | `vaegttab-tal-fra-modul` (**ny**, vindue 2/10 21:30) | `minberegner.dk/vaegttab`: `<title>` skal være byte-uændret «Vægttab: 6 kg på 12 uger = 550 kcal/dag» og `<meta name="description">` «Mand på 80 kg, 180 cm og 30 år med moderat aktivitet: 6 kg på 12 uger kræver 550 kcal i underskud, så du skal spise **2.209** kcal om dagen.»; `og:description` og JSON-LD `description` skal have «**2.209** kcal om dagen (TDEE **2.759** kcal).» og «spiser **2.209** kcal/dag.». **Hele HTML'en skal have 0** `2 209` (dansk side) og FAQ'en skal stadig have «2.759»/«2.209»/«7.700»/«1.500»/«1.200» — de er halve 2, ikke denne. `beraknare.se/vaegttab`: `<title>` «Viktminskning: 6 kg på 12 veckor = 550 kcal/dag» og beskrivelsen «… du behöver äta **2 209** kcal per dag.» — **2 209 med mellemrum**, og **intet** «2.209» på domænet. `beregner.no`: 404'er (❓ nedenfor), uændret |
+| `leasing-restvaerdi-sammenlign` (**ny**, vindue 2/10 21:30) | `beraknare.se/leasing`: FAQ-en skal have **syv** spørgsmål, hvor «Blir leasing dyrare eller billigare än ett billån?» svarer med **hele regnestykket**: «Det beror på restvärdet och räntan. Med kalkylatorns standardvärden — **300 000** kr i bilpris, **150 000** kr i restvärde, **4,5** % ränta, **30 000** kr i kontantinsats och **36** månader — kostar leasingen **178 350** kr. Ett billån med samma förutsättningar kostar **169 140** kr, alltså **9 210** kr mer. Skillnaden är att du äger bilen under ett billån: du har **150 000** kr kvar att sälja den för när långivstiden är slut, medan du med leasing står med **0** kr.». Samme sætning skal stå i JSON-LD `acceptedAnswer`. **Intet** «Det beror på restvärdet och räntan. Ett lågt restvärde» i hele HTML'en. `minberegner.dk/leasing`: FAQ-en skal stadig have de **tre** generiske spørgsmål (byte-uændret) og **intet** «169 140» / «178 350». **Intet** `NaN` nogen steder |
 | `svensk-excel-formel` (**ny**, vindue 2/10 21:30) | `beraknare.se/renteberegner`: Excel-tabellen skal have **`=BETALNING(0,04/12;240;-200000)`** → svar **1 211,96 kr** og **`=BETALNING(0,04/12;240;-200000)*240-200000`** → **90 870,56 kr**, og fældene skal sige «Använd det svenska decimaltecknet (komma) i räntan: **0,04/12**, inte 0.04/12.». **Intet** `BETALNING(4/12` i hele HTML'en, og **intet** `BETALNING(0.04` (punktum som decimaltegn). Tredje række `=200000*4/100` → **8 000 kr** uændret. **0** `NaN` og **0** `æ`/`ø`. `minberegner.dk/renteberegner`: **0** `BETALNING`, **7** `=YDELSE(0,04/12;240;-200000)` og **2** `=RENTENPERIODER(0,04/12;-1211,96;200000)` uændrede |
 | `procentpoint-faq-tal-fra-modul` (**ny**, vindue 2/10 21:30) | `minberegner.dk/procent`: FAQ'en skal have **«Procentpoint trækker du to procenttal fra hinanden: 22,1 % til 19,7 % er -2,4 procentpoint. Procent regner du på det gamle tal: de samme tal er -10,9 %.»** — **intet** «11,3 %» i hele HTML'en (det skal kun stå på `/ejendomsvaerdiskat`, om mio. kr). `beraknare.se/procent`: «Procentenheter får du genom att dra två procenttal från varandra: 22,1 % till 19,7 % är **−2,4** procentenheter. Procent räknar du på det gamla talet: samma tal är **−10,9** %.» — minus skal være **U+2212** (prøv: `grep -c $'är −2,4'` på strippet HTML), fordi `Intl` skriver det for sv-SE, så FAQ'en nu bærer samme tegn som tabellen ved siden af. Dansk minus er ASCII-bindestreg. **Intet** «NaN» nogen steder |
 | `renteberegner-belob-fra-modul` (**ny**, vindue 2/10 21:30) | `minberegner.dk/renteberegner`: `<meta name="description">` skal være **byte-uændret** «Annuitetslån på **100.000** kr. med **5** % rente i **5** år: **1.887** kr. i måneden og **13.227** kr. i samlet rente. Beregn også serielån.» — dansk er bevidst uændret. **Intet** «1.887» på beraknare.se og intet «1 887» på minberegner.dk. `beraknare.se/renteberegner`: `<title>` skal være «Räntekalkylator: **100 000** kr i **5** år = **1 887** kr/mån» og beskrivelsen «… kostar **1 887** kr i månaden … Total ränta: **13 227** kr.», FAQ'en skal have **syv** spørgsmål hvor «Vad är formeln för ett annuitetslån?» svarer «… lån på **200 000** kr till **4** % i **20** år ger **1 212** kr i månaden — **240** månader, **290 871** kr i alt varav **90 871** kr är ränta.» og «Hur räknar jag ett annuitetslån i Excel?» svarer «… =BETALNING(**0,05**/12;**60**;-100000) ger **1 887** kr …». `minberegner.dk/renteberegner`: FAQ'en skal have **seks** spørgsmål hvor formelsvaret svarer «… lån på **200.000** kr. til **4** % i **20** år giver **1.211,96** kr. pr. måned. I Excel er det =YDELSE(**0,04**/12;**240**;-200000)». **Intet** «1 887» og **intet** «13 227» på minberegner.dk. **Intet** «NaN» nogen steder |

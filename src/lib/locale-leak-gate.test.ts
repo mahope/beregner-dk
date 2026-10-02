@@ -529,7 +529,11 @@ describe("locale-leak scanner", () => {
     const original = readFileSync(target);
     try {
       const src = original.toString("utf8");
-      const anchor = /useState<string>\('30000'\)/;
+      // Anchoren følger koden: `LeasingBeregner.tsx` læser sine startværdier fra
+      // `LEASING_EKSEMPEL` (2/10), så der står ikke længere et bogstaveligt tal i
+      // `useState`. Det planten skal have er en `useState<string>(` **generisk**,
+      // så formen matcher kilden uanset hvad der står som startværdi.
+      const anchor = /^ {2}const \[bilpris, setBilpris\] = useState<string>\(.*$/m;
       expect(anchor.test(src)).toBe(true);
       // The exact false positive the first attempt produced: a generic whose
       // `>` is followed by more declarations, so a rule that only looks
@@ -541,7 +545,7 @@ describe("locale-leak scanner", () => {
         target,
         src.replace(
           anchor,
-          "useState<string>('30000');\n  const [udbætaling, setUdbætaling] = useState<string>('4.5');"
+          "  const [bilpris, setBilpris] = useState<string>('300000');\n  const [udbætaling, setUdbætaling] = useState<string>('4.5');"
         )
       );
       const run = runScanner();

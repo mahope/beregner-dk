@@ -24,6 +24,7 @@ import {
   rabatProcent,
 } from "./procent";
 import { formatBelob, formatNumber, formatSvenskText } from "./format";
+import { LEASING_EKSEMPEL, beregnLeasingSammenlign, leasingSammenlignFaqSvar } from "./leasing";
 import { procentpointForskelFaqSvar } from "./procentpoint";
 import {
   BESKAEFTIGELSESTILLAEG_2026,
@@ -161,6 +162,8 @@ export type PageData = {
   schemaDescription: string;
   schemaCategory: string;
 };
+
+const LEASING_SAMMENLIGN = beregnLeasingSammenlign(LEASING_EKSEMPEL)!;
 
 const kr = (value: number) => value.toLocaleString("da-DK");
 /** Svensk løbende tekst: "643 000" og "32,38" — tallene fra `svensk-skatt`. */
@@ -4082,7 +4085,7 @@ const sePages: Record<string, PageData> = {
       faqItems: [
       { question: "Vad kostar leasing av en bil på 300.000 kr?", answer: "Med 150.000 kr i restvärde, 4,5 % ränta, 30.000 kr i kontantinsats och 36 månaders löptid blir månadskostnaden 4.121 kr, vilket är 178.350 kr totalt inklusive 28.350 kr i ränta." },
       { question: "Vad är värdetabet på en leasingbil?", answer: "Värdetabet är bilpriset minus restvärdet. Med 300.000 kr i bilpris och 150.000 kr i restvärde är det 150.000 kr. Det är det belöp du betalar för att bilen tappar värde under löptiden." },
-      { question: "Blir leasing dyrare eller billigare än ett billån?", answer: "Det beror på restvärdet och räntan. Ett lågt restvärde gör att mer värde förloras under löptiden, så månadskostnaden blir högre, men du har samtidigt mindre att betala med om bilen ska säljas. Med kalkylatorns standardvärden jämför den leasing, billån och kontantköp." },
+      { question: "Blir leasing dyrare eller billigare än ett billån?", answer: leasingSammenlignFaqSvar(LEASING_SAMMENLIGN, "se") },
       { question: "Vad är fåretagsleasing och vad kostar det?", answer: "Fåretagsleasing är det vanliga namnet på leasing av bil i Sverige. Kalkylatorn räknar ut månadskostnaden av bilpris, kontantinsats, ränta, restvärde och löptid: en bil på 300.000 kr med 150.000 kr i restvärde, 4,5 % ränta, 30.000 kr i kontantinsats och 36 månader ger 4.121 kr i leasingkostnad per månad. Den räknar inte ut skatten, eftersom det beror på om leasingen drivs i näringsverksamhet eller privat." },
       { question: "Kan jag ändra bilpris, restvärde, ränta och löptid?", answer: "Ja. Alla fält är redigerbara, så att du kan få en beräkning som följer det leasingavtal du jämför." },
       { question: "Är resultatet korrekt?", answer: "Kalkylatorn ger en god uppskattning utifrån effektiv ränta och en genomsnittlig gällande gäld. Den slutliga kostnaden beror på leasingavtalets villkor, till exempel bonus och serviceavgifter." },

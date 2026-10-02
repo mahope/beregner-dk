@@ -25204,3 +25204,72 @@ squashet til `master` i ét commit med planen.
 pos. 8,2** pr. 2026-09-02 → 2026-09-30. Dansk under top-15, så ingen CTR-baseline
 at flytte. Rettelsen er en korrekthedstask, ikke en CTR-tasking — forventningen er
 **ingen** ændring i visninger; beskrivelserne er byte-uændrede på dansk.
+
+---
+
+## 2/10 20:20 — `leasing-restvaerdi-sammenlign` (delvis lukket)
+
+**Feature.** `/leasing` sammenlignede leasing mod billån mod kontantkøb på
+**bruttobeløbene**. Målt på sitets egne startværdier (300.000 / 150.000 / 36 mdr
+/ 4,5 % / 30.000) gav det:
+
+| | Månedlig | I alt | Efter perioden | **Netto** |
+|---|---|---|---|---|
+| Leasing | 4.121 | 178.350 | 0 | **178.350** |
+| Billån | 8.031 | 319.140 | 150.000 | **169.140** |
+| Kontant | 7.500 | 300.000 | 150.000 | **150.000** |
+
+Siden viste altså «178.350 mod 319.140», altså **140.790 kr. til leasings
+fordel** — mens den rigtige forskel er **9.210 kr. til billånets fordel**, fordi
+billånet efterlader en bil værd 150.000 kr. Begge tal var rigtige, og
+sammenligningen var alligevel omvendt.
+
+**Årsagen:** `nettoOmkostning` fandtes ikke. `LeasingBeregner.tsx` trak bare
+`totalLeasing`, `totalLaan` og `kontantMaanedlig` fra sin `useMemo`, og der var
+ingen test for `/leasing` overhovedet — så ingen målte den.
+
+**Rettelsen:** ny `src/lib/leasing.ts` med `beregnLeasing`,
+`beregnLeasingSammenlign`, `leasingSammenlignSætning` (da/se/no) og
+`leasingSammenlignFaqSvar` (da/se/no). Hver mulighed har nu `ejerVedUdlob` og
+`nettoOmkostning = total − ejerVedUdlob`, og UI'et viser «Efter perioden» og
+«Netto omkostning» under hver af de tre. Dommen læses fra modulet, så den er
+også i FAQ'en og i JSON-LD'en — før stod «Det beror på restvärdet och räntan»
+uden ét tal, selv om det var hele spørgsmålet.
+
+**Målt:** 16 nye tests i `src/lib/leasing.test.ts`. Porten går **5 røde**, når
+`nettoOmkostning` for billånet sættes tilbage til det gamle bruttobeløb. Dommen
+skifter retning korrekt: `restvaerdi: 0` gør leasing billigst, og sætningen siger
+«mindre» i stedet for «mer». Muteret fil genskabt byte-for-byte (`diff -q` tom).
+
+**To ting fundet undervejs, som blev rettet i samme opgave:**
+
+1. **Kontantkøb kan aldrig være dyrere end et billån** i modellen (intet rente at
+   betale), så en `billigst`-dom med alle tre ville altid pege på kontantkøb. Og
+   lægger man den foregåede rente på den bundne kapital ind, blir resultatet
+   *præcis* leasingens, fordi leasings gæld er den samme gennemsnitsgæld. Dommen
+   gælder derfor kun de to afdragsformer, som er dem brugeren vælger imellem.
+2. **`locale-leak-gate.test.ts` Plantede sit fixture i `/leasing`.** Porten
+   læser `useState<string>('30000')` i `LeasingBeregner.tsx` for at bevise, at
+   scanneren ikke tager en TypeScript-generisk for JSX-tekst. Startværdierne
+   læses nu fra `LEASING_EKSEMPEL`, så ankeret følger koden: regexen matcher nu
+   selve `useState<string>(`-formen. Plantens formål er uændret.
+
+**Åben:** 32 håndskrevne beløb i den svenske `/leasing`-blok (titel, description,
+metaDescription, ogDescription, schemaDescription + 5 FAQ-svar). De læses fra
+`LEASING_EKSEMPEL` og `beregnLeasingSammenlign` nu, så næste slice er en ren
+om-skrivning af strenge. Tællingen før/efter er 32/32 — det gik **ikke** ned,
+fordi den håndskrevne sætning jeg erstattede ikke havde beløb med tusindtals-
+separator. Det der ændrede sig, er at påstanden nu er genereret.
+
+**Selvreviewen fandt to fejl i min egen diff, begge rettet før committen:**
+
+1. **Kontantkøbs månedstal var ændret ved en fejl.** Jeg havde skrevet
+   `(bilpris − udbetaling) / løbetid` = 7.500 i stedet for det gamle
+   `(bilpris − restværdi) / løbetid` = 4.167. Det gjorde samtidig `vaerdtabNote`
+   («Værditab fordelt over perioden») til en løgn, og den note stod under et
+   `*` på kortet. Tilbage til værdiforringen fordelt, og testen låser nu
+   `kontant.maanedlig = vaerdtab / loebetid`, så noter og tal ikke kan glide fra
+   hinanden igen.
+2. **To labels blev døde.** `totalDuEjerIkke` og `totalDuEjer`（「Total: X (du
+   ejer ikke bilen)」）er ikke længere læst nogen sted, efter at «Efter
+   perioden» overtog deres opgave. Slettet i alle tre sprog.
