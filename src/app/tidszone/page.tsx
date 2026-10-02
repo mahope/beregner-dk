@@ -26,6 +26,7 @@ import {
   TIDSSKILLNADS_LANDE,
   tidsskillnadRaekker,
 } from "@/lib/tidszone-eksempler";
+import { KLOKKEN_LANDE, getKlokkenPrefix } from "@/lib/klokken-i";
 import Link from "next/link";
 
 /**
@@ -95,6 +96,12 @@ export default async function TidszonePage() {
   const locale = await getLocale();
   const domainConfig = await getCurrentDomainConfig();
   const pageData = getPageData("tidszone", locale) || getPageData("tidszone", "da")!;
+  // Præfikserne læses fra modulet, der også skriver dem i sitemap, så en
+  // landeside ikke kan få et prefix her, der peger på 404. Er der intet
+  // prefix (norsk domæne), er der heller ingen liste — der er ingen
+  // `/klokken-i/`-rute at linke til.
+  const klokkenPrefixDa = getKlokkenPrefix("da");
+  const klokkenPrefixSe = getKlokkenPrefix("se");
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -468,6 +475,30 @@ export default async function TidszonePage() {
           aftale.
         </p>
 
+        <h2>Hvad er klokken i et andet land?</h2>
+        <p>
+          Mange spørger bare «hvad er klokken i Japan?» eller «hvad er klokken
+          i Tyrkiet?». Svaret afhænger af datoen, fordi USA, Canada og
+          Australien skifter tid på andre datoer end Danmark, så et fast tal
+          kan være forkert i de få uger, hvor Danmark og landet ikke skifter
+          samtidig. Hver side nedenfor svarer med klokkeslættet lige nu i én by
+          i landet — for USA finder du alle fire kystzoner.
+        </p>
+        <ul>
+          {klokkenPrefixDa
+            ? KLOKKEN_LANDE.map((land) => (
+                <li key={land.slugDa}>
+                  <Link
+                    href={`${klokkenPrefixDa}${land.slugDa}`}
+                    className="underline"
+                  >
+                    {`Hvad er klokken i ${land.navnDa}?`}
+                  </Link>
+                </li>
+              ))
+            : null}
+        </ul>
+
         <h2>Sådan regner du tidsforskel ud i Excel</h2>
         <p>
           Hvis du har to klokkeslæt — et i Danmark og et i den anden by — er
@@ -540,7 +571,8 @@ export default async function TidszonePage() {
         <h2>Tidsskillnad till de länder folk frågar om</h2>
         <p>
           Tabellen ovan visar städer. Här är samma skillnader för hela{" "}
-          <strong>länder</strong>, eftersom           &quot;tidsskillnad Japan&quot;,
+          <strong>länder</strong>, eftersom{" "}
+          &quot;tidsskillnad Japan&quot;,{" "}
           &quot;tidsskillnad Thailand&quot; och &quot;tidsskillnad Turkiet&quot; är
           länder, inte städer. För {byListe("se")} är skillnaden densamma som i
           städstabellen.
@@ -571,6 +603,30 @@ export default async function TidszonePage() {
           använder inte sommartid</strong>, så de ligger en timme tidigare, när
           Sverige har sommartid. Det är fällan som ger det felaktiga mötet.
         </p>
+
+        <h2>Vad är klockan i ett annat land?</h2>
+        <p>
+          Många frågar bara «vad är klockan i Japan?» eller «vad är klockan i
+          Turkiet?». Svaret beror på datum, för USA, Kanada och Australien
+          byter tid på andra datum än Sverige, så ett fast tal kan vara fel i
+          de få veckor då Sverige och landet inte byter samtidigt. Varje sida
+          nedan svarar med klockslaget just nu i en stad i landet — för USA
+          hittar du alla fyra kustzonerna.
+        </p>
+        <ul>
+          {klokkenPrefixSe
+            ? KLOKKEN_LANDE.map((land) => (
+                <li key={land.slugSe}>
+                  <Link
+                    href={`${klokkenPrefixSe}${land.slugSe}`}
+                    className="underline"
+                  >
+                    {`Vad är klockan i ${land.navnSe}?`}
+                  </Link>
+                </li>
+              ))
+            : null}
+        </ul>
 
         <h2>Så räknar du ut tidsskillnad i Excel</h2>
         <p>

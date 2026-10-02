@@ -539,3 +539,70 @@ describe("tidszone stat-tabel for USA", () => {
     }
   });
 });
+
+describe("tidszone giver hver landside en indgang", () => {
+  beforeEach(() => {
+    vi.mocked(getLocale).mockResolvedValue("da");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("da"));
+  });
+
+  // 2/10: de 24 nye sider (12 lande paa hvert domaene) var kun linkede til
+  // hinanden og linkede selv til /tidszone — vejen den anden vej var tom, saa
+  // /tidszone (24.358 visninger, 0,4 % CTR, pos. 7,6) ikke gav dem et eneste
+  // indlaeg. Porten dommer paa den *renderede* side, fordi en href paa det
+  // forkerte domaene er usynlig i kilden: listen af lande er den samme paa
+  // begge domaener, saa kun prefixen kan vaere forkeret. Slugs og navne er
+  // skrevet som litteraler her — ikke læst fra KLOKKEN_LANDE — fordi en port
+  // der laeser sin forventning fra det samme modul som koden, ikke kan se
+  // en fejl i modulet. Tilfojes et land, skal porten vaere med.
+  const SLUGS_DA = [
+    "usa", "thailand", "australien", "japan", "tyrkiet", "canada",
+    "kina", "indien", "england", "spanien", "brasilien", "portugal",
+  ];
+  const SLUGS_SE = [
+    "usa", "thailand", "australien", "japan", "turkiet", "kanada",
+    "kina", "indien", "england", "spanien", "brasilien", "portugal",
+  ];
+
+  test.each([
+    { locale: "da" as const, prefix: "/klokken-i/", slugs: SLUGS_DA, spoergsmaal: "Hvad er klokken i", anker: ["Japan", "Tyrkiet", "USA"], andet: "/klockan-i/", andetTekst: "Vad är klockan i" },
+    { locale: "se" as const, prefix: "/klockan-i/", slugs: SLUGS_SE, spoergsmaal: "Vad är klockan i", anker: ["Japan", "Türkiet", "Kanada"], andet: "/klokken-i/", andetTekst: "Hvad er klokken i" },
+  ])(
+    "$locale linker til alle 12 landesider med spoergsmaalstekst som anker",
+    async ({ locale, prefix, slugs, spoergsmaal, anker, andet, andetTekst }) => {
+      vi.mocked(getLocale).mockResolvedValue(locale);
+      vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale(locale));
+
+      const html = renderToStaticMarkup(await TidszonePage());
+
+      for (const slug of slugs) {
+        expect(html).toContain(`href="${prefix}${slug}"`);
+      }
+      // Ankerteksten er hele spoergsmaalet, saa den ikke kan vaere et navn
+      // der ikke svaerer til den side den peger paa. Tyrkiet/Türkiet og
+      // Canada/Kanada er de to, hvor de to domaener har forskellige navne.
+      for (const navn of anker) {
+        expect(html).toContain(`>${spoergsmaal} ${navn}?</a>`);
+      }
+
+      // Præcis de 12 — ikke flere, ikke færre — og intet fra det andet domaene.
+      const links = [...html.matchAll(new RegExp(`href="${prefix}[a-z-]+"`, "g"))];
+      expect(links).toHaveLength(slugs.length);
+      expect(html).not.toContain(`href="${andet}`);
+      expect(html).not.toContain(andetTekst);
+    }
+  );
+
+  // Samme fejlklasse som de manglende {" "} i C55/C56: JSX bevarer flere
+  // mellemrum paa én linje, saa den svenske landetabel-boen skrev "eftersom"
+  // med elleve mellemrum foran det foerste gaense citat. tsc, lint og build
+  // ser det ikke — det er synligt i markupken, og derfor laeses her.
+  test("den svenska landetabel-sætning har ét mellemrum foran citatet", async () => {
+    vi.mocked(getLocale).mockResolvedValue("se");
+    vi.mocked(getCurrentDomainConfig).mockResolvedValue(getDomainConfigByLocale("se"));
+
+    const html = renderToStaticMarkup(await TidszonePage());
+
+    expect(html).toContain("eftersom &quot;tidsskillnad Japan&quot;,");
+  });
+});

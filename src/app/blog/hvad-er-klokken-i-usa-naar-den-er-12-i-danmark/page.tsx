@@ -436,6 +436,16 @@ export default function TidszoneUsaPage() {
           standardtidsforskellene, så tjek altid datoen op mod tabellen ovenfor, hvis dit
           møde ligger i marts eller oktober.
         </p>
+        <p>
+          Skal du bare se, hvad der er klokken i USA lige nu, står svaret for alle
+          fire kystzoner — New York, Chicago, Denver og Los Angeles — på{" "}
+          <Link href="/klokken-i/usa" className="text-blue-600 hover:underline">
+            siden om klokken i USA
+          </Link>
+          . Den slags sider findes for Japan, Thailand, Tyrkiet, Canada, England
+          og de øvrige lande — de er de lande, dansk autocomplete fylder ind
+          efter «hvad er klokken i».
+        </p>
 
         <div className="not-prose my-8">
           <Link

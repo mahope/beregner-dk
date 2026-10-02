@@ -23535,3 +23535,61 @@ screenshots.
 **Mål:** `/tidsberegner` 291 besøgende/28d (bounce 8 %), 74.546 visninger,
 0,3 % CTR, pos. 6,9 pr. GSC 2026-09-01→09-29. Rettelsen flytter ikke trafik i
 sig selv; den fjerner en modsigelse på en side der ligger i top-3. Genmål 16/10.
+
+---
+
+## 2/10 04:32 — `ceo/tidszone-links-til-lande` → `ceo/landesider`
+
+**Hvad.** `/tidszone` har nu en sektion med alle 12 landesider i begge sprog,
+og blogindlægget om USA linker til `/klokken-i/usa`. Samme diff rettede en
+mellemrumsfejl i den svenske landetabel-boen.
+
+**Hvorfor.** De 24 sider fra `ceo/klokken-i-land` (12 lande × 2 domæner) blev
+bygget med links *til* `/tidszone` og *mellem sig selv* — men der var ingen
+vej *fra* `/tidszone` ind i dem. Det er den side der har flest visninger i
+emnekredsen: 24.358 GSC-visninger / 104 klik / 0,4 % CTR / pos. 7,6 (1/10) og
+3.527 / 12 / 0,3 % / 7,7 på beraknare.se. To blogindlæg-linking var det andet
+`Næste skridt` på opgaven.
+
+**Målinger.**
+
+- **De 12 anchors er fundet i den renderede HTML for begge domæner**, ikke i
+  kildekoden: `href="/klokken-i/japan"` → `Hvad er klokken i Japan?` og
+  `href="/klockan-i/kanada"` → `Vad är klockan i Kanada?`. Prefixet læses fra
+  `getKlokkenPrefix()`, altså samme funktion der skriver sitemap — en landeside
+  kan derfor ikke få et prefix her der peger på 404, og norsk domæne får hverken
+  liste eller links.
+- **Prefixerne i porten er litteraler, ikke læst fra `KLOKKEN_LANDE`.** Første
+  udkast læste både kode og test fra modulet, som gjorde porten tautologisk for
+  netop den fejl den skal se (et land der fik forkert slug). Nu er sluglisten
+  skrevet ud i testen, så et nyt land uden testopdatering gør den rød.
+- **Porten tæller præcis 12** links pr. domæne og negativer det andet domænes
+  prefix — en svensk liste der pegede på danske sider ville ellers være grøn.
+- **Mellemrumsfejlen er målt, ikke formodet.** JSX bevarer flere mellemrum på
+  én linje, så den svenske boen skrev `eftersom           "tidsskillnad
+  Japan",`. Beviset er `renderToStaticMarkup` før rettelsen:
+  `...eftersom           &quot;tidsskillnad Japan&quot;,...` — elleve mellemrum i
+  den udsendte markup. Samme fejlklasse som de manglende `{" "}` i C55/C56:
+  gyldig JSX, grøn i tsc, lint og build.
+
+**Mutationer (punkt 12).** (1) svensk prefix sat til det danske → 1 rød i
+`se`-testen. (2) `{" "}`-rettelsen gjort tilbage til de 11 mellemrum → 1 rød i
+mellemrumstesten. 28/28 grøn på HEAD.
+
+**Copy-ændringer i samme diff, verificeret mod repoets egne moduler.** Første
+udkast skrev «USA, England og Canada skifter tid på hver sin dag» — England
+følger EU's datoer, så det er **USA, Canada og Australien** (jf.
+`tidszone-eksempler.ts:62-64`: «USA, Canada, Australien og New Zealand har egen
+sommertid på andre datoer»). Skrev også «svarer med klokkeslættet i den by, der
+står i tabellen for landet» — sandt for kun 7 af 12, da tabel og landside har
+forskellige lister. Rettet til «i én by i landet».
+
+**Ikke verificeret.** Ingen produktionskørsel — VERIFICÉR-noten er skrevet med
+sluggen. Ingen layoutændring (to lister i eksisterende `prose`-blok, samme
+`underline`-klasse som sideens øvrige interne links), så ingen screenshots.
+Plausible- og GSC-effekten kan **ikke** måles før 16/10 (14 dage), og det er
+indgangslinks — effekten er langsom og vil ikke vise sig i uge 1.
+
+**Mål:** `/tidszone` 24.358 visninger / 104 klik / 0,4 % CTR / pos. 7,6 (da) og
+3.527 / 12 / 0,3 % / 7,7 (se), GSC 2026-09-01→09-29. `/klokken-i/*` er nye
+sider uden baseline. Genmål 16/10.

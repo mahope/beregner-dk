@@ -1,17 +1,17 @@
-STATUS: 2/10 02:10. Rød CI: ingen (seneste kørsel grøn 2/10 01:55Z). Sentry:
+STATUS: 2/10 04:32. Rød CI: ingen (seneste kørsel grøn 2/10 02:08Z). Sentry:
   MINBEREGNER-1 er Next-router-støj, filtreret siden 3e67ed3 og kodetestet siden
   5f137d4 — ingen ny hændelsesgruppe. PR-TJEK: 2026-10-02 — ingen åbne PR'er.
-  CEO-kø punkt 0 er lukket (RETTET 04ca30a).
+  CEO-kø punkt 0 er lukket (RETTET 04ca30a). BRANCH-TJEK: 2/10 — ingen forældede
+  remote-branches.
 **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` ·
-  `npm run build`. Målt 2/10 02:06: 0 · 0 · **3592 grønne i 220 filer** · 0
-  (`/klokken-i/[land]` og `/klockan-i/[land]` er `ƒ` = dynamiske, som de skal
+  `npm run build`. Målt 2/10 04:32: 0 · 0 · **3595 grønne i 220 filer** · 0
+  (`/tidszone`, `/klokken-i/[land]` og bloggen er `ƒ` = dynamiske, som de skal
   være — se nedenfor).
-  **Denne iteration: `/klokken-i/<land>` og `/klockan-i/<land>`, 12 lande
-  pr. domæne.** Datagrund: **10 af 10** danske completioner under «hvad er klokken
-  i» er et land eller en by (autocomplete målt 2/10 04:05). Tidsforskellen
-  læses fra kalenderen med `Intl` — ingen håndskrevet forskel — så den er
-  korrekt også i de tre uger omkring skiftet hvor USA har skiftet og Danmark
-  ikke. `ceo/klokken-i-land`.
+  **Denne iteration: `/tidszone` og USA-blogindlægget linker nu til de 24 nye
+  landesider.** Datagrund: `/tidszone` er 24.358 visninger / 0,4 % CTR / pos.
+  7,6 (GSC 1/10) og de 12 landesider pr. domæne var kun linkede *til* siden,
+  aldrig *fra* den. Samme iteration fandt og rettede 11 bevarede mellemrum i
+  den svenske landetabel-boen. `ceo/tidszone-links-til-lande`.
 
 ## Review-fund 2/10 — lukket ✅ (MIDDEL, `ceo/tidsberegner-halvmarathon-tempo`)
 
@@ -283,10 +283,10 @@ Prioriteret efter forventet effekt på **trafik**. Datagrund fra GSC 1/10
   samme side igen. (3) `force-dynamic` på begge ruter — ellers frosser `next
   build` klokkeslættet på livstid, og alle 24 sider ville stå med det samme
   tidspunkt.
-  *Næste skridt:* der findes allerede et blogindlæg,
-  `/blog/hvad-er-klokken-i-usa-naar-den-er-12-i-danmark`, der ikke linker til
-  den nye side; det skal have et link, og `/tidszone` skal have en «Andre
-  lande»-sektion med de 12 links.
+  *Næste skridt ✅ 2/10:* blogindlægget `/blog/hvad-er-klokken-i-usa-naar-den-er-12-i-danmark`
+  linker nu til `/klokken-i/usa`, og `/tidszone` har en sektion med alle 12
+  links i begge sprog (`ceo/tidszone-links-til-lande`) — de 24 sider havde
+  ingen indgang *fra* den side, der har flest visninger.
 - **Kalorieguide på `/kalorier`.** *Hvem:* 9 af 10 danske autocomplete-træffere
   under «kalorier» er madvarer. **Blokeret på kilde** (opgave 119, ❓) — må
   ikke gættes tal.
@@ -300,6 +300,7 @@ den fulde kommando står i `docs/plan-arkiv.md` under sit slug.
 
 | Slug | Prøv på indhold |
 |---|---|
+| `tidszone-links-til-lande` (**ny**) | `minberegner.dk/tidszone` skal have **12** links med `href="/klokken-i/<slug>"` og ankerteksten «Hvad er klokken i Japan?»; `beraknare.se/tidszone` skal have 12 med `/klockan-i/…` og «Vad är klockan i Kanada?»; **intet** `/klockan-i/` på minberegner.dk og intet `/klokken-i/` på beraknare.se; den svenske landetabel-boen skal **ikke** have 11 mellemrum efter «eftersom»; `/blog/hvad-er-klokken-i-usa-naar-den-er-12-i-danmark` skal linke til `/klokken-i/usa` |
 | `tidsberegner-halvmaraton-tempo` | `/tidsberegner` **og** `beraknare.se/tidsberegner`: «halvmarathon på 1 time og 45 minutter er 21,1 km ved» skal give **4:59** i begge; `grep -c '4:58'` skal være **0** |
 | `pace-tidsberegner` | `minberegner.dk/pace` har «5:00» i et `h1`-afsnit; `/pace.txt` er 404 |
 | `klokken-i-land` (**ny**) | `/klokken-i/usa` skal vise «Det er HH:MM i New York lige nu», «New York», «8 timer foran Danmark» om vinteren og 4 by-tider i tabellen; `beraknare.se/klockan-i/turkiet` skal vise «Vad är klockan i Türkiet?» og «Det är HH:MM i Istanbul just nu»; `/klokken-i/danmark` skal være **404**; begge sitemap skal have de 12 slugs som `daily` |
