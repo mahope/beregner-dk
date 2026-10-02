@@ -34,6 +34,22 @@ export const EKSEMPEL_AARSRENTE = 4;
 export const EKSEMPEL_LOEBETID = 20;
 
 /**
+ * Det eksempel, **titlen, metadataen og FAQ'en** regner på: 100.000 kr i 5 år
+ * til 5 %.
+ *
+ * Før 2/10 stod de fire tal (100.000, 5, 1.887, 13.227, 60) håndskrevet i 19
+ * felter spredt over `daPages`, `noPages` og `sePages` — og `FAQSchema` læser
+ * præcis `faqItems`, så de var ikke bare brødtekst men tal i Googles rich
+ * resultat, som ingen port kunne se. De læses nu herfra, så et eksempel der
+ * ændrer sig, ændrer sig ét sted.
+ */
+export const EKSEMPEL_100K_HOVEDSTOL = 100_000;
+/** Den årlige rente i procent i eksemplet titlen bruger. */
+export const EKSEMPEL_100K_AARSRENTE = 5;
+/** Løbetiden i år i eksemplet titlen bruger. */
+export const EKSEMPEL_100K_LOEBETID = 5;
+
+/**
  * Den faste månedsbetalning i et annuitetslån. Samlet formel som
  * `RenteBeregner` bruger — kun hovedstol, månedlig rente og antal
  * måneder.
@@ -49,27 +65,54 @@ export function annuitetsBetalning(
   );
 }
 
-/** Eksemplet siden og værktøjet begge regner på. */
-export function annuitetsEksempel(): AnnuitetsEksempel {
-  const maanedligRente = EKSEMPEL_AARSRENTE / 100 / 12;
-  const antalMaaneder = EKSEMPEL_LOEBETID * 12;
+/** Et annuitetslån regnet på de tre tal, siderne læser. */
+export function beregnAnnuitetslån(
+  hovedstol: number,
+  aarsrente: number,
+  loebetid: number,
+): AnnuitetsEksempel {
+  const maanedligRente = aarsrente / 100 / 12;
+  const antalMaaneder = loebetid * 12;
   const maanedligBetalning = annuitetsBetalning(
-    EKSEMPEL_HOVEDSTOL,
+    hovedstol,
     maanedligRente,
     antalMaaneder,
   );
   const samletBetaling = maanedligBetalning * antalMaaneder;
 
   return {
-    hovedstol: EKSEMPEL_HOVEDSTOL,
-    aarsrente: EKSEMPEL_AARSRENTE,
-    loebetid: EKSEMPEL_LOEBETID,
+    hovedstol,
+    aarsrente,
+    loebetid,
     maanedligRente,
     antalMaaneder,
     maanedligBetalning,
     samletBetaling,
-    samletRante: samletBetaling - EKSEMPEL_HOVEDSTOL,
+    samletRante: samletBetaling - hovedstol,
   };
+}
+
+/** Eksemplet siden og værktøjet begge regner på. */
+export function annuitetsEksempel(): AnnuitetsEksempel {
+  return beregnAnnuitetslån(
+    EKSEMPEL_HOVEDSTOL,
+    EKSEMPEL_AARSRENTE,
+    EKSEMPEL_LOEBETID,
+  );
+}
+
+/**
+ * Eksemplet i titlen, metadataen og FAQ'en: 100.000 kr i 5 år til 5 %.
+ *
+ * Samme formel som {@link annuitetsEksempel} og som `RenteBeregner` bruger, så
+ * de to eksempler på siden aldrig kan regnes på to forskellige måder.
+ */
+export function hovedEksempel(): AnnuitetsEksempel {
+  return beregnAnnuitetslån(
+    EKSEMPEL_100K_HOVEDSTOL,
+    EKSEMPEL_100K_AARSRENTE,
+    EKSEMPEL_100K_LOEBETID,
+  );
 }
 
 /**

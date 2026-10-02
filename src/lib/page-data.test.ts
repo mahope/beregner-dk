@@ -7,8 +7,9 @@ import { TIDSZONER } from "./tidszone-reference";
 import { forkortBrok } from "./brok";
 import { alderLevet, formatDageLived } from "./alder-levet";
 import { formatAlder } from "./alder-eksempler";
-import { formatNumber, getIntlLocale } from "./format";
+import { formatBelob, formatNumber, getIntlLocale } from "./format";
 import { iDagISidensTidszone } from "./lokal-dato";
+import { annuitetsEksempel, hovedEksempel } from "./rente-eksempler";
 import {
   EXCEL_ANDEL,
   PROCENT_10_AF_FAQ,
@@ -232,32 +233,85 @@ describe("getPageData", () => {
       locale: "da" as const,
       title: "Renteberegner: beregn månedsydelse på annuitetslån",
       loanType: "annuitetslån",
+      maaned: "1.887",
+      samlet: "13.227",
     },
     {
       locale: "se" as const,
-      title: "Räntekalkylator: 100.000 kr i 5 år = 1.887 kr/mån",
+      title: "Räntekalkylator: 100 000 kr i 5 år = 1 887 kr/mån",
       loanType: "annuitetslån",
+      maaned: "1 887",
+      samlet: "13 227",
     },
     {
       locale: "no" as const,
-      title: "Rentekalkulator: 100.000 kr i 5 år = 1.887 kr/md",
+      title: "Rentekalkulator: 100 000 kr i 5 år = 1 887 kr/md",
       loanType: "annuitetslån",
+      maaned: "1 887",
+      samlet: "13 227",
     },
-  ])("has answer-first loan metadata for $locale", ({ locale, title, loanType }) => {
-    const data = getPageData("renteberegner", locale)!;
+  ])(
+    "has answer-first loan metadata for $locale",
+    ({ locale, title, loanType, maaned, samlet }) => {
+      const data = getPageData("renteberegner", locale)!;
 
-    expect(data.metaTitle).toBe(title);
-    expect(data.metaTitle.length).toBeLessThanOrEqual(60);
-    expect(data.description).toContain("1.887");
-    expect(data.description).toContain("13.227");
-    expect(data.description).toContain(loanType);
-    expect(data.metaDescription).toContain("1.887");
-    expect(data.metaDescription).toContain("13.227");
-    expect(data.metaDescription.length).toBeLessThanOrEqual(160);
-    expect(data.ogTitle).toBe(title);
-    expect(data.ogDescription).toContain("1.887");
-    expect(data.ogDescription).toContain("13.227");
-    expect(data.schemaDescription).toContain(loanType);
+      expect(data.metaTitle).toBe(title);
+      expect(data.metaTitle.length).toBeLessThanOrEqual(60);
+      expect(data.description).toContain(maaned);
+      expect(data.description).toContain(samlet);
+      expect(data.description).toContain(loanType);
+      expect(data.metaDescription).toContain(maaned);
+      expect(data.metaDescription).toContain(samlet);
+      expect(data.metaDescription.length).toBeLessThanOrEqual(160);
+      expect(data.ogTitle).toBe(title);
+      expect(data.ogDescription).toContain(maaned);
+      expect(data.ogDescription).toContain(samlet);
+      expect(data.schemaDescription).toContain(loanType);
+
+      // Tusindtalsseparatoren er sprogets, ikke dansks. Svensk og norsk skriver
+      // 1 887 med mellemrum, så en mutation der formatterer med `da` på et
+      // svensk eller norsk felt bliver rød her.
+      if (locale !== "da") {
+        expect(data.description).not.toContain("1.887");
+        expect(data.ogDescription).not.toContain("13.227");
+      }
+    },
+  );
+
+  /**
+   * Beløbene i `/renteberegner`s titel, metadata og FAQ skal komme fra
+   * `rente-eksempler`, ikke fra håndskrevet tekst — de stod i 19 felter på tre
+   * domæner, og `FAQSchema` læser præcis `faqItems`, så de var tal i Googles
+   * svar. Porten dømmer de afledte tal, så en mutation i modulet er rød.
+   */
+  test("renteberegners lån-tal er regnet af modulet, ikke citeret", () => {
+    const hoved = hovedEksempel();
+    const formel = annuitetsEksempel();
+
+    for (const locale of ["da", "se", "no"] as const) {
+      const data = getPageData("renteberegner", locale)!;
+      const hovedstol = formatBelob(hoved.hovedstol, locale);
+      const maaned = formatBelob(hoved.maanedligBetalning, locale);
+      const rente = formatBelob(hoved.samletRante, locale);
+      const svar = data.faqItems.find((f) => f.question.includes(hovedstol));
+
+      expect(svar, `${locale}: FAQ'en skal spørge til beløbet`).toBeDefined();
+      expect(svar!.answer).toContain(maaned);
+      expect(svar!.answer).toContain(rente);
+      expect(svar!.answer).toContain(String(Math.round(hoved.antalMaaneder)));
+      expect(data.description).toContain(hovedstol);
+
+      // Formel-eksemplet: 200.000 kr til 4 % i 20 år.
+      const formelsvar = data.faqItems.find(
+        (f) => f.answer.includes("annuitetslån") && f.answer.includes("måneder"),
+      );
+      if (formelsvar) {
+        expect(formelsvar.answer).toContain(formatBelob(formel.hovedstol, locale));
+        expect(formelsvar.answer).toContain(
+          formatBelob(formel.maanedligBetalning, locale),
+        );
+      }
+    }
   });
 
   test.each([

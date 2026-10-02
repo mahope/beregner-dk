@@ -24949,3 +24949,55 @@ rigtigt, dets placering ikke.
 **Gate grøn:** lint (689 filer), typecheck, **3758 tests / 231 filer** (+6),
 build. Punkt 13: `git diff | grep -nE '^\+.*\$[0-9]'` er tom (kun
 `${…}`-interpolation, ingen `$1`).
+
+---
+
+## `renteberegner-belob-fra-modul` — 2/10 18:20 ✅
+
+**Hvad.** Alle nitten beløb i `/renteberegner` stod som rå tekst i
+`page-data.ts`: `da` 5 felter, `no` 6, `se` 8. `FAQSchema` læser præcis
+`faqItems`, så de var tal i Googles rich resultat, ikke kun brødtekst.
+
+**Målt først.** Egen probe (samme mønster som portens `strengBelob`):
+`page-data.ts` 195 linjer med beløb, hvoraf 19 lå i de tre
+`renteberegner`-blokke. `/renteberegner` har 13.212 visninger i GSC (da) og
+3.123 (se) på 0,9 % / 0,1 % CTR — position 7,5 og 21,9.
+
+**Rettelsen.** `hovedEksempel()` i `rente-eksempler.ts` tager den samme
+`beregnAnnuitetslån()` som `annuitetsEksempel()` og `RenteBeregner`, så de to
+eksempler på siden ikke kan regnes på to måder. `EKSEMPEL_100K_*` (100.000 kr,
+5 %, 5 år) er navngivet, og 1.887 / 13.227 / 60 / 240 / 1.211,96 /
+290.871 / 90.871 er nu regnet, ikke citeret.
+
+**Tusindtalsseparatoren.** Dansk er **byte-identisk** før og efter (dump fra
+`getPageData` i da/se/no, alle 19 felter læst). Svensk og norsk gik fra
+«1.887»/«13.227» til «1 887»/«13 227», fordi det er den separator sproget
+bruger, og fordi resten af `sePages` gør det. Ny `formatBelob(tal, locale,
+decimals)` i `format.ts` rummer normaliseringen, så `/procent` og
+`/renteberegner` ikke lærer den hver især; `rabatTal` er nu en tynd
+kaldsindpakning med uændret signatur, så ingen af de 33 `/procent`-kald
+rørtes.
+
+**Bevidst konsekvens, skrevet ned.** Den norske blokke er ellers
+punktum-konsekvent («BMR 1.780 kcal» på `/kalorier»), så `/renteberegner` er
+nu den ene norske side med mellemrum. Det er den rigtige skrivemåde, og
+`beregner.no` serverer et andet site (❓ 2/10 14:15), så brugerpåvirkningen
+er nul i dag. Hele `noPages`-blokken er en selv opgave.
+
+**Porten kan fejle, målt fire gange:** `EKSEMPEL_100K_AARSRENTE` 5 → 6 giver
+**5 røde**, `EKSEMPEL_100K_HOVEDSTOL` 100.000 → 250.000 giver **5**,
+`EKSEMPEL_HOVEDSTOL` 200.000 → 300.000 giver **3**, og `formatBelob` med `"da"`
+tvunget giver **8**. Alle muterede filer genskabt byte-for-byte.
+
+**Efter:** `page-data.ts` 195 → **176** fund, `/renteberegner` på **0** i alle
+tre sprog. `regnestykker.test.ts` urørt og grøn (11/11).
+
+**Fund undervejs, ikke rettet (næste opgave).** Den svenske Excel-tabel på
+`/renteberegner` skriver **«=BETALNING(4/12;240;-200000)»** mens svarcellen
+siger 1 211,96 kr. `4/12` er 33 % pr. måned, så formlen giver et helt andet
+beløb end det der står ved siden af den — og tabellens egen fælde-tekst
+«0,04/12, ikke 0.04/12» er dermed modsigelsen. Samme fejlklasse som denne
+opgave, anden fil (`rente-excel.ts` + `page.tsx`).
+
+**Gate grøn:** lint (689 filer), typecheck, **3760 tests / 231 filer** (+2),
+build. Punkt 13: `git diff | grep -nE '^\+.*\$[0-9]'` er tom.

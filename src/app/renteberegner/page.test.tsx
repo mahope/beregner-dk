@@ -39,8 +39,8 @@ describe("renteberegner page", () => {
     {
       locale: "se" as const,
       heading: "Räntekalkylator",
-      answer: "1.887 kr i månaden",
-      interest: "Total ränta: 13.227 kr.",
+      answer: "1 887 kr i månaden",
+      interest: "Total ränta: 13 227 kr.",
     },
   ])("viser det konkrete lån-svar og beregneren i $locale", async ({ locale, heading, answer, interest }) => {
     vi.mocked(getLocale).mockResolvedValue(locale);

@@ -23,7 +23,7 @@ import {
   procentForskel,
   rabatProcent,
 } from "./procent";
-import { formatNumber, formatSvenskText } from "./format";
+import { formatBelob, formatNumber, formatSvenskText } from "./format";
 import {
   BESKAEFTIGELSESTILLAEG_2026,
   INDKOMSTKRAV_2026,
@@ -37,6 +37,7 @@ import { markedsprisFaqSvar } from "./timepris-markedspriser";
 import { timerIPeriodeFaqSvar } from "./timer-periode";
 import { ugeDatoerFaqSvar } from "./ugenummer";
 import { distanceEksempelFaqSvar, triatlonCykelAndelFaqSvar, triatlonTotalFaqSvar } from "./pace";
+import { annuitetsEksempel, hovedEksempel } from "./rente-eksempler";
 import { alderSideTekst, erstatAlderTokens } from "./alder-side-tekst";
 import { iDagPaSiden } from "./lokal-dato";
 import { getHelligdage, helligdagsnavne } from "./helligdage";
@@ -250,7 +251,7 @@ const RABAT_MOD_NY = procentForskel(RABAT_EKSEMPEL.normalPris, RABAT_EKSEMPEL.ne
  * normalisering som `procent/page.tsx` laver på sit `num`.
  */
 const rabatTal = (locale: "da" | "se", tal: number, decimaler = 0) =>
-  formatNumber(tal, locale, { maximumFractionDigits: decimaler }).replace(/\u00a0/g, " ");
+  formatBelob(tal, locale, decimaler);
 
 const rabatFaqTal = (locale: "da" | "se") => ({
   normalPris: rabatTal(locale, RABAT_EKSEMPEL.normalPris),
@@ -387,6 +388,12 @@ const seKr = (value: number) => value.toLocaleString("sv-SE");
 const daKr = (value: number) => formatNumber(value, "da");
 /** Pris pr. km med svensk notation: 1.1875 -> "1,19 kr/km". */
 const seKrPrKm = (value: number) => value.toFixed(2).replace(".", ",") + " kr/km";
+
+// ─── /renteberegner — de tal, titlen, metadataen og FAQ'en lover, regnet af `rente-eksempler`
+// frem for håndskrevet. Før 2/10 stod de i 19 felter på tre domæner, og `FAQSchema` læser
+// præcis `faqItems`, så de var tal i Googles svar og ikke kun brødtekst.
+const renteHoved = hovedEksempel();
+const renteFormel = annuitetsEksempel();
 
 // ─── DANISH (da) PAGE DATA ─────────────────────────────────────────────────
 
@@ -1362,12 +1369,12 @@ const daPages: Record<string, PageData> = {
     "renteberegner": {
       slug: "renteberegner",
       title: "Renteberegner",
-      description: "100.000 kr. i 5 år til 5 % rente koster 1.887 kr. om måneden i et annuitetslån. Samlet rente: 13.227 kr.",
+      description: `${formatBelob(renteHoved.hovedstol, "da")} kr. i ${renteHoved.loebetid} år til ${renteHoved.aarsrente} % rente koster ${formatBelob(renteHoved.maanedligBetalning, "da")} kr. om måneden i et annuitetslån. Samlet rente: ${formatBelob(renteHoved.samletRante, "da")} kr.`,
       metaTitle: "Renteberegner: beregn månedsydelse på annuitetslån",
-      metaDescription: "Annuitetslån på 100.000 kr. med 5 % rente i 5 år: 1.887 kr. i måneden og 13.227 kr. i samlet rente. Beregn også serielån.",
+      metaDescription: `Annuitetslån på ${formatBelob(renteHoved.hovedstol, "da")} kr. med ${renteHoved.aarsrente} % rente i ${renteHoved.loebetid} år: ${formatBelob(renteHoved.maanedligBetalning, "da")} kr. i måneden og ${formatBelob(renteHoved.samletRante, "da")} kr. i samlet rente. Beregn også serielån.`,
       keywords: ["renteberegner", "lånberegner", "beregn lån", "månedlig ydelse", "annuitetslån", "rente beregning"],
       ogTitle: "Renteberegner: beregn månedsydelse på annuitetslån",
-      ogDescription: "100.000 kr. i 5 år til 5 %: 1.887 kr. i måneden og 13.227 kr. i samlet rente.",
+      ogDescription: `${formatBelob(renteHoved.hovedstol, "da")} kr. i ${renteHoved.loebetid} år til ${renteHoved.aarsrente} %: ${formatBelob(renteHoved.maanedligBetalning, "da")} kr. i måneden og ${formatBelob(renteHoved.samletRante, "da")} kr. i samlet rente.`,
       category: "Økonomi",
       breadcrumbCategory: "Økonomi",
       breadcrumbCategoryHref: "/kategori/oekonomi",
@@ -1376,10 +1383,10 @@ const daPages: Record<string, PageData> = {
       schemaCategory: "FinanceApplication",
       faqItems: [
       { question: "Annuitetslån vs serielån?", answer: "Annuitetslån: fast ydelse. Serielån: fast afdrag, faldende ydelse." },
-      { question: "Hvad er ydelsen på 100.000 kr. med 5 % rente i 5 år?", answer: "Ca. 1.887 kr. om måneden i et annuitetslån, i alt 13.227 kr. i rente over de 60 terminer." },
+      { question: `Hvad er ydelsen på ${formatBelob(renteHoved.hovedstol, "da")} kr. med ${renteHoved.aarsrente} % rente i ${renteHoved.loebetid} år?`, answer: `Ca. ${formatBelob(renteHoved.maanedligBetalning, "da")} kr. om måneden i et annuitetslån, i alt ${formatBelob(renteHoved.samletRante, "da")} kr. i rente over de ${Math.round(renteHoved.antalMaaneder)} terminer.` },
       { question: "ÅOP?", answer: "Årlige Omkostninger i Procent inkl. alle gebyrer." },
       { question: "Fradrag?", answer: "Se vores rentefradragsberegner for den aktuelle fradragsværdi." },
-      { question: "Hvilken formel beregner et annuitetslån, og hvordan gør man det i Excel?", answer: "Ydelsen er P × r ÷ (1 − (1 + r)^-n), hvor r er den månedlige rente og n antal måneder. Et lån på 200.000 kr. til 4 % i 20 år giver 1.211,96 kr. pr. måned. I Excel er det =YDELSE(0,04/12;240;-200000) — lånebeløbet skal ind som et negativt tal." },
+      { question: "Hvilken formel beregner et annuitetslån, og hvordan gør man det i Excel?", answer: `Ydelsen er P × r ÷ (1 − (1 + r)^-n), hvor r er den månedlige rente og n antal måneder. Et lån på ${formatBelob(renteFormel.hovedstol, "da")} kr. til ${renteFormel.aarsrente} % i ${renteFormel.loebetid} år giver ${formatBelob(renteFormel.maanedligBetalning, "da", 2)} kr. pr. måned. I Excel er det =YDELSE(${formatBelob(renteFormel.aarsrente / 100, "da", 2)}/12;${Math.round(renteFormel.antalMaaneder)};-${renteFormel.hovedstol}) — lånebeløbet skal ind som et negativt tal.` },
       { question: "Hvad er forskellen på nominel og effektiv rente?", answer: "Den nominelle rente er den, banken oplyser, fx 4 % om året. Den effektive rente regner også med månedlig tilskrivning, så 4 % nominelt er 4,07 % effektivt. Omvendt er 1 % pr. måned 12,68 % om året. Sammenlign altid lån på den effektive rente." },
       ],
     },
@@ -2683,12 +2690,12 @@ const noPages: Record<string, PageData> = {
     "renteberegner": {
       slug: "renteberegner",
       title: "Rentekalkulator",
-      description: "100.000 kr i 5 år til 5 % rente koster 1.887 kr i måneden i et annuitetslån. Total rente: 13.227 kr.",
-      metaTitle: "Rentekalkulator: 100.000 kr i 5 år = 1.887 kr/md",
-      metaDescription: "Annuitetslån på 100.000 kr med 5 % rente i 5 år: 1.887 kr i måneden og 13.227 kr i total rente. Beregn også serielån.",
+      description: `${formatBelob(renteHoved.hovedstol, "no")} kr i ${renteHoved.loebetid} år til ${renteHoved.aarsrente} % rente koster ${formatBelob(renteHoved.maanedligBetalning, "no")} kr i måneden i et annuitetslån. Total rente: ${formatBelob(renteHoved.samletRante, "no")} kr.`,
+      metaTitle: `Rentekalkulator: ${formatBelob(renteHoved.hovedstol, "no")} kr i ${renteHoved.loebetid} år = ${formatBelob(renteHoved.maanedligBetalning, "no")} kr/md`,
+      metaDescription: `Annuitetslån på ${formatBelob(renteHoved.hovedstol, "no")} kr med ${renteHoved.aarsrente} % rente i ${renteHoved.loebetid} år: ${formatBelob(renteHoved.maanedligBetalning, "no")} kr i måneden og ${formatBelob(renteHoved.samletRante, "no")} kr i total rente. Beregn også serielån.`,
       keywords: ["rentekalkulator", "lånekalkulator", "beregn lån", "månedlig betaling", "annuitetslån", "renteberegning"],
-      ogTitle: "Rentekalkulator: 100.000 kr i 5 år = 1.887 kr/md",
-      ogDescription: "100.000 kr i 5 år til 5 %: 1.887 kr i måneden og 13.227 kr i total rente.",
+      ogTitle: `Rentekalkulator: ${formatBelob(renteHoved.hovedstol, "no")} kr i ${renteHoved.loebetid} år = ${formatBelob(renteHoved.maanedligBetalning, "no")} kr/md`,
+      ogDescription: `${formatBelob(renteHoved.hovedstol, "no")} kr i ${renteHoved.loebetid} år til ${renteHoved.aarsrente} %: ${formatBelob(renteHoved.maanedligBetalning, "no")} kr i måneden og ${formatBelob(renteHoved.samletRante, "no")} kr i total rente.`,
       category: "Økonomi",
       breadcrumbCategory: "Økonomi",
       breadcrumbCategoryHref: "/kategori/oekonomi",
@@ -2697,7 +2704,7 @@ const noPages: Record<string, PageData> = {
       schemaCategory: "FinanceApplication",
       faqItems: [
       { question: "Annuitetslån vs serielån?", answer: "Annuitetslån: fast betaling. Serielån: fast avdrag, synkende betaling." },
-      { question: "Hva er betalingen på 100.000 kr med 5 % rente i 5 år?", answer: "Ca. 1.887 kr i måneden med annuitetslån, totalt 13.227 kr i rente over de 60 avdragene." },
+      { question: `Hva er betalingen på ${formatBelob(renteHoved.hovedstol, "no")} kr med ${renteHoved.aarsrente} % rente i ${renteHoved.loebetid} år?`, answer: `Ca. ${formatBelob(renteHoved.maanedligBetalning, "no")} kr i måneden med annuitetslån, totalt ${formatBelob(renteHoved.samletRante, "no")} kr i rente over de ${Math.round(renteHoved.antalMaaneder)} avdragene.` },
       { question: "Effektiv rente?", answer: "Årlige kostnader inkl. gebyrer." },
       { question: "Fradrag?", answer: "Sjekk Skatteetaten for fradragsregler for renteutgifter." },
       ],
@@ -3962,12 +3969,12 @@ const sePages: Record<string, PageData> = {
     "renteberegner": {
       slug: "renteberegner",
       title: "Räntekalkylator",
-      description: "100.000 kr i 5 år till 5 % ränta kostar 1.887 kr i månaden i ett annuitetslån. Total ränta: 13.227 kr.",
-      metaTitle: "Räntekalkylator: 100.000 kr i 5 år = 1.887 kr/mån",
-      metaDescription: "Annuitetslån på 100.000 kr med 5 % ränta i 5 år: 1.887 kr i månaden och 13.227 kr i total ränta. Beräkna även rak amortering.",
+      description: `${formatBelob(renteHoved.hovedstol, "se")} kr i ${renteHoved.loebetid} år till ${renteHoved.aarsrente} % ränta kostar ${formatBelob(renteHoved.maanedligBetalning, "se")} kr i månaden i ett annuitetslån. Total ränta: ${formatBelob(renteHoved.samletRante, "se")} kr.`,
+      metaTitle: `Räntekalkylator: ${formatBelob(renteHoved.hovedstol, "se")} kr i ${renteHoved.loebetid} år = ${formatBelob(renteHoved.maanedligBetalning, "se")} kr/mån`,
+      metaDescription: `Annuitetslån på ${formatBelob(renteHoved.hovedstol, "se")} kr med ${renteHoved.aarsrente} % ränta i ${renteHoved.loebetid} år: ${formatBelob(renteHoved.maanedligBetalning, "se")} kr i månaden och ${formatBelob(renteHoved.samletRante, "se")} kr i total ränta. Beräkna även rak amortering.`,
       keywords: ["räntekalkylator", "lånekalkylator", "beräkna lån", "månatlig betalning", "annuitetslån", "ränteberäkning"],
-      ogTitle: "Räntekalkylator: 100.000 kr i 5 år = 1.887 kr/mån",
-      ogDescription: "100.000 kr i 5 år till 5 %: 1.887 kr i månaden och 13.227 kr i total ränta.",
+      ogTitle: `Räntekalkylator: ${formatBelob(renteHoved.hovedstol, "se")} kr i ${renteHoved.loebetid} år = ${formatBelob(renteHoved.maanedligBetalning, "se")} kr/mån`,
+      ogDescription: `${formatBelob(renteHoved.hovedstol, "se")} kr i ${renteHoved.loebetid} år till ${renteHoved.aarsrente} %: ${formatBelob(renteHoved.maanedligBetalning, "se")} kr i månaden och ${formatBelob(renteHoved.samletRante, "se")} kr i total ränta.`,
       category: "Ekonomi",
       breadcrumbCategory: "Ekonomi",
       breadcrumbCategoryHref: "/kategori/oekonomi",
@@ -3976,12 +3983,12 @@ const sePages: Record<string, PageData> = {
       schemaCategory: "FinanceApplication",
       faqItems: [
       { question: "Annuitetslån vs serielån?", answer: "Annuitetslån: fast betalning. Serielån: fast amortering, sjunkande betalning." },
-      { question: "Vad blir betalningen på 100.000 kr med 5 % ränta i 5 år?", answer: "Ca 1.887 kr i månaden med annuitetslån, totalt 13.227 kr i ränta under de 60 betalningarna." },
+      { question: `Vad blir betalningen på ${formatBelob(renteHoved.hovedstol, "se")} kr med ${renteHoved.aarsrente} % ränta i ${renteHoved.loebetid} år?`, answer: `Ca ${formatBelob(renteHoved.maanedligBetalning, "se")} kr i månaden med annuitetslån, totalt ${formatBelob(renteHoved.samletRante, "se")} kr i ränta under de ${Math.round(renteHoved.antalMaaneder)} betalningarna.` },
       { question: "Effektiv ränta?", answer: "Årliga kostnader inkl. avgifter." },
-      { question: "Vad är formeln för ett annuitetslån?", answer: "Betalningen är P × r ÷ (1 − (1 + r)^-n), där r är månadsräntan och n antal månader. Ett lån på 200.000 kr till 4 % i 20 år ger 1.212 kr i månaden — 240 månader, 290.871 kr i alt varav 90.871 kr är ränta." },
+      { question: "Vad är formeln för ett annuitetslån?", answer: `Betalningen är P × r ÷ (1 − (1 + r)^-n), där r är månadsräntan och n antal månader. Ett lån på ${formatBelob(renteFormel.hovedstol, "se")} kr till ${renteFormel.aarsrente} % i ${renteFormel.loebetid} år ger ${formatBelob(renteFormel.maanedligBetalning, "se")} kr i månaden — ${Math.round(renteFormel.antalMaaneder)} månader, ${formatBelob(renteFormel.samletBetaling, "se")} kr i alt varav ${formatBelob(renteFormel.samletRante, "se")} kr är ränta.` },
       { question: "Hur räknar man ut effektiv ränta?", answer: "Den effektiva årsräntan är (1 + månadsränta)^12 − 1. En månadsränta på 1 % blir 12,68 % per år, och en nominell årsränta på 4 % ger en månadsränta på 0,3333 %, vilket är 4,07 % effektivt." },
       { question: "Avdrag?", answer: "Kontrollera Skatteverket för avdragsregler." },
-      { question: "Hur räknar jag ett annuitetslån i Excel?", answer: "Använd BETALNING med semikolon mellan argumenten: =BETALNING(0,05/12;60;-100000) ger 1.887 kr i månaden på 100.000 kr under 5 år." },
+      { question: "Hur räknar jag ett annuitetslån i Excel?", answer: `Använd BETALNING med semikolon mellan argumenten: =BETALNING(${formatBelob(renteHoved.aarsrente / 100, "se", 2)}/12;${Math.round(renteHoved.antalMaaneder)};-${renteHoved.hovedstol}) ger ${formatBelob(renteHoved.maanedligBetalning, "se")} kr i månaden på ${formatBelob(renteHoved.hovedstol, "se")} kr under ${renteHoved.loebetid} år.` },
       ],
     },
     "opsparing": {

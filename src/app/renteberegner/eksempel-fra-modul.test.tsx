@@ -30,8 +30,26 @@ const eksempel = vi.hoisted(() => ({
   samletRante: 76563.6,
 }));
 
+/**
+ * Eksemplet i titlen, metadataen og FAQ'en — et andet lån end formelafsnittets.
+ * Før 2/10 stod det som håndskrevet tekst i 19 felter på tre domæner, og
+ * `FAQSchema` læser præcis `faqItems`, så det var tal i Googles svar. Det er
+ * derfor mocket her, så introen kan ikke vedligeholdes ved at blive skrevet om.
+ */
+const hovedEks = vi.hoisted(() => ({
+  hovedstol: 250_000,
+  aarsrente: 3,
+  loebetid: 10,
+  maanedligRente: 0.03 / 12,
+  antalMaaneder: 120,
+  maanedligBetalning: 2765.11,
+  samletBetaling: 331813.2,
+  samletRante: 81813.2,
+}));
+
 vi.mock("@/lib/rente-eksempler", () => ({
   annuitetsEksempel: () => eksempel,
+  hovedEksempel: () => hovedEks,
   // A distinctive annual rate, so the two "Månedlig rente til årlig rente"
   // rows cannot pass on the hardcoded 12,68 % and 4,07 %.
   effektivAarsrente: () => 0.5,
@@ -77,6 +95,16 @@ const procentDa = (v: number) =>
 const html = renderToStaticMarkup(await RenteberegnerPage());
 
 describe("/renteberegner læser sit eksempel fra modulet", () => {
+  test("introens lån-eksempel læses fra hovedEksempel()", () => {
+    const hel = (tal: number) => tal.toLocaleString("da-DK", { maximumFractionDigits: 0 });
+
+    expect(html).toContain(
+      `${hel(hovedEks.hovedstol)} kr. i ${hovedEks.loebetid} år til ${hovedEks.aarsrente} % rente koster ` +
+        `${hel(hovedEks.maanedligBetalning)} kr. om måneden i et annuitetslån. ` +
+        `Samlet rente: ${hel(hovedEks.samletRante)} kr.`,
+    );
+  });
+
   test("brødteksten i formelafsnittet følger eksemplet", () => {
     expect(html).toContain(
       `Eksempel: du låner <strong>${eksempel.hovedstol.toLocaleString("da-DK")} kr.</strong>`,

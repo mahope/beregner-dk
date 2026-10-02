@@ -1,27 +1,24 @@
-STATUS: 2/10 18:15. CI grøn ved start (seneste kørsel `37025234613`). PR-TJEK
-   2/10 15:12 og 17:30: ingen åbne PR'er. Sentry: ingen opgave med reel
-   effekt — MINBEREGNER-2 (`useLocale must be used within a LocaleProvider`,
-   `POST /`) var **allerede rettet** i `def070c` 09:26, før hændelsen 02:24,
-   altså lukket af en tidligere iteration. MINBEREGNER-1 (router state header,
-   `GET /barselsdagpenge`) er 15 hændelser / **0 brugere** = bot-trafik, ikke
-   en fejl nogen har set. CEO-kø punkt 0: verificeret lukket 2/10 14:48.
-   Review-fund 2/10 15:10: rettet (`0b841f2`).
+STATUS: 2/10 18:20. CI grøn ved start (`37028358056`). PR-TJEK 2/10 15:12
+   og 17:30: ingen åbne PR'er. Sentry: ingen opgave med reel effekt —
+   MINBEREGNER-2 var allerede rettet i `def070c` før hændelsen, MINBEREGNER-1
+   er 15 hændelser / 0 brugere = bot-trafik. CEO-kø punkt 0: lukket 2/10
+   14:48. Review-fund 2/10 15:10: rettet (`0b841f2`).
+   **17:30-vinduet er verificeret på indhold** (ikke HTTP 200): `lon-efter-skat`,
+   `boligsalg`, `arveafgift`, `su`, `triatlon`, `ugenummer`, `boernepenge` × 2
+   og `moms` er alle live med de nye sætninger. Kun `procent-faq-tal-fra-modul`
+   venter på 21:30 (merget 17:37).
    **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` ·
-   `npm run build` — grøn 2/10 18:12 (**3758** tests i 231 filer, **+6**).
-   **Denne iteration:** `/procent`s tolv FAQ-beløb (da 4, no 1, se 7) lå som
+   `npm run build` — grøn 2/10 18:19 (**3760** tests i 231 filer, +2).
+   **Denne iteration:** `/renteberegner`s nitten beløb (da 5, no 6, se 8) lå som
    rå tekst, og `FAQSchema` læser præcis `faqItems` — altså synlige for
-   Google. De læses nu fra de konstanter modulet allerede bruger resten af
-   siden med (`RABAT_EKSEMPEL`, `EXCEL_ANDEL`, `PROCENT_SKILLNAD_EKSEMPEL`).
-   `page-data.ts` 196 → **186** fund, `/procent` på **0**.
-   **Målt:** alle tolv svar er **byte-identiske** før/efter (dump fra
-   `getPageData` i da/se/no), så det er en ren lægningsopgave uden
-   SEO-regression. Porten i `page-data.test.ts` fanges mod to mutationer
-   (`RABAT_EKSEMPEL.nedsatPris` 7875→8000, `PROCENT_10_AF_FAQ` 1600→1500).
-   **Fase 3's tekniske check gjort:** `/procent` `/moms` `/dato`
-   `/tidsberegner` har alle korrekt `canonical`, `hreflang` (da/se/x-default)
-   og title; sitemap har 158 unikke URL, 0 dubletter, 0 trailing-slash. Der er
-   altså ingen titel-/teknik-fejl tilbage — kun positionen, som planen siger.
-   **Næste iteration:** `.ts`-beløbs-køen nederst, `/renteberegner` først.
+   Google. De læses nu fra `hovedEksempel()`, som bruger samme
+   annuitetsformel som `RenteBeregner`. Dansk er byte-identisk før/efter;
+   svensk og norsk fik «1 887»/«13 227» med mellemrum i stedet for punktum.
+   `page-data.ts` 195 → **176** fund, `/renteberegner` på **0** i tre sprog.
+   Fire mutationer i modulet giver 5/5/3/8 røde.
+   **Næste iteration:** `/kvadratmeter` (6 fund, se 3.705 visninger) eller
+   `/leasing` (9 fund, se 2.923), og som **feature** den svenske
+   Excel-formel der er gal.
 
 ## Fase 3 — trafik-drevet
 
@@ -125,11 +122,8 @@ Listen `src/app/regnestykker.test.ts` tæller forekomster pr. fil og må kun
 blive kortere. ✅ betyder lukket; detaljerne står i `docs/plan-arkiv.md`.
 
 **Åben række (strenglisten):** næste fil skal måles på ny — de punkt der stod
-åbne er alle ❓-blokerede. **Fire filer er lukket 2/10:** SU
-(`su-indlaeg-belob-fra-modul`), arveafgift (`arveafgift-belob-fra-modul`),
-`/boligsalg` (`boligsalg-belob-fra-modul`) og `/procent`
-(`procent-faq-tal-fra-modul`) — alle i `docs/plan-arkiv.md`. Strenglistens
-loft er **70 → 57**, JSX-listen **360 → 347 → 338 → 333**.
+åbne er alle ❓-blokerede. **Fem filer er lukket 2/10**, se listen nedenfor.
+Strenglistens loft er **70 → 57**, JSX-listen **360 → 347 → 338 → 333**.
 
 **Ny målt fejlklasse — `page-data.ts` ligger uden for begge beløbs-porte.**
 `strengBelob`/`jsxBelob` måler kun `.tsx`, så de usourcede intervaller i
@@ -140,25 +134,49 @@ porten.
 **Åben: beløbs-porten scanner kun `*.tsx`.** *Accept:* `strengBelob` kører på
 `src/lib/*.ts` også, og listen opdateres i samme commit.
 
-**Målt 2/10 18:12 (egen AST-probe, samme mønster som portens `strengBelob`):**
-**alle 196 fund lå i `page-data.ts` alene** — ikke fordelt i `src/lib/*.ts`
-som portens docblock siger. Efter `/procent` er de **186**. Det er næsten
-alle **FAQ-svar**, altså JSON-LD Google har. Køen pr. slug:
-`vaegttab` 24 · `renteberegner` 22 · `kalorier` 17 · `moms` 15 · `pension` 12 ·
-`leasing` 9 · `rentefradrag` 7 · `kvadratmeter` 6 · `konfirmation` 6 ·
-`efterloen` 5 · `aktieskat` 5 · `loen-efter-skat` 4 · `topskat` 4 ·
-`boernepenge` 4 · resten ≤3. **Anbefalet rækkefølge:** `/renteberegner`
-(svensk 3.123 visninger) → `/moms` (men ⛔ de 3 lovgrænser) → `/kvadratmeter`
-(3.705) → `/leasing` (2.923) → `/vaegttab` (1.277). *Accept pr. slice:* ét
-slug pr. opgave, 12 fund eller færre, de læses fra sit eget modul, og en
-mutation i porten. **Hvis porten udvides til `.ts` med det samme, bliver
-listen 186 lang og de 186 tal bliver en tilladelsesliste** — det er
-måske nok det, men en tilladelsesliste over fejl er dyrere end porten er
-bred. Derfor: fix slugs først, portudvidelsen som sidste skridt når de er
-nede mod 0.
+**Fem filer er lukket:** SU (`su-indlaeg-belob-fra-modul`), arveafgift
+(`arveafgift-belob-fra-modul`), `/boligsalg` (`boligsalg-belob-fra-modul`),
+`/procent` (`procent-faq-tal-fra-modul`) og `/renteberegner`
+(`renteberegner-belob-fra-modul`) — alle i `docs/plan-arkiv.md`.
+
+**Målt 2/10 18:19 (egen AST-probe, samme mønster som portens `strengBelob`):**
+**alle fund lå i `page-data.ts` alene** — ikke fordelt i `src/lib/*.ts` som
+portens docblock siger. Efter `/renteberegner` er de **176** (var 195 ved
+iterationens start). Det er næsten alle **FAQ-svar**, altså JSON-LD Google
+har. Køen pr. slug efter `/renteberegner` er lukket: `vaegttab` 24 ·
+`kalorier` 17 · `moms` 15 · `pension` 12 · `leasing` 9 · `rentefradrag` 7 ·
+`kvadratmeter` 6 · `konfirmation` 6 · `efterloen` 5 · `aktieskat` 5 ·
+`loen-efter-skat` 4 · `topskat` 4 · `boernepenge` 4 · resten ≤3.
+**Anbefalet rækkefølge:** `/vaegttab` (24, største sluse; se 1.277 visninger)
+→ `/kalorier` (17, se 2.825) → `/moms` (men ⛔ de 3 lovgrænser) →
+`/leasing` (9, se 2.923) → `/kvadratmeter` (6, se 3.705).
+*Accept pr. slice:* ét slug pr. opgave, 12 fund eller færre, de læses fra sit
+eget modul, og en mutation i porten. `/vaegttab` er 24 fund, så den deles i to
+halvdele. **Hvis porten udvides til `.ts` med det samme, bliver listen 176
+lang og de 176 tal bliver en tilladelsesliste** — det er måske nok det, men en
+tilladelsesliste over fejl er dyrere end porten er bred. Derfor: fix slugs
+først, portudvidelsen som sidste skridt når de er nede mod 0.
+
+**Ny målt fejl — den svenske Excel-formel er gal, ikke et beløb.** Den
+`rente-excel.ts`-drevne tabel på `/renteberegner` skriver
+**«=BETALNING(4/12;240;-200000)»** mens svarcellen ved siden af sig siger
+1 211,96 kr. `4/12` er 33 % pr. måned, så formlen giver et helt andet beløb,
+og tabellens egen fælde-tekst «0,04/12, ikke 0.04/12» er dermed en
+modsigelse til formlen over den. Samme fejlklasse som beløbene, anden fil.
+*Accept:* formlen læser `aarsrente / 100` formateret til Excel, samme greb som
+`page.tsx`' `excelDa`, og en test dømmer at formlen **og** svaret stammer fra
+samme `annuitetsEksempel()`.
 
 **Åben:** `/moms` har 3 fund tilbage, som er lovgrænser (dansk registrering over
 50.000 kr, svensk over 120.000 kr, told ved import over 1.150 kr). ❓ nedenfor.
+
+**Åben: norske tusindtalsseparatorer.** `/renteberegner` skriver nu «1 887»
+med mellemrum, mens resten af `noPages` skriver «2.500» med punktum («BMR
+1.780 kcal» på `/kalorier»). Mellemrum er den rigtige bokmålsskrivemåde, så
+fejlen er den anden slags. *Accept:* hele `noPages`-blokken går gennem
+`formatBelob(…, "no", …)`, så der kun er én skrivemåde. ⛔ Lav prioritet:
+`beregner.no` serverer et andet site (❓ nedenfor), så brugerpåvirkningen er
+0 indtil den er besvaret.
 
 **Åben:** `/timepris` mangler **norsk brødtekst** (kun `da` og `se` har et
 afsnit) — ❓ kilde til norske timepriser låser både brødteksten og tabellen.
@@ -177,17 +195,18 @@ ingen regex på tal og tekst.
 
 | Slug | Prøv på indhold |
 |---|---|
+| `renteberegner-belob-fra-modul` (**ny**, vindue 2/10 21:30) | `minberegner.dk/renteberegner`: `<meta name="description">` skal være **byte-uændret** «Annuitetslån på **100.000** kr. med **5** % rente i **5** år: **1.887** kr. i måneden og **13.227** kr. i samlet rente. Beregn også serielån.» — dansk er bevidst uændret. **Intet** «1.887» på beraknare.se og intet «1 887» på minberegner.dk. `beraknare.se/renteberegner`: `<title>` skal være «Räntekalkylator: **100 000** kr i **5** år = **1 887** kr/mån» og beskrivelsen «… kostar **1 887** kr i månaden … Total ränta: **13 227** kr.», FAQ'en skal have **syv** spørgsmål hvor «Vad är formeln för ett annuitetslån?» svarer «… lån på **200 000** kr till **4** % i **20** år ger **1 212** kr i månaden — **240** månader, **290 871** kr i alt varav **90 871** kr är ränta.» og «Hur räknar jag ett annuitetslån i Excel?» svarer «… =BETALNING(**0,05**/12;**60**;-100000) ger **1 887** kr …». `minberegner.dk/renteberegner`: FAQ'en skal have **seks** spørgsmål hvor formelsvaret svarer «… lån på **200.000** kr. til **4** % i **20** år giver **1.211,96** kr. pr. måned. I Excel er det =YDELSE(**0,04**/12;**240**;-200000)». **Intet** «1 887» og **intet** «13 227» på minberegner.dk. **Intet** «NaN» nogen steder |
 | `procent-faq-tal-fra-modul` (**ny**, vindue 2/10 21:30) | `minberegner.dk/procent`: FAQ'en skal have de to svar «Skriv =A1/B1\*100 … Et fald fra **9.000** kr til **7.875** kr er =(B1-A1)/A1\*100 = **-12,5 %**.» og «Går en pris fra **9.000** kr til **7.875** kr, er faldet (7.875 - 9.000) / 9.000 = **-12,5 %**.», plus «10 procent af **1.600** er **160**». `beraknare.se/procent`: «**2 500** kr av **10 000** kr ger **0,25**, alltså **25** procent», «**2 500** / **10 000** = **0,25** = **25** procent», «**33 000** kr mot **30 000** kr ger **3 000** / 30 000 = **10** procent», «**10 000** till **12 500** ger … = **25** procent … **2 500** / **11 250** = **22,2** procent», «**10 000** i A1 och **12 500** i B1 ger **25** procent … **22,2** procent», «10 procent av **1 600** är **160**». **Hele teksten skal være byte-uændret** — det er pointen ved opgaven. **Intet** `1.600` på beraknare.se og intet `1 600` på minberegner.dk |
-| `lon-efter-skat-en-kilde` (**åben**, vindue 2/10 17:30) | `beraknare.se/lon-efter-skatt` og `minberegner.dk/lon-efter-skatt`: brødteksten skal sige **«mellan cirka 17 400 och 45 600 kr per år 2026»**, **«prisbasbeloppet 59 200 kr»**, **«Snittet i Sverige 2026 är 32,38 %»**, **«skiktgränsen 643 000 kr 2026»**, **«brytpunkt cirka 660 400 kr i bruttolön»**, **«upp till cirka 4 400 kr per månad»**, **«högst 1 184 kr per år»** og **«Allmän pensionsavgift (7 %)»**. Den nye sætning skal være **«På en månadslön på 35 000 kr blir skillnaden 1 277 kr i nettolön per månad»**. **Intet** «flera hundra kronor». FAQ'en skal have **fem** spørgsmål, hvor intet svar afviger fra de samme tal. `minberegner.dk/lon-efter-skatt` er dansk med svensk fallback — de svenske domæner er de to ovenfor |
-| `boligsalg-belob-fra-modul` (**ny**, vindue 2/10 17:30) | `minberegner.dk/boligsalg`: introen skal sige **«195.105»**, **«2.804.895»**, **«Ejendomsmægler med 120.000»** og **«77 % af omkostningerne»**; listen skal sige **«7.500»**, **«6.500»**, **«4.000»**, **«4.000»** og **«20.000»**. Kilder-afsnittet skal have **«0,6 % af købesummen plus 1.850»** og **«1,45 % af 80 % af vurderingssummen plus 1.825»** og overskriften «Kilder og forbehold». FAQ'en skal have **fire** spørgsmål, hvor **intet** svar indeholder et beløb. **Intet** «150.000-250.000», «3-6%», «25.000-60.000», «6.900-8.700», «5.000-15.000», «Boligejer.dk» eller «august 2025» i hele HTML'en. **Intet** «NaN» nogen steder. `beraknare.se/boligsalg`: **intet** dansk beløb i JSON-LD'en (den har ingen `se`-data, så FAQ'en er dansk — det er en kendt, separat fejl) |
-| `norsk-pace-side` (**ny**, vindue 2/10 17:30) | **De norske rettelser er ikke live og kan ikke være det:** `beregner.no` serverer et andet site (❓ 2/10 14:15). Prøven er derfor at de to **live** domæner er uændrede. `minberegner.dk/pace`: FAQ'en skal have **ni** spørgsmål, «Hvor lang tid tager et Ironman?» skal svare «… 1:00:00 + 5:00:00 + 3:30:00 = 9:30:00 i alt …», og beregneren skal vise «**Holdtider pr. kilometer**» (dansk label). **Intet** «Deltider pr. kilometer» og intet «Løpetidsberegner - beregn fart» på den danske side. `beraknare.se/pace`: skal vise «**Deltider per kilometer**» (svensk label) og de samme ni spørgsmål, **intet** «Deltider pr. kilometer» (norsk) |
-| `arveafgift-belob-fra-modul` (**ny**, vindue 2/10 17:30) | `minberegner.dk/blog/arveafgift-regler-og-satser`: `<title>` byte-uændret «Arveafgift 2026: 1 mio. kr. til børn koster 91.155 kr.» og `<meta name="description">«Arveafgift (boafgift) 2026: Et barn arver 1 mio. kr. og betaler 91.155 kr. Se bundfradrag på 392.300 kr, 15 % for nære arvinger og 36,25 % for søskende.»», `og:description` «Arveafgift 2026: 91.155 kr for et barn der arver 1 mio. kr. Bundfradrag, satser og to regneeksempler.» — **intet** dobbelt punktum. Sats-tabellen skal have **«36,25%»** i to celler, «Kort svar» **«36,25 %»**, og **intet** «36.25» i hele HTML'en. Begge regnestykker byte-uændrede: `1.107.700 / 166.155 / 1.333.845 / 666.923` og `407.700 / 61.155 / 738.845 / 184.711 / 245.866 / 554.134`. FAQ'en skal have **fire** spørgsmål, hvor «Hvad koster arveafgiften, hvis et barn arver 1.000.000 kr?» svarer «… afgiftsgrundlaget er 607.700 kr … modtager 908.845 kr.». Gavegrænserne (74.100 / 26.600 kr) er bevaret med vilje |
-| `su-indlaeg-belob-fra-modul` (**ny**, vindue 2/10 17:30) | `minberegner.dk/blog/su-2026-satser-og-regler`: `<title>` skal være «SU 2026: 7.426 kr. pr. måned udeboende» (byte-uændret) og `<meta name="description">` skal være «SU 2026: udeboende får 7.426 kr. pr. måned, hjemmeboende 1.154-3.202 kr. **Videregående fribeløb fra 20.749 kr.**, SU-lån op til 3.799 kr. Alle tal fra su.dk.». **`Intet` «Fribeløb fra 15.297 kr.»** — det var ungdomsuddansatte sats på en side om videregående uddannelse. Artiklens JSON-LD-`description` skal have den samme nye sætning, og `og:description` skal have «fribeløb fra 20.749 kr. på videregående uddannelse». Resten af siden (tabel, otte FAQ, brødtekst) skal være byte-uændret |
-| `triatlon-ironman-tid` (**åben**, vindue 2/10 17:30) | `minberegner.dk/pace`: en `<h2>` «Triatlon og Ironman: tiden for alle tre ben» med en tabel på fire rækker (Svømning 3,8 km 1:00:00 15:47 · Cykel 180 km 5:00:00 1:40 · Løb 42,195 km 3:30:00 4:59 · I alt 225,995 km 9:30:00) og FAQ'en skal have **ni** spørgsmål, hvor «Hvor lang tid tager et Ironman?» svarer «… 1:00:00 + 5:00:00 + 3:30:00 = 9:30:00 i alt …» og «Hvor stor en del af et Ironman er cyklen?» «… 52,6 % af tiden … 79,6 % af distancen». `beraknare.se/pace` skal have «Triathlon och Ironman» + «Löpning» + «Totalt» og de samme ni spørgsmål. **Intet** «9:30:00» på `/pace` uden for tabellen og de to svar |
-| `ugenummer-uge-datoer` (**åben**, vindue 2/10 17:30) | `minberegner.dk/ugenummer`: resultatboksen skal vise de **syv** datoer i den valgte uge — `Mandag 12. oktober` … `Søndag 18. oktober` for uge 42 — i kort under «Uge 42 / 2026». FAQ'en skal have **fem** spørgsmål, og «Hvilke datoer er der i uge 42?» skal svare «… går fra **mandag den 12. oktober 2026** til **søndag den 18. oktober 2026** …». `keywords` skal have «datoer i uge» og «datoer i uge 42». **Intet** dansk i `beraknare.se/ugenummer` ændret |
-| `boernepenge-aarstal` (**ny**, vindue 2/10 17:30) | `minberegner.dk/blog/boernepenge-2026-satser-og-regler`: aftrapningseksemplets parentes skal være **byte-uændret** «Har du to børn på 0-2 år (21.480 kr × 2 = 42.960 kr.), får du udbetalt 40.182 kr.» — det er **årstal** (5.370 × 4), ikke kvartal. **Intet** «10.740 kr × 2 = 21.480 kr» og intet «18.702 kr» |
-| `boernepenge-indlaeg` (**åben**, vindue 2/10 17:30) | Samme side: `<title>` byte-uændret «Børnepenge 2026: 5.370 kr./kvartal (0-2 år)» (målt OK 12:47). FAQ'en skal have **ti** spørgsmål med svarene «… Ungeydelsen er 1.114 kr. pr. måned, altså 13.368 kr. om året.» og «… 1.741 kr. pr. kvartal pr. barn, 1.774 kr. i ekstra børnetilskud … 5.025 kr. i særligt børnetilskud ved adoption.». Familietabellen skal have `10.740`, `9.618`, `11.838` og `6.684` i kolonnen «Pr. kvartal» |
-| `moms-eksempler-fra-modul` (**åben**, vindue 2/10 17:30) | `minberegner.dk/moms`: introens tre listeregler skal være `Læg moms til: … 1.000 kr. × 1,25 = 1.250 kr. inkl. moms`, `Træk moms fra: … 1.250 kr. ÷ 1,25 = 1.000 kr. ekskl. moms` og `Find momsandelen: … 1.250 kr. × 0,20 = 250 kr. i moms»; «er 2,4414, så 1.000 kr. bliver 2.441,41 kr.» og «bliver prisen 0,4096 af den oprindelige — altså 409,60 kr. i alt»; **intet** «kun 410 kr. oveni». `beraknare.se/moms`: de samme tre linjer med **mellemrum** (`1 000 kr exkl. → 1 250 kr inkl.`), «2,4414»/«0,4096», «10,71 %»/«5,66 %» |
+| `lon-efter-skat-en-kilde` ✅ **DEPLOY OK 2/10 18:00** | `beraknare.se/lon-efter-skatt` og `minberegner.dk/lon-efter-skatt`: brødteksten skal sige **«mellan cirka 17 400 och 45 600 kr per år 2026»**, **«prisbasbeloppet 59 200 kr»**, **«Snittet i Sverige 2026 är 32,38 %»**, **«skiktgränsen 643 000 kr 2026»**, **«brytpunkt cirka 660 400 kr i bruttolön»**, **«upp till cirka 4 400 kr per månad»**, **«högst 1 184 kr per år»** og **«Allmän pensionsavgift (7 %)»**. Den nye sætning skal være **«På en månadslön på 35 000 kr blir skillnaden 1 277 kr i nettolön per månad»**. **Intet** «flera hundra kronor». FAQ'en skal have **fem** spørgsmål, hvor intet svar afviger fra de samme tal. `minberegner.dk/lon-efter-skatt` er dansk med svensk fallback — de svenske domæner er de to ovenfor |
+| `boligsalg-belob-fra-modul` ✅ **DEPLOY OK 2/10 18:00** | `minberegner.dk/boligsalg`: introen skal sige **«195.105»**, **«2.804.895»**, **«Ejendomsmægler med 120.000»** og **«77 % af omkostningerne»**; listen skal sige **«7.500»**, **«6.500»**, **«4.000»**, **«4.000»** og **«20.000»**. Kilder-afsnittet skal have **«0,6 % af købesummen plus 1.850»** og **«1,45 % af 80 % af vurderingssummen plus 1.825»** og overskriften «Kilder og forbehold». FAQ'en skal have **fire** spørgsmål, hvor **intet** svar indeholder et beløb. **Intet** «150.000-250.000», «3-6%», «25.000-60.000», «6.900-8.700», «5.000-15.000», «Boligejer.dk» eller «august 2025» i hele HTML'en. **Intet** «NaN» nogen steder. `beraknare.se/boligsalg`: **intet** dansk beløb i JSON-LD'en (den har ingen `se`-data, så FAQ'en er dansk — det er en kendt, separat fejl) |
+| `norsk-pace-side` ✅ **DEPLOY OK 2/10 18:00** | **De norske rettelser er ikke live og kan ikke være det:** `beregner.no` serverer et andet site (❓ 2/10 14:15). Prøven er derfor at de to **live** domæner er uændrede. `minberegner.dk/pace`: FAQ'en skal have **ni** spørgsmål, «Hvor lang tid tager et Ironman?» skal svare «… 1:00:00 + 5:00:00 + 3:30:00 = 9:30:00 i alt …», og beregneren skal vise «**Holdtider pr. kilometer**» (dansk label). **Intet** «Deltider pr. kilometer» og intet «Løpetidsberegner - beregn fart» på den danske side. `beraknare.se/pace`: skal vise «**Deltider per kilometer**» (svensk label) og de samme ni spørgsmål, **intet** «Deltider pr. kilometer» (norsk) |
+| `arveafgift-belob-fra-modul` ✅ **DEPLOY OK 2/10 18:00** | `minberegner.dk/blog/arveafgift-regler-og-satser`: `<title>` byte-uændret «Arveafgift 2026: 1 mio. kr. til børn koster 91.155 kr.» og `<meta name="description">«Arveafgift (boafgift) 2026: Et barn arver 1 mio. kr. og betaler 91.155 kr. Se bundfradrag på 392.300 kr, 15 % for nære arvinger og 36,25 % for søskende.»», `og:description` «Arveafgift 2026: 91.155 kr for et barn der arver 1 mio. kr. Bundfradrag, satser og to regneeksempler.» — **intet** dobbelt punktum. Sats-tabellen skal have **«36,25%»** i to celler, «Kort svar» **«36,25 %»**, og **intet** «36.25» i hele HTML'en. Begge regnestykker byte-uændrede: `1.107.700 / 166.155 / 1.333.845 / 666.923` og `407.700 / 61.155 / 738.845 / 184.711 / 245.866 / 554.134`. FAQ'en skal have **fire** spørgsmål, hvor «Hvad koster arveafgiften, hvis et barn arver 1.000.000 kr?» svarer «… afgiftsgrundlaget er 607.700 kr … modtager 908.845 kr.». Gavegrænserne (74.100 / 26.600 kr) er bevaret med vilje |
+| `su-indlaeg-belob-fra-modul` ✅ **DEPLOY OK 2/10 18:00** | `minberegner.dk/blog/su-2026-satser-og-regler`: `<title>` skal være «SU 2026: 7.426 kr. pr. måned udeboende» (byte-uændret) og `<meta name="description">` skal være «SU 2026: udeboende får 7.426 kr. pr. måned, hjemmeboende 1.154-3.202 kr. **Videregående fribeløb fra 20.749 kr.**, SU-lån op til 3.799 kr. Alle tal fra su.dk.». **`Intet` «Fribeløb fra 15.297 kr.»** — det var ungdomsuddansatte sats på en side om videregående uddannelse. Artiklens JSON-LD-`description` skal have den samme nye sætning, og `og:description` skal have «fribeløb fra 20.749 kr. på videregående uddannelse». Resten af siden (tabel, otte FAQ, brødtekst) skal være byte-uændret |
+| `triatlon-ironman-tid` ✅ **DEPLOY OK 2/10 18:00** | `minberegner.dk/pace`: en `<h2>` «Triatlon og Ironman: tiden for alle tre ben» med en tabel på fire rækker (Svømning 3,8 km 1:00:00 15:47 · Cykel 180 km 5:00:00 1:40 · Løb 42,195 km 3:30:00 4:59 · I alt 225,995 km 9:30:00) og FAQ'en skal have **ni** spørgsmål, hvor «Hvor lang tid tager et Ironman?» svarer «… 1:00:00 + 5:00:00 + 3:30:00 = 9:30:00 i alt …» og «Hvor stor en del af et Ironman er cyklen?» «… 52,6 % af tiden … 79,6 % af distancen». `beraknare.se/pace` skal have «Triathlon och Ironman» + «Löpning» + «Totalt» og de samme ni spørgsmål. **Intet** «9:30:00» på `/pace` uden for tabellen og de to svar |
+| `ugenummer-uge-datoer` ✅ **DEPLOY OK 2/10 18:00** | `minberegner.dk/ugenummer`: resultatboksen skal vise de **syv** datoer i den valgte uge — `Mandag 12. oktober` … `Søndag 18. oktober` for uge 42 — i kort under «Uge 42 / 2026». FAQ'en skal have **fem** spørgsmål, og «Hvilke datoer er der i uge 42?» skal svare «… går fra **mandag den 12. oktober 2026** til **søndag den 18. oktober 2026** …». `keywords` skal have «datoer i uge» og «datoer i uge 42». **Intet** dansk i `beraknare.se/ugenummer` ændret |
+| `boernepenge-aarstal` ✅ **DEPLOY OK 2/10 18:00** | `minberegner.dk/blog/boernepenge-2026-satser-og-regler`: aftrapningseksemplets parentes skal være **byte-uændret** «Har du to børn på 0-2 år (21.480 kr × 2 = 42.960 kr.), får du udbetalt 40.182 kr.» — det er **årstal** (5.370 × 4), ikke kvartal. **Intet** «10.740 kr × 2 = 21.480 kr» og intet «18.702 kr» |
+| `boernepenge-indlaeg` ✅ **DEPLOY OK 2/10 18:00** | Samme side: `<title>` byte-uændret «Børnepenge 2026: 5.370 kr./kvartal (0-2 år)» (målt OK 12:47). FAQ'en skal have **ti** spørgsmål med svarene «… Ungeydelsen er 1.114 kr. pr. måned, altså 13.368 kr. om året.» og «… 1.741 kr. pr. kvartal pr. barn, 1.774 kr. i ekstra børnetilskud … 5.025 kr. i særligt børnetilskud ved adoption.». Familietabellen skal have `10.740`, `9.618`, `11.838` og `6.684` i kolonnen «Pr. kvartal» |
+| `moms-eksempler-fra-modul` ✅ **DEPLOY OK 2/10 18:00** | `minberegner.dk/moms`: introens tre listeregler skal være `Læg moms til: … 1.000 kr. × 1,25 = 1.250 kr. inkl. moms`, `Træk moms fra: … 1.250 kr. ÷ 1,25 = 1.000 kr. ekskl. moms` og `Find momsandelen: … 1.250 kr. × 0,20 = 250 kr. i moms»; «er 2,4414, så 1.000 kr. bliver 2.441,41 kr.» og «bliver prisen 0,4096 af den oprindelige — altså 409,60 kr. i alt»; **intet** «kun 410 kr. oveni». `beraknare.se/moms`: de samme tre linjer med **mellemrum** (`1 000 kr exkl. → 1 250 kr inkl.`), «2,4414»/«0,4096», «10,71 %»/«5,66 %» |
 
 ## ❓ Til Mads
 

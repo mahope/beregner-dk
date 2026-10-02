@@ -60,6 +60,30 @@ export function formatSvenskText(amount: number, decimals = 0): string {
 }
 
 /**
+ * Format an amount for running prose in any of the three languages: the locale's
+ * own thousands separator, written as a plain space where `Intl` would use
+ * U+00A0.
+ *
+ * `formatSvenskText` does this for Swedish alone. It was a `page-data.ts` helper
+ * named `rabatTal` and typed `"da" | "se"` because `/procent` was the only page
+ * quoting amounts in more than one language; `/renteberegner` needs all three
+ * for the same loan example, so it lives here beside its sibling.
+ *
+ * Danish writes "1.887", Swedish and Norwegian "1 887" — so a page that quotes
+ * the same figure in both languages gets the right separator in both without
+ * anyone typing a separator by hand.
+ */
+export function formatBelob(
+  amount: number,
+  locale: Locale,
+  decimals = 0,
+): string {
+  return formatNumber(amount, locale, {
+    maximumFractionDigits: decimals,
+  }).replace(/\u00a0/g, " ");
+}
+
+/**
  * Get the Intl locale string (e.g. "da-DK", "sv-SE").
  */
 export function getIntlLocale(locale: Locale): string {
