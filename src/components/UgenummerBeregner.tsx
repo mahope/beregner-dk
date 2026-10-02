@@ -7,7 +7,7 @@ import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { useLocale } from "@/components/LocaleProvider";
 import { getIntlLocale } from "@/lib/format";
-import { isoUge, antalUgerIIsoAar, IsoUgeResultat } from "@/lib/ugenummer";
+import { isoUge, antalUgerIIsoAar, datoerIUge, IsoUgeResultat } from "@/lib/ugenummer";
 import { tilIsoDato } from "@/lib/lokal-dato";
 
 const labels = {
@@ -21,6 +21,7 @@ const labels = {
     isoAarAfviger: "Denne dato ligger i uge 1 af det følgende ISO-år",
     isoAarAfvigerTilbage: "Denne dato hører til det foregående ISO-år",
     langtAar: "{aar} er et langt år med {n} uger",
+    ugensDatoer: "Ugens datoer",
     calcName: "Ugenummer-beregner",
   },
 } as const;
@@ -78,6 +79,22 @@ export default function UgenummerBeregner() {
     .replace("{y}", String(r?.ugerIAaret ?? ""))
     .replace("{aar}", String(r?.isoAar ?? ""));
 
+  // The seven dates of the week the chosen date falls in. "datoer i uge 42" is
+  // a Danish autocomplete completion (5. of 10 under "dato"), and before this
+  // the calculator only answered the other direction: date → week number.
+  // `datoerIUge` computes them, so they can never disagree with `isoUge`.
+  const ugensDatoer = useMemo(() => {
+    if (!r) return [];
+    return datoerIUge(r.uge, r.isoAar)?.map((dag) => {
+      const [y, m, d] = dag.isoDato.split("-").map(Number);
+      const dato = new Date(y, m - 1, d);
+      return {
+        ugedag: dato.toLocaleDateString(intlLocale, { weekday: "long" }),
+        dato: dato.toLocaleDateString(intlLocale, { day: "numeric", month: "long" }),
+      };
+    }) ?? [];
+  }, [r, intlLocale]);
+
   return (
     <div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
@@ -132,6 +149,29 @@ export default function UgenummerBeregner() {
             </p>
           )}
           <p className="text-center text-xs text-gray-500 dark:text-gray-400 mt-1">{fmtUgeAf}</p>
+
+          {ugensDatoer.length > 0 && (
+            <div className="mt-4">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-2 text-center">
+                {l.ugensDatoer}
+              </p>
+              <ul aria-label={l.ugensDatoer} className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
+                {ugensDatoer.map((dag) => (
+                  <li
+                    key={dag.dato}
+                    className="bg-white dark:bg-gray-700 rounded-lg p-2 shadow-sm text-center"
+                  >
+                    <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">
+                      {dag.ugedag}
+                    </p>
+                    <p className="text-sm font-bold text-gray-900 dark:text-white">
+                      {dag.dato}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           <div className="flex justify-center mt-4 gap-3">
             <CopyResultButton text={`Uge ${r.uge}, ${r.isoAar}`} />

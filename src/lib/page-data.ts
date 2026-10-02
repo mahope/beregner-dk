@@ -30,6 +30,7 @@ import {
 } from "./dagpenge-satser";
 import { markedsprisFaqSvar } from "./timepris-markedspriser";
 import { timerIPeriodeFaqSvar } from "./timer-periode";
+import { ugeDatoerFaqSvar } from "./ugenummer";
 import { distanceEksempelFaqSvar } from "./pace";
 import { alderSideTekst, erstatAlderTokens } from "./alder-side-tekst";
 import { iDagPaSiden } from "./lokal-dato";
@@ -2205,7 +2206,7 @@ const daPages: Record<string, PageData> = {
       description: "Se hvilket ISO-ugenummer en dato har, ugens dag og hvor mange uger året har. Virker for enhver dato også omkring årsskiftet.",
       metaTitle: "Ugenummer beregner - Hvilken uge er det?",
       metaDescription: "Gratis ugenummer beregner. Se ISO-ugenummeret for enhver dato — også ved årsskifte, hvor uge 1 kan ligge i december. Inkl. ugedag og uger i året.",
-      keywords: ["ugenummer", "hvilken uge er det", "uge beregner", "iso ugenummer", "uge i dag", "uge 2026"],
+      keywords: ["ugenummer", "hvilken uge er det", "uge beregner", "iso ugenummer", "uge i dag", "uge 2026", "datoer i uge", "datoer i uge 42", "ugens datoer"],
       ogTitle: "Ugenummer - Hvilken uge er det?",
       ogDescription: "Se ISO-ugenummeret for enhver dato, ugens dag og uger i året.",
       category: "Praktisk",
@@ -2219,6 +2220,7 @@ const daPages: Record<string, PageData> = {
         { question: "Hvordan beregnes ISO-ugenummeret?", answer: "ISO 8601-reglen: uger starter på mandag, og uge 1 er den uge, der indeholder årets første torsdag. Det betyder, at dage omkring nytår kan tilhøre uge 52 eller 53 af det foregående år." },
         { question: "Hvor mange uger er der i 2026?", answer: "2026 har 53 uger, fordi 1. januar er en torsdag. Cirka hvert femte eller sjette år har 53 uger." },
         { question: "Hvorfor har nogle år 53 uger?", answer: "Et år har 53 uger, når året starter på en torsdag (almindelig år) eller på en onsdag (skudår). Det sker cirka hvert 5-6 år." },
+        { question: "Hvilke datoer er der i uge 42?", answer: ugeDatoerFaqSvar(42, 2026) },
       ],
     },
     "flyttebudget": {

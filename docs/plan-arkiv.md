@@ -24510,3 +24510,35 @@ er 404, DuckDuckGo kræver captcha og Bing ignorerer citater. Derfor er der
 **ingen læst norsk kilde** til periodens længde i denne iteration, og docblocken
 påstander ingen: den siger kun, at hvert sprog har sin egen sætning. Tallene
 (2 år / 3.848 / 3 848 timer) er uændrede og kommer stadig fra `DAGPENGE_2026`.
+
+## 2026-10-02 — `ugenummer-uge-datoer` (feature)
+
+**Datagrund:** «datoer i uge 42» er **5. af 10** danske autocomplete-completions
+under «dato» (målt 2/10 13:20 på `suggestqueries`, hl=da gl=dk), og `/ugenummer`
+kunne kun regne den anden vej — fra en dato til et ugenummer.
+
+**Hvad der kom:** `mandagIIsoUge` og `datoerIUge` i `src/lib/ugenummer.ts` er
+inverse af `isoUge`: 4. januar ligger altid i uge 1, så mandagen i uge *n* er
+4. januar minus ugedagen plus *n−1* uger. `datoerIUge` returnerer de syv datoer
+mandag→søndag og afviser en uge, der ikke findes i året (uge 53 i 2027, som har
+52 uger). Beregneren viser dem i kort under ugenummeret, for den uge brugeren har
+valgt en dato i — altså ikke en «denne uge», der ville være frosset i et
+statisk build (punkt 1). FAQ'en fik «Hvilke datoer er der i uge 42?», hvis svar
+`ugeDatoerFaqSvar` bygger af de samme to tal, og `keywords` fik «datoer i uge» og
+«datoer i uge 42».
+
+**Port:** 7 nye tests i `ugenummer.test.ts` (24 i alt), bl.a. en der kræver at
+alle syv datoer i syv forskellige uger løser tilbage til samme uge og iso-år via
+`isoUge` — altså kan de to retninger ikke glide fra hinanden. **Mutation 1:**
+`(uge - 1) * 7` → `(uge - 2) * 7` → **6 røde**. **Mutation 2:** `ugedagNr: i + 1`
+→ `ugedagNr: 1` → **2 røde**. Filerne genskabt byte-for-byte.
+
+**Målt:** uge 42 i 2026 = mandag 12. oktober → søndag 18. oktober; uge 1 i 2026
+starter **29. december 2025**; uge 53 i 2026 = 28. december 2026 → 3. januar
+2027; uge 53 i 2027 findes ikke.
+
+**UI:** syv kort i `grid-cols-2 sm:grid-cols-4 lg:grid-cols-7` med samme
+kortklasse som de tre resultatkort ovenfor, `aria-label` på listen, `text-xs`/
+`text-sm`. **Ikke efterprøvet i en browser** — repoet har ingen Playwright (❓
+allerede noteret), så 390/1280 px er ikke målt; grid med to kolonner på mobil er
+dog valgt netop for det.

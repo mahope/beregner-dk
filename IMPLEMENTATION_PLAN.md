@@ -1,18 +1,27 @@
-STATUS: 2/10 11:12. CI grøn (`gh run list -L 1`, 10:49). PR-TJEK 2/10: ingen
+STATUS: 2/10 13:50. CI grøn (`gh run list -L 1`, 10:49). PR-TJEK 2/10: ingen
    åbne PR'er. BRANCH-TJEK 2/10: ingen forældede. Sentry MINBEREGNER-1 er
    Next-router-støj (filtreret siden 3e67ed3), MINBEREGNER-2 rettet i
    `4d48370`+`def070c`. CEO-kø punkt 0 lukket (`04ca30a`). **Review-fund MIDDEL
-   fra 2/10 12:20 er rettet** (dagens eneste åbne fund) — norsk dagpenge-linje
-   havde dansk sætning, se VERIFICÉR-tabellen.
+   fra 2/10 12:20 er rettet** (`1174169`): norsk dagpenge-linje havde dansk
+   sætning. *Bemærk:* fundets præmisering «ordene er danske» holder ikke — bokmål
+   siger «dagpengeperiode», «normalt», «år» og «timer» lige så vel — men `no` var
+   en faldlinje, og det er rettet. Se VERIFICÉR-tabellen og arkivet.
    **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` · `npm run build`
-   — målt grøn 2/10 11:10 (3713 tests i 228 filer, uændret antal: rettelsen er i
-   en eksisterende port, ikke en ny testfil).
-   **Denne iteration: `ceo/dagpenge-no-sprog`.**
+   — målt grøn 2/10 13:47 (**3720** tests i 228 filer, +7 fra
+   `ceo/ugenummer-uge-datoer`).
+   **Denne iteration: `ceo/dagpenge-no-sprog` (`1174169`) +
+   `ceo/ugenummer-uge-datoer` (feature).**
    ⚠️ `regnestykker`-porten logger (men får ikke rød) **1 ureviewet dansk
    streng i komponenter der monteres på beraknare.se**:
-   `src/app/procent/page.tsx:621` «En lønsprocent kan du se:». Ikke min kode,
-   fra `ceo/procent-fald` 2/10 — skal vurderes (norsk «lønn» vs dansk «løn»).
-   **Næste iteration skal være en feature** (Fase 3-reglen).
+   `src/app/procent/page.tsx:621` «En lønsprocent kan du se:». **Målt 2/10
+   13:45: falsk positiv** — strengen ligger i den `{locale === "da" && …}`-blok
+   og monteres aldrig på beraknare.se. Ikke en opgave.
+   **Næste iteration:** `ceo/ugenummer-uge-datoer` var den tredje opgave i træk
+   med kun rettelser, så **en feature igen**. De kildeblokerede klynger
+   (momsfrister, madvaretabel, fitnessfradrag, ferielov) kan ikke bygges, så
+   kandidaterne er nye features på eksisterende sider eller nye `/dage-til`-/
+   `/klokken-i`-sider. **Planen er 39,7 KB** — næste iteration skal også skære
+   de afsluttede feature-entries ned i arkivet.
    **Deploy 2/10 12:30 bekræftet på indhold** (kl. 12:47): `dagpenge` har alle
    14 beløb (26.198/18.160 … 10.506/8.283), «25,049 % i kommunaleskat», **otte**
    FAQ-spørgsmål i JSON-LD'en og intet «1.924 kr timer». `pace` har de tre
@@ -163,31 +172,21 @@ besøgende/28d, bounce 38 % → mod 2-7 %; se `/` 20, bounce 80 %.
 Prioriteret efter forventet effekt på **trafik**. Datagrund fra GSC 1/10
 (2026-09-01 → 2026-09-29) og dansk autocomplete målt 1/10 13:05.
 
-- **Procentpoint på `/procent`** — ✅ 1/10, `ceo/procentpoint-vaerktoej`.
-  *Hvem:* alle der googler «hvad er procentpoint» (autocomplete #1 under
-  «hvad er procent», 8 af 8 completions under «procent point»).
-  *Accept:* værktøj + afsnit + 3 FAQ i begge sprog — leveret.
-  *Datagrund:* GSC + autocomplete 1/10. **MÅL:** `/procent` 151.005 / 92 /
-  0,1 % / 7,4 (da) · 27.778 / 2 / 0,0 % / 9,9 (se). Genmål 15/10.
-  *Næste skridt hvis det virker:* de samme tal på sig selv — point leder
-  videre til opinionsmålinger og rentetrin.
-- **Procentfald på `/procent`** — ✅ 2/10, `ceo/procent-fald`. *Hvem:* alle der
-  googler «procent fald beregner» (5. af 10 under «procent beregner») og «procent
-  besparelse beregner» (6. af 10); svensk «procent fald» og «procent minskning» er
-  10 af 10 hver. *Accept:* afsnit med formel, Excel-formel, faldtabel og
-  besparelse i kroner i begge sprog — leveret. *Datagrund:* autocomplete 2/10 11:15
-  + `/procent` 152.615 visninger / 0,1 % CTR / pos 7,4 (da), se 28.674 / 0,0 % / 9,8.
-  **MÅL:** se STATUS. Genmål 16/10.
-- **Renteprognose** — ✅ 1/10, `ceo/renteprognose`. *Hvem:* alle der
-  googler «renteprognose» (10 af 10 danske completions under ordet selv, 3 af 10
-  under «rente»). *Accept:* ny beregner med renteomlægning, afdragsform og
-  rentesvingning — leveret. *Datagrund:* autocomplete 1/10.
-  **MÅL:** ny side, ingen baseline. Genmål 15/10 på Plausible og GSC.
+- **Procentpoint + procentfald på `/procent`** — ✅ 1/10 `ceo/procentpoint-vaerktoej`
+  og ✅ 2/10 `ceo/procent-fald` (formel, Excel-formel, faldtabel, besparelse i
+  kroner, da+se). *Datagrund:* autocomplete 1/10 + 2/10 + `/procent` 152.615
+  visninger / 0,1 % / pos 7,4 (da), se 28.674 / 0,0 % / 9,8. **MÅL:** `/procent`
+  151.005 / 92 / 0,1 % / 7,4 (da) · 27.778 / 2 / 0,0 % / 9,9 (se). Genmål 15/10
+  og 16/10.
+- **Renteprognose** — ✅ 1/10, `ceo/renteprognose` (ny beregner: renteomlægning,
+  afdragsform, rentesvingning). *Datagrund:* «renteprognose» 10 af 10 danske
+  completions under ordet selv. **MÅL:** ny side, ingen baseline. Genmål 15/10.
+  *Næste skridt:* de samme completions peger på banknavnene.
   *Næste skridt:* de samme completions peger på banknavnene — overvej en
   `/renteprognose`-tilføjelse der viser forskellen på 3-årig og 5-årig.
-- **Autocomplete: 28 seeds målt 1/10.** *Accept (delvis):* seeds målt og
-  klyngerne skrevet herunder — det stærkeste klynge er bygget. Resten er
-  prioriteret. *Datagrund:* `suggestqueries.google.com`, hl=da gl=dk.
+- **Autocomplete: 28 seeds målt 1/10 + 10 seeds 2/10 13:20** (`momsfrister
+  2026`, `rente på su lån`, `datoer i uge 42` er de nye fund). *Datagrund:*
+  `suggestqueries.google.com`, hl=da gl=dk.
   **Målt igen 1/10 22:20 på fire nye seeds — alle fire er dækket eller
   kildeblokerede:** `annuitetslån` (10/10, men «serielån vs» og «formel bevis»
   er allerede et `<h2>` på `/renteberegner` + FAQ), `promille` («promille på 2»
@@ -277,16 +276,11 @@ Prioriteret efter forventet effekt på **trafik**. Datagrund fra GSC 1/10
   linker nu til `/klokken-i/usa`, og `/tidszone` har en sektion med alle 12
   links i begge sprog (`ceo/tidszone-links-til-lande`) — de 24 sider havde
   ingen indgang *fra* den side, der har flest visninger.
-- **Dagpenge-sats efter skat på `/dagpenge`** — ✅ 2/10, `ceo/dagpenge-efter-skat`.
-  *Hvem:* «dagpenge nyuddannet» har **10 af 10** danske autocomplete-træffere, og
-  «dagpenge sats 2026 efter skat» er nr. 2 under «dagpenge sats 2026» og nr. 4
-  under «dagpenge sats» (målt 2/10 11:25) — mens siden lovede «dagpenge efter
-  skat» i sin egen `keywords` og FAQ og viste **nul** beløb efter skat.
-  *Accept:* beløb efter skat for alle syv satser, tre nye FAQ-spørgsmål, syv
-  beløb læst fra ét modul i stedet for at stå i fem strenge — leveret.
-  *Datagrund:* autocomplete 2/10 11:25 + `/dagpenge` har ingen GSC-top-15-plads,
-  så CTR-baseline er **ikke kendt**; trafikken måles i Plausible og genmåles ved
-  næste snapshot.
+- **Dagpenge-sats efter skat på `/dagpenge`** — ✅ 2/10, `ceo/dagpenge-efter-skat`
+  (beløb efter skat for alle syv satser + 3 FAQ, læst fra ét modul).
+  *Datagrund:* «dagpenge nyuddannet» 10 af 10 danske completions; «dagpenge sats
+  2026 efter skat» nr. 2 under «dagpenge sats 2026» (2/10 11:25). `/dagpenge` har
+  ingen GSC-top-15-plads, så trafikken måles i Plausible ved næste snapshot.
 - **Kalorieguide på `/kalorier`.** *Hvem:* 9 af 10 danske autocomplete-træffere
   under «kalorier» er madvarer. **Blokeret på kilde** (opgave 119, ❓) — må
   ikke gættes tal.
@@ -306,6 +300,18 @@ Prioriteret efter forventet effekt på **trafik**. Datagrund fra GSC 1/10
   `/tid` har ingen `/timer-i-…`-rute; overvej at samme tabel får en svensk
   `<title>`-frase, når opgave 187 (svenske slugs) sætter gang 13/10.
 
+- **Ugens syv datoer på `/ugenummer`** — ✅ 2/10, `ceo/ugenummer-uge-datoer`.
+  *Hvem:* «datoer i uge 42» er **5. af 10** danske completioner under «dato»
+  (målt 2/10 13:20), og `/ugenummer` kunne kun regne den anden vej: fra dato til
+  ugenummer. *Accept:* de syv datoer vises i beregneren for den uge brugeren har
+  valgt (regnet, ikke skrevet), ét FAQ-spørgsmål hvis svar bygges af samme
+  funktion, `datoer i uge` i keywords — leveret. *Datagrund:* autocomplete 2/10
+  13:20. **MÅL:** `/ugenummer` har hverken GSC-top-15-plads eller
+  Plausible-top-15, så **baseline er ikke kendt** — måles først ved næste
+  snapshot. Genmål **16/10**.
+  *Næste skridt:* de samme completioner dækker «uge-til-dato»-spørgsmål; overvej
+  en `/datoer-i-uge/[uge]`-rute kun hvis GSC viser søgervolumen på den.
+
 ## Åbne VERIFICÉR DEPLOY-noter
 
 Batch-deployeren kører 07:30/12:30/17:30/21:30. Prøverne er på **indhold**,
@@ -315,6 +321,7 @@ under sit slug. Noterne med vindue **2/10 12:30** måles efter kl. 12:30.
 
 | Slug | Prøv på indhold |
 |---|---|
+| `ugenummer-uge-datoer` (**ny**, vindue 2/10 17:30) | `minberegner.dk/ugenummer`: resultatboksen skal vise de **syv** datoer i den valgte uge — `Mandag 12. oktober` … `Søndag 18. oktober` for uge 42 — i kort under «Uge 42 / 2026». FAQ'en skal have **fem** spørgsmål, og «Hvilke datoer er der i uge 42?» skal svare «… går fra **mandag den 12. oktober 2026** til **søndag den 18. oktober 2026** …». `keywords` skal have «datoer i uge» og «datoer i uge 42». **Intet** dansk i `beraknare.se/ugenummer` ændret (siden har ingen svensk faq-liste) |
 | `dagpenge-no-sprog` (**ny**, vindue 2/10 12:30) | `beregnerno/dagpenge`: informationskassen skal have **«Du kan normalt ha dagpenge i 2 år (3 848 timer)»** som periodelinje — norsk i «Du»-form, som linjen under («Du må være medlem av en A-kasse …»), og tusindtalsseparator som **mellemrum** (ikke «3.848»). `minberegner.dk/dagpenge` skal være byte-uændret på «Dagpengeperioden er normalt 2 år (3.848 timer)», `beraknare.se` på «Dagpenningperioden är normalt 2 år (3 848 timmar)». **Intet** «Dagpengeperioden er» på beregnerno |
 | `boernepenge-aarstal` (**ny**, vindue 2/10 17:30) | `minberegner.dk/blog/boernepenge-2026-satser-og-regler`: aftrapningseksemplets parentes skal være **byte-uændret** «Har du to børn på 0-2 år (21.480 kr × 2 = 42.960 kr.), får du udbetalt 40.182 kr.» — det er **årstal** (5.370 × 4), ikke kvartal. **Intet** «10.740 kr × 2 = 21.480 kr» og intet «18.702 kr»: dem skrev min første version af `ceo/boernepenge-indlaeg`, fordi `eksempelToBorn` var `sats0.hel * 2` (kvartalsbeløbet for to børn) i stedet for `aarligBelob(sats0)`. Fundet ved at læse den **live** side efter deployet, ikke ved porten |
 | `boernepenge-indlaeg` (**åben**, vindue 2/10 17:30) | `minberegner.dk/blog/boernepenge-2026-satser-og-regler`: `<title>` skal være **byte-uændret** «Børnepenge 2026: 5.370 kr./kvartal (0-2 år)» og `<meta name="description">» «Børnepenge 2026: 5.370 kr./kvartal (0-2 år), 4.248 (3-6 år), 3.342 (7-14 år) og 1.114 kr./måned (15-17 år). Sådan deles ydelsen mellem jer.» — de er nu bygget af `BOERNE_SATSER_2026`, så tallene er de samme, kun kilden er ændret. **Målt OK 2/10 12:47** på title og description. FAQ'en skal have **ti** spørgsmål, og «Hvornår skifter børnepengen sats, når barnet bliver ældre?» skal svare «… Ungeydelsen er 1.114 kr. pr. måned, altså 13.368 kr. om året.» og «Hvad er forskellen på børnepenge og barnetilskud?» «… 1.741 kr. pr. kvartal pr. barn, 1.774 kr. i ekstra børnetilskud … 5.025 kr. i særligt børnetilskud ved adoption.». Familietabellen skal have `10.740`, `9.618`, `11.838` og `6.684` i kolonnen «Pr. kvartal». **Målt OK 12:47** på de tre børnetilskud; eksemplet venter på `boernepenge-aarstal` |
