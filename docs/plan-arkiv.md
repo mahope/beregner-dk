@@ -25856,3 +25856,82 @@ på dansk).
 5,8** pr. 2026-09-02 → 2026-09-30 (søgninger: «rentefradrag 2026» 450 v pos. 2,
 «rentefradrag beregner» 235 v pos. 4, «beregn rentefradrag» 182 v pos. 6),
 Plausible **430 besøgende/28d (+207 %)** pr. 2026-10-02 — måles igen 3/10+14 dage.
+
+---
+
+## Lukket 3/10 00:45 — `kvadratmeter-faq-tal-fra-modul` (F5b-slice 6/9)
+
+**Målt:** **9** håndskrevne talgrupper væk fra `page-data.ts` — alle ni i
+`/kvadratmeter`'s egen blok i hvert sprog (3 da + 3 no + 3 se), så listen er
+**95 → 86**. Det er **seks** svar pr. sprog plus `description`, `metaTitle`,
+`metaDescription`, `ogTitle`, `ogDescription` og `schemaDescription`, som alle
+skrev «5 x 4 m er 20 m²» i hånden. `page.tsx`'s **danske** blok skrev samme
+fire arealer og «3.000 kr.» i `<strong>`, mens den **svenske** allerede læste
+`arealEksempel()` og `PRIS_EKSEMPEL` — den asymmetri er præcis fejlen hos
+`/vaegttab` halve 1, så den er målt først og fundet først.
+
+**Én reel fejl fundet — to, faktisk, og de var i Googles JSON-LD:**
+
+1. **Svensk og norsk skrev tal med dansk punktum.** «1 m² = 10.000 cm². 10.000
+   m² = 1 hektar.» læses som ti nul nul nul på begge sprog, og «Ved 150 kr./m²
+   blir det 3.000 kr for 20 m²» gjorde det samme — **mens den svenske brødtekst
+   i `page.tsx` stod med korrekt «3 000 kr» lige ovenfor**, så FAQ'en modsagde
+   sin egen side. `FAQSchema` læser præcis `faqItems`, så begge svar var
+   publiceret som JSON-LD. Nu: **10 000 cm²** og **3 000 kr** i begge sprog.
+2. **Materialepriserne lovede et marked, de ikke var fra.** «Laminat 80-200
+   **SEK**/m²» og «… **NOK**/m²» skrev svensk og norsk valutaenhed om de
+   **samme danske tal**, og der er ingen kilde på noget af det i repoet
+   (punkt 11 — der opfindes ingen). Samme fejl som `timepris-markedspriser.ts`
+   fik for frilanstimepriser, samme løsning: `MATERIALEPRISER` erklærer
+   `omraade: "danmark"`, enheden er `kr` på alle tre (sidens egen
+   `getCurrencySuffix`), og **svaret siger det i sætningen** — «Nivåerna är
+   danska — vi saknar en källa till svenska materialpriser.» / «Nivåene er
+   danske — vi mangler en kilde til norske materialpriser.»
+
+**Dansk byte-uændret.** Målt: `getPageData("kvadratmeter", "da")` før og efter
+giver identisk `description`, `metaTitle`, `metaDescription`, `ogTitle`,
+`ogDescription`, `schemaDescription` og alle otte svar. Det er låst med `toBe`
+på de seks strenge i `kvadratmeter-eksempler.test.ts`, så en reel tekstændring
+gør porten rød — altså ingen SEO-regression på det domæne, der har de 21.593
+visninger.
+
+**Nye kilder i modulet** (én fil, ingen opfundne tal):
+- `ArealEksempel.tal` — de led regnestykket ganger og dividerer, så «5 × 4»,
+  «3,14 × 3 × 3» og «((4 + 6) / 2) × 3» ikke kan stå som tekst ved siden af
+  `areal`.
+- `CM2_PR_M2` (10 000), `M2_PR_HAKTAR` (10 000), `SQ_FT_PR_M2` (10,76) —
+  omregningsfaktorerne stod som «10.000 cm²» i alle tre sprog.
+- `VAERELSE_EKSEMPLER` — «3 x 4» og «3,5 x 4,2», hvis arealer *regnes* (12 og
+  14,7) i stedet for at være skrevet.
+- `SPILD_PCT = {min: 5, maks: 10}` — den tommelfingerregel, to svar citerer, og
+  som `kvadratmeter-materialer.ts` allerede dokumenterer i sin
+  `KILDE.beskrivelse`.
+
+**Porten kan fejle, målt tre gange.** (1) Den svenske `omregning` tilbage til
+«10.000 cm²» i `page-data.ts` → **1 rød** af 145. (2) Den norske `gulvpris`
+håndskrevet med «3.000 kr» → **1 rød** af 12. (3) Materialer tilbage på
+«SEK/m²» → **3 røde** af 21 (porten på marked, porten på separator, porten på
+enheden). `page-data.test.ts` krævede «3.000 kr» for *alle tre* sprog — den
+krævede altså fejlen; den dømmer nu `formatBelob` pr. sprog. Nye prøver: 9 i
+`kvadratmeter-eksempler.test.ts` + 2 i `page.test.tsx`.
+
+**Listene sænket i samme commit:** `src/app/kvadratmeter/page.tsx` **1 → 0** i
+`HAARDKODEDE_BELOB`, `HAARDKODEDE_BELOB_I_LISTEN` **333 → 332**. Målt med
+portens egen `jsxBelob` og `strengBelob`: begge **0** for filen. (Disse
+scannere ser kun `.tsx`, så `page-data.ts`' **89** fund ligger stadig uden for
+porten — det er den åbne opgave nederst i planen.)
+
+**Gate grøn:** lint (**712 filer**), typecheck exit 0, **3881 tests / 241 filer**
+(fra 3870 / 240), `next build` exit 0. Rørte filer: `kvadratmeter-eksempler.ts`
+(ny), `kvadratmeter-eksempler.test.ts` (ny), `areal-eksempler.ts` (**+`tal`,
++4 konstanter**), `page-data.ts` (**18 strenge + 1 import**), `page.tsx`
+(begge sproggrene), to lister i `regnestykker.test.ts`, to forventninger i
+`page-data.test.ts`, to prøver i `page.test.tsx`. Ingen beregningslogik, ingen
+CSS, ingen URL, ingen sitemap, ingen `<h1>`, ingen `<title>`.
+
+**MÅL:** `/kvadratmeter` baseline **21.593 visninger / 318 klik / CTR 1,5 % /
+pos. 4,9** pr. 2026-09-02 → 2026-09-30, Plausible **394 besøgende/28d (+87 %,
+bounce 4 %)** pr. 2026-10-02. Svensk side: **3.705 visninger / 5 klik / CTR
+0,1 % / pos. 10,6** — den laveste CTR på sitet efter `/procent`, og dens fire
+største søgninger («5 i kvadrat är» 35 v pos. 8, «mått i kvadratmeter» 12 v pos.
+10, «5 kvadratmeter» 11 v pos. 11) ligger på pos. 8-11. Måles igen 17/10+.

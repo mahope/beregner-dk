@@ -227,7 +227,12 @@ const HAARDKODEDE_BELOB: Record<string, number> = {
   "src/app/flyttebudget/page.tsx": 3,
   "src/app/kalorier/page.tsx": 2,
   "src/app/konfirmation/page.tsx": 6,
-  "src/app/kvadratmeter/page.tsx": 1,
+  // 1 → 0 den 3/10: `kvadratmeter`'s «20 m² til 150 kr./m² er 3.000 kr.» lå
+  // håndskrevet i den danske blok, mens den svenske allerede læste sit beløb
+  // fra `PRIS_EKSEMPEL`. Begge læser nu `kvadratmeter-eksempler`, så de to
+  // sprog ikke kan få hver sin pris, og de fire arealer kommer fra
+  // `AREAL_EKSEEMPLER` i stedet for at være skrevet i `<strong>`.
+  "src/app/kvadratmeter/page.tsx": 0,
   "src/app/loen-efter-skat/page.tsx": 1,
   "src/app/loenstigning/page.tsx": 2,
   "src/app/lon-efter-skatt/page.tsx": 0,
@@ -300,6 +305,8 @@ const HAARDKODEDE_BELOB: Record<string, number> = {
  * børnebørn, 26.600 kr til svigerbørn) — de har ingen kilde i repoet, så de må
  * ikke gættes, og de må ikke forsvinde uden erstatning.
  *
+ * 333 → 332 den 3/10: `/kvadratmeter` stod med 1 fund i JSX-teksten — den
+ * danske blok skrev «3.000 kr.» i hånden, mens den svenske læste `PRIS_EKSEMPEL`.
  * 347 → 338 den 2/10: `/boligsalg` stod med 9 fund i JSX-teksten — otte
  * redaktionelle prisintervaller («3-6 %», «25.000-60.000 kr.») der lå uden for
  * den beregning læseren kan se, og som kaldtes «baseret på Boligejer.dk,
@@ -307,7 +314,7 @@ const HAARDKODEDE_BELOB: Record<string, number> = {
  * `DEFAULT_VALUES` og tinglysningens eksporterede satser. **Ingen** er bevaret
  * som interval: de har ingen kilde, så de må ikke gættes (punkt 11).
  */
-const HAARDKODEDE_BELOB_I_LISTEN = 333;
+const HAARDKODEDE_BELOB_I_LISTEN = 332;
 
 /**
  * Samme port på de `.tsx`-filer der **ikke** er `page.tsx`: beregnerne i
@@ -671,7 +678,7 @@ describe("beløb i JSX-tekst på siderne", () => {
     // 2/10: 385 → 370, da `/moms'` 15 eksempelbeløb læses fra modulet. De 370
     // fund er de samme filers øvrige beløb, så tallet siger hvor meget af
     // korpuset porten endnu dømmer — det må ikke stige i det stille.
-    expect(HAARDKODEDE_BELOB_I_LISTEN).toBe(333);
+    expect(HAARDKODEDE_BELOB_I_LISTEN).toBe(332);
   });
 });
 

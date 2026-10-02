@@ -150,6 +150,56 @@ describe("kvadratmeter page", () => {
     expect(html).not.toContain("fliser");
   });
 
+  // 3/10: FAQ'en skrev «1 m² = 10.000 cm²» og «blir det 3.000 kr for 20 m²»
+  // på svensk og norsk, altså med dansk punktum — og `FAQSchema` publicerer
+  // svaret som JSON-LD, så Google citerede det. Porten dømmer den *rendere*
+  // side, så hele HTML'en — synlig tekst, JSON-LD og RSC-payloaden — skal være
+  // fri for det danske mønster i de to sprog.
+  test("svensk og norsk har intet beløb med dansk tusindtalspunktum", async () => {
+    for (const locale of ["se", "no"] as const) {
+      // FAQ'en dømmes fra `page-data.ts`, for det er den `FAQSchema` læser —
+      // altså præcis den tekst, Google citerer. Resten af siden dømmes på den
+      // renderede HTML, så hele sværdet er med.
+      const alt = [
+        ...getPageData("kvadratmeter", locale)!.faqItems.map((f) => `${f.question} ${f.answer}`),
+        normalisér(renderToStaticMarkup(await medLocale(locale))),
+      ].join("\n");
+
+      // 10.000 cm², 10.000 m², 3.000 kr, 80.000 … — intet af det er gyldigt i
+      // de to sprog. Mutation: en enkelt streng tilbage i page-data.ts med det
+      // danske punktum gør denne prøve rød.
+      expect(`${locale}: ${alt.match(/\d\.\d{3}/g) ?? []}`).not.toMatch(/\d/);
+
+      // Og de rigtige tal skal stå, så prøven ikke kan gå grøn ved at fjerne
+      // svaret. Enheden er «kr» på begge — de skrev «SEK/m²» og «NOK/m²» om de
+      // samme danske intervaller.
+      expect(alt).toContain("10 000 cm²");
+      expect(alt).toContain("3 000 kr");
+      expect(alt).not.toContain("SEK/m²");
+      expect(alt).not.toContain("NOK/m²");
+    }
+  });
+
+  test("materialepriserne siger i sætningen, at de er danske", async () => {
+    // Der er ingen kilde i repoet på svensk eller norsk materialepris, så
+    // intervallerne er danske — og det skal stå i svaret, ellers lover de et
+    // marked, de ikke kan. Samme greb som `timepris-markedspriser.ts`.
+    const se = getPageData("kvadratmeter", "se")!.faqItems.find((f) =>
+      f.answer.includes("Laminat"),
+    );
+    const no = getPageData("kvadratmeter", "no")!.faqItems.find((f) =>
+      f.answer.includes("Laminat"),
+    );
+
+    expect(se?.answer).toContain("Nivåerna är danska");
+    expect(no?.answer).toContain("Nivåene er danske");
+    // Dansk svarer uden forbehold — det er sit eget marked.
+    const da = getPageData("kvadratmeter", "da")!.faqItems.find((f) =>
+      f.answer.includes("Laminat"),
+    );
+    expect(da?.answer).toBe("Laminat 80-200 kr/m², trægulv 300-800 kr/m², fliser 200-500 kr/m².");
+  });
+
   test("den danske siden har ingen svenska formuleringer", async () => {
     const html = renderToStaticMarkup(await KvadratmeterPage());
 

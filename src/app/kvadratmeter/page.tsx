@@ -11,8 +11,13 @@ import RelatedCalculators from "@/components/RelatedCalculators";
 import RelateredeArtikler from "@/components/RelateredeArtikler";
 import { getLocale, getCurrentDomainConfig } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
-import { arealEksempel, PRIS_EKSEMPEL } from "@/lib/areal-eksempler";
-import { formatNumber } from "@/lib/format";
+import {
+  kvadratmeterFacit,
+  kvadratmeterPrisAreal,
+  kvadratmeterPrisBeloeb,
+  kvadratmeterPrisPrM2,
+  kvadratmeterUdtryk,
+} from "@/lib/kvadratmeter-eksempler";
 
 export async function generateMetadata() {
   return generatePageMetadata("kvadratmeter");
@@ -70,7 +75,7 @@ export default async function KvadratmeterPage() {
             <strong>Rektangel</strong> (ett rum, en platta, ett golv): längd ×
             bredd. Ett rum på 5 m × 4 m är{" "}
             <strong>
-              5 × 4 = {formatNumber(arealEksempel("rektangel").areal, locale, { maximumFractionDigits: 0 })} m²
+              {kvadratmeterUdtryk("se").rektangel} = {kvadratmeterFacit("se").rektangel} m²
             </strong>
             .
           </li>
@@ -78,8 +83,7 @@ export default async function KvadratmeterPage() {
             <strong>Cirkel</strong> (ett rundt bord, en brunn, en rund platta):
             3,14 × radie × radie. En cirkel med radien 3 m är{" "}
             <strong>
-              3,14 × 3 × 3 ={" "}
-              {formatNumber(arealEksempel("cirkel").areal, locale, { maximumFractionDigits: 1 })} m²
+              {kvadratmeterUdtryk("se").cirkel} = {kvadratmeterFacit("se").cirkel} m²
             </strong>
             . Mäter du i diameter halverar du den först, så en diameter på 6 m är
             igen radien 3 m.
@@ -88,8 +92,7 @@ export default async function KvadratmeterPage() {
             <strong>Triangel</strong>: (grundlinje × höjd) / 2. En grundlinje på
             6 m med en höjd på 4 m är{" "}
             <strong>
-              (6 × 4) / 2 ={" "}
-              {formatNumber(arealEksempel("trekant").areal, locale, { maximumFractionDigits: 0 })} m²
+              {kvadratmeterUdtryk("se").trekant} = {kvadratmeterFacit("se").trekant} m²
             </strong>
             . Den kan alltid delas i två rektanglar.
           </li>
@@ -98,24 +101,26 @@ export default async function KvadratmeterPage() {
             parallella sidorna) / 2) × höjd. Sidor på 4 m och 6 m med en höjd på
             3 m är{" "}
             <strong>
-              ((4 + 6) / 2) × 3 ={" "}
-              {formatNumber(arealEksempel("trapez").areal, locale, { maximumFractionDigits: 0 })} m²
+              {kvadratmeterUdtryk("se").trapez} = {kvadratmeterFacit("se").trapez} m²
             </strong>
             .
           </li>
         </ul>
         <p>
           Ska du köpa golv, plattor eller målning är det samma tal gånger med
-          priset per m². Som exempel: 20 m² till 150 kr/m² kostar{" "}
-          <strong>{formatNumber(PRIS_EKSEMPEL.pris, locale)} kr</strong>, och så
-          lägger du 5-10 % till för kapning och spill.
+          priset per m². Som exempel: {kvadratmeterPrisAreal("se")} till{" "}
+          {kvadratmeterPrisPrM2("se", "kr/m²")} kostar{" "}
+          <strong>{kvadratmeterPrisBeloeb("se")}</strong>, och så lägger du 5-10 %
+          till för kapning och spill.
         </p>
       </div>
       )}
 
       {/* Metoden med tal: "hvordan regner man kvadratmeter ud" (359 visninger,
           pos. 3 i dansk GSC) er sitets fjerdestørste søgning, og værktøjet
-          skrev kun formlerne symbolske ("Areal = Længde × Bredde"). */}
+          skrev kun formlerne symbolske ("Areal = Længde × Bredde").
+          Begge sproggrene læser tallene fra `kvadratmeter-eksempler`, så den
+          danske og den svenske blok ikke kan komme i forskæld. */}
       {locale === "da" && (
       <div className="prose max-w-none mb-8">
         <h2>Sådan regner du kvadratmeter ud med tal</h2>
@@ -128,29 +133,34 @@ export default async function KvadratmeterPage() {
           <li>
             <strong>Rektangel</strong> (et værelse, en flise, et gulv):{" "}
             længde × bredde. Et rum på 5 m × 4 m er{" "}
-            <strong>5 × 4 = 20 m²</strong>.
+            <strong>{kvadratmeterUdtryk("da").rektangel} = {kvadratmeterFacit("da").rektangel} m²</strong>.
           </li>
           <li>
             <strong>Cirkel</strong> (en rund tabel, en brønd, en rund flise):
             3,14 × radius × radius. En cirkel med radius 3 m er{" "}
-            <strong>3,14 × 3 × 3 = 28,3 m²</strong>. Måler du i diameter skal
-            du halvere den først, så en diameter på 6 m er igen radius 3 m.
+            <strong>{kvadratmeterUdtryk("da").cirkel} = {kvadratmeterFacit("da").cirkel} m²</strong>.
+            Måler du i diameter skal du halvere den først, så en diameter på 6 m
+            er igen radius 3 m.
           </li>
           <li>
-            <strong>Trekant</strong>: (grundlinje × højde) / 2. En grundlinje på
-            6 m med en højde på 4 m er <strong>(6 × 4) / 2 = 12 m²</strong>.
+            <strong>Trekant</strong>: (grundlinje × højd) / 2. En grundlinje på
+            6 m med en højde på 4 m er{" "}
+            <strong>{kvadratmeterUdtryk("da").trekant} = {kvadratmeterFacit("da").trekant} m²</strong>.
             Den kan altid deles i to rektangler.
           </li>
           <li>
             <strong>Trapez</strong> (fire sider, hvor to er parallelle): ((de to
             parallelle sider) / 2) × højde. Sider på 4 m og 6 m med en højde på
-            3 m er <strong>((4 + 6) / 2) × 3 = 15 m²</strong>.
+            3 m er{" "}
+            <strong>{kvadratmeterUdtryk("da").trapez} = {kvadratmeterFacit("da").trapez} m²</strong>.
           </li>
         </ul>
         <p>
           Skal du købe gulv, fliser eller maling, er det samme tal ganget med
-          prisen pr. m². 20 m² til 150 kr./m² er <strong>3.000 kr.</strong>,
-          og så lægger du 5-10 % til for tilskæring og spild.
+          prisen pr. m². {kvadratmeterPrisAreal("da")} til{" "}
+          {kvadratmeterPrisPrM2("da")} er{" "}
+          <strong>{kvadratmeterPrisBeloeb("da")}</strong>, og så lægger du 5-10 %
+          til for tilskæring og spild.
         </p>
       </div>
       )}

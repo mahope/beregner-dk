@@ -546,19 +546,22 @@ describe("getPageData", () => {
       heading: "Et rum på 5 x 4 m er 20 m²",
       price: "3.000 kr.",
     },
+    // Svensk og norsk skriver mellemrum, ikke det danske punktum. Før 3/10 krævede
+    // denne liste «3.000 kr» for alle tre sprog, altså den fejl, svaret havde —
+    // og den lå i Googles JSON-LD.
     {
       locale: "se" as const,
       title: "Kvadratmeterkalkylator: 5 x 4 m = 20 m²",
       area: "20 m²",
       heading: "Ett rum på 5 x 4 m är 20 m²",
-      price: "3.000 kr",
+      price: "3 000 kr",
     },
     {
       locale: "no" as const,
       title: "Kvadratmeterkalkylator: 5 x 4 m = 20 m²",
       area: "20 m²",
       heading: "Et rom på 5 x 4 m er 20 m²",
-      price: "3.000 kr",
+      price: "3 000 kr",
     },
   ])("has answer-first area metadata for $locale", ({ locale, title, area, heading, price }) => {
     const data = getPageData("kvadratmeter", locale)!;

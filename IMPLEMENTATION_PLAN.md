@@ -1,18 +1,18 @@
-STATUS: 3/10 00:30. CI grøn ved start (`37067168962`). Sentry: ingen uløste
-    fejl 14 dage (SDK'en er sat op). **Gate:** `npm run lint` · `npm run typecheck` ·
-    `TZ=UTC npm run test` · `npm run build` — grøn 3/10 00:24 (lint 710 filer,
-    **3870** tests i 240 filer, build exit 0).
-    **Denne iteration: /rentefradrag — FAQ'en løj om et par.** «Skal par fordele
-    rentefradraget mellem sig?» sagde at et par med 80.000 kr. får «præcis samme
-    besparelse» som en enlig, men parrets grænse er dobbelt, så hele beløbet får
-    den høje sats: **26.880 kr. mod 24.480** — 2.400 kr. mere. `page.tsx` havde
-    sagt det rigtige hele tiden, så FAQ'en modsagde sin egen side, og den ligger
-    i Googles JSON-LD. Metadata + de fem tal-svar læser nu `rentefradrag-eksempler`
-    over `RENTEFRADRAG_2026` og `beregnRentefradrag`; «Grænsen har været uændret i
-    en årrække» er byttet med modulets kilde + `verifiedAt`. 7 fund væk fra
-    `page-data.ts` (**102 → 95**). Se `docs/plan-arkiv.md`.
-    **Næste iteration:** (1) mål de fem noter i vinduet 4/10 07:30 på indhold,
-    (2) næste frie F5b-slug er `/kvadratmeter` (6) — `/moms` er ⛔.
+STATUS: 3/10 00:45. CI grøn ved start (`37069720584`). Sentry: ingen uløste
+     fejl 14 dage. **Gate:** `npm run lint` · `npm run typecheck` ·
+     `TZ=UTC npm run test` · `npm run build` — grøn 3/10 00:45 (lint 712 filer,
+     **3881** tests i 241 filer, build exit 0).
+     **Denne iteration: /kvadratmeter — FAQ'en læste tal med dansk punktum på
+     svensk og norsk.** «1 m² = 10.000 cm². 10.000 m² = 1 hektar.» og «blir det
+     3.000 kr for 20 m²» læses som ti nul nul nul i begge sprog, og den svenske
+     brødtekst stod med korrekt «3 000 kr» lige ovenfor — så `FAQSchema`s
+     JSON-LD modsagde siden selv. **9 fund væk fra `page-data.ts` (95 → 86)**,
+     og `page.tsx`'s danske blok læser nu det samme modul som den svenske.
+     Materialepriserne skrev «SEK/m²» og «NOK/m²» om de **samme danske tal**
+     uden kilde; de siger nu i sætningen, at niveauet er dansk. Dansk er
+     byte-uændret (låst med `toBe`). Se `docs/plan-arkiv.md`.
+     **Næste iteration:** (1) mål de noter i vinduet 3/10 07:30 på indhold,
+     (2) næste frie F5b-slug er `/konfirmation` (6).
 
 ## Fase 3 — trafik-drevet
 
@@ -172,6 +172,25 @@ håndskrevet beløb er rødt; mutation (8.500 i et svar + den gamle 1953-påstan
 → **2 røde** af 6. `gang`-reglen tabte ét fund 7 → 6 (Excel-svarets
 «40.000 × 0,15 = 6.000» er nu interpolationer), portens sum 26 → 25.
 
+**Lukket 3/10 00:45 — `kvadratmeter-faq-tal-fra-modul`.** Se
+`docs/plan-arkiv.md`. *Målt:* **9** håndskrevne talgrupper væk fra
+`page-data.ts` (6 svar + 6 metadatafelter i hvert sprog), så listen er
+**95 → 86**. **To reelle fejl fundet:** (1) svensk og norsk skrev «10.000 cm²»,
+«10.000 m²» og «3.000 kr» med dansk punktum, mens den svenske brødtekst i
+`page.tsx` stod med «3 000 kr» — modsagde altså sig selv, og `FAQSchema`
+publicerer svaret; (2) «Laminat 80-200 **SEK**/m²» / «**NOK**/m²» lovede svensk
+og norsk marked om de **samme danske tal**, uden kilde. Ny
+`kvadratmeter-eksempler.ts` bygger alle 18 strenge af `AREAL_EKSEAMPLER` (nu med
+regnestykkets led) + `PRIS_EKSEMPEL` + fire nye konstanter (`CM2_PR_M2`,
+`M2_PR_HAKTAR`, `SQ_FT_PR_M2`, `VAERELSE_EKSEMPLER`) gennem `formatBelob`;
+`SPILD_PCT` og `MATERIALEPRISER` er deklareret her med `omraade: "danmark"`, så
+de to andre svar siger det i sætningen. **Porten låste fejlen fast:**
+`page-data.test.ts` krævede «3.000 kr» for alle tre sprog; den kræver nu «3 000
+kr» for `se`/`no`, og `page.test.tsx` forbyder tre-cifre-punktum i hele den
+svævede sværde. **11 nye tests** (3870 → 3881); tre mutationer målt røde (1, 1
+og 3 røde). `HAARDKODEDE_BELOB` for `kvadratmeter/page.tsx` **1 → 0** og listens
+sum **333 → 332**.
+
 **Lukket 3/10 00:24 — `rentefradrag-faq-tal-fra-modul`.** Se
 `docs/plan-arkiv.md`. *Målt:* **7** håndskrevne talgrupper væk fra `page-data.ts`
 (`description` + `metaDescription` + 5 FAQ-svar), så listen er **102 → 95**.
@@ -189,8 +208,8 @@ den påstand ikke kan efterprøves. Dansk ellers uændret på nær «33,6%» →
 (bindingsprøven), resten låser modulet.
 
 **Åben række (strenglisten):** næste fil skal måles på ny — de punkt der stod
-åbne er alle ❓-blokerede. **Fem filer er lukket 2/10**, se listen nedenfor.
-Strenglistens loft er **70 → 57**, JSX-listen **360 → 347 → 338 → 333**.
+åbne er alle ❓-blokerede. **Syv filer er lukket**, se listen nedenfor.
+Strenglistens loft er **70 → 57**, JSX-listen **360 → 347 → 338 → 333 → 332**.
 
 **Ny målt fejlklasse — `page-data.ts` ligger uden for begge beløbs-porte.**
 `strengBelob`/`jsxBelob` måler kun `.tsx`, så de usourcede intervaller i
@@ -217,21 +236,22 @@ gamle strenge). `/vaegttab` se: 1.277 visninger.
 **Åben: beløbs-porten scanner kun `*.tsx`.** *Accept:* `strengBelob` kører på
 `src/lib/*.ts` også, og listen opdateres i samme commit.
 
-**Seks filer er lukket:** SU (`su-indlaeg-belob-fra-modul`), arveafgift
+**Syv filer er lukket:** SU (`su-indlaeg-belob-fra-modul`), arveafgift
 (`arveafgift-belob-fra-modul`), `/boligsalg` (`boligsalg-belob-fra-modul`),
 `/procent` (`procent-faq-tal-fra-modul`), `/renteberegner`
-(`renteberegner-belob-fra-modul`) og `/procent`s procentpoint-svar
-(`procentpoint-faq-tal-fra-modul`) — alle i `docs/plan-arkiv.md`.
+(`renteberegner-belob-fra-modul`), `/procent`s procentpoint-svar
+(`procentpoint-faq-tal-fra-modul`) og `/kvadratmeter`
+(`kvadratmeter-faq-tal-fra-modul`) — alle i `docs/plan-arkiv.md`.
 
 **Målt 2/10 18:35 (egen AST-probe, samme mønster som portens `strengBelob`):
 alle fund lå i `page-data.ts` alene** — ikke fordelt i `src/lib/*.ts` som
 portens docblock siger. Efter `/renteberegner` var de **176** (var 195 ved
 iterationens start); efter `/vaegttab` halve 2 er de **131** målt 3/10 22:33.
-Køen pr. slug nu (målt 3/10 00:00 med egen AST-probe, ialt **95**):
-`moms` 15 (⛔) · `kvadratmeter` 6 · `konfirmation` 6 · `efterloen` 5 ·
-`aktieskat` 5 · `loen-efter-skatt` 4 · `topskat` 4 · `boernepenge` 4 · resten ≤3.
-**Anbefalet rækkefølge:** `/kvadratmeter` (6, se 3.705) → `/konfirmation` (6) →
-`/efterloen` (5) → `/aktieskat` (5). `/moms` er ⛔ (de 3 lovgrænser).
+Køen pr. slug (**86** efter kvadratmeter 3/10 00:45, målt med egen AST-probe):
+`moms` 15 (⛔) · `konfirmation` 6 · `efterloen` 5 · `aktieskat` 5 ·
+`loen-efter-skatt` 4 · `topskat` 4 · `boernepenge` 4 · resten ≤3.
+**Anbefalet rækkefølge:** `/konfirmation` (6) → `/efterloen` (5) → `/aktieskat`
+(5). `/moms` er ⛔ (de 3 lovgrænser).
 *Accept pr. slice:* ét slug pr. opgave, 12 fund eller færre, de læses fra sit
 eget modul, og en mutation i porten. `/vaegttab` blev delt i to halvdele
 (12 + 12), fordi den er 24 fund. **Hvis porten udvides til `.ts` med det samme,
@@ -296,6 +316,8 @@ kode. Hver note er én linje; den fulde kommando står i `docs/plan-arkiv.md` un
 sit slug. Strip `<!-- -->`-kommentarmarkørerne fra HTML'en, ellers matcher
 ingen regex på tal og tekst.
 
+`VERIFICÉR DEPLOY: /kvadratmeter FAQ (svensk og norsk «10 000 cm²» og «3 000 kr», materialerne «Nivåerna är danska») ceo/kvadratmeter-faq-tal-fra-modul 3/10 00:45`
+
 `VERIFICÉR DEPLOY: /rentefradrag FAQ (parret får 26.880 kr., ikke «præcis samme besparelse») ceo/rentefradrag-faq-tal-fra-modul 3/10 00:30`
 
 `VERIFICÉR DEPLOY: svensk «Första maj» + «använda» på /dato og /nedtaelling ceo/svenska-tekstfejl 3/10 23:20`
@@ -315,6 +337,7 @@ skøn: `getDageTilSlugs()` giver **22 / 19**, og live har 22 / 19.
 
 | Slug | Prøv på indhold |
 |---|---|
+| `kvadratmeter-faq-tal-fra-modul` (**ny**, vindue 3/10 07:30) | `beraknare.se/kvadratmeter` og norsk `/kvadratmeter`: **0** `\d\.\d{3}` i hele HTML'en — altså **intet** «10.000 cm²» / «10.000 m²» / «3.000 kr». **2** `10 000 cm²` og **2** `3 000 kr` skal stå (ét i synlig FAQ-tekst, ét i `FAQPage`-JSON-LD). FAQ'en skal have de **syv** svenske spørgsmål, hvor «Vad kostar 20 m² golv?» svarer «… blir det **3 000** kr för 20 m².» og «Omvandling?» svarer «1 m² = **10 000** cm². **10 000** m² = 1 hektar. 1 m² ≈ 10,76 sq ft.», og «Vad kostar golv per m²?» svarer «Laminat 80-200 kr/m², trägolv 300-800 kr/m², kakel 200-500 kr/m². **Nivåerna är danska — vi saknar en källa till svenska materialpriser.**». Norsk skal have de **fem** spørgsmål med «Nivåene er danske — vi mangler en kilde til norske materialpriser.». **0** `SEK/m²` og **0** `NOK/m²`. `minberegner.dk/kvadratmeter`: FAQ'en skal have de **otte** danske spørgsmål **byte-uændret** (dansk skriver «10.000 cm²» og «3.000 kr.»), og `<meta name="description">` skal starte med «Et rum på 5 x 4 m er 20 m².». **Intet** `NaN`. |
 | `vaegttab-faq-fra-modul` (**ny**, vindue 3/10 21:30) | `beraknare.se/vaegttab`: **0** `2\.209` i hele HTML'en — synlig FAQ-tekst, `FAQSchema`-JSON-LD og RSC-payloaden skal alle skrive «2 209», «1 780», «2 759», «7 700», «1 000», «1 500», «1 200» med **mellemrum**. FAQ'en skal stadig have **fem** spørgsmål, hvor «Hur många kalorier ska jag äta för att gå ner 6 kg på 12 veckor?» svarer «… förbrukar **2 759** kcal per dag (BMR **1 780** kcal × aktivitetsfaktor **1,55**) … så du behöver äta **2 209** kcal per dag.». `minberegner.dk/vaegttab`: FAQ'en skal have de **samme fem** spørgsmål **byte-uændret** med dansk punktum («2.759», «1.780», «550 kcal», «2.209»), og `0` `2 209`. **Intet** `NaN`. |
 | `kalorier-faq-tal-fra-modul` (**ny**, vindue 3/10 07:30) | `beraknare.se/kalorier`: hele HTML'en skal have **0** `\d\.\d{3}` på tal — altså **intet** «1.780» / «2.759» / «2.259» / «7.700». `<meta name="description">` skal være «Hur många kalorier behöver du per dag? Man, 80 kg, 180 cm och 30 år: BMR **1 780** kcal och TDEE **2 759** kcal vid måttlig aktivitet.», `metaDescription` «… BMR **1 780** kcal, TDEE **2 759** kcal. Beräkna BMR, TDEE och makrofördelning.», `metaTitle`/`ogTitle` uændret «Kalorikalkylator: man 80 kg, 180 cm = **2 759** kcal/dag». FAQ'en skal have de **otte** svenske spørgsmål, hvor «Hur många kalorier behöver jag?» svarer «… dagligt behov på **2 759** kcal. En kvinna med samma mått har **2 502** kcal.» og «Hur många kalorier behöver jag för att gå ner 1 kg?» svarer «… cirka **7 700** kcal per kilo fatt … underskott på **7 700** kcal …». Brødteksten skal have «2 259 kcal» og «2 759 kcal» i tabellerne (allerede sådan). **Intet** `NaN`. `minberegner.dk/kalorier`: FAQ'en skal have de **syv** danske spørgsmål **byte-uændret** med dansk punktum («1.780», «2.759», «2.259», «7.700»), og `0` `1 780`. |
 | `svenska-tekstfejl` (**ny**, vindue 3/10 07:30) | `beraknare.se/dato`: **0** `Første maj` i hele HTML'en — den svenske helligdagsliste skal skrive «**Första maj**» (synlig liste, `helligdagsnavne`, RSC). `beraknare.se/nedtaelling`: **0** `använna` og sætningen skal være «… kan du **använda** `datokalkylatorn`». `minberegner.dk/dato` + `/nedtaelling`: uændret (dansk skriver «Første maj» korrekt, og den danske blok sagde «kan du bruge»). **Intet** `NaN`. |
