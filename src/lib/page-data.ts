@@ -25,6 +25,7 @@ import {
 } from "./procent";
 import { formatBelob, formatNumber, formatSvenskText } from "./format";
 import { LEASING_EKSEMPEL, beregnLeasingSammenlign, leasingSammenlignFaqSvar } from "./leasing";
+import { leasingSeEksempelTekster } from "./leasing-eksempler";
 import { procentpointForskelFaqSvar } from "./procentpoint";
 import {
   BESKAEFTIGELSESTILLAEG_2026,
@@ -164,6 +165,8 @@ export type PageData = {
 };
 
 const LEASING_SAMMENLIGN = beregnLeasingSammenlign(LEASING_EKSEMPEL)!;
+/** De svenske strenge, der citerer samme eksempel. Se `leasing-eksempler`. */
+const LEASING_SE = leasingSeEksempelTekster();
 
 const kr = (value: number) => value.toLocaleString("da-DK");
 /** Svensk løbende tekst: "643 000" og "32,38" — tallene fra `svensk-skatt`. */
@@ -4069,24 +4072,24 @@ const sePages: Record<string, PageData> = {
     },
     "leasing": {
       slug: "leasing",
-      title: "Leasingkalkylator: bil på 300.000 kr = 4.121 kr/mån",
-      description: "En bil på 300.000 kr med 150.000 kr i restvärde, 4,5 % ränta, 30.000 kr i kontantinsats och 36 månaders löptid ger 4.121 kr i leasingkostnad per månad och 178.350 kr totalt inklusive 28.350 kr i ränta.",
+      title: LEASING_SE.title,
+      description: LEASING_SE.description,
       metaTitle: "Fåretagsleasing bil - beräkna leasingkostnaden",
-      metaDescription: "Bil på 300.000 kr med 150.000 kr i restvärde, 4,5 % ränta, 30.000 kr i kontantinsats och 36 mån: 4.121 kr i leasingkostnad per månad.",
+      metaDescription: LEASING_SE.metaDescription,
       keywords: ["leasing", "leasing kalkylator", "leasingkostnad", "leasing vs billån", "fåretagsleasing bil", "kalkylator", "gratis", "2026"],
       ogTitle: "Fåretagsleasing bil - beräkna leasingkostnaden",
-      ogDescription: "Bil på 300.000 kr med 150.000 kr i restvärde, 4,5 % ränta, 30.000 kr i kontantinsats och 36 mån: 4.121 kr i leasingkostnad per månad.",
+      ogDescription: LEASING_SE.ogDescription,
       category: "Ekonomi",
       breadcrumbCategory: "Ekonomi",
       breadcrumbCategoryHref: "/kategori/oekonomi",
       schemaName: "Leasingkalkylator",
-      schemaDescription: "Beräkna leasingkostnad per månad och jämför leasing med billån. En bil på 300.000 kr med 150.000 kr i restvärde kostar 4.121 kr per månad över 36 månader.",
+      schemaDescription: LEASING_SE.schemaDescription,
       schemaCategory: "FinanceApplication",
       faqItems: [
-      { question: "Vad kostar leasing av en bil på 300.000 kr?", answer: "Med 150.000 kr i restvärde, 4,5 % ränta, 30.000 kr i kontantinsats och 36 månaders löptid blir månadskostnaden 4.121 kr, vilket är 178.350 kr totalt inklusive 28.350 kr i ränta." },
-      { question: "Vad är värdetabet på en leasingbil?", answer: "Värdetabet är bilpriset minus restvärdet. Med 300.000 kr i bilpris och 150.000 kr i restvärde är det 150.000 kr. Det är det belöp du betalar för att bilen tappar värde under löptiden." },
+      { question: LEASING_SE.faqKostnadQuestion, answer: LEASING_SE.faqKostnadAnswer },
+      { question: "Vad är värdetabet på en leasingbil?", answer: LEASING_SE.faqVaerdetabAnswer },
       { question: "Blir leasing dyrare eller billigare än ett billån?", answer: leasingSammenlignFaqSvar(LEASING_SAMMENLIGN, "se") },
-      { question: "Vad är fåretagsleasing och vad kostar det?", answer: "Fåretagsleasing är det vanliga namnet på leasing av bil i Sverige. Kalkylatorn räknar ut månadskostnaden av bilpris, kontantinsats, ränta, restvärde och löptid: en bil på 300.000 kr med 150.000 kr i restvärde, 4,5 % ränta, 30.000 kr i kontantinsats och 36 månader ger 4.121 kr i leasingkostnad per månad. Den räknar inte ut skatten, eftersom det beror på om leasingen drivs i näringsverksamhet eller privat." },
+      { question: "Vad är fåretagsleasing och vad kostar det?", answer: LEASING_SE.faqFaretagAnswer },
       { question: "Kan jag ändra bilpris, restvärde, ränta och löptid?", answer: "Ja. Alla fält är redigerbara, så att du kan få en beräkning som följer det leasingavtal du jämför." },
       { question: "Är resultatet korrekt?", answer: "Kalkylatorn ger en god uppskattning utifrån effektiv ränta och en genomsnittlig gällande gäld. Den slutliga kostnaden beror på leasingavtalets villkor, till exempel bonus och serviceavgifter." },
       ],

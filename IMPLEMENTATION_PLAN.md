@@ -1,27 +1,31 @@
-STATUS: 2/10 20:20. CI grøn ved start (`37041313843`). PR-TJEK 2/10 19:47:
+STATUS: 2/10 20:42. CI grøn ved start (`37044864618`). PR-TJEK 2/10 19:47:
     ingen åbne PR'er (næste tjek 3/10). Sentry: ingen uløste fejl 14 dage, og det
     er et **rigtigt** signal — `sentryDsn()` har en fallback-DSN og `init`
     kører i `sentry.server.config.ts` + `instrumentation-client.ts`, kun i
     produktion, ingen replay, ingen upload af source maps.
     CEO-kø punkt 0: lukket 2/10 14:48.
     **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` ·
-    `npm run build` — grøn 2/10 20:12 (**3797** tests i 233 filer, +16), plus
+    `npm run build` — grøn 2/10 20:40 (**3803** tests i 234 filer, +6), plus
     `locale-leak.mjs --gate` exit 0 og `knapgruppe-scan.mjs` 0/0.
-    **Denne iteration:** `/leasing`s sammenligning var **det modsatte af
-    rigtigt**. Den stillede bruttobeløbene op mod hinanden — leasing 178.350 kr
-    mod billån 319.134 kr — så siden læser som om leasing var 140.784 kr
-    billigere. Men du ejer bilen under et billån: 150.000 kr står tilbage, så
-    **nettet er 169.140 mod 178.350**, og et billån er 9.210 kr. billigere.
-    Hver mulighed har nu «Efter perioden» og «Netto omkostning», dommen skrives
-    af modulet i da/se/no, og regnestykket — der lå i `useMemo` uden en eneste
-    test — ligger nu i `src/lib/leasing.ts` med 16 tests.
-    **Næste iteration:** `/leasing`s svenske blok har stadig **32**
-    håndskrevne beløb (titel, description, metaDescription, ogDescription,
-    schemaDescription + 5 FAQ-svar) — de læses nu fra samme modul, så det er en
-    ren streng-om-skrivning → `/kalorier` (17) → `/moms` (⛔ lovgrænser) →
-    `/kvadratmeter` (6). **Feature-slot:** planens `## Feature-kø` er alle
-    ⛔-blokerede; se ❓ om ferieloven og GSC-eksporten, for de to kan låse hen-
-    holdsvis `/dage-til` og F1-F3 op.
+    **Denne iteration:** `/leasing`s **svenske** blok skrev sit eget eksempel som
+    rå tekst — «300.000», «4.121», «178.350», «28.350» — i titel, description,
+    metaDescription, ogDescription, schemaDescription og **tre** FAQ-svar, og
+    `FAQSchema` læser præcis `faqItems`, så de var tal i Googles rich resultat.
+    De læses nu fra `LEASING_EKSEMPEL` + `beregnLeasing`, de samme to ting
+    `LeasingBeregner` starter med. Målt: **32 → 0** håndskrevne beløb i
+    `sePages.leasing`, og de tre beløb de lå på var **også danske** — «4.121 kr»
+    med punktum på en svensk side. De skriver nu «4 121 kr» med mellemrum, som
+    `formatBelob(…, "se")` og de andre svenske sider gør.
+    **Review-gælden på `b0d719b` er betalt:** målt uafhængigt, `hovedEksempel()`
+    giver 1.887,12 kr/måned og 13.227 kr rente på 100.000/5 %/5 år, og
+    `annuitetsEksempel()` giver 1.211,96 / 290.871 / 90.871 på 200.000/4 %/20
+    år — altså præcis de tal committen skrev i titel, description og FAQ.
+    **Næste iteration:** `/kalorier` (17 fund, se 2.825 visninger) → `/leasing`
+    er nu på **0** i alle tre sprog → `/moms` (⛔ lovgrænser) → `/pension` (12) →
+    `/rentefradrag` (7) → `/kvadratmeter` (6). **Feature-køen er stadig helt
+    ⛔-blokeret** — fem iterationer på rad har lukket tal, ikke bygget
+    synlige ting, så næste iteration skal være en feature. Se ❓ om ferieloven,
+    GSC-eksporten og `sst.dk`; de tre låser hver sin kø-kandidat.
 
 ## Fase 3 — trafik-drevet
 
@@ -169,6 +173,14 @@ bliver listen 152 lang og de 152 tal bliver en tilladelsesliste** — det er
 måske nok det, men en tilladelsesliste over fejl er dyrere end porten er bred.
 Derfor: fix slugs først, portudvidelsen som sidste skridt når de er nede mod 0.
 
+**Lukket 2/10 20:42 — `leasing-svenske-tal-fra-modul`.** Se
+`docs/plan-arkiv.md`. *Målt:* `sePages.leasing` går fra **32** håndskrevne
+beløb til **0**; `daPages` og `noPages` stod på 0 hele vejen. De tre beløb, der
+blev tilbage i `page-data.test.ts`, lå med **dansk** tusindtalsseparator på en
+svensk side («4.121 kr») — de er nu «4 121 kr», samme som `/renteberegner`,
+`/moms` og `/procent` allerede skrev. Ny `src/lib/leasing-eksempler.ts` med
+`leasingSeEksempelTekster()`.
+
 **Lukket 2/10 20:20 — `leasing-restvaerdi-sammenlign` (delvis).** Se
 `docs/plan-arkiv.md`. *Målt:* porten går rød 5 steder, når
 `nettoOmkostning` for billånet sættes tilbage til det gamle bruttobeløb. Den
@@ -252,6 +264,7 @@ ingen regex på tal og tekst.
 
 | Slug | Prøv på indhold |
 |---|---|
+| `leasing-svenske-tal-fra-modul` (**ny**, vindue 3/10 07:30**) | `beraknare.se/leasing`: `<title>` skal være «Leasingkalkylator: bil på **300 000** kr = **4 121** kr/mån» og `metaDescription` «Bil på **300 000** kr med **150 000** kr i restvärde, **4,5** % ränta, **30 000** kr i kontantinsats och **36** mån: **4 121** kr i leasingkostnad per månad.». `schemaDescription` skal have «**4 121** kr per månad över **36** månader». FAQ'en skal have **syv** spørgsmål, hvor «Vad kostar leasing av en bil på **300 000** kr?» svarer «… blir månadskostnaden **4 121** kr, vilket är **178 350** kr totalt inklusive **28 350** kr i ränta.», «Vad är värdetabet på en leasingbil?» svarer «… är det **150 000** kr. Det är det belopp du betalar …» (~~belöp~~ → **belopp**, svensk stavemåde) og «Vad är fåretagsleasing och vad kostar det?» svarer «… ger **4 121** kr i leasingkostnad per månad.». **Hele HTML'en skal have 0** `\d\.\d{3}` på beløb — altså **intet** «4.121» / «300.000» / «178.350» / «28.350». **Intet** `NaN`. `minberegner.dk/leasing`: uændret (dansk og norsk blok har ingen beløb) |
 | `vaegttab-tal-fra-modul` (**ny**, vindue 2/10 21:30) | `minberegner.dk/vaegttab`: `<title>` skal være byte-uændret «Vægttab: 6 kg på 12 uger = 550 kcal/dag» og `<meta name="description">` «Mand på 80 kg, 180 cm og 30 år med moderat aktivitet: 6 kg på 12 uger kræver 550 kcal i underskud, så du skal spise **2.209** kcal om dagen.»; `og:description` og JSON-LD `description` skal have «**2.209** kcal om dagen (TDEE **2.759** kcal).» og «spiser **2.209** kcal/dag.». **Hele HTML'en skal have 0** `2 209` (dansk side) og FAQ'en skal stadig have «2.759»/«2.209»/«7.700»/«1.500»/«1.200» — de er halve 2, ikke denne. `beraknare.se/vaegttab`: `<title>` «Viktminskning: 6 kg på 12 veckor = 550 kcal/dag» og beskrivelsen «… du behöver äta **2 209** kcal per dag.» — **2 209 med mellemrum**, og **intet** «2.209» på domænet. `beregner.no`: 404'er (❓ nedenfor), uændret |
 | `leasing-restvaerdi-sammenlign` (**ny**, vindue 2/10 21:30) | `beraknare.se/leasing`: FAQ-en skal have **syv** spørgsmål, hvor «Blir leasing dyrare eller billigare än ett billån?» svarer med **hele regnestykket**: «Det beror på restvärdet och räntan. Med kalkylatorns standardvärden — **300 000** kr i bilpris, **150 000** kr i restvärde, **4,5** % ränta, **30 000** kr i kontantinsats och **36** månader — kostar leasingen **178 350** kr. Ett billån med samma förutsättningar kostar **169 140** kr, alltså **9 210** kr mer. Skillnaden är att du äger bilen under ett billån: du har **150 000** kr kvar att sälja den för när långivstiden är slut, medan du med leasing står med **0** kr.». Samme sætning skal stå i JSON-LD `acceptedAnswer`. **Intet** «Det beror på restvärdet och räntan. Ett lågt restvärde» i hele HTML'en. `minberegner.dk/leasing`: FAQ-en skal stadig have de **tre** generiske spørgsmål (byte-uændret) og **intet** «169 140» / «178 350». **Intet** `NaN` nogen steder |
 | `svensk-excel-formel` (**ny**, vindue 2/10 21:30) | `beraknare.se/renteberegner`: Excel-tabellen skal have **`=BETALNING(0,04/12;240;-200000)`** → svar **1 211,96 kr** og **`=BETALNING(0,04/12;240;-200000)*240-200000`** → **90 870,56 kr**, og fældene skal sige «Använd det svenska decimaltecknet (komma) i räntan: **0,04/12**, inte 0.04/12.». **Intet** `BETALNING(4/12` i hele HTML'en, og **intet** `BETALNING(0.04` (punktum som decimaltegn). Tredje række `=200000*4/100` → **8 000 kr** uændret. **0** `NaN` og **0** `æ`/`ø`. `minberegner.dk/renteberegner`: **0** `BETALNING`, **7** `=YDELSE(0,04/12;240;-200000)` og **2** `=RENTENPERIODER(0,04/12;-1211,96;200000)` uændrede |

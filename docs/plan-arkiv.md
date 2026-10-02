@@ -25273,3 +25273,77 @@ separator. Det der ændrede sig, er at påstanden nu er genereret.
 2. **To labels blev døde.** `totalDuEjerIkke` og `totalDuEjer`（「Total: X (du
    ejer ikke bilen)」）er ikke længere læst nogen sted, efter at «Efter
    perioden» overtog deres opgave. Slettet i alle tre sprog.
+
+## `leasing-svenske-tal-fra-modul` — 2/10 20:42
+
+Den svenske `/leasing`-blok stod med **32** håndskrevne beløb i
+`sePages.leasing`: titel, `description`, `metaDescription`, `ogDescription`,
+`schemaDescription` og tre FAQ-svar (inklusive spørgsmålet «Vad kostar leasing
+av en bil på 300.000 kr?»). `FAQSchema` læser præcis `faqItems`, så beløbene var
+ikke brødtekst men tal i Googles rich resultat på `beraknare.se/leasing`.
+
+Ny `src/lib/leasing-eksempler.ts` med `leasingSeEksempelTekster()` bygger alle
+ni felter på `LEASING_EKSEMPEL` + `beregnLeasing` — de samme to ting
+`LeasingBeregner` initialiserer med (`LeasingBeregner.tsx:121-125`).
+Samme greb som `/renteberegner`s `hovedEksempel()` og `/vaegttab`s
+`vaegttabOverskrifter()`.
+
+**Målt.** Egen AST-probe på `sePages.leasing` (samme mønster som portens
+`strengBelob`): **32 → 0** håndskrevne beløb. `daPages.leasing` og
+`noPages.leasing` stod på **0** hele vejen — de har generiske FAQ'er uden tal,
+så de er byte-uændrede. Regnestykket er uafhængigt verificeret mod modulet:
+`maanedligYdelse 4120,83`, `totalLeasing 178.350`, `totalRente 28.350`,
+`vaerdtab 150.000`.
+
+**Den anden fejl fundet undervejs: de beløb var danske.** `page-data.test.ts`
+låste «4.121 kr» og «178.350 kr» på den svenske side — tusindtalsseparator med
+**punktum**, som er dansk. Svensk bogmål bruger mellemrum, og det er præcis det
+`formatBelob(…, "se")` giver og de andre svenske sider (`/renteberegner`,
+`/moms`, `/procent`) allerede skriver. De tre assertions er rettet, og en ny
+`expect(text).not.toMatch(/\d\.\d{3} kr/)` gør det umuligt at skrive den
+separator tilbage på svensk. Det er samme fejlklasse som planens åbne
+«norske tusindtalsseparatorer», bare på svensk.
+
+**Én ord rettet ved siden:** «Det är det belöp du betalar» → «belopp». «betalar»
+tager «belopp» i svensk; «belöp» findes ikke i ordbogen.
+
+**Porten kan fejle, målt to gange:**
+- Håndskrevet titel i `page-data.ts` i stedet for `LEASING_SE.title` →
+  **1 rød** af 6 i `src/app/leasing/eksempel-fra-modul.test.ts` («page-data
+  bruger modulet, ikke håndskrevet tekst»).
+- Håndtering af `beregnLeasing` → `null` ville være en `!` i hver streng, så
+  modulet kaster i stedet. Det er bevidst: `LEASING_EKSEMPEL` er et konstant
+  objekt med positive tal, så `null` kan ikke forekomme, og en stille `!` er
+  præcis den fejl, der slipper gennem en gate.
+
+**Gate:** lint, typecheck, `TZ=UTC npm run test` (**3803** tests i 234 filer,
++6) og `npm run build` grøn; `locale-leak.mjs --gate` exit 0,
+`knapgruppe-scan.mjs` 0/0; punkt 13 (`git diff | grep -E '^\+.*\$[0-9]'`)
+tom.
+
+**MÅL:** `beraknare.se/leasing` 2.923 visninger / 33 klik / 1,1 % / pos. 12,2 →
+mod 14 dage. Fire søgninger ligger på pos. 9-15: «fåretagsleasing bil kalkyl»
+(169v), «beräkna leasing bil företag» (160v), «leasing kalkylator» (112v) og
+«leasingkostnad bil» (109v).
+
+**Review-gæld på `b0d719b` betalt.** Revieweren skrev at kun fund-rettelsen
+`12107ef` var gennemgået, så `b0d719b` («Lad /renteberegner regne sit lån i
+titel, metadata og FAQ») lå ureviewet som næste iterations første pligt.
+Målt uafhængigt mod modulet, ikke mod commit-teksten: `hovedEksempel()` giver
+**1.887,12** kr i måneden og **13.227** kr i rente på 100.000 kr / 5 % / 5 år,
+og `annuitetsEksempel()` giver **1.211,96** / **290.871** / **90.871** på
+200.000 kr / 4 % / 20 år — altså præcis de tal committen skrev i titel,
+description og FAQ på alle tre sprog. De tal, der er load-bearende, er rigtige;
+resten af diffen (testenes mock-struktur) er ikke linje for linje gennemgået,
+men de mutationer committen selv oplyser er dækket af de tests, der kørte grøn
+i denne gate.
+
+**Selvreviewen fandt to fejl i min egen diff, begge rettet før committen:**
+1. `schemaDescription:` misted sin indrykning ved en regex-udskiftning af
+   `leasingSeEksempelTekster().` → `LEASING_SE.`. TypeScript og lint siger
+   intet til det; det kunne ses i `git diff`.
+2. `metaDescription`/`ogDescription` var bygget med
+   `forudsætninger.replace("36 månaders löptid", "36 mån")` — substring-
+   udskiftning på en genereret sætning. Den er væk; de to hållformer skrives nu
+   begge ud fra talene. Pointen er punkt 13 i samme stil: en sådan konstruktion
+   går i stykker i det øjeblik, et tal ændrer længde.
