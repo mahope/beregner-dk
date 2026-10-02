@@ -50,6 +50,11 @@ import { getHelligdage, helligdagsnavne } from "./helligdage";
 import { pinseAfstande, pinseInterval } from "./pinse-intervaller";
 import { estimerNettoMaaned } from "./barsel/netto";
 import { PROMILLE_EKSEAMPLER, formatPromille, formatTimer } from "./promille-eksempler";
+import {
+  rentefradragDescription,
+  rentefradragMetaDescription,
+  RENTEFRADRAG_FAQ_SVAR,
+} from "./rentefradrag-eksempler";
 import { PROMILLEGRANSE, PROMILLEGROV_SE } from "./promille";
 import { SVENSK_SKATT_2026 as SV_SKATT, SVENSK_SKATT_TAL } from "./svensk-skatt";
 import {
@@ -1970,9 +1975,9 @@ faqItems: kalorierFaqItems("da"),
     "rentefradrag": {
       slug: "rentefradrag",
       title: "Rentefradrag beregner 2026 - Se din skattebesparelse",
-      description: "Hvad sparer du i skat? Fradragsværdi 2026: 33,6% på de første 50.000 kr. renter. Eksempel: 50.000 kr renter = 16.800 kr i skattebesparelse. Beregn dit rentefradrag på boliglån og andre lån.",
+      description: rentefradragDescription(),
       metaTitle: "Rentefradrag beregner 2026 - Se din skattebesparelse",
-      metaDescription: "Hvad sparer du i skat? Fradragsværdi 2026: 33,6 % på de første 50.000 kr. renter. 50.000 kr renter sparer 16.800 kr i skat. Beregn dit rentefradrag.",
+      metaDescription: rentefradragMetaDescription(),
       keywords: ["rentefradrag", "rentefradrag beregner", "rentefradrag 2026", "beregn rentefradrag", "skattefradrag renter", "boliglån fradrag", "renteudgifter fradrag", "negativ kapitalindkomst", "fradragsværdi"],
       ogTitle: "Rentefradrag beregner 2026",
       ogDescription: "Beregn hvor meget du sparer i skat på dine renteudgifter.",
@@ -1984,16 +1989,16 @@ faqItems: kalorierFaqItems("da"),
       schemaCategory: "FinanceApplication",
       faqItems: [
       { question: "Hvad er rentefradrag?", answer: "Rentefradrag er et skattefradrag, du får for dine renteudgifter. Det reducerer din skattepligtige indkomst, så du betaler mindre i skat. Fradraget gælder for renter på boliglån, billån, forbrugslån og andre lån." },
-      { question: "Hvad er fradragsværdien i 2026?", answer: "I 2026 er fradragsværdien 33,6% for de første 50.000 kr. renteudgifter (100.000 kr. for par) og 25,6% for beløbet derudover. Værdien afhænger altså af beløbsgrænsen — ikke af din kommune og ikke af om du betaler topskat." },
+      { question: "Hvad er fradragsværdien i 2026?", answer: RENTEFRADRAG_FAQ_SVAR.fradragsvaerdi() },
       { question: "Hvilke renter kan jeg få fradrag for?", answer: "Du kan få fradrag for renter på boliglån (realkreditlån og banklån), billån, studielån, forbrugslån, og kassekreditter. Renter på SU-lån giver også fradrag." },
       { question: "Hvornår får jeg rentefradraget?", answer: "Rentefradraget indregnes automatisk i din forskudsopgørelse, hvis du har indberettet dine lån. Du får dermed lavere skat hen over året. Alternativt får du overskydende skat tilbage ved årsopgørelsen." },
       { question: "Hvordan påvirker rentefradrag min boligøkonomi?", answer: "Rentefradraget gør det billigere at have lån, fordi staten betaler en del af dine renteudgifter via skatten. Det kan gøre det mere attraktivt at låne til bolig frem for at leje." },
       { question: "Skal jeg gøre noget for at få rentefradrag?", answer: "Nej, banker og realkreditinstitutter indberetter automatisk dine renteudgifter til Skattestyrelsen. Du skal dog kontrollere, at beløbene er korrekte i din forskudsopgørelse." },
       { question: "Hvad er negativ kapitalindkomst?", answer: "Negativ kapitalindkomst opstår, når dine renteudgifter er større end dine kapitalindtægter (f.eks. renteindtægter fra opsparing). Det er den negative kapitalindkomst, du får fradrag for." },
-      { question: "Falder rentefradraget?", answer: "Nej. I 2026 er den høje fradragsværdi 33,6% for de første 50.000 kr. (100.000 kr. for par), og beløbet over grænsen har den lave værdi på 25,6%. Grænsen har været uændret i en årrække." },
-      { question: "Er der et loft på rentefradraget?", answer: "Nej. Du kan trække fra alle dine renteudgifter — der er intet loft på selve beløbet. Det, der er begrænset, er kun hvor stor en andel der giver den høje fradragsværdi på 33,6%: de første 50.000 kr. (100.000 kr. for par). Resten giver 25,6%." },
-      { question: "Hvad er rentefradraget værd i procent?", answer: "For en enlig med 80.000 kr. i renteudgifter er den effektive sats 30,6 %, fordi kun de første 50.000 kr. giver 33,6 %. Bliver renterne højere, falder den effektive sats yderligere." },
-      { question: "Skal par fordele rentefradraget mellem sig?", answer: "Som udgangspunkt nej. Den fælles grænse er dobbelt så stor som den enkelte, så et par med 80.000 kr. i renter får præcis samme besparelse, uanset om beløbet står på den ene eller deles i to lige dele. Fordeling hjælper først, når renterne er ujævnt fordelt." },
+      { question: "Falder rentefradraget?", answer: RENTEFRADRAG_FAQ_SVAR.falder() },
+      { question: "Er der et loft på rentefradraget?", answer: RENTEFRADRAG_FAQ_SVAR.loft() },
+      { question: "Hvad er rentefradraget værd i procent?", answer: RENTEFRADRAG_FAQ_SVAR.effektiv() },
+      { question: "Skal par fordele rentefradraget mellem sig?", answer: RENTEFRADRAG_FAQ_SVAR.par() },
       ],
     },
     "boligstoette": {

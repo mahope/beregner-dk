@@ -25802,3 +25802,57 @@ børnepenge-indlæggets «21.480 kr × 2 = 42.960 kr».
 **Gate.** lint 0 · typecheck 0 · **3864 tests i 239 filer grønne** · build exit 0.
 Bredder: ingen UI-ændring, så ingen browserskærmbillede — de eneste ændrede
 strenge er i metadata og FAQ, som ikke er layout.
+
+## Lukket 3/10 00:24 — `rentefradrag-faq-tal-fra-modul`
+
+*Målt:* **7** håndskrevne talgrupper væk fra `page-data.ts` (`description`,
+`metaDescription` og fem FAQ-svar), så egen AST-probe over modulet går **102 →
+95**.
+
+**Én reel fejl fundet.** «Skal par fordele rentefradraget mellem sig?» lød «så et
+par med 80.000 kr. i renter får **præcis samme besparelse**, uanset om beløbet
+står på den ene eller deles i to lige dele». `hojFradragsgraense("couple")` er
+100.000 kr., så hele beløbet ligger under grænsen og får den høje sats:
+**26.880 kr. mod 24.480** for en enlig med samme beløb — **2.400 kr. mere**.
+`src/app/rentefradrag/page.tsx:189-191` har hele tiden sagt det rigtige («får
+{loftEksempelPar.besparelse} kr.»), så FAQ'en modsagde sin egen side, og
+`FAQSchema` publicerer `faqItems` som JSON-LD — altså præcis de tal Google
+citerer. Målt med `npx tsx` mod `rentefradrag.ts`:
+`beregnRentefradrag(80_000, "single")` → besparelse 24.480, effektiv 30,6 %;
+`beregnRentefradrag(80_000, "couple")` → 26.880, effektiv 33,6 %.
+
+**Rettelsen.** Ny `src/lib/rentefradrag-eksempler.ts` bygger alle syv strenge af
+`RENTEFRADRAG_2026` (`highRate` 33,6 %, `lowRate` 25,6 %, 50.000/100.000 kr.)
+og `beregnRentefradrag` gennem `formatBelob`, så et eksempel ikke kan være et
+andet produkt end det værktøjet viser. Den afsluttende kilde-påstand «Grænsen har
+været uændret i en årrække» er erstattet af modulets egen kilde og
+`verifiedAt: 2026-09-25`, fordi en historisk påstand uden kilde ikke kan
+ efterprøves (punkt 11).
+
+**Dansk ellers uændret** på nær «33,6%» → «33,6 %» i fire strenge: de øvrige svar
+skrev allerede med mellemrum, så siden nu har én skrivemåde.
+
+**Harness:** `rentefradrag-eksempler.test.ts` er ny med 6 tests. Den væsentligste
+er adfærdsbaseret: den udtrækker **hvert** beløb (tre cifre + punktum) fra
+`description`, `metaDescription` og alle FAQ-svar og dømmer det mod en
+tilladelsesliste regnet ud fra modulerne, så et håndskrevet beløb er rødt. Den
+anden binder `page-data.ts` til modulets funktioner, så siden ikke kan gå
+tilbage til håndskrevne strenge. Den tredje negerer den gamle påstand med et
+regex på «i renter får præcis samme besparelse» — ikke på hele den afsluttende
+sætning, fordi «Begge parter får præcis samme besparelse» er en **anden** og
+sand påstand (den holder mellem parterne, ikke mellem par og enlig).
+**Modsvejs verificeret:** med `page-data.ts` fra før rettelsen giver de 6 nye
+tests **1 rød** af 6 (bindingsprøven). De øvrige låser modulet, som ikke findes
+i den gamle kode.
+
+**Gate grøn:** lint (**710 filer**), typecheck exit 0, **3870 tests / 240 filer**
+(fra 3864 / 239), `next build` exit 0. Rørte filer: `rentefradrag-eksempler.ts`
+(ny), `rentefradrag-eksempler.test.ts` (ny) og `page-data.ts` (**7 strenge +
+1 import**) — ingen beregningslogik, ingen `page.tsx`, ingen `<title>`, ingen
+`<h1>`, ingen URL, ingen sitemap, ingen svensk/norsk blok (rentefradrag findes kun
+på dansk).
+
+**MÅL:** `/rentefradrag` baseline **5.282 visninger / 303 klik / CTR 5,7 % / pos.
+5,8** pr. 2026-09-02 → 2026-09-30 (søgninger: «rentefradrag 2026» 450 v pos. 2,
+«rentefradrag beregner» 235 v pos. 4, «beregn rentefradrag» 182 v pos. 6),
+Plausible **430 besøgende/28d (+207 %)** pr. 2026-10-02 — måles igen 3/10+14 dage.

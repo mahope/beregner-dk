@@ -1,20 +1,18 @@
-STATUS: 3/10 00:10. CI grøn ved start (`37063823003`); svensk-tekstfejl-kørslen
-    var stadig `in_progress` ved start (ét kald, ingen polling). PR-TJEK 2/10 19:47:
-    ingen åbne PR'er (næste tjek 4/10). Sentry: ingen uløste fejl 14 dage.
-    **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` ·
-    `npm run build` — grøn 3/10 00:12 (**3864** tests i 239 filer), plus
-    `locale-leak --gate` (sidst målt 3/10 23:19, ikke kørt i denne iteration).
-    **Denne iteration: /pension's 12 håndskrevne beløb læser `folkepension.ts`.**
-    Metadata og de elleve FAQ-svar (dem `FAQSchema` giver Google) bygges nu af
-    `pension-eksempler.ts` fra `FOLKEPENSION_2026` + `SATSER_2026`. **Én reel
-    fejl fundet:** FAQ'en sagde «65 år hvis du er født i 1953 eller før» og
-    sprang til 1956 — `alderSkala` siger 65 fra 1/1 1954 og 65 ½/66/66 ½ i
-    1954-55, så 1954 og 1955 stod uden svar. Svaret bygges nu trin for trin af
-    skalaen. Resten er byte-uændret (målt mod `HEAD`: kun de to linjer af
-    aldersvaret). Ny port dømmer hvert beløb mod de tal modulerne må skrive;
-    mutation → 2 røde af 6. Se `docs/plan-arkiv.md`.
+STATUS: 3/10 00:30. CI grøn ved start (`37067168962`). Sentry: ingen uløste
+    fejl 14 dage (SDK'en er sat op). **Gate:** `npm run lint` · `npm run typecheck` ·
+    `TZ=UTC npm run test` · `npm run build` — grøn 3/10 00:24 (lint 710 filer,
+    **3870** tests i 240 filer, build exit 0).
+    **Denne iteration: /rentefradrag — FAQ'en løj om et par.** «Skal par fordele
+    rentefradraget mellem sig?» sagde at et par med 80.000 kr. får «præcis samme
+    besparelse» som en enlig, men parrets grænse er dobbelt, så hele beløbet får
+    den høje sats: **26.880 kr. mod 24.480** — 2.400 kr. mere. `page.tsx` havde
+    sagt det rigtige hele tiden, så FAQ'en modsagde sin egen side, og den ligger
+    i Googles JSON-LD. Metadata + de fem tal-svar læser nu `rentefradrag-eksempler`
+    over `RENTEFRADRAG_2026` og `beregnRentefradrag`; «Grænsen har været uændret i
+    en årrække» er byttet med modulets kilde + `verifiedAt`. 7 fund væk fra
+    `page-data.ts` (**102 → 95**). Se `docs/plan-arkiv.md`.
     **Næste iteration:** (1) mål de fem noter i vinduet 4/10 07:30 på indhold,
-    (2) næste frie F5b-slug er `/leasing` (9 fund) — `/moms` er ⛔.
+    (2) næste frie F5b-slug er `/kvadratmeter` (6) — `/moms` er ⛔.
 
 ## Fase 3 — trafik-drevet
 
@@ -174,6 +172,22 @@ håndskrevet beløb er rødt; mutation (8.500 i et svar + den gamle 1953-påstan
 → **2 røde** af 6. `gang`-reglen tabte ét fund 7 → 6 (Excel-svarets
 «40.000 × 0,15 = 6.000» er nu interpolationer), portens sum 26 → 25.
 
+**Lukket 3/10 00:24 — `rentefradrag-faq-tal-fra-modul`.** Se
+`docs/plan-arkiv.md`. *Målt:* **7** håndskrevne talgrupper væk fra `page-data.ts`
+(`description` + `metaDescription` + 5 FAQ-svar), så listen er **102 → 95**.
+**Én reel fejl fundet:** «Skal par fordele rentefradraget mellem sig?» lød «et par
+med 80.000 kr. i renter får præcis samme besparelse» — men `hojFradragsgraense`
+giver parret 100.000 kr., så hele beløbet får 33,6 %: **26.880 kr. mod 24.480**,
+altså **2.400 kr. mere**, og de to tal stod i samme sætning. `page.tsx:189-191`
+havde hele tiden sagt det rigtige, så brødtekst og FAQ modsagde hinanden, og
+`FAQSchema` publicerer FAQ'en. Ny `rentefradrag-eksempler.ts` bygger de syv
+strenge af `RENTEFRADRAG_2026` + `beregnRentefradrag` gennem `formatBelob`;
+«uændret i en årrække» er erstattet af modulets egen kilde og `verifiedAt`, fordi
+den påstand ikke kan efterprøves. Dansk ellers uændret på nær «33,6%» → «33,6 %»
+(ét mellemrum før procent, som de øvrige svar allerede skrev). **6 nye tests**
+(3864 → 3870); mutation mod `page-data.ts` fra før rettelsen giver **1 rød** af 6
+(bindingsprøven), resten låser modulet.
+
 **Åben række (strenglisten):** næste fil skal måles på ny — de punkt der stod
 åbne er alle ❓-blokerede. **Fem filer er lukket 2/10**, se listen nedenfor.
 Strenglistens loft er **70 → 57**, JSX-listen **360 → 347 → 338 → 333**.
@@ -213,11 +227,11 @@ gamle strenge). `/vaegttab` se: 1.277 visninger.
 alle fund lå i `page-data.ts` alene** — ikke fordelt i `src/lib/*.ts` som
 portens docblock siger. Efter `/renteberegner` var de **176** (var 195 ved
 iterationens start); efter `/vaegttab` halve 2 er de **131** målt 3/10 22:33.
-Køen pr. slug nu: `moms` 15 · `leasing` 9 ·
-`rentefradrag` 7 · `kvadratmeter` 6 · `konfirmation` 6 · `efterloen` 5 ·
+Køen pr. slug nu (målt 3/10 00:00 med egen AST-probe, ialt **95**):
+`moms` 15 (⛔) · `kvadratmeter` 6 · `konfirmation` 6 · `efterloen` 5 ·
 `aktieskat` 5 · `loen-efter-skatt` 4 · `topskat` 4 · `boernepenge` 4 · resten ≤3.
-**Anbefalet rækkefølge:** `/moms` (15, men ⛔ de 3 lovgrænser) → `/leasing`
-(9, se 2.923) → `/kvadratmeter` (6, se 3.705) → `/rentefradrag` (7).
+**Anbefalet rækkefølge:** `/kvadratmeter` (6, se 3.705) → `/konfirmation` (6) →
+`/efterloen` (5) → `/aktieskat` (5). `/moms` er ⛔ (de 3 lovgrænser).
 *Accept pr. slice:* ét slug pr. opgave, 12 fund eller færre, de læses fra sit
 eget modul, og en mutation i porten. `/vaegttab` blev delt i to halvdele
 (12 + 12), fordi den er 24 fund. **Hvis porten udvides til `.ts` med det samme,
@@ -281,6 +295,8 @@ aldrig på HTTP 200: en 200 beviser at svaret serveres, ikke at det er den nye
 kode. Hver note er én linje; den fulde kommando står i `docs/plan-arkiv.md` under
 sit slug. Strip `<!-- -->`-kommentarmarkørerne fra HTML'en, ellers matcher
 ingen regex på tal og tekst.
+
+`VERIFICÉR DEPLOY: /rentefradrag FAQ (parret får 26.880 kr., ikke «præcis samme besparelse») ceo/rentefradrag-faq-tal-fra-modul 3/10 00:30`
 
 `VERIFICÉR DEPLOY: svensk «Första maj» + «använda» på /dato og /nedtaelling ceo/svenska-tekstfejl 3/10 23:20`
 
