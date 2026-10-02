@@ -215,7 +215,7 @@ const HAARDKODEDE_BELOB: Record<string, number> = {
   "src/app/boernepenge/page.tsx": 2,
   "src/app/bolan/page.tsx": 1,
   "src/app/boliglaan/page.tsx": 4,
-  "src/app/boligsalg/page.tsx": 9,
+  "src/app/boligsalg/page.tsx": 0,
   "src/app/brok/page.tsx": 1,
   "src/app/brutto-netto/page.tsx": 4,
   "src/app/bryllup/page.tsx": 4,
@@ -299,8 +299,15 @@ const HAARDKODEDE_BELOB: Record<string, number> = {
  * satserne. De **to** der er bevaret er gavegrænserne (74.100 kr til børn og
  * børnebørn, 26.600 kr til svigerbørn) — de har ingen kilde i repoet, så de må
  * ikke gættes, og de må ikke forsvinde uden erstatning.
+ *
+ * 347 → 338 den 2/10: `/boligsalg` stod med 9 fund i JSX-teksten — otte
+ * redaktionelle prisintervaller («3-6 %», «25.000-60.000 kr.») der lå uden for
+ * den beregning læseren kan se, og som kaldtes «baseret på Boligejer.dk,
+ * opdateret august 2025», et år før siden siger 2026. De læses nu fra
+ * `DEFAULT_VALUES` og tinglysningens eksporterede satser. **Ingen** er bevaret
+ * som interval: de har ingen kilde, så de må ikke gættes (punkt 11).
  */
-const HAARDKODEDE_BELOB_I_LISTEN = 347;
+const HAARDKODEDE_BELOB_I_LISTEN = 338;
 
 /**
  * Samme port på de `.tsx`-filer der **ikke** er `page.tsx`: beregnerne i
@@ -651,7 +658,7 @@ describe("beløb i JSX-tekst på siderne", () => {
     // 2/10: 385 → 370, da `/moms'` 15 eksempelbeløb læses fra modulet. De 370
     // fund er de samme filers øvrige beløb, så tallet siger hvor meget af
     // korpuset porten endnu dømmer — det må ikke stige i det stille.
-    expect(HAARDKODEDE_BELOB_I_LISTEN).toBe(347);
+    expect(HAARDKODEDE_BELOB_I_LISTEN).toBe(338);
   });
 });
 

@@ -2263,10 +2263,10 @@ const daPages: Record<string, PageData> = {
       schemaDescription: "Gratis boligsalg beregner. Beregn nettoprovenu ved salg af bolig med mæglerhonorar, rapporter, istandsættelse og flere omkostninger.",
       schemaCategory: "FinanceApplication",
       faqItems: [
-        { question: "Hvad koster det at sælge en bolig i Danmark?", answer: "Salgsomkostningerne for en bolig til 3 mio. kr er typisk 150.000-250.000 kr. De største poster er ejendomsmægler (3-6% af salgsprisen), istandsættelse og energimærke. Brug beregneren til at se dit konkrete nettoprovenu." },
+        { question: "Hvad koster det at sælge en bolig i Danmark?", answer: "Omkostningerne afhænger af salgsprisen, mæglersalæret, istandsættelsen og de rapporter, du får udarbejdet. Beregneren summerer dem og viser dit nettoprovenu, så du selv kan se hvilke poster der vejer tungest." },
         { question: "Skal sælger betale tinglysning?", answer: "Sælger betaler normalt ikke tinglysning. Det er køber der betaler for nyt skøde og pantebrev. Øst for Storebælt deles tinglysningsafgiften dog ofte mellem køber og sælger. Beregneren kan medtage tinglysning af ny bolig hvis du også skal købe." },
-        { question: "Hvad er et typisk mæglersalær?", answer: "Ejendomsmæglere tager typisk 3-6% af salgsprisen for huse, eller et fast salær på 25.000-60.000 kr. Mange mæglere er villige til at forhandle salæret, især ved høje salgspriser." },
-        { question: "Hvordan får jeg det bedste salgsprovenu?", answer: "Få mindst 3 mæglervurderinger og forhandl salæret. Gør istandsættelse selv når muligt. Overvej home staging (5.000-15.000 kr) — det kan øge salgsprisen. Sælg overskydende møbler i stedet for at flytte dem." },
+        { question: "Hvad er et typisk mæglersalær?", answer: "Mæglersalæret er den største post i dit salgsregnestykke, fordi det følger salgsprisen. Beregneren regner med en procentandel, men du kan vælge et fast salær i stedet — og det er den post, der flytter mest at forhandle." },
+        { question: "Hvordan får jeg det bedste salgsprovenu?", answer: "Få mindst tre mæglervurderinger og forhandl salæret, gør istandsættelsen selv når det kan lade sig gøre, og sælg de overskydende møbler i stedet for at flytte dem. Køb ingen ydelser, før du har set dit eget nettoprovenu i beregneren." },
       ],
     },
 };

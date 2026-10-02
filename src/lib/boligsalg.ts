@@ -26,8 +26,16 @@ export interface BoligsalgResultat {
   fordelinger: { navn: string; beloeb: number; procent: number }[];
 }
 
+/**
+ * Salgsprisen i beregnerens standardindstilling. Brødteksten på `/boligsalg`
+ * beskriver omkostningerne ved «en bolig til 3 mio. kr.», så prisen skal være
+ * den samme i modulet og i teksten — ellers ville siden regne omkostninger ved
+ * en anden pris end den, den læser op.
+ */
+export const BOLIGSALG_STANDARD_SALGSPRIS = 3000000;
+
 const DEFAULT_VALUES: BoligsalgInput = {
-  salgspris: 3000000,
+  salgspris: BOLIGSALG_STANDARD_SALGSPRIS,
   maeglerType: "procent",
   maeglerProcent: 4,
   maeglerFast: 40000,
@@ -47,7 +55,7 @@ const DEFAULT_VALUES: BoligsalgInput = {
   tinglysningInkluderet: false,
 };
 
-function beregnMaegler(input: BoligsalgInput): number {
+export function beregnMaegler(input: BoligsalgInput): number {
   if (input.maeglerType === "procent") {
     return (input.maeglerProcent / 100) * input.salgspris;
   }
@@ -68,10 +76,26 @@ function beregnMaegler(input: BoligsalgInput): number {
 export const TINGLYSNING_SKOEDEBELOB = 1850;
 export const TINGLYSNING_PANTEBREVBELOB = 1825;
 
+/**
+ * Tinglysningens to procentdele og pantebrevets låneandel, eksporteret af samme
+ * grund som de to faste beløb: brødteksten skrev «1,45 % af vurderingssummen»,
+ * mens koden ganged med `0,0145 * pris * 0,8` — to steder, ingen kilde til
+ * hinanden. Procenttallet er nu samme konstant i beregningen og i teksten, og
+ * lånedelen er en del af pantesatsen, ikke en valgfri faktor.
+ */
+export const TINGLYSNING_SKOEDEPROCENT = 0.006;
+export const TINGLYSNING_PANTEBREVPROCENT = 0.0145;
+export const TINGLYSNING_PANTEBREVLAANEDEL = 0.8;
+
 function beregnTinglysning(input: BoligsalgInput): number {
   if (!input.tinglysningInkluderet || input.nyBoligPris <= 0) return 0;
-  const skoede = 0.006 * input.nyBoligPris + TINGLYSNING_SKOEDEBELOB;
-  const pantebrev = 0.0145 * input.nyBoligPris * 0.8 + TINGLYSNING_PANTEBREVBELOB;
+  const skoede =
+    TINGLYSNING_SKOEDEPROCENT * input.nyBoligPris + TINGLYSNING_SKOEDEBELOB;
+  const pantebrev =
+    TINGLYSNING_PANTEBREVPROCENT *
+    input.nyBoligPris *
+    TINGLYSNING_PANTEBREVLAANEDEL +
+    TINGLYSNING_PANTEBREVBELOB;
   return Math.round(skoede + pantebrev);
 }
 

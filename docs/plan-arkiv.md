@@ -24819,3 +24819,71 @@ build (168 sider). Punkt 13: `git diff | grep -nE '^\+.*\$[0-9]'` er tom.
 `bil-omkostninger.ts`). Skrevet op som F9 i planen — **ikke** rettet her, for
 `/dato` og `/tidsberegner` er de to største sider på sitet, og en halv
 oversættelse af dem er dyrere end slet ingen.
+
+---
+
+## Fund — `/boligsalg` (2/10 16:26), `ceo/boligsalg-belob-fra-modul`
+
+**Opgaven.** Strenglistens næste fil: 9 fund i `page.tsx`, hvor **otte** var
+redaktionelle prisintervaller i hånden — «150.000-250.000 kr.», «3-6% af
+salgsprisen», «25.000-60.000 kr.», «6.900-8.700 kr.», «5.000-8.000 kr.»,
+«3.000-5.000 kr.», «ca. 3.000-8.000 kr.», «20.000-50.000 kr.» og «5.000-15.000
+kr.» (home staging) — plus kilden «baseret på Boligejer.dk (Erhvervsstyrelsen),
+**opdateret august 2025**». Den er 14 måneder gammel på en side der siger 2026,
+og ingen i repoet kan læse den.
+
+**Rettelsen er sletning, ikke kildejagt.** Intervallerne lå uden for den
+beregning læseren faktisk kan se: `beregnBoligsalg` har **én** pris pr. post, og
+den er dens egen standardindstilling. Brødteksten siger nu den pris. Den henter
+alle ni fra `DEFAULT_VALUES` og fra `beregnMaegler`, og tinglysningens tekst fra
+de **allerede eksporterede** `TINGLYSNING_*`-konstanter. Tinglysningens to
+procentdele og pantebrevets låneandel var hårdkodet *inde i*
+`beregnTinglysning` mens teksten skrev dem i hånden, så de er nu konstanter
+begge steder — ellers kunne «1,45 % af vurderingssummen» igen blive en påstand
+uden for `0,0145 * pris * 0,8`.
+
+**Home staging-prisen er væk, ikke flyttet.** Den post findes ikke i modulet, så
+der er intet at lade teksten læse fra. Samme behandling fik «rapporterne er fra
+de seneste 6-12 måneder» — jeg kan ikke efterprøve en aldersgrænse på
+tilstandsrapporten read-only, så påstanden er væk i stedet for bevaret.
+
+**Fund 1 — `BoligsalgResultat` har ikke `salgspris`.** Første udkast skrev
+`standard.salgspris / 1000000`, og `standard` er et `BoligsalgResultat` med
+`samledeOmkostninger`, `nettoProvenu`, `poster` og `fordelinger` — så siden
+skrev **«NaN mio. kr.»**. `tsc` siger intet, fordi `resultat.salgspris` er bare
+`undefined` på en type der tillader det. Fundet af den nye test, fordi den læser
+den **renderede** tekst og ikke kildefilen; rettet ved `DEFAULT_VALUES.salgspris`.
+
+**Fund 2 — de usourcede intervaller blev publiceret som JSON-LD.** Begge
+beløbs-porte (`jsxBelob` og `strengBelob`) måler kun `.tsx`, så `/boligsalg`s
+`faqItems` i `src/lib/page-data.ts` lå uden for dem. Men `FAQSchema` læser
+præcis `faqItems`, og `generateMetadata` falder tilbage til `da` på alle
+domæner. Målt på den renderede side for `se`: JSON-LD'en indeholdt
+«typisk 150.000-250.000 kr.», «3-6%» og «home staging (5.000-15.000 kr)» under
+`"inLanguage": "sv"` og `"priceCurrency": "SEK"` — altså **danske kroner i den
+svenske strukturerede visning**, som Google kan vise. Det var ikke en
+regression (teksten lå der i forvejen), men det er den værste udgave af den:
+usourcede intervaller i Googles svenske SERP.
+
+**Løsningen er ikke oversættelse.** Jeg først forsøgte at gøre de tre svar
+locale-afhængige, men `/boligsalg` har **kun** en `da`-nøgle i `page-data.ts`,
+så en `se`-udgave ville være dansk med tal i — det samme problem igen. Derfor
+har de tre beløbssvar **ingen tal**: de beskriver regnestykkets struktur og
+henviser til beregneren, som viser læserens eget tal i dets eget valuta. Det er
+sandt på alle tre domæner og kan ikke lække.
+
+**Porten kan fejle, målt to gange.** (1) `DEFAULT_VALUES.energimaerke`
+7.500 → 8.500 rødder `page.test.tsx` på den afledte sum. (2) Med den gamle
+`page.tsx` og `page-data.ts` gendannet via `git stash` falder **2 af 3** tests i
+den nye fil («brødteksten citerer beregnerens egne tal» og «tinglysningens satser
+i teksten er de samme som koden ganger med»).
+
+**Nyt for de næste iterationer:** en streng med et beløb i en `.ts`-datafil er
+lige så hårdkodet som en i JSX, og `page-data.ts` er 2.400 linjer af præcis
+det. Der er ingen port på den, og den føder JSON-LD. Emner for en ny port:
+`faqItems` over alle slugs, og `schemaDescription`.
+
+**Gate grøn:** lint (688 filer), typecheck, **3741 tests / 230 filer** (+3),
+build (168 sider). Punkt 13: `git diff | grep -nE '^\+.*\$[0-9]'` er tom. De to
+`ureviewede danske strenge` i `regnestykker`-loggen er de kendte falske
+positiver (`procent/page.tsx:621` og `promille/page.tsx`), ikke nye fund.

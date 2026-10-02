@@ -1,23 +1,25 @@
-STATUS: 2/10 14:05. CI grøn ved start (`gh run list -L 2`). PR-TJEK 2/10: ingen
+STATUS: 2/10 16:26. CI grøn ved start (`gh run list -L 3`). PR-TJEK 2/10: ingen
    åbne PR'er. BRANCH-TJEK 2/10: ingen branches ≥14 dage. Sentry: begge fejl
-   lukket. CEO-kø punkt 0 lukket (`04ca30a`). **Review-fund 2/10 15:10 rettet**
-   (`ceo/norsk-pace-side`) — begge fund + to af samme klasse, målt med fire
-   mutationer; detaljer i `docs/plan-arkiv.md`.
+   lukket (MINBEREGNER-1 Next-router-støj, MINBEREGNER-2 rettet i `4d48370`).
+   CEO-kø punkt 0 lukket (`04ca30a`); review-fund 2/10 15:10 rettet (`0b841f2`).
    **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` ·
-   `npm run build` — grøn 2/10 14:01 (**3738** tests i 229 filer, +8).
-   **Denne iteration:** `/pace` på norsk var **halvt dansk** (hele `pageData`
-   faldt tilbage på `da`), og beregnerens egne labels var danske. Rettet med
-   `pace`-nøgle i `noPages`, `no`-gren i `distanceEksempelFaqSvar`, `no`-labels
-   i `PaceBeregner` (`labels[locale]`) og to nye tests. Samme mønster findes 13
-   steder mere → opgave **F9**.
-   **Ingen bruger kan se det endnu:** `beregner.no` serverer et andet site
-   (❓ nedenfor). Dansk og svensk `/pace` er uændrede — prøven i noten.
-   **Næste iteration:** strenglistens næste fil er `/boligsalg` (9 fund, 8
-   redaktionelle prisintervaller uden kilde). Feature-kø har ingen kildefri
-   kandidat; de fire er blokeret af ❓.
-   ⚠️ `regnestykker`-porten logger (men får ikke rød) 1 ureviewet dansk streng
-   i komponenter der monteres på beraknare.se: `src/app/procent/page.tsx:621`.
-   Målt 2/10 13:45: falsk positiv — den ligger i `{locale === "da" && …}`.
+   `npm run build` — grøn 2/10 16:24 (**3741** tests i 230 filer, +3).
+   **Denne iteration:** `/boligsalg` skrev otte prisintervaller i hånden og
+   kaldte dem «baseret på Boligejer.dk, opdateret august 2025». De læses nu fra
+   `DEFAULT_VALUES` og tinglysningens eksporterede satser; strenglisten 347 → 338.
+   **To fund undervejs, begge målt:** (1) `BoligsalgResultat` har ikke
+   `salgspris`, så første udkast skrev «NaN mio. kr.» live i brødteksten;
+   (2) `/boligsalg` har **kun** `da`-data, så FAQ'en blev publiceret som
+   **DKK-JSON-LD på beraknare.se** (`inLanguage: sv`, `priceCurrency: SEK`) —
+   usourcede intervaller i Googles svenske visning. FAQ-svarene har nu ingen
+   beløb, så intet lækker. Se `## Fund — /boligsalg` i arkivet.
+   **Næste iteration:** strenglistens åbne punkter (`/moms` 3, `/timepris`)
+   er begge ❓-blokerede, så næste fil må måles på ny. Feature-kø har ingen
+   kildefri kandidat; de fire er blokeret af ❓.
+   ⚠️ `regnestykker`-porten logger (men får ikke rød) 2 ureviewede danske
+   strenge i komponenter der monteres på beraknare.se:
+   `src/app/procent/page.tsx:621` (målt 2/10 13:45: falsk positiv — den ligger i
+   `{locale === "da" && …}`) og `src/app/promille/page.tsx:255,273,279`.
 
 ## Fase 3 — trafik-drevet
 
@@ -120,14 +122,24 @@ er blokeret af en ❓ og må ikke gættes.
 Listen `src/app/regnestykker.test.ts` tæller forekomster pr. fil og må kun
 blive kortere. ✅ betyder lukket; detaljerne står i `docs/plan-arkiv.md`.
 
-**Åben række (strenglisten):** næste fil er `/boligsalg`. **To indlæg er lukket
-2/10:** SU (`su-indlaeg-belob-fra-modul`) og arveafgift
-(`arveafgift-belob-fra-modul`); begge i `docs/plan-arkiv.md`. Strenglistens loft
-er **70 → 57**, JSX-listen **360 → 347**.
+**Åben række (strenglisten):** næste fil skal måles på ny — de punkt der stod
+åbne er alle ❓-blokerede. **To filer er lukket 2/10:** SU
+(`su-indlaeg-belob-fra-modul`), arveafgift (`arveafgift-belob-fra-modul`) og
+`/boligsalg` (`boligsalg-belob-fra-modul`) — alle i `docs/plan-arkiv.md`.
+Strenglistens loft er **70 → 57**, JSX-listen **360 → 347 → 338**.
 
-**Åben:** `/boligsalg` — 9 fund, hvor 8 er redaktionelle prisintervaller (mægler,
-tinglysning, avance, byggeskade …) uden kilde i repoet, og den niende er
-«opdateret august 2025». Formelbeløb kan læses fra `src/lib/boligsalg.ts`.
+**Lukket:** `/boligsalg` — 9 fund, alle otte redaktionelle prisintervaller
+(mægler, tinglysning, avance, energimærke …) lå uden for den beregning læseren
+kan se, med en kildeangivelse («Boligejer.dk, opdateret august 2025») der var et
+år gammel på en side der siger 2026. Nu læses de fra `DEFAULT_VALUES` +
+tinglysningens konstanter; hjemme-staging-prisen er væk, fordi den post ikke
+findes i beregneren.
+
+**Ny målt fejlklasse — `page-data.ts` ligger uden for begge beløbs-porte.**
+`strengBelob`/`jsxBelob` måler kun `.tsx`, så de usourcede intervaller i
+`/boligsalg`s `faqItems` blev **publiceret som JSON-LD** (`FAQSchema` læser
+præcis `faqItems`). Det er den samme fejl som JSX-teksten, bare usynlig for
+porten. Svaret for den er gjort: de tre beløbssvar har ingen tal tilbage.
 
 **Åben:** `/moms` har 3 fund tilbage, som er lovgrænser (dansk registrering over
 50.000 kr, svensk over 120.000 kr, told ved import over 1.150 kr). ❓ nedenfor.
@@ -149,6 +161,7 @@ ingen regex på tal og tekst.
 
 | Slug | Prøv på indhold |
 |---|---|
+| `boligsalg-belob-fra-modul` (**ny**, vindue 2/10 17:30) | `minberegner.dk/boligsalg`: introen skal sige **«195.105»**, **«2.804.895»**, **«Ejendomsmægler med 120.000»** og **«77 % af omkostningerne»**; listen skal sige **«7.500»**, **«6.500»**, **«4.000»**, **«4.000»** og **«20.000»**. Kilder-afsnittet skal have **«0,6 % af købesummen plus 1.850»** og **«1,45 % af 80 % af vurderingssummen plus 1.825»** og overskriften «Kilder og forbehold». FAQ'en skal have **fire** spørgsmål, hvor **intet** svar indeholder et beløb. **Intet** «150.000-250.000», «3-6%», «25.000-60.000», «6.900-8.700», «5.000-15.000», «Boligejer.dk» eller «august 2025» i hele HTML'en. **Intet** «NaN» nogen steder. `beraknare.se/boligsalg`: **intet** dansk beløb i JSON-LD'en (den har ingen `se`-data, så FAQ'en er dansk — det er en kendt, separat fejl) |
 | `norsk-pace-side` (**ny**, vindue 2/10 17:30) | **De norske rettelser er ikke live og kan ikke være det:** `beregner.no` serverer et andet site (❓ 2/10 14:15). Prøven er derfor at de to **live** domæner er uændrede. `minberegner.dk/pace`: FAQ'en skal have **ni** spørgsmål, «Hvor lang tid tager et Ironman?» skal svare «… 1:00:00 + 5:00:00 + 3:30:00 = 9:30:00 i alt …», og beregneren skal vise «**Holdtider pr. kilometer**» (dansk label). **Intet** «Deltider pr. kilometer» og intet «Løpetidsberegner - beregn fart» på den danske side. `beraknare.se/pace`: skal vise «**Deltider per kilometer**» (svensk label) og de samme ni spørgsmål, **intet** «Deltider pr. kilometer» (norsk) |
 | `arveafgift-belob-fra-modul` (**ny**, vindue 2/10 17:30) | `minberegner.dk/blog/arveafgift-regler-og-satser`: `<title>` byte-uændret «Arveafgift 2026: 1 mio. kr. til børn koster 91.155 kr.» og `<meta name="description">«Arveafgift (boafgift) 2026: Et barn arver 1 mio. kr. og betaler 91.155 kr. Se bundfradrag på 392.300 kr, 15 % for nære arvinger og 36,25 % for søskende.»», `og:description` «Arveafgift 2026: 91.155 kr for et barn der arver 1 mio. kr. Bundfradrag, satser og to regneeksempler.» — **intet** dobbelt punktum. Sats-tabellen skal have **«36,25%»** i to celler, «Kort svar» **«36,25 %»**, og **intet** «36.25» i hele HTML'en. Begge regnestykker byte-uændrede: `1.107.700 / 166.155 / 1.333.845 / 666.923` og `407.700 / 61.155 / 738.845 / 184.711 / 245.866 / 554.134`. FAQ'en skal have **fire** spørgsmål, hvor «Hvad koster arveafgiften, hvis et barn arver 1.000.000 kr?» svarer «… afgiftsgrundlaget er 607.700 kr … modtager 908.845 kr.». Gavegrænserne (74.100 / 26.600 kr) er bevaret med vilje |
 | `su-indlaeg-belob-fra-modul` (**ny**, vindue 2/10 17:30) | `minberegner.dk/blog/su-2026-satser-og-regler`: `<title>` skal være «SU 2026: 7.426 kr. pr. måned udeboende» (byte-uændret) og `<meta name="description">` skal være «SU 2026: udeboende får 7.426 kr. pr. måned, hjemmeboende 1.154-3.202 kr. **Videregående fribeløb fra 20.749 kr.**, SU-lån op til 3.799 kr. Alle tal fra su.dk.». **`Intet` «Fribeløb fra 15.297 kr.»** — det var ungdomsuddansatte sats på en side om videregående uddannelse. Artiklens JSON-LD-`description` skal have den samme nye sætning, og `og:description` skal have «fribeløb fra 20.749 kr. på videregående uddannelse». Resten af siden (tabel, otte FAQ, brødtekst) skal være byte-uændret |
