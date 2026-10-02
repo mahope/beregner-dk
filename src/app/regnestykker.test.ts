@@ -193,7 +193,7 @@ const HAARDKODEDE_BELOB: Record<string, number> = {
   "src/app/blog/30-procent-reglen-husleje/page.tsx": 4,
   "src/app/blog/arveafgift-regler-og-satser/page.tsx": 15,
   "src/app/blog/biloekonomi-2026-hvad-koster-det-at-eje-bil/page.tsx": 47,
-  "src/app/blog/boernepenge-2026-satser-og-regler/page.tsx": 2,
+  "src/app/blog/boernepenge-2026-satser-og-regler/page.tsx": 0,
   "src/app/blog/boliglaan-2026-renter-og-afdrag/page.tsx": 4,
   "src/app/blog/boligsalg-2026-guide-til-omkostninger-og-provenu/page.tsx": 42,
   "src/app/blog/dagpenge-saadan-finder-du-din-sats/page.tsx": 3,
@@ -279,7 +279,11 @@ const HAARDKODEDE_BELOB: Record<string, number> = {
  * 392 → 385 den 2/10: `topskat` stod med 8 fund, hvor syv var beløbsgrænser
  * der lå i `SATSER_2026` og i beregnerens egen formel. Det sidste fund
  * («af en lønforhøjelse på 1.000 kr.») er bevaret med vilje.
- * 385 → 370 den 2/10: `moms` stod med 18 fund, hvor 15 var de eksempler
+ * 362 → 360 den 2/10: `blog/boernepenge-2026-satser-og-regler` stod med 2 fund —
+ * beløbet over aftrapningsgrænsen (138.900 kr.) og de to børn i eksemplet
+ * (21.480 kr × 2 = 42.960 kr.). De læses nu fra eksemplets eget
+ * `EKSEMPEL_INDKOMST` og fra `BOERNE_SATSER_2026`, så eksemplets tal ikke kan
+ * glide fra hverandre. 385 → 370 den 2/10: `moms` stod med 18 fund, hvor 15 var de eksempler
  * brødteksten selv regner — «1.000 kr × 1,25 = 1.250 kr», to gange i hvert
  * sprog plus de fire rækker i Excel-tabellen på beraknare.se. De læses nu fra
  * `beregnMoms`, `momsFaktor` og `momsAndel`, altså samme modul som tabellerne
@@ -290,7 +294,7 @@ const HAARDKODEDE_BELOB: Record<string, number> = {
  * verificeret 26/9 2026» blev læst som «9 202»), da scanneren ikke krævede at
  * de tre cifre var slut på tallet.
  */
-const HAARDKODEDE_BELOB_I_LISTEN = 362;
+const HAARDKODEDE_BELOB_I_LISTEN = 360;
 
 /**
  * Samme port på de `.tsx`-filer der **ikke** er `page.tsx`: beregnerne i
@@ -332,7 +336,6 @@ const HAARDKODEDE_BELOB_I_KOMPONENTER_I_LISTEN = 0;
  * rød, og en rettet tekst sænker den.
  */
 const HAARDKODEDE_BELOB_I_STRENGE: Record<string, number> = {
-  "src/app/blog/boernepenge-2026-satser-og-regler/page.tsx": 9,
   "src/app/blog/arveafgift-regler-og-satser/page.tsx": 7,
   "src/app/blog/su-2026-satser-og-regler/page.tsx": 6,
   "src/app/blog/biloekonomi-2026-hvad-koster-det-at-eje-bil/page.tsx": 5,
@@ -370,8 +373,14 @@ const HAARDKODEDE_BELOB_I_STRENGE: Record<string, number> = {
   "src/app/blog/elpriser-2026-beregn-dit-forbrug/page.tsx": 1,
 };
 
-/** Summen af strenglisten. */
-const HAARDKODEDE_BELOB_I_STRENGE_I_LISTEN = 79;
+/**
+ * 79 → 70 den 2/10: `blog/boernepenge-2026-satser-og-regler` stod med de ni
+ * største fund i hele strenglisten — titel og beskrivelse to gange hver (de
+ * gentages i `openGraph` og i `BlogArticleSchema`), ungeydelsens sats i to
+ * FAQ-svar og de tre børnetilskud i et tredje. De læses nu fra
+ * `BOERNE_SATSER_2026`, `aarligBelob` og `barnetilskudSats`.
+ */
+const HAARDKODEDE_BELOB_I_STRENGE_I_LISTEN = 70;
 
 
 const ROT = join(__dirname, "..", "..");
@@ -516,7 +525,11 @@ const FORVENTEDE_FUND: Record<string, number> = {
   // læser «1.000 kr. × 1,25 = 1.250 kr.» fra `beregnMoms` frem for at skrive
   // det. Sætningen er derfor *rigtig ved konstruktion* i stedet for dømt af
   // porten — de ni `KANONISKE` sætninger ovenfor holder reglerne dømmende.
-  gang: 8,
+  // Samme grund tabte `gang` sit ottende fund 2/10 senere på dagen:
+  // børnepenge-indlæggets «21.480 kr × 2 = 42.960 kr» ligger nu i to
+  // interpolationer omkring portens mønster, så den regel ikke kan læse den
+  // længere. Summen gik 27 → 26.
+  gang: 7,
   del: 6,
   procentAf: 13,
   stigning: 0,
@@ -561,8 +574,9 @@ describe("regnestykker i brødteksten", () => {
     // Før 2/10 var summen 26: `stigning` og `andel` så 0 fund hver, og `gang`
     // så kun de sætninger, der skrev `kr` efter første faktor. Den steg til 33,
     // og 2/10 faldt den til 27 igen, da `/moms`' seks eksempelregnestykker blev
-    // læst fra modulet i stedet for at være håndskrevet.
-    expect(Object.values(målt).reduce((a, b) => a + b, 0)).toBe(27);
+    // læst fra modulet i stedet for at være håndskrevet, og til 26 da
+    // børnepenge-indlæggets «21.480 kr × 2 = 42.960 kr» blev interpolationer.
+    expect(Object.values(målt).reduce((a, b) => a + b, 0)).toBe(26);
   });
 
   test("alle regnestykker på sitet er regnet rigtigt", () => {
@@ -619,7 +633,7 @@ describe("beløb i JSX-tekst på siderne", () => {
     // 2/10: 385 → 370, da `/moms'` 15 eksempelbeløb læses fra modulet. De 370
     // fund er de samme filers øvrige beløb, så tallet siger hvor meget af
     // korpuset porten endnu dømmer — det må ikke stige i det stille.
-    expect(HAARDKODEDE_BELOB_I_LISTEN).toBe(362);
+    expect(HAARDKODEDE_BELOB_I_LISTEN).toBe(360);
   });
 });
 
@@ -711,7 +725,7 @@ describe("beløb i strengliteraler", () => {
     expect(overskredet).toEqual([]);
 
     expect(fund.length).toBeLessThanOrEqual(HAARDKODEDE_BELOB_I_STRENGE_I_LISTEN);
-    expect(HAARDKODEDE_BELOB_I_STRENGE_I_LISTEN).toBe(79);
+    expect(HAARDKODEDE_BELOB_I_STRENGE_I_LISTEN).toBe(70);
   });
 
   test("listen er målt på hele mappen, ikke på en håndplukket fil", () => {

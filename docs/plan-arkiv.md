@@ -24377,3 +24377,58 @@ curl -s https://minberegner.dk/dagpenge | python3 -c "import sys,re;h=sys.stdin.
 Forventet: `['ca. 10.919 kr efter skat', 'ca. 11.590 kr efter skat',
 'ca. 13.047 kr efter skat', 'ca. 15.544 kr efter skat', 'ca. 18.160 kr efter skat',
 'ca. 8.283 kr efter skat', 'ca. 9.255 kr efter skat']` og `kr timer` → 0.
+
+## 2026-10-02 — `boernepenge-indlaeg` (F5b, blogindlæg)
+
+`src/app/blog/boernepenge-2026-satser-og-regler/page.tsx` havde **11 fund** i
+portens to lister — ikke de 2, den forrige iteration havde målt. De 9 i
+strenglisten var titel og beskrivelse (hver to gange, fordi de gentages i
+`openGraph` og i `BlogArticleSchema`), ungeydelsens sats i to FAQ-svar og de tre
+børnetilskud i et tredje. De 2 i JSX-teksten var beløbet over aftrapningsgrænsen
+(138.900 kr) og de to børn i eksemplet (21.480 kr × 2 = 42.960 kr).
+
+Dertil kom otte tal, porten ikke ser, fordi de var **rå argumenter til
+formatteren** i stedet for tekst: `da(5370)`, `da(4248)`, `da(3342)`,
+`da(1114 * 2 * 3)` og `da(21480 * 2)` summerede familietabellen, men af satserne
+skrevet ved siden af dem. Det er samme fejlklasse som fundene porten ser, kun
+ét lag længere nede.
+
+Alt læser nu `BOERNE_SATSER_2026`, `aarligBelob`, `barnetilskudSats` og ét
+`EKSEMPEL_INDKOMST`, som eksemplets øvrige tal afledes af. Listens tal:
+JSX 365 → **362**, strenge 82 → **70**.
+
+**Målt:** `regnestykker` 11/11 grøn; porten gjort rød mod den gamle kode på begge
+lister (`2 > 0` og `9 > 0`, målt ved at sætte listerne til 0 før rettelsen).
+`gang`-regelens dækningssum faldt 8 → 7, fordi «21.480 kr × 2 = 42.960 kr» nu
+ligger i to interpolationer omkring portens mønster — sætningen er rigtig ved
+konstruktion frem for dømt. **Målt ved mutation:** med den gamle fil minus den
+sætning er dækningssummen også 7, altså er det netop den sætning, der forsvandt.
+Fem nye tests i `page.test.tsx` dømmer de afledte tal; `eksempelToBorn * 3`
+gør «aftrapningseksemplet regner sig selv» rød.
+
+**Byte-uændret:** `<title>` og `<meta name="description">` er de samme
+strenge, de var — kun kilden er ændret. Verificeret i test mod
+`BOERNE_SATSER_2026`.
+
+### F5b — lukkede opgaver i denne bane (2/10)
+
+- **`/moms`** ✅ `ceo/moms-eksempler-fra-modul`. 18 → 3 fund, listen 385 → 370.
+  De 15 var eksemplerne brødteksten selv regner; de læses nu fra `beregnMoms`,
+  `momsFaktor` og `momsAndel`. De 3 resterende er lovgrænser (dansk registrering
+  over 50.000 kr, svensk over 120.000 kr, toldens EUR-værdigrænse på 1.150 kr)
+  uden kilde i repoet — de må ikke gættes, så de er bevarede med vilje.
+- **`/topskat`** ✅ `ceo/topskat-graense-fra-sats`. 8 → 1 fund, listen 392 → 385.
+  Alle tre skattetrins-grænser, deres bruttotals og månedstal læses fra
+  `SATSER_2026` med beregnerens egen betingelse. Det ene fund er «lønforhøjelse
+  på 1.000 kr.», der *er* den illustrerede forhøjelse.
+- **`/dagpenge`** ✅ `ceo/dagpenge-efter-skat`. 3 fund i JSX-tekst + 3 i strenge
+  i `DagpengeBeregner.tsx` → 0. Læser nu `src/lib/dagpenge-satser.ts`.
+- **Strengporten** ✅ `ceo/porten-ser-strenge`. `strengBelob` scanner
+  `isStringLiteral` og template literals uden substitution i alle 190 `.tsx`:
+  **111 fund i 38 filer**, som den gamle port så som 0.
+- **`TimeprisBeregner.tsx`** ✅ `ceo/timepris-markedspriser`. 27 → 0. De 12
+  lønintervaller lå nu i `src/lib/timepris-markedspriser.ts`.
+- **Freelancer-indlægget** ✅ `ceo/blog-indlaeg-belob-fra-modul`. Det modsagede
+  `/timepris`: «800-1.400 kr» stod ingen steder i koden.
+- **Denne iteration** ✅ `ceo/boernepenge-indlaeg`. 11 fund → 0, strenglisten
+  82 → 70.

@@ -21,9 +21,8 @@ export async function generateMetadata(): Promise<Metadata> {
   const baseUrl = dc.baseUrl;
 
   return {
-    title: { absolute: "Børnepenge 2026: 5.370 kr./kvartal (0-2 år)" },
-    description:
-      "Børnepenge 2026: 5.370 kr./kvartal (0-2 år), 4.248 (3-6 år), 3.342 (7-14 år) og 1.114 kr./måned (15-17 år). Sådan deles ydelsen mellem jer.",
+    title: { absolute: titel },
+    description: beskrivelse,
     keywords: [
       "børnepenge 2026",
       "børne- og ungeydelse 2026",
@@ -36,9 +35,8 @@ export async function generateMetadata(): Promise<Metadata> {
     ],
     openGraph: {
       images: OG_IMAGE,
-      title: "Børnepenge 2026: 5.370 kr./kvartal (0-2 år)",
-      description:
-        "Børnepenge 2026: 5.370 kr./kvartal (0-2 år), 4.248 (3-6 år), 3.342 (7-14 år) og 1.114 kr./måned (15-17 år). Sådan deles ydelsen mellem jer.",
+      title: titel,
+      description: beskrivelse,
       url: `${baseUrl}/blog/boernepenge-2026-satser-og-regler`,
       type: "article",
       siteName: dc.siteName,
@@ -51,6 +49,31 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 const da = (beloeb: number) => formatNumber(beloeb, "da");
+
+/** De fire satser, navngivet — så ingen beløb i siden skal gentages som tal. */
+const [sats0, sats1, sats2, sats3] = BOERNE_SATSER_2026;
+
+/**
+ * Titel og beskrivelse dannes af satserne, så de ikke kan glide fra tabellen
+ * og fra de to steder, brødteksten nævner samme beløb.
+ */
+const titel = `Børnepenge 2026: ${da(sats0.hel)} kr./${sats0.intervalNavn} (${sats0.alder})`;
+
+const beskrivelse =
+  `Børnepenge 2026: ${da(sats0.hel)} kr./${sats0.intervalNavn} (${sats0.alder}), ` +
+  `${da(sats1.hel)} (${sats1.alder}), ${da(sats2.hel)} (${sats2.alder}) og ` +
+  `${da(sats3.hel)} kr./${sats3.intervalNavn} (${sats3.alder}). Sådan deles ydelsen mellem jer.`;
+
+/**
+ * Indtægtsgrundlaget i aftrapningseksemplet. Det stod tidligere som
+ * «1.100.000 kr.» i både FAQ'en og brødteksten, og beløbet over grænsen,
+ * nedsættelsen og de to børn var håndskrevet ud fra det — så et tal i eksemplet
+ * kunne glide fra sit eget regnestykke.
+ */
+const EKSEMPEL_INDKOMST = 1100000;
+const eksempelOverGraense = EKSEMPEL_INDKOMST - BOERNEUNGEYDELSE_2026.aftrapning.graense;
+const eksempelToBorn = sats0.hel * 2;
+const eksempelNedaettelse = beregnAftrapning(EKSEMPEL_INDKOMST);
 
 const MAANEDER_DA = [
   "januar",
@@ -89,7 +112,7 @@ const betalingsTekst = (u: (typeof ungeudbetalinger)[number]) =>
 const faqItems = [
   {
     question: "Hvor meget får man i børnepenge 2026?",
-    answer: `De officielle satser for børne- og ungeydelse i 2026 er: ${satsOversigt}. Beløbene er skattefri og udbetales automatisk af Udbetaling Danmark. Regnet om til hele år svarer det til ${satsAarligt}. Har I fælles forældremyndighed, får hver af jer halvdelen: ${da(BOERNE_SATSER_2026[0].halv)} kr. pr. kvartal for et barn fra 0-2 år.`,
+    answer: `De officielle satser for børne- og ungeydelse i 2026 er: ${satsOversigt}. Beløbene er skattefri og udbetales automatisk af Udbetaling Danmark. Regnet om til hele år svarer det til ${satsAarligt}. Har I fælles forældremyndighed, får hver af jer halvdelen: ${da(sats0.halv)} kr. pr. kvartal for et barn fra 0-2 år.`,
   },
   {
     question: "Hvornår udbetales børnepenge 2026?",
@@ -101,19 +124,19 @@ const faqItems = [
   },
   {
     question: "Hvad er børnepenge omregnet til pr. måned?",
-    answer: `En kvartalsudbetaling på ${da(5370)} kr. svarer til ${da(maanedligOmregnet(BOERNE_SATSER_2026[0]))} kr. om måneden, en på ${da(4248)} kr. til ${da(maanedligOmregnet(BOERNE_SATSER_2026[1]))} kr., og en på ${da(3342)} kr. til ${da(maanedligOmregnet(BOERNE_SATSER_2026[2]))} kr. Det er ikke officielle satser, men årsbeløbet delt med 12.`,
+    answer: `En kvartalsudbetaling på ${da(sats0.hel)} kr. svarer til ${da(maanedligOmregnet(sats0))} kr. om måneden, en på ${da(sats1.hel)} kr. til ${da(maanedligOmregnet(sats1))} kr., og en på ${da(sats2.hel)} kr. til ${da(maanedligOmregnet(sats2))} kr. Det er ikke officielle satser, men årsbeløbet delt med 12.`,
   },
   {
     question: "Hvor meget får man i børnepenge med to børn?",
-    answer: `Beløbet lægges sammen barn for barn efter hvert barns alder. To børn på 0-2 år giver ${da(5370 * 2)} kr. pr. kvartal, altså ${da(aarligBelob(BOERNE_SATSER_2026[0]) * 2)} kr. om året. Et barn på 0-2 år og ét på 3-6 år giver ${da(5370 + 4248)} kr. pr. kvartal.`,
+    answer: `Beløbet lægges sammen barn for barn efter hvert barns alder. To børn på 0-2 år giver ${da(sats0.hel * 2)} kr. pr. kvartal, altså ${da(aarligBelob(sats0) * 2)} kr. om året. Et barn på 0-2 år og ét på 3-6 år giver ${da(sats0.hel + sats1.hel)} kr. pr. kvartal.`,
   },
   {
     question: "Hvornår skifter børnepengen sats, når barnet bliver ældre?",
-    answer: "Satsen skifter i kvartalet efter at barnet fylder 3 år, 7 år og 15 år — ikke på fødselsdagen. Fylder barnet 15 år i maj, får du børneydelse i april for april og maj, og fra juni får den unge ungeydelse den 20. i hver måned. Ungeydelsen er 1.114 kr. pr. måned, altså 13.368 kr. om året.",
+    answer: `Satsen skifter i kvartalet efter at barnet fylder 3 år, 7 år og 15 år — ikke på fødselsdagen. Fylder barnet 15 år i maj, får du børneydelse i april for april og maj, og fra juni får den unge ungeydelse den 20. i hver måned. Ungeydelsen er ${da(sats3.hel)} kr. pr. måned, altså ${da(aarligBelob(sats3))} kr. om året.`,
   },
   {
     question: "Kan børnepenge blive nedsat ved høj indkomst?",
-    answer: `Ja. Er dit indtægtsgrundlag over ${da(BOERNEUNGEYDELSE_2026.aftrapning.graense)} kr. i 2026, nedsættes ydelsen med 2 % af beløbet over grænsen. Tjener du 1.100.000 kr., bliver nedsættelsen ${da(beregnAftrapning(1100000))} kr. årligt. Siden 1. januar 2022 regnes der kun med din egen indkomst, også hvis I bor sammen.`,
+    answer: `Ja. Er dit indtægtsgrundlag over ${da(BOERNEUNGEYDELSE_2026.aftrapning.graense)} kr. i 2026, nedsættes ydelsen med ${da(BOERNEUNGEYDELSE_2026.aftrapning.pct * 100)} % af beløbet over grænsen. Tjener du ${da(EKSEMPEL_INDKOMST)} kr., bliver nedsættelsen ${da(eksempelNedaettelse)} kr. årligt. Siden 1. januar 2022 regnes der kun med din egen indkomst, også hvis I bor sammen.`,
   },
   {
     question: "Deles børnepenge automatisk mellem forældre?",
@@ -121,11 +144,11 @@ const faqItems = [
   },
   {
     question: "Hvad er forskellen på børnepenge og barnetilskud?",
-    answer: "Børne- og ungeydelsen (børnepenge) får alle forældre automatisk. Barnetilskud får enlige forsørgere oveni: 1.741 kr. pr. kvartal pr. barn, 1.774 kr. i ekstra børnetilskud (kun én gang uanset antal børn) og 5.025 kr. i særligt børnetilskud ved adoption. Børnetilskuddet er en egen ydelse med egne beløb hos borger.dk.",
+    answer: `Børne- og ungeydelsen (børnepenge) får alle forældre automatisk. Barnetilskud får enlige forsørgere oveni: ${da(barnetilskudSats("ordinært").belob)} kr. pr. kvartal pr. barn, ${da(barnetilskudSats("ekstra").belob)} kr. i ekstra børnetilskud (kun én gang uanset antal børn) og ${da(barnetilskudSats("særligt-adoption").belob)} kr. i særligt børnetilskud ved adoption. Børnetilskuddet er en egen ydelse med egne beløb hos borger.dk.`,
   },
   {
     question: "Hvad er ungeydelse?",
-    answer: "Ungeydelse er betegnelsen for børnepenge til unge mellem 15 og 17 år. Satsen er 1.114 kr. pr. måned (13.368 kr. om året) og udbetales den 20. hver måned direkte til den unge, ikke til forældrene.",
+    answer: `Ungeydelse er betegnelsen for børnepenge til unge mellem 15 og 17 år. Satsen er ${da(sats3.hel)} kr. pr. måned (${da(aarligBelob(sats3))} kr. om året) og udbetales den 20. hver måned direkte til den unge, ikke til forældrene.`,
   },
 ];
 
@@ -134,8 +157,8 @@ export default function Boernepenge2026Page() {
     <div className="max-w-3xl mx-auto">
       <BlogArticleSchema
         slug="boernepenge-2026-satser-og-regler"
-        title="Børnepenge 2026: 5.370 kr./kvartal (0-2 år)"
-        description="Børnepenge 2026: 5.370 kr./kvartal (0-2 år), 4.248 (3-6 år), 3.342 (7-14 år) og 1.114 kr./måned (15-17 år). Sådan deles ydelsen mellem jer."
+        title={titel}
+        description={beskrivelse}
       />
       <FAQSchema items={faqItems} />
 
@@ -256,7 +279,7 @@ export default function Boernepenge2026Page() {
                 <td>{datoTekst(u.maaned)}</td>
                 <td>{u.ugedag}</td>
                 <td>
-                  {da(BOERNE_SATSER_2026[0].hel)} kr.{" "}
+                  {da(sats0.hel)} kr.{" "}
                   {u.forskudt ? `faktisk ${betalingsTekst(u)}` : ""}
                 </td>
               </tr>
@@ -320,30 +343,30 @@ export default function Boernepenge2026Page() {
           <tbody>
             <tr>
               <td>Ét barn, 0-2 år</td>
-              <td>{da(5370)} kr.</td>
-              <td>{da(aarligBelob(BOERNE_SATSER_2026[0]))} kr.</td>
+              <td>{da(sats0.hel)} kr.</td>
+              <td>{da(aarligBelob(sats0))} kr.</td>
             </tr>
             <tr>
               <td>Tvillinger, 0-2 år</td>
-              <td>{da(5370 * 2)} kr.</td>
-              <td>{da(aarligBelob(BOERNE_SATSER_2026[0]) * 2)} kr.</td>
+              <td>{da(sats0.hel * 2)} kr.</td>
+              <td>{da(aarligBelob(sats0) * 2)} kr.</td>
             </tr>
             <tr>
               <td>Ét barn 0-2 år + ét barn 3-6 år</td>
-              <td>{da(5370 + 4248)} kr.</td>
+              <td>{da(sats0.hel + sats1.hel)} kr.</td>
               <td>
-                {da(aarligBelob(BOERNE_SATSER_2026[0]) + aarligBelob(BOERNE_SATSER_2026[1]))} kr.
+                {da(aarligBelob(sats0) + aarligBelob(sats1))} kr.
               </td>
             </tr>
             <tr>
               <td>Tvillinger 3-6 år + ét barn 7-14 år</td>
-              <td>{da(4248 * 2 + 3342)} kr.</td>
-              <td>{da(aarligBelob(BOERNE_SATSER_2026[1]) * 2 + aarligBelob(BOERNE_SATSER_2026[2]))} kr.</td>
+              <td>{da(sats1.hel * 2 + sats2.hel)} kr.</td>
+              <td>{da(aarligBelob(sats1) * 2 + aarligBelob(sats2))} kr.</td>
             </tr>
             <tr>
               <td>Tvillinger 15-17 år (ungeydelse, pr. måned)</td>
-              <td>{da(1114 * 2 * 3)} kr.</td>
-              <td>{da(aarligBelob(BOERNE_SATSER_2026[3]) * 2)} kr.</td>
+              <td>{da(sats3.hel * 3 * 2)} kr.</td>
+              <td>{da(aarligBelob(sats3) * 2)} kr.</td>
             </tr>
           </tbody>
         </table>
@@ -365,18 +388,19 @@ export default function Boernepenge2026Page() {
             <strong>Grænse:</strong> {da(BOERNEUNGEYDELSE_2026.aftrapning.graense)} kr. i
             dit eget indtægtsgrundlag
           </li>
-          <li><strong>Nedsættelse:</strong> 2 % af beløbet over grænsen</li>
+          <li><strong>Nedsættelse:</strong> {da(BOERNEUNGEYDELSE_2026.aftrapning.pct * 100)} % af beløbet over grænsen</li>
           <li>
             Kun din egen indkomst tæller med — også hvis I bor sammen. Den anden
             forælders indkomst påvirker ikke din halvdel.
           </li>
         </ul>
         <p>
-          <strong>Eksempel:</strong> Dit indtægtsgrundlag er 1.100.000 kr. i 2026. Beløbet
-          over grænsen er 138.900 kr. Nedsættelsen bliver 2 % × 138.900 kr. ={" "}
-          {da(beregnAftrapning(1100000))} kr. årligt. Har du to børn på 0-2 år (21.480 kr ×
-          2 = 42.960 kr.), får du udbetalt{" "}
-          {da(21480 * 2 - beregnAftrapning(1100000))} kr.
+          <strong>Eksempel:</strong> Dit indtægtsgrundlag er {da(EKSEMPEL_INDKOMST)} kr. i 2026.
+          Beløbet over grænsen er {da(eksempelOverGraense)} kr. Nedsættelsen bliver{" "}
+          {da(BOERNEUNGEYDELSE_2026.aftrapning.pct * 100)} % × {da(eksempelOverGraense)} kr. ={" "}
+          {da(eksempelNedaettelse)} kr. årligt. Har du to børn på 0-2 år ({da(eksempelToBorn)}{" "}
+          kr × 2 = {da(eksempelToBorn * 2)} kr.), får du udbetalt{" "}
+          {da(eksempelToBorn * 2 - eksempelNedaettelse)} kr.
         </p>
         <p>
           Nedsættelsen beregnes på dit indtægtsgrundlag, som hos Udbetaling Danmark svarer

@@ -1,72 +1,52 @@
-STATUS: 2/10 11:40. CI grøn. Sentry MINBEREGNER-1 er Next-router-støj (filtreret
-  siden 3e67ed3), MINBEREGNER-2 rettet i `4d48370`+`def070c`. Alle tre
-  review-fund fra 2/10 lukket (`3875b83`, `73c7e64`, `def070c`), CEO-kø punkt 0
-  lukket (`04ca30a`). PR-TJEK 2026-10-02: ingen åbne PR'er. BRANCH-TJEK 2/10:
-  ingen forældede.
-  **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` · `npm run build`
-  — målt grøn 2/10 11:37 (3708 tests i 228 filer, +18 fra `ceo/dagpenge-efter-skat`).
-  **Denne iteration: `ceo/dagpenge-efter-skat`.** VERIFICÉR DEPLOY-noten står i
-  tabellen nederst. ceo/dagpenge-efter-skat 2/10 11:40
+STATUS: 2/10 12:35. CI grøn. Sentry MINBEREGNER-1 er Next-router-støj (filtreret
+   siden 3e67ed3), MINBEREGNER-2 rettet i `4d48370`+`def070c`. Alle tre
+   review-fund fra 2/10 lukket (`3875b83`, `73c7e64`, `def070c`), CEO-kø punkt 0
+   lukket (`04ca30a`). PR-TJEK 2026-10-02: ingen åbne PR'er. BRANCH-TJEK 2/10:
+   ingen forældede.
+   **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` · `npm run build`
+   — målt grøn 2/10 12:30 (3713 tests i 228 filer, +5 fra `ceo/boernepenge-indlaeg`).
+   **Denne iteration: `ceo/boernepenge-indlaeg`.** VERIFICÉR DEPLOY-noten står i
+   tabellen nederst. ceo/boernepenge-indlaeg 2/10 12:35
+   **Næste iteration skal være en feature** (Fase 3-reglen: mindst hver tredje
+   opgave), ikke endnu en fil i F5b-kæden.
 
 ## Åbne opgaver — F5b: beløb i JSX-tekst → modulkonstanter
 
 Listen `src/app/regnestykker.test.ts` tæller forekomster pr. fil og må kun
-blive kortere. Rækkefølgen er trafikrækkefølge. ✅ betyder lukket.
+blive kortere. Rækkefølgen er trafikrækkefølge. ✅ betyder lukket; detaljerne
+står i `docs/plan-arkiv.md` under hvert slug.
 
-1. **`/moms`** — ✅ 2/10 07:50 (`ceo/moms-eksempler-fra-modul`). 18 fund → **3**,
-   listen 385 → **370**. De 15 var eksemplerne brødteksten selv regner
-   («1.000 kr. × 1,25 = 1.250 kr. inkl. moms» to gange i hvert sprog, fire
-   rækker i den svenske Excel-tabel, «2,4414»/«0,4096» og de svenske
-   «10,71 %»/«5,66 %»); de læses nu fra `beregnMoms`, `momsFaktor` og
-   `momsAndel` på `MOMS_REFERENCE_BELOEB`s tredje beløb. **De 3 resterende er
-   lovgrænser** — dansk registrering over 50.000 kr, svensk over 120.000 kr og
-   «told ved import over 1.150 kr» (en EUR-grænse, der ikke må stå som fast
-   tal) — og de kræver en kilde, se ❓ nedenfor.
-2. **`/boligsalg`** — 9 fund, hvor 8 er redaktionelle prisintervaller (mægler,
-   tinglysning, avance, byggeskade …) uden kilde i repoet, og den niende er
-   «opdateret august 2025». Formelbeløb kan læses fra `src/lib/boligsalg.ts`
-   (findes, har tests); prisintervallerne kræver en kilde. Lav trafikrækkefølge.
-3. **`/topskat`** — ✅ 2/10 07:00 (`ceo/topskat-graense-fra-sats`). 8 fund → 1,
-   listen 392 → **385**. Alle tre grænser, deres bruttotals og månedstal læses
-   fra `SATSER_2026` med beregnerens egen betingelse; målt byte-identisk med
-   den gamle tekst. Det ene fund er «lønforhøjelse på 1.000 kr.», der er den
-   illustrerede forhøjelse.
-0. **`/dagpenge`** — ✅ 2/10 11:35 (`ceo/dagpenge-efter-skat`). 3 fund i JSX-tekst
-   («Op til 26.198 kr» to gange, «263.232 kr») → **0**; 3 fund i strenge i
-   `DagpengeBeregner.tsx` («normalt 2 år (3.848 timer)» i tre sprog) → **0**.
-   Læser nu `src/lib/dagpenge-satser.ts`. Læste `page-data.ts` er det samme modul
-   (kr/md-svarene, `description`, `metaDescription`).
-4. **Beløb i prop-strenge er uden for porten** — ✅ 2/10 07:25
-   (`ceo/porten-ser-strenge`). `strengBelob` scanner `isStringLiteral` og
-   template literals uden substitution i alle 190 `.tsx`. Målt: **111 fund i 38
-   filer**, som den gamle port så som 0 — de lå i strenge, ikke i JSX-tekst.
-   Det første fund er rettet samme sted:
-   `BoligsalgBeregner.tsx`'s disclaimer skrev tinglysningens 1.850/1.825 kr igen,
-   mens modulet havde dem i `beregnTinglysning` — de er nu navngivne eksporter.
-   **Næste bane i rækken:** `TimeprisBeregner.tsx` var den største fil med 27
-   fund — ✅ 2/10 09:05 (`ceo/timepris-markedspriser`). De 12 lønintervaller
-   lå nu i `src/lib/timepris-markedspriser.ts`, FAQ'en læser fra samme modul,
-   og de tre domæner får hver sit sprog i kopier/del-teksten. Listen 110 →
-   **83**. **Næste fil:** `src/app/blog/saadan-finder-du-din-timepris-som-freelancer/page.tsx`
-   — ✅ 2/10 11:35 (`ceo/blog-indlaeg-belob-fra-modul`). Ikke bare de samme intervaller:
-   de **modsagede** `/timepris` («800-1.400 kr» stod ingen steder i koden). Listen 370 →
-   **365** og 83 → **82**. **Næste fil:**
-   `src/app/blog/boernepenge-2026-satser-og-regler/page.tsx` (2 fund i portens liste,
-   ikke 9 som denne linje tidligere sagde — målt 2/10 11:30).
-   `/timepris` mangler stadig **norsk brødtekst** på siden (kun `da` og `se`
-   har et afsnit) — ❓ kilde til norske timepriser låser både brødteksten og
-   tabellen.
-5. **Blogindlæg (19 filer, 273 fund).** Redaktionelle beløb i et indlæg er ikke
-   samme fejlklasse som et beløb på en beregnerside. Beslut først, om de skal
-   med; ellers skal de stå i portens undtagelsesliste som *blog*.
-6. **IndexNow** — nøglefil serveres, krogen efter deploy virker
-   (`src/instrumentation.ts` → `submitDeploymentIndexNow()`). ❓ om
-   `INDEXNOW_ENABLED=true` og `INDEXNOW_API_KEY` i Dokploys env.
-7. **Opgave 187** (svenske slugs + 301-redirects) — **13/10**, må ikke flyttes
-   før de svenske titelændringer er målt.
-8. **F1** — søgeniveau-data for `/procent` (150.470 visninger, 0,1 % CTR,
-   pos. 7,4). GSC's tre søgninger summerer 364 visninger af 150.470. ❓ se
-   nedenfor.
+**Åben række (strenglisten, 70 fund):** næste fil er
+`src/app/blog/su-2026-satser-og-regler/page.tsx` (6 fund — `/su` er samtidig en
+faldende side, 203 → 129), derefter `arveafgift-regler-og-satser` (7 + 15).
+
+**Åben:** `/boligsalg` — 9 fund, hvor 8 er redaktionelle prisintervaller (mægler,
+tinglysning, avance, byggeskade …) uden kilde i repoet, og den niende er
+«opdateret august 2025». Formelbeløb kan læses fra `src/lib/boligsalg.ts`
+(findes, har tests); prisintervallerne kræver en kilde.
+
+**Åben:** `/moms` har 3 fund tilbage, som er lovgrænser — dansk registrering
+over 50.000 kr, svensk over 120.000 kr og «told ved import over 1.150 kr» (en
+EUR-grænse, der ikke må stå som fast tal). De kræver en kilde, se ❓ nedenfor.
+
+**Åben:** `/timepris` mangler **norsk brødtekst** på siden (kun `da` og `se`
+har et afsnit) — ❓ kilde til norske timepriser låser både brødteksten og
+tabellen.
+
+**Åben:** blogindlæg generelt (19 filer, 273 fund). Redaktionelle beløb i et
+indlæg er ikke samme fejlklasse som et beløb på en beregnerside. Beslut først,
+om de skal med; ellers skal de stå i portens undtagelsesliste som *blog*.
+
+**Åben:** IndexNow — nøglefil serveres, krogen efter deploy virker
+(`src/instrumentation.ts` → `submitDeploymentIndexNow()`). ❓ om
+`INDEXNOW_ENABLED=true` og `INDEXNOW_API_KEY` i Dokploys env.
+
+**Åben:** opgave 187 (svenske slugs + 301-redirects) — **13/10**, må ikke flyttes
+før de svenske titelændringer er målt.
+
+**Åben:** F1 — søgeniveau-data for `/procent` (150.470 visninger, 0,1 % CTR,
+pos. 7,4). GSC's tre søgninger summerer 364 visninger af 150.470. ❓ se
+nedenfor.
 
 ## ❓ Uafklaret — ferielov (rammer `/dage-til/summerferien` **og** skolestart)
 
@@ -317,6 +297,7 @@ under sit slug. Noterne med vindue **2/10 12:30** måles efter kl. 12:30.
 
 | Slug | Prøv på indhold |
 |---|---|
+| `boernepenge-indlaeg` (**ny**, vindue 2/10 17:30) | `minberegner.dk/blog/boernepenge-2026-satser-og-regler`: `<title>` skal være **byte-uændret** «Børnepenge 2026: 5.370 kr./kvartal (0-2 år)» og `<meta name="description">» «Børnepenge 2026: 5.370 kr./kvartal (0-2 år), 4.248 (3-6 år), 3.342 (7-14 år) og 1.114 kr./måned (15-17 år). Sådan deles ydelsen mellem jer.» — de er nu bygget af `BOERNE_SATSER_2026`, så tallene er de samme, kun kilden er ændret. Aftrapningseksemplet skal sige «Dit indtægtsgrundlag er 1.100.000 kr. i 2026. Beløbet over grænsen er 138.900 kr. Nedsættelsen bliver 2 % × 138.900 kr. = 2.778 kr. årligt. Har du to børn på 0-2 år (21.480 kr × 2 = 42.960 kr.), får du udbetalt 40.182 kr.» — **intet** «16.110 kr» eller «32.220 kr». FAQ'en skal have **ti** spørgsmål, og «Hvornår skifter børnepengen sats, når barnet bliver ældre?» skal svare «… Ungeydelsen er 1.114 kr. pr. måned, altså 13.368 kr. om året.» og «Hvad er forskellen på børnepenge og barnetilskud?» «… 1.741 kr. pr. kvartal pr. barn, 1.774 kr. i ekstra børnetilskud … 5.025 kr. i særligt børnetilskud ved adoption.». Familietabellen skal have `10.740`, `9.618`, `11.838` og `6.684` i kolonnen «Pr. kvartal» |
 | `dagpenge-efter-skat` (**ny**, vindue 2/10 12:30) | `minberegner.dk/dagpenge`: sats-tabellen skal have **syv** rækker med to tal pr. række — `Med beskæftigelsestillæg / 26.198 kr / ca. 18.160 kr efter skat`, `Max dagpengesats, fuldtidsforsikret / 22.041 kr / ca. 15.544 kr efter skat`, `Dimittend, fuldtid med forsørgelsespligt / 18.074 kr / ca. 13.047 kr efter skat`, `Dimittend, fuldtid uden forsørgelsespligt / 15.759 kr / ca. 11.590 kr efter skat`, `Max dagpengesats, deltidsforsikret / 14.694 kr / ca. 10.919 kr efter skat`, `Dimittend, deltid med forsørgelsespligt / 12.049 kr / ca. 9.255 kr efter skat`, `Dimittend, deltid uden forsørgelsespligt / 10.506 kr / ca. 8.283 kr efter skat` — med **hele kroner**, ingen decimaler («18.160,026» er den fejl porten fangede). Indledningen skal sige «25,049 % i kommunaleskat». FAQ'en skal have **otte** spørgsmål, og de tre nye skal starte med «Hvad er dagpengesatsen for nyuddannet i 2026?» → «… 15.759 kr pr. måned før skat uden forsørgelsespligt, og 18.074 kr hvis du har forsørgelsespligt. Det er 71,5 % hhv. 82 % af maxsatsen på 22.041 kr.», «Hvor længe har nyuddannede ret til dagpenge?» → «… normalt 2 år, svarende til 3.848 timer fuldtid, inden for 3 år.» og «Skal jeg betale skat af dagpenge?» → «… ca. 15.544 kr om måneden tilbage på kontoen.». **Intet** «1.924 kr timer» nogen steder — det stod på den live side 2/10. `minberegner.dk/dagpenge`s `<meta name="description">` skal være uændret i ordlyd: «Beregn dagpenge 2026. Max sats: 22.041 kr/md (90% af løn efter AM-bidrag). Med beskæftigelsestillæg op til 26.198 kr/md. Beregn din dagpengesats ud fra din løn.» |
 | `blog-indlaeg-belob-fra-modul` (**ny**) | `minberegner.dk/blog/saadan-finder-du-din-timepris-som-freelancer`: tabellen «Typiske timepriser i Danmark (2026)» skal have fire grupperækker (`IT & Udvikling`, `Kreativ & Marketing`, `Rådgivning`, `Håndværk & Service`) med de 12 poster, hver som `<postnavn> <interval> kr` — altså `Senior udvikler 800-1.200 kr` (ikke 1.400), `Grafisk designer 500-800 kr`, `Konsulent 800-1.500 kr`, `Fotograf 500-1.500 kr`. **Intet** «Junior»/«Senior»-hoved, intet «800-1.400», intet «600-900 kr», intet «1.000-2.000 kr». FAQ'en «Hvad er en normal timepris for en freelancer?» skal svare «… seniorudviklere 800-1.200 kr, tekstforfattere 600-1.000 kr, konsulenter 800-1.500 kr …» i både JSON-LD'en og den synlige tekst, og noten «Priserne er vejledende og ekskl. moms.» skal stå under tabellen. `/timepris` skal være **byte-uændret** |
 | `pace-marathon-faq` (**ny**) | `minberegner.dk/pace`: FAQ'en skal have «Hvad er et godt tempo for en marathon?» → «På 42,195 km er 3:30:00 et tempo på 4:59 pr. kilometer.», «Hvad er et godt tempo for en halvmaraton?» → «På 21,0975 km er 1:45:00 et tempo på 4:59 pr. kilometer.» og «Hvad er et godt tempo på 10 km?» → «På 10 km er 50:00 et tempo på 5:00 pr. kilometer.» — hver med «… Hvad der er godt for dig, afhænger af din træning og din målsætning.» **Intet** «halvmarahton» nogen steder på siden eller i JSON-LD'en. `beraknare.se/pace` skal have de samme tre spørgsmål med «per kilometer» og **ikke** «pr. kilometer». |

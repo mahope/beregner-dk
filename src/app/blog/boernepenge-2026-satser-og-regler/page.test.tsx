@@ -1,10 +1,25 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, test, vi } from "vitest";
-import { BOERNE_SATSER_2026, udbetalingsdatoerAar } from "@/lib/borneungeydelse";
-import Boernepenge2026Page from "./page";
+import {
+  BOERNE_SATSER_2026,
+  BOERNEUNGEYDELSE_2026,
+  aarligBelob,
+  beregnAftrapning,
+  udbetalingsdatoerAar,
+} from "@/lib/borneungeydelse";
+import { barnetilskudSats } from "@/lib/barnetilskud";
+import { formatNumber } from "@/lib/format";
+import Boernepenge2026Page, { generateMetadata } from "./page";
 
 vi.mock("@/components/FAQ", () => ({ default: () => null }));
 vi.mock("@/components/StructuredData", () => ({ FAQSchema: () => null, ArticleSchema: () => null }));
+vi.mock("@/lib/get-locale", () => ({
+  getCurrentDomainConfig: async () => ({
+    baseUrl: "https://minberegner.dk",
+    siteName: "MinBeregner.dk",
+    ogLocale: "da_DK",
+  }),
+}));
 
 const html = () => renderToStaticMarkup(<Boernepenge2026Page />);
 
@@ -80,6 +95,94 @@ describe("børnepenge 2026 — udbetalingsdatoer", () => {
       "Hvornår skifter børnepengen sats",
     ]) {
       expect(markup, spg).toContain(spg);
+    }
+  });
+});
+
+/**
+ * Beløbene i titel, beskrivelse og FAQ skal læses fra modulet, ikke skrives.
+ * Titeln stod først herinde som «Børnepenge 2026: 5.370 kr./kvartal (0-2 år)», og
+ * blev gentaget i `openGraph` og i `BlogArticleSchema` — altså tre steder, der
+ * kunne glide fra tabellen på samme side.
+ */
+describe("børnepenge 2026 — beløb læst fra modulet", () => {
+  const da = (n: number) => formatNumber(n, "da");
+
+  test("titel og beskrivelse er satserne fra modulet", async () => {
+    const [sats0, sats1, sats2, sats3] = BOERNE_SATSER_2026;
+    const metadata = await generateMetadata();
+
+    expect(metadata.title).toEqual({
+      absolute: `Børnepenge 2026: ${da(sats0.hel)} kr./${sats0.intervalNavn} (${sats0.alder})`,
+    });
+    // Beskrivelsen nævner alle fire satser med deres aldersgruppe — så en
+    // satsregulering ændrer én streng og ikke fire.
+    const beskrivelse = metadata.description as string;
+    for (const sats of BOERNE_SATSER_2026) {
+      expect(beskrivelse, `satsen for ${sats.alder}`).toContain(da(sats.hel));
+      expect(beskrivelse, `aldersgruppen ${sats.alder}`).toContain(`(${sats.alder})`);
+    }
+    expect(beskrivelse).toContain(`${da(sats3.hel)} kr./${sats3.intervalNavn} (${sats3.alder})`);
+    expect(sats1.hel).not.toBe(sats2.hel);
+    expect(metadata.openGraph?.description).toBe(beskrivelse);
+    expect(metadata.openGraph?.title).toBe((metadata.title as { absolute: string }).absolute);
+  });
+
+  test("ungeydelsens sats og årstal i FAQ'en kommer fra samme sats", async () => {
+    const markup = await html();
+    const unge = BOERNE_SATSER_2026.at(-1);
+    if (!unge) throw new Error("BOERNE_SATSER_2026 mangler ungeydelsen");
+
+    // Satsen nævnes to gange («Hvornår skifter satsen» og «Hvad er ungeydelse»),
+    // og årstallet skal være satsen ganget med de tolv udbetalinger.
+    expect(markup).toContain(`Ungeydelsen er ${da(unge.hel)} kr. pr. måned`);
+    expect(markup).toContain(`Satsen er ${da(unge.hel)} kr. pr. måned (${da(aarligBelob(unge))} kr. om året)`);
+    expect(aarligBelob(unge)).toBe(unge.hel * 12);
+  });
+
+  test("børnetilskuddene i FAQ'en er modulet egne satser", async () => {
+    const markup = await html();
+
+    expect(markup).toContain(`${da(barnetilskudSats("ordinært").belob)} kr. pr. kvartal pr. barn`);
+    expect(markup).toContain(`${da(barnetilskudSats("ekstra").belob)} kr. i ekstra børnetilskud`);
+    expect(markup).toContain(
+      `${da(barnetilskudSats("særligt-adoption").belob)} kr. i særligt børnetilskud ved adoption`,
+    );
+  });
+
+  test("aftrapningseksemplet regner sig selv", async () => {
+    const markup = await html();
+    const graense = BOERNEUNGEYDELSE_2026.aftrapning.graense;
+    const toBorn = BOERNE_SATSER_2026[0].hel * 2;
+
+    // Eksemplets indkomst ligger 138.900 kr over grænsen, og de beløb, der står i
+    // brødteksten, er præcis dem — de skal ikke kunne stå som håndskrevne tal.
+    expect(markup).toContain(`Dit indtægtsgrundlag er ${da(1100000)} kr. i 2026`);
+    expect(markup).toContain(`Beløbet over grænsen er ${da(1100000 - graense)} kr.`);
+    expect(markup).toContain(
+      `Nedsættelsen bliver 2 % × ${da(1100000 - graense)} kr. = ${da(beregnAftrapning(1100000))} kr. årligt.`,
+    );
+    // De to børn er satserne selv, to gange: 5.370 × 2 = 10.740 pr. kvartal.
+    expect(markup).toContain(`(${da(toBorn)} kr × 2 = ${da(toBorn * 2)} kr.)`);
+    expect(toBorn).toBe(BOERNE_SATSER_2026[0].hel * 2);
+    // Og nedsættelsen trækkes fra det samlede beløb for de to børn.
+    expect(markup).toContain(da(toBorn * 2 - beregnAftrapning(1100000)));
+  });
+
+  test("familietabellen summerer satserne, ikke tal der er skrevet ved siden af dem", async () => {
+    const markup = await html();
+    const [sats0, sats1, sats2, sats3] = BOERNE_SATSER_2026;
+
+    // Rækkerne i rækkefølge: ét barn, tvillinger, 0-2 + 3-6, 3-6 + 3-6 + 7-14,
+    // og to 15-17-årige månedligt for et helt kvartal.
+    for (const forventet of [
+      sats0.hel,
+      sats0.hel * 2,
+      sats0.hel + sats1.hel,
+      sats1.hel * 2 + sats2.hel,
+      sats3.hel * 3 * 2,
+    ]) {
+      expect(markup).toContain(`${da(forventet)} kr.`);
     }
   });
 });
