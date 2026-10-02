@@ -358,19 +358,19 @@ describe("getPageData", () => {
       locale: "da" as const,
       title: "Kalorieberegner: 80 kg, 180 cm, 30 år, moderat = 2.759 kcal",
       question: "Hvor mange kalorier skal du have om dagen?",
-      diet: "2.259",
+      diet: formatBelob(2259, "da"),
     },
     {
       locale: "se" as const,
       title: "Kalorikalkylator: man 80 kg, 180 cm = 2 759 kcal/dag",
       question: "Hur många kalorier behöver du per dag?",
-      diet: "2.259",
+      diet: formatBelob(2259, "se"),
     },
     {
       locale: "no" as const,
       title: "Hvor mange kalorier per dag? | Kalorikalkulator",
       question: "Hvor mange kalorier trenger du per dag?",
-      diet: "2.259",
+      diet: formatBelob(2259, "no"),
     },
   ])("has answer-first calorie metadata for $locale", ({ locale, title, question, diet }) => {
     const data = getPageData("kalorier", locale)!;
@@ -378,10 +378,22 @@ describe("getPageData", () => {
     expect(data.metaTitle).toBe(title);
     expect(data.metaTitle.length).toBeLessThanOrEqual(60);
     expect(data.description).toContain(question);
-    expect(data.description).toContain("1.780");
-    expect(data.description).toContain("2.759");
-    expect(data.metaDescription).toContain("1.780");
-    expect(data.metaDescription).toContain("2.759");
+    // Dansk skriver tusindtalsseparator med punktum, svensk og norsk med
+    // mellemrum — saa tallene laeses gennem `formatBelob` frem for at ligge i
+    // testen, ellers slaar den paa notationen og ikke paa tallene.
+    const bmr = formatBelob(1780, locale);
+    const tdee = formatBelob(2759, locale);
+    expect(data.description).toContain(bmr);
+    expect(data.description).toContain(tdee);
+    expect(data.metaDescription).toContain(bmr);
+    expect(data.metaDescription).toContain(tdee);
+    if (locale !== "da") {
+      // Punktum mellem to talgrupper er dansk. I svensk og norsk loebende
+      // tekst laeses «1.780 kcal» som 1,780 kcal, saa det er en fejl.
+      for (const streng of [data.description, data.metaDescription]) {
+        expect(streng).not.toMatch(/\d\.\d{3}/);
+      }
+    }
     expect(data.metaDescription.length).toBeLessThanOrEqual(160);
     expect(data.ogTitle).toBe(title);
     expect(data.schemaDescription).toContain("BMR");

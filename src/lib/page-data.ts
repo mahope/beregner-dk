@@ -40,6 +40,7 @@ import { markedsprisFaqSvar } from "./timepris-markedspriser";
 import { timerIPeriodeFaqSvar } from "./timer-periode";
 import { ugeDatoerFaqSvar } from "./ugenummer";
 import { distanceEksempelFaqSvar, triatlonCykelAndelFaqSvar, triatlonTotalFaqSvar } from "./pace";
+import { kalorierFaqItems, kalorierOverskrifter } from "./kalorier-eksempler";
 import { vaegttabFaqItems, vaegttabOverskrifter } from "./vaegttab-eksempler";
 import { annuitetsEksempel, hovedEksempel } from "./rente-eksempler";
 import { alderSideTekst, erstatAlderTokens } from "./alder-side-tekst";
@@ -986,11 +987,11 @@ const daPages: Record<string, PageData> = {
     "kalorier": {
       slug: "kalorier",
       title: "Kalorieberegner",
-      description: "Hvor mange kalorier skal du have om dagen? Mand, 80 kg, 180 cm og 30 år: BMR 1.780 kcal og TDEE 2.759 kcal ved moderat aktivitet.",
-      metaTitle: "Kalorieberegner: 80 kg, 180 cm, 30 år, moderat = 2.759 kcal",
-      metaDescription: "Dit kaloriebehov = BMR × aktivitetsfaktor. Mand, 80 kg, 180 cm, 30 år: BMR 1.780 kcal, TDEE 2.759 kcal. Beregn BMR, TDEE og makroer.",
+      description: kalorierOverskrifter("da").description,
+      metaTitle: kalorierOverskrifter("da").metaTitle,
+      metaDescription: kalorierOverskrifter("da").metaDescription,
       keywords: ["kalorieberegner", "dagligt kaloriebehov", "TDEE beregner", "BMR beregner", "vægttab kalorier", "makroer beregner", "protein beregner", "kalorieunderskud"],
-      ogTitle: "Kalorieberegner: 80 kg, 180 cm, 30 år, moderat = 2.759 kcal",
+      ogTitle: kalorierOverskrifter("da").ogTitle,
       ogDescription: "BMR og TDEE ud fra alder, køn, vægt, højde og aktivitet — med makrofordeling.",
       category: "Sundhed",
       breadcrumbCategory: "Sundhed",
@@ -998,15 +999,7 @@ const daPages: Record<string, PageData> = {
       schemaName: "Kalorieberegner",
       schemaDescription: "Beregn BMR, TDEE og makrofordeling ud fra alder, køn, vægt, højde og aktivitetsniveau.",
       schemaCategory: "HealthApplication",
-      faqItems: [
-      { question: "Hvad er forskellen på BMR og TDEE?", answer: "BMR er kalorier i hvile. TDEE er totalt dagligt forbrug inkl. aktivitet. TDEE = BMR × aktivitetsfaktor." },
-      { question: "Hvor mange kalorier for at tabe mig?", answer: "Spis ca. 500 kcal under din TDEE, svarende til ca. 0,5 kg tab pr. uge. Mand, 80 kg, 180 cm og 30 år med moderat aktivitet: ca. 2.259 kcal om dagen." },
-      { question: "Hvor meget protein?", answer: "Vedligehold: 0,8-1,2g/kg. Vægttab: 1,2-1,6g/kg. Muskelopbygning: 1,6-2,2g/kg." },
-      { question: "Er beregneren præcis?", answer: "Bruger Mifflin-St Jeor formlen. Individuelle variationer kan være 10-15%." },
-      { question: "Hvor mange kalorier skal jeg have?", answer: "En mand på 80 kg, 180 cm og 30 år med moderat aktivitet har et dagligt forbrug på 2.759 kcal. En kvinde på samme mål har 2.502 kcal. Skriv dine egne tal i værktøjet for det præcise tal." },
-      { question: "Hvor mange kalorier skal jeg forbrænde for at tabe 1 kg?", answer: "Der skal bruges ca. 7.700 kcal pr. kilo fedt, så 1 kg kræver et underskud på 7.700 kcal fordelt over en uge. Det svarer til 500 kcal om dagen." },
-      { question: "Er kalorieberegneren gratis?", answer: "Ja. Værktøjet er en gratis hjemmeside — du skal ikke oprette en konto, og det virker direkte i browseren på computer og telefon." },
-      ],
+faqItems: kalorierFaqItems("da"),
     },
     "vaegttab": {
       slug: "vaegttab",
@@ -2389,11 +2382,11 @@ const noPages: Record<string, PageData> = {
     "kalorier": {
       slug: "kalorier",
       title: "Kalorikalkulator",
-      description: "Hvor mange kalorier trenger du per dag? Mann, 80 kg, 180 cm og 30 år: BMR 1.780 kcal og TDEE 2.759 kcal ved moderat aktivitet.",
-      metaTitle: "Hvor mange kalorier per dag? | Kalorikalkulator",
-      metaDescription: "Ditt kaloribehov = BMR × aktivitetsfaktor. Mann, 80 kg, 180 cm, 30 år: BMR 1.780 kcal, TDEE 2.759 kcal. Beregn BMR, TDEE og makroer.",
+      description: kalorierOverskrifter("no").description,
+      metaTitle: kalorierOverskrifter("no").metaTitle,
+      metaDescription: kalorierOverskrifter("no").metaDescription,
       keywords: ["kalorikalkulator", "daglig kaloriforbruk", "TDEE kalkulator", "BMR kalkulator", "vekttap kalorier", "makroer kalkulator", "proteinkalkulator"],
-      ogTitle: "Hvor mange kalorier per dag? | Kalorikalkulator",
+      ogTitle: kalorierOverskrifter("no").ogTitle,
       ogDescription: "BMR og TDEE basert på alder, kjønn, vekt, høyde og aktivitet – med makrofordeling.",
       category: "Helse",
       breadcrumbCategory: "Helse",
@@ -2401,12 +2394,7 @@ const noPages: Record<string, PageData> = {
       schemaName: "Kalorikalkulator",
       schemaDescription: "Beregn BMR, TDEE og makrofordeling ut fra alder, kjønn, vekt, høyde og aktivitetsnivå.",
       schemaCategory: "HealthApplication",
-      faqItems: [
-      { question: "Hva er forskjellen på BMR og TDEE?", answer: "BMR er kalorier i hvile. TDEE er totalt daglig forbruk inkl. aktivitet." },
-      { question: "Hvor mange kalorier for å gå ned i vekt?", answer: "Spis ca. 500 kcal under din TDEE, det gir ca. 0,5 kg tap per uke. Mann, 80 kg, 180 cm og 30 år med moderat aktivitet: ca. 2.259 kcal per dag." },
-      { question: "Hvor mye protein trenger jeg?", answer: "Vedlikehold: 0,8-1,2g/kg. Vekttap: 1,2-1,6g/kg. Muskelbygging: 1,6-2,2g/kg." },
-      { question: "Er kalkulatoren nøyaktig?", answer: "Bruker Mifflin-St Jeor-formelen. Individuelle variasjoner kan være 10-15%." },
-      ],
+      faqItems: kalorierFaqItems("no"),
     },
     "vaegttab": {
       slug: "vaegttab",
@@ -3567,11 +3555,11 @@ const sePages: Record<string, PageData> = {
     "kalorier": {
       slug: "kalorier",
       title: "Kalorikalkylator",
-      description: "Hur många kalorier behöver du per dag? Man, 80 kg, 180 cm och 30 år: BMR 1.780 kcal och TDEE 2.759 kcal vid måttlig aktivitet.",
-      metaTitle: "Kalorikalkylator: man 80 kg, 180 cm = 2 759 kcal/dag",
-      metaDescription: "Ditt kaloribehov = BMR × aktivitetsfaktor. Man, 80 kg, 180 cm, 30 år: BMR 1.780 kcal, TDEE 2.759 kcal. Beräkna BMR, TDEE och makrofördelning.",
+      description: kalorierOverskrifter("se").description,
+      metaTitle: kalorierOverskrifter("se").metaTitle,
+      metaDescription: kalorierOverskrifter("se").metaDescription,
       keywords: ["kalorikalkylator", "dagligt kaloribehov", "TDEE kalkylator", "BMR kalkylator", "viktminskning kalorier", "makrokalkylator", "proteinkalkylator"],
-      ogTitle: "Kalorikalkylator: man 80 kg, 180 cm = 2 759 kcal/dag",
+      ogTitle: kalorierOverskrifter("se").ogTitle,
       ogDescription: "BMR och TDEE baserat på ålder, kön, vikt, längd och aktivitet – med makrofördelning.",
       category: "Hälsa",
       breadcrumbCategory: "Hälsa",
@@ -3579,16 +3567,7 @@ const sePages: Record<string, PageData> = {
       schemaName: "Kalorikalkylator",
       schemaDescription: "Beräkna BMR, TDEE och makrofördelning utifrån ålder, kön, vikt, längd och aktivitetsnivå.",
       schemaCategory: "HealthApplication",
-      faqItems: [
-      { question: "Vad är skillnaden mellan BMR och TDEE?", answer: "BMR är kalorier i vila. TDEE är total daglig förbrukning inkl. aktivitet." },
-      { question: "Hur många kalorier för att gå ner i vikt?", answer: "Ät ca 500 kcal under din TDEE, det ger ca 0,5 kg minskning per vecka. Man, 80 kg, 180 cm och 30 år med måttlig aktivitet: ca 2.259 kcal per dag." },
-      { question: "Hur mycket protein behöver jag?", answer: "Underhåll: 0,8-1,2g/kg. Viktminskning: 1,2-1,6g/kg. Muskeluppbyggnad: 1,6-2,2g/kg." },
-      { question: "Är kalkylatorn korrekt?", answer: "Använder Mifflin-St Jeor-formeln. Individuella variationer kan vara 10-15%." },
-      { question: "Hur många kalorier behöver jag?", answer: "En man på 80 kg, 180 cm och 30 år med måttlig aktivitet har ett dagligt behov på 2.759 kcal. En kvinna med samma mått har 2.502 kcal. Skriv dina egna tal i verktyget för det exakta värdet." },
-      { question: "Hur många kalorier behöver jag för att gå ner 1 kg?", answer: "Det går åt cirka 7.700 kcal per kilo fett, så 1 kg kräver ett underskott på 7.700 kcal som fördelas över en vecka. Det motsvarar 500 kcal per dag." },
-      { question: "Gäller kaloribehovet även barn?", answer: "Nej. Formeln är validerad för vuxna, och barn har ett helt annat behov per kilo. Använd en tabell för barn eller fråga en barnläkare. Kalorikalkylatorn räknar bara ut vuxnas behov." },
-      { question: "Är kalorikalkylatorn gratis?", answer: "Ja. Verktyget är en gratis webbplats — du behöver inte skapa ett konto, och det fungerar direkt i webbläsaren på dator och telefon." },
-      ],
+      faqItems: kalorierFaqItems("se"),
     },
     "vaegttab": {
       slug: "vaegttab",

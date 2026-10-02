@@ -1,28 +1,27 @@
-STATUS: 3/10 22:35. CI grøn ved start (`37058537123`). PR-TJEK 2/10 19:47: ingen
-    åbne PR'er (næste tjek 4/10). Sentry: ingen uløste fejl 14 dage, og det er et
-    **rigtigt** signal (fallback-DSN, kun produktion, intet replay, ingen source
-    maps). CEO-kø punkt 0: lukket 2/10 14:48.
+STATUS: 2/10 23:31. CI grøn ved start (`37061387270`). PR-TJEK 2/10 19:47: ingen
+    åbne PR'er (næste tjek 4/10). Sentry: ingen uløste fejl 14 dage — et rigtigt
+    signal, SDK'en er sat op med fallback-DSN, kun i produktion, intet replay.
     **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` ·
-    `npm run build` — grøn 3/10 22:33 (**3844** tests i 237 filer), plus
-    `locale-leak --gate` (exit 0), `href-scan` (0) og `knapgruppe-scan` (0).
-    **Denne iteration er to ting: otte deploy-noter målt på INDHOLD, og den
-    fejl de afdækede.** Seks noter med vindue 2/10 21:30 er prøvet: **fire
-    DEPLOY OK**, én udfaset (den forventede den modsatte «mer»-retning, som
-    `c4f376d` nu har rettet), og **én halv deploy** — `beraknare.se/vaegttab`
-    har stadig **3** × «2.209» i FAQ'en, fordi halve 1 kun flyttede metadata.
-    Ny `vaegttabFaqItems(locale)` bygger alle fem svar i alle tre sprog fra
-    modulet; **21** håndskrevne talgrupper væk fra `page-data.ts` (152 → 131).
-    `page-data.test.ts` låste fejlen fast med dansk separator på alle tre sprog
-    og dømmer nu `formatBelob` + forbyder `\d\.\d{3}` for se/no. Dansk er
-    byte-uændret, låst med `toEqual`.
-    **MÅL:** `beraknare.se/vaegttab` 1.277 GSC-visninger (28/9), 0 visninger med
-    dansk tusindtalsseparator i brødtekst, FAQ og JSON-LD (målt 3/10 22:28) →
-    0 efter deploy. `minberegner.dk/vaegttab`: ingen tal ændret, så ingen
-    forventet bevægelse.
+    `npm run build` — grøn 2/10 23:29 (**3856** tests i 238 filer), plus
+    `locale-leak --gate` (exit 0).
+    **Denne iteration: `/kalorier` henter sit eksempel fra modulet.** 17 fund
+    væk fra `page-data.ts` (**131 → 114**). Syv af dem var svenske strenge med
+    dansk tusindtalsseparator — «BMR 1.780 kcal», «TDEE 2.759 kcal», «2 259»,
+    «7.700 kcal» — i `description`, `metaDescription` og to FAQ-svar, altså
+    præcis de tal Google citerer på beraknare.se (2.825 visninger). Ny
+    `src/lib/kalorier-eksempler.ts` bygger alle 19 svar i alle tre sprog fra
+    `beregnBmr`/`beregnTdee`/`kalorierForMaal` + `KALORIE_UNDERSKUD` +
+    `PROTEIN_G_PER_KG` + `VAEGTTAB_KCAL_PR_KG`. Dansk er byte-uændret (`toEqual`
+    mod de syv gamle strenge). **Porten låste fejlen fast:** `page-data.test.ts`
+    og `kalorier/page.test.tsx` krævede «1.780»/«2.502» på *alle* sprog;
+    begge dømmer nu `formatBelob` og forbyder `\d\.\d{3}` for se/no.
+    **MÅL:** `beraknare.se/kalorier` 2.825 GSC-visninger / 7 klik / 0,2 % /
+    pos. 15,4 → 0 visninger med dansk separator; `minberegner.dk/kalorier`
+    11.827 visninger, 276 besøgende/28d, ingen tal ændret.
     **Næste iteration:** (1) de to små tekstfejl nederst i ❓ («Første maj» →
-    «Första maj» og «använna» → «använda»), (2) næste punkt i F5b-køen:
-    `/kalorier` (17 fund, se 2.825 visninger), (3) de syv nye VERIFICÉR-noter fra
-    3/10 22:30 er ikke due før vinduet 3/10 21:30.
+    «Första maj», «använna» → «använda»), (2) `/moms`-slaget er ⛔ (lovgrænser),
+    så næste frie slug er `/pension` (12 fund). De syv VERIFICÉR-noter er ikke
+    due før vinduet 3/10 07:30.
 
 ## Fase 3 — trafik-drevet
 
@@ -150,6 +149,23 @@ er blokeret af en ❓ og må ikke gættes.
 Listen `src/app/regnestykker.test.ts` tæller forekomster pr. fil og må kun
 blive kortere. ✅ betyder lukket; detaljerne står i `docs/plan-arkiv.md`.
 
+**Lukket 2/10 23:29 — `kalorier-faq-tal-fra-modul`.** Se `docs/plan-arkiv.md`.
+*Målt:* **17** fund væk fra `page-data.ts` (7 da, 3 no, 7 se), listen
+**131 → 114**. `/kalorier` er sitets syvende mest besøgte side (276/28d) og
+havde **samme synlige fejl som `/vaegttab`**: svenske strenge med «1.780» /
+«2.759» / «2.259» / «7.700» i metadata **og** i to FAQ-svar, som
+`FAQSchema` læser. Ny `kalorier-eksempler.ts` bygger 19 svar i tre sprog fra
+`makroer.ts`' egne `beregnBmr`/`beregnTdee`/`kalorierForMaal` plus
+`KALORIE_UNDERSKUD`, `PROTEIN_G_PER_KG` og `VAEGTTAB_KCAL_PR_KG` (genbrugt fra
+`vaegttab-eksempler`, ikke kopieret). Proteinintervallerne læses fra
+`PROTEIN_G_PER_KG`; «0,5 kg pr. uge» og «10-15 %» er deklareret i modulet med
+begrundelse, for de er allerede rundede tal. Porten låste fejlen fast på to
+steder og er rettet begge: `page-data.test.ts` krævede «1.780»/«2.259» med
+dansk punktum for alle tre sprog, `kalorier/page.test.tsx` «2.502 kcal» og
+«TDEE 2.759 kcal vid måttlig aktivitet» — de dømmer nu `formatBelob(…, locale)`
+og forbyder `\d\.\d{3}` i hvert svensk og norsk felt. **12 nye tests**
+(3856 mod 3844); dansk låst med `toEqual` mod de syv gamle strenge.
+
 **Åben række (strenglisten):** næste fil skal måles på ny — de punkt der stod
 åbne er alle ❓-blokerede. **Fem filer er lukket 2/10**, se listen nedenfor.
 Strenglistens loft er **70 → 57**, JSX-listen **360 → 347 → 338 → 333**.
@@ -265,11 +281,14 @@ ingen regex på tal og tekst.
 
 `VERIFICÉR DEPLOY: /vaegttab FAQ tal fra modulet (svensk 2 209, ikke 2.209) ceo/vaegttab-faq-fra-modul 3/10 22:33`
 
+`VERIFICÉR DEPLOY: /kalorier eksempel fra modulet (svensk 1 780, ikke 1.780) ceo/kalorier-faq-tal-fra-modul 2/10 23:31`
+
 `VERIFICÉR DEPLOY: /leasing FAQ'ens retning + kr.. i dansk ceo/leasing-faq-retning 2/10 19:55`
 
 | Slug | Prøv på indhold |
 |---|---|
 | `vaegttab-faq-fra-modul` (**ny**, vindue 3/10 21:30) | `beraknare.se/vaegttab`: **0** `2\.209` i hele HTML'en — synlig FAQ-tekst, `FAQSchema`-JSON-LD og RSC-payloaden skal alle skrive «2 209», «1 780», «2 759», «7 700», «1 000», «1 500», «1 200» med **mellemrum**. FAQ'en skal stadig have **fem** spørgsmål, hvor «Hur många kalorier ska jag äta för att gå ner 6 kg på 12 veckor?» svarer «… förbrukar **2 759** kcal per dag (BMR **1 780** kcal × aktivitetsfaktor **1,55**) … så du behöver äta **2 209** kcal per dag.». `minberegner.dk/vaegttab`: FAQ'en skal have de **samme fem** spørgsmål **byte-uændret** med dansk punktum («2.759», «1.780», «550 kcal», «2.209»), og `0` `2 209`. **Intet** `NaN`. |
+| `kalorier-faq-tal-fra-modul` (**ny**, vindue 3/10 07:30) | `beraknare.se/kalorier`: hele HTML'en skal have **0** `\d\.\d{3}` på tal — altså **intet** «1.780» / «2.759» / «2.259» / «7.700». `<meta name="description">` skal være «Hur många kalorier behöver du per dag? Man, 80 kg, 180 cm och 30 år: BMR **1 780** kcal och TDEE **2 759** kcal vid måttlig aktivitet.», `metaDescription` «… BMR **1 780** kcal, TDEE **2 759** kcal. Beräkna BMR, TDEE och makrofördelning.», `metaTitle`/`ogTitle` uændret «Kalorikalkylator: man 80 kg, 180 cm = **2 759** kcal/dag». FAQ'en skal have de **otte** svenske spørgsmål, hvor «Hur många kalorier behöver jag?» svarer «… dagligt behov på **2 759** kcal. En kvinna med samma mått har **2 502** kcal.» og «Hur många kalorier behöver jag för att gå ner 1 kg?» svarer «… cirka **7 700** kcal per kilo fatt … underskott på **7 700** kcal …». Brødteksten skal have «2 259 kcal» og «2 759 kcal» i tabellerne (allerede sådan). **Intet** `NaN`. `minberegner.dk/kalorier`: FAQ'en skal have de **syv** danske spørgsmål **byte-uændret** med dansk punktum («1.780», «2.759», «2.259», «7.700»), og `0` `1 780`. |
 | `leasing-faq-retning` (**ny**, vindue 3/10 07:30 — måles på ny, den forrige note forventede den modsatte retning) | Som skrevet. Bemærk: **6** spørgsmål i live, ikke 7 som noten siger — `FAQPage`-JSON-LD'en er målt til 6. |
 | `dage-til-hub` (**ny**, vindue 3/10 07:30) | Som skrevet. |
 | `klokken-i-hub` (**ny**, vindue 3/10 07:30**) | `minberegner.dk/klokken-i`: `<title>` skal være «Hvad er klokken i …? Klokken i 12 lande lige nu», `<meta name="description">` skal starte med «Det er HH:MM i <første land på siden>» og slutte med «Se klokken i alle 12 lande og tidsforskellen til Danmark.». `<h1>` «Hvad er klokken i …?» **én** gang. Siden skal have **12** links til `/klokken-i/*` plus ét til `/tidszone`. Rækkerne er sorteret på \|minutter\|, så rækkefølgen skifter med sommer-/vintertid: **første** række skal være det land der ligger tættest på Danmark (0 eller 60 minutter) og **sidste** det fjerneste (Australien/New York, 8-9 timer) — mål det på de to yderste, ikke på hele rækkefølgen. `beraknare.se/klockan-i`: samme **12** links med svenske slugs (`/klockan-i/spanien` …) og **intet** dansk: hverken «Tyrkiet» eller bogstaverne æ/ø. `minberegner.dk/klockan-i` skal **301** til `/klokken-i`, og `beraknare.se/klokken-i` 301 til `/klockan-i`. Sitemap på begge domæner skal have `…/klokken-i` og `…/klockan-i` som `daily`. `minberegner.dk/tidszone` skal have teksten «klokken i tolv lande» med link til hubben, `beraknare.se/tidszone` «klockan i tolv länder». **Intet** `NaN` |

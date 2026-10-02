@@ -4,7 +4,7 @@ import { getDomainConfigByLocale } from "@/lib/domain-config";
 import { getCurrentDomainConfig, getLocale } from "@/lib/get-locale";
 import { getPageData } from "@/lib/page-data";
 import { kaloriePrAlderRaekker, kaloriePrDagRaekker } from "@/lib/makroer";
-import { formatNumber } from "@/lib/format";
+import { formatBelob, formatNumber } from "@/lib/format";
 import KalorierPage from "./page";
 
 vi.mock("@/components/KalorieBeregner", () => ({
@@ -34,13 +34,13 @@ describe("kalorier page", () => {
       locale: "da" as const,
       heading: "Kalorieberegner",
       question: "Hvor mange kalorier skal du have om dagen?",
-      tdee: "TDEE 2.759 kcal ved moderat aktivitet",
+      tdee: `TDEE ${formatBelob(2759, "da")} kcal ved moderat aktivitet`,
     },
     {
       locale: "se" as const,
       heading: "Kalorikalkylator",
       question: "Hur många kalorier behöver du per dag?",
-      tdee: "TDEE 2.759 kcal vid måttlig aktivitet",
+      tdee: `TDEE ${formatBelob(2759, "se")} kcal vid måttlig aktivitet`,
     },
   ])("viser det konkrete kaloriebehov og beregneren i $locale", async ({ locale, heading, question, tdee }) => {
     vi.mocked(getLocale).mockResolvedValue(locale);
@@ -113,12 +113,16 @@ describe("kalorier side - det svenska svaret paa kaloribehovet", () => {
     expect(html).toContain(`<td>${dec(vaegt80.mand)} kcal</td>`);
     expect(html).toContain(`<td>${dec(vaegt80.kvinde)} kcal</td>`);
     expect(html).toContain(`<td>${dec(vaegt80.tabMand)} kcal</td>`);
-    // Og de er de samme tal som den danske side og FAQ'en lover
-    expect(getPageData("kalorier", "se")!.description).toContain("TDEE 2.759 kcal");
+    // Og de er de samme tal som den danske side og FAQ'en lover — skrevet med
+    // den separator svensk bruger, ellers slaar testen paa notationen.
+    expect(getPageData("kalorier", "se")!.description).toContain(
+      `TDEE ${formatBelob(2759, "se")} kcal`,
+    );
     const behovSvar = getPageData("kalorier", "se")!.faqItems.find(
       (f) => f.question === "Hur många kalorier behöver jag?",
     )!;
-    expect(behovSvar.answer).toContain("2.502 kcal");
+    expect(behovSvar.answer).toContain(formatBelob(2502, "se"));
+    expect(behovSvar.answer).not.toMatch(/\d\.\d{3}/);
     expect(html).toContain('href="/vaegttab"');
     expect(html).toContain('href="/motion-kalorier"');
   });
@@ -165,8 +169,11 @@ describe("kalorier side - det svenska svaret paa kaloribehovet", () => {
     expect(questions).toContain("Är kalorikalkylatorn gratis?");
     // Svaret skal bruge de tal tabellen viser, ikke et andet rundet tal
     const svar = data.faqItems.find((f) => f.question === "Hur många kalorier behöver jag?")!;
-    expect(svar.answer).toContain("2.502 kcal");
-    expect(svar.answer).toContain("2.759 kcal");
+    expect(svar.answer).toContain(formatBelob(2502, "se"));
+    expect(svar.answer).toContain(formatBelob(2759, "se"));
+    // Punktum mellem to talgrupper er dansk; i svensk loebende tekst laeses
+    // «2.759 kcal» som 2,759 kcal, saa det er en fejl og ikke en variant.
+    expect(svar.answer).not.toMatch(/\d\.\d{3}/);
   });
 
   test("den danska side er urort af de svenska tabeller", async () => {

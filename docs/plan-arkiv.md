@@ -25645,3 +25645,46 @@ og er **byte-uændret**, låst med `toEqual` mod de gamle strenge.
 (1.000, 7.700, 1.500/1.200, 2.759/1.780/2.209), så den nye prøve er rød mod den
 gamle kode. `page-data`-bindingen kan heller ikke være grøn mod den, fordi
 modulens `faqItems` slet ikke fandtes.
+
+## 2/10 23:29 — `kalorier-faq-tal-fra-modul` (17 fund, 131 → 114)
+
+**Hvad.** `/kalorier`s `description`, `metaTitle`, `ogTitle`,
+`metaDescription` og alle dens FAQ-svar læser nu fra
+`src/lib/kalorier-eksempler.ts` i stedet for at have tallene indskrevet i
+sætningen.
+
+**Hvorfor.** Samme fejlklasse som `/vaegttab` halve 2 (3/10): på beraknare.se
+skrev **syv** svenske strenge «BMR 1.780 kcal», «TDEE 2.759 kcal», «2 259 kcal»
+og «7.700 kcal» med dansk tusindtalsseparator. I løbende svensk tekst læses
+«2.759» som 2,759 — og `faqItems` er præcis det `FAQSchema` læser, så det var
+også i JSON-LD'en. Svensk `/kalorier` har 2.825 GSC-visninger.
+
+**Målt.** 17 fund væk fra `page-data.ts` (7 da, 3 no, 7 se); `page-data.ts`
+131 → 114 fund med portens eget mønster. 12 nye tests, 3856 mod 3844.
+
+**Porten låste fejlen fast på to steder**, og begge er rettet:
+- `page-data.test.ts` krævede «1.780»/«2.759»/«2.259» med dansk punktum for
+  *alle tre* sprog.
+- `src/app/kalorier/page.test.tsx` krævede «2.502 kcal» og «TDEE 2.759 kcal
+  vid måttlig aktivitet» — i en test, hvis egen kommentar siger at tallene skal
+  læses gennem formatteren «ellers slaar testen paa notationen».
+Begge dømmer nu `formatBelob(…, locale)` og forbyder `\d\.\d{3}` i hvert
+svensk og norsk felt, så mutationen tilbage til dansk punktum giver rød.
+
+**Modulen.** Genbruger `VAEGTTAB_KCAL_PR_KG` fra `vaegttab-eksempler` i stedet
+for at definere 7.700 igen, og bygger resten på `makroer.ts`' egne
+`beregnBmr`/`beregnTdee`/`kalorierForMaal` plus `KALORIE_UNDERSKUD` og
+`PROTEIN_G_PER_KG`. `dagligtMaal` er `kalorierForMaal(…, "tab")`, altså det
+værktøjet selv anbefaler — ikke TDEE minus 500 håndskrevet.
+«0,5 kg pr. uge» og «10-15 %» er deklarerede konstanter med begrundelse, for
+de er allerede rundede tal (3.500 / 7.700 = 0,45).
+
+**Dansk byte-uændret** — låst med `toEqual` mod de syv gamle strenge. De tre
+danske metadatafel (`metaTitle`/`ogTitle`) låst i `page-data.test.ts` og i
+modulens egen test, så der ikke kan komme en SEO-regression på domænet med de
+fleste visninger.
+
+**Ændret i eksisterende filer:** `page-data.ts` (import + 15 fel erstattet),
+`page-data.test.ts`, `src/app/kalorier/page.test.tsx`.
+**Ikke ændret:** `KalorieBeregner.tsx` og `makroer.ts` — de tal, siden lover,
+kommer allerede derfra.
