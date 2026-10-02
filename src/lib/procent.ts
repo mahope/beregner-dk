@@ -118,6 +118,33 @@ export const PROCENTFALD_EKSEMPEL = [
 export const PROCENT_10_AF_TAL = [75, 100, 200, 300, 400, 500, 600, 1000, 1600, 2000, 10000, 25000, 1000000, 2000000, 3000000, 4000000, 5000000];
 
 /**
+ * The number both languages' FAQ answers ask "10 procent of", named.
+ *
+ * 1 600 is in {@link PROCENT_10_AF_TAL} because the table shows it, but the
+ * table is a *list* and a list cannot be addressed from a sentence: the Danish
+ * and Swedish FAQ both answer "Vad är 10 procent av 1 600?" in running text,
+ * and 2/10 those two sentences carried the amount as a hand-written literal.
+ * A list member typed twice is two numbers that can disagree, so the one the
+ * FAQ quotes is named here and the answer is computed by {@link procentAf}.
+ *
+ * Both domains ask it: Danish autocomplete (hl=da&gl=dk, 2026-09-30) answers
+ * "10 procent af" with 1 600 as completion 4 of 10, and the Swedish FAQ asks
+ * the same figure, so one constant answers both.
+ */
+export const PROCENT_10_AF_FAQ = 1600;
+
+/**
+ * The one worked example the Norwegian page quotes in its meta description:
+ * "15% av 2 500 kr = 375 kr".
+ *
+ * A meta description is what Google shows under the result, so the arithmetic
+ * in it is a claim to every visitor who searches. It was a hand-written
+ * literal until 2/10, and `procentAf(2500, 15)` is the only thing that can say
+ * whether it is still true.
+ */
+export const PROCENT_15_AV_BELOEB = { sats: 15, belob: 2500 };
+
+/**
  * A given percent of a number: (tal × procent) / 100.
  *
  * The single rule behind every example on the page — the 10 % table, the

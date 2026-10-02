@@ -24887,3 +24887,65 @@ det. Der er ingen port på den, og den føder JSON-LD. Emner for en ny port:
 build (168 sider). Punkt 13: `git diff | grep -nE '^\+.*\$[0-9]'` er tom. De to
 `ureviewede danske strenge` i `regnestykker`-loggen er de kendte falske
 positiver (`procent/page.tsx:621` og `promille/page.tsx`), ikke nye fund.
+
+---
+
+## `procent-faq-tal-fra-modul` — 2/10 18:12 (ceo/procent-faq-tal-fra-modul)
+
+**Hvorfor `/procent` først.** Den er sitets største side: **152.615** danske
+GSC-visninger (0,1 % CTR, pos 7,4) og **28.674** svenske (0,0 %, pos 9,8) —
+181.289 visninger og **94 klik**. Den svenske er den tredjeste største side på
+beraknare.se og har *dårligere* CTR end nogen anden side i hele målingen.
+
+**De tolv fund.** Egen AST-probe med portens eget `strengBelob`-mønster over
+`src/lib/page-data.ts`: 196 fund i alt, hvoraf **12** under slug'en `procent` —
+dansk 4 (Excel-svaret, procentforskel-svaret, «10 procent af 1.600»), norsk 1
+(`metaDescription`: «15% av 2.500 kr = 375 kr»), svensk 7. De er næsten alle
+**FAQ-svar**, og `FAQSchema` læser præcis `faqItems` — så de var ikke brødtekst
+de læseren kunde tjekke, men **et svar i Googles rich resultat**, som ingen port
+kunne se (`komponenterAndSider` finder kun `*.tsx`).
+
+**Rettelsen.** Tallene læses nu fra de konstanter modulet allerede bruger resten
+af siden med, så FAQ'en citerer siden i stedet for at opfinde et tal til:
+
+| Svar | Før (rå tekst) | Læses nu fra |
+|---|---|---|
+| da «Et fald fra …» | 9.000 / 7.875 / -12,5 % | `RABAT_EKSEMPEL` + `procentForskel` |
+| da «10 procent af 1.600» | 1.600 / 160 | `PROCENT_10_AF_FAQ` (**ny**) + `procentAf` |
+| no `metaDescription` | 15% / 2.500 / 375 | `PROCENT_15_AV_BELOEB` (**ny**) + `procentAf` |
+| se «Excel-andelen» | 2 500 / 10 000 / 0,25 / 25 | `EXCEL_ANDEL` |
+| se «på lön» | 33 000 / 30 000 / 3 000 / 10 | `PROCENT_SKILLNAD_EKSEMPEL[0]` |
+| se «skillnaden … två tal» | 10 000 / 12 500 / 25 / 22,2 | `PROCENT_SKILLNAD_EKSEMPEL[1]` + `procentDifferens` |
+| se «10 procent av 1 600» | 1 600 / 160 | `PROCENT_10_AF_FAQ` + `procentAf` |
+
+**Ingen synlig ændring — det er pointen.** Alle tolv svar er **byte-identiske**
+før og efter, målt ved at dumpe `getPageData("procent", locale)` for `da`/`se`/
+`no` før og efter rettelsen og sammenligne. Ren lægning: ingen titel, ingen
+beskrivelse, ingen synlig tekst rører sig, så der er ingen SEO-regression at
+måle om 14 dage senere — det er point 11 anvendt rigtigt, ikke en ændring der
+skal sælges som en vækstopgave.
+
+**Porten kan fejle, målt to gange** (i `src/lib/page-data.test.ts`, 6 nye tests):
+(1) `RABAT_EKSEMPEL.nedsatPris` 7875 → 8000 ⇒ **1 rød** af 120 i filen; (2)
+`PROCENT_10_AF_FAQ` 1600 → 1500 ⇒ **1 rød** af 120. Begge muterede filer
+genskabt byte-for-byte (`diff -q` tom). Forventningerne er *regnet* af samme
+konstanter som sætningen, så de holder i begge retninger — samme greb som den
+eksisterende rabat-FAQ-port ovenfor i filen.
+
+**Én bevidst ikke-rettelse.** Den norske `metaDescription` skriver tusindtals-
+separatoren som **punktum** («2.500 kr»), fordi hele den norske blokke gør det
+(«BMR 1.780 kcal», «TDEE 2.759 kcal» på `/kalorier`). Bokmålskonventionen er
+egentlig et mellemrum, så det er en fejl — men den vedrører hele blokken, og at
+rette den i denne commit ville give én norsk side en anden skrivemåde end de
+28 andre. Ikke gjort, og skrevet ned.
+
+**Målt undervejs (rettelser en tidligere iteration havde lavet samme dag).**
+Porten `strengBelob` gav 0 røde for de rettede `/lon-efter-skatt`-svar, fordi
+den scanner kun `.tsx` — bekræfter at `.ts`-porten stadig er det åbne arbejde.
+Den egne probe fandt desuden at **alle 196 fund lå i `page-data.ts` alene**,
+ikke fordelt i `src/lib/*.ts` som portens docblock siger; docblockens tal er
+rigtigt, dets placering ikke.
+
+**Gate grøn:** lint (689 filer), typecheck, **3758 tests / 231 filer** (+6),
+build. Punkt 13: `git diff | grep -nE '^\+.*\$[0-9]'` er tom (kun
+`${…}`-interpolation, ingen `$1`).

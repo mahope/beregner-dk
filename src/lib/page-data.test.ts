@@ -10,10 +10,15 @@ import { formatAlder } from "./alder-eksempler";
 import { formatNumber, getIntlLocale } from "./format";
 import { iDagISidensTidszone } from "./lokal-dato";
 import {
+  EXCEL_ANDEL,
+  PROCENT_10_AF_FAQ,
+  PROCENT_15_AV_BELOEB,
+  PROCENT_SKILLNAD_EKSEMPEL,
   RABAT_BELOEB,
   RABAT_EKSEMPEL,
   RABAT_SATS_UDLAET,
   procentAf,
+  procentDifferens,
   procentForskel,
   rabatProcent,
 } from "./procent";
@@ -1489,5 +1494,97 @@ describe("sidetitler bruger ikke de 17 tegn på domænenavnet", () => {
       expect(data.metaTitle, slug).toMatch(mønster);
       expect(data.metaTitle, slug).toBe(data.ogTitle);
     }
+  });
+});
+
+// ─── /procent's egne regnestykker i FAQ'en og i norsk metaDescription.
+// Samme idé som porten ovenfor: forventningerne er *regnet* af de konstanter,
+// sætningen er bygger af, så porten holder i begge retninger. Indtil 2/10 stod
+// alle tolv beløb i disse svar som rå tekst — og `FAQSchema` læser præcis
+// `faqItems`, så de var ikke bare brødtekst men et svar i Googles rich
+// resultat, som ingen port kunne se (`strengBelob` scanner kun `.tsx`).
+describe("procentens egne eksempler i FAQ og metadata", () => {
+  const svar = (locale: "da" | "se" | "no", spoergsmaal: string) => {
+    const data = getPageData("procent", locale);
+    expect(data, `procent mangler for ${locale}`).toBeDefined();
+    const fund = data!.faqItems.find((f) => f.question === spoergsmaal);
+    expect(fund, `svaret på «${spoergsmaal}» mangler i ${locale}`).toBeDefined();
+    return fund!.answer;
+  };
+
+  test("dansk: Excel- og forskelssvaret læser RABAT_EKSEMPEL og procentForskel", () => {
+    const fald = procentForskel(RABAT_EKSEMPEL.nedsatPris, RABAT_EKSEMPEL.normalPris);
+    const foer = talDa(RABAT_EKSEMPEL.normalPris);
+    const efter = talDa(RABAT_EKSEMPEL.nedsatPris);
+
+    // Begge svar skal kunne sige præcis de tal, modulet regner dem til. Skrives
+    // tallene i sætningen i hånden, og konstanten så ændres, bliver de her røde.
+    expect(svar("da", "Hvordan regner man procent i Excel?")).toContain(
+      `Et fald fra ${foer} kr til ${efter} kr er =(B1-A1)/A1*100 = ${talDa(fald, 1)} %.`,
+    );
+    expect(svar("da", "Hvordan regner man procentforskellen mellem to tal?")).toContain(
+      `Går en pris fra ${foer} kr til ${efter} kr, er faldet (${efter} - ${foer}) / ${foer} = ${talDa(fald, 1)} %.`,
+    );
+  });
+
+  test("dansk: «10 procent af 1.600» læser PROCENT_10_AF_FAQ", () => {
+    expect(svar("da", "Hvad er 10 procent af 1.600?")).toBe(
+      `10 procent af ${talDa(PROCENT_10_AF_FAQ)} er ${talDa(procentAf(PROCENT_10_AF_FAQ, 10))}, fordi du deler ${talDa(PROCENT_10_AF_FAQ)} med 10. Det er samme regel som 10 procent af 500 = 50.`,
+    );
+  });
+
+  test("norsk: metaDescriptionens 15 %-eksempel læses fra PROCENT_15_AV_BELOEB", () => {
+    const { sats, belob } = PROCENT_15_AV_BELOEB;
+    expect(getPageData("procent", "no")!.metaDescription).toContain(
+      `Eksempel: ${sats}% av ${talDa(belob)} kr = ${talDa(procentAf(belob, sats))} kr.`,
+    );
+  });
+
+  test("svensk: de tre par læser EXCEL_ANDEL og PROCENT_SKILLNAD_EKSEMPEL", () => {
+    const del = talSe(EXCEL_ANDEL.del);
+    const heltal = talSe(EXCEL_ANDEL.heltal);
+    const andel = talSe(EXCEL_ANDEL.del / EXCEL_ANDEL.heltal, 2);
+    const andelProcent = talSe((EXCEL_ANDEL.del / EXCEL_ANDEL.heltal) * 100);
+
+    expect(svar("se", "Hur räknar man ut procent i Excel?")).toContain(
+      `${del} kr av ${heltal} kr ger ${andel}, alltså ${andelProcent} procent.`,
+    );
+    expect(svar("se", "Hur räknar man ut hur stor del av en summa som är X?")).toContain(
+      `${del} kr av en nota på ${heltal} kr = ${del} / ${heltal} = ${andel} = ${andelProcent} procent.`,
+    );
+
+    const [loen, stigning] = PROCENT_SKILLNAD_EKSEMPEL;
+    expect(svar("se", "Hur räknar man ut procent på lön?")).toContain(
+      `${talSe(loen.ny)} kr mot ${talSe(loen.gammal)} kr ger ${talSe(loen.ny - loen.gammal)} / ${talSe(loen.gammal)} = ${talSe(procentForskel(loen.ny, loen.gammal))} procent.`,
+    );
+    const gennemsnit = talSe((stigning.gammal + stigning.ny) / 2);
+    const differens = talSe(procentDifferens(stigning.gammal, stigning.ny), 1);
+    expect(svar("se", "Hur räknar man ut skillnaden i procent mellan två tal?")).toContain(
+      `${talSe(stigning.gammal)} till ${talSe(stigning.ny)} ger (${talSe(stigning.ny)} - ${talSe(stigning.gammal)}) / ${talSe(stigning.gammal)} = ${talSe(procentForskel(stigning.ny, stigning.gammal))} procent.`,
+    );
+    expect(svar("se", "Hur räknar man ut skillnaden i procent mellan två tal?")).toContain(
+      `${talSe(stigning.ny - stigning.gammal)} / ${gennemsnit} = ${differens} procent för samma två tal.`,
+    );
+    expect(svar("se", "Hur räknar man ut skillnaden mellan två tal i Excel?")).toContain(
+      `${talSe(stigning.gammal)} i A1 och ${talSe(stigning.ny)} i B1 ger ${talSe(procentForskel(stigning.ny, stigning.gammal))} procent.`,
+    );
+    expect(svar("se", "Hur räknar man ut skillnaden mellan två tal i Excel?")).toContain(
+      `=ABS(A1-B1)/((A1+B1)/2)*100, som ger ${differens} procent för samma tal.`,
+    );
+  });
+
+  test("svensk: «10 procent av 1 600» læser PROCENT_10_AF_FAQ", () => {
+    expect(svar("se", "Vad är 10 procent av 1 600?")).toBe(
+      `10 procent av ${talSe(PROCENT_10_AF_FAQ)} är ${talSe(procentAf(PROCENT_10_AF_FAQ, 10))}, eftersom du delar ${talSe(PROCENT_10_AF_FAQ)} med 10. Det är samma regel som 10 procent av 500 = 50.`,
+    );
+  });
+
+  test("de tre sprog svarer hver med sit eget tegnsæt, ikke med dansk", () => {
+    // 1 600 skrives med punktum på dansk og med mellemrum på svensk. En fælles
+    // konstant uden formatering ville givet den danske skrivemåde videre til
+    // beraknare.se — fejlen i review-fundet fra 2/10, i en ny udgave.
+    expect(svar("da", "Hvad er 10 procent af 1.600?")).toContain("1.600");
+    expect(svar("se", "Vad är 10 procent av 1 600?")).toContain("1 600");
+    expect(svar("se", "Vad är 10 procent av 1 600?")).not.toContain("1.600");
   });
 });

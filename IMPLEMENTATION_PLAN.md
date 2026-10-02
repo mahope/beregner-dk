@@ -1,26 +1,27 @@
-STATUS: 2/10 15:12. CI grøn ved start. PR-TJEK 2/10: ingen åbne PR'er.
-   BRANCH-TJEK 2/10: ingen branches ≥14 dage. Sentry: begge fejl lukket.
-   CEO-kø punkt 0 verificeret lukket 2/10 14:48 (alle otte punkter grebet efter
-   i koden: Valborg 30. april, svensk påskafton lørdag, dansk sankthans fast
-   23./24. juni uden «fri med løn», ingen dansk påskeaften-FAQ, huslejen pristal
-   følger nettoprisindekset, `toUtcMidnight` i Europe/Copenhagen, svensk
-   promillegrænse fra `PROMILLEGRANSE`, `maneder: 12` + 1. advent).
-   Review-fund 2/10 15:10 rettet (`0b841f2`).
+STATUS: 2/10 18:15. CI grøn ved start (seneste kørsel `37025234613`). PR-TJEK
+   2/10 15:12 og 17:30: ingen åbne PR'er. Sentry: ingen opgave med reel
+   effekt — MINBEREGNER-2 (`useLocale must be used within a LocaleProvider`,
+   `POST /`) var **allerede rettet** i `def070c` 09:26, før hændelsen 02:24,
+   altså lukket af en tidligere iteration. MINBEREGNER-1 (router state header,
+   `GET /barselsdagpenge`) er 15 hændelser / **0 brugere** = bot-trafik, ikke
+   en fejl nogen har set. CEO-kø punkt 0: verificeret lukket 2/10 14:48.
+   Review-fund 2/10 15:10: rettet (`0b841f2`).
    **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` ·
-   `npm run build` — grøn 2/10 15:10 (**3752** tests i 231 filer, **+11**).
-   **Denne iteration:** `/lon-efter-skatt` skrev grundavdragets spænd,
-   skiktgrænsen, brytpunkten og jobbskatteavdragets maksimum i hånden i både
-   brødteksten og FAQ'en. De læses nu fra `SVENSK_SKATT_TAL`, som er **udledt ved
-   at kalde `beregnGrundavdrag`/`beregnJobbskatteavdrag`** — tal til satsændringen
-   kan ikke længere stå i teksten. JSX-listen 338 → 333, filen låst på 0.
-   **Én reel fejl rettet:** brødteksten sagde «kan det skilja flera hundra kronor
-   i månaden» — kommunalskatt går ind i jobbskatteavdraget, så forskellen er
-   6,0 procentpoint **1 277 kr.** pr. måned ved 35 000 kr. Nu skrevet fra
-   `kommunalskattSkillnadPerManad`.
-   **Målt undervejs:** beløbs-porten scanner kun `*.tsx`, så `page-data.ts`
-   ligger uden for den — de fire rettede FAQ-svar gav 0 røde, kun
-   `lon-efter-skatt/page.tsx` faldt 5 → 0.
-   **Næste iteration:** nye opgaver nederst. Se ❓ `.ts` i porten.
+   `npm run build` — grøn 2/10 18:12 (**3758** tests i 231 filer, **+6**).
+   **Denne iteration:** `/procent`s tolv FAQ-beløb (da 4, no 1, se 7) lå som
+   rå tekst, og `FAQSchema` læser præcis `faqItems` — altså synlige for
+   Google. De læses nu fra de konstanter modulet allerede bruger resten af
+   siden med (`RABAT_EKSEMPEL`, `EXCEL_ANDEL`, `PROCENT_SKILLNAD_EKSEMPEL`).
+   `page-data.ts` 196 → **186** fund, `/procent` på **0**.
+   **Målt:** alle tolv svar er **byte-identiske** før/efter (dump fra
+   `getPageData` i da/se/no), så det er en ren lægningsopgave uden
+   SEO-regression. Porten i `page-data.test.ts` fanges mod to mutationer
+   (`RABAT_EKSEMPEL.nedsatPris` 7875→8000, `PROCENT_10_AF_FAQ` 1600→1500).
+   **Fase 3's tekniske check gjort:** `/procent` `/moms` `/dato`
+   `/tidsberegner` har alle korrekt `canonical`, `hreflang` (da/se/x-default)
+   og title; sitemap har 158 unikke URL, 0 dubletter, 0 trailing-slash. Der er
+   altså ingen titel-/teknik-fejl tilbage — kun positionen, som planen siger.
+   **Næste iteration:** `.ts`-beløbs-køen nederst, `/renteberegner` først.
 
 ## Fase 3 — trafik-drevet
 
@@ -124,23 +125,37 @@ Listen `src/app/regnestykker.test.ts` tæller forekomster pr. fil og må kun
 blive kortere. ✅ betyder lukket; detaljerne står i `docs/plan-arkiv.md`.
 
 **Åben række (strenglisten):** næste fil skal måles på ny — de punkt der stod
-åbne er alle ❓-blokerede. **To filer er lukket 2/10:** SU
-(`su-indlaeg-belob-fra-modul`), arveafgift (`arveafgift-belob-fra-modul`) og
-`/boligsalg` (`boligsalg-belob-fra-modul`) — alle i `docs/plan-arkiv.md`.
-Strenglistens loft er **70 → 57**, JSX-listen **360 → 347 → 338**.
-
-**Lukket:** `/boligsalg` — 9 fund, alle otte redaktionelle prisintervaller
-(mægler, tinglysning, avance, energimærke …) lå uden for den beregning læseren
-kan se, med en kildeangivelse («Boligejer.dk, opdateret august 2025») der var et
-år gammel på en side der siger 2026. Nu læses de fra `DEFAULT_VALUES` +
-tinglysningens konstanter; hjemme-staging-prisen er væk, fordi den post ikke
-findes i beregneren.
+åbne er alle ❓-blokerede. **Fire filer er lukket 2/10:** SU
+(`su-indlaeg-belob-fra-modul`), arveafgift (`arveafgift-belob-fra-modul`),
+`/boligsalg` (`boligsalg-belob-fra-modul`) og `/procent`
+(`procent-faq-tal-fra-modul`) — alle i `docs/plan-arkiv.md`. Strenglistens
+loft er **70 → 57**, JSX-listen **360 → 347 → 338 → 333**.
 
 **Ny målt fejlklasse — `page-data.ts` ligger uden for begge beløbs-porte.**
 `strengBelob`/`jsxBelob` måler kun `.tsx`, så de usourcede intervaller i
 `/boligsalg`s `faqItems` blev **publiceret som JSON-LD** (`FAQSchema` læser
 præcis `faqItems`). Det er den samme fejl som JSX-teksten, bare usynlig for
-porten. Svaret for den er gjort: de tre beløbssvar har ingen tal tilbage.
+porten.
+
+**Åben: beløbs-porten scanner kun `*.tsx`.** *Accept:* `strengBelob` kører på
+`src/lib/*.ts` også, og listen opdateres i samme commit.
+
+**Målt 2/10 18:12 (egen AST-probe, samme mønster som portens `strengBelob`):**
+**alle 196 fund lå i `page-data.ts` alene** — ikke fordelt i `src/lib/*.ts`
+som portens docblock siger. Efter `/procent` er de **186**. Det er næsten
+alle **FAQ-svar**, altså JSON-LD Google har. Køen pr. slug:
+`vaegttab` 24 · `renteberegner` 22 · `kalorier` 17 · `moms` 15 · `pension` 12 ·
+`leasing` 9 · `rentefradrag` 7 · `kvadratmeter` 6 · `konfirmation` 6 ·
+`efterloen` 5 · `aktieskat` 5 · `loen-efter-skat` 4 · `topskat` 4 ·
+`boernepenge` 4 · resten ≤3. **Anbefalet rækkefølge:** `/renteberegner`
+(svensk 3.123 visninger) → `/moms` (men ⛔ de 3 lovgrænser) → `/kvadratmeter`
+(3.705) → `/leasing` (2.923) → `/vaegttab` (1.277). *Accept pr. slice:* ét
+slug pr. opgave, 12 fund eller færre, de læses fra sit eget modul, og en
+mutation i porten. **Hvis porten udvides til `.ts` med det samme, bliver
+listen 186 lang og de 186 tal bliver en tilladelsesliste** — det er
+måske nok det, men en tilladelsesliste over fejl er dyrere end porten er
+bred. Derfor: fix slugs først, portudvidelsen som sidste skridt når de er
+nede mod 0.
 
 **Åben:** `/moms` har 3 fund tilbage, som er lovgrænser (dansk registrering over
 50.000 kr, svensk over 120.000 kr, told ved import over 1.150 kr). ❓ nedenfor.
@@ -152,15 +167,6 @@ afsnit) — ❓ kilde til norske timepriser låser både brødteksten og tabelle
 indlæg er ikke samme fejlklasse som et beløb på en beregnerside. Beslut først,
 om de skal med; ellers skal de stå i portens undtagelsesliste som *blog*.
 
-**Åben: beløbs-porten scanner kun `*.tsx`.** Målt 2/10 15:10: `page-data.ts`
-gav 0 røde for de fire FAQ-svar, der blev læst fra `svensk-skatt`, fordi
-`komponenterAndSider` kun finder `*.tsx`. *Accept:* `strengBelob` kører på
-`src/lib/*.ts` også, og listen opdateres i samme commit. **Målt omfang:** egne
-probe over `src/app` + `src/lib` = **231** fund i strenge, hvoraf `page-data.ts`
-alene står for 196 — så det er en opgave, ikke en linje. Bemærk at `.ts`-fundene
-er FAQ-svar, der bliver publiceret som JSON-LD (`FAQSchema` læser `faqItems`), så
-de er synlige for Google.
-
 ## Åbne VERIFICÉR DEPLOY-noter
 
 Batch-deployeren kører 07:30/12:30/17:30/21:30. Prøverne er på **indhold**,
@@ -171,7 +177,8 @@ ingen regex på tal og tekst.
 
 | Slug | Prøv på indhold |
 |---|---|
-| `lon-efter-skat-en-kilde` (**ny**, vindue 2/10 17:30) | `beraknare.se/lon-efter-skatt` og `minberegner.dk/lon-efter-skatt`: brødteksten skal sige **«mellan cirka 17 400 och 45 600 kr per år 2026»**, **«prisbasbeloppet 59 200 kr»**, **«Snittet i Sverige 2026 är 32,38 %»**, **«skiktgränsen 643 000 kr 2026»**, **«brytpunkt cirka 660 400 kr i bruttolön»**, **«upp till cirka 4 400 kr per månad»**, **«högst 1 184 kr per år»** og **«Allmän pensionsavgift (7 %)»**. Den nye sætning skal være **«På en månadslön på 35 000 kr blir skillnaden 1 277 kr i nettolön per månad»**. **Intet** «flera hundra kronor». FAQ'en skal have **fem** spørgsmål, hvor intet svar afviger fra de samme tal. `minberegner.dk/lon-efter-skatt` er dansk med svensk fallback — de svenske domæner er de to ovenfor |
+| `procent-faq-tal-fra-modul` (**ny**, vindue 2/10 21:30) | `minberegner.dk/procent`: FAQ'en skal have de to svar «Skriv =A1/B1\*100 … Et fald fra **9.000** kr til **7.875** kr er =(B1-A1)/A1\*100 = **-12,5 %**.» og «Går en pris fra **9.000** kr til **7.875** kr, er faldet (7.875 - 9.000) / 9.000 = **-12,5 %**.», plus «10 procent af **1.600** er **160**». `beraknare.se/procent`: «**2 500** kr av **10 000** kr ger **0,25**, alltså **25** procent», «**2 500** / **10 000** = **0,25** = **25** procent», «**33 000** kr mot **30 000** kr ger **3 000** / 30 000 = **10** procent», «**10 000** till **12 500** ger … = **25** procent … **2 500** / **11 250** = **22,2** procent», «**10 000** i A1 och **12 500** i B1 ger **25** procent … **22,2** procent», «10 procent av **1 600** är **160**». **Hele teksten skal være byte-uændret** — det er pointen ved opgaven. **Intet** `1.600` på beraknare.se og intet `1 600` på minberegner.dk |
+| `lon-efter-skat-en-kilde` (**åben**, vindue 2/10 17:30) | `beraknare.se/lon-efter-skatt` og `minberegner.dk/lon-efter-skatt`: brødteksten skal sige **«mellan cirka 17 400 och 45 600 kr per år 2026»**, **«prisbasbeloppet 59 200 kr»**, **«Snittet i Sverige 2026 är 32,38 %»**, **«skiktgränsen 643 000 kr 2026»**, **«brytpunkt cirka 660 400 kr i bruttolön»**, **«upp till cirka 4 400 kr per månad»**, **«högst 1 184 kr per år»** og **«Allmän pensionsavgift (7 %)»**. Den nye sætning skal være **«På en månadslön på 35 000 kr blir skillnaden 1 277 kr i nettolön per månad»**. **Intet** «flera hundra kronor». FAQ'en skal have **fem** spørgsmål, hvor intet svar afviger fra de samme tal. `minberegner.dk/lon-efter-skatt` er dansk med svensk fallback — de svenske domæner er de to ovenfor |
 | `boligsalg-belob-fra-modul` (**ny**, vindue 2/10 17:30) | `minberegner.dk/boligsalg`: introen skal sige **«195.105»**, **«2.804.895»**, **«Ejendomsmægler med 120.000»** og **«77 % af omkostningerne»**; listen skal sige **«7.500»**, **«6.500»**, **«4.000»**, **«4.000»** og **«20.000»**. Kilder-afsnittet skal have **«0,6 % af købesummen plus 1.850»** og **«1,45 % af 80 % af vurderingssummen plus 1.825»** og overskriften «Kilder og forbehold». FAQ'en skal have **fire** spørgsmål, hvor **intet** svar indeholder et beløb. **Intet** «150.000-250.000», «3-6%», «25.000-60.000», «6.900-8.700», «5.000-15.000», «Boligejer.dk» eller «august 2025» i hele HTML'en. **Intet** «NaN» nogen steder. `beraknare.se/boligsalg`: **intet** dansk beløb i JSON-LD'en (den har ingen `se`-data, så FAQ'en er dansk — det er en kendt, separat fejl) |
 | `norsk-pace-side` (**ny**, vindue 2/10 17:30) | **De norske rettelser er ikke live og kan ikke være det:** `beregner.no` serverer et andet site (❓ 2/10 14:15). Prøven er derfor at de to **live** domæner er uændrede. `minberegner.dk/pace`: FAQ'en skal have **ni** spørgsmål, «Hvor lang tid tager et Ironman?» skal svare «… 1:00:00 + 5:00:00 + 3:30:00 = 9:30:00 i alt …», og beregneren skal vise «**Holdtider pr. kilometer**» (dansk label). **Intet** «Deltider pr. kilometer» og intet «Løpetidsberegner - beregn fart» på den danske side. `beraknare.se/pace`: skal vise «**Deltider per kilometer**» (svensk label) og de samme ni spørgsmål, **intet** «Deltider pr. kilometer» (norsk) |
 | `arveafgift-belob-fra-modul` (**ny**, vindue 2/10 17:30) | `minberegner.dk/blog/arveafgift-regler-og-satser`: `<title>` byte-uændret «Arveafgift 2026: 1 mio. kr. til børn koster 91.155 kr.» og `<meta name="description">«Arveafgift (boafgift) 2026: Et barn arver 1 mio. kr. og betaler 91.155 kr. Se bundfradrag på 392.300 kr, 15 % for nære arvinger og 36,25 % for søskende.»», `og:description` «Arveafgift 2026: 91.155 kr for et barn der arver 1 mio. kr. Bundfradrag, satser og to regneeksempler.» — **intet** dobbelt punktum. Sats-tabellen skal have **«36,25%»** i to celler, «Kort svar» **«36,25 %»**, og **intet** «36.25» i hele HTML'en. Begge regnestykker byte-uændrede: `1.107.700 / 166.155 / 1.333.845 / 666.923` og `407.700 / 61.155 / 738.845 / 184.711 / 245.866 / 554.134`. FAQ'en skal have **fire** spørgsmål, hvor «Hvad koster arveafgiften, hvis et barn arver 1.000.000 kr?» svarer «… afgiftsgrundlaget er 607.700 kr … modtager 908.845 kr.». Gavegrænserne (74.100 / 26.600 kr) er bevaret med vilje |
