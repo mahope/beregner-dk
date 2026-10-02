@@ -46,6 +46,10 @@ A deploy is not done until it is verified on production.
 Tests live as `*.test.ts` files in `src/lib/` and run with vitest (`jsdom`, `@testing-library/react`).
 
 - Run `npm run test` before pushing. It must pass.
+- Run the **whole** suite, never a single test file, as proof that a fix works. A
+  lone file can be green while the suite is red (port tests have shipped green
+  next to a TDZ failure elsewhere). A single file is fine for a fast feedback
+  loop while writing, not as the final check.
 - Add or update tests when changing logic in `src/lib/`.
 
 ## Language

@@ -17,3 +17,4 @@ build/
 # TypeScript incremental build cache
 tsconfig.tsbuildinfo
 tsconfig.test.tsbuildinfo
+tsconfig.app.tsbuildinfo

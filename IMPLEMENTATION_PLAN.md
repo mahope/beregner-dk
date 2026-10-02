@@ -3,20 +3,25 @@ STATUS: 2/10 03:40. Rød CI: ingen (seneste kørsel grøn 2/10 01:03Z). Sentry:
   5f137d4 — ingen ny hændelsesgruppe siden sidste iteration. PR-TJEK: 2026-10-02
   — ingen åbne PR'er. BRANCH-TJEK: ikke kørt. CEO-kø punkt 0 er lukket i de otte
   punkter. Fase 3's flaskehals er CTR; første nye feature (`/pace`) er landet.
-  **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` ·
+**Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` ·
   `npm run build`. Målt 2/10 03:36: 0 · 0 · **3577 grønne i 219 filer** ·
   0 (`/tidsberegner` er `ƒ` = dynamisk).
-  **Denne iteration: åbent review-fund fra 2/10 lukket — `/tidsberegner`
-  modsagde sig selv om halvmarathon.** `ceo/tidsberegner-halvmaraton-tempo`.
-  Tabellen siger 4:59 (regnet), den danske brødtekst sagde 4:58 (håndskrevet),
-  den svenske 4:59 — samme regnestykke, to svar, to domæner, 74.546 visninger.
-  Rettelse: begge sprog læser `TEMPO_HALV`, fundet i præcis den række tabellen
-  renderer, så de to ikke kan glide fra hinanden. Ny port dømmer på renderet
-  afsnitstekst — den gamle dømmede på FAQ'en og var blind for brødteksten.
-  Detaljer, målinger og mutationer: sektionen nedenfor og commit-bodens body.
-  ⚠️ **Åbne VERIFICÉR-noter: 15**, alle med vindue **2/10 07:30**.
+  **`typecheck` er fra 2/10 04:05 to programmer**: `tsconfig.app.json` (hele
+  `src/**` + `next.config.ts` + `vitest.config.ts`, minus testfiler) og så
+  `tsconfig.test.json`. Målt 2/10 04:05: 0 · 0 · 3577 · 0.
+  **Denne iteration: gaten så ikke hele koden — de to huller er lukket.**
+  `ceo/typecheck-dækker-hele-src`. `npm run typecheck` kørte kun
+  `tsconfig.test.json`, hvis `include` er testfilerne og deres import-kæde, så
+  en **forkert import i en fil uden test** var usynlig: målt ved at rette
+  `@/lib/page-data` → `@/lib/page-data-TAST` i `src/app/aegloesning/page.tsx`,
+  hvor det gamle program svarede **exit 0** og det nye **exit 2** med præcis den
+  fejl. Det er samme fejlklasse som `satsTilPermille`. Derudover en note i
+  CLAUDE.md om aldrig at bruge én portfil som bevis.
+  ⚠️ **Åbne VERIFICÉR-noter: 18**, alle med vindue **2/10 07:30**. (Tallet var
+  15 i sidste STATUS; målt med `grep -c '^- ⏳'` = 18. Ikke en ny fejl — bare
+  nogle der aldrig blev talt med.)
 
-## Review-fund 2/10 — lukket ✅ (MIDDEL, `ceo/tidsberegner-halvmaraton-tempo`)
+## Review-fund 2/10 — lukket ✅ (MIDDEL, `ceo/tidsberegner-halvmarathon-tempo`)
 
   `/tidsberegner` skrev 4:59 i tabellen og 4:58 i brødteksten på samme side.
   Rettet ved at læse fra tabellens egen række; ny port dømmer på renderet
@@ -67,16 +72,14 @@ for den side falder, og regnestykkerne er verificeret af `regnestykker-porten`.
 - **`/bil`** (16), **`/billaan`** (24), **`/opsparing`** (10), **`/boligsalg`**
   (9), **`/topskat`** (8) — ingen GSC-visning i top-15, så laveste prioritet;
   `/bil` er desuden faldet 46 → 21 besøgende.
-- **To huller i gaten selv (ny, 2/10 — fund under diff-review).**
+- **To huller i gaten selv — ✅ 2/10 (`ceo/typecheck-dækker-hele-src`).**
   (a) `tsconfig.test.json` medtager kun testfiler og deres import-kæde, så en
-  **forkert import i en ikke-testfil** er usynlig for `typecheck` — kun
-  `next build` fangede `satsTilPermille`. *Accept:* typecheck-programmet
-  medtager `src/**` (minus `*.test.ts` er nødvendigt for at undgå dobbelt),
-  eller en ny `tsconfig.app.json` i samme gate.
-  (b) **Kør port-tests isoleret aldrig som bevis.** En enkelt fil var grøn,
-  mens hele suiten var rød (TDZ-fejl). *Accept:* en note i CLAUDE.md eller en
-  `pretest`-regel, og sidste iteration skal have kørt hele suiten efter sidste
-  ændring — hvilket den gjorde.
+  **forkert import i en ikke-testfil** var usynlig for `typecheck` — kun
+  `next build` fangede `satsTilPermille`. Løst med et nyt `tsconfig.app.json`
+  i samme gate. *Accept opfyldt:* målt med mutationen på `aegloesning/page.tsx`
+  — gammelt program exit 0, nyt exit 2.
+  (b) Port-tests isoleret som bevis — lukket med en note i CLAUDE.md's
+  Test-sektion og med hele suiten kørt efter sidste ændring.
 - **Beløb i strengliteraler: målt 2/10 (ny).** Scanneren fandt **531**
   forekomster på tværs af `.ts`/`.tsx`; uden for `page.tsx`, komponenter og test
   ligger de fire i `home-data.ts`, to i `categories.ts` og **16 i
@@ -280,6 +283,15 @@ Prioriteret efter forventet effekt på **trafik**. Datagrund fra GSC 1/10
   ikke gættes tal.
 
 ## Åbne VERIFICÉR DEPLOY-noter
+
+- ⏳ **`typecheck` ser hele `src/`, ikke kun testernes import-kæde.**
+  `ceo/typecheck-dækker-hele-src`. **Ingen produktionsændring** — kun
+  `tsconfig.app.json`, `package.json`, `.gitignore` og CLAUDE.md — så prøven er
+  lokal: `npm run typecheck` skal være grøn, og med mutationen
+  `@/lib/page-data` → `@/lib/page-data-TAST` i `src/app/aegloesning/page.tsx`
+  skal **app-programmet svare exit 2** med `TS2307` mens det gamle
+  test-program svarede exit 0. Målt 2/10 04:05. Deploy-vinduet 2/10 07:30 er
+  uden betydning for denne note; de nedenfor er dem, der skal efterprøves.
 
 - ⏳ **`/tidsberegner` skal give ét svar på halvmarathon, på begge domæner.**
   `ceo/tidsberegner-halvmaraton-tempo`. Prøven er på indhold: `curl -s
