@@ -31,7 +31,7 @@ import {
 import { markedsprisFaqSvar } from "./timepris-markedspriser";
 import { timerIPeriodeFaqSvar } from "./timer-periode";
 import { ugeDatoerFaqSvar } from "./ugenummer";
-import { distanceEksempelFaqSvar } from "./pace";
+import { distanceEksempelFaqSvar, triatlonCykelAndelFaqSvar, triatlonTotalFaqSvar } from "./pace";
 import { alderSideTekst, erstatAlderTokens } from "./alder-side-tekst";
 import { iDagPaSiden } from "./lokal-dato";
 import { getHelligdage, helligdagsnavne } from "./helligdage";
@@ -1082,6 +1082,8 @@ const daPages: Record<string, PageData> = {
       { question: "Hvad er et godt tempo på 10 km?", answer: distanceEksempelFaqSvar("tiaaenkilometer", "da") + " Hvad der er godt for dig, afhænger af din træning og din målsætning." },
       { question: "Hvad er holdtider, og hvorfor summerer de ikke helt?", answer: "Holdtider er den tid hver kilometer tager. Værktøjet lægger afrundingen i den sidste kilometer, så holdtiderne summerer til præcis den løbetid, du har indtastet." },
       { question: "Kan jeg bruge værktøjet til cykling og triatlon?", answer: "Ja. Værktøjet regner i minutter pr. kilometer, så samme tempo kan bruges til løb, cykling, kajak og rulletræning." },
+      { question: "Hvor lang tid tager et Ironman?", answer: triatlonTotalFaqSvar("da") },
+      { question: "Hvor stor en del af et Ironman er cyklen?", answer: triatlonCykelAndelFaqSvar("da") },
       ],
     },
     "tidsberegner": {
@@ -3657,6 +3659,8 @@ const sePages: Record<string, PageData> = {
       { question: "Vad är ett bra tempo för en marathon?", answer: distanceEksempelFaqSvar("maraton", "se") + " Vad som är bra för dig beror på din träning och ditt mål." },
       { question: "Vad är ett bra tempo för en halvmaraton?", answer: distanceEksempelFaqSvar("halvmaraton", "se") + " Vad som är bra för dig beror på din träning och ditt mål." },
       { question: "Vad är ett bra tempo på 10 km?", answer: distanceEksempelFaqSvar("tiaaenkilometer", "se") + " Vad som är bra för dig beror på din träning och ditt mål." },
+      { question: "Hur lång tid tar ett Ironman?", answer: triatlonTotalFaqSvar("se") },
+      { question: "Hur stor del av ett Ironman är cykelbenet?", answer: triatlonCykelAndelFaqSvar("se") },
       ],
     },
     "tidsberegner": {

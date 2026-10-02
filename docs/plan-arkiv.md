@@ -24542,3 +24542,138 @@ kortklasse som de tre resultatkort ovenfor, `aria-label` på listen, `text-xs`/
 `text-sm`. **Ikke efterprøvet i en browser** — repoet har ingen Playwright (❓
 allerede noteret), så 390/1280 px er ikke målt; grid med to kolonner på mobil er
 dog valgt netop for det.
+
+---
+
+## Afsnit flyttet fra planen 2/10 14:20 (planen var over 40 KB)
+
+### Leverede features i Feature-kø (✅ → arkiv)
+
+- **Procentpoint + procentfald på `/procent`** — 1/10 `ceo/procentpoint-vaerktoej`,
+  2/10 `ceo/procent-fald`. Formel, Excel-formel, faldtabel, besparelse i kroner,
+  da+se. *Datagrund:* autocomplete 1/10 + 2/10 + `/procent` 152.615 visninger /
+  0,1 % / pos 7,4 (da), se 28.674 / 0,0 % / 9,8. **MÅL:** `/procent` 151.005 /
+  92 / 0,1 % / 7,4 (da) · 27.778 / 2 / 0,0 % / 9,9 (se). Genmål 15/10 og 16/10.
+- **Renteprognose** — 1/10, `ceo/renteprognose` (renteomlægning, afdragsform,
+  rentesvingning). «renteprognose» 10 af 10 danske completions under ordet selv.
+  **MÅL:** ny side, ingen baseline. Genmål 15/10. *Næste skridt:* de samme
+  completions peger på banknavnene; overvej en tilføjelse der viser forskellen på
+  3-årig og 5-årig.
+- **Pace/lap-beregner til løb** — 2/10, `ceo/pace-tidsberegner`. Tempo fra
+  løbetid **og** løbetid fra tempo, holdtider der summerer, tests, da+se side og
+  interne links. **MÅL:** `/tidsberegner` 290 besøgende/28d, bounce 8 %, GSC
+  74.546/203/0,3 %/6,9. Genmål 16/10. Efterfølger: `ceo/pace-marathon-faq`
+  (marathon-, 10 km- og halvmarathonspørgsmål i begge sprog, beregnet af
+  `beregnPace`, otte distancetermer i `keywords`).
+- **«Hvad er klokken i …»-clusteret** — 2/10, `ceo/klokken-i-land`.
+  `/klokken-i/<land>` + `/klockan-i/<land>` med 12 lande, USA's fire tidszoner som
+  egne rækker, tidsforskel regnet fra kalenderen, 15 tests, `daily` i begge
+  sitemap. *Datagrund:* 10 af 10 danske completioner under «hvad er klokken i» +
+  `/tidszone` 24.358 visninger / 0,4 % / pos 7,6. **MÅL:** `/tidszone` 24.324 /
+  104 / 0,4 % / 7,5 er gruppen den skal flytte. Genmål 16/10. Efterfølger:
+  `ceo/tidszone-links-til-lande` (alle 12 links i begge sprog på `/tidszone`) og
+  blogindlægget der linker til `/klokken-i/usa`. Tre valg lå i koden: ingen
+  `/klokken-i/danmark`, ingen `/klokken-i/new-york` (byen er en række på
+  USA-siden), og `force-dynamic` på begge ruter.
+- **Dagpenge-sats efter skat på `/dagpenge`** — 2/10, `ceo/dagpenge-efter-skat`.
+  Beløb efter skat for alle syv satser + 3 FAQ, læst fra ét modul. *Datagrund:*
+  «dagpenge nyuddannet» 10 af 10 danske completions; «dagpenge sats 2026 efter
+  skat» nr. 2 under «dagpenge sats 2026». `/dagpenge` har ingen GSC-top-15-plads,
+  så trafikken måles ved næste Plausible-snapshot.
+- **Timer pr. periode på `/tidsberegner`** — 2/10, `ceo/timer-periode`. Fem
+  perioder (døgn, uge, måned, kvartal, år) med dage, timer, minutter og
+  sekunder i begge sprog, måned og kvartal som snit af 365 dage, skudåret nævnt,
+  to nye FAQ-spørgsmål pr. sprog, 8 nye enhedstests + 1 renderport. *Datagrund:*
+  autocomplete 2/10 (»hvor mange timer« nr. 1, »timer i en uge« nr. 1) + GSC
+  75.622/194/0,3 %/6,8. **MÅL:** `/tidsberegner` 291 besøgende/28d, bounce 8 %;
+  GSC 75.622/194/0,3 %/6,8. Genmål 16/10. *Næste skridt:* samme spørgsmål i
+  beraknare.se-versionen; `/tid` har ingen `/timer-i-…`-rute.
+- **Ugens syv datoer på `/ugenummer`** — 2/10, `ceo/ugenummer-uge-datoer`.
+  «datoer i uge 42» er 5. af 10 danske completioner under «dato» (2/10 13:20).
+  De syv datoer vises for den valgte uge, ét FAQ-svar bygget af samme funktion,
+  «datoer i uge» i `keywords`. **MÅL:** `/ugenummer` har hverken GSC- top-15-plads
+  eller Plausible-top-15 — baseline er ikke kendt. Genmål 16/10.
+- **Emoji ud, rigtige ikoner ind** — ✅ ALLEREDE FÆRDIG, lukket 2/10. Målt med
+  `rg --pcre2 '[\p{Extended_Pictographic}]' src/`: 13 filer, 4 forekomster i alt,
+  alle i test- og konfigurationsfiler. `home-data.ts`, `navigation.ts`,
+  `categories.ts` og `calculator-list.ts` har 0. **Den gamle plantekst sagde
+  «~154 emoji i home-data.ts» — det er ikke længere sandt.**
+
+### VERIFICÉR-noter der er lukket (→ arkiv)
+
+Kommandoerne står under hvert slug længere oppe i arkivet.
+
+| Slug | Resultat |
+|---|---|
+| `dagpenge-efter-skat` | **DEPLOY OK 2/10 12:47** |
+| `blog-indlaeg-belob-fra-modul` | **DEPLOY OK 2/10 12:47** |
+| `pace-marathon-faq` | **DEPLOY OK 2/10 12:47** |
+| `tidsberegner-faq-fra-modul` | **DEPLOY OK 2/10 12:47** |
+| `timepris-lokale-tal` | **DEPLOY OK 2/10 12:47** |
+| `timepris-markedspriser` | **DEPLOY OK 2/10 12:47** |
+| `timer-periode` | **DEPLOY OK 2/10 12:47** |
+| `error-side-locale` / `fejlside-locale` | Kodetestet (`error.test.tsx` 3 tests). `api/health` svarer `status: ok` 2/10. |
+| `dagpenge-no-sprog` | **Kan ikke måles på beregnerno** — se ❓ «den norske udgave er ikke deployet nogen steder» 2/10 14:20. |
+
+### ❓ der er flyttet til arkiv (kortform)
+
+- **Kilde til svenske og norske frilanstimepriser.** Ét skærmbillede af et
+  markedstal for de tre lande låser `/timepris` pr. `Locale` og den manglende
+  norske brødtekst.
+- **Ser du events fra minberegner.dk i Sentry?** Transporten er bevist
+  (`sentry-send.test.ts`), men ikke at *dit* projekt modtager.
+- **Vægtafgift for elbiler i Danmark 2026.** `/bil` skrev «Elbil: 0 kr (til
+  2026)» og «Afgifter kommer (2026+)»; tallet ligger nu i `bil-omkostninger.ts`
+  som `DRIFT.da.vaegt.el`. Samme spørgsmål for Sveriges fordonsskatt (siden sagde
+  360 kr, beregneren 0).
+- **Momslovgrænserne på `/moms`.** Dansk registrering «over 50.000 kr», svensk
+  «högst 120 000 kr per år» og «eventuel told ved import over 1.150 kr» (en
+  EUR-grænse, der ikke må stå som fast dansk beløb).
+- **Fitnessfradrag og sommerhusudlejningsfradrag.** De to sidste af
+  «fradrag 2026»-klyngen; `dagpenge.dk`, `star.dk` og `skat.dk` har ikke svaret.
+- **Kilde til madvaretabellen** (`/kalorier`, opgave 119, `BLOCKED`). `sst.dk`
+  svarer 429.
+- **17,7 ‰ som højeste grundskyldspromille.** Varde står ikke i modulets
+  kommune-liste, så tallet er håndskrevet.
+- **Cloudflare-cache på trods af Next's `Vary: RSC`.** 280-433 ms TTFB på alle
+  600.000 månedlige visninger; `s-maxage` på HTML'en bryder Next's egen
+  rute-navigation, så løsningen er en Worker, altså din infra.
+- **`AFHAENGIGHEDER.md`'s række for `beregner-dk` er delvis forældet.**
+  Sikkerhedsdelen er lukket (C197, `npm audit` 1 høj → 0) og runtime-kravet er
+  erklæret (`engines.node ">=22 <23"`, `.nvmrc` 22, `Dockerfile` node:22-alpine).
+- **Fulde browsermålinger kræver Playwright** — repoet har ingen, og
+  `CLAUDE.md` forbyder nye afhængigheder uden Mads' ja.
+
+### Autocomplete-klynger, der er målt lukket (2/10 13:20)
+
+28 seeds + 10 nye målt på `suggestqueries.google.com` (hl=da gl=dk). Alle fire
+nye seeds er dækket eller kildeblokerede: `annuitetslån` (formlen er et `<h2>` på
+`/renteberegner` + FAQ), `promille` («Hvor mange promille er 2 øl?» findes på
+siden), `rentefradrag` (loft/sats/begrænsning er hele siden), `boligstøtte`
+(2 af 10 er *udbetaling* — kræver betalingsdato fra en kilde). `fradrag børnebidrag`
+er det eneste nye fradrag-emne i klyngen.
+
+**Klynger vi ikke dækker, i rækkefølge efter hvor ren intentionen er:**
+1. *dagpenge* — «dagpengesats 2026», «dagpenge nyuddannet», «dagpengekort»,
+   «dagpengetæller», «dagpengesats 2026 efter skat». Vi *har* `/dagpenge` — spørg
+   om satsen i stedet for at bygge en ny side.
+2. *børnepenge 2026* — ✅ 2/10 `ceo/boernepenge-udbetalingsdatoer».
+3. *fradrag 2026* — rengøring og havearbejde er servicefradraget (18.300 kr.),
+   de to felter hedder «Rengøring, have m.fl.», boligjob-lofterne var 2025-tal og
+   er rettet (`ceo/boligjob-lofter-2026`). Fitness og sommerhusudlejning mangler
+   stadig og kræver en læst sats.
+4. *skoleferie/skolestart 2026* — ❓ ferielovens startdato (opgave 201).
+5. *renteprognose 2026/2027/2030* — årstal-varianter af den side vi byggede; samme
+   intention, så de skal **ikke** blive egne sider.
+
+### Ferielov ❓ (opgave 201) — status 1/10 17:55, uændret 2/10
+
+`/dage-til/summerferien` siger «sommerferien begynder altid den **sidste lørdag i
+juni**» og hævder, det står i folkeskoleloven (2024). retsinformation.dk er en SPA
+(også på `.xml`), `undervisningsministeriet.dk`/`ferieinfo.dk`/`ferieloven.dk`
+svarer transportfejl, `lovguiden.dk` 429, `danskelove.dk/ferieloven` handler om
+ferieloven for *ansatte*. **Ét skærmbillede af bestemmelsen låser det** — er
+reglen «den lørdag i den kalenderuge, hvori 20. juni ligger», står siden 7 dage
+forkert i de fleste år. Koden er bevidst urørt: en lovpåstand uden kilde er præcis
+den fejl, CEO-køens punkt 0 handler om. Efterårsferien har derimod en side
+(`/dage-til/efteraarsferien`), så kun sommerferien og skolestart er blokeret.

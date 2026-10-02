@@ -1,14 +1,16 @@
-import { generatePageMetadata } from "@/lib/page-helpers";
-import { getCurrentDomainConfig } from "@/lib/get-locale";
-import { getPageData } from "@/lib/page-data";
-import { beregnPace, formaterLobetid } from "@/lib/pace";
-import { formatSekunder } from "@/lib/tidsberegner";
-import PaceBeregner from "@/components/PaceBeregner";
-import FAQ from "@/components/FAQ";
-import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import FAQ from "@/components/FAQ";
+import PaceBeregner from "@/components/PaceBeregner";
 import RelatedCalculators from "@/components/RelatedCalculators";
 import Sidebar from "@/components/Sidebar";
+import { CalculatorSchema, FAQSchema } from "@/components/StructuredData";
+import { formatNumber } from "@/lib/format";
+import { getCurrentDomainConfig } from "@/lib/get-locale";
+import type { Locale } from "@/lib/i18n";
+import { beregnPace, beregnTriatlon, formaterLobetid, triatlonBenNaevn } from "@/lib/pace";
+import { getPageData } from "@/lib/page-data";
+import { generatePageMetadata } from "@/lib/page-helpers";
+import { formatSekunder } from "@/lib/tidsberegner";
 
 /**
  * Alle tal i brødteksten dannes af de samme funktioner som værktøjet, så
@@ -17,6 +19,65 @@ import Sidebar from "@/components/Sidebar";
  */
 const EKS = beregnPace("tid", 5, 25 * 60, 0)!;
 const HALV = beregnPace("tid", 21.0975, 105 * 60, 0)!;
+/** De tre ben og deres tempo — samme `beregnPace` som værktøjet bruger. */
+const TRIATLON = beregnTriatlon();
+
+/**
+ * Sideteksten findes på alle tre domæner, så den norske side ikke arver
+ * danske overskrifter. Samme fejlklasse som den svenske dagpenge-linje blev
+ * rettet for 2/10.
+ */
+const TRIATLON_TEKST: Record<Locale, {
+  h2: string;
+  indledning: string;
+  benKolonne: string;
+  distanceKolonne: string;
+  tidKolonne: string;
+  tempoKolonne: string;
+  total: string;
+  taltOgTreBen: string;
+  note: string;
+}> = {
+  da: {
+    h2: "Triatlon og Ironman: tiden for alle tre ben",
+    indledning:
+      "Et Ironman har tre ben: 3,8 km svømning, 180 km cykel og 42,195 km løb. Hvert ben har sin egen fart, så tempoet pr. kilometer bliver helt forskelligt — men regnestykket er det samme som løbens.",
+    benKolonne: "Ben",
+    distanceKolonne: "Distance",
+    tidKolonne: "Tid i eksemplet",
+    tempoKolonne: "Tempo pr. km",
+    total: "I alt",
+    taltOgTreBen: "tre ben",
+    note:
+      "Tiderne i tabellen er vores eget eksempel, ikke en påstand om hvad netop du har brug for. Læg dem ind i værktøjet ovenfor, så får du holdtiderne for løbbenet og kan se, hvad tempoet bliver.",
+  },
+  se: {
+    h2: "Triathlon och Ironman: tiden för alla tre ben",
+    indledning:
+      "Ett Ironman har tre ben: 3,8 km simning, 180 km cykel och 42,195 km löpning. Varje ben har sin egen fart, så tempot per kilometer blir helt olika — men regnestycket är detsamma som för löpningen.",
+    benKolonne: "Ben",
+    distanceKolonne: "Distans",
+    tidKolonne: "Tid i exemplet",
+    tempoKolonne: "Pace per km",
+    total: "Totalt",
+    taltOgTreBen: "tre ben",
+    note:
+      "Tiderna i tabellen är vårt eget exempel, inte ett påstående om vad just du behöver. Lägg in dem i verktyget ovan så får du deltiderna för löpbenet och ser vilket pace det blir.",
+  },
+  no: {
+    h2: "Triatlon og Ironman: tiden for alle tre etapper",
+    indledning:
+      "Et Ironman har tre etapper: 3,8 km svømming, 180 km sykkel og 42,195 km løping. Hver etappe har sin egen fart, så farten per kilometer blir helt forskjellig — men regnestykket er det samme som for løping.",
+    benKolonne: "Etappe",
+    distanceKolonne: "Distanse",
+    tidKolonne: "Tid i eksemplet",
+    tempoKolonne: "Fart per km",
+    total: "Til sammen",
+    taltOgTreBen: "tre etapper",
+    note:
+      "Tidene i tabellen er eksemplet vårt, ikke et påstand om hva nettopp du trenger. Legg dem inn i verktøyet ovenfor, så får du deltidene for løpingen og ser hvilken fart det blir.",
+  },
+};
 
 export async function generateMetadata() {
   return generatePageMetadata("pace");
@@ -111,6 +172,46 @@ export default async function PacePage() {
             </p>
           </div>
         )}
+
+        <div className="prose dark:prose-invert max-w-none mb-8">
+          <h2>{TRIATLON_TEKST[locale].h2}</h2>
+          <p>{TRIATLON_TEKST[locale].indledning}</p>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-gray-200 dark:border-gray-700">
+                  <th className="text-left py-2 pr-3 font-semibold">{TRIATLON_TEKST[locale].benKolonne}</th>
+                  <th className="text-right py-2 px-3 font-semibold">{TRIATLON_TEKST[locale].distanceKolonne}</th>
+                  <th className="text-right py-2 px-3 font-semibold">{TRIATLON_TEKST[locale].tidKolonne}</th>
+                  <th className="text-right py-2 pl-3 font-semibold">{TRIATLON_TEKST[locale].tempoKolonne}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {TRIATLON.ben.map((rad) => (
+                  <tr key={rad.id} className="border-b border-gray-100 dark:border-gray-800">
+                    <td className="py-2 pr-3">{triatlonBenNaevn(rad.id, locale)}</td>
+                    <td className="py-2 px-3 text-right tabular-nums">
+                      {formatNumber(rad.distanceKm, locale, { minimumFractionDigits: 0, maximumFractionDigits: 3 })} km
+                    </td>
+                    <td className="py-2 px-3 text-right tabular-nums">{formaterLobetid(rad.totalSek)}</td>
+                    <td className="py-2 pl-3 text-right tabular-nums">{formaterLobetid(rad.sekunderPerKm)}</td>
+                  </tr>
+                ))}
+                <tr>
+                  <td className="py-2 pr-3 font-semibold">{TRIATLON_TEKST[locale].total}</td>
+                  <td className="py-2 px-3 text-right font-semibold tabular-nums">
+                    {formatNumber(TRIATLON.totalKm, locale, { minimumFractionDigits: 0, maximumFractionDigits: 3 })} km
+                  </td>
+                  <td className="py-2 px-3 text-right font-semibold tabular-nums">{formaterLobetid(TRIATLON.totalSek)}</td>
+                  <td className="py-2 pl-3 text-right text-gray-500 dark:text-gray-400">
+                    {TRIATLON_TEKST[locale].taltOgTreBen}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p>{TRIATLON_TEKST[locale].note}</p>
+        </div>
 
         <div className="mb-8">
           <FAQ items={pageData.faqItems} />

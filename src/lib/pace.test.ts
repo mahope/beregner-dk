@@ -6,6 +6,10 @@ import {
   formaterLobetid,
   distanceEksempelFaqSvar,
   DISTANCE_EKSEMPLER,
+  beregnTriatlon,
+  triatlonBenNaevn,
+  triatlonCykelAndelFaqSvar,
+  triatlonTotalFaqSvar,
 } from "./pace";
 import { formatSekunder } from "./tidsberegner";
 import { getPageData } from "./page-data";
@@ -223,5 +227,67 @@ describe("/pace's FAQ læser tallene fra modulet", () => {
       ].join(" ");
       expect(alle).not.toMatch(/halvmarahton/i);
     }
+  });
+});
+
+describe("triatlon og Ironman", () => {
+  test("de tre ben er formaternes distancer, og tempoet kommer fra beregnPace", () => {
+    const r = beregnTriatlon();
+    expect(r.ben.map((b) => b.distanceKm)).toEqual([3.8, 180, 42.195]);
+    expect(r.ben.map((b) => b.id)).toEqual(["svomning", "cykel", "lob"]);
+
+    for (const ben of r.ben) {
+      expect(ben.sekunderPerKm).toBe(
+        beregnPace("tid", ben.distanceKm, ben.totalSek, 0)!.sekunderPerKm
+      );
+    }
+
+    expect(r.totalSek).toBe(3600 + 5 * 3600 + 3.5 * 3600);
+    expect(r.totalSek).toBe(34200);
+    expect(r.totalKm).toBeCloseTo(225.995, 3);
+  });
+
+  test("summen af benene er totalen — ellers er løbsiden og tabellen uenige", () => {
+    const r = beregnTriatlon();
+    const sum = r.ben.reduce((sum, b) => sum + b.totalSek, 0);
+    expect(sum).toBe(r.totalSek);
+  });
+
+  test("total-FAQ'en regner summen og skriver den i begge sprog", () => {
+    const da = triatlonTotalFaqSvar("da");
+    const se = triatlonTotalFaqSvar("se");
+    expect(da).toContain("1:00:00 + 5:00:00 + 3:30:00 = 9:30:00");
+    expect(se).toContain("1:00:00 + 5:00:00 + 3:30:00 = 9:30:00");
+    expect(da).toContain("3,8 km");
+    expect(se).toContain("3,8 km");
+    expect(da).toContain("180 km");
+    expect(da).toContain("42,195 km");
+  });
+
+  test("cykel-andelen er regnet, ikke skrevet — og i domænets eget format", () => {
+    const da = triatlonCykelAndelFaqSvar("da");
+    const se = triatlonCykelAndelFaqSvar("se");
+    expect(da).toContain("5:00:00 af 9:30:00");
+    expect(da).toContain("52,6 %");
+    expect(se).toContain("52,6 %");
+    expect(da).toContain("79,6 %");
+    expect(se).toContain("79,6 %");
+  });
+
+  test("sproget følger domænet: ingen danske ord på den svenske side", () => {
+    expect(triatlonTotalFaqSvar("se")).not.toMatch(/vores eksempel|tre ben er|svømning|løbning/);
+    expect(triatlonCykelAndelFaqSvar("se")).not.toMatch(/altså % af tiden|og %|svømning/);
+    expect(triatlonBenNaevn("lob", "se")).toBe("Löpning");
+    expect(triatlonBenNaevn("lob", "da")).toBe("Løb");
+  });
+
+  test("siderne bruger svarene fra modulet, så FAQ og tabel ikke kan glide fra hinanden", () => {
+    for (const locale of ["da", "se"] as const) {
+      const svar = getPageData("pace", locale)!.faqItems.map((f) => f.answer);
+      expect(svar).toContain(triatlonTotalFaqSvar(locale));
+      expect(svar).toContain(triatlonCykelAndelFaqSvar(locale));
+    }
+    expect(getPageData("pace", "da")!.faqItems.length).toBe(9);
+    expect(getPageData("pace", "se")!.faqItems.length).toBe(9);
   });
 });
