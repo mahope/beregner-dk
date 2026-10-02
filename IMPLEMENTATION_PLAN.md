@@ -1,27 +1,36 @@
-STATUS: 2/10 02:20. Rød CI: ingen (seneste kørsel grøn 23:57Z). Sentry: MINBEREGNER-1
-  er Next-router-støj, filtreret siden 3e67ed3, kodetestet siden 5f137d4.
-  PR-TJEK: 2026-10-02 — ingen åbne PR'er. BRANCH-TJEK: ikke kørt i denne uge.
-  CEO-kø punkt 0 gennemgået i kode 2/10: Valborg er 30. april, påskafton er
-  lørdag (1 dag før påskedag), dansk påskeaften-FAQ er væk, `toUtcMidnight`
-  læser `DAGE_TIL_TIMEZONE`, `maneder: 12` har en forklaring, advent-teksten
-  siger 27/11–3/12, og den svenske promille-FAQ genererer fra egen formel med
-  1,0 ‰. Alle otte er lukket.
+STATUS: 2/10 02:40. Rød CI: ingen (seneste kørsel grøn 2/10 00:19Z). Sentry:
+  MINBEREGNER-1 er Next-router-støj, filtreret siden 3e67ed3, kodetestet siden
+  5f137d4. PR-TJEK: 2026-10-02 — ingen åbne PR'er. BRANCH-TJEK: ikke kørt.
+  CEO-kø punkt 0 er lukket i de otte punkter; de to der ikke stod i forrige
+  STATUS er verificeret i kode 2/10: sankthans er fast 23./24. juni på tværs af
+  alle tre `/dage-til/*`-sider (`dage-til.ts:822-903`, ingen svensk
+  midsommar-logik), og `/husleje` siger at lejeloven justerer efter
+  nettoprisindekset og at nævnet **ikke** fastsætter en sats pr. område
+  (`page-data.ts:1901`, `HuslejeNettoprisindeks.tsx:236`).
   **Gate:** `npm run lint` · `npm run typecheck` · `TZ=UTC npm run test` ·
-  `npm run build`. Målt 2/10 02:15: 0 · 0 · **3537 grønne i 217 filer** · 0.
-  **Denne iteration: IndexNow sendte til en nøglefil, der ikke fandtes.**
-  `ceo/indexnow-noeglefil`. `buildIndexNowPayload` erklærede
-  `keyLocation: {host}/{key}.txt`, men nøglen blev serveret på
-  `/api/indexnow-key/{key}` — og IndexNow henter `keyLocation`, før den
-  accepterer **én eneste** URL. Målt på live 2/10 02:12:
-  `https://minberegner.dk/abc12345.txt` → **404**, altså afvises hver
-  indsendelse. Nøglen er et env-værdi og kan derfor ikke ligge i `public/`;
-  løsningen er en rewrite i `proxy.ts` **før** locale-afgørelsen, så
-  `{host}/{key}.txt` bliver den URL, serveren svarer på. Bevis på rigtig
-  server (`next start`, port 3466, `INDEXNOW_API_KEY=abc12345`): `.txt` → 200
-  `text/plain` med nøglen, forkert nøgle → 404, `/dato` → 200, beraknare.se
-  → 200. *Modsvejs:* 4 af de 5 nye proxy-tests **falder** mod master, den 5.
-  låser at rewrite'en ikke sluger en statisk fil.
-  **Åbne VERIFICÉR-noter: 12**, alle med vindue **2/10 07:30**.
+  `npm run build`. Målt 2/10 02:38: 0 · 0 · **3551 grønne i 218 filer** · 0.
+  **Denne iteration: `/ejendomsvaerdiskat` læser sats og eksempel fra et modul.**
+  `ceo/ejendomsvaerdiskat-tal-fra-modul`. Satserne lå som et konstant-objekt
+  *inde i* `EjendomsvaerdiskatBeregner.tsx`, og beregningen lå i en `useMemo` —
+  altså utestet. Siden skrev «5,1‰», «9.007.000 kr» og eksemplet «3.000.000 ×
+  80% × 5,1‰ = 12.240 kr/år» med hånden, uden at tallene hang ved satsen.
+  Nu ligger satsene, kommune-promillerne og den rene `beregnEjendomsvaerdiskat()`
+  i `src/lib/ejendomsvaerdiskat.ts` med **13 nye tests** (grænsen, 5,1‰/14‰
+  kun over progressionsgrænsen, nul ind, custom-promille), og eksemplets tre
+  regnestykker dannes fra beregningen. Listens `ejendomsvaerdiskat` er fjernet
+  (6 fund) og portens sum 448 → 442.
+  ⚠️ **Fund under egen diff-review:** min første `grundskyldPromilleFor` lod en
+  ukendt kommune arve `customPromille` i stedet for 6,0 — en reel regression,
+  fordi `valgtKommune` kommer fra URL-state. Rettet og låst i en test. Samme
+  review fandt to håndskrevne **procentsatser** («0,51%», «1,4%») der nu
+  dannes af samme sats, og at Aarhus skrev «6,0» før og ville have skrevet «6».
+  ⚠️ **Målt i denne iteration:** en isoleret `vitest`-kørsel af den nye fil var
+  **grøn**, mens hele suiten var **rød** — `BESKATTET_ANDEL` stod efter sit
+  første brug (TDZ), og kun en anden fil, der importerer modulet, ramte den.
+  Og et bogstav i en importliste slap igennem både `lint` og `typecheck` og
+  blev først fanget af `next build`. Se de to nye opgaver.
+  **Åbne VERIFICÉR-noter: 13**, alle med vindue **2/10 07:30**.
+
 
 ## Review-fund 29/9 — lukket (detaljer i `docs/plan-arkiv.md`)
 
@@ -38,9 +47,10 @@ tusindtalsseparator i JSX-tekst — de kan ikke glide fra satsen, fordi de ikke
 hænger ved den. Listerne i `src/app/regnestykker.test.ts` tæller forekomster pr.
 fil og må kun blive kortere, så dette er rækkefølgen. *Accept pr. side:* listen
 for den side falder, og regnestykkerne er verificeret af `regnestykker-porten`.
-- **`/ejendomsvaerdiskat`** — 6 fund: «5,1 ‰ / 14 ‰» og «9.007.000 kr for
-  2026-2027» er lovsatser i brødteksten og i et regnestykke
-  («3.000.000 × 80% × 5,1‰ = 12.240 kr/år»).
+- **`/ejendomsvaerdiskat`** — ✅ 2/10 (`ceo/ejendomsvaerdiskat-tal-fra-modul`),
+  se STATUS. Bemærk at `Varde (højest) 17,7‰` i kommunetabellen stadig er
+  håndskrevet, fordi Varde ikke står i modulets kommune-liste. Den mangler en
+  kilde, så den læses ikke fra modulet endnu — ❓ nedenfor hvis den skal.
 - **`/moms`** — 21.651 visninger (0,2 % CTR, pos. 7,1), 2 fund tilbage:
   «Virksomheder med en årlig omsætning over **50.000 kr**» (registreringsgrænsen)
   og «told ved import over **1.150 kr**» — sidstnævnte er en EUR-grænse omregnet
@@ -66,6 +76,24 @@ for den side falder, og regnestykkerne er verificeret af `regnestykker-porten`.
 - **`/bil`** (16), **`/billaan`** (24), **`/opsparing`** (10), **`/boligsalg`**
   (9), **`/topskat`** (8) — ingen GSC-visning i top-15, så laveste prioritet;
   `/bil` er desuden faldet 46 → 21 besøgende.
+- **To huller i gaten selv (ny, 2/10 — fund under diff-review).**
+  (a) `tsconfig.test.json` medtager kun testfiler og deres import-kæde, så en
+  **forkert import i en ikke-testfil** er usynlig for `typecheck` — kun
+  `next build` fangede `satsTilPermille`. *Accept:* typecheck-programmet
+  medtager `src/**` (minus `*.test.ts` er nødvendigt for at undgå dobbelt),
+  eller en ny `tsconfig.app.json` i samme gate.
+  (b) **Kør port-tests isoleret aldrig som bevis.** En enkelt fil var grøn,
+  mens hele suiten var rød (TDZ-fejl). *Accept:* en note i CLAUDE.md eller en
+  `pretest`-regel, og sidste iteration skal have kørt hele suiten efter sidste
+  ændring — hvilket den gjorde.
+- **Beløb i strengliteraler: målt 2/10 (ny).** Scanneren fandt **531**
+  forekomster på tværs af `.ts`/`.tsx`; uden for `page.tsx`, komponenter og test
+  ligger de fire i `home-data.ts`, to i `categories.ts` og **16 i
+  `TimeprisBeregner.tsx`** — som er håndskrevet **tre gange, på tre sprog, med
+  tre forskellige lister** (da har 7 poster, se og no har 6, og skilletegn og
+  tusindtalsformatering varierer). *Accept:* ét datasæt + formatter, brugt alle
+  tre steder. Lav trafikrækkefølge, men det er den eneste måling i rækken hvor
+  indholdet faktisk afviger mellem sprog.
 - **Blogindlæg (19 filer, 273 fund).** Redaktionelle beløb i et indlæg er ikke
   samme fejlklasse som et beløb på en beregnerside. Beslut først om de skal med;
   hvis ikke, skal de stå i portens undtagelsesliste som *blog*.
@@ -213,16 +241,15 @@ Prioriteret efter forventet effekt på **trafik**. Datagrund fra GSC 1/10
   af den side vi lige byggede; de er samme intention, så de skal **ikke** blive
   egne sider.
 
-- **Emoji ud, rigtige ikoner ind — etape 1: kategorier og forside (ny, 2/10).**
-  *Hvem:* alle 7.490 besøgende/28d; det er den første skærm efter et Google-resultat.
-  *Hvilket tal den skal flytte:* CTR og bounce på `/` (211 besøgende, bounce 38 %)
-  og på kategorisiderne — et site der ligner et hobbyprojekt får færre klik.
-  *Accept:* ét centralt ikon-map med `lucide-react` (allerede en afhængighed),
-  brugt af `src/lib/home-data.ts` (~154 emoji), `categories.ts` (~94) og
-  `navigation.ts` (~112); **0 emoji** i de tre filer; dekorative ikoner skjult
-  for skærmlæsere; ét lag ad gangen med grøn gate imellem. *Datagrund:* Mads'
-  mission (prioritet 1) + `wc` målt på repoet 2/10. Resten af de 45 filer er
-  etape 2 og 3 — ikke denne iteration.
+- **Emoji ud, rigtige ikoner ind — ✅ ALLEREDE FÆRDIG, lukket 2/10.**
+  *Målt 2/10 med `rg --pcre2 '[\p{Extended_Pictographic}]' src/`:* **13 filer,
+  4 forekomster i alt** — `dage-til.test.ts` (2), `sentry-config.ts` (1),
+  `satser-2026.ts` (1). `home-data.ts`, `navigation.ts`, `categories.ts` og
+  `calculator-list.ts` har **0**, og har ikke haft det siden `bd832b2`,
+  `de373f4`, `9e50974` og `54b07fd` (alle på master). `src/lib/icons.ts`
+  findes og bruges af `src/components/ui/`. **Den gamle plantekst sagde «~154
+  emoji i home-data.ts» — det er ikke længere sandt og må ikke bruges som
+  datagrund.** De 4 resterende er i test- og konfigurationsfiler, ikke i UI'et.
 - **Landing-side pr. konkrete countdown-spørgsmål** (`/dage-til/<slug>`).
   *Hvem:* «hvor mange dage er der til 1 december» 1.209 visninger, 3 klik,
   pos. 5. *Accept:* de fire sider findes allerede (jul, nytår, sommerferie,
@@ -239,6 +266,26 @@ Prioriteret efter forventet effekt på **trafik**. Datagrund fra GSC 1/10
 - **Forskelsside til `/dato` og `/tidsberegner` på beraknare.se.** *Hvem:*
   190.447 svenske visninger på 0,12 % CTR. *Accept:* CTR over 0,3 % på 14
   dage. *Datagrund:* GSC se, 1/10. **Kan ikke før 13/10** (opgave 187).
+- **Pace/lap-beregner til løb og cykel (ny, målt 2/10 — stærkeste
+  ubbyggede klynge).** *Hvem:* **8 af 10** danske completions under «tid
+  beregner» er sport: «tid beregner løb», «marathon tid beregner»,
+  «halvmarathon tid beregner», «km tid beregner», «cykel tid beregner»,
+  «ironman tid beregner», «triathlon tid beregner», «pace tid beregner». Og
+  `/tidsberegners` **tredjestørste søgning** er «hvor lang tid» (828 visninger,
+  pos. 6) på 74.546 visninger med 0,3 % CTR. *Accept:* et pace-værktøj der
+  regner holdtider pr. kilometer fra distance + tid (og tid fra pace), med
+  tests, dansk side og interne links fra `/tidsberegner` og `/fart`. *Datagrund:*
+  GSC 1/10 + `suggestqueries` målt 2/10 02:45. **Ingen ekstern kilde nødvendig**
+  — det er ren brøkregning, så den behøver ikke at vente på ferielov eller
+  satser. Dette er den næste **feature**.
+- **«Hvad er klokken i …»-clusteret (ny, målt 2/10).** *Hvem:* **9 af 10**
+  danske completions under «hvad er klokken» er «hvad er klokken i usa /
+  danmark / thailand / new york / australien / japan / tyrkiet / bali /
+  canada». `/tidszone` svarer via konverteren, men der er ingen side der
+  **svarer direkte** på «hvad er klokken i norge lige nu». *Accept:* afklar
+  først om det er én `/tidszone`-sektion med klokken nu (billigst, ingen nye
+  URL'er) eller `klokken-i/<land>`-sider (flere sider, samme mønster som
+  `/dage-til/*`). *Datagrund:* autocomplete 2/10 02:45.
 - **Kalorieguide på `/kalorier`.** *Hvem:* 9 af 10 danske autocomplete-træffere
   under «kalorier» er madvarer. **Blokeret på kilde** (opgave 119, ❓) — må
   ikke gættes tal.
@@ -338,6 +385,14 @@ Prioriteret efter forventet effekt på **trafik**. Datagrund fra GSC 1/10
   skal derimod vise den i markupken med de fire beløb hver for sig. Samme prøve
   på `Host: beraknare.se` (svensk: `moms på 1 000 kr`). Vindue **2/10 07:30**.
 
+- ⏳ **`/ejendomsvaerdiskat` læser sats, kommune-promille og eksempel fra
+  modulet.** `ceo/ejendomsvaerdiskat-tal-fra-modul`. Prøven er på **indhold og
+  på uændret tekst**: `curl -s https://minberegner.dk/ejendomsvaerdiskat` skal
+  vise «5,1‰ (0,51%)», «14‰ (1,4%)», «Progressionsgrænsen er 9.007.000 kr»,
+  tabellen med 3,1 / 5,1 / 5,7 / **6,0** / 7,4 / 17,7 ‰, og eksemplet
+  «3.000.000 × 80% × 5,1‰ = 12.240 kr/år», «1.000.000 × 80% × 5,1‰ = 4.080
+  kr/år», «16.320 kr/år (1.360 kr/måned)». Vindue **2/10 07:30**.
+
 ## ❓ Til Mads
 
 - ❓ **Ser du events fra minberegner.dk i Sentry-projektet?** Det er nu det
@@ -429,6 +484,13 @@ Prioriteret efter forventet effekt på **trafik**. Datagrund fra GSC 1/10
   Jeg har kun verificeret denne ene række og ikke rørt filen, fordi den er fælles
   for otte projekter — en opdatering skal laves med vilje, ikke ved en
   sideeffekt.
+- ❓ **Er 17,7‰ virkelig den højeste grundskyldspromille i Danmark?**
+  `/ejendomsvaerdiskat`s tabel siger «Varde (højest)», og Varde står ikke i
+  modulets kommune-liste, så tallet er håndskrevet og uden kilde i koden. Jeg
+  har bevidst ikke ændret det — det er en påstand om kommunesatser, ikke en
+  formel. Hvis du kender en kilde (bolig.guide, KL eller kommunens
+  beskatningsvedtægt), lægges Varde bare ind i `GRUNDSKYLD_KOMMUNER`, og
+  tabellen og dropdown'en får den samme post.
 - ❓ **Nedetid 29/9:** en fuld site-scanning kørte mens produktion svarede 521 på alle
   domæner, og skanningen skrev "ingen fejl" for alle 206 sider. Ingen kode fejl — men
   en måling af et nedbrudt site giver et troværdigt tal om ingenting.

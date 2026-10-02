@@ -8,57 +8,14 @@ import { generateShareableLink, getStateFromUrl, CalculationState } from "@/lib/
 import { trackCalculation, initScrollDepthTracking } from "@/lib/analytics";
 import { useLocale } from '@/components/LocaleProvider';
 import { formatCurrency, getCurrencySuffix } from '@/lib/format';
+import {
+  beregnEjendomsvaerdiskat,
+  EJENDOMSVAERDISKAT,
+  GRUNDSKYLD_KOMMUNER,
+  grundskyldPromilleFor,
+} from '@/lib/ejendomsvaerdiskat';
 
-// Nyt ejendomsskattesystem fra 2024 (boligskattereformen)
-// Kilde: skm.dk, info.skat.dk, vurderingsportalen.dk
-const EJENDOMSVAERDISKAT = {
-  lavSats: 0.0051, // 5,1‰ (0,51%)
-  hoejSats: 0.014, // 14‰ (1,4%)
-  progressionsgraense: 9007000, // 9.007.000 kr beskatningsgrundlag (2026-2027)
-  forsigtighedsfradrag: 0.20, // 20% forsigtighedsfradrag
-};
-
-// Grundskyldspromiller for de største kommuner (2024-2028)
-// Kilde: skm.dk, bolig.guide, vurderingsportalen.dk
-interface KommuneData {
-  navn: string;
-  promille: number;
-}
-
-const KOMMUNER: Record<string, KommuneData> = {
-  koebenhavn: { navn: "København", promille: 5.1 },
-  frederiksberg: { navn: "Frederiksberg", promille: 3.1 },
-  aarhus: { navn: "Aarhus", promille: 6.0 },
-  aalborg: { navn: "Aalborg", promille: 7.4 },
-  odense: { navn: "Odense", promille: 5.7 },
-  vejle: { navn: "Vejle", promille: 10.5 },
-  roskilde: { navn: "Roskilde", promille: 7.4 },
-  kolding: { navn: "Kolding", promille: 11.1 },
-  helsingoer: { navn: "Helsingør", promille: 9.5 },
-  silkeborg: { navn: "Silkeborg", promille: 11.0 },
-  herning: { navn: "Herning", promille: 9.9 },
-  horsens: { navn: "Horsens", promille: 8.7 },
-  randers: { navn: "Randers", promille: 13.9 },
-  esbjerg: { navn: "Esbjerg", promille: 9.9 },
-  gentofte: { navn: "Gentofte", promille: 5.1 },
-  gladsaxe: { navn: "Gladsaxe", promille: 5.9 },
-  lyngby: { navn: "Lyngby-Taarbæk", promille: 6.7 },
-  hvidovre: { navn: "Hvidovre", promille: 6.5 },
-  ballerup: { navn: "Ballerup", promille: 8.3 },
-  hilleroed: { navn: "Hillerød", promille: 6.6 },
-  koege: { navn: "Køge", promille: 5.3 },
-  holbaek: { navn: "Holbæk", promille: 8.1 },
-  naestved: { navn: "Næstved", promille: 9.8 },
-  slagelse: { navn: "Slagelse", promille: 11.1 },
-  viborg: { navn: "Viborg", promille: 11.5 },
-  fredericia: { navn: "Fredericia", promille: 13.0 },
-  greve: { navn: "Greve", promille: 5.5 },
-  rudersdal: { navn: "Rudersdal", promille: 9.6 },
-  svendborg: { navn: "Svendborg", promille: 8.8 },
-  bornholm: { navn: "Bornholm", promille: 10.7 },
-};
-
-const sortedKommuner = Object.entries(KOMMUNER).sort((a, b) =>
+const sortedKommuner = Object.entries(GRUNDSKYLD_KOMMUNER).sort((a, b) =>
   a[1].navn.localeCompare(b[1].navn, "da")
 );
 
@@ -113,46 +70,17 @@ export default function EjendomsvaerdiskatBeregner() {
     setCustomPromille(6.0);
   }, []);
 
-  const grundskyldPromille =
-    valgtKommune === "custom"
-      ? customPromille
-      : KOMMUNER[valgtKommune]?.promille ?? 6.0;
+  const grundskyldPromille = grundskyldPromilleFor(valgtKommune, customPromille);
 
-  const resultat = useMemo(() => {
-    // Beskatningsgrundlag = 80% af ejendomsværdi (20% forsigtighedsfradrag)
-    const beskatningsgrundlag =
-      ejendomsvaerdi * (1 - EJENDOMSVAERDISKAT.forsigtighedsfradrag);
-
-    // Ejendomsværdiskat: 5,1‰ op til progressionsgrænse, 14‰ over
-    let ejendomsvaerdiskat = 0;
-    if (beskatningsgrundlag <= EJENDOMSVAERDISKAT.progressionsgraense) {
-      ejendomsvaerdiskat = beskatningsgrundlag * EJENDOMSVAERDISKAT.lavSats;
-    } else {
-      const under = EJENDOMSVAERDISKAT.progressionsgraense;
-      const over = beskatningsgrundlag - under;
-      ejendomsvaerdiskat =
-        under * EJENDOMSVAERDISKAT.lavSats +
-        over * EJENDOMSVAERDISKAT.hoejSats;
-    }
-
-    // Grundskyld: grundskyldspromille × 80% af grundværdi
-    const grundvaerdiBeskatning =
-      grundvaerdi * (1 - EJENDOMSVAERDISKAT.forsigtighedsfradrag);
-    const grundskyld = grundvaerdiBeskatning * (grundskyldPromille / 1000);
-
-    // Samlet
-    const samlet = ejendomsvaerdiskat + grundskyld;
-    const maanedligt = samlet / 12;
-
-    return {
-      beskatningsgrundlag: Math.round(beskatningsgrundlag),
-      ejendomsvaerdiskat: Math.round(ejendomsvaerdiskat),
-      grundvaerdiBeskatning: Math.round(grundvaerdiBeskatning),
-      grundskyld: Math.round(grundskyld),
-      samlet: Math.round(samlet),
-      maanedligt: Math.round(maanedligt),
-    };
-  }, [ejendomsvaerdi, grundvaerdi, grundskyldPromille]);
+  const resultat = useMemo(
+    () =>
+      beregnEjendomsvaerdiskat({
+        ejendomsvaerdi,
+        grundvaerdi,
+        grundskyldPromille,
+      }),
+    [ejendomsvaerdi, grundvaerdi, grundskyldPromille],
+  );
 
   const formatKr = (amount: number) => formatCurrency(amount, locale, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 

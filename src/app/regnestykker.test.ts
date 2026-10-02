@@ -223,7 +223,6 @@ const HAARDKODEDE_BELOB: Record<string, number> = {
   "src/app/bryllup/page.tsx": 4,
   "src/app/budget/page.tsx": 2,
   "src/app/dagpenge/page.tsx": 3,
-  "src/app/ejendomsvaerdiskat/page.tsx": 6,
   "src/app/elberegner/page.tsx": 2,
   "src/app/enheder/page.tsx": 2,
   "src/app/feriepenge/page.tsx": 4,
@@ -246,11 +245,17 @@ const HAARDKODEDE_BELOB: Record<string, number> = {
 /**
  * Summen af listen, så de to tal ikke kan glide fra hinanden.
  *
+ * 448 → 442 den 2/10 (senere samme dag): `ejendomsvaerdiskat` stod med 6 fund —
+ * progressionsgrænsen to gange og de tre regnestykker plus indgangssætningen i
+ * eksemplet. De læses nu fra `src/lib/ejendomsvaerdiskat.ts`, som også danner
+ * eksemplets beløb, så et tal i siden kan ikke længere glide fra satsen. Som
+ * erstatning for portens dækning af de tre regnestykker har modulet sin egen
+ * test, der holder `EKSEMPEL_TEKST` på de beregnede tal.
  * 453 → 448 den 2/10: fem fund var datoer, ikke beløb («Kilde: borger.dk,
  * verificeret 26/9 2026» blev læst som «9 202»), da scanneren ikke krævede at
  * de tre cifre var slut på tallet.
  */
-const HAARDKODEDE_BELOB_I_LISTEN = 448;
+const HAARDKODEDE_BELOB_I_LISTEN = 442;
 
 /**
  * Samme port på de `.tsx`-filer der **ikke** er `page.tsx`: beregnerne i
@@ -469,7 +474,7 @@ describe("beløb i JSX-tekst på siderne", () => {
     // At rette en side er altid tilladt — listen er en loftpunktssum, ikke en
     // målsætning — så her tælles det samlede antal mod summen af listen.
     expect(fund.length).toBeLessThanOrEqual(HAARDKODEDE_BELOB_I_LISTEN);
-    expect(HAARDKODEDE_BELOB_I_LISTEN).toBe(448);
+    expect(HAARDKODEDE_BELOB_I_LISTEN).toBe(442);
   });
 });
 

@@ -9,6 +9,14 @@ import {
   FAQSchema,
 } from "@/components/StructuredData";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import {
+  EKSEMPEL_TEKST,
+  EJENDOMSVAERDISKAT,
+  GRUNDSKYLD_KOMMUNER,
+  kr,
+  satsTilProcent,
+  satsTilPromille,
+} from "@/lib/ejendomsvaerdiskat";
 
 export async function generateMetadata() {
   return generatePageMetadata("ejendomsvaerdiskat");
@@ -62,11 +70,21 @@ export default async function EjendomsvaerdiskatPage() {
           {" "}(et såkaldt forsigtighedsfradrag på 20%). Satserne er:
         </p>
         <ul>
-          <li><strong>5,1&permil; (0,51%)</strong> af beskatningsgrundlaget op til progressionsgrænsen</li>
-          <li><strong>14&permil; (1,4%)</strong> af beskatningsgrundlaget over progressionsgrænsen</li>
+          <li>
+            <strong>
+              {satsTilPromille(EJENDOMSVAERDISKAT.lavSats * 1000)}&permil; ({satsTilProcent(EJENDOMSVAERDISKAT.lavSats)}%)
+            </strong>{" "}
+            af beskatningsgrundlaget op til progressionsgrænsen
+          </li>
+          <li>
+            <strong>
+              {satsTilPromille(EJENDOMSVAERDISKAT.hoejSats * 1000)}&permil; ({satsTilProcent(EJENDOMSVAERDISKAT.hoejSats)}%)
+            </strong>{" "}
+            af beskatningsgrundlaget over progressionsgrænsen
+          </li>
         </ul>
         <p>
-          <strong>Progressionsgrænsen</strong> er 9.007.000 kr for 2026-2027 (beskatningsgrundlag).
+          <strong>Progressionsgrænsen</strong> er {kr(EJENDOMSVAERDISKAT.progressionsgraense)} kr for 2026-2027 (beskatningsgrundlag).
           Det svarer til en ejendomsværdi på ca. 11,3 mio. kr før forsigtighedsfradraget.
         </p>
 
@@ -86,23 +104,23 @@ export default async function EjendomsvaerdiskatPage() {
           <tbody>
             <tr>
               <td>Frederiksberg (lavest)</td>
-              <td>3,1&permil;</td>
+              <td>{satsTilPromille(GRUNDSKYLD_KOMMUNER.frederiksberg.promille)}&permil;</td>
             </tr>
             <tr>
               <td>København</td>
-              <td>5,1&permil;</td>
+              <td>{satsTilPromille(GRUNDSKYLD_KOMMUNER.koebenhavn.promille)}&permil;</td>
             </tr>
             <tr>
               <td>Odense</td>
-              <td>5,7&permil;</td>
+              <td>{satsTilPromille(GRUNDSKYLD_KOMMUNER.odense.promille)}&permil;</td>
             </tr>
             <tr>
               <td>Aarhus</td>
-              <td>6,0&permil;</td>
+              <td>{satsTilPromille(GRUNDSKYLD_KOMMUNER.aarhus.promille)}&permil;</td>
             </tr>
             <tr>
               <td>Aalborg</td>
-              <td>7,4&permil;</td>
+              <td>{satsTilPromille(GRUNDSKYLD_KOMMUNER.aalborg.promille)}&permil;</td>
             </tr>
             <tr>
               <td>Varde (højest)</td>
@@ -113,12 +131,12 @@ export default async function EjendomsvaerdiskatPage() {
 
         <h2>Eksempel: Beregning af ejendomsskat</h2>
         <p>
-          En bolig i København med ejendomsværdi 3.000.000 kr og grundværdi 1.000.000 kr:
+          {EKSEMPEL_TEKST.intro}
         </p>
         <ul>
-          <li><strong>Ejendomsværdiskat:</strong> 3.000.000 × 80% × 5,1&permil; = 12.240 kr/år</li>
-          <li><strong>Grundskyld:</strong> 1.000.000 × 80% × 5,1&permil; = 4.080 kr/år</li>
-          <li><strong>Samlet:</strong> 16.320 kr/år (1.360 kr/måned)</li>
+          <li><strong>Ejendomsværdiskat:</strong> {EKSEMPEL_TEKST.ejendomsvaerdiskat}</li>
+          <li><strong>Grundskyld:</strong> {EKSEMPEL_TEKST.grundskyld}</li>
+          <li><strong>Samlet:</strong> {EKSEMPEL_TEKST.samlet}</li>
         </ul>
 
         <h2>Forsigtighedsfradraget (20%)</h2>
@@ -145,9 +163,11 @@ export default async function EjendomsvaerdiskatPage() {
         <div className="bg-green-50 dark:bg-green-900/20 border-l-4 border-green-400 dark:border-green-500 p-4 my-6 not-prose">
           <p className="font-medium text-green-800 dark:text-green-300">Opdateret med nyt boligskattesystem</p>
           <p className="text-green-700 dark:text-green-400">
-            Denne beregner bruger det nye ejendomsskattesystem fra 2024 med
-            5,1&permil; / 14&permil; satser og 80% forsigtighedsfradrag. Progressionsgrænse
-            for 2026-2027: 9.007.000 kr. Kilde: skm.dk, info.skat.dk.
+            Denne beregner bruger det nye ejendomsskattesystem fra 2024 med{" "}
+            {satsTilPromille(EJENDOMSVAERDISKAT.lavSats * 1000)}&permil; /{" "}
+            {satsTilPromille(EJENDOMSVAERDISKAT.hoejSats * 1000)}&permil; satser og
+            80% forsigtighedsfradrag. Progressionsgrænse for 2026-2027:{" "}
+            {kr(EJENDOMSVAERDISKAT.progressionsgraense)} kr. Kilde: skm.dk, info.skat.dk.
           </p>
         </div>
 
